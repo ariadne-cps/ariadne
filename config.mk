@@ -19,7 +19,7 @@ OCTAVE_HEADERS = /usr/include/octave-2.1.57
 
 OBJECTS = approx_type.o arc.o automaton.o basic_set_list.o \
 	linear_algebra.o location.o maintain.o map.o set.o \
-	variable.o vectorfield.o polyhedron.o
+	variable.o vectorfield.o 
 
 TARGET = lib${NAME}.a
 

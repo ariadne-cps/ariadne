@@ -1,0 +1,73 @@
+(02-09-2004)
+* cleaned more code for compilation.
+* modified the makefile and added FASTER_BUT_DIRTIER, DEBUG and USE_OCTAVE options.
+
+(01-09-2004)
+* cleaned the code for compilation.
+* deleted the file include delete.h
+* added the class LocationTrace and the type Trace.
+* added the class file include/classes.h
+* added a simple makefile.
+
+(28-08-2004)
+* some bug fixes.
+* added definitions and implementations of methods for intersection and union of different types of set.
+* modified definition of LeavingArc: now the activation region is of type ASet.
+* added HSet::does_activate and HSet::jump_p methods
+* cleaned the code.
+
+
+(26-08-2004)
+* clean up the code.
+* generated new documentations.
+* added definitions and implementations of methods BasicListSet::apply, BasicListSet::apply_on_obj, BasicListSet::slice_eval, BasicListSet::slice_eval_on_obj, BasicListSet::expand_of, BasicListSet::expand_of_on_obj, BasicListSet::shrink_of and BasicListSet::shrink_of_on_obj.
+* added definitions of methods ASet::apply and ASet::apply_on_obj.
+* added implementations of methods ASet::apply, ASet::apply_on_obj, ASet::slice_eval and ASet::flow_eval.
+
+(25-08-2004)
+* some bug fixes.
+* changed the output type of the BasicSet's subtract method (now it seems computable :-) ).
+* adapted all the methods in the BasicSetList class to the new output type
+of BasicSet::subtract(const BasicSet &, const ApproxType).
+* changed BasicSetList::concat_copy method's name to BasicSetList::attach.
+
+(24-08-2004)
+* intoduced the class BasicSetList.
+* implemented all methods of the class BasicSetList.
+* modified the definition of ASet using the class BasicSetList.
+* updated the method ASet::ASet(const ASet &t), ASet::~ASet(), ASet::include(const BasicSet *bset), ASet& ASet::exclude(const BasicSet *bset), ASet ASet::intersect(const BasicSet &bset), ASet& ASet::compact_lists(), ASet::does_intersect(const ASet &R) and ASet::empty().
+
+(19-08-2004)
+* implemented method ASet::contains(const State &s) in set.cpp.
+* implemented method ASet::intersect(const ASet &R) in set.cpp.
+* implemented method ASet::include(const BasicSet &bset) in set.cpp.
+* implemented method ASet::exclude(const BasicSet &bset) in set.cpp.
+* bug fix in methods ASet::include(const BasicSet *bset) and ASet::include(const BasicSet *bset) in set.cpp (bset could be a NULL pointer).
+
+(17-08-2004)
+* implemented method LinearVectorField::exactly_solvable() in vectorfield.cpp.
+* cleaned (up?) the code in vectorfield.cpp, vectorfield.h, map.cpp and map.cpp.
+
+(16-08-2004)
+* moved all the method's implementations into the cpp files in src dir.
+* added the possibility of using liboctave.
+* added operator+=, operator+, operator-, and operator-= to the BasicSet class.
+
+(4-08-2004)
+* implemented many ASet methods
+* added UnderSet and OverSet classes
+* some bug fixes
+* started to move the method's implementations in the cpp files into src dir
+* defined a provisorial ExSet class (typedef ExSet Set)
+
+(3-08-2004)
+* fix the constructor of HSet in set.h line 551
+
+(1-08-2004)
+*add to the automaton class a vector with the name/id of the automaton's variables
+*modify Location class and add the list of LeavingArc from that location
+
+(30-07-2004) 
+*substiture all the costructor with the word constructor
+*check how is used & from basic_set on
+*substitute string with std::string

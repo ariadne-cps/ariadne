@@ -1,0 +1,18 @@
+TODO
+* add EmptyBS, UniverseBS and State classes inheritated from BasicSet.
+* delete old definition of State.
+* add comments to expand_of and shrink_of include/casic_set.h
+* add comments to basic_set_list.h file.
+* reimplement method LinearVectorField::adaptive_runge_kutta(...) in vectorfield.cpp.
+* reimplement method LinearVectorField::get_solution(const double t_step) in vectorfield.cpp.
+* implement a test and check if x'=Ax+b is analiticaly solvable in the method LinearVectorField::LinearVectorField(Matrix *A, Vector *b) in vectorfield.cpp.
+* implement a test and check if x'=M(x) is analiticaly solvable in the method VectorField::VectorField(Map *M) in vectorfield.cpp.
+* find out a method to discover if a system is analiticaly solvable or not. (Does it exist? I bet no. Test cases?)
+* add the method set_v_variable(VecVariable *v_variable) in automaton.h line 95
+* add the method LinearMap *switch_variable_order(VecVariable,VecVariable) in variable.h line 139
+* add the class VecVariable in variable.h line 161
+* implement the class ExSet of unbounded basic set space for activation regions,invariants, etc. 
+* add comments to enum VariableType in variable.h line 49
+* check the presence of over and under approximation in each method of Set in set.h
+* modify the tecnique used to select bset_in_set in the method "include" in set.h
+* implement the method ASet::compact_lists() in set.cpp

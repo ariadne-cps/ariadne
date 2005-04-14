@@ -3,38 +3,27 @@ NAME = ariadne
 
 # set the following variables 
 DEBUG = no
-USE_OCTAVE = no
-FASTER_BUT_DIRTIER = yes
+VERBATIM = yes
 
 CC = gcc
 CXX = g++
-AR = ar
 
 MAKE = make
 
-SRCDIR = src
+EXAMPLEDIR = examples
 INCLUDEDIR = include
 
-OCTAVE_HEADERS = /usr/include/octave-2.1.57
+CXXFLAGS = -I../${INCLUDEDIR}
 
-OBJECTS = approx_type.o discrete_trans.o automaton.o basic_set_list.o \
-	linear_algebra.o location.o maintain.o map.o set.o \
-	variable.o vectorfield.o 
-
-TARGET = lib${NAME}.a
-
-CXXFLAGS = -O3 -Wall -fPIC -I../${INCLUDEDIR}
+LDXXFLAGS = -lppl -lgmpxx
 
 ifeq ($(DEBUG),yes)
-	CXXFLAGS += -g
+	CXXFLAGS += -g -DDEBUG -Wall
+else
+#	CXXFLAGS += -O3 -fPIC
 endif
 
-ifeq ($(USE_OCTAVE),yes)
-	CPPFLAGS += -DUSE_OCTAVE
-	CXXFLAGS += -I${OCTAVE_HEADERS}
-endif
-
-ifeq ($(FASTER_BUT_DIRTIER),yes)
-	CPPFLAGS += -DFASTER_BUT_DIRTIER
+ifeq ($(VERBATIM),yes)
+	CXXFLAGS += -DVERBATIM
 endif
 

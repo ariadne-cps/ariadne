@@ -1,11 +1,8 @@
 include ./config.mk
 
-all:  ${SRCDIR}/Makefile
-	(cd ${SRCDIR}; ${MAKE} all);
+all:  ${EXAMPLEDIR}/Makefile
+	(cd ${EXAMPLEDIR}; ${MAKE} all);
 
 clean:                                                                          
 	rm -f *.bak *.o *~ *% core
-	(cd ${SRCDIR}; ${MAKE} clean);
-
-dep: ${SRCDIR}/Makefile
-	(cd ${SRCDIR}; ${MAKE} dep);
+	(cd ${EXAMPLEDIR}; ${MAKE} clean);

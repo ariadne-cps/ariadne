@@ -1,9 +1,9 @@
 /***************************************************************************
- *            maintain.cpp
+ *            grid.h
  *
- *  Fri Aug 06 10:45:12 2004
- *  Copyright  2004  Alberto Casagrande
- *  casagrande@dimi.uniud.it
+ *  18 January 2005
+ *  Copyright  2004,2005  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -22,27 +22,29 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "maintain.h"
-#include "basic_maintainer.h"
+/*! \file grid.h
+ *  \brief Cuboidal grids.
+ */
 
-using namespace Ariadne;
+#ifndef _GRID_H
+#define _GRID_H
 
-Maintainer::Maintainer(BasicMaintainer* over, BasicMaintainer *under){
-	this->over= over;
-	this->under= under;
+#include <boost/numeric/interval.hpp>
+#include <binary_word.h>
+#include <array.h>
+
+namespace Ariadne {	
+namespace Geometry {	
+    template<typename R> class Rectangle;
+
+    /*!\brief A grid of rectangles in Euclidean space.
+     */
+    template<typename R> class Grid {
+      private:
+	Rectangle<R> _bounding_box;
+	array<unsigned int> _subdivision_coordinates;
+    };
+}
 }
 
-Maintainer::Maintainer(const Maintainer &templ) {
-	this->over= (templ.over)->copy();
-	this->under=(templ.under)->copy();
-}
-		
-Maintainer::~Maintainer() {
-	delete (this->over);	
-	delete (this->under);
-
-	// useless, but safer
-	this->over=NULL;
-	this->under=NULL;
-}
-
+#endif /* _GRID_H */

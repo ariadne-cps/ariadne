@@ -1,8 +1,8 @@
 /***************************************************************************
  *            map.h
  *
- *  Thu Apr 29 14:33:39 2004
- *  Copyright  2004  Alberto Casagrande
+ *  Wed Feb  2 18:33:10 2005
+ *  Copyright  2005  Alberto Casagrande
  *  casagrande@dimi.uniud.it
  ****************************************************************************/
 
@@ -25,61 +25,133 @@
 #ifndef _MAP_H
 #define _MAP_H
 
-#include "linear_algebra.h"
-#include "approx_type.h"
-#include "classes.h"
+#include <denotable_set.h>
+#include <linear_algebra.h>
+#include <rectangle.h>
 
-namespace Ariadne {
-
-/*! \class Map
- *  \brief Represents a (multivalued/nondeterministic) map of the state space..
- * 
- * At the very least, the map f should be able to compute an outer 
- * approximation to a basic closed set \a A with an error of at most \a e.
- */
-class Map {
-	public:
-		virtual ~Map() = 0;
-		
-		virtual BasicSet* operator() (const BasicSet& A, 
-				ApproxType atype) const = 0;
-		
-		virtual ASet* operator() (const ASet& A) const = 0;
-		
-		virtual Set* operator() (const Set& A) const = 0;
-		
-		virtual HSet* operator() (const HSet& A) const = 0;
-
-		virtual bool is_linear() const { return false; }
+namespace Ariadne {	
+namespace Map{
+	
+enum MapKind {
+	LINEAR,
+	AFFINE,
+	GENERAL
 };
 
-class LinearMap: public Map {
+enum MapResultKind {
+	SINGLE_VALUE,
+	MULTI_VALUE
+};
+
+}
+}
+
+#include "affine_map.h"
+
+namespace Ariadne {	
+namespace Map{
 	
-		Matrix *A;
-		Vector *b;
-			
+template <typename MAP>
+class AriadneMap {
+	
 	public:
-		LinearMap(Matrix *A, Vector* b); 
-
-		~LinearMap(); 
-
-		BasicSet* operator() (const BasicSet& A, 
-				ApproxType atype) const;
-
-		ASet* operator() (const ASet& A) const;
-
-		Set* operator() (const Set& A) const;
+		typedef MAP Map;
+		typedef typename Map::DenotableSet DenotableSet;
+		typedef typename DenotableSet::BasicSet BasicSet;
+		typedef typename BasicSet::State State;
+		typedef typename State::Real Real;
+	
+		AriadneMap(const Map &T):_map(T) {}
 		
-		HSet* operator() (const HSet& A) const;
+		inline BasicSet operator() (const BasicSet &A) const { return _map(A); }
 		
-		const Matrix* get_A() const;
+		inline DenotableSet operator() (const DenotableSet &A) const{ 
+			
+			DenotableSet trans_ds(A.dim());
+			
+			for (size_t i=0; i< A.size(); i++) {
+				trans_ds.inplace_union(_map(A[i]));
+			}
+			
+			return trans_ds;
+		}
 		
-		const Vector* get_b() const;
+		inline AriadneMap<MAP> &operator=(const AriadneMap<MAP>  &A) {
+			
+			this->_map=A._map;
+		}
 		
-		bool is_linear() const { return true; }
+		inline size_t dim() const {
+			return (this->_map).dim();
+		}
+		
+		inline bool invertible() const {return this->_map.invertible();}
+		
+	private:
+	
+		Map _map;
+};
+
+
+/* WARNING!!!! Is it the same of an inclusion map? Here I can set
+threshold in inclusion not, but the map seem similar */ 
+template <typename MAP>
+class AriadneThresholdMap {
+	
+	public:
+		typedef MAP Map;
+		typedef typename Map::DenotableSet DenotableSet;
+		typedef typename DenotableSet::BasicSet BasicSet;
+		typedef typename BasicSet::State State;
+		typedef typename State::Real Real;
+	
+		AriadneThresholdMap(const Map &T, const BasicSet &threshold):_map(T), 
+					_threshold(threshold) {}
+		
+		AriadneThresholdMap(const Map &T, Real threshold = 0):_map(T), 
+					_threshold(T.dim(), threshold) {}
+						
+		inline BasicSet operator() (const BasicSet &A) const { 
+			return _map(A)+this->_threshold; 
+		}
+		
+		inline void set_threshold(const Real &threshold) { 
+			BasicSet new_th((this._map).dim(), threshold);
+			
+			this->_threshold=new_th;
+		}
+		
+		inline DenotableSet operator() (const DenotableSet &A) const{ 
+			
+			DenotableSet trans_ds(A.dim());
+			
+			for (size_t i=0; i< A.size(); i++) {
+				trans_ds.inplace_union(_map(A[i])+this->threshold);
+			}
+			
+			return trans_ds;
+		}
+		
+		inline AriadneThresholdMap<MAP> &operator=(const AriadneThresholdMap<MAP>  &A) {
+			
+			this->_map=A._map;
+			this->_threshold=A._threshold;
+
+		}
+		
+		inline size_t dim() const {
+			return (this->_map).dim();
+		}
+		
+	private:
+	
+		Map _map;
+	
+		BasicSet _threshold;
 };
 
 }
 
-#endif /* _MAP_H */
+}
 
+#endif /* _MAP_H */

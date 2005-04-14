@@ -19,7 +19,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330,
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
 #ifndef _LOCATION_H
@@ -28,124 +28,153 @@
 #include <string>	
 #include <list>
 
-#include "classes.h"
+#include <classes.h>
 
 namespace Ariadne {
+
+namespace SystemDescription {
 	
-/*! \typedef LocationID
- *  \brief It's the type of the location's univocal identifier. 
+/*! \typedef DiscreteLocationID
+ *  \brief It's the type of the discrete location's univocal identifier. 
  */	
-typedef unsigned int LocationID; 
+typedef unsigned int DiscreteLocationID; 
 	
-/*! \brief This class represents locations.
+/*! \brief This class represents discrete locations.
  *
- * It associates to each location an univocal identifier, a 
+ * It associates to each discrete location an univocal identifier, a 
  * vector field and an invariant.
  */
-class Location
+class DiscreteLocation
 {
-		/*! \brief The location's name.	*/
-		std::string name;	
+		/*! \brief The discrete location's name.	*/
+		std::string _name;	
 	
-		/*! \brief Univocal identifier of the location. */
-		LocationID id;   
+		/*! \brief Univocal identifier of the discrete location. */
+		DiscreteLocationID _id;   
 
 		/*! \brief The smallest unused identifier. */
-		static LocationID smallest_unused_id;
+		static DiscreteLocationID _smallest_unused_id;
 	
 		/*! \brief The vector field which rules the flow in 
-		 * the location. */
-		VectorField *field;
+		 * the discrete location. */
+		VectorField *_field;
 	
-		/*! \brief The invariant region of the location. */ 
-		ASet *invariant;
+		/*! \brief The invariant region of the discrete location. */ 
+		Ariadne::Geometry::AbstractDenotableSet *_invariant;
 
-		/*! \brief The list of the arcs leaving the 
-		 * location.*/
-		std::list<LeavingArc *> leaving_arcs;
+		/*! \brief The list of the discrete transitions leaving the 
+		 * discrete location.*/
+		std::list<DiscreteTransition *> _discrete_transitions;
 		
 	public:
-		/*! \brief This is a location class constructor.
+		/*! \brief This is a discrete location class constructor.
 		 *
 		 * This constructor initializes the object of the class 
-		 * \a Location.
-		 * \param name is the name of the location.
-		 * \param field is the flow of the location.
-		 * \param inv is the invariant of the location.
+		 * \a DiscreteLocation.
+		 * \param name is the name of the discrete location.
+		 * \param field is the flow of the discrete location.
+		 * \param inv is the invariant of the discrete location.
 		 */
-		Location(const std::string &name, VectorField *field, 
-				ASet *inv);
+		DiscreteLocation(const std::string &name, VectorField *field, 
+				Ariadne::Geometry::AbstractDenotableSet *inv);
 		
-		/*! \brief This is the destructor of the class location.
+		/*! \brief This is the destructor of the discrete 
+		 * locationi class.
 		 *
 		 * This destructor deletes in a safe way an object of the class 
-		 * \a Location.
+		 * \a DiscreteLocation.
 		 */
-		~Location();
+		~DiscreteLocation();
 	
-		/*! \brief Returns the location's vector field.
+		/*! \brief Returns the discrete location's vector field.
 		 *
-		 * \return The vector field of the location.
+		 * \return The vector field of the discrete location.
 		 */
-		const VectorField* get_vectorfield() const; 
+		const VectorField* field() const {
+
+			return this->_field;
+		}
 		
-		/*! \brief Returns the location's name.
+		/*! \brief Returns the discrete location's name.
 		 *
-		 * \return The name of the location.
+		 * \return The name of the discrete location.
 		 */
-		const std::string& get_name() const; 
+		const std::string& name() const {
+
+			return this->_name;
+		}
 	
-		/*! \brief Add a leaving arc to the location.
+		/*! \brief Add a discrete transition from a discrete location.
 		 *
-		 * \param dest is the destination of the new leaving arc.
-		 * \param act is the activation region of the leaving arc.
-		 * \param reset is the reset of the leaving arc.
-		 * \return A pointer to the new leaving arc.
+		 * \param dest is the destination of the new discrete 
+		 * transition.
+		 * \param act is the activation region of the discrete 
+		 * transition.
+		 * \param reset is the reset of the discrete transition.
+		 * \return A pointer to the new discrete transition.
 		 */
-		const LeavingArc* add_a_leaving_arc(Location *dest, 
-				ASet *act, Map *reset);
+		const DiscreteTransition* add_discrete_transition(
+				DiscreteLocation *dest, 
+				Ariadne::Geometry::ASet *act, Map *reset);
 		
-		/*! \brief Initialize location's class.
+		/*! \brief Initialize discrete location's class.
 		 *
-		 * Initialize the static members of location 
-		 * class. The objects of the class Location
+		 * Initialize the static members of discrete location 
+		 * class. The objects of the class DiscreteLocation
 		 * can NOT be initialized before the call
 		 * this method.
 		 */
-		void Init(); 
-		
-		/*! \brief Returns the location's invariant.
+		static void Init() { 
+			this->_smallest_unused_id=0;
+		}
+
+		/*! \brief Returns the discrete location's invariant.
 		 *
-		 * \return The invariant of the location.
+		 * \return The invariant of the discrete location.
 		 */
-		const ASet* get_invariant() const;
+		const Ariadne::Geometry::AbstractDenotableSet* invariant() 
+			const {
+
+			return this->_invariant;
+		}
 	
-		/*! \brief Returns the location's leaving 
-		 * arcs.
+		/*! \brief Returns the discrete transitions leaving the
+		 * discrete location.
 		 *
-		 * \return The list of the arcs leaving the 
-		 * location.
+		 * \return The list of the discrete transitions leaving the 
+		 * discrete location.
 		 */
-		const std::list<LeavingArc *>& get_leaving_arcs() const;
+		const std::list<DiscreteTransition *>& discrete_transitions() 
+			const {
+			
+			return this->_discrete_transitions;
+		}
 		
-		/*! \brief Checks if two locations are the same.
+		/*! \brief Checks if two discrete locations are the same.
 		 *
-		 * This methods checks if two locations are the same.
-		 * \param a is the first location.
+		 * This methods checks if two discrete locations are the same.
+		 * \param a is the first discrete location.
 		 * \return \a TRUE if \a a is equal to the current 
 		 * object, \a TRUE otherwise.
 		 */
-		bool operator==(const Location &a) const;
+		bool operator==(const DiscreteLocation &a) const{
+			return (this->_id==a._id);	
+		}
 		
-		/*! \brief Checks if two locations are different.
+		/*! \brief Checks if two discrete locations are different.
 		 *
-		 * This methods checks if two locations are different.
-		 * \param a is the first location.
+		 * This methods checks if two discrete locations are different.
+		 * \param a is the first discrete location.
 		 * \return \a FALSE if \a a is equal to the current 
 		 * object, \a TRUE otherwise.
 		 */
-		bool operator!=(const Location &a) const; 
+		bool operator!=(const DiscreteLocation &a) const{
+			return (this->_id!=a._id);	
+		} 
+ 
 };
+
+}
 
 }
 

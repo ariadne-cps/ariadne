@@ -1,8 +1,8 @@
 /***************************************************************************
- *            variable.cpp
+ *            set_const.h
  *
- *  Fri Aug  6 12:08:31 2004
- *  Copyright  2004  Alberto Casagrande
+ *  Tue Feb  8 19:25:54 2005
+ *  Copyright  2005  Alberto Casagrande
  *  casagrande@dimi.uniud.it
  ****************************************************************************/
 
@@ -22,46 +22,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include <string>
+#ifndef _SET_CONST_H
+#define _SET_CONST_H
 
-#include "variable.h"
+namespace Ariadne {
+namespace Geometry {
 
-using namespace Ariadne;
-	
-Variable::Variable(const std::string &name){
-	this->name=name;
-	this->id=this->smallest_unused_id;
-	this->smallest_unused_id++;
+enum DegenerateSetKind {
+	EMPTY,
+	UNIVERSE,
+	GENERAL
+};
 
-	this->type=REAL_VAR;
 }
-
-Variable::Variable(const std::string &name, VariableID id){
-	this->name=name;
-	this->id=id;
-			
-	this->type=REAL_VAR;
 }
-		
-Variable::Variable(const std::string &name, VariableType type){
-	this->name=name;
-	this->type=type;
-}
-		
-
-Variable::~Variable(){}
-
-bool Variable::has_id(const VariableID id) const{
-	return (this->id==id);
-}
-
-	
-bool Variable::has_name(const std::string &name) const{
-	return (this->name==name);
-}
-
-void Variable::set(const std::string &name, VariableID id){
-	this->name=name;
-	this->id=id;
-}
-
+#endif /* _SET_CONST_H */

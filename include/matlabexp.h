@@ -1,9 +1,9 @@
 /***************************************************************************
- *            state.h
+ *            matlabexp.h
  *
- *  Thu Jun 17 15:46:37 2004
- *  Copyright  2004  Alberto Casagrande
- *  casagrande@dimi.uniud.it
+ *  Wed Feb 16 18:17:41 2005
+ *  Copyright  2005  Alberto Casagrande, Pierpaolo Murrieri
+ *  casagrande@dimi.uniud.it, murrieri@parades.rm.cnr.it
  ****************************************************************************/
 
 /*
@@ -22,27 +22,40 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#ifndef _STATE_H
-#define _STATE_H
+#ifndef _MATLABEXP_H
+#define _MATLABEXP_H
 
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/io.hpp>
+#include <string>
+#include <fstream>
 
-#include "location.h"
+void open_matlab_stream(std::string &f_name, std::ofstream &os) {
 
-using namespace boost::numeric::ublas;
-
-namespace Ariadne {
-
-/*! \brief The phase space state type. */
-typedef vector< double > State;
-
-/*! \brief The hybrid space state type. */
-typedef struct {
-	State s;	
-	Location *l;
-} HState;
-
+	f_name+=".m";
+	
+	os.open(f_name.c_str() , std::ios::out);
+	
 }
 
-#endif /* _STATE_H */
+void close_mathlab_stream(std::ofstream &os) {
+	
+	os.close();	
+}
+
+void open_OneDim_matlab_stream(std::string &f_name, std::ofstream &os) {
+
+	f_name+=".m";
+	
+	os.open(f_name.c_str() , std::ios::out);
+
+	os<< "data = [ ";	
+}
+
+void close_OneDim_mathlab_stream(std::ofstream &os) {
+	
+	os<< "] "<<std::endl;	
+	
+	os.close();	
+}
+
+
+#endif /* _MATLABEXP_H */

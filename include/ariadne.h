@@ -60,39 +60,8 @@ namespace Ariadne {
  * Currently implemented using the boost::numeric::interval from the Boost C++ library.
  */
 using boost::numeric::interval;
-//     typedef boost::numeric::interval interval;
 
-/*! \brief An integer
- * 
- * An element of the ring of integers.
- * Must allow denotation of any integer, including arbitrarily large values.
- * Integer quotient and remainder must be supported.
- *
- * Currently implemented using mpz_class from the GNU Multiple Precision Library.
- */
-typedef mpz_class integer;
- 
-/*! A dyadic rational (i.e. of form @a m/2^n).
- * 
- * An element of the ring of dyadic rationals.
- * Must allow denotation of any dyadic rational.
- * May be created without loss of precision from any integral or floating point type, 
- * or from any rational of the form m/2^n.
- *
- * Currently implemented using mpf_class from the GNU Multiple Precision library.
- */
-typedef mpf_class dyadic;
- 
-/*! \brief A rational number.
- * 
- * An element of the field of rationals.
- * Must allow denotation of any rational.
- * May be created without loss of precision from any integral or floating point type, and from a dyadic.
- *
- * Currently implemented using mpq_class from the GNU Multiple Precision library.
- */
-typedef mpq_class rational;
- 
+
 
 /*! \brief Geometric calculus library.
  */
@@ -135,26 +104,21 @@ namespace LinearAlgebra {}
  */
 namespace Evaluation {}
 
+}
 
+/* No input routine for intervals defined by boost */
 namespace boost {
-namespace numeric {
-    template<class Ch, class ChTr>
-    std::basic_ostream<Ch, ChTr>&
-    operator<<(std::basic_ostream<Ch, ChTr>& os, const interval<Ariadne::rational>& r)
-    {
-	typename std::basic_ostream<Ch, ChTr>::sentry sentry(os);
-	if (sentry) {
-	    Ariadne::rational l = r.lower(), u = r.upper();
-	    os << '[' << l << ',' << u << ']';
+    namespace numeric {
+	template<typename R> 
+	std::istream&
+	operator>>(std::istream& is, interval<R>& ivl) 
+	{
+	    R l,u;
+	    char c1,c2,c3;
+	    is >> c1 >> l >> c2 >> u >> c3;
+	    ivl=interval<R>(l,u);
 	}
-	return os;
     }
-}
-}
-
-std::ostream& operator<<(std::ostream& os, const boost::numeric::interval<Ariadne::rational>& r) {
-    os << "[" << r.lower() << "," << r.upper() << "]";
-    return os;
 }
 
 #endif /* _ARIADNE_H */

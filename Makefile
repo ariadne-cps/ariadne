@@ -5,4 +5,7 @@ all:  ${EXAMPLEDIR}/Makefile
 
 clean:                                                                          
 	rm -f *.bak *.o *~ *% core
-	(cd ${EXAMPLEDIR}; ${MAKE} clean);
+	(cd ${EXAMPLEDIR}; ${MAKE} clean; cd ..; cd ${TESTDIR}; ${MAKE} clean);
+
+check:
+	(cd ${TESTDIR}; ${MAKE});

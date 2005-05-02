@@ -22,6 +22,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+/*! \file numerical_type.h
+ *  \brief Type definitions and conversion operators for fundamental Ariadne types.
+ */
+
 #ifndef _NUMERICAL_TYPE_H
 #define _NUMERICAL_TYPE_H
 
@@ -29,8 +33,42 @@
 
 namespace Ariadne {
 	
+/*! \brief An integer
+ * 
+ * An element of the ring of integers.
+ * Must allow denotation of any integer, including arbitrarily large values.
+ * Integer quotient and remainder must be supported.
+ *
+ * Currently implemented using mpz_class from the GNU Multiple Precision Library.
+ */
+typedef mpz_class Integer;
+ 
+/*! \brief A dyadic rational (i.e. of form @a m/2^n).
+ * 
+ * An element of the ring of dyadic rationals.
+ * Must allow denotation of any dyadic rational.
+ * May be created without loss of precision from any integral or floating point type, 
+ * or from any rational of the form m/2^n.
+ *
+ * Currently implemented using mpf_class from the GNU Multiple Precision library.
+ */
+typedef mpf_class Dyadic;
+ 
+/*! \brief A rational number.
+ * 
+ * An element of the field of rationals.
+ * Must allow denotation of any rational.
+ * May be created without loss of precision from any integral or floating point type, and from a dyadic.
+ *
+ * Currently implemented using mpq_class from the GNU Multiple Precision library.
+ */
+typedef mpq_class Rational;
+
+/*! \deprecated */
 typedef mpz_class AriadneIntegerType;
+/*! \deprecated */
 typedef mpq_class AriadneRationalType;
+/*! \deprecated */
 typedef mpf_class AriadneDyadeticType;
 
 	

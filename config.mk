@@ -12,6 +12,7 @@ MAKE = make
 
 EXAMPLEDIR = examples
 INCLUDEDIR = include
+TESTDIR = test
 
 CXXFLAGS = -I../${INCLUDEDIR}
 

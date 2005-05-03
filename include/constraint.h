@@ -29,7 +29,7 @@ namespace Ariadne {
 namespace LinearAlgebra {
 	
 template <typename R> 
-class AriadneConstrainSystem {
+class ConstrainSystem {
 	
 	public:
 		
@@ -49,10 +49,10 @@ class AriadneConstrainSystem {
 		
 		Rel_Vector r_type;
 		
-		AriadneConstrainSystem(Matrix new_C, Vector new_d , Rel_Vector new_r_type):
+		ConstrainSystem(Matrix new_C, Vector new_d , Rel_Vector new_r_type):
 					C(new_C),d(new_d),r_type(new_r_type){}
 						
-		AriadneConstrainSystem() {}
+		ConstrainSystem() {}
 		
 		inline size_t nb_equality() const{
 			
@@ -188,7 +188,7 @@ class AriadneConstrainSystem {
 			}
 		}
 		
-		inline const AriadneConstrainSystem<R> &expand_by(const R &delta) {
+		inline const ConstrainSystem<R> &expand_by(const R &delta) {
 			
 			if (delta==0) return *this;
 			
@@ -275,8 +275,8 @@ class AriadneConstrainSystem {
 			
 		}
 		
-		inline const AriadneConstrainSystem<R> &operator=(
-					const AriadneConstrainSystem<R> &cs){
+		inline const ConstrainSystem<R> &operator=(
+					const ConstrainSystem<R> &cs){
 				
 			(this->C) = (cs.C);
 			(this->d) = (cs.d);
@@ -298,7 +298,7 @@ class AriadneConstrainSystem {
 			r_type=	new_r_type;
 		}
 		
-		inline const AriadneConstrainSystem<R> &expand_equality_by(const R &delta) {
+		inline const ConstrainSystem<R> &expand_equality_by(const R &delta) {
 			
 			const size_t &dim=this->space_dim();
 			size_t new_constr=this->nb_equality()+this->nb_constraints();

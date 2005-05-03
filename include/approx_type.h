@@ -40,7 +40,7 @@ enum ApproxKind {
 
 /*! \brief Defines the approximation type */ 
 template < typename R>
-class AriadneApproxType {
+class ApproximationType {
 	public:
 		typedef R Real;
 	
@@ -54,30 +54,30 @@ class AriadneApproxType {
 
 	public:
 		
-		/*! \brief A costructor for the ApproxType class.*/ 
-		AriadneApproxType() {
+		/*! \brief A costructor for the ApproximationType class.*/ 
+		ApproximationType() {
 
 			/* an approx type has NONE kind by default */
 			this->_kind=NONE;
 			this->_value=0.0;
 		}
 		
-		/*! \brief A costructor for the ApproxType class.
+		/*! \brief A costructor for the ApproximationType class.
 		 *
 		 * \param orig is the object used a framework for
 		 * the new object.*/ 
-		AriadneApproxType(const AriadneApproxType<Real> &orig) {
+		ApproximationType(const ApproximationType<Real> &orig) {
 			this->_kind=orig._kind;
 			this->_value=orig._value;
 		}
 		
-		/*! \brief A costructor for the ApproxType class. 
+		/*! \brief A costructor for the ApproximationType class. 
 		 *
-		 * This method is a costructor of the ApproxType class.
-		 * \param kind is the kind of the new ApproxType object.
+		 * This method is a costructor of the ApproximationType class.
+		 * \param kind is the kind of the new ApproximationType object.
 		 * \param value is the value of the approximation.
 		 */
-		AriadneApproxType(const ApproxKind kind, const Real &value) {
+		ApproximationType(const ApproxKind kind, const Real &value) {
 			this->_kind=kind;
 			this->_value=value;
 		}
@@ -98,14 +98,14 @@ class AriadneApproxType {
 			return (this->_kind);
 		}
 
-		/*! \brief Assigns an ApproxType's object
+		/*! \brief Assigns an ApproximationType's object
 		 * to an other.
 		 *
 		 * \param orig is the object which has to be 
 		 * copied.
 		 * \return A reference to the new object.
 		 */
-		const AriadneApproxType& operator=(const AriadneApproxType &orig) {
+		const ApproximationType& operator=(const ApproximationType &orig) {
 			this->_kind=orig._kind;
 			this->_value=orig._value;
 			

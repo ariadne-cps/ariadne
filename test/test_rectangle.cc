@@ -37,7 +37,7 @@ using namespace Ariadne::Geometry;
 using namespace std;
 
 int main() {
-    typedef AriadneRectangle< AriadneState<Rational> > Rectangle;
+    typedef Rectangle< State<Rational> > Rectangle;
     typedef Rectangle::State State;
     typedef Rectangle::Real Real;
     typedef interval<Real> Interval;

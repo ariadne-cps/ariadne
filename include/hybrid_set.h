@@ -43,16 +43,16 @@ namespace Ariadne {
 namespace HybridDefinitions {
 	
 template <typename LOC>
-class AriadneLocationDenotableSet;
+class LocationDenotableSet;
 
 template <typename LDS>
-class AriadneHybridDenotableSet;
+class HybridDenotableSet;
 
 namespace IO_Operators{
 	
 template <typename LOC>
 std::ostream& operator<<(std::ostream &os, 
-				const AriadneLocationDenotableSet<LOC> &A){
+				const LocationDenotableSet<LOC> &A){
 
 		
 	os << "[" << std::endl
@@ -68,7 +68,7 @@ std::ostream& operator<<(std::ostream &os,
 
 template <typename LDS>
 std::ostream& operator<<(std::ostream &os, 
-				const AriadneHybridDenotableSet<LDS> &A){
+				const HybridDenotableSet<LDS> &A){
 
 	if (A.size() >0 )
 		os << "LocationDenotableSet[0]=" << A[0];
@@ -84,7 +84,7 @@ std::ostream& operator<<(std::ostream &os,
 }
 
 template < typename LOC >
-class AriadneLocationDenotableSet {
+class LocationDenotableSet {
 	public:
 		typedef LOC DiscreteLocation;
 		typedef typename DiscreteLocation::DenotableSet DenotableSet;
@@ -99,28 +99,28 @@ class AriadneLocationDenotableSet {
 		DenotableSet set;
 		
 		/*! \brief A denotable set constructor. */
-		AriadneLocationDenotableSet(const DiscreteLocation &loc): 
+		LocationDenotableSet(const DiscreteLocation &loc): 
 				location(loc), set((loc.vector_field()).dim()) {}
 			
 		/*! \brief A denotable set constructor. */
-		AriadneLocationDenotableSet(const DiscreteLocation &loc, 
+		LocationDenotableSet(const DiscreteLocation &loc, 
 					const BasicSet &A):
 					
 				location(loc), set(A) {}
 			
 		/*! \brief A denotable set constructor. */
-		AriadneLocationDenotableSet(const DiscreteLocation &location,
+		LocationDenotableSet(const DiscreteLocation &location,
 					const DenotableSet &A):
 				location(loc), set(A) {}
 					
 		/*! \brief A denotable set constructor. */
-		AriadneLocationDenotableSet(
-					const AriadneLocationDenotableSet< DiscreteLocation > &A):
+		LocationDenotableSet(
+					const LocationDenotableSet< DiscreteLocation > &A):
 				location(A.location), set(A.set) {}
 					
 		/*! \brief Copy the hybrid denotable set. */
-		inline AriadneLocationDenotableSet<DiscreteLocation> &operator=(
-					const AriadneLocationDenotableSet<DiscreteLocation> &A) {
+		inline LocationDenotableSet<DiscreteLocation> &operator=(
+					const LocationDenotableSet<DiscreteLocation> &A) {
 			
 			this->location=A.location;
 			this->set=A.set;
@@ -138,12 +138,12 @@ class AriadneLocationDenotableSet {
 		
 		template <typename L>
 		friend std::ostream& IO_Operators::operator<<(std::ostream &os, 
-				const AriadneLocationDenotableSet<L> &A);
+				const LocationDenotableSet<L> &A);
 		
 };
 
 template < typename LDS >
-class AriadneHybridDenotableSet {
+class HybridDenotableSet {
 	public:
 		typedef LDS LocationDenotableSet;
 		typedef typename LocationDenotableSet::DiscreteLocation DiscreteLocation;
@@ -189,7 +189,7 @@ class AriadneHybridDenotableSet {
 	
 	public:
 		/*! \brief A denotable set constructor. */
-		AriadneHybridDenotableSet(): _ordered(false) {}
+		HybridDenotableSet(): _ordered(false) {}
 					
 		inline void add_location_set(const DiscreteLocation &loc) {
 			
@@ -265,8 +265,8 @@ class AriadneHybridDenotableSet {
 		}
 		
 		/*! \brief Copy the hybrid denotable set. */
-		inline AriadneHybridDenotableSet< LDS > &operator=(
-					const AriadneHybridDenotableSet< LDS > &A) {
+		inline HybridDenotableSet< LDS > &operator=(
+					const HybridDenotableSet< LDS > &A) {
 						
 			for (size_t i=0; i< A.size(); i++) {
 				(this->_location_set).push_back(A._location_set[i]);
@@ -286,7 +286,7 @@ class AriadneHybridDenotableSet {
 		}
 		
 		
-		inline AriadneHybridDenotableSet< LDS > &
+		inline HybridDenotableSet< LDS > &
 					delete_element(const size_t &index) {
 			size_t i;
 			
@@ -307,7 +307,7 @@ class AriadneHybridDenotableSet {
 			return *this;
 		}
 		
-		inline AriadneHybridDenotableSet< LDS > &
+		inline HybridDenotableSet< LDS > &
 					order_using(const std::vector<DiscreteLocation> &l_vector) {
 						
 			size_t i,j,new_size=l_vector.size();
@@ -352,7 +352,7 @@ class AriadneHybridDenotableSet {
 		
 		template <typename L>
 		friend std::ostream& IO_Operators::operator<<(std::ostream &os, 
-				const AriadneHybridDenotableSet<L> &A);
+				const HybridDenotableSet<L> &A);
 };
 
 }

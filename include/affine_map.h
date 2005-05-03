@@ -41,7 +41,7 @@ enum AffineKind {
 };
 
 template <typename BS_MAP>
-class AriadneAffineMap {
+class AffineMap {
 	
 	public:
 		typedef BS_MAP BasicSetMap;
@@ -53,22 +53,22 @@ class AriadneAffineMap {
 		typedef typename boost::numeric::ublas::matrix<Real> Matrix;
 		typedef typename boost::numeric::ublas::vector<Real> Vector;
 	
-		AriadneAffineMap() {}
+		AffineMap() {}
 	
-		AriadneAffineMap(const AriadneAffineMap<BS_MAP> &T):
+		AffineMap(const AffineMap<BS_MAP> &T):
 				_map(T._map), _B(T._B), _inclusion_map(T._inclusion_map){}
 	
-		AriadneAffineMap(const Matrix &A):_map(A), _inclusion_map(false) {}
+		AffineMap(const Matrix &A):_map(A), _inclusion_map(false) {}
 	
-		AriadneAffineMap(const Vector &b): _map(b), _inclusion_map(false) {}
+		AffineMap(const Vector &b): _map(b), _inclusion_map(false) {}
 		
-		AriadneAffineMap(const Matrix &A, const Vector &b):
+		AffineMap(const Matrix &A, const Vector &b):
 				_map(A,b), _inclusion_map(false) {}
 					
-		AriadneAffineMap(const Matrix &A, const BasicSet &B):
+		AffineMap(const Matrix &A, const BasicSet &B):
 				_map(A), _B(B), _inclusion_map(true) {}
 					
-		inline AriadneAffineMap<BS_MAP> &operator=(const AriadneAffineMap<BS_MAP>  &A) {
+		inline AffineMap<BS_MAP> &operator=(const AffineMap<BS_MAP>  &A) {
 			
 			this->_map=A._map;
 			this->_B=A._B;

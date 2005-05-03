@@ -35,13 +35,13 @@ namespace Ariadne {
 
 namespace Geometry {
 
-template <typename S = AriadneState<AriadneRationalType> > 
-class AriadneRectangle;
+template <typename S = State<Rational> > 
+class Rectangle;
 
 
 /*! \brief Tests disjointness */
 template <typename S>
-bool disjoint(const AriadneRectangle<S> &A, const AriadneRectangle<S> &B) {
+bool disjoint(const Rectangle<S> &A, const Rectangle<S> &B) {
 	
 	if (A.dim()!=B.dim()) 
 		throw std::domain_error("The two parameters have different space dimentions");
@@ -57,8 +57,8 @@ bool disjoint(const AriadneRectangle<S> &A, const AriadneRectangle<S> &B) {
 
 /*! \brief Tests intersection of interiors */
 template <typename S>
-bool intersects_interior(const AriadneRectangle<S> &A, 
-		const AriadneRectangle<S> &B) {
+bool intersects_interior(const Rectangle<S> &A, 
+		const Rectangle<S> &B) {
 			
 	if (A.dim()!=B.dim()) 
 		throw std::domain_error("The two parameters have different space dimensions");
@@ -76,8 +76,8 @@ bool intersects_interior(const AriadneRectangle<S> &A,
 
 /*! \brief Tests inclusion of interiors */
 template <typename S>
-bool subset_of_interior(const AriadneRectangle<S> &A, 
-				const AriadneRectangle<S> &B) {
+bool subset_of_interior(const Rectangle<S> &A, 
+				const Rectangle<S> &B) {
 	
 	if (A.dim()!=B.dim()) 
 		throw std::domain_error("The two parameters have different space dimentions");
@@ -96,8 +96,8 @@ bool subset_of_interior(const AriadneRectangle<S> &A,
 
 /*! \brief Tests inclusion of interiors */
 template <typename S>
-bool is_subset_of(const AriadneRectangle<S> &A, 
-		  const AriadneRectangle<S> &B) {
+bool is_subset_of(const Rectangle<S> &A, 
+		  const Rectangle<S> &B) {
 	
 	if (A.dim()!=B.dim()) 
 		throw std::domain_error("The two parameters have different space dimentions");
@@ -115,19 +115,19 @@ bool is_subset_of(const AriadneRectangle<S> &A,
 
 //*! \brief Tests inclusion in an open cover.  */
 template <typename S >
-bool subset_of_open_cover(const AriadneRectangle<S> &A, 
-			  const std::list< AriadneRectangle<S> > &list);
+bool subset_of_open_cover(const Rectangle<S> &A, 
+			  const std::list< Rectangle<S> > &list);
 
 
 /*! \brief Makes intersection of interior */
 template <typename S>
-AriadneRectangle<S> closure_of_intersection_of_interior(
-		const AriadneRectangle<S> &A, const AriadneRectangle<S> &B){
+Rectangle<S> closure_of_intersection_of_interior(
+		const Rectangle<S> &A, const Rectangle<S> &B){
 
 	if (A.dim()!=B.dim()) 
 		throw std::domain_error("The two parameters have different space dimentions");
 	
-	AriadneRectangle<S> C(A.dim());
+	Rectangle<S> C(A.dim());
 
 	if (A.empty()||B.empty()) return C;
 	
@@ -155,31 +155,31 @@ AriadneRectangle<S> closure_of_intersection_of_interior(
  *  This should make the algorithms faster, since we don't have to check emptyness every time.
  */
 template <typename S>
-class AriadneRectangle {
+class Rectangle {
 	
 		/*! \brief Tests disjointness */
-		friend bool disjoint <> (const AriadneRectangle<S> &A, 
-				const AriadneRectangle<S> &B);
+		friend bool disjoint <> (const Rectangle<S> &A, 
+				const Rectangle<S> &B);
 
 		/*! \brief Tests intersection of interiors */
-		friend bool intersects_interior <> (const AriadneRectangle<S> &A, 
-				const AriadneRectangle<S> &B);
+		friend bool intersects_interior <> (const Rectangle<S> &A, 
+				const Rectangle<S> &B);
 
                 /*! \brief Tests if \a A is a subset of the interior of \a B. */
-		friend bool subset_of_interior <> (const AriadneRectangle<S> &A, 
-				const AriadneRectangle<S> &B);
+		friend bool subset_of_interior <> (const Rectangle<S> &A, 
+				const Rectangle<S> &B);
 
 		/*! \brief Tests inclusion */
-		friend bool is_subset_of <> (const AriadneRectangle<S> &A, 
-				const AriadneRectangle<S> &B);
+		friend bool is_subset_of <> (const Rectangle<S> &A, 
+				const Rectangle<S> &B);
 		
 		//*! \brief Tests inclusion in an open cover. */
-		friend bool subset_of_open_cover <> (const AriadneRectangle<S> &A, 
-						     const std::list< AriadneRectangle<S> > &list);
+		friend bool subset_of_open_cover <> (const Rectangle<S> &A, 
+						     const std::list< Rectangle<S> > &list);
 
 		/*! \brief Makes intersection of interiors */
-		friend AriadneRectangle<S> closure_of_intersection_of_interior <> (
-				const AriadneRectangle<S> &A, const AriadneRectangle<S> &B);
+		friend Rectangle<S> closure_of_intersection_of_interior <> (
+				const Rectangle<S> &A, const Rectangle<S> &B);
 	
 	public:
                 /*! \brief The type of denotable real number used for the corners. */
@@ -200,17 +200,17 @@ class AriadneRectangle {
 	
 	public:
                 /*! \brief Default constructor construcs an empty rectangle of dimension 0. */
-		AriadneRectangle(size_t dim = 0)
+		Rectangle(size_t dim = 0)
 		    : _lower_corner(dim),  _upper_corner(dim), _empty(true) {}
     
                 /*! \brief Copy constructor. */
-		AriadneRectangle(const AriadneRectangle<State> &original) 
+		Rectangle(const Rectangle<State> &original) 
 		    : _lower_corner(original._lower_corner),
 		      _upper_corner(original._upper_corner),
 		      _empty(original._empty) {}
 			
                 /*! \brief Construct from an array of intervals. */
-		AriadneRectangle(size_t dim, const Interval* intervals) 
+		Rectangle(size_t dim, const Interval* intervals) 
 		    : _lower_corner(dim), _upper_corner(dim), _empty(true) 
                 {
 		    for(size_t i=0; i!=dim; ++i) {
@@ -227,7 +227,7 @@ class AriadneRectangle {
 		}
 
                 /*! \brief Construct from lower and upper corners. */
-                AriadneRectangle(const State &l_corner, const State &u_corner):
+                Rectangle(const State &l_corner, const State &u_corner):
 		    _lower_corner(l_corner.dim()), _upper_corner(l_corner.dim()), _empty(true) 
                 {
 		    /* Test to see if corners have same dimensions */
@@ -344,11 +344,11 @@ class AriadneRectangle {
 			
 		}
 
-		inline AriadneRectangle<State> find_quadrant(size_t q) const {
+		inline Rectangle<State> find_quadrant(size_t q) const {
 			
 			size_t j;
 			
-			AriadneRectangle<State> quadrant(this->dim());
+			Rectangle<State> quadrant(this->dim());
 			
 			for (j=0; j< this->dim(); j++) {
 				
@@ -367,7 +367,7 @@ class AriadneRectangle {
 			return quadrant;
 		}
 
-		inline AriadneRectangle<State> &expand_by(const Real &delta) {
+		inline Rectangle<State> &expand_by(const Real &delta) {
 			
 			for (size_t j=0; j< this->dim(); j++) {
 				
@@ -378,7 +378,7 @@ class AriadneRectangle {
 			return *this;
 		}
 		
-		inline AriadneRectangle<State> &expand_by(const State &delta) {
+		inline Rectangle<State> &expand_by(const State &delta) {
 			
 			for (size_t j=0; j< this->dim(); j++) {
 				
@@ -389,7 +389,7 @@ class AriadneRectangle {
 			return *this;
 		}
 		
-		inline bool operator!=(const AriadneRectangle<State> &A) const {
+		inline bool operator!=(const Rectangle<State> &A) const {
 			
 			if (this->dim()!= A.dim()) return true;
 		
@@ -406,17 +406,17 @@ class AriadneRectangle {
 		
 		friend std::ostream& 
 		operator<< <> (std::ostream &os, 
-			       const AriadneRectangle<S> &r);
+			       const Rectangle<S> &r);
 
 		friend std::istream& 
 		operator>> <> (std::istream &is, 
-			       AriadneRectangle<S> &r);
+			       Rectangle<S> &r);
 
 };
 
 template <typename S>
 std::ostream& 
-operator<<(std::ostream &os, const AriadneRectangle<S> &r) 
+operator<<(std::ostream &os, const Rectangle<S> &r) 
 {
 
     /*
@@ -438,9 +438,9 @@ operator<<(std::ostream &os, const AriadneRectangle<S> &r)
 
 template <typename S>
 std::istream& 
-operator>>(std::istream &is, AriadneRectangle<S> &r) 
+operator>>(std::istream &is, Rectangle<S> &r) 
 {
-    typedef typename AriadneRectangle<S>::Real Real;
+    typedef typename Rectangle<S>::Real Real;
     typedef typename Ariadne::interval<Real> Interval;
     
     char c;
@@ -450,7 +450,7 @@ operator>>(std::istream &is, AriadneRectangle<S> &r)
 	/* Representation as list of intervals */ 
 	std::vector< Interval > v;
 	Ariadne::operator>>(is,v);
-	r=AriadneRectangle<S>(v.size(),&v[0]);
+	r=Rectangle<S>(v.size(),&v[0]);
     }
     else {
 	/* representation as lower and upper corners */

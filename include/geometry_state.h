@@ -35,10 +35,10 @@
 namespace Ariadne {
 namespace Geometry {
 
-template <typename R = AriadneRationalType> class AriadneState;
+template <typename R = Rational> class State;
 
 template <typename R> 
-class AriadneState {
+class State {
 	public:	
 		typedef R Real;
 	
@@ -47,15 +47,15 @@ class AriadneState {
 		 boost::numeric::ublas::vector<Real> _vector;
 	
 	public:
-		AriadneState() : _vector(0) {
+		State() : _vector(0) {
 		}
 		
-		AriadneState(size_t dim) : _vector(dim) {
+		State(size_t dim) : _vector(dim) {
 			if (dim<0) 
 				throw std::domain_error("States should have at least dimension 0.");
 		}
 		
-		AriadneState(size_t dim, const Real default_value) : 
+		State(size_t dim, const Real default_value) : 
 			_vector(dim) {
 			if (dim<0) 
 				throw std::domain_error("States should have at least dimension 0.");
@@ -65,7 +65,7 @@ class AriadneState {
 				this->_vector[i]=default_value;
 		}
 
-		AriadneState(const AriadneState& original){
+		State(const State& original){
 			_vector=original._vector;
 		}
 		
@@ -87,7 +87,7 @@ class AriadneState {
 
 		
 		/*! \brief Checks equivalence between two states. */
-		inline bool operator==(const AriadneState<Real> &A) const {
+		inline bool operator==(const State<Real> &A) const {
 			
 		    /* Return false if states have different dimensions */
 
@@ -106,7 +106,7 @@ class AriadneState {
 		}
 		
 		/*! \brief Checks equivalence between two states. */
-		inline bool operator!=(const AriadneState<Real> &A) const {
+		inline bool operator!=(const State<Real> &A) const {
 		    return !( *this == A );
 		}
 
@@ -115,7 +115,7 @@ class AriadneState {
 			return (this->_vector).size();
 		}
 		
-		inline AriadneState<Real> &operator=(const AriadneState<Real> &A){
+		inline State<Real> &operator=(const State<Real> &A){
 			
 			this->_vector=A._vector;
 			
@@ -123,15 +123,15 @@ class AriadneState {
 		}
 		
 		template <typename RType>
-		friend std::ostream& operator<<(std::ostream &os, const AriadneState<RType> &state);
+		friend std::ostream& operator<<(std::ostream &os, const State<RType> &state);
 
 		template <typename RType>
-                friend std::istream& operator>>(std::istream &is, AriadneState<RType> &state);
+                friend std::istream& operator>>(std::istream &is, State<RType> &state);
 
 };
 
 template <typename R> 
-std::ostream& operator<< (std::ostream &os, const AriadneState<R> &state)
+std::ostream& operator<< (std::ostream &os, const State<R> &state)
 {
 	os << "[";
 	if(state.dim() > 0) {
@@ -147,7 +147,7 @@ std::ostream& operator<< (std::ostream &os, const AriadneState<R> &state)
 }
 
 template <typename R> 
-std::istream& operator>> (std::istream &is, AriadneState<R> &state)
+std::istream& operator>> (std::istream &is, State<R> &state)
 {
     static size_t last_size;
     

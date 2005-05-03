@@ -31,7 +31,7 @@ namespace Ariadne {
 
 namespace HybridDefinitions {
 
-template < typename LDT > class AriadneHybridAutomaton;
+template < typename LDT > class HybridAutomaton;
 	
 /*! \typedef DiscreteLocationID
  *  \brief It's the type of the discrete location's univocal identifier. 
@@ -40,7 +40,7 @@ typedef size_t DiscreteLocationID;
 
 /*! \brief The discrete location type. */
 template <typename VF >
-class AriadneDiscreteLocation{
+class DiscreteLocation{
 
 	public:
 		typedef VF VectorField;
@@ -52,10 +52,10 @@ class AriadneDiscreteLocation{
 		
 	
 		template < typename LDT >
-		friend class AriadneHybridAutomaton;
+		friend class HybridAutomaton;
 			
 		template < typename LDS >
-		friend class AriadneHybridDenotableSet;
+		friend class HybridDenotableSet;
 	private:
 		/*! \brief The discrete location's identificator. */
 		DiscreteLocationID _id;
@@ -92,7 +92,7 @@ class AriadneDiscreteLocation{
 		 * \param name is the name of the discrete location.
 		 * \param vfield is the location's vector field.
 		 */
-		AriadneDiscreteLocation(const std::string &name, 
+		DiscreteLocation(const std::string &name, 
 										const VectorField &vfield):
 				_name(name), _vfield(vfield), 
 				_invariant(vfield.dim()), _in_automaton(false) {}
@@ -105,7 +105,7 @@ class AriadneDiscreteLocation{
 		 * \param vfield is the location's vector field.
 		 * \param invariant is the location's invariant.
 		 */
-		AriadneDiscreteLocation(const std::string &name, 
+		DiscreteLocation(const std::string &name, 
 										const VectorField &vfield, 
 										const DenotableSet &invariant):
 					
@@ -126,7 +126,7 @@ class AriadneDiscreteLocation{
 		 * \param vfield is the location's vector field.
 		 * \param invariant is the location's invariant.
 		 */
-		AriadneDiscreteLocation(const std::string &name, 
+		DiscreteLocation(const std::string &name, 
 										const VectorField &vfield, 
 										const BasicSet &invariant):
 					
@@ -149,8 +149,8 @@ class AriadneDiscreteLocation{
 		 * discrete location class.
 		 * \param orig is the original object.
 		 */
-		AriadneDiscreteLocation(
-					const AriadneDiscreteLocation<VF> &orig): 
+		DiscreteLocation(
+					const DiscreteLocation<VF> &orig): 
 
 			_id(orig._id), _name(orig._name), _vfield(orig._vfield),
 			_invariant(orig._invariant), _in_automaton(orig._in_automaton) {}
@@ -201,8 +201,8 @@ class AriadneDiscreteLocation{
 		 * \param orig is the original object.
 		 * \return The discrete location reference.
 		 */
-		inline const AriadneDiscreteLocation<VF>& operator=(
-				const AriadneDiscreteLocation<VF> &orig){
+		inline const DiscreteLocation<VF>& operator=(
+				const DiscreteLocation<VF> &orig){
 				
 			this->_id=orig._id;
 			this->_name=orig._name;

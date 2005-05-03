@@ -28,13 +28,13 @@
 namespace Ariadne {
 namespace Geometry {
 	
-template <class BS, uint BS_PER_BLOCK> class AriadneDenotableSet;
+template <class BS, uint BS_PER_BLOCK> class DenotableSet;
 
 namespace IO_Operators {
 	
 template <typename BS, uint BS_PER_BLOCK>
 std::ostream& operator<<(std::ostream &os, 
-				const AriadneDenotableSet< BS , BS_PER_BLOCK > &A){
+				const DenotableSet< BS , BS_PER_BLOCK > &A){
 
 	if (A.size() >0 )
 		os << "BasicSet[0]=" << A[0];
@@ -55,8 +55,8 @@ class DenotableSetExporter {
 		typedef typename Exporter::BasicSet BasicSet;
 		typedef typename BasicSet::State State;
 		typedef typename BasicSet::Real Real;
-	    typedef AriadneDenotableSet<BasicSet, BS_PER_BLOCK> DenotableSet;
-		typedef AriadneRectangle<State> Rectangle;
+	    typedef DenotableSet<BasicSet, BS_PER_BLOCK> DenotableSet;
+		typedef Rectangle<State> Rectangle;
 	
 	private:
 		

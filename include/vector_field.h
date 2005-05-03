@@ -45,9 +45,8 @@ namespace Ariadne {
 namespace VectorField{
 
 template <typename I>
-class AriadneIntegrator {	
+class Integrator {	
 	public:
-		typedef I Integrator;
 		typedef typename I::VectorFieldMap VectorFieldMap;
 		typedef typename I::SolutionMap SolutionMap;
 		typedef typename SolutionMap::DenotableSet DenotableSet;
@@ -63,30 +62,30 @@ class AriadneIntegrator {
 		}
 	
 	public:
-		AriadneIntegrator() {}
+		Integrator() {}
 		
 	
-		AriadneIntegrator(const AriadneIntegrator<I>& orig): 
+		Integrator(const Integrator<I>& orig): 
 			_integrator(orig._integrator),
 			_sol_map(orig._sol_map),_delta_step(orig._delta_step) {}
 	
-		AriadneIntegrator(const VectorFieldMap &vfield): 
+		Integrator(const VectorFieldMap &vfield): 
 			_integrator(vfield),_delta_step(0){}
 	
-		AriadneIntegrator(const VectorFieldMap &vfield, 
+		Integrator(const VectorFieldMap &vfield, 
 				const Real &delta): _integrator(vfield), _delta_step(delta) {
 			
 			this->_sol_map=(this->_integrator).get_solution(delta);
 		}
 		
 		template < typename VF >
-		AriadneIntegrator(const VF &vfield): _delta_step(0){
+		Integrator(const VF &vfield): _delta_step(0){
 			
 			this->_integrator(vfield.vector_field());	
 		}
 		
 		template < typename VF >
-		AriadneIntegrator(const VF &vfield, const Real &delta ): 
+		Integrator(const VF &vfield, const Real &delta ): 
 			_delta_step(delta){
 			
 			this->_integrator(vfield.vector_field());
@@ -149,7 +148,7 @@ class AriadneIntegrator {
 							this->_sol_map,atype);
 		}
 		
-		inline AriadneIntegrator& operator()(const  VectorFieldMap &vfield) {
+		inline Integrator& operator()(const  VectorFieldMap &vfield) {
 			
 			this->_integrator(vfield);
 			
@@ -163,7 +162,7 @@ class AriadneIntegrator {
 		}
 		
 	private:
-		Integrator _integrator;
+		I _integrator;
 	
 		SolutionMap _sol_map;
 	
@@ -172,17 +171,16 @@ class AriadneIntegrator {
 
 
 template <typename VF>
-class AriadneVectorField {
+class VectorField {
 	
 	public:
-		typedef VF VectorField;
-		typedef typename VectorField::VectorFieldMap VectorFieldMap;
-		typedef typename VectorField::DenotableSet DenotableSet;
+		typedef typename VF::VectorFieldMap VectorFieldMap;
+		typedef typename VF::DenotableSet DenotableSet;
 		typedef typename DenotableSet::BasicSet BasicSet;
 		typedef typename BasicSet::State State;
 		typedef typename State::Real Real;
 	
-		AriadneVectorField(const VectorField &T):_vector_field(T) {}
+		VectorField(const VF &T):_vector_field(T) {}
 		
 		inline VectorFieldKind vector_field_kind() {
 			return _vector_field.vector_field_kind();}
@@ -197,7 +195,7 @@ class AriadneVectorField {
 		
 	private:
 	
-		VectorField _vector_field;
+		VF _vector_field;
 };
 
 }

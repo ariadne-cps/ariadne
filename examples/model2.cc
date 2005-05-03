@@ -48,79 +48,80 @@ using namespace Ariadne::HybridDefinitions::IO_Operators;
 
 namespace UBLAS = boost::numeric::ublas;
 
-using namespace Parma_Polyhedra_Library;
-using namespace Parma_Polyhedra_Library::IO_Operators;
+using Parma_Polyhedra_Library::Variable;
+using Parma_Polyhedra_Library::Constraint_System;
+//using namespace Parma_Polyhedra_Library;
+//using namespace Parma_Polyhedra_Library::IO_Operators;
 
-typedef AriadneRationalType Real;
-typedef AriadneState<> State;
-typedef AriadneRectangle<State> Rectangle;
-typedef AriadnePolyhedron<State> Poly;
-typedef AriadneDenotableSet<Poly> DenotableSet;
-typedef AriadnePTree<Rectangle> PTree;
-typedef UBLAS::matrix<Real> MatrixT;
-typedef UBLAS::vector<Real> VectorT;
-typedef AriadnePolyAffineMap< State > PMap;
+typedef State<Rational> StateT;
+typedef Rectangle<StateT> RectangleT;
+typedef Polyhedron<StateT> PolyhedronT;
+typedef DenotableSet<PolyhedronT> DenotableSetT;
+typedef PartitionTree<RectangleT> PTree;
+typedef UBLAS::matrix<Rational> MatrixT;
+typedef UBLAS::vector<Rational> VectorT;
+typedef PolyAffineMap< StateT > PMap;
 
-typedef AriadneAffineMap< PMap > AMap;
+typedef AffineMap< PMap > AMap;
 
-typedef PolyAffineIntegrator< State > PInt;
-typedef AriadneAffineIntegrator< PInt > AInt;
-typedef AriadneIntegrator< AInt > Integrator;
+typedef PolyAffineIntegrator< StateT > PInt;
+typedef AffineIntegrator< PInt > AInt;
+typedef Integrator< AInt > Int;
 
-typedef AriadneAffineVectorField< AMap > AVectF;
+typedef AffineVectorField< AMap > AVectF;
 
-typedef AriadneDiscreteLocation< AVectF > DiscreteLocation;
+typedef DiscreteLocation< AVectF > DiscLoc;
 
-typedef AriadneLeavingDiscreteTransition< DiscreteLocation, AMap > LeavingTrans;
-typedef AriadneHybridAutomaton< LeavingTrans > Automaton; 
+typedef LeavingDiscreteTransition< DiscLoc, AMap > LeavingTrans;
+typedef HybridAutomaton< LeavingTrans > Automaton; 
 
-typedef AriadneLocationDenotableSet<DiscreteLocation> LocationDenotableSet;
-typedef AriadneHybridDenotableSet<LocationDenotableSet> HybridDenotableSet;
+typedef LocationDenotableSet<DiscLoc> LocDenS;
+typedef HybridDenotableSet<LocDenS> HybDenS;
 
-typedef AriadneLocationTrace<DiscreteLocation> LocationTrace;
-typedef AriadneTrace<LocationTrace> Trace;
+typedef LocationTrace<DiscLoc> LTrc;
+typedef Trace<LTrc> Trc;
 
-typedef PolyhedronMatlabExporter<State> BSExporter;
+typedef PolyhedronMatlabExporter<StateT> BSExporter;
 typedef DenotableSetExporter<BSExporter> Exporter;
 
-typedef AriadneSolver<Automaton, HybridDenotableSet, Trace , 
-	PTree, Integrator, Exporter > Solver;
+typedef Solver<Automaton, HybDenS, Trc , 
+	PTree, Int, Exporter > Slv;
 
 int main() {
 
-	Real max_flow(5,100);
-	Real delta_step(1,1000);
+	Rational max_flow(5,100);
+	Rational delta_step(1,1000);
 	
 	uint dim=4;
 	
 	/* Define Constants */
-	Real a(-3,2), b(955, 10);
-	Real a_p=-21, b_p=21840;
-	Real a_phi(4,350), b_phi(27,35);
-	Real T_m=15;
-	Real G=390000;
-	Real a_L(-168,100), b_L=105;
-	Real k(45,100000); k=k/100000;
-	Real k_alpha(259,10000), k_n=6;
+	Rational a(-3,2), b(955, 10);
+	Rational a_p=-21, b_p=21840;
+	Rational a_phi(4,350), b_phi(27,35);
+	Rational T_m=15;
+	Rational G=390000;
+	Rational a_L(-168,100), b_L=105;
+	Rational k(45,100000); k=k/100000;
+	Rational k_alpha(259,10000), k_n=6;
 	
-	Real min_n=740,max_n=860, n_error=10; 
-	Real min_theta=0,max_theta=180, theta_error(1,10); 
-	Real min_p=5000, max_p=12000, p_error=10;
-	Real min_m=k*min_p, max_m=k*max_p, m_error=abs((max_m+min_m)*(delta_step*10));
-	Real min_T=0.6*G*min_m, max_T=G*max_m, T_error=abs((max_T+min_T)*(delta_step*10));
-	Real min_phi=-15, max_phi=20, phi_error(2,10); 
-	Real min_alpha=0, max_alpha=20, alpha_error(1,10);
+	Rational min_n=740,max_n=860, n_error=10; 
+	Rational min_theta=0,max_theta=180, theta_error(1,10); 
+	Rational min_p=5000, max_p=12000, p_error=10;
+	Rational min_m=k*min_p, max_m=k*max_p, m_error=abs((max_m+min_m)*(delta_step*10));
+	Rational min_T=0.6*G*min_m, max_T=G*max_m, T_error=abs((max_T+min_T)*(delta_step*10));
+	Rational min_phi=-15, max_phi=20, phi_error(2,10); 
+	Rational min_alpha=0, max_alpha=20, alpha_error(1,10);
 	
-	Real n_0=800;
-	Real theta_0=0;
-	Real p_0=7300;
-	Real m_0=k*p_0;
-	Real T_0=G*m_0;
-	Real phi_0=20;
-	Real alpha0=-(a_p*p_0)/b_p;;
+	Rational n_0=800;
+	Rational theta_0=0;
+	Rational p_0=7300;
+	Rational m_0=k*p_0;
+	Rational T_0=G*m_0;
+	Rational phi_0=20;
+	Rational alpha0=-(a_p*p_0)/b_p;;
 
 	/* Define Reachability Set Bounding Box */
-	State uc(dim),lc(dim), d_rec(dim), init_val(dim);
+	StateT uc(dim),lc(dim), d_rec(dim), init_val(dim);
 	
 	lc[0]=min_n; 		uc[0]=max_n; 		init_val[0]=n_0;		d_rec[0]=n_error; 
 	lc[1]=min_theta; 	uc[1]=max_theta;	init_val[1]=theta_0;		d_rec[1]=theta_error; 
@@ -138,7 +139,7 @@ int main() {
 	Variable last_space_dim(3);
 	
 	/* Define Vector Field */
-	MatrixT A=zero_matrix<Real>(dim);
+	MatrixT A=zero_matrix<Rational>(dim);
 	
 	A(0,0)=a;A(0,2)=b; 		/* dot{n} = a * n + b * T */
 	A(1,0)=k_n;			/* dot{theta} = k_n * n */
@@ -150,9 +151,9 @@ int main() {
 	cs_inv1.insert( denumerator(theta_error) * theta <= denumerator(theta_error) * 180 + numerator(theta_error) );
 	cs_inv1.insert( 0*last_space_dim >= -1 );
 
-	Poly inv1(cs_inv1);
+	PolyhedronT inv1(cs_inv1);
 
-	DiscreteLocation l0("S", vf , inv1);
+	DiscLoc l0("S", vf , inv1);
 	
 	/* Define Location S+ */
 	Constraint_System cs_inv2;	
@@ -160,19 +161,19 @@ int main() {
 	cs_inv2.insert( theta >= 160 );
 	cs_inv2.insert( 0*last_space_dim >= -1 );
 
-	Poly inv2(cs_inv2);
+	PolyhedronT inv2(cs_inv2);
 
-	DiscreteLocation l1("S+", vf , inv2);
+	DiscLoc l1("S+", vf , inv2);
 
 	/* Define activation from S to S+ */
 	Constraint_System cs_activ1;	
 	cs_activ1.insert( theta >= 160 );
 	cs_activ1.insert( 0*last_space_dim >= -1 );
-	Poly activ1(cs_activ1);
+	PolyhedronT activ1(cs_activ1);
 	
 	/* Define Reset from S to S+ */
-	MatrixT M1=identity_matrix<Real>(dim);
-	VectorT v1=null_vector<Real>(dim);
+	MatrixT M1=identity_matrix<Rational>(dim);
+	VectorT v1=null_vector<Rational>(dim);
 	
 	M1(3,1)=-1; M1(3,3)=0; v1(3)=180;	/* phi= 180 - theta */
 	
@@ -185,11 +186,11 @@ int main() {
 	Constraint_System cs_activ2;	
 	cs_activ2.insert( theta >= 180 );
 	cs_activ2.insert( 0*last_space_dim >= -1 );
-	Poly activ2(cs_activ2);
+	PolyhedronT activ2(cs_activ2);
 	
 	/* Define Reset from S to S+ */
-	MatrixT M2=identity_matrix<Real>(dim);
-	VectorT v2=null_vector<Real>(dim);
+	MatrixT M2=identity_matrix<Rational>(dim);
+	VectorT v2=null_vector<Rational>(dim);
 	
 	v2(1)=-180;				/* theta= theta - 180 */
 	M2(2,3)=T_m * a_phi; M2(2,2)=0; 
@@ -204,11 +205,11 @@ int main() {
 	Constraint_System cs_activ3;	
 	cs_activ3.insert( theta >= 180 );
 	cs_activ3.insert( 0*last_space_dim >= -1 );
-	Poly activ3(cs_activ3);
+	PolyhedronT activ3(cs_activ3);
 	
 	/* Define Reset from S to S */
-	MatrixT M3=identity_matrix<Real>(dim);
-	VectorT v3=null_vector<Real>(dim);
+	MatrixT M3=identity_matrix<Rational>(dim);
+	VectorT v3=null_vector<Rational>(dim);
 	
 	v3(1)=-180;			/* theta= theta - 180 */
 	M3(2,2)=0; v3(2)=T_m * b_phi;	/* T = T_m * b_phi */
@@ -220,7 +221,7 @@ int main() {
 	
 	/* Define initial region */
 	Constraint_System cs_init;	
-	Real var_coef, known_term,delta_term;
+	Rational var_coef, known_term,delta_term;
 	
 	for (uint i=0; i< dim; i++) {
 		
@@ -232,13 +233,13 @@ int main() {
 		cs_init.insert( var_coef * Variable(i) <= known_term + delta_term );
 	}
 
-	Poly bs_init(cs_init);
+	PolyhedronT bs_init(cs_init);
 	
-	LocationDenotableSet init(l0, bs_init);
+	LocDenS init(l0, bs_init);
 	
-	Solver solver;
+	Slv solver;
 	
-	Rectangle bounding_box(lc,uc);
+	RectangleT bounding_box(lc,uc);
 
 	std::vector<uint> dims;
 	

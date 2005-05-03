@@ -37,12 +37,12 @@ class PolyAffineIntegrator {
 	public:
 		typedef S State;
 		typedef typename State::Real Real;
-		typedef typename Ariadne::Geometry::AriadnePolyhedron< State > BasicSet;
-		typedef typename Ariadne::Geometry::AriadnePolyhedron< State > Polyhedron;
-		typedef typename Ariadne::Geometry::AriadneDenotableSet< Polyhedron > DenotableSet;
+		typedef typename Ariadne::Geometry::Polyhedron< State > BasicSet;
+		typedef typename Ariadne::Geometry::Polyhedron< State > Polyhedron;
+		typedef typename Ariadne::Geometry::DenotableSet< Polyhedron > DenotableSet;
 	
-		typedef typename Ariadne::Map::Affine::AriadnePolyAffineMap< State > Map;
-		typedef typename Ariadne::Map::Affine::AriadneAffineMap< Map > SolutionMap;
+		typedef typename Ariadne::Map::Affine::PolyAffineMap< State > Map;
+		typedef typename Ariadne::Map::Affine::AffineMap< Map > SolutionMap;
 	
 		PolyAffineIntegrator() {}
 		

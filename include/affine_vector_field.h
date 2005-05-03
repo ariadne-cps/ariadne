@@ -41,13 +41,13 @@ enum AffineKind {
 
 
 template <typename BS_I>
-class AriadneAffineIntegrator {	
+class AffineIntegrator {	
 	
 	public:
 		typedef BS_I BasicSetIntegrator;
 		typedef typename BasicSetIntegrator::Map Map;
-		typedef typename Ariadne::Map::Affine::AriadneAffineMap< Map > SolutionMap;
-		typedef typename Ariadne::Map::Affine::AriadneAffineMap< Map > VectorFieldMap;
+		typedef typename Ariadne::Map::Affine::AffineMap< Map > SolutionMap;
+		typedef typename Ariadne::Map::Affine::AffineMap< Map > VectorFieldMap;
 		typedef typename Map::DenotableSet DenotableSet;
 		typedef typename DenotableSet::BasicSet BasicSet;
 		typedef typename SolutionMap::Real Real;
@@ -55,21 +55,21 @@ class AriadneAffineIntegrator {
 		typedef typename SolutionMap::Matrix Matrix;
 		typedef typename SolutionMap::Vector Vector;
 	
-		AriadneAffineIntegrator() {}
+		AffineIntegrator() {}
 		
-		AriadneAffineIntegrator(const AriadneAffineIntegrator<BS_I>& orig): 
+		AffineIntegrator(const AffineIntegrator<BS_I>& orig): 
 				_vf_map(orig._vf_map) {}
 	
-		AriadneAffineIntegrator(const VectorFieldMap &vfield): 
+		AffineIntegrator(const VectorFieldMap &vfield): 
 				_vf_map(vfield) {}
 		
-		AriadneAffineIntegrator(const Matrix &A): 
+		AffineIntegrator(const Matrix &A): 
 				_vf_map(A) {}
 					
-		AriadneAffineIntegrator(const Vector &b): 
+		AffineIntegrator(const Vector &b): 
 				_vf_map(b) {}
 					
-		AriadneAffineIntegrator(const Matrix &A, const Vector &b): 
+		AffineIntegrator(const Matrix &A, const Vector &b): 
 				_vf_map(A,b) {}
 					
 		inline SolutionMap get_solution(const Real& delta) const { 	
@@ -118,7 +118,7 @@ class AriadneAffineIntegrator {
 			return flow_tube;				
 		}
 		
-		inline AriadneAffineIntegrator& operator()(const  VectorFieldMap &vfield) {
+		inline AffineIntegrator& operator()(const  VectorFieldMap &vfield) {
 			
 			this->_vf_map=vfield;
 		
@@ -136,7 +136,7 @@ class AriadneAffineIntegrator {
 };
 
 template <typename BS_MAP>
-class AriadneAffineVectorField {
+class AffineVectorField {
 	
 	public:
 		typedef BS_MAP VectorFieldMap;
@@ -148,14 +148,14 @@ class AriadneAffineVectorField {
 		typedef typename boost::numeric::ublas::matrix<Real> Matrix;
 		typedef typename boost::numeric::ublas::vector<Real> Vector;
 	
-		AriadneAffineVectorField(const AriadneAffineVectorField<BS_MAP> &T):
+		AffineVectorField(const AffineVectorField<BS_MAP> &T):
 				 _vf_map(T._vf_map){}
 	
-		AriadneAffineVectorField(const Matrix &A): _vf_map(A) {}
+		AffineVectorField(const Matrix &A): _vf_map(A) {}
 	
-		AriadneAffineVectorField(const Vector &b): _vf_map(b) {}
+		AffineVectorField(const Vector &b): _vf_map(b) {}
 		
-		AriadneAffineVectorField(const Matrix &A, const Vector &b):
+		AffineVectorField(const Matrix &A, const Vector &b):
 			_vf_map(A,b) {}
 		
 		inline AffineKind affine_kind() {

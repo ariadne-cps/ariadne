@@ -42,25 +42,25 @@
 namespace Ariadne {	
 namespace Geometry {
 
-template <typename R> class AriadnePTree;
-class PTree_Node;
+template <typename R> class PartitionTree;
+class PartitionTreeNode;
 
 namespace IO_Operators{
 	
 //class Exporter;
 	
-std::ostream& operator<<(std::ostream &os, const PTree_Node &node);
+std::ostream& operator<<(std::ostream &os, const PartitionTreeNode &node);
 }
 
 
 /*! \brief Intersect two subtrees. */
-PTree_Node intersect(const PTree_Node &A, const PTree_Node &B);
+PartitionTreeNode intersect(const PartitionTreeNode &A, const PartitionTreeNode &B);
 	
 /*! \brief Intersect two subtrees. */
-PTree_Node join(const PTree_Node &A, const PTree_Node &B);
+PartitionTreeNode join(const PartitionTreeNode &A, const PartitionTreeNode &B);
 
 
-class PTree_Node {
+class PartitionTreeNode {
 		
 		typedef std::bitset<MAX_BITSET> space_type;
 	protected:
@@ -88,7 +88,7 @@ class PTree_Node {
 		 * Notice that |_sons| is equal to _space.count() if
 		 * _leaf=false. Otherwise, if _leaf=true, it is equal to 0.
 	     	 */
-		std::vector<PTree_Node *> _sons;
+		std::vector<PartitionTreeNode *> _sons;
 	
 		/*! \brief  Returns true if the subtree is empty. */
 		inline bool empty() const {
@@ -176,7 +176,7 @@ class PTree_Node {
 		}
 		
 		/*! \brief  Intersects node's sons. */
-		inline void intersect_sons(const PTree_Node &A, const PTree_Node &B) {
+		inline void intersect_sons(const PartitionTreeNode &A, const PartitionTreeNode &B) {
 		
 			
 			/* intersect used quadrant */
@@ -193,7 +193,7 @@ class PTree_Node {
 				if ((A._space).test(i)&&(B._space).test(i)) {
 						
 					/* intesect the two quardants */
-					PTree_Node *C=new PTree_Node(intersect(*A._sons[i], *B._sons[i]));
+					PartitionTreeNode *C=new PartitionTreeNode(intersect(*A._sons[i], *B._sons[i]));
 						
 					/* if the intersection is not empty */						
 					if (!C->empty()) {
@@ -247,7 +247,7 @@ class PTree_Node {
 			}
 		}
 	
-		inline void inplace_join_sons(const PTree_Node &A) {
+		inline void inplace_join_sons(const PartitionTreeNode &A) {
 			
 			/* for each quadrant i*/
 			for (size_t i=0;i<A._bits_per_space_member();i++) {
@@ -268,7 +268,7 @@ class PTree_Node {
 						
 						/* add a copy of the i quadrant of A at the end of
 						 * the son vector */
-						this->_sons[i]=new PTree_Node(*A._sons[i]);
+						this->_sons[i]=new PartitionTreeNode(*A._sons[i]);
 					}
 				}						
 						
@@ -287,7 +287,7 @@ class PTree_Node {
 		}
 
 		
-		inline void join_sons(const PTree_Node &A, const PTree_Node &B) {
+		inline void join_sons(const PartitionTreeNode &A, const PartitionTreeNode &B) {
 		
 			/* join used quadrant */
 			this->_space=A._space | B._space;
@@ -307,14 +307,14 @@ class PTree_Node {
 						
 						/* join the two quadrants */
 
-						this->_sons[i]=new PTree_Node(join(*A._sons[i], *B._sons[i]));
+						this->_sons[i]=new PartitionTreeNode(join(*A._sons[i], *B._sons[i]));
 						
 					} else {
 						/* if i is not used by B */
 						
 						/* add a copy of the i quadrant of A at the end of
 						 * the son vector */
-						this->_sons[i]=new PTree_Node(*A._sons[i]);
+						this->_sons[i]=new PartitionTreeNode(*A._sons[i]);
 					}
 			
 				} else {
@@ -325,7 +325,7 @@ class PTree_Node {
 						
 						/* add a copy of the i quadrant of B at the end of
 						 * the son vector */
-						this->_sons[i]=new PTree_Node(*B._sons[i]);
+						this->_sons[i]=new PartitionTreeNode(*B._sons[i]);
 						
 					} else {
 						
@@ -352,7 +352,7 @@ class PTree_Node {
 		
 	public:
 		/*! \brief A class costructor. */
-		PTree_Node(): _leaf(true), _empty(true), _depth(0), 
+		PartitionTreeNode(): _leaf(true), _empty(true), _depth(0), 
 			      _level(0), _dim(0) {
 		
 			#ifdef DEBUG
@@ -371,7 +371,7 @@ class PTree_Node {
 		}
 	
 		/*! \brief A class costructor. */
-		PTree_Node(const size_t dimension): _leaf(true), _empty(true), 
+		PartitionTreeNode(const size_t dimension): _leaf(true), _empty(true), 
 				_depth(0), _level(0),_dim(dimension) {
 					
 			#ifdef DEBUG
@@ -396,7 +396,7 @@ class PTree_Node {
 		}
 		
 		/*! \brief A class costructor. */
-		PTree_Node(const PTree_Node &A): _leaf(A._leaf), 
+		PartitionTreeNode(const PartitionTreeNode &A): _leaf(A._leaf), 
 					_empty(A._empty), _depth(A._depth),  
 					_level(A._level), 
 					_dim(A._dim), _space(A._space) {
@@ -410,7 +410,7 @@ class PTree_Node {
 			for (size_t i=0;i<(A._sons).size();i++) {
 				
 				if (A._sons[i]!=NULL) {
-					this->_sons[i]=new PTree_Node(*A._sons[i]);
+					this->_sons[i]=new PartitionTreeNode(*A._sons[i]);
 				} else {
 					this->_sons[i]=NULL;	
 				}
@@ -423,12 +423,12 @@ class PTree_Node {
 		}
 	
 		/*! \brief A class destructor. */
-		~PTree_Node(){
+		~PartitionTreeNode(){
 			
 			this->_clear_sons();
 		}
 		
-		inline PTree_Node &operator=(const PTree_Node &A){
+		inline PartitionTreeNode &operator=(const PartitionTreeNode &A){
 			
 			#ifdef DEBUG
 				std::cout << __FILE__ << ":" << __LINE__ << std::endl;
@@ -447,7 +447,7 @@ class PTree_Node {
 			
 			for (size_t i=0;i<(A._sons).size();i++) {
 				if (A._sons[i]!=NULL) {
-					this->_sons[i]=new PTree_Node(*A._sons[i]);
+					this->_sons[i]=new PartitionTreeNode(*A._sons[i]);
 				} else {
 					this->_sons[i]=NULL;	
 				}
@@ -464,15 +464,15 @@ class PTree_Node {
 			return this->_dim;
 		}
 		
-		inline PTree_Node add_upper_level(unsigned int i) {
+		inline PartitionTreeNode add_upper_level(unsigned int i) {
 			
 			if (this->_bits_per_space_member()<=i)
 				throw std::out_of_range("Wrong index"); 
 			
-			PTree_Node A(this->_dim);
+			PartitionTreeNode A(this->_dim);
 			
 			(A._space).set(i);
-			A._sons[i]=new PTree_Node(*this);
+			A._sons[i]=new PartitionTreeNode(*this);
 			
 			A._level= this->_level+1;
 			A._sons[i]->increase_depth();
@@ -482,7 +482,7 @@ class PTree_Node {
 			return A;
 		}
 		
-		inline PTree_Node add_lower_level(PTree_Node &A, unsigned int i) const{
+		inline PartitionTreeNode add_lower_level(PartitionTreeNode &A, unsigned int i) const{
 			
 			if (this->_dim!=A._dim) 
 				throw std::domain_error("The object and parameter have different space dimentions");
@@ -490,7 +490,7 @@ class PTree_Node {
 			if (A._bits_per_space_member()<=i)
 				throw std::out_of_range("Wrong index");
 			
-			PTree_Node new_node = A.add_upper_level(i);
+			PartitionTreeNode new_node = A.add_upper_level(i);
 			
 			new_node= join(*this,new_node);
 			
@@ -498,7 +498,7 @@ class PTree_Node {
 		}
 
 		/*! \brief Check inclusion. */
-		inline bool does_include(const PTree_Node &A) const{
+		inline bool does_include(const PartitionTreeNode &A) const{
 			
 			/* intersect used quadrant */
 			space_type c_space=this->_space & A._space;
@@ -533,7 +533,7 @@ class PTree_Node {
 		}		
 	
 		/*! \brief Inplace join. */
-		void inplace_union(const PTree_Node &A){
+		void inplace_union(const PartitionTreeNode &A){
 			
 			if (this->_dim!=A._dim) 
 				throw std::domain_error("The two parameters have different space dimentions.");
@@ -552,22 +552,22 @@ class PTree_Node {
 			this->eval_level_by_sons();
 		}
 		
-		template <typename R> friend class AriadnePTree;
+		template <typename R> friend class PartitionTree;
 
 		friend std::ostream& Ariadne::Geometry::IO_Operators::operator<<(std::ostream &os, 
-				const PTree_Node &node);
+				const PartitionTreeNode &node);
 		
 		/*! \brief Intersect two subtrees. */
-		friend PTree_Node intersect(const PTree_Node &A, const PTree_Node &B);
+		friend PartitionTreeNode intersect(const PartitionTreeNode &A, const PartitionTreeNode &B);
 	
 		/*! \brief Intersect two subtrees. */
-		friend PTree_Node join(const PTree_Node &A, const PTree_Node &B);
+		friend PartitionTreeNode join(const PartitionTreeNode &A, const PartitionTreeNode &B);
 		
 //		friend class Ariadne::Geometry::IO_Operators::Exporter;		
 };
 
 /*! \brief Intersect two subtrees. */
-PTree_Node intersect(const PTree_Node &A, const PTree_Node &B) {
+PartitionTreeNode intersect(const PartitionTreeNode &A, const PartitionTreeNode &B) {
 			
 	if (A._dim!=B._dim) 
 		throw std::domain_error("This object and parameter have different space dimentions.");
@@ -580,7 +580,7 @@ PTree_Node intersect(const PTree_Node &A, const PTree_Node &B) {
 			return A;
 		} else {
 					
-			PTree_Node C(A._dim);
+			PartitionTreeNode C(A._dim);
 			
 			C.intersect_sons(A,B);
 			
@@ -596,7 +596,7 @@ PTree_Node intersect(const PTree_Node &A, const PTree_Node &B) {
 }
 	
 /*! \brief Join two subtrees. */
-PTree_Node join(const PTree_Node &A, const PTree_Node &B){
+PartitionTreeNode join(const PartitionTreeNode &A, const PartitionTreeNode &B){
 			
 	if (A._dim!=B._dim) 
 		throw std::domain_error("The two parameters have different space dimentions.");
@@ -608,7 +608,7 @@ PTree_Node join(const PTree_Node &A, const PTree_Node &B){
 			return A;
 		} else {
 					
-			PTree_Node C(A._dim);
+			PartitionTreeNode C(A._dim);
 					
 			C.join_sons(A,B);
 			
@@ -623,7 +623,7 @@ PTree_Node join(const PTree_Node &A, const PTree_Node &B){
 
 namespace IO_Operators{
 
-std::ostream& operator<<(std::ostream &os, const Ariadne::Geometry::PTree_Node &node) {
+std::ostream& operator<<(std::ostream &os, const Ariadne::Geometry::PartitionTreeNode &node) {
 	
 	os << "[ (level="<<node._level<<")(depth=" <<
 		node._depth<<")";
@@ -667,7 +667,7 @@ std::ostream& operator<<(std::ostream &os, const Ariadne::Geometry::PTree_Node &
 class Exporter{
 	
 	
-		size_t _rec_dot_print(std::ostream& os, const PTree_Node &node, size_t &node_num){
+		size_t _rec_dot_print(std::ostream& os, const PartitionTreeNode &node, size_t &node_num){
 
 			size_t curr_num=node_num;
 
@@ -726,7 +726,7 @@ class Exporter{
 	public:
 		Exporter() {}
 		
-		inline void dot_print(const PTree_Node &node, std::string f_name) {
+		inline void dot_print(const PartitionTreeNode &node, std::string f_name) {
 
 			std::ofstream fos;
 			

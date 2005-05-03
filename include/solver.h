@@ -36,14 +36,14 @@
 namespace Ariadne {
 namespace Evaluation {
 
-template <typename L> class AriadneLocationTrace;
-template <typename L> class AriadneTrace;
+template <typename L> class LocationTrace;
+template <typename L> class Trace;
 
 namespace IO_Operators{
 	
 template <typename L>
 std::ostream& IO_Operators::operator<<(std::ostream &os, 
-	const AriadneLocationTrace<L> &t) {
+	const LocationTrace<L> &t) {
 	
 	os << "Discrete Location = "<< (t._location).name() << 
 		" Time Spent = " << (t._time);
@@ -53,7 +53,7 @@ std::ostream& IO_Operators::operator<<(std::ostream &os,
 
 template <typename LT>
 std::ostream& IO_Operators::operator<<(std::ostream &os, 
-	const  AriadneTrace<LT> &t) {
+	const  Trace<LT> &t) {
 	
 	typename std::list<LT>::iterator i=t.begin();
 	size_t f=0;
@@ -71,7 +71,7 @@ std::ostream& IO_Operators::operator<<(std::ostream &os,
 }
 
 template <typename LOC>
-class AriadneLocationTrace{
+class LocationTrace{
 	
 		typedef LOC DiscreteLocation;
 		typedef typename DiscreteLocation::VectorField VectorField;
@@ -88,14 +88,14 @@ class AriadneLocationTrace{
 	
 	public:
 		
-		AriadneLocationTrace(const DiscreteLocation &loc, Real time): 
+		LocationTrace(const DiscreteLocation &loc, Real time): 
 				_location(loc), _time(time) {}
 					
-		AriadneLocationTrace(const AriadneLocationTrace<Real> &A): 
+		LocationTrace(const LocationTrace<Real> &A): 
 				_location(A._location), _time(A._time) {}
 		
-		inline const AriadneLocationTrace<Real> &operator=(
-			const AriadneLocationTrace<Real> &A) { 
+		inline const LocationTrace<Real> &operator=(
+			const LocationTrace<Real> &A) { 
 				
 			this->_time=A._time;
 			this->_location=A._location;
@@ -105,11 +105,11 @@ class AriadneLocationTrace{
 		
 		template <typename L>
 		friend std::ostream& IO_Operators::operator<<(std::ostream &os, 
-				AriadneTrace<L> &t);
+				Trace<L> &t);
 };
 
 template <typename LT>
-class AriadneTrace{
+class Trace{
 	
 		typedef LT LocationTrace;
 		typedef typename LocationTrace::Real Real;
@@ -121,14 +121,14 @@ class AriadneTrace{
 	
 	public:
 		
-		AriadneTrace() {}
+		Trace() {}
 			
 		inline const std::list<LocationTrace> &trace() const{
 			return this->_trace;	
 		}
 		
-		inline const AriadneTrace<Real> &operator=(
-			const AriadneTrace<Real> &A) { 
+		inline const Trace<Real> &operator=(
+			const Trace<Real> &A) { 
 				
 			this->_trace=A._trace;
 				
@@ -153,13 +153,13 @@ class AriadneTrace{
 		
 		template <typename LocTrace>
 		friend std::ostream& IO_Operators::operator<<(std::ostream &os, 
-				AriadneTrace<LocTrace> &t);
+				Trace<LocTrace> &t);
 };
 
 	
 template <typename AUTO , typename HDS ,typename TRACE, typename MAINTAIN, 
 typename INT , typename EXPORTER>
-class AriadneSolver{
+class Solver{
 	
 	public:
 		typedef TRACE Trace;
@@ -730,9 +730,9 @@ class AriadneSolver{
 		}
 		
 	public:
-		AriadneSolver(const size_t cache = 200): _used(false), _cache_size(cache){}	
+		Solver(const size_t cache = 200): _used(false), _cache_size(cache){}	
 	
-		~AriadneSolver() {
+		~Solver() {
 			this->_clean_solver();
 		}
 		/*! \brief This method evaluates if the 
@@ -1145,15 +1145,15 @@ class AriadneSolver{
 		 * relation determined by the function reach.
 		 */
 /*		Map reachability(const Automaton &A, 
-				AriadneRationalType t, 
-				int n, AriadneRationalType e) = 0;
+				Rational t, 
+				int n, Rational e) = 0;
 			*/
 		/*! Computes a map-based description of the chain-reachability 
 		 * relation determined by the function chainreach.
 		 */
 /*		Map *chainreachability(const Automaton &A, 
-				AriadneRationalType t, 
-				int n, AriadneRationalType e) = 0;
+				Rational t, 
+				int n, Rational e) = 0;
 			*/
 };
 

@@ -51,17 +51,17 @@ enum MapResultKind {
 namespace Ariadne {	
 namespace Map{
 	
-template <typename MAP>
-class AriadneMap {
+template <typename M>
+class Map {
 	
 	public:
-		typedef MAP Map;
+		typedef M MapT;
 		typedef typename Map::DenotableSet DenotableSet;
 		typedef typename DenotableSet::BasicSet BasicSet;
 		typedef typename BasicSet::State State;
 		typedef typename State::Real Real;
 	
-		AriadneMap(const Map &T):_map(T) {}
+		Map(const MapT &T):_map(T) {}
 		
 		inline BasicSet operator() (const BasicSet &A) const { return _map(A); }
 		
@@ -76,7 +76,7 @@ class AriadneMap {
 			return trans_ds;
 		}
 		
-		inline AriadneMap<MAP> &operator=(const AriadneMap<MAP>  &A) {
+		inline Map<MapT> &operator=(const Map<MapT>  &A) {
 			
 			this->_map=A._map;
 		}
@@ -89,14 +89,14 @@ class AriadneMap {
 		
 	private:
 	
-		Map _map;
+		MapT _map;
 };
 
 
 /* WARNING!!!! Is it the same of an inclusion map? Here I can set
 threshold in inclusion not, but the map seem similar */ 
 template <typename MAP>
-class AriadneThresholdMap {
+class ThresholdMap {
 	
 	public:
 		typedef MAP Map;
@@ -105,10 +105,10 @@ class AriadneThresholdMap {
 		typedef typename BasicSet::State State;
 		typedef typename State::Real Real;
 	
-		AriadneThresholdMap(const Map &T, const BasicSet &threshold):_map(T), 
+		ThresholdMap(const Map &T, const BasicSet &threshold):_map(T), 
 					_threshold(threshold) {}
 		
-		AriadneThresholdMap(const Map &T, Real threshold = 0):_map(T), 
+		ThresholdMap(const Map &T, Real threshold = 0):_map(T), 
 					_threshold(T.dim(), threshold) {}
 						
 		inline BasicSet operator() (const BasicSet &A) const { 
@@ -132,7 +132,7 @@ class AriadneThresholdMap {
 			return trans_ds;
 		}
 		
-		inline AriadneThresholdMap<MAP> &operator=(const AriadneThresholdMap<MAP>  &A) {
+		inline ThresholdMap<MAP> &operator=(const ThresholdMap<MAP>  &A) {
 			
 			this->_map=A._map;
 			this->_threshold=A._threshold;

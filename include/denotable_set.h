@@ -34,8 +34,8 @@ namespace Ariadne {
 namespace Geometry {
 
 template <typename BS, uint BS_PER_BLOCK >
-bool disjoint (const AriadneDenotableSet< BS , BS_PER_BLOCK > &A, 
-				const AriadneDenotableSet< BS , BS_PER_BLOCK > &B){
+bool disjoint (const DenotableSet< BS , BS_PER_BLOCK > &A, 
+				const DenotableSet< BS , BS_PER_BLOCK > &B){
 
 	if (A.dim()!=B.dim()) 
 		throw std::invalid_argument("The two denotable set have different space dimensions.");
@@ -58,8 +58,8 @@ bool disjoint (const AriadneDenotableSet< BS , BS_PER_BLOCK > &A,
 }
 
 template <typename BS, uint BS_PER_BLOCK >
-bool intersects_interior(const AriadneDenotableSet< BS , BS_PER_BLOCK > &A, 
-				const AriadneDenotableSet< BS , BS_PER_BLOCK > &B){
+bool intersects_interior(const DenotableSet< BS , BS_PER_BLOCK > &A, 
+				const DenotableSet< BS , BS_PER_BLOCK > &B){
 	
 	if (A.dim()!=B.dim()) 
 		throw std::invalid_argument("The two denotable set have different space dimensions.");
@@ -81,8 +81,8 @@ bool intersects_interior(const AriadneDenotableSet< BS , BS_PER_BLOCK > &A,
 }
 	
 template <typename BS, uint BS_PER_BLOCK >
-bool intersects_interior(const AriadneRectangle< typename BS::State > &rect, 
-				const AriadneDenotableSet< BS , BS_PER_BLOCK > &A){
+bool intersects_interior(const Rectangle< typename BS::State > &rect, 
+				const DenotableSet< BS , BS_PER_BLOCK > &A){
 		
 	if (A.dim()!=rect.dim()) 
 		throw std::invalid_argument("The denotable set and the rectangle have different space dimensions.");
@@ -97,8 +97,8 @@ bool intersects_interior(const AriadneRectangle< typename BS::State > &rect,
 }
 		
 template <typename BS, uint BS_PER_BLOCK >
-bool intersects_interior(const AriadneDenotableSet< BS , BS_PER_BLOCK > &A,
-				const AriadneRectangle< typename BS::State > &rect){
+bool intersects_interior(const DenotableSet< BS , BS_PER_BLOCK > &A,
+				const Rectangle< typename BS::State > &rect){
 		
 	if (A.dim()!=rect.dim()) 
 		throw std::invalid_argument("The denotable set and the rectangle have different space dimensions.");
@@ -113,8 +113,8 @@ bool intersects_interior(const AriadneDenotableSet< BS , BS_PER_BLOCK > &A,
 }
 
 template <typename BS, uint BS_PER_BLOCK >
-bool subset_of_interior(const AriadneDenotableSet< BS , BS_PER_BLOCK > &A, 
-				const AriadneDenotableSet< BS , BS_PER_BLOCK > &B){
+bool subset_of_interior(const DenotableSet< BS , BS_PER_BLOCK > &A, 
+				const DenotableSet< BS , BS_PER_BLOCK > &B){
 	
 	if (A.dim()!=B.dim()) 
 		throw std::invalid_argument("The two denotable set have different space dimensions.");
@@ -130,8 +130,8 @@ bool subset_of_interior(const AriadneDenotableSet< BS , BS_PER_BLOCK > &A,
 }
 	
 template <typename BS, uint BS_PER_BLOCK >
-bool subset_of_interior(const AriadneRectangle<typename BS::State > &rect, 
-				const AriadneDenotableSet< BS , BS_PER_BLOCK > &A){
+bool subset_of_interior(const Rectangle<typename BS::State > &rect, 
+				const DenotableSet< BS , BS_PER_BLOCK > &A){
 
 	#ifdef DEBUG
 		std::cout << __FILE__ << ":" << __LINE__ << std::endl;
@@ -163,8 +163,8 @@ bool subset_of_interior(const AriadneRectangle<typename BS::State > &rect,
 }
 
 template <typename BS, uint BS_PER_BLOCK >
-bool subset_of_interior(const AriadneDenotableSet< BS , BS_PER_BLOCK > &A,
-				const AriadneRectangle<typename BS::State > &rect){
+bool subset_of_interior(const DenotableSet< BS , BS_PER_BLOCK > &A,
+				const Rectangle<typename BS::State > &rect){
 	
 	#ifdef DEBUG
 		std::cout << __FILE__ << ":" << __LINE__ << std::endl;
@@ -196,9 +196,9 @@ bool subset_of_interior(const AriadneDenotableSet< BS , BS_PER_BLOCK > &A,
 
 
 template <typename BS, uint BS_PER_BLOCK >
-AriadneDenotableSet< BS , BS_PER_BLOCK > join(
-				const AriadneDenotableSet< BS , BS_PER_BLOCK > &A, 
-				const AriadneDenotableSet< BS , BS_PER_BLOCK > &B) {
+DenotableSet< BS , BS_PER_BLOCK > join(
+				const DenotableSet< BS , BS_PER_BLOCK > &A, 
+				const DenotableSet< BS , BS_PER_BLOCK > &B) {
 
 	#ifdef DEBUG
 		std::cout << __FILE__ << ":" << __LINE__ << std::endl;
@@ -208,7 +208,7 @@ AriadneDenotableSet< BS , BS_PER_BLOCK > join(
 		throw std::invalid_argument("The two denotable set have different space dimensions.");
 	
 					
-	AriadneDenotableSet< BS , BS_PER_BLOCK > ds_union(A);
+	DenotableSet< BS , BS_PER_BLOCK > ds_union(A);
 					
 	ds_union.inplace_union(B);
 
@@ -221,11 +221,11 @@ AriadneDenotableSet< BS , BS_PER_BLOCK > join(
 }
 
 template <typename BS, uint BS_PER_BLOCK >
-AriadneDenotableSet< BS , BS_PER_BLOCK > closure_of_intersection_of_interior(
-				const AriadneDenotableSet< BS , BS_PER_BLOCK > &A, 
-				const AriadneDenotableSet< BS , BS_PER_BLOCK > &B) {
+DenotableSet< BS , BS_PER_BLOCK > closure_of_intersection_of_interior(
+				const DenotableSet< BS , BS_PER_BLOCK > &A, 
+				const DenotableSet< BS , BS_PER_BLOCK > &B) {
 
-	AriadneDenotableSet< BS , BS_PER_BLOCK > ds_inter;
+	DenotableSet< BS , BS_PER_BLOCK > ds_inter;
 	size_t i,j,&k=ds_inter._basic_sets;
 	size_t new_size=((A.size()*B.size())/BS_PER_BLOCK)+1;
 	std::vector<BS> &vector=ds_inter._vector;
@@ -267,7 +267,7 @@ AriadneDenotableSet< BS , BS_PER_BLOCK > closure_of_intersection_of_interior(
  * \brief It is a list of basic set. 
  */
 template <class BS , size_t BS_PER_BLOCK= 2000>
-class AriadneDenotableSet{
+class DenotableSet{
 		
 	private:
 		/*! \brief The basic set vector */
@@ -286,12 +286,12 @@ class AriadneDenotableSet{
 		typedef typename std::vector<BS>::iterator iterator;
 	
 		/*! \brief A denotable set constructor. */
-		AriadneDenotableSet(): _basic_sets(0), _dim(0) {
+		DenotableSet(): _basic_sets(0), _dim(0) {
 			this->_vector.resize(BS_PER_BLOCK);	
 		}
 			
 		/*! \brief A denotable set constructor. */
-		AriadneDenotableSet(const BasicSet &A): _basic_sets(0), _dim(0) {
+		DenotableSet(const BasicSet &A): _basic_sets(0), _dim(0) {
 			
 			this->_vector.resize(BS_PER_BLOCK);
 			this->_dim=A.dim();
@@ -304,7 +304,7 @@ class AriadneDenotableSet{
 		}
 			
 		/*! \brief A denotable set constructor. */
-		AriadneDenotableSet(const AriadneDenotableSet< BasicSet , BS_PER_BLOCK> &A): 
+		DenotableSet(const DenotableSet< BasicSet , BS_PER_BLOCK> &A): 
 					_basic_sets(0), _dim(A.dim()) {
 						
 			if (A.empty()) {
@@ -325,7 +325,7 @@ class AriadneDenotableSet{
 		}
 		
 		/*! \brief A denotable set constructor. */
-		AriadneDenotableSet(size_t dim, 
+		DenotableSet(size_t dim, 
 				DegenerateSetKind kind = EMPTY):_basic_sets(0),_dim(dim) {
 					
 			if (kind!=EMPTY) {
@@ -340,7 +340,7 @@ class AriadneDenotableSet{
 		}
 
 		/*! \brief A denotable set constructor. */
-		AriadneDenotableSet(const size_t &dim, const Real &size):_basic_sets(0),_dim(dim) {
+		DenotableSet(const size_t &dim, const Real &size):_basic_sets(0),_dim(dim) {
 					
 			BasicSet bs(dim,size);
 			
@@ -352,7 +352,7 @@ class AriadneDenotableSet{
 		}
 		
 		/*! \brief A denotable set destructor. */
-		~AriadneDenotableSet() {
+		~DenotableSet() {
 			this->_vector.clear();
 		}
 	
@@ -385,13 +385,13 @@ class AriadneDenotableSet{
 			return this->_vector[index];
 		}
 		
-		inline AriadneDenotableSet<BS> operator+(const AriadneDenotableSet<BS>& A) const{
+		inline DenotableSet<BS> operator+(const DenotableSet<BS>& A) const{
 		
 			#ifdef DEBUG
 				std::cout << __FILE__ << ":" << __LINE__ << std::endl;
 			#endif
 			
-			AriadneDenotableSet<BS> sum(A.dim());
+			DenotableSet<BS> sum(A.dim());
 			
 			for (size_t i=0; i< this->size(); i++) {
 				for (size_t j=0; j< A.size(); j++) {
@@ -406,7 +406,7 @@ class AriadneDenotableSet{
 			return sum;
 		}
 		
-		inline AriadneDenotableSet<BS> &expand_by(const Real &delta) {
+		inline DenotableSet<BS> &expand_by(const Real &delta) {
 			
 			for (size_t i=0; i< this->size(); i++) {
 				(this->_vector[i]).expand_by(delta);
@@ -415,7 +415,7 @@ class AriadneDenotableSet{
 			return *this;
 		}
 		
-		inline AriadneDenotableSet<BS> &set_precision_to_upperapproximating(const Real &delta) {
+		inline DenotableSet<BS> &set_precision_to_upperapproximating(const Real &delta) {
 			
 			for (size_t i=0; i< this->size(); i++) {
 				(this->_vector[i]).set_precision_to_upperapproximating(delta);
@@ -430,8 +430,8 @@ class AriadneDenotableSet{
 		}
 		
 		/*! \brief Copy the denotable set. */
-		inline const AriadneDenotableSet<BS> &operator=(
-					const AriadneDenotableSet<BS> &A) {
+		inline const DenotableSet<BS> &operator=(
+					const DenotableSet<BS> &A) {
 		
 			#ifdef DEBUG
 				std::cout << __FILE__ << ":" << __LINE__ << std::endl;
@@ -529,7 +529,7 @@ class AriadneDenotableSet{
 		 * The result is stored into the current object.
 		 * \param A is a basic set.
 		 */
-		inline void inplace_union(const AriadneDenotableSet<BasicSet>& A) {	
+		inline void inplace_union(const DenotableSet<BasicSet>& A) {	
 			
 			#ifdef DEBUG
 				std::cout << __FILE__ << ":" << __LINE__ << std::endl;
@@ -606,7 +606,7 @@ class AriadneDenotableSet{
 		/*! \brief Prints the ptree on a ostream */
 		template <typename BSet , uint BSet_PER_BLOCK>
 		friend std::ostream& IO_Operators::operator<<(std::ostream &os, 
-				const AriadneDenotableSet< BSet , BSet_PER_BLOCK > &r);
+				const DenotableSet< BSet , BSet_PER_BLOCK > &r);
 		
 		/*! \brief Tests disjointness. 
 	 	 *
@@ -616,8 +616,8 @@ class AriadneDenotableSet{
 		 * \return \a true if A and B are disjoint, \a false otherwise.
 	     	 */
 		friend bool disjoint <> (
-				const AriadneDenotableSet< BasicSet , BS_PER_BLOCK > &A, 
-				const AriadneDenotableSet< BasicSet , BS_PER_BLOCK > &B);
+				const DenotableSet< BasicSet , BS_PER_BLOCK > &A, 
+				const DenotableSet< BasicSet , BS_PER_BLOCK > &B);
 
 		/*! \brief Tests intersection of interiors. 
 		 *
@@ -629,8 +629,8 @@ class AriadneDenotableSet{
 		 * \a false otherwise.
 	     	 */
 		friend bool intersects_interior <> (
-				const AriadneDenotableSet< BasicSet , BS_PER_BLOCK > &A, 
-				const AriadneDenotableSet< BasicSet , BS_PER_BLOCK > &B);
+				const DenotableSet< BasicSet , BS_PER_BLOCK > &A, 
+				const DenotableSet< BasicSet , BS_PER_BLOCK > &B);
 	
 		/*! \brief Tests intersection of interiors. 
 		 *
@@ -641,8 +641,8 @@ class AriadneDenotableSet{
 		 * \a false otherwise.
 	     	 */	
 		friend bool intersects_interior <> (
-				const AriadneRectangle< State > &rect, 
-				const AriadneDenotableSet< BasicSet , BS_PER_BLOCK > &A);
+				const Rectangle< State > &rect, 
+				const DenotableSet< BasicSet , BS_PER_BLOCK > &A);
 		
 		/*! \brief Tests inclusion of interiors. 
 		 *
@@ -653,8 +653,8 @@ class AriadneDenotableSet{
 		 * \a false otherwise.
 	     	 */
 		friend bool subset_of_interior <> (
-				const AriadneDenotableSet< BasicSet , BS_PER_BLOCK > &A, 
-				const AriadneDenotableSet< BasicSet , BS_PER_BLOCK > &B);
+				const DenotableSet< BasicSet , BS_PER_BLOCK > &A, 
+				const DenotableSet< BasicSet , BS_PER_BLOCK > &B);
 	
 		/*! \brief Tests inclusion of interiors. 
 		 *
@@ -665,8 +665,8 @@ class AriadneDenotableSet{
 		 * \a false otherwise.
 	    	 */
 		friend bool subset_of_interior <> (
-				const AriadneRectangle< State > &rect, 
-				const AriadneDenotableSet< BasicSet , BS_PER_BLOCK > &A);
+				const Rectangle< State > &rect, 
+				const DenotableSet< BasicSet , BS_PER_BLOCK > &A);
 
 		/*! \brief Tests inclusion of interiors. 
 		 *
@@ -677,8 +677,8 @@ class AriadneDenotableSet{
 		 * \a false otherwise.
 		 */
 		friend bool subset_of_interior <> (
-				const AriadneDenotableSet< BasicSet , BS_PER_BLOCK > &A,
-				const AriadneRectangle< State > &rect);
+				const DenotableSet< BasicSet , BS_PER_BLOCK > &A,
+				const Rectangle< State > &rect);
 
 		/*! \brief Makes union of two interiors. 
 		 *
@@ -687,9 +687,9 @@ class AriadneDenotableSet{
 		 * \param B	is a denotable set.
 		 * \return The union of A and B.
 	     	 */
-		friend AriadneDenotableSet< BasicSet , BS_PER_BLOCK > join <> (
-				const AriadneDenotableSet< BasicSet , BS_PER_BLOCK > &A, 
-				const AriadneDenotableSet< BasicSet , BS_PER_BLOCK > &B);
+		friend DenotableSet< BasicSet , BS_PER_BLOCK > join <> (
+				const DenotableSet< BasicSet , BS_PER_BLOCK > &A, 
+				const DenotableSet< BasicSet , BS_PER_BLOCK > &B);
 
 		/*! \brief Makes intersection of two interiors. 
 		 *
@@ -699,10 +699,10 @@ class AriadneDenotableSet{
 		 * \param B is a denotable set.
 		 * \return The closure of the intersection of A with the interiors of B.
 	    	 */
-		friend AriadneDenotableSet< BasicSet , BS_PER_BLOCK > 
+		friend DenotableSet< BasicSet , BS_PER_BLOCK > 
 			closure_of_intersection_of_interior <> (
-				const AriadneDenotableSet< BasicSet , BS_PER_BLOCK > &A, 
-				const AriadneDenotableSet< BasicSet , BS_PER_BLOCK > &B);
+				const DenotableSet< BasicSet , BS_PER_BLOCK > &A, 
+				const DenotableSet< BasicSet , BS_PER_BLOCK > &B);
 };
 	
 }

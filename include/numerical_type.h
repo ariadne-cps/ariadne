@@ -64,46 +64,39 @@ typedef mpf_class Dyadic;
  */
 typedef mpq_class Rational;
 
-/*! \deprecated */
-typedef mpz_class AriadneIntegerType;
-/*! \deprecated */
-typedef mpq_class AriadneRationalType;
-/*! \deprecated */
-typedef mpf_class AriadneDyadeticType;
-
 	
-inline AriadneRationalType transform_into_rational(
-			const AriadneRationalType &num){ return num; }
+inline Rational transform_into_rational(
+			const Rational &num){ return num; }
 
-inline AriadneIntegerType numerator(const AriadneRationalType 
+inline Integer numerator(const Rational 
 		&num){ return num.get_num(); }
 
-inline AriadneIntegerType denumerator(const AriadneRationalType 
+inline Integer denumerator(const Rational 
 		&num){ return num.get_den();}
 
 
 		
-inline AriadneRationalType epsilon(const AriadneRationalType &a) {
+inline Rational epsilon(const Rational &a) {
 	
-	AriadneRationalType e(1,1000);
+	Rational e(1,1000);
 	
 	return e*e*e;
 }
 
 		
 template <typename NumType>
-NumType AriadneGCD(const NumType &a, const NumType &b){
+NumType gcd(const NumType &a, const NumType &b){
 	
 	NumType c=a%b;
 	
 	if (c==0) return b;
 		
-	return (AriadneGCD(b, c));
+	return (gcd(b, c));
 }
 
 template <typename NumType>
-inline NumType AriadneLCM(const NumType &a, const NumType &b) {
-	return ((a*b)/AriadneGCD(a,b));
+inline NumType lcm(const NumType &a, const NumType &b) {
+	return ((a*b)/gcd(a,b));
 }
 
 }

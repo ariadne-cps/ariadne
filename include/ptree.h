@@ -34,7 +34,7 @@ namespace Geometry {
 namespace IO_Operators{
 	
 template <typename R>
-std::ostream& operator<<(std::ostream &os, AriadnePTree<R> &t) {
+std::ostream& operator<<(std::ostream &os, PartitionTree<R> &t) {
 			
 	os << "Bounding Box=" << t._bounding_box << std::endl;
 	os << "Max Depth=" << t._max_depth;
@@ -53,7 +53,7 @@ std::ostream& operator<<(std::ostream &os, AriadnePTree<R> &t) {
 
 
 template <typename R>
-void pov_print(AriadnePTree<R> &t, std::string f_name, 
+void pov_print(PartitionTree<R> &t, std::string f_name, 
 		size_t dim1, size_t dim2, size_t dim3) {
 
 	std::ofstream fos;
@@ -89,12 +89,12 @@ void pov_print(AriadnePTree<R> &t, std::string f_name,
 
 }
 
-/*! \brief The ptree class.
+/*! \brief A partition tree representation for gridded sets.
  *
  * This class represents partition trees.
  */ 
-template <typename R = AriadneRectangle < AriadneState < AriadneRationalType > > >
-class AriadnePTree {
+template <typename R = Rectangle < State < Rational > > >
+class PartitionTree {
 	public:
 		typedef R Rectangle;
 		typedef typename R::State State;
@@ -107,7 +107,7 @@ class AriadnePTree {
 		Rectangle _bounding_box;
 		
 		/*! \brief The ptree's root. */
-		PTree_Node _root;
+		PartitionTreeNode _root;
 
 		/*! \brief The ptree's maximum depth */
 		size_t _max_depth;
@@ -118,7 +118,7 @@ class AriadnePTree {
 		/*! \brief List of maintained rectangles. */
 		std::vector<Rectangle> _vector;
 	
-		uint _count_rect(const PTree_Node &node,
+		uint _count_rect(const PartitionTreeNode &node,
 				const Rectangle &node_box) {
 					
 			if (node.full()) {
@@ -144,7 +144,7 @@ class AriadnePTree {
 			return rect_n;
 		}
 		
-		void _fill_rect_vector(const PTree_Node &node,
+		void _fill_rect_vector(const PartitionTreeNode &node,
 				const Rectangle &node_box, size_t &idx) {
 					
 			if (node.full()) {
@@ -168,7 +168,7 @@ class AriadnePTree {
 			}
 		}
 	
-		void _fill_rect_vector(const PTree_Node &node,
+		void _fill_rect_vector(const PartitionTreeNode &node,
 				const Rectangle &node_box) {
 					
 			uint i=0,rect_n=this->_count_rect(node,node_box);
@@ -179,7 +179,7 @@ class AriadnePTree {
 		}
 		
 		template <typename SetType>
-		inline void _fill_ptree_check_subtrees(PTree_Node &node,
+		inline void _fill_ptree_check_subtrees(PartitionTreeNode &node,
 				const SetType &A, const Rectangle &bbox, 
 				const size_t &depth,const size_t &max_depth) {
 
@@ -192,8 +192,8 @@ class AriadnePTree {
 				Rectangle B=bbox.find_quadrant(i);
 					
 				if (interiors_intersect(B,A)) {
-					PTree_Node *son= 
-						new PTree_Node(A.dim());
+					PartitionTreeNode *son= 
+						new PartitionTreeNode(A.dim());
 					
 					this->_fill_ptree_with(*son , A, B, 
 							depth+1 , max_depth);
@@ -219,7 +219,7 @@ class AriadnePTree {
 		
 		
 		template <typename SetType>
-		void _fill_ptree_with(PTree_Node &node,
+		void _fill_ptree_with(PartitionTreeNode &node,
 				const SetType &A, 
 				const Rectangle &bbox, 
 				size_t depth,const size_t &max_depth) {
@@ -278,7 +278,7 @@ class AriadnePTree {
 		}
 
 		template <typename SetType>
-		inline void _refill_ptree_check_subtrees(PTree_Node &node,
+		inline void _refill_ptree_check_subtrees(PartitionTreeNode &node,
 				const SetType &A, const Rectangle &bbox, 
 				const size_t &depth,const size_t &max_depth) {
 
@@ -301,8 +301,8 @@ class AriadnePTree {
 				} else {
 					
 					if (interiors_intersect(B,A)) {
-						PTree_Node *son= 
-							new PTree_Node(A.dim());
+						PartitionTreeNode *son= 
+							new PartitionTreeNode(A.dim());
 					
 						this->_refill_ptree_with(*son , A, B, 
 								depth+1 , max_depth);
@@ -326,7 +326,7 @@ class AriadnePTree {
 		}
 		
 		template <typename SetType>
-		void _refill_ptree_with(PTree_Node &node,
+		void _refill_ptree_with(PartitionTreeNode &node,
 				const SetType &A, 
 				const Rectangle &bbox, 
 				size_t depth,const size_t &max_depth) {
@@ -405,38 +405,38 @@ class AriadnePTree {
 		
 		/*! \brief A class costructor.
 	     *
-	     * Creates an AriadnePTree. 
+	     * Creates an PartitionTree. 
 	     */
-		AriadnePTree() {}
+		PartitionTree() {}
 	
 		/*! \brief A class costructor.
 	     *
-	     * Creates an AriadnePTree.
+	     * Creates an PartitionTree.
 		 * \param bbox is the bounding box of the ptree.
 		 * \param m_depth is the maximum depth of the ptree. 
 	     */
-		AriadnePTree(const Rectangle &bbox, const size_t m_depth): 
+		PartitionTree(const Rectangle &bbox, const size_t m_depth): 
 			_bounding_box(bbox), _root(bbox.dim()),
 			_max_depth(m_depth){}
 		
 		/*! \brief A class costructor.
 	     *
-	     * Creates an AriadnePTree.
-		 * \param A is the original AriadnePtree.
+	     * Creates an PartitionTree.
+		 * \param A is the original Ptree.
 	     */
-		AriadnePTree(const AriadnePTree<Rectangle> &A): 
+		PartitionTree(const PartitionTree<Rectangle> &A): 
 			_bounding_box(A._bounding_box), _root(A._root),
 			_max_depth(A._max_depth){}
 				
 		/*! \brief A class costructor. 
 		 *
-		 * Creates an AriadnePTree and inserts an object.
+		 * Creates an PartitionTree and inserts an object.
 		 * \param A is an object that should be inserted into the ptree.
 		 * \param bbox is the bounding box of the ptree.
 		 * \param m_depth is the maximum depth of the ptree.
 		 */
 		template <typename SetType>
-		AriadnePTree(const SetType &A,
+		PartitionTree(const SetType &A,
 			const Rectangle &bbox, const size_t m_depth):  
 			_bounding_box(bbox), _root(bbox.dim()), 
 			_max_depth(m_depth) {
@@ -452,13 +452,13 @@ class AriadnePTree {
 		}
 		
 		/*! \brief A class destructor. */
-		~AriadnePTree() {
+		~PartitionTree() {
 			this->_clear_vector();
 		}
 
-		/*! \brief Return the number of rectangles into the AriadnePTree. 
+		/*! \brief Return the number of rectangles into the PartitionTree. 
 		 *
-		 * \return The number of rectangles maitained by the AriadnePTree.
+		 * \return The number of rectangles maitained by the PartitionTree.
 		 */
 		inline size_t size() {
 			if (this->_vector.size()==0) {
@@ -468,9 +468,9 @@ class AriadnePTree {
 			return (this->_vector).size();
 		}
 		
-		/*! \brief Return the space dimention of the AriadnePTree. 
+		/*! \brief Return the space dimention of the PartitionTree. 
 		 *
-		 * \return The space dimention of the AriadnePTree.
+		 * \return The space dimention of the PartitionTree.
 		 */
 		inline size_t dim() const{
 			return (this->_root).dim();
@@ -479,7 +479,7 @@ class AriadnePTree {
 		/*! \brief Accesses the i-th rectangle.
 		 *
 		 * \param index is the index of the returned rectangle.
-		 * \return The i-th rectangle maitained by the AriadnePTree.
+		 * \return The i-th rectangle maitained by the PartitionTree.
 		 */
 		inline const Rectangle &operator[](size_t index){
 			if (this->_vector.size()==0) {
@@ -491,9 +491,9 @@ class AriadnePTree {
 		
 		/*! \brief Checks the inclusion of a state.
 		 *
-		 * \param state is a state in the space represented by the AriadnePTree.
+		 * \param state is a state in the space represented by the PartitionTree.
 		 * \return \a true if the state is contained into the rectangles maintained 
-		 * by the AriadnePTree, \a false otherwise.
+		 * by the PartitionTree, \a false otherwise.
 		 */
 		inline bool contains(const State & state) {
 			if (this->_vector.size()==0) {
@@ -511,9 +511,9 @@ class AriadnePTree {
 		
 		/*! \brief Checks the interior inclusion of a state.
 		 *
-		 * \param state is a state in the space represented by the AriadnePTree.
+		 * \param state is a state in the space represented by the PartitionTree.
 		 * \return \a true if the state is contained into the interior of 
-		 * the rectangles maintained by the AriadnePTree, \a false otherwise.
+		 * the rectangles maintained by the PartitionTree, \a false otherwise.
 		 */
 		inline bool interior_contains(const State & state) const {
 			
@@ -524,7 +524,7 @@ class AriadnePTree {
 		
 		/*! \brief Checks the emptyness.
 		 *
-		 * \return \a true if the space represented by the AriadnePTree is empty,
+		 * \return \a true if the space represented by the PartitionTree is empty,
 		 * \a false otherwise.		
 		 */
 		inline bool empty() const {
@@ -555,13 +555,13 @@ class AriadnePTree {
 			return _vector().end();
 		}
 		
-		/*! \brief Makes the union of two AriadnePTree.
+		/*! \brief Makes the union of two PartitionTree.
 		 *
-		 * Makes the union of the current AriadnePTree and an other AriadnePTree.
+		 * Makes the union of the current PartitionTree and an other PartitionTree.
 		 * The result is stored into the current object.
-		 * \param \a A is an AriadnePTree.
+		 * \param \a A is an PartitionTree.
 		 */
-		inline void inplace_union(const AriadnePTree& A) {	
+		inline void inplace_union(const PartitionTree& A) {	
 
 			#ifdef DEBUG
 				std::cout << __FILE__ << ":" << __LINE__ << std::endl;
@@ -583,9 +583,9 @@ class AriadnePTree {
 			
 		}
 		
-		/*! \brief Inserts an object into the AriadnePTree.
+		/*! \brief Inserts an object into the PartitionTree.
 		 *
-		 * Inserts an object into the AriadnePTree. The result is stored 
+		 * Inserts an object into the PartitionTree. The result is stored 
 		 * into the current object.
 		 * \param \a A is an object representing a set.
 		 */
@@ -615,9 +615,9 @@ class AriadnePTree {
 			
 		}
 		
-		/*! \brief Inserts an object into the AriadnePTree.
+		/*! \brief Inserts an object into the PartitionTree.
 		 *
-		 * Inserts an object into the AriadnePTree. The result is stored 
+		 * Inserts an object into the PartitionTree. The result is stored 
 		 * into the current object.
 		 * \param \a A is an object representing a set.
 		 */
@@ -646,7 +646,7 @@ class AriadnePTree {
 		
 		inline const Rectangle &bounding_box() const { return this->_bounding_box; }
 		
-		inline const AriadnePTree<R> &operator=(const AriadnePTree<R> &A) {
+		inline const PartitionTree<R> &operator=(const PartitionTree<R> &A) {
 			this->_bounding_box=A._bounding_box;
 			this->_root=A._root;
 			this->_max_depth=A._max_depth;
@@ -657,7 +657,7 @@ class AriadnePTree {
 		/*! \brief Prints the ptree on a ostream */
 		template <typename Rect>
 		friend std::ostream& IO_Operators::operator<<(std::ostream &os, 
-				AriadnePTree<Rect> &r);
+				PartitionTree<Rect> &r);
 };
 
 }

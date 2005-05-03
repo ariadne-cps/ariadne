@@ -43,7 +43,7 @@ namespace Geometry {
 namespace IO_Operators{	
 
 template <typename S>
-std::ostream& operator<<(std::ostream &os, const AriadnePolyhedron<S> &r) {
+std::ostream& operator<<(std::ostream &os, const Polyhedron<S> &r) {
 	
 	_print_polyhedron_(os,r._poly);
 	
@@ -58,8 +58,8 @@ class PolyhedronSetExporter {
 		typedef typename Exporter::BasicSet BasicSet;
 		typedef typename BasicSet::State State;
 		typedef typename BasicSet::Real Real;
-	    	typedef AriadneDenotableSet<BasicSet, BS_PER_BLOCK> DenotableSet;
-		typedef AriadneRectangle<State> Rectangle;
+	    	typedef DenotableSet<BasicSet, BS_PER_BLOCK> DenotableSet;
+		typedef Rectangle<State> Rectangle;
 	
 	private:
 		
@@ -109,8 +109,8 @@ class PolyhedronMatlabExporter {
 	public:
 		typedef S State;
 		typedef typename S::Real Real;
-		typedef AriadnePolyhedron<State> BasicSet;
-		typedef AriadneRectangle<State> Rectangle;
+		typedef Polyhedron<State> BasicSet;
+		typedef Rectangle<State> Rectangle;
 	
 	private:
 		
@@ -306,8 +306,8 @@ class PolyhedronVTKOctavePlotExporter {
 	public:
 		typedef S State;
 		typedef typename S::Real Real;
-		typedef AriadnePolyhedron<State> BasicSet;
-		typedef AriadneRectangle<State> Rectangle;
+		typedef Polyhedron<State> BasicSet;
+		typedef Rectangle<State> Rectangle;
 	
 	private:
 		
@@ -492,8 +492,8 @@ class PolyhedronOneDimMatlabExporter {
 	public:
 		typedef S State;
 		typedef typename S::Real Real;
-		typedef AriadnePolyhedron<State> BasicSet;
-		typedef AriadneRectangle<State> Rectangle;
+		typedef Polyhedron<State> BasicSet;
+		typedef Rectangle<State> Rectangle;
 	
 	private:
 		

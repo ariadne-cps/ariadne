@@ -50,12 +50,12 @@ namespace Ariadne {
 namespace HybridDefinitions {
 
 template < typename LDT >
-class AriadneHybridAutomaton;
+class HybridAutomaton;
 	
 namespace IO_Operators{
 
 template < typename LDT>
-inline void dot_print(const AriadneHybridAutomaton< LDT >& A){					
+inline void dot_print(const HybridAutomaton< LDT >& A){					
 	std::ofstream fos;
 			
 	std::string f_name=A.name();
@@ -96,7 +96,7 @@ inline void dot_print(const AriadneHybridAutomaton< LDT >& A){
  * properties and region.
  */
 template < typename LDT >
-class AriadneHybridAutomaton
+class HybridAutomaton
 {
 	public:
 		typedef LDT LeavingTrans;
@@ -132,7 +132,7 @@ class AriadneHybridAutomaton
 		 * hybrid automaton class.
 		 * \param name is the name of the hybrid automaton.
 		 */
-		AriadneHybridAutomaton(const std::string &name): _name(name), _dim(0) {}
+		HybridAutomaton(const std::string &name): _name(name), _dim(0) {}
 	
 		/*! \brief  This is the destructor of the class hybrid 
 		 * automaton.
@@ -140,7 +140,7 @@ class AriadneHybridAutomaton
 		 * This destructor deletes in a safe way an object of the  
 		 * hybrid automaton class.
 		 */
-     	~AriadneHybridAutomaton() {
+     	~HybridAutomaton() {
 			
 			for (size_t i=0; i< (this->_automaton).size(); i++) {
 					this->_automaton[i].clear();
@@ -245,10 +245,10 @@ class AriadneHybridAutomaton
 		
 		template <typename AUTO , typename HDS ,typename TRACE, 
 				typename MAINTAIN, typename INT>
-		friend class Ariadne::Evaluation::AriadneSolver;
+		friend class Ariadne::Evaluation::Solver;
 		
 		template <typename LeavingDT>
-		friend void IO_Operators::dot_print(const AriadneHybridAutomaton< LeavingDT >& A);
+		friend void IO_Operators::dot_print(const HybridAutomaton< LeavingDT >& A);
 };
 
 }

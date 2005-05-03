@@ -32,11 +32,11 @@ using namespace Ariadne::Geometry;
 using namespace std;
 
 int main() {
-    AriadneState<Rational> s1(3);
-    AriadneState<Rational> s2(4);
-    AriadneState<Rational> s3(2,Rational(2,3));
-    AriadneState<Rational> s4(s1);
-    AriadneState<Rational> s5;
+    State<Rational> s1(3);
+    State<Rational> s2(4);
+    State<Rational> s3(2,Rational(2,3));
+    State<Rational> s4(s1);
+    State<Rational> s5;
 
     s1[1] = Rational(0.75);
     s5=s1;

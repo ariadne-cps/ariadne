@@ -37,7 +37,7 @@ namespace Affine {
 	
 /*! \brief Affine trasformation for polyhedron.
  *
- * This class represents AriadnePolyhedron's affine trasformations. 
+ * This class represents Polyhedron's affine trasformations. 
  * Hence all the objects of this class are of the type 
  * \f$T(x)=A\vec{x}+\vec{b}\f$. We can distringuish two cases: \f$A\f$ is 
  * invertible and \f$A\f$ is not invertible.
@@ -70,26 +70,26 @@ namespace Affine {
  * A\mathcal{l})\f$.
  */
 template <typename S>
-class AriadnePolyAffineMap {
+class PolyAffineMap {
 	
 	public:	
 		typedef typename S::Real Real;
 		typedef S State;
-		typedef typename Ariadne::Geometry::AriadnePolyhedron< S > BasicSet;
-		typedef typename Ariadne::Geometry::AriadnePolyhedron< S > Polyhedron;
-		typedef typename Ariadne::Geometry::AriadneDenotableSet< Polyhedron > DenotableSet;
+		typedef typename Ariadne::Geometry::Polyhedron< S > BasicSet;
+		typedef typename Ariadne::Geometry::Polyhedron< S > Polyhedron;
+		typedef typename Ariadne::Geometry::DenotableSet< Polyhedron > DenotableSet;
 	
 		typedef typename boost::numeric::ublas::identity_matrix<Real> IdentityMatrix;
 		typedef typename boost::numeric::ublas::matrix<Real> Matrix;
 		typedef typename boost::numeric::ublas::vector<Real> Vector;
 	
-		AriadnePolyAffineMap() {}
+		PolyAffineMap() {}
 	
-		AriadnePolyAffineMap(const AriadnePolyAffineMap<S> &map): 
+		PolyAffineMap(const PolyAffineMap<S> &map): 
 				_A(map._A), _A_invertible(map._A_invertible), _b(map._b), 
 				_map_type(map._map_type), _E(map._E), _n1(map._n1), _f(map._f){}
 	
-		AriadnePolyAffineMap(const Matrix &A):_A(A), _A_invertible(true),
+		PolyAffineMap(const Matrix &A):_A(A), _A_invertible(true),
 				_b(A.size1()), _map_type(HOMOGENEOUS) {
 			if ((A.size1()==0)||(A.size2()==0))
 				throw std::invalid_argument("The matrix of affine trasformation should have at least 1 row and 1 column.");			
@@ -97,7 +97,7 @@ class AriadnePolyAffineMap {
 			this->_get_solution(A);
 		}
 	
-		AriadnePolyAffineMap(const Vector &b):_A(b.size(),b.size()), 
+		PolyAffineMap(const Vector &b):_A(b.size(),b.size()), 
 				_A_invertible(true),_b(b), _map_type(TRASLATION) {
 			if (b.size()==0)
 				throw std::invalid_argument("The vector of affine trasformation should have at least 1 row.");
@@ -105,7 +105,7 @@ class AriadnePolyAffineMap {
 			this->_get_solution(b);
 		}
 		
-		AriadnePolyAffineMap(const Matrix &A, const Vector &b):
+		PolyAffineMap(const Matrix &A, const Vector &b):
 			_A(A), _A_invertible(true), _b(b), _map_type(NON_HOMOGENEOUS) {
 			
 			if ((A.size1()==0)||(A.size2()==0))
@@ -135,8 +135,8 @@ class AriadnePolyAffineMap {
 				return this->column_nb();			
 		}
 		
-		inline AriadnePolyAffineMap<S>  &operator=(
-					const AriadnePolyAffineMap<S> &orig) {
+		inline PolyAffineMap<S>  &operator=(
+					const PolyAffineMap<S> &orig) {
 			
 			this->_A=orig._A;
 			this->_A_invertible=orig._A_invertible;
@@ -196,7 +196,7 @@ class AriadnePolyAffineMap {
 				std::cout << __FILE__ << ":" << __LINE__ << std::endl;
 			#endif	
 			
-			Ariadne::LinearAlgebra::AriadneGeneratorSystem<Real> gen;	
+			Ariadne::LinearAlgebra::GeneratorSystem<Real> gen;	
 			
 			Ariadne::Geometry::_extract_generators_from_polyhedron(A, gen);
 
@@ -222,7 +222,7 @@ class AriadnePolyAffineMap {
 				std::cout << __FILE__ << ":" << __LINE__ << std::endl;
 			#endif	
 	
-			Ariadne::LinearAlgebra::AriadneConstrainSystem<Real> cs;	
+			Ariadne::LinearAlgebra::ConstrainSystem<Real> cs;	
 			
 			Ariadne::Geometry::_extract_constraints_from_polyhedron(A, cs);
 			
@@ -246,7 +246,7 @@ class AriadnePolyAffineMap {
 					break;
 				
 				default:
-					throw std::invalid_argument("There is a problem in the application of AriadnePolyAffineMap.");
+					throw std::invalid_argument("There is a problem in the application of PolyAffineMap.");
 				
 			}	
 
@@ -259,7 +259,7 @@ class AriadnePolyAffineMap {
 		}
 	
 		inline void _apply_homogeneous(
-			Ariadne::LinearAlgebra::AriadneConstrainSystem<Real> &cs) const{
+			Ariadne::LinearAlgebra::ConstrainSystem<Real> &cs) const{
 			
 			cs.d=this->_n1 * cs.d;
 				
@@ -268,7 +268,7 @@ class AriadnePolyAffineMap {
 		}
 		
 		inline void _apply_non_homogeneous(
-			Ariadne::LinearAlgebra::AriadneConstrainSystem<Real> &cs) const{
+			Ariadne::LinearAlgebra::ConstrainSystem<Real> &cs) const{
 			
 			#ifdef DEBUG
 				std::cout << __FILE__ << ":" << __LINE__ << std::endl;
@@ -289,7 +289,7 @@ class AriadnePolyAffineMap {
 		}
 		
 		inline void _apply_traslation(
-			Ariadne::LinearAlgebra::AriadneConstrainSystem<Real> &cs) const {
+			Ariadne::LinearAlgebra::ConstrainSystem<Real> &cs) const {
 		
 			
 			cs.d=this->_n1 * cs.d;

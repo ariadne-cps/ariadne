@@ -49,7 +49,7 @@ class ApproximateSet /* FOR PIETER: This class should be inherited from some
 		AbstractDenotableSet *_set;
 	
 		/*! \brief The approximation type. */
-		ApproxType _type;
+		ApproximationType _type;
 	public:
 
 		/*! \brief This is a \a ApproximateSet class constructor.
@@ -59,7 +59,7 @@ class ApproximateSet /* FOR PIETER: This class should be inherited from some
 		 * \param set is the denotable set used for the approximation.
 		 * \param type is the approximation type.
 		 */
-		ApproximateSet(AbstractDenotableSet *set, ApproxType type);
+		ApproximateSet(AbstractDenotableSet *set, ApproximationType type);
 
 		/*! \brief This is a \a ApproximateSet class constructor.
 		 *

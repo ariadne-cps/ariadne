@@ -33,7 +33,7 @@ namespace HybridDefinitions {
 	
 /*! \brief Represents discrete transition leaving a discrete location.*/
 template <typename LOC, typename RESET >
-class AriadneLeavingDiscreteTransition 
+class LeavingDiscreteTransition 
 {
 	public:
 		typedef RESET ResetMap;
@@ -59,7 +59,7 @@ class AriadneLeavingDiscreteTransition
 	
 	public:
 	
-		/*! \brief This is a \a AriadneLeavingDiscreteTransition class 
+		/*! \brief This is a \a LeavingDiscreteTransition class 
 		 * constructor.
 		 *
 		 * This constructor initializes the object of the  
@@ -71,11 +71,11 @@ class AriadneLeavingDiscreteTransition
 		 * \param reset is the reset of the current leaving discrete 
 		 * transition.
 		 */
-		AriadneLeavingDiscreteTransition(const DiscreteLocation &dest, 
+		LeavingDiscreteTransition(const DiscreteLocation &dest, 
 						const DenotableSet &act, const ResetMap &reset):
 				_destination(dest), _activation(act), _reset(reset) {}
 		
-		/*! \brief This is a \a AriadneLeavingDiscreteTransition class 
+		/*! \brief This is a \a LeavingDiscreteTransition class 
 		 * constructor.
 		 *
 		 * This constructor initializes the object of the  
@@ -87,7 +87,7 @@ class AriadneLeavingDiscreteTransition
 		 * \param reset is the reset of the current leaving discrete 
 		 * transition.
 		 */
-		AriadneLeavingDiscreteTransition(const DiscreteLocation &dest, 
+		LeavingDiscreteTransition(const DiscreteLocation &dest, 
 						const BasicSet &act, const ResetMap &reset):
 				_destination(dest),_reset(reset) {
 		
@@ -98,15 +98,15 @@ class AriadneLeavingDiscreteTransition
 					
 		}
 					
-		/*! \brief This is a \a AriadneLeavingDiscreteTransition class 
+		/*! \brief This is a \a LeavingDiscreteTransition class 
 		 * constructor.
 		 *
 		 * This constructor initializes the object of the  
 		 * leaving discrete transition class.
 		 * \param orig is the original copy of the leaving arc.
 		 */
-		AriadneLeavingDiscreteTransition(const
-				AriadneLeavingDiscreteTransition< LOC , RESET > &orig):
+		LeavingDiscreteTransition(const
+				LeavingDiscreteTransition< LOC , RESET > &orig):
 				_destination(orig._destination), _activation(orig._activation),
 				_reset(orig._reset) {}
 	
@@ -147,8 +147,8 @@ class AriadneLeavingDiscreteTransition
 		 * This method copies a leaving arc.
 		 * \param orig is the original copy of the leaving arc.
 		 */
-		inline const AriadneLeavingDiscreteTransition< LOC , RESET >& 
-				operator=(const AriadneLeavingDiscreteTransition< LOC , RESET > &orig) {
+		inline const LeavingDiscreteTransition< LOC , RESET >& 
+				operator=(const LeavingDiscreteTransition< LOC , RESET > &orig) {
 			
 			this->_activation=orig._activation;
 			this->_destination=orig._destination;
@@ -165,7 +165,7 @@ class AriadneLeavingDiscreteTransition
  * discrete location of the discrete transition.
  */
 template < typename LOC, typename RESET >
-class AriadneDiscreteTransition
+class DiscreteTransition
 {
 	public:
 		typedef RESET ResetMap;
@@ -207,22 +207,22 @@ class AriadneDiscreteTransition
 		 * \param reset is the reset of the current discrete 
 		 * transition.
 		 */
-		AriadneDiscreteTransition(const DiscreteLocation &source, 
+		DiscreteTransition(const DiscreteLocation &source, 
 				const DiscreteLocation &dest, 
 				const DenotableSet &act, ResetMap reset):
 							_source(source), _destination(dest), 
 							_activation(act), _reset(reset) {}
 
 	
-		/*! \brief This is a \a AriadneLeavingDiscreteTransition class 
+		/*! \brief This is a \a LeavingDiscreteTransition class 
 		 * constructor.
 		 *
 		 * This constructor initializes the object of the  
 		 * leaving discrete transition class.
 		 * \param orig is the original copy of the leaving arc.
 		 */
-		AriadneDiscreteTransition(const
-				AriadneDiscreteTransition< LOC, RESET > &orig):
+		DiscreteTransition(const
+				DiscreteTransition< LOC, RESET > &orig):
 				_source(orig._source), _destination(orig._destination), 
 				_activation(orig._activation), _reset(orig._reset) {}
 								
@@ -272,8 +272,8 @@ class AriadneDiscreteTransition
 		 * This method copies a leaving arc.
 		 * \param orig is the original copy of the leaving arc.
 		 */
-		inline const AriadneDiscreteTransition< LOC , RESET >& 
-				operator=(const AriadneDiscreteTransition< LOC , RESET > &orig) {
+		inline const DiscreteTransition< LOC , RESET >& 
+				operator=(const DiscreteTransition< LOC , RESET > &orig) {
 			
 			this->_activation=orig._activation;
 			this->_destination=orig._destination;

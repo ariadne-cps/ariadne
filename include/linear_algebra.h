@@ -325,7 +325,7 @@ inline Real find_matrix_denumerator(const boost::numeric::ublas::matrix<Real> &A
 	for (j=0; j< j_max; j++) {
 		
 		for (i=0; i< i_max; i++) {
-			denum=AriadneLCM(numerator(denum),denumerator(A(i,j)));
+			denum=lcm(numerator(denum),denumerator(A(i,j)));
 		}
 
 	}
@@ -345,7 +345,7 @@ inline Real find_vector_denumerator(const boost::numeric::ublas::vector<Real> &b
 	Real denum=denumerator(b(0));
 	
 	for (i=0; i< i_max; i++) {
-		denum=AriadneLCM(numerator(denum),denumerator(b(i)));
+		denum=lcm(numerator(denum),denumerator(b(i)));
 	}
 
 	return denum;

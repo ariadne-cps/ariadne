@@ -29,7 +29,7 @@ namespace Ariadne {
 namespace LinearAlgebra {
 	
 template <typename R> 
-class AriadneGeneratorSystem {
+class GeneratorSystem {
 	
 	private:
 
@@ -47,13 +47,13 @@ class AriadneGeneratorSystem {
 		typedef boost::numeric::ublas::vector<R> Vector;
 		typedef std::vector<GeneratorType> TypeVector;
 		
-		AriadneGeneratorSystem(const Matrix &pmatrix, 
+		GeneratorSystem(const Matrix &pmatrix, 
 					const TypeVector &ptype_vector,const Matrix &r_matrix,
 					const TypeVector &rtype_vector):
 				point(pmatrix), point_type(ptype_vector),
 				ray(r_matrix),ray_type(rtype_vector){}
 						
-		AriadneGeneratorSystem() {}
+		GeneratorSystem() {}
 		
 		inline bool empty() const{
 			return ((this->point_nb()==0)&&(this->ray_nb()==0));
@@ -124,7 +124,7 @@ class AriadneGeneratorSystem {
 			
 		}
 		
-		inline const AriadneGeneratorSystem<R> 
+		inline const GeneratorSystem<R> 
 				&sum_vector_to_all_points(const Vector &v) {
 			
 			#ifdef DEBUG
@@ -149,8 +149,8 @@ class AriadneGeneratorSystem {
 			return *this;
 		}
 		
-		inline const AriadneGeneratorSystem<R> &operator=(
-					const AriadneGeneratorSystem<R> &gen){
+		inline const GeneratorSystem<R> &operator=(
+					const GeneratorSystem<R> &gen){
 				
 				(this->point) = (cs.point);
 				(this->point_type) = (cs.point_type);

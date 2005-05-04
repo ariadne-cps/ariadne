@@ -22,19 +22,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "rectangle.h"
+
 #ifndef _DENOTABLESET_IO_H
 #define _DENOTABLESET_IO_H
 
 namespace Ariadne {
 namespace Geometry {
 	
-template <class BS, uint BS_PER_BLOCK> class DenotableSet;
+template <class BS> class DenotableSet;
 
-namespace IO_Operators {
-	
-template <typename BS, uint BS_PER_BLOCK>
+template <typename BS>
 std::ostream& operator<<(std::ostream &os, 
-				const DenotableSet< BS , BS_PER_BLOCK > &A){
+				const DenotableSet<BS> &A){
 
 	if (A.size() >0 )
 		os << "BasicSet[0]=" << A[0];
@@ -46,8 +46,25 @@ std::ostream& operator<<(std::ostream &os,
 	return os;	
 }
 
+template <typename BS>
+std::istream& operator>>(std::istream &is, 
+				DenotableSet<BS> &A)
+{
+    std::vector<BS>& vec(A._vector);
+    is >> vec;
+    
+    if(vec.size()==0) {
+	A._dim = 0;
+    }
+    else {
+	A._dim=vec[0].dim();
+    }
 
-template <typename BSE, uint BS_PER_BLOCK = 2000>
+    return is;
+}
+
+
+template <typename BSE>
 class DenotableSetExporter {
 	
 	public:
@@ -55,7 +72,8 @@ class DenotableSetExporter {
 		typedef typename Exporter::BasicSet BasicSet;
 		typedef typename BasicSet::State State;
 		typedef typename BasicSet::Real Real;
-	    typedef DenotableSet<BasicSet, BS_PER_BLOCK> DenotableSet;
+
+                typedef DenotableSet<BasicSet> DenotableSet;
 		typedef Rectangle<State> Rectangle;
 	
 	private:
@@ -100,7 +118,6 @@ class DenotableSetExporter {
 		}
 };	
 
-}
 }
 }
 

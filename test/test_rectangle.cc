@@ -29,34 +29,80 @@
 #include "exception.h"
 #include "utility.h"
 #include "numerical_type.h"
-#include "geometry_state.h"
+#include "state.h"
 #include "rectangle.h"
+
+#include "test.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Geometry;
 using namespace std;
 
+const char* filename = "test_rectangle";
+
+template class Rectangle< State<Rational> >;
+
 int main() {
     typedef Rectangle< State<Rational> > Rectangle;
     typedef Rectangle::State State;
-    typedef Rectangle::Real Real;
-    typedef interval<Real> Interval;
+    typedef Interval<Rational> Interval;
     
-    State s1(4,Rational(1));
-    State s2(4,Rational(4,3));
+    State s1(2,Rational(1));
+    State s2(2,Rational(3,2));
+    State s3(2,Rational(4,3));
+    State s4(2,Rational(2));
+    Rectangle r0;
     Rectangle r1(s1,s2);
-    Rectangle r2(s2,s1);
-    Rectangle r3;
-    Rectangle r4;
+    Rectangle r2(s3,s4);
+    Rectangle r3(s3,s2);
+    Rectangle r4,r5,r6;
     
-    /* Test input format */
+    string istr = "[ [0,1],[0,1] ] "
+	"[[-1/2,3/2],[-1/3,1/2]] "
+	"[[-1/4,2/3],[1/3,3/2]] "
+	"[[3/5,6/5],[2/5,7/5]] "
+	"[[3/5,6/5],[2/5,1]] "
+	"[[0,1],[0,1/2]] ";
+    stringstream iss(istr);
+    iss >> r1 >> r2 >> r3 >> r4 >> r5 >> r6;
+    Rectangle r7=r1;
+    
+    test_assert(r1==r7,"equality");
+    
+    std::list<Rectangle> cover1,cover2;
+    cover1.push_back(r2);
+    cover1.push_back(r3);
+    cover1.push_back(r4);
+
+    cover2.push_back(r2);
+    cover2.push_back(r3);
+    cover2.push_back(r5);
+
+    test_assert(!r1.empty(),"empty");
+    test_assert(r0.empty(),"empty");
+    
+    test_assert(!disjoint(r1,r1),"disjoint");
+    test_assert(!r1.is_disjoint_from(r1),"disjoint");
+    test_assert(interiors_intersect (r1,r1),"intersects_interior");
+    test_assert(r1.intersects_interior_of(r1),"intersects_interior");
+    test_assert(subset(r1,r1),"is_subset_of");
+    test_assert(r1.is_subset_of(r1),"is_subset_of");
+    test_assert(!subset_of_interior(r1,r1),"subset_of_interior");
+    test_assert(!r1.is_subset_of_interior_of(r1),"subset_of_interior");
+    test_assert(subset_of_open_cover(r1,cover1),"subset_of_open_cover");
+    test_assert(!subset_of_open_cover(r1,cover2),"subset_of_open_cover");
+    test_assert(subset_of_closed_cover(r1,cover2),"subset_of_closed_cover");
+       
+    r4=closure_of_intersection_of_interiors(r1,r2);
+    test_assert(r4==r6,"closure_of_intersection_of_interiors");
+
     try {
-	string input("[ ]  [ [0,2] ]  [ [0,1], [3/4,4/3], [1,3/2] ]  { lower_corner=[0,1], upper_corner=[1,4/3] }");
+	string input("[ ]  [ [0,2] ]  [ [0,1], [3/4,4/3], [1,3/2] ] "
+		     "{ lower_corner=[0,1], upper_corner=[1,4/3] }");
 	stringstream is(input);
 	is >> r1;
 	is >> r2;
 	is >> r3;
-	is >> r4;
    } 
     catch(invalid_input& e) {
 	cout << "test_rectangle: FAILED\n";
@@ -70,7 +116,7 @@ int main() {
     }
     catch(...) {
 	cout << "test_rectangle: FAILED\n";
-	cout << "  Unknown error\n"; 
+	cout << "  Unknown error\n";
 	return 1;
     }
 	

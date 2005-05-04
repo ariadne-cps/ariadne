@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_state.cc
+ *            test_polyhedron.cc
  *
  *  2 May 2005
  *  Copyright  2005  Pieter Collins
@@ -25,62 +25,60 @@
 #include <iostream>
 #include <string>
 
+#include "ariadne.h"
+#include "exception.h"
+#include "utility.h"
+#include "numerical_type.h"
 #include "state.h"
+#include "polyhedron.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Geometry;
 using namespace std;
 
+// template class Polyhedron< State<Rational> >;
+// template class Polyhedron< State<double> >;
+
 int main() {
-    State<Rational> s1(3);
-    State<Rational> s2(4);
-    State<Rational> s3(2,Rational(2,3));
-    State<Rational> s4(s1);
-    State<Rational> s5;
+    std::cout << "test_polyhedron: FAILED: cannot instantiate\n";
+    exit(1);
 
-    s1[1] = Rational(0.75);
-    s5=s1;
-
-    if(!(s1==s1 && s1!=s2 && s1!=s3 && s1!=s4 && s1==s5)) {
-	cout << "test_state: FAILED equality tests\n";
-	return 1;
-    }
-
-    /* Test output format */
-    string str1("[1, 3/2]");
-    string str2;
-    istringstream is(str1);
-    is >> s1;
-    stringstream ss(str2);
-    ss << s1;
-    getline(ss,str2);
+    typedef Polyhedron< State<Rational> > Polyhedron;
+    typedef Polyhedron::State State;
+    typedef Polyhedron::Real Real;
+    typedef Interval<Real> Interval;
     
-    if(str1 != str2) {
-	cout << "test_state: FAILED stream output test\n";
-	return 1;
-    }
+    State s1(4,Rational(1));
+    State s2(4,Rational(4,3));
+    /*
+    Polyhedron p1(s1,s2);
+    Polyhedron p2(s2,s1);
+    Polyhedron p3;
+    Polyhedron p4;
+    */
     
     /* Test input format */
     try {
-	string input("[0,3/4,0] [1,1,1,1] [2/3,2/3] \n");
+	string input("[ ]  [ [0,2] ]  [ [0,1], [3/4,4/3], [1,3/2] ]  { lower_corner=[0,1], upper_corner=[1,4/3] }");
 	stringstream is(input);
-	
-	is >> s1 >> s2 >> s3;
-    } 
-    catch(std::invalid_argument& e) {
-	cerr << "std::invalid_argument " << e.what() << "\n";
+   } 
+    catch(invalid_input& e) {
+	cout << "test_polyhedron: FAILED\n";
+	cout << "  invalid_input: " << e.what() << "\n";
 	return 1;
     }
-    catch(std::runtime_error& e) {
-	cerr << "std::runtime_error " << e.what() << "\n";
+    catch(std::invalid_argument& e) {
+	cout << "test_polyhedron: FAILED\n";
+	cout << "  std::invalid_argument: " << e.what() << "\n";
 	return 1;
     }
     catch(...) {
-	cerr << "Unknown error\n";
+	cout << "test_polyhedron: FAILED\n";
+	cout << "  Unknown error\n"; 
 	return 1;
     }
 	
-    cout << "test_state: PASS\n";
+    cout << "test_polyhedron: PASS\n";
 
     return 0;
 }

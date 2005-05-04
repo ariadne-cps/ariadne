@@ -1,4 +1,5 @@
-#include <ariadne.h>
+#include "ariadne.h"
+#include "interval.h"
 
 #include <iostream>
 #include <string>
@@ -8,9 +9,9 @@ using namespace Ariadne;
 using namespace std;
 
 int main() {
-    interval<double> ivl1(1.1,2.2);
-    interval<double> ivl2;
-    interval<double> ivl3(2.1,3.2);
+    Interval<double> ivl1(1.1,2.2);
+    Interval<double> ivl2;
+    Interval<double> ivl3(2.1,3.2);
 
     string input("[1.1,2.2] ");
     stringstream iss(input);
@@ -21,6 +22,8 @@ int main() {
 	return 1;
     }
 
+    ivl1 = ivl2+ivl3;
+    
     cout << "test_interval: PASS\n";
     
     return 0;

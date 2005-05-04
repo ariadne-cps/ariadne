@@ -25,11 +25,15 @@
 #ifndef _RECTANGLE_H
 #define _RECTANGLE_H
 
-#include<list>
+#include <list>
+#include <set>
+#include <vector>
+#include <valarray>
 
 #include "ariadne.h"
 #include "utility.h"
-#include "geometry_state.h"
+#include "interval.h"
+#include "state.h"
 
 namespace Ariadne {	
 
@@ -38,121 +42,12 @@ namespace Geometry {
 template <typename S = State<Rational> > 
 class Rectangle;
 
-
-/*! \brief Tests disjointness */
 template <typename S>
-bool disjoint(const Rectangle<S> &A, const Rectangle<S> &B) {
+bool subset(const Rectangle<S> &A, 
+	    const Rectangle<S> &B);
 	
-	if (A.dim()!=B.dim()) 
-		throw std::domain_error("The two parameters have different space dimentions");
-			
-
-	for (size_t i=0; i< A.dim(); i++) {
-		if ((A._upper_corner[i]<B._lower_corner[i])|| 
-			(B._upper_corner[i]<A._lower_corner[i])) return true;
-	}
-		
-	return false;
-}
-
-/*! \brief Tests intersection of interiors */
-template <typename S>
-bool intersects_interior(const Rectangle<S> &A, 
-		const Rectangle<S> &B) {
-			
-	if (A.dim()!=B.dim()) 
-		throw std::domain_error("The two parameters have different space dimensions");
-
-	if (A.empty()||B.empty()) return false;
-	
-	for (size_t i=0; i< A.dim(); i++) {
-		if ((A._upper_corner[i]<=B._lower_corner[i])|| 
-			(B._upper_corner[i]<=A._lower_corner[i])) return false;
-	}
-		
-	return true;
-}
-
-
-/*! \brief Tests inclusion of interiors */
-template <typename S>
-bool subset_of_interior(const Rectangle<S> &A, 
-				const Rectangle<S> &B) {
-	
-	if (A.dim()!=B.dim()) 
-		throw std::domain_error("The two parameters have different space dimentions");
-			
-	if (A.empty()||B.empty()) return false;
-	
-	for (size_t i=0; i< A.dim(); i++) {
-		if ((A._upper_corner[i] >= B._upper_corner[i])|| 
-			(B._lower_corner[i] >= A._lower_corner[i])) return false;
-	}
-		
-	return true;				
-}
-
-
-
-/*! \brief Tests inclusion of interiors */
-template <typename S>
-bool is_subset_of(const Rectangle<S> &A, 
-		  const Rectangle<S> &B) {
-	
-	if (A.dim()!=B.dim()) 
-		throw std::domain_error("The two parameters have different space dimentions");
-			
-	if (A.empty()||B.empty()) return false;
-	
-	for (size_t i=0; i< A.dim(); i++) {
-		if ((A._upper_corner[i] > B._upper_corner[i])|| 
-			(B._lower_corner[i] > A._lower_corner[i])) return false;
-	}
-		
-	return true;				
-}
-
-
-//*! \brief Tests inclusion in an open cover.  */
-template <typename S >
-bool subset_of_open_cover(const Rectangle<S> &A, 
-			  const std::list< Rectangle<S> > &list);
-
-
-/*! \brief Makes intersection of interior */
-template <typename S>
-Rectangle<S> closure_of_intersection_of_interior(
-		const Rectangle<S> &A, const Rectangle<S> &B){
-
-	if (A.dim()!=B.dim()) 
-		throw std::domain_error("The two parameters have different space dimentions");
-	
-	Rectangle<S> C(A.dim());
-
-	if (A.empty()||B.empty()) return C;
-	
-	for (size_t i=0; i< A.dim(); i++) {
-	
-		if (A._upper_corner[i] > B._upper_corner[i]) {
-			C._upper_corner[i]=B._upper_corner[i];
-		} else {
-			C._upper_corner[i]=A._upper_corner[i];
-		}
-		
-		if (B._lower_corner[i] > A._lower_corner[i]) {
-			C._lower_corner[i]=B._lower_corner[i];
-		} else {
-			C._lower_corner[i]=A._lower_corner[i];
-		}
-	}
-	
-	return C;
-			
-}
 
 /*! \brief A cuboid of arbitrary dimension.
- *  COMMENT: I think we should disallow empty rectangles. 
- *  This should make the algorithms faster, since we don't have to check emptyness every time.
  */
 template <typename S>
 class Rectangle {
@@ -162,7 +57,7 @@ class Rectangle {
 				const Rectangle<S> &B);
 
 		/*! \brief Tests intersection of interiors */
-		friend bool intersects_interior <> (const Rectangle<S> &A, 
+		friend bool interiors_intersect <> (const Rectangle<S> &A, 
 				const Rectangle<S> &B);
 
                 /*! \brief Tests if \a A is a subset of the interior of \a B. */
@@ -170,7 +65,7 @@ class Rectangle {
 				const Rectangle<S> &B);
 
 		/*! \brief Tests inclusion */
-		friend bool is_subset_of <> (const Rectangle<S> &A, 
+		friend bool subset <> (const Rectangle<S> &A, 
 				const Rectangle<S> &B);
 		
 		//*! \brief Tests inclusion in an open cover. */
@@ -178,7 +73,7 @@ class Rectangle {
 						     const std::list< Rectangle<S> > &list);
 
 		/*! \brief Makes intersection of interiors */
-		friend Rectangle<S> closure_of_intersection_of_interior <> (
+		friend Rectangle<S> closure_of_intersection_of_interiors <> (
 				const Rectangle<S> &A, const Rectangle<S> &B);
 	
 	public:
@@ -186,8 +81,6 @@ class Rectangle {
                 typedef typename S::Real Real;	
                 /*! \brief The type of denotable state contained by the rectangle. */
 		typedef S State;
-	private:
-                typedef Ariadne::interval<Real> Interval;
 	private:
 		/* Rectangle's lower corner */
 		State _lower_corner;
@@ -199,18 +92,12 @@ class Rectangle {
 		bool _empty;
 	
 	public:
-                /*! \brief Default constructor construcs an empty rectangle of dimension 0. */
-		Rectangle(size_t dim = 0)
-		    : _lower_corner(dim),  _upper_corner(dim), _empty(true) {}
+                /*! \brief Default constructor construcs an empty rectangle of dimension \a n. */
+		Rectangle(size_t n = 0)
+		    : _lower_corner(n),  _upper_corner(n), _empty(true) {}
     
-                /*! \brief Copy constructor. */
-		Rectangle(const Rectangle<State> &original) 
-		    : _lower_corner(original._lower_corner),
-		      _upper_corner(original._upper_corner),
-		      _empty(original._empty) {}
-			
                 /*! \brief Construct from an array of intervals. */
-		Rectangle(size_t dim, const Interval* intervals) 
+		Rectangle(size_t dim, const Interval<Real>* intervals) 
 		    : _lower_corner(dim), _upper_corner(dim), _empty(true) 
                 {
 		    for(size_t i=0; i!=dim; ++i) {
@@ -252,6 +139,23 @@ class Rectangle {
 		    
 		}
 	
+                /*! \brief Copy constructor. */
+		Rectangle(const Rectangle<State> &original) 
+		    : _lower_corner(original._lower_corner),
+		      _upper_corner(original._upper_corner),
+		      _empty(original._empty) { 
+		}
+			
+                /*! \brief Copy assignment operator. */
+		Rectangle<State>& operator=(const Rectangle<State>& original) {
+		    if(this != &original) {
+			this->_lower_corner = original._lower_corner;
+			this->_upper_corner = original._upper_corner;
+			this->_empty = original._empty;
+		    }
+		    return *this;
+		}
+
 		/*! \brief Returns rectangle's space dimensions */
 		inline size_t dim() const {
 			return (this->_lower_corner).dim();
@@ -273,13 +177,13 @@ class Rectangle {
 		}
 
                 /*! \brief Returns the projection onto the \a n th coordinate. */
-                inline interval<Real> interval(size_t n) const {
-		    return Interval(this->_lower_corner[n],this->_upper_corner[n]);
+                inline Interval<Real> interval(size_t n) const {
+		    return Interval<Real>(this->_lower_corner[n],this->_upper_corner[n]);
 		}
 
                 /*! \brief Returns the projection onto the \a n th coordinate. */
-                inline Interval operator[] (size_t n) const {
-		    return Interval(this->_lower_corner[n],this->_upper_corner[n]);
+                inline Interval<Real> operator[] (size_t n) const {
+		    return Interval<Real>(this->_lower_corner[n],this->_upper_corner[n]);
 		}
 
                 /*! \brief Returns the lower bound of the \a n th coordinate */
@@ -302,18 +206,18 @@ class Rectangle {
 			
 			/* for each dimension i */
 			for (size_t i=0; i<this->dim(); i++) {
+				/* if the i dim of the state is smaller than the one of the 
+				 * rectangle's lower corner then state is not contained into 
+				 * this object */
+				if (state[i] < this->_lower_corner[i]) return false;
+			
 				
 				/* if the i dim of the state is greater than the one of the 
 				 * rectangle's upper corner then state is not contained into 
 				 * this object */
 				if (state[i] > this->_upper_corner[i]) return false;
-					
-				/* if the i dim of the state is smaller than the one of the 
-				 * rectangle's lower corner then state is not contained into 
-				 * this object */
-				if (state[i] < this->_lower_corner[i]) return false;
 			}
-			
+					
 			return true;
 			
 		}
@@ -344,6 +248,12 @@ class Rectangle {
 			
 		}
 
+		/*! \brief Compute a quadrant of the Rectangle determined by \a q. FIXME: use binary words.
+		 *   
+		 *  \a q is an integer such that the ith bit of q is 0 if the lower half
+                 *  of the rectangle in the ith coordinate is used, and 1 if the upper
+                 *  half is used. 
+                 */
 		inline Rectangle<State> find_quadrant(size_t q) const {
 			
 			size_t j;
@@ -367,9 +277,10 @@ class Rectangle {
 			return quadrant;
 		}
 
+                /*! \brief Expand the Rectangle by \a delta in each direction. */
 		inline Rectangle<State> &expand_by(const Real &delta) {
 			
-			for (size_t j=0; j< this->dim(); j++) {
+			for (size_t j=0; j< this->dim(); ++j) {
 				
 				this->_upper_corner[j]+=delta;
 				this->_lower_corner[j]-=delta;
@@ -378,32 +289,57 @@ class Rectangle {
 			return *this;
 		}
 		
-		inline Rectangle<State> &expand_by(const State &delta) {
+                /*! \brief The equality operator */
+		inline bool operator==(const Rectangle<State> &A) const 
+                {
+			if (this->dim() != A.dim()) return false ;
+		
+			if (A.empty() && this->empty()) { return true; }
+			if (A.empty() || this->empty()) { return false; }
 			
-			for (size_t j=0; j< this->dim(); j++) {
-				
-				this->_upper_corner[j]+=delta[j];
-				this->_lower_corner[j]-=delta[j];
+			for (size_t j=0; j != this->dim(); ++j) {
+			    if (this->_lower_corner[j] != A._lower_corner[j]) { return false; }
+			    if (this->_upper_corner[j] != A._upper_corner[j]) { return false; }
 			}
 			
-			return *this;
+			return true;
 		}
-		
+
+                /*! \brief The inequality operator */
 		inline bool operator!=(const Rectangle<State> &A) const {
-			
-			if (this->dim()!= A.dim()) return true;
-		
-			if ((A.empty()&&!this->empty())||(!A.empty()&&this->empty())) return false;
-			
-			for (size_t j=0; j< this->dim(); j++) {
-				
-				if (this->_upper_corner[j]!=A._upper_corner[j]) return true;
-				if (this->_lower_corner[j]!=A._lower_corner[j]) return true;
-			}
-			
-			return false;
+		    return !(*this == A);
 		}
 		
+                /*! \brief Tests if the Rectangle is disjoint from the set \a s. */
+                template<class SET>
+		inline bool is_disjoint_from(const SET& s) const {
+		    return Ariadne::Geometry::disjoint(*this,s);
+		}
+
+                /*! \brief Tests if the Rectangle intersects the interior of the set \a s. */
+                template<class SET>
+		inline bool intersects_interior_of(const SET& s) const {
+		    return Ariadne::Geometry::interiors_intersect(*this,s);
+		}
+
+                /*! \brief Tests if the Rectangle is a subset of the set \a s. */
+                template<class SET>
+		inline bool is_subset_of(const SET& s) const {
+		    return Ariadne::Geometry::subset(*this,s);
+		}
+
+                /*! \brief Tests if the Rectangle is a subset of the interior of set \a s. */
+                template<class SET>
+		inline bool is_subset_of_interior_of(const SET& s) const {
+		    return Ariadne::Geometry::subset_of_interior(*this,s);
+		}
+
+                /*! \brief Tests if the Rectangle is a subset of the the union of the open sets in \a u. */
+                template<class LIST>
+		inline bool is_covered_by(const LIST& u) const {
+		    return Ariadne::Geometry::subset_of_open_cover(*this,u);
+		}
+
 		friend std::ostream& 
 		operator<< <> (std::ostream &os, 
 			       const Rectangle<S> &r);
@@ -413,6 +349,353 @@ class Rectangle {
 			       Rectangle<S> &r);
 
 };
+
+/*! \brief Tests disjointness */
+template <typename S>
+bool disjoint(const Rectangle<S> &A, const Rectangle<S> &B) {
+	
+	if (A.dim()!=B.dim()) 
+		throw std::domain_error("The two parameters have different space dimentions");
+			
+
+	for (size_t i=0; i< A.dim(); i++) {
+		if ((A._upper_corner[i]<B._lower_corner[i])|| 
+			(B._upper_corner[i]<A._lower_corner[i])) return true;
+	}
+		
+	return false;
+}
+
+/*! \brief Tests intersection of interiors */
+template <typename S>
+bool interiors_intersect(const Rectangle<S> &A, 
+		const Rectangle<S> &B) {
+			
+	if (A.dim()!=B.dim()) 
+		throw std::domain_error("The two parameters have different space dimensions");
+
+	if (A.empty()||B.empty()) return false;
+	
+	for (size_t i=0; i< A.dim(); i++) {
+		if ((A._upper_corner[i]<=B._lower_corner[i])|| 
+			(B._upper_corner[i]<=A._lower_corner[i])) return false;
+	}
+		
+	return true;
+}
+
+
+/*! \brief Tests inclusion of interiors */
+template <typename S>
+bool subset_of_interior(const Rectangle<S> &A, 
+				const Rectangle<S> &B) {
+	
+	if (A.dim()!=B.dim()) 
+		throw std::domain_error("The two parameters have different space dimentions");
+			
+	if (A.empty()||B.empty()) return false;
+	
+	for (size_t i=0; i< A.dim(); i++) {
+		if ((A._upper_corner[i] >= B._upper_corner[i])|| 
+			(B._lower_corner[i] >= A._lower_corner[i])) return false;
+	}
+		
+	return true;				
+}
+
+
+
+/*! \brief Tests inclusion of interiors */
+template <typename S>
+bool subset(const Rectangle<S> &A, 
+	    const Rectangle<S> &B) {
+	
+	if (A.dim()!=B.dim()) 
+		throw std::domain_error("The two parameters have different space dimentions");
+			
+	if (A.empty()||B.empty()) return false;
+	
+	for (size_t i=0; i< A.dim(); i++) {
+		if ((A._upper_corner[i] > B._upper_corner[i])|| 
+			(B._lower_corner[i] > A._lower_corner[i])) return false;
+	}
+		
+	return true;				
+}
+
+/* Compute all points in A on the grid of vertices of rectangles in the cover */
+template <typename S>
+void
+compute_gridpoints(std::vector< std::set<typename S::Real> >& gridpoints, 
+		   const Rectangle<S> &A, 
+		   const std::list< Rectangle<S> >& cover) 
+{
+    typedef typename S::Real Real;
+    typedef typename std::set<Real> Set;
+    typedef typename std::list< Rectangle<S> >::const_iterator list_iterator;
+    
+    size_t dimension = A.dim();
+    
+    for(size_t i=0; i!=dimension; ++i) {
+	Real lower=A.lower(i);
+	Real upper=A.upper(i);
+	gridpoints[i].insert(lower);
+	gridpoints[i].insert(upper);
+	for(list_iterator rect=cover.begin(); rect!=cover.end(); ++rect) {
+	    Real bound = rect->lower(i);
+	    if(lower<bound && bound<upper) {
+		gridpoints[i].insert(bound);
+	    }
+	    bound = rect->upper(i);
+	    if(lower<bound && bound<upper) {
+		gridpoints[i].insert(bound);
+	    }
+	}
+    }
+
+    #ifdef DEBUG
+    std::cerr << "Gridpoints: " << gridpoints << '\n';
+    #endif
+}
+
+//*! \brief Tests inclusion in an open cover.  */
+template <typename S>
+bool subset_of_open_cover(const Rectangle<S> &A, 
+			  const std::list< Rectangle<S> >& cover) 
+{
+    typedef typename S::Real Real;
+    typedef typename std::set<Real> Set;
+    typedef typename Set::const_iterator set_iterator;
+    typedef typename std::list< Rectangle<S> >::const_iterator list_iterator;
+
+    size_t dimension = A.dim();
+
+    std::vector<Set> gridpoints(dimension);
+    compute_gridpoints(gridpoints, A, cover);
+
+    /* This is a hack. We really need a "grid" class based on binary words. */
+    typedef std::valarray<size_t> index_type;
+    
+    /* Whether the jth gridpoint (in some ordering) is covered */
+    std::vector<bool> cover_flags;
+
+    /* Strides for indexing */
+    index_type strides(dimension);
+    size_t stride=1;
+    for(size_t i=0; i!=dimension; ++i) {
+	strides[i]=stride;
+	stride*=gridpoints[i].size();
+    }
+    cover_flags.resize(stride);
+    
+    std::vector<size_t> lower_indices(dimension+1);
+    std::vector<size_t> upper_indices(dimension+1);
+    lower_indices[dimension] = 0;
+    upper_indices[dimension] = 2;
+    
+    for(list_iterator rect=cover.begin(); rect!=cover.end(); ++rect) {
+	for(size_t i=0; i!=dimension; ++i) {
+	    Real lower_bound=rect->lower(i);
+	    size_t lower_index=0;
+	    set_iterator iter=gridpoints[i].begin();
+	    while(iter!=gridpoints[i].end() && (*iter) <= lower_bound) {
+		++iter;
+		++lower_index;
+	    }
+	    lower_indices[i]=lower_index;
+
+	    Real upper_bound=rect->upper(i);
+	    size_t upper_index=0;
+	    iter=gridpoints[i].begin();
+	    while(iter!=gridpoints[i].end() && (*iter) < upper_bound) {
+		++iter;
+		++upper_index;
+	    }
+	    upper_indices[i]=upper_index;
+	}
+	
+        #ifdef DEBUG
+	std::cerr << "Rectangle: " <<  (*rect)
+		  << " lower_indices: " << lower_indices
+		  << " upper_indices: " << upper_indices << '\n';
+	#endif
+
+	index_type index(dimension+1);
+	for(size_t i=0; i!=dimension; ++i) {
+	    index[i] = lower_indices[i];
+	}
+	index[dimension]=0;
+
+	while(index[dimension] != 1) {
+            #ifdef DEBUG
+	    std::cerr << index << " " << upper_indices << "\n";
+	    #endif
+
+	    size_t entry = 0;
+	    for(size_t j=0; j!=dimension; ++j) {
+		entry += index[j]*strides[j];
+	    }
+	    cover_flags[entry] = true;
+	    
+	    size_t inc=0;
+	    ++(index[inc]);
+	    while(index[inc] == upper_indices[inc]) {
+		index[inc]=0;
+		++inc;
+		++(index[inc]);
+	    }
+	}
+	
+	#ifdef DEBUG
+	std::cerr << index << "\n\n";
+	std::cerr << cover_flags << '\n';
+	#endif
+    }
+
+    for( std::vector<bool>::const_iterator flag = cover_flags.begin(); 
+	 flag != cover_flags.end(); ++flag) {
+	if(*flag == false) {
+	    return false;
+	}
+    }
+
+    return true;
+}
+
+//*! \brief Tests inclusion in an open cover.  */
+template <typename S>
+bool subset_of_closed_cover(const Rectangle<S> &A, 
+			  const std::list< Rectangle<S> >& cover) 
+{
+    typedef typename S::Real Real;
+    typedef typename std::set<Real> Set;
+    typedef typename Set::const_iterator set_iterator;
+    typedef typename std::list< Rectangle<S> >::const_iterator list_iterator;
+
+    size_t dimension = A.dim();
+
+    std::vector<Set> gridpoints(dimension);
+    compute_gridpoints(gridpoints, A, cover);
+
+    /* This is a hack. We really need a "grid" class based on binary words. */
+    typedef std::valarray<size_t> index_type;
+    
+    /* Whether the jth gridpoint (in some ordering) is covered */
+    std::vector<bool> cover_flags;
+
+    /* Strides for indexing */
+    index_type strides(dimension);
+    size_t stride=1;
+    for(size_t i=0; i!=dimension; ++i) {
+	strides[i]=stride;
+	stride*=gridpoints[i].size();
+    }
+    cover_flags.resize(stride);
+    
+    std::vector<size_t> lower_indices(dimension+1);
+    std::vector<size_t> upper_indices(dimension+1);
+    lower_indices[dimension] = 0;
+    upper_indices[dimension] = 2;
+    
+    for(list_iterator rect=cover.begin(); rect!=cover.end(); ++rect) {
+	for(size_t i=0; i!=dimension; ++i) {
+	    Real lower_bound=rect->lower(i);
+	    size_t lower_index=0;
+	    set_iterator iter=gridpoints[i].begin();
+	    while(iter!=gridpoints[i].end() && (*iter) < lower_bound) {
+		++iter;
+		++lower_index;
+	    }
+	    lower_indices[i]=lower_index;
+
+	    Real upper_bound=rect->upper(i);
+	    size_t upper_index=0;
+	    iter=gridpoints[i].begin();
+	    while(iter!=gridpoints[i].end() && (*iter) <= upper_bound) {
+		++iter;
+		++upper_index;
+	    }
+	    upper_indices[i]=upper_index;
+	}
+	
+	#ifdef DEBUG
+	std::cerr << "Rectangle: " <<  (*rect)
+		  << " lower_indices: " << lower_indices
+		  << " upper_indices: " << upper_indices << '\n';
+	#endif
+	
+	index_type index(dimension+1);
+	for(size_t i=0; i!=dimension; ++i) {
+	    index[i] = lower_indices[i];
+	}
+	index[dimension]=0;
+
+	while(index[dimension] != 1) {
+	#ifdef DEBUG
+	    std::cerr << index << " " << upper_indices << "\n";
+	#endif
+
+	    size_t entry = 0;
+	    for(size_t j=0; j!=dimension; ++j) {
+		entry += index[j]*strides[j];
+	    }
+	    cover_flags[entry] = true;
+	    
+	    size_t inc=0;
+	    ++(index[inc]);
+	    while(index[inc] == upper_indices[inc]) {
+		index[inc]=0;
+		++inc;
+		++(index[inc]);
+	    }
+	}
+
+	#ifdef DEBUG
+	std::cerr << index << "\n\n";
+	std::cerr << cover_flags << '\n';
+	#endif
+	
+    }
+
+    for( std::vector<bool>::const_iterator flag = cover_flags.begin(); 
+	 flag != cover_flags.end(); ++flag) {
+	if(*flag == false) {
+	    return false;
+	}
+    }
+
+    return true;
+}
+
+
+/*! \brief Makes intersection of interior */
+template <typename S>
+Rectangle<S> 
+closure_of_intersection_of_interiors(const Rectangle<S> &A, const Rectangle<S> &B)
+{
+    if (A.dim()!=B.dim()) {
+	throw std::domain_error("The two parameters have different space dimentions");
+    }
+
+    Rectangle<S> C(A.dim());
+
+    if (A.empty() || B.empty()) { 
+	return C; 
+    }
+	
+    for (size_t i=0; i != C.dim(); ++i) {
+	C._lower_corner[i] = max(A._lower_corner[i],B._lower_corner[i]);
+	C._upper_corner[i] = min(A._upper_corner[i],B._upper_corner[i]);
+	if(C._lower_corner[i] >= C._upper_corner[i]) {
+	    C._empty=true;
+	    return C;
+	}
+    }
+
+    C._empty=false;
+    return C;
+}
+
 
 template <typename S>
 std::ostream& 
@@ -424,6 +707,11 @@ operator<<(std::ostream &os, const Rectangle<S> &r)
     os << "upper=" << (r._upper_corner) << " }" ;
     */
 
+    /*
+    if(r.empty()) {
+	return os << "[ ]";
+    }
+    */
     os << "[ ";
     if(r.dim() > 0) {
 	os << r[0];
@@ -441,7 +729,7 @@ std::istream&
 operator>>(std::istream &is, Rectangle<S> &r) 
 {
     typedef typename Rectangle<S>::Real Real;
-    typedef typename Ariadne::interval<Real> Interval;
+    typedef typename Ariadne::Interval<Real> Interval;
     
     char c;
     is >> c;
@@ -449,7 +737,7 @@ operator>>(std::istream &is, Rectangle<S> &r)
     if(c=='[') {
 	/* Representation as list of intervals */ 
 	std::vector< Interval > v;
-	Ariadne::operator>>(is,v);
+	is >> v;
 	r=Rectangle<S>(v.size(),&v[0]);
     }
     else {

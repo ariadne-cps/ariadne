@@ -29,19 +29,21 @@
 #ifndef _GRID_RECTANGLE_H
 #define _GRID_RECTANGLE_H
 
-#include <boost/numeric/interval.hpp>
-#include <binary_word.h>
+#include "interval.h"
+#include "binary_word.h"
 
 namespace Ariadne {	
 namespace Geometry {	
     template<typename R> class Rectangle;
+    template<typename R> class State;
     
-    /*! A rectangle defined on a grid. 
+    /*! \brief A rectangle defined on a grid. 
      */
     template<typename R>
     class GridRectangle {
       public:
 	typedef R real_type;
+	typedef S state_type;
 	typedef size_t size_type;
 	
 	/*!\brief Construct from a grid and a binary word.

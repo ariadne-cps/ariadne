@@ -673,7 +673,8 @@ class Polyhedron {
 			Ariadne::LinearAlgebra::ConstrainSystem<Real> cs;
 			
 			_extract_constraints_from_polyhedron(*this, cs);
-			
+
+			// FIXME! This method doesn't exist!			
 			return _create_open_polyhedron_from_constraints(*this, cs);
 			
 		}

@@ -41,28 +41,6 @@
  */
 namespace Ariadne {	
 
-/*! \class interval
- * \brief A templated class representing an interval of real numbers.
- *
- * An interval of real numbers with endpoints of type \a R.
- * All operations on an interval must be guarenteed to return an interval contining the exact result.
- * If \a val of real numbers with endpoints of type \a R.
- * All operations on an interval must be guarenteed to return an interval contining the exact result.
- * If \a T supports exact evaluation of a function, then the exact evaluation must be used.
- * If \a T is dense in the reals, e.g. dyadic or rational, then any approximate operations may be given a maximum error of computation.
- *
- * COMMENT FOR ALBERTO: How should we specify error bounds for computations on types which support arbitrary-precision computing?
- * I would suggest using a global(ish) "precision" variable which either may be "locked" by a computation, or stored on a stack.
- * I think functions should keep a natural syntax, so we can declare <code>rational cos(rational)</code>,
- * and set error bounds for the computation elsewhere.
- * Of course, this partly depends on the interval / rational arithmetic library we use.
- *
- * Currently implemented using the boost::numeric::interval from the Boost C++ library.
- */
-using boost::numeric::interval;
-
-
-
 /*! \brief Geometric calculus library.
  */
 namespace Geometry {}
@@ -106,19 +84,6 @@ namespace Evaluation {}
 
 }
 
-/* No input routine for intervals defined by boost */
-namespace boost {
-    namespace numeric {
-	template<typename R> 
-	std::istream&
-	operator>>(std::istream& is, interval<R>& ivl) 
-	{
-	    R l,u;
-	    char c1,c2,c3;
-	    is >> c1 >> l >> c2 >> u >> c3;
-	    ivl=interval<R>(l,u);
-	}
-    }
-}
+
 
 #endif /* _ARIADNE_H */

@@ -31,6 +31,8 @@
 
 #include <cstddef>
 #include <exception>
+#include <stdexcept>
+#include <cassert>
 
 namespace Ariadne {
 
@@ -60,10 +62,10 @@ public:
 
   ~array() { delete[] _ptr; }
   array() : _size(0), _ptr(new value_type[_size]) { }
-  explicit array(const size_type __n) : _size(__n), _ptr(new value_type[_size]) { }
-  array(const size_type __n, const value_type& __val) : _size(__n), _ptr(new value_type[_size]) { fill(__val); }
-  template<class In> array(In __first, In __last) : _size(std::distance(__first,__last)), _ptr(new value_type[_size]) { 
-    fill(__first); }
+  explicit array(const size_type n) : _size(n), _ptr(new value_type[_size]) { }
+  array(const size_type n, const value_type& val) : _size(n), _ptr(new value_type[_size]) { fill(val); }
+  template<class In> array(In first, In last) : _size(std::distance(first,last)), _ptr(new value_type[_size]) { 
+    fill(first); }
 	
   array(const array& a) : _size(a.size()), _ptr(new value_type[_size]) { fill(a.begin()); }
   array& operator=(const array& a) { resize(a.size()); fill(a.begin()); return *this; }
@@ -73,12 +75,12 @@ public:
   size_type empty() const { return _size==0u; }
   size_type size() const { return _size; }
   size_type max_size() const { return (size_type) (-1); }
-  void resize(size_type __n) { if(size()!=__n) { delete[] _ptr; _size=__n; _ptr=new value_type[_size]; } }
+  void resize(size_type n) { if(size()!=n) { delete[] _ptr; _size=n; _ptr=new value_type[_size]; } }
 
   reference operator[](size_type i) { return _ptr[i]; } 
   const_reference operator[](size_type i) const { return _ptr[i]; }
-  reference at(size_type i) { if(i<_size) { return _ptr[i]; } else { throw std::out_of_range(); } } 
-  const_reference at(size_type i) const { if(i<_size) { return _ptr[i]; } else { throw std::out_of_range(); } }
+  reference at(size_type i) { if(i<_size) { return _ptr[i]; } else { throw std::out_of_range("array index out-of-range"); } } 
+  const_reference at(size_type i) const { if(i<_size) { return _ptr[i]; } else { throw std::out_of_range("array index out-of-range"); } }
 
   iterator begin() { return iterator(_ptr); }
   const_iterator begin() const { return const_iterator(_ptr); }
@@ -87,16 +89,16 @@ public:
 
   bool operator==(const array& other) const {
     if(size()!=other.size()) return false; 
-    const_iterator __first=begin(); const_iterator __last=end(); const_iterator __other=other.begin(); 
-    while(__first!=__last) { if((*__first)!=(*__other)) { return false; } ++__first; ++__other; } return true; }
+    const_iterator first=begin(); const_iterator last=end(); const_iterator curr=other.begin(); 
+    while(first!=last) { if((*first)!=(*curr)) { return false; } ++first; ++curr; } return true; }
   bool operator!=(const array& other) const { return !((*this)==other); }
 
-  void fill(value_type __val) { 
-    pointer __curr=_ptr; pointer __end=__curr+size(); while(__curr!=__end) { *__curr=__val; ++__curr; } }
-  template<class Inputiterator> void fill(Inputiterator __iter) { 
-    pointer __curr=_ptr; pointer __end=__curr+size(); while(__curr!=__end) { *__curr=*__iter; ++__curr; ++__iter; } }
-  template<class ForwardIterator> void assign(ForwardIterator __first, ForwardIterator __last) { 
-    resize(std::distance(__first,__last)); fill(__first); }
+  void fill(value_type val) { 
+    pointer curr=_ptr; pointer end=curr+size(); while(curr!=end) { *curr=val; ++curr; } }
+  template<class Inputiterator> void fill(Inputiterator iter) { 
+    pointer curr=_ptr; pointer end=curr+size(); while(curr!=end) { *curr=*iter; ++curr; ++iter; } }
+  template<class ForwardIterator> void assign(ForwardIterator first, ForwardIterator last) { 
+    resize(std::distance(first,last)); fill(first); }
  private:
   size_type _size; 
   pointer _ptr; 
@@ -124,17 +126,17 @@ public:
 
   ~array() { }
   array() { }
-  explicit array(const value_type& __val) { fill(__val); }
-  template<class In> array(In __first, In __last) { assert(distance(__first,__last==N)); fill(__first); }
+  explicit array(const value_type& val) { fill(val); }
+  template<class In> array(In first, In last) { assert(distance(first,last==N)); fill(first); }
   array(const array& a) { fill(a.begin()); }
   array& operator=(const array& a) { fill(a.begin()); return *this; }
 	
-  array(const value_type& __x, const value_type& __y) { 
-    assert(N==2); _ptr[0]=__x; _ptr[1]=__y; }
-  array(const value_type& __x, const value_type& __y, const value_type& __z) { 
-    assert(N==3); _ptr[0]=__x; _ptr[1]=__y; _ptr[2]=__z; }
-  array(const value_type& __w, const value_type& __x, const value_type& __y, const value_type& __z) { 
-    assert(N==4); _ptr[0]=__w; _ptr[1]=__x; _ptr[2]=__y; _ptr[3]=__z; }
+  array(const value_type& x, const value_type& y) { 
+    assert(N==2); _ptr[0]=x; _ptr[1]=y; }
+  array(const value_type& x, const value_type& y, const value_type& z) { 
+    assert(N==3); _ptr[0]=x; _ptr[1]=y; _ptr[2]=z; }
+  array(const value_type& w, const value_type& x, const value_type& y, const value_type& z) { 
+    assert(N==4); _ptr[0]=w; _ptr[1]=x; _ptr[2]=y; _ptr[3]=z; }
   
   size_type empty() const { return N==0u; }
   size_type size() const { return N; }
@@ -151,17 +153,17 @@ public:
   const_iterator end() const { return _ptr+N; }
   
   bool operator==(const array& other) const {
-    const_iterator __first=begin(); const_iterator __last=end(); const_iterator __other=other.begin(); 
-    while(__first!=__last) { if((*__first)!=(*__other)) { return false; } ++__first; ++__other; } return true; }
+    const_iterator first=begin(); const_iterator last=end(); const_iterator curr=other.begin(); 
+    while(first!=last) { if((*first)!=(*curr)) { return false; } ++first; ++curr; } return true; }
   bool operator!=(const array& other) const { return !((*this)==other); }
-  void fill(value_type __val) { 
-    for(size_type i=0; i!=N; ++i) { _ptr[i]=__val; } }
-  template<class In> void fill(In __iter) { 
-    _assign_iter(__first); }
-  template<class In> void assign(In __first, In __last) { 
-    assert(distance(__first,__last)==size()); fill(__first); }
+  void fill(value_type val) { 
+    for(size_type i=0; i!=N; ++i) { _ptr[i]=val; } }
+  template<class In> void fill(In iter) { 
+    _assign_iter(iter); }
+  template<class In> void assign(In first, In last) { 
+    assert(distance(first,last)==size()); fill(first); }
  private:
-  template<class Iter> void _assign_iter(Iter __iter); 
+  template<class Iter> void _assign_iter(Iter iter); 
  private:
   value_type _ptr[N];
 };
@@ -169,24 +171,24 @@ public:
 	
 template<typename T, size_t N> template<class Iter> 
 inline 
-void array<T,N>::_assign_iter(Iter __iter)
+void array<T,N>::_assign_iter(Iter iter)
 { 
   if(N==1) { 
-    *_ptr=*__iter; }
+    *_ptr=*iter; }
   else if(N==2) { 
-    value_type* __curr=_ptr; *__curr=*__iter; ++__curr; ++__iter;  *__curr=*__iter; }
+    value_type* curr=_ptr; *curr=*iter; ++curr; ++iter;  *curr=*iter; }
   else if(N==3) { 
-    value_type* __curr=_ptr; *__curr=*__iter; 
-    ++__curr; ++__iter;  *__curr=*__iter; 
-    ++__curr; ++__iter;  *__curr=*__iter; }
+    value_type* curr=_ptr; *curr=*iter; 
+    ++curr; ++iter;  *curr=*iter; 
+    ++curr; ++iter;  *curr=*iter; }
   else if(N==4) { 
-    value_type* __curr=_ptr; *__curr=*__iter; 
-    ++__curr; ++__iter; *__curr=*__iter; 
-    ++__curr; ++__iter;  *__curr=*__iter;  
-    ++__curr; ++__iter;  *__curr=*__iter; }
+    value_type* curr=_ptr; *curr=*iter; 
+    ++curr; ++iter; *curr=*iter; 
+    ++curr; ++iter;  *curr=*iter;  
+    ++curr; ++iter;  *curr=*iter; }
   else {
-    value_type* __curr=_ptr; value_type* __end=_ptr+N; *__curr=*__iter;
-    while(__curr!=__end) { ++__curr; ++__iter;  *__curr=*__iter;  } }
+    value_type* curr=_ptr; value_type* end=_ptr+N; *curr=*iter;
+    while(curr!=end) { ++curr; ++iter;  *curr=*iter;  } }
 }
  
 template<typename T> template<size_t N> 

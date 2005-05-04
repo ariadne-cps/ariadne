@@ -30,8 +30,10 @@
 #define _EXCEPTION_H
 
 #include <stdexcept>
+#include <iosfwd>
 
 namespace Ariadne {
+
 
     class invalid_input : public std::runtime_error {
       public:

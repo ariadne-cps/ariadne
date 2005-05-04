@@ -50,7 +50,7 @@ std::ostream& operator<<(std::ostream &os, const Polyhedron<S> &r) {
 	return os;
 }
 
-template <typename BSE, uint BS_PER_BLOCK = 2000>
+template <typename BSE>
 class PolyhedronSetExporter {
 	
 	public:
@@ -58,7 +58,7 @@ class PolyhedronSetExporter {
 		typedef typename Exporter::BasicSet BasicSet;
 		typedef typename BasicSet::State State;
 		typedef typename BasicSet::Real Real;
-	    	typedef DenotableSet<BasicSet, BS_PER_BLOCK> DenotableSet;
+	    	typedef DenotableSet<BasicSet> DenotableSet;
 		typedef Rectangle<State> Rectangle;
 	
 	private:

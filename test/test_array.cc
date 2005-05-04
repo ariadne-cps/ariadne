@@ -24,8 +24,15 @@
 
 #include <iostream>
 #include "array.h"
+#include "ariadne.h"
+#include "numerical_type.h"
 
 using namespace Ariadne;
+
+template class array<double>;
+template class array<double,3>;
+template class array<Rational>;
+template class array<Rational,4>;
 
 int main() {
   array<double> A;

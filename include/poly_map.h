@@ -75,8 +75,8 @@ class PolyAffineMap {
 	public:	
 		typedef typename S::Real Real;
 		typedef S State;
-		typedef typename Ariadne::Geometry::Polyhedron< S > BasicSet;
-		typedef typename Ariadne::Geometry::Polyhedron< S > Polyhedron;
+		typedef typename Ariadne::Geometry::Polyhedron< Real > BasicSet;
+		typedef typename Ariadne::Geometry::Polyhedron< Real > Polyhedron;
 		typedef typename Ariadne::Geometry::DenotableSet< Polyhedron > DenotableSet;
 	
 		typedef typename boost::numeric::ublas::identity_matrix<Real> IdentityMatrix;

@@ -485,7 +485,7 @@ class PartitionTreeNode {
 		inline PartitionTreeNode add_lower_level(PartitionTreeNode &A, unsigned int i) const{
 			
 			if (this->_dim!=A._dim) 
-				throw std::domain_error("The object and parameter have different space dimentions");
+				throw std::domain_error("The object and parameter have different space dimensions");
 			
 			if (A._bits_per_space_member()<=i)
 				throw std::out_of_range("Wrong index");
@@ -536,7 +536,7 @@ class PartitionTreeNode {
 		void inplace_union(const PartitionTreeNode &A){
 			
 			if (this->_dim!=A._dim) 
-				throw std::domain_error("The two parameters have different space dimentions.");
+				throw std::domain_error("The two parameters have different space dimensions.");
 			
 	
 			if (A.empty()||this->full()) {
@@ -570,7 +570,7 @@ class PartitionTreeNode {
 PartitionTreeNode intersect(const PartitionTreeNode &A, const PartitionTreeNode &B) {
 			
 	if (A._dim!=B._dim) 
-		throw std::domain_error("This object and parameter have different space dimentions.");
+		throw std::domain_error("This object and parameter have different space dimensions.");
 	
 
 	if (A._leaf||B.empty()) {
@@ -599,7 +599,7 @@ PartitionTreeNode intersect(const PartitionTreeNode &A, const PartitionTreeNode 
 PartitionTreeNode join(const PartitionTreeNode &A, const PartitionTreeNode &B){
 			
 	if (A._dim!=B._dim) 
-		throw std::domain_error("The two parameters have different space dimentions.");
+		throw std::domain_error("The two parameters have different space dimensions.");
 			
 	if (A.empty()||B.full()) {
 		return B;				

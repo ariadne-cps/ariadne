@@ -442,7 +442,7 @@ class PartitionTree {
 			_max_depth(m_depth) {
 			
 			if (A.dim()!=bbox.dim()) 
-				throw std::domain_error("Two of the parameters have different space dimentions");
+				throw std::domain_error("Two of the parameters have different space dimensions");
 		
 			if (!interior_subset_of_interior(A, this->_bounding_box)) 				
 				throw std::domain_error("The object can not be contained into the ptree.");
@@ -468,9 +468,9 @@ class PartitionTree {
 			return (this->_vector).size();
 		}
 		
-		/*! \brief Return the space dimention of the PartitionTree. 
+		/*! \brief Return the space dimension of the PartitionTree. 
 		 *
-		 * \return The space dimention of the PartitionTree.
+		 * \return The space dimension of the PartitionTree.
 		 */
 		inline size_t dim() const{
 			return (this->_root).dim();
@@ -568,7 +568,7 @@ class PartitionTree {
 			#endif			
 			
 			if (this->dim()!=A.dim()) 
-				throw std::domain_error("The two parameters have different space dimentions.");
+				throw std::domain_error("The two parameters have different space dimensions.");
 			
 			if (this->_bounding_box!=A._bounding_box)
 				throw std::domain_error("The two parameters have different bounding boxes.");
@@ -599,7 +599,7 @@ class PartitionTree {
 			if (A.empty()) return; 
 			
 			if (this->dim()!=A.dim()) 
-				throw std::domain_error("The two parameters have different space dimentions.");
+				throw std::domain_error("The two parameters have different space dimensions.");
 			
 			if (this->_bounding_box!=A._bounding_box)
 				throw std::domain_error("The two parameters have different bounding boxes.");
@@ -631,7 +631,7 @@ class PartitionTree {
 			if (A.empty()) return; 
 			
 			if (this->dim()!=A.dim()) 
-				throw std::domain_error("The two parameters have different space dimentions.");
+				throw std::domain_error("The two parameters have different space dimensions.");
 			
 			this->_refill_ptree_with(this->_root, A, this->_bounding_box , 0, 
 					this->_max_depth );

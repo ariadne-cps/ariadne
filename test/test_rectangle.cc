@@ -40,10 +40,11 @@ using namespace std;
 
 const char* filename = "test_rectangle";
 
-template class Rectangle< State<Rational> >;
+template class Rectangle< double >;
+template class Rectangle< Rational >;
 
 int main() {
-    typedef Rectangle< State<Rational> > Rectangle;
+    typedef Rectangle< Rational > Rectangle;
     typedef Rectangle::State State;
     typedef Interval<Rational> Interval;
     

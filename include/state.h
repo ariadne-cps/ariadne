@@ -94,7 +94,7 @@ class State {
 		    if (this->dim()!=A.dim()) { 
 			return false; 
 		    }
-			// throw std::domain_error("The parameters have different space dimentions");
+			// throw std::domain_error("The parameters have different space dimensions");
 			
 			/* for each dimension i */
 			for (size_t i=0; i<this->dim(); i++) {
@@ -110,7 +110,7 @@ class State {
 		    return !( *this == A );
 		}
 
-		/*! \brief Returns the state's dimention. */
+		/*! \brief Returns the state's dimension. */
 		inline size_t dim() const {
 			return (this->_vector).size();
 		}
@@ -153,8 +153,7 @@ std::istream& operator>> (std::istream &is, State<R> &state)
     
     std::vector<R> v;
     v.reserve(last_size);
-    Ariadne::operator>> (is,v);
-    // is >> v;
+    is >> v;
     last_size = v.size();
 
     state._vector.resize(v.size());

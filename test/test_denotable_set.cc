@@ -39,7 +39,8 @@ using namespace Ariadne;
 using namespace Ariadne::Geometry;
 using namespace std;
 
-template class DenotableSet< Rectangle< State<Rational> > >;
+template class DenotableSet< Rectangle<Rational> >;
+template class DenotableSet< Rectangle<double> >;
 
 const char* filename = "test_denotable_set";
 
@@ -50,7 +51,7 @@ int main() {
     State<Rational> s3(2,Rational(3,2));
     
     typedef State<Rational> State;
-    typedef Rectangle<State> Rectangle;
+    typedef Rectangle<Rational> Rectangle;
     typedef DenotableSet<Rectangle> DenotableSet;
 
     Rectangle r0(s0,s1);

@@ -74,7 +74,7 @@ class DenotableSetExporter {
 		typedef typename BasicSet::Real Real;
 
                 typedef DenotableSet<BasicSet> DenotableSet;
-		typedef Rectangle<State> Rectangle;
+		typedef Rectangle<Real> Rectangle;
 	
 	private:
 		

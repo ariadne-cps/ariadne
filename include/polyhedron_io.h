@@ -40,10 +40,8 @@ inline void _print_polyhedron_(std::ostream &os,
 namespace Ariadne {	
 namespace Geometry {
 
-namespace IO_Operators{	
-
-template <typename S>
-std::ostream& operator<<(std::ostream &os, const Polyhedron<S> &r) {
+template <typename R>
+std::ostream& operator<<(std::ostream &os, const Polyhedron<R> &r) {
 	
 	_print_polyhedron_(os,r._poly);
 	
@@ -56,10 +54,9 @@ class PolyhedronSetExporter {
 	public:
 		typedef BSE Exporter;
 		typedef typename Exporter::BasicSet BasicSet;
-		typedef typename BasicSet::State State;
 		typedef typename BasicSet::Real Real;
 	    	typedef DenotableSet<BasicSet> DenotableSet;
-		typedef Rectangle<State> Rectangle;
+		typedef Rectangle<Real> Rectangle;
 	
 	private:
 		
@@ -103,14 +100,13 @@ class PolyhedronSetExporter {
 		}
 };	
 
-template <typename S>
+template <typename R>
 class PolyhedronMatlabExporter {
 		
 	public:
-		typedef S State;
-		typedef typename S::Real Real;
-		typedef Polyhedron<State> BasicSet;
-		typedef Rectangle<State> Rectangle;
+		typedef R Real;
+		typedef Polyhedron<Real> BasicSet;
+		typedef Rectangle<Real> Rectangle;
 	
 	private:
 		
@@ -212,7 +208,7 @@ class PolyhedronMatlabExporter {
 			Real known_term, error(1,100);	
 
 			BasicSet proj_p=p;	
-			proj_p=proj_p.project_on_dimentions(dims);
+			proj_p=proj_p.project_on_dimensions(dims);
 			proj_p.set_precision_to_upperapproximating_for_output(error);
 			
 			Parma_Polyhedra_Library::Constraint_System::const_iterator j_cs, begin, end;
@@ -300,14 +296,13 @@ class PolyhedronMatlabExporter {
 		inline bool &os_given() { return this->_os_given; }
 };
 
-template <typename S>
+template <typename R>
 class PolyhedronVTKOctavePlotExporter {
 		
 	public:
-		typedef S State;
-		typedef typename S::Real Real;
-		typedef Polyhedron<State> BasicSet;
-		typedef Rectangle<State> Rectangle;
+		typedef R Real;
+		typedef Polyhedron<Real> BasicSet;
+		typedef Rectangle<Real> Rectangle;
 	
 	private:
 		
@@ -397,7 +392,7 @@ class PolyhedronVTKOctavePlotExporter {
 			Real known_term, error(1,100);	
 
 			BasicSet proj_p=p;	
-			proj_p=proj_p.project_on_dimentions(dims);
+			proj_p=proj_p.project_on_dimensions(dims);
 			proj_p.set_precision_to_upperapproximating_for_output(error);
 			
 			Parma_Polyhedra_Library::Constraint_System::const_iterator j_cs, begin, end;
@@ -486,14 +481,13 @@ class PolyhedronVTKOctavePlotExporter {
 };
 
 
-template <typename S>
+template <typename R>
 class PolyhedronOneDimMatlabExporter {
 		
 	public:
-		typedef S State;
-		typedef typename S::Real Real;
-		typedef Polyhedron<State> BasicSet;
-		typedef Rectangle<State> Rectangle;
+		typedef R Real;
+		typedef Polyhedron<Real> BasicSet;
+		typedef Rectangle<Real> Rectangle;
 	
 	private:
 		
@@ -599,7 +593,7 @@ class PolyhedronOneDimMatlabExporter {
 				this->_os << " ; ";
 			}
 			
-			BasicSet proj_p=p.project_on_dimentions(dims);
+			BasicSet proj_p=p.project_on_dimensions(dims);
 			
 			Parma_Polyhedra_Library::Constraint_System::const_iterator j_cs, begin, end;
 	
@@ -644,7 +638,6 @@ class PolyhedronOneDimMatlabExporter {
 		inline bool &os_given() { return this->_os_given; }
 };
 
-}
 }
 }
 

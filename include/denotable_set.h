@@ -342,7 +342,7 @@ class DenotableSet{
 		 * \a false otherwise.
 	     	 */	
 		friend bool intersects_interior <> (
-				const Rectangle< State > &rect, 
+				const Rectangle< Real > &rect, 
 				const DenotableSet< BasicSet  > &A);
 		
 		/*! \brief Tests inclusion of interiors. 
@@ -366,7 +366,7 @@ class DenotableSet{
 		 * \a false otherwise.
 	    	 */
 		friend bool subset_of_interior <> (
-				const Rectangle< State > &rect, 
+				const Rectangle< Real > &rect, 
 				const DenotableSet< BasicSet  > &A);
 
 		/*! \brief Tests inclusion of interiors. 
@@ -379,7 +379,7 @@ class DenotableSet{
 		 */
 		friend bool subset_of_interior <> (
 				const DenotableSet< BasicSet > &A,
-				const Rectangle< State > &rect);
+				const Rectangle< Real > &rect);
 
 		/*! \brief Makes union of two interiors. 
 		 *
@@ -454,7 +454,7 @@ bool intersects_interior(const DenotableSet< BS > &A,
 }
 	
 template <typename BS >
-bool intersects_interior(const Rectangle< typename BS::State > &rect, 
+bool intersects_interior(const Rectangle< typename BS::Real > &rect, 
 				const DenotableSet< BS  > &A){
 		
 	if (A.dim()!=rect.dim()) 
@@ -471,7 +471,7 @@ bool intersects_interior(const Rectangle< typename BS::State > &rect,
 		
 template <typename BS >
 bool intersects_interior(const DenotableSet< BS  > &A,
-				const Rectangle< typename BS::State > &rect){
+				const Rectangle< typename BS::Real > &rect){
 		
 	if (A.dim()!=rect.dim()) 
 		throw std::invalid_argument("The denotable set and the rectangle have different space dimensions.");
@@ -503,7 +503,7 @@ bool subset_of_interior(const DenotableSet< BS  > &A,
 }
 	
 template <typename BS >
-bool subset_of_interior(const Rectangle<typename BS::State > &rect, 
+bool subset_of_interior(const Rectangle<typename BS::Real > &rect, 
 				const DenotableSet< BS  > &A){
 
 	#ifdef DEBUG
@@ -537,7 +537,7 @@ bool subset_of_interior(const Rectangle<typename BS::State > &rect,
 
 template <typename BS >
 bool subset_of_interior(const DenotableSet< BS  > &A,
-				const Rectangle<typename BS::State > &rect){
+				const Rectangle<typename BS::Real > &rect){
 	
 	#ifdef DEBUG
 		std::cout << __FILE__ << ":" << __LINE__ << std::endl;

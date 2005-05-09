@@ -39,48 +39,74 @@ namespace Ariadne {
 
 namespace Geometry {
 
-template <typename S = State<Rational> > 
+template < typename R > 
 class Rectangle;
 
-template <typename S>
-bool subset(const Rectangle<S> &A, 
-	    const Rectangle<S> &B);
+template < typename R >
+bool 
+disjoint(const Rectangle<R> &A, 
+	 const Rectangle<R> &B);
+
+template < typename R >
+bool 
+interiors_intersect(const Rectangle<R> &A, 
+		    const Rectangle<R> &B);
+
+template < typename R > 
+bool 
+subset_of_interior(const Rectangle<R> &A, 
+		   const Rectangle<R> &B);
+
+template < typename R > 
+bool 
+subset(const Rectangle<R> &A, 
+       const Rectangle<R> &B);
+  
+template < typename R > 
+bool 
+subset_of_open_cover(const Rectangle<R> &A, 
+		     const std::list< Rectangle<R> > &list);
+
+template < typename R > 
+Rectangle<R> 
+closure_of_intersection_of_interiors(const Rectangle<R> &A, 
+				     const Rectangle<R> &B);
 	
 
 /*! \brief A cuboid of arbitrary dimension.
  */
-template <typename S>
+template <typename R>
 class Rectangle {
 	
-		/*! \brief Tests disjointness */
-		friend bool disjoint <> (const Rectangle<S> &A, 
-				const Rectangle<S> &B);
+                /*! \brief Tests disjointness */
+		friend bool disjoint <> (const Rectangle<R> &A, 
+				const Rectangle<R> &B);
 
 		/*! \brief Tests intersection of interiors */
-		friend bool interiors_intersect <> (const Rectangle<S> &A, 
-				const Rectangle<S> &B);
+		friend bool interiors_intersect <> (const Rectangle<R> &A, 
+				const Rectangle<R> &B);
 
                 /*! \brief Tests if \a A is a subset of the interior of \a B. */
-		friend bool subset_of_interior <> (const Rectangle<S> &A, 
-				const Rectangle<S> &B);
+		friend bool subset_of_interior <> (const Rectangle<R> &A, 
+				const Rectangle<R> &B);
 
 		/*! \brief Tests inclusion */
-		friend bool subset <> (const Rectangle<S> &A, 
-				const Rectangle<S> &B);
+		friend bool subset <> (const Rectangle<R> &A, 
+				const Rectangle<R> &B);
 		
 		//*! \brief Tests inclusion in an open cover. */
-		friend bool subset_of_open_cover <> (const Rectangle<S> &A, 
-						     const std::list< Rectangle<S> > &list);
+		friend bool subset_of_open_cover <> (const Rectangle<R> &A, 
+						     const std::list< Rectangle<R> > &list);
 
 		/*! \brief Makes intersection of interiors */
-		friend Rectangle<S> closure_of_intersection_of_interiors <> (
-				const Rectangle<S> &A, const Rectangle<S> &B);
+		friend Rectangle<R> closure_of_intersection_of_interiors <> (
+				const Rectangle<R> &A, const Rectangle<R> &B);
 	
 	public:
                 /*! \brief The type of denotable real number used for the corners. */
-                typedef typename S::Real Real;	
+                typedef R Real;	
                 /*! \brief The type of denotable state contained by the rectangle. */
-		typedef S State;
+                typedef Geometry::State<R> State;
 	private:
 		/* Rectangle's lower corner */
 		State _lower_corner;
@@ -140,14 +166,14 @@ class Rectangle {
 		}
 	
                 /*! \brief Copy constructor. */
-		Rectangle(const Rectangle<State> &original) 
+		Rectangle(const Rectangle<R> &original) 
 		    : _lower_corner(original._lower_corner),
 		      _upper_corner(original._upper_corner),
 		      _empty(original._empty) { 
 		}
 			
                 /*! \brief Copy assignment operator. */
-		Rectangle<State>& operator=(const Rectangle<State>& original) {
+		Rectangle<R>& operator=(const Rectangle<R>& original) {
 		    if(this != &original) {
 			this->_lower_corner = original._lower_corner;
 			this->_upper_corner = original._upper_corner;
@@ -200,7 +226,7 @@ class Rectangle {
 		inline bool contains(const State& state) const {
 			
 			if (state.dim()!=this->dim()) 
-				throw std::domain_error("This object and parameter have different space dimentions");
+				throw std::domain_error("This object and parameter have different space dimensions");
 			
 			if (this->empty()) return false;
 			
@@ -226,7 +252,7 @@ class Rectangle {
 		inline bool interior_contains(const State& state) const {
 			
 			if (state.dim()!=this->dim()) 
-				throw std::domain_error("This object and parameter have different space dimentions");
+				throw std::domain_error("This object and parameter have different space dimensions");
 			
 			if (this->empty()) return false;
 			
@@ -254,11 +280,11 @@ class Rectangle {
                  *  of the rectangle in the ith coordinate is used, and 1 if the upper
                  *  half is used. 
                  */
-		inline Rectangle<State> find_quadrant(size_t q) const {
+		inline Rectangle<R> find_quadrant(size_t q) const {
 			
 			size_t j;
 			
-			Rectangle<State> quadrant(this->dim());
+			Rectangle<R> quadrant(this->dim());
 			
 			for (j=0; j< this->dim(); j++) {
 				
@@ -278,7 +304,7 @@ class Rectangle {
 		}
 
                 /*! \brief Expand the Rectangle by \a delta in each direction. */
-		inline Rectangle<State> &expand_by(const Real &delta) {
+		inline Rectangle<R> &expand_by(const Real &delta) {
 			
 			for (size_t j=0; j< this->dim(); ++j) {
 				
@@ -290,7 +316,7 @@ class Rectangle {
 		}
 		
                 /*! \brief The equality operator */
-		inline bool operator==(const Rectangle<State> &A) const 
+		inline bool operator==(const Rectangle<Real> &A) const 
                 {
 			if (this->dim() != A.dim()) return false ;
 		
@@ -306,7 +332,7 @@ class Rectangle {
 		}
 
                 /*! \brief The inequality operator */
-		inline bool operator!=(const Rectangle<State> &A) const {
+		inline bool operator!=(const Rectangle<Real> &A) const {
 		    return !(*this == A);
 		}
 		
@@ -342,20 +368,20 @@ class Rectangle {
 
 		friend std::ostream& 
 		operator<< <> (std::ostream &os, 
-			       const Rectangle<S> &r);
+			       const Rectangle<R> &r);
 
 		friend std::istream& 
 		operator>> <> (std::istream &is, 
-			       Rectangle<S> &r);
+			       Rectangle<R> &r);
 
 };
 
 /*! \brief Tests disjointness */
-template <typename S>
-bool disjoint(const Rectangle<S> &A, const Rectangle<S> &B) {
+template <typename R>
+bool disjoint(const Rectangle<R> &A, const Rectangle<R> &B) {
 	
 	if (A.dim()!=B.dim()) 
-		throw std::domain_error("The two parameters have different space dimentions");
+		throw std::domain_error("The two parameters have different space dimensions");
 			
 
 	for (size_t i=0; i< A.dim(); i++) {
@@ -367,9 +393,9 @@ bool disjoint(const Rectangle<S> &A, const Rectangle<S> &B) {
 }
 
 /*! \brief Tests intersection of interiors */
-template <typename S>
-bool interiors_intersect(const Rectangle<S> &A, 
-		const Rectangle<S> &B) {
+template <typename R>
+bool interiors_intersect(const Rectangle<R> &A, 
+		const Rectangle<R> &B) {
 			
 	if (A.dim()!=B.dim()) 
 		throw std::domain_error("The two parameters have different space dimensions");
@@ -386,12 +412,12 @@ bool interiors_intersect(const Rectangle<S> &A,
 
 
 /*! \brief Tests inclusion of interiors */
-template <typename S>
-bool subset_of_interior(const Rectangle<S> &A, 
-				const Rectangle<S> &B) {
+template <typename R>
+bool subset_of_interior(const Rectangle<R> &A, 
+				const Rectangle<R> &B) {
 	
 	if (A.dim()!=B.dim()) 
-		throw std::domain_error("The two parameters have different space dimentions");
+		throw std::domain_error("The two parameters have different space dimensions");
 			
 	if (A.empty()||B.empty()) return false;
 	
@@ -406,12 +432,12 @@ bool subset_of_interior(const Rectangle<S> &A,
 
 
 /*! \brief Tests inclusion of interiors */
-template <typename S>
-bool subset(const Rectangle<S> &A, 
-	    const Rectangle<S> &B) {
+template <typename R>
+bool subset(const Rectangle<R> &A, 
+	    const Rectangle<R> &B) {
 	
 	if (A.dim()!=B.dim()) 
-		throw std::domain_error("The two parameters have different space dimentions");
+		throw std::domain_error("The two parameters have different space dimensions");
 			
 	if (A.empty()||B.empty()) return false;
 	
@@ -424,15 +450,15 @@ bool subset(const Rectangle<S> &A,
 }
 
 /* Compute all points in A on the grid of vertices of rectangles in the cover */
-template <typename S>
+template <typename R>
 void
-compute_gridpoints(std::vector< std::set<typename S::Real> >& gridpoints, 
-		   const Rectangle<S> &A, 
-		   const std::list< Rectangle<S> >& cover) 
+compute_gridpoints(std::vector< std::set<R> >& gridpoints, 
+		   const Rectangle<R> &A, 
+		   const std::list< Rectangle<R> >& cover) 
 {
-    typedef typename S::Real Real;
+    typedef R Real;
     typedef typename std::set<Real> Set;
-    typedef typename std::list< Rectangle<S> >::const_iterator list_iterator;
+    typedef typename std::list< Rectangle<R> >::const_iterator list_iterator;
     
     size_t dimension = A.dim();
     
@@ -459,14 +485,14 @@ compute_gridpoints(std::vector< std::set<typename S::Real> >& gridpoints,
 }
 
 //*! \brief Tests inclusion in an open cover.  */
-template <typename S>
-bool subset_of_open_cover(const Rectangle<S> &A, 
-			  const std::list< Rectangle<S> >& cover) 
+template <typename R>
+bool subset_of_open_cover(const Rectangle<R> &A, 
+			  const std::list< Rectangle<R> >& cover) 
 {
-    typedef typename S::Real Real;
+    typedef R Real;
     typedef typename std::set<Real> Set;
     typedef typename Set::const_iterator set_iterator;
-    typedef typename std::list< Rectangle<S> >::const_iterator list_iterator;
+    typedef typename std::list< Rectangle<R> >::const_iterator list_iterator;
 
     size_t dimension = A.dim();
 
@@ -563,14 +589,14 @@ bool subset_of_open_cover(const Rectangle<S> &A,
 }
 
 //*! \brief Tests inclusion in an open cover.  */
-template <typename S>
-bool subset_of_closed_cover(const Rectangle<S> &A, 
-			  const std::list< Rectangle<S> >& cover) 
+template <typename R>
+bool subset_of_closed_cover(const Rectangle<R> &A, 
+			  const std::list< Rectangle<R> >& cover) 
 {
-    typedef typename S::Real Real;
+    typedef typename Rectangle<R>::Real Real;
     typedef typename std::set<Real> Set;
     typedef typename Set::const_iterator set_iterator;
-    typedef typename std::list< Rectangle<S> >::const_iterator list_iterator;
+    typedef typename std::list< Rectangle<R> >::const_iterator list_iterator;
 
     size_t dimension = A.dim();
 
@@ -669,15 +695,15 @@ bool subset_of_closed_cover(const Rectangle<S> &A,
 
 
 /*! \brief Makes intersection of interior */
-template <typename S>
-Rectangle<S> 
-closure_of_intersection_of_interiors(const Rectangle<S> &A, const Rectangle<S> &B)
+template <typename R>
+Rectangle<R> 
+closure_of_intersection_of_interiors(const Rectangle<R> &A, const Rectangle<R> &B)
 {
     if (A.dim()!=B.dim()) {
-	throw std::domain_error("The two parameters have different space dimentions");
+	throw std::domain_error("The two parameters have different space dimensions");
     }
 
-    Rectangle<S> C(A.dim());
+    Rectangle<R> C(A.dim());
 
     if (A.empty() || B.empty()) { 
 	return C; 
@@ -697,9 +723,9 @@ closure_of_intersection_of_interiors(const Rectangle<S> &A, const Rectangle<S> &
 }
 
 
-template <typename S>
+template <typename R>
 std::ostream& 
-operator<<(std::ostream &os, const Rectangle<S> &r) 
+operator<<(std::ostream &os, const Rectangle<R> &r) 
 {
 
     /*
@@ -724,11 +750,11 @@ operator<<(std::ostream &os, const Rectangle<S> &r)
     return os;
 }
 
-template <typename S>
+template <typename R>
 std::istream& 
-operator>>(std::istream &is, Rectangle<S> &r) 
+operator>>(std::istream &is, Rectangle<R> &r) 
 {
-    typedef typename Rectangle<S>::Real Real;
+    typedef typename Rectangle<R>::Real Real;
     typedef typename Ariadne::Interval<Real> Interval;
     
     char c;
@@ -738,7 +764,7 @@ operator>>(std::istream &is, Rectangle<S> &r)
 	/* Representation as list of intervals */ 
 	std::vector< Interval > v;
 	is >> v;
-	r=Rectangle<S>(v.size(),&v[0]);
+	r=Rectangle<R>(v.size(),&v[0]);
     }
     else {
 	/* representation as lower and upper corners */

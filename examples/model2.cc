@@ -54,14 +54,14 @@ using Parma_Polyhedra_Library::Constraint_System;
 //using namespace Parma_Polyhedra_Library::IO_Operators;
 
 typedef State<Rational> StateT;
-typedef Rectangle<StateT> RectangleT;
-typedef Polyhedron<StateT> PolyhedronT;
+typedef Rectangle<Rational> RectangleT;
+typedef Polyhedron<Rational> PolyhedronT;
 typedef DenotableSet<PolyhedronT> DenotableSetT;
 typedef PartitionTree<RectangleT> PTree;
 typedef UBLAS::matrix<Rational> MatrixT;
 typedef UBLAS::vector<Rational> VectorT;
-typedef PolyAffineMap< StateT > PMap;
 
+typedef PolyAffineMap< StateT > PMap;
 typedef AffineMap< PMap > AMap;
 
 typedef PolyAffineIntegrator< StateT > PInt;
@@ -81,7 +81,7 @@ typedef HybridDenotableSet<LocDenS> HybDenS;
 typedef LocationTrace<DiscLoc> LTrc;
 typedef Trace<LTrc> Trc;
 
-typedef PolyhedronMatlabExporter<StateT> BSExporter;
+typedef PolyhedronMatlabExporter<Rational> BSExporter;
 typedef DenotableSetExporter<BSExporter> Exporter;
 
 typedef Solver<Automaton, HybDenS, Trc , 

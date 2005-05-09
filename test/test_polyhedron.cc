@@ -36,16 +36,13 @@ using namespace Ariadne;
 using namespace Ariadne::Geometry;
 using namespace std;
 
-// template class Polyhedron< State<Rational> >;
-// template class Polyhedron< State<double> >;
+template class Polyhedron<Rational>;
+//template class Polyhedron<double>;
 
 int main() {
-    std::cout << "test_polyhedron: FAILED: cannot instantiate\n";
-    exit(1);
-
-    typedef Polyhedron< State<Rational> > Polyhedron;
-    typedef Polyhedron::State State;
-    typedef Polyhedron::Real Real;
+    typedef Rational Real;
+    typedef Polyhedron<Real> Polyhedron;
+    typedef State<Real> State;
     typedef Interval<Real> Interval;
     
     State s1(4,Rational(1));

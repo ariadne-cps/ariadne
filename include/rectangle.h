@@ -106,7 +106,7 @@ class Rectangle {
                 /*! \brief The type of denotable real number used for the corners. */
                 typedef R Real;	
                 /*! \brief The type of denotable state contained by the rectangle. */
-                typedef Geometry::State<R> State;
+                typedef State<R> State;
 	private:
 		/* Rectangle's lower corner */
 		State _lower_corner;
@@ -140,15 +140,14 @@ class Rectangle {
 		}
 
                 /*! \brief Construct from lower and upper corners. */
+/*
                 Rectangle(const State &l_corner, const State &u_corner):
 		    _lower_corner(l_corner.dim()), _upper_corner(l_corner.dim()), _empty(true) 
                 {
-		    /* Test to see if corners have same dimensions */
 		    if (l_corner.dim()!=u_corner.dim()) {
 				throw std::domain_error("The parameters have different space dimensions");
 		    }
 			
-		    /* Test for emptyness */
 		    for (size_t i=0; i<this->dim(); i++) {
 			if (l_corner[i] > u_corner[i]) {
 			    this->_empty=true;
@@ -157,15 +156,38 @@ class Rectangle {
 		    }
 		    this->_empty=false;
 				
-		    /* Set coordinates */
 		    for (size_t i=0; i<this->dim(); i++) {
 			this->_lower_corner[i]=l_corner[i];
 			this->_upper_corner[i]=u_corner[i];
 		    }
-		    
+		}
+*/
+	
+               /*! \brief Construct from two corners. */
+                Rectangle(const State &s1, const State &s2):
+		    _lower_corner(s1.dim()), _upper_corner(s2.dim()), _empty(true) 
+                {
+		    /* Test to see if corners have same dimensions */
+		    if (s1.dim()!=s2.dim()) {
+		      throw std::domain_error("The parameters have different space dimensions");
+		    }
+				
+		    /* Set coordinates */
+		    for (size_t i=0; i<this->dim(); i++) {
+			this->_lower_corner[i]=std::min(s1[i],s2[i]);
+			this->_upper_corner[i]=std::max(s1[i],s2[i]);
+		    }
+
+		    /* Set emptyness flag */
+		    _empty=false;
+                    for (size_t i=0; i<this->dim(); i++) {
+		      if(this->lower(i) >= this->upper(i)) {
+			_empty=true;
+		      }
+		    }
 		}
 	
-                /*! \brief Copy constructor. */
+                 /*! \brief Copy constructor. */
 		Rectangle(const Rectangle<R> &original) 
 		    : _lower_corner(original._lower_corner),
 		      _upper_corner(original._upper_corner),
@@ -182,9 +204,14 @@ class Rectangle {
 		    return *this;
 		}
 
-		/*! \brief Returns rectangle's space dimensions */
+		/*! \brief Returns rectangle's space dimension */
 		inline size_t dim() const {
 			return (this->_lower_corner).dim();
+		}
+		
+                /*! \brief The dimension of the Euclidean space the rectangle lies in. */
+		inline size_t dimension() const {
+			return (this->_lower_corner).dimension();
 		}
 		
 		/*! \brief Returns \c true if the rectangle is empty */
@@ -210,6 +237,16 @@ class Rectangle {
                 /*! \brief Returns the projection onto the \a n th coordinate. */
                 inline Interval<Real> operator[] (size_t n) const {
 		    return Interval<Real>(this->_lower_corner[n],this->_upper_corner[n]);
+		}
+
+                /*! \brief Sets the lower bound of the \a n th coordinate to \a r. */
+                inline void set_lower(size_t n, const Real& r) {
+		    this->_lower_corner[n] = r;
+		}
+
+                /*! \brief Sets the upper bound of the \a n th coordinate to \a r. */
+                inline void set_upper(size_t n, const Real& r) {
+		    this->_upper_corner[n] = r;
 		}
 
                 /*! \brief Returns the lower bound of the \a n th coordinate */

@@ -60,7 +60,7 @@ class DenotableSet{
 		}
 			
 		/*! \brief A denotable set constructor. */
-		DenotableSet(const BasicSet &A): _vector(0), _dim(0) {
+		DenotableSet(const BasicSet &A): _vector(), _dim(0) {
 			this->_dim=A.dim();
 			if (A.empty()) { 
 			    return;

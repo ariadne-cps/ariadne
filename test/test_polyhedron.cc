@@ -40,6 +40,8 @@ template class Polyhedron<Rational>;
 //template class Polyhedron<double>;
 
 int main() {
+    cout << "test_polyhedron: " << flush;
+
     typedef Rational Real;
     typedef Polyhedron<Real> Polyhedron;
     typedef State<Real> State;
@@ -60,22 +62,22 @@ int main() {
 	stringstream is(input);
    } 
     catch(invalid_input& e) {
-	cout << "test_polyhedron: FAILED\n";
+	cout << "FAILED\n";
 	cout << "  invalid_input: " << e.what() << "\n";
 	return 1;
     }
     catch(std::invalid_argument& e) {
-	cout << "test_polyhedron: FAILED\n";
+	cout << "FAILED\n";
 	cout << "  std::invalid_argument: " << e.what() << "\n";
 	return 1;
     }
     catch(...) {
-	cout << "test_polyhedron: FAILED\n";
+	cout << "FAILED\n";
 	cout << "  Unknown error\n"; 
 	return 1;
     }
 	
-    cout << "test_polyhedron: PASS\n";
+    cout << "INCOMPLETE\n";
 
     return 0;
 }

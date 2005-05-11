@@ -38,12 +38,12 @@ using namespace Ariadne;
 using namespace Ariadne::Geometry;
 using namespace std;
 
-const char* filename = "test_rectangle";
-
 template class Rectangle< double >;
 template class Rectangle< Rational >;
 
 int main() {
+    cout << "test_rectangle: " << flush;
+
     typedef Rectangle< Rational > Rectangle;
     typedef Rectangle::State State;
     typedef Interval<Rational> Interval;
@@ -106,22 +106,22 @@ int main() {
 	is >> r3;
    } 
     catch(invalid_input& e) {
-	cout << "test_rectangle: FAILED\n";
+	cout << "FAILED\n";
 	cout << "  invalid_input: " << e.what() << "\n";
 	return 1;
     }
     catch(std::invalid_argument& e) {
-	cout << "test_rectangle: FAILED\n";
+	cout << "FAILED\n";
 	cout << "  std::invalid_argument: " << e.what() << "\n";
 	return 1;
     }
     catch(...) {
-	cout << "test_rectangle: FAILED\n";
+	cout << "FAILED\n";
 	cout << "  Unknown error\n";
 	return 1;
     }
 	
-    cout << "test_rectangle: PASS\n";
+    cout << "PASS\n";
 
     return 0;
 }

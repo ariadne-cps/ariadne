@@ -27,11 +27,15 @@
 
 #include "state.h"
 
+#include "test.h"
+
 using namespace Ariadne;
 using namespace Ariadne::Geometry;
 using namespace std;
 
 int main() {
+    cout << "test_state: " << flush;
+
     State<Rational> s1(3);
     State<Rational> s2(4);
     State<Rational> s3(2,Rational(2,3));
@@ -41,10 +45,7 @@ int main() {
     s1[1] = Rational(0.75);
     s5=s1;
 
-    if(!(s1==s1 && s1!=s2 && s1!=s3 && s1!=s4 && s1==s5)) {
-	cout << "test_state: FAILED equality tests\n";
-	return 1;
-    }
+    test_assert(s1==s1 && s1!=s2 && s1!=s3 && s1!=s4 && s1==s5,"equality tests");
 
     /* Test output format */
     string str1("[1, 3/2]");
@@ -55,10 +56,7 @@ int main() {
     ss << s1;
     getline(ss,str2);
     
-    if(str1 != str2) {
-	cout << "test_state: FAILED stream output test\n";
-	return 1;
-    }
+    test_assert(str1 == str2,"stream output test");
     
     /* Test input format */
     try {
@@ -80,7 +78,7 @@ int main() {
 	return 1;
     }
 	
-    cout << "test_state: PASS\n";
+    cout << "PASS\n";
 
     return 0;
 }

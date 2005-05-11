@@ -42,9 +42,9 @@ using namespace std;
 template class DenotableSet< Rectangle<Rational> >;
 template class DenotableSet< Rectangle<double> >;
 
-const char* filename = "test_denotable_set";
-
 int main() {
+  cout << "test_denotable_set: " << flush;
+    
     State<Rational> s0(2,Rational(0));
     State<Rational> s1(2,Rational(1));
     State<Rational> s2(2,Rational(4,3));
@@ -58,7 +58,7 @@ int main() {
     Rectangle r1(s1,s2);
     Rectangle r2(s2,s3);
     DenotableSet ds1,ds2;
-    
+
     ds1.inplace_union(r0);
     ds1.inplace_union(r1);
     ds1.inplace_union(r2);
@@ -68,29 +68,29 @@ int main() {
     is >> ds2;
 
     test_assert(ds1[0]==ds2[0] && ds1[1]==ds2[1] && ds1[2]==ds2[2], "stream input");
-
+ 
     /* Test input format */
     try {
 	string input("[ ]  [ [0,2] ]  [ [0,1], [3/4,4/3], [1,3/2] ]  { lower_corner=[0,1], upper_corner=[1,4/3] }");
 	stringstream is(input);
    } 
     catch(invalid_input& e) {
-	cout << "test_denotable_set: FAILED\n";
+	cout << "FAILED\n";
 	cout << "  invalid_input: " << e.what() << "\n";
 	return 1;
     }
     catch(std::invalid_argument& e) {
-	cout << "test_denotable_set: FAILED\n";
+	cout << "FAILED\n";
 	cout << "  std::invalid_argument: " << e.what() << "\n";
 	return 1;
     }
     catch(...) {
-	cout << "test_denotable_set: FAILED\n";
+	cout << "FAILED\n";
 	cout << "  Unknown error\n"; 
 	return 1;
     }
 	
-    cout << "test_denotable_set: PASS\n";
+    cout << "PASS\n";
 
     return 0;
 }

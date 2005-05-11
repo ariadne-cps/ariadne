@@ -115,6 +115,11 @@ class State {
 			return (this->_vector).size();
 		}
 		
+                /*! \brief The dimension of the Euclidean space the state lies in. */
+		inline size_t dimension() const {
+			return (this->_vector).size();
+		}
+		
 		inline State<Real> &operator=(const State<Real> &A){
 			
 			this->_vector=A._vector;

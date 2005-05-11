@@ -135,48 +135,37 @@ namespace Ariadne {
 	}
 	
     } // namespace IO
+} // namespace Ariadne
 
-    namespace Geometry {
-	template <typename T> 
-	inline
-	std::ostream& 
-	operator<< (std::ostream &os, const std::vector<T>& v) {
-	    return Ariadne::IO::operator<<(os,v);
-	}
-
-	template <typename T> 
-	inline
-	std::istream& 
-	operator>> (std::istream &is, std::vector<T>& v) {
-	    return Ariadne::IO::operator>>(is,v);
-	}
-    }
-
-}
 
 /* FIXME: This is a hack to allow io of STL classes.
           But really we should not modify namespace std.
 	  Unfortunately, we need to include the code in 
 	  any namespace using operator<<.
 */
-/*
-namespace std {
-    template <typename T> 
-    inline
-    std::ostream& 
-    operator<< (std::ostream &os, const std::vector<T>& v) {
-	return Ariadne::operator<<(os,v);
-    }
+  namespace std {
+  template <typename T> 
+  inline
+  ostream& 
+  operator<< (ostream &os, const vector<T>& v) {
+    return Ariadne::IO::operator<<(os,v);
+  }
 
-    template <typename T> 
-    inline
-    std::ostream& 
-    operator<< (std::ostream &os, const std::valarray<T>& v) {
-	return Ariadne::operator<<(os,v);
-    }
+  template <typename T> 
+  inline
+  istream& 
+  operator>> (istream &is, vector<T>& v) {
+    return Ariadne::IO::operator>>(is,v);
+  }
+
+  template <typename T> 
+  inline
+  ostream& 
+  operator<< (ostream &os, const valarray<T>& v) {
+    return Ariadne::IO::operator<<(os,v);
+  }
 
 }
-*/
 
 
 #endif /* _UTILITY_H */

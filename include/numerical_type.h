@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numerival_type.h
+ *            numerical_type.h
  *
  *  Thu Oct 02 16:27:05 2004
  *  Copyright  2004  Alberto Casagrande, Pieter Collins
@@ -73,7 +73,6 @@ inline Integer numerator(const Rational
 
 inline Integer denumerator(const Rational 
 		&num){ return num.get_den();}
-
 
 		
 inline Rational epsilon(const Rational &a) {

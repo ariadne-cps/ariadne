@@ -100,7 +100,6 @@ namespace Ariadne {
 	    try {
 		is >> c;
 		if(c != '[') {
-		    cerr << "c='" << c << "'\n";
 		    throw std::invalid_argument("std::vector input must begin with '['");
 		}
 		

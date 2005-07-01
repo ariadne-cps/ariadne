@@ -113,6 +113,15 @@ namespace Ariadne {
 
       bool operator==(const Grid<R>& g) const { return this==&g; }
 
+      IndexArray index(const State<R>& s) const {
+        IndexArray res(s.dimension());
+        for(size_type i=0; i!=res.size(); ++i) {
+          res[i]=subdivision_index(i,s[i]);
+        }
+        return res;
+      }
+
+
       IndexArray lower_index(const Rectangle<R>& r) const {
         IndexArray res(r.dimension());
         for(size_type i=0; i!=res.size(); ++i) {
@@ -154,12 +163,23 @@ namespace Ariadne {
       /*! \brief The underlying dimension of the grid. */
       virtual dimension_type dimension() const { return _subdivision_coordinates.size(); }
       /*! \brief The total number of cells. */
-//      size_type size() const { return _strides[dimension()]; }
+      size_type capacity() const { return _strides[dimension()]; }
       /*! \brief The number of subdivision intervals in dimension @a d. */
       size_type size(dimension_type d) const { return _subdivision_coordinates[d].size(); }
 
-//      const array< std::vector<R> >& subdivision_coordinates() const { return _subdivision_coordinates; }
-//      const std::vector<R>& subdivision_coordinates(dimension_type d) const { return _subdivision_coordinates[d]; }
+      /*! \brief The lowest valid vertex index. */
+      IndexArray lower() const { return IndexArray(dimension(),0); }
+      /*! \brief The highers valid vertex index. */
+      IndexArray upper() const { return lower()+sizes(); }
+      /*! \brief The number of subdivision intervals in deach dimension. */
+      SizeArray sizes() const {
+        SizeArray result(dimension());
+        for(dimension_type d=0; d!=dimension(); ++d) {
+          result[d]=_subdivision_coordinates[d].size();
+        }
+        return result;
+      }
+
       /*! \brief The coordinate of the @a n th subdivision point in dimension @a d. */
       virtual real_type subdivision_coordinate(dimension_type d, index_type n) const {
         return _subdivision_coordinates[d][n];
@@ -182,6 +202,7 @@ namespace Ariadne {
       void create();
      private:
       array< std::vector<R> > _subdivision_coordinates;
+      SizeArray _strides;
     };
 
 
@@ -257,6 +278,7 @@ namespace Ariadne {
         typename std::vector<R>::iterator newend=std::unique(pos.begin(),pos.end());
         pos.resize(std::distance(pos.begin(),newend));
       }
+      _strides=compute_strides(sizes());
     }
 
     template<typename R>
@@ -273,31 +295,6 @@ namespace Ariadne {
       }
       return result;
     }
-
-
-   /*!\brief A partition tree grid of rectangles in Euclidean space.
-     */
-    template<typename R> class PartitionGrid {
-      typedef R real_type;
-    public:
-      /*! \brief Construct from a bounding box \a bb and a sequence of subdivision coordinates \a sc. */
-      PartitionGrid(const Rectangle<R>& bb, const sequence<dimension_type>& sc)
-        : _bounding_box(bb), _subdivision_coordinates(sc) { }
-
-      /*! \brief The underlying dimension of the grid. */
-      dimension_type dimension() const { return _bounding_box.dimension(); }
-
-      /*! \brief The outer bounding box of the grid. */
-      const Rectangle<R>& bounding_box() const { return _bounding_box; }
-      const sequence<dimension_type>& subdivision_coordinates() const { return _subdivision_coordinates; }
-      /*! \brief The coordinate in which the \a n th subdivision is performed. */
-      dimension_type subdivision_coordinate(size_type n) const { return _subdivision_coordinates[n]; }
-     private:
-      Rectangle<R> _bounding_box;
-      sequence<dimension_type> _subdivision_coordinates;
-    };
-
-
 
 
     template<typename R>

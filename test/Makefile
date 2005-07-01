@@ -1,21 +1,23 @@
-TESTS = test_array test_arithmetic test_binary_word test_denotable_set test_epsfstream test_grid test_interval test_list_set test_polyhedron test_rectangle test_state
+TESTS = test_array test_arithmetic test_binary_word test_denotable_set test_epsfstream test_grid test_interval test_list_set \
+  test_partition_tree test_polyhedron test_rectangle test_state
 
 CXXFLAGS = -Wall
 
 include ../config.mk
 
 all: ${TESTS}
-	@test_array 
-	@test_arithmetic 
-	@test_binary_word 
-	@test_denotable_set 
+	@test_array
+	@test_arithmetic
+	@test_binary_word
+	@test_denotable_set
 	@test_epsfstream
-	@test_grid 
-	@test_interval 
-	@test_list_set 
-	@test_rectangle 
+	@test_grid
+	@test_interval
+	@test_list_set
+	@test_partition_tree
+	test_rectangle
 	@test_state
-	@test_polyhedron 
+	@test_polyhedron
 
 
 test_array: test_array.cc ../include/array.h
@@ -42,6 +44,9 @@ test_interval: test_interval.cc ../include/interval.h
 test_list_set: test_list_set.cc ../include/list_set.h
 	${CXX} ${CXXFLAGS} ${LDXXFLAGS} -Wall test_list_set.cc -o test_list_set
 
+test_partition_tree: test_partition_tree.cc ../include/partition_tree.h
+	${CXX} ${CXXFLAGS} ${LDXXFLAGS} -Wall test_partition_tree.cc -o test_partition_tree
+
 test_polyhedron: test_polyhedron.cc ../include/polyhedron.h
 	${CXX} ${CXXFLAGS} ${LDXXFLAGS} -Wall test_polyhedron.cc -o test_polyhedron
 
@@ -51,5 +56,5 @@ test_rectangle: test_rectangle.cc ../include/rectangle.h
 test_state: test_state.cc ../include/state.h
 	${CXX} ${CXXFLAGS} ${LDXXFLAGS} -Wall test_state.cc -o test_state
 
-clean:                                                                          
+clean:
 	rm -f *.bak *.log *.o *~ *% core ${TESTS}

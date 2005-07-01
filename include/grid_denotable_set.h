@@ -123,7 +123,10 @@ namespace Ariadne {
 
       /*!\brief Construct from a GridRectangleListSet. */
       GridMaskSet(const GridRectangleListSet<R>& rls);
-      
+
+      /*!\brief Construct from a Grid and a ListSet of Rectangle. */
+      GridMaskSet(const FiniteGrid<R>&, const ListSet<R,Rectangle>& ls);
+
       /*!\brief Convert to a ListSet of Rectangles. */
       operator ListSet<R,Rectangle>() const;
 
@@ -163,6 +166,13 @@ namespace Ariadne {
       const_iterator begin() const { return const_iterator(*this,0); }
       /*! \brief A constant iterator to the end of the set. */
       const_iterator end() const { return const_iterator(*this,capacity()); }
+
+       /*! \brief Adjoins a rectangle to the set. */
+      void adjoin(const Rectangle<R>& r) {
+        IndexArray rlower=_grid.index(r.lower_corner());
+        IndexArray rupper=_grid.index(r.upper_corner());
+        compute_rectangle_mask(&_mask,_strides,_lower,rlower,rupper);
+      }
 
       /*! \brief Adjoins a cell to the set. */
       void adjoin(const GridCell<R>& c) {
@@ -284,7 +294,7 @@ namespace Ariadne {
       GridRectangleListSet(const Grid<R>& g, const GridRectangleListSet<R>& s);
 
       /*!\brief Construct from a ListSet of Rectangles. */
-      GridRectangleListSet(const ListSet<R,Rectangle>& s);
+      GridRectangleListSet(const Grid<R>& g, const ListSet<R,Rectangle>& s);
 
       /*!\brief Convert to a ListSet of Rectangles. */
       operator ListSet<R,Rectangle>() const;
@@ -371,38 +381,6 @@ namespace Ariadne {
       return regular_intersection(A,B);
     }
 
-
-
-
-   /*! \brief A denotable set on a partition grid, defined using a partition tree of cells.
-     */
-    template<typename R>
-    class PartitionTreeSet {
-     public:
-      /*! \brief Construct an empty set based on a PartitionGrid. */
-      PartitionTreeSet(const PartitionGrid<R>& g)
-        : _grid(g), _tree(1), _mask(1)
-      {
-        _tree[0]=PartitionGrid<R>::leaf;
-        _mask[0]=false;
-      }
-
-      /*! \brief Construct a set based on a PartitionGrid, a subdivision tree and a mask. */
-      PartitionTreeSet(const PartitionGrid<R>& g, const std::vector<bool>& t, const std::vector<bool>& m)
-        : _grid(g), _tree(t), _mask(m)
-      {
-        assert(_tree.size() = 2*_mask.size()-1);
-      }
-
-      /*! \brief The space dimension of the set. */
-      size_t dimension() const {
-        return _grid.dimension();
-      }
-     private:
-      const PartitionGrid<R>& _grid;
-      std::vector<bool> _tree;
-      std::vector<bool> _mask;
-    };
 
 
 
@@ -528,6 +506,21 @@ namespace Ariadne {
       compute_rectangle_list_mask(&_mask, _strides, _lower, grls._list);
     }
 
+    template<typename R>
+    GridMaskSet<R>::GridMaskSet(const FiniteGrid<R>& fg, const ListSet<R,Rectangle>& ls)
+      : _grid(fg), _lower(fg.lower()), _upper(fg.upper()),
+        _sizes(fg.dimension()), _strides(fg.dimension()+1),
+        _mask(fg.capacity())
+    {
+      _sizes=_upper-_lower;
+      _strides=compute_strides(_sizes);
+      _mask=BooleanArray(_strides[dimension()],false);
+      for(typename ListSet<R,Rectangle>::const_iterator riter=ls.begin(); riter!=ls.end(); ++riter) {
+        GridRectangle<R> r(_grid,*riter);
+        adjoin(r);
+      }
+    }
+
 
 
     template<typename R>
@@ -585,9 +578,8 @@ namespace Ariadne {
     }
 
     template<typename R>
-    GridRectangleListSet<R>::GridRectangleListSet(const ListSet<R,Rectangle>& ls)
-    /* FIXME: Memory leak! */
-      : _grid(*new FiniteGrid<R>(ls)), _list(ls.dimension())
+    GridRectangleListSet<R>::GridRectangleListSet(const Grid<R>& g, const ListSet<R,Rectangle>& ls)
+      : _grid(g), _list(ls.dimension())
     {
       typedef typename ListSet<R,Rectangle>::const_iterator ListSet_const_iterator;
 

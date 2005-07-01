@@ -35,6 +35,7 @@
 #include <exception>
 #include <stdexcept>
 #include <iterator>
+#include <iostream>
 
 
 namespace Ariadne {
@@ -64,19 +65,32 @@ namespace Ariadne {
     
     ~sequence() { delete[] _ptr; }
     sequence() : _body_size(0), _tail_size(1), _ptr(new value_type[1]) { _ptr[0]=value_type(); }
-    template<typename ForwardIterator> sequence(ForwardIterator& b, ForwardIterator tb, ForwardIterator te) 
-      : _body_size(std::difference(b,tb)), _tail_size(std::difference(tb,te)), _ptr(new value_type[std::difference(b,te)]) 
+    template<typename ForwardIterator> sequence(const ForwardIterator& b, ForwardIterator tb, ForwardIterator te)
+      : _body_size(std::distance(b,tb)), _tail_size(std::distance(tb,te)), _ptr(new value_type[std::distance(b,te)])
     { fill(b); }
-    
-    sequence(const sequence& a) : _body_size(a._body_size), _tail_size(a._tail_size), _ptr(new value_type[_body_size+_tail_size]) { fill(a.begin()); }
-    sequence& operator=(const sequence& a) { resize(a.body_size(),a.tail_size()); fill(a.begin()); return *this; }
-    
-    size_type body_size() const { _body_size; }
-    size_type tail_size() const { _tail_size; }
-    void resize(size_type bs, size_type ts) { delete[] _ptr; _body_size=bs; _tail_size=ts;  _ptr=new value_type[_body_size+_tail_size]; } 
+
+    sequence(const sequence<T>& a)
+      : _body_size(a._body_size), _tail_size(a._tail_size), _ptr(new value_type[_body_size+_tail_size])
+    { fill(a._ptr); }
+
+    sequence<T>& operator=(const sequence<T>& a) {
+      if(&a!=this) { resize(a.body_size(),a.tail_size()); fill(a._ptr); } return *this; }
+
+    bool operator==(const sequence& a) const {
+      /* FIXME: How far do we need to go? */
+      for(size_type i=0; i!=a.body_size()+a.tail_size()+body_size()+tail_size(); ++i) {
+        if((*this)[i]!=a[i]) { return false; } }
+      return true; }
+
+    size_type body_size() const { return _body_size; }
+    size_type tail_size() const { return _tail_size; }
+    void resize(size_type bs, size_type ts) {
+      delete[] _ptr; _body_size=bs; _tail_size=ts;  _ptr=new value_type[_body_size+_tail_size]; }
   
-    const_reference operator[](size_type i) const {  if(i>=_body_size) { i = ( (i-_body_size) % _tail_size ) + _body_size; } return _ptr[i]; }
-    const_reference at(size_type i) const { return _ptr[i]; }
+    const_reference operator[](size_type i) const {
+      if(i>=_body_size) { i = ( (i-_body_size) % _tail_size ) + _body_size; } return _ptr[i]; }
+    const_reference at(size_type i) const {
+      return _ptr[i]; }
   
     const_iterator begin() const;
      
@@ -87,17 +101,18 @@ namespace Ariadne {
       while(first!=last) { if((*first)!=(*curr)) { return false; } ++first; ++curr; } return true; }
       bool operator!=(const array& other) const { return !((*this)==other); }
     */
-    
+
     template<typename InputIterator> void fill(InputIterator iter) { 
-      pointer curr=_ptr; pointer end=curr+_size(); while(curr!=end) { *curr=*iter; ++curr; ++iter; } }
-    template<typename ForwardIterator> void assign(ForwardIterator first, ForwardIterator tail, ForwardIterator last) { 
+      pointer curr=_ptr; pointer end=curr+size(); while(curr!=end) { *curr=*iter; ++curr; ++iter; } }
+    template<typename ForwardIterator> void assign(ForwardIterator first, ForwardIterator tail, ForwardIterator last) {
       resize(std::distance(first,tail),std::distance(tail,last)); fill(first); }
    private:
-    size_type _size() const { return _body_size + _tail_size; }
+    size_type size() const { return _body_size + _tail_size; }
+    const_pointer pointer_begin() const { return _ptr; }
    private:
-    size_type _body_size; 
-    size_type _tail_size; 
-    pointer _ptr; 
+    size_type _body_size;
+    size_type _tail_size;
+    pointer _ptr;
   };
 
   template<class T>
@@ -107,20 +122,19 @@ namespace Ariadne {
     typedef typename sequence<T>::const_pointer pointer;
    public:
     _sequence_const_iterator (const sequence<T>& seq, size_t n=0)
-      : _tail_begin(seq.pointer()+seq.body_size()), _tail_end(seq.pointer() + seq.body_size()),
-	_current(seq.pointer() + n) { }
-    _sequence_const_iterator (const_pointer tb, const_pointer te, const_pointer c) 
-      : _tail_begin(tb), _tail_end(te), _current(c) { }
+      : _current(seq._ptr + n), _tail_begin(seq._ptr+seq_body_size), _tail_end(seq._ptr+seq._body_size+seq._tail_size) { }
+    _sequence_const_iterator (const_pointer c, const_pointer tb, const_pointer te)
+      : _current(c), _tail_begin(tb), _tail_end(te) { }
     _sequence_const_iterator (const _sequence_const_iterator<T>& iter) 
-      : _tail_begin(iter._tail_begin), _tail_end(iter._tail_end), _current(iter._current) { }
+      : _current(iter._current), _tail_begin(iter._tail_begin), _tail_end(iter._tail_end) { }
     _sequence_const_iterator<T>& operator++() { ++_current; if(_current==_tail_end) { _current=_tail_begin; } return *this; }
     reference operator*() const { return *_current; }
     pointer operator->() const { return _current; }
     bool operator==(const _sequence_const_iterator<T>& other) const { return ( this->_current == other._current); }
    private:
+    const_pointer _current;
     const_pointer _tail_begin;
     const_pointer _tail_end;
-    const_pointer _current;
   };
 
   template<typename T>
@@ -130,7 +144,26 @@ namespace Ariadne {
   {
     return sequence<T>::const_iterator(_ptr,_ptr+_body_size,_ptr+_body_size+_tail_size);
   }
- 
+
+  template<typename T>
+  inline
+  std::ostream&
+  operator<<(std::ostream& os, const sequence<T>& s)
+  {
+    typedef typename sequence<T>::size_type size_type;
+    os << "[";
+    for(size_type i=0; i!=s.body_size(); ++i) {
+      if(i!=0) { os << ","; }
+      os << s[i];
+    }
+    os << ";" << s[s.body_size()];
+    for(size_type i=s.body_size()+1; i!=s.body_size()+s.tail_size(); ++i) {
+      os << "," << s[i];
+    }
+    os << ",...]";
+    return os;
+  }
+
 } // namespace Ariadne
 
 #endif

@@ -64,6 +64,18 @@ namespace Ariadne {
       return result;
     }
 
+    /* Compute the sum of an index array and a size. */
+    inline
+    IndexArray
+    operator+(const IndexArray& l, const SizeArray& s)
+    {
+      IndexArray result(l.size());
+      for(dimension_type i=0; i!=result.size(); ++i) {
+         result[i]=l[i]+s[i];
+      }
+      return result;
+    }
+
     /* Compute a positive offset from two index sets */
     inline
     SizeArray

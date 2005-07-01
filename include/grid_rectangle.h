@@ -117,33 +117,6 @@ namespace Ariadne {
 
 
 
-    /*! \brief A rectangle defined on a partition tree.
-     */
-    template<typename R>
-    class PartitionTreeCell {
-     public:
-      typedef R real_type;
-      typedef State<R> state_type;
-
-      /*!\brief Construct from a grid and a binary word.
-       */
-      PartitionTreeCell(const PartitionGrid<R>& g,
-                        const BinaryWord& w)
-        : _grid(g), _word(w)
-      { }
-
-      /*!\brief The dimension of the cell. */
-      dimension_type dimension() const { return _grid.dimension(); }
-
-      /*!\brief Convert to an ordinary rectangle. */
-      operator Rectangle<R>() const;
-     private:
-      const PartitionGrid<R>& _grid;
-      BinaryWord _word;
-    };
-
-
-
     template<typename R>
     GridRectangle<R>::GridRectangle(const Grid<R>& g, const IndexArray& l, const IndexArray& u)
       : _grid(g), _lower(l), _upper(u)
@@ -212,25 +185,6 @@ namespace Ariadne {
 
 
 
-    template<typename R>
-    inline
-    PartitionTreeCell<R>::operator Rectangle<R>() const {
-      Rectangle<R> res(_grid.bounding_box());
-      sequence<unsigned short>::const_iterator coord_iter=_grid.subdivision_coordinates().begin();
-      BinaryWord::const_iterator word_iter=_word.begin();
-
-      while(word_iter!=_word.end()) {
-        size_type i=(*coord_iter);
-        R centre = ( res.lower(i) + res.upper(i) ) / 2;
-        if( (*word_iter)==0 ) {
-          res.set_upper(i,centre); }
-        else {
-          res.set_lower(i,centre);
-        }
-      }
-
-      return res;
-    }
 
     template<typename R>
     inline

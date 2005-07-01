@@ -23,6 +23,8 @@
  */
 
 #include <iostream>
+#include <vector>
+
 #include "array.h"
 #include "ariadne.h"
 #include "numerical_type.h"
@@ -76,7 +78,7 @@ int main() {
 
   a1.resize(3);
   a1.fill(1.1);
-  Ariadne::vector< array<double> > va;
+  std::vector< array<double> > va;
   va.push_back(a0);
   va.push_back(a1);
   va.push_back(a3);
@@ -84,10 +86,9 @@ int main() {
   va.push_back(a2);
 
   test_assert(va.size()==3,"vector<array>.size");
-  test_assert(va.length()==11,"vector<array>.length");
   test_assert(va[1]==a1,"vector<array>.operator[]");
 
-  Ariadne::vector< array<double> >::const_iterator vai=va.begin();
+  std::vector< array<double> >::const_iterator vai=va.begin();
   test_assert(*vai==a0,"vector<array>::iterator::operator*");
   test_assert(vai!=va.end(),"vector<array>::iterator::operator==");
   ++vai;

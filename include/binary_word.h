@@ -119,7 +119,13 @@ namespace Ariadne
     
     /*! \brief Create a word of length \a n from the chunk of memory starting at \a p. */
     BinaryWord(size_type n, const void* p) : _rep(n,reinterpret_cast<const bool*>(p)) { }
-    
+
+    /*! Equality operator. */
+    bool operator==(const BinaryWord& w) const { return this->_rep==w._rep; }
+
+    /*! Inequality operator. */
+    bool operator!=(const BinaryWord& w) const { return this->_rep!=w._rep; }
+
     /*! \brief Is the word empty. */
     bool empty() const { return _rep.empty(); }
 
@@ -128,10 +134,10 @@ namespace Ariadne
 
     /*! \brief The largest possible size of the BinaryWord. */
     size_type max_size() const { return _rep.max_size(); }
-    
+
     /* \brief The number of machine bytes the word takes up. */
     size_type bytes() const { return (size()+_bits_per_byte-1)/_bits_per_byte; }
-    
+
     /*! \brief Returns the nth bit. */
     bool operator[] (size_type n) const { return _rep[n]; }
 
@@ -612,9 +618,9 @@ namespace Ariadne
   inline
   std::ostream& operator<<(std::ostream& os, const BinaryWord& b) 
   {    
-    os << b.size() << " :";
+ //   os << b.size() << " :";
     for(BinaryWord::size_type i=0; i!=b.size(); ++i) {
-      if(i%8==0) {
+      if(i%8==0 && i!=0) {
         os << " ";
       }
       os << b[i];

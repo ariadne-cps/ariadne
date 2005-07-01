@@ -48,11 +48,9 @@ template class Rectangle<Rational>;
 template class Grid<Rational>;
 template class FiniteGrid<Rational>;
 template class InfiniteGrid<Rational>;
-template class PartitionGrid<Rational>;
 
 template class GridCell<Rational>;
 template class GridRectangle<Rational>;
-template class PartitionTreeCell<Rational>;
 
 template class GridRectangleListSet<Rational>;
 template class GridCellListSet<Rational>;
@@ -70,8 +68,8 @@ int main() {
   is >> ls;
   clog << ls << endl;
 
-  FiniteGrid<Rational> grid(ls);
-  GridRectangleListSet<Rational> grls(ls);
+  FiniteGrid<Rational> gr(ls);
+  GridRectangleListSet<Rational> grls(gr,ls);
   clog << grls << endl;
   clog << ListSet<Rational,Rectangle>(grls) << endl;
 
@@ -103,11 +101,13 @@ int main() {
   clog << FiniteGrid<Rational>::index_translation(fg1,fgj) << "\n";
   clog << FiniteGrid<Rational>::index_translation(fg2,fgj) << "\n";
 
-  GridRectangleListSet<Rational> grls1(ls1);
+  FiniteGrid<Rational> gr1(ls1);
+  GridRectangleListSet<Rational> grls1(gr1,ls1);
   GridRectangleListSet<Rational> grlsj1(fgj,grls1);
   clog << grlsj1 << "\n";
 
-  GridRectangleListSet<Rational> grls2(ls2);
+  FiniteGrid<Rational> gr2(ls2);
+  GridRectangleListSet<Rational> grls2(gr2,ls2);
   GridRectangleListSet<Rational> grlsj2(fgj,grls2);
   clog << grlsj2 << "\n";
 
@@ -116,13 +116,12 @@ int main() {
   GridRectangleListSet<Rational> grlsc1(fgj,gcls1);
   clog << grlsc1 << "\n";
 
-  GridMaskSet<Rational> gms1(grlsj1);
-  GridMaskSet<Rational> gms2(grlsj2);
+  GridMaskSet<Rational> gms1(fgj,grlsj1);
+  GridMaskSet<Rational> gms2(fgj,grlsj2);
   clog << regular_intersection(gms1,gms2);
   clog << join(gms1,gms2);
 
   clog.close();
-
   cout << "PASS\n";
 
   return 0;

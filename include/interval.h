@@ -30,22 +30,23 @@
 
 /* No input routine for intervals defined by boost */
 namespace boost {
-    namespace numeric {
-	template<typename R> 
-	std::istream&
-	operator>>(std::istream& is, interval<R>& ivl) 
-	{
-	    R l,u;
-	    char c1,c2,c3;
-	    is >> c1 >> l >> c2 >> u >> c3;
-	    ivl=interval<R>(l,u);
-	}
+  namespace numeric {
+    template<typename R>
+    std::istream&
+    operator>>(std::istream& is, interval<R>& ivl)
+    {
+      R l,u;
+      char c1,c2,c3;
+      is >> c1 >> l >> c2 >> u >> c3;
+      ivl=interval<R>(l,u);
+      return is;
     }
+  }
 }
 
 
-namespace Ariadne {	
-    /*! 
+namespace Ariadne {
+    /*!
      * \brief A templated class representing an interval of real numbers.
      *
      * An interval of real numbers with endpoints of type \a R.
@@ -66,30 +67,31 @@ namespace Ariadne {
     template<typename R>
     class Interval : public boost::numeric::interval<R> {
     public:
-	Interval() 
-	    : boost::numeric::interval<R>() { }
-	Interval(const boost::numeric::interval<R>& ivl) 
-	    : boost::numeric::interval<R>(ivl) { }
- 	Interval(const R& l, const R& u) 
-	    : boost::numeric::interval<R>(l,u) { }
-   };
+      Interval()
+        : boost::numeric::interval<R>() { }
+      Interval(const boost::numeric::interval<R>& ivl)
+        : boost::numeric::interval<R>(ivl) { }
+      Interval(const R& l, const R& u)
+        : boost::numeric::interval<R>(l,u) { }
+    };
 
-    template<typename R> 
+    template<typename R>
     inline
     std::ostream&
-    operator<<(std::ostream& os, const Interval<R>& ivl) 
+    operator<<(std::ostream& os, const Interval<R>& ivl)
     {
-	const boost::numeric::interval<R>& boost_ivl(ivl);
-	os << boost_ivl;
+      const boost::numeric::interval<R>& boost_ivl(ivl);
+      return os << boost_ivl;
     }
 
-    template<typename R> 
+    template<typename R>
     inline
     std::istream&
-    operator>>(std::istream& is, Interval<R>& ivl) 
+    operator>>(std::istream& is, Interval<R>& ivl)
     {
-	boost::numeric::interval<R>& boost_ivl(ivl);
-	is >> boost_ivl;
+      boost::numeric::interval<R>& boost_ivl(ivl);
+      is >> boost_ivl;
+      return is;
     }
 
 

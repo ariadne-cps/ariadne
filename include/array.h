@@ -246,7 +246,7 @@ namespace Ariadne {
     value_type _ptr[N];
   };
   
-    template<typename T, size_t N> template<class InputIterator> inline 
+  template<typename T, size_t N> template<class InputIterator> inline
   void array<T,N>::_assign_iter(InputIterator iter)
   { 
     if(N==1) { 
@@ -282,63 +282,16 @@ namespace Ariadne {
   { 
     resize(a.size()); fill(a.begin()); return *this; 
   }
-  
-
-  /* DEPRECATED. A constant reference to an array. */
-  template<class T>
-  class array_const_reference {
-   public:
-    typedef typename array<T>::value_type value_type;
-    typedef typename array<T>::reference reference;
-    typedef typename array<T>::const_reference const_reference;
-    typedef typename array<T>::pointer pointer;
-    typedef typename array<T>::const_pointer const_pointer;
-    typedef typename array<T>::iterator iterator;
-    typedef typename array<T>::const_iterator const_iterator;
-    typedef typename array<T>::size_type size_type;
-    typedef typename array<T>::difference_type difference_type;
-    
-    ~array_const_reference() { }
-    array_const_reference(const array<T>& a) : _size(a.size()), _first(a.begin()) { }
-    array_const_reference(iterator first, iterator last) 
-      : _size(last-first), _first(first) { }
-    array_const_reference(const_iterator first, const_iterator last) 
-      : _size(last-first), _first(first) { }
-
-    operator array<value_type>() const { return array<value_type>(begin(),end()); }
-    
-    size_type empty() const { return _size==0u; }
-    size_type size() const { return _size; }
-    
-    const_reference operator[](size_type i) const { return _first[i]; }
-    const_reference at(size_type i) const { if(i<_size) { return _first[i]; } else { throw std::out_of_range("array index out-of-range"); } }
-    
-    const_iterator begin() const { return _first; }
-    const_iterator end() const { return _first+_size; }
-    
-    bool operator==(const array_const_reference<value_type>& other) const { return equals(other.first(),other.last()); }
-    bool operator==(const array<value_type>& other) const { return equals(other.first(),other.last()); }
-    bool operator!=(const array_const_reference<value_type>& other) const { return !((*this)==other); }
-    bool operator!=(const array<value_type>& other) const { return !((*this)==other); }
-   private:
-    template<typename ForwardIterator>
-    bool equals(ForwardIterator first, ForwardIterator last) {
-      if(size()!=std::distance(first,last)) { return false; }
-      const_iterator curr=begin(); 
-      while(first!=last) { if((*first)!=(*curr)) { return false; } ++first; ++curr; }
-      return true; 
-    }
-   private:
-    size_type _size; 
-    iterator _first; 
-  };
 
 
 
 
-  /*! \brief A reference to an array of elements, described by the beginning and end element. */
+
+
+
+  /*! \brief A range of values, which can be used as a reference to an array. */
   template<class RandomAccessIterator>
-  class array_reference {
+  class range {
    public:
     typedef RandomAccessIterator iterator;
     typedef typename std::iterator_traits<RandomAccessIterator>::value_type value_type;
@@ -346,74 +299,76 @@ namespace Ariadne {
     typedef typename std::iterator_traits<RandomAccessIterator>::pointer pointer;
     typedef typename std::iterator_traits<RandomAccessIterator>::difference_type difference_type;
     typedef typename array<value_type>::size_type size_type;
-    
-    ~array_reference() { }
-    array_reference(const array<value_type>& a) : _first(a.begin()), _last(a.end()) { }
-    
+
+    ~range() { }
+    range(const array<value_type>& a) : _first(a.begin()), _last(a.end()) { }
+
     template<typename ForwardIterator>
-    array_reference(ForwardIterator first, ForwardIterator last) 
+    range(ForwardIterator first, ForwardIterator last)
       : _first(first), _last(last) { }
 
     operator array<value_type>() const { return array<value_type>(begin(),end()); }
-    
+
     size_type empty() const { return (_first==_last); }
     size_type size() const { return std::distance(_first,_last); }
-    
+
     reference operator[](size_type i) const { return _first[i]; }
-    reference at(size_type i) const { if(i<_size) { return _first[i]; } else { throw std::out_of_range("array index out-of-range"); } }
-    
+    reference at(size_type i) const { if(i<size()) { return _first[i]; } else { throw std::out_of_range("array index out-of-range"); } }
+
     iterator begin() const { return _first; }
     iterator end() const { return _last; }
-    
-    bool operator==(const array_reference<iterator>& other) const { return equals(other.begin(),other.end()); }
+
+    bool operator==(const range<iterator>& other) const { return equals(other.begin(),other.end()); }
     bool operator==(const array<value_type>& other) const { return equals(other.begin(),other.end()); }
-    bool operator!=(const array_reference<iterator>& other) const { return !((*this)==other); }
+    bool operator!=(const range<iterator>& other) const { return !((*this)==other); }
     bool operator!=(const array<value_type>& other) const { return !((*this)==other); }
    private:
     template<typename ForwardIterator>
     bool equals(ForwardIterator first, ForwardIterator last) const {
-      if(size()!=std::distance(first,last)) { return false; }
-      iterator curr=this->begin(); 
+      if( size() != size_type(std::distance(first,last)) ) { return false; }
+      iterator curr=_first;
       while(first!=last) { if((*first)!=(*curr)) { return false; } ++first; ++curr; }
-      return true; 
+      return true;
     }
    private:
-    iterator _first, _last; 
+    iterator _first, _last;
   };
-  
 
-  
+
+
 
 
   template<typename T>
-  class _array_vector_iterator
-    : public std::iterator<std::bidirectional_iterator_tag, T> 
+  class _vector_of_array_iterator
+    : public std::iterator<std::bidirectional_iterator_tag, T>
   {
    private:
     typedef typename std::vector<T>::size_type array_size_type;
     typedef typename std::vector<array_size_type>::const_iterator size_iterator;
     typedef typename std::vector<T>::const_iterator element_iterator;
-    typedef _array_vector_iterator<T> Self;
+    typedef _vector_of_array_iterator<T> Self;
    public:
     typedef typename std::vector<T>::size_type size_type;
     typedef typename std::vector<T>::difference_type difference_type;
-    typedef array_reference<element_iterator> reference;
+    typedef range<element_iterator> reference;
    private:
-    element_iterator  _curr_elmnt;
     size_iterator _curr_size;
+    element_iterator  _curr_elmnt;
    public:
-    _array_vector_iterator(size_iterator si, element_iterator ei) 
+    _vector_of_array_iterator(size_iterator si, element_iterator ei)
       : _curr_size(si),  _curr_elmnt(ei) { }
     bool operator==(const Self& other) { return _curr_elmnt==other._curr_elmnt; }
     bool operator!=(const Self& other) { return !(*this==other); }
      reference operator*() const { return reference( _curr_elmnt, _curr_elmnt+(*_curr_size) ); }
-    Self& operator++() { _curr_elmnt+=(*_curr_size); ++_curr_size; }
-    Self& operator--() { --_curr_size; _curr_elmnt-=(*_curr_size); }
+    Self& operator++() { _curr_elmnt+=(*_curr_size); ++_curr_size; return *this; }
+    Self& operator--() { --_curr_size; _curr_elmnt-=(*_curr_size); return *this; }
   };
 
-  /*! \brief A vector of arrays of variable sizes. */
+  template<class T> class vector;
+
+  /*! \brief A vector of arrays of variable sizes, useful for bools. */
   template<class T>
-  class array_vector {
+  class vector< array<T> > {
    private:
     typedef typename std::vector<T>::iterator vector_iterator;
     typedef typename std::vector<T>::const_iterator vector_const_iterator;
@@ -421,13 +376,13 @@ namespace Ariadne {
     typedef T array_value_type;
     typedef typename std::vector<T>::size_type array_size_type;
     typedef typename std::vector<T>::size_type size_type;
-    typedef array_reference<vector_iterator> reference;
-    typedef array_reference<vector_const_iterator> const_reference;
-    typedef _array_vector_iterator<T> const_iterator;
+    typedef range<vector_iterator> reference;
+    typedef range<vector_const_iterator> const_reference;
+    typedef _vector_of_array_iterator<T> const_iterator;
    public:
     /*!\brief Default constructor. Creates an empty vector. */
-    array_vector() : _array_sizes(), _elements() { }
-    
+    vector() : _array_sizes(), _elements() { }
+
     /*!\brief The total number of array elements. */
     size_type length() const { return _elements.size(); }
 
@@ -435,36 +390,36 @@ namespace Ariadne {
     size_type size() const { return _array_sizes.size(); }
 
     /*!\brief Insert an element at the back of the vector. */
-    void push_back(const array<T>& a) { 
+    void push_back(const array<T>& a) {
       _array_sizes.push_back(a.size());
       for(size_type i=0; i!=a.size(); ++i) { _elements.push_back(a[i]); }
     }
-  
+
     /*!\brief Removes the element at the back of the vector. */
     void pop_back() { _elements.resize(_elements.size()-_array_sizes.back()); _array_sizes.pop_back(); }
 
     /*!\brief A reference to the array at the front of the vector. */
     const_reference front() const { return const_reference(_elements.begin(),_elements.begin()+_array_sizes.front()); }
-    
+
     /*!\brief A reference to the array at the back of the vector. */
     const_reference back() const { return const_reference(_elements.end()-_array_sizes.back(),_elements.end()); }
-    
+
     /*!\brief Returns the nth array of the vector. */
     const_reference operator[] (size_type i) const {
       vector_const_iterator first=_elements.begin();
       for(size_type j=0; j!=i; ++j) {
-	first+=_array_sizes[j]; 
+        first+=_array_sizes[j];
       }
-      return const_reference(first,first+_array_sizes[i]); 
+      return const_reference(first,first+_array_sizes[i]);
     }
-    
-    const_reference at(size_type i) const { 
-      if(i<size()) { return this->operator[](i); } else { throw std::out_of_range("array index out-of-range"); } 
+
+    const_reference at(size_type i) const {
+      if(i<size()) { return this->operator[](i); } else { throw std::out_of_range("array index out-of-range"); }
     }
-    
+
     /*!\brief Returns a constant random-access iterator pointing to the beginning of the vector of arrays.  */
     const_iterator begin() const { return const_iterator(_array_sizes.begin(),_elements.begin()); }
-  
+
     /*!\brief Returns a constant random-access iterator pointing to the end of the vector of arrays. */
     const_iterator end() const { return const_iterator(_array_sizes.end(),_elements.end()); }
    private:
@@ -472,37 +427,41 @@ namespace Ariadne {
     std::vector<array_value_type> _elements;
   };
 
-      
-    
-  
+
+
   template<typename T>
-  class _fixed_size_array_vector_iterator
-    : public std::iterator<std::random_access_iterator_tag, T> 
+  class _array_vector_iterator
+    : public std::iterator<std::random_access_iterator_tag, T>
   {
    private:
     typedef typename std::vector<T>::const_iterator element_iterator;
-    typedef _fixed_size_array_vector_iterator<T> Self;
+    typedef _array_vector_iterator<T> Self;
    public:
     typedef typename std::vector<T>::size_type size_type;
     typedef typename std::vector<T>::difference_type difference_type;
-    typedef array_reference<element_iterator> reference;
+    typedef range<element_iterator> reference;
    private:
-    element_iterator _curr;
     size_type _array_size;
+    element_iterator _curr;
    public:
-    _fixed_size_array_vector_iterator(size_type n, element_iterator ptr) 
+    _array_vector_iterator(size_type n, element_iterator ptr)
       : _array_size(n), _curr(ptr) { }
     bool operator==(const Self& other) const { return _curr==other._curr; }
     bool operator!=(const Self& other) const { return !(*this==other); }
     reference operator*() const { return reference(_curr,_curr+_array_size); }
-    Self& operator++() { _curr+=_array_size; }
-    Self& operator--() { _curr-=_array_size; }
-    Self& operator+=(difference_type i) { _curr+=(i*_array_size); }
+    Self& operator++() { _curr+=_array_size; return *this; }
+    Self& operator--() { _curr-=_array_size; return *this; }
+    Self& operator+=(difference_type i) { _curr+=(i*_array_size); return *this; }
   };
-      
+
+  template<class T> class array_vector;
+  template<typename T> std::ostream& operator<<(std::ostream&, const array_vector<T>&);
+
+
   /*! \brief A vector of arrays of a fixed size. */
   template<class T>
-  class array_block_vector {
+  class array_vector {
+    friend std::ostream& operator<< < >(std::ostream&, const array_vector<T>&);
    private:
     typedef typename std::vector<T>::iterator vector_iterator;
     typedef typename std::vector<T>::const_iterator vector_const_iterator;
@@ -510,22 +469,28 @@ namespace Ariadne {
     typedef T array_value_type;
     typedef typename std::vector<T>::size_type array_size_type;
     typedef typename std::vector<T>::size_type size_type;
-    typedef array_reference<vector_iterator> reference;
-    typedef array_reference<vector_const_iterator> const_reference;
-    typedef _fixed_size_array_vector_iterator<T> const_iterator;
+    typedef range<vector_iterator> reference;
+    typedef range<vector_const_iterator> const_reference;
+    typedef _array_vector_iterator<T> const_iterator;
    public:
     /*!\brief Construct a vector to hold arrays of size as. */
-    array_block_vector(array_size_type as) : _array_size(as), _elements() { }
-    
+    array_vector(array_size_type as) : _array_size(as), _elements() { }
+
     /*!\brief The total number of array elements. */
     size_type length() const { return _elements.size(); }
 
     /*!\brief The number of arrays in the vector.  */
     size_type size() const { return _elements.size()/array_size(); }
 
+    /*!\brief True if the vector is empty.  */
+    bool empty() const { return _elements.empty(); }
+
     /*!\brief The size of each array word in the list. */
     array_size_type array_size() const { return _array_size; }
-    
+
+    /*!\brief The size of each array word in the list. */
+    void resize(size_type n) { _elements.resize(_array_size*n); }
+
     /*!\brief Insert an element at the back of the vector. */
     void push_back(const array<T>& a) { 
       assert(a.size()==array_size()); 
@@ -564,7 +529,7 @@ namespace Ariadne {
     
     /*!\brief Checked access to the nth array of the vector. */
     const_reference at(size_type i) const { 
-      if(i<_size) { return this->operator[](i); } else { throw std::out_of_range("array index out-of-range"); } 
+      if(i<_size) { return this->operator[](i); } else { throw std::out_of_range("array index out-of-range"); }
     }
     
     /*!\brief A random-access constant iterator pointing to the beginning of the vector of arrays.  */
@@ -592,8 +557,9 @@ namespace Ariadne {
       os << (*first);
       ++first;
       while(first != last) {
-	os << ", " << (*first);
-	++first;
+         os.flush();
+         os << ", " << (*first);
+        ++first;
       }
     }
     os << "]" ;
@@ -601,24 +567,33 @@ namespace Ariadne {
   }
     
   template<typename T> inline
-  std::ostream& 
+  std::ostream&
   operator<<(std::ostream& os, const array<T>& a) {
-    write_array(os,a.begin(),a.end()); 
+    write_array(os,a.begin(),a.end());
+    return os;
   }
     
-  template<typename T> inline
-  std::ostream& 
-  operator<<(std::ostream& os, const array_const_reference<T>& a) {
-    write_array(os,a.begin(),a.end());
-  }   
-
   template<typename Iter> inline
-  std::ostream& 
-  operator<<(std::ostream& os, const array_reference<Iter>& a) {
+  std::ostream&
+  operator<<(std::ostream& os, const range<Iter>& a) {
     write_array(os,a.begin(),a.end());
-  }   
+  }
 
-  
+  template<typename T> inline
+  std::ostream&
+  operator<<(std::ostream& os, const array_vector<T>& a) {
+    os << "[ ";
+    for(size_t i=0; i!=a.size(); ++i) {
+      if(i!=0) {
+        os << ", ";
+      }
+      write_array(os,a[i].begin(),a[i].end());
+      os.flush();
+    }
+    os << " ]";
+    return os;
+  }
+
 } // namespace Ariadne
 
 #endif

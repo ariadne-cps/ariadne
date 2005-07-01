@@ -55,46 +55,46 @@ int main() {
   
   test_assert(a0[2]==2.5,"array assignment");
 
-  array_block_vector<double> fsav(4);
+  array_vector<double> fsav(4);
 
   fsav.push_back(a0);
   fsav.push_back(a1);
   fsav.push_back(a2);
   fsav.pop_back();
 
-  test_assert(fsav.size()==2,"array_vector_fixed_size.size");
-  test_assert(fsav.length()==8,"array_vector_fixed_size.length");
-  test_assert(fsav[1]==a1,"array_vector_fixed_size.operator[]");
+  test_assert(fsav.size()==2,"array_vector.size");
+  test_assert(fsav.length()==8,"array_vector.length");
+  test_assert(fsav[1]==a1,"array_vector.operator[]");
 
-  array_block_vector<double>::const_iterator fsavi=fsav.begin();
-  test_assert(*fsavi==a0,"array_block_vector::iterator");
-  test_assert(fsavi!=fsav.end(),"array_block_vector::iterator::operator==");
+  array_vector<double>::const_iterator fsavi=fsav.begin();
+  test_assert(*fsavi==a0,"array_vector::iterator");
+  test_assert(fsavi!=fsav.end(),"array_vector::iterator::operator==");
   ++fsavi;
-  test_assert(*fsavi==a1,"array_block_vector::iterator");
+  test_assert(*fsavi==a1,"array_vector::iterator");
   fsavi+=1;
-  test_assert(fsavi==fsav.end(),"array_block_vector::iterator::end()");
+  test_assert(fsavi==fsav.end(),"array_vector::iterator::end()");
 
   a1.resize(3);
   a1.fill(1.1);
-  array_vector<double> av;
-  av.push_back(a0);
-  av.push_back(a1);
-  av.push_back(a3);
-  av.pop_back();
-  av.push_back(a2);
+  Ariadne::vector< array<double> > va;
+  va.push_back(a0);
+  va.push_back(a1);
+  va.push_back(a3);
+  va.pop_back();
+  va.push_back(a2);
 
-  test_assert(av.size()==3,"array_vector.size");
-  test_assert(av.length()==11,"array_vector.length");
-  test_assert(av[1]==a1,"array_vector.operator[]");
+  test_assert(va.size()==3,"vector<array>.size");
+  test_assert(va.length()==11,"vector<array>.length");
+  test_assert(va[1]==a1,"vector<array>.operator[]");
 
-  array_vector<double>::const_iterator avi=av.begin();
-  test_assert(*avi==a0,"array_vector::iterator::operator*");
-  test_assert(avi!=av.end(),"array_vector::iterator::operator==");
-  ++avi;
-  test_assert(*avi==a1,"array_vector::iterator::operator++");
-  ++avi;
-  ++avi;
-  test_assert(avi==av.end(),"array_vector::iterator::end()");
+  Ariadne::vector< array<double> >::const_iterator vai=va.begin();
+  test_assert(*vai==a0,"vector<array>::iterator::operator*");
+  test_assert(vai!=va.end(),"vector<array>::iterator::operator==");
+  ++vai;
+  test_assert(*vai==a1,"vector<array>::iterator::operator++");
+  ++vai;
+  ++vai;
+  test_assert(vai==va.end(),"vector<array>::iterator::end()");
 
   cout << "PASS\n";
 

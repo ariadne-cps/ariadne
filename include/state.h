@@ -21,7 +21,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #ifndef _GEOMETRY_STATE_H
 #define _GEOMETRY_STATE_H
 
@@ -33,142 +33,135 @@
 #include "linear_algebra.h"
 
 namespace Ariadne {
-namespace Geometry {
+  namespace Geometry {
 
-template <typename R = Rational> class State;
+    template <typename R = Rational> class State;
 
-template <typename R> 
-class State {
-	public:	
-		typedef R Real;
-	
-	private:
-		/*! \brief The vector defining the state */
-		 boost::numeric::ublas::vector<Real> _vector;
-	
-	public:
-		State() : _vector(0) {
-		}
-		
-		State(size_t dim) : _vector(dim) {
-			if (dim<0) 
-				throw std::domain_error("States should have at least dimension 0.");
-		}
-		
-		State(size_t dim, const Real default_value) : 
-			_vector(dim) {
-			if (dim<0) 
-				throw std::domain_error("States should have at least dimension 0.");
-			
+    template <typename R>
+    class State {
+     public:
+      typedef R Real;
+      typedef size_t size_type;
+     private:
+      /*! \brief The vector defining the state */
+      boost::numeric::ublas::vector<Real> _vector;
 
-			for (size_t i=0; i<dim; i++) 
-				this->_vector[i]=default_value;
-		}
+     public:
+      State() : _vector(0) { }
 
-		State(const State& original){
-			_vector=original._vector;
-		}
-		
-		inline Real &operator[](size_t index) {
-			
-			if (((this->_vector).size() <= index)||(index<0))
-				throw std::out_of_range("Out of the vector's range.");
-			
-			return  (this->_vector[index]);
-		}
-	
-		inline Real operator[](size_t index) const{
-			
-			if (((this->_vector).size() <= index)||(index<0))
-				throw std::out_of_range("Out of the vector's range.");
-			
-			return  (this->_vector[index]);
-		}
+      State(size_type dim) : _vector(dim) {
+        for(size_type i=0; i!=dimension(); ++i) {
+          _vector[i]=Real(0);
+        }
+      }
 
-		
-		/*! \brief Checks equivalence between two states. */
-		inline bool operator==(const State<Real> &A) const {
-			
-		    /* Return false if states have different dimensions */
+      State(size_type dim, const Real default_value) : _vector(dim) {
+        for(size_type i=0; i!=dimension(); ++i) {
+          _vector[i]=default_value;
+        }
+      }
 
-		    if (this->dim()!=A.dim()) { 
-			return false; 
-		    }
-			// throw std::domain_error("The parameters have different space dimensions");
-			
-			/* for each dimension i */
-			for (size_t i=0; i<this->dim(); i++) {
-				
-				if (this->_vector[i]!=A._vector[i])  return false;
-			}
-			
-			return true;
-		}
-		
-		/*! \brief Checks equivalence between two states. */
-		inline bool operator!=(const State<Real> &A) const {
-		    return !( *this == A );
-		}
+      template<class ForwardIterator>
+      State(ForwardIterator b, ForwardIterator e) : _vector(std::distance(b,e))
+      {
+        for(size_type i=0; i!=dimension(); ++i) {
+          _vector[i]=*b;
+          ++b;
+        }
 
-		/*! \brief Returns the state's dimension. */
-		inline size_t dim() const {
-			return (this->_vector).size();
-		}
-		
-                /*! \brief The dimension of the Euclidean space the state lies in. */
-		inline size_t dimension() const {
-			return (this->_vector).size();
-		}
-		
-		inline State<Real> &operator=(const State<Real> &A){
-			
-			this->_vector=A._vector;
-			
-		  	return *this;	
-		}
-		
-		template <typename RType>
-		friend std::ostream& operator<<(std::ostream &os, const State<RType> &state);
+      }
 
-		template <typename RType>
-                friend std::istream& operator>>(std::istream &is, State<RType> &state);
+      State(const State& original) : _vector(original._vector) { }
 
-};
+      inline Real& operator[] (size_type index) {
+        if (((this->_vector).size() <= index)||(index<0)) {
+          throw std::out_of_range("Out of the vector's range.");
+        }
+        return  (this->_vector[index]);
+      }
 
-template <typename R> 
-std::ostream& operator<< (std::ostream &os, const State<R> &state)
-{
-	os << "[";
-	if(state.dim() > 0) {
-	    os << state._vector[0] ;
-			
-	    for (size_t i=1; i<state.dim(); i++) {			
-		os << ", " << state._vector[i];
-	    }
-	}
-	os << "]" ;
+      inline Real operator[](size_t index) const {
+        if (((this->_vector).size() <= index)||(index<0)) {
+            throw std::out_of_range("Out of the vector's range.");
+        }
+        return  (this->_vector[index]);
+      }
 
-	return os;
-}
 
-template <typename R> 
-std::istream& operator>> (std::istream &is, State<R> &state)
-{
-    static size_t last_size;
-    
-    std::vector<R> v;
-    v.reserve(last_size);
-    is >> v;
-    last_size = v.size();
+      /*! \brief Checks equivalence between two states. */
+      inline bool operator==(const State<Real> &A) const {
+        /* Return false if states have different dimensions */
+        if (this->dim()!=A.dim()) { return false; }
 
-    state._vector.resize(v.size());
-    for(size_t i=0; i!=v.size(); ++i) {
-	state._vector[i]=v[i];
+        /* for each dimension i */
+        for (size_t i=0; i<this->dim(); i++) {
+          if (this->_vector[i]!=A._vector[i]) { return false; }
+        }
+
+        return true;
+      }
+
+      /*! \brief Checks equivalence between two states. */
+      inline bool operator!=(const State<Real> &A) const {
+        return !( *this == A );
+      }
+
+      /*! \brief Returns the state's dimension. */
+      inline size_t dim() const {
+        return (this->_vector).size();
+      }
+
+      /*! \brief The dimension of the Euclidean space the state lies in. */
+      inline size_t dimension() const {
+        return (this->_vector).size();
+      }
+
+      inline State<Real> &operator=(const State<Real> &A) {
+        this->_vector=A._vector;
+        return *this;
+      }
+
+      template <typename RType>
+      friend std::ostream& operator<<(std::ostream &os, const State<RType> &state);
+
+      template <typename RType>
+      friend std::istream& operator>>(std::istream &is, State<RType> &state);
+    };
+
+
+    template <typename R>
+    std::ostream& operator<< (std::ostream &os, const State<R> &state)
+    {
+      os << "[";
+      if(state.dimension() > 0) {
+        os << state[0] ;
+        for (size_t i=1; i<state.dimension(); i++) {
+          os << ", " << state[i];
+        }
+      }
+      os << "]" ;
+
+      return os;
     }
-    return is;
-}
 
-}
+    template <typename R>
+    std::istream& operator>> (std::istream &is, State<R> &state)
+    {
+      static size_t last_size;
+
+      std::vector<R> v;
+      v.reserve(last_size);
+      is >> v;
+      last_size = v.size();
+
+      state._vector.resize(v.size());
+      for(size_t i=0; i!=v.size(); ++i) {
+        state._vector[i]=v[i];
+      }
+      return is;
+    }
+
+  }
 }
 
 #endif /* _GEOMETRY_STATE_H */

@@ -38,48 +38,63 @@
 namespace Ariadne {
   namespace Geometry {
     template < typename R > class Rectangle;
+    template < typename R, template <typename> class BS > class ListSet;
 
-    template<typename R> bool disjoint(const Rectangle<R> &A, const Rectangle<R> &B);
-    template<typename R> bool interiors_intersect(const Rectangle<R> &A, const Rectangle<R> &B);
-    template<typename R> bool subset_of_interior(const Rectangle<R> &A, const Rectangle<R> &B);
-    template<typename R> bool subset(const Rectangle<R> &A, const Rectangle<R> &B);
-    template<typename R> bool subset_of_open_cover(const Rectangle<R> &A, const std::list< Rectangle<R> > &list);
-    template <typename R> Rectangle<R> closure_of_intersection_of_interiors(const Rectangle<R> &A, const Rectangle<R> &B);
     template <typename R> Rectangle<R> regular_intersection(const Rectangle<R> &A, const Rectangle<R> &B);
+    template<typename R> bool interiors_intersect(const Rectangle<R> &A, const Rectangle<R> &B);
+    template<typename R> bool disjoint(const Rectangle<R> &A, const Rectangle<R> &B);
+    template<typename R> bool inner_subset(const Rectangle<R> &A, const Rectangle<R> &B);
+    template<typename R> bool subset(const Rectangle<R> &A, const Rectangle<R> &B);
+    template<typename R> bool inner_subset(const Rectangle<R> &A, const ListSet<R,Rectangle> &B);
+    template<typename R> bool subset_of_open_cover(const Rectangle<R> &A, const std::list< Rectangle<R> > &list);
+
+    template <typename R> Rectangle<R> closure_of_intersection_of_interiors(const Rectangle<R> &A, const Rectangle<R> &B);
+    template<typename R> bool subset_of_interior(const Rectangle<R> &A, const Rectangle<R> &B);
 
 
     /*! \brief A cuboid of arbitrary dimension.
      */
     template <typename R>
     class Rectangle {
-      /*! \brief Tests disjointness */
-      friend bool disjoint <> (const Rectangle<R> &A,
-                               const Rectangle<R> &B);
-
-      /*! \brief Tests intersection of interiors */
-      friend bool interiors_intersect <> (const Rectangle<R> &A,
-                                          const Rectangle<R> &B);
-
-      /*! \brief Tests if \a A is a subset of the interior of \a B. */
-      friend bool subset_of_interior <> (const Rectangle<R> &A,
-                                         const Rectangle<R> &B);
-
-      /*! \brief Tests inclusion */
-      friend bool subset <> (const Rectangle<R> &A,
-                             const Rectangle<R> &B);
-
-      /*! \brief Tests inclusion in an open cover. */
-      friend bool subset_of_open_cover <> (const Rectangle<R> &A,
-                                           const std::list< Rectangle<R> > &list);
-      
-      /*! \brief Makes intersection of interiors */
-      friend Rectangle<R> closure_of_intersection_of_interiors <> (const Rectangle<R> &A,
-                                                                   const Rectangle<R> &B);
-      
       /*! \brief Makes intersection of interiors */
       friend Rectangle<R> regular_intersection <> (const Rectangle<R> &A,
                                                    const Rectangle<R> &B);
-      
+
+       /*! \brief Tests intersection of interiors. */
+      friend bool interiors_intersect <> (const Rectangle<R> &A,
+                                          const Rectangle<R> &B);
+
+       /*! \brief Tests disjointness */
+      friend bool disjoint <> (const Rectangle<R> &A,
+                               const Rectangle<R> &B);
+
+      /*! \brief Tests if \a A is a subset of the interior of \a B. */
+      friend bool inner_subset <> (const Rectangle<R> &A,
+                                   const Rectangle<R> &B);
+
+      /*! \brief Tests inclusion. */
+      friend bool subset <> (const Rectangle<R> &A,
+                             const Rectangle<R> &B);
+
+      /*! \brief Tests if \a A is a subset of the interior of \a DS. */
+      friend bool inner_subset <> (const Rectangle<R> &A,
+                                   const ListSet<R,Rectangle> &DS);
+
+
+      /*! \brief Tests inclusion in an open cover.
+       *  \internal We shouldn't restrict to a std::list.
+       */
+      friend bool subset_of_open_cover <> (const Rectangle<R> &A,
+                                           const std::list< Rectangle<R> > &list);
+
+      /*! \brief Tests if \a A is a subset of the interior of \a B. (deprecated)*/
+      friend bool subset_of_interior <> (const Rectangle<R> &A,
+                                         const Rectangle<R> &B);
+
+      /*! \brief Makes intersection of interiors (deprecated). */
+      friend Rectangle<R> closure_of_intersection_of_interiors <> (const Rectangle<R> &A,
+                                                                   const Rectangle<R> &B);
+
      public:
       /*! \brief The type of denotable real number used for the corners. */
       typedef R Real;
@@ -326,34 +341,40 @@ namespace Ariadne {
       inline bool operator!=(const Rectangle<Real> &A) const {
         return !(*this == A);
       }
-      
+
       /*! \brief Tests if the Rectangle is disjoint from the set \a s. */
       template<class SET>
-      inline bool is_disjoint_from(const SET& s) const {
+      inline bool disjoint(const SET& s) const {
         return Ariadne::Geometry::disjoint(*this,s);
       }
       
       /*! \brief Tests if the Rectangle intersects the interior of the set \a s. */
       template<class SET>
-      inline bool intersects_interior_of(const SET& s) const {
+      inline bool intersects_interior(const SET& s) const {
         return Ariadne::Geometry::interiors_intersect(*this,s);
-      }
-      
-      /*! \brief Tests if the Rectangle is a subset of the set \a s. */
-      template<class SET>
-      inline bool is_subset_of(const SET& s) const {
-        return Ariadne::Geometry::subset(*this,s);
       }
       
       /*! \brief Tests if the Rectangle is a subset of the interior of set \a s. */
       template<class SET>
+      inline bool inner_subset(const SET& s) const {
+        return Ariadne::Geometry::subset_of_interior(*this,s);
+      }
+
+      /*! \brief Tests if the Rectangle is a subset of the set \a s. */
+      template<class SET>
+      inline bool subset(const SET& s) const {
+        return Ariadne::Geometry::subset(*this,s);
+      }
+
+      /*! \brief Tests if the Rectangle is a subset of the interior of set \a s. (Deprecated) */
+      template<class SET>
       inline bool is_subset_of_interior_of(const SET& s) const {
         return Ariadne::Geometry::subset_of_interior(*this,s);
       }
-      
+
       /*! \brief Tests if the Rectangle is a subset of the the union of the open sets in \a u. */
       template<class LIST>
-      inline bool is_covered_by(const LIST& u) const {
+      inline bool subset_of_open_cover(const LIST& u) const {
         return Ariadne::Geometry::subset_of_open_cover(*this,u);
       }
       
@@ -370,7 +391,7 @@ namespace Ariadne {
     /*! \brief Tests disjointness */
     template <typename R>
     bool disjoint(const Rectangle<R> &A, const Rectangle<R> &B) {
-      
+
       if (A.dim()!=B.dim())
         throw std::domain_error("The two parameters have different space dimensions");
       
@@ -404,24 +425,22 @@ namespace Ariadne {
     
     /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
-    bool subset_of_interior(const Rectangle<R> &A, 
-                            const Rectangle<R> &B) {
-      
+    bool inner_subset(const Rectangle<R> &A,
+                      const Rectangle<R> &B) {
+
       if (A.dim()!=B.dim())
         throw std::domain_error("The two parameters have different space dimensions");
-      
+
       if (A.empty()||B.empty()) return false;
-      
+
       for (size_t i=0; i< A.dim(); i++) {
         if ((A._upper_corner[i] >= B._upper_corner[i])||
             (B._lower_corner[i] >= A._lower_corner[i])) return false;
       }
-      
+
       return true;
     }
-    
-    
-    
+
     /*! \brief Tests inclusion */
     template <typename R>
     bool subset(const Rectangle<R> &A, 
@@ -440,6 +459,14 @@ namespace Ariadne {
       return true;
     }
     
+    /*! \brief Tests inclusion of \a A in the interior of \a B. */
+    template <typename R>
+    bool subset_of_interior(const Rectangle<R> &A,
+                            const Rectangle<R> &B)
+    {
+      return inner_subset(A,B);
+    }
+
     /* Compute all points in A on the grid of vertices of rectangles in the cover */
     template <typename R>
     void
@@ -579,7 +606,7 @@ namespace Ariadne {
       return true;
     }
     
-    //*! \brief Tests inclusion in an open cover.  */
+    //*! \brief Tests inclusion in a closed cover.  */
     template <typename R>
     bool subset_of_closed_cover(const Rectangle<R> &A,
                                 const std::list< Rectangle<R> >& cover) 
@@ -688,18 +715,18 @@ namespace Ariadne {
     /*! \brief Makes intersection of interior */
     template <typename R>
     Rectangle<R>
-    closure_of_intersection_of_interiors(const Rectangle<R> &A, const Rectangle<R> &B)
+    regular_intersection(const Rectangle<R> &A, const Rectangle<R> &B)
     {
       if (A.dim()!=B.dim()) {
         throw std::domain_error("The two parameters have different space dimensions");
       }
-      
+
       Rectangle<R> C(A.dim());
-      
-      if (A.empty() || B.empty()) { 
+
+      if (A.empty() || B.empty()) {
         return C;
       }
-      
+
       for (size_t i=0; i != C.dim(); ++i) {
         C._lower_corner[i] = max(A._lower_corner[i],B._lower_corner[i]);
         C._upper_corner[i] = min(A._upper_corner[i],B._upper_corner[i]);
@@ -708,12 +735,19 @@ namespace Ariadne {
           return C;
         }
       }
-      
+
       C._empty=false;
       return C;
     }
-    
-    
+
+    /*! \brief Makes intersection of interior */
+    template <typename R>
+    Rectangle<R>
+    closure_of_intersection_of_interiors(const Rectangle<R> &A, const Rectangle<R> &B) {
+      return regular_intersection(A,B);
+    }
+
+
     template <typename R>
     std::ostream&
     operator<<(std::ostream &os, const Rectangle<R> &r) 

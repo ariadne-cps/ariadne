@@ -59,11 +59,11 @@ int main() {
     Rectangle r4,r5,r6;
     
     string istr = "[ [0,1],[0,1] ] "
-	"[[-1/2,3/2],[-1/3,1/2]] "
-	"[[-1/4,2/3],[1/3,3/2]] "
-	"[[3/5,6/5],[2/5,7/5]] "
-	"[[3/5,6/5],[2/5,1]] "
-	"[[0,1],[0,1/2]] ";
+        "[[-1/2,3/2],[-1/3,1/2]] "
+        "[[-1/4,2/3],[1/3,3/2]] "
+        "[[3/5,6/5],[2/5,7/5]] "
+        "[[3/5,6/5],[2/5,1]] "
+        "[[0,1],[0,1/2]] ";
     stringstream iss(istr);
     iss >> r1 >> r2 >> r3 >> r4 >> r5 >> r6;
     Rectangle r7=r1;
@@ -81,15 +81,11 @@ int main() {
 
     test_assert(!r1.empty(),"empty");
     test_assert(r0.empty(),"empty");
-    
+
     test_assert(!disjoint(r1,r1),"disjoint");
-    test_assert(!r1.is_disjoint_from(r1),"disjoint");
     test_assert(interiors_intersect (r1,r1),"intersects_interior");
-    test_assert(r1.intersects_interior_of(r1),"intersects_interior");
     test_assert(subset(r1,r1),"is_subset_of");
-    test_assert(r1.is_subset_of(r1),"is_subset_of");
     test_assert(!subset_of_interior(r1,r1),"subset_of_interior");
-    test_assert(!r1.is_subset_of_interior_of(r1),"subset_of_interior");
     test_assert(subset_of_open_cover(r1,cover1),"subset_of_open_cover");
     test_assert(!subset_of_open_cover(r1,cover2),"subset_of_open_cover");
     test_assert(subset_of_closed_cover(r1,cover2),"subset_of_closed_cover");

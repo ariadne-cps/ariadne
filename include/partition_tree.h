@@ -22,7 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file partition_grid.h
+/*! \file partition_tree.h
  *  \brief Cuboidal partition trees.
  */
 
@@ -86,13 +86,20 @@ namespace Ariadne {
       BinaryWord _word;
     };
 
+    /*! \brief A memory-efficient binary tree, with a forward iterator through the elements. */
     class BinaryTree {
      public:
       typedef BinaryTreeIterator const_iterator;
+
+      /*! \brief Construct a tree with a single leaf node. */
       BinaryTree() : _tree(1) { _tree[0]=leaf; }
+      /*! \brief Construct a tree from an array of bits denoting branches and leaves. */
       BinaryTree(const BinaryArray& t) : _tree(t) { }
+      /*! \brief The total number of leaf nodes in the tree. */
       size_type capacity() const { return (_tree.size()+1)/2; }
+      /*! \brief A constant forward iterator to the first leaf of the tree. */
       const_iterator begin() const { return const_iterator(_tree.begin()).initialize(); }
+      /*! \brief A constant forward iterator to the end of the tree. */
       const_iterator end() const { return const_iterator(_tree.end()); }
      private:
       BinaryArray _tree;

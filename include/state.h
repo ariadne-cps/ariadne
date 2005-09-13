@@ -80,7 +80,7 @@ namespace Ariadne {
         return  (this->_vector[index]);
       }
 
-      inline Real operator[](size_t index) const {
+      inline const Real& operator[](size_t index) const {
         if (((this->_vector).size() <= index)||(index<0)) {
             throw std::out_of_range("Out of the vector's range.");
         }
@@ -114,6 +114,20 @@ namespace Ariadne {
       /*! \brief The dimension of the Euclidean space the state lies in. */
       inline size_t dimension() const {
         return (this->_vector).size();
+      }
+
+      inline Real get(size_t index) const {
+        if (((this->_vector).size() <= index)||(index<0)) {
+            throw std::out_of_range("Out of the vector's range.");
+        }
+        return  (this->_vector[index]);
+      }
+
+      inline void set(size_t index, const Real& r) {
+        if (((this->_vector).size() <= index) || (index<0)) {
+            throw std::out_of_range("Out of the vector's range.");
+        }
+        this->_vector[index]=r;
       }
 
       inline State<Real> &operator=(const State<Real> &A) {

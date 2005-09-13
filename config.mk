@@ -10,18 +10,26 @@ CXX = g++
 
 MAKE = make
 
-EXAMPLEDIR = examples
 INCLUDEDIR = include
+SRCDIR = src
 TESTDIR = test
+EXAMPLEDIR = examples
+PYTHONDIR=python
 
-CXXFLAGS = -I../${INCLUDEDIR}
+SUBDIRS=${INCLUDEDIR} ${SRCDIR} ${TESTDIR} ${EXAMPLEDIR} ${PYTHONDIR}
 
+PYTHONVERSION=2.2
+PYTHONINCLUDEDIR=/usr/include/python$(PYTHONVERSION)
+
+CXXFLAGS =  -I../${INCLUDEDIR}
 LDXXFLAGS = -lppl -lgmpxx
 
 ifeq ($(DEBUG),yes)
 	CXXFLAGS += -g -DDEBUG -Wall
+	LIBS = libariadne.a
 else
-#	CXXFLAGS += -O3 -fPIC
+	CXXFLAGS += -O2 -fPIC -Wall
+	LIBS = libariadne.so
 endif
 
 ifeq ($(VERBATIM),yes)

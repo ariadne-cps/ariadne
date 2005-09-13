@@ -208,6 +208,17 @@ namespace Ariadne {
         return Interval<Real>(this->_lower_corner[n],this->_upper_corner[n]);
       }
       
+      /*! \brief Gets the \a n th interval. */
+      inline Interval<Real> get(size_t n) const {
+        return Interval<Real>(this->_lower_corner[n],this->_upper_corner[n]);
+      }
+      
+      /*! \brief Sets the \a n th interval. */
+      inline void set(size_t n, Interval<Real> i) {
+         this->_lower_corner[n]=i.lower();
+         this->_upper_corner[n]=i.upper();
+      }
+      
       /*! \brief Sets the lower bound of the \a n th coordinate to \a r. */
       inline void set_lower(size_t n, const Real& r) {
         this->_lower_corner[n] = r;
@@ -728,8 +739,8 @@ namespace Ariadne {
       }
 
       for (size_t i=0; i != C.dim(); ++i) {
-        C._lower_corner[i] = max(A._lower_corner[i],B._lower_corner[i]);
-        C._upper_corner[i] = min(A._upper_corner[i],B._upper_corner[i]);
+        C._lower_corner[i] = std::max(A._lower_corner[i],B._lower_corner[i]);
+        C._upper_corner[i] = std::min(A._upper_corner[i],B._upper_corner[i]);
         if(C._lower_corner[i] >= C._upper_corner[i]) {
           C._empty=true;
           return C;

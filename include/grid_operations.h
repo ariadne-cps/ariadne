@@ -29,7 +29,11 @@
 #ifndef GRID_OPERATIONS_H
 #define GRID_OPERATIONS_H
 
- namespace Ariadne {
+#include <vector>
+#include "array.h"
+#include "rectangle.h"
+
+namespace Ariadne {
    namespace Geometry {
 
     typedef unsigned short dimension_type;
@@ -110,7 +114,5 @@
 
   }
 }
-
-#include "grid_operations.cc"
 
 #endif /* _GRID_OPERATIONS_H */

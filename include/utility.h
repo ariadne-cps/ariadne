@@ -37,112 +37,112 @@
 #include <set>
 
 namespace Ariadne {
-    namespace IO {
-	template <typename T> 
-	std::ostream& 
-	operator<< (std::ostream &os, const std::vector<T>& v) 
-	{
-	    os << "[";
-	    if(v.size() > 0) {
-		os << v[0];
-		for (size_t i=1; i<v.size(); ++i) {
-		    os << ", " << v[i];
-		}
-	    }
-	    os << "]" ;
-	    
-	    return os;
-	}
-	
-	template <typename T> 
-	std::ostream& 
-	operator<< (std::ostream &os, const std::valarray<T>& va)
-	{
-	    os << "(";
-	    if(va.size() > 0) {
-		os << va[0];
-		for (size_t i=1; i<va.size(); ++i) {
-		    os << ", " << va[i];
-		}
-	    }
-	    os << ")" ;
-	    
-	    return os;
-	}
-	
-	template <typename T> 
-	std::ostream& 
-	operator<< (std::ostream &os, const std::set<T>& s) 
-	{
-	    os << "[";
-	    if(s.size() > 0) {
-		typename std::set<T>::iterator iter=s.begin();
-		os << *iter++;
-		while(iter!=s.end()) {
-		    os << ", " << *iter++;
-		}
-	    }
-	    os << "]" ;
-	    
-	    return os;
-	}
-	
-	template <typename T> 
-	std::istream& 
-	operator>> (std::istream &is, std::vector<T> &v)
-	{
-	    T x;
-	    char c;
-	    
-	    v.clear();
-	    std::streampos pos = is.tellg();
-	    
-	    try {
-		is >> c;
-		if(c != '[') {
-		    throw std::invalid_argument("std::vector input must begin with '['");
-		}
-		
-		/* Handle case of empty list */
-		is >> c;
-		if(c != ']') {
-		    is.putback(c);
-		    c=',';
-		}
-		
-		while(c != ']') {
-		    if(is.eof()) {
-			throw std::invalid_argument("End-of-file reached");
-		    }
-		    if(c!=',') {
-			throw std::invalid_argument("Items in list must be separated by ','");
-		    }
-		    is >> x;
-		    if(is.fail()) {
-			throw std::invalid_argument("Error inputting value in list");
-		    }
-		    v.push_back(x);
-		    is >> c;
-		}
-	    }
-	    catch(...) {
-		// is.seekg(pos);
-		throw; 
-	    }
-	    
-	    return is;
-	}
-	
-    } // namespace IO
+  namespace IO {
+    template <typename T> 
+    std::ostream& 
+    operator<< (std::ostream &os, const std::vector<T>& v) 
+    {
+      os << "[";
+      if(v.size() > 0) {
+        os << v[0];
+        for (size_t i=1; i<v.size(); ++i) {
+          os << ", " << v[i];
+        }
+      }
+      os << "]" ;
+            
+      return os;
+    }
+    
+    template <typename T> 
+    std::ostream& 
+    operator<< (std::ostream &os, const std::valarray<T>& va)
+    {
+      os << "(";
+      if(va.size() > 0) {
+        os << va[0];
+        for (size_t i=1; i<va.size(); ++i) {
+          os << ", " << va[i];
+        }
+      }
+      os << ")" ;
+            
+      return os;
+    }
+        
+    template <typename T> 
+    std::ostream& 
+    operator<< (std::ostream &os, const std::set<T>& s) 
+    {
+      os << "[";
+      if(s.size() > 0) {
+        typename std::set<T>::iterator iter=s.begin();
+        os << *iter++;
+        while(iter!=s.end()) {
+          os << ", " << *iter++;
+        }
+      }
+      os << "]" ;
+            
+      return os;
+    }
+        
+    template <typename T> 
+    std::istream& 
+    operator>> (std::istream &is, std::vector<T> &v)
+    {
+      T x;
+      char c;
+            
+      v.clear();
+      std::streampos pos = is.tellg();
+            
+      try {
+        is >> c;
+        if(c != '[') {
+          throw std::invalid_argument("std::vector input must begin with '['");
+        }
+                
+        /* Handle case of empty list */
+        is >> c;
+        if(c != ']') {
+          is.putback(c);
+          c=',';
+        }
+                
+        while(c != ']') {
+          if(is.eof()) {
+            throw std::invalid_argument("End-of-file reached");
+          }
+          if(c!=',') {
+            throw std::invalid_argument("Items in list must be separated by ','");
+          }
+          is >> x;
+          if(is.fail()) {
+            throw std::invalid_argument("Error inputting value in list");
+          }
+          v.push_back(x);
+          is >> c;
+        }
+      }
+      catch(...) {
+        // is.seekg(pos);
+        throw; 
+      }
+      
+      return is;
+    }
+        
+  } // namespace IO
 } // namespace Ariadne
 
 
 /* FIXME: This is a hack to allow io of STL classes.
-          But really we should not modify namespace std.
-	  Unfortunately, we need to include the code in 
-	  any namespace using operator<<.
+   But really we should not modify namespace std.
+   Unfortunately, we need to include the code in 
+   any namespace using operator<<.
 */
-  namespace std {
+namespace std {
   template <typename T> 
   inline
   ostream& 

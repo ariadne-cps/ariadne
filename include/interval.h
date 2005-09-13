@@ -73,6 +73,11 @@ namespace Ariadne {
         : boost::numeric::interval<R>(ivl) { }
       Interval(const R& l, const R& u)
         : boost::numeric::interval<R>(l,u) { }
+      
+      bool operator==(const Interval<R>& ivl) { 
+        return this->lower()==ivl.lower() && this->upper()==ivl.upper(); }
+      bool operator!=(const Interval<R>& ivl) { 
+        return !(*this==ivl); }
     };
 
     template<typename R>

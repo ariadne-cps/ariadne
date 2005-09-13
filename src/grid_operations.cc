@@ -53,7 +53,6 @@ namespace Ariadne {
     };
 
     /* Inner product of two positive arrays */
-    inline
     size_type
     inner_product(const array<size_type>& a1, const array<size_type>& a2)
     {
@@ -65,7 +64,6 @@ namespace Ariadne {
     }
 
     /* Compute the sum of an index array and a size. */
-    inline
     IndexArray
     operator+(const IndexArray& l, const SizeArray& s)
     {
@@ -77,7 +75,6 @@ namespace Ariadne {
     }
 
     /* Compute a positive offset from two index sets */
-    inline
     SizeArray
     operator-(const IndexArray& u, const IndexArray& l)
     {
@@ -89,7 +86,6 @@ namespace Ariadne {
       return result;
     }
 
-    inline
     BooleanArray&
     operator&=(BooleanArray& v1, const BooleanArray& v2)
     {
@@ -109,7 +105,6 @@ namespace Ariadne {
       return v1;
     }
 
-    inline
     BooleanArray&
     operator|=(BooleanArray& v1, const BooleanArray& v2)
     {
@@ -129,7 +124,6 @@ namespace Ariadne {
       return v1;
     }
 
-    inline
     BooleanArray&
     operator-=(BooleanArray& v1, const BooleanArray& v2)
     {
@@ -170,7 +164,6 @@ namespace Ariadne {
       return result-=v2;
     }
 
-    inline
     bool
     operator<(const IndexArray& s1, const IndexArray& s2)
     {
@@ -187,7 +180,6 @@ namespace Ariadne {
     }
 
     /* Check ordering of two cells */
-    inline
     bool
     operator<(const IntegerCellList::const_reference& c1, const IntegerCellList::const_reference& c2)
     {
@@ -204,7 +196,6 @@ namespace Ariadne {
     }
 
     /* Compute a positive offset from two index sets */
-    inline
     size_type
     compute_index(const IndexArray& pos, const IndexArray& lower, const SizeArray& strides)
     {
@@ -217,7 +208,6 @@ namespace Ariadne {
     }
 
     /* Compute the position of an index in a grid. */
-    inline
     IndexArray
     compute_position(size_type index, const IndexArray& lower, const SizeArray& strides)
     {
@@ -232,7 +222,6 @@ namespace Ariadne {
     }
 
     /* Compute upper and lower bounds of the cell list cl. */
-    inline
     void
     compute_cell_list_bounds(IndexArray* lptr, IndexArray* uptr, IntegerCellList cl)
     {
@@ -264,7 +253,6 @@ namespace Ariadne {
     }
 
     /* Compute strides from a list of sizes. */
-    inline
     SizeArray
     compute_strides(const SizeArray& s) {
       SizeArray result(s.size()+1);
@@ -276,7 +264,6 @@ namespace Ariadne {
     }
 
     /* Compute upper and lower bounds of the cell list cl. */
-    inline
     void
     compute_rectangle_list_lower_bound(IndexArray* lptr, const IntegerRectangleList& rl)
     {
@@ -301,7 +288,6 @@ namespace Ariadne {
     }
 
     /* Compute upper bounds of the cell list cl. */
-    inline
     void
     compute_rectangle_list_upper_bound(IndexArray* uptr, const IntegerRectangleList& rl)
     {
@@ -326,7 +312,6 @@ namespace Ariadne {
     }
 
     /* Compute upper and lower bounds of the cell list cl. */
-    inline
     void
     compute_rectangle_list_bounds(IndexArray* lptr, IndexArray* uptr, const IntegerRectangleList& rl)
     {

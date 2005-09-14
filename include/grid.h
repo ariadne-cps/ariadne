@@ -42,6 +42,8 @@
 #include "list_set.h"
 
 namespace Ariadne {
+ 
+
   int quotient(double x, double y) {
     assert(y!=0.0);
     int q = int(x/y+0.5);
@@ -171,7 +173,7 @@ namespace Ariadne {
       IndexArray lower() const { return IndexArray(dimension(),0); }
       /*! \brief The highers valid vertex index. */
       IndexArray upper() const { return lower()+sizes(); }
-      /*! \brief The number of subdivision intervals in deach dimension. */
+      /*! \brief The number of subdivision intervals in each dimension. */
       SizeArray sizes() const {
         SizeArray result(dimension());
         for(dimension_type d=0; d!=dimension(); ++d) {

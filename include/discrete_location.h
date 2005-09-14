@@ -95,7 +95,7 @@ class DiscreteLocation{
 		DiscreteLocation(const std::string &name, 
 										const VectorField &vfield):
 				_name(name), _vfield(vfield), 
-				_invariant(vfield.dim()), _in_automaton(false) {}
+				_invariant(vfield.dimension()), _in_automaton(false) {}
 					
 		/*! \brief This is a discrete location class constructor.
 		 *  
@@ -113,7 +113,7 @@ class DiscreteLocation{
 				_invariant(invariant), _in_automaton(false) {
 					
 					
-			if (vfield.dim()!=invariant.dim()) {
+			if (vfield.dimension()!=invariant.dimension()) {
 				throw std::invalid_argument("The invariant and the vector field have different space dimensions.");
 			}
 		}
@@ -134,7 +134,7 @@ class DiscreteLocation{
 				_in_automaton(false) {
 					
 					
-			if (vfield.dim()!=invariant.dim()) {
+			if (vfield.dimension()!=invariant.dimension()) {
 				throw std::invalid_argument("The invariant and the vector field have different space dimensions.");
 			}
 			

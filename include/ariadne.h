@@ -51,27 +51,13 @@ namespace HybridDefinitions {}
 
 /*! \brief Classes defining map.
  */
-namespace Map {
-
-/*! \brief Classes defining affine map.
- */
-namespace Affine {}
-
-}
+namespace Map {}
 
 /*! \brief Classes defining vector field.
  *
  *  In this namespace there are also vector field integrator.
  */
-namespace VectorField {
-
-/*! \brief Classes defining affine vector field.
- *
- * In this namespace there are also affine vector field integrator.
- */
-namespace Affine {}
-
-}
+namespace VectorField {}
 
 /*! \brief Functions for linear algebra.
  */

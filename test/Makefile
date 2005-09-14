@@ -1,9 +1,10 @@
+include ../config.mk
+
 TESTS = test_array test_arithmetic test_binary_word test_denotable_set test_epsfstream test_grid test_interval test_list_set \
   test_partition_tree test_polyhedron test_rectangle test_state
 
 CXXFLAGS += -Wall
-
-include ../config.mk
+LDXXFLAGS += -L../src/ -lariadne
 
 all: ${TESTS}
 	@test_array

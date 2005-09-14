@@ -74,7 +74,7 @@ namespace Ariadne {
       return result;
     }
 
-    /* Compute a positive offset from two index sets */
+    /*! Compute a positive offset from two index sets */
     SizeArray
     operator-(const IndexArray& u, const IndexArray& l)
     {
@@ -195,7 +195,7 @@ namespace Ariadne {
       return false;
     }
 
-    /* Compute a positive offset from two index sets */
+    /* Compute the index of a position in a grid. */
     size_type
     compute_index(const IndexArray& pos, const IndexArray& lower, const SizeArray& strides)
     {

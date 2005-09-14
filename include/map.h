@@ -53,105 +53,99 @@ namespace Map{
 	
 template <typename M>
 class Map {
-	
-	public:
-		typedef M MapT;
-		typedef typename Map::DenotableSet DenotableSet;
-		typedef typename DenotableSet::BasicSet BasicSet;
-		typedef typename BasicSet::State State;
-		typedef typename State::Real Real;
-	
-		Map(const MapT &T):_map(T) {}
-		
-		inline BasicSet operator() (const BasicSet &A) const { return _map(A); }
-		
-		inline DenotableSet operator() (const DenotableSet &A) const{ 
-			
-			DenotableSet trans_ds(A.dim());
-			
-			for (size_t i=0; i< A.size(); i++) {
-				trans_ds.inplace_union(_map(A[i]));
-			}
-			
-			return trans_ds;
-		}
-		
-		inline Map<MapT> &operator=(const Map<MapT>  &A) {
-			
-			this->_map=A._map;
-		}
-		
-		inline size_t dim() const {
-			return (this->_map).dim();
-		}
-		
-		inline bool invertible() const {return this->_map.invertible();}
-		
-	private:
-	
-		MapT _map;
+ public:
+  typedef M MapT;
+  typedef typename Map::DenotableSet DenotableSet;
+  typedef typename DenotableSet::BasicSet BasicSet;
+  typedef typename BasicSet::State State;
+  typedef typename State::Real Real;
+  
+  Map(const MapT& T) :_map(T) {}
+  
+  inline BasicSet operator() (const BasicSet& A) const { return _map(A); }
+  
+  inline DenotableSet operator() (const DenotableSet& A) const { 
+    DenotableSet trans_ds(A.dimension());
+    for (size_t i=0; i< A.size(); i++) {
+      trans_ds.inplace_union(_map(A[i]));
+    }
+    return trans_ds;
+  }
+  
+  inline Map<MapT>& operator=(const Map<MapT> & A) {
+    this->_map=A._map;
+  }
+  
+  inline size_t dimension() const {
+    return (this->_map).dimension();
+  }
+
+  /*! Deprecated. */
+  inline size_t dim() const {
+    return (this->_map).dimension();
+  }
+  
+  inline bool invertible() const {return this->_map.invertible();}
+ private:
+  MapT _map;
 };
-
-
+  
+  
 /* WARNING!!!! Is it the same of an inclusion map? Here I can set
-threshold in inclusion not, but the map seem similar */ 
+ * threshold in inclusion not, but the map seem similar 
+ */ 
 template <typename MAP>
 class ThresholdMap {
-	
-	public:
-		typedef MAP Map;
-		typedef typename Map::DenotableSet DenotableSet;
-		typedef typename DenotableSet::BasicSet BasicSet;
-		typedef typename BasicSet::State State;
-		typedef typename State::Real Real;
-	
-		ThresholdMap(const Map &T, const BasicSet &threshold):_map(T), 
-					_threshold(threshold) {}
-		
-		ThresholdMap(const Map &T, Real threshold = 0):_map(T), 
-					_threshold(T.dim(), threshold) {}
-						
-		inline BasicSet operator() (const BasicSet &A) const { 
-			return _map(A)+this->_threshold; 
-		}
-		
-		inline void set_threshold(const Real &threshold) { 
-			BasicSet new_th((this._map).dim(), threshold);
-			
-			this->_threshold=new_th;
-		}
-		
-		inline DenotableSet operator() (const DenotableSet &A) const{ 
-			
-			DenotableSet trans_ds(A.dim());
-			
-			for (size_t i=0; i< A.size(); i++) {
-				trans_ds.inplace_union(_map(A[i])+this->threshold);
-			}
-			
-			return trans_ds;
-		}
-		
-		inline ThresholdMap<MAP> &operator=(const ThresholdMap<MAP>  &A) {
-			
-			this->_map=A._map;
-			this->_threshold=A._threshold;
-
-		}
-		
-		inline size_t dim() const {
-			return (this->_map).dim();
-		}
-		
-	private:
-	
-		Map _map;
-	
-		BasicSet _threshold;
+  
+ public:
+  typedef MAP Map;
+  typedef typename Map::DenotableSet DenotableSet;
+  typedef typename DenotableSet::BasicSet BasicSet;
+  typedef typename BasicSet::State State;
+  typedef typename State::Real Real;
+  
+  ThresholdMap(const Map& T, const BasicSet& threshold)
+    : _map(T), _threshold(threshold) {}
+  
+  ThresholdMap(const Map& T, Real threshold = 0)
+    : _map(T), _threshold(T.dimension(), threshold) {}
+  
+  inline BasicSet operator() (const BasicSet& A) const { 
+    return _map(A)+this->_threshold; 
+  }
+  
+  inline void set_threshold(const Real& threshold) { 
+    BasicSet new_th((this._map).dimension(), threshold);
+    this->_threshold=new_th;
+  }
+  
+  inline DenotableSet operator() (const DenotableSet& A) const{ 
+    DenotableSet trans_ds(A.dimension());
+    for (size_t i=0; i< A.size(); i++) {
+      trans_ds.inplace_union(_map(A[i])+this->threshold);
+    }
+    return trans_ds;
+  }
+  
+  inline ThresholdMap<MAP>& operator=(const ThresholdMap<MAP>& A) {
+    this->_map=A._map;
+    this->_threshold=A._threshold;
+  }
+  
+  inline size_t dimension() const {
+    return (this->_map).dimension();
+  }
+  
+  /*! Deprecated */
+  inline size_t dim() const {
+    return (this->_map).dimension();
+  }
+ private:
+  Map _map;
+  BasicSet _threshold;
 };
-
+  
 }
-
 }
 
 #endif /* _MAP_H */

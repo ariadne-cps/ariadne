@@ -70,7 +70,7 @@ int main() {
     
     test_assert(r1==r7,"equality");
     
-    std::list<Rectangle> cover1,cover2;
+    std::vector<Rectangle> cover1,cover2;
     cover1.push_back(r2);
     cover1.push_back(r3);
     cover1.push_back(r4);

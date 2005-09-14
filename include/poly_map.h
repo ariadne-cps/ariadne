@@ -33,7 +33,6 @@
 
 namespace Ariadne {	
 namespace Map{
-namespace Affine {
 	
 /*! \brief Affine trasformation for polyhedron.
  *
@@ -71,317 +70,320 @@ namespace Affine {
  */
 template <typename S>
 class PolyAffineMap {
-	
-	public:	
-		typedef typename S::Real Real;
-		typedef S State;
-		typedef typename Ariadne::Geometry::Polyhedron< Real > BasicSet;
-		typedef typename Ariadne::Geometry::Polyhedron< Real > Polyhedron;
-		typedef typename Ariadne::Geometry::DenotableSet< Polyhedron > DenotableSet;
-	
-		typedef typename boost::numeric::ublas::identity_matrix<Real> IdentityMatrix;
-		typedef typename boost::numeric::ublas::matrix<Real> Matrix;
-		typedef typename boost::numeric::ublas::vector<Real> Vector;
-	
-		PolyAffineMap() {}
-	
-		PolyAffineMap(const PolyAffineMap<S> &map): 
-				_A(map._A), _A_invertible(map._A_invertible), _b(map._b), 
-				_map_type(map._map_type), _E(map._E), _n1(map._n1), _f(map._f){}
-	
-		PolyAffineMap(const Matrix &A):_A(A), _A_invertible(true),
-				_b(A.size1()), _map_type(HOMOGENEOUS) {
-			if ((A.size1()==0)||(A.size2()==0))
-				throw std::invalid_argument("The matrix of affine trasformation should have at least 1 row and 1 column.");			
-			
-			this->_get_solution(A);
-		}
-	
-		PolyAffineMap(const Vector &b):_A(b.size(),b.size()), 
-				_A_invertible(true),_b(b), _map_type(TRASLATION) {
-			if (b.size()==0)
-				throw std::invalid_argument("The vector of affine trasformation should have at least 1 row.");
-					
-			this->_get_solution(b);
-		}
-		
-		PolyAffineMap(const Matrix &A, const Vector &b):
-			_A(A), _A_invertible(true), _b(b), _map_type(NON_HOMOGENEOUS) {
-			
-			if ((A.size1()==0)||(A.size2()==0))
-				throw std::invalid_argument("The matrix of affine trasformation should have at least 1 row and 1 column.");
-			
-			if (b.size()==0)
-				throw std::invalid_argument("The vector of affine trasformation should have at least 1 row.");
-
-			this->_get_solution(A,b);		
-		}
-		
-		inline size_t column_nb() const {
-				return this->_A.size2();			
-		}
-		
-		inline size_t row_nb() const {
-			switch(this->_map_type) {
-				case TRASLATION:
-					return this->_b.size();
-					break;
-				default:
-					return this->_A.size1();
-			}				
-		}
-		
-		inline size_t dim() const {
-				return this->column_nb();			
-		}
-		
-		inline PolyAffineMap<S>  &operator=(
-					const PolyAffineMap<S> &orig) {
-			
-			this->_A=orig._A;
-			this->_A_invertible=orig._A_invertible;
-			this->_b=orig._b;
-			this->_map_type=orig._map_type;
-			this->_E=orig._E;
-			this->_n1=orig._n1;
-			this->_f=orig._f;
-						
-			return *this;
-
-		}
-		
-		inline Polyhedron operator()(const Polyhedron &A) const {
-			
-			if (this->_A_invertible) {
-				return _A_not_invertible_apply(A);
-			}
-			else {
-				return _A_not_invertible_apply(A);
-			}
-		}
-		
-		inline const Matrix& A() const { return _A; }
-		
-		inline const Vector& b() const { return _b; }
-		
-		inline AffineKind affine_kind() { return _map_type; }
-		
-		inline bool invertible() const {return this->_A_invertible;}
-		
-	private:
-		/*! \brief The matrix \f$A\f$ */
-		Matrix _A;
-	
-		/*! \brief The invertibility flag of matrix \f$A\f$ */
-		bool _A_invertible;
-		
-		/*! \brief The vector \f$b\f$ */
-		Vector _b;
-	
-		/*! \brief Type of affine trasformation.*/
-		AffineKind _map_type;
-	
-		/*! \brief The matrix \f$E\f$.*/	
-		Matrix _E;
-	
-		/*! \brief The value \f$n_1\f$. */
-		Real _n1;
-		
-		/*! \brief The vector \f$\vec{f}\f$. */	
-		Vector _f;
-		
-		inline Polyhedron _A_not_invertible_apply(const Polyhedron &A) const {
-	
-			#ifdef DEBUG
-				std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-			#endif	
-			
-			Ariadne::LinearAlgebra::GeneratorSystem<Real> gen;	
-			
-			Ariadne::Geometry::_extract_generators_from_polyhedron(A, gen);
-
-			gen.point = prod (this->_A, gen.point);
-			gen.sum_vector_to_all_points(this->_b);
-			
-			gen.ray = prod (this->_A, gen.ray);
-			
-			Polyhedron new_poly=Ariadne::Geometry::_create_polyhedron_from_generators(
-											A,gen);
-											
-			#ifdef DEBUG
-				std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-			#endif		
-			
-			return new_poly;
-		}
-	
-		
-		inline Polyhedron _A_invertible_apply(const Polyhedron &A) const {
-			
-			#ifdef DEBUG
-				std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-			#endif	
-	
-			Ariadne::LinearAlgebra::ConstrainSystem<Real> cs;	
-			
-			Ariadne::Geometry::_extract_constraints_from_polyhedron(A, cs);
-			
-			switch(this->_map_type) {
-				case HOMOGENEOUS:
-				
-					this->_apply_homogeneous(cs);
-				
-					break;
-				
-				case NON_HOMOGENEOUS:
-					
-					this->_apply_non_homogeneous(cs);				
-				
-					break;
-				
-				case TRASLATION:	
-					
-					this->_apply_traslation(cs);
-				
-					break;
-				
-				default:
-					throw std::invalid_argument("There is a problem in the application of PolyAffineMap.");
-				
-			}	
-
-			#ifdef DEBUG
-				std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-			#endif	
-			
-			return Ariadne::Geometry::_create_polyhedron_from_constraints(
-											A,cs);
-		}
-	
-		inline void _apply_homogeneous(
-			Ariadne::LinearAlgebra::ConstrainSystem<Real> &cs) const{
-			
-			cs.d=this->_n1 * cs.d;
-				
-			cs.C=boost::numeric::ublas::prod(cs.C, this->_E);
-			
-		}
-		
-		inline void _apply_non_homogeneous(
-			Ariadne::LinearAlgebra::ConstrainSystem<Real> &cs) const{
-			
-			#ifdef DEBUG
-				std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-			#endif
-			
-			cs.d=this->_n1 * cs.d;
-
-			/* an optimizated version of d= C f + d */
-			//boost::numeric::ublas::axpy_prod(cs.C, this->_f,cs.d, false);
-				
-			cs.d+= boost::numeric::ublas::prod(cs.C, this->_f);
-				
-			cs.C=boost::numeric::ublas::prod(cs.C, this->_E);
-				
-			#ifdef DEBUG
-				std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-			#endif
-		}
-		
-		inline void _apply_traslation(
-			Ariadne::LinearAlgebra::ConstrainSystem<Real> &cs) const {
-		
-			
-			cs.d=this->_n1 * cs.d;
-			
-			/* an optimizated version of d= C f + d */
-			//boost::numeric::ublas::axpy_prod(cs.C, this->_f,cs.d, false);
-				
-			cs.d+= boost::numeric::ublas::prod(cs.C, this->_f);
-							
-		}
-			
-		inline bool _solution_calculated() {
-			return ((this->_E.size1()!=0)||(!this->_A_invertible));
-		}
-	
-		inline void _empty_solution() {
-			
-			#ifdef DEBUG
-				std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-			#endif
-			
-			Matrix empty_matrix(0,0);
-			Vector empty_vector(0);
-				
-			this->_E=empty_matrix;
-			this->_f=empty_vector;
-			
-			#ifdef DEBUG
-				std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-			#endif
-			
-		}
-	
-		inline void _get_solution(const Matrix &A) {
-			
-			try {
-				
-				Matrix inv_A=Ariadne::LinearAlgebra::invert_matrix(A);
-				
-				Real n3=Ariadne::LinearAlgebra::find_matrix_denumerator(inv_A);
-			
-				this->_E=n3*inv_A;
-
-				this->_n1=n3;
-
-				/* useless, but safer */
-				this->_f=Ariadne::LinearAlgebra::null_vector<Real>(A.size1());;
-						
-			} catch (std::exception &e) {
-				
-				this->_A_invertible=false;
-
-			}
-			
-			
-		}
-		
-		inline void _get_solution(const Vector &b) {
-			
-			Real n2=Ariadne::LinearAlgebra::find_vector_denumerator(b);
-			
-			this->_f=n2 * b;
-			
-			this->_n1=n2;
-			
-			/* E=n2*I    useless, but safer */
-			this->_E=n2*Ariadne::LinearAlgebra::identity_matrix<Real>(b.size());	
-	
-		}
-		
-		inline void _get_solution(const Matrix &A, const Vector &b) {
-			
-			try {
-				
-				Matrix inv_A=Ariadne::LinearAlgebra::invert_matrix(A);
-				
-				Real n3=Ariadne::LinearAlgebra::find_matrix_denumerator(inv_A);
-				Real n2=Ariadne::LinearAlgebra::find_vector_denumerator(b);
-			
-				this->_n1=n2 * n3;
-				this->_E=this->_n1*inv_A;
-				this->_f= prod(this->_E, b);
-				
-			} catch (std::exception &e) {
-				this->_A_invertible=false;
-			}
-			
-		}	
-
+ public:	
+  typedef typename S::Real Real;
+  typedef S State;
+  typedef typename Ariadne::Geometry::Polyhedron< Real > BasicSet;
+  typedef typename Ariadne::Geometry::Polyhedron< Real > Polyhedron;
+  typedef typename Ariadne::Geometry::DenotableSet< Polyhedron > DenotableSet;
+  
+  typedef typename boost::numeric::ublas::identity_matrix<Real> IdentityMatrix;
+  typedef typename boost::numeric::ublas::matrix<Real> Matrix;
+  typedef typename boost::numeric::ublas::vector<Real> Vector;
+  
+  PolyAffineMap() {}
+  
+  PolyAffineMap(const PolyAffineMap<S> &map): 
+    _A(map._A), _A_invertible(map._A_invertible), _b(map._b), 
+    _map_type(map._map_type), _E(map._E), _n1(map._n1), _f(map._f){}
+  
+  PolyAffineMap(const Matrix &A):_A(A), _A_invertible(true),
+                                 _b(A.size1()), _map_type(HOMOGENEOUS) {
+    if ((A.size1()==0)||(A.size2()==0))
+      throw std::invalid_argument("The matrix of affine trasformation should have at least 1 row and 1 column.");			
+    
+    this->_get_solution(A);
+  }
+  
+  PolyAffineMap(const Vector &b):_A(b.size(),b.size()), 
+                                 _A_invertible(true),_b(b), _map_type(TRASLATION) {
+    if (b.size()==0)
+      throw std::invalid_argument("The vector of affine trasformation should have at least 1 row.");
+    
+    this->_get_solution(b);
+  }
+  
+  PolyAffineMap(const Matrix &A, const Vector &b):
+    _A(A), _A_invertible(true), _b(b), _map_type(NON_HOMOGENEOUS) {
+    
+    if ((A.size1()==0)||(A.size2()==0))
+      throw std::invalid_argument("The matrix of affine trasformation should have at least 1 row and 1 column.");
+    
+    if (b.size()==0)
+      throw std::invalid_argument("The vector of affine trasformation should have at least 1 row.");
+    
+    this->_get_solution(A,b);		
+  }
+  
+  inline size_t column_nb() const {
+    return this->_A.size2();			
+  }
+  
+  inline size_t row_nb() const {
+    switch(this->_map_type) {
+    case TRASLATION:
+      return this->_b.size();
+      break;
+    default:
+      return this->_A.size1();
+    }				
+  }
+  
+  inline size_t dim() const {
+    return this->column_nb();			
+  }
+  
+  inline size_t dimension() const {
+    return this->column_nb();			
+  }
+  
+  inline PolyAffineMap<S>  &operator=(
+                                      const PolyAffineMap<S> &orig) {
+    
+    this->_A=orig._A;
+    this->_A_invertible=orig._A_invertible;
+    this->_b=orig._b;
+    this->_map_type=orig._map_type;
+    this->_E=orig._E;
+    this->_n1=orig._n1;
+    this->_f=orig._f;
+    
+    return *this;
+    
+  }
+  
+  inline Polyhedron operator()(const Polyhedron &A) const {
+    
+    if (this->_A_invertible) {
+      return _A_not_invertible_apply(A);
+    }
+    else {
+      return _A_not_invertible_apply(A);
+    }
+  }
+  
+  inline const Matrix& A() const { return _A; }
+  
+  inline const Vector& b() const { return _b; }
+  
+  inline AffineKind affine_kind() { return _map_type; }
+  
+  inline bool invertible() const {return this->_A_invertible;}
+  
+ private:
+  /*! \brief The matrix \f$A\f$ */
+  Matrix _A;
+  
+  /*! \brief The invertibility flag of matrix \f$A\f$ */
+  bool _A_invertible;
+  
+  /*! \brief The vector \f$b\f$ */
+  Vector _b;
+  
+  /*! \brief Type of affine trasformation.*/
+  AffineKind _map_type;
+  
+  /*! \brief The matrix \f$E\f$.*/	
+  Matrix _E;
+  
+  /*! \brief The value \f$n_1\f$. */
+  Real _n1;
+  
+  /*! \brief The vector \f$\vec{f}\f$. */	
+  Vector _f;
+  
+  inline Polyhedron _A_not_invertible_apply(const Polyhedron &A) const {
+    
+#ifdef DEBUG
+    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+#endif	
+    
+    Ariadne::LinearAlgebra::GeneratorSystem<Real> gen;	
+    
+    Ariadne::Geometry::_extract_generators_from_polyhedron(A, gen);
+    
+    gen.point = prod (this->_A, gen.point);
+    gen.sum_vector_to_all_points(this->_b);
+    
+    gen.ray = prod (this->_A, gen.ray);
+    
+    Polyhedron new_poly=Ariadne::Geometry::_create_polyhedron_from_generators(
+                                                                              A,gen);
+    
+#ifdef DEBUG
+    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+#endif		
+    
+    return new_poly;
+  }
+  
+  
+  inline Polyhedron _A_invertible_apply(const Polyhedron &A) const {
+    
+#ifdef DEBUG
+    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+#endif	
+    
+    Ariadne::LinearAlgebra::ConstrainSystem<Real> cs;	
+    
+    Ariadne::Geometry::_extract_constraints_from_polyhedron(A, cs);
+    
+    switch(this->_map_type) {
+    case HOMOGENEOUS:
+      
+      this->_apply_homogeneous(cs);
+      
+      break;
+      
+    case NON_HOMOGENEOUS:
+      
+      this->_apply_non_homogeneous(cs);				
+      
+      break;
+      
+    case TRASLATION:	
+      
+      this->_apply_traslation(cs);
+      
+      break;
+      
+    default:
+      throw std::invalid_argument("There is a problem in the application of PolyAffineMap.");
+      
+    }	
+    
+#ifdef DEBUG
+    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+#endif	
+    
+    return Ariadne::Geometry::_create_polyhedron_from_constraints(
+                                                                  A,cs);
+  }
+  
+  inline void _apply_homogeneous(
+                                 Ariadne::LinearAlgebra::ConstrainSystem<Real> &cs) const{
+    
+    cs.d=this->_n1 * cs.d;
+    
+    cs.C=boost::numeric::ublas::prod(cs.C, this->_E);
+    
+  }
+  
+  inline void _apply_non_homogeneous(
+                                     Ariadne::LinearAlgebra::ConstrainSystem<Real> &cs) const{
+    
+#ifdef DEBUG
+    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+#endif
+    
+    cs.d=this->_n1 * cs.d;
+    
+    /* an optimizated version of d= C f + d */
+    //boost::numeric::ublas::axpy_prod(cs.C, this->_f,cs.d, false);
+    
+    cs.d+= boost::numeric::ublas::prod(cs.C, this->_f);
+    
+    cs.C=boost::numeric::ublas::prod(cs.C, this->_E);
+    
+#ifdef DEBUG
+    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+#endif
+  }
+  
+  inline void _apply_traslation(
+                                Ariadne::LinearAlgebra::ConstrainSystem<Real> &cs) const {
+    
+    
+    cs.d=this->_n1 * cs.d;
+    
+    /* an optimizated version of d= C f + d */
+    //boost::numeric::ublas::axpy_prod(cs.C, this->_f,cs.d, false);
+    
+    cs.d+= boost::numeric::ublas::prod(cs.C, this->_f);
+    
+  }
+  
+  inline bool _solution_calculated() {
+    return ((this->_E.size1()!=0)||(!this->_A_invertible));
+  }
+  
+  inline void _empty_solution() {
+    
+#ifdef DEBUG
+    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+#endif
+    
+    Matrix empty_matrix(0,0);
+    Vector empty_vector(0);
+    
+    this->_E=empty_matrix;
+    this->_f=empty_vector;
+    
+#ifdef DEBUG
+    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+#endif
+    
+  }
+  
+  inline void _get_solution(const Matrix &A) {
+    
+    try {
+      
+      Matrix inv_A=Ariadne::LinearAlgebra::invert_matrix(A);
+      
+      Real n3=Ariadne::LinearAlgebra::find_matrix_denumerator(inv_A);
+      
+      this->_E=n3*inv_A;
+      
+      this->_n1=n3;
+      
+      /* useless, but safer */
+      this->_f=Ariadne::LinearAlgebra::null_vector<Real>(A.size1());;
+      
+    } catch (std::exception &e) {
+      
+      this->_A_invertible=false;
+      
+    }
+    
+    
+  }
+  
+  inline void _get_solution(const Vector &b) {
+    
+    Real n2=Ariadne::LinearAlgebra::find_vector_denumerator(b);
+    
+    this->_f=n2 * b;
+    
+    this->_n1=n2;
+    
+    /* E=n2*I    useless, but safer */
+    this->_E=n2*Ariadne::LinearAlgebra::identity_matrix<Real>(b.size());	
+    
+  }
+  
+  inline void _get_solution(const Matrix &A, const Vector &b) {
+    
+    try {
+      
+      Matrix inv_A=Ariadne::LinearAlgebra::invert_matrix(A);
+      
+      Real n3=Ariadne::LinearAlgebra::find_matrix_denumerator(inv_A);
+      Real n2=Ariadne::LinearAlgebra::find_vector_denumerator(b);
+      
+      this->_n1=n2 * n3;
+      this->_E=this->_n1*inv_A;
+      this->_f= prod(this->_E, b);
+      
+    } catch (std::exception &e) {
+      this->_A_invertible=false;
+    }
+    
+  }	
+  
 };
+  
+}
+}
 
-}
-}
-}
 #endif /* _POLY_MAP_H */

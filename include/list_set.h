@@ -48,7 +48,7 @@ namespace Ariadne {
       /* List of basic sets. Note that std::vector provides a
        * reserve(size_t) method to increase the capacity.
        */
-      size_t _dim;
+      size_t _dimension;
       std::vector< BS<R> > _vector;
 
      public:
@@ -60,12 +60,11 @@ namespace Ariadne {
       typedef typename std::vector<BasicSet>::iterator iterator;
 
       /*! \brief A denotable set constructor. */
-      ListSet() : _dim(0), _vector() {
+      ListSet() : _dimension(0), _vector() {
       }
 
       /*! \brief A denotable set constructor. */
-      ListSet(const BasicSet &A) : _dim(0), _vector() {
-        this->_dim=A.dim();
+      ListSet(const BasicSet &A) : _dimension(A.dimension()), _vector() {
         if (A.empty()) {
             return;
         }
@@ -73,10 +72,10 @@ namespace Ariadne {
       }
 
       /*! \brief The copy constructor. */
-      ListSet(const ListSet<R,BS>& A) : _dim(A.dim()), _vector(A._vector) { }
+      ListSet(const ListSet<R,BS>& A) : _dimension(A.dimension()), _vector(A._vector) { }
 
       /*! \brief Construct a ListSet<BasicSet> to hold sets of dimension \a n. */
-      ListSet(size_t n) : _dim(n), _vector() { }
+      ListSet(size_t n) : _dimension(n), _vector() { }
 
       /*! \brief The destructor. */
       ~ListSet() {
@@ -93,26 +92,21 @@ namespace Ariadne {
 
       /*! \brief Adjoins a basic set to the back of the list. */
       inline void push_back(const BS<R>& A) {
-        if (this->dimension()==0) { this->_dim=A.dimension(); }
+        if (this->dimension()==0) { this->_dimension=A.dimension(); }
 
-        if (A.dim()!=this->dimension()) {
+        if (A.dimension()!=this->dimension()) {
           throw std::invalid_argument("The two denotable set has a different space dimension to the list.");
         }
 
         _vector.push_back(A);
       }
 
-     /*! \brief Return the denotable set's space dimension.
+      /*! \brief Return the denotable set's space dimension. 
       *
       * \return The space dimension of the ListSet.
       */
-      inline const size_t dim() const {
-          return this->_dim;
-      }
-
-      /*! \brief Return the denotable set's space dimension. */
       inline const size_t dimension() const {
-          return this->_dim;
+          return this->_dimension;
       }
 
       /*! \brief Accesses the i-th BasicSet.
@@ -120,7 +114,31 @@ namespace Ariadne {
       * \param index is the index of the returned basic set.
       * \return The i-th basic set maitained by the ListSet.
       */
-      inline const BasicSet &operator[](size_t index) const {
+      inline const BasicSet& get(size_t index) const {
+        if (this->size()<=index)
+          throw std::invalid_argument("Index overlaps vector bounds.");
+
+        return this->_vector[index];
+      }
+
+      /*! \brief Assigns to the i-th BasicSet.
+      *
+      * \param index is the index of the returned basic set.
+      * \param set is the new set.
+      */
+      inline void set(size_t index, const BasicSet& set) {
+        if (this->size()<=index)
+          throw std::invalid_argument("Index overlaps vector bounds.");
+
+        this->_vector[index]=set;
+      }
+
+      /*! \brief Accesses the i-th BasicSet.
+      *
+      * \param index is the index of the returned basic set.
+      * \return The i-th basic set maitained by the ListSet.
+      */
+      inline const BasicSet& operator[](size_t index) const {
         if (this->size()<=index)
           throw std::invalid_argument("Index overlaps vector bounds.");
 
@@ -134,7 +152,7 @@ namespace Ariadne {
           std::cout << __FILE__ << ":" << __LINE__ << std::endl;
         #endif
 
-        ListSet<R,BS> sum(A.dim());
+        ListSet<R,BS> sum(A.dimension());
 
         for (size_t i=0; i< this->size(); i++) {
           for (size_t j=0; j< A.size(); j++) {
@@ -176,7 +194,7 @@ namespace Ariadne {
         #endif
 
         if(this != &A) {
-            this->_dim = A._dim;
+            this->_dimension = A._dimension;
             this->_vector = A._vector;
         }
 
@@ -267,9 +285,9 @@ namespace Ariadne {
           std::cout << __FILE__ << ":" << __LINE__ << std::endl;
         #endif
 
-        if (this->dim()==0) { this->_dim=A.dim(); }
+        if (this->dimension()==0) { this->_dimension=A.dimension(); }
 
-        if (A.dim()!=this->dim()) {
+        if (A.dimension()!=this->dimension()) {
           throw std::invalid_argument("The two denotable set have different space dimensions.");
         }
 
@@ -302,9 +320,9 @@ namespace Ariadne {
           std::cout << __FILE__ << ":" << __LINE__ << std::endl;
         #endif
 
-        if (this->dim()==0) { this->_dim=A.dim(); }
+        if (this->dimension()==0) { this->_dimension=A.dimension(); }
 
-        if (A.dim()!=this->dim()) {
+        if (A.dimension()!=this->dimension()) {
           throw std::invalid_argument("The denotable set the basic set have different space dimensions.");
         }
 
@@ -340,8 +358,8 @@ namespace Ariadne {
        * \return \a true if A intersects the interior of B,
        * \a false otherwise.
        */
-      friend bool intersects_interior <> (const ListSet<R,BS> &A,
-                                          const ListSet<R,BS> &B);
+      friend bool interiors_intersect<> (const ListSet<R,BS> &A,
+                                         const ListSet<R,BS> &B);
 
       /*! \brief Tests intersection of interiors.
        *
@@ -351,7 +369,7 @@ namespace Ariadne {
        * \return \a true if A intersects the interior of B,
        * \a false otherwise.
        */
-      friend bool intersects_interior <> (const Rectangle<R> &rect,
+      friend bool interiors_intersect<> (const Rectangle<R> &rect,
                                           const ListSet<R,BS> &A);
 
       /*! \brief Tests inclusion of interiors.
@@ -362,8 +380,8 @@ namespace Ariadne {
        * \return \a true if A is a subset of the interior of B,
        * \a false otherwise.
        */
-      friend bool subset_of_interior <> (const ListSet<R,BS> &A,
-                                         const ListSet<R,BS> &B);
+      friend bool inner_subset<> (const ListSet<R,BS> &A,
+                                  const ListSet<R,BS> &B);
 
       /*! \brief Tests inclusion of interiors.
        *
@@ -373,8 +391,8 @@ namespace Ariadne {
        * \return \a true if A is a subset of the interior of B,
        * \a false otherwise.
        */
-      friend bool subset_of_interior <> (const Rectangle<R> &rect,
-                                         const ListSet<R,BS> &A);
+      friend bool inner_subset<> (const Rectangle<R> &rect,
+                                  const ListSet<R,BS> &A);
 
       /*! \brief Tests inclusion of interiors.
        *
@@ -384,8 +402,8 @@ namespace Ariadne {
        * \return \a true if A is a subset of the interior of B,
        * \a false otherwise.
        */
-      friend bool subset_of_interior <> (const ListSet<R,BS> &A,
-                                         const Rectangle<R> &rect);
+      friend bool inner_subset<> (const ListSet<R,BS> &A,
+                                  const Rectangle<R> &rect);
 
       /*! \brief Makes union of two interiors.
        *
@@ -394,8 +412,8 @@ namespace Ariadne {
        * \param B	is a denotable set.
        * \return The union of A and B.
        */
-      friend ListSet<R,BS> join <> (const ListSet<R,BS> &A,
-                                    const ListSet<R,BS> &B);
+      friend ListSet<R,BS> join<> (const ListSet<R,BS> &A,
+                                   const ListSet<R,BS> &B);
 
       /*! \brief Makes intersection of two interiors.
        *
@@ -406,18 +424,18 @@ namespace Ariadne {
        * \return The closure of the intersection of A with the interiors of B.
        */
       friend ListSet<R,BS>
-      closure_of_intersection_of_interior <> (const ListSet<R,BS> &A,
-                                              const ListSet<R,BS> &B);
+      regular_intersection <> (const ListSet<R,BS> &A,
+                               const ListSet<R,BS> &B);
     };
 
 
 
-    template <template<class> class BS, typename R>
+    template <typename R, template<class> class BS>
     bool
     disjoint (const ListSet<R,BS> &A,
               const ListSet<R,BS> &B)
     {
-      if (A.dim()!=B.dim()) {
+      if (A.dimension()!=B.dimension()) {
         throw std::invalid_argument("The two denotable set have different space dimensions.");
       }
 
@@ -433,10 +451,10 @@ namespace Ariadne {
 
     template <typename R, template <typename> class BS>
     bool
-    intersects_interior(const ListSet<R,BS> &A,
+    interiors_intersect(const ListSet<R,BS> &A,
                         const ListSet<R,BS> &B)
     {
-      if (A.dim()!=B.dim()) {
+      if (A.dimension()!=B.dimension()) {
         throw std::invalid_argument("The two denotable set have different space dimensions.");
       }
 
@@ -453,10 +471,10 @@ namespace Ariadne {
 
     template <typename R, template <typename> class BS>
     bool
-    intersects_interior(const Rectangle<R> &rect,
+    interiors_intersect(const Rectangle<R> &rect,
                         const ListSet<R,BS> &A)
     {
-      if (A.dim()!=rect.dim()) {
+      if (A.dimension()!=rect.dimension()) {
         throw std::invalid_argument(
           "The denotable set and the rectangle have different space dimensions.");
       }
@@ -470,10 +488,10 @@ namespace Ariadne {
 
     template <typename R, template <typename> class BS>
     bool
-    intersects_interior(const ListSet<R,BS> &A,
+    interiors_intersect(const ListSet<R,BS> &A,
                         const Rectangle<R> &rect)
     {
-      if (A.dim()!=rect.dim()) {
+      if (A.dimension()!=rect.dimension()) {
         throw std::invalid_argument(
           "The denotable set and the rectangle have different space dimensions.");
       }
@@ -485,12 +503,12 @@ namespace Ariadne {
       return false;
     }
 
-    template <template <typename> class BS, typename R>
+    template <typename R, template <typename> class BS>
     bool
-    subset_of_interior(const ListSet<R,BS> &A,
-                       const ListSet<R,BS> &B)
+    inner_subset(const ListSet<R,BS> &A,
+                 const ListSet<R,BS> &B)
     {
-      if (A.dim()!=B.dim()) {
+      if (A.dimension()!=B.dimension()) {
         throw std::invalid_argument("The two denotable set have different space dimensions.");
       }
 
@@ -503,14 +521,14 @@ namespace Ariadne {
 
     template <typename R, template <typename> class BS>
     bool
-    subset_of_interior(const Rectangle<R> &rect,
-                       const ListSet<R,BS> &A)
+    inner_subset(const Rectangle<R> &rect,
+                 const ListSet<R,BS> &A)
     {
       #ifdef DEBUG
         std::cout << __FILE__ << ":" << __LINE__ << std::endl;
       #endif
 
-      if (A.dim()!=rect.dim()) {
+      if (A.dimension()!=rect.dimension()) {
         throw std::invalid_argument(
           "The denotable set and the rectangle have different space dimensions.");
       }
@@ -534,14 +552,14 @@ namespace Ariadne {
 
     template <typename R, template <typename> class BS>
     bool
-    subset_of_interior(const ListSet<R,BS> &A,
-                       const Rectangle<R> &rect)
+    inner_subset(const ListSet<R,BS> &A,
+                 const Rectangle<R> &rect)
     {
       #ifdef DEBUG
         std::cout << __FILE__ << ":" << __LINE__ << std::endl;
       #endif
 
-      if (A.dim()!=rect.dim()) {
+      if (A.dimension()!=rect.dimension()) {
         throw std::invalid_argument(
           "The denotable set and the rectangle have different space dimensions.");
       }
@@ -564,6 +582,18 @@ namespace Ariadne {
 
 
     template <typename R, template <typename> class BS>
+    bool
+    subset(const ListSet<R,BS> &A,
+           const ListSet<R,BS> &B)
+    {
+      if (A.dimension()!=B.dimension()) {
+        throw std::invalid_argument("The two denotable set have different space dimensions.");
+      }
+
+      throw std::runtime_error("Not implemented");
+    }
+
+    template <typename R, template <typename> class BS>
     ListSet<R,BS>
     join(const ListSet<R,BS> &A,
          const ListSet<R,BS> &B)
@@ -572,7 +602,7 @@ namespace Ariadne {
         std::cout << __FILE__ << ":" << __LINE__ << std::endl;
       #endif
 
-      if (A.dim()!=B.dim()) {
+      if (A.dimension()!=B.dimension()) {
         throw std::invalid_argument("The two denotable set have different space dimensions.");
       }
 
@@ -589,8 +619,8 @@ namespace Ariadne {
 
     template <typename R, template <typename> class BS>
     ListSet<R,BS>
-    closure_of_intersection_of_interior(const ListSet<R,BS> &A,
-                                        const ListSet<R,BS> &B)
+    regular_intersection(const ListSet<R,BS> &A,
+                         const ListSet<R,BS> &B)
     {
       ListSet<R,BS> ds_inter;
       std::vector< BS<R> > &vector=ds_inter._vector;
@@ -599,7 +629,7 @@ namespace Ariadne {
         std::cout << __FILE__ << ":" << __LINE__ << std::endl;
       #endif
 
-      if (A.dim()!=B.dim()) {
+      if (A.dimension()!=B.dimension()) {
         throw std::invalid_argument("The two denotable set have different space dimensions.");
       }
 
@@ -611,7 +641,7 @@ namespace Ariadne {
         }
       }
 
-      ds_inter._dim=A._dim;
+      ds_inter._dimension=A._dimension;
 
       #ifdef DEBUG
         std::cout << __FILE__ << ":" << __LINE__ << std::endl;
@@ -644,10 +674,10 @@ namespace Ariadne {
       is >> vec;
 
       if(vec.size()==0) {
-        A._dim = 0;
+        A._dimension = 0;
       }
       else {
-        A._dim=vec[0].dim();
+        A._dimension=vec[0].dimension();
       }
       return is;
     }

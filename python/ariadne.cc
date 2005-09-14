@@ -26,6 +26,7 @@
 #include "interval.h"
 #include "state.h"
 #include "rectangle.h"
+#include "list_set.h"
 
 #include <boost/python.hpp>
 
@@ -35,6 +36,7 @@ using namespace Ariadne::Geometry;
 typedef Interval<Rational> QInterval;
 typedef State<Rational> QState;
 typedef Rectangle<Rational> QRectangle;
+typedef ListSet<Rational,Rectangle> QRectangleListSet;
 
 // Since gmpxx operators return intermediate types which need conversion, need to explicitly provide arithmetic functions
 inline Integer neg_z(const Integer& z1) { return -z1; }
@@ -78,14 +80,32 @@ BOOST_PYTHON_MODULE(ariadne)
   using boost::python::copy_const_reference;
   using boost::python::def;
   
-  typedef bool (*QRectFun) (const QRectangle&, const QRectangle&);
-  QRectFun qinner_subset=&inner_subset<Rational>;
+  typedef bool (*QRectBinPred) (const QRectangle&, const QRectangle&);
+  typedef QRectangle (*QRectBinFun) (const QRectangle&, const QRectangle&);
+  QRectBinFun qrect_regular_intersection=&regular_intersection<Rational>;
+  QRectBinPred qrect_interiors_intersect=&interiors_intersect<Rational>;
+  QRectBinPred qrect_disjoint=&disjoint<Rational>;
+  QRectBinPred qrect_inner_subset=&inner_subset<Rational>;
+  QRectBinPred qrect_subset=&subset<Rational>;
 
-  def("regular_intersection", &regular_intersection<Rational>);
-  def("interiors_intersect", &interiors_intersect<Rational>);
-  def("disjoint", &disjoint<Rational>);
-  def("inner_subset", qinner_subset);
-  def("subset", &subset<Rational>);
+  def("regular_intersection", qrect_regular_intersection);
+  def("interiors_intersect", qrect_interiors_intersect);
+  def("disjoint", qrect_disjoint);
+  def("inner_subset", qrect_inner_subset);
+  def("subset", qrect_subset);
+
+  typedef bool (*QRectLSBinPred) (const QRectangleListSet&, const QRectangleListSet&);
+  typedef QRectangleListSet (*QRectLSBinFun) (const QRectangleListSet&, const QRectangleListSet&);
+  //  QRectLSBinPred qrect_interiors_intersect=&interiors_intersect<Rational>;
+  QRectLSBinPred qrectls_disjoint=&disjoint<Rational,Rectangle>;
+  QRectLSBinPred qrectls_inner_subset=&inner_subset<Rational,Rectangle>;
+  QRectLSBinPred qrectls_subset=&subset<Rational,Rectangle>;
+
+  //  def("regular_intersection", qrect_regular_intersection);
+  //  def("interiors_intersect", qrect_interiors_intersect);
+  def("disjoint", qrectls_disjoint);
+  def("inner_subset", qrectls_inner_subset);
+  def("subset", qrectls_subset);
 
   class_<Integer>("Integer")
     .def(init<int>())
@@ -136,27 +156,27 @@ BOOST_PYTHON_MODULE(ariadne)
     .def(boost::python::self_ns::str(self))    // __str__
     ;
 
-  class_< Interval<Rational> >("QInterval")
+  class_<QInterval>("Interval")
     .def(init<Rational,Rational>())
-    .def("lower", &Interval<Rational>::lower, return_value_policy<copy_const_reference>())
-    .def("upper", &Interval<Rational>::upper, return_value_policy<copy_const_reference>())
+    .def("lower", &QInterval::lower, return_value_policy<copy_const_reference>())
+    .def("upper", &QInterval::upper, return_value_policy<copy_const_reference>())
     .def(boost::python::self_ns::str(self))    // __str__
     ;
 
-  class_< State<Rational> >("QState")
+  class_<QState>("State")
     .def(init<int>())
     .def(init<int,Rational>())
     .def(init<QState>())
-    .def("dimension", &State<Rational>::dimension)
-    .def("__len__", &State<Rational>::dimension)
-    .def("__getitem__", &State<Rational>::get)
+    .def("dimension", &QState::dimension)
+    .def("__len__", &QState::dimension)
+    .def("__getitem__", &QState::get)
     .def("__setitem__", &State <Rational>::set)
-    .def("__eq__", &State<Rational>::operator==)
-    .def("__ne__", &State<Rational>::operator!=)
+    .def("__eq__", &QState::operator==)
+    .def("__ne__", &QState::operator!=)
     .def(boost::python::self_ns::str(self))    // __str__
     ;
 
-  class_< QRectangle >("QRectangle")
+  class_< QRectangle >("Rectangle")
     .def(init<int>())
     .def(init<QState,QState>())
     .def(init<QRectangle>())
@@ -170,6 +190,17 @@ BOOST_PYTHON_MODULE(ariadne)
     .def("__setitem__", &QRectangle::set)
     .def("__eq__", &QRectangle::operator==)
     .def("__ne__", &QRectangle::operator!=)
+    .def(boost::python::self_ns::str(self))    // __str__
+    ;
+
+  class_<QRectangleListSet>("RectangleListSet")
+    .def(init<QRectangle>())
+    .def(init<QRectangleListSet>())
+    .def("dimension", &QRectangleListSet::dimension)
+    .def("push_back", &QRectangleListSet::push_back)
+    .def("__len__", &QRectangleListSet::size)
+    .def("__getitem__", &QRectangleListSet::get, return_value_policy<copy_const_reference>())
+    .def("__setitem__", &QRectangleListSet::set)
     .def(boost::python::self_ns::str(self))    // __str__
     ;
 

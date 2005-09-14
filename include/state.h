@@ -91,10 +91,10 @@ namespace Ariadne {
       /*! \brief Checks equivalence between two states. */
       inline bool operator==(const State<Real> &A) const {
         /* Return false if states have different dimensions */
-        if (this->dim()!=A.dim()) { return false; }
+        if (this->dimension()!=A.dimension()) { return false; }
 
         /* for each dimension i */
-        for (size_t i=0; i<this->dim(); i++) {
+        for (size_t i=0; i<this->dimension(); i++) {
           if (this->_vector[i]!=A._vector[i]) { return false; }
         }
 
@@ -104,11 +104,6 @@ namespace Ariadne {
       /*! \brief Checks equivalence between two states. */
       inline bool operator!=(const State<Real> &A) const {
         return !( *this == A );
-      }
-
-      /*! \brief Returns the state's dimension. */
-      inline size_t dim() const {
-        return (this->_vector).size();
       }
 
       /*! \brief The dimension of the Euclidean space the state lies in. */

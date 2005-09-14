@@ -30,163 +30,163 @@ namespace LinearAlgebra {
 	
 template <typename R> 
 class GeneratorSystem {
-	
-	private:
-
-	
-	public:
-		
-		enum GeneratorType{
-			POINT,
-			LINE,
-			RAY,
-			CLOSURE_POINT
-		};
-		
-		typedef boost::numeric::ublas::matrix<R> Matrix;
-		typedef boost::numeric::ublas::vector<R> Vector;
-		typedef std::vector<GeneratorType> TypeVector;
-		
-		GeneratorSystem(const Matrix &pmatrix, 
-					const TypeVector &ptype_vector,const Matrix &r_matrix,
-					const TypeVector &rtype_vector):
-				point(pmatrix), point_type(ptype_vector),
-				ray(r_matrix),ray_type(rtype_vector){}
-						
-		GeneratorSystem() {}
-		
-		inline bool empty() const{
-			return ((this->point_nb()==0)&&(this->ray_nb()==0));
-		}
-		
-		inline size_t space_dim() const{
-				
-			return this->point.size1();
-		}
-		
-		inline size_t point_nb() const{
-				
-			return this->point.size2();
-			
-		}
-		
-		inline size_t ray_nb() const{
-				
-			return this->ray.size2();
-			
-		}
-		
-		inline void set_point(const size_t &j){
-				
-			this->point_type[j]=POINT;
-			
-		}
-		
-		inline void set_closure_point(const size_t &j){
-				
-			this->point_type[j]=CLOSURE_POINT;
-			
-		}
-		
-		inline void set_ray(const size_t &j){
-				
-			this->ray_type[j]=RAY;
-			
-		}
-		
-		inline void set_line(const size_t &j){
-				
-			this->ray_type[j]=LINE;
-			
-		}
-		
-		inline bool is_point(const size_t &j) const {
-				
-			return (this->point_type[j]==POINT);
-			
-		}
-		
-		inline bool is_closure_point(const size_t &j) const {
-				
-			return (this->point_type[j]==CLOSURE_POINT);
-			
-		}
-		
-		inline bool is_ray(const size_t &j) const {
-				
-			return (this->ray_type[j]==RAY);
-			
-		}
-		
-		inline bool is_line(const size_t &j) const {
-				
-			return (this->ray_type[j]==LINE);
-			
-		}
-		
-		inline const GeneratorSystem<R> 
-				&sum_vector_to_all_points(const Vector &v) {
-			
-			#ifdef DEBUG
-				std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-			#endif	
-					
-			size_t i,j;
-
-			for (j=0; j< this->space_dim(); j++) {
-				
-				const R &c=v(j);
-				
-				for (i=0; i< this->point_nb(); i++) {
-					this->point(j,i)+=c;
-				}
-			}						
-					
-			#ifdef DEBUG
-				std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-			#endif	
-			
-			return *this;
-		}
-		
-		inline const GeneratorSystem<R> &operator=(
-					const GeneratorSystem<R> &gen){
-				
-				(this->point) = (cs.point);
-				(this->point_type) = (cs.point_type);
-				(this->ray) = (cs.ray);
-				(this->ray_type) = (cs.ray_type);
-						
-				return *this;
-		}
-		
-		inline void reset_dimensions(const size_t &point_nb, const size_t &ray_nb, const size_t &dim) {
-		
-			Matrix new_point_matrix(dim,point_nb);
-			TypeVector new_point_type_vector;
-			
-			new_point_type_vector.resize(point_nb);
-			
-			Matrix new_ray_matrix(dim,ray_nb);
-			TypeVector new_ray_type_vector;
-		
-			new_ray_type_vector.resize(ray_nb);
-			
-			this->point=new_point_matrix;
-			this->point_type=new_point_type_vector;
-			
-			this->ray=new_ray_matrix;
-			this->ray_type=new_ray_type_vector;
-		}
-		
-		Matrix point;
-		TypeVector point_type;
-
-		Matrix ray;
-		TypeVector ray_type;	
-		
+  
+ private:
+  
+  
+ public:
+  
+  enum GeneratorType{
+    POINT,
+    LINE,
+    RAY,
+    CLOSURE_POINT
+  };
+  
+  typedef boost::numeric::ublas::matrix<R> Matrix;
+  typedef boost::numeric::ublas::vector<R> Vector;
+  typedef std::vector<GeneratorType> TypeVector;
+  
+  GeneratorSystem(const Matrix &pmatrix, 
+                  const TypeVector &ptype_vector,const Matrix &r_matrix,
+                  const TypeVector &rtype_vector):
+    point(pmatrix), point_type(ptype_vector),
+    ray(r_matrix),ray_type(rtype_vector){}
+  
+  GeneratorSystem() {}
+  
+  inline bool empty() const{
+    return ((this->point_nb()==0)&&(this->ray_nb()==0));
+  }
+  
+  inline size_t space_dimension() const{
+    
+    return this->point.size1();
+  }
+  
+  inline size_t point_nb() const{
+    
+    return this->point.size2();
+    
+  }
+  
+  inline size_t ray_nb() const{
+    
+    return this->ray.size2();
+    
+  }
+  
+  inline void set_point(const size_t &j){
+    
+    this->point_type[j]=POINT;
+    
+  }
+  
+  inline void set_closure_point(const size_t &j){
+    
+    this->point_type[j]=CLOSURE_POINT;
+    
+  }
+  
+  inline void set_ray(const size_t &j){
+    
+    this->ray_type[j]=RAY;
+    
+  }
+  
+  inline void set_line(const size_t &j){
+    
+    this->ray_type[j]=LINE;
+    
+  }
+  
+  inline bool is_point(const size_t &j) const {
+    
+    return (this->point_type[j]==POINT);
+    
+  }
+  
+  inline bool is_closure_point(const size_t &j) const {
+    
+    return (this->point_type[j]==CLOSURE_POINT);
+    
+  }
+  
+  inline bool is_ray(const size_t &j) const {
+    
+    return (this->ray_type[j]==RAY);
+    
+  }
+  
+  inline bool is_line(const size_t &j) const {
+    
+    return (this->ray_type[j]==LINE);
+    
+  }
+  
+  inline const GeneratorSystem<R> 
+  &sum_vector_to_all_points(const Vector &v) {
+    
+#ifdef DEBUG
+    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+#endif	
+    
+    size_t i,j;
+    
+    for (j=0; j< this->space_dimension(); j++) {
+      
+      const R &c=v(j);
+      
+      for (i=0; i< this->point_nb(); i++) {
+        this->point(j,i)+=c;
+      }
+    }						
+    
+#ifdef DEBUG
+    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+#endif	
+    
+    return *this;
+  }
+  
+  inline const GeneratorSystem<R> &operator=(
+                                             const GeneratorSystem<R> &gen){
+    
+    (this->point) = (cs.point);
+    (this->point_type) = (cs.point_type);
+    (this->ray) = (cs.ray);
+    (this->ray_type) = (cs.ray_type);
+    
+    return *this;
+  }
+  
+  inline void reset_dimensions(const size_t &point_nb, const size_t &ray_nb, const size_t &dim) {
+    
+    Matrix new_point_matrix(dim,point_nb);
+    TypeVector new_point_type_vector;
+    
+    new_point_type_vector.resize(point_nb);
+    
+    Matrix new_ray_matrix(dim,ray_nb);
+    TypeVector new_ray_type_vector;
+    
+    new_ray_type_vector.resize(ray_nb);
+    
+    this->point=new_point_matrix;
+    this->point_type=new_point_type_vector;
+    
+    this->ray=new_ray_matrix;
+    this->ray_type=new_ray_type_vector;
+  }
+  
+  Matrix point;
+  TypeVector point_type;
+  
+  Matrix ray;
+  TypeVector ray_type;	
+  
 };
-		
+  
 }
 }
 

@@ -61,7 +61,7 @@ inline void _extract_constraints_from_polyhedron(
   begin=((poly._poly).constraints()).begin();
   end=((poly._poly).constraints()).end();
             
-  size_t space_dim=poly.dim();
+  size_t space_dim=poly.dimension();
   size_t nb_constr=0,i,j;
             
   for (j_cs=begin; j_cs!=end; j_cs++) {
@@ -111,7 +111,7 @@ inline void _extract_generators_from_polyhedron(
   begin=((poly._poly).generators()).begin();
   end=((poly._poly).generators()).end();
             
-  size_t space_dim=poly.dim();
+  size_t space_dim=poly.dimension();
   size_t point_nb=0,ray_nb=0, i,j_ray=0, j_point=0;
             
   for (j_gen=begin; j_gen!=end; j_gen++) {
@@ -201,20 +201,20 @@ inline Polyhedron<R> _create_polyhedron_from_generators(
   Parma_Polyhedra_Library::Linear_Expression exp;
   size_t j,i;
           
-  if (poly.dim()!=gen.space_dim()) 
+  if (poly.dimension()!=gen.space_dimension()) 
     throw std::invalid_argument("The generator system's matrix and the variable vector should have the same dimensions.");
   
   for (j=0; j< gen.point_nb(); j++) {
     
     den=denumerator(gen.point(0,j));
     
-    for (i=1; i< poly.dim(); i++) {
+    for (i=1; i< poly.dimension(); i++) {
       den=lcm(numerator(den),denumerator(gen.point(i,j)));
     }
     
     exp=(den*gen.point(0,j))*(Parma_Polyhedra_Library::Variable(0));
 
-    for (i=1; i< poly.dim(); i++) {
+    for (i=1; i< poly.dimension(); i++) {
       exp+=(den*gen.point(i,j))*(Parma_Polyhedra_Library::Variable(i));
     }
     
@@ -229,7 +229,7 @@ inline Polyhedron<R> _create_polyhedron_from_generators(
     
     exp=gen.ray(0,j)*(Parma_Polyhedra_Library::Variable(0));
 
-    for (i=1; i< poly.dim(); i++) {
+    for (i=1; i< poly.dimension(); i++) {
       exp+=gen.ray(i,j)*(Parma_Polyhedra_Library::Variable(i));
     }
     
@@ -263,7 +263,7 @@ inline Parma_Polyhedra_Library::NNC_Polyhedron
   /* if there is an equality, the open set is empty */
   if (cs.any_equality()) {
     Parma_Polyhedra_Library::NNC_Polyhedron 
-      open_poly(cs.space_dim(),Parma_Polyhedra_Library::Polyhedron::EMPTY);
+      open_poly(cs.space_dimension(),Parma_Polyhedra_Library::Polyhedron::EMPTY);
     
     return open_poly;
   }
@@ -272,7 +272,7 @@ inline Parma_Polyhedra_Library::NNC_Polyhedron
         
     exp=cs.C(j,0)*(Parma_Polyhedra_Library::Variable(0));
 
-    for (i=1; i< cs.space_dim(); i++) {
+    for (i=1; i< cs.space_dimension(); i++) {
       exp+=cs.C(j,i)*(Parma_Polyhedra_Library::Variable(i));
     }
     
@@ -299,7 +299,7 @@ inline Parma_Polyhedra_Library::NNC_Polyhedron
         
     exp=cs.C(j,0)*(Parma_Polyhedra_Library::Variable(0));
 
-    for (i=1; i< cs.space_dim(); i++) {
+    for (i=1; i< cs.space_dimension(); i++) {
       exp+=cs.C(j,i)*(Parma_Polyhedra_Library::Variable(i));
     }
     
@@ -328,14 +328,14 @@ inline Polyhedron<R> _create_polyhedron_from_constraints(
   Parma_Polyhedra_Library::Linear_Expression exp;
   size_t j,i;
           
-  if (poly.dim()!=cs.space_dim()) 
+  if (poly.dimension()!=cs.space_dimension()) 
     throw std::invalid_argument("The constraint system's matrix and the variable vector should have the same dimensions.");
   
   for (j=0; j< cs.nb_constraints(); j++) {
         
     exp=cs.C(j,0)*(Parma_Polyhedra_Library::Variable(0));
 
-    for (i=1; i< poly.dim(); i++) {
+    for (i=1; i< poly.dimension(); i++) {
       exp+=cs.C(j,i)*(Parma_Polyhedra_Library::Variable(i));
     }
     
@@ -383,7 +383,7 @@ inline Parma_Polyhedra_Library::NNC_Polyhedron _from_State_to_PPL_Polihedron(con
   Parma_Polyhedra_Library::Constraint_System cs;
   Rational num;
   
-  for (size_t i=0; i<s.dim(); i++) {
+  for (size_t i=0; i<s.dimension(); i++) {
       num=transform_into_rational(s[i]);
       
       cs.insert(Parma_Polyhedra_Library::Variable(i) * 
@@ -407,11 +407,11 @@ inline Parma_Polyhedra_Library::NNC_Polyhedron _from_Rectangle_to_closed_PPL_Pol
     std::vector<Parma_Polyhedra_Library::Variable *> x;
   Rational num;
   
-  for (size_t i=0; i<r.dim(); i++) {
+  for (size_t i=0; i<r.dimension(); i++) {
       x.push_back(new Parma_Polyhedra_Library::Variable(i));
   }
   
-  for (size_t i=0; i<r.dim(); i++) {
+  for (size_t i=0; i<r.dimension(); i++) {
       num=transform_into_rational(u_corner[i]);
       cs.insert((Parma_Polyhedra_Library::Variable(i))*denumerator(num) <= 
             numerator(num));
@@ -550,7 +550,7 @@ inline Polyhedron<R> minkowski_sum(const Polyhedron<R> &A,
           
     _extract_generators_from_polyhedron(B, gen_B);
       
-    for (size_t i=0; i<gen_B.space_dim(); i++) {
+    for (size_t i=0; i<gen_B.space_dimension(); i++) {
         
       for (size_t j=0; j<gen_B.point_nb() ; j++) {
             
@@ -652,7 +652,7 @@ class Polyhedron {
             const Polyhedron<R> &A, 
             const Polyhedron<R> &B);
             
-    friend class Ariadne::Map::Affine::PolyAffineMap<R>;
+    friend class Ariadne::Map::PolyAffineMap<R>;
     
     inline Polyhedron<R> _interior() const {
       
@@ -688,7 +688,7 @@ class Polyhedron {
     inline void _set_empty() {
   
       Parma_Polyhedra_Library::NNC_Polyhedron 
-              poly(this->dim(),
+              poly(this->dimension(),
               Parma_Polyhedra_Library::Polyhedron::EMPTY);
   
       this->_poly=poly;
@@ -820,11 +820,19 @@ class Polyhedron {
       this->_evaluate_interior();
     }
 
-    /*! \brief Returns polyhedron's space dimensions.
+    /*! \brief Returns polyhedron's space dimension. (Deprecated)
      *
      * \return The polyhedron's space dimensions.
      */
     inline size_t dim() const {
+      return ((size_t)this->_poly.space_dimension());
+    }
+    
+    /*! \brief Returns polyhedron's space dimension.
+     *
+     * \return The polyhedron's space dimension.
+     */
+    inline size_t dimension() const {
       return ((size_t)this->_poly.space_dimension());
     }
     
@@ -845,7 +853,7 @@ class Polyhedron {
      */
     inline bool contains(const State& state) const {
       
-      if (state.dim()!=this->dim()) 
+      if (state.dimension()!=this->dimension()) 
         throw std::domain_error("This object and parameter have different space dimensions");
       
       Parma_Polyhedra_Library::NNC_Polyhedron p(this->_poly);
@@ -864,7 +872,7 @@ class Polyhedron {
      */
     inline bool interior_contains(const State& state) const {
       
-      if (state.dim()!=this->dim()) 
+      if (state.dimension()!=this->dimension()) 
         throw std::domain_error("This object and parameter have different space dimensions");
       
       return this->_poly.contains(_from_State_to_PPL_Polihedron(state));
@@ -969,19 +977,19 @@ class Polyhedron {
       if (dims.size()==0) {
         throw "I can not project on zero dimensions.";  
       }
-      if (dims.size()>this->dim()) {
+      if (dims.size()>this->dimension()) {
         throw "I can not project on more dimensions than the polyhedron ones.";
       }
       
       
       boost::numeric::ublas::matrix<Real> projection_map=
-                  Ariadne::LinearAlgebra::zero_matrix<Real>(this->dim());
+                  Ariadne::LinearAlgebra::zero_matrix<Real>(this->dimension());
       
       for (size_t i=0; i< dims.size(); i++) {
         projection_map(dims[i],dims[i])=1.0;
       }
       
-      Ariadne::Map::Affine::PolyAffineMap<State> projection(projection_map);
+      Ariadne::Map::PolyAffineMap<State> projection(projection_map);
       
       #ifdef DEBUG
         std::cout << __FILE__ << ":" << __LINE__ << std::endl;

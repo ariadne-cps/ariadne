@@ -34,8 +34,8 @@
 #include "rectangle.h"
 
 namespace Ariadne {
-   namespace Geometry {
-
+  namespace Geometry {
+    
     typedef unsigned short dimension_type;
     typedef size_t size_type;
     typedef int index_type;
@@ -46,7 +46,7 @@ namespace Ariadne {
     /*!\brief An of integers representing an index in a grid. */
     typedef array<index_type> IndexArray;
      /*!\brief An of integers representing the size of a rectangle in a grid. */
-   typedef array<size_type> SizeArray;
+    typedef array<size_type> SizeArray;
     /*!\brief An array of integers, representing a cell in a grid. */
     typedef array<index_type> IntegerCell;
     /*!\brief A rectangle in an integer grid. */
@@ -56,20 +56,59 @@ namespace Ariadne {
     /*!\brief A list of arrays of integers of the same size, representing rectangles in a grid. */
     typedef array_vector<index_type> IntegerRectangleList;
 
-    inline size_type inner_product(const array<size_type>& a1, const array<size_type>& a2);
+    size_type inner_product(const array<size_type>& a1, const array<size_type>& a2);
 
-    inline BooleanArray& operator&=(BooleanArray& v1, const BooleanArray& v2);
-    inline BooleanArray& operator|=(BooleanArray& v1, const BooleanArray& v2);
-    inline BooleanArray& operator-=(BooleanArray& v1, const BooleanArray& v2);
+    BooleanArray& operator&=(BooleanArray& v1, const BooleanArray& v2);
+    BooleanArray& operator|=(BooleanArray& v1, const BooleanArray& v2);
+    BooleanArray& operator-=(BooleanArray& v1, const BooleanArray& v2);
+    
+    BooleanArray operator&(const BooleanArray& v1, const BooleanArray& v2);
+    BooleanArray operator|(const BooleanArray& v1, const BooleanArray& v2);
+    BooleanArray operator-(const BooleanArray& v1, const BooleanArray& v2);
+    
+    bool operator<(const IndexArray&, const IndexArray&);
+    
+    /*! Compute the sum of an index array and a size. */
+    IndexArray operator+(const IndexArray& l, const SizeArray& s);
 
-    inline BooleanArray operator&(const BooleanArray& v1, const BooleanArray& v2);
-    inline BooleanArray operator|(const BooleanArray& v1, const BooleanArray& v2);
-    inline BooleanArray operator-(const BooleanArray& v1, const BooleanArray& v2);
+    /*! Compute a positive offset from two index sets */
+    SizeArray operator-(const IndexArray& u, const IndexArray& l);
+   
+    void compute_rectangle_list_bounds(IndexArray& l, IndexArray& u, IntegerRectangleList cl);
 
-    inline bool operator<(const IndexArray&, const IndexArray&);
+    /*! Compute the index of a position in a grid. */
+    size_type compute_index(const IndexArray& pos, const IndexArray& lower, const SizeArray& strides);
 
-    inline void compute_cell_list_bounds(IndexArray& l, IndexArray& u, IntegerCellList cl);
-    inline void compute_rectangle_list_bounds(IndexArray& l, IndexArray& u, IntegerRectangleList cl);
+    /*! Compute the position of an index in a grid. */
+    IndexArray compute_position(size_type index, const IndexArray& lower, const SizeArray& strides);
+
+    /*! Compute upper and lower bounds of the cell list cl. */
+      void compute_cell_list_bounds(IndexArray* lptr, IndexArray* uptr, IntegerCellList cl);
+
+    /*! Compute strides from a list of sizes. */
+    SizeArray compute_strides(const SizeArray& s);
+
+    /*! Compute lower bounds of the cell list cl. */
+    void compute_rectangle_list_lower_bound(IndexArray* lptr, const IntegerRectangleList& rl);
+
+    /* Compute upper bounds of the cell list cl. */
+    void compute_rectangle_list_upper_bound(IndexArray* uptr, const IntegerRectangleList& rl);
+
+    /*! Compute upper and lower bounds of the cell list cl. */
+    void compute_rectangle_list_bounds(IndexArray* lptr, IndexArray* uptr, const IntegerRectangleList& rl);
+
+    void append_to_cell_list(IntegerCellList* clptr, const IndexArray& lower, const SizeArray& strides, const BooleanArray& mask);
+    void append_to_cell_list(IntegerCellList* clptr, const IndexArray& lower, const IndexArray& upper);
+    void append_to_cell_list(IntegerCellList* clptr, const IntegerRectangleList rl);
+
+    void compute_cell_mask(BooleanArray* maptr, const SizeArray& grid_strides, const IndexArray& grid_lower, const IndexArray& position);
+    void compute_cell_list_mask(BooleanArray* maptr, const SizeArray& grid_strides, const IndexArray& grid_lower, const IntegerCellList& cl);
+    void compute_rectangle_mask(BooleanArray* maptr, const SizeArray& grid_strides, const IndexArray& grid_lower, 
+                                const IndexArray& lower, const IndexArray& upper);
+    void compute_rectangle_list_mask(BooleanArray* maptr, const SizeArray& grid_strides, const IndexArray& grid_lower, const IntegerRectangleList& rl);
+
+    void translate_rectangle_coordinates(IntegerRectangleList* torlptr, const IntegerRectangleList& frrl, array< std::vector<index_type> > tr);
+    void translate_cell_coordinates(IntegerRectangleList* torlptr, const IntegerCellList& frcl, array< std::vector<index_type> > tr);
 
     /*!\internal TODO:
      * unique sort cell list

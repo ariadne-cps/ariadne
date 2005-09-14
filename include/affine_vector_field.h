@@ -31,155 +31,157 @@
 
 namespace Ariadne {	
 namespace VectorField{
-namespace Affine{
 
 enum AffineKind {
-	HOMOGENEOUS,
-	NON_HOMOGENEOUS,
-	TRASLATION
+  HOMOGENEOUS,
+  NON_HOMOGENEOUS,
+  TRASLATION
 };
 
 
 template <typename BS_I>
 class AffineIntegrator {	
-	
-	public:
-		typedef BS_I BasicSetIntegrator;
-		typedef typename BasicSetIntegrator::Map Map;
-		typedef typename Ariadne::Map::Affine::AffineMap< Map > SolutionMap;
-		typedef typename Ariadne::Map::Affine::AffineMap< Map > VectorFieldMap;
-		typedef typename Map::DenotableSet DenotableSet;
-		typedef typename DenotableSet::BasicSet BasicSet;
-		typedef typename SolutionMap::Real Real;
-	
-		typedef typename SolutionMap::Matrix Matrix;
-		typedef typename SolutionMap::Vector Vector;
-	
-		AffineIntegrator() {}
-		
-		AffineIntegrator(const AffineIntegrator<BS_I>& orig): 
-				_vf_map(orig._vf_map) {}
-	
-		AffineIntegrator(const VectorFieldMap &vfield): 
-				_vf_map(vfield) {}
-		
-		AffineIntegrator(const Matrix &A): 
-				_vf_map(A) {}
-					
-		AffineIntegrator(const Vector &b): 
-				_vf_map(b) {}
-					
-		AffineIntegrator(const Matrix &A, const Vector &b): 
-				_vf_map(A,b) {}
-					
-		inline SolutionMap get_solution(const Real& delta) const { 	
-			
-			Matrix A_sol=
-				Ariadne::LinearAlgebra::exp_Ah((this->_vf_map).A() , delta,5);	
-			
-			Vector b_sol=
-				Ariadne::LinearAlgebra::exp_b((this->_vf_map).A() , 
-								(this->_vf_map).b(), delta,5);
-			
-			SolutionMap sol(A_sol,b_sol);
-			
-			return sol;
-		}
-		
-		inline BasicSet get_flow_tube_from_to(const BasicSet &A, 
-				const BasicSet &B, const SolutionMap &sol_map,
-				const Ariadne::Geometry::ApproxKind &atype) {
-					
-				return (this->_bs_i).get_flow_tube_to(A,B,
-								sol_map,atype);				
-		}
-		
-		inline DenotableSet get_flow_tube_from_to(const DenotableSet &A, 
-				const DenotableSet &B, const SolutionMap &sol_map, 
-				const Ariadne::Geometry::ApproxKind &atype) {
-				
-			#ifdef DEBUG
-				std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-			#endif
-					
-			DenotableSet flow_tube(A.dim());
-			size_t i;
-					
-			for (i=0; i< A.size(); i++) {
-				flow_tube.inplace_union(
-					(this->_bs_i).get_flow_tube_from_to(A[i], B[i],
-								sol_map,atype));
-			}	
-
-			#ifdef DEBUG
-				std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-			#endif
-			
-			return flow_tube;				
-		}
-		
-		inline AffineIntegrator& operator()(const  VectorFieldMap &vfield) {
-			
-			this->_vf_map=vfield;
-		
-			return *this;			
-		}
-		
-		inline VectorFieldMap& vector_field() const {
-			return 	_vf_map;
-		}
-		
-	private:
-		VectorFieldMap _vf_map;
-	
-		BasicSetIntegrator _bs_i;
+ public:
+  typedef BS_I BasicSetIntegrator;
+  typedef typename BasicSetIntegrator::Map Map;
+  typedef typename Ariadne::Map::AffineMap< Map > SolutionMap;
+  typedef typename Ariadne::Map::AffineMap< Map > VectorFieldMap;
+  typedef typename Map::DenotableSet DenotableSet;
+  typedef typename DenotableSet::BasicSet BasicSet;
+  typedef typename SolutionMap::Real Real;
+  
+  typedef typename SolutionMap::Matrix Matrix;
+  typedef typename SolutionMap::Vector Vector;
+  
+  AffineIntegrator() {}
+  
+  AffineIntegrator(const AffineIntegrator<BS_I>& orig): 
+    _vf_map(orig._vf_map) {}
+  
+  AffineIntegrator(const VectorFieldMap &vfield): 
+    _vf_map(vfield) {}
+  
+  AffineIntegrator(const Matrix &A): 
+    _vf_map(A) {}
+  
+  AffineIntegrator(const Vector &b): 
+    _vf_map(b) {}
+  
+  AffineIntegrator(const Matrix &A, const Vector &b): 
+    _vf_map(A,b) {}
+  
+  inline SolutionMap get_solution(const Real& delta) const { 	
+    
+    Matrix A_sol=
+      Ariadne::LinearAlgebra::exp_Ah((this->_vf_map).A() , delta,5);	
+    
+    Vector b_sol=
+      Ariadne::LinearAlgebra::exp_b((this->_vf_map).A() , 
+                                    (this->_vf_map).b(), delta,5);
+    
+    SolutionMap sol(A_sol,b_sol);
+    
+    return sol;
+  }
+  
+  inline BasicSet get_flow_tube_from_to(const BasicSet &A, 
+                                        const BasicSet &B, const SolutionMap &sol_map,
+                                        const Ariadne::Geometry::ApproxKind &atype) {
+    
+    return (this->_bs_i).get_flow_tube_to(A,B,
+                                          sol_map,atype);				
+  }
+  
+  inline DenotableSet get_flow_tube_from_to(const DenotableSet &A, 
+                                            const DenotableSet &B, const SolutionMap &sol_map, 
+                                            const Ariadne::Geometry::ApproxKind &atype) {
+    
+#ifdef DEBUG
+    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+#endif
+    
+    DenotableSet flow_tube(A.dimension());
+    size_t i;
+    
+    for (i=0; i< A.size(); i++) {
+      flow_tube.inplace_union(
+                              (this->_bs_i).get_flow_tube_from_to(A[i], B[i],
+                                                                  sol_map,atype));
+    }	
+    
+#ifdef DEBUG
+    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+#endif
+    
+    return flow_tube;				
+  }
+  
+  inline AffineIntegrator& operator()(const  VectorFieldMap &vfield) {
+    
+    this->_vf_map=vfield;
+    
+    return *this;			
+  }
+  
+  inline VectorFieldMap& vector_field() const {
+    return 	_vf_map;
+  }
+  
+ private:
+  VectorFieldMap _vf_map;
+  
+  BasicSetIntegrator _bs_i;
 };
-
+  
 template <typename BS_MAP>
 class AffineVectorField {
-	
-	public:
-		typedef BS_MAP VectorFieldMap;
-		typedef typename VectorFieldMap::DenotableSet DenotableSet;
-		typedef typename DenotableSet::BasicSet BasicSet;
-		typedef typename BasicSet::State State;
-		typedef typename State::Real Real;
-	
-		typedef typename boost::numeric::ublas::matrix<Real> Matrix;
-		typedef typename boost::numeric::ublas::vector<Real> Vector;
-	
-		AffineVectorField(const AffineVectorField<BS_MAP> &T):
-				 _vf_map(T._vf_map){}
-	
-		AffineVectorField(const Matrix &A): _vf_map(A) {}
-	
-		AffineVectorField(const Vector &b): _vf_map(b) {}
-		
-		AffineVectorField(const Matrix &A, const Vector &b):
-			_vf_map(A,b) {}
-		
-		inline AffineKind affine_kind() {
-			return (this->vector_field()).affine_kind();
-		}
-		
-		inline const Matrix& A() const { return _vf_map.A(); }
-		
-		inline const Vector& b() const { return _vf_map.b(); }
-		
-		inline VectorFieldKind vector_field_kind() { return AFFINE; }
-		
-		inline const VectorFieldMap &vector_field() const {
-			return (this->_vf_map);
-		}
-		
-		inline size_t dim() const {
-			return (this->_vf_map).dim();
-		}
-		
-	private:
-	
-		VectorFieldMap _vf_map;
-};
+ public:
+  typedef BS_MAP VectorFieldMap;
+  typedef typename VectorFieldMap::DenotableSet DenotableSet;
+  typedef typename DenotableSet::BasicSet BasicSet;
+  typedef typename BasicSet::State State;
+  typedef typename State::Real Real;
+  
+  typedef typename boost::numeric::ublas::matrix<Real> Matrix;
+  typedef typename boost::numeric::ublas::vector<Real> Vector;
+  
+  AffineVectorField(const AffineVectorField<BS_MAP> &T):
+    _vf_map(T._vf_map){}
+  
+  AffineVectorField(const Matrix &A): _vf_map(A) {}
+  
+  AffineVectorField(const Vector &b): _vf_map(b) {}
+  
+  AffineVectorField(const Matrix &A, const Vector &b):
+    _vf_map(A,b) {}
+  
+  inline AffineKind affine_kind() {
+    return (this->vector_field()).affine_kind();
+  }
+  
+  inline const Matrix& A() const { return _vf_map.A(); }
+  
+  inline const Vector& b() const { return _vf_map.b(); }
+  
+  inline VectorFieldKind vector_field_kind() { return AFFINE; }
+  
+  inline const VectorFieldMap &vector_field() const {
+    return (this->_vf_map);
+  }
+  
+  /*! Deprecated. */
+  inline size_t dim() const {
+    return (this->_vf_map).dimension();
+  }
 
-}}}
+  inline size_t dimension() const {
+    return (this->_vf_map).dimension();
+  }
+  
+ private:
+  
+  VectorFieldMap _vf_map;
+};
+  
+}}
 #endif /* _AFFINE_VECTOR_FIELD_H */

@@ -36,15 +36,11 @@
 
 using namespace Ariadne;
 using namespace Ariadne::Geometry;
-using namespace Ariadne::Geometry::IO_Operators;
 using namespace Ariadne::Map;
-using namespace Ariadne::Map::Affine;
 using namespace Ariadne::Evaluation;
 using namespace Ariadne::VectorField;
 using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::VectorField::Affine;
 using namespace Ariadne::HybridDefinitions;
-using namespace Ariadne::HybridDefinitions::IO_Operators;
 
 namespace UBLAS = boost::numeric::ublas;
 

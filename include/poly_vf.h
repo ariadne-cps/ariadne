@@ -29,32 +29,29 @@
 
 namespace Ariadne {	
 namespace VectorField{
-namespace Affine{
 
 template <typename S>
 class PolyAffineIntegrator {	
-	
-	public:
-		typedef S State;
-		typedef typename State::Real Real;
-		typedef typename Ariadne::Geometry::Polyhedron< Real > BasicSet;
-		typedef typename Ariadne::Geometry::Polyhedron< Real > Polyhedron;
-		typedef typename Ariadne::Geometry::DenotableSet< Polyhedron > DenotableSet;
-	
-		typedef typename Ariadne::Map::Affine::PolyAffineMap< State > Map;
-		typedef typename Ariadne::Map::Affine::AffineMap< Map > SolutionMap;
-	
-		PolyAffineIntegrator() {}
-		
-		inline BasicSet get_flow_tube_from_to(const BasicSet &A, 
-				const BasicSet &B, const SolutionMap &sol_map, 
-				const Ariadne::Geometry::ApproxKind &atype) {
-					
-				return Ariadne::Geometry::convex_hull(A,B);		
-		}
+ public:
+  typedef S State;
+  typedef typename State::Real Real;
+  typedef typename Ariadne::Geometry::Polyhedron< Real > BasicSet;
+  typedef typename Ariadne::Geometry::Polyhedron< Real > Polyhedron;
+  typedef typename Ariadne::Geometry::DenotableSet< Polyhedron > DenotableSet;
+  
+  typedef typename Ariadne::Map::PolyAffineMap< State > Map;
+  typedef typename Ariadne::Map::AffineMap< Map > SolutionMap;
+  
+  PolyAffineIntegrator() {}
+  
+  inline BasicSet get_flow_tube_from_to(const BasicSet &A, 
+                                        const BasicSet &B, const SolutionMap &sol_map, 
+                                        const Ariadne::Geometry::ApproxKind &atype) {
+    
+    return Ariadne::Geometry::convex_hull(A,B);		
+  }
 };
 	
-}
 }
 }
 

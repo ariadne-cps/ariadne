@@ -46,7 +46,7 @@ namespace Ariadne {
     template<typename R> bool inner_subset(const Rectangle<R> &A, const Rectangle<R> &B);
     template<typename R> bool subset(const Rectangle<R> &A, const Rectangle<R> &B);
     template<typename R> bool inner_subset(const Rectangle<R> &A, const ListSet<R,Rectangle> &B);
-    template<typename R> bool subset_of_open_cover(const Rectangle<R> &A, const std::list< Rectangle<R> > &list);
+    template<typename R> bool subset_of_open_cover(const Rectangle<R> &A, const std::vector< Rectangle<R> > &list);
 
     template <typename R> Rectangle<R> closure_of_intersection_of_interiors(const Rectangle<R> &A, const Rectangle<R> &B);
     template<typename R> bool subset_of_interior(const Rectangle<R> &A, const Rectangle<R> &B);
@@ -85,7 +85,7 @@ namespace Ariadne {
        *  \internal We shouldn't restrict to a std::list.
        */
       friend bool subset_of_open_cover <> (const Rectangle<R> &A,
-                                           const std::list< Rectangle<R> > &list);
+                                           const std::vector< Rectangle<R> > &list);
 
       /*! \brief Tests if \a A is a subset of the interior of \a B. (deprecated)*/
       friend bool subset_of_interior <> (const Rectangle<R> &A,
@@ -134,22 +134,22 @@ namespace Ariadne {
       
       /*! \brief Construct from two corners. */
       Rectangle(const State &s1, const State &s2)
-        : _lower_corner(s1.dim()), _upper_corner(s2.dim()), _empty(true)
+        : _lower_corner(s1.dimension()), _upper_corner(s2.dimension()), _empty(true)
       {
         /* Test to see if corners have same dimensions */
-        if (s1.dim()!=s2.dim()) {
+        if (s1.dimension()!=s2.dimension()) {
           throw std::domain_error("The parameters have different space dimensions");
         }
         
         /* Set coordinates */
-        for (size_t i=0; i<this->dim(); i++) {
+        for (size_t i=0; i<this->dimension(); i++) {
           this->_lower_corner[i]=std::min(s1[i],s2[i]);
           this->_upper_corner[i]=std::max(s1[i],s2[i]);
         }
         
         /* Set emptyness flag */
         _empty=false;
-        for (size_t i=0; i<this->dim(); i++) {
+        for (size_t i=0; i<this->dimension(); i++) {
           if(this->lower(i) >= this->upper(i)) {
             _empty=true;
           }
@@ -173,9 +173,9 @@ namespace Ariadne {
         return *this;
       }
       
-      /*! \brief Returns rectangle's space dimension */
+      /*! \brief The dimension of the Euclidean space the rectangle lies in. (Deprecated) */
       inline size_t dim() const {
-        return (this->_lower_corner).dim();
+        return (this->_lower_corner).dimension();
       }
       
       /*! \brief The dimension of the Euclidean space the rectangle lies in. */
@@ -242,13 +242,13 @@ namespace Ariadne {
       /*! \brief Tests if \a state is included into a rectangle. */
       inline bool contains(const State& state) const {
         
-        if (state.dim()!=this->dim())
+        if (state.dimension()!=this->dimension())
           throw std::domain_error("This object and parameter have different space dimensions");
         
         if (this->empty()) return false;
         
         /* for each dimension i */
-        for (size_t i=0; i<this->dim(); i++) {
+        for (size_t i=0; i<this->dimension(); i++) {
           /* if the i dim of the state is smaller than the one of the
            * rectangle's lower corner then state is not contained into
            * this object */
@@ -268,13 +268,13 @@ namespace Ariadne {
       /*! \brief Tests if \a state is included into the interior a rectangle. */
       inline bool interior_contains(const State& state) const {
         
-        if (state.dim()!=this->dim())
+        if (state.dimension()!=this->dimension())
           throw std::domain_error("This object and parameter have different space dimensions");
         
         if (this->empty()) return false;
         
         /* for each dimension i */
-        for (size_t i=0; i<this->dim(); i++) {
+        for (size_t i=0; i<this->dimension(); i++) {
           
           /* if the i dim of the state is greater or equal than the one
            * of the rectangle's upper corner then state is not contained 
@@ -301,9 +301,9 @@ namespace Ariadne {
         
         size_t j;
         
-        Rectangle<R> quadrant(this->dim());
+        Rectangle<R> quadrant(this->dimension());
         
-        for (j=0; j< this->dim(); j++) {
+        for (j=0; j< this->dimension(); j++) {
           
           if (q%2) {
             quadrant._lower_corner[j]=(this->_upper_corner[j]+
@@ -323,7 +323,7 @@ namespace Ariadne {
       /*! \brief Expand the Rectangle by \a delta in each direction. */
       inline Rectangle<R> &expand_by(const Real &delta) {
         
-        for (size_t j=0; j< this->dim(); ++j) {
+        for (size_t j=0; j< this->dimension(); ++j) {
           
           this->_upper_corner[j]+=delta;
           this->_lower_corner[j]-=delta;
@@ -335,12 +335,12 @@ namespace Ariadne {
       /*! \brief The equality operator */
       inline bool operator==(const Rectangle<Real> &A) const
       {
-        if (this->dim() != A.dim()) return false ;
+        if (this->dimension() != A.dimension()) return false ;
         
         if (A.empty() && this->empty()) { return true; }
         if (A.empty() || this->empty()) { return false; }
         
-        for (size_t j=0; j != this->dim(); ++j) {
+        for (size_t j=0; j != this->dimension(); ++j) {
           if (this->_lower_corner[j] != A._lower_corner[j]) { return false; }
           if (this->_upper_corner[j] != A._upper_corner[j]) { return false; }
         }
@@ -389,6 +389,12 @@ namespace Ariadne {
         return Ariadne::Geometry::subset_of_open_cover(*this,u);
       }
       
+      /*! \brief Tests if the Rectangle is a subset of the the union of the closed sets in \a u. */
+      template<class LIST>
+      inline bool subset_of_open_closed_cover(const LIST& u) const {
+        return Ariadne::Geometry::subset_of_closed_cover(*this,u);
+      }
+      
       friend std::ostream&
       operator<< <> (std::ostream &os, 
                      const Rectangle<R> &r);
@@ -403,11 +409,11 @@ namespace Ariadne {
     template <typename R>
     bool disjoint(const Rectangle<R> &A, const Rectangle<R> &B) {
 
-      if (A.dim()!=B.dim())
+      if (A.dimension()!=B.dimension())
         throw std::domain_error("The two parameters have different space dimensions");
       
       
-      for (size_t i=0; i< A.dim(); i++) {
+      for (size_t i=0; i< A.dimension(); i++) {
         if ((A._upper_corner[i]<B._lower_corner[i])|| 
             (B._upper_corner[i]<A._lower_corner[i])) return true;
       }
@@ -420,12 +426,12 @@ namespace Ariadne {
     bool interiors_intersect(const Rectangle<R> &A,
                              const Rectangle<R> &B) {
       
-      if (A.dim()!=B.dim()) 
+      if (A.dimension()!=B.dimension()) 
         throw std::domain_error("The two parameters have different space dimensions");
       
       if (A.empty()||B.empty()) return false;
       
-      for (size_t i=0; i< A.dim(); i++) {
+      for (size_t i=0; i< A.dimension(); i++) {
         if ((A._upper_corner[i]<=B._lower_corner[i])|| 
             (B._upper_corner[i]<=A._lower_corner[i])) return false;
       }
@@ -439,12 +445,12 @@ namespace Ariadne {
     bool inner_subset(const Rectangle<R> &A,
                       const Rectangle<R> &B) {
 
-      if (A.dim()!=B.dim())
+      if (A.dimension()!=B.dimension())
         throw std::domain_error("The two parameters have different space dimensions");
 
       if (A.empty()||B.empty()) return false;
 
-      for (size_t i=0; i< A.dim(); i++) {
+      for (size_t i=0; i< A.dimension(); i++) {
         if ((A._upper_corner[i] >= B._upper_corner[i])||
             (B._lower_corner[i] >= A._lower_corner[i])) return false;
       }
@@ -457,12 +463,12 @@ namespace Ariadne {
     bool subset(const Rectangle<R> &A, 
                 const Rectangle<R> &B) {
       
-      if (A.dim()!=B.dim())
+      if (A.dimension()!=B.dimension())
         throw std::domain_error("The two parameters have different space dimensions");
       
       if (A.empty()||B.empty()) return false;
       
-      for (size_t i=0; i< A.dim(); i++) {
+      for (size_t i=0; i< A.dimension(); i++) {
         if ((A._upper_corner[i] > B._upper_corner[i])||
             (B._lower_corner[i] > A._lower_corner[i])) return false;
       }
@@ -483,13 +489,13 @@ namespace Ariadne {
     void
     compute_gridpoints(std::vector< std::set<R> >& gridpoints,
                        const Rectangle<R> &A, 
-                       const std::list< Rectangle<R> >& cover)
+                       const std::vector< Rectangle<R> >& cover)
     {
       typedef R Real;
       typedef typename std::set<Real> Set;
-      typedef typename std::list< Rectangle<R> >::const_iterator list_iterator;
+      typedef typename std::vector< Rectangle<R> >::const_iterator list_iterator;
       
-      size_t dimension = A.dim();
+      size_t dimension = A.dimension();
       
       for(size_t i=0; i!=dimension; ++i) {
         Real lower=A.lower(i);
@@ -516,14 +522,14 @@ namespace Ariadne {
     //*! \brief Tests inclusion in an open cover.  */
     template <typename R>
     bool subset_of_open_cover(const Rectangle<R> &A,
-                              const std::list< Rectangle<R> >& cover) 
+                              const std::vector< Rectangle<R> >& cover) 
     {
       typedef R Real;
       typedef typename std::set<Real> Set;
       typedef typename Set::const_iterator set_iterator;
-      typedef typename std::list< Rectangle<R> >::const_iterator list_iterator;
+      typedef typename std::vector< Rectangle<R> >::const_iterator list_iterator;
       
-      size_t dimension = A.dim();
+      size_t dimension = A.dimension();
       
       std::vector<Set> gridpoints(dimension);
       compute_gridpoints(gridpoints, A, cover);
@@ -620,14 +626,14 @@ namespace Ariadne {
     //*! \brief Tests inclusion in a closed cover.  */
     template <typename R>
     bool subset_of_closed_cover(const Rectangle<R> &A,
-                                const std::list< Rectangle<R> >& cover) 
+                                const std::vector< Rectangle<R> >& cover) 
     {
       typedef typename Rectangle<R>::Real Real;
       typedef typename std::set<Real> Set;
       typedef typename Set::const_iterator set_iterator;
-      typedef typename std::list< Rectangle<R> >::const_iterator list_iterator;
+      typedef typename std::vector< Rectangle<R> >::const_iterator list_iterator;
       
-      size_t dimension = A.dim();
+      size_t dimension = A.dimension();
       
       std::vector<Set> gridpoints(dimension);
       compute_gridpoints(gridpoints, A, cover);
@@ -728,17 +734,17 @@ namespace Ariadne {
     Rectangle<R>
     regular_intersection(const Rectangle<R> &A, const Rectangle<R> &B)
     {
-      if (A.dim()!=B.dim()) {
+      if (A.dimension()!=B.dimension()) {
         throw std::domain_error("The two parameters have different space dimensions");
       }
 
-      Rectangle<R> C(A.dim());
+      Rectangle<R> C(A.dimension());
 
       if (A.empty() || B.empty()) {
         return C;
       }
 
-      for (size_t i=0; i != C.dim(); ++i) {
+      for (size_t i=0; i != C.dimension(); ++i) {
         C._lower_corner[i] = std::max(A._lower_corner[i],B._lower_corner[i]);
         C._upper_corner[i] = std::min(A._upper_corner[i],B._upper_corner[i]);
         if(C._lower_corner[i] >= C._upper_corner[i]) {
@@ -774,9 +780,9 @@ namespace Ariadne {
         return os << "[ ]";
         }
       */
-      if(r.dim() > 0) {
+      if(r.dimension() > 0) {
         os << r[0];
-        for(size_t i=1; i!=r.dim(); ++i) {
+        for(size_t i=1; i!=r.dimension(); ++i) {
           os << "x" << r[i];
         }
       }

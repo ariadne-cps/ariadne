@@ -44,7 +44,7 @@ class DenotableSet{
     /* List of basic sets. Note that std::vector provides a
      * reserve(size_t) method to increase the capacity.
      */
-    size_t _dim;
+    size_t _dimension;
     std::vector<BS> _vector;
 
   public:
@@ -56,11 +56,11 @@ class DenotableSet{
     typedef typename std::vector<BS>::iterator iterator;
 
     /*! \brief A denotable set constructor. */
-    DenotableSet() : _dim(0), _vector() { }
+    DenotableSet() : _dimension(0), _vector() { }
 
     /*! \brief A denotable set constructor. */
-    DenotableSet(const BasicSet &A) : _dim(0), _vector() {
-      this->_dim=A.dim();
+    DenotableSet(const BasicSet &A) : _dimension(0), _vector() {
+      this->_dimension=A.dimension();
       if (A.empty()) { 
           return;
       }
@@ -68,10 +68,10 @@ class DenotableSet{
     }
       
     /*! \brief The copy constructor. */
-    DenotableSet(const DenotableSet<BasicSet>& A) : _dim(A.dim()), _vector(A._vector) { }
+    DenotableSet(const DenotableSet<BasicSet>& A) : _dimension(A.dimension()), _vector(A._vector) { }
              
     /*! \brief Construct a DenotableSet<BasicSet> to hold sets of dimension \a n. */
-    DenotableSet(size_t n) : _dim(n), _vector() { }
+    DenotableSet(size_t n) : _dimension(n), _vector() { }
 
     /*! \brief The destructor. */
     ~DenotableSet() {
@@ -90,8 +90,8 @@ class DenotableSet{
      *
      * \return The space dimension of the DenotableSet.
      */
-    inline const size_t dim() const {
-        return this->_dim;
+    inline const size_t dimension() const {
+        return this->_dimension;
     }
     
     /*! \brief Accesses the i-th BasicSet.
@@ -113,7 +113,7 @@ class DenotableSet{
         std::cout << __FILE__ << ":" << __LINE__ << std::endl;
       #endif
       
-      DenotableSet<BS> sum(A.dim());
+      DenotableSet<BS> sum(A.dimension());
       
       for (size_t i=0; i< this->size(); i++) {
         for (size_t j=0; j< A.size(); j++) {
@@ -155,7 +155,7 @@ class DenotableSet{
       #endif
       
       if(this != &A) {
-          this->_dim = A._dim;
+          this->_dimension = A._dimension;
           this->_vector = A._vector;
       }
       
@@ -247,9 +247,9 @@ class DenotableSet{
         std::cout << __FILE__ << ":" << __LINE__ << std::endl;
       #endif
       
-      if (this->dim()==0) { this->_dim=A.dim(); }
+      if (this->dimension()==0) { this->_dimension=A.dimension(); }
         
-      if (A.dim()!=this->dim()) {
+      if (A.dimension()!=this->dimension()) {
         throw std::invalid_argument("The two denotable set have different space dimensions.");
       }
       
@@ -285,9 +285,9 @@ class DenotableSet{
         std::cout << __FILE__ << ":" << __LINE__ << std::endl;
       #endif
       
-      if (this->dim()==0) { this->_dim=A.dim(); }
+      if (this->dimension()==0) { this->_dimension=A.dimension(); }
         
-      if (A.dim()!=this->dim()) {
+      if (A.dimension()!=this->dimension()) {
         throw std::invalid_argument("The denotable set the basic set have different space dimensions.");
       }
       
@@ -409,7 +409,7 @@ template <typename BS >
 bool disjoint (const DenotableSet< BS  > &A, 
         const DenotableSet< BS > &B){
 
-  if (A.dim()!=B.dim()) 
+  if (A.dimension()!=B.dimension()) 
     throw std::invalid_argument("The two denotable set have different space dimensions.");
   
           
@@ -433,7 +433,7 @@ template <typename BS >
 bool intersects_interior(const DenotableSet< BS > &A, 
         const DenotableSet< BS > &B){
   
-  if (A.dim()!=B.dim()) 
+  if (A.dimension()!=B.dimension()) 
     throw std::invalid_argument("The two denotable set have different space dimensions.");
   
           
@@ -456,7 +456,7 @@ template <typename BS >
 bool intersects_interior(const Rectangle< typename BS::Real > &rect, 
         const DenotableSet< BS  > &A){
     
-  if (A.dim()!=rect.dim()) 
+  if (A.dimension()!=rect.dimension()) 
     throw std::invalid_argument("The denotable set and the rectangle have different space dimensions.");
   
           
@@ -472,7 +472,7 @@ template <typename BS >
 bool intersects_interior(const DenotableSet< BS  > &A,
         const Rectangle< typename BS::Real > &rect){
     
-  if (A.dim()!=rect.dim()) 
+  if (A.dimension()!=rect.dimension()) 
     throw std::invalid_argument("The denotable set and the rectangle have different space dimensions.");
   
           
@@ -488,7 +488,7 @@ template <typename BS >
 bool subset_of_interior(const DenotableSet< BS  > &A, 
         const DenotableSet< BS  > &B){
   
-  if (A.dim()!=B.dim()) 
+  if (A.dimension()!=B.dimension()) 
     throw std::invalid_argument("The two denotable set have different space dimensions.");
           
           
@@ -509,7 +509,7 @@ bool subset_of_interior(const Rectangle<typename BS::Real > &rect,
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
   #endif
           
-  if (A.dim()!=rect.dim()) 
+  if (A.dimension()!=rect.dimension()) 
     throw std::invalid_argument("The denotable set and the rectangle have different space dimensions.");
   
 
@@ -542,7 +542,7 @@ bool subset_of_interior(const DenotableSet< BS  > &A,
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
   #endif
           
-  if (A.dim()!=rect.dim()) 
+  if (A.dimension()!=rect.dimension()) 
     throw std::invalid_argument("The denotable set and the rectangle have different space dimensions.");
   
           
@@ -576,7 +576,7 @@ DenotableSet< BS  > join(
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
   #endif
           
-  if (A.dim()!=B.dim()) 
+  if (A.dimension()!=B.dimension()) 
     throw std::invalid_argument("The two denotable set have different space dimensions.");
   
           
@@ -604,7 +604,7 @@ DenotableSet< BS  > closure_of_intersection_of_interior(
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
   #endif
           
-  if (A.dim()!=B.dim()) 
+  if (A.dimension()!=B.dimension()) 
     throw std::invalid_argument("The two denotable set have different space dimensions.");
       
           
@@ -616,7 +616,7 @@ DenotableSet< BS  > closure_of_intersection_of_interior(
     }
   }
   
-  ds_inter._dim=A._dim;
+  ds_inter._dimension=A._dimension;
 
   #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;

@@ -25,9 +25,9 @@
 #ifndef _AFFINE_MAP_H
 #define _AFFINE_MAP_H
 
-#include <map.h>
-#include <denotable_set.h>
-#include <linear_algebra.h>
+#include "map.h"
+#include "state.h"
+#include "linear_algebra.h"
 
 namespace Ariadne {	
 namespace Map{
@@ -38,114 +38,57 @@ enum AffineKind {
   TRASLATION
 };
    
-template <typename BS_MAP>
-class AffineMap {
+template <typename R>
+class AffineMap // : public Map<R,Geometry::State> 
+{
  public:
-  typedef BS_MAP BasicSetMap;
-  typedef typename BasicSetMap::DenotableSet DenotableSet;
-  typedef typename DenotableSet::BasicSet BasicSet;
-  typedef typename BasicSet::State State;
-  typedef typename State::Real Real;
+  typedef Geometry::State<R> State;
+  typedef R Real;
   
   typedef typename boost::numeric::ublas::matrix<Real> Matrix;
   typedef typename boost::numeric::ublas::vector<Real> Vector;
   
-  AffineMap() {}
+  inline explicit AffineMap() {}
+  inline explicit AffineMap(const Matrix& A, const Vector& b) : _A(A), _b(b) { }
+  inline explicit AffineMap(const Matrix& A) : _A(A), _b(A.columns()) { }
+  inline explicit AffineMap(const Vector& b) : _A(b.size(),b.size()), _b(b) { }
   
-  AffineMap(const AffineMap<BS_MAP> &T):
-    _map(T._map), _B(T._B), _inclusion_map(T._inclusion_map){}
+  inline AffineMap(const AffineMap<Real>& T) : _A(T._A), _b(T._b) { }
+  inline AffineMap<Real>& operator=(const AffineMap<Real>& T) {
+    this->_A=T._A; this->_b=T._b; return *this; }
   
-  AffineMap(const Matrix &A):_map(A), _inclusion_map(false) {}
-  
-  AffineMap(const Vector &b): _map(b), _inclusion_map(false) {}
-  
-  AffineMap(const Matrix &A, const Vector &b):
-    _map(A,b), _inclusion_map(false) {}
-  
-  AffineMap(const Matrix &A, const BasicSet &B):
-    _map(A), _B(B), _inclusion_map(true) {}
-  
-  inline AffineMap<BS_MAP> &operator=(const AffineMap<BS_MAP>  &A) {
+  State operator() (const State& x) const;
     
-    this->_map=A._map;
-    this->_B=A._B;
-    this->_inclusion_map=A._inclusion_map;
-    
-    return *this;
-  }
+  template<template <typename> class BS>
+  BS<R> operator() (const BS<R>& A) const;
   
-  inline BasicSet operator()(const BasicSet &A) const { 
-    
-    if (this->_inclusion_map) {
-      return (_map(A))+this->_B;
-    }
-    
-    return _map(A); 
-  }
-  
-  inline DenotableSet operator()(const DenotableSet &A) const{ 
-    
-#ifdef DEBUG
-    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-#endif
-    
-    DenotableSet trans_ds(A.dimension());
-    
-    for (size_t i=0; i< A.size(); i++) {	
-      
-      trans_ds.inplace_union(_map(A[i]));
-    }
-    
-    if (this->_inclusion_map) {
-      trans_ds=trans_ds+this->_B;
-    }
-    
-#ifdef DEBUG
-    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-#endif
-    
-    return trans_ds;
-  }
-  
-  inline const Matrix& A() const { return _map.A(); }
-  
-  inline const Vector& b() const { return _map.b(); }
-  
-  inline const BasicSet& B() const { 
-    
-    if (!this->_inclusion_map) {
-      throw "This is not an inclusion map";
-    }
-    
-    return this->_B; 
-  }
-  
-  inline AffineKind map_kind() { return AFFINE; }
-  
-  inline const BasicSetMap &basicset_map() const{
-    return (this->_map);
-  }
+  inline const Matrix& A() const { return _A; }
+  inline const Vector& b() const { return _b; }
   
   inline size_t dimension() const {
-    return (this->_map).dimension();
+    return _b.dimension();
   }
   
   /*! Deprecated. */ 
   inline size_t dim() const {
-    return (this->_map).dimension();
+    return this->dimension();
   }
   
   inline bool invertible() const {
-    return ((!this->_inclusion_map)&&((this->_map).invertible()));
-  }
-  
+    return _A.invertible(); }
  private:
-  BasicSetMap _map;
-  BasicSet _B;
-  bool _inclusion_map;
+  Matrix _A;
+  Vector _b;
 };
   
-  
+template <typename R>
+template <template<typename> class BS>
+BS<R>
+AffineMap<R>::operator() (const BS<R>& bs) const
+{
+  return apply(*this,bs);
+}
+ 
 }
 }
 

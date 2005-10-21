@@ -24,15 +24,15 @@
 
 #include <vector>
 
-#include <linear_algebra.h>
-#include <polyhedron.h>
-#include <poly_map.h>
-#include <ptree.h>
-#include <vector_field.h>
-#include <poly_vf.h>
-#include <automaton.h>
-#include <hybrid_set.h>
-#include <solver.h>
+#include "linear_algebra.h"
+#include "polyhedron.h"
+#include "poly_map.h"
+#include "ptree.h"
+#include "affine_vector_field.h"
+#include "poly_vf.h"
+#include "automaton.h"
+#include "hybrid_set.h"
+#include "solver.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Geometry;
@@ -49,26 +49,27 @@ using Parma_Polyhedra_Library::Constraint_System;
 //using namespace Parma_Polyhedra_Library;
 //using namespace Parma_Polyhedra_Library::IO_Operators;
 
-typedef State<Rational> StateT;
-typedef Rectangle<Rational> RectangleT;
-typedef Polyhedron<Rational> PolyhedronT;
+typedef Rational RealT;
+typedef State<RealT> StateT;
+typedef Rectangle<RealT> RectangleT;
+typedef Polyhedron<RealT> PolyhedronT;
 typedef DenotableSet<PolyhedronT> DenotableSetT;
-typedef PartitionTree<RectangleT> PTree;
+typedef PartitionTree<RectangleT> PartitionTreeT;
 typedef UBLAS::matrix<Rational> MatrixT;
 typedef UBLAS::vector<Rational> VectorT;
 
-typedef PolyAffineMap< StateT > PMap;
-typedef AffineMap< PMap > AMap;
+typedef AffineMap<RealT> AffineMapT;
+typedef AffineVectorField<RealT> AffineVectorFieldT;
 
-typedef PolyAffineIntegrator< StateT > PInt;
-typedef AffineIntegrator< PInt > AInt;
-typedef Integrator< AInt > Int;
+typedef AffineIntegrator<RealT> IntegratorT;
 
-typedef AffineVectorField< AMap > AVectF;
+//typedef PolyAffineIntegrator< StateT > PInt;
+//typedef AffineIntegrator< PInt > AInt;
+//typedef Integrator< AInt > Int;
 
-typedef DiscreteLocation< AVectF > DiscLoc;
+typedef DiscreteLocation< AffineVectorFieldT > DiscLoc;
 
-typedef LeavingDiscreteTransition< DiscLoc, AMap > LeavingTrans;
+typedef LeavingDiscreteTransition< DiscLoc, AffineMapT > LeavingTrans;
 typedef HybridAutomaton< LeavingTrans > Automaton; 
 
 typedef LocationDenotableSet<DiscLoc> LocDenS;
@@ -81,7 +82,7 @@ typedef PolyhedronMatlabExporter<Rational> BSExporter;
 typedef DenotableSetExporter<BSExporter> Exporter;
 
 typedef Solver<Automaton, HybDenS, Trc , 
-	PTree, Int, Exporter > Slv;
+               PartitionTreeT, IntegratorT, Exporter > Slv;
 
 int main() {
 
@@ -192,7 +193,7 @@ int main() {
 	M2(2,3)=T_m * a_phi; M2(2,2)=0; 
 	v2(2)=T_m * b_phi;	/* T = T_m * a_phi * phi + T_m * b_phi */
 	
-	AMap reset2(M2,v2);
+	AffineMapT reset2(M2,v2);
 	
 	/* Add to H the arc from S to S+ */
 	H.add_arc(l1, l0, activ2, reset2);
@@ -210,7 +211,7 @@ int main() {
 	v3(1)=-180;			/* theta= theta - 180 */
 	M3(2,2)=0; v3(2)=T_m * b_phi;	/* T = T_m * b_phi */
 	
-	AMap reset3(M3,v3);
+	AffineMapT reset3(M3,v3);
 	
 	/* Add to H the arc from S to S+ */
 	H.add_arc(l0, l0, activ3, reset3);

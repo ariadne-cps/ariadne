@@ -25,9 +25,8 @@
 #ifndef _MAP_H
 #define _MAP_H
 
-#include <denotable_set.h>
-#include <linear_algebra.h>
-#include <rectangle.h>
+#include "state.h"
+#include "list_set.h"
 
 namespace Ariadne {	
 namespace Map{
@@ -46,48 +45,38 @@ enum MapResultKind {
 }
 }
 
-#include "affine_map.h"
-
 namespace Ariadne {	
-namespace Map{
+namespace Map {
 	
-template <typename M>
+template <typename R, template<typename> class S>
 class Map {
  public:
-  typedef M MapT;
-  typedef typename Map::DenotableSet DenotableSet;
-  typedef typename DenotableSet::BasicSet BasicSet;
-  typedef typename BasicSet::State State;
-  typedef typename State::Real Real;
+  typedef R Real;
+  typedef S<R> State;
   
-  Map(const MapT& T) :_map(T) {}
-  
-  inline BasicSet operator() (const BasicSet& A) const { return _map(A); }
-  
-  inline DenotableSet operator() (const DenotableSet& A) const { 
-    DenotableSet trans_ds(A.dimension());
+  virtual State apply(const State& x) const = 0;
+
+  // I'm not sure if virtual functions are the way to go here; too restrictive? //
+  virtual Geometry::Rectangle<R> apply(const Geometry::Rectangle<R>& A) const {
+    throw std::invalid_argument("Not implemented."); }
+  virtual Geometry::Polyhedron<R> apply(const Geometry::Polyhedron<R>& A) const {
+    throw std::invalid_argument("Not implemented."); }
+
+  template<template<typename> class BS>
+  inline BS<R> operator() (const BS<R>& A) const { 
+    return apply(*this,A);
+  }
+
+  template<template<typename> class BS>
+  inline Geometry::ListSet<R,BS> operator() (const Geometry::ListSet<R,BS>& A) const { 
+    Geometry::ListSet<R,BS> trans_ds(A.dimension());
     for (size_t i=0; i< A.size(); i++) {
-      trans_ds.inplace_union(_map(A[i]));
+      trans_ds.inplace_union(this->apply(A[i]));
     }
     return trans_ds;
   }
   
-  inline Map<MapT>& operator=(const Map<MapT> & A) {
-    this->_map=A._map;
-  }
-  
-  inline size_t dimension() const {
-    return (this->_map).dimension();
-  }
-
-  /*! Deprecated. */
-  inline size_t dim() const {
-    return (this->_map).dimension();
-  }
-  
-  inline bool invertible() const {return this->_map.invertible();}
- private:
-  MapT _map;
+  virtual size_t dimension() const = 0;
 };
   
   

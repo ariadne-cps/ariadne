@@ -35,10 +35,32 @@ namespace Ariadne {
     template<typename R> class Rectangle;
     template<typename R, template<typename> class BS> class ListSet;
 
+    template <typename R, template<typename> class BS>
+    bool disjoint(const ListSet<R,BS>&, const ListSet<R,BS>&);
+    template <typename R, template<typename> class BS>
+    bool interiors_intersect(const ListSet<R,BS>&, const ListSet<R,BS>&);
+    template <typename R, template<typename> class BS>
+    bool inner_subset(const ListSet<R,BS>&, const ListSet<R,BS>&);
+    template <typename R, template<typename> class BS>
+    bool subset(const ListSet<R,BS>&, const ListSet<R,BS>&);
+    template <typename R, template<typename> class BS>
+    bool subset(const ListSet<R,BS>&, const ListSet<R,BS>&);
+    template <typename R, template<typename> class BS>
+    ListSet<R,BS> regular_intersection(const ListSet<R,BS>&, const ListSet<R,BS>&);
+
+    template <typename R, template<typename> class BS>
+    bool interiors_intersect(const BS<R>&, const ListSet<R,BS>&);
+    template <typename R, template<typename> class BS>
+    bool inner_subset(const ListSet<R,BS>&, const BS<R>&);
+
+    template <typename R, template<typename> class BS>
+    std::istream& operator>> (std::istream &is, ListSet<R,BS> &S);
+    template <typename R, template<typename> class BS>
+    std::ostream& operator<< (std::ostream &is, const ListSet<R,BS> &S);
+
     /*! \brief Stream extraction operator. */
     template <typename R, template<typename> class BS>
-    std::istream&
-    operator>> (std::istream &is, const ListSet<R,BS> &S);
+    std::istream& operator>> (std::istream &is, ListSet<R,BS> &S);
 
     /*! \brief A finite union of basic sets, represented as a sequence.
      */
@@ -412,8 +434,9 @@ namespace Ariadne {
        * \param B	is a denotable set.
        * \return The union of A and B.
        */
-      friend ListSet<R,BS> join<> (const ListSet<R,BS> &A,
-                                   const ListSet<R,BS> &B);
+      //FIXME: Compiler doesn't like this
+      //friend ListSet<R,BS> join<> (const ListSet<R,BS> &A,
+      //                             const ListSet<R,BS> &B);
 
       /*! \brief Makes intersection of two interiors.
        *

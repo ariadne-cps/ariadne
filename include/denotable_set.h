@@ -29,7 +29,7 @@
 #include <iosfwd>
 
 #include <set_const.h>
-#include <denotableset_io.h>
+#include <denotable_set_io.h>
 
 namespace Ariadne {
 namespace Geometry {

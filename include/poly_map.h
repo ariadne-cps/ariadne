@@ -25,11 +25,12 @@
 #ifndef _POLY_MAP_H
 #define _POLY_MAP_H
 
-#include <linear_algebra.h>
-#include <map.h>
-#include <constraint.h>
-#include <generator.h>
-#include <polyhedron.h>
+#include "polyhedron.h"
+#include "affine_map.h"
+
+#include "constraint.h"
+#include "generator.h"
+#include "denotable_set.h"
 
 namespace Ariadne {	
 namespace Map{
@@ -68,11 +69,21 @@ namespace Map{
  * \f$T(P) = (A\mathcal{p} + b,A\mathcal{cp} + b, A\mathcal{r}, 
  * A\mathcal{l})\f$.
  */
-template <typename S>
+
+template<typename R>
+inline 
+Geometry::Polyhedron<R>
+apply(const AffineMap<R>& T, const Geometry::Polyhedron<R>& p) 
+{
+}
+
+
+
+template<typename R>
 class PolyAffineMap {
  public:	
-  typedef typename S::Real Real;
-  typedef S State;
+  typedef R Real;
+  typedef typename Ariadne::Geometry::State<R> State;
   typedef typename Ariadne::Geometry::Polyhedron< Real > BasicSet;
   typedef typename Ariadne::Geometry::Polyhedron< Real > Polyhedron;
   typedef typename Ariadne::Geometry::DenotableSet< Polyhedron > DenotableSet;
@@ -83,7 +94,7 @@ class PolyAffineMap {
   
   PolyAffineMap() {}
   
-  PolyAffineMap(const PolyAffineMap<S> &map): 
+  PolyAffineMap(const PolyAffineMap<R> &map): 
     _A(map._A), _A_invertible(map._A_invertible), _b(map._b), 
     _map_type(map._map_type), _E(map._E), _n1(map._n1), _f(map._f){}
   
@@ -137,9 +148,7 @@ class PolyAffineMap {
     return this->column_nb();			
   }
   
-  inline PolyAffineMap<S>  &operator=(
-                                      const PolyAffineMap<S> &orig) {
-    
+  inline PolyAffineMap<R>& operator=(const PolyAffineMap<R> &orig) {
     this->_A=orig._A;
     this->_A_invertible=orig._A_invertible;
     this->_b=orig._b;

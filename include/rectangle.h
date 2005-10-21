@@ -25,6 +25,7 @@
 #ifndef _RECTANGLE_H
 #define _RECTANGLE_H
 
+#include <iosfwd>
 #include <list>
 #include <set>
 #include <vector>
@@ -47,10 +48,13 @@ namespace Ariadne {
     template<typename R> bool subset(const Rectangle<R> &A, const Rectangle<R> &B);
     template<typename R> bool inner_subset(const Rectangle<R> &A, const ListSet<R,Rectangle> &B);
     template<typename R> bool subset_of_open_cover(const Rectangle<R> &A, const std::vector< Rectangle<R> > &list);
+    template<typename R> bool subset_of_closed_cover(const Rectangle<R> &A, const std::vector< Rectangle<R> > &list);
 
     template <typename R> Rectangle<R> closure_of_intersection_of_interiors(const Rectangle<R> &A, const Rectangle<R> &B);
     template<typename R> bool subset_of_interior(const Rectangle<R> &A, const Rectangle<R> &B);
 
+    template<typename R> std::ostream& operator<<(std::ostream&, const Rectangle<R>&);
+    template<typename R> std::istream& operator>>(std::istream&, Rectangle<R>&);
 
     /*! \brief A cuboid of arbitrary dimension.
      */
@@ -77,8 +81,9 @@ namespace Ariadne {
                              const Rectangle<R> &B);
 
       /*! \brief Tests if \a A is a subset of the interior of \a DS. */
-      friend bool inner_subset <> (const Rectangle<R> &A,
-                                   const ListSet<R,Rectangle> &DS);
+      // FIXME: Compiler doesn't like template parameter
+      //friend bool inner_subset <> (const Rectangle<R> &A,
+      //                             const ListSet<R,Rectangle> &DS);
 
 
       /*! \brief Tests inclusion in an open cover.
@@ -86,6 +91,12 @@ namespace Ariadne {
        */
       friend bool subset_of_open_cover <> (const Rectangle<R> &A,
                                            const std::vector< Rectangle<R> > &list);
+
+      /*! \brief Tests inclusion in an closed cover.
+       *  \internal We shouldn't restrict to a std::list.
+       */
+      friend bool subset_of_closed_cover <> (const Rectangle<R> &A,
+                                             const std::vector< Rectangle<R> > &list);
 
       /*! \brief Tests if \a A is a subset of the interior of \a B. (deprecated)*/
       friend bool subset_of_interior <> (const Rectangle<R> &A,
@@ -809,7 +820,7 @@ namespace Ariadne {
       else {
         /* representation as lower and upper corners */
         /* FIXME */
-        throw invalid_input("Not implemented");
+        // throw invalid_input("Not implemented");
       }
       return is;
     }

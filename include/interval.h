@@ -25,6 +25,7 @@
 #ifndef _INTERVAL_H
 #define _INTERVAL_H
 
+#include <iostream>
 #include <boost/numeric/interval.hpp>
 #include <boost/numeric/interval/io.hpp>
 

@@ -26,8 +26,9 @@
 #define _AFFINE_VECTOR_FIELD_H
 
 
-#include <affine_map.h>
-#include <approx_type.h>
+#include "vector_field.h"
+#include "affine_map.h"
+#include "approx_type.h"
 
 namespace Ariadne {	
 namespace VectorField{
@@ -39,62 +40,166 @@ enum AffineKind {
 };
 
 
-template <typename BS_I>
-class AffineIntegrator {	
+template<typename R>
+integrate(const AffineVectorField<R>& vf, const Geometry::Polyhedron<R> p, R t, R h) {
+  
+}
+
+
+template <typename R>
+class AffineVectorField : public VectorField<R,Geometry::State> 
+{
+  typedef typename Geometry::Polyhedron<R> Polyhedron;
+
  public:
-  typedef BS_I BasicSetIntegrator;
-  typedef typename BasicSetIntegrator::Map Map;
-  typedef typename Ariadne::Map::AffineMap< Map > SolutionMap;
-  typedef typename Ariadne::Map::AffineMap< Map > VectorFieldMap;
-  typedef typename Map::DenotableSet DenotableSet;
-  typedef typename DenotableSet::BasicSet BasicSet;
-  typedef typename SolutionMap::Real Real;
+  typedef R Real;
+  typedef typename Geometry::State<Real> State;
   
-  typedef typename SolutionMap::Matrix Matrix;
-  typedef typename SolutionMap::Vector Vector;
+  typedef typename boost::numeric::ublas::matrix<Real> Matrix;
+  typedef typename boost::numeric::ublas::vector<Real> Vector;
+
+  AffineVectorField(const AffineVectorField<R>& T) : _map(T.A(),T.b()) { }
+  AffineVectorField(const Matrix &A, const Vector &b) : _map(A,b) { }
+
+  State operator() (const State& s);
+  Polyhedron operator() (const Polyhedron& p) { return apply(_map,p); }
+
+  inline const Matrix& A() const { return this->_map.A(); }
+  inline const Vector& b() const { return this->_map.b(); }
   
-  AffineIntegrator() {}
-  
-  AffineIntegrator(const AffineIntegrator<BS_I>& orig): 
-    _vf_map(orig._vf_map) {}
-  
-  AffineIntegrator(const VectorFieldMap &vfield): 
-    _vf_map(vfield) {}
-  
-  AffineIntegrator(const Matrix &A): 
-    _vf_map(A) {}
-  
-  AffineIntegrator(const Vector &b): 
-    _vf_map(b) {}
-  
-  AffineIntegrator(const Matrix &A, const Vector &b): 
-    _vf_map(A,b) {}
-  
-  inline SolutionMap get_solution(const Real& delta) const { 	
-    
-    Matrix A_sol=
-      Ariadne::LinearAlgebra::exp_Ah((this->_vf_map).A() , delta,5);	
-    
-    Vector b_sol=
-      Ariadne::LinearAlgebra::exp_b((this->_vf_map).A() , 
-                                    (this->_vf_map).b(), delta,5);
-    
-    SolutionMap sol(A_sol,b_sol);
-    
-    return sol;
+  inline size_t dimension() const {
+    return (this->_map).dimension();
   }
   
-  inline BasicSet get_flow_tube_from_to(const BasicSet &A, 
-                                        const BasicSet &B, const SolutionMap &sol_map,
-                                        const Ariadne::Geometry::ApproxKind &atype) {
+  /*! Deprecated. */
+  inline size_t dim() const {
+    return this->dimension();
+  }
+
+ private:
+  Map::AffineMap<Real> _map;
+};
+ 
+
+
+template<class R, template<typename> class BS> class AffineMapIntegrator;
+
+template<class R> 
+class AffineMapIntegrator<R,Geometry::Polyhedron> 
+{
+  typedef R Real;
+  typedef Geometry::State<Real> State;
+  typedef Geometry::Polyhedron<Real> BasicSet;
+  typedef Geometry::Polyhedron<Real> Polyhedron;
+  typedef Geometry::ListSet<Real,Polyhedron> DenotableSet;
+  typedef AffineVectorField<Real> VectorField;
+  typedef typename AffineVectorField<Real>::Matrix Matrix;
+  typedef typename AffineVectorField<Real>::Vector Vector;
+  
+  AffineIntegrator() { }
+  AffineIntegrator(const int& n) : _terms(n) { };
+
+  AffineMap solution_map(const VectorField& vf, const Real& t) {
+    Matrix expA = Ariadne::LinearAlgebra::exp_Ah(vf.A(),t,n);
+    Matrix expb = Ariadne::LinearAlgebra::exp_b(vf.A(),vf.b(),h,n);
+    return AffineMap(expA,expB);
+  }
+    
+  inline BasicSet integrate(const VectorField& vf,
+                            const BasicSet& A, 
+                            const Real& t) 
+  { 		
+    return solution_map(vf,h)(A); 
+  }
+      
+  inline DenotableSet integrate(const VectorField& vf,
+                                const DenotableSet& A, 
+                                const Real& t)
+  { 
+    DenotableSet result;
+    AffineMap solution=solution_map(vf,t);
+    for(uint i=0; i< A.size(); i++) {
+      result.inplace_union(solution(A[i]));
+    }
+    return result;
+  }
+
+  inline DenotableSet integrate(const VectorField& vf,
+                                const DenotableSet& A, 
+                                const Real& t1,
+                                const Real& t2)
+  {
+    assert(0<=t1 && t1<=t2);
+    
+    DenotableSet result;
+    DenotableSet B;
+
+    if(t1==0) {
+      B=A;
+    } 
+    else {
+      B=integrate(vf,A,t);
+    }
+    
+    if(t2==t1) {
+      return B;
+    }
+
+    AffineMap affmap=solution_map(vf,t2-t1);
+    
+    for(uint i=0; i!=B.size(); ++i) {
+      BasicSet bs=B[i];
+      result.inplace_union(Ariadne::Geometry::convex_hull(bs,affmap(bs)));
+    }
+    return result;
+  }
+ private:
+  Real _time_step;
+  unsigned int _terms;
+};
+  
+
+
+
+template<typename R>
+ListSet<R,Geometry::Polyhedron>
+AffineIntegrator<R,Geometry::Polyhedron>::
+integrate(const VectorField& vf,
+          const Polyhedron& p,
+          const Real& h)
+{
+  ListSet<R,Geometry::Polyhedron> result;
+
+  const Real& h=_time_step;
+  const unsigned int& n=_terms;
+  const Matrix& A=vf.A();
+  const Matrix& b=vf.b();
+  
+  Matrix expA = Ariadne::LinearAlgebra::exp_Ah(A,h,n);
+  Matrix expb = Ariadne::LinearAlgebra::exp_b(A,b,h,n);
+  AffineMap solution(expA,expB);
+  
+  Real t=0;
+  Polyhedron q=p;
+  
+  while(t<t_1) {
+    q=solution(q);
+  }
+  
+
+}
+  
+  inline BasicSet get_flow_tube_from_to(const BasicSet& A, 
+                                        const BasicSet& B, const SolutionMap& sol_map,
+                                        const Ariadne::Geometry::ApproxKind& atype) {
     
     return (this->_bs_i).get_flow_tube_to(A,B,
                                           sol_map,atype);				
   }
   
-  inline DenotableSet get_flow_tube_from_to(const DenotableSet &A, 
-                                            const DenotableSet &B, const SolutionMap &sol_map, 
-                                            const Ariadne::Geometry::ApproxKind &atype) {
+  inline DenotableSet get_flow_tube_from_to(const DenotableSet& A, 
+                                            const DenotableSet& B, const SolutionMap& sol_map, 
+                                            const Ariadne::Geometry::ApproxKind& atype) {
     
 #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
@@ -116,7 +221,7 @@ class AffineIntegrator {
     return flow_tube;				
   }
   
-  inline AffineIntegrator& operator()(const  VectorFieldMap &vfield) {
+  inline AffineIntegrator& operator()(const  VectorFieldMap& vfield) {
     
     this->_vf_map=vfield;
     
@@ -131,57 +236,6 @@ class AffineIntegrator {
   VectorFieldMap _vf_map;
   
   BasicSetIntegrator _bs_i;
-};
-  
-template <typename BS_MAP>
-class AffineVectorField {
- public:
-  typedef BS_MAP VectorFieldMap;
-  typedef typename VectorFieldMap::DenotableSet DenotableSet;
-  typedef typename DenotableSet::BasicSet BasicSet;
-  typedef typename BasicSet::State State;
-  typedef typename State::Real Real;
-  
-  typedef typename boost::numeric::ublas::matrix<Real> Matrix;
-  typedef typename boost::numeric::ublas::vector<Real> Vector;
-  
-  AffineVectorField(const AffineVectorField<BS_MAP> &T):
-    _vf_map(T._vf_map){}
-  
-  AffineVectorField(const Matrix &A): _vf_map(A) {}
-  
-  AffineVectorField(const Vector &b): _vf_map(b) {}
-  
-  AffineVectorField(const Matrix &A, const Vector &b):
-    _vf_map(A,b) {}
-  
-  inline AffineKind affine_kind() {
-    return (this->vector_field()).affine_kind();
-  }
-  
-  inline const Matrix& A() const { return _vf_map.A(); }
-  
-  inline const Vector& b() const { return _vf_map.b(); }
-  
-  inline VectorFieldKind vector_field_kind() { return AFFINE; }
-  
-  inline const VectorFieldMap &vector_field() const {
-    return (this->_vf_map);
-  }
-  
-  /*! Deprecated. */
-  inline size_t dim() const {
-    return (this->_vf_map).dimension();
-  }
-
-  inline size_t dimension() const {
-    return (this->_vf_map).dimension();
-  }
-  
- private:
-  
-  VectorFieldMap _vf_map;
-};
-  
+ 
 }}
 #endif /* _AFFINE_VECTOR_FIELD_H */

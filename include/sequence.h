@@ -23,11 +23,11 @@
  */
  
 /*! \file sequence.h
- *  \brief An eventually-periodic sequence.
+ *  \brief Infinite sequences.
  */
 
-#ifndef _SEQUENCE_H
-#define _SEQUENCE_H
+#ifndef _ARIADNE_SEQUENCE_H
+#define _ARIADNE_SEQUENCE_H
 
 #include <cstddef>
 #include <cassert>
@@ -43,7 +43,8 @@ namespace Ariadne {
   template<typename T> class sequence;
   template<typename T> class compact_sequence;
   template<typename T> class _sequence_const_iterator;
-
+  template<typename T> class _compact_sequence_const_iterator;
+  
   template<typename T> compact_sequence<T> convolution(const compact_sequence<T>& u, const compact_sequence<T>& v);
 
   /*! \brief An eventually-periodic sequence with an STL style interface.
@@ -61,14 +62,13 @@ namespace Ariadne {
     typedef const value_type& const_reference;
     typedef value_type* pointer;
     typedef const value_type* const_pointer;
-    typedef pointer iterator;
-    typedef const_pointer const_iterator;
     typedef size_t size_type;
     typedef ptrdiff_t difference_type;
     
     ~sequence() { delete[] _ptr; }
     sequence() : _body_size(0), _tail_size(1), _ptr(new value_type[1]) { _ptr[0]=value_type(); }
-    template<typename ForwardIterator> sequence(const ForwardIterator& b, ForwardIterator tb, ForwardIterator te)
+
+    template<typename ForwardIterator> sequence(ForwardIterator b, ForwardIterator tb, ForwardIterator te)
       : _body_size(std::distance(b,tb)), _tail_size(std::distance(tb,te)), _ptr(new value_type[std::distance(b,te)])
     { fill(b); }
 
@@ -92,6 +92,8 @@ namespace Ariadne {
   
     const_reference operator[](size_type i) const {
       if(i>=_body_size) { i = ( (i-_body_size) % _tail_size ) + _body_size; } return _ptr[i]; }
+    value_type get(size_type i) const {
+      return _ptr[i]; }
     const_reference at(size_type i) const {
       return _ptr[i]; }
   
@@ -120,18 +122,17 @@ namespace Ariadne {
 
   template<class C>
   class _container_reference {
-    typedef C::value_type value_type;
-    typedef C::size_type index_type;
+    typedef typename C::value_type value_type;
+    typedef typename C::size_type index_type;
    public:
     _container_reference(C& container, index_type& index) : _container(container), _index(index) { }
     operator value_type() const { return _container.get(_index); }
-    operator=(const value_type& x) { _container.set(_index,x); }
+    void operator=(const value_type& x) { _container.set(_index,x); }
    private:
     C& _container;
     index_type& _index;
   };
 
-  class _sequence_const_iterator : public std::iterator<std::forward_iterator_tag,T> {
   template<class T>
   class _sequence_const_iterator : public std::iterator<std::forward_iterator_tag,T> {
     typedef typename sequence<T>::const_pointer const_pointer;
@@ -139,7 +140,7 @@ namespace Ariadne {
     typedef typename sequence<T>::const_pointer pointer;
    public:
     _sequence_const_iterator (const sequence<T>& seq, size_t n=0)
-      : _current(seq._ptr + n), _tail_begin(seq._ptr+seq_body_size), _tail_end(seq._ptr+seq._body_size+seq._tail_size) { }
+      : _current(seq._ptr + n), _tail_begin(seq._ptr+seq._body_size), _tail_end(seq._ptr+seq._body_size+seq._tail_size) { }
     _sequence_const_iterator (const_pointer c, const_pointer tb, const_pointer te)
       : _current(c), _tail_begin(tb), _tail_end(te) { }
     _sequence_const_iterator (const _sequence_const_iterator<T>& iter) 
@@ -159,14 +160,14 @@ namespace Ariadne {
   typename sequence<T>::const_iterator
   sequence<T>::begin() const
   {
-    return sequence<T>::const_iterator(_ptr,_ptr+_body_size,_ptr+_body_size+_tail_size);
+    return typename sequence<T>::const_iterator(_ptr,_ptr+_body_size,_ptr+_body_size+_tail_size);
   }
 
   /*! \brief An eventually-zero biinfinite sequence.
    */
   template<typename T> class compact_sequence {
     friend class _compact_sequence_const_iterator<T>;
-    friend template<> compact_sequence<T> convolution(const compact_sequence<T>& u, const compact_sequence<T>& v);
+//    friend template<> compact_sequence<T> convolution(const compact_sequence<T>& u, const compact_sequence<T>& v);
    public:
     typedef _compact_sequence_const_iterator<T> iterator;
     typedef _compact_sequence_const_iterator<T> const_iterator;
@@ -176,12 +177,10 @@ namespace Ariadne {
     typedef const value_type& const_reference;
     typedef value_type* pointer;
     typedef const value_type* const_pointer;
-    typedef pointer iterator;
-    typedef const_pointer const_iterator;
     typedef ptrdiff_t size_type;
     typedef ptrdiff_t difference_type;
     
-    ~compact_sequence() { delete[] _ptr+_start; }
+    ~compact_sequence() { delete[] (_ptr+_start); }
     compact_sequence() : _start(0), _finish(0), _ptr(new value_type[0]) { }
     compact_sequence(size_type start, size_type finish, value_type x) : _start(start), _finish(finish), _ptr(new value_type[finish-start]) { 
       for(size_type i=_start; i!=_finish; ++i) { _ptr[i]=x; }
@@ -192,12 +191,12 @@ namespace Ariadne {
 
     compact_sequence(const compact_sequence<T>& s)
       : _start(s._start), _finish(s._finish), _ptr(new value_type[-_start+_finish]+_start)
-    { fill(a._ptr); }
+    { fill(s._ptr); }
 
     sequence<T>& operator=(const sequence<T>& s) {
       if(&s!=this) { resize(s._start,s._finish); fill(s._ptr); } return *this; }
 
-    bool operator==(const sequence& s) const {
+    bool operator==(const sequence<T>& s) const {
       /* FIXME: How far do we need to go? */
       for(size_type i=_start; i!=_finish; ++i) {
         if((*this)[i]!=s[i]) { return false; } }
@@ -205,25 +204,28 @@ namespace Ariadne {
 
     size_type start() const { return _start; }
     size_type finish() const { return _finish; }
+
     void resize(size_type s, size_type f) {
       pointer _old_pointer=_ptr;
-      size_type_old_start=_start;
+      size_type _old_start=_start;
       size_type _old_finish=_finish;
       _start=s; 
       _finish=f;  
       _ptr=new value_type[-_start+_finish]-_start;
-      for(i=__start; i!=__finish; ++i) {
+      for(size_type i=_start; i!=_finish; ++i) {
         _ptr[i]=0;
       }
-      for(i=_old_start; i!=_old_finish; ++i) {
-        _ptr[i]=_old_ptr[i];
+      for(size_type i=_old_start; i!=_old_finish; ++i) {
+        _ptr[i]=_old_pointer[i];
       }
-      delete[] _old_ptr+_old_start; 
+      delete[] (_old_pointer+_old_start); 
     }
 
     const_reference get(difference_type i) const {
-      if(i<_start || i>=_finish) { return 0; } return _ptr[i]; }
-    void set(difference_type i, reference_type x) {
+      if(i<_start || i>=_finish) { return 0; } return _ptr[i]; 
+    }
+      
+    void set(difference_type i, reference x) {
       if(i<_start) {
         resize(i,_finish);
       } 
@@ -251,7 +253,7 @@ namespace Ariadne {
   template<typename T>
   compact_sequence<T>
   convolution(const compact_sequence<T>& u, const compact_sequence<T>& v) {
-    typedef compact_sequence<T>::size_type size_type;
+    typedef typename compact_sequence<T>::size_type size_type;
     compact_sequence<T> r(u.start()-v.finish(),u.finish()-v.start(),0);
     for(size_type j=u._start; j!=u.finish; ++j) {
       for(size_type k=v._start; k!=v.finish; ++k) {
@@ -281,4 +283,4 @@ namespace Ariadne {
 
 } // namespace Ariadne
 
-#endif
+#endif /* _ARIADNE_SEQUENCE_H */

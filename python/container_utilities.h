@@ -1,9 +1,9 @@
 /***************************************************************************
- *            arithmetic.h
+ *            python/container.h
  *
- *  Wed 18 May 2005
- *  Copyright 2005  Alberto Casagrande, Pieter Collins
- *  Email casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  16 November 2005
+ *  Copyright  2005  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,41 +21,24 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-#ifndef _ARITHMETIC_H
-#define _ARITHMETIC_H
 
-/// Arithmetic for double, dyadic and rational types and intervals.
+#ifndef _ARIADNE_PYTHON_CONTAINER_UTILITIES_H
+#define _ARIADNE_PYTHON_CONTAINER_UTILITIES_H
 
-#include <cmath>
-#include "numerical_type.h"
-
-namespace Ariadne {
-  uint factorial(const uint& n) {
-    uint result=1;
-    for(uint i=1; i<=n; ++i) {
-      result*=i;
-    }
-    return result;
-  }
-
-  Rational pow(const Rational& x, const uint& n) {
-    Rational result=1;
-    for(uint i=0; i!=n; ++i) {
-      result*=x;
-    }
-    return result;
-  }
-
-  int pow(int x, uint n) {
-    int result=1;
-    for(uint i=0; i!=n; ++i) {
-      result*=x;
-    }
-    return result;
-  }
+template<class C> 
+inline
+typename C::value_type 
+get(const C& c, const typename C::size_type n) {
+  assert(n<c.size());
+  return c[n];
 }
 
+template<class C> 
+inline
+void
+set(C& c, const typename C::size_type n, const typename C::value_type x) {
+  assert(n<c.size());
+  c[n]=x;
+}
 
-
-#endif /* _ARITHMETIC_H */
+#endif

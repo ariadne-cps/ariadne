@@ -23,11 +23,11 @@
  */
 
 /*! \file grid_operations.h
- *  \brief Header for non-templated operations on grids.
+ *  \brief Non-templated operations on grids.
  */
 
-#ifndef GRID_OPERATIONS_H
-#define GRID_OPERATIONS_H
+#ifndef _ARIADNE_GRID_OPERATIONS_H
+#define _ARIADNE_GRID_OPERATIONS_H
 
 #include <vector>
 #include "array.h"
@@ -105,7 +105,8 @@ namespace Ariadne {
     void compute_cell_list_mask(BooleanArray* maptr, const SizeArray& grid_strides, const IndexArray& grid_lower, const IntegerCellList& cl);
     void compute_rectangle_mask(BooleanArray* maptr, const SizeArray& grid_strides, const IndexArray& grid_lower, 
                                 const IndexArray& lower, const IndexArray& upper);
-    void compute_rectangle_list_mask(BooleanArray* maptr, const SizeArray& grid_strides, const IndexArray& grid_lower, const IntegerRectangleList& rl);
+    void compute_rectangle_list_mask(BooleanArray* maptr, const SizeArray& grid_strides, 
+                                     const IndexArray& grid_lower, const IntegerRectangleList& rl);
 
     void translate_rectangle_coordinates(IntegerRectangleList* torlptr, const IntegerRectangleList& frrl, array< std::vector<index_type> > tr);
     void translate_cell_coordinates(IntegerRectangleList* torlptr, const IntegerCellList& frcl, array< std::vector<index_type> > tr);
@@ -154,4 +155,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* _GRID_OPERATIONS_H */
+#endif /* _ARIADNE_GRID_OPERATIONS_H */

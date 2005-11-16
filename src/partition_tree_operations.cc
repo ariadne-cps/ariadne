@@ -1,9 +1,9 @@
 /***************************************************************************
- *            arithmetic.h
+ *            partition_tree_operations.cc
  *
- *  Wed 18 May 2005
- *  Copyright 2005  Alberto Casagrande, Pieter Collins
- *  Email casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  1 July 2005
+ *  Copyright  2005  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,41 +21,14 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-#ifndef _ARITHMETIC_H
-#define _ARITHMETIC_H
 
-/// Arithmetic for double, dyadic and rational types and intervals.
+#include "partition_tree_set.h"
 
-#include <cmath>
-#include "numerical_type.h"
-
-namespace Ariadne {
-  uint factorial(const uint& n) {
-    uint result=1;
-    for(uint i=1; i<=n; ++i) {
-      result*=i;
-    }
-    return result;
+Ariadne::Geometry::SubdivisionSequence 
+Ariadne::Geometry::default_subdivision_coordinates(dimension_type n) {
+  dimension_type coords[n];
+  for(dimension_type i=0; i!=n; ++i) {
+    coords[i]=i;
   }
-
-  Rational pow(const Rational& x, const uint& n) {
-    Rational result=1;
-    for(uint i=0; i!=n; ++i) {
-      result*=x;
-    }
-    return result;
-  }
-
-  int pow(int x, uint n) {
-    int result=1;
-    for(uint i=0; i!=n; ++i) {
-      result*=x;
-    }
-    return result;
-  }
+  return SubdivisionSequence(coords,coords,coords+n);
 }
-
-
-
-#endif /* _ARITHMETIC_H */

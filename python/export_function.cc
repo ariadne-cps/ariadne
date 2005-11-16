@@ -1,9 +1,9 @@
 /***************************************************************************
- *            arithmetic.h
+ *            python/export_function.cc
  *
- *  Wed 18 May 2005
- *  Copyright 2005  Alberto Casagrande, Pieter Collins
- *  Email casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  21 October 2005
+ *  Copyright  2005  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,41 +21,24 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-#ifndef _ARITHMETIC_H
-#define _ARITHMETIC_H
 
-/// Arithmetic for double, dyadic and rational types and intervals.
+#include <iostream>
+#include <boost/python.hpp>
+#include <gmpxx.h>
 
-#include <cmath>
-#include "numerical_type.h"
+#include "function.h"
 
-namespace Ariadne {
-  uint factorial(const uint& n) {
-    uint result=1;
-    for(uint i=1; i<=n; ++i) {
-      result*=i;
-    }
-    return result;
-  }
+using boost::python::class_;
+using boost::python::init;
+using boost::python::self;
+using boost::python::def;
+using boost::python::return_value_policy;
+using boost::python::copy_const_reference;
 
-  Rational pow(const Rational& x, const uint& n) {
-    Rational result=1;
-    for(uint i=0; i!=n; ++i) {
-      result*=x;
-    }
-    return result;
-  }
+#include "real_typedef.h"
 
-  int pow(int x, uint n) {
-    int result=1;
-    for(uint i=0; i!=n; ++i) {
-      result*=x;
-    }
-    return result;
-  }
+void export_function() {
+  def("exp_approx", Ariadne::exp_approx<Real>, "approximate exponential function (maximum error e)" );
+  def("cos_approx", Ariadne::exp_approx<Real>, "approximate sine function (maximum error e)" );
+  def("sin_approx", Ariadne::exp_approx<Real>, "approximate cosine function (maximum error e)" );
 }
-
-
-
-#endif /* _ARITHMETIC_H */

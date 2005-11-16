@@ -1,10 +1,12 @@
-/***************************************************************************
- *            exception.h
- *
- *  2 May 2005
- *  Copyright  2005  Pieter Collins, Alberto Casagrande
- *  Email  Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
- ****************************************************************************/
+#ifndef _ARIADNE_REAL_TYPEDEF_H
+#define _ARIADNE_REAL_TYPEDEF_H
+
+//typedef double Real;
+typedef Ariadne::Dyadic Real;
+//typedef Ariadne::Rational Real;
+
+#endif /* _ARIADNE_REAL_TYPEDEF_H */
+
 
 /*
  *  This program is free software; you can redistribute it and/or modify
@@ -22,22 +24,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file exception.h
- *  \brief Exceptions, error handling and assertions.
+/*! \file real_typedef.h
+ *  \brief Defines the real number type used by the Python interface.
  */
-
-#ifndef _ARIADNE_EXCEPTION_H
-#define _ARIADNE_EXCEPTION_H
-
-#include <stdexcept>
-#include <iosfwd>
-
-namespace Ariadne {
-    class invalid_input : public std::runtime_error {
-      public:
-	invalid_input(const std::string& str) : std::runtime_error(str) { }
-    };
-    
-}
-
-#endif /* _ARIADNE_EXCEPTION_H */

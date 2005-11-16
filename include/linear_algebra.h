@@ -22,8 +22,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#ifndef _LINEAR_ALGEBRA_H
-#define _LINEAR_ALGEBRA_H
+/*! \file linear_algebra.h
+ *  \brief Basic linear algebra.
+ */
+
+#ifndef _ARIADNE_LINEAR_ALGEBRA_H
+#define _ARIADNE_LINEAR_ALGEBRA_H
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
@@ -31,7 +35,7 @@
 #include "numerical_type.h"
 
 namespace Ariadne {
-namespace LinearAlgebra {
+  namespace LinearAlgebra {
 
 template <typename Real>
 inline boost::numeric::ublas::vector<Real> null_vector(size_t dim) {
@@ -337,4 +341,4 @@ inline Real find_vector_denumerator(const boost::numeric::ublas::vector<Real> &b
 }
 }
 
-#endif /* _LINEAR_ALGEBRA_H */
+#endif /* _ARIADNE_LINEAR_ALGEBRA_H */

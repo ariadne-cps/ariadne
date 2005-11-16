@@ -66,12 +66,57 @@ preferences.indent.closing=0
 
 module.include.name=include
 module.include.type=
-module.include.files=
+module.include.files=\
+	affine_map.h\
+	affine_vector_field.h\
+	approx_type.h\
+	approximate_set.h\
+	ariadne.h\
+	arithmetic.h\
+	array.h\
+	automaton.h\
+	binary_word.h\
+	constraint.h\
+	denotable_set.h\
+	denotable_set_io.h\
+	discrete_location.h\
+	discrete_trans.h\
+	doc.h\
+	epsfstream.h\
+	exception.h\
+	generator.h\
+	grid.h\
+	grid_denotable_set.h\
+	grid_operations.h\
+	grid_rectangle.h\
+	hybrid_set.h\
+	interval.h\
+	linear_algebra.h\
+	list_set.h\
+	location.h\
+	map.h\
+	matlabexp.h\
+	numerical_type.h\
+	partition_tree.h\
+	poly_map.h\
+	poly_vf.h\
+	polyhedron.h\
+	polyhedron_io.h\
+	povexp.h\
+	ptree.h\
+	ptree_node.h\
+	rectangle.h\
+	sequence.h\
+	set_const.h\
+	solver.h\
+	state.h\
+	utility.h\
+	vector_field.h
 
 module.source.name=src
 module.source.type=
 module.source.files=\
-	main.cc
+	grid_operations.cc
 
 module.pixmap.name=pixmaps
 module.pixmap.type=

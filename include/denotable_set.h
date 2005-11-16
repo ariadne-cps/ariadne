@@ -28,8 +28,8 @@
 #include <vector>
 #include <iosfwd>
 
-#include <set_const.h>
-#include <denotable_set_io.h>
+#include "set_const.h"
+#include "denotable_set_io.h"
 
 namespace Ariadne {
 namespace Geometry {

@@ -33,10 +33,7 @@
 #include "state.h"
 #include "rectangle.h"
 #include "binary_word.h"
-#include "grid.h"
-#include "grid_rectangle.h"
-#include "grid_denotable_set.h"
-#include "grid_operations.h"
+#include "grid_set.h"
 
 #include "test.h"
 
@@ -55,6 +52,18 @@ template class GridRectangle<Rational>;
 template class GridRectangleListSet<Rational>;
 template class GridCellListSet<Rational>;
 template class GridMaskSet<Rational>;
+
+template class Rectangle<Dyadic>;
+template class Grid<Dyadic>;
+template class FiniteGrid<Dyadic>;
+template class InfiniteGrid<Dyadic>;
+
+template class GridCell<Dyadic>;
+template class GridRectangle<Dyadic>;
+
+template class GridRectangleListSet<Dyadic>;
+template class GridCellListSet<Dyadic>;
+template class GridMaskSet<Dyadic>;
 
 int main() {
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            partition_tree.h
+ *            partition_tree_set.h
  *
  *  1 July 2005
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
@@ -22,12 +22,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file partition_tree.h
+/*! \file partition_tree_set.h
  *  \brief Cuboidal partition trees.
  */
 
-#ifndef _PARTITION_TREE_H
-#define _PARTITION_TREE_H
+#ifndef _ARIADNE_PARTITION_TREE_SET_H
+#define _ARIADNE_PARTITION_TREE_SET_H
 
 #include <algorithm>
 #include <vector>
@@ -37,108 +37,58 @@
 #include "sequence.h"
 #include "utility.h"
 #include "binary_word.h"
+#include "binary_tree.h"
 
 #include "rectangle.h"
 #include "list_set.h"
 
 namespace Ariadne {
   namespace Geometry {
-      const bool leaf=1;
-      const bool branch=0;
-      const bool left=0;
-      const bool right=1;
-
     typedef unsigned short dimension_type;
     typedef size_t size_type;
     typedef sequence<dimension_type> SubdivisionSequence;
-    typedef std::vector<bool> BinaryArray;
     typedef std::vector<bool> BooleanArray;
 
-    template<typename R> class Rectangle;
-    template<typename R, template<typename> class BS> class ListSet;
-
-    class BinaryTree;
+    const bool leaf=1;
+    const bool branch=0;
+    const bool left=0;
+    const bool right=1;
 
     template<typename R> class PartitionScheme;
-    template<typename R> class PartitionTreeCell;
     template<typename R> class PartitionTree;
+    template<typename R> class PartitionTreeCell;
     template<typename R> class PartitionTreeSet;
 
     template<typename R> class PartitionTreeIterator;
     template<typename R> class PartitionTreeSetIterator;
 
-    class BinaryTreeIterator {
-      friend class BinaryTree;
-     private:
-      BinaryTreeIterator(BinaryArray::const_iterator i) : _position(i), _word() { }
-      BinaryTreeIterator& initialize() { while(*_position==branch) { _word.push_back(left); ++_position; } return *this; }
-     public:
-      BinaryTreeIterator(const BinaryArray& ba) : _position(ba.begin()), _word() { initialize(); }
-     public:
-      BinaryTreeIterator(const BinaryTreeIterator& iter) : _position(iter._position), _word(iter._word) { }
-      bool operator==(const BinaryTreeIterator& iter) const { return this->_position==iter._position; }
-      bool operator!=(const BinaryTreeIterator& iter) const { return this->_position!=iter._position; }
-      const BinaryWord& operator*() const { return _word; }
-      const BinaryWord* operator->() const { return &_word; }
-      BinaryTreeIterator& operator++();
-     private:
-      BinaryArray::const_iterator _position;
-      BinaryWord _word;
-    };
+    /* External class declarations. */
+    template<typename R> class Rectangle;
+    template<typename R, template<typename> class BS> class ListSet;
 
-    /*! \brief A memory-efficient binary tree, with a forward iterator through the elements. */
-    class BinaryTree {
-     public:
-      typedef BinaryTreeIterator const_iterator;
-
-      /*! \brief Construct a tree with a single leaf node. */
-      BinaryTree() : _tree(1) { _tree[0]=leaf; }
-      /*! \brief Construct a tree from an array of bits denoting branches and leaves. */
-      BinaryTree(const BinaryArray& t) : _tree(t) { }
-      /*! \brief The total number of leaf nodes in the tree. */
-      size_type capacity() const { return (_tree.size()+1)/2; }
-      /*! \brief A constant forward iterator to the first leaf of the tree. */
-      const_iterator begin() const { return const_iterator(_tree.begin()).initialize(); }
-      /*! \brief A constant forward iterator to the end of the tree. */
-      const_iterator end() const { return const_iterator(_tree.end()); }
-     private:
-      BinaryArray _tree;
-    };
-
-    class BinaryTreeSetIterator {
-     public:
-      BinaryTreeSetIterator(const BinaryTree& t, const BooleanArray& m)
-        : _tree_iter(t.begin()), _mask_iter(m.begin()) { initialize(); }
-      BinaryTreeSetIterator(BinaryTree::const_iterator t,
-                            BooleanArray::const_iterator m)
-        : _tree_iter(t), _mask_iter(m) { }
-      BinaryTreeSetIterator& initialize() { if(!*_mask_iter) { ++(*this); } return *this; }
-      bool operator==(const BinaryTreeSetIterator iter) const {
-        return _tree_iter==iter._tree_iter && _mask_iter==iter._mask_iter; }
-      bool operator!=(const BinaryTreeSetIterator iter) const { return !(*this==iter); }
-      const BinaryWord& operator*() const { return _tree_iter.operator*(); }
-      const BinaryWord* operator->() const { return _tree_iter.operator->(); }
-      BinaryTreeSetIterator& operator++() {
-        do { ++_mask_iter; ++_tree_iter; } while((*_mask_iter==false) && !_tree_iter->empty()); return *this; }
-     private:
-      BinaryTreeIterator _tree_iter;
-      BooleanArray::const_iterator _mask_iter;
-    };
-
+    SubdivisionSequence default_subdivision_coordinates(dimension_type n);
+          
     /*!\brief A partition grid of rectangles in Euclidean space.
      */
     template<typename R> class PartitionScheme {
       typedef R real_type;
     public:
+      /*! \brief Construct from a bounding box \a bb with default subdivision coordinates. */
+      PartitionScheme(const Rectangle<R>& bb)
+        : _bounding_box(bb), 
+          _subdivision_coordinates(default_subdivision_coordinates(bb.dimension())) 
+      { }
+
       /*! \brief Construct from a bounding box \a bb and a sequence of subdivision coordinates \a sc. */
-      PartitionScheme(const Rectangle<R>& bb, const sequence<dimension_type>& sc)
+      PartitionScheme(const Rectangle<R>& bb, const SubdivisionSequence& sc)
         : _bounding_box(bb), _subdivision_coordinates(sc) { }
 
+      /*! \brief Equality. */
       bool operator==(const PartitionScheme<R>& pg) const {
         return _bounding_box==pg._bounding_box && _subdivision_coordinates==pg._subdivision_coordinates;
       }
 
-      /*! \brief The underlying dimension of the grid. */
+      /*! \brief The underlying dimension of the partition scheme. */
       dimension_type dimension() const { return _bounding_box.dimension(); }
 
       /*! \brief The outer bounding box of the grid. */
@@ -152,44 +102,6 @@ namespace Ariadne {
       Rectangle<R> _bounding_box;
       SubdivisionSequence _subdivision_coordinates;
     };
-
-
-    /*! \brief A rectangle defined on a partition tree.
-     */
-    template<typename R>
-    class PartitionTreeCell {
-     public:
-      typedef R real_type;
-      typedef State<R> state_type;
-
-      /*!\brief Construct from a grid and a binary word.
-       */
-      PartitionTreeCell(const PartitionScheme<R>& g,
-                        const BinaryWord& w)
-        : _scheme(g), _word(w)
-      { }
-
-      bool operator==(const PartitionTreeCell<R>& ptc) const {
-        return _scheme==ptc._scheme && _word==ptc._word;
-      }
-
-      /*!\brief The underlying partition grid. */
-      const PartitionScheme<R>& grid() const { return _scheme; }
-
-      /*!\brief The dimension of the cell. */
-      dimension_type dimension() const { return _scheme.dimension(); }
-
-      /*!\brief The dimension of the cell. */
-      BinaryWord index() const { return _word; }
-
-      /*!\brief Convert to an ordinary rectangle. */
-      operator Rectangle<R>() const;
-     private:
-      PartitionScheme<R> _scheme;
-      BinaryWord _word;
-    };
-
-
 
 
 
@@ -214,31 +126,51 @@ namespace Ariadne {
         BinaryTreeIterator _iter;
       };
 
+      /*! \brief Construct a tree from a partition scheme and a binary tree. */
+      explicit PartitionTree(const PartitionScheme<R>& g, const BinaryTree& t)
+        : _scheme(g), _tree(t) { }
+
+      /*! \brief Construct a tree from a rectangle, a subdivision sequence and a binary tree. */
+      explicit PartitionTree(const Rectangle<R>& r, const SubdivisionSequence& s, const BinaryTree& t)
+        : _scheme(r,s), _tree(t) { }
+
+      /*! \brief Construct a tree from a rectangle and a binary tree. */
+      explicit PartitionTree(const Rectangle<R>& r, const BinaryTree& t)
+        : _scheme(r), _tree(t) { }
+
       /*! \brief Construct a one-cell tree. */
-      PartitionTree(const PartitionScheme<R>& g)
+      explicit PartitionTree(const PartitionScheme<R>& g)
         : _scheme(g), _tree() { }
 
-      /*! \brief Construct a set based on a PartitionScheme, a subdivision tree and a mask. */
-      PartitionTree(const PartitionScheme<R>& g, const BinaryArray& t)
-        : _scheme(g), _tree(t) { }
+      /*! \brief Construct a one-cell tree. */
+      explicit PartitionTree(const Rectangle<R>& bb, const SubdivisionSequence& ss)
+        : _scheme(PartitionScheme<R>(bb,ss)), _tree() { }
+
+      /*! \brief The space dimension of the tree. */
+      dimension_type dimension() const { return _scheme.dimension(); }
 
       /*! \brief The underlying PartitionScheme. */
       const PartitionScheme<R>& scheme() const { return _scheme; }
 
-      /*! \brief The space dimension of the tree. */
-      dimension_type dimension() const { return _scheme.dimension(); }
+      /*! \brief The underlying bounding box. */
+      const Rectangle<R>& bounding_box() const { return _scheme.bounding_box(); }
+
+      /*! \brief The underlying bounding box. */
+      const SubdivisionSequence& subdivision_coordinates() const { return _scheme.subdivision_coordinates(); }
+
+      /*! \brief The coordinate in which the \a n th subdivision is performed. */
+      dimension_type subdivision_coordinate(size_type n) const { return _scheme.subdivision_coordinate(n); }
 
       /*! \brief The array describing the tree. */
       const BinaryTree& tree() const { return _tree; }
 
       /*! \brief The number of cells in the PartitionTree. */
-      size_type capacity() const { return _tree.capacity(); }
+      size_type capacity() const { return _tree.size(); }
 
       /*! \brief Constant iterator to the beginning of the cells in the tree. */
       const_iterator begin() const { return const_iterator(_scheme,_tree.begin()); }
       /*! \brief Constant iterator to the end of the cells in the tree. */
       const_iterator end() const { return const_iterator(_scheme,_tree.end()); }
-
      private:
       PartitionScheme<R> _scheme;
       BinaryTree _tree;
@@ -246,21 +178,55 @@ namespace Ariadne {
 
 
 
-   template<typename R>
-    class PartitionTreeSetIterator {
-      const PartitionScheme<R>& _scheme;
-      BinaryTreeSetIterator _iter;
+    /*! \brief A rectangle defined on a partition tree.
+     */
+    template<typename R>
+    class PartitionTreeCell {
      public:
-      PartitionTreeSetIterator(const PartitionScheme<R>& g, BinaryTreeSetIterator i) :
-        _scheme(g), _iter(i) { }
-      bool operator==(const PartitionTreeSetIterator<R>& other) { return this->_iter==other._iter; }
-      bool operator!=(const PartitionTreeSetIterator<R>& other) { return this->_iter!=other._iter; }
-      PartitionTreeCell<R> operator*() const { return PartitionTreeCell<R>(_scheme,*_iter); }
-      PartitionTreeSetIterator& operator++() { ++_iter; return *this; }
-      bool end() const { return _iter.end(); }
+      typedef R real_type;
+      typedef State<R> state_type;
+
+      /*!\brief Construct from a partition scheme and a binary word. */
+      PartitionTreeCell(const PartitionScheme<R>& p, const BinaryWord& w)
+        : _scheme(p), _word(w) { }
+
+      /*!\brief Construct from a rectangle, the subdivision_coordinates and a binary word. */
+      PartitionTreeCell(const Rectangle<R>& r, const SubdivisionSequence& s, 
+                        const BinaryWord& w) 
+        : _scheme(r,s), _word(w) { }
+
+      bool operator==(const PartitionTreeCell<R>& ptc) const {
+        return _scheme==ptc._scheme && _word==ptc._word;
+      }
+
+      /*!\brief The dimension of the cell. */
+      dimension_type dimension() const { return _scheme.dimension(); }
+
+      /*!\brief The underlying partition scheme. */
+      const PartitionScheme<R>& scheme() const { return _scheme; }
+
+      /*!\brief The bounding box. */
+      const Rectangle<R>& bounding_box() const { return _scheme.bounding_box(); }
+
+      /*!\brief The subdivision coordinates. */
+      const SubdivisionSequence& subdivision_coordinates() const { return _scheme.subdivision_coordinates(); }
+
+      /*!\brief The subdivision coordinates. */
+      const BinaryWord& word() const { return _word; }
+
+      /*!\brief The dimension of the cell. */
+      BinaryWord index() const { return _word; }
+
+      /*!\brief Convert to an ordinary rectangle. */
+      operator Rectangle<R>() const;
+     private:
+      PartitionScheme<R> _scheme;
+      BinaryWord _word;
     };
 
-  /*! \brief A denotable set on a partition grid, defined using a partition tree of cells.
+
+
+    /*! \brief A denotable set on a partition grid, defined using a partition tree of cells.
      */
     template<typename R>
     class PartitionTreeSet {
@@ -271,16 +237,23 @@ namespace Ariadne {
       PartitionTreeSet(const PartitionScheme<R>& g)
         : _ptree(g), _mask(1) { _mask[0]=false; }
 
-      /*! \brief Construct a set based on a PartitionScheme, a subdivision tree and a mask. */
-      PartitionTreeSet(const PartitionScheme<R>& g, const BinaryArray& t, const BooleanArray& m)
+      /*! \brief Construct a set based on a PartitionScheme, a binary tree and a mask. */
+      PartitionTreeSet(const PartitionScheme<R>& g, const BinaryTree& t, const BooleanArray& m)
         : _ptree(g,t), _mask(m)
       {
         assert(_ptree.capacity() == _mask.size());
       }
 
-      /*! \brief Construct a set based on a PartitionScheme, a subdivision tree and a mask. */
+      /*! \brief Construct a set based on a PartitionTree and a mask. */
       PartitionTreeSet(const PartitionTree<R>& t, const BooleanArray& m)
         : _ptree(t), _mask(m)
+      {
+        assert(_ptree.capacity() == _mask.size());
+      }
+
+      /*! \brief Construct a set based on a bounding box, a subdivision sequence, a binary tree and a mask. */
+      PartitionTreeSet(const Rectangle<R>& r, const SubdivisionSequence& s, const BinaryTree& t, const BooleanArray& m)
+        : _ptree(r,s,t), _mask(m)
       {
         assert(_ptree.capacity() == _mask.size());
       }
@@ -288,11 +261,20 @@ namespace Ariadne {
       /*! \brief Convert to a ListSet of Rectangle. */
       operator ListSet<R,Rectangle> () const;
 
+      /*! \brief The space dimension of the set. */
+      size_type dimension() const { return scheme().dimension(); }
+
       /*! \brief The underlying PartitionScheme. */
       const PartitionScheme<R>& scheme() const { return _ptree.scheme(); }
 
-      /*! \brief The space dimension of the set. */
-      size_type dimension() const { return scheme().dimension(); }
+      /*! \brief The bounding box. */
+      const Rectangle<R>& bounding_box() const { return _ptree.bounding_box(); }
+
+      /*! \brief The subdivision coordinates. */
+      const SubdivisionSequence& subdivision_coordinates() const { return _ptree.subdivision_coordinates(); }
+
+      /*! \brief The subdivision coordinates. */
+      dimension_type subdivision_coordinate(size_type n) const { return _ptree.subdivision_coordinate(n); }
 
       /*! \brief The binary tree. */
       const BinaryTree& tree() const { return _ptree.tree(); }
@@ -311,7 +293,6 @@ namespace Ariadne {
       PartitionTree<R> _ptree;
       BooleanArray _mask;
     };
-
 
 
 
@@ -336,7 +317,6 @@ namespace Ariadne {
       return res;
     }
 
-
     template<typename R>
     PartitionTreeSet<R>::operator ListSet<R,Rectangle>() const {
       ListSet<R,Rectangle> res(this->dimension());
@@ -347,24 +327,15 @@ namespace Ariadne {
     }
 
 
+
     template<typename R>
     std::ostream&
     operator<<(std::ostream& os, const PartitionScheme<R>& g)
     {
-      os << "{ class: PartitionScheme<" << name<R>() << ">,\n";
-      os << "  bounding_box: " << bounding_box() << ",\n";
-      os << "  subdivision_coordinates: " << subdivision_coordinates() << "\n";
-      os << "}\n";
-    }
-
-    template<typename R>
-    std::ostream&
-    operator<<(std::ostream& os, const PartitionTreeCell<R>& c)
-    {
-      os << "{ class: PartitionTreeCell<" << name<R>() << ">,\n";
-      os << "  word: " << c.index() << ",\n";
-      os << "  rectangle: " << Rectangle<R>(c) << "\n";
-      os << "}\n";
+      os << "PartitionScheme<" << name<R>() << ">(\n";
+      os << "  bounding_box=" << g.bounding_box() << ",\n";
+      os << "  subdivision_coordinates=" << g.subdivision_coordinates() << "\n";
+      os << ")\n";
       return os;
     }
 
@@ -372,16 +343,29 @@ namespace Ariadne {
     std::ostream&
     operator<<(std::ostream& os, const PartitionTree<R>& t)
     {
-      os << "{ class: PartitionTree<" << name<R>() << ">,\n";
-      os << "  words: ";
-      write_array(os, t.tree().begin(), t.tree().end());
+      os << "PartitionTree<" << name<R>() << ">(\n";
+      os << "  bounding_box=" << t.bounding_box() << ",\n";
+      os << "  subdivision_coordinates=" << t.subdivision_coordinates() << "\n";
+      os << "  words=";
+      write_sequence(os, t.tree().begin(), t.tree().end());
       os << "\n";
-      os << "  rectangles: [ " << Rectangle<R>(*t.begin());
+      os << "  rectangles=[ " << Rectangle<R>(*t.begin());
       for(typename PartitionTree<R>::const_iterator ptree_iter=++t.begin() ; ptree_iter!=t.end(); ++ptree_iter) {
         os << ", " << Rectangle<R>(*ptree_iter);
       }
       os << " ]\n";
-      os << "}\n";
+      os << ")\n";
+      return os;
+    }
+
+    template<typename R>
+    std::ostream&
+    operator<<(std::ostream& os, const PartitionTreeCell<R>& c)
+    {
+      os << "PartitionTreeCell<" << name<R>() << ">(\n";
+      os << "  word=" << c.index() << ",\n";
+      os << "  rectangle=" << Rectangle<R>(c) << "\n";
+      os << ")\n";
       return os;
     }
 
@@ -389,24 +373,26 @@ namespace Ariadne {
     std::ostream&
     operator<<(std::ostream& os, const PartitionTreeSet<R>& set)
     {
-      os << "{ class: PartitionTreeSet<" << name<R>() << ">,\n";
-      os << "  bounding_box: " << set.scheme().bounding_box() << ",\n";
-      os << "  subdivision_coordinates: " << set.scheme().subdivision_coordinates() << ",\n";
+      os << "PartitionTreeSet<" << name<R>() << ">(\n";
+      os << "  bounding_box=" << set.bounding_box() << ",\n";
+      os << "  subdivision_coordinates=" << set.subdivision_coordinates() << ",\n";
+      os << "  words="; write_sequence(os, set.tree().begin(), set.tree().end()); os << ",\n";
+      os << "  mask=" << set.mask() << ",\n";
+/*
       os << "  words: ";
-      write_array(os, BinaryTreeSetIterator(set.tree(),set.mask()), BinaryTreeSetIterator(set.tree().end(),set.mask().end()));
+      write_sequence(os, BinaryTreeSetIterator(set.tree(),set.mask()), BinaryTreeSetIterator(set.tree().end(),set.mask().end()));
       os << "\n";
       os << "  rectangles: [ " << Rectangle<R>(*set.begin());
       for(typename PartitionTreeSet<R>::const_iterator pts_iter=++set.begin() ; pts_iter!=set.end(); ++pts_iter) {
         os << ", " << Rectangle<R>(*pts_iter);
       }
       os << " ]\n";
-      os << "}\n";
+*/
+      os << ")\n";
       return os;
     }
 
   }
 }
 
-#include "partition_tree.cc"
-
-#endif /* _PARTITION_TREE_H */
+#endif /* _ARIADNE_PARTITION_TREE_SET_H */

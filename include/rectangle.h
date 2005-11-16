@@ -22,8 +22,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#ifndef _RECTANGLE_H
-#define _RECTANGLE_H
+/*! \file rectangle.h
+ *  \brief Rectangles and cuboids.
+ */
+
+#ifndef _ARIADNE_RECTANGLE_H
+#define _ARIADNE_RECTANGLE_H
 
 #include <iosfwd>
 #include <list>
@@ -828,4 +832,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* _RECTANGLE_H */
+#endif /* _ARIADNE_RECTANGLE_H */

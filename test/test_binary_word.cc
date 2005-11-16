@@ -32,6 +32,7 @@
 #include "state.h"
 #include "rectangle.h"
 #include "binary_word.h"
+#include "binary_tree.h"
 
 #include "test.h"
 
@@ -48,10 +49,9 @@ int main() {
   stringstream iss(istr);
 
   BinaryWord bw;
-  BinaryWordList l;
-  BinaryWordFixedSizeList fsl(12);
-  BinaryWordPrefixTree pt;
-  BinaryWordPrefixFreeTree pft;
+  BinaryWordList bwl;
+  BinaryWordFixedSizeList bwfsl(12);
+  BinaryTree bwt;
   
   vector<bool> v;
 

@@ -22,8 +22,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _DOC_H
-#define _DOC_H
+#ifndef _ARIADNE_DOC_H
+#define _ARIADNE_DOC_H
 
 /*! \file doc.h
  * \brief Miscellaneous documentation pages
@@ -518,4 +518,4 @@
  * \endcode
  */
 
-#endif /* _DOC_H */
+#endif /* _ARIADNE_DOC_H */

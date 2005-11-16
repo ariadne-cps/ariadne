@@ -31,7 +31,6 @@
 #include "numerical_type.h"
 #include "state.h"
 #include "denotable_set.h"
-#include "denotableset_io.h"
 
 #include "test.h"
 

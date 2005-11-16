@@ -26,8 +26,8 @@
  *  \brief STL style arrays.
  */
 
-#ifndef _ARRAY_H
-#define _ARRAY_H
+#ifndef _ARIADNE_ARRAY_H
+#define _ARIADNE_ARRAY_H
 
 #include <cstddef>
 #include <cassert>
@@ -36,6 +36,8 @@
 #include <stdexcept>
 #include <vector>
 #include <iterator>
+
+#include "utility.h"
 
 namespace Ariadne {
 
@@ -433,12 +435,12 @@ namespace Ariadne {
     
     /*!\brief Checked access to the nth array of the vector. */
     reference at(size_type i) { 
-      if(i<_size) { return this->operator[](i); } else { throw std::out_of_range("array index out-of-range"); } 
+      if(i<size()) { return this->operator[](i); } else { throw std::out_of_range("array index out-of-range"); } 
     }
     
     /*!\brief Checked access to the nth array of the vector. */
     const_reference at(size_type i) const { 
-      if(i<_size) { return this->operator[](i); } else { throw std::out_of_range("array index out-of-range"); }
+      if(i<size()) { return this->operator[](i); } else { throw std::out_of_range("array index out-of-range"); }
     }
     
     /*!\brief A random-access constant iterator pointing to the beginning of the vector of arrays.  */
@@ -456,36 +458,18 @@ namespace Ariadne {
 
 
 
-  template<typename InputIterator>
-  inline
-  std::ostream&
-  write_array(std::ostream& os, InputIterator first, InputIterator last) 
-  {
-    os << "[";
-    if(first!=last) {
-      os << (*first);
-      ++first;
-      while(first != last) {
-         os.flush();
-         os << ", " << (*first);
-        ++first;
-      }
-    }
-    os << "]" ;
-    return os;
-  }
-    
   template<typename T> inline
   std::ostream&
   operator<<(std::ostream& os, const array<T>& a) {
-    write_array(os,a.begin(),a.end());
+    write_sequence(os,a.begin(),a.end());
     return os;
   }
     
   template<typename Iter> inline
   std::ostream&
   operator<<(std::ostream& os, const range<Iter>& a) {
-    write_array(os,a.begin(),a.end());
+    write_sequence(os,a.begin(),a.end());
+    return os;
   }
 
   template<typename T> inline
@@ -496,7 +480,7 @@ namespace Ariadne {
       if(i!=0) {
         os << ", ";
       }
-      write_array(os,a[i].begin(),a[i].end());
+      write_sequence(os,a[i].begin(),a[i].end());
       os.flush();
     }
     os << " ]";
@@ -505,4 +489,4 @@ namespace Ariadne {
 
 } // namespace Ariadne
 
-#endif
+#endif /* _ARIADNE_ARRAY_H */

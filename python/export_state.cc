@@ -1,7 +1,7 @@
 /***************************************************************************
- *            partition_tree.cc
+ *            python/state.cc
  *
- *  1 July 2005
+ *  21 October 2005
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
@@ -22,33 +22,35 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "partition_tree.h"
+#include <iostream>
+#include "numerical_type.h"
+#include "state.h"
 
-namespace Ariadne {
-  namespace Geometry {
+#include <boost/python.hpp>
 
-    BinaryTreeIterator&
-    BinaryTreeIterator::operator++()
-    {
-      while(!_word.empty() && _word.back()==right) {
-        _word.pop_back();
-      }
-      if(_word.empty()) { // at end of tree
-        ++_position;
-      }
-      else { // not at end of tree
-        _word.pop_back();
-        _word.push_back(right);
-        ++_position;
-        while(*_position==branch) {
-          _word.push_back(left);
-          ++_position;
-        }
-      }
-      return *this;
-    }
+#include "real_typedef.h"
+#include "container_utilities.h"
 
+typedef Ariadne::Geometry::State<Real> RState;
 
+using boost::python::class_;
+using boost::python::init; 
+using boost::python::self;
+using boost::python::def;
+using boost::python::self_ns::str;
+using boost::python::return_value_policy;
+using boost::python::copy_const_reference;
 
-  }
+void export_state() {
+  class_<RState>("State",init<int>())
+    .def(init<int,Real>())
+    .def(init<RState>())
+    .def("dimension", &RState::dimension)
+    .def("__len__", &RState::dimension)
+    .def("__getitem__", &RState::get)
+    .def("__setitem__", &RState::set)
+    .def("__eq__", &RState::operator==)
+    .def("__ne__", &RState::operator!=)
+    .def(str(self))    // __str__
+  ;
 }

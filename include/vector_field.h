@@ -22,8 +22,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#ifndef _VECTOR_FIELD_H
-#define _VECTOR_FIELD_H
+#ifndef _ARIADNE_VECTOR_FIELD_H
+#define _ARIADNE_VECTOR_FIELD_H
 
 #include "exception.h"
 
@@ -70,4 +70,4 @@ class VectorField {
 }
 }
 
-#endif /* _VECTOR_FIELD_H */
+#endif /* _ARIADNE_VECTOR_FIELD_H */

@@ -67,8 +67,8 @@
  * for big grids or fine subdivisions, memory may well be a limiting factor.
  */
 
-#ifndef _BINARY_WORD_H
-#define _BINARY_WORD_H
+#ifndef _ARIADNE_BINARY_WORD_H
+#define _ARIADNE_BINARY_WORD_H
 
 #include <bitset>
 #include <vector>
@@ -76,19 +76,29 @@
 #include <iostream>
 
 #include "utility.h"
+#include "array.h"
 
 namespace Ariadne 
-{	
+{
+  typedef size_t size_type;
+  typedef unsigned short dimension_type;
+  typedef int index_type;
+
+  typedef array<index_type> IndexArray;
+  typedef array<size_type> SizeArray;
+  typedef std::vector<bool> BooleanArray;
+
+  class BinaryWordList;
+  class BinaryWordFixedSizeList;
+
   class _BinaryWordList_const_iterator;
-  class _BinaryWordixedSizeList_const_iterator;
-
-
+  class _BinaryWordFixedSizeList_const_iterator;
+    
   /*! \brief A statically-allocated binary word of fixed maximum length.
    */
   class BinaryWord {
+    friend class BinaryTree;
     friend class BinaryWordList;
-    friend class BinaryWordPrefixTree;
-    friend class BinaryWordPrefixFreeTree;
     friend class BinaryWordFixedSizeList;
    public:
     /*! \brief An unsigned integral type. */
@@ -139,10 +149,13 @@ namespace Ariadne
     size_type bytes() const { return (size()+_bits_per_byte-1)/_bits_per_byte; }
 
     /*! \brief Returns the nth bit. */
-    bool operator[] (size_type n) const { return _rep[n]; }
+    bool get(size_type n) const { return _rep[n]; }
+
+    /*! \brief Returns the nth bit. */
+    bool operator[] (size_type n) const { return get(n); }
 
     /*! \brief Checked access to the nth bit. */
-    bool at(size_type n) const { if(n<size()) { return operator[](n); } else { throw std::out_of_range("BinaryWord"); } }
+    bool at(size_type n) const { if(n<size()) { return get(n); } else { throw std::out_of_range("BinaryWord"); } }
 
     /*! \brief Returns the last bit. */
     bool back () const { return operator[](size()-1); }
@@ -223,7 +236,7 @@ namespace Ariadne
     
     typedef size_t size_type;
     typedef BinaryWord::byte_type byte_type;
-    typedef  _BinaryWordFixedSizeList_const_iterator const_iterator;
+    typedef _BinaryWordFixedSizeList_const_iterator const_iterator;
    private:
     static const size_type _bits_per_byte=std::numeric_limits<byte_type>::digits;
     size_type _word_size;
@@ -271,338 +284,6 @@ namespace Ariadne
     size_type storage_in_bytes() const { return _elements.size()/_bits_per_byte; }
   };
   
-  /*!\brief A sorted list of BinaryWord elements such that every binary sequence has a unique prefix in the list.
-   *   Optimised for memory usage.
-   *   Constant forward iterators only, access may be inefficient.
-   */
-  class BinaryWordPrefixTree {
-    friend class _BinaryWordPrefixTree_const_iterator;
-
-    typedef size_t size_type;
-    typedef BinaryWord::byte_type byte_type;
-   private:
-    std::vector<bool> _rep;
-    
-    static const bool _leaf = 1;
-    static const bool _branch = 0;
-   public:
-    /*! \brief The type of the BinaryWord object stored in the tree. */
-    typedef BinaryWord value_type;
-
-    typedef _BinaryWordPrefixTree_const_iterator const_iterator;
-    
-   public:
-    /*!\brief Construct a list containing just the empty word.
-     */
-    BinaryWordPrefixTree() : _rep() { _rep.push_back(_leaf); }
-    
-    BinaryWordPrefixTree(const std::vector<bool>& __rep) : _rep(__rep) { }
-    BinaryWordPrefixTree(const size_type& __n, const bool* __ptr) : _rep(__n,__ptr) { }
-    
-    /*!\brief The number of words in the list.
-     */
-    size_type size() const { return (_rep.size()+1)/2; }
-    
-    /*!\brief Returns a constant forward iterator pointing to the beginning of the BinaryWordPrefixTree.
-     */
-    const_iterator begin() const;
-    /*!\brief Returns a constant forward iterator pointing to the end of the BinaryWordPrefixTree.
-     */
-    const_iterator end() const;
-  };
-    
-  class _BinaryWordPrefixTree_const_iterator {
-    typedef _BinaryWordPrefixTree_const_iterator Self;
-    typedef size_t size_type;
-    
-    std::vector<bool>::const_iterator _pos;
-    BinaryWord _word;
-      
-    static const bool _leaf = BinaryWordPrefixTree::_leaf;
-    static const bool _branch = BinaryWordPrefixTree::_branch;
-   public:
-    _BinaryWordPrefixTree_const_iterator(const std::vector<bool>::const_iterator& __pos)
-      : _pos(__pos), _word() { }
-      
-    _BinaryWordPrefixTree_const_iterator(const Self& __other) 
-      : _pos(__other._pos), _word(__other._word) { }
-      
-    bool operator==(const Self& __other) const {
-      return (_pos==__other._pos); 
-    }
-      
-    BinaryWord operator*() const { return _word; }
-
-    Self& operator++() {
-      if( !_word.empty() ) {
-        while( _word.back() == 1 ) {
-	  _word.pop_back();
-	  if( _word.empty() ) {
-	    return *this;
-	  }
-	}
-        _word.set_back(1);
-      }
-      while( (*_pos) == _branch ) {
-        ++_pos;
-        _word.push_back(0);
-      }
-
-      ++_pos;
-      return *this;
-    }
-
-    Self operator++(int) {
-      Self res=(*this);
-      ++(*this);
-      return res;
-    }
-  };
-
-  inline BinaryWordPrefixTree::const_iterator BinaryWordPrefixTree::begin() const { return ++(const_iterator(_rep.begin())); }
-  inline BinaryWordPrefixTree::const_iterator BinaryWordPrefixTree::end() const { return const_iterator(_rep.end()); }
-
-
-  /*!\brief A list of prefix-free BinaryWord elements using a tree representation.
-   *   Optimised for memory usage.
-   *   Constant forward iterators only, access may be inefficient.
-   */
-  class BinaryWordPrefixFreeTree {
-    friend class _BinaryWordPrefixFreeTree_const_iterator;
-    /*!\brief Union of two BinaryWordPrefixFreeTree s.
-     */
-    friend BinaryWordPrefixFreeTree join(const BinaryWordPrefixFreeTree& __tree1, const BinaryWordPrefixFreeTree& __tree2);
-
-    typedef size_t size_type;
-    typedef BinaryWord::byte_type byte_type;
-   private:
-    static const size_type _bits_per_byte=std::numeric_limits<byte_type>::digits;
-    BinaryWordPrefixTree _tree;
-    std::vector<bool> _mask;
-
-    static const bool _leaf = 0;
-    static const bool _branch = 1;
-    static const bool _empty = 0;
-    static const bool _full = 1;
-   public:
-    /* \brief A forward iterator through the tree.
-     */
-    typedef _BinaryWordPrefixFreeTree_const_iterator const_iterator;
-
-    /*!\brief Construct an empty list of prefix-free binary words
-     */
-    BinaryWordPrefixFreeTree() : _tree(), _mask() { }
-    /*
-    BinaryWordPrefixFreeTree(const size_type& __n, const std::vector<bool>& __rep) : _size(__n), _rep(__rep) { }
-    BinaryWordPrefixFreeTree(const size_type& __n, const bool* __ptr) : _size(__n), _rep(__n,__ptr) { }
-    BinaryWordPrefixFreeTree(const BinaryWordList& __list);
-    */
-
-    /*!\brief The number of words in the list.
-     */
-    size_type size() const { return std::count(_mask.begin(), _mask.end(), true); }
-
-    /*!\brief Returns a constant forward iterator pointing to the beginning of the BinaryWordPrefixFreeTree.
-     */
-    const_iterator begin() const;
-    /*!\brief Returns a constant forward iterator pointing to the end of the BinaryWordPrefixFreeTree.
-     */
-    const_iterator end() const;
-   private:
-    /* \brief The number of bytes needed to store the list.
-     */
-    // size_type storage_in_bytes() const { return _rep.size() / _bits_per_byte; }
-  };
-
-  class _BinaryWordPrefixFreeTree_const_iterator {
-    typedef _BinaryWordPrefixFreeTree_const_iterator Self;
-    typedef size_t size_type;
-
-    std::vector<bool>::const_iterator _pos;
-    std::vector<bool> _word;
-
-    static const bool _leaf = BinaryWordPrefixFreeTree::_leaf;
-    static const bool _branch = 1;
-    static const bool _empty = 0;
-    static const bool _full = 1;
-   public:
-    _BinaryWordPrefixFreeTree_const_iterator(const std::vector<bool>::const_iterator& __pos)
-      : _pos(__pos), _word() {
-    }
-
-    _BinaryWordPrefixFreeTree_const_iterator(const Self& __other)
-      : _pos(__other._pos), _word(__other._word) {
-    }
-    
-    bool operator==(const Self& __other) const {
-      return (_pos==__other._pos); 
-    }
-    
-    BinaryWord operator*() const { return BinaryWord(_word); }
-    
-    Self& operator++() { 
-      while(true) {
-	if( !_word.empty() ) {
-	  while( _word.back() == 1 ) {
-	    _word.pop_back();
-	    if( _word.empty() ) {
-	      return *this;
-	    }
-	  }
-	  _word.back()=1;
-	}
-	while( (*_pos) == _branch ) {
-	  ++_pos;
-	  _word.push_back(0);
-	}
-	if( (*_pos) == _full ) {
-	  ++_pos;
-	  return *this;
-	} 
-	else {
-	  ++_pos;
-	}
-      }
-    }
-    
-    Self operator++(int) {
-      Self res=(*this);
-      ++(*this);
-      return res;
-    }
-    
-    void skip_subtree() {
-      size_type __len=_word.size();
-      do {
-	if(*_pos == _branch) {
-	  _word.push_back(0);
-	  ++_pos;
-	}
-	else {
-	  ++_pos;
-	  ++_pos;
-	  if(_word.size()==__len) {
-	    return;
-	  }
-	  while(_word.back()==1) {
-	    _word.pop_back();
-	    if(_word.size()==__len) {
-	      return;
-	    }
-	  }
-	  _word.pop_back();
-	  _word.push_back(1);
-	}
-      }
-      while(true);
-    }
-  };
-
-  /*
-
-  inline BinaryWordPrefixFreeTree::const_iterator BinaryWordPrefixFreeTree::begin() const { return ++(const_iterator(_rep.begin())); }
-  inline BinaryWordPrefixFreeTree::const_iterator BinaryWordPrefixFreeTree::end() const { return const_iterator(_rep.end()); }
-
-  */
-
-  BinaryWordPrefixFreeTree
-  inline
-  join(const BinaryWordPrefixFreeTree& __tree1, const BinaryWordPrefixFreeTree& __tree2) {
-    return BinaryWordPrefixFreeTree();
- /*   BinaryWordPrefixFreeTree result;
-    BinaryWordPrefixTree& _tree = result._tree;
-    std::vector<bool>& mask = result._mask;
-
-    BinaryWord word;
-   */
-    /*
-      BinaryWordPrefixFreeTree::const_iterator iter1=__tree1.begin();
-      BinaryWordPrefixFreeTree::const_iterator iter2=__tree2.begin();
-    */
-   /*
-    BinaryWordPrefixFreeTree::const_iterator iter1=__tree1.begin();
-    BinaryWordPrefixFreeTree::const_iterator iter2=__tree2.begin();
-
-    static const bool _leaf = BinaryWordPrefixFreeTree::_leaf;
-    static const bool _branch = BinaryWordPrefixFreeTree::_branch;
-    static const bool _empty = BinaryWordPrefixFreeTree::_empty;
-    static const bool _full =  BinaryWordPrefixFreeTree::_full;
-
-
-*/
-    /* FIXME!
-
-    bool bool1=*iter1;
-    bool bool2=*iter2;
-
-    if( ((*iter1)==_branch) or ((*iter2)==_branch) ) {
-      tree.push_back(_branch);
-      ++iter1;
-      ++iter2;
-    }
-    else if ( (*iter1==_leaf) and (*iter2==_leaf) ) {
-      tree.push_back(_leaf);
-      ++iter1;
-      ++iter2;
-      if( (*iter1==_full) or (*iter2==_full) ) {
-	tree.push_back(_full);
-      }
-      else {
-	tree.push_back(_empty);
-      }
-      ++iter1;
-      ++iter2;
-    }
-    else if( (*iter1==_branch) and (*iter2==_branch) ) {
-      tree.push_back(_branch);
-      ++iter1;
-      ++iter2;
-    }
-    else {
-      if( *iter1==_branch ) {
-	++iter2;
-	// BinaryWordPrefixFreeTree::const_iterator iter0=iter1;
-	std::vector<bool>::const_iterator iter0=iter1;
-	// FIXME -- this is for tree iterators!
-	// iter1.skip_subtree
-	if(*iter2==_full) {
-	  tree.push_back(_leaf);
-	  tree.push_back(_full);
-	}
-	else {
-	  while(iter0!=iter1) {
-	    tree.push_back(*iter0);
-	    ++iter0;
-	  }
-	}
-      }
-      else { // iter2==_branch
-	++iter1;
-	// BinaryWordPrefixFreeTree::const_iterator iter0=iter2;
-	std::vector<bool>::const_iterator iter0=iter2;
-	// FIXME
-	// iter2.skip_tree;
-	if(*iter1==_full) {
-	  tree.push_back(_leaf);
-	  tree.push_back(_full);
-	}
-	else {
-	  while(iter0!=iter2) {
-	    tree.push_back(*iter0);
-	    ++iter0;
-	  }
-	}
-      }
-    }
-    if( (tree[tree.size()-3] == _branch) && (tree[tree.size()-2]==tree[tree.size()-1]) ) {
-      bool state=tree.back();
-      tree.pop_back();
-      tree.pop_back();
-      tree.pop_back();
-      tree.push_back(state);
-    }
-    */
-  }
 
 
   inline
@@ -630,5 +311,4 @@ namespace Ariadne
 
 }
 
-#endif /* _BINARY_WORD_H */
-
+#endif /* _ARIADNE_BINARY_WORD_H */

@@ -22,8 +22,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#ifndef _MAP_H
-#define _MAP_H
+#ifndef _ARIADNE_MAP_H
+#define _ARIADNE_MAP_H
 
 #include "state.h"
 #include "list_set.h"
@@ -137,4 +137,4 @@ class ThresholdMap {
 }
 }
 
-#endif /* _MAP_H */
+#endif /* _ARIADNE_MAP_H */

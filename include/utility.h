@@ -26,8 +26,8 @@
  *  \brief Input-output utilities 
  */
 
-#ifndef _UTILITY_H
-#define _UTILITY_H
+#ifndef _ARIADNE_UTILITY_H
+#define _ARIADNE_UTILITY_H
 
 #include <iostream>
 #include <stdexcept>
@@ -37,103 +37,88 @@
 #include <set>
 
 namespace Ariadne {
-  namespace IO {
-    template <typename T> 
-    std::ostream& 
-    operator<< (std::ostream &os, const std::vector<T>& v) 
-    {
-      os << "[";
-      if(v.size() > 0) {
-        os << v[0];
-        for (size_t i=1; i<v.size(); ++i) {
-          os << ", " << v[i];
-        }
+  template<typename InputIterator>
+  inline
+  std::ostream&
+  write_sequence(std::ostream& os, InputIterator first, InputIterator last, char opening='[', char closing=']', char separator=',') 
+  {
+    os << opening;
+    if(first!=last) {
+      os << (*first);
+      ++first;
+      while(first != last) {
+         os.flush();
+         os << separator << (*first);
+        ++first;
       }
-      os << "]" ;
-            
-      return os;
+    }
+    os << closing;
+    return os;
+  }
+    
+  template<typename T>
+  inline
+  std::istream&
+  read_vector(std::istream& is, std::vector<T>& v, char opening='[', char closing=']', char separator=',') 
+  {
+    T x;
+    char c;
+          
+    v.clear();
+    std::streampos pos = is.tellg();
+          
+    try {
+      is >> c;
+      if(c != opening) {
+        throw std::invalid_argument("input must begin with "+opening);
+      }
+              
+      /* Handle case of empty list */
+      is >> c;
+      if(c != closing) {
+        is.putback(c);
+        c=separator;
+      }
+              
+      while(c != closing) {
+        if(is.eof()) {
+          throw std::invalid_argument("End-of-file reached");
+        }
+        if(c!=separator) {
+          throw std::invalid_argument("Items in list must be separated by "+separator);
+        }
+        is >> x;
+        if(is.fail()) {
+          throw std::invalid_argument("Error inputting value in list");
+        }
+        v.push_back(x);
+        is >> c;
+      }
+    }
+    catch(...) {
+      // is.seekg(pos);
+      throw; 
     }
     
-    template <typename T> 
-    std::ostream& 
-    operator<< (std::ostream &os, const std::valarray<T>& va)
-    {
-      os << "(";
-      if(va.size() > 0) {
-        os << va[0];
-        for (size_t i=1; i<va.size(); ++i) {
-          os << ", " << va[i];
-        }
+    return is;
+  }
+    
+  template <typename T> 
+  std::ostream& 
+  operator<< (std::ostream &os, const std::valarray<T>& va)
+  {
+    os << "(";
+    if(va.size() > 0) {
+      os << va[0];
+      for (size_t i=1; i<va.size(); ++i) {
+        os << ", " << va[i];
       }
-      os << ")" ;
-            
-      return os;
     }
-        
-    template <typename T> 
-    std::ostream& 
-    operator<< (std::ostream &os, const std::set<T>& s) 
-    {
-      os << "[";
-      if(s.size() > 0) {
-        typename std::set<T>::iterator iter=s.begin();
-        os << *iter++;
-        while(iter!=s.end()) {
-          os << ", " << *iter++;
-        }
-      }
-      os << "]" ;
-            
-      return os;
-    }
-        
-    template <typename T> 
-    std::istream& 
-    operator>> (std::istream &is, std::vector<T> &v)
-    {
-      T x;
-      char c;
-            
-      v.clear();
-      std::streampos pos = is.tellg();
-            
-      try {
-        is >> c;
-        if(c != '[') {
-          throw std::invalid_argument("std::vector input must begin with '['");
-        }
-                
-        /* Handle case of empty list */
-        is >> c;
-        if(c != ']') {
-          is.putback(c);
-          c=',';
-        }
-                
-        while(c != ']') {
-          if(is.eof()) {
-            throw std::invalid_argument("End-of-file reached");
-          }
-          if(c!=',') {
-            throw std::invalid_argument("Items in list must be separated by ','");
-          }
-          is >> x;
-          if(is.fail()) {
-            throw std::invalid_argument("Error inputting value in list");
-          }
-          v.push_back(x);
-          is >> c;
-        }
-      }
-      catch(...) {
-        // is.seekg(pos);
-        throw; 
-      }
+    os << ")" ;
+          
+    return os;
+  }
       
-      return is;
-    }
-        
-  } // namespace IO
 } // namespace Ariadne
 
 
@@ -145,26 +130,36 @@ namespace Ariadne {
 namespace std {
   template <typename T> 
   inline
+  std::ostream& 
+  operator<< (std::ostream &os, const std::vector<T>& v) 
+  {
+    return Ariadne::write_sequence(os,v.begin(),v.end());
+  }
+
+  template <typename T> 
+  inline 
+  std::ostream& 
+  operator<<(std::ostream &os, const std::set<T>& s) 
+  {
+    return Ariadne::write_sequence(os,s.begin(), s.end(), '{', '}');
+  }
+      
+  template <typename T> 
+  inline
   ostream& 
-  operator<< (ostream &os, const vector<T>& v) {
-    return Ariadne::IO::operator<<(os,v);
+  operator<< (ostream &os, const valarray<T>& v) {
+    return Ariadne::operator<<(os,v);
   }
 
   template <typename T> 
   inline
   istream& 
   operator>> (istream &is, vector<T>& v) {
-    return Ariadne::IO::operator>>(is,v);
+    return Ariadne::read_vector(is,v);
   }
 
-  template <typename T> 
-  inline
-  ostream& 
-  operator<< (ostream &os, const valarray<T>& v) {
-    return Ariadne::IO::operator<<(os,v);
-  }
 
 }
 
 
-#endif /* _UTILITY_H */
+#endif /* _ARIADNE_UTILITY_H */

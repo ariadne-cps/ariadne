@@ -22,8 +22,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#ifndef _LIST_SET_H
-#define _LIST_SET_H
+/*! \file list_set.h
+ *  \brief Denotable sets implemented as lists.
+ */
+
+#ifndef _ARIADNE_LIST_SET_H
+#define _ARIADNE_LIST_SET_H
 
 #include <vector>
 #include <iosfwd>
@@ -81,9 +85,11 @@ namespace Ariadne {
       typedef typename std::vector<BasicSet>::const_iterator const_iterator;
       typedef typename std::vector<BasicSet>::iterator iterator;
 
-      /*! \brief A denotable set constructor. */
-      ListSet() : _dimension(0), _vector() {
-      }
+      /*! \brief An empty list set which can hold sets of an unspecified dimension. */
+      ListSet() : _dimension(0), _vector() { }
+
+      /*! \brief An empty ListSet which can only hold sets of dimension \a n. */
+      ListSet(size_t n) : _dimension(n), _vector() { }
 
       /*! \brief A denotable set constructor. */
       ListSet(const BasicSet &A) : _dimension(A.dimension()), _vector() {
@@ -95,9 +101,6 @@ namespace Ariadne {
 
       /*! \brief The copy constructor. */
       ListSet(const ListSet<R,BS>& A) : _dimension(A.dimension()), _vector(A._vector) { }
-
-      /*! \brief Construct a ListSet<BasicSet> to hold sets of dimension \a n. */
-      ListSet(size_t n) : _dimension(n), _vector() { }
 
       /*! \brief The destructor. */
       ~ListSet() {
@@ -485,7 +488,7 @@ namespace Ariadne {
 
       for (i=0; i<A.size() ; i++) {
         for (j=0; j<B.size() ; j++) {
-          if (intersects_interior(A[i],B[j])) { return true; }
+          if (interiors_intersect(A[i],B[j])) { return true; }
         }
       }
 
@@ -658,8 +661,8 @@ namespace Ariadne {
 
       for (size_t i=0; i<A.size(); i++) {
         for (size_t j=0; j<B.size(); j++) {
-          if (intersects_interior(A[i],B[j])) {
-              vector.push_back(closure_of_intersection_of_interior(A[i],B[j]));
+          if (interiors_intersect(A[i],B[j])) {
+              vector.push_back(regular_intersection(A[i],B[j]));
           }
         }
       }

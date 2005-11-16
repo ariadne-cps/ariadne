@@ -22,7 +22,7 @@ PYTHONVERSION=2.4
 PYTHONINCLUDEDIR=/usr/include/python$(PYTHONVERSION)
 
 CXXFLAGS =  -I../${INCLUDEDIR}
-LDXXFLAGS = -lppl -lgmpxx
+LDXXFLAGS = -lppl -lgmpxx -lgmp
 
 ifeq ($(DEBUG),yes)
 	CXXFLAGS += -g -DDEBUG -Wall

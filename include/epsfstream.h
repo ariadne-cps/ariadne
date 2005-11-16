@@ -67,7 +67,7 @@ namespace Ariadne {
                 << "%%EndComments\n"
                 << "\n";
 
-        (*this) << "/linewidth " << linewidth << " def\n";
+        (*this) << "/linewidth " << epsfstream::linewidth << " def\n";
         (*this) << "/black {0.0 0.0 0.0 setrgbcolor} def\n"
                 << "/gray {0.5 0.5 0.5 setrgbcolor} def\n"
                 << "/red {1.0 0.0 0.0 setrgbcolor} def\n"
@@ -127,6 +127,7 @@ namespace Ariadne {
       for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
         eps << (*set_iter);
       }
+      return eps;
     }
 
   }

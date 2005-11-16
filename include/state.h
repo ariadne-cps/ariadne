@@ -1,5 +1,5 @@
 /***************************************************************************
- *            geometry_state.h
+ *            state.h
  *
  *  Sun Jan 23 18:00:21 2005
  *  Copyright  2005  Alberto Casagrande
@@ -22,8 +22,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _GEOMETRY_STATE_H
-#define _GEOMETRY_STATE_H
+/*! \file state.h
+ *  \brief A state in Euclidean space.
+ */
+
+#ifndef _ARIADNE_STATE_H
+#define _ARIADNE_STATE_H
 
 #include <vector>
 #include <iostream>
@@ -41,6 +45,7 @@ namespace Ariadne {
     class State {
      public:
       typedef R Real;
+      typedef Real value_type;
       typedef size_t size_type;
      private:
       /*! \brief The vector defining the state */
@@ -173,4 +178,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* _GEOMETRY_STATE_H */
+#endif /* _ARIADNE_STATE_H */

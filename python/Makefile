@@ -1,30 +1,25 @@
 include ../config.mk
 
 CXXFLAGS = -I../${INCLUDEDIR} -O2 -fpic -Wall
-LDXXFLAGS += -lboost_python -lsuperlu -lblas -lmpfr -lgmpxx -lgmp
+LDXXFLAGS += -lariadne -lboost_python -lsuperlu -lblas -lmpfr -lgmpxx -lgmp
 
-OBJ=ariadne.o 
+ARIADNE_OBJ=ariadne_module.o export_numeric.o export_function.o 
+
+GEOMETRY_OBJ = geometry_module.o \
+	export_state.o export_interval.o export_rectangle.o \
+	export_list_set.o export_grid.o export_partition_tree.o
 
 all: python
 
-python: ariadne.so numeric.so interval.so function.so geometry.so
+python: ariadne.so geometry.so
 
-ariadne.so: ${OBJ}
-	${CXX} -shared ${OBJ} ${LDXXFLAGS} -o ariadne.so
+ariadne.so: ${ARIADNE_OBJ}
+	${CXX} -shared ${ARIADNE_OBJ} ${LDXXFLAGS} -o ariadne.so
 
-numeric.so: numeric.o
-	${CXX} -shared numeric.o ${LDXXFLAGS} -o numeric.so
+geometry.so: ${GEOMETRY_OBJ}
+	${CXX} -shared ${GEOMETRY_OBJ} ${LDXXFLAGS} -o geometry.so
 
-interval.so: interval.o
-	${CXX} -shared interval.o ${LDXXFLAGS} -o interval.so
-
-function.so: function.o
-	${CXX} -shared function.o ${LDXXFLAGS} -o function.so
-
-geometry.so: geometry.o
-	${CXX} -shared geometry.o ${LDXXFLAGS} -o geometry.so
-
-.cc.o: ariadne.cc interval.cc function.cc
+.cc.o: ariadne.cc function.cc geometry.cc grid.cc interval.cc list_set.cc partition_tree.cc rectangle.cc state.cc
 	${CXX} ${CXXFLAGS} -I${PYTHONINCLUDEDIR} -c $<
 
 clean:

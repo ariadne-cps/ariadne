@@ -33,24 +33,11 @@
 
 using namespace Ariadne;
 
-// Since gmpxx operators return intermediate types which need conversion, need to explicitly provide arithmetic functions
-inline Integer neg_z(const Integer& z1) { return -z1; }
-inline Integer add_z(const Integer& z1, const Integer& z2) { return z1+z2; }
-inline Integer sub_z(const Integer& z1, const Integer& z2) { return z1-z2; }
-inline Integer mul_z(const Integer& z1, const Integer& z2) { return z1*z2; }
-inline Rational div_z(const Integer& z1, const Integer& z2) { return Rational(z1)/z2; }
-inline bool eq_z(const Integer& z1, const Integer& z2) { return z1==z2; }
-inline bool ne_z(const Integer& z1, const Integer& z2) { return z1!=z2; }
-inline bool lt_z(const Integer& z1, const Integer& z2) { return z1<z2; }
-inline bool le_z(const Integer& z1, const Integer& z2) { return z1<=z2; }
+void export_function();
+void export_numeric();
 
 BOOST_PYTHON_MODULE(ariadne)
 {
-  using boost::python::class_;
-  using boost::python::init;
-  using boost::python::self;
-  using boost::python::return_value_policy;
-  using boost::python::copy_const_reference;
-  using boost::python::def;
-
+  export_numeric();
+  export_function();
 }

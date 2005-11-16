@@ -1,12 +1,14 @@
 include ../config.mk
 
+OBJ = binary_tree.o grid_operations.o partition_tree_operations.o
+
 all: ${LIBS}
 
-libariadne.so: grid_operations.o
-	${CXX} ${LDXXFLAGS} -shared -o libariadne.so *.o
+libariadne.so: ${OBJ}
+	${CXX} ${LDXXFLAGS} -shared -o libariadne.so ${OBJ}
 
-libariadne.a: grid_operations.o
-	${CXX} ${LDXXFLAGS} -o libariadne.a *.o
+libariadne.a: ${OBJ}
+	${CXX} ${LDXXFLAGS} -o libariadne.a ${OBJ}
 
 # ${CXX} ${INCLUDE} -M 
 

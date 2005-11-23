@@ -1,5 +1,5 @@
 /***************************************************************************
- *            python/container.h
+ *            python/python_utilities.h
  *
  *  16 November 2005
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
@@ -22,8 +22,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _ARIADNE_PYTHON_CONTAINER_UTILITIES_H
-#define _ARIADNE_PYTHON_CONTAINER_UTILITIES_H
+#ifndef _ARIADNE_PYTHON_UTILITIES_H
+#define _ARIADNE_PYTHON_UTILITIES_H
 
 template<class C> 
 inline
@@ -41,4 +41,4 @@ set(C& c, const typename C::size_type n, const typename C::value_type x) {
   c[n]=x;
 }
 
-#endif
+#endif /* _ARIADNE_PYTHON_UTILITIES_H */

@@ -242,6 +242,13 @@ namespace Ariadne {
     return q;
   }
   
+  template<typename Res, typename Arg> Res convert_to(const Arg&);
+  
+  template<> inline Rational convert_to(const Rational& q) { return q; }
+  template<> inline Rational convert_to(const Dyadic& d) { return Rational(d); }
+  template<> inline Rational convert_to(const double& x) { return Rational(x); }
+  
+  
   template <typename T> std::string name();
   template<> inline std::string name<double>() { return "double"; }
   template<> inline std::string name<Rational>() { return "Rational"; }

@@ -30,6 +30,9 @@
 #define _ARIADNE_RECTANGLE_H
 
 #include <iosfwd>
+#include <string>
+#include <sstream>
+
 #include <list>
 #include <set>
 #include <vector>
@@ -45,18 +48,18 @@ namespace Ariadne {
     template < typename R > class Rectangle;
     template < typename R, template <typename> class BS > class ListSet;
 
+    template <typename R> Rectangle<R> intersection(const Rectangle<R> &A, const Rectangle<R> &B);
     template <typename R> Rectangle<R> regular_intersection(const Rectangle<R> &A, const Rectangle<R> &B);
+
     template<typename R> bool interiors_intersect(const Rectangle<R> &A, const Rectangle<R> &B);
     template<typename R> bool disjoint(const Rectangle<R> &A, const Rectangle<R> &B);
     template<typename R> bool inner_subset(const Rectangle<R> &A, const Rectangle<R> &B);
     template<typename R> bool subset(const Rectangle<R> &A, const Rectangle<R> &B);
-    template<typename R> bool inner_subset(const Rectangle<R> &A, const ListSet<R,Rectangle> &B);
     template<typename R> bool subset_of_open_cover(const Rectangle<R> &A, const std::vector< Rectangle<R> > &list);
     template<typename R> bool subset_of_closed_cover(const Rectangle<R> &A, const std::vector< Rectangle<R> > &list);
 
-    template <typename R> Rectangle<R> closure_of_intersection_of_interiors(const Rectangle<R> &A, const Rectangle<R> &B);
-    template<typename R> bool subset_of_interior(const Rectangle<R> &A, const Rectangle<R> &B);
-
+    template<typename R> bool inner_subset(const Rectangle<R> &rect, const ListSet<R,Rectangle> &A);
+    
     template<typename R> std::ostream& operator<<(std::ostream&, const Rectangle<R>&);
     template<typename R> std::istream& operator>>(std::istream&, Rectangle<R>&);
 
@@ -64,6 +67,10 @@ namespace Ariadne {
      */
     template <typename R>
     class Rectangle {
+      /*! \brief Makes intersection */
+      friend Rectangle<R> intersection <> (const Rectangle<R> &A,
+                                           const Rectangle<R> &B);
+
       /*! \brief Makes intersection of interiors */
       friend Rectangle<R> regular_intersection <> (const Rectangle<R> &A,
                                                    const Rectangle<R> &B);
@@ -102,14 +109,6 @@ namespace Ariadne {
       friend bool subset_of_closed_cover <> (const Rectangle<R> &A,
                                              const std::vector< Rectangle<R> > &list);
 
-      /*! \brief Tests if \a A is a subset of the interior of \a B. (deprecated)*/
-      friend bool subset_of_interior <> (const Rectangle<R> &A,
-                                         const Rectangle<R> &B);
-
-      /*! \brief Makes intersection of interiors (deprecated). */
-      friend Rectangle<R> closure_of_intersection_of_interiors <> (const Rectangle<R> &A,
-                                                                   const Rectangle<R> &B);
-
      public:
       /*! \brief The type of denotable real number used for the corners. */
       typedef R Real;
@@ -122,25 +121,15 @@ namespace Ariadne {
       /* Rectangle's upper corner */
       State _upper_corner;
       
-      /* The emptyness flag */
-      bool _empty;
-      
      public:
       /*! \brief Default constructor construcs an empty rectangle of dimension \a n. */
       Rectangle(size_t n = 0)
-        : _lower_corner(n),  _upper_corner(n), _empty(true) {}
+        : _lower_corner(n),  _upper_corner(n) {}
       
       /*! \brief Construct from an array of intervals. */
       Rectangle(size_t dim, const Interval<Real>* intervals)
-        : _lower_corner(dim), _upper_corner(dim), _empty(true)
+        : _lower_corner(dim), _upper_corner(dim)
       {
-        for(size_t i=0; i!=dim; ++i) {
-          if(intervals[i].lower() >= intervals[i].upper()) {
-            this->_empty=true;
-          }
-        }
-        this->_empty=false;
-        
         for(size_t i=0; i!=dim; ++i) {
           this->_lower_corner[i] = intervals[i].lower();
           this->_upper_corner[i] = intervals[i].upper();
@@ -149,7 +138,7 @@ namespace Ariadne {
       
       /*! \brief Construct from two corners. */
       Rectangle(const State &s1, const State &s2)
-        : _lower_corner(s1.dimension()), _upper_corner(s2.dimension()), _empty(true)
+        : _lower_corner(s1.dimension()), _upper_corner(s2.dimension())
       {
         /* Test to see if corners have same dimensions */
         if (s1.dimension()!=s2.dimension()) {
@@ -157,40 +146,34 @@ namespace Ariadne {
         }
         
         /* Set coordinates */
-        for (size_t i=0; i<this->dimension(); i++) {
+        for (size_t i=0; i!=this->dimension(); ++i) {
           this->_lower_corner[i]=std::min(s1[i],s2[i]);
           this->_upper_corner[i]=std::max(s1[i],s2[i]);
         }
         
-        /* Set emptyness flag */
-        _empty=false;
-        for (size_t i=0; i<this->dimension(); i++) {
-          if(this->lower(i) >= this->upper(i)) {
-            _empty=true;
-          }
-        }
+      }
+      
+      /*! \brief Construct from a string literal. */
+      explicit Rectangle(const std::string &s)
+        : _lower_corner(), _upper_corner()
+      {
+        std::stringstream ss(s);
+        ss >> *this;
       }
       
       /*! \brief Copy constructor. */
       Rectangle(const Rectangle<R> &original)
         : _lower_corner(original._lower_corner),
-          _upper_corner(original._upper_corner),
-          _empty(original._empty) {
-      }
+          _upper_corner(original._upper_corner)
+      { }
       
       /*! \brief Copy assignment operator. */
       Rectangle<R>& operator=(const Rectangle<R>& original) {
         if(this != &original) {
           this->_lower_corner = original._lower_corner;
           this->_upper_corner = original._upper_corner;
-          this->_empty = original._empty;
         }
         return *this;
-      }
-      
-      /*! \brief The dimension of the Euclidean space the rectangle lies in. (Deprecated) */
-      inline size_t dim() const {
-        return (this->_lower_corner).dimension();
       }
       
       /*! \brief The dimension of the Euclidean space the rectangle lies in. */
@@ -198,9 +181,24 @@ namespace Ariadne {
         return (this->_lower_corner).dimension();
       }
       
-      /*! \brief Returns \c true if the rectangle is empty */
+      /*! \brief True if the rectangle is empty. */
       inline bool empty() const {
-        return (this->_empty);
+        for(size_t i=0; i!=this->dimension(); ++i) {
+          if(this->lower_bound(i) > this->upper_bound(i)) {
+            return true;
+          }
+        }
+        return false;
+      }
+      
+      /*! \brief True if the rectangle has empty interior. */
+      inline bool empty_interior() const {
+        for(size_t i=0; i!=this->dimension(); ++i) {
+          if(this->lower_bound(i) >= this->upper_bound(i)) {
+            return true;
+          }
+        }
+        return false;
       }
       
       /*! \brief The lower corner. */
@@ -235,22 +233,22 @@ namespace Ariadne {
       }
       
       /*! \brief Sets the lower bound of the \a n th coordinate to \a r. */
-      inline void set_lower(size_t n, const Real& r) {
+      inline void set_lower_bound(size_t n, const Real& r) {
         this->_lower_corner[n] = r;
       }
       
       /*! \brief Sets the upper bound of the \a n th coordinate to \a r. */
-      inline void set_upper(size_t n, const Real& r) {
+      inline void set_upper_bound(size_t n, const Real& r) {
         this->_upper_corner[n] = r;
       }
       
       /*! \brief Returns the lower bound of the \a n th coordinate */
-      inline Real lower(size_t n) const {
+      inline Real lower_bound(size_t n) const {
         return this->_lower_corner[n];
       }
       
       /*! \brief Returns the upper bound of the \a n th coordinate */
-      inline Real upper(size_t n) const {
+      inline Real upper_bound(size_t n) const {
         return this->_upper_corner[n];
       }
       
@@ -383,19 +381,13 @@ namespace Ariadne {
       /*! \brief Tests if the Rectangle is a subset of the interior of set \a s. */
       template<class SET>
       inline bool inner_subset(const SET& s) const {
-        return Ariadne::Geometry::subset_of_interior(*this,s);
+        return Ariadne::Geometry::inner_subset(*this,s);
       }
 
       /*! \brief Tests if the Rectangle is a subset of the set \a s. */
       template<class SET>
       inline bool subset(const SET& s) const {
         return Ariadne::Geometry::subset(*this,s);
-      }
-
-      /*! \brief Tests if the Rectangle is a subset of the interior of set \a s. (Deprecated) */
-      template<class SET>
-      inline bool is_subset_of_interior_of(const SET& s) const {
-        return Ariadne::Geometry::subset_of_interior(*this,s);
       }
 
       /*! \brief Tests if the Rectangle is a subset of the the union of the open sets in \a u. */
@@ -513,16 +505,16 @@ namespace Ariadne {
       size_t dimension = A.dimension();
       
       for(size_t i=0; i!=dimension; ++i) {
-        Real lower=A.lower(i);
-        Real upper=A.upper(i);
+        Real lower=A.lower_bound(i);
+        Real upper=A.upper_bound(i);
         gridpoints[i].insert(lower);
         gridpoints[i].insert(upper);
         for(list_iterator rect=cover.begin(); rect!=cover.end(); ++rect) {
-          Real bound = rect->lower(i);
+          Real bound = rect->lower_bound(i);
           if(lower<bound && bound<upper) {
             gridpoints[i].insert(bound);
           }
-          bound = rect->upper(i);
+          bound = rect->upper_bound(i);
           if(lower<bound && bound<upper) {
             gridpoints[i].insert(bound);
           }
@@ -571,23 +563,23 @@ namespace Ariadne {
       
       for(list_iterator rect=cover.begin(); rect!=cover.end(); ++rect) {
         for(size_t i=0; i!=dimension; ++i) {
-          Real lower_bound=rect->lower(i);
-          size_t lower_index=0;
+          Real lower_bnd=rect->lower_bound(i);
+          size_t lower_indx=0;
           set_iterator iter=gridpoints[i].begin();
-          while(iter!=gridpoints[i].end() && (*iter) <= lower_bound) {
+          while(iter!=gridpoints[i].end() && (*iter) <= lower_bnd) {
             ++iter;
-            ++lower_index;
+            ++lower_indx;
           }
-          lower_indices[i]=lower_index;
+          lower_indices[i]=lower_indx;
           
-          Real upper_bound=rect->upper(i);
-          size_t upper_index=0;
+          Real upper_bnd=rect->upper_bound(i);
+          size_t upper_indx=0;
           iter=gridpoints[i].begin();
-          while(iter!=gridpoints[i].end() && (*iter) < upper_bound) {
+          while(iter!=gridpoints[i].end() && (*iter) < upper_bnd) {
             ++iter;
-            ++upper_index;
+            ++upper_indx;
           }
-          upper_indices[i]=upper_index;
+          upper_indices[i]=upper_indx;
         }
         
 #ifdef DEBUG
@@ -744,7 +736,30 @@ namespace Ariadne {
     }
     
     
-    /*! \brief Makes intersection of interior */
+    /*! \brief The intersections of \a A and \a B. */
+    template <typename R>
+    Rectangle<R>
+    intersection(const Rectangle<R> &A, const Rectangle<R> &B)
+    {
+      if (A.dimension()!=B.dimension()) {
+        throw std::domain_error("The two parameters have different space dimensions");
+      }
+
+      Rectangle<R> C(A.dimension());
+
+      for (size_t i=0; i != C.dimension(); ++i) {
+        C._lower_corner[i] = std::max(A._lower_corner[i],B._lower_corner[i]);
+        C._upper_corner[i] = std::min(A._upper_corner[i],B._upper_corner[i]);
+        if(C._lower_corner[i] > C._upper_corner[i]) {
+          C._lower_corner[0]=1;
+          C._upper_corner[0]=0;
+          return C;
+        }
+      }
+      return C;
+    }
+
+    /*! \brief The closure of the intersection of the interiors of \a A and \a B. */
     template <typename R>
     Rectangle<R>
     regular_intersection(const Rectangle<R> &A, const Rectangle<R> &B)
@@ -763,22 +778,13 @@ namespace Ariadne {
         C._lower_corner[i] = std::max(A._lower_corner[i],B._lower_corner[i]);
         C._upper_corner[i] = std::min(A._upper_corner[i],B._upper_corner[i]);
         if(C._lower_corner[i] >= C._upper_corner[i]) {
-          C._empty=true;
+          C._lower_corner[0]=1;
+          C._upper_corner[0]=0;
           return C;
         }
       }
-
-      C._empty=false;
       return C;
     }
-
-    /*! \brief Makes intersection of interior */
-    template <typename R>
-    Rectangle<R>
-    closure_of_intersection_of_interiors(const Rectangle<R> &A, const Rectangle<R> &B) {
-      return regular_intersection(A,B);
-    }
-
 
     template <typename R>
     std::ostream&
@@ -790,12 +796,10 @@ namespace Ariadne {
         os << "upper=" << (r._upper_corner) << " }" ;
       */
       
-      /*
-        if(r.empty()) {
-        return os << "[ ]";
-        }
-      */
-      if(r.dimension() > 0) {
+      if(r.empty()) {
+        os << "Empty";
+      }
+      else if(r.dimension() > 0) {
         os << r[0];
         for(size_t i=1; i!=r.dimension(); ++i) {
           os << "x" << r[i];
@@ -816,10 +820,28 @@ namespace Ariadne {
       is >> c;
       is.putback(c);
       if(c=='[') {
-        /* Representation as list of intervals */ 
+        /* Representation as a literal [a1,b1]x[a2,b2]x...x[an,bn] */
+        std::vector< Interval > v;
+        Interval i;
+        c='x';
+        while(c=='x') {
+          is >> i;
+          v.push_back(i);
+          c=' ';
+          while( is && c==' ') {
+            is >> c;
+          }
+        }
+        if(is) {
+          is.putback(c);
+        }
+        r=Rectangle<R>(v.size(),&v[0]);
+        /* Representation as list of intervals (deprecated) */ 
+      /*
         std::vector< Interval > v;
         is >> v;
         r=Rectangle<R>(v.size(),&v[0]);
+      */
       }
       else {
         /* representation as lower and upper corners */

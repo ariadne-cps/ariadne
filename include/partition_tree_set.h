@@ -304,11 +304,11 @@ namespace Ariadne {
 
       while(word_iter!=_word.end()) {
         size_type i=(*coord_iter);
-        R centre = ( res.lower(i) + res.upper(i) ) / 2;
+        R centre = ( res.lower_bound(i) + res.upper_bound(i) ) / 2;
         if( (*word_iter)==left ) {
-          res.set_upper(i,centre); }
+          res.set_upper_bound(i,centre); }
         else {
-          res.set_lower(i,centre);
+          res.set_lower_bound(i,centre);
         }
         ++word_iter;
         ++coord_iter;

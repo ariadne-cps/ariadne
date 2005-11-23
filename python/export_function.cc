@@ -22,11 +22,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <iostream>
-#include <boost/python.hpp>
-#include <gmpxx.h>
-
 #include "function.h"
+
+#include <boost/python.hpp>
 
 using boost::python::class_;
 using boost::python::init;

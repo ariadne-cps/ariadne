@@ -1,5 +1,5 @@
 /***************************************************************************
- *            python/interval.cc
+ *            python/export_interval.cc
  *
  *  21 October 2005
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
@@ -20,10 +20,8 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- */// g++ -fpic -I../include/ -I/usr/include/python2.4 -c interval.cc
-// g++ -shared interval.o -o interval.so -lboost_python -lmpfr -lgmp  -lsuperlu -lblas
-
-#include <iostream>
+ */
+ 
 #include "numerical_type.h"
 #include "interval.h"
 

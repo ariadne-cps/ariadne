@@ -1,7 +1,7 @@
 /***************************************************************************
- *            python/ariadne_module.cc
+ *            python/export_matrix.cc
  *
- *  22 June 2005
+ *  17 November 2005
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
@@ -23,20 +23,26 @@
  */
 
 #include "numerical_type.h"
-#include "interval.h"
-#include "state.h"
-#include "rectangle.h"
-#include "list_set.h"
+#include "linear_algebra.h"
 
 #include <boost/python.hpp>
 
-using namespace Ariadne;
+#include "real_typedef.h"
+#include "python_utilities.h"
 
-void export_function();
-void export_numeric();
+typedef Ariadne::LinearAlgebra::matrix<Real> RMatrix;
 
-BOOST_PYTHON_MODULE(ariadne)
-{
-  export_numeric();
-  export_function();
+using boost::python::class_;
+using boost::python::init;
+using boost::python::self;
+using boost::python::def;
+using boost::python::self_ns::str;
+using boost::python::return_value_policy;
+using boost::python::copy_const_reference;
+
+void export_matrix() {
+  class_<RMatrix>("Matrix",init<int,int>())
+    .def(init<RMatrix>())
+    .def(str(self))    // __str__
+  ;
 }

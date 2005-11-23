@@ -29,9 +29,9 @@ namespace Ariadne {
 namespace Geometry {
 
 enum DegenerateSetKind {
-	EMPTY,
-	UNIVERSE,
-	GENERAL
+  EMPTY,
+  UNIVERSE,
+  GENERAL
 };
 
 }

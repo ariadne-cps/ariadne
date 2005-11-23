@@ -154,7 +154,7 @@ namespace Ariadne {
       IndexArray upper_index(const Rectangle<R>& r) const {
         IndexArray res(r.dimension());
         for(size_type i=0; i!=res.size(); ++i) {
-          res[i]=subdivision_upper_index(i,r.upper(i));
+          res[i]=subdivision_upper_index(i,r.upper_bound(i));
         }
         return res;
       }
@@ -278,8 +278,8 @@ namespace Ariadne {
     {
       for(typename ListSet<R,Rectangle>::const_iterator riter=ls.begin(); riter!=ls.end(); ++riter) {
         for(dimension_type n=0; n!=ls.dimension(); ++n) {
-          _subdivision_coordinates[n].push_back(riter->lower(n));
-          _subdivision_coordinates[n].push_back(riter->upper(n));
+          _subdivision_coordinates[n].push_back(riter->lower_bound(n));
+          _subdivision_coordinates[n].push_back(riter->upper_bound(n));
         }
       }
       create();
@@ -697,8 +697,8 @@ namespace Ariadne {
       assert(g.dimension()==r.dimension());
       for(dimension_type d=0; d!=dimension(); ++d) {
         /* TODO: Catch and rethrow exceptions */
-        _lower[d]=g.subdivision_index(d,r.lower(d));
-        _upper[d]=g.subdivision_index(d,r.upper(d));
+        _lower[d]=g.subdivision_index(d,r.lower_bound(d));
+        _upper[d]=g.subdivision_index(d,r.upper_bound(d));
       }
     }
 
@@ -727,8 +727,8 @@ namespace Ariadne {
       Rectangle<R> result(dimension());
 
       for(dimension_type i=0; i!=dimension(); ++i) {
-        result.set_lower(i, _grid.subdivision_coordinate(i,_position[i]));
-        result.set_upper(i, _grid.subdivision_coordinate(i,_position[i]+1));
+        result.set_lower_bound(i, _grid.subdivision_coordinate(i,_position[i]));
+        result.set_upper_bound(i, _grid.subdivision_coordinate(i,_position[i]+1));
       }
 
       return result;
@@ -741,8 +741,8 @@ namespace Ariadne {
       Rectangle<R> result(dimension());
 
       for(size_type i=0; i!=dimension(); ++i) {
-        result.set_lower(i, _grid.subdivision_coordinate(i,_lower[i]));
-        result.set_upper(i, _grid.subdivision_coordinate(i,_upper[i]));
+        result.set_lower_bound(i, _grid.subdivision_coordinate(i,_lower[i]));
+        result.set_upper_bound(i, _grid.subdivision_coordinate(i,_upper[i]));
       }
 
       return result;

@@ -22,553 +22,68 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#ifndef _POLYHEDRON_H
-#define _POLYHEDRON_H
+#ifndef _ARIADNE_POLYHEDRON_H
+#define _ARIADNE_POLYHEDRON_H
 
 #include<ppl.hh>
 #include<iostream>
 #include<vector>
 
-#include <rectangle.h>
-
-
-namespace Ariadne {  
-namespace Geometry {
-  
-template <typename R> class Polyhedron;
-template <typename R> class State;
-
-}
-}
-
-#include <poly_map.h>
 #include <constraint.h>
 #include <generator.h>
-#include <set_const.h>
-#include <polyhedron_io.h>
 
+#include <rectangle.h>
 
 namespace Ariadne {  
 namespace Geometry {
 
+template<typename R> class State;
+template<typename R> class Polyhedron;
+
+template<typename R> inline bool disjoint(const Polyhedron<R>& A, 
+                                   const Polyhedron<R>& B);
+template<typename R> inline bool interiors_intersect(const Polyhedron<R>& A, 
+                                              const Polyhedron<R>& B);
+template<typename R> inline bool interiors_intersect(const Rectangle<R>& A, 
+                                              const Polyhedron<R>& B);
+template<typename R> inline bool interiors_intersect(const Polyhedron<R>& A,
+                                              const Rectangle<R>& B);
+template<typename R> inline bool inner_subset(const Polyhedron<R>& A, 
+                                       const Polyhedron<R>& B);
+template<typename R> inline bool inner_subset(const Rectangle<R>& A, 
+                                       const Polyhedron<R>& B);
+template<typename R> inline bool inner_subset(const Polyhedron<R>& A,
+                                       const Rectangle<R>& B);
+template<typename R> inline bool subset(const Polyhedron<R>& A, 
+                                 const Polyhedron<R>& B);
+template<typename R> inline bool subset(const Polyhedron<R>& A, 
+                                 const std::vector< Polyhedron<R> >& B);
+template<typename R> inline Polyhedron<R> regular_intersection(const Polyhedron<R>& A, 
+                                                        const Polyhedron<R>& B);
+template<typename R> inline Polyhedron<R> convex_hull(const Polyhedron<R>& A, 
+                                               const Polyhedron<R>& B);
+template<typename R> inline Polyhedron<R> minkowski_sum(const Polyhedron<R>& A,
+                                                 const Polyhedron<R>& B);
+                                               
+template<typename R> inline std::ostream& operator<<(std::ostream& os, 
+                                              const Polyhedron<R>& P);
+                                               
+
+/* Transforms an State into a Parma_Polyhedra_Library::C_Polyhedron */
 template <typename R>
-inline void _extract_constraints_from_polyhedron(
-      const Polyhedron<R> &poly, 
-      Ariadne::LinearAlgebra::ConstrainSystem<R> &cs){
+inline 
+Parma_Polyhedra_Library::NNC_Polyhedron 
+_from_State_to_PPL_Polyhedron(const State<R>& s);
 
-  Parma_Polyhedra_Library::Constraint_System::const_iterator j_cs, begin, end;
-      
-  begin=((poly._poly).constraints()).begin();
-  end=((poly._poly).constraints()).end();
-            
-  size_t space_dim=poly.dimension();
-  size_t nb_constr=0,i,j;
-            
-  for (j_cs=begin; j_cs!=end; j_cs++) {
-    nb_constr++;
-  }
-  
-  cs.reset_dimensions(space_dim, nb_constr);
-  
-  j=0;
-  
-  for (j_cs=begin; j_cs!=end; j_cs++) {
-          
-    for (i=0; i< space_dim; i++) {
-        cs.C(j,i)=j_cs->coefficient(Parma_Polyhedra_Library::Variable(i));
-    }
-          
-    cs.d(j)=-j_cs->inhomogeneous_term();
-    
-    if (j_cs->is_equality()) {
-      cs.r_type[j]=Ariadne::LinearAlgebra::ConstrainSystem<R>::EQUALITY;
-    } else {
-      if (j_cs->is_strict_inequality()) {
-        cs.r_type[j]=Ariadne::LinearAlgebra::ConstrainSystem<R>::STRICT_INEQUALITY;
-      } else {
-        cs.r_type[j]=Ariadne::LinearAlgebra::ConstrainSystem<R>::INEQUALITY;
-      }
-    }
-          
-    j++;
-  }
-
-}
-
-template <typename R>
-inline void _extract_generators_from_polyhedron(
-      const Polyhedron<R> &poly, 
-      Ariadne::LinearAlgebra::GeneratorSystem<R> &gen){
-
-  #ifdef DEBUG
-    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-  #endif    
-
-  typedef R Real;
-        
-  Parma_Polyhedra_Library::Generator_System::const_iterator j_gen, begin, end;
-        
-  begin=((poly._poly).generators()).begin();
-  end=((poly._poly).generators()).end();
-            
-  size_t space_dim=poly.dimension();
-  size_t point_nb=0,ray_nb=0, i,j_ray=0, j_point=0;
-            
-  for (j_gen=begin; j_gen!=end; j_gen++) {
-    
-    if ((j_gen->is_line())||(j_gen->is_ray())) {
-      ray_nb++;
-    } else {
-      point_nb++;  
-    }
-  }
-  
-  gen.reset_dimensions(point_nb,ray_nb,space_dim);
-
-  for (j_gen=begin; j_gen!=end; j_gen++) {
-    
-    
-    if (j_gen->is_line()) {
-    
-      for (i=0; i< space_dim; i++) {
-        gen.ray(i,j_ray)=j_gen->coefficient(Parma_Polyhedra_Library::Variable(i));
-      }
-          
-      gen.set_line(j_ray);
-      
-      j_ray++;
-      
-    } else {
-      if (j_gen->is_ray()) {
-    
-        for (i=0; i< space_dim; i++) {
-          gen.ray(i,j_ray)=j_gen->coefficient(Parma_Polyhedra_Library::Variable(i));
-        }
-          
-        gen.set_ray(j_ray);
-      
-        j_ray++;
-        
-      } else {
-        if (j_gen->is_point()) {
-    
-          Real den=j_gen->divisor();
-          
-          for (i=0; i< space_dim; i++) {
-            gen.point(i,j_point)=j_gen->coefficient(Parma_Polyhedra_Library::Variable(i))/den;
-          }
-          
-          gen.set_point(j_point);
-      
-          j_point++;
-        
-        } else { /*j_gen is a closure point */
-          
-          Real den=j_gen->divisor();
-          
-          for (i=0; i< space_dim; i++) {
-            gen.point(i,j_point)=j_gen->coefficient(Parma_Polyhedra_Library::Variable(i))/den;
-          }
-          
-          gen.set_closure_point(j_point);
-      
-          j_point++;
-          
-        }
-      }
-    }
-        
-  }
-  
-  #ifdef DEBUG
-    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-  #endif  
-}
-
-
-template <typename R>
-inline Polyhedron<R> _create_polyhedron_from_generators(
-      const Polyhedron<R> &poly,
-      const Ariadne::LinearAlgebra::GeneratorSystem<R> &gen){
-  
-  #ifdef DEBUG
-    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-  #endif      
-
-  R den;
-        
-  Parma_Polyhedra_Library::Generator_System poly_gen;
-  Parma_Polyhedra_Library::Linear_Expression exp;
-  size_t j,i;
-          
-  if (poly.dimension()!=gen.space_dimension()) 
-    throw std::invalid_argument("The generator system's matrix and the variable vector should have the same dimensions.");
-  
-  for (j=0; j< gen.point_nb(); j++) {
-    
-    den=denumerator(gen.point(0,j));
-    
-    for (i=1; i< poly.dimension(); i++) {
-      den=lcm(numerator(den),denumerator(gen.point(i,j)));
-    }
-    
-    exp=(den*gen.point(0,j))*(Parma_Polyhedra_Library::Variable(0));
-
-    for (i=1; i< poly.dimension(); i++) {
-      exp+=(den*gen.point(i,j))*(Parma_Polyhedra_Library::Variable(i));
-    }
-    
-    if (gen.is_point(j)) {    
-      poly_gen.insert(Parma_Polyhedra_Library::Generator::point(exp,den));
-    } else {
-      poly_gen.insert(Parma_Polyhedra_Library::Generator::closure_point(exp,den));
-    }
-  }
-  
-  for (j=0; j< gen.ray_nb(); j++) {
-    
-    exp=gen.ray(0,j)*(Parma_Polyhedra_Library::Variable(0));
-
-    for (i=1; i< poly.dimension(); i++) {
-      exp+=gen.ray(i,j)*(Parma_Polyhedra_Library::Variable(i));
-    }
-    
-    if (gen.is_ray(j)) {    
-      poly_gen.insert(Parma_Polyhedra_Library::Generator::ray(exp));
-    } else {
-      poly_gen.insert(Parma_Polyhedra_Library::Generator::line(exp));
-    }
-  }
-  
-  Polyhedron<R> new_poly(poly_gen);
-  
-  #ifdef DEBUG
-    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-  #endif
-
-  return new_poly;
-}
-
-
+/* Transforms an Rectangle into a Parma_Polyhedra_Library::C_Polyhedron */
 template <typename R>
 inline Parma_Polyhedra_Library::NNC_Polyhedron 
-    _create_open_PPL_poly_from_constraints(
-      const Ariadne::LinearAlgebra::ConstrainSystem<R> &cs){
-  
-  Parma_Polyhedra_Library::Constraint_System poly_cs;
-  Parma_Polyhedra_Library::Linear_Expression exp;
-  
-  size_t i,j;
-        
-  /* if there is an equality, the open set is empty */
-  if (cs.any_equality()) {
-    Parma_Polyhedra_Library::NNC_Polyhedron 
-      open_poly(cs.space_dimension(),Parma_Polyhedra_Library::Polyhedron::EMPTY);
-    
-    return open_poly;
-  }
-  
-  for (j=0; j< cs.nb_constraints(); j++) {
-        
-    exp=cs.C(j,0)*(Parma_Polyhedra_Library::Variable(0));
-
-    for (i=1; i< cs.space_dimension(); i++) {
-      exp+=cs.C(j,i)*(Parma_Polyhedra_Library::Variable(i));
-    }
-    
-    poly_cs.insert(exp > cs.d(j));
-    
-  }
-  
-  Parma_Polyhedra_Library::NNC_Polyhedron poly(poly_cs);
-  
-  return poly;
-}
-
-template <typename R>
-inline Parma_Polyhedra_Library::NNC_Polyhedron 
-    _create_closed_PPL_poly_from_constraints(
-      const Ariadne::LinearAlgebra::ConstrainSystem<R> &cs){
-  
-  Parma_Polyhedra_Library::Constraint_System poly_cs;
-  Parma_Polyhedra_Library::Linear_Expression exp;
-  
-  size_t i,j;
-  
-  for (j=0; j< cs.nb_constraints(); j++) {
-        
-    exp=cs.C(j,0)*(Parma_Polyhedra_Library::Variable(0));
-
-    for (i=1; i< cs.space_dimension(); i++) {
-      exp+=cs.C(j,i)*(Parma_Polyhedra_Library::Variable(i));
-    }
-    
-    if (cs.is_equality(j)) {
-      poly_cs.insert(exp == cs.d(j));
-    } else {
-      poly_cs.insert(exp >= cs.d(j));
-    }
-  }
-  
-  Parma_Polyhedra_Library::NNC_Polyhedron poly(poly_cs);
-  
-  return poly;
-}
-
-template <typename R>
-inline Polyhedron<R> _create_polyhedron_from_constraints(
-      const Polyhedron<R> &poly,
-      const Ariadne::LinearAlgebra::ConstrainSystem<R> &cs){
-  
-  #ifdef DEBUG
-    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-  #endif      
-        
-  Parma_Polyhedra_Library::Constraint_System poly_cs;
-  Parma_Polyhedra_Library::Linear_Expression exp;
-  size_t j,i;
-          
-  if (poly.dimension()!=cs.space_dimension()) 
-    throw std::invalid_argument("The constraint system's matrix and the variable vector should have the same dimensions.");
-  
-  for (j=0; j< cs.nb_constraints(); j++) {
-        
-    exp=cs.C(j,0)*(Parma_Polyhedra_Library::Variable(0));
-
-    for (i=1; i< poly.dimension(); i++) {
-      exp+=cs.C(j,i)*(Parma_Polyhedra_Library::Variable(i));
-    }
-    
-    if (cs.is_equality(j)) {    
-      poly_cs.insert(exp == cs.d(j));
-    } else {
-      poly_cs.insert(exp >= cs.d(j));
-    }
-  }
-      
-  Polyhedron<R> new_poly(poly_cs);
-
-  #ifdef DEBUG
-    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-  #endif
-
-  return new_poly;
-}
+_from_Rectangle_to_closed_PPL_Polyhedron(const Rectangle<R>& r);
 
 
-template <typename R>
-inline Polyhedron<R> convex_hull(const Polyhedron<R> &A, 
-            const Polyhedron<R> &B){
-      
-  #ifdef DEBUG
-    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-  #endif
-              
-  Polyhedron<R> chull(A);
-              
-  (chull._poly).poly_hull_assign_and_minimize(B._poly);
-  chull._evaluate_interior();
-              
-  #ifdef DEBUG
-    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-  #endif
-              
-  return chull;
-}
-  
-/*! \brief Transforms an State into a Parma_Polyhedra_Library::C_Polyhedron */
-template <typename R>
-inline Parma_Polyhedra_Library::NNC_Polyhedron _from_State_to_PPL_Polihedron(const State<R> &s){
-  
-  Parma_Polyhedra_Library::Constraint_System cs;
-  Rational num;
-  
-  for (size_t i=0; i<s.dimension(); i++) {
-      num=transform_into_rational(s[i]);
-      
-      cs.insert(Parma_Polyhedra_Library::Variable(i) * 
-              denumerator(num) == numerator(num));
-  }
-  
-  Parma_Polyhedra_Library::NNC_Polyhedron p(cs);
-  
-  return p;
-  
-}
 
 
-/*! \brief Transforms an Rectangle into a Parma_Polyhedra_Library::C_Polyhedron */
-template <typename R>
-inline Parma_Polyhedra_Library::NNC_Polyhedron _from_Rectangle_to_closed_PPL_Polihedron(const Rectangle<R> &r){
   
-  State<R> u_corner(r.upper_corner()), l_corner(r.lower_corner());
-  
-  Parma_Polyhedra_Library::Constraint_System cs;
-    std::vector<Parma_Polyhedra_Library::Variable *> x;
-  Rational num;
-  
-  for (size_t i=0; i<r.dimension(); i++) {
-      x.push_back(new Parma_Polyhedra_Library::Variable(i));
-  }
-  
-  for (size_t i=0; i<r.dimension(); i++) {
-      num=transform_into_rational(u_corner[i]);
-      cs.insert((Parma_Polyhedra_Library::Variable(i))*denumerator(num) <= 
-            numerator(num));
-    
-      num=transform_into_rational(l_corner[i]);
-      cs.insert((Parma_Polyhedra_Library::Variable(i))*denumerator(num) >=
-            numerator(num));
-  }
-  
-  Parma_Polyhedra_Library::NNC_Polyhedron p(cs);
-  
-  return p;
-  
-}
-
-
-template <typename R>
-inline bool disjoint(const Polyhedron<R> &A, 
-        const Polyhedron<R> &B){
-              
-  return (A._poly).is_disjoint_from(B._poly);
-                  
-}
-
-template <typename R>
-inline bool intersects_interior(const Polyhedron<R> &A, 
-        const Polyhedron<R> &B){
-  
-  #ifdef DEBUG
-    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-  #endif
-          
-  return !((A._poly).is_disjoint_from(B._interior_poly));        
-}
-
-template <typename R>
-inline bool interiors_intersect(const Rectangle<R> &rect, 
-        const Polyhedron<R> &A) {
-  
-  return interiors_intersect(A,rect);
-}
-
-template <typename R>
-inline bool interiors_intersect(const Polyhedron<R> &A,
-        const Rectangle<R> &rect) {
-  
-  Parma_Polyhedra_Library::NNC_Polyhedron P_rect=_from_Rectangle_to_open_PPL_Polihedron(rect);
-
-  return !((A._poly).is_disjoint_from(P_rect));
-                  
-}
-
-template <typename R>
-inline bool subset_of_interior(const Polyhedron<R> &A, 
-        const Polyhedron<R> &B){        
-    
-  return (B._interior_poly).contains(A._poly);
-}
-
-template <typename R>
-inline bool interior_subset_of_interior(const Rectangle<R> &rect, 
-        const Polyhedron<R> &A) {
-  
-  Parma_Polyhedra_Library::NNC_Polyhedron P_rect=_from_Rectangle_to_open_PPL_Polihedron(rect);          
-                    
-  return (A._interior_poly).contains(P_rect);
-}
-
-template <typename R>
-inline bool interior_subset_of_interior(const Polyhedron<R> &A,
-          const Rectangle<R> &rect) {
-
-  Parma_Polyhedra_Library::NNC_Polyhedron P_rect=_from_Rectangle_to_open_PPL_Polihedron(rect);          
-                    
-  return (P_rect).contains(A._interior_poly);
-}
-
-
-template <typename R>
-inline bool subset_of_open_cover(const Polyhedron<R> &A, 
-        const std::vector< Polyhedron<R> > &vector){
-          
-    
-  typename std::vector< Polyhedron <R> >::const_iterator i;
-
-  /* TO REIMPLEMENT */
-  for (i = vector.begin(); i != vector.end(); i++) {
-
-    if (subset_of_interior(A,*i)) return true;
-    
-  }
-
-  return false;
-}
-
-
-template <typename R>
-inline Polyhedron<R> closure_of_intersection_of_interior (
-        const Polyhedron<R> &A, const Polyhedron<R> &B) {
-          
-  #ifdef DEBUG
-    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-  #endif
-          
-  Polyhedron<R> new_poly(A);        
-    
-  (new_poly._poly).intersection_assign(B._poly);
-  (new_poly._interior_poly).intersection_assign(B._interior_poly);
-
-  #ifdef DEBUG
-    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-  #endif
-  
-  return (new_poly);
-}
-
-/* TO REIMPLEMENT */
-template <typename R>
-inline Polyhedron<R> minkowski_sum(const Polyhedron<R> &A,
-      const Polyhedron<R> &B) {
-    
-  #ifdef DEBUG
-    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-  #endif
-  
-  if ((!(A._poly).is_bounded()) || (!(B._poly).is_bounded())) {
-    throw std::domain_error("Minkosky sum is implemented for bounded polyhedra only");
-  }  
-        
-  Ariadne::LinearAlgebra::GeneratorSystem<R> gen_A, gen_B;
-  _extract_generators_from_polyhedron(A, gen_A);
-        
-  Polyhedron<R> sum=B, new_poly;
-        
-  for (size_t k=0; k<gen_A.point_nb(); k++) {
-          
-    _extract_generators_from_polyhedron(B, gen_B);
-      
-    for (size_t i=0; i<gen_B.space_dimension(); i++) {
-        
-      for (size_t j=0; j<gen_B.point_nb() ; j++) {
-            
-        gen_B.point(i,j)+=gen_A.point(i,k);
-      }
-    }
-      
-    new_poly=_create_polyhedron_from_generators(B,gen_B);
-        
-    sum=convex_hull(sum,new_poly);
-  }
-  
-  #ifdef DEBUG
-    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-  #endif
-  
-  return sum;
-}
 
 /*! \brief The polyhedron class.
  *
@@ -577,168 +92,27 @@ inline Polyhedron<R> minkowski_sum(const Polyhedron<R> &A,
  */ 
 template <typename R>
 class Polyhedron {
-  
-  public:
-    typedef R Real;
-    typedef State<R> State;
-  
-    /*! \brief Tests disjointness. */
-    friend bool disjoint <> (const Polyhedron<R> &A, 
-        const Polyhedron<R> &B);
-
-    /*! \brief Tests intersection of interiors. */
-    friend bool intersects_interior <> (const Polyhedron<R> &A, 
-        const Polyhedron<R> &B);
-  
-    /*! \brief Tests intersection of interiors. */  
-    //friend bool intersects_interior <> (const Rectangle<R> &rect, 
-    //          const Polyhedron<R> &A);
-    
-    /*! \brief Tests intersection of interiors. */  
-    friend bool interiors_intersect <> (const Polyhedron<R> &A,
-              const Rectangle<R> &rect);
-    
-    /*! \brief Tests inclusion of interiors. */
-    friend bool subset_of_interior <> (const Polyhedron<R> &A, 
-        const Polyhedron<R> &B);
-  
-    /*! \brief Tests inclusion of interiors. */
-    friend bool interior_subset_of_interior <> (const Rectangle<R> &rect, 
-        const Polyhedron<R> &A);
-
-    /*! \brief Tests inclusion of interiors. */
-    friend bool interior_subset_of_interior <> (const Polyhedron<R> &A,
-        const Rectangle<R> &rect);
-        
-    /*! \brief Tests inclusion. */
-    friend bool subset_of_open_cover <> (const Polyhedron<R> &A, 
-        const std::vector< Polyhedron<R> > &vector);
-
-    /*! \brief Makes intersection of interiors. */
-    friend Polyhedron<R> closure_of_intersection_of_interior <> (
-        const Polyhedron<R> &A, const Polyhedron<R> &B);
-
-    /*! \brief Prints polyhedron. */
-    friend std::ostream& operator<< <>(std::ostream &os, 
-               const Polyhedron<R> &r);
-
-    template <typename STATE>
-    friend class PolyhedronMatlabExporter;
-    
-    template <typename STATE>
-    friend class PolyhedronOneDimMatlabExporter;
-  
-    friend void _extract_constraints_from_polyhedron <> (
-            const Polyhedron<R> &poly, 
-            Ariadne::LinearAlgebra::ConstrainSystem<R> &cs);
-    
-    friend void _extract_generators_from_polyhedron <> (
-            const Polyhedron<R> &poly, 
-            Ariadne::LinearAlgebra::GeneratorSystem<R> &gen);
-    
-    friend Polyhedron<R> _create_polyhedron_from_constraints <> (
-      const Polyhedron<R> &poly,
-      const Ariadne::LinearAlgebra::ConstrainSystem<R> &cs);
-    
-    friend Polyhedron<R> _create_polyhedron_from_generators <> (
-      const Polyhedron<R> &poly,
-      const Ariadne::LinearAlgebra::GeneratorSystem<R> &gen);
-    
-    friend Polyhedron<R> convex_hull <> (
-            const Polyhedron<R> &A, 
-            const Polyhedron<R> &B);
-    
-    friend Polyhedron<R> minkowski_sum <> (
-            const Polyhedron<R> &A, 
-            const Polyhedron<R> &B);
-            
-    friend class Ariadne::Map::PolyAffineMap<R>;
-    
-    inline Polyhedron<R> _interior() const {
-      
-      if (this->_interior_poly.space_dimension()==0) {
-        Ariadne::LinearAlgebra::ConstrainSystem<Real> cs;
-        _extract_constraints_from_polyhedron(*this, cs);
-        this->_interior_poly=_create_open_PPL_poly_from_constraints(cs);
-      }
-      Polyhedron<R> interior(*this);
-      interior._poly=this->_interior_poly;
-      return interior;
-    }
-
-  private:
-    
-    inline void _evaluate_interior(){      
-
-      #ifdef DEBUG
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-      #endif
-      
-      Ariadne::LinearAlgebra::ConstrainSystem<Real> cs;
-      
-      _extract_constraints_from_polyhedron(*this, cs);
-      
-      this->_interior_poly=_create_open_PPL_poly_from_constraints(cs);
-      
-      #ifdef DEBUG
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-      #endif
-    }      
-    
-    inline void _set_empty() {
-  
-      Parma_Polyhedra_Library::NNC_Polyhedron 
-              poly(this->dimension(),
-              Parma_Polyhedra_Library::Polyhedron::EMPTY);
-  
-      this->_poly=poly;
-      this->_interior_poly=poly;
-    }
-    
-    /*! \brief The polyhedron data structure. */
-    Parma_Polyhedra_Library::NNC_Polyhedron _poly; //(thanks Parma, I LOVE you! :-) )
-  
-                /* This is mutable since we do not compute it unless needed */
-    mutable Parma_Polyhedra_Library::NNC_Polyhedron _interior_poly;
-  public:
-    /*! \brief A polyhedron constructor. 
-     *
-     * Builds a polyhedron.
-     * \param kind is the kind of the new polyhedron.
+ public:
+  typedef size_t size_type;
+  typedef R Real;
+  typedef State<R> State;
+ public:
+    /*! \brief Default constructor creates empty set. 
      */
-    Polyhedron(DegenerateSetKind kind = EMPTY): 
-      _poly(Parma_Polyhedra_Library::Polyhedron::EMPTY),
-      _interior_poly(Parma_Polyhedra_Library::Polyhedron::EMPTY) {
-      
-      if (kind==UNIVERSE) {
-          Parma_Polyhedra_Library::NNC_Polyhedron 
-              poly(Parma_Polyhedra_Library::Polyhedron::UNIVERSE);
-        
-          this->_poly=poly;
-          this->_interior_poly=poly;
-      }
-      
-
-    }      
+    inline Polyhedron()
+      : _ppl_poly(Parma_Polyhedra_Library::Polyhedron::EMPTY),
+        _interior_poly(Parma_Polyhedra_Library::Polyhedron::EMPTY)
+    { }      
     
-    /*! \brief A polyhedron constructor. 
+    /*! \brief Construct an empty polyhedron with dimension \a dim.
      *
      * Builds a polyhedron with dimension \a dim.
      * \param dim is the new polyhedron's number of dimensions.
-     * \param kind is the kind of the new polyhedron.
      */
-    Polyhedron(size_t dim, DegenerateSetKind kind = EMPTY): 
-      _poly(dim, Parma_Polyhedra_Library::Polyhedron::EMPTY), 
-      _interior_poly(dim, Parma_Polyhedra_Library::Polyhedron::EMPTY) {
-        
-      if (kind==UNIVERSE) {
-          Parma_Polyhedra_Library::NNC_Polyhedron 
-              poly(Parma_Polyhedra_Library::Polyhedron::UNIVERSE);
-        
-          this->_poly=poly;
-          this->_interior_poly=poly;
-      }  
-    }
+    inline Polyhedron(size_t dim)
+      : _ppl_poly(dim, Parma_Polyhedra_Library::Polyhedron::EMPTY), 
+        _interior_poly(dim, Parma_Polyhedra_Library::Polyhedron::EMPTY) 
+    { }
       
     /*! \brief A polyhedron constructor. 
      *
@@ -747,14 +121,15 @@ class Polyhedron {
      * \param dim is the new polyhedron's space dimension.
      * \param size is the dimension per space dimension.
      */
-    Polyhedron(const size_t &dim, const Real &size) {
+    inline Polyhedron(const size_type& dim, const Real& size) {
       
       #ifdef DEBUG
         std::cout << __FILE__ << ":" << __LINE__ << std::endl;
       #endif
       
       Parma_Polyhedra_Library::Constraint_System cs;
-      Real num=numerator(abs(size/2)),den=denumerator(abs(size/2));
+      Real num=numerator(abs(size/2));
+      Real den=denominator(abs(size/2));
       
       for (size_t i=0; i< dim; i++) {
         cs.insert( den* Parma_Polyhedra_Library::Variable(i) >=  -num );
@@ -763,7 +138,7 @@ class Polyhedron {
       
       Parma_Polyhedra_Library::NNC_Polyhedron new_poly(cs);
       
-      this->_poly=new_poly;  
+      this->_ppl_poly=new_poly;  
       this->_evaluate_interior();
 
       #ifdef DEBUG
@@ -771,61 +146,39 @@ class Polyhedron {
       #endif
 
     }
-    
-    /*! \brief A polyhedron constructor. 
-     *
-     * Builds a polyhedron from an other polyhedron.
-     * \param original is the original polyhedron.
+  
+    /*! \brief Copy constructor. 
      */
-    Polyhedron(const Polyhedron<R> &original): 
-      _poly(original._poly), _interior_poly(original._interior_poly){}
+    inline Polyhedron(const Polyhedron<R>& original)
+      : _ppl_poly(original._ppl_poly), _interior_poly(original._interior_poly){}
         
-    /*! \brief A polyhedron constructor. 
+    /*! \brief Construct a polyhedron from a constraint system.
      *
-     * Builds a polyhedron from constraint system.
      * \param cs is the constraint system.
      */
-    Polyhedron(Parma_Polyhedra_Library::Constraint_System &cs): 
-      _poly(cs){
-        
+    inline Polyhedron(Ariadne::LinearAlgebra::ConstraintSystem<R>& cs)
+      : _ppl_poly(Parma_Polyhedra_Library::Constraint_System(cs))
+    {
       this->_evaluate_interior();
     }
     
-    /*! \brief A polyhedron constructor. 
+    /*! \brief Construct a polyhedron from a generator system.
      *
-     * Builds a polyhedron from generator system.
      * \param gen is the generator system.
      */
-    Polyhedron(Parma_Polyhedra_Library::Generator_System &gen): 
-      _poly(gen){
-        
-      #ifdef DEBUG
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-      #endif
-        
+    inline Polyhedron(Ariadne::LinearAlgebra::GeneratorSystem<R>& gen)
+      : _ppl_poly(Parma_Polyhedra_Library::Generator_System(gen)) 
+    {
       this->_evaluate_interior();
-        
-      #ifdef DEBUG
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-      #endif  
     }    
     
     /*! \brief A polyhedron constructor. 
      *
      * Builds a polyhedron from a rectangle.
      */
-    Polyhedron(const Rectangle<R> &rect){
-      _poly=_from_Rectangle_to_closed_PPL_Polihedron(rect);
-      
+    Polyhedron(const Rectangle<R>& rect) {
+      _ppl_poly=_from_Rectangle_to_closed_PPL_Polyhedron(rect);
       this->_evaluate_interior();
-    }
-
-    /*! \brief Returns polyhedron's space dimension. (Deprecated)
-     *
-     * \return The polyhedron's space dimensions.
-     */
-    inline size_t dim() const {
-      return ((size_t)this->_poly.space_dimension());
     }
     
     /*! \brief Returns polyhedron's space dimension.
@@ -833,7 +186,7 @@ class Polyhedron {
      * \return The polyhedron's space dimension.
      */
     inline size_t dimension() const {
-      return ((size_t)this->_poly.space_dimension());
+      return ((size_t)this->_ppl_poly.space_dimension());
     }
     
     /*! \brief Checks the emptyness.
@@ -842,9 +195,14 @@ class Polyhedron {
      * \a false otherwise.    
      */
     inline bool empty() const {
-      return (this->_poly.is_empty());
+      return (this->_ppl_poly.is_empty());
     }
     
+    inline void clear() {
+      this->_ppl_poly=Parma_Polyhedra_Library::NNC_Polyhedron(this->dimension(), Parma_Polyhedra_Library::Polyhedron::EMPTY);;
+      this->_interior_poly=_ppl_poly;
+    }
+
     /*! \brief Tests if a state is included into a polyhedron.
      *
      * \param state is a state in the polyhedron's space.
@@ -856,11 +214,11 @@ class Polyhedron {
       if (state.dimension()!=this->dimension()) 
         throw std::domain_error("This object and parameter have different space dimensions");
       
-      Parma_Polyhedra_Library::NNC_Polyhedron p(this->_poly);
+      Parma_Polyhedra_Library::NNC_Polyhedron p(this->_ppl_poly);
       
       p.topological_closure_assign();
       
-      return p.contains(_from_State_to_PPL_Polihedron(state));
+      return p.contains(_from_State_to_PPL_Polyhedron(state));
       
     }
     
@@ -875,7 +233,7 @@ class Polyhedron {
       if (state.dimension()!=this->dimension()) 
         throw std::domain_error("This object and parameter have different space dimensions");
       
-      return this->_poly.contains(_from_State_to_PPL_Polihedron(state));
+      return this->_ppl_poly.contains(_from_State_to_PPL_Polyhedron(state));
       
     }
     
@@ -891,115 +249,387 @@ class Polyhedron {
   
     }
     
-    inline Polyhedron<R> &expand_by(const Real &delta) {
-      
-      Ariadne::LinearAlgebra::ConstrainSystem<R> cs;
-      
-      _extract_constraints_from_polyhedron(*this, cs);
-      
-      if (cs.any_equality()) {
-        this->_set_empty();
-        return *this;        
-      }
-      
+    inline Polyhedron<R> over_approximation(const Real& delta) {
+      Ariadne::LinearAlgebra::ConstraintSystem<R> cs(this->_ppl_poly.constraints());
       cs.expand_by(delta);
-      
-      this->_poly=_create_closed_PPL_poly_from_constraints(cs);
-      this->_interior_poly=_create_open_PPL_poly_from_constraints(cs);
-      
-      return *this;
+      return Polyhedron(cs);
     }
     
-    /*! \brief Copies a polyhedron. 
+    /*! \brief Copy assignment operator. 
      *
      * \param original is the original polyhedron.
      * \return A reference to the current object.
      */
-    inline Polyhedron<R> &operator=(
-          const Polyhedron<R> &original) {        
-            
-      this->_poly=original._poly;
+    inline Polyhedron<R>& operator=(const Polyhedron<R>& original) {        
+      this->_ppl_poly=original._ppl_poly;
       this->_interior_poly=original._interior_poly;
-            
       return *this;
     }
     
-    inline Polyhedron<R> &set_precision_to_upperapproximating(const Real &delta) {
-    
-      Real denum=denumerator(delta);
-
-      Ariadne::LinearAlgebra::ConstrainSystem<R> cs;
-      
-      _extract_constraints_from_polyhedron(*this, cs);
-      
-      if (cs.already_at_precision(denum)) return *this;
-    
+    inline Polyhedron<R>& set_precision_to_upperapproximating(const Real& delta) {
+      Real denum=denominator(delta);
+      Ariadne::LinearAlgebra::ConstraintSystem<R> cs(this->_ppl_poly.constraints());
+      if (cs.already_at_precision(denum)) { 
+        return *this;
+      }
       cs.reduce_precision_to_expanding(denum);
       
-      Parma_Polyhedra_Library::NNC_Polyhedron new_poly=_create_open_PPL_poly_from_constraints(cs);
-      
+      Parma_Polyhedra_Library::NNC_Polyhedron new_poly(cs.open_ppl_constraint_system());
       if (!new_poly.is_empty()) {
-          
-        this->_poly=_create_closed_PPL_poly_from_constraints(cs);
+        this->_ppl_poly=Parma_Polyhedra_Library::NNC_Polyhedron(cs.ppl_constraint_system());
         this->_interior_poly=new_poly;
       }
       
       return *this;
-            
     }
   
-    inline Polyhedron<R> &set_precision_to_upperapproximating_for_output(const Real &delta) {
-    
-      Real denum=denumerator(delta);
-
-      Ariadne::LinearAlgebra::ConstrainSystem<R> cs;
-      
-      _extract_constraints_from_polyhedron(*this, cs);
-      
-      if (cs.already_at_precision(denum)) return *this;
-    
+    inline Polyhedron<R>& set_precision_to_upperapproximating_for_output(const Real& delta) {
+      Real denum=denominator(delta);
+      Ariadne::LinearAlgebra::ConstraintSystem<R> cs(this->_ppl_poly.constraints());
+      if (cs.already_at_precision(denum)) {
+        return *this;
+      }
       cs.reduce_precision_to_expanding(denum);
-      
-      this->_poly=_create_closed_PPL_poly_from_constraints(cs);
-      this->_interior_poly=_create_open_PPL_poly_from_constraints(cs);
-      
+      this->_ppl_poly=Parma_Polyhedra_Library::NNC_Polyhedron(cs.ppl_constraint_system());
+      this->_interior_poly=Parma_Polyhedra_Library::NNC_Polyhedron(cs.open_ppl_constraint_system());
       return *this;
-            
     }
 
-    
-    inline Polyhedron<R> project_on_dimensions(const std::vector<uint> &dims) const {
-      
+    inline Polyhedron<R> project_on_dimensions(const std::vector<uint>& dims) const {
       #ifdef DEBUG
         std::cout << __FILE__ << ":" << __LINE__ << std::endl;
       #endif    
-      
       if (dims.size()==0) {
         throw "I can not project on zero dimensions.";  
       }
       if (dims.size()>this->dimension()) {
         throw "I can not project on more dimensions than the polyhedron ones.";
       }
-      
-      
       boost::numeric::ublas::matrix<Real> projection_map=
-                  Ariadne::LinearAlgebra::zero_matrix<Real>(this->dimension());
-      
+          Ariadne::LinearAlgebra::zero_matrix<Real>(this->dimension());
       for (size_t i=0; i< dims.size(); i++) {
         projection_map(dims[i],dims[i])=1.0;
       }
       
-      Ariadne::Map::PolyAffineMap<State> projection(projection_map);
-      
       #ifdef DEBUG
         std::cout << __FILE__ << ":" << __LINE__ << std::endl;
       #endif  
-      
-      return projection(*this);
-      
+      /* FIXME! */
+      return *this;
     }
+  
+  public:
+    /*! \brief Tests disjointness. */
+    friend bool disjoint <>(const Polyhedron<R>& A, 
+                            const Polyhedron<R>& B);
+
+    /*! \brief Tests intersection of interiors. */
+    friend bool interiors_intersect<>(const Polyhedron<R>& A, 
+                                      const Polyhedron<R>& B);
+  
+    /*! \brief Tests intersection of interiors. */  
+    friend bool interiors_intersect<>(const Polyhedron<R>& P,
+                                      const Rectangle<R>& R);
+    
+    /*! \brief Tests inclusion of \a A in interior of \a B. */
+    friend bool inner_subset<>(const Polyhedron<R>& A, 
+                               const Polyhedron<R>& B);
+  
+    /*! \brief Tests inclusion of \a R in interior of \a P. */
+    friend bool inner_subset<>(const Rectangle<R>& R, 
+                               const Polyhedron<R>& P);
+
+    /*! \brief Tests inclusion of \a P in interior of \a R. */
+    friend bool inner_subset<>(const Polyhedron<R>& P,
+                               const Rectangle<R>& R);
+        
+    /*! \brief Tests inclusion. */
+    friend bool subset<>(const Polyhedron<R>& A, 
+                         const Polyhedron<R>& B);
+
+    /*! \brief Tests inclusion. */
+    friend bool subset<>(const Polyhedron<R>& A, 
+                         const std::vector< Polyhedron<R> >& C);
+
+    /*! \brief Makes closure of intersection of interiors. */
+    friend Polyhedron<R> regular_intersection<>(const Polyhedron<R>& A, 
+                                                const Polyhedron<R>& B);
+
+    /*! \brief The convex hull of two polyhedra. */
+    friend Polyhedron<R> convex_hull<>(const Polyhedron<R>& A, 
+                                       const Polyhedron<R>& B);
+    
+    /*! \brief The Monkowski (pointwise) sum. */
+    friend Polyhedron<R> minkowski_sum<>(const Polyhedron<R>& A, 
+                                         const Polyhedron<R>& B);
+
+    /*! \brief Prints polyhedron. */
+    friend std::ostream& operator<< <>(std::ostream& os, 
+                                       const Polyhedron<R>& P);
+
+   
+  private:
+    inline void _evaluate_interior();
+ 
+    /* The polyhedron data structure. */
+    Parma_Polyhedra_Library::NNC_Polyhedron _ppl_poly; //(thanks Parma, I LOVE you! :-) )
+  
+    /* This is mutable since we do not compute it unless needed */
+    mutable Parma_Polyhedra_Library::NNC_Polyhedron _interior_poly;
+  private:
+    template <typename STATE>
+    friend class PolyhedronMatlabExporter;
+    
+    template <typename STATE>
+    friend class PolyhedronOneDimMatlabExporter;
 };
+
+template <typename R>
+inline 
+bool 
+disjoint(const Polyhedron<R>& A, 
+         const Polyhedron<R>& B)
+{
+  return (A._ppl_poly).is_disjoint_from(B._ppl_poly);
+}
+
+template <typename R>
+inline 
+bool
+interiors_intersect(const Polyhedron<R>& A, 
+                    const Polyhedron<R>& B)
+{
+  #ifdef DEBUG
+    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+  #endif
+  return !((A._ppl_poly).is_disjoint_from(B._interior_poly));        
+}
+
+template <typename R>
+inline 
+bool 
+interiors_intersect(const Rectangle<R>& rect, 
+                    const Polyhedron<R>& A) 
+{
+  return interiors_intersect(A,rect);
+}
+
+template <typename R>
+inline 
+bool 
+interiors_intersect(const Polyhedron<R>& A,
+                    const Rectangle<R>& rect) 
+{
+  Parma_Polyhedra_Library::NNC_Polyhedron P_rect=_from_Rectangle_to_open_PPL_Polihedron(rect);
+  return !((A._ppl_poly).is_disjoint_from(P_rect));
+}
+
+template <typename R>
+inline 
+bool 
+inner_subset(const Polyhedron<R>& A, 
+             const Polyhedron<R>& B)
+{        
+  return (B._interior_poly).contains(A._ppl_poly);
+}
+
+
+template <typename R>
+inline 
+bool 
+inner_subset(const Rectangle<R>& rect, 
+             const Polyhedron<R>& A) 
+{
+  Parma_Polyhedra_Library::NNC_Polyhedron P_rect=_from_Rectangle_to_open_PPL_Polihedron(rect);          
+  return (A._interior_poly).contains(P_rect);
+}
+
+template <typename R>
+inline 
+bool 
+inner_subset(const Polyhedron<R>& A,
+             const Rectangle<R>& rect) 
+{
+  /* FIXME! */
+  Parma_Polyhedra_Library::NNC_Polyhedron P_rect=_from_Rectangle_to_open_PPL_Polihedron(rect);          
+  return (P_rect).contains(A);
+}
+
+template <typename R>
+inline 
+bool 
+subset(const Polyhedron<R>& A,
+       const Polyhedron<R>& B) 
+{
+  return B._ppl_poly.contains(A._ppl_poly);
+}
+
+
+template <typename R>
+inline 
+bool 
+subset(const Polyhedron<R>& A, 
+       const std::vector< Polyhedron<R> >& vector)
+{
+  typename std::vector< Polyhedron <R> >::const_iterator i;
+
+  /* FIXME! */
+  for (i = vector.begin(); i != vector.end(); i++) {
+    if (inner_subset(A,*i)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+
+template <typename R>
+inline 
+Polyhedron<R> 
+regular_intersection(const Polyhedron<R>& A, 
+                     const Polyhedron<R>& B) 
+{
+  Polyhedron<R> new_poly(A);        
+    
+  new_poly._ppl_poly.intersection_assign(B._ppl_poly);
+  new_poly._interior_poly.intersection_assign(B._interior_poly);
+  return new_poly;
+}
+
+
+template <typename R>
+inline 
+Polyhedron<R> 
+convex_hull(const Polyhedron<R>& A, 
+            const Polyhedron<R>& B)
+{
+  Polyhedron<R> chull(A);
+  chull._ppl_poly.poly_hull_assign_and_minimize(B._ppl_poly);
+  chull._evaluate_interior();
+  return chull;
+}
+
+
+/* FIXME: TO REIMPLEMENT */
+template <typename R>
+inline 
+Polyhedron<R> 
+minkowski_sum(const Polyhedron<R>& A,
+              const Polyhedron<R>& B) 
+{
+  #ifdef DEBUG
+    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+  #endif
+  
+  if ((!(A._ppl_poly).is_bounded()) || (!(B._ppl_poly).is_bounded())) {
+    throw std::domain_error("Minkosky sum is implemented for bounded polyhedra only");
+  }  
+        
+  Ariadne::LinearAlgebra::GeneratorSystem<R> gen_A(A._ppl_poly.generators());
+        
+  Polyhedron<R> sum=B;
+  Polyhedron<R> new_poly;
+        
+  for (size_t k=0; k<gen_A.number_of_points(); k++) {
+    Ariadne::LinearAlgebra::GeneratorSystem<R> gen_B(B._ppl_poly.generators());
+    for (size_t i=0; i<gen_B.space_dimension(); i++) {
+      for (size_t j=0; j<gen_B.number_of_points() ; j++) {
+        gen_B._points(i,j)+=gen_A._points(i,k);
+      }
+    }
+    new_poly._ppl_poly=Parma_Polyhedra_Library::NNC_Polyhedron(gen_B.ppl_generator_system());
+    sum=convex_hull(sum,new_poly);
+  }
+  
+  #ifdef DEBUG
+    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+  #endif
+  
+  return sum;
+}
+
+
+template <typename R>
+inline
+std::ostream& 
+operator<<(std::ostream &os, const Polyhedron<R>& p) {
+  Parma_Polyhedra_Library::IO_Operators::operator<<(os,p._ppl_poly);
+  return os;
+}
+
+
+template<typename R> 
+inline
+void 
+Polyhedron<R>::_evaluate_interior()
+{      
+  #ifdef DEBUG
+    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+  #endif
+  
+  Ariadne::LinearAlgebra::ConstraintSystem<Real> cs(this->_ppl_poly.constraints());
+  this->_interior_poly=Parma_Polyhedra_Library::NNC_Polyhedron(cs.open_ppl_constraint_system());
+  
+  #ifdef DEBUG
+    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+  #endif
+}      
+
+
+
+
+
+/* Transforms an State into a Parma_Polyhedra_Library::C_Polyhedron */
+template <typename R>
+inline 
+Parma_Polyhedra_Library::NNC_Polyhedron 
+_from_State_to_PPL_Polyhedron(const State<R>& s)
+{
+  Parma_Polyhedra_Library::Constraint_System cs;
+  Rational num;
+  
+  for (size_t i=0; i<s.dimension(); i++) {
+      num=convert_to<Rational>(s[i]);
+      cs.insert(Parma_Polyhedra_Library::Variable(i) * 
+                Ariadne::denominator(num) == Ariadne::numerator(num));
+  }
+  
+  return Parma_Polyhedra_Library::NNC_Polyhedron(cs);
+}
+
+
+/* Transforms an Rectangle into a Parma_Polyhedra_Library::C_Polyhedron */
+template <typename R>
+inline Parma_Polyhedra_Library::NNC_Polyhedron 
+_from_Rectangle_to_closed_PPL_Polyhedron(const Rectangle<R>& r)
+{
+  State<R> u_corner(r.upper_corner()), l_corner(r.lower_corner());
+  
+  Parma_Polyhedra_Library::Constraint_System cs;
+  std::vector<Parma_Polyhedra_Library::Variable *> x;
+  Rational num;
+  
+  for (size_t i=0; i<r.dimension(); i++) {
+    x.push_back(new Parma_Polyhedra_Library::Variable(i));
+  }
+  
+  for (size_t i=0; i<r.dimension(); i++) {
+    num=convert_to<Rational>(u_corner[i]);
+    cs.insert(
+      (Parma_Polyhedra_Library::Variable(i))*denominator(num) <= numerator(num)
+    );
+  
+    num=convert_to<Rational>(l_corner[i]);
+    cs.insert(
+      (Parma_Polyhedra_Library::Variable(i))*denominator(num) >= numerator(num)
+    );
+  }
+  
+  return Parma_Polyhedra_Library::NNC_Polyhedron(cs);
+}
+
 
 }
 }
-#endif /* _POLYHEDRON_H */
+
+#endif /* _ARIADNE_POLYHEDRON_H */

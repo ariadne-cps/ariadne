@@ -1,7 +1,7 @@
 /***************************************************************************
- *            python/ariadne_module.cc
+ *            python/linear_algebra_module.cc
  *
- *  22 June 2005
+ *  17 November 2005
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
@@ -22,21 +22,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numerical_type.h"
-#include "interval.h"
-#include "state.h"
-#include "rectangle.h"
-#include "list_set.h"
+#include "linear_algebra.h"
 
 #include <boost/python.hpp>
 
-using namespace Ariadne;
+#include "real_typedef.h"
 
-void export_function();
-void export_numeric();
+void export_vector();
+void export_matrix();
 
-BOOST_PYTHON_MODULE(ariadne)
+BOOST_PYTHON_MODULE(linear_algebra)
 {
-  export_numeric();
-  export_function();
+  export_vector();
+  export_matrix();
 }

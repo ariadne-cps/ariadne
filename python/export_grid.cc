@@ -1,5 +1,5 @@
 /***************************************************************************
- *            python/grid.cc
+ *            python/export_grid.cc
  *
  *  21 October 2005
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
@@ -22,7 +22,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <iostream>
 #include "numerical_type.h"
 #include "grid_set.h"
 

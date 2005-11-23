@@ -1,5 +1,5 @@
 /***************************************************************************
- *            python/geometry.cc
+ *            python/geometry_module.cc
  *
  *  21 October 2005
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
@@ -22,7 +22,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <iostream>
 #include "numerical_type.h"
 #include "interval.h"
 #include "state.h"
@@ -36,7 +35,7 @@
 #include <boost/python.hpp>
 
 #include "real_typedef.h"
-#include "container_utilities.h"
+#include "python_utilities.h"
 
 using Ariadne::BooleanArray;
 using Ariadne::BinaryWord;
@@ -47,6 +46,7 @@ using Ariadne::SubdivisionSequence;
 void export_state();
 void export_interval();
 void export_rectangle();
+void export_polyhedron();
 void export_list_set();
 void export_grid();
 void export_partition_tree();
@@ -110,6 +110,7 @@ BOOST_PYTHON_MODULE(geometry)
   export_state();
   export_interval();
   export_rectangle();
+  export_polyhedron();
   export_list_set();
   export_grid();
   export_partition_tree();

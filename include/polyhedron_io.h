@@ -41,7 +41,7 @@ namespace Geometry {
 
 template <typename R>
 std::ostream& operator<<(std::ostream &os, const Polyhedron<R> &r) {
-  _print_polyhedron_(os,r._poly);
+  _print_polyhedron_(os,r._ppl_poly);
   return os;
 }
 
@@ -202,8 +202,8 @@ class PolyhedronMatlabExporter {
     
     coeff.resize(dims.size());
     
-    begin=((proj_p._poly).constraints()).begin();
-    end=((proj_p._poly).constraints()).end();
+    begin=((proj_p._ppl_poly).constraints()).begin();
+    end=((proj_p._ppl_poly).constraints()).end();
     
     this->_os << "C"<< this->_polyhedron_n << " = [ " ;
     
@@ -385,8 +385,8 @@ class PolyhedronVTKOctavePlotExporter {
     
     coeff.resize(dims.size());
     
-    begin=((proj_p._poly).constraints()).begin();
-    end=((proj_p._poly).constraints()).end();
+    begin=((proj_p._ppl_poly).constraints()).begin();
+    end=((proj_p._ppl_poly).constraints()).end();
     
     this->_os << "C"<< this->_polyhedron_n << " = [ " ;
     
@@ -547,8 +547,8 @@ class PolyhedronOneDimMatlabExporter {
     Real coeff, known_term, error(1,1000);	
 
     proj_p.set_precision_to_upperapproximating(error);
-    begin=((proj_p._poly).constraints()).begin();
-    end=((proj_p._poly).constraints()).end();
+    begin=((proj_p._ppl_poly).constraints()).begin();
+    end=((proj_p._ppl_poly).constraints()).end();
 
     this->_os << this->_data_line << ", ";
     bool first=true;

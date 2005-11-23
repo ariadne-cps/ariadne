@@ -40,44 +40,47 @@ template class Polyhedron<Rational>;
 //template class Polyhedron<double>;
 
 int main() {
-    cout << "test_polyhedron: " << flush;
+  cout << "test_polyhedron: " << flush;
 
-    typedef Rational Real;
-    typedef Polyhedron<Real> Polyhedron;
-    typedef State<Real> State;
-    typedef Interval<Real> Interval;
+  typedef Rational Real;
+  typedef Polyhedron<Real> Polyhedron;
+  typedef State<Real> State;
+  typedef Interval<Real> Interval;
     
-    State s1(4,Rational(1));
-    State s2(4,Rational(4,3));
-    /*
-    Polyhedron p1(s1,s2);
-    Polyhedron p2(s2,s1);
-    Polyhedron p3;
-    Polyhedron p4;
-    */
+  State s1(4,Rational(1));
+  State s2(4,Rational(4,3));
+/*
+  Polyhedron p1(s1,s2);
+  Polyhedron p2(s2,s1);
+  Polyhedron p3;
+  Polyhedron p4;
+*/
     
-    /* Test input format */
-    try {
-	string input("[ ]  [ [0,2] ]  [ [0,1], [3/4,4/3], [1,3/2] ]  { lower_corner=[0,1], upper_corner=[1,4/3] }");
-	stringstream is(input);
-   } 
-    catch(invalid_input& e) {
-	cout << "FAILED\n";
-	cout << "  invalid_input: " << e.what() << "\n";
-	return 1;
-    }
-    catch(std::invalid_argument& e) {
-	cout << "FAILED\n";
-	cout << "  std::invalid_argument: " << e.what() << "\n";
-	return 1;
-    }
-    catch(...) {
-	cout << "FAILED\n";
-	cout << "  Unknown error\n"; 
-	return 1;
-    }
-	
-    cout << "INCOMPLETE\n";
+  Polyhedron p;
+  std::cout << p;
+  
+  /* Test input format */
+  try {
+    string input("[ ]  [ [0,2] ]  [ [0,1], [3/4,4/3], [1,3/2] ]  { lower_corner=[0,1], upper_corner=[1,4/3] }");
+    stringstream is(input);
+  } 
+  catch(invalid_input& e) {
+    cout << "FAILED\n";
+    cout << "  invalid_input: " << e.what() << "\n";
+    return 1;
+  }
+  catch(std::invalid_argument& e) {
+    cout << "FAILED\n";
+    cout << "  std::invalid_argument: " << e.what() << "\n";
+    return 1;
+  }
+  catch(...) {
+    cout << "FAILED\n";
+    cout << "  Unknown error\n"; 
+    return 1;
+  }
 
-    return 0;
+  cout << "INCOMPLETE\n";
+
+  return 0;
 }

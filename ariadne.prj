@@ -116,7 +116,9 @@ module.include.files=\
 module.source.name=src
 module.source.type=
 module.source.files=\
-	grid_operations.cc
+	grid_operations.cc\
+	binary_tree.cc\
+	partition_tree_operations.cc
 
 module.pixmap.name=pixmaps
 module.pixmap.type=

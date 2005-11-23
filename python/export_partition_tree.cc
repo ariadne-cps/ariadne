@@ -1,5 +1,5 @@
 /***************************************************************************
- *            python/geometry.cc
+ *            python/export_partition_tree.cc
  *
  *  21 October 2005
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
@@ -22,13 +22,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <iostream>
 #include "numerical_type.h"
-#include "interval.h"
-#include "state.h"
 #include "rectangle.h"
-#include "list_set.h"
-#include "grid_set.h"
 #include "binary_word.h"
 #include "binary_tree.h"
 #include "partition_tree_set.h"

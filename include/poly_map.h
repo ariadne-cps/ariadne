@@ -81,7 +81,7 @@ apply(const AffineMap<R>& T, const Geometry::Polyhedron<R>& p)
 
 template<typename R>
 class PolyAffineMap {
- public:	
+ public:
   typedef R Real;
   typedef typename Ariadne::Geometry::State<R> State;
   typedef typename Ariadne::Geometry::Polyhedron< Real > BasicSet;
@@ -101,7 +101,7 @@ class PolyAffineMap {
   PolyAffineMap(const Matrix &A):_A(A), _A_invertible(true),
                                  _b(A.size1()), _map_type(HOMOGENEOUS) {
     if ((A.size1()==0)||(A.size2()==0))
-      throw std::invalid_argument("The matrix of affine trasformation should have at least 1 row and 1 column.");			
+      throw std::invalid_argument("The matrix of affine trasformation should have at least 1 row and 1 column.");	
     
     this->_get_solution(A);
   }
@@ -123,11 +123,11 @@ class PolyAffineMap {
     if (b.size()==0)
       throw std::invalid_argument("The vector of affine trasformation should have at least 1 row.");
     
-    this->_get_solution(A,b);		
+    this->_get_solution(A,b);
   }
   
   inline size_t column_nb() const {
-    return this->_A.size2();			
+    return this->_A.size2();
   }
   
   inline size_t row_nb() const {
@@ -137,15 +137,15 @@ class PolyAffineMap {
       break;
     default:
       return this->_A.size1();
-    }				
+    }
   }
   
   inline size_t dim() const {
-    return this->column_nb();			
+    return this->column_nb();
   }
   
   inline size_t dimension() const {
-    return this->column_nb();			
+    return this->column_nb();
   }
   
   inline PolyAffineMap<R>& operator=(const PolyAffineMap<R> &orig) {
@@ -192,22 +192,22 @@ class PolyAffineMap {
   /*! \brief Type of affine trasformation.*/
   AffineKind _map_type;
   
-  /*! \brief The matrix \f$E\f$.*/	
+  /*! \brief The matrix \f$E\f$.*/
   Matrix _E;
   
   /*! \brief The value \f$n_1\f$. */
   Real _n1;
   
-  /*! \brief The vector \f$\vec{f}\f$. */	
+  /*! \brief The vector \f$\vec{f}\f$. */
   Vector _f;
   
   inline Polyhedron _A_not_invertible_apply(const Polyhedron &A) const {
     
 #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-#endif	
+#endif
     
-    Ariadne::LinearAlgebra::GeneratorSystem<Real> gen;	
+    Ariadne::LinearAlgebra::GeneratorSystem<Real> gen;
     
     Ariadne::Geometry::_extract_generators_from_polyhedron(A, gen);
     
@@ -221,7 +221,7 @@ class PolyAffineMap {
     
 #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-#endif		
+#endif
     
     return new_poly;
   }
@@ -231,9 +231,9 @@ class PolyAffineMap {
     
 #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-#endif	
+#endif
     
-    Ariadne::LinearAlgebra::ConstrainSystem<Real> cs;	
+    Ariadne::LinearAlgebra::ConstrainSystem<Real> cs;
     
     Ariadne::Geometry::_extract_constraints_from_polyhedron(A, cs);
     
@@ -246,11 +246,11 @@ class PolyAffineMap {
       
     case NON_HOMOGENEOUS:
       
-      this->_apply_non_homogeneous(cs);				
+      this->_apply_non_homogeneous(cs);
       
       break;
       
-    case TRASLATION:	
+    case TRASLATION:
       
       this->_apply_traslation(cs);
       
@@ -259,11 +259,11 @@ class PolyAffineMap {
     default:
       throw std::invalid_argument("There is a problem in the application of PolyAffineMap.");
       
-    }	
+    }
     
 #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-#endif	
+#endif
     
     return Ariadne::Geometry::_create_polyhedron_from_constraints(
                                                                   A,cs);
@@ -318,10 +318,10 @@ class PolyAffineMap {
   
   inline void _empty_solution() {
     
-#ifdef DEBUG
-    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-#endif
-    
+    #ifdef DEBUG
+        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+    #endif
+        
     Matrix empty_matrix(0,0);
     Vector empty_vector(0);
     
@@ -367,7 +367,7 @@ class PolyAffineMap {
     this->_n1=n2;
     
     /* E=n2*I    useless, but safer */
-    this->_E=n2*Ariadne::LinearAlgebra::identity_matrix<Real>(b.size());	
+    this->_E=n2*Ariadne::LinearAlgebra::identity_matrix<Real>(b.size());
     
   }
   
@@ -388,7 +388,7 @@ class PolyAffineMap {
       this->_A_invertible=false;
     }
     
-  }	
+  }
   
 };
   

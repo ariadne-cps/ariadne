@@ -1,5 +1,5 @@
 /***************************************************************************
- *            python/export_polyhedron.cc
+ *            python/export_rectangle.cc
  *
  *  21 October 2005
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
@@ -22,12 +22,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <vector>
-
 #include "numerical_type.h"
 #include "rectangle.h"
-#include "parallelopiped.h"
-#include "polyhedron.h"
+#include "simplex.h"
+#include "list_set.h"
 
 #include <boost/python.hpp>
 
@@ -35,17 +33,12 @@
 #include "python_utilities.h"
 
 typedef Ariadne::LinearAlgebra::matrix<Real> RMatrix;
-typedef Ariadne::LinearAlgebra::vector<Real> RVector;
-
 typedef Ariadne::Geometry::State<Real> RState;
+typedef Ariadne::Interval<Real> RInterval;
 typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
-typedef Ariadne::Geometry::Parallelopiped<Real> RParallelopiped;
-typedef Ariadne::Geometry::Polyhedron<Real> RPolyhedron;
+typedef Ariadne::Geometry::Simplex<Real> RSimplex;
+typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Simplex> RSimplexListSet;
 
-typedef std::vector<RState> RStateList;
-
-using Ariadne::Geometry::intersection;
-using Ariadne::Geometry::regular_intersection;
 using Ariadne::Geometry::interiors_intersect;
 using Ariadne::Geometry::disjoint;
 using Ariadne::Geometry::inner_subset;
@@ -59,39 +52,33 @@ using boost::python::self_ns::str;
 using boost::python::return_value_policy;
 using boost::python::copy_const_reference;
 
-void export_polyhedron() {
-  typedef bool (*PolyBinPred) (const RPolyhedron&, const RPolyhedron&);
-  typedef RPolyhedron (*PolyBinFunc) (const RPolyhedron&, const RPolyhedron&);
-  PolyBinFunc poly_intersection=&regular_intersection<Real>;
-  PolyBinFunc poly_regular_intersection=&regular_intersection<Real>;
-  PolyBinPred poly_interiors_intersect=&interiors_intersect<Real>;
-  PolyBinPred poly_disjoint=&disjoint<Real>;
-  PolyBinPred poly_inner_subset=&inner_subset<Real>;
-  PolyBinPred poly_subset=&subset<Real>;
+void export_simplex() {
+  typedef bool (*SmplxBinPred) (const RSimplex&, const RSimplex&);
+  typedef bool (*SmplxRectBinPred) (const RSimplex&, const RRectangle&);
+  SmplxRectBinPred smplx_rect_interiors_intersect=&interiors_intersect<Real>;
+  SmplxBinPred smplx_interiors_intersect=&interiors_intersect<Real>;
+  SmplxBinPred smplx_disjoint=&disjoint<Real>;
+  SmplxBinPred smplx_inner_subset=&inner_subset<Real>;
+  SmplxBinPred smplx_subset=&subset<Real>;
 
-  def("intersection", poly_intersection);
-  def("regular_intersection", poly_regular_intersection);
-  def("interiors_intersect", poly_interiors_intersect);
-  def("disjoint", poly_disjoint);
-  def("inner_subset", poly_inner_subset);
-  def("subset", poly_subset);
+  def("interiors_intersect", smplx_interiors_intersect);
+  def("interiors_intersect", smplx_rect_interiors_intersect);
+  def("disjoint", smplx_disjoint);
+  def("inner_subset", smplx_inner_subset);
 
-  class_<RPolyhedron>("Polyhedron",init<int>())
-    .def(init<RMatrix,RVector>())
-    .def(init<RStateList>())
-    .def(init<RPolyhedron>())
-    .def(init<RRectangle>())
-    .def(init<RParallelopiped>())
-    .def("dimension", &RPolyhedron::dimension)
+  def("subset", smplx_subset);
+
+  class_<RSimplex>("Simplex",init<int>())
+    .def(init<RSimplex>())
+    .def(init< std::vector<RState> >())
+    .def(init< Ariadne::array<RState> >())
+    .def(init<RSimplex>())
+    .def(init<std::string>())
+    .def("empty", &RSimplex::empty)
+    .def("empty_interior", &RSimplex::empty_interior)
+    .def("dimension", &RSimplex::dimension)
+    .def("contains", &RSimplex::contains)
+    .def("interior_contains", &RSimplex::interior_contains)
     .def(str(self))    // __str__
   ;
-  
-  class_<RStateList>("StateList",init<>())
-    .def("size", &RStateList::size)
-    .def("append", &RStateList::push_back)
-//    .def("__getitem__", &const RStateList::operator[], return_value_policy<copy_const_reference>())
-    .def(str(self))    // __str__
-  ;
-
-  
 }

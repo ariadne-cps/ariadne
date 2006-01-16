@@ -239,8 +239,8 @@ namespace Ariadne {
      
     template<typename InputIterator> void fill(InputIterator iter) { 
       pointer curr=_ptr+_start; iter=iter+_start; pointer end=curr+_finish; while(curr!=end) { *curr=*iter; ++curr; ++iter; } }
-    template<typename ForwardIterator> void assign(ForwardIterator first, ForwardIterator center, ForwardIterator last) {
-      resize(std::distance(center,first),std::distance(center,last)); fill(center); }
+    template<typename ForwardIterator> void assign(ForwardIterator first, ForwardIterator centre, ForwardIterator last) {
+      resize(std::distance(centre,first),std::distance(centre,last)); fill(centre); }
    private:
     size_type size() const { return _finish-_start; }
     const_pointer pointer_begin() const { return _ptr; }

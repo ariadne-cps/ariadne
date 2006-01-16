@@ -34,8 +34,8 @@
 
 namespace Ariadne {	
 namespace Map{
-	
-/*! \brief Affine trasformation for polyhedron.
+
+/*! \brief Affine trasformation for polyhedron. DEPRECATED.
  *
  * This class represents Polyhedron's affine trasformations. 
  * Hence all the objects of this class are of the type 

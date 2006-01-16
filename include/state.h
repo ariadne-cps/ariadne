@@ -38,18 +38,26 @@
 
 namespace Ariadne {
   namespace Geometry {
-
+    
     template <typename R = Rational> class State;
+
+    template<typename R> typename State<R>::difference_type operator-(const State<R>&, const State<R>&);
+    template<typename R> std::ostream& operator<<(std::ostream&, const State<R>&);
+    template<typename R> std::istream& operator>>(std::istream&, State<R>&);
+
 
     template <typename R>
     class State {
      public:
+      typedef ::Ariadne::LinearAlgebra::vector<R> Vector;
+
       typedef R Real;
       typedef Real value_type;
       typedef size_t size_type;
+      typedef Vector difference_type;
      private:
       /*! \brief The vector defining the state */
-      boost::numeric::ublas::vector<Real> _vector;
+      Vector _vector;
 
      public:
       State() : _vector(0) { }
@@ -135,16 +143,25 @@ namespace Ariadne {
         return *this;
       }
 
-      template <typename RType>
-      friend std::ostream& operator<<(std::ostream &os, const State<RType> &state);
+       /*! \brief Difference of two states. */
+      friend Vector operator- <> (const State<Real>& s1,
+                                  const State<Real>& s2);
 
-      template <typename RType>
-      friend std::istream& operator>>(std::istream &is, State<RType> &state);
+      friend std::ostream& operator<< <>(std::ostream& os, const State<Real>& state);
+
+      friend std::istream& operator>> <> (std::istream& is, State<Real>& state);
     };
 
 
     template <typename R>
-    std::ostream& operator<< (std::ostream &os, const State<R> &state)
+    typename State<R>::difference_type 
+    operator-(const State<R>& s1, const State<R>& s2)
+    {
+      return s1._vector - s2._vector;
+    }
+
+    template <typename R>
+    std::ostream& operator<<(std::ostream& os, const State<R>& state)
     {
       os << "[";
       if(state.dimension() > 0) {
@@ -159,7 +176,7 @@ namespace Ariadne {
     }
 
     template <typename R>
-    std::istream& operator>> (std::istream &is, State<R> &state)
+    std::istream& operator>>(std::istream& is, State<R>& state)
     {
       static size_t last_size;
 

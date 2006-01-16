@@ -39,11 +39,44 @@ namespace Ariadne {
 
     using boost::numeric::ublas::vector;
     using boost::numeric::ublas::matrix;
+    using boost::numeric::ublas::matrix_row;
+    using boost::numeric::ublas::matrix_column;
   
     typedef size_t size_type;
         
     template <typename Real>
-    inline vector<Real> null_vector(size_type dim) {
+    inline vector<Real> operator*(const matrix<Real>& m, vector<Real>& v) {
+      return prod(m,v);
+    }
+      
+    template <typename Real>
+    inline matrix<Real> operator*(const matrix<Real>& A, matrix<Real>& B) {
+      return prod(A,B);
+    }
+      
+//    template <typename Real>
+//  inline matrix_row< matrix<Real> > row(const matrix<Real>& m, size_type i) {
+//    return matrix_row< matrix<Real> >(m,i);
+//    inline vector<Real> row(const matrix<Real>& m, typename matrix<Real>::size_type i) {
+//      matrix_row< matrix<Real> > mr(m,i);
+//      return vector<Real>(mr);
+      //return vector<Real>(matrix_row< matrix<Real> >(m,i));
+ //   }
+    template <typename Real>
+    inline matrix_row< matrix<Real> > row(matrix<Real>& m, size_type i) {
+      return matrix_row< matrix<Real> >(m,i);
+    }
+    
+    template <typename Real>
+//    inline matrix_column< matrix<Real> > column(const matrix<Real>& m, size_type i) {
+//      return matrix_column< matrix<Real> >(m,i);
+    inline vector<Real> column(const matrix<Real>& m, size_type i) {
+      return vector<Real>(matrix_column< matrix<Real> >(m,i));
+    }
+    
+    
+    template <typename Real>
+    inline vector<Real> zero_vector(size_type dim) {
       vector<Real> v(dim);
       for (size_type j=0; j< dim; j++) {
         v(j)=0.0;
@@ -253,8 +286,23 @@ namespace Ariadne {
     }
     
     template <typename Real>
+    inline
+    size_type
+    number_of_rows(const matrix<Real> &A) {
+      return A.size1();
+    }
+    
+    template <typename Real>
+    inline
+    size_type
+    number_of_columns(const matrix<Real> &A) {
+      return A.size2();
+    }
+    
+    template <typename Real>
+    inline
     matrix<Real> 
-    invert_matrix(const matrix<Real> &A) {
+    inverse(const matrix<Real> &A) {
       
       size_type size=A.size1(),i,j;
       
@@ -278,49 +326,108 @@ namespace Ariadne {
       }
       
       return inv_A;
-      
     }
     
     template <typename Real>
-    inline Real find_matrix_denumerator(const matrix<Real> &A)
+    matrix<Real> 
+    invert_matrix(const matrix<Real> &A) {
+      return inverse(A);
+    }
+    
+    template <typename Real>
+    inline Integer common_denominator(const matrix<Real>& A)
     {
-      size_type i_max=A.size1(), j_max=A.size2();
-      size_type i,j;
-      
-      if ((i_max==0)||(j_max==0)) 
-        return 0.0;
-      
-      Real denum=denumerator(A(0,0));
-      
-      for (j=0; j< j_max; j++) {
-        
-        for (i=0; i< i_max; i++) {
-          denum=lcm(numerator(denum),denumerator(A(i,j)));
+      Integer denom=1;
+      for (size_type i=0; i<A.size1(); ++i) {
+        for (size_type j=0; j<A.size2(); ++j) {
+          denom=lcm( denom, denominator(A(i,j)) );
         }
-        
       }
-      return denum;
+      return denom;
     }
     
-    
     template <typename Real>
-    inline Real find_vector_denumerator(const vector<Real> &b) {
-      
-      size_type i_max=b.size();
-      size_type i;
-      
-      if (i_max==0) 
-        return 0.0;
-      
-      Real denum=denumerator(b(0));
-      
-      for (i=0; i< i_max; i++) {
-        denum=lcm(numerator(denum),denumerator(b(i)));
+    inline vector<Integer> row_common_denominators(const matrix<Real>& A) 
+    {
+      vector<Integer> denoms(A.size1());
+      for(size_type i=0; i!=A.size1(); ++i) {
+        Integer denom=1;
+        for(size_type j=0; j!=A.size2(); ++j) {
+          denom=lcm( denom, denominator(A(i,j)) );
+        }
+        denoms(i)=denom;
       }
-      
-      return denum;
+      return denoms;
     }
 
+    
+    template <typename Real>
+    inline Integer common_denominator(const vector<Real>& b) 
+    {
+      Integer denom=1;
+      for (size_type i=0; i< b.size(); ++i) {
+        denom=lcm( denom, denominator(b(i)) );
+      }
+      return denom;
+    }
+
+    
+    /* \brief Transforms the linear inequalities $Ax\leq b$ to $At^{-1}y \leq b$. */
+    template <typename R>
+    inline void transform_linear_inequalities(const matrix<R>& T, 
+                                       matrix<R>& A, 
+                                       vector<R>& b) 
+    {
+      A=A*inverse(T);
+    }
+    
+    template <>
+    inline void transform_linear_inequalities<Dyadic>(const matrix<Dyadic>& T, 
+                                               matrix<Dyadic>& A, 
+                                               vector<Dyadic>& b) 
+    {
+      typedef Dyadic Real;
+      
+      size_type n=A.size1();
+      if(A.size1() != b.size()) {
+        throw std::domain_error("Invalid linear inequalities"); 
+      }
+      if(n!=T.size1() || n!=T.size2()) {
+        throw std::domain_error("Invalid linear transformation");
+      }
+      
+      matrix<Rational> Trat(T.size1(),T.size2());
+      for(size_type i=0; i!=n; ++i) {
+        for(size_type j=0; j!=n; ++j) {
+          Trat(i,j)=convert_to<Rational>(T(i,j));
+        }
+      }
+      matrix<Rational> Tinv=inverse(Trat);
+      Trat.clear();
+      
+      Integer multiplier=common_denominator(Tinv);
+      
+      matrix<Integer> iTinv(n,n);
+      for(size_type i=0; i!=n; ++i) {
+        for(size_type j=0; j!=n; ++j) {
+          iTinv(i,j) = numerator(Tinv(i,j)) * (multiplier/denominator(Tinv(i,j)));
+        }
+      }
+      
+      Real rmultiplier = convert_to<Real>(multiplier);
+      matrix<Real> rTinv(n,n);
+       for(size_type i=0; i!=n; ++i) {
+        for(size_type j=0; j!=n; ++j) {
+          rTinv(i,j) = convert_to<Real>(iTinv(i,j));
+        }
+      }
+
+      A=A*rTinv;
+      b=b*rmultiplier;
+    }
+    
+    
+    
   }
 }
 

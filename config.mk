@@ -5,6 +5,8 @@ NAME = ariadne
 DEBUG = no
 VERBATIM = yes
 
+PREFIX=${HOME}
+
 CC = gcc
 CXX = g++
 
@@ -16,13 +18,19 @@ TESTDIR = test
 EXAMPLEDIR = examples
 PYTHONDIR=python
 
+LIBGMPXX = -lgmpxx -lgmp
+LIBPPL = -L${HOME}/lib -lppl
+LIBSUPERLU = -L${HOME}/lib -lsuperlu
+
 SUBDIRS=${INCLUDEDIR} ${SRCDIR} ${TESTDIR} ${EXAMPLEDIR} ${PYTHONDIR}
 
 PYTHONVERSION=2.4
 PYTHONINCLUDEDIR=/usr/include/python$(PYTHONVERSION)
 
 CXXFLAGS =  -I../${INCLUDEDIR}
-LDXXFLAGS = -lppl -lgmpxx -lgmp
+LDXXFLAGS = 
+RPATH = ${PREFIX}/lib
+RPATHFLAGS = -Wl,-rpath -Wl,${RPATH}
 
 ifeq ($(DEBUG),yes)
 	CXXFLAGS += -g -DDEBUG -Wall

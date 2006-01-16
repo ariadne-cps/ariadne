@@ -1,5 +1,5 @@
 /***************************************************************************
- *            python/export_polyhedron.cc
+ *            python/export_rectangle.cc
  *
  *  21 October 2005
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
@@ -22,12 +22,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <vector>
-
 #include "numerical_type.h"
 #include "rectangle.h"
 #include "parallelopiped.h"
-#include "polyhedron.h"
+#include "list_set.h"
 
 #include <boost/python.hpp>
 
@@ -35,17 +33,12 @@
 #include "python_utilities.h"
 
 typedef Ariadne::LinearAlgebra::matrix<Real> RMatrix;
-typedef Ariadne::LinearAlgebra::vector<Real> RVector;
-
 typedef Ariadne::Geometry::State<Real> RState;
+typedef Ariadne::Interval<Real> RInterval;
 typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
 typedef Ariadne::Geometry::Parallelopiped<Real> RParallelopiped;
-typedef Ariadne::Geometry::Polyhedron<Real> RPolyhedron;
+typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Parallelopiped> RParallelopipedListSet;
 
-typedef std::vector<RState> RStateList;
-
-using Ariadne::Geometry::intersection;
-using Ariadne::Geometry::regular_intersection;
 using Ariadne::Geometry::interiors_intersect;
 using Ariadne::Geometry::disjoint;
 using Ariadne::Geometry::inner_subset;
@@ -59,39 +52,32 @@ using boost::python::self_ns::str;
 using boost::python::return_value_policy;
 using boost::python::copy_const_reference;
 
-void export_polyhedron() {
-  typedef bool (*PolyBinPred) (const RPolyhedron&, const RPolyhedron&);
-  typedef RPolyhedron (*PolyBinFunc) (const RPolyhedron&, const RPolyhedron&);
-  PolyBinFunc poly_intersection=&regular_intersection<Real>;
-  PolyBinFunc poly_regular_intersection=&regular_intersection<Real>;
-  PolyBinPred poly_interiors_intersect=&interiors_intersect<Real>;
-  PolyBinPred poly_disjoint=&disjoint<Real>;
-  PolyBinPred poly_inner_subset=&inner_subset<Real>;
-  PolyBinPred poly_subset=&subset<Real>;
+void export_parallelopiped() {
+  typedef bool (*PlpdBinPred) (const RParallelopiped&, const RParallelopiped&);
+  typedef bool (*PlpdRectBinPred) (const RParallelopiped&, const RRectangle&);
+  PlpdRectBinPred plpd_rect_interiors_intersect=&interiors_intersect<Real>;
+  PlpdBinPred plpd_interiors_intersect=&interiors_intersect<Real>;
+  PlpdBinPred plpd_disjoint=&disjoint<Real>;
+  PlpdBinPred plpd_inner_subset=&inner_subset<Real>;
+  PlpdBinPred plpd_subset=&subset<Real>;
 
-  def("intersection", poly_intersection);
-  def("regular_intersection", poly_regular_intersection);
-  def("interiors_intersect", poly_interiors_intersect);
-  def("disjoint", poly_disjoint);
-  def("inner_subset", poly_inner_subset);
-  def("subset", poly_subset);
+  def("interiors_intersect", plpd_interiors_intersect);
+  def("interiors_intersect", plpd_rect_interiors_intersect);
+  def("disjoint", plpd_disjoint);
+  def("inner_subset", plpd_inner_subset);
 
-  class_<RPolyhedron>("Polyhedron",init<int>())
-    .def(init<RMatrix,RVector>())
-    .def(init<RStateList>())
-    .def(init<RPolyhedron>())
-    .def(init<RRectangle>())
+  def("subset", plpd_subset);
+
+  class_<RParallelopiped>("Parallelopiped",init<int>())
+    .def(init<RState,RMatrix>())
     .def(init<RParallelopiped>())
-    .def("dimension", &RPolyhedron::dimension)
+    .def(init<RRectangle>())
+    .def(init<std::string>())
+    .def("empty", &RParallelopiped::empty)
+    .def("empty_interior", &RParallelopiped::empty_interior)
+    .def("dimension", &RParallelopiped::dimension)
+    .def("contains", &RParallelopiped::contains)
+    .def("interior_contains", &RParallelopiped::interior_contains)
     .def(str(self))    // __str__
   ;
-  
-  class_<RStateList>("StateList",init<>())
-    .def("size", &RStateList::size)
-    .def("append", &RStateList::push_back)
-//    .def("__getitem__", &const RStateList::operator[], return_value_policy<copy_const_reference>())
-    .def(str(self))    // __str__
-  ;
-
-  
 }

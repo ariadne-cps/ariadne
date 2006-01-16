@@ -21,5 +21,9 @@ clean:
 	(cd ${TESTDIR}; ${MAKE} clean; cd ..; )
 	(cd ${PYTHONDIR}; ${MAKE} clean; cd ..; )
 
+install:
+#	cp src/libariadne.so ${PREFIX}/lib/libariadne.so
+	ln -s ${PWD}/src/libariadne.so ${PREFIX}/lib/libariadne.so 
+   
 check:
 	(cd ${TESTDIR}; ${MAKE});

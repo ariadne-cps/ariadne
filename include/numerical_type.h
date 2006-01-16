@@ -248,6 +248,8 @@ namespace Ariadne {
   template<> inline Rational convert_to(const Dyadic& d) { return Rational(d); }
   template<> inline Rational convert_to(const double& x) { return Rational(x); }
   
+  template<> inline int convert_to(const Integer& n) { return n.get_si(); }
+  template<> inline long convert_to(const Integer& n) { return n.get_si(); }
   
   template <typename T> std::string name();
   template<> inline std::string name<double>() { return "double"; }

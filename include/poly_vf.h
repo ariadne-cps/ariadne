@@ -27,11 +27,11 @@
 
 #include <approx_type.h>
 
-namespace Ariadne {	
+namespace Ariadne {
 namespace VectorField{
 
 template <typename S>
-class PolyAffineIntegrator {	
+class PolyAffineIntegrator {
  public:
   typedef S State;
   typedef typename State::Real Real;

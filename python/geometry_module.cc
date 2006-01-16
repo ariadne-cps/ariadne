@@ -26,6 +26,7 @@
 #include "interval.h"
 #include "state.h"
 #include "rectangle.h"
+#include "parallelopiped.h"
 #include "list_set.h"
 #include "grid_set.h"
 #include "binary_word.h"
@@ -46,6 +47,8 @@ using Ariadne::SubdivisionSequence;
 void export_state();
 void export_interval();
 void export_rectangle();
+void export_parallelopiped();
+void export_simplex();
 void export_polyhedron();
 void export_list_set();
 void export_grid();
@@ -110,6 +113,8 @@ BOOST_PYTHON_MODULE(geometry)
   export_state();
   export_interval();
   export_rectangle();
+  export_parallelopiped();
+  export_simplex();
   export_polyhedron();
   export_list_set();
   export_grid();

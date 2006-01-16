@@ -37,11 +37,14 @@
 #include <set>
 #include <vector>
 #include <valarray>
+#include <exception>
 
 #include "ariadne.h"
 #include "utility.h"
 #include "interval.h"
 #include "state.h"
+
+#include "binary_word.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -55,10 +58,10 @@ namespace Ariadne {
     template<typename R> bool disjoint(const Rectangle<R> &A, const Rectangle<R> &B);
     template<typename R> bool inner_subset(const Rectangle<R> &A, const Rectangle<R> &B);
     template<typename R> bool subset(const Rectangle<R> &A, const Rectangle<R> &B);
-    template<typename R> bool subset_of_open_cover(const Rectangle<R> &A, const std::vector< Rectangle<R> > &list);
-    template<typename R> bool subset_of_closed_cover(const Rectangle<R> &A, const std::vector< Rectangle<R> > &list);
+    template<typename R> bool subset_of_open_cover(const Rectangle<R> &A, const std::vector< Rectangle<R> > &L);
 
-    template<typename R> bool inner_subset(const Rectangle<R> &rect, const ListSet<R,Rectangle> &A);
+    template<typename R> bool inner_subset(const Rectangle<R> &A, const ListSet<R,Rectangle> &B);
+    template<typename R> bool subset(const Rectangle<R> &A, const ListSet<R,Rectangle> &B);
     
     template<typename R> std::ostream& operator<<(std::ostream&, const Rectangle<R>&);
     template<typename R> std::istream& operator>>(std::istream&, Rectangle<R>&);
@@ -87,14 +90,17 @@ namespace Ariadne {
       friend bool inner_subset <> (const Rectangle<R> &A,
                                    const Rectangle<R> &B);
 
-      /*! \brief Tests inclusion. */
+      /*! \brief Tests if \a A is a subset of the interior of \a B. */
+      friend bool inner_subset <> (const Rectangle<R> &A,
+                                   const ListSet<R,::Ariadne::Geometry::Rectangle> &B);
+
+      /*! \brief Tests if \a A is a subset of \a B. */
       friend bool subset <> (const Rectangle<R> &A,
                              const Rectangle<R> &B);
 
-      /*! \brief Tests if \a A is a subset of the interior of \a DS. */
-      // FIXME: Compiler doesn't like template parameter
-      //friend bool inner_subset <> (const Rectangle<R> &A,
-      //                             const ListSet<R,Rectangle> &DS);
+      /*! \brief Tests if \a A is a subset of \a B. */
+      friend bool subset <> (const Rectangle<R> &A,
+                             const ListSet<R,::Ariadne::Geometry::Rectangle> &B);
 
 
       /*! \brief Tests inclusion in an open cover.
@@ -103,13 +109,9 @@ namespace Ariadne {
       friend bool subset_of_open_cover <> (const Rectangle<R> &A,
                                            const std::vector< Rectangle<R> > &list);
 
-      /*! \brief Tests inclusion in an closed cover.
-       *  \internal We shouldn't restrict to a std::list.
-       */
-      friend bool subset_of_closed_cover <> (const Rectangle<R> &A,
-                                             const std::vector< Rectangle<R> > &list);
-
      public:
+      /*! \brief The unsigned integer type used to denote the array positions. */
+      typedef size_t size_type;
       /*! \brief The type of denotable real number used for the corners. */
       typedef R Real;
       /*! \brief The type of denotable state contained by the rectangle. */
@@ -123,14 +125,14 @@ namespace Ariadne {
       
      public:
       /*! \brief Default constructor construcs an empty rectangle of dimension \a n. */
-      Rectangle(size_t n = 0)
+      Rectangle(size_type n = 0)
         : _lower_corner(n),  _upper_corner(n) {}
       
       /*! \brief Construct from an array of intervals. */
-      Rectangle(size_t dim, const Interval<Real>* intervals)
+      Rectangle(size_type dim, const Interval<Real>* intervals)
         : _lower_corner(dim), _upper_corner(dim)
       {
-        for(size_t i=0; i!=dim; ++i) {
+        for(size_type i=0; i!=dim; ++i) {
           this->_lower_corner[i] = intervals[i].lower();
           this->_upper_corner[i] = intervals[i].upper();
         }
@@ -146,7 +148,7 @@ namespace Ariadne {
         }
         
         /* Set coordinates */
-        for (size_t i=0; i!=this->dimension(); ++i) {
+        for (size_type i=0; i!=this->dimension(); ++i) {
           this->_lower_corner[i]=std::min(s1[i],s2[i]);
           this->_upper_corner[i]=std::max(s1[i],s2[i]);
         }
@@ -177,13 +179,13 @@ namespace Ariadne {
       }
       
       /*! \brief The dimension of the Euclidean space the rectangle lies in. */
-      inline size_t dimension() const {
+      inline size_type dimension() const {
         return (this->_lower_corner).dimension();
       }
       
       /*! \brief True if the rectangle is empty. */
       inline bool empty() const {
-        for(size_t i=0; i!=this->dimension(); ++i) {
+        for(size_type i=0; i!=this->dimension(); ++i) {
           if(this->lower_bound(i) > this->upper_bound(i)) {
             return true;
           }
@@ -193,7 +195,7 @@ namespace Ariadne {
       
       /*! \brief True if the rectangle has empty interior. */
       inline bool empty_interior() const {
-        for(size_t i=0; i!=this->dimension(); ++i) {
+        for(size_type i=0; i!=this->dimension(); ++i) {
           if(this->lower_bound(i) >= this->upper_bound(i)) {
             return true;
           }
@@ -212,44 +214,39 @@ namespace Ariadne {
       }
       
       /*! \brief Returns the projection onto the \a n th coordinate. */
-      inline Interval<Real> interval(size_t n) const {
+      inline Interval<Real> operator[] (size_type n) const {
         return Interval<Real>(this->_lower_corner[n],this->_upper_corner[n]);
       }
       
       /*! \brief Returns the projection onto the \a n th coordinate. */
-      inline Interval<Real> operator[] (size_t n) const {
+      inline Interval<Real> interval(size_type n) const {
         return Interval<Real>(this->_lower_corner[n],this->_upper_corner[n]);
       }
       
-      /*! \brief Gets the \a n th interval. */
-      inline Interval<Real> get(size_t n) const {
-        return Interval<Real>(this->_lower_corner[n],this->_upper_corner[n]);
+      /*! \brief Returns the lower bound of the \a n th coordinate */
+      inline Real lower_bound(size_type n) const {
+        return this->_lower_corner[n];
+      }
+      
+      /*! \brief Returns the upper bound of the \a n th coordinate */
+      inline Real upper_bound(size_type n) const {
+        return this->_upper_corner[n];
       }
       
       /*! \brief Sets the \a n th interval. */
-      inline void set(size_t n, Interval<Real> i) {
+      inline void set_interval(size_type n, Interval<Real> i) {
          this->_lower_corner[n]=i.lower();
          this->_upper_corner[n]=i.upper();
       }
       
       /*! \brief Sets the lower bound of the \a n th coordinate to \a r. */
-      inline void set_lower_bound(size_t n, const Real& r) {
+      inline void set_lower_bound(size_type n, const Real& r) {
         this->_lower_corner[n] = r;
       }
       
       /*! \brief Sets the upper bound of the \a n th coordinate to \a r. */
-      inline void set_upper_bound(size_t n, const Real& r) {
+      inline void set_upper_bound(size_type n, const Real& r) {
         this->_upper_corner[n] = r;
-      }
-      
-      /*! \brief Returns the lower bound of the \a n th coordinate */
-      inline Real lower_bound(size_t n) const {
-        return this->_lower_corner[n];
-      }
-      
-      /*! \brief Returns the upper bound of the \a n th coordinate */
-      inline Real upper_bound(size_t n) const {
-        return this->_upper_corner[n];
       }
       
       /*! \brief Tests if \a state is included into a rectangle. */
@@ -261,17 +258,9 @@ namespace Ariadne {
         if (this->empty()) return false;
         
         /* for each dimension i */
-        for (size_t i=0; i<this->dimension(); i++) {
-          /* if the i dim of the state is smaller than the one of the
-           * rectangle's lower corner then state is not contained into
-           * this object */
-          if (state[i] < this->_lower_corner[i]) return false;
-          
-          
-          /* if the i dim of the state is greater than the one of the
-           * rectangle's upper corner then state is not contained into
-           * this object */
-          if (state[i] > this->_upper_corner[i]) return false;
+        for (size_type i=0; i<this->dimension(); i++) {
+          if (state[i] < this->_lower_corner[i]) { return false; }
+          if (state[i] > this->_upper_corner[i]) { return false; }
         }
         
         return true;
@@ -287,32 +276,24 @@ namespace Ariadne {
         if (this->empty()) return false;
         
         /* for each dimension i */
-        for (size_t i=0; i<this->dimension(); i++) {
-          
-          /* if the i dim of the state is greater or equal than the one
-           * of the rectangle's upper corner then state is not contained 
-           * in the interior of this object */
-          if (state[i] >= this->_upper_corner[i]) return false;
-          
-          /* if the i dim of the state is smaller or equal than the one 
-           * of the rectangle's lower corner then state is not contained
-           * in the interior of this object */
-          if (state[i] <= this->_lower_corner[i]) return false;
+        for (size_type i=0; i<this->dimension(); i++) {
+          if (state[i] >= this->_upper_corner[i]) { return false; }
+          if (state[i] <= this->_lower_corner[i]) { return false; }
         }
         
         return true;
         
       }
       
-      /*! \brief Compute a quadrant of the Rectangle determined by \a q. FIXME: use binary words.
+      /*! \brief Compute a quadrant of the Rectangle determined by \a q. DEPRECATED.
        *
        *  \a q is an integer such that the ith bit of q is 0 if the lower half
        *  of the rectangle in the ith coordinate is used, and 1 if the upper
        *  half is used.
        */
-      inline Rectangle<R> find_quadrant(size_t q) const {
+      inline Rectangle<R> find_quadrant(size_type q) const {
         
-        size_t j;
+        size_type j;
         
         Rectangle<R> quadrant(this->dimension());
         
@@ -333,10 +314,36 @@ namespace Ariadne {
         return quadrant;
       }
       
-      /*! \brief Expand the Rectangle by \a delta in each direction. */
-      inline Rectangle<R> &expand_by(const Real &delta) {
+      /*! \brief Compute a quadrant of the Rectangle determined by \a q.
+       *
+       *  \a q is a binary word such that the ith bit of q is 0 if the lower half
+       *  of the rectangle in the ith coordinate is used, and 1 if the upper
+       *  half is used.
+       */
+      inline Rectangle<R> find_quadrant(BinaryWord q) const {
+        assert(q.size() == this->dimension());
+        Rectangle<R> quadrant(this->dimension());
         
-        for (size_t j=0; j< this->dimension(); ++j) {
+        for (size_type j=0; j< this->dimension(); j++) {
+          if (q[j]) {
+            quadrant._lower_corner[j]=(this->_upper_corner[j]+
+                                       this->_lower_corner[j])/2;
+            quadrant._upper_corner[j]=this->_upper_corner[j];
+          } 
+          else {
+            quadrant._upper_corner[j]=(this->_upper_corner[j]+
+                                       this->_lower_corner[j])/2;
+            quadrant._lower_corner[j]=this->_lower_corner[j];
+          }
+        }
+        
+        return quadrant;
+      }
+      
+       /*! \brief Expand the Rectangle by \a delta in each direction. */
+      inline Rectangle<R>& expand_by(const Real& delta) {
+        
+        for (size_type j=0; j< this->dimension(); ++j) {
           
           this->_upper_corner[j]+=delta;
           this->_lower_corner[j]-=delta;
@@ -346,14 +353,14 @@ namespace Ariadne {
       }
       
       /*! \brief The equality operator */
-      inline bool operator==(const Rectangle<Real> &A) const
+      inline bool operator==(const Rectangle<Real>& A) const
       {
         if (this->dimension() != A.dimension()) return false ;
         
         if (A.empty() && this->empty()) { return true; }
         if (A.empty() || this->empty()) { return false; }
         
-        for (size_t j=0; j != this->dimension(); ++j) {
+        for (size_type j=0; j != this->dimension(); ++j) {
           if (this->_lower_corner[j] != A._lower_corner[j]) { return false; }
           if (this->_upper_corner[j] != A._upper_corner[j]) { return false; }
         }
@@ -362,45 +369,10 @@ namespace Ariadne {
       }
       
       /*! \brief The inequality operator */
-      inline bool operator!=(const Rectangle<Real> &A) const {
+      inline bool operator!=(const Rectangle<Real>& A) const {
         return !(*this == A);
       }
 
-      /*! \brief Tests if the Rectangle is disjoint from the set \a s. */
-      template<class SET>
-      inline bool disjoint(const SET& s) const {
-        return Ariadne::Geometry::disjoint(*this,s);
-      }
-      
-      /*! \brief Tests if the Rectangle intersects the interior of the set \a s. */
-      template<class SET>
-      inline bool intersects_interior(const SET& s) const {
-        return Ariadne::Geometry::interiors_intersect(*this,s);
-      }
-      
-      /*! \brief Tests if the Rectangle is a subset of the interior of set \a s. */
-      template<class SET>
-      inline bool inner_subset(const SET& s) const {
-        return Ariadne::Geometry::inner_subset(*this,s);
-      }
-
-      /*! \brief Tests if the Rectangle is a subset of the set \a s. */
-      template<class SET>
-      inline bool subset(const SET& s) const {
-        return Ariadne::Geometry::subset(*this,s);
-      }
-
-      /*! \brief Tests if the Rectangle is a subset of the the union of the open sets in \a u. */
-      template<class LIST>
-      inline bool subset_of_open_cover(const LIST& u) const {
-        return Ariadne::Geometry::subset_of_open_cover(*this,u);
-      }
-      
-      /*! \brief Tests if the Rectangle is a subset of the the union of the closed sets in \a u. */
-      template<class LIST>
-      inline bool subset_of_open_closed_cover(const LIST& u) const {
-        return Ariadne::Geometry::subset_of_closed_cover(*this,u);
-      }
       
       friend std::ostream&
       operator<< <> (std::ostream &os, 
@@ -414,13 +386,13 @@ namespace Ariadne {
     
     /*! \brief Tests disjointness */
     template <typename R>
-    bool disjoint(const Rectangle<R> &A, const Rectangle<R> &B) {
-
+    bool disjoint(const Rectangle<R>& A, const Rectangle<R>& B) 
+    {
       if (A.dimension()!=B.dimension())
         throw std::domain_error("The two parameters have different space dimensions");
       
       
-      for (size_t i=0; i< A.dimension(); i++) {
+      for (typename Rectangle<R>::size_type i=0; i< A.dimension(); i++) {
         if ((A._upper_corner[i]<B._lower_corner[i])|| 
             (B._upper_corner[i]<A._lower_corner[i])) return true;
       }
@@ -430,15 +402,15 @@ namespace Ariadne {
     
     /*! \brief Tests intersection of interiors */
     template <typename R>
-    bool interiors_intersect(const Rectangle<R> &A,
-                             const Rectangle<R> &B) {
-      
+    bool interiors_intersect(const Rectangle<R>& A,
+                             const Rectangle<R>& B) 
+    {
       if (A.dimension()!=B.dimension()) 
         throw std::domain_error("The two parameters have different space dimensions");
       
       if (A.empty()||B.empty()) return false;
       
-      for (size_t i=0; i< A.dimension(); i++) {
+      for (typename Rectangle<R>::size_type i=0; i< A.dimension(); i++) {
         if ((A._upper_corner[i]<=B._lower_corner[i])|| 
             (B._upper_corner[i]<=A._lower_corner[i])) return false;
       }
@@ -449,15 +421,15 @@ namespace Ariadne {
     
     /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
-    bool inner_subset(const Rectangle<R> &A,
-                      const Rectangle<R> &B) {
-
+    bool inner_subset(const Rectangle<R>& A,
+                      const Rectangle<R>& B) 
+    {
       if (A.dimension()!=B.dimension())
         throw std::domain_error("The two parameters have different space dimensions");
 
       if (A.empty()||B.empty()) return false;
 
-      for (size_t i=0; i< A.dimension(); i++) {
+      for (typename Rectangle<R>::size_type i=0; i< A.dimension(); i++) {
         if ((A._upper_corner[i] >= B._upper_corner[i])||
             (B._lower_corner[i] >= A._lower_corner[i])) return false;
       }
@@ -468,14 +440,14 @@ namespace Ariadne {
     /*! \brief Tests inclusion */
     template <typename R>
     bool subset(const Rectangle<R> &A, 
-                const Rectangle<R> &B) {
-      
+                const Rectangle<R> &B) 
+    {
       if (A.dimension()!=B.dimension())
         throw std::domain_error("The two parameters have different space dimensions");
       
       if (A.empty()||B.empty()) return false;
       
-      for (size_t i=0; i< A.dimension(); i++) {
+      for (typename Rectangle<R>::size_type i=0; i< A.dimension(); i++) {
         if ((A._upper_corner[i] > B._upper_corner[i])||
             (B._lower_corner[i] > A._lower_corner[i])) return false;
       }
@@ -485,8 +457,8 @@ namespace Ariadne {
     
     /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
-    bool subset_of_interior(const Rectangle<R> &A,
-                            const Rectangle<R> &B)
+    bool subset_of_interior(const Rectangle<R>& A,
+                            const Rectangle<R>& B)
     {
       return inner_subset(A,B);
     }
@@ -502,9 +474,11 @@ namespace Ariadne {
       typedef typename std::set<Real> Set;
       typedef typename std::vector< Rectangle<R> >::const_iterator list_iterator;
       
-      size_t dimension = A.dimension();
+      typedef typename Rectangle<R>::size_type size_type;
+
+      size_type dimension = A.dimension();
       
-      for(size_t i=0; i!=dimension; ++i) {
+      for(size_type i=0; i!=dimension; ++i) {
         Real lower=A.lower_bound(i);
         Real upper=A.upper_bound(i);
         gridpoints[i].insert(lower);
@@ -536,35 +510,36 @@ namespace Ariadne {
       typedef typename Set::const_iterator set_iterator;
       typedef typename std::vector< Rectangle<R> >::const_iterator list_iterator;
       
-      size_t dimension = A.dimension();
+      typedef typename Rectangle<R>::size_type size_type;
+      typedef std::valarray<size_type> index_type;
+
+      typename Rectangle<R>::size_type dimension = A.dimension();
       
       std::vector<Set> gridpoints(dimension);
       compute_gridpoints(gridpoints, A, cover);
       
-      /* This is a hack. We really need a "grid" class based on binary words. */
-      typedef std::valarray<size_t> index_type;
       
       /* Whether the jth gridpoint (in some ordering) is covered */
       std::vector<bool> cover_flags;
       
       /* Strides for indexing */
       index_type strides(dimension);
-      size_t stride=1;
-      for(size_t i=0; i!=dimension; ++i) {
+      size_type stride=1;
+      for(size_type i=0; i!=dimension; ++i) {
         strides[i]=stride;
         stride*=gridpoints[i].size();
       }
       cover_flags.resize(stride);
       
-      std::vector<size_t> lower_indices(dimension+1);
-      std::vector<size_t> upper_indices(dimension+1);
+      std::vector<size_type> lower_indices(dimension+1);
+      std::vector<size_type> upper_indices(dimension+1);
       lower_indices[dimension] = 0;
       upper_indices[dimension] = 2;
       
       for(list_iterator rect=cover.begin(); rect!=cover.end(); ++rect) {
-        for(size_t i=0; i!=dimension; ++i) {
+        for(size_type i=0; i!=dimension; ++i) {
           Real lower_bnd=rect->lower_bound(i);
-          size_t lower_indx=0;
+          size_type lower_indx=0;
           set_iterator iter=gridpoints[i].begin();
           while(iter!=gridpoints[i].end() && (*iter) <= lower_bnd) {
             ++iter;
@@ -573,7 +548,7 @@ namespace Ariadne {
           lower_indices[i]=lower_indx;
           
           Real upper_bnd=rect->upper_bound(i);
-          size_t upper_indx=0;
+          size_type upper_indx=0;
           iter=gridpoints[i].begin();
           while(iter!=gridpoints[i].end() && (*iter) < upper_bnd) {
             ++iter;
@@ -589,7 +564,7 @@ namespace Ariadne {
 #endif
         
         index_type index(dimension+1);
-        for(size_t i=0; i!=dimension; ++i) {
+        for(size_type i=0; i!=dimension; ++i) {
           index[i] = lower_indices[i];
         }
         index[dimension]=0;
@@ -599,13 +574,13 @@ namespace Ariadne {
           std::cerr << index << " " << upper_indices << "\n";
 #endif
           
-          size_t entry = 0;
-          for(size_t j=0; j!=dimension; ++j) {
+          size_type entry = 0;
+          for(size_type j=0; j!=dimension; ++j) {
             entry += index[j]*strides[j];
           }
           cover_flags[entry] = true;
           
-          size_t inc=0;
+          size_type inc=0;
           ++(index[inc]);
           while(index[inc] == upper_indices[inc]) {
             index[inc]=0;
@@ -630,7 +605,7 @@ namespace Ariadne {
       return true;
     }
     
-    //*! \brief Tests inclusion in a closed cover.  */
+    /*! \brief Tests inclusion in a closed cover.  */
     template <typename R>
     bool subset_of_closed_cover(const Rectangle<R> &A,
                                 const std::vector< Rectangle<R> >& cover) 
@@ -640,35 +615,36 @@ namespace Ariadne {
       typedef typename Set::const_iterator set_iterator;
       typedef typename std::vector< Rectangle<R> >::const_iterator list_iterator;
       
-      size_t dimension = A.dimension();
+      typedef typename Rectangle<R>::size_type size_type;
+      typedef std::valarray<size_type> index_type;
+
+      size_type dimension = A.dimension();
       
       std::vector<Set> gridpoints(dimension);
       compute_gridpoints(gridpoints, A, cover);
       
-      /* This is a hack. We really need a "grid" class based on binary words. */
-      typedef std::valarray<size_t> index_type;
       
       /* Whether the jth gridpoint (in some ordering) is covered */
       std::vector<bool> cover_flags;
       
       /* Strides for indexing */
       index_type strides(dimension);
-      size_t stride=1;
-      for(size_t i=0; i!=dimension; ++i) {
+      size_type stride=1;
+      for(size_type i=0; i!=dimension; ++i) {
         strides[i]=stride;
         stride*=gridpoints[i].size();
       }
       cover_flags.resize(stride);
       
-      std::vector<size_t> lower_indices(dimension+1);
-      std::vector<size_t> upper_indices(dimension+1);
+      std::vector<size_type> lower_indices(dimension+1);
+      std::vector<size_type> upper_indices(dimension+1);
       lower_indices[dimension] = 0;
       upper_indices[dimension] = 2;
       
       for(list_iterator rect=cover.begin(); rect!=cover.end(); ++rect) {
-        for(size_t i=0; i!=dimension; ++i) {
+        for(size_type i=0; i!=dimension; ++i) {
           Real lower_bound=rect->lower(i);
-          size_t lower_index=0;
+          size_type lower_index=0;
           set_iterator iter=gridpoints[i].begin();
           while(iter!=gridpoints[i].end() && (*iter) < lower_bound) {
             ++iter;
@@ -677,7 +653,7 @@ namespace Ariadne {
           lower_indices[i]=lower_index;
           
           Real upper_bound=rect->upper(i);
-          size_t upper_index=0;
+          size_type upper_index=0;
           iter=gridpoints[i].begin();
           while(iter!=gridpoints[i].end() && (*iter) <= upper_bound) {
             ++iter;
@@ -693,7 +669,7 @@ namespace Ariadne {
 #endif
         
         index_type index(dimension+1);
-        for(size_t i=0; i!=dimension; ++i) {
+        for(size_type i=0; i!=dimension; ++i) {
           index[i] = lower_indices[i];
         }
         index[dimension]=0;
@@ -703,13 +679,13 @@ namespace Ariadne {
           std::cerr << index << " " << upper_indices << "\n";
 #endif
           
-          size_t entry = 0;
-          for(size_t j=0; j!=dimension; ++j) {
+          size_type entry = 0;
+          for(size_type j=0; j!=dimension; ++j) {
             entry += index[j]*strides[j];
           }
           cover_flags[entry] = true;
           
-          size_t inc=0;
+          size_type inc=0;
           ++(index[inc]);
           while(index[inc] == upper_indices[inc]) {
             index[inc]=0;
@@ -747,7 +723,7 @@ namespace Ariadne {
 
       Rectangle<R> C(A.dimension());
 
-      for (size_t i=0; i != C.dimension(); ++i) {
+      for (typename Rectangle<R>::size_type i=0; i != C.dimension(); ++i) {
         C._lower_corner[i] = std::max(A._lower_corner[i],B._lower_corner[i]);
         C._upper_corner[i] = std::min(A._upper_corner[i],B._upper_corner[i]);
         if(C._lower_corner[i] > C._upper_corner[i]) {
@@ -774,7 +750,7 @@ namespace Ariadne {
         return C;
       }
 
-      for (size_t i=0; i != C.dimension(); ++i) {
+      for (typename Rectangle<R>::size_type i=0; i != C.dimension(); ++i) {
         C._lower_corner[i] = std::max(A._lower_corner[i],B._lower_corner[i]);
         C._upper_corner[i] = std::min(A._upper_corner[i],B._upper_corner[i]);
         if(C._lower_corner[i] >= C._upper_corner[i]) {
@@ -801,7 +777,7 @@ namespace Ariadne {
       }
       else if(r.dimension() > 0) {
         os << r[0];
-        for(size_t i=1; i!=r.dimension(); ++i) {
+        for(typename Rectangle<R>::size_type i=1; i!=r.dimension(); ++i) {
           os << "x" << r[i];
         }
       }

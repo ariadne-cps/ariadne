@@ -31,6 +31,8 @@
 
 #include <algorithm>
 
+#include <ppl.hh>
+
 #include "ariadne.h"
 #include "linear_algebra.h"
 
@@ -49,12 +51,23 @@ class ConstraintSystem {
     STRICT_INEQUALITY
   };
   
-  typedef boost::numeric::ublas::matrix<R> Matrix;
-  typedef boost::numeric::ublas::vector<R> Vector;
+  typedef ::Ariadne::LinearAlgebra::matrix<R> Matrix;
+  typedef ::Ariadne::LinearAlgebra::vector<R> Vector;
+
   typedef std::vector<RelType> Rel_Vector;
   
   ConstraintSystem() { }
+  
   ConstraintSystem(const Parma_Polyhedra_Library::Constraint_System& ppl_cs);
+  
+  ConstraintSystem(Matrix new_C, Vector new_d)
+    : _C(new_C), _d(new_d), _rel_types(new_C.size1()) 
+  { 
+    for(size_type i=0; i!=_rel_types.size(); ++i) {
+      _rel_types[i]=INEQUALITY;
+    }
+  }
+
   ConstraintSystem(Matrix new_C, Vector new_d , Rel_Vector new_r_type)
     : _C(new_C), _d(new_d), _rel_types(new_r_type) 
   { }

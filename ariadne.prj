@@ -77,32 +77,22 @@ module.include.files=\
 	automaton.h\
 	binary_word.h\
 	constraint.h\
-	denotable_set.h\
-	denotable_set_io.h\
 	discrete_location.h\
 	discrete_trans.h\
-	doc.h\
 	epsfstream.h\
 	exception.h\
 	generator.h\
-	grid.h\
-	grid_denotable_set.h\
 	grid_operations.h\
-	grid_rectangle.h\
 	hybrid_set.h\
 	interval.h\
 	linear_algebra.h\
 	list_set.h\
 	location.h\
 	map.h\
-	matlabexp.h\
 	numerical_type.h\
-	partition_tree.h\
 	poly_map.h\
 	poly_vf.h\
 	polyhedron.h\
-	polyhedron_io.h\
-	povexp.h\
 	ptree.h\
 	ptree_node.h\
 	rectangle.h\
@@ -111,7 +101,13 @@ module.include.files=\
 	solver.h\
 	state.h\
 	utility.h\
-	vector_field.h
+	vector_field.h\
+	grid_set.h\
+	parallelopiped.h\
+	simplex.h\
+	documentation.h\
+	matlab_export.h\
+	pov_export.h
 
 module.source.name=src
 module.source.type=

@@ -28,9 +28,6 @@
 #include <vector>
 #include <iosfwd>
 
-#include "set_const.h"
-#include "denotable_set_io.h"
-
 namespace Ariadne {
 namespace Geometry {
 
@@ -38,7 +35,7 @@ namespace Geometry {
  * \brief A finite union of basic sets, represented as a sequence.
  */
 template <class BS>
-class DenotableSet{
+class DenotableSet {
 
   private:
     /* List of basic sets. Note that std::vector provides a
@@ -83,7 +80,7 @@ class DenotableSet{
      * \return The number of basic sets forming this object.
      */
     inline const size_t size() const {
-        return this->_vector.size(); 
+      return this->_vector.size(); 
     }
     
     /*! \brief Return the denotable set's space dimension. 
@@ -91,7 +88,7 @@ class DenotableSet{
      * \return The space dimension of the DenotableSet.
      */
     inline const size_t dimension() const {
-        return this->_dimension;
+      return this->_dimension;
     }
     
     /*! \brief Accesses the i-th BasicSet.
@@ -100,14 +97,14 @@ class DenotableSet{
      * \return The i-th basic set maitained by the DenotableSet.
      */
     inline const BasicSet &operator[](size_t index) const {
-      if (this->size()<=index) 
+      if (this->size()<=index) {
         throw std::invalid_argument("Index overlaps vector bounds.");
-      
+      }
       return this->_vector[index];
     }
     
-    /*! \brief What does this do? */
-    inline DenotableSet<BS> operator+(const DenotableSet<BS>& A) const{
+    /*! \briefMinkowski (pointwise) sum. */
+    inline DenotableSet<BS> operator+(const DenotableSet<BS>& A) const {
     
       #ifdef DEBUG
         std::cout << __FILE__ << ":" << __LINE__ << std::endl;
@@ -131,7 +128,7 @@ class DenotableSet{
     /*! \brief Expands set by \a delta. */
     /*  \internal This is dangerous since it modifies the current set.
      */
-    inline void expand_by(const Real &delta) {
+    inline void expand_by(const Real& delta) {
       for (size_t i=0; i< this->size(); i++) {
         (this->_vector[i]).expand_by(delta);
       }
@@ -140,16 +137,14 @@ class DenotableSet{
      /*! \brief Replaces set be an over-approximation by at most \a delta. */
      /*  \internal This is dangerous since it modifies the current set.
      */
-                inline void
-    set_precision_to_upperapproximating(const Real &delta)  {
+    inline void set_precision_to_upperapproximating(const Real& delta) {
       for (size_t i=0; i< this->size(); i++) {
           //        (this->_vector[i]).set_precision_to_upperapproximating(delta);
       }  
     }
     
     /*! \brief Copy assignment. */
-    inline const DenotableSet<BS> &
-           operator=(const DenotableSet<BS> &A) {
+    inline const DenotableSet<BS>& operator=(const DenotableSet<BS>& A) {
       #ifdef DEBUG
         std::cout << __FILE__ << ":" << __LINE__ << std::endl;
       #endif
@@ -176,12 +171,10 @@ class DenotableSet{
      * current set, \a false otherwise.
      */
     inline bool contains(const State &s) const {
-      
       for (size_t i=0; i<this->size(); i++) {
         if ((this->_vector[i]).contains(s)) 
           return true;
       }
-
       return false;      
     }
     
@@ -195,14 +188,12 @@ class DenotableSet{
      * current set, \a false otherwise.
      */
     inline bool interior_contains(const State & state) const {
-        throw(std::domain_error("Not implemented"));
+      throw(std::domain_error("Not implemented"));
       for (size_t i=0; i<this->size(); i++) {
         if ((this->_vector[i]).interior_contains(state)) 
           return true;
       }
-
       return false;
-      
     }
     
     /*! \brief Checks for emptyness.
@@ -215,7 +206,6 @@ class DenotableSet{
         if (!(this->_vector[i]).empty()) 
           return false;
       }
-    
       return true;
     }
     
@@ -224,7 +214,7 @@ class DenotableSet{
      * \return The begin of the maintained basic set vector.
      */
     inline const_iterator begin() const {
-        return _vector.begin();
+      return _vector.begin();
     }
     
     /*! \brief A constant iterator to the end of the list of basic sets.
@@ -242,7 +232,7 @@ class DenotableSet{
      * \param A is a DenotableSet.
      */
     inline void inplace_union(const DenotableSet<BasicSet>& A) {  
-      
+
       #ifdef DEBUG
         std::cout << __FILE__ << ":" << __LINE__ << std::endl;
       #endif
@@ -301,12 +291,14 @@ class DenotableSet{
     }
     
     /*! \brief Writes the denotable set to a stream. */
-    friend std::ostream& operator<< <>(std::ostream &os, 
-               const DenotableSet<BasicSet> &bs);
+    friend std::ostream& operator<< <>(
+        std::ostream &os, 
+        const DenotableSet<BasicSet> &bs);
     
     /*! \brief Input from a stream. */
-    friend std::istream& operator>> <>(std::istream &is,
-               DenotableSet<BasicSet> &bs);
+    friend std::istream& operator>> <>(
+        std::istream &is,
+        DenotableSet<BasicSet> &bs);
     
     /*! \brief Tests disjointness. 
      *
@@ -329,8 +321,8 @@ class DenotableSet{
      * \a false otherwise.
      */
     friend bool intersects_interior <> (
-        const DenotableSet< BasicSet > &A, 
-        const DenotableSet< BasicSet > &B);
+        const DenotableSet<BasicSet> &A, 
+        const DenotableSet<BasicSet> &B);
   
     /*! \brief Tests intersection of interiors. 
      *
@@ -341,8 +333,8 @@ class DenotableSet{
      * \a false otherwise.
           */  
     friend bool intersects_interior <> (
-        const Rectangle< Real > &rect, 
-        const DenotableSet< BasicSet  > &A);
+        const Rectangle<Real> &rect, 
+        const DenotableSet<BasicSet> &A);
     
     /*! \brief Tests inclusion of interiors. 
      *
@@ -353,8 +345,8 @@ class DenotableSet{
      * \a false otherwise.
      */
     friend bool subset_of_interior <> (
-        const DenotableSet< BasicSet  > &A, 
-        const DenotableSet< BasicSet  > &B);
+        const DenotableSet<BasicSet> &A, 
+        const DenotableSet<BasicSet> &B);
   
     /*! \brief Tests inclusion of interiors. 
      *
@@ -365,8 +357,8 @@ class DenotableSet{
      * \a false otherwise.
      */
     friend bool subset_of_interior <> (
-        const Rectangle< Real > &rect, 
-        const DenotableSet< BasicSet  > &A);
+        const Rectangle<Real>& rect, 
+        const DenotableSet<BasicSet>& A);
 
     /*! \brief Tests inclusion of interiors. 
      *
@@ -377,8 +369,8 @@ class DenotableSet{
      * \a false otherwise.
      */
     friend bool subset_of_interior <> (
-        const DenotableSet< BasicSet > &A,
-        const Rectangle< Real > &rect);
+        const DenotableSet<BasicSet> &A,
+        const Rectangle<Real> &rect);
 
     /*! \brief Makes union of two interiors. 
      *
@@ -387,9 +379,9 @@ class DenotableSet{
      * \param B  is a denotable set.
      * \return The union of A and B.
      */
-    friend DenotableSet< BasicSet > join <> (
-        const DenotableSet< BasicSet > &A, 
-        const DenotableSet< BasicSet > &B);
+    friend DenotableSet<BasicSet> join <> (
+        const DenotableSet<BasicSet> &A, 
+        const DenotableSet<BasicSet> &B);
 
     /*! \brief Makes intersection of two interiors. 
      *
@@ -399,145 +391,124 @@ class DenotableSet{
      * \param B is a denotable set.
      * \return The closure of the intersection of A with the interiors of B.
      */
-    friend DenotableSet< BasicSet  > 
-      closure_of_intersection_of_interior <> (
-        const DenotableSet< BasicSet > &A, 
-        const DenotableSet< BasicSet > &B);
+    friend DenotableSet<BasicSet> regular_intersection <> (
+        const DenotableSet<BasicSet> &A, 
+        const DenotableSet<BasicSet> &B);
 };
 
-template <typename BS >
-bool disjoint (const DenotableSet< BS  > &A, 
-        const DenotableSet< BS > &B){
-
+template <typename BS>
+bool disjoint(const DenotableSet<BS> &A, 
+              const DenotableSet< BS> &B)
+{
   if (A.dimension()!=B.dimension()) 
     throw std::invalid_argument("The two denotable set have different space dimensions.");
   
-          
   size_t i,j;
-          
   for (i=0; i<A.size() ; i++) {
-  
     for (j=0; j<B.size() ; j++) {
-  
         if (!disjoint(A[i],B[j])) return false;
-    
-    }  
-    
+    }
   }
   
   return true;
-            
 }
 
-template <typename BS >
-bool intersects_interior(const DenotableSet< BS > &A, 
-        const DenotableSet< BS > &B){
-  
-  if (A.dimension()!=B.dimension()) 
+template <typename BS>
+bool intersects_interior(const DenotableSet< BS> &A, 
+                         const DenotableSet< BS> &B)
+{
+  if (A.dimension()!=B.dimension()) {
     throw std::invalid_argument("The two denotable set have different space dimensions.");
+  }
   
-          
   size_t i,j;
-          
   for (i=0; i<A.size() ; i++) {
-  
     for (j=0; j<B.size() ; j++) {
-  
       if (intersects_interior(A[i],B[j])) return true;
-    
     }  
-    
-  }        
+  }
   
   return false;
 }
   
-template <typename BS >
-bool intersects_interior(const Rectangle< typename BS::Real > &rect, 
-        const DenotableSet< BS  > &A){
-    
-  if (A.dimension()!=rect.dimension()) 
+template <typename BS>
+bool intersects_interior(const Rectangle<typename BS::Real> &rect, 
+                         const DenotableSet<BS> &A)
+{
+  if (A.dimension()!=rect.dimension()) {
     throw std::invalid_argument("The denotable set and the rectangle have different space dimensions.");
+  }
   
-          
   for (size_t i=0; i<A.size() ; i++) {        
-
     if (intersects_interior(rect,A[i])) return true;
   }
   
   return false;
 }
     
-template <typename BS >
-bool intersects_interior(const DenotableSet< BS  > &A,
-        const Rectangle< typename BS::Real > &rect){
-    
-  if (A.dimension()!=rect.dimension()) 
+template <typename BS>
+bool intersects_interior(const DenotableSet<BS>& A,
+                         const Rectangle<typename BS::Real>& rect)
+{
+  if (A.dimension()!=rect.dimension()) {
     throw std::invalid_argument("The denotable set and the rectangle have different space dimensions.");
-  
-          
-  for (size_t i=0; i<A.size() ; i++) {        
-
-    if (intersects_interior(A[i],rect)) return true;
   }
   
+  for (size_t i=0; i<A.size() ; i++) {        
+    if (intersects_interior(A[i],rect)) return true;
+  }
+
   return false;
 }
 
-template <typename BS >
-bool subset_of_interior(const DenotableSet< BS  > &A, 
-        const DenotableSet< BS  > &B){
+template <typename BS>
+bool subset_of_interior(const DenotableSet<BS> &A, 
+                        const DenotableSet<BS> &B){
   
-  if (A.dimension()!=B.dimension()) 
+  if (A.dimension()!=B.dimension()) {
     throw std::invalid_argument("The two denotable set have different space dimensions.");
-          
-          
-  for (size_t i=0; i<A.size() ; i++) {
+  }
   
+  for (size_t i=0; i<A.size() ; i++) {
     if (!subset_of_open_cover(A[i], B._vector)) return false;
   }        
   
   return true;
-            
 }
   
-template <typename BS >
-bool subset_of_interior(const Rectangle<typename BS::Real > &rect, 
-        const DenotableSet< BS  > &A){
-
+template <typename BS>
+bool subset_of_interior(const Rectangle<typename BS::Real>& rect, 
+                        const DenotableSet<BS>& A)
+{
   #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
   #endif
           
-  if (A.dimension()!=rect.dimension()) 
+  if (A.dimension()!=rect.dimension()) {
     throw std::invalid_argument("The denotable set and the rectangle have different space dimensions.");
+  }
   
-
   /* TO REIMPLEMENT */
   for (size_t i=0; i<A.size() ; i++) {
-
     if (subset_of_interior(rect,A[i])) {
-    
       #ifdef DEBUG
         std::cout << __FILE__ << ":" << __LINE__ << std::endl;
       #endif      
-      
       return true;
     }
-    
   }
   
   #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
   #endif
   
-  return false;          
+  return false;
 }
 
-template <typename BS >
-bool subset_of_interior(const DenotableSet< BS  > &A,
-        const Rectangle<typename BS::Real > &rect){
-  
+template <typename BS>
+bool subset_of_interior(const DenotableSet<BS>& A,
+                        const Rectangle<typename BS::Real>& rect)
+{
   #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
   #endif
@@ -545,18 +516,13 @@ bool subset_of_interior(const DenotableSet< BS  > &A,
   if (A.dimension()!=rect.dimension()) 
     throw std::invalid_argument("The denotable set and the rectangle have different space dimensions.");
   
-          
   for (size_t i=0; i<A.size() ; i++) {
-
     if (!subset_of_interior(A[i], rect)) {
-    
       #ifdef DEBUG
         std::cout << __FILE__ << ":" << __LINE__ << std::endl;
       #endif
-      
       return false;
     }
-    
   }
 
   #ifdef DEBUG
@@ -567,10 +533,10 @@ bool subset_of_interior(const DenotableSet< BS  > &A,
 }
 
 
-template <typename BS >
-DenotableSet< BS  > join(
-        const DenotableSet< BS  > &A, 
-        const DenotableSet< BS  > &B) {
+template <typename BS>
+DenotableSet<BS> join(const DenotableSet<BS>& A, 
+                      const DenotableSet<BS>& B) 
+{
 
   #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
@@ -579,9 +545,7 @@ DenotableSet< BS  > join(
   if (A.dimension()!=B.dimension()) 
     throw std::invalid_argument("The two denotable set have different space dimensions.");
   
-          
-  DenotableSet< BS  > ds_union(A);
-          
+  DenotableSet<BS> ds_union(A);
   ds_union.inplace_union(B);
 
   #ifdef DEBUG
@@ -592,22 +556,22 @@ DenotableSet< BS  > join(
           
 }
 
-template <typename BS >
-DenotableSet< BS  > closure_of_intersection_of_interior(
-        const DenotableSet< BS  > &A, 
-        const DenotableSet< BS  > &B) {
+template <typename BS>
+DenotableSet<BS> regular_intersection(const DenotableSet<BS>& A, 
+                                      const DenotableSet<BS>& B) 
+{
 
-  DenotableSet< BS  > ds_inter;
+  DenotableSet<BS> ds_inter;
   std::vector<BS> &vector=ds_inter._vector;
   
   #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
   #endif
           
-  if (A.dimension()!=B.dimension()) 
+  if (A.dimension()!=B.dimension()) {
     throw std::invalid_argument("The two denotable set have different space dimensions.");
-      
-          
+  }
+  
   for (size_t i=0; i<A.size(); i++) {
     for (size_t j=0; j<B.size(); j++) {
       if (intersects_interior(A[i],B[j])) {
@@ -623,10 +587,41 @@ DenotableSet< BS  > closure_of_intersection_of_interior(
   #endif
 
   return ds_inter;    
-          
 }
   
+
+
+template <typename BS>
+std::ostream& operator<<(std::ostream &os, 
+                         const DenotableSet<BS> &A)
+{
+  if (A.size() > 0) {
+    os << "BasicSet[0]=" << A[0];
+  }
+  for (size_t i=1; i<A.size(); ++i) {
+    os << std::endl << "BasicSet["<< i <<"]=" << A[i];
+  }
+  return os;
+}
+
+template <typename BS>
+std::istream& operator>>(std::istream &is, 
+                         DenotableSet<BS> &A)
+{
+  std::vector<BS>& vec(A._vector);
+  is >> vec;
+    
+  if(vec.size()==0) {
+    A._dimension = 0;
+  }
+  else {
+    A._dimension=vec[0].dimension();
+  }
   
+  return is;
+}
+
+
 }
 }
 

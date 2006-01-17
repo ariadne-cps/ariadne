@@ -115,10 +115,11 @@ class Polyhedron {
  public:
   typedef size_t size_type;
   typedef R Real;
-  typedef ::Ariadne::Geometry::State<R> State;
+  typedef Ariadne::Geometry::State<R> State;
   typedef std::vector<State> StateList;
-  typedef ::Ariadne::LinearAlgebra::vector<R> Vector;
-  typedef ::Ariadne::LinearAlgebra::matrix<R> Matrix;
+  typedef Ariadne::LinearAlgebra::vector<R> Vector;
+  typedef Ariadne::LinearAlgebra::matrix<R> Matrix;
+  typedef Ariadne::LinearAlgebra::matrix_row<const Matrix> Matrix_Row;
  public:
     /*! \brief Default constructor creates empty set. 
      */
@@ -196,7 +197,7 @@ class Polyhedron {
     /*! \brief Makes the polyhedron empty.
      */
     inline void clear() {
-      this->_ppl_poly=Parma_Polyhedra_Library::NNC_Polyhedron(this->dimension(), Parma_Polyhedra_Library::Polyhedron::EMPTY);;
+      this->_ppl_poly=Parma_Polyhedra_Library::NNC_Polyhedron(this->dimension(), Parma_Polyhedra_Library::Polyhedron::EMPTY);
     }
 
     /*! \brief The vertices of the Polyhedron. */
@@ -614,7 +615,8 @@ Polyhedron<R>::_ppl_interior() const
 template<typename R>
 inline
 Parma_Polyhedra_Library::Constraint
-_convert_to_PPL_constraint(const ::Ariadne::LinearAlgebra::vector<R> & v, 
+_convert_to_PPL_constraint(const Ariadne::LinearAlgebra::matrix_row< const 
+			Ariadne::LinearAlgebra::matrix<R> >& v, 
                            const R& s) 
 {
   Parma_Polyhedra_Library::Linear_Expression e;
@@ -640,12 +642,11 @@ template <typename R>
 Polyhedron<R>::Polyhedron(const Matrix& A, const Vector& b)
   : _ppl_poly(A.size1()) 
 {
-  Vector rw;
   Real cnst;
   Parma_Polyhedra_Library::Constraint_System cs;
   
   for(size_type i=0; i!=A.size1(); ++i) {
-    rw=row(A,i);
+    Matrix_Row rw(A,i);
     cnst=b[i];
     cs.insert(_convert_to_PPL_constraint(rw,cnst));
   }
@@ -660,7 +661,7 @@ Polyhedron<R>::Polyhedron(const std::vector<State>& states)
   Parma_Polyhedra_Library::Linear_Expression ppl_lin_expr;
   
   size_type n=states[0].dimension();
-  ::Ariadne::Geometry::State<Rational> s(n);
+  Ariadne::Geometry::State<Rational> s(n);
   for(size_type i=0; i!=states.size(); ++i) {
     for(size_type j=0; j!=n; ++j) {
       s[j]=convert_to<Rational>(states[i][j]);

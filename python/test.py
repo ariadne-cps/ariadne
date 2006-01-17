@@ -32,6 +32,7 @@ r=Rectangle("[0,1]x[1,2]x[2,3]z")
 print r
 r=Rectangle("[0,1]x[1,2] x [2,3]")
 print r
+r2=Rectangle("[0.5,7]x[-1,5] x [5,7]")
 r=Rectangle(" [0,1] x[1,2], x [2,3]")
 print r
 

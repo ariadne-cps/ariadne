@@ -30,6 +30,7 @@
 #define _ARIADNE_LINEAR_ALGEBRA_H
 
 #include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
 #include "numerical_type.h"
@@ -53,27 +54,29 @@ namespace Ariadne {
     inline matrix<Real> operator*(const matrix<Real>& A, matrix<Real>& B) {
       return prod(A,B);
     }
-      
-//    template <typename Real>
-//  inline matrix_row< matrix<Real> > row(const matrix<Real>& m, size_type i) {
-//    return matrix_row< matrix<Real> >(m,i);
-//    inline vector<Real> row(const matrix<Real>& m, typename matrix<Real>::size_type i) {
-//      matrix_row< matrix<Real> > mr(m,i);
-//      return vector<Real>(mr);
-      //return vector<Real>(matrix_row< matrix<Real> >(m,i));
- //   }
+    
+    /*
     template <typename Real>
     inline matrix_row< matrix<Real> > row(matrix<Real>& m, size_type i) {
       return matrix_row< matrix<Real> >(m,i);
     }
+
+    template <typename Real>
+    inline matrix_row< const matrix<Real> > row(const matrix<Real>& m, size_type i) {
+      return matrix_row< const matrix<Real> >(m,i);
+    }
+
     
     template <typename Real>
-//    inline matrix_column< matrix<Real> > column(const matrix<Real>& m, size_type i) {
-//      return matrix_column< matrix<Real> >(m,i);
-    inline vector<Real> column(const matrix<Real>& m, size_type i) {
-      return vector<Real>(matrix_column< matrix<Real> >(m,i));
+    inline matrix_column<Real> column(matrix<Real>& m, size_type i) {
+      return matrix_column< matrix<Real> >(m,i);
     }
     
+    template <typename Real>
+    inline matrix_column< const matrix<Real> > column(const matrix<Real>& m, size_type i) {
+      return matrix_column< const matrix<Real> >(m,i);
+    }
+    */
     
     template <typename Real>
     inline vector<Real> zero_vector(size_type dim) {

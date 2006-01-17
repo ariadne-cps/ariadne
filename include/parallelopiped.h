@@ -426,6 +426,7 @@ namespace Ariadne {
     bool inner_subset(const Parallelopiped<R>& A,
                       const Parallelopiped<R>& B) 
     {
+      /* FIXME: To optimize... */
       return inner_subset(Polyhedron<R>(A), Polyhedron<R>(B));
     }
 
@@ -434,6 +435,7 @@ namespace Ariadne {
     bool subset(const Parallelopiped<R>& A, 
                 const Parallelopiped<R>& B) 
     {
+      /* FIXME: To optimize... */
       return subset(Polyhedron<R>(A), Polyhedron<R>(B));
     }
     
@@ -442,6 +444,7 @@ namespace Ariadne {
     bool subset_of_interior(const Parallelopiped<R>& A,
                             const Parallelopiped<R>& B)
     {
+      /* FIXME: To optimize... */
       return subset_of_interior(Polyhedron<R>(A), Polyhedron<R>(B));
     }
 
@@ -455,22 +458,13 @@ namespace Ariadne {
     }
 
     
-    /*! \brief Tests inclusion of \a A om the interior of \a B. */
+    /*! \brief Tests proper inclusion of \a A in \a B. */
     template <typename R>
     bool inner_subset(const Parallelopiped<R>& A,
                       const ListSet<R,Parallelopiped>& B) 
     {
-      throw std::domain_error("subset_of_closed_cover(Parallelopiped, std::vector<Parallelopiped>) not implemented");
+      throw std::domain_error("inner_subset(Parallelopiped, ListSet<Parallelopiped>) not implemented");
     }
-
-    /*! \brief Tests inclusion of \a A in \a B. */
-    template <typename R>
-    bool inner_subset(const Parallelopiped<R>& A,
-                      const ListSet<R,Parallelopiped>& B) 
-    {
-      throw std::domain_error("subset_of_closed_cover(Parallelopiped, std::vector<Parallelopiped>) not implemented");
-    }
-
 
     template <typename R>
     std::ostream&

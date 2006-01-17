@@ -2,9 +2,8 @@ include ./config.mk
 
 .PHONY: lib python check clean
 
-all:  ${SRCDIR}/Makefile  ${EXAMPLEDIR}/Makefile ${PYTHONDIR}/Makefile
+all:  ${SRCDIR}/Makefile  ${PYTHONDIR}/Makefile
 	(cd ${SRCDIR}; ${MAKE} all);
-	(cd ${EXAMPLEDIR}; ${MAKE} all);
 	(cd ${PYTHONDIR}; ${MAKE} all);
 
 lib: 
@@ -27,3 +26,8 @@ install:
    
 check:
 	(cd ${TESTDIR}; ${MAKE});
+
+dep: 
+	(cd ${SRCDIR}; ${MAKE} dep);
+	(cd ${PYTHONDIR}; ${MAKE} dep);
+	 

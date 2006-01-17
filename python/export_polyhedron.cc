@@ -41,11 +41,13 @@ typedef Ariadne::Geometry::State<Real> RState;
 typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
 typedef Ariadne::Geometry::Parallelopiped<Real> RParallelopiped;
 typedef Ariadne::Geometry::Polyhedron<Real> RPolyhedron;
+typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
 
 typedef std::vector<RState> RStateList;
 
 using Ariadne::Geometry::intersection;
 using Ariadne::Geometry::regular_intersection;
+using Ariadne::Geometry::convex_hull;
 using Ariadne::Geometry::interiors_intersect;
 using Ariadne::Geometry::disjoint;
 using Ariadne::Geometry::inner_subset;
@@ -64,6 +66,7 @@ void export_polyhedron() {
   typedef RPolyhedron (*PolyBinFunc) (const RPolyhedron&, const RPolyhedron&);
   PolyBinFunc poly_intersection=&regular_intersection<Real>;
   PolyBinFunc poly_regular_intersection=&regular_intersection<Real>;
+  PolyBinFunc poly_convex_hull=&convex_hull<Real>;
   PolyBinPred poly_interiors_intersect=&interiors_intersect<Real>;
   PolyBinPred poly_disjoint=&disjoint<Real>;
   PolyBinPred poly_inner_subset=&inner_subset<Real>;
@@ -71,6 +74,7 @@ void export_polyhedron() {
 
   def("intersection", poly_intersection);
   def("regular_intersection", poly_regular_intersection);
+  def("convex_hull", poly_convex_hull);
   def("interiors_intersect", poly_interiors_intersect);
   def("disjoint", poly_disjoint);
   def("inner_subset", poly_inner_subset);

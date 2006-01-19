@@ -8,7 +8,7 @@ VERBATIM = yes
 PREFIX=${HOME}
 
 CC = gcc
-CXX = g++
+CXX = g++-4.0
 
 MAKE = make
 
@@ -19,8 +19,6 @@ EXAMPLEDIR = examples
 PYTHONDIR=python
 
 LIBGMPXX = -lgmpxx -lgmp
-LIBPPL = -L${HOME}/lib -lppl
-LIBSUPERLU = -L${HOME}/lib -lsuperlu
 
 SUBDIRS=${INCLUDEDIR} ${SRCDIR} ${TESTDIR} ${EXAMPLEDIR} ${PYTHONDIR}
 

@@ -33,7 +33,7 @@
 #include "python_utilities.h"
 
 typedef Ariadne::LinearAlgebra::matrix<Real> RMatrix;
-typedef Ariadne::Geometry::State<Real> RState;
+typedef Ariadne::Geometry::Point<Real> RPoint;
 typedef Ariadne::Interval<Real> RInterval;
 typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
 typedef Ariadne::Geometry::Simplex<Real> RSimplex;
@@ -69,9 +69,8 @@ void export_simplex() {
   def("subset", smplx_subset);
 
   class_<RSimplex>("Simplex",init<int>())
-    .def(init<RSimplex>())
-    .def(init< std::vector<RState> >())
-    .def(init< Ariadne::array<RState> >())
+    .def(init< std::vector<RPoint> >())
+    .def(init< Ariadne::array<RPoint> >())
     .def(init<RSimplex>())
     .def(init<std::string>())
     .def("empty", &RSimplex::empty)

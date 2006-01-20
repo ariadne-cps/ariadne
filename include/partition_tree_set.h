@@ -184,7 +184,7 @@ namespace Ariadne {
     class PartitionTreeCell {
      public:
       typedef R real_type;
-      typedef State<R> state_type;
+      typedef Point<R> state_type;
 
       /*!\brief Construct from a partition scheme and a binary word. */
       PartitionTreeCell(const PartitionScheme<R>& p, const BinaryWord& w)

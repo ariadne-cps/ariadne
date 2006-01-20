@@ -42,7 +42,7 @@
 #include "utility.h"
 #include "linear_algebra.h"
 #include "interval.h"
-#include "state.h"
+#include "point.h"
 #include "rectangle.h"
 #include "list_set.h"
 
@@ -121,7 +121,7 @@ namespace Ariadne {
       /*! \brief The type of denotable real number used for the corners. */
       typedef R Real;
       /*! \brief The type of denotable state contained by the rectangle. */
-      typedef State<R> State;
+      typedef Point<R> State;
       /*! \brief The type of matrix giving principal directions. */
       typedef ::Ariadne::LinearAlgebra::vector<R> Vector;
       /*! \brief The type of matrix giving principal directions. */
@@ -178,6 +178,17 @@ namespace Ariadne {
           this->_directions = original._directions;
         }
         return *this;
+      }
+      
+      /*! \brief A rectangle containing the given parallelopiped. */
+      inline Rectangle<R> bounding_box() const {
+        Vector offset(this->dimension());
+        for(size_type i=0; i!=this->dimension(); ++i) {
+          for(size_type j=0; i!=this->dimension(); ++j) {
+            offset[i] += abs(this->_directions(i,j));
+          }
+        }
+        return Rectangle<R>(this->centre()+offset, this->centre()-offset);
       }
       
       /*! \brief Convert to a polyhedron. */
@@ -403,6 +414,13 @@ namespace Ariadne {
       return disjoint(Polyhedron<R>(A), Polyhedron<R>(B));
     }
     
+    /*! \brief Tests disjointness */
+    template <typename R>
+    bool disjoint(const Rectangle<R>&A, const Parallelopiped<R>& B) 
+    {
+      return disjoint(Polyhedron<R>(A), Polyhedron<R>(B));
+    }
+    
     
     /*! \brief Tests intersection of interiors */
     template <typename R>
@@ -420,13 +438,36 @@ namespace Ariadne {
       return interiors_intersect(Polyhedron<R>(A), Polyhedron<R>(B));
     }
     
+    /*! \brief Tests intersection of interiors */
+    template <typename R>
+    bool interiors_intersect(const Rectangle<R>& A,
+                             const Parallelopiped<R>& B) 
+    {
+      return interiors_intersect(Polyhedron<R>(A), Polyhedron<R>(B));
+    }
+    
     
     /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     bool inner_subset(const Parallelopiped<R>& A,
                       const Parallelopiped<R>& B) 
     {
-      /* FIXME: To optimize... */
+      return inner_subset(Polyhedron<R>(A), Polyhedron<R>(B));
+    }
+
+    /*! \brief Tests inclusion of \a A in the interior of \a B. */
+    template <typename R>
+    bool inner_subset(const Parallelopiped<R>& A,
+                      const Rectangle<R>& B) 
+    {
+      return inner_subset(Polyhedron<R>(A), Polyhedron<R>(B));
+    }
+
+    /*! \brief Tests inclusion of \a A in the interior of \a B. */
+    template <typename R>
+    bool inner_subset(const Rectangle<R>& A,
+                      const Parallelopiped<R>& B) 
+    {
       return inner_subset(Polyhedron<R>(A), Polyhedron<R>(B));
     }
 
@@ -435,19 +476,9 @@ namespace Ariadne {
     bool subset(const Parallelopiped<R>& A, 
                 const Parallelopiped<R>& B) 
     {
-      /* FIXME: To optimize... */
       return subset(Polyhedron<R>(A), Polyhedron<R>(B));
     }
     
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
-    template <typename R>
-    bool subset_of_interior(const Parallelopiped<R>& A,
-                            const Parallelopiped<R>& B)
-    {
-      /* FIXME: To optimize... */
-      return subset_of_interior(Polyhedron<R>(A), Polyhedron<R>(B));
-    }
-
 
     /*! \brief Tests inclusion in an open cover.  */
     template <typename R>
@@ -458,13 +489,15 @@ namespace Ariadne {
     }
 
     
-    /*! \brief Tests proper inclusion of \a A in \a B. */
+    /*! \brief Tests inclusion of \a A om the interior of \a B. */
     template <typename R>
     bool inner_subset(const Parallelopiped<R>& A,
                       const ListSet<R,Parallelopiped>& B) 
     {
-      throw std::domain_error("inner_subset(Parallelopiped, ListSet<Parallelopiped>) not implemented");
+      throw std::domain_error("subset_of_closed_cover(Parallelopiped, std::vector<Parallelopiped>) not implemented");
     }
+
+
 
     template <typename R>
     std::ostream&

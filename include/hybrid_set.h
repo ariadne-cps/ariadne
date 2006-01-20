@@ -38,9 +38,9 @@ inline void _print_ds_(std::ostream &os,
   os << p;
 }
 
-namespace Ariadne {	
+namespace Ariadne {  
 namespace HybridDefinitions {
-	
+  
 template <typename LOC>
 class LocationDenotableSet;
 
@@ -59,7 +59,7 @@ std::ostream& operator<<(std::ostream &os,
   
   os << std::endl << "] ]";
   
-  return os;	
+  return os;  
 }
 
 template <typename LDS>
@@ -74,7 +74,7 @@ std::ostream& operator<<(std::ostream &os,
        << A._location_set[i];
   }
   
-  return os;	
+  return os;  
 }
 
 template < typename LOC >
@@ -148,7 +148,7 @@ class HybridDenotableSet {
  private:
   
   inline bool _insert_unordered(const DiscreteLocation &location, 
-                                const DenotableSet &A)	{
+                                const DenotableSet &A)  {
     
     for (size_t i=0; i<this->size(); i++) {
       
@@ -164,7 +164,7 @@ class HybridDenotableSet {
   }
   
   inline bool _insert_unordered(const DiscreteLocation &location, 
-                                const BasicSet &A)	{
+                                const BasicSet &A)  {
     
     for (size_t i=0; i<this->size(); i++) {
       
@@ -202,7 +202,7 @@ class HybridDenotableSet {
     if (this->_ordered) {
       (this->_location_set[loc.id()].set).inplace_union(A);
       
-      return;				
+      return;        
     }
     
     if (this->_insert_unordered(loc,A)) { 
@@ -216,7 +216,7 @@ class HybridDenotableSet {
     
     LocationDenotableSet set(loc,A);
     
-    (this->_location_set).push_back(set);		
+    (this->_location_set).push_back(set);    
     
 #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
@@ -230,14 +230,14 @@ class HybridDenotableSet {
     if (this->_ordered) {
       (this->_location_set[loc.id()].set).inplace_union(A);
       
-      return;				
+      return;        
     }
     
     if (this->_insert_unordered(loc,A)) return;
     
     LocationDenotableSet set(loc,A);
     
-    (this->_location_set).push_back(set);				
+    (this->_location_set).push_back(set);        
     
   }
   
@@ -246,7 +246,7 @@ class HybridDenotableSet {
     if (this->_ordered) {
       (this->_location_set[A.id()].set).inplace_union(A.set);
       
-      return;				
+      return;        
     }
     
     if (this->_insert_unordered(A.location,A.set)) return;
@@ -254,26 +254,23 @@ class HybridDenotableSet {
     (this->_location_set).push_back(A);
   }
   
-  inline size_t size() const {	
+  inline size_t size() const {  
     return (this->_location_set).size();
   }
   
   /*! \brief Copy the hybrid denotable set. */
-  inline HybridDenotableSet< LDS > &operator=(
-                                              const HybridDenotableSet< LDS > &A) {
-    
+  inline HybridDenotableSet< LDS >& 
+  operator=(const HybridDenotableSet< LDS > &A) {
     for (size_t i=0; i< A.size(); i++) {
       (this->_location_set).push_back(A._location_set[i]);
-    }				
+    }        
     
     return *this;
   }
   
-  inline const LDS &operator[](
-                               const size_t &index) const{
-    
+  inline const LDS&operator[](const size_t &index) const{
     if (index>=this->size()) {
-      throw std::invalid_argument("Index is bigger than vector size.");	
+      throw std::invalid_argument("Index is bigger than vector size.");  
     }
     
     return this->_location_set[index];
@@ -287,7 +284,7 @@ class HybridDenotableSet {
     std::vector<LocationDenotableSet> l_set=this->_location_set;
     
     if (index>=this->size()) {
-      throw std::invalid_argument("Index is bigger than vector size.");	
+      throw std::invalid_argument("Index is bigger than vector size.");  
     }
     
     for (i=0; i< index; i++) {
@@ -305,7 +302,7 @@ class HybridDenotableSet {
   order_using(const std::vector<DiscreteLocation> &l_vector) {
     
     size_t i,j,new_size=l_vector.size();
-    bool not_found=true;	
+    bool not_found=true;  
     
     std::vector<LocationDenotableSet> l_set;
     
@@ -326,9 +323,9 @@ class HybridDenotableSet {
           l_set[l_vector[j].id()]=loc_ds;
           
           not_found=false;
-        }			
+        }      
       }
-      if (not_found) {				
+      if (not_found) {
         throw std::invalid_argument("A discrete location is not present into the vector.");
       }
     }

@@ -39,7 +39,7 @@
 #define MAX_DIM 12
 #define MAX_BITSET 1<<MAX_DIM
 
-namespace Ariadne {	
+namespace Ariadne {
 namespace Geometry {
 
 template <typename R> class PartitionTree;
@@ -50,7 +50,7 @@ std::ostream& operator<<(std::ostream &os, const PartitionTreeNode &node);
 
 /*! \brief Intersect two subtrees. */
 PartitionTreeNode intersect(const PartitionTreeNode &A, const PartitionTreeNode &B);
-	
+
 /*! \brief Intersect two subtrees. */
 PartitionTreeNode join(const PartitionTreeNode &A, const PartitionTreeNode &B);
 
@@ -86,7 +86,7 @@ class PartitionTreeNode {
   
   /*! \brief  Returns true if the subtree is empty. */
   inline bool empty() const {
-    return 	(this->_empty);
+    return (this->_empty);
   }
   
   inline void set_not_empty() {
@@ -96,7 +96,7 @@ class PartitionTreeNode {
   
   /*! \brief  Returns true if the subtree is full. */
   inline bool full() const {
-    return 	((!this->_empty)&&(this->_leaf));
+    return ((!this->_empty)&&(this->_leaf));
   }
   
   inline void set_empty() {
@@ -121,7 +121,7 @@ class PartitionTreeNode {
   }
   
   /*! \brief Increases node's depth. */
-  inline void increase_depth() {	
+  inline void increase_depth() {
     
     this->_depth++;
     
@@ -129,7 +129,7 @@ class PartitionTreeNode {
       if (this->_sons[i]!=NULL) {
         (this->_sons[i])->increase_depth();
       }
-    }	
+    }
     
   }
   
@@ -151,7 +151,7 @@ class PartitionTreeNode {
           this->_level=(this->_sons[i])->_level+1;
         }
       }
-    }	
+    }
     
 #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
@@ -189,7 +189,7 @@ class PartitionTreeNode {
         /* intesect the two quardants */
         PartitionTreeNode *C=new PartitionTreeNode(intersect(*A._sons[i], *B._sons[i]));
         
-        /* if the intersection is not empty */						
+        /* if the intersection is not empty */
         if (!C->empty()) {
           
           /* insert the intersection at the end of son 
@@ -207,7 +207,7 @@ class PartitionTreeNode {
           delete C;
         }
         
-      } 				
+      }
       
     }
     
@@ -264,7 +264,7 @@ class PartitionTreeNode {
            * the son vector */
           this->_sons[i]=new PartitionTreeNode(*A._sons[i]);
         }
-      }						
+      }
       
     }
     
@@ -325,14 +325,14 @@ class PartitionTreeNode {
           
           this->_sons[i]=NULL;
         }
-      }							
+      }
       
     }
     
     /* compact node */
     this->compact_node();
     
-  }	
+  }
   
   void _clear_sons() {
     
@@ -370,7 +370,7 @@ class PartitionTreeNode {
     
 #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-#endif			
+#endif
     
     if (this->_dimension>MAX_DIM) 
       throw std::out_of_range("Wrong space dimension"); 
@@ -397,7 +397,7 @@ class PartitionTreeNode {
     
 #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-#endif		
+#endif
     
     (this->_sons).resize(A._bits_per_space_member());
     
@@ -406,13 +406,13 @@ class PartitionTreeNode {
       if (A._sons[i]!=NULL) {
         this->_sons[i]=new PartitionTreeNode(*A._sons[i]);
       } else {
-        this->_sons[i]=NULL;	
+        this->_sons[i]=NULL;
       }
-    }		
+    }
     
 #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-#endif			
+#endif
     
   }
   
@@ -426,7 +426,7 @@ class PartitionTreeNode {
     
 #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-#endif			
+#endif
     
     this->_clear_sons();
     
@@ -443,7 +443,7 @@ class PartitionTreeNode {
       if (A._sons[i]!=NULL) {
         this->_sons[i]=new PartitionTreeNode(*A._sons[i]);
       } else {
-        this->_sons[i]=NULL;	
+        this->_sons[i]=NULL;
       }
     }
     
@@ -518,7 +518,7 @@ class PartitionTreeNode {
             
           }
           
-        } 						
+        }
         
       }
       
@@ -528,7 +528,7 @@ class PartitionTreeNode {
     
     /* if A uses a quadrant which this object does not use*/
     return false;
-  }		
+  }
   
   /*! \brief Inplace join. */
   void inplace_union(const PartitionTreeNode &A){
@@ -538,7 +538,7 @@ class PartitionTreeNode {
     
     
     if (A.empty()||this->full()) {
-      return;				
+      return;
     }
     
     if (this->empty()||A.full()) {
@@ -561,7 +561,7 @@ class PartitionTreeNode {
   /*! \brief Intersect two subtrees. */
   friend PartitionTreeNode join(const PartitionTreeNode &A, const PartitionTreeNode &B);
   
-  //		friend class Ariadne::Geometry::IO_Operators::Exporter;		
+  //friend class Ariadne::Geometry::IO_Operators::Exporter;
 };
   
 /*! \brief Intersect two subtrees. */
@@ -572,7 +572,7 @@ PartitionTreeNode intersect(const PartitionTreeNode &A, const PartitionTreeNode 
   
   
   if (A._leaf||B.empty()) {
-    return B;				
+    return B;
   } else {
     if (B._leaf||A.empty()) {
       return A;
@@ -599,12 +599,12 @@ PartitionTreeNode join(const PartitionTreeNode &A, const PartitionTreeNode &B){
     throw std::domain_error("The two parameters have different space dimensions.");
   
   if (A.empty()||B.full()) {
-    return B;				
-  } 
+    return B;
+  }
   else {
     if (B.empty()||A.full()) {
       return A;
-    } 
+    }
     else {
       PartitionTreeNode C(A._dimension);
       
@@ -623,13 +623,13 @@ std::ostream& operator<<(std::ostream &os, const Ariadne::Geometry::PartitionTre
   if (node.full()) {
     os << "1]";
     return os;
-  } 
+  }
   
   if (node.empty()) {
     os << "0]";
     
     return os;
-  } 
+  }
   
   size_t idx_this=0;
     
@@ -639,11 +639,11 @@ std::ostream& operator<<(std::ostream &os, const Ariadne::Geometry::PartitionTre
     if ((node._space).test(i)) {
       os << *(node._sons[idx_this]);
       idx_this++;
-    } 
+    }
     else {
       /* if i is not used by A */
       os << "[]";
-    }							
+    }
   }
   os << " ]"; 
   

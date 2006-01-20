@@ -31,7 +31,7 @@
 #include "real_typedef.h"
 #include "python_utilities.h"
 
-typedef Ariadne::Geometry::State<Real> RState;
+typedef Ariadne::Geometry::Point<Real> RPoint;
 typedef Ariadne::Interval<Real> RInterval;
 typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
 typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Rectangle> RRectangleListSet;
@@ -71,7 +71,7 @@ void export_rectangle() {
   def("subset", rect_subset);
 
   class_<RRectangle>("Rectangle",init<int>())
-    .def(init<RState,RState>())
+    .def(init<RPoint,RPoint>())
     .def(init<RRectangle>())
     .def(init<std::string>())
     .def("empty", &RRectangle::empty)
@@ -83,6 +83,7 @@ void export_rectangle() {
     .def("__setitem__", &RRectangle::set_interval)
     .def("set_lower_bound", &RRectangle::set_lower_bound)
     .def("set_upper_bound", &RRectangle::set_upper_bound)
+    .def("bounding_box", &RRectangle::bounding_box)
     .def("lower_corner", &RRectangle::lower_corner)
     .def("upper_corner", &RRectangle::upper_corner)
     .def("lower", &RRectangle::lower_bound)

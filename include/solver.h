@@ -116,7 +116,7 @@ class Trace{
   Trace() {}
   
   inline const std::list<LocationTrace> &trace() const{
-    return this->_trace;	
+    return this->_trace;
   }
   
   inline const Trace<Real> &operator=(
@@ -170,7 +170,7 @@ class Solver{
   typedef typename State::Real Real;
   
   typedef HDS HybridDenotableSet;
-  typedef typename HybridDenotableSet::LocationDenotableSet LocationDenotableSet;		
+  typedef typename HybridDenotableSet::LocationDenotableSet LocationDenotableSet;
   
   typedef Ariadne::HybridDefinitions::HybridAutomatonID HybridAutomatonID;
   typedef Ariadne::HybridDefinitions::DiscreteLocationID DiscreteLocationID;
@@ -183,7 +183,7 @@ class Solver{
   
   HybridAutomatonID _automaton_id;
   
-  std::vector<Integrator> _integrators;	
+  std::vector<Integrator> _integrators;
   
   size_t _cache_size;
   
@@ -192,14 +192,14 @@ class Solver{
     
 #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-#endif	
+#endif
     
     /* if cache is not empty */
     if (ds_in_cache > 0 ) {
       
-#ifdef VERBATIM	
+#ifdef VERBATIM
       std::cout << "Flushing cache....";
-#endif				
+#endif
       
       /* add flow to the reached region of the current location */
       exporter.export_denotableset(maintain_cache);
@@ -209,7 +209,7 @@ class Solver{
       DenotableSet empty_ds;
       maintain_cache=empty_ds;
       
-#ifdef VERBATIM		
+#ifdef VERBATIM
       std::cout << "done" <<std::endl;
 #endif
       
@@ -217,7 +217,7 @@ class Solver{
     
 #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-#endif			
+#endif
     
   }
   
@@ -226,14 +226,14 @@ class Solver{
     
 #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-#endif	
+#endif
     
     /* if cache is not empty */
     if (ds_in_cache > 0 ) {
       
-#ifdef VERBATIM	
+#ifdef VERBATIM
       std::cout << "Flushing cache....";
-#endif				
+#endif
       
       /* add flow to the reached region of the current location */
       reach.inplace_union_bbox_intersection(maintain_cache);
@@ -243,7 +243,7 @@ class Solver{
       DenotableSet empty_ds;
       maintain_cache=empty_ds;
       
-#ifdef VERBATIM		
+#ifdef VERBATIM
       std::cout << "done" <<std::endl;
 #endif
       
@@ -251,7 +251,7 @@ class Solver{
     
 #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-#endif			
+#endif
     
   }
   
@@ -334,10 +334,10 @@ class Solver{
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
 #endif
     
-#ifdef VERBATIM	
+#ifdef VERBATIM
     uint unit=0;
     
-    if (from_reset) {			
+    if (from_reset) {
       std::cout << "done"<<std::endl;
     }
     
@@ -353,7 +353,7 @@ class Solver{
       
       /* not implemented yet
          if (subset_of_interior(ds0,reach_regions[id])) {
-         return true;	
+         return true;
          }*/
       
       maintain_cache.inplace_union(ds0);
@@ -361,8 +361,8 @@ class Solver{
     
     while (((t_max==0)||(t<t_max))&&(!ds0.empty())) {
       
-#ifdef VERBATIM	
-      if (unit>TIME_PER_UNIT) {				
+#ifdef VERBATIM
+      if (unit>TIME_PER_UNIT) {
         std::cout << "Time=" << t <<std::endl;
         unit=0;
       }
@@ -420,7 +420,7 @@ class Solver{
     this->_empty_cache(exporter,maintain_cache,ds_in_cache);
     
 #ifdef VERBATIM
-    if (from_reset) {			
+    if (from_reset) {
       std::cout << "Backtracking...";
     }
 #endif
@@ -521,7 +521,7 @@ class Solver{
     
     /* not implemented yet
        if (subset_of_interior(ds0,reach_regions[id])) {
-       return true;	
+       return true;
        }*/
     
     maintain_cache.inplace_union(ds0);
@@ -623,9 +623,9 @@ class Solver{
         }
         
         /* if I don't get reachability remove last trace entry */
-        bt->del_last_location_trace();	
+        bt->del_last_location_trace();
       }
-    }						
+    }
     
     return false;
   }
@@ -676,7 +676,7 @@ class Solver{
                                                        leaving_arcs)) {
           
           /* if I get reachability return true */
-          return true;				
+          return true;
         }
         
       }
@@ -721,7 +721,7 @@ class Solver{
   }
   
  public:
-  Solver(const size_t cache = 200): _used(false), _cache_size(cache){}	
+  Solver(const size_t cache = 200): _used(false), _cache_size(cache){}
   
   ~Solver() {
     this->_clean_solver();
@@ -760,8 +760,8 @@ class Solver{
                            unsigned int n, Real e, Trace &bt, 
                            Ariadne::Geometry::ApproxKind atype = Ariadne::Geometry::OVER) {
     
-    if 	(atype!= Ariadne::Geometry::OVER) {
-      throw std::invalid_argument("Not yet implemented.");	
+    if (atype!= Ariadne::Geometry::OVER) {
+      throw std::invalid_argument("Not yet implemented.");
     }
     
     if ((!this->_used)||(!this->_used_by(A))) {
@@ -769,13 +769,13 @@ class Solver{
     }
     
     if (!R_d.ordered()) {
-      R_d.order_using(A._locations);	
+      R_d.order_using(A._locations);
     }
     
     DenotableSet &ds0=R_s.set;
     DiscreteLocationID id=(R_s.location).id();
     
-    return 	this->_is_reachable(A, id, ds0,R_d,t_max,0,n,e,atype);
+    return this->_is_reachable(A, id, ds0,R_d,t_max,0,n,e,atype);
     
   }
   
@@ -813,8 +813,8 @@ class Solver{
                            unsigned int n, Real e, Trace &bt, 
                            Ariadne::Geometry::ApproxKind atype = Ariadne::Geometry::OVER) {
     
-    if 	(atype!= Ariadne::Geometry::OVER) {
-      throw std::invalid_argument("Not yet implemented.");	
+    if (atype!= Ariadne::Geometry::OVER) {
+      throw std::invalid_argument("Not yet implemented.");
     }
     
     if ((!this->_used)||(!this->_used_by(A))) {
@@ -822,7 +822,7 @@ class Solver{
     }
     
     if (!R_s.ordered()) {
-      R_s.order_using(A._locations);	
+      R_s.order_using(A._locations);
     }
     
     for (size_t i=0; i< R_s.size(); i++) {
@@ -831,7 +831,7 @@ class Solver{
         
         return true;
       }
-    }				
+    }
     
     return false;
   }
@@ -878,7 +878,7 @@ class Solver{
    */
   inline HybridDenotableSet evolve_for_time(const Automaton &A, 
                                             const HybridDenotableSet &R, Real t, 
-                                            unsigned int n, ApproxKind atype);				
+                                            unsigned int n, ApproxKind atype);
   
   /*! Evolves a set until immediately after the \a n-th reset, as 
    * long at this occurs withing time \a t.
@@ -915,8 +915,8 @@ class Solver{
                     unsigned int n, Real e, Exporter &exporter,
                     Ariadne::Geometry::ApproxKind atype = Ariadne::Geometry::OVER) {
     
-    if 	(atype!= Ariadne::Geometry::OVER) {
-      throw std::invalid_argument("Not yet implemented.");	
+    if (atype!= Ariadne::Geometry::OVER) {
+      throw std::invalid_argument("Not yet implemented.");
     }
     
     if ((!this->_used)||(!this->_used_by(A))) {
@@ -961,8 +961,8 @@ class Solver{
                     unsigned int n, Real e, Exporter &exporter,
                     Ariadne::Geometry::ApproxKind atype = Ariadne::Geometry::OVER) {
     
-    if 	(atype!= Ariadne::Geometry::OVER) {
-      throw std::invalid_argument("Not yet implemented.");	
+    if (atype!= Ariadne::Geometry::OVER) {
+      throw std::invalid_argument("Not yet implemented.");
     }
     
     if ((!this->_used)||(!this->_used_by(A))) {
@@ -970,7 +970,7 @@ class Solver{
     }
     
     if (!init.ordered()) {
-      init.order_using(A._locations);	
+      init.order_using(A._locations);
     }
     bool fix_point=true, local_fix_point;
     
@@ -983,9 +983,9 @@ class Solver{
                                    (init[i]).set, t_max, zero, n, e, atype, exporter);
       
       fix_point=fix_point && local_fix_point;
-    }				
+    }
     
-    return fix_point;	
+    return fix_point;
   }
   
   /*! \brief Compute an approximation to the reachable set.
@@ -1016,8 +1016,8 @@ class Solver{
                     unsigned int n, Real e, MaintainDenotableSet &reach_set,
                     Ariadne::Geometry::ApproxKind atype = Ariadne::Geometry::OVER) {
     
-    if 	(atype!= Ariadne::Geometry::OVER) {
-      throw std::invalid_argument("Not yet implemented.");	
+    if (atype!= Ariadne::Geometry::OVER) {
+      throw std::invalid_argument("Not yet implemented.");
     }
     
     if ((!this->_used)||(!this->_used_by(A))) {
@@ -1072,8 +1072,8 @@ class Solver{
                     unsigned int n, Real e, MaintainDenotableSet &reach_set,
                     Ariadne::Geometry::ApproxKind atype = Ariadne::Geometry::OVER) {
     
-    if 	(atype!= Ariadne::Geometry::OVER) {
-      throw std::invalid_argument("Not yet implemented.");	
+    if (atype!= Ariadne::Geometry::OVER) {
+      throw std::invalid_argument("Not yet implemented.");
     }
     
     if ((!this->_used)||(!this->_used_by(A))) {
@@ -1081,7 +1081,7 @@ class Solver{
     }
     
     if (!init.ordered()) {
-      init.order_using(A._locations);	
+      init.order_using(A._locations);
     }
     bool fix_point=true, local_fix_point;
     
@@ -1107,9 +1107,9 @@ class Solver{
       for (size_t j=0; j< init.size(); j++) {
         reach_set.inplace_union(reach[i]);
       }
-    }				
+    }
     
-    return fix_point;	
+    return fix_point;
   }
   
   /*! \brief Compute an outer approximation to the reachable set.
@@ -1135,14 +1135,14 @@ class Solver{
   /*! Computes a map-based description of the reachability 
    * relation determined by the function reach.
    */
-  /*		Map reachability(const Automaton &A, 
+  /*Map reachability(const Automaton &A, 
                 Rational t, 
                 int n, Rational e) = 0;
   */
   /*! Computes a map-based description of the chain-reachability 
    * relation determined by the function chainreach.
    */
-  /*		Map *chainreachability(const Automaton &A, 
+  /* Map *chainreachability(const Automaton &A, 
                 Rational t, 
                 int n, Rational e) = 0;
   */

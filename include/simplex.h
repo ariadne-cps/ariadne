@@ -43,7 +43,7 @@
 #include "utility.h"
 #include "linear_algebra.h"
 #include "interval.h"
-#include "state.h"
+#include "point.h"
 #include "rectangle.h"
 #include "polyhedron.h"
 #include "list_set.h"
@@ -124,7 +124,7 @@ namespace Ariadne {
       /*! \brief The type of denotable real number used for the corners. */
       typedef R Real;
       /*! \brief The type of denotable state contained by the simplex. */
-      typedef State<R> State;
+      typedef Point<R> State;
      private:
       /* Simplex's vertices. */
       array<State> _vertices;
@@ -252,60 +252,122 @@ namespace Ariadne {
     
     /*! \brief Tests disjointness */
     template <typename R>
-    bool disjoint(const Simplex<R>& A, const Simplex<R>& B) 
+    inline bool disjoint(const Simplex<R>& A, const Simplex<R>& B) 
     {
       return disjoint(Polyhedron<R>(A),Polyhedron<R>(B));
     }
     
     /*! \brief Tests disjointness */
     template <typename R>
-    bool disjoint(const Simplex<R>& A, const Rectangle<R>& B) 
+    inline bool disjoint(const Simplex<R>& A, const Rectangle<R>& B) 
     {
       return disjoint(Polyhedron<R>(A),Polyhedron<R>(B));
     }
     
+    /*! \brief Tests disjointness */
+    template <typename R>
+    inline bool disjoint(const Rectangle<R>& A, const Simplex<R>& B) 
+    {
+      return disjoint(B,A);
+    }
+    
+    /*! \brief Tests disjointness */
+    template <typename R>
+    inline bool disjoint(const Simplex<R>& A, const Polyhedron<R>& B) 
+    {
+      return disjoint(Polyhedron<R>(A),B);
+    }
+    
+    /*! \brief Tests disjointness */
+    template <typename R>
+    inline bool disjoint(const Polyhedron<R>& A, const Simplex<R>& B) 
+    {
+      return disjoint(B,A);
+    }
+    
     
     /*! \brief Tests intersection of interiors */
     template <typename R>
-    bool interiors_intersect(const Simplex<R>& A,
+    inline bool interiors_intersect(const Simplex<R>& A,
+                                    const Simplex<R>& B) 
+    {
+      return interiors_intersect(Polyhedron<R>(A),Polyhedron<R>(B));
+    }
+    
+    /*! \brief Tests intersection of interiors */
+    template <typename R>
+    inline bool interiors_intersect(const Simplex<R>& A,
+                                    const Rectangle<R>& B) 
+    {
+      return interiors_intersect(Polyhedron<R>(A),Polyhedron<R>(B));
+    }
+    
+    /*! \brief Tests intersection of interiors */
+    template <typename R>
+    inline bool interiors_intersect(const Rectangle<R>& A,
+                                    const Simplex<R>& B) 
+    {
+      return interiors_intersect(B,A);
+    }
+    
+    /*! \brief Tests intersection of interiors */
+    template <typename R>
+    inline bool interiors_intersect(const Simplex<R>& A,
+                                    const Polyhedron<R>& B) 
+    {
+      return interiors_intersect(Polyhedron<R>(A),B);
+    }
+    
+    /*! \brief Tests intersection of interiors */
+    template <typename R>
+    inline bool interiors_intersect(const Polyhedron<R>& A,
+                                    const Simplex<R>& B) 
+    {
+      return interiors_intersect(B,A);
+    }
+    
+    
+    /*! \brief Tests inclusion of \a A in the interior of \a B. */
+    template <typename R>
+    inline bool inner_subset(const Simplex<R>& A,
                              const Simplex<R>& B) 
     {
-      return interiors_intersect(Polyhedron<R>(A),Polyhedron<R>(B));
+      return inner_subset(Polyhedron<R>(A),Polyhedron<R>(B));
     }
-    
-    /*! \brief Tests intersection of interiors */
+
+    /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
-    bool interiors_intersect(const Simplex<R>& A,
+    inline bool inner_subset(const Simplex<R>& A,
                              const Rectangle<R>& B) 
     {
-      return interiors_intersect(Polyhedron<R>(A),Polyhedron<R>(B));
+      return inner_subset(Polyhedron<R>(A),Polyhedron<R>(B));
     }
+
+    /*! \brief Tests inclusion of \a A in the interior of \a B. */
+    template <typename R>
+    inline bool inner_subset(const Rectangle<R>& A,
+                             const Simplex<R>& B) 
+    {
+      return inner_subset(B,A);
+    }
+
+    /*! \brief Tests inclusion of \a A in the interior of \a B. */
+    template <typename R>
+    inline bool inner_subset(const Simplex<R>& A,
+                             const Polyhedron<R>& B) 
+    {
+      return inner_subset(Polyhedron<R>(A),B);
+    }
+
+    /*! \brief Tests inclusion of \a A in the interior of \a B. */
+    template <typename R>
+    inline bool inner_subset(const Polyhedron<R>& A,
+                             const Simplex<R>& B) 
+    {
+      return inner_subset(B,A);
+    }
+
     
-    
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
-    template <typename R>
-    bool inner_subset(const Simplex<R>& A,
-                      const Simplex<R>& B) 
-    {
-      return inner_subset(Polyhedron<R>(A),Polyhedron<R>(B));
-    }
-
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
-    template <typename R>
-    bool inner_subset(const Simplex<R>& A,
-                      const Rectangle<R>& B) 
-    {
-      return inner_subset(Polyhedron<R>(A),Polyhedron<R>(B));
-    }
-
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
-    template <typename R>
-    bool inner_subset(const Rectangle<R>& A,
-                      const Simplex<R>& B) 
-    {
-      return inner_subset(Polyhedron<R>(A),Polyhedron<R>(B));
-    }
-
     /*! \brief Tests inclusion of \a A in \a B. */
     template <typename R>
     bool subset(const Simplex<R>& A, 

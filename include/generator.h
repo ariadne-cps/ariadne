@@ -33,7 +33,7 @@
 namespace Ariadne {
 
 namespace Geometry {
-  template<typename R> class State;
+  template<typename R> class Point;
   template<typename R> class Polyhedron;
   template<typename R> Polyhedron<R> minkowski_sum(const Polyhedron<R>& A,
                                                    const Polyhedron<R>& B);
@@ -55,7 +55,7 @@ class GeneratorSystem {
   
   typedef boost::numeric::ublas::matrix<R> Matrix;
   typedef boost::numeric::ublas::vector<R> Vector;
-  typedef Ariadne::Geometry::State<R> Point;
+  typedef Ariadne::Geometry::Point<R> State;
 
   typedef std::vector<GeneratorType> TypeVector;
   

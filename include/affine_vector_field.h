@@ -30,7 +30,7 @@
 #include "affine_map.h"
 #include "approx_type.h"
 
-namespace Ariadne {	
+namespace Ariadne {
 namespace VectorField{
 
 enum AffineKind {
@@ -47,13 +47,13 @@ integrate(const AffineVectorField<R>& vf, const Geometry::Polyhedron<R> p, R t, 
 
 
 template <typename R>
-class AffineVectorField : public VectorField<R,Geometry::State> 
+class AffineVectorField : public VectorField<R,Geometry::Point> 
 {
   typedef typename Geometry::Polyhedron<R> Polyhedron;
 
  public:
   typedef R Real;
-  typedef typename Geometry::State<Real> State;
+  typedef typename Geometry::Point<Real> State;
   
   typedef typename boost::numeric::ublas::matrix<Real> Matrix;
   typedef typename boost::numeric::ublas::vector<Real> Vector;
@@ -88,7 +88,7 @@ template<class R>
 class AffineMapIntegrator<R,Geometry::Polyhedron> 
 {
   typedef R Real;
-  typedef Geometry::State<Real> State;
+  typedef Geometry::Point<Real> State;
   typedef Geometry::Polyhedron<Real> BasicSet;
   typedef Geometry::Polyhedron<Real> Polyhedron;
   typedef Geometry::ListSet<Real,Polyhedron> DenotableSet;
@@ -108,7 +108,7 @@ class AffineMapIntegrator<R,Geometry::Polyhedron>
   inline BasicSet integrate(const VectorField& vf,
                             const BasicSet& A, 
                             const Real& t) 
-  { 		
+  {
     return solution_map(vf,h)(A); 
   }
       
@@ -194,7 +194,7 @@ integrate(const VectorField& vf,
                                         const Ariadne::Geometry::ApproxKind& atype) {
     
     return (this->_bs_i).get_flow_tube_to(A,B,
-                                          sol_map,atype);				
+                                          sol_map,atype);
   }
   
   inline DenotableSet get_flow_tube_from_to(const DenotableSet& A, 
@@ -212,24 +212,24 @@ integrate(const VectorField& vf,
       flow_tube.inplace_union(
                               (this->_bs_i).get_flow_tube_from_to(A[i], B[i],
                                                                   sol_map,atype));
-    }	
+    }
     
 #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
 #endif
     
-    return flow_tube;				
+    return flow_tube;
   }
   
   inline AffineIntegrator& operator()(const  VectorFieldMap& vfield) {
     
     this->_vf_map=vfield;
     
-    return *this;			
+    return *this;
   }
   
   inline VectorFieldMap& vector_field() const {
-    return 	_vf_map;
+    return _vf_map;
   }
   
  private:

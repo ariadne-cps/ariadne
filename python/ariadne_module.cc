@@ -24,7 +24,7 @@
 
 #include "numerical_type.h"
 #include "interval.h"
-#include "state.h"
+#include "point.h"
 #include "rectangle.h"
 #include "list_set.h"
 

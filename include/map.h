@@ -25,29 +25,29 @@
 #ifndef _ARIADNE_MAP_H
 #define _ARIADNE_MAP_H
 
-#include "state.h"
+#include "point.h"
 #include "list_set.h"
 
-namespace Ariadne {	
+namespace Ariadne {
 namespace Map{
-	
+
 enum MapKind {
-	LINEAR,
-	AFFINE,
-	GENERAL
+  LINEAR,
+  AFFINE,
+  GENERAL
 };
 
 enum MapResultKind {
-	SINGLE_VALUE,
-	MULTI_VALUE
+  SINGLE_VALUE,
+  MULTI_VALUE
 };
 
 }
 }
 
-namespace Ariadne {	
+namespace Ariadne {
 namespace Map {
-	
+
 template <typename R, template<typename> class S>
 class Map {
  public:

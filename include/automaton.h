@@ -32,27 +32,27 @@
 #include "discrete_trans.h"
 #include "discrete_location.h"
 
-namespace Ariadne {	
+namespace Ariadne {  
 namespace HybridDefinitions {
-	
+  
 /*! \typedef HybridAutomatonID
  *  \brief It's the type of the automaton's univocal identifier. 
- */	
+ */  
 typedef size_t HybridAutomatonID;
-	
+  
 }
 }
 
 #include "solver.h"
 
-namespace Ariadne {	
+namespace Ariadne {  
 namespace HybridDefinitions {
 
 template < typename LDT >
 class HybridAutomaton;
-	
+  
 template < typename LDT>
-inline void dot_print(const HybridAutomaton< LDT >& A){					
+inline void dot_print(const HybridAutomaton< LDT >& A){          
   std::ofstream fos;
   
   std::string f_name=A.name();
@@ -73,7 +73,7 @@ inline void dot_print(const HybridAutomaton< LDT >& A){
       fos << "\"" <<  l_name << "\" -> \"" 
           << (((A._automaton[i])[j]).destination()).name() 
           << "\" [ label=\"a_" << arc_number++ << "\" ]; " << std::endl;
-    }			
+    }      
   }
   
   fos << "}" << std::endl;
@@ -111,7 +111,7 @@ class HybridAutomaton
   /*! \brief The list of the automaton's locations. */
   std::vector<DiscreteLocation> _locations;
   
-  /*! \brief The discrete automaton. */	
+  /*! \brief The discrete automaton. */
   std::vector< std::vector<LeavingTrans> > _automaton;
   
   /*! \brief The automaton space dimension. */
@@ -121,7 +121,7 @@ class HybridAutomaton
   
   /*! \brief This is a hybrid automaton class constructor.
    *  
-   * This constructor initializes the object of the 
+   * This constructor initializes the object of the
    * hybrid automaton class.
    * \param name is the name of the hybrid automaton.
    */
@@ -130,7 +130,7 @@ class HybridAutomaton
   /*! \brief  This is the destructor of the class hybrid 
    * automaton.
    *
-   * This destructor deletes in a safe way an object of the  
+   * This destructor deletes in a safe way an object of the
    * hybrid automaton class.
    */
   ~HybridAutomaton() {

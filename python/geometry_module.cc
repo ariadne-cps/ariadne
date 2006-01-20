@@ -24,7 +24,7 @@
 
 #include "numerical_type.h"
 #include "interval.h"
-#include "state.h"
+#include "point.h"
 #include "rectangle.h"
 #include "parallelopiped.h"
 #include "list_set.h"
@@ -53,6 +53,8 @@ void export_polyhedron();
 void export_list_set();
 void export_grid();
 void export_partition_tree();
+
+void export_polynomial_map();
 
 typedef Ariadne::Interval<Real> RInterval;
 typedef Ariadne::Geometry::Rectangle<Real> RRectangle;

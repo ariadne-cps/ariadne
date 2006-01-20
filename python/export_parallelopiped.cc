@@ -33,7 +33,7 @@
 #include "python_utilities.h"
 
 typedef Ariadne::LinearAlgebra::matrix<Real> RMatrix;
-typedef Ariadne::Geometry::State<Real> RState;
+typedef Ariadne::Geometry::Point<Real> RPoint;
 typedef Ariadne::Interval<Real> RInterval;
 typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
 typedef Ariadne::Geometry::Parallelopiped<Real> RParallelopiped;
@@ -53,26 +53,38 @@ using boost::python::return_value_policy;
 using boost::python::copy_const_reference;
 
 void export_parallelopiped() {
-  typedef bool (*PlpdBinPred) (const RParallelopiped&, const RParallelopiped&);
+  typedef bool (*PlpdPlpdBinPred) (const RParallelopiped&, const RParallelopiped&);
   typedef bool (*PlpdRectBinPred) (const RParallelopiped&, const RRectangle&);
+  typedef bool (*RectPlpdBinPred) (const RRectangle&, const RParallelopiped&);
+  PlpdPlpdBinPred plpd_plpd_interiors_intersect=&interiors_intersect<Real>;
   PlpdRectBinPred plpd_rect_interiors_intersect=&interiors_intersect<Real>;
-  PlpdBinPred plpd_interiors_intersect=&interiors_intersect<Real>;
-  PlpdBinPred plpd_disjoint=&disjoint<Real>;
-  PlpdBinPred plpd_inner_subset=&inner_subset<Real>;
-  PlpdBinPred plpd_subset=&subset<Real>;
+  RectPlpdBinPred rect_plpd_interiors_intersect=&interiors_intersect<Real>;
+  PlpdPlpdBinPred plpd_plpd_disjoint=&disjoint<Real>;
+  PlpdRectBinPred plpd_rect_disjoint=&disjoint<Real>;
+  RectPlpdBinPred rect_plpd_disjoint=&disjoint<Real>;
+  PlpdPlpdBinPred plpd_plpd_inner_subset=&inner_subset<Real>;
+  PlpdRectBinPred plpd_rect_inner_subset=&inner_subset<Real>;
+  RectPlpdBinPred rect_plpd_inner_subset=&inner_subset<Real>;
+  PlpdPlpdBinPred plpd_plpd_subset=&subset<Real>;
 
-  def("interiors_intersect", plpd_interiors_intersect);
+  def("interiors_intersect", plpd_plpd_interiors_intersect);
   def("interiors_intersect", plpd_rect_interiors_intersect);
-  def("disjoint", plpd_disjoint);
-  def("inner_subset", plpd_inner_subset);
+  def("interiors_intersect", rect_plpd_interiors_intersect);
+  def("disjoint", plpd_plpd_disjoint);
+  def("disjoint", plpd_rect_disjoint);
+  def("disjoint", rect_plpd_disjoint);
+  def("inner_subset", plpd_plpd_inner_subset);
+  def("inner_subset", plpd_rect_inner_subset);
+  def("inner_subset", rect_plpd_inner_subset);
 
-  def("subset", plpd_subset);
+  def("subset", plpd_plpd_subset);
 
   class_<RParallelopiped>("Parallelopiped",init<int>())
-    .def(init<RState,RMatrix>())
+    .def(init<RPoint,RMatrix>())
     .def(init<RParallelopiped>())
     .def(init<RRectangle>())
     .def(init<std::string>())
+    .def("bounding_box", &RParallelopiped::bounding_box)
     .def("empty", &RParallelopiped::empty)
     .def("empty_interior", &RParallelopiped::empty_interior)
     .def("dimension", &RParallelopiped::dimension)

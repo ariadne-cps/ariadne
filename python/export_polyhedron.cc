@@ -37,17 +37,15 @@
 typedef Ariadne::LinearAlgebra::matrix<Real> RMatrix;
 typedef Ariadne::LinearAlgebra::vector<Real> RVector;
 
-typedef Ariadne::Geometry::State<Real> RState;
+typedef Ariadne::Geometry::Point<Real> RPoint;
 typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
 typedef Ariadne::Geometry::Parallelopiped<Real> RParallelopiped;
 typedef Ariadne::Geometry::Polyhedron<Real> RPolyhedron;
-typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
 
-typedef std::vector<RState> RStateList;
+typedef std::vector<RPoint> RPointList;
 
 using Ariadne::Geometry::intersection;
 using Ariadne::Geometry::regular_intersection;
-using Ariadne::Geometry::convex_hull;
 using Ariadne::Geometry::interiors_intersect;
 using Ariadne::Geometry::disjoint;
 using Ariadne::Geometry::inner_subset;
@@ -66,7 +64,6 @@ void export_polyhedron() {
   typedef RPolyhedron (*PolyBinFunc) (const RPolyhedron&, const RPolyhedron&);
   PolyBinFunc poly_intersection=&regular_intersection<Real>;
   PolyBinFunc poly_regular_intersection=&regular_intersection<Real>;
-  PolyBinFunc poly_convex_hull=&convex_hull<Real>;
   PolyBinPred poly_interiors_intersect=&interiors_intersect<Real>;
   PolyBinPred poly_disjoint=&disjoint<Real>;
   PolyBinPred poly_inner_subset=&inner_subset<Real>;
@@ -74,7 +71,6 @@ void export_polyhedron() {
 
   def("intersection", poly_intersection);
   def("regular_intersection", poly_regular_intersection);
-  def("convex_hull", poly_convex_hull);
   def("interiors_intersect", poly_interiors_intersect);
   def("disjoint", poly_disjoint);
   def("inner_subset", poly_inner_subset);
@@ -82,17 +78,18 @@ void export_polyhedron() {
 
   class_<RPolyhedron>("Polyhedron",init<int>())
     .def(init<RMatrix,RVector>())
-    .def(init<RStateList>())
+    .def(init<RPointList>())
     .def(init<RPolyhedron>())
     .def(init<RRectangle>())
     .def(init<RParallelopiped>())
     .def("dimension", &RPolyhedron::dimension)
+    .def("vertices", &RPolyhedron::vertices)
     .def(str(self))    // __str__
   ;
   
-  class_<RStateList>("StateList",init<>())
-    .def("size", &RStateList::size)
-    .def("append", &RStateList::push_back)
+  class_<RPointList>("PointList",init<>())
+    .def("size", &RPointList::size)
+    .def("append", &RPointList::push_back)
 //    .def("__getitem__", &const RStateList::operator[], return_value_policy<copy_const_reference>())
     .def(str(self))    // __str__
   ;

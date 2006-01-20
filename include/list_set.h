@@ -207,7 +207,7 @@ namespace Ariadne {
       inline void
       set_precision_to_upperapproximating(const Real &delta)  {
         for (size_t i=0; i< this->size(); i++) {
-            //				(this->_vector[i]).set_precision_to_upperapproximating(delta);
+            // (this->_vector[i]).set_precision_to_upperapproximating(delta);
         }
       }
 
@@ -434,7 +434,7 @@ namespace Ariadne {
        *
        * Evalutates the union of two denotable sets.
        * \param A is a denotable set.
-       * \param B	is a denotable set.
+       * \param B is a denotable set.
        * \return The union of A and B.
        */
       //FIXME: Compiler doesn't like this

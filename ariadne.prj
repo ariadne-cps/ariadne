@@ -99,7 +99,6 @@ module.include.files=\
 	sequence.h\
 	set_const.h\
 	solver.h\
-	state.h\
 	utility.h\
 	vector_field.h\
 	grid_set.h\
@@ -107,7 +106,8 @@ module.include.files=\
 	simplex.h\
 	documentation.h\
 	matlab_export.h\
-	pov_export.h
+	pov_export.h\
+	point.h
 
 module.source.name=src
 module.source.type=

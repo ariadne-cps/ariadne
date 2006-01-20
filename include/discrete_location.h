@@ -32,189 +32,189 @@ namespace Ariadne {
 namespace HybridDefinitions {
 
 template < typename LDT > class HybridAutomaton;
-	
+  
 /*! \typedef DiscreteLocationID
  *  \brief It's the type of the discrete location's univocal identifier. 
- */	
-typedef size_t DiscreteLocationID;	
+ */  
+typedef size_t DiscreteLocationID;  
 
 /*! \brief The discrete location type. */
 template <typename VF >
 class DiscreteLocation{
 
-	public:
-		typedef VF VectorField;
-		typedef typename VectorField::VectorFieldMap VectorFieldMap;
-		typedef typename VectorField::DenotableSet DenotableSet;
-		typedef typename DenotableSet::BasicSet BasicSet;
-		typedef typename BasicSet::State State;
-		typedef typename State::Real Real;
-		
-	
-		template < typename LDT >
-		friend class HybridAutomaton;
-			
-		template < typename LDS >
-		friend class HybridDenotableSet;
-	private:
-		/*! \brief The discrete location's identificator. */
-		DiscreteLocationID _id;
-	
-		/*! \brief The discrete location's name. */
-		std::string _name;
-	
-		/*! \brief The discrete location's vector field. */
-		VectorField _vfield;
-	
-		/*! \brief The discrete location's invariant. */
-		DenotableSet _invariant;
-	
-		/*! \brief Indicates if this location has been inserted into an automaton. */
-		bool _in_automaton;
-	
-				
-		/*! \brief Sets the discrete location's id. 
-		 *
-		 * \param new_id is the new location's id.
-		 */
-		inline void _set_id(const DiscreteLocationID new_id) {
-			this->_id=new_id;
-			
-			this->_in_automaton=true;
-		}
-	
-	public:	
-	
-		/*! \brief This is a discrete location class constructor.
-		 *  
-		 * This constructor initializes the object of the 
-		 * discrete location class.
-		 * \param name is the name of the discrete location.
-		 * \param vfield is the location's vector field.
-		 */
-		DiscreteLocation(const std::string &name, 
-										const VectorField &vfield):
-				_name(name), _vfield(vfield), 
-				_invariant(vfield.dimension()), _in_automaton(false) {}
-					
-		/*! \brief This is a discrete location class constructor.
-		 *  
-		 * This constructor initializes the object of the 
-		 * discrete location class.
-		 * \param name is the name of the discrete location.
-		 * \param vfield is the location's vector field.
-		 * \param invariant is the location's invariant.
-		 */
-		DiscreteLocation(const std::string &name, 
-										const VectorField &vfield, 
-										const DenotableSet &invariant):
-					
-				_name(name), _vfield(vfield), 
-				_invariant(invariant), _in_automaton(false) {
-					
-					
-			if (vfield.dimension()!=invariant.dimension()) {
-				throw std::invalid_argument("The invariant and the vector field have different space dimensions.");
-			}
-		}
-			
-		/*! \brief This is a discrete location class constructor.
-		 *  
-		 * This constructor initializes the object of the 
-		 * discrete location class.
-		 * \param name is the name of the discrete location.
-		 * \param vfield is the location's vector field.
-		 * \param invariant is the location's invariant.
-		 */
-		DiscreteLocation(const std::string &name, 
-										const VectorField &vfield, 
-										const BasicSet &invariant):
-					
-				_name(name), _vfield(vfield), 
-				_in_automaton(false) {
-					
-					
-			if (vfield.dimension()!=invariant.dimension()) {
-				throw std::invalid_argument("The invariant and the vector field have different space dimensions.");
-			}
-			
-			DenotableSet DS_inv(invariant);
-			
-			this->_invariant=DS_inv;
-		}
-		
-		/*! \brief This is a discrete location class constructor.
-		 *  
-		 * This constructor initializes the object of the 
-		 * discrete location class.
-		 * \param orig is the original object.
-		 */
-		DiscreteLocation(
-					const DiscreteLocation<VF> &orig): 
+  public:
+    typedef VF VectorField;
+    typedef typename VectorField::VectorFieldMap VectorFieldMap;
+    typedef typename VectorField::DenotableSet DenotableSet;
+    typedef typename DenotableSet::BasicSet BasicSet;
+    typedef typename BasicSet::State State;
+    typedef typename State::Real Real;
+    
+  
+    template < typename LDT >
+    friend class HybridAutomaton;
+      
+    template < typename LDS >
+    friend class HybridDenotableSet;
+  private:
+    /*! \brief The discrete location's identificator. */
+    DiscreteLocationID _id;
+  
+    /*! \brief The discrete location's name. */
+    std::string _name;
+  
+    /*! \brief The discrete location's vector field. */
+    VectorField _vfield;
+  
+    /*! \brief The discrete location's invariant. */
+    DenotableSet _invariant;
+  
+    /*! \brief Indicates if this location has been inserted into an automaton. */
+    bool _in_automaton;
+  
+        
+    /*! \brief Sets the discrete location's id. 
+     *
+     * \param new_id is the new location's id.
+     */
+    inline void _set_id(const DiscreteLocationID new_id) {
+      this->_id=new_id;
+      
+      this->_in_automaton=true;
+    }
+  
+  public:  
+  
+    /*! \brief This is a discrete location class constructor.
+     *  
+     * This constructor initializes the object of the 
+     * discrete location class.
+     * \param name is the name of the discrete location.
+     * \param vfield is the location's vector field.
+     */
+    DiscreteLocation(const std::string &name, 
+                    const VectorField &vfield):
+        _name(name), _vfield(vfield), 
+        _invariant(vfield.dimension()), _in_automaton(false) {}
+          
+    /*! \brief This is a discrete location class constructor.
+     *  
+     * This constructor initializes the object of the 
+     * discrete location class.
+     * \param name is the name of the discrete location.
+     * \param vfield is the location's vector field.
+     * \param invariant is the location's invariant.
+     */
+    DiscreteLocation(const std::string &name, 
+                    const VectorField &vfield, 
+                    const DenotableSet &invariant):
+          
+        _name(name), _vfield(vfield), 
+        _invariant(invariant), _in_automaton(false) {
+          
+          
+      if (vfield.dimension()!=invariant.dimension()) {
+        throw std::invalid_argument("The invariant and the vector field have different space dimensions.");
+      }
+    }
+      
+    /*! \brief This is a discrete location class constructor.
+     *  
+     * This constructor initializes the object of the 
+     * discrete location class.
+     * \param name is the name of the discrete location.
+     * \param vfield is the location's vector field.
+     * \param invariant is the location's invariant.
+     */
+    DiscreteLocation(const std::string &name, 
+                    const VectorField &vfield, 
+                    const BasicSet &invariant):
+          
+        _name(name), _vfield(vfield), 
+        _in_automaton(false) {
+          
+          
+      if (vfield.dimension()!=invariant.dimension()) {
+        throw std::invalid_argument("The invariant and the vector field have different space dimensions.");
+      }
+      
+      DenotableSet DS_inv(invariant);
+      
+      this->_invariant=DS_inv;
+    }
+    
+    /*! \brief This is a discrete location class constructor.
+     *  
+     * This constructor initializes the object of the 
+     * discrete location class.
+     * \param orig is the original object.
+     */
+    DiscreteLocation(
+          const DiscreteLocation<VF> &orig): 
 
-			_id(orig._id), _name(orig._name), _vfield(orig._vfield),
-			_invariant(orig._invariant), _in_automaton(orig._in_automaton) {}
-		
-		/*! \brief Gets the discrete location's id. 
-		 *
-		 * \return The location's id.
-		 */
-		inline const DiscreteLocationID &id() const{
-			return this->_id;
-		}
-		
-		/*! \brief Returns the discrete location's name. 
-		 *
-		 * \return The discrete location's name.
-		 */
-		inline const std::string& name() const {
-			return this->_name;	
-		}
-		
-		/*! \brief Tests if this location is part of an automaton. 
-		 *
-		 * \return \a true if this location is part of an automaton, \a false
-		 * otherwise.
-		 */
-		inline bool in_automaton() const {
-			return this->_in_automaton;	
-		}
-		
-		/*! \brief Returns the discrete location's vector field. 
-		 *
-		 * \return The discrete location's vector field.
-		 */
-		inline const VectorField& vector_field() const {
-			return this->_vfield;	
-		}
-		
-		/*! \brief Returns the discrete location's invariant. 
-		 *
-		 * \return The discrete location's invariant.
-		 */
-		inline const DenotableSet& invariant() const{
-			return this->_invariant;	
-		}
-		
-		/*! \brief Copies a discrete location. 
-		 *
-		 * \param orig is the original object.
-		 * \return The discrete location reference.
-		 */
-		inline const DiscreteLocation<VF>& operator=(
-				const DiscreteLocation<VF> &orig){
-				
-			this->_id=orig._id;
-			this->_name=orig._name;
-			this->_vfield=orig._vfield;
-			this->_invariant=orig._invariant;
-			this->_in_automaton=orig._in_automaton;
-	
-			return *this;			
-		}
-		
+      _id(orig._id), _name(orig._name), _vfield(orig._vfield),
+      _invariant(orig._invariant), _in_automaton(orig._in_automaton) {}
+    
+    /*! \brief Gets the discrete location's id. 
+     *
+     * \return The location's id.
+     */
+    inline const DiscreteLocationID &id() const{
+      return this->_id;
+    }
+    
+    /*! \brief Returns the discrete location's name. 
+     *
+     * \return The discrete location's name.
+     */
+    inline const std::string& name() const {
+      return this->_name;  
+    }
+    
+    /*! \brief Tests if this location is part of an automaton. 
+     *
+     * \return \a true if this location is part of an automaton, \a false
+     * otherwise.
+     */
+    inline bool in_automaton() const {
+      return this->_in_automaton;  
+    }
+    
+    /*! \brief Returns the discrete location's vector field. 
+     *
+     * \return The discrete location's vector field.
+     */
+    inline const VectorField& vector_field() const {
+      return this->_vfield;  
+    }
+    
+    /*! \brief Returns the discrete location's invariant. 
+     *
+     * \return The discrete location's invariant.
+     */
+    inline const DenotableSet& invariant() const{
+      return this->_invariant;  
+    }
+    
+    /*! \brief Copies a discrete location. 
+     *
+     * \param orig is the original object.
+     * \return The discrete location reference.
+     */
+    inline const DiscreteLocation<VF>& operator=(
+        const DiscreteLocation<VF> &orig){
+        
+      this->_id=orig._id;
+      this->_name=orig._name;
+      this->_vfield=orig._vfield;
+      this->_invariant=orig._invariant;
+      this->_in_automaton=orig._in_automaton;
+  
+      return *this;      
+    }
+    
 };
-	
+  
 }
 }
 

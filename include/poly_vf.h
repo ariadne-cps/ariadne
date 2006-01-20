@@ -48,10 +48,10 @@ class PolyAffineIntegrator {
                                         const BasicSet &B, const SolutionMap &sol_map, 
                                         const Ariadne::Geometry::ApproxKind &atype) {
     
-    return Ariadne::Geometry::convex_hull(A,B);		
+    return Ariadne::Geometry::convex_hull(A,B);
   }
 };
-	
+
 }
 }
 

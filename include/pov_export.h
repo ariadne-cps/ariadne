@@ -34,25 +34,20 @@
 #define POV_COLOR "1.0, 0.8, 0.8"
 
 void open_and_copy_pov_header(std::string &f_name, std::ofstream &os) {
+  f_name+=".pov";
+  os.open(f_name.c_str() , std::ios::out);
 
-	f_name+=".pov";
-	
-	os.open(f_name.c_str() , std::ios::out);
-	
-
-	os << "#include \"colors.inc\"" << std::endl << std::endl
-		<< "camera {" << std::endl << "location < " << POV_BBOX -9 
-		<< " , "<< POV_BBOX -9 << " , " << POV_BBOX -9 <<" >" << std::endl
-		<< "look_at  <0, 0, 0>"<< std::endl << "}" << std::endl
-		<< " light_source { <45, 40, 25> color White} "<< std::endl
-		//<< " light_source { <0, 45, 0> color White} "<< std::endl	
-		<< std::endl;
-	
+  os << "#include \"colors.inc\"" << std::endl << std::endl
+     << "camera {" << std::endl << "location < " << POV_BBOX -9 
+     << " , "<< POV_BBOX -9 << " , " << POV_BBOX -9 <<" >" << std::endl
+     << "look_at  <0, 0, 0>"<< std::endl << "}" << std::endl
+     << " light_source { <45, 40, 25> color White} "<< std::endl
+   //<< " light_source { <0, 45, 0> color White} "<< std::endl
+     << std::endl;
 }
 
 void close_pov_stream(std::ofstream &os) {
-	
-	os.close();	
+  os.close();
 }
 
 #endif

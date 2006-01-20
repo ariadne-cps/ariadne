@@ -1,5 +1,5 @@
 /***************************************************************************
- *            state.h
+ *            point.h
  *
  *  Sun Jan 23 18:00:21 2005
  *  Copyright  2005  Alberto Casagrande
@@ -22,12 +22,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file state.h
- *  \brief A state in Euclidean space.
+/*! \file point.h
+ *  \brief A point in Euclidean space.
  */
 
-#ifndef _ARIADNE_STATE_H
-#define _ARIADNE_STATE_H
+#ifndef _ARIADNE_POINT_H
+#define _ARIADNE_POINT_H
 
 #include <vector>
 #include <iostream>
@@ -39,15 +39,17 @@
 namespace Ariadne {
   namespace Geometry {
     
-    template <typename R = Rational> class State;
+    template <typename R = Rational> class Point;
 
-    template<typename R> typename State<R>::difference_type operator-(const State<R>&, const State<R>&);
-    template<typename R> std::ostream& operator<<(std::ostream&, const State<R>&);
-    template<typename R> std::istream& operator>>(std::istream&, State<R>&);
+    template<typename R> typename Point<R>::difference_type operator-(const Point<R>&, const Point<R>&);
+    template<typename R> Point<R> operator+(const Point<R>&, const typename Point<R>::difference_type&);
+    template<typename R> Point<R> operator-(const Point<R>&, const typename Point<R>::difference_type&);
+    template<typename R> std::ostream& operator<<(std::ostream&, const Point<R>&);
+    template<typename R> std::istream& operator>>(std::istream&, Point<R>&);
 
 
     template <typename R>
-    class State {
+    class Point {
      public:
       typedef ::Ariadne::LinearAlgebra::vector<R> Vector;
 
@@ -60,22 +62,22 @@ namespace Ariadne {
       Vector _vector;
 
      public:
-      State() : _vector(0) { }
+      Point() : _vector(0) { }
 
-      State(size_type dim) : _vector(dim) {
+      Point(size_type dim) : _vector(dim) {
         for(size_type i=0; i!=dimension(); ++i) {
           _vector[i]=Real(0);
         }
       }
 
-      State(size_type dim, const Real default_value) : _vector(dim) {
+      Point(size_type dim, const Real default_value) : _vector(dim) {
         for(size_type i=0; i!=dimension(); ++i) {
           _vector[i]=default_value;
         }
       }
 
       template<class ForwardIterator>
-      State(ForwardIterator b, ForwardIterator e) : _vector(std::distance(b,e))
+      Point(ForwardIterator b, ForwardIterator e) : _vector(std::distance(b,e))
       {
         for(size_type i=0; i!=dimension(); ++i) {
           _vector[i]=*b;
@@ -84,7 +86,7 @@ namespace Ariadne {
 
       }
 
-      State(const State& original) : _vector(original._vector) { }
+      Point(const Point& original) : _vector(original._vector) { }
 
       inline Real& operator[] (size_type index) {
         if (((this->_vector).size() <= index)||(index<0)) {
@@ -102,7 +104,7 @@ namespace Ariadne {
 
 
       /*! \brief Checks equivalence between two states. */
-      inline bool operator==(const State<Real> &A) const {
+      inline bool operator==(const Point<Real> &A) const {
         /* Return false if states have different dimensions */
         if (this->dimension()!=A.dimension()) { return false; }
 
@@ -115,7 +117,7 @@ namespace Ariadne {
       }
 
       /*! \brief Checks equivalence between two states. */
-      inline bool operator!=(const State<Real> &A) const {
+      inline bool operator!=(const Point<Real> &A) const {
         return !( *this == A );
       }
 
@@ -138,45 +140,70 @@ namespace Ariadne {
         this->_vector[index]=r;
       }
 
-      inline State<Real> &operator=(const State<Real> &A) {
+      inline Point<Real> &operator=(const Point<Real> &A) {
         this->_vector=A._vector;
         return *this;
       }
 
        /*! \brief Difference of two states. */
-      friend Vector operator- <> (const State<Real>& s1,
-                                  const State<Real>& s2);
+      friend Vector operator- <> (const Point<Real>& s1,
+                                  const Point<Real>& s2);
 
-      friend std::ostream& operator<< <>(std::ostream& os, const State<Real>& state);
+       /*! \brief Difference of two states. */
+      friend Point<Real> operator+ <> (const Point<Real>& s,
+                                       const Vector& v);
 
-      friend std::istream& operator>> <> (std::istream& is, State<Real>& state);
+       /*! \brief Difference of two states. */
+      friend Point<Real> operator- <> (const Point<Real>& s,
+                                       const Vector& v);
+
+      friend std::ostream& operator<< <>(std::ostream& os, const Point<Real>& state);
+
+      friend std::istream& operator>> <> (std::istream& is, Point<Real>& state);
+      
+     private:
+      Point(const Vector& v) : _vector(v) { }
     };
 
 
     template <typename R>
-    typename State<R>::difference_type 
-    operator-(const State<R>& s1, const State<R>& s2)
+    typename Point<R>::difference_type 
+    operator-(const Point<R>& s1, const Point<R>& s2)
     {
       return s1._vector - s2._vector;
     }
 
     template <typename R>
-    std::ostream& operator<<(std::ostream& os, const State<R>& state)
+    Point<R> 
+    operator+(const Point<R>& s, const typename Point<R>::difference_type& v)
     {
-      os << "[";
+      return Point<R>(s._vector + v);
+    }
+
+    template <typename R>
+    Point<R> 
+    operator-(const Point<R>& s, const typename Point<R>::difference_type& v)
+    {
+      return Point<R>(s._vector - v);
+    }
+
+    template <typename R>
+    std::ostream& operator<<(std::ostream& os, const Point<R>& state)
+    {
+      os << "(";
       if(state.dimension() > 0) {
         os << state[0] ;
         for (size_t i=1; i<state.dimension(); i++) {
           os << ", " << state[i];
         }
       }
-      os << "]" ;
+      os << ")" ;
 
       return os;
     }
 
     template <typename R>
-    std::istream& operator>>(std::istream& is, State<R>& state)
+    std::istream& operator>>(std::istream& is, Point<R>& state)
     {
       static size_t last_size;
 
@@ -195,4 +222,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* _ARIADNE_STATE_H */
+#endif /* _ARIADNE_POINT_H */

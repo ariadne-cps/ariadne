@@ -22,14 +22,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#ifndef _AFFINE_MAP_H
-#define _AFFINE_MAP_H
+#ifndef _ARIADNE_AFFINE_MAP_H
+#define _ARIADNE_AFFINE_MAP_H
 
 #include "map.h"
-#include "state.h"
+#include "point.h"
 #include "linear_algebra.h"
 
-namespace Ariadne {	
+namespace Ariadne {
 namespace Map{
 
 enum AffineKind {
@@ -39,10 +39,10 @@ enum AffineKind {
 };
    
 template <typename R>
-class AffineMap // : public Map<R,Geometry::State> 
+class AffineMap // : public Map<R,Geometry::Point> 
 {
  public:
-  typedef Geometry::State<R> State;
+  typedef Geometry::Point<R> State;
   typedef R Real;
   
   typedef typename boost::numeric::ublas::matrix<Real> Matrix;
@@ -62,17 +62,16 @@ class AffineMap // : public Map<R,Geometry::State>
   template<template <typename> class BS>
   BS<R> operator() (const BS<R>& A) const;
   
-  //Rectangle<R> operator() (const Rectangle<R>& A) const;
-  
-  inline const Matrix& matrix() const { return _A; }
-  inline const Vector& vector() const { return _b; }
-  
-  /* Deprecated */
   inline const Matrix& A() const { return _A; }
   inline const Vector& b() const { return _b; }
   
   inline size_t dimension() const {
     return _b.dimension();
+  }
+  
+  /*! Deprecated. */ 
+  inline size_t dim() const {
+    return this->dimension();
   }
   
   inline bool invertible() const {
@@ -94,4 +93,4 @@ AffineMap<R>::operator() (const BS<R>& bs) const
 }
 
 
-#endif /* _AFFINE_MAP_H */
+#endif /* _ARIADNE_AFFINE_MAP_H */

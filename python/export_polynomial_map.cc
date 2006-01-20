@@ -1,5 +1,5 @@
 /***************************************************************************
- *            python/export_state.cc
+ *            python/export_rectangle.cc
  *
  *  21 October 2005
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
@@ -22,35 +22,31 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <iostream>
 #include "numerical_type.h"
-#include "state.h"
+#include "point.h"
+#include "polynomial_map.h"
 
 #include <boost/python.hpp>
 
 #include "real_typedef.h"
 #include "python_utilities.h"
 
-typedef Ariadne::Geometry::State<Real> RState;
+typedef Ariadne::Geometry::Point<Real> RPoint;
+typedef Ariadne::Geometry::PolynomialMap<Real> RPolynomialMap;
 
 using boost::python::class_;
-using boost::python::init; 
+using boost::python::init;
 using boost::python::self;
 using boost::python::def;
 using boost::python::self_ns::str;
 using boost::python::return_value_policy;
 using boost::python::copy_const_reference;
 
-void export_state() {
-  class_<RState>("State",init<int>())
-    .def(init<int,Real>())
-    .def(init<RState>())
-    .def("dimension", &RState::dimension)
-    .def("__len__", &RState::dimension)
-    .def("__getitem__", &RState::get)
-    .def("__setitem__", &RState::set)
-    .def("__eq__", &RState::operator==)
-    .def("__ne__", &RState::operator!=)
+void export_polynomial_map() {
+
+  class_<RPolynomialMap>("PolynomialMap",init<int,int>())
+    .def("argument_dimension", &RPolynomialMap::argument_dimension)
+    .def("result_dimension", &RPolynomialMap::result_dimension)
     .def(str(self))    // __str__
   ;
 }

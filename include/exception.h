@@ -33,10 +33,10 @@
 #include <iosfwd>
 
 namespace Ariadne {
-    class invalid_input : public std::runtime_error {
-      public:
-	invalid_input(const std::string& str) : std::runtime_error(str) { }
-    };
+  class invalid_input : public std::runtime_error {
+   public:
+    invalid_input(const std::string& str) : std::runtime_error(str) { }
+  };
     
 }
 

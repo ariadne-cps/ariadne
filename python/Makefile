@@ -7,9 +7,10 @@ LDLIBS = -lariadne -lboost_python ${LIBGMPXX}
 ARIADNE_OBJ=ariadne_module.o export_numeric.o export_function.o 
 
 GEOMETRY_OBJ = geometry_module.o \
-	export_state.o export_interval.o \
+	export_point.o export_interval.o \
 	export_rectangle.o export_parallelopiped.o export_simplex.o export_polyhedron.o \
-	export_list_set.o export_grid.o export_partition_tree.o
+	export_list_set.o export_grid.o export_partition_tree.o \
+	export_polynomial_map.o
 
 LINEAR_ALGEBRA_OBJ = linear_algebra_module.o \
 	export_vector.o export_matrix.o

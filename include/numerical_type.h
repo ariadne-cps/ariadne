@@ -31,6 +31,7 @@
 
 #include <gmpxx.h>
 #include <string>
+#include "synaps/dyadic.h"
 
 namespace Ariadne {
 
@@ -242,7 +243,7 @@ namespace Ariadne {
     return q;
   }
   
-  template<typename Res, typename Arg> Res convert_to(const Arg&);
+  template<typename Res, typename Arg> inline Res convert_to(const Arg& x) { return Res(x); }
   
   template<> inline Rational convert_to(const Rational& q) { return q; }
   template<> inline Rational convert_to(const Dyadic& d) { return Rational(d); }

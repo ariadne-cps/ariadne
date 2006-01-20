@@ -29,134 +29,134 @@
 
 namespace Ariadne {
 namespace HybridDefinitions {
-		
-	
+    
+  
 /*! \brief Represents discrete transition leaving a discrete location.*/
 template <typename LOC, typename RESET >
 class LeavingDiscreteTransition 
 {
-	public:
-		typedef RESET ResetMap;
-		typedef LOC DiscreteLocation;
-		typedef typename DiscreteLocation::VectorField VectorField;
-		typedef typename ResetMap::DenotableSet DenotableSet;
-		typedef typename DenotableSet::BasicSet BasicSet;
-		typedef typename BasicSet::State State;
-		typedef typename State::Real Real;
-	
-	private:
-	
-		/*! \brief The destination of the leaving discrete 
-		 * transition. */
-		DiscreteLocation _destination;   
-	
-		/*! \brief The activation region of the leaving discrete 
-		 * transition. */ 
-		DenotableSet _activation; 
+  public:
+    typedef RESET ResetMap;
+    typedef LOC DiscreteLocation;
+    typedef typename DiscreteLocation::VectorField VectorField;
+    typedef typename ResetMap::DenotableSet DenotableSet;
+    typedef typename DenotableSet::BasicSet BasicSet;
+    typedef typename BasicSet::State State;
+    typedef typename State::Real Real;
+  
+  private:
+  
+    /*! \brief The destination of the leaving discrete 
+     * transition. */
+    DiscreteLocation _destination;   
+  
+    /*! \brief The activation region of the leaving discrete 
+     * transition. */ 
+    DenotableSet _activation; 
 
-		/*! \brief The reset of the leaving discrete transition. */ 
-		ResetMap _reset;
-	
-	public:
-	
-		/*! \brief This is a \a LeavingDiscreteTransition class 
-		 * constructor.
-		 *
-		 * This constructor initializes the object of the  
-		 * leaving discrete transition class.
-		 * \param dest is the destination of the current leaving 
-		 * discrete transition.
-		 * \param act is the activation region of the current leaving 
-		 * discrete transition.
-		 * \param reset is the reset of the current leaving discrete 
-		 * transition.
-		 */
-		LeavingDiscreteTransition(const DiscreteLocation &dest, 
-						const DenotableSet &act, const ResetMap &reset):
-				_destination(dest), _activation(act), _reset(reset) {}
-		
-		/*! \brief This is a \a LeavingDiscreteTransition class 
-		 * constructor.
-		 *
-		 * This constructor initializes the object of the  
-		 * leaving discrete transition class.
-		 * \param dest is the destination of the current leaving 
-		 * discrete transition.
-		 * \param act is the activation region of the current leaving 
-		 * discrete transition.
-		 * \param reset is the reset of the current leaving discrete 
-		 * transition.
-		 */
-		LeavingDiscreteTransition(const DiscreteLocation &dest, 
-						const BasicSet &act, const ResetMap &reset):
-				_destination(dest),_reset(reset) {
-		
-			DenotableSet DS_act(act);
-					
-					
-			this->_activation=DS_act;
-					
-		}
-					
-		/*! \brief This is a \a LeavingDiscreteTransition class 
-		 * constructor.
-		 *
-		 * This constructor initializes the object of the  
-		 * leaving discrete transition class.
-		 * \param orig is the original copy of the leaving arc.
-		 */
-		LeavingDiscreteTransition(const
-				LeavingDiscreteTransition< LOC , RESET > &orig):
-				_destination(orig._destination), _activation(orig._activation),
-				_reset(orig._reset) {}
-	
-		/*! \brief Return the destination of the discrete transition.
-		 * 
-		 * This method return the destination of the discrete 
-		 * transition.
-		 * \return The destination of the discrete transition.
-		 */
-		inline const DiscreteLocation &destination() const { 
-			return this->_destination;
-		}
-	
-		/*! \brief Return the activation region of the discrete 
-		 * transition.
-		 * 
-		 * This method return the activation region of the leaving 
-		 * discrete transition.
-		 * \return The activation region of the discrete transition.
-		 */
-      	inline const DenotableSet &activation() const{ 
-			return this->_activation;
-		}
+    /*! \brief The reset of the leaving discrete transition. */ 
+    ResetMap _reset;
+  
+  public:
+  
+    /*! \brief This is a \a LeavingDiscreteTransition class 
+     * constructor.
+     *
+     * This constructor initializes the object of the  
+     * leaving discrete transition class.
+     * \param dest is the destination of the current leaving 
+     * discrete transition.
+     * \param act is the activation region of the current leaving 
+     * discrete transition.
+     * \param reset is the reset of the current leaving discrete 
+     * transition.
+     */
+    LeavingDiscreteTransition(const DiscreteLocation &dest, 
+            const DenotableSet &act, const ResetMap &reset):
+        _destination(dest), _activation(act), _reset(reset) {}
+    
+    /*! \brief This is a \a LeavingDiscreteTransition class 
+     * constructor.
+     *
+     * This constructor initializes the object of the  
+     * leaving discrete transition class.
+     * \param dest is the destination of the current leaving 
+     * discrete transition.
+     * \param act is the activation region of the current leaving 
+     * discrete transition.
+     * \param reset is the reset of the current leaving discrete 
+     * transition.
+     */
+    LeavingDiscreteTransition(const DiscreteLocation &dest, 
+            const BasicSet &act, const ResetMap &reset):
+        _destination(dest),_reset(reset) {
+    
+      DenotableSet DS_act(act);
+          
+          
+      this->_activation=DS_act;
+          
+    }
+          
+    /*! \brief This is a \a LeavingDiscreteTransition class 
+     * constructor.
+     *
+     * This constructor initializes the object of the  
+     * leaving discrete transition class.
+     * \param orig is the original copy of the leaving arc.
+     */
+    LeavingDiscreteTransition(const
+        LeavingDiscreteTransition< LOC , RESET > &orig):
+        _destination(orig._destination), _activation(orig._activation),
+        _reset(orig._reset) {}
+  
+    /*! \brief Return the destination of the discrete transition.
+     * 
+     * This method return the destination of the discrete 
+     * transition.
+     * \return The destination of the discrete transition.
+     */
+    inline const DiscreteLocation &destination() const { 
+      return this->_destination;
+    }
+  
+    /*! \brief Return the activation region of the discrete 
+     * transition.
+     * 
+     * This method return the activation region of the leaving 
+     * discrete transition.
+     * \return The activation region of the discrete transition.
+     */
+        inline const DenotableSet &activation() const{ 
+      return this->_activation;
+    }
 
-		/*! \brief Return the reset.
-		 * 
-		 * This method return the reset function of the leaving 
-		 * discrete transition.
-		 * \return The reset function of the leaving discrete 
-		 * transition.
-		 */
-		inline const ResetMap &reset() const { 
-			return this->_reset;
-		}
-		
-		/*! \brief Copies a leaving arc.
-		 *
-		 * This method copies a leaving arc.
-		 * \param orig is the original copy of the leaving arc.
-		 */
-		inline const LeavingDiscreteTransition< LOC , RESET >& 
-				operator=(const LeavingDiscreteTransition< LOC , RESET > &orig) {
-			
-			this->_activation=orig._activation;
-			this->_destination=orig._destination;
-					
-			this->_reset=orig._reset;
-					
-			return *this;
-		}
+    /*! \brief Return the reset.
+     * 
+     * This method return the reset function of the leaving 
+     * discrete transition.
+     * \return The reset function of the leaving discrete 
+     * transition.
+     */
+    inline const ResetMap &reset() const { 
+      return this->_reset;
+    }
+    
+    /*! \brief Copies a leaving arc.
+     *
+     * This method copies a leaving arc.
+     * \param orig is the original copy of the leaving arc.
+     */
+    inline const LeavingDiscreteTransition< LOC , RESET >& 
+        operator=(const LeavingDiscreteTransition< LOC , RESET > &orig) {
+      
+      this->_activation=orig._activation;
+      this->_destination=orig._destination;
+          
+      this->_reset=orig._reset;
+          
+      return *this;
+    }
  };
 
 /*! \brief Represents discrete transitions.
@@ -167,122 +167,122 @@ class LeavingDiscreteTransition
 template < typename LOC, typename RESET >
 class DiscreteTransition
 {
-	public:
-		typedef RESET ResetMap;
-		typedef LOC DiscreteLocation;
-		typedef typename DiscreteLocation::VectorField VectorField;
-		typedef typename ResetMap::DenotableSet DenotableSet;
-		typedef typename DenotableSet::BasicSet BasicSet;
-		typedef typename BasicSet::State State;
-		typedef typename State::Real Real;
-	
-	private:
-		/*! \brief This is the source of the current discrete 
-		 * transition. */ 
-		DiscreteLocation _source;   
-	
-		/*! \brief The destination of the leaving discrete 
-		 * transition. */
-		DiscreteLocation _destination;   
-	
-		/*! \brief The activation region of the leaving discrete 
-		 * transition. */ 
-		DenotableSet _activation; 
+  public:
+    typedef RESET ResetMap;
+    typedef LOC DiscreteLocation;
+    typedef typename DiscreteLocation::VectorField VectorField;
+    typedef typename ResetMap::DenotableSet DenotableSet;
+    typedef typename DenotableSet::BasicSet BasicSet;
+    typedef typename BasicSet::State State;
+    typedef typename State::Real Real;
+  
+  private:
+    /*! \brief This is the source of the current discrete 
+     * transition. */ 
+    DiscreteLocation _source;   
+  
+    /*! \brief The destination of the leaving discrete 
+     * transition. */
+    DiscreteLocation _destination;   
+  
+    /*! \brief The activation region of the leaving discrete 
+     * transition. */ 
+    DenotableSet _activation; 
 
-		/*! \brief The reset of the leaving discrete transition. */ 
-		ResetMap _reset;	
-		
-	public:
-		/*! \brief This is a discrete transition class constructor.
-		 *
-		 * This constructor initializes the object of the discrete 
-		 * transitioni class.
-		 * @see LeavingDiscreteTransition()
-		 * \param source is the source of the current discrete 
-		 * transition.
-		 * \param dest is the destination of the current discrete 
-		 * transition.
-		 * \param act is the activation region of the current 
-		 * discrete transition.
-		 * \param reset is the reset of the current discrete 
-		 * transition.
-		 */
-		DiscreteTransition(const DiscreteLocation &source, 
-				const DiscreteLocation &dest, 
-				const DenotableSet &act, ResetMap reset):
-							_source(source), _destination(dest), 
-							_activation(act), _reset(reset) {}
+    /*! \brief The reset of the leaving discrete transition. */ 
+    ResetMap _reset;  
+    
+  public:
+    /*! \brief This is a discrete transition class constructor.
+     *
+     * This constructor initializes the object of the discrete 
+     * transitioni class.
+     * @see LeavingDiscreteTransition()
+     * \param source is the source of the current discrete 
+     * transition.
+     * \param dest is the destination of the current discrete 
+     * transition.
+     * \param act is the activation region of the current 
+     * discrete transition.
+     * \param reset is the reset of the current discrete 
+     * transition.
+     */
+    DiscreteTransition(const DiscreteLocation &source, 
+        const DiscreteLocation &dest, 
+        const DenotableSet &act, ResetMap reset):
+              _source(source), _destination(dest), 
+              _activation(act), _reset(reset) {}
 
-	
-		/*! \brief This is a \a LeavingDiscreteTransition class 
-		 * constructor.
-		 *
-		 * This constructor initializes the object of the  
-		 * leaving discrete transition class.
-		 * \param orig is the original copy of the leaving arc.
-		 */
-		DiscreteTransition(const
-				DiscreteTransition< LOC, RESET > &orig):
-				_source(orig._source), _destination(orig._destination), 
-				_activation(orig._activation), _reset(orig._reset) {}
-								
-		/*! \brief Return the source of the discrete transition.
-		 *
-		 * This method return the source of the discrete transition.
-		 * \return The source of the discrete transition.
-		 */
-		inline const DiscreteLocation &source() const {
-			this->_source;
-		}			
+  
+    /*! \brief This is a \a LeavingDiscreteTransition class 
+     * constructor.
+     *
+     * This constructor initializes the object of the  
+     * leaving discrete transition class.
+     * \param orig is the original copy of the leaving arc.
+     */
+    DiscreteTransition(const
+        DiscreteTransition< LOC, RESET > &orig):
+        _source(orig._source), _destination(orig._destination), 
+        _activation(orig._activation), _reset(orig._reset) {}
+                
+    /*! \brief Return the source of the discrete transition.
+     *
+     * This method return the source of the discrete transition.
+     * \return The source of the discrete transition.
+     */
+    inline const DiscreteLocation &source() const {
+      this->_source;
+    }      
 
-			/*! \brief Return the destination of the discrete transition.
-		 * 
-		 * This method return the destination of the discrete 
-		 * transition.
-		 * \return The destination of the discrete transition.
-		 */
-		inline const DiscreteLocation &destination() const { 
-			return this->_destination;
-		}
-	
-		/*! \brief Return the activation region of the discrete 
-		 * transition.
-		 * 
-		 * This method return the activation region of the leaving 
-		 * discrete transition.
-		 * \return The activation region of the discrete transition.
-		 */
-      	inline const DenotableSet &activation() const{ 
-			return this->_activation;
-		}
+      /*! \brief Return the destination of the discrete transition.
+     * 
+     * This method return the destination of the discrete 
+     * transition.
+     * \return The destination of the discrete transition.
+     */
+    inline const DiscreteLocation &destination() const { 
+      return this->_destination;
+    }
+  
+    /*! \brief Return the activation region of the discrete 
+     * transition.
+     * 
+     * This method return the activation region of the leaving 
+     * discrete transition.
+     * \return The activation region of the discrete transition.
+     */
+        inline const DenotableSet &activation() const{ 
+      return this->_activation;
+    }
 
-		/*! \brief Return the reset.
-		 * 
-		 * This method return the reset function of the leaving 
-		 * discrete transition.
-		 * \return The reset function of the leaving discrete 
-		 * transition.
-		 */
-		inline const ResetMap &reset() const{ 
-			return this->_reset;
-		}
-		
-		/*! \brief Copies a leaving arc.
-		 *
-		 * This method copies a leaving arc.
-		 * \param orig is the original copy of the leaving arc.
-		 */
-		inline const DiscreteTransition< LOC , RESET >& 
-				operator=(const DiscreteTransition< LOC , RESET > &orig) {
-			
-			this->_activation=orig._activation;
-			this->_destination=orig._destination;
-					
-			this->_reset=orig._reset;
-			this->_source=orig._source;
-						
-			return *this;
-		}
+    /*! \brief Return the reset.
+     * 
+     * This method return the reset function of the leaving 
+     * discrete transition.
+     * \return The reset function of the leaving discrete 
+     * transition.
+     */
+    inline const ResetMap &reset() const{ 
+      return this->_reset;
+    }
+    
+    /*! \brief Copies a leaving arc.
+     *
+     * This method copies a leaving arc.
+     * \param orig is the original copy of the leaving arc.
+     */
+    inline const DiscreteTransition< LOC , RESET >& 
+        operator=(const DiscreteTransition< LOC , RESET > &orig) {
+      
+      this->_activation=orig._activation;
+      this->_destination=orig._destination;
+          
+      this->_reset=orig._reset;
+      this->_source=orig._source;
+            
+      return *this;
+    }
 };
 
 }

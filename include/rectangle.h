@@ -42,7 +42,7 @@
 #include "ariadne.h"
 #include "utility.h"
 #include "interval.h"
-#include "state.h"
+#include "point.h"
 
 #include "binary_word.h"
 
@@ -115,7 +115,7 @@ namespace Ariadne {
       /*! \brief The type of denotable real number used for the corners. */
       typedef R Real;
       /*! \brief The type of denotable state contained by the rectangle. */
-      typedef State<R> State;
+      typedef Point<R> State;
      private:
       /* Rectangle's lower corner */
       State _lower_corner;
@@ -203,6 +203,11 @@ namespace Ariadne {
         return false;
       }
       
+      /*! \brief A rectangle containing the given rectangle; returns a copy. */
+      inline Rectangle bounding_box() const {
+        return *this;
+      }
+        
       /*! \brief The lower corner. */
       inline State lower_corner() const {
         return this->_lower_corner;

@@ -35,7 +35,7 @@
 #include "interval.h"
 #include "binary_word.h"
 #include "rectangle.h"
-#include "state.h"
+#include "point.h"
 
 #include "grid_operations.h"
 
@@ -71,7 +71,7 @@ namespace Ariadne {
     template<typename R, template<typename> class BS> class ListSet;
 
     template<typename R> class Rectangle;
-    template<typename R> class State;
+    template<typename R> class Point;
 
     template<typename R> class Grid;
     template<typename R> class FiniteGrid;
@@ -134,7 +134,7 @@ namespace Ariadne {
 
       bool operator==(const Grid<R>& g) const { return this==&g; }
 
-      IndexArray index(const State<R>& s) const {
+      IndexArray index(const Point<R>& s) const {
         IndexArray res(s.dimension());
         for(size_type i=0; i!=res.size(); ++i) {
           res[i]=subdivision_index(i,s[i]);
@@ -362,7 +362,7 @@ namespace Ariadne {
       friend class GridCellListSet<R>;
      public:
       typedef R real_type;
-      typedef State<R> state_type;
+      typedef Point<R> state_type;
 
       /*!\brief Construct from a grid and an integer array. */
       GridCell(const Grid<R>& g, const IndexArray& pos);
@@ -393,7 +393,7 @@ namespace Ariadne {
       friend class GridRectangleListSet<R>;
      public:
       typedef R real_type;
-      typedef State<R> state_type;
+      typedef Point<R> state_type;
 
       /*!\brief Construct from a grid and two integer arrays giving the corners. */
       GridRectangle(const Grid<R>& g, const IndexArray& l, const IndexArray& u);
@@ -409,8 +409,8 @@ namespace Ariadne {
 
       /*!\brief The position of the rectangle in the grid. */
       IntegerRectangle position() const {
-        State<index_type> lst(_lower.begin(),_lower.end());
-        State<index_type> ust(_upper.begin(),_upper.end());
+        Point<index_type> lst(_lower.begin(),_lower.end());
+        Point<index_type> ust(_upper.begin(),_upper.end());
         return IntegerRectangle(lst,ust);
       }
 
@@ -449,7 +449,7 @@ namespace Ariadne {
       friend class GridCellListSet<R>;
      public:
       typedef R real_type;
-      typedef State<R> state_type;
+      typedef Point<R> state_type;
       typedef GridMaskSet_const_iterator<R> const_iterator;
 
       /*!\brief Construct an empty set from a grid, and a list of lower and upper bounds. */
@@ -570,7 +570,7 @@ namespace Ariadne {
       friend class GridMaskSet<R>;
      public:
       typedef R real_type;
-      typedef State<R> state_type;
+      typedef Point<R> state_type;
 
       /*!\brief Construct an empty set based on a Grid. */
       GridCellListSet(const Grid<R>& g);
@@ -623,7 +623,7 @@ namespace Ariadne {
       friend class GridCellListSet<R>;
      public:
       typedef R real_type;
-      typedef State<R> state_type;
+      typedef Point<R> state_type;
 
       /* TODO: Make iterators */
 

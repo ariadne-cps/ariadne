@@ -1,8 +1,8 @@
 /***************************************************************************
- *            ariadne.h
+ *            python/export_point.cc
  *
- *  Wed Sep 15 15:56 2004
- *  Copyright  2004  Alberto Casagrande, Pieter Collins
+ *  21 October 2005
+ *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -21,55 +21,36 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-/*! \file ariadne.h
- *  \brief Top-level header file.
- */
-
-#ifndef _ARIADNE_H
-#define _ARIADNE_H
-
-#include <gmpxx.h>
-#include <boost/numeric/interval.hpp>
-#include <boost/numeric/interval/io.hpp>
 
 #include <iostream>
-#include <iomanip>
+#include "numerical_type.h"
+#include "point.h"
 
-/*!
- * \brief Top-level namespace
- */
-namespace Ariadne {
+#include <boost/python.hpp>
 
-/*! \brief Geometric calculus library.
- */
-namespace Geometry {}
+#include "real_typedef.h"
+#include "python_utilities.h"
 
-/*! \brief Classes defining a hybrid system.
- */
-namespace HybridDefinitions {}
+typedef Ariadne::Geometry::Point<Real> RPoint;
 
-/*! \brief Classes defining map.
- */
-namespace Map {}
+using boost::python::class_;
+using boost::python::init; 
+using boost::python::self;
+using boost::python::def;
+using boost::python::self_ns::str;
+using boost::python::return_value_policy;
+using boost::python::copy_const_reference;
 
-/*! \brief Classes defining vector field.
- *
- *  In this namespace there are also vector field integrator.
- */
-namespace VectorField {}
-
-/*! \brief Functions for linear algebra.
- */
-namespace LinearAlgebra {}
-
-
-/*! \brief Functions for computing hybrid system trajectories.
- */
-namespace Evaluation {}
-
+void export_point() {
+  class_<RPoint>("Point",init<int>())
+    .def(init<int,Real>())
+    .def(init<RPoint>())
+    .def("dimension", &RPoint::dimension)
+    .def("__len__", &RPoint::dimension)
+    .def("__getitem__", &RPoint::get)
+    .def("__setitem__", &RPoint::set)
+    .def("__eq__", &RPoint::operator==)
+    .def("__ne__", &RPoint::operator!=)
+    .def(str(self))    // __str__
+  ;
 }
-
-
-
-#endif /* _ARIADNE_H */

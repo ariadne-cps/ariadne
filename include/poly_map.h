@@ -32,7 +32,7 @@
 #include "generator.h"
 #include "denotable_set.h"
 
-namespace Ariadne {	
+namespace Ariadne {
 namespace Map{
 
 /*! \brief Affine trasformation for polyhedron. DEPRECATED.
@@ -83,7 +83,7 @@ template<typename R>
 class PolyAffineMap {
  public:
   typedef R Real;
-  typedef typename Ariadne::Geometry::State<R> State;
+  typedef typename Ariadne::Geometry::Point<R> State;
   typedef typename Ariadne::Geometry::Polyhedron< Real > BasicSet;
   typedef typename Ariadne::Geometry::Polyhedron< Real > Polyhedron;
   typedef typename Ariadne::Geometry::DenotableSet< Polyhedron > DenotableSet;
@@ -101,7 +101,7 @@ class PolyAffineMap {
   PolyAffineMap(const Matrix &A):_A(A), _A_invertible(true),
                                  _b(A.size1()), _map_type(HOMOGENEOUS) {
     if ((A.size1()==0)||(A.size2()==0))
-      throw std::invalid_argument("The matrix of affine trasformation should have at least 1 row and 1 column.");	
+      throw std::invalid_argument("The matrix of affine trasformation should have at least 1 row and 1 column.");
     
     this->_get_solution(A);
   }

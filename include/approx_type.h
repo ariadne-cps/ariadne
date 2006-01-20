@@ -31,88 +31,88 @@ namespace Ariadne {
 namespace Geometry {
 
 enum ApproxKind {
-	OVER, /*!< Over-approximation */
-	UNDER, /*!< Under-approximation */
-	OUTER, /*!< Outer-approximation */
-	INNER, /*!< Inner-approximation */
-	NONE /*!< No approximation */
+  OVER, /*!< Over-approximation */
+  UNDER, /*!< Under-approximation */
+  OUTER, /*!< Outer-approximation */
+  INNER, /*!< Inner-approximation */
+  NONE /*!< No approximation */
 };
 
 /*! \brief Defines the approximation type */ 
 template < typename R>
 class ApproximationType {
-	public:
-		typedef R Real;
-	
-	private:
+  public:
+    typedef R Real;
+  
+  private:
 
-		/*! \brief Indicates the type of approximation */
-		ApproxKind _kind;
+    /*! \brief Indicates the type of approximation */
+    ApproxKind _kind;
 
-		/*! \brief Indicates the value of approximation */
-		Real _value; 
+    /*! \brief Indicates the value of approximation */
+    Real _value; 
 
-	public:
-		
-		/*! \brief A costructor for the ApproximationType class.*/ 
-		ApproximationType() {
+  public:
+    
+    /*! \brief A costructor for the ApproximationType class.*/ 
+    ApproximationType() {
 
-			/* an approx type has NONE kind by default */
-			this->_kind=NONE;
-			this->_value=0.0;
-		}
-		
-		/*! \brief A costructor for the ApproximationType class.
-		 *
-		 * \param orig is the object used a framework for
-		 * the new object.*/ 
-		ApproximationType(const ApproximationType<Real> &orig) {
-			this->_kind=orig._kind;
-			this->_value=orig._value;
-		}
-		
-		/*! \brief A costructor for the ApproximationType class. 
-		 *
-		 * This method is a costructor of the ApproximationType class.
-		 * \param kind is the kind of the new ApproximationType object.
-		 * \param value is the value of the approximation.
-		 */
-		ApproximationType(const ApproxKind kind, const Real &value) {
-			this->_kind=kind;
-			this->_value=value;
-		}
+      /* an approx type has NONE kind by default */
+      this->_kind=NONE;
+      this->_value=0.0;
+    }
+    
+    /*! \brief A costructor for the ApproximationType class.
+     *
+     * \param orig is the object used a framework for
+     * the new object.*/ 
+    ApproximationType(const ApproximationType<Real> &orig) {
+      this->_kind=orig._kind;
+      this->_value=orig._value;
+    }
+    
+    /*! \brief A costructor for the ApproximationType class. 
+     *
+     * This method is a costructor of the ApproximationType class.
+     * \param kind is the kind of the new ApproximationType object.
+     * \param value is the value of the approximation.
+     */
+    ApproximationType(const ApproxKind kind, const Real &value) {
+      this->_kind=kind;
+      this->_value=value;
+    }
 
-		/*! \brief Returns the object's value.
-		 *
-		 * \return The value of the approximation.
-		 */
-		Real &value() {
-			return (this->_value);
-		}
+    /*! \brief Returns the object's value.
+     *
+     * \return The value of the approximation.
+     */
+    Real &value() {
+      return (this->_value);
+    }
 
-		/*! \brief Returns the kind of approximation.
-		 *
-		 * \return The object's kind.
-		 */
-		ApproxKind &kind() {
-			return (this->_kind);
-		}
+    /*! \brief Returns the kind of approximation.
+     *
+     * \return The object's kind.
+     */
+    ApproxKind &kind() {
+      return (this->_kind);
+    }
 
-		/*! \brief Assigns an ApproximationType's object
-		 * to an other.
-		 *
-		 * \param orig is the object which has to be 
-		 * copied.
-		 * \return A reference to the new object.
-		 */
-		const ApproximationType& operator=(const ApproximationType &orig) {
-			this->_kind=orig._kind;
-			this->_value=orig._value;
-			
-			return *this;
-		}
+    /*! \brief Assigns an ApproximationType's object
+     * to an other.
+     *
+     * \param orig is the object which has to be 
+     * copied.
+     * \return A reference to the new object.
+     */
+    const ApproximationType& operator=(const ApproximationType &orig) {
+      this->_kind=orig._kind;
+      this->_value=orig._value;
+      
+      return *this;
+    }
 
-		
+    
 };
 
 }

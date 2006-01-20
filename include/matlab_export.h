@@ -29,32 +29,23 @@
 #include <fstream>
 
 void open_matlab_stream(std::string &f_name, std::ofstream &os) {
-
-	f_name+=".m";
-	
-	os.open(f_name.c_str() , std::ios::out);
-	
+  f_name+=".m";
+  os.open(f_name.c_str() , std::ios::out);
 }
 
 void close_mathlab_stream(std::ofstream &os) {
-	
-	os.close();	
+  os.close();
 }
 
 void open_OneDim_matlab_stream(std::string &f_name, std::ofstream &os) {
-
-	f_name+=".m";
-	
-	os.open(f_name.c_str() , std::ios::out);
-
-	os<< "data = [ ";	
+  f_name+=".m";
+  os.open(f_name.c_str() , std::ios::out);
+  os<< "data = [ ";
 }
 
 void close_OneDim_mathlab_stream(std::ofstream &os) {
-	
-	os<< "] "<<std::endl;	
-	
-	os.close();	
+  os<< "] "<<std::endl;
+  os.close();
 }
 
 

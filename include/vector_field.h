@@ -27,14 +27,14 @@
 
 #include "exception.h"
 
-namespace Ariadne {	
+namespace Ariadne {
 namespace VectorField{
-	
+
 enum VectorFieldKind {
-	LINEAR,
-	AFFINE,
-	MULTIVALUE,
-	GENERAL
+  LINEAR,
+  AFFINE,
+  MULTIVALUE,
+  GENERAL
 };
 
 }
@@ -42,13 +42,13 @@ enum VectorFieldKind {
 
 template<typename R> class Ariadne::Geometry::Rectangle;
 template<typename R> class Ariadne::Geometry::Polyhedron;
-template<typename R> class Ariadne::Geometry::State;
+template<typename R> class Ariadne::Geometry::Point;
 template<typename R, template<typename> class BS> class Ariadne::Geometry::ListSet;
 template<typename R, template<typename> class S> class Ariadne::Map::Map;
 
 
-namespace Ariadne {	
-  namespace VectorField{
+namespace Ariadne {
+namespace VectorField{
 
    
 template <typename R, template<typename> class S>

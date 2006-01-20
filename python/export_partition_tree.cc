@@ -37,7 +37,7 @@ using Ariadne::BinaryWord;
 using Ariadne::BinaryTree;
 using Ariadne::SubdivisionSequence;
 
-typedef Ariadne::Geometry::State<Real> RState;
+typedef Ariadne::Geometry::Point<Real> RPoint;
 
 typedef Ariadne::Interval<Real> RInterval;
 typedef Ariadne::Geometry::Rectangle<Real> RRectangle;

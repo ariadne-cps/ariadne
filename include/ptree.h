@@ -28,7 +28,7 @@
 #include <rectangle.h>
 #include <ptree_node.h>
 
-namespace Ariadne {	
+namespace Ariadne {
 namespace Geometry {
 
 template <typename R>
@@ -51,7 +51,7 @@ std::ostream& operator<<(std::ostream &os, PartitionTree<R> &t) {
 
 template <typename R>
 void pov_print(PartitionTree<R> &t, std::string f_name, 
-		size_t dim1, size_t dim2, size_t dim3) 
+               size_t dim1, size_t dim2, size_t dim3) 
 {
   std::ofstream fos;
   typedef typename R::State State;
@@ -69,7 +69,7 @@ void pov_print(PartitionTree<R> &t, std::string f_name,
     upper=t[i].upper_corner();
     
     //mpf_class l[3], u[3];
-				
+
     fos << std::endl << "box {" << std::endl 
         << "< " << (mpf_class) lower[dim1] << " , " << (mpf_class) lower[dim2] << " , " << (mpf_class) lower[dim3]<<" >," << std::endl 
         << "< " << (mpf_class) upper [dim1] << " , " << (mpf_class) upper[dim2] << " , "  << (mpf_class) upper[dim3]<<" >" << std::endl 
@@ -179,7 +179,7 @@ class PartitionTree {
     
 #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-#endif			
+#endif
     
     for (size_t i=0; i< node._bits_per_space_member(); i++) {
       
@@ -200,13 +200,13 @@ class PartitionTree {
           node._sons[i]=son;
         }
         
-      }					
+      }
       
     }
     
 #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-#endif			
+#endif
     
     
   }
@@ -220,7 +220,7 @@ class PartitionTree {
     
 #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-#endif			
+#endif
     
     node._depth=depth;
     
@@ -231,10 +231,10 @@ class PartitionTree {
       
 #ifdef DEBUG
       std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-#endif			
+#endif
       
       return;
-    }		
+    }
     
     if (depth>max_depth) {
       
@@ -243,7 +243,7 @@ class PartitionTree {
       
 #ifdef DEBUG
       std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-#endif			
+#endif
       
       return;
     }
@@ -256,18 +256,18 @@ class PartitionTree {
       
 #ifdef DEBUG
       std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-#endif			
+#endif
       
       return;
     }
     
     node.set_not_empty();
     
-    node.eval_level_by_sons();	
+    node.eval_level_by_sons();
     
 #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-#endif			
+#endif
     
   }
   
@@ -310,7 +310,7 @@ class PartitionTree {
           }
         }
         
-      }					
+      }
       
     }
     
@@ -337,7 +337,7 @@ class PartitionTree {
       std::cout << __FILE__ << ":" << __LINE__ << std::endl;
 #endif
       
-      return;	
+      return;
     }
     
     node._depth=depth;
@@ -352,7 +352,7 @@ class PartitionTree {
 #endif
       
       return;
-    }		
+    }
     
     if (depth>max_depth) {
       
@@ -383,7 +383,7 @@ class PartitionTree {
     
     node.compact_node();
     
-    node.eval_level_by_sons();	
+    node.eval_level_by_sons();
     
 #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
@@ -438,7 +438,7 @@ class PartitionTree {
     if (A.dimension()!=bbox.dimension()) 
       throw std::domain_error("Two of the parameters have different space dimensions");
     
-    if (!interior_subset_of_interior(A, this->_bounding_box)) 				
+    if (!interior_subset_of_interior(A, this->_bounding_box))
       throw std::domain_error("The object can not be contained into the ptree.");
     
     this->_fill_ptree_with(this->_root, A, bbox, 0, m_depth);
@@ -524,7 +524,7 @@ class PartitionTree {
   /*! \brief Checks the emptyness.
    *
    * \return \a true if the space represented by the PartitionTree is empty,
-   * \a false otherwise.		
+   * \a false otherwise.
    */
   inline bool empty() const {
     return ((this->_root).empty());
@@ -560,11 +560,11 @@ class PartitionTree {
    * The result is stored into the current object.
    * \param \a A is an PartitionTree.
    */
-  inline void inplace_union(const PartitionTree& A) {	
+  inline void inplace_union(const PartitionTree& A) {
     
 #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-#endif			
+#endif
     
     if (this->dimension()!=A.dimension()) 
       throw std::domain_error("The two parameters have different space dimensions.");

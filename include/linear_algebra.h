@@ -29,7 +29,10 @@
 #ifndef _ARIADNE_LINEAR_ALGEBRA_H
 #define _ARIADNE_LINEAR_ALGEBRA_H
 
+#include <boost/numeric/ublas/vector.hpp>
+#include <boost/numeric/ublas/vector_proxy.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
 #include "numerical_type.h"
@@ -41,7 +44,7 @@ namespace Ariadne {
     using boost::numeric::ublas::matrix;
     using boost::numeric::ublas::matrix_row;
     using boost::numeric::ublas::matrix_column;
-  
+        
     typedef size_t size_type;
         
     template <typename Real>

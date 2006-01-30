@@ -57,17 +57,17 @@ namespace Ariadne {
     template < typename R > class Polyhedron;
     template < typename R, template <typename> class BS > class ListSet;
 
-    template <typename R> Parallelopiped<R> intersection(const Parallelopiped<R> &A, const Parallelopiped<R> &B);
-    template <typename R> Parallelopiped<R> regular_intersection(const Parallelopiped<R> &A, const Parallelopiped<R> &B);
+    template <typename R> Parallelopiped<R> intersection(const Parallelopiped<R>& A, const Parallelopiped<R>& B);
+    template <typename R> Parallelopiped<R> regular_intersection(const Parallelopiped<R>& A, const Parallelopiped<R>& B);
 
-    template<typename R> bool interiors_intersect(const Parallelopiped<R> &A, const Parallelopiped<R> &B);
-    template<typename R> bool disjoint(const Parallelopiped<R> &A, const Parallelopiped<R> &B);
-    template<typename R> bool inner_subset(const Parallelopiped<R> &A, const Parallelopiped<R> &B);
-    template<typename R> bool subset(const Parallelopiped<R> &A, const Parallelopiped<R> &B);
-    template<typename R> bool subset_of_open_cover(const Parallelopiped<R> &A, const std::vector< Parallelopiped<R> > &list);
+    template<typename R> bool interiors_intersect(const Parallelopiped<R>& A, const Parallelopiped<R>& B);
+    template<typename R> bool disjoint(const Parallelopiped<R>& A, const Parallelopiped<R>& B);
+    template<typename R> bool inner_subset(const Parallelopiped<R>& A, const Parallelopiped<R>& B);
+    template<typename R> bool subset(const Parallelopiped<R>& A, const Parallelopiped<R>& B);
 
-    template<typename R> bool inner_subset(const Parallelopiped<R> &rect, const ListSet<R,Parallelopiped> &A);
-    template<typename R> bool subset(const Parallelopiped<R> &rect, const ListSet<R,Parallelopiped> &A);
+    template<typename R> bool subset_of_open_cover(const Parallelopiped<R>& A, const ListSet<R, Parallelopiped >& list);
+    template<typename R> bool inner_subset(const Parallelopiped<R>& rect, const ListSet<R,Parallelopiped>& A);
+    template<typename R> bool subset(const Parallelopiped<R>& rect, const ListSet<R,Parallelopiped>& A);
     
     template<typename R> std::ostream& operator<<(std::ostream&, const Parallelopiped<R>&);
     template<typename R> std::istream& operator>>(std::istream&, Parallelopiped<R>&);
@@ -77,43 +77,42 @@ namespace Ariadne {
     template <typename R>
     class Parallelopiped {
       /*! \brief Makes intersection */
-      friend Parallelopiped<R> intersection <> (const Parallelopiped<R> &A,
-                                           const Parallelopiped<R> &B);
+      friend Parallelopiped<R> intersection <> (const Parallelopiped<R>& A,
+                                           const Parallelopiped<R>& B);
 
       /*! \brief Makes intersection of interiors */
-      friend Parallelopiped<R> regular_intersection <> (const Parallelopiped<R> &A,
-                                                   const Parallelopiped<R> &B);
+      friend Parallelopiped<R> regular_intersection <> (const Parallelopiped<R>& A,
+                                                   const Parallelopiped<R>& B);
 
        /*! \brief Tests intersection of interiors. */
-      friend bool interiors_intersect <> (const Parallelopiped<R> &A,
-                                          const Parallelopiped<R> &B);
+      friend bool interiors_intersect <> (const Parallelopiped<R>& A,
+                                          const Parallelopiped<R>& B);
 
        /*! \brief Tests disjointness */
-      friend bool disjoint <> (const Parallelopiped<R> &A,
-                               const Parallelopiped<R> &B);
+      friend bool disjoint <> (const Parallelopiped<R>& A,
+                               const Parallelopiped<R>& B);
 
       /*! \brief Tests if \a A is a subset of the interior of \a B. */
-      friend bool inner_subset <> (const Parallelopiped<R> &A,
-                                   const Parallelopiped<R> &B);
+      friend bool inner_subset <> (const Parallelopiped<R>& A,
+                                   const Parallelopiped<R>& B);
 
       /*! \brief Tests inclusion. */
-      friend bool subset <> (const Parallelopiped<R> &A,
-                             const Parallelopiped<R> &B);
+      friend bool subset <> (const Parallelopiped<R>& A,
+                             const Parallelopiped<R>& B);
 
       /*! \brief Tests if \a A is a subset of the interior of \a B. */
-      friend bool inner_subset <> (const Parallelopiped<R> &A,
+      friend bool inner_subset <> (const Parallelopiped<R>& A,
                                    const ListSet<R,::Ariadne::Geometry::Parallelopiped>& B);
 
       /*! \brief Tests if \a A is a subset of \a B. */
-      friend bool subset <> (const Parallelopiped<R> &A,
+      friend bool subset <> (const Parallelopiped<R>& A,
                              const ListSet<R,::Ariadne::Geometry::Parallelopiped>& B);
 
 
-      /*! \brief Tests inclusion in an open cover.
-       *  \internal We shouldn't restrict to a std::list.
+      /*! \brief Tests inclusion in an open cover, represented as a ListSet.
        */
-      friend bool subset_of_open_cover <> (const Parallelopiped<R> &A,
-                                           const std::vector< Parallelopiped<R> > &list);
+      friend bool subset_of_open_cover <> (const Parallelopiped<R>& A,
+                                           const ListSet<R,::Ariadne::Geometry::Parallelopiped>& B);
 
      public:
       /*! \brief The unsigned integer type used to denote the array positions. */
@@ -158,7 +157,7 @@ namespace Ariadne {
       explicit Parallelopiped(const Rectangle<Real>& r);
       
       /*! \brief Construct from a string literal. */
-      explicit Parallelopiped(const std::string &s)
+      explicit Parallelopiped(const std::string& s)
         : _centre(), _directions()
       {
         std::stringstream ss(s);
@@ -166,7 +165,7 @@ namespace Ariadne {
       }
       
       /*! \brief Copy constructor. */
-      Parallelopiped(const Parallelopiped<R> &original)
+      Parallelopiped(const Parallelopiped<R>& original)
         : _centre(original._centre),
           _directions(original._directions)
       { }
@@ -265,31 +264,24 @@ namespace Ariadne {
        * Not currently implemented, since it requires matching the columns of 
        * the matrix of principal directions. 
        */
-      inline bool operator==(const Parallelopiped<Real> &A) const
+      inline bool operator==(const Parallelopiped<Real>& A) const
       {
         throw std::domain_error("Parallelopiped::operator==(...)  not implemented");
       }
       
       /*! \brief The inequality operator */
-      inline bool operator!=(const Parallelopiped<Real> &A) const {
+      inline bool operator!=(const Parallelopiped<Real>& A) const {
         throw std::domain_error("Parallelopiped::operator!=(...)  not implemented");
         return !(*this == A);
       }
 
-      /*! \brief Tests if the parallelopiped is disjoint from the set \a s. */
-      /*! \brief Tests if the parallelopiped is a subset of the the union of the closed sets in \a u. */
-      template<class LIST>
-      inline bool subset_of_open_closed_cover(const LIST& u) const {
-        return Ariadne::Geometry::subset_of_closed_cover(*this,u);
-      }
-      
       friend std::ostream&
-      operator<< <> (std::ostream &os, 
-                     const Parallelopiped<R> &r);
+      operator<< <> (std::ostream& os, 
+                     const Parallelopiped<R>& r);
       
       friend std::istream&
-      operator>> <> (std::istream &is, 
-                     Parallelopiped<R> &r);
+      operator>> <> (std::istream& is, 
+                     Parallelopiped<R>& r);
       
      private:
       inline void compute_linear_inequalities(Matrix&, Vector&, Vector&) const;
@@ -483,7 +475,7 @@ namespace Ariadne {
     /*! \brief Tests inclusion in an open cover.  */
     template <typename R>
     bool subset_of_open_cover(const Parallelopiped<R>& A,
-                              const std::vector< Parallelopiped<R> >& cover) 
+                              const ListSet<R, Parallelopiped >& cover) 
     {
       throw std::domain_error("subset_of_open_cover(Parallelopiped, std::vector<Parallelopiped>) not implemented");
     }

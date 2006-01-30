@@ -47,7 +47,7 @@ namespace Ariadne {
     template<typename R> std::ostream& operator<<(std::ostream&, const Point<R>&);
     template<typename R> std::istream& operator>>(std::istream&, Point<R>&);
 
-
+    /*! \brief A point in Euclidean space. */
     template <typename R>
     class Point {
      public:
@@ -104,7 +104,7 @@ namespace Ariadne {
 
 
       /*! \brief Checks equivalence between two states. */
-      inline bool operator==(const Point<Real> &A) const {
+      inline bool operator==(const Point<Real>& A) const {
         /* Return false if states have different dimensions */
         if (this->dimension()!=A.dimension()) { return false; }
 
@@ -117,7 +117,7 @@ namespace Ariadne {
       }
 
       /*! \brief Checks equivalence between two states. */
-      inline bool operator!=(const Point<Real> &A) const {
+      inline bool operator!=(const Point<Real>& A) const {
         return !( *this == A );
       }
 
@@ -140,7 +140,7 @@ namespace Ariadne {
         this->_vector[index]=r;
       }
 
-      inline Point<Real> &operator=(const Point<Real> &A) {
+      inline Point<Real>& operator=(const Point<Real>& A) {
         this->_vector=A._vector;
         return *this;
       }

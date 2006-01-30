@@ -27,14 +27,15 @@
 namespace Ariadne {
   namespace Geometry {
 
-    class PositionIterator {
+    /* An iterator for positions in rectangular piece of a grid. */
+    class GridPositionIterator {
      public:
-      PositionIterator(const IndexArray& l, const IndexArray& u)
+      GridPositionIterator(const IndexArray& l, const IndexArray& u)
         : _lower(l), _upper(u), _position(l) { }
-      PositionIterator(const IndexArray& l, const IndexArray& u, const IndexArray& p)
+      GridPositionIterator(const IndexArray& l, const IndexArray& u, const IndexArray& p)
         : _lower(l), _upper(u), _position(p) { }
       const IndexArray& operator*() const { return _position; }
-      PositionIterator& operator++() {
+      GridPositionIterator& operator++() {
         dimension_type d=0;
         _position[d]+=1;
         while(_position[d]==_upper[d] && (d+1u)!=_position.size() ) {
@@ -339,7 +340,7 @@ namespace Ariadne {
                         const IndexArray& lower,
                         const IndexArray& upper)
     {
-      for(PositionIterator iter(lower,upper); !iter.end(); ++iter) {
+      for(GridPositionIterator iter(lower,upper); !iter.end(); ++iter) {
         clptr->push_back(*iter);
       }
     }

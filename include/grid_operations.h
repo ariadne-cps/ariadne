@@ -41,7 +41,7 @@ namespace Ariadne {
     typedef int index_type;
 
     /*!\brief An array of bool, to be used as a mask. */
-    typedef std::vector<bool> BooleanArray;
+    typedef array<bool> BooleanArray;
 
     /*!\brief An of integers representing an index in a grid. */
     typedef array<index_type> IndexArray;

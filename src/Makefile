@@ -31,28 +31,22 @@ dep:
 ### Do Not edit this line
 ### Everything below is auto-generated
 binary_tree.o: binary_tree.cc ../include/binary_tree.h ../include/array.h \
-  ../include/utility.h ../include/sequence.h ../include/utility.h \
-  ../include/binary_word.h ../include/utility.h ../include/array.h \
-  ../include/rectangle.h ../include/ariadne.h ../include/utility.h \
-  ../include/interval.h ../include/state.h ../include/utility.h \
-  ../include/linear_algebra.h ../include/numerical_type.h \
-  ../include/binary_word.h
+  ../include/utility.h ../include/sequence.h ../include/binary_word.h \
+  ../include/rectangle.h ../include/ariadne.h ../include/interval.h \
+  ../include/point.h ../include/linear_algebra.h \
+  ../include/numerical_type.h ../include/synaps/dyadic.h
 
 grid_operations.o: grid_operations.cc ../include/grid_operations.h \
   ../include/array.h ../include/utility.h ../include/rectangle.h \
-  ../include/ariadne.h ../include/utility.h ../include/interval.h \
-  ../include/state.h ../include/utility.h ../include/linear_algebra.h \
-  ../include/numerical_type.h ../include/binary_word.h \
-  ../include/utility.h ../include/array.h
+  ../include/ariadne.h ../include/interval.h ../include/point.h \
+  ../include/linear_algebra.h ../include/numerical_type.h \
+  ../include/synaps/dyadic.h ../include/binary_word.h
 
 partition_tree_operations.o: partition_tree_operations.cc \
   ../include/partition_tree_set.h ../include/array.h ../include/utility.h \
-  ../include/sequence.h ../include/utility.h ../include/binary_word.h \
-  ../include/utility.h ../include/array.h ../include/binary_tree.h \
-  ../include/array.h ../include/sequence.h ../include/utility.h \
-  ../include/binary_word.h ../include/rectangle.h ../include/ariadne.h \
-  ../include/utility.h ../include/interval.h ../include/state.h \
-  ../include/utility.h ../include/linear_algebra.h \
-  ../include/numerical_type.h ../include/binary_word.h \
-  ../include/rectangle.h ../include/list_set.h
+  ../include/sequence.h ../include/binary_word.h ../include/binary_tree.h \
+  ../include/rectangle.h ../include/ariadne.h ../include/interval.h \
+  ../include/point.h ../include/linear_algebra.h \
+  ../include/numerical_type.h ../include/synaps/dyadic.h \
+  ../include/list_set.h
 

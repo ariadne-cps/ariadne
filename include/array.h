@@ -150,6 +150,7 @@ namespace Ariadne {
     template<class In> array(In first, In last) : _vector(first,last) { }
     
     array(const array& a) : _vector(a._vector) { }
+    array(const std::vector<bool>& v) : _vector(v) { }
     array& operator=(const array& a) { if(this!=&a) { _vector=a._vector; } return *this; }
     
     size_type empty() const { return _vector.empty(); }

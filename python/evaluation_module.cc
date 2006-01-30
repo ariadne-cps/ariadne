@@ -1,5 +1,5 @@
 /***************************************************************************
- *            python/export_rectangle.cc
+ *            python/evaluation_module.cc
  *
  *  21 October 2005
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
@@ -23,7 +23,6 @@
  */
 
 #include "numerical_type.h"
-#include "point.h"
 #include "polynomial_map.h"
 
 #include <boost/python.hpp>
@@ -31,8 +30,13 @@
 #include "real_typedef.h"
 #include "python_utilities.h"
 
-typedef Ariadne::Geometry::Point<Real> RPoint;
-typedef Ariadne::Evaluation::PolynomialMap<Real> RPolynomialMap;
+void export_polynomial();
+
+typedef Ariadne::Interval<Real> RInterval;
+typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
+typedef Ariadne::Geometry::Parallelopiped<Real> RParallelopiped;
+
+typedef Ariadne::Evaluation::Polynomial<Real> RPolynomial;
 
 using boost::python::class_;
 using boost::python::init;
@@ -41,12 +45,8 @@ using boost::python::def;
 using boost::python::self_ns::str;
 using boost::python::return_value_policy;
 using boost::python::copy_const_reference;
-
-void export_polynomial_map() {
-
-  class_<RPolynomialMap>("PolynomialMap",init<int,int>())
-    .def("argument_dimension", &RPolynomialMap::argument_dimension)
-    .def("result_dimension", &RPolynomialMap::result_dimension)
-    .def(str(self))    // __str__
-  ;
+  
+BOOST_PYTHON_MODULE(evaluation)
+{
+  export_polynomial();
 }

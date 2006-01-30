@@ -41,6 +41,7 @@
 
 #include "ariadne.h"
 #include "utility.h"
+#include "geometry.h"
 #include "interval.h"
 #include "point.h"
 
@@ -51,18 +52,18 @@ namespace Ariadne {
     template < typename R > class Rectangle;
     template < typename R, template <typename> class BS > class ListSet;
 
-    template <typename R> Rectangle<R> intersection(const Rectangle<R> &A, const Rectangle<R> &B);
-    template <typename R> Rectangle<R> regular_intersection(const Rectangle<R> &A, const Rectangle<R> &B);
+    template <typename R> Rectangle<R> intersection(const Rectangle<R>& A, const Rectangle<R>& B);
+    template <typename R> Rectangle<R> regular_intersection(const Rectangle<R>& A, const Rectangle<R>& B);
 
-    template<typename R> bool interiors_intersect(const Rectangle<R> &A, const Rectangle<R> &B);
-    template<typename R> bool disjoint(const Rectangle<R> &A, const Rectangle<R> &B);
-    template<typename R> bool inner_subset(const Rectangle<R> &A, const Rectangle<R> &B);
-    template<typename R> bool subset(const Rectangle<R> &A, const Rectangle<R> &B);
-    template<typename R> bool subset_of_open_cover(const Rectangle<R> &A, const std::vector< Rectangle<R> > &L);
+    template<typename R> bool interiors_intersect(const Rectangle<R>& A, const Rectangle<R>& B);
+    template<typename R> bool disjoint(const Rectangle<R>& A, const Rectangle<R>& B);
+    template<typename R> bool inner_subset(const Rectangle<R>& A, const Rectangle<R>& B);
+    template<typename R> bool subset(const Rectangle<R>& A, const Rectangle<R>& B);
 
-    template<typename R> bool inner_subset(const Rectangle<R> &A, const ListSet<R,Rectangle> &B);
-    template<typename R> bool subset(const Rectangle<R> &A, const ListSet<R,Rectangle> &B);
-    
+    template<typename R> bool subset_of_open_cover(const Rectangle<R>& A, const ListSet<R,Rectangle>& L);
+    template<typename R> bool inner_subset(const Rectangle<R>& A, const ListSet<R,Rectangle>& B);
+    template<typename R> bool subset(const Rectangle<R>& A, const ListSet<R,Rectangle>& B);
+
     template<typename R> std::ostream& operator<<(std::ostream&, const Rectangle<R>&);
     template<typename R> std::istream& operator>>(std::istream&, Rectangle<R>&);
 
@@ -70,44 +71,43 @@ namespace Ariadne {
      */
     template <typename R>
     class Rectangle {
-      /*! \brief Makes intersection */
-      friend Rectangle<R> intersection <> (const Rectangle<R> &A,
-                                           const Rectangle<R> &B);
-
       /*! \brief Makes intersection of interiors */
-      friend Rectangle<R> regular_intersection <> (const Rectangle<R> &A,
-                                                   const Rectangle<R> &B);
+      friend Rectangle<R> regular_intersection <> (const Rectangle<R>& A,
+                                                   const Rectangle<R>& B);
 
-       /*! \brief Tests intersection of interiors. */
-      friend bool interiors_intersect <> (const Rectangle<R> &A,
-                                          const Rectangle<R> &B);
+      /*! \brief Makes intersection */
+      friend Rectangle<R> intersection <> (const Rectangle<R>& A,
+                                           const Rectangle<R>& B);
 
        /*! \brief Tests disjointness */
-      friend bool disjoint <> (const Rectangle<R> &A,
-                               const Rectangle<R> &B);
+      friend bool disjoint <> (const Rectangle<R>& A,
+                               const Rectangle<R>& B);
+
+       /*! \brief Tests intersection of interiors. */
+      friend bool interiors_intersect <> (const Rectangle<R>& A,
+                                          const Rectangle<R>& B);
 
       /*! \brief Tests if \a A is a subset of the interior of \a B. */
-      friend bool inner_subset <> (const Rectangle<R> &A,
-                                   const Rectangle<R> &B);
+      friend bool inner_subset <> (const Rectangle<R>& A,
+                                   const Rectangle<R>& B);
+
+      /*! \brief Tests if \a A is a subset of \a B. */
+      friend bool subset <> (const Rectangle<R>& A,
+                             const Rectangle<R>& B);
+
+
+      /*! \brief Tests inclusion in an open cover. */
+      friend bool subset_of_open_cover <> (const Rectangle<R>& A,
+                                           const ListSet<R,::Ariadne::Geometry::Rectangle>& list);
 
       /*! \brief Tests if \a A is a subset of the interior of \a B. */
-      friend bool inner_subset <> (const Rectangle<R> &A,
-                                   const ListSet<R,::Ariadne::Geometry::Rectangle> &B);
+      friend bool inner_subset <> (const Rectangle<R>& A,
+                                   const ListSet<R,::Ariadne::Geometry::Rectangle>& B);
 
       /*! \brief Tests if \a A is a subset of \a B. */
-      friend bool subset <> (const Rectangle<R> &A,
-                             const Rectangle<R> &B);
+      friend bool subset <> (const Rectangle<R>& A,
+                             const ListSet<R,::Ariadne::Geometry::Rectangle>& B);
 
-      /*! \brief Tests if \a A is a subset of \a B. */
-      friend bool subset <> (const Rectangle<R> &A,
-                             const ListSet<R,::Ariadne::Geometry::Rectangle> &B);
-
-
-      /*! \brief Tests inclusion in an open cover.
-       *  \internal We shouldn't restrict to a std::list.
-       */
-      friend bool subset_of_open_cover <> (const Rectangle<R> &A,
-                                           const std::vector< Rectangle<R> > &list);
 
      public:
       /*! \brief The unsigned integer type used to denote the array positions. */
@@ -139,7 +139,7 @@ namespace Ariadne {
       }
       
       /*! \brief Construct from two corners. */
-      Rectangle(const State &s1, const State &s2)
+      Rectangle(const State& s1, const State& s2)
         : _lower_corner(s1.dimension()), _upper_corner(s2.dimension())
       {
         /* Test to see if corners have same dimensions */
@@ -156,7 +156,7 @@ namespace Ariadne {
       }
       
       /*! \brief Construct from a string literal. */
-      explicit Rectangle(const std::string &s)
+      explicit Rectangle(const std::string& s)
         : _lower_corner(), _upper_corner()
       {
         std::stringstream ss(s);
@@ -164,7 +164,7 @@ namespace Ariadne {
       }
       
       /*! \brief Copy constructor. */
-      Rectangle(const Rectangle<R> &original)
+      Rectangle(const Rectangle<R>& original)
         : _lower_corner(original._lower_corner),
           _upper_corner(original._upper_corner)
       { }
@@ -380,12 +380,12 @@ namespace Ariadne {
 
       
       friend std::ostream&
-      operator<< <> (std::ostream &os, 
-                     const Rectangle<R> &r);
+      operator<< <> (std::ostream& os, 
+                     const Rectangle<R>& r);
       
       friend std::istream&
-      operator>> <> (std::istream &is, 
-                     Rectangle<R> &r);
+      operator>> <> (std::istream& is, 
+                     Rectangle<R>& r);
       
     };
     
@@ -444,8 +444,8 @@ namespace Ariadne {
 
     /*! \brief Tests inclusion */
     template <typename R>
-    bool subset(const Rectangle<R> &A, 
-                const Rectangle<R> &B) 
+    bool subset(const Rectangle<R>& A, 
+                const Rectangle<R>& B) 
     {
       if (A.dimension()!=B.dimension())
         throw std::domain_error("The two parameters have different space dimensions");
@@ -472,7 +472,7 @@ namespace Ariadne {
     template <typename R>
     void
     compute_gridpoints(std::vector< std::set<R> >& gridpoints,
-                       const Rectangle<R> &A, 
+                       const Rectangle<R>& A, 
                        const std::vector< Rectangle<R> >& cover)
     {
       typedef R Real;
@@ -505,15 +505,17 @@ namespace Ariadne {
 #endif
     }
     
-    //*! \brief Tests inclusion in an open cover.  */
+    /*! \brief Tests inclusion in an open cover.
+     * FIXME: Use some kind of GridSet for this operation.
+     */
     template <typename R>
-    bool subset_of_open_cover(const Rectangle<R> &A,
-                              const std::vector< Rectangle<R> >& cover) 
+    bool subset_of_open_cover(const Rectangle<R>& A,
+                              const ListSet<R,Rectangle>& cover) 
     {
       typedef R Real;
       typedef typename std::set<Real> Set;
       typedef typename Set::const_iterator set_iterator;
-      typedef typename std::vector< Rectangle<R> >::const_iterator list_iterator;
+      typedef typename ListSet<R,Rectangle>::const_iterator list_iterator;
       
       typedef typename Rectangle<R>::size_type size_type;
       typedef std::valarray<size_type> index_type;
@@ -610,15 +612,17 @@ namespace Ariadne {
       return true;
     }
     
-    /*! \brief Tests inclusion in a closed cover.  */
+    /*! \brief Tests inclusion. 
+     *  FIXME: Convert B to GridMaskSet<R> .
+     */
     template <typename R>
-    bool subset_of_closed_cover(const Rectangle<R> &A,
-                                const std::vector< Rectangle<R> >& cover) 
+    bool subset(const Rectangle<R>& A,
+                const ListSet<R,Rectangle>& B) 
     {
       typedef typename Rectangle<R>::Real Real;
       typedef typename std::set<Real> Set;
       typedef typename Set::const_iterator set_iterator;
-      typedef typename std::vector< Rectangle<R> >::const_iterator list_iterator;
+      typedef typename ListSet<R,Rectangle>::const_iterator list_iterator;
       
       typedef typename Rectangle<R>::size_type size_type;
       typedef std::valarray<size_type> index_type;
@@ -626,7 +630,7 @@ namespace Ariadne {
       size_type dimension = A.dimension();
       
       std::vector<Set> gridpoints(dimension);
-      compute_gridpoints(gridpoints, A, cover);
+      compute_gridpoints(gridpoints, A, B);
       
       
       /* Whether the jth gridpoint (in some ordering) is covered */
@@ -646,7 +650,7 @@ namespace Ariadne {
       lower_indices[dimension] = 0;
       upper_indices[dimension] = 2;
       
-      for(list_iterator rect=cover.begin(); rect!=cover.end(); ++rect) {
+      for(list_iterator rect=B.begin(); rect!=B.end(); ++rect) {
         for(size_type i=0; i!=dimension; ++i) {
           Real lower_bound=rect->lower(i);
           size_type lower_index=0;
@@ -720,7 +724,7 @@ namespace Ariadne {
     /*! \brief The intersections of \a A and \a B. */
     template <typename R>
     Rectangle<R>
-    intersection(const Rectangle<R> &A, const Rectangle<R> &B)
+    intersection(const Rectangle<R>& A, const Rectangle<R>& B)
     {
       if (A.dimension()!=B.dimension()) {
         throw std::domain_error("The two parameters have different space dimensions");
@@ -743,7 +747,7 @@ namespace Ariadne {
     /*! \brief The closure of the intersection of the interiors of \a A and \a B. */
     template <typename R>
     Rectangle<R>
-    regular_intersection(const Rectangle<R> &A, const Rectangle<R> &B)
+    regular_intersection(const Rectangle<R>& A, const Rectangle<R>& B)
     {
       if (A.dimension()!=B.dimension()) {
         throw std::domain_error("The two parameters have different space dimensions");
@@ -769,7 +773,7 @@ namespace Ariadne {
 
     template <typename R>
     std::ostream&
-    operator<<(std::ostream &os, const Rectangle<R> &r) 
+    operator<<(std::ostream& os, const Rectangle<R>& r) 
     {
       
       /*
@@ -792,7 +796,7 @@ namespace Ariadne {
     
     template <typename R>
     std::istream& 
-    operator>>(std::istream &is, Rectangle<R> &r)
+    operator>>(std::istream& is, Rectangle<R>& r)
     {
       typedef typename Rectangle<R>::Real Real;
       typedef typename Ariadne::Interval<Real> Interval;

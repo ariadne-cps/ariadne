@@ -135,10 +135,6 @@ class Polyhedron {
       : _ppl_poly(dim, Parma_Polyhedra_Library::Polyhedron::EMPTY)
     { }
       
-    /*! \brief Construct the polyhedron defined by the matrix equations \f$Ax\leq b\f$.
-     */
-    inline Polyhedron(const Matrix& A, const Vector& v);
-    
     /*! \brief Construct a polyhedron from a constraint system.
      *
      * \param cs is the constraint system.
@@ -156,6 +152,10 @@ class Polyhedron {
       : _ppl_poly(Parma_Polyhedra_Library::Generator_System(gen)) 
     {
     }    
+    
+    /*! \brief Construct the polyhedron defined by the matrix equations \f$Ax\leq b\f$.
+     */
+    inline Polyhedron(const Matrix& A, const Vector& b);
     
     /*! \brief Construct the polyhedron defined as the convex hull of a list of states.
      */
@@ -607,7 +607,7 @@ minkowski_sum(const Polyhedron<R>& A,
 template <typename R>
 inline
 std::ostream& 
-operator<<(std::ostream &os, const Polyhedron<R>& p) {
+operator<<(std::ostream& os, const Polyhedron<R>& p) {
   os << "Polyhedron(equations=[";
   Parma_Polyhedra_Library::IO_Operators::operator<<(os,p._ppl_poly);
   os << "], vertices=";
@@ -645,6 +645,7 @@ Polyhedron<R>::Polyhedron(const Matrix& A, const Vector& b)
   Parma_Polyhedra_Library::Constraint_System cs;
   
   for(size_type i=0; i!=A.size1(); ++i) {
+//    rw=Vector(row(A,i));
     rw=row(A,i);
     cnst=b[i];
     cs.insert(_convert_to_PPL_constraint(rw,cnst));
@@ -721,11 +722,11 @@ _from_State_to_PPL_Polyhedron(const Point<R>& s)
 }
 
 
-/*! Convert the vector \a v and constant \a c into the constraint $v\cdot x\leq c$. */
+/* Convert the vector \a v and constant \a c into the constraint $v\cdot x\leq c$. */
 template<typename R>
 inline
 Parma_Polyhedra_Library::Constraint
-_convert_to_PPL_constraint(const ::Ariadne::LinearAlgebra::vector<R> & v, 
+_convert_to_PPL_constraint(const ::Ariadne::LinearAlgebra::vector<R>&  v, 
                            const R& s) 
 {
   Parma_Polyhedra_Library::Linear_Expression e;

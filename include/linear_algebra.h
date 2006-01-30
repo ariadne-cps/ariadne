@@ -54,25 +54,29 @@ namespace Ariadne {
       return prod(A,B);
     }
       
-//    template <typename Real>
-//  inline matrix_row< matrix<Real> > row(const matrix<Real>& m, size_type i) {
-//    return matrix_row< matrix<Real> >(m,i);
-//    inline vector<Real> row(const matrix<Real>& m, typename matrix<Real>::size_type i) {
-//      matrix_row< matrix<Real> > mr(m,i);
-//      return vector<Real>(mr);
-      //return vector<Real>(matrix_row< matrix<Real> >(m,i));
- //   }
+/*
+    template <typename Real>
+    inline vector<Real> row(const matrix<Real>& m, size_type i) {
+      return vector<Real>(matrix_row< matrix<Real> >(m,i));
+    }
+
+    template <typename Real>
+    inline vector<Real> column(const matrix<Real>& m, size_type i) {
+      return vector<Real>(matrix_column< matrix<Real> >(m,i));
+    }
+*/
+
+/*
     template <typename Real>
     inline matrix_row< matrix<Real> > row(matrix<Real>& m, size_type i) {
       return matrix_row< matrix<Real> >(m,i);
     }
     
     template <typename Real>
-//    inline matrix_column< matrix<Real> > column(const matrix<Real>& m, size_type i) {
-//      return matrix_column< matrix<Real> >(m,i);
-    inline vector<Real> column(const matrix<Real>& m, size_type i) {
-      return vector<Real>(matrix_column< matrix<Real> >(m,i));
+    inline matrix_column< matrix<Real> > column(const matrix<Real>& m, size_type i) {
+      return matrix_column< matrix<Real> >(m,i);
     }
+*/
     
     
     template <typename Real>

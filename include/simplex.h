@@ -53,18 +53,17 @@ namespace Ariadne {
     template < typename R > class Simplex;
     template < typename R, template <typename> class BS > class ListSet;
 
-    template <typename R> Simplex<R> intersection(const Simplex<R> &A, const Simplex<R> &B);
-    template <typename R> Simplex<R> regular_intersection(const Simplex<R> &A, const Simplex<R> &B);
+    template <typename R> Simplex<R> intersection(const Simplex<R>& A, const Simplex<R>& B);
+    template <typename R> Simplex<R> regular_intersection(const Simplex<R>& A, const Simplex<R>& B);
 
-    template<typename R> bool interiors_intersect(const Simplex<R> &A, const Simplex<R> &B);
-    template<typename R> bool disjoint(const Simplex<R> &A, const Simplex<R> &B);
-    template<typename R> bool inner_subset(const Simplex<R> &A, const Simplex<R> &B);
-    template<typename R> bool subset(const Simplex<R> &A, const Simplex<R> &B);
-    template<typename R> bool subset_of_open_cover(const Simplex<R> &A, const std::vector< Simplex<R> > &list);
-    template<typename R> bool subset_of_closed_cover(const Simplex<R> &A, const std::vector< Simplex<R> > &list);
+    template<typename R> bool interiors_intersect(const Simplex<R>& A, const Simplex<R>& B);
+    template<typename R> bool disjoint(const Simplex<R>& A, const Simplex<R>& B);
+    template<typename R> bool inner_subset(const Simplex<R>& A, const Simplex<R>& B);
+    template<typename R> bool subset(const Simplex<R>& A, const Simplex<R>& B);
 
-    template<typename R> bool inner_subset(const Simplex<R> &rect, const ListSet<R,Simplex> &A);
-    template<typename R> bool subset(const Simplex<R> &rect, const ListSet<R,Simplex> &A);
+    template<typename R> bool subset_of_open_cover(const Simplex<R>& A, const ListSet<R,Simplex>& list);
+    template<typename R> bool inner_subset(const Simplex<R>& rect, const ListSet<R,Simplex>& A);
+    template<typename R> bool subset(const Simplex<R>& rect, const ListSet<R,Simplex>& A);
     
     template<typename R> std::ostream& operator<<(std::ostream&, const Simplex<R>&);
     template<typename R> std::istream& operator>>(std::istream&, Simplex<R>&);
@@ -107,16 +106,9 @@ namespace Ariadne {
 
 
       /*! \brief Tests inclusion in an open cover.
-       *  \internal We shouldn't restrict to a std::list.
        */
       friend bool subset_of_open_cover <> (const Simplex<R>& A,
-                                           const std::vector< Simplex<R> >& list);
-
-      /*! \brief Tests inclusion in an closed cover.
-       *  \internal We shouldn't restrict to a std::list.
-       */
-      friend bool subset_of_closed_cover <> (const Simplex<R>& A,
-                                             const std::vector< Simplex<R> >& list);
+                                           const ListSet<R,Ariadne::Geometry::Simplex>& list);
 
      public:
       /*! \brief The unsigned integer type used to denote the array positions. */
@@ -380,20 +372,12 @@ namespace Ariadne {
     //*! \brief Tests inclusion in an open cover.  */
     template <typename R>
     bool subset_of_open_cover(const Simplex<R>& A,
-                              const std::vector< Simplex<R> >& cover) 
+                              const ListSet<R,Simplex>& cover) 
     {
       throw std::domain_error("subset_of_open_cover(Simplex, std::vector<Simplex>) not implemented");
     }
 
     
-    //*! \brief Tests inclusion in a closed cover.  */
-    template <typename R>
-    bool subset_of_closed_cover(const Simplex<R>& A,
-                                const std::vector< Simplex<R> >& cover) 
-    {
-      throw std::domain_error("subset_of_closed_cover(Simplex, std::vector<Simplex>) not implemented");
-    }
-
 
     template <typename R>
     std::ostream&

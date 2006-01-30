@@ -39,6 +39,7 @@
 #include "binary_word.h"
 #include "binary_tree.h"
 
+#include "geometry.h"
 #include "rectangle.h"
 #include "list_set.h"
 
@@ -47,7 +48,7 @@ namespace Ariadne {
     typedef unsigned short dimension_type;
     typedef size_t size_type;
     typedef sequence<dimension_type> SubdivisionSequence;
-    typedef std::vector<bool> BooleanArray;
+    typedef array<bool> BooleanArray;
 
     const bool leaf=1;
     const bool branch=0;

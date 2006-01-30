@@ -10,6 +10,8 @@ GEOMETRY_OBJ = geometry_module.o \
 	export_point.o export_interval.o \
 	export_rectangle.o export_parallelopiped.o export_simplex.o export_polyhedron.o \
 	export_list_set.o export_grid.o export_partition_tree.o \
+
+EVALUATION_OBJ = evaluation_module.o \
 	export_polynomial_map.o
 
 LINEAR_ALGEBRA_OBJ = linear_algebra_module.o \
@@ -17,13 +19,16 @@ LINEAR_ALGEBRA_OBJ = linear_algebra_module.o \
 
 all: python
 
-python: ariadne.so geometry.so linear_algebra.so
+python: ariadne.so geometry.so evaluation.so linear_algebra.so
 
 ariadne.so: ${ARIADNE_OBJ}
 	${CXX} -shared -o ariadne.so ${LDXXFLAGS} ${ARIADNE_OBJ} ${LDLIBS} ${RPATHFLAGS}
 
 geometry.so: ${GEOMETRY_OBJ}
 	${CXX} -shared -o geometry.so ${LDXXFLAGS} ${GEOMETRY_OBJ} ${LDLIBS} ${RPATHFLAGS}
+
+evaluation.so: ${EVALUATION_OBJ}
+	${CXX} -shared -o evaluation.so ${LDXXFLAGS} ${EVALUATION_OBJ} ${LDLIBS} ${RPATHFLAGS}
 
 linear_algebra.so: ${LINEAR_ALGEBRA_OBJ}
 	${CXX} -shared -o linear_algebra.so ${LDXXFLAGS} ${LINEAR_ALGEBRA_OBJ} ${LDLIBS} ${RPATHFLAGS}
@@ -46,19 +51,3 @@ dep:
 
 ### Do Not edit this line
 ### Everything below is auto-generated
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

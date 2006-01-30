@@ -49,7 +49,7 @@
 #include "list_set.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  namespace Evaluation {
     template<typename R> class PolynomialMap;
 
     template<typename R> std::ostream& operator<<(std::ostream&, const PolynomialMap<R>&);
@@ -63,7 +63,7 @@ namespace Ariadne {
       /*! \brief The type of denotable real number used for the coefficients. */
       typedef R Real;
       /*! \brief The type of denotable state accepted as argument. */
-      typedef Point<R> State;
+      typedef Geometry::Point<R> State;
      public:
       Monomial(size_type n) : _coefficient(0), _multi_index(n,0) { }
       Monomial(Real a, array<size_type>& i) : _coefficient(a), _multi_index(i) { }
@@ -96,7 +96,7 @@ namespace Ariadne {
       /*! \brief The type of denotable real number used for the corners. */
       typedef R Real;
       /*! \brief The type of denotable state contained by the simplex. */
-      typedef Point<R> State;
+      typedef Geometry::Point<R> State;
      private:
       /* Simplex's vertices. */
       std::vector< Monomial<Real> > _terms;
@@ -129,7 +129,7 @@ namespace Ariadne {
       /*! \brief The type of denotable real number used for the corners. */
       typedef R Real;
       /*! \brief The type of denotable state contained by the simplex. */
-      typedef Point<R> State;
+      typedef Geometry::Point<R> State;
      private:
       /* Components of the map. */
       array< Polynomial<R> > _components;
@@ -183,4 +183,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* _ARIADNE_SIMPLEX_H */
+#endif /* _ARIADNE_POLYNOMIAL_MAP_H */

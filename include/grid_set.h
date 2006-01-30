@@ -34,6 +34,7 @@
 #include "array.h"
 #include "interval.h"
 #include "binary_word.h"
+#include "geometry.h"
 #include "rectangle.h"
 #include "point.h"
 
@@ -83,6 +84,7 @@ namespace Ariadne {
     template<typename R> class GridRectangleListSet;
     template<typename R> class GridCellListSet;
 
+    template<typename R> bool subset(const Rectangle<R>&, const GridMaskSet<R>&);
     template<typename R> bool subset(const GridMaskSet<R>&, const GridMaskSet<R>&);
     template<typename R> GridMaskSet<R> regular_intersection(const GridMaskSet<R>&, const GridMaskSet<R>&);
     template<typename R> GridMaskSet<R> join(const GridMaskSet<R>&, const GridMaskSet<R>&);
@@ -163,8 +165,7 @@ namespace Ariadne {
    };
 
 
-    /*!\brief A finite, nonuniform grid of rectangles in Euclidean space.
-     */
+    /*!\brief A finite, nonuniform grid of rectangles in Euclidean space. */
     template<typename R>
     class FiniteGrid : public Grid<R> {
       typedef R real_type;
@@ -455,11 +456,14 @@ namespace Ariadne {
       /*!\brief Construct an empty set from a grid, and a list of lower and upper bounds. */
       GridMaskSet(const Grid<R>& g, IndexArray l, IndexArray u);
 
-      /*!\brief Construct an empty set from a grid, a list of lower and upper bounds, and a mask */
+      /*!\brief Construct a set from a grid, a list of lower and upper bounds, and a mask */
       GridMaskSet(const Grid<R>& g, IndexArray l, IndexArray u, const BooleanArray& m);
 
       /*!\brief Copy constructor. */
       GridMaskSet(const GridMaskSet<R>& gms);
+
+      /*!\brief Construct from a ListSet of Rectangle. */
+      GridMaskSet(const ListSet<R,Rectangle>& ls);
 
       /*!\brief Construct from a GridCellListSet. */
       GridMaskSet(const GridCellListSet<R>& gcls);
@@ -553,11 +557,11 @@ namespace Ariadne {
       friend GridMaskSet<R> regular_intersection<> (const GridMaskSet<R>&, const GridMaskSet<R>&);
      private:
       const Grid<R>* _grid_ptr;
-      array<index_type> _lower;
-      array<index_type> _upper;
-      array<size_type> _sizes;
-      array<size_type> _strides;
-      std::vector<bool> _mask;
+      IndexArray _lower;
+      IndexArray _upper;
+      SizeArray _sizes;
+      SizeArray _strides;
+      BooleanArray _mask;
     };
 
 
@@ -782,7 +786,7 @@ namespace Ariadne {
 
     /*! \brief Tests if A is a subset of the interior of B. */
     template<typename R>
-    bool subset_of_interior (const GridMaskSet<R> &A, const GridMaskSet<R> &B);
+    bool inner_subset (const GridMaskSet<R> &A, const GridMaskSet<R> &B);
 
     /*! \brief Tests if A is a subset of B. */
     template<typename R>
@@ -917,6 +921,22 @@ namespace Ariadne {
         _mask(gms._mask)
     {  
     }
+    
+    template<typename R>
+    GridMaskSet<R>::GridMaskSet(const ListSet<R,Rectangle>& rls) 
+      : _grid_ptr(new FiniteGrid<R>(rls)), _lower(rls.dimension()), _upper(rls.dimension()),
+        _sizes(rls.dimension()), _strides(rls.dimension()+1),
+        _mask()
+    {
+      _sizes=_upper-_lower;
+      _strides=compute_strides(_sizes);
+      _mask=BooleanArray(_strides[dimension()],false);
+      for(typename ListSet<R,Rectangle>::const_iterator riter=rls.begin(); riter!=rls.end(); ++riter) {
+        GridRectangle<R> r(grid(),*riter);
+        adjoin(r);
+      }
+    }
+
     
     
     template<typename R>

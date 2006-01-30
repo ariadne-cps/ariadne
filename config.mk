@@ -8,7 +8,7 @@ VERBATIM = yes
 PREFIX=${HOME}
 
 CC = gcc
-CXX = g++-4.0
+CXX = g++
 
 MAKE = make
 

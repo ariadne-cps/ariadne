@@ -539,7 +539,7 @@ namespace Ariadne {
       }
 
       for (size_t i=0; i<A.size() ; i++) {
-        if (!subset_of_open_cover(A[i], B._vector)) { return false; }
+        if (!inner_subset(A[i], B)) { return false; }
       }
 
       return true;

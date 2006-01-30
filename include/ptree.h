@@ -88,7 +88,7 @@ void pov_print(PartitionTree<R> &t, std::string f_name,
  * This class represents partition trees.
  */ 
 template <typename R = Rectangle < State < Rational > > >
-class PartitionTree {
+class PTree {
  public:
   typedef R Rectangle;
   typedef typename R::State State;
@@ -101,7 +101,7 @@ class PartitionTree {
   Rectangle _bounding_box;
   
   /*! \brief The ptree's root. */
-  PartitionTreeNode _root;
+  PTreeNode _root;
   
   /*! \brief The ptree's maximum depth */
   size_t _max_depth;
@@ -112,7 +112,7 @@ class PartitionTree {
   /*! \brief List of maintained rectangles. */
   std::vector<Rectangle> _vector;
   
-  uint _count_rect(const PartitionTreeNode &node,
+  uint _count_rect(const PTreeNode &node,
                    const Rectangle &node_box) {
     
     if (node.full()) {
@@ -138,7 +138,7 @@ class PartitionTree {
     return rect_n;
   }
   
-  void _fill_rect_vector(const PartitionTreeNode &node,
+  void _fill_rect_vector(const PTreeNode &node,
                          const Rectangle &node_box, size_t &idx) {
     
     if (node.full()) {
@@ -162,7 +162,7 @@ class PartitionTree {
     }
   }
   
-  void _fill_rect_vector(const PartitionTreeNode &node,
+  void _fill_rect_vector(const PTreeNode &node,
                          const Rectangle &node_box) {
     
     uint i=0,rect_n=this->_count_rect(node,node_box);
@@ -173,7 +173,7 @@ class PartitionTree {
   }
   
   template <typename SetType>
-  inline void _fill_ptree_check_subtrees(PartitionTreeNode &node,
+  inline void _fill_ptree_check_subtrees(PTreeNode &node,
                                          const SetType &A, const Rectangle &bbox, 
                                          const size_t &depth,const size_t &max_depth) {
     
@@ -186,8 +186,8 @@ class PartitionTree {
       Rectangle B=bbox.find_quadrant(i);
       
       if (interiors_intersect(B,A)) {
-        PartitionTreeNode *son= 
-          new PartitionTreeNode(A.dimension());
+        PTreeNode *son= 
+          new PTreeNode(A.dimension());
         
         this->_fill_ptree_with(*son , A, B, 
                                depth+1 , max_depth);
@@ -213,7 +213,7 @@ class PartitionTree {
   
   
   template <typename SetType>
-  void _fill_ptree_with(PartitionTreeNode &node,
+  void _fill_ptree_with(PTreeNode &node,
                         const SetType &A, 
                         const Rectangle &bbox, 
                         size_t depth,const size_t &max_depth) {
@@ -272,7 +272,7 @@ class PartitionTree {
   }
   
   template <typename SetType>
-  inline void _refill_ptree_check_subtrees(PartitionTreeNode &node,
+  inline void _refill_ptree_check_subtrees(PTreeNode &node,
                                            const SetType &A, const Rectangle &bbox, 
                                            const size_t &depth,const size_t &max_depth) {
     
@@ -295,8 +295,8 @@ class PartitionTree {
       } else {
         
         if (interiors_intersect(B,A)) {
-          PartitionTreeNode *son= 
-            new PartitionTreeNode(A.dimension());
+          PTreeNode *son= 
+            new PTreeNode(A.dimension());
           
           this->_refill_ptree_with(*son , A, B, 
                                    depth+1 , max_depth);
@@ -320,7 +320,7 @@ class PartitionTree {
   }
   
   template <typename SetType>
-  void _refill_ptree_with(PartitionTreeNode &node,
+  void _refill_ptree_with(PTreeNode &node,
                           const SetType &A, 
                           const Rectangle &bbox, 
                           size_t depth,const size_t &max_depth) {
@@ -399,38 +399,38 @@ class PartitionTree {
   
   /*! \brief A class costructor.
    *
-   * Creates an PartitionTree. 
+   * Creates an PTree. 
    */
-  PartitionTree() {}
+  PTree() {}
   
   /*! \brief A class costructor.
    *
-   * Creates an PartitionTree.
+   * Creates an PTree.
    * \param bbox is the bounding box of the ptree.
    * \param m_depth is the maximum depth of the ptree. 
    */
-  PartitionTree(const Rectangle &bbox, const size_t m_depth): 
+  PTree(const Rectangle &bbox, const size_t m_depth): 
     _bounding_box(bbox), _root(bbox.dimension()),
     _max_depth(m_depth){}
   
   /*! \brief A class costructor.
    *
-   * Creates an PartitionTree.
+   * Creates an PTree.
    * \param A is the original Ptree.
    */
-  PartitionTree(const PartitionTree<Rectangle> &A): 
+  PTree(const PTree<Rectangle> &A): 
     _bounding_box(A._bounding_box), _root(A._root),
     _max_depth(A._max_depth){}
   
   /*! \brief A class costructor. 
    *
-   * Creates an PartitionTree and inserts an object.
+   * Creates an PTree and inserts an object.
    * \param A is an object that should be inserted into the ptree.
    * \param bbox is the bounding box of the ptree.
    * \param m_depth is the maximum depth of the ptree.
    */
   template <typename SetType>
-  PartitionTree(const SetType &A,
+  PTree(const SetType &A,
                 const Rectangle &bbox, const size_t m_depth):  
     _bounding_box(bbox), _root(bbox.dimension()), 
     _max_depth(m_depth) {
@@ -446,13 +446,13 @@ class PartitionTree {
   }
   
   /*! \brief A class destructor. */
-  ~PartitionTree() {
+  ~PTree() {
     this->_clear_vector();
   }
   
-  /*! \brief Return the number of rectangles into the PartitionTree. 
+  /*! \brief Return the number of rectangles into the PTree. 
    *
-   * \return The number of rectangles maitained by the PartitionTree.
+   * \return The number of rectangles maitained by the PTree.
    */
   inline size_t size() {
     if (this->_vector.size()==0) {
@@ -462,15 +462,15 @@ class PartitionTree {
     return (this->_vector).size();
   }
   
-  /*! \brief Return the space dimension of the PartitionTree. 
+  /*! \brief Return the space dimension of the PTree. 
    *
-   * \return The space dimension of the PartitionTree.
+   * \return The space dimension of the PTree.
    */
   inline size_t dimension() const{
     return (this->_root).dimension();
   }
   
-  /*! \brief Return the space dimension of the PartitionTree. (Deprecated) */
+  /*! \brief Return the space dimension of the PTree. (Deprecated) */
   inline size_t dim() const{
     return (this->_root).dimension();
   }
@@ -478,7 +478,7 @@ class PartitionTree {
   /*! \brief Accesses the i-th rectangle.
    *
    * \param index is the index of the returned rectangle.
-   * \return The i-th rectangle maitained by the PartitionTree.
+   * \return The i-th rectangle maitained by the PTree.
    */
   inline const Rectangle &operator[](size_t index){
     if (this->_vector.size()==0) {
@@ -490,9 +490,9 @@ class PartitionTree {
   
   /*! \brief Checks the inclusion of a state.
    *
-   * \param state is a state in the space represented by the PartitionTree.
+   * \param state is a state in the space represented by the PTree.
    * \return \a true if the state is contained into the rectangles maintained 
-   * by the PartitionTree, \a false otherwise.
+   * by the PTree, \a false otherwise.
    */
   inline bool contains(const State & state) {
     if (this->_vector.size()==0) {
@@ -510,9 +510,9 @@ class PartitionTree {
   
   /*! \brief Checks the interior inclusion of a state.
    *
-   * \param state is a state in the space represented by the PartitionTree.
+   * \param state is a state in the space represented by the PTree.
    * \return \a true if the state is contained into the interior of 
-   * the rectangles maintained by the PartitionTree, \a false otherwise.
+   * the rectangles maintained by the PTree, \a false otherwise.
    */
   inline bool interior_contains(const State & state) const {
     
@@ -523,7 +523,7 @@ class PartitionTree {
   
   /*! \brief Checks the emptyness.
    *
-   * \return \a true if the space represented by the PartitionTree is empty,
+   * \return \a true if the space represented by the PTree is empty,
    * \a false otherwise.
    */
   inline bool empty() const {
@@ -554,13 +554,13 @@ class PartitionTree {
     return _vector().end();
   }
   
-  /*! \brief Makes the union of two PartitionTree.
+  /*! \brief Makes the union of two PTree.
    *
-   * Makes the union of the current PartitionTree and an other PartitionTree.
+   * Makes the union of the current PTree and an other PTree.
    * The result is stored into the current object.
-   * \param \a A is an PartitionTree.
+   * \param \a A is an PTree.
    */
-  inline void inplace_union(const PartitionTree& A) {
+  inline void inplace_union(const PTree& A) {
     
 #ifdef DEBUG
     std::cout << __FILE__ << ":" << __LINE__ << std::endl;
@@ -582,9 +582,9 @@ class PartitionTree {
     
   }
   
-  /*! \brief Inserts an object into the PartitionTree.
+  /*! \brief Inserts an object into the PTree.
    *
-   * Inserts an object into the PartitionTree. The result is stored 
+   * Inserts an object into the PTree. The result is stored 
    * into the current object.
    * \param \a A is an object representing a set.
    */
@@ -614,9 +614,9 @@ class PartitionTree {
     
   }
   
-  /*! \brief Inserts an object into the PartitionTree.
+  /*! \brief Inserts an object into the PTree.
    *
-   * Inserts an object into the PartitionTree. The result is stored 
+   * Inserts an object into the PTree. The result is stored 
    * into the current object.
    * \param \a A is an object representing a set.
    */
@@ -645,7 +645,7 @@ class PartitionTree {
   
   inline const Rectangle &bounding_box() const { return this->_bounding_box; }
   
-  inline const PartitionTree<R> &operator=(const PartitionTree<R> &A) {
+  inline const PTree<R> &operator=(const PTree<R> &A) {
     this->_bounding_box=A._bounding_box;
     this->_root=A._root;
     this->_max_depth=A._max_depth;
@@ -656,7 +656,7 @@ class PartitionTree {
   /*! \brief Prints the ptree on a ostream */
   template <typename Rect>
   friend std::ostream& operator<<(std::ostream &os, 
-                                  PartitionTree<Rect> &r);
+                                  PTree<Rect> &r);
 };
   
 }

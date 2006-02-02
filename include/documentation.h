@@ -25,7 +25,7 @@
 #ifndef _ARIADNE_DOC_H
 #define _ARIADNE_DOC_H
 
-/*! \file doc.h
+/*! \file documentation.h
  * \brief Miscellaneous documentation pages
  */
 
@@ -146,23 +146,12 @@
  * \endcode
  *
  * \internal
- * The names are chosen for compatibility with \c \<cmath\> and Boost.
- * The only name change is that \c multiplicative_inverse from Boost has become \c recip.
- *
  * Should we only support explicit approximation functions, like \c exp_approx for finite-precision types?
  * While it is in some ways appealing to make the approximation explicit,
  * I think it's probably better to allow <tt> double exp(double)</tt> in Ariadne, for two reasons.
  * The first reason is that this is common useage, and people might well include <cmath> anyway.
  * The second is operator overloading; we should insist that \c operator+ and add give the same answers,
  * and by disallowing add, we also need to disallow all operator overloading on double-precision types.
- *
- * With \c floor and \c ceil, it would be useful to have these return an \c int.
- * Unfortunately, this is not the behaviour in \c \<cmath\>, and it's probably not a good idea to change this.
- * A solution for \c double is to use the conversion to \c int, but this doesn't work for \c dyadic and \c rational types.
- * Solutions are
- * \li provide functions <tt>int ifloor(Real)</tt> and <tt>int iceil(Real)</tt>
- * \li wrap the GnuMP classes to provide conversion operator to int (rounding to zero)
- * \li provide a function <tt>int convert_to_int(Real)</tt> (ugly)
  *
  * Should we use the \c f_down, \c f_up syntax, or the \c f(Real,ApproximationKind) syntax?
  * Boost uses \c f_down and \c f_up.
@@ -204,7 +193,7 @@
  *
  * rational recip(rational);
  * rational div(rational,rational);
- * dyadic div(dyadic,int); // Behaviour undefined unless i is a power of 2.
+ * dyadic div(dyadic,int i); // Behaviour undefined unless i is a power of 2.
  *
  * // Conversions.
  * APReal floor(APReal);
@@ -222,15 +211,15 @@
  * APReal square(APReal)
  *
  * // Approximate algebraic functions.
- * APReal div_approx(APReal x, APReal y, APReal d, APReal& e); // d gives the error in y.
- * APReal recip_approx(APReal x, APReal d, APReal& e);
- * APReal sqrt_approx(APReal x, APReal d, APReal& e);
+ * APReal div_approx(APReal x, APReal y, APReal e); 
+ * APReal recip_approx(APReal x, APReal e);
+ * APReal sqrt_approx(APReal x, APReal e);
  *
  * // Approximate transcendental functions.
- * APReal exp_approx(APReal x, APReal d, APReal& e);
- * APReal log_approx(APReal x, APReal d, APReal& e);
+ * APReal exp_approx(APReal x, APReal e);
+ * APReal log_approx(APReal x, APReal e);
  *
- * APReal sin_approx(APReal x, APReal d, APReal& e);
+ * APReal sin_approx(APReal x, APReal e);
  *  ...
  * \endcode
  *
@@ -244,17 +233,11 @@
  *
  * \b Warning: The compiler may not catch errors resulting from inexact division involving \c dyadic numbers!!
  *
- * The semantics of \c f_approx is as follows:
+ * The parameter \a e is an input parameter giving the desired error in the output.
  *
- * The parameter \a d is the maximum error in the argument \a x.
- * If \c d==0, then \a x is exact.
- * The parameter \a e is an input/output parameter giving the error in the output.
- * The function \c f_approx tries to find an output with a maximum error of \a e, if possible.
- * After the function call, \a e is overwritten with the best guarenteed error bound.
+ * \internal Alternatively, since we always need an error bound, we don't need to add the suffix \c _approx 
+ * to function names for exact arithmetic.
  *
- * If \c e==0, then \c f_approx is guarenteed to converge to the exact answer as \a d tends to 0.
- * If \c d==0 and \c e==0, then either an approximation is computed to some arbitrary error, or an exception is thrown.
- * This choice is implementation-dependent.
  *
  * \section interval Interval Arithmetic
  *
@@ -266,6 +249,7 @@
  *
  * Finite precision functions are of the form
  * \code
+ * Interval<FPReal> f(Interval<FPReal>);
  * Interval<FPReal> f_approx(Interval<FPReal>);
  * \endcode
  * and satisfy the mathematical postcondition \f$ \forall x\in I,\ f(x)\in\textrm{f\_approx}(I) \f$,
@@ -280,10 +264,12 @@
  * and approximate arbitrary-precision interval functions by
  * \code
  * Interval<APReal> f_approx(Interval<APReal>);
+ * Interval<APReal> f(Interval<APReal>); // (Possible) syntactic sugar for f_approx.
  * \endcode
  * where \c f(I) is the exact image of the interval \c I, and \c f_approx satisfies the mathematical postcondition
  * \f$ \textrm{f\_approx}(I) \supset f(I)\f$, and the convergence criterion that the length of \c f_approx(I) approaches 0
  * as the length of \c I approaches 0.
+ *
  */
 
 /*! \page geometric Geometric Representation
@@ -358,7 +344,7 @@
  *   Rectangle<Real> bounding_box() const;
  *   Sphere<Real> bounding_sphere() const;
  * };
-
+ *
  *  // Optional, since the intersection of two basic sets need not be a basic set.
  *  BasicSet regular_intersection(const BasicSet &, const BasicSet &);
  *
@@ -518,4 +504,157 @@
  * \endcode
  */
 
+/*! \page evaluation Function Evaluation
+ * 
+ * Ariadne is primarily a module for set-based computationan.
+ * For this reason, functions are best defined by their actions on sets.
+ * However, we sometimes also want to compute function values on points, and to evaluate real-valued functions.
+ * For this reason, we also allow definition of functions on points.
+ * 
+ * We distinguish between computations on \em fixed-precision and \em arbitrary-precision types, 
+ * between computations on \em points and \em sets, and between \em exact and \em approximate computations.
+ *
+ * The basic computation on sets is to compute \em over-approximations to the image of <em>basic sets</em>
+ * From these computations, arbitrarily-accurate computations can be performed.
+ * The basic computation on points can be \em exact and \em approximate, as appropriate.
+ *
+ * \section set_functions  Computations on sets.
+ *
+ * A valid arbitrary-precision computation on sets is defined as follows
+ * If \f$f\f$ is a mathematical function, and \tt BS is a basic set type,
+ * then a valid representation \tt f of \f$f\f$ is a function which, 
+ * for any basic set \f$A\f$, returns a set \f$B\f$ such that \f$f(A)\subset B\f$,
+ * and such that whenever \f$A_n\f$ is a decreasing sequence of sets with \f$\bigcap_{n=1}^{\infty} A_n=\{x\}\f$,
+ * then \f$\bigcap_{n=1}^{\infty} B_n=\{y\}\f$, where \f$y=f(x)\f$.
+ *
+ * A valid fixed-precision computation on sets is an over-approximation. 
+ * In other words, a valid representation \tt f of \f$f\f$ is a function which,
+ * for any basic set \f$A\f$, returns a set \f$B\f$ such that \f$f(A)\subset B\f$.
+ * No guarentees on the accuracy are required.
+ * Note that it does not make sense to consider a sequence \f$A_n\f$ converging to a point for fixed-precision types. 
+ *
+ * \section point_functions Computations on points.
+ *
+ * A arbitrary-precision computation on points may be \em exact or \em approximate.
+ * Examples of exact operations are polynomial functions on a ring (e.g. dyadic numbers)
+ * and rational functions on a field (e.g. rational numbers). If \f$f\f$ is a mathematical function, 
+ * then \tt f(x) computes \f$f(x)\f$ exactly if possible, and is undefined (compile-time or run-time error) otherwise.
+ * \tt f(x,e) computes \f$f(x)\f$ with an error of at most \tt e.
+ * 
+ * Note that even if \tt f is exact, it is impossible to compute 
+ * the action of \f$f\f$ on a set just from the action of \tt f on points,
+ * unless a modulus of continuity for \f$f\f$ is known.
+ *
+ * All fixed-precision computations on points are approximate. Further, the accuracy of the approximation is often unknown,
+ * or hard to compute. Since the aim of the fixed-precision computation is rapid computation, no guarentees are given about 
+ * the error. We use the syntax \tt f(x) to compute an approximation to \f$f(x)\f$ with no controls on the accuracy.
+ *
+ *
+ * \section real_functions Computations on real numbers.
+ *
+ * Most continuous functions used in science and engineering are built up from elementary real-valued functions,
+ * either arithmetical or defined using Taylor series expansions. 
+ * For this reason, Ariadne provides extended operations for computation on real-valued functions.
+ * 
+ * Arbitrary-precision computations may be exact or approximate. 
+ * The function \tt f(x) computes \f$f(x)\f$ exactly, if possible, 
+ * and gives an error (at compile-time or run-time) if the result cannot be computed exactly.
+ * The function \tt f_approx(x,e) computes \f$f(x)\f$ with an error of at most \f$e\f$.
+ *
+ * Although it is not, in general, possible to perform evaluation of functions on sets from their definitions on points,
+ * in many cases such a computation can be extracted. 
+ * In particular, we can construct interval computations from pointwise computations in the following cases:
+ * <ul>
+ *    <li>The function is Lipschitz with a known Lipschitz constant e.g. \f$\sin,\ \cos\f$.</li>
+ *    <li>The function is monotone e.g. \f$\exp\f$.</li>
+ *    <li>The function is piecewise-monotone with known branches e.g. arithmetic.</li>
+ * </ul>
+ *
+ *
+ * Fixed-precision computations are inherantly approximate, 
+ * though in some cases they may happen to give exact result. 
+ * The function \c f_approx(x) computes \f$f(x)\f$ approximately, with no control on the error bound.
+ * The function \c f_down(x) computes a lower-approximation to \f$f(x)\f$, 
+ * and \c f_up(x) computes an upper-approximation.
+ * For consistency with existing practise, we also allow \c fnc(x) as a valid alternative to \c fnc_approx(x).
+ *
+ * Note that in many cases, including arithmetic and simple functions, it is possible to compute an interval \f$J\f$ containing \f$f(I)\f$ 
+ * using \c f_down and \c f_upp. This allows an implementation of the standard set-based function \c f(I).
+ * 
+ * \section function_syntax Syntax for continuous functions and function objects.
+ *
+ * Computable functions are represented as function objects, i.e. objects in a
+ * class with an overloaded operator().
+ * Elementary and arithmetical functions are represented as ordinary functions
+ * with the same syntax.
+ *
+ * \code
+ * // Syntax for built-in real-valued functions.
+ * FPReal f(FPReal x); // A synonym for f_approx(x)
+ * FPReal f_approx(FPReal x); // Compute an approximation to f(x).
+ * FPReal f_down(FPReal x); // Compute a lower-approximation to f(x). 
+ * FPReal f_up(FPReal x); // Compute an upper-approximation to f(x). 
+ *
+ * APReal f(APReal x); // Compute f(x) exactly, if possible.
+ * APReal f(APReal x, APReal e); // A synonym for f_approx(x,e).
+ * APReal f_approx(APReal x, APReal e); // Compute f(x) with an error of at most e.
+ *
+ * // Syntax for user-defined single-valued continuous functions with fixed-precision arithmetic.
+ * Point<FPReal> f(Point<FPReal> A); // A synonym for f.approx(x)
+ * Point<FPReal> f.approx(Point<FPReal A); // Compute an approximation to f(x).
+ * Point<FPReal> f.approximate(Point<FPReal> A); // Compute an approximation to f(x).
+ *
+ * BasicSet<FPReal> f(BasicSet<FPReal> A); // Compute an over-approximation to f(A).
+ *
+ * // Syntax for user-defined single-valued continuous functions with arbitrary-precision arithmetic.
+ * Point<APReal> f(Point<APReal> x); // Compute f(x) exactly, if possible.
+ * Point<APReal> f(Point<APReal> x, APReal e); // Compute f(x) with an error of at most e.
+ * Point<APReal> f.approx(Point<APReal> x, APReal e); // A more descriptive syntax for f(x,e)
+ * Point<APReal> f.approximate(Point<APReal> x, APReal e); // A more descriptive syntax for f(x,e)
+ *
+ * BasicSet<APReal> f(BasicSet<APReal> A); // Compute a convergent over-approximation to f(A).
+ * BasicSet<APReal> f(BasicSet<APReal> A, OverApproximation); // Compute a convergent over-approximation to f(A).
+ * BasicSet<APReal> f.approx(BasicSet<APReal> A); // A more descriptive syntax for f(A).
+ * BasicSet<APReal> f.approximate(BasicSet<APReal> A); // A more descriptive syntax for f(A).
+ * BasicSet<APReal> f.approximation(BasicSet<APReal> A); // A more descriptive syntax for f(A).
+ * BasicSet<APReal> f.over(BasicSet<APReal> A); // A more descriptive syntax for f(A).
+ * BasicSet<APReal> f.over_approximate(BasicSet<APReal> A); // A more descriptive syntax for f(A).
+ *
+ * // Definition for fixed-precision continuous functions.
+ * template<class FPReal>
+ * class ContinuousFunction {
+ *   // Compute an approximation to f(p) with no guarentees on error.
+ *   Point<FPReal> operator() (Point<FPReal> p); 
+ *   Point<FPReal> approximate() (Point<FPReal> p); 
+ *   Point<FPReal> approx() (Point<FPReal> p); 
+ *
+ *   // Compute an over-approximation to f(A) with no guarentees on error.
+ *   BasicSet<FPReal> operator() (BasicSet<FPReal> A); 
+ * };
+ *
+ *
+ * // Definition for arbitrary-precision continuous functions.
+ * template<class APReal>
+ * class ContinuousFunction {
+ *   // Compute f(p) exactly, but only if possible.
+ *   Point<APReal> operator() (Point<APReal> p); 
+ *
+ *   // Compute an approximation to f(p) with error at most e.
+ *   Point<APReal> operator() (Point<APReal> p, APReal e); 
+ *   Point<APReal> approximate() (Point<APReal> p, APReal e); 
+ *
+ *   // Compute an over-approximation to f(A). The result is guarenteed to 
+ *   // converge to a one-point set as the argument converges to a one-point set.
+ *   BasicSet<APReal> operator() (BasicSet<APReal> A); 
+ * };
+ *
+ * \endcode
+ *
+ * \internal 
+ *    Use \tt f.approx(p) or f.approximate(p) for function objects?
+ *    Use \tt f_approx(p) or f_approximate(p) for functions?     
+ 
+ * 
+ */
+ 
 #endif /* _ARIADNE_DOC_H */

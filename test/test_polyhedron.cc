@@ -29,7 +29,7 @@
 #include "exception.h"
 #include "utility.h"
 #include "numerical_type.h"
-#include "state.h"
+#include "point.h"
 #include "polyhedron.h"
 
 using namespace Ariadne;
@@ -44,11 +44,11 @@ int main() {
 
   typedef Rational Real;
   typedef Polyhedron<Real> Polyhedron;
-  typedef State<Real> State;
+  typedef Point<Real> Point;
   typedef Interval<Real> Interval;
     
-  State s1(4,Rational(1));
-  State s2(4,Rational(4,3));
+  Point s1(4,Rational(1));
+  Point s2(4,Rational(4,3));
 /*
   Polyhedron p1(s1,s2);
   Polyhedron p2(s2,s1);

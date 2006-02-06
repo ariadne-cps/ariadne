@@ -148,7 +148,7 @@ namespace Ariadne {
       IndexArray lower_index(const Rectangle<R>& r) const {
         IndexArray res(r.dimension());
         for(size_type i=0; i!=res.size(); ++i) {
-          res[i]=subdivision_lower_index(i,r.lower(i));
+          res[i]=subdivision_lower_index(i,r.lower_bound(i));
         }
         return res;
       }

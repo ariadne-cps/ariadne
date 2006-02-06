@@ -31,6 +31,7 @@
 
 #include <gmpxx.h>
 #include <string>
+#include <assert.h>
 #include "synaps/dyadic.h"
 
 namespace Ariadne {

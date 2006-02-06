@@ -29,7 +29,7 @@
 #include "exception.h"
 #include "utility.h"
 #include "numerical_type.h"
-#include "state.h"
+#include "point.h"
 #include "rectangle.h"
 #include "list_set.h"
 
@@ -45,14 +45,14 @@ template class ListSet<double, Rectangle>;
 int main() {
   cout << "test_list_set: " << flush;
 
-    State<Rational> s0(2,Rational(0));
-    State<Rational> s1(2,Rational(1));
-    State<Rational> s2(2,Rational(4,3));
-    State<Rational> s3(2,Rational(3,2));
+    Point<Rational> s0(2,Rational(0));
+    Point<Rational> s1(2,Rational(1));
+    Point<Rational> s2(2,Rational(4,3));
+    Point<Rational> s3(2,Rational(3,2));
 
     typedef ListSet<Rational, Rectangle> ListSet;
     typedef Rectangle<Rational> Rectangle;
-    typedef State<Rational> State;
+    typedef Point<Rational> Point;
 
     Rectangle r0(s0,s1);
     Rectangle r1(s1,s2);

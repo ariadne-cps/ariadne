@@ -28,9 +28,8 @@
 #include "ariadne.h"
 #include "exception.h"
 #include "utility.h"
-#include "numerical_type.h"
-#include "state.h"
 #include "rectangle.h"
+#include "list_set.h"
 
 #include "test.h"
 
@@ -44,19 +43,19 @@ template class Rectangle< Rational >;
 int main() {
     cout << "test_rectangle: " << flush;
 
-    typedef Rectangle< Rational > Rectangle;
-    typedef Rectangle::State State;
+    typedef Rectangle< Rational > ARectangle;
+    typedef ARectangle::Point Point;
     typedef Interval<Rational> Interval;
     
-    State s1(2,Rational(1));
-    State s2(2,Rational(3,2));
-    State s3(2,Rational(4,3));
-    State s4(2,Rational(2));
-    Rectangle r0;
-    Rectangle r1(s1,s2);
-    Rectangle r2(s3,s4);
-    Rectangle r3(s3,s2);
-    Rectangle r4,r5,r6;
+    Point s1(2,Rational(1));
+    Point s2(2,Rational(3,2));
+    Point s3(2,Rational(4,3));
+    Point s4(2,Rational(2));
+    ARectangle r0;
+    ARectangle r1(s1,s2);
+    ARectangle r2(s3,s4);
+    ARectangle r3(s3,s2);
+    ARectangle r4,r5,r6;
     
     string istr = "[ [0,1],[0,1] ] "
         "[[-1/2,3/2],[-1/3,1/2]] "
@@ -66,11 +65,11 @@ int main() {
         "[[0,1],[0,1/2]] ";
     stringstream iss(istr);
     iss >> r1 >> r2 >> r3 >> r4 >> r5 >> r6;
-    Rectangle r7=r1;
+    ARectangle r7=r1;
     
     test_assert(r1==r7,"equality");
     
-    std::vector<Rectangle> cover1,cover2;
+    ListSet<Rational,Rectangle> cover1,cover2;
     cover1.push_back(r2);
     cover1.push_back(r3);
     cover1.push_back(r4);
@@ -88,10 +87,9 @@ int main() {
     test_assert(!subset_of_interior(r1,r1),"subset_of_interior");
     test_assert(subset_of_open_cover(r1,cover1),"subset_of_open_cover");
     test_assert(!subset_of_open_cover(r1,cover2),"subset_of_open_cover");
-    test_assert(subset_of_closed_cover(r1,cover2),"subset_of_closed_cover");
        
-    r4=closure_of_intersection_of_interiors(r1,r2);
-    test_assert(r4==r6,"closure_of_intersection_of_interiors");
+    r4=regular_intersection(r1,r2);
+    test_assert(r4==r6,"regular_intersection");
 
     try {
 	string input("[ ]  [ [0,2] ]  [ [0,1], [3/4,4/3], [1,3/2] ] "

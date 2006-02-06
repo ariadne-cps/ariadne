@@ -30,7 +30,7 @@
 #include "exception.h"
 #include "utility.h"
 #include "numerical_type.h"
-#include "state.h"
+#include "point.h"
 #include "rectangle.h"
 #include "binary_word.h"
 #include "grid_set.h"
@@ -71,10 +71,14 @@ int main() {
   ofstream clog("test_grid.log");
 
   ListSet<Rational,Rectangle> ls;
-
-  string input("[ [[0,5/6],[0,4/3]], [[2/3,1],[1,4/3]], [[4/3,3/2],[4/3,5/2]] ]");
+  Rectangle< Rational > r;
+  
+  string input("[[0,5/6],[0,4/3]], [[2/3,1],[1,4/3]], [[4/3,3/2],[4/3,5/2]] ");
   stringstream is(input);
-  is >> ls;
+  for (int i=0; i< 4; i++) {
+	  is >> r;
+  	ls.push_back(r);
+  }
   clog << ls << endl;
 
   FiniteGrid<Rational> gr(ls);

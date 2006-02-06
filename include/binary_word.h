@@ -76,17 +76,12 @@
 #include <iostream>
 
 #include "utility.h"
-#include "array.h"
+#include "basic_type.h"
 
 namespace Ariadne 
 {
-  typedef size_t size_type;
-  typedef unsigned short dimension_type;
-  typedef int index_type;
-
   typedef array<index_type> IndexArray;
   typedef array<size_type> SizeArray;
-  typedef std::vector<bool> BooleanArray;
 
   class BinaryWordList;
   class BinaryWordFixedSizeList;

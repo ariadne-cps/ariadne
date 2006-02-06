@@ -30,16 +30,16 @@
 #include "exception.h"
 #include "utility.h"
 #include "numerical_type.h"
-#include "state.h"
+#include "point.h"
 #include "rectangle.h"
 #include "binary_word.h"
-#include "partition_tree.h"
+#include "partition_tree_set.h"
 
 #include "test.h"
 
+using namespace std;
 using namespace Ariadne;
 using namespace Ariadne::Geometry;
-using namespace std;
 
 template class Rectangle<Dyadic>;
 template class PartitionScheme<Dyadic>;
@@ -47,23 +47,22 @@ template class PartitionTreeCell<Dyadic>;
 template class PartitionTree<Dyadic>;
 template class PartitionTreeSet<Dyadic>;
 
-
 int main() {
 
   cout << "test_partition_grid: " << flush;
   ofstream clog("test_partition_grid.log");
 //  ostream& clog=cerr;
 
-  std::vector<dimension_type> seqa;
+  std::vector<Ariadne::dimension_type> seqa;
 
   Rectangle<Dyadic> r;
   SubdivisionSequence seq;
-  BinaryArray bna;
+  BinaryWord bna;
   BooleanArray bla;
 
   string input("[[0,1],[0,3]]" "[0,1]" "[0,0,1,0,0,1,1,1,0,1,1]" "[1,0,1,1,0,1]");
   stringstream is(input);
-  is >> r >> seqa >> bna >> bla;
+  is >> r >> seqa >> bna; //>> bla;
   seq=SubdivisionSequence(seqa.begin(),seqa.begin(),seqa.end());
 
   clog << r << "  " << seq << "  " << bna << "  " << bla << " " << endl;

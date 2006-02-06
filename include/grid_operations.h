@@ -31,15 +31,11 @@
 
 #include <vector>
 #include "array.h"
+#include "basic_type.h"
 #include "rectangle.h"
 
 namespace Ariadne {
   namespace Geometry {
-    
-    typedef unsigned short dimension_type;
-    typedef size_t size_type;
-    typedef int index_type;
-
     /*!\brief An array of bool, to be used as a mask. */
     typedef array<bool> BooleanArray;
 

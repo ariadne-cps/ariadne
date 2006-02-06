@@ -114,14 +114,14 @@ namespace Ariadne {
       typedef size_t size_type;
       /*! \brief The type of denotable real number used for the corners. */
       typedef R Real;
-      /*! \brief The type of denotable state contained by the rectangle. */
-      typedef Point<R> State;
+      /*! \brief The type of denotable point contained by the rectangle. */
+      typedef Point<R> Point;
      private:
       /* Rectangle's lower corner */
-      State _lower_corner;
+      Point _lower_corner;
       
       /* Rectangle's upper corner */
-      State _upper_corner;
+      Point _upper_corner;
       
      public:
       /*! \brief Default constructor construcs an empty rectangle of dimension \a n. */
@@ -139,7 +139,7 @@ namespace Ariadne {
       }
       
       /*! \brief Construct from two corners. */
-      Rectangle(const State& s1, const State& s2)
+      Rectangle(const Point& s1, const Point& s2)
         : _lower_corner(s1.dimension()), _upper_corner(s2.dimension())
       {
         /* Test to see if corners have same dimensions */
@@ -209,12 +209,12 @@ namespace Ariadne {
       }
         
       /*! \brief The lower corner. */
-      inline State lower_corner() const {
+      inline Point lower_corner() const {
         return this->_lower_corner;
       }
       
       /*! \brief The upper corner. */
-      inline State upper_corner() const {
+      inline Point upper_corner() const {
         return this->_upper_corner;
       }
       
@@ -254,36 +254,36 @@ namespace Ariadne {
         this->_upper_corner[n] = r;
       }
       
-      /*! \brief Tests if \a state is included into a rectangle. */
-      inline bool contains(const State& state) const {
+      /*! \brief Tests if \a point is included into a rectangle. */
+      inline bool contains(const Point& point) const {
         
-        if (state.dimension()!=this->dimension())
+        if (point.dimension()!=this->dimension())
           throw std::domain_error("This object and parameter have different space dimensions");
         
         if (this->empty()) return false;
         
         /* for each dimension i */
         for (size_type i=0; i<this->dimension(); i++) {
-          if (state[i] < this->_lower_corner[i]) { return false; }
-          if (state[i] > this->_upper_corner[i]) { return false; }
+          if (point[i] < this->_lower_corner[i]) { return false; }
+          if (point[i] > this->_upper_corner[i]) { return false; }
         }
         
         return true;
         
       }
       
-      /*! \brief Tests if \a state is included into the interior a rectangle. */
-      inline bool interior_contains(const State& state) const {
+      /*! \brief Tests if \a point is included into the interior a rectangle. */
+      inline bool interior_contains(const Point& point) const {
         
-        if (state.dimension()!=this->dimension())
+        if (point.dimension()!=this->dimension())
           throw std::domain_error("This object and parameter have different space dimensions");
         
         if (this->empty()) return false;
         
         /* for each dimension i */
         for (size_type i=0; i<this->dimension(); i++) {
-          if (state[i] >= this->_upper_corner[i]) { return false; }
-          if (state[i] <= this->_lower_corner[i]) { return false; }
+          if (point[i] >= this->_upper_corner[i]) { return false; }
+          if (point[i] <= this->_lower_corner[i]) { return false; }
         }
         
         return true;
@@ -473,11 +473,11 @@ namespace Ariadne {
     void
     compute_gridpoints(std::vector< std::set<R> >& gridpoints,
                        const Rectangle<R>& A, 
-                       const std::vector< Rectangle<R> >& cover)
+                       const ListSet< R, Rectangle >& cover)
     {
       typedef R Real;
       typedef typename std::set<Real> Set;
-      typedef typename std::vector< Rectangle<R> >::const_iterator list_iterator;
+      typedef typename ListSet< R, Rectangle >::const_iterator list_iterator;
       
       typedef typename Rectangle<R>::size_type size_type;
 

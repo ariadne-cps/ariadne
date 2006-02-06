@@ -89,21 +89,16 @@ template<typename R> class Rectangle;
 template<typename R> class Simplex;
 template<typename R> class Parallelopiped;
 
-/* Transforms an State into a Parma_Polyhedra_Library::C_Polyhedron */
+/* Transforms an Point into a Parma_Polyhedra_Library::C_Polyhedron */
 template <typename R>
 inline 
 Parma_Polyhedra_Library::NNC_Polyhedron 
-_from_State_to_PPL_Polyhedron(const Point<R>& s);
+_from_Point_to_PPL_Polyhedron(const Point<R>& s);
 
 /* Transforms an Rectangle into a Parma_Polyhedra_Library::C_Polyhedron */
 template <typename R>
 inline Parma_Polyhedra_Library::NNC_Polyhedron 
 _from_Rectangle_to_closed_PPL_Polyhedron(const Rectangle<R>& r);
-
-
-
-
-  
 
 /*! \brief The polyhedron class.
  *
@@ -115,15 +110,15 @@ class Polyhedron {
  public:
   typedef size_t size_type;
   typedef R Real;
-  typedef Point<R> State;
-  typedef std::vector<State> StateList;
-  typedef ::Ariadne::LinearAlgebra::vector<R> Vector;
-  typedef ::Ariadne::LinearAlgebra::matrix<R> Matrix;
+  typedef Point<R> RPoint;
+  typedef std::vector<RPoint> PointList;
+  typedef Ariadne::LinearAlgebra::vector<R> Vector;
+  typedef Ariadne::LinearAlgebra::matrix<R> Matrix;
  public:
     /*! \brief Default constructor creates empty set. 
      */
     inline Polyhedron()
-      : _ppl_poly(Parma_Polyhedra_Library::Polyhedron::EMPTY)
+      : _ppl_poly(Parma_Polyhedra_Library::EMPTY)
     { }      
     
     /*! \brief Construct an empty polyhedron with dimension \a dim.
@@ -132,7 +127,7 @@ class Polyhedron {
      * \param dim is the new polyhedron's number of dimensions.
      */
     inline Polyhedron(size_type dim)
-      : _ppl_poly(dim, Parma_Polyhedra_Library::Polyhedron::EMPTY)
+      : _ppl_poly(dim, Parma_Polyhedra_Library::EMPTY)
     { }
       
     /*! \brief Construct a polyhedron from a constraint system.
@@ -157,9 +152,9 @@ class Polyhedron {
      */
     inline Polyhedron(const Matrix& A, const Vector& b);
     
-    /*! \brief Construct the polyhedron defined as the convex hull of a list of states.
+    /*! \brief Construct the polyhedron defined as the convex hull of a list of points.
      */
-    inline Polyhedron(const StateList& states);
+    inline Polyhedron(const PointList& points);
     
     /*! \brief Construct a polyhedron from a rectangle. */
     Polyhedron(const Rectangle<R>& rect);
@@ -196,32 +191,32 @@ class Polyhedron {
     /*! \brief Makes the polyhedron empty.
      */
     inline void clear() {
-      this->_ppl_poly=Parma_Polyhedra_Library::NNC_Polyhedron(this->dimension(), Parma_Polyhedra_Library::Polyhedron::EMPTY);;
+      this->_ppl_poly=Parma_Polyhedra_Library::NNC_Polyhedron(this->dimension(), Parma_Polyhedra_Library::EMPTY);;
     }
 
     /*! \brief The vertices of the Polyhedron. */
-    StateList vertices() const; 
+    PointList vertices() const; 
     
-    /*! \brief Tests if a State is an element of the Polyhedron.
+    /*! \brief Tests if a Point is an element of the Polyhedron.
      */
-    inline bool contains(const State& state) const {
-      if (state.dimension()!=this->dimension()) {
+    inline bool contains(const RPoint& point) const {
+      if (point.dimension()!=this->dimension()) {
         throw std::domain_error("This object and parameter have different space dimensions");
       }
       Parma_Polyhedra_Library::NNC_Polyhedron p(this->_ppl_poly);
       p.topological_closure_assign();
       
-      return p.contains(_from_State_to_PPL_Polyhedron(state));
+      return p.contains(_from_Point_to_PPL_Polyhedron(point));
       
     }
     
-    /*! \brief Tests if a state is an element of the interior of the polyhedron.
+    /*! \brief Tests if a point is an element of the interior of the polyhedron.
      */
-    inline bool interior_contains(const State& state) const {
-      if (state.dimension()!=this->dimension()) {
+    inline bool interior_contains(const RPoint& point) const {
+      if (point.dimension()!=this->dimension()) {
         throw std::domain_error("This object and parameter have different space dimensions");
       }
-      return this->_ppl_poly.contains(_from_State_to_PPL_Polyhedron(state));
+      return this->_ppl_poly.contains(_from_Point_to_PPL_Polyhedron(point));
     }
     
     
@@ -332,7 +327,7 @@ class Polyhedron {
 
     /*! \brief Tests inclusion of \a A in the interior of \a LS. */
     friend bool inner_subset<>(const Polyhedron<R>& A, 
-                               const ListSet<R,::Ariadne::Geometry::Polyhedron>& LS);
+                               const ListSet<R,Ariadne::Geometry::Polyhedron>& LS);
 
     /*! \brief Tests inclusion. */
     friend bool subset<>(const Polyhedron<R>& A, 
@@ -340,7 +335,7 @@ class Polyhedron {
 
     /*! \brief Tests inclusion. */
     friend bool subset<>(const Polyhedron<R>& A, 
-                         const ListSet<R,::Ariadne::Geometry::Polyhedron>& C);
+                         const ListSet<R,Ariadne::Geometry::Polyhedron>& C);
 
     /*! \brief Makes closure of intersection of interiors. */
     friend Polyhedron<R> regular_intersection<>(const Polyhedron<R>& A, 
@@ -638,7 +633,7 @@ Polyhedron<R>::_ppl_interior() const
 
 template <typename R>
 Polyhedron<R>::Polyhedron(const Matrix& A, const Vector& b)
-  : _ppl_poly(A.size1()) 
+  //: _ppl_poly(A.size1()) 
 {
   Vector rw;
   Real cnst;
@@ -654,17 +649,17 @@ Polyhedron<R>::Polyhedron(const Matrix& A, const Vector& b)
 }
   
 template <typename R>
-Polyhedron<R>::Polyhedron(const std::vector<State>& states)
+Polyhedron<R>::Polyhedron(const std::vector<RPoint>& points)
   : _ppl_poly() 
 {
   Parma_Polyhedra_Library::Generator_System ppl_gen;
   Parma_Polyhedra_Library::Linear_Expression ppl_lin_expr;
   
-  size_type n=states[0].dimension();
+  size_type n=points[0].dimension();
   Point<Rational> s(n);
-  for(size_type i=0; i!=states.size(); ++i) {
+  for(size_type i=0; i!=points.size(); ++i) {
     for(size_type j=0; j!=n; ++j) {
-      s[j]=convert_to<Rational>(states[i][j]);
+      s[j]=convert_to<Rational>(points[i][j]);
     }
   
     Integer den=1;
@@ -682,12 +677,12 @@ Polyhedron<R>::Polyhedron(const std::vector<State>& states)
 }
 
 template <typename R>
-typename Polyhedron<R>::StateList
+typename Polyhedron<R>::PointList
 Polyhedron<R>::vertices() const 
 {
-  StateList result;
+  PointList result;
   const Parma_Polyhedra_Library::Generator_System& gs = this->_ppl_poly.minimized_generators();
-  State state(this->dimension());
+  RPoint point(this->dimension());
   
   for(Parma_Polyhedra_Library::Generator_System::const_iterator iter=gs.begin(); iter!=gs.end(); ++iter) {
     Parma_Polyhedra_Library::Generator gen = *iter;
@@ -695,9 +690,9 @@ Polyhedron<R>::vertices() const
     Parma_Polyhedra_Library::Coefficient_traits::const_reference denom = gen.divisor();
     for(size_type i=0; i!=this->dimension(); ++i) {
       Parma_Polyhedra_Library::Coefficient_traits::const_reference num = gen.coefficient(Parma_Polyhedra_Library::Variable(i));
-      state[i] = convert_to<R>(num)/denom;
+      point[i] = convert_to<R>(num)/denom;
     }
-    result.push_back(state);
+    result.push_back(point);
   }
   
   return result;
@@ -707,7 +702,7 @@ Polyhedron<R>::vertices() const
 template <typename R>
 inline 
 Parma_Polyhedra_Library::NNC_Polyhedron 
-_from_State_to_PPL_Polyhedron(const Point<R>& s)
+_from_Point_to_PPL_Polyhedron(const Point<R>& s)
 {
   Parma_Polyhedra_Library::Constraint_System cs;
   Rational num;
@@ -726,7 +721,7 @@ _from_State_to_PPL_Polyhedron(const Point<R>& s)
 template<typename R>
 inline
 Parma_Polyhedra_Library::Constraint
-_convert_to_PPL_constraint(const ::Ariadne::LinearAlgebra::vector<R>&  v, 
+_convert_to_PPL_constraint(const Ariadne::LinearAlgebra::vector<R>&  v, 
                            const R& s) 
 {
   Parma_Polyhedra_Library::Linear_Expression e;
@@ -734,16 +729,16 @@ _convert_to_PPL_constraint(const ::Ariadne::LinearAlgebra::vector<R>&  v,
   Integer multiplier = denominator(convert_to<Rational>(s));
   
   for (uint i = 0; i!=v.size(); ++i) {
-    multiplier=::Ariadne::lcm(multiplier,denominator(convert_to<Rational>(v[i])));
+    multiplier=Ariadne::lcm(multiplier,denominator(convert_to<Rational>(v[i])));
   }
   for (uint i = 0; i!=v.size(); ++i) {
     Rational coefficient = convert_to<Rational>(v[i]);
     Integer scaled_coefficient = numerator(coefficient)*(multiplier/denominator(coefficient));
-    e += Parma_Polyhedra_Library::Variable(i) * convert_to<int>(scaled_coefficient);
+    e += Parma_Polyhedra_Library::Variable(i) * convert_to<Integer>(scaled_coefficient);
   }
   Rational coefficient = convert_to<Rational>(s);
   Integer scaled_coefficient = numerator(coefficient)*(multiplier/denominator(coefficient));
-  c = Parma_Polyhedra_Library::Linear_Expression(convert_to<int>(scaled_coefficient));
+  c = Parma_Polyhedra_Library::Linear_Expression(convert_to<Integer>(scaled_coefficient));
   
   return e<=c;
 }
@@ -752,8 +747,8 @@ template <typename R>
 Polyhedron<R>::Polyhedron(const Rectangle<R>& r)
   : _ppl_poly(r.dimension())
 {
-  State u_corner(r.upper_corner());
-  State l_corner(r.lower_corner());
+  RPoint u_corner(r.upper_corner());
+  RPoint l_corner(r.lower_corner());
   
   Parma_Polyhedra_Library::Constraint_System cs;
   Rational num;

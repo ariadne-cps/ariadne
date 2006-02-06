@@ -35,17 +35,18 @@
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
+#include "basic_type.h"
 #include "numerical_type.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {
 
+    using boost::numeric::ublas::identity_matrix;
+    using boost::numeric::ublas::herm;
     using boost::numeric::ublas::vector;
     using boost::numeric::ublas::matrix;
     using boost::numeric::ublas::matrix_row;
     using boost::numeric::ublas::matrix_column;
-        
-    typedef size_t size_type;
         
     template <typename Real>
     inline vector<Real> operator*(const matrix<Real>& m, vector<Real>& v) {
@@ -57,63 +58,40 @@ namespace Ariadne {
       return prod(A,B);
     }
       
-/*
     template <typename Real>
-    inline vector<Real> row(const matrix<Real>& m, size_type i) {
-      return vector<Real>(matrix_row< matrix<Real> >(m,i));
-    }
-
-    template <typename Real>
-    inline vector<Real> column(const matrix<Real>& m, size_type i) {
-      return vector<Real>(matrix_column< matrix<Real> >(m,i));
-    }
-*/
-
-/*
-    template <typename Real>
-    inline matrix_row< matrix<Real> > row(matrix<Real>& m, size_type i) {
-      return matrix_row< matrix<Real> >(m,i);
-    }
-    
-    template <typename Real>
-    inline matrix_column< matrix<Real> > column(const matrix<Real>& m, size_type i) {
-      return matrix_column< matrix<Real> >(m,i);
-    }
-*/
-    
-    
-    template <typename Real>
-    inline vector<Real> zero_vector(size_type dim) {
+    inline vector<Real> zero_vector(dimension_type dim) {
       vector<Real> v(dim);
-      for (size_type j=0; j< dim; j++) {
+      for (dimension_type j=0; j< dim; j++) {
         v(j)=0.0;
       }
       return v;
     }
     
     template <typename Real>
-    inline matrix<Real> zero_matrix(size_type dim) {
+    inline matrix<Real> zero_matrix(dimension_type dim) {
       matrix<Real> A(dim,dim);
-      for (size_type i=0; i<dim; ++i) {
-        for (size_type j=0; j<dim; ++j) {
+      for (dimension_type i=0; i<dim; ++i) {
+        for (dimension_type j=0; j<dim; ++j) {
           A(i,j)=0.0;
         }
       }
       return A;
     }
-    
+  
+    /*
     template <typename Real>
-    inline matrix<Real> identity_matrix(size_type dim) {
+    inline matrix<Real> identity_matrix(dimension_type dim) {
       matrix<Real> A(dim,dim);
-      for (size_type i=0; i<dim; i++) {
-        for (size_type j=0; j<dim; j++) {
+      for (dimension_type i=0; i<dim; i++) {
+        for (dimension_type j=0; j<dim; j++) {
           A(i,j)=0.0;
         }
         A(i,i)=1.0;
       }
       return A;
     }
-      
+    */
+    
     template <typename Real>
     inline matrix<Real> exp_Ah(const matrix<Real> &A, 
                                const Real h, const unsigned int n) 
@@ -125,7 +103,7 @@ namespace Ariadne {
       
       /* tmp = \frac{h^{0}}{0!}*A^{0} = I
        * and e_Ah = \Sum_{j=0}^{0}\frac{h^j}{j!}*A^{j} = I */
-      for (size_type i=1; i<n; ++i) {
+      for (dimension_type i=1; i<n; ++i) {
         /* tmp = \frac{h^{i-1}}{(i-1)!}*A^{i-1}
          * and e_Ah = \Sum_{j=0}^{i-1}\frac{h^j}{j!}*A^{j} */
         tmp *= (h/i);
@@ -148,7 +126,7 @@ namespace Ariadne {
       e_b=tmp;
       /* tmp = \frac{h^{1}}{1!}*A^{0} = I
        * and e_b = \Sum_{j=0}^{0}\frac{h^(j+1)}{(j+1)!}*A^{j} */
-      for (size_type i=1; i< n; ++i) {
+      for (dimension_type i=1; i< n; ++i) {
         /* tmp = \frac{h^{i}}{i!}*A^{i-1}
          * and e_b = \Sum_{j=0}^{i-1}\frac{h^(j+1)}{(j+1)!}*A^{j} */
         
@@ -172,10 +150,10 @@ namespace Ariadne {
     template <typename Real>
     matrix<Real> 
     lu_decompose(const matrix<Real> &A, 
-                 vector<size_type> &p_vect) 
+                 vector<dimension_type> &p_vect) 
     {
       Real max,sum,p_val;
-      size_type i,j,k, size=A.size1(), pivot=0;
+      dimension_type i,j,k, size=A.size1(), pivot=0;
       
       vector<Real> scale(size);
       matrix<Real> O=A;
@@ -249,10 +227,10 @@ namespace Ariadne {
     template <typename Real>
     vector<Real> 
     lu_solve(const matrix<Real> &A, 
-             const vector<size_type> &p_vect, 
+             const vector<dimension_type> &p_vect, 
              const vector<Real> &b) 
     {
-      size_type i_diag=0, idx_p, size=A.size1(),i,j;
+      dimension_type i_diag=0, idx_p, size=A.size1(),i,j;
       Real sum;
       vector<Real> sol=b;
     
@@ -291,17 +269,69 @@ namespace Ariadne {
       return sol;
     
     }
+  
+    /* WARNING!!! The following function has some precision problems */ 
+    template <typename Real>
+    inline
+    matrix<Real> 
+    Householder_QR(const matrix<Real> &A) {
+
+      dimension_type dim1=A.size1(),dim2=A.size2();
+      vector<Real> x(dim1);
+      matrix<Real> Q=identity_matrix<Real>(dim1),QA=A,Qi;
+      Real norm,coef;
+
+      for (dimension_type i=0; i< dim2; i++) {
+	
+	norm=0;
+	
+	for (dimension_type j=i; j< dim1; j++) {
+	  norm+=QA(j,i)*QA(j,i);
+	  x(j)=QA(j,i);
+	}
+	coef=norm-x(i)*x(i);
+	
+	if (x(i)>=0)  
+	   x(i)-=sqrt(norm);
+	else 
+	   x(i)+=sqrt(norm);
+
+	coef+=x(i)*x(i);
+	
+	Qi=identity_matrix<Real>(dim1);
+	  
+	if (coef!=0) {
+	  for (dimension_type j=i; j< dim2; j++) {
+	    for (dimension_type k=i; k< dim1; k++) {
+	       Qi(k,j)-=((2*x(k)*x(j))/coef);
+	    }
+	  }
+	}
+	
+	QA=prod(Qi,QA);
+	Q=prod(Q,Qi);
+      }
+     
+      return Q;
+    }
+   
+    template <typename Real>
+    inline
+    matrix<Real>
+    hermitian(const matrix<Real>& m) {
+       return herm(m);
+    }
     
     template <typename Real>
     inline
-    size_type
+    dimension_type
     number_of_rows(const matrix<Real> &A) {
       return A.size1();
     }
     
     template <typename Real>
     inline
-    size_type
+    dimension_type
     number_of_columns(const matrix<Real> &A) {
       return A.size2();
     }
@@ -311,11 +341,11 @@ namespace Ariadne {
     matrix<Real> 
     inverse(const matrix<Real> &A) {
       
-      size_type size=A.size1(),i,j;
+      dimension_type size=A.size1(),i,j;
       
       matrix<Real> inv_A(size,size);
       vector<Real> Id_vect(size), Id_sol;
-      vector<size_type> p_vect(size);
+      vector<dimension_type> p_vect(size);
       
       
       matrix<Real> lu_A=lu_decompose(A, p_vect);
@@ -345,8 +375,8 @@ namespace Ariadne {
     inline Integer common_denominator(const matrix<Real>& A)
     {
       Integer denom=1;
-      for (size_type i=0; i<A.size1(); ++i) {
-        for (size_type j=0; j<A.size2(); ++j) {
+      for (dimension_type i=0; i<A.size1(); ++i) {
+        for (dimension_type j=0; j<A.size2(); ++j) {
           denom=lcm( denom, denominator(A(i,j)) );
         }
       }
@@ -357,9 +387,9 @@ namespace Ariadne {
     inline vector<Integer> row_common_denominators(const matrix<Real>& A) 
     {
       vector<Integer> denoms(A.size1());
-      for(size_type i=0; i!=A.size1(); ++i) {
+      for(dimension_type i=0; i!=A.size1(); ++i) {
         Integer denom=1;
-        for(size_type j=0; j!=A.size2(); ++j) {
+        for(dimension_type j=0; j!=A.size2(); ++j) {
           denom=lcm( denom, denominator(A(i,j)) );
         }
         denoms(i)=denom;
@@ -372,7 +402,7 @@ namespace Ariadne {
     inline Integer common_denominator(const vector<Real>& b) 
     {
       Integer denom=1;
-      for (size_type i=0; i< b.size(); ++i) {
+      for (dimension_type i=0; i< b.size(); ++i) {
         denom=lcm( denom, denominator(b(i)) );
       }
       return denom;
@@ -395,7 +425,7 @@ namespace Ariadne {
     {
       typedef Dyadic Real;
       
-      size_type n=A.size1();
+      dimension_type n=A.size1();
       if(A.size1() != b.size()) {
         throw std::domain_error("Invalid linear inequalities"); 
       }
@@ -404,8 +434,8 @@ namespace Ariadne {
       }
       
       matrix<Rational> Trat(T.size1(),T.size2());
-      for(size_type i=0; i!=n; ++i) {
-        for(size_type j=0; j!=n; ++j) {
+      for(dimension_type i=0; i!=n; ++i) {
+        for(dimension_type j=0; j!=n; ++j) {
           Trat(i,j)=convert_to<Rational>(T(i,j));
         }
       }
@@ -415,16 +445,16 @@ namespace Ariadne {
       Integer multiplier=common_denominator(Tinv);
       
       matrix<Integer> iTinv(n,n);
-      for(size_type i=0; i!=n; ++i) {
-        for(size_type j=0; j!=n; ++j) {
+      for(dimension_type i=0; i!=n; ++i) {
+        for(dimension_type j=0; j!=n; ++j) {
           iTinv(i,j) = numerator(Tinv(i,j)) * (multiplier/denominator(Tinv(i,j)));
         }
       }
       
       Real rmultiplier = convert_to<Real>(multiplier);
       matrix<Real> rTinv(n,n);
-       for(size_type i=0; i!=n; ++i) {
-        for(size_type j=0; j!=n; ++j) {
+       for(dimension_type i=0; i!=n; ++i) {
+        for(dimension_type j=0; j!=n; ++j) {
           rTinv(i,j) = convert_to<Real>(iTinv(i,j));
         }
       }

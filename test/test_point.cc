@@ -1,8 +1,8 @@
 /***************************************************************************
- *            test_binary_word.cc
+ *            test_point.cc
  *
- *  9 May 2005
- *  Copyright  2005  Pieter Collins
+ *  2 May 2005
+ *  Copyright  2005  Pieter Collins, Alberto Casagrande
  *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
  ****************************************************************************/
 
@@ -25,14 +25,7 @@
 #include <iostream>
 #include <string>
 
-#include "ariadne.h"
-#include "exception.h"
-#include "utility.h"
-#include "numerical_type.h"
 #include "point.h"
-#include "rectangle.h"
-#include "binary_word.h"
-#include "binary_tree.h"
 
 #include "test.h"
 
@@ -40,25 +33,53 @@ using namespace Ariadne;
 using namespace Ariadne::Geometry;
 using namespace std;
 
-template class Rectangle< Rational >;
-
 int main() {
-  cout << "test_binary_word: " << flush;
+    cout << "test_point: " << flush;
 
-  string istr = "[0,1,1,0,1,0] ";
-  stringstream iss(istr);
+    Point<Rational> s1(3);
+    Point<Rational> s2(4);
+    Point<Rational> s3(2,Rational(2,3));
+    Point<Rational> s4(s1);
+    Point<Rational> s5;
 
-  BinaryWord bw;
-  BinaryWordList bwl;
-  BinaryWordFixedSizeList bwfsl(12);
-  BinaryTree bwt;
-  
-  vector<bool> v;
+    s1[1] = Rational(0.75);
+    s5=s1;
 
-  iss >> v;
-  bw=BinaryWord(v);
-  
-  cout << "INCOMPLETE\n";
+    test_assert(s1==s1 && s1!=s2 && s1!=s3 && s1!=s4 && s1==s5,
+		    "equality tests");
+
+    /* Test output format */
+    string str1("[1, 3/2]");
+    string str2;
+    istringstream is(str1);
+    is >> s1;
+    stringstream ss(str2);
+    ss << s1;
+    getline(ss,str2);
+    
+    test_assert(str1 == str2,"stream output test");
+    
+    /* Test input format */
+    try {
+	string input("[0,3/4,0] [1,1,1,1] [2/3,2/3] \n");
+	stringstream is(input);
+	
+	is >> s1 >> s2 >> s3;
+    } 
+    catch(std::invalid_argument& e) {
+	cerr << "std::invalid_argument " << e.what() << "\n";
+	return 1;
+    }
+    catch(std::runtime_error& e) {
+	cerr << "std::runtime_error " << e.what() << "\n";
+	return 1;
+    }
+    catch(...) {
+	cerr << "Unknown error\n";
+	return 1;
+    }
+	
+    cout << "PASS\n";
 
     return 0;
 }

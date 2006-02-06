@@ -33,8 +33,7 @@
 #include <vector>
 #include <iostream>
 
-#include "array.h"
-#include "sequence.h"
+#include "basic_type.h"
 #include "utility.h"
 #include "binary_word.h"
 #include "binary_tree.h"
@@ -45,10 +44,6 @@
 
 namespace Ariadne {
   namespace Geometry {
-    typedef unsigned short dimension_type;
-    typedef size_t size_type;
-    typedef sequence<dimension_type> SubdivisionSequence;
-    typedef array<bool> BooleanArray;
 
     const bool leaf=1;
     const bool branch=0;

@@ -163,9 +163,10 @@ class GeneratorSystem {
   }
  private:  
   friend class Ariadne::Geometry::Polyhedron<R>;
-  friend Ariadne::Geometry::Polyhedron<R> 
-      Ariadne::Geometry::minkowski_sum<>(const Polyhedron<R>& A,
-                                         const Polyhedron<R>& B);
+/*  friend Ariadne::Geometry::Polyhedron<R> 
+      Ariadne::Geometry::minkowski_sum<>(
+		      const Ariadne::Geometry::Polyhedron<R>& A,
+                      const Ariadne::Geometry::Polyhedron<R>& B);*/
  private:  
   Matrix _points;
   TypeVector _point_types;

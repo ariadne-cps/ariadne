@@ -1,8 +1,8 @@
 /***************************************************************************
- *            test_state.cc
+ *            test_linear_algebra.cc
  *
- *  2 May 2005
- *  Copyright  2005  Pieter Collins
+ *  31 Jan 2006
+ *  Copyright  2006  Pieter Collins, Alberto Casagrande
  *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
  ****************************************************************************/
 
@@ -25,59 +25,48 @@
 #include <iostream>
 #include <string>
 
-#include "state.h"
+#include "numerical_type.h"
+#include "linear_algebra.h"
 
 #include "test.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Geometry;
+using namespace Ariadne::LinearAlgebra;
 using namespace std;
 
 int main() {
-    cout << "test_state: " << flush;
+    cout << "test_linear_algebra: " << flush;
 
-    State<Rational> s1(3);
-    State<Rational> s2(4);
-    State<Rational> s3(2,Rational(2,3));
-    State<Rational> s4(s1);
-    State<Rational> s5;
-
-    s1[1] = Rational(0.75);
-    s5=s1;
-
-    test_assert(s1==s1 && s1!=s2 && s1!=s3 && s1!=s4 && s1==s5,"equality tests");
-
-    /* Test output format */
-    string str1("[1, 3/2]");
-    string str2;
-    istringstream is(str1);
-    is >> s1;
-    stringstream ss(str2);
-    ss << s1;
-    getline(ss,str2);
+    Ariadne::LinearAlgebra::matrix< Rational > A(3,3), LU(3,3);
+    Ariadne::LinearAlgebra::matrix< Dyadic > Aq(3,3), QT, R;
+    Ariadne::LinearAlgebra::vector< Rational > b(3), x(3);
+    Ariadne::LinearAlgebra::vector< dimension_type > pivot(3);
     
-    test_assert(str1 == str2,"stream output test");
+    A(0,0)=Rational(7,3);A(0,1)=4;A(0,2)=-1;
+    A(1,0)=-13;A(1,1)=Rational(10,9);A(1,2)=6;
+    A(2,0)=0;A(2,1)=Rational(1,13);A(2,2)=9;
+   
+    b(0)=Rational(16,3);
+    b(1)=-Rational(53,9);
+    b(2)=Rational(118,13);
+   
+    test_assert(1==13*A(2,1),"mutiplication");
+   
+    LU=lu_decompose(A,pivot);
     
-    /* Test input format */
-    try {
-	string input("[0,3/4,0] [1,1,1,1] [2/3,2/3] \n");
-	stringstream is(input);
-	
-	is >> s1 >> s2 >> s3;
-    } 
-    catch(std::invalid_argument& e) {
-	cerr << "std::invalid_argument " << e.what() << "\n";
-	return 1;
+    x=lu_solve(LU,pivot,b);
+	   
+    test_assert(x(0)==x(1)==x(2)==1,"lu_solve");
+
+ /*   for (unsigned int i=0; i< A.size1(); i++) {
+       for (unsigned int j=0; j< A.size2(); j++) {
+	   Aq(i,j)=(Dyadic)A(i,j);
+       }
     }
-    catch(std::runtime_error& e) {
-	cerr << "std::runtime_error " << e.what() << "\n";
-	return 1;
-    }
-    catch(...) {
-	cerr << "Unknown error\n";
-	return 1;
-    }
-	
+   
+    QT=hermitian(Householder_QR(Aq));
+    R=prod(QT,Aq); */
+    
     cout << "PASS\n";
 
     return 0;

@@ -1,12 +1,10 @@
-#ifndef _ARIADNE_REAL_TYPEDEF_H
-#define _ARIADNE_REAL_TYPEDEF_H
-
-//typedef double Real;
-typedef Ariadne::Dyadic Real;
-//typedef Ariadne::Rational Real;
-
-#endif /* _ARIADNE_REAL_TYPEDEF_H */
-
+/***************************************************************************
+ *            real_typedef.h
+ *
+ *  06 Feb 2006
+ *  Copyright  2005  Pieter Collins
+ *  pieter.collins@cwi.nl
+ ****************************************************************************/
 
 /*
  *  This program is free software; you can redistribute it and/or modify
@@ -27,3 +25,14 @@ typedef Ariadne::Dyadic Real;
 /*! \file real_typedef.h
  *  \brief Defines the real number type used by the Python interface.
  */
+
+#ifndef _ARIADNE_REAL_TYPEDEF_H
+#define _ARIADNE_REAL_TYPEDEF_H
+
+//typedef double Real;
+typedef Ariadne::Dyadic Real;
+//typedef Ariadne::Rational Real;
+
+#endif /* _ARIADNE_REAL_TYPEDEF_H */
+
+

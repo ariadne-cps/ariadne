@@ -2,7 +2,7 @@
  *            map.h
  *
  *  Wed Feb  2 18:33:10 2005
- *  Copyright  2005  Alberto Casagrande
+ *  Copyright  2005, 2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it
  ****************************************************************************/
 
@@ -22,14 +22,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+/*! \file map.h
+ *  \brief Base class for maps.
+ */
+
 #ifndef _ARIADNE_MAP_H
 #define _ARIADNE_MAP_H
 
+#include "geometry_declarations.h"
+
 #include "point.h"
+#include "rectangle.h"
 #include "list_set.h"
 
 namespace Ariadne {
-namespace Map{
+namespace Evaluation {
 
 enum MapKind {
   LINEAR,
@@ -46,29 +53,34 @@ enum MapResultKind {
 }
 
 namespace Ariadne {
-namespace Map {
+namespace Evaluation {
 
-template <typename R, template<typename> class S>
+template <typename R>
 class Map {
  public:
   typedef R Real;
-  typedef S<R> State;
+  typedef Geometry::Point<R> State;
+  typedef LinearAlgebra::vector<R> Vector;
+  typedef LinearAlgebra::matrix<R> Matrix;
+  typedef LinearAlgebra::matrix< Interval<R> > IntervalMatrix;
   
-  virtual State apply(const State& x) const = 0;
-
+  virtual ~Map() { }
+  
   // I'm not sure if virtual functions are the way to go here; too restrictive? //
+  virtual State apply(const State& x) const {
+    throw std::invalid_argument("Not implemented."); }
+
   virtual Geometry::Rectangle<R> apply(const Geometry::Rectangle<R>& A) const {
     throw std::invalid_argument("Not implemented."); }
   virtual Geometry::Polyhedron<R> apply(const Geometry::Polyhedron<R>& A) const {
     throw std::invalid_argument("Not implemented."); }
 
+  virtual Matrix derivative(const State& r) const {
+    throw std::invalid_argument("Derivative at point not implemented."); }
+  virtual LinearAlgebra::matrix< Interval<R> > derivative(const Geometry::Rectangle<R>& r) const = 0;
+    
   template<template<typename> class BS>
-  inline BS<R> operator() (const BS<R>& A) const { 
-    return apply(*this,A);
-  }
-
-  template<template<typename> class BS>
-  inline Geometry::ListSet<R,BS> operator() (const Geometry::ListSet<R,BS>& A) const { 
+  inline Geometry::ListSet<R,BS> apply(const Geometry::ListSet<R,BS>& A) const { 
     Geometry::ListSet<R,BS> trans_ds(A.dimension());
     for (size_t i=0; i< A.size(); i++) {
       trans_ds.inplace_union(this->apply(A[i]));
@@ -76,7 +88,8 @@ class Map {
     return trans_ds;
   }
   
-  virtual size_t dimension() const = 0;
+  virtual size_type argument_dimension() const = 0;
+  virtual size_type result_dimension() const = 0;
 };
   
   

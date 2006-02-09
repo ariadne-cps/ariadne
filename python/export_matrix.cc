@@ -23,6 +23,7 @@
  */
 
 #include "numerical_type.h"
+#include "interval.h"
 #include "linear_algebra.h"
 
 #include <boost/python.hpp>
@@ -30,7 +31,12 @@
 #include "real_typedef.h"
 #include "python_utilities.h"
 
+#include <utility>  //for std::pair
+
+typedef size_t size_type;
+typedef Ariadne::Interval<Real> RInterval;
 typedef Ariadne::LinearAlgebra::matrix<Real> RMatrix;
+typedef Ariadne::LinearAlgebra::matrix< Ariadne::Interval<Real> > IMatrix;
 
 using boost::python::class_;
 using boost::python::init;
@@ -40,9 +46,47 @@ using boost::python::self_ns::str;
 using boost::python::return_value_policy;
 using boost::python::copy_const_reference;
 
+using boost::python::tuple;
+using boost::python::extract;
+
+inline Real rmatrix_getitem(const RMatrix& A, tuple index) {
+  uint i=extract<uint>(index[0]);
+  uint j=extract<uint>(index[1]);
+  return A(i,j);
+}
+
+inline void rmatrix_setitem(RMatrix& A, tuple index, Real x) {
+  uint i=extract<uint>(index[0]);
+  uint j=extract<uint>(index[1]);
+  A(i,j)=x;
+}
+
+inline RInterval imatrix_getitem(const IMatrix& A, tuple index) {
+  uint i=extract<uint>(index[0]);
+  uint j=extract<uint>(index[1]);
+  return A(i,j);
+}
+
+inline void imatrix_setitem(IMatrix& A, tuple index, RInterval x) {
+  uint i=extract<uint>(index[0]);
+  uint j=extract<uint>(index[1]);
+  A(i,j)=x;
+}
+
 void export_matrix() {
   class_<RMatrix>("Matrix",init<int,int>())
     .def(init<RMatrix>())
+    .def("__getitem__",&rmatrix_getitem)
+    .def("__setitem__",&rmatrix_setitem)
+    .def(str(self))    // __str__
+  ;
+}
+
+void export_interval_matrix() {
+  class_<IMatrix>("IntervalMatrix",init<int,int>())
+    .def(init<IMatrix>())
+    .def("__getitem__",&imatrix_getitem)
+    .def("__setitem__",&imatrix_setitem)
     .def(str(self))    // __str__
   ;
 }

@@ -36,11 +36,11 @@
 #include "utility.h"
 #include "linear_algebra.h"
 
+#include "geometry_declarations.h"
+
 namespace Ariadne {
   namespace Geometry {
     
-    template <typename R = Rational> class Point;
-
     template<typename R> typename Point<R>::difference_type operator-(const Point<R>&, const Point<R>&);
     template<typename R> Point<R> operator+(const Point<R>&, const typename Point<R>::difference_type&);
     template<typename R> Point<R> operator-(const Point<R>&, const typename Point<R>::difference_type&);
@@ -86,6 +86,8 @@ namespace Ariadne {
 
       }
 
+      explicit Point(const Vector& position) : _vector(position) { }
+
       Point(const Point& original) : _vector(original._vector) { }
 
       inline Real& operator[] (size_type index) {
@@ -116,6 +118,11 @@ namespace Ariadne {
         return true;
       }
 
+      /*! \brief Returns the position vector of the point. */
+      inline const Vector& position_vector() const {
+        return this->_vector; 
+      }
+      
       /*! \brief Checks equivalence between two states. */
       inline bool operator!=(const Point<Real>& A) const {
         return !( *this == A );
@@ -160,9 +167,6 @@ namespace Ariadne {
       friend std::ostream& operator<< <>(std::ostream& os, const Point<Real>& state);
 
       friend std::istream& operator>> <> (std::istream& is, Point<Real>& state);
-      
-     private:
-      Point(const Vector& v) : _vector(v) { }
     };
 
 

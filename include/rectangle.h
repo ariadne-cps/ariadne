@@ -30,6 +30,8 @@
 #define _ARIADNE_RECTANGLE_H
 
 #include <iosfwd>
+#include "geometry_declarations.h"
+
 #include <string>
 #include <sstream>
 
@@ -41,7 +43,6 @@
 
 #include "ariadne.h"
 #include "utility.h"
-#include "geometry.h"
 #include "interval.h"
 #include "point.h"
 
@@ -67,6 +68,18 @@ namespace Ariadne {
     template<typename R> std::ostream& operator<<(std::ostream&, const Rectangle<R>&);
     template<typename R> std::istream& operator>>(std::istream&, Rectangle<R>&);
 
+    /* Value holder to allow expressions of the form r[i]=[a,b]. */
+    template <typename R>
+    class RectangleInterval {
+     public:
+      RectangleInterval(Rectangle<R>& r, const size_type& n) : _r(r), _n(n) { }
+      void operator=(const Interval<R>& i) { _r.set_interval(_n,i); }
+      operator Interval<R> () const { return _r[_n]; }
+     private:
+      Rectangle<R>& _r; const size_type& _n;
+    };
+    
+    
     /*! \brief A cuboid of arbitrary dimension.
      */
     template <typename R>
@@ -115,13 +128,13 @@ namespace Ariadne {
       /*! \brief The type of denotable real number used for the corners. */
       typedef R Real;
       /*! \brief The type of denotable point contained by the rectangle. */
-      typedef Point<R> Point;
+      typedef Point<R> State;
      private:
       /* Rectangle's lower corner */
-      Point _lower_corner;
+      State _lower_corner;
       
       /* Rectangle's upper corner */
-      Point _upper_corner;
+      State _upper_corner;
       
      public:
       /*! \brief Default constructor construcs an empty rectangle of dimension \a n. */
@@ -139,7 +152,7 @@ namespace Ariadne {
       }
       
       /*! \brief Construct from two corners. */
-      Rectangle(const Point& s1, const Point& s2)
+      Rectangle(const State& s1, const State& s2)
         : _lower_corner(s1.dimension()), _upper_corner(s2.dimension())
       {
         /* Test to see if corners have same dimensions */
@@ -209,12 +222,12 @@ namespace Ariadne {
       }
         
       /*! \brief The lower corner. */
-      inline Point lower_corner() const {
+      inline State lower_corner() const {
         return this->_lower_corner;
       }
       
       /*! \brief The upper corner. */
-      inline Point upper_corner() const {
+      inline State upper_corner() const {
         return this->_upper_corner;
       }
       
@@ -238,6 +251,11 @@ namespace Ariadne {
         return this->_upper_corner[n];
       }
       
+      /*! \brief Returns a smart reference projection onto the \a n th coordinate. */
+      inline RectangleInterval<Real> operator[] (size_type n) {
+        return RectangleInterval<Real>(*this,n);
+      }
+      
       /*! \brief Sets the \a n th interval. */
       inline void set_interval(size_type n, Interval<Real> i) {
          this->_lower_corner[n]=i.lower();
@@ -255,7 +273,7 @@ namespace Ariadne {
       }
       
       /*! \brief Tests if \a point is included into a rectangle. */
-      inline bool contains(const Point& point) const {
+      inline bool contains(const State& point) const {
         
         if (point.dimension()!=this->dimension())
           throw std::domain_error("This object and parameter have different space dimensions");
@@ -273,7 +291,7 @@ namespace Ariadne {
       }
       
       /*! \brief Tests if \a point is included into the interior a rectangle. */
-      inline bool interior_contains(const Point& point) const {
+      inline bool interior_contains(const State& point) const {
         
         if (point.dimension()!=this->dimension())
           throw std::domain_error("This object and parameter have different space dimensions");
@@ -473,12 +491,11 @@ namespace Ariadne {
     void
     compute_gridpoints(std::vector< std::set<R> >& gridpoints,
                        const Rectangle<R>& A, 
-                       const ListSet< R, Rectangle >& cover)
+                       const ListSet< R,Rectangle >& cover)
     {
       typedef R Real;
       typedef typename std::set<Real> Set;
       typedef typename ListSet< R, Rectangle >::const_iterator list_iterator;
-      
       typedef typename Rectangle<R>::size_type size_type;
 
       size_type dimension = A.dimension();
@@ -512,6 +529,17 @@ namespace Ariadne {
     bool subset_of_open_cover(const Rectangle<R>& A,
                               const ListSet<R,Rectangle>& cover) 
     {
+      throw std::domain_error("subset_of_open_cover(Simplex, std::vector<Simplex>) not implemented");
+    }
+    
+    /*! \brief Tests inclusion in the interior of a denotable set.
+     * FIXME: Use some kind of GridSet for this operation.
+     * WARNING: Maybe this is the wrong routing...
+     */
+    template <typename R>
+    bool inner_subset(const Rectangle<R>& A,
+                      const ListSet<R,Rectangle>& B) 
+    {
       typedef R Real;
       typedef typename std::set<Real> Set;
       typedef typename Set::const_iterator set_iterator;
@@ -523,7 +551,7 @@ namespace Ariadne {
       typename Rectangle<R>::size_type dimension = A.dimension();
       
       std::vector<Set> gridpoints(dimension);
-      compute_gridpoints(gridpoints, A, cover);
+      compute_gridpoints(gridpoints, A, B);
       
       
       /* Whether the jth gridpoint (in some ordering) is covered */
@@ -543,7 +571,7 @@ namespace Ariadne {
       lower_indices[dimension] = 0;
       upper_indices[dimension] = 2;
       
-      for(list_iterator rect=cover.begin(); rect!=cover.end(); ++rect) {
+      for(list_iterator rect=B.begin(); rect!=B.end(); ++rect) {
         for(size_type i=0; i!=dimension; ++i) {
           Real lower_bnd=rect->lower_bound(i);
           size_type lower_indx=0;

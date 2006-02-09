@@ -35,40 +35,16 @@
 #include <iostream>
 #include <iomanip>
 
-namespace Ariadne {
-  namespace Geometry {
+#include "geometry_declarations.h"
 
-    template<typename R> class Point;
+#include "point.h"
+#include "rectangle.h"
+#include "parallelopiped.h"
+#include "polyhedron.h"
+#include "simplex.h"
 
-    template<typename R> class Rectangle;
-    template<typename R> class Polyhedron;
-    template<typename R> class Parallelopiped;
-    template<typename R> class Simplex;
-    
-    template<typename R, template<typename> class BS> class ListSet;
-    template<typename R> class GridMaskSet;
-    template<typename R> class GridCellListSet;
-    template<typename R> class GridRectangleListSet;
-    template<typename R> class PartitionTreeSet;
-
-/* Need partial template function specialization to do this!
-    template<typename R, template<typename> class BS> bool disjoint(const BS<R>&, const BS<R>&);
-    template<typename R, template<typename> class BS> bool interiors_intersect(const BS<R>&, const BS<R>&);
-    template<typename R, template<typename> class BS> bool subset_of_open_cover(const BS<R>&, const ListSet<R,BS>);
-      
-    template<class Set1, class Set2> bool disjoint(const Set1&, const Set2&);
-    template<class Set1, class Set2> bool interiors_intersect(const Set1&, const Set2&);
-    template<class Set1, class Set2> bool inner_subset(const Set1&, const Set2&);
-    template<class Set1, class Set2> bool intersect(const Set1&, const Set2&);
-    template<class Set1, class Set2> bool subset(const Set1&, const Set2&);
-
-    template<class Set> Set regular_intersection(const Set&, const Set&);
-    template<class Set> Set intersection(const Set&, const Set&);
-    template<class Set> Set join(const Set&, const Set&);
-*/
-  }
-}
-
-
+#include "list_set.h"
+#include "grid_set.h"
+#include "partition_tree_set.h"
 
 #endif /* _ARIADNE_GEOMETRY_H */

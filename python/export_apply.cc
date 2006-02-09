@@ -1,7 +1,7 @@
 /***************************************************************************
- *            python/evaluation_module.cc
+ *            python/export_apply.cc
  *
- *  21 October 2005
+ *  6 February 2006
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
@@ -22,15 +22,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "apply.h"
+
 #include <boost/python.hpp>
 
-void export_affine_map();
-void export_polynomial_map();
-void export_henon_map();
-  
-BOOST_PYTHON_MODULE(evaluation)
-{
-  export_affine_map();
-  export_polynomial_map();
-  export_henon_map();
+using boost::python::class_;
+using boost::python::init;
+using boost::python::self;
+using boost::python::def;
+using boost::python::return_value_policy;
+using boost::python::copy_const_reference;
+
+#include "real_typedef.h"
+
+void export_function() {
+  def("apply", Ariadne::Evaluation::apply<Real>, "apply the image of a polynomial to a set" );
 }

@@ -22,21 +22,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numerical_type.h"
-#include "interval.h"
-#include "point.h"
-#include "rectangle.h"
-#include "list_set.h"
-
 #include <boost/python.hpp>
 
-using namespace Ariadne;
-
 void export_function();
+void export_interval();
 void export_numeric();
 
 BOOST_PYTHON_MODULE(ariadne)
 {
   export_numeric();
+  export_interval();
   export_function();
 }

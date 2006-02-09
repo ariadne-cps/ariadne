@@ -107,6 +107,64 @@ namespace Ariadne {
     void translate_rectangle_coordinates(IntegerRectangleList* torlptr, const IntegerRectangleList& frrl, array< std::vector<index_type> > tr);
     void translate_cell_coordinates(IntegerRectangleList* torlptr, const IntegerCellList& frcl, array< std::vector<index_type> > tr);
 
+
+
+    /*! \brief An iterator for positions in rectangular piece of a grid. */
+    class GridPositionIterator {
+     public:
+      GridPositionIterator(const IndexArray& l, const IndexArray& u)
+        : _lower(l), _upper(u), _position(l) { }
+      GridPositionIterator(const IndexArray& l, const IndexArray& u, const IndexArray& p)
+        : _lower(l), _upper(u), _position(p) { }
+      const IndexArray& operator*() const { return _position; }
+      GridPositionIterator& operator++() {
+        dimension_type d=0;
+        _position[d]+=1;
+        while(_position[d]==_upper[d] && (d+1u)!=_position.size() ) {
+          _position[d]=_lower[d];
+          d+=1;
+          _position[d]+=1;
+        }
+        return *this;
+      }
+      bool operator==(const GridPositionIterator& other) const {
+        return (this->_position==other._position) 
+          && (this->_lower==other._lower) && (this->_upper==other._upper);
+      }
+      bool operator!=(const GridPositionIterator& other) const {
+        return !(*this==other);
+      }
+      bool end() const { return _position[dimension()-1]==_upper[dimension()-1]; }
+     private:
+      dimension_type dimension() const { return _position.size(); }
+      const IndexArray& _lower;
+      const IndexArray& _upper;
+      IndexArray _position;
+    };
+
+
+    /*! \brief A block of indices in a grid. */
+    class IndexBlock {
+     public:
+      typedef GridPositionIterator const_iterator;
+      IndexBlock(dimension_type n) : _lower_corner(n), _upper_corner(n) { }
+      IndexBlock(const IndexArray& l, const IndexArray& u)
+        : _lower_corner(l), _upper_corner(u) { }
+      
+      dimension_type dimension() const { return _lower_corner.size(); }
+      GridPositionIterator begin() const { 
+        return GridPositionIterator(_lower_corner, _upper_corner,_lower_corner);
+      }
+      GridPositionIterator end() const { 
+        IndexArray end_position=_lower_corner;
+        end_position[this->dimension()-1]=_upper_corner[this->dimension()-1];
+        return GridPositionIterator(_lower_corner, _upper_corner,end_position);
+      }
+     private:
+      IndexArray _lower_corner;
+      IndexArray _upper_corner;
+    };
+    
     /*!\internal TODO:
      * unique sort cell list
      * subset remove rectangle list

@@ -85,6 +85,7 @@ void export_parallelopiped() {
     .def(init<RRectangle>())
     .def(init<std::string>())
     .def("bounding_box", &RParallelopiped::bounding_box)
+    .def("subdivide", &RParallelopiped::subdivide)
     .def("empty", &RParallelopiped::empty)
     .def("empty_interior", &RParallelopiped::empty_interior)
     .def("dimension", &RParallelopiped::dimension)

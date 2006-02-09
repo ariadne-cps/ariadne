@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from ariadne import *
+from evaluation import *
 from geometry import *
 from linear_algebra import *
 

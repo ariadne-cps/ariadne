@@ -22,17 +22,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "linear_algebra.h"
-
 #include <boost/python.hpp>
-
-#include "real_typedef.h"
 
 void export_vector();
 void export_matrix();
+
+void export_interval_vector();
+void export_interval_matrix();
 
 BOOST_PYTHON_MODULE(linear_algebra)
 {
   export_vector();
   export_matrix();
+  
+  export_interval_vector();
+  export_interval_matrix();
 }

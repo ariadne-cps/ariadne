@@ -1,8 +1,7 @@
 /***************************************************************************
- *            python/evaluation_module.cc
+ *            evaluation_declarations.h
  *
- *  21 October 2005
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
+ *  Copyright 6 February 2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -21,16 +20,24 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+ 
+/*! \file evaluation_declarations.h
+ *  \brief Forward declarations for the Evaluation module.
+ */
 
-#include <boost/python.hpp>
+#ifndef _ARIADNE_EVALUATION_DECLARATIONS_H
+#define _ARIADNE_EVALUATION_DECLARATIONS_H
 
-void export_affine_map();
-void export_polynomial_map();
-void export_henon_map();
-  
-BOOST_PYTHON_MODULE(evaluation)
-{
-  export_affine_map();
-  export_polynomial_map();
-  export_henon_map();
+#include "linear_algebra.h"
+#include "interval.h"
+
+namespace Ariadne {
+  namespace Evaluation {
+
+
+  }
 }
+
+
+
+#endif /* _ARIADNE_EVALUATION_DECLARATIONS_H */

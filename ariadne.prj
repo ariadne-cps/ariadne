@@ -107,7 +107,10 @@ module.include.files=\
 	documentation.h\
 	matlab_export.h\
 	pov_export.h\
-	point.h
+	point.h\
+	apply.h\
+	henon_map.h\
+	polynomial_map.h
 
 module.source.name=src
 module.source.type=

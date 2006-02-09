@@ -1,7 +1,7 @@
 /***************************************************************************
- *            python/evaluation_module.cc
+ *            python/export_affine_map.cc
  *
- *  21 October 2005
+ *  6 February 2006
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
@@ -22,15 +22,36 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "numerical_type.h"
+#include "point.h"
+#include "affine_map.h"
+
 #include <boost/python.hpp>
 
-void export_affine_map();
-void export_polynomial_map();
-void export_henon_map();
-  
-BOOST_PYTHON_MODULE(evaluation)
-{
-  export_affine_map();
-  export_polynomial_map();
-  export_henon_map();
+#include "real_typedef.h"
+#include "python_utilities.h"
+
+typedef Ariadne::Geometry::Point<Real> RPoint;
+typedef Ariadne::Evaluation::AffineMap<Real> RAffineMap;
+
+using boost::python::class_;
+using boost::python::init;
+using boost::python::self;
+using boost::python::def;
+using boost::python::self_ns::str;
+using boost::python::return_value_policy;
+using boost::python::copy_const_reference;
+
+typedef RPoint (RAffineMap::*AffMapCallPoint) (const RPoint&) const;
+
+AffMapCallPoint affine_map_call_point=&RAffineMap::operator();
+
+void export_affine_map() {
+
+  class_<RAffineMap>("AffineMap",init<RAffineMap::Matrix,RAffineMap::Vector>())
+    .def("argument_dimension", &RAffineMap::argument_dimension)
+    .def("result_dimension", &RAffineMap::result_dimension)
+    .def("__call__", affine_map_call_point)
+//    .def(str(self))    // __str__
+  ;
 }

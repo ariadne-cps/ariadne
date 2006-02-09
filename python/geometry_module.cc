@@ -22,13 +22,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numerical_type.h"
-#include "interval.h"
-#include "point.h"
-#include "rectangle.h"
-#include "parallelopiped.h"
-#include "list_set.h"
-#include "grid_set.h"
 #include "binary_word.h"
 #include "binary_tree.h"
 #include "partition_tree_set.h"
@@ -44,8 +37,7 @@ using Ariadne::BinaryTree;
 using Ariadne::BinaryWord;
 using Ariadne::SubdivisionSequence;
 
-void export_state();
-void export_interval();
+void export_point();
 void export_rectangle();
 void export_parallelopiped();
 void export_simplex();
@@ -53,27 +45,6 @@ void export_polyhedron();
 void export_list_set();
 void export_grid();
 void export_partition_tree();
-
-void export_polynomial_map();
-
-typedef Ariadne::Interval<Real> RInterval;
-typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
-
-typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Rectangle> RRectangleListSet;
-
-typedef Ariadne::Geometry::FiniteGrid<Real> RFiniteGrid;
-typedef Ariadne::Geometry::GridRectangleListSet<Real> RGridRectangleListSet;
-typedef Ariadne::Geometry::GridMaskSet<Real> RGridMaskSet;
-
-typedef Ariadne::Geometry::PartitionScheme<Real> RPartitionScheme;
-typedef Ariadne::Geometry::PartitionTree<Real> RPartitionTree;
-typedef Ariadne::Geometry::PartitionTreeSet<Real> RPartitionTreeSet;
-
-using Ariadne::Geometry::regular_intersection;
-using Ariadne::Geometry::interiors_intersect;
-using Ariadne::Geometry::disjoint;
-using Ariadne::Geometry::inner_subset;
-using Ariadne::Geometry::subset;
 
 using boost::python::class_;
 using boost::python::init;
@@ -112,8 +83,7 @@ BOOST_PYTHON_MODULE(geometry)
     .def(str(self))    // __str__
   ;
 
-  export_state();
-  export_interval();
+  export_point();
   export_rectangle();
   export_parallelopiped();
   export_simplex();

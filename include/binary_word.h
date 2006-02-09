@@ -170,13 +170,28 @@ namespace Ariadne
     /* \brief An iterator to the beginning of the bits of the BinaryWord. */
     const_iterator end() const { return _rep.end(); }
     
-    /*! \brief true if the word is a subword of the other word. */
-    bool is_subword(const BinaryWord& b) const {
+    /*! \brief true if the word is a prefix of the other word. */
+    bool is_prefix(const BinaryWord& b) const {
       if(size()>b.size()) { return false; }
       for(size_type i=0; i!=size(); ++i) { if((*this)[i] != b[i]) { return false; } }
       return true;
     }
 
+    /*! \brief true if the word is a subword of the other word. */
+    bool is_subword(const BinaryWord& b) const {
+      if(this->size() > b.size()) { return false; }
+      for(size_type i=0; i!=b.size()-size(); ++i) { 
+        size_type j=0;
+        while(j!=this->size() && (*this)[j]==b[i+j]) {
+          ++j;
+        }
+        if(j==this->size()) {
+          return true;
+        }
+      }
+      return false;
+    }
+    
     /*! \brief Stream insertion operator. */
     friend std::ostream& operator<<(std::ostream& os, const BinaryWord& bw);
     /*! \brief Stream extraction operator. */

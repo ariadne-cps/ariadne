@@ -2,17 +2,19 @@ include ../config.mk
 
 CXXFLAGS = -I../${INCLUDEDIR} -O2 -fpic -Wall 
 LDXXFLAGS += -L../src
-LDLIBS = -lariadne -lboost_python ${LIBGMPXX}
+LDLIBS = -lariadne -lboost_python ${LIBGMPXX} -lppl
 
-ARIADNE_OBJ=ariadne_module.o export_numeric.o export_function.o 
+ARIADNE_OBJ=ariadne_module.o \
+	export_numeric.o export_interval.o export_function.o 
 
 GEOMETRY_OBJ = geometry_module.o \
-	export_point.o export_interval.o \
+	export_point.o \
 	export_rectangle.o export_parallelopiped.o export_simplex.o export_polyhedron.o \
 	export_list_set.o export_grid.o export_partition_tree.o \
 
 EVALUATION_OBJ = evaluation_module.o \
-	export_polynomial_map.o
+	export_polynomial_map.o export_affine_map.o export_apply.o \
+	export_henon_map.o
 
 LINEAR_ALGEBRA_OBJ = linear_algebra_module.o \
 	export_vector.o export_matrix.o

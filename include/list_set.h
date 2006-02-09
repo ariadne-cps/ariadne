@@ -29,8 +29,10 @@
 #ifndef _ARIADNE_LIST_SET_H
 #define _ARIADNE_LIST_SET_H
 
-#include <vector>
 #include <iosfwd>
+#include "geometry_declarations.h"
+
+#include <vector>
 #include <iostream>
 
 namespace Ariadne {
@@ -54,6 +56,8 @@ namespace Ariadne {
 
     template <typename R, template<typename> class BS>
     bool interiors_intersect(const BS<R>&, const ListSet<R,BS>&);
+    template <typename R, template<typename> class BS>
+    bool inner_subset(const BS<R>&, const ListSet<R,BS>&);
     template <typename R, template<typename> class BS>
     bool inner_subset(const ListSet<R,BS>&, const BS<R>&);
 
@@ -79,8 +83,8 @@ namespace Ariadne {
 
      public:
       typedef BS<R> BasicSet;
-      typedef typename BasicSet::Point Point;
-      typedef typename BasicSet::Point::Real Real;
+      typedef typename BasicSet::State State;
+      typedef typename BasicSet::State::Real Real;
 
       typedef typename std::vector<BasicSet>::const_iterator const_iterator;
       typedef typename std::vector<BasicSet>::iterator iterator;
@@ -239,7 +243,7 @@ namespace Ariadne {
       * \return  \a true, if \a s is contained into the
       * current set, \a false otherwise.
       */
-      inline bool contains(const Point &s) const {
+      inline bool contains(const State &s) const {
 
         for (size_t i=0; i<this->size(); i++) {
           if ((this->_vector[i]).contains(s))
@@ -259,7 +263,7 @@ namespace Ariadne {
        * \return  \a true, if \a s is contained into the
        * current set, \a false otherwise.
        */
-      inline bool interior_contains(const Point & point) const {
+      inline bool interior_contains(const State & point) const {
         throw(std::domain_error("Not implemented"));
         for (size_t i=0; i<this->size(); i++) {
           if ((this->_vector[i]).interior_contains(point))
@@ -360,6 +364,11 @@ namespace Ariadne {
         #endif
       }
 
+      /*! \brief Adjoins (makes union with) a basic set. */
+      inline void adjoin(const BasicSet &A) {
+        this->inplace_union(A);
+      }
+
       /*! \brief Stream extraction operator. */
       friend std::istream& operator>> <> (std::istream &is,
                                           ListSet<R,BS> &S);
@@ -388,14 +397,14 @@ namespace Ariadne {
 
       /*! \brief Tests intersection of interiors.
        *
-       * Tests intersection of a denotable set with the interior of a rectangle.
-       * \param A is a rectangle.
+       * Tests intersection of a denotable set with the interior of a basic set.
+       * \param A is a basic set.
        * \param B is a denotable set.
        * \return \a true if A intersects the interior of B,
        * \a false otherwise.
        */
-      friend bool interiors_intersect<> (const Rectangle<R> &rect,
-                                          const ListSet<R,BS> &A);
+      friend bool interiors_intersect<> (const BS<R> &A,
+                                         const ListSet<R,BS> &B);
 
       /*! \brief Tests inclusion of interiors.
        *
@@ -416,8 +425,8 @@ namespace Ariadne {
        * \return \a true if A is a subset of the interior of B,
        * \a false otherwise.
        */
-      friend bool inner_subset<> (const Rectangle<R> &rect,
-                                  const ListSet<R,BS> &A);
+      friend bool inner_subset<> (const BS<R> & A,
+                                  const ListSet<R,BS> &B);
 
       /*! \brief Tests inclusion of interiors.
        *
@@ -428,7 +437,7 @@ namespace Ariadne {
        * \a false otherwise.
        */
       friend bool inner_subset<> (const ListSet<R,BS> &A,
-                                  const Rectangle<R> &rect);
+                                  const BS<R> &B);
 
       /*! \brief Makes union of two interiors.
        *

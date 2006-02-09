@@ -27,32 +27,6 @@
 namespace Ariadne {
   namespace Geometry {
 
-    /* An iterator for positions in rectangular piece of a grid. */
-    class GridPositionIterator {
-     public:
-      GridPositionIterator(const IndexArray& l, const IndexArray& u)
-        : _lower(l), _upper(u), _position(l) { }
-      GridPositionIterator(const IndexArray& l, const IndexArray& u, const IndexArray& p)
-        : _lower(l), _upper(u), _position(p) { }
-      const IndexArray& operator*() const { return _position; }
-      GridPositionIterator& operator++() {
-        dimension_type d=0;
-        _position[d]+=1;
-        while(_position[d]==_upper[d] && (d+1u)!=_position.size() ) {
-          _position[d]=_lower[d];
-          d+=1;
-          _position[d]+=1;
-        }
-        return *this;
-      }
-      bool end() const { return _position[dimension()-1]==_upper[dimension()-1]; }
-     private:
-      dimension_type dimension() const { return _position.size(); }
-      const IndexArray& _lower;
-      const IndexArray& _upper;
-      IndexArray _position;
-    };
-
     /* Inner product of two positive arrays */
     size_type
     inner_product(const array<size_type>& a1, const array<size_type>& a2)

@@ -1,4 +1,5 @@
-/****************************************************************************            epsstream.h
+/****************************************************************************
+ * epsstream.h
  *
  *  22 June 2005
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
@@ -28,16 +29,6 @@
 
 namespace Ariadne {
   namespace Postscript {
-    // TODO: Move these to numerical_types.h
-    template<typename R> double convert_to_double(const R& x) {
-      return double(x); }
-
-    template<> double convert_to_double(const Rational& x) {
-      return x.get_d(); }
-
-    template<> double convert_to_double(const Dyadic& x) {
-      return x.get_d(); }
-
 
     class epsfstream : public std::ofstream {
      private:
@@ -115,6 +106,26 @@ namespace Ariadne {
           << rux << ' ' << ruy << " lineto\n"
           << rlx << ' ' << ruy << " lineto\n"
           << rlx << ' ' << rly << " lineto\n"
+          << "fill\n";
+      return eps;
+    }
+
+    template<typename R>
+    epsfstream&
+    operator<<(epsfstream& eps, const Ariadne::Geometry::Parallelopiped<R>& p)
+    {
+      assert(p.dimension()==2);
+
+      Ariadne::Geometry::Point<R> bl=p.centre()-p.generator(0)-p.generator(1);
+      Ariadne::Geometry::Point<R> br=p.centre()+p.generator(0)-p.generator(1);
+      Ariadne::Geometry::Point<R> tr=p.centre()+p.generator(0)+p.generator(1);
+      Ariadne::Geometry::Point<R> tl=p.centre()-p.generator(0)+p.generator(1);
+
+      eps << bl[0] << ' ' << bl[1] << " moveto\n"
+          << br[0] << ' ' << br[1] << " lineto\n"
+          << tr[0] << ' ' << tr[1] << " lineto\n"
+          << tl[0] << ' ' << tl[1] << " lineto\n"
+          << bl[0] << ' ' << bl[1] << " lineto\n"
           << "fill\n";
       return eps;
     }

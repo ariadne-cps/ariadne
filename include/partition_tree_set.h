@@ -29,6 +29,9 @@
 #ifndef _ARIADNE_PARTITION_TREE_SET_H
 #define _ARIADNE_PARTITION_TREE_SET_H
 
+#include <iosfwd>
+#include "geometry_declarations.h"
+
 #include <algorithm>
 #include <vector>
 #include <iostream>
@@ -38,7 +41,6 @@
 #include "binary_word.h"
 #include "binary_tree.h"
 
-#include "geometry.h"
 #include "rectangle.h"
 #include "list_set.h"
 

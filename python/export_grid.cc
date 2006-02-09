@@ -23,7 +23,10 @@
  */
 
 #include "numerical_type.h"
+#include "linear_algebra.h"
 #include "grid_set.h"
+
+#include "parallelopiped.h"
 
 #include <boost/python.hpp>
 
@@ -31,14 +34,17 @@
 
 using Ariadne::BooleanArray;
 using Ariadne::IndexArray;
+using Ariadne::Geometry::IntegerRectangle;
 
 typedef Ariadne::Geometry::Point<Real> RPoint;
 typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
+typedef Ariadne::Geometry::Parallelopiped<Real> RParallelopiped;
 typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Rectangle> RRectangleListSet;
 
 typedef Ariadne::Geometry::Grid<Real> RGrid;
 typedef Ariadne::Geometry::FiniteGrid<Real> RFiniteGrid;
 typedef Ariadne::Geometry::GridCell<Real> RGridCell;
+typedef Ariadne::Geometry::GridCellListSet<Real> RGridCellListSet;
 typedef Ariadne::Geometry::GridRectangle<Real> RGridRectangle;
 typedef Ariadne::Geometry::GridRectangleListSet<Real> RGridRectangleListSet;
 typedef Ariadne::Geometry::GridMaskSet<Real> RGridMaskSet;
@@ -57,9 +63,14 @@ using boost::python::copy_const_reference;
 using boost::python::def;
 using boost::python::self_ns::str;
 
+inline RGridCellListSet over_approximation_parallelopiped(const RFiniteGrid& g, const RParallelopiped& p) {
+  return Ariadne::Geometry::over_approximation(g,p);
+}
+
 void export_grid() {
   class_<RFiniteGrid>("FiniteGrid",init<RFiniteGrid>())
     .def(init<RRectangleListSet>())
+    .def(init<RRectangle,uint>())
     .def("dimension", &RFiniteGrid::dimension)
     .def("subdivision_coordinate", &RFiniteGrid::subdivision_coordinate)
     .def("subdivision_interval", &RFiniteGrid::subdivision_interval)
@@ -74,6 +85,15 @@ void export_grid() {
     .def(str(self))    // __str__
     ;
   
+  class_<RGridCellListSet>("GridCellListSet",init<RFiniteGrid>())
+    .def(init<RGridMaskSet>())
+    .def(init<RGridCellListSet>())
+    .def("dimension", &RGridCellListSet::dimension)
+//    .def("adjoin", &RGridRectangleListSet::adjoin)
+    .def("__len__", &RGridCellListSet::size)
+    .def(str(self))    // __str__
+    ;
+    
   class_<RGridRectangle>("RGridCell",init<RFiniteGrid,IndexArray,IndexArray>())
     .def("dimension", &RGridCell::dimension)
     .def(str(self))    // __str__
@@ -88,10 +108,13 @@ void export_grid() {
     .def(str(self))    // __str__
     ;
     
-  class_<RGridMaskSet>("GridMaskSet",init<RRectangleListSet>())
+  class_<RGridMaskSet>("GridMaskSet",init<RFiniteGrid,IntegerRectangle>())
     .def("dimension", &RGridMaskSet::dimension)
 //    .def("adjoin", &RGridMaskSet::adjoin)
     .def("__len__", &RGridMaskSet::size)
     .def(str(self))    // __str__
     ;
+    
+    
+  def("over_approximation",&over_approximation_parallelopiped);
 }

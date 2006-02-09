@@ -24,6 +24,7 @@
 
 #include "numerical_type.h"
 #include "rectangle.h"
+#include "parallelopiped.h"
 #include "list_set.h"
 
 #include <boost/python.hpp>
@@ -34,7 +35,9 @@
 typedef Ariadne::Geometry::Point<Real> RPoint;
 typedef Ariadne::Interval<Real> RInterval;
 typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
+typedef Ariadne::Geometry::Parallelopiped<Real> RParallelopiped;
 typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Rectangle> RRectangleListSet;
+typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Parallelopiped> RParallelopipedListSet;
 
 using Ariadne::Geometry::Rectangle;
 using Ariadne::Geometry::regular_intersection;
@@ -76,4 +79,16 @@ void export_list_set() {
     .def("__setitem__", &RRectangleListSet::set)
     .def(str(self))    // __str__
   ;
+  
+  class_<RParallelopipedListSet>("ParallelopipedListSet",init<int>())
+    .def(init<RParallelopiped>())
+    .def(init<RParallelopipedListSet>())
+    .def("dimension", &RParallelopipedListSet::dimension)
+    .def("push_back", &RParallelopipedListSet::push_back)
+    .def("__len__", &RParallelopipedListSet::size)
+    .def("__getitem__", &RParallelopipedListSet::get, return_value_policy<copy_const_reference>())
+    .def("__setitem__", &RParallelopipedListSet::set)
+    .def(str(self))    // __str__
+  ;
+
 }

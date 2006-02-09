@@ -23,6 +23,7 @@
  */
 
 #include "numerical_type.h"
+#include "interval.h"
 #include "linear_algebra.h"
 
 #include <boost/python.hpp>
@@ -30,7 +31,9 @@
 #include "real_typedef.h"
 #include "python_utilities.h"
 
+typedef Ariadne::Interval<Real> RInterval;
 typedef Ariadne::LinearAlgebra::vector<Real> RVector;
+typedef Ariadne::LinearAlgebra::vector< Ariadne::Interval<Real> > IVector;
 
 using boost::python::class_;
 using boost::python::init;
@@ -40,10 +43,38 @@ using boost::python::self_ns::str;
 using boost::python::return_value_policy;
 using boost::python::copy_const_reference;
 
+inline Real rvector_getitem(const RVector& v, uint i) {
+  return v(i);
+}
+
+inline void rvector_setitem(RVector& v, uint i, Real x) {
+  v(i)=x;
+}
+
+inline RInterval ivector_getitem(const IVector& v, uint i) {
+  return v(i);
+}
+
+inline void ivector_setitem(IVector& v, uint i, RInterval x) {
+  v(i)=x;
+}
+
 void export_vector() {
   class_<RVector>("Vector",init<int>())
     .def(init<RVector>())
     .def("__len__", &RVector::size)
+    .def("__getitem__",&rvector_getitem)
+    .def("__setitem__",&rvector_setitem)
+    .def(str(self))    // __str__
+  ;
+}
+
+void export_interval_vector() {
+  class_<IVector>("IntervalVector",init<int>())
+    .def(init<IVector>())
+    .def("__len__", &IVector::size)
+    .def("__getitem__",&ivector_getitem)
+    .def("__setitem__",&ivector_setitem)
     .def(str(self))    // __str__
   ;
 }

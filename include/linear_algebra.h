@@ -37,6 +37,7 @@
 
 #include "basic_type.h"
 #include "numerical_type.h"
+#include "interval.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {
@@ -49,15 +50,34 @@ namespace Ariadne {
     using boost::numeric::ublas::matrix_column;
         
     template <typename Real>
-    inline vector<Real> operator*(const matrix<Real>& m, vector<Real>& v) {
-      return prod(m,v);
+    matrix< Interval<Real> > 
+    prod(const matrix< Interval<Real> >& A, const matrix<Real>& B) {
+      matrix< Interval<Real> > result(A.size1(),B.size2());
+      for (size_type i=0; i!=A.size1(); ++i) {
+        for (size_type j=0; j!=B.size2(); ++j) {
+          result(i,j)=Interval<Real>(0);
+          for (size_type k=0; k!=A.size2(); ++k) {
+            result(i,j)+=A(i,k)*B(k,j);
+          }
+        }
+      }
+      return result;
     }
       
     template <typename Real>
-    inline matrix<Real> operator*(const matrix<Real>& A, matrix<Real>& B) {
-      return prod(A,B);
+    matrix< Interval<Real> > 
+    prod(const matrix<Real>& A, const matrix< Interval<Real> >& B) {
+      matrix< Interval<Real> > result(A.size1(),B.size2());
+      for (size_type i=0; i!=A.size1(); ++i) {
+        for (size_type j=0; j!=B.size2(); ++j) {
+          result(i,j)=Interval<Real>(0);
+          for (size_type k=0; k!=A.size2(); ++k) {
+            result(i,j)+=A(i,k)*B(k,j);
+          }
+        }
+      }
+      return result;
     }
-      
     template <typename Real>
     inline vector<Real> zero_vector(dimension_type dim) {
       vector<Real> v(dim);
@@ -365,6 +385,13 @@ namespace Ariadne {
       return inv_A;
     }
     
+    /* FIXME:Disable this template since the inverse of a dyadic matrix cannot be computed. */
+    /*
+    template < >
+    matrix<Dyadic>
+    inverse(const matrix<Dyadic>& A);
+    */
+    
     template <typename Real>
     matrix<Real> 
     invert_matrix(const matrix<Real> &A) {
@@ -459,13 +486,69 @@ namespace Ariadne {
         }
       }
 
-      A=A*rTinv;
+      A=prod(A,rTinv);
       b=b*rmultiplier;
     }
     
+  }
+}
+
+namespace Ariadne {
+  namespace Evaluation {
+
+    //FIXME: Hack to include matrix/vector product operators.
+    template<typename R>
+    inline
+    LinearAlgebra::vector<R>
+    operator*(const LinearAlgebra::matrix<R>& A, const LinearAlgebra::vector<R>& B) {
+      return prod(A,B);
+    }
     
+    template<typename R>
+    inline
+    LinearAlgebra::matrix<R>
+    operator*(const LinearAlgebra::matrix<R>& A, const LinearAlgebra::matrix<R>& B) {
+      return prod(A,B);
+    }
+    
+    template<typename R>
+    inline
+    LinearAlgebra::matrix< Interval<R> >
+    operator*(const LinearAlgebra::matrix< Interval<R> >& A, const LinearAlgebra::matrix<R>& B) {
+      return prod(A,B);
+    }
+    
+    template<typename R>
+    inline
+    LinearAlgebra::matrix< Interval<R> >
+    operator*(const LinearAlgebra::matrix<R>& A, const LinearAlgebra::matrix< Interval<R> >& B) {
+      return prod(A,B);
+    }
+ 
+
+  }
+}
+
+namespace Ariadne {
+  namespace Geometry {
+
+    //FIXME: Hack to include matrix/vector product operators.
+    template<typename R>
+    inline
+    LinearAlgebra::vector<R>
+    operator*(const LinearAlgebra::matrix<R>& A, const LinearAlgebra::vector<R>& B) {
+      return prod(A,B);
+    }
+    
+    template<typename R>
+    inline
+    LinearAlgebra::matrix<R>
+    operator*(const LinearAlgebra::matrix<R>& A, const LinearAlgebra::matrix<R>& B) {
+      return prod(A,B);
+    }
     
   }
 }
+
 
 #endif /* _ARIADNE_LINEAR_ALGEBRA_H */

@@ -25,8 +25,10 @@
 #ifndef _ARIADNE_POLYHEDRON_H
 #define _ARIADNE_POLYHEDRON_H
 
+#include <iosfwd>
+#include "geometry_declarations.h"
+
 #include <ppl.hh>
-#include <iostream>
 #include <vector>
 
 #include "constraint.h"
@@ -110,8 +112,8 @@ class Polyhedron {
  public:
   typedef size_t size_type;
   typedef R Real;
-  typedef Point<R> RPoint;
-  typedef std::vector<RPoint> PointList;
+  typedef Point<R> State;
+  typedef std::vector<State> PointList;
   typedef Ariadne::LinearAlgebra::vector<R> Vector;
   typedef Ariadne::LinearAlgebra::matrix<R> Matrix;
  public:
@@ -199,7 +201,7 @@ class Polyhedron {
     
     /*! \brief Tests if a Point is an element of the Polyhedron.
      */
-    inline bool contains(const RPoint& point) const {
+    inline bool contains(const State& point) const {
       if (point.dimension()!=this->dimension()) {
         throw std::domain_error("This object and parameter have different space dimensions");
       }
@@ -212,14 +214,17 @@ class Polyhedron {
     
     /*! \brief Tests if a point is an element of the interior of the polyhedron.
      */
-    inline bool interior_contains(const RPoint& point) const {
+    inline bool interior_contains(const State& point) const {
       if (point.dimension()!=this->dimension()) {
         throw std::domain_error("This object and parameter have different space dimensions");
       }
       return this->_ppl_poly.contains(_from_Point_to_PPL_Polyhedron(point));
     }
     
-    
+    /*! \brief A rectangle containing the polyhedron. */
+    inline Rectangle<R> bounding_box() const {
+      throw std::runtime_error("Polyhedron::bounding_box() const not implemented.");
+    }
     
     /*! \brief An over-approximation of the Polyhdron governed by the parameter \a delta.
      *
@@ -649,7 +654,7 @@ Polyhedron<R>::Polyhedron(const Matrix& A, const Vector& b)
 }
   
 template <typename R>
-Polyhedron<R>::Polyhedron(const std::vector<RPoint>& points)
+Polyhedron<R>::Polyhedron(const std::vector<State>& points)
   : _ppl_poly() 
 {
   Parma_Polyhedra_Library::Generator_System ppl_gen;
@@ -682,7 +687,7 @@ Polyhedron<R>::vertices() const
 {
   PointList result;
   const Parma_Polyhedra_Library::Generator_System& gs = this->_ppl_poly.minimized_generators();
-  RPoint point(this->dimension());
+  State point(this->dimension());
   
   for(Parma_Polyhedra_Library::Generator_System::const_iterator iter=gs.begin(); iter!=gs.end(); ++iter) {
     Parma_Polyhedra_Library::Generator gen = *iter;
@@ -747,8 +752,8 @@ template <typename R>
 Polyhedron<R>::Polyhedron(const Rectangle<R>& r)
   : _ppl_poly(r.dimension())
 {
-  RPoint u_corner(r.upper_corner());
-  RPoint l_corner(r.lower_corner());
+  State u_corner(r.upper_corner());
+  State l_corner(r.lower_corner());
   
   Parma_Polyhedra_Library::Constraint_System cs;
   Rational num;

@@ -84,6 +84,7 @@ void export_polyhedron() {
     .def(init<RParallelopiped>())
     .def("dimension", &RPolyhedron::dimension)
     .def("vertices", &RPolyhedron::vertices)
+    .def("bounding_box", &RPolyhedron::bounding_box)
     .def(str(self))    // __str__
   ;
   

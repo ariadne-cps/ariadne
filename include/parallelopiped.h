@@ -18,7 +18,7 @@
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
+ *  along with this program; if not, write to bouthe Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
@@ -30,6 +30,8 @@
 #define _ARIADNE_PARALLELOPIPED_H
 
 #include <iosfwd>
+#include "geometry_declarations.h"
+
 #include <string>
 #include <sstream>
 
@@ -45,6 +47,8 @@
 #include "point.h"
 #include "rectangle.h"
 #include "list_set.h"
+
+#include "grid_operations.h" // For IndexBlock
 
 #include "constraint.h"
 #include "polyhedron.h"
@@ -115,7 +119,7 @@ namespace Ariadne {
                                            const ListSet<R,::Ariadne::Geometry::Parallelopiped>& B);
 
      public:
-      /*! \brief The unsigned integer type used to denote the array positions. */
+      /*! \brief The unsigned integer type used to denote temphe array positions. */
       typedef size_t size_type;
       /*! \brief The type of denotable real number used for the corners. */
       typedef R Real;
@@ -130,20 +134,20 @@ namespace Ariadne {
       State _centre;
       
       /* Parallelopiped's principal directions. */
-      Matrix _directions;
+      Matrix _generators;
       
      public:
       /*! \brief Default constructor constructs an empty parallelopiped of dimension \a n. */
       explicit Parallelopiped(size_type n = 0)
-        : _centre(n),  _directions(n,n) 
+        : _centre(n),  _generators(n,n) 
       {
       }
       
       /*! \brief Construct from centre and directions. */
       explicit Parallelopiped(const State& c, const Matrix& m)
-        : _centre(c), _directions(m)
+        : _centre(c), _generators(m)
       {
-        if (LinearAlgebra::number_of_rows(m)==LinearAlgebra::number_of_columns(m)) {
+        if (LinearAlgebra::number_of_rows(m)!=LinearAlgebra::number_of_columns(m)) {
           throw std::domain_error(
               "The the matrix of principal directions is not a square matrix");
         }
@@ -158,7 +162,7 @@ namespace Ariadne {
       
       /*! \brief Construct from a string literal. */
       explicit Parallelopiped(const std::string& s)
-        : _centre(), _directions()
+        : _centre(), _generators()
       {
         std::stringstream ss(s);
         ss >> *this;
@@ -167,14 +171,14 @@ namespace Ariadne {
       /*! \brief Copy constructor. */
       Parallelopiped(const Parallelopiped<R>& original)
         : _centre(original._centre),
-          _directions(original._directions)
+          _generators(original._generators)
       { }
       
       /*! \brief Copy assignment operator. */
       Parallelopiped<R>& operator=(const Parallelopiped<R>& original) {
         if(this != &original) {
           this->_centre = original._centre;
-          this->_directions = original._directions;
+          this->_generators = original._generators;
         }
         return *this;
       }
@@ -183,15 +187,19 @@ namespace Ariadne {
       inline Rectangle<R> bounding_box() const {
         Vector offset(this->dimension());
         for(size_type i=0; i!=this->dimension(); ++i) {
-          for(size_type j=0; i!=this->dimension(); ++j) {
-            offset[i] += abs(this->_directions(i,j));
+          for(size_type j=0; j!=this->dimension(); ++j) {
+            offset[i] += abs(this->_generators(i,j));
           }
         }
-        return Rectangle<R>(this->centre()+offset, this->centre()-offset);
+        Rectangle<R> result(this->centre()+offset, this->centre()-offset);
+        return result;
       }
       
       /*! \brief Convert to a polyhedron. */
       inline operator Polyhedron<R> () const;
+      
+      /*! \subdivide into smaller pieces. */
+      inline ListSet<R,::Ariadne::Geometry::Parallelopiped> subdivide() const;
       
       /*! \brief The dimension of the Euclidean space the parallelopiped lies in. */
       inline size_type dimension() const {
@@ -200,7 +208,8 @@ namespace Ariadne {
       
       /*! \brief True if the parallelopiped is empty. */
       inline bool empty() const {
-        throw std::domain_error("Parallelopiped::empty() not implemented.");
+        // FIXME: This is probably ok since we're not talking about interior.
+        return false;
       }
       
       /*! \brief True if the parallelopiped has empty interior. */
@@ -214,13 +223,13 @@ namespace Ariadne {
       }
       
       /*! \brief The \a n th of principle direction. */
-      inline Vector principle_direction(size_type n) const {
-        return matrix_column(this->_directions);
+      inline Vector generator(size_type n) const {
+        return column(this->_generators,n);
       }
       
       /*! \brief The matrix of principle directions. */
-      inline Matrix principle_directions() const {
-        return this->_directions;
+      inline Matrix generators() const {
+        return this->_generators;
       }
       
       /*! \brief Tests if the parallelopiped contains \a state. */
@@ -287,7 +296,7 @@ namespace Ariadne {
       inline void compute_linear_inequalities(Matrix&, Vector&, Vector&) const;
       Vector coordinates(const State& s) const {
         Vector diff = s-_centre;
-        Matrix inv = LinearAlgebra::inverse(_directions);
+        Matrix inv = LinearAlgebra::inverse(_generators);
         return prod(inv,diff);
       }
     };
@@ -302,7 +311,7 @@ namespace Ariadne {
       size_type n=this->dimension();
       
       Vector c=this->centre() - State(n,0);
-      A=inverse(this->principle_directions());
+      A=inverse(this->generators());
       o=A*c;
       b=vector<R>(n);
       for(size_type i=0; i!=n; ++i) {
@@ -323,7 +332,7 @@ namespace Ariadne {
       matrix<Rational> M(n,n);
       for(size_type i=0; i!=n; ++i) {
         for(size_type j=0; j!=n; ++j) {
-          M(i,j) = convert_to<Rational>(this->_directions(i,j));
+          M(i,j) = convert_to<Rational>(this->_generators(i,j));
         }
       }
       M=inverse(M);
@@ -351,11 +360,11 @@ namespace Ariadne {
       
     template <typename R>
     Parallelopiped<R>::Parallelopiped(const Rectangle<Real>& r)
-      : _centre(r.dimension()), _directions(r.dimension(),r.dimension())
+      : _centre(r.dimension()), _generators(r.dimension(),r.dimension())
     {
       for(size_type i=0; i!=dimension(); ++i) {
         _centre[i] = (r.lower_bound(i)+r.upper_bound(i))/2;
-        _directions(i,i) = (r.upper_bound(i)-r.lower_bound(i))/2;
+        _generators(i,i) = (r.upper_bound(i)-r.lower_bound(i))/2;
       }
     }
     
@@ -391,7 +400,35 @@ namespace Ariadne {
     }
 
 
+    template <typename R>
+    ListSet<R,Parallelopiped>
+    Parallelopiped<R>::subdivide() const 
+    {
+      size_type n=this->dimension();
+      ListSet<R,Geometry::Parallelopiped> result(this->dimension());
+      Matrix new_generators=this->generators()/2;
+      
+      IndexBlock ir(IndexArray(n,0),IndexArray(n,2));
 
+      State first_centre=this->centre();
+      for(size_type i=0; i!=n; ++i) {
+        first_centre=first_centre-(this->generator(i))/2;
+      }
+      
+      for(IndexBlock::const_iterator iter=ir.begin(); iter!=ir.end(); ++iter) {
+        const IndexArray& ary=*iter;
+        State new_centre=first_centre;
+        for(size_type i=0; i!=n; ++i) {
+          if(ary[i]==1) {
+            new_centre=new_centre+this->generator(i);
+          }
+        }
+        result.adjoin(Parallelopiped(new_centre,new_generators));
+      }
+      return result;
+    }
+    
+    
     /*! \brief Tests disjointness */
     template <typename R>
     bool disjoint(const Parallelopiped<R>& A, const Parallelopiped<R>& B) 
@@ -501,7 +538,7 @@ namespace Ariadne {
 //      else 
       if(p.dimension() > 0) {
         os << "Parallelopiped(\n  centre=" << p.centre();
-        os << "\n  directions=" << p.principle_directions();
+        os << "\n  directions=" << p.generators();
         os << "\n) ";
       }
 

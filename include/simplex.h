@@ -30,6 +30,8 @@
 #define _ARIADNE_SIMPLEX_H
 
 #include <iosfwd>
+#include "geometry_declarations.h"
+
 #include <string>
 #include <sstream>
 
@@ -42,9 +44,8 @@
 #include "array.h"
 #include "utility.h"
 #include "linear_algebra.h"
-#include "interval.h"
+
 #include "point.h"
-#include "rectangle.h"
 #include "polyhedron.h"
 #include "list_set.h"
 

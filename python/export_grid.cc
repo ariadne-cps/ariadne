@@ -34,12 +34,13 @@
 
 using Ariadne::BooleanArray;
 using Ariadne::IndexArray;
-using Ariadne::Geometry::IntegerRectangle;
+using Ariadne::Geometry::IndexBlock;
 
 typedef Ariadne::Geometry::Point<Real> RPoint;
 typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
 typedef Ariadne::Geometry::Parallelopiped<Real> RParallelopiped;
 typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Rectangle> RRectangleListSet;
+typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Parallelopiped> RParallelopipedListSet;
 
 typedef Ariadne::Geometry::Grid<Real> RGrid;
 typedef Ariadne::Geometry::FiniteGrid<Real> RFiniteGrid;
@@ -63,9 +64,37 @@ using boost::python::copy_const_reference;
 using boost::python::def;
 using boost::python::self_ns::str;
 
-inline RGridCellListSet over_approximation_parallelopiped(const RFiniteGrid& g, const RParallelopiped& p) {
-  return Ariadne::Geometry::over_approximation(g,p);
+inline RGridRectangle over_approximation_rectangle(const RRectangle& r, const RFiniteGrid& g) {
+  return Ariadne::Geometry::over_approximation(r,g);
 }
+inline RGridCellListSet over_approximation_parallelopiped(const RParallelopiped& p, const RFiniteGrid& g) {
+  return Ariadne::Geometry::over_approximation(p,g);
+}
+inline RGridMaskSet over_approximation_rectangle_list_set(const RRectangleListSet& rls, const RFiniteGrid& g) {
+  return Ariadne::Geometry::over_approximation(rls,g);
+}
+inline RGridMaskSet over_approximation_parallelopiped_list_set(const RParallelopipedListSet& pls, const RFiniteGrid& g) {
+  return Ariadne::Geometry::over_approximation(pls,g);
+}
+inline RGridMaskSet join(const RGridMaskSet& gms1, const RGridMaskSet& gms2) {
+  return Ariadne::Geometry::join(gms1,gms2);
+}
+inline RGridMaskSet difference(const RGridMaskSet& gms1, const RGridMaskSet& gms2) {
+  return Ariadne::Geometry::difference(gms1,gms2);
+}
+inline RGridMaskSet grid_mask_set_regular_intersection(const RGridMaskSet& gms1, const RGridMaskSet& gms2) {
+  return Ariadne::Geometry::regular_intersection(gms1,gms2);
+}
+inline void grid_mask_set_adjoin_grid_rectangle(RGridMaskSet& gms, const RGridRectangle& gr) {
+  return gms.adjoin(gr);
+}
+inline void grid_mask_set_adjoin_grid_cell_list_set(RGridMaskSet& gms, const RGridCellListSet& gcls) {
+  return gms.adjoin(gcls);
+}
+inline void grid_mask_set_adjoin_grid_mask_set(RGridMaskSet& gms, const RGridMaskSet& agms) {
+  return gms.adjoin(agms);
+}
+
 
 void export_grid() {
   class_<RFiniteGrid>("FiniteGrid",init<RFiniteGrid>())
@@ -80,7 +109,7 @@ void export_grid() {
     .def(str(self))    // __str__
     ;
 
-  class_<RGridCell>("RGridCell",init<RFiniteGrid,IndexArray>())
+  class_<RGridCell>("GridCell",init<RFiniteGrid,IndexArray>())
     .def("dimension", &RGridCell::dimension)
     .def(str(self))    // __str__
     ;
@@ -88,19 +117,20 @@ void export_grid() {
   class_<RGridCellListSet>("GridCellListSet",init<RFiniteGrid>())
     .def(init<RGridMaskSet>())
     .def(init<RGridCellListSet>())
+    .def(init<RGridRectangleListSet>())
     .def("dimension", &RGridCellListSet::dimension)
-//    .def("adjoin", &RGridRectangleListSet::adjoin)
     .def("__len__", &RGridCellListSet::size)
     .def(str(self))    // __str__
     ;
     
-  class_<RGridRectangle>("RGridCell",init<RFiniteGrid,IndexArray,IndexArray>())
-    .def("dimension", &RGridCell::dimension)
+  class_<RGridRectangle>("GridRectangle",init<RFiniteGrid,IndexArray,IndexArray>())
+    .def("dimension", &RGridRectangle::dimension)
     .def(str(self))    // __str__
     ;
   
   
   class_<RGridRectangleListSet>("GridRectangleListSet",init<RRectangleListSet>())
+    .def(init<RGridCellListSet>())
     .def(init<RGridRectangleListSet>())
     .def("dimension", &RGridRectangleListSet::dimension)
 //    .def("adjoin", &RGridRectangleListSet::adjoin)
@@ -108,13 +138,25 @@ void export_grid() {
     .def(str(self))    // __str__
     ;
     
-  class_<RGridMaskSet>("GridMaskSet",init<RFiniteGrid,IntegerRectangle>())
+  class_<RGridMaskSet>("GridMaskSet",init<RFiniteGrid,IndexBlock>())
+    .def(init<RFiniteGrid>())
+    .def(init<RGridCellListSet>())
+    .def(init<RGridRectangleListSet>())
+    .def("empty", &RGridMaskSet::empty)
     .def("dimension", &RGridMaskSet::dimension)
-//    .def("adjoin", &RGridMaskSet::adjoin)
+    .def("adjoin", &grid_mask_set_adjoin_grid_rectangle)
+    .def("adjoin", &grid_mask_set_adjoin_grid_cell_list_set)
+    .def("adjoin", &grid_mask_set_adjoin_grid_mask_set)
     .def("__len__", &RGridMaskSet::size)
     .def(str(self))    // __str__
     ;
     
+  def("join",&join);
+  def("difference",&difference);
+  def("regular_intersection",&grid_mask_set_regular_intersection);
     
+  def("over_approximation",&over_approximation_rectangle);
   def("over_approximation",&over_approximation_parallelopiped);
+  def("over_approximation",&over_approximation_rectangle_list_set);
+  def("over_approximation",&over_approximation_parallelopiped_list_set);
 }

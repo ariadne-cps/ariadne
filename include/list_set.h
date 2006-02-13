@@ -145,7 +145,7 @@ namespace Ariadne {
       */
       inline const BasicSet& get(size_t index) const {
         if (this->size()<=index)
-          throw std::invalid_argument("Index overlaps vector bounds.");
+          throw std::invalid_argument("Invalid index in ListSet::get(size_type).");
 
         return this->_vector[index];
       }
@@ -157,7 +157,7 @@ namespace Ariadne {
       */
       inline void set(size_t index, const BasicSet& set) {
         if (this->size()<=index)
-          throw std::invalid_argument("Index overlaps vector bounds.");
+          throw std::invalid_argument("Invalid index in ListSet:;set(size_type, const BasicSet&).");
 
         this->_vector[index]=set;
       }
@@ -169,7 +169,7 @@ namespace Ariadne {
       */
       inline const BasicSet& operator[](size_t index) const {
         if (this->size()<=index)
-          throw std::invalid_argument("Index overlaps vector bounds.");
+          throw std::invalid_argument("Invalid index in ListSet::operator[](size_type).");
 
         return this->_vector[index];
       }
@@ -279,7 +279,7 @@ namespace Ariadne {
        * \a false otherwise.
        */
       inline bool empty() const {
-        for (size_t i=0; i<this->size(); i++) {
+        for (size_t i=0; i<this->size(); ++i) {
           if (!(this->_vector[i]).empty())
             return false;
         }
@@ -287,6 +287,25 @@ namespace Ariadne {
         return true;
       }
 
+      /*! \brief Return a rectangle containing the set. */
+      inline Rectangle<R> bounding_box() const {
+        assert(!this->empty());
+        Rectangle<R> result=(*this)[0].bounding_box();
+        for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+          Rectangle<R> bb=iter->bounding_box();
+          for(size_type i=0; i!=result.dimension(); ++i) {
+            if(bb.lower_bound(i) < result.lower_bound(i)) {
+              result.set_lower_bound(i,bb.lower_bound(i));
+            }
+            if(bb.upper_bound(i) > result.upper_bound(i)) {
+              result.set_upper_bound(i,bb.upper_bound(i));
+            }
+          }
+        }
+        return result;
+      }
+        
+        
       /*! \brief A constant iterator to the beginning of the list of basic sets.
        *
        * \return The begin of the maintained basic set vector.

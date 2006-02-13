@@ -51,6 +51,10 @@ inline void rvector_setitem(RVector& v, uint i, Real x) {
   v(i)=x;
 }
 
+inline void rvector_setitem_from_double(RVector& v, uint i, double x) {
+  v(i)=Ariadne::convert_to<Real>(x);
+}
+
 inline RInterval ivector_getitem(const IVector& v, uint i) {
   return v(i);
 }
@@ -59,12 +63,14 @@ inline void ivector_setitem(IVector& v, uint i, RInterval x) {
   v(i)=x;
 }
 
+
 void export_vector() {
   class_<RVector>("Vector",init<int>())
     .def(init<RVector>())
     .def("__len__", &RVector::size)
     .def("__getitem__",&rvector_getitem)
     .def("__setitem__",&rvector_setitem)
+    .def("__setitem__",&rvector_setitem_from_double)
     .def(str(self))    // __str__
   ;
 }

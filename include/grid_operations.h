@@ -30,6 +30,7 @@
 #define _ARIADNE_GRID_OPERATIONS_H
 
 #include <vector>
+#include <iosfwd>
 #include "array.h"
 #include "basic_type.h"
 #include "rectangle.h"
@@ -45,12 +46,12 @@ namespace Ariadne {
     typedef array<size_type> SizeArray;
     /*!\brief An array of integers, representing a cell in a grid. */
     typedef array<index_type> IntegerCell;
-    /*!\brief A rectangle in an integer grid. */
-    typedef Rectangle<index_type> IntegerRectangle;
+    /*!\brief An of integers representing an index in a grid. */
+    class IndexBlock;
      /*!\brief A list of arrays of integers of the same size, representing cells in a grid. */
-    typedef array_vector<index_type> IntegerCellList;
+    typedef array_vector<index_type> IndexArrayList;
     /*!\brief A list of arrays of integers of the same size, representing rectangles in a grid. */
-    typedef array_vector<index_type> IntegerRectangleList;
+    typedef array_vector<index_type> IndexBlockList;
 
     size_type inner_product(const array<size_type>& a1, const array<size_type>& a2);
 
@@ -64,14 +65,15 @@ namespace Ariadne {
     
     bool operator<(const IndexArray&, const IndexArray&);
     
+    /*! Returns true if v1-v2 is all zeros. */
+    bool operator<=(const BooleanArray& v1, const BooleanArray& v2);
+    
     /*! Compute the sum of an index array and a size. */
     IndexArray operator+(const IndexArray& l, const SizeArray& s);
 
     /*! Compute a positive offset from two index sets */
     SizeArray operator-(const IndexArray& u, const IndexArray& l);
    
-    void compute_rectangle_list_bounds(IndexArray& l, IndexArray& u, IntegerRectangleList cl);
-
     /*! Compute the index of a position in a grid. */
     size_type compute_index(const IndexArray& pos, const IndexArray& lower, const SizeArray& strides);
 
@@ -79,33 +81,27 @@ namespace Ariadne {
     IndexArray compute_position(size_type index, const IndexArray& lower, const SizeArray& strides);
 
     /*! Compute upper and lower bounds of the cell list cl. */
-      void compute_cell_list_bounds(IndexArray* lptr, IndexArray* uptr, IntegerCellList cl);
+    IndexBlock compute_cell_list_bounds(const IndexArrayList& cl);
 
     /*! Compute strides from a list of sizes. */
     SizeArray compute_strides(const SizeArray& s);
 
-    /*! Compute lower bounds of the cell list cl. */
-    void compute_rectangle_list_lower_bound(IndexArray* lptr, const IntegerRectangleList& rl);
+    /*! Compute upper and lower bounds of the rectangle list rl. */
+    IndexBlock compute_rectangle_list_bounds(const IndexBlockList& rl);
 
-    /* Compute upper bounds of the cell list cl. */
-    void compute_rectangle_list_upper_bound(IndexArray* uptr, const IntegerRectangleList& rl);
-
-    /*! Compute upper and lower bounds of the cell list cl. */
-    void compute_rectangle_list_bounds(IndexArray* lptr, IndexArray* uptr, const IntegerRectangleList& rl);
-
-    void append_to_cell_list(IntegerCellList* clptr, const IndexArray& lower, const SizeArray& strides, const BooleanArray& mask);
-    void append_to_cell_list(IntegerCellList* clptr, const IndexArray& lower, const IndexArray& upper);
-    void append_to_cell_list(IntegerCellList* clptr, const IntegerRectangleList rl);
+    void append_to_cell_list(IndexArrayList* clptr, const IndexArray& lower, const SizeArray& strides, const BooleanArray& mask);
+    void append_to_cell_list(IndexArrayList* clptr, const IndexArray& lower, const IndexArray& upper);
+    void append_to_cell_list(IndexArrayList* clptr, const IndexBlockList rl);
 
     void compute_cell_mask(BooleanArray* maptr, const SizeArray& grid_strides, const IndexArray& grid_lower, const IndexArray& position);
-    void compute_cell_list_mask(BooleanArray* maptr, const SizeArray& grid_strides, const IndexArray& grid_lower, const IntegerCellList& cl);
+    void compute_cell_list_mask(BooleanArray* maptr, const SizeArray& grid_strides, const IndexArray& grid_lower, const IndexArrayList& cl);
     void compute_rectangle_mask(BooleanArray* maptr, const SizeArray& grid_strides, const IndexArray& grid_lower, 
                                 const IndexArray& lower, const IndexArray& upper);
     void compute_rectangle_list_mask(BooleanArray* maptr, const SizeArray& grid_strides, 
-                                     const IndexArray& grid_lower, const IntegerRectangleList& rl);
+                                     const IndexArray& grid_lower, const IndexBlockList& rl);
 
-    void translate_rectangle_coordinates(IntegerRectangleList* torlptr, const IntegerRectangleList& frrl, array< std::vector<index_type> > tr);
-    void translate_cell_coordinates(IntegerRectangleList* torlptr, const IntegerCellList& frcl, array< std::vector<index_type> > tr);
+    void translate_rectangle_coordinates(IndexBlockList* torlptr, const IndexBlockList& frrl, array< std::vector<index_type> > tr);
+    void translate_cell_coordinates(IndexBlockList* torlptr, const IndexArrayList& frcl, array< std::vector<index_type> > tr);
 
 
 
@@ -143,15 +139,26 @@ namespace Ariadne {
     };
 
 
-    /*! \brief A block of indices in a grid. */
+    /*! \brief A block of indicejos in a grid. */
     class IndexBlock {
      public:
       typedef GridPositionIterator const_iterator;
       IndexBlock(dimension_type n) : _lower_corner(n), _upper_corner(n) { }
       IndexBlock(const IndexArray& l, const IndexArray& u)
         : _lower_corner(l), _upper_corner(u) { }
+      IndexBlock(const IndexBlock& b)
+        : _lower_corner(b._lower_corner), _upper_corner(b._upper_corner) { }
       
       dimension_type dimension() const { return _lower_corner.size(); }
+      index_type lower_bound(dimension_type i) const { return _lower_corner[i]; }
+      index_type upper_bound(dimension_type i) const { return _upper_corner[i]; }
+
+      void set_lower_bound(dimension_type i, index_type n) { _lower_corner[i]=n; }
+      void set_upper_bound(dimension_type i, index_type n) { _upper_corner[i]=n; }
+
+      const IndexArray& lower_corner() const { return _lower_corner; }
+      const IndexArray& upper_corner() const { return _upper_corner; }
+
       GridPositionIterator begin() const { 
         return GridPositionIterator(_lower_corner, _upper_corner,_lower_corner);
       }
@@ -164,6 +171,10 @@ namespace Ariadne {
       IndexArray _lower_corner;
       IndexArray _upper_corner;
     };
+    
+    std::ostream&
+    operator<<(std::ostream&, const IndexBlock&);
+    
     
     /*!\internal TODO:
      * unique sort cell list
@@ -179,10 +190,6 @@ namespace Ariadne {
      * transform indices in cell list
      * transform indices in rectangle list
      * transform indices in mask array
-     *
-     * compute bounding box of cell list DONE
-     * compute bounding box of rectangle list DONE
-     * compute bounding box of mask array
      *
      * sorted union cell list
      * union rectangle list

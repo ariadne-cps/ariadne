@@ -46,6 +46,8 @@ void export_list_set();
 void export_grid();
 void export_partition_tree();
 
+void export_postscript_output();
+
 using boost::python::class_;
 using boost::python::init;
 using boost::python::self;
@@ -91,4 +93,7 @@ BOOST_PYTHON_MODULE(geometry)
   export_list_set();
   export_grid();
   export_partition_tree();
+  
+  export_postscript_output();
+
 }

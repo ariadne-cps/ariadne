@@ -69,9 +69,9 @@ namespace Ariadne {
       inline const Real& b() const { return _b; }
       
       /*! \brief  The dimension of the argument. */
-      inline size_type argument_dimension() const { return 2; }
+      inline dimension_type argument_dimension() const { return 2; }
       /*! \brief The dimension of the result. */
-      inline size_type result_dimension() const { return 2; }
+      inline dimension_type result_dimension() const { return 2; }
       
       inline bool invertible() const {
         return _b!=0; }
@@ -106,6 +106,7 @@ namespace Ariadne {
     {
       std::cerr << "HenonMap::apply(const Parallelopiped) const" << std::endl;
       return Evaluation::apply(*this,p);
+      std::cerr << "Done HenonMap::apply(const Parallelopiped) const" << std::endl;
     }
 
     template <typename R>

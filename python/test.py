@@ -29,15 +29,16 @@ r[1]=Interval(0,1)
 
 r=Rectangle("")
 print r
-r=Rectangle("[0,1]x[1,2]x[2,3]z")
+r=Rectangle("[0,1]x[1,2]x[2,3]")
 print r
-r=Rectangle("[0,1]x[1,2] x [2,3]")
+r1=Rectangle("[0,1]x[1,2] x [2,3]")
 print r
 r2=Rectangle("[0.5,7]x[-1,5] x [5,7]")
 r=Rectangle(" [0,1] x[1,2], x [2,3]")
 print r
 
-print r1,r2,regular_intersection(r1,r2)
+print r1,r2
+print regular_intersection(r1,r2)
 print disjoint(r1,r2), interiors_intersect(r1,r2), inner_subset(r1,r2)
 
 ps=PartitionScheme(r2)
@@ -49,3 +50,6 @@ p = Polyhedron(3)
 print ps
 print pt
 print pts
+
+eps_print("r.eps",r)
+eps_print("pts.eps",pts)

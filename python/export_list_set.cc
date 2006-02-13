@@ -26,6 +26,7 @@
 #include "rectangle.h"
 #include "parallelopiped.h"
 #include "list_set.h"
+#include "grid_set.h"
 
 #include <boost/python.hpp>
 
@@ -38,6 +39,9 @@ typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
 typedef Ariadne::Geometry::Parallelopiped<Real> RParallelopiped;
 typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Rectangle> RRectangleListSet;
 typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Parallelopiped> RParallelopipedListSet;
+typedef Ariadne::Geometry::GridRectangleListSet<Real> RGridRectangleListSet;
+typedef Ariadne::Geometry::GridCellListSet<Real> RGridCellListSet;
+typedef Ariadne::Geometry::GridMaskSet<Real> RGridMaskSet;
 
 using Ariadne::Geometry::Rectangle;
 using Ariadne::Geometry::regular_intersection;
@@ -72,8 +76,12 @@ void export_list_set() {
   class_<RRectangleListSet>("RectangleListSet",init<int>())
     .def(init<RRectangle>())
     .def(init<RRectangleListSet>())
+    .def(init<RGridRectangleListSet>())
+    .def(init<RGridCellListSet>())
+    .def(init<RGridMaskSet>())
     .def("dimension", &RRectangleListSet::dimension)
     .def("push_back", &RRectangleListSet::push_back)
+    .def("size", &RRectangleListSet::size)
     .def("__len__", &RRectangleListSet::size)
     .def("__getitem__", &RRectangleListSet::get, return_value_policy<copy_const_reference>())
     .def("__setitem__", &RRectangleListSet::set)
@@ -85,6 +93,7 @@ void export_list_set() {
     .def(init<RParallelopipedListSet>())
     .def("dimension", &RParallelopipedListSet::dimension)
     .def("push_back", &RParallelopipedListSet::push_back)
+    .def("size", &RParallelopipedListSet::size)
     .def("__len__", &RParallelopipedListSet::size)
     .def("__getitem__", &RParallelopipedListSet::get, return_value_policy<copy_const_reference>())
     .def("__setitem__", &RParallelopipedListSet::set)

@@ -11,9 +11,11 @@ GEOMETRY_OBJ = geometry_module.o \
 	export_point.o \
 	export_rectangle.o export_parallelopiped.o export_simplex.o export_polyhedron.o \
 	export_list_set.o export_grid.o export_partition_tree.o \
+	export_postscript_output.o \
 
 EVALUATION_OBJ = evaluation_module.o \
-	export_polynomial_map.o export_affine_map.o export_apply.o \
+	export_map.o export_affine_map.o export_polynomial_map.o \
+	export_apply.o \
 	export_henon_map.o
 
 LINEAR_ALGEBRA_OBJ = linear_algebra_module.o \
@@ -53,110 +55,140 @@ dep:
 
 ### Do Not edit this line
 ### Everything below is auto-generated
-ariadne_module.o: ariadne_module.cc ../include/numerical_type.h \
-  ../include/synaps/dyadic.h ../include/interval.h ../include/point.h \
-  ../include/utility.h ../include/linear_algebra.h \
-  ../include/numerical_type.h ../include/rectangle.h ../include/ariadne.h \
-  ../include/geometry.h ../include/interval.h ../include/point.h \
-  ../include/binary_word.h ../include/array.h ../include/list_set.h
+ariadne_module.o: ariadne_module.cc
 
 export_numeric.o: export_numeric.cc ../include/numerical_type.h \
   ../include/synaps/dyadic.h
 
-export_function.o: export_function.cc ../include/function.h \
-  ../include/numerical_type.h ../include/synaps/dyadic.h real_typedef.h
+export_interval.o: export_interval.cc ../include/numerical_type.h \
+  ../include/synaps/dyadic.h ../include/interval.h real_typedef.h
 
-geometry_module.o: geometry_module.cc ../include/numerical_type.h \
-  ../include/synaps/dyadic.h ../include/interval.h ../include/point.h \
-  ../include/utility.h ../include/linear_algebra.h \
-  ../include/numerical_type.h ../include/rectangle.h ../include/ariadne.h \
-  ../include/geometry.h ../include/interval.h ../include/point.h \
-  ../include/binary_word.h ../include/array.h ../include/parallelopiped.h \
-  ../include/rectangle.h ../include/list_set.h ../include/constraint.h \
-  ../include/polyhedron.h ../include/generator.h ../include/list_set.h \
-  ../include/grid_set.h ../include/grid_operations.h \
-  ../include/binary_word.h ../include/binary_tree.h ../include/sequence.h \
-  ../include/partition_tree_set.h ../include/binary_tree.h real_typedef.h \
+export_function.o: export_function.cc ../include/function.h \
+  /ufs/collins/include/mpfr.h ../include/numerical_type.h \
+  ../include/synaps/dyadic.h real_typedef.h
+
+geometry_module.o: geometry_module.cc ../include/binary_word.h \
+  ../include/utility.h ../include/basic_type.h ../include/array.h \
+  ../include/sequence.h ../include/binary_tree.h ../include/binary_word.h \
+  ../include/rectangle.h ../include/geometry_declarations.h \
+  ../include/ariadne.h ../include/interval.h ../include/point.h \
+  ../include/linear_algebra.h ../include/numerical_type.h \
+  ../include/synaps/dyadic.h ../include/partition_tree_set.h \
+  ../include/binary_tree.h ../include/list_set.h real_typedef.h \
   python_utilities.h
 
 export_point.o: export_point.cc ../include/numerical_type.h \
   ../include/synaps/dyadic.h ../include/point.h ../include/utility.h \
-  ../include/linear_algebra.h ../include/numerical_type.h real_typedef.h \
-  python_utilities.h
-
-export_interval.o: export_interval.cc ../include/numerical_type.h \
-  ../include/synaps/dyadic.h ../include/interval.h real_typedef.h
+  ../include/linear_algebra.h ../include/basic_type.h ../include/array.h \
+  ../include/sequence.h ../include/numerical_type.h ../include/interval.h \
+  ../include/geometry_declarations.h real_typedef.h python_utilities.h
 
 export_rectangle.o: export_rectangle.cc ../include/numerical_type.h \
-  ../include/synaps/dyadic.h ../include/rectangle.h ../include/ariadne.h \
-  ../include/utility.h ../include/geometry.h ../include/interval.h \
-  ../include/point.h ../include/linear_algebra.h \
-  ../include/numerical_type.h ../include/binary_word.h ../include/array.h \
-  ../include/list_set.h real_typedef.h python_utilities.h
+  ../include/synaps/dyadic.h ../include/rectangle.h \
+  ../include/geometry_declarations.h ../include/ariadne.h \
+  ../include/basic_type.h ../include/array.h ../include/utility.h \
+  ../include/sequence.h ../include/interval.h ../include/point.h \
+  ../include/linear_algebra.h ../include/numerical_type.h \
+  ../include/binary_word.h ../include/list_set.h real_typedef.h \
+  python_utilities.h
 
 export_parallelopiped.o: export_parallelopiped.cc \
   ../include/numerical_type.h ../include/synaps/dyadic.h \
-  ../include/rectangle.h ../include/ariadne.h ../include/utility.h \
-  ../include/geometry.h ../include/interval.h ../include/point.h \
-  ../include/linear_algebra.h ../include/numerical_type.h \
-  ../include/binary_word.h ../include/array.h ../include/parallelopiped.h \
-  ../include/rectangle.h ../include/list_set.h ../include/constraint.h \
+  ../include/rectangle.h ../include/geometry_declarations.h \
+  ../include/ariadne.h ../include/basic_type.h ../include/array.h \
+  ../include/utility.h ../include/sequence.h ../include/interval.h \
+  ../include/point.h ../include/linear_algebra.h \
+  ../include/numerical_type.h ../include/binary_word.h \
+  ../include/parallelopiped.h ../include/rectangle.h \
+  ../include/list_set.h  \
+  ../include/constraint.h /ufs/collins/include/ppl.hh \
   ../include/polyhedron.h ../include/generator.h ../include/list_set.h \
   real_typedef.h python_utilities.h
 
 export_simplex.o: export_simplex.cc ../include/numerical_type.h \
-  ../include/synaps/dyadic.h ../include/rectangle.h ../include/ariadne.h \
-  ../include/utility.h ../include/geometry.h ../include/interval.h \
-  ../include/point.h ../include/linear_algebra.h \
-  ../include/numerical_type.h ../include/binary_word.h ../include/array.h \
-  ../include/simplex.h ../include/rectangle.h ../include/polyhedron.h \
-  ../include/constraint.h ../include/generator.h ../include/list_set.h \
+  ../include/synaps/dyadic.h ../include/rectangle.h \
+  ../include/geometry_declarations.h ../include/ariadne.h \
+  ../include/basic_type.h ../include/array.h ../include/utility.h \
+  ../include/sequence.h ../include/interval.h ../include/point.h \
+  ../include/linear_algebra.h ../include/numerical_type.h \
+  ../include/binary_word.h ../include/simplex.h ../include/polyhedron.h \
+  /ufs/collins/include/ppl.hh ../include/constraint.h \
+  ../include/generator.h ../include/rectangle.h ../include/list_set.h \
   ../include/list_set.h real_typedef.h python_utilities.h
 
 export_polyhedron.o: export_polyhedron.cc ../include/numerical_type.h \
-  ../include/synaps/dyadic.h ../include/rectangle.h ../include/ariadne.h \
-  ../include/utility.h ../include/geometry.h ../include/interval.h \
-  ../include/point.h ../include/linear_algebra.h \
-  ../include/numerical_type.h ../include/binary_word.h ../include/array.h \
-  ../include/parallelopiped.h ../include/rectangle.h \
-  ../include/list_set.h ../include/constraint.h ../include/polyhedron.h \
+  ../include/synaps/dyadic.h ../include/rectangle.h \
+  ../include/geometry_declarations.h ../include/ariadne.h \
+  ../include/basic_type.h ../include/array.h ../include/utility.h \
+  ../include/sequence.h ../include/interval.h ../include/point.h \
+  ../include/linear_algebra.h ../include/numerical_type.h \
+  ../include/binary_word.h ../include/parallelopiped.h \
+  ../include/rectangle.h ../include/list_set.h \
+   ../include/constraint.h \
+  /ufs/collins/include/ppl.hh ../include/polyhedron.h \
   ../include/generator.h ../include/polyhedron.h real_typedef.h \
   python_utilities.h
 
 export_list_set.o: export_list_set.cc ../include/numerical_type.h \
-  ../include/synaps/dyadic.h ../include/rectangle.h ../include/ariadne.h \
-  ../include/utility.h ../include/geometry.h ../include/interval.h \
-  ../include/point.h ../include/linear_algebra.h \
-  ../include/numerical_type.h ../include/binary_word.h ../include/array.h \
-  ../include/list_set.h real_typedef.h python_utilities.h
+  ../include/synaps/dyadic.h ../include/rectangle.h \
+  ../include/geometry_declarations.h ../include/ariadne.h \
+  ../include/basic_type.h ../include/array.h ../include/utility.h \
+  ../include/sequence.h ../include/interval.h ../include/point.h \
+  ../include/linear_algebra.h ../include/numerical_type.h \
+  ../include/binary_word.h ../include/parallelopiped.h \
+  ../include/rectangle.h ../include/list_set.h \
+  ../include/constraint.h \
+  /ufs/collins/include/ppl.hh ../include/polyhedron.h \
+  ../include/generator.h ../include/list_set.h  \
+  real_typedef.h python_utilities.h
 
 export_grid.o: export_grid.cc ../include/numerical_type.h \
-  ../include/synaps/dyadic.h ../include/grid_set.h ../include/array.h \
-  ../include/utility.h ../include/interval.h ../include/binary_word.h \
-  ../include/geometry.h ../include/rectangle.h ../include/ariadne.h \
+  ../include/synaps/dyadic.h ../include/linear_algebra.h \
+  ../include/basic_type.h ../include/array.h ../include/utility.h \
+  ../include/sequence.h ../include/numerical_type.h ../include/interval.h \
+  ../include/grid_set.h ../include/geometry_declarations.h \
+  ../include/binary_word.h ../include/rectangle.h ../include/ariadne.h \
   ../include/point.h ../include/linear_algebra.h \
-  ../include/numerical_type.h ../include/grid_operations.h \
-  ../include/list_set.h real_typedef.h
+  ../include/grid_operations.h \
+  ../include/parallelopiped.h ../include/constraint.h \
+  /ufs/collins/include/ppl.hh ../include/polyhedron.h \
+  ../include/generator.h real_typedef.h
 
 export_partition_tree.o: export_partition_tree.cc \
   ../include/numerical_type.h ../include/synaps/dyadic.h \
-  ../include/rectangle.h ../include/ariadne.h ../include/utility.h \
-  ../include/geometry.h ../include/interval.h ../include/point.h \
-  ../include/linear_algebra.h ../include/numerical_type.h \
-  ../include/binary_word.h ../include/array.h ../include/binary_word.h \
-  ../include/binary_tree.h ../include/sequence.h ../include/rectangle.h \
-  ../include/partition_tree_set.h ../include/binary_tree.h \
-  ../include/list_set.h real_typedef.h
+  ../include/rectangle.h ../include/geometry_declarations.h \
+  ../include/ariadne.h ../include/basic_type.h ../include/array.h \
+  ../include/utility.h ../include/sequence.h ../include/interval.h \
+  ../include/point.h ../include/linear_algebra.h \
+  ../include/numerical_type.h ../include/binary_word.h \
+  ../include/binary_word.h ../include/binary_tree.h \
+  ../include/rectangle.h ../include/partition_tree_set.h \
+  ../include/binary_tree.h ../include/list_set.h real_typedef.h
 
-linear_algebra_module.o: linear_algebra_module.cc \
-  ../include/linear_algebra.h ../include/numerical_type.h \
-  ../include/synaps/dyadic.h real_typedef.h
+export_postscript_output.o: export_postscript_output.cc \
+  ../include/rectangle.h ../include/geometry_declarations.h \
+  ../include/ariadne.h ../include/basic_type.h ../include/array.h \
+  ../include/utility.h ../include/sequence.h ../include/interval.h \
+  ../include/point.h ../include/linear_algebra.h \
+  ../include/numerical_type.h ../include/synaps/dyadic.h \
+  ../include/binary_word.h ../include/parallelopiped.h \
+  ../include/rectangle.h ../include/list_set.h \
+   ../include/constraint.h \
+  /ufs/collins/include/ppl.hh ../include/polyhedron.h \
+  ../include/generator.h ../include/list_set.h  \
+  ../include/partition_tree_set.h ../include/binary_tree.h \
+  ../include/epsfstream.h ../include/partition_tree_set.h real_typedef.h
+
+linear_algebra_module.o: linear_algebra_module.cc
 
 export_vector.o: export_vector.cc ../include/numerical_type.h \
-  ../include/synaps/dyadic.h ../include/linear_algebra.h \
-  ../include/numerical_type.h real_typedef.h python_utilities.h
+  ../include/synaps/dyadic.h ../include/interval.h \
+  ../include/linear_algebra.h ../include/basic_type.h ../include/array.h \
+  ../include/utility.h ../include/sequence.h ../include/numerical_type.h \
+  ../include/interval.h real_typedef.h python_utilities.h
 
 export_matrix.o: export_matrix.cc ../include/numerical_type.h \
-  ../include/synaps/dyadic.h ../include/linear_algebra.h \
-  ../include/numerical_type.h real_typedef.h python_utilities.h
-
+  ../include/synaps/dyadic.h ../include/interval.h \
+  ../include/linear_algebra.h ../include/basic_type.h ../include/array.h \
+  ../include/utility.h ../include/sequence.h ../include/numerical_type.h \
+  ../include/interval.h real_typedef.h python_utilities.h

@@ -46,6 +46,7 @@
 
 #include "linear_algebra.h"
 #include "geometry.h"
+#include "list_set.h"
 
 #include "evaluation_declarations.h"
 #include "map.h"
@@ -58,9 +59,7 @@ namespace Ariadne {
     Geometry::Parallelopiped<R> 
     apply(const Map<R>& f, const Geometry::Parallelopiped<R>& p) 
     {
-      std::cerr << "apply(const Map&, const Parallelopiped&)" << std::endl;
-      std::cerr << "p=" << p << std::endl;
-      
+      //std::cerr << "apply(const Map&, const Parallelopiped&)" << std::endl;
       const size_type m=p.dimension();
       const size_type n=p.dimension();
       
@@ -69,21 +68,13 @@ namespace Ariadne {
       for(size_type i=0; i!=cuboid_vector.size(); ++i) {
         cuboid_vector[i]=Interval<R>(-1,1);
       }
-      
-      std::cerr << "cuboid_vector=" << cuboid_vector << std::endl;
-      
+            
       const Geometry::Point<R>& c=p.centre();
       const LinearAlgebra::matrix<R>& g=p.generators();
       
-      std::cerr << "c=" << c << "  g=" << g << std::endl;
-      
       Geometry::Point<R> img_centre=f.apply(c);
-      std::cerr << "img_centre=" << img_centre << std::endl;
-      std::cerr << "bounding_box=" << p.bounding_box() << std::endl;
       LinearAlgebra::matrix< Interval<R> > df_on_set = f.derivative(p.bounding_box());
-      std::cerr << "df_on_set=" << df_on_set << std::endl;
       LinearAlgebra::matrix<R> df_at_centre = f.derivative(c);
-      std::cerr << "df_at_centre=" << df_at_centre << std::endl;
       
       LinearAlgebra::matrix<R> img_generators = df_at_centre*g;
       
@@ -99,13 +90,60 @@ namespace Ariadne {
         new_cuboid_sup=std::max( new_cuboid_sup, R(abs(new_cuboid[j].upper())) );
       }
       
-      std::cerr << "img_generators=" << img_generators << std::endl;
       Geometry::Parallelopiped<R> result(img_centre,img_generators);
-      std::cerr << "Done apply(Map,Parallelopiped)" << std::endl;
+      return result;
+    }
+
+    template<typename R, template<typename> class BS>
+    Ariadne::Geometry::ListSet<R,BS> 
+    apply(const Map<R>& f, const Ariadne::Geometry::ListSet<R,BS>& ds) {
+      //std::cerr << "apply(const Map<R>& f, const Ariadne::Geometry::ListSet<R,BS>& ds)" << std::endl;
+      Ariadne::Geometry::ListSet<R,BS> result(f.result_dimension());
+      for(typename Geometry::ListSet<R,BS>::const_iterator iter=ds.begin(); iter!=ds.end(); ++iter) {
+        result.push_back(apply(f,*iter));
+      }
+      return result;
+    }
+     
+    template<typename R>
+    void cr(const Map<R>& f, const Geometry::Parallelopiped<R>& p) {
+      apply(f,p);
+    }
+    
+    template<typename R>
+    Ariadne::Geometry::GridMaskSet<R> 
+    chainreach(const Map<R>& f, 
+               const Ariadne::Geometry::ListSet<R,Ariadne::Geometry::Rectangle>& is, 
+               const Ariadne::Geometry::FiniteGrid<R>& g, 
+               const Ariadne::Geometry::Rectangle<R>& bb) 
+    {
+      typedef typename Ariadne::Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
+      
+      Ariadne::Geometry::GridMaskSet<R> result(g);
+      Ariadne::Geometry::GridMaskSet<R> gbb(g);
+      gbb.adjoin(over_approximation(bb,g));
+      Ariadne::Geometry::GridMaskSet<R> found=over_approximation(is,g);
+      found=regular_intersection(found,gbb);
+      Ariadne::Geometry::GridMaskSet<R> image(g);
+      
+      while(!subset(found,result)) {
+        found=difference(found,result);
+        result.adjoin(found);
+        image=Ariadne::Geometry::GridMaskSet<R>(g);
+        uint size=0;
+        for(gms_const_iterator iter=found.begin(); iter!=found.end(); ++iter) {
+          ++size;
+          Ariadne::Geometry::Rectangle<R> r=*iter;
+          Ariadne::Geometry::Parallelopiped<R> pp(r);
+          Ariadne::Geometry::Parallelopiped<R> fp(Ariadne::Evaluation::apply(f,pp));
+          image.adjoin(over_approximation(fp,g));
+        }
+        std::cerr << size << std::endl;
+        found=regular_intersection(image,gbb);
+      }
       return result;
       
     }
-
   }
 }
 

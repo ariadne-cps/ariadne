@@ -61,6 +61,12 @@ inline void rmatrix_setitem(RMatrix& A, tuple index, Real x) {
   A(i,j)=x;
 }
 
+inline void rmatrix_setitem_from_double(RMatrix& A, tuple index, double x) {
+  uint i=extract<uint>(index[0]);
+  uint j=extract<uint>(index[1]);
+  A(i,j)=Ariadne::convert_to<Real>(x);
+}
+
 inline RInterval imatrix_getitem(const IMatrix& A, tuple index) {
   uint i=extract<uint>(index[0]);
   uint j=extract<uint>(index[1]);
@@ -73,13 +79,20 @@ inline void imatrix_setitem(IMatrix& A, tuple index, RInterval x) {
   A(i,j)=x;
 }
 
+inline RMatrix rmatrix_inverse(const RMatrix& A) {
+  return Ariadne::LinearAlgebra::inverse(A);
+}
+
 void export_matrix() {
   class_<RMatrix>("Matrix",init<int,int>())
     .def(init<RMatrix>())
     .def("__getitem__",&rmatrix_getitem)
     .def("__setitem__",&rmatrix_setitem)
+    .def("__setitem__",&rmatrix_setitem_from_double)
     .def(str(self))    // __str__
   ;
+  
+  def("inverse",&rmatrix_inverse);
 }
 
 void export_interval_matrix() {

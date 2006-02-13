@@ -77,7 +77,8 @@ class Map {
 
   virtual Matrix derivative(const State& r) const {
     throw std::invalid_argument("Derivative at point not implemented."); }
-  virtual LinearAlgebra::matrix< Interval<R> > derivative(const Geometry::Rectangle<R>& r) const = 0;
+  virtual LinearAlgebra::matrix< Interval<R> > derivative(const Geometry::Rectangle<R>& r) const {
+    throw std::invalid_argument("Derivative on Rectangle not implemented."); }
     
   template<template<typename> class BS>
   inline Geometry::ListSet<R,BS> apply(const Geometry::ListSet<R,BS>& A) const { 
@@ -88,8 +89,8 @@ class Map {
     return trans_ds;
   }
   
-  virtual size_type argument_dimension() const = 0;
-  virtual size_type result_dimension() const = 0;
+  virtual dimension_type argument_dimension() const = 0;
+  virtual dimension_type result_dimension() const = 0;
 };
   
   

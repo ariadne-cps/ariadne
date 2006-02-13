@@ -24,12 +24,16 @@
 
 #include <boost/python.hpp>
 
+void export_apply();
+void export_map();
 void export_affine_map();
 void export_polynomial_map();
 void export_henon_map();
   
 BOOST_PYTHON_MODULE(evaluation)
 {
+  export_apply();
+  export_map();
   export_affine_map();
   export_polynomial_map();
   export_henon_map();

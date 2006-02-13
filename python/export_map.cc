@@ -1,8 +1,8 @@
 /***************************************************************************
- *            python/export_point.cc
+ *            python/export_map.cc
  *
- *  21 October 2005
- *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
+ *  13 February 2006
+ *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -22,39 +22,39 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <iostream>
-#include "numerical_type.h"
-#include "point.h"
+#include "map.h"
+#include "polyhedron.h"
 
 #include <boost/python.hpp>
 
-#include "real_typedef.h"
-#include "python_utilities.h"
-
-typedef Ariadne::Geometry::Point<Real> RPoint;
-
 using boost::python::class_;
-using boost::python::init; 
+using boost::python::init;
 using boost::python::self;
 using boost::python::def;
-using boost::python::self_ns::str;
+using boost::python::bases;
+using boost::python::wrapper;
 using boost::python::return_value_policy;
 using boost::python::copy_const_reference;
+using boost::python::pure_virtual;
 
-inline void rpoint_setitem_from_double(RPoint& p, uint i, double x) {
-  p.set(i,Ariadne::convert_to<Real>(x));
-}
-void export_point() {
-  class_<RPoint>("Point",init<int>())
-    .def(init<int,Real>())
-    .def(init<RPoint>())
-    .def("dimension", &RPoint::dimension)
-    .def("__len__", &RPoint::dimension)
-    .def("__getitem__", &RPoint::get)
-    .def("__setitem__", &RPoint::set)
-    .def("__setitem__", &rpoint_setitem_from_double)
-    .def("__eq__", &RPoint::operator==)
-    .def("__ne__", &RPoint::operator!=)
-    .def(str(self))    // __str__
+#include "real_typedef.h"
+  
+using Ariadne::dimension_type;
+using Ariadne::Interval;
+using namespace Ariadne::LinearAlgebra;
+using namespace Ariadne::Geometry;
+
+typedef Ariadne::Evaluation::Map<Real> RMapBase;
+
+struct RMap : RMapBase, wrapper<RMapBase>
+{
+  dimension_type argument_dimension() const { return this->get_override("argument_dimension")(); }
+  dimension_type result_dimension() const { return this->get_override("result_dimension")(); }
+};
+
+void export_map() {
+  class_<RMap, boost::noncopyable>("Map")
+    .def("argument_dimension", pure_virtual(&RMapBase::argument_dimension))
+    .def("result_dimension", pure_virtual(&RMapBase::result_dimension))
   ;
 }

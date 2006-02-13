@@ -30,6 +30,7 @@ using boost::python::class_;
 using boost::python::init;
 using boost::python::self;
 using boost::python::def;
+using boost::python::bases;
 using boost::python::return_value_policy;
 using boost::python::copy_const_reference;
 
@@ -41,6 +42,7 @@ typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
 typedef Ariadne::Geometry::Parallelopiped<Real> RParallelopiped;
 typedef Ariadne::LinearAlgebra::matrix<Real> RMatrix;
 typedef Ariadne::LinearAlgebra::matrix<RInterval> IMatrix;
+typedef Ariadne::Evaluation::Map<Real> RMap;
 typedef Ariadne::Evaluation::HenonMap<Real> RHenonMap;
 
 typedef RPoint (RHenonMap::* PointMap) (const RPoint&) const;
@@ -49,9 +51,8 @@ typedef RParallelopiped (RHenonMap::* ParallelopipedMap) (const RParallelopiped&
 typedef RMatrix (RHenonMap::* PointDerivative) (const RPoint&) const;
 typedef IMatrix (RHenonMap::* RectangleDerivative) (const RRectangle&) const;
 
-
 void export_henon_map() {
-  class_<RHenonMap>("HenonMap",init<Real,Real>())
+  class_<RHenonMap, bases<RMap> >("HenonMap",init<Real,Real>())
     .def("argument_dimension", &RHenonMap::argument_dimension)
     .def("result_dimension", &RHenonMap::result_dimension)
     .def("__call__", PointMap(&RHenonMap::apply))

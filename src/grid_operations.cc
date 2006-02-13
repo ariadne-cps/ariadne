@@ -22,6 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <iostream>
 #include "grid_operations.h"
 
 namespace Ariadne {
@@ -140,6 +141,24 @@ namespace Ariadne {
     }
 
     bool
+    operator<=(const BooleanArray& v1, const BooleanArray& v2)
+    {
+      assert(v1.size()==v2.size());
+      typedef BooleanArray::const_iterator const_iterator;
+      const_iterator v1_iter=v1.begin();
+      const_iterator v2_iter=v2.begin();
+      const_iterator v1_end=v1.end();
+      while(v1_iter!=v1_end) {
+        if((*v1_iter) && (!*v2_iter)) {
+          return false;
+        }
+        ++v1_iter;
+        ++v2_iter;
+      }
+      return true;
+    }
+
+    bool
     operator<(const IndexArray& s1, const IndexArray& s2)
     {
       assert(s1.size() == s2.size());
@@ -156,7 +175,7 @@ namespace Ariadne {
 
     /* Check ordering of two cells */
     bool
-    operator<(const IntegerCellList::const_reference& c1, const IntegerCellList::const_reference& c2)
+    operator<(const IndexArrayList::const_reference& c1, const IndexArrayList::const_reference& c2)
     {
       assert(c1.size() == c2.size());
       for(dimension_type i=0; i!=c1.size(); ++i) {
@@ -196,37 +215,6 @@ namespace Ariadne {
       return result;
     }
 
-    /* Compute upper and lower bounds of the cell list cl. */
-    void
-    compute_cell_list_bounds(IndexArray* lptr, IndexArray* uptr, IntegerCellList cl)
-    {
-      assert(!cl.empty());
-      dimension_type d = cl[0].size();
-
-      IndexArray& l(*lptr);
-      IndexArray& u(*uptr);
-
-      l=cl[0];
-      u=cl[0];
-      for(dimension_type j=0; j!=d; ++j) {
-        l[j]=cl[0][j];
-        u[j]=cl[0][j];
-      }
-
-      for(size_type i=1; i!=cl.size(); ++i) {
-        for(dimension_type j=0; j!=d; ++j) {
-          l[j] = std::min(l[j],cl[i][j]);
-          u[j] = std::max(u[j],cl[i][j]);
-        }
-      }
-
-      for(dimension_type j=0; j!=d; ++j) {
-        u[j]+=1;
-      }
-
-      return;
-    }
-
     /* Compute strides from a list of sizes. */
     SizeArray
     compute_strides(const SizeArray& s) {
@@ -239,64 +227,61 @@ namespace Ariadne {
     }
 
     /* Compute upper and lower bounds of the cell list cl. */
-    void
-    compute_rectangle_list_lower_bound(IndexArray* lptr, const IntegerRectangleList& rl)
+    IndexBlock
+    compute_cell_list_bounds(const IndexArrayList& cl)
     {
-      IndexArray& l(*lptr);
+      IndexBlock b(cl.array_size());
 
-      assert(!rl.empty());
-      assert(rl.size()%2 == 0);
-      dimension_type d = rl[0].size();
+      assert(!cl.empty());
+      dimension_type d = cl.array_size();
 
-      l=rl[0];
       for(dimension_type j=0; j!=d; ++j) {
-        l[j]=rl[0][j];
-     }
+        b.set_lower_bound(j,cl[0][j]);
+        b.set_upper_bound(j,cl[0][j]+1);
+      }
 
-      for(size_type i=1; i!=rl.size()/2; ++i) {
+      for(size_type i=1; i!=cl.size(); ++i) {
         for(dimension_type j=0; j!=d; ++j) {
-          l[j] = std::min(l[j],rl[2*i][j]);
+          if(cl[i][j] < b.lower_bound(j)) {
+            b.set_lower_bound(j,cl[i][j]);
+          }
+        if(cl[i][j] >= b.upper_bound(j)) {
+            b.set_upper_bound(j,cl[i][j]+1);
+          }
         }
       }
-
-      return;
+      return b;
     }
+    
 
-    /* Compute upper bounds of the cell list cl. */
-    void
-    compute_rectangle_list_upper_bound(IndexArray* uptr, const IntegerRectangleList& rl)
+    /* Compute upper and lower bounds of the rectangle list rl. */
+    IndexBlock compute_rectangle_list_bounds(const IndexBlockList& rl)
     {
-      IndexArray& u(*uptr);
+      IndexBlock b(rl.array_size()/2);
 
       assert(!rl.empty());
-      assert(rl.size()%2 == 0);
-      dimension_type d = rl.array_size();
+      dimension_type d = rl.array_size()/2;
 
-      u=rl[1];
       for(dimension_type j=0; j!=d; ++j) {
-        u[j]=rl[1][j];
+        b.set_lower_bound(j,rl[0][j]);
+        b.set_upper_bound(j,rl[0][j+d]);
       }
 
-      for(size_type i=1; i!=rl.size()/2; ++i) {
+      for(size_type i=1; i!=rl.size(); ++i) {
         for(dimension_type j=0; j!=d; ++j) {
-          u[j] = std::max(u[j],rl[2*i+1][j]);
+          if(rl[i][j] < b.lower_bound(j)) {
+            b.set_lower_bound(j,rl[i][j]);
+          }
+        if(rl[i][j+d] > b.upper_bound(j)) {
+            b.set_upper_bound(j,rl[i][j+d]);
+          }
         }
       }
-
-      return;
-    }
-
-    /* Compute upper and lower bounds of the cell list cl. */
-    void
-    compute_rectangle_list_bounds(IndexArray* lptr, IndexArray* uptr, const IntegerRectangleList& rl)
-    {
-      compute_rectangle_list_lower_bound(lptr,rl);
-      compute_rectangle_list_upper_bound(uptr,rl);
-      return;
+      return b;
     }
 
     void
-    append_to_cell_list(IntegerCellList* clptr,
+    append_to_cell_list(IndexArrayList* clptr,
                         const IndexArray& lower,
                         const SizeArray& strides,
                         const BooleanArray& mask)
@@ -310,7 +295,7 @@ namespace Ariadne {
     }
 
     void
-    append_to_cell_list(IntegerCellList* clptr,
+    append_to_cell_list(IndexArrayList* clptr,
                         const IndexArray& lower,
                         const IndexArray& upper)
     {
@@ -320,8 +305,8 @@ namespace Ariadne {
     }
 
     void
-    append_to_cell_list(IntegerCellList* clptr,
-                        const IntegerRectangleList rl)
+    append_to_cell_list(IndexArrayList* clptr,
+                        const IndexBlockList rl)
     {
       for(size_type n=0; n!=rl.size()/2; ++n) {
         append_to_cell_list(clptr,rl[2*n],rl[2*n+1]);
@@ -343,7 +328,7 @@ namespace Ariadne {
     compute_cell_list_mask(BooleanArray* maptr,
                  const SizeArray& grid_strides,
                  const IndexArray& grid_lower,
-                 const IntegerCellList& cl)
+                 const IndexArrayList& cl)
     {
       for(size_type n=0; n!=cl.size(); ++n) {
         IndexArray position=cl[n];
@@ -416,7 +401,7 @@ namespace Ariadne {
     compute_rectangle_list_mask(BooleanArray* maptr,
                  const SizeArray& grid_strides,
                  const IndexArray& grid_lower,
-                 const IntegerRectangleList& rl)
+                 const IndexBlockList& rl)
     {
       for(size_type n=0; n!=rl.size()/2; ++n) {
         IndexArray lower=rl[2*n];
@@ -426,11 +411,11 @@ namespace Ariadne {
     }
 
     void
-    translate_rectangle_coordinates(IntegerRectangleList* torlptr,
-                                    const IntegerRectangleList& frrl,
+    translate_rectangle_coordinates(IndexBlockList* torlptr,
+                                    const IndexBlockList& frrl,
                                     array< std::vector<index_type> > tr)
     {
-      IntegerRectangleList& torl(*torlptr);
+      IndexBlockList& torl(*torlptr);
       dimension_type dim=tr.size();
       for(size_type n=0; n!=torl.size()/2; ++n) {
         for(dimension_type i=0; i!=dim; ++i) {
@@ -441,11 +426,11 @@ namespace Ariadne {
     }
 
     void
-    translate_cell_coordinates(IntegerRectangleList* torlptr,
-                               const IntegerCellList& frcl,
+    translate_cell_coordinates(IndexBlockList* torlptr,
+                               const IndexArrayList& frcl,
                                array< std::vector<index_type> > tr)
     {
-      IntegerRectangleList& torl(*torlptr);
+      IndexBlockList& torl(*torlptr);
       dimension_type dim=tr.size();
       for(size_type n=0; n!=frcl.size(); ++n) {
         for(dimension_type i=0; i!=dim; ++i) {
@@ -455,6 +440,19 @@ namespace Ariadne {
       }
     }
 
-
+    std::ostream&
+    operator<<(std::ostream& os, const IndexBlock& ib) 
+    {
+      for(dimension_type i=0; i!=ib.dimension(); ++i) {
+        if(i!=0) {
+          os << "x";
+        }
+        os << '[' << ib.lower_bound(i) << ','<< ib.upper_bound(i) << ']';
+      }
+      return os;
+    }
+  
+    
+    
   }
 }

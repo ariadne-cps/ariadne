@@ -22,14 +22,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "rectangle.h"
-#include "parallelopiped.h"
-#include "list_set.h"
-#include "grid_set.h"
-#include "partition_tree_set.h"
-#include "epsfstream.h"
+#include "geometry/rectangle.h"
+#include "geometry/parallelopiped.h"
+#include "geometry/list_set.h"
+#include "geometry/grid_set.h"
+#include "geometry/partition_tree_set.h"
+#include "utility/epsfstream.h"
 
-#include "real_typedef.h"
+#include "python/real_typedef.h"
 
 typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
 typedef Ariadne::Geometry::GridRectangle<Real> RGridRectangle;

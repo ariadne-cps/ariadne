@@ -22,14 +22,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numerical_type.h"
-#include "point.h"
-#include "polynomial_map.h"
+#include "base/numerical_type.h"
+#include "geometry/point.h"
+#include "evaluation/polynomial_map.h"
 
 #include <boost/python.hpp>
 
-#include "real_typedef.h"
-#include "python_utilities.h"
+#include "python/real_typedef.h"
 
 typedef Ariadne::Geometry::Point<Real> RPoint;
 typedef Ariadne::Evaluation::PolynomialMap<Real> RPolynomialMap;

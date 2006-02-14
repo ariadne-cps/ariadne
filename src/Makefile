@@ -1,53 +1,37 @@
 include ../config.mk
 
-OBJ = binary_tree.o grid_operations.o partition_tree_operations.o
+GEOMETRYDIR=geometry/
+BASEDIR = base/
 
-all: ${LIBS}
+.PHONY: lib base geometry python check clean
 
-libariadne.so: ${OBJ}
-	${CXX} ${LDXXFLAGS} -shared -o libariadne.so ${OBJ} ${LIBPPL} ${LIBGMPXX} ${RPATHFLAGS}
-  
+all: lib python
+
+lib: libariadne.so
+
+base: 
+	(cd base/; ${MAKE} all)
+
+geometry: 
+	(cd geometry/; ${MAKE} all)
+
+libariadne.so: base geometry
+	${CXX} ${LDXXFLAGS} -shared -o libariadne.so base/*.o geometry/*.o ${LIBPPL} ${LIBGMPXX} ${RPATHFLAGS}
+
 libariadne.a: ${OBJ}
 	${CXX} ${LDXXFLAGS} -o libariadne.a ${OBJ} -lppl -lgmpxx -lgmp
 
-# ${CXX} ${INCLUDE} -M 
-
-.cc.o: 
-	${CXX} ${INCLUDE} ${CXXFLAGS} -c $<
+python: lib
+	(cd python/; ${MAKE} all)
 
 clean:                                                                          
 	rm -f *.bak *.o *~ *% core libariadne.*
+	(cd ${BASEDIR}; ${MAKE} clean; cd ..; )
+	(cd ${GEOMETRYDIR}; ${MAKE} clean; cd ..; )
+	(cd ${PYTHONDIR}; ${MAKE} clean; cd ..; )
+
 
 dep:  
-	@sed -e '/^### Do Not edit this line$$/,$$d' Makefile \
-		> MMM.$$$$ && mv MMM.$$$$ Makefile
-	@echo "### Do Not edit this line" >> Makefile
-	@echo "### Everything below is auto-generated" >> Makefile
-	@for ff in ${OBJ}; \
-	do f=`basename $$ff .o`.cc ; \
-	g++ -MM ${CXXFLAGS} $$f; echo ""; \
-	done >> Makefile
-
-### Do Not edit this line
-### Everything below is auto-generated
-binary_tree.o: binary_tree.cc ../include/binary_tree.h ../include/array.h \
-  ../include/utility.h ../include/sequence.h ../include/binary_word.h \
-  ../include/rectangle.h ../include/ariadne.h ../include/geometry.h \
-  ../include/interval.h ../include/point.h ../include/linear_algebra.h \
-  ../include/numerical_type.h ../include/synaps/dyadic.h
-
-grid_operations.o: grid_operations.cc ../include/grid_operations.h \
-  ../include/array.h ../include/utility.h ../include/rectangle.h \
-  ../include/ariadne.h ../include/geometry.h ../include/interval.h \
-  ../include/point.h ../include/linear_algebra.h \
-  ../include/numerical_type.h ../include/synaps/dyadic.h \
-  ../include/binary_word.h
-
-partition_tree_operations.o: partition_tree_operations.cc \
-  ../include/partition_tree_set.h ../include/array.h ../include/utility.h \
-  ../include/sequence.h ../include/binary_word.h ../include/binary_tree.h \
-  ../include/rectangle.h ../include/ariadne.h ../include/geometry.h \
-  ../include/interval.h ../include/point.h ../include/linear_algebra.h \
-  ../include/numerical_type.h ../include/synaps/dyadic.h \
-  ../include/list_set.h
-
+	(cd ${BASEDIR}; ${MAKE} dep);
+	(cd ${GEOMETRYDIR}; ${MAKE} dep);
+	(cd ${PYTHONDIR}; ${MAKE} dep);

@@ -24,9 +24,11 @@
 
 #include <iostream>
 #include <fstream>
-#include "rectangle.h"
-#include "list_set.h"
-#include "partition_tree_set.h"
+#include "geometry/rectangle.h"
+#include "geometry/parallelopiped.h"
+#include "geometry/list_set.h"
+#include "geometry/grid_set.h"
+#include "geometry/partition_tree_set.h"
 
 namespace Ariadne {
   namespace Postscript {

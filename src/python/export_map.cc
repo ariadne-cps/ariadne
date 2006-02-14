@@ -22,8 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "map.h"
-#include "polyhedron.h"
+#include "evaluation/map.h"
 
 #include <boost/python.hpp>
 
@@ -37,7 +36,7 @@ using boost::python::return_value_policy;
 using boost::python::copy_const_reference;
 using boost::python::pure_virtual;
 
-#include "real_typedef.h"
+#include "python/real_typedef.h"
   
 using Ariadne::dimension_type;
 using Ariadne::Interval;

@@ -37,8 +37,6 @@
 #include <vector>
 #include <iterator>
 
-#include "utility.h"
-
 namespace Ariadne {
 
   template<typename T, size_t N=0> class array;
@@ -453,40 +451,6 @@ namespace Ariadne {
     array_size_type _array_size;
     std::vector<T> _elements;
   };
-
-
-
-
-
-
-  template<typename T> inline
-  std::ostream&
-  operator<<(std::ostream& os, const array<T>& a) {
-    write_sequence(os,a.begin(),a.end());
-    return os;
-  }
-    
-  template<typename Iter> inline
-  std::ostream&
-  operator<<(std::ostream& os, const range<Iter>& a) {
-    write_sequence(os,a.begin(),a.end());
-    return os;
-  }
-
-  template<typename T> inline
-  std::ostream&
-  operator<<(std::ostream& os, const array_vector<T>& a) {
-    os << "[ ";
-    for(size_t i=0; i!=a.size(); ++i) {
-      if(i!=0) {
-        os << ", ";
-      }
-      write_sequence(os,a[i].begin(),a[i].end());
-      os.flush();
-    }
-    os << " ]";
-    return os;
-  }
 
 } // namespace Ariadne
 

@@ -22,15 +22,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numerical_type.h"
-#include "rectangle.h"
-#include "simplex.h"
-#include "list_set.h"
+#include "base/numerical_type.h"
+#include "geometry/rectangle.h"
+#include "geometry/simplex.h"
+#include "geometry/list_set.h"
 
 #include <boost/python.hpp>
 
-#include "real_typedef.h"
-#include "python_utilities.h"
+#include "python/real_typedef.h"
 
 typedef Ariadne::LinearAlgebra::matrix<Real> RMatrix;
 typedef Ariadne::Geometry::Point<Real> RPoint;

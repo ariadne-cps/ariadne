@@ -23,7 +23,7 @@
  */
 
 #include <iostream>
-#include "grid_operations.h"
+#include "geometry/grid_operations.h"
 
 namespace Ariadne {
   namespace Geometry {

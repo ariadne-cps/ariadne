@@ -22,7 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function.h"
+#include "base/function.h"
 
 #include <boost/python.hpp>
 
@@ -33,7 +33,7 @@ using boost::python::def;
 using boost::python::return_value_policy;
 using boost::python::copy_const_reference;
 
-#include "real_typedef.h"
+#include "python/real_typedef.h"
 
 void export_function() {
   def("exp_approx", Ariadne::exp_approx<Real>, "approximate exponential function (maximum error e)" );

@@ -39,14 +39,18 @@
 #include <vector>
 #include <valarray>
 
-#include "ariadne.h"
-#include "array.h"
-#include "utility.h"
-#include "interval.h"
+#include "base/array.h"
+#include "base/utility.h"
+#include "base/interval.h"
 
-#include "linear_algebra.h"
-#include "geometry.h"
-#include "list_set.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
+
+#include "geometry/point.h"
+#include "geometry/rectangle.h"
+#include "geometry/parallelopiped.h"
+#include "geometry/list_set.h"
+#include "geometry/grid_set.h"
 
 #include "evaluation_declarations.h"
 #include "map.h"

@@ -22,15 +22,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numerical_type.h"
-#include "rectangle.h"
-#include "binary_word.h"
-#include "binary_tree.h"
-#include "partition_tree_set.h"
+#include "base/numerical_type.h"
+#include "base/binary_word.h"
+#include "base/binary_tree.h"
+#include "geometry/rectangle.h"
+#include "geometry/partition_tree_set.h"
 
 #include <boost/python.hpp>
 
-#include "real_typedef.h"
+#include "python/real_typedef.h"
 
 using Ariadne::BooleanArray;
 using Ariadne::BinaryWord;

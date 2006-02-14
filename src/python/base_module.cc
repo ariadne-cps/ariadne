@@ -1,8 +1,8 @@
 /***************************************************************************
- *            python/ariadne_module.cc
+ *            python/base_module.cc
  *
  *  22 June 2005
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
+ *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -28,7 +28,7 @@ void export_function();
 void export_interval();
 void export_numeric();
 
-BOOST_PYTHON_MODULE(ariadne)
+BOOST_PYTHON_MODULE(base)
 {
   export_numeric();
   export_interval();

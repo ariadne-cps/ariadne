@@ -28,9 +28,6 @@
 #ifndef _ARIADNE_EVALUATION_DECLARATIONS_H
 #define _ARIADNE_EVALUATION_DECLARATIONS_H
 
-#include "linear_algebra.h"
-#include "interval.h"
-
 namespace Ariadne {
   namespace Evaluation {
 

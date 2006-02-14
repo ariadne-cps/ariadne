@@ -24,15 +24,14 @@
 
 #include <vector>
 
-#include "numerical_type.h"
-#include "rectangle.h"
-#include "parallelopiped.h"
-#include "polyhedron.h"
+#include "base/numerical_type.h"
+#include "geometry/rectangle.h"
+#include "geometry/parallelopiped.h"
+#include "geometry/polyhedron.h"
 
 #include <boost/python.hpp>
 
-#include "real_typedef.h"
-#include "python_utilities.h"
+#include "python/real_typedef.h"
 
 typedef Ariadne::LinearAlgebra::matrix<Real> RMatrix;
 typedef Ariadne::LinearAlgebra::vector<Real> RVector;

@@ -29,11 +29,11 @@
 #ifndef _ARIADNE_HENON_MAP_H
 #define _ARIADNE_HENON_MAP_H
 
-#include "linear_algebra.h"
+#include "linear_algebra/matrix.h"
 
-#include "point.h"
-#include "rectangle.h"
-#include "parallelopiped.h"
+#include "geometry/point.h"
+#include "geometry/rectangle.h"
+#include "geometry/parallelopiped.h"
 
 #include "map.h"
 #include "apply.h"

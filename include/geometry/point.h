@@ -33,8 +33,8 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "utility.h"
-#include "linear_algebra.h"
+#include "base/utility.h"
+#include "linear_algebra/vector.h"
 
 #include "geometry_declarations.h"
 

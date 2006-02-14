@@ -22,8 +22,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "apply.h"
-#include "henon_map.h"
+#include "evaluation/apply.h"
+#include "evaluation/henon_map.h"
 
 #include <boost/python.hpp>
 
@@ -34,7 +34,7 @@ using boost::python::def;
 using boost::python::return_value_policy;
 using boost::python::copy_const_reference;
 
-#include "real_typedef.h"
+#include "python/real_typedef.h"
 
 using namespace Ariadne::Geometry;
 using namespace Ariadne::Evaluation;

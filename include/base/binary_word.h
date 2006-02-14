@@ -75,8 +75,8 @@
 #include <exception>
 #include <iostream>
 
-#include "utility.h"
 #include "basic_type.h"
+#include "utility.h"
 
 namespace Ariadne 
 {

@@ -36,10 +36,10 @@
 #include <vector>
 #include <iostream>
 
-#include "basic_type.h"
-#include "utility.h"
-#include "binary_word.h"
-#include "binary_tree.h"
+#include "base/basic_type.h"
+#include "base/utility.h"
+#include "base/binary_word.h"
+#include "base/binary_tree.h"
 
 #include "rectangle.h"
 #include "list_set.h"

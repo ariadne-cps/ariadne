@@ -40,18 +40,18 @@
 #include <vector>
 #include <valarray>
 
-#include "ariadne.h"
-#include "utility.h"
-#include "linear_algebra.h"
-#include "interval.h"
+#include "base/utility.h"
+#include "base/interval.h"
+
+#include "linear_algebra/matrix.h"
+#include "linear_algebra/constraint.h"
 #include "point.h"
 #include "rectangle.h"
+#include "polyhedron.h"
 #include "list_set.h"
 
 #include "grid_operations.h" // For IndexBlock
 
-#include "constraint.h"
-#include "polyhedron.h"
 
 namespace Ariadne {
   namespace Geometry {

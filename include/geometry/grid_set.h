@@ -34,14 +34,13 @@
 
 #include <iostream>
 
-#include "array.h"
-#include "interval.h"
-#include "binary_word.h"
+#include "base/array.h"
+#include "base/interval.h"
+#include "base/binary_word.h"
+
 #include "rectangle.h"
 #include "point.h"
-
 #include "grid_operations.h"
-
 #include "list_set.h"
 
 /** \internal

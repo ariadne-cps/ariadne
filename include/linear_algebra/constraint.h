@@ -30,11 +30,10 @@
 #define _ARIADNE_CONSTRAINT_H
 
 #include <algorithm>
-
 #include <ppl.hh>
 
-#include "ariadne.h"
-#include "linear_algebra.h"
+#include "vector.h"
+#include "matrix.h"
 
 namespace Ariadne {
 namespace LinearAlgebra {

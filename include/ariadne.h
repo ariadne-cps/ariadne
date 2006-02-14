@@ -36,8 +36,6 @@
 #include <iostream>
 #include <iomanip>
 
-#include "basic_type.h"
-
 /*!
  * \brief Top-level namespace
  */

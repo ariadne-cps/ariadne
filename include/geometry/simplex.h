@@ -40,10 +40,9 @@
 #include <vector>
 #include <valarray>
 
-#include "ariadne.h"
-#include "array.h"
-#include "utility.h"
-#include "linear_algebra.h"
+#include "base/array.h"
+#include "base/utility.h"
+#include "linear_algebra/vector.h"
 
 #include "point.h"
 #include "polyhedron.h"

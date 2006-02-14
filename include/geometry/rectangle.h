@@ -41,12 +41,12 @@
 #include <valarray>
 #include <exception>
 
-#include "ariadne.h"
-#include "utility.h"
-#include "interval.h"
+#include "base/utility.h"
+#include "base/interval.h"
+#include "base/binary_word.h"
+
 #include "point.h"
 
-#include "binary_word.h"
 
 namespace Ariadne {
   namespace Geometry {

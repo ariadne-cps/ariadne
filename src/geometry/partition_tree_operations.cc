@@ -21,7 +21,8 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#include "partition_tree_set.h"
+
+#include "geometry/partition_tree_set.h"
 
 Ariadne::SubdivisionSequence 
 Ariadne::Geometry::default_subdivision_coordinates(dimension_type n) {

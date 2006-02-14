@@ -29,11 +29,16 @@
 #ifndef _ARIADNE_MAP_H
 #define _ARIADNE_MAP_H
 
-#include "geometry_declarations.h"
+#include "geometry/geometry_declarations.h"
 
-#include "point.h"
-#include "rectangle.h"
-#include "list_set.h"
+#include "geometry/point.h"
+#include "geometry/rectangle.h"
+#include "geometry/parallelopiped.h"
+#include "geometry/polyhedron.h"
+#include "geometry/list_set.h"
+
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
 namespace Ariadne {
 namespace Evaluation {

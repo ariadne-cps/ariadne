@@ -34,10 +34,9 @@
 #include <iostream>
 
 #include "basic_type.h"
-#include "utility.h"
 #include "binary_word.h"
 
-#include "rectangle.h"
+#include "utility.h"
 
 namespace Ariadne {
   const bool leaf=1;

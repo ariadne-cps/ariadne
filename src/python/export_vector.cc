@@ -22,14 +22,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numerical_type.h"
-#include "interval.h"
-#include "linear_algebra.h"
+#include "base/numerical_type.h"
+#include "base/interval.h"
+#include "linear_algebra/vector.h"
 
 #include <boost/python.hpp>
 
-#include "real_typedef.h"
-#include "python_utilities.h"
+#include "python/real_typedef.h"
 
 typedef Ariadne::Interval<Real> RInterval;
 typedef Ariadne::LinearAlgebra::vector<Real> RVector;

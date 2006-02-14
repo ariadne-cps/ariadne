@@ -23,13 +23,12 @@
  */
 
 #include <iostream>
-#include "numerical_type.h"
-#include "point.h"
+#include "base/numerical_type.h"
+#include "geometry/point.h"
 
 #include <boost/python.hpp>
 
-#include "real_typedef.h"
-#include "python_utilities.h"
+#include "python/real_typedef.h"
 
 typedef Ariadne::Geometry::Point<Real> RPoint;
 

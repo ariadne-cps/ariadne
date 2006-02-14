@@ -36,6 +36,8 @@
 #include <valarray>
 #include <set>
 
+#include "base/array.h"
+
 namespace Ariadne {
   template<typename InputIterator>
   inline
@@ -157,9 +159,39 @@ namespace std {
   operator>> (istream &is, vector<T>& v) {
     return Ariadne::read_vector(is,v);
   }
+} // namespace std
 
+namespace Ariadne {
+  template<typename Iter> inline
+  std::ostream&
+  operator<<(std::ostream& os, const range<Iter>& a) {
+    write_sequence(os,a.begin(),a.end());
+    return os;
+  }
 
-}
+  template<typename T> inline
+  std::ostream&
+  operator<<(std::ostream& os, const array<T>& a) {
+    write_sequence(os,a.begin(),a.end());
+    return os;
+  }
+    
+  template<typename T> inline
+  std::ostream&
+  operator<<(std::ostream& os, const array_vector<T>& a) {
+    os << "[ ";
+    for(size_t i=0; i!=a.size(); ++i) {
+      if(i!=0) {
+        os << ", ";
+      }
+      write_sequence(os,a[i].begin(),a[i].end());
+      os.flush();
+    }
+    os << " ]";
+    return os;
+  }
+
+} // namespace Ariadne
 
 
 #endif /* _ARIADNE_UTILITY_H */

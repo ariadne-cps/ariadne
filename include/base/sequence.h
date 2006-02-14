@@ -37,7 +37,6 @@
 #include <iterator>
 #include <iostream>
 
-
 namespace Ariadne {
   
   template<typename T> class sequence;

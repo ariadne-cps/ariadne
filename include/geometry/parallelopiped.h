@@ -30,7 +30,6 @@
 #define _ARIADNE_PARALLELOPIPED_H
 
 #include <iosfwd>
-#include "geometry_declarations.h"
 
 #include <string>
 #include <sstream>
@@ -40,18 +39,20 @@
 #include <vector>
 #include <valarray>
 
-#include "base/utility.h"
-#include "base/interval.h"
+#include <ariadne.h>
 
-#include "linear_algebra/matrix.h"
-#include "linear_algebra/constraint.h"
-#include "point.h"
-#include "rectangle.h"
-#include "polyhedron.h"
-#include "list_set.h"
+#include <base/utility.h>
+#include <base/interval.h>
 
-#include "grid_operations.h" // For IndexBlock
+#include <linear_algebra/linear_algebra.h>
+#include <linear_algebra/constraint.h>
 
+#include <geometry/point.h>
+#include <geometry/rectangle.h>
+#include <geometry/list_set.h>
+#include <geometry/grid_operations.h> // For IndexBlock
+#include <geometry/polyhedron.h>
+#include <geometry/geometry_declarations.h>
 
 namespace Ariadne {
   namespace Geometry {

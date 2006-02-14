@@ -25,7 +25,7 @@
 #ifndef _APPROX_TYPE_H
 #define _APPROX_TYPE_H
 
-#include <numerical_type.h>
+#include <base/numerical_type.h>
 
 namespace Ariadne {
 namespace Geometry {

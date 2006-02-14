@@ -1,16 +1,12 @@
 include ./config.mk
 
-.PHONY: lib python check clean
-
-all:  ${SRCDIR}/Makefile 
-	(cd ${SRCDIR}; ${MAKE} all);
+all:  python 
 
 lib: 
 	(cd ${SRCDIR}; ${MAKE} lib);
 
-python: 
-	(cd ${SRCDIR}; ${MAKE} lib);
-	(cd ${SRCDIR}; ${MAKE} python);
+python: lib
+	(cd ${SRCDIR}/${PYTHONDIR}; ${MAKE} all);
 
 clean:                                                                          
 	rm -f *.bak *.o *~ *% core

@@ -26,7 +26,7 @@
  *  \brief Cuboidal binary trees.
  */
 
-#include "base/binary_tree.h"
+#include <base/binary_tree.h>
 
 namespace Ariadne {
   BinaryTreeIterator& 

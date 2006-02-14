@@ -30,18 +30,18 @@
 #define _ARIADNE_GRID_SET_H
 
 #include <iosfwd>
-#include "geometry_declarations.h"
-
 #include <iostream>
 
-#include "base/array.h"
-#include "base/interval.h"
-#include "base/binary_word.h"
+#include <base/array.h>
+#include <base/interval.h>
+#include <base/binary_word.h>
 
-#include "rectangle.h"
-#include "point.h"
-#include "grid_operations.h"
-#include "list_set.h"
+#include <geometry/geometry_declarations.h>
+#include <geometry/rectangle.h>
+#include <geometry/point.h>
+#include <geometry/grid_operations.h>
+
+#include <geometry/list_set.h>
 
 /** \internal
  * Non-templated functions needed to implement grid denotable sets.

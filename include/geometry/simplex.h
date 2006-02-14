@@ -30,8 +30,6 @@
 #define _ARIADNE_SIMPLEX_H
 
 #include <iosfwd>
-#include "geometry_declarations.h"
-
 #include <string>
 #include <sstream>
 
@@ -40,13 +38,17 @@
 #include <vector>
 #include <valarray>
 
-#include "base/array.h"
-#include "base/utility.h"
-#include "linear_algebra/vector.h"
+#include <ariadne.h>
 
-#include "point.h"
-#include "polyhedron.h"
-#include "list_set.h"
+#include <base/array.h>
+#include <base/utility.h>
+
+#include <linear_algebra/vector.h>
+
+#include <geometry/point.h>
+#include <geometry/polyhedron.h>
+#include <geometry/list_set.h>
+#include <geometry/geometry_declarations.h>
 
 namespace Ariadne {
   namespace Geometry {

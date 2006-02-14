@@ -30,8 +30,6 @@
 #define _ARIADNE_RECTANGLE_H
 
 #include <iosfwd>
-#include "geometry_declarations.h"
-
 #include <string>
 #include <sstream>
 
@@ -41,12 +39,14 @@
 #include <valarray>
 #include <exception>
 
-#include "base/utility.h"
-#include "base/interval.h"
-#include "base/binary_word.h"
+#include <ariadne.h>
 
-#include "point.h"
+#include <base/utility.h>
+#include <base/interval.h>
+#include <base/binary_word.h>
 
+#include <geometry/point.h>
+#include <geometry/geometry_declarations.h>
 
 namespace Ariadne {
   namespace Geometry {

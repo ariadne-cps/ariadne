@@ -25,14 +25,17 @@
 #include <iostream>
 #include <string>
 
-#include "ariadne.h"
-#include "exception.h"
-#include "utility.h"
-#include "numerical_type.h"
-#include "point.h"
-#include "rectangle.h"
-#include "binary_word.h"
-#include "binary_tree.h"
+#include <ariadne.h>
+
+#include <base/exception.h>
+#include <base/numerical_type.h>
+#include <base/binary_word.h>
+#include <base/binary_tree.h>
+
+#include <utility/utility.h>
+
+#include <geometry/point.h>
+#include <geometry/rectangle.h>
 
 #include "test.h"
 

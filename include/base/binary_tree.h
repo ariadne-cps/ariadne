@@ -33,10 +33,11 @@
 #include <vector>
 #include <iostream>
 
-#include "basic_type.h"
-#include "binary_word.h"
+#include <base/basic_type.h>
+#include <base/binary_word.h>
+#include <base/utility.h>
 
-#include "utility.h"
+#include <geometry/rectangle.h>
 
 namespace Ariadne {
   const bool leaf=1;

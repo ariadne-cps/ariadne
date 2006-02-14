@@ -23,8 +23,10 @@
  */
 
 #include <iostream>
-#include "base/numerical_type.h"
-#include "geometry/point.h"
+
+#include <base/numerical_type.h>
+
+#include <geometry/point.h>
 
 #include <boost/python.hpp>
 

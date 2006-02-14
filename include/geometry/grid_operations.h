@@ -31,9 +31,11 @@
 
 #include <vector>
 #include <iosfwd>
-#include "base/array.h"
-#include "base/basic_type.h"
-#include "geometry/rectangle.h"
+
+#include <base/array.h>
+#include <base/basic_type.h>
+
+#include <geometry/rectangle.h>
 
 namespace Ariadne {
   namespace Geometry {

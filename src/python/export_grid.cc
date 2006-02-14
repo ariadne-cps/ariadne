@@ -22,10 +22,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "base/numerical_type.h"
-#include "geometry/grid_set.h"
+#include <base/numerical_type.h>
 
-#include "geometry/parallelopiped.h"
+#include <linear_algebra/linear_algebra.h>
+
+#include <geometry/grid_set.h>
+#include <geometry/parallelopiped.h>
 
 #include <boost/python.hpp>
 

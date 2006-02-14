@@ -29,14 +29,14 @@
 #ifndef _ARIADNE_HENON_MAP_H
 #define _ARIADNE_HENON_MAP_H
 
-#include "linear_algebra/matrix.h"
+#include <linear_algebra/matrix.h>
 
-#include "geometry/point.h"
-#include "geometry/rectangle.h"
-#include "geometry/parallelopiped.h"
+#include <geometry/point.h>
+#include <geometry/rectangle.h>
+#include <geometry/parallelopiped.h>
 
-#include "map.h"
-#include "apply.h"
+#include <evaluation/map.h>
+#include <evaluation/apply.h>
 
 namespace Ariadne {
   namespace Evaluation {

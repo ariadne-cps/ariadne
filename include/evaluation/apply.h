@@ -39,21 +39,18 @@
 #include <vector>
 #include <valarray>
 
-#include "base/array.h"
-#include "base/utility.h"
-#include "base/interval.h"
+#include <base/utility.h>
+#include <base/array.h>
+#include <base/interval.h>
 
-#include "linear_algebra/vector.h"
-#include "linear_algebra/matrix.h"
+#include <linear_algebra/vector.h>
+#include <linear_algebra/matrix.h>
 
-#include "geometry/point.h"
-#include "geometry/rectangle.h"
-#include "geometry/parallelopiped.h"
-#include "geometry/list_set.h"
-#include "geometry/grid_set.h"
+#include <geometry/geometry.h>
+#include <geometry/list_set.h>
 
-#include "evaluation_declarations.h"
-#include "map.h"
+#include <evaluation/evaluation_declarations.h>
+#include <evaluation/map.h>
 
 namespace Ariadne {
   namespace Evaluation {

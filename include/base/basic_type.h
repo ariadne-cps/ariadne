@@ -29,8 +29,8 @@
 #ifndef _ARIADNE_BASIC_TYPE_H
 #define _ARIADNE_BASIC_TYPE_H
 
-#include "array.h"
-#include "sequence.h"
+#include <base/array.h>
+#include <base/sequence.h>
 
 namespace Ariadne {
     

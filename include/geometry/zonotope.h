@@ -38,17 +38,17 @@
 #include <vector>
 #include <valarray>
 
-#include "base/utility.h"
-#include "base/interval.h"
-#include "linear_algebra/vector.h"
-#include "linear_algebra/matrix.h"
-#include "linear_algebra/constraint.h"
+#include <ariadne.h>
 
-#include "point.h"
-#include "rectangle.h"
-#include "polyhedron.h"
-#include "list_set.h"
+#include <linear_algebra/linear_algebra.h>
 
+#include <base/utility.h>
+#include <base/interval.h>
+
+#include <geometry/point.h>
+#include <geometry/rectangle.h>
+#include <geometry/list_set.h>
+#include <geometry/polyhedron.h>
 
 namespace Ariadne {
   namespace Geometry {

@@ -30,19 +30,18 @@
 #define _ARIADNE_PARTITION_TREE_SET_H
 
 #include <iosfwd>
-#include "geometry_declarations.h"
-
 #include <algorithm>
 #include <vector>
 #include <iostream>
 
-#include "base/basic_type.h"
-#include "base/utility.h"
-#include "base/binary_word.h"
-#include "base/binary_tree.h"
+#include <base/basic_type.h>
+#include <base/binary_word.h>
+#include <base/binary_tree.h>
+#include <base/utility.h>
 
-#include "rectangle.h"
-#include "list_set.h"
+#include <geometry/rectangle.h>
+#include <geometry/list_set.h>
+#include <geometry/geometry_declarations.h>
 
 namespace Ariadne {
   namespace Geometry {

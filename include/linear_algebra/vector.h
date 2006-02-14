@@ -33,8 +33,9 @@
 #include <boost/numeric/ublas/vector_proxy.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
-#include "base/basic_type.h"
-#include "base/numerical_type.h"
+#include <base/basic_type.h>
+#include <base/numerical_type.h>
+#include <base/interval.h>
 
 namespace Ariadne {
   namespace LinearAlgebra {

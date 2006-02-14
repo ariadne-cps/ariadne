@@ -30,10 +30,11 @@
 #define _ARIADNE_LIST_SET_H
 
 #include <iosfwd>
-#include "geometry_declarations.h"
 
 #include <vector>
 #include <iostream>
+
+#include <geometry/geometry_declarations.h>
 
 namespace Ariadne {
   namespace Geometry {

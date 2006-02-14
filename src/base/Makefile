@@ -22,8 +22,3 @@ dep:
 
 ### Do Not edit this line
 ### Everything below is auto-generated
-binary_tree.o: binary_tree.cc ../../include/base/binary_tree.h \
-  ../../include/base/basic_type.h ../../include/base/array.h \
-  ../../include/base/sequence.h ../../include/base/binary_word.h \
-  ../../include/base/utility.h ../../include/base/array.h
-

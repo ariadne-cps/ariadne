@@ -22,8 +22,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "evaluation/apply.h"
-#include "evaluation/henon_map.h"
+#include <evaluation/apply.h>
+#include <evaluation/henon_map.h>
 
 #include <boost/python.hpp>
 

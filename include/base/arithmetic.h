@@ -28,7 +28,7 @@
 /// Arithmetic for double, dyadic and rational types and intervals.
 
 #include <cmath>
-#include "numerical_type.h"
+#include <base/numerical_type.h>
 
 namespace Ariadne {
   uint factorial(const uint& n) {

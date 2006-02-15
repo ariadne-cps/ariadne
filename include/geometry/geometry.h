@@ -35,16 +35,16 @@
 #include <iostream>
 #include <iomanip>
 
-#include <geometry/geometry_declarations.h>
+#include "geometry/geometry_declarations.h"
 
-#include <geometry/point.h>
-#include <geometry/rectangle.h>
-#include <geometry/parallelopiped.h>
-#include <geometry/polyhedron.h>
-#include <geometry/simplex.h>
+#include "geometry/point.h"
+#include "geometry/rectangle.h"
+#include "geometry/parallelopiped.h"
+#include "geometry/polyhedron.h"
+#include "geometry/simplex.h"
 
-#include <geometry/list_set.h>
-#include <geometry/grid_set.h>
-#include <geometry/partition_tree_set.h>
+#include "geometry/list_set.h"
+#include "geometry/grid_set.h"
+#include "geometry/partition_tree_set.h"
 
 #endif /* _ARIADNE_GEOMETRY_H */

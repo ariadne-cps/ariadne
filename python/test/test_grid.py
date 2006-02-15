@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
-from ariadne import *
-from evaluation import *
-from geometry import *
-from linear_algebra import *
+from ariadne.base import *
+from ariadne.evaluation import *
+from ariadne.geometry import *
+from ariadne.linear_algebra import *
 import sys
 
 bb=Rectangle("[-3,3]x[-3,3]")
@@ -34,6 +34,9 @@ print sp
 print ap
 asp=over_approximation(sp,g)
 print asp
+
+for i in range(0,len(asp)):
+  print asp[i]
 
 eps=EpsPlot("tg.eps",bb)
 eps.set_fill_colour("blue")

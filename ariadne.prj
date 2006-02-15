@@ -67,57 +67,91 @@ preferences.indent.closing=0
 module.include.name=include
 module.include.type=
 module.include.files=\
-	affine_map.h\
-	affine_vector_field.h\
-	approx_type.h\
-	approximate_set.h\
 	ariadne.h\
-	arithmetic.h\
-	array.h\
-	automaton.h\
-	binary_word.h\
-	constraint.h\
-	discrete_location.h\
-	discrete_trans.h\
-	epsfstream.h\
-	exception.h\
-	generator.h\
-	grid_operations.h\
-	hybrid_set.h\
-	interval.h\
-	linear_algebra.h\
-	list_set.h\
-	location.h\
-	map.h\
-	numerical_type.h\
-	poly_map.h\
-	poly_vf.h\
-	polyhedron.h\
-	ptree.h\
-	ptree_node.h\
-	rectangle.h\
-	sequence.h\
-	set_const.h\
-	solver.h\
-	utility.h\
-	vector_field.h\
-	grid_set.h\
-	parallelopiped.h\
-	simplex.h\
 	documentation.h\
-	matlab_export.h\
-	pov_export.h\
-	point.h\
-	apply.h\
-	henon_map.h\
-	polynomial_map.h
+	base/arithmetic.h\
+	base/array.h\
+	base/basic_type.h\
+	base/binary_tree.h\
+	base/binary_word.h\
+	base/dyadic.h\
+	base/exception.h\
+	base/function.h\
+	base/interval.h\
+	base/numerical_type.h\
+	base/sequence.h\
+	base/utility.h\
+	evaluation/affine_map.h\
+	evaluation/affine_vector_field.h\
+	evaluation/apply.h\
+	evaluation/evaluation.h\
+	evaluation/evaluation_declarations.h\
+	evaluation/henon_map.h\
+	evaluation/map.h\
+	evaluation/polyhedral_affine_map.h\
+	evaluation/polyhedral_vector_field.h\
+	evaluation/polynomial_map.h\
+	evaluation/solver.h\
+	evaluation/vector_field.h\
+	geometry/approximate_set.h\
+	geometry/approximation_type.h\
+	geometry/generator.h\
+	geometry/geometry.h\
+	geometry/geometry_declarations.h\
+	geometry/grid_operations.h\
+	geometry/grid_set.h\
+	geometry/hybrid_set.h\
+	geometry/list_set.h\
+	geometry/parallelopiped.h\
+	geometry/partition_tree_set.h\
+	geometry/point.h\
+	geometry/polyhedron.h\
+	geometry/ptree.h\
+	geometry/ptree_node.h\
+	geometry/rectangle.h\
+	geometry/simplex.h\
+	geometry/zonotope.h\
+	linear_algebra/constraint.h\
+	linear_algebra/linear_algebra.h\
+	linear_algebra/matrix.h\
+	linear_algebra/vector.h\
+	python/python_utilities.h\
+	python/real_typedef.h\
+	system/automaton.h\
+	system/discrete_location.h\
+	system/discrete_transition.h\
+	system/location.h\
+	utility/epsfstream.h
 
 module.source.name=src
 module.source.type=
 module.source.files=\
-	grid_operations.cc\
-	binary_tree.cc\
-	partition_tree_operations.cc
+	base/binary_tree.cc\
+	geometry/grid_operations.cc\
+	geometry/partition_tree_operations.cc\
+	python/base_module.cc\
+	python/evaluation_module.cc\
+	python/export_affine_map.cc\
+	python/export_apply.cc\
+	python/export_function.cc\
+	python/export_grid.cc\
+	python/export_henon_map.cc\
+	python/export_interval.cc\
+	python/export_list_set.cc\
+	python/export_map.cc\
+	python/export_matrix.cc\
+	python/export_numeric.cc\
+	python/export_parallelopiped.cc\
+	python/export_partition_tree.cc\
+	python/export_point.cc\
+	python/export_polyhedron.cc\
+	python/export_polynomial_map.cc\
+	python/export_postscript_output.cc\
+	python/export_rectangle.cc\
+	python/export_simplex.cc\
+	python/export_vector.cc\
+	python/geometry_module.cc\
+	python/linear_algebra_module.cc
 
 module.pixmap.name=pixmaps
 module.pixmap.type=

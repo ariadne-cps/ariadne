@@ -33,7 +33,7 @@
 #include <string>
 #include <assert.h>
 
-#include <base/dyadic.h>
+#include "base/dyadic.h"
 
 namespace Ariadne {
 

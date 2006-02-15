@@ -24,7 +24,7 @@
 
 #include <iostream>
 
-#include <geometry/grid_operations.h>
+#include "geometry/grid_operations.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -209,11 +209,23 @@ namespace Ariadne {
       dimension_type dim=lower.size();
       IndexArray result(dim);
       for(dimension_type i=dim-1; i!=0; --i) {
-        result[i] = index/strides[i];
+        result[i] = index/strides[i]+lower[i];
         index = index%strides[i];
       }
       result[0]=index;
       return result;
+    }
+
+    /* Compute the index of a position in a grid. */
+    size_type
+    compute_index(const IndexArray& pos, const SizeArray& strides, const index_type offset)
+    {
+      dimension_type dim=pos.size();
+      index_type result=offset;
+      for(dimension_type i=0; i!=dim; ++i) {
+        result += pos[i]*strides[i];
+      }
+      return size_type(result);
     }
 
     /* Compute strides from a list of sizes. */

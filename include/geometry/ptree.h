@@ -25,8 +25,8 @@
 #ifndef _PTREE_H
 #define _PTREE_H
 
-#include <geometry/rectangle.h>
-#include <geometry/ptree_node.h>
+#include "geometry/rectangle.h>"
+#include "geometry/ptree_node.h"
 
 namespace Ariadne {
 namespace Geometry {

@@ -25,7 +25,7 @@
 #ifndef _POLY_VF_H
 #define _POLY_VF_H
 
-#include <approx_type.h>
+#include "approx_type.h"
 
 namespace Ariadne {
 namespace VectorField{

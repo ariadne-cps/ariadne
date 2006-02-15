@@ -39,20 +39,19 @@
 #include <vector>
 #include <valarray>
 
-#include <ariadne.h>
+#include "base/utility.h"
+#include "base/interval.h"
 
-#include <base/utility.h>
-#include <base/interval.h>
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
+#include "linear_algebra/constraint.h"
 
-#include <linear_algebra/linear_algebra.h>
-#include <linear_algebra/constraint.h>
-
-#include <geometry/point.h>
-#include <geometry/rectangle.h>
-#include <geometry/list_set.h>
-#include <geometry/grid_operations.h> // For IndexBlock
-#include <geometry/polyhedron.h>
-#include <geometry/geometry_declarations.h>
+#include "geometry/point.h"
+#include "geometry/rectangle.h"
+#include "geometry/list_set.h"
+#include "geometry/grid_operations.h" // For IndexBlock
+#include "geometry/polyhedron.h"
+#include "geometry/geometry_declarations.h"
 
 namespace Ariadne {
   namespace Geometry {

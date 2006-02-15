@@ -27,9 +27,9 @@
 
 #include <list>
 
-#include <numerical_type.h>
-#include <discrete_location.h>
-#include <automaton.h>
+#include "base/numerical_type.h"
+#include "system/discrete_location.h"
+#include "system/automaton.h"
 
 #define TIME_PER_UNIT 15
 

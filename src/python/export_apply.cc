@@ -22,8 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <evaluation/apply.h>
-#include <evaluation/henon_map.h>
+#include "evaluation/apply.h"
 
 #include <boost/python.hpp>
 
@@ -56,15 +55,10 @@ chainreach_of_rectangle_list_set(const Map<Real>& f,
   return chainreach(f,rls,g,bb); 
 }
 
-inline ListSet<Real,Parallelopiped> apply_henon_map_to_parallelopiped_list_set(const HenonMap<Real>& f, const ListSet<Real,Parallelopiped>& pls) {
-  std::cerr << "apply_henon_map_to_parallelopiped_list_set" << std::endl << std::flush;
-  return apply(f,pls); 
-}
 
 
 void export_apply() {
   def("apply", apply_to_parallelopiped, "apply the image of a polynomial to a set" );
   def("apply", apply_to_parallelopiped_list_set, "apply the image of a polynomial to a set" );
   def("chainreach", &chainreach_of_rectangle_list_set, "chain reach of a set" );
-//  def("apply", apply_henon_map_to_parallelopiped_list_set, "apply the image of a polynomial to a set" );
 }

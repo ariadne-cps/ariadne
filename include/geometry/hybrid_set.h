@@ -26,8 +26,8 @@
 #define _HYBRID_SET_H
 
 
-#include <discrete_location.h>
-#include <denotable_set.h>
+#include "discrete_location.h"
+#include "denotable_set.h"
 
 template <typename DS>
 inline void _print_ds_(std::ostream &os,

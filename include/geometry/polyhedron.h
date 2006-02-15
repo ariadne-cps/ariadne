@@ -29,14 +29,14 @@
 #include <ppl.hh>
 #include <vector>
 
-#include <linear_algebra/constraint.h>
-#include <linear_algebra/vector.h>
-#include <linear_algebra/matrix.h>
+#include "linear_algebra/constraint.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
-#include <geometry/generator.h>
-#include <geometry/point.h>
-#include <geometry/rectangle.h>
-#include <geometry/geometry_declarations.h>
+#include "geometry/generator.h"
+#include "geometry/point.h"
+#include "geometry/rectangle.h"
+#include "geometry/geometry_declarations.h"
 
 namespace Parma_Polyhedra_Library {
   // Import all the output operators into the main PPL namespace.

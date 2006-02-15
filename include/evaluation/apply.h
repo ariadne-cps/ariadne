@@ -39,18 +39,19 @@
 #include <vector>
 #include <valarray>
 
-#include <base/utility.h>
-#include <base/array.h>
-#include <base/interval.h>
+#include "base/utility.h"
+#include "base/array.h"
+#include "base/interval.h"
 
-#include <linear_algebra/vector.h>
-#include <linear_algebra/matrix.h>
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
-#include <geometry/geometry.h>
-#include <geometry/list_set.h>
+#include "geometry/geometry.h"
+#include "geometry/list_set.h"
+#include "geometry/grid_set.h"
 
-#include <evaluation/evaluation_declarations.h>
-#include <evaluation/map.h>
+#include "evaluation/evaluation_declarations.h"
+#include "evaluation/map.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -106,10 +107,6 @@ namespace Ariadne {
       return result;
     }
      
-    template<typename R>
-    void cr(const Map<R>& f, const Geometry::Parallelopiped<R>& p) {
-      apply(f,p);
-    }
     
     template<typename R>
     Ariadne::Geometry::GridMaskSet<R> 
@@ -121,10 +118,7 @@ namespace Ariadne {
       typedef typename Ariadne::Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
       
       Ariadne::Geometry::GridMaskSet<R> result(g);
-      Ariadne::Geometry::GridMaskSet<R> gbb(g);
-      gbb.adjoin(over_approximation(bb,g));
-      Ariadne::Geometry::GridMaskSet<R> found=over_approximation(is,g);
-      found=regular_intersection(found,gbb);
+      Ariadne::Geometry::GridMaskSet<R> found=over_approximation_of_intersection(is,bb,g);
       Ariadne::Geometry::GridMaskSet<R> image(g);
       
       while(!subset(found,result)) {
@@ -137,10 +131,11 @@ namespace Ariadne {
           Ariadne::Geometry::Rectangle<R> r=*iter;
           Ariadne::Geometry::Parallelopiped<R> pp(r);
           Ariadne::Geometry::Parallelopiped<R> fp(Ariadne::Evaluation::apply(f,pp));
-          image.adjoin(over_approximation(fp,g));
+          Geometry::GridCellListSet<R> oai=over_approximation_of_intersection(fp,bb,g);
+          image.adjoin(oai);
         }
         std::cerr << size << std::endl;
-        found=regular_intersection(image,gbb);
+        found=image;
       }
       return result;
       

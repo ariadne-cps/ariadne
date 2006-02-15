@@ -37,7 +37,7 @@
 #include <boost/numeric/interval.hpp>
 #include <boost/numeric/interval/io.hpp>
 
-#include <base/numerical_type.h>
+#include "base/numerical_type.h"
 
 namespace Ariadne {
   template<typename R> class rounding;

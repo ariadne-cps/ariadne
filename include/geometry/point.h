@@ -33,11 +33,11 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <base/utility.h>
+#include "base/utility.h"
 
-#include <linear_algebra/vector.h>
+#include "linear_algebra/vector.h"
 
-#include <geometry/geometry_declarations.h>
+#include "geometry/geometry_declarations.h"
 
 namespace Ariadne {
   namespace Geometry {

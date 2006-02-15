@@ -28,10 +28,10 @@
 #ifndef _ARIADNE_EVALUATION_H
 #define _ARIADNE_EVALUATION_H
 
-#include <evaluation/evaluation_declarations.h>
+#include "evaluation/evaluation_declarations.h"
 
-#include <evaluation/map.h>
-#include <evaluation/affine_map.h>
-#include <evaluation/polynomial_map.h>
+#include "evaluation/map.h"
+#include "evaluation/affine_map.h"
+#include "evaluation/polynomial_map.h"
 
 #endif /* _ARIADNE_EVALUATION_H */

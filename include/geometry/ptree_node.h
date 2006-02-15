@@ -34,7 +34,7 @@
 #include <iomanip> 
 #include <string>
 
-#include <geometry/rectangle.h>
+#include "geometry/rectangle.h"
 
 #define MAX_DIM 12
 #define MAX_BITSET 1<<MAX_DIM

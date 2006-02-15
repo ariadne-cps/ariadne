@@ -29,14 +29,14 @@
 #ifndef _ARIADNE_AFFINE_MAP_H
 #define _ARIADNE_AFFINE_MAP_H
 
-#include <linear_algebra/vector.h>
-#include <linear_algebra/matrix.h>
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
-#include <evaluation/map.h>
+#include "evaluation/map.h"
 
-#include <geometry/point.h>
-#include <geometry/rectangle.h>
-#include <geometry/parallelopiped.h>
+#include "geometry/point.h"
+#include "geometry/rectangle.h"
+#include "geometry/parallelopiped.h"
 
 namespace Ariadne {
   namespace Evaluation {

@@ -28,7 +28,6 @@
 #include <string>
 #include <list>
 
-#include <classes.h>
 
 namespace Ariadne {
 

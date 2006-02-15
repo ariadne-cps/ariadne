@@ -34,7 +34,7 @@
 #include <vector>
 #include <iostream>
 
-#include <geometry/geometry_declarations.h>
+#include "geometry/geometry_declarations.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -710,7 +710,8 @@ namespace Ariadne {
     std::ostream& operator<<(std::ostream &os,
                              const ListSet<R,BS> &A)
     {
-      os << "{ class: ListSet<" << name<R>() << ",BS>,\n  basic_set_list: [\n    ";
+      os << "ListSet<" << name<R>() << ",BS>(\n  ";
+      os << "[";
       if (A.size() >0 ) {
         os << A[0];
       }

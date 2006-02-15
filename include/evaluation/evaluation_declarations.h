@@ -35,6 +35,4 @@ namespace Ariadne {
   }
 }
 
-
-
 #endif /* _ARIADNE_EVALUATION_DECLARATIONS_H */

@@ -22,13 +22,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include <geometry/rectangle.h>
-#include <geometry/parallelopiped.h>
-#include <geometry/list_set.h>
-#include <geometry/grid_set.h>
-#include <geometry/partition_tree_set.h>
+#include "geometry/rectangle.h"
+#include "geometry/parallelopiped.h"
+#include "geometry/list_set.h"
+#include "geometry/grid_set.h"
+#include "geometry/partition_tree_set.h"
 
-#include <utility/epsfstream.h>
+#include "utility/epsfstream.h"
 
 #include "python/real_typedef.h"
 

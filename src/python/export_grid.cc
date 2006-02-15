@@ -22,12 +22,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <base/numerical_type.h>
+#include "base/numerical_type.h"
 
-#include <linear_algebra/linear_algebra.h>
+#include "linear_algebra/linear_algebra.h"
 
-#include <geometry/grid_set.h>
-#include <geometry/parallelopiped.h>
+#include "geometry/grid_set.h"
+#include "geometry/parallelopiped.h"
 
 #include <boost/python.hpp>
 
@@ -35,6 +35,7 @@
 
 using Ariadne::BooleanArray;
 using Ariadne::IndexArray;
+using Ariadne::SizeArray;
 using Ariadne::Geometry::IndexBlock;
 
 typedef Ariadne::Geometry::Point<Real> RPoint;
@@ -86,6 +87,9 @@ inline RGridMaskSet difference(const RGridMaskSet& gms1, const RGridMaskSet& gms
 inline RGridMaskSet grid_mask_set_regular_intersection(const RGridMaskSet& gms1, const RGridMaskSet& gms2) {
   return Ariadne::Geometry::regular_intersection(gms1,gms2);
 }
+inline void grid_mask_set_adjoin_grid_cell(RGridMaskSet& gms, const RGridCell& gc) {
+  return gms.adjoin(gc);
+}
 inline void grid_mask_set_adjoin_grid_rectangle(RGridMaskSet& gms, const RGridRectangle& gr) {
   return gms.adjoin(gr);
 }
@@ -98,12 +102,12 @@ inline void grid_mask_set_adjoin_grid_mask_set(RGridMaskSet& gms, const RGridMas
 
 
 void export_grid() {
-  class_<RFiniteGrid>("FiniteGrid",init<RFiniteGrid>())
-    .def(init<RRectangleListSet>())
+  class_<RFiniteGrid>("FiniteGrid",init<RRectangle,SizeArray>())
     .def(init<RRectangle,uint>())
+    .def(init<RRectangleListSet>())
+    .def(init<RFiniteGrid>())
     .def("dimension", &RFiniteGrid::dimension)
     .def("subdivision_coordinate", &RFiniteGrid::subdivision_coordinate)
-    .def("subdivision_interval", &RFiniteGrid::subdivision_interval)
     .def("subdivision_index", &RFiniteGrid::subdivision_index)
     .def("subdivision_lower_index", &RFiniteGrid::subdivision_lower_index)
     .def("subdivision_upper_index", &RFiniteGrid::subdivision_upper_index)
@@ -115,40 +119,47 @@ void export_grid() {
     .def(str(self))    // __str__
     ;
   
-  class_<RGridCellListSet>("GridCellListSet",init<RFiniteGrid>())
-    .def(init<RGridMaskSet>())
-    .def(init<RGridCellListSet>())
-    .def(init<RGridRectangleListSet>())
-    .def("dimension", &RGridCellListSet::dimension)
-    .def("__len__", &RGridCellListSet::size)
-    .def(str(self))    // __str__
-    ;
-    
   class_<RGridRectangle>("GridRectangle",init<RFiniteGrid,IndexArray,IndexArray>())
     .def("dimension", &RGridRectangle::dimension)
     .def(str(self))    // __str__
     ;
   
-  
-  class_<RGridRectangleListSet>("GridRectangleListSet",init<RRectangleListSet>())
+  class_<RGridCellListSet>("GridCellListSet",init<RFiniteGrid>())
+    .def(init<RGridMaskSet>())
     .def(init<RGridCellListSet>())
     .def(init<RGridRectangleListSet>())
+    .def(init<RRectangleListSet>())
+    .def("dimension", &RGridCellListSet::dimension)
+    .def("__len__", &RGridCellListSet::size)
+    .def("__getitem__", &RGridCellListSet::operator[])
+    .def(str(self))    // __str__
+    ;
+  
+  class_<RGridRectangleListSet>("GridRectangleListSet",init<RFiniteGrid>())
+    .def(init<RGridMaskSet>())
+    .def(init<RGridCellListSet>())
+    .def(init<RGridRectangleListSet>())
+    .def(init<RRectangleListSet>())
     .def("dimension", &RGridRectangleListSet::dimension)
 //    .def("adjoin", &RGridRectangleListSet::adjoin)
     .def("__len__", &RGridRectangleListSet::size)
+    .def("__getitem__", &RGridRectangleListSet::operator[])
     .def(str(self))    // __str__
     ;
     
-  class_<RGridMaskSet>("GridMaskSet",init<RFiniteGrid,IndexBlock>())
-    .def(init<RFiniteGrid>())
+  class_<RGridMaskSet>("GridMaskSet",init<RFiniteGrid>())
+    .def(init<RGridMaskSet>())
     .def(init<RGridCellListSet>())
     .def(init<RGridRectangleListSet>())
+    .def(init<RRectangleListSet>())
     .def("empty", &RGridMaskSet::empty)
     .def("dimension", &RGridMaskSet::dimension)
+    .def("adjoin", &grid_mask_set_adjoin_grid_cell)
     .def("adjoin", &grid_mask_set_adjoin_grid_rectangle)
     .def("adjoin", &grid_mask_set_adjoin_grid_cell_list_set)
     .def("adjoin", &grid_mask_set_adjoin_grid_mask_set)
     .def("__len__", &RGridMaskSet::size)
+    .def("__getitem__", &RGridMaskSet::operator[])
     .def(str(self))    // __str__
     ;
     

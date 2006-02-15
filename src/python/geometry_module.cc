@@ -22,10 +22,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <base/binary_word.h>
-#include <base/binary_tree.h>
+#include "base/binary_word.h"
+#include "base/binary_tree.h"
 
-#include <geometry/partition_tree_set.h>
+#include "geometry/partition_tree_set.h"
 
 #include <boost/python.hpp>
 

@@ -32,10 +32,10 @@
 #include <vector>
 #include <iosfwd>
 
-#include <base/array.h>
-#include <base/basic_type.h>
+#include "base/array.h"
+#include "base/basic_type.h"
 
-#include <geometry/rectangle.h>
+#include "geometry/rectangle.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -158,9 +158,11 @@ namespace Ariadne {
       void set_lower_bound(dimension_type i, index_type n) { _lower_corner[i]=n; }
       void set_upper_bound(dimension_type i, index_type n) { _upper_corner[i]=n; }
 
-      const IndexArray& lower_corner() const { return _lower_corner; }
-      const IndexArray& upper_corner() const { return _upper_corner; }
-
+      const IndexArray& lower() const { return _lower_corner; }
+      const IndexArray& upper() const { return _upper_corner; }
+      SizeArray sizes() const { return _upper_corner-_lower_corner; }
+      SizeArray strides() const { return compute_strides(sizes()); }
+      
       GridPositionIterator begin() const { 
         return GridPositionIterator(_lower_corner, _upper_corner,_lower_corner);
       }

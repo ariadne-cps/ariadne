@@ -25,7 +25,7 @@
 #ifndef _ARIADNE_VECTOR_FIELD_H
 #define _ARIADNE_VECTOR_FIELD_H
 
-#include <base/exception.h>
+#include "base/exception.h"
 
 namespace Ariadne {
 namespace VectorField{

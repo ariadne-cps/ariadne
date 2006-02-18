@@ -15,8 +15,7 @@ clean:
 	(cd ${TESTDIR}; ${MAKE} clean; cd ..; )
 
 install:
-#	cp src/libariadne.so ${PREFIX}/lib/libariadne.so
-	ln -s ${PWD}/src/libariadne.so ${PREFIX}/lib/libariadne.so 
+	(cd ${SRCDIR}; ${MAKE} install);
 
 check:
 	(cd ${TESTDIR}; ${MAKE});

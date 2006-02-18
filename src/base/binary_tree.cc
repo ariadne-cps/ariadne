@@ -29,6 +29,33 @@
 #include "base/binary_tree.h"
 
 namespace Ariadne {
+  void 
+  BinaryTree::check() const { 
+    size_type ends=1;
+    for(BooleanArray::const_iterator iter=_array.begin(); iter!=_array.end(); ++iter) {
+      /* Test for too many leaves */
+      assert(ends!=0); 
+      if(*iter==branch) {
+        ends+=1;
+      }
+      else {
+        ends-=1;
+      }
+    }
+    assert(ends==0);
+  }
+
+  size_type 
+  BinaryTree::depth() const { 
+    size_type depth=0;
+    for(const_iterator iter=begin(); iter!=end(); ++iter) {
+      if(iter->size()>depth) {
+        depth=iter->size();
+      }
+    }
+    return depth;
+  }
+
   BinaryTreeIterator& 
   BinaryTreeIterator::operator++() { 
     while( !_word.empty() && (_word.back() == right) ) {
@@ -79,6 +106,29 @@ namespace Ariadne {
   }
 
    
+  std::istream& operator>>(std::istream& is, BinaryWord& b)
+  {
+    std::vector<bool> v;
+    is >> v;
+    b=BinaryWord(v);
+
+    return is;
+  }
+  
+  std::ostream& operator<<(std::ostream& os, const BinaryWord& b) 
+  {    
+    if(b.empty()) {
+      os << "e";
+    }
+    for(BinaryWord::size_type i=0; i!=b.size(); ++i) {
+      if(i%8==0 && i!=0) {
+        os << " ";
+      }
+      os << b[i];
+    }
+    return os;
+  }
+
   std::ostream& 
   operator<<(std::ostream& os, const BinaryTree& t) {
     os << "BinaryTree( words=";

@@ -307,6 +307,22 @@ namespace Ariadne {
       }
         
         
+      /*! \brief An iterator to the beginning of the list of basic sets.
+       *
+       * \return The begin of the maintained basic set vector.
+       */
+      inline iterator begin() {
+          return _vector.begin();
+      }
+
+      /*! \brief An iterator to the end of the list of basic sets.
+       *
+       * \return The end of the maintained basic set vector.
+       */
+      inline iterator end() {
+        return _vector.end();
+      }
+
       /*! \brief A constant iterator to the beginning of the list of basic sets.
        *
        * \return The begin of the maintained basic set vector.

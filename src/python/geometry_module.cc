@@ -25,8 +25,6 @@
 #include "base/binary_word.h"
 #include "base/binary_tree.h"
 
-#include "geometry/partition_tree_set.h"
-
 #include <boost/python.hpp>
 
 #include "python/real_typedef.h"
@@ -37,6 +35,7 @@ using Ariadne::BooleanArray;
 using Ariadne::BinaryWord;
 using Ariadne::BinaryTree;
 using Ariadne::BinaryWord;
+using Ariadne::SizeArray;
 using Ariadne::SubdivisionSequence;
 
 void export_point();
@@ -78,6 +77,13 @@ BOOST_PYTHON_MODULE(geometry)
     .def(init<BinaryWord>())
     .def("__len__", &BinaryWord::size)
     .def("__getitem__", &BinaryWord::get)
+    .def(str(self))    // __str__
+  ;
+
+  class_<SizeArray>("SizeArray")
+    .def(init<SizeArray>())
+    .def("__len__", &SizeArray::size)
+    .def("__getitem__", &get<SizeArray>)
     .def(str(self))    // __str__
   ;
 

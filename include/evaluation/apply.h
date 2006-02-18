@@ -46,7 +46,6 @@
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 
-#include "geometry/geometry.h"
 #include "geometry/list_set.h"
 #include "geometry/grid_set.h"
 

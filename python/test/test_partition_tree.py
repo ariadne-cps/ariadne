@@ -26,26 +26,64 @@ from ariadne.geometry import *
 from ariadne.linear_algebra import *
 import sys
 
+bb=Rectangle("[-3,3]x[-3,3]")
+print bb,"\n"
 
-h=HenonMap(Dyadic(1.5),Dyadic(0.875))
-gbb=Rectangle("[-4,4]x[-4,4]") # grid bounding box
-g=FiniteGrid(gbb,512);
-ir=Rectangle("[1.49,1.51]x[0.49,0.51]") # initial state
-cb=Rectangle("[-4,4]x[-4,4]") # cutoff box
-epsbb=Rectangle("[-4.1,4.1]x[-4.1,4.1]") # eps bounding box
-i=RectangleListSet(ir)
+ps=PartitionScheme(bb)
+print ps
 
-cr=chainreach(h,i,g,cb)
+#btl=[0,0,0,1,0,0,1,0,1,1,0,1,1,0,1,1,1]
+#bal=[1,1,1,0,1,0,1,0,1]
+btl=[0,0,1,1,0,1,1]
+bal=[1,1,1,1,]
 
-eps=EpsPlot("cr.eps",epsbb)
-eps.set_pen_colour("black")
-eps.set_fill_colour("white")
-eps.write(cb)
-eps.set_line_style(0)
+bt=BooleanArray(len(btl))
+for i in range(0,len(btl)):
+  bt[i]=btl[i]
+bt=BinaryTree(bt)
+ba=BooleanArray(len(bal))
+for i in range(0,len(bal)):
+  ba[i]=bal[i]
+
+print bt, ba
+
+pts=PartitionTreeSet(ps,bt,ba)
+print pts
+#print "Stepping through PartitionTreeSet using index"
+#for i in range(0,len(pts)):
+#  print pts[i]
+print "Iterating through PartitionTreeSet"
+for cell in pts:
+  print cell
+
+rls=RectangleListSet(pts)
+print "RectangleListSet"
+for rect in rls:
+  print rect
+
+print
+
+grls=GridRectangleListSet(pts)
+print "GridRectangleListSet"
+for grect in grls:
+  print grect
+
+print
+
+gms=GridMaskSet(grls)
+print "GridMaskSet"
+print gms
+
+npts=PartitionTreeSet(gms)
+print pts
+print npts
+
+
+eps=EpsPlot("pt.eps",bb)
 eps.set_fill_colour("green")
-eps.write(cr)
-eps.set_line_style(1)
+eps.write(pts)
 eps.set_fill_colour("blue")
-eps.write(ir)
+eps.write(grls)
+eps.set_fill_colour("red")
+eps.write(npts)
 eps.close()
-sys.exit()

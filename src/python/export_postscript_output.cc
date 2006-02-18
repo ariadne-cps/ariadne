@@ -40,7 +40,7 @@ typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Rectangle> RRectangle
 typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Parallelopiped> RParallelopipedListSet;
 typedef Ariadne::Geometry::GridMaskSet<Real> RGridMaskSet;
 typedef Ariadne::Geometry::GridCellListSet<Real> RGridCellListSet;
-typedef Ariadne::Geometry::GridCellListSet<Real> RGridRectangleListSet;
+typedef Ariadne::Geometry::GridRectangleListSet<Real> RGridRectangleListSet;
 typedef Ariadne::Geometry::PartitionTreeSet<Real> RPartitionTreeSet;
 
 using Ariadne::Postscript::epsfstream;

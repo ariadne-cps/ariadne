@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/pythons
 
 ##############################################################################
 #            test_polyhedron.py
@@ -20,32 +20,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from ariadne.base import *
-from ariadne.evaluation import *
 from ariadne.geometry import *
-from ariadne.linear_algebra import *
-import sys
 
+r=Rectangle("[0,3]x[2,4]")
+p=Parallelopiped(r)
+q=Polyhedron(p)
 
-h=HenonMap(Dyadic(1.5),Dyadic(0.875))
-gbb=Rectangle("[-4,4]x[-4,4]") # grid bounding box
-g=FiniteGrid(gbb,512);
-ir=Rectangle("[1.49,1.51]x[0.49,0.51]") # initial state
-cb=Rectangle("[-4,4]x[-4,4]") # cutoff box
-epsbb=Rectangle("[-4.1,4.1]x[-4.1,4.1]") # eps bounding box
-i=RectangleListSet(ir)
-
-cr=chainreach(h,i,g,cb)
-
-eps=EpsPlot("cr.eps",epsbb)
-eps.set_pen_colour("black")
-eps.set_fill_colour("white")
-eps.write(cb)
-eps.set_line_style(0)
-eps.set_fill_colour("green")
-eps.write(cr)
-eps.set_line_style(1)
-eps.set_fill_colour("blue")
-eps.write(ir)
-eps.close()
-sys.exit()
+print r
+print p
+print q

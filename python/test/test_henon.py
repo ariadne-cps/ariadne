@@ -1,9 +1,29 @@
 #!/usr/bin/python
 
-from ariadne import *
-from evaluation import *
-from geometry import *
-from linear_algebra import *
+##############################################################################
+#            test_polyhedron.py
+#
+#  Copyright 2006  Pieter Collins <Pieter.Collins@cwi.nl>
+##############################################################################
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+from ariadne.base import *
+from ariadne.evaluation import *
+from ariadne.geometry import *
+from ariadne.linear_algebra import *
 import sys
 
 h=HenonMap(Dyadic(1.5),Dyadic(0.275))
@@ -19,40 +39,16 @@ p=Parallelopiped(r)
 sp=p.subdivide()
 hp=h(p)
 hsp=apply(h,sp)
-#eps=EpsPlot("henon.eps",Rectangle("[-2,3]x[-2,3]"))
-eps=EpsPlot("henon.eps",h(r))
-eps.set_fill_colour("blue")
-eps.write(hp)
-eps.set_fill_colour("green")
-eps.write(hsp)
 
 print subset(hsp[0],hp)
 print subset(hsp[1],hp)
 print subset(hsp[2],hp)
 print subset(hsp[3],hp)
 print subset(hsp[3].subdivide()[0],hp)
-eps.set_fill_colour("red")
-eps.write(hsp[3].subdivide()[0])
 
+eps=EpsPlot("henon.eps",h(r))
+eps.set_fill_colour("blue")
+eps.write(hp)
+eps.set_fill_colour("green")
+eps.write(hsp)
 eps.close()
-
-rb=Rectangle("[-1,1]x[-1,1]")
-print rb
-
-g=FiniteGrid(rb,12);
-print g
-print over_approximation(g,p)
-
-c=Point(2)
-A=Matrix(2,2)
-c[0]=1.0
-c[1]=1.0
-A[0,0]=2.0
-A[1,1]=1.0
-A[0,1]=1.1
-A[1,0]=1.5
-p1=Parallelopiped(c,A)
-p2=Parallelopiped(c,inverse(A))
-pls=ParallelopipedListSet(2)
-pls.push_back(p1)
-pls.push_back(p2)

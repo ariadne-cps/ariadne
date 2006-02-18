@@ -1,6 +1,7 @@
 include ../../config.mk
 
-OBJ = grid_operations.o partition_tree_operations.o
+OBJ = grid_operations.o partition_tree_operations.o \
+	grid_set.o partition_tree_set.o
 
 all: ${OBJ}
 
@@ -45,6 +46,56 @@ partition_tree_operations.o: partition_tree_operations.cc \
   ../../include/linear_algebra/vector.h ../../include/base/basic_type.h \
   ../../include/base/numerical_type.h ../../include/base/dyadic.h \
   ../../include/base/interval.h \
+  ../../include/geometry/geometry_declarations.h
+
+grid_set.o: grid_set.cc ../../include/geometry/grid_set.h \
+  ../../include/base/array.h ../../include/base/interval.h \
+  ../../include/base/binary_word.h ../../include/base/utility.h \
+  ../../include/base/array.h ../../include/base/basic_type.h \
+  ../../include/base/sequence.h \
   ../../include/geometry/geometry_declarations.h \
-  ../../include/geometry/rectangle.h ../../include/geometry/list_set.h
+  ../../include/geometry/rectangle.h ../../include/base/utility.h \
+  ../../include/geometry/point.h ../../include/linear_algebra/vector.h \
+  ../../include/base/basic_type.h ../../include/base/numerical_type.h \
+  ../../include/base/dyadic.h ../../include/base/interval.h \
+  ../../include/geometry/grid_operations.h \
+  ../../include/base/basic_type.h ../../include/geometry/list_set.h \
+  ../../include/geometry/grid_set.tpl \
+  ../../include/geometry/../geometry/parallelopiped.h \
+  ../../include/base/utility.h ../../include/base/interval.h \
+  ../../include/linear_algebra/vector.h \
+  ../../include/linear_algebra/matrix.h \
+  ../../include/linear_algebra/constraint.h \
+  ../../include/linear_algebra/vector.h \
+  ../../include/linear_algebra/matrix.h ../../include/geometry/point.h \
+  ../../include/geometry/rectangle.h ../../include/geometry/list_set.h \
+  ../../include/geometry/grid_operations.h \
+  ../../include/geometry/polyhedron.h \
+  ../../include/linear_algebra/constraint.h \
+  ../../include/linear_algebra/matrix.h \
+  ../../include/geometry/generator.h \
+  ../../include/geometry/geometry_declarations.h \
+  ../../include/geometry/../geometry/partition_tree_set.h \
+  ../../include/base/basic_type.h ../../include/base/binary_word.h \
+  ../../include/base/binary_tree.h ../../include/base/binary_word.h \
+  ../../include/geometry/rectangle.h \
+  ../../include/geometry/../geometry/grid_set.h
+
+partition_tree_set.o: partition_tree_set.cc \
+  ../../include/geometry/partition_tree_set.h \
+  ../../include/base/basic_type.h ../../include/base/array.h \
+  ../../include/base/sequence.h ../../include/base/binary_word.h \
+  ../../include/base/utility.h ../../include/base/basic_type.h \
+  ../../include/base/binary_tree.h ../../include/base/binary_word.h \
+  ../../include/geometry/rectangle.h ../../include/base/utility.h \
+  ../../include/base/interval.h ../../include/geometry/point.h \
+  ../../include/linear_algebra/vector.h ../../include/base/basic_type.h \
+  ../../include/base/numerical_type.h ../../include/base/dyadic.h \
+  ../../include/base/interval.h \
+  ../../include/geometry/geometry_declarations.h \
+  ../../include/geometry/partition_tree_set.tpl \
+  ../../include/geometry/partition_tree_set.h \
+  ../../include/geometry/rectangle.h ../../include/geometry/list_set.h \
+  ../../include/geometry/grid_set.h ../../include/base/array.h \
+  ../../include/geometry/grid_operations.h
 

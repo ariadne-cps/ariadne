@@ -242,14 +242,14 @@ namespace Ariadne {
       return eps << Ariadne::Geometry::ListSet<R,Ariadne::Geometry::Rectangle>(ds);
     }
     
-/*
+
     template<typename R>
     epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::PartitionTreeSet<R>& ds)
     {
       return eps << Ariadne::Geometry::ListSet<R,Ariadne::Geometry::Rectangle>(ds);
     }
-*/
+
     
   }
 }

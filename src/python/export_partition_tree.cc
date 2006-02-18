@@ -27,6 +27,7 @@
 #include "base/binary_tree.h"
 
 #include "geometry/rectangle.h"
+#include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
 
 #include <boost/python.hpp>
@@ -44,6 +45,7 @@ typedef Ariadne::Interval<Real> RInterval;
 typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
 
 typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Rectangle> RRectangleListSet;
+typedef Ariadne::Geometry::GridMaskSet<Real> RGridMaskSet;
 
 typedef Ariadne::Geometry::PartitionScheme<Real> RPartitionScheme;
 typedef Ariadne::Geometry::PartitionTree<Real> RPartitionTree;
@@ -59,6 +61,7 @@ using Ariadne::Geometry::subset;
 using boost::python::class_;
 using boost::python::init;
 using boost::python::self;
+using boost::python::iterator;
 using boost::python::return_value_policy;
 using boost::python::copy_const_reference;
 using boost::python::def;
@@ -88,11 +91,16 @@ void export_partition_tree() {
   class_<RPartitionTreeSet>("PartitionTreeSet",init<RRectangle,SubdivisionSequence,BinaryTree,BooleanArray>())
     .def(init<RPartitionScheme,BinaryTree,BooleanArray>())
     .def(init<RPartitionTree,BooleanArray>())
+    .def(init<RGridMaskSet>())
     .def("dimension", &RPartitionTreeSet::dimension)
     .def("bounding_box", &RPartitionTreeSet::bounding_box, return_value_policy<copy_const_reference>())
     .def("subdivision_coordinates", &RPartitionTreeSet::subdivision_coordinates, return_value_policy<copy_const_reference>())
     .def("tree", &RPartitionTreeSet::tree, return_value_policy<copy_const_reference>())
     .def("mask", &RPartitionTreeSet::mask, return_value_policy<copy_const_reference>()) 
+    .def("depth", &RPartitionTreeSet::depth)
+    .def("subdivisions", &RPartitionTreeSet::subdivisions)
+    .def("__len__", &RPartitionTreeSet::size)
+    .def("__iter__", iterator<RPartitionTreeSet>())
     .def(str(self))    // __str__
   ;
   class_<RPartitionTreeCell>("PartitionTreeCell",init<RRectangle,SubdivisionSequence,BinaryWord>())

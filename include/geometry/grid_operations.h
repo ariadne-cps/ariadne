@@ -145,35 +145,38 @@ namespace Ariadne {
     class IndexBlock {
      public:
       typedef GridPositionIterator const_iterator;
-      IndexBlock(dimension_type n) : _lower_corner(n), _upper_corner(n) { }
+      IndexBlock(dimension_type n) : _lower(n), _upper(n) { }
       IndexBlock(const IndexArray& l, const IndexArray& u)
-        : _lower_corner(l), _upper_corner(u) { }
+        : _lower(l), _upper(u) { }
       IndexBlock(const IndexBlock& b)
-        : _lower_corner(b._lower_corner), _upper_corner(b._upper_corner) { }
+        : _lower(b._lower), _upper(b._upper) { }
       
-      dimension_type dimension() const { return _lower_corner.size(); }
-      index_type lower_bound(dimension_type i) const { return _lower_corner[i]; }
-      index_type upper_bound(dimension_type i) const { return _upper_corner[i]; }
+      bool operator==(const IndexBlock& b) { 
+        return this->_lower==b._lower && this->_upper==b._upper; }
+        
+      dimension_type dimension() const { return _lower.size(); }
+      index_type lower_bound(dimension_type i) const { return _lower[i]; }
+      index_type upper_bound(dimension_type i) const { return _upper[i]; }
 
-      void set_lower_bound(dimension_type i, index_type n) { _lower_corner[i]=n; }
-      void set_upper_bound(dimension_type i, index_type n) { _upper_corner[i]=n; }
+      void set_lower_bound(dimension_type i, index_type n) { _lower[i]=n; }
+      void set_upper_bound(dimension_type i, index_type n) { _upper[i]=n; }
 
-      const IndexArray& lower() const { return _lower_corner; }
-      const IndexArray& upper() const { return _upper_corner; }
-      SizeArray sizes() const { return _upper_corner-_lower_corner; }
+      const IndexArray& lower() const { return _lower; }
+      const IndexArray& upper() const { return _upper; }
+      SizeArray sizes() const { return _upper-_lower; }
       SizeArray strides() const { return compute_strides(sizes()); }
       
       GridPositionIterator begin() const { 
-        return GridPositionIterator(_lower_corner, _upper_corner,_lower_corner);
+        return GridPositionIterator(_lower, _upper,_lower);
       }
       GridPositionIterator end() const { 
-        IndexArray end_position=_lower_corner;
-        end_position[this->dimension()-1]=_upper_corner[this->dimension()-1];
-        return GridPositionIterator(_lower_corner, _upper_corner,end_position);
+        IndexArray end_position=_lower;
+        end_position[this->dimension()-1]=_upper[this->dimension()-1];
+        return GridPositionIterator(_lower, _upper,end_position);
       }
      private:
-      IndexArray _lower_corner;
-      IndexArray _upper_corner;
+      IndexArray _lower;
+      IndexArray _upper;
     };
     
     std::ostream&

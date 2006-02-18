@@ -25,6 +25,11 @@ libariadne.a: ${OBJ}
 python: lib
 	(cd ${PYTHONDIR}; ${MAKE} all)
 
+install: lib python
+	cp -f libariadne.so ${PREFIX}/lib/libariadne.so
+	(cd ${PYTHONDIR}; ${MAKE} install)
+
+
 clean:                                                                          
 	rm -f *.bak *.o *~ *% core libariadne.*
 	(cd ${BASEDIR}; ${MAKE} clean )

@@ -40,7 +40,7 @@
 #include "geometry/geometry_declarations.h"
 #include "geometry/rectangle.h"
 #include "geometry/point.h"
-#include "geometry/grid_operations.h"
+#include "geometry/unit_grid_set.h"
 
 #include "geometry/list_set.h"
 
@@ -266,7 +266,7 @@ namespace Ariadne {
       /*! \brief The highers valid vertex index. */
       IndexArray upper() const { return lower()+sizes(); }
       /*! \brief The block of valid lattice cells. */
-      IndexBlock bounds() const { return IndexBlock(lower(),upper()); }
+      UnitGridRectangle bounds() const { return UnitGridRectangle(lower(),upper()); }
       /*! \brief The number of subdivision intervals in each dimension. */
       SizeArray sizes() const {
         SizeArray result(dimension());
@@ -347,23 +347,26 @@ namespace Ariadne {
       typedef R real_type;
       typedef Point<R> state_type;
 
-      /*!\brief Construct from a grid and an integer array. */
+      /*!\brief Construct from a grid and an unit grid cell. */
+      GridCell(const Grid<R>& g, const UnitGridCell& pos);
+
+      /*!\brief Construct from a grid and an unit grid cell. */
       GridCell(const Grid<R>& g, const IndexArray& pos);
 
       /*!\brief The grid containing the cell. */
       const Grid<R>& grid() const { return _grid; }
 
       /*!\brief The dimension of the cell. */
-      dimension_type dimension() const { return _position.size(); }
+      dimension_type dimension() const { return _position.dimension(); }
 
       /*!\brief The position of the cell in the grid. */
-      const IndexArray& position() const { return _position; }
+      const UnitGridCell& position() const { return _position; }
 
       /*!\brief Convert to an ordinary rectangle. */
       operator Rectangle<R>() const;
      private:
       const Grid<R>& _grid;
-      IndexArray _position;
+      UnitGridCell _position;
     };
 
 
@@ -381,7 +384,7 @@ namespace Ariadne {
       /*!\brief Construct an empty rectangle on a grid. */
       GridRectangle(const Grid<R>& g);
       /*!\brief Construct from a grid and a bounding block. */
-      GridRectangle(const Grid<R>& g, const IndexBlock& b);
+      GridRectangle(const Grid<R>& g, const UnitGridRectangle& b);
       /*!\brief Construct from a grid and two integer arrays giving the corners. */
       GridRectangle(const Grid<R>& g, const IndexArray& l, const IndexArray& u);
       /*!\brief Construct from a grid and an ordinary rectangle. */
@@ -395,13 +398,13 @@ namespace Ariadne {
       dimension_type dimension() const { return _position.dimension(); }
 
       /*!\brief The position of the rectangle in the grid. */
-      const IndexBlock& position() const { return _position; }
+      const UnitGridRectangle& position() const { return _position; }
 
       /*!\brief Convert to an ordinary rectangle. */
       operator Rectangle<R>() const;
      private:
       const Grid<R>& _grid;
-      IndexBlock _position;
+      UnitGridRectangle _position;
     };
 
 
@@ -437,6 +440,7 @@ namespace Ariadne {
     class GridMaskSet {
       friend class GridMaskSetConstIterator<R>;
       friend class GridCellListSet<R>;
+      friend class PartitionTreeSet<R>;
      public:
       typedef R real_type;
       typedef Point<R> state_type;
@@ -447,10 +451,10 @@ namespace Ariadne {
       GridMaskSet(const FiniteGrid<R>& g);
      
       /*!\brief Construct an empty set from a grid, and a bounding box. */
-      GridMaskSet(const Grid<R>& g, const IndexBlock& b);
+      GridMaskSet(const Grid<R>& g, const UnitGridRectangle& b);
      
       /*!\brief Construct a set from a grid, a bounding box, and a mask */
-      GridMaskSet(const Grid<R>& g, const IndexBlock& b, const BooleanArray& m);
+      GridMaskSet(const Grid<R>& g, const UnitGridRectangle& b, const BooleanArray& m);
 
       /*!\brief Copy constructor. */
       GridMaskSet(const GridMaskSet<R>& gms);
@@ -472,8 +476,8 @@ namespace Ariadne {
 
       /*! \brief Equality operator. */
       bool operator==(const GridMaskSet<R>& gms) {
-        if(this->grid()==gms.grid() && this->_bounds==gms._bounds) {
-          return this->_mask==gms._mask;
+        if(this->grid()==gms.grid() && this->bounds()==gms.bounds()) {
+          return this->mask()==gms.mask();
         }
         throw(std::domain_error("Can only compare GridMaskSets on the same grid"));
       }
@@ -485,29 +489,35 @@ namespace Ariadne {
       const Grid<R>& grid() const { return *_grid_ptr; }
 
       /*! \brief The space dimension of the set. */
-      dimension_type dimension() const { return _sizes.size(); }
+      dimension_type dimension() const { return _unit_set.dimension(); }
 
        /*! \brief The number of elements in the mask. */
-      size_type capacity() const { return _strides[dimension()]; }
-
+      size_type capacity() const { return _unit_set.capacity(); }
+      
       /*! \brief The lowest position in the grid. */
-      const IndexArray& lower() const { return _bounds.lower(); }
+      const IndexArray& lower() const { return _unit_set.lower(); }
 
       /*! \brief The highest position in the grid. */
-      const IndexArray& upper() const { return _bounds.upper(); }
+      const IndexArray& upper() const { return _unit_set.upper(); }
 
-      /*! \brief The highest position in the grid. */
-      const IndexBlock& bounds() const { return _bounds; }
+      /*! \brief The bounding rectangle in the grid. */
+      const UnitGridRectangle& bounds() const { return _unit_set.bounds(); }
+
+      /*! \brief The bounding rectangle in the grid. */
+      const SizeArray& sizes() const { return _unit_set.sizes(); }
+
+      /*! \brief The bounding rectangle in the grid. */
+      const SizeArray& strides() const { return _unit_set.strides(); }
 
       /*! \brief The number of cells in the grid. */
-      const BooleanArray& mask() const { return _mask; }
+      const BooleanArray& mask() const { return _unit_set.mask(); }
 
       /*! \brief Returns true if the set is empty. */
-      bool empty() const { return std::find(_mask.begin(),_mask.end(),true)==_mask.end(); }
-
+      bool empty() const { return _unit_set.empty(); }
+      
       /*! \brief The number of cells in the grid. */
-      size_type size() const { return std::count(_mask.begin(),_mask.end(),true); }
-
+      size_type size() const { return _unit_set.size(); }
+      
       /*! \brief The ith nonempty cell in the grid. */
       GridCell<R> operator[](size_type i) const { 
         const_iterator iter=this->begin();
@@ -530,32 +540,31 @@ namespace Ariadne {
       /*! \brief Adjoins a cell to the set. */
       void adjoin(const GridCell<R>& c) {
         assert(c.grid()==this->grid());
-        compute_cell_mask(&_mask,_strides,_lower,c._position);
+        _unit_set.adjoin(c._position);
       }
 
       /*! \brief Adjoins a rectangle to the set. */
       void adjoin(const GridRectangle<R>& r) {
         assert(r.grid()==this->grid());
-        compute_rectangle_mask(&_mask,_strides,_lower,
-                               r.position().lower(),r.position().upper());
+        _unit_set.adjoin(r._position);
       }
 
       /*! \brief Adjoins a GridMaskSet to the set. */
-      void adjoin(const GridMaskSet<R>& ms) {
-        assert(ms.grid()==this->grid());
-        _mask |= ms._mask;
+      void adjoin(const GridMaskSet<R>& gms) {
+        assert(gms.grid()==this->grid());
+        _unit_set.adjoin(gms._unit_set);
       }
 
       /*! \brief Adjoins a GridCellListSet to the set. */
       void adjoin(const GridCellListSet<R>& cls) {
         assert(cls.grid()==this->grid());
-        compute_cell_list_mask(&_mask,_strides,_lower,cls._list);
+        _unit_set.adjoin_cells(cls._list);
       }
 
       /*! \brief Adjoins a GridRectangleListSet to the set. */
       void adjoin(const GridRectangleListSet<R>& rls) {
         assert(rls.grid()==this->grid());
-        compute_rectangle_list_mask(&_mask,_strides,_lower,rls._list);
+        _unit_set.adjoin_rectangles(rls._list);
       }
 
       friend bool subset<> (const GridMaskSet<R>&, const GridMaskSet<R>&);
@@ -564,13 +573,7 @@ namespace Ariadne {
       friend GridMaskSet<R> difference<> (const GridMaskSet<R>&, const GridMaskSet<R>&);
      private:
       const Grid<R>* _grid_ptr;
-      IndexBlock _bounds;
-      IndexArray _lower;
-      SizeArray _sizes;
-      SizeArray _strides;
-      BooleanArray _mask;
-      //size_type _capacity;
-      //index_type _offset;
+      UnitGridMaskSet _unit_set;
     };
 
 
@@ -648,7 +651,7 @@ namespace Ariadne {
       const_iterator end() const { return const_iterator(*this,this->size()); }
 
       /*!\brief Append a GridCell to the list. */
-      void adjoin(const GridCell<R>& c) { _list.push_back(c._position); }
+      void adjoin(const GridCell<R>& c) { _list.push_back(c.position().lower()); }
 
       friend std::ostream& operator<< <> (std::ostream&, const GridCellListSet<R>&);
      private:
@@ -737,7 +740,7 @@ namespace Ariadne {
 
       /*!\brief Return the @a i th rectangle in the list. */
       GridRectangle<R> operator[] (const size_t i) const {
-        return GridRectangle<R>(grid(),IndexBlock(_list[2*i],_list[2*i+1]));
+        return GridRectangle<R>(grid(),UnitGridRectangle(_list[2*i],_list[2*i+1]));
       }
 
       /*! \brief A constant iterator to the beginning of the list. */

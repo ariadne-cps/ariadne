@@ -63,8 +63,10 @@ namespace Ariadne {
     typedef BinaryTreeIterator iterator;
     typedef BinaryTreeIterator const_iterator;
    public:
-    /*!\brief Construct a list containing just the empty word. */
+    /*!\brief Construct a tree containing just the empty word. */
     explicit BinaryTree() : _array(1) { _array[0]=leaf; }
+    /*!\brief Construct a tree of depth n containing all words of size n. */
+    explicit BinaryTree(size_type n);
     /*! \brief Construct a tree from an array of bits denoting branches and leaves. */
     explicit BinaryTree(const BooleanArray& t) : _array(t) { check(); }
     explicit BinaryTree(const std::vector<bool>& t) : _array(t.begin(),t.end()) { check(); }
@@ -81,6 +83,9 @@ namespace Ariadne {
     /*! \brief The depth of the furthest leaf of the tree. */
     size_type depth() const;
 
+    /*! \brief The array of bits denoting branches and leaves. */
+    const BooleanArray& array() const { return _array; }
+
     friend std::ostream& operator<<(std::ostream&, const BinaryTree&);
    private:
     void check() const;
@@ -92,9 +97,9 @@ namespace Ariadne {
     friend class BinaryTree;
    private:
     BinaryTreeIterator(BooleanArray::const_iterator i) : _position(i), _word() { }
-    BinaryTreeIterator& initialize() { while(*_position==branch) { _word.push_back(left); ++_position; } return *this; }
+    BinaryTreeIterator& initialise() { while(*_position==branch) { _word.push_back(left); ++_position; } return *this; }
    public:
-    BinaryTreeIterator(const BooleanArray& ba) : _position(ba.begin()), _word() { initialize(); }
+    BinaryTreeIterator(const BooleanArray& ba) : _position(ba.begin()), _word() { initialise(); }
    public:
     BinaryTreeIterator(const BinaryTreeIterator& iter) : _position(iter._position), _word(iter._word) { }
     bool operator==(const BinaryTreeIterator& iter) const { return this->_position==iter._position; }
@@ -109,28 +114,11 @@ namespace Ariadne {
     BinaryWord _word;
   };
 
-  //TODO: Replace by a general-purpose mask iterator
-  class BinarySubtreeIterator {
-    friend class BinaryTree;
-   public:
-    BinarySubtreeIterator(BinaryTree::const_iterator ti, BooleanArray::const_iterator pi) : _word_iter(ti), _mask_iter(pi) { }
-    BinarySubtreeIterator& initialize() { while(!*_mask_iter) { ++_mask_iter; ++_word_iter; } return *this; }
-  
-    bool operator==(const BinarySubtreeIterator& iter) const { return this->_word_iter==iter._word_iter && this->_mask_iter==iter._mask_iter; }
-    bool operator!=(const BinarySubtreeIterator& iter) const { return !(*this==iter); }
-    const BinaryWord& operator*() const { return _word_iter.operator*(); }
-    const BinaryWord* operator->() const { return _word_iter.operator->(); }
-    BinarySubtreeIterator& operator++() { do { ++_mask_iter; ++_word_iter; } while( !_word_iter->empty() && !*_mask_iter ); return *this; }
-   private:
-    BinaryTree::const_iterator _word_iter;
-    BooleanArray::const_iterator _mask_iter;
-  };
-
   inline
   BinaryTree::const_iterator 
   BinaryTree::begin() const 
   { 
-    return const_iterator(_array.begin()).initialize(); 
+    return const_iterator(_array.begin()).initialise(); 
   }
 
   inline
@@ -140,9 +128,10 @@ namespace Ariadne {
     return const_iterator(_array.end()); 
   }
 
-
   std::ostream& operator<<(std::ostream& os, const BinaryTree& t);
  
+  
+  
 }
 
   

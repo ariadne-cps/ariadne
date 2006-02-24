@@ -1,7 +1,7 @@
 /***************************************************************************
- *            partition_tree_operations.cc
+ *            partition_tree_operations.h
  *
- *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
+ *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -21,25 +21,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "geometry/partition_tree_operations.h"
+/*! \file partition_tree_operations.h
+ *  \brief General operations on partition trees.
+ */
 
-Ariadne::SubdivisionSequence 
-Ariadne::Geometry::default_subdivision_coordinates(dimension_type n) {
-  dimension_type coords[n];
-  for(dimension_type i=0; i!=n; ++i) {
-    coords[i]=i;
+#ifndef _ARIADNE_PARTITION_TREE_OPERATIONS_H
+#define _ARIADNE_PARTITION_TREE_OPERATIONS_H
+
+#include "base/basic_type.h"
+
+#include "geometry/geometry_declarations.h"
+
+namespace Ariadne {
+  namespace Geometry {
+    SubdivisionSequence default_subdivision_coordinates(dimension_type);
+    dimension_type compute_dimension(const SubdivisionSequence&);
   }
-  return SubdivisionSequence(coords,coords,coords+n);
 }
 
-Ariadne::dimension_type 
-Ariadne::Geometry::compute_dimension(const SubdivisionSequence& ss) 
-{
-  Ariadne::dimension_type result=0;
-  for(size_type i=0; i!=ss.body_size()+ss.tail_size(); ++i) {
-    if(ss[i]>=result) {
-      result=ss[i]+1;
-    }
-  }
-  return result;
-}
+#endif /* _ARIADNE_PARTITION_TREE_OPERATIONS_H */

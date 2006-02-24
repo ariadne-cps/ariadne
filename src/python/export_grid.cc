@@ -40,7 +40,8 @@ using Ariadne::index_type;
 using Ariadne::BooleanArray;
 using Ariadne::IndexArray;
 using Ariadne::SizeArray;
-using Ariadne::Geometry::IndexBlock;
+using Ariadne::Geometry::UnitGridCell;
+using Ariadne::Geometry::UnitGridRectangle;
 
 typedef Ariadne::Geometry::Point<Real> RPoint;
 typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
@@ -143,12 +144,12 @@ void export_grid() {
     //    .def(str(self))    // __str__
     ;
 
-  class_<RGridCell>("GridCell",init<RFiniteGrid,IndexArray>())
+  class_<RGridCell>("GridCell",init<RFiniteGrid,UnitGridCell>())
     .def("dimension", &RGridCell::dimension)
     .def(str(self))    // __str__
     ;
   
-  class_<RGridRectangle>("GridRectangle",init<RFiniteGrid,IndexBlock>())
+  class_<RGridRectangle>("GridRectangle",init<RFiniteGrid,UnitGridRectangle>())
     .def("dimension", &RGridRectangle::dimension)
     .def(str(self))    // __str__
     ;

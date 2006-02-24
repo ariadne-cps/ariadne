@@ -1,8 +1,7 @@
 /***************************************************************************
- *            grid_operations.cc
+ *            unit_grid_set.cc
  *
- *  22 June 2005
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
+ *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -467,5 +466,5 @@ namespace Ariadne {
   
     
     
-  }
+  } 
 }

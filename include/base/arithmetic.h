@@ -31,7 +31,9 @@
 #include "base/numerical_type.h"
 
 namespace Ariadne {
-  uint factorial(const uint& n) {
+  inline
+  uint 
+  factorial(const uint& n) {
     uint result=1;
     for(uint i=1; i<=n; ++i) {
       result*=i;
@@ -39,7 +41,9 @@ namespace Ariadne {
     return result;
   }
 
-  Rational pow(const Rational& x, const uint& n) {
+  inline
+  Rational 
+  pow(const Rational& x, const uint& n) {
     Rational result=1;
     for(uint i=0; i!=n; ++i) {
       result*=x;
@@ -47,13 +51,48 @@ namespace Ariadne {
     return result;
   }
 
-  int pow(int x, uint n) {
+  inline
+  int 
+  pow(int x, uint n) {
     int result=1;
     for(uint i=0; i!=n; ++i) {
       result*=x;
     }
     return result;
   }
+  
+  inline
+  uint 
+  pow(uint x, uint n) {
+    uint result=1;
+    for(uint i=0; i!=n; ++i) {
+      result*=x;
+    }
+    return result;
+  }
+  
+  inline
+  uint 
+  log_floor(uint n, uint x) {
+    assert(n>1 && x>0);
+    uint result=0;
+    while(x>=n) {
+      x/=n;
+      result+=1;
+    }
+    return result;
+  }
+  
+  inline
+  uint 
+  log_ceil(uint n, uint x) {
+    assert(n>1 && x>0);
+    if(x==1) {
+      return 0;
+    }
+    return log_floor(n,x-1)+1;
+  }
+
 }
 
 

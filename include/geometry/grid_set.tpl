@@ -22,6 +22,8 @@
  *  Foundation, Inc., 59 Templece Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "../base/arithmetic.h"
+
 #include "../geometry/parallelopiped.h"
 #include "../geometry/partition_tree_set.h"
 #include "../geometry/grid_set.h"
@@ -169,7 +171,7 @@ namespace Ariadne {
     { }
 
     template<typename R>
-    GridRectangle<R>::GridRectangle(const Grid<R>& g, const IndexBlock& b)
+    GridRectangle<R>::GridRectangle(const Grid<R>& g, const UnitGridRectangle& b)
       : _grid(g), _position(b)
     {
       assert(g.dimension()==b.dimension());
@@ -196,20 +198,23 @@ namespace Ariadne {
 
     template<typename R>
     GridRectangle<R>::GridRectangle(const GridCell<R>& c)
-      : _grid(c._grid), _position(c.dimension())
+      : _grid(c._grid), _position(c.position())
     {
-      for(dimension_type i=0; i!=_position.dimension(); ++i) {
-        _position.set_lower_bound(i,c.position()[i]);
-        _position.set_upper_bound(i,c.position()[i]+1);
-      }
     }
 
+
+    template<typename R>
+    GridCell<R>::GridCell(const Grid<R>& g, const UnitGridCell& pos)
+      : _grid(g), _position(pos)
+    {
+      assert(_position.dimension()==_grid.dimension());
+    }
 
     template<typename R>
     GridCell<R>::GridCell(const Grid<R>& g, const IndexArray& pos)
       : _grid(g), _position(pos)
     {
-      assert(_position.size()==_grid.dimension());
+      assert(_position.dimension()==_grid.dimension());
     }
 
 
@@ -219,8 +224,8 @@ namespace Ariadne {
       Rectangle<R> result(dimension());
 
       for(dimension_type i=0; i!=dimension(); ++i) {
-        result.set_lower_bound(i, _grid.subdivision_coordinate(i,_position[i]));
-        result.set_upper_bound(i, _grid.subdivision_coordinate(i,_position[i]+1));
+        result.set_lower_bound(i, _grid.subdivision_coordinate(i,_position.lower_bound(i)));
+        result.set_upper_bound(i, _grid.subdivision_coordinate(i,_position.upper_bound(i)));
       }
 
       return result;
@@ -305,8 +310,8 @@ namespace Ariadne {
     bool
     subset (const GridMaskSet<R> &A, const GridMaskSet<R> &B)
     {
-      assert(A.grid()==B.grid());
-      return A._mask <= B._mask;
+      assert(A.grid()==B.grid() && A.bounds()==B.bounds());
+      return A.mask() <= B.mask();
     }
 
     /*! \brief The union of \a A and \a B. */
@@ -314,8 +319,8 @@ namespace Ariadne {
     GridMaskSet<R>
     join(const GridMaskSet<R> &A, const GridMaskSet<R> &B)
     {
-      assert(A.grid()==B.grid());
-      return GridMaskSet<R>(A.grid(), A.bounds(), A._mask | B._mask);
+      assert(A.grid()==B.grid() && A.bounds()==B.bounds());
+      return GridMaskSet<R>(A.grid(), A.bounds(), A.mask() | B.mask());
     }
 
     /*! \brief The closure of the intersection of the interior of \a A with the interior of \a B. */
@@ -323,8 +328,8 @@ namespace Ariadne {
     GridMaskSet<R>
     regular_intersection(const GridMaskSet<R> &A, const GridMaskSet<R> &B)
     {
-      assert(A.grid()==B.grid());
-      return GridMaskSet<R>(A.grid(), A.bounds(), A._mask & B._mask);
+      assert(A.grid()==B.grid() && A.bounds()==B.bounds());
+      return GridMaskSet<R>(A.grid(), A.bounds(), A.mask() & B.mask());
     }
 
     /*! \brief The closure of the intersection of the interior of \a A with the interior of \a B. */
@@ -332,8 +337,8 @@ namespace Ariadne {
     GridMaskSet<R>
     difference(const GridMaskSet<R> &A, const GridMaskSet<R> &B)
     {
-      assert(A.grid()==B.grid());
-      return GridMaskSet<R>(A.grid(), A.bounds(), A._mask - B._mask);
+      assert(A.grid()==B.grid() && A.bounds()==B.bounds());
+      return GridMaskSet<R>(A.grid(), A.bounds(), A.mask() - B.mask());
     }
 
 
@@ -352,7 +357,7 @@ namespace Ariadne {
     GridMaskSetConstIterator<R>::GridMaskSetConstIterator(const GridMaskSet<R>& s,
                                                           const IndexArray& pos)
       : _set(s),
-        _index(compute_index(pos,s._lower,s._strides))
+        _index(compute_index(pos,s.lower(),s.strides()))
     {
       initialise();
     }
@@ -360,11 +365,13 @@ namespace Ariadne {
     template<typename R>
     void 
     GridMaskSetConstIterator<R>::initialise() { 
-      if(_index>=_set._mask.size()) {
-        _index=_set._mask.size();
+      if(_index>=_set.mask().size()) {
+        _index=_set.mask().size();
       }
-      else if(_set._mask[_index]==false) { 
-        ++(*this); 
+      else {
+        while(_index!=_set.mask().size() && _set.mask()[_index]==false) { 
+          ++(*this); 
+        }
       }
     }
     
@@ -372,7 +379,7 @@ namespace Ariadne {
     GridCell<R>
     GridMaskSetConstIterator<R>::operator*() const
     {
-      return GridCell<R>(_set.grid(),compute_position(_index,_set._lower,_set._strides));
+      return GridCell<R>(_set.grid(),compute_position(_index,_set.lower(),_set.strides()));
     }
 
     template<typename R>
@@ -381,7 +388,7 @@ namespace Ariadne {
     {
       do {
         ++_index;
-      } while( _index<_set._mask.size() && _set._mask[_index]==false );
+      } while( _index<_set.mask().size() && _set.mask()[_index]==false );
       return *this;
     }
 
@@ -393,9 +400,10 @@ namespace Ariadne {
     GridMaskSet<R>::operator ListSet<R,Rectangle>() const
     {
       //std::cerr << "GridMaskSet<R>::operator ListSet<R,Rectangle>() const" << std::endl;
-      ListSet<R,Rectangle> result(dimension());
+      ListSet<R,Rectangle> result(this->dimension());
       for(typename GridMaskSet::const_iterator riter=begin(); riter!=end(); ++riter) {
-        result.push_back(*riter);
+        Rectangle<R> r(*riter);
+        result.push_back(r);
       }
       return result;
     }
@@ -425,105 +433,61 @@ namespace Ariadne {
 
 
 
-
+  
     template<typename R>
     GridMaskSet<R>::GridMaskSet(const FiniteGrid<R>& g)
-      : _grid_ptr(&g), _bounds(g.bounds()), 
-        _lower(g.lower()), _sizes(g.dimension()), _strides(g.dimension()+1),
-        _mask()
-    {
-      //std::cerr << "GridMaskSet<R>::GridMaskSet(const FiniteGrid<R>& g)" << std::endl;
-      _sizes=_bounds.sizes();
-      _strides=_bounds.strides();
-      _mask=BooleanArray(capacity(),false);
+      : _grid_ptr(&g), _unit_set(g.bounds()) 
+    { 
     }
 
     template<typename R>
-    GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const IndexBlock& b)
-      : _grid_ptr(&g), _bounds(b),
-        _lower(g.dimension()), _sizes(g.dimension()), _strides(_sizes.size()+1),
-        _mask()
+    GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const UnitGridRectangle& b)
+      : _grid_ptr(&g), _unit_set(b) 
     {
-      _lower=_bounds.lower();
-      _sizes=_bounds.sizes();
-      _strides=_bounds.strides();
-      _mask=BooleanArray(capacity(),false);
+      const FiniteGrid<R>* finite_grid_ptr=dynamic_cast<const FiniteGrid<R>*>(_grid_ptr);
+      if(finite_grid_ptr) {
+        assert(subset(b,finite_grid_ptr->bounds()));
+      }
     }
-
+  
     template<typename R>
-    GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const IndexBlock& b, const BooleanArray& m)
-      : _grid_ptr(&g), _bounds(b),
-        _lower(g.dimension()), _sizes(g.dimension()), _strides(_sizes.size()+1),
-        _mask(m)
+    GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const UnitGridRectangle& b, const BooleanArray& m)
+      : _grid_ptr(&g), _unit_set(b,m)
     {
-      _lower=_bounds.lower();
-      _sizes=_bounds.sizes();
-      _strides=_bounds.strides();
-      assert(_mask.size()==capacity());
+      const FiniteGrid<R>* finite_grid_ptr=dynamic_cast<const FiniteGrid<R>*>(_grid_ptr);
+      if(finite_grid_ptr) {
+        assert(subset(b,finite_grid_ptr->bounds()));
+      }
     }
 
     template<typename R>
     GridMaskSet<R>::GridMaskSet(const GridMaskSet<R>& gms) 
-      : _grid_ptr(&gms.grid()), _bounds(gms._bounds),
-        _lower(gms._lower), _sizes(gms._sizes), _strides(gms._strides),
-        _mask(gms._mask)
-    {  
+      : _grid_ptr(&gms.grid()), _unit_set(gms._unit_set)
+    {
     }
     
     template<typename R>
     GridMaskSet<R>::GridMaskSet(const GridCellListSet<R>& gcls)
-      : _grid_ptr(&gcls.grid()), _bounds(grid().dimension()),
-        _lower(grid().dimension()), _sizes(grid().dimension()), _strides(grid().dimension()+1),
-        _mask()
+      : _grid_ptr(&gcls.grid()),
+        _unit_set(dynamic_cast<const FiniteGrid<R>*>(_grid_ptr)->bounds())
     {
-      const FiniteGrid<R>* finite_grid_ptr=dynamic_cast<const FiniteGrid<R>*>(_grid_ptr);
-      if(finite_grid_ptr) {
-        _bounds=finite_grid_ptr->bounds();
-      }
-      else {
-        _bounds=compute_cell_list_bounds(gcls._list);
-      }
-      _lower=_bounds.lower();
-      _sizes=_bounds.sizes();
-      _strides=_bounds.strides();
-      _mask=BooleanArray(capacity(),false);
-      compute_cell_list_mask(&_mask, _strides, _lower, gcls._list);
+      _unit_set.adjoin_cells(gcls._list);
     }
-
+    
     template<typename R>
     GridMaskSet<R>::GridMaskSet(const GridRectangleListSet<R>& grls)
-      : _grid_ptr(&grls.grid()), _bounds(grid().dimension()),
-        _lower(grid().dimension()), _sizes(grid().dimension()), _strides(grid().dimension()+1),
-        _mask()
+      : _grid_ptr(&grls.grid()),
+        _unit_set(dynamic_cast<const FiniteGrid<R>*>(_grid_ptr)->bounds())
     {
-      const FiniteGrid<R>* finite_grid_ptr=dynamic_cast<const FiniteGrid<R>*>(_grid_ptr);
-      if(finite_grid_ptr) {
-        _bounds=finite_grid_ptr->bounds();
-      }
-      else {
-        _bounds=compute_rectangle_list_bounds(grls._list);
-      }
-      _lower=_bounds.lower();
-      _sizes=_bounds.sizes();
-      _strides=_bounds.strides();
-      _mask=BooleanArray(capacity(),false);
-      compute_rectangle_list_mask(&_mask, _strides, _lower, grls._list);
+      _unit_set.adjoin_rectangles(grls._list);
     }
-
 
     template<typename R>
     GridMaskSet<R>::GridMaskSet(const ListSet<R,Rectangle>& rls) 
-      : _grid_ptr(0), _bounds(rls.dimension()),
-        _lower(rls.dimension()), _sizes(rls.dimension()), _strides(rls.dimension()+1),
-        _mask()
+      : _grid_ptr(new FiniteGrid<R>(rls)), 
+        _unit_set(dynamic_cast<const FiniteGrid<R>*>(_grid_ptr)->bounds())
     {
       //FIXME: Memory leak!    
-      _grid_ptr=new FiniteGrid<R>(rls);
-      _bounds=dynamic_cast<const FiniteGrid<R>*>(_grid_ptr)->bounds();
-      _lower=_bounds.lower();
-      _sizes=_bounds.sizes();
-      _strides=_bounds.strides();
-      _mask=BooleanArray(capacity(),false);
 
       for(typename ListSet<R,Rectangle>::const_iterator riter=rls.begin(); 
           riter!=rls.end(); ++riter) 
@@ -547,7 +511,7 @@ namespace Ariadne {
     GridCellListSet<R>::GridCellListSet(const GridMaskSet<R>& gms)
       : _grid_ptr(&gms.grid()), _list(gms.dimension())
     {
-      append_to_cell_list(&_list, gms._lower, gms._strides, gms._mask);
+      append_to_cell_list(&_list, gms.lower(), gms.strides(), gms.mask());
     }
 
     template<typename R>
@@ -595,8 +559,12 @@ namespace Ariadne {
     GridRectangleListSet<R>::GridRectangleListSet(const PartitionTreeSet<R>& pts)
       : _grid_ptr(0),_list(pts.dimension()) 
     {
-      //std::cerr << "GridRectangleListSet<R>::GridRectangleListSet(const PartitionTreeSet<R>& pts)" << std::endl;
-      _grid_ptr=new FiniteGrid<R>(pts.bounding_box(),pts.subdivisions());
+      std::cerr << "GridRectangleListSet<R>::GridRectangleListSet(const PartitionTreeSet<R>& pts)" << std::endl;
+      SizeArray sizes=pts.depths();
+      for(dimension_type i=0; i!=pts.dimension(); ++i) {
+        sizes[i]=pow(2,sizes[i]);
+      }
+      _grid_ptr=new FiniteGrid<R>(pts.bounding_box(),sizes);
       for(typename PartitionTreeSet<R>::const_iterator iter=pts.begin(); iter!=pts.end(); ++iter) {
         Rectangle<R> rect(*iter);
         GridRectangle<R> grect(this->grid(),rect);
@@ -675,9 +643,9 @@ namespace Ariadne {
       }
       Rectangle<R> bb=p.bounding_box();
       GridRectangle<R> gbb=over_approximation(bb,g);
-      IndexBlock block=gbb.position();
+      UnitGridRectangle block=gbb.position();
 
-      for(IndexBlock::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
+      for(UnitGridRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
         GridCell<R> cell(g,*iter);
         if(!disjoint(Rectangle<R>(cell),p)) {
           result.adjoin(cell);
@@ -724,9 +692,9 @@ namespace Ariadne {
 
       if(!bb.empty()) {
         GridRectangle<R> gbb=over_approximation(bb,g);
-        IndexBlock block=gbb.position();
+        UnitGridRectangle block=gbb.position();
 
-        for(IndexBlock::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
+        for(UnitGridRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
           GridCell<R> cell(g,*iter);
           if(!disjoint(Rectangle<R>(cell),p)) {
             result.adjoin(cell);
@@ -752,7 +720,7 @@ namespace Ariadne {
       return result;
     }
 
-
+  
 
     template <typename R>
     std::ostream& operator<<(std::ostream &os,

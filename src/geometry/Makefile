@@ -1,6 +1,7 @@
 include ../../config.mk
 
 OBJ = grid_operations.o partition_tree_operations.o \
+	unit_grid_set.o unit_partition_tree_set.o \
 	grid_set.o partition_tree_set.o
 
 all: ${OBJ}
@@ -36,17 +37,41 @@ grid_operations.o: grid_operations.cc \
   ../../include/geometry/geometry_declarations.h
 
 partition_tree_operations.o: partition_tree_operations.cc \
-  ../../include/geometry/partition_tree_set.h \
+  ../../include/geometry/partition_tree_operations.h \
   ../../include/base/basic_type.h ../../include/base/array.h \
-  ../../include/base/sequence.h ../../include/base/binary_word.h \
-  ../../include/base/utility.h ../../include/base/basic_type.h \
-  ../../include/base/binary_tree.h ../../include/base/binary_word.h \
-  ../../include/geometry/rectangle.h ../../include/base/utility.h \
-  ../../include/base/interval.h ../../include/geometry/point.h \
-  ../../include/linear_algebra/vector.h ../../include/base/basic_type.h \
-  ../../include/base/numerical_type.h ../../include/base/dyadic.h \
-  ../../include/base/interval.h \
+  ../../include/base/sequence.h \
   ../../include/geometry/geometry_declarations.h
+
+unit_grid_set.o: unit_grid_set.cc ../../include/geometry/unit_grid_set.h \
+  ../../include/base/array.h ../../include/base/basic_type.h \
+  ../../include/base/array.h ../../include/base/sequence.h \
+  ../../include/geometry/grid_operations.h \
+  ../../include/geometry/rectangle.h ../../include/base/utility.h \
+  ../../include/base/interval.h ../../include/base/binary_word.h \
+  ../../include/base/utility.h ../../include/base/basic_type.h \
+  ../../include/geometry/point.h ../../include/linear_algebra/vector.h \
+  ../../include/base/basic_type.h ../../include/base/numerical_type.h \
+  ../../include/base/dyadic.h ../../include/base/interval.h \
+  ../../include/geometry/geometry_declarations.h \
+  ../../include/geometry/grid_operations.h
+
+unit_partition_tree_set.o: unit_partition_tree_set.cc \
+  ../../include/base/arithmetic.h ../../include/base/numerical_type.h \
+  ../../include/base/dyadic.h ../../include/geometry/rectangle.h \
+  ../../include/base/utility.h ../../include/base/array.h \
+  ../../include/base/interval.h ../../include/base/binary_word.h \
+  ../../include/base/utility.h ../../include/base/basic_type.h \
+  ../../include/base/sequence.h ../../include/geometry/point.h \
+  ../../include/linear_algebra/vector.h ../../include/base/basic_type.h \
+  ../../include/base/numerical_type.h ../../include/base/interval.h \
+  ../../include/geometry/geometry_declarations.h \
+  ../../include/geometry/unit_partition_tree_set.h \
+  ../../include/base/basic_type.h ../../include/base/array.h \
+  ../../include/base/binary_tree.h ../../include/base/binary_word.h \
+  ../../include/geometry/rectangle.h \
+  ../../include/geometry/unit_grid_set.h \
+  ../../include/geometry/grid_operations.h \
+  ../../include/geometry/rectangle.h
 
 grid_set.o: grid_set.cc ../../include/geometry/grid_set.h \
   ../../include/base/array.h ../../include/base/interval.h \
@@ -58,9 +83,11 @@ grid_set.o: grid_set.cc ../../include/geometry/grid_set.h \
   ../../include/geometry/point.h ../../include/linear_algebra/vector.h \
   ../../include/base/basic_type.h ../../include/base/numerical_type.h \
   ../../include/base/dyadic.h ../../include/base/interval.h \
+  ../../include/geometry/unit_grid_set.h ../../include/base/basic_type.h \
   ../../include/geometry/grid_operations.h \
-  ../../include/base/basic_type.h ../../include/geometry/list_set.h \
-  ../../include/geometry/grid_set.tpl \
+  ../../include/geometry/list_set.h ../../include/geometry/grid_set.tpl \
+  ../../include/geometry/../base/arithmetic.h \
+  ../../include/base/numerical_type.h \
   ../../include/geometry/../geometry/parallelopiped.h \
   ../../include/base/utility.h ../../include/base/interval.h \
   ../../include/linear_algebra/vector.h \
@@ -79,6 +106,8 @@ grid_set.o: grid_set.cc ../../include/geometry/grid_set.h \
   ../../include/base/basic_type.h ../../include/base/binary_word.h \
   ../../include/base/binary_tree.h ../../include/base/binary_word.h \
   ../../include/geometry/rectangle.h \
+  ../../include/geometry/unit_partition_tree_set.h \
+  ../../include/base/binary_tree.h \
   ../../include/geometry/../geometry/grid_set.h
 
 partition_tree_set.o: partition_tree_set.cc \
@@ -93,9 +122,12 @@ partition_tree_set.o: partition_tree_set.cc \
   ../../include/base/numerical_type.h ../../include/base/dyadic.h \
   ../../include/base/interval.h \
   ../../include/geometry/geometry_declarations.h \
+  ../../include/geometry/unit_partition_tree_set.h \
+  ../../include/base/array.h \
   ../../include/geometry/partition_tree_set.tpl \
   ../../include/geometry/partition_tree_set.h \
   ../../include/geometry/rectangle.h ../../include/geometry/list_set.h \
-  ../../include/geometry/grid_set.h ../../include/base/array.h \
+  ../../include/geometry/grid_set.h \
+  ../../include/geometry/unit_grid_set.h \
   ../../include/geometry/grid_operations.h
 

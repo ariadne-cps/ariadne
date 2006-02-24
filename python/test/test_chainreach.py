@@ -28,14 +28,20 @@ import sys
 
 
 h=HenonMap(Dyadic(1.5),Dyadic(0.875))
-gbb=Rectangle("[-4,4]x[-4,4]") # grid bounding box
-g=FiniteGrid(gbb,512);
-ir=Rectangle("[1.49,1.51]x[0.49,0.51]") # initial state
+gbb=Rectangle("[-10,4]x[-7,7]") # grid bounding box
+g=FiniteGrid(gbb,128);
+ir=Rectangle("[1.499,1.501]x[0.499,0.501]") # initial state
 cb=Rectangle("[-4,4]x[-4,4]") # cutoff box
 epsbb=Rectangle("[-4.1,4.1]x[-4.1,4.1]") # eps bounding box
+cb=Rectangle(gbb) # cutoff box
+epsbb=Rectangle(gbb) # eps bounding box
 i=RectangleListSet(ir)
 
 cr=chainreach(h,i,g,cb)
+ptcr=PartitionTreeSet(cr)
+
+print len(cr)
+print len(ptcr),ptcr.capacity()
 
 eps=EpsPlot("cr.eps",epsbb)
 eps.set_pen_colour("black")
@@ -44,6 +50,9 @@ eps.write(cb)
 eps.set_line_style(0)
 eps.set_fill_colour("green")
 eps.write(cr)
+eps.set_line_style(1)
+eps.set_fill_style(0)
+eps.write(ptcr.partition_tree())
 eps.set_line_style(1)
 eps.set_fill_colour("blue")
 eps.write(ir)

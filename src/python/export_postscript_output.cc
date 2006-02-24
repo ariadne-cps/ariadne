@@ -41,6 +41,7 @@ typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Parallelopiped> RPara
 typedef Ariadne::Geometry::GridMaskSet<Real> RGridMaskSet;
 typedef Ariadne::Geometry::GridCellListSet<Real> RGridCellListSet;
 typedef Ariadne::Geometry::GridRectangleListSet<Real> RGridRectangleListSet;
+typedef Ariadne::Geometry::PartitionTree<Real> RPartitionTree;
 typedef Ariadne::Geometry::PartitionTreeSet<Real> RPartitionTreeSet;
 
 using Ariadne::Postscript::epsfstream;
@@ -54,6 +55,7 @@ inline void write_parallelopiped_list_set(epsfstream& eps, const RParallelopiped
 inline void write_grid_mask_set(epsfstream& eps, const RGridMaskSet& s) { eps << s; }
 inline void write_grid_cell_list_set(epsfstream& eps, const RGridCellListSet& s) { eps << s; }
 inline void write_grid_rectangle_list_set(epsfstream& eps, const RGridRectangleListSet& s) { eps << s; }
+inline void write_partition_tree(epsfstream& eps, const RPartitionTree& s) { eps << s; }
 inline void write_partition_tree_set(epsfstream& eps, const RPartitionTreeSet& s) { eps << s; }
 inline void epsfstream_open(epsfstream& eps, const Ariadne::Geometry::Rectangle<Real>& bbox) { eps.open(bbox); }
 
@@ -75,6 +77,7 @@ void export_postscript_output()
     .def("set_pen_colour",&epsfstream::set_pen_colour)
     .def("set_fill_colour",&epsfstream::set_fill_colour)
     .def("set_line_style",&epsfstream::set_line_style)
+    .def("set_fill_style",&epsfstream::set_fill_style)
     .def("write",&write_rectangle)
     .def("write",&write_grid_rectangle)
     .def("write",&write_grid_cell)
@@ -84,6 +87,7 @@ void export_postscript_output()
     .def("write",&write_grid_mask_set)
     .def("write",&write_grid_cell_list_set)
     .def("write",&write_grid_rectangle_list_set)
+    .def("write",&write_partition_tree)
     .def("write",&write_partition_tree_set)
   ;
   

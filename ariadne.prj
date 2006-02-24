@@ -121,7 +121,8 @@ module.include.files=\
 	system/discrete_location.h\
 	system/discrete_transition.h\
 	system/location.h\
-	utility/epsfstream.h
+	utility/epsfstream.h\
+	geometry/unit_partition_tree_set.h
 
 module.source.name=src
 module.source.type=

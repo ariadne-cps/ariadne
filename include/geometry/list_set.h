@@ -125,7 +125,7 @@ namespace Ariadne {
         if (this->dimension()==0) { this->_dimension=A.dimension(); }
 
         if (A.dimension()!=this->dimension()) {
-          throw std::invalid_argument("The two denotable set has a different space dimension to the list.");
+          throw std::invalid_argument("The denotable set has a different space dimension to the list.");
         }
 
         _vector.push_back(A);
@@ -353,7 +353,7 @@ namespace Ariadne {
         if (this->dimension()==0) { this->_dimension=A.dimension(); }
 
         if (A.dimension()!=this->dimension()) {
-          throw std::invalid_argument("The two denotable set have different space dimensions.");
+          throw std::invalid_argument("The two denotable sets have different space dimensions.");
         }
 
         if (A.empty()) {
@@ -388,7 +388,7 @@ namespace Ariadne {
         if (this->dimension()==0) { this->_dimension=A.dimension(); }
 
         if (A.dimension()!=this->dimension()) {
-          throw std::invalid_argument("The denotable set the basic set have different space dimensions.");
+          throw std::invalid_argument("The denotable set and the basic set have different space dimensions.");
         }
 
         if (!A.empty()) {
@@ -507,7 +507,7 @@ namespace Ariadne {
               const ListSet<R,BS> &B)
     {
       if (A.dimension()!=B.dimension()) {
-        throw std::invalid_argument("The two denotable set have different space dimensions.");
+        throw std::invalid_argument("The two denotable sets have different space dimensions.");
       }
 
       size_t i,j;
@@ -526,7 +526,7 @@ namespace Ariadne {
                         const ListSet<R,BS> &B)
     {
       if (A.dimension()!=B.dimension()) {
-        throw std::invalid_argument("The two denotable set have different space dimensions.");
+        throw std::invalid_argument("The two denotable sets have different space dimensions.");
       }
 
       size_t i,j;
@@ -580,7 +580,7 @@ namespace Ariadne {
                  const ListSet<R,BS> &B)
     {
       if (A.dimension()!=B.dimension()) {
-        throw std::invalid_argument("The two denotable set have different space dimensions.");
+        throw std::invalid_argument("The two denotable sets have different space dimensions.");
       }
 
       for (size_t i=0; i<A.size() ; i++) {
@@ -658,7 +658,7 @@ namespace Ariadne {
            const ListSet<R,BS> &B)
     {
       if (A.dimension()!=B.dimension()) {
-        throw std::invalid_argument("The two denotable set have different space dimensions.");
+        throw std::invalid_argument("The two denotable sets have different space dimensions.");
       }
 
       throw std::runtime_error("Not implemented");
@@ -674,7 +674,7 @@ namespace Ariadne {
       #endif
 
       if (A.dimension()!=B.dimension()) {
-        throw std::invalid_argument("The two denotable set have different space dimensions.");
+        throw std::invalid_argument("The two denotable sets have different space dimensions.");
       }
 
       ListSet<R,BS> ds_union(A);
@@ -701,7 +701,7 @@ namespace Ariadne {
       #endif
 
       if (A.dimension()!=B.dimension()) {
-        throw std::invalid_argument("The two denotable set have different space dimensions.");
+        throw std::invalid_argument("The two denotable sets have different space dimensions.");
       }
 
       for (size_t i=0; i<A.size(); i++) {

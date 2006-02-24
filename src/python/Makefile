@@ -185,10 +185,13 @@ export_list_set.o: export_list_set.cc ../../include/base/numerical_type.h \
   ../../include/base/basic_type.h ../../include/geometry/polyhedron.h \
   ../../include/geometry/generator.h ../../include/geometry/list_set.h \
   ../../include/geometry/grid_set.h \
+  ../../include/geometry/unit_grid_set.h \
+  ../../include/geometry/grid_operations.h \
   ../../include/geometry/partition_tree_set.h \
   ../../include/base/binary_tree.h ../../include/base/binary_word.h \
-  ../../include/geometry/rectangle.h ../../include/python/real_typedef.h \
-  ../../include/base/numerical_type.h \
+  ../../include/geometry/rectangle.h \
+  ../../include/geometry/unit_partition_tree_set.h \
+  ../../include/python/real_typedef.h ../../include/base/numerical_type.h \
   ../../include/python/python_utilities.h
 
 export_grid.o: export_grid.cc ../../include/base/numerical_type.h \
@@ -212,10 +215,13 @@ export_grid.o: export_grid.cc ../../include/base/numerical_type.h \
   ../../include/base/basic_type.h ../../include/geometry/polyhedron.h \
   ../../include/geometry/generator.h ../../include/geometry/list_set.h \
   ../../include/geometry/grid_set.h \
+  ../../include/geometry/unit_grid_set.h \
+  ../../include/geometry/grid_operations.h \
   ../../include/geometry/partition_tree_set.h \
   ../../include/base/binary_tree.h ../../include/base/binary_word.h \
-  ../../include/geometry/rectangle.h ../../include/python/real_typedef.h \
-  ../../include/base/numerical_type.h
+  ../../include/geometry/rectangle.h \
+  ../../include/geometry/unit_partition_tree_set.h \
+  ../../include/python/real_typedef.h ../../include/base/numerical_type.h
 
 export_partition_tree.o: export_partition_tree.cc \
   ../../include/base/numerical_type.h ../../include/base/dyadic.h \
@@ -230,11 +236,13 @@ export_partition_tree.o: export_partition_tree.cc \
   ../../include/geometry/geometry_declarations.h \
   ../../include/geometry/rectangle.h ../../include/geometry/grid_set.h \
   ../../include/base/array.h ../../include/geometry/rectangle.h \
+  ../../include/geometry/unit_grid_set.h ../../include/base/basic_type.h \
   ../../include/geometry/grid_operations.h \
-  ../../include/base/basic_type.h ../../include/geometry/list_set.h \
+  ../../include/geometry/list_set.h \
   ../../include/geometry/partition_tree_set.h \
-  ../../include/base/binary_tree.h ../../include/python/real_typedef.h \
-  ../../include/base/numerical_type.h
+  ../../include/base/binary_tree.h \
+  ../../include/geometry/unit_partition_tree_set.h \
+  ../../include/python/real_typedef.h ../../include/base/numerical_type.h
 
 export_postscript_output.o: export_postscript_output.cc \
   ../../include/geometry/rectangle.h ../../include/base/utility.h \
@@ -255,11 +263,14 @@ export_postscript_output.o: export_postscript_output.cc \
   ../../include/base/basic_type.h ../../include/geometry/polyhedron.h \
   ../../include/geometry/generator.h ../../include/geometry/list_set.h \
   ../../include/geometry/grid_set.h \
+  ../../include/geometry/unit_grid_set.h \
+  ../../include/geometry/grid_operations.h \
   ../../include/geometry/partition_tree_set.h \
   ../../include/base/binary_tree.h ../../include/base/binary_word.h \
-  ../../include/geometry/rectangle.h ../../include/utility/epsfstream.h \
-  ../../include/geometry/rectangle.h ../../include/geometry/list_set.h \
-  ../../include/geometry/grid_set.h \
+  ../../include/geometry/rectangle.h \
+  ../../include/geometry/unit_partition_tree_set.h \
+  ../../include/utility/epsfstream.h ../../include/geometry/rectangle.h \
+  ../../include/geometry/list_set.h ../../include/geometry/grid_set.h \
   ../../include/geometry/parallelopiped.h \
   ../../include/geometry/partition_tree_set.h \
   ../../include/python/real_typedef.h ../../include/base/numerical_type.h
@@ -354,8 +365,9 @@ export_apply.o: export_apply.cc ../../include/evaluation/apply.h \
   ../../include/base/utility.h ../../include/base/basic_type.h \
   ../../include/geometry/rectangle.h ../../include/base/utility.h \
   ../../include/geometry/point.h ../../include/linear_algebra/vector.h \
+  ../../include/geometry/unit_grid_set.h ../../include/base/basic_type.h \
   ../../include/geometry/grid_operations.h \
-  ../../include/base/basic_type.h ../../include/geometry/list_set.h \
+  ../../include/geometry/list_set.h \
   ../../include/evaluation/evaluation_declarations.h \
   ../../include/evaluation/map.h \
   ../../include/geometry/geometry_declarations.h \
@@ -365,6 +377,7 @@ export_apply.o: export_apply.cc ../../include/evaluation/apply.h \
   ../../include/linear_algebra/constraint.h \
   ../../include/linear_algebra/vector.h \
   ../../include/linear_algebra/matrix.h \
+  ../../include/geometry/grid_operations.h \
   ../../include/geometry/polyhedron.h ../../include/geometry/generator.h \
   ../../include/geometry/polyhedron.h ../../include/python/real_typedef.h \
   ../../include/base/numerical_type.h
@@ -394,6 +407,8 @@ export_henon_map.o: export_henon_map.cc \
   ../../include/linear_algebra/vector.h ../../include/evaluation/apply.h \
   ../../include/base/utility.h ../../include/base/array.h \
   ../../include/base/interval.h ../../include/geometry/grid_set.h \
+  ../../include/geometry/unit_grid_set.h \
+  ../../include/geometry/grid_operations.h \
   ../../include/evaluation/evaluation_declarations.h \
   ../../include/python/real_typedef.h ../../include/base/numerical_type.h
 

@@ -72,44 +72,45 @@ void export_partition_tree() {
     .def(init<RRectangle>())
     .def("dimension", &RPartitionScheme::dimension)
     .def("bounding_box", &RPartitionScheme::bounding_box, return_value_policy<copy_const_reference>())
-    .def("subdivision_coordinates", &RPartitionScheme::subdivision_coordinates, return_value_policy<copy_const_reference>())
-    .def("subdivision_coordinate", &RPartitionScheme::subdivision_coordinate)
+    .def("subdivisions", &RPartitionScheme::subdivisions, return_value_policy<copy_const_reference>())
     .def(str(self))    // __str__
   ;
 
   class_<RPartitionTree>("PartitionTree",init<RRectangle,SubdivisionSequence,BinaryTree>())
-    .def(init<RRectangle>())
-    .def(init<RRectangle,BinaryTree>())
     .def(init<RPartitionScheme,BinaryTree>())
     .def("dimension", &RPartitionTree::dimension)
     .def("bounding_box", &RPartitionTree::bounding_box, return_value_policy<copy_const_reference>())
-    .def("subdivision_coordinates", &RPartitionTree::subdivision_coordinates, return_value_policy<copy_const_reference>())
-    .def("tree", &RPartitionTree::tree, return_value_policy<copy_const_reference>())
+    .def("subdivisions", &RPartitionTree::subdivisions, return_value_policy<copy_const_reference>())
+    .def("binary_tree", &RPartitionTree::binary_tree, return_value_policy<copy_const_reference>())
+    .def("size", &RPartitionTree::size)
+    .def("__len__", &RPartitionTree::size)
+    .def("__iter__", iterator<RPartitionTree>())
     .def(str(self))    // __str__
   ;
 
   class_<RPartitionTreeSet>("PartitionTreeSet",init<RRectangle,SubdivisionSequence,BinaryTree,BooleanArray>())
-    .def(init<RPartitionScheme,BinaryTree,BooleanArray>())
     .def(init<RPartitionTree,BooleanArray>())
+    .def(init<RPartitionScheme>())
     .def(init<RGridMaskSet>())
     .def("dimension", &RPartitionTreeSet::dimension)
     .def("bounding_box", &RPartitionTreeSet::bounding_box, return_value_policy<copy_const_reference>())
-    .def("subdivision_coordinates", &RPartitionTreeSet::subdivision_coordinates, return_value_policy<copy_const_reference>())
-    .def("tree", &RPartitionTreeSet::tree, return_value_policy<copy_const_reference>())
+    .def("subdivisions", &RPartitionTreeSet::subdivisions, return_value_policy<copy_const_reference>())
+    .def("binary_tree", &RPartitionTreeSet::binary_tree, return_value_policy<copy_const_reference>())
     .def("mask", &RPartitionTreeSet::mask, return_value_policy<copy_const_reference>()) 
+    .def("partition_tree", &RPartitionTreeSet::partition_tree)
+    .def("depths", &RPartitionTreeSet::depths)
     .def("depth", &RPartitionTreeSet::depth)
-    .def("subdivisions", &RPartitionTreeSet::subdivisions)
+    .def("capacity", &RPartitionTreeSet::capacity)
+    .def("size", &RPartitionTreeSet::size)
     .def("__len__", &RPartitionTreeSet::size)
     .def("__iter__", iterator<RPartitionTreeSet>())
     .def(str(self))    // __str__
   ;
   class_<RPartitionTreeCell>("PartitionTreeCell",init<RRectangle,SubdivisionSequence,BinaryWord>())
-    .def(init<RPartitionScheme,BinaryWord>())
-//    .def(init<RRectangle,SubdivisionSequence,BinaryWord>())
     .def("dimension", &RPartitionTreeCell::dimension)
     .def("bounding_box", &RPartitionTreeCell::bounding_box, return_value_policy<copy_const_reference>())
-    .def("subdivision_coordinates", &RPartitionTreeCell::subdivision_coordinates, return_value_policy<copy_const_reference>())
-    .def("word", &RPartitionTreeCell::word, return_value_policy<copy_const_reference>())
+    .def("subdivisions", &RPartitionTreeCell::subdivisions, return_value_policy<copy_const_reference>())
+    .def("word", &RPartitionTreeCell::word)
     .def(str(self))    // __str__
   ;
 }

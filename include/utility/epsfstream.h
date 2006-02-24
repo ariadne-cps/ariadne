@@ -58,10 +58,11 @@ namespace Ariadne {
       std::string line_colour;
       std::string fill_colour;
       bool line_style;
+      bool fill_style;
       
       template<typename R>
       epsfstream(const char* fn, const Ariadne::Geometry::Rectangle<R>& bbox)
-       : std::ofstream(fn), line_colour("black"), fill_colour("green"), line_style(true)
+       : std::ofstream(fn), line_colour("black"), fill_colour("green"), line_style(true), fill_style(true)
       {
         this->open(bbox);
       }
@@ -129,6 +130,10 @@ namespace Ariadne {
         this->line_style=ls;
       }
     
+      void set_fill_style(bool fs) {
+        this->fill_style=fs;
+      }
+    
       void set_pen_colour(const char* pc) {
         this->line_colour=pc;
       }
@@ -181,8 +186,10 @@ namespace Ariadne {
     {
       assert(r.dimension()==2);
 
-      trace(eps,r);
-      eps << eps.fill_colour << " fill\n";
+      if(eps.fill_style) {
+        trace(eps,r);
+        eps << eps.fill_colour << " fill\n";
+      }
       if(eps.line_style) {
         trace(eps,r);
         eps << eps.line_colour << " stroke\n";
@@ -250,6 +257,15 @@ namespace Ariadne {
       return eps << Ariadne::Geometry::ListSet<R,Ariadne::Geometry::Rectangle>(ds);
     }
 
+    template<typename R>
+    epsfstream&
+    operator<<(epsfstream& eps, const Ariadne::Geometry::PartitionTree<R>& pt)
+    {
+      for(typename Ariadne::Geometry::PartitionTree<R>::const_iterator iter = pt.begin(); iter!=pt.end(); ++iter) {
+        eps << Ariadne::Geometry::Rectangle<R>(*iter);
+      }
+      return eps;
+    }
     
   }
 }

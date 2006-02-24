@@ -29,6 +29,9 @@
 #include "base/binary_tree.h"
 
 namespace Ariadne {
+  BinaryTree::BinaryTree(size_type n) {
+    
+  }
   void 
   BinaryTree::check() const { 
     size_type ends=1;
@@ -56,6 +59,9 @@ namespace Ariadne {
     return depth;
   }
 
+ 
+  
+  
   BinaryTreeIterator& 
   BinaryTreeIterator::operator++() { 
     while( !_word.empty() && (_word.back() == right) ) {
@@ -122,7 +128,7 @@ namespace Ariadne {
     }
     for(BinaryWord::size_type i=0; i!=b.size(); ++i) {
       if(i%8==0 && i!=0) {
-        os << " ";
+        //os << " ";
       }
       os << b[i];
     }

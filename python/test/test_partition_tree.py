@@ -34,8 +34,11 @@ print ps
 
 #btl=[0,0,0,1,0,0,1,0,1,1,0,1,1,0,1,1,1]
 #bal=[1,1,1,0,1,0,1,0,1]
-btl=[0,0,1,1,0,1,1]
-bal=[1,1,1,1,]
+btl=[0,0,1,0,1,1,0,1,1]
+bal=[1,1,1,1,1]
+btl=[0,1,0,0,1,0,1,1,0,1,1]
+bal=[0,1,1,0,1,1]
+#bal=[0,1,0,1,0,1]
 
 bt=BooleanArray(len(btl))
 for i in range(0,len(btl)):
@@ -44,14 +47,16 @@ bt=BinaryTree(bt)
 ba=BooleanArray(len(bal))
 for i in range(0,len(bal)):
   ba[i]=bal[i]
-
 print bt, ba
 
-pts=PartitionTreeSet(ps,bt,ba)
+pt=PartitionTree(ps,bt)
+print pt
+print "Iterating through PartitionTree"
+for cell in pt:
+  print cell
+
+pts=PartitionTreeSet(pt,ba)
 print pts
-#print "Stepping through PartitionTreeSet using index"
-#for i in range(0,len(pts)):
-#  print pts[i]
 print "Iterating through PartitionTreeSet"
 for cell in pts:
   print cell
@@ -74,16 +79,20 @@ gms=GridMaskSet(grls)
 print "GridMaskSet"
 print gms
 
+
 npts=PartitionTreeSet(gms)
 print pts
 print npts
-
+ 
 
 eps=EpsPlot("pt.eps",bb)
 eps.set_fill_colour("green")
 eps.write(pts)
+eps.set_fill_style(0)
+#eps.write(pts.partition_tree())
 eps.set_fill_colour("blue")
-eps.write(grls)
+#eps.write(grls)
+#eps.write(gms)
 eps.set_fill_colour("red")
-eps.write(npts)
+#eps.write(npts)
 eps.close()

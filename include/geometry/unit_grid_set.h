@@ -31,56 +31,79 @@
 #include <vector>
 #include <iosfwd>
 
+#include <boost/iterator/iterator_facade.hpp>
+#include <boost/iterator/iterator_adaptor.hpp>
+
 #include "base/array.h"
+#include "base/iterator.h"
 #include "base/basic_type.h"
+#include "base/interval.h"
 
 #include "grid_operations.h"
 
 namespace Ariadne {
   namespace Geometry {
-    /*!\brief An array of bool, to be used as a mask. */
-    typedef array<bool> BooleanArray;
-
-    /*!\brief An of integers representing a cell in a grid. */
-    typedef array<index_type> IndexArray;
-     /*!\brief An of integers representing the size of a rectangle in a grid. */
-    typedef array<size_type> SizeArray;
-
     /*!\brief An array of integers, representing a cell in a grid. */
-    class UnitGridCell;
+    class LatticeCell;
     /*!\brief An of integers representing an index in a grid. */
-    class UnitGridRectangle;
-    class UnitGridRectangleIterator;
+    class LatticeRectangle;
+    class LatticeRectangleIterator;
 
     /*!\brief A list of arrays of integers of the same size, representing cells in a grid. */
-    typedef array_vector<index_type> UnitCellList;
+    class LatticeCellListSet;
+    class LatticeCellListSetIterator;
     /*!\brief A list of arrays of integers of the same size, representing rectangles in a grid. */
-    typedef array_vector<index_type> UnitRectangleList;
+    class LatticeRectangleListSet;
+    class LatticeRectangleListSetIterator;
 
     /*!\brief A list of arrays of integers of the same size, representing rectangles in a grid. */
-    class UnitGridMaskSet;
-    class UnitGridMaskSetIterator;
+    class LatticeMaskSet;
+    class LatticeMaskSetIterator;
 
-    UnitGridRectangle regular_intersection(const UnitGridRectangle&, const UnitGridRectangle&);
-    bool subset(const UnitGridRectangle&, const UnitGridRectangle&);
-    bool interiors_intersect(const UnitGridRectangle&, const UnitGridRectangle&);
+    bool interiors_intersect(const LatticeRectangle&, const LatticeRectangle&);
+    bool interiors_intersect(const LatticeRectangle&, const LatticeMaskSet&);
+    bool interiors_intersect(const LatticeMaskSet&, const LatticeMaskSet&);
+    bool subset(const LatticeCell&, const LatticeRectangle&);
+    bool subset(const LatticeRectangle&, const LatticeRectangle&);
+    bool subset(const LatticeRectangle&, const LatticeMaskSet&);
+    bool subset(const LatticeMaskSet&, const LatticeMaskSet&);
+    
+    LatticeRectangle regular_intersection(const LatticeRectangle&, const LatticeRectangle&);
+    LatticeMaskSet regular_intersection(const LatticeMaskSet&, const LatticeMaskSet&);
+    LatticeMaskSet join(const LatticeMaskSet&, const LatticeMaskSet&);
+    LatticeMaskSet difference(const LatticeMaskSet&, const LatticeMaskSet&);
 
-    bool interiors_intersect(const UnitGridRectangle&, const UnitGridMaskSet&);
-    bool subset(const UnitGridRectangle&, const UnitGridMaskSet&);
+
+    std::ostream& operator<<(std::ostream& os, const LatticeRectangle&);
     
-    std::ostream& operator<<(std::ostream& os, const UnitGridRectangle&);
-    
+
+    /*! \brief A transformation rule for lattice points. */
+    class LatticeTransformation {
+      LatticeTransformation(const array< std::vector<index_type> >& tr)
+        : _transformation(tr) { }
+
+      dimension_type dimension() const { return _transformation.size(); }
+      LatticeRectangle operator() (const LatticeCell& c) const;
+      LatticeRectangle operator() (const LatticeRectangle& r) const;
+     private:
+      array< std::vector<index_type> > _transformation;
+    };
+
+ 
+      
+ 
+
 
     /*! \brief A cell in a unit grid. */
-    class UnitGridCell {
-      friend class UnitGridRectangleIterator;
-      friend class UnitGridMaskSet;
+    class LatticeCell {
+      friend class LatticeRectangleIterator;
+      friend class LatticeMaskSet;
      public:
-      UnitGridCell(dimension_type n) : _lower(n) { }
-      UnitGridCell(const IndexArray& l) : _lower(l) { }
-      UnitGridCell(const UnitGridCell& c) : _lower(c._lower) { }
+      LatticeCell(dimension_type n) : _lower(n) { }
+      LatticeCell(const IndexArray& l) : _lower(l) { }
+      LatticeCell(const LatticeCell& c) : _lower(c._lower) { }
       
-      bool operator==(const UnitGridCell& c) const { 
+      bool operator==(const LatticeCell& c) const { 
         return this->_lower==c._lower; }
         
       dimension_type dimension() const { return this->_lower.size(); }
@@ -101,21 +124,21 @@ namespace Ariadne {
       IndexArray _lower;
     };
     
-    /*! \brief A block of indicejos in a grid. */
-    class UnitGridRectangle {
-      friend class UnitGridRectangleIterator;
-      friend class UnitGridMaskSet;
+    /*! \brief A block of indices in a grid. */
+    class LatticeRectangle {
+      friend class LatticeRectangleIterator;
+      friend class LatticeMaskSet;
      public:
-      typedef UnitGridRectangleIterator const_iterator;
-      UnitGridRectangle(dimension_type n) : _lower(n), _upper(n) { }
-      UnitGridRectangle(const IndexArray& l, const IndexArray& u)
+      typedef LatticeRectangleIterator const_iterator;
+      LatticeRectangle(dimension_type n) : _lower(n), _upper(n) { }
+      LatticeRectangle(const IndexArray& l, const IndexArray& u)
         : _lower(l), _upper(u) { }
-      UnitGridRectangle(const UnitGridCell& c)
+      LatticeRectangle(const LatticeCell& c)
         : _lower(c.lower()), _upper(c.upper()) { }
-      UnitGridRectangle(const UnitGridRectangle& r)
+      LatticeRectangle(const LatticeRectangle& r)
         : _lower(r._lower), _upper(r._upper) { }
       
-      bool operator==(const UnitGridRectangle& other) const { 
+      bool operator==(const LatticeRectangle& other) const { 
         return this->_lower==other._lower && this->_upper==other._upper; }
         
       dimension_type dimension() const { return this->_lower.size(); }
@@ -143,21 +166,19 @@ namespace Ariadne {
     };
     
     /*! \brief An iterator for positions in rectangular piece of a grid. */
-    class UnitGridRectangleIterator {
+    class LatticeRectangleIterator 
+      : public boost::iterator_facade<LatticeRectangleIterator,
+                                      LatticeCell,
+                                      boost::forward_traversal_tag,
+                                      LatticeCell>
+    {
      public:
-      UnitGridRectangleIterator(const IndexArray& l, const IndexArray& u)
+      LatticeRectangleIterator(const IndexArray& l, const IndexArray& u)
         : _lower(l), _upper(u), _position(l) { }
-      UnitGridRectangleIterator(const IndexArray& l, const IndexArray& u, const IndexArray& p)
+      LatticeRectangleIterator(const IndexArray& l, const IndexArray& u, const IndexArray& p)
         : _lower(l), _upper(u), _position(p) { }
-      UnitGridCell operator*() const { return this->dereference(); }
-      UnitGridRectangleIterator& operator++() { this->increment(); return *this; }
-      
-      bool operator==(const UnitGridRectangleIterator& other) const {
-        return this->equal(other); }
-      bool operator!=(const UnitGridRectangleIterator& other) const {
-        return !this->equal(other); }
      private:
-      bool equal(const UnitGridRectangleIterator& other) const {
+      bool equal(const LatticeRectangleIterator& other) const {
         return (this->_position==other._position) 
           && (this->_lower==other._lower) && (this->_upper==other._upper);
       }
@@ -170,8 +191,9 @@ namespace Ariadne {
           _position[d]+=1;
         }
       }
-      UnitGridCell dereference() const { return UnitGridCell(_position); }
+      LatticeCell dereference() const { return LatticeCell(_position); }
      private:
+      friend class boost::iterator_core_access;
       dimension_type dimension() const { return _position.size(); }
       const IndexArray& _lower;
       const IndexArray& _upper;
@@ -179,68 +201,212 @@ namespace Ariadne {
     };
 
     inline
-    UnitGridRectangle::const_iterator 
-    UnitGridRectangle::begin() const 
+    LatticeRectangle::const_iterator 
+    LatticeRectangle::begin() const 
     { 
       return const_iterator(this->_lower, this->_upper, this->_lower);
     }
     
     inline
-    UnitGridRectangle::const_iterator 
-    UnitGridRectangle::end() const 
+    LatticeRectangle::const_iterator 
+    LatticeRectangle::end() const 
     { 
       IndexArray end_position=this->_lower;
       end_position[this->dimension()-1]=_upper[this->dimension()-1];
       return const_iterator(this->_lower, this->_upper, end_position);
     }
     
-     /*!\brief A list of arrays of integers of the same size, representing rectangles in a grid. */
-    class UnitGridMaskSet {
+
+
+    /*!\brief A list of cells in a lattice. */
+    class LatticeCellListSet {
      public:
-      typedef UnitGridMaskSetIterator iterator;
-      typedef UnitGridMaskSetIterator const_iterator;
+      typedef conversion_iterator<array_vector<index_type>::const_iterator, LatticeCell> iterator;
+      typedef conversion_iterator<array_vector<index_type>::const_iterator, LatticeCell> const_iterator;
      public:
-      UnitGridMaskSet(const UnitGridRectangle& bb) 
+      LatticeCellListSet(dimension_type n) 
+        : _list(n) { }
+
+      LatticeCellListSet(const LatticeCellListSet& cls) 
+        : _list(cls._list) { }
+      
+      dimension_type dimension() const { return _list.array_size(); }
+      size_type empty() const { return _list.empty(); }
+      size_type size() const { return _list.size(); }
+      LatticeCell operator[] (size_type i) const { return LatticeCell(_list[i]); }
+      
+      LatticeRectangle bounds() const;
+
+      /*! \brief Adjoins a LatticeCell to the set. */
+      void adjoin(const LatticeCell& c) { 
+        assert(this->dimension() == c.dimension());
+        this->_list.push_back(c.lower()); 
+      }
+      /*! \brief Adjoins all cells in a LatticeRectangle to the set. */
+      void adjoin(const LatticeRectangle& r);
+      /*! \brief Adjoins a LatticeMaskSet to the set. */
+      void adjoin(const LatticeMaskSet& ms);
+      /*! \brief Adjoins a LatticeCellListSet to the set. */
+        void adjoin(const LatticeCellListSet& cl);
+      /*! \brief Adjoins a LatticeRectangleListSet to the set. */
+        void adjoin(const LatticeRectangleListSet& rl);
+      
+      /*! \brief Constant iterator to the beginning of the cells in the set. */
+      const_iterator begin() const;
+      /*! \brief Constant iterator to the end of the cells in the set. */
+      const_iterator end() const;
+     private:
+      array_vector<index_type> _list;
+    };
+ 
+    inline
+    LatticeCellListSet::const_iterator 
+    LatticeCellListSet::begin() const 
+    { 
+      return const_iterator(_list.begin());
+    }
+    
+    inline
+    LatticeCellListSet::const_iterator 
+    LatticeCellListSet::end() const 
+    { 
+      return const_iterator(_list.end());
+    }
+        
+
+
+    /*!\brief A list of rectangles in a lattice. */
+    class LatticeRectangleListSet {
+     public:
+      //      typedef LatticeRectangleListSetIterator iterator;
+      //typedef LatticeRectangleListSetIterator const_iterator;
+      typedef pair_constructor_iterator<array_vector<index_type>::const_iterator, LatticeRectangle> iterator;
+      typedef pair_constructor_iterator<array_vector<index_type>::const_iterator, LatticeRectangle> const_iterator;
+     public:
+      LatticeRectangleListSet(dimension_type n) 
+        : _list(n) { }
+
+      LatticeRectangleListSet(const LatticeRectangleListSet& rls) 
+        : _list(rls._list) { }
+      
+      dimension_type dimension() const { return _list.array_size(); }
+      size_type empty() const { return _list.empty(); }
+      size_type size() const { return _list.size()/2; }
+      LatticeRectangle operator[] (size_type i) const { 
+        return LatticeRectangle(_list[2*i],_list[2*i+1]); 
+      }
+      LatticeRectangle bounds() const;
+
+      /*! \brief Adjoins a LatticeCell to the set. */
+      void adjoin(const LatticeCell& c) { 
+        assert(this->dimension() == c.dimension());
+        this->_list.push_back(c.lower()); 
+        this->_list.push_back(c.upper()); 
+      }
+      /*! \brief Adjoins all cells in a LatticeRectangle to the set. */
+      void adjoin(const LatticeRectangle& r) { 
+        assert(this->dimension() == r.dimension());
+        this->_list.push_back(r.lower()); 
+        this->_list.push_back(r.upper()); 
+      }
+      /*! \brief Adjoins a LatticeMaskSet to the set. */
+      void adjoin(const LatticeMaskSet& ms);
+      /*! \brief Adjoins a LatticeCellListSet to the set. */
+      void adjoin(const LatticeCellListSet& cl);
+      /*! \brief Adjoins a LatticeRectangleListSet to the set. */
+      void adjoin_rectangles(const LatticeRectangleListSet& rl);
+      
+      /*! \brief Constant iterator to the beginning of the cells in the set. */
+      const_iterator begin() const;
+      /*! \brief Constant iterator to the end of the cells in the set. */
+      const_iterator end() const;
+     private:
+      array_vector<index_type> _list;
+    };
+
+    class LatticeRectangleListSetIterator 
+      : public boost::iterator_adaptor<LatticeRectangleListSetIterator,
+                                       array_vector<index_type>::const_iterator,
+                                       LatticeRectangle,
+                                       boost::random_access_traversal_tag,
+                                       LatticeRectangle>
+    {
+     public:
+      LatticeRectangleListSetIterator(const array_vector<index_type>::const_iterator i)
+        : LatticeRectangleListSetIterator::iterator_adaptor_(i) { }
+     private:
+      void increment() { ++(++base_reference()); }
+      void advance(difference_type n) { base_reference()+=(2*n); }
+      LatticeRectangle dereference() const { return LatticeRectangle(*base_reference(),*(base_reference()+1)); }
+      friend class boost::iterator_core_access;
+    };
+
+    inline
+    LatticeRectangleListSet::const_iterator 
+    LatticeRectangleListSet::begin() const 
+    { 
+      return const_iterator(_list.begin());
+    }
+    
+    inline
+    LatticeRectangleListSet::const_iterator 
+    LatticeRectangleListSet::end() const 
+    { 
+      return const_iterator(_list.end());
+    }
+        
+
+
+
+    /*!\brief A list of arrays of integers of the same size, representing rectangles in a grid. */
+    class LatticeMaskSet {
+     public:
+      typedef mask_iterator<LatticeRectangle::const_iterator,BooleanArray::const_iterator> iterator;
+      typedef iterator const_iterator;
+     public:
+      LatticeMaskSet(const LatticeRectangle& bb) 
         : _bounds(bb), _mask(bb.size(),false) { this->_compute_cached_attributes(); }
-      UnitGridMaskSet(const UnitGridRectangle& bb, const BooleanArray& ma) 
+      LatticeMaskSet(const LatticeRectangle& bb, const BooleanArray& ma) 
         : _bounds(bb), _mask(ma) { this->_compute_cached_attributes(); }
 
-      UnitGridMaskSet(const UnitGridMaskSet& ms);
+      LatticeMaskSet(const LatticeMaskSet& ms);
       
-      const UnitGridRectangle& bounds() const { return _bounds; }
+      const LatticeRectangle& bounds() const { return _bounds; }
       const BooleanArray& mask() const { return _mask; };
       dimension_type dimension() const { return _bounds.dimension(); }
       size_type capacity() const { return _mask.size(); }
-      size_type size() const { return std::count(_mask.begin(),_mask.end(),true); }
       size_type empty() const { return this->size()==0; }
+      size_type size() const { return std::count(_mask.begin(),_mask.end(),true); }
+      LatticeCell operator[](size_type i) const; 
+
       const IndexArray& lower() const { return _lower; }
       const IndexArray& upper() const { return _upper; }
       const SizeArray& sizes() const { return _sizes; }
       const SizeArray& strides() const { return _strides; }
       
-      void adjoin(const UnitGridCell& c) { 
-        compute_cell_mask(&_mask,_strides,_lower,c.position()); 
-      }
-      void adjoin(const UnitGridRectangle& r) { 
-        compute_rectangle_mask(&_mask,_strides,_lower,
-                               r.lower(),r.upper());
-      }
-      /*! \brief Adjoins a UnitGridMaskSet to the set. */
-      void adjoin(const UnitGridMaskSet& ms) {
-        assert(ms._bounds==this->_bounds);
-        _mask |= ms._mask;
-      }
+      /*! \brief Empties the set. */
+      void clear();
 
-      /*! \brief Adjoins a GridCellListSet to the set. */
-      void adjoin_cells(const UnitCellList& ucl) {
-        compute_cell_list_mask(&_mask,_strides,_lower,ucl);
-      }
-
-      /*! \brief Adjoins a GridRectangleListSet to the set. */
-      void adjoin_rectangles(const UnitRectangleList& url) {
-        compute_rectangle_list_mask(&_mask,_strides,_lower,url);
+      /*! \brief Adjoins a LatticeCell to the set. */
+      void adjoin(const LatticeCell& c) { 
+        _mask[compute_index(c.position(),_lower,_strides)]=true;
       }
       
+      /*! \brief Adjoins a LatticeRectangle to the set. */
+      void adjoin(const LatticeRectangle& r);
+
+      /*! \brief Adjoins a LatticeMaskSet to the set. */
+      void adjoin(const LatticeMaskSet& ms);
+      /*! \brief Adjoins a GridCellListSet to the set. */
+      void adjoin(const LatticeCellListSet& cl);
+      /*! \brief Adjoins a GridRectangleListSet to the set. */
+      void adjoin(const LatticeRectangleListSet& rl);
+        
+      /*! \brief The one-box neighbourhood on the same grid. */
+      LatticeMaskSet neighbourhood() const;
+      /*! \brief The adjoining elements on the same grid. */
+      LatticeMaskSet adjoining() const;
+
       /*! \brief Constant iterator to the beginning of the cells in the set. */
       const_iterator begin() const;
       /*! \brief Constant iterator to the end of the cells in the set. */
@@ -248,7 +414,7 @@ namespace Ariadne {
      private:
       void _compute_cached_attributes();
      private:
-      UnitGridRectangle _bounds;
+      LatticeRectangle _bounds;
       IndexArray _lower;
       IndexArray _upper;
       SizeArray _sizes;
@@ -256,59 +422,16 @@ namespace Ariadne {
       BooleanArray _mask;
     };
 
-        
-     
-    //TODO: Replace by a general-purpose mask iterator
-    class UnitGridMaskSetIterator {
-      typedef UnitGridCell value_type;
-      typedef UnitGridCell reference;
-     public:
-      UnitGridMaskSetIterator(UnitGridRectangle::const_iterator ri, 
-                              BooleanArray::const_iterator mi, 
-                              BooleanArray::const_iterator me) 
-        : _cell_iter(ri), _mask_iter(mi), _mask_end(me) 
-      { 
-        while(_mask_iter!=_mask_end && !*_mask_iter) { 
-          ++_mask_iter; ++_cell_iter; 
-        }
-      }
-      
-      bool operator==(const UnitGridMaskSetIterator& other) const { 
-        return this->equal(other); }
-      bool operator!=(const UnitGridMaskSetIterator& other) const { 
-        return !this->equal(other); }
-      UnitGridCell operator*() const { 
-        return this->dereference(); }
-      UnitGridMaskSetIterator& operator++() { 
-        this->increment(); return *this; }
-     private:
-      bool equal(const UnitGridMaskSetIterator& other) const {
-        return this->_cell_iter==other._cell_iter && this->_mask_iter==other._mask_iter;
-      }
-      UnitGridCell dereference() const { 
-        return _cell_iter.operator*(); 
-      }
-      void increment() { 
-        do { 
-          ++_mask_iter; ++_cell_iter; } 
-        while(_mask_iter!=_mask_end && !*_mask_iter);
-      }
-     private:
-      UnitGridRectangle::const_iterator _cell_iter;
-      BooleanArray::const_iterator _mask_iter;
-      BooleanArray::const_iterator _mask_end;
-    };
-
     inline
-    UnitGridMaskSet::const_iterator 
-    UnitGridMaskSet::begin() const 
+    LatticeMaskSet::const_iterator 
+    LatticeMaskSet::begin() const 
     { 
       return const_iterator(_bounds.begin(),_mask.begin(),_mask.end()); 
     }
     
     inline
-    UnitGridMaskSet::const_iterator 
-    UnitGridMaskSet::end() const 
+    LatticeMaskSet::const_iterator 
+    LatticeMaskSet::end() const 
     { 
       return const_iterator(_bounds.end(),_mask.end(),_mask.end());
     }

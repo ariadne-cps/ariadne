@@ -37,7 +37,6 @@
 using Ariadne::BooleanArray;
 using Ariadne::BinaryWord;
 using Ariadne::BinaryTree;
-using Ariadne::SubdivisionSequence;
 
 typedef Ariadne::Geometry::Point<Real> RPoint;
 
@@ -47,6 +46,7 @@ typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
 typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Rectangle> RRectangleListSet;
 typedef Ariadne::Geometry::GridMaskSet<Real> RGridMaskSet;
 
+using Ariadne::Geometry::SubdivisionSequence;
 typedef Ariadne::Geometry::PartitionScheme<Real> RPartitionScheme;
 typedef Ariadne::Geometry::PartitionTree<Real> RPartitionTree;
 typedef Ariadne::Geometry::PartitionTreeCell<Real> RPartitionTreeCell;
@@ -67,7 +67,16 @@ using boost::python::copy_const_reference;
 using boost::python::def;
 using boost::python::self_ns::str;
 
+RRectangle convert_to_rectangle(const RPartitionTreeCell& ptc) {
+  return RRectangle(ptc); }
+
 void export_partition_tree() {
+  class_<SubdivisionSequence>("SubdivisionSequence",init<unsigned int>())
+    .def("dimension", &SubdivisionSequence::dimension)
+    .def("__getitem__", &SubdivisionSequence::get)
+    .def(str(self))    // __str__
+  ;
+
   class_<RPartitionScheme>("PartitionScheme",init<RRectangle,SubdivisionSequence>())
     .def(init<RRectangle>())
     .def("dimension", &RPartitionScheme::dimension)
@@ -106,11 +115,9 @@ void export_partition_tree() {
     .def("__iter__", iterator<RPartitionTreeSet>())
     .def(str(self))    // __str__
   ;
+
   class_<RPartitionTreeCell>("PartitionTreeCell",init<RRectangle,SubdivisionSequence,BinaryWord>())
     .def("dimension", &RPartitionTreeCell::dimension)
-    .def("bounding_box", &RPartitionTreeCell::bounding_box, return_value_policy<copy_const_reference>())
-    .def("subdivisions", &RPartitionTreeCell::subdivisions, return_value_policy<copy_const_reference>())
-    .def("word", &RPartitionTreeCell::word)
     .def(str(self))    // __str__
   ;
 }

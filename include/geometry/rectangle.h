@@ -140,10 +140,10 @@ namespace Ariadne {
         : _lower_corner(n),  _upper_corner(n) {}
       
       /*! \brief Construct from an array of intervals. */
-      Rectangle(size_type dim, const Interval<Real>* intervals)
-        : _lower_corner(dim), _upper_corner(dim)
+      Rectangle(dimension_type n, const Interval<Real>* intervals)
+        : _lower_corner(n), _upper_corner(n)
       {
-        for(size_type i=0; i!=dim; ++i) {
+        for(size_type i=0; i!=n; ++i) {
           this->_lower_corner[i] = intervals[i].lower();
           this->_upper_corner[i] = intervals[i].upper();
         }
@@ -240,12 +240,12 @@ namespace Ariadne {
       }
       
       /*! \brief Returns the lower bound of the \a n th coordinate */
-      inline Real lower_bound(size_type n) const {
+      inline const Real& lower_bound(size_type n) const {
         return this->_lower_corner[n];
       }
       
       /*! \brief Returns the upper bound of the \a n th coordinate */
-      inline Real upper_bound(size_type n) const {
+      inline const Real& upper_bound(size_type n) const {
         return this->_upper_corner[n];
       }
       

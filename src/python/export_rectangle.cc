@@ -86,8 +86,8 @@ void export_rectangle() {
     .def("bounding_box", &RRectangle::bounding_box)
     .def("lower_corner", &RRectangle::lower_corner)
     .def("upper_corner", &RRectangle::upper_corner)
-    .def("lower", &RRectangle::lower_bound)
-    .def("upper", &RRectangle::upper_bound)
+    .def("lower_bound", &RRectangle::lower_bound, return_value_policy<copy_const_reference>())
+    .def("upper_bound", &RRectangle::upper_bound, return_value_policy<copy_const_reference>())
     .def(str(self))    // __str__
   ;
 }

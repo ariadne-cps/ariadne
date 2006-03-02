@@ -23,17 +23,17 @@
 
 #include "geometry/partition_tree_operations.h"
 
-Ariadne::SubdivisionSequence 
+Ariadne::sequence<Ariadne::dimension_type>
 Ariadne::Geometry::default_subdivision_coordinates(dimension_type n) {
   dimension_type coords[n];
   for(dimension_type i=0; i!=n; ++i) {
     coords[i]=i;
   }
-  return SubdivisionSequence(coords,coords,coords+n);
+  return sequence<dimension_type>(coords,coords,coords+n);
 }
 
 Ariadne::dimension_type 
-Ariadne::Geometry::compute_dimension(const SubdivisionSequence& ss) 
+Ariadne::Geometry::compute_dimension(const sequence<dimension_type>& ss) 
 {
   Ariadne::dimension_type result=0;
   for(size_type i=0; i!=ss.body_size()+ss.tail_size(); ++i) {

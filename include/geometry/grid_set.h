@@ -33,6 +33,8 @@
 #include <iostream>
 #include <iterator>
 
+#include <boost/iterator/iterator_adaptor.hpp>
+
 #include "base/array.h"
 #include "base/interval.h"
 #include "base/binary_word.h"
@@ -40,6 +42,8 @@
 #include "geometry/geometry_declarations.h"
 #include "geometry/rectangle.h"
 #include "geometry/point.h"
+
+#include "geometry/grid.h"
 #include "geometry/unit_grid_set.h"
 
 #include "geometry/list_set.h"
@@ -70,8 +74,8 @@
 
 namespace Ariadne {
   namespace Geometry {
-    typedef Rectangle<index_type> IntegerRectangle;
-    
+    class LatticeRectangle;
+
     template<typename R, template<typename> class BS> class ListSet;
 
     template<typename R> class Rectangle;
@@ -87,8 +91,11 @@ namespace Ariadne {
     template<typename R> class GridRectangleListSet;
     template<typename R> class GridCellListSet;
 
+    template<typename R> bool interiors_intersect(const GridRectangle<R>&, const GridRectangle<R>&);
     template<typename R> bool interiors_intersect(const Rectangle<R>&, const GridMaskSet<R>&);
     template<typename R> bool interiors_intersect(const GridRectangle<R>&, const GridMaskSet<R>&);
+    template<typename R> bool interiors_intersect(const GridMaskSet<R>&, const GridMaskSet<R>&);
+    template<typename R> bool subset(const GridRectangle<R>&, const GridRectangle<R>&);
     template<typename R> bool subset(const Rectangle<R>&, const GridMaskSet<R>&);
     template<typename R> bool subset(const GridRectangle<R>&, const GridMaskSet<R>&);
     template<typename R> bool subset(const GridMaskSet<R>&, const GridMaskSet<R>&);
@@ -126,216 +133,12 @@ namespace Ariadne {
                                        const Rectangle<R>& r, 
                                        const FiniteGrid<R>& g);
     
-    template<typename R> std::ostream& operator<<(std::ostream&, const Grid<R>&);
     template<typename R> std::ostream& operator<<(std::ostream&, const GridCell<R>&);
     template<typename R> std::ostream& operator<<(std::ostream&, const GridRectangle<R>&);
     template<typename R> std::ostream& operator<<(std::ostream&, const GridRectangleListSet<R>&);
     template<typename R> std::ostream& operator<<(std::ostream&, const GridCellListSet<R>&);
     template<typename R> std::ostream& operator<<(std::ostream&, const GridMaskSet<R>&);
     
-    /*!\brief Base type for defining a grid.
-     * We use inheritence and abstract functions here partly for ease of development
-     * and partly since the grid coordinates only play a role when converting to rectangles
-     * and should occur with linear complexity in the space dimension.
-     */
-    template<typename R>
-    class Grid {
-    public:
-      typedef R real_type;
-     
-      /*! \brief Destructor. */
-      virtual ~Grid() { }
-
-      /*! \brief Cloning operator. */
-      virtual Grid<R>* clone() const = 0;
-      
-      /*! \brief The underlying dimension of the grid. */
-      virtual dimension_type dimension() const = 0;
-      /*! \brief The coordinate of the @a n th subdivision point in dimension @a d. */
-      virtual real_type subdivision_coordinate(dimension_type d, index_type n) const = 0;
-      /*! \brief The interval @math [p_n,p_{n+1}) in dimension @a d index containing @a x. */
-      virtual index_type subdivision_interval(dimension_type d, const real_type& x) const = 0;
-
-      /*! \brief The index in dimension @a d of the subdivision point @a x. Throws an exception if @a x is not a subdivision point. */
-      index_type subdivision_index(dimension_type d, const real_type& x) const {
-        index_type n=subdivision_interval(d,x);
-        if(subdivision_coordinate(d,n) == x) { return n; }
-        throw std::domain_error("Value is not a grid coordinate");
-      }
-
-      /*! \brief The index of the subdivision point below x. */
-      index_type subdivision_lower_index(dimension_type d, const real_type& x) const {
-        return subdivision_interval(d,x);
-      }
-
-      /*! \brief The index of the subdivision point above x. */
-      index_type subdivision_upper_index(dimension_type d, const real_type& x) const {
-        index_type n=subdivision_interval(d,x);
-        return subdivision_coordinate(d,n) == x ? n : n+1;
-      }
-
-      bool operator==(const Grid<R>& g) const { return this==&g; }
-
-      IndexArray index(const Point<R>& s) const {
-        IndexArray res(s.dimension());
-        for(size_type i=0; i!=res.size(); ++i) {
-          res[i]=subdivision_index(i,s[i]);
-        }
-        return res;
-      }
-
-
-      IndexArray lower_index(const Rectangle<R>& r) const {
-        IndexArray res(r.dimension());
-        for(size_type i=0; i!=res.size(); ++i) {
-          res[i]=subdivision_lower_index(i,r.lower_bound(i));
-        }
-        return res;
-      }
-
-      IndexArray upper_index(const Rectangle<R>& r) const {
-        IndexArray res(r.dimension());
-        for(size_type i=0; i!=res.size(); ++i) {
-          res[i]=subdivision_upper_index(i,r.upper_bound(i));
-        }
-        return res;
-      }
-
-      virtual std::ostream& write(std::ostream& os) const = 0;
-   };
-
-
-    /*!\brief A finite, nonuniform grid of rectangles in Euclidean space. */
-    template<typename R>
-    class FiniteGrid : public Grid<R> {
-      typedef R real_type;
-     public:
-      /*! \brief Cloning operator. */
-      virtual FiniteGrid<R>* clone() const;
-    
-      /*! \brief Destructor. */
-      virtual ~FiniteGrid();
-
-      /*! \brief The underlying dimension of the grid. */
-      virtual dimension_type dimension() const { 
-        return this->_subdivision_coordinates.size();
-      }
-    
-      /*! \brief The coordinate of the @a n th subdivision point in dimension @a d. */
-      virtual real_type subdivision_coordinate(dimension_type d, index_type n) const {
-        return _subdivision_coordinates[d][n];
-      }
-  
-      /*! \brief The index of interval in dimension @a d index containing @a x. */
-      virtual index_type subdivision_interval(dimension_type d, const real_type& x) const {
-        typename std::vector<R>::const_iterator pos;
-        if(x<_subdivision_coordinates[d].front() || x>_subdivision_coordinates[d].back()) {
-          throw std::runtime_error("point does not lie in extent of finite grid");
-        }
-        pos = std::upper_bound(_subdivision_coordinates[d].begin(),
-                               _subdivision_coordinates[d].end(), x);
-        return (pos - _subdivision_coordinates[d].begin()) - 1;
-      }
-
-
-      /*! \brief Construct from a bounding box and an equal number of subdivisions in each coordinate. */
-      explicit FiniteGrid(const Rectangle<R>& r, size_type n);
-
-      /*! \brief Construct from a bounding box and an array giving the number of subdivisions in each coordinate. */
-      explicit FiniteGrid(const Rectangle<R>& r, SizeArray sz);
-
-      /*! \brief Construct from a list of subdivision coordinates in each dimension. */
-      explicit FiniteGrid(const array< std::vector<R> >& sp);
-
-      /*! \brief Construct from a list of rectangles giving the grid points. */
-      explicit FiniteGrid(const ListSet<R,Rectangle>& ls);
-
-      /*! \brief Join two finite grids. */
-      FiniteGrid(const FiniteGrid& g1, FiniteGrid& g2);
-
-      bool operator==(const FiniteGrid<R>& g) const { 
-        return this->_subdivision_coordinates==g._subdivision_coordinates; }
-            
-      /*! \brief The total number of cells. */
-      size_type capacity() const { return _strides[dimension()]; }
-      /*! \brief The number of subdivision intervals in dimension @a d. */
-      size_type size(dimension_type d) const { return _subdivision_coordinates[d].size()-1; }
-
-      /*! \brief The lowest valid vertex index. */
-      IndexArray lower() const { return IndexArray(dimension(),0); }
-      /*! \brief The highers valid vertex index. */
-      IndexArray upper() const { return lower()+sizes(); }
-      /*! \brief The block of valid lattice cells. */
-      UnitGridRectangle bounds() const { return UnitGridRectangle(lower(),upper()); }
-      /*! \brief The number of subdivision intervals in each dimension. */
-      SizeArray sizes() const {
-        SizeArray result(dimension());
-        for(dimension_type d=0; d!=dimension(); ++d) {
-          result[d]=_subdivision_coordinates[d].size()-1;
-        }
-        return result;
-      }
-
-      Rectangle<R> bounding_box() { 
-        Rectangle<R> result(this->dimension());
-        for(dimension_type i=0; i!=this->dimension(); ++i) {
-          result.set_lower_bound(i,this->_subdivision_coordinates[i].front());
-          result.set_upper_bound(i,this->_subdivision_coordinates[i].back());
-        }
-        return result;
-      }
-      
-      /*! \brief Find the rule to translate elements from a grid to a refinement. */
-      static array< std::vector<index_type> > index_translation(const FiniteGrid<R>& from, const FiniteGrid<R>& to);
-
-      virtual std::ostream& write(std::ostream& os) const;
-     private:
-      void create();
-     private:
-      array< std::vector<R> > _subdivision_coordinates;
-      SizeArray _strides;
-    };
-
-
-
-    /*!\brief An infinite, uniform grid of rectangles in Euclidean space.
-     */
-    template<typename R> class InfiniteGrid : public Grid<R> {
-      typedef R real_type;
-     public:
-      /*! \brief Cloning operator. */
-      InfiniteGrid<R>* clone() const;
-      
-      /*! \brief Construct from an array of subdivision lengths \a sl.
-       */
-      InfiniteGrid(const array<R>& sl)
-        : _subdivision_lengths(sl) { }
-
-      /*! \brief The underlying dimension of the grid. */
-      virtual dimension_type dimension() const { 
-        return _subdivision_lengths.size(); }
-
-      /*! \brief The coordinate of the @a n th subdivision point in dimension @a d. */
-      virtual real_type subdivision_coordinate(dimension_type d, index_type n) const { 
-        return _subdivision_lengths[d] * n; }
-
-      /*! \brief The length of the subdivision in the \a d th coordinate. */
-      real_type subdivision_length(dimension_type d) const { 
-        return _subdivision_lengths[d]; }
-
-      /*! \brief The index of interval in dimension @a d index containing @a x. */
-      virtual index_type subdivision_interval(dimension_type d, const real_type& x) const {
-        index_type result = quotient(x,_subdivision_lengths[d]);
-        return result;
-      }
-
-      virtual std::ostream& write(std::ostream& os) const;
-     private:
-      array<R> _subdivision_lengths;
-    };
-
-
-
     /*! \brief A cell in a grid.
      */
     template<typename R>
@@ -348,7 +151,7 @@ namespace Ariadne {
       typedef Point<R> state_type;
 
       /*!\brief Construct from a grid and an unit grid cell. */
-      GridCell(const Grid<R>& g, const UnitGridCell& pos);
+      GridCell(const Grid<R>& g, const LatticeCell& pos);
 
       /*!\brief Construct from a grid and an unit grid cell. */
       GridCell(const Grid<R>& g, const IndexArray& pos);
@@ -360,13 +163,13 @@ namespace Ariadne {
       dimension_type dimension() const { return _position.dimension(); }
 
       /*!\brief The position of the cell in the grid. */
-      const UnitGridCell& position() const { return _position; }
+      const LatticeCell& position() const { return _position; }
 
       /*!\brief Convert to an ordinary rectangle. */
       operator Rectangle<R>() const;
      private:
       const Grid<R>& _grid;
-      UnitGridCell _position;
+      LatticeCell _position;
     };
 
 
@@ -384,7 +187,7 @@ namespace Ariadne {
       /*!\brief Construct an empty rectangle on a grid. */
       GridRectangle(const Grid<R>& g);
       /*!\brief Construct from a grid and a bounding block. */
-      GridRectangle(const Grid<R>& g, const UnitGridRectangle& b);
+      GridRectangle(const Grid<R>& g, const LatticeRectangle& b);
       /*!\brief Construct from a grid and two integer arrays giving the corners. */
       GridRectangle(const Grid<R>& g, const IndexArray& l, const IndexArray& u);
       /*!\brief Construct from a grid and an ordinary rectangle. */
@@ -394,24 +197,42 @@ namespace Ariadne {
 
       /*!\brief The grid containing the rectangle. */
       const Grid<R>& grid() const { return _grid; }
+
       /*!\brief The dimension of the rectangle. */
       dimension_type dimension() const { return _position.dimension(); }
 
       /*!\brief The position of the rectangle in the grid. */
-      const UnitGridRectangle& position() const { return _position; }
+      const LatticeRectangle& position() const { return _position; }
 
       /*!\brief Convert to an ordinary rectangle. */
       operator Rectangle<R>() const;
+
+      friend bool interiors_intersect<> (const GridRectangle<R>&, const GridRectangle<R>&);
+      friend bool interiors_intersect<> (const GridRectangle<R>&, const GridMaskSet<R>&);
+      friend bool subset<> (const GridRectangle<R>&, const GridMaskSet<R>&);
      private:
       const Grid<R>& _grid;
-      UnitGridRectangle _position;
+      LatticeRectangle _position;
+    };
+
+    template<class Base, class Value>
+    class GridSetIterator 
+      : public boost::iterator_adaptor<GridSetIterator<Base,Value>,Base,Value,boost::use_default,Value>
+    { 
+     public:
+      typedef typename Value::real_type real_type;
+      GridSetIterator(const Grid<real_type>& g, Base i) 
+        : GridSetIterator::iterator_adaptor_(i), _grid(g) { }
+     private:
+      friend class boost::iterator_core_access;
+      Value dereference() const { return Value(_grid,*this->base_reference()); }
+      const Grid<real_type>& _grid;
     };
 
 
     template<class R>
-    class GridMaskSetConstIterator {
-      typedef GridMaskSetConstIterator Self;
-  
+    class GridMaskSetIterator {
+      typedef GridMaskSetIterator Self;
      public:
       typedef std::forward_iterator_tag iterator_category;
       typedef GridCell<R> value_type;
@@ -419,18 +240,19 @@ namespace Ariadne {
       typedef const GridCell<R>* pointer;
       typedef int difference_type;
      public:
-      GridMaskSetConstIterator(const GridMaskSet<R>& s, const IndexArray& pos);
-      GridMaskSetConstIterator(const GridMaskSet<R>& s, const size_type& ind);
-      GridCell<R> operator*() const;
-      Self& operator++();
-      Self operator++(int) { Self tmp=*this; ++(*this); return tmp; }
-      bool operator==(const Self& other) const { return _index==other._index && (&_set)==(&(other._set)); }
-      bool operator!=(const Self& other) const { return !(*this==other); }
-    private:
-      void initialise();
-    public:
-      const GridMaskSet<R>& _set;
-      size_type _index;
+      GridMaskSetIterator(const Grid<R>& g, LatticeMaskSetIterator iter);
+      GridCell<R> operator*() const { return this->dereference(); }
+      Self& operator++() { this->increment(); return *this; }
+      Self operator++(int) { Self tmp=*this; this->increment(); return tmp; }
+      bool operator==(const Self& other) const { return this->equal(other); }
+      bool operator!=(const Self& other) const { return !this->equal(other); }
+     private:
+      bool equal(const GridMaskSetIterator& other) const { return this->_iter==other._iter; }
+      void increment() { ++_iter; }
+      GridCell<R> dereference() const { return GridCell<R>(*_grid_ptr,*_iter); }
+     private:
+      const Grid<R>* _grid_ptr;
+      LatticeMaskSet::const_iterator _iter;
     };
 
     
@@ -438,23 +260,24 @@ namespace Ariadne {
     /*! \brief A denotable set on a finite grid, defined using a mask. */
     template<typename R>
     class GridMaskSet {
-      friend class GridMaskSetConstIterator<R>;
       friend class GridCellListSet<R>;
       friend class PartitionTreeSet<R>;
      public:
       typedef R real_type;
       typedef Point<R> state_type;
-      typedef GridMaskSetConstIterator<R> iterator;
-      typedef GridMaskSetConstIterator<R> const_iterator;
-
+      typedef GridSetIterator< LatticeMaskSet::const_iterator, GridCell<R> > iterator;
+      typedef GridSetIterator< LatticeMaskSet::const_iterator, GridCell<R> > const_iterator;
       /*!\brief Construct an empty set from a finite grid. */
       GridMaskSet(const FiniteGrid<R>& g);
      
       /*!\brief Construct an empty set from a grid, and a bounding box. */
-      GridMaskSet(const Grid<R>& g, const UnitGridRectangle& b);
+      GridMaskSet(const Grid<R>& g, const LatticeRectangle& b);
+     
+      /*!\brief Construct a set from a grid, and a lattice mask set. */
+      GridMaskSet(const Grid<R>& g, const LatticeMaskSet& ms);
      
       /*!\brief Construct a set from a grid, a bounding box, and a mask */
-      GridMaskSet(const Grid<R>& g, const UnitGridRectangle& b, const BooleanArray& m);
+      GridMaskSet(const Grid<R>& g, const LatticeRectangle& b, const BooleanArray& m);
 
       /*!\brief Copy constructor. */
       GridMaskSet(const GridMaskSet<R>& gms);
@@ -488,116 +311,132 @@ namespace Ariadne {
       /*! \brief The underlying grid. */
       const Grid<R>& grid() const { return *_grid_ptr; }
 
+      /*! \brief The underlying grid. */
+      const LatticeMaskSet& lattice_set() const { return _lattice_set; }
+
       /*! \brief The space dimension of the set. */
-      dimension_type dimension() const { return _unit_set.dimension(); }
+      dimension_type dimension() const { return _lattice_set.dimension(); }
 
        /*! \brief The number of elements in the mask. */
-      size_type capacity() const { return _unit_set.capacity(); }
+      size_type capacity() const { return _lattice_set.capacity(); }
       
       /*! \brief The lowest position in the grid. */
-      const IndexArray& lower() const { return _unit_set.lower(); }
+      const IndexArray& lower() const { return _lattice_set.lower(); }
 
       /*! \brief The highest position in the grid. */
-      const IndexArray& upper() const { return _unit_set.upper(); }
+      const IndexArray& upper() const { return _lattice_set.upper(); }
 
       /*! \brief The bounding rectangle in the grid. */
-      const UnitGridRectangle& bounds() const { return _unit_set.bounds(); }
+      const LatticeRectangle& bounds() const { return _lattice_set.bounds(); }
 
       /*! \brief The bounding rectangle in the grid. */
-      const SizeArray& sizes() const { return _unit_set.sizes(); }
+      const SizeArray& sizes() const { return _lattice_set.sizes(); }
 
       /*! \brief The bounding rectangle in the grid. */
-      const SizeArray& strides() const { return _unit_set.strides(); }
+      const SizeArray& strides() const { return _lattice_set.strides(); }
 
       /*! \brief The number of cells in the grid. */
-      const BooleanArray& mask() const { return _unit_set.mask(); }
+      const BooleanArray& mask() const { return _lattice_set.mask(); }
 
       /*! \brief Returns true if the set is empty. */
-      bool empty() const { return _unit_set.empty(); }
+      bool empty() const { return _lattice_set.empty(); }
       
       /*! \brief The number of cells in the grid. */
-      size_type size() const { return _unit_set.size(); }
+      size_type size() const { return _lattice_set.size(); }
       
       /*! \brief The ith nonempty cell in the grid. */
-      GridCell<R> operator[](size_type i) const { 
-        const_iterator iter=this->begin();
-        while(i!=0) {
-          --i;
-          ++iter;
-        }
-        return *iter;
-      }
+      GridCell<R> operator[](size_type i) const { return GridCell<R>(*_grid_ptr,_lattice_set[i]); }
 
       /*! \brief A constant iterator to the beginning of the set. */
-      const_iterator begin() const { return const_iterator(*this,0); }
+      const_iterator begin() const { return const_iterator(*this->_grid_ptr,this->_lattice_set.begin()); }
       /*! \brief A constant iterator to the end of the set. */
-      const_iterator end() const { return const_iterator(*this,capacity()); }
+      const_iterator end() const { return const_iterator(*this->_grid_ptr,this->_lattice_set.end()); }
 
-      Rectangle<R> bounding_box() const {
-        return GridRectangle<R>(grid(),bounds());
-      }
+      /*! \brief The rectangle bounding the region of the mask. */
+      Rectangle<R> bounding_box() const { return Rectangle<R>(GridRectangle<R>(grid(),bounds())); }
       
+      /*! \brief Adjoins a cell to the set. */
+      void clear() {
+        _lattice_set.clear();
+      }
+
       /*! \brief Adjoins a cell to the set. */
       void adjoin(const GridCell<R>& c) {
         assert(c.grid()==this->grid());
-        _unit_set.adjoin(c._position);
+        _lattice_set.adjoin(c._position);
       }
 
       /*! \brief Adjoins a rectangle to the set. */
       void adjoin(const GridRectangle<R>& r) {
         assert(r.grid()==this->grid());
-        _unit_set.adjoin(r._position);
+        _lattice_set.adjoin(r._position);
       }
 
       /*! \brief Adjoins a GridMaskSet to the set. */
       void adjoin(const GridMaskSet<R>& gms) {
         assert(gms.grid()==this->grid());
-        _unit_set.adjoin(gms._unit_set);
+        _lattice_set.adjoin(gms._lattice_set);
       }
 
       /*! \brief Adjoins a GridCellListSet to the set. */
       void adjoin(const GridCellListSet<R>& cls) {
         assert(cls.grid()==this->grid());
-        _unit_set.adjoin_cells(cls._list);
+        _lattice_set.adjoin(cls._lattice_set);
       }
 
       /*! \brief Adjoins a GridRectangleListSet to the set. */
       void adjoin(const GridRectangleListSet<R>& rls) {
         assert(rls.grid()==this->grid());
-        _unit_set.adjoin_rectangles(rls._list);
+        _lattice_set.adjoin(rls._lattice_set);
       }
 
+      GridMaskSet neighbourhood() const {
+        return GridMaskSet(this->grid(),this->_lattice_set.neighbourhood());
+      }
+
+      GridMaskSet adjoining() const {
+        return GridMaskSet(this->grid(),this->_lattice_set.adjoining());
+      }
+
+      friend bool interiors_intersect<> (const GridRectangle<R>&, const GridMaskSet<R>&);
+      friend bool interiors_intersect<> (const GridMaskSet<R>&, const GridMaskSet<R>&);
+      friend bool subset<> (const GridRectangle<R>&, const GridMaskSet<R>&);
       friend bool subset<> (const GridMaskSet<R>&, const GridMaskSet<R>&);
       friend GridMaskSet<R> join<> (const GridMaskSet<R>&, const GridMaskSet<R>&);
       friend GridMaskSet<R> regular_intersection<> (const GridMaskSet<R>&, const GridMaskSet<R>&);
       friend GridMaskSet<R> difference<> (const GridMaskSet<R>&, const GridMaskSet<R>&);
      private:
       const Grid<R>* _grid_ptr;
-      UnitGridMaskSet _unit_set;
+      LatticeMaskSet _lattice_set;
     };
 
 
 
     template<class R>
-    class GridCellListSetConstIterator {
-      typedef GridCellListSetConstIterator Self;
+    class GridCellListSetIterator {
+      typedef GridCellListSetIterator Self;
      public:
-      typedef std::random_access_iterator_tag iterator_category;
+      typedef std::forward_iterator_tag iterator_category;
       typedef GridCell<R> value_type;
       typedef GridCell<R> reference;
       typedef const GridCell<R>* pointer;
       typedef int difference_type;
      public:
-      GridCellListSetConstIterator(const GridCellListSet<R>& s, const size_type& ind) : _set(s), _index(ind) { }
-      GridCell<R> operator*() const { return _set[_index]; }
-      Self& operator++() { ++_index; return *this; }
-      Self operator++(int) { Self tmp=*this; ++(*this); return tmp; }
-      bool operator==(const Self& other) const { return _index==other._index && (&_set)==(&(other._set)); }
-      bool operator!=(const Self& other) const { return !(*this==other); }
-    public:
-      const GridCellListSet<R>& _set;
-      size_type _index;
+      GridCellListSetIterator(const Grid<R>& g, LatticeCellListSetIterator iter);
+      GridCell<R> operator*() const { return this->dereference(); }
+      Self& operator++() { this->increment(); return *this; }
+      Self operator++(int) { Self tmp=*this; this->increment(); return tmp; }
+      bool operator==(const Self& other) const { return this->equal(other); }
+      bool operator!=(const Self& other) const { return !this->equal(other); }
+     private:
+      bool equal(const GridCellListSetIterator& other) const { return this->_iter==other._iter; }
+      void increment() { ++_iter; }
+      GridCell<R> dereference() const { return GridCell<R>(*_grid_ptr,*_iter); }
+     private:
+      const Grid<R>* _grid_ptr;
+      LatticeCellListSet::const_iterator _iter;
     };
+
 
     /*! \brief A denotable set on a grid, defined using a list of cells.
      */
@@ -608,8 +447,8 @@ namespace Ariadne {
      public:
       typedef R real_type;
       typedef Point<R> state_type;
-      typedef GridCellListSetConstIterator<R> iterator;
-      typedef GridCellListSetConstIterator<R> const_iterator;
+      typedef GridSetIterator< LatticeCellListSet::const_iterator, GridCell<R> > iterator;
+      typedef GridSetIterator< LatticeCellListSet::const_iterator, GridCell<R> > const_iterator;
 
       /*!\brief Construct an empty set based on a Grid. */
       GridCellListSet(const Grid<R>& g);
@@ -633,30 +472,30 @@ namespace Ariadne {
       const Grid<R>& grid() const { return *_grid_ptr; }
 
       /*! \brief The space dimension of the set. */
-      dimension_type dimension() const { return grid().dimension(); }
+      dimension_type dimension() const { return _lattice_set.dimension(); }
 
       /*! \brief True if the set is empty. */
-      bool empty() const { return _list.empty(); }
+      bool empty() const { return _lattice_set.empty(); }
 
       /*! \brief The numeber of cells in the list. */
-      size_type size() const { return _list.size(); }
+      size_type size() const { return _lattice_set.size(); }
 
       /*!\brief The @a i th cell in the list. */
-      GridCell<R> operator[] (const size_type i) const { return GridCell<R>(grid(),_list[i]); }
+      GridCell<R> operator[] (const size_type i) const { return GridCell<R>(grid(),_lattice_set[i]); }
 
       /*! \brief A constant iterator to the beginning of the list. */
-      const_iterator begin() const { return const_iterator(*this,0); }
+      const_iterator begin() const { return const_iterator(*_grid_ptr,_lattice_set.begin()); }
 
       /*! \brief A constant iterator to the end of the list. */
-      const_iterator end() const { return const_iterator(*this,this->size()); }
+      const_iterator end() const { return const_iterator(*_grid_ptr,_lattice_set.end()); }
 
       /*!\brief Append a GridCell to the list. */
-      void adjoin(const GridCell<R>& c) { _list.push_back(c.position().lower()); }
+      void adjoin(const GridCell<R>& c) { _lattice_set.adjoin(c.position()); }
 
       friend std::ostream& operator<< <> (std::ostream&, const GridCellListSet<R>&);
      private:
       const Grid<R>* _grid_ptr;
-      IndexArrayList _list;
+      LatticeCellListSet _lattice_set;
     };
 
 
@@ -664,25 +503,30 @@ namespace Ariadne {
 
 
     template<class R>
-    class GridRectangleListSetConstIterator {
-      typedef GridRectangleListSetConstIterator Self;
+    class GridRectangleListSetIterator {
+      typedef GridRectangleListSetIterator Self;
      public:
-      typedef std::random_access_iterator_tag iterator_category;
+      typedef std::forward_iterator_tag iterator_category;
       typedef GridRectangle<R> value_type;
       typedef GridRectangle<R> reference;
       typedef const GridRectangle<R>* pointer;
       typedef int difference_type;
      public:
-      GridRectangleListSetConstIterator(const GridRectangleListSet<R>& s, const size_type& ind) : _set(s), _index(ind) { }
-      GridRectangle<R> operator*() const { return _set[_index]; }
-      Self& operator++() { ++_index; return *this; }
-      Self operator++(int) { Self tmp=*this; ++(*this); return tmp; }
-      bool operator==(const Self& other) const { return _index==other._index && (&_set)==(&(other._set)); }
-      bool operator!=(const Self& other) const { return !(*this==other); }
-    public:
-      const GridRectangleListSet<R>& _set;
-      size_type _index;
+      GridRectangleListSetIterator(const Grid<R>& g, LatticeRectangleListSetIterator iter);
+      GridRectangle<R> operator*() const { return this->dereference(); }
+      Self& operator++() { this->increment(); return *this; }
+      Self operator++(int) { Self tmp=*this; this->increment(); return tmp; }
+      bool operator==(const Self& other) const { return this->equal(other); }
+      bool operator!=(const Self& other) const { return !this->equal(other); }
+     private:
+      bool equal(const GridRectangleListSetIterator& other) const { return this->_iter==other._iter; }
+      void increment() { ++_iter; }
+      GridRectangle<R> dereference() const { return GridRectangle<R>(*_grid_ptr,*_iter); }
+     private:
+      const Grid<R>* _grid_ptr;
+      LatticeRectangleListSetIterator _iter;
     };
+
 
     /*! \brief A denotable set on a grid, defined using a list of rectangles.
      */
@@ -693,8 +537,8 @@ namespace Ariadne {
      public:
       typedef R real_type;
       typedef Point<R> state_type;
-      typedef GridRectangleListSetConstIterator<R> iterator;
-      typedef GridRectangleListSetConstIterator<R> const_iterator;
+      typedef GridSetIterator< LatticeRectangleListSet::const_iterator, GridRectangle<R> > iterator;
+      typedef GridSetIterator< LatticeRectangleListSet::const_iterator, GridRectangle<R> > const_iterator;
 
       /*!\brief Destructor. */
       ~GridRectangleListSet() { 
@@ -730,35 +574,34 @@ namespace Ariadne {
       const Grid<R>& grid() const { return *_grid_ptr; }
 
       /*! \brief The space dimension of the set. */
-      dimension_type dimension() const { return grid().dimension(); }
+      dimension_type dimension() const { return _lattice_set.dimension(); }
 
       /*! \brief True if the set is empty. */
-      bool empty() const { return _list.empty(); }
+      bool empty() const { return _lattice_set.empty(); }
 
       /*! \brief The number of rectangles in the list. */
-      size_type size() const { return _list.size()/2; }
+      size_type size() const { return _lattice_set.size(); }
 
       /*!\brief Return the @a i th rectangle in the list. */
       GridRectangle<R> operator[] (const size_t i) const {
-        return GridRectangle<R>(grid(),UnitGridRectangle(_list[2*i],_list[2*i+1]));
+        return GridRectangle<R>(grid(),_lattice_set[i]);
       }
 
       /*! \brief A constant iterator to the beginning of the list. */
-      const_iterator begin() const { return const_iterator(*this,0); }
+      const_iterator begin() const { return const_iterator(*_grid_ptr,_lattice_set.begin()); }
 
       /*! \brief A constant iterator to the end of the list. */
-      const_iterator end() const { return const_iterator(*this,this->size()); }
+      const_iterator end() const { return const_iterator(*_grid_ptr,_lattice_set.end()); }
 
       /*!\brief Append a GridRectangle to the list. */
-      void push_back(const GridRectangle<R>& r) {
-        _list.push_back(r._position.lower());
-        _list.push_back(r._position.upper());
+      void adjoin(const GridRectangle<R>& r) {
+        _lattice_set.adjoin(r._position);
       }
 
       friend std::ostream& operator<< <> (std::ostream&, const GridRectangleListSet<R>&);
      private:
       const Grid<R>* _grid_ptr;
-      IndexBlockList _list;
+      LatticeRectangleListSet _lattice_set;
     };
 
 

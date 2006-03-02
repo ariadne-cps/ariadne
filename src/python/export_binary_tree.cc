@@ -1,8 +1,7 @@
 /***************************************************************************
- *            python/geometry_module.cc
+ *            python/export_binary_tree.cc
  *
- *  21 October 2005
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
+ *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -24,29 +23,16 @@
 
 #include "base/binary_word.h"
 #include "base/binary_tree.h"
+#include "base/basic_type.h"
 
 #include <boost/python.hpp>
 
 #include "python/real_typedef.h"
 #include "python/python_utilities.h"
 
-
 using Ariadne::BooleanArray;
-using Ariadne::IndexArray;
-using Ariadne::SizeArray;
 using Ariadne::Base::BinaryWord;
 using Ariadne::Base::BinaryTree;
-
-void export_point();
-void export_rectangle();
-void export_parallelopiped();
-void export_simplex();
-void export_polyhedron();
-void export_list_set();
-void export_grid();
-void export_partition_tree();
-
-void export_postscript_output();
 
 using boost::python::class_;
 using boost::python::init;
@@ -56,17 +42,22 @@ using boost::python::self_ns::str;
 using boost::python::return_value_policy;
 using boost::python::copy_const_reference;
   
-BOOST_PYTHON_MODULE(geometry)
-{
-  export_point();
-  export_rectangle();
-  export_parallelopiped();
-  export_simplex();
-  export_polyhedron();
-  export_list_set();
-  export_grid();
-  export_partition_tree();
-  
-  export_postscript_output();
+void export_binary_tree() {
+  class_<BinaryWord>("BinaryWord",init<>())
+    .def(init<BinaryWord>())
+    .def("back", &BinaryWord::back)
+    .def("set_back", &BinaryWord::set_back)
+    .def("pop_back", &BinaryWord::pop_back)
+    .def("push_back", &BinaryWord::push_back)
+    .def("__len__", &BinaryWord::size)
+    .def("__getitem__", &BinaryWord::get)
+    .def(str(self))    // __str__
+  ;
 
+  class_<BinaryTree>("BinaryTree",init<>())
+    .def(init<uint>())
+    .def(init<BooleanArray>())
+    .def("__len__", &BinaryTree::size)
+    .def(str(self))    // __str__
+  ;
 }

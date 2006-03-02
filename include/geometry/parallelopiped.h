@@ -49,7 +49,6 @@
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
 #include "geometry/list_set.h"
-#include "geometry/grid_operations.h" // For IndexBlock
 #include "geometry/polyhedron.h"
 #include "geometry/geometry_declarations.h"
 
@@ -138,13 +137,13 @@ namespace Ariadne {
       
      public:
       /*! \brief Default constructor constructs an empty parallelopiped of dimension \a n. */
-      explicit Parallelopiped(size_type n = 0)
+      inline explicit Parallelopiped(size_type n = 0)
         : _centre(n),  _generators(n,n) 
       {
       }
       
       /*! \brief Construct from centre and directions. */
-      explicit Parallelopiped(const State& c, const Matrix& m)
+      inline explicit Parallelopiped(const State& c, const Matrix& m)
         : _centre(c), _generators(m)
       {
         if (LinearAlgebra::number_of_rows(m)!=LinearAlgebra::number_of_columns(m)) {
@@ -158,10 +157,17 @@ namespace Ariadne {
       }
       
       /*! \brief Construct from a Rectangle. */
-      explicit Parallelopiped(const Rectangle<Real>& r);
+      inline explicit Parallelopiped(const Rectangle<Real>& r)
+        : _centre(r.dimension()), _generators(r.dimension(),r.dimension())
+      {
+        for(size_type i=0; i!=dimension(); ++i) {
+          _centre[i] = (r.lower_bound(i)+r.upper_bound(i))/2;
+          _generators(i,i) = (r.upper_bound(i)-r.lower_bound(i))/2;
+        }
+      }
       
       /*! \brief Construct from a string literal. */
-      explicit Parallelopiped(const std::string& s)
+      inline explicit Parallelopiped(const std::string& s)
         : _centre(), _generators()
       {
         std::stringstream ss(s);
@@ -182,24 +188,6 @@ namespace Ariadne {
         }
         return *this;
       }
-      
-      /*! \brief A rectangle containing the given parallelopiped. */
-      inline Rectangle<R> bounding_box() const {
-        Vector offset(this->dimension());
-        for(size_type i=0; i!=this->dimension(); ++i) {
-          for(size_type j=0; j!=this->dimension(); ++j) {
-            offset[i] += abs(this->_generators(i,j));
-          }
-        }
-        Rectangle<R> result(this->centre()+offset, this->centre()-offset);
-        return result;
-      }
-      
-      /*! \brief Convert to a polyhedron. */
-      inline operator Polyhedron<R> () const;
-      
-      /*! \subdivide into smaller pieces. */
-      inline ListSet<R,::Ariadne::Geometry::Parallelopiped> subdivide() const;
       
       /*! \brief The dimension of the Euclidean space the parallelopiped lies in. */
       inline size_type dimension() const {
@@ -284,6 +272,15 @@ namespace Ariadne {
         return !(*this == A);
       }
 
+      /*! \brief A rectangle containing the given parallelopiped. */
+      Rectangle<R> bounding_box() const;
+      
+      /*! \brief Convert to a polyhedron. */
+      operator Polyhedron<R> () const;
+      
+      /*! \subdivide into smaller pieces. */
+      ListSet<R,::Ariadne::Geometry::Parallelopiped> subdivide() const;
+      
       friend std::ostream&
       operator<< <> (std::ostream& os, 
                      const Parallelopiped<R>& r);
@@ -293,142 +290,10 @@ namespace Ariadne {
                      Parallelopiped<R>& r);
       
      private:
-      inline void compute_linear_inequalities(Matrix&, Vector&, Vector&) const;
-      Vector coordinates(const State& s) const {
-        Vector diff = s-_centre;
-        Matrix inv = LinearAlgebra::inverse(_generators);
-        return prod(inv,diff);
-      }
+      void compute_linear_inequalities(Matrix&, Vector&, Vector&) const;
+      Vector coordinates(const State& s) const;
     };
   
-    using namespace ::Ariadne::LinearAlgebra;
-    
-    template<typename R>
-    inline 
-    void Parallelopiped<R>::compute_linear_inequalities(Matrix& A, Vector& o, Vector& b) const
-    {
-      using namespace ::Ariadne::LinearAlgebra;
-      size_type n=this->dimension();
-      
-      Vector c=this->centre() - State(n,0);
-      A=inverse(this->generators());
-      o=A*c;
-      b=vector<R>(n);
-      for(size_type i=0; i!=n; ++i) {
-        b[i]=1;
-      }
-    }
-      
-    /* Specialization for Dyadics to compute linear inequalities exactly via rational matrices */
-    
-    template<>
-    inline
-    void Parallelopiped<Dyadic>::compute_linear_inequalities(matrix<Dyadic>& A, vector<Dyadic>& o, vector<Dyadic>& b) const
-    {
-      using namespace ::Ariadne::LinearAlgebra;
-      typedef Dyadic Real;
-      size_type n=this->dimension();
-      
-      matrix<Rational> M(n,n);
-      for(size_type i=0; i!=n; ++i) {
-        for(size_type j=0; j!=n; ++j) {
-          M(i,j) = convert_to<Rational>(this->_generators(i,j));
-        }
-      }
-      M=inverse(M);
-      
-      vector<Integer> multipliers = row_common_denominators(M);
-      
-      A.resize(n,n);
-      for(size_type i=0; i!=n; ++i) {
-        for(size_type j=0; j!=n; ++j) {
-          A(i,j) = numerator(M(i,j)) * (multipliers(i)/denominator(M(i,j)));
-        }
-      }
-
-      Vector c = this->centre() - State(n,0);
-      o = A * c;
-      
-      b.resize(n);
-      for(size_type i=0; i!=n; ++i) {
-        b(i)=multipliers(i);
-      }
-    }
-      
-  
-
-      
-    template <typename R>
-    Parallelopiped<R>::Parallelopiped(const Rectangle<Real>& r)
-      : _centre(r.dimension()), _generators(r.dimension(),r.dimension())
-    {
-      for(size_type i=0; i!=dimension(); ++i) {
-        _centre[i] = (r.lower_bound(i)+r.upper_bound(i))/2;
-        _generators(i,i) = (r.upper_bound(i)-r.lower_bound(i))/2;
-      }
-    }
-    
-    template <typename R>
-    Parallelopiped<R>::operator Polyhedron<R>() const 
-    {
-      using namespace ::Ariadne::LinearAlgebra;
-      
-      typedef typename Parallelopiped<R>::Real Real;
-      typedef typename Parallelopiped<R>::State State;
-      
-      size_type n = this->dimension();
-      
-      /* Express in form invs * x - offst in [-bnds,+bnds] */
-      matrix<R> invs;
-      vector<R> offst;
-      vector<R> bnds;
-      this->compute_linear_inequalities(invs,offst,bnds);
-      
-     
-      matrix<R> A(2*n,n);
-      vector<R> b(2*n);
-      
-      for(uint i=0; i!=n; ++i) {
-        for(uint j=0; j!=n; ++j) {
-          A(i,j) = -invs(i,j);
-          A(i+n,j) = invs(i,j);
-        }
-        b(i) = bnds(i)-offst(i);
-        b(i+n) = bnds(i)+offst(i);
-      }
-      return Polyhedron<R>(A,b);
-    }
-
-
-    template <typename R>
-    ListSet<R,Parallelopiped>
-    Parallelopiped<R>::subdivide() const 
-    {
-      size_type n=this->dimension();
-      ListSet<R,Geometry::Parallelopiped> result(this->dimension());
-      Matrix new_generators=this->generators()/2;
-      
-      IndexBlock ir(IndexArray(n,0),IndexArray(n,2));
-
-      State first_centre=this->centre();
-      for(size_type i=0; i!=n; ++i) {
-        first_centre=first_centre-(this->generator(i))/2;
-      }
-      
-      for(IndexBlock::const_iterator iter=ir.begin(); iter!=ir.end(); ++iter) {
-        const IndexArray& ary=*iter;
-        State new_centre=first_centre;
-        for(size_type i=0; i!=n; ++i) {
-          if(ary[i]==1) {
-            new_centre=new_centre+this->generator(i);
-          }
-        }
-        result.adjoin(Parallelopiped(new_centre,new_generators));
-      }
-      return result;
-    }
-    
-    
     /*! \brief Tests disjointness */
     template <typename R>
     bool disjoint(const Parallelopiped<R>& A, const Parallelopiped<R>& B) 
@@ -528,30 +393,6 @@ namespace Ariadne {
 
 
 
-    template <typename R>
-    std::ostream&
-    operator<<(std::ostream& os, const Parallelopiped<R>& p) 
-    {
-//      if(p.empty()) {
-//        os << "Empty";
-//     }
-//      else 
-      if(p.dimension() > 0) {
-        os << "Parallelopiped(\n  centre=" << p.centre();
-        os << "\n  directions=" << p.generators();
-        os << "\n) ";
-      }
-
-      return os;
-    }
-    
-    template <typename R>
-    std::istream& 
-    operator>>(std::istream& is, Parallelopiped<R>& p)
-    {
-      throw std::domain_error("Not implemented");
-    }
-      
     
 
   }

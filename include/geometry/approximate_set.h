@@ -35,7 +35,7 @@ namespace Ariadne {
 namespace Geometry {
 
 /*! \class ApproximateSet
- * \brief Rappresents an approximating denotable set. 
+ * \brief Represents an approximating denotable set. 
  */
 class ApproximateSet {
   /* FOR PIETER: This class should be inherited from some 

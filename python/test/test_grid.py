@@ -56,6 +56,7 @@ p=Parallelopiped(c,A)
 
 print "\n\n", p, "\n\n"
 sp=p.subdivide()
+print "Subdivided: ",sp
 ap=over_approximation(p,g)
 print sp
 print ap
@@ -99,20 +100,47 @@ print "Iterating through GridRectangleListSet"
 for rect in grls:
   print rect
 
-
-eps=EpsPlot("tg.eps",bb)
+  
+eps=EpsPlot("tg1.eps",bb)
 eps.set_fill_colour("blue")
 eps.write(over_approximation(p.bounding_box(),g))
 eps.set_fill_colour("red")
 eps.write(asp)
 eps.set_fill_colour("green")
 eps.write(sp)
+eps.close()
 
+eps=EpsPlot("tg2.eps",bb)
 eps.set_fill_colour("red")
 eps.write(afp)
 eps.set_fill_colour("green")
 eps.write(cafp)
 eps.set_fill_colour("white")
 eps.write(sp)
-
 eps.close()
+
+eps=EpsPlot("tg3.eps",bb)
+eps.set_fill_colour("white")
+eps.write(gms.bounding_box())
+eps.set_fill_colour("magenta")
+eps.write(gms.adjoining().adjoining())
+eps.set_fill_colour("red")
+eps.write(gms.neighbourhood())
+eps.set_fill_colour("blue")
+eps.write(gms.adjoining())
+eps.set_fill_colour("green")
+eps.write(gms)
+eps.close()
+
+pts=PartitionTreeSet(gms.neighbourhood())
+grls=GridRectangleListSet(pts)
+gms=GridMaskSet(grls)
+gms.clear()
+gms.adjoin(grls[0*(len(grls)-6)])
+eps=EpsPlot("tg4.eps",bb)
+eps.set_fill_colour("magenta")
+eps.write(grls)
+eps.set_fill_colour("green")
+eps.write(gms)
+eps.close()
+

@@ -26,120 +26,148 @@
  *  \brief Cuboidal binary trees.
  */
 
+#include "base/arithmetic.h"
 #include "base/binary_tree.h"
 
 namespace Ariadne {
-  BinaryTree::BinaryTree(size_type n) {
-    
-  }
-  void 
-  BinaryTree::check() const { 
-    size_type ends=1;
-    for(BooleanArray::const_iterator iter=_array.begin(); iter!=_array.end(); ++iter) {
-      /* Test for too many leaves */
-      assert(ends!=0); 
-      if(*iter==branch) {
-        ends+=1;
-      }
-      else {
-        ends-=1;
-      }
-    }
-    assert(ends==0);
-  }
+  namespace Base {
+   BinaryTree::BinaryTree()
+     : _array(1) { _array[0]=leaf; }
 
-  size_type 
-  BinaryTree::depth() const { 
-    size_type depth=0;
-    for(const_iterator iter=begin(); iter!=end(); ++iter) {
-      if(iter->size()>depth) {
-        depth=iter->size();
-      }
-    }
-    return depth;
-  }
+    BinaryTree::BinaryTree(size_type d)
+      : _array(pow(2,d+1)-1)
+    {
+      size_type n=_array.size();
+      _array[n-1]=leaf;
 
- 
-  
-  
-  BinaryTreeIterator& 
-  BinaryTreeIterator::operator++() { 
-    while( !_word.empty() && (_word.back() == right) ) {
-      _word.pop_back();
-    }
-    
-    if( _word.empty() ) {
-      ++_position;
-      return *this;
-    }
-
-    _word.set_back(right);
-    ++_position;
-
-    while( (*_position) == branch ) {
-      _word.push_back(left);
-      ++_position;
-    }
-    return *this;
-  }
-    
-     
-  void 
-  BinaryTreeIterator::skip_subtree() 
-  {
-    size_type __len=_word.size();
-    do {
-      if(*_position == branch) {
-        _word.push_back(0);
-        ++_position;
-      }
-      else {
-        ++_position;
-        ++_position;
-        if(_word.size()==__len) {
-          return;
+      for(size_type i=0; i!=d; ++i) {
+        size_type m=pow(2,i+1)-1;
+        for(size_type j=n-m; j!=n; ++j) {
+          _array[j-m]=_array[j];
         }
-        while(_word.back()==1) {
-          _word.pop_back();
+        _array[n-2*m-1]=branch;
+      }
+    }
+
+    void 
+    BinaryTree::check() const { 
+      size_type ends=1;
+      for(BooleanArray::const_iterator iter=_array.begin(); iter!=_array.end(); ++iter) {
+        /* Test for too many leaves */
+        assert(ends!=0); 
+        if(*iter==branch) {
+          ends+=1;
+        }
+        else {
+          ends-=1;
+        }
+      }
+      assert(ends==0);
+    }
+    
+    size_type 
+    BinaryTree::depth() const { 
+      size_type depth=0;
+      for(const_iterator iter=begin(); iter!=end(); ++iter) {
+        if(iter->size() > depth) {
+          depth=iter->size();
+        }
+      }
+      return depth;
+    }
+    
+    
+    
+    BinaryTreeIterator::BinaryTreeIterator(BooleanArray::const_iterator i, BooleanArray::const_iterator e)
+      : _position(i), _word()
+    {
+      if(i!=e) {
+        while(*_position==BinaryTree::branch) { 
+          _word.push_back(BinaryTree::left); 
+          ++_position; 
+        }
+      }
+    }
+    
+    void
+    BinaryTreeIterator::increment() { 
+      while( !_word.empty() && (_word.back() == BinaryTree::right) ) {
+        _word.pop_back();
+      }
+      
+      if( _word.empty() ) {
+        ++_position;
+        return;
+      }
+      
+      _word.set_back(BinaryTree::right);
+      ++_position;
+      
+      while( (*_position) == BinaryTree::branch ) {
+        _word.push_back(BinaryTree::left);
+        ++_position;
+      }
+      return;
+    }
+    
+    
+    void 
+    BinaryTreeIterator::skip_subtree() 
+    {
+      size_type __len=_word.size();
+      do {
+        if(*_position == BinaryTree::branch) {
+          _word.push_back(BinaryTree::left);
+          ++_position;
+        }
+        else {
+          ++_position;
+          ++_position;
           if(_word.size()==__len) {
             return;
           }
+          while(_word.back()==BinaryTree::right) {
+            _word.pop_back();
+            if(_word.size()==__len) {
+              return;
+            }
+          }
+          _word.set_back(BinaryTree::right);
         }
-        _word.set_back(1);
       }
+      while(true);
     }
-    while(true);
-  }
-
-   
-  std::istream& operator>>(std::istream& is, BinaryWord& b)
-  {
-    std::vector<bool> v;
-    is >> v;
-    b=BinaryWord(v);
-
-    return is;
-  }
-  
-  std::ostream& operator<<(std::ostream& os, const BinaryWord& b) 
-  {    
-    if(b.empty()) {
-      os << "e";
+    
+    
+    std::istream& operator>>(std::istream& is, BinaryWord& b)
+    {
+      std::vector<bool> v;
+      is >> v;
+      b=BinaryWord(v);
+      
+      return is;
     }
-    for(BinaryWord::size_type i=0; i!=b.size(); ++i) {
-      if(i%8==0 && i!=0) {
-        //os << " ";
+    
+    std::ostream& operator<<(std::ostream& os, const BinaryWord& b) 
+    {    
+      if(b.empty()) {
+        os << "e";
       }
-      os << b[i];
+      for(BinaryWord::size_type i=0; i!=b.size(); ++i) {
+        if(i%8==0 && i!=0) {
+          //os << " ";
+        }
+        os << b[i];
+      }
+      return os;
     }
-    return os;
+    
+    std::ostream& 
+    operator<<(std::ostream& os, const BinaryTree& t) {
+      os << "BinaryTree( words=";
+      write_sequence(os, t.begin(), t.end());
+      return os << ", sequence=" << t._array << " )"; 
+    }
+    
   }
-
-  std::ostream& 
-  operator<<(std::ostream& os, const BinaryTree& t) {
-    os << "BinaryTree( words=";
-    write_sequence(os, t.begin(), t.end());
-    return os << ", sequence=" << t._array << " )"; 
-  }
-
 }

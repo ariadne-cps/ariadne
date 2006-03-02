@@ -78,226 +78,228 @@
 #include "base/utility.h"
 #include "base/basic_type.h"
 
-namespace Ariadne 
-{
-  typedef array<index_type> IndexArray;
-  typedef array<size_type> SizeArray;
-
-  class BinaryWordList;
-  class BinaryWordFixedSizeList;
-
-  class _BinaryWordList_const_iterator;
-  class _BinaryWordFixedSizeList_const_iterator;
+namespace Ariadne {
+  namespace Base {
+    typedef array<index_type> IndexArray;
+    typedef array<size_type> SizeArray;
     
-  /*! \brief A statically-allocated binary word of fixed maximum length.
-   */
-  class BinaryWord {
-    friend class BinaryTree;
-    friend class BinaryWordList;
-    friend class BinaryWordFixedSizeList;
-   public:
-    /*! \brief An unsigned integral type. */
-    typedef std::vector<bool>::size_type size_type;
-    typedef std::vector<bool>::const_iterator const_iterator;
-   private:
-    /* The type of a machine byte (not used) */
-    typedef unsigned char byte_type; 
-    /* The number of bits per byte */
-    static const size_type _bits_per_byte=std::numeric_limits<byte_type>::digits;
-   private:
-    std::vector<bool> _rep;
-   public:
-    /*! \brief Default constructor creates a zero-length word.  */
-    BinaryWord() : _rep() { }
+    class BinaryWordList;
+    class BinaryWordFixedSizeList;
     
-    /*! \brief Conversion from a std:vector<bool>. */
-    BinaryWord(const std::vector<bool>& v) : _rep(v) { }
+    class _BinaryWordList_const_iterator;
+    class _BinaryWordFixedSizeList_const_iterator;
     
-    /*! \brief Create a word of length \a n from the boolean array starting at \a p. */
-    BinaryWord(size_type n, const bool* p) : _rep(n,p) { }
-    
-    /*! \brief Create a word of length \a n from the boolean array starting at \a iter. */
-    BinaryWord(size_type n, std::vector<bool>::const_iterator first) : _rep(first,first+n) { }
-    
-    /*! \brief Create a word of length \a n from the boolean array between \a first and \a last. */
-    BinaryWord(std::vector<bool>::const_iterator first, std::vector<bool>::const_iterator last) : _rep(first,last) { }
-    
-    /*! \brief Create a word of length \a n from the chunk of memory starting at \a p. */
-    BinaryWord(size_type n, const void* p) : _rep(n,reinterpret_cast<const bool*>(p)) { }
-
-    /*! Equality operator. */
-    bool operator==(const BinaryWord& w) const { return this->_rep==w._rep; }
-
-    /*! Inequality operator. */
-    bool operator!=(const BinaryWord& w) const { return this->_rep!=w._rep; }
-
-    /*! \brief Is the word empty. */
-    bool empty() const { return _rep.empty(); }
-
-    /*! \brief The size of the word, in bits. */
-    size_type size() const { return _rep.size(); }
-
-    /*! \brief The largest possible size of the BinaryWord. */
-    size_type max_size() const { return _rep.max_size(); }
-
-    /* \brief The number of machine bytes the word takes up. */
-    size_type bytes() const { return (size()+_bits_per_byte-1)/_bits_per_byte; }
-
-    /*! \brief Returns the nth bit. */
-    bool get(size_type n) const { return _rep[n]; }
-
-    /*! \brief Returns the nth bit. */
-    bool operator[] (size_type n) const { return get(n); }
-
-    /*! \brief Checked access to the nth bit. */
-    bool at(size_type n) const { if(n<size()) { return get(n); } else { throw std::out_of_range("BinaryWord"); } }
-
-    /*! \brief Returns the last bit. */
-    bool back () const { return operator[](size()-1); }
-
-     /*! \brief Sets the last bit to \a x.  */
-    void set_back (bool x) { set(size()-1,x); }
- 
-    /*! \brief Insert a bit at the end of the word. */
-    void push_back(bool x) { _rep.push_back(x); }
-    
-    /*! \brief Removes the bit at the end of the word. */
-    void pop_back() { _rep.pop_back(); }
-    
-    /* \brief An iterator to the beginning of the bits of the BinaryWord. */
-    const_iterator begin() const { return _rep.begin(); }
-    
-    /* \brief An iterator to the beginning of the bits of the BinaryWord. */
-    const_iterator end() const { return _rep.end(); }
-    
-    /*! \brief true if the word is a prefix of the other word. */
-    bool is_prefix(const BinaryWord& b) const {
-      if(size()>b.size()) { return false; }
-      for(size_type i=0; i!=size(); ++i) { if((*this)[i] != b[i]) { return false; } }
-      return true;
-    }
-
-    /*! \brief true if the word is a subword of the other word. */
-    bool is_subword(const BinaryWord& b) const {
-      if(this->size() > b.size()) { return false; }
-      for(size_type i=0; i!=b.size()-size(); ++i) { 
-        size_type j=0;
-        while(j!=this->size() && (*this)[j]==b[i+j]) {
-          ++j;
-        }
-        if(j==this->size()) {
-          return true;
-        }
+    /*! \brief A statically-allocated binary word of fixed maximum length.
+     */
+    class BinaryWord {
+      friend class BinaryTree;
+      friend class BinaryWordList;
+      friend class BinaryWordFixedSizeList;
+     public:
+      /*! \brief An unsigned integral type. */
+      typedef std::vector<bool>::size_type size_type;
+      typedef std::vector<bool>::const_iterator const_iterator;
+     private:
+      /* The type of a machine byte (not used) */
+      typedef unsigned char byte_type; 
+      /* The number of bits per byte */
+      static const size_type _bits_per_byte=std::numeric_limits<byte_type>::digits;
+     private:
+      std::vector<bool> _rep;
+     public:
+      /*! \brief Default constructor creates a zero-length word.  */
+      BinaryWord() : _rep() { }
+      
+      /*! \brief Conversion from a std:vector<bool>. */
+      BinaryWord(const std::vector<bool>& v) : _rep(v) { }
+      
+      /*! \brief Create a word of length \a n from the boolean array starting at \a p. */
+      BinaryWord(size_type n, const bool* p) : _rep(n,p) { }
+      
+      /*! \brief Create a word of length \a n from the boolean array starting at \a iter. */
+      BinaryWord(size_type n, std::vector<bool>::const_iterator first) : _rep(first,first+n) { }
+      
+      /*! \brief Create a word of length \a n from the boolean array between \a first and \a last. */
+      BinaryWord(std::vector<bool>::const_iterator first, std::vector<bool>::const_iterator last) : _rep(first,last) { }
+      
+      /*! \brief Create a word of length \a n from the chunk of memory starting at \a p. */
+      BinaryWord(size_type n, const void* p) : _rep(n,reinterpret_cast<const bool*>(p)) { }
+      
+      /*! Equality operator. */
+      bool operator==(const BinaryWord& w) const { return this->_rep==w._rep; }
+      
+      /*! Inequality operator. */
+      bool operator!=(const BinaryWord& w) const { return this->_rep!=w._rep; }
+      
+      /*! \brief Is the word empty. */
+      bool empty() const { return _rep.empty(); }
+      
+      /*! \brief The size of the word, in bits. */
+      size_type size() const { return _rep.size(); }
+      
+      /*! \brief The largest possible size of the BinaryWord. */
+      size_type max_size() const { return _rep.max_size(); }
+      
+      /* \brief The number of machine bytes the word takes up. */
+      size_type bytes() const { return (size()+_bits_per_byte-1)/_bits_per_byte; }
+      
+      /*! \brief Returns the nth bit. */
+      bool get(size_type n) const { return _rep[n]; }
+      
+      /*! \brief Returns the nth bit. */
+      bool operator[] (size_type n) const { return get(n); }
+      
+      /*! \brief Checked access to the nth bit. */
+      bool at(size_type n) const { if(n<size()) { return get(n); } else { throw std::out_of_range("BinaryWord"); } }
+      
+      /*! \brief Returns the last bit. */
+      bool back () const { return operator[](size()-1); }
+      
+      /*! \brief Sets the last bit to \a x.  */
+      void set_back (bool x) { set(size()-1,x); }
+      
+      /*! \brief Insert a bit at the end of the word. */
+      void push_back(bool x) { _rep.push_back(x); }
+      
+      /*! \brief Removes the bit at the end of the word. */
+      void pop_back() { _rep.pop_back(); }
+      
+      /* \brief An iterator to the beginning of the bits of the BinaryWord. */
+      const_iterator begin() const { return _rep.begin(); }
+      
+      /* \brief An iterator to the beginning of the bits of the BinaryWord. */
+      const_iterator end() const { return _rep.end(); }
+      
+      /*! \brief true if the word is a prefix of the other word. */
+      bool is_prefix(const BinaryWord& b) const {
+        if(size()>b.size()) { return false; }
+        for(size_type i=0; i!=size(); ++i) { if((*this)[i] != b[i]) { return false; } }
+        return true;
       }
-      return false;
-    }
+      
+      /*! \brief true if the word is a subword of the other word. */
+      bool is_subword(const BinaryWord& b) const {
+        if(this->size() > b.size()) { return false; }
+        for(size_type i=0; i!=b.size()-size(); ++i) { 
+          size_type j=0;
+          while(j!=this->size() && (*this)[j]==b[i+j]) {
+            ++j;
+          }
+          if(j==this->size()) {
+            return true;
+          }
+        }
+        return false;
+      }
+      
+      /*! \brief Stream insertion operator. */
+      friend std::ostream& operator<<(std::ostream& os, const BinaryWord& bw);
+      /*! \brief Stream extraction operator. */
+      friend std::istream& operator>>(std::istream& is, BinaryWord& bw);
+     private:
+      /* Set the nth element to x. */
+      void set(const size_type& n, const bool& x) { _rep[n]=x; }
+    };
     
-    /*! \brief Stream insertion operator. */
-    friend std::ostream& operator<<(std::ostream& os, const BinaryWord& bw);
-    /*! \brief Stream extraction operator. */
-    friend std::istream& operator>>(std::istream& is, BinaryWord& bw);
-   private:
-    /* Set the nth element to x. */
-    void set(const size_type& n, const bool& x) { _rep[n]=x; }
-  };
-
-
-  /*!\brief A list of BinaryWord elements of variable size, optimised for memory usage. Access by constant forward iterators only.
-   */
-  class BinaryWordList {
-    /*!\brief Union of two BinaryWordList s. */
-    friend BinaryWordList join(const BinaryWordList& l1, const BinaryWordList& l2);
     
-    typedef size_t size_type;
-    typedef BinaryWord::byte_type byte_type;
-    typedef _BinaryWordList_const_iterator const_iterator;
-   private:
-    static const size_type _bits_per_byte=std::numeric_limits<byte_type>::digits;
-    std::vector<size_type> _sizes;
-    std::vector<bool> _elements;
-   public:
-    /*!\brief Construct an empty list.
+    /*!\brief A list of BinaryWord elements of variable size, optimised for memory usage. Access by constant forward iterators only.
      */
-    BinaryWordList() : _sizes(), _elements() { }
+    class BinaryWordList {
+      /*!\brief Union of two BinaryWordList s. */
+      friend BinaryWordList join(const BinaryWordList& l1, const BinaryWordList& l2);
+      
+      typedef size_t size_type;
+      typedef BinaryWord::byte_type byte_type;
+      typedef _BinaryWordList_const_iterator const_iterator;
+     private:
+      static const size_type _bits_per_byte=std::numeric_limits<byte_type>::digits;
+      std::vector<size_type> _sizes;
+      std::vector<bool> _elements;
+     public:
+      /*!\brief Construct an empty list.
+       */
+      BinaryWordList() : _sizes(), _elements() { }
+      
+      /*!\brief The size of the list, in binary words. */
+      size_type size() const { return _sizes.size(); }
+      
+      /*!\brief Insert an element at the back of the list. */
+      void push_back(const BinaryWord& b) { 
+        _sizes.push_back(b.size());
+        for(size_type i=0; i!=b.size(); ++i) { _elements.push_back(b[i]); }
+      }
+      
+      /*!\brief Returns a constant forward iterator pointing to the beginning of the BinaryWordList. */
+      const_iterator begin() const;
+      
+      /*!\brief Returns a constant forward iterator pointing to the end of the BinaryWordList. */
+      const_iterator end() const;
+    };
     
-    /*!\brief The size of the list, in binary words. */
-    size_type size() const { return _sizes.size(); }
+    /*!\brief A list of BinaryWord elements, each of the same size, optimised for memory usage. */
+    class BinaryWordFixedSizeList {
+      friend class _BinaryWordFixedSizeList_const_iterator;
+      
+      /*!\brief Union of two BinaryWordFixedSizeList s.
+       */
+      friend BinaryWordFixedSizeList join(const BinaryWordFixedSizeList& l1, const BinaryWordFixedSizeList& l2);
+      
+      typedef size_t size_type;
+      typedef BinaryWord::byte_type byte_type;
+      typedef _BinaryWordFixedSizeList_const_iterator const_iterator;
+     private:
+      static const size_type _bits_per_byte=std::numeric_limits<byte_type>::digits;
+      size_type _word_size;
+      std::vector<bool> _elements;
+     public:
+      BinaryWordFixedSizeList(size_type ws) : _word_size(ws), _elements() { }
+      
+      /*!\brief The size of the list, in binary words.
+       */
+      size_type size() const { return _elements.size()/word_size(); }
+      
+      /*!\brief The size of each binary word in the list, in bits. */
+      size_type word_size() const { return _word_size; }
+      
+      /*!\brief Insert an element at the back of the list. */
+      void push_back(const BinaryWord& b) { 
+        assert(b.size()==word_size()); 
+        for(size_type i=0; i!=word_size(); ++i) { _elements.push_back(b[i]); }
+      }
+      
+      /*!\brief Remove the element at the back of the list. */
+      void pop_back() { for(size_type i=0; i!=word_size(); ++i) { _elements.pop_back(); } }
+      
+      /*!\brief Returns the element at the back of the list. */
+      BinaryWord back() const {
+        std::vector<bool>::const_iterator iter=_elements.end()-word_size();
+        return BinaryWord(word_size(), iter);
+      }
+      
+      /*!\brief Returns the nth element of the list.
+       */
+      BinaryWord operator[] ( size_type n) const {
+        std::vector<bool>::const_iterator iter=_elements.begin() + (n*word_size());
+        return BinaryWord(word_size(), iter);
+      }
+      
+      /*!\brief Returns a constant random-access iterator pointing to the beginning of the BinaryWordFixedSizeList.  */
+      const_iterator begin() const;
+      
+      /*!\brief Returns a constant random-access iterator pointing to the end of the BinaryWordFixedSizeList. */
+      const_iterator end() const;
+      
+     private:
+      /* \brief The number of bytes needed to store the list. */
+      size_type storage_in_bytes() const { return _elements.size()/_bits_per_byte; }
+    };
     
-    /*!\brief Insert an element at the back of the list. */
-    void push_back(const BinaryWord& b) { 
-      _sizes.push_back(b.size());
-      for(size_type i=0; i!=b.size(); ++i) { _elements.push_back(b[i]); }
-    }
+    std::istream& operator>>(std::istream& is, BinaryWord& b);
+    std::ostream& operator<<(std::ostream& os, const BinaryWord& b);
     
-    /*!\brief Returns a constant forward iterator pointing to the beginning of the BinaryWordList. */
-    const_iterator begin() const;
-
-    /*!\brief Returns a constant forward iterator pointing to the end of the BinaryWordList. */
-    const_iterator end() const;
-  };
+    
+  } // namespace Base
+} // namespace Ariadne
   
-  /*!\brief A list of BinaryWord elements, each of the same size, optimised for memory usage. */
-  class BinaryWordFixedSizeList {
-    friend class _BinaryWordFixedSizeList_const_iterator;
-    
-    /*!\brief Union of two BinaryWordFixedSizeList s.
-     */
-    friend BinaryWordFixedSizeList join(const BinaryWordFixedSizeList& l1, const BinaryWordFixedSizeList& l2);
-    
-    typedef size_t size_type;
-    typedef BinaryWord::byte_type byte_type;
-    typedef _BinaryWordFixedSizeList_const_iterator const_iterator;
-   private:
-    static const size_type _bits_per_byte=std::numeric_limits<byte_type>::digits;
-    size_type _word_size;
-    std::vector<bool> _elements;
-   public:
-    BinaryWordFixedSizeList(size_type ws) : _word_size(ws), _elements() { }
-    
-    /*!\brief The size of the list, in binary words.
-     */
-    size_type size() const { return _elements.size()/word_size(); }
-
-    /*!\brief The size of each binary word in the list, in bits. */
-    size_type word_size() const { return _word_size; }
-    
-    /*!\brief Insert an element at the back of the list. */
-    void push_back(const BinaryWord& b) { 
-      assert(b.size()==word_size()); 
-      for(size_type i=0; i!=word_size(); ++i) { _elements.push_back(b[i]); }
-    }
-
-    /*!\brief Remove the element at the back of the list. */
-    void pop_back() { for(size_type i=0; i!=word_size(); ++i) { _elements.pop_back(); } }
-
-    /*!\brief Returns the element at the back of the list. */
-    BinaryWord back() const {
-      std::vector<bool>::const_iterator iter=_elements.end()-word_size();
-      return BinaryWord(word_size(), iter);
-    }
-    
-    /*!\brief Returns the nth element of the list.
-     */
-    BinaryWord operator[] ( size_type n) const {
-      std::vector<bool>::const_iterator iter=_elements.begin() + (n*word_size());
-      return BinaryWord(word_size(), iter);
-    }
-    
-    /*!\brief Returns a constant random-access iterator pointing to the beginning of the BinaryWordFixedSizeList.  */
-    const_iterator begin() const;
-
-    /*!\brief Returns a constant random-access iterator pointing to the end of the BinaryWordFixedSizeList. */
-    const_iterator end() const;
-    
-   private:
-    /* \brief The number of bytes needed to store the list. */
-    size_type storage_in_bytes() const { return _elements.size()/_bits_per_byte; }
-  };
-  
-  std::istream& operator>>(std::istream& is, BinaryWord& b);
-  std::ostream& operator<<(std::ostream& os, const BinaryWord& b);
-
-
-}
-
 #endif /* _ARIADNE_BINARY_WORD_H */
+  

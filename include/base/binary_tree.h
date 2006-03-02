@@ -33,106 +33,109 @@
 #include <vector>
 #include <iostream>
 
+#include <boost/iterator/iterator_facade.hpp>
+
 #include "base/basic_type.h"
 #include "base/binary_word.h"
 #include "base/utility.h"
 
-#include "geometry/rectangle.h"
-
 namespace Ariadne {
-  const bool leaf=1;
-  const bool branch=0;
-  const bool left=0;
-  const bool right=1;
-  
-  class BinaryTree;
-  class BinaryTreeIterator;
-
-  /*!\brief A sorted list of BinaryWord elements such that every binary sequence has a unique prefix in the list.
-   *   Optimised for memory usage.
-   *   Constant forward iterators only, access may be inefficient.
-   */
-  class BinaryTree {
-    friend class BinaryTreeIterator;
-  
-    typedef BinaryWord::byte_type byte_type;
-   public:
-    /*! \brief The type of the BinaryWord object stored in the tree. */
-    typedef BinaryWord value_type;
-    typedef size_t size_type;
-    typedef BinaryTreeIterator iterator;
-    typedef BinaryTreeIterator const_iterator;
-   public:
-    /*!\brief Construct a tree containing just the empty word. */
-    explicit BinaryTree() : _array(1) { _array[0]=leaf; }
-    /*!\brief Construct a tree of depth n containing all words of size n. */
-    explicit BinaryTree(size_type n);
-    /*! \brief Construct a tree from an array of bits denoting branches and leaves. */
-    explicit BinaryTree(const BooleanArray& t) : _array(t) { check(); }
-    explicit BinaryTree(const std::vector<bool>& t) : _array(t.begin(),t.end()) { check(); }
-    explicit BinaryTree(const size_type& n, const bool* ptr) : _array(n,ptr) { check(); }
-  
-    /*! \brief The total number of leaf nodes in the tree. */
-    size_type size() const { return (_array.size()+1)/2; }
-
-    /*! \brief A constant forward iterator to the first leaf of the tree. */
-    const_iterator begin() const;
-    /*! \brief A constant forward iterator to the end of the tree. */
-    const_iterator end() const;
+  namespace Base {
+    class BinaryTree;
+    class BinaryTreeIterator;
     
-    /*! \brief The depth of the furthest leaf of the tree. */
-    size_type depth() const;
+    /*!\brief A sorted list of BinaryWord elements such that every binary sequence has a unique prefix in the list.
+     *   Optimised for memory usage.
+     *   Constant forward iterators only, access may be inefficient.
+     */
+    class BinaryTree {
+      typedef BinaryWord::byte_type byte_type;
+     public:
+      static const bool leaf=1;
+      static const bool branch=0;
+      static const bool left=0;
+      static const bool right=1;
+     public:    
+      /*! \brief The type of the BinaryWord object stored in the tree. */
+      typedef BinaryWord value_type;
+      typedef size_t size_type;
+      typedef BinaryTreeIterator iterator;
+      typedef BinaryTreeIterator const_iterator;
+      friend class BinaryTreeIterator;
+     public:
+      /*!\brief Construct a tree containing just the empty word. */
+      explicit BinaryTree();
+      /*!\brief Construct a tree of depth n containing all words of size n. */
+      explicit BinaryTree(size_type n);
 
-    /*! \brief The array of bits denoting branches and leaves. */
-    const BooleanArray& array() const { return _array; }
-
-    friend std::ostream& operator<<(std::ostream&, const BinaryTree&);
-   private:
-    void check() const;
-   private:
-    BooleanArray _array;
-  };
+      /*! \brief Construct a tree from an array of bits denoting branches and leaves. */
+      explicit BinaryTree(const array<bool>& t) : _array(t.begin(),t.end()) { check(); }
+      explicit BinaryTree(const std::vector<bool>& t) : _array(t.begin(),t.end()) { check(); }
+      explicit BinaryTree(const size_type& n, const bool* ptr) : _array(n,ptr) { check(); }
+      
+      /*! \brief The total number of leaf nodes in the tree. */
+      size_type size() const { return (_array.size()+1)/2; }
+      
+      /*! \brief A constant forward iterator to the first leaf of the tree. */
+      const_iterator begin() const;
+      /*! \brief A constant forward iterator to the end of the tree. */
+      const_iterator end() const;
+      
+      /*! \brief The depth of the furthest leaf of the tree. */
+      size_type depth() const;
+      
+      /*! \brief The array of bits denoting branches and leaves. */
+      const BooleanArray& array() const { return _array; }
+      
+      friend std::ostream& operator<<(std::ostream&, const BinaryTree&);
+     private:
+      void check() const;
+     private:
+      BooleanArray _array;
+    };
     
-  class BinaryTreeIterator {
-    friend class BinaryTree;
-   private:
-    BinaryTreeIterator(BooleanArray::const_iterator i) : _position(i), _word() { }
-    BinaryTreeIterator& initialise() { while(*_position==branch) { _word.push_back(left); ++_position; } return *this; }
-   public:
-    BinaryTreeIterator(const BooleanArray& ba) : _position(ba.begin()), _word() { initialise(); }
-   public:
-    BinaryTreeIterator(const BinaryTreeIterator& iter) : _position(iter._position), _word(iter._word) { }
-    bool operator==(const BinaryTreeIterator& iter) const { return this->_position==iter._position; }
-    bool operator!=(const BinaryTreeIterator& iter) const { return this->_position!=iter._position; }
-    const BinaryWord& operator*() const { return _word; }
-    const BinaryWord* operator->() const { return &_word; }
-    BinaryTreeIterator& operator++();
-    void skip_subtree();
-   private:
-    // Invariant: _position should always point to a leaf after operator++
-    BooleanArray::const_iterator _position;
-    BinaryWord _word;
-  };
+    class BinaryTreeIterator 
+      : public boost::iterator_facade<BinaryTreeIterator,
+                                      BinaryWord,
+                                      boost::forward_traversal_tag,
+                                      const BinaryWord&>
+    {
+      friend class BinaryTree;
+     private:
+      BinaryTreeIterator(BooleanArray::const_iterator i, BooleanArray::const_iterator e);
+     public:
+      void skip_subtree();
+     private:
+      bool equal(const BinaryTreeIterator& other) const { 
+        return this->_position==other._position && this->_word==other._word; }
+      const BinaryWord& dereference() const { 
+        return _word; }
+      void increment();
+      friend class boost::iterator_core_access;
+     private:
+      // Invariant: _position should always point to a leaf after operator++
+      BooleanArray::const_iterator _position;
+      BinaryWord _word;
+    };
+    
+    inline
+    BinaryTree::const_iterator 
+    BinaryTree::begin() const 
+    { 
+      return const_iterator(_array.begin(),_array.end());
+    }
+    
+    inline
+    BinaryTree::const_iterator 
+    BinaryTree::end() const 
+    { 
+      return const_iterator(_array.end(),_array.end()); 
+    }
+    
+    std::ostream& operator<<(std::ostream& os, const BinaryTree& t);
+    
+  } // namespace Base
+} // namespace Ariadne
 
-  inline
-  BinaryTree::const_iterator 
-  BinaryTree::begin() const 
-  { 
-    return const_iterator(_array.begin()).initialise(); 
-  }
 
-  inline
-  BinaryTree::const_iterator 
-  BinaryTree::end() const 
-  { 
-    return const_iterator(_array.end()); 
-  }
-
-  std::ostream& operator<<(std::ostream& os, const BinaryTree& t);
- 
-  
-  
-}
-
-  
 #endif /* _ARIADNE_BINARY_TREE_H */

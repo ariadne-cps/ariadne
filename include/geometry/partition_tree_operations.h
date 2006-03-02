@@ -34,8 +34,8 @@
 
 namespace Ariadne {
   namespace Geometry {
-    SubdivisionSequence default_subdivision_coordinates(dimension_type);
-    dimension_type compute_dimension(const SubdivisionSequence&);
+    sequence<dimension_type> default_subdivision_coordinates(dimension_type);
+    dimension_type compute_dimension(const sequence<dimension_type>&);
   }
 }
 

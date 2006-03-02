@@ -28,17 +28,15 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template class Grid<Dyadic>;
-    template class FiniteGrid<Dyadic>;
     template class GridCell<Dyadic>;
     template class GridRectangle<Dyadic>;
     template class GridMaskSet<Dyadic>;
     template class GridCellListSet<Dyadic>;
     template class GridRectangleListSet<Dyadic>;
       
-    template class GridMaskSetConstIterator<Dyadic>;
-    template class GridCellListSetConstIterator<Dyadic>;
-    template class GridRectangleListSetConstIterator<Dyadic>;
+    template class GridMaskSetIterator<Dyadic>;
+    template class GridCellListSetIterator<Dyadic>;
+    template class GridRectangleListSetIterator<Dyadic>;
 
     template bool interiors_intersect(const Rectangle<Dyadic>&, const GridMaskSet<Dyadic>&);
     template bool interiors_intersect(const GridRectangle<Dyadic>&, const GridMaskSet<Dyadic>&);
@@ -89,7 +87,6 @@ namespace Ariadne {
                                        const Rectangle<Dyadic>& r, 
                                        const FiniteGrid<Dyadic>& g);
     
-    template std::ostream& operator<<(std::ostream&, const Grid<Dyadic>&);
     template std::ostream& operator<<(std::ostream&, const GridCell<Dyadic>&);
     template std::ostream& operator<<(std::ostream&, const GridRectangle<Dyadic>&);
     template std::ostream& operator<<(std::ostream&, const GridRectangleListSet<Dyadic>&);

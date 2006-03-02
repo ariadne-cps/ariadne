@@ -38,7 +38,7 @@ namespace Ariadne {
     template<typename R>
     PartitionScheme<R>::PartitionScheme(const Rectangle<R>& bb) 
       : _bounding_box(bb), 
-        _subdivisions(default_subdivision_coordinates(bb.dimension())) 
+        _subdivisions(bb.dimension()) 
       { }
 
     template<typename R>
@@ -46,10 +46,10 @@ namespace Ariadne {
       Rectangle<R> result(this->dimension());
       for(dimension_type i=0; i!=this->dimension(); ++i) {
         result.set_lower_bound( i,
-          _bounding_box.lower_bound(i)+_cell.lower_bound(i)
+          _bounding_box.lower_bound(i)+_unit_cell.lower_bound(i)
             *(_bounding_box.upper_bound(i)-_bounding_box.lower_bound(i)) ); 
         result.set_upper_bound( i,
-          _bounding_box.lower_bound(i)+_cell.upper_bound(i)
+          _bounding_box.lower_bound(i)+_unit_cell.upper_bound(i)
             *(_bounding_box.upper_bound(i)-_bounding_box.lower_bound(i)) ); 
       }
       return result;
@@ -58,7 +58,7 @@ namespace Ariadne {
     template<typename R>
     PartitionTreeSet<R>::PartitionTreeSet(const GridMaskSet<R>& gms) 
       : _bounding_box(gms.bounding_box()),
-        _unit_set(gms._unit_set)
+        _unit_set(gms._lattice_set)
     { }
 
     template<typename R>
@@ -98,32 +98,10 @@ namespace Ariadne {
 
     template<typename R>
     std::ostream&
-    operator<<(std::ostream& os, const PartitionTree<R>& t)
-    {
-      os << "PartitionTree<" << name<R>() << ">(\n";
-      os << "  bounding_box=" << t.bounding_box() << ",\n";
-      os << "  subdivisions=" << t.subdivisions() << "\n";
-      os << "  words=";
-      write_sequence(os, t.binary_tree().begin(), t.binary_tree().end());
-      os << "\n";
-      os << "  rectangles=[ " << Rectangle<R>(*t.begin());
-      for(typename PartitionTree<R>::const_iterator ptree_iter=++t.begin() ; ptree_iter!=t.end(); ++ptree_iter) {
-        os << ", " << Rectangle<R>(*ptree_iter);
-      }
-      os << " ]\n";
-      os << ")\n";
-      return os;
-    }
-
-    template<typename R>
-    std::ostream&
     operator<<(std::ostream& os, const PartitionTreeCell<R>& c)
     {
       os << "PartitionTreeCell<" << name<R>() << ">(\n";
-      os << "  bouding_box=" << c.bounding_box() << ",\n";
-      os << "  subdivisions=" << c.subdivisions() << ",\n";
-      os << "  word=" << c.word() << ",\n";
-      os << "  bounds=" << c.bounds() << ",\n";
+      os << "  bounds=" << c.unit_cell() << ",\n";
       os << "  rectangle=" << Rectangle<R>(c) << "\n";
       os << ")\n";
       return os;
@@ -131,19 +109,28 @@ namespace Ariadne {
 
     template<typename R>
     std::ostream&
-    operator<<(std::ostream& os, const PartitionTreeSet<R>& set)
+    operator<<(std::ostream& os, const PartitionTree<R>& pt)
+    {
+      os << "PartitionTree<" << name<R>() << ">(\n";
+      os << "  bounding_box=" << pt.bounding_box() << ",\n";
+      os << "  subdivisions=" << pt.subdivisions() << "\n";
+      os << "  words="; write_sequence(os, pt.binary_tree().begin(), pt.binary_tree().end()); os << ",\n";
+      os << "  blocks=["; write_sequence(os,  pt.unit_tree().begin(), pt.unit_tree().end()); os << ",\n";
+      os << "  cells=["; write_sequence(os,  pt.begin(), pt.end()); os << ",\n";
+      os << ")\n";
+      return os;
+    }
+
+    template<typename R>
+    std::ostream&
+    operator<<(std::ostream& os, const PartitionTreeSet<R>& pts)
     {
       os << "PartitionTreeSet<" << name<R>() << ">(\n";
-      os << "  bounding_box=" << set.bounding_box() << ",\n";
-      os << "  subdivisions=" << set.subdivisions() << ",\n";
-      BinarySubtreeIterator bstb(set.binary_tree().begin(),set.mask().begin(),set.mask().end());
-      BinarySubtreeIterator bste(set.binary_tree().end(),set.mask().end(),set.mask().end());
-      os << "  words="; write_sequence(os, bstb, bste); os << ",\n";
-      os << "  cells=["; 
-      for(typename PartitionTreeSet<R>::const_iterator i=set.begin(); i!=set.end(); ++i) {
-        os << (*i).bounds() << ",";
-      }
-      os << "]\n";
+      os << "  bounding_box=" << pts.bounding_box() << ",\n";
+      os << "  subdivisions=" << pts.subdivisions() << ",\n";
+      os << "  words="; write_sequence(os, pts.unit_set().words().begin(), pts.unit_set().words().end()); os << ",\n";
+      os << "  blocks=["; write_sequence(os,  pts.unit_set().begin(), pts.unit_set().end()); os << ",\n";
+      os << "  cells=["; write_sequence(os,  pts.begin(), pts.end()); os << ",\n";
       os << ")\n";
       return os;
     }

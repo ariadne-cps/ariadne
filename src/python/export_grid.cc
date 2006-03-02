@@ -40,8 +40,8 @@ using Ariadne::index_type;
 using Ariadne::BooleanArray;
 using Ariadne::IndexArray;
 using Ariadne::SizeArray;
-using Ariadne::Geometry::UnitGridCell;
-using Ariadne::Geometry::UnitGridRectangle;
+using Ariadne::Geometry::LatticeCell;
+using Ariadne::Geometry::LatticeRectangle;
 
 typedef Ariadne::Geometry::Point<Real> RPoint;
 typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
@@ -80,6 +80,7 @@ struct RGrid : RGridBase, wrapper<RGridBase>
   dimension_type dimension() const { return this->get_override("dimension")(); }
   real_type subdivision_coordinate(dimension_type d, index_type n) const { return this->get_override("subdivision_coordinate")(); }
   index_type subdivision_interval(dimension_type d, const real_type& x) const { return this->get_override("subdivision_interval")(); }
+  bool contains(const LatticeRectangle& r) const { return this->get_override("subdivision_interval")(); }
   std::ostream& write(std::ostream& os) const { return this->get_override("write")(); }
 };
 
@@ -123,13 +124,20 @@ inline void grid_mask_set_adjoin_grid_mask_set(RGridMaskSet& gms, const RGridMas
 
 
 void export_grid() {
+  class_<LatticeRectangle>("LatticeRectangle",init<IndexArray,IndexArray>())
+    .def("dimension", &RGridCell::dimension)
+    .def(str(self))    // __str__
+    ;
+
+
   class_<RGrid, boost::noncopyable>("Grid")
     .def("dimension", &RFiniteGrid::dimension)
     .def("subdivision_coordinate", &RFiniteGrid::subdivision_coordinate)
     .def("subdivision_index", &RFiniteGrid::subdivision_index)
     .def("subdivision_lower_index", &RFiniteGrid::subdivision_lower_index)
     .def("subdivision_upper_index", &RFiniteGrid::subdivision_upper_index)
-    //    .def(str(self))    // __str__
+    .def("contains", &RFiniteGrid::contains)
+    .def(str(self))    // __str__
     ;
 
   class_<RFiniteGrid>("FiniteGrid",init<RRectangle,SizeArray>())
@@ -141,15 +149,16 @@ void export_grid() {
     .def("subdivision_index", &RFiniteGrid::subdivision_index)
     .def("subdivision_lower_index", &RFiniteGrid::subdivision_lower_index)
     .def("subdivision_upper_index", &RFiniteGrid::subdivision_upper_index)
-    //    .def(str(self))    // __str__
+    .def(str(self))    // __str__
     ;
 
-  class_<RGridCell>("GridCell",init<RFiniteGrid,UnitGridCell>())
+  class_<RGridCell>("GridCell",init<RFiniteGrid,LatticeCell>())
     .def("dimension", &RGridCell::dimension)
     .def(str(self))    // __str__
     ;
   
-  class_<RGridRectangle>("GridRectangle",init<RFiniteGrid,UnitGridRectangle>())
+  class_<RGridRectangle>("GridRectangle",init<RFiniteGrid,LatticeRectangle>())
+    .def(init<RGridCell>()) 
     .def("dimension", &RGridRectangle::dimension)
     .def(str(self))    // __str__
     ;
@@ -173,7 +182,7 @@ void export_grid() {
     .def(init<RRectangleListSet>())
     .def(init<RPartitionTreeSet>())
     .def("dimension", &RGridRectangleListSet::dimension)
-    .def("push_back", &RGridRectangleListSet::push_back)
+    .def("adjoin", &RGridRectangleListSet::adjoin)
     .def("size", &RGridRectangleListSet::size)
     .def("__len__", &RGridRectangleListSet::size)
     .def("__getitem__", &RGridRectangleListSet::operator[])
@@ -186,12 +195,16 @@ void export_grid() {
     .def(init<RGridCellListSet>())
     .def(init<RGridRectangleListSet>())
     .def(init<RRectangleListSet>())
+    .def("bounding_box", &RGridMaskSet::bounding_box)
     .def("empty", &RGridMaskSet::empty)
     .def("dimension", &RGridMaskSet::dimension)
+    .def("clear", &RGridMaskSet::clear)
     .def("adjoin", &grid_mask_set_adjoin_grid_cell)
     .def("adjoin", &grid_mask_set_adjoin_grid_rectangle)
     .def("adjoin", &grid_mask_set_adjoin_grid_cell_list_set)
     .def("adjoin", &grid_mask_set_adjoin_grid_mask_set)
+    .def("neighbourhood", &RGridMaskSet::neighbourhood)
+    .def("adjoining", &RGridMaskSet::adjoining)
     .def("size", &RGridMaskSet::size)
     .def("__len__", &RGridMaskSet::size)
     .def("__getitem__", &RGridMaskSet::operator[])

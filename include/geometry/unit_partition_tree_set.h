@@ -35,206 +35,227 @@
 
 #include "base/basic_type.h"
 #include "base/array.h"
+#include "base/sequence.h"
 #include "base/interval.h"
 #include "base/binary_word.h"
 #include "base/binary_tree.h"
+#include "base/iterator.h"
 #include "base/utility.h"
 
 #include "geometry/geometry_declarations.h"
+#include "geometry/rectangle.h"
 
 namespace Ariadne {
   namespace Geometry {
-
     class UnitPartitionTreeCell;
+    class UnitPartitionTree;
     class UnitPartitionTreeSet;
-    class UnitPartitionTreeSetIterator;
     
     std::ostream& operator<<(std::ostream&, const UnitPartitionTreeCell&);
     
-    class UnitGridMaskSet;
-    class UnitGridRectangle;
+    class LatticeMaskSet;
+    class LatticeRectangle;
       
-    //TODO: Replace by a general-purpose mask iterator
-    class BinarySubtreeIterator {
-      typedef BinaryWord value_type;
-      typedef BinaryWord reference;
+    class SubdivisionSequence
+      : public sequence<dimension_type> 
+    {
      public:
-      BinarySubtreeIterator(BinaryTree::const_iterator ti, 
-                            BooleanArray::const_iterator mi, 
-                            BooleanArray::const_iterator me) 
-        : _word_iter(ti), _mask_iter(mi), _mask_end(me) 
-      { 
-        while(_mask_iter!=_mask_end && !*_mask_iter) { 
-          ++_mask_iter; ++_word_iter; 
-        }
-      }
+      SubdivisionSequence(const dimension_type& n)
+        : _sequence(_default(n)), _dimension(n) { }
       
-      bool operator==(const BinarySubtreeIterator& other) const { 
-        return this->equal(other); }
-      bool operator!=(const BinarySubtreeIterator& other) const { 
-        return !this->equal(other); }
-      BinaryWord operator*() const { 
-        return this->dereference(); }
-      BinarySubtreeIterator& operator++() { 
-        this->increment(); return *this; }
+      template<typename FwdIter> 
+      SubdivisionSequence(FwdIter b, FwdIter tb, FwdIter te)
+        : _sequence(b,tb,te), _dimension(_compute_dimension())
+      { }
+
+      dimension_type dimension() const { 
+        return _dimension; }
+      dimension_type operator[](const size_type& i) const { 
+        return _sequence[i]; }
      private:
-      bool equal(const BinarySubtreeIterator& other) const {
-        return this->_word_iter==other._word_iter && this->_mask_iter==other._mask_iter;
-      }
-      BinaryWord dereference() const { 
-        return _word_iter.operator*(); 
-      }
-      void increment() { 
-        do { 
-          ++_mask_iter; ++_word_iter; } 
-        while(_mask_iter!=_mask_end && !*_mask_iter);
-      }
+      dimension_type _compute_dimension();
+      sequence<dimension_type> _default(dimension_type n);
      private:
-      BinaryTree::const_iterator _word_iter;
-      BooleanArray::const_iterator _mask_iter;
-      BooleanArray::const_iterator _mask_end;
+      sequence<dimension_type> _sequence;
+      dimension_type _dimension;
     };
 
-    
-    
-    class UnitPartitionTreeCell {
-      typedef double dyadic_type;
+    class MaskedBinaryTree {
      public:
-      UnitPartitionTreeCell(const dimension_type& d, const SubdivisionSequence& ss, 
+      typedef mask_iterator<BinaryTree::const_iterator, 
+                            BooleanArray::const_iterator> const_iterator;
+      typedef const_iterator iterator;
+
+      MaskedBinaryTree() 
+        : _tree(), _mask(1,false) { }
+      MaskedBinaryTree(const BooleanArray& t, const BooleanArray& m) 
+        : _tree(t), _mask(m) { }
+      MaskedBinaryTree(const BinaryTree& t, const BooleanArray& m) 
+        : _tree(t), _mask(m) { }
+
+      const BinaryTree& tree() const { return _tree; }
+      const BooleanArray& mask() const { return _mask; }
+      
+      size_type capacity() const { return mask().size(); }
+      size_type size() const { return std::count(_mask.begin(),_mask.end(),true); }
+
+      void reduce();
+
+      const_iterator begin() const { 
+        return const_iterator(_tree.begin(),_mask.begin(),_mask.end()); }
+      const_iterator end() const { 
+        return const_iterator(_tree.end(),_mask.end(),_mask.end()); }
+     private:
+      BinaryTree _tree;
+      BooleanArray _mask;
+    };
+
+    class UnitPartitionTreeCell {
+     public:
+      typedef double dyadic_type;
+
+      UnitPartitionTreeCell(const SubdivisionSequence& ss, 
                             const BinaryWord& bw);
 
       bool operator==(const UnitPartitionTreeCell& other) const {
         return this->_bounds==other._bounds; }
 
-      const SubdivisionSequence& subdivisions() const { 
-        return _subdivisions; }
-      BinaryWord word() const { 
-        return _word; }
       dimension_type dimension() const { 
-        return _bounds.size()/2; }
-      Interval<dyadic_type> operator[](dimension_type i) const { 
-        return Interval<dyadic_type>(_bounds[2*i],_bounds[2*i+1]); }
-      dyadic_type lower_bound(dimension_type i) const { return _bounds[2*i]; }
-      dyadic_type upper_bound(dimension_type i) const { return _bounds[2*i+1]; }
-      Rectangle<dyadic_type> bounds() const;
+        return _bounds.dimension(); }
+      const dyadic_type& lower_bound(dimension_type i) const {
+        return _bounds.lower_bound(i); }
+      const dyadic_type& upper_bound(dimension_type i) const {
+        return _bounds.upper_bound(i); }
+      const Rectangle<dyadic_type>& bounds() const { return _bounds; };
      private:
-      const SubdivisionSequence _subdivisions;
-      BinaryWord _word;
-      array<dyadic_type> _bounds;
+      void _compute_bounds(const SubdivisionSequence& ss, const BinaryWord& bw);
+     private:
+      Rectangle<dyadic_type> _bounds;
     };
     
-    class UnitPartitionTreeSet {
-     public:
-      typedef UnitPartitionTreeSetIterator iterator;
-      typedef UnitPartitionTreeSetIterator const_iterator;
-     
-      UnitPartitionTreeSet(const SubdivisionSequence& ss);
-      UnitPartitionTreeSet(const SubdivisionSequence& ss, 
-                           const BinaryTree& bt,
-                           const BooleanArray& ba); 
-      UnitPartitionTreeSet(const UnitGridMaskSet& ms); 
 
-     /*! \brief The space dimension of the tree. */
-      dimension_type dimension() const { return _dimension; }
+
+    class UnitPartitionTree {
+     public:
+      typedef binary_constructor_iterator<BinaryTree::const_iterator, 
+                                          UnitPartitionTreeCell, 
+                                          SubdivisionSequence> const_iterator;
+      typedef const_iterator iterator;
+     
+      UnitPartitionTree(const SubdivisionSequence& ss, 
+                        const BinaryTree& bt);
+
+      /*! \brief The space dimension of the tree. */
+      dimension_type dimension() const { return _subdivisions.dimension(); }
 
       /*! \brief The sequence describing the order of subdivisions. */
       const SubdivisionSequence& subdivisions() const { return _subdivisions; }
 
       /*! \brief The array describing the tree. */
-      const BinaryTree& tree() const { return _tree; }
-
-      /*! \brief The array describing the tree. */
-      const BooleanArray& mask() const { return _mask; }
+      const BinaryTree& binary_tree() const { return _tree; }
 
       /*! \brief The number of cells in the tree. */
-      size_type capacity() const { return _mask.size(); }
+      size_type size() const { return _tree.size(); }
 
-      /*! \brief The number of cells in the UnitPartitionTreeSet. */
-      size_type size() const { return std::count(_mask.begin(),_mask.end(), true); }
-      
       /*! \brief The depth of the smallest cell in the set. */
-      size_type depth() const { return tree().depth(); }
+      size_type depth() const { return _tree.depth(); }
       /*! \brief The maximum number of subdivisions in each dimension. */
       SizeArray depths() const;      
 
       /*! \brief Constant iterator to the beginning of the cells in the tree. */
-      const_iterator begin() const;
+      const_iterator begin() const { return const_iterator(_subdivisions,_tree.begin()); }
       /*! \brief Constant iterator to the end of the cells in the tree. */
-      const_iterator end() const;
+      const_iterator end() const { return const_iterator(_subdivisions,_tree.end()); }
      private:
       void reduce();
      private:
-      dimension_type _dimension;
       SubdivisionSequence _subdivisions;
       BinaryTree _tree;
-      BooleanArray _mask;
+    };
+    
+    class UnitPartitionTreeSetIterator 
+      : public boost::iterator_adaptor<UnitPartitionTreeSetIterator,
+                                       mask_iterator<BinaryTree::const_iterator, BooleanArray::const_iterator>,
+                                       UnitPartitionTreeCell,
+                                       boost::use_default,
+                                       UnitPartitionTreeCell>
+      
+    {
+      typedef mask_iterator<BinaryTree::const_iterator, BooleanArray::const_iterator> Base;
+     public:
+      UnitPartitionTreeSetIterator(const SubdivisionSequence& ss,
+                                   BinaryTree::const_iterator ti, 
+                                   BooleanArray::const_iterator mi, 
+                                   BooleanArray::const_iterator me) 
+      //        : UnitPartitionTreeSetIterator::iterator_adaptor_(mask_iterator<BinaryTree::const_iterator, BooleanArray::const_iterator>(ti,mi,me)),
+        : UnitPartitionTreeSetIterator::iterator_adaptor_(Base(ti,mi,me)),
+          _subdivisions(ss)
+      { }
+     private:
+      friend class boost::iterator_core_access;
+      UnitPartitionTreeCell dereference() const { 
+        return UnitPartitionTreeCell(_subdivisions,*this->base_reference()); 
+      }
+     private:
+      SubdivisionSequence _subdivisions;
+    };
+  
+    class UnitPartitionTreeSet {
+     public:
+      typedef binary_constructor_iterator<MaskedBinaryTree::const_iterator,
+                                          UnitPartitionTreeCell,
+                                          SubdivisionSequence> const_iterator;
+      typedef const_iterator iterator;
+     
+      UnitPartitionTreeSet(const SubdivisionSequence& ss);
+      UnitPartitionTreeSet(const SubdivisionSequence& ss, 
+                           const BinaryTree& bt,
+                           const BooleanArray& ba); 
+      UnitPartitionTreeSet(const LatticeMaskSet& ms); 
+
+     /*! \brief The space dimension of the tree. */
+      dimension_type dimension() const { return _subdivisions.dimension(); }
+
+      /*! \brief The sequence describing the order of subdivisions. */
+      const SubdivisionSequence& subdivisions() const { return _subdivisions; }
+
+      /*! \brief The array describing the tree. */
+      const MaskedBinaryTree& words() const { return _words; }
+
+      /*! \brief The array describing the tree. */
+      const BinaryTree& binary_tree() const { return _words.tree(); }
+
+      /*! \brief The array describing the tree. */
+      const BooleanArray& mask() const { return _words.mask(); }
+
+      /*! \brief The number of cells in the tree. */
+      size_type capacity() const { return _words.capacity(); }
+
+      /*! \brief The number of cells in the UnitPartitionTreeSet. */
+      size_type size() const { return _words.size(); }
+      
+      /*! \brief The depth of the smallest cell in the set. */
+      size_type depth() const { return binary_tree().depth(); }
+      /*! \brief The maximum number of subdivisions in each dimension. */
+      SizeArray depths() const;      
+
+      /*! \brief Constant iterator to the beginning of the cells in the tree. */
+      const_iterator begin() const { return const_iterator(_subdivisions,_words.begin()); }
+      /*! \brief Constant iterator to the end of the cells in the tree. */
+      const_iterator end() const { return const_iterator(_subdivisions,_words.end()); };
+     private:
+      void reduce() { this->_words.reduce(); }
+     private:
+      SubdivisionSequence _subdivisions;
+      MaskedBinaryTree _words;
     };
     
 
-
-    class UnitPartitionTreeSetIterator {
-      typedef UnitPartitionTreeCell value_type;
-      typedef UnitPartitionTreeCell reference;
-     public:
-      UnitPartitionTreeSetIterator(const dimension_type& d,
-                                const SubdivisionSequence& ss,
-                                BinaryTree::const_iterator ti, 
-                                BooleanArray::const_iterator mi, 
-                                BooleanArray::const_iterator me) 
-        : _dimension(d), _subdivisions(ss), _word_iter(ti), _mask_iter(mi), _mask_end(me) 
-      { 
-        while(_mask_iter!=_mask_end && !*_mask_iter) { 
-          ++_mask_iter; ++_word_iter; 
-        }
-      }
+    index_type compute_index(const SubdivisionSequence& ss, const BinaryWord& bw,const LatticeRectangle& r);
       
-      bool operator==(const UnitPartitionTreeSetIterator& other) const { 
-        return this->equal(other); }
-      bool operator!=(const UnitPartitionTreeSetIterator& other) const { 
-        return !this->equal(other); }
-      UnitPartitionTreeCell operator*() const { 
-        return this->dereference(); }
-      UnitPartitionTreeSetIterator& operator++() { 
-        this->increment(); return *this; }
-     private:
-      bool equal(const UnitPartitionTreeSetIterator& other) const {
-        return this->_word_iter==other._word_iter && this->_mask_iter==other._mask_iter;
-      }
-      UnitPartitionTreeCell dereference() const { 
-        return UnitPartitionTreeCell(_dimension,_subdivisions,*_word_iter); 
-      }
-      void increment() { 
-        do { 
-          ++_mask_iter; ++_word_iter; } 
-        while(_mask_iter!=_mask_end && !*_mask_iter);
-      }
-     private:
-      dimension_type _dimension;
-      SubdivisionSequence _subdivisions;
-      BinaryTree::const_iterator _word_iter;
-      BooleanArray::const_iterator _mask_iter;
-      BooleanArray::const_iterator _mask_end;
-    };
-  
-    inline 
-    UnitPartitionTreeSet::const_iterator 
-    UnitPartitionTreeSet::begin() const 
-    { 
-      return const_iterator(_dimension,_subdivisions,_tree.begin(),_mask.begin(),_mask.end()); 
-    }
-
-    inline 
-    UnitPartitionTreeSet::const_iterator 
-    UnitPartitionTreeSet::end() const 
-    { 
-      return const_iterator(_dimension,_subdivisions,_tree.end(),_mask.end(),_mask.end()); 
-    }
-
-    index_type compute_index(const SubdivisionSequence& ss, const BinaryWord& bw,const UnitGridRectangle& r);
-      
-    UnitGridRectangle 
+    LatticeRectangle 
     compute_block(const UnitPartitionTreeCell& c, 
-                  const UnitGridRectangle& r);
+                  const LatticeRectangle& r);
 
   }
   

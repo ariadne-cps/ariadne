@@ -55,7 +55,7 @@ namespace Ariadne {
 
     template<typename R> std::ostream& operator<<(std::ostream&, const PolynomialMap<R>&);
     
-    /*! A monomial. */
+    /*! \brief A monomial in several variables. */
     template<typename R>
     class Monomial {
      public:
@@ -88,7 +88,7 @@ namespace Ariadne {
       array<size_type> _multi_index;
     };
      
-    /*! A polynomial with single-variable output. */
+    /*! \brief A polynomial in several variables. */
     template<typename R>
     class Polynomial {
      public:
@@ -121,7 +121,7 @@ namespace Ariadne {
       }
     };
 
-    /*! A polynomial map with single-variable output. */
+    /*! \brief A polynomial map with multivalued output. */
     template <typename R>
     class PolynomialMap {
      public:

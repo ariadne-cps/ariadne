@@ -29,7 +29,7 @@
 
 #include "python/real_typedef.h"
 
-typedef Ariadne::Interval<Real> RInterval;
+typedef Ariadne::Base::Interval<Real> RInterval;
 
 using boost::python::class_;
 using boost::python::init;

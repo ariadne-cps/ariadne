@@ -31,154 +31,35 @@
 
 namespace Ariadne {
   namespace Geometry {
+    const bool branch=BinaryTree::branch;
+    const bool leaf=BinaryTree::leaf;
+    const bool left=BinaryTree::left;
+    const bool right=BinaryTree::right;
     
-    UnitPartitionTreeCell::UnitPartitionTreeCell(const dimension_type& d,
-                                                 const SubdivisionSequence& ss,
-                                                 const BinaryWord& w)
-      : _subdivisions(ss), _word(w), _bounds(2*d)
-    {
-      for(dimension_type i=0; i!=this->dimension(); ++i) {
-        _bounds[2*i]=0;
-        _bounds[2*i+1]=1;
-      }
-      for(size_type j=0; j!=_word.size(); ++j) {
-        dimension_type i=_subdivisions[j];
-        dyadic_type c=(_bounds[2*i]+_bounds[2*i+1])/2;
-        if(w[j]==left) {
-          _bounds[2*i+1]=c;
-        }
-        else {
-          _bounds[2*i]=c;
-        }
-      }
-    }
-
-    Rectangle<UnitPartitionTreeCell::dyadic_type>
-    UnitPartitionTreeCell::bounds() const
-    {
-      Rectangle<dyadic_type> result(this->dimension());
-      for(dimension_type i=0; i!=this->dimension(); ++i) {
-        result.set_lower_bound(i,this->lower_bound(i));
-        result.set_upper_bound(i,this->upper_bound(i));
-      }
-      return result;
-    }
-
-    UnitPartitionTreeSet::UnitPartitionTreeSet(const SubdivisionSequence& ss)
-      : _dimension(compute_dimension(ss)), _subdivisions(ss), 
-        _tree(), _mask(1,false)
-    {
-    }
-    
-    UnitPartitionTreeSet::UnitPartitionTreeSet(const SubdivisionSequence& ss, 
-                                               const BinaryTree& bt,
-                                               const BooleanArray& ba)
-      : _dimension(compute_dimension(ss)), _subdivisions(ss), 
-        _tree(bt), _mask(ba)
-    {
-      assert(bt.size()==ba.size());
-      this->reduce();
-    }
-    
-    UnitPartitionTreeSet::UnitPartitionTreeSet(const UnitGridMaskSet& ms) 
-      : _dimension(ms.dimension()),
-        _subdivisions(default_subdivision_coordinates(ms.dimension())),
-        _tree(),
-        _mask()
-    {
-      dimension_type n=ms.dimension();
-      dimension_type dimension=ms.dimension();
-      UnitGridRectangle bounds=ms.bounds();
-      SizeArray grid_sizes=bounds.sizes();
-      SizeArray new_sizes(this->dimension());
-      SizeArray depths(this->dimension());
-      size_type depth=0;
-
-      /* Compute grid sizes as powers of two */
+    sequence<dimension_type> 
+    SubdivisionSequence::_default(dimension_type n) {
+      dimension_type coords[n];
       for(dimension_type i=0; i!=n; ++i) {
-        depths[i]=log_ceil(2,grid_sizes[i]);
-        new_sizes[i]=pow(2,depths[i]);
-        depth+=depths[i];
+        coords[i]=i;
       }
-      
-
-      /* Compute subdivision coordinates */
-      std::vector<dimension_type> sc;
-      for(size_type i=0; i!=depth; ++i) {
-        dimension_type coordinate=0;
-        for(dimension_type j=1; j!=n; ++j) {
-          if(depths[j]>depths[coordinate]) {
-             // || depths[j]=depth[coordinate] && gms.grid().upper_bound(j) > gms.grid().upper_bound(i)) {
-            coordinate=j;
-          }
-        }
-        sc.push_back(coordinate);
-        depths[coordinate]-=1;
-      }
-      for(dimension_type j=0; j!=n; ++j) {
-        sc.push_back(j);
-      }
-      while(sc.size()>n && (sc[sc.size()-1]==sc[sc.size()-n-1])) {
-        sc.pop_back();
-      }
-      SubdivisionSequence subdivisions(sc.begin(),sc.end()-n,sc.end());
-      
-      std::vector<bool> tree;
-      std::vector<bool> mask;
-      BinaryWord word;
-      
-      do {
-        //TODO: Construct full tree, then reduce
-        UnitPartitionTreeCell c(dimension,subdivisions,word);
-        UnitGridRectangle r=compute_block(c,bounds);
-        if(subset(r,ms)) {
-          //std::cerr <<  c.bounds() << " " << r << " subset" << std::endl;
-          tree.push_back(leaf);
-          mask.push_back(true);
-        }
-        else if(!interiors_intersect(r,ms)) {
-          //std::cerr <<  c.bounds() << " " << r << " disjoint" << std::endl;
-          tree.push_back(leaf);
-          mask.push_back(false);
-        }
-        else {
-          //std::cerr <<  c.bounds() << " " << r << " neither" << std::endl;
-          tree.push_back(branch);
-        }          
-        if(tree.back()==leaf) {
-          while(!word.empty() && word.back()==right) {
-            word.pop_back();
-          }
-          if(!word.empty()) {
-            word.set_back(right);
-          }
-        }
-        else {
-          word.push_back(left);
-        }
-      } 
-      while(!word.empty());
-      
-      this->_dimension=dimension;
-      this->_subdivisions=subdivisions;
-      this->_tree=BinaryTree(tree);
-      this->_mask=mask;
-    
-      this->reduce();
+      return sequence<dimension_type>(coords,coords,coords+n);
     }
 
-    SizeArray
-    UnitPartitionTreeSet::depths() const
+    dimension_type 
+    SubdivisionSequence::_compute_dimension() 
     {
-      SizeArray result(this->dimension(),0);
-      for(size_type j=0; j!=this->depth(); ++j) {
-        result[_subdivisions[j]]+=1;
+      dimension_type result=0;
+      const sequence<dimension_type>& ss(this->_sequence);
+      for(size_type i=0; i!=ss.body_size()+ss.tail_size(); ++i) {
+        if(ss[i]>=result) {
+          result=ss[i]+1;
+        }
       }
       return result;
     }
     
     void
-    UnitPartitionTreeSet::reduce()
+    MaskedBinaryTree::reduce()
     {
       const BooleanArray& tree(this->_tree.array());
       const BooleanArray& mask(this->_mask);
@@ -222,22 +103,157 @@ namespace Ariadne {
       this->_mask=BooleanArray(new_mask);
     }
 
+    
+    UnitPartitionTreeCell::UnitPartitionTreeCell(const SubdivisionSequence& ss,
+                                                 const BinaryWord& w)
+      : _bounds(ss.dimension())
+    {
+      _compute_bounds(ss,w);
+    }
+    
+    void
+    UnitPartitionTreeCell::_compute_bounds(const SubdivisionSequence& ss,
+                                           const BinaryWord& w)
+    {
+      for(dimension_type i=0; i!=this->dimension(); ++i) {
+        _bounds.set_lower_bound(i,0.0);
+        _bounds.set_upper_bound(i,1.0);
+      }
+      for(size_type j=0; j!=w.size(); ++j) {
+        dimension_type i=ss[j];
+        dyadic_type c=(_bounds.lower_bound(i)+_bounds.upper_bound(i))/2;
+        if(w[j]==left) {
+          _bounds.set_upper_bound(i,c);
+        }
+        else {
+          _bounds.set_lower_bound(i,c); 
+        }
+      }
+    }
+
+    UnitPartitionTree::UnitPartitionTree(const SubdivisionSequence& ss,
+                                         const BinaryTree& t)
+      : _subdivisions(ss), _tree(t)
+    {
+    }
+    
+    UnitPartitionTreeSet::UnitPartitionTreeSet(const SubdivisionSequence& ss)
+      :  _subdivisions(ss), _words()
+    {
+    }
+    
+    UnitPartitionTreeSet::UnitPartitionTreeSet(const SubdivisionSequence& ss, 
+                                               const BinaryTree& bt,
+                                               const BooleanArray& ba)
+      : _subdivisions(ss), _words(bt,ba)
+    {
+      assert(bt.size()==ba.size());
+      this->reduce();
+    }
+    
+    UnitPartitionTreeSet::UnitPartitionTreeSet(const LatticeMaskSet& ms) 
+      : _subdivisions(ms.dimension()), _words()
+    {
+      dimension_type n=ms.dimension();
+
+      LatticeRectangle bounds=ms.bounds();
+      SizeArray grid_sizes=bounds.sizes();
+      SizeArray new_sizes(this->dimension());
+      SizeArray depths(this->dimension());
+      size_type depth=0;
+
+      /* Compute grid sizes as powers of two */
+      for(dimension_type i=0; i!=n; ++i) {
+        depths[i]=log_ceil(2,grid_sizes[i]);
+        new_sizes[i]=pow(2,depths[i]);
+        depth+=depths[i];
+      }
+      
+
+      /* Compute subdivision coordinates */
+      std::vector<dimension_type> sc;
+      for(size_type i=0; i!=depth; ++i) {
+        dimension_type coordinate=0;
+        for(dimension_type j=1; j!=n; ++j) {
+          if(depths[j]>depths[coordinate]) {
+             // || depths[j]=depth[coordinate] && gms.grid().upper_bound(j) > gms.grid().upper_bound(i)) {
+            coordinate=j;
+          }
+        }
+        sc.push_back(coordinate);
+        depths[coordinate]-=1;
+      }
+      for(dimension_type j=0; j!=n; ++j) {
+        sc.push_back(j);
+      }
+      while(sc.size()>n && (sc[sc.size()-1]==sc[sc.size()-n-1])) {
+        sc.pop_back();
+      }
+      SubdivisionSequence subdivisions(sc.begin(),sc.end()-n,sc.end());
+      
+      std::vector<bool> tree;
+      std::vector<bool> mask;
+      BinaryWord word;
+      
+      do {
+        //TODO: Construct full tree, then reduce
+        UnitPartitionTreeCell c(subdivisions,word);
+        LatticeRectangle r=compute_block(c,bounds);
+        if(subset(r,ms)) {
+          //std::cerr <<  c.bounds() << " " << r << " subset" << std::endl;
+          tree.push_back(leaf);
+          mask.push_back(true);
+        }
+        else if(!interiors_intersect(r,ms)) {
+          //std::cerr <<  c.bounds() << " " << r << " disjoint" << std::endl;
+          tree.push_back(leaf);
+          mask.push_back(false);
+        }
+        else {
+          //std::cerr <<  c.bounds() << " " << r << " neither" << std::endl;
+          tree.push_back(branch);
+        }          
+        if(tree.back()==leaf) {
+          while(!word.empty() && word.back()==right) {
+            word.pop_back();
+          }
+          if(!word.empty()) {
+            word.set_back(right);
+          }
+        }
+        else {
+          word.push_back(left);
+        }
+      } 
+      while(!word.empty());
+      
+      this->_subdivisions=subdivisions;
+      this->_words=MaskedBinaryTree(tree,mask);
+    
+      this->reduce();
+    }
+
+    SizeArray
+    UnitPartitionTreeSet::depths() const
+    {
+      SizeArray result(this->dimension(),0);
+      for(size_type j=0; j!=this->depth(); ++j) {
+        result[_subdivisions[j]]+=1;
+      }
+      return result;
+    }
+    
+
     std::ostream&
     operator<<(std::ostream& os, const UnitPartitionTreeCell& uptc) 
     {
       os << "UnitPartitionTreeCell(" 
-         << "subdivisions=" << uptc.subdivisions() << ", "
-         << "word=" << uptc.word() << ", "
-         << "block=" << "[" << uptc.lower_bound(0) << "," << uptc.upper_bound(0) << "]";
-      for(dimension_type i=1; i!=uptc.dimension(); ++i) {
-        os << "x" << "[" << uptc.lower_bound(i) << "," << uptc.upper_bound(i) << "]";
-      }
-      os << ")";
+         << "block=" << uptc.bounds() << ")";
       return os;
     }
     
     
-    index_type compute_index(const SubdivisionSequence& ss, const BinaryWord& bw, const UnitGridRectangle& r)
+    index_type compute_index(const SubdivisionSequence& ss, const BinaryWord& bw, const LatticeRectangle& r)
     {
       IndexArray lower=r.lower();
       IndexArray upper=r.upper();
@@ -259,18 +275,19 @@ namespace Ariadne {
     }
     
       
-    UnitGridRectangle 
+    LatticeRectangle 
     compute_block(const UnitPartitionTreeCell& c, 
-                  const UnitGridRectangle& r)
+                  const LatticeRectangle& r)
     {
       IndexArray lower(r.dimension());
       IndexArray upper(r.dimension());
       SizeArray sizes=r.sizes();
+      Rectangle<UnitPartitionTreeCell::dyadic_type> cr=c.bounds();
       for(dimension_type i=0; i!=r.dimension(); ++i) {
-        lower[i]=r.lower_bound(i)+index_type(c.lower_bound(i)*sizes[i]);
-        upper[i]=r.lower_bound(i)+index_type(c.upper_bound(i)*sizes[i]);
+        lower[i]=r.lower_bound(i)+index_type(cr.lower_bound(i)*sizes[i]);
+        upper[i]=r.lower_bound(i)+index_type(cr.upper_bound(i)*sizes[i]);
       }
-      return UnitGridRectangle(lower,upper);
+      return LatticeRectangle(lower,upper);
     }
 
 

@@ -41,7 +41,7 @@
 namespace Ariadne {
   namespace Evaluation {
 
-    /*! \brief An affine map on Euclidean space. */
+    /*! \brief The Henon map. */
     template <typename R>
     class HenonMap : public Map<R> 
     {

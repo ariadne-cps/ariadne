@@ -30,15 +30,199 @@ namespace Ariadne {
   namespace Geometry {
     
     
-    UnitGridMaskSet::UnitGridMaskSet(const UnitGridMaskSet& ms)
+    LatticeRectangle
+    LatticeTransformation::operator() (const LatticeCell& c) const
+    {
+      dimension_type n=c.dimension();
+      IndexArray lower(n);
+      IndexArray upper(n);
+      for(dimension_type i=0; i!=n; ++i) {
+        lower[i]=_transformation[i][c.lower_bound(i)];
+        upper[i]=_transformation[i][c.upper_bound(i)];
+      }
+      return LatticeRectangle(lower,upper);
+    }
+
+    LatticeRectangle
+    LatticeTransformation::operator() (const LatticeRectangle& r) const
+    {
+      dimension_type n=r.dimension();
+      IndexArray lower(n);
+      IndexArray upper(n);
+      for(dimension_type i=0; i!=n; ++i) {
+        lower[i]=_transformation[i][r.lower_bound(i)];
+        upper[i]=_transformation[i][r.upper_bound(i)];
+      }
+      return LatticeRectangle(lower,upper);
+    }
+
+
+
+    LatticeRectangle
+    LatticeRectangleListSet::bounds() const
+    { 
+      assert(!this->empty());
+
+      LatticeRectangle r=(*this)[0];
+      IndexArray lower(r.lower());
+      IndexArray upper(r.upper());
+
+      for(size_type i=1; i!=this->size(); ++i) {
+        r=(*this)[i];
+        assign_min(lower,r.lower());
+        assign_max(upper,r.upper());
+      }
+      return LatticeRectangle(lower,upper);
+    }
+
+    LatticeRectangle
+    LatticeCellListSet::bounds() const
+    { 
+      assert(!this->empty());
+
+      LatticeCell c=(*this)[0];
+      IndexArray lower(c.lower());
+      IndexArray upper(c.upper());
+
+      for(size_type i=1; i!=this->size(); ++i) {
+        c=(*this)[i];
+        assign_min(lower,c.lower());
+        assign_max(upper,c.upper());
+      }
+      return LatticeRectangle(lower,upper);
+    }
+
+    void 
+    LatticeCellListSet::adjoin(const LatticeRectangle& r) 
+    { 
+      assert(this->dimension() == r.dimension());
+      for(LatticeRectangle::const_iterator i=r.begin(); i!=r.end(); ++i) {
+        this->adjoin(*i);
+      }
+    }
+
+    void 
+    LatticeCellListSet::adjoin(const LatticeMaskSet& ms) {
+      assert(this->dimension() == ms.dimension());
+      for(LatticeMaskSet::const_iterator i=ms.begin(); i!=ms.end(); ++i) {
+        this->adjoin(*i);
+      }
+    }
+
+    void 
+    LatticeCellListSet::adjoin(const LatticeCellListSet& cl) {
+      for(LatticeCellListSet::const_iterator i=cl.begin(); i!=cl.end(); ++i) {
+        this->adjoin(*i);
+      }
+    }
+
+    void 
+    LatticeCellListSet::adjoin(const LatticeRectangleListSet& rl) {
+      for(LatticeRectangleListSet::const_iterator i=rl.begin(); i!=rl.end(); ++i) {
+        this->adjoin(*i);
+      }
+    }
+
+
+    LatticeMaskSet::LatticeMaskSet(const LatticeMaskSet& ms)
       : _bounds(ms._bounds), _mask(ms._mask)
     {
       this->_compute_cached_attributes();
     }
     
 
+    LatticeCell
+    LatticeMaskSet::operator[](size_type i) const
+    {
+      const_iterator iter=this->begin();
+      while(i!=0) {
+        --i;
+        ++iter;
+      }
+      return *iter;
+    }
+
     void
-    UnitGridMaskSet::_compute_cached_attributes() {
+    LatticeMaskSet::clear()
+    {
+      _mask=BooleanArray(_mask.size(),false);
+    }
+
+    void 
+    LatticeMaskSet::adjoin(const LatticeRectangle& r) {
+      assert(subset(r,this->bounds()));
+
+      dimension_type n=this->dimension();
+      const IndexArray& rlower(r.lower());
+      const IndexArray& rupper(r.upper());
+      const IndexArray& glower(this->lower());
+      const SizeArray& gstrides(this->strides());
+
+      if(n==1) {
+        for(size_type i=rlower[0]-glower[0]; i!=size_type(rupper[0]-glower[0]); ++i) {
+          _mask[i]=true;
+        }
+        return;
+      }
+
+      if(n==2) {
+        SizeArray rsizes=rupper-rlower;
+        size_type index=compute_index(rlower,glower,gstrides);
+        for(size_type loop_end=index+rsizes[1]*gstrides[1]; index!=loop_end; index+=gstrides[1]-rsizes[0]) {
+          for(size_type inner_loop_end=index+rsizes[0]; index!=inner_loop_end; index+=1) {
+            _mask[index]=true;
+          }
+        }
+        return;
+      }
+
+      if(n==0) {
+        return;
+      }
+
+      /* dim>2 */
+      SizeArray rsizes=rupper-rlower;
+      size_type index=compute_index(rlower,glower,gstrides);
+      IndexArray rposition=rlower;
+
+      while(rposition[n-1]!=rupper[n-1]) {
+        _mask[index]=true;
+        
+        dimension_type d=0;
+        rposition[d]+=1;
+        index+=gstrides[d];
+        while(rposition[d]==rupper[d] && (d+1u)!=n ) {
+          rposition[d]=rlower[d];
+          index-=gstrides[d]*rsizes[d];
+          d+=1;
+          rposition[d]+=1;
+          index+=gstrides[d];
+        }
+      }
+    }
+
+    void 
+    LatticeMaskSet::adjoin(const LatticeMaskSet& lm) {
+      assert(this->bounds()==lm.bounds());
+      this->_mask |= lm._mask;
+    }
+
+    void 
+    LatticeMaskSet::adjoin(const LatticeCellListSet& cl) {
+      for(LatticeCellListSet::const_iterator i=cl.begin(); i!=cl.end(); ++i) {
+        this->adjoin(*i);
+      }
+    }
+
+    void 
+    LatticeMaskSet::adjoin(const LatticeRectangleListSet& rl) {
+      for(LatticeRectangleListSet::const_iterator i=rl.begin(); i!=rl.end(); ++i) {
+        this->adjoin(*i);
+      }
+    }
+
+    void
+    LatticeMaskSet::_compute_cached_attributes() {
       _lower=_bounds.lower();
       _upper=_bounds.upper();
       _sizes=_bounds.sizes();
@@ -46,7 +230,7 @@ namespace Ariadne {
     }
     
     bool 
-    UnitGridRectangle::empty() const
+    LatticeRectangle::empty() const
     {
       for(dimension_type i=0; i!=this->dimension(); ++i) {
         if(this->lower_bound(i)>=this->upper_bound(i)) {
@@ -56,8 +240,100 @@ namespace Ariadne {
       return false;
     }
     
+
+
+    LatticeRectangle 
+    regular_intersection(const LatticeRectangle& r1, const LatticeRectangle& r2) 
+    {
+      LatticeRectangle result(r1.dimension());
+      for(dimension_type i=0; i!=r1.dimension(); ++i) {
+        result.set_lower_bound(i,std::max(r1.lower_bound(i),r2.lower_bound(i)));
+        result.set_upper_bound(i,std::min(r1.upper_bound(i),r2.upper_bound(i)));
+      }
+      return result;
+    }
+
+    LatticeMaskSet
+    regular_intersection(const LatticeMaskSet& A, const LatticeMaskSet& B) 
+    {
+      assert(A.bounds()==B.bounds());
+      return LatticeMaskSet(A.bounds(),A.mask() & B.mask());
+    }
+
+    LatticeMaskSet
+    join(const LatticeMaskSet& A, const LatticeMaskSet& B) 
+    {
+      assert(A.bounds()==B.bounds());
+      return LatticeMaskSet(A.bounds(),A.mask() | B.mask());
+    }
+
+    LatticeMaskSet
+    difference(const LatticeMaskSet& A, const LatticeMaskSet& B) 
+    {
+      assert(A.bounds()==B.bounds());
+      return LatticeMaskSet(A.bounds(),A.mask() - B.mask());
+    }
+
     bool 
-    subset(const UnitGridRectangle& r1, const UnitGridRectangle& r2) 
+    interiors_intersect(const LatticeRectangle& r1, const LatticeRectangle& r2) 
+    {
+      for(dimension_type i=0; i!=r1.dimension(); ++i) {
+        if(r1.upper_bound(i)<=r2.lower_bound(i)
+            || r1.upper_bound(i)<=r2.lower_bound(i))
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+    
+    bool 
+    interiors_intersect(const LatticeRectangle& r, const LatticeMaskSet& ms) 
+    {
+      //std::cerr << "interiors_intersect(const LatticeRectangle& r, const LatticeMaskSet& ms)" << std::endl;
+      LatticeRectangle rstr=regular_intersection(r,ms.bounds());
+      if(rstr.empty()) {
+        return false;
+      }
+      //std::cerr << "LatticeRectangle: " << r << std::endl;
+      for(LatticeRectangle::const_iterator i=rstr.begin(); i!=rstr.end(); ++i) {
+        if(subset(*i,ms)) {
+          return true;
+        }
+      }
+      return false;
+    }
+    
+    bool 
+    interiors_intersect(const LatticeMaskSet& a, const LatticeMaskSet& b) 
+    {
+      //std::cerr << "interiors_intersect(const LatticeMaskSet& r, const LatticeMaskSet& ms)" << std::endl;
+      assert(a.bounds()==b.bounds());
+      BooleanArray::const_iterator aiter=a.mask().begin();
+      BooleanArray::const_iterator biter=a.mask().begin();
+      BooleanArray::const_iterator aend=a.mask().end();
+      while(aiter!=aend) {
+        if(*aiter & *biter) {
+          return true;
+        }
+        ++aiter;
+        ++biter;
+      }
+      return false;
+    }
+    
+
+
+    bool 
+    subset(const LatticeCell& c, const LatticeMaskSet& ms) 
+    {
+      //std::cerr << "subset(const LatticeCell& c, const LatticeMaskSet& ms)" << std::endl; 
+      //std::cerr << "LatticeCell: " << c << std::endl;
+      return ms.mask()[compute_index(c.lower(),ms.lower(),ms.strides())];
+    }
+    
+    bool 
+    subset(const LatticeRectangle& r1, const LatticeRectangle& r2) 
     {
       for(dimension_type i=0; i!=r1.dimension(); ++i) {
         if(r1.lower_bound(i)<r2.lower_bound(i)
@@ -70,67 +346,17 @@ namespace Ariadne {
     }
 
     bool 
-    interiors_intersect(const UnitGridRectangle& r1, const UnitGridRectangle& r2) 
+    subset(const LatticeRectangle& r, const LatticeMaskSet& ms) 
     {
-      for(dimension_type i=0; i!=r1.dimension(); ++i) {
-        if(r1.upper_bound(i)<=r2.lower_bound(i)
-            || r1.upper_bound(i)<=r2.lower_bound(i))
-        {
-          return false;
-        }
-      }
-      return true;
-    }
-    
-    UnitGridRectangle 
-    regular_intersection(const UnitGridRectangle& r1, const UnitGridRectangle& r2) 
-    {
-      UnitGridRectangle result(r1.dimension());
-      for(dimension_type i=0; i!=r1.dimension(); ++i) {
-        result.set_lower_bound(i,std::max(r1.lower_bound(i),r2.lower_bound(i)));
-        result.set_upper_bound(i,std::min(r1.upper_bound(i),r2.upper_bound(i)));
-      }
-      return result;
-    }
-
-
-    bool 
-    subset(const UnitGridCell& c, const UnitGridMaskSet& ms) 
-    {
-      //std::cerr << "subset(const UnitGridCell& c, const UnitGridMaskSet& ms)" << std::endl; 
-      //std::cerr << "UnitGridCell: " << c << std::endl;
-      return ms.mask()[compute_index(c.lower(),ms.lower(),ms.strides())];
-    }
-    
-    bool 
-    interiors_intersect(const UnitGridRectangle& r, const UnitGridMaskSet& ms) 
-    {
-      //std::cerr << "interiors_intersect(const UnitGridRectangle& r, const UnitGridMaskSet& ms)" << std::endl;
-      UnitGridRectangle rstr=regular_intersection(r,ms.bounds());
-      if(rstr.empty()) {
-        return false;
-      }
-      //std::cerr << "UnitGridRectangle: " << r << std::endl;
-      for(UnitGridRectangle::const_iterator i=rstr.begin(); i!=rstr.end(); ++i) {
-        if(subset(*i,ms)) {
-          return true;
-        }
-      }
-      return false;
-    }
-    
-    bool 
-    subset(const UnitGridRectangle& r, const UnitGridMaskSet& ms) 
-    {
-      //std::cerr << "subset(const UnitGridRectangle& r, const UnitGridMaskSet& ms)" << std::endl; 
+      //std::cerr << "subset(const LatticeRectangle& r, const LatticeMaskSet& ms)" << std::endl; 
       if(r.empty()) {
         return true;
       }
       if(!subset(r,ms.bounds())) {
         return false;
       }
-      //std::cerr << "UnitGridRectangle: " << r << std::endl;
-      for(UnitGridRectangle::const_iterator i=r.begin(); i!=r.end(); ++i) {
+      //std::cerr << "LatticeRectangle: " << r << std::endl;
+      for(LatticeRectangle::const_iterator i=r.begin(); i!=r.end(); ++i) {
         if(!subset(*i,ms)) {
           return false;
         }
@@ -138,8 +364,56 @@ namespace Ariadne {
       return true;
     }
     
+    bool 
+    subset(const LatticeMaskSet& a, const LatticeMaskSet& b) {
+      assert(a.bounds() == b.bounds());
+      return a.mask() <= b.mask();
+    }
+      
+
+    LatticeMaskSet LatticeMaskSet::neighbourhood() const {
+      LatticeMaskSet result=*this;
+      IndexArray lower_bound=result.lower();
+      IndexArray upper_bound=result.upper();
+      for(LatticeMaskSet::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+        LatticeCell cell=*iter;
+        IndexArray lower(this->dimension());
+        IndexArray upper(this->dimension());
+        for(dimension_type i=0; i!=this->dimension(); ++i) {
+          lower[i]=std::max(cell.lower()[i]-1,lower_bound[i]);
+          upper[i]=std::min(cell.upper()[i]+1,upper_bound[i]);
+        }
+        LatticeRectangle block(lower,upper);
+        result.adjoin(block);
+      }
+      return result;
+    }
+
+    LatticeMaskSet LatticeMaskSet::adjoining() const {
+      LatticeMaskSet result=*this;
+      IndexArray lower_bound=result.lower();
+      IndexArray upper_bound=result.upper();
+      for(LatticeMaskSet::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+        LatticeCell cell=*iter;
+        IndexArray lower=(cell.lower());
+        for(dimension_type i=0; i!=this->dimension(); ++i) {
+          if(lower[i]>lower_bound[i]) {
+            lower[i]-=1;
+            result.adjoin(LatticeCell(lower));
+            lower[i]+=1;
+          }
+          if(lower[i]<upper_bound[i]-1) {
+            lower[i]+=1;
+            result.adjoin(LatticeCell(lower));
+            lower[i]-=1;
+          }
+        }
+      }
+      return result;
+    }
+
     std::ostream& 
-    operator<<(std::ostream& os, const UnitGridRectangle& r) 
+    operator<<(std::ostream& os, const LatticeRectangle& r) 
     {
       if(r.empty() || r.dimension()==0) {
         return os<<"Empty";

@@ -33,14 +33,30 @@
 #include "base/sequence.h"
 
 namespace Ariadne {
-    
-    typedef unsigned short dimension_type;
-    typedef size_t size_type;
-    typedef int index_type;
+  namespace Base {
+    template<typename R> class Interval;
+    class BinaryWord;
+    class BinaryTree;
+  }
+}
 
-    //typedef std::vector<bool> BooleanArray;
-    typedef array<bool> BooleanArray;
-    typedef sequence<dimension_type> SubdivisionSequence;
+namespace Ariadne {
+  typedef unsigned short dimension_type;
+  typedef size_t size_type;
+  typedef int index_type;
+  
+  using Base::array;
+  using Base::array_vector;
+  using Base::sequence;
+
+  using Base::Interval;
+  using Base::BinaryWord;
+  using Base::BinaryTree;
+
+  //typedef std::vector<bool> BooleanArray;
+  typedef Base::array<bool> BooleanArray;
+  typedef Base::array<size_type> SizeArray;
+  typedef Base::array<index_type> IndexArray;
 
 }
 

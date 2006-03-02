@@ -25,8 +25,8 @@
 #include "base/numerical_type.h"
 
 #include "geometry/rectangle.h"
-#include "geometry/parallelopiped.h"
 #include "geometry/list_set.h"
+#include "geometry/parallelopiped.h"
 
 #include <boost/python.hpp>
 

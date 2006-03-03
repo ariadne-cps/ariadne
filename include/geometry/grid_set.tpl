@@ -24,7 +24,7 @@
 
 #include "../base/arithmetic.h"
 
-#include "../geometry/parallelopiped.h"
+#include "../geometry/parallelotope.h"
 #include "../geometry/partition_tree_set.h"
 #include "../geometry/grid_set.h"
 
@@ -489,7 +489,7 @@ namespace Ariadne {
     
     template<typename R>
     GridCellListSet<R>
-    over_approximation(const Parallelopiped<R>& p, const Grid<R>& g) 
+    over_approximation(const Parallelotope<R>& p, const Grid<R>& g) 
     {
       GridCellListSet<R> result(g);
       assert(g.dimension()==p.dimension());
@@ -536,7 +536,7 @@ namespace Ariadne {
 
     template<typename R>
     GridCellListSet<R>
-    over_approximation_of_intersection(const Parallelopiped<R>& p, 
+    over_approximation_of_intersection(const Parallelotope<R>& p, 
                                        const Rectangle<R>& r,
                                        const Grid<R>& g) 
     {

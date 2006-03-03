@@ -32,15 +32,13 @@
 #include <iostream>
 #include <iterator>
 
-#include "base/array.h"
-#include "base/interval.h"
-#include "base/binary_word.h"
+#include "../base/array.h"
+#include "../base/interval.h"
+#include "../base/binary_word.h"
 
-#include "geometry/geometry_declarations.h"
-#include "geometry/rectangle.h"
-#include "geometry/point.h"
+#include "../geometry/geometry_declarations.h"
 
-#include "unit_grid_set.h"
+#include "../geometry/lattice_set.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -48,6 +46,9 @@ namespace Ariadne {
     template<typename R> class FiniteGrid;
     template<typename R> class UniformGrid;
     
+    template<typename R> class GridCell;
+    template<typename R> class GridRectangle;
+
     template<typename R> std::ostream& operator<<(std::ostream&, const Grid<R>&);
     
     /*!\brief Base type for defining a grid.
@@ -96,30 +97,9 @@ namespace Ariadne {
 
       bool operator==(const Grid<R>& g) const { return this==&g; }
 
-      IndexArray index(const Point<R>& s) const {
-        IndexArray res(s.dimension());
-        for(size_type i=0; i!=res.size(); ++i) {
-          res[i]=subdivision_index(i,s[i]);
-        }
-        return res;
-      }
-
-
-      IndexArray lower_index(const Rectangle<R>& r) const {
-        IndexArray res(r.dimension());
-        for(size_type i=0; i!=res.size(); ++i) {
-          res[i]=subdivision_lower_index(i,r.lower_bound(i));
-        }
-        return res;
-      }
-
-      IndexArray upper_index(const Rectangle<R>& r) const {
-        IndexArray res(r.dimension());
-        for(size_type i=0; i!=res.size(); ++i) {
-          res[i]=subdivision_upper_index(i,r.upper_bound(i));
-        }
-        return res;
-      }
+      IndexArray index(const Point<R>& s) const;
+      IndexArray lower_index(const Rectangle<R>& r) const;
+      IndexArray upper_index(const Rectangle<R>& r) const;
 
       virtual std::ostream& write(std::ostream& os) const = 0;
    };
@@ -179,34 +159,27 @@ namespace Ariadne {
       bool operator==(const FiniteGrid<R>& g) const { 
         return this->_subdivision_coordinates==g._subdivision_coordinates; }
             
-      /*! \brief The total number of cells. */
-      size_type capacity() const { return _strides[dimension()]; }
-      /*! \brief The number of subdivision intervals in dimension @a d. */
-      size_type size(dimension_type d) const { return _subdivision_coordinates[d].size()-1; }
-
       /*! \brief The lowest valid vertex index. */
       IndexArray lower() const { return IndexArray(dimension(),0); }
-      /*! \brief The highers valid vertex index. */
-      IndexArray upper() const { return lower()+sizes(); }
+      /*! \brief The highest valid vertex index. */
+      IndexArray upper() const { 
+        IndexArray result(this->dimension());
+        for(dimension_type i=0; i!=this->dimension(); ++i) {
+          result[i]=_subdivision_coordinates[i].size()-1;
+        }
+        return result;
+      }
       /*! \brief The block of valid lattice cells. */
       LatticeRectangle bounds() const { return LatticeRectangle(lower(),upper()); }
       /*! \brief The number of subdivision intervals in each dimension. */
-      SizeArray sizes() const {
-        SizeArray result(dimension());
-        for(dimension_type d=0; d!=dimension(); ++d) {
-          result[d]=_subdivision_coordinates[d].size()-1;
-        }
-        return result;
-      }
+      SizeArray sizes() const { return bounds().sizes(); }
+      /*! \brief The total number of cells. */
+      size_type capacity() const { return bounds().size(); }
+      /*! \brief The number of subdivision intervals in dimension @a d. */
+      size_type size(dimension_type i) const { return _subdivision_coordinates[i].size()-1; }
 
-      Rectangle<R> bounding_box() { 
-        Rectangle<R> result(this->dimension());
-        for(dimension_type i=0; i!=this->dimension(); ++i) {
-          result.set_lower_bound(i,this->_subdivision_coordinates[i].front());
-          result.set_upper_bound(i,this->_subdivision_coordinates[i].back());
-        }
-        return result;
-      }
+      /*! \brief The rectangle bounding the grid. */
+      GridRectangle<R> bounding_box() const;
       
       /*! \brief Find the rule to translate elements from a grid to a refinement. */
       static array< std::vector<index_type> > index_translation(const FiniteGrid<R>& from, const FiniteGrid<R>& to);
@@ -216,7 +189,6 @@ namespace Ariadne {
       void create();
      private:
       array< std::vector<R> > _subdivision_coordinates;
-      SizeArray _strides;
     };
 
 

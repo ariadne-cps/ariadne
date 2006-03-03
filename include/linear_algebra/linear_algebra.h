@@ -29,8 +29,8 @@
 #ifndef _ARIADNE_LINEAR_ALGEBRA_H
 #define _ARIADNE_LINEAR_ALGEBRA_H
 
-#include "linear_algebra/vector.h"
-#include "linear_algebra/matrix.h"
-#include "linear_algebra/constraint.h"
+#include "../linear_algebra/vector.h"
+#include "../linear_algebra/matrix.h"
+#include "../linear_algebra/constraint.h"
 
 #endif /* _ARIADNE_LINEAR_ALGEBRA_H */

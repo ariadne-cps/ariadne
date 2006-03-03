@@ -10,8 +10,8 @@ BASE_OBJ=base_module.o \
 
 GEOMETRY_OBJ = geometry_module.o \
 	export_point.o \
-	export_rectangle.o export_parallelopiped.o export_simplex.o export_polyhedron.o \
-	export_list_set.o export_grid.o export_partition_tree.o \
+	export_rectangle.o export_parallelotope.o export_simplex.o export_polyhedron.o \
+	export_list_set.o export_grid_set.o export_partition_tree_set.o \
 	export_postscript_output.o \
 
 EVALUATION_OBJ = evaluation_module.o \
@@ -60,394 +60,765 @@ dep:
 base_module.o: base_module.cc
 
 export_numeric.o: export_numeric.cc ../../include/base/numerical_type.h \
-  ../../include/base/dyadic.h
+  ../../include/base/../base/dyadic.h
 
 export_interval.o: export_interval.cc ../../include/base/numerical_type.h \
-  ../../include/base/dyadic.h ../../include/base/interval.h \
-  ../../include/python/real_typedef.h ../../include/base/numerical_type.h
+  ../../include/base/../base/dyadic.h ../../include/base/interval.h \
+  ../../include/python/real_typedef.h \
+  ../../include/python/../base/numerical_type.h
 
 export_function.o: export_function.cc ../../include/base/function.h \
-  ../../include/base/numerical_type.h ../../include/base/dyadic.h \
-  ../../include/python/real_typedef.h ../../include/base/numerical_type.h
+  /ufs/collins/include/mpfr.h ../../include/base/../base/numerical_type.h \
+  ../../include/base/../base/../base/dyadic.h \
+  ../../include/python/real_typedef.h \
+  ../../include/python/../base/numerical_type.h
 
 export_array.o: export_array.cc ../../include/base/array.h \
-  ../../include/base/utility.h ../../include/base/array.h \
-  ../../include/base/basic_type.h ../../include/base/sequence.h \
-  ../../include/python/real_typedef.h ../../include/base/numerical_type.h \
-  ../../include/base/dyadic.h ../../include/python/python_utilities.h
+  ../../include/base/array_operations.h \
+  ../../include/base/../base/array.h \
+  ../../include/base/../base/basic_type.h \
+  ../../include/base/../base/../base/array.h \
+  ../../include/base/../base/../base/sequence.h \
+  ../../include/base/utility.h ../../include/base/basic_type.h \
+  ../../include/python/real_typedef.h \
+  ../../include/python/../base/numerical_type.h \
+  ../../include/python/../base/../base/dyadic.h \
+  ../../include/python/python_utilities.h
 
 export_binary_tree.o: export_binary_tree.cc \
-  ../../include/base/binary_word.h ../../include/base/utility.h \
-  ../../include/base/array.h ../../include/base/basic_type.h \
-  ../../include/base/sequence.h ../../include/base/binary_tree.h \
-  ../../include/base/binary_word.h ../../include/base/basic_type.h \
-  ../../include/python/real_typedef.h ../../include/base/numerical_type.h \
-  ../../include/base/dyadic.h ../../include/python/python_utilities.h
+  ../../include/base/binary_word.h \
+  ../../include/base/../base/basic_type.h \
+  ../../include/base/../base/../base/array.h \
+  ../../include/base/../base/../base/sequence.h \
+  ../../include/base/binary_tree.h \
+  ../../include/base/../base/binary_word.h \
+  ../../include/base/basic_type.h ../../include/python/real_typedef.h \
+  ../../include/python/../base/numerical_type.h \
+  ../../include/python/../base/../base/dyadic.h \
+  ../../include/python/python_utilities.h
 
 geometry_module.o: geometry_module.cc ../../include/base/binary_word.h \
-  ../../include/base/utility.h ../../include/base/array.h \
-  ../../include/base/basic_type.h ../../include/base/sequence.h \
-  ../../include/base/binary_tree.h ../../include/base/binary_word.h \
-  ../../include/python/real_typedef.h ../../include/base/numerical_type.h \
-  ../../include/base/dyadic.h ../../include/python/python_utilities.h
+  ../../include/base/../base/basic_type.h \
+  ../../include/base/../base/../base/array.h \
+  ../../include/base/../base/../base/sequence.h \
+  ../../include/base/binary_tree.h \
+  ../../include/base/../base/binary_word.h \
+  ../../include/python/real_typedef.h \
+  ../../include/python/../base/numerical_type.h \
+  ../../include/python/../base/../base/dyadic.h \
+  ../../include/python/python_utilities.h
 
 export_point.o: export_point.cc ../../include/base/numerical_type.h \
-  ../../include/base/dyadic.h ../../include/geometry/point.h \
-  ../../include/base/utility.h ../../include/base/array.h \
-  ../../include/linear_algebra/vector.h ../../include/base/basic_type.h \
-  ../../include/base/sequence.h ../../include/base/numerical_type.h \
-  ../../include/base/interval.h \
-  ../../include/geometry/geometry_declarations.h \
-  ../../include/python/real_typedef.h ../../include/base/numerical_type.h
+  ../../include/base/../base/dyadic.h ../../include/geometry/point.h \
+  ../../include/geometry/../base/utility.h \
+  ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../linear_algebra/vector.h \
+  ../../include/geometry/../linear_algebra/../base/basic_type.h \
+  ../../include/geometry/../linear_algebra/../base/../base/array.h \
+  ../../include/geometry/../linear_algebra/../base/../base/sequence.h \
+  ../../include/geometry/../linear_algebra/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../base/interval.h \
+  ../../include/geometry/../geometry/geometry_declarations.h \
+  ../../include/python/real_typedef.h \
+  ../../include/python/../base/numerical_type.h
 
 export_rectangle.o: export_rectangle.cc \
-  ../../include/base/numerical_type.h ../../include/base/dyadic.h \
-  ../../include/geometry/rectangle.h ../../include/base/utility.h \
-  ../../include/base/array.h ../../include/base/interval.h \
-  ../../include/base/binary_word.h ../../include/base/utility.h \
-  ../../include/base/basic_type.h ../../include/base/sequence.h \
-  ../../include/geometry/point.h ../../include/linear_algebra/vector.h \
-  ../../include/base/basic_type.h ../../include/base/numerical_type.h \
-  ../../include/base/interval.h \
-  ../../include/geometry/geometry_declarations.h \
+  ../../include/base/numerical_type.h ../../include/base/../base/dyadic.h \
+  ../../include/geometry/rectangle.h \
+  ../../include/geometry/../base/utility.h \
+  ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/interval.h \
+  ../../include/geometry/../base/binary_word.h \
+  ../../include/geometry/../base/../base/basic_type.h \
+  ../../include/geometry/../base/../base/../base/array.h \
+  ../../include/geometry/../base/../base/../base/sequence.h \
+  ../../include/geometry/../geometry/point.h \
+  ../../include/geometry/../geometry/../base/utility.h \
+  ../../include/geometry/../geometry/../linear_algebra/vector.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/basic_type.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/numerical_type.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/interval.h \
+  ../../include/geometry/../geometry/../geometry/geometry_declarations.h \
+  ../../include/geometry/../geometry/geometry_declarations.h \
   ../../include/geometry/list_set.h ../../include/python/real_typedef.h \
-  ../../include/base/numerical_type.h
+  ../../include/python/../base/numerical_type.h
 
-export_parallelopiped.o: export_parallelopiped.cc \
-  ../../include/base/numerical_type.h ../../include/base/dyadic.h \
-  ../../include/geometry/rectangle.h ../../include/base/utility.h \
-  ../../include/base/array.h ../../include/base/interval.h \
-  ../../include/base/binary_word.h ../../include/base/utility.h \
-  ../../include/base/basic_type.h ../../include/base/sequence.h \
-  ../../include/geometry/point.h ../../include/linear_algebra/vector.h \
-  ../../include/base/basic_type.h ../../include/base/numerical_type.h \
-  ../../include/base/interval.h \
-  ../../include/geometry/geometry_declarations.h \
+export_parallelotope.o: export_parallelotope.cc \
+  ../../include/base/numerical_type.h ../../include/base/../base/dyadic.h \
+  ../../include/geometry/rectangle.h \
+  ../../include/geometry/../base/utility.h \
+  ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/interval.h \
+  ../../include/geometry/../base/binary_word.h \
+  ../../include/geometry/../base/../base/basic_type.h \
+  ../../include/geometry/../base/../base/../base/array.h \
+  ../../include/geometry/../base/../base/../base/sequence.h \
+  ../../include/geometry/../geometry/point.h \
+  ../../include/geometry/../geometry/../base/utility.h \
+  ../../include/geometry/../geometry/../linear_algebra/vector.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/basic_type.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/numerical_type.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/interval.h \
+  ../../include/geometry/../geometry/../geometry/geometry_declarations.h \
+  ../../include/geometry/../geometry/geometry_declarations.h \
   ../../include/geometry/list_set.h \
-  ../../include/geometry/parallelopiped.h \
-  ../../include/linear_algebra/matrix.h \
-  ../../include/linear_algebra/constraint.h \
-  ../../include/linear_algebra/vector.h \
-  ../../include/linear_algebra/matrix.h \
-  ../../include/geometry/rectangle.h ../../include/geometry/list_set.h \
-  ../../include/geometry/polyhedron.h ../../include/geometry/generator.h \
-  ../../include/python/real_typedef.h ../../include/base/numerical_type.h \
+  ../../include/geometry/parallelotope.h \
+  ../../include/geometry/../linear_algebra/vector.h \
+  ../../include/geometry/../linear_algebra/matrix.h \
+  ../../include/geometry/../linear_algebra/../base/basic_type.h \
+  ../../include/geometry/../linear_algebra/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../base/interval.h \
+  ../../include/geometry/../geometry/rectangle.h \
+  ../../include/geometry/../geometry/list_set.h \
+  ../../include/geometry/../geometry/polyhedron.h \
+  /ufs/collins/include/ppl.hh \
+  ../../include/geometry/../geometry/../linear_algebra/constraint.h \
+  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/geometry/../geometry/../linear_algebra/matrix.h \
+  ../../include/geometry/../geometry/../geometry/generator.h \
+  ../../include/geometry/../geometry/../geometry/point.h \
+  ../../include/geometry/../geometry/../geometry/rectangle.h \
+  ../../include/python/real_typedef.h \
+  ../../include/python/../base/numerical_type.h \
   ../../include/python/python_utilities.h
 
 export_simplex.o: export_simplex.cc ../../include/base/numerical_type.h \
-  ../../include/base/dyadic.h ../../include/geometry/rectangle.h \
-  ../../include/base/utility.h ../../include/base/array.h \
-  ../../include/base/interval.h ../../include/base/binary_word.h \
-  ../../include/base/utility.h ../../include/base/basic_type.h \
-  ../../include/base/sequence.h ../../include/geometry/point.h \
-  ../../include/linear_algebra/vector.h ../../include/base/basic_type.h \
-  ../../include/base/numerical_type.h ../../include/base/interval.h \
-  ../../include/geometry/geometry_declarations.h \
-  ../../include/geometry/simplex.h ../../include/base/array.h \
-  ../../include/geometry/polyhedron.h \
-  ../../include/linear_algebra/constraint.h \
-  ../../include/linear_algebra/vector.h \
-  ../../include/linear_algebra/matrix.h \
-  ../../include/linear_algebra/matrix.h \
-  ../../include/geometry/generator.h ../../include/geometry/rectangle.h \
-  ../../include/geometry/list_set.h ../../include/geometry/list_set.h \
-  ../../include/python/real_typedef.h ../../include/base/numerical_type.h
+  ../../include/base/../base/dyadic.h ../../include/geometry/rectangle.h \
+  ../../include/geometry/../base/utility.h \
+  ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/interval.h \
+  ../../include/geometry/../base/binary_word.h \
+  ../../include/geometry/../base/../base/basic_type.h \
+  ../../include/geometry/../base/../base/../base/array.h \
+  ../../include/geometry/../base/../base/../base/sequence.h \
+  ../../include/geometry/../geometry/point.h \
+  ../../include/geometry/../geometry/../base/utility.h \
+  ../../include/geometry/../geometry/../linear_algebra/vector.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/basic_type.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/numerical_type.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/interval.h \
+  ../../include/geometry/../geometry/../geometry/geometry_declarations.h \
+  ../../include/geometry/../geometry/geometry_declarations.h \
+  ../../include/geometry/simplex.h ../../include/geometry/../base/array.h \
+  ../../include/geometry/../linear_algebra/vector.h \
+  ../../include/geometry/../geometry/polyhedron.h \
+  /ufs/collins/include/ppl.hh \
+  ../../include/geometry/../geometry/../linear_algebra/constraint.h \
+  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/../base/basic_type.h \
+  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/../base/numerical_type.h \
+  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/../base/interval.h \
+  ../../include/geometry/../geometry/../linear_algebra/matrix.h \
+  ../../include/geometry/../geometry/../geometry/generator.h \
+  ../../include/geometry/../geometry/../geometry/point.h \
+  ../../include/geometry/../geometry/../geometry/rectangle.h \
+  ../../include/geometry/../geometry/list_set.h \
+  ../../include/geometry/list_set.h ../../include/python/real_typedef.h \
+  ../../include/python/../base/numerical_type.h
 
 export_polyhedron.o: export_polyhedron.cc \
-  ../../include/base/numerical_type.h ../../include/base/dyadic.h \
-  ../../include/geometry/rectangle.h ../../include/base/utility.h \
-  ../../include/base/array.h ../../include/base/interval.h \
-  ../../include/base/binary_word.h ../../include/base/utility.h \
-  ../../include/base/basic_type.h ../../include/base/sequence.h \
-  ../../include/geometry/point.h ../../include/linear_algebra/vector.h \
-  ../../include/base/basic_type.h ../../include/base/numerical_type.h \
-  ../../include/base/interval.h \
-  ../../include/geometry/geometry_declarations.h \
-  ../../include/geometry/parallelopiped.h \
-  ../../include/linear_algebra/matrix.h \
-  ../../include/linear_algebra/constraint.h \
-  ../../include/linear_algebra/vector.h \
-  ../../include/linear_algebra/matrix.h \
-  ../../include/geometry/rectangle.h ../../include/geometry/list_set.h \
-  ../../include/geometry/polyhedron.h ../../include/geometry/generator.h \
+  ../../include/base/numerical_type.h ../../include/base/../base/dyadic.h \
+  ../../include/geometry/rectangle.h \
+  ../../include/geometry/../base/utility.h \
+  ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/interval.h \
+  ../../include/geometry/../base/binary_word.h \
+  ../../include/geometry/../base/../base/basic_type.h \
+  ../../include/geometry/../base/../base/../base/array.h \
+  ../../include/geometry/../base/../base/../base/sequence.h \
+  ../../include/geometry/../geometry/point.h \
+  ../../include/geometry/../geometry/../base/utility.h \
+  ../../include/geometry/../geometry/../linear_algebra/vector.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/basic_type.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/numerical_type.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/interval.h \
+  ../../include/geometry/../geometry/../geometry/geometry_declarations.h \
+  ../../include/geometry/../geometry/geometry_declarations.h \
+  ../../include/geometry/parallelotope.h \
+  ../../include/geometry/../linear_algebra/vector.h \
+  ../../include/geometry/../linear_algebra/matrix.h \
+  ../../include/geometry/../linear_algebra/../base/basic_type.h \
+  ../../include/geometry/../linear_algebra/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../base/interval.h \
+  ../../include/geometry/../geometry/rectangle.h \
+  ../../include/geometry/../geometry/list_set.h \
+  ../../include/geometry/../geometry/polyhedron.h \
+  /ufs/collins/include/ppl.hh \
+  ../../include/geometry/../geometry/../linear_algebra/constraint.h \
+  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/geometry/../geometry/../linear_algebra/matrix.h \
+  ../../include/geometry/../geometry/../geometry/generator.h \
+  ../../include/geometry/../geometry/../geometry/point.h \
+  ../../include/geometry/../geometry/../geometry/rectangle.h \
   ../../include/geometry/polyhedron.h ../../include/python/real_typedef.h \
-  ../../include/base/numerical_type.h
+  ../../include/python/../base/numerical_type.h
 
 export_list_set.o: export_list_set.cc ../../include/base/numerical_type.h \
-  ../../include/base/dyadic.h ../../include/geometry/rectangle.h \
-  ../../include/base/utility.h ../../include/base/array.h \
-  ../../include/base/interval.h ../../include/base/binary_word.h \
-  ../../include/base/utility.h ../../include/base/basic_type.h \
-  ../../include/base/sequence.h ../../include/geometry/point.h \
-  ../../include/linear_algebra/vector.h ../../include/base/basic_type.h \
-  ../../include/base/numerical_type.h ../../include/base/interval.h \
-  ../../include/geometry/geometry_declarations.h \
-  ../../include/geometry/parallelopiped.h \
-  ../../include/linear_algebra/matrix.h \
-  ../../include/linear_algebra/constraint.h \
-  ../../include/linear_algebra/vector.h \
-  ../../include/linear_algebra/matrix.h \
-  ../../include/geometry/rectangle.h ../../include/geometry/list_set.h \
-  ../../include/geometry/polyhedron.h ../../include/geometry/generator.h \
+  ../../include/base/../base/dyadic.h ../../include/geometry/rectangle.h \
+  ../../include/geometry/../base/utility.h \
+  ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/interval.h \
+  ../../include/geometry/../base/binary_word.h \
+  ../../include/geometry/../base/../base/basic_type.h \
+  ../../include/geometry/../base/../base/../base/array.h \
+  ../../include/geometry/../base/../base/../base/sequence.h \
+  ../../include/geometry/../geometry/point.h \
+  ../../include/geometry/../geometry/../base/utility.h \
+  ../../include/geometry/../geometry/../linear_algebra/vector.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/basic_type.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/numerical_type.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/interval.h \
+  ../../include/geometry/../geometry/../geometry/geometry_declarations.h \
+  ../../include/geometry/../geometry/geometry_declarations.h \
+  ../../include/geometry/parallelotope.h \
+  ../../include/geometry/../linear_algebra/vector.h \
+  ../../include/geometry/../linear_algebra/matrix.h \
+  ../../include/geometry/../linear_algebra/../base/basic_type.h \
+  ../../include/geometry/../linear_algebra/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../base/interval.h \
+  ../../include/geometry/../geometry/rectangle.h \
+  ../../include/geometry/../geometry/list_set.h \
+  ../../include/geometry/../geometry/polyhedron.h \
+  /ufs/collins/include/ppl.hh \
+  ../../include/geometry/../geometry/../linear_algebra/constraint.h \
+  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/geometry/../geometry/../linear_algebra/matrix.h \
+  ../../include/geometry/../geometry/../geometry/generator.h \
+  ../../include/geometry/../geometry/../geometry/point.h \
+  ../../include/geometry/../geometry/../geometry/rectangle.h \
   ../../include/geometry/list_set.h ../../include/geometry/grid_set.h \
-  ../../include/base/array.h ../../include/geometry/grid.h \
-  ../../include/geometry/unit_grid_set.h ../../include/base/iterator.h \
-  ../../include/base/../base/array.h \
-  ../../include/base/../base/basic_type.h ../../include/base/basic_type.h \
-  ../../include/geometry/grid_operations.h \
-  ../../include/geometry/unit_grid_set.h \
+  ../../include/geometry/../base/array.h \
+  ../../include/geometry/../geometry/grid.h \
+  ../../include/geometry/../geometry/../base/array.h \
+  ../../include/geometry/../geometry/../base/interval.h \
+  ../../include/geometry/../geometry/../base/binary_word.h \
+  ../../include/geometry/../geometry/../geometry/lattice_set.h \
+  ../../include/geometry/../geometry/../geometry/../base/array.h \
+  ../../include/geometry/../geometry/../geometry/../base/iterator.h \
+  ../../include/geometry/../geometry/../geometry/../base/../base/array.h \
+  ../../include/geometry/../geometry/../geometry/../base/basic_type.h \
+  ../../include/geometry/../geometry/../geometry/../base/interval.h \
+  ../../include/geometry/../geometry/../geometry/../base/array_operations.h \
+  ../../include/geometry/../geometry/../geometry/../base/../base/basic_type.h \
+  ../../include/geometry/../geometry/lattice_set.h \
   ../../include/geometry/partition_tree_set.h \
-  ../../include/base/binary_tree.h ../../include/base/binary_word.h \
-  ../../include/geometry/unit_partition_tree_set.h \
-  ../../include/base/sequence.h ../../include/python/real_typedef.h \
-  ../../include/base/numerical_type.h \
+  ../../include/geometry/../base/basic_type.h \
+  ../../include/geometry/../base/binary_tree.h \
+  ../../include/geometry/../base/../base/binary_word.h \
+  ../../include/geometry/../base/iterator.h \
+  ../../include/geometry/../geometry/subdivision_tree_set.h \
+  ../../include/geometry/../geometry/../base/basic_type.h \
+  ../../include/geometry/../geometry/../base/sequence.h \
+  ../../include/geometry/../geometry/../base/binary_tree.h \
+  ../../include/geometry/../geometry/../base/iterator.h \
+  ../../include/python/real_typedef.h \
+  ../../include/python/../base/numerical_type.h \
   ../../include/python/python_utilities.h
 
-export_grid.o: export_grid.cc ../../include/base/numerical_type.h \
-  ../../include/base/dyadic.h \
+export_grid_set.o: export_grid_set.cc ../../include/base/numerical_type.h \
+  ../../include/base/../base/dyadic.h \
   ../../include/linear_algebra/linear_algebra.h \
-  ../../include/linear_algebra/vector.h ../../include/base/basic_type.h \
-  ../../include/base/array.h ../../include/base/sequence.h \
-  ../../include/base/numerical_type.h ../../include/base/interval.h \
-  ../../include/linear_algebra/matrix.h \
-  ../../include/linear_algebra/constraint.h \
-  ../../include/geometry/parallelopiped.h ../../include/base/utility.h \
-  ../../include/base/interval.h ../../include/linear_algebra/vector.h \
-  ../../include/linear_algebra/matrix.h \
-  ../../include/linear_algebra/constraint.h \
-  ../../include/geometry/point.h \
-  ../../include/geometry/geometry_declarations.h \
-  ../../include/geometry/rectangle.h ../../include/base/binary_word.h \
-  ../../include/base/utility.h ../../include/base/basic_type.h \
-  ../../include/geometry/list_set.h ../../include/geometry/polyhedron.h \
-  ../../include/geometry/generator.h ../../include/geometry/list_set.h \
-  ../../include/geometry/grid_set.h ../../include/base/array.h \
-  ../../include/geometry/grid.h ../../include/geometry/unit_grid_set.h \
-  ../../include/base/iterator.h ../../include/base/../base/array.h \
-  ../../include/base/../base/basic_type.h ../../include/base/basic_type.h \
-  ../../include/geometry/grid_operations.h \
-  ../../include/geometry/unit_grid_set.h \
+  ../../include/linear_algebra/../linear_algebra/vector.h \
+  ../../include/linear_algebra/../linear_algebra/../base/basic_type.h \
+  ../../include/linear_algebra/../linear_algebra/../base/../base/array.h \
+  ../../include/linear_algebra/../linear_algebra/../base/../base/sequence.h \
+  ../../include/linear_algebra/../linear_algebra/../base/numerical_type.h \
+  ../../include/linear_algebra/../linear_algebra/../base/interval.h \
+  ../../include/linear_algebra/../linear_algebra/matrix.h \
+  ../../include/linear_algebra/../linear_algebra/constraint.h \
+  /ufs/collins/include/ppl.hh \
+  ../../include/linear_algebra/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/geometry/parallelotope.h \
+  ../../include/geometry/../base/utility.h \
+  ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/interval.h \
+  ../../include/geometry/../linear_algebra/vector.h \
+  ../../include/geometry/../linear_algebra/matrix.h \
+  ../../include/geometry/../geometry/point.h \
+  ../../include/geometry/../geometry/../base/utility.h \
+  ../../include/geometry/../geometry/../linear_algebra/vector.h \
+  ../../include/geometry/../geometry/../geometry/geometry_declarations.h \
+  ../../include/geometry/../geometry/rectangle.h \
+  ../../include/geometry/../geometry/../base/interval.h \
+  ../../include/geometry/../geometry/../base/binary_word.h \
+  ../../include/geometry/../geometry/../base/../base/basic_type.h \
+  ../../include/geometry/../geometry/../geometry/point.h \
+  ../../include/geometry/../geometry/list_set.h \
+  ../../include/geometry/../geometry/polyhedron.h \
+  ../../include/geometry/../geometry/../linear_algebra/constraint.h \
+  ../../include/geometry/../geometry/../linear_algebra/matrix.h \
+  ../../include/geometry/../geometry/../geometry/generator.h \
+  ../../include/geometry/../geometry/../geometry/rectangle.h \
+  ../../include/geometry/../geometry/geometry_declarations.h \
+  ../../include/geometry/list_set.h ../../include/geometry/grid_set.h \
+  ../../include/geometry/../base/array.h \
+  ../../include/geometry/../base/binary_word.h \
+  ../../include/geometry/../geometry/grid.h \
+  ../../include/geometry/../geometry/../base/array.h \
+  ../../include/geometry/../geometry/../geometry/lattice_set.h \
+  ../../include/geometry/../geometry/../geometry/../base/array.h \
+  ../../include/geometry/../geometry/../geometry/../base/iterator.h \
+  ../../include/geometry/../geometry/../geometry/../base/../base/array.h \
+  ../../include/geometry/../geometry/../geometry/../base/basic_type.h \
+  ../../include/geometry/../geometry/../geometry/../base/interval.h \
+  ../../include/geometry/../geometry/../geometry/../base/array_operations.h \
+  ../../include/geometry/../geometry/../geometry/../base/../base/basic_type.h \
+  ../../include/geometry/../geometry/lattice_set.h \
   ../../include/geometry/partition_tree_set.h \
-  ../../include/base/binary_tree.h ../../include/base/binary_word.h \
-  ../../include/geometry/unit_partition_tree_set.h \
-  ../../include/base/sequence.h ../../include/python/real_typedef.h \
-  ../../include/base/numerical_type.h
+  ../../include/geometry/../base/basic_type.h \
+  ../../include/geometry/../base/binary_tree.h \
+  ../../include/geometry/../base/../base/basic_type.h \
+  ../../include/geometry/../base/../base/binary_word.h \
+  ../../include/geometry/../base/iterator.h \
+  ../../include/geometry/../geometry/subdivision_tree_set.h \
+  ../../include/geometry/../geometry/../base/basic_type.h \
+  ../../include/geometry/../geometry/../base/sequence.h \
+  ../../include/geometry/../geometry/../base/binary_tree.h \
+  ../../include/geometry/../geometry/../base/iterator.h \
+  ../../include/python/real_typedef.h \
+  ../../include/python/../base/numerical_type.h
 
-export_partition_tree.o: export_partition_tree.cc \
-  ../../include/base/numerical_type.h ../../include/base/dyadic.h \
-  ../../include/base/binary_word.h ../../include/base/utility.h \
-  ../../include/base/array.h ../../include/base/basic_type.h \
-  ../../include/base/sequence.h ../../include/base/binary_tree.h \
-  ../../include/base/binary_word.h ../../include/geometry/rectangle.h \
-  ../../include/base/utility.h ../../include/base/interval.h \
-  ../../include/base/binary_word.h ../../include/geometry/point.h \
-  ../../include/linear_algebra/vector.h ../../include/base/basic_type.h \
-  ../../include/base/numerical_type.h ../../include/base/interval.h \
-  ../../include/geometry/geometry_declarations.h \
-  ../../include/geometry/grid_set.h ../../include/base/array.h \
-  ../../include/geometry/rectangle.h ../../include/geometry/grid.h \
-  ../../include/geometry/unit_grid_set.h ../../include/base/iterator.h \
-  ../../include/base/../base/array.h \
-  ../../include/base/../base/basic_type.h ../../include/base/basic_type.h \
-  ../../include/geometry/grid_operations.h \
-  ../../include/geometry/unit_grid_set.h \
-  ../../include/geometry/list_set.h \
-  ../../include/geometry/partition_tree_set.h \
+export_partition_tree_set.o: export_partition_tree_set.cc \
+  ../../include/base/numerical_type.h ../../include/base/../base/dyadic.h \
+  ../../include/base/binary_word.h \
+  ../../include/base/../base/basic_type.h \
+  ../../include/base/../base/../base/array.h \
+  ../../include/base/../base/../base/sequence.h \
   ../../include/base/binary_tree.h \
-  ../../include/geometry/unit_partition_tree_set.h \
-  ../../include/base/sequence.h ../../include/python/real_typedef.h \
-  ../../include/base/numerical_type.h
+  ../../include/base/../base/binary_word.h \
+  ../../include/geometry/rectangle.h \
+  ../../include/geometry/../base/utility.h \
+  ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/interval.h \
+  ../../include/geometry/../base/binary_word.h \
+  ../../include/geometry/../geometry/point.h \
+  ../../include/geometry/../geometry/../base/utility.h \
+  ../../include/geometry/../geometry/../linear_algebra/vector.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/basic_type.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/numerical_type.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/interval.h \
+  ../../include/geometry/../geometry/../geometry/geometry_declarations.h \
+  ../../include/geometry/../geometry/geometry_declarations.h \
+  ../../include/geometry/grid_set.h \
+  ../../include/geometry/../base/array.h \
+  ../../include/geometry/../geometry/rectangle.h \
+  ../../include/geometry/../geometry/grid.h \
+  ../../include/geometry/../geometry/../base/array.h \
+  ../../include/geometry/../geometry/../base/interval.h \
+  ../../include/geometry/../geometry/../base/binary_word.h \
+  ../../include/geometry/../geometry/../geometry/lattice_set.h \
+  ../../include/geometry/../geometry/../geometry/../base/array.h \
+  ../../include/geometry/../geometry/../geometry/../base/iterator.h \
+  ../../include/geometry/../geometry/../geometry/../base/../base/array.h \
+  ../../include/geometry/../geometry/../geometry/../base/basic_type.h \
+  ../../include/geometry/../geometry/../geometry/../base/interval.h \
+  ../../include/geometry/../geometry/../geometry/../base/array_operations.h \
+  ../../include/geometry/../geometry/../geometry/../base/../base/basic_type.h \
+  ../../include/geometry/../geometry/lattice_set.h \
+  ../../include/geometry/../geometry/list_set.h \
+  ../../include/geometry/partition_tree_set.h \
+  ../../include/geometry/../base/basic_type.h \
+  ../../include/geometry/../base/binary_tree.h \
+  ../../include/geometry/../base/iterator.h \
+  ../../include/geometry/../geometry/subdivision_tree_set.h \
+  ../../include/geometry/../geometry/../base/basic_type.h \
+  ../../include/geometry/../geometry/../base/sequence.h \
+  ../../include/geometry/../geometry/../base/binary_tree.h \
+  ../../include/geometry/../geometry/../base/iterator.h \
+  ../../include/geometry/../geometry/../geometry/rectangle.h \
+  ../../include/python/real_typedef.h \
+  ../../include/python/../base/numerical_type.h
 
 export_postscript_output.o: export_postscript_output.cc \
-  ../../include/geometry/rectangle.h ../../include/base/utility.h \
-  ../../include/base/array.h ../../include/base/interval.h \
-  ../../include/base/binary_word.h ../../include/base/utility.h \
-  ../../include/base/basic_type.h ../../include/base/sequence.h \
-  ../../include/geometry/point.h ../../include/linear_algebra/vector.h \
-  ../../include/base/basic_type.h ../../include/base/numerical_type.h \
-  ../../include/base/dyadic.h ../../include/base/interval.h \
-  ../../include/geometry/geometry_declarations.h \
-  ../../include/geometry/parallelopiped.h \
-  ../../include/linear_algebra/matrix.h \
-  ../../include/linear_algebra/constraint.h \
-  ../../include/linear_algebra/vector.h \
-  ../../include/linear_algebra/matrix.h \
-  ../../include/geometry/rectangle.h ../../include/geometry/list_set.h \
-  ../../include/geometry/polyhedron.h ../../include/geometry/generator.h \
+  ../../include/geometry/rectangle.h \
+  ../../include/geometry/../base/utility.h \
+  ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/interval.h \
+  ../../include/geometry/../base/binary_word.h \
+  ../../include/geometry/../base/../base/basic_type.h \
+  ../../include/geometry/../base/../base/../base/array.h \
+  ../../include/geometry/../base/../base/../base/sequence.h \
+  ../../include/geometry/../geometry/point.h \
+  ../../include/geometry/../geometry/../base/utility.h \
+  ../../include/geometry/../geometry/../linear_algebra/vector.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/basic_type.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/numerical_type.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/../base/dyadic.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/interval.h \
+  ../../include/geometry/../geometry/../geometry/geometry_declarations.h \
+  ../../include/geometry/../geometry/geometry_declarations.h \
+  ../../include/geometry/parallelotope.h \
+  ../../include/geometry/../linear_algebra/vector.h \
+  ../../include/geometry/../linear_algebra/matrix.h \
+  ../../include/geometry/../linear_algebra/../base/basic_type.h \
+  ../../include/geometry/../linear_algebra/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../base/interval.h \
+  ../../include/geometry/../geometry/rectangle.h \
+  ../../include/geometry/../geometry/list_set.h \
+  ../../include/geometry/../geometry/polyhedron.h \
+  /ufs/collins/include/ppl.hh \
+  ../../include/geometry/../geometry/../linear_algebra/constraint.h \
+  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/geometry/../geometry/../linear_algebra/matrix.h \
+  ../../include/geometry/../geometry/../geometry/generator.h \
+  ../../include/geometry/../geometry/../geometry/point.h \
+  ../../include/geometry/../geometry/../geometry/rectangle.h \
   ../../include/geometry/list_set.h ../../include/geometry/grid_set.h \
-  ../../include/base/array.h ../../include/geometry/grid.h \
-  ../../include/geometry/unit_grid_set.h ../../include/base/iterator.h \
-  ../../include/base/../base/array.h \
-  ../../include/base/../base/basic_type.h ../../include/base/basic_type.h \
-  ../../include/geometry/grid_operations.h \
-  ../../include/geometry/unit_grid_set.h \
+  ../../include/geometry/../base/array.h \
+  ../../include/geometry/../geometry/grid.h \
+  ../../include/geometry/../geometry/../base/array.h \
+  ../../include/geometry/../geometry/../base/interval.h \
+  ../../include/geometry/../geometry/../base/binary_word.h \
+  ../../include/geometry/../geometry/../geometry/lattice_set.h \
+  ../../include/geometry/../geometry/../geometry/../base/array.h \
+  ../../include/geometry/../geometry/../geometry/../base/iterator.h \
+  ../../include/geometry/../geometry/../geometry/../base/../base/array.h \
+  ../../include/geometry/../geometry/../geometry/../base/basic_type.h \
+  ../../include/geometry/../geometry/../geometry/../base/interval.h \
+  ../../include/geometry/../geometry/../geometry/../base/array_operations.h \
+  ../../include/geometry/../geometry/../geometry/../base/../base/basic_type.h \
+  ../../include/geometry/../geometry/lattice_set.h \
   ../../include/geometry/partition_tree_set.h \
-  ../../include/base/binary_tree.h ../../include/base/binary_word.h \
-  ../../include/geometry/unit_partition_tree_set.h \
-  ../../include/base/sequence.h ../../include/utility/epsfstream.h \
-  ../../include/geometry/rectangle.h ../../include/geometry/list_set.h \
-  ../../include/geometry/grid_set.h \
-  ../../include/geometry/parallelopiped.h \
-  ../../include/geometry/partition_tree_set.h \
-  ../../include/python/real_typedef.h ../../include/base/numerical_type.h
+  ../../include/geometry/../base/basic_type.h \
+  ../../include/geometry/../base/binary_tree.h \
+  ../../include/geometry/../base/../base/binary_word.h \
+  ../../include/geometry/../base/iterator.h \
+  ../../include/geometry/../geometry/subdivision_tree_set.h \
+  ../../include/geometry/../geometry/../base/basic_type.h \
+  ../../include/geometry/../geometry/../base/sequence.h \
+  ../../include/geometry/../geometry/../base/binary_tree.h \
+  ../../include/geometry/../geometry/../base/iterator.h \
+  ../../include/utility/epsfstream.h \
+  ../../include/utility/../geometry/rectangle.h \
+  ../../include/utility/../geometry/list_set.h \
+  ../../include/utility/../geometry/grid_set.h \
+  ../../include/utility/../geometry/parallelotope.h \
+  ../../include/utility/../geometry/partition_tree_set.h \
+  ../../include/python/real_typedef.h \
+  ../../include/python/../base/numerical_type.h
 
 evaluation_module.o: evaluation_module.cc
 
 export_map.o: export_map.cc ../../include/evaluation/map.h \
-  ../../include/geometry/geometry_declarations.h \
-  ../../include/geometry/point.h ../../include/base/utility.h \
-  ../../include/base/array.h ../../include/linear_algebra/vector.h \
-  ../../include/base/basic_type.h ../../include/base/sequence.h \
-  ../../include/base/numerical_type.h ../../include/base/dyadic.h \
-  ../../include/base/interval.h \
-  ../../include/geometry/geometry_declarations.h \
-  ../../include/geometry/rectangle.h ../../include/base/interval.h \
-  ../../include/base/binary_word.h ../../include/base/utility.h \
-  ../../include/base/basic_type.h ../../include/geometry/point.h \
-  ../../include/geometry/list_set.h \
-  ../../include/geometry/parallelopiped.h \
-  ../../include/linear_algebra/matrix.h \
-  ../../include/linear_algebra/constraint.h \
-  ../../include/linear_algebra/vector.h \
-  ../../include/linear_algebra/matrix.h \
-  ../../include/geometry/rectangle.h ../../include/geometry/list_set.h \
-  ../../include/geometry/polyhedron.h ../../include/geometry/generator.h \
-  ../../include/geometry/polyhedron.h \
-  ../../include/linear_algebra/vector.h \
-  ../../include/linear_algebra/matrix.h \
-  ../../include/python/real_typedef.h ../../include/base/numerical_type.h
+  ../../include/evaluation/../geometry/geometry_declarations.h \
+  ../../include/evaluation/../geometry/point.h \
+  ../../include/evaluation/../geometry/../base/utility.h \
+  ../../include/evaluation/../geometry/../base/../base/array.h \
+  ../../include/evaluation/../geometry/../linear_algebra/vector.h \
+  ../../include/evaluation/../geometry/../linear_algebra/../base/basic_type.h \
+  ../../include/evaluation/../geometry/../linear_algebra/../base/../base/array.h \
+  ../../include/evaluation/../geometry/../linear_algebra/../base/../base/sequence.h \
+  ../../include/evaluation/../geometry/../linear_algebra/../base/numerical_type.h \
+  ../../include/evaluation/../geometry/../linear_algebra/../base/../base/dyadic.h \
+  ../../include/evaluation/../geometry/../linear_algebra/../base/interval.h \
+  ../../include/evaluation/../geometry/../geometry/geometry_declarations.h \
+  ../../include/evaluation/../geometry/rectangle.h \
+  ../../include/evaluation/../geometry/../base/interval.h \
+  ../../include/evaluation/../geometry/../base/binary_word.h \
+  ../../include/evaluation/../geometry/../base/../base/basic_type.h \
+  ../../include/evaluation/../geometry/../geometry/point.h \
+  ../../include/evaluation/../geometry/list_set.h \
+  ../../include/evaluation/../geometry/parallelotope.h \
+  ../../include/evaluation/../geometry/../linear_algebra/matrix.h \
+  ../../include/evaluation/../geometry/../geometry/rectangle.h \
+  ../../include/evaluation/../geometry/../geometry/list_set.h \
+  ../../include/evaluation/../geometry/../geometry/polyhedron.h \
+  /ufs/collins/include/ppl.hh \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/vector.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/matrix.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/generator.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/point.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/rectangle.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/geometry_declarations.h \
+  ../../include/evaluation/../geometry/polyhedron.h \
+  ../../include/evaluation/../linear_algebra/vector.h \
+  ../../include/evaluation/../linear_algebra/matrix.h \
+  ../../include/python/real_typedef.h \
+  ../../include/python/../base/numerical_type.h
 
 export_affine_map.o: export_affine_map.cc \
-  ../../include/base/numerical_type.h ../../include/base/dyadic.h \
-  ../../include/geometry/point.h ../../include/base/utility.h \
-  ../../include/base/array.h ../../include/linear_algebra/vector.h \
-  ../../include/base/basic_type.h ../../include/base/sequence.h \
-  ../../include/base/numerical_type.h ../../include/base/interval.h \
-  ../../include/geometry/geometry_declarations.h \
+  ../../include/base/numerical_type.h ../../include/base/../base/dyadic.h \
+  ../../include/geometry/point.h ../../include/geometry/../base/utility.h \
+  ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../linear_algebra/vector.h \
+  ../../include/geometry/../linear_algebra/../base/basic_type.h \
+  ../../include/geometry/../linear_algebra/../base/../base/array.h \
+  ../../include/geometry/../linear_algebra/../base/../base/sequence.h \
+  ../../include/geometry/../linear_algebra/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../base/interval.h \
+  ../../include/geometry/../geometry/geometry_declarations.h \
   ../../include/evaluation/affine_map.h \
-  ../../include/linear_algebra/vector.h \
-  ../../include/linear_algebra/matrix.h ../../include/evaluation/map.h \
-  ../../include/geometry/geometry_declarations.h \
-  ../../include/geometry/point.h ../../include/geometry/rectangle.h \
-  ../../include/base/interval.h ../../include/base/binary_word.h \
-  ../../include/base/utility.h ../../include/base/basic_type.h \
-  ../../include/geometry/point.h ../../include/geometry/list_set.h \
-  ../../include/geometry/parallelopiped.h \
-  ../../include/linear_algebra/matrix.h \
-  ../../include/linear_algebra/constraint.h \
-  ../../include/linear_algebra/vector.h \
-  ../../include/linear_algebra/matrix.h \
-  ../../include/geometry/rectangle.h ../../include/geometry/list_set.h \
-  ../../include/geometry/polyhedron.h ../../include/geometry/generator.h \
-  ../../include/geometry/polyhedron.h ../../include/python/real_typedef.h \
-  ../../include/base/numerical_type.h \
+  ../../include/evaluation/../linear_algebra/vector.h \
+  ../../include/evaluation/../linear_algebra/matrix.h \
+  ../../include/evaluation/../linear_algebra/../base/basic_type.h \
+  ../../include/evaluation/../linear_algebra/../base/numerical_type.h \
+  ../../include/evaluation/../linear_algebra/../base/interval.h \
+  ../../include/evaluation/../evaluation/map.h \
+  ../../include/evaluation/../evaluation/../geometry/geometry_declarations.h \
+  ../../include/evaluation/../evaluation/../geometry/point.h \
+  ../../include/evaluation/../evaluation/../geometry/rectangle.h \
+  ../../include/evaluation/../evaluation/../geometry/../base/utility.h \
+  ../../include/evaluation/../evaluation/../geometry/../base/interval.h \
+  ../../include/evaluation/../evaluation/../geometry/../base/binary_word.h \
+  ../../include/evaluation/../evaluation/../geometry/../base/../base/basic_type.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/point.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/geometry_declarations.h \
+  ../../include/evaluation/../evaluation/../geometry/list_set.h \
+  ../../include/evaluation/../evaluation/../geometry/parallelotope.h \
+  ../../include/evaluation/../evaluation/../geometry/../linear_algebra/vector.h \
+  ../../include/evaluation/../evaluation/../geometry/../linear_algebra/matrix.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/rectangle.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/list_set.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/polyhedron.h \
+  /ufs/collins/include/ppl.hh \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../linear_algebra/vector.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../linear_algebra/matrix.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/generator.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/point.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/rectangle.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/geometry_declarations.h \
+  ../../include/evaluation/../evaluation/../geometry/polyhedron.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/vector.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/matrix.h \
+  ../../include/evaluation/../geometry/point.h \
+  ../../include/evaluation/../geometry/rectangle.h \
+  ../../include/evaluation/../geometry/parallelotope.h \
+  ../../include/python/real_typedef.h \
+  ../../include/python/../base/numerical_type.h \
   ../../include/python/python_utilities.h
 
 export_polynomial_map.o: export_polynomial_map.cc \
-  ../../include/base/numerical_type.h ../../include/base/dyadic.h \
-  ../../include/geometry/point.h ../../include/base/utility.h \
-  ../../include/base/array.h ../../include/linear_algebra/vector.h \
-  ../../include/base/basic_type.h ../../include/base/sequence.h \
-  ../../include/base/numerical_type.h ../../include/base/interval.h \
-  ../../include/geometry/geometry_declarations.h \
+  ../../include/base/numerical_type.h ../../include/base/../base/dyadic.h \
+  ../../include/geometry/point.h ../../include/geometry/../base/utility.h \
+  ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../linear_algebra/vector.h \
+  ../../include/geometry/../linear_algebra/../base/basic_type.h \
+  ../../include/geometry/../linear_algebra/../base/../base/array.h \
+  ../../include/geometry/../linear_algebra/../base/../base/sequence.h \
+  ../../include/geometry/../linear_algebra/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../base/interval.h \
+  ../../include/geometry/../geometry/geometry_declarations.h \
   ../../include/evaluation/polynomial_map.h \
-  ../../include/linear_algebra/linear_algebra.h \
-  ../../include/linear_algebra/vector.h \
-  ../../include/linear_algebra/matrix.h \
-  ../../include/linear_algebra/constraint.h ../../include/base/utility.h \
-  ../../include/base/array.h ../../include/base/interval.h \
-  ../../include/geometry/point.h ../../include/geometry/rectangle.h \
-  ../../include/base/interval.h ../../include/base/binary_word.h \
-  ../../include/base/utility.h ../../include/base/basic_type.h \
-  ../../include/geometry/point.h ../../include/geometry/polyhedron.h \
-  ../../include/linear_algebra/constraint.h \
-  ../../include/linear_algebra/matrix.h \
-  ../../include/geometry/generator.h ../../include/geometry/rectangle.h \
-  ../../include/geometry/list_set.h ../../include/python/real_typedef.h \
-  ../../include/base/numerical_type.h
+  ../../include/evaluation/../linear_algebra/vector.h \
+  ../../include/evaluation/../linear_algebra/matrix.h \
+  ../../include/evaluation/../linear_algebra/../base/basic_type.h \
+  ../../include/evaluation/../linear_algebra/../base/numerical_type.h \
+  ../../include/evaluation/../linear_algebra/../base/interval.h \
+  ../../include/evaluation/../base/utility.h \
+  ../../include/evaluation/../base/array.h \
+  ../../include/evaluation/../base/interval.h \
+  ../../include/evaluation/../geometry/point.h \
+  ../../include/evaluation/../geometry/rectangle.h \
+  ../../include/evaluation/../geometry/../base/utility.h \
+  ../../include/evaluation/../geometry/../base/interval.h \
+  ../../include/evaluation/../geometry/../base/binary_word.h \
+  ../../include/evaluation/../geometry/../base/../base/basic_type.h \
+  ../../include/evaluation/../geometry/../geometry/point.h \
+  ../../include/evaluation/../geometry/../geometry/geometry_declarations.h \
+  ../../include/evaluation/../geometry/polyhedron.h \
+  /ufs/collins/include/ppl.hh \
+  ../../include/evaluation/../geometry/../linear_algebra/constraint.h \
+  ../../include/evaluation/../geometry/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/evaluation/../geometry/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/evaluation/../geometry/../linear_algebra/vector.h \
+  ../../include/evaluation/../geometry/../linear_algebra/matrix.h \
+  ../../include/evaluation/../geometry/../geometry/generator.h \
+  ../../include/evaluation/../geometry/../geometry/rectangle.h \
+  ../../include/evaluation/../geometry/list_set.h \
+  ../../include/python/real_typedef.h \
+  ../../include/python/../base/numerical_type.h
 
 export_apply.o: export_apply.cc ../../include/evaluation/apply.h \
-  ../../include/base/utility.h ../../include/base/array.h \
-  ../../include/base/array.h ../../include/base/interval.h \
-  ../../include/linear_algebra/vector.h ../../include/base/basic_type.h \
-  ../../include/base/sequence.h ../../include/base/numerical_type.h \
-  ../../include/base/dyadic.h ../../include/base/interval.h \
-  ../../include/linear_algebra/matrix.h ../../include/geometry/list_set.h \
-  ../../include/geometry/geometry_declarations.h \
-  ../../include/geometry/grid_set.h ../../include/base/array.h \
-  ../../include/base/interval.h ../../include/base/binary_word.h \
-  ../../include/base/utility.h ../../include/base/basic_type.h \
-  ../../include/geometry/rectangle.h ../../include/base/utility.h \
-  ../../include/geometry/point.h ../../include/linear_algebra/vector.h \
-  ../../include/geometry/grid.h ../../include/geometry/unit_grid_set.h \
-  ../../include/base/iterator.h ../../include/base/../base/array.h \
-  ../../include/base/../base/basic_type.h ../../include/base/basic_type.h \
-  ../../include/geometry/grid_operations.h \
-  ../../include/geometry/unit_grid_set.h \
-  ../../include/geometry/list_set.h \
-  ../../include/evaluation/evaluation_declarations.h \
-  ../../include/evaluation/map.h \
-  ../../include/geometry/geometry_declarations.h \
-  ../../include/geometry/point.h ../../include/geometry/rectangle.h \
-  ../../include/geometry/parallelopiped.h \
-  ../../include/linear_algebra/matrix.h \
-  ../../include/linear_algebra/constraint.h \
-  ../../include/linear_algebra/vector.h \
-  ../../include/linear_algebra/matrix.h \
-  ../../include/geometry/polyhedron.h ../../include/geometry/generator.h \
-  ../../include/geometry/polyhedron.h ../../include/python/real_typedef.h \
-  ../../include/base/numerical_type.h
+  ../../include/evaluation/../base/utility.h \
+  ../../include/evaluation/../base/../base/array.h \
+  ../../include/evaluation/../base/array.h \
+  ../../include/evaluation/../base/interval.h \
+  ../../include/evaluation/../linear_algebra/vector.h \
+  ../../include/evaluation/../linear_algebra/../base/basic_type.h \
+  ../../include/evaluation/../linear_algebra/../base/../base/array.h \
+  ../../include/evaluation/../linear_algebra/../base/../base/sequence.h \
+  ../../include/evaluation/../linear_algebra/../base/numerical_type.h \
+  ../../include/evaluation/../linear_algebra/../base/../base/dyadic.h \
+  ../../include/evaluation/../linear_algebra/../base/interval.h \
+  ../../include/evaluation/../linear_algebra/matrix.h \
+  ../../include/evaluation/../geometry/list_set.h \
+  ../../include/evaluation/../geometry/../geometry/geometry_declarations.h \
+  ../../include/evaluation/../geometry/grid_set.h \
+  ../../include/evaluation/../geometry/../base/array.h \
+  ../../include/evaluation/../geometry/../base/interval.h \
+  ../../include/evaluation/../geometry/../base/binary_word.h \
+  ../../include/evaluation/../geometry/../base/../base/basic_type.h \
+  ../../include/evaluation/../geometry/../geometry/rectangle.h \
+  ../../include/evaluation/../geometry/../geometry/../base/utility.h \
+  ../../include/evaluation/../geometry/../geometry/../base/interval.h \
+  ../../include/evaluation/../geometry/../geometry/../base/binary_word.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/point.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../base/utility.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../linear_algebra/vector.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../geometry/geometry_declarations.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/geometry_declarations.h \
+  ../../include/evaluation/../geometry/../geometry/point.h \
+  ../../include/evaluation/../geometry/../geometry/grid.h \
+  ../../include/evaluation/../geometry/../geometry/../base/array.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/lattice_set.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../base/array.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../base/iterator.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../base/../base/array.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../base/basic_type.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../base/interval.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../base/array_operations.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../base/../base/basic_type.h \
+  ../../include/evaluation/../geometry/../geometry/lattice_set.h \
+  ../../include/evaluation/../geometry/../geometry/list_set.h \
+  ../../include/evaluation/../evaluation/evaluation_declarations.h \
+  ../../include/evaluation/../evaluation/map.h \
+  ../../include/evaluation/../evaluation/../geometry/geometry_declarations.h \
+  ../../include/evaluation/../evaluation/../geometry/point.h \
+  ../../include/evaluation/../evaluation/../geometry/rectangle.h \
+  ../../include/evaluation/../evaluation/../geometry/list_set.h \
+  ../../include/evaluation/../evaluation/../geometry/parallelotope.h \
+  ../../include/evaluation/../evaluation/../geometry/../base/utility.h \
+  ../../include/evaluation/../evaluation/../geometry/../base/interval.h \
+  ../../include/evaluation/../evaluation/../geometry/../linear_algebra/vector.h \
+  ../../include/evaluation/../evaluation/../geometry/../linear_algebra/matrix.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/point.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/rectangle.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/list_set.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/polyhedron.h \
+  /ufs/collins/include/ppl.hh \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../linear_algebra/vector.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../linear_algebra/matrix.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/generator.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/point.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/rectangle.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/geometry_declarations.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/geometry_declarations.h \
+  ../../include/evaluation/../evaluation/../geometry/polyhedron.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/vector.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/matrix.h \
+  ../../include/python/real_typedef.h \
+  ../../include/python/../base/numerical_type.h
 
 export_henon_map.o: export_henon_map.cc \
   ../../include/evaluation/henon_map.h \
-  ../../include/linear_algebra/matrix.h ../../include/base/basic_type.h \
-  ../../include/base/array.h ../../include/base/sequence.h \
-  ../../include/base/numerical_type.h ../../include/base/dyadic.h \
-  ../../include/base/interval.h ../../include/geometry/point.h \
-  ../../include/base/utility.h ../../include/linear_algebra/vector.h \
-  ../../include/geometry/geometry_declarations.h \
-  ../../include/geometry/rectangle.h ../../include/base/interval.h \
-  ../../include/base/binary_word.h ../../include/base/utility.h \
-  ../../include/base/basic_type.h ../../include/geometry/point.h \
-  ../../include/geometry/parallelopiped.h \
-  ../../include/linear_algebra/matrix.h \
-  ../../include/linear_algebra/constraint.h \
-  ../../include/linear_algebra/vector.h \
-  ../../include/linear_algebra/matrix.h \
-  ../../include/geometry/rectangle.h ../../include/geometry/list_set.h \
-  ../../include/geometry/polyhedron.h ../../include/geometry/generator.h \
-  ../../include/evaluation/map.h \
-  ../../include/geometry/geometry_declarations.h \
-  ../../include/geometry/list_set.h ../../include/geometry/polyhedron.h \
-  ../../include/linear_algebra/vector.h ../../include/evaluation/apply.h \
-  ../../include/base/utility.h ../../include/base/array.h \
-  ../../include/base/interval.h ../../include/geometry/grid_set.h \
-  ../../include/base/array.h ../../include/geometry/grid.h \
-  ../../include/geometry/unit_grid_set.h ../../include/base/iterator.h \
-  ../../include/base/../base/array.h \
-  ../../include/base/../base/basic_type.h ../../include/base/basic_type.h \
-  ../../include/geometry/grid_operations.h \
-  ../../include/geometry/unit_grid_set.h \
-  ../../include/evaluation/evaluation_declarations.h \
-  ../../include/python/real_typedef.h ../../include/base/numerical_type.h
+  ../../include/evaluation/../linear_algebra/matrix.h \
+  ../../include/evaluation/../linear_algebra/../base/basic_type.h \
+  ../../include/evaluation/../linear_algebra/../base/../base/array.h \
+  ../../include/evaluation/../linear_algebra/../base/../base/sequence.h \
+  ../../include/evaluation/../linear_algebra/../base/numerical_type.h \
+  ../../include/evaluation/../linear_algebra/../base/../base/dyadic.h \
+  ../../include/evaluation/../linear_algebra/../base/interval.h \
+  ../../include/evaluation/../geometry/point.h \
+  ../../include/evaluation/../geometry/../base/utility.h \
+  ../../include/evaluation/../geometry/../base/../base/array.h \
+  ../../include/evaluation/../geometry/../linear_algebra/vector.h \
+  ../../include/evaluation/../geometry/../linear_algebra/../base/basic_type.h \
+  ../../include/evaluation/../geometry/../linear_algebra/../base/numerical_type.h \
+  ../../include/evaluation/../geometry/../linear_algebra/../base/interval.h \
+  ../../include/evaluation/../geometry/../geometry/geometry_declarations.h \
+  ../../include/evaluation/../geometry/rectangle.h \
+  ../../include/evaluation/../geometry/../base/interval.h \
+  ../../include/evaluation/../geometry/../base/binary_word.h \
+  ../../include/evaluation/../geometry/../base/../base/basic_type.h \
+  ../../include/evaluation/../geometry/../geometry/point.h \
+  ../../include/evaluation/../geometry/parallelotope.h \
+  ../../include/evaluation/../geometry/../linear_algebra/matrix.h \
+  ../../include/evaluation/../geometry/../geometry/rectangle.h \
+  ../../include/evaluation/../geometry/../geometry/list_set.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/geometry_declarations.h \
+  ../../include/evaluation/../geometry/../geometry/polyhedron.h \
+  /ufs/collins/include/ppl.hh \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/vector.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/matrix.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/generator.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/point.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/rectangle.h \
+  ../../include/evaluation/../evaluation/map.h \
+  ../../include/evaluation/../evaluation/../geometry/geometry_declarations.h \
+  ../../include/evaluation/../evaluation/../geometry/point.h \
+  ../../include/evaluation/../evaluation/../geometry/rectangle.h \
+  ../../include/evaluation/../evaluation/../geometry/list_set.h \
+  ../../include/evaluation/../evaluation/../geometry/parallelotope.h \
+  ../../include/evaluation/../evaluation/../geometry/polyhedron.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/vector.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/matrix.h \
+  ../../include/evaluation/../evaluation/apply.h \
+  ../../include/evaluation/../evaluation/../base/utility.h \
+  ../../include/evaluation/../evaluation/../base/array.h \
+  ../../include/evaluation/../evaluation/../base/interval.h \
+  ../../include/evaluation/../evaluation/../geometry/grid_set.h \
+  ../../include/evaluation/../evaluation/../geometry/../base/array.h \
+  ../../include/evaluation/../evaluation/../geometry/../base/interval.h \
+  ../../include/evaluation/../evaluation/../geometry/../base/binary_word.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/geometry_declarations.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/rectangle.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/point.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/grid.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../base/array.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../base/interval.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../base/binary_word.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/geometry_declarations.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/lattice_set.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/../base/array.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/../base/iterator.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/../base/../base/array.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/../base/basic_type.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/../base/interval.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/../base/array_operations.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/../base/../base/basic_type.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/lattice_set.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/list_set.h \
+  ../../include/evaluation/../evaluation/../evaluation/evaluation_declarations.h \
+  ../../include/evaluation/../evaluation/../evaluation/map.h \
+  ../../include/python/real_typedef.h \
+  ../../include/python/../base/numerical_type.h
 
 linear_algebra_module.o: linear_algebra_module.cc
 
 export_vector.o: export_vector.cc ../../include/base/numerical_type.h \
-  ../../include/base/dyadic.h ../../include/base/interval.h \
+  ../../include/base/../base/dyadic.h ../../include/base/interval.h \
   ../../include/linear_algebra/linear_algebra.h \
-  ../../include/linear_algebra/vector.h ../../include/base/basic_type.h \
-  ../../include/base/array.h ../../include/base/sequence.h \
-  ../../include/base/numerical_type.h ../../include/base/interval.h \
-  ../../include/linear_algebra/matrix.h \
-  ../../include/linear_algebra/constraint.h \
-  ../../include/python/real_typedef.h ../../include/base/numerical_type.h
+  ../../include/linear_algebra/../linear_algebra/vector.h \
+  ../../include/linear_algebra/../linear_algebra/../base/basic_type.h \
+  ../../include/linear_algebra/../linear_algebra/../base/../base/array.h \
+  ../../include/linear_algebra/../linear_algebra/../base/../base/sequence.h \
+  ../../include/linear_algebra/../linear_algebra/../base/numerical_type.h \
+  ../../include/linear_algebra/../linear_algebra/../base/interval.h \
+  ../../include/linear_algebra/../linear_algebra/matrix.h \
+  ../../include/linear_algebra/../linear_algebra/constraint.h \
+  /ufs/collins/include/ppl.hh \
+  ../../include/linear_algebra/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/python/real_typedef.h \
+  ../../include/python/../base/numerical_type.h
 
 export_matrix.o: export_matrix.cc ../../include/base/numerical_type.h \
-  ../../include/base/dyadic.h ../../include/base/interval.h \
-  ../../include/linear_algebra/matrix.h ../../include/base/basic_type.h \
-  ../../include/base/array.h ../../include/base/sequence.h \
-  ../../include/base/numerical_type.h ../../include/base/interval.h \
-  ../../include/python/real_typedef.h ../../include/base/numerical_type.h \
+  ../../include/base/../base/dyadic.h ../../include/base/interval.h \
+  ../../include/linear_algebra/matrix.h \
+  ../../include/linear_algebra/../base/basic_type.h \
+  ../../include/linear_algebra/../base/../base/array.h \
+  ../../include/linear_algebra/../base/../base/sequence.h \
+  ../../include/linear_algebra/../base/numerical_type.h \
+  ../../include/linear_algebra/../base/interval.h \
+  ../../include/python/real_typedef.h \
+  ../../include/python/../base/numerical_type.h \
   ../../include/python/python_utilities.h
 

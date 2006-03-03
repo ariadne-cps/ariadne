@@ -22,6 +22,7 @@
  */
 
 #include "base/array.h"
+#include "base/array_operations.h"
 #include "base/utility.h"
 #include "base/basic_type.h"
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            unit_partition_tree_set.cc
+ *            subdivision_tree_set.cc
  *
  *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
@@ -24,10 +24,9 @@
 #include "base/arithmetic.h"
 
 #include "geometry/rectangle.h"
-#include "geometry/unit_grid_set.h"
+#include "geometry/lattice_set.h"
 
-#include "geometry/unit_partition_tree_set.h"
-#include "geometry/partition_tree_operations.h"
+#include "geometry/subdivision_tree_set.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -104,7 +103,7 @@ namespace Ariadne {
     }
 
     
-    UnitPartitionTreeCell::UnitPartitionTreeCell(const SubdivisionSequence& ss,
+    SubdivisionTreeCell::SubdivisionTreeCell(const SubdivisionSequence& ss,
                                                  const BinaryWord& w)
       : _bounds(ss.dimension())
     {
@@ -112,7 +111,7 @@ namespace Ariadne {
     }
     
     void
-    UnitPartitionTreeCell::_compute_bounds(const SubdivisionSequence& ss,
+    SubdivisionTreeCell::_compute_bounds(const SubdivisionSequence& ss,
                                            const BinaryWord& w)
     {
       for(dimension_type i=0; i!=this->dimension(); ++i) {
@@ -131,18 +130,18 @@ namespace Ariadne {
       }
     }
 
-    UnitPartitionTree::UnitPartitionTree(const SubdivisionSequence& ss,
+    SubdivisionTree::SubdivisionTree(const SubdivisionSequence& ss,
                                          const BinaryTree& t)
       : _subdivisions(ss), _tree(t)
     {
     }
     
-    UnitPartitionTreeSet::UnitPartitionTreeSet(const SubdivisionSequence& ss)
+    SubdivisionTreeSet::SubdivisionTreeSet(const SubdivisionSequence& ss)
       :  _subdivisions(ss), _words()
     {
     }
     
-    UnitPartitionTreeSet::UnitPartitionTreeSet(const SubdivisionSequence& ss, 
+    SubdivisionTreeSet::SubdivisionTreeSet(const SubdivisionSequence& ss, 
                                                const BinaryTree& bt,
                                                const BooleanArray& ba)
       : _subdivisions(ss), _words(bt,ba)
@@ -151,7 +150,7 @@ namespace Ariadne {
       this->reduce();
     }
     
-    UnitPartitionTreeSet::UnitPartitionTreeSet(const LatticeMaskSet& ms) 
+    SubdivisionTreeSet::SubdivisionTreeSet(const LatticeMaskSet& ms) 
       : _subdivisions(ms.dimension()), _words()
     {
       dimension_type n=ms.dimension();
@@ -197,7 +196,7 @@ namespace Ariadne {
       
       do {
         //TODO: Construct full tree, then reduce
-        UnitPartitionTreeCell c(subdivisions,word);
+        SubdivisionTreeCell c(subdivisions,word);
         LatticeRectangle r=compute_block(c,bounds);
         if(subset(r,ms)) {
           //std::cerr <<  c.bounds() << " " << r << " subset" << std::endl;
@@ -234,7 +233,7 @@ namespace Ariadne {
     }
 
     SizeArray
-    UnitPartitionTreeSet::depths() const
+    SubdivisionTreeSet::depths() const
     {
       SizeArray result(this->dimension(),0);
       for(size_type j=0; j!=this->depth(); ++j) {
@@ -245,15 +244,16 @@ namespace Ariadne {
     
 
     std::ostream&
-    operator<<(std::ostream& os, const UnitPartitionTreeCell& uptc) 
+    operator<<(std::ostream& os, const SubdivisionTreeCell& uptc) 
     {
-      os << "UnitPartitionTreeCell(" 
+      os << "SubdivisionTreeCell(" 
          << "block=" << uptc.bounds() << ")";
       return os;
     }
     
     
-    index_type compute_index(const SubdivisionSequence& ss, const BinaryWord& bw, const LatticeRectangle& r)
+    IndexArray 
+    compute_position(const SubdivisionSequence& ss, const BinaryWord& bw, const LatticeRectangle& r)
     {
       IndexArray lower=r.lower();
       IndexArray upper=r.upper();
@@ -271,18 +271,18 @@ namespace Ariadne {
       for(dimension_type i=0; i!=r.dimension(); ++i) {
         assert(lower[i]+1 == upper[i]);
       }
-      return compute_index(lower,r.lower(),r.strides());
+      return lower;
     }
     
       
     LatticeRectangle 
-    compute_block(const UnitPartitionTreeCell& c, 
+    compute_block(const SubdivisionTreeCell& c, 
                   const LatticeRectangle& r)
     {
       IndexArray lower(r.dimension());
       IndexArray upper(r.dimension());
       SizeArray sizes=r.sizes();
-      Rectangle<UnitPartitionTreeCell::dyadic_type> cr=c.bounds();
+      Rectangle<SubdivisionTreeCell::dyadic_type> cr=c.bounds();
       for(dimension_type i=0; i!=r.dimension(); ++i) {
         lower[i]=r.lower_bound(i)+index_type(cr.lower_bound(i)*sizes[i]);
         upper[i]=r.lower_bound(i)+index_type(cr.upper_bound(i)*sizes[i]);

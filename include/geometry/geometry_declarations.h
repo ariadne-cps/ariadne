@@ -35,7 +35,7 @@ namespace Ariadne {
 
     template<typename R> class Rectangle;
     template<typename R> class Polyhedron;
-    template<typename R> class Parallelopiped;
+    template<typename R> class Parallelotope;
     template<typename R> class Simplex;
     
     template<typename R, template<typename> class BS> class ListSet;

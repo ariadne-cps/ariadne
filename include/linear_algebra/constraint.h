@@ -32,8 +32,8 @@
 #include <algorithm>
 #include <ppl.hh>
 
-#include "linear_algebra/vector.h"
-#include "linear_algebra/matrix.h"
+#include "../linear_algebra/vector.h"
+#include "../linear_algebra/matrix.h"
 
 namespace Ariadne {
 namespace LinearAlgebra {

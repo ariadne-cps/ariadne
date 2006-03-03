@@ -1,7 +1,7 @@
 /***************************************************************************
- *            partition_tree_operations.cc
+ *            polyhedron.cc
  *
- *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
+ *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -21,25 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "geometry/partition_tree_operations.h"
+#include "geometry/polyhedron.h"
+#include "geometry/polyhedron.tpl"
 
-Ariadne::sequence<Ariadne::dimension_type>
-Ariadne::Geometry::default_subdivision_coordinates(dimension_type n) {
-  dimension_type coords[n];
-  for(dimension_type i=0; i!=n; ++i) {
-    coords[i]=i;
-  }
-  return sequence<dimension_type>(coords,coords,coords+n);
-}
+namespace Ariadne {
+  namespace Geometry {
 
-Ariadne::dimension_type 
-Ariadne::Geometry::compute_dimension(const sequence<dimension_type>& ss) 
-{
-  Ariadne::dimension_type result=0;
-  for(size_type i=0; i!=ss.body_size()+ss.tail_size(); ++i) {
-    if(ss[i]>=result) {
-      result=ss[i]+1;
-    }
+    template class Polyhedron<Dyadic>;
+
+    template std::ostream& operator<<(std::ostream&, const Polyhedron<Dyadic>&);
+
   }
-  return result;
 }

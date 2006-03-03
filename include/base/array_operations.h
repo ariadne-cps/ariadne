@@ -1,5 +1,5 @@
 /***************************************************************************
- *            grid_operations.h
+ *            array_operations.h
  *
  *  22 June 2005
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
@@ -22,65 +22,63 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file grid_operations.h
- *  \brief Non-templated operations on grids.
+/*! \file array_operations.h
+ *  \brief Operations on arrays.
  */
 
-#ifndef _ARIADNE_GRID_OPERATIONS_H
-#define _ARIADNE_GRID_OPERATIONS_H
+#ifndef _ARIADNE_ARRAY_OPERATIONS_H
+#define _ARIADNE_ARRAY_OPERATIONS_H
 
 #include <vector>
 #include <iosfwd>
 
-#include "base/array.h"
-#include "base/basic_type.h"
-
-#include "geometry/rectangle.h"
+#include "../base/array.h"
+#include "../base/basic_type.h"
 
 namespace Ariadne {
-  namespace Geometry {
-    size_type inner_product(const array<size_type>& a1, const array<size_type>& a2);
+  namespace Base {
+    /*! \brief Inner product. */
+    size_type inner_product(const SizeArray& a1, const SizeArray& a2);
+    /*! \brief Inner product. */
+    index_type inner_product(const IndexArray& a1, const IndexArray& a2);
 
+    /*! \brief Inplace boolean and. */
     BooleanArray& operator&=(BooleanArray& v1, const BooleanArray& v2);
+    /*! \brief Inplace boolean or. */
     BooleanArray& operator|=(BooleanArray& v1, const BooleanArray& v2);
+    /*! \brief Inplace boolean minus. */
     BooleanArray& operator-=(BooleanArray& v1, const BooleanArray& v2);
     
+    /*! \brief Boolean and. */
     BooleanArray operator&(const BooleanArray& v1, const BooleanArray& v2);
+    /*! \brief Boolean or. */
     BooleanArray operator|(const BooleanArray& v1, const BooleanArray& v2);
+    /*! \brief Boolean minus. */
     BooleanArray operator-(const BooleanArray& v1, const BooleanArray& v2);
-    
-    bool lexicographic_order(const IndexArray&, const IndexArray&);
-    bool coordinate_order(const IndexArray&, const IndexArray&);
 
-    /*! Returns true if v1-v2 is all zeros. */
+    /*! \brief True if v1-v2 is all zeros. */
     bool operator<=(const BooleanArray& v1, const BooleanArray& v2);
     
-    /*! Compute the sum of an index array and a size. */
+    
+    /*! \brief Compare two arrays using the lexicographic total ordering. */
+    bool lexicographic_less(const IndexArray&, const IndexArray&);
+    /*! \brief Compare two arrays using the componentwise partial ordering. */
+    bool coordinate_less(const IndexArray&, const IndexArray&);
+
+    /*! \brief Compute the sum of an index array and a size. */
     IndexArray operator+(const IndexArray& l, const SizeArray& s);
 
-    /*! Compute a positive offset from two index sets */
-    SizeArray operator-(const IndexArray& u, const IndexArray& l);
+    /*! \brief Compute a positive offset from two index sets */
+    IndexArray operator-(const IndexArray& u, const IndexArray& l);
    
-    /*! Assigns the max of a and b to a. */
+    /*! \brief Assigns the max of a and b to a. */
     void assign_max(IndexArray& a, const IndexArray& l);
 
-    /*! Assigns the minimum of a and b componentwise to a. */
+    /*! \brief Assigns the minimum of a and b componentwise to a. */
     void assign_min(IndexArray& a, const IndexArray& u);
-
-    /*! Compute strides from a list of sizes. */
-    SizeArray compute_strides(const SizeArray& s);
-
-    /*! Compute the index of a position in a grid. */
-    size_type compute_index(const IndexArray& pos, const IndexArray& lower, const SizeArray& strides);
-
-    /*! Compute the index of a position in a grid. */
-    size_type compute_index(const IndexArray& pos, const SizeArray& strides, const index_type offset);
-
-    /*! Compute the position of an index in a grid. */
-    IndexArray compute_position(size_type index, const IndexArray& lower, const SizeArray& strides);
 
 
   }
 }
 
-#endif /* _ARIADNE_GRID_OPERATIONS_H */
+#endif /* _ARIADNE_ARRAY_OPERATIONS_H */

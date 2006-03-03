@@ -1,5 +1,5 @@
 /***************************************************************************
- *            unit_partition_tree_set.h
+ *            subdivision_tree_set.h
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
@@ -21,37 +21,37 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file unit_partition_tree_set.h
+/*! \file subdivision_tree_set.h
  *  \brief Cuboidal partition trees on a unit cuboid.
  */
 
-#ifndef _ARIADNE_UNIT_PARTITION_TREE_SET_H
-#define _ARIADNE_UNIT_PARTITION_TREE_SET_H
+#ifndef _ARIADNE_SUBDIVISION_TREE_SET_H
+#define _ARIADNE_SUBDIVISION_TREE_SET_H
 
 #include <iosfwd>
 #include <algorithm>
 #include <vector>
 #include <iosfwd>
 
-#include "base/basic_type.h"
-#include "base/array.h"
-#include "base/sequence.h"
-#include "base/interval.h"
-#include "base/binary_word.h"
-#include "base/binary_tree.h"
-#include "base/iterator.h"
-#include "base/utility.h"
+#include "../base/basic_type.h"
+#include "../base/array.h"
+#include "../base/sequence.h"
+#include "../base/interval.h"
+#include "../base/binary_word.h"
+#include "../base/binary_tree.h"
+#include "../base/iterator.h"
+#include "../base/utility.h"
 
-#include "geometry/geometry_declarations.h"
-#include "geometry/rectangle.h"
+#include "../geometry/geometry_declarations.h"
+#include "../geometry/rectangle.h"
 
 namespace Ariadne {
   namespace Geometry {
-    class UnitPartitionTreeCell;
-    class UnitPartitionTree;
-    class UnitPartitionTreeSet;
+    class SubdivisionTreeCell;
+    class SubdivisionTree;
+    class SubdivisionTreeSet;
     
-    std::ostream& operator<<(std::ostream&, const UnitPartitionTreeCell&);
+    std::ostream& operator<<(std::ostream&, const SubdivisionTreeCell&);
     
     class LatticeMaskSet;
     class LatticeRectangle;
@@ -110,14 +110,14 @@ namespace Ariadne {
       BooleanArray _mask;
     };
 
-    class UnitPartitionTreeCell {
+    class SubdivisionTreeCell {
      public:
       typedef double dyadic_type;
 
-      UnitPartitionTreeCell(const SubdivisionSequence& ss, 
+      SubdivisionTreeCell(const SubdivisionSequence& ss, 
                             const BinaryWord& bw);
 
-      bool operator==(const UnitPartitionTreeCell& other) const {
+      bool operator==(const SubdivisionTreeCell& other) const {
         return this->_bounds==other._bounds; }
 
       dimension_type dimension() const { 
@@ -135,14 +135,14 @@ namespace Ariadne {
     
 
 
-    class UnitPartitionTree {
+    class SubdivisionTree {
      public:
       typedef binary_constructor_iterator<BinaryTree::const_iterator, 
-                                          UnitPartitionTreeCell, 
+                                          SubdivisionTreeCell, 
                                           SubdivisionSequence> const_iterator;
       typedef const_iterator iterator;
      
-      UnitPartitionTree(const SubdivisionSequence& ss, 
+      SubdivisionTree(const SubdivisionSequence& ss, 
                         const BinaryTree& bt);
 
       /*! \brief The space dimension of the tree. */
@@ -173,45 +173,45 @@ namespace Ariadne {
       BinaryTree _tree;
     };
     
-    class UnitPartitionTreeSetIterator 
-      : public boost::iterator_adaptor<UnitPartitionTreeSetIterator,
+    class SubdivisionTreeSetIterator 
+      : public boost::iterator_adaptor<SubdivisionTreeSetIterator,
                                        mask_iterator<BinaryTree::const_iterator, BooleanArray::const_iterator>,
-                                       UnitPartitionTreeCell,
+                                       SubdivisionTreeCell,
                                        boost::use_default,
-                                       UnitPartitionTreeCell>
+                                       SubdivisionTreeCell>
       
     {
       typedef mask_iterator<BinaryTree::const_iterator, BooleanArray::const_iterator> Base;
      public:
-      UnitPartitionTreeSetIterator(const SubdivisionSequence& ss,
+      SubdivisionTreeSetIterator(const SubdivisionSequence& ss,
                                    BinaryTree::const_iterator ti, 
                                    BooleanArray::const_iterator mi, 
                                    BooleanArray::const_iterator me) 
-      //        : UnitPartitionTreeSetIterator::iterator_adaptor_(mask_iterator<BinaryTree::const_iterator, BooleanArray::const_iterator>(ti,mi,me)),
-        : UnitPartitionTreeSetIterator::iterator_adaptor_(Base(ti,mi,me)),
+      //        : SubdivisionTreeSetIterator::iterator_adaptor_(mask_iterator<BinaryTree::const_iterator, BooleanArray::const_iterator>(ti,mi,me)),
+        : SubdivisionTreeSetIterator::iterator_adaptor_(Base(ti,mi,me)),
           _subdivisions(ss)
       { }
      private:
       friend class boost::iterator_core_access;
-      UnitPartitionTreeCell dereference() const { 
-        return UnitPartitionTreeCell(_subdivisions,*this->base_reference()); 
+      SubdivisionTreeCell dereference() const { 
+        return SubdivisionTreeCell(_subdivisions,*this->base_reference()); 
       }
      private:
       SubdivisionSequence _subdivisions;
     };
   
-    class UnitPartitionTreeSet {
+    class SubdivisionTreeSet {
      public:
       typedef binary_constructor_iterator<MaskedBinaryTree::const_iterator,
-                                          UnitPartitionTreeCell,
+                                          SubdivisionTreeCell,
                                           SubdivisionSequence> const_iterator;
       typedef const_iterator iterator;
      
-      UnitPartitionTreeSet(const SubdivisionSequence& ss);
-      UnitPartitionTreeSet(const SubdivisionSequence& ss, 
+      SubdivisionTreeSet(const SubdivisionSequence& ss);
+      SubdivisionTreeSet(const SubdivisionSequence& ss, 
                            const BinaryTree& bt,
                            const BooleanArray& ba); 
-      UnitPartitionTreeSet(const LatticeMaskSet& ms); 
+      SubdivisionTreeSet(const LatticeMaskSet& ms); 
 
      /*! \brief The space dimension of the tree. */
       dimension_type dimension() const { return _subdivisions.dimension(); }
@@ -231,7 +231,7 @@ namespace Ariadne {
       /*! \brief The number of cells in the tree. */
       size_type capacity() const { return _words.capacity(); }
 
-      /*! \brief The number of cells in the UnitPartitionTreeSet. */
+      /*! \brief The number of cells in the SubdivisionTreeSet. */
       size_type size() const { return _words.size(); }
       
       /*! \brief The depth of the smallest cell in the set. */
@@ -251,10 +251,13 @@ namespace Ariadne {
     };
     
 
-    index_type compute_index(const SubdivisionSequence& ss, const BinaryWord& bw,const LatticeRectangle& r);
+    IndexArray 
+    compute_position(const SubdivisionSequence& ss, 
+                     const BinaryWord& bw,
+                     const LatticeRectangle& r);
       
     LatticeRectangle 
-    compute_block(const UnitPartitionTreeCell& c, 
+    compute_block(const SubdivisionTreeCell& c, 
                   const LatticeRectangle& r);
 
   }
@@ -262,4 +265,4 @@ namespace Ariadne {
   
 }
 
-#endif /* _ARIADNE_UNIT_PARTITION_TREE_SET_H */
+#endif /* _ARIADNE_SUBDIVISION_TREE_SET_H */

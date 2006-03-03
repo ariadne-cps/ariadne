@@ -39,28 +39,28 @@
 #include <vector>
 #include <valarray>
 
-#include "base/utility.h"
-#include "base/array.h"
-#include "base/interval.h"
+#include "../base/utility.h"
+#include "../base/array.h"
+#include "../base/interval.h"
 
-#include "linear_algebra/vector.h"
-#include "linear_algebra/matrix.h"
+#include "../linear_algebra/vector.h"
+#include "../linear_algebra/matrix.h"
 
-#include "geometry/list_set.h"
-#include "geometry/grid_set.h"
+#include "../geometry/list_set.h"
+#include "../geometry/grid_set.h"
 
-#include "evaluation/evaluation_declarations.h"
-#include "evaluation/map.h"
+#include "../evaluation/evaluation_declarations.h"
+#include "../evaluation/map.h"
 
 namespace Ariadne {
   namespace Evaluation {
 
    
     template<typename R>
-    Geometry::Parallelopiped<R> 
-    apply(const Map<R>& f, const Geometry::Parallelopiped<R>& p) 
+    Geometry::Parallelotope<R> 
+    apply(const Map<R>& f, const Geometry::Parallelotope<R>& p) 
     {
-      //std::cerr << "apply(const Map&, const Parallelopiped&)" << std::endl;
+      //std::cerr << "apply(const Map&, const Parallelotope&)" << std::endl;
       const size_type m=p.dimension();
       const size_type n=p.dimension();
       
@@ -91,7 +91,7 @@ namespace Ariadne {
         new_cuboid_sup=std::max( new_cuboid_sup, R(abs(new_cuboid[j].upper())) );
       }
       
-      Geometry::Parallelopiped<R> result(img_centre,img_generators);
+      Geometry::Parallelotope<R> result(img_centre,img_generators);
       return result;
     }
 
@@ -128,8 +128,8 @@ namespace Ariadne {
         for(gms_const_iterator iter=found.begin(); iter!=found.end(); ++iter) {
           ++size;
           Ariadne::Geometry::Rectangle<R> r=*iter;
-          Ariadne::Geometry::Parallelopiped<R> pp(r);
-          Ariadne::Geometry::Parallelopiped<R> fp(Ariadne::Evaluation::apply(f,pp));
+          Ariadne::Geometry::Parallelotope<R> pp(r);
+          Ariadne::Geometry::Parallelotope<R> fp(Ariadne::Evaluation::apply(f,pp));
           Geometry::GridCellListSet<R> oai=over_approximation_of_intersection(fp,bb,g);
           image.adjoin(oai);
         }

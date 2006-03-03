@@ -25,7 +25,7 @@
 #include "base/numerical_type.h"
 
 #include "geometry/rectangle.h"
-#include "geometry/parallelopiped.h"
+#include "geometry/parallelotope.h"
 #include "geometry/list_set.h"
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
@@ -38,9 +38,9 @@
 typedef Ariadne::Geometry::Point<Real> RPoint;
 typedef Ariadne::Interval<Real> RInterval;
 typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
-typedef Ariadne::Geometry::Parallelopiped<Real> RParallelopiped;
+typedef Ariadne::Geometry::Parallelotope<Real> RParallelotope;
 typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Rectangle> RRectangleListSet;
-typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Parallelopiped> RParallelopipedListSet;
+typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Parallelotope> RParallelotopeListSet;
 typedef Ariadne::Geometry::GridRectangleListSet<Real> RGridRectangleListSet;
 typedef Ariadne::Geometry::GridCellListSet<Real> RGridCellListSet;
 typedef Ariadne::Geometry::GridMaskSet<Real> RGridMaskSet;
@@ -94,16 +94,16 @@ void export_list_set() {
     .def(str(self))    // __str__
   ;
   
-  class_<RParallelopipedListSet>("ParallelopipedListSet",init<int>())
-    .def(init<RParallelopiped>())
-    .def(init<RParallelopipedListSet>())
-    .def("dimension", &RParallelopipedListSet::dimension)
-    .def("push_back", &RParallelopipedListSet::push_back)
-    .def("size", &RParallelopipedListSet::size)
-    .def("__len__", &RParallelopipedListSet::size)
-    .def("__getitem__", &RParallelopipedListSet::get, return_value_policy<copy_const_reference>())
-    .def("__setitem__", &RParallelopipedListSet::set)
-    .def("__iter__", iterator<RParallelopipedListSet>())
+  class_<RParallelotopeListSet>("ParallelotopeListSet",init<int>())
+    .def(init<RParallelotope>())
+    .def(init<RParallelotopeListSet>())
+    .def("dimension", &RParallelotopeListSet::dimension)
+    .def("push_back", &RParallelotopeListSet::push_back)
+    .def("size", &RParallelotopeListSet::size)
+    .def("__len__", &RParallelotopeListSet::size)
+    .def("__getitem__", &RParallelotopeListSet::get, return_value_policy<copy_const_reference>())
+    .def("__setitem__", &RParallelotopeListSet::set)
+    .def("__iter__", iterator<RParallelotopeListSet>())
     .def(str(self))    // __str__
   ;
 

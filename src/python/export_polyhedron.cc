@@ -27,7 +27,7 @@
 #include "base/numerical_type.h"
 
 #include "geometry/rectangle.h"
-#include "geometry/parallelopiped.h"
+#include "geometry/parallelotope.h"
 #include "geometry/polyhedron.h"
 
 #include <boost/python.hpp>
@@ -39,7 +39,7 @@ typedef Ariadne::LinearAlgebra::vector<Real> RVector;
 
 typedef Ariadne::Geometry::Point<Real> RPoint;
 typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
-typedef Ariadne::Geometry::Parallelopiped<Real> RParallelopiped;
+typedef Ariadne::Geometry::Parallelotope<Real> RParallelotope;
 typedef Ariadne::Geometry::Polyhedron<Real> RPolyhedron;
 
 typedef std::vector<RPoint> RPointList;
@@ -81,7 +81,7 @@ void export_polyhedron() {
     .def(init<RPointList>())
     .def(init<RPolyhedron>())
     .def(init<RRectangle>())
-    .def(init<RParallelopiped>())
+    .def(init<RParallelotope>())
     .def("dimension", &RPolyhedron::dimension)
     .def("vertices", &RPolyhedron::vertices)
     .def("bounding_box", &RPolyhedron::bounding_box)

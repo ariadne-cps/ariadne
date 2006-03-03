@@ -1,5 +1,5 @@
 /***************************************************************************
- *            python/export_grid.cc
+ *            python/export_grid_set.cc
  *
  *  21 October 2005
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
@@ -26,7 +26,7 @@
 
 #include "linear_algebra/linear_algebra.h"
 
-#include "geometry/parallelopiped.h"
+#include "geometry/parallelotope.h"
 #include "geometry/list_set.h"
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
@@ -45,9 +45,9 @@ using Ariadne::Geometry::LatticeRectangle;
 
 typedef Ariadne::Geometry::Point<Real> RPoint;
 typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
-typedef Ariadne::Geometry::Parallelopiped<Real> RParallelopiped;
+typedef Ariadne::Geometry::Parallelotope<Real> RParallelotope;
 typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Rectangle> RRectangleListSet;
-typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Parallelopiped> RParallelopipedListSet;
+typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Parallelotope> RParallelotopeListSet;
 typedef Ariadne::Geometry::PartitionTreeSet<Real> RPartitionTreeSet;
 
 typedef Ariadne::Geometry::Grid<Real> RGridBase;
@@ -87,13 +87,13 @@ struct RGrid : RGridBase, wrapper<RGridBase>
 inline RGridRectangle over_approximation_rectangle(const RRectangle& r, const RFiniteGrid& g) {
   return Ariadne::Geometry::over_approximation(r,g);
 }
-inline RGridCellListSet over_approximation_parallelopiped(const RParallelopiped& p, const RFiniteGrid& g) {
+inline RGridCellListSet over_approximation_parallelotope(const RParallelotope& p, const RFiniteGrid& g) {
   return Ariadne::Geometry::over_approximation(p,g);
 }
 inline RGridMaskSet over_approximation_rectangle_list_set(const RRectangleListSet& rls, const RFiniteGrid& g) {
   return Ariadne::Geometry::over_approximation(rls,g);
 }
-inline RGridMaskSet over_approximation_parallelopiped_list_set(const RParallelopipedListSet& pls, const RFiniteGrid& g) {
+inline RGridMaskSet over_approximation_parallelotope_list_set(const RParallelotopeListSet& pls, const RFiniteGrid& g) {
   return Ariadne::Geometry::over_approximation(pls,g);
 }
 
@@ -123,7 +123,7 @@ inline void grid_mask_set_adjoin_grid_mask_set(RGridMaskSet& gms, const RGridMas
 }
 
 
-void export_grid() {
+void export_grid_set() {
   class_<LatticeRectangle>("LatticeRectangle",init<IndexArray,IndexArray>())
     .def("dimension", &RGridCell::dimension)
     .def(str(self))    // __str__
@@ -216,7 +216,7 @@ void export_grid() {
   def("regular_intersection",&grid_mask_set_regular_intersection);
     
   def("over_approximation",&over_approximation_rectangle);
-  def("over_approximation",&over_approximation_parallelopiped);
+  def("over_approximation",&over_approximation_parallelotope);
   def("over_approximation",&over_approximation_rectangle_list_set);
-  def("over_approximation",&over_approximation_parallelopiped_list_set);
+  def("over_approximation",&over_approximation_parallelotope_list_set);
 }

@@ -52,7 +52,7 @@ A[0,1]=0.5
 A[1,0]=0.5
 A[1,1]=0.6
 
-p=Parallelopiped(c,A)
+p=Parallelotope(c,A)
 
 print "\n\n", p, "\n\n"
 sp=p.subdivide()
@@ -101,7 +101,7 @@ for rect in grls:
   print rect
 
   
-eps=EpsPlot("tg1.eps",bb)
+eps=EpsPlot("gr1.eps",bb)
 eps.set_fill_colour("blue")
 eps.write(over_approximation(p.bounding_box(),g))
 eps.set_fill_colour("red")
@@ -110,7 +110,7 @@ eps.set_fill_colour("green")
 eps.write(sp)
 eps.close()
 
-eps=EpsPlot("tg2.eps",bb)
+eps=EpsPlot("gr2.eps",bb)
 eps.set_fill_colour("red")
 eps.write(afp)
 eps.set_fill_colour("green")
@@ -119,7 +119,7 @@ eps.set_fill_colour("white")
 eps.write(sp)
 eps.close()
 
-eps=EpsPlot("tg3.eps",bb)
+eps=EpsPlot("gr3.eps",bb)
 eps.set_fill_colour("white")
 eps.write(gms.bounding_box())
 eps.set_fill_colour("magenta")
@@ -137,7 +137,7 @@ grls=GridRectangleListSet(pts)
 gms=GridMaskSet(grls)
 gms.clear()
 gms.adjoin(grls[0*(len(grls)-6)])
-eps=EpsPlot("tg4.eps",bb)
+eps=EpsPlot("gr4.eps",bb)
 eps.set_fill_colour("magenta")
 eps.write(grls)
 eps.set_fill_colour("green")

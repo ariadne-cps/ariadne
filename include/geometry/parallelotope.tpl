@@ -1,5 +1,5 @@
 /***************************************************************************
- *            parallelopiped.tpl
+ *            parallelotope.tpl
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -31,27 +31,26 @@
 #include <vector>
 #include <valarray>
 
-#include "base/utility.h"
-#include "base/interval.h"
+#include "../base/utility.h"
+#include "../base/interval.h"
 
-#include "linear_algebra/vector.h"
-#include "linear_algebra/matrix.h"
-#include "linear_algebra/constraint.h"
+#include "../linear_algebra/vector.h"
+#include "../linear_algebra/matrix.h"
+#include "../linear_algebra/constraint.h"
 
-#include "geometry/point.h"
-#include "geometry/rectangle.h"
-#include "geometry/list_set.h"
-#include "geometry/unit_grid_set.h" // For LatticeRectangle
-#include "geometry/parallelopiped.h"
-#include "geometry/polyhedron.h"
-#include "geometry/geometry_declarations.h"
+#include "../geometry/lattice_set.h" 
+#include "../geometry/point.h"
+#include "../geometry/rectangle.h"
+#include "../geometry/list_set.h"
+#include "../geometry/parallelotope.h"
+#include "../geometry/polyhedron.h"
 
 namespace Ariadne {
   namespace Geometry {
 
     template<typename R>
     Rectangle<R> 
-    Parallelopiped<R>::bounding_box() const 
+    Parallelotope<R>::bounding_box() const 
     {
       Vector offset(this->dimension());
       for(size_type i=0; i!=this->dimension(); ++i) {
@@ -65,12 +64,12 @@ namespace Ariadne {
       
     
     template <typename R>
-    Parallelopiped<R>::operator Polyhedron<R>() const 
+    Parallelotope<R>::operator Polyhedron<R>() const 
     {
       using namespace ::Ariadne::LinearAlgebra;
       
-      typedef typename Parallelopiped<R>::Real Real;
-      typedef typename Parallelopiped<R>::State State;
+      typedef typename Parallelotope<R>::Real Real;
+      typedef typename Parallelotope<R>::State State;
       
       size_type n = this->dimension();
       
@@ -97,11 +96,11 @@ namespace Ariadne {
 
 
     template <typename R>
-    ListSet<R,Parallelopiped>
-    Parallelopiped<R>::subdivide() const 
+    ListSet<R,Parallelotope>
+    Parallelotope<R>::subdivide() const 
     {
       size_type n=this->dimension();
-      ListSet<R,Geometry::Parallelopiped> result(this->dimension());
+      ListSet<R,Geometry::Parallelotope> result(this->dimension());
       Matrix new_generators=this->generators()/2;
       
       State first_centre=this->centre();
@@ -123,7 +122,7 @@ namespace Ariadne {
             new_centre=new_centre+this->generator(i);
           }
         }
-        result.adjoin(Parallelopiped(new_centre,new_generators));
+        result.adjoin(Parallelotope(new_centre,new_generators));
       }
       return result;
     }
@@ -132,7 +131,7 @@ namespace Ariadne {
 
     template<typename R>
     void 
-    Parallelopiped<R>::compute_linear_inequalities(Matrix& A, Vector& o, Vector& b) const
+    Parallelotope<R>::compute_linear_inequalities(Matrix& A, Vector& o, Vector& b) const
     {
       using namespace ::Ariadne::LinearAlgebra;
       size_type n=this->dimension();
@@ -148,7 +147,7 @@ namespace Ariadne {
       
     template<>
     void 
-    Parallelopiped<Dyadic>::compute_linear_inequalities(Matrix& A, Vector& o, Vector& b) const
+    Parallelotope<Dyadic>::compute_linear_inequalities(Matrix& A, Vector& o, Vector& b) const
     {
       using namespace ::Ariadne::LinearAlgebra;
       typedef Dyadic Real;
@@ -183,8 +182,8 @@ namespace Ariadne {
   
   
     template<typename R>
-    typename Parallelopiped<R>::Vector 
-    Parallelopiped<R>::coordinates(const State& s) const {
+    typename Parallelotope<R>::Vector 
+    Parallelotope<R>::coordinates(const State& s) const {
       Vector diff = s-_centre;
       Matrix inv = LinearAlgebra::inverse(_generators);
       return prod(inv,diff);
@@ -194,10 +193,10 @@ namespace Ariadne {
 
     template <typename R>
     std::ostream&
-    operator<<(std::ostream& os, const Parallelopiped<R>& p) 
+    operator<<(std::ostream& os, const Parallelotope<R>& p) 
     {
       if(p.dimension() > 0) {
-        os << "Parallelopiped(\n  centre=" << p.centre();
+        os << "Parallelotope(\n  centre=" << p.centre();
         os << "\n  directions=" << p.generators();
         os << "\n) ";
       }
@@ -207,7 +206,7 @@ namespace Ariadne {
     
     template <typename R>
     std::istream& 
-    operator>>(std::istream& is, Parallelopiped<R>& p)
+    operator>>(std::istream& is, Parallelotope<R>& p)
     {
       throw std::domain_error("Not implemented");
     }

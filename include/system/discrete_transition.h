@@ -25,7 +25,7 @@
 #ifndef _DISCRETE_TRANSITION_H
 #define _DISCRETE_TRANSITION_H
 
-#include "discrete_location.h"
+#include "../system/discrete_location.h"
 
 namespace Ariadne {
 namespace HybridDefinitions {

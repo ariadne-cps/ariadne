@@ -39,12 +39,12 @@ using Ariadne::Base::BinaryTree;
 
 void export_point();
 void export_rectangle();
-void export_parallelopiped();
+void export_parallelotope();
 void export_simplex();
 void export_polyhedron();
 void export_list_set();
-void export_grid();
-void export_partition_tree();
+void export_grid_set();
+void export_partition_tree_set();
 
 void export_postscript_output();
 
@@ -60,12 +60,12 @@ BOOST_PYTHON_MODULE(geometry)
 {
   export_point();
   export_rectangle();
-  export_parallelopiped();
+  export_parallelotope();
   export_simplex();
   export_polyhedron();
   export_list_set();
-  export_grid();
-  export_partition_tree();
+  export_grid_set();
+  export_partition_tree_set();
   
   export_postscript_output();
 

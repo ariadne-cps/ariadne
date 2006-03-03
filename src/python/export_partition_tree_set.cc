@@ -1,5 +1,5 @@
 /***************************************************************************
- *            python/export_partition_tree.cc
+ *            python/export_partition_tree_set.cc
  *
  *  21 October 2005
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
@@ -70,7 +70,7 @@ using boost::python::self_ns::str;
 RRectangle convert_to_rectangle(const RPartitionTreeCell& ptc) {
   return RRectangle(ptc); }
 
-void export_partition_tree() {
+void export_partition_tree_set() {
   class_<SubdivisionSequence>("SubdivisionSequence",init<unsigned int>())
     .def("dimension", &SubdivisionSequence::dimension)
     .def("__getitem__", &SubdivisionSequence::get)

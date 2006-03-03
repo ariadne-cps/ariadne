@@ -23,7 +23,7 @@
  */
  
 #include "geometry/rectangle.h"
-#include "geometry/parallelopiped.h"
+#include "geometry/parallelotope.h"
 #include "geometry/list_set.h"
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
@@ -35,9 +35,9 @@
 typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
 typedef Ariadne::Geometry::GridRectangle<Real> RGridRectangle;
 typedef Ariadne::Geometry::GridCell<Real> RGridCell;
-typedef Ariadne::Geometry::Parallelopiped<Real> RParallelopiped;
+typedef Ariadne::Geometry::Parallelotope<Real> RParallelotope;
 typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Rectangle> RRectangleListSet;
-typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Parallelopiped> RParallelopipedListSet;
+typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Parallelotope> RParallelotopeListSet;
 typedef Ariadne::Geometry::GridMaskSet<Real> RGridMaskSet;
 typedef Ariadne::Geometry::GridCellListSet<Real> RGridCellListSet;
 typedef Ariadne::Geometry::GridRectangleListSet<Real> RGridRectangleListSet;
@@ -49,9 +49,9 @@ using Ariadne::Postscript::epsfstream;
 inline void write_rectangle(epsfstream& eps, const RRectangle& r) { eps << r; }
 inline void write_grid_rectangle(epsfstream& eps, const RGridRectangle& r) { eps << RRectangle(r); }
 inline void write_grid_cell(epsfstream& eps, const RGridCell& r) { eps << RRectangle(r); }
-inline void write_parallelopiped(epsfstream& eps, const RParallelopiped& p) { eps << p; }
+inline void write_parallelotope(epsfstream& eps, const RParallelotope& p) { eps << p; }
 inline void write_rectangle_list_set(epsfstream& eps, const RRectangleListSet& r) { eps << r; }
-inline void write_parallelopiped_list_set(epsfstream& eps, const RParallelopipedListSet& s) { eps << s; }
+inline void write_parallelotope_list_set(epsfstream& eps, const RParallelotopeListSet& s) { eps << s; }
 inline void write_grid_mask_set(epsfstream& eps, const RGridMaskSet& s) { eps << s; }
 inline void write_grid_cell_list_set(epsfstream& eps, const RGridCellListSet& s) { eps << s; }
 inline void write_grid_rectangle_list_set(epsfstream& eps, const RGridRectangleListSet& s) { eps << s; }
@@ -81,9 +81,9 @@ void export_postscript_output()
     .def("write",&write_rectangle)
     .def("write",&write_grid_rectangle)
     .def("write",&write_grid_cell)
-    .def("write",&write_parallelopiped)
+    .def("write",&write_parallelotope)
     .def("write",&write_rectangle_list_set)
-    .def("write",&write_parallelopiped_list_set)
+    .def("write",&write_parallelotope_list_set)
     .def("write",&write_grid_mask_set)
     .def("write",&write_grid_cell_list_set)
     .def("write",&write_grid_rectangle_list_set)

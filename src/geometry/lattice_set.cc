@@ -1,5 +1,5 @@
 /***************************************************************************
- *            unit_grid_set.cc
+ *            lattice_set.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
@@ -23,13 +23,41 @@
 
 #include <iostream>
 
-#include "geometry/unit_grid_set.h"
-#include "geometry/grid_operations.h"
+#include "base/array_operations.h"
+#include "geometry/lattice_set.h"
 
 namespace Ariadne {
   namespace Geometry {
     
-    
+    SizeArray
+    LatticeRectangle::sizes() const
+    {
+      SizeArray result(this->dimension());
+      for(dimension_type i=0; i!=this->dimension(); ++i) {
+        result[i]=size_type(this->_upper[i]-this->_lower[i]);
+      }
+      return result;
+    }
+
+    SizeArray
+    LatticeRectangle::strides() const
+    {
+      SizeArray result(this->dimension()+1);
+      result[0]=1;
+      for(dimension_type i=0; i!=this->dimension(); ++i) {
+        result[i+1]=size_type(this->_upper[i]-this->_lower[i])*result[i];
+      }
+      return result;
+    }
+
+    size_type
+    LatticeRectangle::size() const
+    {
+      return this->strides()[this->dimension()];
+    }
+
+
+
     LatticeRectangle
     LatticeTransformation::operator() (const LatticeCell& c) const
     {
@@ -148,6 +176,47 @@ namespace Ariadne {
       _mask=BooleanArray(_mask.size(),false);
     }
 
+
+
+    /* Compute the index of a position in a grid. */
+    size_type
+    LatticeMaskSet::index(const IndexArray& pos) const
+    {
+      size_type result=0;
+      dimension_type n=pos.size();
+      for(dimension_type i=0; i!=n; ++i) {
+        result += size_type(pos[i]-this->_lower[i])*this->_strides[i];
+      }
+      return result;
+    }
+
+/*
+    size_type
+    LatticeMaskSet::index(const IndexArray& pos) const
+    {
+      index_type result=this->_origin_index;
+      dimension_type n=pos.size();
+      for(dimension_type i=0; i!=n; ++i) {
+        result += pos[i]*this->_strides[i];
+      }
+      return size_type(result);
+    }
+*/
+
+    IndexArray
+    LatticeMaskSet::position(size_type index) const
+    {
+      IndexArray result(this->dimension());
+      dimension_type n=this->dimension();
+      for(dimension_type i=n-1; i!=0; --i) {
+        result[i] = index/this->_strides[i]+this->_lower[i];
+        index = index%this->_strides[i];
+      }
+      result[0]=index;
+      return result;
+    }
+
+
     void 
     LatticeMaskSet::adjoin(const LatticeRectangle& r) {
       assert(subset(r,this->bounds()));
@@ -166,8 +235,8 @@ namespace Ariadne {
       }
 
       if(n==2) {
-        SizeArray rsizes=rupper-rlower;
-        size_type index=compute_index(rlower,glower,gstrides);
+        SizeArray rsizes=r.sizes();
+        size_type index=this->index(rlower);
         for(size_type loop_end=index+rsizes[1]*gstrides[1]; index!=loop_end; index+=gstrides[1]-rsizes[0]) {
           for(size_type inner_loop_end=index+rsizes[0]; index!=inner_loop_end; index+=1) {
             _mask[index]=true;
@@ -181,8 +250,8 @@ namespace Ariadne {
       }
 
       /* dim>2 */
-      SizeArray rsizes=rupper-rlower;
-      size_type index=compute_index(rlower,glower,gstrides);
+      SizeArray rsizes=r.sizes();
+      size_type index=this->index(rlower);
       IndexArray rposition=rlower;
 
       while(rposition[n-1]!=rupper[n-1]) {
@@ -329,7 +398,7 @@ namespace Ariadne {
     {
       //std::cerr << "subset(const LatticeCell& c, const LatticeMaskSet& ms)" << std::endl; 
       //std::cerr << "LatticeCell: " << c << std::endl;
-      return ms.mask()[compute_index(c.lower(),ms.lower(),ms.strides())];
+      return ms.mask()[ms.index(c.lower())];
     }
     
     bool 

@@ -26,9 +26,9 @@
 #define _AFFINE_VECTOR_FIELD_H
 
 
-#include "vector_field.h"
-#include "affine_map.h"
-#include "approx_type.h"
+#include "../vector_field.h"
+#include "../affine_map.h"
+#include "../approx_type.h"
 
 namespace Ariadne {
 namespace VectorField{

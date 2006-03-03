@@ -34,7 +34,7 @@
 #include <vector>
 #include <iostream>
 
-#include "geometry/geometry_declarations.h"
+#include "../geometry/geometry_declarations.h"
 
 namespace Ariadne {
   namespace Geometry {

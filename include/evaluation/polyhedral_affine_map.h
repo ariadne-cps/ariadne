@@ -25,12 +25,12 @@
 #ifndef _POLY_MAP_H
 #define _POLY_MAP_H
 
-#include "polyhedron.h"
-#include "affine_map.h"
+#include "../geometry/polyhedron.h"
+#include "../evaluation/affine_map.h"
 
-#include "constraint.h"
-#include "generator.h"
-#include "denotable_set.h"
+#include "../geometry/constraint.h"
+#include "../geometry/generator.h"
+#include "../geometry/denotable_set.h"
 
 namespace Ariadne {
 namespace Map{

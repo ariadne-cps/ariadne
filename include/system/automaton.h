@@ -29,8 +29,11 @@
 #include <vector>
 #include <iostream>
 
-#include "discrete_trans.h"
-#include "discrete_location.h"
+#include "../system/discrete_transition.h"
+#include "../system/discrete_location.h"
+
+#include "../evaluation/solver.h"
+
 
 namespace Ariadne {  
 namespace HybridDefinitions {
@@ -40,13 +43,6 @@ namespace HybridDefinitions {
  */  
 typedef size_t HybridAutomatonID;
   
-}
-}
-
-#include "solver.h"
-
-namespace Ariadne {  
-namespace HybridDefinitions {
 
 template < typename LDT >
 class HybridAutomaton;

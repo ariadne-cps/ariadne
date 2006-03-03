@@ -33,14 +33,14 @@
 #include <vector>
 #include <iostream>
 
-#include "base/basic_type.h"
-#include "base/binary_word.h"
-#include "base/binary_tree.h"
-#include "base/iterator.h"
-#include "base/utility.h"
+#include "../base/basic_type.h"
+#include "../base/binary_word.h"
+#include "../base/binary_tree.h"
+#include "../base/iterator.h"
+#include "../base/utility.h"
 
-#include "geometry/geometry_declarations.h"
-#include "geometry/unit_partition_tree_set.h"
+#include "../geometry/geometry_declarations.h"
+#include "../geometry/subdivision_tree_set.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -145,10 +145,10 @@ namespace Ariadne {
      public:
       typedef R real_type;
       typedef Point<R> state_type;
-      typedef UnitPartitionTreeCell::dyadic_type dyadic_type;
+      typedef SubdivisionTreeCell::dyadic_type dyadic_type;
 
       /*!\brief Construct from a rectangle, and a unit partition tree cell. */
-      PartitionTreeCell(const Rectangle<R>& r, const UnitPartitionTreeCell& c)
+      PartitionTreeCell(const Rectangle<R>& r, const SubdivisionTreeCell& c)
         : _bounding_box(r), _unit_cell(c)
       { assert(r.dimension()==c.dimension()); }
 
@@ -169,7 +169,7 @@ namespace Ariadne {
         return this->_bounding_box; }
 
       /*!\brief The cell in a unit box. */
-      const UnitPartitionTreeCell& unit_cell() const { 
+      const SubdivisionTreeCell& unit_cell() const { 
         return this->_unit_cell; }
 
       /*!\brief The dimension of the cell. */
@@ -180,7 +180,7 @@ namespace Ariadne {
       operator Rectangle<R>() const;
      private:
       const Rectangle<R> _bounding_box;
-      UnitPartitionTreeCell _unit_cell;
+      SubdivisionTreeCell _unit_cell;
     };
 
 
@@ -193,7 +193,7 @@ namespace Ariadne {
      public:
       //      typedef PartitionTreeIterator<R> iterator;
       //      typedef PartitionTreeIterator<R> const_iterator;
-      typedef binary_constructor_iterator< UnitPartitionTree::const_iterator,
+      typedef binary_constructor_iterator< SubdivisionTree::const_iterator,
                                            PartitionTreeCell<R>,
                                            Rectangle<R> > const_iterator;
       typedef const_iterator iterator;
@@ -210,7 +210,7 @@ namespace Ariadne {
       const Rectangle<R>& bounding_box() const { return _bounding_box; }
 
       /*! \brief The underlying bounding box. */
-      const UnitPartitionTree& unit_tree() const { return _unit_tree; }
+      const SubdivisionTree& unit_tree() const { return _unit_tree; }
 
       /*! \brief The space dimension of the tree. */
       dimension_type dimension() const { return _unit_tree.dimension(); }
@@ -233,7 +233,7 @@ namespace Ariadne {
       const_iterator end() const { return const_iterator(_bounding_box,_unit_tree.end()); }
      private:
       Rectangle<R> _bounding_box;
-      UnitPartitionTree _unit_tree;
+      SubdivisionTree _unit_tree;
     };
 
 
@@ -244,7 +244,7 @@ namespace Ariadne {
      public:
       //      typedef PartitionTreeSetIterator<R> iterator;
       //      typedef PartitionTreeSetIterator<R> const_iterator;
-      typedef binary_constructor_iterator< UnitPartitionTreeSet::const_iterator,
+      typedef binary_constructor_iterator< SubdivisionTreeSet::const_iterator,
                                            PartitionTreeCell<R>,
                                            Rectangle<R> > const_iterator;         
       typedef const_iterator iterator;
@@ -282,7 +282,7 @@ namespace Ariadne {
       const Rectangle<R>& bounding_box() const { return _bounding_box; }
 
       /*! \brief The bounding box. */
-      const UnitPartitionTreeSet& unit_set() const { return _unit_set; }
+      const SubdivisionTreeSet& unit_set() const { return _unit_set; }
 
       /*! \brief The space dimension of the set. */
       size_type dimension() const { return _unit_set.dimension(); }
@@ -322,7 +322,7 @@ namespace Ariadne {
       const_iterator end() const { return const_iterator(_bounding_box,_unit_set.end()); }
      private:
       Rectangle<R> _bounding_box;
-      UnitPartitionTreeSet _unit_set;
+      SubdivisionTreeSet _unit_set;
     };
 
   }

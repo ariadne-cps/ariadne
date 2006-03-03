@@ -39,7 +39,7 @@ using boost::python::copy_const_reference;
 typedef Ariadne::Interval<Real> RInterval;
 typedef Ariadne::Geometry::Point<Real> RPoint;
 typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
-typedef Ariadne::Geometry::Parallelopiped<Real> RParallelopiped;
+typedef Ariadne::Geometry::Parallelotope<Real> RParallelotope;
 typedef Ariadne::LinearAlgebra::matrix<Real> RMatrix;
 typedef Ariadne::LinearAlgebra::matrix<RInterval> IMatrix;
 typedef Ariadne::Evaluation::Map<Real> RMap;
@@ -47,7 +47,7 @@ typedef Ariadne::Evaluation::HenonMap<Real> RHenonMap;
 
 typedef RPoint (RHenonMap::* PointMap) (const RPoint&) const;
 typedef RRectangle (RHenonMap::* RectangleMap) (const RRectangle&) const;
-typedef RParallelopiped (RHenonMap::* ParallelopipedMap) (const RParallelopiped&) const;
+typedef RParallelotope (RHenonMap::* ParallelotopeMap) (const RParallelotope&) const;
 typedef RMatrix (RHenonMap::* PointDerivative) (const RPoint&) const;
 typedef IMatrix (RHenonMap::* RectangleDerivative) (const RRectangle&) const;
 
@@ -57,10 +57,10 @@ void export_henon_map() {
     .def("result_dimension", &RHenonMap::result_dimension)
     .def("__call__", PointMap(&RHenonMap::apply))
     .def("__call__", RectangleMap(&RHenonMap::apply))
-    .def("__call__", ParallelopipedMap(&RHenonMap::apply))
+    .def("__call__", ParallelotopeMap(&RHenonMap::apply))
     .def("apply", PointMap(&RHenonMap::apply))
     .def("apply", RectangleMap(&RHenonMap::apply))
-    .def("apply", ParallelopipedMap(&RHenonMap::apply))
+    .def("apply", ParallelotopeMap(&RHenonMap::apply))
     .def("derivative", PointDerivative(&RHenonMap::derivative))
     .def("derivative", RectangleDerivative(&RHenonMap::derivative))
     .def(str(self))    // __str__

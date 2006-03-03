@@ -35,9 +35,8 @@
 
 #include <boost/iterator/iterator_facade.hpp>
 
-#include "base/basic_type.h"
-#include "base/binary_word.h"
-#include "base/utility.h"
+#include "../base/basic_type.h"
+#include "../base/binary_word.h"
 
 namespace Ariadne {
   namespace Base {

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            parallelopiped.h
+ *            parallelotope.h
  *
  *  6 January 2006
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
@@ -22,12 +22,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file parallelopiped.h
- *  \brief Parallelopipeds.
+/*! \file parallelotope.h
+ *  \brief Parallelotopes.
  */
 
-#ifndef _ARIADNE_PARALLELOPIPED_H
-#define _ARIADNE_PARALLELOPIPED_H
+#ifndef _ARIADNE_PARALLELOTOPE_H
+#define _ARIADNE_PARALLELOTOPE_H
 
 #include <iosfwd>
 
@@ -39,83 +39,82 @@
 #include <vector>
 #include <valarray>
 
-#include "base/utility.h"
-#include "base/interval.h"
+#include "../base/utility.h"
+#include "../base/interval.h"
 
-#include "linear_algebra/vector.h"
-#include "linear_algebra/matrix.h"
-#include "linear_algebra/constraint.h"
+#include "../linear_algebra/vector.h"
+#include "../linear_algebra/matrix.h"
 
-#include "geometry/point.h"
-#include "geometry/rectangle.h"
-#include "geometry/list_set.h"
-#include "geometry/polyhedron.h"
-#include "geometry/geometry_declarations.h"
+#include "../geometry/point.h"
+#include "../geometry/rectangle.h"
+#include "../geometry/list_set.h"
+#include "../geometry/polyhedron.h"
+#include "../geometry/geometry_declarations.h"
 
 namespace Ariadne {
   namespace Geometry {
-    template < typename R > class Parallelopiped;
+    template < typename R > class Parallelotope;
 
     template < typename R > class Rectangle;
     template < typename R > class Polyhedron;
     template < typename R, template <typename> class BS > class ListSet;
 
-    template <typename R> Parallelopiped<R> intersection(const Parallelopiped<R>& A, const Parallelopiped<R>& B);
-    template <typename R> Parallelopiped<R> regular_intersection(const Parallelopiped<R>& A, const Parallelopiped<R>& B);
+    template <typename R> Parallelotope<R> intersection(const Parallelotope<R>& A, const Parallelotope<R>& B);
+    template <typename R> Parallelotope<R> regular_intersection(const Parallelotope<R>& A, const Parallelotope<R>& B);
 
-    template<typename R> bool interiors_intersect(const Parallelopiped<R>& A, const Parallelopiped<R>& B);
-    template<typename R> bool disjoint(const Parallelopiped<R>& A, const Parallelopiped<R>& B);
-    template<typename R> bool inner_subset(const Parallelopiped<R>& A, const Parallelopiped<R>& B);
-    template<typename R> bool subset(const Parallelopiped<R>& A, const Parallelopiped<R>& B);
+    template<typename R> bool interiors_intersect(const Parallelotope<R>& A, const Parallelotope<R>& B);
+    template<typename R> bool disjoint(const Parallelotope<R>& A, const Parallelotope<R>& B);
+    template<typename R> bool inner_subset(const Parallelotope<R>& A, const Parallelotope<R>& B);
+    template<typename R> bool subset(const Parallelotope<R>& A, const Parallelotope<R>& B);
 
-    template<typename R> bool subset_of_open_cover(const Parallelopiped<R>& A, const ListSet<R, Parallelopiped >& list);
-    template<typename R> bool inner_subset(const Parallelopiped<R>& rect, const ListSet<R,Parallelopiped>& A);
-    template<typename R> bool subset(const Parallelopiped<R>& rect, const ListSet<R,Parallelopiped>& A);
+    template<typename R> bool subset_of_open_cover(const Parallelotope<R>& A, const ListSet<R, Parallelotope >& list);
+    template<typename R> bool inner_subset(const Parallelotope<R>& rect, const ListSet<R,Parallelotope>& A);
+    template<typename R> bool subset(const Parallelotope<R>& rect, const ListSet<R,Parallelotope>& A);
     
-    template<typename R> std::ostream& operator<<(std::ostream&, const Parallelopiped<R>&);
-    template<typename R> std::istream& operator>>(std::istream&, Parallelopiped<R>&);
+    template<typename R> std::ostream& operator<<(std::ostream&, const Parallelotope<R>&);
+    template<typename R> std::istream& operator>>(std::istream&, Parallelotope<R>&);
 
     /*! \brief A parallelopiped of arbitrary dimension.
      */
     template <typename R>
-    class Parallelopiped {
+    class Parallelotope {
       /*! \brief Makes intersection */
-      friend Parallelopiped<R> intersection <> (const Parallelopiped<R>& A,
-                                           const Parallelopiped<R>& B);
+      friend Parallelotope<R> intersection <> (const Parallelotope<R>& A,
+                                           const Parallelotope<R>& B);
 
       /*! \brief Makes intersection of interiors */
-      friend Parallelopiped<R> regular_intersection <> (const Parallelopiped<R>& A,
-                                                   const Parallelopiped<R>& B);
+      friend Parallelotope<R> regular_intersection <> (const Parallelotope<R>& A,
+                                                   const Parallelotope<R>& B);
 
        /*! \brief Tests intersection of interiors. */
-      friend bool interiors_intersect <> (const Parallelopiped<R>& A,
-                                          const Parallelopiped<R>& B);
+      friend bool interiors_intersect <> (const Parallelotope<R>& A,
+                                          const Parallelotope<R>& B);
 
        /*! \brief Tests disjointness */
-      friend bool disjoint <> (const Parallelopiped<R>& A,
-                               const Parallelopiped<R>& B);
+      friend bool disjoint <> (const Parallelotope<R>& A,
+                               const Parallelotope<R>& B);
 
       /*! \brief Tests if \a A is a subset of the interior of \a B. */
-      friend bool inner_subset <> (const Parallelopiped<R>& A,
-                                   const Parallelopiped<R>& B);
+      friend bool inner_subset <> (const Parallelotope<R>& A,
+                                   const Parallelotope<R>& B);
 
       /*! \brief Tests inclusion. */
-      friend bool subset <> (const Parallelopiped<R>& A,
-                             const Parallelopiped<R>& B);
+      friend bool subset <> (const Parallelotope<R>& A,
+                             const Parallelotope<R>& B);
 
       /*! \brief Tests if \a A is a subset of the interior of \a B. */
-      friend bool inner_subset <> (const Parallelopiped<R>& A,
-                                   const ListSet<R,::Ariadne::Geometry::Parallelopiped>& B);
+      friend bool inner_subset <> (const Parallelotope<R>& A,
+                                   const ListSet<R,::Ariadne::Geometry::Parallelotope>& B);
 
       /*! \brief Tests if \a A is a subset of \a B. */
-      friend bool subset <> (const Parallelopiped<R>& A,
-                             const ListSet<R,::Ariadne::Geometry::Parallelopiped>& B);
+      friend bool subset <> (const Parallelotope<R>& A,
+                             const ListSet<R,::Ariadne::Geometry::Parallelotope>& B);
 
 
       /*! \brief Tests inclusion in an open cover, represented as a ListSet.
        */
-      friend bool subset_of_open_cover <> (const Parallelopiped<R>& A,
-                                           const ListSet<R,::Ariadne::Geometry::Parallelopiped>& B);
+      friend bool subset_of_open_cover <> (const Parallelotope<R>& A,
+                                           const ListSet<R,::Ariadne::Geometry::Parallelotope>& B);
 
      public:
       /*! \brief The unsigned integer type used to denote temphe array positions. */
@@ -129,21 +128,21 @@ namespace Ariadne {
       /*! \brief The type of matrix giving principal directions. */
       typedef ::Ariadne::LinearAlgebra::matrix<R> Matrix;
      private:
-      /* Parallelopiped's centre. */
+      /* Parallelotope's centre. */
       State _centre;
       
-      /* Parallelopiped's principal directions. */
+      /* Parallelotope's principal directions. */
       Matrix _generators;
       
      public:
       /*! \brief Default constructor constructs an empty parallelopiped of dimension \a n. */
-      inline explicit Parallelopiped(size_type n = 0)
+      inline explicit Parallelotope(size_type n = 0)
         : _centre(n),  _generators(n,n) 
       {
       }
       
       /*! \brief Construct from centre and directions. */
-      inline explicit Parallelopiped(const State& c, const Matrix& m)
+      inline explicit Parallelotope(const State& c, const Matrix& m)
         : _centre(c), _generators(m)
       {
         if (LinearAlgebra::number_of_rows(m)!=LinearAlgebra::number_of_columns(m)) {
@@ -157,7 +156,7 @@ namespace Ariadne {
       }
       
       /*! \brief Construct from a Rectangle. */
-      inline explicit Parallelopiped(const Rectangle<Real>& r)
+      inline explicit Parallelotope(const Rectangle<Real>& r)
         : _centre(r.dimension()), _generators(r.dimension(),r.dimension())
       {
         for(size_type i=0; i!=dimension(); ++i) {
@@ -167,7 +166,7 @@ namespace Ariadne {
       }
       
       /*! \brief Construct from a string literal. */
-      inline explicit Parallelopiped(const std::string& s)
+      inline explicit Parallelotope(const std::string& s)
         : _centre(), _generators()
       {
         std::stringstream ss(s);
@@ -175,13 +174,13 @@ namespace Ariadne {
       }
       
       /*! \brief Copy constructor. */
-      Parallelopiped(const Parallelopiped<R>& original)
+      Parallelotope(const Parallelotope<R>& original)
         : _centre(original._centre),
           _generators(original._generators)
       { }
       
       /*! \brief Copy assignment operator. */
-      Parallelopiped<R>& operator=(const Parallelopiped<R>& original) {
+      Parallelotope<R>& operator=(const Parallelotope<R>& original) {
         if(this != &original) {
           this->_centre = original._centre;
           this->_generators = original._generators;
@@ -202,7 +201,7 @@ namespace Ariadne {
       
       /*! \brief True if the parallelopiped has empty interior. */
       inline bool empty_interior() const {
-        throw std::domain_error("Parallelopiped::empty_interior() not implemented.");
+        throw std::domain_error("Parallelotope::empty_interior() not implemented.");
       }
       
       /*! \brief The centre of the parallelopiped. */
@@ -261,14 +260,14 @@ namespace Ariadne {
        * Not currently implemented, since it requires matching the columns of 
        * the matrix of principal directions. 
        */
-      inline bool operator==(const Parallelopiped<Real>& A) const
+      inline bool operator==(const Parallelotope<Real>& A) const
       {
-        throw std::domain_error("Parallelopiped::operator==(...)  not implemented");
+        throw std::domain_error("Parallelotope::operator==(...)  not implemented");
       }
       
       /*! \brief The inequality operator */
-      inline bool operator!=(const Parallelopiped<Real>& A) const {
-        throw std::domain_error("Parallelopiped::operator!=(...)  not implemented");
+      inline bool operator!=(const Parallelotope<Real>& A) const {
+        throw std::domain_error("Parallelotope::operator!=(...)  not implemented");
         return !(*this == A);
       }
 
@@ -279,15 +278,15 @@ namespace Ariadne {
       operator Polyhedron<R> () const;
       
       /*! \subdivide into smaller pieces. */
-      ListSet<R,::Ariadne::Geometry::Parallelopiped> subdivide() const;
+      ListSet<R,::Ariadne::Geometry::Parallelotope> subdivide() const;
       
       friend std::ostream&
       operator<< <> (std::ostream& os, 
-                     const Parallelopiped<R>& r);
+                     const Parallelotope<R>& r);
       
       friend std::istream&
       operator>> <> (std::istream& is, 
-                     Parallelopiped<R>& r);
+                     Parallelotope<R>& r);
       
      private:
       void compute_linear_inequalities(Matrix&, Vector&, Vector&) const;
@@ -296,21 +295,27 @@ namespace Ariadne {
   
     /*! \brief Tests disjointness */
     template <typename R>
-    bool disjoint(const Parallelopiped<R>& A, const Parallelopiped<R>& B) 
+    inline
+    bool 
+    disjoint(const Parallelotope<R>& A, const Parallelotope<R>& B) 
     {
       return disjoint(Polyhedron<R>(A), Polyhedron<R>(B));
     }
     
     /*! \brief Tests disjointness */
     template <typename R>
-    bool disjoint(const Parallelopiped<R>&A, const Rectangle<R>& B) 
+    inline 
+    bool 
+    disjoint(const Parallelotope<R>&A, const Rectangle<R>& B) 
     {
       return disjoint(Polyhedron<R>(A), Polyhedron<R>(B));
     }
     
     /*! \brief Tests disjointness */
     template <typename R>
-    bool disjoint(const Rectangle<R>&A, const Parallelopiped<R>& B) 
+    inline
+    bool 
+    disjoint(const Rectangle<R>&A, const Parallelotope<R>& B) 
     {
       return disjoint(Polyhedron<R>(A), Polyhedron<R>(B));
     }
@@ -318,24 +323,30 @@ namespace Ariadne {
     
     /*! \brief Tests intersection of interiors */
     template <typename R>
-    bool interiors_intersect(const Parallelopiped<R>& A,
-                             const Parallelopiped<R>& B) 
+    inline
+    bool 
+    interiors_intersect(const Parallelotope<R>& A,
+                        const Parallelotope<R>& B) 
     {
       return interiors_intersect(Polyhedron<R>(A), Polyhedron<R>(B));
     }
     
     /*! \brief Tests intersection of interiors */
     template <typename R>
-    bool interiors_intersect(const Parallelopiped<R>& A,
-                             const Rectangle<R>& B) 
+    inline
+    bool 
+    interiors_intersect(const Parallelotope<R>& A,
+                        const Rectangle<R>& B) 
     {
       return interiors_intersect(Polyhedron<R>(A), Polyhedron<R>(B));
     }
     
     /*! \brief Tests intersection of interiors */
     template <typename R>
-    bool interiors_intersect(const Rectangle<R>& A,
-                             const Parallelopiped<R>& B) 
+    inline
+    bool
+    interiors_intersect(const Rectangle<R>& A,
+                        const Parallelotope<R>& B) 
     {
       return interiors_intersect(Polyhedron<R>(A), Polyhedron<R>(B));
     }
@@ -343,32 +354,40 @@ namespace Ariadne {
     
     /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
-    bool inner_subset(const Parallelopiped<R>& A,
-                      const Parallelopiped<R>& B) 
+    inline
+    bool
+    inner_subset(const Parallelotope<R>& A,
+                 const Parallelotope<R>& B) 
     {
       return inner_subset(Polyhedron<R>(A), Polyhedron<R>(B));
     }
 
     /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
-    bool inner_subset(const Parallelopiped<R>& A,
-                      const Rectangle<R>& B) 
+    inline
+    bool
+    inner_subset(const Parallelotope<R>& A,
+                 const Rectangle<R>& B) 
     {
       return inner_subset(Polyhedron<R>(A), Polyhedron<R>(B));
     }
 
     /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
-    bool inner_subset(const Rectangle<R>& A,
-                      const Parallelopiped<R>& B) 
+    inline
+    bool
+    inner_subset(const Rectangle<R>& A,
+                 const Parallelotope<R>& B) 
     {
       return inner_subset(Polyhedron<R>(A), Polyhedron<R>(B));
     }
 
     /*! \brief Tests inclusion */
     template <typename R>
-    bool subset(const Parallelopiped<R>& A, 
-                const Parallelopiped<R>& B) 
+    inline
+    bool 
+    subset(const Parallelotope<R>& A, 
+           const Parallelotope<R>& B) 
     {
       return subset(Polyhedron<R>(A), Polyhedron<R>(B));
     }
@@ -376,26 +395,26 @@ namespace Ariadne {
 
     /*! \brief Tests inclusion in an open cover.  */
     template <typename R>
-    bool subset_of_open_cover(const Parallelopiped<R>& A,
-                              const ListSet<R, Parallelopiped >& cover) 
+    inline
+    bool 
+    subset_of_open_cover(const Parallelotope<R>& A,
+                         const ListSet<R, Parallelotope >& cover) 
     {
-      throw std::domain_error("subset_of_open_cover(Parallelopiped, std::vector<Parallelopiped>) not implemented");
+      throw std::domain_error("subset_of_open_cover(Parallelotope, std::vector<Parallelotope>) not implemented");
     }
 
     
     /*! \brief Tests inclusion of \a A om the interior of \a B. */
     template <typename R>
-    bool inner_subset(const Parallelopiped<R>& A,
-                      const ListSet<R,Parallelopiped>& B) 
+    inline
+    bool 
+    inner_subset(const Parallelotope<R>& A,
+                 const ListSet<R,Parallelotope>& B) 
     {
-      throw std::domain_error("subset_of_closed_cover(Parallelopiped, std::vector<Parallelopiped>) not implemented");
+      throw std::domain_error("subset_of_closed_cover(Parallelotope, std::vector<Parallelotope>) not implemented");
     }
-
-
-
-    
 
   }
 }
 
-#endif /* _ARIADNE_PARALLELOPIPED_H */
+#endif /* _ARIADNE_PARALLELOTOPE_H */

@@ -36,7 +36,7 @@
 #include <valarray>
 #include <set>
 
-#include "base/array.h"
+#include "../base/array.h"
 
 namespace Ariadne {
   namespace Base { 

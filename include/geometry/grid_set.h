@@ -35,18 +35,18 @@
 
 #include <boost/iterator/iterator_adaptor.hpp>
 
-#include "base/array.h"
-#include "base/interval.h"
-#include "base/binary_word.h"
+#include "../base/array.h"
+#include "../base/interval.h"
+#include "../base/binary_word.h"
 
-#include "geometry/geometry_declarations.h"
-#include "geometry/rectangle.h"
-#include "geometry/point.h"
+#include "../geometry/geometry_declarations.h"
+#include "../geometry/rectangle.h"
+#include "../geometry/point.h"
 
-#include "geometry/grid.h"
-#include "geometry/unit_grid_set.h"
+#include "../geometry/grid.h"
+#include "../geometry/lattice_set.h"
 
-#include "geometry/list_set.h"
+#include "../geometry/list_set.h"
 
 /** \internal
  * Non-templated functions needed to implement grid denotable sets.
@@ -109,7 +109,7 @@ namespace Ariadne {
 
     template<typename R>
     GridCellListSet<R>
-    over_approximation(const Parallelopiped<R>& p, const Grid<R>& g);
+    over_approximation(const Parallelotope<R>& p, const Grid<R>& g);
 
     template<typename R, template<typename> class BS>
     GridMaskSet<R>
@@ -123,7 +123,7 @@ namespace Ariadne {
     
     template<typename R>
     GridCellListSet<R>
-    over_approximation_of_intersection(const Parallelopiped<R>& p, 
+    over_approximation_of_intersection(const Parallelotope<R>& p, 
                                        const Rectangle<R>& r,
                                        const Grid<R>& g);
 
@@ -524,7 +524,7 @@ namespace Ariadne {
       GridRectangle<R> dereference() const { return GridRectangle<R>(*_grid_ptr,*_iter); }
      private:
       const Grid<R>* _grid_ptr;
-      LatticeRectangleListSetIterator _iter;
+      LatticeRectangleListSet::const_iterator _iter;
     };
 
 

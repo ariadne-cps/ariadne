@@ -1,5 +1,5 @@
 /***************************************************************************
- *            unit_grid_set.h
+ *            lattice_set.h
  *
  *  Copyright  2005,6  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file unit_grid_set.h
+/*! \file lattice_set.h
  *  \brief Sets on an integer grid.
  */
 
-#ifndef _ARIADNE_UNIT_GRID_SET_H
-#define _ARIADNE_UNIT_GRID_SET_H
+#ifndef _ARIADNE_LATTICE_SET_H
+#define _ARIADNE_LATTICE_SET_H
 
 #include <vector>
 #include <iosfwd>
@@ -34,12 +34,11 @@
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/iterator/iterator_adaptor.hpp>
 
-#include "base/array.h"
-#include "base/iterator.h"
-#include "base/basic_type.h"
-#include "base/interval.h"
-
-#include "grid_operations.h"
+#include "../base/array.h"
+#include "../base/iterator.h"
+#include "../base/basic_type.h"
+#include "../base/interval.h"
+#include "../base/array_operations.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -154,9 +153,9 @@ namespace Ariadne {
 
       const IndexArray& lower() const { return this->_lower; }
       const IndexArray& upper() const { return this->_upper; }
-      SizeArray sizes() const { return this->_upper-this->_lower; }
-      SizeArray strides() const { return compute_strides(this->sizes()); }
-      size_type size() const { return compute_strides(this->sizes())[dimension()]; }
+      SizeArray sizes() const;
+      SizeArray strides() const;
+      size_type size() const;
       
       const_iterator begin() const;
       const_iterator end() const;
@@ -252,27 +251,13 @@ namespace Ariadne {
         void adjoin(const LatticeRectangleListSet& rl);
       
       /*! \brief Constant iterator to the beginning of the cells in the set. */
-      const_iterator begin() const;
+      const_iterator begin() const { return const_iterator(_list.begin()); }
       /*! \brief Constant iterator to the end of the cells in the set. */
-      const_iterator end() const;
+      const_iterator end() const { return const_iterator(_list.end()); }
      private:
       array_vector<index_type> _list;
     };
- 
-    inline
-    LatticeCellListSet::const_iterator 
-    LatticeCellListSet::begin() const 
-    { 
-      return const_iterator(_list.begin());
-    }
-    
-    inline
-    LatticeCellListSet::const_iterator 
-    LatticeCellListSet::end() const 
-    { 
-      return const_iterator(_list.end());
-    }
-        
+      
 
 
     /*!\brief A list of rectangles in a lattice. */
@@ -317,44 +302,13 @@ namespace Ariadne {
       void adjoin_rectangles(const LatticeRectangleListSet& rl);
       
       /*! \brief Constant iterator to the beginning of the cells in the set. */
-      const_iterator begin() const;
+      const_iterator begin() const  { return const_iterator(_list.begin()); }
       /*! \brief Constant iterator to the end of the cells in the set. */
-      const_iterator end() const;
+      const_iterator end() const { return const_iterator(_list.end()); }
      private:
       array_vector<index_type> _list;
     };
-
-    class LatticeRectangleListSetIterator 
-      : public boost::iterator_adaptor<LatticeRectangleListSetIterator,
-                                       array_vector<index_type>::const_iterator,
-                                       LatticeRectangle,
-                                       boost::random_access_traversal_tag,
-                                       LatticeRectangle>
-    {
-     public:
-      LatticeRectangleListSetIterator(const array_vector<index_type>::const_iterator i)
-        : LatticeRectangleListSetIterator::iterator_adaptor_(i) { }
-     private:
-      void increment() { ++(++base_reference()); }
-      void advance(difference_type n) { base_reference()+=(2*n); }
-      LatticeRectangle dereference() const { return LatticeRectangle(*base_reference(),*(base_reference()+1)); }
-      friend class boost::iterator_core_access;
-    };
-
-    inline
-    LatticeRectangleListSet::const_iterator 
-    LatticeRectangleListSet::begin() const 
-    { 
-      return const_iterator(_list.begin());
-    }
-    
-    inline
-    LatticeRectangleListSet::const_iterator 
-    LatticeRectangleListSet::end() const 
-    { 
-      return const_iterator(_list.end());
-    }
-        
+       
 
 
 
@@ -384,12 +338,18 @@ namespace Ariadne {
       const SizeArray& sizes() const { return _sizes; }
       const SizeArray& strides() const { return _strides; }
       
+      /*! Compute the index of a position in a grid. */
+      size_type index(const IndexArray& pos) const;
+
+      /*! Compute the position of an index in a grid. */
+      IndexArray position(size_type index) const;
+
       /*! \brief Empties the set. */
       void clear();
 
       /*! \brief Adjoins a LatticeCell to the set. */
       void adjoin(const LatticeCell& c) { 
-        _mask[compute_index(c.position(),_lower,_strides)]=true;
+        this->_mask[this->index(c.position())]=true;
       }
       
       /*! \brief Adjoins a LatticeRectangle to the set. */
@@ -408,11 +368,12 @@ namespace Ariadne {
       LatticeMaskSet adjoining() const;
 
       /*! \brief Constant iterator to the beginning of the cells in the set. */
-      const_iterator begin() const;
+      const_iterator begin() const { return const_iterator(_bounds.begin(),_mask.begin(),_mask.end()); }
       /*! \brief Constant iterator to the end of the cells in the set. */
-      const_iterator end() const;
+      const_iterator end() const { return const_iterator(_bounds.end(),_mask.end(),_mask.end()); }
      private:
       void _compute_cached_attributes();
+
      private:
       LatticeRectangle _bounds;
       IndexArray _lower;
@@ -422,21 +383,7 @@ namespace Ariadne {
       BooleanArray _mask;
     };
 
-    inline
-    LatticeMaskSet::const_iterator 
-    LatticeMaskSet::begin() const 
-    { 
-      return const_iterator(_bounds.begin(),_mask.begin(),_mask.end()); 
-    }
-    
-    inline
-    LatticeMaskSet::const_iterator 
-    LatticeMaskSet::end() const 
-    { 
-      return const_iterator(_bounds.end(),_mask.end(),_mask.end());
-    }
-
   }
 }
 
-#endif /* _ARIADNE_UNIT_GRID_SET_H */
+#endif /* _ARIADNE_LATTICE_SET_H */

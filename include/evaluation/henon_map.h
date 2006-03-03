@@ -29,14 +29,14 @@
 #ifndef _ARIADNE_HENON_MAP_H
 #define _ARIADNE_HENON_MAP_H
 
-#include "linear_algebra/matrix.h"
+#include "../linear_algebra/matrix.h"
 
-#include "geometry/point.h"
-#include "geometry/rectangle.h"
-#include "geometry/parallelopiped.h"
+#include "../geometry/point.h"
+#include "../geometry/rectangle.h"
+#include "../geometry/parallelotope.h"
 
-#include "evaluation/map.h"
-#include "evaluation/apply.h"
+#include "../evaluation/map.h"
+#include "../evaluation/apply.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -55,8 +55,8 @@ namespace Ariadne {
       virtual State apply(const State& x) const;
       /*! \brief  The map applied to a rectangle basic set. */
       virtual Geometry::Rectangle<R> apply(const Geometry::Rectangle<R>& r) const;
-      /*! \brief  The map applied to a parallelopiped basic set. */
-      virtual Geometry::Parallelopiped<R> apply(const Geometry::Parallelopiped<R>& p) const;
+      /*! \brief  The map applied to a parallelotope basic set. */
+      virtual Geometry::Parallelotope<R> apply(const Geometry::Parallelotope<R>& p) const;
       
       /*! \brief  The derivative of the map at a point. */
       virtual LinearAlgebra::matrix<R> derivative(const State& x) const;
@@ -101,12 +101,12 @@ namespace Ariadne {
     }
      
     template <typename R>
-    Geometry::Parallelopiped<R>
-    HenonMap<R>::apply(const Geometry::Parallelopiped<R>& p) const
+    Geometry::Parallelotope<R>
+    HenonMap<R>::apply(const Geometry::Parallelotope<R>& p) const
     {
-      std::cerr << "HenonMap::apply(const Parallelopiped) const" << std::endl;
+      std::cerr << "HenonMap::apply(const Parallelotope) const" << std::endl;
       return Evaluation::apply(*this,p);
-      std::cerr << "Done HenonMap::apply(const Parallelopiped) const" << std::endl;
+      std::cerr << "Done HenonMap::apply(const Parallelotope) const" << std::endl;
     }
 
     template <typename R>

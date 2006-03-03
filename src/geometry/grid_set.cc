@@ -53,7 +53,7 @@ namespace Ariadne {
 
     template
     GridCellListSet<Dyadic>
-    over_approximation(const Parallelopiped<Dyadic>& p, const Grid<Dyadic>& g);
+    over_approximation(const Parallelotope<Dyadic>& p, const Grid<Dyadic>& g);
 
     template
     GridMaskSet<Dyadic>
@@ -61,7 +61,7 @@ namespace Ariadne {
 
     template
     GridMaskSet<Dyadic>
-    over_approximation(const ListSet<Dyadic,Parallelopiped>& ls, const FiniteGrid<Dyadic>& g); 
+    over_approximation(const ListSet<Dyadic,Parallelotope>& ls, const FiniteGrid<Dyadic>& g); 
 
     template
     GridRectangle<Dyadic>
@@ -71,7 +71,7 @@ namespace Ariadne {
     
     template
     GridCellListSet<Dyadic>
-    over_approximation_of_intersection(const Parallelopiped<Dyadic>& p, 
+    over_approximation_of_intersection(const Parallelotope<Dyadic>& p, 
                                        const Rectangle<Dyadic>& r,
                                        const Grid<Dyadic>& g);
 
@@ -83,7 +83,7 @@ namespace Ariadne {
     
     template
     GridMaskSet<Dyadic>
-    over_approximation_of_intersection(const ListSet<Dyadic,Parallelopiped>& ls, 
+    over_approximation_of_intersection(const ListSet<Dyadic,Parallelotope>& ls, 
                                        const Rectangle<Dyadic>& r, 
                                        const FiniteGrid<Dyadic>& g);
     

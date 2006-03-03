@@ -23,7 +23,7 @@
 from ariadne.geometry import *
 
 r=Rectangle("[0,3]x[2,4]")
-p=Parallelopiped(r)
+p=Parallelotope(r)
 q=Polyhedron(p)
 
 print r

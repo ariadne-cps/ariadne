@@ -27,6 +27,7 @@
  */
 
 #include "base/arithmetic.h"
+#include "base/utility.h"
 #include "base/binary_tree.h"
 
 namespace Ariadne {

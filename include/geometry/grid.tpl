@@ -24,11 +24,43 @@
 #include "../base/arithmetic.h"
 
 #include "../geometry/grid.h"
+#include "../geometry/grid_set.h"
 #include "../geometry/rectangle.h"
 #include "../geometry/list_set.h"
 
 namespace Ariadne {
   namespace Geometry {
+
+    template<typename R>
+    IndexArray 
+    Grid<R>::index(const Point<R>& s) const
+    {
+      IndexArray res(s.dimension());
+      for(size_type i=0; i!=res.size(); ++i) {
+        res[i]=subdivision_index(i,s[i]);
+      }
+      return res;
+    }
+
+    template<typename R>
+    IndexArray  
+    Grid<R>::lower_index(const Rectangle<R>& r) const {
+      IndexArray res(r.dimension());
+      for(size_type i=0; i!=res.size(); ++i) {
+        res[i]=subdivision_lower_index(i,r.lower_bound(i));
+      }
+      return res;
+    }
+
+    template<typename R>
+    IndexArray  
+    Grid<R>::upper_index(const Rectangle<R>& r) const {
+      IndexArray res(r.dimension());
+      for(size_type i=0; i!=res.size(); ++i) {
+        res[i]=subdivision_upper_index(i,r.upper_bound(i));
+      }
+      return res;
+    }
 
     template<typename R>
     FiniteGrid<R>*
@@ -121,9 +153,15 @@ namespace Ariadne {
         typename std::vector<R>::iterator newend=std::unique(pos.begin(),pos.end());
         pos.resize(std::distance(pos.begin(),newend));
       }
-      _strides=compute_strides(sizes());
     }
 
+    template<typename R>
+    GridRectangle<R>
+    FiniteGrid<R>::bounding_box() const
+    { 
+      return GridRectangle<R>(*this,bounds());
+    }
+    
     template<typename R>
     array< std::vector<index_type> >
     FiniteGrid<R>::index_translation(const FiniteGrid<R>& from, const FiniteGrid<R>& to)

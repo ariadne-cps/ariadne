@@ -29,7 +29,7 @@
 #ifndef _ARIADNE_REAL_TYPEDEF_H
 #define _ARIADNE_REAL_TYPEDEF_H
 
-#include "base/numerical_type.h"
+#include "../base/numerical_type.h"
 //typedef double Real;
 typedef Ariadne::Dyadic Real;
 //typedef Ariadne::Rational Real;

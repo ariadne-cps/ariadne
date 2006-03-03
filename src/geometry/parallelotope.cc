@@ -1,5 +1,5 @@
 /***************************************************************************
- *            parallelopiped.cc
+ *            parallelotope.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
@@ -21,16 +21,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "geometry/parallelopiped.h"
-#include "geometry/parallelopiped.tpl"
+#include "geometry/parallelotope.h"
+#include "geometry/parallelotope.tpl"
 
 namespace Ariadne {
   namespace Geometry {
 
-    template class Parallelopiped<Dyadic>;
+    template class Parallelotope<Dyadic>;
 
-    template std::ostream& operator<<(std::ostream&, const Parallelopiped<Dyadic>&);
-    template std::istream& operator>>(std::istream&, Parallelopiped<Dyadic>&);
+    template std::ostream& operator<<(std::ostream&, const Parallelotope<Dyadic>&);
+    template std::istream& operator>>(std::istream&, Parallelotope<Dyadic>&);
 
   }
 }

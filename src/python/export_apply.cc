@@ -38,11 +38,11 @@ using boost::python::copy_const_reference;
 using namespace Ariadne::Geometry;
 using namespace Ariadne::Evaluation;
 
-inline Parallelopiped<Real> apply_to_parallelopiped(const Map<Real>& f, const Parallelopiped<Real>& p) {
+inline Parallelotope<Real> apply_to_parallelotope(const Map<Real>& f, const Parallelotope<Real>& p) {
   return apply(f,p); 
 }
 
-inline ListSet<Real,Parallelopiped> apply_to_parallelopiped_list_set(const Map<Real>& f, const ListSet<Real,Parallelopiped>& pls) {
+inline ListSet<Real,Parallelotope> apply_to_parallelotope_list_set(const Map<Real>& f, const ListSet<Real,Parallelotope>& pls) {
   return apply(f,pls); 
 }
 
@@ -58,7 +58,7 @@ chainreach_of_rectangle_list_set(const Map<Real>& f,
 
 
 void export_apply() {
-  def("apply", apply_to_parallelopiped, "apply the image of a polynomial to a set" );
-  def("apply", apply_to_parallelopiped_list_set, "apply the image of a polynomial to a set" );
+  def("apply", apply_to_parallelotope, "apply the image of a polynomial to a set" );
+  def("apply", apply_to_parallelotope_list_set, "apply the image of a polynomial to a set" );
   def("chainreach", &chainreach_of_rectangle_list_set, "chain reach of a set" );
 }

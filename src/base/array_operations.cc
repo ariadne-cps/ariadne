@@ -1,5 +1,5 @@
 /***************************************************************************
- *            grid_operations.cc
+ *            array_operations.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
@@ -21,44 +21,27 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <iostream>
-
-#include "geometry/grid_operations.h"
-#include "geometry/unit_grid_set.h"
+#include "base/array_operations.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  namespace Base {
 
-    /* Inner product of two positive arrays */
     size_type
-    inner_product(const array<size_type>& a1, const array<size_type>& a2)
+    inner_product(const SizeArray& a1, const SizeArray& a2)
     {
       size_type result=0;
-      for(array<size_type>::size_type i=0; i!=a1.size(); ++i) {
+      for(size_type i=0; i!=a1.size(); ++i) {
         result += (a1[i] * a2[i]);
       }
       return result;
     }
 
-    /* Compute the sum of an index array and a size. */
-    IndexArray
-    operator+(const IndexArray& l, const SizeArray& s)
+    index_type
+    inner_product(const IndexArray& a1, const IndexArray& a2)
     {
-      IndexArray result(l.size());
-      for(dimension_type i=0; i!=result.size(); ++i) {
-         result[i]=l[i]+s[i];
-      }
-      return result;
-    }
-
-    /*! Compute a positive offset from two index sets */
-    SizeArray
-    operator-(const IndexArray& u, const IndexArray& l)
-    {
-      SizeArray result(l.size());
-      for(dimension_type i=0; i!=result.size(); ++i) {
-        assert(l[i]<=u[i]);
-        result[i]=size_type(u[i]-l[i]);
+      index_type result=0;
+      for(size_type i=0; i!=a1.size(); ++i) {
+        result += (a1[i] * a2[i]);
       }
       return result;
     }
@@ -160,7 +143,7 @@ namespace Ariadne {
     }
 
     bool
-    lexicographic_order(const IndexArray& s1, const IndexArray& s2)
+    lexicographic_less(const IndexArray& s1, const IndexArray& s2)
     {
       assert(s1.size() == s2.size());
       for(dimension_type i=0; i!=s1.size(); ++i) {
@@ -175,7 +158,7 @@ namespace Ariadne {
     }
 
     bool
-    coordinate_order(const IndexArray& s1, const IndexArray& s2)
+    coordinate_less(const IndexArray& s1, const IndexArray& s2)
     {
       assert(s1.size() == s2.size());
       for(dimension_type i=0; i!=s1.size(); ++i) {
@@ -184,6 +167,27 @@ namespace Ariadne {
         }
       }
       return true;
+    }
+
+    IndexArray
+    operator+(const IndexArray& l, const SizeArray& s)
+    {
+      IndexArray result(l.size());
+      for(dimension_type i=0; i!=result.size(); ++i) {
+         result[i]=l[i]+s[i];
+      }
+      return result;
+    }
+
+    /*! Compute a positive offset from two index sets */
+    IndexArray
+    operator-(const IndexArray& u, const IndexArray& l)
+    {
+      IndexArray result(l.size());
+      for(dimension_type i=0; i!=result.size(); ++i) {
+        result[i]=size_type(u[i]-l[i]);
+      }
+      return result;
     }
 
     void
@@ -205,55 +209,6 @@ namespace Ariadne {
     }
 
 
-    /* Compute strides from a list of sizes. */
-    SizeArray
-    compute_strides(const SizeArray& s) {
-      SizeArray result(s.size()+1);
-      result[0]=1;
-      for(dimension_type i=0; i!=s.size(); ++i) {
-        result[i+1]=s[i]*result[i];
-      }
-      return result;
-    }
-
-
-    /* Compute the index of a position in a grid. */
-    size_type
-    compute_index(const IndexArray& pos, const IndexArray& lower, const SizeArray& strides)
-    {
-      dimension_type dim=pos.size();
-      size_type result=0;
-      for(dimension_type i=0; i!=dim; ++i) {
-        result += size_type(pos[i]-lower[i])*strides[i];
-      }
-      return result;
-    }
-
-    /* Compute the index of a position in a grid. */
-    size_type
-    compute_index(const IndexArray& pos, const SizeArray& strides, const index_type offset)
-    {
-      dimension_type dim=pos.size();
-      index_type result=offset;
-      for(dimension_type i=0; i!=dim; ++i) {
-        result += pos[i]*strides[i];
-      }
-      return size_type(result);
-    }
-
-    /* Compute the position of an index in a grid. */
-    IndexArray
-    compute_position(size_type index, const IndexArray& lower, const SizeArray& strides)
-    {
-      dimension_type dim=lower.size();
-      IndexArray result(dim);
-      for(dimension_type i=dim-1; i!=0; --i) {
-        result[i] = index/strides[i]+lower[i];
-        index = index%strides[i];
-      }
-      result[0]=index;
-      return result;
-    }
 
   } 
 }

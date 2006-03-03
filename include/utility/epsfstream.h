@@ -25,11 +25,11 @@
 #include <iostream>
 #include <fstream>
 
-#include "geometry/rectangle.h"
-#include "geometry/list_set.h"
-#include "geometry/grid_set.h"
-#include "geometry/parallelopiped.h"
-#include "geometry/partition_tree_set.h"
+#include "../geometry/rectangle.h"
+#include "../geometry/list_set.h"
+#include "../geometry/grid_set.h"
+#include "../geometry/parallelotope.h"
+#include "../geometry/partition_tree_set.h"
 
 namespace Ariadne {
   namespace Postscript {
@@ -165,7 +165,7 @@ namespace Ariadne {
     
     template<typename R>
     epsfstream&
-    trace(epsfstream& eps, const Ariadne::Geometry::Parallelopiped<R>& p)
+    trace(epsfstream& eps, const Ariadne::Geometry::Parallelotope<R>& p)
     {
       Ariadne::Geometry::Point<R> bl=p.centre()-p.generator(0)-p.generator(1);
       Ariadne::Geometry::Point<R> br=p.centre()+p.generator(0)-p.generator(1);
@@ -199,7 +199,7 @@ namespace Ariadne {
 
     template<typename R>
     epsfstream&
-    operator<<(epsfstream& eps, const Ariadne::Geometry::Parallelopiped<R>& p)
+    operator<<(epsfstream& eps, const Ariadne::Geometry::Parallelotope<R>& p)
     {
       assert(p.dimension()==2);
 

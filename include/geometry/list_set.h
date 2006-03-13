@@ -84,8 +84,8 @@ namespace Ariadne {
 
      public:
       typedef BS<R> BasicSet;
-      typedef typename BasicSet::State State;
-      typedef typename BasicSet::State::Real Real;
+      typedef typename BasicSet::Point Point;
+      typedef typename BasicSet::Point::Real Real;
 
       typedef typename std::vector<BasicSet>::const_iterator const_iterator;
       typedef typename std::vector<BasicSet>::iterator iterator;
@@ -238,16 +238,16 @@ namespace Ariadne {
       /*! \brief Checks if a denotable set includes a point.
       *
       * This method checks whenever the current denotable set
-      * includes the point \a s.
-      * \param s is the point of which inclusion
+      * includes the point \a p.
+      * \param p is the point of which inclusion
       * into the current denotable set should be tested.
       * \return  \a true, if \a s is contained into the
       * current set, \a false otherwise.
       */
-      inline bool contains(const State &s) const {
+      inline bool contains(const Point &p) const {
 
         for (size_t i=0; i<this->size(); i++) {
-          if ((this->_vector[i]).contains(s))
+          if ((this->_vector[i]).contains(p))
             return true;
         }
 
@@ -259,15 +259,15 @@ namespace Ariadne {
        *
        * This method checks whenever the interior of the current denotable set
        * includes the point \a s.
-       * \param s is the point of which inclusion
+       * \param p is the point of which inclusion
        * into the current denotable set should be tested.
        * \return  \a true, if \a s is contained into the
        * current set, \a false otherwise.
        */
-      inline bool interior_contains(const State & point) const {
+      inline bool interior_contains(const Point & p) const {
         throw(std::domain_error("Not implemented"));
         for (size_t i=0; i<this->size(); i++) {
-          if ((this->_vector[i]).interior_contains(point))
+          if ((this->_vector[i]).interior_contains(p))
             return true;
         }
 

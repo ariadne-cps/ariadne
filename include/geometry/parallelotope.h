@@ -74,7 +74,7 @@ namespace Ariadne {
     template<typename R> std::ostream& operator<<(std::ostream&, const Parallelotope<R>&);
     template<typename R> std::istream& operator>>(std::istream&, Parallelotope<R>&);
 
-    /*! \brief A parallelopiped of arbitrary dimension.
+    /*! \brief A parallelotope of arbitrary dimension.
      */
     template <typename R>
     class Parallelotope {
@@ -104,45 +104,43 @@ namespace Ariadne {
 
       /*! \brief Tests if \a A is a subset of the interior of \a B. */
       friend bool inner_subset <> (const Parallelotope<R>& A,
-                                   const ListSet<R,::Ariadne::Geometry::Parallelotope>& B);
+                                   const ListSet<R,Ariadne::Geometry::Parallelotope>& B);
 
       /*! \brief Tests if \a A is a subset of \a B. */
       friend bool subset <> (const Parallelotope<R>& A,
-                             const ListSet<R,::Ariadne::Geometry::Parallelotope>& B);
+                             const ListSet<R,Ariadne::Geometry::Parallelotope>& B);
 
 
       /*! \brief Tests inclusion in an open cover, represented as a ListSet.
        */
       friend bool subset_of_open_cover <> (const Parallelotope<R>& A,
-                                           const ListSet<R,::Ariadne::Geometry::Parallelotope>& B);
+                                           const ListSet<R,Ariadne::Geometry::Parallelotope>& B);
 
      public:
       /*! \brief The unsigned integer type used to denote temphe array positions. */
       typedef size_t size_type;
       /*! \brief The type of denotable real number used for the corners. */
       typedef R Real;
-      /*! \brief The type of denotable state contained by the rectangle. */
-      typedef Point<R> State;
+      /*! \brief The type of denotable point contained by the rectangle. */
+      typedef Point<R> Point;
       /*! \brief The type of matrix giving principal directions. */
-      typedef ::Ariadne::LinearAlgebra::vector<R> Vector;
+      typedef Ariadne::LinearAlgebra::vector<R> Vector;
       /*! \brief The type of matrix giving principal directions. */
-      typedef ::Ariadne::LinearAlgebra::matrix<R> Matrix;
+      typedef Ariadne::LinearAlgebra::matrix<R> Matrix;
      private:
       /* Parallelotope's centre. */
-      State _centre;
+      Point _centre;
       
       /* Parallelotope's principal directions. */
       Matrix _generators;
       
      public:
-      /*! \brief Default constructor constructs an empty parallelopiped of dimension \a n. */
+      /*! \brief Default constructor constructs an empty parallelotope of dimension \a n. */
       inline explicit Parallelotope(size_type n = 0)
-        : _centre(n),  _generators(n,n) 
-      {
-      }
+        : _centre(n),  _generators(n,n) { }
       
       /*! \brief Construct from centre and directions. */
-      inline explicit Parallelotope(const State& c, const Matrix& m)
+      inline explicit Parallelotope(const Point& c, const Matrix& m)
         : _centre(c), _generators(m)
       {
         if (LinearAlgebra::number_of_rows(m)!=LinearAlgebra::number_of_columns(m)) {
@@ -188,24 +186,26 @@ namespace Ariadne {
         return *this;
       }
       
-      /*! \brief The dimension of the Euclidean space the parallelopiped lies in. */
+      /*! \brief The dimension of the Euclidean space the parallelotope lies in. */
       inline size_type dimension() const {
         return (this->_centre).dimension();
       }
       
-      /*! \brief True if the parallelopiped is empty. */
+      /*! \brief True if the parallelotope is empty. */
       inline bool empty() const {
         // FIXME: This is probably ok since we're not talking about interior.
         return false;
       }
       
-      /*! \brief True if the parallelopiped has empty interior. */
+      /*! \brief True if the paralleltope has empty interior. */
       inline bool empty_interior() const {
-        throw std::domain_error("Parallelotope::empty_interior() not implemented.");
+        using namespace Ariadne::LinearAlgebra;
+
+        return !independent_rows(this->_generators);     
       }
       
-      /*! \brief The centre of the parallelopiped. */
-      inline State centre() const {
+      /*! \brief The centre of the parallelotope. */
+      inline Point centre() const {
         return this->_centre;
       }
       
@@ -219,39 +219,29 @@ namespace Ariadne {
         return this->_generators;
       }
       
-      /*! \brief Tests if the parallelopiped contains \a state. */
-      inline bool contains(const State& state) const {
-        if (state.dimension()!=this->dimension()) {
+      /*! \brief Tests if the parallelotope contains \a point. */
+      inline bool contains(const Point& point) const {
+        if (point.dimension()!=this->dimension()) {
           throw std::domain_error("This object and parameter have different space dimensions");
         }  
         
         if (this->empty()) { return false; }
           
-        Vector v=coordinates(state);
-        for (size_type i=0; i<v.size(); ++i) {
-          if(v[i]<-1 || v[i]>+1) {
-            return false;
-          }
-        }
-      
+     	throw std::domain_error("Parallelotope::contains(...)  not implemented");
+	
         return true;
       }
       
-      /*! \brief Tests if the interior of the parallelopiped contains \a state. */
-      inline bool interior_contains(const State& state) const {
-        if (state.dimension()!=this->dimension()) {
+      /*! \brief Tests if the interior of the parallelotope contains \a point. */
+      inline bool interior_contains(const Point& point) const {
+        if (point.dimension()!=this->dimension()) {
          throw std::domain_error("This object and parameter have different space dimensions");
         } 
       
-        if (this->empty()) { return false; }
+        if (this->empty_interior()) { return false; }
         
-        Vector v=coordinates(state);
-        for (size_type i=0; i<v.size(); ++i) {
-          if(v[i]<=-1 || v[i]>=+1) {
-            return false;
-          }
-        }
-      
+        throw std::domain_error("Parallelotope::interior_contains(...)  not implemented");
+  
         return true;
       }
       
@@ -267,18 +257,17 @@ namespace Ariadne {
       
       /*! \brief The inequality operator */
       inline bool operator!=(const Parallelotope<Real>& A) const {
-        throw std::domain_error("Parallelotope::operator!=(...)  not implemented");
         return !(*this == A);
       }
 
-      /*! \brief A rectangle containing the given parallelopiped. */
+      /*! \brief A rectangle containing the given parallelotope. */
       Rectangle<R> bounding_box() const;
       
       /*! \brief Convert to a polyhedron. */
       operator Polyhedron<R> () const;
       
       /*! \subdivide into smaller pieces. */
-      ListSet<R,::Ariadne::Geometry::Parallelotope> subdivide() const;
+      ListSet<R,Ariadne::Geometry::Parallelotope> subdivide() const;
       
       friend std::ostream&
       operator<< <> (std::ostream& os, 
@@ -290,7 +279,7 @@ namespace Ariadne {
       
      private:
       void compute_linear_inequalities(Matrix&, Vector&, Vector&) const;
-      Vector coordinates(const State& s) const;
+      Vector coordinates(const Point& s) const;
     };
   
     /*! \brief Tests disjointness */

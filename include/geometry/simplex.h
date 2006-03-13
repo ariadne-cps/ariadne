@@ -115,16 +115,16 @@ namespace Ariadne {
       typedef size_t size_type;
       /*! \brief The type of denotable real number used for the corners. */
       typedef R Real;
-      /*! \brief The type of denotable state contained by the simplex. */
-      typedef Point<R> State;
+      /*! \brief The type of denotable point contained by the simplex. */
+      typedef Point<R> Point;
      private:
       /* Simplex's vertices. */
-      array<State> _vertices;
+      array<Point> _vertices;
    
      public:
       /*! \brief Default constructor constructs standard simplex of dimension \a n. */
       Simplex(size_type n = 0)
-        : _vertices(n+1,State(n)) 
+        : _vertices(n+1,Point(n)) 
       {
         for(size_type i=0; i!=n; ++i) {
           _vertices[i][i]=1;
@@ -132,7 +132,7 @@ namespace Ariadne {
       }
     
       /*! \brief Construct from list of vertices. */
-      Simplex(const std::vector<State>& v)
+      Simplex(const std::vector<Point>& v)
         : _vertices(v.begin(),v.end())
       {
         size_type d=_vertices.size()-1;
@@ -144,7 +144,7 @@ namespace Ariadne {
       }
       
       /*! \brief Construct from list of vertices. */
-      Simplex(const array<State>& v)
+      Simplex(const array<Point>& v)
         : _vertices(v.begin(),v.end())
       {
         size_type d=_vertices.size()-1;
@@ -177,7 +177,7 @@ namespace Ariadne {
       }
       
       operator Polyhedron<R> () const {
-        std::vector<State> vert_vec(_vertices.begin(),_vertices.end());
+        std::vector<Point> vert_vec(_vertices.begin(),_vertices.end());
         return Polyhedron<R>(vert_vec);
       }
       
@@ -197,23 +197,23 @@ namespace Ariadne {
       }
       
       /*! \brief The array of vertices. */
-      inline const array<State>& vertices() const {
+      inline const array<Point>& vertices() const {
         return this->_vertices;
       }
       
       /*! \brief The @a n th vertex. */
-      inline const State& vertex(size_type n) const {
+      inline const Point& vertex(size_type n) const {
         return this->_vertices[n];
       }
       
-      /*! \brief Tests if \a state is included into a simplex. */
-      inline bool contains(const State& state) const {
-        return Polyhedron<R>(*this).contains(state);
+      /*! \brief Tests if \a point is included into a simplex. */
+      inline bool contains(const Point& point) const {
+        return Polyhedron<R>(*this).contains(point);
       }
       
-      /*! \brief Tests if \a state is included into the interior a simplex. */
-      inline bool interior_contains(const State& state) const {
-        return Polyhedron<R>(*this).interior_contains(state);
+      /*! \brief Tests if \a point is included into the interior a simplex. */
+      inline bool interior_contains(const Point& point) const {
+        return Polyhedron<R>(*this).interior_contains(point);
       }
     
       /*! \brief The equality operator (not implemented).

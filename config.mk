@@ -36,10 +36,10 @@ RPATH = ${PREFIX}/lib
 RPATHFLAGS = -Wl,-rpath -Wl,${RPATH}
 
 ifeq ($(DEBUG),yes)
-	CXXFLAGS += -g -DDEBUG -Wall
+	CXXFLAGS += -g -DDEBUG -Wall -Wextra
 	LIBS = libariadne.a
 else
-	CXXFLAGS += -O2 -fPIC -Wall
+	CXXFLAGS += -O2 -fPIC -Wall 
 	LIBS = libariadne.so
 endif
 

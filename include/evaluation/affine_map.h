@@ -35,8 +35,11 @@
 #include "../evaluation/map.h"
 
 #include "../geometry/point.h"
+#include "../geometry/simplex.h"
 #include "../geometry/rectangle.h"
 #include "../geometry/parallelotope.h"
+#include "../geometry/zonotope.h"
+#include "../geometry/polyhedron.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -47,7 +50,7 @@ namespace Ariadne {
     {
      public:
       typedef R Real;
-      typedef Geometry::Point<Real> State;
+      typedef Geometry::Point<Real> Point;
       
       typedef Ariadne::LinearAlgebra::matrix<Real> Matrix;
       typedef Ariadne::LinearAlgebra::vector<Real> Vector;
@@ -62,13 +65,22 @@ namespace Ariadne {
         this->_A=T._A; this->_b=T._b; return *this; }
       
       /*! \brief  The map applied to a state. */
-      State operator() (const State& x) const;
+      Point operator() (const Point& x) const;
         
+      /*! \brief  The map applied to a simplex basic set. */
+      Geometry::Simplex<R> operator() (const Geometry::Simplex<R>& A) const;
+      
       /*! \brief  The map applied to a rectangle basic set. */
       Geometry::Rectangle<R> operator() (const Geometry::Rectangle<R>& A) const;
       
-      /*! \brief  The map applied to a parallelopiped basic set. */
-      Geometry::Parallelopiped<R> operator() (const Geometry::Parallelopiped<R>& A) const;
+      /*! \brief  The map applied to a parallelotope basic set. */
+      Geometry::Parallelotope<R> operator() (const Geometry::Parallelotope<R>& A) const;
+      
+      /*! \brief  The map applied to a zonotope basic set. */
+      Geometry::Zonotope<R> operator() (const Geometry::Zonotope<R>& A) const;
+      
+      /*! \brief  The map applied to a polyhedron basic set. */
+      Geometry::Polyhedron<R> operator() (const Geometry::Polyhedron<R>& A) const;
       
       /*! \brief  The linear transformation of the map. */
       inline const Matrix& A() const { return _A; }
@@ -93,17 +105,30 @@ namespace Ariadne {
     };
       
     template <typename R>
-    typename AffineMap<R>::State
-    AffineMap<R>::operator() (const State& s) const
+    typename AffineMap<R>::Point
+    AffineMap<R>::operator() (const Point& s) const
     {
       const Matrix& m=this->A();
       const Vector& pv=s.position_vector();
       Vector v=prod(m,pv);
       v+= this->b();
-      return State(v);
-      //return State(Vector(this->A() * s.position_vector() + this->b()));
+      return Point(v);
     }
+    
+    template <typename R>
+    Geometry::Simplex<R>
+    AffineMap<R>::operator() (const Geometry::Simplex<R>& s) const
+    {
+      const array<Point>&  v=s.vertices();
+      array<Point> new_v(s.dimension());
+      
+      for(size_type i=0; i<s.size(); i++) {
+        new_v[i]= (*this)(i);
+      }
      
+      return Geometry::Simplex<R>(new_v);
+    }
+
     template <typename R>
     Geometry::Rectangle<R>
     AffineMap<R>::operator() (const Geometry::Rectangle<R>& r) const
@@ -118,12 +143,34 @@ namespace Ariadne {
     }
      
     template <typename R>
-    Geometry::Parallelopiped<R>
-    AffineMap<R>::operator() (const Geometry::Parallelopiped<R>& p) const
+    Geometry::Parallelotope<R>
+    AffineMap<R>::operator() (const Geometry::Parallelotope<R>& p) const
     {
-      return Geometry::Parallelopiped<R>(this->A()*p.centre()+this->b(),this->A()*p.generators());
+      const Matrix& A=this->A();
+      const Vector& c=p.centre();
+      Vector v=prod(m,c);
+      v+= this->b();
+      return Geometry::Parallelotope<R>(v,A*p.generators());
     }
+
+    template <typename R>
+    Geometry::Zonotope<R>
+    AffineMap<R>::operator() (const Geometry::Zonotope<R>& z) const
+    {
+      const Matrix& A=this->A();
+      const Vector& c=p.centre();
+      Vector v=prod(m,c);
+      v+= this->b();
+      return Geometry::Parallelotope<R>(v,A*p.generators());
+    }    
      
+    template <typename R>
+    Geometry::Polyhedron<R>
+    AffineMap<R>::operator() (const Geometry::Polyhedron<R>& p) const
+    {
+    	throw std::domain_error("AffineMap<R>::operator() (const Geometry::Polyhedron<R>& p) not implemented.");
+    }    
+
   }
 }
 

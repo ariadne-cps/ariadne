@@ -63,7 +63,7 @@ template <typename R>
 class Map {
  public:
   typedef R Real;
-  typedef Geometry::Point<R> State;
+  typedef Geometry::Point<R> Point;
   typedef LinearAlgebra::vector<R> Vector;
   typedef LinearAlgebra::matrix<R> Matrix;
   typedef LinearAlgebra::matrix< Interval<R> > IntervalMatrix;
@@ -71,7 +71,7 @@ class Map {
   virtual ~Map() { }
   
   // I'm not sure if virtual functions are the way to go here; too restrictive? //
-  virtual State apply(const State& x) const {
+  virtual Point apply(const Point& x) const {
     throw std::invalid_argument("Not implemented."); }
 
   virtual Geometry::Rectangle<R> apply(const Geometry::Rectangle<R>& A) const {
@@ -79,7 +79,7 @@ class Map {
   virtual Geometry::Polyhedron<R> apply(const Geometry::Polyhedron<R>& A) const {
     throw std::invalid_argument("Not implemented."); }
 
-  virtual Matrix derivative(const State& r) const {
+  virtual Matrix derivative(const Point& r) const {
     throw std::invalid_argument("Derivative at point not implemented."); }
   virtual LinearAlgebra::matrix< Interval<R> > derivative(const Geometry::Rectangle<R>& r) const {
     throw std::invalid_argument("Derivative on Rectangle not implemented."); }
@@ -108,8 +108,8 @@ class ThresholdMap {
   typedef MAP Map;
   typedef typename Map::DenotableSet DenotableSet;
   typedef typename DenotableSet::BasicSet BasicSet;
-  typedef typename BasicSet::State State;
-  typedef typename State::Real Real;
+  typedef typename BasicSet::Point Point;
+  typedef typename Point::Real Real;
   
   ThresholdMap(const Map& T, const BasicSet& threshold)
     : _map(T), _threshold(threshold) {}

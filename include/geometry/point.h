@@ -52,11 +52,10 @@ namespace Ariadne {
     template <typename R>
     class Point {
      public:
-      typedef ::Ariadne::LinearAlgebra::vector<R> Vector;
+      typedef Ariadne::LinearAlgebra::vector<R> Vector;
 
       typedef R Real;
       typedef Real value_type;
-      typedef size_t size_type;
       typedef Vector difference_type;
      private:
       /*! \brief The vector defining the state */
@@ -65,14 +64,14 @@ namespace Ariadne {
      public:
       Point() : _vector(0) { }
 
-      Point(size_type dim) : _vector(dim) {
-        for(size_type i=0; i!=dimension(); ++i) {
+      Point(size_t dim) : _vector(dim) {
+        for(size_t i=0; i!=dimension(); ++i) {
           _vector[i]=Real(0);
         }
       }
 
-      Point(size_type dim, const Real default_value) : _vector(dim) {
-        for(size_type i=0; i!=dimension(); ++i) {
+      Point(size_t dim, const Real default_value) : _vector(dim) {
+        for(size_t i=0; i!=dimension(); ++i) {
           _vector[i]=default_value;
         }
       }
@@ -80,7 +79,7 @@ namespace Ariadne {
       template<class ForwardIterator>
       Point(ForwardIterator b, ForwardIterator e) : _vector(std::distance(b,e))
       {
-        for(size_type i=0; i!=dimension(); ++i) {
+        for(size_t i=0; i!=dimension(); ++i) {
           _vector[i]=*b;
           ++b;
         }
@@ -91,15 +90,19 @@ namespace Ariadne {
 
       Point(const Point& original) : _vector(original._vector) { }
 
-      inline Real& operator[] (size_type index) {
-        if (((this->_vector).size() <= index)||(index<0)) {
+      inline Real& operator[] (size_t index) {
+        if ((this->_vector).size() <= index) { 
+	 /* Since index has type  size_t there is no need to check whever
+	      index < 0 or not */ 
           throw std::out_of_range("Out of the vector's range.");
         }
         return  (this->_vector[index]);
       }
 
       inline const Real& operator[](size_t index) const {
-        if (((this->_vector).size() <= index)||(index<0)) {
+        if ((this->_vector).size() <= index) { 
+	   /* Since index has type  size_t there is no need to check whever
+	      index < 0 or not */ 	
             throw std::out_of_range("Out of the vector's range.");
         }
         return  (this->_vector[index]);
@@ -135,14 +138,18 @@ namespace Ariadne {
       }
 
       inline Real get(size_t index) const {
-        if (((this->_vector).size() <= index)||(index<0)) {
+        if ((this->_vector).size() <= index) { 
+	   /* Since index has type  size_t there is no need to check whever
+	      index < 0 or not */ 
             throw std::out_of_range("Out of the vector's range.");
         }
         return  (this->_vector[index]);
       }
 
       inline void set(size_t index, const Real& r) {
-        if (((this->_vector).size() <= index) || (index<0)) {
+        if ((this->_vector).size() <= index) {
+	    /* Since index has type  size_t there is no need to check whever
+	      index < 0 or not */ 
             throw std::out_of_range("Out of the vector's range.");
         }
         this->_vector[index]=r;

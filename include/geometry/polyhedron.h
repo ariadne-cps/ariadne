@@ -372,12 +372,6 @@ class Polyhedron {
   
     /* This is mutable since we do not compute it unless needed */
     mutable Parma_Polyhedra_Library::NNC_Polyhedron _interior_poly;
-  private:
-    template <typename STATE>
-    friend class PolyhedronMatlabExporter;
-    
-    template <typename STATE>
-    friend class PolyhedronOneDimMatlabExporter;
 };
 
 

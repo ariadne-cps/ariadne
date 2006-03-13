@@ -57,8 +57,8 @@ namespace Ariadne {
     template < typename R > class Polyhedron;
     template < typename R, template <typename> class BS > class ListSet;
 
-    template<typename R> Zonotope<R> minkowski_sum(const Zonotope<R>& A, const Zonotope& b);
-    template<typename R> Zonotope<R> minkowski_difference(const Zonotope<R>& A, const Zonotope& b);
+    template<typename R> Zonotope<R> minkowski_sum(const Zonotope<R>& A, const Zonotope<R>& B);
+    template<typename R> Zonotope<R> minkowski_difference(const Zonotope<R>& A, const Zonotope<R>& B);
 
     template<typename R> bool interiors_intersect(const Zonotope<R>& A, const Zonotope<R>& B);
     template<typename R> bool disjoint(const Zonotope<R>& A, const Zonotope<R>& B);
@@ -80,8 +80,16 @@ namespace Ariadne {
      */
     template <typename R>
     class Zonotope {
+       /*! \brief Performs the Minkoswi difference of two zonotopes */
+      friend Zonotope<R> minkowski_difference <> (const Zonotope<R>& A,
+                                          const Zonotope<R>& B);
+
+       /*! \brief Performs the Minkoswi sum of two zonotopes */
+      friend Zonotope<R> minkowski_sum <> (const Zonotope<R>& A,
+                                          const Zonotope<R>& B);
+       
        /*! \brief Tests intersection of interiors. */
-      friend bool interiors_intersect <> (const Parallelopiped<R>& A,
+      friend bool interiors_intersect <> (const Zonotope<R>& A,
                                           const Zonotope<R>& B);
 
        /*! \brief Tests disjointness */
@@ -111,44 +119,55 @@ namespace Ariadne {
                                            const ListSet<R,::Ariadne::Geometry::Zonotope>& B);
 
      public:
-      /*! \brief The unsigned integer type used to denote the array positions. */
-      typedef size_t size_type;
       /*! \brief The type of denotable real number used for the corners. */
       typedef R Real;
-      /*! \brief The type of denotable state contained by the rectangle. */
-      typedef Point<R> State;
+      /*! \brief The type of denotable point contained by the rectangle. */
+      typedef Point<R> Point;
+      /*! \brief The type of vectors. */
+      typedef Ariadne::LinearAlgebra::vector<R> Vector;
       /*! \brief The type of matrix giving principal directions. */
-      typedef ::Ariadne::LinearAlgebra::vector<R> Vector;
-      /*! \brief The type of matrix giving principal directions. */
-      typedef ::Ariadne::LinearAlgebra::matrix<R> Matrix;
+      typedef Ariadne::LinearAlgebra::matrix<R> Matrix;
      private:
       /* Zonotope's centre. */
-      State _centre;
+      Point _centre;
       
       /* Zonotope's principal directions. */
       Matrix _generators;
-      
+     
      public:
-      /*! \brief Default constructor constructs an empty parallelopiped of dimension \a n. */
-      explicit Zonotope(size_type n = 0)
-        : _centre(n),  _generators(n,0) 
-      {
-      }
+      /*! \brief Default constructor constructs an empty zonotope of dimension \a n. */
+      explicit Zonotope(size_t n = 0)
+        : _centre(n),  _generators(n,0) { }
       
       /*! \brief Construct from centre and directions. */
-      explicit Zonotope(const State& c, const Matrix& m)
-        : _centre(c), _generators(m)
+      explicit Zonotope(const Point& c, const Matrix& m)
+        : _centre(c)
       {
-        if (c.dimension()!=LinearAlgebra::number_of_rows(m)) {
+	using namespace Ariadne::LinearAlgebra;
+	
+	if (c.dimension()!=number_of_rows(m)) {
           throw std::domain_error(
-              "The the matrix of principal directions does not have the same number of rows as the state dimension.");
+              "The the matrix of principal directions does not have the same number of rows as the point dimension.");
         }
-        
+
+        this->_generators= remove_null_columns_but_one(m);
       }
-      
-      /*! \brief Construct from a Rectangle. */
-      explicit Zonotope(const Rectangle<Real>& r);
-      
+       
+      /*! \brief Construct from a rectangle. */
+      explicit Zonotope(const Rectangle<Real>& r)
+        : _centre(r.dimension())
+      {
+        if(r.lower_bound(0) > r.upper_bound(0)) {
+	  this->_generators=Matrix(r.dimension(),0);
+	}
+	      
+	this->_generators=Matrix(r.dimension(),r.dimension());
+        for(size_t i=0; i!=dimension(); ++i) {
+          this->_centre[i] = (r.lower_bound(i)+r.upper_bound(i))/2;
+          this->_generators(i,i) = (r.upper_bound(i)-r.lower_bound(i))/2;
+        }
+      }
+
       /*! \brief Construct from a string literal. */
       explicit Zonotope(const std::string& s)
         : _centre(), _generators()
@@ -172,43 +191,54 @@ namespace Ariadne {
         return *this;
       }
       
-      /*! \brief A rectangle containing the given parallelopiped. */
+      /*! \brief A rectangle containing the given zonotope. */
       inline Rectangle<R> bounding_box() const {
         Vector offset(this->dimension());
-        for(size_type i=0; i!=this->dimension(); ++i) {
-          for(size_type j=0; i!=this->dimension(); ++j) {
-            offset[i] += abs(this->_generators(i,j));
+	
+        for(size_t i=0; i!=this->dimension(); ++i) {
+          for(size_t j=0; j!=number_of_columns(this->_generators); ++j) {
+	     offset(i) += abs(this->_generators(i,j));
           }
         }
-        return Rectangle<R>(this->centre()+offset, this->centre()-offset);
+	
+        return Rectangle<R>(this->centre()-offset, this->centre()-offset);
       }
       
       /*! \brief Convert to a polyhedron. */
       inline operator Polyhedron<R> () const;
       
-      /*! \brief The dimension of the Euclidean space the parallelopiped lies in. */
-      inline size_type dimension() const {
+      /*! \brief The dimension of the Euclidean space the zonotope lies in. */
+      inline size_t dimension() const {
         return (this->_centre).dimension();
       }
       
-      /*! \brief True if the parallelopiped is empty. */
+      /*! \brief True if the zonotope is empty. */
       inline bool empty() const {
-        throw std::domain_error("Zonotope::empty() not implemented.");
+      	if (number_of_columns(this->_generators)==0) return true;
+	return false;
       }
       
-      /*! \brief True if the parallelopiped has empty interior. */
+      /*! \brief True if the zonotope has empty interior. */
       inline bool empty_interior() const {
-        throw std::domain_error("Zonotope::empty_interior() not implemented.");
+ 	using namespace Ariadne::LinearAlgebra;
+
+        return !independent_rows(this->_generators);
       }
       
-      /*! \brief The centre of the parallelopiped. */
-      inline State centre() const {
+      /*! \brief The centre of the zonotope. */
+      inline Point centre() const {
         return this->_centre;
       }
       
       /*! \brief The \a n th of principle direction. */
-      inline Vector principle_direction(size_type n) const {
-        return matrix_column(this->_generators);
+      inline Vector principle_direction(size_t n) const {
+	Vector out(this->dimension());
+
+	for (int i=0; i!=this->dimension(); ++i) {
+	   out(i)=this->_generators(i,n);
+        }
+	
+        return out;
       }
       
       /*! \brief The matrix of principle directions. */
@@ -216,39 +246,31 @@ namespace Ariadne {
         return this->_generators;
       }
       
-      /*! \brief Tests if the parallelopiped contains \a state. */
-      inline bool contains(const State& state) const {
-        if (state.dimension()!=this->dimension()) {
+      /*! \brief Tests if the zonotope contains \a point. */
+      inline bool contains(const Point& point) const {
+        if (point.dimension()!=this->dimension()) {
           throw std::domain_error("This object and parameter have different space dimensions");
         }  
         
+	const Matrix &gen=this->_generators;
+	
         if (this->empty()) { return false; }
-          
-        Vector v=coordinates(state);
-        for (size_type i=0; i<v.size(); ++i) {
-          if(v[i]<-1 || v[i]>+1) {
-            return false;
-          }
-        }
-      
+	      
+        throw std::domain_error("Zonotope::contains(...)  not implemented");
+	
         return true;
       }
       
-      /*! \brief Tests if the interior of the parallelopiped contains \a state. */
-      inline bool interior_contains(const State& state) const {
-        if (state.dimension()!=this->dimension()) {
+      /*! \brief Tests if the interior of the zonotope contains \a point. */
+      inline bool interior_contains(const Point& point) const {
+	if (point.dimension()!=this->dimension()) {
          throw std::domain_error("This object and parameter have different space dimensions");
         } 
       
-        if (this->empty()) { return false; }
-        
-        Vector v=coordinates(state);
-        for (size_type i=0; i<v.size(); ++i) {
-          if(v[i]<=-1 || v[i]>=+1) {
-            return false;
-          }
-        }
-      
+        if (this->empty_interior()) { return false; }
+     	
+	throw std::domain_error("Zonotope::interior_contains(...)  not implemented");
+
         return true;
       }
       
@@ -264,7 +286,6 @@ namespace Ariadne {
       
       /*! \brief The inequality operator */
       inline bool operator!=(const Zonotope<Real>& A) const {
-        throw std::domain_error("Zonotope::operator!=(...)  not implemented");
         return !(*this == A);
       }
 
@@ -281,47 +302,36 @@ namespace Ariadne {
       inline void compute_linear_inequalities(Matrix&, Vector&, Vector&) const;
     };
   
-    using namespace ::Ariadne::LinearAlgebra;
-    
     template<typename R>
     inline 
     void Zonotope<R>::compute_linear_inequalities(Matrix& A, Vector& o, Vector& b) const
     {
-      using namespace ::Ariadne::LinearAlgebra;
-      size_type n=this->dimension();
-      
-      Vector c=this->centre() - State(n,0);
+      /*
+      using namespace Ariadne::LinearAlgebra;
+      size_t n=this->dimension();
+      const Vector &c=(this->centre()).position_vector();
+
       //FIXME: can't use matrix inverse here
       A=inverse(this->principle_directions());
       o=A*c;
+
       b=vector<R>(n);
-      for(size_type i=0; i!=n; ++i) {
-        b[i]=1;
+      for(size_t i=0; i!=n; ++i) {
+        b(i)=1;
       }
+      */
+      throw std::domain_error("Zonotope::compute_linear_inequalities(...)  not implemented");	    
     }
       
-
-
-      
-    template <typename R>
-    Zonotope<R>::Zonotope(const Rectangle<Real>& r)
-      : _centre(r.dimension()), _generators(r.dimension(),r.dimension())
-    {
-      for(size_type i=0; i!=dimension(); ++i) {
-        _centre[i] = (r.lower_bound(i)+r.upper_bound(i))/2;
-        _generators(i,i) = (r.upper_bound(i)-r.lower_bound(i))/2;
-      }
-    }
-    
     template <typename R>
     Zonotope<R>::operator Polyhedron<R>() const 
     {
-      using namespace ::Ariadne::LinearAlgebra;
+      using namespace Ariadne::LinearAlgebra;
       
       typedef typename Zonotope<R>::Real Real;
-      typedef typename Zonotope<R>::State State;
+      typedef typename Zonotope<R>::Point Point;
       
-      size_type n = this->dimension();
+      size_t n = this->dimension();
       
       /* Express in form invs * x - offst in [-bnds,+bnds] */
       matrix<R> invs;
@@ -333,8 +343,8 @@ namespace Ariadne {
       matrix<R> A(2*n,n);
       vector<R> b(2*n);
       
-      for(uint i=0; i!=n; ++i) {
-        for(uint j=0; j!=n; ++j) {
+      for(size_t i=0; i!=n; ++i) {
+        for(size_t j=0; j!=n; ++j) {
           A(i,j) = -invs(i,j);
           A(i+n,j) = invs(i,j);
         }
@@ -344,21 +354,86 @@ namespace Ariadne {
       return Polyhedron<R>(A,b);
     }
 
+    /*! \brief Performs the Minkoswi sum of two zonotopes */
+    template<typename R> 
+    inline
+    Zonotope<R> minkowski_sum(const Zonotope<R>& A, const Zonotope<R>& B)
+    {
+      using namespace Ariadne::LinearAlgebra;
+     
+      if (A.dimension()!=B.dimension()) {
+          throw std::domain_error(
+              "minkowski_sum: the two zonotopes have different dimension.");
+      }
+      
+      dimension_type col_A=number_of_columns(A._generators), 
+		     col_B=number_of_columns(B._generators); 
+      
+      matrix<R> gen(A.dimension(), col_A+col_B);
 
+      for (size_t i=0; i!=col_A; ++i) {
+         for (size_t j=0; j!=A.dimension(); ++j) {
+	    gen(j,i)=A._generators(j,i);
+	 }
+      }
 
+      
+      for (size_t i=0; i!=col_B; ++i) {
+         for (size_t j=0; j!=A.dimension(); ++j) {
+	    gen(j,i+col_A)=B._generators(j,i);
+	 }
+      }
+      
+      return Zonotope<R>(A._centre+B._centre, remove_null_columns_but_one(gen));
+    }
+   
+    /*! \brief Performs the Minkoswi difference of two zonotopes */
+    template<typename R> 
+    inline
+    Zonotope<R> minkowski_difference(const Zonotope<R>& A, const Zonotope<R>& B)
+    {
+      using namespace Ariadne::LinearAlgebra;
+     
+      if (A.dimension()!=B.dimension()) {
+          throw std::domain_error(
+              "minkowski_difference: the two zonotopes have different dimension.");
+      }
+      
+      dimension_type col_A=number_of_columns(A._generators), 
+		     col_B=number_of_columns(B._generators); 
+      
+      matrix<R> gen(A.dimension(), col_A+col_B);
+
+      for (size_t i=0; i!=col_A; ++i) {
+         for (size_t j=0; j!=A.dimension(); ++j) {
+	    gen(j,i)=A._generators(j,i);
+	 }
+      }
+
+      
+      for (size_t i=0; i!=col_B; ++i) {
+         for (size_t j=0; j!=A.dimension(); ++j) {
+	    gen(j,i+col_A)=B._generators(j,i);
+	 }
+      }
+      
+      return Zonotope<R>(A._centre-B._centre, remove_null_columns_but_one(gen));
+    }
+
+    
     /*! \brief Tests disjointness */
     template <typename R>
     bool disjoint(const Zonotope<R>& A, const Zonotope<R>& B) 
     {
-      return !minkowski_difference(A,B).contains(State(A.dimension(),0))
-      }
-        
+      return !minkowski_difference(A,B).contains(Point<R>(A.dimension(),0));
+    }
+       
     /*! \brief Tests intersection of interiors */
     template <typename R>
     bool interiors_intersect(const Zonotope<R>& A,
                              const Zonotope<R>& B) 
     {
-      return !minkowski_sum(A,B).interior_contains(State(A.dimension(),0));
+      return !minkowski_sum(A,B).interior_contains(Point<R>(A.dimension(),0));
     }
     
     

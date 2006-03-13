@@ -126,13 +126,13 @@ namespace Ariadne {
       /*! \brief The type of denotable real number used for the corners. */
       typedef R Real;
       /*! \brief The type of denotable point contained by the rectangle. */
-      typedef Point<R> State;
+      typedef Point<R> Point;
      private:
       /* Rectangle's lower corner */
-      State _lower_corner;
+      Point _lower_corner;
       
       /* Rectangle's upper corner */
-      State _upper_corner;
+      Point _upper_corner;
       
      public:
       /*! \brief Default constructor construcs an empty rectangle of dimension \a n. */
@@ -150,18 +150,18 @@ namespace Ariadne {
       }
       
       /*! \brief Construct from two corners. */
-      Rectangle(const State& s1, const State& s2)
-        : _lower_corner(s1.dimension()), _upper_corner(s2.dimension())
+      Rectangle(const Point& p1, const Point& p2)
+        : _lower_corner(p1.dimension()), _upper_corner(p2.dimension())
       {
         /* Test to see if corners have same dimensions */
-        if (s1.dimension()!=s2.dimension()) {
+        if (p1.dimension()!=p2.dimension()) {
           throw std::domain_error("The parameters have different space dimensions");
         }
         
         /* Set coordinates */
         for (size_type i=0; i!=this->dimension(); ++i) {
-          this->_lower_corner[i]=std::min(s1[i],s2[i]);
-          this->_upper_corner[i]=std::max(s1[i],s2[i]);
+          this->_lower_corner[i]=std::min(p1[i],p2[i]);
+          this->_upper_corner[i]=std::max(p1[i],p2[i]);
         }
         
       }
@@ -220,12 +220,12 @@ namespace Ariadne {
       }
         
       /*! \brief The lower corner. */
-      inline State lower_corner() const {
+      inline Point lower_corner() const {
         return this->_lower_corner;
       }
       
       /*! \brief The upper corner. */
-      inline State upper_corner() const {
+      inline Point upper_corner() const {
         return this->_upper_corner;
       }
       
@@ -271,17 +271,17 @@ namespace Ariadne {
       }
       
       /*! \brief Tests if \a point is included into a rectangle. */
-      inline bool contains(const State& point) const {
+      inline bool contains(const Point& p) const {
         
-        if (point.dimension()!=this->dimension())
+        if (p.dimension()!=this->dimension())
           throw std::domain_error("This object and parameter have different space dimensions");
         
         if (this->empty()) return false;
         
         /* for each dimension i */
         for (size_type i=0; i<this->dimension(); i++) {
-          if (point[i] < this->_lower_corner[i]) { return false; }
-          if (point[i] > this->_upper_corner[i]) { return false; }
+          if (p[i] < this->_lower_corner[i]) { return false; }
+          if (p[i] > this->_upper_corner[i]) { return false; }
         }
         
         return true;
@@ -289,17 +289,17 @@ namespace Ariadne {
       }
       
       /*! \brief Tests if \a point is included into the interior a rectangle. */
-      inline bool interior_contains(const State& point) const {
+      inline bool interior_contains(const Point& p) const {
         
-        if (point.dimension()!=this->dimension())
+        if (p.dimension()!=this->dimension())
           throw std::domain_error("This object and parameter have different space dimensions");
         
         if (this->empty()) return false;
         
         /* for each dimension i */
         for (size_type i=0; i<this->dimension(); i++) {
-          if (point[i] >= this->_upper_corner[i]) { return false; }
-          if (point[i] <= this->_lower_corner[i]) { return false; }
+          if (p[i] >= this->_upper_corner[i]) { return false; }
+          if (p[i] <= this->_lower_corner[i]) { return false; }
         }
         
         return true;

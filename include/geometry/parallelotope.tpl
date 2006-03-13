@@ -53,13 +53,12 @@ namespace Ariadne {
     Parallelotope<R>::bounding_box() const 
     {
       Vector offset(this->dimension());
-      for(size_type i=0; i!=this->dimension(); ++i) {
-        for(size_type j=0; j!=this->dimension(); ++j) {
+      for(size_t i=0; i!=this->dimension(); ++i) {
+        for(size_t j=0; j!=this->dimension(); ++j) {
           offset[i] += abs(this->_generators(i,j));
         }
       }
-      Rectangle<R> result(this->centre()+offset, this->centre()-offset);
-      return result;
+      return Rectangle<R>(this->centre()-offset, this->centre()+offset);
     }
       
     
@@ -69,7 +68,7 @@ namespace Ariadne {
       using namespace ::Ariadne::LinearAlgebra;
       
       typedef typename Parallelotope<R>::Real Real;
-      typedef typename Parallelotope<R>::State State;
+      typedef typename Parallelotope<R>::Point Point;
       
       size_type n = this->dimension();
       
@@ -103,7 +102,7 @@ namespace Ariadne {
       ListSet<R,Geometry::Parallelotope> result(this->dimension());
       Matrix new_generators=this->generators()/2;
       
-      State first_centre=this->centre();
+      Point first_centre=this->centre();
       for(size_type i=0; i!=n; ++i) {
         first_centre=first_centre-(this->generator(i))/2;
       }
@@ -116,7 +115,7 @@ namespace Ariadne {
 
       for(lattice_iterator iter(lower,lower,upper); iter!=end; ++iter) {
         array<index_type> ary=*iter;
-        State new_centre=first_centre;
+        Point new_centre=first_centre;
         for(size_type i=0; i!=n; ++i) {
           if(ary[i]==1) {
             new_centre=new_centre+this->generator(i);
@@ -134,11 +133,13 @@ namespace Ariadne {
     Parallelotope<R>::compute_linear_inequalities(Matrix& A, Vector& o, Vector& b) const
     {
       using namespace ::Ariadne::LinearAlgebra;
-      size_type n=this->dimension();
       
-      Vector c=this->centre() - State(n,0);
+      size_type n=this->dimension();
+      Vector c=(this->centre()).position_vector();
+      
       A=inverse(this->generators());
       o=A*c;
+      
       b=vector<R>(n);
       for(size_type i=0; i!=n; ++i) {
         b[i]=1;
@@ -170,7 +171,7 @@ namespace Ariadne {
         }
       }
 
-      Vector c = this->centre() - State(n,0);
+      Vector c = this->centre() - Point(n,0);
       o = A * c;
       
       b.resize(n);
@@ -183,9 +184,9 @@ namespace Ariadne {
   
     template<typename R>
     typename Parallelotope<R>::Vector 
-    Parallelotope<R>::coordinates(const State& s) const {
-      Vector diff = s-_centre;
-      Matrix inv = LinearAlgebra::inverse(_generators);
+    Parallelotope<R>::coordinates(const Point& s) const {
+      Vector diff = s-this->_centre;
+      Matrix inv = LinearAlgebra::inverse(this->_generators);
       return prod(inv,diff);
     }
 

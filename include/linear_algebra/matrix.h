@@ -48,7 +48,13 @@ namespace Ariadne {
     using boost::numeric::ublas::matrix;
     using boost::numeric::ublas::matrix_row;
     using boost::numeric::ublas::matrix_column;
-        
+  
+    class SingularMatrix{
+    public:
+       SingularMatrix(){}
+       ~SingularMatrix(){}    
+    };
+    
     template <typename Real>
     matrix< Interval<Real> > 
     prod(const matrix< Interval<Real> >& A, const matrix<Real>& B) {
@@ -165,25 +171,25 @@ namespace Ariadne {
                  vector<dimension_type> &p_vect) 
     {
       Real max,sum,p_val;
-      dimension_type i,j,k, size=A.size1(), pivot=0;
+      dimension_type i,j,k, rows=A.size1(), cols=A.size2(), pivot=0;
       
-      vector<Real> scale(size);
+      vector<Real> scale(rows);
       matrix<Real> O=A;
       
-      for (i=0; i<size; i++) {
+      for (i=0; i<rows; i++) {
         max=0.0;
-        for (j=0; j<size; j++) {
+        for (j=0; j<cols; j++) {
           if (abs(O(i,j)) > max ) {
             max=abs(O(i,j));
           }
         }
         if (max==0) {
-          throw std::invalid_argument("The input matrix is singular");
+          throw SingularMatrix();
         }
         scale(i)=1.0/max;
       }
       
-      for (j=0; j<size; j++) {
+      for (j=0; j<cols && j<rows; j++) {
         for (i=0; i<j; i++) {
           sum=O(i,j);
           for (k=0; k<i; k++) {
@@ -194,7 +200,7 @@ namespace Ariadne {
         
         max=0.0;
         
-        for (i=j; i<size; i++) {
+        for (i=j; i<rows; i++) {
           sum=O(i,j);
           for (k=0; k<j; k++) {
             sum -= O( i , k ) * O( k , j );
@@ -208,22 +214,22 @@ namespace Ariadne {
         }
         
         if (j != pivot ) {
-          for (k=0; k<size; k++) {
+          for (k=0; k<cols; k++) {
             p_val=O(pivot,k);
             O(pivot,k)=O(j,k);
             O(j,k)=p_val;
           }
           scale(pivot)=scale(j);
         }
-        
+      
         p_vect(j)=pivot;
         
         if ( O(j,j) == 0 ) {
-          throw std::invalid_argument("The input matrix is singular");
+          throw SingularMatrix();
         }
     
-        if (j < size-1) {
-          for (i=j+1;i<size; i++) {
+        if (j < cols-1) {
+          for (i=j+1;i<rows; i++) {
             O(i,j)=O(i,j)/O(j,j);
           }
         }
@@ -242,40 +248,46 @@ namespace Ariadne {
              const vector<dimension_type> &p_vect, 
              const vector<Real> &b) 
     {
-      dimension_type i_diag=0, idx_p, size=A.size1(),i,j;
+      dimension_type i_diag=0, idx_p, rows=A.size1(), cols=A.size2(),i,j;
       Real sum;
-      vector<Real> sol=b;
-    
-      for (i=0; i<size; i++) {
-        idx_p=p_vect(i);
-        
-        sum=sol(idx_p);
-        sol(idx_p)=b(i);
-        
-        if (i_diag!=0) {
-          for (j=i_diag-1; j<i; j++){
-            
-            sum -= (A( i , j ) * sol (j));
-          }
-        } else {
-          if (sum!=0) {
-            i_diag=i+1;
-          }
-        }
-        
-        sol(i)=sum;
-        
+      vector<Real> sol(cols);
+   
+      for (i=0; i<rows&& i<cols; i++) {
+        sol(i)=b(i);
       }
       
-      for (idx_p=0; idx_p<size; idx_p++){
-        i=(size-1)-idx_p;
+      for (i=0; i<rows; i++) {
+        idx_p=p_vect(i);
+       
+	if (idx_p < cols) {
+          sum=sol(idx_p);
+          sol(idx_p)=b(i);
         
-        sum=sol(i);
-        for (j=i+1; j< size; j++){
-          sum -= A(i,j) * sol(j);
-        }
+          if (i_diag!=0) {
+            for (j=i_diag-1; j<i; j++){
+              if (j< cols) sum -= (A( i , j ) * sol (j));
+            }
+          } else {
+            if (sum!=0) {
+              i_diag=i+1;
+            }
+          }
         
-        sol(i) = sum / A(i,i);
+          if (i< cols) sol(i)=sum;
+        }  
+      }
+      
+      for (idx_p=0; idx_p<rows; idx_p++){
+        i=(rows-1)-idx_p;
+        
+        if ((i<cols)&&(i<rows)) {
+	  sum=sol(i);
+          for (j=i+1; j< cols; j++){
+            sum -= A(i,j) * sol(j);
+          }
+        
+          sol(i) = sum / A(i,i);
+	}
       }
       
       return sol;
@@ -353,24 +365,24 @@ namespace Ariadne {
     matrix<Real> 
     inverse(const matrix<Real> &A) {
       
-      dimension_type size=A.size1(),i,j;
+      dimension_type rows=A.size1(), cols=A.size2(),i,j;
       
-      matrix<Real> inv_A(size,size);
-      vector<Real> Id_vect(size), Id_sol;
-      vector<dimension_type> p_vect(size);
+      matrix<Real> inv_A(cols,rows);
+      vector<Real> Id_vect(rows), Id_sol;
+      vector<dimension_type> p_vect(rows);
       
-      
+
       matrix<Real> lu_A=lu_decompose(A, p_vect);
-      
-      for (j=0; j<size; j++) {
-        for (i=0; i<size; i++)
+     
+      for (j=0; j<rows; j++) {
+        for (i=0; i<rows; i++)
           Id_vect(i)=0.0;
         
         Id_vect(j)=1.0;
-        
+
         Id_sol=lu_solve(lu_A,p_vect,Id_vect);
         
-        for (i=0; i<size; i++)
+        for (i=0; i<cols; i++)
           inv_A(i,j)=Id_sol(i);
       }
       
@@ -471,7 +483,63 @@ namespace Ariadne {
       A=prod(A,rTinv);
       b=b*rmultiplier;
     }
+   
+    template <class T>
+    inline bool independent_rows(matrix<T> A) {
+     const size_t rows = A.size1(),cols = A.size2();
+     size_t i,j,i2,j2;
+
+      if (rows > cols) return false;
     
+      for ( i=0; i<rows; i++) {
+        j=0;
+        while (A(i,j)==0) {
+          j++; 
+          if (j >= cols) return false;
+        }
+        for (i2=i+1; i2<rows; i2++) {
+          for (j2=0; j2<cols; j2++) {
+            A(i2,j2)= A(i2,j2) - ((A(i,j2) * A(i2,j))/A(i,j));
+          }
+        }
+      }
+
+      return true;
+    } 
+   
+    template <class T>
+    inline
+    matrix<T> remove_null_columns_but_one(const matrix<T> &A) {
+	size_t point=0,directions=0;
+	size_t cols=number_of_columns(A), 
+	       rows=number_of_rows(A);
+	array<bool> null_v(cols);
+
+	if (cols==0) {
+	  return A;
+	}
+	
+        for(size_t j=0; j!=cols; ++j) {
+	  valid[j]=false;
+	  for(size_t i=0; i!=rows; ++i) {
+            if (A(i,j)!=0.0) { null_v[j]=true; }
+          }
+	  if (null_v[j]) { directions++; }
+        }
+
+	Matrix new_A(rows,std::max((size_t)1,directions));
+	
+	for(size_t j=0; j!=cols; ++j) {
+	  if (null_v[j]) { 
+	    for(size_t i=0; i!=rows; ++i) {
+	      new_A(i,point)=A(i,j);
+	    }
+	    point++;
+          }
+        }
+	
+	return new_A;
+      }
   }
 }
 

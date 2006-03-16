@@ -520,14 +520,14 @@ namespace Ariadne {
 	}
 	
         for(size_t j=0; j!=cols; ++j) {
-	  valid[j]=false;
+	  null_v[j]=false;
 	  for(size_t i=0; i!=rows; ++i) {
             if (A(i,j)!=0.0) { null_v[j]=true; }
           }
 	  if (null_v[j]) { directions++; }
         }
 
-	Matrix new_A(rows,std::max((size_t)1,directions));
+	matrix<T> new_A(rows,std::max((size_t)1,directions));
 	
 	for(size_t j=0; j!=cols; ++j) {
 	  if (null_v[j]) { 

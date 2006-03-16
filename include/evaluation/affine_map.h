@@ -148,7 +148,7 @@ namespace Ariadne {
     {
       const Matrix& A=this->A();
       const Vector& c=p.centre();
-      Vector v=prod(m,c);
+      Vector v=prod(A,c);
       v+= this->b();
       return Geometry::Parallelotope<R>(v,A*p.generators());
     }
@@ -158,10 +158,10 @@ namespace Ariadne {
     AffineMap<R>::operator() (const Geometry::Zonotope<R>& z) const
     {
       const Matrix& A=this->A();
-      const Vector& c=p.centre();
-      Vector v=prod(m,c);
+      const Vector& c=z.centre();
+      Vector v=prod(A,c);
       v+= this->b();
-      return Geometry::Parallelotope<R>(v,A*p.generators());
+      return Geometry::Zonotope<R>(v,A*z.generators());
     }    
      
     template <typename R>

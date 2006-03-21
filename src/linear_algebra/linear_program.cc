@@ -1,12 +1,15 @@
 /***************************************************************************
- *            python/linear_algebra_module.cc
+ *            linear_program.cc
  *
- *  17 November 2005
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2006  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it Pieter.Collins@cwi.nl
  ****************************************************************************/
-
 /*
+ * Based on the linear programming algorithms in PPL-0.8
+ *   Copyright (C) 2001-2006 Roberto Bagnara <bagnara@cs.unipr.it>
+ */
+
+ /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
@@ -21,23 +24,18 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+ 
+#include "linear_algebra/linear_program.h"
+#include "linear_algebra/linear_program.tpl"
 
-#include <boost/python.hpp>
+namespace Ariadne {
+  namespace LinearAlgebra {
+    
+    template class LinearProgram<Dyadic>;
+    template std::ostream& operator<<(std::ostream&, const LinearProgram<Dyadic>&);
 
-void export_vector();
-void export_matrix();
-void export_linear_program();
+    template class LinearProgram<Rational>;
+    template std::ostream& operator<<(std::ostream&, const LinearProgram<Rational>&);
 
-void export_interval_vector();
-void export_interval_matrix();
-
-
-BOOST_PYTHON_MODULE(linear_algebra)
-{
-  export_vector();
-  export_matrix();
-  export_linear_program();
-  
-  export_interval_vector();
-  export_interval_matrix();
+  }
 }

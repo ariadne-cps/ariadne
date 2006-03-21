@@ -31,7 +31,7 @@
 
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
-#include <boost/numeric/ublas/io.hpp>
+//#include <boost/numeric/ublas/io.hpp>
 
 #include "../base/basic_type.h"
 #include "../base/numerical_type.h"
@@ -63,6 +63,24 @@ namespace Ariadne {
 
   }
 }
+
+
+namespace boost { namespace numeric { namespace ublas {
+    template <typename Real>
+    std::ostream&
+    operator<<(std::ostream& os, const vector<Real>& v)
+    {
+      os << "[";
+      if(v.size()>0) {
+        os << v[0];
+      }
+      for(uint i=1; i!=v.size(); ++i) {
+        os << "," << v[i];
+      }
+      os << "]";
+      return os;
+    }
+}}}
 
 
 #endif /* _ARIADNE_VECTOR_H */

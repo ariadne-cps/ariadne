@@ -36,7 +36,8 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
-#include "../linear_algebra/constraint.h"
+//#include "../linear_algebra/constraint.h"
+#include "../linear_algebra/linear_program.h"
 
 #include "../geometry/lattice_set.h" 
 #include "../geometry/point.h"
@@ -65,6 +66,7 @@ namespace Ariadne {
     template <typename R>
     Parallelotope<R>::operator Polyhedron<R>() const 
     {
+      std::cerr << "Parallelotope<" << name<R>() << "<::operator Polyhedron<" << name<R>() << ">() const" << std::endl;
       using namespace ::Ariadne::LinearAlgebra;
       
       typedef typename Parallelotope<R>::Real Real;
@@ -93,7 +95,41 @@ namespace Ariadne {
       return Polyhedron<R>(A,b);
     }
 
-
+    template <typename R>
+    bool 
+    Parallelotope<R>::contains(const Point& point) const 
+    {
+      if (point.dimension()!=this->dimension()) {
+        throw std::domain_error("This object and parameter have different space dimensions");
+      }  
+        
+      Vector c=coordinates(point);
+      for(dimension_type i=0; i!=this->dimension(); ++i) {
+        if(c[i]<-1 || c[i]>1) {
+          return false;
+        }
+      }
+      return true;
+    }
+    
+    template <typename R>
+    bool 
+    Parallelotope<R>::interior_contains(const Point& point) const {
+      if (point.dimension()!=this->dimension()) {
+        throw std::domain_error("This object and parameter have different space dimensions");
+      }  
+        
+      Vector c=coordinates(point);
+      for(dimension_type i=0; i!=this->dimension(); ++i) {
+        if(c[i]<=-1 || c[i]>=1) {
+          return false;
+        }
+      }
+      return true;
+    }
+      
+      
+      
     template <typename R>
     ListSet<R,Parallelotope>
     Parallelotope<R>::subdivide() const 
@@ -190,7 +226,81 @@ namespace Ariadne {
       return prod(inv,diff);
     }
 
+    template<typename R>
+    bool
+    Parallelotope<R>::disjoint(const Rectangle<R>& r) const
+    {
+      //std::cerr << "Parallelotope<" << name<R>() << ">::disjoint(const Rectangle<" << name<R>() << ">& r) const" << std::endl;
+      assert(this->dimension()==r.dimension());
+      dimension_type n=this->dimension();
+      
+      // Construct tableau for testing intersection of rectangle and point
+      // Rectangle  a<=x<=b
+      // Parallelotope  x==c+Ae,  -1<=e<=1
+      // 
+      // Translate x'=x-a,  e'=e+1
+      //   0<=x'<=b-a
+      //   0<=e'<=2
+      //   x'+a==c+A(e'-1) ->  x'-Ae' == c-a-A1
+      //  
+      // Introduce slack variables for first two inequalities
+      // Introduce auxiliary variables for last equality, changing sign of RHS if necessary
+      // 
+      // Need to minimise sum of auxiliary variables -> add sum of last rows 
+      // to get value function.
+      LinearAlgebra::matrix<Rational> T(3*n+1,2*n+1);
 
+      const Geometry::Point<R>& a=r.lower_corner();
+      const Geometry::Point<R>& b=r.upper_corner();
+      const Geometry::Point<R>& c=this->centre();
+      const LinearAlgebra::matrix<R>& A=this->generators();
+
+      for(size_type i=0; i!=n; ++i) {
+        T(i,i)=1;
+        T(i,2*n)=Rational(b[i])-Rational(a[i]);
+        T(n+i,n+i)=1;
+        T(n+i,2*n)=2;
+
+        // Compute rhs = c[i]-a[i]-(A*1)[i]
+        Rational rhs=Rational(c[i]) - Rational(a[i]);
+        for(size_type j=0; j!=n; ++j) {
+          rhs-=A(i,j);
+        }
+        
+        if(rhs>=0) {
+          T(2*n+i,i)=1;
+          for(size_type j=0; j!=n; ++j) {
+            T(2*n+i,n+j)=-A(i,j);
+          }
+          T(2*n+i,2*n)=rhs;
+        }
+        else {
+          T(2*n+i,i)=-1;
+          for(size_type j=0; j!=n; ++j) {
+            T(2*n+i,n+j)=A(i,j);
+          }
+          T(2*n+i,2*n)=-rhs;
+        }
+        for(size_type j=0; j!=2u*n; ++j) {
+          T(3*n,j)-=T(2*n+i,j);
+        }
+        T(3*n,2*n)-=T(2*n+i,2*n);
+      }
+      
+      LinearAlgebra::LinearProgram<Rational> lp(T);
+      
+      bool result=(lp.optimal_value()!=0);
+      /*
+      if(result!=Geometry::disjoint(Polyhedron<R>(*this), Polyhedron<R>(r))) {
+        std::cerr << "Incorrect result for \n  " << r << "\nand\n" << *this << "\n";
+        std::cerr << T << "\n" << lp.tableau() << "\n";
+        std::cerr << convert_to<double>(lp.tableau()(3*n,2*n)) << "\n";
+        assert(false);
+      }
+      */
+      return result;
+    }
+    
 
     template <typename R>
     std::ostream&
@@ -214,4 +324,3 @@ namespace Ariadne {
       
   }
 }
-

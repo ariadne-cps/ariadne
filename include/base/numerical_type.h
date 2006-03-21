@@ -151,6 +151,10 @@ namespace Ariadne {
   inline Integer denominator(const Rational& num){ 
     return num.get_den();}
 
+  inline Integer floor(const Rational& num){ 
+    return numerator(num)/denominator(num);
+  }
+  
   template<typename R> 
   inline
   R neg(const R& x) {
@@ -257,6 +261,12 @@ namespace Ariadne {
   template<> inline int convert_to(const Integer& n) { return n.get_si(); }
   template<> inline long convert_to(const Integer& n) { return n.get_si(); }
   
+  inline Rational approximate(const Rational& q, const Rational& e) {
+    //Rational r=floor(q);
+    return q;
+  }
+    
+    
   template <typename T> std::string name();
   template<> inline std::string name<double>() { return "double"; }
   template<> inline std::string name<Rational>() { return "Rational"; }

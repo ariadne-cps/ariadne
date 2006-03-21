@@ -56,7 +56,8 @@ parallelotope.o: parallelotope.cc ../../include/geometry/parallelotope.h \
   ../../include/geometry/../geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/geometry_declarations.h \
   ../../include/geometry/parallelotope.tpl \
-  ../../include/geometry/../linear_algebra/constraint.h \
+  ../../include/geometry/../linear_algebra/linear_program.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/geometry/../geometry/lattice_set.h \
   ../../include/geometry/../geometry/../base/array.h \
   ../../include/geometry/../geometry/../base/iterator.h \

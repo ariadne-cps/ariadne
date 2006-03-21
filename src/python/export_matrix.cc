@@ -36,8 +36,13 @@
 
 typedef size_t size_type;
 typedef Ariadne::Interval<Real> RInterval;
+typedef Ariadne::LinearAlgebra::vector<Real> RVector;
 typedef Ariadne::LinearAlgebra::matrix<Real> RMatrix;
 typedef Ariadne::LinearAlgebra::matrix< Ariadne::Interval<Real> > IMatrix;
+
+typedef Ariadne::Rational Rational;
+typedef Ariadne::LinearAlgebra::vector<Rational> QVector;
+typedef Ariadne::LinearAlgebra::matrix<Rational> QMatrix;
 
 using boost::python::class_;
 using boost::python::init;
@@ -49,6 +54,30 @@ using boost::python::copy_const_reference;
 
 using boost::python::tuple;
 using boost::python::extract;
+
+inline Rational qmatrix_getitem(const QMatrix& A, tuple index) {
+  uint i=extract<uint>(index[0]);
+  uint j=extract<uint>(index[1]);
+  return A(i,j);
+}
+
+inline void qmatrix_setitem(QMatrix& A, tuple index, Rational x) {
+  uint i=extract<uint>(index[0]);
+  uint j=extract<uint>(index[1]);
+  A(i,j)=x;
+}
+
+inline void qmatrix_setitem_from_real(QMatrix& A, tuple index, Real x) {
+  uint i=extract<uint>(index[0]);
+  uint j=extract<uint>(index[1]);
+  A(i,j)=Ariadne::convert_to<Rational>(x);
+}
+
+inline void qmatrix_setitem_from_double(QMatrix& A, tuple index, double x) {
+  uint i=extract<uint>(index[0]);
+  uint j=extract<uint>(index[1]);
+  A(i,j)=Ariadne::convert_to<Rational>(x);
+}
 
 inline Real rmatrix_getitem(const RMatrix& A, tuple index) {
   uint i=extract<uint>(index[0]);
@@ -66,6 +95,10 @@ inline void rmatrix_setitem_from_double(RMatrix& A, tuple index, double x) {
   uint i=extract<uint>(index[0]);
   uint j=extract<uint>(index[1]);
   A(i,j)=Ariadne::convert_to<Real>(x);
+}
+
+inline RVector rmatrix_vprod(const RMatrix& A, const RVector v) {
+  return prod(A,v);
 }
 
 inline RInterval imatrix_getitem(const IMatrix& A, tuple index) {
@@ -87,13 +120,23 @@ inline RMatrix rmatrix_inverse(const RMatrix& A) {
 void export_matrix() {
   class_<RMatrix>("Matrix",init<int,int>())
     .def(init<RMatrix>())
+    .def("__mul__",&rmatrix_vprod)
     .def("__getitem__",&rmatrix_getitem)
     .def("__setitem__",&rmatrix_setitem)
     .def("__setitem__",&rmatrix_setitem_from_double)
     .def(str(self))    // __str__
   ;
-  
+    
   def("inverse",&rmatrix_inverse);
+
+  class_<QMatrix>("QMatrix",init<int,int>())
+    .def(init<QMatrix>())
+    .def("__getitem__",&qmatrix_getitem)
+    .def("__setitem__",&qmatrix_setitem)
+    .def("__setitem__",&qmatrix_setitem_from_real)
+    .def("__setitem__",&qmatrix_setitem_from_double)
+    .def(str(self))    // __str__
+  ;
 }
 
 void export_interval_matrix() {

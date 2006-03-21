@@ -33,7 +33,7 @@
 #include <boost/numeric/ublas/vector_proxy.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
-#include <boost/numeric/ublas/io.hpp>
+//#include <boost/numeric/ublas/io.hpp>
 
 #include "../base/basic_type.h"
 #include "../base/numerical_type.h"
@@ -510,36 +510,37 @@ namespace Ariadne {
     template <class T>
     inline
     matrix<T> remove_null_columns_but_one(const matrix<T> &A) {
-	size_t point=0,directions=0;
-	size_t cols=number_of_columns(A), 
-	       rows=number_of_rows(A);
-	array<bool> null_v(cols);
+      size_t point=0,directions=0;
+      size_t cols=number_of_columns(A), 
+      rows=number_of_rows(A);
+      array<bool> null_v(cols);
 
-	if (cols==0) {
-	  return A;
-	}
-	
-        for(size_t j=0; j!=cols; ++j) {
-	  null_v[j]=false;
-	  for(size_t i=0; i!=rows; ++i) {
-            if (A(i,j)!=0.0) { null_v[j]=true; }
-          }
-	  if (null_v[j]) { directions++; }
-        }
-
-	matrix<T> new_A(rows,std::max((size_t)1,directions));
-	
-	for(size_t j=0; j!=cols; ++j) {
-	  if (null_v[j]) { 
-	    for(size_t i=0; i!=rows; ++i) {
-	      new_A(i,point)=A(i,j);
-	    }
-	    point++;
-          }
-        }
-	
-	return new_A;
+      if (cols==0) {
+        return A;
       }
+
+      for(size_t j=0; j!=cols; ++j) {
+        null_v[j]=false;
+        for(size_t i=0; i!=rows; ++i) {
+          if (A(i,j)!=0.0) { null_v[j]=true; }
+        }
+        if (null_v[j]) { directions++; }
+      }
+
+      matrix<T> new_A(rows,std::max((size_t)1,directions));
+
+      for(size_t j=0; j!=cols; ++j) {
+        if (null_v[j]) { 
+          for(size_t i=0; i!=rows; ++i) {
+            new_A(i,point)=A(i,j);
+          }
+          ++point;
+        }
+      }
+
+      return new_A;
+    }
+
   }
 }
 
@@ -596,9 +597,31 @@ namespace Ariadne {
     operator*(const LinearAlgebra::matrix<R>& A, const LinearAlgebra::matrix<R>& B) {
       return prod(A,B);
     }
-    
   }
 }
+
+
+namespace boost { namespace numeric { namespace ublas {
+
+    template <typename Real>
+    std::ostream&
+    operator<<(std::ostream& os, const matrix<Real>& A)
+    {
+      if(A.size1()==0 || A.size2()==0) {
+        return os << "[ ]";
+      }
+      
+      for(uint i=0; i!=A.size1(); ++i) {
+        os << (i==0 ? "[ " : " ; ") << A(i,0);
+        for(uint j=1; j!=A.size2(); ++j) {
+          os << "," << A(i,j);
+        }
+      }
+      os << " ]";
+      return os;
+    }
+    
+}}}
 
 
 #endif /* _ARIADNE_MATRIX_H */

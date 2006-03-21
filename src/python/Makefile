@@ -20,7 +20,7 @@ EVALUATION_OBJ = evaluation_module.o \
 	export_henon_map.o
 
 LINEAR_ALGEBRA_OBJ = linear_algebra_module.o \
-	export_vector.o export_matrix.o
+	export_vector.o export_matrix.o export_linear_program.o
 
 all: python
 
@@ -119,6 +119,7 @@ export_point.o: export_point.cc ../../include/base/numerical_type.h \
   ../../include/geometry/../linear_algebra/../base/numerical_type.h \
   ../../include/geometry/../linear_algebra/../base/interval.h \
   ../../include/geometry/../geometry/geometry_declarations.h \
+  ../../include/linear_algebra/vector.h \
   ../../include/python/real_typedef.h \
   ../../include/python/../base/numerical_type.h
 
@@ -593,8 +594,21 @@ export_affine_map.o: export_affine_map.cc \
   ../../include/evaluation/../evaluation/../linear_algebra/vector.h \
   ../../include/evaluation/../evaluation/../linear_algebra/matrix.h \
   ../../include/evaluation/../geometry/point.h \
+  ../../include/evaluation/../geometry/simplex.h \
+  ../../include/evaluation/../geometry/../base/array.h \
+  ../../include/evaluation/../geometry/../base/utility.h \
+  ../../include/evaluation/../geometry/../linear_algebra/vector.h \
+  ../../include/evaluation/../geometry/../geometry/point.h \
+  ../../include/evaluation/../geometry/../geometry/polyhedron.h \
+  ../../include/evaluation/../geometry/../geometry/list_set.h \
+  ../../include/evaluation/../geometry/../geometry/geometry_declarations.h \
   ../../include/evaluation/../geometry/rectangle.h \
   ../../include/evaluation/../geometry/parallelotope.h \
+  ../../include/evaluation/../geometry/zonotope.h \
+  ../../include/evaluation/../geometry/../linear_algebra/matrix.h \
+  ../../include/evaluation/../geometry/../base/interval.h \
+  ../../include/evaluation/../geometry/../geometry/rectangle.h \
+  ../../include/evaluation/../geometry/polyhedron.h \
   ../../include/python/real_typedef.h \
   ../../include/python/../base/numerical_type.h \
   ../../include/python/python_utilities.h
@@ -818,6 +832,20 @@ export_matrix.o: export_matrix.cc ../../include/base/numerical_type.h \
   ../../include/linear_algebra/../base/../base/sequence.h \
   ../../include/linear_algebra/../base/numerical_type.h \
   ../../include/linear_algebra/../base/interval.h \
+  ../../include/python/real_typedef.h \
+  ../../include/python/../base/numerical_type.h \
+  ../../include/python/python_utilities.h
+
+export_linear_program.o: export_linear_program.cc \
+  ../../include/base/numerical_type.h ../../include/base/../base/dyadic.h \
+  ../../include/linear_algebra/linear_program.h \
+  ../../include/linear_algebra/../base/basic_type.h \
+  ../../include/linear_algebra/../base/../base/array.h \
+  ../../include/linear_algebra/../base/../base/sequence.h \
+  ../../include/linear_algebra/../linear_algebra/matrix.h \
+  ../../include/linear_algebra/../linear_algebra/../base/basic_type.h \
+  ../../include/linear_algebra/../linear_algebra/../base/numerical_type.h \
+  ../../include/linear_algebra/../linear_algebra/../base/interval.h \
   ../../include/python/real_typedef.h \
   ../../include/python/../base/numerical_type.h \
   ../../include/python/python_utilities.h

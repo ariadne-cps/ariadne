@@ -26,12 +26,14 @@
 
 #include "base/numerical_type.h"
 #include "geometry/point.h"
+#include "linear_algebra/vector.h"
 
 #include <boost/python.hpp>
 
 #include "python/real_typedef.h"
 
 typedef Ariadne::Geometry::Point<Real> RPoint;
+typedef Ariadne::LinearAlgebra::vector<Real> RVector;
 
 using boost::python::class_;
 using boost::python::init; 
@@ -44,6 +46,16 @@ using boost::python::copy_const_reference;
 inline void rpoint_setitem_from_double(RPoint& p, uint i, double x) {
   p.set(i,Ariadne::convert_to<Real>(x));
 }
+
+inline RPoint rpoint_add_rvector(const RPoint& p, const RVector& v) {
+  return p+v;
+}
+
+inline RVector rpoint_sub_rpoint(const RPoint& p, const RPoint& q) {
+  return p-q;
+}
+
+
 void export_point() {
   class_<RPoint>("Point",init<int>())
     .def(init<int,Real>())
@@ -55,6 +67,8 @@ void export_point() {
     .def("__setitem__", &rpoint_setitem_from_double)
     .def("__eq__", &RPoint::operator==)
     .def("__ne__", &RPoint::operator!=)
+    .def("__add__", &rpoint_add_rvector)
+    .def("__sub__", &rpoint_sub_rpoint)
     .def(str(self))    // __str__
   ;
 }

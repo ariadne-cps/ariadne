@@ -220,30 +220,10 @@ namespace Ariadne {
       }
       
       /*! \brief Tests if the parallelotope contains \a point. */
-      inline bool contains(const Point& point) const {
-        if (point.dimension()!=this->dimension()) {
-          throw std::domain_error("This object and parameter have different space dimensions");
-        }  
-        
-        if (this->empty()) { return false; }
-          
-     	throw std::domain_error("Parallelotope::contains(...)  not implemented");
-	
-        return true;
-      }
+      inline bool contains(const Point& point) const;
       
       /*! \brief Tests if the interior of the parallelotope contains \a point. */
-      inline bool interior_contains(const Point& point) const {
-        if (point.dimension()!=this->dimension()) {
-         throw std::domain_error("This object and parameter have different space dimensions");
-        } 
-      
-        if (this->empty_interior()) { return false; }
-        
-        throw std::domain_error("Parallelotope::interior_contains(...)  not implemented");
-  
-        return true;
-      }
+      inline bool interior_contains(const Point& point) const;
       
       /*! \brief The equality operator (not implemented).
        *
@@ -266,8 +246,11 @@ namespace Ariadne {
       /*! \brief Convert to a polyhedron. */
       operator Polyhedron<R> () const;
       
-      /*! \subdivide into smaller pieces. */
+      /*! \brief Subdivide into smaller pieces. */
       ListSet<R,Ariadne::Geometry::Parallelotope> subdivide() const;
+      
+      /* \brief Tests disjointness with a rectangle */
+      bool disjoint(const Rectangle<R>& r) const;
       
       friend std::ostream&
       operator<< <> (std::ostream& os, 
@@ -295,18 +278,18 @@ namespace Ariadne {
     template <typename R>
     inline 
     bool 
-    disjoint(const Parallelotope<R>&A, const Rectangle<R>& B) 
+    disjoint(const Parallelotope<R>& A, const Rectangle<R>& B) 
     {
-      return disjoint(Polyhedron<R>(A), Polyhedron<R>(B));
+      return A.disjoint(B);
     }
     
     /*! \brief Tests disjointness */
     template <typename R>
     inline
     bool 
-    disjoint(const Rectangle<R>&A, const Parallelotope<R>& B) 
+    disjoint(const Rectangle<R>& A, const Parallelotope<R>& B) 
     {
-      return disjoint(Polyhedron<R>(A), Polyhedron<R>(B));
+      return B.disjoint(A);
     }
     
     

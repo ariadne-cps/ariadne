@@ -95,7 +95,7 @@ template<typename R> class Parallelopiped;
 template <typename R>
 inline 
 Parma_Polyhedra_Library::NNC_Polyhedron 
-_from_Point_to_PPL_Polyhedron(const Point<R>& s);
+_from_Point_to_PPL_Polyhedron(const Point<R>& s); 
 
 /* Transforms an Rectangle into a Parma_Polyhedra_Library::C_Polyhedron */
 template <typename R>

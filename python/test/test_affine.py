@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 ##############################################################################
-#            test_henon.py
+#            test_affine.py
 #
 #  Copyright 2006  Pieter Collins <Pieter.Collins@cwi.nl>
 ##############################################################################
@@ -24,31 +24,41 @@ from ariadne.base import *
 from ariadne.evaluation import *
 from ariadne.geometry import *
 from ariadne.linear_algebra import *
+from math import *
 import sys
 
-h=HenonMap(Dyadic(1.5),Dyadic(0.275))
+A=Matrix(2,2)
+b=Vector(2)
 
-x=Point(2)
-#print x,h(x),h(h(x)),"\n\n"
+alpha=3.14/4
+r_fact=7.0/8
 
-r=Rectangle("[1.4,1.6]x[-0.9,1.1]")
-#print r,h(r),h(h(r)),"\n\n"
-print h(r)
+A[0,0]=r_fact*cos(alpha)
+A[0,1]=r_fact*sin(alpha)
+A[1,0]=r_fact*-sin(alpha)
+A[1,1]=r_fact*cos(alpha)
+
+M=AffineMap(A,b)
+
+r=Rectangle("[9,11]x[5,11]")
+r2=Rectangle("[5,6]x[3,4]")
+box=Rectangle("[-14,14]x[-14,14]")
 
 p=Parallelotope(r)
-sp=p.subdivide()
-hp=h(p)
-hsp=apply(h,sp)
+p2=Parallelotope(r2)
 
-print subset(hsp[0],hp)
-print subset(hsp[1],hp)
-print subset(hsp[2],hp)
-print subset(hsp[3],hp)
-print subset(hsp[3].subdivide()[0],hp)
+print p
 
-eps=EpsPlot("henon.eps",h(r))
+eps=EpsPlot("affine.eps",box)
 eps.set_fill_colour("blue")
-eps.write(hp)
+eps.write(p)
+eps.write(p2)
 eps.set_fill_colour("green")
-eps.write(hsp)
+
+for i in range(0,100):
+	p=M(p)
+	p2=M(p2)
+	eps.write(p)
+	eps.write(p2)
+
 eps.close()

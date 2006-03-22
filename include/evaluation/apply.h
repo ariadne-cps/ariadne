@@ -60,7 +60,6 @@ namespace Ariadne {
     Geometry::Parallelotope<R> 
     apply(const Map<R>& f, const Geometry::Parallelotope<R>& p) 
     {
-      //std::cerr << "apply(const Map&, const Parallelotope&)" << std::endl;
       const size_type m=p.dimension();
       const size_type n=p.dimension();
       
@@ -98,7 +97,6 @@ namespace Ariadne {
     template<typename R, template<typename> class BS>
     Ariadne::Geometry::ListSet<R,BS> 
     apply(const Map<R>& f, const Ariadne::Geometry::ListSet<R,BS>& ds) {
-      //std::cerr << "apply(const Map<R>& f, const Ariadne::Geometry::ListSet<R,BS>& ds)" << std::endl;
       Ariadne::Geometry::ListSet<R,BS> result(f.result_dimension());
       for(typename Geometry::ListSet<R,BS>::const_iterator iter=ds.begin(); iter!=ds.end(); ++iter) {
         result.push_back(apply(f,*iter));

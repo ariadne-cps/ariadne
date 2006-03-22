@@ -86,6 +86,11 @@ namespace Ariadne {
         return this->lower()==ivl.lower() && this->upper()==ivl.upper(); }
       bool operator!=(const Interval<R>& ivl) { 
         return !(*this==ivl); }
+
+      const Interval<R> &operator=(const R &r) {
+	*this=Interval<R>(r,r);
+	return *this;
+      }
     };
     
     template<typename R>

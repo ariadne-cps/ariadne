@@ -104,9 +104,7 @@ namespace Ariadne {
     Geometry::Parallelotope<R>
     HenonMap<R>::apply(const Geometry::Parallelotope<R>& p) const
     {
-      std::cerr << "HenonMap::apply(const Parallelotope) const" << std::endl;
       return Evaluation::apply(*this,p);
-      std::cerr << "Done HenonMap::apply(const Parallelotope) const" << std::endl;
     }
 
     template <typename R>

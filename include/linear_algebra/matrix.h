@@ -430,7 +430,7 @@ namespace Ariadne {
 
     
     
-    /* \brief Transforms the linear inequalities $Ax\leq b$ to $At^{-1}y \leq b$. */
+    /* \brief Transforms the linear inequalities $Ax\leq b$ to $AT^{-1}y \leq b$. */
     template <typename R>
     inline void transform_linear_inequalities(const matrix<R>& T, 
                                        matrix<R>& A, 

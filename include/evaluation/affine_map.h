@@ -108,9 +108,12 @@ namespace Ariadne {
     typename AffineMap<R>::Point
     AffineMap<R>::operator() (const Point& s) const
     {
-      const Matrix& m=this->A();
+      const Matrix& A=this->A();
+      if (LinearAlgebra::number_of_columns(A)!=s.dimension())
+    	throw std::domain_error("AffineMap<R>::operator() (const Point& s): the map does not have the same dimension of the point.");
+      
       const Vector& pv=s.position_vector();
-      Vector v=prod(m,pv);
+      Vector v=prod(A,pv);
       v+= this->b();
       return Point(v);
     }
@@ -119,11 +122,15 @@ namespace Ariadne {
     Geometry::Simplex<R>
     AffineMap<R>::operator() (const Geometry::Simplex<R>& s) const
     {
+      const Matrix& A=this->A();
+      if (LinearAlgebra::number_of_columns(A)!=s.dimension())
+    	throw std::domain_error("AffineMap<R>::operator() (const Geometry::Simplex<R>& s): the map does not have the same dimension of the simplex.");
+      
       const array<Point>&  v=s.vertices();
       array<Point> new_v(s.dimension());
       
-      for(size_type i=0; i<s.size(); i++) {
-        new_v[i]= (*this)(i);
+      for(size_t i=0; i<s.dimension(); i++) {
+        new_v[i]= (*this)(v[i]);
       }
      
       return Geometry::Simplex<R>(new_v);
@@ -133,13 +140,21 @@ namespace Ariadne {
     Geometry::Rectangle<R>
     AffineMap<R>::operator() (const Geometry::Rectangle<R>& r) const
     {
-      LinearAlgebra::vector<Interval<R> > rv(r.dimension());
-      for(size_type i=0; i!=r.dimension(); ++i) {
-        rv[i]=r[i];
+      const Matrix& A=this->A();
+      const Vector& b=this->b();
+      if (LinearAlgebra::number_of_columns(A)!=r.dimension())
+    	throw std::domain_error("AffineMap<R>::operator() (const Geometry::Rectangle<R>& r): the map does not have the same dimension of the rectangle.");
+      
+      Base::array<Interval<R> > imv(r.dimension());
+      
+      for(size_t j=0; j<LinearAlgebra::number_of_rows(A); j++) {
+	imv[j]=b[j];
+        for(size_t i=0; i!=r.dimension(); ++i) {
+           imv[j]+=A(j,i)*r[i];
+	}
       }
       
-      LinearAlgebra::vector<Interval<R> > imv=this->_A*rv+this->_b; 
-      return Geometry::Rectangle<R>(imv.begin(),imv.end());
+      return Geometry::Rectangle<R>(imv);
     }
      
     template <typename R>
@@ -147,10 +162,11 @@ namespace Ariadne {
     AffineMap<R>::operator() (const Geometry::Parallelotope<R>& p) const
     {
       const Matrix& A=this->A();
-      const Vector& c=p.centre();
-      Vector v=prod(A,c);
-      v+= this->b();
-      return Geometry::Parallelotope<R>(v,A*p.generators());
+      if (LinearAlgebra::number_of_columns(A)!=p.dimension())
+    	throw std::domain_error("AffineMap<R>::operator() (const Geometry::Parallelotope<R>& p): the map does not have the same dimension of the parallelotope.");
+      
+      Point new_centre=(*this)(p.centre());
+      return Geometry::Parallelotope<R>(new_centre,A*p.generators());
     }
 
     template <typename R>
@@ -158,16 +174,21 @@ namespace Ariadne {
     AffineMap<R>::operator() (const Geometry::Zonotope<R>& z) const
     {
       const Matrix& A=this->A();
-      const Vector& c=z.centre();
-      Vector v=prod(A,c);
-      v+= this->b();
-      return Geometry::Zonotope<R>(v,A*z.generators());
+      if (LinearAlgebra::number_of_columns(A)!=z.dimension())
+    	throw std::domain_error("AffineMap<R>::operator() (const Geometry::Zonotope<R>& z): the map does not have the same dimension of the zonotope.");
+      
+      Point new_centre=(*this)(z.centre());
+      return Geometry::Zonotope<R>(new_centre,A*z.principle_directions());
     }    
      
     template <typename R>
     Geometry::Polyhedron<R>
     AffineMap<R>::operator() (const Geometry::Polyhedron<R>& p) const
     {
+      const Matrix& A=this->A();
+      if (LinearAlgebra::number_of_columns(A)!=p.dimension())
+    	throw std::domain_error("AffineMap<R>::operator() (const Geometry::Polyhedron<R>& p): the map does not have the same dimension of the polyhedron.");
+      
     	throw std::domain_error("AffineMap<R>::operator() (const Geometry::Polyhedron<R>& p) not implemented.");
     }    
 

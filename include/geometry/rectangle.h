@@ -148,6 +148,16 @@ namespace Ariadne {
           this->_upper_corner[i] = intervals[i].upper();
         }
       }
+
+      /*! \brief Construct from an array of intervals. */
+      Rectangle(const Base::array< Interval<Real> > a)
+        : _lower_corner(a.size()), _upper_corner(a.size())
+      {
+        for(size_type i=0; i!=a.size(); ++i) {
+          this->_lower_corner[i] = a[i].lower();
+          this->_upper_corner[i] = a[i].upper();
+        }
+      }
       
       /*! \brief Construct from two corners. */
       Rectangle(const Point& p1, const Point& p2)

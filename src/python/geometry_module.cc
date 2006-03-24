@@ -41,6 +41,7 @@ void export_point();
 void export_rectangle();
 void export_parallelotope();
 void export_simplex();
+void export_zonotope();
 void export_polyhedron();
 void export_list_set();
 void export_grid_set();
@@ -62,6 +63,7 @@ BOOST_PYTHON_MODULE(geometry)
   export_rectangle();
   export_parallelotope();
   export_simplex();
+  export_zonotope();
   export_polyhedron();
   export_list_set();
   export_grid_set();

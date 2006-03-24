@@ -1,6 +1,6 @@
 include ../../config.mk
 
-OBJ = parallelotope.o polyhedron.o \
+OBJ = parallelotope.o polyhedron.o zonotope.o\
 	lattice_set.o grid.o grid_set.o \
 	subdivision_tree_set.o partition_tree_set.o
 
@@ -98,6 +98,44 @@ polyhedron.o: polyhedron.cc ../../include/geometry/polyhedron.h \
   ../../include/geometry/../geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/../geometry/polyhedron.h \
+  ../../include/geometry/../geometry/polyhedron.h
+
+zonotope.o: zonotope.cc ../../include/geometry/zonotope.h \
+  ../../include/geometry/../linear_algebra/vector.h \
+  ../../include/geometry/../linear_algebra/../base/basic_type.h \
+  ../../include/geometry/../linear_algebra/../base/../base/array.h \
+  ../../include/geometry/../linear_algebra/../base/../base/sequence.h \
+  ../../include/geometry/../linear_algebra/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../base/../base/dyadic.h \
+  ../../include/geometry/../linear_algebra/../base/interval.h \
+  ../../include/geometry/../linear_algebra/matrix.h \
+  ../../include/geometry/../base/utility.h \
+  ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/interval.h \
+  ../../include/geometry/../geometry/point.h \
+  ../../include/geometry/../geometry/../base/utility.h \
+  ../../include/geometry/../geometry/../linear_algebra/vector.h \
+  ../../include/geometry/../geometry/../geometry/geometry_declarations.h \
+  ../../include/geometry/../geometry/rectangle.h \
+  ../../include/geometry/../geometry/../base/interval.h \
+  ../../include/geometry/../geometry/../base/binary_word.h \
+  ../../include/geometry/../geometry/../base/../base/basic_type.h \
+  ../../include/geometry/../geometry/../geometry/point.h \
+  ../../include/geometry/../geometry/list_set.h \
+  ../../include/geometry/../geometry/parallelotope.h \
+  ../../include/geometry/../geometry/../linear_algebra/matrix.h \
+  ../../include/geometry/../geometry/../geometry/rectangle.h \
+  ../../include/geometry/../geometry/../geometry/list_set.h \
+  ../../include/geometry/../geometry/../geometry/polyhedron.h \
+  ../../include/geometry/../geometry/../geometry/../linear_algebra/constraint.h \
+  ../../include/geometry/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/geometry/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/geometry/../geometry/../geometry/../linear_algebra/vector.h \
+  ../../include/geometry/../geometry/../geometry/../linear_algebra/matrix.h \
+  ../../include/geometry/../geometry/../geometry/../geometry/generator.h \
+  ../../include/geometry/../geometry/../geometry/../geometry/point.h \
+  ../../include/geometry/../geometry/../geometry/../geometry/rectangle.h \
+  ../../include/geometry/../geometry/../geometry/../geometry/geometry_declarations.h \
   ../../include/geometry/../geometry/polyhedron.h
 
 lattice_set.o: lattice_set.cc ../../include/base/array_operations.h \

@@ -154,7 +154,21 @@ namespace Ariadne {
   inline Integer floor(const Rational& num){ 
     return numerator(num)/denominator(num);
   }
+
+  /*
+  inline unsigned int get_ui(const Integer& num){ 
+    return num.get_ui();
+  }
   
+  inline unsigned int get_ui(const Rational& num){ 
+    return (unsigned int)num.get_d();
+  }
+  
+  inline unsigned int get_ui(const Dyadic& num){ 
+    return num.get_ui();
+  }
+  */
+
   template<typename R> 
   inline
   R neg(const R& x) {

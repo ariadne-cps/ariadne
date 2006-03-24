@@ -61,6 +61,16 @@ namespace Ariadne {
       return denom;
     }
 
+    template <typename Real>
+    inline Real norm_infinite(const vector<Real>& b) 
+    {
+      Real norm=0.0;
+      for (size_t i=0; i< b.size(); i++) {
+      	if (abs(b[i])>norm) norm=abs(b[i]);
+      }
+      return norm;
+    }
+
   }
 }
 

@@ -9,8 +9,8 @@ BASE_OBJ=base_module.o \
 	export_array.o export_binary_tree.o 
 
 GEOMETRY_OBJ = geometry_module.o \
-	export_point.o \
-	export_rectangle.o export_parallelotope.o export_simplex.o export_polyhedron.o \
+	export_point.o export_rectangle.o export_parallelotope.o \
+	export_zonotope.o export_simplex.o export_polyhedron.o \
 	export_list_set.o export_grid_set.o export_partition_tree_set.o \
 	export_postscript_output.o \
 
@@ -179,6 +179,46 @@ export_parallelotope.o: export_parallelotope.cc \
   ../../include/geometry/../geometry/../geometry/generator.h \
   ../../include/geometry/../geometry/../geometry/point.h \
   ../../include/geometry/../geometry/../geometry/rectangle.h \
+  ../../include/python/real_typedef.h \
+  ../../include/python/../base/numerical_type.h \
+  ../../include/python/python_utilities.h
+
+export_zonotope.o: export_zonotope.cc ../../include/base/numerical_type.h \
+  ../../include/base/../base/dyadic.h ../../include/geometry/rectangle.h \
+  ../../include/geometry/../base/utility.h \
+  ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/interval.h \
+  ../../include/geometry/../base/binary_word.h \
+  ../../include/geometry/../base/../base/basic_type.h \
+  ../../include/geometry/../base/../base/../base/array.h \
+  ../../include/geometry/../base/../base/../base/sequence.h \
+  ../../include/geometry/../geometry/point.h \
+  ../../include/geometry/../geometry/../base/utility.h \
+  ../../include/geometry/../geometry/../linear_algebra/vector.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/basic_type.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/numerical_type.h \
+  ../../include/geometry/../geometry/../linear_algebra/../base/interval.h \
+  ../../include/geometry/../geometry/../geometry/geometry_declarations.h \
+  ../../include/geometry/../geometry/geometry_declarations.h \
+  ../../include/geometry/list_set.h \
+  ../../include/geometry/parallelotope.h \
+  ../../include/geometry/../linear_algebra/vector.h \
+  ../../include/geometry/../linear_algebra/matrix.h \
+  ../../include/geometry/../linear_algebra/../base/basic_type.h \
+  ../../include/geometry/../linear_algebra/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../base/interval.h \
+  ../../include/geometry/../geometry/rectangle.h \
+  ../../include/geometry/../geometry/list_set.h \
+  ../../include/geometry/../geometry/polyhedron.h \
+  ../../include/geometry/../geometry/../linear_algebra/constraint.h \
+  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/geometry/../geometry/../linear_algebra/matrix.h \
+  ../../include/geometry/../geometry/../geometry/generator.h \
+  ../../include/geometry/../geometry/../geometry/point.h \
+  ../../include/geometry/../geometry/../geometry/rectangle.h \
+  ../../include/geometry/zonotope.h \
+  ../../include/geometry/../geometry/parallelotope.h \
   ../../include/python/real_typedef.h \
   ../../include/python/../base/numerical_type.h \
   ../../include/python/python_utilities.h
@@ -550,18 +590,16 @@ export_affine_map.o: export_affine_map.cc \
   ../../include/geometry/../linear_algebra/../base/numerical_type.h \
   ../../include/geometry/../linear_algebra/../base/interval.h \
   ../../include/geometry/../geometry/geometry_declarations.h \
-  ../../include/geometry/parallelotope.h \
+  ../../include/geometry/rectangle.h \
   ../../include/geometry/../base/interval.h \
-  ../../include/geometry/../linear_algebra/matrix.h \
+  ../../include/geometry/../base/binary_word.h \
+  ../../include/geometry/../base/../base/basic_type.h \
   ../../include/geometry/../geometry/point.h \
+  ../../include/geometry/parallelotope.h \
+  ../../include/geometry/../linear_algebra/matrix.h \
   ../../include/geometry/../geometry/rectangle.h \
-  ../../include/geometry/../geometry/../base/utility.h \
-  ../../include/geometry/../geometry/../base/interval.h \
-  ../../include/geometry/../geometry/../base/binary_word.h \
-  ../../include/geometry/../geometry/../base/../base/basic_type.h \
-  ../../include/geometry/../geometry/../geometry/point.h \
-  ../../include/geometry/../geometry/../geometry/geometry_declarations.h \
   ../../include/geometry/../geometry/list_set.h \
+  ../../include/geometry/../geometry/../geometry/geometry_declarations.h \
   ../../include/geometry/../geometry/polyhedron.h \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
@@ -569,7 +607,12 @@ export_affine_map.o: export_affine_map.cc \
   ../../include/geometry/../geometry/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/matrix.h \
   ../../include/geometry/../geometry/../geometry/generator.h \
+  ../../include/geometry/../geometry/../geometry/point.h \
   ../../include/geometry/../geometry/../geometry/rectangle.h \
+  ../../include/geometry/simplex.h ../../include/geometry/../base/array.h \
+  ../../include/geometry/zonotope.h \
+  ../../include/geometry/../geometry/parallelotope.h \
+  ../../include/geometry/polyhedron.h \
   ../../include/evaluation/affine_map.h \
   ../../include/evaluation/../linear_algebra/vector.h \
   ../../include/evaluation/../linear_algebra/matrix.h \
@@ -584,19 +627,9 @@ export_affine_map.o: export_affine_map.cc \
   ../../include/evaluation/../evaluation/../linear_algebra/matrix.h \
   ../../include/evaluation/../geometry/point.h \
   ../../include/evaluation/../geometry/simplex.h \
-  ../../include/evaluation/../geometry/../base/array.h \
-  ../../include/evaluation/../geometry/../base/utility.h \
-  ../../include/evaluation/../geometry/../linear_algebra/vector.h \
-  ../../include/evaluation/../geometry/../geometry/point.h \
-  ../../include/evaluation/../geometry/../geometry/polyhedron.h \
-  ../../include/evaluation/../geometry/../geometry/list_set.h \
-  ../../include/evaluation/../geometry/../geometry/geometry_declarations.h \
   ../../include/evaluation/../geometry/rectangle.h \
   ../../include/evaluation/../geometry/parallelotope.h \
   ../../include/evaluation/../geometry/zonotope.h \
-  ../../include/evaluation/../geometry/../linear_algebra/matrix.h \
-  ../../include/evaluation/../geometry/../base/interval.h \
-  ../../include/evaluation/../geometry/../geometry/rectangle.h \
   ../../include/evaluation/../geometry/polyhedron.h \
   ../../include/python/real_typedef.h \
   ../../include/python/../base/numerical_type.h \

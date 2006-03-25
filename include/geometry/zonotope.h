@@ -152,7 +152,7 @@ namespace Ariadne {
       
       /* Zonotope's principal directions. */
       Matrix _generators;
-     
+    
      public:
       /*! \brief Default constructor constructs an empty zonotope of dimension \a n. */
       explicit Zonotope(size_t n = 0)
@@ -160,7 +160,7 @@ namespace Ariadne {
       
       /*! \brief Construct from centre and directions. */
       explicit Zonotope(const Point& c, const Matrix& m)
-        : _centre(c)
+        : _centre(c), _generators(m)
       {
 	using namespace Ariadne::LinearAlgebra;
 	
@@ -169,13 +169,15 @@ namespace Ariadne {
               "The the matrix of principal directions does not have the same number of rows as the point dimension.");
         }
 
-        this->_generators= remove_null_columns_but_one(m);
+        this->minimize_generators();
       }
        
       /*! \brief Construct from a rectangle. */
       explicit Zonotope(const Rectangle<Real>& r)
         : _centre(r.dimension())
       {
+	using namespace LinearAlgebra;
+
         if(r.lower_bound(0) > r.upper_bound(0)) {
           this->_generators=Matrix(r.dimension(),0);
         }
@@ -185,6 +187,8 @@ namespace Ariadne {
           this->_centre[i] = (r.lower_bound(i)+r.upper_bound(i))/2;
           this->_generators(i,i) = (r.upper_bound(i)-r.lower_bound(i))/2;
         }
+
+	this->_generators=remove_null_columns_but_one(this->_generators);
       }
 
       /*! \brief Construct from a Parallelotope. */
@@ -193,7 +197,7 @@ namespace Ariadne {
       {
 	using namespace Ariadne::LinearAlgebra;
 
-	this->_generators= remove_null_columns_but_one(this->_generators);
+        this->minimize_generators();
       }
 
       /*! \brief Construct from a string literal. */
@@ -323,19 +327,45 @@ namespace Ariadne {
         return true;
       }
       
-      /*! \brief The equality operator (not implemented).
-       *
-       * Not currently implemented, since it requires matching the columns of 
-       * the matrix of principal directions. 
-       */
+      /*! \brief The equality operator. */
       inline bool operator==(const Zonotope<Real>& A) const
       {
-        throw std::domain_error("Zonotope::operator==(...)  not implemented");
+	using namespace LinearAlgebra;
+	      
+	const Matrix &this_gen=this->_generators;
+	const Matrix &A_gen=A._generators;
+	size_t directions=number_of_columns(A_gen);
+
+        if (!have_same_dimensions(this_gen,A_gen))
+	  return false;
+	
+      	array<bool> not_found(directions,true);
+	bool searching_for_equiv;
+
+	size_t j2;
+	for (size_t j=0; j< directions; j++) {
+	  j2=j; 
+	  searching_for_equiv=true;
+	  while ((j2< directions)&&(searching_for_equiv)) {
+            if (not_found[j2]) {
+	      if (equivalent_columns(this_gen, j, A_gen, j2)) { 
+	        searching_for_equiv=false;
+		not_found[j2]=false;
+	      }
+	    }
+	    j2++;
+          }
+
+	  if (searching_for_equiv) 
+	    return false;
+	}
+
+	return true;
       }
       
       /*! \brief The inequality operator */
       inline bool operator!=(const Zonotope<Real>& A) const {
-        return !(*this == A);
+	return !(*this == A);
       }
 
       friend std::ostream&
@@ -347,31 +377,132 @@ namespace Ariadne {
                      Zonotope<R>& r);
       
      private:
+      // Minimize the generator matrix
+      inline void minimize_generators(void);
+      
       // The linear inequalities defining the zonotope.
       inline void compute_linear_inequalities(Matrix&, Vector&) const;
     };
   
-    // TO FIX: the following code does not consider the case in which the
-    // zonotope has less dimensions that the space (e.g. a rectangle in
-    // a 3d space)
+    template<typename R>
+    inline 
+    void Zonotope<R>::minimize_generators(void) {
+
+      using namespace LinearAlgebra;
+	   
+      size_t i,j,i2,j2;
+      Matrix &gen=this->_generators;
+      gen=remove_null_columns_but_one(gen);
+      size_t rows=number_of_rows(gen);
+      
+      // if the first row is null the zonotope is a point and it is already
+      // minimized
+      if (find_first_not_null_in_col(gen,0)==rows) {
+	return;
+      }
+      
+      size_t cols=number_of_columns(gen);
+      size_t min_cols=cols;
+      R coef,coef2;
+     
+      array<size_t> dependences(cols,cols);
+      array<bool> same_sign(cols,true);
+      
+      for (j=0; j<cols; j++) {
+        i=find_first_not_null_in_col(gen,j);
+	     
+	// if the first row is null the zonotope is a point and it is already
+	// minimized
+	assert(i!=rows);
+
+        coef=gen(i,j);
+	
+	for (j2=j+1; j2<cols; j2++) {
+	  i2=find_first_not_null_in_col(gen,j2);
+
+	  if (i==i2) {
+            coef2=gen(i2,j2);
+
+	    //check whever the j-th and the j2-th columns are linear depended
+	    //or not.
+	    while ((i2<rows)&&(gen(i2,j2)*coef==gen(i2,j)*coef2))
+	      i2++;
+
+	    // if they are
+	    if (i2==rows) {
+	      if (dependences[j]==cols) {
+                dependences[j2]=j;
+	        if (coef*coef2<0) same_sign[j2]=false;
+	        min_cols--;
+	      } else {
+                dependences[j2]=dependences[j];
+		if ((coef*coef2>0)^same_sign[j]) same_sign[j2]=false;
+	      }
+	    }
+	  }
+        }
+      }
+      
+      if (min_cols!= cols) {
+	Matrix new_gen(rows,min_cols);
+
+	j2=0;
+	for (j=0; j< cols; j++) {
+          if (dependences[j]==cols) {
+	    dependences[j]=j2;
+	    
+	    for (i=0; i<rows; i++)
+	      new_gen(i,j2)=gen(i,j);
+	    
+	    j2++;
+	  } else {
+	     
+	     if (same_sign[j]) {
+	       for (i=0; i<rows; i++)
+	         new_gen(i,dependences[j])+=gen(i,j);
+	     } else {
+               for (i=0; i<rows; i++)
+	         new_gen(i, dependences[j])-=gen(i,j);
+	     }
+	  }
+	}
+
+	gen=new_gen;
+      }
+    }
+    
     template<typename R>
     inline 
     void Zonotope<R>::compute_linear_inequalities(Matrix& A, Vector& b) const
     {
       using namespace Ariadne::LinearAlgebra;
-      
+     
       const Matrix &gen=this->_generators;
-      size_t number_of_generator=number_of_columns(gen);
+      Matrix Space=trans(gen);
+      size_t number_of_generators=number_of_columns(gen);
       R b2;
-	
-      A=Matrix(2*number_of_generator,this->dimension());
-      b=Vector(2*number_of_generator);
-      
+     
+      //compute complanar hyperplanes
+      array<size_t> col,row;
+      A=lu_decompose(Space,col,row); 
+
+      if (col.size()==row.size()) {
+        A=Matrix(2*number_of_generators,this->dimension());
+        b=Vector(2*number_of_generators);
+	Space=Matrix();
+      } else { 
+        remove_null_columns(A,row,col);
+        Space=compute_space(A,row,col);
+
+	A=Matrix(2*number_of_generators+2*number_of_rows(Space),
+			this->dimension());
+	b=Vector(2*number_of_generators+2*number_of_rows(Space));
+      }
       // TO IMPROVE: we new compute both (col_i)^T(cols_j) and 
       // (col_j)^T(cols_i)
-      for (size_t i=0; i< number_of_generator; i++) {
+      for (size_t i=0; i< number_of_generators; i++) {
 	b(2*i)=0.0;
-	for (size_t j=0; j< number_of_generator; j++) {
+	for (size_t j=0; j< number_of_generators; j++) {
 	  //b(2*i)-=abs(this->principle_direction(i)*this->principle_direction(j));
 	  b2=0.0;
 	  for (size_t k=0; k< this->dimension(); k++) {
@@ -394,8 +525,12 @@ namespace Ariadne {
 	}
       }
 
-      std::cerr << "Pay attention Zonotope::compute_linear_inequalities(...) may not work if the zonotope has less dimensions than the space" << std::endl;	
-
+      for (size_t i=0; i< number_of_rows(Space); i++) {
+	for (size_t j=0; j< this->dimension(); j++) {
+          A(2*(i+number_of_generators),j)=Space(i,j);
+          A(2*(i+number_of_generators)+1,j)=-Space(i,j);
+        }
+      }
     }
       
     template <typename R>

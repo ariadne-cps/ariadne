@@ -38,6 +38,7 @@
 #include "../base/basic_type.h"
 #include "../base/numerical_type.h"
 #include "../base/interval.h"
+#include "../base/utility.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {
@@ -159,16 +160,95 @@ namespace Ariadne {
       return (prod(e_b,b));
       /* out = ( \Sum_{j=0}^{n}\frac{h^(j+1)}{(j+1)!}*A^{j} ) b */
     }
+   
+   template <typename Real>
+   inline 
+   void lu_local_dec(matrix<Real> &A, const array<size_t> &row, 
+		const array<size_t> &col, const size_t &rows, 
+		const size_t &columns, const size_t &p) {
+      size_t i,j;
+      Real coef;
+	
+      // perform lu decomposition on the sub matrix
+      for (i=p+1; i< rows; i++) {
+        coef=A(row[i],col[p])/A(row[p],col[p]);
+	  
+        for (j=p+1; j< columns; j++) 
+          A(row[i],col[j])-=(A(row[p],col[j])*coef);
     
+        A(row[i],col[p])=coef;
+    
+      }
+    }
+   
+    template <typename Real>
+    inline	    
+    matrix<Real> lu_decompose(const matrix<Real> &A, 
+        array<size_t> &p_col, array<size_t> &p_row) {
+	
+      //create output matrix
+      matrix<Real> lu_A(A);
+	
+      size_t rows,columns;
+      rows=number_of_rows(A);
+      columns=number_of_columns(A);
+
+      // create the two pivot vectors
+      array<size_t> row(rows);
+      p_col=array<size_t>(columns);
+
+      size_t i,j;
+      for (j=0; j< columns; j++) 
+        p_col[j]=j;
+
+      for (i=0; i< rows; i++) 
+        row[i]=i;
+  
+      i=0;
+      // for all the linear independent rows
+      while (i<rows) {
+        j=i;
+
+        //search a not null element in the row
+        while ((j<columns)&&(lu_A(row[i],p_col[j])==0.0)) 
+          j++;
+    
+        // if it does not exist, decrease the linear independent row number and 
+        // swap the last linear independent row with the current one
+        if (j==columns) {
+          rows--;
+          swap(row[i],row[rows]);
+        } else { // otherwise (if the current row is linear independent for the 
+	         // previous ones)
+      
+          // swap the current column with the first column which has a not null 
+          // value in the i-th row
+          swap(p_col[i],p_col[j]);
+
+          // perform lu decomposition on the sub matrix A(i..rows,i..columns)
+          lu_local_dec(lu_A, row, p_col, rows, columns, i);
+       
+          i++;
+        }
+      }
+ 
+      p_row=array<size_t>(rows);
+  
+      for (i=0; i<rows; i++) 
+        p_row[i]=row[i];
+    
+      return lu_A;
+    }
     
     /* PAY ATTENTION!!! 
      * I supose that matrix is row based i.e. 
      * A(i,j) is the element in the i-th row and in the j-th column 
      */
     template <typename Real>
+    inline
     matrix<Real> 
     lu_decompose(const matrix<Real> &A, 
-                 vector<dimension_type> &p_vect) 
+                 array<dimension_type> &p_array) 
     {
       Real max,sum,p_val;
       dimension_type i,j,k, rows=A.size1(), cols=A.size2(), pivot=0;
@@ -222,7 +302,7 @@ namespace Ariadne {
           scale(pivot)=scale(j);
         }
       
-        p_vect(j)=pivot;
+        p_array[j]=pivot;
         
         if ( O(j,j) == 0 ) {
           throw SingularMatrix();
@@ -245,7 +325,7 @@ namespace Ariadne {
     template <typename Real>
     vector<Real> 
     lu_solve(const matrix<Real> &A, 
-             const vector<dimension_type> &p_vect, 
+             const array<dimension_type> &p_array, 
              const vector<Real> &b) 
     {
       dimension_type i_diag=0, idx_p, rows=A.size1(), cols=A.size2(),i,j;
@@ -257,7 +337,7 @@ namespace Ariadne {
       }
       
       for (i=0; i<rows; i++) {
-        idx_p=p_vect(i);
+        idx_p=p_array[i];
        
 	if (idx_p < cols) {
           sum=sol(idx_p);
@@ -369,10 +449,10 @@ namespace Ariadne {
       
       matrix<Real> inv_A(cols,rows);
       vector<Real> Id_vect(rows), Id_sol;
-      vector<dimension_type> p_vect(rows);
+      array<dimension_type> p_array(rows);
       
 
-      matrix<Real> lu_A=lu_decompose(A, p_vect);
+      matrix<Real> lu_A=lu_decompose(A, p_array);
      
       for (j=0; j<rows; j++) {
         for (i=0; i<rows; i++)
@@ -380,7 +460,7 @@ namespace Ariadne {
         
         Id_vect(j)=1.0;
 
-        Id_sol=lu_solve(lu_A,p_vect,Id_vect);
+        Id_sol=lu_solve(lu_A,p_array,Id_vect);
         
         for (i=0; i<cols; i++)
           inv_A(i,j)=Id_sol(i);
@@ -506,39 +586,155 @@ namespace Ariadne {
 
       return true;
     } 
+ 
+    template <typename Real>
+    inline 
+    bool have_same_dimensions(const matrix<Real> &A,  const matrix<Real> &B) {
+
+      return ((number_of_columns(A)==number_of_columns(B))&&
+	                (number_of_rows(A)==number_of_rows(B)));
+    }
+    
+    template <typename Real>
+    inline 
+    bool equivalent_columns(const matrix<Real> &A, 
+        const size_t &A_col, const matrix<Real> &B, 
+        const size_t &B_col) {
+
+      if (number_of_rows(A)!=number_of_rows(B))
+        throw std::domain_error("The two matrix have a diffentent number of rows"); 
+
+      for (size_t i=0; i< number_of_rows(A); i++)
+	if (A(i,A_col)!=B(i,B_col)) return false;
    
+      return true;
+    }
+  
+    template<typename R>
+    inline 
+    size_t find_first_not_null_in_col(const matrix<R> &A, 
+		    const size_t &col) {
+	    
+      size_t i=0;
+
+      while ((i< number_of_rows(A))&&(A(i,col)==0.0))
+      	i++;
+
+      return i;
+      
+    }
+    
     template <class T>
     inline
     matrix<T> remove_null_columns_but_one(const matrix<T> &A) {
-      size_t point=0,directions=0;
-      size_t cols=number_of_columns(A), 
-      rows=number_of_rows(A);
-      array<bool> null_v(cols);
+      size_t directions=0;
+      size_t cols=number_of_columns(A), rows=number_of_rows(A);
+      array<bool> not_null(cols);
 
-      if (cols==0) {
+      if (cols<2) {
         return A;
       }
 
       for(size_t j=0; j!=cols; ++j) {
-        null_v[j]=false;
-        for(size_t i=0; i!=rows; ++i) {
-          if (A(i,j)!=0.0) { null_v[j]=true; }
-        }
-        if (null_v[j]) { directions++; }
+        not_null[j]=(find_first_not_null_in_col(A,j)<rows);
+        if (not_null[j]) 
+	  directions++; 
       }
 
       matrix<T> new_A(rows,std::max((size_t)1,directions));
 
+      size_t j2=0;
       for(size_t j=0; j!=cols; ++j) {
-        if (null_v[j]) { 
+        if (not_null[j]) { 
           for(size_t i=0; i!=rows; ++i) {
-            new_A(i,point)=A(i,j);
+            new_A(i,j2)=A(i,j);
           }
-          ++point;
+          j2++;
         }
       }
 
       return new_A;
+    }
+    
+    template <typename Real>
+    inline 
+    void remove_null_columns(const matrix<Real> &A, 
+        array<size_t> &row, array<size_t> &col) {
+
+      size_t i,j, columns=col.size(), rows=row.size();
+      size_t new_columns=columns;
+  
+      j=columns-1;
+      while (j>rows) {
+        i=0;
+        while ((i<rows)&&(A(row[i],col[j])==0)) 
+          i++;
+    
+        if (i==rows) {
+          swap(col[j],col[rows+1]);
+          new_columns--;
+        }
+    
+        j--;
+      }
+  
+      if (new_columns<columns) {
+        array<size_t> p_col(new_columns);
+
+        for (size_t j=0; j<new_columns; j++) 
+          p_col[j]=col[j];
+
+        col=p_col;
+      }
+    }
+
+
+    template <typename Real>
+    inline 
+    matrix<Real> compute_space(const matrix<Real> &SA, 
+        array<size_t> &row,const array<size_t> &col) {
+	
+      size_t cols=col.size(), rows=row.size();
+   
+      assert(cols>=rows);
+	   
+      size_t SA_cols=number_of_columns(SA), A_rows=SA_cols-rows;
+      size_t i,j,k,j2;
+   
+      matrix<Real> A(A_rows,SA_cols);
+
+      k=0;
+      for (i=0; i<SA_cols; i++) {
+        j=0;
+        while ((j<cols)&&(col[j]!=i))
+          j++;
+
+        if (j==cols) {
+          A(k,i)=1;
+          k++;
+        }
+      }
+
+      Real aux;
+  
+      for (i=rows; i<cols; i++) {
+        A(k,col[i])=1;
+   
+        A(k,col[rows-1])=-SA(row[rows-1], col[i])/SA(row[rows-1],col[rows-1]);
+
+        j=rows; 
+        while (j>0) {
+          j--;
+       
+          aux=-SA(row[j], col[i]);
+          for (j2=j+1; j2<rows; j2++)
+            aux-=SA(row[j], col[j2])*A(k,col[j2]);
+ 
+          A(k,col[j])=aux/SA(row[j], col[j]);
+        }
+      }
+
+      return A;
     }
 
   }

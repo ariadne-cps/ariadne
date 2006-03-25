@@ -29,34 +29,19 @@ from ariadne.linear_algebra import *
 from math import *
 import sys
 
-r=Rectangle("[9,11]x[5,11]")
-r2=Rectangle("[5,6]x[3,4]")
-
+r=Rectangle("[9,11]x[5,11]x[0,0]")
+r2=Rectangle("[5,6]x[3,4]x[-0.5,0.5]")
 
 z=Zonotope(r);
 z2=Zonotope(r2);
 
-A=Matrix(2,2)
-b=Vector(2)
-
-alpha=3.14/4
-r_fact=7.0/8
-
-A[0,0]=r_fact*cos(alpha)
-A[0,1]=r_fact*sin(alpha)
-A[1,0]=r_fact*-sin(alpha)
-A[1,1]=r_fact*cos(alpha)
-
-M=AffineMap(A,b)
-
-z2=M(z2)
-
 z3=minkowski_sum(z,z2)
 
-p=Point(2)
+p=Point(3)
 
 p[0]=17
 p[1]=15
+p[2]=-0.5
 
 p2=Point(p)
 p3=Point(p)
@@ -66,29 +51,73 @@ p3[0]=14
 
 p4=Point(p3)
 p5=Point(p3)
-p6=Point(z3.centre())
+p6=Point(3)
+
+p6[0]=15.5
+p6[1]=11.5
+p6[2]=0
 
 p4[1]=p2[1]
 
 p5[1]=p2[1]-3
 
-print z3.contains(p)
-print z3.contains(p2)
-print z3.contains(p3)
-print z3.contains(p4)
-print z3.contains(p5)
-print z3.interior_contains(p)
-print z3.interior_contains(p2)
-print z3.interior_contains(p3)
-print z3.interior_contains(p4)
-print z3.interior_contains(p6)
+print "Z1 = ",z 
+print "Z2 = ",z2 
+print "Z3 = Z1 + Z2 = ",z3 
 
-print z3 
-print p
-print p2
-print p3
-print p4
-print p5
-print p6
+if (z3.contains(p)):
+	print "Z contains the point ",p
+else:
+	print "Z does not contain the point ",p
 
+if (z3.contains(p2)):
+	print "Z contains the point ",p2
+else:
+	print "Z does not contain the point ",p2
+	
+if (z3.contains(p3)):
+	print "Z contains the point ",p3
+else:
+	print "Z does not contain the point ",p3
+	
+if (z3.contains(p4)):
+	print "Z contains the point ",p4
+else:
+	print "Z does not contain the point ",p4
+
+if (z3.contains(p5)):
+	print "Z contains the point ",p5
+else:
+	print "Z does not contain the point ",p5
+	
+
+if (z3.interior_contains(p)):
+	print "Z's interior contains the point ",p
+else:
+	print "Z's interior does not contain the point ",p
+
+if (z3.interior_contains(p2)):
+	print "Z's interior contains the point ",p2
+else:
+	print "Z's interior does not contain the point ",p2
+	
+if (z3.interior_contains(p3)):
+	print "Z's interior contains the point ",p3
+else:
+	print "Z's interior does not contain the point ",p3
+	
+if (z3.interior_contains(p4)):
+	print "Z's interior contains the point ",p4
+else:
+	print "Z's interior does not contain the point ",p4
+
+if (z3.interior_contains(p5)):
+	print "Z's interior contains the point ",p5
+else:
+	print "Z's interior does not contain the point ",p5
+	
+if (z3.interior_contains(p6)):
+	print "Z's interior contains the point ",p6
+else:
+	print "Z's interior does not contain the point ",p6
 

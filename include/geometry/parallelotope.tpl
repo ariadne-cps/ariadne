@@ -44,6 +44,7 @@
 #include "../geometry/rectangle.h"
 #include "../geometry/list_set.h"
 #include "../geometry/parallelotope.h"
+#include "../geometry/zonotope.h"
 #include "../geometry/polyhedron.h"
 
 namespace Ariadne {
@@ -61,7 +62,13 @@ namespace Ariadne {
       }
       return Rectangle<R>(this->centre()-offset, this->centre()+offset);
     }
-      
+   
+    template <typename R>
+    Parallelotope<R>::operator Zonotope<R>() const 
+    {
+      return Zonotope<R>(*this); 
+    }
+
     
     template <typename R>
     Parallelotope<R>::operator Polyhedron<R>() const 
@@ -95,40 +102,35 @@ namespace Ariadne {
       return Polyhedron<R>(A,b);
     }
 
+    /*! \brief The equality operator */
     template <typename R>
-    bool 
-    Parallelotope<R>::contains(const Point& point) const 
-    {
-      if (point.dimension()!=this->dimension()) {
-        throw std::domain_error("This object and parameter have different space dimensions");
-      }  
-        
-      Vector c=coordinates(point);
-      for(dimension_type i=0; i!=this->dimension(); ++i) {
-        if(c[i]<-1 || c[i]>1) {
-          return false;
-        }
-      }
-      return true;
-    }
-    
-    template <typename R>
-    bool 
-    Parallelotope<R>::interior_contains(const Point& point) const {
-      if (point.dimension()!=this->dimension()) {
-        throw std::domain_error("This object and parameter have different space dimensions");
-      }  
-        
-      Vector c=coordinates(point);
-      for(dimension_type i=0; i!=this->dimension(); ++i) {
-        if(c[i]<=-1 || c[i]>=1) {
-          return false;
-        }
-      }
-      return true;
+    bool Parallelotope<R>::operator==(const Parallelotope<R>& A) const {
+      Zonotope<R> z_this(*this), z_A(A);
+
+      return z_this==z_A;
     }
       
+    /*! \brief The inequality operator */
+    template <typename R>
+    bool Parallelotope<R>::operator!=(const Parallelotope<R>& A) const {
+      return !(*this == A);
+    }  
+     
+    /*! \brief Tests if the parallelotope contains \a point. */
+    template <typename R>
+    bool Parallelotope<R>::contains(const Point& point) const {
+      Zonotope<R> z_this(*this);
+	      
+      return z_this.contains(point);
+    }
       
+    /*! \brief Tests if the interior of the parallelotope contains \a point. */
+    template<typename R>
+    bool Parallelotope<R>::interior_contains(const Point& point) const {
+      Zonotope<R> z_this(*this);
+      
+      return z_this.interior_contains(point);
+    }
       
     template <typename R>
     ListSet<R,Parallelotope>

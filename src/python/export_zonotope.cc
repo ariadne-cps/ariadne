@@ -120,11 +120,12 @@ void export_zonotope() {
     .def(init<std::string>())
     .def("bounding_box", &RZonotope::bounding_box)
     //.def("subdivide", &RZonotope::subdivide)
-    .def("centre", &RZonotope::centre)
     .def("empty", &RZonotope::empty)
     .def("empty_interior", &RZonotope::empty_interior)
     .def("dimension", &RZonotope::dimension)
     .def("contains", &RZonotope::contains)
+    //.def("==", &RZonotope::operator==)
+    //.def("!=", &RZonotope::operator!=)
     .def("interior_contains", &RZonotope::interior_contains)
     .def(str(self))    // __str__
   ;

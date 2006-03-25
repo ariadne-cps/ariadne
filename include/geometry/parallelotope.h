@@ -49,6 +49,7 @@
 #include "../geometry/rectangle.h"
 #include "../geometry/list_set.h"
 #include "../geometry/polyhedron.h"
+#include "../geometry/zonotope.h"
 #include "../geometry/geometry_declarations.h"
 
 namespace Ariadne {
@@ -57,6 +58,8 @@ namespace Ariadne {
 
     template < typename R > class Rectangle;
     template < typename R > class Polyhedron;
+    template < typename R > class Zonotope;
+
     template < typename R, template <typename> class BS > class ListSet;
 
     template <typename R> Parallelotope<R> intersection(const Parallelotope<R>& A, const Parallelotope<R>& B);
@@ -218,34 +221,28 @@ namespace Ariadne {
       inline Matrix generators() const {
         return this->_generators;
       }
-      
-      /*! \brief Tests if the parallelotope contains \a point. */
-      inline bool contains(const Point& point) const;
-      
-      /*! \brief Tests if the interior of the parallelotope contains \a point. */
-      inline bool interior_contains(const Point& point) const;
-      
-      /*! \brief The equality operator (not implemented).
-       *
-       * Not currently implemented, since it requires matching the columns of 
-       * the matrix of principal directions. 
-       */
-      inline bool operator==(const Parallelotope<Real>& A) const
-      {
-        throw std::domain_error("Parallelotope::operator==(...)  not implemented");
-      }
+     
+      /*! \brief The equality operator */
+      bool operator==(const Parallelotope<R>& A) const;
       
       /*! \brief The inequality operator */
-      inline bool operator!=(const Parallelotope<Real>& A) const {
-        return !(*this == A);
-      }
+      bool operator!=(const Parallelotope<R>& A) const; 
 
       /*! \brief A rectangle containing the given parallelotope. */
       Rectangle<R> bounding_box() const;
       
+      /*! \brief Convert to a zonotope. */
+      operator Zonotope<R> () const;
+      
       /*! \brief Convert to a polyhedron. */
       operator Polyhedron<R> () const;
+       
+      /*! \brief Tests if the parallelotope contains \a point. */
+      bool contains(const Point& point) const;
       
+      /*! \brief Tests if the interior of the parallelotope contains \a point. */
+      bool interior_contains(const Point& point) const;
+
       /*! \brief Subdivide into smaller pieces. */
       ListSet<R,Ariadne::Geometry::Parallelotope> subdivide() const;
       

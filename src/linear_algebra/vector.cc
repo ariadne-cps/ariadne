@@ -1,5 +1,5 @@
 /***************************************************************************
- *            linear_program.cc
+ *            vector.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it Pieter.Collins@cwi.nl
@@ -21,16 +21,26 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "linear_algebra/linear_program.h"
-#include "linear_algebra/linear_program.tpl"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/vector.tpl"
 
+namespace boost {
+  namespace numeric {
+    namespace ublas {
+      using namespace Ariadne;
+      
+      template class vector<Dyadic>;
+      template std::ostream& operator<<(std::ostream&, const vector<Dyadic>&);
+      template std::ostream& operator<<(std::ostream&, const vector< Interval<Dyadic> >&);
+      template class vector<Rational>;
+      template std::ostream& operator<<(std::ostream&, const vector<Rational>&);
+      template std::ostream& operator<<(std::ostream&, const vector< Interval<Rational> >&);
+    }
+  }
+}
+      
 namespace Ariadne {
   namespace LinearAlgebra {
     
-    template class LinearProgram<Dyadic>;
-    template std::ostream& operator<<(std::ostream&, const LinearProgram<Dyadic>&);
-    template class LinearProgram<Rational>;
-    template std::ostream& operator<<(std::ostream&, const LinearProgram<Rational>&);
-
   }
 }

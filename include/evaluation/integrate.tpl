@@ -37,9 +37,10 @@
 #include "../base/interval.h"
 
 #include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
-
 #include "../linear_algebra/interval_vector.h"
+#include "../linear_algebra/zonotopic_vector.h"
+
+#include "../linear_algebra/matrix.h"
 #include "../linear_algebra/interval_matrix.h"
 
 #include "../geometry/rectangle.h"
@@ -57,6 +58,21 @@ namespace Ariadne {
     Geometry::Rectangle<R> 
     move(const Geometry::Rectangle<R>& r, 
          const R& h,
+         const LinearAlgebra::vector< Interval<R> >& iv)
+    {
+      Geometry::Rectangle<R> result(r.dimension());
+      assert(r.dimension()==iv.size());
+      
+      for(size_type i=0; i!=result.dimension(); ++i) {
+        result.set_interval(i,r[i]+h*iv[i]);
+      }
+      return result;
+    }
+    
+    template<typename R>
+    Geometry::Rectangle<R> 
+    move(const Geometry::Rectangle<R>& r, 
+         const Interval<R>& h,
          const LinearAlgebra::vector< Interval<R> >& iv)
     {
       Geometry::Rectangle<R> result(r.dimension());
@@ -88,11 +104,14 @@ namespace Ariadne {
     Geometry::Rectangle<R> 
     integrate(const VectorField<R>& vf, const Geometry::Rectangle<R>& r, const R& t) 
     {
+      using namespace Geometry;
+      using namespace LinearAlgebra;
+      
       std::cerr << "integrate(const VectorField<R>& vf, const Geometry::Rectangle<R>& r, const R& t)" << std::endl;
       
       assert(vf.dimension()==r.dimension());
       const size_type n=r.dimension();
-      Geometry::Rectangle<R> result=r;
+      Rectangle<R> result=r;
       R time=t;
       
       while(time>0) {
@@ -152,14 +171,20 @@ namespace Ariadne {
     Geometry::Parallelotope<R> 
     integrate(const VectorField<R>& vf, const Geometry::Parallelotope<R>& p, const R& t) 
     {
+      using namespace LinearAlgebra;
+      using namespace Geometry;
+
       assert(vf.dimension()==p.dimension());
       const size_type n=p.dimension();
   
       R h=t;
       
+      /* Compute an estimate of the Lipschitz constant. */
       LinearAlgebra::vector< Interval<R> > f;
       Geometry::Rectangle<R> ibb=p.bounding_box();
-      Geometry::Rectangle<R> obb=move(ibb,R(2*h),vf.apply(ibb));
+      Geometry::Rectangle<R> obb=move(ibb,Interval<R>(0,2*h),vf.apply(ibb));
+      R lipschitz=norm(vf.apply(obb));
+      
       Geometry::Rectangle<R> bb=move(ibb,h,vf.apply(obb));
       while(!subset(bb,obb)) {
         std::cerr << "stepsize=" << h << std::endl;

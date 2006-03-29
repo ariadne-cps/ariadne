@@ -144,12 +144,12 @@ namespace Ariadne {
       inline explicit Parallelotope(const State& c, const Matrix& m)
         : _centre(c), _generators(m)
       {
-        if (LinearAlgebra::number_of_rows(m)!=LinearAlgebra::number_of_columns(m)) {
+        if (m.size1()!=m.size2()) {
           throw std::domain_error(
               "The the matrix of principal directions is not a square matrix");
         }
         
-        if (c.dimension()!=LinearAlgebra::number_of_rows(m)) {
+        if (c.dimension()!=m.size1()) {
           throw std::domain_error("The centre and directions have different dimensions.");
         }
       }

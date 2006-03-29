@@ -107,12 +107,31 @@ namespace boost {
         return iprod(A,B);
       }
    
+    
 
     
     }
   }
 }
 
-
+namespace Ariadne {
+  namespace LinearAlgebra {
+    template<typename Real>
+    inline
+    Real
+    norm(const matrix< Interval<Real> >& A) 
+    {
+      Real result=0;
+      for(size_type i=0; i!=A.size1(); ++i) {
+        Real row_sum=0;
+        for(size_type j=0; j!=A.size2(); ++j) {
+          row_sum+=std::max(abs(A(i,j).lower()),abs(A(i,j).upper()));
+        }
+        result=std::max(result,row_sum);
+      }
+    }
+        
+  }
+}
 
 #endif /* _ARIADNE_INTERVAL_MATRIX_H */

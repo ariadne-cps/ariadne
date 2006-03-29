@@ -76,5 +76,22 @@ namespace boost {
   }
 }
   
+namespace Ariadne {
+  namespace LinearAlgebra {
+    template<typename Real>
+    inline
+    Real
+    norm(const vector< Interval<Real> >& v)
+    {
+      Real norm=Real(0);
+      for (size_type i=0; i<v.size(); i++) {
+        norm=std::max(norm,Real(abs(v(i).lower())));
+        norm=std::max(norm,Real(abs(v(i).upper())));
+      }
+      return norm;
+    }
+    
+  }
+}  
 
 #endif /* _ARIADNE_INTERVAL_VECTOR_H */

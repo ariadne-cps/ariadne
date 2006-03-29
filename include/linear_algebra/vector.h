@@ -42,19 +42,7 @@ namespace boost {
     namespace ublas {
       template <typename Real>
       std::ostream&
-      operator<<(std::ostream& os, const vector<Real>& v)
-      {
-        os << "[";
-        if(v.size()>0) {
-          os << v[0];
-        }
-        for(uint i=1; i!=v.size(); ++i) {
-          os << "," << v[i];
-        }
-        os << "]";
-        return os;
-      }
-
+      operator<<(std::ostream& os, const vector<Real>& v);
     }
   }
 }
@@ -81,10 +69,41 @@ namespace Ariadne {
     template <typename Real>
     inline vector<Real> zero_vector(dimension_type dim) {
       vector<Real> v(dim);
-      for (dimension_type j=0; j< dim; j++) {
-        v(j)=0.0;
+      for (dimension_type i=0; i<dim; ++i) {
+        v(i)=0;
       }
       return v;
+    }
+    
+    template <typename Real>
+    inline bool linear_multiple(const vector<Real> u, const vector<Real>& v) {
+      assert(u.dimension()==v.dimension());
+      Real multiple=0;
+      for (dimension_type i=0; i<u.dimension(); ++i) {
+        if(u(i)==0 && multiple!=0 && v(i)!=0) {
+          return false;
+        }
+        if(multiple==0) {
+          multiple=v(i)/u(i);
+        }
+        else {
+          if(multiple*u(i)!=v(i)) {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+    
+    template<typename Real>
+    inline
+    Real
+    norm(const vector<Real>& v) {
+      Real norm=Real(0);
+      for (size_type i=0; i<v.size(); ++i) {
+        norm=std::max(norm,abs(v(i)));
+      }
+      return norm;
     }
     
     template <typename Real>

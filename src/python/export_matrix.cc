@@ -128,6 +128,7 @@ void export_matrix() {
   ;
     
   def("inverse",&rmatrix_inverse);
+  def("exp_Ah",&Ariadne::LinearAlgebra::exp_Ah<Real>);
 
   class_<QMatrix>("QMatrix",init<int,int>())
     .def(init<QMatrix>())

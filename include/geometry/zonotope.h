@@ -155,7 +155,7 @@ namespace Ariadne {
     
      public:
       /*! \brief Default constructor constructs an empty zonotope of dimension \a n. */
-      explicit Zonotope(size_t n = 0)
+      explicit Zonotope(size_type n = 0)
         : _centre(n),  _generators(n,0) { }
       
       /*! \brief Construct from centre and directions. */
@@ -164,7 +164,7 @@ namespace Ariadne {
       {
         using namespace Ariadne::LinearAlgebra;
         
-        if (c.dimension()!=number_of_rows(m)) {
+        if (c.dimension()!=m.size1()) {
           throw std::domain_error(
               "The the matrix of principal directions does not have the same number of rows as the point dimension.");
         }
@@ -183,7 +183,7 @@ namespace Ariadne {
         }
               
         this->_generators=Matrix(r.dimension(),r.dimension());
-        for(size_t i=0; i!=dimension(); ++i) {
+        for(size_type i=0; i!=dimension(); ++i) {
           this->_centre[i] = (r.lower_bound(i)+r.upper_bound(i))/2;
           this->_generators(i,i) = (r.upper_bound(i)-r.lower_bound(i))/2;
         }
@@ -228,8 +228,8 @@ namespace Ariadne {
          using namespace Ariadne::LinearAlgebra;
         Vector offset(this->dimension());
         
-        for(size_t i=0; i!=this->dimension(); ++i) {
-          for(size_t j=0; j!=number_of_columns(this->_generators); ++j) {
+        for(size_type i=0; i!=this->dimension(); ++i) {
+          for(size_type j=0; j!=this->_generators.size2(); ++j) {
              offset(i) += abs(this->_generators(i,j));
           }
         }
@@ -241,21 +241,23 @@ namespace Ariadne {
       inline operator Polyhedron<R> () const;
       
       /*! \brief The dimension of the Euclidean space the zonotope lies in. */
-      inline size_t dimension() const {
-        return (this->_centre).dimension();
+      inline dimension_type dimension() const {
+        return this->_centre.dimension();
+      }
+      
+      /*! \brief The number of generators of the zonotope. */
+      inline size_type number_of_generators() const {
+        return this->_generators.size2();
       }
       
       /*! \brief True if the zonotope is empty. */
       inline bool empty() const {
-         using namespace Ariadne::LinearAlgebra;
-        
-              if (number_of_columns(this->_generators)==0) return true;
         return false;
       }
       
       /*! \brief True if the zonotope has empty interior. */
       inline bool empty_interior() const {
-         using namespace Ariadne::LinearAlgebra;
+        using namespace Ariadne::LinearAlgebra;
 
         return !independent_rows(this->_generators);
       }
@@ -266,10 +268,10 @@ namespace Ariadne {
       }
       
       /*! \brief The \a n th of principle direction. */
-      inline Vector principle_direction(size_t n) const {
+      inline Vector principle_direction(size_type n) const {
         Vector out(this->dimension());
 
-        for (size_t i=0; i<this->dimension(); i++) {
+        for (size_type i=0; i<this->dimension(); i++) {
            out(i)=this->_generators(i,n);
         }
         
@@ -296,7 +298,7 @@ namespace Ariadne {
 
         Vector result(A*point.position_vector()-b);
 
-        for (size_t i=0; i<result.size(); i++) {
+        for (size_type i=0; i<result.size(); i++) {
            if (result(i)<0) return false;
         }
         
@@ -320,7 +322,7 @@ namespace Ariadne {
 
         Vector result(A*point.position_vector()-b);
         
-        for (size_t i=0; i<result.size(); i++) {
+        for (size_type i=0; i<result.size(); i++) {
            if (result(i)<=0) return false;
         }
         
@@ -334,16 +336,16 @@ namespace Ariadne {
               
         const Matrix &this_gen=this->_generators;
         const Matrix &A_gen=A._generators;
-        size_t directions=number_of_columns(A_gen);
+        size_type directions=this->number_of_generators();
 
-        if (!have_same_dimensions(this_gen,A_gen))
+        if (!have_same_dimensions(this_gen,A_gen)) {
           return false;
-        
-              array<bool> not_found(directions,true);
+        }
+        array<bool> not_found(directions,true);
         bool searching_for_equiv;
 
-        size_t j2;
-        for (size_t j=0; j< directions; j++) {
+        size_type j2;
+        for (size_type j=0; j< directions; j++) {
           j2=j; 
           searching_for_equiv=true;
           while ((j2< directions)&&(searching_for_equiv)) {
@@ -356,8 +358,9 @@ namespace Ariadne {
             j2++;
           }
 
-          if (searching_for_equiv) 
+          if (searching_for_equiv) {
             return false;
+          }
         }
 
         return true;
@@ -386,14 +389,14 @@ namespace Ariadne {
   
     template<typename R>
     inline 
-    void Zonotope<R>::minimize_generators(void) {
-
+    void Zonotope<R>::minimize_generators(void) 
+    {
       using namespace LinearAlgebra;
            
-      size_t i,j,i2,j2;
+      size_type i,j,i2,j2;
       Matrix &gen=this->_generators;
       gen=remove_null_columns_but_one(gen);
-      size_t rows=number_of_rows(gen);
+      size_type rows=gen.size1();
       
       // if the first row is null the zonotope is a point and it is already
       // minimized
@@ -401,11 +404,11 @@ namespace Ariadne {
         return;
       }
       
-      size_t cols=number_of_columns(gen);
-      size_t min_cols=cols;
+      size_type cols=this->number_of_generators();
+      size_type min_cols=cols;
       R coef,coef2;
      
-      array<size_t> dependences(cols,cols);
+      array<size_type> dependences(cols,cols);
       array<bool> same_sign(cols,true);
       
       for (j=0; j<cols; j++) {
@@ -473,67 +476,70 @@ namespace Ariadne {
     
     template<typename R>
     inline 
-    void Zonotope<R>::compute_linear_inequalities(Matrix& A, Vector& b) const
+    void 
+    Zonotope<R>::compute_linear_inequalities(Matrix& A, Vector& b) const
     {
       using namespace Ariadne::LinearAlgebra;
      
       const Matrix &gen=this->_generators;
       Matrix Space=trans(gen);
-      size_t number_of_generators=number_of_columns(gen);
       R b2;
-     
+      size_type ngen=this->number_of_generators();
+      
       //compute complanar hyperplanes
-      array<size_t> col,row;
+      array<size_type> col,row;
       A=lu_decompose(Space,col,row); 
 
       if (col.size()==row.size()) {
-        A=Matrix(2*number_of_generators,this->dimension());
-        b=Vector(2*number_of_generators);
+        A=Matrix(2*ngen,this->dimension());
+        b=Vector(2*ngen);
         Space=Matrix();
-      } else { 
+      } 
+      else { 
         remove_null_columns(A,row,col);
         Space=compute_space(A,row,col);
 
-        A=Matrix(2*number_of_generators+2*number_of_rows(Space),
+        A=Matrix(2*ngen+2*Space.size1(),
                         this->dimension());
-        b=Vector(2*number_of_generators+2*number_of_rows(Space));
+        b=Vector(2*ngen+2*Space.size1());
       }
       // TO IMPROVE: we new compute both (col_i)^T(cols_j) and 
       // (col_j)^T(cols_i)
-      for (size_t i=0; i< number_of_generators; i++) {
+      for (size_type i=0; i<ngen; i++) {
         b(2*i)=0.0;
-        for (size_t j=0; j< number_of_generators; j++) {
+        for (size_type j=0; j<ngen; j++) {
           //b(2*i)-=abs(this->principle_direction(i)*this->principle_direction(j));
           b2=0.0;
-          for (size_t k=0; k< this->dimension(); k++) {
+          for (size_type k=0; k< this->dimension(); k++) {
             b2+=gen(k,i)*gen(k,j);
           }
           b(2*i)-=abs(b2);
         }
         
         b2=0.0;
-        for (size_t k=0; k< this->dimension(); k++) {
+        for (size_type k=0; k< this->dimension(); k++) {
           b2+=gen(k,i)*this->_centre[k];
         }
 
         b(2*i+1)=b(2*i)+b2;
         b(2*i)=b(2*i)-b2;        
         
-        for (size_t k=0; k< this->dimension(); k++) {
+        for (size_type k=0; k< this->dimension(); k++) {
            A(2*i,k)=-gen(k,i);
            A(2*i+1,k)=gen(k,i);
         }
       }
 
-      for (size_t i=0; i< number_of_rows(Space); i++) {
-        for (size_t j=0; j< this->dimension(); j++) {
-          A(2*(i+number_of_generators),j)=Space(i,j);
-          A(2*(i+number_of_generators)+1,j)=-Space(i,j);
+      for (size_type i=0; i< Space.size1(); i++) {
+        for (size_type j=0; j< this->dimension(); j++) {
+          A(2*(i+ngen),j)=Space(i,j);
+          A(2*(i+ngen)+1,j)=-Space(i,j);
         }
       }
     }
       
     template <typename R>
+    inline
     Zonotope<R>::operator Polyhedron<R>() const 
     {
       using namespace Ariadne::LinearAlgebra;
@@ -558,26 +564,25 @@ namespace Ariadne {
               "minkowski_sum: the two zonotopes have different dimension.");
       }
       
-      dimension_type col_A=number_of_columns(A._generators), 
-                     col_B=number_of_columns(B._generators); 
+      dimension_type col_A=A._generators.size2(); 
+      dimension_type col_B=B._generators.size2(); 
       
       matrix<R> gen(A.dimension(), col_A+col_B);
 
-      for (size_t i=0; i!=col_A; ++i) {
-         for (size_t j=0; j!=A.dimension(); ++j) {
+      for (size_type i=0; i!=col_A; ++i) {
+         for (size_type j=0; j!=A.dimension(); ++j) {
             gen(j,i)=A._generators(j,i);
          }
       }
 
       
-      for (size_t i=0; i!=col_B; ++i) {
-        for (size_t j=0; j!=A.dimension(); ++j) {
+      for (size_type i=0; i!=col_B; ++i) {
+        for (size_type j=0; j!=A.dimension(); ++j) {
           gen(j,i+col_A)=B._generators(j,i);
         }
       }
       
-      return Zonotope<R>(A._centre+(B._centre).position_vector(), 
-                         remove_null_columns_but_one(gen));
+      return Zonotope<R>(A._centre+(B._centre).position_vector(),gen);
     }
    
     /*! \brief Performs the Minkoswi difference of two zonotopes */
@@ -592,20 +597,20 @@ namespace Ariadne {
               "minkowski_difference: the two zonotopes have different dimension.");
       }
       
-      dimension_type col_A=number_of_columns(A._generators), 
-                     col_B=number_of_columns(B._generators); 
+      dimension_type col_A=A._generators.size2();
+      dimension_type col_B=B._generators.size2(); 
       
       matrix<R> gen(A.dimension(), col_A+col_B);
 
-      for (size_t i=0; i!=col_A; ++i) {
-         for (size_t j=0; j!=A.dimension(); ++j) {
+      for (size_type i=0; i!=col_A; ++i) {
+         for (size_type j=0; j!=A.dimension(); ++j) {
           gen(j,i)=A._generators(j,i);
         }
       }
 
       
-      for (size_t i=0; i!=col_B; ++i) {
-        for (size_t j=0; j!=A.dimension(); ++j) {
+      for (size_type i=0; i!=col_B; ++i) {
+        for (size_type j=0; j!=A.dimension(); ++j) {
           gen(j,i+col_A)=B._generators(j,i);
          }
       }

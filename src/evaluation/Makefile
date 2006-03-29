@@ -50,6 +50,7 @@ map.o: map.cc ../../include/evaluation/map.h \
   ../../include/evaluation/../geometry/../geometry/rectangle.h \
   ../../include/evaluation/../geometry/../geometry/list_set.h \
   ../../include/evaluation/../geometry/../geometry/polyhedron.h \
+  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -99,6 +100,7 @@ vector_field.o: vector_field.cc ../../include/evaluation/vector_field.h \
   ../../include/evaluation/../geometry/../geometry/list_set.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/geometry_declarations.h \
   ../../include/evaluation/../geometry/../geometry/polyhedron.h \
+  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -154,6 +156,7 @@ apply.o: apply.cc ../../include/evaluation/apply.h \
   ../../include/evaluation/../geometry/../geometry/rectangle.h \
   ../../include/evaluation/../geometry/../geometry/list_set.h \
   ../../include/evaluation/../geometry/../geometry/polyhedron.h \
+  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -209,8 +212,13 @@ integrate.o: integrate.cc ../../include/evaluation/integrate.h \
   ../../include/evaluation/../base/../base/numerical_type.h \
   ../../include/evaluation/../base/interval.h \
   ../../include/evaluation/../linear_algebra/vector.h \
-  ../../include/evaluation/../linear_algebra/matrix.h \
   ../../include/evaluation/../linear_algebra/interval_vector.h \
+  ../../include/evaluation/../linear_algebra/zonotopic_vector.h \
+  ../../include/evaluation/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/evaluation/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/evaluation/../linear_algebra/../base/utility.h \
+  ../../include/evaluation/../linear_algebra/../base/interval.h \
+  ../../include/evaluation/../linear_algebra/matrix.h \
   ../../include/evaluation/../linear_algebra/interval_matrix.h \
   ../../include/evaluation/../geometry/rectangle.h \
   ../../include/evaluation/../geometry/../base/utility.h \
@@ -228,6 +236,7 @@ integrate.o: integrate.cc ../../include/evaluation/integrate.h \
   ../../include/evaluation/../geometry/../geometry/rectangle.h \
   ../../include/evaluation/../geometry/../geometry/list_set.h \
   ../../include/evaluation/../geometry/../geometry/polyhedron.h \
+  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \

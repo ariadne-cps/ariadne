@@ -53,20 +53,15 @@ using boost::python::return_value_policy;
 using boost::python::copy_const_reference;
 
 void export_simplex() {
-  typedef bool (*SmplxBinPred) (const RSimplex&, const RSimplex&);
+  typedef bool (*SmplxSmplxBinPred) (const RSimplex&, const RSimplex&);
   typedef bool (*SmplxRectBinPred) (const RSimplex&, const RRectangle&);
-  SmplxRectBinPred smplx_rect_interiors_intersect=&interiors_intersect<Real>;
-  SmplxBinPred smplx_interiors_intersect=&interiors_intersect<Real>;
-  SmplxBinPred smplx_disjoint=&disjoint<Real>;
-  SmplxBinPred smplx_inner_subset=&inner_subset<Real>;
-  SmplxBinPred smplx_subset=&subset<Real>;
 
-  def("interiors_intersect", smplx_interiors_intersect);
-  def("interiors_intersect", smplx_rect_interiors_intersect);
-  def("disjoint", smplx_disjoint);
-  def("inner_subset", smplx_inner_subset);
+  def("interiors_intersect", SmplxSmplxBinPred(&interiors_intersect));
+  def("interiors_intersect", SmplxRectBinPred(&interiors_intersect));
+  def("disjoint", SmplxSmplxBinPred(&disjoint));
+  def("inner_subset", SmplxSmplxBinPred(&inner_subset));
 
-  def("subset", smplx_subset);
+  def("subset", SmplxSmplxBinPred(&subset));
 
   class_<RSimplex>("Simplex",init<int>())
     .def(init< std::vector<RPoint> >())

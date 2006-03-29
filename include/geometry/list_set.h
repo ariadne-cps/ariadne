@@ -79,13 +79,13 @@ namespace Ariadne {
       /* List of basic sets. Note that std::vector provides a
        * reserve(size_t) method to increase the capacity.
        */
-      size_t _dimension;
+      dimension_type _dimension;
       std::vector< BS<R> > _vector;
 
      public:
       typedef BS<R> BasicSet;
-      typedef typename BasicSet::Point Point;
-      typedef typename BasicSet::Point::Real Real;
+      typedef typename BasicSet::State State;
+      typedef typename BasicSet::State::Real Real;
 
       typedef typename std::vector<BasicSet>::const_iterator const_iterator;
       typedef typename std::vector<BasicSet>::iterator iterator;
@@ -244,7 +244,7 @@ namespace Ariadne {
       * \return  \a true, if \a s is contained into the
       * current set, \a false otherwise.
       */
-      inline bool contains(const Point &p) const {
+      inline bool contains(const State& p) const {
 
         for (size_t i=0; i<this->size(); i++) {
           if ((this->_vector[i]).contains(p))
@@ -264,7 +264,7 @@ namespace Ariadne {
        * \return  \a true, if \a s is contained into the
        * current set, \a false otherwise.
        */
-      inline bool interior_contains(const Point & p) const {
+      inline bool interior_contains(const State& p) const {
         throw(std::domain_error("Not implemented"));
         for (size_t i=0; i<this->size(); i++) {
           if ((this->_vector[i]).interior_contains(p))

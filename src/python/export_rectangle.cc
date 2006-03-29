@@ -55,21 +55,15 @@ using boost::python::copy_const_reference;
 void export_rectangle() {
   typedef bool (*RectBinPred) (const RRectangle&, const RRectangle&);
   typedef RRectangle (*RectBinFunc) (const RRectangle&, const RRectangle&);
-  RectBinFunc rect_intersection=&intersection<Real>;
-  RectBinPred rect_interiors_intersect=&interiors_intersect<Real>;
-  RectBinPred rect_disjoint=&disjoint<Real>;
-  RectBinPred rect_inner_subset=&inner_subset<Real>;
-  RectBinFunc rect_regular_intersection=&regular_intersection<Real>;
-  RectBinPred rect_subset=&subset<Real>;
+  
+  def("regular_intersection", RectBinFunc(&regular_intersection));
+  def("interiors_intersect", RectBinPred(&interiors_intersect));
+  def("disjoint", RectBinPred(&disjoint));
+  def("inner_subset", RectBinPred(&inner_subset));
 
-  def("regular_intersection", rect_regular_intersection);
-  def("interiors_intersect", rect_interiors_intersect);
-  def("disjoint", rect_disjoint);
-  def("inner_subset", rect_inner_subset);
-
-  def("intersection", rect_intersection);
-  def("subset", rect_subset);
-
+  def("intersection", RectBinFunc(&intersection));
+  def("subset", RectBinPred(&subset));
+  
   class_<RRectangle>("Rectangle",init<int>())
     .def(init<RPoint,RPoint>())
     .def(init<RRectangle>())

@@ -25,49 +25,41 @@
 #ifndef _ARIADNE_VECTOR_FIELD_H
 #define _ARIADNE_VECTOR_FIELD_H
 
-#include "../base/exception.h"
+#include "../base/interval.h"
+#include "../linear_algebra/vector.h"
+#include "../linear_algebra/matrix.h"
+#include "../linear_algebra/interval_vector.h"
+#include "../linear_algebra/interval_matrix.h"
+#include "../geometry/geometry_declarations.h"
+#include "../evaluation/evaluation_declarations.h"
 
 namespace Ariadne {
-namespace VectorField{
+  namespace Evaluation {
 
-enum VectorFieldKind {
-  LINEAR,
-  AFFINE,
-  MULTIVALUE,
-  GENERAL
-};
+    template <typename R>
+    class VectorField {
+     public:
+      typedef R Real;
+      typedef Geometry::Point<R> State;
+      
+      virtual ~VectorField();
+     
+      virtual LinearAlgebra::vector<R> apply(const Geometry::Point<R>& x) const;
+      virtual LinearAlgebra::vector< Interval<R> > apply(const Geometry::Rectangle<R>& A) const;
 
-}
-}
-
-template<typename R> class Ariadne::Geometry::Rectangle;
-template<typename R> class Ariadne::Geometry::Polyhedron;
-template<typename R> class Ariadne::Geometry::Point;
-template<typename R, template<typename> class BS> class Ariadne::Geometry::ListSet;
-template<typename R, template<typename> class S> class Ariadne::Map::Map;
-
-
-namespace Ariadne {
-namespace VectorField{
-
-   
-template <typename R, template<typename> class S>
-class VectorField {
- public:
-  typedef R Real;
-  typedef S<R> State;
-  
-  virtual State operator() (const State& x) const = 0;
-  virtual Geometry::Rectangle<R> operator() (const Geometry::Rectangle<R>& A) const {
-    throw std::invalid_argument("Not implemented."); }
-  virtual Geometry::Polyhedron<R> operator() (const Geometry::Polyhedron<R>& A) const {
-    throw std::invalid_argument("Not implemented."); };
-
-  size_t dimension() const = 0;
-};
-
+      virtual LinearAlgebra::matrix<R> derivative(const Geometry::Point<R>& x) const;
+      virtual LinearAlgebra::matrix< Interval<R> > derivative(const Geometry::Rectangle<R>& A) const;
     
-}
+      virtual dimension_type dimension() const = 0;
+
+      LinearAlgebra::vector<R> operator() (const Geometry::Point<R>& x) const  {
+        return this->apply(x); }
+
+      LinearAlgebra::vector< Interval<R> > operator() (const Geometry::Rectangle<R>& r) const {
+        return this->apply(r); }
+     };
+    
+  }
 }
 
 #endif /* _ARIADNE_VECTOR_FIELD_H */

@@ -1,7 +1,6 @@
 /***************************************************************************
- *            apply.h
+ *            integrate.h
  *
- *  17 January 2006
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
@@ -22,41 +21,50 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file apply.h
- *  \brief Methods for computing the images of sets under maps.
+/*! \file integrate.h
+ *  \brief Methods for integrating points and sets under a vector field.
  */
 
-#ifndef _ARIADNE_APPLY_H
-#define _ARIADNE_APPLY_H
+#ifndef _ARIADNE_INTEGRATE_H
+#define _ARIADNE_INTEGRATE_H
 
 #include "../geometry/geometry_declarations.h"
+#include "../linear_algebra/linear_algebra_declarations.h"
 
 #include "../evaluation/evaluation_declarations.h"
-#include "../evaluation/map.h"
+#include "../evaluation/vector_field.h"
 
 namespace Ariadne {
   namespace Evaluation {
-
+   
     template<typename R>
     Geometry::Rectangle<R> 
-    apply(const Map<R>& f, const Geometry::Rectangle<R>& p);
+    operator+(const Geometry::Rectangle<R>& r, 
+              const LinearAlgebra::vector< Interval<R> >& iv);
+
+    /*! An inefficient C0 algorithm for integrating forward a rectangle. */
+    template<typename R>
+    Geometry::Rectangle<R> 
+    integrate(const VectorField<R>& vf, const Geometry::Rectangle<R>& r, const R& t);
 
     template<typename R>
     Geometry::Parallelotope<R> 
-    apply(const Map<R>& f, const Geometry::Parallelotope<R>& p);
+    integrate(const VectorField<R>& vf, const Geometry::Parallelotope<R>& p, const R& t);
 
     template<typename R, template<typename> class BS>
     Ariadne::Geometry::ListSet<R,BS> 
-    apply(const Map<R>& f, const Ariadne::Geometry::ListSet<R,BS>& ds);
-     
+    integrate(const VectorField<R>& vf, const Ariadne::Geometry::ListSet<R,BS>& ds, const R& t);
+    
+/*
     template<typename R>
     Ariadne::Geometry::GridMaskSet<R> 
-    chainreach(const Map<R>& f, 
+    chainreach(const VectorField<R>& f, 
                const Ariadne::Geometry::ListSet<R,Ariadne::Geometry::Rectangle>& is, 
                const Ariadne::Geometry::FiniteGrid<R>& g, 
                const Ariadne::Geometry::Rectangle<R>& bb);
+*/
     
   }
 }
 
-#endif /* _ARIADNE_APPLY_H */
+#endif /* _ARIADNE_INTEGRATE_H */

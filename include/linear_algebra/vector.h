@@ -37,11 +37,47 @@
 #include "../base/numerical_type.h"
 #include "../base/interval.h"
 
+namespace boost { 
+  namespace numeric { 
+    namespace ublas {
+      template <typename Real>
+      std::ostream&
+      operator<<(std::ostream& os, const vector<Real>& v)
+      {
+        os << "[";
+        if(v.size()>0) {
+          os << v[0];
+        }
+        for(uint i=1; i!=v.size(); ++i) {
+          os << "," << v[i];
+        }
+        os << "]";
+        return os;
+      }
+
+    }
+  }
+}
+
 namespace Ariadne {
   namespace LinearAlgebra {
 
     using boost::numeric::ublas::vector;
         
+    template<typename Real>
+    class Vector
+      : public boost::numeric::ublas::vector<Real> 
+    {
+      typedef boost::numeric::ublas::vector<Real> Base;
+     public:
+      template<typename E>
+      Vector(const boost::numeric::ublas::vector_expression<E>& v) : Base(v().size()) {
+        for(dimension_type i=0; i!=this->size(); ++i) {
+          (*this)[i]=v()[i];
+        }
+      }
+    };
+    
     template <typename Real>
     inline vector<Real> zero_vector(dimension_type dim) {
       vector<Real> v(dim);
@@ -66,7 +102,7 @@ namespace Ariadne {
     {
       Real norm=0.0;
       for (size_t i=0; i< b.size(); i++) {
-      	if (abs(b[i])>norm) norm=abs(b[i]);
+        if (abs(b[i])>norm) norm=abs(b[i]);
       }
       return norm;
     }
@@ -75,22 +111,6 @@ namespace Ariadne {
 }
 
 
-namespace boost { namespace numeric { namespace ublas {
-    template <typename Real>
-    std::ostream&
-    operator<<(std::ostream& os, const vector<Real>& v)
-    {
-      os << "[";
-      if(v.size()>0) {
-        os << v[0];
-      }
-      for(uint i=1; i!=v.size(); ++i) {
-        os << "," << v[i];
-      }
-      os << "]";
-      return os;
-    }
-}}}
 
 
 #endif /* _ARIADNE_VECTOR_H */

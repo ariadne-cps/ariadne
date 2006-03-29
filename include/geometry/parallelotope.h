@@ -120,19 +120,17 @@ namespace Ariadne {
                                            const ListSet<R,Ariadne::Geometry::Parallelotope>& B);
 
      public:
-      /*! \brief The unsigned integer type used to denote temphe array positions. */
-      typedef size_t size_type;
       /*! \brief The type of denotable real number used for the corners. */
       typedef R Real;
       /*! \brief The type of denotable point contained by the rectangle. */
-      typedef Point<R> Point;
+      typedef Point<R> State;
       /*! \brief The type of matrix giving principal directions. */
       typedef Ariadne::LinearAlgebra::vector<R> Vector;
       /*! \brief The type of matrix giving principal directions. */
       typedef Ariadne::LinearAlgebra::matrix<R> Matrix;
      private:
       /* Parallelotope's centre. */
-      Point _centre;
+      State _centre;
       
       /* Parallelotope's principal directions. */
       Matrix _generators;
@@ -143,7 +141,7 @@ namespace Ariadne {
         : _centre(n),  _generators(n,n) { }
       
       /*! \brief Construct from centre and directions. */
-      inline explicit Parallelotope(const Point& c, const Matrix& m)
+      inline explicit Parallelotope(const State& c, const Matrix& m)
         : _centre(c), _generators(m)
       {
         if (LinearAlgebra::number_of_rows(m)!=LinearAlgebra::number_of_columns(m)) {
@@ -208,7 +206,7 @@ namespace Ariadne {
       }
       
       /*! \brief The centre of the parallelotope. */
-      inline Point centre() const {
+      inline State centre() const {
         return this->_centre;
       }
       
@@ -238,10 +236,10 @@ namespace Ariadne {
       operator Polyhedron<R> () const;
        
       /*! \brief Tests if the parallelotope contains \a point. */
-      bool contains(const Point& point) const;
+      bool contains(const State& point) const;
       
       /*! \brief Tests if the interior of the parallelotope contains \a point. */
-      bool interior_contains(const Point& point) const;
+      bool interior_contains(const State& point) const;
 
       /*! \brief Subdivide into smaller pieces. */
       ListSet<R,Ariadne::Geometry::Parallelotope> subdivide() const;
@@ -259,7 +257,7 @@ namespace Ariadne {
       
      private:
       void compute_linear_inequalities(Matrix&, Vector&, Vector&) const;
-      Vector coordinates(const Point& s) const;
+      Vector coordinates(const State& s) const;
     };
   
     /*! \brief Tests disjointness */
@@ -356,6 +354,26 @@ namespace Ariadne {
     inline
     bool 
     subset(const Parallelotope<R>& A, 
+           const Parallelotope<R>& B) 
+    {
+      return subset(Polyhedron<R>(A), Polyhedron<R>(B));
+    }
+    
+    /*! \brief Tests inclusion */
+    template <typename R>
+    inline
+    bool 
+    subset(const Parallelotope<R>& A, 
+           const Rectangle<R>& B) 
+    {
+      return subset(Polyhedron<R>(A), Polyhedron<R>(B));
+    }
+    
+    /*! \brief Tests inclusion */
+    template <typename R>
+    inline
+    bool 
+    subset(const Rectangle<R>& A, 
            const Parallelotope<R>& B) 
     {
       return subset(Polyhedron<R>(A), Polyhedron<R>(B));

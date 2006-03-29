@@ -23,6 +23,7 @@
 
 
 #include "geometry/zonotope.h"
+#include "geometry/zonotope.tpl"
 
 namespace Ariadne {
   namespace Geometry {

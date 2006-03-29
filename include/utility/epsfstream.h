@@ -184,7 +184,7 @@ namespace Ariadne {
     epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::Rectangle<R>& r) 
     {
-      assert(r.dimension()==2);
+      assert(r.dimension()>=2);
 
       if(eps.fill_style) {
         trace(eps,r);

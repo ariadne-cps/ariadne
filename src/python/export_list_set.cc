@@ -65,17 +65,12 @@ using boost::python::copy_const_reference;
 void export_list_set() {
   typedef bool (*RectLSBinPred) (const RRectangleListSet&, const RRectangleListSet&);
   typedef RRectangleListSet (*RectLSBinFun) (const RRectangleListSet&, const RRectangleListSet&);
-  RectLSBinFun rectls_regular_intersection=&regular_intersection<Real,Rectangle>;
-  RectLSBinPred rectls_interiors_intersect=&interiors_intersect<Real,Rectangle>;
-  RectLSBinPred rectls_disjoint=&disjoint<Real,Rectangle>;
-  RectLSBinPred rectls_inner_subset=&inner_subset<Real,Rectangle>;
-  RectLSBinPred rectls_subset=&subset<Real,Rectangle>;
 
-  def("regular_intersection", rectls_regular_intersection);
-  def("interiors_intersect", rectls_interiors_intersect);
-  def("disjoint", rectls_disjoint);
-  def("inner_subset", rectls_inner_subset);
-  def("subset", rectls_subset);
+  def("regular_intersection", RectLSBinFun(&regular_intersection));
+  def("interiors_intersect", RectLSBinPred(&interiors_intersect));
+  def("disjoint", RectLSBinPred(&disjoint));
+  def("inner_subset", RectLSBinPred(&inner_subset));
+  def("subset", RectLSBinPred(&subset));
 
   class_<RRectangleListSet>("RectangleListSet",init<int>())
     .def(init<RRectangle>())

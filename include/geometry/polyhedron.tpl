@@ -66,7 +66,7 @@ namespace Ariadne {
     
 
     template <typename R>
-    Polyhedron<R>::Polyhedron(const std::vector<Point>& points)
+    Polyhedron<R>::Polyhedron(const StateList& points)
       : _ppl_poly() 
     {
       Parma_Polyhedra_Library::Generator_System ppl_gen;
@@ -98,8 +98,8 @@ namespace Ariadne {
     Polyhedron<R>::Polyhedron(const Rectangle<R>& r)
       : _ppl_poly(r.dimension())
     {
-      Point u_corner(r.upper_corner());
-      Point l_corner(r.lower_corner());
+      State u_corner(r.upper_corner());
+      State l_corner(r.lower_corner());
       
       Parma_Polyhedra_Library::Constraint_System cs;
       Rational num;
@@ -122,12 +122,12 @@ namespace Ariadne {
 
 
     template <typename R>
-    typename Polyhedron<R>::PointList
+    typename Polyhedron<R>::StateList
     Polyhedron<R>::vertices() const 
     {
-      PointList result;
+      StateList result;
       const Parma_Polyhedra_Library::Generator_System& gs = this->_ppl_poly.minimized_generators();
-      Point point(this->dimension());
+      State point(this->dimension());
       
       for(Parma_Polyhedra_Library::Generator_System::const_iterator iter=gs.begin(); iter!=gs.end(); ++iter) {
         Parma_Polyhedra_Library::Generator gen = *iter;
@@ -214,4 +214,3 @@ namespace Ariadne {
     
   }
 }
-

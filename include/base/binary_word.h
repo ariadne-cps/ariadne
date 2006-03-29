@@ -96,7 +96,6 @@ namespace Ariadne {
       friend class BinaryWordFixedSizeList;
      public:
       /*! \brief An unsigned integral type. */
-      typedef std::vector<bool>::size_type size_type;
       typedef std::vector<bool>::const_iterator const_iterator;
      private:
       /* The type of a machine byte (not used) */
@@ -207,7 +206,6 @@ namespace Ariadne {
       /*!\brief Union of two BinaryWordList s. */
       friend BinaryWordList join(const BinaryWordList& l1, const BinaryWordList& l2);
       
-      typedef size_t size_type;
       typedef BinaryWord::byte_type byte_type;
       typedef _BinaryWordList_const_iterator const_iterator;
      private:
@@ -301,4 +299,3 @@ namespace Ariadne {
 } // namespace Ariadne
   
 #endif /* _ARIADNE_BINARY_WORD_H */
-  

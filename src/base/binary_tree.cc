@@ -154,7 +154,7 @@ namespace Ariadne {
       if(b.empty()) {
         os << "e";
       }
-      for(BinaryWord::size_type i=0; i!=b.size(); ++i) {
+      for(size_type i=0; i!=b.size(); ++i) {
         if(i%8==0 && i!=0) {
           //os << " ";
         }

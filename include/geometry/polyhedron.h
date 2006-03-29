@@ -93,13 +93,12 @@ template<typename R> class Parallelopiped;
 
 /* Transforms an Point into a Parma_Polyhedra_Library::C_Polyhedron */
 template <typename R>
-inline 
 Parma_Polyhedra_Library::NNC_Polyhedron 
 _from_Point_to_PPL_Polyhedron(const Point<R>& s); 
 
 /* Transforms an Rectangle into a Parma_Polyhedra_Library::C_Polyhedron */
 template <typename R>
-inline Parma_Polyhedra_Library::NNC_Polyhedron 
+Parma_Polyhedra_Library::NNC_Polyhedron 
 _from_Rectangle_to_closed_PPL_Polyhedron(const Rectangle<R>& r);
 
 /*! \brief The polyhedron class.
@@ -110,10 +109,9 @@ _from_Rectangle_to_closed_PPL_Polyhedron(const Rectangle<R>& r);
 template <typename R>
 class Polyhedron {
  public:
-  typedef size_t size_type;
   typedef R Real;
-  typedef Point<R> Point;
-  typedef std::vector<Point> PointList;
+  typedef Point<R> State;
+  typedef std::vector<State> StateList;
   typedef Ariadne::LinearAlgebra::vector<R> Vector;
   typedef Ariadne::LinearAlgebra::matrix<R> Matrix;
  public:
@@ -156,7 +154,7 @@ class Polyhedron {
     
     /*! \brief Construct the polyhedron defined as the convex hull of a list of points.
      */
-    Polyhedron(const PointList& points);
+    Polyhedron(const StateList& points);
     
     /*! \brief Construct a polyhedron from a rectangle. */
     Polyhedron(const Rectangle<R>& rect);
@@ -197,11 +195,11 @@ class Polyhedron {
     }
 
     /*! \brief The vertices of the Polyhedron. */
-    PointList vertices() const; 
+    StateList vertices() const; 
     
     /*! \brief Tests if a Point is an element of the Polyhedron.
      */
-    bool contains(const Point& point) const {
+    bool contains(const State& point) const {
       if (point.dimension()!=this->dimension()) {
         throw std::domain_error("This object and parameter have different space dimensions");
       }
@@ -214,7 +212,7 @@ class Polyhedron {
     
     /*! \brief Tests if a point is an element of the interior of the polyhedron.
      */
-    bool interior_contains(const Point& point) const {
+    bool interior_contains(const State& point) const {
       if (point.dimension()!=this->dimension()) {
         throw std::domain_error("This object and parameter have different space dimensions");
       }
@@ -341,6 +339,10 @@ class Polyhedron {
     /*! \brief Tests inclusion. */
     friend bool subset<>(const Polyhedron<R>& A, 
                          const ListSet<R,Ariadne::Geometry::Polyhedron>& C);
+
+    /*! \brief Makes intersection. */
+    friend Polyhedron<R> intersection<>(const Polyhedron<R>& A, 
+                                        const Polyhedron<R>& B);
 
     /*! \brief Makes closure of intersection of interiors. */
     friend Polyhedron<R> regular_intersection<>(const Polyhedron<R>& A, 

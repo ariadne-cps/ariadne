@@ -39,9 +39,12 @@ namespace Ariadne {
     template<typename R> class Simplex;
     
     template<typename R, template<typename> class BS> class ListSet;
+
+    template<typename R> class FiniteGrid;
     template<typename R> class GridMaskSet;
     template<typename R> class GridCellListSet;
     template<typename R> class GridRectangleListSet;
+
     template<typename R> class PartitionTreeSet;
 
 /* Need partial template function specialization to do this!

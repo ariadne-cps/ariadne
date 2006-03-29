@@ -76,9 +76,6 @@ namespace Ariadne {
       std::cerr << "Parallelotope<" << name<R>() << "<::operator Polyhedron<" << name<R>() << ">() const" << std::endl;
       using namespace ::Ariadne::LinearAlgebra;
       
-      typedef typename Parallelotope<R>::Real Real;
-      typedef typename Parallelotope<R>::Point Point;
-      
       size_type n = this->dimension();
       
       /* Express in form invs * x - offst in [-bnds,+bnds] */
@@ -118,7 +115,7 @@ namespace Ariadne {
      
     /*! \brief Tests if the parallelotope contains \a point. */
     template <typename R>
-    bool Parallelotope<R>::contains(const Point& point) const {
+    bool Parallelotope<R>::contains(const State& point) const {
       Zonotope<R> z_this(*this);
 	      
       return z_this.contains(point);
@@ -126,7 +123,7 @@ namespace Ariadne {
       
     /*! \brief Tests if the interior of the parallelotope contains \a point. */
     template<typename R>
-    bool Parallelotope<R>::interior_contains(const Point& point) const {
+    bool Parallelotope<R>::interior_contains(const State& point) const {
       Zonotope<R> z_this(*this);
       
       return z_this.interior_contains(point);
@@ -140,7 +137,7 @@ namespace Ariadne {
       ListSet<R,Geometry::Parallelotope> result(this->dimension());
       Matrix new_generators=this->generators()/2;
       
-      Point first_centre=this->centre();
+      State first_centre=this->centre();
       for(size_type i=0; i!=n; ++i) {
         first_centre=first_centre-(this->generator(i))/2;
       }
@@ -153,7 +150,7 @@ namespace Ariadne {
 
       for(lattice_iterator iter(lower,lower,upper); iter!=end; ++iter) {
         array<index_type> ary=*iter;
-        Point new_centre=first_centre;
+        State new_centre=first_centre;
         for(size_type i=0; i!=n; ++i) {
           if(ary[i]==1) {
             new_centre=new_centre+this->generator(i);
@@ -209,7 +206,7 @@ namespace Ariadne {
         }
       }
 
-      Vector c = this->centre() - Point(n,0);
+      Vector c = this->centre().position_vector();
       o = A * c;
       
       b.resize(n);
@@ -222,7 +219,7 @@ namespace Ariadne {
   
     template<typename R>
     typename Parallelotope<R>::Vector 
-    Parallelotope<R>::coordinates(const Point& s) const {
+    Parallelotope<R>::coordinates(const State& s) const {
       Vector diff = s-this->_centre;
       Matrix inv = LinearAlgebra::inverse(this->_generators);
       return prod(inv,diff);

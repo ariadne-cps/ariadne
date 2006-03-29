@@ -30,129 +30,50 @@
 #define _ARIADNE_MAP_H
 
 #include "../geometry/geometry_declarations.h"
-#include "../geometry/point.h"
-#include "../geometry/rectangle.h"
-#include "../geometry/list_set.h"
-#include "../geometry/parallelotope.h"
-#include "../geometry/polyhedron.h"
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 
 namespace Ariadne {
-namespace Evaluation {
+  namespace Evaluation {
 
-enum MapKind {
-  LINEAR,
-  AFFINE,
-  GENERAL
-};
-
-enum MapResultKind {
-  SINGLE_VALUE,
-  MULTI_VALUE
-};
-
-}
-}
-
-namespace Ariadne {
-namespace Evaluation {
-
-template <typename R>
-class Map {
- public:
-  typedef R Real;
-  typedef Geometry::Point<R> Point;
-  typedef LinearAlgebra::vector<R> Vector;
-  typedef LinearAlgebra::matrix<R> Matrix;
-  typedef LinearAlgebra::matrix< Interval<R> > IntervalMatrix;
-  
-  virtual ~Map() { }
-  
-  // I'm not sure if virtual functions are the way to go here; too restrictive? //
-  virtual Point apply(const Point& x) const {
-    throw std::invalid_argument("Not implemented."); }
-
-  virtual Geometry::Rectangle<R> apply(const Geometry::Rectangle<R>& A) const {
-    throw std::invalid_argument("Not implemented."); }
-  virtual Geometry::Polyhedron<R> apply(const Geometry::Polyhedron<R>& A) const {
-    throw std::invalid_argument("Not implemented."); }
-
-  virtual Matrix derivative(const Point& r) const {
-    throw std::invalid_argument("Derivative at point not implemented."); }
-  virtual LinearAlgebra::matrix< Interval<R> > derivative(const Geometry::Rectangle<R>& r) const {
-    throw std::invalid_argument("Derivative on Rectangle not implemented."); }
+    template <typename R>
+    class Map {
+     public:
+      typedef R Real;
+      typedef Geometry::Point<R> State;
+      typedef LinearAlgebra::vector<R> Vector;
+      typedef LinearAlgebra::matrix<R> Matrix;
+      typedef LinearAlgebra::matrix< Interval<R> > IntervalMatrix;
+      
+      virtual ~Map();
+      
+      // I'm not sure if virtual functions are the way to go here; too restrictive? //
+      virtual State apply(const State& x) const;
+      virtual Geometry::Rectangle<R> apply(const Geometry::Rectangle<R>& A) const;
+      virtual Geometry::Parallelotope<R> apply(const Geometry::Parallelotope<R>& A) const;
+      virtual Geometry::Polyhedron<R> apply(const Geometry::Polyhedron<R>& A) const;
     
-  template<template<typename> class BS>
-  inline Geometry::ListSet<R,BS> apply(const Geometry::ListSet<R,BS>& A) const { 
-    Geometry::ListSet<R,BS> trans_ds(A.dimension());
-    for (size_t i=0; i< A.size(); i++) {
-      trans_ds.inplace_union(this->apply(A[i]));
-    }
-    return trans_ds;
+      virtual Matrix derivative(const State& r) const;
+      virtual IntervalMatrix derivative(const Geometry::Rectangle<R>& r) const;
+        
+      template<template<typename> class BS>
+      inline Geometry::ListSet<R,BS> apply(const Geometry::ListSet<R,BS>& A) const;
+      
+      virtual dimension_type argument_dimension() const = 0;
+      virtual dimension_type result_dimension() const = 0;
+    
+      State operator() (const State& x) const {
+        return this->apply(x); }
+      Geometry::Rectangle<R> operator() (const Geometry::Rectangle<R>& A) const {
+        return this->apply(A); }
+      Geometry::Polyhedron<R> operator() (const Geometry::Polyhedron<R>& A) const {
+        return this->apply(A); }
+    
+    };
+  
+    
   }
-  
-  virtual dimension_type argument_dimension() const = 0;
-  virtual dimension_type result_dimension() const = 0;
-};
-  
-  
-/* WARNING!!!! Is it the same of an inclusion map? Here I can set
- * threshold in inclusion not, but the map seem similar 
- */ 
-template <typename MAP>
-class ThresholdMap {
-  
- public:
-  typedef MAP Map;
-  typedef typename Map::DenotableSet DenotableSet;
-  typedef typename DenotableSet::BasicSet BasicSet;
-  typedef typename BasicSet::Point Point;
-  typedef typename Point::Real Real;
-  
-  ThresholdMap(const Map& T, const BasicSet& threshold)
-    : _map(T), _threshold(threshold) {}
-  
-  ThresholdMap(const Map& T, Real threshold = 0)
-    : _map(T), _threshold(T.dimension(), threshold) {}
-  
-  inline BasicSet operator() (const BasicSet& A) const { 
-    return _map(A)+this->_threshold; 
-  }
-  
-  inline void set_threshold(const Real& threshold) { 
-    BasicSet new_th((this._map).dimension(), threshold);
-    this->_threshold=new_th;
-  }
-  
-  inline DenotableSet operator() (const DenotableSet& A) const{ 
-    DenotableSet trans_ds(A.dimension());
-    for (size_t i=0; i< A.size(); i++) {
-      trans_ds.inplace_union(_map(A[i])+this->threshold);
-    }
-    return trans_ds;
-  }
-  
-  inline ThresholdMap<MAP>& operator=(const ThresholdMap<MAP>& A) {
-    this->_map=A._map;
-    this->_threshold=A._threshold;
-  }
-  
-  inline size_t dimension() const {
-    return (this->_map).dimension();
-  }
-  
-  /*! Deprecated */
-  inline size_t dim() const {
-    return (this->_map).dimension();
-  }
- private:
-  Map _map;
-  BasicSet _threshold;
-};
-  
-}
 }
 
 #endif /* _ARIADNE_MAP_H */

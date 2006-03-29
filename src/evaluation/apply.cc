@@ -1,8 +1,8 @@
 /***************************************************************************
- *            evaluation_declarations.h
+ *            apply.cc
  *
- *  Copyright 6 February 2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2006  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -20,24 +20,31 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-/*! \file evaluation_declarations.h
- *  \brief Forward declarations for the Evaluation module.
- */
 
-#ifndef _ARIADNE_EVALUATION_DECLARATIONS_H
-#define _ARIADNE_EVALUATION_DECLARATIONS_H
+#include "evaluation/apply.h"
+#include "evaluation/apply.tpl"
 
 namespace Ariadne {
   namespace Evaluation {
 
-    template <typename R> class Map;
-    template <typename R> class AffineMap;
-
-    template <typename R> class VectorField;
-    template <typename R> class AffineVectorField;
-
+    template 
+    Geometry::Rectangle<Dyadic> 
+    apply(const Map<Dyadic>&, const Geometry::Rectangle<Dyadic>&);
+  
+    template 
+    Geometry::Parallelotope<Dyadic> 
+    apply(const Map<Dyadic>&, const Geometry::Parallelotope<Dyadic>&);
+  
+    template
+    Ariadne::Geometry::ListSet<Dyadic,Geometry::Parallelotope> 
+    apply(const Map<Dyadic>& f, const Ariadne::Geometry::ListSet<Dyadic,Geometry::Parallelotope>&);
+       
+    template
+    Ariadne::Geometry::GridMaskSet<Dyadic> 
+    chainreach(const Map<Dyadic>&, 
+               const Ariadne::Geometry::ListSet<Dyadic,Ariadne::Geometry::Rectangle>&, 
+               const Ariadne::Geometry::FiniteGrid<Dyadic>&, 
+               const Ariadne::Geometry::Rectangle<Dyadic>&);
+  
   }
 }
-
-#endif /* _ARIADNE_EVALUATION_DECLARATIONS_H */

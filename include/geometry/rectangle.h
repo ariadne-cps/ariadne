@@ -121,18 +121,16 @@ namespace Ariadne {
 
 
      public:
-      /*! \brief The unsigned integer type used to denote the array positions. */
-      typedef size_t size_type;
       /*! \brief The type of denotable real number used for the corners. */
       typedef R Real;
       /*! \brief The type of denotable point contained by the rectangle. */
-      typedef Point<R> Point;
+      typedef Point<R> State;
      private:
       /* Rectangle's lower corner */
-      Point _lower_corner;
+      State _lower_corner;
       
       /* Rectangle's upper corner */
-      Point _upper_corner;
+      State _upper_corner;
       
      public:
       /*! \brief Default constructor construcs an empty rectangle of dimension \a n. */
@@ -160,7 +158,7 @@ namespace Ariadne {
       }
       
       /*! \brief Construct from two corners. */
-      Rectangle(const Point& p1, const Point& p2)
+      Rectangle(const State& p1, const State& p2)
         : _lower_corner(p1.dimension()), _upper_corner(p2.dimension())
       {
         /* Test to see if corners have same dimensions */
@@ -230,12 +228,12 @@ namespace Ariadne {
       }
         
       /*! \brief The lower corner. */
-      inline Point lower_corner() const {
+      inline State lower_corner() const {
         return this->_lower_corner;
       }
       
       /*! \brief The upper corner. */
-      inline Point upper_corner() const {
+      inline State upper_corner() const {
         return this->_upper_corner;
       }
       
@@ -281,37 +279,37 @@ namespace Ariadne {
       }
       
       /*! \brief Tests if \a point is included into a rectangle. */
-      inline bool contains(const Point& p) const {
-        
-        if (p.dimension()!=this->dimension())
+      inline bool contains(const State& p) const {
+        if (p.dimension()!=this->dimension()) {
           throw std::domain_error("This object and parameter have different space dimensions");
-        
-        if (this->empty()) return false;
+        }
+        if (this->empty()) {
+          return false;
+        }
         
         /* for each dimension i */
         for (size_type i=0; i<this->dimension(); i++) {
           if (p[i] < this->_lower_corner[i]) { return false; }
           if (p[i] > this->_upper_corner[i]) { return false; }
         }
-        
         return true;
         
       }
       
       /*! \brief Tests if \a point is included into the interior a rectangle. */
-      inline bool interior_contains(const Point& p) const {
-        
-        if (p.dimension()!=this->dimension())
+      inline bool interior_contains(const State& p) const {
+        if (p.dimension()!=this->dimension()) {
           throw std::domain_error("This object and parameter have different space dimensions");
-        
-        if (this->empty()) return false;
+        }
+        if (this->empty()) {
+          return false;
+        }
         
         /* for each dimension i */
         for (size_type i=0; i<this->dimension(); i++) {
           if (p[i] >= this->_upper_corner[i]) { return false; }
           if (p[i] <= this->_lower_corner[i]) { return false; }
         }
-        
         return true;
         
       }
@@ -329,12 +327,12 @@ namespace Ariadne {
         Rectangle<R> quadrant(this->dimension());
         
         for (j=0; j< this->dimension(); j++) {
-          
           if (q%2) {
             quadrant._lower_corner[j]=(this->_upper_corner[j]+
                                        this->_lower_corner[j])/2;
             quadrant._upper_corner[j]=this->_upper_corner[j];
-          } else {
+          } 
+          else {
             quadrant._upper_corner[j]=(this->_upper_corner[j]+
                                        this->_lower_corner[j])/2;
             quadrant._lower_corner[j]=this->_lower_corner[j];
@@ -375,11 +373,9 @@ namespace Ariadne {
       inline Rectangle<R>& expand_by(const Real& delta) {
         
         for (size_type j=0; j< this->dimension(); ++j) {
-          
           this->_upper_corner[j]+=delta;
           this->_lower_corner[j]-=delta;
         }
-        
         return *this;
       }
       
@@ -423,7 +419,7 @@ namespace Ariadne {
         throw std::domain_error("The two parameters have different space dimensions");
       
       
-      for (typename Rectangle<R>::size_type i=0; i< A.dimension(); i++) {
+      for(size_type i=0; i< A.dimension(); i++) {
         if ((A._upper_corner[i]<B._lower_corner[i])|| 
             (B._upper_corner[i]<A._lower_corner[i])) return true;
       }
@@ -441,7 +437,7 @@ namespace Ariadne {
       
       if (A.empty()||B.empty()) return false;
       
-      for (typename Rectangle<R>::size_type i=0; i< A.dimension(); i++) {
+      for(size_type i=0; i< A.dimension(); i++) {
         if ((A._upper_corner[i]<=B._lower_corner[i])|| 
             (B._upper_corner[i]<=A._lower_corner[i])) return false;
       }
@@ -460,7 +456,7 @@ namespace Ariadne {
 
       if (A.empty()||B.empty()) return false;
 
-      for (typename Rectangle<R>::size_type i=0; i< A.dimension(); i++) {
+      for (size_type i=0; i< A.dimension(); i++) {
         if ((A._upper_corner[i] >= B._upper_corner[i])||
             (B._lower_corner[i] >= A._lower_corner[i])) return false;
       }
@@ -478,7 +474,7 @@ namespace Ariadne {
       
       if (A.empty()||B.empty()) return false;
       
-      for (typename Rectangle<R>::size_type i=0; i< A.dimension(); i++) {
+      for(size_type i=0; i< A.dimension(); i++) {
         if ((A._upper_corner[i] > B._upper_corner[i])||
             (B._lower_corner[i] > A._lower_corner[i])) return false;
       }
@@ -504,7 +500,6 @@ namespace Ariadne {
       typedef R Real;
       typedef typename std::set<Real> Set;
       typedef typename ListSet< R, Rectangle >::const_iterator list_iterator;
-      typedef typename Rectangle<R>::size_type size_type;
 
       size_type dimension = A.dimension();
       
@@ -553,10 +548,9 @@ namespace Ariadne {
       typedef typename Set::const_iterator set_iterator;
       typedef typename ListSet<R,Rectangle>::const_iterator list_iterator;
       
-      typedef typename Rectangle<R>::size_type size_type;
       typedef std::valarray<size_type> index_type;
 
-      typename Rectangle<R>::size_type dimension = A.dimension();
+      size_type dimension = A.dimension();
       
       std::vector<Set> gridpoints(dimension);
       compute_gridpoints(gridpoints, A, B);
@@ -660,7 +654,6 @@ namespace Ariadne {
       typedef typename Set::const_iterator set_iterator;
       typedef typename ListSet<R,Rectangle>::const_iterator list_iterator;
       
-      typedef typename Rectangle<R>::size_type size_type;
       typedef std::valarray<size_type> index_type;
 
       size_type dimension = A.dimension();
@@ -768,7 +761,7 @@ namespace Ariadne {
 
       Rectangle<R> C(A.dimension());
 
-      for (typename Rectangle<R>::size_type i=0; i != C.dimension(); ++i) {
+      for(size_type i=0; i != C.dimension(); ++i) {
         C._lower_corner[i] = std::max(A._lower_corner[i],B._lower_corner[i]);
         C._upper_corner[i] = std::min(A._upper_corner[i],B._upper_corner[i]);
         if(C._lower_corner[i] > C._upper_corner[i]) {
@@ -795,7 +788,7 @@ namespace Ariadne {
         return C;
       }
 
-      for (typename Rectangle<R>::size_type i=0; i != C.dimension(); ++i) {
+      for(size_type i=0; i != C.dimension(); ++i) {
         C._lower_corner[i] = std::max(A._lower_corner[i],B._lower_corner[i]);
         C._upper_corner[i] = std::min(A._upper_corner[i],B._upper_corner[i]);
         if(C._lower_corner[i] >= C._upper_corner[i]) {
@@ -822,7 +815,7 @@ namespace Ariadne {
       }
       else if(r.dimension() > 0) {
         os << r[0];
-        for(typename Rectangle<R>::size_type i=1; i!=r.dimension(); ++i) {
+        for(size_type i=1; i!=r.dimension(); ++i) {
           os << "x" << r[i];
         }
       }
@@ -834,7 +827,7 @@ namespace Ariadne {
     std::istream& 
     operator>>(std::istream& is, Rectangle<R>& r)
     {
-      typedef typename Rectangle<R>::Real Real;
+      typedef R Real;
       typedef typename Ariadne::Interval<Real> Interval;
       
       char c;

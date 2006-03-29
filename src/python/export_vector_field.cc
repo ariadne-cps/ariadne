@@ -1,8 +1,7 @@
 /***************************************************************************
- *            python/evaluation_module.cc
+ *            python/export_vector_field.cc
  *
- *  21 October 2005
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
+ *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -22,29 +21,36 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "evaluation/vector_field.h"
+
 #include <boost/python.hpp>
 
-void export_apply();
-void export_map();
-void export_affine_map();
-void export_polynomial_map();
-void export_henon_map();
-  
-void export_integrate();
-void export_vector_field();
-void export_affine_vector_field();
-void export_lorenz_system();
+using boost::python::class_;
+using boost::python::init;
+using boost::python::self;
+using boost::python::def;
+using boost::python::bases;
+using boost::python::wrapper;
+using boost::python::return_value_policy;
+using boost::python::copy_const_reference;
+using boost::python::pure_virtual;
 
-BOOST_PYTHON_MODULE(evaluation)
-{
-  export_apply();
-  export_map();
-  export_affine_map();
-  export_polynomial_map();
-  export_henon_map();
+#include "python/real_typedef.h"
   
-  export_integrate();
-  export_vector_field();
-  export_affine_vector_field();
-  export_lorenz_system();
+using Ariadne::dimension_type;
+using Ariadne::Interval;
+using namespace Ariadne::LinearAlgebra;
+using namespace Ariadne::Geometry;
+
+typedef Ariadne::Evaluation::VectorField<Real> RVectorFieldBase;
+
+struct RVectorField : RVectorFieldBase, wrapper<RVectorFieldBase>
+{
+  dimension_type dimension() const { return this->get_override("dimension")(); }
+};
+
+void export_vector_field() {
+  class_<RVectorField, boost::noncopyable>("VectorField")
+    .def("dimension", pure_virtual(&RVectorFieldBase::dimension))
+  ;
 }

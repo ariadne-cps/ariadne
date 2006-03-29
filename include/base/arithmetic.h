@@ -92,6 +92,14 @@ namespace Ariadne {
     }
     return log_floor(n,x-1)+1;
   }
+  
+  template<typename R>
+  inline
+  R 
+  abs(const R& x) {
+    return (x>=R(0)) ? x : R(-x);
+  }
+
 
 }
 

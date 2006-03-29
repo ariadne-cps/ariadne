@@ -61,6 +61,7 @@ namespace Ariadne {
   * FIXME: mpf_class does not implement addition, subtraction and multiplication exactly.
   */
   typedef mpf_class Dyadic;
+  //typedef Synaps::Dyadic Dyadic;
   
 /* Hand-coded wrapped (currently not used)
   class Dyadic {

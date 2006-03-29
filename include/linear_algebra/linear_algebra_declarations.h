@@ -1,8 +1,7 @@
 /***************************************************************************
- *            python/evaluation_module.cc
+ *            linear_algebra_declarations.h
  *
- *  21 October 2005
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
+ *  February 2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -21,30 +20,30 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+ 
+/*! \file linear_algebra_declarations.h
+ *  \brief Forward declarations for the LinearAlgebra module.
+ */
 
-#include <boost/python.hpp>
+#ifndef _ARIADNE_LINEAR_ALGEBRA_DECLARATIONS_H
+#define _ARIADNE_LINEAR_ALGEBRA_DECLARATIONS_H
 
-void export_apply();
-void export_map();
-void export_affine_map();
-void export_polynomial_map();
-void export_henon_map();
-  
-void export_integrate();
-void export_vector_field();
-void export_affine_vector_field();
-void export_lorenz_system();
+#include <boost/numeric/ublas/vector.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
 
-BOOST_PYTHON_MODULE(evaluation)
-{
-  export_apply();
-  export_map();
-  export_affine_map();
-  export_polynomial_map();
-  export_henon_map();
-  
-  export_integrate();
-  export_vector_field();
-  export_affine_vector_field();
-  export_lorenz_system();
+namespace Ariadne {
+  namespace LinearAlgebra {
+
+    using boost::numeric::ublas::vector;
+    using boost::numeric::ublas::matrix;
+
+    template<typename R> class IntervalVector;
+
+    template<typename R> class IntervalMatrix;
+
+  }
 }
+
+
+
+#endif /* _ARIADNE_LINEAR_ALGEBRA_DECLARATIONS_H */

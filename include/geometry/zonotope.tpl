@@ -1,9 +1,9 @@
 /***************************************************************************
- *            python/evaluation_module.cc
+ *            zonotope.h
  *
- *  21 October 2005
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  6 February 2006
+ *  Copyright  2006  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,30 +21,36 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+ 
+#include <iostream>
 
-#include <boost/python.hpp>
+#include "../geometry/zonotope.h"
 
-void export_apply();
-void export_map();
-void export_affine_map();
-void export_polynomial_map();
-void export_henon_map();
-  
-void export_integrate();
-void export_vector_field();
-void export_affine_vector_field();
-void export_lorenz_system();
 
-BOOST_PYTHON_MODULE(evaluation)
-{
-  export_apply();
-  export_map();
-  export_affine_map();
-  export_polynomial_map();
-  export_henon_map();
-  
-  export_integrate();
-  export_vector_field();
-  export_affine_vector_field();
-  export_lorenz_system();
+namespace Ariadne {
+  namespace Geometry {
+
+    template <typename R>
+    std::ostream&
+    operator<<(std::ostream& os, const Zonotope<R>& z) 
+    {
+      if(z.dimension() > 0) {
+        os << "Zonotope(\n  centre=" << z.centre();
+        os << "\n  directions=" << z.principle_directions();
+        os << "\n) ";
+      }
+
+      return os;
+    }
+    
+    template <typename R>
+    std::istream& 
+    operator>>(std::istream& is, Zonotope<R>& z)
+    {
+      throw std::domain_error("Not implemented");
+    }
+      
+    
+
+  }
 }

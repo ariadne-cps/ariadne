@@ -50,7 +50,7 @@ namespace Ariadne {
     {
      public:
       typedef R Real;
-      typedef Geometry::Point<Real> Point;
+      typedef Geometry::Point<Real> State;
       
       typedef Ariadne::LinearAlgebra::matrix<Real> Matrix;
       typedef Ariadne::LinearAlgebra::vector<Real> Vector;
@@ -65,7 +65,7 @@ namespace Ariadne {
         this->_A=T._A; this->_b=T._b; return *this; }
       
       /*! \brief  The map applied to a state. */
-      Point operator() (const Point& x) const;
+      State operator() (const State& x) const;
         
       /*! \brief  The map applied to a simplex basic set. */
       Geometry::Simplex<R> operator() (const Geometry::Simplex<R>& A) const;
@@ -105,17 +105,17 @@ namespace Ariadne {
     };
       
     template <typename R>
-    typename AffineMap<R>::Point
-    AffineMap<R>::operator() (const Point& s) const
+    typename AffineMap<R>::State
+    AffineMap<R>::operator() (const State& s) const
     {
       const Matrix& A=this->A();
-      if (LinearAlgebra::number_of_columns(A)!=s.dimension())
-    	throw std::domain_error("AffineMap<R>::operator() (const Point& s): the map does not have the same dimension of the point.");
-      
+      if (LinearAlgebra::number_of_columns(A)!=s.dimension()) {
+        throw std::domain_error("AffineMap<R>::operator() (const Point& s): the map does not have the same dimension of the point.");
+      }
       const Vector& pv=s.position_vector();
       Vector v=prod(A,pv);
       v+= this->b();
-      return Point(v);
+      return State(v);
     }
     
     template <typename R>
@@ -123,11 +123,12 @@ namespace Ariadne {
     AffineMap<R>::operator() (const Geometry::Simplex<R>& s) const
     {
       const Matrix& A=this->A();
-      if (LinearAlgebra::number_of_columns(A)!=s.dimension())
-    	throw std::domain_error("AffineMap<R>::operator() (const Geometry::Simplex<R>& s): the map does not have the same dimension of the simplex.");
+      if (LinearAlgebra::number_of_columns(A)!=s.dimension()) {
+        throw std::domain_error("AffineMap<R>::operator() (const Geometry::Simplex<R>& s): the map does not have the same dimension of the simplex.");
+      }
       
-      const array<Point>&  v=s.vertices();
-      array<Point> new_v(s.dimension());
+      const array<State>&  v=s.vertices();
+      array<State> new_v(s.dimension());
       
       for(size_t i=0; i<s.dimension(); i++) {
         new_v[i]= (*this)(v[i]);
@@ -142,16 +143,17 @@ namespace Ariadne {
     {
       const Matrix& A=this->A();
       const Vector& b=this->b();
-      if (LinearAlgebra::number_of_columns(A)!=r.dimension())
-    	throw std::domain_error("AffineMap<R>::operator() (const Geometry::Rectangle<R>& r): the map does not have the same dimension of the rectangle.");
+      if (LinearAlgebra::number_of_columns(A)!=r.dimension()) {
+        throw std::domain_error("AffineMap<R>::operator() (const Geometry::Rectangle<R>& r): the map does not have the same dimension of the rectangle.");
+      }
       
       Base::array<Interval<R> > imv(r.dimension());
       
       for(size_t j=0; j<LinearAlgebra::number_of_rows(A); j++) {
-	imv[j]=b[j];
+        imv[j]=b[j];
         for(size_t i=0; i!=r.dimension(); ++i) {
            imv[j]+=A(j,i)*r[i];
-	}
+        }
       }
       
       return Geometry::Rectangle<R>(imv);
@@ -162,10 +164,10 @@ namespace Ariadne {
     AffineMap<R>::operator() (const Geometry::Parallelotope<R>& p) const
     {
       const Matrix& A=this->A();
-      if (LinearAlgebra::number_of_columns(A)!=p.dimension())
-    	throw std::domain_error("AffineMap<R>::operator() (const Geometry::Parallelotope<R>& p): the map does not have the same dimension of the parallelotope.");
-      
-      Point new_centre=(*this)(p.centre());
+      if (LinearAlgebra::number_of_columns(A)!=p.dimension()) {
+        throw std::domain_error("AffineMap<R>::operator() (const Geometry::Parallelotope<R>& p): the map does not have the same dimension of the parallelotope.");
+      }
+      State new_centre=(*this)(p.centre());
       return Geometry::Parallelotope<R>(new_centre,A*p.generators());
     }
 
@@ -174,10 +176,11 @@ namespace Ariadne {
     AffineMap<R>::operator() (const Geometry::Zonotope<R>& z) const
     {
       const Matrix& A=this->A();
-      if (LinearAlgebra::number_of_columns(A)!=z.dimension())
-    	throw std::domain_error("AffineMap<R>::operator() (const Geometry::Zonotope<R>& z): the map does not have the same dimension of the zonotope.");
+      if (LinearAlgebra::number_of_columns(A)!=z.dimension()) {
+        throw std::domain_error("AffineMap<R>::operator() (const Geometry::Zonotope<R>& z): the map does not have the same dimension of the zonotope."); 
+      }
       
-      Point new_centre=(*this)(z.centre());
+      State new_centre=(*this)(z.centre());
       return Geometry::Zonotope<R>(new_centre,A*z.principle_directions());
     }    
      
@@ -186,10 +189,10 @@ namespace Ariadne {
     AffineMap<R>::operator() (const Geometry::Polyhedron<R>& p) const
     {
       const Matrix& A=this->A();
-      if (LinearAlgebra::number_of_columns(A)!=p.dimension())
-    	throw std::domain_error("AffineMap<R>::operator() (const Geometry::Polyhedron<R>& p): the map does not have the same dimension of the polyhedron.");
-      
-    	throw std::domain_error("AffineMap<R>::operator() (const Geometry::Polyhedron<R>& p) not implemented.");
+      if (LinearAlgebra::number_of_columns(A)!=p.dimension()) {
+        throw std::domain_error("AffineMap<R>::operator() (const Geometry::Polyhedron<R>& p): the map does not have the same dimension of the polyhedron.");
+      }
+      throw std::domain_error("AffineMap<R>::operator() (const Geometry::Polyhedron<R>& p) not implemented.");
     }    
 
   }

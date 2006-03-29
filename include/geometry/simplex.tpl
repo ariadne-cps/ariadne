@@ -1,9 +1,8 @@
 /***************************************************************************
- *            python/evaluation_module.cc
+ *            simplex.tpl
  *
- *  21 October 2005
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2006  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,30 +20,36 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+ 
+#include <iostream>
+#include <vector>
 
-#include <boost/python.hpp>
+#include "../geometry/simplex.h"
 
-void export_apply();
-void export_map();
-void export_affine_map();
-void export_polynomial_map();
-void export_henon_map();
-  
-void export_integrate();
-void export_vector_field();
-void export_affine_vector_field();
-void export_lorenz_system();
+namespace Ariadne {
+  namespace Geometry {
 
-BOOST_PYTHON_MODULE(evaluation)
-{
-  export_apply();
-  export_map();
-  export_affine_map();
-  export_polynomial_map();
-  export_henon_map();
-  
-  export_integrate();
-  export_vector_field();
-  export_affine_vector_field();
-  export_lorenz_system();
+    template <typename R>
+    std::ostream&
+    operator<<(std::ostream& os, const Simplex<R>& s) 
+    {
+//      if(s.empty()) {
+//        os << "Empty";
+//     }
+//      else 
+      if(s.dimension() > 0) {
+        os << "Simplex(vertices=" << s.vertices() << ") ";
+      }
+
+      return os;
+    }
+    
+    template <typename R>
+    std::istream& 
+    operator>>(std::istream& is, Simplex<R>& s)
+    {
+      throw std::domain_error("Not implemented");
+    }
+      
+  }
 }

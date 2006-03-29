@@ -111,20 +111,18 @@ namespace Ariadne {
                                            const ListSet<R,Ariadne::Geometry::Simplex>& list);
 
      public:
-      /*! \brief The unsigned integer type used to denote the array positions. */
-      typedef size_t size_type;
       /*! \brief The type of denotable real number used for the corners. */
       typedef R Real;
       /*! \brief The type of denotable point contained by the simplex. */
-      typedef Point<R> Point;
+      typedef Point<R> State;
      private:
       /* Simplex's vertices. */
-      array<Point> _vertices;
+      array<State> _vertices;
    
      public:
       /*! \brief Default constructor constructs standard simplex of dimension \a n. */
       Simplex(size_type n = 0)
-        : _vertices(n+1,Point(n)) 
+        : _vertices(n+1,State(n)) 
       {
         for(size_type i=0; i!=n; ++i) {
           _vertices[i][i]=1;
@@ -132,7 +130,7 @@ namespace Ariadne {
       }
     
       /*! \brief Construct from list of vertices. */
-      Simplex(const std::vector<Point>& v)
+      Simplex(const std::vector<State>& v)
         : _vertices(v.begin(),v.end())
       {
         size_type d=_vertices.size()-1;
@@ -144,7 +142,7 @@ namespace Ariadne {
       }
       
       /*! \brief Construct from list of vertices. */
-      Simplex(const array<Point>& v)
+      Simplex(const array<State>& v)
         : _vertices(v.begin(),v.end())
       {
         size_type d=_vertices.size()-1;
@@ -177,7 +175,7 @@ namespace Ariadne {
       }
       
       operator Polyhedron<R> () const {
-        std::vector<Point> vert_vec(_vertices.begin(),_vertices.end());
+        std::vector<State> vert_vec(_vertices.begin(),_vertices.end());
         return Polyhedron<R>(vert_vec);
       }
       
@@ -197,22 +195,22 @@ namespace Ariadne {
       }
       
       /*! \brief The array of vertices. */
-      inline const array<Point>& vertices() const {
+      inline const array<State>& vertices() const {
         return this->_vertices;
       }
       
       /*! \brief The @a n th vertex. */
-      inline const Point& vertex(size_type n) const {
+      inline const State& vertex(size_type n) const {
         return this->_vertices[n];
       }
       
       /*! \brief Tests if \a point is included into a simplex. */
-      inline bool contains(const Point& point) const {
+      inline bool contains(const State& point) const {
         return Polyhedron<R>(*this).contains(point);
       }
       
       /*! \brief Tests if \a point is included into the interior a simplex. */
-      inline bool interior_contains(const Point& point) const {
+      inline bool interior_contains(const State& point) const {
         return Polyhedron<R>(*this).interior_contains(point);
       }
     
@@ -362,7 +360,7 @@ namespace Ariadne {
     
     /*! \brief Tests inclusion of \a A in \a B. */
     template <typename R>
-    bool subset(const Simplex<R>& A, 
+    inline bool subset(const Simplex<R>& A, 
                 const Simplex<R>& B) 
     {
       return subset(Polyhedron<R>(A),Polyhedron<R>(B));
@@ -371,7 +369,7 @@ namespace Ariadne {
 
     //*! \brief Tests inclusion in an open cover.  */
     template <typename R>
-    bool subset_of_open_cover(const Simplex<R>& A,
+    inline bool subset_of_open_cover(const Simplex<R>& A,
                               const ListSet<R,Simplex>& cover) 
     {
       throw std::domain_error("subset_of_open_cover(Simplex, std::vector<Simplex>) not implemented");
@@ -381,25 +379,13 @@ namespace Ariadne {
 
     template <typename R>
     std::ostream&
-    operator<<(std::ostream& os, const Simplex<R>& s) 
-    {
-//      if(p.empty()) {
-//        os << "Empty";
-//     }
-//      else 
-      if(s.dimension() > 0) {
-        os << "Simplex(vertices=" << s.vertices() << ") ";
-      }
+    operator<<(std::ostream& os, const Simplex<R>& s); 
 
-      return os;
-    }
     
     template <typename R>
     std::istream& 
-    operator>>(std::istream& is, Simplex<R>& s)
-    {
-      throw std::domain_error("Not implemented");
-    }
+    operator>>(std::istream& is, Simplex<R>& s);
+
       
   }
 }

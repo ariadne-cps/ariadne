@@ -113,7 +113,7 @@ namespace Ariadne {
        /*! \brief Tests disjointness */
       /*friend bool disjoint <> (const Zonotope<R>& A,
                                const Zonotope<R>& B);
-	*/
+        */
       
       /*! \brief Tests if \a A is a subset of the interior of \a B. */
       friend bool inner_subset <> (const Zonotope<R>& A,
@@ -141,14 +141,14 @@ namespace Ariadne {
       /*! \brief The type of denotable real number used for the corners. */
       typedef R Real;
       /*! \brief The type of denotable point contained by the rectangle. */
-      typedef Point<R> Point;
+      typedef Point<R> State;
       /*! \brief The type of vectors. */
       typedef Ariadne::LinearAlgebra::vector<R> Vector;
       /*! \brief The type of matrix giving principal directions. */
       typedef Ariadne::LinearAlgebra::matrix<R> Matrix;
      private:
       /* Zonotope's centre. */
-      Point _centre;
+      State _centre;
       
       /* Zonotope's principal directions. */
       Matrix _generators;
@@ -159,12 +159,12 @@ namespace Ariadne {
         : _centre(n),  _generators(n,0) { }
       
       /*! \brief Construct from centre and directions. */
-      explicit Zonotope(const Point& c, const Matrix& m)
+      explicit Zonotope(const State& c, const Matrix& m)
         : _centre(c), _generators(m)
       {
-	using namespace Ariadne::LinearAlgebra;
-	
-	if (c.dimension()!=number_of_rows(m)) {
+        using namespace Ariadne::LinearAlgebra;
+        
+        if (c.dimension()!=number_of_rows(m)) {
           throw std::domain_error(
               "The the matrix of principal directions does not have the same number of rows as the point dimension.");
         }
@@ -176,7 +176,7 @@ namespace Ariadne {
       explicit Zonotope(const Rectangle<Real>& r)
         : _centre(r.dimension())
       {
-	using namespace LinearAlgebra;
+        using namespace LinearAlgebra;
 
         if(r.lower_bound(0) > r.upper_bound(0)) {
           this->_generators=Matrix(r.dimension(),0);
@@ -188,14 +188,14 @@ namespace Ariadne {
           this->_generators(i,i) = (r.upper_bound(i)-r.lower_bound(i))/2;
         }
 
-	this->_generators=remove_null_columns_but_one(this->_generators);
+        this->_generators=remove_null_columns_but_one(this->_generators);
       }
 
       /*! \brief Construct from a Parallelotope. */
       explicit Zonotope(const Parallelotope<Real>& p)
         : _centre(p.centre()), _generators(p.generators())
       {
-	using namespace Ariadne::LinearAlgebra;
+        using namespace Ariadne::LinearAlgebra;
 
         this->minimize_generators();
       }
@@ -225,15 +225,15 @@ namespace Ariadne {
       
       /*! \brief A rectangle containing the given zonotope. */
       inline Rectangle<R> bounding_box() const {
- 	using namespace Ariadne::LinearAlgebra;
+         using namespace Ariadne::LinearAlgebra;
         Vector offset(this->dimension());
-	
+        
         for(size_t i=0; i!=this->dimension(); ++i) {
           for(size_t j=0; j!=number_of_columns(this->_generators); ++j) {
-	     offset(i) += abs(this->_generators(i,j));
+             offset(i) += abs(this->_generators(i,j));
           }
         }
-	
+        
         return Rectangle<R>(this->centre()-offset, this->centre()-offset);
       }
       
@@ -247,32 +247,32 @@ namespace Ariadne {
       
       /*! \brief True if the zonotope is empty. */
       inline bool empty() const {
- 	using namespace Ariadne::LinearAlgebra;
-	
-      	if (number_of_columns(this->_generators)==0) return true;
-	return false;
+         using namespace Ariadne::LinearAlgebra;
+        
+              if (number_of_columns(this->_generators)==0) return true;
+        return false;
       }
       
       /*! \brief True if the zonotope has empty interior. */
       inline bool empty_interior() const {
- 	using namespace Ariadne::LinearAlgebra;
+         using namespace Ariadne::LinearAlgebra;
 
         return !independent_rows(this->_generators);
       }
       
       /*! \brief The centre of the zonotope. */
-      inline Point centre() const {
+      inline State centre() const {
         return this->_centre;
       }
       
       /*! \brief The \a n th of principle direction. */
       inline Vector principle_direction(size_t n) const {
-	Vector out(this->dimension());
+        Vector out(this->dimension());
 
-	for (size_t i=0; i<this->dimension(); i++) {
-	   out(i)=this->_generators(i,n);
+        for (size_t i=0; i<this->dimension(); i++) {
+           out(i)=this->_generators(i,n);
         }
-	
+        
         return out;
       }
       
@@ -282,90 +282,90 @@ namespace Ariadne {
       }
      
       /*! \brief Tests if the zonotope contains \a point. */
-      inline bool contains(const Point& point) const {
+      inline bool contains(const State& point) const {
         if (point.dimension()!=this->dimension()) {
           throw std::domain_error("This object and parameter have different space dimensions");
         }  
         
         if (this->empty()) { return false; }
       
-	Matrix A(0,0);
+        Matrix A(0,0);
         Vector b(0);
-		
+                
         this->compute_linear_inequalities(A,b);
 
-	Vector result(A*point.position_vector()-b);
+        Vector result(A*point.position_vector()-b);
 
-	for (size_t i=0; i<result.size(); i++) {
-	   if (result(i)<0) return false;
+        for (size_t i=0; i<result.size(); i++) {
+           if (result(i)<0) return false;
         }
-	
+        
         return true;
       }
       
       /*! \brief Tests if the interior of the zonotope contains \a point. */
-      inline bool interior_contains(const Point& point) const {
- 	using namespace Ariadne::LinearAlgebra;
-	
-	if (point.dimension()!=this->dimension()) {
+      inline bool interior_contains(const State& point) const {
+         using namespace Ariadne::LinearAlgebra;
+        
+        if (point.dimension()!=this->dimension()) {
          throw std::domain_error("This object and parameter have different space dimensions");
         } 
       
         if (this->empty_interior()) { return false; }
     
-	Matrix A(0,0);
+        Matrix A(0,0);
         Vector b(0);
-		
+                
         this->compute_linear_inequalities(A,b);
 
-	Vector result(A*point.position_vector()-b);
-	
-	for (size_t i=0; i<result.size(); i++) {
-	   if (result(i)<=0) return false;
+        Vector result(A*point.position_vector()-b);
+        
+        for (size_t i=0; i<result.size(); i++) {
+           if (result(i)<=0) return false;
         }
-	
+        
         return true;
       }
       
       /*! \brief The equality operator. */
       inline bool operator==(const Zonotope<Real>& A) const
       {
-	using namespace LinearAlgebra;
-	      
-	const Matrix &this_gen=this->_generators;
-	const Matrix &A_gen=A._generators;
-	size_t directions=number_of_columns(A_gen);
+        using namespace LinearAlgebra;
+              
+        const Matrix &this_gen=this->_generators;
+        const Matrix &A_gen=A._generators;
+        size_t directions=number_of_columns(A_gen);
 
         if (!have_same_dimensions(this_gen,A_gen))
-	  return false;
-	
-      	array<bool> not_found(directions,true);
-	bool searching_for_equiv;
+          return false;
+        
+              array<bool> not_found(directions,true);
+        bool searching_for_equiv;
 
-	size_t j2;
-	for (size_t j=0; j< directions; j++) {
-	  j2=j; 
-	  searching_for_equiv=true;
-	  while ((j2< directions)&&(searching_for_equiv)) {
+        size_t j2;
+        for (size_t j=0; j< directions; j++) {
+          j2=j; 
+          searching_for_equiv=true;
+          while ((j2< directions)&&(searching_for_equiv)) {
             if (not_found[j2]) {
-	      if (equivalent_columns(this_gen, j, A_gen, j2)) { 
-	        searching_for_equiv=false;
-		not_found[j2]=false;
-	      }
-	    }
-	    j2++;
+              if (equivalent_columns(this_gen, j, A_gen, j2)) { 
+                searching_for_equiv=false;
+                not_found[j2]=false;
+              }
+            }
+            j2++;
           }
 
-	  if (searching_for_equiv) 
-	    return false;
-	}
+          if (searching_for_equiv) 
+            return false;
+        }
 
-	return true;
+        return true;
       }
       
       /*! \brief The inequality operator */
       inline bool operator!=(const Zonotope<Real>& A) const {
-	return !(*this == A);
+        return !(*this == A);
       }
 
       friend std::ostream&
@@ -389,7 +389,7 @@ namespace Ariadne {
     void Zonotope<R>::minimize_generators(void) {
 
       using namespace LinearAlgebra;
-	   
+           
       size_t i,j,i2,j2;
       Matrix &gen=this->_generators;
       gen=remove_null_columns_but_one(gen);
@@ -398,7 +398,7 @@ namespace Ariadne {
       // if the first row is null the zonotope is a point and it is already
       // minimized
       if (find_first_not_null_in_col(gen,0)==rows) {
-	return;
+        return;
       }
       
       size_t cols=number_of_columns(gen);
@@ -410,64 +410,64 @@ namespace Ariadne {
       
       for (j=0; j<cols; j++) {
         i=find_first_not_null_in_col(gen,j);
-	     
-	// if the first row is null the zonotope is a point and it is already
-	// minimized
-	assert(i!=rows);
+             
+        // if the first row is null the zonotope is a point and it is already
+        // minimized
+        assert(i!=rows);
 
         coef=gen(i,j);
-	
-	for (j2=j+1; j2<cols; j2++) {
-	  i2=find_first_not_null_in_col(gen,j2);
+        
+        for (j2=j+1; j2<cols; j2++) {
+          i2=find_first_not_null_in_col(gen,j2);
 
-	  if (i==i2) {
+          if (i==i2) {
             coef2=gen(i2,j2);
 
-	    //check whever the j-th and the j2-th columns are linear depended
-	    //or not.
-	    while ((i2<rows)&&(gen(i2,j2)*coef==gen(i2,j)*coef2))
-	      i2++;
+            //check whever the j-th and the j2-th columns are linear depended
+            //or not.
+            while ((i2<rows)&&(gen(i2,j2)*coef==gen(i2,j)*coef2))
+              i2++;
 
-	    // if they are
-	    if (i2==rows) {
-	      if (dependences[j]==cols) {
+            // if they are
+            if (i2==rows) {
+              if (dependences[j]==cols) {
                 dependences[j2]=j;
-	        if (coef*coef2<0) same_sign[j2]=false;
-	        min_cols--;
-	      } else {
+                if (coef*coef2<0) same_sign[j2]=false;
+                min_cols--;
+              } else {
                 dependences[j2]=dependences[j];
-		if ((coef*coef2>0)^same_sign[j]) same_sign[j2]=false;
-	      }
-	    }
-	  }
+                if ((coef*coef2>0)^same_sign[j]) same_sign[j2]=false;
+              }
+            }
+          }
         }
       }
       
       if (min_cols!= cols) {
-	Matrix new_gen(rows,min_cols);
+        Matrix new_gen(rows,min_cols);
 
-	j2=0;
-	for (j=0; j< cols; j++) {
+        j2=0;
+        for (j=0; j< cols; j++) {
           if (dependences[j]==cols) {
-	    dependences[j]=j2;
-	    
-	    for (i=0; i<rows; i++)
-	      new_gen(i,j2)=gen(i,j);
-	    
-	    j2++;
-	  } else {
-	     
-	     if (same_sign[j]) {
-	       for (i=0; i<rows; i++)
-	         new_gen(i,dependences[j])+=gen(i,j);
-	     } else {
+            dependences[j]=j2;
+            
+            for (i=0; i<rows; i++)
+              new_gen(i,j2)=gen(i,j);
+            
+            j2++;
+          } else {
+             
+             if (same_sign[j]) {
                for (i=0; i<rows; i++)
-	         new_gen(i, dependences[j])-=gen(i,j);
-	     }
-	  }
-	}
+                 new_gen(i,dependences[j])+=gen(i,j);
+             } else {
+               for (i=0; i<rows; i++)
+                 new_gen(i, dependences[j])-=gen(i,j);
+             }
+          }
+        }
 
-	gen=new_gen;
+        gen=new_gen;
       }
     }
     
@@ -489,44 +489,44 @@ namespace Ariadne {
       if (col.size()==row.size()) {
         A=Matrix(2*number_of_generators,this->dimension());
         b=Vector(2*number_of_generators);
-	Space=Matrix();
+        Space=Matrix();
       } else { 
         remove_null_columns(A,row,col);
         Space=compute_space(A,row,col);
 
-	A=Matrix(2*number_of_generators+2*number_of_rows(Space),
-			this->dimension());
-	b=Vector(2*number_of_generators+2*number_of_rows(Space));
+        A=Matrix(2*number_of_generators+2*number_of_rows(Space),
+                        this->dimension());
+        b=Vector(2*number_of_generators+2*number_of_rows(Space));
       }
       // TO IMPROVE: we new compute both (col_i)^T(cols_j) and 
       // (col_j)^T(cols_i)
       for (size_t i=0; i< number_of_generators; i++) {
-	b(2*i)=0.0;
-	for (size_t j=0; j< number_of_generators; j++) {
-	  //b(2*i)-=abs(this->principle_direction(i)*this->principle_direction(j));
-	  b2=0.0;
-	  for (size_t k=0; k< this->dimension(); k++) {
+        b(2*i)=0.0;
+        for (size_t j=0; j< number_of_generators; j++) {
+          //b(2*i)-=abs(this->principle_direction(i)*this->principle_direction(j));
+          b2=0.0;
+          for (size_t k=0; k< this->dimension(); k++) {
             b2+=gen(k,i)*gen(k,j);
-	  }
-	  b(2*i)-=abs(b2);
-	}
-	
-	b2=0.0;
-	for (size_t k=0; k< this->dimension(); k++) {
+          }
+          b(2*i)-=abs(b2);
+        }
+        
+        b2=0.0;
+        for (size_t k=0; k< this->dimension(); k++) {
           b2+=gen(k,i)*this->_centre[k];
-	}
+        }
 
-	b(2*i+1)=b(2*i)+b2;
-        b(2*i)=b(2*i)-b2;	
-	
-	for (size_t k=0; k< this->dimension(); k++) {
+        b(2*i+1)=b(2*i)+b2;
+        b(2*i)=b(2*i)-b2;        
+        
+        for (size_t k=0; k< this->dimension(); k++) {
            A(2*i,k)=-gen(k,i);
            A(2*i+1,k)=gen(k,i);
-	}
+        }
       }
 
       for (size_t i=0; i< number_of_rows(Space); i++) {
-	for (size_t j=0; j< this->dimension(); j++) {
+        for (size_t j=0; j< this->dimension(); j++) {
           A(2*(i+number_of_generators),j)=Space(i,j);
           A(2*(i+number_of_generators)+1,j)=-Space(i,j);
         }
@@ -559,25 +559,25 @@ namespace Ariadne {
       }
       
       dimension_type col_A=number_of_columns(A._generators), 
-		     col_B=number_of_columns(B._generators); 
+                     col_B=number_of_columns(B._generators); 
       
       matrix<R> gen(A.dimension(), col_A+col_B);
 
       for (size_t i=0; i!=col_A; ++i) {
          for (size_t j=0; j!=A.dimension(); ++j) {
-	    gen(j,i)=A._generators(j,i);
-	 }
+            gen(j,i)=A._generators(j,i);
+         }
       }
 
       
       for (size_t i=0; i!=col_B; ++i) {
-         for (size_t j=0; j!=A.dimension(); ++j) {
-	    gen(j,i+col_A)=B._generators(j,i);
-	 }
+        for (size_t j=0; j!=A.dimension(); ++j) {
+          gen(j,i+col_A)=B._generators(j,i);
+        }
       }
       
       return Zonotope<R>(A._centre+(B._centre).position_vector(), 
-		      	remove_null_columns_but_one(gen));
+                         remove_null_columns_but_one(gen));
     }
    
     /*! \brief Performs the Minkoswi difference of two zonotopes */
@@ -593,25 +593,25 @@ namespace Ariadne {
       }
       
       dimension_type col_A=number_of_columns(A._generators), 
-		     col_B=number_of_columns(B._generators); 
+                     col_B=number_of_columns(B._generators); 
       
       matrix<R> gen(A.dimension(), col_A+col_B);
 
       for (size_t i=0; i!=col_A; ++i) {
          for (size_t j=0; j!=A.dimension(); ++j) {
-	    gen(j,i)=A._generators(j,i);
-	 }
+          gen(j,i)=A._generators(j,i);
+        }
       }
 
       
       for (size_t i=0; i!=col_B; ++i) {
-         for (size_t j=0; j!=A.dimension(); ++j) {
-	    gen(j,i+col_A)=B._generators(j,i);
-	 }
+        for (size_t j=0; j!=A.dimension(); ++j) {
+          gen(j,i+col_A)=B._generators(j,i);
+         }
       }
       
       return Zonotope<R>(A._centre-(B._centre).position_vector(), 
-		      	remove_null_columns_but_one(gen));
+                         remove_null_columns_but_one(gen));
     }
 
     
@@ -815,26 +815,6 @@ namespace Ariadne {
       throw std::domain_error("subset_of_closed_cover(Zonotope, std::vector<Zonotope>) not implemented");
     }
 
-
-    template <typename R>
-    std::ostream&
-    operator<<(std::ostream& os, const Zonotope<R>& z) 
-    {
-      if(z.dimension() > 0) {
-        os << "Zonotope(\n  centre=" << z.centre();
-        os << "\n  directions=" << z.principle_directions();
-        os << "\n) ";
-      }
-
-      return os;
-    }
-    
-    template <typename R>
-    std::istream& 
-    operator>>(std::istream& is, Zonotope<R>& z)
-    {
-      throw std::domain_error("Not implemented");
-    }
       
     
 

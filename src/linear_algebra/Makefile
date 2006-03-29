@@ -32,7 +32,9 @@ linear_program.o: linear_program.cc \
   ../../include/linear_algebra/../linear_algebra/../base/numerical_type.h \
   ../../include/linear_algebra/../linear_algebra/../base/../base/dyadic.h \
   ../../include/linear_algebra/../linear_algebra/../base/interval.h \
+  ../../include/linear_algebra/../linear_algebra/../base/utility.h \
+  ../../include/linear_algebra/../linear_algebra/../base/../base/array.h \
   ../../include/linear_algebra/linear_program.tpl \
   ../../include/linear_algebra/linear_program.h \
-  ../../include/base/utility.h ../../include/base/../base/array.h
+  ../../include/base/utility.h
 

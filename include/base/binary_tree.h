@@ -57,7 +57,6 @@ namespace Ariadne {
      public:    
       /*! \brief The type of the BinaryWord object stored in the tree. */
       typedef BinaryWord value_type;
-      typedef size_t size_type;
       typedef BinaryTreeIterator iterator;
       typedef BinaryTreeIterator const_iterator;
       friend class BinaryTreeIterator;

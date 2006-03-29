@@ -44,6 +44,7 @@ typedef Ariadne::Geometry::Polyhedron<Real> RPolyhedron;
 
 typedef std::vector<RPoint> RPointList;
 
+using Ariadne::size_type;
 using Ariadne::Geometry::intersection;
 using Ariadne::Geometry::regular_intersection;
 using Ariadne::Geometry::interiors_intersect;
@@ -59,22 +60,20 @@ using boost::python::self_ns::str;
 using boost::python::return_value_policy;
 using boost::python::copy_const_reference;
 
-void export_polyhedron() {
-  typedef bool (*PolyBinPred) (const RPolyhedron&, const RPolyhedron&);
-  typedef RPolyhedron (*PolyBinFunc) (const RPolyhedron&, const RPolyhedron&);
-  PolyBinFunc poly_intersection=&regular_intersection<Real>;
-  PolyBinFunc poly_regular_intersection=&regular_intersection<Real>;
-  PolyBinPred poly_interiors_intersect=&interiors_intersect<Real>;
-  PolyBinPred poly_disjoint=&disjoint<Real>;
-  PolyBinPred poly_inner_subset=&inner_subset<Real>;
-  PolyBinPred poly_subset=&subset<Real>;
+inline RPoint point_list_get(const RPointList& pl, const size_type& n) {
+  return pl[n];
+}
 
-  def("intersection", poly_intersection);
-  def("regular_intersection", poly_regular_intersection);
-  def("interiors_intersect", poly_interiors_intersect);
-  def("disjoint", poly_disjoint);
-  def("inner_subset", poly_inner_subset);
-  def("subset", poly_subset);
+void export_polyhedron() {
+  typedef bool (*PolyPolyBinPred) (const RPolyhedron&, const RPolyhedron&);
+  typedef RPolyhedron (*PolyPolyBinFunc) (const RPolyhedron&, const RPolyhedron&);
+
+  def("intersection", PolyPolyBinFunc(&intersection));
+  def("regular_intersection", PolyPolyBinFunc(&regular_intersection));
+  def("interiors_intersect", PolyPolyBinPred(&interiors_intersect));
+  def("disjoint", PolyPolyBinPred(&disjoint));
+  def("inner_subset", PolyPolyBinPred(&inner_subset));
+  def("subset", PolyPolyBinPred(&subset));
 
   class_<RPolyhedron>("Polyhedron",init<int>())
     .def(init<RMatrix,RVector>())
@@ -88,10 +87,11 @@ void export_polyhedron() {
     .def(str(self))    // __str__
   ;
   
+  typedef RPoint (RPointList::* RPLGetFunc) (const RPointList::size_type&) const;
   class_<RPointList>("PointList",init<>())
     .def("size", &RPointList::size)
     .def("append", &RPointList::push_back)
-//    .def("__getitem__", &const RStateList::operator[], return_value_policy<copy_const_reference>())
+    .def("__getitem__", &point_list_get)
     .def(str(self))    // __str__
   ;
 

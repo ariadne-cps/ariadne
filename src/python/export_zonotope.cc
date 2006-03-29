@@ -64,53 +64,27 @@ void export_zonotope() {
   typedef bool (*PltpZntpBinPred) (const RParallelotope&, const RZonotope&);
   typedef bool (*ZntpPltpBinPred) (const RZonotope&, const RParallelotope&);
  
-  ZntpZntpBinFunc zntp_zntp_minkowski_sum=&minkowski_sum<Real>;
-  
-  ZntpZntpBinPred zntp_zntp_interiors_intersect=&interiors_intersect<Real>;
-  ZntpRectBinPred zntp_rect_interiors_intersect=&interiors_intersect<Real>;
-  RectZntpBinPred rect_zntp_interiors_intersect=&interiors_intersect<Real>;
-  ZntpPltpBinPred zntp_pltp_interiors_intersect=&interiors_intersect<Real>;
-  PltpZntpBinPred pltp_zntp_interiors_intersect=&interiors_intersect<Real>;
-  
-  ZntpZntpBinPred zntp_zntp_disjoint=&disjoint<Real>;
-  ZntpRectBinPred zntp_rect_disjoint=&disjoint<Real>;
-  RectZntpBinPred rect_zntp_disjoint=&disjoint<Real>;
-  ZntpPltpBinPred zntp_pltp_disjoint=&disjoint<Real>;
-  PltpZntpBinPred pltp_zntp_disjoint=&disjoint<Real>;
-
-  ZntpZntpBinPred zntp_zntp_inner_subset=&inner_subset<Real>;
-  ZntpRectBinPred zntp_rect_inner_subset=&inner_subset<Real>;
-  RectZntpBinPred rect_zntp_inner_subset=&inner_subset<Real>;
-  ZntpPltpBinPred zntp_pltp_inner_subset=&inner_subset<Real>;
-  PltpZntpBinPred pltp_zntp_inner_subset=&inner_subset<Real>;
-  
-  ZntpZntpBinPred zntp_zntp_subset=&subset<Real>;
-  ZntpRectBinPred zntp_rect_subset=&subset<Real>;
-  RectZntpBinPred rect_zntp_subset=&subset<Real>;
-  ZntpPltpBinPred zntp_pltp_subset=&subset<Real>;
-  PltpZntpBinPred pltp_zntp_subset=&subset<Real>;
-  
-  def("interiors_intersect", zntp_zntp_interiors_intersect);
-  def("interiors_intersect", zntp_rect_interiors_intersect);
-  def("interiors_intersect", rect_zntp_interiors_intersect);
-  def("interiors_intersect", pltp_zntp_interiors_intersect);
-  def("interiors_intersect", zntp_pltp_interiors_intersect);
-  def("disjoint", zntp_zntp_disjoint);
-  def("disjoint", zntp_rect_disjoint);
-  def("disjoint", rect_zntp_disjoint);
-  def("disjoint", pltp_zntp_disjoint);
-  def("disjoint", zntp_pltp_disjoint);
-  def("inner_subset", zntp_zntp_inner_subset);
-  def("inner_subset", zntp_rect_inner_subset);
-  def("inner_subset", rect_zntp_inner_subset);
-  def("inner_subset", pltp_zntp_inner_subset);
-  def("inner_subset", zntp_pltp_inner_subset);
-  def("subset", zntp_zntp_subset);
-  def("subset", zntp_rect_subset);
-  def("subset", rect_zntp_subset);
-  def("subset", pltp_zntp_subset);
-  def("subset", zntp_pltp_subset);
-  def("minkowski_sum", zntp_zntp_minkowski_sum);
+  def("interiors_intersect", ZntpZntpBinPred(&interiors_intersect));
+  def("interiors_intersect", ZntpRectBinPred(&interiors_intersect));
+  def("interiors_intersect", RectZntpBinPred(&interiors_intersect));
+  def("interiors_intersect", PltpZntpBinPred(&interiors_intersect));
+  def("interiors_intersect", ZntpPltpBinPred(&interiors_intersect));
+  def("disjoint", ZntpZntpBinPred(&disjoint));
+  def("disjoint", ZntpRectBinPred(&disjoint));
+  def("disjoint", RectZntpBinPred(&disjoint));
+  def("disjoint", PltpZntpBinPred(&disjoint));
+  def("disjoint", ZntpPltpBinPred(&disjoint));
+  def("inner_subset", ZntpZntpBinPred(&inner_subset));
+  def("inner_subset", ZntpRectBinPred(&inner_subset));
+  def("inner_subset", RectZntpBinPred(&inner_subset));
+  def("inner_subset", PltpZntpBinPred(&inner_subset));
+  def("inner_subset", ZntpPltpBinPred(&inner_subset));
+  def("subset", ZntpZntpBinPred(&subset));
+  def("subset", ZntpRectBinPred(&subset));
+  def("subset", RectZntpBinPred(&subset));
+  def("subset", PltpZntpBinPred(&subset));
+  def("subset", ZntpPltpBinPred(&subset));
+  def("minkowski_sum", ZntpZntpBinFunc(&minkowski_sum));
 
   class_<RZonotope>("Zonotope",init<int>())
     .def(init<RPoint,RMatrix>())

@@ -57,28 +57,20 @@ void export_parallelotope() {
   typedef bool (*PltpPltpBinPred) (const RParallelotope&, const RParallelotope&);
   typedef bool (*PltpRectBinPred) (const RParallelotope&, const RRectangle&);
   typedef bool (*RectPltpBinPred) (const RRectangle&, const RParallelotope&);
-  PltpPltpBinPred pltp_pltp_interiors_intersect=&interiors_intersect<Real>;
-  PltpRectBinPred pltp_rect_interiors_intersect=&interiors_intersect<Real>;
-  RectPltpBinPred rect_pltp_interiors_intersect=&interiors_intersect<Real>;
-  PltpPltpBinPred pltp_pltp_disjoint=&disjoint<Real>;
-  PltpRectBinPred pltp_rect_disjoint=&disjoint<Real>;
-  RectPltpBinPred rect_pltp_disjoint=&disjoint<Real>;
-  PltpPltpBinPred pltp_pltp_inner_subset=&inner_subset<Real>;
-  PltpRectBinPred pltp_rect_inner_subset=&inner_subset<Real>;
-  RectPltpBinPred rect_pltp_inner_subset=&inner_subset<Real>;
-  PltpPltpBinPred pltp_pltp_subset=&subset<Real>;
+  
+  def("interiors_intersect", PltpPltpBinPred(&interiors_intersect));
+  def("interiors_intersect", PltpRectBinPred(&interiors_intersect));
+  def("interiors_intersect", RectPltpBinPred(&interiors_intersect));
+  def("disjoint", PltpPltpBinPred(&disjoint));
+  def("disjoint", PltpRectBinPred(&disjoint));
+  def("disjoint", RectPltpBinPred(&disjoint));
+  def("inner_subset", PltpPltpBinPred(&inner_subset));
+  def("inner_subset", PltpRectBinPred(&inner_subset));
+  def("inner_subset", RectPltpBinPred(&inner_subset));
 
-  def("interiors_intersect", pltp_pltp_interiors_intersect);
-  def("interiors_intersect", pltp_rect_interiors_intersect);
-  def("interiors_intersect", rect_pltp_interiors_intersect);
-  def("disjoint", pltp_pltp_disjoint);
-  def("disjoint", pltp_rect_disjoint);
-  def("disjoint", rect_pltp_disjoint);
-  def("inner_subset", pltp_pltp_inner_subset);
-  def("inner_subset", pltp_rect_inner_subset);
-  def("inner_subset", rect_pltp_inner_subset);
-
-  def("subset", pltp_pltp_subset);
+  def("subset", PltpPltpBinPred(&subset));
+  def("subset", PltpRectBinPred(&subset));
+  def("subset", RectPltpBinPred(&subset));
 
   class_<RParallelotope>("Parallelotope",init<int>())
     .def(init<RPoint,RMatrix>())

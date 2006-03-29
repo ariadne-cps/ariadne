@@ -40,6 +40,48 @@
 #include "../base/interval.h"
 #include "../base/utility.h"
 
+namespace boost {
+  namespace numeric {
+    namespace ublas {
+            
+      template<typename R>
+      inline
+      vector<R>
+      operator*(const matrix<R>& A, const vector<R>& B) {
+        return prod(A,B);
+      }
+           
+      template<typename R>
+      inline
+      matrix<R>
+      operator*(const matrix<R>& A, const matrix<R>& B) {
+        return prod(A,B);
+      }
+      
+
+      template <typename Real>
+      std::ostream&
+      operator<<(std::ostream& os, const matrix<Real>& A)
+      {
+        if(A.size1()==0 || A.size2()==0) {
+          return os << "[ ]";
+        }
+        
+        for(uint i=0; i!=A.size1(); ++i) {
+          os << (i==0 ? "[ " : "; ") << A(i,0);
+          for(uint j=1; j!=A.size2(); ++j) {
+            os << "," << A(i,j);
+          }
+        }
+        os << " ]";
+        return os;
+      }
+       
+    }
+  }
+}
+      
+
 namespace Ariadne {
   namespace LinearAlgebra {
 
@@ -56,35 +98,6 @@ namespace Ariadne {
        ~SingularMatrix(){}    
     };
     
-    template <typename Real>
-    matrix< Interval<Real> > 
-    prod(const matrix< Interval<Real> >& A, const matrix<Real>& B) {
-      matrix< Interval<Real> > result(A.size1(),B.size2());
-      for (size_type i=0; i!=A.size1(); ++i) {
-        for (size_type j=0; j!=B.size2(); ++j) {
-          result(i,j)=Interval<Real>(0);
-          for (size_type k=0; k!=A.size2(); ++k) {
-            result(i,j)+=A(i,k)*B(k,j);
-          }
-        }
-      }
-      return result;
-    }
-      
-    template <typename Real>
-    matrix< Interval<Real> > 
-    prod(const matrix<Real>& A, const matrix< Interval<Real> >& B) {
-      matrix< Interval<Real> > result(A.size1(),B.size2());
-      for (size_type i=0; i!=A.size1(); ++i) {
-        for (size_type j=0; j!=B.size2(); ++j) {
-          result(i,j)=Interval<Real>(0);
-          for (size_type k=0; k!=A.size2(); ++k) {
-            result(i,j)+=A(i,k)*B(k,j);
-          }
-        }
-      }
-      return result;
-    }
 
     template <typename Real>
     inline matrix<Real> zero_matrix(dimension_type dim) {
@@ -161,18 +174,18 @@ namespace Ariadne {
       /* out = ( \Sum_{j=0}^{n}\frac{h^(j+1)}{(j+1)!}*A^{j} ) b */
     }
    
-   template <typename Real>
-   inline 
-   void lu_local_dec(matrix<Real> &A, const array<size_t> &row, 
-		const array<size_t> &col, const size_t &rows, 
-		const size_t &columns, const size_t &p) {
+    template <typename Real>
+    inline 
+    void lu_local_dec(matrix<Real> &A, const array<size_t> &row, 
+    const array<size_t> &col, const size_t &rows, 
+    const size_t &columns, const size_t &p) {
       size_t i,j;
       Real coef;
-	
+  
       // perform lu decomposition on the sub matrix
       for (i=p+1; i< rows; i++) {
         coef=A(row[i],col[p])/A(row[p],col[p]);
-	  
+    
         for (j=p+1; j< columns; j++) 
           A(row[i],col[j])-=(A(row[p],col[j])*coef);
     
@@ -182,13 +195,13 @@ namespace Ariadne {
     }
    
     template <typename Real>
-    inline	    
+    inline  
     matrix<Real> lu_decompose(const matrix<Real> &A, 
         array<size_t> &p_col, array<size_t> &p_row) {
-	
+  
       //create output matrix
       matrix<Real> lu_A(A);
-	
+  
       size_t rows,columns;
       rows=number_of_rows(A);
       columns=number_of_columns(A);
@@ -219,7 +232,7 @@ namespace Ariadne {
           rows--;
           swap(row[i],row[rows]);
         } else { // otherwise (if the current row is linear independent for the 
-	         // previous ones)
+           // previous ones)
       
           // swap the current column with the first column which has a not null 
           // value in the i-th row
@@ -339,7 +352,7 @@ namespace Ariadne {
       for (i=0; i<rows; i++) {
         idx_p=p_array[i];
        
-	if (idx_p < cols) {
+        if (idx_p < cols) {
           sum=sol(idx_p);
           sol(idx_p)=b(i);
         
@@ -361,13 +374,13 @@ namespace Ariadne {
         i=(rows-1)-idx_p;
         
         if ((i<cols)&&(i<rows)) {
-	  sum=sol(i);
+          sum=sol(i);
           for (j=i+1; j< cols; j++){
             sum -= A(i,j) * sol(j);
           }
         
           sol(i) = sum / A(i,i);
-	}
+        }
       }
       
       return sol;
@@ -386,34 +399,34 @@ namespace Ariadne {
       Real norm,coef;
 
       for (dimension_type i=0; i< dim2; i++) {
-	
-	norm=0;
-	
-	for (dimension_type j=i; j< dim1; j++) {
-	  norm+=QA(j,i)*QA(j,i);
-	  x(j)=QA(j,i);
-	}
-	coef=norm-x(i)*x(i);
-	
-	if (x(i)>=0)  
-	   x(i)-=sqrt(norm);
-	else 
-	   x(i)+=sqrt(norm);
-
-	coef+=x(i)*x(i);
-	
-	Qi=identity_matrix<Real>(dim1);
-	  
-	if (coef!=0) {
-	  for (dimension_type j=i; j< dim2; j++) {
-	    for (dimension_type k=i; k< dim1; k++) {
-	       Qi(k,j)-=((2*x(k)*x(j))/coef);
-	    }
-	  }
-	}
-	
-	QA=prod(Qi,QA);
-	Q=prod(Q,Qi);
+        
+        norm=0;
+        
+        for (dimension_type j=i; j< dim1; j++) {
+          norm+=QA(j,i)*QA(j,i);
+          x(j)=QA(j,i);
+        }
+        coef=norm-x(i)*x(i);
+        
+        if (x(i)>=0)  
+           x(i)-=sqrt(norm);
+        else 
+           x(i)+=sqrt(norm);
+      
+        coef+=x(i)*x(i);
+        
+        Qi=identity_matrix<Real>(dim1);
+          
+        if (coef!=0) {
+          for (dimension_type j=i; j< dim2; j++) {
+            for (dimension_type k=i; k< dim1; k++) {
+               Qi(k,j)-=((2*x(k)*x(j))/coef);
+            }
+          }
+        }
+        
+        QA=prod(Qi,QA);
+        Q=prod(Q,Qi);
       }
      
       return Q;
@@ -592,7 +605,7 @@ namespace Ariadne {
     bool have_same_dimensions(const matrix<Real> &A,  const matrix<Real> &B) {
 
       return ((number_of_columns(A)==number_of_columns(B))&&
-	                (number_of_rows(A)==number_of_rows(B)));
+                        (number_of_rows(A)==number_of_rows(B)));
     }
     
     template <typename Real>
@@ -605,7 +618,7 @@ namespace Ariadne {
         throw std::domain_error("The two matrix have a diffentent number of rows"); 
 
       for (size_t i=0; i< number_of_rows(A); i++)
-	if (A(i,A_col)!=B(i,B_col)) return false;
+        if (A(i,A_col)!=B(i,B_col)) return false;
    
       return true;
     }
@@ -613,13 +626,13 @@ namespace Ariadne {
     template<typename R>
     inline 
     size_t find_first_not_null_in_col(const matrix<R> &A, 
-		    const size_t &col) {
-	    
+                                      const size_t &col) 
+    {
       size_t i=0;
 
-      while ((i< number_of_rows(A))&&(A(i,col)==0.0))
-      	i++;
-
+      while ((i< number_of_rows(A))&&(A(i,col)==0.0)) {
+        i++;
+      }
       return i;
       
     }
@@ -637,8 +650,9 @@ namespace Ariadne {
 
       for(size_t j=0; j!=cols; ++j) {
         not_null[j]=(find_first_not_null_in_col(A,j)<rows);
-        if (not_null[j]) 
-	  directions++; 
+        if (not_null[j]) {
+          directions++; 
+        }
       }
 
       matrix<T> new_A(rows,std::max((size_t)1,directions));
@@ -693,11 +707,11 @@ namespace Ariadne {
     inline 
     matrix<Real> compute_space(const matrix<Real> &SA, 
         array<size_t> &row,const array<size_t> &col) {
-	
+
       size_t cols=col.size(), rows=row.size();
    
       assert(cols>=rows);
-	   
+   
       size_t SA_cols=number_of_columns(SA), A_rows=SA_cols-rows;
       size_t i,j,k,j2;
    
@@ -739,85 +753,6 @@ namespace Ariadne {
 
   }
 }
-
-namespace Ariadne {
-  namespace Evaluation {
-
-    //FIXME: Hack to include matrix/vector product operators.
-    template<typename R>
-    inline
-    LinearAlgebra::vector<R>
-    operator*(const LinearAlgebra::matrix<R>& A, const LinearAlgebra::vector<R>& B) {
-      return prod(A,B);
-    }
-    
-    template<typename R>
-    inline
-    LinearAlgebra::matrix<R>
-    operator*(const LinearAlgebra::matrix<R>& A, const LinearAlgebra::matrix<R>& B) {
-      return prod(A,B);
-    }
-    
-    template<typename R>
-    inline
-    LinearAlgebra::matrix< Interval<R> >
-    operator*(const LinearAlgebra::matrix< Interval<R> >& A, const LinearAlgebra::matrix<R>& B) {
-      return prod(A,B);
-    }
-    
-    template<typename R>
-    inline
-    LinearAlgebra::matrix< Interval<R> >
-    operator*(const LinearAlgebra::matrix<R>& A, const LinearAlgebra::matrix< Interval<R> >& B) {
-      return prod(A,B);
-    }
- 
-
-  }
-}
-
-namespace Ariadne {
-  namespace Geometry {
-
-    //FIXME: Hack to include matrix/vector product operators.
-    template<typename R>
-    inline
-    LinearAlgebra::vector<R>
-    operator*(const LinearAlgebra::matrix<R>& A, const LinearAlgebra::vector<R>& B) {
-      return prod(A,B);
-    }
-    
-    template<typename R>
-    inline
-    LinearAlgebra::matrix<R>
-    operator*(const LinearAlgebra::matrix<R>& A, const LinearAlgebra::matrix<R>& B) {
-      return prod(A,B);
-    }
-  }
-}
-
-
-namespace boost { namespace numeric { namespace ublas {
-
-    template <typename Real>
-    std::ostream&
-    operator<<(std::ostream& os, const matrix<Real>& A)
-    {
-      if(A.size1()==0 || A.size2()==0) {
-        return os << "[ ]";
-      }
-      
-      for(uint i=0; i!=A.size1(); ++i) {
-        os << (i==0 ? "[ " : " ; ") << A(i,0);
-        for(uint j=1; j!=A.size2(); ++j) {
-          os << "," << A(i,j);
-        }
-      }
-      os << " ]";
-      return os;
-    }
-    
-}}}
 
 
 #endif /* _ARIADNE_MATRIX_H */

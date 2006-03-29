@@ -60,8 +60,6 @@ namespace Ariadne {
     template<typename R>
     class Monomial {
      public:
-      /*! \brief The unsigned integer type used to denote the array positions. */
-      typedef size_t size_type;
       /*! \brief The type of denotable real number used for the coefficients. */
       typedef R Real;
       /*! \brief The type of denotable state accepted as argument. */
@@ -93,8 +91,6 @@ namespace Ariadne {
     template<typename R>
     class Polynomial {
      public:
-      /*! \brief The unsigned integer type used to denote the array positions. */
-      typedef size_t size_type;
       /*! \brief The type of denotable real number used for the corners. */
       typedef R Real;
       /*! \brief The type of denotable state contained by the simplex. */
@@ -126,8 +122,6 @@ namespace Ariadne {
     template <typename R>
     class PolynomialMap {
      public:
-      /*! \brief The unsigned integer type used to denote the array positions. */
-      typedef size_t size_type;
       /*! \brief The type of denotable real number used for the corners. */
       typedef R Real;
       /*! \brief The type of denotable state contained by the simplex. */

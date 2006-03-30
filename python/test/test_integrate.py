@@ -26,8 +26,8 @@ from ariadne.geometry import *
 from ariadne.linear_algebra import *
 import sys
 
-n=20
-h=Dyadic(1./256)
+n=4
+h=Dyadic(1./64)
 ls=LorenzSystem(Dyadic(8./3.),Dyadic(28.0),Dyadic(10.0))
 r0=Rectangle("[1.0,1.1]x[1.0,1.1]x[1.0,1.1]")
 r=[r0]
@@ -45,9 +45,14 @@ for i in range(0,n):
   print
   ar.append(integrate(avf,ar[-1],Dyadic(0.2)))
 
+print "\n\n\n\n"
 p=[Parallelotope(r0)]
+p.append(integrate_to(ls,p[-1],h/4))
 for i in range(0,n):
   p.append(integrate(ls,p[-1],h))
+p.append(integrate_to(ls,p[-1],h/4))
+  
+print p[-1]
 
 bb=Rectangle("[-4,4]x[-2,6]")
 eps=EpsPlot("integrate.eps",bb)
@@ -56,4 +61,6 @@ for i in range(0,n):
   eps.write(p[i])
 eps.set_fill_colour("blue")
 eps.write(p[0])
+eps.set_fill_colour("red")
+eps.write(p[-1])
 eps.close()

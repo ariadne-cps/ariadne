@@ -23,6 +23,7 @@
  */
 
 #include "base/numerical_type.h"
+#include "base/arithmetic.h"
 
 #include <boost/python.hpp>
 
@@ -80,6 +81,7 @@ inline Dyadic sub_dx(const Dyadic d1, const double& d2) { return d1-d2; }
 inline Dyadic rsub_dx(const Dyadic d1, const double& d2) { return d2-d1; }
 inline Dyadic mul_dd(const Dyadic d1, const Dyadic& d2) { return d1*d2; }
 inline Dyadic mul_dx(const Dyadic d1, const double& d2) { return d1*d2; }
+inline Dyadic div_dn(const Dyadic d1, const uint& d2) { return d1/d2; }
 inline bool eq_dd(const Dyadic& d1, const Dyadic& d2) { return d1==d2; }
 inline bool eq_dx(const Dyadic& d1, const double& d2) { return d1==d2; }
 inline bool ne_dd(const Dyadic& d1, const Dyadic& d2) { return d1!=d2; }
@@ -179,6 +181,7 @@ void export_numeric() {
     .def("__mul__", &mul_dd)
     .def("__mul__", &mul_dx)
     .def("__rmul__", &mul_dx)
+    .def("__div__", &div_dn)
     .def("__eq__", &eq_dd)
     .def("__eq__", &eq_dx)
     .def("__eq__", &eq_dz)

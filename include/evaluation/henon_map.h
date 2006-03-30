@@ -23,7 +23,7 @@
  */
  
 /*! \file henon_map.h
- *  \brief The Henon map \f$(x,y) \hookrightarrow (a-x^2-by,x)\f$.
+ *  \brief The Henon map \f$(x,y) \rightarrow (a-x^2-by,x)\f$.
  */
 
 #ifndef _ARIADNE_HENON_MAP_H

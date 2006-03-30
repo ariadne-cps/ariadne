@@ -36,6 +36,10 @@ namespace Ariadne {
     integrate(const VectorField<Dyadic>&, const Geometry::Parallelotope<Dyadic>&, const Dyadic& t);
   
     template 
+    Geometry::Parallelotope<Dyadic> 
+    integrate(const VectorField<Dyadic>&, const Geometry::Parallelotope<Dyadic>&, const Interval<Dyadic>& t);
+  
+    template 
     Geometry::ListSet<Dyadic,Geometry::Parallelotope> 
     integrate(const VectorField<Dyadic>&, 
               const Geometry::ListSet<Dyadic,Geometry::Parallelotope>&, 

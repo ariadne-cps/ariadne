@@ -54,45 +54,170 @@
 namespace Ariadne {
   namespace Evaluation {
     
-    LinearAlgebra::matrix< Interval<double> >
-    approximate_matrix(const LinearAlgebra::matrix< Interval<Rational> >& A) {
-      LinearAlgebra::matrix< Interval<double> > result(A.size1(),A.size2());
-      for(size_type i=0; i!=result.size1(); ++i) {
-        for(size_type j=0; j!=result.size2(); ++j) {
-          double l=convert_to<double>(A(i,j).lower());
-          double u=convert_to<double>(A(i,j).upper());
-          result(i,j)=Interval<double>(l,u);
-        }
-      }
-      return result;
-    }
-
-    LinearAlgebra::matrix<double>
-    approximate_matrix(const LinearAlgebra::matrix<Rational>& A) {
-      LinearAlgebra::matrix<double> result(A.size1(),A.size2());
-      for(size_type i=0; i!=result.size1(); ++i) {
-        for(size_type j=0; j!=result.size2(); ++j) {
-          result(i,j)=convert_to<double>(A(i,j));
-        }
-      }
-      return result;
-    }
-
-/*
     template<typename R>
-    Geometry::Rectangle<R> 
-    operator+(const Geometry::Rectangle<R>& r, 
-              const LinearAlgebra::vector< Interval<R> >& iv)
+    Geometry::Zonotope<R>
+    operator+(const Geometry::Zonotope<R>& z, const LinearAlgebra::zonotopic_vector<R>& v)
     {
-      Geometry::Rectangle<R> result(r.dimension());
-      assert(r.dimension()==iv.size());
-      
-      for(size_type i=0; i!=result.dimension(); ++i) {
-        result.set_interval(i,r[i]+iv[i]);
-      }
-      return result;
+      return Geometry::Zonotope<R>(z.centre()+v.centre(),LinearAlgebra::concatenate_columns(z.generators(),v.generators()));
     }
-*/
+    
+    template<typename R>
+    Geometry::Zonotope<R>
+    operator+(const Geometry::Rectangle<R>& r, const LinearAlgebra::zonotopic_vector<R>& v)
+    {
+      return Geometry::Zonotope<R>(r)+v;
+    }
+    
+    template<typename R>
+    LinearAlgebra::zonotopic_vector<R>
+    symmetrise(const LinearAlgebra::vector< Interval<R> >& iv)
+    {
+      using namespace Geometry;
+      using namespace LinearAlgebra;
+
+      matrix<R> A(iv.size(),iv.size()+1);
+      for(size_type i=0; i!=A.size1(); ++i) {
+        A(i,i)=(iv[i].upper()-iv[i].lower())/2;
+        A(i,iv.size())=(iv[i].upper()+iv[i].lower())/2;
+      }
+      return zonotopic_vector<R>(vector<R>(iv.size()),A);
+    }
+      
+    template<typename R>
+    LinearAlgebra::matrix<R>
+    over_approximating_matrix(const LinearAlgebra::matrix< Interval<R> >& D, const LinearAlgebra::matrix<R>& A)
+    {
+      using namespace Geometry;
+      using namespace LinearAlgebra;
+      
+      typedef typename numerical_traits<R>::field_extension_type F;
+      dimension_type n=A.size1();
+      
+      matrix<R> B(n,n);
+      matrix<F> BF(n,n);
+      for(size_type i=0; i!=n; ++i) {
+        for(size_type j=0; j!=n; ++j) {
+          B(i,j)=(D(i,j).upper()+D(i,j).lower())/2;
+          BF(i,j)=B(i,j);
+        }
+      }
+      
+      matrix<F> Binv=inverse(BF);
+      matrix< Interval<F> > E(n,n);
+      for(size_type i=0; i!=n; ++i) {
+        for(size_type j=0; j!=n; ++j) {
+          for(size_type k=0; k!=n; ++k) {
+            Interval<F> invl(D(i,k).lower(),D(i,k).upper());
+            E(i,j)+=invl*Binv(k,j);
+          }
+        }
+      }
+      
+      std::cerr << "flow derivative centre=" << B << std::endl;
+      std::cerr << "flow derivative centre inverse=" << Binv << std::endl;
+      std::cerr << "error matrix=" << E << std::endl;
+            
+      F excess=norm(E);
+      uint precision=log_floor(2,F(1/(excess-1)));
+      R approx_excess=1+pow(Dyadic(0.5),precision);
+    
+      return approx_excess*(B*A);
+
+    }
+      
+    /* Compute an over-approximation to z. */
+    template<typename R>
+    Geometry::Parallelotope<R>
+    over_approximating_parallelotope(const Geometry::Zonotope<R>& z)
+    {
+      std::cerr << "over_approximating_parallelotope(const Geometry::Zonotope<R>& z)" << std::endl;
+      dimension_type n=z.dimension();
+      LinearAlgebra::matrix<R> A(n,n);
+      for(dimension_type i=0; i!=n; ++i) {
+        for(dimension_type j=0; j!=n; ++j) {
+          A(i,j)=z.generators()(i,j);
+        }
+      }
+      LinearAlgebra::matrix<R> B=LinearAlgebra::inverse(A);
+      const Geometry::Point<R>& c=z.centre();
+      
+      Geometry::Parallelotope<R> p(c,A);
+      while(!subset(z,p)) {
+        std::cerr << "A=" << A << std::endl;
+        A*=2;
+        p=Geometry::Parallelotope<R>(c,A);
+      }
+      std::cerr << "A=" << A << std::endl;
+      return p;
+    }
+      
+    /* Compute an over-approximation to c+DAe. */
+    template<typename R>
+    Geometry::Parallelotope<R>
+    over_approximating_parallelotope(const Geometry::Rectangle<R>& c,
+                                     const LinearAlgebra::matrix< Interval<R> >& D,
+                                     const LinearAlgebra::matrix<R>& A)
+    {
+      LinearAlgebra::matrix<R> DA=over_approximating_matrix(D,A);
+      Geometry::Zonotope<R> z(c);
+      DA=LinearAlgebra::concatenate_columns(DA,z.generators());
+      z=Geometry::Zonotope<R>(c.centre(),DA);
+      return over_approximating_parallelotope(z);
+    }
+    
+    template<typename R>
+    bool
+    check_flow_bounds(const Evaluation::VectorField<R>& vf,
+                      const Geometry::Rectangle<R>& r,
+                      const Geometry::Rectangle<R>& b,
+                      const R& h)
+    {
+      using namespace Geometry;
+      return subset(r+Interval<R>(0,h)*vf.apply(b),b);
+    }
+    
+    template<typename R>
+    Geometry::Rectangle<R>
+    compute_flow_bounds(const Evaluation::VectorField<R>& vf,
+                        const Geometry::Rectangle<R>& r,
+                        const R& h)
+    {
+      std::cerr << "\n\n\ncompute_flow_bounds\n";
+      using namespace Geometry;
+      typedef typename numerical_traits<R>::field_extension_type F;
+      uint max_iterations=16;
+      uint iteration=0;
+      R multiplier=1.125;
+      F t=h;
+      Rectangle<R> reach=(vf.dimension());
+      Rectangle<R> bounds(vf.dimension());
+      std::cerr << h << " " << r << std::endl;
+      reach=r;
+      std::cerr << t << " " << reach << std::endl;
+      while(t>0) {
+        bounds=reach+Interval<R>(0,multiplier*h)*vf.apply(reach);
+        LinearAlgebra::vector< Interval<R> > df=vf.apply(bounds);
+        
+        F dt=t;
+        for(dimension_type i=0; i!=vf.dimension(); ++i) {
+          if(df[i].upper()>0) {
+            dt=std::min(dt,F((bounds[i].upper()-reach[i].upper())/df[i].upper()));
+          }
+          if(df[i].lower()<0) {
+            dt=std::min(dt,F((bounds[i].lower()-reach[i].lower())/df[i].lower()));
+          }
+        }
+        reach=bounds;
+        t-=dt;
+        
+        std::cerr << t << " " << reach << std::endl;
+        ++iteration;
+        if(iteration==max_iterations) {
+          throw std::runtime_error("Cannot find bounding box for flow");
+        }
+      }
+      return reach;
+    }
     
     template<typename R>
     Geometry::Rectangle<R>
@@ -111,7 +236,7 @@ namespace Ariadne {
         estimate=bounds;
         bounds=r+Interval<R>(0,h)*vf.apply(estimate);
         std::cerr << h << " " << bounds << " " << estimate << std::endl;
-      };
+      }
       assert(subset(r+Interval<R>(0,h)*vf.apply(bounds),bounds));
       return bounds;
     }
@@ -135,6 +260,7 @@ namespace Ariadne {
       return bounds;
     }
     
+
     template<typename R>
     Geometry::Rectangle<R>
     refine_flow_bounds(const Evaluation::VectorField<R>& vf,
@@ -236,85 +362,102 @@ namespace Ariadne {
         Rectangle<R> phic=refine_flow_bounds(vf,c,b,h);
         std::cerr << "bounds on centre=" << phic << std::endl;
         
-        /* TODO: Make this code more accurate by computing Minkowski sum zonotope. */
-        matrix<R> B(n,n);
-        matrix<F> BF(n,n);
-        for(size_type i=0; i!=n; ++i) {
-          for(size_type j=0; j!=n; ++j) {
-            B(i,j)=(dphi(i,j).upper()+dphi(i,j).lower())/2;
-            BF(i,j)=B(i,j);
-          }
-        }
-        matrix<F> Binv=inverse(BF);
-        matrix< Interval<F> > E(n,n);
-        for(size_type i=0; i!=n; ++i) {
-          for(size_type j=0; j!=n; ++j) {
-            for(size_type k=0; k!=n; ++k) {
-              Interval<F> invl(dphi(i,k).lower(),dphi(i,k).upper());
-              E(i,j)+=invl*Binv(k,j);
-            }
-          }
-        }
-        
-        std::cerr << "flow derivative centre=" << B << std::endl;
-        std::cerr << "flow derivative centre inverse=" << approximate_matrix(Binv) << std::endl;
-        std::cerr << "error matrix=" << approximate_matrix(E) << std::endl;
-        
-        matrix<F> Ainv=inverse(p.generators());
-        matrix<F> Rerr(n,n);
-        for(size_type i=0; i!=n; ++i) {
-          const Rectangle<R>& cnstphic(phic);
-          Interval<R> intvl=cnstphic[i];
-          Rerr(i,i)=(intvl.upper()-intvl.lower())/2;
-        }
-        matrix<F> RerrAinvBinv=Rerr*Ainv*Binv;
-        std::cerr << "relative rectangle error" << approximate_matrix(RerrAinvBinv) << std::endl;
-        E+=RerrAinvBinv;
-        std::cerr << "total error matrix=" << approximate_matrix(E) << std::endl;
-        
-        F excess=norm(E);
-        uint precision=log_floor(2,F(1/(excess-1)));
-        R approx_excess=1;
-        
-        p=Parallelotope<R>(phic.centre(),approx_excess*(B*p.generators()));
-        
+        p=over_approximating_parallelotope(phic,dphi,p.generators());
+        std::cerr << "new approximation=" << p << std::endl;
+       
         t=t-h;
         h*=2;
         h=std::min(h,t);
       }
-/*
-      LinearAlgebra::vector< Interval<R> > cuboid_vector(m);
-      const Interval<R> unit_interval(-1,1);
-      for(size_type i=0; i!=cuboid_vector.size(); ++i) {
-        cuboid_vector[i]=Interval<R>(-1,1);
-      }
-            
-      const Geometry::Point<R>& c=p.centre();
-      const LinearAlgebra::matrix<R>& g=p.generators();
-      
-      Geometry::Point<R> img_centre=f.apply(c);
-      LinearAlgebra::matrix< Interval<R> > df_on_set = f.derivative(p.bounding_box());
-      LinearAlgebra::matrix<R> df_at_centre = f.derivative(c);
-      
-      LinearAlgebra::matrix<R> img_generators = df_at_centre*g;
-      
-      LinearAlgebra::matrix<R> img_generators_inverse = LinearAlgebra::inverse(img_generators);
-      
-      LinearAlgebra::matrix< Interval<R> > cuboid_transform = img_generators_inverse * df_on_set * g;
-      
-      LinearAlgebra::vector< Interval<R> > new_cuboid = cuboid_transform * cuboid_vector;
-      
-      R new_cuboid_sup(0);
-      for(size_type j=0; j!=n; ++j) {
-        new_cuboid_sup=std::max( new_cuboid_sup, R(abs(new_cuboid[j].lower())) );
-        new_cuboid_sup=std::max( new_cuboid_sup, R(abs(new_cuboid[j].upper())) );
-      }
-*/
-      
-//      Geometry::Parallelotope<R> result(img_centre,img_generators);
+
       return p;
     }
 
+    template<typename R>
+    Geometry::Parallelotope<R> 
+    integrate_to(const VectorField<R>& vector_field, 
+                 const Geometry::Parallelotope<R>& initial_set, 
+                 const R& time)
+    {
+      typedef typename numerical_traits<R>::field_extension_type F;
+      std::cerr << "integrate_to(VectorField<R>, Parallelotope<R>, R)\n";
+
+      using namespace LinearAlgebra;
+      using namespace Geometry;
+
+      assert(vector_field.dimension()==initial_set.dimension());
+
+      const VectorField<R>& vf(vector_field);
+      Parallelotope<R> p=initial_set;
+      const size_type n=p.dimension();
+      R t=time;
+      R h=time;
+      const matrix<R> id=identity_matrix<R>(n);
+      
+      std::cerr << "time left=" << t << std::endl;
+      /* Throws exception if we can't find flow bounds for given stepsize. */
+      Rectangle<R> b=compute_flow_bounds(vf,p.bounding_box(),h);
+        
+      std::cerr << "stepsize=" << h << std::endl;
+      std::cerr << "bound=" << b << std::endl;
+      
+      vector< Interval<R> > f=vf.apply(b);
+      std::cerr << "flow=" << f << std::endl;
+      matrix< Interval<R> > df=vf.derivative(b);
+      std::cerr << "jacobian=" << df << std::endl;
+      matrix< Interval<R> > dphi=id+Interval<R>(0,h)*df;
+      std::cerr << "flow derivative=" << dphi << std::endl;
+        
+      Point<R> c=p.centre();
+      std::cerr << "centre=" << c << std::endl;
+      Rectangle<R> phic=refine_flow_bounds(vf,c,b,R(h/2));
+      std::cerr << "bounds on centre=" << phic << std::endl;
+      
+      //interval_vector<R> fh=(R(h/2)*f);
+      vector< Interval<R> > fh=(R(h/2)*f);
+      std::cerr << "flow times stepsize=" << fh << std::endl;
+      zonotopic_vector<R> zfh=symmetrise(fh);
+      std::cerr << "symmetrised flow=" << fh << std::endl;
+      matrix<R> mdf=over_approximating_matrix(dphi,p.generators());
+      std::cerr << "over approximating matrix=" << fh << std::endl;
+      zonotopic_vector<R> zv=zfh+zonotopic_vector<R>(vector<R>(n),mdf);
+      
+      Zonotope<R> z=phic+zv;
+      std::cerr << "approximating zonotope " << z;
+      
+      p=over_approximating_parallelotope(z);
+      assert(subset(z,p));
+      std::cerr << "new approximation=" << p << std::endl;
+
+      return p;
+    }
+
+    
+    template<typename R>
+    Geometry::Parallelotope<R> 
+    integrate(const VectorField<R>& vector_field, 
+              const Geometry::Parallelotope<R>& initial_set, 
+              const Interval<R>& time) 
+    {
+      typedef typename numerical_traits<R>::field_extension_type F;
+      std::cerr << "integrate(VectorField<R>, Parallelotope<R>, Interval<R>)\n";
+
+      using namespace LinearAlgebra;
+      using namespace Geometry;
+
+      assert(vector_field.dimension()==initial_set.dimension());
+
+      const VectorField<R>& vf(vector_field);
+      Parallelotope<R> p=initial_set;
+      R t1=time.lower();
+      R t2=time.upper();
+      
+      p=integrate(vf,p,t1);
+      p=integrate_to(vf,p,R(t2-t1));
+      
+      return p;
+    }
+    
     template<typename R, template<typename> class BS>
     Ariadne::Geometry::ListSet<R,BS> 
     integrate(const VectorField<R>& vf, const Ariadne::Geometry::ListSet<R,BS>& ds, const R& t) 

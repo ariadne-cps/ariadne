@@ -39,6 +39,7 @@ using boost::python::copy_const_reference;
 using namespace Ariadne::Geometry;
 using namespace Ariadne::Evaluation;
 
+typedef Ariadne::Interval<Real> RInterval;
 typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
 typedef Ariadne::Geometry::Parallelotope<Real> RParallelotope;
 typedef Ariadne::Geometry::ListSet<Real,Parallelotope> RParallelotopeListSet;
@@ -58,12 +59,15 @@ chainreach_of_rectangle_list_set(const Map<Real>& f,
 
 
 void export_integrate() {
-  typedef RRectangle (*IntRectFun) (const RVectorField&, const RRectangle&, const Real&);
-  typedef RParallelotope (*IntPltpFun) (const RVectorField&, const RParallelotope&, const Real&);
-  typedef RParallelotopeListSet (*IntLSPltpFun) (const RVectorField&, const RParallelotopeListSet&, const Real&);
+  typedef RRectangle (*IntRectFunc) (const RVectorField&, const RRectangle&, const Real&);
+  typedef RParallelotope (*IntPltpFunc) (const RVectorField&, const RParallelotope&, const Real&);
+  typedef RParallelotope (*IntPltpIntvlFunc) (const RVectorField&, const RParallelotope&, const RInterval&);
+  typedef RParallelotopeListSet (*IntLSPltpFunc) (const RVectorField&, const RParallelotopeListSet&, const Real&);
   
-  def("integrate", IntRectFun(&integrate), "integrate a vector field over a set");
-  def("integrate", IntPltpFun(&integrate));
-  def("integrate", IntLSPltpFun(&integrate));
+  def("integrate", IntRectFunc(&integrate), "integrate a vector field over a set");
+  def("integrate", IntPltpFunc(&integrate));
+  def("integrate", IntPltpIntvlFunc(&integrate));
+  def("integrate_to", IntPltpFunc(&integrate_to));
+  def("integrate", IntLSPltpFunc(&integrate));
 //  def("chainreach", &chainreach_of_rectangle_list_set, "chain reach of a set" );
 }

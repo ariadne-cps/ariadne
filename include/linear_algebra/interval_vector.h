@@ -35,6 +35,52 @@
 #include "../base/numerical_type.h"
 #include "../base/interval.h"
 
+namespace Ariadne {
+  namespace LinearAlgebra {
+    
+    /*! \brief A vector of intervals. */
+    template<typename Real>
+    class interval_vector : public vector< Interval<Real> >
+    {
+     private:
+      typedef vector< Interval<Real> > Base;
+     public:
+      template<typename E> interval_vector(const vector_expression<E> v) : Base(v()) { }
+    };
+      
+    template <typename Real>
+    vector< Interval<Real> > 
+    operator+(const interval_vector<Real>& iv, const vector<Real> v)
+    {
+      interval_vector<Real> result(v.size());
+      for(size_type i=0; i!=result.size(); ++i) {
+        result(i)=v(i)+iv(i);
+      }
+      return result;
+    }
+
+    template <typename Real>
+    interval_vector<Real> 
+    operator+(const vector<Real>& v, const interval_vector<Real> iv)
+    {
+      interval_vector<Real> result(v.size());
+      for(size_type i=0; i!=result.size(); ++i) {
+        result(i)=v(i)+iv(i);
+      }
+      return result;
+    }
+
+    template<typename Real>
+    inline
+    interval_vector<Real>
+    operator*(const Real& s, const interval_vector<Real>& v)
+    {
+      return Interval<Real>(s)*v;
+    }
+  }
+}  
+
+
 namespace boost {
   namespace numeric {
     namespace ublas {

@@ -37,12 +37,16 @@ namespace Ariadne {
     /*! \brief A matrix stored in LU product form. */
     template<typename Real>
     class lu_matrix {
+      matrix<Real> L() const;
+      matrix<Real> U() const;
       
+      operator matrix<Real> () const;
+      matrix<Real> inverse() const;
      private:
       matrix<Real> _elements;
       array<size_type> _row_permuation;
       array<size_type> _column_permuation;
-    }
+    };
     
     template <typename Real>
     void 

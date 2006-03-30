@@ -37,6 +37,7 @@
 
 #include "../base/basic_type.h"
 #include "../base/numerical_type.h"
+#include "../base/arithmetic.h"
 #include "../base/interval.h"
 #include "../base/utility.h"
 
@@ -98,6 +99,11 @@ namespace Ariadne {
     log_norm(const matrix<Real>& A);
     
 
+    template<typename R>
+    matrix<R>
+    concatenate_columns(const matrix<R>& A1, const matrix<R>& A2);
+
+    
     template <typename Real>
     matrix<Real> exp_Ah(const matrix<Real> &A, 
                         const Real& h, 

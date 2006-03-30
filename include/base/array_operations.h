@@ -68,7 +68,7 @@ namespace Ariadne {
     /*! \brief Compute the sum of an index array and a size. */
     IndexArray operator+(const IndexArray& l, const SizeArray& s);
 
-    /*! \brief Compute a positive offset from two index sets */
+    /*! \brief Compute a positive offset from two index sets. */
     IndexArray operator-(const IndexArray& u, const IndexArray& l);
    
     /*! \brief Assigns the max of a and b to a. */

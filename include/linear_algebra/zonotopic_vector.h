@@ -92,6 +92,13 @@ namespace Ariadne {
         this->minimize_generators();
       }
 
+      /*! \brief Construct from directions. */
+      explicit zonotopic_vector(const matrix<R>& m)
+        : _centre(m.size1()), _generators(m)
+      {
+        this->minimize_generators();
+      }
+       
       /*! \brief Construct from a string literal. */
       explicit zonotopic_vector(const std::string& s)
         : _centre(), _generators()

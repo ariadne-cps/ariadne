@@ -36,9 +36,43 @@ namespace boost {
         }
         
         for(uint i=0; i!=A.size1(); ++i) {
-          os << (i==0 ? "[ " : "; ") << A(i,0);
-          for(uint j=1; j!=A.size2(); ++j) {
-            os << "," << A(i,j);
+          for(uint j=0; j!=A.size2(); ++j) {
+            os << (j==0 ? (i==0 ? "[ " : "; ") : ",");
+            os << A(i,j);
+          }
+        }
+        os << " ]";
+        return os;
+      }
+       
+      template <>
+      std::ostream&
+      operator<<(std::ostream& os, const matrix<Ariadne::Rational>& A)
+      {
+        for(uint i=0; i!=A.size1(); ++i) {
+          for(uint j=0; j!=A.size2(); ++j) {
+            os << (j==0 ? (i==0 ? "[ " : "; ") : ",");
+            os << Ariadne::convert_to<double>(A(i,j));
+          }
+        }
+        os << " ]";
+        return os;
+      }
+       
+      template <>
+      std::ostream&
+      operator<<(std::ostream& os, const matrix< Ariadne::Interval<Ariadne::Rational> >& A)
+      {
+        if(A.size1()==0 || A.size2()==0) {
+          return os << "[ ]";
+        }
+        
+        for(uint i=0; i!=A.size1(); ++i) {
+          for(uint j=0; j!=A.size2(); ++j) {
+            os << (j==0 ? (i==0 ? "[ " : "; ") : ",");
+            double l=Ariadne::convert_to<double>(A(i,j).lower());
+            double u=Ariadne::convert_to<double>(A(i,j).upper());
+            os << Ariadne::Interval<double>(l,u);
           }
         }
         os << " ]";
@@ -97,7 +131,23 @@ namespace Ariadne {
       return result;
     }
         
+    template<typename R>
+    matrix<R>
+    concatenate_columns(const matrix<R>& A1, const matrix<R>& A2) {
+      assert(A1.size1()==A2.size1());
+      LinearAlgebra::matrix<R> result(A1.size1(),A2.size1()+A2.size2());
+      for(size_type i=0; i!=result.size1(); ++i) {
+        for(size_type j=0; j!=A1.size2(); ++j) {
+          result(i,j)=A1(i,j);
+        }
+        for(size_type j=0; j!=A2.size2(); ++j) {
+          result(i,j+A1.size2())=A2(i,j);
+        }
+      }
+      return result;
+    }
     
+
    
     
     template <typename Real>

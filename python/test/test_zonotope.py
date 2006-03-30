@@ -29,13 +29,15 @@ from ariadne.linear_algebra import *
 from math import *
 import sys
 
-r=Rectangle("[9,11]x[5,11]x[0,0]")
+r1=Rectangle("[9,11]x[5,11]x[0,0]")
 r2=Rectangle("[5,6]x[3,4]x[-0.5,0.5]")
 
-z=Zonotope(r);
-z2=Zonotope(r2);
+p2=Parallelotope(r2)
 
-z3=minkowski_sum(z,z2)
+z1=Zonotope(r1);
+z2=Zonotope(p2);
+
+z3=minkowski_sum(z1,z2)
 
 p=Point(3)
 
@@ -61,7 +63,7 @@ p4[1]=p2[1]
 
 p5[1]=p2[1]-3
 
-print "Z1 = ",z 
+print "Z1 = ",z1 
 print "Z2 = ",z2 
 print "Z3 = Z1 + Z2 = ",z3 
 
@@ -120,4 +122,3 @@ if (z3.interior_contains(p6)):
 	print "Z's interior contains the point ",p6
 else:
 	print "Z's interior does not contain the point ",p6
-

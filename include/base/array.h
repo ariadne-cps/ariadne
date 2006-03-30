@@ -42,7 +42,7 @@ namespace Ariadne {
     
     template<typename T, size_t N=0> class array;
     
-    /*! \brief STL style interface to dynaically-sized arrays. 
+    /*! \brief STL style interface to dynamically-sized arrays. 
      *
      * An array<T> is a variable-size array which can be resized and is allocated 
      * on the heap. Arrays provide checked access using at and unchecked access using operator[].
@@ -129,7 +129,7 @@ namespace Ariadne {
     };
     
     
-    /* Specialisation for array<bool> using vector<bool> */
+    /*! \brief STL style interface to dynamically-sized boolean arrays. */
     template<> class array<bool> {
      public:
       typedef std::vector<bool>::value_type value_type;
@@ -186,6 +186,7 @@ namespace Ariadne {
     
     
     /*! \brief STL style interface to fixed-size arrays. 
+     *  \class array<T,N>
      *
      * An array<T,N> is a fixed-size array of size \a N which is allocated 
      * on the stack. Arrays provide checked access using at and unchecked access using operator[].
@@ -458,4 +459,3 @@ namespace Ariadne {
 } // namespace Ariadne
   
 #endif /* _ARIADNE_ARRAY_H */
-  

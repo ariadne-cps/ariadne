@@ -62,6 +62,16 @@ namespace Ariadne {
     Geometry::Parallelotope<R> 
     integrate(const VectorField<R>& vf, const Geometry::Parallelotope<R>& p, const R& t);
 
+    /*! \brief A C1 algorithm for integrating forward a parallelotope up to a certain time. */
+    template<typename R>
+    Geometry::Parallelotope<R> 
+    integrate_to(const VectorField<R>& vf, const Geometry::Parallelotope<R>& p, const R& t);
+
+    /*! \brief A C1 algorithm for integrating forward a over a time interval. */
+    template<typename R>
+    Geometry::Parallelotope<R> 
+    integrate(const VectorField<R>& vf, const Geometry::Parallelotope<R>& p, const Interval<R>& t);
+
     template<typename R, template<typename> class BS>
     Ariadne::Geometry::ListSet<R,BS> 
     integrate(const VectorField<R>& vf, const Ariadne::Geometry::ListSet<R,BS>& ds, const R& t);

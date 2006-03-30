@@ -23,7 +23,7 @@
  */
  
 /*! \file affine_map.h
- *  \brief Affine maps of the form \f$x\rightarrow Ax+b\f$.
+ *  \brief Maps of affine form \f$x\rightarrow Ax+b\f$.
  */
 
 #ifndef _ARIADNE_AFFINE_MAP_H

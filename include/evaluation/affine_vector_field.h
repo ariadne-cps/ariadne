@@ -23,7 +23,7 @@
  */
  
  /*! \file affine_vector_field.h
- *  \brief Vector fields of affine form of the form \f$x\rightarrow Ax+b\f$.
+ *  \brief Vector fields of affine form of the form \f$\dot{x}=Ax+b\f$.
  */
 
 #ifndef _AFFINE_VECTOR_FIELD_H
@@ -85,10 +85,10 @@ namespace Ariadne {
         return this->_A;
       }
       
-      inline const Matrix& A() const { return this->_A; }
-      inline const Vector& b() const { return this->_b; }
+      const Matrix& A() const { return this->_A; }
+      const Vector& b() const { return this->_b; }
       
-      inline dimension_type dimension() const {
+      dimension_type dimension() const {
         return this->_b.size();
       }
       

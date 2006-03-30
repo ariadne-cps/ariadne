@@ -283,6 +283,11 @@ namespace Ariadne {
         return this->_generators;
       }
      
+      /*! \brief The matrix of principle directions. */
+      inline Matrix generators() const {
+        return this->_generators;
+      }
+     
       /*! \brief Tests if the zonotope contains \a point. */
       inline bool contains(const State& point) const {
         if (point.dimension()!=this->dimension()) {

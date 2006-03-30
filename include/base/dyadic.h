@@ -42,7 +42,7 @@ namespace Synaps {
 class Dyadic;
 
 /*! This class provides arithmetic operations on numbers 
- *  which are an integer of type @Integer@, 
+ *  which are an integer of type \a Integer, 
  *   times a power of 2, which is stored by as its exponent.
  */
 

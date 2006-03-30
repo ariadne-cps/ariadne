@@ -54,6 +54,14 @@ namespace Ariadne {
     template Dyadic norm(const matrix<Dyadic>& A);
     template Rational norm(const matrix<Rational>& A);
 
+    template Dyadic log_norm(const matrix<Dyadic>& A);
+    template Rational log_norm(const matrix<Rational>& A);
+
+    template matrix<Dyadic> concatenate_columns(const matrix<Dyadic>& A1,
+                                                const matrix<Dyadic>& A2);
+    template matrix<Rational> concatenate_columns(const matrix<Rational>& A1,
+                                                  const matrix<Rational>& A2);
+
     template matrix<Dyadic> exp_Ah(const matrix<Dyadic> &A, 
                                    const Dyadic& h, 
                                    const Dyadic& e); 

@@ -56,9 +56,11 @@ namespace Ariadne {
   using Base::BinaryWord;
   using Base::BinaryTree;
 
-  //typedef std::vector<bool> BooleanArray;
+  /*! \brief An array of boolean values. */
   typedef Base::array<bool> BooleanArray;
+  /*! \brief An array of unsigned integer values. */
   typedef Base::array<size_type> SizeArray;
+  /*! \brief An array of integer values. */
   typedef Base::array<index_type> IndexArray;
 
 }

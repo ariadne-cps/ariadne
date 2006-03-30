@@ -22,6 +22,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+/*! \file vector_field.h
+ *  \brief Vector field interface.
+ */
+ 
 #ifndef _ARIADNE_VECTOR_FIELD_H
 #define _ARIADNE_VECTOR_FIELD_H
 

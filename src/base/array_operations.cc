@@ -179,7 +179,6 @@ namespace Ariadne {
       return result;
     }
 
-    /*! Compute a positive offset from two index sets */
     IndexArray
     operator-(const IndexArray& u, const IndexArray& l)
     {

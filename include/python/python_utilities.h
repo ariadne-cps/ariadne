@@ -22,6 +22,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+/*! \file python_utilities.h
+ *  Commonly used inline methods for the Python interface.
+ */
+ 
 #ifndef _ARIADNE_PYTHON_UTILITIES_H
 #define _ARIADNE_PYTHON_UTILITIES_H
 

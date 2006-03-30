@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file geometry_decalarations.h
+/*! \file geometry_declarations.h
  *  \brief Forward declarations for the Geometry module.
  */
 

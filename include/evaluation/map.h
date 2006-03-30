@@ -23,7 +23,7 @@
  */
  
 /*! \file map.h
- *  \brief Base class for maps.
+ *  \brief Map interface.
  */
 
 #ifndef _ARIADNE_MAP_H

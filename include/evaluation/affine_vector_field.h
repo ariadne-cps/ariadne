@@ -22,6 +22,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+ /*! \file affine_vector_field.h
+ *  \brief Vector fields of affine form of the form \f$x\rightarrow Ax+b\f$.
+ */
+
 #ifndef _AFFINE_VECTOR_FIELD_H
 #define _AFFINE_VECTOR_FIELD_H
 
@@ -38,6 +42,7 @@
 namespace Ariadne {
   namespace Evaluation {
 
+    /*! \brief An affine vector field in Euclidean space. */
     template <typename R>
     class AffineVectorField : public VectorField<R> 
     {

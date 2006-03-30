@@ -129,6 +129,7 @@ namespace Ariadne {
         }
         result=std::max(result,row_sum);
       }
+      return result;
     }
         
   }

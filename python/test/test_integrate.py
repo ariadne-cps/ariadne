@@ -26,13 +26,13 @@ from ariadne.geometry import *
 from ariadne.linear_algebra import *
 import sys
 
-n=6
-
+n=20
+h=Dyadic(1./256)
 ls=LorenzSystem(Dyadic(8./3.),Dyadic(28.0),Dyadic(10.0))
-
-r=[Rectangle("[1.0,1.1]x[1.0,1.1]x[1.0,1.1]")]
-for i in range(0,1):
-  r.append(integrate(ls,r[-1],Dyadic(0.1)))
+r0=Rectangle("[1.0,1.1]x[1.0,1.1]x[1.0,1.1]")
+r=[r0]
+for i in range(0,n):
+  r.append(integrate(ls,r[-1],h))
 
 b=Vector(2)
 A=Matrix(2,2)
@@ -42,13 +42,18 @@ avf=AffineVectorField(A,b)
 
 ar=[Rectangle("[0.95,1.05]x[-0.05,0.05]")]
 for i in range(0,n):
+  print
   ar.append(integrate(avf,ar[-1],Dyadic(0.2)))
 
-bb=Rectangle("[-2,2]x[-2,2]")
+p=[Parallelotope(r0)]
+for i in range(0,n):
+  p.append(integrate(ls,p[-1],h))
+
+bb=Rectangle("[-4,4]x[-2,6]")
 eps=EpsPlot("integrate.eps",bb)
 eps.set_fill_colour("green")
 for i in range(0,n):
-  eps.write(ar[i])
+  eps.write(p[i])
 eps.set_fill_colour("blue")
-eps.write(ar[0])
+eps.write(p[0])
 eps.close()

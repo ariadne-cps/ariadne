@@ -80,7 +80,25 @@ namespace Ariadne {
       return result;
     }
         
+    template<typename Real>
+    Real
+    log_norm(const matrix<Real>& A) 
+    {
+      Real result=0;
+      for(size_type i=0; i!=A.size1(); ++i) {
+        Real row_sum=A(i,i);
+        for(size_type j=0; j!=A.size2(); ++j) {
+          if(i!=j) {
+            row_sum+=abs(A(i,j));
+          }
+        }
+        result=std::max(result,row_sum);
+      }
+      return result;
+    }
+        
     
+   
     
     template <typename Real>
     matrix<Real>

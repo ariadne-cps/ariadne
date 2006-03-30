@@ -51,6 +51,7 @@ namespace Ariadne {
   namespace LinearAlgebra {
 
     using boost::numeric::ublas::vector;
+    using boost::numeric::ublas::vector_expression;
         
     template<typename Real>
     class Vector

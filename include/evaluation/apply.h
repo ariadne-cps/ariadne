@@ -37,24 +37,28 @@
 namespace Ariadne {
   namespace Evaluation {
 
+    /*! \brief Compute the image of a rectangle under a continuous function. */
     template<typename R>
     Geometry::Rectangle<R> 
     apply(const Map<R>& f, const Geometry::Rectangle<R>& p);
 
+    /*! \brief Compute the image of a parallelotope under a differentiable function. */
     template<typename R>
     Geometry::Parallelotope<R> 
     apply(const Map<R>& f, const Geometry::Parallelotope<R>& p);
 
+    /*! \brief Compute the image of a list set under a map. */
     template<typename R, template<typename> class BS>
-    Ariadne::Geometry::ListSet<R,BS> 
-    apply(const Map<R>& f, const Ariadne::Geometry::ListSet<R,BS>& ds);
+    Geometry::ListSet<R,BS> 
+    apply(const Map<R>& f, const Geometry::ListSet<R,BS>& ds);
      
+    /*! \brief Compute the chain-reachable set of \p map starting in \p initial_set on the grid \p grid while staying within \p bounds. */
     template<typename R>
-    Ariadne::Geometry::GridMaskSet<R> 
-    chainreach(const Map<R>& f, 
-               const Ariadne::Geometry::ListSet<R,Ariadne::Geometry::Rectangle>& is, 
-               const Ariadne::Geometry::FiniteGrid<R>& g, 
-               const Ariadne::Geometry::Rectangle<R>& bb);
+    Geometry::GridMaskSet<R> 
+    chainreach(const Map<R>& map, 
+               const Geometry::ListSet<R,Geometry::Rectangle>& initial_set, 
+               const Geometry::FiniteGrid<R>& grid, 
+               const Geometry::Rectangle<R>& bounds);
     
   }
 }

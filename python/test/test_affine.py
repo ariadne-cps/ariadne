@@ -54,11 +54,22 @@ eps.set_fill_colour("blue")
 eps.write(p)
 eps.write(p2)
 eps.set_fill_colour("green")
-
 for i in range(0,100):
-	p=M(p)
-	p2=M(p2)
-	eps.write(p)
-	eps.write(p2)
-
+  p=M(p)
+  p2=M(p2)
+  eps.write(p)
+  eps.write(p2)
 eps.close()
+
+A=Matrix(3,3)
+A[0,0]=-1
+A[0,1]=-1
+A[1,0]=+1
+A[1,1]=-1
+A[2,2]=+1
+B=exp_Ah(A,Dyadic(1),Dyadic(0.000001))
+print B
+
+E=Matrix(1,1)
+E[0,0]=1
+print exp_Ah(E,Dyadic(1),Dyadic(0.000000001))[0,0]-exp(1)

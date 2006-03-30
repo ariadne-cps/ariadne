@@ -30,6 +30,7 @@
 #include "../geometry/grid_set.h"
 #include "../geometry/parallelotope.h"
 #include "../geometry/partition_tree_set.h"
+#include "../linear_algebra/matrix.h"
 
 namespace Ariadne {
   namespace Postscript {
@@ -201,8 +202,9 @@ namespace Ariadne {
     epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::Parallelotope<R>& p)
     {
-      assert(p.dimension()==2);
-
+      LinearAlgebra::matrix<R> A(2,p.dimension());
+      A(0,0)=1;
+      A(1,1)=1;
       trace(eps,p);
       eps << eps.fill_colour << " fill\n";
       if(eps.line_style) {

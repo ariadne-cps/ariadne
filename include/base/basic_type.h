@@ -41,8 +41,11 @@ namespace Ariadne {
 }
 
 namespace Ariadne {
+  /*! \brief An unsigned integral type used to represent a coordinate in state space. */
   typedef unsigned short dimension_type;
+  /*! \brief An unsigned integral type used to represent the size of a list. */
   typedef size_t size_type;
+  /*! \brief An signed integral type used to represent the position in a list with positive and negative indices. */
   typedef int index_type;
   
   using Base::array;

@@ -37,7 +37,8 @@
 namespace Ariadne {
   namespace Evaluation {
 
-    template <typename R>
+    /*! \brief Base class for (differentiable) functions. */
+    template<typename R>
     class Map {
      public:
       typedef R Real;

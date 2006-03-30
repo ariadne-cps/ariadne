@@ -93,6 +93,10 @@ namespace Ariadne {
     Real
     norm(const matrix<Real>& A);
     
+    template<typename Real>
+    Real
+    log_norm(const matrix<Real>& A);
+    
 
     template <typename Real>
     matrix<Real> exp_Ah(const matrix<Real> &A, 

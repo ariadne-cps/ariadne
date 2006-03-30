@@ -41,6 +41,14 @@
  */
 namespace Ariadne {
 
+/*! \brief Fundamental base types.
+ */
+namespace Base {}
+  
+/*! \brief Functions for linear algebra.
+ */
+namespace LinearAlgebra {}
+
 /*! \brief Geometric calculus library.
  */
 namespace Geometry {}
@@ -49,22 +57,7 @@ namespace Geometry {}
  */
 namespace HybridDefinitions {}
 
-/*! \brief Classes defining map.
- */
-namespace Map {}
-
-/*! \brief Classes defining vector field.
- *
- *  In this namespace there are also vector field integrator.
- */
-namespace VectorField {}
-
-/*! \brief Functions for linear algebra.
- */
-namespace LinearAlgebra {}
-
-
-/*! \brief Functions for computing hybrid system trajectories.
+/*! \brief Classes for defining maps and vector fields, and computing system trajectories.
  */
 namespace Evaluation {}
 

@@ -85,6 +85,18 @@ namespace Ariadne {
   
   inline
   uint 
+  log_floor(uint n, Rational x) {
+    assert(n>1 && x>=1);
+    uint result=0;
+    while(x>=n) {
+      x/=n;
+      result+=1;
+    }
+    return result;
+  }
+  
+  inline
+  uint 
   log_ceil(uint n, uint x) {
     assert(n>1 && x>0);
     if(x==1) {

@@ -37,16 +37,27 @@
 namespace Ariadne {
   namespace Evaluation {
    
-    template<typename R>
+    template<typename R, typename E>
+    inline
     Geometry::Rectangle<R> 
     operator+(const Geometry::Rectangle<R>& r, 
-              const LinearAlgebra::vector< Interval<R> >& iv);
+              const LinearAlgebra::vector_expression<E>& v)
+    {
+      Geometry::Rectangle<R> result(r.dimension());
+      assert(r.dimension()==v().size());
+      
+      for(size_type i=0; i!=result.dimension(); ++i) {
+        result.set_interval(i,r[i]+v()[i]);
+      }
+      return result;
+    }
 
-    /*! An inefficient C0 algorithm for integrating forward a rectangle. */
+    /*! \brief An inefficient C0 algorithm for integrating forward a rectangle. */
     template<typename R>
     Geometry::Rectangle<R> 
     integrate(const VectorField<R>& vf, const Geometry::Rectangle<R>& r, const R& t);
 
+    /*! \brief A C1 algorithm for integrating forward a parallelotope. */
     template<typename R>
     Geometry::Parallelotope<R> 
     integrate(const VectorField<R>& vf, const Geometry::Parallelotope<R>& p, const R& t);

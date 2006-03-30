@@ -53,37 +53,32 @@
 
 namespace Ariadne {
   namespace Evaluation {
-   
-    template<typename R>
-    Geometry::Rectangle<R> 
-    move(const Geometry::Rectangle<R>& r, 
-         const R& h,
-         const LinearAlgebra::vector< Interval<R> >& iv)
-    {
-      Geometry::Rectangle<R> result(r.dimension());
-      assert(r.dimension()==iv.size());
-      
-      for(size_type i=0; i!=result.dimension(); ++i) {
-        result.set_interval(i,r[i]+h*iv[i]);
+    
+    LinearAlgebra::matrix< Interval<double> >
+    approximate_matrix(const LinearAlgebra::matrix< Interval<Rational> >& A) {
+      LinearAlgebra::matrix< Interval<double> > result(A.size1(),A.size2());
+      for(size_type i=0; i!=result.size1(); ++i) {
+        for(size_type j=0; j!=result.size2(); ++j) {
+          double l=convert_to<double>(A(i,j).lower());
+          double u=convert_to<double>(A(i,j).upper());
+          result(i,j)=Interval<double>(l,u);
+        }
       }
       return result;
     }
-    
-    template<typename R>
-    Geometry::Rectangle<R> 
-    move(const Geometry::Rectangle<R>& r, 
-         const Interval<R>& h,
-         const LinearAlgebra::vector< Interval<R> >& iv)
-    {
-      Geometry::Rectangle<R> result(r.dimension());
-      assert(r.dimension()==iv.size());
-      
-      for(size_type i=0; i!=result.dimension(); ++i) {
-        result.set_interval(i,r[i]+h*iv[i]);
+
+    LinearAlgebra::matrix<double>
+    approximate_matrix(const LinearAlgebra::matrix<Rational>& A) {
+      LinearAlgebra::matrix<double> result(A.size1(),A.size2());
+      for(size_type i=0; i!=result.size1(); ++i) {
+        for(size_type j=0; j!=result.size2(); ++j) {
+          result(i,j)=convert_to<double>(A(i,j));
+        }
       }
       return result;
     }
-    
+
+/*
     template<typename R>
     Geometry::Rectangle<R> 
     operator+(const Geometry::Rectangle<R>& r, 
@@ -97,107 +92,196 @@ namespace Ariadne {
       }
       return result;
     }
+*/
     
-
+    template<typename R>
+    Geometry::Rectangle<R>
+    estimate_flow_bounds(const Evaluation::VectorField<R>& vf,
+                         const Geometry::Rectangle<R>& r,
+                         R& h)
+    {
+      using namespace Geometry;
+      Rectangle<R> estimate(vf.dimension());
+      Rectangle<R> bounds(vf.dimension());
+      std::cerr << h/2 << " " << r << std::endl;
+      estimate=r+Interval<R>(0,2*h)*vf.apply(r);
+      bounds=r+Interval<R>(0,h)*vf.apply(estimate);
+      while(!subset(bounds,estimate)) {
+        h=h/2;
+        estimate=bounds;
+        bounds=r+Interval<R>(0,h)*vf.apply(estimate);
+        std::cerr << h << " " << bounds << " " << estimate << std::endl;
+      };
+      assert(subset(r+Interval<R>(0,h)*vf.apply(bounds),bounds));
+      return bounds;
+    }
+    
+    template<typename R>
+    Geometry::Rectangle<R>
+    estimate_flow_derivative_bounds(const Evaluation::VectorField<R>& vf,
+                                    const Geometry::Rectangle<R>& r,
+                                    R& h)
+    {
+      Geometry::Rectangle<R> estimate(vf.dimension());
+      Geometry::Rectangle<R> bounds(vf.dimension());
+      h=2*h;
+      std::cerr << h/2 << " " << r << " " << vf.apply(r) << std::endl;
+      do {
+        estimate=r+Interval<R>(0,h)*vf.apply(r);
+        h=h/2;
+        bounds=r+Interval<R>(0,h)*vf.apply(estimate);
+        std::cerr << h << " " << bounds << " " << estimate << std::endl;
+      } while(!subset(bounds,estimate));
+      return bounds;
+    }
+    
+    template<typename R>
+    Geometry::Rectangle<R>
+    refine_flow_bounds(const Evaluation::VectorField<R>& vf,
+                       const Geometry::Point<R>& x,
+                       const Geometry::Rectangle<R>& b,
+                       const R& h)
+    {
+      /* TODO: Use higher order method. */
+      using namespace Geometry;
+      using namespace LinearAlgebra;
+      Rectangle<R> rx(x,x);
+      Rectangle<R> xb=rx+Interval<R>(0,h)*vf.apply(b);
+      Rectangle<R> xxb=rx+Interval<R>(0,h)*vf.apply(xb);
+      std::cerr << "new bounds " << xxb << "," << xb << " vs old bounds " << b << "  " << subset(xb,b) << std::endl;
+      vector< Interval<R> > ddphi=vf.derivative(xb)*vf.apply(xb);
+      vector< Interval<R> > dfx=vf.apply(x);
+      vector< Interval<R> > hdfx=(h*dfx);
+      vector< Interval<R> > hhddphi=(R(h*h/2)*ddphi);
+      vector< Interval<R> > dx=hdfx+hhddphi;
+      return rx+dx;
+    }
+    
+    
     /*! An inefficient C0 algorithm for integrating forward a rectangle. */
     template<typename R>
     Geometry::Rectangle<R> 
-    integrate(const VectorField<R>& vf, const Geometry::Rectangle<R>& r, const R& t) 
+    integrate(const VectorField<R>& vector_field, 
+              const Geometry::Rectangle<R>& initial_set, 
+              const R& time) 
     {
       using namespace Geometry;
       using namespace LinearAlgebra;
       
       std::cerr << "integrate(const VectorField<R>& vf, const Geometry::Rectangle<R>& r, const R& t)" << std::endl;
+      assert(vector_field.dimension()==initial_set.dimension());
       
-      assert(vf.dimension()==r.dimension());
-      const size_type n=r.dimension();
-      Rectangle<R> result=r;
-      R time=t;
-      
-      while(time>0) {
-        std::cerr << "time left=" << time << std::endl;
-        R expansion=result.upper_bound(0)-result.lower_bound(0);
-        for(dimension_type i=1; i!=n; ++i) {
-          R radius=result.upper_bound(i)-result.lower_bound(i);
-          if(radius<expansion) {
-            expansion=radius;
-          }
-        }
-        
-        std::cerr << "expansion=" << expansion << std::endl;
-        
-        Geometry::Rectangle<R> q=result;
-        q.expand_by(expansion);
-        
+      const VectorField<R>& vf(vector_field);
+      Rectangle<R> r=initial_set;
+      R t=time;
+      R h=time;
+
+      while(t>0) {
+        std::cerr << "time left=" << t << std::endl;
+        Geometry::Rectangle<R> q=estimate_flow_bounds(vf,r,h);
+                
+        std::cerr << "stepsize=" << h << std::endl;
         std::cerr << "bound=" << q << std::endl;
 
         LinearAlgebra::vector< Interval<R> > fq=vf.apply(q);
 
         std::cerr << "derivative=" << fq << std::endl;
 
-        R vmax=0;
-        for(dimension_type i=0; i!=n; ++i) {
-          R vabs=Ariadne::abs(fq[i].lower());
-          if(vabs>vmax) {
-            vmax=vabs;
-          }
-          vabs=Ariadne::abs(fq[i].upper());
-          if(vabs>vmax) {
-            vmax=vabs;
-          }
-        }
-        
-        R h=std::min(R(expansion/vmax),time);
-        std::cerr << "stepsize=" << h << std::endl;
-        
-/*
-        for(dimension_type i=0; i!=n; ++i) {
-          //Interval<R> ri=result[i];
-          Interval<R> ri(result.lower_bound(i),result.upper_bound(i));
-          Interval<R> fqi=fq(i);
-          Interval<R> nri=ri+h*fqi;
-          result.set_interval(i,nri);
-        }
-*/
-        result=move(result,h,fq);
-        std::cerr << "position=" << result << std::endl;
+        r=r+h*fq;
+        std::cerr << "position=" << r << std::endl;
 
-        time=time-h;
+        t=t-h;
+        h=std::min(R(2*h),t);
       }
-      return result;
+      return r;
     }
 
     template<typename R>
     Geometry::Parallelotope<R> 
-    integrate(const VectorField<R>& vf, const Geometry::Parallelotope<R>& p, const R& t) 
+    integrate(const VectorField<R>& vector_field, 
+              const Geometry::Parallelotope<R>& initial_set, 
+              const R& time) 
     {
+      typedef typename numerical_traits<R>::field_extension_type F;
+      std::cerr << "integrate(VectorField<R>, Parallelotope<R>, R)\n";
+
       using namespace LinearAlgebra;
       using namespace Geometry;
 
-      assert(vf.dimension()==p.dimension());
-      const size_type n=p.dimension();
-  
-      R h=t;
-      
-      /* Compute an estimate of the Lipschitz constant. */
-      LinearAlgebra::vector< Interval<R> > f;
-      Geometry::Rectangle<R> ibb=p.bounding_box();
-      Geometry::Rectangle<R> obb=move(ibb,Interval<R>(0,2*h),vf.apply(ibb));
-      R lipschitz=norm(vf.apply(obb));
-      
-      Geometry::Rectangle<R> bb=move(ibb,h,vf.apply(obb));
-      while(!subset(bb,obb)) {
-        std::cerr << "stepsize=" << h << std::endl;
-        Geometry::Rectangle<R> obb=move(ibb,h,vf.apply(ibb));
-        h=h/2;
-        Geometry::Rectangle<R> bb=move(ibb,h,vf.apply(obb));
-      }
-      std::cerr << "stepsize=" << h << std::endl;
-      
-      f=vf.apply(obb);
-      LinearAlgebra::matrix< Interval<R> > df=vf.derivative(obb);
+      assert(vector_field.dimension()==initial_set.dimension());
 
+      const VectorField<R>& vf(vector_field);
+      Parallelotope<R> p=initial_set;
+      const size_type n=p.dimension();
+      R t=time;
+      R h=time;
+      const matrix<R> id=identity_matrix<R>(n);
       
+      while(t>0) {
+        std::cerr << "time left=" << t << std::endl;
+        Rectangle<R> b=estimate_flow_bounds(vf,p.bounding_box(),h);
+                
+        std::cerr << "stepsize=" << h << std::endl;
+        std::cerr << "bound=" << b << std::endl;
+      
+        vector< Interval<R> > f=vf.apply(b);
+        std::cerr << "flow=" << f << std::endl;
+        matrix< Interval<R> > df=vf.derivative(b);
+        std::cerr << "jacobian=" << df << std::endl;
+        matrix< Interval<R> > dphi=id+h*df;
+        std::cerr << "flow derivative=" << dphi << std::endl;
+        
+        Point<R> c=p.centre();
+        std::cerr << "centre=" << c << std::endl;
+        Rectangle<R> phic=refine_flow_bounds(vf,c,b,h);
+        std::cerr << "bounds on centre=" << phic << std::endl;
+        
+        /* TODO: Make this code more accurate by computing Minkowski sum zonotope. */
+        matrix<R> B(n,n);
+        matrix<F> BF(n,n);
+        for(size_type i=0; i!=n; ++i) {
+          for(size_type j=0; j!=n; ++j) {
+            B(i,j)=(dphi(i,j).upper()+dphi(i,j).lower())/2;
+            BF(i,j)=B(i,j);
+          }
+        }
+        matrix<F> Binv=inverse(BF);
+        matrix< Interval<F> > E(n,n);
+        for(size_type i=0; i!=n; ++i) {
+          for(size_type j=0; j!=n; ++j) {
+            for(size_type k=0; k!=n; ++k) {
+              Interval<F> invl(dphi(i,k).lower(),dphi(i,k).upper());
+              E(i,j)+=invl*Binv(k,j);
+            }
+          }
+        }
+        
+        std::cerr << "flow derivative centre=" << B << std::endl;
+        std::cerr << "flow derivative centre inverse=" << approximate_matrix(Binv) << std::endl;
+        std::cerr << "error matrix=" << approximate_matrix(E) << std::endl;
+        
+        matrix<F> Ainv=inverse(p.generators());
+        matrix<F> Rerr(n,n);
+        for(size_type i=0; i!=n; ++i) {
+          const Rectangle<R>& cnstphic(phic);
+          Interval<R> intvl=cnstphic[i];
+          Rerr(i,i)=(intvl.upper()-intvl.lower())/2;
+        }
+        matrix<F> RerrAinvBinv=Rerr*Ainv*Binv;
+        std::cerr << "relative rectangle error" << approximate_matrix(RerrAinvBinv) << std::endl;
+        E+=RerrAinvBinv;
+        std::cerr << "total error matrix=" << approximate_matrix(E) << std::endl;
+        
+        F excess=norm(E);
+        uint precision=log_floor(2,F(1/(excess-1)));
+        R approx_excess=1;
+        
+        p=Parallelotope<R>(phic.centre(),approx_excess*(B*p.generators()));
+        
+        t=t-h;
+        h*=2;
+        h=std::min(h,t);
+      }
 /*
       LinearAlgebra::vector< Interval<R> > cuboid_vector(m);
       const Interval<R> unit_interval(-1,1);
@@ -228,8 +312,7 @@ namespace Ariadne {
 */
       
 //      Geometry::Parallelotope<R> result(img_centre,img_generators);
-      Geometry::Parallelotope<R> result(n);
-      return result;
+      return p;
     }
 
     template<typename R, template<typename> class BS>

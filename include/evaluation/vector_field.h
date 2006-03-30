@@ -36,6 +36,7 @@
 namespace Ariadne {
   namespace Evaluation {
 
+    /*! \brief Abstract base class for (differentiable) vector fields. */
     template <typename R>
     class VectorField {
      public:

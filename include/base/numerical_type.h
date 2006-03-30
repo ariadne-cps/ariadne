@@ -38,15 +38,23 @@
 namespace Ariadne {
 
   /*! \brief An integer
-  *
-  * An element of the ring of integers.
-  * Must allow denotation of any integer, including arbitrarily large values.
-  * Integer quotient and remainder must be supported.
-  *
-  * Currently implemented using mpz_class from the GNU Multiple Precision Library.
-  */
+   *
+   * An element of the ring of integers.
+   * Must allow denotation of any integer, including arbitrarily large values.
+   * Integer quotient and remainder must be supported.
+   *
+   * Currently implemented using mpz_class from the GNU Multiple Precision Library.
+   */
   typedef mpz_class Integer;
 
+  /*! \brief A 64-bit fixed-precision floating point number.
+   *
+   * Standard operations are not exact, but must support interval arithmetic.
+   *
+   * Currently implemented by the built-in type double.
+   */
+  typedef double Float64;
+  
   /*! \brief A dyadic rational (i.e. of form @a m/2^n).
   *
   * An element of the ring of dyadic rationals.
@@ -156,51 +164,86 @@ namespace Ariadne {
     return numerator(num)/denominator(num);
   }
 
-  /*
-  inline unsigned int get_ui(const Integer& num){ 
-    return num.get_ui();
-  }
-  
-  inline unsigned int get_ui(const Rational& num){ 
-    return (unsigned int)num.get_d();
-  }
-  
-  inline unsigned int get_ui(const Dyadic& num){ 
-    return num.get_ui();
-  }
-  */
+  /* numerical traits */
+  class ring_tag { };
+  class field_tag { };
+    
+  template<typename T> class numerical_traits;
+    
+  template<> class numerical_traits<double> {
+   public:
+    typedef field_tag algebraic_category;
+    typedef double field_extension_type;
+  };
 
+  template<> class numerical_traits<Dyadic> {
+   public:
+    typedef ring_tag algebraic_category;
+    typedef Rational field_extension_type;
+  };
+    
+  template<> class numerical_traits<Rational> {
+   public:
+    typedef field_tag algebraic_category;
+    typedef Rational field_extension_type;
+  };
+
+  /* Arithmetical operations. */
+
+  /*! \brief Unary negation. */
   template<typename R> 
   inline
   R neg(const R& x) {
     return -x;
   }
   
+  /*! \brief Addition. */
   template<typename R> 
   inline
   R add(const R& x1,const R& x2) {
     return x1+x2;
   }
   
+  /*! \brief Subtraction. */
   template<typename R> 
   inline
   R sub(const R& x1,const R& x2) {
     return x1-x2;
   }
   
+  /*! \brief Multiplication. */
   template<typename R> 
   inline
   R mul(const R& x1,const R& x2) {
     return x1*x2;
   }
   
-  inline double div(const double& x1, const double& x2) {
+  /*! \brief Division. */
+  template<typename R> 
+  inline
+  typename numerical_traits<R>::field_extension_type
+  div(const R& x1, const R& x2)
+  {
+    return _div(x1,x2,numerical_traits<R>::algebraic_category());
+  }
+  
+  template<typename R> 
+  inline
+  R
+  _div(const R& x1, const R& x2, field_tag)
+  {
     return x1/x2;
   }
   
-  inline Rational div(const Rational& x1, const Rational& x2) {
-    return x1/x2;
+  template<typename R> 
+  inline
+  typename numerical_traits<R>::field_extension_type
+  _div(const R& x1, const R& x2, ring_tag)
+  {
+    typedef typename numerical_traits<R>::field_extension_type Fld;
+    return Fld(x1)/Fld(x2);
   }
+  
   
 /*
   inline
@@ -222,22 +265,32 @@ namespace Ariadne {
   }
   
 
+  /*! \brief Greatest common divisor. */
   template <typename NumType>
-  inline NumType gcd(const NumType &a, const NumType &b){
-
+  inline 
+  NumType 
+  gcd(const NumType &a, const NumType &b)
+  {
     NumType c=a%b;
-
-    if (c==0) return b;
-
+    if (c==0) { 
+      return b;
+    }
     return (gcd(b, c));
   }
 
+  /*! \brief Least common multiple. */
   template <typename NumType>
-  inline NumType lcm(const NumType &a, const NumType &b) {
+  inline 
+  NumType 
+  lcm(const NumType &a, const NumType &b) {
     return ((a*b)/gcd(a,b));
   }
 
-  inline int quotient(double x, double y) {
+  /*! \brief Return an integer n such that \f$n\leq x/y < n+1\f$. */
+  template<typename R> int quotient(R x, R y);
+
+  template<> inline int quotient(double x, double y)
+  {
     assert(y!=0.0);
     int q = int(x/y+0.5);
     if(x < q*y) { q=q-1; }
@@ -245,7 +298,8 @@ namespace Ariadne {
     return q;
   }
 
-  inline int quotient(Rational x, Rational y) {
+  template<> inline int quotient(Rational x, Rational y) 
+  {
     assert(y!=Rational(0));
     Rational d = x/y;
     Integer qz = d.get_num() / d.get_den();
@@ -254,7 +308,8 @@ namespace Ariadne {
     return q;
   }
 
-  inline int quotient(Dyadic x, Dyadic y) {
+  template<> inline int quotient(Dyadic x, Dyadic y) 
+  {
     assert(y!=Dyadic(0));
     Dyadic d = x/y + Dyadic(0.5);
     Dyadic qd = floor(d);
@@ -276,17 +331,21 @@ namespace Ariadne {
   template<> inline int convert_to(const Integer& n) { return n.get_si(); }
   template<> inline long convert_to(const Integer& n) { return n.get_si(); }
   
+  template<typename Res, typename Arg>
+  Res approximate(const Arg& x, const int& p);
+
+  
   inline Rational approximate(const Rational& q, const Rational& e) {
     //Rational r=floor(q);
     return q;
   }
-    
-    
+  
+  /* names (for diagnostic output) */
   template <typename T> std::string name();
   template<> inline std::string name<double>() { return "double"; }
   template<> inline std::string name<Rational>() { return "Rational"; }
   template<> inline std::string name<Dyadic>() { return "Dyadic"; }
-
+    
 }
 
 #endif /* _ARIADNE_NUMERICAL_TYPE */

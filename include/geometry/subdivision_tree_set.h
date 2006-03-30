@@ -56,6 +56,7 @@ namespace Ariadne {
     class LatticeMaskSet;
     class LatticeRectangle;
       
+    /*! \brief A sequence of coordinate giving axes of subdivision for a subdivision tree. */
     class SubdivisionSequence
       : public sequence<dimension_type> 
     {
@@ -80,6 +81,7 @@ namespace Ariadne {
       dimension_type _dimension;
     };
 
+    /*! \brief A binary tree with a boolean labelling on the leaves. */
     class MaskedBinaryTree {
      public:
       typedef mask_iterator<BinaryTree::const_iterator, 
@@ -110,6 +112,7 @@ namespace Ariadne {
       BooleanArray _mask;
     };
 
+    /*! \brief A cell in a subdivision tree. */
     class SubdivisionTreeCell {
      public:
       typedef double dyadic_type;
@@ -135,6 +138,7 @@ namespace Ariadne {
     
 
 
+    /*! \brief A subdivision structure on the unit hypercube determined by a sequence of subdivision coordinates and a binary tree. */
     class SubdivisionTree {
      public:
       typedef binary_constructor_iterator<BinaryTree::const_iterator, 
@@ -200,6 +204,7 @@ namespace Ariadne {
       SubdivisionSequence _subdivisions;
     };
   
+    /*! \brief A subset of the unit hypercube described by a subdivision structure. */
     class SubdivisionTreeSet {
      public:
       typedef binary_constructor_iterator<MaskedBinaryTree::const_iterator,

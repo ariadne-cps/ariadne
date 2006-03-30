@@ -73,6 +73,8 @@ namespace Ariadne {
       RectangleInterval(Rectangle<R>& r, const size_type& n) : _r(r), _n(n) { }
       void operator=(const Interval<R>& i) { _r.set_interval(_n,i); }
       operator Interval<R> () const { return _r[_n]; }
+      R lower() const { return _r.lower_bound(_n); }
+      R upper() const { return _r.upper_bound(_n); }
      private:
       Rectangle<R>& _r; const size_type& _n;
     };
@@ -235,6 +237,11 @@ namespace Ariadne {
       /*! \brief The upper corner. */
       inline State upper_corner() const {
         return this->_upper_corner;
+      }
+      
+      /*! \brief The centre. */
+      inline State centre() const {
+        return State((this->_lower_corner.position_vector()+this->_upper_corner.position_vector())/2);
       }
       
       /*! \brief Returns the projection onto the \a n th coordinate. */

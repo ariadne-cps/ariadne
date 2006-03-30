@@ -59,3 +59,4 @@ linear_program.o: linear_program.cc \
   ../../include/linear_algebra/linear_program.tpl \
   ../../include/linear_algebra/linear_program.h \
   ../../include/base/utility.h
+

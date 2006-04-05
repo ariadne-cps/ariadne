@@ -137,11 +137,25 @@ namespace Ariadne {
       
      public:
       /*! \brief Default constructor constructs an empty parallelotope of dimension \a n. */
-      inline explicit Parallelotope(size_type n = 0)
+      explicit Parallelotope(size_type n = 0)
         : _centre(n),  _generators(n,n) { }
       
       /*! \brief Construct from centre and directions. */
-      inline explicit Parallelotope(const State& c, const Matrix& m)
+      explicit Parallelotope(const Vector& c, const Matrix& m)
+        : _centre(c), _generators(m)
+      {
+        if (m.size1()!=m.size2()) {
+          throw std::domain_error(
+              "The the matrix of principal directions is not a square matrix");
+        }
+        
+        if (c.size()!=m.size1()) {
+          throw std::domain_error("The centre and directions have different dimensions.");
+        }
+      }
+      
+      /*! \brief Construct from centre and directions. */
+      explicit Parallelotope(const State& c, const Matrix& m)
         : _centre(c), _generators(m)
       {
         if (m.size1()!=m.size2()) {
@@ -155,7 +169,7 @@ namespace Ariadne {
       }
       
       /*! \brief Construct from a Rectangle. */
-      inline explicit Parallelotope(const Rectangle<Real>& r)
+      explicit Parallelotope(const Rectangle<Real>& r)
         : _centre(r.dimension()), _generators(r.dimension(),r.dimension())
       {
         for(size_type i=0; i!=dimension(); ++i) {
@@ -165,7 +179,7 @@ namespace Ariadne {
       }
       
       /*! \brief Construct from a string literal. */
-      inline explicit Parallelotope(const std::string& s)
+      explicit Parallelotope(const std::string& s)
         : _centre(), _generators()
       {
         std::stringstream ss(s);
@@ -188,35 +202,35 @@ namespace Ariadne {
       }
       
       /*! \brief The dimension of the Euclidean space the parallelotope lies in. */
-      inline size_type dimension() const {
+      size_type dimension() const {
         return (this->_centre).dimension();
       }
       
       /*! \brief True if the parallelotope is empty. */
-      inline bool empty() const {
+      bool empty() const {
         // FIXME: This is probably ok since we're not talking about interior.
         return false;
       }
       
       /*! \brief True if the paralleltope has empty interior. */
-      inline bool empty_interior() const {
+      bool empty_interior() const {
         using namespace Ariadne::LinearAlgebra;
 
         return !independent_rows(this->_generators);     
       }
       
       /*! \brief The centre of the parallelotope. */
-      inline State centre() const {
+      State centre() const {
         return this->_centre;
       }
       
       /*! \brief The \a n th of principle direction. */
-      inline Vector generator(size_type n) const {
+      Vector generator(size_type n) const {
         return column(this->_generators,n);
       }
       
       /*! \brief The matrix of principle directions. */
-      inline Matrix generators() const {
+      Matrix generators() const {
         return this->_generators;
       }
      
@@ -241,11 +255,17 @@ namespace Ariadne {
       /*! \brief Tests if the interior of the parallelotope contains \a point. */
       bool interior_contains(const State& point) const;
 
-      /*! \brief Subdivide into smaller pieces. */
-      ListSet<R,Ariadne::Geometry::Parallelotope> subdivide() const;
+      /*! \brief Subdivide into two smaller pieces. */
+      ListSet<R,Geometry::Parallelotope> divide() const;
+      
+      /*! \brief Subdivide into smaller pieces in each dimension. */
+      ListSet<R,Geometry::Parallelotope> subdivide() const;
       
       /* \brief Tests disjointness with a rectangle */
       bool disjoint(const Rectangle<R>& r) const;
+      
+      /* \brief Tests disjointness with a parallelotope */
+      bool disjoint(const Parallelotope<R>& p) const;
       
       friend std::ostream&
       operator<< <> (std::ostream& os, 
@@ -266,7 +286,7 @@ namespace Ariadne {
     bool 
     disjoint(const Parallelotope<R>& A, const Parallelotope<R>& B) 
     {
-      return disjoint(Polyhedron<R>(A), Polyhedron<R>(B));
+      return A.disjoint(B);
     }
     
     /*! \brief Tests disjointness */

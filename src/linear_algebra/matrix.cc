@@ -30,17 +30,12 @@ namespace boost {
       using namespace Ariadne;
       
       template class matrix<Dyadic>;
-      template std::ostream& operator<<(std::ostream&, const matrix<Dyadic>&);
-      template class matrix< Interval<Dyadic> >;
-      template std::ostream& operator<<(std::ostream&, const matrix< Interval<Dyadic> >&);
       template class matrix<Rational>;
-      template std::ostream& operator<<(std::ostream&, const matrix<Rational>&);
-      template class matrix< Interval<Rational> >;
-      template std::ostream& operator<<(std::ostream&, const matrix< Interval<Rational> >&);
       template class matrix<Float64>;
+
+      template std::ostream& operator<<(std::ostream&, const matrix<Dyadic>&);
+      template std::ostream& operator<<(std::ostream&, const matrix<Rational>&);
       template std::ostream& operator<<(std::ostream&, const matrix<Float64>&);
-      template class matrix< Interval<Float64> >;
-      template std::ostream& operator<<(std::ostream&, const matrix< Interval<Float64> >&);
     }
   }
 }
@@ -62,21 +57,12 @@ namespace Ariadne {
     template matrix<Rational> concatenate_columns(const matrix<Rational>& A1,
                                                   const matrix<Rational>& A2);
 
-    template matrix<Dyadic> exp_Ah(const matrix<Dyadic> &A, 
-                                   const Dyadic& h, 
-                                   const Dyadic& e); 
-    template matrix<Rational> exp_Ah(const matrix<Rational> &A, 
-                                     const Rational& h, 
-                                     const Rational& e); 
+    template matrix<Dyadic> exp_approx(const matrix<Dyadic> &A, 
+                                       const Dyadic& e); 
     
-    template vector<Dyadic> exp_b_approx(const matrix<Dyadic> &A, 
-                                         const vector<Dyadic> &b, 
-                                         const Dyadic h, 
-                                         const uint n); 
-    template vector<Rational> exp_b_approx(const matrix<Rational> &A, 
-                                           const vector<Rational> &b, 
-                                           const Rational h, 
-                                           const uint n); 
+    template matrix<Rational> exp_approx(const matrix<Rational> &A, 
+                                         const Rational& e); 
+
     
     template void lu_local_dec(matrix<Dyadic>& A, 
                                const array<size_type>& row, 
@@ -117,6 +103,7 @@ namespace Ariadne {
     
     template matrix<Dyadic> inverse(const matrix<Dyadic> &A);
     template matrix<Rational> inverse(const matrix<Rational> &A);
+    template matrix<Float64> inverse(const matrix<Float64> &A);
     
     template Integer common_denominator(const matrix<Dyadic>& A);
     

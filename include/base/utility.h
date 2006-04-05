@@ -40,16 +40,6 @@
 
 namespace Ariadne {
   
-  template <typename type>
-  inline
-  void swap(type &a, type &b) {
-    type aux;
-	
-    aux=a;
-    a=b;
-    b=aux;
-  } 
-
   namespace Base { 
     template<typename InputIterator>
     inline
@@ -188,5 +178,3 @@ namespace std {
 
 
 #endif /* _ARIADNE_UTILITY_H */
-
-

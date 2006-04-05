@@ -29,8 +29,6 @@
 #ifndef _ARIADNE_MATRIX_H
 #define _ARIADNE_MATRIX_H
 
-#include <boost/numeric/ublas/vector.hpp>
-#include <boost/numeric/ublas/vector_proxy.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 //#include <boost/numeric/ublas/io.hpp>
@@ -38,31 +36,31 @@
 #include "../base/basic_type.h"
 #include "../base/numerical_type.h"
 #include "../base/arithmetic.h"
-#include "../base/interval.h"
-#include "../base/utility.h"
+
+#include "../linear_algebra/vector.h"
 
 namespace boost {
   namespace numeric {
     namespace ublas {
             
-      template<typename Real>
+      template<typename R>
       inline
-      vector<Real>
-      operator*(const matrix<Real>& A, const vector<Real>& B) {
+      vector<R>
+      operator*(const matrix<R>& A, const vector<R>& B) {
         return prod(A,B);
       }
            
-      template<typename Real>
+      template<typename R>
       inline
-      matrix<Real>
-      operator*(const matrix<Real>& A, const matrix<Real>& B) {
+      matrix<R>
+      operator*(const matrix<R>& A, const matrix<R>& B) {
         return prod(A,B);
       }
       
 
-      template <typename Real>
+      template <typename R>
       std::ostream&
-      operator<<(std::ostream& os, const matrix<Real>& A);
+      operator<<(std::ostream& os, const matrix<R>& A);
        
     }
   }
@@ -79,51 +77,44 @@ namespace Ariadne {
     using boost::numeric::ublas::matrix_row;
     using boost::numeric::ublas::matrix_column;
   
-    template <typename Real>
-    matrix<Real> zero_matrix(size_type r, size_type c);
+    template <typename R>
+    matrix<R> zero_matrix(size_type r, size_type c);
   
-    template <typename Real>
+    template <typename R>
     inline
-    matrix<Real> zero_matrix(size_type n)
+    matrix<R> zero_matrix(size_type n)
     {
-      return zero_matrix<Real>(n,n);
+      return zero_matrix<R>(n,n);
     }
     
   
-    template<typename Real>
-    Real
-    norm(const matrix<Real>& A);
+    template<typename R>
+    R
+    norm(const matrix<R>& A);
     
-    template<typename Real>
-    Real
-    log_norm(const matrix<Real>& A);
+    template<typename R>
+    R
+    log_norm(const matrix<R>& A);
     
 
     template<typename R>
     matrix<R>
+    exp_approx(const matrix<R>& A, const R& e);
+    
+    template<typename R>
+    matrix<R>
     concatenate_columns(const matrix<R>& A1, const matrix<R>& A2);
 
-    
-    template <typename Real>
-    matrix<Real> exp_Ah(const matrix<Real> &A, 
-                        const Real& h, 
-                        const Real& e); 
-
-    template <typename Real> 
-    vector<Real> exp_b_approx(const matrix<Real> &A, 
-                                     const vector<Real> &b, 
-                                     const Real h, const unsigned int n); 
-   
-    template <typename Real>
+    template <typename R>
     void 
-    lu_local_dec(matrix<Real>& A, 
+    lu_local_dec(matrix<R>& A, 
                  const array<size_type>& row, const array<size_type>& col, 
                  const size_type& rows, const size_type& columns, 
                  const size_type& p);
    
-    template <typename Real>
-    matrix<Real> 
-    lu_decompose(const matrix<Real>& A, 
+    template <typename R>
+    matrix<R> 
+    lu_decompose(const matrix<R>& A, 
                  array<size_type>& p_col, 
                  array<size_type>& p_row);
                               
@@ -131,9 +122,9 @@ namespace Ariadne {
      * I supose that matrix is row based i.e. 
      * A(i,j) is the element in the i-th row and in the j-th column 
      */
-    template <typename Real>
-    matrix<Real> 
-    lu_decompose(const matrix<Real> &A, 
+    template <typename R>
+    matrix<R> 
+    lu_decompose(const matrix<R> &A, 
                  array<size_type>& p_array);
 
     
@@ -141,82 +132,82 @@ namespace Ariadne {
      * I supose that boost::numeric::ublas::matrix is row based i.e. 
      * A(i,j) is the element in the i-th row and in the j-th column 
      */
-    template <typename Real>
-    vector<Real> 
-    lu_solve(const matrix<Real>& A, 
+    template <typename R>
+    vector<R> 
+    lu_solve(const matrix<R>& A, 
              const array<size_type>& p_array, 
-             const vector<Real>& b);
+             const vector<R>& b);
              
     /* WARNING!!! The following function has some precision problems */ 
-    template <typename Real>
+    template <typename R>
     inline
-    matrix<Real> 
-    Householder_QR(const matrix<Real> &A);
+    matrix<R> 
+    Householder_QR(const matrix<R> &A);
 
-    template <typename Real>
-    matrix<Real>
-    hermitian(const matrix<Real>& m);
+    template <typename R>
+    matrix<R>
+    hermitian(const matrix<R>& m);
     
-    template <typename Real>
-    matrix<Real> 
-    inverse(const matrix<Real> &A);
+    template <typename R>
+    matrix<R> 
+    inverse(const matrix<R> &A);
     
-    template <typename Real>
+    template <typename R>
     Integer 
-    common_denominator(const matrix<Real>& A);
+    common_denominator(const matrix<R>& A);
     
-    template <typename Real>
+    template <typename R>
     vector<Integer> 
-    row_common_denominators(const matrix<Real>& A);
+    row_common_denominators(const matrix<R>& A);
 
     
     
     /* \brief Transforms the linear inequalities $Ax\leq b$ to $AT^{-1}y \leq b$. */
-    template <typename Real>
+    template <typename R>
     void 
-    transform_linear_inequalities(const matrix<Real>& Real, 
-                                  matrix<Real>& A, 
-                                  vector<Real>& b);
+    transform_linear_inequalities(const matrix<R>& R, 
+                                  matrix<R>& A, 
+                                  vector<R>& b);
     
     template <>
     void 
-    transform_linear_inequalities<Dyadic>(const matrix<Dyadic>& Real, 
+    transform_linear_inequalities<Dyadic>(const matrix<Dyadic>& R, 
                                           matrix<Dyadic>& A, 
                                           vector<Dyadic>& b); 
 
-    template <class Real>
-    bool independent_rows(matrix<Real> A);
+    template <class R>
+    bool independent_rows(matrix<R> A);
 
-    template <typename Real>
+    template <typename R>
     bool 
-    have_same_dimensions(const matrix<Real> &A,  const matrix<Real> &B);
+    have_same_dimensions(const matrix<R> &A,  const matrix<R> &B);
     
-    template <typename Real>
+    template <typename R>
     bool 
-    equivalent_columns(const matrix<Real> &A, 
+    equivalent_columns(const matrix<R> &A, 
                        const size_type &A_col, 
-                       const matrix<Real> &B, 
+                       const matrix<R> &B, 
                        const size_type &B_col);
     
   
-    template<typename Real>
+    template<typename R>
     size_type 
-    find_first_not_null_in_col(const matrix<Real> &A, 
+    find_first_not_null_in_col(const matrix<R> &A, 
                                const size_type &col);
     
-    template <class Real>
-    matrix<Real> 
-    remove_null_columns_but_one(const matrix<Real> &A);
+    template <class R>
+    matrix<R> 
+    remove_null_columns_but_one(const matrix<R> &A);
     
-    template <typename Real>
+    template <typename R>
     void 
-    remove_null_columns(const matrix<Real>& A, 
+    remove_null_columns(const matrix<R>& A, 
                         array<size_type>& row, 
                         array<size_type>& col);
 
-    template <typename Real>
-    matrix<Real> 
-    compute_space(const matrix<Real>& SA, 
+    template <typename R>
+    matrix<R> 
+    compute_space(const matrix<R>& SA, 
                   array<size_type>& row,
                   const array<size_type>& col);
     

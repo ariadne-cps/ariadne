@@ -31,20 +31,20 @@
 namespace Ariadne {
   namespace LinearAlgebra {
 
-    template<typename Real>
-    LinearProgram<Real>::~LinearProgram()
+    template<typename R>
+    LinearProgram<R>::~LinearProgram()
     {
     }
     
-    template<typename Real>
-    LinearProgram<Real>::LinearProgram()
+    template<typename R>
+    LinearProgram<R>::LinearProgram()
       : _tableau(),
         _variable_indices()
     {
     }
     
-    template<typename Real>
-    LinearProgram<Real>::LinearProgram(const matrix_type& A,
+    template<typename R>
+    LinearProgram<R>::LinearProgram(const matrix_type& A,
                                        const vector_type& b,
                                        const vector_type& c)
       : _tableau(), 
@@ -100,8 +100,8 @@ namespace Ariadne {
       }
     }
     
-    template<typename Real>
-    LinearProgram<Real>::LinearProgram(const matrix_type& T)
+    template<typename R>
+    LinearProgram<R>::LinearProgram(const matrix_type& T)
       : _tableau(T),
         _variable_indices()
     {
@@ -112,16 +112,16 @@ namespace Ariadne {
       }
     }
     
-    template<typename Real>
-    LinearProgram<Real>::LinearProgram(const LinearProgram& LP)
+    template<typename R>
+    LinearProgram<R>::LinearProgram(const LinearProgram& LP)
       : _tableau(LP._tableau),
         _variable_indices(LP._variable_indices)
     {
     }
     
-    template<typename Real>
-    LinearProgram<Real>&
-    LinearProgram<Real>::operator=(const LinearProgram& LP) 
+    template<typename R>
+    LinearProgram<R>&
+    LinearProgram<R>::operator=(const LinearProgram& LP) 
     {
       if( this != &LP) {
         this->_tableau=LP._tableau;
@@ -130,9 +130,9 @@ namespace Ariadne {
       return *this;
     }
 
-    template<typename Real>
+    template<typename R>
     size_type
-    LinearProgram<Real>::compute_entering_variable_index() const 
+    LinearProgram<R>::compute_entering_variable_index() const 
     {
       size_type m=this->number_of_constraints();
       size_type n=this->number_of_free_variables();
@@ -146,19 +146,19 @@ namespace Ariadne {
       return n;
     }
  
-    template<typename Real>
+    template<typename R>
     size_type
-    LinearProgram<Real>::compute_exiting_base_index(size_type j) const 
+    LinearProgram<R>::compute_exiting_base_index(size_type j) const 
     {
       // select variable to exit basis
       size_type m=this->number_of_constraints();
       size_type n=this->number_of_free_variables();
 
       size_type i=m;
-      Real min_change=0;
+      R min_change=0;
       for(size_type k=0; k!=m; ++k) {
         if(this->_tableau(k,j)>0) {
-          Real change=this->_tableau(k,n)/this->_tableau(k,j);
+          R change=this->_tableau(k,n)/this->_tableau(k,j);
           if(change<min_change || min_change==0) {
             min_change=change;
             i=k;
@@ -168,9 +168,9 @@ namespace Ariadne {
       return i;
     }
     
-    template<typename Real>
+    template<typename R>
     void
-    LinearProgram<Real>::swap_base(const size_type entering_variable_index,
+    LinearProgram<R>::swap_base(const size_type entering_variable_index,
                                    const size_type exiting_base_index) const
     {
       // select variable to exit basis
@@ -203,11 +203,11 @@ namespace Ariadne {
       }
     }
     
-    template<typename Real>
+    template<typename R>
     void
-    LinearProgram<Real>::solve_tableau() const 
+    LinearProgram<R>::solve_tableau() const 
     {
-      //std::cerr << "LinearProgram<" << name<Real>() << ">::second_phase() const" << std::endl;
+      //std::cerr << "LinearProgram<" << name<R>() << ">::second_phase() const" << std::endl;
       size_type n=this->number_of_free_variables();
       
       size_type recursions=10;
@@ -232,9 +232,9 @@ namespace Ariadne {
       return;
     }
     
-    template<typename Real>
-    typename LinearProgram<Real>::vector_type
-    LinearProgram<Real>::optimizing_point() const 
+    template<typename R>
+    typename LinearProgram<R>::vector_type
+    LinearProgram<R>::optimizing_point() const 
     {
       vector_type result(this->number_of_free_variables());
  
@@ -251,18 +251,18 @@ namespace Ariadne {
       return result;
     }
         
-    template<typename Real>
-    Real
-    LinearProgram<Real>::optimal_value() const 
+    template<typename R>
+    R
+    LinearProgram<R>::optimal_value() const 
     {
-      // std::cerr << "LinearProgram<" << name<Real>() << ">::optimal_value() const\n";
+      // std::cerr << "LinearProgram<" << name<R>() << ">::optimal_value() const\n";
       solve_tableau();
       return this->_tableau(_tableau.size1()-1,_tableau.size2()-1);
     }
     
-    template<typename Real>
-    Real 
-    LinearProgram<Real>::objective_function(const vector_type& v) const
+    template<typename R>
+    R 
+    LinearProgram<R>::objective_function(const vector_type& v) const
     {
       assert(false);
     }
@@ -975,9 +975,9 @@ namespace Ariadne {
       normalize2(ext_n, evaluating_point.divisor(), ext_n, ext_d);
     }
 
-    template<typename Real>
+    template<typename R>
     bool
-    LinearProgram<Real>::is_satisfiable() const {
+    LinearProgram<R>::is_satisfiable() const {
     #if PPL_NOISY_SIMPLEX
       num_iterations = 0;
     #endif
@@ -1164,9 +1164,9 @@ namespace Ariadne {
     
 
 */
-    template<typename Real>
+    template<typename R>
     std::ostream& 
-    operator<<(std::ostream& os, const LinearProgram<Real>& lp) 
+    operator<<(std::ostream& os, const LinearProgram<R>& lp) 
     {
       return os << "LinearProgram( tableau=" << lp.tableau() << ")";
     }

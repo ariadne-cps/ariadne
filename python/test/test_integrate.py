@@ -26,36 +26,67 @@ from ariadne.geometry import *
 from ariadne.linear_algebra import *
 import sys
 
-n=4
+def plot(fn,bb,set):
+  eps=EpsPlot(fn+".eps",bb)
+  eps.set_fill_colour("green")
+  for bs in set:
+    eps.write(bs)
+  eps.set_fill_colour("blue")
+ # eps.write(set[0])
+  eps.set_fill_colour("red")
+#  eps.write(set[-1])
+  eps.close()
+
+bb=Rectangle("[-2,2]x[-2,2]")
+
+A=Matrix(2,2)
+b=Vector(2)
+A[0,0]=-0.25;
+A[0,1]=-1;
+A[1,0]=+1;
+A[1,1]=-0.25;
+avf=AffineVectorField(A,b)
+
+init_rect=Rectangle("[0.95,1.05]x[0.45,0.55]")
+init_paral=Parallelotope(init_rect)
+
+ar=[init_rect]
+for i in range(0,16):
+  ar.append(integrate(avf,ar[-1],Dyadic(0.1),Dyadic(0.1)))
+plot("integrate1",bb,ar)
+
+print "\n\n\n\n"
+print avf.name()
+
+ap=[init_paral]
+for i in range(0,128):
+  print
+  ap.append(integrate(avf,ap[-1],Dyadic(0.1),Dyadic(0.1)))
+#for p in ap:
+#  print p
+plot("integrate2",bb,ap)
+
+sys.exit()
+
 h=Dyadic(1./64)
 ls=LorenzSystem(Dyadic(8./3.),Dyadic(28.0),Dyadic(10.0))
 r0=Rectangle("[1.0,1.1]x[1.0,1.1]x[1.0,1.1]")
 r=[r0]
 for i in range(0,n):
-  r.append(integrate(ls,r[-1],h))
+  r.append(integration_step(ls,r[-1],h))
 
-b=Vector(2)
-A=Matrix(2,2)
-A[0,1]=-1;
-A[1,0]=+1;
-avf=AffineVectorField(A,b)
-
-ar=[Rectangle("[0.95,1.05]x[-0.05,0.05]")]
-for i in range(0,n):
-  print
-  ar.append(integrate(avf,ar[-1],Dyadic(0.2)))
 
 print "\n\n\n\n"
 p=[Parallelotope(r0)]
-p.append(integrate_to(ls,p[-1],h/4))
+#p.append(reach_step(ls,p[-1],h/4))
 for i in range(0,n):
-  p.append(integrate(ls,p[-1],h))
-p.append(integrate_to(ls,p[-1],h/4))
+  p.append(integration_step(ls,p[-1],h))
+#p.append(reach_step(ls,p[-1],Dyadic(h/4)))
   
 print p[-1]
 
-bb=Rectangle("[-4,4]x[-2,6]")
-eps=EpsPlot("integrate.eps",bb)
+bb
+eps=EpsPlot("integrate2.eps",bb)
 eps.set_fill_colour("green")
 for i in range(0,n):
   eps.write(p[i])

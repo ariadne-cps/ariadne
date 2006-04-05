@@ -29,11 +29,12 @@
 #ifndef _ARIADNE_BASIC_TYPE_H
 #define _ARIADNE_BASIC_TYPE_H
 
-#include "../base/array.h"
-#include "../base/sequence.h"
-
 namespace Ariadne {
   namespace Base {
+    template<typename R, size_t N=0> class array;
+    template<typename R> class array_vector;
+    template<typename R> class sequence;
+
     template<typename R> class Interval;
     class BinaryWord;
     class BinaryTree;

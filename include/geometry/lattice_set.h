@@ -102,17 +102,25 @@ namespace Ariadne {
       LatticeCell(const IndexArray& l) : _lower(l) { }
       LatticeCell(const LatticeCell& c) : _lower(c._lower) { }
       
+      /*!\brief Equality operator. */
       bool operator==(const LatticeCell& c) const { 
         return this->_lower==c._lower; }
         
+      /*!\brief The dimension of the cell. */
       dimension_type dimension() const { return this->_lower.size(); }
+      /*!\brief The \a i th interval. */
       Interval<index_type> operator[](dimension_type i) {
         return Interval<index_type>(this->_lower[i],this->_lower[i]+1); } 
+      /*!\brief The lower bound in the \a i th dimension. */
       index_type lower_bound(dimension_type i) const { return this->_lower[i]; }
+      /*!\brief The upper bound in the \a i th dimension. */
       index_type upper_bound(dimension_type i) const { return this->_lower[i]+1; }
 
+      /*!\brief The position of the lower corner in the latiice. */
       const IndexArray& position() const { return this->_lower; }
+      /*!\brief The position of the lower corner in the latiice. */
       IndexArray lower() const { return this->_lower; }
+      /*!\brief The position of the upper corner in the latiice. */
       IndexArray upper() const { 
         IndexArray result(this->dimension());
         for(dimension_type i=0; i!=this->dimension(); ++i) {
@@ -129,35 +137,56 @@ namespace Ariadne {
       friend class LatticeMaskSet;
      public:
       typedef LatticeRectangleIterator const_iterator;
-      LatticeRectangle(dimension_type n) : _lower(n), _upper(n) { }
+      
+      explicit LatticeRectangle(dimension_type n) : _lower(n), _upper(n) { }
+      /*!\brief A lattice rectangle specified by lower and upper corners. */
       LatticeRectangle(const IndexArray& l, const IndexArray& u)
         : _lower(l), _upper(u) { }
+      /*!\brief Convert from a lattice cell. */
       LatticeRectangle(const LatticeCell& c)
         : _lower(c.lower()), _upper(c.upper()) { }
+      /*!\brief Copy constructor. */
       LatticeRectangle(const LatticeRectangle& r)
         : _lower(r._lower), _upper(r._upper) { }
       
+      /*!\brief Equality operator. */
       bool operator==(const LatticeRectangle& other) const { 
         return this->_lower==other._lower && this->_upper==other._upper; }
         
+      /*!\brief The dimension of the lattice rectangle. */
       dimension_type dimension() const { return this->_lower.size(); }
+      /*!\brief Returns true if the lattice rectangle is empty. */
       bool empty() const;
       
+
+      /*!\brief The \a i th interval. */
       Interval<index_type> operator[](dimension_type i) const {
         return Interval<index_type>(this->_lower[i],this->_upper[i]); } 
+      /*!\brief The lower bound in the \a i th dimension. */
       index_type lower_bound(dimension_type i) const { return this->_lower[i]; }
+      /*!\brief The upper bound in the \a i th dimension. */
       index_type upper_bound(dimension_type i) const { return this->_upper[i]; }
 
+      /*!\brief Set the lower bound in the \a i th dimension to \a n. */
       void set_lower_bound(dimension_type i, index_type n) { this->_lower[i]=n; }
+      /*!\brief Set the upper bound in the \a i th dimension to \a n. */
       void set_upper_bound(dimension_type i, index_type n) { this->_upper[i]=n; }
 
+      /*!\brief The position of the lower corner in the latiice. */
       const IndexArray& lower() const { return this->_lower; }
+      /*!\brief The position of the upper corner in the latiice. */
       const IndexArray& upper() const { return this->_upper; }
+
+      /*! \brief The number of cells in each dimension. */
       SizeArray sizes() const;
+      /*! \brief The product of the number of cells in each lower dimension. */
       SizeArray strides() const;
+      /*! \brief The totel number of cells. */
       size_type size() const;
       
+      /*!\brief A constant iterator to the lower cell in the lattice rectangle. */
       const_iterator begin() const;
+      /*!\brief A constant iterator to the past-the-end cell of the lattice rectangle. */
       const_iterator end() const;
      private:
       IndexArray _lower;

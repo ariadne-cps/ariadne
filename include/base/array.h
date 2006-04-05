@@ -37,18 +37,28 @@
 #include <vector>
 #include <iterator>
 
+#include "basic_type.h"
+
 namespace Ariadne {
+  
   namespace Base {
     
-    template<typename T, size_t N=0> class array;
-    
-    /*! \brief STL style interface to dynamically-sized arrays. 
+    /*! \brief STL style interface to sized arrays. 
      *
      * An array<T> is a variable-size array which can be resized and is allocated 
      * on the heap. Arrays provide checked access using at and unchecked access using operator[].
      *
+     * An array<T,N> is a fixed-size array of size \a N which is allocated 
+     * on the stack. Arrays provide checked access using at and unchecked access using operator[].
+     *
+     * FIXME: Constructors for small arrays.
      * FIXME: Exception safety in constructors!
      */
+    template<typename T, size_t N> class array;
+    
+    // Need to give default size in first declaration.
+    //template<typename T, size_t N=0> class array;
+    
     template<typename T> class array<T> {
      public:
       typedef T value_type;
@@ -129,7 +139,6 @@ namespace Ariadne {
     };
     
     
-    /*! \brief STL style interface to dynamically-sized boolean arrays. */
     template<> class array<bool> {
      public:
       typedef std::vector<bool>::value_type value_type;
@@ -185,14 +194,6 @@ namespace Ariadne {
     
     
     
-    /*! \brief STL style interface to fixed-size arrays. 
-     *  \class array<T,N>
-     *
-     * An array<T,N> is a fixed-size array of size \a N which is allocated 
-     * on the stack. Arrays provide checked access using at and unchecked access using operator[].
-     *
-     * FIXME: Constructors for small arrays.
-     */
     template<typename T, size_t N> class array {
      public:
       typedef T value_type;

@@ -187,6 +187,23 @@ namespace Ariadne {
 
     template<typename R>
     epsfstream&
+    operator<<(epsfstream& eps, const Ariadne::Geometry::Point<R>& p) 
+    {
+      assert(p.dimension()>=2);
+
+      if(eps.fill_style) {
+        eps << double(p[0]) << " " << double(p[0]) << "0.001 0 360 closepath\n";
+        eps << eps.fill_colour << " fill\n";
+      }
+      if(eps.line_style) {
+        eps << double(p[0]) << " " << double(p[0]) << "0.001 0 360 closepath\n";
+        eps << eps.line_colour << " stroke\n";
+      }
+      return eps;
+    }
+
+    template<typename R>
+    epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::Rectangle<R>& r) 
     {
       assert(r.dimension()>=2);

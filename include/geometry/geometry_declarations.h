@@ -34,17 +34,24 @@ namespace Ariadne {
     template<typename R> class Point;
 
     template<typename R> class Rectangle;
-    template<typename R> class Polyhedron;
     template<typename R> class Parallelotope;
+    template<typename R> class Zonotope;
     template<typename R> class Simplex;
+    template<typename R> class Polyhedron;
     
     template<typename R, template<typename> class BS> class ListSet;
 
+    template<typename R> class Grid;
     template<typename R> class FiniteGrid;
+    template<typename R> class GridCell;
+    template<typename R> class GridRectangle;
     template<typename R> class GridMaskSet;
     template<typename R> class GridCellListSet;
     template<typename R> class GridRectangleListSet;
 
+    template<typename R> class PartitionScheme;
+    template<typename R> class PartitionTree;
+    template<typename R> class PartitionTreeCell;
     template<typename R> class PartitionTreeSet;
 
 /* Need partial template function specialization to do this!

@@ -42,7 +42,7 @@ namespace Ariadne {
     }
     
     template<typename R>
-    LinearAlgebra::vector< Interval<R> >
+    LinearAlgebra::interval_vector<R>
     VectorField<R>::apply(const Geometry::Rectangle<R>& x) const
     {
       throw std::invalid_argument("Not implemented."); 
@@ -56,7 +56,7 @@ namespace Ariadne {
     }
     
     template<typename R>
-    LinearAlgebra::matrix< Interval<R> > 
+    LinearAlgebra::interval_matrix<R> 
     VectorField<R>::derivative(const Geometry::Rectangle<R>& A) const 
     {
       throw std::invalid_argument("Not implemented."); 

@@ -37,9 +37,8 @@ namespace Ariadne {
     using boost::numeric::ublas::vector;
     using boost::numeric::ublas::matrix;
 
-    template<typename R> class IntervalVector;
-
-    template<typename R> class IntervalMatrix;
+    template<typename R> class interval_vector;
+    template<typename R> class interval_matrix;
 
   }
 }

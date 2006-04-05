@@ -181,7 +181,7 @@ namespace Ariadne {
       }
       
       State new_centre=(*this)(z.centre());
-      return Geometry::Zonotope<R>(new_centre,A*z.principle_directions());
+      return Geometry::Zonotope<R>(new_centre,A*z.generators());
     }    
      
     template <typename R>

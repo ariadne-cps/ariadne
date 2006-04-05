@@ -33,11 +33,13 @@
 
 #include <vector>
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
-
 #include "../base/utility.h"
 #include "../base/interval.h"
+
+#include "../linear_algebra/vector.h"
+#include "../linear_algebra/matrix.h"
+#include "../linear_algebra/interval_vector.h"
+
 
 namespace Ariadne {
   namespace LinearAlgebra {
@@ -49,14 +51,11 @@ namespace Ariadne {
     /*! \brief A zonotopic vector set. 
      * 
      * A zonotope is a set of the form \f$c+Ae\f$, where \f$||e||_{infty}\leq1\f$.
-     * The intersection and membership tests are performed using algorithms from: <br/>
-     * Guibas, Leonidas J.; Nguyen, An; Zhang, Li, "Zonotopes as bounding volumes."  <it>Proceedings of the Fourteenth Annual ACM-SIAM Symposium on Discrete Algorithms</it> (Baltimore, MD, 2003),  803--812, ACM, New York, 2003.
+     * The intersection and membership tests are performed using algorithms from: <br>
+     * Guibas, Leonidas J.; Nguyen, An; Zhang, Li, "Zonotopes as bounding volumes."  <i>Proceedings of the Fourteenth Annual ACM-SIAM Symposium on Discrete Algorithms</i> (Baltimore, MD, 2003),  803--812, ACM, New York, 2003.
      */
     template <typename R>
     class zonotopic_vector {
-     public:
-      /*! \brief The type of denotable real number used for the corners. */
-      typedef R Real;
      public:
       /*! \brief Default constructor constructs a zonotopic vector representation of the origin of dimension \a n. */
       explicit zonotopic_vector(size_type n = 0)
@@ -81,7 +80,7 @@ namespace Ariadne {
       }
 
       /*! \brief Construct from an interval vector. */
-      zonotopic_vector(const vector< Interval<R> >& iv)
+      zonotopic_vector(const interval_vector<R>& iv)
         : _centre(iv.size()), _generators(iv.size(),iv.size())
       {
         for(size_type i=0; i!=this->size(); ++i) {
@@ -123,8 +122,8 @@ namespace Ariadne {
       }
       
       /*! \brief A rectangle containing the given zonotope. */
-      inline vector< Interval<R> > bounding_box() const {
-        vector< Interval<R> > unit(this->size());
+      inline interval_vector<R> bounding_box() const {
+        interval_vector<R> unit(this->size());
         for(size_type i=0; i!=this->size(); ++i) {
           unit[i]=Interval<R>(-1,1);
         }
@@ -248,7 +247,7 @@ namespace Ariadne {
     template<typename R> 
     inline
     zonotopic_vector<R> operator+(const zonotopic_vector<R>& u, 
-                                  const vector< Interval<R> >& v)
+                                  const interval_vector<R>& v)
     {
       return u+zonotopic_vector<R>(v);
     }
@@ -256,7 +255,7 @@ namespace Ariadne {
     /*! \brief The sum of an interval vector and a zonotopic vector. */
     template<typename R> 
     inline
-    zonotopic_vector<R> operator+(const vector< Interval<R> >& u, 
+    zonotopic_vector<R> operator+(const interval_vector<R>& u, 
                                   const zonotopic_vector<R>& v)
     {
       return zonotopic_vector<R>(u)+v;
@@ -280,6 +279,22 @@ namespace Ariadne {
       return zonotopic_vector<R>(A*v.centre(),A*v.generators());
     }
     
+
+    /*! The convex hull of \f$[-1,1]*v\f$. */
+    template<typename R> 
+    inline
+    LinearAlgebra::zonotopic_vector<R>
+    symmetrise(const LinearAlgebra::interval_vector<R>& iv)
+    {
+      matrix<R> A(iv.size(),iv.size()+1);
+      for(size_type i=0; i!=A.size1(); ++i) {
+        A(i,i)=(iv(i).upper()-iv(i).lower())/2;
+        A(i,iv.size())=(iv(i).upper()+iv(i).lower())/2;
+      }
+      return zonotopic_vector<R>(vector<R>(iv.size()),A);
+    }
+      
+
     template<typename R> 
     std::ostream&
     operator<<(std::ostream& os, const zonotopic_vector<R>& zv) 

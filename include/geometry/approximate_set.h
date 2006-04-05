@@ -83,7 +83,7 @@ class ApproximateSet {
    * This method tries to make the union of two approximate sets.
    * If the set's types do not agree, this methods throws
    * a \a NotCompatibleApproximateSets exception.
-   * \param the set .
+   * \param set the set .
    * \return A new object representing the
    * union of the two sets.
    */

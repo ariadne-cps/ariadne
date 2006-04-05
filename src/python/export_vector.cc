@@ -25,19 +25,12 @@
 #include "base/numerical_type.h"
 #include "base/interval.h"
 
-#include "linear_algebra/linear_algebra.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/interval_vector.h"
 
 #include <boost/python.hpp>
 
-#include "python/real_typedef.h"
-
-typedef Ariadne::Interval<Real> RInterval;
-typedef Ariadne::LinearAlgebra::vector<Real> RVector;
-typedef Ariadne::LinearAlgebra::vector< Ariadne::Interval<Real> > IVector;
-
-typedef Ariadne::Rational Rational;
-typedef Ariadne::LinearAlgebra::vector<Rational> QVector;
-
+#include "python/typedefs.h"
 
 using boost::python::class_;
 using boost::python::init;
@@ -67,11 +60,11 @@ inline RVector rvector_sub_rvector(const RVector& u, RVector& v) {
   return RVector(u-v);
 }
 
-inline RInterval ivector_getitem(const IVector& v, uint i) {
+inline RInterval ivector_getitem(const RIntervalVector& v, uint i) {
   return v(i);
 }
 
-inline void ivector_setitem(IVector& v, uint i, RInterval x) {
+inline void ivector_setitem(RIntervalVector& v, uint i, RInterval x) {
   v(i)=x;
 }
 
@@ -117,9 +110,9 @@ void export_vector() {
 }
 
 void export_interval_vector() {
-  class_<IVector>("IntervalVector",init<int>())
-    .def(init<IVector>())
-    .def("__len__", &IVector::size)
+  class_<RIntervalVector>("IntervalVector",init<int>())
+    .def(init<RIntervalVector>())
+    .def("__len__", &RIntervalVector::size)
     .def("__getitem__",&ivector_getitem)
     .def("__setitem__",&ivector_setitem)
     .def(str(self))    // __str__

@@ -9,7 +9,9 @@ python: lib
 	(cd ${SRCDIR}/${PYTHONDIR}; ${MAKE} all);
 
 clean:                                                                          
-	rm -f *.bak *.o *~ *% core
+	rm -f *.bak *.o *~ *% core 
+	rm -f *.eps
+	rm -rf latex html
 	(cd ${SRCDIR}; ${MAKE} clean; cd ..; )
 	(cd ${EXAMPLEDIR}; ${MAKE} clean; cd ..; )
 	(cd ${TESTDIR}; ${MAKE} clean; cd ..; )

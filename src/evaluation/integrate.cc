@@ -29,21 +29,60 @@ namespace Ariadne {
 
     template 
     Geometry::Rectangle<Dyadic> 
-    integrate(const VectorField<Dyadic>&, const Geometry::Rectangle<Dyadic>&, const Dyadic& t);
+    integration_step(const VectorField<Dyadic>&, const Geometry::Rectangle<Dyadic>&, Dyadic& step_size);
   
     template 
     Geometry::Parallelotope<Dyadic> 
-    integrate(const VectorField<Dyadic>&, const Geometry::Parallelotope<Dyadic>&, const Dyadic& t);
+    integration_step(const VectorField<Dyadic>&, const Geometry::Parallelotope<Dyadic>&, Dyadic& step_size);
+  
+    template 
+    Geometry::Rectangle<Dyadic> 
+    reach_step(const VectorField<Dyadic>&, const Geometry::Rectangle<Dyadic>&, Dyadic& step_size);
   
     template 
     Geometry::Parallelotope<Dyadic> 
-    integrate(const VectorField<Dyadic>&, const Geometry::Parallelotope<Dyadic>&, const Interval<Dyadic>& t);
+    reach_step(const VectorField<Dyadic>&, const Geometry::Parallelotope<Dyadic>&, Dyadic& step_size);
   
+    template 
+    Geometry::Zonotope<Dyadic> 
+    reach_step(const VectorField<Dyadic>&, const Geometry::Zonotope<Dyadic>&, Dyadic& step_size);
+  
+
+    template 
+    Geometry::Rectangle<Dyadic> 
+    integrate(const VectorField<Dyadic>&, 
+              const Geometry::Rectangle<Dyadic>&, 
+              const Dyadic&,
+              const Dyadic&);
+
+    template 
+    Geometry::Parallelotope<Dyadic> 
+    integrate(const VectorField<Dyadic>&, 
+              const Geometry::Parallelotope<Dyadic>&, 
+              const Dyadic&,
+              const Dyadic&);
+
     template 
     Geometry::ListSet<Dyadic,Geometry::Parallelotope> 
     integrate(const VectorField<Dyadic>&, 
               const Geometry::ListSet<Dyadic,Geometry::Parallelotope>&, 
-              const Dyadic& t);
+              const Dyadic&,
+              const Dyadic&);
+  
+    template 
+    Geometry::GridMaskSet<Dyadic> 
+    integrate(const VectorField<Dyadic>&, 
+              const Geometry::GridMaskSet<Dyadic>&, 
+              const Dyadic&,
+              const Dyadic&);
+  
+  
+    template 
+    Geometry::GridMaskSet<Dyadic> 
+    reach(const VectorField<Dyadic>&, 
+          const Geometry::GridMaskSet<Dyadic>&, 
+          const Dyadic&,
+          const Dyadic&);
   
   }
 }

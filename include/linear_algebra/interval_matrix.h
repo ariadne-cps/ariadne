@@ -35,102 +35,154 @@
 #include "../base/numerical_type.h"
 #include "../base/interval.h"
 
-namespace boost {
-  namespace numeric {
-    namespace ublas {
-      
-      using Ariadne::Interval;
-      using Ariadne::size_type;
-      
-      template <typename Real>
-      vector< Interval<Real> > 
-      iprod(const matrix<Real>& A, const vector< Interval<Real> >& B) {
-        vector< Interval<Real> > result(A.size1());
-        for (size_type i=0; i!=result.size(); ++i) {
-          result(i)=Interval<Real>(0);
-          for (size_type j=0; j!=B.size(); ++j) {
-            result(i)+=A(i,j)*B(j);
-          }
-        }
-        return result;
-      }
-        
-      template <typename Real>
-      matrix< Interval<Real> > 
-      iprod(const matrix< Interval<Real> >& A, const matrix<Real>& B) {
-        matrix< Interval<Real> > result(A.size1(),B.size2());
-        for (size_type i=0; i!=A.size1(); ++i) {
-          for (size_type j=0; j!=B.size2(); ++j) {
-            result(i,j)=Interval<Real>(0);
-            for (size_type k=0; k!=A.size2(); ++k) {
-              result(i,j)+=A(i,k)*B(k,j);
-            }
-          }
-        }
-        return result;
-      }
-        
-      template <typename Real>
-      matrix< Interval<Real> > 
-      iprod(const matrix<Real>& A, const matrix< Interval<Real> >& B) {
-        matrix< Interval<Real> > result(A.size1(),B.size2());
-        for (size_type i=0; i!=A.size1(); ++i) {
-          for (size_type j=0; j!=B.size2(); ++j) {
-            result(i,j)=Interval<Real>(0);
-            for (size_type k=0; k!=A.size2(); ++k) {
-              result(i,j)+=A(i,k)*B(k,j);
-            }
-          }
-        }
-        return result;
-      }
-      
-      template<typename R>
-      inline
-      vector< Interval<R> >
-      operator*(const matrix<R>& A, const vector< Interval<R> >& B) {
-        return iprod(A,B);
-      }
-      
-      
-      template<typename R>
-      inline
-      matrix< Interval<R> >
-      operator*(const matrix< Interval<R> >& A, const matrix<R>& B) {
-        return iprod(A,B);
-      }
-      
-      template<typename R>
-      inline
-      matrix< Interval<R> >
-      operator*(const matrix<R>& A, const matrix< Interval<R> >& B) {
-        return iprod(A,B);
-      }
-   
-    
+#include "../linear_algebra/vector.h"
+#include "../linear_algebra/matrix.h"
+#include "../linear_algebra/interval_vector.h"
 
-    
-    }
-  }
-}
 
 namespace Ariadne {
   namespace LinearAlgebra {
-    template<typename Real>
-    inline
-    Real
-    norm(const matrix< Interval<Real> >& A) 
+
+    /*! \brief A matrix of intervals. */
+    template<typename R>
+    class interval_matrix : public boost::numeric::ublas::matrix< Interval<R> >
     {
-      Real result=0;
-      for(size_type i=0; i!=A.size1(); ++i) {
-        Real row_sum=0;
-        for(size_type j=0; j!=A.size2(); ++j) {
-          row_sum+=std::max(abs(A(i,j).lower()),abs(A(i,j).upper()));
+     private:
+      typedef boost::numeric::ublas::matrix< Interval<R> > Base;
+     public:
+      interval_matrix() : Base() { }
+      interval_matrix(const size_type& r, const size_type& c) : Base(r,c) { }
+      template<typename E> interval_matrix(const boost::numeric::ublas::matrix_expression<E>& A) : Base(A()) { }
+      interval_matrix(const matrix<R>& A, const R& r) : Base(A.size1(),A.size2()) { 
+        for(size_type i=0; i!=A.size1(); ++i) {
+          for(size_type j=0; j!=A.size2(); ++j) {
+            Base::operator()(i,j)=Interval<R>(A(i,j)-r,A(i,j)+r);
+          }
         }
-        result=std::max(result,row_sum);
       }
-      return result;
+    };
+
+    
+    template <typename R>
+    std::ostream& 
+    operator<<(std::ostream& os, const interval_matrix<R>& A);
+        
+    template <typename R>
+    interval_vector<R> 
+    prod(const matrix<R>& A, const interval_vector<R>& v);
+        
+    template <typename R>
+    interval_vector<R> 
+    prod(const interval_matrix<R>& A, const vector<R>& v);
+        
+    template <typename R>
+    interval_vector<R> 
+    prod(const interval_matrix<R>& A, const interval_vector<R>& v);
+        
+    template <typename R>
+    interval_matrix<R> 
+    prod(const interval_matrix<R>& A, const matrix<R>& B);
+      
+    template <typename R>
+    interval_matrix<R> 
+    prod(const matrix<R>& A, const interval_matrix<R>& B);
+      
+    template <typename R>
+    interval_matrix<R> 
+    prod(const interval_matrix<R>& A, const interval_matrix<R>& B);
+      
+      
+    template<typename R>
+    inline
+    interval_vector<R>
+    operator*(const matrix<R>& A, const interval_vector<R>& B) {
+      return prod(A,B);
     }
+      
+    template<typename R>
+    inline
+    interval_vector<R>
+    operator*(const interval_matrix<R>& A, const vector<R>& B) {
+      return prod(A,B);
+    }
+    
+    template<typename R>
+    inline
+    interval_vector<R>
+    operator*(const interval_matrix<R>& A, const interval_vector<R>& B) {
+      return prod(A,B);
+    }
+    
+    
+    template<typename R>
+    inline
+    interval_matrix<R>
+    operator*(const interval_matrix<R>& A, const matrix<R>& B) {
+      return prod(A,B);
+    }
+    
+    template<typename R>
+    inline
+    interval_matrix<R>
+    operator*(const matrix<R>& A, const interval_matrix<R>& B) {
+      return prod(A,B);
+    }
+    
+    template<typename R>
+    inline
+    interval_matrix<R>
+    operator*(const interval_matrix<R>& A, const interval_matrix<R>& B) {
+      return prod(A,B);
+    }
+    
+    
+    /*! \brief The midpoint of the interval matrix. */
+    template<typename R>
+    matrix<R>
+    centre(const interval_matrix<R>& A); 
+        
+    /*! \brief The sup norm of the matrix of radii of the interval matrix. */
+    template<typename R>
+    R
+    radius(const interval_matrix<R>& A); 
+        
+    /*! \brief The range of supremum norms of matrices in the interval matrix. */
+    template<typename R>
+    Interval<R>
+    norm(const interval_matrix<R>& A); 
+        
+    /*! \brief The maximum norm in the interval matrix.
+     */
+    template<typename R>
+    R
+    upper_norm(const interval_matrix<R>& A); 
+        
+    /*! \brief The maximum logarithmic norm in the interval matrix.
+     * 
+     *  The logarithmic norm is defined as \f$\max_{i} A_{ii}+\sum_{j!=i}|A_{ij}|\f$.
+     */
+    template<typename R>
+    R
+    upper_log_norm(const interval_matrix<R>& A); 
+        
+    /*! \brief The interval matrix inverse. */
+    template<typename R>
+    interval_matrix<R>
+    inverse(const interval_matrix<R>& A); 
+        
+    /*! \brief A matrix \f$A\f$ such that for all zonotopes \f$Z\f$, \f$AZ\subset \overline{\underline{A}}\f$. */
+    template<typename R>
+    matrix<R>
+    over_approximation(const interval_matrix<R>& A); 
+        
+    /*! \brief A matrix \f$A\f$ such that for all zonotopes \f$Z\f$, \f$AZ\subset \overline{\underline{A}}\f$. */
+    template<typename R>
+    interval_matrix<R>
+    exp(const interval_matrix<R>& A); 
+        
+    /*! \brief The interval matrix inverse. */
+    interval_matrix<Dyadic>
+    approximate(const matrix<Rational>& A,const Dyadic& e); 
         
   }
 }

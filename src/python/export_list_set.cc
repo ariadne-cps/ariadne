@@ -32,21 +32,9 @@
 
 #include <boost/python.hpp>
 
-#include "python/real_typedef.h"
+#include "python/typedefs.h"
 #include "python/python_utilities.h"
 
-typedef Ariadne::Geometry::Point<Real> RPoint;
-typedef Ariadne::Interval<Real> RInterval;
-typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
-typedef Ariadne::Geometry::Parallelotope<Real> RParallelotope;
-typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Rectangle> RRectangleListSet;
-typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Parallelotope> RParallelotopeListSet;
-typedef Ariadne::Geometry::GridRectangleListSet<Real> RGridRectangleListSet;
-typedef Ariadne::Geometry::GridCellListSet<Real> RGridCellListSet;
-typedef Ariadne::Geometry::GridMaskSet<Real> RGridMaskSet;
-typedef Ariadne::Geometry::PartitionTreeSet<Real> RPartitionTreeSet;
-
-using Ariadne::Geometry::Rectangle;
 using Ariadne::Geometry::regular_intersection;
 using Ariadne::Geometry::interiors_intersect;
 using Ariadne::Geometry::disjoint;

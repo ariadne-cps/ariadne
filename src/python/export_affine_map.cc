@@ -34,16 +34,8 @@
 #include <boost/python.hpp>
 
 #include "python/real_typedef.h"
+#include "python/typedefs.h"
 #include "python/python_utilities.h"
-
-typedef Ariadne::Geometry::Point<Real> RPoint;
-typedef Ariadne::Geometry::Simplex<Real> RSimplex;
-typedef Ariadne::Geometry::Parallelotope<Real> RParallelotope;
-typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
-typedef Ariadne::Geometry::Zonotope<Real> RZonotope;
-typedef Ariadne::Geometry::Polyhedron<Real> RPolyhedron;
-
-typedef Ariadne::Evaluation::AffineMap<Real> RAffineMap;
 
 using boost::python::class_;
 using boost::python::init;

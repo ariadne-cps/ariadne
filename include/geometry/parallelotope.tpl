@@ -36,7 +36,6 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
-//#include "../linear_algebra/constraint.h"
 #include "../linear_algebra/linear_program.h"
 
 #include "../geometry/lattice_set.h" 
@@ -117,7 +116,6 @@ namespace Ariadne {
     template <typename R>
     bool Parallelotope<R>::contains(const State& point) const {
       Zonotope<R> z_this(*this);
-	      
       return z_this.contains(point);
     }
       
@@ -129,6 +127,38 @@ namespace Ariadne {
       return z_this.interior_contains(point);
     }
       
+    template <typename R>
+    ListSet<R,Parallelotope>
+    Parallelotope<R>::divide() const 
+    {
+      size_type n=this->dimension();
+      ListSet<R,Geometry::Parallelotope> result(this->dimension());
+      
+      Matrix new_generators=generators();
+      
+      R max_norm=0;
+      size_type max_column=0;
+      for(size_type j=0; j!=n; ++j) {
+        R norm = LinearAlgebra::norm(LinearAlgebra::vector<R>(column(new_generators,j)));
+        if(norm>max_norm) {
+          max_norm=norm;
+          max_column=j;
+        }
+      }
+      
+      size_type j=max_column;
+      for(size_type i=0; i!=n; ++i) {
+        new_generators(i,j)/=2;
+      }
+      
+      State new_centre=this->centre()-column(new_generators,j)/2;
+      result.adjoin(Parallelotope<R>(new_centre,new_generators));
+      new_centre=new_centre+column(new_generators,j);
+      result.adjoin(Parallelotope(new_centre,new_generators));
+
+      return result;
+    }
+    
     template <typename R>
     ListSet<R,Parallelotope>
     Parallelotope<R>::subdivide() const 
@@ -300,7 +330,13 @@ namespace Ariadne {
       return result;
     }
     
-
+    template<typename R>
+    bool
+    Parallelotope<R>::disjoint(const Parallelotope<R>& p) const
+    {
+     return Geometry::disjoint(Polyhedron<R>(*this),Polyhedron<R>(p));
+    }
+    
     template <typename R>
     std::ostream&
     operator<<(std::ostream& os, const Parallelotope<R>& p) 

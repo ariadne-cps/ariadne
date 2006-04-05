@@ -559,6 +559,31 @@ namespace Ariadne {
       return result;
     }
 
+    template<typename R>
+    GridCellListSet<R>
+    over_approximation_of_intersection(const Zonotope<R>& z, 
+                                       const Rectangle<R>& r,
+                                       const Grid<R>& g) 
+    {
+      GridCellListSet<R> result(g);
+      assert(z()==r.dimension());
+      assert(g.dimension()==z.dimension());
+      Rectangle<R> bb=intersection(z.bounding_box(),r);
+
+      if(!bb.empty()) {
+        GridRectangle<R> gbb=over_approximation(bb,g);
+        LatticeRectangle block=gbb.position();
+
+        for(LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
+          GridCell<R> cell(g,*iter);
+          if(!disjoint(Rectangle<R>(cell),z)) {
+            result.adjoin(cell);
+          }
+        }
+      }
+      return result;
+    }
+
     template<typename R, template<typename> class BS>
     GridMaskSet<R>
     over_approximation_of_intersection(const ListSet<R,BS>& ls, const Rectangle<R>& r, const FiniteGrid<R>& g) 

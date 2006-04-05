@@ -66,31 +66,31 @@ namespace Ariadne {
       const size_type m=p.dimension();
       const size_type n=p.dimension();
       
-      LinearAlgebra::vector< Interval<R> > cuboid_vector(m);
+      LinearAlgebra::interval_vector<R> cuboid_vector(m);
       const Interval<R> unit_interval(-1,1);
       for(size_type i=0; i!=cuboid_vector.size(); ++i) {
-        cuboid_vector[i]=Interval<R>(-1,1);
+        cuboid_vector(i)=Interval<R>(-1,1);
       }
             
       const Geometry::Point<R>& c=p.centre();
       const LinearAlgebra::matrix<R>& g=p.generators();
       
       Geometry::Point<R> img_centre=f.apply(c);
-      LinearAlgebra::matrix< Interval<R> > df_on_set = f.derivative(p.bounding_box());
+      LinearAlgebra::interval_matrix<R> df_on_set = f.derivative(p.bounding_box());
       LinearAlgebra::matrix<R> df_at_centre = f.derivative(c);
       
       LinearAlgebra::matrix<R> img_generators = df_at_centre*g;
       
       LinearAlgebra::matrix<R> img_generators_inverse = LinearAlgebra::inverse(img_generators);
       
-      LinearAlgebra::matrix< Interval<R> > cuboid_transform = img_generators_inverse * df_on_set * g;
+      LinearAlgebra::interval_matrix<R> cuboid_transform = img_generators_inverse * df_on_set * g;
       
-      LinearAlgebra::vector< Interval<R> > new_cuboid = cuboid_transform * cuboid_vector;
+      LinearAlgebra::interval_vector<R> new_cuboid = cuboid_transform * cuboid_vector;
       
       R new_cuboid_sup(0);
       for(size_type j=0; j!=n; ++j) {
-        new_cuboid_sup=std::max( new_cuboid_sup, R(abs(new_cuboid[j].lower())) );
-        new_cuboid_sup=std::max( new_cuboid_sup, R(abs(new_cuboid[j].upper())) );
+        new_cuboid_sup=std::max( new_cuboid_sup, R(abs(new_cuboid(j).lower())) );
+        new_cuboid_sup=std::max( new_cuboid_sup, R(abs(new_cuboid(j).upper())) );
       }
       
       Geometry::Parallelotope<R> result(img_centre,img_generators);
@@ -98,9 +98,9 @@ namespace Ariadne {
     }
 
     template<typename R, template<typename> class BS>
-    Ariadne::Geometry::ListSet<R,BS> 
-    apply(const Map<R>& f, const Ariadne::Geometry::ListSet<R,BS>& ds) {
-      Ariadne::Geometry::ListSet<R,BS> result(f.result_dimension());
+    Geometry::ListSet<R,BS> 
+    apply(const Map<R>& f, const Geometry::ListSet<R,BS>& ds) {
+      Geometry::ListSet<R,BS> result(f.result_dimension());
       for(typename Geometry::ListSet<R,BS>::const_iterator iter=ds.begin(); iter!=ds.end(); ++iter) {
         result.push_back(apply(f,*iter));
       }
@@ -109,28 +109,28 @@ namespace Ariadne {
      
     
     template<typename R>
-    Ariadne::Geometry::GridMaskSet<R> 
+    Geometry::GridMaskSet<R> 
     chainreach(const Map<R>& f, 
-               const Ariadne::Geometry::ListSet<R,Ariadne::Geometry::Rectangle>& is, 
-               const Ariadne::Geometry::FiniteGrid<R>& g, 
-               const Ariadne::Geometry::Rectangle<R>& bb) 
+               const Geometry::ListSet<R,Ariadne::Geometry::Rectangle>& is, 
+               const Geometry::FiniteGrid<R>& g, 
+               const Geometry::Rectangle<R>& bb) 
     {
       typedef typename Ariadne::Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
       
-      Ariadne::Geometry::GridMaskSet<R> result(g);
-      Ariadne::Geometry::GridMaskSet<R> found=over_approximation_of_intersection(is,bb,g);
-      Ariadne::Geometry::GridMaskSet<R> image(g);
+      Geometry::GridMaskSet<R> result(g);
+      Geometry::GridMaskSet<R> found=over_approximation_of_intersection(is,bb,g);
+      Geometry::GridMaskSet<R> image(g);
       
       while(!subset(found,result)) {
         found=difference(found,result);
         result.adjoin(found);
-        image=Ariadne::Geometry::GridMaskSet<R>(g);
+        image=Geometry::GridMaskSet<R>(g);
         uint size=0;
         for(gms_const_iterator iter=found.begin(); iter!=found.end(); ++iter) {
           ++size;
-          Ariadne::Geometry::Rectangle<R> r=*iter;
-          Ariadne::Geometry::Parallelotope<R> pp(r);
-          Ariadne::Geometry::Parallelotope<R> fp(Ariadne::Evaluation::apply(f,pp));
+          Geometry::Rectangle<R> r=*iter;
+          Geometry::Parallelotope<R> pp(r);
+          Geometry::Parallelotope<R> fp(Ariadne::Evaluation::apply(f,pp));
           Geometry::GridCellListSet<R> oai=over_approximation_of_intersection(fp,bb,g);
           image.adjoin(oai);
         }

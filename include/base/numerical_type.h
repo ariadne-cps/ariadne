@@ -165,9 +165,12 @@ namespace Ariadne {
   }
 
   /* numerical traits */
+  /*! \brief Tags a class representing a ring. */
   class ring_tag { };
+  /*! \brief Tags a class representing a field. */
   class field_tag { };
     
+  /*! \brief Typedef's describing a numerical type. */
   template<typename T> class numerical_traits;
     
   template<> class numerical_traits<double> {
@@ -188,7 +191,10 @@ namespace Ariadne {
     typedef Rational field_extension_type;
   };
 
-  template<typename Res, typename Arg> inline Res convert_to(const Arg& x) { return Res(x); }
+  /*! \brief Convert from type \p Arg to type \p Res. */
+  template<typename Res, typename Arg> Res convert_to(const Arg& x) { return Res(x); }
+  /*! \brief Approximate \a x by an element of \p Res with accuracy \a e. */
+  template<typename Res, typename Arg, typename EArg> Res approximate(const Arg& x, const EArg& e);
   
   template<> inline Rational convert_to(const Rational& q) { return q; }
   template<> inline Rational convert_to(const Dyadic& d) { return Rational(d); }
@@ -200,13 +206,19 @@ namespace Ariadne {
   template<> inline int convert_to(const Integer& n) { return n.get_si(); }
   template<> inline long convert_to(const Integer& n) { return n.get_si(); }
   
-  template<typename Res, typename Arg>
-  Res approximate(const Arg& x, const int& p);
-
+ 
+  template<> inline double approximate(const double& x, const double& e) {
+    return x;
+  }
   
-  inline Rational approximate(const Rational& q, const Rational& e) {
-    //Rational r=floor(q);
+  template<> inline Rational approximate(const Rational& q, const Rational& e) {
     return q;
+  }
+  
+  template<> inline Dyadic approximate(const Rational& q, const Dyadic& e) {
+    Dyadic x=Dyadic(q);
+    assert(abs(Rational(x)-q)<Rational(e));
+    return x;
   }
   
   /* names (for diagnostic output) */

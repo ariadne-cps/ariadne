@@ -39,104 +39,150 @@ namespace Ariadne {
   namespace LinearAlgebra {
     
     /*! \brief A vector of intervals. */
-    template<typename Real>
-    class interval_vector : public vector< Interval<Real> >
+    template<typename R>
+    class interval_vector
     {
      private:
-      typedef vector< Interval<Real> > Base;
+      vector< Interval<R> > Base;
      public:
       template<typename E> interval_vector(const vector_expression<E> v) : Base(v()) { }
+      interval_vector() : Base() { }
+      interval_vector(const size_type& n) : Base(n) { }
+      interval_vector(const vector<R>& v) : Base(v.size()) { 
+        for(size_type i=0; i!=this->size(); ++i) {
+          Base.operator()(i) = Interval<R>(v(i),v(i));
+        }
+      }
+      interval_vector(const vector<R>& v, const R& r) : Base(v.size()) { 
+        for(size_type i=0; i!=this->size(); ++i) {
+          Base.operator()(i) = Interval<R>(v(i)-r,v(i)+r);
+        }
+      }
+      size_type size() const { return Base.size(); }
+      Interval<R>& operator() (const size_type& n) { return Base.operator()(n); }
+      const Interval<R>& operator() (const size_type& n) const { return Base.operator()(n); }
     };
       
-    template <typename Real>
-    vector< Interval<Real> > 
-    operator+(const interval_vector<Real>& iv, const vector<Real> v)
+    template <typename R>
+    inline
+    interval_vector<R> 
+    operator+(const interval_vector<R>& iv, const vector<R> v)
     {
-      interval_vector<Real> result(v.size());
+      interval_vector<R> result(v.size());
       for(size_type i=0; i!=result.size(); ++i) {
         result(i)=v(i)+iv(i);
       }
       return result;
     }
 
-    template <typename Real>
-    interval_vector<Real> 
-    operator+(const vector<Real>& v, const interval_vector<Real> iv)
+    template <typename R>
+    inline
+    interval_vector<R> 
+    operator+(const vector<R>& v, const interval_vector<R> iv)
     {
-      interval_vector<Real> result(v.size());
+      interval_vector<R> result(v.size());
       for(size_type i=0; i!=result.size(); ++i) {
         result(i)=v(i)+iv(i);
       }
       return result;
     }
 
-    template<typename Real>
+    template <typename R>
     inline
-    interval_vector<Real>
-    operator*(const Real& s, const interval_vector<Real>& v)
+    interval_vector<R> 
+    operator+(const interval_vector<R>& iv1, const interval_vector<R> iv2)
     {
-      return Interval<Real>(s)*v;
+      interval_vector<R> result(iv1.size());
+      for(size_type i=0; i!=result.size(); ++i) {
+        result(i)=iv1(i)+iv2(i);
+      }
+      return result;
     }
-  }
-}  
 
-
-namespace boost {
-  namespace numeric {
-    namespace ublas {
-      
-      using Ariadne::Interval;
-      using Ariadne::size_type;
-      
-      template <typename Real>
-      vector< Interval<Real> > 
-      operator+(const vector< Interval<Real> >& iv, const vector<Real> v)
-      {
-        vector< Interval<Real> > result(v.size());
-        for(size_type i=0; i!=result.size(); ++i) {
-          result(i)=v(i)+iv(i);
-        }
-        return result;
-      }
-
-      template <typename Real>
-      vector< Interval<Real> > 
-      operator+(const vector<Real>& v, const vector< Interval<Real> > iv)
-      {
-        vector< Interval<Real> > result(v.size());
-        for(size_type i=0; i!=result.size(); ++i) {
-          result(i)=v(i)+iv(i);
-        }
-        return result;
-      }
-
-      template<typename Real>
-      inline
-      vector< Interval<Real> >
-      operator*(const Real& s, const vector< Interval<Real> >& v)
-      {
-        return Interval<Real>(s)*v;
-      }
-      
-    }
-  }
-}
-  
-namespace Ariadne {
-  namespace LinearAlgebra {
-    template<typename Real>
+    template<typename R>
     inline
-    Real
-    norm(const vector< Interval<Real> >& v)
+    interval_vector<R>
+    operator*(const Interval<R>& s, const interval_vector<R>& v)
     {
-      Real norm=Real(0);
+      interval_vector<R> result(v.size());
+      for(size_type i=0; i!=result.size(); ++i) {
+        result(i)=s*v(i);
+      }
+      return result;
+    }
+
+    template<typename R>
+    inline
+    interval_vector<R>
+    operator*(const R& s, const interval_vector<R>& v)
+    {
+      return Interval<R>(s)*v;
+    }
+
+    template<typename R>
+    inline
+    interval_vector<R>
+    operator*(const Interval<R>& s, const vector<R>& v)
+    {
+      return s*interval_vector<R>(v); 
+    }
+
+
+    template<typename R>
+    inline
+    vector<R>
+    centre(const interval_vector<R>& v)
+    {
+      vector<R> result(v.size());
       for (size_type i=0; i<v.size(); i++) {
-        norm=std::max(norm,Real(abs(v(i).lower())));
-        norm=std::max(norm,Real(abs(v(i).upper())));
+        result(i)=(v(i).upper()+v(i).lower())/2;
       }
-      return norm;
+      return result;
     }
     
+    template<typename R>
+    inline
+    R
+    radius(const interval_vector<R>& v)
+    {
+      R diameter=0;
+      for (size_type i=0; i<v.size(); i++) {
+        diameter=max(diameter,R(v(i).upper()-v(i).lower()));
+      }
+      return diameter/2;
+    }
+    
+    template<typename R>
+    inline
+    Interval<R>
+    norm(const interval_vector<R>& v)
+    {
+      R lower_bound=0;
+      R upper_bound=0;
+      for (size_type i=0; i<v.size(); i++) {
+        if(!(v(i).lower()<=0 && v(i).upper()>=0)) {
+          lower_bound=std::min(lower_bound,std::min(abs(v(i).lower(),abs(v(i).upper()))));
+        }
+        upper_bound=std::max(upper_bound,std::max(abs(v(i).lower()),abs(v(i).upper())));
+      }
+      return Interval<R>(lower_bound,upper_bound);
+    }
+    
+    template <typename R>
+    inline
+    std::ostream&
+    operator<<(std::ostream& os, const interval_vector<R>& v)
+    {
+      os << "[";
+      if(v.size()>0) {
+        os << v(0);
+      }
+      for(uint i=1; i!=v.size(); ++i) {
+        os << "," << v(i);
+      }
+      os << "]";
+      return os;
+    }
   }
 }  
 

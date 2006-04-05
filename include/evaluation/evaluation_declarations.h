@@ -37,6 +37,9 @@ namespace Ariadne {
     template <typename R> class VectorField;
     template <typename R> class AffineVectorField;
 
+    template <typename R> class HenonMap;
+    template <typename R> class LorenzSystem;
+      
   }
 }
 

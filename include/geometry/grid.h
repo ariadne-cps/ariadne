@@ -69,27 +69,27 @@ namespace Ariadne {
       
       /*! \brief The underlying dimension of the grid. */
       virtual dimension_type dimension() const = 0;
-      /*! \brief The coordinate of the @a n th subdivision point in dimension @a d. */
+      /*! \brief The coordinate of the \a n th subdivision point in dimension \a d. */
       virtual real_type subdivision_coordinate(dimension_type d, index_type n) const = 0;
-      /*! \brief The interval @math [p_n,p_{n+1}) in dimension @a d index containing @a x. */
+      /*! \brief The interval \f$[p_n,p_{n+1})\f$ in dimension \a d index containing \a x. */
       virtual index_type subdivision_interval(dimension_type d, const real_type& x) const = 0;
 
       /*! \brief Tests whether the grid contains the given lattice rectangle within its bounds. */
       virtual bool contains(const LatticeRectangle& r) const = 0;
 
-      /*! \brief The index in dimension @a d of the subdivision point @a x. Throws an exception if @a x is not a subdivision point. */
+      /*! \brief The index in dimension \a d of the subdivision point \a x. Throws an exception if \a x is not a subdivision point. */
       index_type subdivision_index(dimension_type d, const real_type& x) const {
         index_type n=subdivision_interval(d,x);
         if(subdivision_coordinate(d,n) == x) { return n; }
         throw std::domain_error("Value is not a grid coordinate");
       }
 
-      /*! \brief The index of the subdivision point below x. */
+      /*! \brief The index of the subdivision point below \a x. */
       index_type subdivision_lower_index(dimension_type d, const real_type& x) const {
         return subdivision_interval(d,x);
       }
 
-      /*! \brief The index of the subdivision point above x. */
+      /*! \brief The index of the subdivision point above \a x. */
       index_type subdivision_upper_index(dimension_type d, const real_type& x) const {
         index_type n=subdivision_interval(d,x);
         return subdivision_coordinate(d,n) == x ? n : n+1;
@@ -121,12 +121,12 @@ namespace Ariadne {
         return this->_subdivision_coordinates.size();
       }
     
-      /*! \brief The coordinate of the @a n th subdivision point in dimension @a d. */
+      /*! \brief The coordinate of the \a n th subdivision point in dimension \a d. */
       virtual real_type subdivision_coordinate(dimension_type d, index_type n) const {
         return _subdivision_coordinates[d][n];
       }
   
-      /*! \brief The index of interval in dimension @a d index containing @a x. */
+      /*! \brief The index of interval in dimension \a d index containing \a x. */
       virtual index_type subdivision_interval(dimension_type d, const real_type& x) const {
         typename std::vector<R>::const_iterator pos;
         if(x<_subdivision_coordinates[d].front() || x>_subdivision_coordinates[d].back()) {
@@ -175,7 +175,7 @@ namespace Ariadne {
       SizeArray sizes() const { return bounds().sizes(); }
       /*! \brief The total number of cells. */
       size_type capacity() const { return bounds().size(); }
-      /*! \brief The number of subdivision intervals in dimension @a d. */
+      /*! \brief The number of subdivision intervals in dimension \a d. */
       size_type size(dimension_type i) const { return _subdivision_coordinates[i].size()-1; }
 
       /*! \brief The rectangle bounding the grid. */
@@ -210,7 +210,7 @@ namespace Ariadne {
       virtual dimension_type dimension() const { 
         return _subdivision_lengths.size(); }
 
-      /*! \brief The coordinate of the @a n th subdivision point in dimension @a d. */
+      /*! \brief The coordinate of the \a n th subdivision point in dimension \a d. */
       virtual real_type subdivision_coordinate(dimension_type d, index_type n) const { 
         return _subdivision_lengths[d] * n; }
 
@@ -218,7 +218,7 @@ namespace Ariadne {
       real_type subdivision_length(dimension_type d) const { 
         return _subdivision_lengths[d]; }
 
-      /*! \brief The index of interval in dimension @a d index containing @a x. */
+      /*! \brief The index of interval in dimension \a d index containing \a x. */
       virtual index_type subdivision_interval(dimension_type d, const real_type& x) const {
         index_type result = quotient(x,_subdivision_lengths[d]);
         return result;

@@ -45,12 +45,12 @@ namespace Ariadne {
      *
      * FIXME: The dyadic version doesn't work properly due to divisions. 
      */
-    template<typename Real>
+    template<typename R>
     class LinearProgram {
      public:
-      typedef Real real_type;
-      typedef matrix<Real> matrix_type;
-      typedef vector<Real> vector_type;
+      typedef R real_type;
+      typedef matrix<R> matrix_type;
+      typedef vector<R> vector_type;
      
       /*! \brief Destructor. */
       ~LinearProgram();
@@ -247,78 +247,78 @@ namespace Ariadne {
       size_type steepest_edge() const;
     };
 
-    template<typename Real>
+    template<typename R>
     std::ostream& 
-    operator<<(std::ostream& os, const LinearProgram<Real>& lp);
+    operator<<(std::ostream& os, const LinearProgram<R>& lp);
     
     
     
     
-    template<typename Real>
+    template<typename R>
     inline 
-    const typename LinearProgram<Real>::matrix_type&
-    LinearProgram<Real>::tableau() const 
+    const typename LinearProgram<R>::matrix_type&
+    LinearProgram<R>::tableau() const 
     {
       return _tableau;
     }
     
-    template<typename Real>
+    template<typename R>
     inline 
-    typename LinearProgram<Real>::matrix_type&
-    LinearProgram<Real>::tableau() 
+    typename LinearProgram<R>::matrix_type&
+    LinearProgram<R>::tableau() 
     {
       return _tableau;
     }
     
-    template<typename Real>
+    template<typename R>
     inline 
     size_type
-    LinearProgram<Real>::number_of_constraints() const 
+    LinearProgram<R>::number_of_constraints() const 
     {
       return _tableau.size1()-1;
     }
     
-    template<typename Real>
+    template<typename R>
     inline 
     size_type
-    LinearProgram<Real>::number_of_free_variables() const 
+    LinearProgram<R>::number_of_free_variables() const 
     {
       return _tableau.size2()-1;
     }
     
-    template<typename Real>
+    template<typename R>
     inline 
     size_type
-    LinearProgram<Real>::number_of_variables() const 
+    LinearProgram<R>::number_of_variables() const 
     {
       return _tableau.size1()+_tableau.size2()-2;
     }
     
 
     
-    template<typename Real>
+    template<typename R>
     inline 
     void
-    LinearProgram<Real>::solve() const 
+    LinearProgram<R>::solve() const 
     {
       this->solve_tableau();
     }
     
     
-    template<typename Real>
+    template<typename R>
     inline
     bool 
-    LinearProgram<Real>::is_satisfiable() const 
+    LinearProgram<R>::is_satisfiable() const 
     {
       assert(false);
       return true;
     }
     
 /*
-    template<typename Real>
+    template<typename R>
     inline 
-    typename LinearProgram<Real>::vector_type
-    LinearProgram<Real>::feasible_point() const 
+    typename LinearProgram<R>::vector_type
+    LinearProgram<R>::feasible_point() const 
     {
       if (is_satisfiable()) {
         return last_point;

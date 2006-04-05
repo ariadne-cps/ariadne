@@ -45,9 +45,9 @@ typedef Ariadne::Geometry::Zonotope<Real> RZonotope;
 typedef Ariadne::Geometry::Polyhedron<Real> RPolyhedron;
 
 typedef Ariadne::LinearAlgebra::vector<Real> RVector;
-typedef Ariadne::LinearAlgebra::vector<RInterval> RIntervalVector;
+typedef Ariadne::LinearAlgebra::interval_vector<Real> RIntervalVector;
 typedef Ariadne::LinearAlgebra::matrix<Real> RMatrix;
-typedef Ariadne::LinearAlgebra::matrix<RInterval> RIntervalMatrix;
+typedef Ariadne::LinearAlgebra::interval_matrix<Real> RIntervalMatrix;
 
 typedef Ariadne::Evaluation::VectorField<Real> RVectorField;
 typedef Ariadne::Evaluation::AffineVectorField<Real> RAffineVectorField;

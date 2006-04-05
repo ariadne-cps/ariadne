@@ -47,10 +47,12 @@ typedef Ariadne::Evaluation::VectorField<Real> RVectorFieldBase;
 struct RVectorField : RVectorFieldBase, wrapper<RVectorFieldBase>
 {
   dimension_type dimension() const { return this->get_override("dimension")(); }
+  std::string name() const { return this->get_override("name")(); }
 };
 
 void export_vector_field() {
   class_<RVectorField, boost::noncopyable>("VectorField")
     .def("dimension", pure_virtual(&RVectorFieldBase::dimension))
+    .def("name", pure_virtual(&RVectorFieldBase::name))
   ;
 }

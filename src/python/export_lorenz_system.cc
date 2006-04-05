@@ -33,19 +33,8 @@ using boost::python::bases;
 using boost::python::return_value_policy;
 using boost::python::copy_const_reference;
 
-#include "python/real_typedef.h"
+#include "python/typedefs.h"
   
-typedef Ariadne::Interval<Real> RInterval;
-typedef Ariadne::Geometry::Point<Real> RPoint;
-typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
-typedef Ariadne::Geometry::Parallelotope<Real> RParallelotope;
-typedef Ariadne::LinearAlgebra::vector<Real> RVector;
-typedef Ariadne::LinearAlgebra::vector<RInterval> RIntervalVector;
-typedef Ariadne::LinearAlgebra::matrix<Real> RMatrix;
-typedef Ariadne::LinearAlgebra::matrix<RInterval> RIntervalMatrix;
-typedef Ariadne::Evaluation::VectorField<Real> RVectorField;
-typedef Ariadne::Evaluation::LorenzSystem<Real> RLorenzSystem;
-
 typedef RVector (RLorenzSystem::* PointMap) (const RPoint&) const;
 typedef RIntervalVector (RLorenzSystem::* RectangleMap) (const RRectangle&) const;
 typedef RMatrix (RLorenzSystem::* PointDerivative) (const RPoint&) const;

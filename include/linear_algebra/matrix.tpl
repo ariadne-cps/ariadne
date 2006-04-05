@@ -23,13 +23,16 @@
  
 #include "../linear_algebra/matrix.h"
 
+#include <algorithm>
+#include "../base/array.h"
+
 namespace boost {
   namespace numeric {
     namespace ublas {
 
-      template <typename Real>
+      template <typename R>
       std::ostream&
-      operator<<(std::ostream& os, const matrix<Real>& A)
+      operator<<(std::ostream& os, const matrix<R>& A)
       {
         if(A.size1()==0 || A.size2()==0) {
           return os << "[ ]";
@@ -59,26 +62,7 @@ namespace boost {
         return os;
       }
        
-      template <>
-      std::ostream&
-      operator<<(std::ostream& os, const matrix< Ariadne::Interval<Ariadne::Rational> >& A)
-      {
-        if(A.size1()==0 || A.size2()==0) {
-          return os << "[ ]";
-        }
-        
-        for(uint i=0; i!=A.size1(); ++i) {
-          for(uint j=0; j!=A.size2(); ++j) {
-            os << (j==0 ? (i==0 ? "[ " : "; ") : ",");
-            double l=Ariadne::convert_to<double>(A(i,j).lower());
-            double u=Ariadne::convert_to<double>(A(i,j).upper());
-            os << Ariadne::Interval<double>(l,u);
-          }
-        }
-        os << " ]";
-        return os;
-      }
-       
+
     }
   }
 }
@@ -87,10 +71,10 @@ namespace boost {
 namespace Ariadne {
   namespace LinearAlgebra {
 
-    template <typename Real>
-    matrix<Real> zero_matrix(size_type r, size_type c) 
+    template <typename R>
+    matrix<R> zero_matrix(size_type r, size_type c) 
     {
-      matrix<Real> A(r,c);
+      matrix<R> A(r,c);
       for (size_type i=0; i<r; ++i) {
         for (size_type j=0; j<c; ++j) {
           A(i,j)=0.0;
@@ -99,13 +83,13 @@ namespace Ariadne {
       return A;
     }
   
-    template<typename Real>
-    Real
-    norm(const matrix<Real>& A) 
+    template<typename R>
+    R
+    norm(const matrix<R>& A) 
     {
-      Real result=0;
+      R result=0;
       for(size_type i=0; i!=A.size1(); ++i) {
-        Real row_sum=0;
+        R row_sum=0;
         for(size_type j=0; j!=A.size2(); ++j) {
           row_sum+=abs(A(i,j));
         }
@@ -114,19 +98,19 @@ namespace Ariadne {
       return result;
     }
         
-    template<typename Real>
-    Real
-    log_norm(const matrix<Real>& A) 
+    template<typename R>
+    R
+    log_norm(const matrix<R>& A) 
     {
-      Real result=0;
+      R result=0;
       for(size_type i=0; i!=A.size1(); ++i) {
-        Real row_sum=A(i,i);
+        R row_sum=A(i,i);
         for(size_type j=0; j!=A.size2(); ++j) {
           if(i!=j) {
             row_sum+=abs(A(i,j));
           }
         }
-        result=std::max(result,row_sum);
+        result=max(result,row_sum);
       }
       return result;
     }
@@ -135,7 +119,7 @@ namespace Ariadne {
     matrix<R>
     concatenate_columns(const matrix<R>& A1, const matrix<R>& A2) {
       assert(A1.size1()==A2.size1());
-      LinearAlgebra::matrix<R> result(A1.size1(),A2.size1()+A2.size2());
+      LinearAlgebra::matrix<R> result(A1.size1(),A1.size2()+A2.size2());
       for(size_type i=0; i!=result.size1(); ++i) {
         for(size_type j=0; j!=A1.size2(); ++j) {
           result(i,j)=A1(i,j);
@@ -150,63 +134,34 @@ namespace Ariadne {
 
    
     
-    template <typename Real>
-    matrix<Real>
-    exp_Ah(const matrix<Real>& A, 
-           const Real& h, 
-           const Real& e) 
+    template <typename R>
+    matrix<R>
+    exp_approx(const matrix<R>& A, 
+               const R& e) 
     {
-      matrix<Real> result=identity_matrix<Real>(A.size1());
+      matrix<R> result=identity_matrix<R>(A.size1());
       
-      Real norm_Ah=h*norm(A);
-      matrix<Real> AhpowNdivfN=result;
+      R norm_A=norm(A);
+      matrix<R> term=result;
       uint n=0;
-      while(norm(AhpowNdivfN)*n >= e*(n-norm_Ah)) {
+      while(norm(term)*n >= e*(n-norm_A)) {
         ++n;
-        AhpowNdivfN=(h/n)*(AhpowNdivfN*A);
-        result=result+AhpowNdivfN;
+        term=(term*A)/n;
+        result=result+term;
       }
       return result;
     }
     
-    template <typename Real> 
-    vector<Real> 
-    exp_b_approx(const matrix<Real> &A, 
-                 const vector<Real> &b, 
-                 const Real h, 
-                 const unsigned int n) 
-    {
-      matrix<Real> tmp,e_b;
-      
-      tmp=h*identity_matrix<Real>(A.size1());
-      e_b=tmp;
-      /* tmp = \frac{h^{1}}{1!}*A^{0} = I
-       * and e_b = \Sum_{j=0}^{0}\frac{h^(j+1)}{(j+1)!}*A^{j} */
-      for (size_type i=1; i< n; ++i) {
-        /* tmp = \frac{h^{i}}{i!}*A^{i-1}
-         * and e_b = \Sum_{j=0}^{i-1}\frac{h^(j+1)}{(j+1)!}*A^{j} */
-        
-        tmp *= (h/(i+1));
-        tmp = prod(tmp,A);        
-        /* tmp =  (h^(i+1)/(i+1)!)*A^i */
 
-        e_b += tmp;
-        /*  e_b = \Sum_{j=0}^{i}\frac{h^(j+1)}{(j+1)!}*A^{j} */
-      }
-      
-      return (prod(e_b,b));
-      /* out = ( \Sum_{j=0}^{n}\frac{h^(j+1)}{(j+1)!}*A^{j} ) b */
-    }
-   
-    template <typename Real>
+    template <typename R>
     void 
-    lu_local_dec(matrix<Real> &A, 
+    lu_local_dec(matrix<R> &A, 
                  const array<size_type> &row, const array<size_type> &col, 
                  const size_type &rows, const size_type &columns, 
                  const size_type &p) 
     {
       size_type i,j;
-      Real coef;
+      R coef;
   
       // perform lu decomposition on the sub matrix
       for (i=p+1; i< rows; i++) {
@@ -220,14 +175,16 @@ namespace Ariadne {
       }
     }
    
-    template <typename Real>
-    matrix<Real> 
-    lu_decompose(const matrix<Real> &A, 
+    template <typename R>
+    matrix<R> 
+    lu_decompose(const matrix<R> &A, 
                  array<size_type> &p_col, 
                  array<size_type> &p_row) 
     {
+      using std::swap;
+      
       //create output matrix
-      matrix<Real> lu_A(A);
+      matrix<R> lu_A(A);
   
       size_type rows,columns;
       rows=A.size1();
@@ -284,16 +241,16 @@ namespace Ariadne {
      * I supose that matrix is row based i.e. 
      * A(i,j) is the element in the i-th row and in the j-th column 
      */
-    template <typename Real>
-    matrix<Real> 
-    lu_decompose(const matrix<Real> &A, 
+    template <typename R>
+    matrix<R> 
+    lu_decompose(const matrix<R> &A, 
                  array<size_type> &p_array) 
     {
-      Real max,sum,p_val;
+      R max,sum,p_val;
       size_type i,j,k, rows=A.size1(), cols=A.size2(), pivot=0;
       
-      vector<Real> scale(rows);
-      matrix<Real> O=A;
+      vector<R> scale(rows);
+      matrix<R> O=A;
       
       for (i=0; i<rows; i++) {
         max=0.0;
@@ -361,15 +318,15 @@ namespace Ariadne {
      * I supose that boost::numeric::ublas::matrix is row based i.e. 
      * A(i,j) is the element in the i-th row and in the j-th column 
      */
-    template <typename Real>
-    vector<Real> 
-    lu_solve(const matrix<Real> &A, 
+    template <typename R>
+    vector<R> 
+    lu_solve(const matrix<R> &A, 
              const array<size_type> &p_array, 
-             const vector<Real> &b) 
+             const vector<R> &b) 
     {
       size_type i_diag=0, idx_p, rows=A.size1(), cols=A.size2(),i,j;
-      Real sum;
-      vector<Real> sol(cols);
+      R sum;
+      vector<R> sol(cols);
    
       for (i=0; i<rows&& i<cols; i++) {
         sol(i)=b(i);
@@ -414,15 +371,15 @@ namespace Ariadne {
     }
   
     /* WARNING!!! The following function has some precision problems */ 
-    template <typename Real>
+    template <typename R>
     inline
-    matrix<Real> 
-    Householder_QR(const matrix<Real> &A) {
+    matrix<R> 
+    Householder_QR(const matrix<R> &A) {
 
       size_type dim1=A.size1(),dim2=A.size2();
-      vector<Real> x(dim1);
-      matrix<Real> Q=identity_matrix<Real>(dim1),QA=A,Qi;
-      Real norm,coef;
+      vector<R> x(dim1);
+      matrix<R> Q=identity_matrix<R>(dim1),QA=A,Qi;
+      R norm,coef;
 
       for (size_type i=0; i< dim2; i++) {
         
@@ -441,7 +398,7 @@ namespace Ariadne {
       
         coef+=x(i)*x(i);
         
-        Qi=identity_matrix<Real>(dim1);
+        Qi=identity_matrix<R>(dim1);
           
         if (coef!=0) {
           for (size_type j=i; j< dim2; j++) {
@@ -458,24 +415,24 @@ namespace Ariadne {
       return Q;
     }
    
-    template <typename Real>
-    matrix<Real>
-    hermitian(const matrix<Real>& m) {
+    template <typename R>
+    matrix<R>
+    hermitian(const matrix<R>& m) {
        return herm(m);
     }
     
-    template <typename Real>
-    matrix<Real> 
-    inverse(const matrix<Real> &A) {
+    template <typename R>
+    matrix<R> 
+    inverse(const matrix<R> &A) {
       
       size_type rows=A.size1(), cols=A.size2(),i,j;
       
-      matrix<Real> inv_A(cols,rows);
-      vector<Real> Id_vect(rows), Id_sol;
+      matrix<R> inv_A(cols,rows);
+      vector<R> Id_vect(rows), Id_sol;
       array<size_type> p_array(rows);
       
 
-      matrix<Real> lu_A=lu_decompose(A, p_array);
+      matrix<R> lu_A=lu_decompose(A, p_array);
      
       for (j=0; j<rows; j++) {
         for (i=0; i<rows; i++)
@@ -499,9 +456,9 @@ namespace Ariadne {
     inverse(const matrix<Dyadic>& A);
     */
     
-    template <typename Real>
+    template <typename R>
     Integer 
-    common_denominator(const matrix<Real>& A)
+    common_denominator(const matrix<R>& A)
     {
       Integer denom=1;
       for (size_type i=0; i<A.size1(); ++i) {
@@ -512,9 +469,9 @@ namespace Ariadne {
       return denom;
     }
     
-    template <typename Real>
+    template <typename R>
     vector<Integer> 
-    row_common_denominators(const matrix<Real>& A) 
+    row_common_denominators(const matrix<R>& A) 
     {
       vector<Integer> denoms(A.size1());
       for(size_type i=0; i!=A.size1(); ++i) {
@@ -530,11 +487,11 @@ namespace Ariadne {
     
     
     /* \brief Transforms the linear inequalities $Ax\leq b$ to $AT^{-1}y \leq b$. */
-    template <typename Real>
+    template <typename R>
     void 
-    transform_linear_inequalities(const matrix<Real>& T, 
-                                  matrix<Real>& A, 
-                                  vector<Real>& b) 
+    transform_linear_inequalities(const matrix<R>& T, 
+                                  matrix<R>& A, 
+                                  vector<R>& b) 
     {
       A=A*inverse(T);
     }
@@ -545,7 +502,7 @@ namespace Ariadne {
                                           matrix<Dyadic>& A, 
                                           vector<Dyadic>& b) 
     {
-      typedef Dyadic Real;
+      typedef Dyadic R;
       
       size_type n=A.size1();
       if(A.size1() != b.size()) {
@@ -573,11 +530,11 @@ namespace Ariadne {
         }
       }
       
-      Real rmultiplier = convert_to<Real>(multiplier);
-      matrix<Real> rTinv(n,n);
+      R rmultiplier = convert_to<R>(multiplier);
+      matrix<R> rTinv(n,n);
        for(size_type i=0; i!=n; ++i) {
         for(size_type j=0; j!=n; ++j) {
-          rTinv(i,j) = convert_to<Real>(iTinv(i,j));
+          rTinv(i,j) = convert_to<R>(iTinv(i,j));
         }
       }
 
@@ -585,9 +542,9 @@ namespace Ariadne {
       b=b*rmultiplier;
     }
    
-    template <class Real>
+    template <class R>
     bool 
-    independent_rows(matrix<Real> A) 
+    independent_rows(matrix<R> A) 
     {
      const size_type rows = A.size1(),cols = A.size2();
      size_type i,j,i2,j2;
@@ -610,17 +567,17 @@ namespace Ariadne {
       return true;
     } 
  
-    template <typename Real>
+    template <typename R>
     bool 
-    have_same_dimensions(const matrix<Real> &A,  const matrix<Real> &B) 
+    have_same_dimensions(const matrix<R> &A,  const matrix<R> &B) 
     {
       return (A.size1()==B.size1() && A.size2()==B.size2());
     }
     
-    template <typename Real>
+    template <typename R>
     bool 
-    equivalent_columns(const matrix<Real> &A, const size_type &A_col, 
-                       const matrix<Real> &B, const size_type &B_col) 
+    equivalent_columns(const matrix<R> &A, const size_type &A_col, 
+                       const matrix<R> &B, const size_type &B_col) 
     {
       if (A.size1()!=B.size1()) {
         throw std::domain_error("The two matrix have a diffentent number of rows"); 
@@ -633,9 +590,9 @@ namespace Ariadne {
       return true;
     }
   
-    template<typename Real>
+    template<typename R>
     size_type 
-    find_first_not_null_in_col(const matrix<Real> &A, 
+    find_first_not_null_in_col(const matrix<R> &A, 
                                const size_type &col) 
     {
       size_type i=0;
@@ -647,9 +604,9 @@ namespace Ariadne {
       
     }
     
-    template <class Real>
-    matrix<Real> 
-    remove_null_columns_but_one(const matrix<Real> &A) 
+    template <class R>
+    matrix<R> 
+    remove_null_columns_but_one(const matrix<R> &A) 
     {
       size_type directions=0;
       size_type rows=A.size1();
@@ -667,7 +624,7 @@ namespace Ariadne {
         }
       }
 
-      matrix<Real> new_A(rows,std::max(1u,directions));
+      matrix<R> new_A(rows,std::max(1u,directions));
 
       size_type j2=0;
       for(size_type j=0; j!=cols; ++j) {
@@ -682,11 +639,13 @@ namespace Ariadne {
       return new_A;
     }
     
-    template <typename Real>
+    template <typename R>
     void 
-    remove_null_columns(const matrix<Real> &A, 
+    remove_null_columns(const matrix<R> &A, 
                         array<size_type> &row, array<size_type> &col) 
     {
+      using std::swap;
+      
       size_type i,j, columns=col.size(), rows=row.size();
       size_type new_columns=columns;
   
@@ -715,9 +674,9 @@ namespace Ariadne {
     }
 
 
-    template <typename Real>
-    matrix<Real> 
-    compute_space(const matrix<Real> &SA, 
+    template <typename R>
+    matrix<R> 
+    compute_space(const matrix<R> &SA, 
                   array<size_type> &row,const array<size_type> &col) 
     {
       size_type cols=col.size(), rows=row.size();
@@ -727,7 +686,7 @@ namespace Ariadne {
       size_type SA_cols=SA.size2(), A_rows=SA_cols-rows;
       size_type i,j,k,j2;
    
-      matrix<Real> A(A_rows,SA_cols);
+      matrix<R> A(A_rows,SA_cols);
 
       k=0;
       for (i=0; i<SA_cols; i++) {
@@ -741,7 +700,7 @@ namespace Ariadne {
         }
       }
 
-      Real aux;
+      R aux;
   
       for (i=rows; i<cols; i++) {
         A(k,col[i])=1;

@@ -32,7 +32,7 @@
 
 #include <boost/python.hpp>
 
-#include "python/real_typedef.h"
+#include "python/typedefs.h"
 
 using Ariadne::BooleanArray;
 using Ariadne::BinaryWord;

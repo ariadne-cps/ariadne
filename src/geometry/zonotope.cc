@@ -30,6 +30,14 @@ namespace Ariadne {
 
     template class Zonotope<Dyadic>;
 
+    template Geometry::Parallelotope<Dyadic> over_approximating_parallelotope(const Geometry::Zonotope<Dyadic>& z);
+
+    template Zonotope<Dyadic> minkowski_sum(const Zonotope<Dyadic>& z1, const Zonotope<Dyadic>& z2);
+    template Zonotope<Dyadic> minkowski_difference(const Zonotope<Dyadic>& z1, const Zonotope<Dyadic>& z2);
+
+    template Zonotope<Dyadic> operator+(const Rectangle<Dyadic>& r, const LinearAlgebra::zonotopic_vector<Dyadic>& z);
+    template Zonotope<Dyadic> operator+(const Zonotope<Dyadic>& r, const LinearAlgebra::zonotopic_vector<Dyadic>& z);
+    
     template std::ostream& operator<<(std::ostream&, const Zonotope<Dyadic>&);
     template std::istream& operator>>(std::istream&, Zonotope<Dyadic>&);
 

@@ -76,12 +76,10 @@
 #include <iostream>
 
 #include "../base/basic_type.h"
+#include "../base/array.h"
 
 namespace Ariadne {
-  namespace Base {
-    typedef array<index_type> IndexArray;
-    typedef array<size_type> SizeArray;
-    
+  namespace Base {    
     class BinaryWordList;
     class BinaryWordFixedSizeList;
     

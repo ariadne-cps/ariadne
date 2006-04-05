@@ -40,12 +40,26 @@
 namespace boost { 
   namespace numeric { 
     namespace ublas {
-      template <typename Real>
+
+      template <typename R>
       std::ostream&
-      operator<<(std::ostream& os, const vector<Real>& v);
+      operator<<(std::ostream& os, const vector<R>& v)
+      {
+        os << "[";
+        if(v.size()>0) {
+          os << v[0];
+        }
+        for(uint i=1; i!=v.size(); ++i) {
+          os << "," << v[i];
+        }
+        os << "]";
+        return os;
+      }
+
     }
   }
 }
+
 
 namespace Ariadne {
   namespace LinearAlgebra {
@@ -53,11 +67,12 @@ namespace Ariadne {
     using boost::numeric::ublas::vector;
     using boost::numeric::ublas::vector_expression;
         
-    template<typename Real>
+/*
+    template<typename R>
     class Vector
-      : public boost::numeric::ublas::vector<Real> 
+      : public boost::numeric::ublas::vector<R> 
     {
-      typedef boost::numeric::ublas::vector<Real> Base;
+      typedef boost::numeric::ublas::vector<R> Base;
      public:
       template<typename E>
       Vector(const boost::numeric::ublas::vector_expression<E>& v) : Base(v().size()) {
@@ -66,20 +81,21 @@ namespace Ariadne {
         }
       }
     };
+*/
     
-    template <typename Real>
-    inline vector<Real> zero_vector(dimension_type dim) {
-      vector<Real> v(dim);
+    template <typename R>
+    inline vector<R> zero_vector(dimension_type dim) {
+      vector<R> v(dim);
       for (dimension_type i=0; i<dim; ++i) {
         v(i)=0;
       }
       return v;
     }
     
-    template <typename Real>
-    inline bool linear_multiple(const vector<Real> u, const vector<Real>& v) {
+    template <typename R>
+    inline bool linear_multiple(const vector<R> u, const vector<R>& v) {
       assert(u.dimension()==v.dimension());
-      Real multiple=0;
+      R multiple=0;
       for (dimension_type i=0; i<u.dimension(); ++i) {
         if(u(i)==0 && multiple!=0 && v(i)!=0) {
           return false;
@@ -96,19 +112,19 @@ namespace Ariadne {
       return true;
     }
     
-    template<typename Real>
+    template<typename R>
     inline
-    Real
-    norm(const vector<Real>& v) {
-      Real norm=Real(0);
+    R
+    norm(const vector<R>& v) {
+      R norm=R(0);
       for (size_type i=0; i<v.size(); ++i) {
-        norm=std::max(norm,abs(v(i)));
+        norm=std::max(norm,R(abs(v(i))));
       }
       return norm;
     }
     
-    template <typename Real>
-    inline Integer common_denominator(const vector<Real>& b) 
+    template <typename R>
+    inline Integer common_denominator(const vector<R>& b) 
     {
       Integer denom=1;
       for (dimension_type i=0; i< b.size(); ++i) {
@@ -117,10 +133,10 @@ namespace Ariadne {
       return denom;
     }
 
-    template <typename Real>
-    inline Real norm_infinite(const vector<Real>& b) 
+    template <typename R>
+    inline R norm_infinite(const vector<R>& b) 
     {
-      Real norm=0.0;
+      R norm=0.0;
       for (size_t i=0; i< b.size(); i++) {
         if (abs(b[i])>norm) norm=abs(b[i]);
       }

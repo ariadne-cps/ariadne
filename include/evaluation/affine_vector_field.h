@@ -31,10 +31,8 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
-
 #include "../linear_algebra/interval_vector.h"
 #include "../linear_algebra/interval_matrix.h"
-
 
 #include "../evaluation/vector_field.h"
 #include "../evaluation/affine_map.h"
@@ -55,48 +53,52 @@ namespace Ariadne {
       typedef LinearAlgebra::matrix<R> Matrix;
       typedef LinearAlgebra::vector<R> Vector;
     
-      typedef LinearAlgebra::vector< Interval<R> > IntervalVector;
-      typedef LinearAlgebra::matrix< Interval<R> > IntervalMatrix;
+      typedef LinearAlgebra::interval_vector<R> IntervalVector;
+      typedef LinearAlgebra::interval_matrix<R> IntervalMatrix;
     
+      virtual ~AffineVectorField();
+      
       AffineVectorField(const AffineVectorField<R>& F) : _A(F.A()), _b(F.b()) { }
       AffineVectorField(const Matrix &A, const Vector &b) : _A(A), _b(b) { }
     
-      Vector apply(const State& s) const { return this->_A*s.position_vector()+this->_b; }
-      IntervalVector apply(const Rectangle& r) const {
-        IntervalVector iv(this->dimension());
-        for(dimension_type i=0; i!=this->dimension(); ++i) {
-          iv[i]=r.interval(i);
-        }
-        return IntervalVector(this->_A*iv)+(this->_b);
-      }
+      LinearAlgebra::vector<R> apply(const Geometry::Point<R>& s) const;
+      LinearAlgebra::interval_vector<R> apply(const Geometry::Rectangle<R>& r) const;
     
-      Matrix derivative(const State& x) const { return this->_A; }
-      IntervalMatrix df(const Rectangle& r) const { 
-        IntervalMatrix result(this->dimension(),this->dimension());
-        for(dimension_type i=0; i!=this->dimension(); ++i) {
-          for(dimension_type j=0; j!=this->dimension(); ++j) {
-            result(i,j)=this->_A(i,j);
-          }
-        }
-        return result;
-      }
+      LinearAlgebra::matrix<R> derivative(const Geometry::Point<R>& x) const;
+      LinearAlgebra::interval_matrix<R> derivative(const Geometry::Rectangle<R>& r) const;
       
-      IntervalMatrix derivative(const Rectangle& r) const { 
-        return this->_A;
-      }
-      
-      const Matrix& A() const { return this->_A; }
-      const Vector& b() const { return this->_b; }
+      const LinearAlgebra::matrix<R>& A() const { return this->_A; }
+      const LinearAlgebra::vector<R>& b() const { return this->_b; }
       
       dimension_type dimension() const {
         return this->_b.size();
       }
       
+      std::string name() const { return "AffineVectorField"; }
+      
      private:
-      Matrix _A;
-      Vector _b;
+      LinearAlgebra::matrix<R> _A;
+      LinearAlgebra::vector<R> _b;
     };
  
+  }
+}
+
+namespace Ariadne {
+  namespace LinearAlgebra {
+    template <typename R>
+    matrix<R> 
+    exp_Ah_approx(const matrix<R>& A, 
+                  const R& h, 
+                  const R& e); 
+
+    /*! \brief Compute \f$A^{-1}(e^{Ah}-I) = h\sum_{n=0}^{\infty} \frac{{(Ah)}^{n}}{(n+1)!}\f$. */
+    template <typename R> 
+    matrix<R> 
+    exp_Ah_sub_id_div_A_approx(const matrix<R>& A, 
+                               const R& h, 
+                               const R& e); 
+
   }
 }
 

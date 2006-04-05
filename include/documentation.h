@@ -34,7 +34,7 @@
  * \section Introduction
  *
  * Ariadne supports three different real number types, \a double, \a dyadic and \a rational.
- * The \a double type is a \emph finite-precision type, and the \a dyadic and \a rational types are \emph arbitrary-precision types.
+ * The \a double type is a \em finite-precision type, and the \a dyadic and \a rational types are \em arbitrary-precision types.
  *
  * \section Finite-Precision Real Numbers
  *
@@ -149,7 +149,7 @@
  * Should we only support explicit approximation functions, like \c exp_approx for finite-precision types?
  * While it is in some ways appealing to make the approximation explicit,
  * I think it's probably better to allow <tt> double exp(double)</tt> in Ariadne, for two reasons.
- * The first reason is that this is common useage, and people might well include <cmath> anyway.
+ * The first reason is that this is common useage, and people might well include \c <cmath> anyway.
  * The second is operator overloading; we should insist that \c operator+ and add give the same answers,
  * and by disallowing add, we also need to disallow all operator overloading on double-precision types.
  *
@@ -547,7 +547,7 @@
  *
  * All fixed-precision computations on points are approximate. Further, the accuracy of the approximation is often unknown,
  * or hard to compute. Since the aim of the fixed-precision computation is rapid computation, no guarentees are given about 
- * the error. We use the syntax \tt f(x) to compute an approximation to \f$f(x)\f$ with no controls on the accuracy.
+ * the error. We use the syntax \c f(x) to compute an approximation to \f$f(x)\f$ with no controls on the accuracy.
  *
  *
  * \section real_functions Computations on real numbers.
@@ -557,9 +557,9 @@
  * For this reason, Ariadne provides extended operations for computation on real-valued functions.
  * 
  * Arbitrary-precision computations may be exact or approximate. 
- * The function \tt f(x) computes \f$f(x)\f$ exactly, if possible, 
+ * The function \c f(x) computes \f$f(x)\f$ exactly, if possible, 
  * and gives an error (at compile-time or run-time) if the result cannot be computed exactly.
- * The function \tt f_approx(x,e) computes \f$f(x)\f$ with an error of at most \f$e\f$.
+ * The function \c f_approx(x,e) computes \f$f(x)\f$ with an error of at most \f$e\f$.
  *
  * Although it is not, in general, possible to perform evaluation of functions on sets from their definitions on points,
  * in many cases such a computation can be extracted. 
@@ -651,8 +651,8 @@
  * \endcode
  *
  * \internal 
- *    Use \tt f.approx(p) or f.approximate(p) for function objects?
- *    Use \tt f_approx(p) or f_approximate(p) for functions?     
+ *    Use \c f.approx(p) or f.approximate(p) for function objects?
+ *    Use \c f_approx(p) or f_approximate(p) for functions?     
  
  * 
  */

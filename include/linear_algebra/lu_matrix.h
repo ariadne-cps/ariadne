@@ -35,31 +35,31 @@ namespace Ariadne {
   namespace LinearAlgebra {
 
     /*! \brief A matrix stored in LU product form. */
-    template<typename Real>
+    template<typename R>
     class lu_matrix {
-      matrix<Real> L() const;
-      matrix<Real> U() const;
+      matrix<R> L() const;
+      matrix<R> U() const;
       
-      operator matrix<Real> () const;
-      matrix<Real> inverse() const;
+      operator matrix<R> () const;
+      matrix<R> inverse() const;
      private:
-      matrix<Real> _elements;
+      matrix<R> _elements;
       array<size_type> _row_permuation;
       array<size_type> _column_permuation;
     };
     
-    template <typename Real>
+    template <typename R>
     void 
-    lu_local_dec(matrix<Real>& A, 
+    lu_local_dec(matrix<R>& A, 
                  const array<size_type>& row, 
                  const array<size_type>& col, 
                  const size_type& rows, 
                  const size_type& columns, 
                  const size_type& p);
    
-    template <typename Real>
-    matrix<Real> 
-    lu_decompose(const matrix<Real>& A, 
+    template <typename R>
+    matrix<R> 
+    lu_decompose(const matrix<R>& A, 
                  array<size_type>& p_col, 
                  array<size_type>& p_row);
                               
@@ -67,9 +67,9 @@ namespace Ariadne {
      * I supose that matrix is row based i.e. 
      * A(i,j) is the element in the i-th row and in the j-th column 
      */
-    template <typename Real>
-    matrix<Real> 
-    lu_decompose(const matrix<Real> &A, 
+    template <typename R>
+    matrix<R> 
+    lu_decompose(const matrix<R> &A, 
                  array<size_type>& p_array);
 
     
@@ -77,11 +77,11 @@ namespace Ariadne {
      * I supose that boost::numeric::ublas::matrix is row based i.e. 
      * A(i,j) is the element in the i-th row and in the j-th column 
      */
-    template <typename Real>
-    vector<Real> 
-    lu_solve(const matrix<Real>& A, 
+    template <typename R>
+    vector<R> 
+    lu_solve(const matrix<R>& A, 
              const array<size_type>& p_array, 
-             const vector<Real>& b);
+             const vector<R>& b);
              
 
   }

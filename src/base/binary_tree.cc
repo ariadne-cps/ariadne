@@ -22,10 +22,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file binary_tree.h
- *  \brief Cuboidal binary trees.
- */
-
 #include "base/arithmetic.h"
 #include "base/utility.h"
 #include "base/binary_tree.h"

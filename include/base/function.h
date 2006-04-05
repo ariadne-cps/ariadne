@@ -140,6 +140,42 @@ namespace Ariadne {
   }
   
   template<typename R> 
+  R exp_down(R x, R e) {
+    R result=0;
+    R term=1;
+    R error=term;
+    R n=0;    
+    while(error>e && x>n) {
+      result+=term;
+      n+=1;
+      term*=x/n;
+      error=term;
+    }
+    if(term<0) {
+      result+=term;
+    }
+    return result;
+  }
+  
+  template<typename R> 
+  R exp_up(R x, R e) {
+    R result=0;
+    R term=1;
+    R error=term;
+    R n=0;    
+    while(error>e && x>n) {
+      result+=term;
+      n+=1;
+      term*=x/n;
+      error=term;
+    }
+    if(term>0) {
+      result+=term;
+    }
+    return result;
+  }
+
+  template<typename R> 
   R cos_approx(R x, R e) {
     R result=0;
     R term=1;

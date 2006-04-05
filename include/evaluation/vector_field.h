@@ -50,17 +50,19 @@ namespace Ariadne {
       virtual ~VectorField();
      
       virtual LinearAlgebra::vector<R> apply(const Geometry::Point<R>& x) const;
-      virtual LinearAlgebra::vector< Interval<R> > apply(const Geometry::Rectangle<R>& A) const;
+      virtual LinearAlgebra::interval_vector<R> apply(const Geometry::Rectangle<R>& A) const;
 
       virtual LinearAlgebra::matrix<R> derivative(const Geometry::Point<R>& x) const;
-      virtual LinearAlgebra::matrix< Interval<R> > derivative(const Geometry::Rectangle<R>& A) const;
+      virtual LinearAlgebra::interval_matrix<R> derivative(const Geometry::Rectangle<R>& A) const;
     
       virtual dimension_type dimension() const = 0;
+
+      virtual std::string name() const = 0;
 
       LinearAlgebra::vector<R> operator() (const Geometry::Point<R>& x) const  {
         return this->apply(x); }
 
-      LinearAlgebra::vector< Interval<R> > operator() (const Geometry::Rectangle<R>& r) const {
+      LinearAlgebra::interval_vector<R> operator() (const Geometry::Rectangle<R>& r) const {
         return this->apply(r); }
      };
     

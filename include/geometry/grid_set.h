@@ -48,27 +48,6 @@
 
 #include "../geometry/list_set.h"
 
-/** \internal
- * Non-templated functions needed to implement grid denotable sets.
- *
- * Grid:
- * Insert a cell into a mask array
- *    insert(BooleanArray& mask, const IntegerArray& index, const IntegerArray& strides);
- * Insert a list of cells into a mask array
- *   insert(BooleanArray& mask, const IntegerBlockArray& indices, const IntegerArray& strides);
- * Insert a rectangle into a mask array.
- *   insert_rectangle(BooleanArray& mask, const IntegerArray& lower, const IntegerArray& upper, const IntegerArray& strides);
- * Insert a list of rectangles into a mask array.
- *   insert_rectangle(BooleanArray& mask, const IntegerBlockArray& indices, const IntegerArray& strides);
- * and, or and subtraction of mask arrays
- *   &=(BooleanArray& mask1, const BooleanArray& mask2)
- *   |=(BooleanArray& mask1, const BooleanArray& mask2)
- *   inplace_and_not(BooleanArray& mask1, const BooleanArray& mask2)
- * Extract list of cells from a mask array
- * Extract a list of rectangles from a mask array
- * Compute bounds from a list of cells.
- * Compute bounds from a list of rectangles.
- */
 
 /*TODO: Unify bounds in FiniteGrid, and make GridMaskSet use only finite grid bounds*/
 
@@ -124,6 +103,12 @@ namespace Ariadne {
     template<typename R>
     GridCellListSet<R>
     over_approximation_of_intersection(const Parallelotope<R>& p, 
+                                       const Rectangle<R>& r,
+                                       const Grid<R>& g);
+
+    template<typename R>
+    GridCellListSet<R>
+    over_approximation_of_intersection(const Zonotope<R>& p, 
                                        const Rectangle<R>& r,
                                        const Grid<R>& g);
 

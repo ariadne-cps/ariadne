@@ -49,6 +49,9 @@ namespace Ariadne {
     return (x>=R(0)) ? x : R(-x);
   }
 
+  using std::min;
+  using std::max;
+  
   /*! \brief Addition. */
   template<typename R> 
   inline

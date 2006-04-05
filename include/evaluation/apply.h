@@ -52,7 +52,7 @@ namespace Ariadne {
     Geometry::ListSet<R,BS> 
     apply(const Map<R>& f, const Geometry::ListSet<R,BS>& ds);
      
-    /*! \brief Compute the chain-reachable set of \p map starting in \p initial_set on the grid \p grid while staying within \p bounds. */
+    /*! \brief Compute the chain-reachable set of \a map starting in \a initial_set on the grid \a grid while staying within \a bounds. */
     template<typename R>
     Geometry::GridMaskSet<R> 
     chainreach(const Map<R>& map, 

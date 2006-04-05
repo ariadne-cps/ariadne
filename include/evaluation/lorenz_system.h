@@ -28,7 +28,10 @@
 #ifndef _ARIADNE_LORENZ_FLOW_H
 #define _ARIADNE_LORENZ_FLOW_H
 
+#include "../linear_algebra/vector.h"
+#include "../linear_algebra/interval_vector.h"
 #include "../linear_algebra/matrix.h"
+#include "../linear_algebra/interval_matrix.h"
 
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
@@ -57,24 +60,26 @@ namespace Ariadne {
       /*! \brief  The vector field applied to a state. */
       virtual LinearAlgebra::vector<R> apply(const State& x) const;
       /*! \brief  The map applied to a rectangle basic set. */
-      virtual LinearAlgebra::vector< Interval<R> > apply(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::interval_vector<R> apply(const Geometry::Rectangle<R>& r) const;
      
       /*! \brief  The derivative of the map at a point. */
       virtual LinearAlgebra::matrix<R> derivative(const State& x) const;
       /*! \brief  The derivative of the map over a rectangular basic set. */
-      virtual LinearAlgebra::matrix< Interval<R> > derivative(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::interval_matrix<R> derivative(const Geometry::Rectangle<R>& r) const;
             
-      /*! \brief  The parameter \f$\beta$\f. */
-      inline const Real& beta() const { return _b; }
-      /*! \brief  The parameter \f$\rho$\f. */
-      inline const Real& rho() const { return _p; }
-      /*! \brief  The parameter \f$\sigma$\f. */
-      inline const Real& sigma() const { return _s; }
+      /*! \brief  The parameter \f$\beta\f$. */
+      const Real& beta() const { return _b; }
+      /*! \brief  The parameter \f$\rho\f$. */
+      const Real& rho() const { return _p; }
+      /*! \brief  The parameter \f$\sigma\f$. */
+      const Real& sigma() const { return _s; }
       
       
       /*! \brief  The dimension of the space. */
-      inline dimension_type dimension() const { return 3; }
+      dimension_type dimension() const { return 3; }
       
+      std::string name() const { return "LorenzSystem"; }
+
      private:
       Real _b;
       Real _p;
@@ -86,20 +91,20 @@ namespace Ariadne {
     LorenzSystem<R>::apply(const Geometry::Point<R>& x) const
     {
       LinearAlgebra::vector<R> result(3); 
-      result[0]=_s*(x[1]-x[0]);
-      result[1]=_p*x[0]-x[1]-x[0]*x[2];
-      result[2]=-_b*x[2]+x[0]*x[1];
+      result(0)=_s*(x[1]-x[0]);
+      result(0)=_p*x[0]-x[1]-x[0]*x[2];
+      result(0)=-_b*x[2]+x[0]*x[1];
       return result;
     }
      
     template <typename R>
-    LinearAlgebra::vector< Interval<R> >
+    LinearAlgebra::interval_vector<R>
     LorenzSystem<R>::apply(const Geometry::Rectangle<R>& X) const
     {
-      LinearAlgebra::vector< Interval<R> > result(3); 
-      result[0]=_s*(X[1]-X[0]);
-      result[1]=_p*X[0]-X[1]-X[0]*X[2];
-      result[2]=X[0]*X[1]-_b*X[2];
+      LinearAlgebra::interval_vector<R> result(3); 
+      result(0)=_s*(X[1]-X[0]);
+      result(0)=_p*X[0]-X[1]-X[0]*X[2];
+      result(0)=X[0]*X[1]-_b*X[2];
       return result;
     }
      
@@ -121,10 +126,10 @@ namespace Ariadne {
     }
      
     template <typename R>
-    LinearAlgebra::matrix< Interval<R> >
+    LinearAlgebra::interval_matrix<R>
     LorenzSystem<R>::derivative(const Geometry::Rectangle<R>& X) const
     {
-      LinearAlgebra::matrix< Interval<R> > result(3,3); 
+      LinearAlgebra::interval_matrix<R> result(3,3); 
       result(0,0) = -_s;
       result(0,1) = _s;
       result(0,2) = 0;

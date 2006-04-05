@@ -39,12 +39,13 @@
 #include <valarray>
 #include <exception>
 
+#include "../declarations.h"
+
 #include "../base/utility.h"
 #include "../base/interval.h"
 #include "../base/binary_word.h"
 
 #include "../geometry/point.h"
-#include "../geometry/geometry_declarations.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -805,6 +806,38 @@ namespace Ariadne {
         }
       }
       return C;
+    }
+
+    /*! \brief Adds a vector to a rectangle. */
+    template<typename R>
+    inline
+    Geometry::Rectangle<R> 
+    operator+(const Geometry::Rectangle<R>& r, 
+              const LinearAlgebra::vector<R>& v)
+    {
+      Geometry::Rectangle<R> result(r.dimension());
+      assert(r.dimension()==v.size());
+      
+      for(size_type i=0; i!=result.dimension(); ++i) {
+        result.set_interval(i,r[i]+v(i));
+      }
+      return result;
+    }
+
+    /*! \brief Adds an interval vector to a rectangle. */
+    template<typename R>
+    inline
+    Geometry::Rectangle<R> 
+    operator+(const Geometry::Rectangle<R>& r, 
+              const LinearAlgebra::interval_vector<R>& v)
+    {
+      Geometry::Rectangle<R> result(r.dimension());
+      assert(r.dimension()==v.size());
+      
+      for(size_type i=0; i!=result.dimension(); ++i) {
+        result.set_interval(i,r[i]+v(i));
+      }
+      return result;
     }
 
     template <typename R>

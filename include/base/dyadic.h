@@ -78,6 +78,10 @@ class dyadic
   dyadic& operator-= (const double& r);
   dyadic& operator*= (const double& r);
   dyadic& operator/= (const double& r);
+  
+  dyadic& operator= (const dyadic& r);
+  dyadic& operator= (const double& r);
+  dyadic& operator= (const mpz_class& n);
    
   exponent_type precision() const { return log2_floor_(num_); }
 
@@ -104,6 +108,43 @@ class dyadic
   numerator_type num_;
   exponent_type exp_;
 };
+
+/*
+inline
+dyadic& 
+dyadic::operator= (const dyadic& r)
+{
+  this->num_=r.num_;
+  this->exp_=r.exp_; 
+  return *this; 
+}
+
+inline
+dyadic& 
+dyadic::operator= (const mpz_class& n)
+{
+  this->num_=n;
+  this->exp_=0; 
+  return *this; 
+}
+
+inline
+dyadic& 
+dyadic::operator= (const double& n)
+{
+  int exp;	
+  double man=frexp(n, &exp);
+
+  while (man != floor(man)) {
+    man*=2;
+    exp-=1;
+  }
+  
+  this->num_=numerator_type(man);
+  this->exp_=-exp; 
+  return *this; 
+}
+*/
 
 inline
 int 

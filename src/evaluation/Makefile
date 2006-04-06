@@ -62,7 +62,6 @@ map.o: map.cc ../../include/evaluation/map.h \
   ../../include/evaluation/../geometry/../geometry/rectangle.h \
   ../../include/evaluation/../geometry/../geometry/list_set.h \
   ../../include/evaluation/../geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../geometry/../geometry/../declarations.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
@@ -83,7 +82,8 @@ map.o: map.cc ../../include/evaluation/map.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/parallelotope.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/polyhedron.h \
   ../../include/evaluation/../geometry/polyhedron.h \
-  ../../include/evaluation/../evaluation/map.h
+  ../../include/evaluation/../evaluation/map.h \
+  ../../include/real_typedef.h ../../include/base/numerical_type.h
 
 vector_field.o: vector_field.cc ../../include/evaluation/vector_field.h \
   ../../include/evaluation/../declarations.h \
@@ -122,7 +122,6 @@ vector_field.o: vector_field.cc ../../include/evaluation/vector_field.h \
   ../../include/evaluation/../geometry/../geometry/list_set.h \
   ../../include/evaluation/../geometry/../geometry/../declarations.h \
   ../../include/evaluation/../geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -141,7 +140,8 @@ vector_field.o: vector_field.cc ../../include/evaluation/vector_field.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/list_set.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/parallelotope.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/polyhedron.h \
-  ../../include/evaluation/../evaluation/vector_field.h
+  ../../include/evaluation/../evaluation/vector_field.h \
+  ../../include/real_typedef.h ../../include/base/numerical_type.h
 
 affine_map.o: affine_map.cc ../../include/evaluation/affine_map.h \
   ../../include/evaluation/../linear_algebra/vector.h \
@@ -172,7 +172,6 @@ affine_map.o: affine_map.cc ../../include/evaluation/affine_map.h \
   ../../include/evaluation/../geometry/../base/array.h \
   ../../include/evaluation/../geometry/../geometry/point.h \
   ../../include/evaluation/../geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../geometry/../geometry/../declarations.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
@@ -213,7 +212,8 @@ affine_map.o: affine_map.cc ../../include/evaluation/affine_map.h \
   ../../include/evaluation/../evaluation/../linear_algebra/matrix.h \
   ../../include/evaluation/../evaluation/../linear_algebra/interval_matrix.h \
   ../../include/evaluation/affine_map.tpl \
-  ../../include/evaluation/../evaluation/affine_map.h
+  ../../include/evaluation/../evaluation/affine_map.h \
+  ../../include/real_typedef.h ../../include/base/numerical_type.h
 
 affine_vector_field.o: affine_vector_field.cc \
   ../../include/evaluation/affine_vector_field.h \
@@ -251,7 +251,6 @@ affine_vector_field.o: affine_vector_field.cc \
   ../../include/evaluation/../evaluation/../geometry/../base/array.h \
   ../../include/evaluation/../evaluation/../geometry/../geometry/point.h \
   ../../include/evaluation/../evaluation/../geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../evaluation/../geometry/../geometry/../declarations.h \
   ../../include/evaluation/../evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/evaluation/../evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
@@ -292,7 +291,8 @@ affine_vector_field.o: affine_vector_field.cc \
   ../../include/evaluation/../evaluation/../evaluation/../linear_algebra/matrix.h \
   ../../include/evaluation/../evaluation/../evaluation/../linear_algebra/interval_matrix.h \
   ../../include/evaluation/affine_vector_field.tpl \
-  ../../include/evaluation/../evaluation/affine_vector_field.h
+  ../../include/evaluation/../evaluation/affine_vector_field.h \
+  ../../include/real_typedef.h ../../include/base/numerical_type.h
 
 apply.o: apply.cc ../../include/evaluation/apply.h \
   ../../include/evaluation/../declarations.h \
@@ -340,7 +340,6 @@ apply.o: apply.cc ../../include/evaluation/apply.h \
   ../../include/evaluation/../geometry/../geometry/rectangle.h \
   ../../include/evaluation/../geometry/../geometry/list_set.h \
   ../../include/evaluation/../geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -372,7 +371,8 @@ apply.o: apply.cc ../../include/evaluation/apply.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/../base/array_operations.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/../base/../base/basic_type.h \
   ../../include/evaluation/../geometry/../geometry/lattice_set.h \
-  ../../include/evaluation/../evaluation/apply.h
+  ../../include/evaluation/../evaluation/apply.h \
+  ../../include/real_typedef.h ../../include/base/numerical_type.h
 
 integrate.o: integrate.cc ../../include/base/numerical_type.h \
   ../../include/base/../base/dyadic.h \
@@ -402,7 +402,7 @@ integrate.o: integrate.cc ../../include/base/numerical_type.h \
   ../../include/evaluation/../base/../base/basic_type.h \
   ../../include/evaluation/../base/array.h \
   ../../include/evaluation/../base/arithmetic.h \
-  ../../include/evaluation/../base/function.h /ufs/collins/include/mpfr.h \
+  ../../include/evaluation/../base/function.h \
   ../../include/evaluation/../base/../base/numerical_type.h \
   ../../include/evaluation/../base/interval.h \
   ../../include/evaluation/../linear_algebra/vector.h \
@@ -432,7 +432,6 @@ integrate.o: integrate.cc ../../include/base/numerical_type.h \
   ../../include/evaluation/../geometry/../geometry/rectangle.h \
   ../../include/evaluation/../geometry/../geometry/list_set.h \
   ../../include/evaluation/../geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -485,5 +484,6 @@ integrate.o: integrate.cc ../../include/base/numerical_type.h \
   ../../include/evaluation/../evaluation/../evaluation/../evaluation/../declarations.h \
   ../../include/evaluation/../evaluation/../evaluation/../evaluation/../linear_algebra/vector.h \
   ../../include/evaluation/../evaluation/../evaluation/../evaluation/../linear_algebra/matrix.h \
-  ../../include/evaluation/../evaluation/../evaluation/../evaluation/../linear_algebra/interval_matrix.h
+  ../../include/evaluation/../evaluation/../evaluation/../evaluation/../linear_algebra/interval_matrix.h \
+  ../../include/real_typedef.h ../../include/base/numerical_type.h
 

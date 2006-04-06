@@ -43,7 +43,8 @@ evaluation.so: ${EVALUATION_OBJ}
 
 install: python
 	mkdir -p ${PYTHONINSTALLDIR}/ariadne
-	cp -f *.so __init__.py ${PYTHONINSTALLDIR}/ariadne/
+	rm -rf ${PYTHONINSTALLDIR}/ariadne/*.pyc
+	cp -f *.so *.py ${PYTHONINSTALLDIR}/ariadne/
 
 clean:
 	rm -f *.o *.so ariadne/*.so
@@ -66,7 +67,8 @@ export_numeric.o: export_numeric.cc ../../include/base/numerical_type.h \
   ../../include/base/../base/dyadic.h ../../include/base/arithmetic.h \
   ../../include/base/../base/numerical_type.h \
   ../../include/base/../base/approximation.h \
-  ../../include/base/../base/../base/numerical_type.h
+  ../../include/base/../base/../base/numerical_type.h \
+  ../../include/real_typedef.h ../../include/base/numerical_type.h
 
 export_interval.o: export_interval.cc ../../include/base/numerical_type.h \
   ../../include/base/../base/dyadic.h ../../include/base/interval.h \
@@ -76,7 +78,7 @@ export_interval.o: export_interval.cc ../../include/base/numerical_type.h \
   ../../include/python/../base/basic_type.h
 
 export_function.o: export_function.cc ../../include/base/function.h \
-  /ufs/collins/include/mpfr.h ../../include/base/../base/numerical_type.h \
+  ../../include/base/../base/numerical_type.h \
   ../../include/base/../base/../base/dyadic.h \
   ../../include/python/typedefs.h ../../include/python/../real_typedef.h \
   ../../include/python/../base/numerical_type.h \
@@ -179,7 +181,6 @@ export_parallelotope.o: export_parallelotope.cc \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -234,7 +235,6 @@ export_zonotope.o: export_zonotope.cc ../../include/base/numerical_type.h \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -279,7 +279,6 @@ export_simplex.o: export_simplex.cc ../../include/base/numerical_type.h \
   ../../include/geometry/simplex.h ../../include/geometry/../base/array.h \
   ../../include/geometry/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -330,7 +329,6 @@ export_polyhedron.o: export_polyhedron.cc \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -384,7 +382,6 @@ export_list_set.o: export_list_set.cc ../../include/base/numerical_type.h \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -447,7 +444,6 @@ export_grid_set.o: export_grid_set.cc ../../include/base/numerical_type.h \
   ../../include/linear_algebra/../linear_algebra/../base/../base/../base/numerical_type.h \
   ../../include/linear_algebra/../linear_algebra/../linear_algebra/vector.h \
   ../../include/linear_algebra/../linear_algebra/constraint.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/geometry/parallelotope.h \
   ../../include/geometry/../declarations.h \
@@ -597,7 +593,6 @@ export_postscript_output.o: export_postscript_output.cc \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -705,7 +700,6 @@ export_affine_map.o: export_affine_map.cc \
   ../../include/geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/../declarations.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -788,7 +782,6 @@ export_polynomial_map.o: export_polynomial_map.cc \
   ../../include/evaluation/../geometry/../base/../base/array.h \
   ../../include/evaluation/../geometry/../geometry/point.h \
   ../../include/evaluation/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../geometry/../linear_algebra/constraint.h \
   ../../include/evaluation/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -853,7 +846,6 @@ export_affine_vector_field.o: export_affine_vector_field.cc \
   ../../include/geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/../declarations.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -941,7 +933,6 @@ export_apply.o: export_apply.cc ../../include/geometry/rectangle.h \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -1022,7 +1013,6 @@ export_integrate.o: export_integrate.cc \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -1106,7 +1096,6 @@ export_henon_map.o: export_henon_map.cc \
   ../../include/evaluation/../geometry/../geometry/list_set.h \
   ../../include/evaluation/../geometry/../geometry/../declarations.h \
   ../../include/evaluation/../geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -1181,7 +1170,6 @@ export_lorenz_system.o: export_lorenz_system.cc \
   ../../include/evaluation/../geometry/../geometry/list_set.h \
   ../../include/evaluation/../geometry/../geometry/../declarations.h \
   ../../include/evaluation/../geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \

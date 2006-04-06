@@ -27,6 +27,7 @@
 
 #include <string>
 #include <vector>
+#include <list>
 #include <iostream>
 
 #include "../system/discrete_transition.h"
@@ -36,14 +37,8 @@
 
 
 namespace Ariadne {  
-namespace HybridDefinitions {
+namespace HybridSystem {
   
-/*! \typedef HybridAutomatonID
- *  \brief It's the type of the automaton's univocal identifier. 
- */  
-typedef size_t HybridAutomatonID;
-  
-
 template < typename LDT >
 class HybridAutomaton;
   
@@ -87,6 +82,9 @@ inline void dot_print(const HybridAutomaton< LDT >& A){
 template < typename LDT >
 class HybridAutomaton
 {
+ private: 
+  static std::list<std::string> system_names;
+  
  public:
   typedef LDT LeavingTrans;
   typedef typename LeavingTrans::DiscreteLocation DiscreteLocation;

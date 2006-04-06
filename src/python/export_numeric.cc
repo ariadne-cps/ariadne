@@ -201,6 +201,7 @@ void export_numeric() {
     .def(init<int>())
     .def(init<Integer>())
     .def(init<double>())
+    .def(init<float>())
     .def(init<MPFloat>())
     .def("__neg__", &neg_f)
     .def("__add__", &add_ff)

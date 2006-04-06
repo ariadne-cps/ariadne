@@ -42,7 +42,9 @@ namespace Ariadne {
       if (point.dimension()!=this->dimension()) {
         throw std::domain_error("This object and parameter have different space dimensions");
       }  
-      
+     
+      throw std::domain_error("Zonotope<R>::contains() not yet implemented");
+     
       if (this->empty()) { return false; }
     
       matrix_type A(0,0);
@@ -74,6 +76,8 @@ namespace Ariadne {
       matrix_type A(0,0);
       vector_type b(0);
               
+      throw std::domain_error("Zonotope<R>::contains() not yet implemented");
+
       this->compute_linear_inequalities(A,b);
 
       vector_type result(A*point.position_vector()-b);

@@ -515,7 +515,7 @@ namespace Ariadne {
           iTinv(i,j) = numerator(Tinv(i,j)) * (multiplier/denominator(Tinv(i,j)));
         }
       }
-      
+     
       R rmultiplier = convert_to<R>(multiplier);
       matrix<R> rTinv(n,n);
        for(size_type i=0; i!=n; ++i) {

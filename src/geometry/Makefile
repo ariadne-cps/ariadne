@@ -52,7 +52,6 @@ parallelotope.o: parallelotope.cc ../../include/geometry/parallelotope.h \
   ../../include/geometry/../geometry/../geometry/point.h \
   ../../include/geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -78,13 +77,15 @@ parallelotope.o: parallelotope.cc ../../include/geometry/parallelotope.h \
   ../../include/geometry/../geometry/../base/iterator.h \
   ../../include/geometry/../geometry/../base/basic_type.h \
   ../../include/geometry/../geometry/../base/array_operations.h \
-  ../../include/geometry/../geometry/parallelotope.h
+  ../../include/geometry/../geometry/parallelotope.h \
+  ../../include/real_typedef.h ../../include/base/numerical_type.h
 
-zonotope.o: zonotope.cc ../../include/geometry/zonotope.h \
+zonotope.o: zonotope.cc ../../include/real_typedef.h \
+  ../../include/base/numerical_type.h ../../include/base/../base/dyadic.h \
+  ../../include/geometry/zonotope.h \
   ../../include/geometry/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/../base/basic_type.h \
   ../../include/geometry/../linear_algebra/../base/numerical_type.h \
-  ../../include/geometry/../linear_algebra/../base/../base/dyadic.h \
   ../../include/geometry/../linear_algebra/matrix.h \
   ../../include/geometry/../linear_algebra/../base/arithmetic.h \
   ../../include/geometry/../linear_algebra/../base/../base/numerical_type.h \
@@ -119,7 +120,6 @@ zonotope.o: zonotope.cc ../../include/geometry/zonotope.h \
   ../../include/geometry/../geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../geometry/../declarations.h \
   ../../include/geometry/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
@@ -149,7 +149,6 @@ simplex.o: simplex.cc ../../include/geometry/simplex.h \
   ../../include/geometry/../geometry/../base/utility.h \
   ../../include/geometry/../geometry/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -173,10 +172,11 @@ simplex.o: simplex.cc ../../include/geometry/simplex.h \
   ../../include/geometry/../geometry/../geometry/../geometry/point.h \
   ../../include/geometry/../geometry/list_set.h \
   ../../include/geometry/simplex.tpl \
-  ../../include/geometry/../geometry/simplex.h
+  ../../include/geometry/../geometry/simplex.h \
+  ../../include/real_typedef.h ../../include/base/numerical_type.h
 
 polyhedron.o: polyhedron.cc ../../include/geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh ../../include/geometry/../declarations.h \
+  ../../include/geometry/../declarations.h \
   ../../include/geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../base/basic_type.h \
@@ -230,7 +230,8 @@ polyhedron.o: polyhedron.cc ../../include/geometry/polyhedron.h \
   ../../include/geometry/../geometry/../geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/../geometry/../geometry/parallelotope.h \
   ../../include/geometry/../geometry/../geometry/../geometry/polyhedron.h \
-  ../../include/geometry/../geometry/polyhedron.h
+  ../../include/geometry/../geometry/polyhedron.h \
+  ../../include/real_typedef.h ../../include/base/numerical_type.h
 
 lattice_set.o: lattice_set.cc ../../include/base/array_operations.h \
   ../../include/base/../base/array.h \
@@ -287,7 +288,8 @@ grid.o: grid.cc ../../include/geometry/grid.h \
   ../../include/geometry/../geometry/../geometry/lattice_set.h \
   ../../include/geometry/../geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/rectangle.h \
-  ../../include/geometry/../geometry/list_set.h
+  ../../include/geometry/../geometry/list_set.h \
+  ../../include/real_typedef.h ../../include/base/numerical_type.h
 
 grid_set.o: grid_set.cc ../../include/geometry/grid_set.h \
   ../../include/geometry/../declarations.h \
@@ -338,7 +340,6 @@ grid_set.o: grid_set.cc ../../include/geometry/grid_set.h \
   ../../include/geometry/../geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -367,7 +368,8 @@ grid_set.o: grid_set.cc ../../include/geometry/grid_set.h \
   ../../include/geometry/../geometry/../geometry/../base/sequence.h \
   ../../include/geometry/../geometry/../geometry/../base/binary_word.h \
   ../../include/geometry/../geometry/../geometry/../base/binary_tree.h \
-  ../../include/geometry/../geometry/grid_set.h
+  ../../include/geometry/../geometry/grid_set.h \
+  ../../include/real_typedef.h ../../include/base/numerical_type.h
 
 subdivision_tree_set.o: subdivision_tree_set.cc \
   ../../include/base/arithmetic.h \
@@ -451,5 +453,6 @@ partition_tree_set.o: partition_tree_set.cc \
   ../../include/geometry/../geometry/../geometry/../geometry/../base/../base/array.h \
   ../../include/geometry/../geometry/../geometry/../geometry/../base/../base/basic_type.h \
   ../../include/geometry/../geometry/../geometry/lattice_set.h \
-  ../../include/geometry/../geometry/../geometry/list_set.h
+  ../../include/geometry/../geometry/../geometry/list_set.h \
+  ../../include/real_typedef.h ../../include/base/numerical_type.h
 

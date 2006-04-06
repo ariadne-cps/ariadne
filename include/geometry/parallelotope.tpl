@@ -72,20 +72,18 @@ namespace Ariadne {
     template <typename R>
     Parallelotope<R>::operator Polyhedron<R>() const 
     {
-      std::cerr << "Parallelotope<" << name<R>() << "<::operator Polyhedron<" << name<R>() << ">() const" << std::endl;
       using namespace ::Ariadne::LinearAlgebra;
       
       size_type n = this->dimension();
       
       /* Express in form invs * x - offst in [-bnds,+bnds] */
-      matrix<R> invs;
-      vector<R> offst;
-      vector<R> bnds;
+      matrix_type invs;
+      vector_type offst;
+      vector_type bnds;
       this->compute_linear_inequalities(invs,offst,bnds);
       
-     
-      matrix<R> A(2*n,n);
-      vector<R> b(2*n);
+      matrix_type A(2*n,n);
+      vector_type b(2*n);
       
       for(uint i=0; i!=n; ++i) {
         for(uint j=0; j!=n; ++j) {
@@ -95,6 +93,7 @@ namespace Ariadne {
         b(i) = bnds(i)-offst(i);
         b(i+n) = bnds(i)+offst(i);
       }
+
       return Polyhedron<R>(A,b);
     }
 
@@ -115,16 +114,31 @@ namespace Ariadne {
     /*! \brief Tests if the parallelotope contains \a point. */
     template <typename R>
     bool Parallelotope<R>::contains(const state_type& point) const {
-      Zonotope<R> z_this(*this);
-      return z_this.contains(point);
+      matrix_type inv_gen(LinearAlgebra::inverse(this->_generators));
+      const state_type &centre=this->_centre;
+      vector_type v(point.position_vector()-centre.position_vector());
+
+      vector_type e=prod(inv_gen,v);
+
+      for (size_t i=0; i<e.size(); i++) 
+        if (abs(e(i))>1) return false;
+      
+      return true;
     }
       
     /*! \brief Tests if the interior of the parallelotope contains \a point. */
     template<typename R>
     bool Parallelotope<R>::interior_contains(const state_type& point) const {
-      Zonotope<R> z_this(*this);
+      matrix_type inv_gen=LinearAlgebra::inverse(this->_generators);
+      const state_type &centre=this->_centre;
+      vector_type v(point.position_vector()-centre.position_vector());
+
+      vector_type e=inv_gen*v;
+
+      for (size_t i=0; i<e.size(); i++) 
+        if (abs(e(i))>=1) return false;
       
-      return z_this.interior_contains(point);
+      return true;  
     }
       
     template <typename R>
@@ -278,7 +292,6 @@ namespace Ariadne {
     bool
     Parallelotope<R>::disjoint(const Rectangle<R>& r) const
     {
-      //std::cerr << "Parallelotope<" << name<R>() << ">::disjoint(const Rectangle<" << name<R>() << ">& r) const" << std::endl;
       assert(this->dimension()==r.dimension());
       dimension_type n=this->dimension();
       

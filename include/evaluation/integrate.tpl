@@ -462,19 +462,19 @@ namespace Ariadne {
         
         R t=time.lower();
         while(t>0) {
-          h=max(t,h);
+          h=min(t,h);
           bs=integration_step(vf,bs,h);
           t=t-h;
-          h=max(2*h,step_size);
+          //h=max(2*h,step_size);
         }
         
         t=time.upper()-time.lower();
         while(t>0) {
-          h=max(t,h);
+          h=min(t,h);
           result.push_back(integration__reach_step(vf,bs,h));
           bs=integration_step(vf,bs,h);
           t=t-h;
-          h=max(2*h,step_size);
+          //h=max(2*h,step_size);
         }
       }
     }
@@ -495,10 +495,10 @@ namespace Ariadne {
       R t=time;
       R h=step_size;
       while(t>0) {
-        h=max(t,h);
+        h=min(t,h);
         r=integration_step(vf,r,h);
         t=t-h;
-        h=max(R(2*h),step_size);
+        //h=max(R(2*h),step_size);
       }
       return r;
     }
@@ -520,10 +520,10 @@ namespace Ariadne {
       R t=time;
       R h=step_size;
       while(t>0) {
-        h=max(t,h);
+        h=min(t,h);
         p=integration_step(vf,p,h);
         t=t-h;
-        h=max(R(2*h),step_size);
+        //h=max(R(2*h),step_size);
       }
       return p;
     }
@@ -546,10 +546,10 @@ namespace Ariadne {
         
         R t=time;
         while(t>0) {
-          h=max(t,h);
+          h=min(t,h);
           bs=integration_step(vf,bs,h);
           t=t-h;
-          h=max(R(2*h),step_size);
+          //h=max(R(2*h),step_size);
         }
         result.adjoin(bs);
       }
@@ -578,10 +578,10 @@ namespace Ariadne {
         R t=time;
         R h=step_size;
         while(t>0) {
-          h=max(t,h);
+          h=min(t,h);
           p=integration_step(vf,p,h);
           t=t-h;
-          h=max(R(2*h),step_size);
+          //h=max(R(2*h),step_size);
         }
         result.adjoin(over_approximation_of_intersection(p,bb,g));
       }
@@ -606,11 +606,11 @@ namespace Ariadne {
         R t=time;
         R h=step_size;
         while(t>0) {
-          h=max(t,h);
+          h=min(t,h);
           result.adjoin(over_approximation_of_intersection(reach_step(vf,p,h),bb,g));
           p=integration_step(vf,p,h);
           t=t-h;
-          h=max(R(2*h),step_size);
+          //h=max(R(2*h),step_size);
         }
       }
       return result;

@@ -1,3 +1,0 @@
-If you do not install libariadne.so on your system, you need to set the 
-library path environment variable to execute test.py script.
-To set library path variable use "export LD_LIBRARY_PATH=../src/"

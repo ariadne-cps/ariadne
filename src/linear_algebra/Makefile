@@ -41,8 +41,7 @@ matrix.o: matrix.cc ../../include/real_typedef.h \
   ../../include/linear_algebra/../linear_algebra/matrix.h \
   ../../include/linear_algebra/../base/array.h \
   ../../include/linear_algebra/../base/basic_type.h \
-  ../../include/linear_algebra/../base/function.h \
-  /ufs/collins/include/mpfr.h
+  ../../include/linear_algebra/../base/function.h
 
 interval_matrix.o: interval_matrix.cc ../../include/real_typedef.h \
   ../../include/base/numerical_type.h ../../include/base/../base/dyadic.h \

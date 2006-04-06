@@ -24,13 +24,15 @@
 #include "geometry/simplex.h"
 #include "geometry/simplex.tpl"
 
+#include "real_typedef.h"
+
 namespace Ariadne {
   namespace Geometry {
 
-    template class Simplex<Dyadic>;
+    template class Simplex<Real>;
 
-    template std::ostream& operator<<(std::ostream&, const Simplex<Dyadic>&);
-    template std::istream& operator>>(std::istream&, Simplex<Dyadic>&);
+    template std::ostream& operator<<(std::ostream&, const Simplex<Real>&);
+    template std::istream& operator>>(std::istream&, Simplex<Real>&);
 
   }
 }

@@ -29,10 +29,13 @@
 #ifndef _ARIADNE_MAP_H
 #define _ARIADNE_MAP_H
 
-#include "../geometry/geometry_declarations.h"
+#include <string>
+
+#include "../declarations.h"
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
+#include "../linear_algebra/interval_matrix.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -41,22 +44,22 @@ namespace Ariadne {
     template<typename R>
     class Map {
      public:
-      typedef R Real;
-      typedef Geometry::Point<R> State;
-      typedef LinearAlgebra::vector<R> Vector;
-      typedef LinearAlgebra::matrix<R> Matrix;
-      typedef LinearAlgebra::matrix< Interval<R> > IntervalMatrix;
+      typedef R real_type;
+      typedef Geometry::Point<R> state_type;
+      typedef LinearAlgebra::vector<R> vector_type;
+      typedef LinearAlgebra::matrix<R> matrix_type;
+      typedef LinearAlgebra::interval_matrix<R> interval_matrix_type;
       
       virtual ~Map();
       
       // I'm not sure if virtual functions are the way to go here; too restrictive? //
-      virtual State apply(const State& x) const;
+      virtual state_type apply(const state_type& x) const;
       virtual Geometry::Rectangle<R> apply(const Geometry::Rectangle<R>& A) const;
       virtual Geometry::Parallelotope<R> apply(const Geometry::Parallelotope<R>& A) const;
       virtual Geometry::Polyhedron<R> apply(const Geometry::Polyhedron<R>& A) const;
     
-      virtual Matrix derivative(const State& r) const;
-      virtual IntervalMatrix derivative(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::matrix<R> derivative(const state_type& r) const;
+      virtual LinearAlgebra::interval_matrix<R> derivative(const Geometry::Rectangle<R>& r) const;
         
       template<template<typename> class BS>
       inline Geometry::ListSet<R,BS> apply(const Geometry::ListSet<R,BS>& A) const;
@@ -64,7 +67,9 @@ namespace Ariadne {
       virtual dimension_type argument_dimension() const = 0;
       virtual dimension_type result_dimension() const = 0;
     
-      State operator() (const State& x) const {
+      virtual std::string name() const = 0;
+
+      state_type operator() (const state_type& x) const {
         return this->apply(x); }
       Geometry::Rectangle<R> operator() (const Geometry::Rectangle<R>& A) const {
         return this->apply(A); }

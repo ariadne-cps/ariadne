@@ -48,15 +48,15 @@ namespace Ariadne {
   namespace Geometry {
     
     template <typename R>
-    Polyhedron<R>::Polyhedron(const Matrix& A, const Vector& b)
+    Polyhedron<R>::Polyhedron(const matrix_type& A, const vector_type& b)
     //: _ppl_poly(A.size1()) 
     {
-      Vector rw;
-      Real cnst;
+      vector_type rw;
+      real_type cnst;
       Parma_Polyhedra_Library::Constraint_System cs;
       
       for(size_type i=0; i!=A.size1(); ++i) {
-        //    rw=Vector(row(A,i));
+        //    rw=vector_type(row(A,i));
         rw=row(A,i);
         cnst=b[i];
         cs.insert(_convert_to_PPL_constraint(rw,cnst));
@@ -66,7 +66,7 @@ namespace Ariadne {
     
 
     template <typename R>
-    Polyhedron<R>::Polyhedron(const StateList& points)
+    Polyhedron<R>::Polyhedron(const state_list_type& points)
       : _ppl_poly() 
     {
       Parma_Polyhedra_Library::Generator_System ppl_gen;
@@ -98,8 +98,8 @@ namespace Ariadne {
     Polyhedron<R>::Polyhedron(const Rectangle<R>& r)
       : _ppl_poly(r.dimension())
     {
-      State u_corner(r.upper_corner());
-      State l_corner(r.lower_corner());
+      state_type u_corner(r.upper_corner());
+      state_type l_corner(r.lower_corner());
       
       Parma_Polyhedra_Library::Constraint_System cs;
       Rational num;
@@ -122,12 +122,12 @@ namespace Ariadne {
 
 
     template <typename R>
-    typename Polyhedron<R>::StateList
+    typename Polyhedron<R>::state_list_type
     Polyhedron<R>::vertices() const 
     {
-      StateList result;
+      state_list_type result;
       const Parma_Polyhedra_Library::Generator_System& gs = this->_ppl_poly.minimized_generators();
-      State point(this->dimension());
+      state_type point(this->dimension());
       
       for(Parma_Polyhedra_Library::Generator_System::const_iterator iter=gs.begin(); iter!=gs.end(); ++iter) {
         Parma_Polyhedra_Library::Generator gen = *iter;
@@ -162,7 +162,7 @@ namespace Ariadne {
     const Parma_Polyhedra_Library::NNC_Polyhedron& 
     Polyhedron<R>::_ppl_interior() const
     {      
-      Ariadne::LinearAlgebra::ConstraintSystem<Real> cs(this->_ppl_poly.constraints());
+      Ariadne::LinearAlgebra::ConstraintSystem<real_type> cs(this->_ppl_poly.constraints());
       this->_interior_poly=Parma_Polyhedra_Library::NNC_Polyhedron(cs.open_ppl_constraint_system());
       return this->_interior_poly;
     }

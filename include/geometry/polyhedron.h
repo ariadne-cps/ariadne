@@ -33,6 +33,8 @@
 #include <ppl.hh>
 #include <vector>
 
+#include "../declarations.h"
+
 #include "../linear_algebra/constraint.h"
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
@@ -40,7 +42,6 @@
 #include "../geometry/generator.h"
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
-#include "../geometry/geometry_declarations.h"
 
 namespace Parma_Polyhedra_Library {
   // Import all the output operators into the main PPL namespace.
@@ -113,11 +114,11 @@ _from_Rectangle_to_closed_PPL_Polyhedron(const Rectangle<R>& r);
 template <typename R>
 class Polyhedron {
  public:
-  typedef R Real;
-  typedef Point<R> State;
-  typedef std::vector<State> StateList;
-  typedef Ariadne::LinearAlgebra::vector<R> Vector;
-  typedef Ariadne::LinearAlgebra::matrix<R> Matrix;
+  typedef R real_type;
+  typedef Point<R> state_type;
+  typedef std::vector< Point<R> > state_list_type;
+  typedef Ariadne::LinearAlgebra::vector<R> vector_type;
+  typedef Ariadne::LinearAlgebra::matrix<R> matrix_type;
  public:
     /*! \brief Default constructor creates empty set. 
      */
@@ -154,11 +155,11 @@ class Polyhedron {
     
     /*! \brief Construct the polyhedron defined by the matrix equations \f$Ax\leq b\f$.
      */
-    Polyhedron(const Matrix& A, const Vector& b);
+    Polyhedron(const matrix_type& A, const vector_type& b);
     
     /*! \brief Construct the polyhedron defined as the convex hull of a list of points.
      */
-    Polyhedron(const StateList& points);
+    Polyhedron(const state_list_type& points);
     
     /*! \brief Construct a polyhedron from a rectangle. */
     Polyhedron(const Rectangle<R>& rect);
@@ -199,11 +200,11 @@ class Polyhedron {
     }
 
     /*! \brief The vertices of the Polyhedron. */
-    StateList vertices() const; 
+    state_list_type vertices() const; 
     
     /*! \brief Tests if a Point is an element of the Polyhedron.
      */
-    bool contains(const State& point) const {
+    bool contains(const state_type& point) const {
       if (point.dimension()!=this->dimension()) {
         throw std::domain_error("This object and parameter have different space dimensions");
       }
@@ -216,7 +217,7 @@ class Polyhedron {
     
     /*! \brief Tests if a point is an element of the interior of the polyhedron.
      */
-    bool interior_contains(const State& point) const {
+    bool interior_contains(const state_type& point) const {
       if (point.dimension()!=this->dimension()) {
         throw std::domain_error("This object and parameter have different space dimensions");
       }
@@ -232,15 +233,15 @@ class Polyhedron {
      *
      * WARNING: The metric error of the approximation may be larger than \a delta.
      */
-    Polyhedron<R> over_approximation(const Real& delta) {
+    Polyhedron<R> over_approximation(const real_type& delta) {
       Ariadne::LinearAlgebra::ConstraintSystem<R> cs(this->_ppl_poly.constraints());
       cs.expand_by(delta);
       return Polyhedron(cs);
     }
     
     /*! \brief WHAT DOES THIS DO??. */
-    Polyhedron<R>& set_precision_to_upperapproximating(const Real& delta) {
-      Real denum=denominator(delta);
+    Polyhedron<R>& set_precision_to_upperapproximating(const real_type& delta) {
+      real_type denum=denominator(delta);
       Ariadne::LinearAlgebra::ConstraintSystem<R> cs(this->_ppl_poly.constraints());
       if (cs.already_at_precision(denum)) { 
         return *this;
@@ -257,8 +258,8 @@ class Polyhedron {
     }
   
     /*! \brief WHAT DOES THIS DO??. */
-    Polyhedron<R>& set_precision_to_upperapproximating_for_output(const Real& delta) {
-      Real denum=denominator(delta);
+    Polyhedron<R>& set_precision_to_upperapproximating_for_output(const real_type& delta) {
+      real_type denum=denominator(delta);
       Ariadne::LinearAlgebra::ConstraintSystem<R> cs(this->_ppl_poly.constraints());
       if (cs.already_at_precision(denum)) {
         return *this;
@@ -280,8 +281,8 @@ class Polyhedron {
       if (dims.size()>this->dimension()) {
         throw "Cannot project on more dimensions than the polyhedron ones.";
       }
-      boost::numeric::ublas::matrix<Real> projection_map=
-          Ariadne::LinearAlgebra::zero_matrix<Real>(this->dimension());
+      boost::numeric::ublas::matrix<real_type> projection_map=
+          Ariadne::LinearAlgebra::zero_matrix<real_type>(this->dimension());
       for (size_t i=0; i< dims.size(); i++) {
         projection_map(dims[i],dims[i])=1.0;
       }

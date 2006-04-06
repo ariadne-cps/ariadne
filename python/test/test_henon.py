@@ -20,13 +20,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+from ariadne import Real
 from ariadne.base import *
 from ariadne.evaluation import *
 from ariadne.geometry import *
 from ariadne.linear_algebra import *
 import sys
 
-h=HenonMap(Dyadic(1.5),Dyadic(0.275))
+h=HenonMap(Real(1.5),Real(0.275))
 
 x=Point(2)
 #print x,h(x),h(h(x)),"\n\n"

@@ -20,14 +20,20 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+from ariadne import Real
 from ariadne.base import *
 from ariadne.evaluation import *
 from ariadne.geometry import *
 from ariadne.linear_algebra import *
 import sys
 
+parameters=Point(2)
+parameters[0]=1.5
+parameters[1]=0.875
+a=Real(1.5)
+b=Real(0.875)
 
-h=HenonMap(Dyadic(1.5),Dyadic(0.875))
+h=HenonMap(a,b)
 gbb=Rectangle("[-10,4]x[-7,7]") # grid bounding box
 g=FiniteGrid(gbb,128);
 ir=Rectangle("[1.499,1.501]x[0.499,0.501]") # initial state

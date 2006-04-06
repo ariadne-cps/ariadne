@@ -27,27 +27,9 @@
 namespace Ariadne {
   namespace LinearAlgebra {
 
-    template <>
+    template <typename R>
     std::ostream&
-    operator<<(std::ostream& os, const interval_matrix<Float64>& A)
-    {
-      if(A.size1()==0 || A.size2()==0) {
-        return os << "[ ]";
-      }
-      
-      for(uint i=0; i!=A.size1(); ++i) {
-        for(uint j=0; j!=A.size2(); ++j) {
-          os << (j==0 ? (i==0 ? "[ " : "; ") : ",");
-          os << A(i,j);
-        }
-      }
-      os << " ]";
-      return os;
-    }
-     
-    template <>
-    std::ostream&
-    operator<<(std::ostream& os, const interval_matrix<Dyadic>& A)
+    operator<<(std::ostream& os, const interval_matrix<R>& A)
     {
       if(A.size1()==0 || A.size2()==0) {
         return os << "[ ]";
@@ -300,16 +282,17 @@ namespace Ariadne {
       return approx_excess*Amid;
     }
     
-    interval_matrix<Dyadic>
-    approximate(const matrix<Rational>& A, const Dyadic& e)
+    template<typename R>
+    interval_matrix<R>
+    approximate(const matrix<typename numerical_traits<R>::field_extension_type>& A, const R& e)
     {
-      Dyadic err=e/2;
-      interval_matrix<Dyadic> result(A.size1(),A.size2());
+      R err=e/2;
+      interval_matrix<R> result(A.size1(),A.size2());
       for(size_type i=0; i!=result.size1(); ++i) {
         for(size_type j=0; j!=result.size1(); ++j) {
-          Dyadic lower=Ariadne::approximate<Dyadic>(A(i,j),err)-err;
-          Dyadic upper=Ariadne::approximate<Dyadic>(A(i,j),err)+err;
-          result(i,j)=Interval<Dyadic>(lower,upper);
+          R lower=Ariadne::approximate<R>(A(i,j),err)-err;
+          R upper=Ariadne::approximate<R>(A(i,j),err)+err;
+          result(i,j)=Interval<R>(lower,upper);
         }
       }
       return result;

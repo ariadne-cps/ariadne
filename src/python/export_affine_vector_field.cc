@@ -6,12 +6,12 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This program is free software; you can rediself_ns::stribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  This program is diself_ns::stributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
@@ -31,35 +31,13 @@
 #include "geometry/polyhedron.h"
 #include "evaluation/affine_vector_field.h"
 
-#include <boost/python.hpp>
 
-#include "python/real_typedef.h"
+#include "python/typedefs.h"
 #include "python/python_utilities.h"
+using namespace Ariadne;
 
-typedef Ariadne::Interval<Real> RInterval;
-typedef Ariadne::Geometry::Point<Real> RPoint;
-typedef Ariadne::Geometry::Simplex<Real> RSimplex;
-typedef Ariadne::Geometry::Parallelotope<Real> RParallelotope;
-typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
-typedef Ariadne::Geometry::Zonotope<Real> RZonotope;
-typedef Ariadne::Geometry::Polyhedron<Real> RPolyhedron;
-
-typedef Ariadne::LinearAlgebra::vector<Real> RVector;
-typedef Ariadne::LinearAlgebra::interval_vector<Real> RIntervalVector;
-typedef Ariadne::LinearAlgebra::matrix<Real> RMatrix;
-typedef Ariadne::LinearAlgebra::interval_matrix<Real> RIntervalMatrix;
-
-typedef Ariadne::Evaluation::VectorField<Real> RVectorField;
-typedef Ariadne::Evaluation::AffineVectorField<Real> RAffineVectorField;
-
-using boost::python::class_;
-using boost::python::init;
-using boost::python::self;
-using boost::python::def;
-using boost::python::bases;
-using boost::python::self_ns::str;
-using boost::python::return_value_policy;
-using boost::python::copy_const_reference;
+#include <boost/python.hpp>
+using namespace boost::python;
 
 typedef RVector (RAffineVectorField::*AffVectorFieldApplyPoint) (const RPoint&) const;
 typedef RIntervalVector (RAffineVectorField::*AffVectorFieldApplyRectangle) (const RRectangle&) const;
@@ -83,7 +61,7 @@ AffVectorFieldDerivativeRectangle affine_vf_derivative_rectangle=&RAffineVectorF
 
 void export_affine_vector_field() {
 
-  class_< RAffineVectorField, bases<RVectorField> >("AffineVectorField",init<RAffineVectorField::Matrix,RAffineVectorField::Vector>())
+  class_< RAffineVectorField, bases<RVectorFieldBase> >("AffineVectorField",init<RMatrix,RVector>())
     .def("dimension", &RAffineVectorField::dimension)
     .def("__call__", affine_vf_apply_point)
     .def("__call__", affine_vf_apply_rectangle)
@@ -93,6 +71,6 @@ void export_affine_vector_field() {
 //    .def("__call__", affine_vf_apply_simplex)
     .def("derivative", affine_vf_derivative_point)
     .def("derivative", affine_vf_derivative_rectangle)
-//    .def(str(self))    // __str__
+//    .def(self_ns::str(self))    // __self_ns::str__
   ;
 }

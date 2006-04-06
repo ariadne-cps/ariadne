@@ -24,10 +24,12 @@
 #include "evaluation/affine_map.h"
 #include "evaluation/affine_map.tpl"
 
+#include "real_typedef.h"
+
 namespace Ariadne {
   namespace Evaluation {
 
-    template class AffineMap<Dyadic>;
+    template class AffineMap<Real>;
 
   }
 }

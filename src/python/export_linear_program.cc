@@ -6,12 +6,12 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This program is free software; you can rediself_ns::stribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  This program is diself_ns::stributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
@@ -22,33 +22,17 @@
  */
 
 #include "base/numerical_type.h"
-
 #include "linear_algebra/linear_program.h"
-
-#include <boost/python.hpp>
 
 #include "python/typedefs.h"
 #include "python/python_utilities.h"
+using namespace Ariadne;
 
-#include <utility>  //for std::pair
-
-using boost::python::class_;
-using boost::python::init;
-using boost::python::self;
-using boost::python::def;
-using boost::python::self_ns::str;
-using boost::python::return_value_policy;
-using boost::python::copy_const_reference;
-
-using boost::python::tuple;
-using boost::python::extract;
-
-inline FMatrix flinear_program_tableau(const FLinearProgram& lp) {
-  return lp.tableau();
-}
-
+#include <boost/python.hpp>
+using namespace boost::python;
 
 void export_linear_program() {
+  typedef const FMatrix& (FLinearProgram::*MatrixConst) () const;
 
   class_<FLinearProgram>("FLinearProgram",init<FMatrix,FVector,FVector>())
     .def(init<FMatrix>())
@@ -56,7 +40,7 @@ void export_linear_program() {
     .def("is_satisfiable",&FLinearProgram::is_satisfiable)
     .def("optimizing_point",&FLinearProgram::optimizing_point)
     .def("optimal_value",&FLinearProgram::optimal_value)
-    .def("tableau",&flinear_program_tableau)
-    .def(str(self))    // __str__
+    .def("tableau",MatrixConst(&FLinearProgram::tableau),return_value_policy<copy_const_reference>())
+    .def(self_ns::str(self))    // __self_ns::str__
   ;
 }

@@ -7,12 +7,12 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This program is free software; you can rediself_ns::stribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  This program is diself_ns::stributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
@@ -22,20 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "base/binary_word.h"
-#include "base/binary_tree.h"
-
 #include <boost/python.hpp>
-
-#include "python/real_typedef.h"
-#include "python/python_utilities.h"
-
-
-using Ariadne::BooleanArray;
-using Ariadne::IndexArray;
-using Ariadne::SizeArray;
-using Ariadne::Base::BinaryWord;
-using Ariadne::Base::BinaryTree;
 
 void export_point();
 void export_rectangle();
@@ -48,14 +35,6 @@ void export_grid_set();
 void export_partition_tree_set();
 
 void export_postscript_output();
-
-using boost::python::class_;
-using boost::python::init;
-using boost::python::self;
-using boost::python::def;
-using boost::python::self_ns::str;
-using boost::python::return_value_policy;
-using boost::python::copy_const_reference;
   
 BOOST_PYTHON_MODULE(geometry)
 {
@@ -70,5 +49,4 @@ BOOST_PYTHON_MODULE(geometry)
   export_partition_tree_set();
   
   export_postscript_output();
-
 }

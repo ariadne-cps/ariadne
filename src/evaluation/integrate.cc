@@ -21,68 +21,71 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "base/numerical_type.h"
 #include "evaluation/integrate.h"
 #include "evaluation/integrate.tpl"
+
+#include "real_typedef.h"
 
 namespace Ariadne {
   namespace Evaluation {
 
     template 
-    Geometry::Rectangle<Dyadic> 
-    integration_step(const VectorField<Dyadic>&, const Geometry::Rectangle<Dyadic>&, Dyadic& step_size);
+    Geometry::Rectangle<Real> 
+    integration_step(const VectorField<Real>&, const Geometry::Rectangle<Real>&, Real& step_size);
   
     template 
-    Geometry::Parallelotope<Dyadic> 
-    integration_step(const VectorField<Dyadic>&, const Geometry::Parallelotope<Dyadic>&, Dyadic& step_size);
+    Geometry::Parallelotope<Real> 
+    integration_step(const VectorField<Real>&, const Geometry::Parallelotope<Real>&, Real& step_size);
   
     template 
-    Geometry::Rectangle<Dyadic> 
-    reach_step(const VectorField<Dyadic>&, const Geometry::Rectangle<Dyadic>&, Dyadic& step_size);
+    Geometry::Rectangle<Real> 
+    reach_step(const VectorField<Real>&, const Geometry::Rectangle<Real>&, Real& step_size);
   
     template 
-    Geometry::Parallelotope<Dyadic> 
-    reach_step(const VectorField<Dyadic>&, const Geometry::Parallelotope<Dyadic>&, Dyadic& step_size);
+    Geometry::Parallelotope<Real> 
+    reach_step(const VectorField<Real>&, const Geometry::Parallelotope<Real>&, Real& step_size);
   
     template 
-    Geometry::Zonotope<Dyadic> 
-    reach_step(const VectorField<Dyadic>&, const Geometry::Zonotope<Dyadic>&, Dyadic& step_size);
+    Geometry::Zonotope<Real> 
+    reach_step(const VectorField<Real>&, const Geometry::Zonotope<Real>&, Real& step_size);
   
 
     template 
-    Geometry::Rectangle<Dyadic> 
-    integrate(const VectorField<Dyadic>&, 
-              const Geometry::Rectangle<Dyadic>&, 
-              const Dyadic&,
-              const Dyadic&);
+    Geometry::Rectangle<Real> 
+    integrate(const VectorField<Real>&, 
+              const Geometry::Rectangle<Real>&, 
+              const Real&,
+              const Real&);
 
     template 
-    Geometry::Parallelotope<Dyadic> 
-    integrate(const VectorField<Dyadic>&, 
-              const Geometry::Parallelotope<Dyadic>&, 
-              const Dyadic&,
-              const Dyadic&);
+    Geometry::Parallelotope<Real> 
+    integrate(const VectorField<Real>&, 
+              const Geometry::Parallelotope<Real>&, 
+              const Real&,
+              const Real&);
 
     template 
-    Geometry::ListSet<Dyadic,Geometry::Parallelotope> 
-    integrate(const VectorField<Dyadic>&, 
-              const Geometry::ListSet<Dyadic,Geometry::Parallelotope>&, 
-              const Dyadic&,
-              const Dyadic&);
+    Geometry::ListSet<Real,Geometry::Parallelotope> 
+    integrate(const VectorField<Real>&, 
+              const Geometry::ListSet<Real,Geometry::Parallelotope>&, 
+              const Real&,
+              const Real&);
   
     template 
-    Geometry::GridMaskSet<Dyadic> 
-    integrate(const VectorField<Dyadic>&, 
-              const Geometry::GridMaskSet<Dyadic>&, 
-              const Dyadic&,
-              const Dyadic&);
+    Geometry::GridMaskSet<Real> 
+    integrate(const VectorField<Real>&, 
+              const Geometry::GridMaskSet<Real>&, 
+              const Real&,
+              const Real&);
   
   
     template 
-    Geometry::GridMaskSet<Dyadic> 
-    reach(const VectorField<Dyadic>&, 
-          const Geometry::GridMaskSet<Dyadic>&, 
-          const Dyadic&,
-          const Dyadic&);
+    Geometry::GridMaskSet<Real> 
+    reach(const VectorField<Real>&, 
+          const Geometry::GridMaskSet<Real>&, 
+          const Real&,
+          const Real&);
   
   }
 }

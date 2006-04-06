@@ -133,7 +133,7 @@ class ApproximateSet {
    * \return  \a true, if \a s is contained into the 
    * current set, \a false otherwise.
    */
-  bool contains(const State &s) const;
+  bool contains(const state_type &s) const;
 
   /*! \brief Checks if the intersection of two set is not null.
    *

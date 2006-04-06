@@ -57,6 +57,16 @@ namespace Ariadne {
     return approximate<Dyadic>(q,Rational(e));
   }
     
+  template<> inline MPFloat approximate(const Rational& q, const Rational& e) {
+    MPFloat x=MPFloat(q);
+    assert(abs(Rational(x)-q)<e);
+    return x;
+  }
+    
+  template<> inline MPFloat approximate(const Rational& q, const MPFloat& e) {
+    return approximate<MPFloat>(q,Rational(e));
+  }
+    
 }
 
 #endif /* _ARIADNE_APPROXIMATION_TYPE */

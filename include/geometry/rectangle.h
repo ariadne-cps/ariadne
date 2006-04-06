@@ -125,15 +125,15 @@ namespace Ariadne {
 
      public:
       /*! \brief The type of denotable real number used for the corners. */
-      typedef R Real;
+      typedef R real_type;
       /*! \brief The type of denotable point contained by the rectangle. */
-      typedef Point<R> State;
+      typedef Point<R> state_type;
      private:
       /* Rectangle's lower corner */
-      State _lower_corner;
+      state_type _lower_corner;
       
       /* Rectangle's upper corner */
-      State _upper_corner;
+      state_type _upper_corner;
       
      public:
       /*! \brief Default constructor construcs an empty rectangle of dimension \a n. */
@@ -141,7 +141,7 @@ namespace Ariadne {
         : _lower_corner(n),  _upper_corner(n) {}
       
       /*! \brief Construct from an array of intervals. */
-      Rectangle(dimension_type n, const Interval<Real>* intervals)
+      Rectangle(dimension_type n, const Interval<real_type>* intervals)
         : _lower_corner(n), _upper_corner(n)
       {
         for(size_type i=0; i!=n; ++i) {
@@ -151,7 +151,7 @@ namespace Ariadne {
       }
 
       /*! \brief Construct from an array of intervals. */
-      Rectangle(const Base::array< Interval<Real> > a)
+      Rectangle(const Base::array< Interval<real_type> > a)
         : _lower_corner(a.size()), _upper_corner(a.size())
       {
         for(size_type i=0; i!=a.size(); ++i) {
@@ -161,7 +161,7 @@ namespace Ariadne {
       }
       
       /*! \brief Construct from two corners. */
-      Rectangle(const State& p1, const State& p2)
+      Rectangle(const state_type& p1, const state_type& p2)
         : _lower_corner(p1.dimension()), _upper_corner(p2.dimension())
       {
         /* Test to see if corners have same dimensions */
@@ -231,63 +231,63 @@ namespace Ariadne {
       }
         
       /*! \brief The lower corner. */
-      inline State lower_corner() const {
+      inline state_type lower_corner() const {
         return this->_lower_corner;
       }
       
       /*! \brief The upper corner. */
-      inline State upper_corner() const {
+      inline state_type upper_corner() const {
         return this->_upper_corner;
       }
       
       /*! \brief The centre. */
-      inline State centre() const {
-        return State((this->_lower_corner.position_vector()+this->_upper_corner.position_vector())/2);
+      inline state_type centre() const {
+        return state_type((this->_lower_corner.position_vector()+this->_upper_corner.position_vector())/2);
       }
       
       /*! \brief Returns the projection onto the \a n th coordinate. */
-      inline Interval<Real> operator[] (size_type n) const {
-        return Interval<Real>(this->_lower_corner[n],this->_upper_corner[n]);
+      inline Interval<real_type> operator[] (size_type n) const {
+        return Interval<real_type>(this->_lower_corner[n],this->_upper_corner[n]);
       }
       
       /*! \brief Returns the projection onto the \a n th coordinate. */
-      inline Interval<Real> interval(size_type n) const {
-        return Interval<Real>(this->_lower_corner[n],this->_upper_corner[n]);
+      inline Interval<real_type> interval(size_type n) const {
+        return Interval<real_type>(this->_lower_corner[n],this->_upper_corner[n]);
       }
       
       /*! \brief Returns the lower bound of the \a n th coordinate */
-      inline const Real& lower_bound(size_type n) const {
+      inline const real_type& lower_bound(size_type n) const {
         return this->_lower_corner[n];
       }
       
       /*! \brief Returns the upper bound of the \a n th coordinate */
-      inline const Real& upper_bound(size_type n) const {
+      inline const real_type& upper_bound(size_type n) const {
         return this->_upper_corner[n];
       }
       
       /*! \brief Returns a smart reference projection onto the \a n th coordinate. */
-      inline RectangleInterval<Real> operator[] (size_type n) {
-        return RectangleInterval<Real>(*this,n);
+      inline RectangleInterval<real_type> operator[] (size_type n) {
+        return RectangleInterval<real_type>(*this,n);
       }
       
       /*! \brief Sets the \a n th interval. */
-      inline void set_interval(size_type n, Interval<Real> i) {
+      inline void set_interval(size_type n, Interval<real_type> i) {
          this->_lower_corner[n]=i.lower();
          this->_upper_corner[n]=i.upper();
       }
       
       /*! \brief Sets the lower bound of the \a n th coordinate to \a r. */
-      inline void set_lower_bound(size_type n, const Real& r) {
+      inline void set_lower_bound(size_type n, const real_type& r) {
         this->_lower_corner[n] = r;
       }
       
       /*! \brief Sets the upper bound of the \a n th coordinate to \a r. */
-      inline void set_upper_bound(size_type n, const Real& r) {
+      inline void set_upper_bound(size_type n, const real_type& r) {
         this->_upper_corner[n] = r;
       }
       
       /*! \brief Tests if \a point is included into a rectangle. */
-      inline bool contains(const State& p) const {
+      inline bool contains(const state_type& p) const {
         if (p.dimension()!=this->dimension()) {
           throw std::domain_error("This object and parameter have different space dimensions");
         }
@@ -305,7 +305,7 @@ namespace Ariadne {
       }
       
       /*! \brief Tests if \a point is included into the interior a rectangle. */
-      inline bool interior_contains(const State& p) const {
+      inline bool interior_contains(const state_type& p) const {
         if (p.dimension()!=this->dimension()) {
           throw std::domain_error("This object and parameter have different space dimensions");
         }
@@ -378,7 +378,7 @@ namespace Ariadne {
       }
       
        /*! \brief Expand the Rectangle by \a delta in each direction. */
-      inline Rectangle<R>& expand_by(const Real& delta) {
+      inline Rectangle<R>& expand_by(const real_type& delta) {
         
         for (size_type j=0; j< this->dimension(); ++j) {
           this->_upper_corner[j]+=delta;
@@ -388,7 +388,7 @@ namespace Ariadne {
       }
       
       /*! \brief The equality operator */
-      inline bool operator==(const Rectangle<Real>& A) const
+      inline bool operator==(const Rectangle<real_type>& A) const
       {
         if (this->dimension() != A.dimension()) return false ;
         
@@ -404,7 +404,7 @@ namespace Ariadne {
       }
       
       /*! \brief The inequality operator */
-      inline bool operator!=(const Rectangle<Real>& A) const {
+      inline bool operator!=(const Rectangle<real_type>& A) const {
         return !(*this == A);
       }
 
@@ -505,19 +505,17 @@ namespace Ariadne {
                        const Rectangle<R>& A, 
                        const ListSet< R,Rectangle >& cover)
     {
-      typedef R Real;
-      typedef typename std::set<Real> Set;
       typedef typename ListSet< R, Rectangle >::const_iterator list_iterator;
 
       size_type dimension = A.dimension();
       
       for(size_type i=0; i!=dimension; ++i) {
-        Real lower=A.lower_bound(i);
-        Real upper=A.upper_bound(i);
+        R lower=A.lower_bound(i);
+        R upper=A.upper_bound(i);
         gridpoints[i].insert(lower);
         gridpoints[i].insert(upper);
         for(list_iterator rect=cover.begin(); rect!=cover.end(); ++rect) {
-          Real bound = rect->lower_bound(i);
+          R bound = rect->lower_bound(i);
           if(lower<bound && bound<upper) {
             gridpoints[i].insert(bound);
           }
@@ -551,16 +549,13 @@ namespace Ariadne {
     bool inner_subset(const Rectangle<R>& A,
                       const ListSet<R,Rectangle>& B) 
     {
-      typedef R Real;
-      typedef typename std::set<Real> Set;
-      typedef typename Set::const_iterator set_iterator;
       typedef typename ListSet<R,Rectangle>::const_iterator list_iterator;
       
       typedef std::valarray<size_type> index_type;
 
       size_type dimension = A.dimension();
       
-      std::vector<Set> gridpoints(dimension);
+      std::vector< std::set<R> > gridpoints(dimension);
       compute_gridpoints(gridpoints, A, B);
       
       
@@ -583,16 +578,16 @@ namespace Ariadne {
       
       for(list_iterator rect=B.begin(); rect!=B.end(); ++rect) {
         for(size_type i=0; i!=dimension; ++i) {
-          Real lower_bnd=rect->lower_bound(i);
+          R lower_bnd=rect->lower_bound(i);
           size_type lower_indx=0;
-          set_iterator iter=gridpoints[i].begin();
+          typename std::set<R>::const_iterator iter=gridpoints[i].begin();
           while(iter!=gridpoints[i].end() && (*iter) <= lower_bnd) {
             ++iter;
             ++lower_indx;
           }
           lower_indices[i]=lower_indx;
           
-          Real upper_bnd=rect->upper_bound(i);
+          R upper_bnd=rect->upper_bound(i);
           size_type upper_indx=0;
           iter=gridpoints[i].begin();
           while(iter!=gridpoints[i].end() && (*iter) < upper_bnd) {
@@ -657,16 +652,13 @@ namespace Ariadne {
     bool subset(const Rectangle<R>& A,
                 const ListSet<R,Rectangle>& B) 
     {
-      typedef typename Rectangle<R>::Real Real;
-      typedef typename std::set<Real> Set;
-      typedef typename Set::const_iterator set_iterator;
       typedef typename ListSet<R,Rectangle>::const_iterator list_iterator;
       
       typedef std::valarray<size_type> index_type;
 
       size_type dimension = A.dimension();
       
-      std::vector<Set> gridpoints(dimension);
+      std::vector< std::set<R> > gridpoints(dimension);
       compute_gridpoints(gridpoints, A, B);
       
       
@@ -689,16 +681,16 @@ namespace Ariadne {
       
       for(list_iterator rect=B.begin(); rect!=B.end(); ++rect) {
         for(size_type i=0; i!=dimension; ++i) {
-          Real lower_bound=rect->lower(i);
+          R lower_bound=rect->lower(i);
           size_type lower_index=0;
-          set_iterator iter=gridpoints[i].begin();
+          typename std::set<R>::const_iterator iter=gridpoints[i].begin();
           while(iter!=gridpoints[i].end() && (*iter) < lower_bound) {
             ++iter;
             ++lower_index;
           }
           lower_indices[i]=lower_index;
           
-          Real upper_bound=rect->upper(i);
+          R upper_bound=rect->upper(i);
           size_type upper_index=0;
           iter=gridpoints[i].begin();
           while(iter!=gridpoints[i].end() && (*iter) <= upper_bound) {
@@ -867,16 +859,14 @@ namespace Ariadne {
     std::istream& 
     operator>>(std::istream& is, Rectangle<R>& r)
     {
-      typedef R Real;
-      typedef typename Ariadne::Interval<Real> Interval;
-      
+     
       char c;
       is >> c;
       is.putback(c);
       if(c=='[') {
         /* Representation as a literal [a1,b1]x[a2,b2]x...x[an,bn] */
-        std::vector< Interval > v;
-        Interval i;
+        std::vector< Interval<R> > v;
+        Interval<R> i;
         c='x';
         while(c=='x') {
           is >> i;

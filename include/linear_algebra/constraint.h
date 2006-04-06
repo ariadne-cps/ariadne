@@ -50,16 +50,16 @@ class ConstraintSystem {
     STRICT_INEQUALITY
   };
   
-  typedef ::Ariadne::LinearAlgebra::matrix<R> Matrix;
-  typedef ::Ariadne::LinearAlgebra::vector<R> Vector;
+  typedef ::Ariadne::LinearAlgebra::matrix<R> matrix_type;
+  typedef ::Ariadne::LinearAlgebra::vector<R> vector_type;
 
-  typedef std::vector<RelType> Rel_Vector;
+  typedef std::vector<RelType> Rel_vector_type;
   
   ConstraintSystem() { }
   
   ConstraintSystem(const Parma_Polyhedra_Library::Constraint_System& ppl_cs);
   
-  ConstraintSystem(Matrix new_C, Vector new_d)
+  ConstraintSystem(matrix_type new_C, vector_type new_d)
     : _C(new_C), _d(new_d), _rel_types(new_C.size1()) 
   { 
     for(size_type i=0; i!=_rel_types.size(); ++i) {
@@ -67,7 +67,7 @@ class ConstraintSystem {
     }
   }
 
-  ConstraintSystem(Matrix new_C, Vector new_d , Rel_Vector new_r_type)
+  ConstraintSystem(matrix_type new_C, vector_type new_d , Rel_vector_type new_r_type)
     : _C(new_C), _d(new_d), _rel_types(new_r_type) 
   { }
 
@@ -118,9 +118,9 @@ class ConstraintSystem {
     return *this;
   }
  private:
-  Matrix _C;
-  Vector _d;
-  Rel_Vector _rel_types;
+  matrix_type _C;
+  vector_type _d;
+  Rel_vector_type _rel_types;
  private:  
   inline bool any_equality() const{
     for (size_t i=0; i< this->number_of_constraints(); i++) {
@@ -253,8 +253,8 @@ ConstraintSystem<R>::expand_by(const R& delta)
   }
 
   if (delta<0) {
-    Matrix new_C(1, dim);
-    Vector new_d(1);
+    matrix_type new_C(1, dim);
+    vector_type new_d(1);
     this->_rel_types.resize(1);
     for (size_t i=0; i< dim; i++) {
       new_C(1,i)=0;
@@ -278,10 +278,10 @@ void
 ConstraintSystem<R>::reset_dimensions(const size_t& dim, 
                                       const size_t& nb_constraints) 
 {
-  Matrix new_C(nb_constraints,dim);
-  Vector new_d(nb_constraints);
+  matrix_type new_C(nb_constraints,dim);
+  vector_type new_d(nb_constraints);
   
-  Rel_Vector new_r_type(nb_constraints);
+  Rel_vector_type new_r_type(nb_constraints);
   
   _C=new_C;
   _d=new_d;
@@ -299,8 +299,8 @@ ConstraintSystem<R>::expand_equality_by(const R& delta)
   
   R den=denominator(delta), num=numerator(delta);
   
-  Matrix new_C(new_constr, dim);
-  Vector new_d(new_constr);
+  matrix_type new_C(new_constr, dim);
+  vector_type new_d(new_constr);
   
   /* TODO: REIMPLEMENT */
   for (size_t i=0; i<this->number_of_constraints(); ++i) {

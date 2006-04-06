@@ -7,12 +7,12 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This program is free software; you can rediself_ns::stribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  This program is diself_ns::stributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
@@ -33,10 +33,11 @@ using boost::python::def;
 using boost::python::return_value_policy;
 using boost::python::copy_const_reference;
 
-#include "python/real_typedef.h"
+#include "python/typedefs.h"
+using namespace Ariadne;
 
 void export_function() {
-  def("exp_approx", Ariadne::exp_approx<Real>, "approximate exponential function (maximum error e)" );
-  def("cos_approx", Ariadne::exp_approx<Real>, "approximate sine function (maximum error e)" );
-  def("sin_approx", Ariadne::exp_approx<Real>, "approximate cosine function (maximum error e)" );
+  def("exp_approx", exp_approx<Real>, "approximate exponential function (maximum error e)" );
+  def("cos_approx", cos_approx<Real>, "approximate sine function (maximum error e)" );
+  def("sin_approx", sin_approx<Real>, "approximate cosine function (maximum error e)" );
 }

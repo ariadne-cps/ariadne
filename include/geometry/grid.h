@@ -32,11 +32,12 @@
 #include <iostream>
 #include <iterator>
 
+#include "../declarations.h"
+
 #include "../base/array.h"
 #include "../base/interval.h"
 #include "../base/binary_word.h"
 
-#include "../geometry/geometry_declarations.h"
 
 #include "../geometry/lattice_set.h"
 

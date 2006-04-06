@@ -37,7 +37,7 @@ namespace Ariadne {
     
     template<typename R>
     bool 
-    Zonotope<R>::contains(const State& point) const 
+    Zonotope<R>::contains(const state_type& point) const 
     {
       if (point.dimension()!=this->dimension()) {
         throw std::domain_error("This object and parameter have different space dimensions");
@@ -45,12 +45,12 @@ namespace Ariadne {
       
       if (this->empty()) { return false; }
     
-      Matrix A(0,0);
-      Vector b(0);
+      matrix_type A(0,0);
+      vector_type b(0);
               
       this->compute_linear_inequalities(A,b);
 
-      Vector result(A*point.position_vector()-b);
+      vector_type result(A*point.position_vector()-b);
 
       for (size_type i=0; i<result.size(); i++) {
          if (result(i)<0) return false;
@@ -61,7 +61,7 @@ namespace Ariadne {
       
     template<typename R>
     bool 
-    Zonotope<R>::interior_contains(const State& point) const 
+    Zonotope<R>::interior_contains(const state_type& point) const 
     {
        using namespace Ariadne::LinearAlgebra;
       
@@ -71,12 +71,12 @@ namespace Ariadne {
     
       if (this->empty_interior()) { return false; }
   
-      Matrix A(0,0);
-      Vector b(0);
+      matrix_type A(0,0);
+      vector_type b(0);
               
       this->compute_linear_inequalities(A,b);
 
-      Vector result(A*point.position_vector()-b);
+      vector_type result(A*point.position_vector()-b);
       
       for (size_type i=0; i<result.size(); i++) {
          if (result(i)<=0) return false;
@@ -87,12 +87,12 @@ namespace Ariadne {
       
     template<typename R>
     bool 
-    Zonotope<R>::operator==(const Zonotope<Real>& A) const
+    Zonotope<R>::operator==(const Zonotope<real_type>& A) const
     {
       using namespace LinearAlgebra;
             
-      const Matrix &this_gen=this->_generators;
-      const Matrix &A_gen=A._generators;
+      const matrix_type &this_gen=this->_generators;
+      const matrix_type &A_gen=A._generators;
       size_type directions=this->number_of_generators();
 
       if (!have_same_dimensions(this_gen,A_gen)) {
@@ -128,7 +128,7 @@ namespace Ariadne {
     Zonotope<R>::bounding_box() const 
     {
       using namespace Ariadne::LinearAlgebra;
-      Vector offset(this->dimension());
+      vector_type offset(this->dimension());
       
       for(size_type i=0; i!=this->dimension(); ++i) {
         for(size_type j=0; j!=this->_generators.size2(); ++j) {
@@ -145,7 +145,7 @@ namespace Ariadne {
       using namespace LinearAlgebra;
            
       size_type i,j,i2,j2;
-      Matrix &gen=this->_generators;
+      matrix_type &gen=this->_generators;
       gen=remove_null_columns_but_one(gen);
       size_type rows=gen.size1();
       
@@ -198,7 +198,7 @@ namespace Ariadne {
       }
       
       if (min_cols!= cols) {
-        Matrix new_gen(rows,min_cols);
+        matrix_type new_gen(rows,min_cols);
 
         j2=0;
         for (j=0; j< cols; j++) {
@@ -319,13 +319,13 @@ namespace Ariadne {
     }
     template<typename R>
     void 
-    Zonotope<R>::compute_linear_inequalities(Matrix& A, Vector& b) const
+    Zonotope<R>::compute_linear_inequalities(matrix_type& A, vector_type& b) const
     {
       assert(false);
       using namespace Ariadne::LinearAlgebra;
      
-      const Matrix &gen=this->_generators;
-      Matrix Space=trans(gen);
+      const matrix_type &gen=this->_generators;
+      matrix_type Space=trans(gen);
       R b2;
       size_type ngen=this->number_of_generators();
       
@@ -335,17 +335,17 @@ namespace Ariadne {
       //A=lu_decompose(Space,col,row); 
 
       if (col.size()==row.size()) {
-        A=Matrix(2*ngen,this->dimension());
-        b=Vector(2*ngen);
-        Space=Matrix();
+        A=matrix_type(2*ngen,this->dimension());
+        b=vector_type(2*ngen);
+        Space=matrix_type();
       } 
       else { 
         remove_null_columns(A,row,col);
         Space=compute_space(A,row,col);
 
-        A=Matrix(2*ngen+2*Space.size1(),
+        A=matrix_type(2*ngen+2*Space.size1(),
                         this->dimension());
-        b=Vector(2*ngen+2*Space.size1());
+        b=vector_type(2*ngen+2*Space.size1());
       }
       // TO IMPROVE: we new compute both (col_i)^T(cols_j) and 
       // (col_j)^T(cols_i)

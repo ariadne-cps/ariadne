@@ -29,60 +29,65 @@
 #ifndef _ARIADNE_PYTHON_TYPEDEFS_H
 #define _ARIADNE_PYTHON_TYPEDEFS_H
 
-#include "../python/real_typedef.h"
+#include "../real_typedef.h"
 #include "../declarations.h"
 
 #include "../base/basic_type.h"
 
-typedef Ariadne::Dyadic Dyadic;
-typedef Ariadne::Rational Rational;
+namespace Ariadne {
+  
+typedef Float64 Float64;
+typedef MPFloat MPFloat;
+typedef Dyadic Dyadic;
+typedef Rational Rational;
 
-typedef Ariadne::numerical_traits<Real>::field_extension_type Field;
+typedef Interval<Real> RInterval;
+typedef Interval<Field> FInterval;
 
-typedef Ariadne::Interval<Real> RInterval;
-typedef Ariadne::Interval<Field> FInterval;
+typedef LinearAlgebra::vector<Real> RVector;
+typedef LinearAlgebra::matrix<Real> RMatrix;
+typedef LinearAlgebra::interval_vector<Real> RIntervalVector;
+typedef LinearAlgebra::interval_matrix<Real> RIntervalMatrix;
 
-typedef Ariadne::LinearAlgebra::vector<Rational> QVector;
-typedef Ariadne::LinearAlgebra::matrix<Rational> QMatrix;
+typedef LinearAlgebra::vector<Field> FVector;
+typedef LinearAlgebra::matrix<Field> FMatrix;
+typedef LinearAlgebra::LinearProgram<Field> FLinearProgram;
 
-typedef Ariadne::LinearAlgebra::vector<Real> RVector;
-typedef Ariadne::LinearAlgebra::matrix<Real> RMatrix;
-typedef Ariadne::LinearAlgebra::interval_vector<Real> RIntervalVector;
-typedef Ariadne::LinearAlgebra::interval_matrix<Real> RIntervalMatrix;
+typedef Geometry::Point<Real> RPoint;
+typedef Geometry::Rectangle<Real> RRectangle;
+typedef Geometry::Parallelotope<Real> RParallelotope;
+typedef Geometry::Zonotope<Real> RZonotope;
+typedef Geometry::Simplex<Real> RSimplex;
+typedef Geometry::Polyhedron<Real> RPolyhedron;
 
-typedef Ariadne::LinearAlgebra::vector<Field> FVector;
-typedef Ariadne::LinearAlgebra::matrix<Field> FMatrix;
-typedef Ariadne::LinearAlgebra::LinearProgram<Field> FLinearProgram;
+typedef Geometry::ListSet<Real,Geometry::Rectangle> RRectangleListSet;
+typedef Geometry::ListSet<Real,Geometry::Parallelotope> RParallelotopeListSet;
 
-typedef Ariadne::Geometry::Point<Real> RPoint;
-typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
-typedef Ariadne::Geometry::Parallelotope<Real> RParallelotope;
-typedef Ariadne::Geometry::Zonotope<Real> RZonotope;
-typedef Ariadne::Geometry::Simplex<Real> RSimplex;
-typedef Ariadne::Geometry::Polyhedron<Real> RPolyhedron;
+typedef Geometry::LatticeCell LatticeCell;
+typedef Geometry::LatticeRectangle LatticeRectangle;
 
-typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Rectangle> RRectangleListSet;
-typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Parallelotope> RParallelotopeListSet;
+typedef Geometry::Grid<Real> RGridBase;
+typedef Geometry::FiniteGrid<Real> RFiniteGrid;
+typedef Geometry::GridCell<Real> RGridCell;
+typedef Geometry::GridRectangle<Real> RGridRectangle;
+typedef Geometry::GridCellListSet<Real> RGridCellListSet;
+typedef Geometry::GridRectangleListSet<Real> RGridRectangleListSet;
+typedef Geometry::GridMaskSet<Real> RGridMaskSet;
 
-typedef Ariadne::Geometry::Grid<Real> RGridBase;
-typedef Ariadne::Geometry::FiniteGrid<Real> RFiniteGrid;
-typedef Ariadne::Geometry::GridCell<Real> RGridCell;
-typedef Ariadne::Geometry::GridRectangle<Real> RGridRectangle;
-typedef Ariadne::Geometry::GridCellListSet<Real> RGridCellListSet;
-typedef Ariadne::Geometry::GridRectangleListSet<Real> RGridRectangleListSet;
-typedef Ariadne::Geometry::GridMaskSet<Real> RGridMaskSet;
+typedef Geometry::PartitionScheme<Real> RPartitionScheme;
+typedef Geometry::PartitionTree<Real> RPartitionTree;
+typedef Geometry::PartitionTreeCell<Real> RPartitionTreeCell;
+typedef Geometry::PartitionTreeSet<Real> RPartitionTreeSet;
 
-typedef Ariadne::Geometry::PartitionScheme<Real> RPartitionScheme;
-typedef Ariadne::Geometry::PartitionTree<Real> RPartitionTree;
-typedef Ariadne::Geometry::PartitionTreeCell<Real> RPartitionTreeCell;
-typedef Ariadne::Geometry::PartitionTreeSet<Real> RPartitionTreeSet;
+typedef Evaluation::Map<Real> RMapBase;
+typedef Evaluation::AffineMap<Real> RAffineMap;
+typedef Evaluation::PolynomialMap<Real> RPolynomialMap;
+typedef Evaluation::VectorField<Real> RVectorFieldBase;
+typedef Evaluation::AffineVectorField<Real> RAffineVectorField;
 
-typedef Ariadne::Evaluation::Map<Real> RMap;
-typedef Ariadne::Evaluation::AffineMap<Real> RAffineMap;
-typedef Ariadne::Evaluation::VectorField<Real> RVectorField;
-typedef Ariadne::Evaluation::AffineVectorField<Real> RAffineVectorField;
+typedef Evaluation::HenonMap<Real> RHenonMap;
+typedef Evaluation::LorenzSystem<Real> RLorenzSystem;
 
-typedef Ariadne::Evaluation::HenonMap<Real> RHenonMap;
-typedef Ariadne::Evaluation::LorenzSystem<Real> RLorenzSystem;
+}
 
 #endif /* _ARIADNE_PYTHON_TYPEDEFS_H */

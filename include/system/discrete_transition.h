@@ -38,11 +38,11 @@ class LeavingDiscreteTransition
   public:
     typedef RESET ResetMap;
     typedef LOC DiscreteLocation;
-    typedef typename DiscreteLocation::VectorField VectorField;
+    typedef typename DiscreteLocation::vector_typeField vector_typeField;
     typedef typename ResetMap::DenotableSet DenotableSet;
     typedef typename DenotableSet::BasicSet BasicSet;
-    typedef typename BasicSet::State State;
-    typedef typename State::Real Real;
+    typedef typename BasicSet::state_type state_type;
+    typedef typename state_type::real_type real_type;
   
   private:
   
@@ -170,11 +170,11 @@ class DiscreteTransition
   public:
     typedef RESET ResetMap;
     typedef LOC DiscreteLocation;
-    typedef typename DiscreteLocation::VectorField VectorField;
+    typedef typename DiscreteLocation::vector_typeField vector_typeField;
     typedef typename ResetMap::DenotableSet DenotableSet;
     typedef typename DenotableSet::BasicSet BasicSet;
-    typedef typename BasicSet::State State;
-    typedef typename State::Real Real;
+    typedef typename BasicSet::state_type state_type;
+    typedef typename state_type::real_type real_type;
   
   private:
     /*! \brief This is the source of the current discrete 

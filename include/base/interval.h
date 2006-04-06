@@ -87,9 +87,9 @@ namespace Ariadne {
       bool operator!=(const Interval<R>& ivl) { 
         return !(*this==ivl); }
 
-      const Interval<R> &operator=(const R &r) {
-	*this=Interval<R>(r,r);
-	return *this;
+      const Interval<R>& operator=(const R &r) {
+        *this=Interval<R>(r,r);
+        return *this;
       }
 
       R centre() const { return (this->lower()+this->upper())/2; }
@@ -118,4 +118,3 @@ namespace Ariadne {
 } // namespace Ariadne
   
 #endif /* _ARIADNE_INTERVAL_H */
-  

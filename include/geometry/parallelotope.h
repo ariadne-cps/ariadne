@@ -39,6 +39,8 @@
 #include <vector>
 #include <valarray>
 
+#include "../declarations.h"
+
 #include "../base/utility.h"
 #include "../base/interval.h"
 
@@ -50,7 +52,6 @@
 #include "../geometry/list_set.h"
 #include "../geometry/polyhedron.h"
 #include "../geometry/zonotope.h"
-#include "../geometry/geometry_declarations.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -123,19 +124,19 @@ namespace Ariadne {
       typedef typename numerical_traits<R>::field_extension_type F;
      public:
       /*! \brief The type of denotable real number used for the corners. */
-      typedef R Real;
+      typedef R real_type;
       /*! \brief The type of denotable point contained by the rectangle. */
-      typedef Point<R> State;
+      typedef Point<R> state_type;
       /*! \brief The type of matrix giving principal directions. */
-      typedef Ariadne::LinearAlgebra::vector<R> Vector;
+      typedef Ariadne::LinearAlgebra::vector<R> vector_type;
       /*! \brief The type of matrix giving principal directions. */
-      typedef Ariadne::LinearAlgebra::matrix<R> Matrix;
+      typedef Ariadne::LinearAlgebra::matrix<R> matrix_type;
      private:
       /* Parallelotope's centre. */
-      State _centre;
+      state_type _centre;
       
       /* Parallelotope's principal directions. */
-      Matrix _generators;
+      matrix_type _generators;
       
      public:
       /*! \brief Default constructor constructs an empty parallelotope of dimension \a n. */
@@ -143,7 +144,7 @@ namespace Ariadne {
         : _centre(n),  _generators(n,n) { }
       
       /*! \brief Construct from centre and directions. */
-      explicit Parallelotope(const Vector& c, const Matrix& m)
+      explicit Parallelotope(const vector_type& c, const matrix_type& m)
         : _centre(c), _generators(m)
       {
         if (m.size1()!=m.size2()) {
@@ -157,7 +158,7 @@ namespace Ariadne {
       }
       
       /*! \brief Construct from centre and directions. */
-      explicit Parallelotope(const State& c, const Matrix& m)
+      explicit Parallelotope(const state_type& c, const matrix_type& m)
         : _centre(c), _generators(m)
       {
         if (m.size1()!=m.size2()) {
@@ -171,7 +172,7 @@ namespace Ariadne {
       }
       
       /*! \brief Construct from a Rectangle. */
-      explicit Parallelotope(const Rectangle<Real>& r)
+      explicit Parallelotope(const Rectangle<real_type>& r)
         : _centre(r.dimension()), _generators(r.dimension(),r.dimension())
       {
         for(size_type i=0; i!=dimension(); ++i) {
@@ -222,17 +223,17 @@ namespace Ariadne {
       }
       
       /*! \brief The centre of the parallelotope. */
-      State centre() const {
+      state_type centre() const {
         return this->_centre;
       }
       
       /*! \brief The \a n th of principle direction. */
-      Vector generator(size_type n) const {
+      vector_type generator(size_type n) const {
         return column(this->_generators,n);
       }
       
       /*! \brief The matrix of principle directions. */
-      Matrix generators() const {
+      matrix_type generators() const {
         return this->_generators;
       }
      
@@ -252,10 +253,10 @@ namespace Ariadne {
       operator Polyhedron<R> () const;
        
       /*! \brief Tests if the parallelotope contains \a point. */
-      bool contains(const State& point) const;
+      bool contains(const state_type& point) const;
       
       /*! \brief Tests if the interior of the parallelotope contains \a point. */
-      bool interior_contains(const State& point) const;
+      bool interior_contains(const state_type& point) const;
 
       /*! \brief Subdivide into two smaller pieces. */
       ListSet<R,Geometry::Parallelotope> divide() const;
@@ -278,8 +279,8 @@ namespace Ariadne {
                      Parallelotope<R>& r);
       
      private:
-      void compute_linear_inequalities(Matrix&, Vector&, Vector&) const;
-      LinearAlgebra::vector<F> coordinates(const State& s) const;
+      void compute_linear_inequalities(matrix_type&, vector_type&, vector_type&) const;
+      LinearAlgebra::vector<F> coordinates(const state_type& s) const;
     };
   
     /*! \brief Tests disjointness */

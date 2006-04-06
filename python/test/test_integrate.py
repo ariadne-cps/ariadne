@@ -20,11 +20,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+from ariadne import Real
 from ariadne.base import *
 from ariadne.evaluation import *
 from ariadne.geometry import *
 from ariadne.linear_algebra import *
 import sys
+
 
 def plot(fn,bb,set):
   eps=EpsPlot(fn+".eps",bb)
@@ -52,7 +54,7 @@ init_paral=Parallelotope(init_rect)
 
 ar=[init_rect]
 for i in range(0,16):
-  ar.append(integrate(avf,ar[-1],Dyadic(0.1),Dyadic(0.1)))
+  ar.append(integrate(avf,ar[-1],Real(0.1),Real(0.1)))
 plot("integrate1",bb,ar)
 
 print "\n\n\n\n"
@@ -61,15 +63,15 @@ print avf.name()
 ap=[init_paral]
 for i in range(0,128):
   print
-  ap.append(integrate(avf,ap[-1],Dyadic(0.1),Dyadic(0.1)))
+  ap.append(integrate(avf,ap[-1],Real(0.1),Real(0.1)))
 #for p in ap:
 #  print p
 plot("integrate2",bb,ap)
 
 sys.exit()
 
-h=Dyadic(1./64)
-ls=LorenzSystem(Dyadic(8./3.),Dyadic(28.0),Dyadic(10.0))
+h=Real(1./64)
+ls=LorenzSystem(Real(8./3.),Real(28.0),Real(10.0))
 r0=Rectangle("[1.0,1.1]x[1.0,1.1]x[1.0,1.1]")
 r=[r0]
 for i in range(0,n):
@@ -81,7 +83,7 @@ p=[Parallelotope(r0)]
 #p.append(reach_step(ls,p[-1],h/4))
 for i in range(0,n):
   p.append(integration_step(ls,p[-1],h))
-#p.append(reach_step(ls,p[-1],Dyadic(h/4)))
+#p.append(reach_step(ls,p[-1],Real(h/4)))
   
 print p[-1]
 

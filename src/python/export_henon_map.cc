@@ -7,12 +7,12 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This program is free software; you can rediself_ns::stribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  This program is diself_ns::stributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
@@ -24,35 +24,20 @@
 
 #include "evaluation/henon_map.h"
 
+#include "python/typedefs.h"
+using namespace Ariadne;
+
 #include <boost/python.hpp>
-
-using boost::python::class_;
-using boost::python::init;
-using boost::python::self;
-using boost::python::def;
-using boost::python::bases;
-using boost::python::return_value_policy;
-using boost::python::copy_const_reference;
-
-#include "python/real_typedef.h"
+using namespace boost::python;
   
-typedef Ariadne::Interval<Real> RInterval;
-typedef Ariadne::Geometry::Point<Real> RPoint;
-typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
-typedef Ariadne::Geometry::Parallelotope<Real> RParallelotope;
-typedef Ariadne::LinearAlgebra::matrix<Real> RMatrix;
-typedef Ariadne::LinearAlgebra::matrix<RInterval> IMatrix;
-typedef Ariadne::Evaluation::Map<Real> RMap;
-typedef Ariadne::Evaluation::HenonMap<Real> RHenonMap;
-
 typedef RPoint (RHenonMap::* PointMap) (const RPoint&) const;
 typedef RRectangle (RHenonMap::* RectangleMap) (const RRectangle&) const;
 typedef RParallelotope (RHenonMap::* ParallelotopeMap) (const RParallelotope&) const;
 typedef RMatrix (RHenonMap::* PointDerivative) (const RPoint&) const;
-typedef IMatrix (RHenonMap::* RectangleDerivative) (const RRectangle&) const;
+typedef RIntervalMatrix (RHenonMap::* RectangleDerivative) (const RRectangle&) const;
 
 void export_henon_map() {
-  class_<RHenonMap, bases<RMap> >("HenonMap",init<Real,Real>())
+  class_<RHenonMap, bases<RMapBase> >("HenonMap",init<Real,Real>())
     .def("argument_dimension", &RHenonMap::argument_dimension)
     .def("result_dimension", &RHenonMap::result_dimension)
     .def("__call__", PointMap(&RHenonMap::apply))
@@ -63,6 +48,6 @@ void export_henon_map() {
     .def("apply", ParallelotopeMap(&RHenonMap::apply))
     .def("derivative", PointDerivative(&RHenonMap::derivative))
     .def("derivative", RectangleDerivative(&RHenonMap::derivative))
-    .def(str(self))    // __str__
+    .def(self_ns::str(self))    // __self_ns::str__
   ;
 }

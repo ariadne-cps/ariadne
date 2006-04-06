@@ -23,7 +23,7 @@
  */
  
 /*! \file vector.h
- *  \brief Vectors and vector operations.
+ *  \brief vector_types and vector operations.
   */
 
 #ifndef _ARIADNE_VECTOR_H
@@ -31,57 +31,24 @@
 
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
-//#include <boost/numeric/ublas/io.hpp>
 
 #include "../base/basic_type.h"
 #include "../base/numerical_type.h"
-#include "../base/interval.h"
-
-namespace boost { 
-  namespace numeric { 
-    namespace ublas {
-
-      template <typename R>
-      std::ostream&
-      operator<<(std::ostream& os, const vector<R>& v)
-      {
-        os << "[";
-        if(v.size()>0) {
-          os << v[0];
-        }
-        for(uint i=1; i!=v.size(); ++i) {
-          os << "," << v[i];
-        }
-        os << "]";
-        return os;
-      }
-
-    }
-  }
-}
-
 
 namespace Ariadne {
   namespace LinearAlgebra {
 
-    using boost::numeric::ublas::vector;
-    using boost::numeric::ublas::vector_expression;
-        
-/*
     template<typename R>
-    class Vector
+    class vector
       : public boost::numeric::ublas::vector<R> 
     {
       typedef boost::numeric::ublas::vector<R> Base;
      public:
-      template<typename E>
-      Vector(const boost::numeric::ublas::vector_expression<E>& v) : Base(v().size()) {
-        for(dimension_type i=0; i!=this->size(); ++i) {
-          (*this)[i]=v()[i];
-        }
-      }
+      vector() : Base() { }
+      vector(const size_t& n) : Base(n) { }
+      template<typename E> vector(const boost::numeric::ublas::vector_expression<E>& v) : Base(v()) { }
     };
-*/
+
     
     template <typename R>
     inline vector<R> zero_vector(dimension_type dim) {
@@ -141,6 +108,22 @@ namespace Ariadne {
         if (abs(b[i])>norm) norm=abs(b[i]);
       }
       return norm;
+    }
+    
+    template <typename R>
+    inline
+    std::ostream&
+    operator<<(std::ostream& os, const vector<R>& v)
+    {
+      os << "[";
+      if(v.size()>0) {
+        os << v[0];
+      }
+      for(uint i=1; i!=v.size(); ++i) {
+        os << "," << v[i];
+      }
+      os << "]";
+      return os;
     }
 
   }

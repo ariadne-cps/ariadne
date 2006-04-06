@@ -38,6 +38,8 @@
 #include "../base/function.h"
 #include "../base/interval.h"
 
+#include "../declarations.h"
+
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/interval_vector.h"
 #include "../linear_algebra/zonotopic_vector.h"
@@ -51,7 +53,6 @@
 #include "../geometry/list_set.h"
 #include "../geometry/grid_set.h"
 
-#include "../evaluation/evaluation_declarations.h"
 #include "../evaluation/vector_field.h"
 #include "../evaluation/affine_vector_field.h"
 
@@ -99,7 +100,7 @@ namespace Ariadne {
       
       /* FIXME: Don't hard-code this error! */
       LinearAlgebra::matrix<F> AinvF=LinearAlgebra::inverse(Amid);
-      LinearAlgebra::interval_matrix<R> Ainv=LinearAlgebra::approximate(AinvF,Dyadic(1)/65536);
+      LinearAlgebra::interval_matrix<R> Ainv=LinearAlgebra::approximate(AinvF,R(R(1)/65536));
       
       R err = upper_norm(Ainv*LinearAlgebra::interval_matrix<R>(D+A));
       std::cerr << "error=" << err << std::endl;

@@ -33,11 +33,11 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "../base/utility.h"
+#include "../declarations.h"
 
+#include "../base/utility.h"
 #include "../linear_algebra/vector.h"
 
-#include "../geometry/geometry_declarations.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -52,25 +52,25 @@ namespace Ariadne {
     template <typename R>
     class Point {
      public:
-      typedef Ariadne::LinearAlgebra::vector<R> Vector;
+      typedef Ariadne::LinearAlgebra::vector<R> vector_type;
 
-      typedef R Real;
-      typedef Real value_type;
-      typedef Vector difference_type;
+      typedef R real_type;
+      typedef real_type value_type;
+      typedef vector_type difference_type;
      private:
       /*! \brief The vector defining the state */
-      Vector _vector;
+      vector_type _vector;
 
      public:
       Point() : _vector(0) { }
 
       Point(size_t dim) : _vector(dim) {
         for(size_t i=0; i!=dimension(); ++i) {
-          _vector[i]=Real(0);
+          _vector[i]=real_type(0);
         }
       }
 
-      Point(size_t dim, const Real default_value) : _vector(dim) {
+      Point(size_t dim, const real_type default_value) : _vector(dim) {
         for(size_t i=0; i!=dimension(); ++i) {
           _vector[i]=default_value;
         }
@@ -86,11 +86,11 @@ namespace Ariadne {
 
       }
 
-      explicit Point(const Vector& position) : _vector(position) { }
+      explicit Point(const vector_type& position) : _vector(position) { }
 
       Point(const Point& original) : _vector(original._vector) { }
 
-      inline Real& operator[] (size_t index) {
+      inline real_type& operator[] (size_t index) {
         if ((this->_vector).size() <= index) { 
 	 /* Since index has type  size_t there is no need to check whever
 	      index < 0 or not */ 
@@ -99,7 +99,7 @@ namespace Ariadne {
         return  (this->_vector[index]);
       }
 
-      inline const Real& operator[](size_t index) const {
+      inline const real_type& operator[](size_t index) const {
         if ((this->_vector).size() <= index) { 
 	   /* Since index has type  size_t there is no need to check whever
 	      index < 0 or not */ 	
@@ -110,7 +110,7 @@ namespace Ariadne {
 
 
       /*! \brief Checks equivalence between two states. */
-      inline bool operator==(const Point<Real>& A) const {
+      inline bool operator==(const Point<real_type>& A) const {
         /* Return false if states have different dimensions */
         if (this->dimension()!=A.dimension()) { return false; }
 
@@ -123,12 +123,12 @@ namespace Ariadne {
       }
 
       /*! \brief Returns the position vector of the point. */
-      inline const Vector& position_vector() const {
+      inline const vector_type& position_vector() const {
         return this->_vector; 
       }
       
       /*! \brief Checks equivalence between two states. */
-      inline bool operator!=(const Point<Real>& A) const {
+      inline bool operator!=(const Point<real_type>& A) const {
         return !( *this == A );
       }
 
@@ -137,7 +137,7 @@ namespace Ariadne {
         return (this->_vector).size();
       }
 
-      inline Real get(size_t index) const {
+      inline real_type get(size_t index) const {
         if ((this->_vector).size() <= index) { 
 	   /* Since index has type  size_t there is no need to check whever
 	      index < 0 or not */ 
@@ -146,7 +146,7 @@ namespace Ariadne {
         return  (this->_vector[index]);
       }
 
-      inline void set(size_t index, const Real& r) {
+      inline void set(size_t index, const real_type& r) {
         if ((this->_vector).size() <= index) {
 	    /* Since index has type  size_t there is no need to check whever
 	      index < 0 or not */ 
@@ -155,26 +155,26 @@ namespace Ariadne {
         this->_vector[index]=r;
       }
 
-      inline Point<Real>& operator=(const Point<Real>& A) {
+      inline Point<real_type>& operator=(const Point<real_type>& A) {
         this->_vector=A._vector;
         return *this;
       }
 
        /*! \brief Difference of two states. */
-      friend Vector operator- <> (const Point<Real>& s1,
-                                  const Point<Real>& s2);
+      friend vector_type operator- <> (const Point<real_type>& s1,
+                                  const Point<real_type>& s2);
 
        /*! \brief Difference of two states. */
-      friend Point<Real> operator+ <> (const Point<Real>& s,
-                                       const Vector& v);
+      friend Point<real_type> operator+ <> (const Point<real_type>& s,
+                                       const vector_type& v);
 
        /*! \brief Difference of two states. */
-      friend Point<Real> operator- <> (const Point<Real>& s,
-                                       const Vector& v);
+      friend Point<real_type> operator- <> (const Point<real_type>& s,
+                                       const vector_type& v);
 
-      friend std::ostream& operator<< <>(std::ostream& os, const Point<Real>& state);
+      friend std::ostream& operator<< <>(std::ostream& os, const Point<real_type>& state);
 
-      friend std::istream& operator>> <> (std::istream& is, Point<Real>& state);
+      friend std::istream& operator>> <> (std::istream& is, Point<real_type>& state);
     };
 
 

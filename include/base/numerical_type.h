@@ -68,7 +68,7 @@ namespace Ariadne {
   *
   * FIXME: mpf_class does not implement addition, subtraction and multiplication exactly.
   */
-  //typedef Synaps::dyadic Dyadic;
+  typedef Synaps::dyadic Dyadic;
   
   /*! \brief A multiple-precision floating-point type.
    *
@@ -170,6 +170,7 @@ namespace Ariadne {
   /* names (for diagnostic output) */
   template <typename T> std::string name();
   template<> inline std::string name<Float64>() { return "Float64"; }
+  template<> inline std::string name<MPFloat>() { return "MPFloat"; }
   template<> inline std::string name<Rational>() { return "Rational"; }
   template<> inline std::string name<Dyadic>() { return "Dyadic"; }
 

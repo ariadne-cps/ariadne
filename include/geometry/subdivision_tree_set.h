@@ -33,6 +33,8 @@
 #include <vector>
 #include <iosfwd>
 
+#include "../declarations.h"
+
 #include "../base/basic_type.h"
 #include "../base/array.h"
 #include "../base/sequence.h"
@@ -42,7 +44,6 @@
 #include "../base/iterator.h"
 #include "../base/utility.h"
 
-#include "../geometry/geometry_declarations.h"
 #include "../geometry/rectangle.h"
 
 namespace Ariadne {

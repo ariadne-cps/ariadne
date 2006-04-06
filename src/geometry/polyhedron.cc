@@ -24,12 +24,14 @@
 #include "geometry/polyhedron.h"
 #include "geometry/polyhedron.tpl"
 
+#include "real_typedef.h"
+
 namespace Ariadne {
   namespace Geometry {
 
-    template class Polyhedron<Dyadic>;
+    template class Polyhedron<Real>;
 
-    template std::ostream& operator<<(std::ostream&, const Polyhedron<Dyadic>&);
+    template std::ostream& operator<<(std::ostream&, const Polyhedron<Real>&);
 
   }
 }

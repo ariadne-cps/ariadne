@@ -31,48 +31,12 @@
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
 
+
+#include "python/typedefs.h"
+using namespace Ariadne;
+
 #include <boost/python.hpp>
-
-#include "python/real_typedef.h"
-
-using Ariadne::dimension_type;
-using Ariadne::index_type;
-using Ariadne::BooleanArray;
-using Ariadne::IndexArray;
-using Ariadne::SizeArray;
-using Ariadne::Geometry::LatticeCell;
-using Ariadne::Geometry::LatticeRectangle;
-
-typedef Ariadne::Geometry::Point<Real> RPoint;
-typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
-typedef Ariadne::Geometry::Parallelotope<Real> RParallelotope;
-typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Rectangle> RRectangleListSet;
-typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Parallelotope> RParallelotopeListSet;
-typedef Ariadne::Geometry::PartitionTreeSet<Real> RPartitionTreeSet;
-
-typedef Ariadne::Geometry::Grid<Real> RGridBase;
-typedef Ariadne::Geometry::FiniteGrid<Real> RFiniteGrid;
-typedef Ariadne::Geometry::GridCell<Real> RGridCell;
-typedef Ariadne::Geometry::GridCellListSet<Real> RGridCellListSet;
-typedef Ariadne::Geometry::GridRectangle<Real> RGridRectangle;
-typedef Ariadne::Geometry::GridRectangleListSet<Real> RGridRectangleListSet;
-typedef Ariadne::Geometry::GridMaskSet<Real> RGridMaskSet;
-
-using Ariadne::Geometry::regular_intersection;
-using Ariadne::Geometry::interiors_intersect;
-using Ariadne::Geometry::disjoint;
-using Ariadne::Geometry::inner_subset;
-using Ariadne::Geometry::subset;
-
-using boost::python::class_;
-using boost::python::init; 
-using boost::python::self;
-using boost::python::return_value_policy;
-using boost::python::copy_const_reference;
-using boost::python::def;
-using boost::python::iterator;
-using boost::python::wrapper;
-using boost::python::self_ns::str;
+using namespace boost::python;
 
 struct RGrid : RGridBase, wrapper<RGridBase>
 {
@@ -80,7 +44,7 @@ struct RGrid : RGridBase, wrapper<RGridBase>
   dimension_type dimension() const { return this->get_override("dimension")(); }
   real_type subdivision_coordinate(dimension_type d, index_type n) const { return this->get_override("subdivision_coordinate")(); }
   index_type subdivision_interval(dimension_type d, const real_type& x) const { return this->get_override("subdivision_interval")(); }
-  bool contains(const LatticeRectangle& r) const { return this->get_override("subdivision_interval")(); }
+  bool contains(const LatticeRectangle& r) const { return this->get_override("contains")(); }
   std::ostream& write(std::ostream& os) const { return this->get_override("write")(); }
 };
 
@@ -126,21 +90,21 @@ inline void grid_mask_set_adjoin_grid_mask_set(RGridMaskSet& gms, const RGridMas
 void export_grid_set() {
   class_<LatticeRectangle>("LatticeRectangle",init<IndexArray,IndexArray>())
     .def("dimension", &RGridCell::dimension)
-    .def(str(self))    // __str__
+    .def(self_ns::str(self))    // __str__
     ;
 
 
   class_<RGrid, boost::noncopyable>("Grid")
-    .def("dimension", &RFiniteGrid::dimension)
-    .def("subdivision_coordinate", &RFiniteGrid::subdivision_coordinate)
-    .def("subdivision_index", &RFiniteGrid::subdivision_index)
-    .def("subdivision_lower_index", &RFiniteGrid::subdivision_lower_index)
-    .def("subdivision_upper_index", &RFiniteGrid::subdivision_upper_index)
-    .def("contains", &RFiniteGrid::contains)
-    .def(str(self))    // __str__
+    .def("dimension", pure_virtual(&RGridBase::dimension))
+    .def("subdivision_coordinate", pure_virtual(&RGridBase::subdivision_coordinate))
+    .def("subdivision_index", pure_virtual(&RGridBase::subdivision_index))
+    .def("subdivision_lower_index", &RGridBase::subdivision_lower_index)
+    .def("subdivision_upper_index", &RGridBase::subdivision_upper_index)
+    .def("contains", pure_virtual(&RGridBase::contains))
+    .def(self_ns::str(self))    // __str__
     ;
 
-  class_<RFiniteGrid>("FiniteGrid",init<RRectangle,SizeArray>())
+  class_< RFiniteGrid, bases<RGridBase> >("FiniteGrid",init<RRectangle,SizeArray>())
     .def(init<RRectangle,uint>())
     .def(init<RRectangleListSet>())
     .def(init<RFiniteGrid>())
@@ -149,18 +113,19 @@ void export_grid_set() {
     .def("subdivision_index", &RFiniteGrid::subdivision_index)
     .def("subdivision_lower_index", &RFiniteGrid::subdivision_lower_index)
     .def("subdivision_upper_index", &RFiniteGrid::subdivision_upper_index)
-    .def(str(self))    // __str__
+    .def("contains", &RFiniteGrid::contains)
+    .def(self_ns::str(self))    // __str__
     ;
 
   class_<RGridCell>("GridCell",init<RFiniteGrid,LatticeCell>())
     .def("dimension", &RGridCell::dimension)
-    .def(str(self))    // __str__
+    .def(self_ns::str(self))    // __str__
     ;
   
   class_<RGridRectangle>("GridRectangle",init<RFiniteGrid,LatticeRectangle>())
     .def(init<RGridCell>()) 
     .def("dimension", &RGridRectangle::dimension)
-    .def(str(self))    // __str__
+    .def(self_ns::str(self))    // __str__
     ;
   
   class_<RGridCellListSet>("GridCellListSet",init<RGrid>())
@@ -174,7 +139,7 @@ void export_grid_set() {
     .def("__len__", &RGridCellListSet::size)
     .def("__getitem__", &RGridCellListSet::operator[])
     .def("__iter__", iterator<RGridCellListSet>())
-    .def(str(self))    // __str__
+    .def(self_ns::str(self))    // __str__
     ;
   
   class_<RGridRectangleListSet>("GridRectangleListSet",init<RGrid>())
@@ -187,7 +152,7 @@ void export_grid_set() {
     .def("__len__", &RGridRectangleListSet::size)
     .def("__getitem__", &RGridRectangleListSet::operator[])
     .def("__iter__", iterator<RGridRectangleListSet>())
-    .def(str(self))    // __str__
+    .def(self_ns::str(self))    // __str__
     ;
     
   class_<RGridMaskSet>("GridMaskSet",init<RFiniteGrid>())
@@ -209,7 +174,7 @@ void export_grid_set() {
     .def("__len__", &RGridMaskSet::size)
     .def("__getitem__", &RGridMaskSet::operator[])
     .def("__iter__", iterator<RGridMaskSet>())
-    .def(str(self))    // __str__
+    .def(self_ns::str(self))    // __str__
     ;
   def("join",&join);
   def("difference",&difference);

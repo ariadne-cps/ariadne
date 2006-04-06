@@ -61,21 +61,21 @@ namespace Ariadne {
     class Monomial {
      public:
       /*! \brief The type of denotable real number used for the coefficients. */
-      typedef R Real;
+      typedef R real_type;
       /*! \brief The type of denotable state accepted as argument. */
-      typedef Geometry::Point<R> State;
+      typedef Geometry::Point<R> state_type;
      public:
       Monomial(size_type n) : _coefficient(0), _multi_index(n,0) { }
-      Monomial(Real a, array<size_type>& i) : _coefficient(a), _multi_index(i) { }
+      Monomial(real_type a, array<size_type>& i) : _coefficient(a), _multi_index(i) { }
      
       size_type argument_dimension() const { return _multi_index.size(); }
-      const Real& coefficient() const { return _coefficient; }
+      const real_type& coefficient() const { return _coefficient; }
       const array<size_type>& multi_index() const { return _multi_index; }
       const size_type& index(size_type n) const { return _multi_index[n]; }
     
-      Real operator() (const State& s) const {
+      real_type operator() (const state_type& s) const {
         assert(s.size() == this->dimension());
-        Real result=_coefficient;
+        real_type result=_coefficient;
         for(size_type k=0; k!=this->dimension(); ++k) {
           result *= s[k]^_multi_index[k];
         }
@@ -83,7 +83,7 @@ namespace Ariadne {
       }
       
      private:
-      Real _coefficient;
+      real_type _coefficient;
       array<size_type> _multi_index;
     };
      
@@ -92,25 +92,25 @@ namespace Ariadne {
     class Polynomial {
      public:
       /*! \brief The type of denotable real number used for the corners. */
-      typedef R Real;
+      typedef R real_type;
       /*! \brief The type of denotable state contained by the simplex. */
-      typedef Geometry::Point<R> State;
+      typedef Geometry::Point<R> state_type;
      private:
       /* Simplex's vertices. */
-      std::vector< Monomial<Real> > _terms;
+      std::vector< Monomial<real_type> > _terms;
      public:
       Polynomial() : _terms(1,Monomial<R>(0)) { }
       Polynomial(size_type m) : _terms(1,Monomial<R>(m)) { }
-      Polynomial(const std::vector< Monomial<Real> >& t) : _terms(t) { }
-      Polynomial(const std::vector<Real>& , std::vector< array<size_type> >&);
+      Polynomial(const std::vector< Monomial<real_type> >& t) : _terms(t) { }
+      Polynomial(const std::vector<real_type>& , std::vector< array<size_type> >&);
 
       size_type argument_dimension() const { return _terms[0].argument_dimension(); }
       const Monomial<R>& term(size_type j) const { return _terms[j]; }
       size_type number_of_terms() const { return _terms.size(); }
       
-      Real operator() (const State& s) const {
+      real_type operator() (const state_type& s) const {
         assert(s.size() == this->argument_dimension());
-        Real result=0;
+        real_type result=0;
         for(size_type j=0; j!=term.size(); ++j) {
           result += _terms[j](s);
         }
@@ -123,9 +123,9 @@ namespace Ariadne {
     class PolynomialMap {
      public:
       /*! \brief The type of denotable real number used for the corners. */
-      typedef R Real;
+      typedef R real_type;
       /*! \brief The type of denotable state contained by the simplex. */
-      typedef Geometry::Point<R> State;
+      typedef Geometry::Point<R> state_type;
      private:
       /* Components of the map. */
       array< Polynomial<R> > _components;
@@ -138,9 +138,9 @@ namespace Ariadne {
       size_type argument_dimension() const { return _components[0].argument_dimension(); }
       size_type result_dimension() const { return _components.size(); }
       
-      State operator() (const State& s) const {
+      state_type operator() (const state_type& s) const {
         assert(s.dimension() == this->argument_dimension());
-        State result(this->result_dimension());
+        state_type result(this->result_dimension());
         for(size_type i=0; i!=this->result_dimension(); ++i) {
           result[i] = _components[i](s);
         }

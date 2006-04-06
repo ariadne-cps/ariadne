@@ -29,9 +29,10 @@
 #ifndef _ARIADNE_MATRIX_H
 #define _ARIADNE_MATRIX_H
 
+#include <iosfwd>
+
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
-//#include <boost/numeric/ublas/io.hpp>
 
 #include "../base/basic_type.h"
 #include "../base/numerical_type.h"
@@ -39,44 +40,39 @@
 
 #include "../linear_algebra/vector.h"
 
-namespace boost {
-  namespace numeric {
-    namespace ublas {
-            
-      template<typename R>
-      inline
-      vector<R>
-      operator*(const matrix<R>& A, const vector<R>& B) {
-        return prod(A,B);
-      }
-           
-      template<typename R>
-      inline
-      matrix<R>
-      operator*(const matrix<R>& A, const matrix<R>& B) {
-        return prod(A,B);
-      }
-      
-
-      template <typename R>
-      std::ostream&
-      operator<<(std::ostream& os, const matrix<R>& A);
-       
-    }
-  }
-}
-      
-
 namespace Ariadne {
   namespace LinearAlgebra {
 
+    template<typename R>
+    class matrix : public boost::numeric::ublas::matrix<R> 
+    {
+      typedef boost::numeric::ublas::matrix<R> Base;
+     public:
+      matrix() : Base() { }
+      matrix(const size_type& r, const size_type& c) : Base(r,c) { }
+      template<typename E> matrix(const boost::numeric::ublas::matrix_expression<E>& A) : Base(A()) { }
+    };
+    
     using boost::numeric::ublas::identity_matrix;
     using boost::numeric::ublas::herm;
-    using boost::numeric::ublas::vector;
-    using boost::numeric::ublas::matrix;
     using boost::numeric::ublas::matrix_row;
     using boost::numeric::ublas::matrix_column;
   
+    template<typename R>
+    inline
+    vector<R>
+    operator*(const matrix<R>& A, const vector<R>& B) {
+      return boost::numeric::ublas::prod(A,B);
+    }
+           
+    template<typename R>
+    inline
+    matrix<R>
+    operator*(const matrix<R>& A, const matrix<R>& B) {
+      return boost::numeric::ublas::prod(A,B);
+    }
+    
+
     template <typename R>
     matrix<R> zero_matrix(size_type r, size_type c);
   
@@ -169,12 +165,6 @@ namespace Ariadne {
                                   matrix<R>& A, 
                                   vector<R>& b);
     
-    template <>
-    void 
-    transform_linear_inequalities<Dyadic>(const matrix<Dyadic>& R, 
-                                          matrix<Dyadic>& A, 
-                                          vector<Dyadic>& b); 
-
     template <class R>
     bool independent_rows(matrix<R> A);
 
@@ -211,6 +201,10 @@ namespace Ariadne {
                   array<size_type>& row,
                   const array<size_type>& col);
     
+    template <typename R>
+    std::ostream&
+    operator<<(std::ostream& os, const matrix<R>& A);
+
   }
 }
 

@@ -1,8 +1,9 @@
 /***************************************************************************
- *            evaluation_declarations.h
+ *            real_typedef.h
  *
- *  Copyright 6 February 2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  06 Feb 2006
+ *  Copyright  2005  Pieter Collins
+ *  pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,26 +22,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file evaluation_declarations.h
- *  \brief Forward declarations for the Evaluation module.
+/*! \file real_typedef.h
+ *  \brief Defines the real number type used by the library and the Python interface.
  */
 
-#ifndef _ARIADNE_EVALUATION_DECLARATIONS_H
-#define _ARIADNE_EVALUATION_DECLARATIONS_H
+#ifndef _ARIADNE_REAL_TYPEDEF_H
+#define _ARIADNE_REAL_TYPEDEF_H
+
+#include "base/numerical_type.h"
 
 namespace Ariadne {
-  namespace Evaluation {
 
-    template <typename R> class Map;
-    template <typename R> class AffineMap;
+//typedef double Real;
+typedef Ariadne::MPFloat Real;
+//typedef Ariadne::Dyadic Real;
+//typedef Ariadne::Rational Real;
 
-    template <typename R> class VectorField;
-    template <typename R> class AffineVectorField;
-
-    template <typename R> class HenonMap;
-    template <typename R> class LorenzSystem;
-      
-  }
+typedef Ariadne::numerical_traits<Real>::field_extension_type Field;
 }
 
-#endif /* _ARIADNE_EVALUATION_DECLARATIONS_H */
+#endif /* _ARIADNE_REAL_TYPEDEF_H */

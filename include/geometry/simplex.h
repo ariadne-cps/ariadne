@@ -38,6 +38,8 @@
 #include <vector>
 #include <valarray>
 
+#include "../declarations.h"
+
 #include "../base/array.h"
 #include "../base/utility.h"
 
@@ -46,7 +48,6 @@
 #include "../geometry/point.h"
 #include "../geometry/polyhedron.h"
 #include "../geometry/list_set.h"
-#include "../geometry/geometry_declarations.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -112,17 +113,17 @@ namespace Ariadne {
 
      public:
       /*! \brief The type of denotable real number used for the corners. */
-      typedef R Real;
+      typedef R real_type;
       /*! \brief The type of denotable point contained by the simplex. */
-      typedef Point<R> State;
+      typedef Point<R> state_type;
      private:
       /* Simplex's vertices. */
-      array<State> _vertices;
+      array<state_type> _vertices;
    
      public:
       /*! \brief Default constructor constructs standard simplex of dimension \a n. */
       Simplex(size_type n = 0)
-        : _vertices(n+1,State(n)) 
+        : _vertices(n+1,state_type(n)) 
       {
         for(size_type i=0; i!=n; ++i) {
           _vertices[i][i]=1;
@@ -130,7 +131,7 @@ namespace Ariadne {
       }
     
       /*! \brief Construct from list of vertices. */
-      Simplex(const std::vector<State>& v)
+      Simplex(const std::vector<state_type>& v)
         : _vertices(v.begin(),v.end())
       {
         size_type d=_vertices.size()-1;
@@ -142,7 +143,7 @@ namespace Ariadne {
       }
       
       /*! \brief Construct from list of vertices. */
-      Simplex(const array<State>& v)
+      Simplex(const array<state_type>& v)
         : _vertices(v.begin(),v.end())
       {
         size_type d=_vertices.size()-1;
@@ -175,7 +176,7 @@ namespace Ariadne {
       }
       
       operator Polyhedron<R> () const {
-        std::vector<State> vert_vec(_vertices.begin(),_vertices.end());
+        std::vector<state_type> vert_vec(_vertices.begin(),_vertices.end());
         return Polyhedron<R>(vert_vec);
       }
       
@@ -195,22 +196,22 @@ namespace Ariadne {
       }
       
       /*! \brief The array of vertices. */
-      inline const array<State>& vertices() const {
+      inline const array<state_type>& vertices() const {
         return this->_vertices;
       }
       
       /*! \brief The @a n th vertex. */
-      inline const State& vertex(size_type n) const {
+      inline const state_type& vertex(size_type n) const {
         return this->_vertices[n];
       }
       
       /*! \brief Tests if \a point is included into a simplex. */
-      inline bool contains(const State& point) const {
+      inline bool contains(const state_type& point) const {
         return Polyhedron<R>(*this).contains(point);
       }
       
       /*! \brief Tests if \a point is included into the interior a simplex. */
-      inline bool interior_contains(const State& point) const {
+      inline bool interior_contains(const state_type& point) const {
         return Polyhedron<R>(*this).interior_contains(point);
       }
     
@@ -219,13 +220,13 @@ namespace Ariadne {
        * Not currently implemented, since it requires matching the columns of 
        * the matrix of principal directions. 
        */
-      inline bool operator==(const Simplex<Real>& A) const
+      inline bool operator==(const Simplex<real_type>& A) const
       {
         throw std::domain_error("Simplex::operator==(...)  not implemented");
       }
       
       /*! \brief The inequality operator */
-      inline bool operator!=(const Simplex<Real>& A) const {
+      inline bool operator!=(const Simplex<real_type>& A) const {
         throw std::domain_error("Simplex::operator!=(...)  not implemented");
         return !(*this == A);
       }

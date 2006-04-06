@@ -21,6 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "real_typedef.h"
 
 #include "geometry/zonotope.h"
 #include "geometry/zonotope.tpl"
@@ -28,18 +29,18 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template class Zonotope<Dyadic>;
+    template class Zonotope<Real>;
 
-    template Geometry::Parallelotope<Dyadic> over_approximating_parallelotope(const Geometry::Zonotope<Dyadic>& z);
+    template Geometry::Parallelotope<Real> over_approximating_parallelotope(const Geometry::Zonotope<Real>& z);
 
-    template Zonotope<Dyadic> minkowski_sum(const Zonotope<Dyadic>& z1, const Zonotope<Dyadic>& z2);
-    template Zonotope<Dyadic> minkowski_difference(const Zonotope<Dyadic>& z1, const Zonotope<Dyadic>& z2);
+    template Zonotope<Real> minkowski_sum(const Zonotope<Real>& z1, const Zonotope<Real>& z2);
+    template Zonotope<Real> minkowski_difference(const Zonotope<Real>& z1, const Zonotope<Real>& z2);
 
-    template Zonotope<Dyadic> operator+(const Rectangle<Dyadic>& r, const LinearAlgebra::zonotopic_vector<Dyadic>& z);
-    template Zonotope<Dyadic> operator+(const Zonotope<Dyadic>& r, const LinearAlgebra::zonotopic_vector<Dyadic>& z);
+    template Zonotope<Real> operator+(const Rectangle<Real>& r, const LinearAlgebra::zonotopic_vector<Real>& z);
+    template Zonotope<Real> operator+(const Zonotope<Real>& r, const LinearAlgebra::zonotopic_vector<Real>& z);
     
-    template std::ostream& operator<<(std::ostream&, const Zonotope<Dyadic>&);
-    template std::istream& operator>>(std::istream&, Zonotope<Dyadic>&);
+    template std::ostream& operator<<(std::ostream&, const Zonotope<Real>&);
+    template std::istream& operator>>(std::istream&, Zonotope<Real>&);
 
   }
 }

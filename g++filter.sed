@@ -1,4 +1,5 @@
-s/__gmp_expr<__gmpf_value, __gmpf_value>/Dyadic/g
+s/Synaps::dyadic/Dyadic/g
+s/__gmp_expr<__gmpf_value, __gmpf_value>/MPFloat/g
 s/__gmp_expr<__gmpq_value, __gmpq_value>/Rational/g
 s/__gmp_expr<__gmpz_value, __gmpz_value>/Integer/g
 s/Ariadne:://g

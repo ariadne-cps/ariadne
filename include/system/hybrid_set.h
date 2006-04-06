@@ -83,8 +83,8 @@ class LocationDenotableSet {
   typedef LOC DiscreteLocation;
   typedef typename DiscreteLocation::DenotableSet DenotableSet;
   typedef typename DenotableSet::BasicSet BasicSet;
-  typedef typename BasicSet::State State;
-  typedef typename State::Real Real;
+  typedef typename BasicSet::state_type state_type;
+  typedef typename state_type::real_type real_type;
   
  public:
   
@@ -143,8 +143,8 @@ class HybridDenotableSet {
   typedef typename LocationDenotableSet::DiscreteLocation DiscreteLocation;
   typedef typename DiscreteLocation::DenotableSet DenotableSet;
   typedef typename DenotableSet::BasicSet BasicSet;
-  typedef typename BasicSet::State State;
-  typedef typename State::Real Real;
+  typedef typename BasicSet::state_type state_type;
+  typedef typename state_type::real_type real_type;
  private:
   
   inline bool _insert_unordered(const DiscreteLocation &location, 

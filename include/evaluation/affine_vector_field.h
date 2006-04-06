@@ -23,7 +23,7 @@
  */
  
  /*! \file affine_vector_field.h
- *  \brief Vector fields of affine form of the form \f$\dot{x}=Ax+b\f$.
+ *  \brief vector_type fields of affine form of the form \f$\dot{x}=Ax+b\f$.
  */
 
 #ifndef _AFFINE_VECTOR_FIELD_H
@@ -48,18 +48,18 @@ namespace Ariadne {
       typedef typename Geometry::Rectangle<R> Rectangle;
     
      public:
-      typedef typename Geometry::Point<R> State;
+      typedef typename Geometry::Point<R> state_type;
       
-      typedef LinearAlgebra::matrix<R> Matrix;
-      typedef LinearAlgebra::vector<R> Vector;
+      typedef LinearAlgebra::matrix<R> matrix_type;
+      typedef LinearAlgebra::vector<R> vector_type;
     
-      typedef LinearAlgebra::interval_vector<R> IntervalVector;
-      typedef LinearAlgebra::interval_matrix<R> IntervalMatrix;
+      typedef LinearAlgebra::interval_vector<R> Intervalvector_type;
+      typedef LinearAlgebra::interval_matrix<R> Intervalmatrix_type;
     
       virtual ~AffineVectorField();
       
       AffineVectorField(const AffineVectorField<R>& F) : _A(F.A()), _b(F.b()) { }
-      AffineVectorField(const Matrix &A, const Vector &b) : _A(A), _b(b) { }
+      AffineVectorField(const matrix_type &A, const vector_type &b) : _A(A), _b(b) { }
     
       LinearAlgebra::vector<R> apply(const Geometry::Point<R>& s) const;
       LinearAlgebra::interval_vector<R> apply(const Geometry::Rectangle<R>& r) const;

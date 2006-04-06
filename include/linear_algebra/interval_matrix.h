@@ -31,7 +31,8 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 
-#include "../base/basic_type.h"
+#include "../declarations.h"
+
 #include "../base/numerical_type.h"
 #include "../base/interval.h"
 
@@ -63,7 +64,6 @@ namespace Ariadne {
 
     };
 
-    
     template <typename R>
     std::ostream& 
     operator<<(std::ostream& os, const interval_matrix<R>& A);
@@ -196,8 +196,9 @@ namespace Ariadne {
     exp(const interval_matrix<R>& A); 
         
     /*! \brief The interval matrix inverse. */
-    interval_matrix<Dyadic>
-    approximate(const matrix<Rational>& A,const Dyadic& e); 
+    template<typename R>
+    interval_matrix<R>
+    approximate(const matrix<typename numerical_traits<R>::field_extension_type>& A,const R& e); 
         
   }
 }

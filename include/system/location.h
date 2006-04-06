@@ -56,7 +56,7 @@ class DiscreteLocation
   
     /*! \brief The vector field which rules the flow in 
      * the discrete location. */
-    VectorField *_field;
+    vector_typeField *_field;
   
     /*! \brief The invariant region of the discrete location. */ 
     Ariadne::Geometry::AbstractDenotableSet *_invariant;
@@ -74,7 +74,7 @@ class DiscreteLocation
      * \param field is the flow of the discrete location.
      * \param inv is the invariant of the discrete location.
      */
-    DiscreteLocation(const std::string &name, VectorField *field, 
+    DiscreteLocation(const std::string &name, vector_typeField *field, 
         Ariadne::Geometry::AbstractDenotableSet *inv);
     
     /*! \brief This is the destructor of the discrete 
@@ -89,7 +89,7 @@ class DiscreteLocation
      *
      * \return The vector field of the discrete location.
      */
-    const VectorField* field() const {
+    const vector_typeField* field() const {
       return this->_field;
     }
     

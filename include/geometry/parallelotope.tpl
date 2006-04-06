@@ -53,7 +53,7 @@ namespace Ariadne {
     Rectangle<R> 
     Parallelotope<R>::bounding_box() const 
     {
-      Vector offset(this->dimension());
+      vector_type offset(this->dimension());
       for(size_t i=0; i!=this->dimension(); ++i) {
         for(size_t j=0; j!=this->dimension(); ++j) {
           offset[i] += abs(this->_generators(i,j));
@@ -114,14 +114,14 @@ namespace Ariadne {
      
     /*! \brief Tests if the parallelotope contains \a point. */
     template <typename R>
-    bool Parallelotope<R>::contains(const State& point) const {
+    bool Parallelotope<R>::contains(const state_type& point) const {
       Zonotope<R> z_this(*this);
       return z_this.contains(point);
     }
       
     /*! \brief Tests if the interior of the parallelotope contains \a point. */
     template<typename R>
-    bool Parallelotope<R>::interior_contains(const State& point) const {
+    bool Parallelotope<R>::interior_contains(const state_type& point) const {
       Zonotope<R> z_this(*this);
       
       return z_this.interior_contains(point);
@@ -134,7 +134,7 @@ namespace Ariadne {
       size_type n=this->dimension();
       ListSet<R,Geometry::Parallelotope> result(this->dimension());
       
-      Matrix new_generators=generators();
+      matrix_type new_generators=generators();
       
       R max_norm=0;
       size_type max_column=0;
@@ -151,7 +151,7 @@ namespace Ariadne {
         new_generators(i,j)/=2;
       }
       
-      State new_centre=this->centre()-column(new_generators,j)/2;
+      state_type new_centre=this->centre()-column(new_generators,j)/2;
       result.adjoin(Parallelotope<R>(new_centre,new_generators));
       new_centre=new_centre+column(new_generators,j);
       result.adjoin(Parallelotope(new_centre,new_generators));
@@ -165,9 +165,9 @@ namespace Ariadne {
     {
       size_type n=this->dimension();
       ListSet<R,Geometry::Parallelotope> result(this->dimension());
-      Matrix new_generators=this->generators()/2;
+      matrix_type new_generators=this->generators()/2;
       
-      State first_centre=this->centre();
+      state_type first_centre=this->centre();
       for(size_type i=0; i!=n; ++i) {
         first_centre=first_centre-(this->generator(i))/2;
       }
@@ -180,7 +180,7 @@ namespace Ariadne {
 
       for(lattice_iterator iter(lower,lower,upper); iter!=end; ++iter) {
         array<index_type> ary=*iter;
-        State new_centre=first_centre;
+        state_type new_centre=first_centre;
         for(size_type i=0; i!=n; ++i) {
           if(ary[i]==1) {
             new_centre=new_centre+this->generator(i);
@@ -195,39 +195,55 @@ namespace Ariadne {
 
     template<typename R>
     void 
-    Parallelotope<R>::compute_linear_inequalities(Matrix& A, Vector& o, Vector& b) const
+    Parallelotope<R>::compute_linear_inequalities(matrix_type& A, vector_type& o, vector_type& b) const
     {
-      using namespace ::Ariadne::LinearAlgebra;
+      _compute_linear_inequalities(A,o,b,this->centre().position_vector(),this->generators(),typename numerical_traits<R>::algebraic_category());
+    }
+    
+    template<typename R>
+    inline
+    void
+    _compute_linear_inequalities(LinearAlgebra::matrix<R>& A,   
+                                 LinearAlgebra::vector<R>& o, 
+                                 LinearAlgebra::vector<R>& b, 
+                                 const LinearAlgebra::vector<R>& c, 
+                                 const LinearAlgebra::matrix<R>& G, 
+                                 const field_tag&)
+    {
+      size_type n=c.size();
       
-      size_type n=this->dimension();
-      Vector c=(this->centre()).position_vector();
-      
-      A=inverse(this->generators());
+      A=LinearAlgebra::inverse(G);
       o=A*c;
       
-      b=vector<R>(n);
+      b=LinearAlgebra::vector<R>(n);
       for(size_type i=0; i!=n; ++i) {
         b[i]=1;
       }
     }
       
-    template<>
-    void 
-    Parallelotope<Dyadic>::compute_linear_inequalities(Matrix& A, Vector& o, Vector& b) const
+    template<typename R>
+    inline
+    void
+    _compute_linear_inequalities(LinearAlgebra::matrix<R>& A,   
+                                 LinearAlgebra::vector<R>& o, 
+                                 LinearAlgebra::vector<R>& b, 
+                                 const LinearAlgebra::vector<R>& c, 
+                                 const LinearAlgebra::matrix<R>& G, 
+                                 const ring_tag&)
     {
-      using namespace ::Ariadne::LinearAlgebra;
-      typedef Dyadic Real;
-      size_type n=this->dimension();
+      typedef typename numerical_traits<R>::field_extension_type F;
       
-      matrix<Rational> M(n,n);
+      size_type n=c.size();
+      
+      LinearAlgebra::matrix<F> M(n,n);
       for(size_type i=0; i!=n; ++i) {
         for(size_type j=0; j!=n; ++j) {
-          M(i,j) = convert_to<Rational>(this->_generators(i,j));
+          M(i,j) = convert_to<F>(G(i,j));
         }
       }
-      M=inverse(M);
+      M=LinearAlgebra::inverse(M);
       
-      vector<Integer> multipliers = row_common_denominators(M);
+      LinearAlgebra::vector<Integer> multipliers = row_common_denominators(M);
       
       A.resize(n,n);
       for(size_type i=0; i!=n; ++i) {
@@ -236,7 +252,6 @@ namespace Ariadne {
         }
       }
 
-      Vector c = this->centre().position_vector();
       o = A * c;
       
       b.resize(n);
@@ -249,7 +264,7 @@ namespace Ariadne {
   
     template<typename R>
     LinearAlgebra::vector<typename numerical_traits<R>::field_extension_type>
-    Parallelotope<R>::coordinates(const State& s) const {
+    Parallelotope<R>::coordinates(const state_type& s) const {
       typedef typename numerical_traits<R>::field_extension_type F;
       LinearAlgebra::vector<F> diff(this->dimension());
       for(size_type i=0; i!=diff.size(); ++i) {

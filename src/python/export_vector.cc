@@ -7,12 +7,12 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This program is free software; you can rediself_ns::stribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  This program is diself_ns::stributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
@@ -28,17 +28,11 @@
 #include "linear_algebra/vector.h"
 #include "linear_algebra/interval_vector.h"
 
-#include <boost/python.hpp>
-
 #include "python/typedefs.h"
+using namespace Ariadne;
 
-using boost::python::class_;
-using boost::python::init;
-using boost::python::self;
-using boost::python::def;
-using boost::python::self_ns::str;
-using boost::python::return_value_policy;
-using boost::python::copy_const_reference;
+#include <boost/python.hpp>
+using namespace boost::python;
 
 inline Real rvector_getitem(const RVector& v, uint i) {
   return v(i);
@@ -68,19 +62,19 @@ inline void ivector_setitem(RIntervalVector& v, uint i, RInterval x) {
   v(i)=x;
 }
 
-inline Rational qvector_getitem(const QVector& v, uint i) {
+inline Field qvector_getitem(const FVector& v, uint i) {
   return v(i);
 }
 
-inline void qvector_setitem(QVector& v, uint i, Rational x) {
+inline void qvector_setitem(FVector& v, uint i, Field x) {
   v(i)=x;
 }
 
-inline void qvector_setitem_from_real(QVector& v, uint i, Real x) {
+inline void qvector_setitem_from_real(FVector& v, uint i, Real x) {
   v(i)=Ariadne::convert_to<Rational>(x);
 }
 
-inline void qvector_setitem_from_double(QVector& v, uint i, double x) {
+inline void qvector_setitem_from_double(FVector& v, uint i, double x) {
   v(i)=Ariadne::convert_to<Rational>(x);
 }
 
@@ -94,17 +88,17 @@ void export_vector() {
     .def("__setitem__",&rvector_setitem_from_double)
     .def("__add__",&rvector_add_rvector)
     .def("__sub__",&rvector_sub_rvector)
-    .def(str(self))    // __str__
+    .def(self_ns::str(self))    // __self_ns::str__
   ;
 
-  class_<QVector>("QVector",init<int>())
-    .def(init<QVector>())
-    .def("__len__", &QVector::size)
+  class_<FVector>("KVector",init<int>())
+    .def(init<FVector>())
+    .def("__len__", &FVector::size)
     .def("__getitem__",&qvector_getitem)
     .def("__setitem__",&qvector_setitem)
     .def("__setitem__",&qvector_setitem_from_real)
     .def("__setitem__",&qvector_setitem_from_double)
-    .def(str(self))    // __str__
+    .def(self_ns::str(self))    // __self_ns::str__
   ;
   
 }
@@ -115,6 +109,6 @@ void export_interval_vector() {
     .def("__len__", &RIntervalVector::size)
     .def("__getitem__",&ivector_getitem)
     .def("__setitem__",&ivector_setitem)
-    .def(str(self))    // __str__
+    .def(self_ns::str(self))    // __self_ns::str__
   ;
 }

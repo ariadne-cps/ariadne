@@ -7,12 +7,12 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This program is free software; you can rediself_ns::stribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  This program is diself_ns::stributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
@@ -30,25 +30,13 @@
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
 
-#include <boost/python.hpp>
-
 #include "python/typedefs.h"
 #include "python/python_utilities.h"
+using namespace Ariadne;
+using namespace Ariadne::Geometry;
 
-using Ariadne::Geometry::regular_intersection;
-using Ariadne::Geometry::interiors_intersect;
-using Ariadne::Geometry::disjoint;
-using Ariadne::Geometry::inner_subset;
-using Ariadne::Geometry::subset;
-
-using boost::python::class_;
-using boost::python::init;
-using boost::python::self;
-using boost::python::iterator;
-using boost::python::def;
-using boost::python::self_ns::str;
-using boost::python::return_value_policy;
-using boost::python::copy_const_reference;
+#include <boost/python.hpp>
+using namespace boost::python;
 
 void export_list_set() {
   typedef bool (*RectLSBinPred) (const RRectangleListSet&, const RRectangleListSet&);
@@ -74,7 +62,7 @@ void export_list_set() {
     .def("__getitem__", &RRectangleListSet::get, return_value_policy<copy_const_reference>())
     .def("__setitem__", &RRectangleListSet::set)
     .def("__iter__", iterator<RRectangleListSet>())
-    .def(str(self))    // __str__
+    .def(self_ns::str(self))    // __self_ns::str__
   ;
   
   class_<RParallelotopeListSet>("ParallelotopeListSet",init<int>())
@@ -87,7 +75,7 @@ void export_list_set() {
     .def("__getitem__", &RParallelotopeListSet::get, return_value_policy<copy_const_reference>())
     .def("__setitem__", &RParallelotopeListSet::set)
     .def("__iter__", iterator<RParallelotopeListSet>())
-    .def(str(self))    // __str__
+    .def(self_ns::str(self))    // __self_ns::str__
   ;
 
 }

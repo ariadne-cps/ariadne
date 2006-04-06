@@ -911,7 +911,7 @@ namespace Ariadne {
         for (size_type i = new_cost.size(); i-- > 0; )
           neg_assign(new_cost[i]);
     
-      // Substitute properly the cost funcion in the `costs' Matrix.
+      // Substitute properly the cost funcion in the `costs' matrix_type.
       const size_type cost_zero_size = working_cost.size();
       Row tmp_cost = Row(new_cost, cost_zero_size, cost_zero_size);
       tmp_cost.swap(working_cost);

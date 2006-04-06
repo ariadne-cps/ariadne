@@ -96,8 +96,8 @@ namespace Ariadne {
   typename numerical_traits<R>::field_extension_type
   _div(const R& x1, const R& x2, ring_tag)
   {
-    typedef typename numerical_traits<R>::field_extension_type Fld;
-    return Fld(x1)/Fld(x2);
+    typedef typename numerical_traits<R>::field_extension_type F;
+    return F(x1)/F(x2);
   }
 
   inline MPFloat div_approx(const MPFloat& x1, const MPFloat& x2, const MPFloat& e) {

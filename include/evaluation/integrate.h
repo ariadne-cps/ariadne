@@ -28,10 +28,8 @@
 #ifndef _ARIADNE_INTEGRATE_H
 #define _ARIADNE_INTEGRATE_H
 
-#include "../geometry/geometry_declarations.h"
-#include "../linear_algebra/linear_algebra_declarations.h"
+#include "../declarations.h"
 
-#include "../evaluation/evaluation_declarations.h"
 #include "../evaluation/vector_field.h"
 
 namespace Ariadne {

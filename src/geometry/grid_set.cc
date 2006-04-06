@@ -25,73 +25,75 @@
 #include "geometry/grid_set.h"
 #include "geometry/grid_set.tpl"
 
+#include "real_typedef.h"
+
 namespace Ariadne {
   namespace Geometry {
 
-    template class GridCell<Dyadic>;
-    template class GridRectangle<Dyadic>;
-    template class GridMaskSet<Dyadic>;
-    template class GridCellListSet<Dyadic>;
-    template class GridRectangleListSet<Dyadic>;
+    template class GridCell<Real>;
+    template class GridRectangle<Real>;
+    template class GridMaskSet<Real>;
+    template class GridCellListSet<Real>;
+    template class GridRectangleListSet<Real>;
       
-    template class GridMaskSetIterator<Dyadic>;
-    template class GridCellListSetIterator<Dyadic>;
-    template class GridRectangleListSetIterator<Dyadic>;
+    template class GridMaskSetIterator<Real>;
+    template class GridCellListSetIterator<Real>;
+    template class GridRectangleListSetIterator<Real>;
 
-    template bool interiors_intersect(const Rectangle<Dyadic>&, const GridMaskSet<Dyadic>&);
-    template bool interiors_intersect(const GridRectangle<Dyadic>&, const GridMaskSet<Dyadic>&);
-    template bool subset(const Rectangle<Dyadic>&, const GridMaskSet<Dyadic>&);
-    template bool subset(const GridMaskSet<Dyadic>&, const GridMaskSet<Dyadic>&);
-    template GridMaskSet<Dyadic> regular_intersection(const GridMaskSet<Dyadic>&, 
-                                                      const GridMaskSet<Dyadic>&);
-    template GridMaskSet<Dyadic> join(const GridMaskSet<Dyadic>&, const GridMaskSet<Dyadic>&);
-    template GridMaskSet<Dyadic> difference(const GridMaskSet<Dyadic>&, 
-                                            const GridMaskSet<Dyadic>&);
+    template bool interiors_intersect(const Rectangle<Real>&, const GridMaskSet<Real>&);
+    template bool interiors_intersect(const GridRectangle<Real>&, const GridMaskSet<Real>&);
+    template bool subset(const Rectangle<Real>&, const GridMaskSet<Real>&);
+    template bool subset(const GridMaskSet<Real>&, const GridMaskSet<Real>&);
+    template GridMaskSet<Real> regular_intersection(const GridMaskSet<Real>&, 
+                                                      const GridMaskSet<Real>&);
+    template GridMaskSet<Real> join(const GridMaskSet<Real>&, const GridMaskSet<Real>&);
+    template GridMaskSet<Real> difference(const GridMaskSet<Real>&, 
+                                            const GridMaskSet<Real>&);
 
-    template GridRectangle<Dyadic>
-    over_approximation(const Rectangle<Dyadic>& p, const Grid<Dyadic>& g);
-
-    template
-    GridCellListSet<Dyadic>
-    over_approximation(const Parallelotope<Dyadic>& p, const Grid<Dyadic>& g);
+    template GridRectangle<Real>
+    over_approximation(const Rectangle<Real>& p, const Grid<Real>& g);
 
     template
-    GridMaskSet<Dyadic>
-    over_approximation(const ListSet<Dyadic,Rectangle>& ls, const FiniteGrid<Dyadic>& g); 
+    GridCellListSet<Real>
+    over_approximation(const Parallelotope<Real>& p, const Grid<Real>& g);
 
     template
-    GridMaskSet<Dyadic>
-    over_approximation(const ListSet<Dyadic,Parallelotope>& ls, const FiniteGrid<Dyadic>& g); 
+    GridMaskSet<Real>
+    over_approximation(const ListSet<Real,Rectangle>& ls, const FiniteGrid<Real>& g); 
 
     template
-    GridRectangle<Dyadic>
-    over_approximation_of_intersection(const Rectangle<Dyadic>& r1, 
-                                       const Rectangle<Dyadic>& r2,
-                                       const Grid<Dyadic>& g);
+    GridMaskSet<Real>
+    over_approximation(const ListSet<Real,Parallelotope>& ls, const FiniteGrid<Real>& g); 
+
+    template
+    GridRectangle<Real>
+    over_approximation_of_intersection(const Rectangle<Real>& r1, 
+                                       const Rectangle<Real>& r2,
+                                       const Grid<Real>& g);
     
     template
-    GridCellListSet<Dyadic>
-    over_approximation_of_intersection(const Parallelotope<Dyadic>& p, 
-                                       const Rectangle<Dyadic>& r,
-                                       const Grid<Dyadic>& g);
+    GridCellListSet<Real>
+    over_approximation_of_intersection(const Parallelotope<Real>& p, 
+                                       const Rectangle<Real>& r,
+                                       const Grid<Real>& g);
 
     template
-    GridMaskSet<Dyadic>
-    over_approximation_of_intersection(const ListSet<Dyadic,Rectangle>& ls, 
-                                       const Rectangle<Dyadic>& r, 
-                                       const FiniteGrid<Dyadic>& g);
+    GridMaskSet<Real>
+    over_approximation_of_intersection(const ListSet<Real,Rectangle>& ls, 
+                                       const Rectangle<Real>& r, 
+                                       const FiniteGrid<Real>& g);
     
     template
-    GridMaskSet<Dyadic>
-    over_approximation_of_intersection(const ListSet<Dyadic,Parallelotope>& ls, 
-                                       const Rectangle<Dyadic>& r, 
-                                       const FiniteGrid<Dyadic>& g);
+    GridMaskSet<Real>
+    over_approximation_of_intersection(const ListSet<Real,Parallelotope>& ls, 
+                                       const Rectangle<Real>& r, 
+                                       const FiniteGrid<Real>& g);
     
-    template std::ostream& operator<<(std::ostream&, const GridCell<Dyadic>&);
-    template std::ostream& operator<<(std::ostream&, const GridRectangle<Dyadic>&);
-    template std::ostream& operator<<(std::ostream&, const GridRectangleListSet<Dyadic>&);
-    template std::ostream& operator<<(std::ostream&, const GridCellListSet<Dyadic>&);
-    template std::ostream& operator<<(std::ostream&, const GridMaskSet<Dyadic>&);
+    template std::ostream& operator<<(std::ostream&, const GridCell<Real>&);
+    template std::ostream& operator<<(std::ostream&, const GridRectangle<Real>&);
+    template std::ostream& operator<<(std::ostream&, const GridRectangleListSet<Real>&);
+    template std::ostream& operator<<(std::ostream&, const GridCellListSet<Real>&);
+    template std::ostream& operator<<(std::ostream&, const GridMaskSet<Real>&);
  
   }
 }

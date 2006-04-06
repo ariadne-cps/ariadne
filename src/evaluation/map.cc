@@ -24,10 +24,12 @@
 #include "evaluation/map.h"
 #include "evaluation/map.tpl"
 
+#include "real_typedef.h"
+
 namespace Ariadne {
   namespace Evaluation {
 
-    template class Map<Dyadic>;
+    template class Map<Real>;
       
   }
 }

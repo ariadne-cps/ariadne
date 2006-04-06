@@ -28,17 +28,13 @@
 #ifndef _ARIADNE_DECLARATIONS_H
 #define _ARIADNE_DECLARATIONS_H
  
-#include <boost/numeric/ublas/vector.hpp>
-#include <boost/numeric/ublas/matrix.hpp>
-
 namespace Ariadne { namespace Base {
 template<typename R> class Interval;
 }}
 
 namespace Ariadne { namespace LinearAlgebra {
-using boost::numeric::ublas::vector;
-using boost::numeric::ublas::matrix;
-
+template<typename R> class vector;
+template<typename R> class matrix;
 template<typename R> class interval_vector;
 template<typename R> class interval_matrix;
 template<typename R> class LinearProgram;
@@ -55,6 +51,12 @@ template<typename R> class Polyhedron;
 
 template<typename R, template<typename> class BS> class ListSet;
 
+class LatticeCell;
+class LatticeRectangle;
+class LatticeMaskSet;
+class LatticeCellListSet;
+class LatticeRectangleListSet;
+  
 template<typename R> class Grid;
 template<typename R> class FiniteGrid;
 template<typename R> class GridCell;
@@ -73,6 +75,7 @@ template<typename R> class PartitionTreeSet;
 namespace Ariadne { namespace Evaluation {
 template <typename R> class Map;
 template <typename R> class AffineMap;
+template <typename R> class PolynomialMap;
 template <typename R> class VectorField;
 template <typename R> class AffineVectorField;
 

@@ -26,15 +26,15 @@ from ariadne.geometry import *
 
 sl=PointList()
 s=Point(2)
-s[0]=Dyadic(0.125)
-s[1]=Dyadic(0.125)
+s[0]=0.125
+s[1]=0.125
 sl.append(s)
-s[0]=Dyadic(2.375)
+s[0]=2.375
 sl.append(s)
-s[1]=Dyadic(2.375)
+s[1]=2.375
 sl.append(s)
 r=Simplex(sl)
-s[0]=Dyadic(1.5)
+s[0]=1.5
 sl.append(s)
 q=Polyhedron(sl)
 

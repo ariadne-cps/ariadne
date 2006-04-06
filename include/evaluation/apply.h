@@ -29,9 +29,8 @@
 #ifndef _ARIADNE_APPLY_H
 #define _ARIADNE_APPLY_H
 
-#include "../geometry/geometry_declarations.h"
+#include "../declarations.h"
 
-#include "../evaluation/evaluation_declarations.h"
 #include "../evaluation/map.h"
 
 namespace Ariadne {

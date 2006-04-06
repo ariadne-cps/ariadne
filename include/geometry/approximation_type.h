@@ -42,7 +42,7 @@ enum ApproxKind {
 template < typename R>
 class ApproximationType {
   public:
-    typedef R Real;
+    typedef R real_type;
   
   private:
 
@@ -50,7 +50,7 @@ class ApproximationType {
     ApproxKind _kind;
 
     /*! \brief Indicates the value of approximation */
-    Real _value; 
+    real_type _value; 
 
   public:
     
@@ -66,7 +66,7 @@ class ApproximationType {
      *
      * \param orig is the object used a framework for
      * the new object.*/ 
-    ApproximationType(const ApproximationType<Real> &orig) {
+    ApproximationType(const ApproximationType<real_type> &orig) {
       this->_kind=orig._kind;
       this->_value=orig._value;
     }
@@ -77,7 +77,7 @@ class ApproximationType {
      * \param kind is the kind of the new ApproximationType object.
      * \param value is the value of the approximation.
      */
-    ApproximationType(const ApproxKind kind, const Real &value) {
+    ApproximationType(const ApproxKind kind, const real_type &value) {
       this->_kind=kind;
       this->_value=value;
     }
@@ -86,7 +86,7 @@ class ApproximationType {
      *
      * \return The value of the approximation.
      */
-    Real &value() {
+    real_type &value() {
       return (this->_value);
     }
 

@@ -22,7 +22,7 @@
  */
  
 /*! \file interval_vector.h
- *  \brief Vectors of intervals.
+ *  \brief vector_types of intervals.
   */
 
 #ifndef _ARIADNE_INTERVAL_VECTOR_H
@@ -40,27 +40,24 @@ namespace Ariadne {
     
     /*! \brief A vector of intervals. */
     template<typename R>
-    class interval_vector
+    class interval_vector : public boost::numeric::ublas::vector< Interval<R> >
     {
      private:
-      vector< Interval<R> > Base;
+      typedef boost::numeric::ublas::vector< Interval<R> > Base;
      public:
-      template<typename E> interval_vector(const vector_expression<E> v) : Base(v()) { }
+      template<typename E> interval_vector(const boost::numeric::ublas::vector_expression<E> v) : Base(v()) { }
       interval_vector() : Base() { }
       interval_vector(const size_type& n) : Base(n) { }
       interval_vector(const vector<R>& v) : Base(v.size()) { 
         for(size_type i=0; i!=this->size(); ++i) {
-          Base.operator()(i) = Interval<R>(v(i),v(i));
+          Base::operator()(i) = Interval<R>(v(i),v(i));
         }
       }
       interval_vector(const vector<R>& v, const R& r) : Base(v.size()) { 
         for(size_type i=0; i!=this->size(); ++i) {
-          Base.operator()(i) = Interval<R>(v(i)-r,v(i)+r);
+          Base::operator()(i) = Interval<R>(v(i)-r,v(i)+r);
         }
       }
-      size_type size() const { return Base.size(); }
-      Interval<R>& operator() (const size_type& n) { return Base.operator()(n); }
-      const Interval<R>& operator() (const size_type& n) const { return Base.operator()(n); }
     };
       
     template <typename R>

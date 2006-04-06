@@ -51,7 +51,7 @@ namespace Ariadne {
   
     template<typename R>
     LinearAlgebra::matrix<R>
-    AffineVectorField<R>::derivative(const State& x) const 
+    AffineVectorField<R>::derivative(const state_type& x) const 
     { 
       return this->_A; 
     }

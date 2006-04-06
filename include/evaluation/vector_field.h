@@ -23,19 +23,19 @@
  */
  
 /*! \file vector_field.h
- *  \brief Vector field interface.
+ *  \brief vector_type field interface.
  */
  
 #ifndef _ARIADNE_VECTOR_FIELD_H
 #define _ARIADNE_VECTOR_FIELD_H
+
+#include "../declarations.h"
 
 #include "../base/interval.h"
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 #include "../linear_algebra/interval_vector.h"
 #include "../linear_algebra/interval_matrix.h"
-#include "../geometry/geometry_declarations.h"
-#include "../evaluation/evaluation_declarations.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -44,8 +44,8 @@ namespace Ariadne {
     template <typename R>
     class VectorField {
      public:
-      typedef R Real;
-      typedef Geometry::Point<R> State;
+      typedef R real_type;
+      typedef Geometry::Point<R> state_type;
       
       virtual ~VectorField();
      

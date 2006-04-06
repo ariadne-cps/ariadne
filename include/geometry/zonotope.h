@@ -141,19 +141,19 @@ namespace Ariadne {
 
      public:
       /*! \brief The type of denotable real number used for the corners. */
-      typedef R Real;
+      typedef R real_type;
       /*! \brief The type of denotable point contained by the rectangle. */
-      typedef Point<R> State;
+      typedef Point<R> state_type;
       /*! \brief The type of vectors. */
-      typedef Ariadne::LinearAlgebra::vector<R> Vector;
+      typedef Ariadne::LinearAlgebra::vector<R> vector_type;
       /*! \brief The type of matrix giving principal directions. */
-      typedef Ariadne::LinearAlgebra::matrix<R> Matrix;
+      typedef Ariadne::LinearAlgebra::matrix<R> matrix_type;
      private:
       /* Zonotope's centre. */
-      State _centre;
+      state_type _centre;
       
       /* Zonotope's principal directions. */
-      Matrix _generators;
+      matrix_type _generators;
     
      public:
       /*! \brief Default constructor constructs an empty zonotope of dimension \a n. */
@@ -161,7 +161,7 @@ namespace Ariadne {
         : _centre(n),  _generators(n,0) { }
       
       /*! \brief Construct from centre and directions. */
-      explicit Zonotope(const State& c, const Matrix& m)
+      explicit Zonotope(const state_type& c, const matrix_type& m)
         : _centre(c), _generators(m)
       {
         using namespace Ariadne::LinearAlgebra;
@@ -175,16 +175,16 @@ namespace Ariadne {
       }
        
       /*! \brief Construct from a rectangle. */
-      explicit Zonotope(const Rectangle<Real>& r)
+      explicit Zonotope(const Rectangle<real_type>& r)
         : _centre(r.dimension())
       {
         using namespace LinearAlgebra;
 
         if(r.lower_bound(0) > r.upper_bound(0)) {
-          this->_generators=Matrix(r.dimension(),0);
+          this->_generators=matrix_type(r.dimension(),0);
         }
               
-        this->_generators=Matrix(r.dimension(),r.dimension());
+        this->_generators=matrix_type(r.dimension(),r.dimension());
         for(size_type i=0; i!=dimension(); ++i) {
           this->_centre[i] = (r.lower_bound(i)+r.upper_bound(i))/2;
           this->_generators(i,i) = (r.upper_bound(i)-r.lower_bound(i))/2;
@@ -194,7 +194,7 @@ namespace Ariadne {
       }
 
       /*! \brief Construct from a Parallelotope. */
-      explicit Zonotope(const Parallelotope<Real>& p)
+      explicit Zonotope(const Parallelotope<real_type>& p)
         : _centre(p.centre()), _generators(p.generators())
       {
         using namespace Ariadne::LinearAlgebra;
@@ -254,26 +254,26 @@ namespace Ariadne {
       }
       
       /*! \brief The centre of the zonotope. */
-      State centre() const {
+      state_type centre() const {
         return this->_centre;
       }
       
       /*! \brief The matrix of principle directions. */
-      Matrix generators() const {
+      matrix_type generators() const {
         return this->_generators;
       }
      
       /*! \brief Tests if the zonotope contains \a point. */
-      bool contains(const State& point) const;
+      bool contains(const state_type& point) const;
       
       /*! \brief Tests if the interior of the zonotope contains \a point. */
-      bool interior_contains(const State& point) const;
+      bool interior_contains(const state_type& point) const;
       
       /*! \brief The equality operator. */
-      bool operator==(const Zonotope<Real>& A) const;
+      bool operator==(const Zonotope<real_type>& A) const;
       
       /*! \brief The inequality operator */
-      bool operator!=(const Zonotope<Real>& A) const {
+      bool operator!=(const Zonotope<real_type>& A) const {
         return !(*this == A);
       }
 
@@ -293,7 +293,7 @@ namespace Ariadne {
       void sort_generators(void);
       
       // The linear inequalities defining the zonotope.
-      void compute_linear_inequalities(Matrix&, Vector&) const;
+      void compute_linear_inequalities(matrix_type&, vector_type&) const;
     };
   
     

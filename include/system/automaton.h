@@ -91,11 +91,11 @@ class HybridAutomaton
   typedef LDT LeavingTrans;
   typedef typename LeavingTrans::DiscreteLocation DiscreteLocation;
   typedef typename LeavingTrans::ResetMap ResetMap;
-  typedef typename DiscreteLocation::VectorField VectorField;
+  typedef typename DiscreteLocation::vector_typeField vector_typeField;
   typedef typename ResetMap::DenotableSet DenotableSet;
   typedef typename DenotableSet::BasicSet BasicSet;
-  typedef typename BasicSet::State State;
-  typedef typename State::Real Real;
+  typedef typename BasicSet::state_type state_type;
+  typedef typename state_type::real_type real_type;
   
  protected:
   /*! \brief HybridAutomaton's name. */

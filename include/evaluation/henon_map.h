@@ -46,45 +46,47 @@ namespace Ariadne {
     class HenonMap : public Map<R> 
     {
      public:
-      typedef R Real;
-      typedef Geometry::Point<Real> State;
+      typedef R real_type;
+      typedef Geometry::Point<real_type> state_type;
       
-      inline explicit HenonMap(Real a=Real(1.5),Real b=Real(0.3)) : _a(a), _b(b) { }
+      inline explicit HenonMap(real_type a=real_type(1.5),real_type b=real_type(0.3)) : _a(a), _b(b) { }
       
       /*! \brief  The map applied to a state. */
-      virtual State apply(const State& x) const;
+      virtual state_type apply(const state_type& x) const;
       /*! \brief  The map applied to a rectangle basic set. */
       virtual Geometry::Rectangle<R> apply(const Geometry::Rectangle<R>& r) const;
       /*! \brief  The map applied to a parallelotope basic set. */
       virtual Geometry::Parallelotope<R> apply(const Geometry::Parallelotope<R>& p) const;
       
       /*! \brief  The derivative of the map at a point. */
-      virtual LinearAlgebra::matrix<R> derivative(const State& x) const;
+      virtual LinearAlgebra::matrix<R> derivative(const state_type& x) const;
       /*! \brief  The derivative of the map over a rectangular basic set. */
-      virtual LinearAlgebra::matrix< Interval<R> > derivative(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::interval_matrix<R> derivative(const Geometry::Rectangle<R>& r) const;
             
       /*! \brief  The parameter a. */
-      inline const Real& a() const { return _a; }
+      const real_type& a() const { return _a; }
       /*! \brief  The parameter b. */
-      inline const Real& b() const { return _b; }
+      const real_type& b() const { return _b; }
       
       /*! \brief  The dimension of the argument. */
-      inline dimension_type argument_dimension() const { return 2; }
+      dimension_type argument_dimension() const { return 2; }
       /*! \brief The dimension of the result. */
-      inline dimension_type result_dimension() const { return 2; }
+      dimension_type result_dimension() const { return 2; }
       
-      inline bool invertible() const {
+      bool invertible() const {
         return _b!=0; }
+        
+      std::string name() const { return "HenonMap"; }
      private:
-      Real _a;
-      Real _b;
+      real_type _a;
+      real_type _b;
     };
       
     template <typename R>
     Geometry::Point<R>
     HenonMap<R>::apply(const Geometry::Point<R>& x) const
     {
-      State result(2); 
+      state_type result(2); 
       result[0]=_a-x[0]*x[0]-_b*x[1]; 
       result[1]=x[0]; 
       return result;
@@ -120,7 +122,7 @@ namespace Ariadne {
     }
      
     template <typename R>
-    LinearAlgebra::matrix< Interval<R> >
+    LinearAlgebra::interval_matrix<R>
     HenonMap<R>::derivative(const Geometry::Rectangle<R>& r) const
     {
       LinearAlgebra::matrix< Interval<R> > result(2,2); 

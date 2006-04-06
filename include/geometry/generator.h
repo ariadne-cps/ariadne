@@ -53,19 +53,19 @@ class GeneratorSystem {
     CLOSURE_POINT
   };
   
-  typedef boost::numeric::ublas::matrix<R> Matrix;
-  typedef boost::numeric::ublas::vector<R> Vector;
-  typedef Ariadne::Geometry::Point<R> State;
+  typedef boost::numeric::ublas::matrix<R> matrix_type;
+  typedef boost::numeric::ublas::vector<R> vector_type;
+  typedef Ariadne::Geometry::Point<R> state_type;
 
-  typedef std::vector<GeneratorType> TypeVector;
+  typedef std::vector<GeneratorType> generator_type_list_type;
   
   GeneratorSystem() { }
   
   
-  GeneratorSystem(const Matrix& p_matrix, 
-                  const TypeVector& ptype_vector,
-                  const Matrix& r_matrix,
-                  const TypeVector& rtype_vector)
+  GeneratorSystem(const matrix_type& p_matrix, 
+                  const generator_type_list_type& ptype_vector,
+                  const matrix_type& r_matrix,
+                  const generator_type_list_type& rtype_vector)
     : _points(p_matrix), _point_types(ptype_vector),
       _rays(r_matrix), _ray_types(rtype_vector) 
   { }
@@ -75,47 +75,47 @@ class GeneratorSystem {
   operator Parma_Polyhedra_Library::Generator_System() const {
     return ppl_generator_system(); }
     
-  inline bool empty() const {
+  bool empty() const {
     return ( (this->number_of_points()==0) && (this->number_of_rays()==0) );
   }
   
-  inline size_type space_dimension() const {
+  size_type space_dimension() const {
     return this->_points.size1();
   }
   
-  inline size_type number_of_points() const {
+  size_type number_of_points() const {
     return this->_points.size2();    
   }
   
-  inline size_type number_of_rays() const {
+  size_type number_of_rays() const {
     return this->_rays.size2();
   }
   
-  inline void set_point_type(const size_type& n, const GeneratorType& gt) {
+  void set_point_type(const size_type& n, const GeneratorType& gt) {
     this->_point_types[n]=gt;
   }
   
-  inline void set_ray_type(const size_type& n, const GeneratorType& gt) {
+  void set_ray_type(const size_type& n, const GeneratorType& gt) {
     this->_ray_types[n]=gt;
   }
  
-  inline bool is_point(const size_type& n) const {
+  bool is_point(const size_type& n) const {
     return (this->_point_types[n]==POINT);
   }
   
-  inline bool is_closure_point(const size_type& n) const {
+  bool is_closure_point(const size_type& n) const {
     return (this->_point_types[n]==CLOSURE_POINT);
   }
   
-  inline bool is_ray(const size_type& n) const {
+  bool is_ray(const size_type& n) const {
     return (this->_ray_types[n]==RAY);
   }
   
-  inline bool is_line(const size_type& n) const {
+  bool is_line(const size_type& n) const {
     return (this->_ray_types[n]==LINE);
   }
   
-  inline const GeneratorSystem<R>& sum_vector_to_all_points(const Vector &v) {
+  const GeneratorSystem<R>& sum_vector_to_all_points(const vector_type &v) {
     #ifdef DEBUG
       std::cout << __FILE__ << ":" << __LINE__ << std::endl;
     #endif
@@ -131,7 +131,7 @@ class GeneratorSystem {
     return *this;
   }
   
-  inline GeneratorSystem<R>& operator=(const GeneratorSystem<R>& gen) {
+  GeneratorSystem<R>& operator=(const GeneratorSystem<R>& gen) {
     if(this!=&gen) {
       this->_points =  gen._points;
       this->_point_types =  gen._point_types;
@@ -141,17 +141,17 @@ class GeneratorSystem {
     return *this;
   }
   
-  inline void reset_dimensions(const size_type& number_of_points, 
+  void reset_dimensions(const size_type& number_of_points, 
                                const size_type& ray_nb, 
                                const size_type& dim) 
   {
-    Matrix new_point_matrix(dim,number_of_points);
-    TypeVector new_point_type_vector;
+    matrix_type new_point_matrix(dim,number_of_points);
+    generator_type_list_type new_point_type_vector;
     
     new_point_type_vector.resize(number_of_points);
     
-    Matrix new_ray_matrix(dim,ray_nb);
-    TypeVector new_ray_type_vector;
+    matrix_type new_ray_matrix(dim,ray_nb);
+    generator_type_list_type new_ray_type_vector;
     
     new_ray_type_vector.resize(ray_nb);
     
@@ -165,14 +165,14 @@ class GeneratorSystem {
   friend class Ariadne::Geometry::Polyhedron<R>;
 /*  friend Ariadne::Geometry::Polyhedron<R> 
       Ariadne::Geometry::minkowski_sum<>(
-		      const Ariadne::Geometry::Polyhedron<R>& A,
-                      const Ariadne::Geometry::Polyhedron<R>& B);*/
+          const Ariadne::Geometry::Polyhedron<R>& A,
+          const Ariadne::Geometry::Polyhedron<R>& B);*/
  private:  
-  Matrix _points;
-  TypeVector _point_types;
+  matrix_type _points;
+  generator_type_list_type _point_types;
   
-  Matrix _rays;
-  TypeVector _ray_types;
+  matrix_type _rays;
+  generator_type_list_type _ray_types;
 };
 
 
@@ -180,7 +180,7 @@ template <typename R>
 GeneratorSystem<R>::GeneratorSystem(const Parma_Polyhedra_Library::Generator_System& ppl_gen)
 {
   Ariadne::LinearAlgebra::GeneratorSystem<R>& gen(*this);
-  typedef R Real;
+  typedef R real_type;
         
   Parma_Polyhedra_Library::Generator_System::const_iterator j_gen, begin, end;
         
@@ -218,7 +218,7 @@ GeneratorSystem<R>::GeneratorSystem(const Parma_Polyhedra_Library::Generator_Sys
       } 
       else {
         if (j_gen->is_point()) {
-          Real den=j_gen->divisor();
+          real_type den=j_gen->divisor();
           for (i=0; i< space_dim; ++i) {
             gen._points(i,j_point)=j_gen->coefficient(Parma_Polyhedra_Library::Variable(i))/den;
           }
@@ -226,7 +226,7 @@ GeneratorSystem<R>::GeneratorSystem(const Parma_Polyhedra_Library::Generator_Sys
           j_point++;
         } 
         else { /*j_gen is a closure _points */
-          Real den=j_gen->divisor();
+          real_type den=j_gen->divisor();
           for (i=0; i< space_dim; ++i) {
             gen._points(i,j_point)=j_gen->coefficient(Parma_Polyhedra_Library::Variable(i))/den;
           }

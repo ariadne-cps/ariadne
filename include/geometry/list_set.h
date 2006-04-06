@@ -34,7 +34,7 @@
 #include <vector>
 #include <iostream>
 
-#include "../geometry/geometry_declarations.h"
+#include "../declarations.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -83,12 +83,12 @@ namespace Ariadne {
       std::vector< BS<R> > _vector;
 
      public:
-      typedef BS<R> BasicSet;
-      typedef typename BasicSet::State State;
-      typedef typename BasicSet::State::Real Real;
+      typedef R real_type;
+      typedef typename BS<R>::state_type state_type;
+      typedef BS<R> basic_set_type;
 
-      typedef typename std::vector<BasicSet>::const_iterator const_iterator;
-      typedef typename std::vector<BasicSet>::iterator iterator;
+      typedef typename std::vector<basic_set_type>::const_iterator const_iterator;
+      typedef typename std::vector<basic_set_type>::iterator iterator;
 
       /*! \brief An empty list set which can hold sets of an unspecified dimension. */
       ListSet() : _dimension(0), _vector() { }
@@ -97,7 +97,7 @@ namespace Ariadne {
       ListSet(size_type n) : _dimension(n), _vector() { }
 
       /*! \brief A denotable set constructor. */
-      ListSet(const BasicSet& A) : _dimension(A.dimension()), _vector() {
+      ListSet(const BS<R>& A) : _dimension(A.dimension()), _vector() {
         if (A.empty()) {
             return;
         }
@@ -144,7 +144,7 @@ namespace Ariadne {
       * \param index is the index of the returned basic set.
       * \return The i-th basic set maitained by the ListSet.
       */
-      inline const BasicSet& get(size_type index) const {
+      inline const BS<R>& get(size_type index) const {
         if (this->size()<=index)
           throw std::invalid_argument("Invalid index in ListSet::get(size_type).");
 
@@ -156,7 +156,7 @@ namespace Ariadne {
       * \param index is the index of the returned basic set.
       * \param set is the new set.
       */
-      inline void set(size_type index, const BasicSet& set) {
+      inline void set(size_type index, const BS<R>& set) {
         if (this->size()<=index)
           throw std::invalid_argument("Invalid index in ListSet:;set(size_type, const BasicSet& ).");
 
@@ -168,7 +168,7 @@ namespace Ariadne {
       * \param index is the index of the returned basic set.
       * \return The i-th basic set maitained by the ListSet.
       */
-      inline const BasicSet& operator[](size_type index) const {
+      inline const BS<R>& operator[](size_type index) const {
         if (this->size()<=index)
           throw std::invalid_argument("Invalid index in ListSet::operator[](size_type).");
 
@@ -200,7 +200,7 @@ namespace Ariadne {
       /*! \brief Expands set by \a delta. */
       /*  \internal This is dangerous since it modifies the current set.
       */
-      inline void expand_by(const Real& delta) {
+      inline void expand_by(const R& delta) {
         for (size_type i=0; i< this->size(); i++) {
           (this->_vector[i]).expand_by(delta);
         }
@@ -210,7 +210,7 @@ namespace Ariadne {
       /*  \internal This is dangerous since it modifies the current set.
       */
       inline void
-      set_precision_to_upperapproximating(const Real& delta)  {
+      set_precision_to_upperapproximating(const R& delta)  {
         for (size_type i=0; i< this->size(); i++) {
             // (this->_vector[i]).set_precision_to_upperapproximating(delta);
         }
@@ -244,7 +244,7 @@ namespace Ariadne {
       * \return  \a true, if \a s is contained into the
       * current set, \a false otherwise.
       */
-      inline bool contains(const State& p) const {
+      inline bool contains(const Point<R>& p) const {
 
         for (size_type i=0; i<this->size(); i++) {
           if ((this->_vector[i]).contains(p))
@@ -264,7 +264,7 @@ namespace Ariadne {
        * \return  \a true, if \a s is contained into the
        * current set, \a false otherwise.
        */
-      inline bool interior_contains(const State& p) const {
+      inline bool interior_contains(const Point<R>& p) const {
         throw(std::domain_error("Not implemented"));
         for (size_type i=0; i<this->size(); i++) {
           if ((this->_vector[i]).interior_contains(p))
@@ -380,7 +380,7 @@ namespace Ariadne {
        * The result is stored into the current object.
        * \param A is a basic set.
        */
-      inline void inplace_union(const BasicSet& A) {
+      inline void inplace_union(const BS<R>& A) {
         #ifdef DEBUG
           std::cout << __FILE__ << ":" << __LINE__ << std::endl;
         #endif
@@ -401,7 +401,7 @@ namespace Ariadne {
       }
 
       /*! \brief Adjoins (makes union with) a basic set. */
-      inline void adjoin(const BasicSet& A) {
+      inline void adjoin(const BS<R>& A) {
         this->inplace_union(A);
       }
 

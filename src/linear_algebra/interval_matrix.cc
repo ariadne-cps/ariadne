@@ -21,65 +21,55 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "real_typedef.h"
+
 #include "linear_algebra/interval_matrix.h"
 #include "linear_algebra/interval_matrix.tpl"
 
 namespace Ariadne {
   namespace LinearAlgebra {
-    template class interval_matrix<Dyadic>;
-    template class interval_matrix<Rational>;
-    template class interval_matrix<Float64>;
+    template class interval_matrix<Real>;
+    template class interval_matrix<Field>;
       
-    template interval_vector<Dyadic> prod(const matrix<Dyadic>&, const interval_vector<Dyadic>&);
-    template interval_vector<Rational> prod(const matrix<Rational>&, const interval_vector<Rational>&);
-    template interval_vector<Float64> prod(const matrix<Float64>&, const interval_vector<Float64>&);
+    template interval_vector<Real> prod(const matrix<Real>&, const interval_vector<Real>&);
+    template interval_vector<Field> prod(const matrix<Field>&, const interval_vector<Field>&);
     
-    template interval_vector<Dyadic> prod(const interval_matrix<Dyadic>&, const vector<Dyadic>&);
-    template interval_vector<Rational> prod(const interval_matrix<Rational>&, const vector<Rational>&);
-    template interval_vector<Float64> prod(const interval_matrix<Float64>&, const vector<Float64>&);
+    template interval_vector<Real> prod(const interval_matrix<Real>&, const vector<Real>&);
+    template interval_vector<Field> prod(const interval_matrix<Field>&, const vector<Field>&);
     
-    template interval_vector<Dyadic> prod(const interval_matrix<Dyadic>&, const interval_vector<Dyadic>&);
-    template interval_vector<Rational> prod(const interval_matrix<Rational>&, const interval_vector<Rational>&);
-    template interval_vector<Float64> prod(const interval_matrix<Float64>&, const interval_vector<Float64>&);
+    template interval_vector<Real> prod(const interval_matrix<Real>&, const interval_vector<Real>&);
+    template interval_vector<Field> prod(const interval_matrix<Field>&, const interval_vector<Field>&);
     
-    template interval_matrix<Dyadic> prod(const matrix<Dyadic>&, const interval_matrix<Dyadic>&);
-    template interval_matrix<Rational> prod(const matrix<Rational>&, const interval_matrix<Rational>&);
-    template interval_matrix<Float64> prod(const matrix<Float64>&, const interval_matrix<Float64>&);
+    template interval_matrix<Real> prod(const matrix<Real>&, const interval_matrix<Real>&);
+    template interval_matrix<Field> prod(const matrix<Field>&, const interval_matrix<Field>&);
     
-    template interval_matrix<Dyadic> prod(const interval_matrix<Dyadic>&, const matrix<Dyadic>&);
-    template interval_matrix<Rational> prod(const interval_matrix<Rational>&, const matrix<Rational>&);
-    template interval_matrix<Float64> prod(const interval_matrix<Float64>&, const matrix<Float64>&);
+    template interval_matrix<Real> prod(const interval_matrix<Real>&, const matrix<Real>&);
+    template interval_matrix<Field> prod(const interval_matrix<Field>&, const matrix<Field>&);
     
-    template interval_matrix<Dyadic> prod(const interval_matrix<Dyadic>&, const interval_matrix<Dyadic>&);
-    template interval_matrix<Rational> prod(const interval_matrix<Rational>&, const interval_matrix<Rational>&);
-    template interval_matrix<Float64> prod(const interval_matrix<Float64>&, const interval_matrix<Float64>&);
+    template interval_matrix<Real> prod(const interval_matrix<Real>&, const interval_matrix<Real>&);
+    template interval_matrix<Field> prod(const interval_matrix<Field>&, const interval_matrix<Field>&);
     
-    template interval_matrix<Dyadic> fprod(const matrix<Rational>&, const interval_matrix<Dyadic>&);
+    template interval_matrix<Real> fprod(const matrix<Field>&, const interval_matrix<Real>&);
      
-    template std::ostream& operator<<(std::ostream&, const interval_matrix<Dyadic>&);
-    template std::ostream& operator<<(std::ostream&, const interval_matrix<Rational>&);
-    template std::ostream& operator<<(std::ostream&, const interval_matrix<Float64>&);
+    template std::ostream& operator<<(std::ostream&, const interval_matrix<Real>&);
+    template std::ostream& operator<<(std::ostream&, const interval_matrix<Field>&);
     
-    template matrix<Dyadic> centre(const interval_matrix<Dyadic>&);
-    template matrix<Rational> centre(const interval_matrix<Rational>&);
-    template matrix<Float64> centre(const interval_matrix<Float64>&);
+    template matrix<Real> centre(const interval_matrix<Real>&);
+    template matrix<Field> centre(const interval_matrix<Field>&);
 
-    template Dyadic radius(const interval_matrix<Dyadic>&);
-    template Rational radius(const interval_matrix<Rational>&);
-    template Float64 radius(const interval_matrix<Float64>&);
+    template Real radius(const interval_matrix<Real>&);
+    template Field radius(const interval_matrix<Field>&);
 
-    template Interval<Dyadic> norm(const interval_matrix<Dyadic>&);
-    template Interval<Rational> norm(const interval_matrix<Rational>&);
-    template Interval<Float64> norm(const interval_matrix<Float64>&);
+    template Interval<Real> norm(const interval_matrix<Real>&);
+    template Interval<Field> norm(const interval_matrix<Field>&);
 
-    template Dyadic upper_log_norm(const interval_matrix<Dyadic>&);
-    template Rational upper_log_norm(const interval_matrix<Rational>&);
-    template Float64 upper_log_norm(const interval_matrix<Float64>&);
-      
-    template matrix<Dyadic> over_approximation(const interval_matrix<Dyadic>&);
-    template matrix<Rational> over_approximation(const interval_matrix<Rational>&);
-    template matrix<Float64> over_approximation(const interval_matrix<Float64>&);
+    template Real upper_log_norm(const interval_matrix<Real>&);
+    template Field upper_log_norm(const interval_matrix<Field>&);
+       
+    template matrix<Real> over_approximation(const interval_matrix<Real>&);
+    template matrix<Field> over_approximation(const interval_matrix<Field>&);
 
+    template interval_matrix<Real> approximate(const matrix<Field>& A,const Real& e); 
 
   }
 }

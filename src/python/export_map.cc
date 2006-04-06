@@ -7,12 +7,12 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This program is free software; you can rediself_ns::stribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  This program is diself_ns::stributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
@@ -24,31 +24,17 @@
 
 #include "evaluation/map.h"
 
+#include "python/typedefs.h"
+using namespace Ariadne;
+
 #include <boost/python.hpp>
-
-using boost::python::class_;
-using boost::python::init;
-using boost::python::self;
-using boost::python::def;
-using boost::python::bases;
-using boost::python::wrapper;
-using boost::python::return_value_policy;
-using boost::python::copy_const_reference;
-using boost::python::pure_virtual;
-
-#include "python/real_typedef.h"
-  
-using Ariadne::dimension_type;
-using Ariadne::Interval;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Geometry;
-
-typedef Ariadne::Evaluation::Map<Real> RMapBase;
+using namespace boost::python;
 
 struct RMap : RMapBase, wrapper<RMapBase>
 {
   dimension_type argument_dimension() const { return this->get_override("argument_dimension")(); }
   dimension_type result_dimension() const { return this->get_override("result_dimension")(); }
+  std::string name() const { return this->get_override("name")(); }
 };
 
 void export_map() {

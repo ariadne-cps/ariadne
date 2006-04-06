@@ -1,5 +1,5 @@
 /***************************************************************************
- *            lorenz_flow.h
+ *            lorenz_system.h
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.itm, Pieter.Collins@cwi.nl
@@ -25,8 +25,8 @@
  *  \brief The Lorenz system \f$(\dot{x},\dot{y},\dot{z}) = (\sigma(y-x),\rho x-y-xz,-\beta z+xy)\f$.
  */
 
-#ifndef _ARIADNE_LORENZ_FLOW_H
-#define _ARIADNE_LORENZ_FLOW_H
+#ifndef _ARIADNE_LORENZ_SYSTEM_H
+#define _ARIADNE_LORENZ_SYSTEM_H
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/interval_vector.h"
@@ -46,33 +46,31 @@ namespace Ariadne {
     template <typename R>
     class LorenzSystem : public VectorField<R> 
     {
-      typedef R Real;
-      typedef Geometry::Point<R> State;
      public:
-      typedef Real real_type;
-      typedef State state_type;
-      
-      explicit LorenzSystem(Real beta=Real(8.0/3.0), 
-                            Real rho=Real(28.0), 
-                            Real sigma=Real(10.0))
+      typedef R real_type;
+      typedef Geometry::Point<R> state_type;
+
+      explicit LorenzSystem(real_type beta=real_type(8.0/3.0), 
+                            real_type rho=real_type(28.0), 
+                            real_type sigma=real_type(10.0))
        : _b(beta), _p(rho), _s(sigma) { }
       
       /*! \brief  The vector field applied to a state. */
-      virtual LinearAlgebra::vector<R> apply(const State& x) const;
+      virtual LinearAlgebra::vector<R> apply(const state_type& x) const;
       /*! \brief  The map applied to a rectangle basic set. */
       virtual LinearAlgebra::interval_vector<R> apply(const Geometry::Rectangle<R>& r) const;
      
       /*! \brief  The derivative of the map at a point. */
-      virtual LinearAlgebra::matrix<R> derivative(const State& x) const;
+      virtual LinearAlgebra::matrix<R> derivative(const state_type& x) const;
       /*! \brief  The derivative of the map over a rectangular basic set. */
       virtual LinearAlgebra::interval_matrix<R> derivative(const Geometry::Rectangle<R>& r) const;
             
       /*! \brief  The parameter \f$\beta\f$. */
-      const Real& beta() const { return _b; }
+      const real_type& beta() const { return _b; }
       /*! \brief  The parameter \f$\rho\f$. */
-      const Real& rho() const { return _p; }
+      const real_type& rho() const { return _p; }
       /*! \brief  The parameter \f$\sigma\f$. */
-      const Real& sigma() const { return _s; }
+      const real_type& sigma() const { return _s; }
       
       
       /*! \brief  The dimension of the space. */
@@ -81,9 +79,9 @@ namespace Ariadne {
       std::string name() const { return "LorenzSystem"; }
 
      private:
-      Real _b;
-      Real _p;
-      Real _s;
+      real_type _b;
+      real_type _p;
+      real_type _s;
     };
       
     template <typename R>
@@ -155,4 +153,4 @@ namespace Ariadne {
 }
 
 
-#endif /* _ARIADNE_LORENZ_FLOW_H */
+#endif /* _ARIADNE_LORENZ_SYSTEM_H */

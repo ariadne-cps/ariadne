@@ -24,13 +24,15 @@
 #include "geometry/grid.h"
 #include "geometry/grid.tpl"
 
+#include "real_typedef.h"
+
 namespace Ariadne {
   namespace Geometry {
 
-    template class Grid<Dyadic>;
-    template class FiniteGrid<Dyadic>;
+    template class Grid<Real>;
+    template class FiniteGrid<Real>;
 
-    template std::ostream& operator<<(std::ostream&, const Grid<Dyadic>&);
+    template std::ostream& operator<<(std::ostream&, const Grid<Real>&);
  
   }
 }

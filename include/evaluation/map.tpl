@@ -21,15 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "../geometry/geometry_declarations.h"
+#include "../linear_algebra/vector.h"
+#include "../linear_algebra/matrix.h"
+
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
 #include "../geometry/list_set.h"
 #include "../geometry/parallelotope.h"
 #include "../geometry/polyhedron.h"
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
 #include "../evaluation/map.h"
 
 namespace Ariadne {
@@ -77,7 +77,7 @@ namespace Ariadne {
     }
 
     template<typename R>
-    LinearAlgebra::matrix< Interval<R> > 
+    LinearAlgebra::interval_matrix<R> 
     Map<R>::derivative(const Geometry::Rectangle<R>& r) const 
     {
       throw std::invalid_argument("Derivative on Rectangle not implemented."); 

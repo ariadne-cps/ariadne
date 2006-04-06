@@ -24,27 +24,29 @@
 #include "evaluation/apply.h"
 #include "evaluation/apply.tpl"
 
+#include "real_typedef.h"
+
 namespace Ariadne {
   namespace Evaluation {
 
     template 
-    Geometry::Rectangle<Dyadic> 
-    apply(const Map<Dyadic>&, const Geometry::Rectangle<Dyadic>&);
+    Geometry::Rectangle<Real> 
+    apply(const Map<Real>&, const Geometry::Rectangle<Real>&);
   
     template 
-    Geometry::Parallelotope<Dyadic> 
-    apply(const Map<Dyadic>&, const Geometry::Parallelotope<Dyadic>&);
+    Geometry::Parallelotope<Real> 
+    apply(const Map<Real>&, const Geometry::Parallelotope<Real>&);
   
     template
-    Ariadne::Geometry::ListSet<Dyadic,Geometry::Parallelotope> 
-    apply(const Map<Dyadic>& f, const Ariadne::Geometry::ListSet<Dyadic,Geometry::Parallelotope>&);
+    Ariadne::Geometry::ListSet<Real,Geometry::Parallelotope> 
+    apply(const Map<Real>& f, const Ariadne::Geometry::ListSet<Real,Geometry::Parallelotope>&);
        
     template
-    Ariadne::Geometry::GridMaskSet<Dyadic> 
-    chainreach(const Map<Dyadic>&, 
-               const Ariadne::Geometry::ListSet<Dyadic,Ariadne::Geometry::Rectangle>&, 
-               const Ariadne::Geometry::FiniteGrid<Dyadic>&, 
-               const Ariadne::Geometry::Rectangle<Dyadic>&);
+    Ariadne::Geometry::GridMaskSet<Real> 
+    chainreach(const Map<Real>&, 
+               const Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Rectangle>&, 
+               const Ariadne::Geometry::FiniteGrid<Real>&, 
+               const Ariadne::Geometry::Rectangle<Real>&);
   
   }
 }

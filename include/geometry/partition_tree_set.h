@@ -33,13 +33,14 @@
 #include <vector>
 #include <iostream>
 
+#include "../declarations.h"
+
 #include "../base/basic_type.h"
 #include "../base/binary_word.h"
 #include "../base/binary_tree.h"
 #include "../base/iterator.h"
 #include "../base/utility.h"
 
-#include "../geometry/geometry_declarations.h"
 #include "../geometry/subdivision_tree_set.h"
 
 namespace Ariadne {

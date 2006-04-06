@@ -7,12 +7,12 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This program is free software; you can rediself_ns::stribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  This program is diself_ns::stributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
@@ -25,26 +25,11 @@
 #include "base/numerical_type.h"
 #include "base/arithmetic.h"
 
+#include "real_typedef.h"
+using namespace Ariadne;
+
 #include <boost/python.hpp>
-
-using boost::python::class_;
-using boost::python::init;
-using boost::python::self;
-using boost::python::def;
-using boost::python::self_ns::str;
-using boost::python::return_value_policy;
-using boost::python::copy_const_reference;
-
-using Ariadne::Integer;
-using Ariadne::Dyadic;
-using Ariadne::Rational;
-
-using Ariadne::div_approx;
-using Ariadne::precision;
-using Ariadne::mantissa;
-using Ariadne::exponent;
-using Ariadne::numerator;
-using Ariadne::denominator;
+using namespace boost::python;
 
 // Since gmpxx operators return intermediate types which need conversion, need to explicitly provide arithmetic functions
 inline Integer neg_z(const Integer& z1) { return -z1; }
@@ -73,25 +58,69 @@ inline bool le_zx(const Integer& z1, const double& z2) { return z1<=z2; }
 inline bool ge_zi(const Integer& z1, const int& z2) { return z1>=z2; }
 inline bool ge_zx(const Integer& z1, const double& z2) { return z1>=z2; }
 
-inline Dyadic neg_d(const Dyadic d1) { return -d1; }
-inline Dyadic add_dd(const Dyadic d1, const Dyadic& d2) { return d1+d2; }
-inline Dyadic add_dx(const Dyadic d1, const double& d2) { return d1+d2; }
-inline Dyadic sub_dd(const Dyadic d1, const Dyadic& d2) { return d1-d2; }
-inline Dyadic sub_dx(const Dyadic d1, const double& d2) { return d1-d2; }
-inline Dyadic rsub_dx(const Dyadic d1, const double& d2) { return d2-d1; }
-inline Dyadic mul_dd(const Dyadic d1, const Dyadic& d2) { return d1*d2; }
-inline Dyadic mul_dx(const Dyadic d1, const double& d2) { return d1*d2; }
-inline Dyadic div_dn(const Dyadic d1, const uint& d2) { return d1/d2; }
+inline MPFloat neg_f(const MPFloat& f1) { return -f1; }
+inline MPFloat add_ff(const MPFloat& f1, const MPFloat& f2) { return f1+f2; }
+inline MPFloat add_fx(const MPFloat& f1, const double& f2) { return f1+f2; }
+inline MPFloat sub_ff(const MPFloat& f1, const MPFloat& f2) { return f1-f2; }
+inline MPFloat sub_fx(const MPFloat& f1, const double& f2) { return f1-f2; }
+inline MPFloat rsub_fx(const MPFloat& f1, const double& f2) { return f2-f1; }
+inline MPFloat mul_ff(const MPFloat& f1, const MPFloat& f2) { return f1*f2; }
+inline MPFloat mul_fx(const MPFloat& f1, const double& f2) { return f1*f2; }
+inline MPFloat div_ff(const MPFloat& f1, const MPFloat& f2) { return f1/f2; }
+inline MPFloat div_fn(const MPFloat& f1, const uint& f2) { return f1/f2; }
+inline bool eq_ff(const MPFloat& f1, const MPFloat& f2) { return f1==f2; }
+inline bool eq_fx(const MPFloat& f1, const double& f2) { return f1==f2; }
+inline bool eq_fz(const MPFloat& f1, const Integer& f2) { return f1==f2; }
+inline bool ne_ff(const MPFloat& f1, const MPFloat& f2) { return f1!=f2; }
+inline bool ne_fx(const MPFloat& f1, const double& f2) { return f1!=f2; }
+inline bool ne_fz(const MPFloat& f1, const Integer& f2) { return f1!=f2; }
+inline bool lt_ff(const MPFloat& f1, const MPFloat& f2) { return f1<f2; }
+inline bool lt_fx(const MPFloat& f1, const double& f2) { return f1<f2; }
+inline bool lt_fz(const MPFloat& f1, const Integer& f2) { return f1<f2; }
+inline bool gt_ff(const MPFloat& f1, const MPFloat& f2) { return f1>f2; }
+inline bool gt_fx(const MPFloat& f1, const double& f2) { return f1>f2; }
+inline bool gt_fz(const MPFloat& f1, const Integer& f2) { return f1>f2; }
+inline bool le_ff(const MPFloat& f1, const MPFloat& f2) { return f1<=f2; }
+inline bool le_fx(const MPFloat& f1, const double& f2) { return f1<=f2; }
+inline bool le_fz(const MPFloat& f1, const Integer& f2) { return f1<=f2; }
+inline bool ge_ff(const MPFloat& f1, const MPFloat& f2) { return f1>=f2; }
+inline bool ge_fx(const MPFloat& f1, const double& f2) { return f1>=f2; }
+inline bool ge_fz(const MPFloat& f1, const Integer& f2) { return f1>=f2; }
+inline MPFloat div_approx_ff(const MPFloat f1, const MPFloat& f2, const MPFloat& e) { return div_approx(f1,f2,e);  }
+inline MPFloat div_approx_fx(const MPFloat f1, const double& f2, const MPFloat& e) { return div_approx(f1,MPFloat(f2),e);  }
+inline MPFloat div_approx_xf(const double f1, const MPFloat& f2, const MPFloat& e) { return div_approx(MPFloat(f1),f2,e);  }
+inline MPFloat div_prec_ff(const MPFloat f1, const MPFloat& f2, const int& n) { return div_approx(f1,f2,n);  }
+inline MPFloat mantissa_f(const MPFloat f) { return mantissa(f); }
+inline Integer exponent_f(const MPFloat f) { return exponent(f); }
+inline Integer precision_f(const MPFloat f) { return precision(f); }
+
+inline Dyadic neg_d(const Dyadic& d1) { return -d1; }
+inline Dyadic add_dd(const Dyadic& d1, const Dyadic& d2) { return d1+d2; }
+inline Dyadic add_dx(const Dyadic& d1, const double& d2) { return d1+d2; }
+inline Dyadic sub_dd(const Dyadic& d1, const Dyadic& d2) { return d1-d2; }
+inline Dyadic sub_dx(const Dyadic& d1, const double& d2) { return d1-d2; }
+inline Dyadic rsub_dx(const Dyadic& d1, const double& d2) { return d2-d1; }
+inline Dyadic mul_dd(const Dyadic& d1, const Dyadic& d2) { return d1*d2; }
+inline Dyadic mul_dx(const Dyadic& d1, const double& d2) { return d1*d2; }
+inline Dyadic div_dn(const Dyadic& d1, const uint& d2) { return d1/d2; }
 inline bool eq_dd(const Dyadic& d1, const Dyadic& d2) { return d1==d2; }
 inline bool eq_dx(const Dyadic& d1, const double& d2) { return d1==d2; }
+inline bool eq_dz(const Dyadic& n1, const Integer& n2) { return n1==n2; }
 inline bool ne_dd(const Dyadic& d1, const Dyadic& d2) { return d1!=d2; }
 inline bool ne_dx(const Dyadic& d1, const double& d2) { return d1!=d2; }
+inline bool ne_dz(const Dyadic& n1, const Integer& n2) { return n1!=n2; }
 inline bool lt_dd(const Dyadic& d1, const Dyadic& d2) { return d1<d2; }
 inline bool lt_dx(const Dyadic& d1, const double& d2) { return d1<d2; }
+inline bool lt_dz(const Dyadic& n1, const Integer& n2) { return n1<n2; }
+inline bool gt_dd(const Dyadic& d1, const Dyadic& d2) { return d1>d2; }
 inline bool gt_dx(const Dyadic& d1, const double& d2) { return d1>d2; }
+inline bool gt_dz(const Dyadic& n1, const Integer& n2) { return n1>n2; }
 inline bool le_dd(const Dyadic& d1, const Dyadic& d2) { return d1<=d2; }
 inline bool le_dx(const Dyadic& d1, const double& d2) { return d1<=d2; }
+inline bool le_dz(const Dyadic& n1, const Integer& n2) { return n1<=n2; }
+inline bool ge_dd(const Dyadic& d1, const Dyadic& d2) { return d1>=d2; }
 inline bool ge_dx(const Dyadic& d1, const double& d2) { return d1>=d2; }
+inline bool ge_dz(const Dyadic& n1, const Integer& n2) { return n1>=n2; }
 inline Dyadic div_approx_dd(const Dyadic d1, const Dyadic& d2, const Dyadic& e) { return div_approx(d1,d2,e);  }
 inline Dyadic div_approx_dx(const Dyadic d1, const double& d2, const Dyadic& e) { return div_approx(d1,Dyadic(d2),e);  }
 inline Dyadic div_approx_xd(const double d1, const Dyadic& d2, const Dyadic& e) { return div_approx(Dyadic(d1),d2,e);  }
@@ -100,17 +129,17 @@ inline Dyadic mantissa_d(const Dyadic d) { return mantissa(d); }
 inline int exponent_d(const Dyadic d) { return exponent(d); }
 inline int precision_d(const Dyadic d) { return precision(d); }
 
-inline Rational neg_q(const Rational q1) { return -q1; }
-inline Rational add_qq(const Rational q1, const Rational& q2) { return q1+q2; }
-inline Rational add_qx(const Rational q1, const double& q2) { return q1+q2; }
-inline Rational sub_qq(const Rational q1, const Rational& q2) { return q1-q2; }
-inline Rational sub_qx(const Rational q1, const double& q2) { return q1-q2; }
-inline Rational rsub_qx(const Rational q1, const double& q2) { return q2-q1; }
-inline Rational mul_qq(const Rational q1, const Rational& q2) { return q1*q2; }
-inline Rational mul_qx(const Rational q1, const double& q2) { return q1*q2; }
-inline Rational div_qq(const Rational q1, const Rational& q2) { return q1/q2; }
-inline Rational div_qx(const Rational q1, const double& q2) { return q1/q2; }
-inline Rational rdiv_qx(const Rational q1, const double& q2) { return q2/q1; }
+inline Rational neg_q(const Rational& q1) { return -q1; }
+inline Rational add_qq(const Rational& q1, const Rational& q2) { return q1+q2; }
+inline Rational add_qx(const Rational& q1, const double& q2) { return q1+q2; }
+inline Rational sub_qq(const Rational& q1, const Rational& q2) { return q1-q2; }
+inline Rational sub_qx(const Rational& q1, const double& q2) { return q1-q2; }
+inline Rational rsub_qx(const Rational& q1, const double& q2) { return q2-q1; }
+inline Rational mul_qq(const Rational& q1, const Rational& q2) { return q1*q2; }
+inline Rational mul_qx(const Rational& q1, const double& q2) { return q1*q2; }
+inline Rational div_qq(const Rational& q1, const Rational& q2) { return q1/q2; }
+inline Rational div_qx(const Rational& q1, const double& q2) { return q1/q2; }
+inline Rational rdiv_qx(const Rational& q1, const double& q2) { return q2/q1; }
 inline bool eq_qq(const Rational& q1, const Rational& q2) { return q1==q2; }
 inline bool eq_qx(const Rational& q1, const double& q2) { return q1==q2; }
 inline bool ne_qq(const Rational& q1, const Rational& q2) { return q1!=q2; }
@@ -124,29 +153,25 @@ inline bool ge_qx(const Rational& q1, const double& q2) { return q1>=q2; }
 
 inline bool eq_qd(const Rational& n1, const Dyadic& n2) { return n1==n2; }
 inline bool eq_qz(const Rational& n1, const Integer& n2) { return n1==n2; }
-inline bool eq_dz(const Dyadic& n1, const Integer& n2) { return n1==n2; }
 inline bool ne_qd(const Rational& n1, const Dyadic& n2) { return n1!=n2; }
 inline bool ne_qz(const Rational& n1, const Integer& n2) { return n1!=n2; }
-inline bool ne_dz(const Dyadic& n1, const Integer& n2) { return n1!=n2; }
 inline bool lt_qd(const Rational& n1, const Dyadic& n2) { return n1<n2; }
 inline bool lt_qz(const Rational& n1, const Integer& n2) { return n1<n2; }
-inline bool lt_dz(const Dyadic& n1, const Integer& n2) { return n1<n2; }
 inline bool gt_qd(const Rational& n1, const Dyadic& n2) { return n1>n2; }
 inline bool gt_qz(const Rational& n1, const Integer& n2) { return n1>n2; }
-inline bool gt_dz(const Dyadic& n1, const Integer& n2) { return n1>n2; }
 inline bool le_qd(const Rational& n1, const Dyadic& n2) { return n1<=n2; }
 inline bool le_qz(const Rational& n1, const Integer& n2) { return n1<=n2; }
-inline bool le_dz(const Dyadic& n1, const Integer& n2) { return n1<=n2; }
 inline bool ge_qd(const Rational& n1, const Dyadic& n2) { return n1>=n2; }
 inline bool ge_qz(const Rational& n1, const Integer& n2) { return n1>=n2; }
-inline bool ge_dz(const Dyadic& n1, const Integer& n2) { return n1>=n2; }
 inline Integer numerator_q(const Rational& q) { return numerator(q); }
 inline Integer denominator_q(const Rational& q) { return denominator(q); }
+
+
 
 void export_numeric() {
   class_<Integer>("Integer")
     .def(init<int>())
-    .def(init<double>())
+    .def(init<Integer>())
     .def("__neg__", &neg_z)
     .def("__add__", &add_zz)
     .def("__add__", &add_zi)
@@ -168,13 +193,56 @@ void export_numeric() {
     .def("__le__", &le_zx)
     .def("__ge__", &le_zx)
     .def("__div__", &div_zz)
-    .def(str(self))    // __str__
+    .def(self_ns::str(self))
+  ;
+
+  class_<MPFloat>("MPFloat")
+    .def(init<int,int>())
+    .def(init<int>())
+    .def(init<Integer>())
+    .def(init<double>())
+    .def(init<MPFloat>())
+    .def("__neg__", &neg_f)
+    .def("__add__", &add_ff)
+    .def("__add__", &add_fx)
+    .def("__radd__", &add_fx)
+    .def("__sub__", &sub_ff)
+    .def("__sub__", &sub_fx)
+    .def("__rsub__", &rsub_fx)
+    .def("__mul__", &mul_ff)
+    .def("__mul__", &mul_fx)
+    .def("__rmul__", &mul_fx)
+    .def("__div__", &div_fn)
+    .def("__eq__", &eq_ff)
+    .def("__eq__", &eq_fx)
+    .def("__eq__", &eq_fz)
+    .def("__ne__", &ne_ff)
+    .def("__ne__", &ne_fx)
+    .def("__ne__", &ne_fz)
+    .def("__lt__", &lt_ff)
+    .def("__lt__", &lt_fx)
+    .def("__lt__", &lt_fz)
+    .def("__gt__", &gt_ff)
+    .def("__gt__", &gt_fx)
+    .def("__gt__", &gt_fz)
+    .def("__le__", &le_ff)
+    .def("__le__", &le_fx)
+    .def("__le__", &le_fz)
+    .def("__ge__", &ge_ff)
+    .def("__ge__", &ge_fx)
+    .def("__ge__", &ge_fz)
+    .def("precision", &precision_f)
+    .def("exponent", &exponent_f)
+    .def("mantissa", &mantissa_f)
+    .def(self_ns::str(self))
   ;
 
   class_<Dyadic>("Dyadic")
-    .def(init<int>())
-    .def(init<double>())
     .def(init<int,int>())
+    .def(init<int>())
+    .def(init<Integer>())
+    .def(init<double>())
+    .def(init<MPFloat>())
     .def(init<Dyadic>())
     .def("__neg__", &neg_d)
     .def("__add__", &add_dd)
@@ -201,12 +269,13 @@ void export_numeric() {
     .def("__le__", &le_dd)
     .def("__le__", &le_dx)
     .def("__le__", &le_dz)
+    .def("__ge__", &ge_dd)
     .def("__ge__", &ge_dx)
     .def("__ge__", &ge_dz)
     .def("precision", &precision_d)
     .def("exponent", &exponent_d)
     .def("mantissa", &mantissa_d)
-    .def(str(self))    // __str__
+    .def(self_ns::str(self))
   ;
 
   def("div_approx", &div_approx_dd);
@@ -217,9 +286,11 @@ void export_numeric() {
   class_<Rational>("Rational")
     .def(init<int,int>())
     .def(init<int>())
-    .def(init<double>())
     .def(init<Integer>())
+    .def(init<double>())
+    .def(init<MPFloat>())
     .def(init<Dyadic>())
+    .def(init<Rational>())
     .def("__neg__", &neg_q)
     .def("__add__", &add_qq)
     .def("__add__", &add_qx)
@@ -257,6 +328,96 @@ void export_numeric() {
     .def("__ge__", &ge_qd)
     .def("numerator", &numerator_q)
     .def("denominator", &denominator_q)
-    .def(str(self))    // __str__
+    .def(self_ns::str(self))
   ;
+  
+/*
+inline Real neg_r(const Real& r) { return -r; }
+inline Real add_rr(const Real& r1, const Real& r2) { return r1+r2; }
+inline Real add_rx(const Real& r1, const double& r2) { return r1+r2; }
+inline Real sub_rr(const Real& r1, const Real& r2) { return r1-r2; }
+inline Real sub_rx(const Real& r1, const double& r2) { return r1-r2; }
+inline Real rsub_rx(const Real& r1, const double& r2) { return r2-r1; }
+inline Real mul_rr(const Real& r1, const Real& r2) { return r1*r2; }
+inline Real mul_rx(const Real& r1, const double& r2) { return r1*r2; }
+inline Real div_rr(const Real& r1, const Real& r2) { return r1/r2; }
+inline Real div_rn(const Real& r1, const uint& r2) { return r1/r2; }
+inline bool eq_rq(const Real& r1, const Rational& r2) { return r1==r2; }
+inline bool eq_rr(const Real& r1, const Real& r2) { return r1==r2; }
+inline bool eq_rx(const Real& r1, const double& r2) { return r1==r2; }
+inline bool eq_rz(const Real& r1, const Integer& r2) { return r1==r2; }
+inline bool ne_rq(const Real& r1, const Rational& r2) { return r1!=r2; }
+inline bool ne_rr(const Real& r1, const Real& r2) { return r1!=r2; }
+inline bool ne_rx(const Real& r1, const double& r2) { return r1!=r2; }
+inline bool ne_rz(const Real& r1, const Integer& r2) { return r1!=r2; }
+inline bool lt_rq(const Real& r1, const Rational& r2) { return r1<r2; }
+inline bool lt_rr(const Real& r1, const Real& r2) { return r1<r2; }
+inline bool lt_rx(const Real& r1, const double& r2) { return r1<r2; }
+inline bool lt_rz(const Real& r1, const Integer& r2) { return r1<r2; }
+inline bool gt_rq(const Real& r1, const Rational& r2) { return r1>r2; }
+inline bool gt_rr(const Real& r1, const Real& r2) { return r1>r2; }
+inline bool gt_rx(const Real& r1, const double& r2) { return r1>r2; }
+inline bool gt_rz(const Real& r1, const Integer& r2) { return r1>r2; }
+inline bool le_rq(const Real& r1, const Rational& r2) { return r1<=r2; }
+inline bool le_rr(const Real& r1, const Real& r2) { return r1<=r2; }
+inline bool le_rx(const Real& r1, const double& r2) { return r1<=r2; }
+inline bool le_rz(const Real& r1, const Integer& r2) { return r1<=r2; }
+inline bool ge_rq(const Real& r1, const Rational& r2) { return r1>=r2; }
+inline bool ge_rr(const Real& r1, const Real& r2) { return r1>=r2; }
+inline bool ge_rx(const Real& r1, const double& r2) { return r1>=r2; }
+inline bool ge_rz(const Real& r1, const Integer& r2) { return r1>=r2; }
+inline Real div_approx_rr(const Real r1, const Real& r2, const Real& e) { return div_approx(r1,r2,e);  }
+inline Real div_approx_rx(const Real r1, const double& r2, const Real& e) { return div_approx(r1,Real(r2),e);  }
+inline Real div_approx_xr(const double r1, const Real& r2, const Real& e) { return div_approx(Real(r1),r2,e);  }
+inline Real div_prec_rr(const Real r1, const Real& r2, const int& n) { return div_approx(r1,r2,n);  }
+inline Real mantissa_r(const Real r) { return mantissa(r); }
+inline Integer exponent_r(const Real r) { return exponent(r); }
+inline Integer precision_r(const Real r) { return precision(r); }  class_<Real>("Real")
+    .def(init<int>())
+    .def(init<double>())
+    .def(init<int,int>())
+    .def(init<Real>())
+    .def("__neg__", &neg_r)
+    .def("__add__", &add_rr)
+    .def("__add__", &add_rx)
+    .def("__radd__", &add_rx)
+    .def("__sub__", &sub_rr)
+    .def("__sub__", &sub_rx)
+    .def("__rsub__", &rsub_rx)
+    .def("__mul__", &mul_rr)
+    .def("__mul__", &mul_rx)
+    .def("__rmul__", &mul_rx)
+    .def("__div__", &div_rn)
+    .def("__eq__", &eq_rq)
+    .def("__eq__", &eq_rr)
+    .def("__eq__", &eq_rx)
+    .def("__eq__", &eq_rz)
+    .def("__ne__", &ne_rq)
+    .def("__ne__", &ne_rr)
+    .def("__ne__", &ne_rx)
+    .def("__ne__", &ne_rz)
+    .def("__lt__", &lt_rq)
+    .def("__lt__", &lt_rr)
+    .def("__lt__", &lt_rx)
+    .def("__lt__", &lt_rz)
+    .def("__gt__", &gt_rq)
+    .def("__gt__", &gt_rr)
+    .def("__gt__", &gt_rx)
+    .def("__gt__", &gt_rz)
+    .def("__le__", &le_rq)
+    .def("__le__", &le_rr)
+    .def("__le__", &le_rx)
+    .def("__le__", &le_rz)
+    .def("__ge__", &ge_rq)
+    .def("__ge__", &ge_rr)
+    .def("__ge__", &ge_rx)
+    .def("__ge__", &ge_rz)
+    .def("precision", &precision_r)
+    .def("exponent", &exponent_r)
+    .def("mantissa", &mantissa_r)
+    .def(self_ns::str(self))
+  ;
+*/
+
+  
 }

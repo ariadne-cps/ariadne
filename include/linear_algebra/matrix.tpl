@@ -27,48 +27,6 @@
 #include "../base/array.h"
 #include "../base/function.h"
 
-namespace boost {
-  namespace numeric {
-    namespace ublas {
-
-      template <typename R>
-      std::ostream&
-      operator<<(std::ostream& os, const matrix<R>& A)
-      {
-        if(A.size1()==0 || A.size2()==0) {
-          return os << "[ ]";
-        }
-        
-        for(uint i=0; i!=A.size1(); ++i) {
-          for(uint j=0; j!=A.size2(); ++j) {
-            os << (j==0 ? (i==0 ? "[ " : "; ") : ",");
-            os << A(i,j);
-          }
-        }
-        os << " ]";
-        return os;
-      }
-       
-      template <>
-      std::ostream&
-      operator<<(std::ostream& os, const matrix<Ariadne::Rational>& A)
-      {
-        for(uint i=0; i!=A.size1(); ++i) {
-          for(uint j=0; j!=A.size2(); ++j) {
-            os << (j==0 ? (i==0 ? "[ " : "; ") : ",");
-            os << Ariadne::convert_to<double>(A(i,j));
-          }
-        }
-        os << " ]";
-        return os;
-      }
-       
-
-    }
-  }
-}
-      
-
 namespace Ariadne {
   namespace LinearAlgebra {
 
@@ -261,7 +219,7 @@ namespace Ariadne {
           }
         }
         if (max==0) {
-          throw std::runtime_error("Matrix is singular");
+          throw std::runtime_error("matrix_type is singular");
         }
         scale(i)=1.0/max;
       }
@@ -302,7 +260,7 @@ namespace Ariadne {
         p_array[j]=pivot;
         
         if ( O(j,j) == 0 ) {
-          throw std::runtime_error("Matrix is singular");
+          throw std::runtime_error("matrix_type is singular");
         }
     
         if (j < cols-1) {
@@ -424,8 +382,16 @@ namespace Ariadne {
     
     template <typename R>
     matrix<typename numerical_traits<R>::field_extension_type> 
-    inverse(const matrix<R> &A) {
-      
+    inverse(const matrix<R> &A) 
+    {
+      return _inverse(A,typename numerical_traits<R>::algebraic_category());
+    }
+    
+    template <typename R>
+    inline
+    matrix<typename numerical_traits<R>::field_extension_type> 
+    _inverse(const matrix<R> &A, const field_tag&) 
+    {
       size_type rows=A.size1(), cols=A.size2(),i,j;
       
       matrix<R> inv_A(cols,rows);
@@ -450,11 +416,12 @@ namespace Ariadne {
       return inv_A;
     }
     
-    template < >
-    matrix<Rational>
-    inverse(const matrix<Dyadic>& A) 
+    template <typename R>
+    inline
+    matrix<typename numerical_traits<R>::field_extension_type> 
+    _inverse(const matrix<R>& A, const ring_tag&) 
     {
-      matrix<Rational> result(A.size1(),A.size2());
+      matrix<typename numerical_traits<R>::field_extension_type> result(A.size1(),A.size2());
       for(size_type i=0; i!=result.size1(); ++i) {
         for(size_type j=0; j!=result.size2(); ++j) {
           result(i,j)=A(i,j);
@@ -462,6 +429,7 @@ namespace Ariadne {
       }
       return inverse(result);
     }
+    
     
     template <typename R>
     Integer 
@@ -500,16 +468,27 @@ namespace Ariadne {
                                   matrix<R>& A, 
                                   vector<R>& b) 
     {
+      return transform_linear_inequalities(T,A,b, typename numerical_traits<R>::algebraic_category());
+    }
+    
+    template <typename R>
+    void 
+    transform_linear_inequalities(const matrix<R>& T, 
+                                  matrix<R>& A, 
+                                  vector<R>& b,
+                                  const field_tag& ft) 
+    {
       A=A*inverse(T);
     }
     
-    template <>
+    template <typename R>
     void 
-    transform_linear_inequalities<Dyadic>(const matrix<Dyadic>& T, 
-                                          matrix<Dyadic>& A, 
-                                          vector<Dyadic>& b) 
+    transform_linear_inequalities(const matrix<R>& T, 
+                                  matrix<R>& A, 
+                                  vector<R>& b,
+                                  const ring_tag& rt) 
     {
-      typedef Dyadic R;
+      typedef typename numerical_traits<R>::field_extension_type F;
       
       size_type n=A.size1();
       if(A.size1() != b.size()) {
@@ -519,13 +498,13 @@ namespace Ariadne {
         throw std::domain_error("Invalid linear transformation");
       }
       
-      matrix<Rational> Trat(T.size1(),T.size2());
+      matrix<F> Trat(T.size1(),T.size2());
       for(size_type i=0; i!=n; ++i) {
         for(size_type j=0; j!=n; ++j) {
-          Trat(i,j)=convert_to<Rational>(T(i,j));
+          Trat(i,j)=convert_to<F>(T(i,j));
         }
       }
-      matrix<Rational> Tinv=inverse(Trat);
+      matrix<F> Tinv=inverse(Trat);
       Trat.clear();
       
       Integer multiplier=common_denominator(Tinv);
@@ -729,5 +708,19 @@ namespace Ariadne {
       return A;
     }
 
+    template <typename R>
+    std::ostream&
+    operator<<(std::ostream& os, const matrix<R>& A)
+    {
+      for(uint i=0; i!=A.size1(); ++i) {
+        for(uint j=0; j!=A.size2(); ++j) {
+          os << (j==0 ? (i==0 ? "[ " : "; ") : ",");
+          os << Ariadne::convert_to<double>(A(i,j));
+        }
+      }
+      os << " ]";
+      return os;
+    }
+       
   }
 }

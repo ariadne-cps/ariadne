@@ -43,12 +43,12 @@ template <typename VF >
 class DiscreteLocation{
 
   public:
-    typedef VF VectorField;
-    typedef typename VectorField::VectorFieldMap VectorFieldMap;
-    typedef typename VectorField::DenotableSet DenotableSet;
+    typedef VF vector_typeField;
+    typedef typename vector_typeField::vector_typeFieldMap vector_typeFieldMap;
+    typedef typename vector_typeField::DenotableSet DenotableSet;
     typedef typename DenotableSet::BasicSet BasicSet;
-    typedef typename BasicSet::State State;
-    typedef typename State::Real Real;
+    typedef typename BasicSet::state_type state_type;
+    typedef typename state_type::real_type real_type;
     
   
     template < typename LDT >
@@ -64,7 +64,7 @@ class DiscreteLocation{
     std::string _name;
   
     /*! \brief The discrete location's vector field. */
-    VectorField _vfield;
+    vector_typeField _vfield;
   
     /*! \brief The discrete location's invariant. */
     DenotableSet _invariant;
@@ -93,7 +93,7 @@ class DiscreteLocation{
      * \param vfield is the location's vector field.
      */
     DiscreteLocation(const std::string &name, 
-                    const VectorField &vfield):
+                    const vector_typeField &vfield):
         _name(name), _vfield(vfield), 
         _invariant(vfield.dimension()), _in_automaton(false) {}
           
@@ -106,7 +106,7 @@ class DiscreteLocation{
      * \param invariant is the location's invariant.
      */
     DiscreteLocation(const std::string &name, 
-                    const VectorField &vfield, 
+                    const vector_typeField &vfield, 
                     const DenotableSet &invariant):
           
         _name(name), _vfield(vfield), 
@@ -127,7 +127,7 @@ class DiscreteLocation{
      * \param invariant is the location's invariant.
      */
     DiscreteLocation(const std::string &name, 
-                    const VectorField &vfield, 
+                    const vector_typeField &vfield, 
                     const BasicSet &invariant):
           
         _name(name), _vfield(vfield), 
@@ -184,7 +184,7 @@ class DiscreteLocation{
      *
      * \return The discrete location's vector field.
      */
-    inline const VectorField& vector_field() const {
+    inline const vector_typeField& vector_field() const {
       return this->_vfield;  
     }
     

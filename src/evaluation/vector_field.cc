@@ -24,10 +24,12 @@
 #include "evaluation/vector_field.h"
 #include "evaluation/vector_field.tpl"
 
+#include "real_typedef.h"
+
 namespace Ariadne {
   namespace Evaluation {
 
-    template class VectorField<Dyadic>;
+    template class VectorField<Real>;
       
   }
 }

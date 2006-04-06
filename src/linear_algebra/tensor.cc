@@ -20,37 +20,38 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
+#include "real_typedef.h"
+
 #include "linear_algebra/tensor.h"
 #include "linear_algebra/tensor.tpl"
-
 
 namespace Ariadne {
   namespace LinearAlgebra {
     
     template class tensor<Float64>;
-    template class tensor<Dyadic>;
-    template class tensor<Rational>;
+    template class tensor<Real>;
+    template class tensor<Field>;
 
     template vector<Float64> product(const tensor<Float64>&, const vector<Float64>&, const vector<Float64>&);
-    template vector<Dyadic> product(const tensor<Dyadic>&, const vector<Dyadic>&, const vector<Dyadic>&);
-    template vector<Rational> product(const tensor<Rational>&, const vector<Rational>&, const vector<Rational>&);
+    template vector<Real> product(const tensor<Real>&, const vector<Real>&, const vector<Real>&);
+    template vector<Field> product(const tensor<Field>&, const vector<Field>&, const vector<Field>&);
     
     template matrix<Float64> product(const tensor<Float64>&, const vector<Float64>&);
-    template matrix<Dyadic> product(const tensor<Dyadic>&, const vector<Dyadic>&);
-    template matrix<Rational> product(const tensor<Rational>&, const vector<Rational>&);
+    template matrix<Real> product(const tensor<Real>&, const vector<Real>&);
+    template matrix<Field> product(const tensor<Field>&, const vector<Field>&);
     
     template tensor<Float64> product(const tensor<Float64>&, const matrix<Float64>&);
-    template tensor<Dyadic> product(const tensor<Dyadic>&, const matrix<Dyadic>&);
-    template tensor<Rational> product(const tensor<Rational>&, const matrix<Rational>&);
+    template tensor<Real> product(const tensor<Real>&, const matrix<Real>&);
+    template tensor<Field> product(const tensor<Field>&, const matrix<Field>&);
     
     template tensor<Float64> product(const tensor<Float64>&, const matrix<Float64>&, const matrix<Float64>&);
-    template tensor<Dyadic> product(const tensor<Dyadic>&, const matrix<Dyadic>&, const matrix<Dyadic>&);
-    template tensor<Rational> product(const tensor<Rational>&, const matrix<Rational>&, const matrix<Rational>&);
+    template tensor<Real> product(const tensor<Real>&, const matrix<Real>&, const matrix<Real>&);
+    template tensor<Field> product(const tensor<Field>&, const matrix<Field>&, const matrix<Field>&);
     
     template std::ostream& operator<<(std::ostream&, const tensor<Float64>&);
-    template std::ostream& operator<<(std::ostream&, const tensor<Dyadic>&);
-    template std::ostream& operator<<(std::ostream&, const tensor<Rational>&);
+    template std::ostream& operator<<(std::ostream&, const tensor<Real>&);
+    template std::ostream& operator<<(std::ostream&, const tensor<Field>&);
     
   }
 }

@@ -24,10 +24,12 @@
 #include "evaluation/affine_vector_field.h"
 #include "evaluation/affine_vector_field.tpl"
 
+#include "real_typedef.h"
+
 namespace Ariadne {
   namespace Evaluation {
 
-    template class AffineVectorField<Dyadic>;
+    template class AffineVectorField<Real>;
 
   }
 }
@@ -36,13 +38,13 @@ namespace Ariadne {
 namespace Ariadne {
   namespace LinearAlgebra {
     
-    template matrix<Dyadic> exp_Ah_approx(const matrix<Dyadic>& A, 
-                                          const Dyadic& h, 
-                                          const Dyadic& e);
+    template matrix<Real> exp_Ah_approx(const matrix<Real>& A, 
+                                          const Real& h, 
+                                          const Real& e);
     
-    template matrix<Dyadic> exp_Ah_sub_id_div_A_approx(const matrix<Dyadic>& A, 
-                                                       const Dyadic& h, 
-                                                       const Dyadic& e);
+    template matrix<Real> exp_Ah_sub_id_div_A_approx(const matrix<Real>& A, 
+                                                       const Real& h, 
+                                                       const Real& e);
 
   }
 }

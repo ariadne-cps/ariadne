@@ -24,13 +24,15 @@
 #include "geometry/parallelotope.h"
 #include "geometry/parallelotope.tpl"
 
+#include "real_typedef.h"
+
 namespace Ariadne {
   namespace Geometry {
 
-    template class Parallelotope<Dyadic>;
+    template class Parallelotope<Real>;
 
-    template std::ostream& operator<<(std::ostream&, const Parallelotope<Dyadic>&);
-    template std::istream& operator>>(std::istream&, Parallelotope<Dyadic>&);
+    template std::ostream& operator<<(std::ostream&, const Parallelotope<Real>&);
+    template std::istream& operator>>(std::istream&, Parallelotope<Real>&);
 
   }
 }

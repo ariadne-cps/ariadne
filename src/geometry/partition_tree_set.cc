@@ -25,17 +25,19 @@
 #include "geometry/partition_tree_set.h"
 #include "geometry/partition_tree_set.tpl"
 
+#include "real_typedef.h"
+
 namespace Ariadne {
   namespace Geometry {
 
-    template class PartitionScheme<Dyadic>;
-    template class PartitionTree<Dyadic>;
-    template class PartitionTreeCell<Dyadic>;
-    template class PartitionTreeSet<Dyadic>;
+    template class PartitionScheme<Real>;
+    template class PartitionTree<Real>;
+    template class PartitionTreeCell<Real>;
+    template class PartitionTreeSet<Real>;
 
-    template std::ostream& operator<<(std::ostream&, const PartitionScheme<Dyadic>&);
-    template std::ostream& operator<<(std::ostream&, const PartitionTree<Dyadic>&);
-    template std::ostream& operator<<(std::ostream&, const PartitionTreeCell<Dyadic>&);
-    template std::ostream& operator<<(std::ostream&, const PartitionTreeSet<Dyadic>&);
+    template std::ostream& operator<<(std::ostream&, const PartitionScheme<Real>&);
+    template std::ostream& operator<<(std::ostream&, const PartitionTree<Real>&);
+    template std::ostream& operator<<(std::ostream&, const PartitionTreeCell<Real>&);
+    template std::ostream& operator<<(std::ostream&, const PartitionTreeSet<Real>&);
   }
 }

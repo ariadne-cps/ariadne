@@ -7,12 +7,12 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can redistribute it and/or modify
+ *  This program is free software; you can rediself_ns::stribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  This program is diself_ns::stributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
@@ -30,42 +30,13 @@
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
 
-#include <boost/python.hpp>
 
 #include "python/typedefs.h"
+using namespace Ariadne;
+using namespace Ariadne::Geometry;
 
-using Ariadne::BooleanArray;
-using Ariadne::BinaryWord;
-using Ariadne::BinaryTree;
-
-typedef Ariadne::Geometry::Point<Real> RPoint;
-
-typedef Ariadne::Interval<Real> RInterval;
-typedef Ariadne::Geometry::Rectangle<Real> RRectangle;
-
-typedef Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Rectangle> RRectangleListSet;
-typedef Ariadne::Geometry::GridMaskSet<Real> RGridMaskSet;
-
-using Ariadne::Geometry::SubdivisionSequence;
-typedef Ariadne::Geometry::PartitionScheme<Real> RPartitionScheme;
-typedef Ariadne::Geometry::PartitionTree<Real> RPartitionTree;
-typedef Ariadne::Geometry::PartitionTreeCell<Real> RPartitionTreeCell;
-typedef Ariadne::Geometry::PartitionTreeSet<Real> RPartitionTreeSet;
-
-using Ariadne::Geometry::regular_intersection;
-using Ariadne::Geometry::interiors_intersect;
-using Ariadne::Geometry::disjoint;
-using Ariadne::Geometry::inner_subset;
-using Ariadne::Geometry::subset;
-
-using boost::python::class_;
-using boost::python::init;
-using boost::python::self;
-using boost::python::iterator;
-using boost::python::return_value_policy;
-using boost::python::copy_const_reference;
-using boost::python::def;
-using boost::python::self_ns::str;
+#include <boost/python.hpp>
+using namespace boost::python;
 
 RRectangle convert_to_rectangle(const RPartitionTreeCell& ptc) {
   return RRectangle(ptc); }
@@ -74,7 +45,7 @@ void export_partition_tree_set() {
   class_<SubdivisionSequence>("SubdivisionSequence",init<unsigned int>())
     .def("dimension", &SubdivisionSequence::dimension)
     .def("__getitem__", &SubdivisionSequence::get)
-    .def(str(self))    // __str__
+    .def(self_ns::str(self))    // __self_ns::str__
   ;
 
   class_<RPartitionScheme>("PartitionScheme",init<RRectangle,SubdivisionSequence>())
@@ -82,7 +53,7 @@ void export_partition_tree_set() {
     .def("dimension", &RPartitionScheme::dimension)
     .def("bounding_box", &RPartitionScheme::bounding_box, return_value_policy<copy_const_reference>())
     .def("subdivisions", &RPartitionScheme::subdivisions, return_value_policy<copy_const_reference>())
-    .def(str(self))    // __str__
+    .def(self_ns::str(self))    // __self_ns::str__
   ;
 
   class_<RPartitionTree>("PartitionTree",init<RRectangle,SubdivisionSequence,BinaryTree>())
@@ -94,7 +65,7 @@ void export_partition_tree_set() {
     .def("size", &RPartitionTree::size)
     .def("__len__", &RPartitionTree::size)
     .def("__iter__", iterator<RPartitionTree>())
-    .def(str(self))    // __str__
+    .def(self_ns::str(self))    // __self_ns::str__
   ;
 
   class_<RPartitionTreeSet>("PartitionTreeSet",init<RRectangle,SubdivisionSequence,BinaryTree,BooleanArray>())
@@ -113,11 +84,11 @@ void export_partition_tree_set() {
     .def("size", &RPartitionTreeSet::size)
     .def("__len__", &RPartitionTreeSet::size)
     .def("__iter__", iterator<RPartitionTreeSet>())
-    .def(str(self))    // __str__
+    .def(self_ns::str(self))    // __self_ns::str__
   ;
 
   class_<RPartitionTreeCell>("PartitionTreeCell",init<RRectangle,SubdivisionSequence,BinaryWord>())
     .def("dimension", &RPartitionTreeCell::dimension)
-    .def(str(self))    // __str__
+    .def(self_ns::str(self))    // __self_ns::str__
   ;
 }

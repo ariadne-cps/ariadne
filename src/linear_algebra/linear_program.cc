@@ -27,8 +27,8 @@
 namespace Ariadne {
   namespace LinearAlgebra {
     
-    template class LinearProgram<Dyadic>;
-    template std::ostream& operator<<(std::ostream&, const LinearProgram<Dyadic>&);
+    //    template class LinearProgram<Dyadic>;
+    //    template std::ostream& operator<<(std::ostream&, const LinearProgram<Dyadic>&);
     template class LinearProgram<Rational>;
     template std::ostream& operator<<(std::ostream&, const LinearProgram<Rational>&);
 

@@ -55,7 +55,7 @@ namespace Ariadne {
    */
   typedef double Float64;
   
-  /*! \brief A dyadic rational (i.e. of form @a m/2^n).
+  /*! \brief A dyadic rational (i.e. of form \f$m/2^n\f$).
   *
   * An element of the ring of dyadic rationals.
   * Must allow denotation of any dyadic rational.
@@ -64,66 +64,17 @@ namespace Ariadne {
   * May be created without loss of precision from any integral or floating point type,
   * or from any rational of the form m/2^n.
   *
-  * Currently implemented using mpf_class from the GNU Multiple Precision library.
+  * Currently implemented using a modification of the Synaps dyadic class.
   *
   * FIXME: mpf_class does not implement addition, subtraction and multiplication exactly.
   */
-  typedef mpf_class Dyadic;
-  //typedef Synaps::Dyadic Dyadic;
+  //typedef Synaps::dyadic Dyadic;
   
-/* Hand-coded wrapped (currently not used)
-  class Dyadic {
-   public:
-    Dyadic(const mpf_class& x) : _rep(x) { }
-    Dyadic(const double& x) : _rep(x) { }
-    Dyadic(const int& x) : _rep(x) { }
-    Dyadic(const Dyadic& x) : _rep(x._rep) { }
-    
-    Dyadic(const double& x, uint n) : _rep(x,n) { } 
-    Dyadic(const Dyadic& x, uint n) : _rep(x._rep,n) { }
-
-    uint precision() const { return _rep.get_prec(); }
-    int exponent() const { long int res; mpf_get_d_2exp(&res,_rep.get_mpf_t()); return res-1; }
-    Dyadic mantissa() const { mpf_class res; mpf_div_2exp(res.get_mpf_t(),_rep.get_mpf_t(),this->exponent()); return res; }
-    double mantissa_approx() const { long int tmp; return mpf_get_d_2exp(&tmp,_rep.get_mpf_t()); }
-    
-    Dyadic operator-() const { Dyadic res; mpf_neg(res._rep.get_mpf_t(),this->_rep.get_mpf_t()); return res; }
-    Dyadic operator+(const Dyadic& y) const { Dyadic res; mpf_add(res._rep.get_mpf_t(),this->_rep.get_mpf_t(),y._rep.get_mpf_t()); return res; }
-    Dyadic operator-(const Dyadic& y) const { Dyadic res; mpf_sub(res._rep.get_mpf_t(),this->_rep.get_mpf_t(),y._rep.get_mpf_t()); return res; }
-    Dyadic operator*(const Dyadic& y) const { Dyadic res; mpf_mul(res._rep.get_mpf_t(),this->_rep.get_mpf_t(),y._rep.get_mpf_t()); return res; }
-    
-    bool operator==(const Dyadic& y) const { return *this==y; }
-    bool operator!=(const Dyadic& y) const { return *this!=y; }
-    bool operator<(const Dyadic& y) const { return *this<y; }
-    bool operator<=(const Dyadic& y) const { return *this<=y; }
-    
-    Dyadic operator-() const { return mpf_class(-this->_rep); }
-    Dyadic operator+(const Dyadic& y) const { return mpf_class(this->_rep + y._rep); }
-    Dyadic operator-(const Dyadic& y) const { return mpf_class(this->_rep - y._rep); }
-    Dyadic operator*(const Dyadic& y) const { return mpf_class(this->_rep * y._rep); }
-    
-    friend Dyadic div_approx(const Dyadic& x, const Dyadic& y, const Dyadic& e);
-    friend Dyadic div_approx(const Dyadic& x, const Dyadic& y, const uint& n);
-    friend std::ostream& operator<<(std::ostream&, const Dyadic&);
-    friend std::istream& operator>>(std::istream&, Dyadic&);
-    Dyadic() { }
-   private:
-    mpf_class _rep;
-  };
- 
-  inline std::ostream& operator<<(std::ostream& os, const Dyadic& x) {
-    mpf_class tmp(x._rep);
-    os << tmp;
-    return os;
-  }
-  
-  inline std::istream& operator>>(std::istream& is, Dyadic& x) {
-    mpf_class tmp;
-    is >> tmp;
-    x=Dyadic(tmp);
-    return is;
-  }
-*/
+  /*! \brief A multiple-precision floating-point type.
+   *
+   * Currently implemented using mpf_class from the GNU Multiple Precision library.
+   */
+  typedef mpf_class MPFloat;
   
   /*! \brief A rational number.
   *
@@ -135,17 +86,18 @@ namespace Ariadne {
   */
   typedef mpq_class Rational;
 
-  inline Integer precision(const Dyadic& num) {
+
+  inline Integer precision(const MPFloat& num) {
     return mpf_get_prec(num.get_mpf_t());
   }
 
-  inline Integer exponent(const Dyadic& num) {
+  inline Integer exponent(const MPFloat& num) {
     long int res; 
     mpf_get_d_2exp(&res,num.get_mpf_t()); 
     return res-1; 
   }
 
-  inline Dyadic mantissa(const Dyadic& num) {
+  inline MPFloat mantissa(const MPFloat& num) {
     long int exp; 
     mpf_class res; 
     mpf_get_d_2exp(&exp,num.get_mpf_t()); 
@@ -154,15 +106,33 @@ namespace Ariadne {
     return res; 
   }
 
+  inline Dyadic mantissa(const Dyadic& num) {
+    return num.mantissa();
+  }
+
+  inline int exponent(const Dyadic& num) {
+    return num.exponent();
+  }
+
+  inline int precision(const Dyadic& num) {
+    return num.precision();
+  }
+
+  inline Integer numerator(const Dyadic& num) {
+    return num.numerator();
+  }
+
+  inline Integer denominator(const Dyadic& num) {
+    return num.denominator();
+  }
+
+
   inline Integer numerator(const Rational& num){ 
     return num.get_num(); }
 
   inline Integer denominator(const Rational& num){ 
     return num.get_den();}
 
-  inline Integer floor(const Rational& num){ 
-    return numerator(num)/denominator(num);
-  }
 
   /* numerical traits */
   /*! \brief Tags a class representing a ring. */
@@ -179,6 +149,12 @@ namespace Ariadne {
     typedef double field_extension_type;
   };
 
+  template<> class numerical_traits<MPFloat> {
+   public:
+    typedef ring_tag algebraic_category;
+    typedef Rational field_extension_type;
+  };
+    
   template<> class numerical_traits<Dyadic> {
    public:
     typedef ring_tag algebraic_category;
@@ -191,41 +167,22 @@ namespace Ariadne {
     typedef Rational field_extension_type;
   };
 
+  /* names (for diagnostic output) */
+  template <typename T> std::string name();
+  template<> inline std::string name<Float64>() { return "Float64"; }
+  template<> inline std::string name<Rational>() { return "Rational"; }
+  template<> inline std::string name<Dyadic>() { return "Dyadic"; }
+
+
   /*! \brief Convert from type \p Arg to type \p Res. */
   template<typename Res, typename Arg> Res convert_to(const Arg& x) { return Res(x); }
-  /*! \brief Approximate \a x by an element of \p Res with accuracy \a e. */
-  template<typename Res, typename Arg, typename EArg> Res approximate(const Arg& x, const EArg& e);
-  
-  template<> inline Rational convert_to(const Rational& q) { return q; }
-  template<> inline Rational convert_to(const Dyadic& d) { return Rational(d); }
-  template<> inline Rational convert_to(const double& x) { return Rational(x); }
   
   template<> inline double convert_to(const Rational& x) { return x.get_d(); }
+  template<> inline double convert_to(const MPFloat& x) { return x.get_d(); }
   template<> inline double convert_to(const Dyadic& x) { return x.get_d(); }
 
   template<> inline int convert_to(const Integer& n) { return n.get_si(); }
   template<> inline long convert_to(const Integer& n) { return n.get_si(); }
-  
- 
-  template<> inline double approximate(const double& x, const double& e) {
-    return x;
-  }
-  
-  template<> inline Rational approximate(const Rational& q, const Rational& e) {
-    return q;
-  }
-  
-  template<> inline Dyadic approximate(const Rational& q, const Dyadic& e) {
-    Dyadic x=Dyadic(q);
-    assert(abs(Rational(x)-q)<Rational(e));
-    return x;
-  }
-  
-  /* names (for diagnostic output) */
-  template <typename T> std::string name();
-  template<> inline std::string name<double>() { return "double"; }
-  template<> inline std::string name<Rational>() { return "Rational"; }
-  template<> inline std::string name<Dyadic>() { return "Dyadic"; }
     
 }
 

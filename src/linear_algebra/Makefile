@@ -27,20 +27,25 @@ dep:
 ### Everything below is auto-generated
 matrix.o: matrix.cc ../../include/linear_algebra/matrix.h \
   ../../include/linear_algebra/../base/basic_type.h \
-  ../../include/linear_algebra/../base/../base/array.h \
-  ../../include/linear_algebra/../base/../base/sequence.h \
   ../../include/linear_algebra/../base/numerical_type.h \
   ../../include/linear_algebra/../base/../base/dyadic.h \
   ../../include/linear_algebra/../base/arithmetic.h \
   ../../include/linear_algebra/../base/../base/numerical_type.h \
+  ../../include/linear_algebra/../base/../base/approximation.h \
+  ../../include/linear_algebra/../base/../base/../base/numerical_type.h \
+  ../../include/linear_algebra/../linear_algebra/vector.h \
+  ../../include/linear_algebra/../linear_algebra/../base/basic_type.h \
+  ../../include/linear_algebra/../linear_algebra/../base/numerical_type.h \
+  ../../include/linear_algebra/../linear_algebra/../base/interval.h \
   ../../include/linear_algebra/matrix.tpl \
-  ../../include/linear_algebra/../linear_algebra/matrix.h
+  ../../include/linear_algebra/../linear_algebra/matrix.h \
+  ../../include/linear_algebra/../base/array.h \
+  ../../include/linear_algebra/../base/basic_type.h \
+  ../../include/linear_algebra/../base/function.h
 
 interval_matrix.o: interval_matrix.cc \
   ../../include/linear_algebra/interval_matrix.h \
   ../../include/linear_algebra/../base/basic_type.h \
-  ../../include/linear_algebra/../base/../base/array.h \
-  ../../include/linear_algebra/../base/../base/sequence.h \
   ../../include/linear_algebra/../base/numerical_type.h \
   ../../include/linear_algebra/../base/../base/dyadic.h \
   ../../include/linear_algebra/../base/interval.h \
@@ -51,15 +56,17 @@ interval_matrix.o: interval_matrix.cc \
   ../../include/linear_algebra/../linear_algebra/matrix.h \
   ../../include/linear_algebra/../linear_algebra/../base/arithmetic.h \
   ../../include/linear_algebra/../linear_algebra/../base/../base/numerical_type.h \
+  ../../include/linear_algebra/../linear_algebra/../base/../base/approximation.h \
+  ../../include/linear_algebra/../linear_algebra/../base/../base/../base/numerical_type.h \
+  ../../include/linear_algebra/../linear_algebra/../linear_algebra/vector.h \
   ../../include/linear_algebra/../linear_algebra/interval_vector.h \
   ../../include/linear_algebra/interval_matrix.tpl \
   ../../include/linear_algebra/../linear_algebra/interval_matrix.h
 
 tensor.o: tensor.cc ../../include/linear_algebra/tensor.h \
   ../../include/linear_algebra/../base/basic_type.h \
-  ../../include/linear_algebra/../base/../base/array.h \
-  ../../include/linear_algebra/../base/../base/sequence.h \
   ../../include/linear_algebra/../base/array.h \
+  ../../include/linear_algebra/../base/basic_type.h \
   ../../include/linear_algebra/../linear_algebra/vector.h \
   ../../include/linear_algebra/../linear_algebra/../base/basic_type.h \
   ../../include/linear_algebra/../linear_algebra/../base/numerical_type.h \
@@ -68,6 +75,9 @@ tensor.o: tensor.cc ../../include/linear_algebra/tensor.h \
   ../../include/linear_algebra/../linear_algebra/matrix.h \
   ../../include/linear_algebra/../linear_algebra/../base/arithmetic.h \
   ../../include/linear_algebra/../linear_algebra/../base/../base/numerical_type.h \
+  ../../include/linear_algebra/../linear_algebra/../base/../base/approximation.h \
+  ../../include/linear_algebra/../linear_algebra/../base/../base/../base/numerical_type.h \
+  ../../include/linear_algebra/../linear_algebra/../linear_algebra/vector.h \
   ../../include/linear_algebra/tensor.tpl \
   ../../include/linear_algebra/tensor.h \
   ../../include/linear_algebra/../base/numerical_type.h
@@ -75,15 +85,20 @@ tensor.o: tensor.cc ../../include/linear_algebra/tensor.h \
 linear_program.o: linear_program.cc \
   ../../include/linear_algebra/linear_program.h \
   ../../include/linear_algebra/../base/basic_type.h \
-  ../../include/linear_algebra/../base/../base/array.h \
-  ../../include/linear_algebra/../base/../base/sequence.h \
   ../../include/linear_algebra/../linear_algebra/matrix.h \
   ../../include/linear_algebra/../linear_algebra/../base/basic_type.h \
   ../../include/linear_algebra/../linear_algebra/../base/numerical_type.h \
   ../../include/linear_algebra/../linear_algebra/../base/../base/dyadic.h \
   ../../include/linear_algebra/../linear_algebra/../base/arithmetic.h \
   ../../include/linear_algebra/../linear_algebra/../base/../base/numerical_type.h \
+  ../../include/linear_algebra/../linear_algebra/../base/../base/approximation.h \
+  ../../include/linear_algebra/../linear_algebra/../base/../base/../base/numerical_type.h \
+  ../../include/linear_algebra/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/linear_algebra/../linear_algebra/../linear_algebra/../base/basic_type.h \
+  ../../include/linear_algebra/../linear_algebra/../linear_algebra/../base/numerical_type.h \
+  ../../include/linear_algebra/../linear_algebra/../linear_algebra/../base/interval.h \
   ../../include/linear_algebra/linear_program.tpl \
   ../../include/linear_algebra/linear_program.h \
-  ../../include/base/utility.h ../../include/base/../base/array.h
+  ../../include/base/utility.h ../../include/base/../base/array.h \
+  ../../include/base/../base/basic_type.h
 

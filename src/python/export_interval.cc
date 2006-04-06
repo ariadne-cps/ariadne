@@ -27,9 +27,7 @@
 
 #include <boost/python.hpp>
 
-#include "python/real_typedef.h"
-
-typedef Ariadne::Base::Interval<Real> RInterval;
+#include "python/typedefs.h"
 
 using boost::python::class_;
 using boost::python::init;
@@ -38,6 +36,11 @@ using boost::python::return_value_policy;
 using boost::python::copy_const_reference;
 using boost::python::def;
 using boost::python::self_ns::str;
+
+/* FIXME: Do these divisions */
+inline RInterval div_ii(const RInterval& r, const RInterval& i) { assert(false); }
+inline RInterval div_ri(const Real& r, const RInterval& i) { assert(false); }
+inline RInterval div_ir(const RInterval& i, const Real& r) { assert(false); }
 
 void export_interval()
 {
@@ -51,15 +54,15 @@ void export_interval()
     .def(self + self)  // __add__
     .def(self - self)  // __sub__
     .def(self * self)  // __mul__
-    .def(self / self)  // __div__
+    .def("__div__",&div_ii)  // __div__
     .def(self + Real())  // __add__
     .def(self - Real())  // __sub__
     .def(self * Real())  // __mul__
-    .def(self / Real())  // __div__
+    .def("__div__",&div_ir)  // __div__
     .def(Real() + self)  // __add__
     .def(Real() - self)  // __sub__
     .def(Real() * self)  // __mul__
-    .def(Real() / self)  // __div__
+    .def("__div__",&div_ri)  // __div__
     .def("lower", &RInterval::lower, return_value_policy<copy_const_reference>())
     .def("upper", &RInterval::upper, return_value_policy<copy_const_reference>())
     .def(str(self))    // __str__

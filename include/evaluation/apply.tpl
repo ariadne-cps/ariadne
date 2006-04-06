@@ -63,6 +63,8 @@ namespace Ariadne {
     Geometry::Parallelotope<R> 
     apply(const Map<R>& f, const Geometry::Parallelotope<R>& p) 
     {
+      typedef typename numerical_traits<R>::field_extension_type F;
+
       const size_type m=p.dimension();
       const size_type n=p.dimension();
       
@@ -81,9 +83,10 @@ namespace Ariadne {
       
       LinearAlgebra::matrix<R> img_generators = df_at_centre*g;
       
-      LinearAlgebra::matrix<R> img_generators_inverse = LinearAlgebra::inverse(img_generators);
+      LinearAlgebra::matrix<F> img_generators_inverse = LinearAlgebra::inverse(img_generators);
       
-      LinearAlgebra::interval_matrix<R> cuboid_transform = img_generators_inverse * df_on_set * g;
+      LinearAlgebra::interval_matrix<R> img_generators_on_set = df_on_set * g;
+      LinearAlgebra::interval_matrix<R> cuboid_transform = img_generators_inverse * img_generators_on_set;
       
       LinearAlgebra::interval_vector<R> new_cuboid = cuboid_transform * cuboid_vector;
       

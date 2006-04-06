@@ -82,7 +82,7 @@ namespace Ariadne {
 
       /*! \brief Builds an LP problem from the _tableau T. 
        *
-       * The tableau T is a bordered matrix of the form \f$\begin{array}{c|c}{A&b\\\hline -c^T&v}\end{array}\f$
+       * The tableau T is a bordered matrix of the form \f$\begin{array}{c|c} A&b\\\hline -c^T&v \end{array}\f$
        * with \f$ b\geq0 \f$. 
        * The optimization problem is 
        * \f[ \max c^T x +v \quad \textrm{s.t.} \quad Ax+s=b,\ x,s\geq 0 \f]

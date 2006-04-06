@@ -267,22 +267,22 @@ GeneratorSystem<R>::ppl_generator_system() const
     for (size_t j=1; j< dim; ++j) {
       den=lcm(numerator(den),denominator(gen._points(j,i)));
     }
-    ppl_lin_expr=(den*gen._points(0,i))*(Parma_Polyhedra_Library::Variable(0));
+    ppl_lin_expr=Rational(den*gen._points(0,i))*Parma_Polyhedra_Library::Variable(0);
     for (size_t j=1; j< dim; ++j) {
-      ppl_lin_expr+=(den*gen._points(j,i))*(Parma_Polyhedra_Library::Variable(j));
+      ppl_lin_expr+=Rational(den*gen._points(j,i))*Parma_Polyhedra_Library::Variable(j);
     }
     if (gen.is_point(i)) {    
-      ppl_gen.insert(Parma_Polyhedra_Library::Generator::point(ppl_lin_expr,den));
+      ppl_gen.insert(Parma_Polyhedra_Library::Generator::point(ppl_lin_expr,Rational(den)));
     } 
     else {
-      ppl_gen.insert(Parma_Polyhedra_Library::Generator::closure_point(ppl_lin_expr,den));
+      ppl_gen.insert(Parma_Polyhedra_Library::Generator::closure_point(ppl_lin_expr,Rational(den)));
     }
   }
   
   for (size_t i=0; i< gen.number_of_rays(); ++i) {
-    ppl_lin_expr=gen._rays(0,i)*(Parma_Polyhedra_Library::Variable(0));
+    ppl_lin_expr=Rational(gen._rays(0,i))*Parma_Polyhedra_Library::Variable(0);
     for (size_t j=1; j<dim; ++j) {
-      ppl_lin_expr+=gen._rays(j,i)*(Parma_Polyhedra_Library::Variable(j));
+      ppl_lin_expr+=Rational(gen._rays(j,i))*Parma_Polyhedra_Library::Variable(j);
     }
     if (gen.is_ray(i)) {    
       ppl_gen.insert(Parma_Polyhedra_Library::Generator::ray(ppl_lin_expr));

@@ -232,7 +232,7 @@ namespace Ariadne {
       A.resize(n,n);
       for(size_type i=0; i!=n; ++i) {
         for(size_type j=0; j!=n; ++j) {
-          A(i,j) = numerator(M(i,j)) * (multipliers(i)/denominator(M(i,j)));
+          A(i,j) = Integer(numerator(M(i,j)) * (multipliers(i)/denominator(M(i,j))));
         }
       }
 
@@ -248,10 +248,14 @@ namespace Ariadne {
   
   
     template<typename R>
-    typename Parallelotope<R>::Vector 
+    LinearAlgebra::vector<typename numerical_traits<R>::field_extension_type>
     Parallelotope<R>::coordinates(const State& s) const {
-      Vector diff = s-this->_centre;
-      Matrix inv = LinearAlgebra::inverse(this->_generators);
+      typedef typename numerical_traits<R>::field_extension_type F;
+      LinearAlgebra::vector<F> diff(this->dimension());
+      for(size_type i=0; i!=diff.size(); ++i) {
+        diff(i)=s[i]-this->_centre[i];
+      }
+      LinearAlgebra::matrix<F> inv = LinearAlgebra::inverse(this->_generators);
       return prod(inv,diff);
     }
 
@@ -293,7 +297,7 @@ namespace Ariadne {
         // Compute rhs = c[i]-a[i]-(A*1)[i]
         Rational rhs=Rational(c[i]) - Rational(a[i]);
         for(size_type j=0; j!=n; ++j) {
-          rhs-=A(i,j);
+          rhs-=Rational(A(i,j));
         }
         
         if(rhs>=0) {

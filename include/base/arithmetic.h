@@ -31,6 +31,7 @@
 
 #include <cmath>
 #include "../base/numerical_type.h"
+#include "../base/approximation.h"
 
 namespace Ariadne {
   
@@ -79,7 +80,7 @@ namespace Ariadne {
   typename numerical_traits<R>::field_extension_type
   div(const R& x1, const R& x2)
   {
-    return _div(x1,x2,numerical_traits<R>::algebraic_category());
+    return _div(x1,x2, typename numerical_traits<R>::algebraic_category());
   }
   
   template<typename R> 
@@ -99,21 +100,25 @@ namespace Ariadne {
     return Fld(x1)/Fld(x2);
   }
 
-  inline Dyadic div_approx(const Dyadic& x1, const Dyadic& x2, const Dyadic& e) {
+  inline MPFloat div_approx(const MPFloat& x1, const MPFloat& x2, const MPFloat& e) {
     return div_approx(x1,x2,precision(e));
   }
     
-  inline Dyadic div_approx(const Dyadic& x1, const Dyadic& x2, const uint& n) {
-    Dyadic r(0,n);
+  inline MPFloat div_approx(const MPFloat& x1, const MPFloat& x2, const uint& n) {
+    MPFloat r(0,n);
     mpf_div(r.get_mpf_t(),x1.get_mpf_t(),x2.get_mpf_t());
     return r;
   }
  
-
+  inline Dyadic div_approx(const Dyadic& x1, const Dyadic& x2, const Dyadic& e) {
+    Rational q=div(Rational(x1),Rational(x2));
+    return approximate<Dyadic>(q,e);
+  }
+    
   /*! \brief An integer n such that \f$n\leq x/y < n+1\f$. */
   template<typename R> int quotient(R x, R y);
 
-  template<> inline int quotient(double x, double y)
+  template<> inline int quotient(Float64 x, Float64 y)
   {
     assert(y!=0.0);
     int q = int(x/y+0.5);
@@ -132,15 +137,14 @@ namespace Ariadne {
     return q;
   }
 
+  template<> inline int quotient(MPFloat x, MPFloat y)
+  {
+    return quotient(Rational(x),Rational(y));
+  }
+
   template<> inline int quotient(Dyadic x, Dyadic y) 
   {
-    assert(y!=Dyadic(0));
-    Dyadic d = x/y + Dyadic(0.5);
-    Dyadic qd = floor(d);
-    int q = int(qd.get_si());
-    if(x < q*y) { q=q-1; }
-    assert(q*y <= x && x < (q+1)*y);
-    return q;
+    return quotient(Rational(x),Rational(y));
   }
   
   

@@ -49,6 +49,13 @@ namespace Ariadne {
   /*! \brief An signed integral type used to represent the position in a list with positive and negative indices. */
   typedef int index_type;
   
+  /*! \brief An array of boolean values. */
+  typedef Base::array<bool> BooleanArray;
+  /*! \brief An array of unsigned integer values. */
+  typedef Base::array<size_type> SizeArray;
+  /*! \brief An array of integer values. */
+  typedef Base::array<index_type> IndexArray;
+
   using Base::array;
   using Base::array_vector;
   using Base::sequence;
@@ -56,13 +63,6 @@ namespace Ariadne {
   using Base::Interval;
   using Base::BinaryWord;
   using Base::BinaryTree;
-
-  /*! \brief An array of boolean values. */
-  typedef Base::array<bool> BooleanArray;
-  /*! \brief An array of unsigned integer values. */
-  typedef Base::array<size_type> SizeArray;
-  /*! \brief An array of integer values. */
-  typedef Base::array<index_type> IndexArray;
 
 }
 

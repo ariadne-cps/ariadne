@@ -54,6 +54,7 @@ namespace Ariadne {
     template interval_matrix<Rational> prod(const interval_matrix<Rational>&, const interval_matrix<Rational>&);
     template interval_matrix<Float64> prod(const interval_matrix<Float64>&, const interval_matrix<Float64>&);
     
+    template interval_matrix<Dyadic> fprod(const matrix<Rational>&, const interval_matrix<Dyadic>&);
      
     template std::ostream& operator<<(std::ostream&, const interval_matrix<Dyadic>&);
     template std::ostream& operator<<(std::ostream&, const interval_matrix<Rational>&);

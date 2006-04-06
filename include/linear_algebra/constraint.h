@@ -186,7 +186,7 @@ ConstraintSystem<R>::reduce_precision_to_expanding(const R &delta)
         }
         this->_d(i)=numerator(this->_d(i))/numerator(delta);
       }
-      --this->_d(i);
+      this->_d(i)-=1;
     }
   }
 }
@@ -383,15 +383,15 @@ ConstraintSystem<R>::ppl_constraint_system() const
   Parma_Polyhedra_Library::Linear_Expression ppl_lin_expr;
   
   for (size_t i=0; i<this->number_of_constraints(); ++i) {
-    ppl_lin_expr=this->_C(i,0)*(Parma_Polyhedra_Library::Variable(0));
+    ppl_lin_expr=Rational(this->_C(i,0))*Parma_Polyhedra_Library::Variable(0);
     for (size_t j=1; j<this->space_dimension(); ++j) {
-      ppl_lin_expr+=this->_C(i,j)*(Parma_Polyhedra_Library::Variable(j));
+      ppl_lin_expr+=Rational(this->_C(i,j))*Parma_Polyhedra_Library::Variable(j);
     }
     if (this->is_equality(i)) {    
-      ppl_cs.insert(ppl_lin_expr == this->_d(i));
+      ppl_cs.insert(ppl_lin_expr == Rational(this->_d(i)));
     } 
     else {
-      ppl_cs.insert(ppl_lin_expr >= this->_d(i));
+      ppl_cs.insert(ppl_lin_expr >= Rational(this->_d(i)));
     }
   }
   return ppl_cs;
@@ -415,11 +415,11 @@ ConstraintSystem<R>::open_ppl_constraint_system() const
    
  
   for (size_t i=0; i<cs.number_of_constraints(); ++i) {
-    ppl_lin_expr=cs._C(i,0)*(Parma_Polyhedra_Library::Variable(0));
+    ppl_lin_expr=Rational(cs._C(i,0))*Parma_Polyhedra_Library::Variable(0);
     for (size_t j=1; j<cs.space_dimension(); ++j) {
-      ppl_lin_expr += cs._C(i,j)*(Parma_Polyhedra_Library::Variable(j));
+      ppl_lin_expr += Rational(cs._C(i,j))*Parma_Polyhedra_Library::Variable(j);
     }
-    ppl_cs.insert(ppl_lin_expr > cs._d(i));
+    ppl_cs.insert(ppl_lin_expr > Rational(cs._d(i)));
   }
   
   return ppl_cs;

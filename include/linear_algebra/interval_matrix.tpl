@@ -167,7 +167,15 @@ namespace Ariadne {
       return result;
     }
 
-      
+    template<typename R>
+    interval_matrix<R>
+    fprod(const matrix<typename numerical_traits<R>::field_extension_type>& A, 
+         const interval_matrix<R>& B) 
+    {
+      /* FIXME: Write this code! */
+      return interval_matrix<R>(A.size1(),B.size2());
+    }
+          
     template<typename R>
     matrix<R>
     centre(const interval_matrix<R>& A)

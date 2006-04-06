@@ -149,7 +149,7 @@ namespace Ariadne {
     hermitian(const matrix<R>& m);
     
     template <typename R>
-    matrix<R> 
+    matrix<typename numerical_traits<R>::field_extension_type> 
     inverse(const matrix<R> &A);
     
     template <typename R>

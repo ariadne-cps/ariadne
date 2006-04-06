@@ -96,6 +96,9 @@ inline Dyadic div_approx_dd(const Dyadic d1, const Dyadic& d2, const Dyadic& e) 
 inline Dyadic div_approx_dx(const Dyadic d1, const double& d2, const Dyadic& e) { return div_approx(d1,Dyadic(d2),e);  }
 inline Dyadic div_approx_xd(const double d1, const Dyadic& d2, const Dyadic& e) { return div_approx(Dyadic(d1),d2,e);  }
 inline Dyadic div_prec_dd(const Dyadic d1, const Dyadic& d2, const int& n) { return div_approx(d1,d2,n);  }
+inline Dyadic mantissa_d(const Dyadic d) { return mantissa(d); }
+inline int exponent_d(const Dyadic d) { return exponent(d); }
+inline int precision_d(const Dyadic d) { return precision(d); }
 
 inline Rational neg_q(const Rational q1) { return -q1; }
 inline Rational add_qq(const Rational q1, const Rational& q2) { return q1+q2; }
@@ -137,6 +140,8 @@ inline bool le_dz(const Dyadic& n1, const Integer& n2) { return n1<=n2; }
 inline bool ge_qd(const Rational& n1, const Dyadic& n2) { return n1>=n2; }
 inline bool ge_qz(const Rational& n1, const Integer& n2) { return n1>=n2; }
 inline bool ge_dz(const Dyadic& n1, const Integer& n2) { return n1>=n2; }
+inline Integer numerator_q(const Rational& q) { return numerator(q); }
+inline Integer denominator_q(const Rational& q) { return denominator(q); }
 
 void export_numeric() {
   class_<Integer>("Integer")
@@ -169,8 +174,8 @@ void export_numeric() {
   class_<Dyadic>("Dyadic")
     .def(init<int>())
     .def(init<double>())
-    .def(init<double,int>())
-    .def(init<Dyadic,int>())
+    .def(init<int,int>())
+    .def(init<Dyadic>())
     .def("__neg__", &neg_d)
     .def("__add__", &add_dd)
     .def("__add__", &add_dx)
@@ -198,9 +203,9 @@ void export_numeric() {
     .def("__le__", &le_dz)
     .def("__ge__", &ge_dx)
     .def("__ge__", &ge_dz)
-    .def("precision", &precision)
-    .def("exponent", &exponent)
-    .def("mantissa", &mantissa)
+    .def("precision", &precision_d)
+    .def("exponent", &exponent_d)
+    .def("mantissa", &mantissa_d)
     .def(str(self))    // __str__
   ;
 
@@ -250,8 +255,8 @@ void export_numeric() {
     .def("__ge__", &ge_qx)
     .def("__ge__", &ge_qz)
     .def("__ge__", &ge_qd)
-    .def("numerator", &numerator)
-    .def("denominator", &denominator)
+    .def("numerator", &numerator_q)
+    .def("denominator", &denominator_q)
     .def(str(self))    // __str__
   ;
 }

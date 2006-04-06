@@ -31,6 +31,9 @@
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 
+namespace Ariadne { namespace Base {
+template<typename R> class Interval;
+}}
 
 namespace Ariadne { namespace LinearAlgebra {
 using boost::numeric::ublas::vector;
@@ -38,6 +41,7 @@ using boost::numeric::ublas::matrix;
 
 template<typename R> class interval_vector;
 template<typename R> class interval_matrix;
+template<typename R> class LinearProgram;
 }}
 
 namespace Ariadne { namespace Geometry {

@@ -1,9 +1,8 @@
 /***************************************************************************
- *            python/base_module.cc
+ *            affine_map.cc
  *
- *  22 June 2005
- *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2006  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -22,20 +21,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <boost/python.hpp>
+#include "evaluation/affine_map.h"
+#include "evaluation/affine_map.tpl"
 
-void export_numeric();
-void export_function();
-void export_interval();
-void export_array();
-void export_binary_tree();
+namespace Ariadne {
+  namespace Evaluation {
 
-BOOST_PYTHON_MODULE(base)
-{
-  export_numeric();
-  export_interval();
-  export_function();
-  export_array();
-  export_binary_tree();
+    template class AffineMap<Dyadic>;
+
+  }
 }
-

@@ -119,6 +119,8 @@ namespace Ariadne {
       friend bool subset_of_open_cover <> (const Parallelotope<R>& A,
                                            const ListSet<R,Ariadne::Geometry::Parallelotope>& B);
 
+     private:
+      typedef typename numerical_traits<R>::field_extension_type F;
      public:
       /*! \brief The type of denotable real number used for the corners. */
       typedef R Real;
@@ -277,7 +279,7 @@ namespace Ariadne {
       
      private:
       void compute_linear_inequalities(Matrix&, Vector&, Vector&) const;
-      Vector coordinates(const State& s) const;
+      LinearAlgebra::vector<F> coordinates(const State& s) const;
     };
   
     /*! \brief Tests disjointness */

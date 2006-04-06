@@ -150,15 +150,16 @@ namespace Ariadne {
     size_type
     LinearProgram<R>::compute_exiting_base_index(size_type j) const 
     {
+      typedef typename numerical_traits<R>::field_extension_type F;
       // select variable to exit basis
       size_type m=this->number_of_constraints();
       size_type n=this->number_of_free_variables();
 
       size_type i=m;
-      R min_change=0;
+      F min_change=0;
       for(size_type k=0; k!=m; ++k) {
         if(this->_tableau(k,j)>0) {
-          R change=this->_tableau(k,n)/this->_tableau(k,j);
+          F change=this->_tableau(k,n)/this->_tableau(k,j);
           if(change<min_change || min_change==0) {
             min_change=change;
             i=k;

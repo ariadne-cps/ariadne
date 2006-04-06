@@ -81,7 +81,7 @@ namespace Ariadne {
         
         Integer den=1;
         for (size_type j=0; j!=n; ++j) {
-          den=lcm(numerator(den),denominator(s[j]));
+          den=lcm(den,denominator(s[j]));
         }
         
         Parma_Polyhedra_Library::Linear_Expression ppl_lin_expr;

@@ -91,6 +91,8 @@ namespace Ariadne {
 	*this=Interval<R>(r,r);
 	return *this;
       }
+
+      R centre() const { return (this->lower()+this->upper())/2; }
     };
     
     template<typename R>

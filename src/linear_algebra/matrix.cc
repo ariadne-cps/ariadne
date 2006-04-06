@@ -64,12 +64,6 @@ namespace Ariadne {
                                          const Rational& e); 
 
     
-    template void lu_local_dec(matrix<Dyadic>& A, 
-                               const array<size_type>& row, 
-                               const array<size_type>& col, 
-                               const size_type& rows, 
-                               const size_type& columns, 
-                               const size_type& p);
     template void lu_local_dec(matrix<Rational>& A, 
                                const array<size_type>& row, 
                                const array<size_type>& col, 
@@ -77,31 +71,22 @@ namespace Ariadne {
                                const size_type& columns, 
                                const size_type& p);
     
-    template matrix<Dyadic> lu_decompose(const matrix<Dyadic>& A, 
-                                         array<size_type>& p_col, 
-                                         array<size_type>& p_row);
     template matrix<Rational> lu_decompose(const matrix<Rational>& A, 
                                            array<size_type>& p_col, 
                                            array<size_type>& p_row);
                               
-    template matrix<Dyadic> lu_decompose(const matrix<Dyadic> &A, 
-                                         array<size_type>& p_array);
     template matrix<Rational> lu_decompose(const matrix<Rational> &A, 
                                            array<size_type>& p_array);
 
-    template vector<Dyadic> lu_solve(const matrix<Dyadic>& A, 
-                                     const array<size_type>& p_array, 
-                                     const vector<Dyadic>& b);
-             
     template vector<Rational> lu_solve(const matrix<Rational>& A, 
                                        const array<size_type>& p_array, 
                                        const vector<Rational>& b);
                                        
-    template matrix<Dyadic> Householder_QR(const matrix<Dyadic> &A);
+    template matrix<Rational> Householder_QR(const matrix<Rational> &A);
 
     template matrix<Dyadic> hermitian(const matrix<Dyadic>& m);
     
-    template matrix<Dyadic> inverse(const matrix<Dyadic> &A);
+    template matrix<Rational> inverse(const matrix<Dyadic> &A);
     template matrix<Rational> inverse(const matrix<Rational> &A);
     template matrix<Float64> inverse(const matrix<Float64> &A);
     
@@ -133,9 +118,9 @@ namespace Ariadne {
                                       array<size_type>& row, 
                                       array<size_type>& col);
 
-    template matrix<Dyadic> compute_space(const matrix<Dyadic>& SA, 
-                                          array<size_type>& row,
-                                          const array<size_type>& col);
+    template matrix<Rational> compute_space(const matrix<Rational>& SA, 
+                                            array<size_type>& row,
+                                            const array<size_type>& col);
     
   }
 }

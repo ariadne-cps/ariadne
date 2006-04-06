@@ -39,51 +39,86 @@
 namespace Ariadne { 
 namespace Synaps {
 
-class Dyadic;
-
-/*! This class provides arithmetic operations on numbers 
+/*! \brief This class provides arithmetic operations on numbers 
  *  which are an integer of type \a Integer, 
  *   times a power of 2, which is stored by as its exponent.
  */
-
-class Dyadic
+class dyadic
 {
  public:
   typedef mpz_class numerator_type;
   typedef int exponent_type;
  public:
-  Dyadic() : num_(0), exp_(0) { }
-  Dyadic(const numerator_type& n)
-    : num_(n), exp_(0) { normalize(); }
-  Dyadic(const numerator_type& n, exponent_type d)
-    : num_(n), exp_(d) { normalize(); }
+  dyadic() : num_(0), exp_(0) { }
+  dyadic(const double& x) { mpq_class q=x; num_=q.get_num(); exp_=-log2_floor_(q.get_den()); normalize_(); }
 
-  Dyadic& operator+= (const Dyadic& r);
-  Dyadic& operator-= (const Dyadic& r);
-  Dyadic& operator*= (const Dyadic& r);
-  Dyadic& operator+= (const numerator_type& r);
-  Dyadic& operator-= (const numerator_type& r);
-  Dyadic& operator*= (const numerator_type& r);
-  Dyadic& operator/= (const numerator_type& n);
- 
-  Dyadic& normalize();
-  
+  dyadic(const numerator_type& n)
+    : num_(n), exp_(0) { normalize_(); }
+  dyadic(const numerator_type& n, exponent_type d)
+    : num_(n), exp_(d) { normalize_(); }
+  template<class T> dyadic(const __gmp_expr<__gmpz_value, T>& n) { 
+    *this=dyadic(mpz_class(n)); }
+
+  dyadic& operator+= (const dyadic& r);
+  dyadic& operator-= (const dyadic& r);
+  dyadic& operator*= (const dyadic& r);
+  dyadic& operator+= (const int& r);
+  dyadic& operator-= (const int& r);
+  dyadic& operator*= (const int& r);
+  dyadic& operator/= (const int& n);
+  dyadic& operator+= (const numerator_type& r);
+  dyadic& operator-= (const numerator_type& r);
+  dyadic& operator*= (const numerator_type& r);
+  dyadic& operator/= (const numerator_type& n);
+  dyadic& operator+= (const double& r);
+  dyadic& operator-= (const double& r);
+  dyadic& operator*= (const double& r);
+  dyadic& operator/= (const double& r);
+   
+  exponent_type precision() const { return log2_floor_(num_); }
+
   const numerator_type& numerator() const { return num_; }
   numerator_type  denominator() const { return 2^exp_; }
-  exponent_type denominator_exponent()  const { return exp_; }
-  exponent_type valuation()  const { return exp_; }
- 
-  friend int quotient_cmp(const Dyadic&, const Dyadic&);
-  friend bool operator==(const Dyadic&, const Dyadic&);
-  friend bool operator==(const Dyadic&, const numerator_type&);
+
+  exponent_type exponent() const { return exp_; }
+  dyadic mantissa() const { return dyadic(num_,exp_-log2_floor_(num_)); }
+
+  operator mpq_class() const { return mpq_class(numerator(),denominator()); }
+  double get_d() const { return mpq_class(numerator(),denominator()).get_d(); }
+
+  friend int quotient_cmp(const dyadic&, const dyadic&);
+  friend bool operator==(const dyadic&, const dyadic&);
+  friend bool operator==(const dyadic&, const double&);
+  friend bool operator==(const dyadic&, const mpz_class&);
+  friend bool operator==(const dyadic&, const int&);
+  friend std::ostream& operator<<(std::ostream&, const dyadic&);
+  friend std::istream& operator>>(std::istream&, dyadic&);
+ private:  
+  void normalize_();
+  static int log2_floor_(mpz_class n);
  private:  
   numerator_type num_;
   exponent_type exp_;
 };
 
 inline
-Dyadic& 
-Dyadic::normalize()
+int 
+dyadic::log2_floor_(mpz_class n)
+{
+  if(n==0) { return -1; }
+  if(n<0) { n=-n; }
+  int result=0;
+  while(n!=1) {
+    ++result;
+    n=n/2;
+  }
+  return result;
+}
+
+
+inline
+void
+dyadic::normalize_()
 {
   if( num_==0) {
     exp_=0;
@@ -94,13 +129,12 @@ Dyadic::normalize()
       num_/=2;
     }
   }
-  return *this;
 }
 
 
 inline
-Dyadic::numerator_type 
-shift_2(const Dyadic::numerator_type& z, int d) {
+dyadic::numerator_type 
+shift_2(const dyadic::numerator_type& z, int d) {
   if(d>0) { return z*(2^d); }
   else { return z/(2^d); }
 }
@@ -109,10 +143,10 @@ shift_2(const Dyadic::numerator_type& z, int d) {
 // Arithmetic operators
 //--------------------------------------------------------------------
 
-/*! \brief Inplace addition of Dyadic numbers. */
+/*! \brief Inplace addition of dyadic numbers. */
 inline
-Dyadic&
-Dyadic::operator+= (const Dyadic& r)
+dyadic&
+dyadic::operator+= (const dyadic& r)
 {
   if(r.exp_<exp_) {
     exponent_type d=exp_-r.exp_;
@@ -125,16 +159,16 @@ Dyadic::operator+= (const Dyadic& r)
   }
   else {
     num_ += r.num_;
-    normalize();
+    normalize_();
   }
   return *this;
 }
 
 
-/*! \brief Inplace subtraction of Dyadic numbers. */
+/*! \brief Inplace subtraction of dyadic numbers. */
 inline
-Dyadic&
-Dyadic::operator-= (const Dyadic& r)
+dyadic&
+dyadic::operator-= (const dyadic& r)
 {
   if(r.exp_<exp_) {
     num_  = shift_2(num_,exp_-r.exp_);
@@ -146,60 +180,26 @@ Dyadic::operator-= (const Dyadic& r)
   }
   else {
     num_ -= r.num_;
-    normalize();
+    normalize_();
   }
   return *this;
 }
 
-/*! \brief Inplace multiplication of Dyadic numbers. */
+/*! \brief Inplace multiplication of dyadic numbers. */
 inline
-Dyadic&
-Dyadic::operator*= (const Dyadic& r)
+dyadic&
+dyadic::operator*= (const dyadic& r)
 {
   num_ *= r.num_;
   exp_ += r.exp_;
   return *this;
 }
 
-/*! \brief Inplace division of Dyadic numbers. 
- * 
- *  The numerator is divided inplace
- *  by the other denominators and the exponents are substracted.
- *  This corresponds to a euclidean division.
- */
-/*
-Dyadic&
-Dyadic::operator/=(const Dyadic& r)
-{
-  assert( r.num_ != 0 );
-  exp_ -= r.exp_;
-  num_ /= r.num_;
-  normalize();
-  return *this;
-}
-*/ 
 
-/*! \brief Inplace division of a Dyadic number by an machine integer @n@. 
- *  The number @n@ is supposed to be a power of two.
- */
+/*! \brief Inplace addition of a dyadic number with an integer. */
 inline
-Dyadic&
-Dyadic::operator/= (const numerator_type& n)
-{
-  assert( n != 0 );
-  numerator_type d=n;
-  while( (d%2) ==0 ) {
-    --exp_;
-    d/=2;
-  }
-  num_/=d;
-  return *this;
-}
-
-/*! Inplace addition of a Dyadic number with an integer. */
-inline
-Dyadic&
-Dyadic::operator+= (const numerator_type& r)
+dyadic&
+dyadic::operator+= (const numerator_type& r)
 {
   if(exp_<0) {
     num_ += shift_2(r,exp_);
@@ -211,14 +211,14 @@ Dyadic::operator+= (const numerator_type& r)
   else {
     num_+=r;
   }
-  normalize();
+  normalize_();
   return *this;
 }
 
-/*! Inplace subtraction of a Dyadic number with an integer. */
+/*! \brief Inplace subtraction of a dyadic number with an integer. */
 inline
-Dyadic&
-Dyadic::operator-= (const numerator_type& r)
+dyadic&
+dyadic::operator-= (const numerator_type& r)
 {
   if(exp_<0) {
     num_ -= shift_2(r,exp_);
@@ -230,32 +230,110 @@ Dyadic::operator-= (const numerator_type& r)
   else {
     num_-= r;
   }
-  normalize();
+  normalize_();
   return *this;
 }
 
-/*! Inplace multiplication of a Dyadic number with an integer. */
+/*! \brief Inplace multiplication of a dyadic number with an integer. */
 inline
-Dyadic&
-Dyadic::operator*= (const numerator_type& r)
+dyadic&
+dyadic::operator*= (const numerator_type& r)
 {
   num_ *= r;
-  normalize();
+  normalize_();
   return *this;
 }
+
+/*! \brief Inplace division of a dyadic number by an integer \a n. 
+ *  The number \a n must be a power of two.
+ */
+inline
+dyadic&
+dyadic::operator/= (const numerator_type& n)
+{
+  assert( n != 0 );
+  numerator_type d=n;
+  while( (d%2)==0 ) {
+    --exp_;
+    d/=2;
+  }
+  assert(d==1);
+  return *this;
+}
+
+/*! \brief Inplace addition of a dyadic number with a machine integer \a n. */
+inline
+dyadic&
+dyadic::operator+= (const int& n)
+{
+  return this->operator+=(numerator_type(n));
+}
+
+/*! \brief Inplace subtraction of a dyadic number with a machine integer \a n. */
+inline
+dyadic&
+dyadic::operator-= (const int& n)
+{
+  return this->operator-=(numerator_type(n));
+}
+
+/*! \brief Inplace multiplication of a dyadic number with a machine integer \a n. */
+inline
+dyadic&
+dyadic::operator*= (const int& n)
+{
+  return this->operator*=(numerator_type(n));
+}
+
+/*! \brief Inplace division of a dyadic number by a machine integer \a n
+ *  The number \a n is supposed to be a power of two.
+ */
+inline
+dyadic&
+dyadic::operator/= (const int& n)
+{
+  return this->operator/=(numerator_type(n));
+}
+
+
+/*! \brief Inplace addition of a dyadic number with a double. */
+inline
+dyadic&
+dyadic::operator+= (const double& r)
+{
+  return this->operator+=(dyadic(r));
+}
+
+/*! \brief Inplace subtraction of a dyadic number with a double. */
+inline
+dyadic&
+dyadic::operator-= (const double& r)
+{
+  return this->operator-=(dyadic(r));
+}
+
+/*! \brief Inplace multiplication of a dyadic number with a double. */
+inline
+dyadic&
+dyadic::operator*= (const double& r)
+{
+  return this->operator*=(dyadic(r));
+}
+
 
 inline
 int 
-sign(const Dyadic::numerator_type& n) {
+sign(const dyadic::numerator_type& n) {
   if(n>0) { return +1; }
   else if(n<0) { return -1; }
   else { return 0; }
 }
 
+
 // Help function. Do not use it :-)
 inline
 int
-quotient_cmp(const Dyadic& a, const Dyadic& b)
+quotient_cmp(const dyadic& a, const dyadic& b)
 {
   int asign = sign(a.num_);
   int bsign = sign(b.num_);
@@ -265,9 +343,9 @@ quotient_cmp(const Dyadic& a, const Dyadic& b)
   if (asign > bsign) { return +1; }
 
   // now a and b have the same sign
-  Dyadic::numerator_type ta=a.num_;
-  Dyadic::numerator_type tb=b.num_;
-  Dyadic::exponent_type d=a.exp_-b.exp_;
+  dyadic::numerator_type ta=a.num_;
+  dyadic::numerator_type tb=b.num_;
+  dyadic::exponent_type d=a.exp_-b.exp_;
 
   if(d>0) {
     ta = shift_2(ta,d);
@@ -281,124 +359,359 @@ quotient_cmp(const Dyadic& a, const Dyadic& b)
   else { return 0; }
 }
 
-/*! Returns the sign of y-x. */
+/*! \brief Returns the sign of y-x. */
 inline
 int
-compare(const Dyadic& x, const Dyadic& y)
+compare(const dyadic& x, const dyadic& y)
 { 
   return quotient_cmp(x, y); 
 }
 
 
-/*! Stream insertion operator. */
+/*! \brief Stream insertion operator. */
 inline
 std::ostream&
-operator<<(std::ostream& os, const Dyadic& x)
+operator<<(std::ostream& os, const dyadic& x)
 {
-  os << x.numerator();
-  os<< "*2^(" << x.valuation() << ")";
+  os << x.num_;
+  os << "*2^" << x.exp_ << "";
   return os;
 }
 
+/*! \brief Stream extraction operator. */
+inline
+std::istream&
+operator>>(std::istream& is, dyadic& x)
+{
+  double y;
+  is >> y;
+  x=dyadic(y);
+  return is;
+}
+
 //--------------------------------------------------------------------
-// Arithmetic with Dyadics
+// Arithmetic with dyadics
 //--------------------------------------------------------------------
 
 /*! \brief Addition of dyadic numbers. */
 inline
-Dyadic
-operator+(const Dyadic& x, const Dyadic& y)
+dyadic
+operator+(const dyadic& x, const dyadic& y)
 {
-  return Dyadic(x)+=y;
+  return dyadic(x)+=y;
 }
 
-/*! Substraction of dyadic numbers. */
+/*! \brief Substraction of dyadic numbers. */
 inline
-Dyadic
-operator-(const Dyadic& x, const Dyadic& y)
+dyadic
+operator-(const dyadic& x, const dyadic& y)
 { 
-  return Dyadic(x)-=y; 
+  return dyadic(x)-=y; 
 }
 
 
-/*! Multiplication of dyadic numbers. */
+/*! \brief Multiplication of dyadic numbers. */
 inline
-Dyadic
-operator*(const Dyadic& x, const Dyadic& y)
+dyadic
+operator*(const dyadic& x, const dyadic& y)
 {
-  return Dyadic(x)*=y;
+  return dyadic(x)*=y;
 }
 
-/*! Division of dyadic numbers. */
-/*
-Dyadic
-operator/(const Dyadic& x, const Dyadic& y)
-{
-  return Dyadic(x)/=y;
-}
-*/
-
-/*! Division of a dyadic number by a power of 2. */
+/*! \brief Division of dyadic numbers, which yields a rational. */
 inline
-Dyadic
-operator/(const Dyadic& x, int d)
+mpq_class
+operator/(const dyadic& x, const dyadic& y)
 {
-  return Dyadic(x)/=d;
+  return mpq_class(x.numerator()*y.denominator(),x.denominator()*y.numerator());
 }
 
-/*! Negation of a dyadic number. */
+/*! \brief Negation of a dyadic number. */
 inline
-Dyadic
-operator-(const Dyadic& x)
+dyadic
+operator-(const dyadic& x)
 { 
-  return Dyadic(-x.numerator(),x.denominator_exponent()); 
+  return dyadic(-x.numerator(),x.exponent()); 
 }
 
-/*! Addition of an integer and a dyadic number. */
+//--------------------------------------------------------------------
+// Arithmetic with dyadics and mpz_class
+//--------------------------------------------------------------------
+
+/*! \brief Addition of an integer and a dyadic number. */
 inline
-Dyadic
-operator+(const Dyadic::numerator_type& x, const Dyadic& y)
+dyadic
+operator+(const mpz_class& n, const dyadic& x)
 {
-  return Dyadic(y)+=x;
+  return dyadic(n)+=x;
 }
 
-/*! Addition of a dyadic number and an integer. */
+/*! \brief Addition of a dyadic number and an integer. */
 inline
-Dyadic
-operator+(const Dyadic& x, const Dyadic::numerator_type& y)
+dyadic
+operator+(const dyadic& x, const mpz_class& n)
 {
-  return Dyadic(x)+=y;
+  return dyadic(n)+=x;
 }
 
-/*! Subtraction of an integer and a dyadic number. */
+/*! \brief Subtraction of an integer and a dyadic number. */
 inline
-Dyadic
-operator-(const Dyadic::numerator_type& x, const Dyadic& y)
+dyadic
+operator-(const mpz_class& n, const dyadic& x)
 {
-  return Dyadic(y)-=x;
+  return dyadic(n)-=x;
 }
 
-/*! Subtraction of a dyadic number and an integer. */
+/*! \brief Subtraction of a dyadic number and an integer. */
 inline
-Dyadic
-operator-(const Dyadic& x, const Dyadic::numerator_type& y)
+dyadic
+operator-(const dyadic& x, const mpz_class& n)
 {
-  return Dyadic(x)+=y;
+  return dyadic(n)-=x;
 }
 
-/*! Multiplication of an integer and a dyadic number. */
+/*! \brief Multiplication of an integer and a dyadic number. */
 inline
-Dyadic
-operator*(const Dyadic::numerator_type& x, const Dyadic& y)
+dyadic
+operator*(const mpz_class& n, const dyadic& x)
 {
-  return Dyadic(y)*=x;
+  return dyadic(n)*=x;
 }
-/*! Multiplication of a dyadic number and an integer. */
+
+/*! \brief Multiplication of a dyadic number and an integer. */
 inline
-Dyadic
-operator*(const Dyadic& x, const Dyadic::numerator_type& y)
+dyadic
+operator*(const dyadic& x, const mpz_class& n)
 {
-  return Dyadic(x)+=y;
+  return dyadic(n)*=x;
+}
+
+/*! \brief Division of a dyadic number by an integer. */
+inline
+dyadic
+operator/(const dyadic& x, const mpz_class& n)
+{
+  return dyadic(x)/=n;
+}
+
+//--------------------------------------------------------------------
+// Arithmetic with dyadics and ints
+//--------------------------------------------------------------------
+
+inline
+dyadic
+operator+(const dyadic& x, const int& n)
+{ 
+  return dyadic(x)+=n;
+}
+
+inline
+dyadic
+operator+(const int& n, const dyadic& x)
+{ 
+  return dyadic(x)+=n;
+}
+
+inline
+dyadic
+operator-(const dyadic& x, const int& n)
+{ 
+  return dyadic(x)-=n;
+}
+
+inline
+dyadic
+operator-(const int& n, const dyadic& x)
+{ 
+  return dyadic(x)-=n;
+}
+
+inline
+dyadic
+operator*(const dyadic& x, const int& n)
+{ 
+  return dyadic(x)*=n;
+}
+
+inline
+dyadic
+operator*(const int& n, const dyadic& x)
+{ 
+  return dyadic(x)*=n;
+}
+
+inline
+dyadic
+operator/(const dyadic& x, const int& n)
+{ 
+  return dyadic(x)/=n;
+}
+
+//--------------------------------------------------------------------
+// Arithmetic with dyadics and unsigned ints
+//--------------------------------------------------------------------
+
+inline
+dyadic
+operator+(const dyadic& x, const unsigned int& n)
+{ 
+  return dyadic(x)+=int(n);
+}
+
+inline
+dyadic
+operator+(const unsigned int& n, const dyadic& x)
+{ 
+  return dyadic(x)+=int(n);
+}
+
+inline
+dyadic
+operator-(const dyadic& x, const unsigned int& n)
+{ 
+  return dyadic(x)-=int(n);
+}
+
+inline
+dyadic
+operator-(const unsigned int& n, const dyadic& x)
+{ 
+  return dyadic(x)-=int(n);
+}
+
+inline
+dyadic
+operator*(const dyadic& x, const unsigned int& n)
+{ 
+  return dyadic(x)*=int(n);
+}
+
+inline
+dyadic
+operator*(const unsigned int& n, const dyadic& x)
+{ 
+  return dyadic(x)*=int(n);
+}
+
+inline
+dyadic
+operator/(const dyadic& x, const unsigned int& n)
+{ 
+  return dyadic(x)/=int(n);
+}
+
+
+//--------------------------------------------------------------------
+// Arithmetic with dyadics and doubles
+//--------------------------------------------------------------------
+
+inline
+dyadic
+operator+(const dyadic& x, const double& y)
+{ 
+  return dyadic(y)+=x;
+}
+
+inline
+dyadic
+operator+(const double& x, const dyadic& y)
+{ 
+  return dyadic(x)+=y;
+}
+
+inline
+dyadic
+operator-(const dyadic& x, const double& y)
+{ 
+  return dyadic(x)-=y;
+}
+
+inline
+dyadic
+operator-(const double& x, const dyadic& y)
+{ 
+  return dyadic(x)-=y;
+}
+
+inline
+dyadic
+operator*(const dyadic& x, const double& y)
+{ 
+  return x*dyadic(y);
+}
+
+inline
+dyadic
+operator*(const double& x, const dyadic& y)
+{ 
+  return dyadic(y)*x;
+}
+
+//--------------------------------------------------------------------
+// Arithmetic with dyadics and rationals
+//--------------------------------------------------------------------
+
+///
+inline
+mpq_class
+operator+(const dyadic& x, const mpq_class& y)
+{ 
+  return mpq_class(x)+y;
+}
+
+///
+inline
+mpq_class
+operator+(const mpq_class& x, const dyadic& y)
+{ 
+  return x+mpq_class(y);
+}
+
+///
+inline
+mpq_class
+operator-(const dyadic& x, const mpq_class& y)
+{ 
+  return mpq_class(x)-y;
+}
+
+///
+inline
+mpq_class
+operator-(const mpq_class& x, const dyadic& y)
+{ 
+  return x-mpq_class(y);
+}
+
+///
+inline
+mpq_class
+operator*(const dyadic& x, const mpq_class& y)
+{ 
+  return mpq_class(x)*y;
+}
+
+///
+inline
+mpq_class
+operator*(const mpq_class& x, const dyadic& y)
+{ 
+  return x*mpq_class(y);
+}
+
+inline
+mpq_class
+operator/(const dyadic& x, const mpq_class& y)
+{ 
+  return mpq_class(x)/y;
+}
+
+///
+inline
+mpq_class
+operator/(const mpq_class& x, const dyadic& y)
+{ 
+  return x/mpq_class(y);
 }
 
 //--------------------------------------------------------------------
@@ -408,30 +721,59 @@ operator*(const Dyadic& x, const Dyadic::numerator_type& y)
 /// 
 inline
 bool
-operator==(const Dyadic& x, const Dyadic& y)
+operator==(const dyadic& x, const dyadic& y)
 { 
   return shift_2(x.num_ ,y.exp_) == shift_2(y.num_,x.exp_); 
 }
 
 ///
 inline
-bool operator==(const Dyadic& x, const Dyadic::numerator_type& y)
+bool operator==(const dyadic& x, const double& y)
 { 
-  return shift_2(y, x.exp_) == x.num_; 
+  return mpq_class(x)==mpq_class(y);
+}
+
+///
+inline
+bool operator==(const double& x, const dyadic& y)
+{ 
+  return y==x;
+}
+
+///
+inline
+bool operator==(const dyadic& x, const int& n)
+{ 
+  return shift_2(n, x.exp_) == x.num_; 
 }
 
 ///
 inline
 bool
-operator==(const Dyadic::numerator_type& x, const Dyadic& y)
+operator==(const int& n, const dyadic& x)
 { 
-  return y == x; 
+  return x == n; 
+}
+
+///
+inline
+bool operator==(const dyadic& x, const mpz_class& n)
+{ 
+  return shift_2(n, x.exp_) == x.num_; 
 }
 
 ///
 inline
 bool
-operator!=(const Dyadic& x, const Dyadic& y)
+operator==(const mpz_class& n, const dyadic& x)
+{ 
+  return x == n; 
+}
+
+///
+inline
+bool
+operator!=(const dyadic& x, const dyadic& y)
 { 
   return ! (x == y); 
 }
@@ -439,7 +781,7 @@ operator!=(const Dyadic& x, const Dyadic& y)
 ///
 inline
 bool
-operator!=(const Dyadic& x, const Dyadic::numerator_type& y)
+operator!=(const dyadic& x, const double& y)
 { 
   return ! (x == y); 
 }
@@ -447,7 +789,7 @@ operator!=(const Dyadic& x, const Dyadic::numerator_type& y)
 ///
 inline
 bool
-operator!=(const Dyadic::numerator_type& x, const Dyadic& y)
+operator!=(const double& x, const dyadic& y)
 { 
   return ! (x == y); 
 }
@@ -455,7 +797,39 @@ operator!=(const Dyadic::numerator_type& x, const Dyadic& y)
 ///
 inline
 bool
-operator<(const Dyadic& x, const Dyadic& y)
+operator!=(const dyadic& x, const mpz_class& n)
+{ 
+  return ! (x == n); 
+}
+
+///
+inline
+bool
+operator!=(const mpz_class& n, const dyadic& x)
+{ 
+  return ! (x == n); 
+}
+
+///
+inline
+bool
+operator!=(const dyadic& x, const int& n)
+{ 
+  return ! (x == n); 
+}
+
+///
+inline
+bool
+operator!=(const int& n, const dyadic& x)
+{ 
+  return ! (x == n); 
+}
+
+///
+inline
+bool
+operator<(const dyadic& x, const dyadic& y)
 {
   return quotient_cmp(x,y) == -1;
 }
@@ -463,23 +837,54 @@ operator<(const Dyadic& x, const Dyadic& y)
 ///
 inline
 bool
-operator<(const Dyadic& x, const Dyadic::numerator_type& y)
+operator<(const dyadic& x, const mpz_class& y)
 {
-  return quotient_cmp(x,Dyadic(y)) == -1;
+  return quotient_cmp(x,dyadic(y)) == -1;
 }
 
 ///
 inline
 bool
-operator<(const Dyadic::numerator_type& x, const Dyadic& y)
+operator<(const mpz_class& x, const dyadic& y)
 {
-  return quotient_cmp(Dyadic(x),y) == -1;
+  return quotient_cmp(dyadic(x),y) == -1;
+}
+
+inline
+bool
+operator<(const dyadic& x, const int& y)
+{
+  return quotient_cmp(x,dyadic(y)) == -1;
 }
 
 ///
 inline
 bool
-operator>(const Dyadic& x, const Dyadic& y)
+operator<(const int& x, const dyadic& y)
+{
+  return quotient_cmp(dyadic(x),y) == -1;
+}
+
+///
+inline
+bool
+operator<(const dyadic& x, const double& y)
+{
+  return x<dyadic(y);
+}
+
+///
+inline
+bool
+operator<(const double& x, const dyadic& y)
+{
+  return dyadic(x)<y;
+}
+
+///
+inline
+bool
+operator>(const dyadic& x, const dyadic& y)
 { 
   return(y < x); 
 }
@@ -487,7 +892,7 @@ operator>(const Dyadic& x, const Dyadic& y)
 ///
 inline
 bool
-operator>(const Dyadic& x, const Dyadic::numerator_type& y)
+operator>(const dyadic& x, const mpz_class& y)
 { 
   return y < x; 
 }
@@ -495,7 +900,7 @@ operator>(const Dyadic& x, const Dyadic::numerator_type& y)
 ///
 inline
 bool
-operator>(const Dyadic::numerator_type& x, const Dyadic& y)
+operator>(const mpz_class& x, const dyadic& y)
 { 
   return y < x; 
 }
@@ -503,7 +908,39 @@ operator>(const Dyadic::numerator_type& x, const Dyadic& y)
 ///
 inline
 bool
-operator<=(const Dyadic& x, const Dyadic& y)
+operator>(const dyadic& x, const int& y)
+{ 
+  return y < x; 
+}
+
+///
+inline
+bool
+operator>(const int& x, const dyadic& y)
+{ 
+  return y < x; 
+}
+
+///
+inline
+bool
+operator>(const dyadic& x, const double& y)
+{ 
+  return y < x; 
+}
+
+///
+inline
+bool
+operator>(const double& x, const dyadic& y)
+{ 
+  return y < x; 
+}
+
+///
+inline
+bool
+operator<=(const dyadic& x, const dyadic& y)
 { 
   return ! (y < x); 
 }
@@ -511,7 +948,7 @@ operator<=(const Dyadic& x, const Dyadic& y)
 ///
 inline
 bool
-operator<=(const Dyadic& x, const Dyadic::numerator_type& y)
+operator<=(const dyadic& x, const mpz_class& y)
 { 
   return ! (y < x); 
 }
@@ -519,7 +956,37 @@ operator<=(const Dyadic& x, const Dyadic::numerator_type& y)
 
 inline
 bool
-operator<=(const Dyadic::numerator_type& x, const Dyadic& y)
+operator<=(const mpz_class& x, const dyadic& y)
+{ 
+  return ! (y < x); 
+}
+
+inline
+bool
+operator<=(const dyadic& x, const int& y)
+{ 
+  return ! (y < x); 
+}
+
+
+inline
+bool
+operator<=(const int& x, const dyadic& y)
+{ 
+  return ! (y < x); 
+}
+
+inline
+bool
+operator<=(const dyadic& x, const double& y)
+{ 
+  return ! (y < x); 
+}
+
+
+inline
+bool
+operator<=(const double& x, const dyadic& y)
 { 
   return ! (y < x); 
 }
@@ -527,7 +994,7 @@ operator<=(const Dyadic::numerator_type& x, const Dyadic& y)
 ///
 inline
 bool
-operator>=(const Dyadic& x, const Dyadic& y)
+operator>=(const dyadic& x, const dyadic& y)
 {
   return ! (x < y); 
 }
@@ -535,7 +1002,7 @@ operator>=(const Dyadic& x, const Dyadic& y)
 ///
 inline
 bool
-operator>=(const Dyadic& x, const Dyadic::numerator_type& y)
+operator>=(const dyadic& x, const mpz_class& y)
 { 
   return ! (x < y); 
 }
@@ -543,27 +1010,44 @@ operator>=(const Dyadic& x, const Dyadic::numerator_type& y)
 ///
 inline
 bool
-operator>=(const Dyadic::numerator_type& x, const Dyadic& y)
+operator>=(const mpz_class& x, const dyadic& y)
+{ 
+  return ! (x < y); 
+}
+
+///
+inline
+bool
+operator>=(const dyadic& x, const int& y)
+{ 
+  return ! (x < y); 
+}
+
+///
+inline
+bool
+operator>=(const int& x, const dyadic& y)
+{ 
+  return ! (x < y); 
+}
+
+///
+inline
+bool
+operator>=(const dyadic& x, const double& y)
+{ 
+  return ! (x < y); 
+}
+
+///
+inline
+bool
+operator>=(const double& x, const dyadic& y)
 { 
   return ! (x < y); 
 }
 
 
-
-/*! The denominator of a dyadic number. */
-inline
-Dyadic::numerator_type denominator(const Dyadic& q)
-{ 
-  return q.denominator(); 
-}
-
-/*! The numerator of a dyadic number. */
-inline
-const Dyadic::numerator_type&
-numerator(const Dyadic& q)
-{ 
-  return q.numerator(); 
-}
 
 } // namespace Synaps
 } // namespace Ariadne

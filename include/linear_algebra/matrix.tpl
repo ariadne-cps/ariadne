@@ -25,6 +25,7 @@
 
 #include <algorithm>
 #include "../base/array.h"
+#include "../base/function.h"
 
 namespace boost {
   namespace numeric {
@@ -207,7 +208,7 @@ namespace Ariadne {
         j=i;
 
         //search a not null element in the row
-        while ((j<columns)&&(lu_A(row[i],p_col[j])==0.0)) 
+        while ((j<columns)&&(lu_A(row[i],p_col[j])==0)) 
           j++;
     
         // if it does not exist, decrease the linear independent row number and 
@@ -392,9 +393,9 @@ namespace Ariadne {
         coef=norm-x(i)*x(i);
         
         if (x(i)>=0)  
-           x(i)-=sqrt(norm);
+          x(i)-=sqrt_approx(norm,R(0.00000000001));
         else 
-           x(i)+=sqrt(norm);
+           x(i)+=sqrt_approx(norm,R(0.00000000001));
       
         coef+=x(i)*x(i);
         
@@ -422,7 +423,7 @@ namespace Ariadne {
     }
     
     template <typename R>
-    matrix<R> 
+    matrix<typename numerical_traits<R>::field_extension_type> 
     inverse(const matrix<R> &A) {
       
       size_type rows=A.size1(), cols=A.size2(),i,j;
@@ -449,12 +450,18 @@ namespace Ariadne {
       return inv_A;
     }
     
-    /* FIXME:Disable this template since the inverse of a dyadic matrix cannot be computed. */
-    /*
     template < >
-    matrix<Dyadic>
-    inverse(const matrix<Dyadic>& A);
-    */
+    matrix<Rational>
+    inverse(const matrix<Dyadic>& A) 
+    {
+      matrix<Rational> result(A.size1(),A.size2());
+      for(size_type i=0; i!=result.size1(); ++i) {
+        for(size_type j=0; j!=result.size2(); ++j) {
+          result(i,j)=A(i,j);
+        }
+      }
+      return inverse(result);
+    }
     
     template <typename R>
     Integer 
@@ -559,7 +566,7 @@ namespace Ariadne {
         }
         for (i2=i+1; i2<rows; i2++) {
           for (j2=0; j2<cols; j2++) {
-            A(i2,j2)= A(i2,j2) - ((A(i,j2) * A(i2,j))/A(i,j));
+            A(i2,j2)=(A(i2,j2)*A(i,j) - A(i,j2)*A(i2,j));
           }
         }
       }
@@ -597,7 +604,7 @@ namespace Ariadne {
     {
       size_type i=0;
 
-      while ( (i<A.size1()) && (A(i,col)==0.0) ) {
+      while ( (i<A.size1()) && (A(i,col)==0) ) {
         ++i;
       }
       return i;

@@ -321,6 +321,7 @@ namespace Ariadne {
     void 
     Zonotope<R>::compute_linear_inequalities(Matrix& A, Vector& b) const
     {
+      assert(false);
       using namespace Ariadne::LinearAlgebra;
      
       const Matrix &gen=this->_generators;
@@ -330,7 +331,8 @@ namespace Ariadne {
       
       //compute complanar hyperplanes
       array<size_type> col,row;
-      A=lu_decompose(Space,col,row); 
+      // FIXME: Can't use lu_decompose for general R
+      //A=lu_decompose(Space,col,row); 
 
       if (col.size()==row.size()) {
         A=Matrix(2*ngen,this->dimension());
@@ -401,6 +403,8 @@ namespace Ariadne {
     Geometry::Parallelotope<R>
     over_approximating_parallelotope(const Geometry::Zonotope<R>& z)
     {
+      typedef typename numerical_traits<R>::field_extension_type F;
+      
       std::cerr << "over_approximating_parallelotope(const Geometry::Zonotope<R>& z)" << std::endl;
       dimension_type n=z.dimension();
       LinearAlgebra::matrix<R> A(n,n);
@@ -409,7 +413,7 @@ namespace Ariadne {
           A(i,j)=z.generators()(i,j);
         }
       }
-      LinearAlgebra::matrix<R> B=LinearAlgebra::inverse(A);
+      LinearAlgebra::matrix<F> B=LinearAlgebra::inverse(A);
       const Point<R>& c=z.centre();
       
       Parallelotope<R> p(c,A);

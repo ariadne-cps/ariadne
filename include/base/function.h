@@ -35,7 +35,6 @@
 #include <mpfr.h>
 
 #include <boost/numeric/interval.hpp>
-#include <boost/numeric/interval/io.hpp>
 
 #include "../base/numerical_type.h"
 
@@ -43,86 +42,91 @@ namespace Ariadne {
   template<typename R> class rounding;
   
   template<>
-  struct rounding<double> :
-    boost::numeric::interval_lib::rounded_arith_opp<double>
+  struct rounding<Float64> :
+    boost::numeric::interval_lib::rounded_arith_opp<Float64>
   {
    private:
     typedef int mpfr_func(mpfr_t, const __mpfr_struct*, mp_rnd_t);
   
-    double invoke_mpfr(double x, mpfr_func f, mp_rnd_t r) {
+    Float64 invoke_mpfr(Float64 x, mpfr_func f, mp_rnd_t r) {
       mpfr_t xx;
       mpfr_init_set_d(xx, x, GMP_RNDN);
       f(xx, xx, r);
-      double res = mpfr_get_d(xx, r);
+      Float64 res = mpfr_get_d(xx, r);
       mpfr_clear(xx);
       return res;
     }
    public:
-    double exp_down(double x) { return invoke_mpfr(x, mpfr_exp, GMP_RNDD); } 
-    double log_down(double x) { return invoke_mpfr(x, mpfr_log, GMP_RNDD); } 
-    double sin_down(double x) { return invoke_mpfr(x, mpfr_sin, GMP_RNDD); } 
-    double cos_down(double x) { return invoke_mpfr(x, mpfr_cos, GMP_RNDD); } 
-    double tan_down(double x) { return invoke_mpfr(x, mpfr_tan, GMP_RNDD); } 
-    double asin_down(double x) { return invoke_mpfr(x, mpfr_asin, GMP_RNDD); } 
-    double acos_down(double x) { return invoke_mpfr(x, mpfr_acos, GMP_RNDD); } 
-    double atan_down(double x) { return invoke_mpfr(x, mpfr_atan, GMP_RNDD); } 
-    double sinh_down(double x) { return invoke_mpfr(x, mpfr_sinh, GMP_RNDD); } 
-    double cosh_down(double x) { return invoke_mpfr(x, mpfr_cosh, GMP_RNDD); } 
-    double tanh_down(double x) { return invoke_mpfr(x, mpfr_tanh, GMP_RNDD); }
-    double asinh_down(double x) { return invoke_mpfr(x, mpfr_asinh, GMP_RNDD); } 
-    double acosh_down(double x) { return invoke_mpfr(x, mpfr_acosh, GMP_RNDD); } 
-    double atanh_down(double x) { return invoke_mpfr(x, mpfr_atanh, GMP_RNDD); }
+    Float64 exp_down(Float64 x) { return invoke_mpfr(x, mpfr_exp, GMP_RNDD); } 
+    Float64 log_down(Float64 x) { return invoke_mpfr(x, mpfr_log, GMP_RNDD); } 
+    Float64 sin_down(Float64 x) { return invoke_mpfr(x, mpfr_sin, GMP_RNDD); } 
+    Float64 cos_down(Float64 x) { return invoke_mpfr(x, mpfr_cos, GMP_RNDD); } 
+    Float64 tan_down(Float64 x) { return invoke_mpfr(x, mpfr_tan, GMP_RNDD); } 
+    Float64 asin_down(Float64 x) { return invoke_mpfr(x, mpfr_asin, GMP_RNDD); } 
+    Float64 acos_down(Float64 x) { return invoke_mpfr(x, mpfr_acos, GMP_RNDD); } 
+    Float64 atan_down(Float64 x) { return invoke_mpfr(x, mpfr_atan, GMP_RNDD); } 
+    Float64 sinh_down(Float64 x) { return invoke_mpfr(x, mpfr_sinh, GMP_RNDD); } 
+    Float64 cosh_down(Float64 x) { return invoke_mpfr(x, mpfr_cosh, GMP_RNDD); } 
+    Float64 tanh_down(Float64 x) { return invoke_mpfr(x, mpfr_tanh, GMP_RNDD); }
+    Float64 asinh_down(Float64 x) { return invoke_mpfr(x, mpfr_asinh, GMP_RNDD); } 
+    Float64 acosh_down(Float64 x) { return invoke_mpfr(x, mpfr_acosh, GMP_RNDD); } 
+    Float64 atanh_down(Float64 x) { return invoke_mpfr(x, mpfr_atanh, GMP_RNDD); }
   
-    double exp_up (double x) { return invoke_mpfr(x, mpfr_exp, GMP_RNDU); }
-    double log_up (double x) { return invoke_mpfr(x, mpfr_log, GMP_RNDU); }
-    double sin_up (double x) { return invoke_mpfr(x, mpfr_sin, GMP_RNDU); }
-    double cos_up (double x) { return invoke_mpfr(x, mpfr_cos, GMP_RNDU); }
-    double tan_up (double x) { return invoke_mpfr(x, mpfr_tan, GMP_RNDU); }
-    double asin_up (double x) { return invoke_mpfr(x, mpfr_asin, GMP_RNDU); }
-    double acos_up (double x) { return invoke_mpfr(x, mpfr_acos, GMP_RNDU); }
-    double atan_up (double x) { return invoke_mpfr(x, mpfr_atan, GMP_RNDU); }
-    double sinh_up (double x) { return invoke_mpfr(x, mpfr_sinh, GMP_RNDU); }
-    double cosh_up (double x) { return invoke_mpfr(x, mpfr_cosh, GMP_RNDU); }
-    double tanh_up (double x) { return invoke_mpfr(x, mpfr_tanh, GMP_RNDU); }
-    double asinh_up (double x) { return invoke_mpfr(x, mpfr_asinh, GMP_RNDU); }
-    double acosh_up (double x) { return invoke_mpfr(x, mpfr_acosh, GMP_RNDU); }
-    double atanh_up (double x) { return invoke_mpfr(x, mpfr_atanh, GMP_RNDU); }
+    Float64 exp_up (Float64 x) { return invoke_mpfr(x, mpfr_exp, GMP_RNDU); }
+    Float64 log_up (Float64 x) { return invoke_mpfr(x, mpfr_log, GMP_RNDU); }
+    Float64 sin_up (Float64 x) { return invoke_mpfr(x, mpfr_sin, GMP_RNDU); }
+    Float64 cos_up (Float64 x) { return invoke_mpfr(x, mpfr_cos, GMP_RNDU); }
+    Float64 tan_up (Float64 x) { return invoke_mpfr(x, mpfr_tan, GMP_RNDU); }
+    Float64 asin_up (Float64 x) { return invoke_mpfr(x, mpfr_asin, GMP_RNDU); }
+    Float64 acos_up (Float64 x) { return invoke_mpfr(x, mpfr_acos, GMP_RNDU); }
+    Float64 atan_up (Float64 x) { return invoke_mpfr(x, mpfr_atan, GMP_RNDU); }
+    Float64 sinh_up (Float64 x) { return invoke_mpfr(x, mpfr_sinh, GMP_RNDU); }
+    Float64 cosh_up (Float64 x) { return invoke_mpfr(x, mpfr_cosh, GMP_RNDU); }
+    Float64 tanh_up (Float64 x) { return invoke_mpfr(x, mpfr_tanh, GMP_RNDU); }
+    Float64 asinh_up (Float64 x) { return invoke_mpfr(x, mpfr_asinh, GMP_RNDU); }
+    Float64 acosh_up (Float64 x) { return invoke_mpfr(x, mpfr_acosh, GMP_RNDU); }
+    Float64 atanh_up (Float64 x) { return invoke_mpfr(x, mpfr_atanh, GMP_RNDU); }
   };
   
   template<>
-  struct rounding<Dyadic> :
-    boost::numeric::interval_lib::rounded_arith_opp<double>
+  struct rounding<MPFloat> :
+    boost::numeric::interval_lib::rounded_arith_opp<Float64>
   {
    public:
-    Dyadic exp_down(Dyadic x); 
-    Dyadic log_down(Dyadic x);
-    Dyadic sin_down(Dyadic x);
-    Dyadic cos_down(Dyadic x);
-    Dyadic tan_down(Dyadic x);
-    Dyadic asin_down(Dyadic x);
-    Dyadic atan_down(Dyadic x);
-    Dyadic sinh_down(Dyadic x);
-    Dyadic cosh_down(Dyadic x);
-    Dyadic tanh_down(Dyadic x);
-    Dyadic asinh_down(Dyadic x);
-    Dyadic acosh_down(Dyadic x);
-    Dyadic atanh_down(Dyadic x);
+    MPFloat exp_down(MPFloat x); 
+    MPFloat log_down(MPFloat x);
+    MPFloat sin_down(MPFloat x);
+    MPFloat cos_down(MPFloat x);
+    MPFloat tan_down(MPFloat x);
+    MPFloat asin_down(MPFloat x);
+    MPFloat atan_down(MPFloat x);
+    MPFloat sinh_down(MPFloat x);
+    MPFloat cosh_down(MPFloat x);
+    MPFloat tanh_down(MPFloat x);
+    MPFloat asinh_down(MPFloat x);
+    MPFloat acosh_down(MPFloat x);
+    MPFloat atanh_down(MPFloat x);
   
-    Dyadic exp_up (Dyadic x);
-    Dyadic log_up (Dyadic x);
-    Dyadic sin_up (Dyadic x);
-    Dyadic cos_up (Dyadic x);
-    Dyadic tan_up (Dyadic x);
-    Dyadic asin_up (Dyadic x); 
-    Dyadic acos_up (Dyadic x);
-    Dyadic atan_up (Dyadic x); 
-    Dyadic sinh_up (Dyadic x);
-    Dyadic cosh_up (Dyadic x);
-    Dyadic tanh_up (Dyadic x); 
-    Dyadic asinh_up (Dyadic x);
-    Dyadic acosh_up (Dyadic x);
-    Dyadic atanh_up (Dyadic x);
+    MPFloat exp_up (MPFloat x);
+    MPFloat log_up (MPFloat x);
+    MPFloat sin_up (MPFloat x);
+    MPFloat cos_up (MPFloat x);
+    MPFloat tan_up (MPFloat x);
+    MPFloat asin_up (MPFloat x); 
+    MPFloat acos_up (MPFloat x);
+    MPFloat atan_up (MPFloat x); 
+    MPFloat sinh_up (MPFloat x);
+    MPFloat cosh_up (MPFloat x);
+    MPFloat tanh_up (MPFloat x); 
+    MPFloat asinh_up (MPFloat x);
+    MPFloat acosh_up (MPFloat x);
+    MPFloat atanh_up (MPFloat x);
   };
+
+  template<typename R> 
+  R sqrt_approx(R x, R e) {
+    assert(false);
+  }
 
   template<typename R> 
   R exp_approx(R x, R e) {

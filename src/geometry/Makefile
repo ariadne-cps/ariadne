@@ -27,17 +27,19 @@ dep:
 parallelotope.o: parallelotope.cc ../../include/geometry/parallelotope.h \
   ../../include/geometry/../base/utility.h \
   ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/../base/basic_type.h \
   ../../include/geometry/../base/interval.h \
   ../../include/geometry/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/../base/basic_type.h \
-  ../../include/geometry/../linear_algebra/../base/../base/array.h \
-  ../../include/geometry/../linear_algebra/../base/../base/sequence.h \
   ../../include/geometry/../linear_algebra/../base/numerical_type.h \
   ../../include/geometry/../linear_algebra/../base/../base/dyadic.h \
   ../../include/geometry/../linear_algebra/../base/interval.h \
   ../../include/geometry/../linear_algebra/matrix.h \
   ../../include/geometry/../linear_algebra/../base/arithmetic.h \
   ../../include/geometry/../linear_algebra/../base/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../base/../base/approximation.h \
+  ../../include/geometry/../linear_algebra/../base/../base/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/point.h \
   ../../include/geometry/../geometry/../base/utility.h \
   ../../include/geometry/../geometry/../linear_algebra/vector.h \
@@ -47,10 +49,10 @@ parallelotope.o: parallelotope.cc ../../include/geometry/parallelotope.h \
   ../../include/geometry/../geometry/../base/interval.h \
   ../../include/geometry/../geometry/../base/binary_word.h \
   ../../include/geometry/../geometry/../base/../base/basic_type.h \
+  ../../include/geometry/../geometry/../base/../base/array.h \
   ../../include/geometry/../geometry/../geometry/point.h \
   ../../include/geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -75,7 +77,6 @@ parallelotope.o: parallelotope.cc ../../include/geometry/parallelotope.h \
   ../../include/geometry/../geometry/lattice_set.h \
   ../../include/geometry/../geometry/../base/array.h \
   ../../include/geometry/../geometry/../base/iterator.h \
-  ../../include/geometry/../geometry/../base/../base/array.h \
   ../../include/geometry/../geometry/../base/basic_type.h \
   ../../include/geometry/../geometry/../base/array_operations.h \
   ../../include/geometry/../geometry/parallelotope.h
@@ -83,17 +84,19 @@ parallelotope.o: parallelotope.cc ../../include/geometry/parallelotope.h \
 zonotope.o: zonotope.cc ../../include/geometry/zonotope.h \
   ../../include/geometry/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/../base/basic_type.h \
-  ../../include/geometry/../linear_algebra/../base/../base/array.h \
-  ../../include/geometry/../linear_algebra/../base/../base/sequence.h \
   ../../include/geometry/../linear_algebra/../base/numerical_type.h \
   ../../include/geometry/../linear_algebra/../base/../base/dyadic.h \
   ../../include/geometry/../linear_algebra/../base/interval.h \
   ../../include/geometry/../linear_algebra/matrix.h \
   ../../include/geometry/../linear_algebra/../base/arithmetic.h \
   ../../include/geometry/../linear_algebra/../base/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../base/../base/approximation.h \
+  ../../include/geometry/../linear_algebra/../base/../base/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/zonotopic_vector.h \
   ../../include/geometry/../linear_algebra/../base/utility.h \
-  ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/geometry/../linear_algebra/../base/../base/array.h \
+  ../../include/geometry/../linear_algebra/../base/../base/basic_type.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/interval_vector.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../base/basic_type.h \
@@ -110,6 +113,7 @@ zonotope.o: zonotope.cc ../../include/geometry/zonotope.h \
   ../../include/geometry/../geometry/../base/interval.h \
   ../../include/geometry/../geometry/../base/binary_word.h \
   ../../include/geometry/../geometry/../base/../base/basic_type.h \
+  ../../include/geometry/../geometry/../base/../base/array.h \
   ../../include/geometry/../geometry/../geometry/point.h \
   ../../include/geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/parallelotope.h \
@@ -117,7 +121,6 @@ zonotope.o: zonotope.cc ../../include/geometry/zonotope.h \
   ../../include/geometry/../geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -134,12 +137,11 @@ zonotope.o: zonotope.cc ../../include/geometry/zonotope.h \
 
 simplex.o: simplex.cc ../../include/geometry/simplex.h \
   ../../include/geometry/../base/array.h \
+  ../../include/geometry/../base/basic_type.h \
   ../../include/geometry/../base/utility.h \
   ../../include/geometry/../base/../base/array.h \
   ../../include/geometry/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/../base/basic_type.h \
-  ../../include/geometry/../linear_algebra/../base/../base/array.h \
-  ../../include/geometry/../linear_algebra/../base/../base/sequence.h \
   ../../include/geometry/../linear_algebra/../base/numerical_type.h \
   ../../include/geometry/../linear_algebra/../base/../base/dyadic.h \
   ../../include/geometry/../linear_algebra/../base/interval.h \
@@ -148,7 +150,6 @@ simplex.o: simplex.cc ../../include/geometry/simplex.h \
   ../../include/geometry/../geometry/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../geometry/geometry_declarations.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -156,6 +157,9 @@ simplex.o: simplex.cc ../../include/geometry/simplex.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/../base/numerical_type.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/../base/arithmetic.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/../base/../base/numerical_type.h \
+  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/../base/../base/approximation.h \
+  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/../base/../base/../base/numerical_type.h \
+  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/matrix.h \
   ../../include/geometry/../geometry/../geometry/generator.h \
   ../../include/geometry/../geometry/../geometry/point.h \
@@ -165,6 +169,7 @@ simplex.o: simplex.cc ../../include/geometry/simplex.h \
   ../../include/geometry/../geometry/../geometry/../base/interval.h \
   ../../include/geometry/../geometry/../geometry/../base/binary_word.h \
   ../../include/geometry/../geometry/../geometry/../base/../base/basic_type.h \
+  ../../include/geometry/../geometry/../geometry/../base/../base/array.h \
   ../../include/geometry/../geometry/../geometry/../geometry/point.h \
   ../../include/geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/geometry_declarations.h \
@@ -172,24 +177,25 @@ simplex.o: simplex.cc ../../include/geometry/simplex.h \
   ../../include/geometry/../geometry/simplex.h
 
 polyhedron.o: polyhedron.cc ../../include/geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../base/basic_type.h \
-  ../../include/geometry/../linear_algebra/../linear_algebra/../base/../base/array.h \
-  ../../include/geometry/../linear_algebra/../linear_algebra/../base/../base/sequence.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../base/numerical_type.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../base/../base/dyadic.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../base/interval.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../base/arithmetic.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../base/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/../base/../base/approximation.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/../base/../base/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/matrix.h \
   ../../include/geometry/../geometry/generator.h \
   ../../include/geometry/../geometry/point.h \
   ../../include/geometry/../geometry/../base/utility.h \
   ../../include/geometry/../geometry/../base/../base/array.h \
+  ../../include/geometry/../geometry/../base/../base/basic_type.h \
   ../../include/geometry/../geometry/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../geometry/geometry_declarations.h \
   ../../include/geometry/../geometry/rectangle.h \
@@ -232,8 +238,7 @@ polyhedron.o: polyhedron.cc ../../include/geometry/polyhedron.h \
 lattice_set.o: lattice_set.cc ../../include/base/array_operations.h \
   ../../include/base/../base/array.h \
   ../../include/base/../base/basic_type.h \
-  ../../include/base/../base/../base/array.h \
-  ../../include/base/../base/../base/sequence.h \
+  ../../include/base/../base/basic_type.h \
   ../../include/geometry/lattice_set.h \
   ../../include/geometry/../base/array.h \
   ../../include/geometry/../base/iterator.h \
@@ -244,11 +249,11 @@ lattice_set.o: lattice_set.cc ../../include/base/array_operations.h \
 
 grid.o: grid.cc ../../include/geometry/grid.h \
   ../../include/geometry/../base/array.h \
+  ../../include/geometry/../base/basic_type.h \
   ../../include/geometry/../base/interval.h \
   ../../include/geometry/../base/binary_word.h \
   ../../include/geometry/../base/../base/basic_type.h \
-  ../../include/geometry/../base/../base/../base/array.h \
-  ../../include/geometry/../base/../base/../base/sequence.h \
+  ../../include/geometry/../base/../base/array.h \
   ../../include/geometry/../geometry/geometry_declarations.h \
   ../../include/geometry/../geometry/lattice_set.h \
   ../../include/geometry/../geometry/../base/array.h \
@@ -262,6 +267,8 @@ grid.o: grid.cc ../../include/geometry/grid.h \
   ../../include/geometry/../base/arithmetic.h \
   ../../include/geometry/../base/../base/numerical_type.h \
   ../../include/geometry/../base/../base/../base/dyadic.h \
+  ../../include/geometry/../base/../base/approximation.h \
+  ../../include/geometry/../base/../base/../base/numerical_type.h \
   ../../include/geometry/../geometry/grid.h \
   ../../include/geometry/../geometry/grid_set.h \
   ../../include/geometry/../geometry/../base/binary_word.h \
@@ -289,11 +296,11 @@ grid.o: grid.cc ../../include/geometry/grid.h \
 
 grid_set.o: grid_set.cc ../../include/geometry/grid_set.h \
   ../../include/geometry/../base/array.h \
+  ../../include/geometry/../base/basic_type.h \
   ../../include/geometry/../base/interval.h \
   ../../include/geometry/../base/binary_word.h \
   ../../include/geometry/../base/../base/basic_type.h \
-  ../../include/geometry/../base/../base/../base/array.h \
-  ../../include/geometry/../base/../base/../base/sequence.h \
+  ../../include/geometry/../base/../base/array.h \
   ../../include/geometry/../geometry/geometry_declarations.h \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/../declarations.h \
@@ -326,16 +333,18 @@ grid_set.o: grid_set.cc ../../include/geometry/grid_set.h \
   ../../include/geometry/grid_set.tpl \
   ../../include/geometry/../base/arithmetic.h \
   ../../include/geometry/../base/../base/numerical_type.h \
+  ../../include/geometry/../base/../base/approximation.h \
+  ../../include/geometry/../base/../base/../base/numerical_type.h \
   ../../include/geometry/../geometry/parallelotope.h \
   ../../include/geometry/../geometry/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/matrix.h \
   ../../include/geometry/../geometry/../linear_algebra/../base/basic_type.h \
   ../../include/geometry/../geometry/../linear_algebra/../base/numerical_type.h \
   ../../include/geometry/../geometry/../linear_algebra/../base/arithmetic.h \
+  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -369,15 +378,16 @@ subdivision_tree_set.o: subdivision_tree_set.cc \
   ../../include/base/arithmetic.h \
   ../../include/base/../base/numerical_type.h \
   ../../include/base/../base/../base/dyadic.h \
+  ../../include/base/../base/approximation.h \
+  ../../include/base/../base/../base/numerical_type.h \
   ../../include/geometry/rectangle.h \
   ../../include/geometry/../declarations.h \
   ../../include/geometry/../base/utility.h \
   ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/../base/basic_type.h \
   ../../include/geometry/../base/interval.h \
   ../../include/geometry/../base/binary_word.h \
   ../../include/geometry/../base/../base/basic_type.h \
-  ../../include/geometry/../base/../base/../base/array.h \
-  ../../include/geometry/../base/../base/../base/sequence.h \
   ../../include/geometry/../geometry/point.h \
   ../../include/geometry/../geometry/../base/utility.h \
   ../../include/geometry/../geometry/../linear_algebra/vector.h \
@@ -400,9 +410,9 @@ subdivision_tree_set.o: subdivision_tree_set.cc \
 partition_tree_set.o: partition_tree_set.cc \
   ../../include/geometry/partition_tree_set.h \
   ../../include/geometry/../base/basic_type.h \
-  ../../include/geometry/../base/../base/array.h \
-  ../../include/geometry/../base/../base/sequence.h \
   ../../include/geometry/../base/binary_word.h \
+  ../../include/geometry/../base/../base/basic_type.h \
+  ../../include/geometry/../base/../base/array.h \
   ../../include/geometry/../base/../base/basic_type.h \
   ../../include/geometry/../base/binary_tree.h \
   ../../include/geometry/../base/../base/binary_word.h \

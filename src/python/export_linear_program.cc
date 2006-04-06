@@ -27,7 +27,7 @@
 
 #include <boost/python.hpp>
 
-#include "python/real_typedef.h"
+#include "python/typedefs.h"
 #include "python/python_utilities.h"
 
 #include <utility>  //for std::pair
@@ -43,42 +43,20 @@ using boost::python::copy_const_reference;
 using boost::python::tuple;
 using boost::python::extract;
 
-typedef Ariadne::LinearAlgebra::vector<Real> RVector;
-typedef Ariadne::LinearAlgebra::matrix<Real> RMatrix;
-typedef Ariadne::LinearAlgebra::LinearProgram<Real> RLinearProgram;
-
-typedef Ariadne::Rational Rational;
-typedef Ariadne::LinearAlgebra::vector<Rational> QVector;
-typedef Ariadne::LinearAlgebra::matrix<Rational> QMatrix;
-typedef Ariadne::LinearAlgebra::LinearProgram<Rational> QLinearProgram;
-
-inline RMatrix rlinear_program_tableau(const RLinearProgram& lp) {
-  return lp.tableau();
-}
-
-inline QMatrix qlinear_program_tableau(const QLinearProgram& lp) {
+inline FMatrix flinear_program_tableau(const FLinearProgram& lp) {
   return lp.tableau();
 }
 
 
 void export_linear_program() {
-  class_<RLinearProgram>("LinearProgram",init<RMatrix,RVector,RVector>())
-    .def(init<RMatrix>())
-    .def("solve",&RLinearProgram::solve)
-    .def("is_satisfiable",&RLinearProgram::is_satisfiable)
-    .def("optimizing_point",&RLinearProgram::optimizing_point)
-    .def("optimal_value",&RLinearProgram::optimal_value)
-    .def("tableau",&rlinear_program_tableau)
-    .def(str(self))    // __str__
-  ;
 
-  class_<QLinearProgram>("QLinearProgram",init<RMatrix,RVector,RVector>())
-    .def(init<QMatrix>())
-    .def("solve",&QLinearProgram::solve)
-    .def("is_satisfiable",&QLinearProgram::is_satisfiable)
-    .def("optimizing_point",&QLinearProgram::optimizing_point)
-    .def("optimal_value",&QLinearProgram::optimal_value)
-    .def("tableau",&qlinear_program_tableau)
+  class_<FLinearProgram>("FLinearProgram",init<FMatrix,FVector,FVector>())
+    .def(init<FMatrix>())
+    .def("solve",&FLinearProgram::solve)
+    .def("is_satisfiable",&FLinearProgram::is_satisfiable)
+    .def("optimizing_point",&FLinearProgram::optimizing_point)
+    .def("optimal_value",&FLinearProgram::optimal_value)
+    .def("tableau",&flinear_program_tableau)
     .def(str(self))    // __str__
   ;
 }

@@ -64,27 +64,29 @@ base_module.o: base_module.cc
 
 export_numeric.o: export_numeric.cc ../../include/base/numerical_type.h \
   ../../include/base/../base/dyadic.h ../../include/base/arithmetic.h \
-  ../../include/base/../base/numerical_type.h
+  ../../include/base/../base/numerical_type.h \
+  ../../include/base/../base/approximation.h \
+  ../../include/base/../base/../base/numerical_type.h
 
 export_interval.o: export_interval.cc ../../include/base/numerical_type.h \
   ../../include/base/../base/dyadic.h ../../include/base/interval.h \
-  ../../include/python/real_typedef.h \
-  ../../include/python/../base/numerical_type.h
+  ../../include/python/typedefs.h \
+  ../../include/python/../python/real_typedef.h \
+  ../../include/python/../python/../base/numerical_type.h \
+  ../../include/python/../declarations.h \
+  ../../include/python/../base/basic_type.h
 
 export_function.o: export_function.cc ../../include/base/function.h \
-  /ufs/collins/include/mpfr.h ../../include/base/../base/numerical_type.h \
+  ../../include/base/../base/numerical_type.h \
   ../../include/base/../base/../base/dyadic.h \
   ../../include/python/real_typedef.h \
   ../../include/python/../base/numerical_type.h
 
 export_array.o: export_array.cc ../../include/base/array.h \
-  ../../include/base/array_operations.h \
+  ../../include/base/basic_type.h ../../include/base/array_operations.h \
   ../../include/base/../base/array.h \
-  ../../include/base/../base/basic_type.h \
-  ../../include/base/../base/../base/array.h \
-  ../../include/base/../base/../base/sequence.h \
-  ../../include/base/utility.h ../../include/base/basic_type.h \
-  ../../include/python/real_typedef.h \
+  ../../include/base/../base/basic_type.h ../../include/base/utility.h \
+  ../../include/base/basic_type.h ../../include/python/real_typedef.h \
   ../../include/python/../base/numerical_type.h \
   ../../include/python/../base/../base/dyadic.h \
   ../../include/python/python_utilities.h
@@ -92,8 +94,8 @@ export_array.o: export_array.cc ../../include/base/array.h \
 export_binary_tree.o: export_binary_tree.cc \
   ../../include/base/binary_word.h \
   ../../include/base/../base/basic_type.h \
-  ../../include/base/../base/../base/array.h \
-  ../../include/base/../base/../base/sequence.h \
+  ../../include/base/../base/array.h \
+  ../../include/base/../base/basic_type.h \
   ../../include/base/binary_tree.h \
   ../../include/base/../base/binary_word.h \
   ../../include/base/basic_type.h ../../include/python/real_typedef.h \
@@ -103,8 +105,8 @@ export_binary_tree.o: export_binary_tree.cc \
 
 geometry_module.o: geometry_module.cc ../../include/base/binary_word.h \
   ../../include/base/../base/basic_type.h \
-  ../../include/base/../base/../base/array.h \
-  ../../include/base/../base/../base/sequence.h \
+  ../../include/base/../base/array.h \
+  ../../include/base/../base/basic_type.h \
   ../../include/base/binary_tree.h \
   ../../include/base/../base/binary_word.h \
   ../../include/python/real_typedef.h \
@@ -116,10 +118,9 @@ export_point.o: export_point.cc ../../include/base/numerical_type.h \
   ../../include/base/../base/dyadic.h ../../include/geometry/point.h \
   ../../include/geometry/../base/utility.h \
   ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/../base/basic_type.h \
   ../../include/geometry/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/../base/basic_type.h \
-  ../../include/geometry/../linear_algebra/../base/../base/array.h \
-  ../../include/geometry/../linear_algebra/../base/../base/sequence.h \
   ../../include/geometry/../linear_algebra/../base/numerical_type.h \
   ../../include/geometry/../linear_algebra/../base/interval.h \
   ../../include/geometry/../geometry/geometry_declarations.h \
@@ -133,11 +134,10 @@ export_rectangle.o: export_rectangle.cc \
   ../../include/geometry/../declarations.h \
   ../../include/geometry/../base/utility.h \
   ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/../base/basic_type.h \
   ../../include/geometry/../base/interval.h \
   ../../include/geometry/../base/binary_word.h \
   ../../include/geometry/../base/../base/basic_type.h \
-  ../../include/geometry/../base/../base/../base/array.h \
-  ../../include/geometry/../base/../base/../base/sequence.h \
   ../../include/geometry/../geometry/point.h \
   ../../include/geometry/../geometry/../base/utility.h \
   ../../include/geometry/../geometry/../linear_algebra/vector.h \
@@ -156,11 +156,10 @@ export_parallelotope.o: export_parallelotope.cc \
   ../../include/geometry/../declarations.h \
   ../../include/geometry/../base/utility.h \
   ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/../base/basic_type.h \
   ../../include/geometry/../base/interval.h \
   ../../include/geometry/../base/binary_word.h \
   ../../include/geometry/../base/../base/basic_type.h \
-  ../../include/geometry/../base/../base/../base/array.h \
-  ../../include/geometry/../base/../base/../base/sequence.h \
   ../../include/geometry/../geometry/point.h \
   ../../include/geometry/../geometry/../base/utility.h \
   ../../include/geometry/../geometry/../linear_algebra/vector.h \
@@ -177,10 +176,12 @@ export_parallelotope.o: export_parallelotope.cc \
   ../../include/geometry/../linear_algebra/../base/numerical_type.h \
   ../../include/geometry/../linear_algebra/../base/arithmetic.h \
   ../../include/geometry/../linear_algebra/../base/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../base/../base/approximation.h \
+  ../../include/geometry/../linear_algebra/../base/../base/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -200,11 +201,10 @@ export_parallelotope.o: export_parallelotope.cc \
   ../../include/geometry/../geometry/../geometry/parallelotope.h \
   ../../include/geometry/../geometry/../geometry/polyhedron.h \
   ../../include/python/typedefs.h \
-  ../../include/python/../linear_algebra/linear_algebra_declarations.h \
-  ../../include/python/../geometry/geometry_declarations.h \
-  ../../include/python/../evaluation/evaluation_declarations.h \
   ../../include/python/../python/real_typedef.h \
   ../../include/python/../python/../base/numerical_type.h \
+  ../../include/python/../declarations.h \
+  ../../include/python/../base/basic_type.h \
   ../../include/python/python_utilities.h
 
 export_zonotope.o: export_zonotope.cc ../../include/base/numerical_type.h \
@@ -212,11 +212,10 @@ export_zonotope.o: export_zonotope.cc ../../include/base/numerical_type.h \
   ../../include/geometry/../declarations.h \
   ../../include/geometry/../base/utility.h \
   ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/../base/basic_type.h \
   ../../include/geometry/../base/interval.h \
   ../../include/geometry/../base/binary_word.h \
   ../../include/geometry/../base/../base/basic_type.h \
-  ../../include/geometry/../base/../base/../base/array.h \
-  ../../include/geometry/../base/../base/../base/sequence.h \
   ../../include/geometry/../geometry/point.h \
   ../../include/geometry/../geometry/../base/utility.h \
   ../../include/geometry/../geometry/../linear_algebra/vector.h \
@@ -233,10 +232,12 @@ export_zonotope.o: export_zonotope.cc ../../include/base/numerical_type.h \
   ../../include/geometry/../linear_algebra/../base/numerical_type.h \
   ../../include/geometry/../linear_algebra/../base/arithmetic.h \
   ../../include/geometry/../linear_algebra/../base/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../base/../base/approximation.h \
+  ../../include/geometry/../linear_algebra/../base/../base/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -264,11 +265,10 @@ export_simplex.o: export_simplex.cc ../../include/base/numerical_type.h \
   ../../include/geometry/../declarations.h \
   ../../include/geometry/../base/utility.h \
   ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/../base/basic_type.h \
   ../../include/geometry/../base/interval.h \
   ../../include/geometry/../base/binary_word.h \
   ../../include/geometry/../base/../base/basic_type.h \
-  ../../include/geometry/../base/../base/../base/array.h \
-  ../../include/geometry/../base/../base/../base/sequence.h \
   ../../include/geometry/../geometry/point.h \
   ../../include/geometry/../geometry/../base/utility.h \
   ../../include/geometry/../geometry/../linear_algebra/vector.h \
@@ -279,7 +279,6 @@ export_simplex.o: export_simplex.cc ../../include/base/numerical_type.h \
   ../../include/geometry/simplex.h ../../include/geometry/../base/array.h \
   ../../include/geometry/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -287,6 +286,9 @@ export_simplex.o: export_simplex.cc ../../include/base/numerical_type.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/../base/numerical_type.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/../base/arithmetic.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/../base/../base/numerical_type.h \
+  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/../base/../base/approximation.h \
+  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/../base/../base/../base/numerical_type.h \
+  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/matrix.h \
   ../../include/geometry/../geometry/../geometry/generator.h \
   ../../include/geometry/../geometry/../geometry/point.h \
@@ -302,11 +304,10 @@ export_polyhedron.o: export_polyhedron.cc \
   ../../include/geometry/../declarations.h \
   ../../include/geometry/../base/utility.h \
   ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/../base/basic_type.h \
   ../../include/geometry/../base/interval.h \
   ../../include/geometry/../base/binary_word.h \
   ../../include/geometry/../base/../base/basic_type.h \
-  ../../include/geometry/../base/../base/../base/array.h \
-  ../../include/geometry/../base/../base/../base/sequence.h \
   ../../include/geometry/../geometry/point.h \
   ../../include/geometry/../geometry/../base/utility.h \
   ../../include/geometry/../geometry/../linear_algebra/vector.h \
@@ -321,10 +322,12 @@ export_polyhedron.o: export_polyhedron.cc \
   ../../include/geometry/../linear_algebra/../base/numerical_type.h \
   ../../include/geometry/../linear_algebra/../base/arithmetic.h \
   ../../include/geometry/../linear_algebra/../base/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../base/../base/approximation.h \
+  ../../include/geometry/../linear_algebra/../base/../base/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -352,11 +355,10 @@ export_list_set.o: export_list_set.cc ../../include/base/numerical_type.h \
   ../../include/geometry/../declarations.h \
   ../../include/geometry/../base/utility.h \
   ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/../base/basic_type.h \
   ../../include/geometry/../base/interval.h \
   ../../include/geometry/../base/binary_word.h \
   ../../include/geometry/../base/../base/basic_type.h \
-  ../../include/geometry/../base/../base/../base/array.h \
-  ../../include/geometry/../base/../base/../base/sequence.h \
   ../../include/geometry/../geometry/point.h \
   ../../include/geometry/../geometry/../base/utility.h \
   ../../include/geometry/../geometry/../linear_algebra/vector.h \
@@ -371,10 +373,12 @@ export_list_set.o: export_list_set.cc ../../include/base/numerical_type.h \
   ../../include/geometry/../linear_algebra/../base/numerical_type.h \
   ../../include/geometry/../linear_algebra/../base/arithmetic.h \
   ../../include/geometry/../linear_algebra/../base/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../base/../base/approximation.h \
+  ../../include/geometry/../linear_algebra/../base/../base/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -419,11 +423,10 @@ export_list_set.o: export_list_set.cc ../../include/base/numerical_type.h \
   ../../include/geometry/../geometry/../base/binary_tree.h \
   ../../include/geometry/../geometry/../base/iterator.h \
   ../../include/python/typedefs.h \
-  ../../include/python/../linear_algebra/linear_algebra_declarations.h \
-  ../../include/python/../geometry/geometry_declarations.h \
-  ../../include/python/../evaluation/evaluation_declarations.h \
   ../../include/python/../python/real_typedef.h \
   ../../include/python/../python/../base/numerical_type.h \
+  ../../include/python/../declarations.h \
+  ../../include/python/../base/basic_type.h \
   ../../include/python/python_utilities.h
 
 export_grid_set.o: export_grid_set.cc ../../include/base/numerical_type.h \
@@ -431,20 +434,20 @@ export_grid_set.o: export_grid_set.cc ../../include/base/numerical_type.h \
   ../../include/linear_algebra/linear_algebra.h \
   ../../include/linear_algebra/../linear_algebra/vector.h \
   ../../include/linear_algebra/../linear_algebra/../base/basic_type.h \
-  ../../include/linear_algebra/../linear_algebra/../base/../base/array.h \
-  ../../include/linear_algebra/../linear_algebra/../base/../base/sequence.h \
   ../../include/linear_algebra/../linear_algebra/../base/numerical_type.h \
   ../../include/linear_algebra/../linear_algebra/../base/interval.h \
   ../../include/linear_algebra/../linear_algebra/matrix.h \
   ../../include/linear_algebra/../linear_algebra/../base/arithmetic.h \
   ../../include/linear_algebra/../linear_algebra/../base/../base/numerical_type.h \
-  ../../include/linear_algebra/../linear_algebra/constraint.h \
-  /ufs/collins/include/ppl.hh \
+  ../../include/linear_algebra/../linear_algebra/../base/../base/approximation.h \
+  ../../include/linear_algebra/../linear_algebra/../base/../base/../base/numerical_type.h \
   ../../include/linear_algebra/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/linear_algebra/../linear_algebra/constraint.h \
   ../../include/linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/geometry/parallelotope.h \
   ../../include/geometry/../base/utility.h \
   ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/../base/basic_type.h \
   ../../include/geometry/../base/interval.h \
   ../../include/geometry/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/matrix.h \
@@ -457,6 +460,7 @@ export_grid_set.o: export_grid_set.cc ../../include/base/numerical_type.h \
   ../../include/geometry/../geometry/../base/interval.h \
   ../../include/geometry/../geometry/../base/binary_word.h \
   ../../include/geometry/../geometry/../base/../base/basic_type.h \
+  ../../include/geometry/../geometry/../base/../base/array.h \
   ../../include/geometry/../geometry/../geometry/point.h \
   ../../include/geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/polyhedron.h \
@@ -510,8 +514,8 @@ export_partition_tree_set.o: export_partition_tree_set.cc \
   ../../include/base/numerical_type.h ../../include/base/../base/dyadic.h \
   ../../include/base/binary_word.h \
   ../../include/base/../base/basic_type.h \
-  ../../include/base/../base/../base/array.h \
-  ../../include/base/../base/../base/sequence.h \
+  ../../include/base/../base/array.h \
+  ../../include/base/../base/basic_type.h \
   ../../include/base/binary_tree.h \
   ../../include/base/../base/binary_word.h \
   ../../include/geometry/rectangle.h \
@@ -556,22 +560,20 @@ export_partition_tree_set.o: export_partition_tree_set.cc \
   ../../include/geometry/../geometry/../base/iterator.h \
   ../../include/geometry/../geometry/../geometry/rectangle.h \
   ../../include/python/typedefs.h \
-  ../../include/python/../linear_algebra/linear_algebra_declarations.h \
-  ../../include/python/../geometry/geometry_declarations.h \
-  ../../include/python/../evaluation/evaluation_declarations.h \
   ../../include/python/../python/real_typedef.h \
-  ../../include/python/../python/../base/numerical_type.h
+  ../../include/python/../python/../base/numerical_type.h \
+  ../../include/python/../declarations.h \
+  ../../include/python/../base/basic_type.h
 
 export_postscript_output.o: export_postscript_output.cc \
   ../../include/geometry/rectangle.h \
   ../../include/geometry/../declarations.h \
   ../../include/geometry/../base/utility.h \
   ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/../base/basic_type.h \
   ../../include/geometry/../base/interval.h \
   ../../include/geometry/../base/binary_word.h \
   ../../include/geometry/../base/../base/basic_type.h \
-  ../../include/geometry/../base/../base/../base/array.h \
-  ../../include/geometry/../base/../base/../base/sequence.h \
   ../../include/geometry/../geometry/point.h \
   ../../include/geometry/../geometry/../base/utility.h \
   ../../include/geometry/../geometry/../linear_algebra/vector.h \
@@ -587,10 +589,12 @@ export_postscript_output.o: export_postscript_output.cc \
   ../../include/geometry/../linear_algebra/../base/numerical_type.h \
   ../../include/geometry/../linear_algebra/../base/arithmetic.h \
   ../../include/geometry/../linear_algebra/../base/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../base/../base/approximation.h \
+  ../../include/geometry/../linear_algebra/../base/../base/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -650,14 +654,15 @@ export_map.o: export_map.cc ../../include/evaluation/map.h \
   ../../include/evaluation/../geometry/geometry_declarations.h \
   ../../include/evaluation/../linear_algebra/vector.h \
   ../../include/evaluation/../linear_algebra/../base/basic_type.h \
-  ../../include/evaluation/../linear_algebra/../base/../base/array.h \
-  ../../include/evaluation/../linear_algebra/../base/../base/sequence.h \
   ../../include/evaluation/../linear_algebra/../base/numerical_type.h \
   ../../include/evaluation/../linear_algebra/../base/../base/dyadic.h \
   ../../include/evaluation/../linear_algebra/../base/interval.h \
   ../../include/evaluation/../linear_algebra/matrix.h \
   ../../include/evaluation/../linear_algebra/../base/arithmetic.h \
   ../../include/evaluation/../linear_algebra/../base/../base/numerical_type.h \
+  ../../include/evaluation/../linear_algebra/../base/../base/approximation.h \
+  ../../include/evaluation/../linear_algebra/../base/../base/../base/numerical_type.h \
+  ../../include/evaluation/../linear_algebra/../linear_algebra/vector.h \
   ../../include/python/real_typedef.h \
   ../../include/python/../base/numerical_type.h
 
@@ -665,10 +670,9 @@ export_affine_map.o: export_affine_map.cc \
   ../../include/base/numerical_type.h ../../include/base/../base/dyadic.h \
   ../../include/geometry/point.h ../../include/geometry/../base/utility.h \
   ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/../base/basic_type.h \
   ../../include/geometry/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/../base/basic_type.h \
-  ../../include/geometry/../linear_algebra/../base/../base/array.h \
-  ../../include/geometry/../linear_algebra/../base/../base/sequence.h \
   ../../include/geometry/../linear_algebra/../base/numerical_type.h \
   ../../include/geometry/../linear_algebra/../base/interval.h \
   ../../include/geometry/../geometry/geometry_declarations.h \
@@ -682,11 +686,13 @@ export_affine_map.o: export_affine_map.cc \
   ../../include/geometry/../linear_algebra/matrix.h \
   ../../include/geometry/../linear_algebra/../base/arithmetic.h \
   ../../include/geometry/../linear_algebra/../base/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../base/../base/approximation.h \
+  ../../include/geometry/../linear_algebra/../base/../base/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/../geometry/geometry_declarations.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -726,20 +732,18 @@ export_affine_map.o: export_affine_map.cc \
   ../../include/python/real_typedef.h \
   ../../include/python/../base/numerical_type.h \
   ../../include/python/typedefs.h \
-  ../../include/python/../linear_algebra/linear_algebra_declarations.h \
-  ../../include/python/../geometry/geometry_declarations.h \
-  ../../include/python/../evaluation/evaluation_declarations.h \
   ../../include/python/../python/real_typedef.h \
+  ../../include/python/../declarations.h \
+  ../../include/python/../base/basic_type.h \
   ../../include/python/python_utilities.h
 
 export_polynomial_map.o: export_polynomial_map.cc \
   ../../include/base/numerical_type.h ../../include/base/../base/dyadic.h \
   ../../include/geometry/point.h ../../include/geometry/../base/utility.h \
   ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/../base/basic_type.h \
   ../../include/geometry/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/../base/basic_type.h \
-  ../../include/geometry/../linear_algebra/../base/../base/array.h \
-  ../../include/geometry/../linear_algebra/../base/../base/sequence.h \
   ../../include/geometry/../linear_algebra/../base/numerical_type.h \
   ../../include/geometry/../linear_algebra/../base/interval.h \
   ../../include/geometry/../geometry/geometry_declarations.h \
@@ -750,6 +754,9 @@ export_polynomial_map.o: export_polynomial_map.cc \
   ../../include/evaluation/../linear_algebra/../base/numerical_type.h \
   ../../include/evaluation/../linear_algebra/../base/arithmetic.h \
   ../../include/evaluation/../linear_algebra/../base/../base/numerical_type.h \
+  ../../include/evaluation/../linear_algebra/../base/../base/approximation.h \
+  ../../include/evaluation/../linear_algebra/../base/../base/../base/numerical_type.h \
+  ../../include/evaluation/../linear_algebra/../linear_algebra/vector.h \
   ../../include/evaluation/../base/utility.h \
   ../../include/evaluation/../base/array.h \
   ../../include/evaluation/../base/interval.h \
@@ -760,9 +767,9 @@ export_polynomial_map.o: export_polynomial_map.cc \
   ../../include/evaluation/../geometry/../base/interval.h \
   ../../include/evaluation/../geometry/../base/binary_word.h \
   ../../include/evaluation/../geometry/../base/../base/basic_type.h \
+  ../../include/evaluation/../geometry/../base/../base/array.h \
   ../../include/evaluation/../geometry/../geometry/point.h \
   ../../include/evaluation/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../geometry/../linear_algebra/constraint.h \
   ../../include/evaluation/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -780,17 +787,17 @@ export_vector_field.o: export_vector_field.cc \
   ../../include/evaluation/../base/interval.h \
   ../../include/evaluation/../linear_algebra/vector.h \
   ../../include/evaluation/../linear_algebra/../base/basic_type.h \
-  ../../include/evaluation/../linear_algebra/../base/../base/array.h \
-  ../../include/evaluation/../linear_algebra/../base/../base/sequence.h \
   ../../include/evaluation/../linear_algebra/../base/numerical_type.h \
   ../../include/evaluation/../linear_algebra/../base/../base/dyadic.h \
   ../../include/evaluation/../linear_algebra/../base/interval.h \
   ../../include/evaluation/../linear_algebra/matrix.h \
   ../../include/evaluation/../linear_algebra/../base/arithmetic.h \
   ../../include/evaluation/../linear_algebra/../base/../base/numerical_type.h \
+  ../../include/evaluation/../linear_algebra/../base/../base/approximation.h \
+  ../../include/evaluation/../linear_algebra/../base/../base/../base/numerical_type.h \
+  ../../include/evaluation/../linear_algebra/../linear_algebra/vector.h \
   ../../include/evaluation/../linear_algebra/interval_vector.h \
   ../../include/evaluation/../linear_algebra/interval_matrix.h \
-  ../../include/evaluation/../linear_algebra/../linear_algebra/vector.h \
   ../../include/evaluation/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/evaluation/../linear_algebra/../linear_algebra/interval_vector.h \
   ../../include/evaluation/../geometry/geometry_declarations.h \
@@ -803,10 +810,9 @@ export_affine_vector_field.o: export_affine_vector_field.cc \
   ../../include/base/interval.h ../../include/geometry/point.h \
   ../../include/geometry/../base/utility.h \
   ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/../base/basic_type.h \
   ../../include/geometry/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/../base/basic_type.h \
-  ../../include/geometry/../linear_algebra/../base/../base/array.h \
-  ../../include/geometry/../linear_algebra/../base/../base/sequence.h \
   ../../include/geometry/../linear_algebra/../base/numerical_type.h \
   ../../include/geometry/../linear_algebra/../base/interval.h \
   ../../include/geometry/../geometry/geometry_declarations.h \
@@ -820,11 +826,13 @@ export_affine_vector_field.o: export_affine_vector_field.cc \
   ../../include/geometry/../linear_algebra/matrix.h \
   ../../include/geometry/../linear_algebra/../base/arithmetic.h \
   ../../include/geometry/../linear_algebra/../base/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../base/../base/approximation.h \
+  ../../include/geometry/../linear_algebra/../base/../base/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/../geometry/geometry_declarations.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -886,11 +894,10 @@ export_apply.o: export_apply.cc ../../include/geometry/rectangle.h \
   ../../include/geometry/../declarations.h \
   ../../include/geometry/../base/utility.h \
   ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/../base/basic_type.h \
   ../../include/geometry/../base/interval.h \
   ../../include/geometry/../base/binary_word.h \
   ../../include/geometry/../base/../base/basic_type.h \
-  ../../include/geometry/../base/../base/../base/array.h \
-  ../../include/geometry/../base/../base/../base/sequence.h \
   ../../include/geometry/../geometry/point.h \
   ../../include/geometry/../geometry/../base/utility.h \
   ../../include/geometry/../geometry/../linear_algebra/vector.h \
@@ -906,10 +913,12 @@ export_apply.o: export_apply.cc ../../include/geometry/rectangle.h \
   ../../include/geometry/../linear_algebra/../base/numerical_type.h \
   ../../include/geometry/../linear_algebra/../base/arithmetic.h \
   ../../include/geometry/../linear_algebra/../base/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../base/../base/approximation.h \
+  ../../include/geometry/../linear_algebra/../base/../base/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -958,11 +967,10 @@ export_integrate.o: export_integrate.cc \
   ../../include/geometry/../declarations.h \
   ../../include/geometry/../base/utility.h \
   ../../include/geometry/../base/../base/array.h \
+  ../../include/geometry/../base/../base/basic_type.h \
   ../../include/geometry/../base/interval.h \
   ../../include/geometry/../base/binary_word.h \
   ../../include/geometry/../base/../base/basic_type.h \
-  ../../include/geometry/../base/../base/../base/array.h \
-  ../../include/geometry/../base/../base/../base/sequence.h \
   ../../include/geometry/../geometry/point.h \
   ../../include/geometry/../geometry/../base/utility.h \
   ../../include/geometry/../geometry/../linear_algebra/vector.h \
@@ -978,10 +986,12 @@ export_integrate.o: export_integrate.cc \
   ../../include/geometry/../linear_algebra/../base/numerical_type.h \
   ../../include/geometry/../linear_algebra/../base/arithmetic.h \
   ../../include/geometry/../linear_algebra/../base/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../base/../base/approximation.h \
+  ../../include/geometry/../linear_algebra/../base/../base/../base/numerical_type.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -1034,29 +1044,30 @@ export_integrate.o: export_integrate.cc \
   ../../include/evaluation/../evaluation/../geometry/geometry_declarations.h \
   ../../include/evaluation/../evaluation/../evaluation/evaluation_declarations.h \
   ../../include/python/typedefs.h \
-  ../../include/python/../linear_algebra/linear_algebra_declarations.h \
-  ../../include/python/../geometry/geometry_declarations.h \
-  ../../include/python/../evaluation/evaluation_declarations.h \
   ../../include/python/../python/real_typedef.h \
-  ../../include/python/../python/../base/numerical_type.h
+  ../../include/python/../python/../base/numerical_type.h \
+  ../../include/python/../declarations.h \
+  ../../include/python/../base/basic_type.h
 
 export_henon_map.o: export_henon_map.cc \
   ../../include/evaluation/henon_map.h \
   ../../include/evaluation/../linear_algebra/matrix.h \
   ../../include/evaluation/../linear_algebra/../base/basic_type.h \
-  ../../include/evaluation/../linear_algebra/../base/../base/array.h \
-  ../../include/evaluation/../linear_algebra/../base/../base/sequence.h \
   ../../include/evaluation/../linear_algebra/../base/numerical_type.h \
   ../../include/evaluation/../linear_algebra/../base/../base/dyadic.h \
   ../../include/evaluation/../linear_algebra/../base/arithmetic.h \
   ../../include/evaluation/../linear_algebra/../base/../base/numerical_type.h \
+  ../../include/evaluation/../linear_algebra/../base/../base/approximation.h \
+  ../../include/evaluation/../linear_algebra/../base/../base/../base/numerical_type.h \
+  ../../include/evaluation/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/evaluation/../linear_algebra/../linear_algebra/../base/basic_type.h \
+  ../../include/evaluation/../linear_algebra/../linear_algebra/../base/numerical_type.h \
+  ../../include/evaluation/../linear_algebra/../linear_algebra/../base/interval.h \
   ../../include/evaluation/../geometry/point.h \
   ../../include/evaluation/../geometry/../base/utility.h \
   ../../include/evaluation/../geometry/../base/../base/array.h \
+  ../../include/evaluation/../geometry/../base/../base/basic_type.h \
   ../../include/evaluation/../geometry/../linear_algebra/vector.h \
-  ../../include/evaluation/../geometry/../linear_algebra/../base/basic_type.h \
-  ../../include/evaluation/../geometry/../linear_algebra/../base/numerical_type.h \
-  ../../include/evaluation/../geometry/../linear_algebra/../base/interval.h \
   ../../include/evaluation/../geometry/../geometry/geometry_declarations.h \
   ../../include/evaluation/../geometry/rectangle.h \
   ../../include/evaluation/../geometry/../declarations.h \
@@ -1070,7 +1081,6 @@ export_henon_map.o: export_henon_map.cc \
   ../../include/evaluation/../geometry/../geometry/list_set.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/geometry_declarations.h \
   ../../include/evaluation/../geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -1106,8 +1116,6 @@ export_lorenz_system.o: export_lorenz_system.cc \
   ../../include/evaluation/lorenz_system.h \
   ../../include/evaluation/../linear_algebra/vector.h \
   ../../include/evaluation/../linear_algebra/../base/basic_type.h \
-  ../../include/evaluation/../linear_algebra/../base/../base/array.h \
-  ../../include/evaluation/../linear_algebra/../base/../base/sequence.h \
   ../../include/evaluation/../linear_algebra/../base/numerical_type.h \
   ../../include/evaluation/../linear_algebra/../base/../base/dyadic.h \
   ../../include/evaluation/../linear_algebra/../base/interval.h \
@@ -1115,13 +1123,16 @@ export_lorenz_system.o: export_lorenz_system.cc \
   ../../include/evaluation/../linear_algebra/matrix.h \
   ../../include/evaluation/../linear_algebra/../base/arithmetic.h \
   ../../include/evaluation/../linear_algebra/../base/../base/numerical_type.h \
-  ../../include/evaluation/../linear_algebra/interval_matrix.h \
+  ../../include/evaluation/../linear_algebra/../base/../base/approximation.h \
+  ../../include/evaluation/../linear_algebra/../base/../base/../base/numerical_type.h \
   ../../include/evaluation/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/evaluation/../linear_algebra/interval_matrix.h \
   ../../include/evaluation/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/evaluation/../linear_algebra/../linear_algebra/interval_vector.h \
   ../../include/evaluation/../geometry/point.h \
   ../../include/evaluation/../geometry/../base/utility.h \
   ../../include/evaluation/../geometry/../base/../base/array.h \
+  ../../include/evaluation/../geometry/../base/../base/basic_type.h \
   ../../include/evaluation/../geometry/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/../geometry/geometry_declarations.h \
   ../../include/evaluation/../geometry/rectangle.h \
@@ -1136,7 +1147,6 @@ export_lorenz_system.o: export_lorenz_system.cc \
   ../../include/evaluation/../geometry/../geometry/list_set.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/geometry_declarations.h \
   ../../include/evaluation/../geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -1164,11 +1174,10 @@ export_lorenz_system.o: export_lorenz_system.cc \
   ../../include/evaluation/../evaluation/../geometry/geometry_declarations.h \
   ../../include/evaluation/../evaluation/../evaluation/evaluation_declarations.h \
   ../../include/python/typedefs.h \
-  ../../include/python/../linear_algebra/linear_algebra_declarations.h \
-  ../../include/python/../geometry/geometry_declarations.h \
-  ../../include/python/../evaluation/evaluation_declarations.h \
   ../../include/python/../python/real_typedef.h \
-  ../../include/python/../python/../base/numerical_type.h
+  ../../include/python/../python/../base/numerical_type.h \
+  ../../include/python/../declarations.h \
+  ../../include/python/../base/basic_type.h
 
 linear_algebra_module.o: linear_algebra_module.cc
 
@@ -1176,55 +1185,58 @@ export_vector.o: export_vector.cc ../../include/base/numerical_type.h \
   ../../include/base/../base/dyadic.h ../../include/base/interval.h \
   ../../include/linear_algebra/vector.h \
   ../../include/linear_algebra/../base/basic_type.h \
-  ../../include/linear_algebra/../base/../base/array.h \
-  ../../include/linear_algebra/../base/../base/sequence.h \
   ../../include/linear_algebra/../base/numerical_type.h \
   ../../include/linear_algebra/../base/interval.h \
   ../../include/linear_algebra/interval_vector.h \
   ../../include/python/typedefs.h \
-  ../../include/python/../linear_algebra/linear_algebra_declarations.h \
-  ../../include/python/../geometry/geometry_declarations.h \
-  ../../include/python/../evaluation/evaluation_declarations.h \
   ../../include/python/../python/real_typedef.h \
-  ../../include/python/../python/../base/numerical_type.h
+  ../../include/python/../python/../base/numerical_type.h \
+  ../../include/python/../declarations.h \
+  ../../include/python/../base/basic_type.h
 
 export_matrix.o: export_matrix.cc ../../include/base/numerical_type.h \
   ../../include/base/../base/dyadic.h ../../include/base/interval.h \
   ../../include/linear_algebra/matrix.h \
   ../../include/linear_algebra/../base/basic_type.h \
-  ../../include/linear_algebra/../base/../base/array.h \
-  ../../include/linear_algebra/../base/../base/sequence.h \
   ../../include/linear_algebra/../base/numerical_type.h \
   ../../include/linear_algebra/../base/arithmetic.h \
   ../../include/linear_algebra/../base/../base/numerical_type.h \
-  ../../include/linear_algebra/interval_matrix.h \
-  ../../include/linear_algebra/../base/interval.h \
+  ../../include/linear_algebra/../base/../base/approximation.h \
+  ../../include/linear_algebra/../base/../base/../base/numerical_type.h \
   ../../include/linear_algebra/../linear_algebra/vector.h \
   ../../include/linear_algebra/../linear_algebra/../base/basic_type.h \
   ../../include/linear_algebra/../linear_algebra/../base/numerical_type.h \
   ../../include/linear_algebra/../linear_algebra/../base/interval.h \
+  ../../include/linear_algebra/interval_matrix.h \
+  ../../include/linear_algebra/../base/interval.h \
   ../../include/linear_algebra/../linear_algebra/matrix.h \
   ../../include/linear_algebra/../linear_algebra/interval_vector.h \
   ../../include/python/typedefs.h \
-  ../../include/python/../linear_algebra/linear_algebra_declarations.h \
-  ../../include/python/../geometry/geometry_declarations.h \
-  ../../include/python/../evaluation/evaluation_declarations.h \
   ../../include/python/../python/real_typedef.h \
   ../../include/python/../python/../base/numerical_type.h \
+  ../../include/python/../declarations.h \
+  ../../include/python/../base/basic_type.h \
   ../../include/python/python_utilities.h
 
 export_linear_program.o: export_linear_program.cc \
   ../../include/base/numerical_type.h ../../include/base/../base/dyadic.h \
   ../../include/linear_algebra/linear_program.h \
   ../../include/linear_algebra/../base/basic_type.h \
-  ../../include/linear_algebra/../base/../base/array.h \
-  ../../include/linear_algebra/../base/../base/sequence.h \
   ../../include/linear_algebra/../linear_algebra/matrix.h \
   ../../include/linear_algebra/../linear_algebra/../base/basic_type.h \
   ../../include/linear_algebra/../linear_algebra/../base/numerical_type.h \
   ../../include/linear_algebra/../linear_algebra/../base/arithmetic.h \
   ../../include/linear_algebra/../linear_algebra/../base/../base/numerical_type.h \
-  ../../include/python/real_typedef.h \
-  ../../include/python/../base/numerical_type.h \
+  ../../include/linear_algebra/../linear_algebra/../base/../base/approximation.h \
+  ../../include/linear_algebra/../linear_algebra/../base/../base/../base/numerical_type.h \
+  ../../include/linear_algebra/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/linear_algebra/../linear_algebra/../linear_algebra/../base/basic_type.h \
+  ../../include/linear_algebra/../linear_algebra/../linear_algebra/../base/numerical_type.h \
+  ../../include/linear_algebra/../linear_algebra/../linear_algebra/../base/interval.h \
+  ../../include/python/typedefs.h \
+  ../../include/python/../python/real_typedef.h \
+  ../../include/python/../python/../base/numerical_type.h \
+  ../../include/python/../declarations.h \
+  ../../include/python/../base/basic_type.h \
   ../../include/python/python_utilities.h
 

@@ -60,6 +60,7 @@ namespace Ariadne {
           }
         }
       }
+
     };
 
     
@@ -91,7 +92,12 @@ namespace Ariadne {
     interval_matrix<R> 
     prod(const interval_matrix<R>& A, const interval_matrix<R>& B);
       
-      
+    template<typename R>
+    interval_matrix<R>
+    fprod(const matrix<typename numerical_traits<R>::field_extension_type>& A, 
+         const interval_matrix<R>& B);
+    
+
     template<typename R>
     inline
     interval_vector<R>
@@ -135,6 +141,15 @@ namespace Ariadne {
       return prod(A,B);
     }
     
+    template<typename R>
+    inline
+    interval_matrix<R>
+    operator*(const matrix<typename numerical_traits<R>::field_extension_type>& A, 
+              const interval_matrix<R>& B) {
+      return fprod(A,B);
+    }
+
+    
     
     /*! \brief The midpoint of the interval matrix. */
     template<typename R>
@@ -175,7 +190,7 @@ namespace Ariadne {
     matrix<R>
     over_approximation(const interval_matrix<R>& A); 
         
-    /*! \brief A matrix \f$A\f$ such that for all zonotopes \f$Z\f$, \f$AZ\subset \overline{\underline{A}}\f$. */
+    /*! \brief An interval matrix exponential. */
     template<typename R>
     interval_matrix<R>
     exp(const interval_matrix<R>& A); 

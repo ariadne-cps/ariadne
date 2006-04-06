@@ -35,6 +35,7 @@
 #include "../base/utility.h"
 #include "../base/array.h"
 #include "../base/arithmetic.h"
+#include "../base/function.h"
 #include "../base/interval.h"
 
 #include "../linear_algebra/vector.h"
@@ -279,6 +280,8 @@ namespace Ariadne {
       R& h=step_size;
       const matrix<R> id=identity_matrix<R>(n);
       
+      R err=norm(p.generators())/65536;
+
       std::cerr << "suggested stepsize=" << step_size << std::endl;
       Rectangle<R> b=estimate_flow_bounds(vf,p.bounding_box(),h);
       std::cerr << "stepsize=" << h << std::endl;
@@ -291,23 +294,22 @@ namespace Ariadne {
       R l=upper_log_norm(df);
       std::cerr << "logarithmic_norm=" << l << std::endl;
       l=max(l,R(1));
-      interval_matrix<R> bdphi=id+Interval<R>(0,R(l*h))*df;
-      std::cerr << "flow derivative_bounds=" << bdphi << std::endl;
+      interval_matrix<R> dphi=exp(interval_matrix<R>(dphi*h));
+      std::cerr << "flow derivative=" << dphi << std::endl;
         
       Point<R> c=p.centre();
       std::cerr << "centre=" << c << std::endl;
       Rectangle<R> phic=refine_flow_bounds(vf,c,b,h);
       std::cerr << "bounds on centre=" << phic << std::endl;
-        
-      interval_matrix<R> dphi=bdphi;
-      matrix<R> approx_dphi=over_approximation(dphi);
-      std::cerr << "over_approximation of flow derivative=" << approx_dphi << std::endl;
-      zonotopic_vector<R> zv(approx_dphi*p.generators());
+      interval_vector<R> phicv(n);
+      for(size_type i=0; i!=n; ++i) {
+        phicv(i)=phic[i];
+      }
+      interval_matrix<R> zv(dphi*p.generators());
       std::cerr << "zonotopic vector to add to image of centre=" << zv << std::endl;
-      Zonotope<R> z=phic+zv;
-      std::cerr << "approximating zonotope=" << z << std::endl;
-      p=over_approximating_parallelotope(z);
-      assert(subset(z,p));
+      IntervalParallelotope<R> ip(phicv,zv);
+      std::cerr << "approximating interval parallelotope=" << ip << std::endl;
+      p=ip.over_approximating_parallelotope();
       std::cerr << "new approximation=" << p << std::endl;
 
       return p;

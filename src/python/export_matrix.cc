@@ -104,7 +104,7 @@ inline void imatrix_setitem(RIntervalMatrix& A, tuple index, RInterval x) {
   A(i,j)=x;
 }
 
-inline RMatrix rmatrix_inverse(const RMatrix& A) {
+inline FMatrix rmatrix_inverse(const RMatrix& A) {
   return Ariadne::LinearAlgebra::inverse(A);
 }
 

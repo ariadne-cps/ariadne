@@ -29,16 +29,18 @@
 #ifndef _ARIADNE_PYTHON_TYPEDEFS_H
 #define _ARIADNE_PYTHON_TYPEDEFS_H
 
-#include "../linear_algebra/linear_algebra_declarations.h"
-#include "../geometry/geometry_declarations.h"
-#include "../evaluation/evaluation_declarations.h"
-
 #include "../python/real_typedef.h"
+#include "../declarations.h"
+
+#include "../base/basic_type.h"
 
 typedef Ariadne::Dyadic Dyadic;
 typedef Ariadne::Rational Rational;
 
+typedef Ariadne::numerical_traits<Real>::field_extension_type Field;
+
 typedef Ariadne::Interval<Real> RInterval;
+typedef Ariadne::Interval<Field> FInterval;
 
 typedef Ariadne::LinearAlgebra::vector<Rational> QVector;
 typedef Ariadne::LinearAlgebra::matrix<Rational> QMatrix;
@@ -47,6 +49,10 @@ typedef Ariadne::LinearAlgebra::vector<Real> RVector;
 typedef Ariadne::LinearAlgebra::matrix<Real> RMatrix;
 typedef Ariadne::LinearAlgebra::interval_vector<Real> RIntervalVector;
 typedef Ariadne::LinearAlgebra::interval_matrix<Real> RIntervalMatrix;
+
+typedef Ariadne::LinearAlgebra::vector<Field> FVector;
+typedef Ariadne::LinearAlgebra::matrix<Field> FMatrix;
+typedef Ariadne::LinearAlgebra::LinearProgram<Field> FLinearProgram;
 
 typedef Ariadne::Geometry::Point<Real> RPoint;
 typedef Ariadne::Geometry::Rectangle<Real> RRectangle;

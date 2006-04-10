@@ -23,6 +23,7 @@
 
 
 from ariadne.base import *
+from ariadne.numeric import *
 from ariadne.evaluation import *
 from ariadne.geometry import *
 from ariadne.linear_algebra import *
@@ -44,11 +45,6 @@ dyn=AffineVectorField(A,b)
 inv=Parallelotope(Rectangle("[-1,1]x[-1,1]"))
 n1=DiscreteNode(dyn,inv)
 
-#A[0,0]=0.25
-#A[0,1]=1
-#A[1,0]=-1
-#A[1,1]=0.25
-#dyn=AffineVectorField(A,b)
 n2=DiscreteNode(dyn,inv)
 
 A[0,0]=-7
@@ -74,7 +70,7 @@ h.add(e1)
 h.add(e2)
 
 c_init=Parallelotope(Rectangle("[-0.8,-0.7]x[0.7,0.8]"))
-reach=bounded_time_reachability(h, n1, c_init, Real(20.0), Real(0.1))
+reach=bounded_time_reachability(h, n1, c_init, MPFloat(20.0), MPFloat(0.1))
 
 
 eps.set_fill_colour("blue")

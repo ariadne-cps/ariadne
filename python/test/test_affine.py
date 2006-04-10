@@ -20,8 +20,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from ariadne import Real
 from ariadne.base import *
+from ariadne.numeric import *
 from ariadne.evaluation import *
 from ariadne.geometry import *
 from ariadne.linear_algebra import *
@@ -62,16 +62,3 @@ for i in range(0,100):
   eps.write(p2)
 eps.close()
 
-A=Matrix(3,3)
-A[0,0]=-1
-A[0,1]=-1
-A[1,0]=+1
-A[1,1]=-1
-A[2,2]=+1
-
-B=exp_Ah(A,Real(1),Real(0.000001))
-print B
-
-E=Matrix(1,1)
-E[0,0]=1
-print exp_Ah(E,Real(1),Real(0.000000001))[0,0]-exp(1)

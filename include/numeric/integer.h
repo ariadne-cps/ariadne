@@ -47,8 +47,8 @@ namespace Ariadne {
   }
   
   namespace Base {
-    template<typename R> inline R convert_to(const Numeric::Integer& n) 
-    { throw std::runtime_error("convert_to(const Numeric::Integer&): Unknow destination type"); }
+    template<typename I> inline I convert_to(const Numeric::Integer& n) 
+    { return I(n); }
 	  
     template<> inline int convert_to<int>(const Numeric::Integer& n) { return n.get_si(); }
     template<> inline long convert_to<long>(const Numeric::Integer& n) { return n.get_si(); }

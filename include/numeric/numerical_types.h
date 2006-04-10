@@ -184,17 +184,18 @@ namespace Ariadne {
     template<> inline std::string name<Numeric::Rational>() { return "Rational"; }
     
     template<typename R> inline R convert_to(const Numeric::MPFloat& x) 
-    { throw std::runtime_error("convert_to(const Numeric::MPFloat&): Unknow destination type"); }
+    { return R(x); }
     template<typename R> inline R convert_to(const Numeric::Dyadic& x) 
-    { throw std::runtime_error("convert_to(const Numeric::Dyadic&): Unknow destination type"); }
+    { return R(x); }
     template<typename R> inline R convert_to(const Numeric::Rational& x) 
-    { throw std::runtime_error("convert_to(const Numeric::Rational&): Unknow destination type"); }
+    { return R(x); }
+    template<typename R> inline R convert_to(const double& x) 
+    { return R(x); } 
 
     template<> inline double convert_to<double>(const Numeric::MPFloat& x) { return x.get_d(); }
     template<> inline double convert_to<double>(const Numeric::Dyadic& x) { return x.get_d(); }
     template<> inline double convert_to<double>(const Numeric::Rational& x) { return x.get_d(); }
 
-    template<typename R> inline R convert_to(const double& x) { return R(x); } 
   }
 
 }

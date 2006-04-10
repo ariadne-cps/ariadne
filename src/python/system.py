@@ -138,7 +138,7 @@ class HybridAutomaton:
       discrete_nodes = discrete_nodes + i.__str__() + "\n"
     for i in self._discrete_transitions:
       discrete_transitions = discrete_transitions + i.__str__() + "\n"
-    return "HybridAutomaton \"%s\" = [ \n%s%s]" % (self.name, discrete_nodes, discrete_transitions)
+    return "HybridAutomaton \'%s\' = [ \n%s%s]" % (self._name, discrete_nodes, discrete_transitions)
 
 class HybridRegion:
   def __init__(self,discrete_node, set):

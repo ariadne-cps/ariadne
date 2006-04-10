@@ -5,7 +5,6 @@ LDXXFLAGS += -L../src
 LDLIBS = -lariadne -lboost_python ${LIBGMPXX} -lppl
 
 BASE_OBJ=base_module.o \
-	export_numeric.o export_interval.o export_function.o \
 	export_array.o export_binary_tree.o 
 
 LINEAR_ALGEBRA_OBJ = linear_algebra_module.o \
@@ -44,9 +43,8 @@ geometry.so: ${GEOMETRY_OBJ}
 evaluation.so: ${EVALUATION_OBJ}
 	${CXX} -shared -o evaluation.so ${CXXFLAGS} ${LDXXFLAGS} ${EVALUATION_OBJ} ${LDLIBS} ${RPATHFLAGS}
 
-#numeric.so: ${NUMERIC_OBJ}
-#	${CXX} -shared -o numeric.so ${CXXFLAGS} ${LDXXFLAGS} ${NUMERIC_OBJ} ${LDLIBS} ${RPATHFLAGS}
-
+numeric.so: ${NUMERIC_OBJ}
+	${CXX} -shared -o numeric.so ${CXXFLAGS} ${LDXXFLAGS} ${NUMERIC_OBJ} ${LDLIBS} ${RPATHFLAGS}
 
 install: python
 	mkdir -p ${PYTHONINSTALLDIR}/ariadne

@@ -20,7 +20,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from ariadne.base import Dyadic, Rational
+from ariadne.base import *
+from ariadne.numeric import * 
 from ariadne.linear_algebra import *
 from ariadne.geometry import EpsPlot, Point, Rectangle, Parallelotope, disjoint
 
@@ -46,8 +47,6 @@ print lp
 lp.solve()
 print lp.optimizing_point()
 print lp.optimal_value()
-
-
 
 
 T=Matrix(4,4)

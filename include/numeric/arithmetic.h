@@ -197,7 +197,13 @@ namespace Ariadne {
     lcm(const N &a, const N &b) {
       return ((a*b)/gcd(a,b));
     }
-  
+ 
+    template <typename R>
+    int
+    quotient(const R& x, const R& y)
+    {
+      throw std::runtime_error("quotient(): Not implemented for such type.");
+    }
   }
 }
 

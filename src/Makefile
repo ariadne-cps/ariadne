@@ -15,7 +15,7 @@ lib: libariadne.so
 base: 
 	(cd base; ${MAKE} all)
 
-numeric: 
+numeric:
 	(cd numeric; ${MAKE} all)
 
 linear_algebra: numeric
@@ -28,7 +28,7 @@ evaluation: base numeric linear_algebra geometry
 	(cd evaluation; ${MAKE} all)
 
 libariadne.so: base numeric linear_algebra geometry evaluation
-	${CXX} ${LDXXFLAGS} -shared -o libariadne.so base/*.o linear_algebra/*.o geometry/*.o evaluation/*.o ${LIBPPL} ${LIBGMPXX} ${RPATHFLAGS}
+	${CXX} ${LDXXFLAGS} -shared -o libariadne.so base/*.o linear_algebra/*.o geometry/*.o evaluation/*.o numeric/*.o ${LIBPPL} ${LIBGMPXX} ${RPATHFLAGS}
 
 libariadne.a: ${OBJ}
 	${CXX} ${LDXXFLAGS} -o libariadne.a ${OBJ} -lppl -lgmpxx -lgmp
@@ -48,6 +48,7 @@ clean:
 	(cd ${GEOMETRYDIR}; ${MAKE} clean )
 	(cd ${EVALUATIONDIR}; ${MAKE} clean )
 	(cd ${PYTHONDIR}; ${MAKE} clean )
+	(cd ${NUMERICDIR}; ${MAKE} clean )
 
 
 dep:  
@@ -56,3 +57,4 @@ dep:
 	(cd ${GEOMETRYDIR}; ${MAKE} dep);
 	(cd ${EVALUATIONDIR}; ${MAKE} dep; )
 	(cd ${PYTHONDIR}; ${MAKE} dep);
+	(cd ${NUMERICDIR}; ${MAKE} dep)

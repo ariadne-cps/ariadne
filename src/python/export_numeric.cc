@@ -25,6 +25,7 @@
 
 #include "numeric/numerical_types.h"
 #include "numeric/arithmetic.h"
+#include "numeric/function.h"
 
 #include "real_typedef.h"
 using namespace Ariadne;

@@ -35,6 +35,8 @@
 
 #include "../declarations.h"
 
+#include "../base/array.h"
+
 #include "../linear_algebra/constraint.h"
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
@@ -228,72 +230,7 @@ class Polyhedron {
     Rectangle<R> bounding_box() const {
       throw std::runtime_error("Polyhedron::bounding_box() const not implemented.");
     }
-    
-    /*! \brief An over-approximation of the Polyhdron governed by the parameter \a delta.
-     *
-     * WARNING: The metric error of the approximation may be larger than \a delta.
-     */
-    Polyhedron<R> over_approximation(const real_type& delta) {
-      Ariadne::LinearAlgebra::ConstraintSystem<R> cs(this->_ppl_poly.constraints());
-      cs.expand_by(delta);
-      return Polyhedron(cs);
-    }
-    
-    /*! \brief WHAT DOES THIS DO??. */
-    Polyhedron<R>& set_precision_to_upperapproximating(const real_type& delta) {
-      real_type denum=denominator(delta);
-      Ariadne::LinearAlgebra::ConstraintSystem<R> cs(this->_ppl_poly.constraints());
-      if (cs.already_at_precision(denum)) { 
-        return *this;
-      }
-      cs.reduce_precision_to_expanding(denum);
-      
-      Parma_Polyhedra_Library::NNC_Polyhedron new_poly(cs.open_ppl_constraint_system());
-      if (!new_poly.is_empty()) {
-        this->_ppl_poly=Parma_Polyhedra_Library::NNC_Polyhedron(cs.ppl_constraint_system());
-        this->_interior_poly=new_poly;
-      }
-      
-      return *this;
-    }
-  
-    /*! \brief WHAT DOES THIS DO??. */
-    Polyhedron<R>& set_precision_to_upperapproximating_for_output(const real_type& delta) {
-      real_type denum=denominator(delta);
-      Ariadne::LinearAlgebra::ConstraintSystem<R> cs(this->_ppl_poly.constraints());
-      if (cs.already_at_precision(denum)) {
-        return *this;
-      }
-      cs.reduce_precision_to_expanding(denum);
-      this->_ppl_poly=Parma_Polyhedra_Library::NNC_Polyhedron(cs.ppl_constraint_system());
-      this->_interior_poly=Parma_Polyhedra_Library::NNC_Polyhedron(cs.open_ppl_constraint_system());
-      return *this;
-    }
-
-    /*! \brief Project onto the given coordinates. */
-    Polyhedron<R> project_on_dimensions(const std::vector<uint>& dims) const {
-      #ifdef DEBUG
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-      #endif    
-      if (dims.size()==0) {
-        throw "Cannot project on zero dimensions.";  
-      }
-      if (dims.size()>this->dimension()) {
-        throw "Cannot project on more dimensions than the polyhedron ones.";
-      }
-      boost::numeric::ublas::matrix<real_type> projection_map=
-          Ariadne::LinearAlgebra::zero_matrix<real_type>(this->dimension());
-      for (size_t i=0; i< dims.size(); i++) {
-        projection_map(dims[i],dims[i])=1.0;
-      }
-      
-      #ifdef DEBUG
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-      #endif  
-      /* FIXME! */
-      return *this;
-    }
-  
+     
   public:
     friend class Parallelopiped<R>;
       
@@ -365,7 +302,6 @@ class Polyhedron {
     friend std::ostream& operator<< <>(std::ostream& os, 
                                        const Polyhedron<R>& P);
 
-   
   private:
     /* Construct a polyhedron from a PPL constraint system. */
     Polyhedron(Parma_Polyhedra_Library::Constraint_System& cs)
@@ -575,7 +511,7 @@ minkowski_sum(const Polyhedron<R>& A,
               const Polyhedron<R>& B) 
 {
   #ifdef DEBUG
-    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+    std::cerr << __FILE__ << ":" << __LINE__ << std::endl;
   #endif
   
   if ((!(A._ppl_poly).is_bounded()) || (!(B._ppl_poly).is_bounded())) {
@@ -599,13 +535,11 @@ minkowski_sum(const Polyhedron<R>& A,
   }
   
   #ifdef DEBUG
-    std::cout << __FILE__ << ":" << __LINE__ << std::endl;
+    std::cerr << __FILE__ << ":" << __LINE__ << std::endl;
   #endif
   
   return sum;
 }
-
-
 
 }
 }

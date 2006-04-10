@@ -31,7 +31,7 @@
 #include <gmpxx.h>
 
 #include "../declarations.h"
-#include "../base/utility.h"
+#include "../utility/stlio.h"
 
 namespace Ariadne {
   namespace Numeric {
@@ -47,8 +47,11 @@ namespace Ariadne {
   }
   
   namespace Base {
-    template<> inline int convert_to(const Numeric::Integer& n) { return n.get_si(); }
-    template<> inline long convert_to(const Numeric::Integer& n) { return n.get_si(); }
+    template<typename R> inline R convert_to(const Numeric::Integer& n) 
+    { throw std::runtime_error("convert_to(const Numeric::Integer&): Unknow destination type"); }
+	  
+    template<> inline int convert_to<int>(const Numeric::Integer& n) { return n.get_si(); }
+    template<> inline long convert_to<long>(const Numeric::Integer& n) { return n.get_si(); }
   }
 }
 

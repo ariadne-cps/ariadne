@@ -45,6 +45,13 @@ namespace Ariadne {
     template<typename R> typename Point<R>::difference_type operator-(const Point<R>&, const Point<R>&);
     template<typename R> Point<R> operator+(const Point<R>&, const typename Point<R>::difference_type&);
     template<typename R> Point<R> operator-(const Point<R>&, const typename Point<R>::difference_type&);
+    template<typename R> Point<R> project_on_dimensions(const Point<R>& A,
+		    			const Base::array<bool> &dims);
+    template<typename R> Point<R> project_on_dimensions(const Point<R>& A,
+		    			const size_t &x, const size_t &y);
+    template<typename R> Point<R> project_on_dimensions(const Point<R>& A,
+		    			const size_t &x, const size_t &y,
+					const size_t &z);
     template<typename R> std::ostream& operator<<(std::ostream&, const Point<R>&);
     template<typename R> std::istream& operator>>(std::istream&, Point<R>&);
 
@@ -172,6 +179,17 @@ namespace Ariadne {
       friend Point<real_type> operator- <> (const Point<real_type>& s,
                                        const vector_type& v);
 
+       /*! \brief Project a point. */
+      friend Point<real_type> project_on_dimensions<>(const Point<real_type>& A,
+		    			const Base::array<bool> &dims);
+       /*! \brief Project a point. */
+      friend Point<real_type> project_on_dimensions<>(const Point<real_type>& A,
+		                        const size_t &x, const size_t &y); 
+       /*! \brief Project a point. */
+      friend Point<real_type> project_on_dimensions<>(const Point<real_type>& A,
+		    	                const size_t &x, const size_t &y, 
+				        const size_t &z);
+
       friend std::ostream& operator<< <>(std::ostream& os, const Point<real_type>& state);
 
       friend std::istream& operator>> <> (std::istream& is, Point<real_type>& state);
@@ -229,6 +247,63 @@ namespace Ariadne {
         state._vector[i]=v[i];
       }
       return is;
+    }
+
+    template <typename R>
+    inline Point<R> project_on_dimensions(const Point<R> &A, 
+		    const Base::array<bool> &dims) {
+	    
+      if (A.dimension()!=dims.size())
+         throw "project_on_dimensions(const Point & ,...): the two parameters have different dimension";
+ 
+      size_t new_dim=0;
+
+      for (size_t i=0; i< A.dimension(); i++)
+        if (dims[i])
+          new_dim++;
+
+      Point<R> new_point(new_dim);
+      
+      size_t new_i=0;
+      for (size_t i=0; i<dims.size(); i++) {
+        if (dims[i]) {
+           new_point.set(new_i,A[i]);
+	   new_i++;
+	}
+      }
+
+      return new_point;
+    }
+
+    template <typename R>
+    inline Point<R> project_on_dimensions(const Point<R> &A, 
+		    const size_t &x, const size_t&y, const size_t&z) {
+	    
+      if ((A.dimension()<=x)||(A.dimension()<=y)||(A.dimension()<=z))
+         throw "project_on_dimensions(const Point& ,...): one of the projection dimensions is greater than the Point dimension";
+      
+      Point<R> new_point(3);
+      
+      new_point.set(0,A[x]);
+      new_point.set(1,A[y]);
+      new_point.set(2,A[z]);
+
+      return new_point;
+    }
+
+    template <typename R>
+    inline Point<R> project_on_dimensions(const Point<R> &A, 
+		    const size_t &x, const size_t&y) {
+	    
+      if ((A.dimension()<=x)||(A.dimension()<=y))
+         throw "project_on_dimensions(const Point& ,...): one of the projection dimensions is greater than the Point dimension";
+      
+      Point<R> new_point(2);
+      
+      new_point.set(0,A[x]);
+      new_point.set(1,A[y]);
+
+      return new_point;
     }
 
   }

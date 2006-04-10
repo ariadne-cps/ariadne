@@ -25,7 +25,6 @@
 
 #include <algorithm>
 #include "../base/array.h"
-#include "../base/utility.h"
 
 #include "../numeric/integer.h"
 #include "../numeric/arithmetic.h"
@@ -140,6 +139,8 @@ namespace Ariadne {
   
       // perform lu decomposition on the sub matrix
       for (i=p+1; i< rows; i++) {
+        if (A(row[p],col[p])==0.0)  
+	  throw std::runtime_error("matrix_type is singular");
         coef=A(row[i],col[p])/A(row[p],col[p]);
     
         for (j=p+1; j< columns; j++) 

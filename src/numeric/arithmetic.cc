@@ -22,6 +22,7 @@
  */
 
 #include "numeric/arithmetic.h"
+#include "numeric/arithmetic.tpl"
 
 #include "numeric/numerical_types.h"
 

@@ -57,7 +57,7 @@ namespace Ariadne {
 
     template <typename R> Rectangle<R> intersection(const Rectangle<R>& A, const Rectangle<R>& B);
     template <typename R> Rectangle<R> regular_intersection(const Rectangle<R>& A, const Rectangle<R>& B);
-
+    
     template<typename R> bool interiors_intersect(const Rectangle<R>& A, const Rectangle<R>& B);
     template<typename R> bool disjoint(const Rectangle<R>& A, const Rectangle<R>& B);
     template<typename R> bool inner_subset(const Rectangle<R>& A, const Rectangle<R>& B);
@@ -115,16 +115,15 @@ namespace Ariadne {
 
       /*! \brief Tests inclusion in an open cover. */
       friend bool subset_of_open_cover <> (const Rectangle<R>& A,
-                                           const ListSet<R,::Ariadne::Geometry::Rectangle>& list);
+                                           const ListSet<R,Ariadne::Geometry::Rectangle>& list);
 
       /*! \brief Tests if \a A is a subset of the interior of \a B. */
       friend bool inner_subset <> (const Rectangle<R>& A,
-                                   const ListSet<R,::Ariadne::Geometry::Rectangle>& B);
+                                   const ListSet<R,Ariadne::Geometry::Rectangle>& B);
 
       /*! \brief Tests if \a A is a subset of \a B. */
       friend bool subset <> (const Rectangle<R>& A,
-                             const ListSet<R,::Ariadne::Geometry::Rectangle>& B);
-
+                             const ListSet<R,Ariadne::Geometry::Rectangle>& B);
 
      public:
       /*! \brief The type of denotable real number used for the corners. */
@@ -946,7 +945,7 @@ namespace Ariadne {
       }
       return is;
     }
-    
+   
   }
 }
 

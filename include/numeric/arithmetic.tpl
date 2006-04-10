@@ -63,5 +63,3 @@ namespace Ariadne {
 }
 
 
-
-#endif /* _ARITHMETIC_H */

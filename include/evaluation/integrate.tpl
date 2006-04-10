@@ -63,8 +63,6 @@
 namespace Ariadne {
   namespace Evaluation {
 
-    
-
     template<typename R>
     Geometry::Rectangle<R> 
     integrate(const VectorField<R>& vector_field, 
@@ -81,10 +79,10 @@ namespace Ariadne {
       R t=time;
       R h=step_size;
       while(t>0) {
-        h=max(t,h);
+        h=min(t,h);
         r=integration_step(vf,r,h);
         t=t-h;
-        h=max(R(2*h),step_size);
+        //h=max(R(2*h),step_size);
       }
       return r;
     }
@@ -106,10 +104,10 @@ namespace Ariadne {
       R t=time;
       R h=step_size;
       while(t>0) {
-        h=max(t,h);
+        h=min(t,h);
         p=integration_step(vf,p,h);
         t=t-h;
-        h=max(R(2*h),step_size);
+        //h=max(R(2*h),step_size);
       }
       return p;
     }
@@ -131,7 +129,7 @@ namespace Ariadne {
       Geometry::ListSet<R,BS> finish(initial_set.dimension());
       
       while(t!=0) {
-        h=max(t,h);
+        h=min(t,h);
         for(typename Geometry::ListSet<R,BS>::const_iterator iter=start.begin(); iter!=start.end(); ++iter) {
           const VectorField<R>& vf=vector_field;
           BS<R> bs(*iter);
@@ -194,7 +192,7 @@ namespace Ariadne {
       
       while(t!=0) {
         std::cerr << "time left=" << t << "  stepsize=" << h << "  sets in list=" << start_set.size() << "\n";
-        h=max(t,h);
+        h=min(t,h);
         for(typename ListSet<R,Parallelotope>::const_iterator iter=start_set.begin(); iter!=start_set.end(); ++iter) {
           const VectorField<R>& vf=vector_field;
           Geometry::Parallelotope<R> p(*iter);
@@ -236,6 +234,8 @@ namespace Ariadne {
           const R& time,
           const R& step_size) 
     {
+      throw std::runtime_error("reach(...): Not implemented.");
+      
       return initial_set;
     }
 
@@ -258,11 +258,11 @@ namespace Ariadne {
         R t=time;
         R h=step_size;
         while(t>0) {
-          h=max(t,h);
+          h=min(t,h);
           result.adjoin(over_approximation_of_intersection(reach_step(vf,p,h),gbb,g));
           p=integration_step(vf,p,h);
           t=t-h;
-          h=max(R(2*h),step_size);
+          //h=max(R(2*h),step_size);
         }
       }
       return result;

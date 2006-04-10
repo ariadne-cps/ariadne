@@ -31,8 +31,8 @@
 #include <gmpxx.h>
 
 #include "../declarations.h"
-#include "../base/utility.h"
 #include "../numeric/dyadic.h"
+#include "../utility/stlio.h"
 
 namespace Ariadne {
   namespace Numeric {
@@ -175,15 +175,26 @@ namespace Ariadne {
   }
   
   namespace Base {
+    template<typename R> inline std::string name() 
+    { throw std::runtime_error("name(): Unknow type");}
+
     template<> inline std::string name<Numeric::Float64>() { return "Float64"; }
     template<> inline std::string name<Numeric::MPFloat>() { return "MPFloat"; }
     template<> inline std::string name<Numeric::Dyadic>() { return "Dyadic"; }
     template<> inline std::string name<Numeric::Rational>() { return "Rational"; }
     
-    template<> inline double convert_to<double>(const MPFloat& x) { return x.get_d(); }
-    template<> inline double convert_to<double>(const Dyadic& x) { return x.get_d(); }
-    template<> inline double convert_to<double>(const Rational& x) { return x.get_d(); }
+    template<typename R> inline R convert_to(const Numeric::MPFloat& x) 
+    { throw std::runtime_error("convert_to(const Numeric::MPFloat&): Unknow destination type"); }
+    template<typename R> inline R convert_to(const Numeric::Dyadic& x) 
+    { throw std::runtime_error("convert_to(const Numeric::Dyadic&): Unknow destination type"); }
+    template<typename R> inline R convert_to(const Numeric::Rational& x) 
+    { throw std::runtime_error("convert_to(const Numeric::Rational&): Unknow destination type"); }
 
+    template<> inline double convert_to<double>(const Numeric::MPFloat& x) { return x.get_d(); }
+    template<> inline double convert_to<double>(const Numeric::Dyadic& x) { return x.get_d(); }
+    template<> inline double convert_to<double>(const Numeric::Rational& x) { return x.get_d(); }
+
+    template<typename R> inline R convert_to(const double& x) { return R(x); } 
   }
 
 }

@@ -34,7 +34,6 @@
 #include "../declarations.h"
 
 #include "../utility/stlio.h"
-#include "../base/utility.h"
 #include "../numeric/interval.h"
 
 #include "../linear_algebra/vector.h"
@@ -370,6 +369,42 @@ namespace Ariadne {
     Parallelotope<R>::disjoint(const Parallelotope<R>& p) const
     {
      return Geometry::disjoint(Polyhedron<R>(*this),Polyhedron<R>(p));
+    }
+
+    template <typename R>
+    Point<R> 
+    Parallelotope<R>::vertices(const size_t &i) const
+    {
+      Point<R> vertex(this->centre());
+      const LinearAlgebra::matrix<R> gen=this->_generators;
+      
+      for (size_t j=0; j<gen.size1(); j++) {
+	for (size_t k=0; k<gen.size2(); k++) {
+          if ((1<<k)&(i)) {
+	    vertex[j]+=gen(j,k);
+	  } else {
+	    vertex[j]-=gen(j,k);
+	  }
+	}
+      }
+ 
+      return vertex;
+
+    }
+    
+    template<typename R>
+    std::vector< Point<R> > 
+    Parallelotope<R>::vertices() const
+    {
+      size_t vert_num=(1<<(this->_generators).size2());
+      std::vector< Point<R> > vert(1<<(this->_generators).size2());
+
+      assert((this->_generators).size2()<32);
+      for (size_t i=0; i<vert_num; i++) {
+	vert[i]=this->vertices(i);
+      }
+
+      return vert;
     }
     
     template <typename R>

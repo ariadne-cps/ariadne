@@ -60,6 +60,8 @@ typedef Geometry::Polyhedron<Real> RPolyhedron;
 
 typedef Geometry::ListSet<Real,Geometry::Rectangle> RRectangleListSet;
 typedef Geometry::ListSet<Real,Geometry::Parallelotope> RParallelotopeListSet;
+typedef Geometry::ListSet<Real,Geometry::Zonotope> RZonotopeListSet;
+typedef Geometry::ListSet<Real,Geometry::Polyhedron> RPolyhedronListSet;
 
 typedef Geometry::LatticeCell LatticeCell;
 typedef Geometry::LatticeRectangle LatticeRectangle;

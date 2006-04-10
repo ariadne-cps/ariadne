@@ -31,12 +31,12 @@ parallelotope.o: parallelotope.cc ../../include/geometry/parallelotope.h \
   ../../include/geometry/../utility/../base/../declarations.h \
   ../../include/geometry/../numeric/interval.h \
   ../../include/geometry/../numeric/../declarations.h \
+  ../../include/geometry/../base/array.h \
   ../../include/geometry/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../numeric/integer.h \
   ../../include/geometry/../linear_algebra/../numeric/../declarations.h \
-  ../../include/geometry/../linear_algebra/../numeric/../base/utility.h \
-  ../../include/geometry/../linear_algebra/../numeric/../base/../declarations.h \
+  ../../include/geometry/../linear_algebra/../numeric/../utility/stlio.h \
   ../../include/geometry/../linear_algebra/matrix.h \
   ../../include/geometry/../geometry/point.h \
   ../../include/geometry/../geometry/../declarations.h \
@@ -59,13 +59,14 @@ parallelotope.o: parallelotope.cc ../../include/geometry/parallelotope.h \
   ../../include/geometry/../geometry/../geometry/../base/array_operations.h \
   ../../include/geometry/../geometry/../geometry/../base/../declarations.h \
   ../../include/geometry/../geometry/list_set.h \
+  ../../include/geometry/../geometry/../numeric/numerical_types.h \
+  ../../include/geometry/../geometry/../numeric/../declarations.h \
+  ../../include/geometry/../geometry/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../geometry/../numeric/../utility/stlio.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
+  ../../include/geometry/../geometry/../base/array.h \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../numeric/numerical_types.h \
-  ../../include/geometry/../geometry/../linear_algebra/../numeric/../declarations.h \
-  ../../include/geometry/../geometry/../linear_algebra/../numeric/../base/utility.h \
-  ../../include/geometry/../geometry/../linear_algebra/../numeric/../numeric/dyadic.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/geometry/../geometry/../linear_algebra/matrix.h \
   ../../include/geometry/../geometry/../geometry/generator.h \
@@ -81,7 +82,6 @@ parallelotope.o: parallelotope.cc ../../include/geometry/parallelotope.h \
   ../../include/geometry/../geometry/../geometry/parallelotope.h \
   ../../include/geometry/../geometry/../geometry/polyhedron.h \
   ../../include/geometry/parallelotope.tpl \
-  ../../include/geometry/../base/utility.h \
   ../../include/geometry/../linear_algebra/linear_program.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/geometry/../geometry/lattice_set.h \
@@ -91,15 +91,16 @@ parallelotope.o: parallelotope.cc ../../include/geometry/parallelotope.h \
 zonotope.o: zonotope.cc ../../include/real_typedef.h \
   ../../include/numeric/numerical_types.h \
   ../../include/numeric/../declarations.h \
-  ../../include/numeric/../base/utility.h \
-  ../../include/numeric/../base/../declarations.h \
   ../../include/numeric/../numeric/dyadic.h \
+  ../../include/numeric/../utility/stlio.h \
+  ../../include/numeric/../utility/../base/array.h \
+  ../../include/numeric/../utility/../base/../declarations.h \
   ../../include/geometry/zonotope.h \
   ../../include/geometry/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../numeric/integer.h \
   ../../include/geometry/../linear_algebra/../numeric/../declarations.h \
-  ../../include/geometry/../linear_algebra/../numeric/../base/utility.h \
+  ../../include/geometry/../linear_algebra/../numeric/../utility/stlio.h \
   ../../include/geometry/../linear_algebra/matrix.h \
   ../../include/geometry/../linear_algebra/zonotopic_vector.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
@@ -112,9 +113,8 @@ zonotope.o: zonotope.cc ../../include/real_typedef.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/interval_matrix.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/geometry/../utility/stlio.h \
-  ../../include/geometry/../utility/../base/array.h \
-  ../../include/geometry/../utility/../base/../declarations.h \
   ../../include/geometry/../numeric/interval.h \
+  ../../include/geometry/../base/array.h \
   ../../include/geometry/../geometry/point.h \
   ../../include/geometry/../geometry/../declarations.h \
   ../../include/geometry/../geometry/../utility/stlio.h \
@@ -133,12 +133,13 @@ zonotope.o: zonotope.cc ../../include/real_typedef.h \
   ../../include/geometry/../geometry/../geometry/../base/array_operations.h \
   ../../include/geometry/../geometry/../geometry/../base/../declarations.h \
   ../../include/geometry/../geometry/list_set.h \
+  ../../include/geometry/../geometry/../numeric/numerical_types.h \
   ../../include/geometry/../geometry/parallelotope.h \
+  ../../include/geometry/../geometry/../base/array.h \
   ../../include/geometry/../geometry/../linear_algebra/matrix.h \
   ../../include/geometry/../geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/../geometry/list_set.h \
   ../../include/geometry/../geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../geometry/../declarations.h \
   ../../include/geometry/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../geometry/../linear_algebra/../declarations.h \
@@ -165,20 +166,19 @@ simplex.o: simplex.cc ../../include/geometry/simplex.h \
   ../../include/geometry/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../numeric/integer.h \
   ../../include/geometry/../linear_algebra/../numeric/../declarations.h \
-  ../../include/geometry/../linear_algebra/../numeric/../base/utility.h \
-  ../../include/geometry/../linear_algebra/../numeric/../base/../declarations.h \
+  ../../include/geometry/../linear_algebra/../numeric/../utility/stlio.h \
   ../../include/geometry/../geometry/point.h \
   ../../include/geometry/../geometry/../declarations.h \
   ../../include/geometry/../geometry/../utility/stlio.h \
   ../../include/geometry/../geometry/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
+  ../../include/geometry/../geometry/../base/array.h \
   ../../include/geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../linear_algebra/../declarations.h \
   ../../include/geometry/../geometry/../linear_algebra/../numeric/numerical_types.h \
   ../../include/geometry/../geometry/../linear_algebra/../numeric/../declarations.h \
-  ../../include/geometry/../geometry/../linear_algebra/../numeric/../base/utility.h \
   ../../include/geometry/../geometry/../linear_algebra/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../geometry/../linear_algebra/../numeric/../utility/stlio.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/../declarations.h \
@@ -206,24 +206,27 @@ simplex.o: simplex.cc ../../include/geometry/simplex.h \
   ../../include/geometry/../geometry/../geometry/../geometry/../base/array_operations.h \
   ../../include/geometry/../geometry/../geometry/../geometry/../base/../declarations.h \
   ../../include/geometry/../geometry/list_set.h \
+  ../../include/geometry/../geometry/../numeric/numerical_types.h \
   ../../include/geometry/simplex.tpl \
   ../../include/geometry/../geometry/simplex.h \
   ../../include/real_typedef.h ../../include/numeric/numerical_types.h
 
 polyhedron.o: polyhedron.cc ../../include/geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh ../../include/geometry/../declarations.h \
+  ../../include/geometry/../declarations.h \
+  ../../include/geometry/../base/array.h \
+  ../../include/geometry/../base/../declarations.h \
   ../../include/geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../numeric/numerical_types.h \
   ../../include/geometry/../linear_algebra/../numeric/../declarations.h \
-  ../../include/geometry/../linear_algebra/../numeric/../base/utility.h \
-  ../../include/geometry/../linear_algebra/../numeric/../base/../declarations.h \
   ../../include/geometry/../linear_algebra/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../linear_algebra/../numeric/../utility/stlio.h \
+  ../../include/geometry/../linear_algebra/../numeric/../utility/../base/array.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../numeric/integer.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../numeric/../declarations.h \
-  ../../include/geometry/../linear_algebra/../linear_algebra/../numeric/../base/utility.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/../numeric/../utility/stlio.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/geometry/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/matrix.h \
@@ -231,8 +234,6 @@ polyhedron.o: polyhedron.cc ../../include/geometry/polyhedron.h \
   ../../include/geometry/../geometry/point.h \
   ../../include/geometry/../geometry/../declarations.h \
   ../../include/geometry/../geometry/../utility/stlio.h \
-  ../../include/geometry/../geometry/../utility/../base/array.h \
-  ../../include/geometry/../geometry/../utility/../base/../declarations.h \
   ../../include/geometry/../geometry/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/../numeric/interval.h \
@@ -260,7 +261,9 @@ polyhedron.o: polyhedron.cc ../../include/geometry/polyhedron.h \
   ../../include/geometry/../numeric/../numeric/../declarations.h \
   ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/../geometry/list_set.h \
+  ../../include/geometry/../geometry/../numeric/numerical_types.h \
   ../../include/geometry/../geometry/parallelotope.h \
+  ../../include/geometry/../geometry/../base/array.h \
   ../../include/geometry/../geometry/../linear_algebra/matrix.h \
   ../../include/geometry/../geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/../geometry/list_set.h \
@@ -316,9 +319,9 @@ grid.o: grid.cc ../../include/geometry/grid.h \
   ../../include/geometry/../numeric/arithmetic.h \
   ../../include/geometry/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/../numeric/../numeric/../declarations.h \
-  ../../include/geometry/../numeric/../numeric/../base/utility.h \
-  ../../include/geometry/../numeric/../numeric/../base/../declarations.h \
   ../../include/geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../numeric/../numeric/../utility/stlio.h \
+  ../../include/geometry/../numeric/../numeric/../utility/../base/array.h \
   ../../include/geometry/../numeric/../numeric/approximation.h \
   ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/../geometry/grid.h \
@@ -329,7 +332,6 @@ grid.o: grid.cc ../../include/geometry/grid.h \
   ../../include/geometry/../geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/../geometry/../declarations.h \
   ../../include/geometry/../geometry/../geometry/../utility/stlio.h \
-  ../../include/geometry/../geometry/../geometry/../utility/../base/array.h \
   ../../include/geometry/../geometry/../geometry/../numeric/interval.h \
   ../../include/geometry/../geometry/../geometry/../base/binary_word.h \
   ../../include/geometry/../geometry/../geometry/../linear_algebra/interval_vector.h \
@@ -339,7 +341,7 @@ grid.o: grid.cc ../../include/geometry/grid.h \
   ../../include/geometry/../geometry/../geometry/../linear_algebra/../linear_algebra/../declarations.h \
   ../../include/geometry/../geometry/../geometry/../linear_algebra/../linear_algebra/../numeric/integer.h \
   ../../include/geometry/../geometry/../geometry/../linear_algebra/../linear_algebra/../numeric/../declarations.h \
-  ../../include/geometry/../geometry/../geometry/../linear_algebra/../linear_algebra/../numeric/../base/utility.h \
+  ../../include/geometry/../geometry/../geometry/../linear_algebra/../linear_algebra/../numeric/../utility/stlio.h \
   ../../include/geometry/../geometry/../geometry/../geometry/point.h \
   ../../include/geometry/../geometry/../geometry/../geometry/../declarations.h \
   ../../include/geometry/../geometry/../geometry/../geometry/../utility/stlio.h \
@@ -350,6 +352,7 @@ grid.o: grid.cc ../../include/geometry/grid.h \
   ../../include/geometry/../geometry/../geometry/lattice_set.h \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/list_set.h \
+  ../../include/geometry/../geometry/../numeric/numerical_types.h \
   ../../include/real_typedef.h ../../include/numeric/numerical_types.h
 
 grid_set.o: grid_set.cc ../../include/geometry/grid_set.h \
@@ -362,15 +365,14 @@ grid_set.o: grid_set.cc ../../include/geometry/grid_set.h \
   ../../include/geometry/../numeric/arithmetic.h \
   ../../include/geometry/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/../numeric/../numeric/../declarations.h \
-  ../../include/geometry/../numeric/../numeric/../base/utility.h \
-  ../../include/geometry/../numeric/../numeric/../base/../declarations.h \
   ../../include/geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../numeric/../numeric/../utility/stlio.h \
+  ../../include/geometry/../numeric/../numeric/../utility/../base/array.h \
   ../../include/geometry/../numeric/../numeric/approximation.h \
   ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/../declarations.h \
   ../../include/geometry/../geometry/../utility/stlio.h \
-  ../../include/geometry/../geometry/../utility/../base/array.h \
   ../../include/geometry/../geometry/../numeric/interval.h \
   ../../include/geometry/../geometry/../base/binary_word.h \
   ../../include/geometry/../geometry/../linear_algebra/interval_vector.h \
@@ -380,7 +382,7 @@ grid_set.o: grid_set.cc ../../include/geometry/grid_set.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/../declarations.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/../numeric/integer.h \
   ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/../numeric/../declarations.h \
-  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/../numeric/../base/utility.h \
+  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/../numeric/../utility/stlio.h \
   ../../include/geometry/../geometry/../geometry/point.h \
   ../../include/geometry/../geometry/../geometry/../declarations.h \
   ../../include/geometry/../geometry/../geometry/../utility/stlio.h \
@@ -404,8 +406,8 @@ grid_set.o: grid_set.cc ../../include/geometry/grid_set.h \
   ../../include/geometry/../geometry/../linear_algebra/../numeric/integer.h \
   ../../include/geometry/../geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/../geometry/list_set.h \
+  ../../include/geometry/../geometry/../geometry/../numeric/numerical_types.h \
   ../../include/geometry/../geometry/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/geometry/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/geometry/../geometry/../geometry/../linear_algebra/../declarations.h \
   ../../include/geometry/../geometry/../geometry/../linear_algebra/../numeric/numerical_types.h \
@@ -442,16 +444,15 @@ subdivision_tree_set.o: subdivision_tree_set.cc \
   ../../include/numeric/arithmetic.h \
   ../../include/numeric/../numeric/numerical_types.h \
   ../../include/numeric/../numeric/../declarations.h \
-  ../../include/numeric/../numeric/../base/utility.h \
-  ../../include/numeric/../numeric/../base/../declarations.h \
   ../../include/numeric/../numeric/../numeric/dyadic.h \
+  ../../include/numeric/../numeric/../utility/stlio.h \
+  ../../include/numeric/../numeric/../utility/../base/array.h \
+  ../../include/numeric/../numeric/../utility/../base/../declarations.h \
   ../../include/numeric/../numeric/approximation.h \
   ../../include/numeric/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/rectangle.h \
   ../../include/geometry/../declarations.h \
   ../../include/geometry/../utility/stlio.h \
-  ../../include/geometry/../utility/../base/array.h \
-  ../../include/geometry/../utility/../base/../declarations.h \
   ../../include/geometry/../numeric/interval.h \
   ../../include/geometry/../numeric/../declarations.h \
   ../../include/geometry/../base/binary_word.h \
@@ -463,7 +464,7 @@ subdivision_tree_set.o: subdivision_tree_set.cc \
   ../../include/geometry/../linear_algebra/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../numeric/integer.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../numeric/../declarations.h \
-  ../../include/geometry/../linear_algebra/../linear_algebra/../numeric/../base/utility.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/../numeric/../utility/stlio.h \
   ../../include/geometry/../geometry/point.h \
   ../../include/geometry/../geometry/../declarations.h \
   ../../include/geometry/../geometry/../utility/stlio.h \
@@ -519,8 +520,7 @@ partition_tree_set.o: partition_tree_set.cc \
   ../../include/geometry/../geometry/../geometry/../linear_algebra/../linear_algebra/../declarations.h \
   ../../include/geometry/../geometry/../geometry/../linear_algebra/../linear_algebra/../numeric/integer.h \
   ../../include/geometry/../geometry/../geometry/../linear_algebra/../linear_algebra/../numeric/../declarations.h \
-  ../../include/geometry/../geometry/../geometry/../linear_algebra/../linear_algebra/../numeric/../base/utility.h \
-  ../../include/geometry/../geometry/../geometry/../linear_algebra/../linear_algebra/../numeric/../base/../declarations.h \
+  ../../include/geometry/../geometry/../geometry/../linear_algebra/../linear_algebra/../numeric/../utility/stlio.h \
   ../../include/geometry/../geometry/../geometry/../geometry/point.h \
   ../../include/geometry/../geometry/../geometry/../geometry/../declarations.h \
   ../../include/geometry/../geometry/../geometry/../geometry/../utility/stlio.h \
@@ -535,13 +535,14 @@ partition_tree_set.o: partition_tree_set.cc \
   ../../include/geometry/../geometry/partition_tree_set.h \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/list_set.h \
+  ../../include/geometry/../geometry/../numeric/numerical_types.h \
+  ../../include/geometry/../geometry/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../geometry/../numeric/../utility/stlio.h \
   ../../include/geometry/../geometry/grid_set.h \
   ../../include/geometry/../geometry/../numeric/arithmetic.h \
   ../../include/geometry/../geometry/../numeric/../numeric/numerical_types.h \
-  ../../include/geometry/../geometry/../numeric/../numeric/../declarations.h \
-  ../../include/geometry/../geometry/../numeric/../numeric/../base/utility.h \
-  ../../include/geometry/../geometry/../numeric/../numeric/../numeric/dyadic.h \
   ../../include/geometry/../geometry/../numeric/../numeric/approximation.h \
+  ../../include/geometry/../geometry/../numeric/../numeric/../declarations.h \
   ../../include/geometry/../geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/../geometry/../geometry/point.h \
   ../../include/geometry/../geometry/../geometry/grid.h \

@@ -28,17 +28,78 @@
  
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 
+#include "../geometry/point.h"
 #include "../geometry/rectangle.h"
 #include "../geometry/list_set.h"
 #include "../geometry/grid_set.h"
 #include "../geometry/parallelotope.h"
+#include "../geometry/zonotope.h"
+#include "../geometry/polyhedron.h"
 #include "../geometry/partition_tree_set.h"
 #include "../linear_algebra/matrix.h"
 
 namespace Ariadne {
   namespace Postscript {
+    
+    typedef struct{
+      size_t pos;
+      double radiant;
+    } radiant_pointer_type;
+	  
+    inline bool
+    is_smaller_than(const radiant_pointer_type &a, 
+		    const radiant_pointer_type &b) {
+      return (a.radiant<b.radiant);
+    }
+   
+    template <typename R>
+    std::vector< Geometry::Point<R> >
+    order_around_a_point(const std::vector< Geometry::Point<R> > &vertices, 
+		    const Geometry::Point<R> &centre)
+    {
+      std::vector< LinearAlgebra::vector<R> > vert_pos(vertices.size());
+      
+      for (size_t i=0; i< vertices.size(); i++) {
+	vert_pos[i]=vertices[i].position_vector()-
+				centre.position_vector();
+      }
+      
+      radiant_pointer_type pointers[vertices.size()];
+      
+      double tangent=0;
+      R tangent_R=0;
+      
+      for (size_t i=0; i< vert_pos.size(); i++) {
+        pointers[i].pos=i;
+	if (vert_pos[i](1)==0) {
+	  if (vert_pos[i](0) >0)
+            pointers[i].radiant=acos(0.0);
+	  else
+            pointers[i].radiant=-acos(0.0);
+	} else {
+	  tangent_R=vert_pos[i](0)/vert_pos[i](1);
+	  tangent=convert_to<double>(tangent_R);
+	  pointers[i].radiant=atan(tangent);
+	
+	  if (vert_pos[i](1) <0)
+            pointers[i].radiant+=acos(-1.0);
+        }
+      }
+      
+//      const size_t N = sizeof(pointers) / sizeof(radiant_pointer_type);
+      std::sort(pointers, pointers + vert_pos.size(), is_smaller_than);
+      
+      std::vector< Geometry::Point<R> > new_vector(vertices.size()); 
+   
+      for (size_t i=0; i< vertices.size(); i++) {
+	new_vector[i]=vertices[pointers[i].pos];
+      }
 
+      return new_vector;
+    }
+    
     template<typename R>
     Ariadne::Geometry::Rectangle<double>
     convert_to_double_rectangle(const Ariadne::Geometry::Rectangle<R>& r) {
@@ -150,7 +211,6 @@ namespace Ariadne {
     };
 
     
-    
     template<typename R>
     epsfstream&
     trace(epsfstream& eps, const Ariadne::Geometry::Rectangle<R>& r)
@@ -167,29 +227,48 @@ namespace Ariadne {
           << rlx << ' ' << rly << " lineto\n";
       return eps;
     }
+   
+    template<typename R>
+    epsfstream&
+    trace(epsfstream& eps, const std::vector< Geometry::Point<R> > &vertices) 
+    {
+      assert(vertices.size()>0);
+      
+      Geometry::Point<R> baricentre=vertices[0];
+
+      for (size_t j=1; j<vertices.size(); j++) 
+        for (size_t i=1; i<baricentre.dimension(); i++) 
+          baricentre[i]=baricentre[i]+vertices[j][i];
+
+      for (size_t i=1; i<baricentre.dimension(); i++) 
+        baricentre[i]/=vertices.size();
+
+      return trace(eps, vertices, baricentre);
+    }
     
     template<typename R>
     epsfstream&
-    trace(epsfstream& eps, const Ariadne::Geometry::Parallelotope<R>& p)
-    {
-      Ariadne::Geometry::Point<R> bl=p.centre()-p.generator(0)-p.generator(1);
-      Ariadne::Geometry::Point<R> br=p.centre()+p.generator(0)-p.generator(1);
-      Ariadne::Geometry::Point<R> tr=p.centre()+p.generator(0)+p.generator(1);
-      Ariadne::Geometry::Point<R> tl=p.centre()-p.generator(0)+p.generator(1);
+    trace(epsfstream& eps, const std::vector< Geometry::Point<R> > &vertices,
+                   const Geometry::Point<R> &baricentre) {
+      std::vector< Geometry::Point<R> > ordered_vertices;
+   
+      ordered_vertices=order_around_a_point(vertices,baricentre);
 
-      eps << bl[0] << ' ' << bl[1] << " moveto\n"
-          << br[0] << ' ' << br[1] << " lineto\n"
-          << tr[0] << ' ' << tr[1] << " lineto\n"
-          << tl[0] << ' ' << tl[1] << " lineto\n"
-          << bl[0] << ' ' << bl[1] << " lineto\n";
+      eps << ordered_vertices[0][0] << ' ' << ordered_vertices[0][1] << 
+	      " moveto\n";
+      for (size_t i=1; i< ordered_vertices.size(); i++) {
+        eps << ordered_vertices[i][0] << ' ' << ordered_vertices[i][1] << 
+	      " lineto\n";
+      }
       return eps;
     }
+
 
     template<typename R>
     epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::Point<R>& p) 
     {
-      assert(p.dimension()>=2);
+      assert(p.dimension()==2);
 
       if(eps.fill_style) {
         eps << double(p[0]) << " " << double(p[0]) << "0.001 0 360 closepath\n";
@@ -206,7 +285,7 @@ namespace Ariadne {
     epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::Rectangle<R>& r) 
     {
-      assert(r.dimension()>=2);
+      assert(r.dimension()==2);
 
       if(eps.fill_style) {
         trace(eps,r);
@@ -223,13 +302,45 @@ namespace Ariadne {
     epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::Parallelotope<R>& p)
     {
-      LinearAlgebra::matrix<R> A(2,p.dimension());
-      A(0,0)=1;
-      A(1,1)=1;
-      trace(eps,p);
-      eps << eps.fill_colour << " fill\n";
+      
+      if(eps.fill_style) {
+	trace(eps,p.vertices(),p.centre());
+        eps << eps.fill_colour << " fill\n";
+      }
       if(eps.line_style) {
-        trace(eps,p);
+	trace(eps,p.vertices(),p.centre());
+        eps << eps.line_colour << " stroke\n";
+      }
+      return eps;
+    }
+    
+    template<typename R>
+    epsfstream&
+    operator<<(epsfstream& eps, const Ariadne::Geometry::Zonotope<R>& z)
+    {
+      
+      if(eps.fill_style) {
+	trace(eps,z.vertices(),z.centre());
+        eps << eps.fill_colour << " fill\n";
+      }
+      if(eps.line_style) {
+	trace(eps,z.vertices(),z.centre());
+        eps << eps.line_colour << " stroke\n";
+      }
+      return eps;
+    }
+   
+    template<typename R>
+    epsfstream&
+    operator<<(epsfstream& eps, const Ariadne::Geometry::Polyhedron<R>& p)
+    {
+      
+      if(eps.fill_style) {
+	trace(eps,p.vertices());
+        eps << eps.fill_colour << " fill\n";
+      }
+      if(eps.line_style) {
+	trace(eps,p.vertices());
         eps << eps.line_colour << " stroke\n";
       }
       return eps;
@@ -241,11 +352,13 @@ namespace Ariadne {
     {
       typedef typename Ariadne::Geometry::ListSet<R,BS>::const_iterator const_iterator;
         for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
-          trace(eps,*set_iter) << eps.fill_colour << " fill\n";
+          //trace(eps,*set_iter) << eps.fill_colour << " fill\n";
+          eps << *set_iter << eps.fill_colour << " fill\n";
         }
       if(eps.line_style) {
         for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
-          trace(eps,*set_iter) << eps.line_colour << " stroke\n";
+          //trace(eps,*set_iter) << eps.line_colour << " stroke\n";
+          eps<< *set_iter << eps.line_colour << " stroke\n";
         }
       }
       return eps;

@@ -23,6 +23,8 @@
 
 from ariadne.base import *
 from ariadne.geometry import *
+from ariadne.linear_algebra import *
+from ariadne.evaluation import *
 
 sl=PointList()
 s=Point(2)
@@ -37,6 +39,30 @@ r=Simplex(sl)
 s[0]=1.5
 sl.append(s)
 q=Polyhedron(sl)
+
+A=Matrix(2,2);
+b=Vector(2);
+
+A[0,0]=-1.0;
+A[1,1]=-1.0;
+
+M=AffineMap(A,b)
+
+q2=M(q);
+
+c=convex_hull(q,q2);
+
+eps=EpsPlot("polyhedron.eps",Rectangle("[-3,3]x[-3,3]"))
+eps.set_fill_colour("yellow")
+
+eps.write(c)
+
+eps.set_fill_colour("blue")
+
+eps.write(q)
+eps.write(q2)
+
+eps.close()
 
 print sl
 print r

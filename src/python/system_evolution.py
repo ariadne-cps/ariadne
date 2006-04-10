@@ -23,27 +23,33 @@ from ariadne.base import *
 from ariadne.evaluation import *
 from ariadne.geometry import *
 from ariadne.linear_algebra import *
+from ariadne.system import *
 import sys
 
+def try_to_reset_from(H, d_node, c_set, time, time_step, reach_set):
+  for trans in H.get_discrete_transitions_leaving(d_node):
+    act=trans.activation()
+    if (interiors_intersect(c_set, act)):
+      reset=trans.reset()
+      dest_d_node=trans.destination()
+      dest_c_set=reset(c_set)
+      bounded_time_reachability_with_reach_set(H, dest_d_node, dest_c_set, time, time_step, reach_set)
+	
+
+def bounded_time_reachability_with_reach_set(H, d_node, c_set, time, time_step, reach_set):
+  if not (d_node in H.discrete_nodes()):
+    raise 'bounded_time_reachability(...): initial discrete node does not belong to the automaton'
+  last_reached=c_set
+  inv=d_node.invariant()
+  while ((time>=0) and (interiors_intersect(last_reached,inv))):
+    reached=integrate(d_node.dynamic(),last_reached,time_step,time_step)
+    reach_set.add_a_hybrid_region(d_node, reached)
+    try_to_reset_from(H, d_node, reached, time, time_step, reach_set)
+    last_reached=reached
+    time=time-time_step
+
 def bounded_time_reachability(H, d_node, c_set, time, time_step):
-	if not (d_node in H.discrete_nodes()):
-		raise 'bounded_time_reachability(...): initial discrete node does not belong to the automaton'
-	last_reached=c_set
-	reach_set=[last_reached]
-	inv=d_node.invariant()
-	while ((time>=0) and (interiors_intersect(last_reached,inv))):
-		reached=integrate(d_node.dynamic(),last_reached,time_step,time_step)
-		for trans in H.get_discrete_transitions_leaving(d_node):
-			act=trans.activation()
-			if (interiors_intersect(reached,act)):
-				reset=trans.reset()
-				dest_d_node=trans.destination()
-				dest_c_set=reset(reached)
-				new_reach=bounded_time_reachability(H, dest_d_node, dest_c_set, time, time_step)
-				reach_set.extend(new_reach)
-		
-		reach_set.append(reached)
-		last_reached=reached
-		time=time-time_step
-	return reach_set
+  reach_set=HybridReachSet()
+  bounded_time_reachability_with_reach_set(H, d_node, c_set, time, time_step, reach_set)
+  return reach_set.reached_region()
 

@@ -30,7 +30,7 @@ from ariadne.system import *
 from ariadne.system_evolution import *
 import sys
 
-eps=EpsPlot("hybrid_evolution.eps",Rectangle("[-2,2]x[-2,2]"))
+eps=EpsPlot("hybrid_evolution.eps",Rectangle("[-1,1]x[-1,1]"))
 eps.set_fill_colour("yellow")
 
 b=Vector(2)

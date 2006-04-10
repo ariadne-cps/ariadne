@@ -35,6 +35,7 @@
 #include <iostream>
 
 #include "../declarations.h"
+#include "../numeric/numerical_types.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -265,7 +266,7 @@ namespace Ariadne {
        * current set, \a false otherwise.
        */
       bool interior_contains(const Point<R>& p) const {
-        throw(std::domain_error("Not implemented"));
+        throw(std::domain_error("ListSet::interior_contains(): Not implemented."));
         for (size_type i=0; i<this->size(); i++) {
           if ((this->_vector[i]).interior_contains(p))
             return true;
@@ -718,7 +719,7 @@ namespace Ariadne {
     std::ostream& operator<<(std::ostream& os,
                              const ListSet<R,BS>& A)
     {
-      os << "ListSet<" << name<R>() << ",BS>(\n  ";
+      os << "ListSet<" << Base::name<R>() << ",BS>(\n  ";
       os << "[";
       if (A.size() >0 ) {
         os << A[0];

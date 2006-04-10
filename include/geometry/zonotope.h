@@ -40,11 +40,11 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
-
 #include "../linear_algebra/zonotopic_vector.h"
 
 #include "../utility/stlio.h"
 #include "../numeric/interval.h"
+#include "../base/array.h"
 
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
@@ -154,7 +154,6 @@ namespace Ariadne {
       
       /* Zonotope's principal directions. */
       matrix_type _generators;
-    
      public:
       /*! \brief Default constructor constructs an empty zonotope of dimension \a n. */
       explicit Zonotope(size_type n = 0)
@@ -277,6 +276,9 @@ namespace Ariadne {
         return !(*this == A);
       }
 
+      /*! \brief Returns the parallelotope vertices */
+      std::vector< Point<R> > vertices() const;
+
       friend std::ostream&
       operator<< <> (std::ostream& os, 
                      const Zonotope<R>& r);
@@ -294,12 +296,12 @@ namespace Ariadne {
       
       // The linear inequalities defining the zonotope.
       void compute_linear_inequalities(matrix_type&, vector_type&) const;
+    
+      Point<R> _possible_vertices(size_t &vert_num) const;
+      
+      std::vector< state_type > get_the_possible_vertices() const ;
     };
   
-    
-    
-
-    
     /*! \brief Performs the Minkoswi sum of two zonotopes */
     template<typename R> 
     Zonotope<R> 
@@ -317,7 +319,6 @@ namespace Ariadne {
     {
       return !minkowski_difference(A,B).contains(Point<R>(A.dimension(),0));
     }
-   
     
     /*! \brief Tests disjointness */
     template <typename R>
@@ -354,7 +355,6 @@ namespace Ariadne {
     {
       return disjoint(B,A);
     }
-
     
     /*! \brief Tests intersection of interiors */
     template <typename R>
@@ -445,7 +445,6 @@ namespace Ariadne {
       return inner_subset(Polyhedron<R>(A), Polyhedron<R>(B));
     }
 
-
     /*! \brief Tests inclusion of \a A in \a B. */
     template <typename R>
     inline
@@ -489,7 +488,6 @@ namespace Ariadne {
     {
       return subset(Polyhedron<R>(A), Polyhedron<R>(B));
     }
-
     
     /*! \brief Tests inclusion in an open cover.  */
     template <typename R>
@@ -499,7 +497,6 @@ namespace Ariadne {
     {
       throw std::domain_error("subset_of_open_cover(Zonotope, std::vector<Zonotope>) not implemented");
     }
-
     
     /*! \brief Tests inclusion of \a A om the interior of \a B. */
     template <typename R>
@@ -509,7 +506,6 @@ namespace Ariadne {
     {
       throw std::domain_error("subset_of_closed_cover(Zonotope, std::vector<Zonotope>) not implemented");
     }
-
     
     /*! Compute an over-approximatiing parallelotope to \a z. */
     template <typename R>
@@ -524,7 +520,6 @@ namespace Ariadne {
     Zonotope<R>
     operator+(const Zonotope<R>& z, const LinearAlgebra::zonotopic_vector<R>& v);
     
-
   }
 }
 

@@ -130,7 +130,7 @@ namespace Ariadne {
       state_list_type result;
       const Parma_Polyhedra_Library::Generator_System& gs = this->_ppl_poly.minimized_generators();
       state_type point(this->dimension());
-      
+     
       for(Parma_Polyhedra_Library::Generator_System::const_iterator iter=gs.begin(); iter!=gs.end(); ++iter) {
         Parma_Polyhedra_Library::Generator gen = *iter;
         
@@ -211,8 +211,6 @@ namespace Ariadne {
       
       return e<=c;
     }
-    
-    
     
   }
 }

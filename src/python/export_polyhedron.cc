@@ -50,6 +50,7 @@ void export_polyhedron() {
 
   def("intersection", PolyPolyBinFunc(&intersection));
   def("regular_intersection", PolyPolyBinFunc(&regular_intersection));
+  def("convex_hull", PolyPolyBinFunc(&convex_hull));
   def("interiors_intersect", PolyPolyBinPred(&interiors_intersect));
   def("disjoint", PolyPolyBinPred(&disjoint));
   def("inner_subset", PolyPolyBinPred(&inner_subset));

@@ -44,7 +44,7 @@ inline void rvector_setitem(RVector& v, uint i, Real x) {
 }
 
 inline void rvector_setitem_from_double(RVector& v, uint i, double x) {
-  v(i)=Ariadne::convert_to<Real>(x);
+  v(i)=Ariadne::Base::convert_to<Real>(x);
 }
 
 inline RVector rvector_add_rvector(const RVector& u, RVector& v) {

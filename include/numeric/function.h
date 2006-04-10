@@ -37,6 +37,7 @@
 #include <boost/numeric/interval.hpp>
 
 #include "../numeric/numerical_types.h"
+#include "../numeric/approximation.h"
 
 namespace Ariadne {
   template<typename R> class rounding;
@@ -134,8 +135,8 @@ namespace Ariadne {
   }
  
   inline Dyadic div_approx(const Dyadic& x1, const Dyadic& x2, const Dyadic& e) {
-    Rational q=div(Rational(x1),Rational(x2));
-    return approximate<Dyadic>(q,e);
+    Rational q=Rational(x1)/Rational(x2);
+    return Numeric::approximate<Dyadic>(q,e);
   }
     
   template<typename R> 

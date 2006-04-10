@@ -30,9 +30,8 @@ binary_tree.o: binary_tree.cc ../../include/base/binary_tree.h \
   ../../include/numeric/arithmetic.h \
   ../../include/numeric/../numeric/numerical_types.h \
   ../../include/numeric/../numeric/../declarations.h \
-  ../../include/numeric/../numeric/../base/utility.h \
-  ../../include/numeric/../numeric/../base/../declarations.h \
   ../../include/numeric/../numeric/../numeric/dyadic.h \
+  ../../include/numeric/../numeric/../utility/stlio.h \
   ../../include/numeric/../numeric/approximation.h \
   ../../include/numeric/../numeric/../numeric/numerical_types.h
 

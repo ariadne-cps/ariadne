@@ -43,6 +43,7 @@
 
 #include "../utility/stlio.h"
 #include "../numeric/interval.h"
+#include "../base/array.h"
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
@@ -65,7 +66,6 @@ namespace Ariadne {
 
     template <typename R> Parallelotope<R> intersection(const Parallelotope<R>& A, const Parallelotope<R>& B);
     template <typename R> Parallelotope<R> regular_intersection(const Parallelotope<R>& A, const Parallelotope<R>& B);
-
     template<typename R> bool interiors_intersect(const Parallelotope<R>& A, const Parallelotope<R>& B);
     template<typename R> bool disjoint(const Parallelotope<R>& A, const Parallelotope<R>& B);
     template<typename R> bool inner_subset(const Parallelotope<R>& A, const Parallelotope<R>& B);
@@ -168,16 +168,25 @@ namespace Ariadne {
         
         if (c.dimension()!=m.size1()) {
           throw std::domain_error("The centre and directions have different dimensions.");
+	
+	  try {
+	    Base::array<size_t> p_array(m.size1());
+	    LinearAlgebra::lu_decompose(m,p_array);
+	  } catch (std::runtime_error &e) {
+            throw std::domain_error("The directions matrix should have full range.");
+          }
         }
       }
       
       /*! \brief Construct from a Rectangle. */
       explicit Parallelotope(const Rectangle<real_type>& r)
         : _centre(r.dimension()), _generators(r.dimension(),r.dimension())
-      {
+      {	      
         for(size_type i=0; i!=dimension(); ++i) {
           _centre[i] = (r.lower_bound(i)+r.upper_bound(i))/2;
           _generators(i,i) = (r.upper_bound(i)-r.lower_bound(i))/2;
+	  if (_generators(i,i)==0)
+            throw std::domain_error("The directions matrix should have full range.");
         }
       }
       
@@ -260,6 +269,9 @@ namespace Ariadne {
       /*! \brief Tests if the parallelotope contains \a point. */
       bool contains(const state_type& point) const;
       
+      /*! \brief Returns the parallelotope vertices */
+      std::vector< Point<R> > vertices() const;
+
       /*! \brief Tests if the interior of the parallelotope contains \a point. */
       bool interior_contains(const state_type& point) const;
 
@@ -286,6 +298,8 @@ namespace Ariadne {
      private:
       void compute_linear_inequalities(matrix_type&, vector_type&, vector_type&) const;
       LinearAlgebra::vector<F> coordinates(const state_type& s) const;
+      
+      Point<R> vertices(const size_t &i) const;
     };
   
     /*! \brief Tests disjointness */
@@ -407,7 +421,6 @@ namespace Ariadne {
       return subset(Polyhedron<R>(A), Polyhedron<R>(B));
     }
     
-
     /*! \brief Tests inclusion in an open cover.  */
     template <typename R>
     inline

@@ -108,7 +108,8 @@ namespace Ariadne {
       state_type new_centre=(*this)(z.centre());
       return Geometry::Zonotope<R>(new_centre,A*z.generators());
     }    
-     
+    
+    /* TO IMPROVE */
     template <typename R>
     Geometry::Polyhedron<R>
     AffineMap<R>::operator() (const Geometry::Polyhedron<R>& p) const
@@ -117,7 +118,16 @@ namespace Ariadne {
       if (A.size2()!=p.dimension()) {
         throw std::domain_error("AffineMap<R>::operator() (const Geometry::Polyhedron<R>& p): the map does not have the same dimension of the polyhedron.");
       }
-      throw std::domain_error("AffineMap<R>::operator() (const Geometry::Polyhedron<R>& p) not implemented.");
+
+      std::vector< Geometry::Point<R> > vert=p.vertices();
+      LinearAlgebra::vector<R> new_point_pos;
+
+      for (size_t i=0; i< vert.size(); i++) {
+       new_point_pos=this->b()+prod(A,vert[i].position_vector());
+       vert[i]=Geometry::Point<R>(new_point_pos); 
+      }
+
+      return Geometry::Polyhedron<R>(vert);
     }    
 
   }

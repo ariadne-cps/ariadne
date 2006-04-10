@@ -41,8 +41,8 @@
 
 #include "../declarations.h"
 
-#include "../base/utility.h"
-#include "../base/interval.h"
+#include "../utility/stlio.h"
+#include "../numeric/interval.h"
 #include "../base/binary_word.h"
 
 #include "../linear_algebra/interval_vector.h"
@@ -154,7 +154,7 @@ namespace Ariadne {
       }
 
       /*! \brief Construct from an array of intervals. */
-      Rectangle(const Base::array< Interval<real_type> > a)
+      Rectangle(const array< Interval<real_type> > a)
         : _lower_corner(a.size()), _upper_corner(a.size())
       {
         for(size_type i=0; i!=a.size(); ++i) {

@@ -24,8 +24,10 @@
 
 #include <utility>  //for std::pair
 
-#include "base/numerical_type.h"
-#include "base/interval.h"
+
+#include "numeric/interval.h"
+#include "numeric/integer.h"
+#include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/interval_matrix.h"
 

@@ -38,16 +38,16 @@
 #include "../declarations.h"
 
 #include "../base/array.h"
-#include "../base/interval.h"
+#include "../numeric/interval.h"
 #include "../base/binary_word.h"
+
+#include "../numeric/arithmetic.h"
 
 #include "../geometry/rectangle.h"
 #include "../geometry/point.h"
 
 #include "../geometry/grid.h"
 #include "../geometry/lattice_set.h"
-
-#include "../geometry/list_set.h"
 
 
 /*TODO: Unify bounds in FiniteGrid, and make GridMaskSet use only finite grid bounds*/

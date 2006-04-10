@@ -43,8 +43,8 @@
 
 #include "../linear_algebra/zonotopic_vector.h"
 
-#include "../base/utility.h"
-#include "../base/interval.h"
+#include "../utility/stlio.h"
+#include "../numeric/interval.h"
 
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"

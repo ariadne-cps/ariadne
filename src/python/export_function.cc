@@ -22,16 +22,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "base/function.h"
+#include "numeric/function.h"
 
 #include <boost/python.hpp>
-
-using boost::python::class_;
-using boost::python::init;
-using boost::python::self;
-using boost::python::def;
-using boost::python::return_value_policy;
-using boost::python::copy_const_reference;
+using namespace boost::python;
 
 #include "python/typedefs.h"
 using namespace Ariadne;

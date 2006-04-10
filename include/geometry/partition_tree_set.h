@@ -29,17 +29,18 @@
 #define _ARIADNE_PARTITION_TREE_SET_H
 
 #include <iosfwd>
+#include <stdexcept>
 #include <algorithm>
 #include <vector>
 #include <iostream>
 
 #include "../declarations.h"
 
-#include "../base/basic_type.h"
+
 #include "../base/binary_word.h"
 #include "../base/binary_tree.h"
 #include "../base/iterator.h"
-#include "../base/utility.h"
+#include "../utility/stlio.h"
 
 #include "../geometry/subdivision_tree_set.h"
 

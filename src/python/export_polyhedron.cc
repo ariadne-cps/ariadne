@@ -24,7 +24,7 @@
 
 #include <vector>
 
-#include "base/numerical_type.h"
+
 
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"

@@ -30,11 +30,9 @@
 
 #include <iosfwd>
 
-#include "../base/basic_type.h"
+#include "../declarations.h"
 #include "../base/array.h"
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {

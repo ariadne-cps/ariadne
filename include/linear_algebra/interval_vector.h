@@ -31,9 +31,9 @@
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
 
-#include "../base/basic_type.h"
-#include "../base/numerical_type.h"
-#include "../base/interval.h"
+#include "../declarations.h"
+#include "../numeric/interval.h"
+#include "../linear_algebra/vector.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {
@@ -43,11 +43,11 @@ namespace Ariadne {
     class interval_vector : public boost::numeric::ublas::vector< Interval<R> >
     {
      private:
-      typedef boost::numeric::ublas::vector< Interval<R> > Base;
+      typedef boost::numeric::ublas::vector< Interval<R> > _Base;
      public:
-      template<typename E> interval_vector(const boost::numeric::ublas::vector_expression<E> v) : Base(v()) { }
-      interval_vector() : Base() { }
-      interval_vector(const size_type& n) : Base(n) { }
+      template<typename E> interval_vector(const boost::numeric::ublas::vector_expression<E> v) :_Base(v()) { }
+      interval_vector() : _Base() { }
+      interval_vector(const size_type& n) : _Base(n) { }
       interval_vector(const vector<R>& v);
       interval_vector(const vector<R>& v, const R& r);
       
@@ -66,20 +66,20 @@ namespace Ariadne {
     template <typename R>
     inline
     interval_vector<R>::interval_vector(const vector<R>& v)
-      : Base(v.size()) 
+      : _Base(v.size()) 
     { 
       for(size_type i=0; i!=this->size(); ++i) {
-        Base::operator()(i) = Interval<R>(v(i),v(i));
+        _Base::operator()(i) = Interval<R>(v(i),v(i));
       }
     }
     
     template <typename R>
     inline
     interval_vector<R>::interval_vector(const vector<R>& v, const R& r)
-      : Base(v.size()) 
+      : _Base(v.size()) 
     { 
       for(size_type i=0; i!=this->size(); ++i) {
-        Base::operator()(i) = Interval<R>(v(i)-r,v(i)+r);
+        _Base::operator()(i) = Interval<R>(v(i)-r,v(i)+r);
       }
     }
       
@@ -104,7 +104,7 @@ namespace Ariadne {
       const interval_vector<R>& v=*this;
       R result=0;
       for(size_type i=0; i!=v.size(); ++i) {
-        result = max(result,v(i).diameter());
+        result = max(result,v(i).length());
       }
       return result;
     }
@@ -119,9 +119,9 @@ namespace Ariadne {
       R upper_bound=0;
       for (size_type i=0; i<v.size(); i++) {
         if(!(v(i).lower()<=0 && v(i).upper()>=0)) {
-          lower_bound=std::min(lower_bound,std::min(abs(v(i).lower(),abs(v(i).upper()))));
+          lower_bound=min(lower_bound,R(min(abs(v(i).lower()),abs(v(i).upper()))));
         }
-        upper_bound=std::max(upper_bound,std::max(abs(v(i).lower()),abs(v(i).upper())));
+        upper_bound=max(upper_bound,R(max(abs(v(i).lower()),abs(v(i).upper()))));
       }
       return Interval<R>(lower_bound,upper_bound);
     }
@@ -134,7 +134,7 @@ namespace Ariadne {
       const interval_vector<R>& v=*this;
       R upper_bound=0;
       for (size_type i=0; i<v.size(); i++) {
-        upper_bound=std::max(upper_bound,std::max(abs(v(i).lower()),abs(v(i).upper())));
+        upper_bound=max(upper_bound,R(max(abs(v(i).lower()),abs(v(i).upper()))));
       }
       return upper_bound;
     }
@@ -224,20 +224,9 @@ namespace Ariadne {
     }
     
     template <typename R>
-    inline
     std::ostream&
-    operator<<(std::ostream& os, const interval_vector<R>& v)
-    {
-      os << "[";
-      if(v.size()>0) {
-        os << v(0);
-      }
-      for(uint i=1; i!=v.size(); ++i) {
-        os << "," << v(i);
-      }
-      os << "]";
-      return os;
-    }
+    operator<<(std::ostream& os, const interval_vector<R>& v);
+    
   }
 }  
 

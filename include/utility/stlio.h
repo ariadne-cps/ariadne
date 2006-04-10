@@ -1,8 +1,7 @@
 /***************************************************************************
- *            utility.h
+ *            stlio.h
  *
- *  2 May 2005
- *  Copyright  2005  Pieter Collins, Alberto Casagrande
+ *  Copyright  2005-6  Pieter Collins, Alberto Casagrande
  *  Email: Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
  ****************************************************************************/
 
@@ -22,25 +21,26 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file utility.h
+/*! \file stlio.h
  *  \brief Input-output utilities 
  */
 
-#ifndef _ARIADNE_UTILITY_H
-#define _ARIADNE_UTILITY_H
+#ifndef _ARIADNE_STLIO_H
+#define _ARIADNE_STLIO_H
 
 #include <iostream>
 #include <stdexcept>
 
 #include <vector>
+#include <list>
+#include <deque>
 #include <valarray>
 #include <set>
 
 #include "../base/array.h"
 
 namespace Ariadne {
-  
-  namespace Base { 
+  namespace Utility { 
     template<typename InputIterator>
     inline
     std::ostream&
@@ -106,18 +106,24 @@ namespace Ariadne {
       
       return is;
     }
-    
+  }
+}
+
+namespace Ariadne {
+  namespace Base { 
+
     template<typename Iter> inline
     std::ostream&
     operator<<(std::ostream& os, const range<Iter>& a) {
-      write_sequence(os,a.begin(),a.end());
+      Utility::write_sequence(os,a.begin(),a.end());
       return os;
     }
+
     
     template<typename T> inline
     std::ostream&
     operator<<(std::ostream& os, const array<T>& a) {
-      write_sequence(os,a.begin(),a.end());
+      Utility::write_sequence(os,a.begin(),a.end());
       return os;
     }
     
@@ -135,6 +141,7 @@ namespace Ariadne {
       os << " ]";
       return os;
     }
+
   } // namespace Base
 } // namespace Ariadne
 
@@ -150,7 +157,15 @@ namespace std {
   std::ostream& 
   operator<< (std::ostream &os, const std::vector<T>& v) 
   {
-    return Ariadne::Base::write_sequence(os,v.begin(),v.end());
+    return Ariadne::Utility::write_sequence(os,v.begin(),v.end());
+  }
+  
+  template <typename T> 
+  inline
+  std::ostream& 
+  operator<< (std::ostream &os, const std::list<T>& l) 
+  {
+    return Ariadne::Utility::write_sequence(os,l.begin(),l.end());
   }
   
   template <typename T> 
@@ -158,23 +173,31 @@ namespace std {
   std::ostream& 
   operator<<(std::ostream &os, const std::set<T>& s) 
   {
-    return Ariadne::Base::write_sequence(os,s.begin(), s.end(), '{', '}');
+    return Ariadne::Utility::write_sequence(os,s.begin(), s.end(), '{', '}');
+  }
+  
+  template <typename T> 
+  inline
+  std::ostream& 
+  operator<< (std::ostream &os, const std::deque<T>& d) 
+  {
+    return Ariadne::Utility::write_sequence(os,d.begin(),d.end());
   }
   
   template <typename T> 
   inline
   ostream& 
   operator<< (ostream &os, const std::valarray<T>& v) {
-    return Ariadne::Base::operator<<(os,v);
+    return Ariadne::Utility::write_sequence(os,v.begin(),v.end());
   }
   
   template <typename T> 
   inline
   istream& 
   operator>> (istream &is, vector<T>& v) {
-    return Ariadne::Base::read_vector(is,v);
+    return Ariadne::Utility::read_vector(is,v);
   }
 } // namespace std
 
 
-#endif /* _ARIADNE_UTILITY_H */
+#endif /* _ARIADNE_STLIO_H */

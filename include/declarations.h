@@ -27,9 +27,20 @@
 
 #ifndef _ARIADNE_DECLARATIONS_H
 #define _ARIADNE_DECLARATIONS_H
- 
+
+#include <iosfwd>
+  
 namespace Ariadne { namespace Base {
+template<typename T, unsigned int N=0> class array;
+template<typename T> class sequence;
+  
+class BinaryWord;
+class BinaryTree;  
+}}
+
+namespace Ariadne { namespace Numeric {
 template<typename R> class Interval;
+template<typename T> class numerical_traits;
 }}
 
 namespace Ariadne { namespace LinearAlgebra {
@@ -84,5 +95,26 @@ template <typename R> class AffineVectorField;
 template <typename R> class HenonMap;
 template <typename R> class LorenzSystem;
 }}
+
+namespace Ariadne {
+/*! \brief An unsigned integral type used to represent a coordinate in state space. */
+typedef unsigned short dimension_type;
+/*! \brief An unsigned integral type used to represent the size of a list. */
+typedef size_t size_type;
+/*! \brief An signed integral type used to represent the position in a list with positive and negative indices. */
+typedef int index_type;
+/*! \brief The type of a machine byte. */
+typedef unsigned char byte_type; 
+ 
+/*! \brief An array of boolean values. */
+typedef Base::array<bool> BooleanArray;
+/*! \brief An array of unsigned integer values. */
+typedef Base::array<size_type> SizeArray;
+/*! \brief An array of integer values. */
+typedef Base::array<index_type> IndexArray;
+
+using namespace Base;
+using namespace Numeric;
+}
 
 #endif /* _ARIADNE_DECLARATIONS_H */

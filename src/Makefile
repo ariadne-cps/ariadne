@@ -1,8 +1,9 @@
 include ../config.mk
 
-GEOMETRYDIR=geometry/
-BASEDIR = base/
+BASEDIR=base/
+NUMERICDIR=numeric/
 LINEARALGEBRADIR=linear_algebra/
+GEOMETRYDIR=geometry/
 EVALUATIONDIR=evaluation/
 
 .PHONY: lib base linear_algebra geometry evaluation python check clean
@@ -14,16 +15,19 @@ lib: libariadne.so
 base: 
 	(cd base; ${MAKE} all)
 
-linear_algebra: base 
+numeric: 
+	(cd numeric; ${MAKE} all)
+
+linear_algebra: numeric
 	(cd linear_algebra; ${MAKE} all)
 
-geometry: base 
+geometry: base numeric linear_algebra
 	(cd geometry; ${MAKE} all)
 
-evaluation: base geometry 
+evaluation: base numeric linear_algebra geometry 
 	(cd evaluation; ${MAKE} all)
 
-libariadne.so: base linear_algebra geometry evaluation
+libariadne.so: base numeric linear_algebra geometry evaluation
 	${CXX} ${LDXXFLAGS} -shared -o libariadne.so base/*.o linear_algebra/*.o geometry/*.o evaluation/*.o ${LIBPPL} ${LIBGMPXX} ${RPATHFLAGS}
 
 libariadne.a: ${OBJ}

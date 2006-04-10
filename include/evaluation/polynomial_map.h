@@ -41,9 +41,9 @@
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 
-#include "../base/utility.h"
+#include "../utility/stlio.h"
 #include "../base/array.h"
-#include "../base/interval.h"
+#include "../numeric/interval.h"
 
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"

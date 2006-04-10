@@ -22,8 +22,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "base/numerical_type.h"
-#include "base/arithmetic.h"
+
+#include "numeric/numerical_types.h"
+#include "numeric/arithmetic.h"
 
 #include "real_typedef.h"
 using namespace Ariadne;

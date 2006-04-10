@@ -31,7 +31,7 @@
 #include <vector>
 #include <valarray>
 
-#include "../base/interval.h"
+#include "../numeric/interval.h"
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"

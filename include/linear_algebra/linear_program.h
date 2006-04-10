@@ -35,7 +35,7 @@
 #include <iosfwd>
 #include <map>
 
-#include "../base/basic_type.h"
+
 #include "../linear_algebra/matrix.h"
 
 namespace Ariadne {

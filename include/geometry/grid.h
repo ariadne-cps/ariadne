@@ -35,7 +35,7 @@
 #include "../declarations.h"
 
 #include "../base/array.h"
-#include "../base/interval.h"
+#include "../numeric/interval.h"
 #include "../base/binary_word.h"
 
 

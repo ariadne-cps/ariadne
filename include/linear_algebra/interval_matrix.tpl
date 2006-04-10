@@ -21,7 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "../linear_algebra/interval_matrix.h"
+#include "interval_matrix.h"
+
+#include "../numeric/arithmetic.h"
+#include "../linear_algebra/vector.h"
+#include "../linear_algebra/matrix.h"
+#include "../linear_algebra/interval_vector.h"
 
 
 namespace Ariadne {

@@ -22,13 +22,35 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "base/arithmetic.h"
-#include "base/utility.h"
 #include "base/binary_tree.h"
+
+#include "utility/stlio.h"
+#include "base/array.h"
+#include "numeric/arithmetic.h"
 
 namespace Ariadne {
   namespace Base {
-   BinaryTree::BinaryTree()
+
+
+  BinaryTree::BinaryTree(const Base::array<bool>& t)
+    : _array(t.begin(),t.end()) 
+  { 
+    check(); 
+  }
+  
+  BinaryTree::BinaryTree(const std::vector<bool>& t)
+    : _array(t.begin(),t.end()) 
+  { 
+    check(); 
+  }
+  
+  BinaryTree::BinaryTree(const size_type& n, const bool* ptr)
+    : _array(n,ptr) 
+  { 
+      check();
+  }
+  
+  BinaryTree::BinaryTree()
      : _array(1) { _array[0]=leaf; }
 
     BinaryTree::BinaryTree(size_type d)
@@ -162,7 +184,7 @@ namespace Ariadne {
     std::ostream& 
     operator<<(std::ostream& os, const BinaryTree& t) {
       os << "BinaryTree( words=";
-      write_sequence(os, t.begin(), t.end());
+      Utility::write_sequence(os, t.begin(), t.end());
       return os << ", sequence=" << t._array << " )"; 
     }
     

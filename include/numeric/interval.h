@@ -34,6 +34,7 @@
 #include <boost/numeric/interval.hpp>
 #include <boost/numeric/interval/io.hpp>
 
+#include "../declarations.h"
 
 /* No input routine for intervals defined by boost */
 namespace boost {
@@ -53,7 +54,7 @@ namespace boost {
 
 
 namespace Ariadne {
-  namespace Base {
+  namespace Numeric {
     /*!
      * \brief A templated class representing an interval of real numbers.
      *
@@ -63,12 +64,6 @@ namespace Ariadne {
      * All operations on an interval must be guarenteed to return an interval contining the exact result.
      * If \a T supports exact evaluation of a function, then the exact evaluation must be used.
      * If \a T is dense in the reals, e.g. dyadic or rational, then any approximate operations may be given a maximum error of computation.
-     *
-     * COMMENT FOR ALBERTO: How should we specify error bounds for computations on types which support arbitrary-precision computing?
-     * I would suggest using a global(ish) "precision" variable which either may be "locked" by a computation, or stored on a stack.
-     * I think functions should keep a natural syntax, so we can declare <code>rational cos(rational)</code>,
-     * and set error bounds for the computation elsewhere.
-     * Of course, this partly depends on the interval / rational arithmetic library we use.
      *
      * Currently implemented as a wrapper around the boost::numeric::interval class template from the Boost C++ library.
      */
@@ -93,6 +88,7 @@ namespace Ariadne {
       }
 
       bool contains(const R& r) const { return this->lower()<=r && r<=this->upper(); }
+      bool interior_contains(const R& r) const { return this->lower()<r && r<this->upper(); }
       
       R centre() const { return (this->lower()+this->upper())/2; }
       R radius() const { return (this->upper()-this->lower())/2; }
@@ -118,7 +114,7 @@ namespace Ariadne {
       return is;
     }
     
-  } // namespace Base
+  } // namespace Numeric
 } // namespace Ariadne
   
 #endif /* _ARIADNE_INTERVAL_H */

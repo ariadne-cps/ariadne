@@ -28,17 +28,12 @@
 #ifndef _ARIADNE_ZONOTOPIC_VECTOR_H
 #define _ARIADNE_ZONOTOPIC_VECTOR_H
 
-#include <ostream>
-#include <string>
-
-#include <vector>
-
-#include "../base/utility.h"
-#include "../base/interval.h"
+#include <iosfwd>
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 #include "../linear_algebra/interval_vector.h"
+#include "../linear_algebra/interval_matrix.h"
 
 
 namespace Ariadne {
@@ -46,7 +41,6 @@ namespace Ariadne {
     template < typename R > class zonotopic_vector;
 
     template<typename R> std::ostream& operator<<(std::ostream&, const zonotopic_vector<R>&);
-    template<typename R> std::istream& operator>>(std::istream&, zonotopic_vector<R>&);
 
     /*! \brief A zonotopic vector set. 
      * 
@@ -98,14 +92,6 @@ namespace Ariadne {
         this->minimize_generators();
       }
        
-      /*! \brief Construct from a string literal. */
-      explicit zonotopic_vector(const std::string& s)
-        : _centre(), _generators()
-      {
-        std::stringstream ss(s);
-        ss >> *this;
-      }
-      
       /*! \brief Copy constructor. */
       zonotopic_vector(const zonotopic_vector<R>& v)
         : _centre(v._centre), _generators(v._generators)
@@ -144,8 +130,6 @@ namespace Ariadne {
       inline matrix<R> generators() const {
         return this->_generators;
       }
-      
-      friend std::istream& operator>> <> (std::istream& is, zonotopic_vector<R>& r);
      private:
       // Minimize the generator matrix
       inline void minimize_generators(void);
@@ -294,13 +278,6 @@ namespace Ariadne {
       return zonotopic_vector<R>(vector<R>(iv.size()),A);
     }
       
-
-    template<typename R> 
-    std::ostream&
-    operator<<(std::ostream& os, const zonotopic_vector<R>& zv) 
-    {
-      return os << zv.centre() << "+" << zv.generators() << "[-1,1]^" << zv.size();
-    }
     
   }
 }

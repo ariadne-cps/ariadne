@@ -29,13 +29,13 @@
 #ifndef _ARIADNE_BINARY_TREE_H
 #define _ARIADNE_BINARY_TREE_H
 
-#include <algorithm>
 #include <vector>
-#include <iostream>
+#include <iosfwd>
 
 #include <boost/iterator/iterator_facade.hpp>
 
-#include "../base/basic_type.h"
+#include "../declarations.h"
+#include "../base/array.h"
 #include "../base/binary_word.h"
 
 namespace Ariadne {
@@ -48,7 +48,6 @@ namespace Ariadne {
      *   Constant forward iterators only, access may be inefficient.
      */
     class BinaryTree {
-      typedef BinaryWord::byte_type byte_type;
      public:
       static const bool leaf=1;
       static const bool branch=0;
@@ -67,12 +66,12 @@ namespace Ariadne {
       explicit BinaryTree(size_type n);
 
       /*! \brief Construct a tree from an array of bits denoting branches and leaves. */
-      explicit BinaryTree(const array<bool>& t) : _array(t.begin(),t.end()) { check(); }
-      explicit BinaryTree(const std::vector<bool>& t) : _array(t.begin(),t.end()) { check(); }
-      explicit BinaryTree(const size_type& n, const bool* ptr) : _array(n,ptr) { check(); }
+      explicit BinaryTree(const array<bool>& t);
+      explicit BinaryTree(const std::vector<bool>& t);
+      explicit BinaryTree(const size_type& n, const bool* ptr);
       
       /*! \brief The total number of leaf nodes in the tree. */
-      size_type size() const { return (_array.size()+1)/2; }
+      size_type size() const;
       
       /*! \brief A constant forward iterator to the first leaf of the tree. */
       const_iterator begin() const;
@@ -83,13 +82,13 @@ namespace Ariadne {
       size_type depth() const;
       
       /*! \brief The array of bits denoting branches and leaves. */
-      const BooleanArray& array() const { return _array; }
+      const std::vector<bool>& array() const;
       
       friend std::ostream& operator<<(std::ostream&, const BinaryTree&);
      private:
       void check() const;
      private:
-      BooleanArray _array;
+      std::vector<bool> _array;
     };
     
     class BinaryTreeIterator 
@@ -112,9 +111,23 @@ namespace Ariadne {
       friend class boost::iterator_core_access;
      private:
       // Invariant: _position should always point to a leaf after operator++
-      BooleanArray::const_iterator _position;
+      std::vector<bool>::const_iterator _position;
       BinaryWord _word;
     };
+    
+    inline
+    size_type 
+    BinaryTree::size() const
+    { 
+      return (_array.size()+1)/2; 
+    }
+      
+    inline
+    const std::vector<bool>& 
+    BinaryTree::array() const 
+    { 
+      return this->_array;
+    }
     
     inline
     BinaryTree::const_iterator 

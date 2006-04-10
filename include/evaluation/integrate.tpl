@@ -34,11 +34,11 @@
 
 #include "../declarations.h"
 
-#include "../base/utility.h"
+#include "../utility/stlio.h"
 #include "../base/array.h"
-#include "../base/arithmetic.h"
-#include "../base/function.h"
-#include "../base/interval.h"
+#include "../numeric/arithmetic.h"
+#include "../numeric/function.h"
+#include "../numeric/interval.h"
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/interval_vector.h"

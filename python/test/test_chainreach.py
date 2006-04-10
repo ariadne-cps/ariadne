@@ -22,16 +22,17 @@
 
 from ariadne import Real
 from ariadne.base import *
+from ariadne.numeric import *
 from ariadne.evaluation import *
 from ariadne.geometry import *
 from ariadne.linear_algebra import *
 import sys
 
-parameters=Point(2)
-parameters[0]=1.5
-parameters[1]=0.875
-a=Real(1.5)
-b=Real(0.875)
+params=Point(2)
+params[0]=1.5
+params[1]=0.875
+a=params[0]
+b=params[1]
 
 h=HenonMap(a,b)
 gbb=Rectangle("[-10,4]x[-7,7]") # grid bounding box

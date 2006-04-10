@@ -113,9 +113,9 @@ namespace Ariadne {
       os << "PartitionTree<" << name<R>() << ">(\n";
       os << "  bounding_box=" << pt.bounding_box() << ",\n";
       os << "  subdivisions=" << pt.subdivisions() << "\n";
-      os << "  words="; write_sequence(os, pt.binary_tree().begin(), pt.binary_tree().end()); os << ",\n";
-      os << "  blocks=["; write_sequence(os,  pt.unit_tree().begin(), pt.unit_tree().end()); os << ",\n";
-      os << "  cells=["; write_sequence(os,  pt.begin(), pt.end()); os << ",\n";
+      os << "  words="; Utility::write_sequence(os, pt.binary_tree().begin(), pt.binary_tree().end()); os << ",\n";
+      os << "  blocks=["; Utility::write_sequence(os,  pt.unit_tree().begin(), pt.unit_tree().end()); os << ",\n";
+      os << "  cells=["; Utility::write_sequence(os,  pt.begin(), pt.end()); os << ",\n";
       os << ")\n";
       return os;
     }
@@ -127,9 +127,9 @@ namespace Ariadne {
       os << "PartitionTreeSet<" << name<R>() << ">(\n";
       os << "  bounding_box=" << pts.bounding_box() << ",\n";
       os << "  subdivisions=" << pts.subdivisions() << ",\n";
-      os << "  words="; write_sequence(os, pts.unit_set().words().begin(), pts.unit_set().words().end()); os << ",\n";
-      os << "  blocks=["; write_sequence(os,  pts.unit_set().begin(), pts.unit_set().end()); os << ",\n";
-      os << "  cells=["; write_sequence(os,  pts.begin(), pts.end()); os << ",\n";
+      os << "  words="; Utility::write_sequence(os, pts.unit_set().words().begin(), pts.unit_set().words().end()); os << ",\n";
+      os << "  blocks=["; Utility::write_sequence(os,  pts.unit_set().begin(), pts.unit_set().end()); os << ",\n";
+      os << "  cells=["; Utility::write_sequence(os,  pts.begin(), pts.end()); os << ",\n";
       os << ")\n";
       return os;
     }

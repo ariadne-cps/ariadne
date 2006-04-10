@@ -22,7 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "base/numerical_type.h"
+
 
 #include "linear_algebra/linear_algebra.h"
 
@@ -64,10 +64,10 @@ inline RGridMaskSet over_approximation_parallelotope_list_set(const RParalleloto
 inline void grid_cell_list_set_adjoin_grid_cell(RGridMaskSet& gms, const RGridCell& gc) {
   return gms.adjoin(gc);
 }
-inline RGridMaskSet join(const RGridMaskSet& gms1, const RGridMaskSet& gms2) {
+inline RGridMaskSet grid_mask_set_join(const RGridMaskSet& gms1, const RGridMaskSet& gms2) {
   return Ariadne::Geometry::join(gms1,gms2);
 }
-inline RGridMaskSet difference(const RGridMaskSet& gms1, const RGridMaskSet& gms2) {
+inline RGridMaskSet grid_mask_set_difference(const RGridMaskSet& gms1, const RGridMaskSet& gms2) {
   return Ariadne::Geometry::difference(gms1,gms2);
 }
 inline RGridMaskSet grid_mask_set_regular_intersection(const RGridMaskSet& gms1, const RGridMaskSet& gms2) {
@@ -102,7 +102,7 @@ void export_grid_set() {
     .def(self_ns::str(self))    // __str__
     ;
 
-  class_< RFiniteGrid, bases<RGrid> >("FiniteGrid",init<RRectangle,SizeArray>())
+  class_< RFiniteGrid, bases<RGridBase> >("FiniteGrid",init<RRectangle,SizeArray>())
     .def(init<RRectangle,uint>())
     .def(init<RRectangleListSet>())
     .def("dimension", &RFiniteGrid::dimension)
@@ -169,6 +169,8 @@ void export_grid_set() {
   class_<RGridMaskSet>("GridMaskSet",init<const RFiniteGrid&>())
     .def(init<const RGridBase&, LatticeRectangle>())
     .def(init<const RInfiniteGrid&, LatticeRectangle>())
+    .def(init<RGridRectangleListSet>())
+    .def(init<RGridCellListSet>())
     .def(init<RGridMaskSet>())
     .def(init<RRectangleListSet>())
     .def("bounding_box", &RGridMaskSet::bounding_box)
@@ -190,8 +192,9 @@ void export_grid_set() {
     .def("__iter__", iterator<RGridMaskSet>())
     .def(self_ns::str(self))    // __str__
     ;
-  def("join",&join);
-  def("difference",&difference);
+    
+  def("join",&grid_mask_set_join);
+  def("difference",&grid_mask_set_difference);
   def("regular_intersection",&grid_mask_set_regular_intersection);
     
   def("over_approximation",&over_approximation_rectangle);

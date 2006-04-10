@@ -30,7 +30,6 @@
 #define _ARIADNE_SEQUENCE_H
 
 #include <cstddef>
-#include <cassert>
 
 #include <exception>
 #include <stdexcept>
@@ -288,4 +287,3 @@ namespace Ariadne {
 } // namespace Ariadne
   
 #endif /* _ARIADNE_SEQUENCE_H */
-  

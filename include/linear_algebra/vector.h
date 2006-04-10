@@ -30,14 +30,14 @@
 #define _ARIADNE_VECTOR_H 
 
 #include <iosfwd>
-#include <string>
 
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
 
-#include "../base/utility.h"
-#include "../base/basic_type.h"
-#include "../base/numerical_type.h"
+#include "../declarations.h"
+#include "../numeric/integer.h"
+
+
 
 namespace Ariadne {
   namespace LinearAlgebra {
@@ -47,12 +47,12 @@ namespace Ariadne {
     class vector
       : public boost::numeric::ublas::vector<R> 
     {
-      typedef boost::numeric::ublas::vector<R> Base;
+      typedef boost::numeric::ublas::vector<R> _Base;
      public:
-      vector() : Base() { }
-      vector(const size_type& n) : Base(n) { }
-      template<typename E> vector(const boost::numeric::ublas::vector_expression<E>& v) : Base(v()) { }
-      explicit vector(const std::string& s) : Base(0) { std::stringstream ss(s); ss >> *this; }      
+      vector() : _Base() { }
+      vector(const size_type& n) : _Base(n) { }
+      template<typename E> vector(const boost::numeric::ublas::vector_expression<E>& v) : _Base(v()) { }
+      explicit vector(const std::string& s); 
     };
     
     
@@ -133,39 +133,15 @@ namespace Ariadne {
     }
     
     template <typename R>
-    inline
     std::ostream&
-    operator<<(std::ostream& os, const vector<R>& v)
-    {
-      os << "[";
-      if(v.size()>0) {
-        os << v[0];
-      }
-      for(uint i=1; i!=v.size(); ++i) {
-        os << "," << v[i];
-      }
-      os << "]";
-      return os;
-    }
+    operator<<(std::ostream& os, const vector<R>& v);
     
     template <typename R>
-    inline
     std::istream&
-    operator>>(std::istream& is, vector<R>& v)
-    {
-      std::vector<R> stdvec;
-      is >> stdvec;
-      v.resize(stdvec.size());
-      for(size_type i=0; i!=v.size(); ++i) {
-        v(i)=stdvec[i];
-      }
-      return is;
-    }
+    operator>>(std::istream& is, vector<R>& v);
 
   }
 }
-
-
 
 
 #endif /* _ARIADNE_VECTOR_H */

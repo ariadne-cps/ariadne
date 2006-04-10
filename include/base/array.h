@@ -30,14 +30,14 @@
 #define _ARIADNE_ARRAY_H
 
 #include <cstddef>
-#include <cassert>
 
 #include <exception>
 #include <stdexcept>
 #include <vector>
 #include <iterator>
 
-#include "basic_type.h"
+#include "../declarations.h"
+
 
 namespace Ariadne {
   

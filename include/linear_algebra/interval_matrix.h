@@ -31,15 +31,10 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 
+#include "../linear_algebra/matrix.h"
 #include "../declarations.h"
 
-#include "../base/numerical_type.h"
-#include "../base/interval.h"
-
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
-#include "../linear_algebra/interval_vector.h"
-
+#include "../numeric/interval.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {

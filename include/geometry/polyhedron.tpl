@@ -31,8 +31,10 @@
 #include <vector>
 #include <valarray>
 
-#include "../base/utility.h"
-#include "../base/interval.h"
+#include "../utility/stlio.h"
+#include "../numeric/interval.h"
+
+#include "../numeric/arithmetic.h"
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"

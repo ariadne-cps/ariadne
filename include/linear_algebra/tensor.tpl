@@ -28,7 +28,7 @@
 #include "tensor.h"
 
 #include <iostream>
-#include "../base/numerical_type.h"
+
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 

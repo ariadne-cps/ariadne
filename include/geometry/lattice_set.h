@@ -36,8 +36,8 @@
 
 #include "../base/array.h"
 #include "../base/iterator.h"
-#include "../base/basic_type.h"
-#include "../base/interval.h"
+
+#include "../numeric/interval.h"
 #include "../base/array_operations.h"
 
 namespace Ariadne {

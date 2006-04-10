@@ -1,5 +1,6 @@
-__all__=["base","linear_algebra","geometry","evaluation"]
+__all__=["base","numeric", "linear_algebra","geometry","evaluation"]
 
 from base import *
+from numeric import *
 Real=MPFloat
-base.Real=Real
+numeric.Real=Real

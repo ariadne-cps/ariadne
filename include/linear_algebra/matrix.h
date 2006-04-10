@@ -34,11 +34,8 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 
-#include "../base/basic_type.h"
-#include "../base/numerical_type.h"
-#include "../base/arithmetic.h"
-
-#include "../linear_algebra/vector.h"
+#include "../declarations.h"
+#include "../numeric/integer.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {

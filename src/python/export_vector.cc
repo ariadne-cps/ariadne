@@ -22,8 +22,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "base/numerical_type.h"
-#include "base/interval.h"
+
+#include "numeric/numerical_types.h"
+#include "numeric/interval.h"
 
 #include "linear_algebra/vector.h"
 #include "linear_algebra/interval_vector.h"
@@ -71,11 +72,11 @@ inline void qvector_setitem(FVector& v, uint i, Field x) {
 }
 
 inline void qvector_setitem_from_real(FVector& v, uint i, Real x) {
-  v(i)=Ariadne::convert_to<Rational>(x);
+  v(i)=Ariadne::convert_to<Field>(x);
 }
 
 inline void qvector_setitem_from_double(FVector& v, uint i, double x) {
-  v(i)=Ariadne::convert_to<Rational>(x);
+  v(i)=Ariadne::convert_to<Field>(x);
 }
 
 

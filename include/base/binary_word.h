@@ -70,13 +70,11 @@
 #ifndef _ARIADNE_BINARY_WORD_H
 #define _ARIADNE_BINARY_WORD_H
 
-#include <bitset>
 #include <vector>
-#include <exception>
-#include <iostream>
+#include <iosfwd>
+#include <stdexcept>
 
-#include "../base/basic_type.h"
-#include "../base/array.h"
+#include "../declarations.h"
 
 namespace Ariadne {
   namespace Base {    
@@ -96,8 +94,6 @@ namespace Ariadne {
       /*! \brief An unsigned integral type. */
       typedef std::vector<bool>::const_iterator const_iterator;
      private:
-      /* The type of a machine byte (not used) */
-      typedef unsigned char byte_type; 
       /* The number of bits per byte */
       static const size_type _bits_per_byte=std::numeric_limits<byte_type>::digits;
      private:
@@ -204,7 +200,6 @@ namespace Ariadne {
       /*!\brief Union of two BinaryWordList s. */
       friend BinaryWordList join(const BinaryWordList& l1, const BinaryWordList& l2);
       
-      typedef BinaryWord::byte_type byte_type;
       typedef _BinaryWordList_const_iterator const_iterator;
      private:
       static const size_type _bits_per_byte=std::numeric_limits<byte_type>::digits;
@@ -239,8 +234,6 @@ namespace Ariadne {
        */
       friend BinaryWordFixedSizeList join(const BinaryWordFixedSizeList& l1, const BinaryWordFixedSizeList& l2);
       
-      typedef size_t size_type;
-      typedef BinaryWord::byte_type byte_type;
       typedef _BinaryWordFixedSizeList_const_iterator const_iterator;
      private:
       static const size_type _bits_per_byte=std::numeric_limits<byte_type>::digits;

@@ -31,7 +31,7 @@
 
 #include "../declarations.h"
 
-#include "../base/interval.h"
+#include "../numeric/interval.h"
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 #include "../linear_algebra/interval_vector.h"

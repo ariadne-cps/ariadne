@@ -22,7 +22,7 @@
  *  Foundation, Inc., 59 Templece Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "../base/arithmetic.h"
+#include "../base/array_operations.h"
 
 #include "../geometry/parallelotope.h"
 #include "../geometry/partition_tree_set.h"

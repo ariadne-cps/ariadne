@@ -35,7 +35,7 @@
 
 #include "../declarations.h"
 
-#include "../base/utility.h"
+#include "../utility/stlio.h"
 #include "../linear_algebra/vector.h"
 
 

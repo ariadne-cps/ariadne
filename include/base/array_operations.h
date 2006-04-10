@@ -29,11 +29,8 @@
 #ifndef _ARIADNE_ARRAY_OPERATIONS_H
 #define _ARIADNE_ARRAY_OPERATIONS_H
 
-#include <vector>
-#include <iosfwd>
+#include "../declarations.h"
 
-#include "../base/array.h"
-#include "../base/basic_type.h"
 
 namespace Ariadne {
   namespace Base {
@@ -41,6 +38,24 @@ namespace Ariadne {
     size_type inner_product(const SizeArray& a1, const SizeArray& a2);
     /*! \brief Inner product. */
     index_type inner_product(const IndexArray& a1, const IndexArray& a2);
+
+    /*! \brief Compare two arrays using the lexicographic total ordering. */
+    bool lexicographic_less(const IndexArray&, const IndexArray&);
+    /*! \brief Compare two arrays using the componentwise partial ordering. */
+    bool coordinate_less(const IndexArray&, const IndexArray&);
+  
+    /*! \brief Assigns the max of a and b to a. */
+    void assign_max(IndexArray& a, const IndexArray& l);
+
+    /*! \brief Assigns the minimum of a and b componentwise to a. */
+    void assign_min(IndexArray& a, const IndexArray& u);
+
+
+    /*! \brief Compute the sum of an index array and a size. */
+    IndexArray operator+(const IndexArray& l, const SizeArray& s);
+
+    /*! \brief Compute a positive offset from two index sets. */
+    IndexArray operator-(const IndexArray& u, const IndexArray& l);
 
     /*! \brief Inplace boolean and. */
     BooleanArray& operator&=(BooleanArray& v1, const BooleanArray& v2);
@@ -59,26 +74,10 @@ namespace Ariadne {
     /*! \brief True if v1-v2 is all zeros. */
     bool operator<=(const BooleanArray& v1, const BooleanArray& v2);
     
-    
-    /*! \brief Compare two arrays using the lexicographic total ordering. */
-    bool lexicographic_less(const IndexArray&, const IndexArray&);
-    /*! \brief Compare two arrays using the componentwise partial ordering. */
-    bool coordinate_less(const IndexArray&, const IndexArray&);
-
-    /*! \brief Compute the sum of an index array and a size. */
-    IndexArray operator+(const IndexArray& l, const SizeArray& s);
-
-    /*! \brief Compute a positive offset from two index sets. */
-    IndexArray operator-(const IndexArray& u, const IndexArray& l);
-   
-    /*! \brief Assigns the max of a and b to a. */
-    void assign_max(IndexArray& a, const IndexArray& l);
-
-    /*! \brief Assigns the minimum of a and b componentwise to a. */
-    void assign_min(IndexArray& a, const IndexArray& u);
-
 
   }
+
 }
+
 
 #endif /* _ARIADNE_ARRAY_OPERATIONS_H */

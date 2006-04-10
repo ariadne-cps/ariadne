@@ -32,14 +32,12 @@
 #include "../real_typedef.h"
 #include "../declarations.h"
 
-#include "../base/basic_type.h"
-
 namespace Ariadne {
   
-typedef Float64 Float64;
-typedef MPFloat MPFloat;
-typedef Dyadic Dyadic;
-typedef Rational Rational;
+typedef Numeric::Float64 Float64;
+typedef Numeric::MPFloat MPFloat;
+typedef Numeric::Dyadic Dyadic;
+typedef Numeric::Rational Rational;
 
 typedef Interval<Real> RInterval;
 typedef Interval<Field> FInterval;

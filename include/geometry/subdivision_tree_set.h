@@ -35,14 +35,13 @@
 
 #include "../declarations.h"
 
-#include "../base/basic_type.h"
 #include "../base/array.h"
 #include "../base/sequence.h"
-#include "../base/interval.h"
+#include "../numeric/interval.h"
 #include "../base/binary_word.h"
 #include "../base/binary_tree.h"
 #include "../base/iterator.h"
-#include "../base/utility.h"
+#include "../utility/stlio.h"
 
 #include "../geometry/rectangle.h"
 

@@ -23,6 +23,8 @@
 
 #include "base/array_operations.h"
 
+#include "base/array.h"
+
 namespace Ariadne {
   namespace Base {
 

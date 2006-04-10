@@ -36,7 +36,7 @@
 
 #include <boost/numeric/interval.hpp>
 
-#include "../base/numerical_type.h"
+#include "../numeric/numerical_types.h"
 
 namespace Ariadne {
   template<typename R> class rounding;
@@ -123,6 +123,21 @@ namespace Ariadne {
     MPFloat atanh_up (MPFloat x);
   };
 
+  inline MPFloat div_approx(const MPFloat& x1, const MPFloat& x2, const MPFloat& e) {
+    return div_approx(x1,x2,precision(e));
+  }
+    
+  inline MPFloat div_approx(const MPFloat& x1, const MPFloat& x2, const uint& n) {
+    MPFloat r(0,n);
+    mpf_div(r.get_mpf_t(),x1.get_mpf_t(),x2.get_mpf_t());
+    return r;
+  }
+ 
+  inline Dyadic div_approx(const Dyadic& x1, const Dyadic& x2, const Dyadic& e) {
+    Rational q=div(Rational(x1),Rational(x2));
+    return approximate<Dyadic>(q,e);
+  }
+    
   template<typename R> 
   R sqrt_approx(R x, R e) {
     assert(false);

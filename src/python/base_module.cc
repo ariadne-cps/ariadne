@@ -24,18 +24,11 @@
 
 #include <boost/python.hpp>
 
-void export_numeric();
-void export_function();
-void export_interval();
 void export_array();
 void export_binary_tree();
 
 BOOST_PYTHON_MODULE(base)
 {
-  export_numeric();
-  export_interval();
-  export_function();
   export_array();
   export_binary_tree();
 }
-

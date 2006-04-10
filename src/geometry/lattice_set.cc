@@ -25,8 +25,8 @@
 #include <sstream>
 #include <string>
 
-#include "base/utility.h"
-#include "base/numerical_type.h"
+#include "utility/stlio.h"
+
 #include "base/array_operations.h"
 #include "geometry/lattice_set.h"
 
@@ -600,13 +600,13 @@ namespace Ariadne {
     std::ostream& 
     operator<<(std::ostream& os, const LatticeCellListSet& cls) 
     {
-      return write_sequence(os,cls.begin(),cls.end(),'[',']',',');
+      return Utility::write_sequence(os,cls.begin(),cls.end(),'[',']',',');
     }
     
     std::ostream& 
     operator<<(std::ostream& os, const LatticeRectangleListSet& rls) 
     {
-      return write_sequence(os,rls.begin(),rls.end(),'[',']',',');
+      return Utility::write_sequence(os,rls.begin(),rls.end(),'[',']',',');
     }
     
   } 

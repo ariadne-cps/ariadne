@@ -179,6 +179,14 @@ namespace Ariadne {
 
 
     template<typename R>
+    InfiniteGrid<R>*
+    InfiniteGrid<R>::clone() const
+    {
+      std::cerr << "WARNING: Cloning InfiniteGrid<R> causes memory leak" << std::endl;
+      return new InfiniteGrid<R>(*this);
+    }
+
+    template<typename R>
     std::ostream&
     operator<<(std::ostream& os, const Grid<R>& g)
     {
@@ -196,7 +204,7 @@ namespace Ariadne {
     std::ostream&
     InfiniteGrid<R>::write(std::ostream& os) const
     {
-        return os << "InfiniteGrid";
+        return os << "InfiniteGrid( subdivision_lengths=" << this->_subdivision_lengths << " )\n";
     }
 
   }

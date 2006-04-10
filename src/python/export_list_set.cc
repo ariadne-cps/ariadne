@@ -41,6 +41,11 @@ using namespace boost::python;
 void export_list_set() {
   typedef bool (*RectLSBinPred) (const RRectangleListSet&, const RRectangleListSet&);
   typedef RRectangleListSet (*RectLSBinFun) (const RRectangleListSet&, const RRectangleListSet&);
+  typedef void (RRectangleListSet::* RectLSadjRectLS) (const RRectangleListSet&);
+  typedef void (RParallelotopeListSet::* PltpLSadjRect) (const RRectangle&);
+  typedef void (RParallelotopeListSet::* PltpLSadjRectLS) (const RRectangleListSet&);
+  typedef void (RParallelotopeListSet::* PltpLSadjPltp) (const RParallelotope&);
+  typedef void (RParallelotopeListSet::* PltpLSadjPltpLS) (const RParallelotopeListSet&);
 
   def("regular_intersection", RectLSBinFun(&regular_intersection));
   def("interiors_intersect", RectLSBinPred(&interiors_intersect));
@@ -70,6 +75,8 @@ void export_list_set() {
     .def(init<RParallelotopeListSet>())
     .def("dimension", &RParallelotopeListSet::dimension)
     .def("push_back", &RParallelotopeListSet::push_back)
+    .def("adjoin", PltpLSadjPltp(&RParallelotopeListSet::adjoin))
+    .def("adjoin", PltpLSadjPltpLS(&RParallelotopeListSet::adjoin))
     .def("size", &RParallelotopeListSet::size)
     .def("__len__", &RParallelotopeListSet::size)
     .def("__getitem__", &RParallelotopeListSet::get, return_value_policy<copy_const_reference>())

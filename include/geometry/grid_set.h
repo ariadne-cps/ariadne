@@ -98,25 +98,25 @@ namespace Ariadne {
     template<typename R>
     GridRectangle<R>
     over_approximation_of_intersection(const Rectangle<R>& r1, 
-                                       const Rectangle<R>& r2,
+                                       const GridRectangle<R>& r2,
                                        const Grid<R>& g);
     
     template<typename R>
     GridCellListSet<R>
     over_approximation_of_intersection(const Parallelotope<R>& p, 
-                                       const Rectangle<R>& r,
+                                       const GridRectangle<R>& r,
                                        const Grid<R>& g);
 
     template<typename R>
     GridCellListSet<R>
     over_approximation_of_intersection(const Zonotope<R>& p, 
-                                       const Rectangle<R>& r,
+                                       const GridRectangle<R>& r,
                                        const Grid<R>& g);
 
     template<typename R, template<typename> class BS>
     GridMaskSet<R>
     over_approximation_of_intersection(const ListSet<R,BS>& ls, 
-                                       const Rectangle<R>& r, 
+                                       const GridRectangle<R>& r, 
                                        const FiniteGrid<R>& g);
     
     template<typename R> std::ostream& operator<<(std::ostream&, const GridCell<R>&);
@@ -190,6 +190,9 @@ namespace Ariadne {
       /*!\brief The position of the rectangle in the grid. */
       const LatticeRectangle& position() const { return _position; }
 
+      /*!\brief Tests if the rectangle is empty. */
+      bool empty() const { return _position.empty(); }
+
       /*!\brief Convert to an ordinary rectangle. */
       operator Rectangle<R>() const;
 
@@ -253,6 +256,7 @@ namespace Ariadne {
       typedef Point<R> state_type;
       typedef GridSetIterator< LatticeMaskSet::const_iterator, GridCell<R> > iterator;
       typedef GridSetIterator< LatticeMaskSet::const_iterator, GridCell<R> > const_iterator;
+
       /*!\brief Construct an empty set from a finite grid. */
       GridMaskSet(const FiniteGrid<R>& g);
      
@@ -339,9 +343,9 @@ namespace Ariadne {
       const_iterator end() const { return const_iterator(*this->_grid_ptr,this->_lattice_set.end()); }
 
       /*! \brief The rectangle bounding the region of the mask. */
-      Rectangle<R> bounding_box() const { return Rectangle<R>(GridRectangle<R>(grid(),bounds())); }
+      GridRectangle<R> bounding_box() const { return GridRectangle<R>(grid(),bounds()); }
       
-      /*! \brief Adjoins a cell to the set. */
+      /*! \brief Removes all cells. */
       void clear() {
         _lattice_set.clear();
       }
@@ -349,31 +353,32 @@ namespace Ariadne {
       /*! \brief Adjoins a cell to the set. */
       void adjoin(const GridCell<R>& c) {
         assert(c.grid()==this->grid());
-        _lattice_set.adjoin(c._position);
+        this->_lattice_set.adjoin(c._position);
       }
 
       /*! \brief Adjoins a rectangle to the set. */
       void adjoin(const GridRectangle<R>& r) {
         assert(r.grid()==this->grid());
-        _lattice_set.adjoin(r._position);
+        this->_lattice_set.adjoin(r._position);
       }
 
       /*! \brief Adjoins a GridMaskSet to the set. */
       void adjoin(const GridMaskSet<R>& gms) {
+        //std::cerr << "GridMaskSet<R>::adjoin(const GridMaskSet<R>&)" << std::endl;
         assert(gms.grid()==this->grid());
-        _lattice_set.adjoin(gms._lattice_set);
+        this->_lattice_set.adjoin(gms._lattice_set);
       }
 
       /*! \brief Adjoins a GridCellListSet to the set. */
       void adjoin(const GridCellListSet<R>& cls) {
         assert(cls.grid()==this->grid());
-        _lattice_set.adjoin(cls._lattice_set);
+        this->_lattice_set.adjoin(cls._lattice_set);
       }
 
       /*! \brief Adjoins a GridRectangleListSet to the set. */
       void adjoin(const GridRectangleListSet<R>& rls) {
         assert(rls.grid()==this->grid());
-        _lattice_set.adjoin(rls._lattice_set);
+        this->_lattice_set.adjoin(rls._lattice_set);
       }
 
       GridMaskSet neighbourhood() const {
@@ -465,6 +470,9 @@ namespace Ariadne {
 
       /*! \brief The numeber of cells in the list. */
       size_type size() const { return _lattice_set.size(); }
+
+      /*! \brief The lattice set. */
+      const LatticeCellListSet& lattice_set() const { return _lattice_set; }
 
       /*!\brief The @a i th cell in the list. */
       GridCell<R> operator[] (const size_type i) const { return GridCell<R>(grid(),_lattice_set[i]); }
@@ -568,6 +576,9 @@ namespace Ariadne {
       /*! \brief The number of rectangles in the list. */
       size_type size() const { return _lattice_set.size(); }
 
+      /*! \brief The rectangles on the underlying lattice. */
+      const LatticeRectangleListSet& lattice_set() { return _lattice_set; }
+      
       /*!\brief Return the @a i th rectangle in the list. */
       GridRectangle<R> operator[] (const size_t i) const {
         return GridRectangle<R>(grid(),_lattice_set[i]);

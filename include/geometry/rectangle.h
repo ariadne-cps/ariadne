@@ -45,7 +45,10 @@
 #include "../base/interval.h"
 #include "../base/binary_word.h"
 
+#include "../linear_algebra/interval_vector.h"
+
 #include "../geometry/point.h"
+#include "../geometry/lattice_set.h" 
 
 namespace Ariadne {
   namespace Geometry {
@@ -245,6 +248,15 @@ namespace Ariadne {
         return state_type((this->_lower_corner.position_vector()+this->_upper_corner.position_vector())/2);
       }
       
+      /*! \brief The radius in the sup norm. */
+      inline real_type radius() const {
+        real_type diameter=0;
+        for(dimension_type i=0; i!=this->dimension(); ++i) {
+          diameter=max(diameter,this->operator[](i).length());
+        }
+        return diameter/2;
+      }
+      
       /*! \brief Returns the projection onto the \a n th coordinate. */
       inline Interval<real_type> operator[] (size_type n) const {
         return Interval<real_type>(this->_lower_corner[n],this->_upper_corner[n]);
@@ -284,6 +296,14 @@ namespace Ariadne {
       /*! \brief Sets the upper bound of the \a n th coordinate to \a r. */
       inline void set_upper_bound(size_type n, const real_type& r) {
         this->_upper_corner[n] = r;
+      }
+      
+      LinearAlgebra::interval_vector<R> position_vector() const {
+        LinearAlgebra::interval_vector<R> result(this->dimension());
+        for(size_type i=0; i!=result.size(); ++i) {
+          result(i)=this->operator[](i);
+        }
+        return result;
       }
       
       /*! \brief Tests if \a point is included into a rectangle. */
@@ -403,6 +423,9 @@ namespace Ariadne {
         return true;
       }
       
+      /*! \brief Subdivide into smaller pieces. */
+      ListSet<R,Geometry::Rectangle> subdivide() const;
+      
       /*! \brief The inequality operator */
       inline bool operator!=(const Rectangle<real_type>& A) const {
         return !(*this == A);
@@ -418,6 +441,35 @@ namespace Ariadne {
                      Rectangle<R>& r);
       
     };
+    
+    template <typename R>
+    inline
+    ListSet<R,Rectangle>
+    Rectangle<R>::subdivide() const 
+    {
+      size_type n=this->dimension();
+      ListSet<R,Geometry::Rectangle> result(this->dimension());
+      
+      array<index_type> lower(n,0);
+      array<index_type> upper(n,2);
+      array<index_type> finish(n,0);
+      finish[n-1]=2;
+      lattice_iterator end(finish,lower,upper);
+
+      Point<R> lwr_crnr=this->lower_corner();
+      LinearAlgebra::vector<R> offst=(this->upper_corner()-this->lower_corner())/2;
+      for(lattice_iterator iter(lower,lower,upper); iter!=end; ++iter) {
+        array<index_type> ary=*iter;
+        state_type new_lwr_crnr=lwr_crnr;
+        for(size_type i=0; i!=n; ++i) {
+          if(ary[i]==1) {
+            new_lwr_crnr[i]+=offst(i);
+          }
+        }
+        result.adjoin(Rectangle(new_lwr_crnr,new_lwr_crnr+offst));
+      }
+      return result;
+    }
     
     /*! \brief Tests disjointness */
     template <typename R>

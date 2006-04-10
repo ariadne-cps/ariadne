@@ -31,6 +31,13 @@ namespace Ariadne {
   namespace LinearAlgebra {
 
     template <typename R>
+    matrix<R>::matrix(const std::string& s) 
+    {
+        std::stringstream ss(s);
+        ss >> *this;
+    }
+    
+    template <typename R>
     matrix<R> zero_matrix(size_type r, size_type c) 
     {
       matrix<R> A(r,c);
@@ -44,8 +51,9 @@ namespace Ariadne {
   
     template<typename R>
     R
-    norm(const matrix<R>& A) 
+    matrix<R>::norm() const
     {
+      const matrix<R>& A=*this;
       R result=0;
       for(size_type i=0; i!=A.size1(); ++i) {
         R row_sum=0;
@@ -59,8 +67,9 @@ namespace Ariadne {
         
     template<typename R>
     R
-    log_norm(const matrix<R>& A) 
+    matrix<R>::log_norm() const 
     {
+      const matrix<R>& A=*this;
       R result=0;
       for(size_type i=0; i!=A.size1(); ++i) {
         R row_sum=A(i,i);
@@ -382,9 +391,9 @@ namespace Ariadne {
     
     template <typename R>
     matrix<typename numerical_traits<R>::field_extension_type> 
-    inverse(const matrix<R> &A) 
+    matrix<R>::inverse() const
     {
-      return _inverse(A,typename numerical_traits<R>::algebraic_category());
+      return _inverse(*this,typename numerical_traits<R>::algebraic_category());
     }
     
     template <typename R>
@@ -428,6 +437,13 @@ namespace Ariadne {
         }
       }
       return inverse(result);
+    }
+    
+    template <typename R>
+    vector<typename numerical_traits<R>::field_extension_type> 
+    matrix<R>::solve(const vector<R>& v) const
+    {
+      return this->inverse()*vector<F>(v);
     }
     
     
@@ -515,7 +531,7 @@ namespace Ariadne {
           iTinv(i,j) = numerator(Tinv(i,j)) * (multiplier/denominator(Tinv(i,j)));
         }
       }
-     
+      
       R rmultiplier = convert_to<R>(multiplier);
       matrix<R> rTinv(n,n);
        for(size_type i=0; i!=n; ++i) {
@@ -722,5 +738,51 @@ namespace Ariadne {
       return os;
     }
        
+     
+    template <typename R>
+    std::istream&
+    operator>>(std::istream& is, matrix<R>& A)
+    {
+      char c;
+      is >> c;
+      is.putback(c);
+      if(c=='[') {
+        is >> c;
+        /* Representation as a literal [a11,a12,...,a1n; a21,a22,...a2n; ... ; am1,am2,...,amn] */
+        std::vector< std::vector<R> > v;
+        R x;
+        c=';';
+        while(is && c==';') {
+          v.push_back(std::vector<R>());
+          c=',';
+          while(is && c==',') {
+            is >> x;
+            v.back().push_back(x);
+            is >> c;
+          }
+        }
+        if(is) {
+          A=matrix<R>(v.size(),v.front().size());
+          for(size_type i=0; i!=A.size1(); ++i) {
+            assert(v[i].size()==A.size2());
+            for(size_type j=0; j!=A.size2(); ++j) {
+              A(i,j)=v[i][j];
+            }
+          }
+        }  /* Representation as list of intervals (deprecated) */ 
+      /*
+        std::vector< Interval > v;
+        is >> v;
+        r=Rectangle<R>(v.size(),&v[0]);
+      */
+      }
+      else {
+        /* representation as lower and upper corners */
+        /* FIXME */
+        // throw invalid_input("Not implemented");
+      }
+      return is;
+    }
+
   }
 }

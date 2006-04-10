@@ -143,6 +143,12 @@ namespace Ariadne {
   /*! \brief Typedef's describing a numerical type. */
   template<typename T> class numerical_traits;
     
+  template<> class numerical_traits<Integer> {
+   public:
+    typedef field_tag algebraic_category;
+    typedef Rational field_extension_type;
+  };
+
   template<> class numerical_traits<double> {
    public:
     typedef field_tag algebraic_category;
@@ -176,11 +182,11 @@ namespace Ariadne {
 
 
   /*! \brief Convert from type \p Arg to type \p Res. */
-  template<typename Res, typename Arg> Res convert_to(const Arg& x) { return Res(x); }
+  template<typename Res, typename Arg> inline Res convert_to(const Arg& x) { return Res(x); }
   
-  template<> inline double convert_to(const Rational& x) { return x.get_d(); }
-  template<> inline double convert_to(const MPFloat& x) { return x.get_d(); }
-  template<> inline double convert_to(const Dyadic& x) { return x.get_d(); }
+  template<> inline double convert_to<double>(const Rational& x) { return x.get_d(); }
+  template<> inline double convert_to<double>(const MPFloat& x) { return x.get_d(); }
+  template<> inline double convert_to<double>(const Dyadic& x) { return x.get_d(); }
 
   template<> inline int convert_to(const Integer& n) { return n.get_si(); }
   template<> inline long convert_to(const Integer& n) { return n.get_si(); }

@@ -73,8 +73,14 @@ namespace Ariadne {
     LatticeMaskSet difference(const LatticeMaskSet&, const LatticeMaskSet&);
 
 
-    std::ostream& operator<<(std::ostream& os, const LatticeRectangle&);
+    std::istream& operator>>(std::istream& os, LatticeRectangle&);
     
+    std::ostream& operator<<(std::ostream& os, const LatticeCell&);
+    std::ostream& operator<<(std::ostream& os, const LatticeRectangle&);
+    std::ostream& operator<<(std::ostream& os, const LatticeMaskSet&);
+    std::ostream& operator<<(std::ostream& os, const LatticeCellListSet&);
+    std::ostream& operator<<(std::ostream& os, const LatticeRectangleListSet&);
+
 
     /*! \brief A transformation rule for lattice points. */
     class LatticeTransformation {
@@ -109,7 +115,7 @@ namespace Ariadne {
       /*!\brief The dimension of the cell. */
       dimension_type dimension() const { return this->_lower.size(); }
       /*!\brief The \a i th interval. */
-      Interval<index_type> operator[](dimension_type i) {
+      Interval<index_type> operator[](dimension_type i) const {
         return Interval<index_type>(this->_lower[i],this->_lower[i]+1); } 
       /*!\brief The lower bound in the \a i th dimension. */
       index_type lower_bound(dimension_type i) const { return this->_lower[i]; }
@@ -142,6 +148,8 @@ namespace Ariadne {
       /*!\brief A lattice rectangle specified by lower and upper corners. */
       LatticeRectangle(const IndexArray& l, const IndexArray& u)
         : _lower(l), _upper(u) { }
+      /*!\brief A lattice rectangle defined by a string literal. */
+      LatticeRectangle(const std::string& s);
       /*!\brief Convert from a lattice cell. */
       LatticeRectangle(const LatticeCell& c)
         : _lower(c.lower()), _upper(c.upper()) { }
@@ -258,6 +266,9 @@ namespace Ariadne {
       LatticeCellListSet(const LatticeCellListSet& cls) 
         : _list(cls._list) { }
       
+      LatticeCellListSet(const LatticeMaskSet& ms);
+      LatticeCellListSet(const LatticeRectangleListSet& rls);
+      
       dimension_type dimension() const { return _list.array_size(); }
       size_type empty() const { return _list.empty(); }
       size_type size() const { return _list.size(); }
@@ -347,10 +358,14 @@ namespace Ariadne {
       typedef mask_iterator<LatticeRectangle::const_iterator,BooleanArray::const_iterator> iterator;
       typedef iterator const_iterator;
      public:
+      LatticeMaskSet(const size_type& n) 
+        : _bounds(n), _mask() { this->_compute_cached_attributes(); }
       LatticeMaskSet(const LatticeRectangle& bb) 
         : _bounds(bb), _mask(bb.size(),false) { this->_compute_cached_attributes(); }
       LatticeMaskSet(const LatticeRectangle& bb, const BooleanArray& ma) 
         : _bounds(bb), _mask(ma) { this->_compute_cached_attributes(); }
+      LatticeMaskSet(const LatticeRectangle& bb, const LatticeCellListSet& cls);
+      LatticeMaskSet(const LatticeRectangle& bb, const LatticeRectangleListSet& rls);
 
       LatticeMaskSet(const LatticeMaskSet& ms);
       

@@ -54,20 +54,38 @@ namespace Ariadne {
       interval_matrix() : Base() { }
       interval_matrix(const size_type& r, const size_type& c) : Base(r,c) { }
       template<typename E> interval_matrix(const boost::numeric::ublas::matrix_expression<E>& A) : Base(A()) { }
-      interval_matrix(const matrix<R>& A, const R& r) : Base(A.size1(),A.size2()) { 
-        for(size_type i=0; i!=A.size1(); ++i) {
-          for(size_type j=0; j!=A.size2(); ++j) {
-            Base::operator()(i,j)=Interval<R>(A(i,j)-r,A(i,j)+r);
-          }
-        }
-      }
-
+      interval_matrix(const matrix<R>& A, const R& r);
+      
+      matrix<R> centre() const;
+      R radius() const;
+      
+      Interval<R> norm() const;
+      R upper_norm() const;
+      R upper_log_norm() const;
+      
+      interval_matrix<R> inverse() const;
     };
 
     template <typename R>
     std::ostream& 
     operator<<(std::ostream& os, const interval_matrix<R>& A);
         
+    /*! \brief A matrix \f$A\f$ such that for all zonotopes \f$Z\f$, \f$AZ\subset \overline{\underline{A}}\f$. */
+    template<typename R>
+    matrix<R>
+    over_approximation(const interval_matrix<R>& A); 
+        
+    /*! \brief An interval matrix exponential. */
+    template<typename R>
+    interval_matrix<R>
+    exp(const interval_matrix<R>& A); 
+        
+    /*! \brief The interval matrix inverse. */
+    template<typename R>
+    interval_matrix<R>
+    approximate(const matrix<typename numerical_traits<R>::field_extension_type>& A,const R& e); 
+        
+    
     template <typename R>
     interval_vector<R> 
     prod(const matrix<R>& A, const interval_vector<R>& v);
@@ -149,57 +167,46 @@ namespace Ariadne {
       return fprod(A,B);
     }
 
-    
-    
-    /*! \brief The midpoint of the interval matrix. */
-    template<typename R>
-    matrix<R>
-    centre(const interval_matrix<R>& A); 
-        
-    /*! \brief The sup norm of the matrix of radii of the interval matrix. */
-    template<typename R>
-    R
-    radius(const interval_matrix<R>& A); 
-        
     /*! \brief The range of supremum norms of matrices in the interval matrix. */
     template<typename R>
+    inline
     Interval<R>
-    norm(const interval_matrix<R>& A); 
+    norm(const interval_matrix<R>& A)
+    { 
+      return A.norm();
+    }
         
     /*! \brief The maximum norm in the interval matrix.
      */
     template<typename R>
+    inline
     R
-    upper_norm(const interval_matrix<R>& A); 
-        
+    upper_norm(const interval_matrix<R>& A)
+    {    
+      return A.upper_norm();
+    }
+    
     /*! \brief The maximum logarithmic norm in the interval matrix.
      * 
      *  The logarithmic norm is defined as \f$\max_{i} A_{ii}+\sum_{j!=i}|A_{ij}|\f$.
      */
     template<typename R>
+    inline
     R
-    upper_log_norm(const interval_matrix<R>& A); 
+    upper_log_norm(const interval_matrix<R>& A)
+    {
+      return A.upper_log_norm();
+    }
         
     /*! \brief The interval matrix inverse. */
     template<typename R>
+    inline
     interval_matrix<R>
-    inverse(const interval_matrix<R>& A); 
-        
-    /*! \brief A matrix \f$A\f$ such that for all zonotopes \f$Z\f$, \f$AZ\subset \overline{\underline{A}}\f$. */
-    template<typename R>
-    matrix<R>
-    over_approximation(const interval_matrix<R>& A); 
-        
-    /*! \brief An interval matrix exponential. */
-    template<typename R>
-    interval_matrix<R>
-    exp(const interval_matrix<R>& A); 
-        
-    /*! \brief The interval matrix inverse. */
-    template<typename R>
-    interval_matrix<R>
-    approximate(const matrix<typename numerical_traits<R>::field_extension_type>& A,const R& e); 
-        
+    inverse(const interval_matrix<R>& A)
+    {
+      return A.inverse(); 
+    }
+    
   }
 }
 

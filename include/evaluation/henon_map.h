@@ -125,7 +125,7 @@ namespace Ariadne {
     LinearAlgebra::interval_matrix<R>
     HenonMap<R>::derivative(const Geometry::Rectangle<R>& r) const
     {
-      LinearAlgebra::matrix< Interval<R> > result(2,2); 
+      LinearAlgebra::interval_matrix<R> result(2,2); 
       result(0,0) = R(-2)*r[0];
       result(0,1) = Interval<R>(-_b);
       result(1,0) = Interval<R>(1);

@@ -31,6 +31,9 @@ namespace Ariadne {
     template class interval_matrix<Real>;
     template class interval_matrix<Field>;
       
+    template std::ostream& operator<<(std::ostream&, const interval_matrix<Real>&);
+    template std::ostream& operator<<(std::ostream&, const interval_matrix<Field>&);
+           
     template interval_vector<Real> prod(const matrix<Real>&, const interval_vector<Real>&);
     template interval_vector<Field> prod(const matrix<Field>&, const interval_vector<Field>&);
     
@@ -51,25 +54,12 @@ namespace Ariadne {
     
     template interval_matrix<Real> fprod(const matrix<Field>&, const interval_matrix<Real>&);
      
-    template std::ostream& operator<<(std::ostream&, const interval_matrix<Real>&);
-    template std::ostream& operator<<(std::ostream&, const interval_matrix<Field>&);
-    
-    template matrix<Real> centre(const interval_matrix<Real>&);
-    template matrix<Field> centre(const interval_matrix<Field>&);
-
-    template Real radius(const interval_matrix<Real>&);
-    template Field radius(const interval_matrix<Field>&);
-
-    template Interval<Real> norm(const interval_matrix<Real>&);
-    template Interval<Field> norm(const interval_matrix<Field>&);
-
-    template Real upper_log_norm(const interval_matrix<Real>&);
-    template Field upper_log_norm(const interval_matrix<Field>&);
-       
     template matrix<Real> over_approximation(const interval_matrix<Real>&);
     template matrix<Field> over_approximation(const interval_matrix<Field>&);
 
     template interval_matrix<Real> approximate(const matrix<Field>& A,const Real& e); 
+
+    template interval_matrix<Real> exp(const interval_matrix<Real>& A); 
 
   }
 }

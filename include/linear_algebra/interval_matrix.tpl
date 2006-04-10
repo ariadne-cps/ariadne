@@ -157,32 +157,45 @@ namespace Ariadne {
       /* FIXME: Write this code! */
       return interval_matrix<R>(A.size1(),B.size2());
     }
-          
+    
+
+    
+    template<typename R>
+    interval_matrix<R>::interval_matrix(const matrix<R>& A, const R& r)
+      : Base(A.size1(),A.size2()) 
+    { 
+      for(size_type i=0; i!=A.size1(); ++i) {
+        for(size_type j=0; j!=A.size2(); ++j) {
+          Base::operator()(i,j)=Interval<R>(A(i,j)-r,A(i,j)+r);
+        }
+      }
+    }
+    
     template<typename R>
     matrix<R>
-    centre(const interval_matrix<R>& A)
+    interval_matrix<R>::centre() const
     {
-      dimension_type m=A.size1();
-      dimension_type n=A.size2();
-      
-      matrix<R> result(m,n);
-      for(size_type i=0; i!=m; ++i) {
-        for(size_type j=0; j!=n; ++j) {
-          result(i,j)=(A(i,j).lower()+A(i,j).upper())/2;
+      const interval_matrix<R>& A=*this;      
+      matrix<R> result(A.size1(),A.size2());
+      for(size_type i=0; i!=A.size1(); ++i) {
+        for(size_type j=0; j!=A.size2(); ++j) {
+          result(i,j)=A(i,j).centre();
         }
       }
       return result;
     }
 
+    
     template<typename R>
     R
-    radius(const interval_matrix<R>& A)
+    interval_matrix<R>::radius() const
     {
+      const interval_matrix<R>& A=*this;
       R diameter=0;
       for(size_type i=0; i!=A.size1(); ++i) {
         R row_sum=0;
         for(size_type j=0; j!=A.size2(); ++j) {
-          row_sum+=A(i,j).upper()-A(i,j).lower();
+          row_sum+=A(i,j).length();
         }
         diameter=max(diameter,row_sum);
       }
@@ -193,8 +206,9 @@ namespace Ariadne {
 
     template<typename R>
     Interval<R>
-    norm(const interval_matrix<R>& A) 
+    interval_matrix<R>::norm() const 
     {
+      const interval_matrix<R>& A=*this;
       R lower_bound=0;
       R upper_bound=0;
       for(size_type i=0; i!=A.size1(); ++i) {
@@ -214,8 +228,9 @@ namespace Ariadne {
         
     template<typename R>
     R
-    upper_norm(const interval_matrix<R>& A) 
+    interval_matrix<R>::upper_norm() const
     {
+      const interval_matrix<R>& A=*this;
       R upper_bound=0;
       for(size_type i=0; i!=A.size1(); ++i) {
          R upper_row_sum=0;
@@ -229,8 +244,9 @@ namespace Ariadne {
         
     template<typename R>
     R
-    upper_log_norm(const interval_matrix<R>& A) 
+    interval_matrix<R>::upper_log_norm() const
     {
+      const interval_matrix<R>& A=*this;
       R upper_bound=0;
       for(size_type i=0; i!=A.size1(); ++i) {
          R upper_row_sum=A(i,i).upper();
@@ -245,6 +261,7 @@ namespace Ariadne {
     }
         
 
+    
 
     template<typename R>
     matrix<R>
@@ -298,6 +315,43 @@ namespace Ariadne {
       return result;
     }
       
+    template<typename R>
+    interval_matrix<R>
+    identity_interval_matrix(const size_type& n) 
+    {
+      interval_matrix<R> result(n,n);
+      for(size_type i=0; i!=n; ++i) {
+        result(i,i)=1;
+      }
+      return result;
+    }
+    
+    template<typename R>
+    interval_matrix<R>
+    exp(const interval_matrix<R>& A) 
+    {
+      assert(A.size1()==A.size2());
+      R err=A.radius()/65536;
+      if(err==0) {
+        err=A.upper_norm()/65536;
+        err/=65536;
+        err/=65536;
+      }
+            
+      interval_matrix<R> result=identity_interval_matrix<R>(A.size1())+A;
+      interval_matrix<R> term=A;
+      unsigned int n=1;
+      while(term.upper_norm()>err) {
+        n=n+1;
+        term=(term*A)/Interval<R>(n);
+        result+=term;
+      }
+      term=Interval<R>(-1,1)*term;
+      result+=term;
       
+      return result;
+    }
+    
+    
   }
 }

@@ -97,6 +97,7 @@ namespace Ariadne {
       }
 
       bool operator==(const Grid<R>& g) const { return this==&g; }
+      bool operator!=(const Grid<R>& g) const { return !(*this==g); }
 
       IndexArray index(const Point<R>& s) const;
       IndexArray lower_index(const Rectangle<R>& r) const;
@@ -204,8 +205,13 @@ namespace Ariadne {
       
       /*! \brief Construct from an array of subdivision lengths \a sl.
        */
-      InfiniteGrid(const array<R>& sl)
+      explicit InfiniteGrid(const array<R>& sl)
         : _subdivision_lengths(sl) { }
+
+      /*! \brief Construct from an array of subdivision lengths \a sl.
+       */
+      InfiniteGrid(const dimension_type& n, const R& l)
+        : _subdivision_lengths(n,l) { }
 
       /*! \brief The underlying dimension of the grid. */
       virtual dimension_type dimension() const { 

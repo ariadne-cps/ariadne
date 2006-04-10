@@ -22,13 +22,24 @@
  */
 
 #include <iostream>
+#include <sstream>
+#include <string>
 
+#include "base/utility.h"
+#include "base/numerical_type.h"
 #include "base/array_operations.h"
 #include "geometry/lattice_set.h"
 
 namespace Ariadne {
   namespace Geometry {
     
+    LatticeRectangle::LatticeRectangle(const std::string& s)
+      : _lower(), _upper()
+    {
+      std::stringstream ss(s);
+      ss >> *this;
+    }
+     
     SizeArray
     LatticeRectangle::sizes() const
     {
@@ -56,8 +67,46 @@ namespace Ariadne {
       return this->strides()[this->dimension()];
     }
 
+    std::istream& 
+    operator>>(std::istream& is, LatticeRectangle& r)
+    {
+      char c;
+      is >> c;
+      is.putback(c);
+      if(c=='[') {
+        /* Representation as a literal [a1,b1]x[a2,b2]x...x[an,bn] */
+        std::vector< Interval<int> > v;
+        Interval<int> i;
+        c='x';
+        while(c=='x') {
+          is >> i;
+          v.push_back(i);
+          c=' ';
+          while( is && c==' ') {
+            is >> c;
+          }
+        }
+        if(is) {
+          is.putback(c);
+        }
+        
+        IndexArray l(v.size());
+        IndexArray u(v.size());
+        for(size_type i=0; i!=v.size(); ++i) {
+          l[i]=v[i].lower();
+          u[i]=v[i].upper();
+        }
+        r=LatticeRectangle(l,u);
+      }
+      else {
+        /* representation as lower and upper corners */
+        /* FIXME */
+        // throw invalid_input("Not implemented");
+      }
+      return is;
+    }
 
-
+    
     LatticeRectangle
     LatticeTransformation::operator() (const LatticeCell& c) const
     {
@@ -103,6 +152,18 @@ namespace Ariadne {
       return LatticeRectangle(lower,upper);
     }
 
+    LatticeCellListSet::LatticeCellListSet(const LatticeMaskSet& ms) 
+      : _list(ms.dimension()) 
+    {
+      this->adjoin(ms); 
+    }
+    
+    LatticeCellListSet::LatticeCellListSet(const LatticeRectangleListSet& rls) 
+      : _list(rls.dimension()) 
+    {
+      this->adjoin(rls); 
+    }
+    
     LatticeRectangle
     LatticeCellListSet::bounds() const
     { 
@@ -119,6 +180,8 @@ namespace Ariadne {
       }
       return LatticeRectangle(lower,upper);
     }
+    
+    
 
     void 
     LatticeCellListSet::adjoin(const LatticeRectangle& r) 
@@ -156,6 +219,20 @@ namespace Ariadne {
       : _bounds(ms._bounds), _mask(ms._mask)
     {
       this->_compute_cached_attributes();
+    }
+    
+    LatticeMaskSet::LatticeMaskSet(const LatticeRectangle& bd, const LatticeCellListSet& cls)
+      : _bounds(bd)
+    {
+      this->_compute_cached_attributes();
+      this->adjoin(cls);
+    }
+    
+    LatticeMaskSet::LatticeMaskSet(const LatticeRectangle& bd, const LatticeRectangleListSet& rls)
+      : _bounds(bd)
+    {
+      this->_compute_cached_attributes();
+      this->adjoin(rls);
     }
     
 
@@ -272,8 +349,15 @@ namespace Ariadne {
 
     void 
     LatticeMaskSet::adjoin(const LatticeMaskSet& lm) {
-      assert(this->bounds()==lm.bounds());
-      this->_mask |= lm._mask;
+      //std::cerr << "LatticeMaskSet::adjoin(const LatticeMaskSet&)" << std::endl;
+      if(this->bounds()==lm.bounds()) {
+        this->_mask |= lm._mask;
+      }
+      else {
+        for(LatticeMaskSet::const_iterator iter=lm.begin(); iter!=lm.end(); ++iter) {
+          this->adjoin(*iter);
+        }
+      }
     }
 
     void 
@@ -482,6 +566,19 @@ namespace Ariadne {
     }
 
     std::ostream& 
+    operator<<(std::ostream& os, const LatticeCell& c) 
+    {
+      if(c.dimension()==0) {
+        return os<<"Empty";
+      }
+      os << c[0];
+      for(dimension_type i=1; i!=c.dimension(); ++i) {
+        os << "x" << c[i];
+      }
+      return os;
+    }
+        
+    std::ostream& 
     operator<<(std::ostream& os, const LatticeRectangle& r) 
     {
       if(r.empty() || r.dimension()==0) {
@@ -494,5 +591,23 @@ namespace Ariadne {
       return os;
     }
         
+    std::ostream& 
+    operator<<(std::ostream& os, const LatticeMaskSet& ms) 
+    {
+      return os << "LatticeMaskSet(\n  bounds=" << ms.bounds() << "\n  mask=" << ms.mask() << "\n)\n";
+    }
+        
+    std::ostream& 
+    operator<<(std::ostream& os, const LatticeCellListSet& cls) 
+    {
+      return write_sequence(os,cls.begin(),cls.end(),'[',']',',');
+    }
+    
+    std::ostream& 
+    operator<<(std::ostream& os, const LatticeRectangleListSet& rls) 
+    {
+      return write_sequence(os,rls.begin(),rls.end(),'[',']',',');
+    }
+    
   } 
 }

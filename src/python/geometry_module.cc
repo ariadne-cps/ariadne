@@ -31,6 +31,7 @@ void export_simplex();
 void export_zonotope();
 void export_polyhedron();
 void export_list_set();
+void export_lattice_set();
 void export_grid_set();
 void export_partition_tree_set();
 
@@ -45,6 +46,7 @@ BOOST_PYTHON_MODULE(geometry)
   export_zonotope();
   export_polyhedron();
   export_list_set();
+  export_lattice_set();
   export_grid_set();
   export_partition_tree_set();
   

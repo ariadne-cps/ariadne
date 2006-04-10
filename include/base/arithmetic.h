@@ -120,7 +120,7 @@ namespace Ariadne {
 
   template<> inline int quotient(Float64 x, Float64 y)
   {
-    assert(y!=0.0);
+    assert(y>=0.0);
     int q = int(x/y+0.5);
     if(x < q*y) { q=q-1; }
     assert(q*y <= x && x < (q+1)*y);
@@ -129,10 +129,13 @@ namespace Ariadne {
 
   template<> inline int quotient(Rational x, Rational y) 
   {
-    assert(y!=Rational(0));
+    assert(y>=0);
     Rational d = x/y;
-    Integer qz = d.get_num() / d.get_den();
-    int q = int(qz.get_si());
+    Integer qz= d.get_num() / d.get_den();
+    if(d<0 && qz*y!=x) {
+      qz-=1;
+    }
+    int q = qz.get_si();
     assert(q*y <= x && x < (q+1)*y);
     return q;
   }

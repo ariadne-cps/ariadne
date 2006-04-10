@@ -27,6 +27,21 @@ from ariadne.geometry import *
 from ariadne.linear_algebra import *
 import sys
 
+a=IndexArray(2)
+a[0]=1
+a[1]=2
+
+lcls=LatticeCellListSet(2)
+lc=LatticeCell(a)
+lr=LatticeRectangle("[0,2]x[0,3]")
+lms=LatticeMaskSet(lr)
+lms.adjoin(lc)
+print lms
+lms.adjoin(lr)
+print lms
+lcls.adjoin(lms)
+print lcls
+
 
 def plot(fn,bb,set):
   eps=EpsPlot(fn+".eps",bb)
@@ -41,59 +56,97 @@ def plot(fn,bb,set):
 
 bb=Rectangle("[-2,2]x[-2,2]")
 
-A=Matrix(2,2)
-b=Vector(2)
-A[0,0]=-0.25;
-A[0,1]=-1;
-A[1,0]=+1;
-A[1,1]=-0.25;
+A=Matrix("[-0.25,-1;+1,-0.25]")
+b=Vector("[0,0]")
 avf=AffineVectorField(A,b)
 
-init_rect=Rectangle("[0.95,1.05]x[0.45,0.55]")
+init_rect=Rectangle("[0.96,1.04]x[0.46,0.54]")
 init_paral=Parallelotope(init_rect)
 
-ar=[init_rect]
+init_set=ParallelotopeListSet(init_paral)
 for i in range(0,16):
-  ar.append(integrate(avf,ar[-1],Real(0.1),Real(0.1)))
-plot("integrate1",bb,ar)
+  print
+  init_set.push_back(integrate(avf,init_set[len(init_set)-1],Real(0.1),Real(0.1)))
+plot("integrate1",bb,init_set)
 
 print "\n\n\n\n"
-print avf.name()
 
-ap=[init_paral]
-for i in range(0,128):
-  print
-  ap.append(integrate(avf,ap[-1],Real(0.1),Real(0.1)))
-#for p in ap:
-#  print p
-plot("integrate2",bb,ap)
+init_set=ParallelotopeListSet(init_paral.subdivide())
+reach_set=ParallelotopeListSet(init_set)
+for i in range(0,11):
+  final_set=integrate(avf,init_set,Real(0.2*i),Real(0.1))
+  reach_set.adjoin(final_set)
+plot("integrate2",bb,reach_set)
 
+print "\n\n\n\n"
+
+grid=InfiniteGrid(2,Real(0.02))
+print "grid =", grid
+bounding_box=Rectangle("[-2,2]x[-2,2]")
+bounds=over_approximation(bounding_box,grid).position()
+gcl=over_approximation(init_paral,grid)
+print "Cell list =",gcl
+init_set=GridMaskSet(grid,bounds)
+init_set.adjoin(gcl)
+reach_set=GridMaskSet(grid,bounds)
+reach_set.adjoin(init_set)
+#print "init_set =", init_set
+bounds_set=GridMaskSet(grid,bounds)
+bounds_set.adjoin(GridRectangle(grid,bounds))
+#print "bounding set =",bounds_set
+for i in range(0,2):
+  init_set=integrate(avf,init_set,bounds_set,Real(2.0),Real(0.2))
+  reach_set.adjoin(init_set)
+plot("integrate3",bb,reach_set)
+#print reach_set
+
+print "Done"
 sys.exit()
 
-h=Real(1./64)
+
+h=Real(1./32)
 ls=LorenzSystem(Real(8./3.),Real(28.0),Real(10.0))
 r0=Rectangle("[1.0,1.1]x[1.0,1.1]x[1.0,1.1]")
 r=[r0]
-for i in range(0,n):
+for i in range(0,4):
   r.append(integration_step(ls,r[-1],h))
+plot("integrate4",bb,r)
 
 
 print "\n\n\n\n"
-p=[Parallelotope(r0)]
-#p.append(reach_step(ls,p[-1],h/4))
-for i in range(0,n):
+p0=Parallelotope(r0)
+p=[p0]
+for i in range(0,1):
   p.append(integration_step(ls,p[-1],h))
-#p.append(reach_step(ls,p[-1],Real(h/4)))
   
 print p[-1]
+plot("integrate5",bb,p)
 
-bb
-eps=EpsPlot("integrate2.eps",bb)
-eps.set_fill_colour("green")
-for i in range(0,n):
-  eps.write(p[i])
+print "\n\n\n\n"
+print "Computing integration of list set\n\n"
+initial=ParallelotopeListSet(p0)
+final=integrate(ls,initial,Real(0.3),Real(0.001))
+print final
+eps=EpsPlot("integrate6.eps",bb)
 eps.set_fill_colour("blue")
-eps.write(p[0])
-eps.set_fill_colour("red")
-eps.write(p[-1])
-eps.close()
+eps.write(initial)
+eps.set_fill_colour("green")
+eps.write(final)
+eps.close
+
+sys.exit()
+
+print "\n\n\n\n"
+print "Computing integration of denotable set\n\n"
+grid=InfiniteGrid(3,Real(0.05));
+lr=LatticeRectangle("[-400,400]x[-400,400]x[-400,400]")
+initial=GridMaskSet(grid,lr)
+initial.adjoin(over_approximation(r0,grid))
+bounding_set=GridMaskSet(grid,lr)
+bounding_set.adjoin(GridRectangle(grid,lr))
+
+final=integrate(ls,initial,bounding_set,Real(1.0),Real(0.1))
+eps=EpsPlot("integrate7.eps",bb)
+eps.set_fill_colour("green")
+eps.write(final)
+eps.close

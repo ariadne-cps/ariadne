@@ -30,70 +30,9 @@
 
 #include "../declarations.h"
 
-#include "../evaluation/vector_field.h"
-
 namespace Ariadne {
   namespace Evaluation {
    
-    /*! \brief Verifies that the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time. */
-    template<typename R>
-    bool
-    check_flow_bounds(const Evaluation::VectorField<R>& vector_field,
-                      const Geometry::Rectangle<R>& initial_set,
-                      const Geometry::Rectangle<R>& bound,
-                      const R& integration_time);
-
-    /*! \brief Compute a set \a bound such that the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to \a integration_time. 
-     *
-     *  The algorithm is guarenteed to terminate if the flow has linear growth at infinity.
-     */
-    template<typename R>
-    Geometry::Rectangle<R>
-    estimate_flow_bounds(const Evaluation::VectorField<R>& vector_field,
-                         const Geometry::Rectangle<R>& initial_set,
-                         R& integration_time);
-
-    /*! \brief Compute a set \a bound such that the flow of \a vector_field starting at \a initial_point remains in \a bound for times up to \a integration_time, given a bound \a estimated_bound. */
-    template<typename R>
-    Geometry::Rectangle<R>
-    refine_flow_bounds(const Evaluation::VectorField<R>& vector_field,
-                       const Geometry::Point<R>& initial_point,
-                       const Geometry::Rectangle<R>& estimated_bound,
-                       const R& integration_time);
-
-    
-    /*! \brief An inaccurate C0 algorithm for integrating forward a rectangle. */
-    template<typename R>
-    Geometry::Rectangle<R> 
-    integration_step(const VectorField<R>& vector_field, const Geometry::Rectangle<R>& initial_set, R& step_size);
-
-    /*! \brief A C1 algorithm for integrating forward a parallelotope. */
-    template<typename R>
-    Geometry::Parallelotope<R> 
-    integration_step(const VectorField<R>& vector_field, const Geometry::Parallelotope<R>& initial_set, R& step_size);
-
-    /*! \brief A specialized algorithm for integrating forward a parallelotope. */
-    template<typename R>
-    Geometry::Parallelotope<R> 
-    integration_step(const AffineVectorField<R>& vector_field, const Geometry::Parallelotope<R>& initial_set, R& step_size);
-
-    
-    /*! \brief An inaccurate C0 algorithm for integrating forward a rectangle up to a certain time. */
-    template<typename R>
-    Geometry::Rectangle<R> 
-    reach_step(const VectorField<R>& vector_field, const Geometry::Rectangle<R>& initial_set, R& step_size);
-
-    /*! \brief A C1 algorithm for integrating forward a parallelotope up to a certain time. */
-    template<typename R>
-    Geometry::Parallelotope<R> 
-    reach_step(const VectorField<R>& vector_field, const Geometry::Parallelotope<R>& initial_set, R& step_size);
-
-    /*! \brief A C1 algorithm for integrating forward a zonotope up to a certain time. */
-    template<typename R>
-    Geometry::Zonotope<R> 
-    reach_step(const VectorField<R>& vector_field, const Geometry::Zonotope<R>& initial_set, R& step_size);
-
-
 
     /*! \brief Integrate a rectangle. */
     template<typename R>
@@ -105,26 +44,41 @@ namespace Ariadne {
     Geometry::Parallelotope<R> 
     integrate(const VectorField<R>& vector_field, const Geometry::Parallelotope<R>& initial_set, const R& time, const R& step_size);
 
+    
     /*! \brief Integrate a set. */
     template<typename R, template<typename> class BS>
     Geometry::ListSet<R,BS> 
-    integrate(const VectorField<R>& vector_field, const Geometry::ListSet<R,BS>& initial_set, const R& time, const R& step_size);
+    integrate(const VectorField<R>& vector_field, 
+              const Geometry::ListSet<R,BS>& initial_set, 
+              const R& time, 
+              const R& step_size);
 
-    /*! \brief Integrate a set using a C1 algorithm. */
+    /*! \brief Integrate a set within a boundin box using a C1 algorithm. */
     template<typename R>
     Geometry::GridMaskSet<R> 
-    integrate(const VectorField<R>& vector_field, const Geometry::GridMaskSet<R>& initial_set, const R& time, const R& step_size);
+    integrate(const VectorField<R>& vector_field, 
+              const Geometry::GridMaskSet<R>& initial_set, 
+              const Geometry::GridMaskSet<R>& bounding_set,
+              const R& time, 
+              const R& step_size);
 
     
     /*! \brief Compute the reachable set. */
     template<typename R, template<typename> class BS>
     Geometry::ListSet<R,BS> 
-    reach(const VectorField<R>& vector_field, const Geometry::ListSet<R,BS>& initial_set, const R& time, const R& step_size);
+    reach(const VectorField<R>& vector_field, 
+          const Geometry::ListSet<R,BS>& initial_set, 
+          const R& time, 
+          const R& step_size);
 
     /*! \brief Integrate a set using a C1 algorithm. */
     template<typename R>
     Geometry::GridMaskSet<R> 
-    reach(const VectorField<R>& vector_field, const Geometry::GridMaskSet<R>& initial_set, const R& time, const R& step_size);
+    reach(const VectorField<R>& vector_field, 
+          const Geometry::GridMaskSet<R>& initial_set, 
+          const Geometry::GridMaskSet<R>& bounding_set, 
+          const R& time, 
+          const R& step_size);
 
     
 /*

@@ -38,14 +38,11 @@ namespace Ariadne {
     template std::ostream& operator<<(std::ostream&, const matrix<Real>&);
     template std::ostream& operator<<(std::ostream&, const matrix<Field>&);
     
+    template std::istream& operator>>(std::istream&, matrix<Real>&);
+    template std::istream& operator>>(std::istream&, matrix<Field>&);
+    
     template matrix<Real> zero_matrix(size_type r, size_type c);
     template matrix<Field> zero_matrix(size_type r, size_type c);
-
-    template Real norm(const matrix<Real>& A);
-    template Field norm(const matrix<Field>& A);
-
-    template Real log_norm(const matrix<Real>& A);
-    template Field log_norm(const matrix<Field>& A);
 
     template matrix<Real> concatenate_columns(const matrix<Real>& A1,
                                                 const matrix<Real>& A2);
@@ -80,10 +77,6 @@ namespace Ariadne {
     template matrix<Field> Householder_QR(const matrix<Field> &A);
 
     template matrix<Real> hermitian(const matrix<Real>& m);
-    
-    template matrix<Field> inverse(const matrix<Real> &A);
-    template matrix<Field> inverse(const matrix<Field> &A);
-    template matrix<Float64> inverse(const matrix<Float64> &A);
     
     template Integer common_denominator(const matrix<Real>& A);
     

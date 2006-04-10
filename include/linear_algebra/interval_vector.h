@@ -48,18 +48,99 @@ namespace Ariadne {
       template<typename E> interval_vector(const boost::numeric::ublas::vector_expression<E> v) : Base(v()) { }
       interval_vector() : Base() { }
       interval_vector(const size_type& n) : Base(n) { }
-      interval_vector(const vector<R>& v) : Base(v.size()) { 
-        for(size_type i=0; i!=this->size(); ++i) {
-          Base::operator()(i) = Interval<R>(v(i),v(i));
-        }
-      }
-      interval_vector(const vector<R>& v, const R& r) : Base(v.size()) { 
-        for(size_type i=0; i!=this->size(); ++i) {
-          Base::operator()(i) = Interval<R>(v(i)-r,v(i)+r);
-        }
-      }
+      interval_vector(const vector<R>& v);
+      interval_vector(const vector<R>& v, const R& r);
+      
+      vector<R> centre() const;
+      R radius() const;
+      
+      Interval<R> norm() const;
+      R upper_norm() const;
     };
       
+    template <typename R> interval_vector<R> operator+(const interval_vector<R>& iv1, const interval_vector<R> iv2);
+    template <typename R> interval_vector<R> operator*(const Interval<R>& s, const interval_vector<R>& iv);
+    template <typename R> interval_vector<R> operator*(const R& s, const interval_vector<R>& iv);
+
+    
+    template <typename R>
+    inline
+    interval_vector<R>::interval_vector(const vector<R>& v)
+      : Base(v.size()) 
+    { 
+      for(size_type i=0; i!=this->size(); ++i) {
+        Base::operator()(i) = Interval<R>(v(i),v(i));
+      }
+    }
+    
+    template <typename R>
+    inline
+    interval_vector<R>::interval_vector(const vector<R>& v, const R& r)
+      : Base(v.size()) 
+    { 
+      for(size_type i=0; i!=this->size(); ++i) {
+        Base::operator()(i) = Interval<R>(v(i)-r,v(i)+r);
+      }
+    }
+      
+    template <typename R>
+    inline
+    vector<R> 
+    interval_vector<R>::centre() const
+    {
+      vector<R> result(this->size());
+      const interval_vector<R>& v=*this;
+      for(size_type i=0; i!=v.size(); ++i) {
+        result(i) = v(i).centre();
+      }
+      return result;
+    }
+    
+    template <typename R>
+    inline
+    R
+    interval_vector<R>::radius() const
+    {
+      const interval_vector<R>& v=*this;
+      R result=0;
+      for(size_type i=0; i!=v.size(); ++i) {
+        result = max(result,v(i).diameter());
+      }
+      return result;
+    }
+    
+    template<typename R>
+    inline
+    Interval<R>
+    interval_vector<R>::norm() const 
+    {
+      const interval_vector<R>& v=*this;
+      R lower_bound=0;
+      R upper_bound=0;
+      for (size_type i=0; i<v.size(); i++) {
+        if(!(v(i).lower()<=0 && v(i).upper()>=0)) {
+          lower_bound=std::min(lower_bound,std::min(abs(v(i).lower(),abs(v(i).upper()))));
+        }
+        upper_bound=std::max(upper_bound,std::max(abs(v(i).lower()),abs(v(i).upper())));
+      }
+      return Interval<R>(lower_bound,upper_bound);
+    }
+    
+    template<typename R>
+    inline
+    R
+    interval_vector<R>::upper_norm() const 
+    {
+      const interval_vector<R>& v=*this;
+      R upper_bound=0;
+      for (size_type i=0; i<v.size(); i++) {
+        upper_bound=std::max(upper_bound,std::max(abs(v(i).lower()),abs(v(i).upper())));
+      }
+      return upper_bound;
+    }
+    
+    
+    
     template <typename R>
     inline
     interval_vector<R> 
@@ -125,44 +206,21 @@ namespace Ariadne {
     }
 
 
-    template<typename R>
-    inline
-    vector<R>
-    centre(const interval_vector<R>& v)
-    {
-      vector<R> result(v.size());
-      for (size_type i=0; i<v.size(); i++) {
-        result(i)=(v(i).upper()+v(i).lower())/2;
-      }
-      return result;
-    }
-    
-    template<typename R>
-    inline
-    R
-    radius(const interval_vector<R>& v)
-    {
-      R diameter=0;
-      for (size_type i=0; i<v.size(); i++) {
-        diameter=max(diameter,R(v(i).upper()-v(i).lower()));
-      }
-      return diameter/2;
-    }
     
     template<typename R>
     inline
     Interval<R>
     norm(const interval_vector<R>& v)
     {
-      R lower_bound=0;
-      R upper_bound=0;
-      for (size_type i=0; i<v.size(); i++) {
-        if(!(v(i).lower()<=0 && v(i).upper()>=0)) {
-          lower_bound=std::min(lower_bound,std::min(abs(v(i).lower(),abs(v(i).upper()))));
-        }
-        upper_bound=std::max(upper_bound,std::max(abs(v(i).lower()),abs(v(i).upper())));
-      }
-      return Interval<R>(lower_bound,upper_bound);
+      return v.norm();
+    }
+
+    template<typename R>
+    inline
+    R
+    upper_norm(const interval_vector<R>& v)
+    {
+      return v.upper_norm();
     }
     
     template <typename R>

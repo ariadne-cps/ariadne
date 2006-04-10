@@ -26,6 +26,9 @@
 #include "geometry/zonotope.h"
 #include "geometry/grid_set.h"
 
+#include "evaluation/vector_field.h"
+
+#include "evaluation/integration_step.h"
 #include "evaluation/integrate.h"
 
 
@@ -36,19 +39,15 @@ using namespace Ariadne::Evaluation;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-RRectangle rectangle_integration_step(const RVectorFieldBase& vf, const RRectangle& r, Real& h) {
-  return integration_step(vf,r,h);
-}
-
 void export_integrate() {
   typedef RRectangle (*IntStepRectFunc) (const RVectorFieldBase&, const RRectangle&, Real&);
   typedef RParallelotope (*IntStepPltpFunc) (const RVectorFieldBase&, const RParallelotope&, Real&);
   typedef RZonotope (*IntStepZntpFunc) (const RVectorFieldBase&, const RZonotope&, Real&);
   typedef RRectangle (*IntRectFunc) (const RVectorFieldBase&, const RRectangle&, const Real&, const Real&);
   typedef RParallelotope (*IntPltpFunc) (const RVectorFieldBase&, const RParallelotope&, const Real&, const Real&);
+  typedef RRectangleListSet (*IntLSRectFunc) (const RVectorFieldBase&, const RRectangleListSet&, const Real&, const Real&);
   typedef RParallelotopeListSet (*IntLSPltpFunc) (const RVectorFieldBase&, const RParallelotopeListSet&, const Real&, const Real&);
-  typedef RGridMaskSet (*IntGMSFunc) (const RVectorFieldBase&, const RGridMaskSet&, const Real&, const Real&);
-  
+  typedef RGridMaskSet (*IntGMSFunc) (const RVectorFieldBase&, const RGridMaskSet&, const RGridMaskSet&, const Real&, const Real&);
   
   def("integration_step", IntStepRectFunc(&integration_step), "integrate a vector field over a set for a time up to time h");
   def("integration_step", IntStepPltpFunc(&integration_step));
@@ -57,7 +56,10 @@ void export_integrate() {
   def("reach_step", IntStepZntpFunc(&reach_step));
   def("integrate", IntRectFunc(&integrate));
   def("integrate", IntPltpFunc(&integrate));
+  def("integrate", IntLSRectFunc(&integrate));
+  def("integrate", IntLSPltpFunc(&integrate));
   def("integrate", IntGMSFunc(&integrate));
+  def("reach", IntLSPltpFunc(&reach));
   def("reach", IntGMSFunc(&reach));
 //  def("chainreach", &chainreach_of_rectangle_list_set, "chain reach of a set" );
 }

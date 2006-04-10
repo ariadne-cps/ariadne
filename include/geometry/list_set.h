@@ -116,12 +116,12 @@ namespace Ariadne {
       *
       * \return The number of basic sets forming this object.
       */
-      inline const size_type size() const {
+      const size_type size() const {
           return this->_vector.size();
       }
 
       /*! \brief Adjoins a basic set to the back of the list. */
-      inline void push_back(const BS<R>& A) {
+      void push_back(const BS<R>& A) {
         if (this->dimension()==0) { this->_dimension=A.dimension(); }
 
         if (A.dimension()!=this->dimension()) {
@@ -135,7 +135,7 @@ namespace Ariadne {
       *
       * \return The space dimension of the ListSet.
       */
-      inline const size_type dimension() const {
+      const size_type dimension() const {
           return this->_dimension;
       }
 
@@ -144,7 +144,7 @@ namespace Ariadne {
       * \param index is the index of the returned basic set.
       * \return The i-th basic set maitained by the ListSet.
       */
-      inline const BS<R>& get(size_type index) const {
+      const BS<R>& get(size_type index) const {
         if (this->size()<=index)
           throw std::invalid_argument("Invalid index in ListSet::get(size_type).");
 
@@ -156,7 +156,7 @@ namespace Ariadne {
       * \param index is the index of the returned basic set.
       * \param set is the new set.
       */
-      inline void set(size_type index, const BS<R>& set) {
+      void set(size_type index, const BS<R>& set) {
         if (this->size()<=index)
           throw std::invalid_argument("Invalid index in ListSet:;set(size_type, const BasicSet& ).");
 
@@ -168,7 +168,7 @@ namespace Ariadne {
       * \param index is the index of the returned basic set.
       * \return The i-th basic set maitained by the ListSet.
       */
-      inline const BS<R>& operator[](size_type index) const {
+      const BS<R>& operator[](size_type index) const {
         if (this->size()<=index)
           throw std::invalid_argument("Invalid index in ListSet::operator[](size_type).");
 
@@ -176,7 +176,7 @@ namespace Ariadne {
       }
 
       /*! \brief What does this do? */
-      inline ListSet<R,BS> operator+(const ListSet<R,BS>& A) const{
+      ListSet<R,BS> operator+(const ListSet<R,BS>& A) const{
 
         #ifdef DEBUG
           std::cout << __FILE__ << ":" << __LINE__ << std::endl;
@@ -200,7 +200,7 @@ namespace Ariadne {
       /*! \brief Expands set by \a delta. */
       /*  \internal This is dangerous since it modifies the current set.
       */
-      inline void expand_by(const R& delta) {
+      void expand_by(const R& delta) {
         for (size_type i=0; i< this->size(); i++) {
           (this->_vector[i]).expand_by(delta);
         }
@@ -209,7 +209,7 @@ namespace Ariadne {
       /*! \brief Replaces set be an over-approximation by at most \a delta. */
       /*  \internal This is dangerous since it modifies the current set.
       */
-      inline void
+      void
       set_precision_to_upperapproximating(const R& delta)  {
         for (size_type i=0; i< this->size(); i++) {
             // (this->_vector[i]).set_precision_to_upperapproximating(delta);
@@ -217,7 +217,7 @@ namespace Ariadne {
       }
 
       /*! \brief Copy assignment. */
-      inline const ListSet<R,BS>& 
+      const ListSet<R,BS>& 
       operator=(const ListSet<R,BS>& A) {
         #ifdef DEBUG
           std::cout << __FILE__ << ":" << __LINE__ << std::endl;
@@ -244,7 +244,7 @@ namespace Ariadne {
       * \return  \a true, if \a s is contained into the
       * current set, \a false otherwise.
       */
-      inline bool contains(const Point<R>& p) const {
+      bool contains(const Point<R>& p) const {
 
         for (size_type i=0; i<this->size(); i++) {
           if ((this->_vector[i]).contains(p))
@@ -264,7 +264,7 @@ namespace Ariadne {
        * \return  \a true, if \a s is contained into the
        * current set, \a false otherwise.
        */
-      inline bool interior_contains(const Point<R>& p) const {
+      bool interior_contains(const Point<R>& p) const {
         throw(std::domain_error("Not implemented"));
         for (size_type i=0; i<this->size(); i++) {
           if ((this->_vector[i]).interior_contains(p))
@@ -279,7 +279,7 @@ namespace Ariadne {
        * \return \a true if the denotable set is empty,
        * \a false otherwise.
        */
-      inline bool empty() const {
+      bool empty() const {
         for (size_type i=0; i<this->size(); ++i) {
           if (!(this->_vector[i]).empty())
             return false;
@@ -289,7 +289,7 @@ namespace Ariadne {
       }
 
       /*! \brief Return a rectangle containing the set. */
-      inline Rectangle<R> bounding_box() const {
+      Rectangle<R> bounding_box() const {
         assert(!this->empty());
         Rectangle<R> result=(*this)[0].bounding_box();
         for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
@@ -306,12 +306,16 @@ namespace Ariadne {
         return result;
       }
         
-        
+      /*! \brief Make the set empty. */
+      void clear() { 
+        this->_vector.clear();
+      }
+      
       /*! \brief An iterator to the beginning of the list of basic sets.
        *
        * \return The begin of the maintained basic set vector.
        */
-      inline iterator begin() {
+      iterator begin() {
           return _vector.begin();
       }
 
@@ -319,7 +323,7 @@ namespace Ariadne {
        *
        * \return The end of the maintained basic set vector.
        */
-      inline iterator end() {
+      iterator end() {
         return _vector.end();
       }
 
@@ -327,7 +331,7 @@ namespace Ariadne {
        *
        * \return The begin of the maintained basic set vector.
        */
-      inline const_iterator begin() const {
+      const_iterator begin() const {
           return _vector.begin();
       }
 
@@ -335,7 +339,7 @@ namespace Ariadne {
        *
        * \return The end of the maintained basic set vector.
        */
-      inline const_iterator end() const {
+      const_iterator end() const {
         return _vector.end();
       }
 
@@ -345,33 +349,29 @@ namespace Ariadne {
        * The result is stored into the current object.
        * \param A is a ListSet.
        */
-      inline void inplace_union(const ListSet<R,BS>& A) {
-        #ifdef DEBUG
-          std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-        #endif
+      void adjoin(const ListSet<R,BS>& A) {
+        if(this->dimension()==0) { 
+          this->_dimension=A.dimension(); 
+        }
 
-        if (this->dimension()==0) { this->_dimension=A.dimension(); }
-
-        if (A.dimension()!=this->dimension()) {
+        if(A.dimension()!=this->dimension()) {
           throw std::invalid_argument("The two denotable sets have different space dimensions.");
         }
 
-        if (A.empty()) {
-          #ifdef DEBUG
-            std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-          #endif
-
-          return;
-        }
-
         this->_vector.reserve(A.size());
-        for (size_type i = 0; i < A.size(); i++) {
-          this->_vector.push_back(A[i]);
+        for(typename ListSet<R,BS>::const_iterator iter=A.begin(); iter!=A.end(); ++iter) {
+          this->_vector.push_back(*iter);
         }
-
-        #ifdef DEBUG
-          std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-        #endif
+      }
+      
+      /*! \brief Adjoins (makes union with) another denotable set.
+       *
+       * Makes the union of the current denotable set with another of the same type.
+       * The result is stored into the current object.
+       * \param A is a ListSet.
+       */
+      void inplace_union(const ListSet<R,BS>& A) {
+        this->adjoin(A);
       }
 
       /*! \brief Adjoins (makes union with) a basic set.
@@ -380,29 +380,21 @@ namespace Ariadne {
        * The result is stored into the current object.
        * \param A is a basic set.
        */
-      inline void inplace_union(const BS<R>& A) {
-        #ifdef DEBUG
-          std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-        #endif
-
-        if (this->dimension()==0) { this->_dimension=A.dimension(); }
-
+      void adjoin(const BS<R>& A) {
+        if(this->dimension()==0) { 
+          this->_dimension=A.dimension(); 
+        }
         if (A.dimension()!=this->dimension()) {
           throw std::invalid_argument("The denotable set and the basic set have different space dimensions.");
         }
-
-        if (!A.empty()) {
-            this->_vector.push_back(A);
+        if(!A.empty()) {
+          this->_vector.push_back(A);
         }
-
-        #ifdef DEBUG
-          std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-        #endif
       }
 
       /*! \brief Adjoins (makes union with) a basic set. */
-      inline void adjoin(const BS<R>& A) {
-        this->inplace_union(A);
+      void inplace_union(const BS<R>& A) {
+        this->adjoin(A);
       }
 
       /*! \brief Stream extraction operator. */

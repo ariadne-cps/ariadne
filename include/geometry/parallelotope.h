@@ -227,6 +227,11 @@ namespace Ariadne {
         return this->_centre;
       }
       
+      /*! \brief The radius of the parallelotope. */
+      real_type radius() const {
+        return this->_generators.norm();
+      }
+      
       /*! \brief The \a n th of principle direction. */
       vector_type generator(size_type n) const {
         return column(this->_generators,n);

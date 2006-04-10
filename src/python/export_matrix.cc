@@ -100,6 +100,7 @@ inline FMatrix rmatrix_inverse(const RMatrix& A) {
 
 void export_matrix() {
   class_<RMatrix>("Matrix",init<int,int>())
+    .def(init<std::string>())
     .def(init<RMatrix>())
     .def("__mul__",&rmatrix_vprod)
     .def("__getitem__",&rmatrix_getitem)

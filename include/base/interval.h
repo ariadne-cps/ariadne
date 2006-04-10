@@ -92,7 +92,11 @@ namespace Ariadne {
         return *this;
       }
 
+      bool contains(const R& r) const { return this->lower()<=r && r<=this->upper(); }
+      
       R centre() const { return (this->lower()+this->upper())/2; }
+      R radius() const { return (this->upper()-this->lower())/2; }
+      R length() const { return this->upper()-this->lower(); }
     };
     
     template<typename R>

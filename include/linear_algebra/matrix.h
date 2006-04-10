@@ -43,14 +43,24 @@
 namespace Ariadne {
   namespace LinearAlgebra {
 
+    /*! \brief A matrix over \a R. */
     template<typename R>
     class matrix : public boost::numeric::ublas::matrix<R> 
     {
       typedef boost::numeric::ublas::matrix<R> Base;
+      typedef typename numerical_traits<R>::field_extension_type F;
      public:
       matrix() : Base() { }
       matrix(const size_type& r, const size_type& c) : Base(r,c) { }
       template<typename E> matrix(const boost::numeric::ublas::matrix_expression<E>& A) : Base(A()) { }
+      
+      matrix(const std::string& s);
+
+      R norm() const;
+      R log_norm() const;
+      
+      matrix<F> inverse() const;
+      vector<F> solve(const vector<R>& v) const;
     };
     
     using boost::numeric::ublas::identity_matrix;
@@ -85,14 +95,37 @@ namespace Ariadne {
     
   
     template<typename R>
+    inline
     R
-    norm(const matrix<R>& A);
+    norm(const matrix<R>& A) 
+    {
+      return A.norm();
+    }
     
     template<typename R>
+    inline
     R
-    log_norm(const matrix<R>& A);
-    
+    log_norm(const matrix<R>& A)
+    {
+      return A.log_norm();
+    }
 
+    template <typename R>
+    inline
+    matrix<typename numerical_traits<R>::field_extension_type> 
+    inverse(const matrix<R>& A)
+    {
+      return A.inverse();
+    }
+    
+    template <typename R>
+    inline
+    vector<typename numerical_traits<R>::field_extension_type> 
+    solve(const matrix<R>& A, const vector<R>& v)
+    {
+      return A.solve(v);
+    }
+    
     template<typename R>
     matrix<R>
     exp_approx(const matrix<R>& A, const R& e);
@@ -143,10 +176,6 @@ namespace Ariadne {
     template <typename R>
     matrix<R>
     hermitian(const matrix<R>& m);
-    
-    template <typename R>
-    matrix<typename numerical_traits<R>::field_extension_type> 
-    inverse(const matrix<R> &A);
     
     template <typename R>
     Integer 
@@ -204,6 +233,10 @@ namespace Ariadne {
     template <typename R>
     std::ostream&
     operator<<(std::ostream& os, const matrix<R>& A);
+
+    template <typename R>
+    std::istream&
+    operator>>(std::istream& is, matrix<R>& A);
 
   }
 }

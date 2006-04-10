@@ -31,6 +31,7 @@ namespace Ariadne {
 
     template class Grid<Real>;
     template class FiniteGrid<Real>;
+    template class InfiniteGrid<Real>;
 
     template std::ostream& operator<<(std::ostream&, const Grid<Real>&);
  

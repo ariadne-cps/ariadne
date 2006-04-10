@@ -2,7 +2,7 @@ include ../../config.mk
 
 OBJ = map.o vector_field.o \
 	affine_map.o affine_vector_field.o \
-	apply.o integrate.o
+	apply.o integrate.o integration_step.o
 
 all: ${OBJ}
 
@@ -27,6 +27,9 @@ dep:
 map.o: map.cc ../../include/evaluation/map.h \
   ../../include/evaluation/../declarations.h \
   ../../include/evaluation/../linear_algebra/vector.h \
+  ../../include/evaluation/../linear_algebra/../base/utility.h \
+  ../../include/evaluation/../linear_algebra/../base/../base/array.h \
+  ../../include/evaluation/../linear_algebra/../base/../base/basic_type.h \
   ../../include/evaluation/../linear_algebra/../base/basic_type.h \
   ../../include/evaluation/../linear_algebra/../base/numerical_type.h \
   ../../include/evaluation/../linear_algebra/../base/../base/dyadic.h \
@@ -48,20 +51,29 @@ map.o: map.cc ../../include/evaluation/map.h \
   ../../include/evaluation/../geometry/point.h \
   ../../include/evaluation/../geometry/../declarations.h \
   ../../include/evaluation/../geometry/../base/utility.h \
-  ../../include/evaluation/../geometry/../base/../base/array.h \
-  ../../include/evaluation/../geometry/../base/../base/basic_type.h \
   ../../include/evaluation/../geometry/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/rectangle.h \
   ../../include/evaluation/../geometry/../base/interval.h \
   ../../include/evaluation/../geometry/../base/binary_word.h \
   ../../include/evaluation/../geometry/../base/../base/basic_type.h \
+  ../../include/evaluation/../geometry/../base/../base/array.h \
+  ../../include/evaluation/../geometry/../linear_algebra/interval_vector.h \
   ../../include/evaluation/../geometry/../geometry/point.h \
+  ../../include/evaluation/../geometry/../geometry/lattice_set.h \
+  ../../include/evaluation/../geometry/../geometry/../base/array.h \
+  ../../include/evaluation/../geometry/../geometry/../base/iterator.h \
+  ../../include/evaluation/../geometry/../geometry/../base/../base/array.h \
+  ../../include/evaluation/../geometry/../geometry/../base/basic_type.h \
+  ../../include/evaluation/../geometry/../geometry/../base/interval.h \
+  ../../include/evaluation/../geometry/../geometry/../base/array_operations.h \
+  ../../include/evaluation/../geometry/../geometry/../base/../base/basic_type.h \
   ../../include/evaluation/../geometry/list_set.h \
   ../../include/evaluation/../geometry/parallelotope.h \
   ../../include/evaluation/../geometry/../linear_algebra/matrix.h \
   ../../include/evaluation/../geometry/../geometry/rectangle.h \
   ../../include/evaluation/../geometry/../geometry/list_set.h \
   ../../include/evaluation/../geometry/../geometry/polyhedron.h \
+  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../geometry/../geometry/../declarations.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
@@ -77,7 +89,6 @@ map.o: map.cc ../../include/evaluation/map.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../base/interval.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/interval_vector.h \
   ../../include/evaluation/../geometry/../geometry/../base/utility.h \
-  ../../include/evaluation/../geometry/../geometry/../base/interval.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/list_set.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/parallelotope.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/polyhedron.h \
@@ -89,6 +100,9 @@ vector_field.o: vector_field.cc ../../include/evaluation/vector_field.h \
   ../../include/evaluation/../declarations.h \
   ../../include/evaluation/../base/interval.h \
   ../../include/evaluation/../linear_algebra/vector.h \
+  ../../include/evaluation/../linear_algebra/../base/utility.h \
+  ../../include/evaluation/../linear_algebra/../base/../base/array.h \
+  ../../include/evaluation/../linear_algebra/../base/../base/basic_type.h \
   ../../include/evaluation/../linear_algebra/../base/basic_type.h \
   ../../include/evaluation/../linear_algebra/../base/numerical_type.h \
   ../../include/evaluation/../linear_algebra/../base/../base/dyadic.h \
@@ -108,20 +122,29 @@ vector_field.o: vector_field.cc ../../include/evaluation/vector_field.h \
   ../../include/evaluation/../geometry/point.h \
   ../../include/evaluation/../geometry/../declarations.h \
   ../../include/evaluation/../geometry/../base/utility.h \
-  ../../include/evaluation/../geometry/../base/../base/array.h \
-  ../../include/evaluation/../geometry/../base/../base/basic_type.h \
   ../../include/evaluation/../geometry/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/rectangle.h \
   ../../include/evaluation/../geometry/../base/interval.h \
   ../../include/evaluation/../geometry/../base/binary_word.h \
   ../../include/evaluation/../geometry/../base/../base/basic_type.h \
+  ../../include/evaluation/../geometry/../base/../base/array.h \
+  ../../include/evaluation/../geometry/../linear_algebra/interval_vector.h \
   ../../include/evaluation/../geometry/../geometry/point.h \
+  ../../include/evaluation/../geometry/../geometry/lattice_set.h \
+  ../../include/evaluation/../geometry/../geometry/../base/array.h \
+  ../../include/evaluation/../geometry/../geometry/../base/iterator.h \
+  ../../include/evaluation/../geometry/../geometry/../base/../base/array.h \
+  ../../include/evaluation/../geometry/../geometry/../base/basic_type.h \
+  ../../include/evaluation/../geometry/../geometry/../base/interval.h \
+  ../../include/evaluation/../geometry/../geometry/../base/array_operations.h \
+  ../../include/evaluation/../geometry/../geometry/../base/../base/basic_type.h \
   ../../include/evaluation/../geometry/parallelotope.h \
   ../../include/evaluation/../geometry/../linear_algebra/matrix.h \
   ../../include/evaluation/../geometry/../geometry/rectangle.h \
   ../../include/evaluation/../geometry/../geometry/list_set.h \
   ../../include/evaluation/../geometry/../geometry/../declarations.h \
   ../../include/evaluation/../geometry/../geometry/polyhedron.h \
+  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -136,7 +159,6 @@ vector_field.o: vector_field.cc ../../include/evaluation/vector_field.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../base/interval.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/interval_vector.h \
   ../../include/evaluation/../geometry/../geometry/../base/utility.h \
-  ../../include/evaluation/../geometry/../geometry/../base/interval.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/list_set.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/parallelotope.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/polyhedron.h \
@@ -145,6 +167,9 @@ vector_field.o: vector_field.cc ../../include/evaluation/vector_field.h \
 
 affine_map.o: affine_map.cc ../../include/evaluation/affine_map.h \
   ../../include/evaluation/../linear_algebra/vector.h \
+  ../../include/evaluation/../linear_algebra/../base/utility.h \
+  ../../include/evaluation/../linear_algebra/../base/../base/array.h \
+  ../../include/evaluation/../linear_algebra/../base/../base/basic_type.h \
   ../../include/evaluation/../linear_algebra/../base/basic_type.h \
   ../../include/evaluation/../linear_algebra/../base/numerical_type.h \
   ../../include/evaluation/../linear_algebra/../base/../base/dyadic.h \
@@ -165,13 +190,12 @@ affine_map.o: affine_map.cc ../../include/evaluation/affine_map.h \
   ../../include/evaluation/../geometry/point.h \
   ../../include/evaluation/../geometry/../declarations.h \
   ../../include/evaluation/../geometry/../base/utility.h \
-  ../../include/evaluation/../geometry/../base/../base/array.h \
-  ../../include/evaluation/../geometry/../base/../base/basic_type.h \
   ../../include/evaluation/../geometry/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/simplex.h \
   ../../include/evaluation/../geometry/../base/array.h \
   ../../include/evaluation/../geometry/../geometry/point.h \
   ../../include/evaluation/../geometry/../geometry/polyhedron.h \
+  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../geometry/../geometry/../declarations.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
@@ -187,7 +211,16 @@ affine_map.o: affine_map.cc ../../include/evaluation/affine_map.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/../base/binary_word.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/../base/../base/basic_type.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/../base/../base/array.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../linear_algebra/interval_vector.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/../geometry/point.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../geometry/lattice_set.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../geometry/../base/array.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../geometry/../base/iterator.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../geometry/../base/../base/array.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../geometry/../base/basic_type.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../geometry/../base/interval.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../geometry/../base/array_operations.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../geometry/../base/../base/basic_type.h \
   ../../include/evaluation/../geometry/../geometry/list_set.h \
   ../../include/evaluation/../geometry/rectangle.h \
   ../../include/evaluation/../geometry/parallelotope.h \
@@ -218,6 +251,9 @@ affine_map.o: affine_map.cc ../../include/evaluation/affine_map.h \
 affine_vector_field.o: affine_vector_field.cc \
   ../../include/evaluation/affine_vector_field.h \
   ../../include/evaluation/../linear_algebra/vector.h \
+  ../../include/evaluation/../linear_algebra/../base/utility.h \
+  ../../include/evaluation/../linear_algebra/../base/../base/array.h \
+  ../../include/evaluation/../linear_algebra/../base/../base/basic_type.h \
   ../../include/evaluation/../linear_algebra/../base/basic_type.h \
   ../../include/evaluation/../linear_algebra/../base/numerical_type.h \
   ../../include/evaluation/../linear_algebra/../base/../base/dyadic.h \
@@ -244,13 +280,12 @@ affine_vector_field.o: affine_vector_field.cc \
   ../../include/evaluation/../evaluation/../geometry/point.h \
   ../../include/evaluation/../evaluation/../geometry/../declarations.h \
   ../../include/evaluation/../evaluation/../geometry/../base/utility.h \
-  ../../include/evaluation/../evaluation/../geometry/../base/../base/array.h \
-  ../../include/evaluation/../evaluation/../geometry/../base/../base/basic_type.h \
   ../../include/evaluation/../evaluation/../geometry/../linear_algebra/vector.h \
   ../../include/evaluation/../evaluation/../geometry/simplex.h \
   ../../include/evaluation/../evaluation/../geometry/../base/array.h \
   ../../include/evaluation/../evaluation/../geometry/../geometry/point.h \
   ../../include/evaluation/../evaluation/../geometry/../geometry/polyhedron.h \
+  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../evaluation/../geometry/../geometry/../declarations.h \
   ../../include/evaluation/../evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/evaluation/../evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
@@ -266,7 +301,16 @@ affine_vector_field.o: affine_vector_field.cc \
   ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/../base/binary_word.h \
   ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/../base/../base/basic_type.h \
   ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/../base/../base/array.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/../linear_algebra/interval_vector.h \
   ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/../geometry/point.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/../geometry/lattice_set.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/../geometry/../base/array.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/../geometry/../base/iterator.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/../geometry/../base/../base/array.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/../geometry/../base/basic_type.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/../geometry/../base/interval.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/../geometry/../base/array_operations.h \
+  ../../include/evaluation/../evaluation/../geometry/../geometry/../geometry/../geometry/../base/../base/basic_type.h \
   ../../include/evaluation/../evaluation/../geometry/../geometry/list_set.h \
   ../../include/evaluation/../evaluation/../geometry/rectangle.h \
   ../../include/evaluation/../evaluation/../geometry/parallelotope.h \
@@ -299,6 +343,9 @@ apply.o: apply.cc ../../include/evaluation/apply.h \
   ../../include/evaluation/../evaluation/map.h \
   ../../include/evaluation/../evaluation/../declarations.h \
   ../../include/evaluation/../evaluation/../linear_algebra/vector.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/../base/utility.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/../base/../base/array.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/../base/../base/basic_type.h \
   ../../include/evaluation/../evaluation/../linear_algebra/../base/basic_type.h \
   ../../include/evaluation/../evaluation/../linear_algebra/../base/numerical_type.h \
   ../../include/evaluation/../evaluation/../linear_algebra/../base/../base/dyadic.h \
@@ -325,21 +372,30 @@ apply.o: apply.cc ../../include/evaluation/apply.h \
   ../../include/evaluation/../geometry/rectangle.h \
   ../../include/evaluation/../geometry/../declarations.h \
   ../../include/evaluation/../geometry/../base/utility.h \
-  ../../include/evaluation/../geometry/../base/../base/array.h \
-  ../../include/evaluation/../geometry/../base/../base/basic_type.h \
   ../../include/evaluation/../geometry/../base/interval.h \
   ../../include/evaluation/../geometry/../base/binary_word.h \
   ../../include/evaluation/../geometry/../base/../base/basic_type.h \
+  ../../include/evaluation/../geometry/../base/../base/array.h \
+  ../../include/evaluation/../geometry/../linear_algebra/interval_vector.h \
   ../../include/evaluation/../geometry/../geometry/point.h \
   ../../include/evaluation/../geometry/../geometry/../declarations.h \
   ../../include/evaluation/../geometry/../geometry/../base/utility.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/vector.h \
+  ../../include/evaluation/../geometry/../geometry/lattice_set.h \
+  ../../include/evaluation/../geometry/../geometry/../base/array.h \
+  ../../include/evaluation/../geometry/../geometry/../base/iterator.h \
+  ../../include/evaluation/../geometry/../geometry/../base/../base/array.h \
+  ../../include/evaluation/../geometry/../geometry/../base/basic_type.h \
+  ../../include/evaluation/../geometry/../geometry/../base/interval.h \
+  ../../include/evaluation/../geometry/../geometry/../base/array_operations.h \
+  ../../include/evaluation/../geometry/../geometry/../base/../base/basic_type.h \
   ../../include/evaluation/../geometry/parallelotope.h \
   ../../include/evaluation/../geometry/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/../linear_algebra/matrix.h \
   ../../include/evaluation/../geometry/../geometry/rectangle.h \
   ../../include/evaluation/../geometry/../geometry/list_set.h \
   ../../include/evaluation/../geometry/../geometry/polyhedron.h \
+  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -352,7 +408,6 @@ apply.o: apply.cc ../../include/evaluation/apply.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../base/utility.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../base/interval.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/interval_vector.h \
-  ../../include/evaluation/../geometry/../geometry/../base/interval.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/list_set.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/parallelotope.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/polyhedron.h \
@@ -360,17 +415,8 @@ apply.o: apply.cc ../../include/evaluation/apply.h \
   ../../include/evaluation/../geometry/grid_set.h \
   ../../include/evaluation/../geometry/../base/array.h \
   ../../include/evaluation/../geometry/../geometry/grid.h \
-  ../../include/evaluation/../geometry/../geometry/../base/array.h \
   ../../include/evaluation/../geometry/../geometry/../base/binary_word.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/lattice_set.h \
-  ../../include/evaluation/../geometry/../geometry/../geometry/../base/array.h \
-  ../../include/evaluation/../geometry/../geometry/../geometry/../base/iterator.h \
-  ../../include/evaluation/../geometry/../geometry/../geometry/../base/../base/array.h \
-  ../../include/evaluation/../geometry/../geometry/../geometry/../base/basic_type.h \
-  ../../include/evaluation/../geometry/../geometry/../geometry/../base/interval.h \
-  ../../include/evaluation/../geometry/../geometry/../geometry/../base/array_operations.h \
-  ../../include/evaluation/../geometry/../geometry/../geometry/../base/../base/basic_type.h \
-  ../../include/evaluation/../geometry/../geometry/lattice_set.h \
   ../../include/evaluation/../evaluation/apply.h \
   ../../include/real_typedef.h ../../include/base/numerical_type.h
 
@@ -378,43 +424,34 @@ integrate.o: integrate.cc ../../include/base/numerical_type.h \
   ../../include/base/../base/dyadic.h \
   ../../include/evaluation/integrate.h \
   ../../include/evaluation/../declarations.h \
-  ../../include/evaluation/../evaluation/vector_field.h \
-  ../../include/evaluation/../evaluation/../declarations.h \
-  ../../include/evaluation/../evaluation/../base/interval.h \
-  ../../include/evaluation/../evaluation/../linear_algebra/vector.h \
-  ../../include/evaluation/../evaluation/../linear_algebra/../base/basic_type.h \
-  ../../include/evaluation/../evaluation/../linear_algebra/../base/numerical_type.h \
-  ../../include/evaluation/../evaluation/../linear_algebra/matrix.h \
-  ../../include/evaluation/../evaluation/../linear_algebra/../base/arithmetic.h \
-  ../../include/evaluation/../evaluation/../linear_algebra/../base/../base/numerical_type.h \
-  ../../include/evaluation/../evaluation/../linear_algebra/../base/../base/approximation.h \
-  ../../include/evaluation/../evaluation/../linear_algebra/../base/../base/../base/numerical_type.h \
-  ../../include/evaluation/../evaluation/../linear_algebra/../linear_algebra/vector.h \
-  ../../include/evaluation/../evaluation/../linear_algebra/interval_vector.h \
-  ../../include/evaluation/../evaluation/../linear_algebra/../base/interval.h \
-  ../../include/evaluation/../evaluation/../linear_algebra/interval_matrix.h \
-  ../../include/evaluation/../evaluation/../linear_algebra/../declarations.h \
-  ../../include/evaluation/../evaluation/../linear_algebra/../linear_algebra/matrix.h \
-  ../../include/evaluation/../evaluation/../linear_algebra/../linear_algebra/interval_vector.h \
   ../../include/evaluation/integrate.tpl \
   ../../include/evaluation/../base/utility.h \
   ../../include/evaluation/../base/../base/array.h \
   ../../include/evaluation/../base/../base/basic_type.h \
   ../../include/evaluation/../base/array.h \
   ../../include/evaluation/../base/arithmetic.h \
-  ../../include/evaluation/../base/function.h \
   ../../include/evaluation/../base/../base/numerical_type.h \
+  ../../include/evaluation/../base/../base/approximation.h \
+  ../../include/evaluation/../base/../base/../base/numerical_type.h \
+  ../../include/evaluation/../base/function.h /ufs/collins/include/mpfr.h \
   ../../include/evaluation/../base/interval.h \
   ../../include/evaluation/../linear_algebra/vector.h \
-  ../../include/evaluation/../linear_algebra/interval_vector.h \
-  ../../include/evaluation/../linear_algebra/zonotopic_vector.h \
   ../../include/evaluation/../linear_algebra/../base/utility.h \
+  ../../include/evaluation/../linear_algebra/../base/basic_type.h \
+  ../../include/evaluation/../linear_algebra/../base/numerical_type.h \
+  ../../include/evaluation/../linear_algebra/interval_vector.h \
   ../../include/evaluation/../linear_algebra/../base/interval.h \
+  ../../include/evaluation/../linear_algebra/zonotopic_vector.h \
   ../../include/evaluation/../linear_algebra/../linear_algebra/vector.h \
   ../../include/evaluation/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/evaluation/../linear_algebra/../linear_algebra/../base/basic_type.h \
+  ../../include/evaluation/../linear_algebra/../linear_algebra/../base/numerical_type.h \
+  ../../include/evaluation/../linear_algebra/../linear_algebra/../base/arithmetic.h \
+  ../../include/evaluation/../linear_algebra/../linear_algebra/../linear_algebra/vector.h \
   ../../include/evaluation/../linear_algebra/../linear_algebra/interval_vector.h \
   ../../include/evaluation/../linear_algebra/matrix.h \
   ../../include/evaluation/../linear_algebra/interval_matrix.h \
+  ../../include/evaluation/../linear_algebra/../declarations.h \
   ../../include/evaluation/../geometry/rectangle.h \
   ../../include/evaluation/../geometry/../declarations.h \
   ../../include/evaluation/../geometry/../base/utility.h \
@@ -422,16 +459,26 @@ integrate.o: integrate.cc ../../include/base/numerical_type.h \
   ../../include/evaluation/../geometry/../base/binary_word.h \
   ../../include/evaluation/../geometry/../base/../base/basic_type.h \
   ../../include/evaluation/../geometry/../base/../base/array.h \
+  ../../include/evaluation/../geometry/../linear_algebra/interval_vector.h \
   ../../include/evaluation/../geometry/../geometry/point.h \
   ../../include/evaluation/../geometry/../geometry/../declarations.h \
   ../../include/evaluation/../geometry/../geometry/../base/utility.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/vector.h \
+  ../../include/evaluation/../geometry/../geometry/lattice_set.h \
+  ../../include/evaluation/../geometry/../geometry/../base/array.h \
+  ../../include/evaluation/../geometry/../geometry/../base/iterator.h \
+  ../../include/evaluation/../geometry/../geometry/../base/../base/array.h \
+  ../../include/evaluation/../geometry/../geometry/../base/basic_type.h \
+  ../../include/evaluation/../geometry/../geometry/../base/interval.h \
+  ../../include/evaluation/../geometry/../geometry/../base/array_operations.h \
+  ../../include/evaluation/../geometry/../geometry/../base/../base/basic_type.h \
   ../../include/evaluation/../geometry/parallelotope.h \
   ../../include/evaluation/../geometry/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/../linear_algebra/matrix.h \
   ../../include/evaluation/../geometry/../geometry/rectangle.h \
   ../../include/evaluation/../geometry/../geometry/list_set.h \
   ../../include/evaluation/../geometry/../geometry/polyhedron.h \
+  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -441,26 +488,22 @@ integrate.o: integrate.cc ../../include/base/numerical_type.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/rectangle.h \
   ../../include/evaluation/../geometry/../geometry/zonotope.h \
   ../../include/evaluation/../geometry/../geometry/../linear_algebra/zonotopic_vector.h \
-  ../../include/evaluation/../geometry/../geometry/../base/interval.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/list_set.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/parallelotope.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/polyhedron.h \
   ../../include/evaluation/../geometry/zonotope.h \
   ../../include/evaluation/../geometry/list_set.h \
-  ../../include/evaluation/../geometry/grid_set.h \
+  ../../include/evaluation/../geometry/grid.h \
   ../../include/evaluation/../geometry/../base/array.h \
+  ../../include/evaluation/../geometry/grid_set.h \
   ../../include/evaluation/../geometry/../geometry/grid.h \
-  ../../include/evaluation/../geometry/../geometry/../base/array.h \
-  ../../include/evaluation/../geometry/../geometry/../base/binary_word.h \
-  ../../include/evaluation/../geometry/../geometry/../geometry/lattice_set.h \
-  ../../include/evaluation/../geometry/../geometry/../geometry/../base/array.h \
-  ../../include/evaluation/../geometry/../geometry/../geometry/../base/iterator.h \
-  ../../include/evaluation/../geometry/../geometry/../geometry/../base/../base/array.h \
-  ../../include/evaluation/../geometry/../geometry/../geometry/../base/basic_type.h \
-  ../../include/evaluation/../geometry/../geometry/../geometry/../base/interval.h \
-  ../../include/evaluation/../geometry/../geometry/../geometry/../base/array_operations.h \
-  ../../include/evaluation/../geometry/../geometry/../geometry/../base/../base/basic_type.h \
-  ../../include/evaluation/../geometry/../geometry/lattice_set.h \
+  ../../include/evaluation/../evaluation/vector_field.h \
+  ../../include/evaluation/../evaluation/../declarations.h \
+  ../../include/evaluation/../evaluation/../base/interval.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/vector.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/matrix.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/interval_vector.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/interval_matrix.h \
   ../../include/evaluation/../evaluation/affine_vector_field.h \
   ../../include/evaluation/../evaluation/../evaluation/vector_field.h \
   ../../include/evaluation/../evaluation/../evaluation/affine_map.h \
@@ -485,5 +528,113 @@ integrate.o: integrate.cc ../../include/base/numerical_type.h \
   ../../include/evaluation/../evaluation/../evaluation/../evaluation/../linear_algebra/vector.h \
   ../../include/evaluation/../evaluation/../evaluation/../evaluation/../linear_algebra/matrix.h \
   ../../include/evaluation/../evaluation/../evaluation/../evaluation/../linear_algebra/interval_matrix.h \
+  ../../include/evaluation/../evaluation/integration_step.h \
+  ../../include/evaluation/../evaluation/integrate.h \
+  ../../include/real_typedef.h ../../include/base/numerical_type.h
+
+integration_step.o: integration_step.cc \
+  ../../include/base/numerical_type.h ../../include/base/../base/dyadic.h \
+  ../../include/evaluation/integration_step.h \
+  ../../include/evaluation/../declarations.h \
+  ../../include/evaluation/integration_step.tpl \
+  ../../include/evaluation/../base/utility.h \
+  ../../include/evaluation/../base/../base/array.h \
+  ../../include/evaluation/../base/../base/basic_type.h \
+  ../../include/evaluation/../base/array.h \
+  ../../include/evaluation/../base/arithmetic.h \
+  ../../include/evaluation/../base/../base/numerical_type.h \
+  ../../include/evaluation/../base/../base/approximation.h \
+  ../../include/evaluation/../base/../base/../base/numerical_type.h \
+  ../../include/evaluation/../base/function.h /ufs/collins/include/mpfr.h \
+  ../../include/evaluation/../base/interval.h \
+  ../../include/evaluation/../linear_algebra/vector.h \
+  ../../include/evaluation/../linear_algebra/../base/utility.h \
+  ../../include/evaluation/../linear_algebra/../base/basic_type.h \
+  ../../include/evaluation/../linear_algebra/../base/numerical_type.h \
+  ../../include/evaluation/../linear_algebra/interval_vector.h \
+  ../../include/evaluation/../linear_algebra/../base/interval.h \
+  ../../include/evaluation/../linear_algebra/zonotopic_vector.h \
+  ../../include/evaluation/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/evaluation/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/evaluation/../linear_algebra/../linear_algebra/../base/basic_type.h \
+  ../../include/evaluation/../linear_algebra/../linear_algebra/../base/numerical_type.h \
+  ../../include/evaluation/../linear_algebra/../linear_algebra/../base/arithmetic.h \
+  ../../include/evaluation/../linear_algebra/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/evaluation/../linear_algebra/../linear_algebra/interval_vector.h \
+  ../../include/evaluation/../linear_algebra/matrix.h \
+  ../../include/evaluation/../linear_algebra/interval_matrix.h \
+  ../../include/evaluation/../linear_algebra/../declarations.h \
+  ../../include/evaluation/../geometry/rectangle.h \
+  ../../include/evaluation/../geometry/../declarations.h \
+  ../../include/evaluation/../geometry/../base/utility.h \
+  ../../include/evaluation/../geometry/../base/interval.h \
+  ../../include/evaluation/../geometry/../base/binary_word.h \
+  ../../include/evaluation/../geometry/../base/../base/basic_type.h \
+  ../../include/evaluation/../geometry/../base/../base/array.h \
+  ../../include/evaluation/../geometry/../linear_algebra/interval_vector.h \
+  ../../include/evaluation/../geometry/../geometry/point.h \
+  ../../include/evaluation/../geometry/../geometry/../declarations.h \
+  ../../include/evaluation/../geometry/../geometry/../base/utility.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/vector.h \
+  ../../include/evaluation/../geometry/../geometry/lattice_set.h \
+  ../../include/evaluation/../geometry/../geometry/../base/array.h \
+  ../../include/evaluation/../geometry/../geometry/../base/iterator.h \
+  ../../include/evaluation/../geometry/../geometry/../base/../base/array.h \
+  ../../include/evaluation/../geometry/../geometry/../base/basic_type.h \
+  ../../include/evaluation/../geometry/../geometry/../base/interval.h \
+  ../../include/evaluation/../geometry/../geometry/../base/array_operations.h \
+  ../../include/evaluation/../geometry/../geometry/../base/../base/basic_type.h \
+  ../../include/evaluation/../geometry/parallelotope.h \
+  ../../include/evaluation/../geometry/../linear_algebra/vector.h \
+  ../../include/evaluation/../geometry/../linear_algebra/matrix.h \
+  ../../include/evaluation/../geometry/../geometry/rectangle.h \
+  ../../include/evaluation/../geometry/../geometry/list_set.h \
+  ../../include/evaluation/../geometry/../geometry/polyhedron.h \
+  /ufs/collins/include/ppl.hh \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/constraint.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/matrix.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/generator.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/point.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/rectangle.h \
+  ../../include/evaluation/../geometry/../geometry/zonotope.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/zonotopic_vector.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/list_set.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/parallelotope.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/polyhedron.h \
+  ../../include/evaluation/../geometry/zonotope.h \
+  ../../include/evaluation/../evaluation/vector_field.h \
+  ../../include/evaluation/../evaluation/../declarations.h \
+  ../../include/evaluation/../evaluation/../base/interval.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/vector.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/matrix.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/interval_vector.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/interval_matrix.h \
+  ../../include/evaluation/../evaluation/affine_vector_field.h \
+  ../../include/evaluation/../evaluation/../evaluation/vector_field.h \
+  ../../include/evaluation/../evaluation/../evaluation/affine_map.h \
+  ../../include/evaluation/../evaluation/../evaluation/../linear_algebra/vector.h \
+  ../../include/evaluation/../evaluation/../evaluation/../linear_algebra/matrix.h \
+  ../../include/evaluation/../evaluation/../evaluation/../linear_algebra/interval_matrix.h \
+  ../../include/evaluation/../evaluation/../evaluation/../geometry/point.h \
+  ../../include/evaluation/../evaluation/../evaluation/../geometry/simplex.h \
+  ../../include/evaluation/../evaluation/../evaluation/../geometry/../declarations.h \
+  ../../include/evaluation/../evaluation/../evaluation/../geometry/../base/array.h \
+  ../../include/evaluation/../evaluation/../evaluation/../geometry/../base/utility.h \
+  ../../include/evaluation/../evaluation/../evaluation/../geometry/../linear_algebra/vector.h \
+  ../../include/evaluation/../evaluation/../evaluation/../geometry/../geometry/point.h \
+  ../../include/evaluation/../evaluation/../evaluation/../geometry/../geometry/polyhedron.h \
+  ../../include/evaluation/../evaluation/../evaluation/../geometry/../geometry/list_set.h \
+  ../../include/evaluation/../evaluation/../evaluation/../geometry/rectangle.h \
+  ../../include/evaluation/../evaluation/../evaluation/../geometry/parallelotope.h \
+  ../../include/evaluation/../evaluation/../evaluation/../geometry/zonotope.h \
+  ../../include/evaluation/../evaluation/../evaluation/../geometry/polyhedron.h \
+  ../../include/evaluation/../evaluation/../evaluation/../evaluation/map.h \
+  ../../include/evaluation/../evaluation/../evaluation/../evaluation/../declarations.h \
+  ../../include/evaluation/../evaluation/../evaluation/../evaluation/../linear_algebra/vector.h \
+  ../../include/evaluation/../evaluation/../evaluation/../evaluation/../linear_algebra/matrix.h \
+  ../../include/evaluation/../evaluation/../evaluation/../evaluation/../linear_algebra/interval_matrix.h \
+  ../../include/evaluation/../evaluation/integration_step.h \
   ../../include/real_typedef.h ../../include/base/numerical_type.h
 

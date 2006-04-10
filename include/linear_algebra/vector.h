@@ -29,15 +29,20 @@
 #ifndef _ARIADNE_VECTOR_H
 #define _ARIADNE_VECTOR_H 
 
+#include <iosfwd>
+#include <string>
+
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
 
+#include "../base/utility.h"
 #include "../base/basic_type.h"
 #include "../base/numerical_type.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {
 
+    /*! \brief A vector over \a R. */
     template<typename R>
     class vector
       : public boost::numeric::ublas::vector<R> 
@@ -45,17 +50,34 @@ namespace Ariadne {
       typedef boost::numeric::ublas::vector<R> Base;
      public:
       vector() : Base() { }
-      vector(const size_t& n) : Base(n) { }
+      vector(const size_type& n) : Base(n) { }
       template<typename E> vector(const boost::numeric::ublas::vector_expression<E>& v) : Base(v()) { }
+      explicit vector(const std::string& s) : Base(0) { std::stringstream ss(s); ss >> *this; }      
     };
-
+    
     
     template <typename R>
-    inline vector<R> zero_vector(dimension_type dim) {
-      vector<R> v(dim);
-      for (dimension_type i=0; i<dim; ++i) {
+    inline vector<R> zero_vector(dimension_type n) {
+      vector<R> v(n);
+      for (dimension_type i=0; i<n; ++i) {
         v(i)=0;
       }
+      return v;
+    }
+    
+    template <typename R>
+    inline vector<R> ones_vector(dimension_type n) {
+      vector<R> v(n);
+      for (dimension_type i=0; i<n; ++i) {
+        v(i)=1;
+      }
+      return v;
+    }
+    
+    template <typename R>
+    inline vector<R> unit_vector(dimension_type n, dimension_type i) {
+      vector<R> v(n);
+      v(i)=1;
       return v;
     }
     
@@ -124,6 +146,20 @@ namespace Ariadne {
       }
       os << "]";
       return os;
+    }
+    
+    template <typename R>
+    inline
+    std::istream&
+    operator>>(std::istream& is, vector<R>& v)
+    {
+      std::vector<R> stdvec;
+      is >> stdvec;
+      v.resize(stdvec.size());
+      for(size_type i=0; i!=v.size(); ++i) {
+        v(i)=stdvec[i];
+      }
+      return is;
     }
 
   }

@@ -81,6 +81,7 @@ inline void qvector_setitem_from_double(FVector& v, uint i, double x) {
 
 void export_vector() {
   class_<RVector>("Vector",init<int>())
+    .def(init<std::string>())
     .def(init<RVector>())
     .def("__len__", &RVector::size)
     .def("__getitem__",&rvector_getitem)

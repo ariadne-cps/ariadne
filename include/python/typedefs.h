@@ -65,9 +65,14 @@ typedef Geometry::ListSet<Real,Geometry::Parallelotope> RParallelotopeListSet;
 
 typedef Geometry::LatticeCell LatticeCell;
 typedef Geometry::LatticeRectangle LatticeRectangle;
+typedef Geometry::LatticeMaskSet LatticeMaskSet;
+typedef Geometry::LatticeCellListSet LatticeCellListSet;
+typedef Geometry::LatticeRectangleListSet LatticeRectangleListSet;
+typedef Geometry::LatticeTransformation LatticeTransformation;
 
 typedef Geometry::Grid<Real> RGridBase;
 typedef Geometry::FiniteGrid<Real> RFiniteGrid;
+typedef Geometry::InfiniteGrid<Real> RInfiniteGrid;
 typedef Geometry::GridCell<Real> RGridCell;
 typedef Geometry::GridRectangle<Real> RGridRectangle;
 typedef Geometry::GridCellListSet<Real> RGridCellListSet;

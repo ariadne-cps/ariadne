@@ -32,27 +32,6 @@ namespace Ariadne {
 
     template 
     Geometry::Rectangle<Real> 
-    integration_step(const VectorField<Real>&, const Geometry::Rectangle<Real>&, Real& step_size);
-  
-    template 
-    Geometry::Parallelotope<Real> 
-    integration_step(const VectorField<Real>&, const Geometry::Parallelotope<Real>&, Real& step_size);
-  
-    template 
-    Geometry::Rectangle<Real> 
-    reach_step(const VectorField<Real>&, const Geometry::Rectangle<Real>&, Real& step_size);
-  
-    template 
-    Geometry::Parallelotope<Real> 
-    reach_step(const VectorField<Real>&, const Geometry::Parallelotope<Real>&, Real& step_size);
-  
-    template 
-    Geometry::Zonotope<Real> 
-    reach_step(const VectorField<Real>&, const Geometry::Zonotope<Real>&, Real& step_size);
-  
-
-    template 
-    Geometry::Rectangle<Real> 
     integrate(const VectorField<Real>&, 
               const Geometry::Rectangle<Real>&, 
               const Real&,
@@ -65,6 +44,14 @@ namespace Ariadne {
               const Real&,
               const Real&);
 
+    
+    template 
+    Geometry::ListSet<Real,Geometry::Rectangle> 
+    integrate(const VectorField<Real>&, 
+              const Geometry::ListSet<Real,Geometry::Rectangle>&, 
+              const Real&,
+              const Real&);
+  
     template 
     Geometry::ListSet<Real,Geometry::Parallelotope> 
     integrate(const VectorField<Real>&, 
@@ -76,13 +63,22 @@ namespace Ariadne {
     Geometry::GridMaskSet<Real> 
     integrate(const VectorField<Real>&, 
               const Geometry::GridMaskSet<Real>&, 
+              const Geometry::GridMaskSet<Real>&,
               const Real&,
               const Real&);
   
   
     template 
+    Geometry::ListSet<Real,Geometry::Parallelotope> 
+    reach(const VectorField<Real>&, 
+          const Geometry::ListSet<Real,Geometry::Parallelotope>&, 
+          const Real&,
+          const Real&);
+  
+    template 
     Geometry::GridMaskSet<Real> 
     reach(const VectorField<Real>&, 
+          const Geometry::GridMaskSet<Real>&, 
           const Geometry::GridMaskSet<Real>&, 
           const Real&,
           const Real&);

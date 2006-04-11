@@ -26,15 +26,54 @@
 #include <vector>
 #include <algorithm>
 
+#include "zonotope.h"
+
 #include "../base/array.h"
-
 #include "../linear_algebra/vector.h"
-
-#include "../geometry/zonotope.h"
+#include "../geometry/rectangle.h"
+#include "../geometry/parallelotope.h"
+#include "../geometry/polyhedron.h"
 
 namespace Ariadne {
   namespace Geometry {
+    
+    template<typename R>
+    Zonotope<R>::Zonotope(const Rectangle<R>& r)
+      : _centre(r.dimension())
+    {
+      using namespace LinearAlgebra;
 
+      if(r.lower_bound(0) > r.upper_bound(0)) {
+        this->_generators=matrix_type(r.dimension(),0);
+      }
+            
+      this->_generators=matrix_type(r.dimension(),r.dimension());
+      for(size_type i=0; i!=dimension(); ++i) {
+        this->_centre[i] = (r.lower_bound(i)+r.upper_bound(i))/2;
+        this->_generators(i,i) = (r.upper_bound(i)-r.lower_bound(i))/2;
+      }
+
+      this->_generators=remove_null_columns_but_one(this->_generators);
+    }
+
+    template<typename R>
+    Zonotope<R>::Zonotope(const Parallelotope<R>& p)
+      : _centre(p.centre()), _generators(p.generators())
+    {
+      using namespace Ariadne::LinearAlgebra;
+
+      this->minimize_generators();
+    }
+
+    template<typename R>
+    Zonotope<R>::Zonotope(const std::string& s)
+      : _centre(), _generators()
+    {
+      std::stringstream ss(s);
+      ss >> *this;
+    }
+         
+    
     template<typename R>
     bool 
     Zonotope<R>::contains(const state_type& point) const 
@@ -42,9 +81,7 @@ namespace Ariadne {
       if (point.dimension()!=this->dimension()) {
         throw std::domain_error("This object and parameter have different space dimensions");
       }  
-     
-      throw std::runtime_error("Zonotope<R>::contains(): Not implemented.");
-     
+      
       if (this->empty()) { return false; }
     
       matrix_type A(0,0);
@@ -76,8 +113,6 @@ namespace Ariadne {
       matrix_type A(0,0);
       vector_type b(0);
               
-      throw std::runtime_error("Zonotope<R>::contains(): Not implemented");
-
       this->compute_linear_inequalities(A,b);
 
       vector_type result(A*point.position_vector()-b);
@@ -385,58 +420,22 @@ namespace Ariadne {
         }
       }
     }
-
-
-    template <typename R>
-    Point<R> 
-    Zonotope<R>::_possible_vertices(size_t &i) const
-    {
-      Point<R> vertex(this->centre());
-      const LinearAlgebra::matrix<R> &gen=this->_generators;
       
-      for (size_t j=0; j<gen.size1(); j++) {
-	for (size_t k=0; k<gen.size2(); k++) {
-          if ((1<<k)&(i)) {
-            vertex[j]+=gen(j,k);
-	  } else {
-	    vertex[j]-=gen(j,k);
-	  }
-	}
-      }
- 
-      return vertex;
-    }
-  
-    /* TO IMPROVE */
-    template <typename R>
-    std::vector< Point<R> > 
-    Zonotope<R>::vertices() const
-    {
-   	return Polyhedron<R>(*this).vertices();
-    }
-
-    template <typename R>
-    std::vector< Point<R> > 
-    Zonotope<R>::get_the_possible_vertices() const
-    {
-      size_t poss_vert=(1<<(this->_generators).size2());
-      std::vector< Point<R> > possible_vertices(poss_vert);
-
-      assert((this->_generators).size2()<32);
-      for (size_t i=0; i<poss_vert; i++) {
-        
-	possible_vertices[i]=this->_possible_vertices(i);
-      }
-
-      return possible_vertices;
-    }
-      
-    /* TO IMPROVE */    
+    
     template <typename R>
     Zonotope<R>::operator Polyhedron<R>() const 
     {
-      return Polyhedron<R>(this->get_the_possible_vertices());
+      using namespace Ariadne::LinearAlgebra;
+      
+      matrix<R> A(0,0);
+      vector<R> b(0);
+      
+      this->compute_linear_inequalities(A,b);
+      
+      return Polyhedron<R>(A,b);
     }
+    
+    
     
     
     template<typename R>
@@ -509,5 +508,7 @@ namespace Ariadne {
       throw std::domain_error("Not implemented");
     }
       
+    
+
   }
 }

@@ -29,7 +29,8 @@
 #ifndef _ARIADNE_GENERATOR_H
 #define _ARIADNE_GENERATOR_H
 
-  
+#include "../declarations.h"
+
 namespace Ariadne {
 
 namespace Geometry {
@@ -44,6 +45,9 @@ namespace LinearAlgebra {
 /*! \brief A generating structure for a polyhedron in terms of points and rays. */
 template <typename R> 
 class GeneratorSystem {
+  
+  friend Geometry::Polyhedron<R> Geometry::minkowski_sum<>(const Geometry::Polyhedron<R>& A, const Geometry::Polyhedron<R>& B);
+    
  private:
  public:
   enum GeneratorType {

@@ -24,9 +24,11 @@
 
 
 
-#include "geometry/rectangle.h"
-#include "geometry/list_set.h"
 #include "geometry/parallelotope.h"
+
+#include "geometry/rectangle.h"
+#include "geometry/polyhedron.h"
+#include "geometry/list_set.h"
 
 
 #include "python/typedefs.h"

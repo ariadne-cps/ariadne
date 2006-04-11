@@ -24,10 +24,10 @@
 
 
 
-#include "geometry/rectangle.h"
 #include "geometry/simplex.h"
-#include "geometry/list_set.h"
 
+#include "geometry/rectangle.h"
+#include "geometry/polyhedron.h"
 
 #include "python/typedefs.h"
 using namespace Ariadne;
@@ -40,11 +40,10 @@ void export_simplex() {
   typedef bool (*SmplxSmplxBinPred) (const RSimplex&, const RSimplex&);
   typedef bool (*SmplxRectBinPred) (const RSimplex&, const RRectangle&);
 
-  def("interiors_intersect", SmplxSmplxBinPred(&interiors_intersect));
   def("interiors_intersect", SmplxRectBinPred(&interiors_intersect));
   def("disjoint", SmplxSmplxBinPred(&disjoint));
+  def("interiors_intersect", SmplxSmplxBinPred(&interiors_intersect));
   def("inner_subset", SmplxSmplxBinPred(&inner_subset));
-
   def("subset", SmplxSmplxBinPred(&subset));
 
   class_<RSimplex>("Simplex",init<int>())

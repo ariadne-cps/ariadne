@@ -30,46 +30,21 @@
 #define _ARIADNE_GRID_SET_H
 
 #include <iosfwd>
-#include <iostream>
-#include <iterator>
 
 #include <boost/iterator/iterator_adaptor.hpp>
 
 #include "../declarations.h"
 
 #include "../base/array.h"
-#include "../numeric/interval.h"
-#include "../base/binary_word.h"
-
-#include "../numeric/arithmetic.h"
 
 #include "../geometry/rectangle.h"
-#include "../geometry/point.h"
-
 #include "../geometry/grid.h"
 #include "../geometry/lattice_set.h"
-
 
 /*TODO: Unify bounds in FiniteGrid, and make GridMaskSet use only finite grid bounds*/
 
 namespace Ariadne {
   namespace Geometry {
-    class LatticeRectangle;
-
-    template<typename R, template<typename> class BS> class ListSet;
-
-    template<typename R> class Rectangle;
-    template<typename R> class Point;
-
-    template<typename R> class Grid;
-    template<typename R> class FiniteGrid;
-    template<typename R> class UniformGrid;
-
-    template<typename R> class GridCell;
-    template<typename R> class GridRectangle;
-    template<typename R> class GridMaskSet;
-    template<typename R> class GridRectangleListSet;
-    template<typename R> class GridCellListSet;
 
     template<typename R> bool interiors_intersect(const GridRectangle<R>&, const GridRectangle<R>&);
     template<typename R> bool interiors_intersect(const Rectangle<R>&, const GridMaskSet<R>&);
@@ -79,9 +54,14 @@ namespace Ariadne {
     template<typename R> bool subset(const Rectangle<R>&, const GridMaskSet<R>&);
     template<typename R> bool subset(const GridRectangle<R>&, const GridMaskSet<R>&);
     template<typename R> bool subset(const GridMaskSet<R>&, const GridMaskSet<R>&);
+    template<typename R> bool inner_subset(const Rectangle<R>&, const GridMaskSet<R>&);
     template<typename R> GridMaskSet<R> regular_intersection(const GridMaskSet<R>&, const GridMaskSet<R>&);
     template<typename R> GridMaskSet<R> join(const GridMaskSet<R>&, const GridMaskSet<R>&);
     template<typename R> GridMaskSet<R> difference(const GridMaskSet<R>&, const GridMaskSet<R>&);
+
+    template<typename R>
+    GridRectangle<R>
+    outer_approximation(const Rectangle<R>& p, const Grid<R>& g);
 
     template<typename R>
     GridRectangle<R>

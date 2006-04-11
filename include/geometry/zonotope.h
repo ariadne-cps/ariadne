@@ -30,64 +30,22 @@
 #define _ARIADNE_ZONOTOPE_H
 
 #include <iosfwd>
-#include <string>
-#include <sstream>
-
-#include <list>
-#include <set>
-#include <vector>
-#include <valarray>
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
+
 #include "../linear_algebra/zonotopic_vector.h"
 
-#include "../utility/stlio.h"
 #include "../numeric/interval.h"
-#include "../base/array.h"
 
 #include "../geometry/point.h"
-#include "../geometry/rectangle.h"
-#include "../geometry/list_set.h"
-#include "../geometry/parallelotope.h"
-#include "../geometry/polyhedron.h"
 
 namespace Ariadne {
   namespace Geometry {
-    template < typename R > class Zonotope;
 
-    template < typename R > class Rectangle;
-    template < typename R > class Polyhedron;
-    template < typename R, template <typename> class BS > class ListSet;
-
+    /* Forward declaration of friends. */
     template<typename R> Zonotope<R> minkowski_sum(const Zonotope<R>& A, const Zonotope<R>& B);
     template<typename R> Zonotope<R> minkowski_difference(const Zonotope<R>& A, const Zonotope<R>& B);
-
-    template<typename R> bool interiors_intersect(const Zonotope<R>& A, const Zonotope<R>& B);
-    template<typename R> bool interiors_intersect(const Zonotope<R>& A, const Rectangle<R>& B);
-    template<typename R> bool interiors_intersect(const Rectangle<R>& A, const Zonotope<R>& B);
-    template<typename R> bool interiors_intersect(const Zonotope<R>& A, const Parallelotope<R>& B);
-    template<typename R> bool interiors_intersect(const Parallelotope<R>& A, const Zonotope<R>& B);
-    template<typename R> bool disjoint(const Zonotope<R>& A, const Zonotope<R>& B);
-    template<typename R> bool disjoint(const Zonotope<R>& A, const Rectangle<R>& B);
-    template<typename R> bool disjoint(const Rectangle<R>& A, const Zonotope<R>& B);
-    template<typename R> bool disjoint(const Parallelotope<R>& A, const Zonotope<R>& B);
-    template<typename R> bool disjoint(const Zonotope<R>& A, const Parallelotope<R>& B);
-    template<typename R> bool inner_subset(const Zonotope<R>& A, const Zonotope<R>& B);
-    template<typename R> bool inner_subset(const Rectangle<R>& A, const Zonotope<R>& B);
-    template<typename R> bool inner_subset(const Zonotope<R>& A, const Rectangle<R>& B);
-    template<typename R> bool inner_subset(const Parallelotope<R>& A, const Zonotope<R>& B);
-    template<typename R> bool inner_subset(const Zonotope<R>& A, const Parallelotope<R>& B);
-    template<typename R> bool subset(const Zonotope<R>& A, const Zonotope<R>& B);
-    template<typename R> bool subset(const Rectangle<R>& A, const Zonotope<R>& B);
-    template<typename R> bool subset(const Zonotope<R>& A, const Rectangle<R>& B);
-    template<typename R> bool subset(const Parallelotope<R>& A, const Zonotope<R>& B);
-    template<typename R> bool subset(const Zonotope<R>& A, const Parallelotope<R>& B);
-
-    template<typename R> bool subset_of_open_cover(const Zonotope<R>& A, const ListSet<R, Zonotope >& U);
-    template<typename R> bool inner_subset(const Zonotope<R>& A, const ListSet<R,Zonotope>& U);
-    template<typename R> bool subset(const Zonotope<R>& A, const ListSet<R,Zonotope>& B);
-    
     template<typename R> std::ostream& operator<<(std::ostream&, const Zonotope<R>&);
     template<typename R> std::istream& operator>>(std::istream&, Zonotope<R>&);
 
@@ -99,46 +57,6 @@ namespace Ariadne {
      */
     template <typename R>
     class Zonotope {
-       /*! \brief Performs the Minkoswi difference of two zonotopes */
-      friend Zonotope<R> minkowski_difference <> (const Zonotope<R>& A,
-                                          const Zonotope<R>& B);
-
-       /*! \brief Performs the Minkoswi sum of two zonotopes */
-      friend Zonotope<R> minkowski_sum <> (const Zonotope<R>& A,
-                                          const Zonotope<R>& B);
-       
-      /*! \brief Tests intersection of interiors. */
-      /*friend bool interiors_intersect <> (const Zonotope<R>& A,
-                                          const Zonotope<R>& B);
-      */
-      
-       /*! \brief Tests disjointness */
-      /*friend bool disjoint <> (const Zonotope<R>& A,
-                               const Zonotope<R>& B);
-        */
-      
-      /*! \brief Tests if \a A is a subset of the interior of \a B. */
-      friend bool inner_subset <> (const Zonotope<R>& A,
-                                   const Zonotope<R>& B);
-
-      /*! \brief Tests inclusion. */
-      friend bool subset <> (const Zonotope<R>& A,
-                             const Zonotope<R>& B);
-
-      /*! \brief Tests if \a A is a subset of the interior of \a B. */
-      friend bool inner_subset <> (const Zonotope<R>& A,
-                                   const ListSet<R,::Ariadne::Geometry::Zonotope>& B);
-
-      /*! \brief Tests if \a A is a subset of \a B. */
-      friend bool subset <> (const Zonotope<R>& A,
-                             const ListSet<R,::Ariadne::Geometry::Zonotope>& B);
-
-
-      /*! \brief Tests inclusion in an open cover, represented as a ListSet.
-       */
-      friend bool subset_of_open_cover <> (const Zonotope<R>& A,
-                                           const ListSet<R,::Ariadne::Geometry::Zonotope>& B);
-
      public:
       /*! \brief The type of denotable real number used for the corners. */
       typedef R real_type;
@@ -148,6 +66,7 @@ namespace Ariadne {
       typedef Ariadne::LinearAlgebra::vector<R> vector_type;
       /*! \brief The type of matrix giving principal directions. */
       typedef Ariadne::LinearAlgebra::matrix<R> matrix_type;
+
      private:
       /* Zonotope's centre. */
       state_type _centre;
@@ -163,8 +82,6 @@ namespace Ariadne {
       explicit Zonotope(const state_type& c, const matrix_type& m)
         : _centre(c), _generators(m)
       {
-        using namespace Ariadne::LinearAlgebra;
-        
         if (c.dimension()!=m.size1()) {
           throw std::domain_error(
               "The the matrix of principal directions does not have the same number of rows as the point dimension.");
@@ -174,40 +91,13 @@ namespace Ariadne {
       }
        
       /*! \brief Construct from a rectangle. */
-      explicit Zonotope(const Rectangle<real_type>& r)
-        : _centre(r.dimension())
-      {
-        using namespace LinearAlgebra;
-
-        if(r.lower_bound(0) > r.upper_bound(0)) {
-          this->_generators=matrix_type(r.dimension(),0);
-        }
-              
-        this->_generators=matrix_type(r.dimension(),r.dimension());
-        for(size_type i=0; i!=dimension(); ++i) {
-          this->_centre[i] = (r.lower_bound(i)+r.upper_bound(i))/2;
-          this->_generators(i,i) = (r.upper_bound(i)-r.lower_bound(i))/2;
-        }
-
-        this->_generators=remove_null_columns_but_one(this->_generators);
-      }
+      explicit Zonotope(const Rectangle<real_type>& r);
 
       /*! \brief Construct from a Parallelotope. */
-      explicit Zonotope(const Parallelotope<real_type>& p)
-        : _centre(p.centre()), _generators(p.generators())
-      {
-        using namespace Ariadne::LinearAlgebra;
-
-        this->minimize_generators();
-      }
+      explicit Zonotope(const Parallelotope<real_type>& p);
 
       /*! \brief Construct from a string literal. */
-      explicit Zonotope(const std::string& s)
-        : _centre(), _generators()
-      {
-        std::stringstream ss(s);
-        ss >> *this;
-      }
+      explicit Zonotope(const std::string& s);
       
       /*! \brief Copy constructor. */
       Zonotope(const Zonotope<R>& original)
@@ -224,6 +114,14 @@ namespace Ariadne {
         return *this;
       }
       
+      /*! \brief The equality operator. */
+      bool operator==(const Zonotope<real_type>& A) const;
+      
+      /*! \brief The inequality operator */
+      bool operator!=(const Zonotope<real_type>& A) const {
+        return !(*this == A);
+      }
+
       /*! \brief A rectangle containing the given zonotope. */
       Rectangle<R> bounding_box() const;
       
@@ -267,26 +165,12 @@ namespace Ariadne {
       
       /*! \brief Tests if the interior of the zonotope contains \a point. */
       bool interior_contains(const state_type& point) const;
-      
-      /*! \brief The equality operator. */
-      bool operator==(const Zonotope<real_type>& A) const;
-      
-      /*! \brief The inequality operator */
-      bool operator!=(const Zonotope<real_type>& A) const {
-        return !(*this == A);
-      }
 
-      /*! \brief Returns the parallelotope vertices */
-      std::vector< Point<R> > vertices() const;
-
-      friend std::ostream&
-      operator<< <> (std::ostream& os, 
-                     const Zonotope<R>& r);
-      
-      friend std::istream&
-      operator>> <> (std::istream& is, 
-                     Zonotope<R>& r);
-      
+     private: 
+      friend Zonotope<R> minkowski_sum <> (const Zonotope<R>& A, const Zonotope<R>& B);
+      friend Zonotope<R> minkowski_difference <> (const Zonotope<R>& A, const Zonotope<R>& B);       
+      friend std::ostream& operator<< <> (std::ostream& os, const Zonotope<R>& r);
+      friend std::istream& operator>> <> (std::istream& is, Zonotope<R>& r);
      private:
       // Minimize the generator matrix
       void minimize_generators(void);
@@ -296,12 +180,12 @@ namespace Ariadne {
       
       // The linear inequalities defining the zonotope.
       void compute_linear_inequalities(matrix_type&, vector_type&) const;
-    
-      Point<R> _possible_vertices(size_t &vert_num) const;
-      
-      std::vector< state_type > get_the_possible_vertices() const ;
     };
   
+    
+    
+
+    
     /*! \brief Performs the Minkoswi sum of two zonotopes */
     template<typename R> 
     Zonotope<R> 
@@ -312,28 +196,30 @@ namespace Ariadne {
     Zonotope<R> 
     minkowski_difference(const Zonotope<R>& A, const Zonotope<R>& B);
     
+    
     /*! \brief Tests disjointness */
     template <typename R>
     inline
-    bool disjoint(const Zonotope<R>& A, const Zonotope<R>& B) 
+    bool 
+    disjoint(const Zonotope<R>& A, const Zonotope<R>& B) 
     {
-      return !minkowski_difference(A,B).contains(Point<R>(A.dimension(),0));
+      return !minkowski_difference(A,B).contains(Point<R>(A.dimension()));
     }
     
     /*! \brief Tests disjointness */
     template <typename R>
     inline
-    bool disjoint(const Rectangle<R>& A, const Zonotope<R>& B) 
+    bool 
+    disjoint(const Rectangle<R>& A, const Zonotope<R>& B) 
     {
-      Zonotope<R> z_A(A);
-
-      return disjoint(z_A,B);
+      return disjoint(Zonotope<R>(A),B);
     }
 
     /*! \brief Tests disjointness */
     template <typename R>
     inline
-    bool disjoint(const Zonotope<R>& A, const Rectangle<R>& B) 
+    bool 
+    disjoint(const Zonotope<R>& A, const Rectangle<R>& B) 
     {
       return disjoint(B,A);
     }
@@ -341,71 +227,73 @@ namespace Ariadne {
     /*! \brief Tests disjointness */
     template <typename R>
     inline
-    bool disjoint(const Parallelotope<R>& A, const Zonotope<R>& B) 
+    bool 
+    disjoint(const Parallelotope<R>& A, const Zonotope<R>& B) 
     {
-      Zonotope<R> z_A(A);
-
-      return disjoint(z_A,B);
+      return disjoint(Zonotope<R>(A),B);
     }
 
     /*! \brief Tests disjointness */
     template <typename R>
     inline
-    bool disjoint(const Zonotope<R>& A, const Parallelotope<R>& B) 
+    bool 
+    disjoint(const Zonotope<R>& A, const Parallelotope<R>& B) 
     {
       return disjoint(B,A);
+    }
+
+    
+    /*! \brief Tests intersection of interiors */
+    template <typename R>
+    inline
+    bool 
+    interiors_intersect(const Zonotope<R>& A, const Zonotope<R>& B) 
+    {
+      return !minkowski_sum(A,B).interior_contains(Point<R>(A.dimension()));
+    }
+   
+    /*! \brief Tests intersection of interiors */
+    template <typename R>
+    inline
+    bool 
+    interiors_intersect(const Rectangle<R>& A, const Zonotope<R>& B) 
+    {
+      Zonotope<R> z_A(A);
+      return interiors_intersect(Zonotope<R>(A),B);
+    }
+
+    /*! \brief Tests intersection of interiors */
+    template <typename R>
+    inline
+    bool 
+    interiors_intersect(const Zonotope<R>& A, const Rectangle<R>& B) 
+    {
+      return interiors_intersect(B,A);
     }
     
     /*! \brief Tests intersection of interiors */
     template <typename R>
     inline
-    bool interiors_intersect(const Zonotope<R>& A,
-                             const Zonotope<R>& B) 
+    bool 
+    interiors_intersect(const Parallelotope<R>& A, const Zonotope<R>& B) 
     {
-      return !minkowski_sum(A,B).interior_contains(Point<R>(A.dimension(),0));
-    }
-   
-    template <typename R>
-    inline
-    bool interiors_intersect(const Zonotope<R>& A,
-                             const Rectangle<R>& B) 
-    {
-      Zonotope<R> z_B(B);
-      return interiors_intersect(A,z_B);
+      return interiors_intersect(Zonotope<R>(A),B);
     }
     
+    /*! \brief Tests intersection of interiors */
     template <typename R>
     inline
-    bool interiors_intersect(const Rectangle<R>& A,
-                             const Zonotope<R>& B) 
+    bool 
+    interiors_intersect(const Zonotope<R>& A, const Parallelotope<R>& B) 
     {
-      Zonotope<R> z_A(A);
-      return interiors_intersect(z_A,B);
-    }
-   
-    template <typename R>
-    inline
-    bool interiors_intersect(const Zonotope<R>& A,
-                             const Parallelotope<R>& B) 
-    {
-      Zonotope<R> z_B(B);
-      return interiors_intersect(A,z_B);
-    }
-    
-    template <typename R>
-    inline
-    bool interiors_intersect(const Parallelotope<R>& A,
-                             const Zonotope<R>& B) 
-    {
-      Zonotope<R> z_A(A);
-      return interiors_intersect(z_A,B);
+      return interiors_intersect(B,A);
     }
 
     /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     inline
-    bool inner_subset(const Zonotope<R>& A,
-                      const Zonotope<R>& B) 
+    bool 
+    inner_subset(const Zonotope<R>& A, const Zonotope<R>& B) 
     {
       return inner_subset(Polyhedron<R>(A), Polyhedron<R>(B));
     }
@@ -413,8 +301,8 @@ namespace Ariadne {
     /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     inline
-    bool inner_subset(const Rectangle<R>& A,
-                      const Zonotope<R>& B) 
+    bool 
+    inner_subset(const Rectangle<R>& A, const Zonotope<R>& B) 
     {
       return inner_subset(Polyhedron<R>(A), Polyhedron<R>(B));
     }
@@ -422,16 +310,8 @@ namespace Ariadne {
     /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     inline
-    bool inner_subset(const Zonotope<R>& A,
-                      const Rectangle<R>& B) 
-    {
-      return inner_subset(Polyhedron<R>(A), Polyhedron<R>(B));
-    }
-
-    template <typename R>
-    inline
-    bool inner_subset(const Parallelotope<R>& A,
-                      const Zonotope<R>& B) 
+    bool 
+    inner_subset(const Zonotope<R>& A, const Rectangle<R>& B) 
     {
       return inner_subset(Polyhedron<R>(A), Polyhedron<R>(B));
     }
@@ -439,17 +319,27 @@ namespace Ariadne {
     /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     inline
-    bool inner_subset(const Zonotope<R>& A,
-                      const Parallelotope<R>& B) 
+    bool 
+    inner_subset(const Parallelotope<R>& A, const Zonotope<R>& B) 
     {
       return inner_subset(Polyhedron<R>(A), Polyhedron<R>(B));
     }
+
+    /*! \brief Tests inclusion of \a A in the interior of \a B. */
+    template <typename R>
+    inline
+    bool 
+    inner_subset(const Zonotope<R>& A, const Parallelotope<R>& B) 
+    {
+      return inner_subset(Polyhedron<R>(A), Polyhedron<R>(B));
+    }
+
 
     /*! \brief Tests inclusion of \a A in \a B. */
     template <typename R>
     inline
-    bool subset(const Zonotope<R>& A,
-                      const Zonotope<R>& B) 
+    bool 
+    subset(const Zonotope<R>& A, const Zonotope<R>& B) 
     {
       return subset(Polyhedron<R>(A), Polyhedron<R>(B));
     }
@@ -457,8 +347,8 @@ namespace Ariadne {
     /*! \brief Tests inclusion of \a A in \a B. */
     template <typename R>
     inline
-    bool subset(const Rectangle<R>& A,
-                      const Zonotope<R>& B) 
+    bool 
+    subset(const Rectangle<R>& A, const Zonotope<R>& B) 
     {
       return subset(Polyhedron<R>(A), Polyhedron<R>(B));
     }
@@ -466,16 +356,8 @@ namespace Ariadne {
     /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     inline
-    bool subset(const Zonotope<R>& A,
-                      const Rectangle<R>& B) 
-    {
-      return subset(Polyhedron<R>(A), Polyhedron<R>(B));
-    }
-
-    template <typename R>
-    inline
-    bool subset(const Parallelotope<R>& A,
-                      const Zonotope<R>& B) 
+    bool 
+    subset(const Zonotope<R>& A, const Rectangle<R>& B) 
     {
       return subset(Polyhedron<R>(A), Polyhedron<R>(B));
     }
@@ -483,29 +365,22 @@ namespace Ariadne {
     /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     inline
-    bool subset(const Zonotope<R>& A,
-                      const Parallelotope<R>& B) 
+    bool 
+    subset(const Parallelotope<R>& A, const Zonotope<R>& B) 
+    {
+      return subset(Polyhedron<R>(A), Polyhedron<R>(B));
+    }
+
+    /*! \brief Tests inclusion of \a A in the interior of \a B. */
+    template <typename R>
+    inline
+    bool 
+    subset(const Zonotope<R>& A, const Parallelotope<R>& B) 
     {
       return subset(Polyhedron<R>(A), Polyhedron<R>(B));
     }
     
-    /*! \brief Tests inclusion in an open cover.  */
-    template <typename R>
-    inline
-    bool subset_of_open_cover(const Zonotope<R>& A,
-                              const ListSet<R, Zonotope >& cover) 
-    {
-      throw std::domain_error("subset_of_open_cover(Zonotope, std::vector<Zonotope>) not implemented");
-    }
-    
-    /*! \brief Tests inclusion of \a A om the interior of \a B. */
-    template <typename R>
-    inline
-    bool inner_subset(const Zonotope<R>& A,
-                      const ListSet<R,Zonotope>& B) 
-    {
-      throw std::domain_error("subset_of_closed_cover(Zonotope, std::vector<Zonotope>) not implemented");
-    }
+
     
     /*! Compute an over-approximatiing parallelotope to \a z. */
     template <typename R>
@@ -520,6 +395,7 @@ namespace Ariadne {
     Zonotope<R>
     operator+(const Zonotope<R>& z, const LinearAlgebra::zonotopic_vector<R>& v);
     
+
   }
 }
 

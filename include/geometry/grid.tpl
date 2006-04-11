@@ -21,9 +21,14 @@
  *  Foundation, Inc., 59 Templece Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "grid.h"
+
+#include <ostream>
+
+#include "../utility/stlio.h"
+
 #include "../numeric/arithmetic.h"
 
-#include "../geometry/grid.h"
 #include "../geometry/grid_set.h"
 #include "../geometry/rectangle.h"
 #include "../geometry/list_set.h"

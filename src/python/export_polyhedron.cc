@@ -25,6 +25,7 @@
 #include <vector>
 
 
+#include "utility/stlio.h"
 
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
@@ -73,7 +74,7 @@ void export_polyhedron() {
     .def("size", &RPointList::size)
     .def("append", &RPointList::push_back)
     .def("__getitem__", &point_list_get)
-    .def(self_ns::str(self))    // __self_ns::str__
+   // .def(self_ns::str(self))    // __self_ns::str__
   ;
 
   

@@ -42,20 +42,17 @@
 
 namespace Ariadne {
   namespace Geometry {
-    /*!\brief An array of integers, representing a cell in a grid. */
     class LatticeCell;
-    /*!\brief An of integers representing an index in a grid. */
+
     class LatticeRectangle;
     class LatticeRectangleIterator;
 
-    /*!\brief A list of arrays of integers of the same size, representing cells in a grid. */
     class LatticeCellListSet;
     class LatticeCellListSetIterator;
-    /*!\brief A list of arrays of integers of the same size, representing rectangles in a grid. */
+
     class LatticeRectangleListSet;
     class LatticeRectangleListSetIterator;
 
-    /*!\brief A list of arrays of integers of the same size, representing rectangles in a grid. */
     class LatticeMaskSet;
     class LatticeMaskSetIterator;
 
@@ -393,6 +390,7 @@ namespace Ariadne {
 
       /*! \brief Adjoins a LatticeCell to the set. */
       void adjoin(const LatticeCell& c) { 
+        assert(subset(c,this->bounds()));
         this->_mask[this->index(c.position())]=true;
       }
       

@@ -21,14 +21,66 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "simplex.h"
+
 #include <iostream>
 #include <vector>
 
-#include "../geometry/simplex.h"
+#include "../utility/stlio.h"
+#include "../geometry/parallelotope.h"
+#include "../geometry/polyhedron.h"
 
 namespace Ariadne {
   namespace Geometry {
 
+    template<typename R>
+    Simplex<R>::Simplex(size_type n)
+      : _vertices(n+1,state_type(n)) 
+    {
+      for(size_type i=0; i!=n; ++i) {
+        _vertices[i][i]=1;
+      }
+    }
+  
+    template<typename R>
+    Simplex<R>::Simplex(const std::vector<state_type>& v)
+      : _vertices(v.begin(),v.end())
+    {
+      size_type d=_vertices.size()-1;
+      for(size_type i=0; i!=d+1; ++i) {
+        if(_vertices[i].dimension()!=d) {
+          throw std::domain_error("The the list of vertices is invalid");
+        }
+      }
+    }
+    
+    template<typename R>
+    Simplex<R>::Simplex(const array<state_type>& v)
+      : _vertices(v.begin(),v.end())
+    {
+      size_type d=_vertices.size()-1;
+      for(size_type i=0; i!=d+1; ++i) {
+        if(_vertices[i].dimension()!=d) {
+          throw std::domain_error("The the list of vertices is invalid");
+        }
+      }
+    }
+    
+    template<typename R>
+    Simplex<R>::Simplex(const std::string& s)
+      : _vertices()
+    {
+      std::stringstream ss(s);
+      ss >> *this;
+    }
+    
+    template<typename R>
+    Simplex<R>::operator Polyhedron<R> () const 
+    {
+      std::vector<state_type> vert_vec(_vertices.begin(),_vertices.end());
+      return Polyhedron<R>(vert_vec);
+    }
+    
     template <typename R>
     std::ostream&
     operator<<(std::ostream& os, const Simplex<R>& s) 
@@ -38,9 +90,10 @@ namespace Ariadne {
 //     }
 //      else 
       if(s.dimension() > 0) {
-        os << "Simplex(vertices=" << s.vertices() << ") ";
+        os << "Simplex( vertices=";
+        Utility::write_sequence(os,s.vertices().begin(),s.vertices().end());
+        os << ")";
       }
-
       return os;
     }
     

@@ -1,8 +1,8 @@
 /***************************************************************************
- *            geometry.h
+ *            utilty.h
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,24 +21,26 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file geometry.h
- *  \brief Top-level header file for the Geometry module.
+/*! \file utility.h
+ *  \brief Miscellaneous, general-purpose functions.
  */
 
-#ifndef _ARIADNE_GEOMETRY_H
-#define _ARIADNE_GEOMETRY_H
+#ifndef _ARIADNE_UTILITY_H
+#define _ARIADNE_UTILITY_H
 
-#include "../geometry/geometry_declarations.h"
+#include <iosfwd>
+#include "../declarations.h"
 
-#include "../geometry/point.h"
-#include "../geometry/rectangle.h"
-#include "../geometry/parallelopiped.h"
-#include "../geometry/zonotope.h"
-#include "../geometry/simplex.h"
-#include "../geometry/polyhedron.h"
+namespace Ariadne {
+  namespace Base {
+    
+    /*! \brief Convert an element \a x of type \a Arg to type \a Res. */
+    template<typename Res, typename Arg> inline Res convert_to(const Arg& x) { return Res(x); }
 
-#include "../geometry/list_set.h"
-#include "../geometry/grid_set.h"
-#include "../geometry/partition_tree_set.h"
+    /*! \brief Convert an element \a x of type \a Arg to type \a Res. */
+    template<typename T> inline std::string name();
+    
+  }    
+}
 
-#endif /* _ARIADNE_GEOMETRY_H */
+#endif /* _ARIADNE_UTILITY_H */

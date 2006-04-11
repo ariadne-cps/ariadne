@@ -31,6 +31,8 @@ using namespace boost::python;
 using namespace Ariadne;
 
 void export_function() {
+  def("div_approx", div_approx<Real>, "approximate division function (maximum error e)" );
+  def("sqrt_approx", sqrt_approx<Real>, "approximate square root function (maximum error e)" );
   def("exp_approx", exp_approx<Real>, "approximate exponential function (maximum error e)" );
   def("cos_approx", cos_approx<Real>, "approximate sine function (maximum error e)" );
   def("sin_approx", sin_approx<Real>, "approximate cosine function (maximum error e)" );

@@ -354,6 +354,7 @@ namespace Ariadne {
         this->_mask |= lm._mask;
       }
       else {
+        assert(subset(lm.bounds(),this->bounds()));
         for(LatticeMaskSet::const_iterator iter=lm.begin(); iter!=lm.end(); ++iter) {
           this->adjoin(*iter);
         }
@@ -476,6 +477,12 @@ namespace Ariadne {
     }
     
 
+    bool
+    subset(const LatticeCell& lc, const LatticeRectangle& lr)
+    {
+      return subset(LatticeRectangle(lc),lr);
+    }
+     
 
     bool 
     subset(const LatticeCell& c, const LatticeMaskSet& ms) 

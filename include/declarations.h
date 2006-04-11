@@ -82,6 +82,11 @@ template<typename R> class PartitionScheme;
 template<typename R> class PartitionTree;
 template<typename R> class PartitionTreeCell;
 template<typename R> class PartitionTreeSet;
+
+template<typename R> bool disjoint(const Polyhedron<R>&, const Polyhedron<R>&);
+template<typename R> bool interiors_intersect(const Polyhedron<R>&, const Polyhedron<R>&);
+template<typename R> bool inner_subset(const Polyhedron<R>&, const Polyhedron<R>&);
+template<typename R> bool subset(const Polyhedron<R>&, const Polyhedron<R>&);
 }}
 
 

@@ -31,50 +31,19 @@
 
 #include <iosfwd>
 
-#include <string>
-#include <sstream>
-
-#include <list>
-#include <set>
-#include <vector>
-#include <valarray>
-
 #include "../declarations.h"
 
-#include "../utility/stlio.h"
 #include "../numeric/interval.h"
-#include "../base/array.h"
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 
 #include "../geometry/point.h"
-#include "../geometry/rectangle.h"
-#include "../geometry/list_set.h"
-#include "../geometry/polyhedron.h"
-#include "../geometry/zonotope.h"
 
 namespace Ariadne {
   namespace Geometry {
-    template < typename R > class Parallelotope;
-
-    template < typename R > class Rectangle;
-    template < typename R > class Polyhedron;
-    template < typename R > class Zonotope;
-
-    template < typename R, template <typename> class BS > class ListSet;
-
-    template <typename R> Parallelotope<R> intersection(const Parallelotope<R>& A, const Parallelotope<R>& B);
-    template <typename R> Parallelotope<R> regular_intersection(const Parallelotope<R>& A, const Parallelotope<R>& B);
-    template<typename R> bool interiors_intersect(const Parallelotope<R>& A, const Parallelotope<R>& B);
-    template<typename R> bool disjoint(const Parallelotope<R>& A, const Parallelotope<R>& B);
-    template<typename R> bool inner_subset(const Parallelotope<R>& A, const Parallelotope<R>& B);
-    template<typename R> bool subset(const Parallelotope<R>& A, const Parallelotope<R>& B);
-
-    template<typename R> bool subset_of_open_cover(const Parallelotope<R>& A, const ListSet<R, Parallelotope >& list);
-    template<typename R> bool inner_subset(const Parallelotope<R>& rect, const ListSet<R,Parallelotope>& A);
-    template<typename R> bool subset(const Parallelotope<R>& rect, const ListSet<R,Parallelotope>& A);
-    
+ 
+    /* Forward declaration of friends. */
     template<typename R> std::ostream& operator<<(std::ostream&, const Parallelotope<R>&);
     template<typename R> std::istream& operator>>(std::istream&, Parallelotope<R>&);
 
@@ -82,44 +51,6 @@ namespace Ariadne {
      */
     template <typename R>
     class Parallelotope {
-      /*! \brief Makes intersection */
-      friend Parallelotope<R> intersection <> (const Parallelotope<R>& A,
-                                           const Parallelotope<R>& B);
-
-      /*! \brief Makes intersection of interiors */
-      friend Parallelotope<R> regular_intersection <> (const Parallelotope<R>& A,
-                                                   const Parallelotope<R>& B);
-
-       /*! \brief Tests intersection of interiors. */
-      friend bool interiors_intersect <> (const Parallelotope<R>& A,
-                                          const Parallelotope<R>& B);
-
-       /*! \brief Tests disjointness */
-      friend bool disjoint <> (const Parallelotope<R>& A,
-                               const Parallelotope<R>& B);
-
-      /*! \brief Tests if \a A is a subset of the interior of \a B. */
-      friend bool inner_subset <> (const Parallelotope<R>& A,
-                                   const Parallelotope<R>& B);
-
-      /*! \brief Tests inclusion. */
-      friend bool subset <> (const Parallelotope<R>& A,
-                             const Parallelotope<R>& B);
-
-      /*! \brief Tests if \a A is a subset of the interior of \a B. */
-      friend bool inner_subset <> (const Parallelotope<R>& A,
-                                   const ListSet<R,Ariadne::Geometry::Parallelotope>& B);
-
-      /*! \brief Tests if \a A is a subset of \a B. */
-      friend bool subset <> (const Parallelotope<R>& A,
-                             const ListSet<R,Ariadne::Geometry::Parallelotope>& B);
-
-
-      /*! \brief Tests inclusion in an open cover, represented as a ListSet.
-       */
-      friend bool subset_of_open_cover <> (const Parallelotope<R>& A,
-                                           const ListSet<R,Ariadne::Geometry::Parallelotope>& B);
-
      private:
       typedef typename numerical_traits<R>::field_extension_type F;
      public:
@@ -128,16 +59,9 @@ namespace Ariadne {
       /*! \brief The type of denotable point contained by the rectangle. */
       typedef Point<R> state_type;
       /*! \brief The type of matrix giving principal directions. */
-      typedef Ariadne::LinearAlgebra::vector<R> vector_type;
+      typedef LinearAlgebra::vector<R> vector_type;
       /*! \brief The type of matrix giving principal directions. */
-      typedef Ariadne::LinearAlgebra::matrix<R> matrix_type;
-     private:
-      /* Parallelotope's centre. */
-      state_type _centre;
-      
-      /* Parallelotope's principal directions. */
-      matrix_type _generators;
-      
+      typedef LinearAlgebra::matrix<R> matrix_type;
      public:
       /*! \brief Default constructor constructs an empty parallelotope of dimension \a n. */
       explicit Parallelotope(size_type n = 0)
@@ -168,25 +92,16 @@ namespace Ariadne {
         
         if (c.dimension()!=m.size1()) {
           throw std::domain_error("The centre and directions have different dimensions.");
-	
-	  try {
-	    Base::array<size_t> p_array(m.size1());
-	    LinearAlgebra::lu_decompose(m,p_array);
-	  } catch (std::runtime_error &e) {
-            throw std::domain_error("The directions matrix should have full range.");
-          }
         }
       }
       
       /*! \brief Construct from a Rectangle. */
       explicit Parallelotope(const Rectangle<real_type>& r)
         : _centre(r.dimension()), _generators(r.dimension(),r.dimension())
-      {	      
+      {
         for(size_type i=0; i!=dimension(); ++i) {
           _centre[i] = (r.lower_bound(i)+r.upper_bound(i))/2;
           _generators(i,i) = (r.upper_bound(i)-r.lower_bound(i))/2;
-	  if (_generators(i,i)==0)
-            throw std::domain_error("The directions matrix should have full range.");
         }
       }
       
@@ -213,6 +128,12 @@ namespace Ariadne {
         return *this;
       }
       
+      /*! \brief The equality operator */
+      bool operator==(const Parallelotope<R>& A) const;
+      
+      /*! \brief The inequality operator */
+      bool operator!=(const Parallelotope<R>& A) const; 
+
       /*! \brief The dimension of the Euclidean space the parallelotope lies in. */
       size_type dimension() const {
         return (this->_centre).dimension();
@@ -251,14 +172,14 @@ namespace Ariadne {
         return this->_generators;
       }
      
-      /*! \brief The equality operator */
-      bool operator==(const Parallelotope<R>& A) const;
-      
-      /*! \brief The inequality operator */
-      bool operator!=(const Parallelotope<R>& A) const; 
-
       /*! \brief A rectangle containing the given parallelotope. */
       Rectangle<R> bounding_box() const;
+      
+      /*! \brief The \a i th vertex. */
+      Point<R> vertex(const size_type& i) const;
+      
+      /*! \brief The vertices of the parallelotope. */
+      std::vector< Point<R> > vertices() const;
       
       /*! \brief Convert to a zonotope. */
       operator Zonotope<R> () const;
@@ -269,9 +190,6 @@ namespace Ariadne {
       /*! \brief Tests if the parallelotope contains \a point. */
       bool contains(const state_type& point) const;
       
-      /*! \brief Returns the parallelotope vertices */
-      std::vector< Point<R> > vertices() const;
-
       /*! \brief Tests if the interior of the parallelotope contains \a point. */
       bool interior_contains(const state_type& point) const;
 
@@ -281,25 +199,19 @@ namespace Ariadne {
       /*! \brief Subdivide into smaller pieces in each dimension. */
       ListSet<R,Geometry::Parallelotope> subdivide() const;
       
-      /* \brief Tests disjointness with a rectangle */
+      /*! \brief Tests disjointness from a rectangle. */
       bool disjoint(const Rectangle<R>& r) const;
       
-      /* \brief Tests disjointness with a parallelotope */
-      bool disjoint(const Parallelotope<R>& p) const;
-      
-      friend std::ostream&
-      operator<< <> (std::ostream& os, 
-                     const Parallelotope<R>& r);
-      
-      friend std::istream&
-      operator>> <> (std::istream& is, 
-                     Parallelotope<R>& r);
-      
+      friend std::istream& operator>> <> (std::istream& is, Parallelotope<R>& r);
      private:
       void compute_linear_inequalities(matrix_type&, vector_type&, vector_type&) const;
       LinearAlgebra::vector<F> coordinates(const state_type& s) const;
+     private:
+      /* Parallelotope's centre. */
+      state_type _centre;
+      /* Parallelotope's principal directions. */
+      matrix_type _generators;
       
-      Point<R> vertices(const size_t &i) const;
     };
   
     /*! \brief Tests disjointness */
@@ -308,14 +220,14 @@ namespace Ariadne {
     bool 
     disjoint(const Parallelotope<R>& A, const Parallelotope<R>& B) 
     {
-      return A.disjoint(B);
+      return disjoint(Polyhedron<R>(A),Polyhedron<R>(B));
     }
     
     /*! \brief Tests disjointness */
     template <typename R>
-    inline 
+    inline
     bool 
-    disjoint(const Parallelotope<R>& A, const Rectangle<R>& B) 
+    disjoint(const Parallelotope<R>& A, const Rectangle<R>& B)
     {
       return A.disjoint(B);
     }
@@ -326,7 +238,7 @@ namespace Ariadne {
     bool 
     disjoint(const Rectangle<R>& A, const Parallelotope<R>& B) 
     {
-      return B.disjoint(A);
+      return disjoint(B,A);
     }
     
     
@@ -421,6 +333,7 @@ namespace Ariadne {
       return subset(Polyhedron<R>(A), Polyhedron<R>(B));
     }
     
+
     /*! \brief Tests inclusion in an open cover.  */
     template <typename R>
     inline

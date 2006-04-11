@@ -29,16 +29,9 @@
 #define _ARIADNE_GRID_H
 
 #include <iosfwd>
-#include <iostream>
-#include <iterator>
 
 #include "../declarations.h"
-
 #include "../base/array.h"
-#include "../numeric/interval.h"
-#include "../base/binary_word.h"
-
-
 #include "../geometry/lattice_set.h"
 
 namespace Ariadne {
@@ -125,12 +118,15 @@ namespace Ariadne {
     
       /*! \brief The coordinate of the \a n th subdivision point in dimension \a d. */
       virtual real_type subdivision_coordinate(dimension_type d, index_type n) const {
+        assert(d<this->dimension());
+        assert(0<=n && n<_subdivision_coordinates[d].size());
         return _subdivision_coordinates[d][n];
       }
   
       /*! \brief The index of interval in dimension \a d index containing \a x. */
       virtual index_type subdivision_interval(dimension_type d, const real_type& x) const {
         typename std::vector<R>::const_iterator pos;
+        assert(d<this->dimension());
         if(x<_subdivision_coordinates[d].front() || x>_subdivision_coordinates[d].back()) {
           throw std::runtime_error("point does not lie in extent of finite grid");
         }

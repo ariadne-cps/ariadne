@@ -1,6 +1,6 @@
 include ../../config.mk
 
-OBJ = arithmetic.o 
+OBJ = arithmetic.o function.o
 
 all: ${OBJ}
 
@@ -25,12 +25,29 @@ dep:
 arithmetic.o: arithmetic.cc ../../include/numeric/arithmetic.h \
   ../../include/numeric/../numeric/numerical_types.h \
   ../../include/numeric/../numeric/../declarations.h \
+  ../../include/numeric/../numeric/../base/utility.h \
+  ../../include/numeric/../numeric/../base/../declarations.h \
   ../../include/numeric/../numeric/../numeric/dyadic.h \
-  ../../include/numeric/../numeric/../utility/stlio.h \
-  ../../include/numeric/../numeric/../utility/../base/array.h \
-  ../../include/numeric/../numeric/../utility/../base/../declarations.h \
   ../../include/numeric/../numeric/approximation.h \
   ../../include/numeric/../numeric/../numeric/numerical_types.h \
   ../../include/numeric/arithmetic.tpl ../../include/numeric/arithmetic.h \
+  ../../include/numeric/numerical_types.h
+
+function.o: function.cc ../../include/numeric/function.h \
+  /ufs/collins/include/mpfr.h \
+  ../../include/numeric/../numeric/numerical_types.h \
+  ../../include/numeric/../numeric/../declarations.h \
+  ../../include/numeric/../numeric/../base/utility.h \
+  ../../include/numeric/../numeric/../base/../declarations.h \
+  ../../include/numeric/../numeric/../numeric/dyadic.h \
+  ../../include/numeric/function.tpl ../../include/numeric/function.h \
+  ../../include/numeric/../numeric/integer.h \
+  ../../include/numeric/../numeric/arithmetic.h \
+  ../../include/numeric/../numeric/../numeric/numerical_types.h \
+  ../../include/numeric/../numeric/../numeric/approximation.h \
+  ../../include/numeric/../numeric/../numeric/../declarations.h \
+  ../../include/numeric/../numeric/../numeric/../numeric/numerical_types.h \
+  ../../include/numeric/../numeric/approximation.h \
+  ../../include/numeric/numerical_types.h ../../include/real_typedef.h \
   ../../include/numeric/numerical_types.h
 

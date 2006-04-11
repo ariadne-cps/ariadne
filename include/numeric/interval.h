@@ -70,30 +70,79 @@ namespace Ariadne {
     template<typename R>
     class Interval : public boost::numeric::interval<R> {
      public:
-      Interval()
+      /*! \brief Default constructer constructs what?? */
+     Interval()
         : boost::numeric::interval<R>() { }
       Interval(const boost::numeric::interval<R>& ivl)
         : boost::numeric::interval<R>(ivl) { }
+      /*! \brief Construct from lower and upper bounds. */
       Interval(const R& l, const R& u)
         : boost::numeric::interval<R>(l,u) { }
-      
-      bool operator==(const Interval<R>& ivl) { 
-        return this->lower()==ivl.lower() && this->upper()==ivl.upper(); }
-      bool operator!=(const Interval<R>& ivl) { 
-        return !(*this==ivl); }
-
+      /*! \brief Assignment operator. */
       const Interval<R>& operator=(const R &r) {
         *this=Interval<R>(r,r);
         return *this;
       }
+      
+      /*! \brief Equality operator. */
+      bool operator==(const Interval<R>& ivl) { 
+        return this->lower()==ivl.lower() && this->upper()==ivl.upper(); }
+      /*! \brief Inequality operator. */
+      bool operator!=(const Interval<R>& ivl) { 
+        return !(*this==ivl); }
 
+
+      /*! \brief Tests if the interval contains \a r. */
       bool contains(const R& r) const { return this->lower()<=r && r<=this->upper(); }
+      /*! \brief Tests if the interior of the interval contains \a r. */
       bool interior_contains(const R& r) const { return this->lower()<r && r<this->upper(); }
       
+      /*! \brief The midpoint of the interval, given by \f$(a+b)/2\f$. */
       R centre() const { return (this->lower()+this->upper())/2; }
+      /*! \brief The radius of the interval, given by \f$(b-a)/2\f$. */
       R radius() const { return (this->upper()-this->lower())/2; }
+      /*! \brief The length of the interval, given by \f$b-a\f$. */
       R length() const { return this->upper()-this->lower(); }
     };
+    
+    /*! \brief Tests disjointness. */
+    template<typename R>
+    inline
+    bool
+    disjoint(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    {
+      return (ivl1.upper()<ivl2.lower() || ivl1.lower()>ivl2.upper());
+    }
+
+    /*! \brief Tests intersection of interiors. */
+    template<typename R>
+    inline
+    bool
+    interiors_intersect(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    {
+      return (ivl1.upper()>ivl2.lower() && ivl1.lower()<ivl2.upper());
+    }
+
+    /*! \brief Tests if \a ivl1 is a subset of the interior of \a ivl2. */
+    template<typename R>
+    inline
+    bool
+    inner_subset(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    {
+      return (ivl1.lower()>ivl2.lower() && ivl1.upper()<ivl2.upper());
+    }
+
+    /*! \brief Tests if \a ivl1 is a subset of \a ivl2. */
+    template<typename R>
+    inline
+    bool
+    subset(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    {
+      return (ivl1.lower()>=ivl2.lower() && ivl1.upper()<=ivl2.upper());
+    }
+
+
+
     
     template<typename R>
     inline

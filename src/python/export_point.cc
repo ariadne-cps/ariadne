@@ -49,8 +49,8 @@ inline RVector rpoint_sub_rpoint(const RPoint& p, const RPoint& q) {
 
 void export_point() {
   class_<RPoint>("Point",init<int>())
-    .def(init<int,Real>())
     .def(init<RPoint>())
+    .def(init<std::string>())
     .def("dimension", &RPoint::dimension)
     .def("__len__", &RPoint::dimension)
     .def("__getitem__", &RPoint::get)

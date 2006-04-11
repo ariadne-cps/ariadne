@@ -30,18 +30,24 @@
 #define _ARIADNE_LIST_SET_H
 
 #include <iosfwd>
+#include <exception>
+#include <stdexcept>
 
 #include <vector>
-#include <iostream>
 
 #include "../declarations.h"
-#include "../numeric/numerical_types.h"
+#include "../base/utility.h"
 
 namespace Ariadne {
   namespace Geometry {
 
     template<typename R> class Rectangle;
     template<typename R, template<typename> class BS> class ListSet;
+
+    template <typename R, template<typename> class BS>
+    bool disjoint(const BS<R>& , const ListSet<R,BS>& );
+    template <typename R, template<typename> class BS>
+    bool interiors_intersect(const BS<R>& , const ListSet<R,BS>& );
 
     template <typename R, template<typename> class BS>
     bool disjoint(const ListSet<R,BS>& , const ListSet<R,BS>& );
@@ -52,19 +58,9 @@ namespace Ariadne {
     template <typename R, template<typename> class BS>
     bool subset(const ListSet<R,BS>& , const ListSet<R,BS>& );
     template <typename R, template<typename> class BS>
-    bool subset(const ListSet<R,BS>& , const ListSet<R,BS>& );
-    template <typename R, template<typename> class BS>
     ListSet<R,BS> regular_intersection(const ListSet<R,BS>& , const ListSet<R,BS>& );
 
-    template <typename R, template<typename> class BS>
-    bool interiors_intersect(const BS<R>& , const ListSet<R,BS>& );
-    template <typename R, template<typename> class BS>
-    bool inner_subset(const BS<R>& , const ListSet<R,BS>& );
-    template <typename R, template<typename> class BS>
-    bool inner_subset(const ListSet<R,BS>& , const BS<R>& );
-
-    template <typename R, template<typename> class BS>
-    std::istream& operator>> (std::istream& is, ListSet<R,BS>& S);
+    /*! \brief Stream insertion operator. */
     template <typename R, template<typename> class BS>
     std::ostream& operator<< (std::ostream& is, const ListSet<R,BS>& S);
 
@@ -198,24 +194,6 @@ namespace Ariadne {
         return sum;
       }
 
-      /*! \brief Expands set by \a delta. */
-      /*  \internal This is dangerous since it modifies the current set.
-      */
-      void expand_by(const R& delta) {
-        for (size_type i=0; i< this->size(); i++) {
-          (this->_vector[i]).expand_by(delta);
-        }
-      }
-
-      /*! \brief Replaces set be an over-approximation by at most \a delta. */
-      /*  \internal This is dangerous since it modifies the current set.
-      */
-      void
-      set_precision_to_upperapproximating(const R& delta)  {
-        for (size_type i=0; i< this->size(); i++) {
-            // (this->_vector[i]).set_precision_to_upperapproximating(delta);
-        }
-      }
 
       /*! \brief Copy assignment. */
       const ListSet<R,BS>& 
@@ -266,7 +244,7 @@ namespace Ariadne {
        * current set, \a false otherwise.
        */
       bool interior_contains(const Point<R>& p) const {
-        throw(std::domain_error("ListSet::interior_contains(): Not implemented."));
+        throw(std::domain_error("Not implemented"));
         for (size_type i=0; i<this->size(); i++) {
           if ((this->_vector[i]).interior_contains(p))
             return true;
@@ -398,95 +376,27 @@ namespace Ariadne {
         this->adjoin(A);
       }
 
-      /*! \brief Stream extraction operator. */
       friend std::istream& operator>> <> (std::istream& is,
                                           ListSet<R,BS>& S);
 
-      /*! \brief Tests disjointness.
-       *
-       * Tests disjointness of two denotable sets.
-       * \param A is a denotable set.
-       * \param B is a denotable set.
-       * \return \a true if A and B are disjoint, \a false otherwise.
-       */
       friend bool disjoint <> (const ListSet<R,BS>& A,
                                const ListSet<R,BS>& B);
 
-      /*! \brief Tests intersection of interiors.
-       *
-       * Tests intersection of a denotable set with the interior of an other
-       * denotable set.
-       * \param A is a denotable set.
-       * \param B is a denotable set.
-       * \return \a true if A intersects the interior of B,
-       * \a false otherwise.
-       */
+      friend bool disjoint<> (const BS<R>& A,
+                              const ListSet<R,BS>& B);
+
       friend bool interiors_intersect<> (const ListSet<R,BS>& A,
                                          const ListSet<R,BS>& B);
 
-      /*! \brief Tests intersection of interiors.
-       *
-       * Tests intersection of a denotable set with the interior of a basic set.
-       * \param A is a basic set.
-       * \param B is a denotable set.
-       * \return \a true if A intersects the interior of B,
-       * \a false otherwise.
-       */
       friend bool interiors_intersect<> (const BS<R>& A,
                                          const ListSet<R,BS>& B);
 
-      /*! \brief Tests inclusion of interiors.
-       *
-       * Tests inclusion of a denotable set into the interior of a denotable set.
-       * \param A is a denotable set.
-       * \param B is a denotable set.
-       * \return \a true if A is a subset of the interior of B,
-       * \a false otherwise.
-       */
       friend bool inner_subset<> (const ListSet<R,BS>& A,
                                   const ListSet<R,BS>& B);
 
-      /*! \brief Tests inclusion of interiors.
-       *
-       * Tests inclusion of a rectangle into the interior of a denotable set.
-       * \param A is a rectangle.
-       * \param B is a denotable set.
-       * \return \a true if A is a subset of the interior of B,
-       * \a false otherwise.
-       */
-      friend bool inner_subset<> (const BS<R>& A,
+      friend bool subset<> (const ListSet<R,BS>& A,
                                   const ListSet<R,BS>& B);
 
-      /*! \brief Tests inclusion of interiors.
-       *
-       * Tests inclusion of a denotable set into the interior of a rectangle.
-       * \param A is a denotable set.
-       * \param B is a rectangle.
-       * \return \a true if A is a subset of the interior of B,
-       * \a false otherwise.
-       */
-      friend bool inner_subset<> (const ListSet<R,BS>& A,
-                                  const BS<R>& B);
-
-      /*! \brief Makes union of two interiors.
-       *
-       * Evalutates the union of two denotable sets.
-       * \param A is a denotable set.
-       * \param B is a denotable set.
-       * \return The union of A and B.
-       */
-      //FIXME: Compiler doesn't like this
-      //friend ListSet<R,BS> join<> (const ListSet<R,BS>& A,
-      //                             const ListSet<R,BS>& B);
-
-      /*! \brief Makes intersection of two interiors.
-       *
-       * Evalutates the closure of the intersection of a denotable set
-       * with the interiors of an other denotable sets.
-       * \param A is a denotable set.
-       * \param B is a denotable set.
-       * \return The closure of the intersection of A with the interiors of B.
-       */
       friend ListSet<R,BS>
       regular_intersection <> (const ListSet<R,BS>& A,
                                const ListSet<R,BS>& B);
@@ -494,260 +404,92 @@ namespace Ariadne {
 
 
 
+    /*! \brief Tests disjointness.
+     *
+     * Tests disjointness of two denotable sets.
+     * \param A is a denotable set.
+     * \param B is a denotable set.
+     * \return \a true if A and B are disjoint, \a false otherwise.
+     */
     template <typename R, template<class> class BS>
     bool
     disjoint (const ListSet<R,BS>& A,
-              const ListSet<R,BS>& B)
-    {
-      if (A.dimension()!=B.dimension()) {
-        throw std::invalid_argument("The two denotable sets have different space dimensions.");
-      }
+              const ListSet<R,BS>& B);
 
-      size_type i,j;
-      for (i=0; i<A.size() ; i++) {
-        for (j=0; j<B.size() ; j++) {
-          if (!disjoint(A[i],B[j])) { return false; }
-        }
-      }
-
-      return true;
-    }
-
+    /*! \brief Tests intersection of interiors.
+     *
+     * Tests intersection of a denotable set with the interior of an other
+     * denotable set.
+     * \param A is a denotable set.
+     * \param B is a denotable set.
+     * \return \a true if A intersects the interior of B,
+     * \a false otherwise.
+     */
     template <typename R, template <typename> class BS>
     bool
     interiors_intersect(const ListSet<R,BS>& A,
-                        const ListSet<R,BS>& B)
-    {
-      if (A.dimension()!=B.dimension()) {
-        throw std::invalid_argument("The two denotable sets have different space dimensions.");
-      }
+                        const ListSet<R,BS>& B);
 
-      size_type i,j;
 
-      for (i=0; i<A.size() ; i++) {
-        for (j=0; j<B.size() ; j++) {
-          if (interiors_intersect(A[i],B[j])) { return true; }
-        }
-      }
-
-      return false;
-    }
-
-    template <typename R, template <typename> class BS>
-    bool
-    interiors_intersect(const Rectangle<R>& rect,
-                        const ListSet<R,BS>& A)
-    {
-      if (A.dimension()!=rect.dimension()) {
-        throw std::invalid_argument(
-          "The denotable set and the rectangle have different space dimensions.");
-      }
-
-      for (size_type i=0; i<A.size() ; i++) {
-        if (intersects_interior(rect,A[i])) { return true; }
-      }
-
-      return false;
-    }
-
-    template <typename R, template <typename> class BS>
-    bool
-    interiors_intersect(const ListSet<R,BS>& A,
-                        const Rectangle<R>& rect)
-    {
-      if (A.dimension()!=rect.dimension()) {
-        throw std::invalid_argument(
-          "The denotable set and the rectangle have different space dimensions.");
-      }
-
-      for (size_type i=0; i<A.size() ; i++) {
-        if (intersects_interior(A[i],rect)) { return true; }
-      }
-
-      return false;
-    }
-
+    /*! \brief Tests inclusion of interiors.
+     *
+     * Tests inclusion of a denotable set into the interior of a denotable set.
+     * \param A is a denotable set.
+     * \param B is a denotable set.
+     * \return \a true if A is a subset of the interior of B,
+     * \a false otherwise.
+     */
     template <typename R, template <typename> class BS>
     bool
     inner_subset(const ListSet<R,BS>& A,
-                 const ListSet<R,BS>& B)
-    {
-      if (A.dimension()!=B.dimension()) {
-        throw std::invalid_argument("The two denotable sets have different space dimensions.");
-      }
-
-      for (size_type i=0; i<A.size() ; i++) {
-        if (!inner_subset(A[i], B)) { return false; }
-      }
-
-      return true;
-    }
-
-    template <typename R, template <typename> class BS>
-    bool
-    inner_subset(const Rectangle<R>& rect,
-                 const ListSet<R,BS>& A)
-    {
-      #ifdef DEBUG
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-      #endif
-
-      if (A.dimension()!=rect.dimension()) {
-        throw std::invalid_argument(
-          "The denotable set and the rectangle have different space dimensions.");
-      }
-
-      /* FIXME: TO REIMPLEMENT */
-      for (size_type i=0; i<A.size() ; i++) {
-        if (subset_of_interior(rect,A[i])) {
-          #ifdef DEBUG
-            std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-          #endif
-          return true;
-        }
-      }
-
-      #ifdef DEBUG
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-      #endif
-
-      return false;
-    }
-
-    template <typename R, template <typename> class BS>
-    bool
-    inner_subset(const ListSet<R,BS>& A,
-                 const Rectangle<R>& rect)
-    {
-      #ifdef DEBUG
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-      #endif
-
-      if (A.dimension()!=rect.dimension()) {
-        throw std::invalid_argument(
-          "The denotable set and the rectangle have different space dimensions.");
-      }
-
-      for (size_type i=0; i<A.size() ; i++) {
-        if (!subset_of_interior(A[i], rect)) {
-          #ifdef DEBUG
-            std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-          #endif
-          return false;
-        }
-      }
-
-      #ifdef DEBUG
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-      #endif
-
-      return true;
-    }
+                 const ListSet<R,BS>& B);
 
 
+
+
+   /*! \brief Tests inclusion of interiors.
+     *
+     * Tests inclusion of a denotable set into the interior of a rectangle.
+     * \param A is a denotable set.
+     * \param B is a rectangle.
+     * \return \a true if A is a subset of the interior of B,
+     * \a false otherwise.
+     */
     template <typename R, template <typename> class BS>
     bool
     subset(const ListSet<R,BS>& A,
-           const ListSet<R,BS>& B)
-    {
-      if (A.dimension()!=B.dimension()) {
-        throw std::invalid_argument("The two denotable sets have different space dimensions.");
-      }
-
-      throw std::runtime_error("Not implemented");
-    }
-
+           const ListSet<R,BS>& B);
+    
+    
+    /*! \brief Makes union of two interiors.
+     *
+     * Evalutates the union of two denotable sets.
+     * \param A is a denotable set.
+     * \param B is a denotable set.
+     * \return The union of A and B.
+     */
+    //FIXME: Compiler doesn't like this
+    //friend ListSet<R,BS> join<> (const ListSet<R,BS>& A,
+    //                             const ListSet<R,BS>& B);
     template <typename R, template <typename> class BS>
     ListSet<R,BS>
     join(const ListSet<R,BS>& A,
-         const ListSet<R,BS>& B)
-    {
-      #ifdef DEBUG
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-      #endif
+         const ListSet<R,BS>& B);
+    
 
-      if (A.dimension()!=B.dimension()) {
-        throw std::invalid_argument("The two denotable sets have different space dimensions.");
-      }
-
-      ListSet<R,BS> ds_union(A);
-
-      ds_union.inplace_union(B);
-
-      #ifdef DEBUG
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-      #endif
-
-      return ds_union;
-    }
-
+    /*! \brief Makes intersection of two interiors.
+     *
+     * Evalutates the closure of the intersection of a denotable set
+     * with the interiors of an other denotable sets.
+     * \param A is a denotable set.
+     * \param B is a denotable set.
+     * \return The closure of the intersection of A with the interiors of B.
+     */
     template <typename R, template <typename> class BS>
     ListSet<R,BS>
     regular_intersection(const ListSet<R,BS>& A,
-                         const ListSet<R,BS>& B)
-    {
-      ListSet<R,BS> ds_inter;
-      std::vector< BS<R> >& vector=ds_inter._vector;
-
-      #ifdef DEBUG
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-      #endif
-
-      if (A.dimension()!=B.dimension()) {
-        throw std::invalid_argument("The two denotable sets have different space dimensions.");
-      }
-
-      for (size_type i=0; i<A.size(); i++) {
-        for (size_type j=0; j<B.size(); j++) {
-          if (interiors_intersect(A[i],B[j])) {
-              vector.push_back(regular_intersection(A[i],B[j]));
-          }
-        }
-      }
-
-      ds_inter._dimension=A._dimension;
-
-      #ifdef DEBUG
-        std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-      #endif
-
-      return ds_inter;
-
-    }
-
-    template <typename R, template<typename> class BS>
-    std::ostream& operator<<(std::ostream& os,
-                             const ListSet<R,BS>& A)
-    {
-      os << "ListSet<" << Base::name<R>() << ",BS>(\n  ";
-      os << "[";
-      if (A.size() >0 ) {
-        os << A[0];
-      }
-      for (size_type i=1; i<A.size(); i++) {
-        os << ",\n    " << A[i];
-      }
-      os << "\n  ]\n}" << std::endl;
-      return os;
-    }
-
-    template <typename R, template<typename> class BS>
-    std::istream& operator>>(std::istream& is,
-                             ListSet<R,BS>& A)
-    {
-      std::vector< BS<R> >& vec(A._vector);
-      is >> vec;
-
-      if(vec.size()==0) {
-        A._dimension = 0;
-      }
-      else {
-        A._dimension=vec[0].dimension();
-      }
-      return is;
-    }
-
-
+                         const ListSet<R,BS>& B);
+  
   }
 }
 

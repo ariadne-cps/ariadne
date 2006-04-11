@@ -21,17 +21,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include <iosfwd>
-
+#include <iostream>
 #include <string>
 #include <sstream>
 
-#include <list>
-#include <set>
 #include <vector>
-#include <valarray>
 
-#include "../declarations.h"
+#include "parallelotope.h"
 
 #include "../utility/stlio.h"
 #include "../numeric/interval.h"
@@ -44,7 +40,6 @@
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
 #include "../geometry/list_set.h"
-#include "../geometry/parallelotope.h"
 #include "../geometry/zonotope.h"
 #include "../geometry/polyhedron.h"
 
@@ -167,9 +162,9 @@ namespace Ariadne {
         new_generators(i,j)/=2;
       }
       
-      state_type new_centre=this->centre()-column(new_generators,j)/2;
+      state_type new_centre=this->centre()-LinearAlgebra::vector<R>(column(new_generators,j)/2);
       result.adjoin(Parallelotope<R>(new_centre,new_generators));
-      new_centre=new_centre+column(new_generators,j);
+      new_centre=new_centre+LinearAlgebra::vector<R>(column(new_generators,j));
       result.adjoin(Parallelotope(new_centre,new_generators));
 
       return result;
@@ -185,7 +180,7 @@ namespace Ariadne {
       
       state_type first_centre=this->centre();
       for(size_type i=0; i!=n; ++i) {
-        first_centre=first_centre-(this->generator(i))/2;
+        first_centre=first_centre-LinearAlgebra::vector<R>((this->generator(i))/2);
       }
       
       array<index_type> lower(n,0);
@@ -294,8 +289,9 @@ namespace Ariadne {
     bool
     Parallelotope<R>::disjoint(const Rectangle<R>& r) const
     {
-      assert(this->dimension()==r.dimension());
-      dimension_type n=this->dimension();
+      const Parallelotope<R>& p=*this;
+      assert(p.dimension()==r.dimension());
+      dimension_type n=p.dimension();
       
       // Construct tableau for testing intersection of rectangle and point
       // Rectangle  a<=x<=b
@@ -315,8 +311,8 @@ namespace Ariadne {
 
       const Geometry::Point<R>& a=r.lower_corner();
       const Geometry::Point<R>& b=r.upper_corner();
-      const Geometry::Point<R>& c=this->centre();
-      const LinearAlgebra::matrix<R>& A=this->generators();
+      const Geometry::Point<R>& c=p.centre();
+      const LinearAlgebra::matrix<R>& A=p.generators();
 
       for(size_type i=0; i!=n; ++i) {
         T(i,i)=1;
@@ -364,46 +360,37 @@ namespace Ariadne {
       return result;
     }
     
-    template<typename R>
-    bool
-    Parallelotope<R>::disjoint(const Parallelotope<R>& p) const
-    {
-     return Geometry::disjoint(Polyhedron<R>(*this),Polyhedron<R>(p));
-    }
-
     template <typename R>
     Point<R> 
-    Parallelotope<R>::vertices(const size_t &i) const
+    Parallelotope<R>::vertex(const size_type& i) const
     {
       Point<R> vertex(this->centre());
-      const LinearAlgebra::matrix<R> gen=this->_generators;
+      const LinearAlgebra::matrix<R>& gen=this->_generators;
       
-      for (size_t j=0; j<gen.size1(); j++) {
-	for (size_t k=0; k<gen.size2(); k++) {
+      for (size_type j=0; j<gen.size1(); ++j) {
+        for (size_type k=0; k<gen.size2(); ++k) {
           if ((1<<k)&(i)) {
-	    vertex[j]+=gen(j,k);
-	  } else {
-	    vertex[j]-=gen(j,k);
-	  }
-	}
+            vertex[j]+=gen(j,k);
+          } 
+          else {
+            vertex[j]-=gen(j,k);
+          }
+        }
       }
- 
       return vertex;
-
     }
     
     template<typename R>
     std::vector< Point<R> > 
     Parallelotope<R>::vertices() const
     {
-      size_t vert_num=(1<<(this->_generators).size2());
+      size_type vert_num=(1<<(this->_generators).size2());
       std::vector< Point<R> > vert(1<<(this->_generators).size2());
 
       assert((this->_generators).size2()<32);
-      for (size_t i=0; i<vert_num; i++) {
-	vert[i]=this->vertices(i);
+      for (size_type i=0; i<vert_num; ++i) {
+        vert[i]=this->vertex(i);
       }
-
       return vert;
     }
     

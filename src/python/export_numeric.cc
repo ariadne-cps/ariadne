@@ -25,7 +25,7 @@
 
 #include "numeric/numerical_types.h"
 #include "numeric/arithmetic.h"
-#include "numeric/function.h"
+#include "numeric/approximation.h"
 
 #include "real_typedef.h"
 using namespace Ariadne;
@@ -88,10 +88,6 @@ inline bool le_fz(const MPFloat& f1, const Integer& f2) { return f1<=f2; }
 inline bool ge_ff(const MPFloat& f1, const MPFloat& f2) { return f1>=f2; }
 inline bool ge_fx(const MPFloat& f1, const double& f2) { return f1>=f2; }
 inline bool ge_fz(const MPFloat& f1, const Integer& f2) { return f1>=f2; }
-inline MPFloat div_approx_ff(const MPFloat f1, const MPFloat& f2, const MPFloat& e) { return div_approx(f1,f2,e);  }
-inline MPFloat div_approx_fx(const MPFloat f1, const double& f2, const MPFloat& e) { return div_approx(f1,MPFloat(f2),e);  }
-inline MPFloat div_approx_xf(const double f1, const MPFloat& f2, const MPFloat& e) { return div_approx(MPFloat(f1),f2,e);  }
-inline MPFloat div_prec_ff(const MPFloat f1, const MPFloat& f2, const int& n) { return div_approx(f1,f2,n);  }
 inline MPFloat mantissa_f(const MPFloat f) { return mantissa(f); }
 inline Integer exponent_f(const MPFloat f) { return exponent(f); }
 inline Integer precision_f(const MPFloat f) { return precision(f); }
@@ -123,10 +119,6 @@ inline bool le_dz(const Dyadic& n1, const Integer& n2) { return n1<=n2; }
 inline bool ge_dd(const Dyadic& d1, const Dyadic& d2) { return d1>=d2; }
 inline bool ge_dx(const Dyadic& d1, const double& d2) { return d1>=d2; }
 inline bool ge_dz(const Dyadic& n1, const Integer& n2) { return n1>=n2; }
-inline Dyadic div_approx_dd(const Dyadic d1, const Dyadic& d2, const Dyadic& e) { return div_approx(d1,d2,e);  }
-inline Dyadic div_approx_dx(const Dyadic d1, const double& d2, const Dyadic& e) { return div_approx(d1,Dyadic(d2),e);  }
-inline Dyadic div_approx_xd(const double d1, const Dyadic& d2, const Dyadic& e) { return div_approx(Dyadic(d1),d2,e);  }
-inline Dyadic div_prec_dd(const Dyadic d1, const Dyadic& d2, const int& n) { return div_approx(d1,d2,n);  }
 inline Dyadic mantissa_d(const Dyadic d) { return mantissa(d); }
 inline int exponent_d(const Dyadic d) { return exponent(d); }
 inline int precision_d(const Dyadic d) { return precision(d); }
@@ -280,11 +272,6 @@ void export_numeric() {
     .def("mantissa", &mantissa_d)
     .def(self_ns::str(self))
   ;
-
-  def("div_approx", &div_approx_dd);
-  def("div_approx", &div_approx_dx);
-  def("div_approx", &div_approx_xd);
-  def("div_prec", &div_prec_dd);
 
   class_<Rational>("Rational")
     .def(init<int,int>())

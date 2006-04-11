@@ -351,7 +351,7 @@ namespace Ariadne {
       Point<R> c=p.centre();
       Rectangle<R> phic=refine_flow_bounds(vf,c,b,h);
       
-      interval_vector<R> phicv=phic.position_vector();
+      interval_vector<R> phicv=phic.position_vectors();
       interval_matrix<R> zv(dphi*p.generators());
 
       IntervalParallelotope<R> ip(phicv,zv);

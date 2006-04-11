@@ -29,19 +29,14 @@
 #define _ARIADNE_SUBDIVISION_TREE_SET_H
 
 #include <iosfwd>
-#include <algorithm>
-#include <vector>
-#include <iosfwd>
 
 #include "../declarations.h"
 
 #include "../base/array.h"
 #include "../base/sequence.h"
-#include "../numeric/interval.h"
 #include "../base/binary_word.h"
 #include "../base/binary_tree.h"
 #include "../base/iterator.h"
-#include "../utility/stlio.h"
 
 #include "../geometry/rectangle.h"
 

@@ -21,8 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <iosfwd>
-
+#include <iostream>
 #include <string>
 #include <sstream>
 
@@ -48,6 +47,36 @@
 
 namespace Ariadne {
   namespace Geometry {
+    
+    template<typename R>
+    Polyhedron<R>::Polyhedron()
+      : _ppl_poly(Parma_Polyhedra_Library::EMPTY)
+    { 
+    }      
+    
+    template<typename R>
+    Polyhedron<R>::Polyhedron(size_type dim)
+      : _ppl_poly(dim, Parma_Polyhedra_Library::EMPTY)
+    { 
+    }
+    
+    template<typename R>
+    Polyhedron<R>::Polyhedron(Parma_Polyhedra_Library::Constraint_System& cs)
+      : _ppl_poly(cs)
+    { 
+    }
+    
+    template<typename R>
+    Polyhedron<R>::Polyhedron(Ariadne::LinearAlgebra::ConstraintSystem<R>& cs)
+      : _ppl_poly(Parma_Polyhedra_Library::Constraint_System(cs))
+    {
+    }
+    
+    template<typename R>
+    Polyhedron<R>::Polyhedron(Ariadne::LinearAlgebra::GeneratorSystem<R>& gen)
+      : _ppl_poly(Parma_Polyhedra_Library::Generator_System(gen)) 
+    {
+    }    
     
     template <typename R>
     Polyhedron<R>::Polyhedron(const matrix_type& A, const vector_type& b)
@@ -121,8 +150,31 @@ namespace Ariadne {
       _ppl_poly.add_constraints_and_minimize(cs);
     }
     
+    template<typename R>
+    Polyhedron<R>::Polyhedron(const Polyhedron<R>& original)
+      : _ppl_poly(original._ppl_poly)
+    {
+    }
+        
+    template<typename R>
+    Polyhedron<R>& 
+    Polyhedron<R>::operator=(const Polyhedron<R>& original) 
+    {        
+      if(this != &original) { 
+        this->_ppl_poly=original._ppl_poly; 
+      }
+      return *this;
+    }
+    
 
 
+    template <typename R>
+    size_type 
+    Polyhedron<R>::dimension() const 
+    {
+      return ((size_type)this->_ppl_poly.space_dimension());
+    }
+    
     template <typename R>
     typename Polyhedron<R>::state_list_type
     Polyhedron<R>::vertices() const 
@@ -145,15 +197,162 @@ namespace Ariadne {
       return result;
     }
     
+    /*! \brief Checks for emptyness.
+     */
+    template <typename R>
+    bool 
+    Polyhedron<R>::empty() const 
+    {
+      return (this->_ppl_poly.is_empty());
+    }
     
+    /*! \brief Makes the polyhedron empty.
+     */
+    template <typename R>
+    void 
+    Polyhedron<R>::clear() {
+      this->_ppl_poly=Parma_Polyhedra_Library::NNC_Polyhedron(this->dimension(), Parma_Polyhedra_Library::EMPTY);;
+    }
+
+    /*! \brief Tests if a Point is an element of the Polyhedron.
+     */
+    template <typename R>
+    bool 
+    Polyhedron<R>::contains(const state_type& point) const {
+      if (point.dimension()!=this->dimension()) {
+        throw std::domain_error("This object and parameter have different space dimensions");
+      }
+      Parma_Polyhedra_Library::NNC_Polyhedron p(this->_ppl_poly);
+      p.topological_closure_assign();
+      
+      return p.contains(_from_Point_to_PPL_Polyhedron(point));
+      
+    }
+    
+    /*! \brief Tests if a point is an element of the interior of the polyhedron.
+     */
+    template <typename R>
+    bool 
+    Polyhedron<R>::interior_contains(const state_type& point) const 
+    {
+      if (point.dimension()!=this->dimension()) {
+        throw std::domain_error("This object and parameter have different space dimensions");
+      }
+      return this->_ppl_poly.contains(_from_Point_to_PPL_Polyhedron(point));
+    }
+    
+    /*! \brief A rectangle containing the polyhedron. */
+    template <typename R>
+    Rectangle<R> 
+    Polyhedron<R>::bounding_box() const 
+    {
+      throw std::runtime_error("Polyhedron::bounding_box() const not implemented.");
+    }
+    
+    template <typename R>
+    Polyhedron<R> 
+    Polyhedron<R>::over_approximation(const real_type& delta) const
+    {
+      Ariadne::LinearAlgebra::ConstraintSystem<R> cs(this->_ppl_poly.constraints());
+      cs.expand_by(delta);
+      return Polyhedron(cs);
+    }
+
+    template <typename R>
+    bool 
+    disjoint(const Polyhedron<R>& A, const Polyhedron<R>& B)
+    {
+      return (A._ppl_poly).is_disjoint_from(B._ppl_poly);
+    }
+    
+    template <typename R>
+    bool
+    interiors_intersect(const Polyhedron<R>& A, const Polyhedron<R>& B)
+    {
+      return !( (A._ppl_poly).is_disjoint_from(B._interior_poly) );        
+    }
+    
+    template <typename R>
+    inline 
+    bool 
+    inner_subset(const Polyhedron<R>& A, const Polyhedron<R>& B)
+    {        
+      return (B._ppl_interior()).contains(A._ppl_poly);
+    }
+    
+    template <typename R>
+    bool 
+    subset(const Polyhedron<R>& A, const Polyhedron<R>& B)
+    {
+      return (B._ppl_poly).contains(A._ppl_poly);
+    }
+
+    template <typename R>
+    Polyhedron<R> 
+    regular_intersection(const Polyhedron<R>& A, 
+                         const Polyhedron<R>& B) 
+    {
+      Polyhedron<R> intersctn(A);        
+      intersctn._ppl_poly.intersection_assign(B._ppl_interior());
+      return intersctn;
+    }    
+    
+    template <typename R>
+    inline 
+    Polyhedron<R> 
+    intersection(const Polyhedron<R>& A, 
+                 const Polyhedron<R>& B) 
+    {
+      Polyhedron<R> intersctn(A);        
+      intersctn._ppl_poly.intersection_assign(B._ppl_poly);
+      return intersctn;
+    }
+
+    template <typename R>
+    Polyhedron<R> 
+    convex_hull(const Polyhedron<R>& A, const Polyhedron<R>& B)
+    {   
+      Polyhedron<R> chull(A);
+      chull._ppl_poly.poly_hull_assign_and_minimize(B._ppl_poly);
+      return chull;
+    }
+
+    /* FIXME: TO REIMPLEMENT */
+    template <typename R>
+    Polyhedron<R> 
+    minkowski_sum(const Polyhedron<R>& A, const Polyhedron<R>& B)
+    {
+      if ((!(A._ppl_poly).is_bounded()) || (!(B._ppl_poly).is_bounded())) {
+        throw std::domain_error("Minkosky sum is implemented for bounded polyhedra only");
+      }  
+            
+      Ariadne::LinearAlgebra::GeneratorSystem<R> gen_A(A._ppl_poly.generators());
+            
+      Polyhedron<R> sum=B;
+      Polyhedron<R> new_poly;
+            
+      for (size_type k=0; k<gen_A.number_of_points(); k++) {
+        Ariadne::LinearAlgebra::GeneratorSystem<R> gen_B(B._ppl_poly.generators());
+        for (size_type i=0; i<gen_B.space_dimension(); i++) {
+          for (size_type j=0; j<gen_B.number_of_points() ; j++) {
+            gen_B._points(i,j)+=gen_A._points(i,k);
+          }
+        }
+        new_poly._ppl_poly=Parma_Polyhedra_Library::NNC_Polyhedron(gen_B.ppl_generator_system());
+        sum=Geometry::convex_hull(sum,new_poly);
+      }      
+      return sum;
+    }
+      
 
     template <typename R>
     std::ostream& 
-    operator<<(std::ostream& os, const Polyhedron<R>& p) {
+    operator<<(std::ostream& os, const Polyhedron<R>& p) 
+    {
       os << "Polyhedron(equations=[";
       Parma_Polyhedra_Library::IO_Operators::operator<<(os,p._ppl_poly);
       os << "], vertices=";
-      os << p.vertices();
+      Utility::write_sequence(os,p.vertices().begin(),p.vertices().end());
       os << ") ";
       return os;
     }

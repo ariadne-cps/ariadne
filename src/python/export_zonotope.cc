@@ -24,10 +24,12 @@
 
 
 
-#include "geometry/rectangle.h"
-#include "geometry/list_set.h"
-#include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
+
+#include "geometry/rectangle.h"
+#include "geometry/parallelotope.h"
+#include "geometry/polyhedron.h"
+#include "geometry/list_set.h"
 
 
 #include "python/typedefs.h"

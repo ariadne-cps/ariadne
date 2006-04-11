@@ -25,6 +25,7 @@
 #include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
 #include "geometry/grid_set.h"
+#include "geometry/list_set.h"
 
 #include "evaluation/vector_field.h"
 

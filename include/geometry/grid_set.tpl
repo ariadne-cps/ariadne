@@ -22,11 +22,18 @@
  *  Foundation, Inc., 59 Templece Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "grid_set.h"
+
+#include <ostream>
+
+#include "../utility/stlio.h"
+
 #include "../base/array_operations.h"
 
+#include "../geometry/rectangle.h"
 #include "../geometry/parallelotope.h"
+#include "../geometry/list_set.h"
 #include "../geometry/partition_tree_set.h"
-#include "../geometry/grid_set.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -195,15 +202,22 @@ namespace Ariadne {
       return interiors_intersect(gr,B);
     }
     
+    /*! \brief Tests if A is a subset of the interior of B. */
+    template<typename R>
+    bool
+    inner_subset(const Rectangle<R>& A, const GridMaskSet<R>& B)
+    {
+      assert(A.dimension() == B.dimension());
+      return subset(outer_approximation(A,B.grid()),B);
+    }
+
     /*! \brief Tests if A is a subset of B. */
     template<typename R>
     bool
-    subset(const Rectangle<R>& r, const GridMaskSet<R>& B)
+    subset(const Rectangle<R>& A, const GridMaskSet<R>& B)
     {
-      assert(r.dimension() == B.dimension());
-      GridMaskSet<R> A(B.grid(),B.bounds());
-      A.adjoin(over_approximation(r,A.grid()));
-      return subset(A,B);
+      assert(A.dimension() == B.dimension());
+      return subset(over_approximation(A,B.grid()),B);
     }
 
 
@@ -477,6 +491,22 @@ namespace Ariadne {
       }
     }
 
+    template<typename R>
+    GridRectangle<R>
+    outer_approximation(const Rectangle<R>& r, const Grid<R>& g) 
+    {
+      if(r.empty()) {
+        return GridRectangle<R>(g);
+      }
+      IndexArray lower(r.dimension());
+      IndexArray upper(r.dimension());
+      for(size_type i=0; i!=r.dimension(); ++i) {
+        lower[i]=g.subdivision_upper_index(i,r.lower_bound(i))-1;
+        upper[i]=g.subdivision_lower_index(i,r.upper_bound(i))+1;
+      }
+      return GridRectangle<R>(g,lower,upper);
+    }
+    
     template<typename R>
     GridRectangle<R>
     over_approximation(const Rectangle<R>& r, const Grid<R>& g) 

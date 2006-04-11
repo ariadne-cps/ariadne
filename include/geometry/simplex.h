@@ -30,42 +30,16 @@
 #define _ARIADNE_SIMPLEX_H
 
 #include <iosfwd>
-#include <string>
-#include <sstream>
-
-#include <list>
-#include <set>
-#include <vector>
-#include <valarray>
 
 #include "../declarations.h"
 
 #include "../base/array.h"
-#include "../utility/stlio.h"
-
-#include "../linear_algebra/vector.h"
-
 #include "../geometry/point.h"
-#include "../geometry/polyhedron.h"
-#include "../geometry/list_set.h"
 
 namespace Ariadne {
   namespace Geometry {
-    template < typename R > class Simplex;
-    template < typename R, template <typename> class BS > class ListSet;
 
-    template <typename R> Simplex<R> intersection(const Simplex<R>& A, const Simplex<R>& B);
-    template <typename R> Simplex<R> regular_intersection(const Simplex<R>& A, const Simplex<R>& B);
-
-    template<typename R> bool interiors_intersect(const Simplex<R>& A, const Simplex<R>& B);
-    template<typename R> bool disjoint(const Simplex<R>& A, const Simplex<R>& B);
-    template<typename R> bool inner_subset(const Simplex<R>& A, const Simplex<R>& B);
-    template<typename R> bool subset(const Simplex<R>& A, const Simplex<R>& B);
-
-    template<typename R> bool subset_of_open_cover(const Simplex<R>& A, const ListSet<R,Simplex>& list);
-    template<typename R> bool inner_subset(const Simplex<R>& rect, const ListSet<R,Simplex>& A);
-    template<typename R> bool subset(const Simplex<R>& rect, const ListSet<R,Simplex>& A);
-    
+    /* Forward declaration of friends. */
     template<typename R> std::ostream& operator<<(std::ostream&, const Simplex<R>&);
     template<typename R> std::istream& operator>>(std::istream&, Simplex<R>&);
 
@@ -73,94 +47,28 @@ namespace Ariadne {
      */
     template <typename R>
     class Simplex {
-      /*! \brief Makes intersection */
-      friend Simplex<R> intersection <> (const Simplex<R>& A,
-                                         const Simplex<R>& B);
-
-      /*! \brief Makes intersection of interiors */
-      friend Simplex<R> regular_intersection <> (const Simplex<R>& A,
-                                                   const Simplex<R>& B);
-
-       /*! \brief Tests intersection of interiors. */
-      friend bool interiors_intersect <> (const Simplex<R>& A,
-                                          const Simplex<R>& B);
-
-       /*! \brief Tests disjointness */
-      friend bool disjoint <> (const Simplex<R>& A,
-                               const Simplex<R>& B);
-
-      /*! \brief Tests if \a A is a subset of the interior of \a B. */
-      friend bool inner_subset <> (const Simplex<R>& A,
-                                   const Simplex<R>& B);
-
-      /*! \brief Tests inclusion. */
-      friend bool subset <> (const Simplex<R>& A,
-                             const Simplex<R>& B);
-
-      /*! \brief Tests if \a A is a subset of the interior of \a DS. */
-      friend bool inner_subset <> (const Simplex<R>& A,
-                                   const ListSet<R,Ariadne::Geometry::Simplex>& B);
-
-      /*! \brief Tests if \a A is a subset of the interior of \a DS. */
-      friend bool subset <> (const Simplex<R>& A,
-                             const ListSet<R,::Ariadne::Geometry::Simplex>& B);
-
-
-      /*! \brief Tests inclusion in an open cover.
-       */
-      friend bool subset_of_open_cover <> (const Simplex<R>& A,
-                                           const ListSet<R,Ariadne::Geometry::Simplex>& list);
-
      public:
       /*! \brief The type of denotable real number used for the corners. */
       typedef R real_type;
       /*! \brief The type of denotable point contained by the simplex. */
       typedef Point<R> state_type;
+     
      private:
       /* Simplex's vertices. */
       array<state_type> _vertices;
    
      public:
       /*! \brief Default constructor constructs standard simplex of dimension \a n. */
-      Simplex(size_type n = 0)
-        : _vertices(n+1,state_type(n)) 
-      {
-        for(size_type i=0; i!=n; ++i) {
-          _vertices[i][i]=1;
-        }
-      }
+      Simplex(size_type n = 0);
     
       /*! \brief Construct from list of vertices. */
-      Simplex(const std::vector<state_type>& v)
-        : _vertices(v.begin(),v.end())
-      {
-        size_type d=_vertices.size()-1;
-        for(size_type i=0; i!=d+1; ++i) {
-          if(_vertices[i].dimension()!=d) {
-            throw std::domain_error("The the list of vertices is invalid");
-          }
-        }
-      }
-      
+      explicit Simplex(const std::vector<state_type>& v);
+     
       /*! \brief Construct from list of vertices. */
-      Simplex(const array<state_type>& v)
-        : _vertices(v.begin(),v.end())
-      {
-        size_type d=_vertices.size()-1;
-        for(size_type i=0; i!=d+1; ++i) {
-          if(_vertices[i].dimension()!=d) {
-            throw std::domain_error("The the list of vertices is invalid");
-          }
-        }
-      }
+      explicit Simplex(const array<state_type>& v);
       
       /*! \brief Construct from a string literal. */
-      explicit Simplex(const std::string& s)
-        : _vertices()
-      {
-        std::stringstream ss(s);
-        ss >> *this;
-      }
+      explicit Simplex(const std::string& s);
       
       /*! \brief Copy constructor. */
       Simplex(const Simplex<R>& original)
@@ -175,70 +83,62 @@ namespace Ariadne {
         return *this;
       }
       
-      operator Polyhedron<R> () const {
-        std::vector<state_type> vert_vec(_vertices.begin(),_vertices.end());
-        return Polyhedron<R>(vert_vec);
-      }
-      
-      /*! \brief The dimension of the Euclidean space the rectangle lies in. */
-      inline size_type dimension() const {
-        return (this->_vertices)[0].dimension();
-      }
-      
-      /*! \brief True if the rectangle is empty. */
-      inline bool empty() const {
-        throw std::domain_error("Simplex::empty() not implemented.");
-      }
-      
-      /*! \brief True if the rectangle has empty interior. */
-      inline bool empty_interior() const {
-        throw std::domain_error("Simplex::empty_interior() not implemented.");
-      }
-      
-      /*! \brief The array of vertices. */
-      inline const array<state_type>& vertices() const {
-        return this->_vertices;
-      }
-      
-      /*! \brief The @a n th vertex. */
-      inline const state_type& vertex(size_type n) const {
-        return this->_vertices[n];
-      }
-      
-      /*! \brief Tests if \a point is included into a simplex. */
-      inline bool contains(const state_type& point) const {
-        return Polyhedron<R>(*this).contains(point);
-      }
-      
-      /*! \brief Tests if \a point is included into the interior a simplex. */
-      inline bool interior_contains(const state_type& point) const {
-        return Polyhedron<R>(*this).interior_contains(point);
-      }
-    
       /*! \brief The equality operator (not implemented).
        *
        * Not currently implemented, since it requires matching the columns of 
        * the matrix of principal directions. 
        */
-      inline bool operator==(const Simplex<real_type>& A) const
+      bool operator==(const Simplex<real_type>& A) const
       {
         throw std::domain_error("Simplex::operator==(...)  not implemented");
       }
       
       /*! \brief The inequality operator */
-      inline bool operator!=(const Simplex<real_type>& A) const {
+      bool operator!=(const Simplex<real_type>& A) const {
         throw std::domain_error("Simplex::operator!=(...)  not implemented");
         return !(*this == A);
       }
       
-      friend std::ostream&
-      operator<< <> (std::ostream& os, 
-                     const Simplex<R>& r);
+      /*! \brief Convert to a polyhedron. */
+      operator Polyhedron<R> () const;
       
-      friend std::istream&
-      operator>> <> (std::istream& is, 
-                     Simplex<R>& r);
+      /*! \brief The dimension of the Euclidean space the rectangle lies in. */
+      size_type dimension() const {
+        return (this->_vertices)[0].dimension();
+      }
       
+      /*! \brief True if the rectangle is empty. */
+      bool empty() const {
+        throw std::domain_error("Simplex::empty() not implemented.");
+      }
+      
+      /*! \brief True if the rectangle has empty interior. */
+      bool empty_interior() const {
+        throw std::domain_error("Simplex::empty_interior() not implemented.");
+      }
+      
+      /*! \brief The array of vertices. */
+      const array<state_type>& vertices() const {
+        return this->_vertices;
+      }
+      
+      /*! \brief The \a n th vertex. */
+      const state_type& vertex(size_type n) const {
+        return this->_vertices[n];
+      }
+      
+      /*! \brief Tests if \a point is included into a simplex. */
+      bool contains(const state_type& point) const {
+        return Polyhedron<R>(*this).contains(point);
+      }
+      
+      /*! \brief Tests if \a point is included into the interior a simplex. */
+      bool interior_contains(const state_type& point) const {
+        return Polyhedron<R>(*this).interior_contains(point);
+      }
+    
+      friend std::ostream& operator<< <> (std::ostream& os, const Simplex<R>& r);
+      friend std::istream& operator>> <> (std::istream& is, Simplex<R>& r);
     };
     
     /*! \brief Tests disjointness */
@@ -367,15 +267,6 @@ namespace Ariadne {
       return subset(Polyhedron<R>(A),Polyhedron<R>(B));
     }
     
-
-    //*! \brief Tests inclusion in an open cover.  */
-    template <typename R>
-    inline bool subset_of_open_cover(const Simplex<R>& A,
-                              const ListSet<R,Simplex>& cover) 
-    {
-      throw std::domain_error("subset_of_open_cover(Simplex, std::vector<Simplex>) not implemented");
-    }
-
     
 
     template <typename R>

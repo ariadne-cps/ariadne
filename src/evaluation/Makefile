@@ -273,6 +273,7 @@ apply.o: apply.cc ../../include/evaluation/apply.h \
   ../../include/evaluation/../geometry/../base/array.h \
   ../../include/evaluation/../geometry/../geometry/rectangle.h \
   ../../include/evaluation/../geometry/../geometry/grid.h \
+  ../../include/evaluation/../geometry/../geometry/../numeric/arithmetic.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/lattice_set.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/../base/array.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/../base/iterator.h \
@@ -386,34 +387,45 @@ integrate.o: integrate.cc ../../include/evaluation/integrate.h \
   ../../include/evaluation/../evaluation/../evaluation/../evaluation/../linear_algebra/matrix.h \
   ../../include/evaluation/../evaluation/../evaluation/../evaluation/../linear_algebra/interval_matrix.h \
   ../../include/evaluation/../evaluation/integration_step.h \
+  ../../include/evaluation/../evaluation/../geometry/rectangle.h \
   ../../include/evaluation/../evaluation/integrate.h \
   ../../include/real_typedef.h ../../include/numeric/numerical_types.h
 
 integration_step.o: integration_step.cc \
   ../../include/evaluation/integration_step.h \
   ../../include/evaluation/../declarations.h \
+  ../../include/evaluation/../geometry/rectangle.h \
+  ../../include/evaluation/../geometry/../declarations.h \
+  ../../include/evaluation/../geometry/../numeric/arithmetic.h \
+  ../../include/evaluation/../geometry/../numeric/../numeric/numerical_types.h \
+  ../../include/evaluation/../geometry/../numeric/../numeric/../declarations.h \
+  ../../include/evaluation/../geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/evaluation/../geometry/../numeric/../numeric/../utility/stlio.h \
+  ../../include/evaluation/../geometry/../numeric/../numeric/../utility/../base/array.h \
+  ../../include/evaluation/../geometry/../numeric/../numeric/../utility/../base/../declarations.h \
+  ../../include/evaluation/../geometry/../numeric/../numeric/approximation.h \
+  ../../include/evaluation/../geometry/../numeric/../numeric/../numeric/numerical_types.h \
+  ../../include/evaluation/../geometry/../numeric/interval.h \
+  ../../include/evaluation/../geometry/../numeric/../declarations.h \
+  ../../include/evaluation/../geometry/../geometry/point.h \
+  ../../include/evaluation/../geometry/../geometry/../declarations.h \
+  ../../include/evaluation/../geometry/../geometry/../base/array.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/vector.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/../declarations.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/../numeric/integer.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/../numeric/../declarations.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/../numeric/../utility/stlio.h \
   ../../include/evaluation/integration_step.tpl \
   ../../include/evaluation/../utility/stlio.h \
-  ../../include/evaluation/../utility/../base/array.h \
-  ../../include/evaluation/../utility/../base/../declarations.h \
   ../../include/evaluation/../base/array.h \
   ../../include/evaluation/../numeric/arithmetic.h \
-  ../../include/evaluation/../numeric/../numeric/numerical_types.h \
-  ../../include/evaluation/../numeric/../numeric/../declarations.h \
-  ../../include/evaluation/../numeric/../numeric/../numeric/dyadic.h \
-  ../../include/evaluation/../numeric/../numeric/../utility/stlio.h \
-  ../../include/evaluation/../numeric/../numeric/approximation.h \
-  ../../include/evaluation/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/evaluation/../numeric/function.h \
   /ufs/collins/include/mpfr.h \
+  ../../include/evaluation/../numeric/../numeric/numerical_types.h \
   ../../include/evaluation/../numeric/interval.h \
-  ../../include/evaluation/../numeric/../declarations.h \
   ../../include/evaluation/../linear_algebra/vector.h \
-  ../../include/evaluation/../linear_algebra/../declarations.h \
-  ../../include/evaluation/../linear_algebra/../numeric/integer.h \
-  ../../include/evaluation/../linear_algebra/../numeric/../declarations.h \
-  ../../include/evaluation/../linear_algebra/../numeric/../utility/stlio.h \
   ../../include/evaluation/../linear_algebra/interval_vector.h \
+  ../../include/evaluation/../linear_algebra/../declarations.h \
   ../../include/evaluation/../linear_algebra/../numeric/interval.h \
   ../../include/evaluation/../linear_algebra/../linear_algebra/vector.h \
   ../../include/evaluation/../linear_algebra/zonotopic_vector.h \
@@ -426,14 +438,6 @@ integration_step.o: integration_step.cc \
   ../../include/evaluation/../linear_algebra/../linear_algebra/../numeric/interval.h \
   ../../include/evaluation/../linear_algebra/matrix.h \
   ../../include/evaluation/../linear_algebra/interval_matrix.h \
-  ../../include/evaluation/../geometry/rectangle.h \
-  ../../include/evaluation/../geometry/../declarations.h \
-  ../../include/evaluation/../geometry/../numeric/arithmetic.h \
-  ../../include/evaluation/../geometry/../numeric/interval.h \
-  ../../include/evaluation/../geometry/../geometry/point.h \
-  ../../include/evaluation/../geometry/../geometry/../declarations.h \
-  ../../include/evaluation/../geometry/../geometry/../base/array.h \
-  ../../include/evaluation/../geometry/../geometry/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/parallelotope.h \
   ../../include/evaluation/../geometry/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/../linear_algebra/matrix.h \

@@ -40,9 +40,11 @@ namespace Ariadne {
 
     template<typename R>
     GridRectangle<R>::GridRectangle(const Grid<R>& g)
-      : _grid(g), _position()
+      : _grid(g), _position(g.dimension())
     { 
       //std::cerr << "GridRectangle<R>::GridRectangle(const Grid<R>& g)" << std::endl;
+      _position.set_lower_bound(0,1);
+      _position.set_upper_bound(0,0);
     }
 
     template<typename R>
@@ -516,7 +518,7 @@ namespace Ariadne {
     GridRectangle<R>
     over_approximation(const Rectangle<R>& r, const Grid<R>& g) 
     {
-      //std::cerr << "over_approximation(const Rectangle<R>& r, const Grid<R>& g)" << std::endl;
+      //std::cerr << "over_approximation<" << name<R>() << ">(const Rectangle<R>& r, const Grid<R>& g)" << std::endl;
       
       if(r.empty()) {
         return GridRectangle<R>(g);

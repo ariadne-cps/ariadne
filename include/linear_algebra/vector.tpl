@@ -25,6 +25,9 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
+#include <exception>
+
 #include "../utility/stlio.h"
 
 namespace Ariadne {
@@ -32,9 +35,9 @@ namespace Ariadne {
 
     template <typename R>
     vector<R>::vector(const std::string& s)
-      : _Base(0)
+      : _Base(1)
     {  
-      std::stringstream ss(s); 
+      std::istringstream ss(s); 
       ss >> *this; 
     }      
 
@@ -59,7 +62,7 @@ namespace Ariadne {
     {
       std::vector<R> stdvec;
       is >> stdvec;
-      v.resize(stdvec.size());
+      v=vector<R>(stdvec.size());
       for(size_type i=0; i!=v.size(); ++i) {
         v(i)=stdvec[i];
       }

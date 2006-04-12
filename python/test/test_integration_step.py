@@ -28,6 +28,8 @@ from ariadne.geometry import *
 from ariadne.linear_algebra import *
 import sys
 
+Real.__repr__=Real.__str__
+
 def plot(fn,bb,set):
   eps=EpsPlot(fn+".eps",bb)
   eps.set_fill_colour("green")
@@ -39,6 +41,8 @@ def plot(fn,bb,set):
 #  eps.write(set[-1])
   eps.close()
 
+
+
 bb=Rectangle("[-2,2]x[-2,2]")
 
 A=Matrix("[-0.25,-1;+1,-0.25]")
@@ -48,17 +52,21 @@ avf=AffineVectorField(A,b)
 init_rect=Rectangle("[0.96,1.04]x[0.46,0.54]")
 init_paral=Parallelotope(init_rect)
 
-Real.__repr__=Real.__str__
+print "Testing integration step of affine vector field on parallelotope"
 reach_list=[init_paral]
 step_size=Real(0.125)
 step_sizes=[step_size]
-print Rational(step_size)
+#print Rational(step_size)
 for i in range(0,128):
-  print "before:",Rational(step_size)
+  #print "before:",Rational(step_size)
   reach_list.append(integration_step(avf,reach_list[-1],step_size))
-  print Rational(step_size)
+  #print Rational(step_size)
   step_sizes.append(step_size)
   step_size=min(step_size*2,step_sizes[0])
-print Rational(step_size)
+#print Rational(step_size)
 plot("integrationstep1",bb,reach_list)
-print step_sizes, len(step_sizes)
+print len(step_sizes), "steps, sizes", step_sizes
+print "Done\n"
+
+print "Exiting"
+sys.exit()

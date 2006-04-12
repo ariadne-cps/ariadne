@@ -200,10 +200,7 @@ namespace Ariadne {
  
     template <typename R>
     int
-    quotient(const R& x, const R& y)
-    {
-      throw std::runtime_error("quotient(): Not implemented for such type.");
-    }
+    quotient(const R& x, const R& y);
   }
 }
 

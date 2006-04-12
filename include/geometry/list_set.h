@@ -83,7 +83,8 @@ namespace Ariadne {
       typedef R real_type;
       typedef typename BS<R>::state_type state_type;
       typedef BS<R> basic_set_type;
-
+      
+      typedef BS<R> value_type;
       typedef typename std::vector<basic_set_type>::const_iterator const_iterator;
       typedef typename std::vector<basic_set_type>::iterator iterator;
 

@@ -38,6 +38,8 @@ using namespace Ariadne::Geometry;
 #include <boost/python.hpp>
 using namespace boost::python;
 
+inline RParallelotope plsg(const RParallelotopeListSet& s, int n) { return ::get_item(s,n); }
+  
 void export_list_set() {
   typedef bool (*RectLSBinPred) (const RRectangleListSet&, const RRectangleListSet&);
   typedef RRectangleListSet (*RectLSBinFun) (const RRectangleListSet&, const RRectangleListSet&);
@@ -47,7 +49,8 @@ void export_list_set() {
   typedef void (RParallelotopeListSet::* PltpLSadjPltp) (const RParallelotope&);
   typedef void (RParallelotopeListSet::* PltpLSadjPltpLS) (const RParallelotopeListSet&);
 
-  def("regular_intersection", RectLSBinFun(&regular_intersection));
+
+def("regular_intersection", RectLSBinFun(&regular_intersection));
   def("interiors_intersect", RectLSBinPred(&interiors_intersect));
   def("disjoint", RectLSBinPred(&disjoint));
   def("inner_subset", RectLSBinPred(&inner_subset));
@@ -79,7 +82,9 @@ void export_list_set() {
     .def("adjoin", PltpLSadjPltpLS(&RParallelotopeListSet::adjoin))
     .def("size", &RParallelotopeListSet::size)
     .def("__len__", &RParallelotopeListSet::size)
-    .def("__getitem__", &RParallelotopeListSet::get, return_value_policy<copy_const_reference>())
+//    .def("__getitem__", &RParallelotopeListSet::get, return_value_policy<copy_const_reference>())
+//    .def("__getitem__", &get_item<RParallelotopeListSet>)
+    .def("__getitem__", &plsg)
     .def("__setitem__", &RParallelotopeListSet::set)
     .def("__iter__", iterator<RParallelotopeListSet>())
     .def(self_ns::str(self))    // __self_ns::str__

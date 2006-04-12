@@ -49,6 +49,10 @@ namespace Base {}
  */
 namespace Iterator {}
   
+/*! \brief Numerical types, arithmetic, real functions and interval functions.
+ */
+namespace Numeric {}
+  
 /*! \brief Functions for linear algebra.
  */
 namespace LinearAlgebra {}

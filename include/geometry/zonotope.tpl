@@ -389,7 +389,7 @@ namespace Ariadne {
     void 
     Zonotope<R>::compute_linear_inequalities(matrix_type& A, vector_type& b) const
     {
-      assert(false);
+      throw std::runtime_error("Zonotope<R>::compute_linear_inequalities(matrix_type&, vector_type&) const not implemented");
       using namespace Ariadne::LinearAlgebra;
      
       const matrix_type &gen=this->_generators;

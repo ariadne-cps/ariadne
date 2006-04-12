@@ -87,7 +87,7 @@ namespace Ariadne {
        * The optimization problem is 
        * \f[ \max c^T x +v \quad \textrm{s.t.} \quad Ax+s=b,\ x,s\geq 0 \f]
        * The variables \f$s\f$ are the <em>slack variables</em>, and a feasible 
-       * solution is given \f[ \max c^T x +v \quad \textrm{s.t.} \quad Ax+s=b,\ x,s\geq 0 \f\]
+       * solution is given \f[ \max c^T x +v \quad \textrm{s.t.} \quad Ax+s=b,\ x,s\geq 0 \f]
        */
       explicit LinearProgram(const matrix_type& T);
     

@@ -136,7 +136,9 @@ namespace Ariadne {
           bs=integrate(vf,bs,h,h);
           finish.adjoin(bs);
         }
+#ifdef DEBUG
         std::cerr << "finish.size()=" << finish.size() << "  ";
+#endif
         start.clear();
         for(typename Geometry::ListSet<R,BS>::const_iterator iter=finish.begin(); iter!=finish.end(); ++iter) {
           BS<R> bs=*iter;
@@ -147,7 +149,9 @@ namespace Ariadne {
             start.adjoin(bs);
           }
         }
+#ifdef DEBUG
         std::cerr << "start.size()=" << start.size() << "\n";
+#endif
         finish.clear();
         t-=h;
       }
@@ -191,7 +195,9 @@ namespace Ariadne {
       }
       
       while(t!=0) {
+#ifdef DEBUG
         std::cerr << "time left=" << t << "  stepsize=" << h << "  sets in list=" << start_set.size() << "\n";
+#endif
         h=min(t,h);
         for(typename ListSet<R,Parallelotope>::const_iterator iter=start_set.begin(); iter!=start_set.end(); ++iter) {
           const VectorField<R>& vf=vector_field;
@@ -204,7 +210,9 @@ namespace Ariadne {
         for(typename ListSet<R,Parallelotope>::const_iterator iter=finish_set.begin(); iter!=finish_set.end(); ++iter) {
           const Parallelotope<R>& p=*iter;
           if(p.radius()>spacial_tolerance) {
+#ifdef DEBUG
             std::cerr << "Splitting, radius=" << p.radius() << "\n" << p << "\n";
+#endif
             GridCellListSet<R> p_approx=over_approximation(p,g);
             mask_set.adjoin(p_approx);
           }
@@ -260,7 +268,9 @@ namespace Ariadne {
         while(t>0) {
           h=min(t,h);
           result.adjoin(over_approximation_of_intersection(reach_step(vf,p,h),bb,g));
+          R hr=h;
           p=integration_step(vf,p,h);
+          assert(h==hr); // Check integration step uses same time step as reach step.
           t=t-h;
           //h=max(R(2*h),step_size);
         }

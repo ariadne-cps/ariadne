@@ -33,7 +33,13 @@
 namespace Ariadne {
   namespace Evaluation {
    
-
+    template<typename R>
+    class IntegrationParameters {
+     public:
+      IntegrationParameters(const R& h, const R& dx, const R& nh);
+    };
+    
+    
     /*! \brief Integrate a rectangle. */
     template<typename R>
     Geometry::Rectangle<R> 

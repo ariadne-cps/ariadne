@@ -358,6 +358,7 @@ export_list_set.o: export_list_set.cc ../../include/geometry/rectangle.h \
   ../../include/geometry/../base/array.h \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/grid.h \
+  ../../include/geometry/../geometry/../numeric/arithmetic.h \
   ../../include/geometry/../geometry/../geometry/lattice_set.h \
   ../../include/geometry/../geometry/../geometry/../base/array.h \
   ../../include/geometry/../geometry/../geometry/../base/iterator.h \
@@ -445,7 +446,8 @@ export_grid_set.o: export_grid_set.cc \
   ../../include/geometry/../geometry/../geometry/rectangle.h \
   ../../include/python/typedefs.h ../../include/python/../real_typedef.h \
   ../../include/python/../numeric/numerical_types.h \
-  ../../include/python/../declarations.h
+  ../../include/python/../declarations.h \
+  ../../include/python/python_utilities.h
 
 export_partition_tree_set.o: export_partition_tree_set.cc \
   ../../include/base/binary_word.h ../../include/base/../declarations.h \
@@ -476,6 +478,7 @@ export_partition_tree_set.o: export_partition_tree_set.cc \
   ../../include/geometry/../base/array.h \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/grid.h \
+  ../../include/geometry/../geometry/../numeric/arithmetic.h \
   ../../include/geometry/../geometry/../geometry/lattice_set.h \
   ../../include/geometry/../geometry/../geometry/../base/array.h \
   ../../include/geometry/../geometry/../geometry/../base/iterator.h \
@@ -546,6 +549,7 @@ export_postscript_output.o: export_postscript_output.cc \
   ../../include/geometry/grid_set.h \
   ../../include/geometry/../base/array.h \
   ../../include/geometry/../geometry/grid.h \
+  ../../include/geometry/../geometry/../numeric/arithmetic.h \
   ../../include/geometry/../geometry/../geometry/lattice_set.h \
   ../../include/geometry/../geometry/../geometry/../base/array.h \
   ../../include/geometry/../geometry/../geometry/../base/iterator.h \
@@ -838,6 +842,7 @@ export_apply.o: export_apply.cc ../../include/geometry/rectangle.h \
   ../../include/geometry/../base/array.h \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/grid.h \
+  ../../include/geometry/../geometry/../numeric/arithmetic.h \
   ../../include/geometry/../geometry/../geometry/lattice_set.h \
   ../../include/geometry/../geometry/../geometry/../base/array.h \
   ../../include/geometry/../geometry/../geometry/../base/iterator.h \
@@ -901,6 +906,7 @@ export_integrate.o: export_integrate.cc \
   ../../include/geometry/../base/array.h \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/grid.h \
+  ../../include/geometry/../geometry/../numeric/arithmetic.h \
   ../../include/geometry/../geometry/../geometry/lattice_set.h \
   ../../include/geometry/../geometry/../geometry/../base/array.h \
   ../../include/geometry/../geometry/../geometry/../base/iterator.h \
@@ -920,6 +926,7 @@ export_integrate.o: export_integrate.cc \
   ../../include/evaluation/../linear_algebra/interval_vector.h \
   ../../include/evaluation/../linear_algebra/interval_matrix.h \
   ../../include/evaluation/integration_step.h \
+  ../../include/evaluation/../geometry/rectangle.h \
   ../../include/evaluation/integrate.h ../../include/python/typedefs.h \
   ../../include/python/../real_typedef.h \
   ../../include/python/../numeric/numerical_types.h \

@@ -115,7 +115,7 @@ namespace Ariadne {
      public:
       typedef R real_type;
       typedef Point<R> state_type;
-
+      
       /*!\brief Construct from a grid and an unit grid cell. */
       GridCell(const Grid<R>& g, const LatticeCell& pos);
 
@@ -172,6 +172,8 @@ namespace Ariadne {
 
       /*!\brief Tests if the rectangle is empty. */
       bool empty() const { return _position.empty(); }
+      /*!\brief Tests if the rectangle has empty interior. */
+      bool empty_interior() const { return _position.empty_interior(); }
 
       /*!\brief Convert to an ordinary rectangle. */
       operator Rectangle<R>() const;
@@ -234,6 +236,7 @@ namespace Ariadne {
      public:
       typedef R real_type;
       typedef Point<R> state_type;
+      typedef GridCell<R> value_type;
       typedef GridSetIterator< LatticeMaskSet::const_iterator, GridCell<R> > iterator;
       typedef GridSetIterator< LatticeMaskSet::const_iterator, GridCell<R> > const_iterator;
 
@@ -418,6 +421,7 @@ namespace Ariadne {
      public:
       typedef R real_type;
       typedef Point<R> state_type;
+      typedef GridCell<R> value_type;
       typedef GridSetIterator< LatticeCellListSet::const_iterator, GridCell<R> > iterator;
       typedef GridSetIterator< LatticeCellListSet::const_iterator, GridCell<R> > const_iterator;
 
@@ -511,6 +515,7 @@ namespace Ariadne {
      public:
       typedef R real_type;
       typedef Point<R> state_type;
+      typedef GridRectangle<R> value_type;
       typedef GridSetIterator< LatticeRectangleListSet::const_iterator, GridRectangle<R> > iterator;
       typedef GridSetIterator< LatticeRectangleListSet::const_iterator, GridRectangle<R> > const_iterator;
 

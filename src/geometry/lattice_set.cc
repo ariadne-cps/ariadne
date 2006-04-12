@@ -74,6 +74,20 @@ namespace Ariadne {
         return true;
       }
       for(dimension_type i=0; i!=this->dimension(); ++i) {
+        if(this->lower_bound(i)>this->upper_bound(i)) {
+          return true;
+        }
+      }
+      return false;
+    }
+    
+    bool 
+    LatticeRectangle::empty_interior() const
+    {
+      if(this->dimension()==0) {
+        return true;
+      }
+      for(dimension_type i=0; i!=this->dimension(); ++i) {
         if(this->lower_bound(i)>=this->upper_bound(i)) {
           return true;
         }

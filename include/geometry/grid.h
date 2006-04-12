@@ -32,6 +32,7 @@
 
 #include "../declarations.h"
 #include "../base/array.h"
+#include "../numeric/arithmetic.h"
 #include "../geometry/lattice_set.h"
 
 namespace Ariadne {
@@ -226,7 +227,7 @@ namespace Ariadne {
 
       /*! \brief The index of interval in dimension \a d index containing \a x. */
       virtual index_type subdivision_interval(dimension_type d, const real_type& x) const {
-        index_type result = quotient(x,_subdivision_lengths[d]);
+        index_type result = Numeric::quotient(x,_subdivision_lengths[d]);
         return result;
       }
 

@@ -47,23 +47,23 @@ namespace Ariadne {
       size_t pos;
       double radiant;
     } radiant_pointer_type;
-	  
+
     inline bool
     is_smaller_than(const radiant_pointer_type &a, 
-		    const radiant_pointer_type &b) {
+                    const radiant_pointer_type &b) {
       return (a.radiant<b.radiant);
     }
    
     template <typename R>
     std::vector< Geometry::Point<R> >
     order_around_a_point(const std::vector< Geometry::Point<R> > &vertices, 
-		    const Geometry::Point<R> &centre)
+                         const Geometry::Point<R> &centre)
     {
       std::vector< LinearAlgebra::vector<R> > vert_pos(vertices.size());
       
       for (size_t i=0; i< vertices.size(); i++) {
-	vert_pos[i]=vertices[i].position_vector()-
-				centre.position_vector();
+        vert_pos[i]=vertices[i].position_vector()-
+                         centre.position_vector();
       }
       
       radiant_pointer_type pointers[vertices.size()];
@@ -73,17 +73,17 @@ namespace Ariadne {
       
       for (size_t i=0; i< vert_pos.size(); i++) {
         pointers[i].pos=i;
-	if (vert_pos[i](1)==0) {
-	  if (vert_pos[i](0) >0)
+        if (vert_pos[i](1)==0) {
+          if (vert_pos[i](0) >0)
             pointers[i].radiant=acos(0.0);
-	  else
+          else
             pointers[i].radiant=-acos(0.0);
-	} else {
-	  tangent_R=vert_pos[i](0)/vert_pos[i](1);
-	  tangent=convert_to<double>(tangent_R);
-	  pointers[i].radiant=atan(tangent);
+        } else {
+          tangent_R=vert_pos[i](0)/vert_pos[i](1);
+          tangent=convert_to<double>(tangent_R);
+          pointers[i].radiant=atan(tangent);
 	
-	  if (vert_pos[i](1) <0)
+          if (vert_pos[i](1) <0)
             pointers[i].radiant+=acos(-1.0);
         }
       }
@@ -94,7 +94,7 @@ namespace Ariadne {
       std::vector< Geometry::Point<R> > new_vector(vertices.size()); 
    
       for (size_t i=0; i< vertices.size(); i++) {
-	new_vector[i]=vertices[pointers[i].pos];
+        new_vector[i]=vertices[pointers[i].pos];
       }
 
       return new_vector;
@@ -254,11 +254,11 @@ namespace Ariadne {
    
       ordered_vertices=order_around_a_point(vertices,baricentre);
 
-      eps << ordered_vertices[0][0] << ' ' << ordered_vertices[0][1] << 
-	      " moveto\n";
+      eps << ordered_vertices[0][0] << ' ' << ordered_vertices[0][1] 
+          << " moveto\n";
       for (size_t i=1; i< ordered_vertices.size(); i++) {
-        eps << ordered_vertices[i][0] << ' ' << ordered_vertices[i][1] << 
-	      " lineto\n";
+        eps << ordered_vertices[i][0] << ' ' << ordered_vertices[i][1] 
+            << " lineto\n";
       }
       return eps;
     }
@@ -285,7 +285,7 @@ namespace Ariadne {
     epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::Rectangle<R>& r) 
     {
-      assert(r.dimension()==2);
+      assert(r.dimension()>=2);
 
       if(eps.fill_style) {
         trace(eps,r);

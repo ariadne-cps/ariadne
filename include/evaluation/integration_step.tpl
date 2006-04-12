@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+//#define DEBUG
+
 #include <iosfwd>
 #include <string>
 #include <sstream>
@@ -126,6 +128,10 @@ namespace Ariadne {
     }
     
     
+    
+    
+    
+    
     template<typename R>
     bool
     check_flow_bounds(const Evaluation::VectorField<R>& vf,
@@ -142,27 +148,23 @@ namespace Ariadne {
     Geometry::Rectangle<R>
     compute_flow_bounds(const Evaluation::VectorField<R>& vf,
                         const Geometry::Rectangle<R>& r,
-                        const R& h)
+                        const R& h,
+                        const unsigned int& maximum_iterations)
     {
 #ifdef DEBUG
-      std::cerr << "compute_flow_bounds(VectorField<R>, Rectangle<R>, R)\n";
+      std::cerr << "compute_flow_bounds(VectorField<R>, Rectangle<R>, R, uint)\n";
+      std::cerr << "r=" << r << "  h=" << h << "  max_iter=" << maximum_iterations << std::endl;
 #endif
 
       using namespace Geometry;
       typedef typename numerical_traits<R>::field_extension_type F;
-      uint max_iterations=16;
       uint iteration=0;
       R multiplier=1.125;
       F t=h;
-      Rectangle<R> reach=(vf.dimension());
+      Rectangle<R> reach(vf.dimension());
       Rectangle<R> bounds(vf.dimension());
       reach=r;
       
-#ifdef DEBUG
-      std::cerr << h << " " << r << std::endl;
-      std::cerr << t << " " << reach << std::endl;
-#endif
-
       while(t>0) {
         bounds=reach+Interval<R>(0,multiplier*h)*vf.apply(reach);
         LinearAlgebra::interval_vector<R> df=vf.apply(bounds);
@@ -180,10 +182,10 @@ namespace Ariadne {
         t-=dt;
         
 #ifdef DEBUG
-        std::cerr << t << " " << reach << std::endl;
+        std::cerr << "t=" << convert_to<double>(t) << "  reach="  << reach << std::endl;
 #endif
         ++iteration;
-        if(iteration==max_iterations) {
+        if(iteration==maximum_iterations) {
           throw std::runtime_error("Cannot find bounding box for flow");
         }
       }
@@ -200,29 +202,21 @@ namespace Ariadne {
       std::cerr << "estimate_flow_bounds" << std::endl;
 #endif
 
-      using namespace Geometry;
-      Rectangle<R> estimate(vf.dimension());
-      Rectangle<R> bounds(vf.dimension());
-
-      estimate=r+Interval<R>(0,2*h)*vf.apply(r);
+      unsigned int max_iterations=16;
       
-      bounds=r+Interval<R>(0,h)*vf.apply(estimate);
-      
+      Geometry::Rectangle<R> bounds(vf.dimension());
+      while(bounds.empty_interior()) {
+        try {
+          bounds=compute_flow_bounds(vf,r,h,max_iterations);
+        }
+        catch(std::runtime_error) { 
+          h/=2;
+          max_iterations*=2;
+        }
+      }
 #ifdef DEBUG
-      std::cerr << h << " " << r << std::endl;
-      std::cerr << LinearAlgebra::interval_vector<R>(Interval<R>(0,2*h)*vf.apply(r)) << std::endl;
-      std::cerr << "estimate=" << estimate << std::endl;
       std::cerr << "bounds=" << bounds << std::endl;
 #endif
-      while(!subset(bounds,estimate)) {
-        h=h/2;
-        estimate=bounds;
-        bounds=r+Interval<R>(0,h)*vf.apply(estimate);
-#ifdef DEBUG
-        std::cerr << h << " " << bounds << " " << estimate << std::endl;
-#endif
-      }
-      assert(subset(r+Interval<R>(0,h)*vf.apply(bounds),bounds));
       return bounds;
     }
     
@@ -344,7 +338,7 @@ namespace Ariadne {
 
       l=max(l,R(1));
       
-      std::cerr << "integration_step(): the varaible l is useless!" << std::endl;
+      //integration_step(): the varaible l is useless!
       
       interval_matrix<R> hdf=h*df;
       interval_matrix<R> dphi=exp(hdf);

@@ -165,6 +165,8 @@ namespace Ariadne {
       dimension_type dimension() const { return this->_lower.size(); }
       /*!\brief Returns true if the lattice rectangle is empty. */
       bool empty() const;
+      /*!\brief Returns true if the lattice rectangle has empty interior. */
+      bool empty_interior() const;
       
 
       /*!\brief The \a i th interval. */

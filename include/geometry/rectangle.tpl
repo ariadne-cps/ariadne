@@ -34,6 +34,7 @@
 #include "rectangle.h"
 
 #include "../base/binary_word.h" 
+#include "../base/array.h" 
 #include "../linear_algebra/interval_vector.h" 
 #include "../geometry/lattice_set.h" 
 #include "../geometry/list_set.h" 
@@ -44,10 +45,31 @@ namespace Ariadne {
 
     template <typename R>
     Rectangle<R>::Rectangle(const std::string& s)
-      : _lower_corner(), _upper_corner()
+      : _lower_corner(1), _upper_corner(1)
     {
       std::stringstream ss(s);
       ss >> *this;
+    }
+    
+    /*! \brief Construct from an array of intervals. */
+    template <typename R>
+    Rectangle<R>::Rectangle(const array< Interval<real_type> >& a)
+      : _lower_corner(a.size()), _upper_corner(a.size())
+    {
+      for(dimension_type i=0; i!=a.size(); ++i) {
+        this->_lower_corner[i] = a[i].lower();
+        this->_upper_corner[i] = a[i].upper();
+      }
+    }
+    
+    template <typename R>
+    Rectangle<R>::Rectangle(const std::vector< Interval<real_type> >& v)
+      : _lower_corner(v.size()), _upper_corner(v.size())
+    {
+      for(dimension_type i=0; i!=v.size(); ++i) {
+        this->_lower_corner[i] = v[i].lower();
+        this->_upper_corner[i] = v[i].upper();
+      }
     }
     
     template <typename R>
@@ -57,6 +79,19 @@ namespace Ariadne {
       for(dimension_type i=0; i!=this->dimension(); ++i) {
         this->_lower_corner[i]=iv[i].lower();
         this->_upper_corner[i]=iv[i].upper();
+      }
+    }
+      
+    template <typename R>
+    Rectangle<R>::Rectangle(const state_type& p1, const state_type& p2)
+      : _lower_corner(p1.dimension()), _upper_corner(p2.dimension())
+    {
+      if (p1.dimension()!=p2.dimension()) {
+        throw std::domain_error("The parameters have different space dimensions");
+      }
+      for (size_type i=0; i!=this->dimension(); ++i) {
+        this->_lower_corner[i]=std::min(p1[i],p2[i]);
+        this->_upper_corner[i]=std::max(p1[i],p2[i]);
       }
     }
       
@@ -438,7 +473,7 @@ namespace Ariadne {
         if(is) {
           is.putback(c);
         }
-        r=Rectangle<R>(v.size(),&v[0]);
+        r=Rectangle<R>(v.begin(),v.end());
         /* Representation as list of intervals (deprecated) */ 
       /*
         std::vector< Interval > v;

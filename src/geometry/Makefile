@@ -67,6 +67,7 @@ rectangle.o: rectangle.cc ../../include/geometry/rectangle.h \
   ../../include/geometry/rectangle.tpl ../../include/geometry/rectangle.h \
   ../../include/geometry/../base/binary_word.h \
   ../../include/geometry/../base/../declarations.h \
+  ../../include/geometry/../base/array.h \
   ../../include/geometry/../linear_algebra/interval_vector.h \
   ../../include/geometry/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../numeric/interval.h \
@@ -84,6 +85,7 @@ rectangle.o: rectangle.cc ../../include/geometry/rectangle.h \
   ../../include/geometry/../geometry/../geometry/grid.h \
   ../../include/geometry/../geometry/../geometry/../declarations.h \
   ../../include/geometry/../geometry/../geometry/../base/array.h \
+  ../../include/geometry/../geometry/../geometry/../numeric/arithmetic.h \
   ../../include/geometry/../geometry/../geometry/../geometry/lattice_set.h \
   ../../include/geometry/../geometry/../geometry/lattice_set.h \
   ../../include/real_typedef.h ../../include/numeric/numerical_types.h
@@ -306,6 +308,7 @@ list_set.o: list_set.cc ../../include/geometry/rectangle.tpl \
   ../../include/geometry/../geometry/../linear_algebra/../numeric/../utility/stlio.h \
   ../../include/geometry/../base/binary_word.h \
   ../../include/geometry/../base/../declarations.h \
+  ../../include/geometry/../base/array.h \
   ../../include/geometry/../linear_algebra/interval_vector.h \
   ../../include/geometry/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../numeric/interval.h \
@@ -323,6 +326,7 @@ list_set.o: list_set.cc ../../include/geometry/rectangle.tpl \
   ../../include/geometry/../geometry/../geometry/grid.h \
   ../../include/geometry/../geometry/../geometry/../declarations.h \
   ../../include/geometry/../geometry/../geometry/../base/array.h \
+  ../../include/geometry/../geometry/../geometry/../numeric/arithmetic.h \
   ../../include/geometry/../geometry/../geometry/../geometry/lattice_set.h \
   ../../include/geometry/../geometry/../geometry/lattice_set.h \
   ../../include/geometry/parallelotope.tpl \
@@ -371,6 +375,14 @@ grid.o: grid.cc ../../include/geometry/grid.h \
   ../../include/geometry/../declarations.h \
   ../../include/geometry/../base/array.h \
   ../../include/geometry/../base/../declarations.h \
+  ../../include/geometry/../numeric/arithmetic.h \
+  ../../include/geometry/../numeric/../numeric/numerical_types.h \
+  ../../include/geometry/../numeric/../numeric/../declarations.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../numeric/../numeric/../utility/stlio.h \
+  ../../include/geometry/../numeric/../numeric/../utility/../base/array.h \
+  ../../include/geometry/../numeric/../numeric/approximation.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/../geometry/lattice_set.h \
   ../../include/geometry/../geometry/../base/array.h \
   ../../include/geometry/../geometry/../base/iterator.h \
@@ -381,14 +393,6 @@ grid.o: grid.cc ../../include/geometry/grid.h \
   ../../include/geometry/../geometry/../base/../declarations.h \
   ../../include/geometry/grid.tpl ../../include/geometry/grid.h \
   ../../include/geometry/../utility/stlio.h \
-  ../../include/geometry/../utility/../base/array.h \
-  ../../include/geometry/../numeric/arithmetic.h \
-  ../../include/geometry/../numeric/../numeric/numerical_types.h \
-  ../../include/geometry/../numeric/../numeric/../declarations.h \
-  ../../include/geometry/../numeric/../numeric/../numeric/dyadic.h \
-  ../../include/geometry/../numeric/../numeric/../utility/stlio.h \
-  ../../include/geometry/../numeric/../numeric/approximation.h \
-  ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/../geometry/grid_set.h \
   ../../include/geometry/../geometry/../declarations.h \
   ../../include/geometry/../geometry/../geometry/rectangle.h \

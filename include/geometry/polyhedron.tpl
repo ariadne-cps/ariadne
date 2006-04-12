@@ -351,9 +351,7 @@ namespace Ariadne {
     {
       os << "Polyhedron(equations=[";
       Parma_Polyhedra_Library::IO_Operators::operator<<(os,p._ppl_poly);
-      os << "], vertices=";
-      Utility::write_sequence(os,p.vertices().begin(),p.vertices().end());
-      os << ") ";
+      os << "], vertices=" << p.vertices() << ") ";
       return os;
     }
     

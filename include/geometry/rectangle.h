@@ -72,43 +72,36 @@ namespace Ariadne {
       typedef Point<R> state_type;
 
      public:
-      /*! \brief Default constructor construcs an empty rectangle of dimension \a n. */
-      Rectangle(size_type n = 0)
+      /*! \brief Construct an empty rectangle of dimension \a n. */
+      explicit Rectangle(size_type n=0)
         : _lower_corner(n),  _upper_corner(n) 
-      { }
+      { 
+        if(n>0) {
+          set_lower_bound(0,R(1));
+          set_upper_bound(0,R(0));
+        }
+      }
+      
+      /*! \brief Construct a rectangle from a range of interval values. */
+      template<class ForwardIterator>
+      Rectangle(ForwardIterator b, ForwardIterator e)
+        : _lower_corner(std::distance(b,e)), _upper_corner(std::distance(b,e))
+      {
+        for(size_type i=0; i!=dimension(); ++i) {
+          _lower_corner[i]=b->lower();
+          _upper_corner[i]=b->upper();
+          ++b;
+        }
+      }
       
       /*! \brief Construct from an array of intervals. */
-      Rectangle(dimension_type n, const Interval<real_type>* intervals)
-        : _lower_corner(n), _upper_corner(n)
-      {
-        for(size_type i=0; i!=n; ++i) {
-          this->_lower_corner[i] = intervals[i].lower();
-          this->_upper_corner[i] = intervals[i].upper();
-        }
-      }
-
-      /*! \brief Construct from an array of intervals. */
-      Rectangle(const array< Interval<real_type> > a)
-        : _lower_corner(a.size()), _upper_corner(a.size())
-      {
-        for(size_type i=0; i!=a.size(); ++i) {
-          this->_lower_corner[i] = a[i].lower();
-          this->_upper_corner[i] = a[i].upper();
-        }
-      }
+      explicit Rectangle(const array< Interval<real_type> >& a);
+      
+      /*! \brief Construct from a std::vector of intervals. */
+      explicit Rectangle(const std::vector< Interval<real_type> >& v);
       
       /*! \brief Construct from two corners. */
-      Rectangle(const state_type& p1, const state_type& p2)
-        : _lower_corner(p1.dimension()), _upper_corner(p2.dimension())
-      {
-        if (p1.dimension()!=p2.dimension()) {
-          throw std::domain_error("The parameters have different space dimensions");
-        }
-        for (size_type i=0; i!=this->dimension(); ++i) {
-          this->_lower_corner[i]=std::min(p1[i],p2[i]);
-          this->_upper_corner[i]=std::max(p1[i],p2[i]);
-        }
-      }
+      explicit Rectangle(const state_type& p1, const state_type& p2);
       
       /*! \brief Construct from a string literal. */
       explicit Rectangle(const std::string& s);

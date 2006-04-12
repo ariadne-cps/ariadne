@@ -33,6 +33,7 @@
 
 
 #include "python/typedefs.h"
+#include "python/python_utilities.h"
 using namespace Ariadne;
 
 #include <boost/python.hpp>
@@ -147,7 +148,7 @@ void export_grid_set() {
     .def("adjoin", &RGridCellListSet::adjoin)
     .def("size", &RGridCellListSet::size)
     .def("__len__", &RGridCellListSet::size)
-    .def("__getitem__", &RGridCellListSet::operator[])
+    .def("__getitem__", &get_item<RGridCellListSet>)
     .def("__iter__", iterator<RGridCellListSet>())
     .def(self_ns::str(self))    // __str__
     ;
@@ -161,7 +162,7 @@ void export_grid_set() {
     .def("adjoin", &RGridRectangleListSet::adjoin)
     .def("size", &RGridRectangleListSet::size)
     .def("__len__", &RGridRectangleListSet::size)
-    .def("__getitem__", &RGridRectangleListSet::operator[])
+    .def("__getitem__", &get_item<RGridRectangleListSet>)
     .def("__iter__", iterator<RGridRectangleListSet>())
     .def(self_ns::str(self))    // __str__
     ;
@@ -188,7 +189,7 @@ void export_grid_set() {
     .def("adjoining", &RGridMaskSet::adjoining)
     .def("size", &RGridMaskSet::size)
     .def("__len__", &RGridMaskSet::size)
-    .def("__getitem__", &RGridMaskSet::operator[])
+    .def("__getitem__", &get_item<RGridMaskSet>)
     .def("__iter__", iterator<RGridMaskSet>())
     .def(self_ns::str(self))    // __str__
     ;

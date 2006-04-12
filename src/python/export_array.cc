@@ -37,24 +37,24 @@ void export_array() {
   class_<BooleanArray>("BooleanArray",init<uint>())
     .def(init<BooleanArray>())
     .def("__len__", &BooleanArray::size)
-    .def("__getitem__", &get<BooleanArray>)
-    .def("__setitem__", &set<BooleanArray>)
+    .def("__getitem__", &get_item<BooleanArray>)
+    .def("__setitem__", &set_item<BooleanArray>)
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 
   class_<IndexArray>("IndexArray",init<uint>())
     .def(init<IndexArray>())
     .def("__len__", &IndexArray::size)
-    .def("__getitem__", &get<IndexArray>)
-    .def("__setitem__", &set<IndexArray>)
+    .def("__getitem__", &get_item<IndexArray>)
+    .def("__setitem__", &set_item<IndexArray>)
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 
   class_<SizeArray>("SizeArray",init<uint>())
     .def(init<SizeArray>())
     .def("__len__", &SizeArray::size)
-    .def("__getitem__", &get<SizeArray>)
-    .def("__setitem__", &set<SizeArray>)
+    .def("__getitem__", &get_item<SizeArray>)
+    .def("__setitem__", &set_item<SizeArray>)
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 }

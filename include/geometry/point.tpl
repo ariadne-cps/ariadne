@@ -27,8 +27,9 @@
 #include "point.h"
 
 #include <iostream>
+#include <string>
 #include <sstream>
-#include <iostream>
+#include <exception>
 
 #include "../utility/stlio.h"
 
@@ -37,7 +38,7 @@ namespace Ariadne {
     
     /*! \brief Construct a point from a string literal. */
     template<typename R>
-    Point<R>::Point(const std::string& s)
+    Point<R>::Point(const std::string& s) : _vector(1)
     {
       std::stringstream ss(s);
       ss >> *this;
@@ -65,10 +66,10 @@ namespace Ariadne {
 
       std::vector<R> v;
       v.reserve(last_size);
-      is >> v;
+      Utility::read_vector(is, v, '(', ')');
       last_size = v.size();
 
-      state._vector.resize(v.size());
+      state._vector=LinearAlgebra::vector<R>(v.size());
       for(size_t i=0; i!=v.size(); ++i) {
         state._vector[i]=v[i];
       }

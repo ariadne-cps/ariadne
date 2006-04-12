@@ -32,16 +32,26 @@
 template<class C> 
 inline
 typename C::value_type 
-get(const C& c, const typename C::size_type n) {
-  assert(n<c.size());
-  return c[n];
+get_item(const C& c, int n) {
+  if(n<0) {
+    n+=c.size();
+  }
+  assert(0<=n);
+  size_t m=size_t(n);
+  assert(m<c.size());
+  return c[m];
 }
 
 template<class C> 
 inline
 void
-set(C& c, const typename C::size_type n, const typename C::value_type x) {
-  assert(n<c.size());
+set_item(C& c, int n, const typename C::value_type& x) {
+  if(n<0) {
+    n+=c.size();
+  }
+  assert(0<=n);
+  size_t m=size_t(n);
+  assert(m<c.size());
   c[n]=x;
 }
 

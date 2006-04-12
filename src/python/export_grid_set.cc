@@ -44,7 +44,7 @@ struct RGrid : RGridBase, wrapper<RGridBase>
   dimension_type dimension() const { return this->get_override("dimension")(); }
   real_type subdivision_coordinate(dimension_type d, index_type n) const { return this->get_override("subdivision_coordinate")(); }
   index_type subdivision_interval(dimension_type d, const real_type& x) const { return this->get_override("subdivision_interval")(); }
-  bool contains(const LatticeRectangle& r) const { return this->get_override("contains")(); }
+  bool bounds_enclose(const RRectangle& r) const { return this->get_override("bounds_enclose")(); }
   std::ostream& write(std::ostream& os) const { return this->get_override("write")(); }
 };
 
@@ -98,7 +98,7 @@ void export_grid_set() {
     .def("subdivision_index", pure_virtual(&RGridBase::subdivision_index))
     .def("subdivision_lower_index", &RGridBase::subdivision_lower_index)
     .def("subdivision_upper_index", &RGridBase::subdivision_upper_index)
-    .def("contains", pure_virtual(&RGridBase::contains))
+    .def("bounds_enclose", pure_virtual(&RGridBase::bounds_enclose))
     .def(self_ns::str(self))    // __str__
     ;
 
@@ -110,7 +110,7 @@ void export_grid_set() {
     .def("subdivision_index", &RFiniteGrid::subdivision_index)
     .def("subdivision_lower_index", &RFiniteGrid::subdivision_lower_index)
     .def("subdivision_upper_index", &RFiniteGrid::subdivision_upper_index)
-    .def("contains", &RFiniteGrid::contains)
+    .def("bounds_enclose", &RFiniteGrid::bounds_enclose)
     .def(self_ns::str(self))    // __str__
     ;
 
@@ -121,7 +121,7 @@ void export_grid_set() {
     .def("subdivision_index", &RInfiniteGrid::subdivision_index)
     .def("subdivision_lower_index", &RInfiniteGrid::subdivision_lower_index)
     .def("subdivision_upper_index", &RInfiniteGrid::subdivision_upper_index)
-    .def("contains", &RInfiniteGrid::contains)
+    .def("bounds_enclose", &RInfiniteGrid::bounds_enclose)
     .def(self_ns::str(self))    // __str__
     ;
 

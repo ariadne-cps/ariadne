@@ -78,25 +78,25 @@ namespace Ariadne {
     template<typename R>
     GridRectangle<R>
     over_approximation_of_intersection(const Rectangle<R>& r1, 
-                                       const GridRectangle<R>& r2,
+                                       const Rectangle<R>& r2,
                                        const Grid<R>& g);
     
     template<typename R>
     GridCellListSet<R>
     over_approximation_of_intersection(const Parallelotope<R>& p, 
-                                       const GridRectangle<R>& r,
+                                       const Rectangle<R>& r,
                                        const Grid<R>& g);
 
     template<typename R>
     GridCellListSet<R>
     over_approximation_of_intersection(const Zonotope<R>& p, 
-                                       const GridRectangle<R>& r,
+                                       const Rectangle<R>& r,
                                        const Grid<R>& g);
 
     template<typename R, template<typename> class BS>
     GridMaskSet<R>
     over_approximation_of_intersection(const ListSet<R,BS>& ls, 
-                                       const GridRectangle<R>& r, 
+                                       const Rectangle<R>& r, 
                                        const FiniteGrid<R>& g);
     
     template<typename R> std::ostream& operator<<(std::ostream&, const GridCell<R>&);

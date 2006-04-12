@@ -125,6 +125,7 @@ namespace Ariadne {
       return os << "IntervalParallelotope(\n  centre=" << ip.centre() << "\n  generators=" << ip.generators() << "\n)\n";
     }
     
+    
     template<typename R>
     bool
     check_flow_bounds(const Evaluation::VectorField<R>& vf,

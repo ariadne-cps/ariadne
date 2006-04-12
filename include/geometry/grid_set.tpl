@@ -40,8 +40,10 @@ namespace Ariadne {
 
     template<typename R>
     GridRectangle<R>::GridRectangle(const Grid<R>& g)
-      : _grid(g), _position(g.dimension())
-    { }
+      : _grid(g), _position()
+    { 
+      //std::cerr << "GridRectangle<R>::GridRectangle(const Grid<R>& g)" << std::endl;
+    }
 
     template<typename R>
     GridRectangle<R>::GridRectangle(const Grid<R>& g, const LatticeRectangle& b)
@@ -107,8 +109,11 @@ namespace Ariadne {
 
     template<typename R>
     GridRectangle<R>::operator Rectangle<R>() const {
+      if(this->empty()) {
+        return Rectangle<R>();
+      }
+      
       Rectangle<R> result(dimension());
-
       for(size_type i=0; i!=dimension(); ++i) {
         result.set_lower_bound(i, _grid.subdivision_coordinate(i,_position.lower_bound(i)));
         result.set_upper_bound(i, _grid.subdivision_coordinate(i,_position.upper_bound(i)));
@@ -198,7 +203,7 @@ namespace Ariadne {
     bool
     interiors_intersect(const Rectangle<R>& A, const GridMaskSet<R>& B) {
       assert(A.dimension()==B.dimension());
-      GridRectangle<R> gr=over_approximation_of_intersection(A,B.bounding_box(),B.grid());
+      GridRectangle<R> gr=over_approximation_of_intersection(A,Rectangle<R>(B.bounding_box()),B.grid());
       return interiors_intersect(gr,B);
     }
     
@@ -511,6 +516,8 @@ namespace Ariadne {
     GridRectangle<R>
     over_approximation(const Rectangle<R>& r, const Grid<R>& g) 
     {
+      //std::cerr << "over_approximation(const Rectangle<R>& r, const Grid<R>& g)" << std::endl;
+      
       if(r.empty()) {
         return GridRectangle<R>(g);
       }
@@ -565,7 +572,7 @@ namespace Ariadne {
     template<typename R>
     GridRectangle<R>
     over_approximation_of_intersection(const Rectangle<R>& r1, 
-                                       const GridRectangle<R>& r2,
+                                       const Rectangle<R>& r2,
                                        const Grid<R>& g) 
     {
       return over_approximation(intersection(r1,Rectangle<R>(r2)),g);
@@ -574,17 +581,14 @@ namespace Ariadne {
     template<typename R>
     GridCellListSet<R>
     over_approximation_of_intersection(const Parallelotope<R>& p, 
-                                       const GridRectangle<R>& r,
+                                       const Rectangle<R>& r,
                                        const Grid<R>& g) 
     {
+      //std::cerr << "over_approximation_of_intersection(Parallelotope<R>, GridRectangle<R>, Grid<R>)" << std::endl;
       GridCellListSet<R> result(g);
-      assert(p.dimension()==r.dimension());
-      assert(g.dimension()==p.dimension());
       GridRectangle<R> gbb=over_approximation_of_intersection(p.bounding_box(),r,g);
-
       if(!gbb.empty()) {
         LatticeRectangle block=gbb.position();
-
         for(LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
           GridCell<R> cell(g,*iter);
           if(!disjoint(Rectangle<R>(cell),p)) {
@@ -598,17 +602,14 @@ namespace Ariadne {
     template<typename R>
     GridCellListSet<R>
     over_approximation_of_intersection(const Zonotope<R>& z, 
-                                       const GridRectangle<R>& r,
+                                       const Rectangle<R>& r,
                                        const Grid<R>& g) 
     {
       GridCellListSet<R> result(g);
-      assert(z()==r.dimension());
-      assert(g.dimension()==z.dimension());
       GridRectangle<R> gbb=over_approximation_of_intersection(z.bounding_box(),r,g);
 
       if(!gbb.empty()) {
         LatticeRectangle block=gbb.position();
-
         for(LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
           GridCell<R> cell(g,*iter);
           if(!disjoint(Rectangle<R>(cell),z)) {
@@ -621,7 +622,7 @@ namespace Ariadne {
 
     template<typename R, template<typename> class BS>
     GridMaskSet<R>
-    over_approximation_of_intersection(const ListSet<R,BS>& ls, const GridRectangle<R>& r, const FiniteGrid<R>& g) 
+    over_approximation_of_intersection(const ListSet<R,BS>& ls, const Rectangle<R>& r, const FiniteGrid<R>& g) 
     {
       //std::cerr << "GridMaskSet<R>::over_approximation(const ListSet<R,BS>& ls, const FiniteGrid<R>& g) " << std::endl;
       GridMaskSet<R> result(g);

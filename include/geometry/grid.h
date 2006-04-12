@@ -68,8 +68,8 @@ namespace Ariadne {
       /*! \brief The interval \f$[p_n,p_{n+1})\f$ in dimension \a d index containing \a x. */
       virtual index_type subdivision_interval(dimension_type d, const real_type& x) const = 0;
 
-      /*! \brief Tests whether the grid contains the given lattice rectangle within its bounds. */
-      virtual bool contains(const LatticeRectangle& r) const = 0;
+      /*! \brief Tests whether the grid contains the given rectangle within its bounds. */
+      virtual bool bounds_enclose(const Rectangle<R>& r) const = 0;
 
       /*! \brief The index in dimension \a d of the subdivision point \a x. Throws an exception if \a x is not a subdivision point. */
       index_type subdivision_index(dimension_type d, const real_type& x) const {
@@ -119,7 +119,10 @@ namespace Ariadne {
       /*! \brief The coordinate of the \a n th subdivision point in dimension \a d. */
       virtual real_type subdivision_coordinate(dimension_type d, index_type n) const {
         assert(d<this->dimension());
-        assert(0<=n && uint(n)<_subdivision_coordinates[d].size());
+        if(!(0<=n && uint(n)<_subdivision_coordinates[d].size())) {
+          std::cerr << "d=" << d << ", n=" << n << ", size=" << _subdivision_coordinates[d].size() << std::endl;
+          throw std::runtime_error("index does not lie in range of finite grid");
+        }
         return _subdivision_coordinates[d][n];
       }
   
@@ -136,8 +139,8 @@ namespace Ariadne {
       }
 
       /*! \brief Tests whether the grid contains the given lattice rectangle within its bounds. */
-      virtual bool contains(const LatticeRectangle& r) const {
-        return subset(r,this->bounds()); }
+      virtual bool bounds_enclose(const Rectangle<R>& r) const {
+        return subset(r,Rectangle<R>(this->bounding_box())); }
 
       /*! \brief Construct from a bounding box and an equal number of subdivisions in each coordinate. */
       explicit FiniteGrid(const Rectangle<R>& r, size_type n);
@@ -227,7 +230,7 @@ namespace Ariadne {
         return result;
       }
 
-      virtual bool contains(const LatticeRectangle& r) const { return true; }
+      virtual bool bounds_enclose(const Rectangle<R>& r) const { return true; }
 
       virtual std::ostream& write(std::ostream& os) const;
      private:

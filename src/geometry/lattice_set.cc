@@ -67,6 +67,20 @@ namespace Ariadne {
       return this->strides()[this->dimension()];
     }
 
+    bool 
+    LatticeRectangle::empty() const
+    {
+      if(this->dimension()==0) {
+        return true;
+      }
+      for(dimension_type i=0; i!=this->dimension(); ++i) {
+        if(this->lower_bound(i)>=this->upper_bound(i)) {
+          return true;
+        }
+      }
+      return false;
+    }
+    
     std::istream& 
     operator>>(std::istream& is, LatticeRectangle& r)
     {
@@ -383,17 +397,6 @@ namespace Ariadne {
       _strides=_bounds.strides();
     }
     
-    bool 
-    LatticeRectangle::empty() const
-    {
-      for(dimension_type i=0; i!=this->dimension(); ++i) {
-        if(this->lower_bound(i)>=this->upper_bound(i)) {
-          return true;
-        }
-      }
-      return false;
-    }
-    
 
 
     LatticeRectangle 
@@ -495,6 +498,9 @@ namespace Ariadne {
     bool 
     subset(const LatticeRectangle& r1, const LatticeRectangle& r2) 
     {
+      if(r1.empty()) { 
+        return true; 
+      }
       for(dimension_type i=0; i!=r1.dimension(); ++i) {
         if(r1.lower_bound(i)<r2.lower_bound(i)
             || r1.upper_bound(i)>r2.upper_bound(i))

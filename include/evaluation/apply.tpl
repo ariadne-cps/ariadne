@@ -120,10 +120,8 @@ namespace Ariadne {
     {
       typedef typename Ariadne::Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
       
-      Geometry::GridRectangle<R> gbb=over_approximation(bb,g);
-      
       Geometry::GridMaskSet<R> result(g);
-      Geometry::GridMaskSet<R> found=over_approximation_of_intersection(is,gbb,g);
+      Geometry::GridMaskSet<R> found=over_approximation_of_intersection(is,bb,g);
       Geometry::GridMaskSet<R> image(g);
       
       while(!subset(found,result)) {
@@ -136,7 +134,7 @@ namespace Ariadne {
           Geometry::Rectangle<R> r=*iter;
           Geometry::Parallelotope<R> pp(r);
           Geometry::Parallelotope<R> fp(Ariadne::Evaluation::apply(f,pp));
-          Geometry::GridCellListSet<R> oai=over_approximation_of_intersection(fp,gbb,g);
+          Geometry::GridCellListSet<R> oai=over_approximation_of_intersection(fp,bb,g);
           image.adjoin(oai);
         }
         std::cerr << size << std::endl;

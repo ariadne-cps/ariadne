@@ -41,6 +41,12 @@ namespace Ariadne {
                       const Geometry::Rectangle<R>& bound,
                       const R& integration_time);
 
+    template<typename R>
+    Geometry::Rectangle<R>
+    compute_flow_bounds(const Evaluation::VectorField<R>& vector_field,
+                        const Geometry::Rectangle<R>& initial_set,
+                        const R& integration_time);
+
     /*! \brief Compute a set \a bound such that the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to \a integration_time. 
      *
      *  The algorithm is guarenteed to terminate if the flow has linear growth at infinity.

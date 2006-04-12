@@ -173,7 +173,7 @@ namespace Ariadne {
       
       const Geometry::Grid<R>& g(initial_set.grid());
       Geometry::LatticeRectangle lb=bounding_set.bounds();
-      Geometry::GridRectangle<R> bb=bounding_set.bounding_box();
+      Geometry::Rectangle<R> bb=bounding_set.bounding_box();
       
       Geometry::GridMaskSet<R> result(bounding_set.grid(),bounding_set.bounds());
       
@@ -249,7 +249,7 @@ namespace Ariadne {
               const R& step_size) 
     {
       const Geometry::Grid<R>& g(initial_set.grid());
-      const Geometry::GridRectangle<R> gbb=Geometry::GridRectangle<R>(initial_set.grid(),initial_set.bounds());
+      const Geometry::Rectangle<R> bb=bounding_set.bounding_box();
       
       Geometry::GridMaskSet<R> result(vector_field.dimension());
       for(typename Geometry::GridMaskSet<R>::const_iterator iter=initial_set.begin(); iter!=initial_set.end(); ++iter) {
@@ -259,7 +259,7 @@ namespace Ariadne {
         R h=step_size;
         while(t>0) {
           h=min(t,h);
-          result.adjoin(over_approximation_of_intersection(reach_step(vf,p,h),gbb,g));
+          result.adjoin(over_approximation_of_intersection(reach_step(vf,p,h),bb,g));
           p=integration_step(vf,p,h);
           t=t-h;
           //h=max(R(2*h),step_size);

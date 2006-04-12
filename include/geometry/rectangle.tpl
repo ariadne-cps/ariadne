@@ -408,7 +408,9 @@ namespace Ariadne {
           os << "x" << r[i];
         }
       }
-
+      else {
+        os << "ZeroDimensionalRectangle";
+      }
       return os;
     }
     

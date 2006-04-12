@@ -141,12 +141,15 @@ namespace Ariadne {
      public:
       typedef LatticeRectangleIterator const_iterator;
       
+      /*!\brief An empty lattice rectangle. */
+      explicit LatticeRectangle() : _lower(), _upper() { }
+      /*!\brief A lattice rectangle of dimension \a n. */
       explicit LatticeRectangle(dimension_type n) : _lower(n), _upper(n) { }
       /*!\brief A lattice rectangle specified by lower and upper corners. */
-      LatticeRectangle(const IndexArray& l, const IndexArray& u)
+      explicit LatticeRectangle(const IndexArray& l, const IndexArray& u)
         : _lower(l), _upper(u) { }
       /*!\brief A lattice rectangle defined by a string literal. */
-      LatticeRectangle(const std::string& s);
+      explicit LatticeRectangle(const std::string& s);
       /*!\brief Convert from a lattice cell. */
       LatticeRectangle(const LatticeCell& c)
         : _lower(c.lower()), _upper(c.upper()) { }

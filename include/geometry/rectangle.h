@@ -134,9 +134,9 @@ namespace Ariadne {
       /*! \brief The equality operator */
       bool operator==(const Rectangle<real_type>& A) const
       {
-        if (this->dimension() != A.dimension()) { return false ; }
         if (A.empty() && this->empty()) { return true; }
         if (A.empty() || this->empty()) { return false; }
+        if (this->dimension() != A.dimension()) { return false ; }
         for (size_type j=0; j != this->dimension(); ++j) {
           if (this->_lower_corner[j] != A._lower_corner[j]) { return false; }
           if (this->_upper_corner[j] != A._upper_corner[j]) { return false; }
@@ -156,6 +156,9 @@ namespace Ariadne {
       
       /*! \brief True if the rectangle is empty. */
       bool empty() const {
+        if(this->dimension()==0) {
+          return true;
+        }
         for(size_type i=0; i!=this->dimension(); ++i) {
           if(this->lower_bound(i) > this->upper_bound(i)) {
             return true;
@@ -166,6 +169,9 @@ namespace Ariadne {
       
       /*! \brief True if the rectangle has empty interior. */
       bool empty_interior() const {
+        if(this->dimension()==0) {
+          return true;
+        }
         for(size_type i=0; i!=this->dimension(); ++i) {
           if(this->lower_bound(i) >= this->upper_bound(i)) {
             return true;
@@ -294,13 +300,12 @@ namespace Ariadne {
     bool 
     Rectangle<R>::contains(const state_type& p) const 
     {
-      if (p.dimension()!=this->dimension()) {
-        throw std::domain_error("This object and parameter have different space dimensions");
-      }
       if (this->empty()) {
         return false;
       }
-      
+      if (p.dimension()!=this->dimension()) {
+        throw std::domain_error("This object and parameter have different space dimensions");
+      }
       for (size_type i=0; i<this->dimension(); i++) {
         if (p[i] < this->_lower_corner[i]) { return false; }
         if (p[i] > this->_upper_corner[i]) { return false; }
@@ -313,11 +318,11 @@ namespace Ariadne {
     bool 
     Rectangle<R>::interior_contains(const state_type& p) const 
     {
-      if (p.dimension()!=this->dimension()) {
-        throw std::domain_error("This object and parameter have different space dimensions");
-      }
       if (this->empty()) {
         return false;
+      }
+      if (p.dimension()!=this->dimension()) {
+        throw std::domain_error("This object and parameter have different space dimensions");
       }
       for (size_type i=0; i<this->dimension(); i++) {
         if (p[i] >= this->_upper_corner[i]) { return false; }
@@ -331,6 +336,9 @@ namespace Ariadne {
     bool 
     disjoint(const Rectangle<R>& A, const Rectangle<R>& B)
     {
+      if (A.empty() || B.empty()) {
+        return true;
+      }
       if(A.dimension()!=B.dimension()) {
         throw std::domain_error("The two parameters have different space dimensions");
       }
@@ -350,11 +358,11 @@ namespace Ariadne {
     bool 
     interiors_intersect(const Rectangle<R>& A, const Rectangle<R>& B)
     {
+      if (A.empty() || B.empty()) {
+        return false;
+      }
       if (A.dimension()!=B.dimension()) {
         throw std::domain_error("The two parameters have different space dimensions");
-      }
-      if (A.empty()||B.empty()) {
-        return false;
       }
       for(size_type i=0; i< A.dimension(); i++) {
         if ((A.upper_bound(i)<=B.lower_bound(i))|| 
@@ -372,11 +380,14 @@ namespace Ariadne {
     bool 
     inner_subset(const Rectangle<R>& A, const Rectangle<R>& B)
     {
+      if(A.empty()) {
+        return true;
+      }
+      if(B.empty()) {
+        return false;
+      }
       if (A.dimension()!=B.dimension()) {
         throw std::domain_error("The two parameters have different space dimensions");
-      }
-      if (A.empty()||B.empty()) {
-        return false;
       }
       for (size_type i=0; i< A.dimension(); i++) {
         if((A.lower_bound(i) >= B.lower_bound(i))||
@@ -396,11 +407,14 @@ namespace Ariadne {
     bool 
     subset(const Rectangle<R>& A, const Rectangle<R>& B) 
     {
+      if(A.empty()) {
+        return true;
+      }
+      if(B.empty()) {
+        return false;
+      }
       if(A.dimension()!=B.dimension()) {
         throw std::domain_error("The two parameters have different space dimensions");
-      }
-      if(A.empty()||B.empty()) {
-        return false;
       }
       for(size_type i=0; i< A.dimension(); i++) {
         if((A.lower_bound(i) > B.lower_bound(i))||

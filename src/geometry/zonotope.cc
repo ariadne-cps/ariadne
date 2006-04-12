@@ -31,8 +31,6 @@ namespace Ariadne {
 
     template class Zonotope<Real>;
 
-    template Geometry::Parallelotope<Real> over_approximating_parallelotope(const Geometry::Zonotope<Real>& z);
-
     template Zonotope<Real> minkowski_sum(const Zonotope<Real>& z1, const Zonotope<Real>& z2);
     template Zonotope<Real> minkowski_difference(const Zonotope<Real>& z1, const Zonotope<Real>& z2);
 

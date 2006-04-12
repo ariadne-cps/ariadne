@@ -463,7 +463,7 @@ namespace Ariadne {
                const Geometry::Parallelotope<R>& initial_set, 
                R& step_size)
     {
-      return Geometry::over_approximating_parallelotope(reach_step(vector_field,Geometry::Zonotope<R>(initial_set),step_size));
+      return reach_step(vector_field,Geometry::Zonotope<R>(initial_set),step_size).over_approximating_parallelotope();
     }
 
     template<typename R>

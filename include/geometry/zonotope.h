@@ -122,17 +122,21 @@ namespace Ariadne {
         return !(*this == A);
       }
 
-      /*! \brief A rectangle containing the given zonotope. */
-      Rectangle<R> bounding_box() const;
-      
-      /*! \brief Convert to a polyhedron. */
-      operator Polyhedron<R> () const;
-      
       /*! \brief The dimension of the Euclidean space the zonotope lies in. */
       dimension_type dimension() const {
         return this->_centre.dimension();
       }
       
+      /*! \brief The centre of the zonotope. */
+      state_type centre() const {
+        return this->_centre;
+      }
+      
+      /*! \brief The matrix of principle directions. */
+      matrix_type generators() const {
+        return this->_generators;
+      }
+     
       /*! \brief The number of generators of the zonotope. */
       size_type number_of_generators() const {
         return this->_generators.size2();
@@ -150,22 +154,24 @@ namespace Ariadne {
         return !independent_rows(this->_generators);
       }
       
-      /*! \brief The centre of the zonotope. */
-      state_type centre() const {
-        return this->_centre;
-      }
+      /*! \brief A rectangle containing the given zonotope. */
+      Rectangle<R> bounding_box() const;
       
-      /*! \brief The matrix of principle directions. */
-      matrix_type generators() const {
-        return this->_generators;
-      }
-     
+      /*! \brief Returns the zonotope's vertices */
+      std::vector< Point<R> > vertices() const;
+      
       /*! \brief Tests if the zonotope contains \a point. */
       bool contains(const state_type& point) const;
       
       /*! \brief Tests if the interior of the zonotope contains \a point. */
       bool interior_contains(const state_type& point) const;
 
+      /*! \brief Convert to a polyhedron. */
+      operator Polyhedron<R> () const;
+      
+      /*! \brief Construct a parallelopic over-approximation. */
+      Parallelotope<R> over_approximating_parallelotope() const;
+      
      private: 
       friend Zonotope<R> minkowski_sum <> (const Zonotope<R>& A, const Zonotope<R>& B);
       friend Zonotope<R> minkowski_difference <> (const Zonotope<R>& A, const Zonotope<R>& B);       
@@ -180,6 +186,10 @@ namespace Ariadne {
       
       // The linear inequalities defining the zonotope.
       void compute_linear_inequalities(matrix_type&, vector_type&) const;
+
+      Point<R> _possible_vertices(size_t &vert_num) const;
+      
+      std::vector< state_type > get_the_possible_vertices() const ;
     };
   
     
@@ -381,11 +391,6 @@ namespace Ariadne {
     }
     
 
-    
-    /*! Compute an over-approximatiing parallelotope to \a z. */
-    template <typename R>
-    Geometry::Parallelotope<R>
-    over_approximating_parallelotope(const Geometry::Zonotope<R>& z);      
     
     template<typename R>
     Zonotope<R>

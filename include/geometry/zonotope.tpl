@@ -1,5 +1,5 @@
 /***************************************************************************
- *            zonotope.h
+ *            zonotope.tpl
  *
  *  6 February 2006
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
@@ -76,6 +76,44 @@ namespace Ariadne {
     
     template<typename R>
     bool 
+    Zonotope<R>::operator==(const Zonotope<real_type>& A) const
+    {
+      using namespace LinearAlgebra;
+            
+      const matrix_type &this_gen=this->_generators;
+      const matrix_type &A_gen=A._generators;
+      size_type directions=this->number_of_generators();
+
+      if (!have_same_dimensions(this_gen,A_gen)) {
+        return false;
+      }
+      array<bool> not_found(directions,true);
+      bool searching_for_equiv;
+
+      size_type j2;
+      for (size_type j=0; j< directions; j++) {
+        j2=j; 
+        searching_for_equiv=true;
+        while ((j2< directions)&&(searching_for_equiv)) {
+          if (not_found[j2]) {
+            if (equivalent_columns(this_gen, j, A_gen, j2)) { 
+              searching_for_equiv=false;
+              not_found[j2]=false;
+            }
+          }
+          j2++;
+        }
+
+        if (searching_for_equiv) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+    
+    template<typename R>
+    bool 
     Zonotope<R>::contains(const state_type& point) const 
     {
       if (point.dimension()!=this->dimension()) {
@@ -125,44 +163,6 @@ namespace Ariadne {
     }
       
     template<typename R>
-    bool 
-    Zonotope<R>::operator==(const Zonotope<real_type>& A) const
-    {
-      using namespace LinearAlgebra;
-            
-      const matrix_type &this_gen=this->_generators;
-      const matrix_type &A_gen=A._generators;
-      size_type directions=this->number_of_generators();
-
-      if (!have_same_dimensions(this_gen,A_gen)) {
-        return false;
-      }
-      array<bool> not_found(directions,true);
-      bool searching_for_equiv;
-
-      size_type j2;
-      for (size_type j=0; j< directions; j++) {
-        j2=j; 
-        searching_for_equiv=true;
-        while ((j2< directions)&&(searching_for_equiv)) {
-          if (not_found[j2]) {
-            if (equivalent_columns(this_gen, j, A_gen, j2)) { 
-              searching_for_equiv=false;
-              not_found[j2]=false;
-            }
-          }
-          j2++;
-        }
-
-        if (searching_for_equiv) {
-          return false;
-        }
-      }
-
-      return true;
-    }
-    
-    template<typename R>
     Rectangle<R> 
     Zonotope<R>::bounding_box() const 
     {
@@ -177,6 +177,96 @@ namespace Ariadne {
       return Rectangle<R>(this->centre()-offset, this->centre()-offset);
     }
 
+    /* TO IMPROVE */
+    template <typename R>
+    std::vector< Point<R> > 
+    Zonotope<R>::vertices() const
+    {
+      return Polyhedron<R>(*this).vertices();
+    }
+
+    template <typename R>
+    std::vector< Point<R> > 
+    Zonotope<R>::get_the_possible_vertices() const
+    {
+      size_t poss_vert=(1<<(this->_generators).size2());
+      std::vector< Point<R> > possible_vertices(poss_vert);
+
+      assert((this->_generators).size2()<32);
+      for (size_t i=0; i<poss_vert; i++) {
+        
+        possible_vertices[i]=this->_possible_vertices(i);
+      }
+
+      return possible_vertices;
+    }
+      
+    template <typename R>
+    Point<R> 
+    Zonotope<R>::_possible_vertices(size_t &i) const
+    {
+      Point<R> vertex(this->centre());
+      const LinearAlgebra::matrix<R> &gen=this->_generators;
+      
+      for (size_t j=0; j<gen.size1(); j++) {
+        for (size_t k=0; k<gen.size2(); k++) {
+          if ((1<<k)&(i)) {
+            vertex[j]+=gen(j,k);
+          } 
+          else {
+            vertex[j]-=gen(j,k);
+          }
+        }
+      }
+      return vertex;
+    }
+  
+    
+    template <typename R>
+    Zonotope<R>::operator Polyhedron<R>() const 
+    {
+      using namespace Ariadne::LinearAlgebra;
+      
+      matrix<R> A(0,0);
+      vector<R> b(0);
+      
+      this->compute_linear_inequalities(A,b);
+      
+      return Polyhedron<R>(A,b);
+    }
+    
+    
+    
+    template<typename R>
+    Parallelotope<R>
+    Zonotope<R>::over_approximating_parallelotope() const
+    {
+      typedef typename numerical_traits<R>::field_extension_type F;
+      const Zonotope<R>& z=*this;
+      
+      std::cerr << "over_approximating_parallelotope(const Geometry::Zonotope<R>& z)" << std::endl;
+      dimension_type n=z.dimension();
+      LinearAlgebra::matrix<R> A(n,n);
+      for(dimension_type i=0; i!=n; ++i) {
+        for(dimension_type j=0; j!=n; ++j) {
+          A(i,j)=z.generators()(i,j);
+        }
+      }
+      LinearAlgebra::matrix<F> B=LinearAlgebra::inverse(A);
+      const Point<R>& c=z.centre();
+      
+      Parallelotope<R> p(c,A);
+      while(!subset(z,p)) {
+        std::cerr << "A=" << A << std::endl;
+        A*=2;
+        p=Parallelotope<R>(c,A);
+      }
+      std::cerr << "A=" << A << std::endl;
+      return p;
+    }        
+    
+    
+    
     template<typename R>
     void 
     Zonotope<R>::minimize_generators(void) 
@@ -265,7 +355,8 @@ namespace Ariadne {
       sort_generators();
     }
     
-    
+
+
     template<typename R>
     inline
     bool 
@@ -273,7 +364,6 @@ namespace Ariadne {
     {
       return LinearAlgebra::norm(v1)>LinearAlgebra::norm(v2);
     }
-    
     
     template<typename R>
     void 
@@ -293,69 +383,8 @@ namespace Ariadne {
       }
     }
     
-    template<typename R> 
-    Zonotope<R> 
-    minkowski_sum(const Zonotope<R>& A, const Zonotope<R>& B)
-    {
-      using namespace Ariadne::LinearAlgebra;
-     
-      if (A.dimension()!=B.dimension()) {
-          throw std::domain_error(
-              "minkowski_sum: the two zonotopes have different dimension.");
-      }
-      
-      dimension_type col_A=A._generators.size2(); 
-      dimension_type col_B=B._generators.size2(); 
-      
-      matrix<R> gen(A.dimension(), col_A+col_B);
-
-      for (size_type i=0; i!=col_A; ++i) {
-         for (size_type j=0; j!=A.dimension(); ++j) {
-            gen(j,i)=A._generators(j,i);
-         }
-      }
-
-      
-      for (size_type i=0; i!=col_B; ++i) {
-        for (size_type j=0; j!=A.dimension(); ++j) {
-          gen(j,i+col_A)=B._generators(j,i);
-        }
-      }
-      
-      return Zonotope<R>(A._centre+(B._centre).position_vector(),gen);
-    }
-   
-    template<typename R> 
-    Zonotope<R> minkowski_difference(const Zonotope<R>& A, const Zonotope<R>& B)
-    {
-      using namespace Ariadne::LinearAlgebra;
-     
-      if (A.dimension()!=B.dimension()) {
-          throw std::domain_error(
-              "minkowski_difference: the two zonotopes have different dimension.");
-      }
-      
-      dimension_type col_A=A._generators.size2();
-      dimension_type col_B=B._generators.size2(); 
-      
-      matrix<R> gen(A.dimension(), col_A+col_B);
-
-      for (size_type i=0; i!=col_A; ++i) {
-         for (size_type j=0; j!=A.dimension(); ++j) {
-          gen(j,i)=A._generators(j,i);
-        }
-      }
-
-      
-      for (size_type i=0; i!=col_B; ++i) {
-        for (size_type j=0; j!=A.dimension(); ++j) {
-          gen(j,i+col_A)=B._generators(j,i);
-         }
-      }
-      
-      return Zonotope<R>(A._centre-(B._centre).position_vector(), 
-                         remove_null_columns_but_one(gen));
-    }
+    
+    
     template<typename R>
     void 
     Zonotope<R>::compute_linear_inequalities(matrix_type& A, vector_type& b) const
@@ -420,50 +449,72 @@ namespace Ariadne {
         }
       }
     }
-      
     
-    template <typename R>
-    Zonotope<R>::operator Polyhedron<R>() const 
+    
+    template<typename R> 
+    Zonotope<R> 
+    minkowski_sum(const Zonotope<R>& A, const Zonotope<R>& B)
     {
       using namespace Ariadne::LinearAlgebra;
+     
+      if (A.dimension()!=B.dimension()) {
+          throw std::domain_error(
+              "minkowski_sum: the two zonotopes have different dimension.");
+      }
       
-      matrix<R> A(0,0);
-      vector<R> b(0);
+      dimension_type col_A=A._generators.size2(); 
+      dimension_type col_B=B._generators.size2(); 
       
-      this->compute_linear_inequalities(A,b);
+      matrix<R> gen(A.dimension(), col_A+col_B);
+
+      for (size_type i=0; i!=col_A; ++i) {
+         for (size_type j=0; j!=A.dimension(); ++j) {
+            gen(j,i)=A._generators(j,i);
+         }
+      }
+
       
-      return Polyhedron<R>(A,b);
-    }
-    
-    
-    
-    
-    template<typename R>
-    Geometry::Parallelotope<R>
-    over_approximating_parallelotope(const Geometry::Zonotope<R>& z)
-    {
-      typedef typename numerical_traits<R>::field_extension_type F;
-      
-      std::cerr << "over_approximating_parallelotope(const Geometry::Zonotope<R>& z)" << std::endl;
-      dimension_type n=z.dimension();
-      LinearAlgebra::matrix<R> A(n,n);
-      for(dimension_type i=0; i!=n; ++i) {
-        for(dimension_type j=0; j!=n; ++j) {
-          A(i,j)=z.generators()(i,j);
+      for (size_type i=0; i!=col_B; ++i) {
+        for (size_type j=0; j!=A.dimension(); ++j) {
+          gen(j,i+col_A)=B._generators(j,i);
         }
       }
-      LinearAlgebra::matrix<F> B=LinearAlgebra::inverse(A);
-      const Point<R>& c=z.centre();
       
-      Parallelotope<R> p(c,A);
-      while(!subset(z,p)) {
-        std::cerr << "A=" << A << std::endl;
-        A*=2;
-        p=Parallelotope<R>(c,A);
+      return Zonotope<R>(A._centre+(B._centre).position_vector(),gen);
+    }
+   
+    template<typename R> 
+    Zonotope<R> minkowski_difference(const Zonotope<R>& A, const Zonotope<R>& B)
+    {
+      using namespace Ariadne::LinearAlgebra;
+     
+      if (A.dimension()!=B.dimension()) {
+          throw std::domain_error(
+              "minkowski_difference: the two zonotopes have different dimension.");
       }
-      std::cerr << "A=" << A << std::endl;
-      return p;
-    }        
+      
+      dimension_type col_A=A._generators.size2();
+      dimension_type col_B=B._generators.size2(); 
+      
+      matrix<R> gen(A.dimension(), col_A+col_B);
+
+      for (size_type i=0; i!=col_A; ++i) {
+         for (size_type j=0; j!=A.dimension(); ++j) {
+          gen(j,i)=A._generators(j,i);
+        }
+      }
+
+      
+      for (size_type i=0; i!=col_B; ++i) {
+        for (size_type j=0; j!=A.dimension(); ++j) {
+          gen(j,i+col_A)=B._generators(j,i);
+         }
+      }
+      
+      return Zonotope<R>(A._centre-(B._centre).position_vector(), 
+                         remove_null_columns_but_one(gen));
+    }
+
     
     template<typename R>
     Zonotope<R>

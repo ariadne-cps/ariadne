@@ -458,7 +458,8 @@ namespace Ariadne {
                const Geometry::Parallelotope<R>& initial_set, 
                R& step_size)
     {
-      return reach_step(vector_field,Geometry::Zonotope<R>(initial_set),step_size).over_approximating_parallelotope();
+      //FIXME: Return a parallelotope
+      return Geometry::Parallelotope<R>(reach_step(vector_field,Geometry::Zonotope<R>(initial_set),step_size).bounding_box());
     }
 
     template<typename R>
@@ -471,7 +472,6 @@ namespace Ariadne {
 #ifdef DEBUG
       std::cerr << "integration_step_to(VectorField<R>, Zonotope<R>, R)\n";
 #endif
-      throw std::runtime_error("reach_step(VectorField<R>, Zonotope<R>, R) contains major bugs");
 
       typedef typename numerical_traits<R>::field_extension_type F;
 
@@ -487,9 +487,9 @@ namespace Ariadne {
       const matrix<R> id=identity_matrix<R>(n);
       
       /* Throws exception if we can't find flow bounds for given stepsize. */
-      Rectangle<R> b=estimate_flow_bounds(vf,z.bounding_box(),h);
-
-      interval_vector<R> f=vf.apply(z.bounding_box());
+      Rectangle<R> b=compute_flow_bounds(vf,z.bounding_box(),h,256);
+      
+      interval_vector<R> f=vf.apply(b);
       interval_matrix<R> df=vf.derivative(b);
       
       interval_matrix<R> dphi=id+Interval<R>(0,h)*df;
@@ -505,14 +505,14 @@ namespace Ariadne {
       zonotopic_vector<R> zv=zfh+zonotopic_vector<R>(vector<R>(n),mdf);
       
       z=phic+zv;
-  
+#define DEBUG
 #ifdef DEBUG
       std::cerr << "suggested stepsize=" << step_size << std::endl;
         
       std::cerr << "stepsize=" << h << std::endl;
       std::cerr << "bound=" << b << std::endl;
       
-      std::cerr << "flow=" << f << std::endl;
+      std::cerr << "flow=" << f << "=" << std::endl;
       std::cerr << "jacobian=" << df << std::endl;
       std::cerr << "flow derivative=" << dphi << std::endl;
         
@@ -520,8 +520,8 @@ namespace Ariadne {
       std::cerr << "bounds on centre=" << phic << std::endl;
       
       std::cerr << "flow times stepsize=" << fh << std::endl;
-      std::cerr << "symmetrised flow=" << fh << std::endl;
-      std::cerr << "over approximating matrix=" << fh << std::endl;
+      std::cerr << "symmetrised flow=" << zfh << std::endl;
+      std::cerr << "over approximating matrix=" << mdf << std::endl;
       
       std::cerr << "approximating zonotope " << z;
 #endif

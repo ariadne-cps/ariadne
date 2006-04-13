@@ -40,16 +40,35 @@ using namespace Ariadne::Evaluation;
 #include <boost/python.hpp>
 using namespace boost::python;
 
+typedef IntegrationParameters<Real> RIntegrationParameters;
+
+RZonotopeListSet inline reach_zonotope_parallelotope_list_set(
+  const RVectorFieldBase& vf, const RParallelotopeListSet& ls, const Real& t, const RIntegrationParameters& p)
+{
+  return reach<Real,Geometry::Zonotope>(vf,ls,t,p);
+}
+
 void export_integrate() {
   typedef RRectangle (*IntStepRectFunc) (const RVectorFieldBase&, const RRectangle&, Real&);
   typedef RParallelotope (*IntStepPltpFunc) (const RVectorFieldBase&, const RParallelotope&, Real&);
   typedef RZonotope (*IntStepZntpFunc) (const RVectorFieldBase&, const RZonotope&, Real&);
   typedef RRectangle (*IntRectFunc) (const RVectorFieldBase&, const RRectangle&, const Real&, const Real&);
   typedef RParallelotope (*IntPltpFunc) (const RVectorFieldBase&, const RParallelotope&, const Real&, const Real&);
-  typedef RRectangleListSet (*IntLSRectFunc) (const RVectorFieldBase&, const RRectangleListSet&, const Real&, const Real&);
-  typedef RParallelotopeListSet (*IntLSPltpFunc) (const RVectorFieldBase&, const RParallelotopeListSet&, const Real&, const Real&);
-  typedef RGridMaskSet (*IntGMSFunc) (const RVectorFieldBase&, const RGridMaskSet&, const RGridMaskSet&, const Real&, const Real&);
-  
+  typedef RRectangleListSet (*IntLSRectFunc) (const RVectorFieldBase&, const RRectangleListSet&, const Real&, const RIntegrationParameters&);
+  typedef RZonotopeListSet (*IntLSZNtpFunc) (const RVectorFieldBase&, const RZonotopeListSet&, const Real&, const RIntegrationParameters&);
+  typedef RZonotopeListSet (*ReachLSPltpFunc) (const RVectorFieldBase&, const RParallelotopeListSet&, const Real&, const RIntegrationParameters&);
+  typedef RParallelotopeListSet (*IntLSPltpFunc) (const RVectorFieldBase&, const RParallelotopeListSet&, const Real&, const RIntegrationParameters&);
+  typedef RGridMaskSet (*IntGMSFunc) (const RVectorFieldBase&, const RGridMaskSet&, const RGridMaskSet&, const Real&, const RIntegrationParameters&);
+   typedef RGridMaskSet (*CRGMSFunc) (const RVectorFieldBase&, const RGridMaskSet&, const RGridMaskSet&, const RIntegrationParameters&);
+ 
+  class_<RIntegrationParameters>("IntegrationParameters",init<Real,Real,Real>())
+    .def(init<Real>()) 
+    .def(init<double>()) 
+    .def(init<double,double>()) 
+    .def_readwrite("step_size", &RIntegrationParameters::step_size)
+    .def_readwrite("maximum_set_radius", &RIntegrationParameters::maximum_set_radius)
+  ;
+
   def("integration_step", IntStepRectFunc(&integration_step), "integrate a vector field over a set for a time up to time h");
   def("integration_step", IntStepPltpFunc(&integration_step));
   def("reach_step", IntStepRectFunc(&reach_step));
@@ -60,7 +79,9 @@ void export_integrate() {
   def("integrate", IntLSRectFunc(&integrate));
   def("integrate", IntLSPltpFunc(&integrate));
   def("integrate", IntGMSFunc(&integrate));
-  def("reach", IntLSPltpFunc(&reach));
+  def("reach", ReachLSPltpFunc(&reach));
+//  def("reach", ReachLSPltpFunc(&reach<Real,Geometry::Zonotope,Geometry::Parallelotope>));
+//  def("reach", &reach_zonotope_parallelotope_list_set);
   def("reach", IntGMSFunc(&reach));
-//  def("chainreach", &chainreach_of_rectangle_list_set, "chain reach of a set" );
+  def("chainreach", CRGMSFunc(&chainreach), "chain reach of a set" );
 }

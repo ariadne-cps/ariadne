@@ -152,6 +152,14 @@ namespace Ariadne {
    any namespace using operator<<.
 */
 namespace std {
+  template <typename S,typename T> 
+  inline 
+  std::ostream& 
+  operator<<(std::ostream &os, const std::pair<S,T>& s) 
+  {
+    return os << '(' << s.first << ',' << s.second << ')';
+  }
+  
   template <typename T> 
   inline
   std::ostream& 
@@ -168,10 +176,10 @@ namespace std {
     return Ariadne::Utility::write_sequence(os,l.begin(),l.end());
   }
   
-  template <typename T> 
+  template <typename T, typename C> 
   inline 
   std::ostream& 
-  operator<<(std::ostream &os, const std::set<T>& s) 
+  operator<<(std::ostream &os, const std::set<T,C>& s) 
   {
     return Ariadne::Utility::write_sequence(os,s.begin(), s.end(), '{', '}');
   }

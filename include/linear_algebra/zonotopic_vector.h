@@ -121,6 +121,11 @@ namespace Ariadne {
         return this->_centre.size();
       }
       
+      /*! \brief The number of generators. */
+      inline size_type number_of_generators() const {
+        return this->_generators.size2();
+      }
+      
       /*! \brief The centre of the zonotope. */
       inline vector<R> centre() const {
         return this->_centre;
@@ -132,7 +137,7 @@ namespace Ariadne {
       }
      private:
       // Minimize the generator matrix
-      inline void minimize_generators(void);
+      void minimize_generators(void);
      private:
       /* Zonotopic vector's centre. */
       vector<R> _centre;
@@ -141,32 +146,7 @@ namespace Ariadne {
     
     };
   
-    template<typename R>
-    inline 
-    void zonotopic_vector<R>::minimize_generators() 
-    {
-      /* Remove all zero columns from generators. */
-      /* TODO: Remove all linear combinations. */
-      std::vector<size_type> nzcols;
-      for(size_type j=0; j!=_generators.size2(); ++j) {
-        for(size_type i=0; i!=_generators.size1(); ++i) {
-          if(_generators(i,j)!=0) {
-            nzcols.push_back(i);
-            break;
-          }
-        }
-      }
-      
-      matrix<R> new_gens(this->_generators.size1(),nzcols.size());
-      for(size_type j=0; j!=new_gens.size2(); ++j) {
-        size_type k=nzcols[j];
-        for(size_type i=0; i!=new_gens.size1(); ++i) {
-          new_gens(i,j)=this->_generators(i,k);
-        }
-      }
-      
-      this->_generators=new_gens;
-    }
+
   
     /*! \brief The scalar multiple of a zonotopic vector. */
     template<typename R> 
@@ -268,15 +248,7 @@ namespace Ariadne {
     template<typename R> 
     inline
     LinearAlgebra::zonotopic_vector<R>
-    symmetrise(const LinearAlgebra::interval_vector<R>& iv)
-    {
-      matrix<R> A(iv.size(),iv.size()+1);
-      for(size_type i=0; i!=A.size1(); ++i) {
-        A(i,i)=(iv(i).upper()-iv(i).lower())/2;
-        A(i,iv.size())=(iv(i).upper()+iv(i).lower())/2;
-      }
-      return zonotopic_vector<R>(vector<R>(iv.size()),A);
-    }
+    symmetrise(const LinearAlgebra::interval_vector<R>& iv);
       
     
   }

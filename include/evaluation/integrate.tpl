@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+//#define DEBUG
+
 #include <iosfwd>
 #include <string>
 #include <sstream>
@@ -112,50 +114,92 @@ namespace Ariadne {
       return p;
     }
     
-
+    
+    
+/*
+    template<typename R, template<typename> class BS>
+      bool operator<(const std::pair< R,BS<R> >& ts1, const std::pair< R,BS<R> >& ts2) {
+        return ts1.first < ts2.first; 
+      }
+*/
+      
+    template<typename R, typename BST>
+    struct pair_first_less {
+      bool operator()(const std::pair<R,BST>& ts1, const std::pair<R,BST>& ts2) {
+        return ts1.first < ts2.first; 
+      }
+    };
+    
     template<typename R, template<typename> class BS>
     Geometry::ListSet<R,BS> 
-    integrate(const VectorField<R>& vector_field, const Geometry::ListSet<R,BS>& initial_set, const R& time, const R& step_size)
+    integrate(const VectorField<R>& vector_field, 
+              const Geometry::ListSet<R,BS>& initial_set, 
+              const R& time, 
+              const IntegrationParameters<R>& parameters)
     {
       if(time==0) { 
         return initial_set;
       }
 
+      const VectorField<R>& vf=vector_field;
+      R step_size=parameters.step_size;
+      R maximum_set_radius=parameters.maximum_set_radius;
+#ifdef DEBUG
+        std::cerr << "step_size=" << step_size << "  maximum_set_radius=" << maximum_set_radius << std::endl;
+#endif
+      
       R t=time;
       R h=step_size;
-      R spacial_tolerance=0.1;
+      BS<R> bs(initial_set.dimension());
       
-      Geometry::ListSet<R,BS> start=initial_set;
-      Geometry::ListSet<R,BS> finish(initial_set.dimension());
+      std::multiset< std::pair<R,BS<R> >, pair_first_less<R,BS<R> > > working_sets;
+      Geometry::ListSet<R,BS> final_set(initial_set.dimension());
       
-      while(t!=0) {
-        h=min(t,h);
-        for(typename Geometry::ListSet<R,BS>::const_iterator iter=start.begin(); iter!=start.end(); ++iter) {
-          const VectorField<R>& vf=vector_field;
-          BS<R> bs(*iter);
-          bs=integrate(vf,bs,h,h);
-          finish.adjoin(bs);
-        }
-#ifdef DEBUG
-        std::cerr << "finish.size()=" << finish.size() << "  ";
-#endif
-        start.clear();
-        for(typename Geometry::ListSet<R,BS>::const_iterator iter=finish.begin(); iter!=finish.end(); ++iter) {
-          BS<R> bs=*iter;
-          if(bs.radius()>spacial_tolerance) {
-            start.adjoin(bs.subdivide());
-          }
-          else {
-            start.adjoin(bs);
-          }
-        }
-#ifdef DEBUG
-        std::cerr << "start.size()=" << start.size() << "\n";
-#endif
-        finish.clear();
-        t-=h;
+      typedef typename Geometry::ListSet<R,BS>::const_iterator list_set_const_iterator;
+      typedef std::pair< R,BS<R> > timed_set;
+      for(list_set_const_iterator bs_iter=initial_set.begin(); bs_iter!=initial_set.end(); ++bs_iter) {
+        working_sets.insert(timed_set(time,*bs_iter));
       }
-      return start;
+      
+      while(!working_sets.empty()) {
+#ifdef DEBUG
+        //std::cerr << working_sets << "\n\n\n";
+#endif
+        timed_set ts=*working_sets.begin();
+        working_sets.erase(working_sets.begin());
+        t=ts.first;
+        bs=ts.second;
+        h=step_size;
+        
+
+        if(bs.radius()>maximum_set_radius) {
+          Geometry::ListSet<R,BS> subdivisions=bs.subdivide();
+          for(list_set_const_iterator subdiv_iter=subdivisions.begin(); 
+              subdiv_iter!=subdivisions.end(); ++subdiv_iter)
+          {
+            working_sets.insert(timed_set(t,*subdiv_iter));
+          }
+        }
+        else {
+          do {
+#ifdef DEBUG
+        std::cerr << "time left=" << t << "  stepsize=" << h << "  centre=" << bs.centre() 
+                  << "  radius=" << bs.radius() << std::endl;
+#endif
+            h=min(t,h);
+            bs=integration_step(vf,bs,h);
+            t=t-h;
+            h=min(R(2*h),step_size);
+          } while(t!=0 && bs.radius()<=maximum_set_radius);
+          if(t==0) {
+            final_set.adjoin(bs);
+          } else {
+            working_sets.insert(timed_set(t,bs));
+          }
+        }
+      }
+      
+      return final_set;
     }
     
 
@@ -165,7 +209,7 @@ namespace Ariadne {
               const Geometry::GridMaskSet<R>& initial_set,
               const Geometry::GridMaskSet<R>& bounding_set,
               const R& time,
-              const R& step_size) 
+              const IntegrationParameters<R>& parameters) 
     {
       assert(initial_set.grid()==bounding_set.grid());
       using namespace Geometry;
@@ -174,6 +218,8 @@ namespace Ariadne {
       if(time==0) { 
         return initial_set;
       }
+      
+      R step_size=parameters.step_size;
       
       const Geometry::Grid<R>& g(initial_set.grid());
       Geometry::LatticeRectangle lb=bounding_set.bounds();
@@ -235,83 +281,185 @@ namespace Ariadne {
     }
     
     
-    template<typename R, template<typename> class BS>
-    Geometry::ListSet<R,BS> 
+    template<typename R, template<typename> class BSR, template<typename> class BSA>
+    Geometry::ListSet<R,BSR> 
     reach(const VectorField<R>& vector_field, 
-          const Geometry::ListSet<R,BS>& initial_set, 
+          const Geometry::ListSet<R,BSA>& initial_set, 
           const R& time,
-          const R& step_size) 
+          const IntegrationParameters<R>& parameters) 
     {
-      throw std::runtime_error("reach(...): Not implemented.");
+      const VectorField<R>& vf=vector_field;
+      R step_size=parameters.step_size;
+      R maximum_set_radius=parameters.maximum_set_radius;
+#ifdef DEBUG
+        std::cerr << "step_size=" << step_size << "  maximum_set_radius=" << maximum_set_radius << std::endl;
+#endif
       
-      return initial_set;
-    }
+      R t=time;
+      R h=step_size;
+      BSA<R> bs(initial_set.dimension());
+      BSR<R> rs(initial_set.dimension());
+      
+      std::multiset< std::pair<R,BSA<R> >, pair_first_less<R,BSA<R> > > working_sets;
+      Geometry::ListSet<R,BSR> reach_set(initial_set.dimension());
+      
+      typedef typename Geometry::ListSet<R,BSA>::const_iterator list_set_const_iterator;
+      typedef std::pair< R,BSA<R> > timed_set;
+      for(list_set_const_iterator bs_iter=initial_set.begin(); bs_iter!=initial_set.end(); ++bs_iter) {
+        working_sets.insert(timed_set(time,*bs_iter));
+      }
+      
+      while(!working_sets.empty()) {
+#ifdef DEBUG
+        //std::cerr << working_sets << "\n\n\n";
+#endif
+        timed_set ts=*working_sets.begin();
+        working_sets.erase(working_sets.begin());
+        t=ts.first;
+        bs=ts.second;
+        h=step_size;
+        
 
+        if(bs.radius()>maximum_set_radius) {
+          Geometry::ListSet<R,BSA> subdivisions=bs.subdivide();
+          for(list_set_const_iterator subdiv_iter=subdivisions.begin(); 
+              subdiv_iter!=subdivisions.end(); ++subdiv_iter)
+          {
+            working_sets.insert(timed_set(t,*subdiv_iter));
+          }
+        }
+        else {
+          do {
+#ifdef DEBUG
+        std::cerr << "time left=" << t << "  stepsize=" << h << "  centre=" << bs.centre() 
+                  << "  radius=" << bs.radius() << std::endl;
+#endif
+            h=min(t,h);
+            rs=reach_step(vf,BSR<R>(bs),h);
+            reach_set.adjoin(rs);
+#ifdef DEBUG
+        std::cerr << "rs.centre=" << rs.centre() << "  radius=" << rs.radius() 
+                  << "  new size=" << reach_set.size() << std::endl;
+#endif
+            
+            bs=integration_step(vf,bs,h);
+            t=t-h;
+            h=min(R(2*h),step_size);
+          } while(t!=0 && bs.radius()<=maximum_set_radius);
+          if(t==0) {
+          } else {
+            working_sets.insert(timed_set(t,bs));
+          }
+        }
+      }
+      
+      return reach_set;
+    }
 
     template<typename R>
     Geometry::GridMaskSet<R> 
     reach(const VectorField<R>& vector_field, 
-              const Geometry::GridMaskSet<R>& initial_set, 
-              const Geometry::GridMaskSet<R>& bounding_set, 
-              const R& time,
-              const R& step_size) 
+          const Geometry::GridMaskSet<R>& initial_set,
+          const Geometry::GridMaskSet<R>& bounding_set,
+          const R& time,
+          const IntegrationParameters<R>& parameters) 
     {
-      const Geometry::Grid<R>& g(initial_set.grid());
-      const Geometry::Rectangle<R> bb=bounding_set.bounding_box();
+      typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
+      typedef typename Geometry::ListSet<R,Geometry::Zonotope>::const_iterator zls_const_iterator;
       
-      Geometry::GridMaskSet<R> result(vector_field.dimension());
-      for(typename Geometry::GridMaskSet<R>::const_iterator iter=initial_set.begin(); iter!=initial_set.end(); ++iter) {
-        const VectorField<R>& vf=vector_field;
-        Geometry::Parallelotope<R> p(*iter);
-        R t=time;
-        R h=step_size;
-        while(t>0) {
-          h=min(t,h);
-          result.adjoin(over_approximation_of_intersection(reach_step(vf,p,h),bb,g));
-          R hr=h;
-          p=integration_step(vf,p,h);
-          assert(h==hr); // Check integration step uses same time step as reach step.
-          t=t-h;
-          //h=max(R(2*h),step_size);
-        }
+      if(!subset(initial_set,bounding_set)) {
+        throw std::runtime_error("chainreach: Initial set must be subset of bounding set");
+      }
+        
+      const Geometry::Grid<R>& g=initial_set.grid();
+      const Geometry::GridMaskSet<R>& is=initial_set;
+      const Geometry::Rectangle<R>& bb=bounding_set.bounding_box();
+      const Geometry::LatticeRectangle lb=over_approximation(bb,g).position();
+      
+      Geometry::GridMaskSet<R> stored(g,lb);
+      Geometry::GridMaskSet<R> found(g,lb);
+      Geometry::GridMaskSet<R> image(g,lb);
+      Geometry::GridMaskSet<R> result(g,lb);
+      found.adjoin(is);
+      
+      int steps=quotient(time,parameters.lock_to_grid_time);
+      R time_step=time/steps;
+      
+      for(int step=0; step!=steps; ++step) {
+        found=difference(found,stored);
+        stored.adjoin(found);
+        image.clear();
+        Geometry::GridMaskSet<R> image=integrate(vector_field,found,bounding_set,time_step,parameters);
+        found=image;
+      }
+      
+      Geometry::ListSet<R,Geometry::Parallelotope> parallelotope_list;
+      Geometry::ListSet<R,Geometry::Zonotope> zonotope_list;
+      for(gms_const_iterator iter=stored.begin(); iter!=stored.end(); ++iter) {
+        Geometry::Rectangle<R> r=*iter;
+        Geometry::Parallelotope<R> pp(r);
+        parallelotope_list.adjoin(pp);
+      }
+      zonotope_list=reach<R,Geometry::Zonotope,Geometry::Parallelotope>(vector_field,parallelotope_list,time_step,parameters);
+      for(zls_const_iterator iter=zonotope_list.begin(); iter!=zonotope_list.end(); ++iter) {
+        Geometry::Zonotope<R> fz=*iter;
+        Geometry::GridCellListSet<R> oai=over_approximation_of_intersection(fz,bb,g);
+        result.adjoin(oai);
       }
       return result;
     }
-
-/*
+    
+    
+    
     template<typename R>
     Ariadne::Geometry::GridMaskSet<R> 
-    chainreach(const VectorField<R>& f, 
-               const Ariadne::Geometry::ListSet<R,Ariadne::Geometry::Rectangle>& is, 
-               const Ariadne::Geometry::FiniteGrid<R>& g, 
-               const Ariadne::Geometry::Rectangle<R>& bb) 
+    chainreach(const VectorField<R>& vf, 
+               const Geometry::GridMaskSet<R>& initial_set, 
+               const Geometry::GridMaskSet<R>& bounding_set, 
+               const IntegrationParameters<R>& parameters)
     {
-      typedef typename Ariadne::Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
+      typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
+      typedef typename Geometry::ListSet<R,Geometry::Parallelotope>::const_iterator pls_const_iterator;
       
-      Ariadne::Geometry::GridMaskSet<R> result(g);
-      Ariadne::Geometry::GridMaskSet<R> found=over_approximation_of_intersection(is,bb,g);
-      Ariadne::Geometry::GridMaskSet<R> image(g);
+      if(!subset(initial_set,bounding_set)) {
+        throw std::runtime_error("chainreach: Initial set must be subset of bounding set");
+      }
+        
+      const Geometry::Grid<R>& g=initial_set.grid();
+      const Geometry::GridMaskSet<R>& is=initial_set;
+      const Geometry::Rectangle<R>& bb=bounding_set.bounding_box();
+      const Geometry::LatticeRectangle lb=over_approximation(bb,g).position();
       
-      R h(1); // FIXME: change stepsize
+      Geometry::GridMaskSet<R> result(g,lb);
+      Geometry::GridMaskSet<R> found(g,lb);
+      Geometry::GridMaskSet<R> image(g,lb);
+      found.adjoin(is);
+      
+      R step_size=parameters.step_size;
+      R time_step=parameters.lock_to_grid_time;
       
       while(!subset(found,result)) {
         found=difference(found,result);
         result.adjoin(found);
-        image=Ariadne::Geometry::GridMaskSet<R>(g);
+        image.clear();
         uint size=0;
+        Geometry::ListSet<R,Geometry::Parallelotope> parallotope_list;
         for(gms_const_iterator iter=found.begin(); iter!=found.end(); ++iter) {
           ++size;
-          Ariadne::Geometry::Rectangle<R> r=*iter;
-          Ariadne::Geometry::Parallelotope<R> pp(r);
-          Ariadne::Geometry::Parallelotope<R> fp(Ariadne::Evaluation::integrate(f,pp,h));
+          Geometry::Rectangle<R> r=*iter;
+          Geometry::Parallelotope<R> pp(r);
+          parallotope_list.adjoin(pp);
+        }
+        parallotope_list=integrate(vf,parallotope_list,time_step,parameters);
+        for(pls_const_iterator iter=parallotope_list.begin(); iter!=parallotope_list.end(); ++iter) {
+          Geometry::Parallelotope<R> fp=*iter;
           Geometry::GridCellListSet<R> oai=over_approximation_of_intersection(fp,bb,g);
           image.adjoin(oai);
         }
-        std::cerr << size << std::endl;
         found=image;
       }
       return result;
     }
-*/
+
   }
 }

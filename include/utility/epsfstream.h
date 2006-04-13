@@ -304,11 +304,11 @@ namespace Ariadne {
     {
       
       if(eps.fill_style) {
-	trace(eps,p.vertices(),p.centre());
+        trace(eps,p.vertices(),p.centre());
         eps << eps.fill_colour << " fill\n";
       }
       if(eps.line_style) {
-	trace(eps,p.vertices(),p.centre());
+        trace(eps,p.vertices(),p.centre());
         eps << eps.line_colour << " stroke\n";
       }
       return eps;
@@ -318,13 +318,12 @@ namespace Ariadne {
     epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::Zonotope<R>& z)
     {
-      
       if(eps.fill_style) {
-	trace(eps,z.vertices(),z.centre());
+        trace(eps,z.vertices(),z.centre());
         eps << eps.fill_colour << " fill\n";
       }
       if(eps.line_style) {
-	trace(eps,z.vertices(),z.centre());
+        trace(eps,z.vertices(),z.centre());
         eps << eps.line_colour << " stroke\n";
       }
       return eps;
@@ -336,11 +335,11 @@ namespace Ariadne {
     {
       
       if(eps.fill_style) {
-	trace(eps,p.vertices());
+        trace(eps,p.vertices());
         eps << eps.fill_colour << " fill\n";
       }
       if(eps.line_style) {
-	trace(eps,p.vertices());
+        trace(eps,p.vertices());
         eps << eps.line_colour << " stroke\n";
       }
       return eps;

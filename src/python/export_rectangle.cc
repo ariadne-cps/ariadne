@@ -56,6 +56,8 @@ void export_rectangle() {
     .def("dimension", &RRectangle::dimension)
     .def("contains", &RRectangle::contains)
     .def("interior_contains", &RRectangle::interior_contains)
+    .def("centre", &RRectangle::centre)
+    .def("radius", &RRectangle::radius)
     .def("__getitem__", &RRectangle::interval)
     .def("__setitem__", &RRectangle::set_interval)
     .def("set_lower_bound", &RRectangle::set_lower_bound)

@@ -16,7 +16,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
- *
+ *over
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Templece Place - Suite 330, Boston, MA 02111-1307, USA.
@@ -70,6 +70,10 @@ namespace Ariadne {
     template<typename R>
     GridCellListSet<R>
     over_approximation(const Parallelotope<R>& p, const Grid<R>& g);
+
+    template<typename R>
+    GridCellListSet<R>
+    over_approximation(const Zonotope<R>& p, const Grid<R>& g);
 
     template<typename R, template<typename> class BS>
     GridMaskSet<R>

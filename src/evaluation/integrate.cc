@@ -45,19 +45,20 @@ namespace Ariadne {
               const Real&);
 
     
+    
     template 
     Geometry::ListSet<Real,Geometry::Rectangle> 
     integrate(const VectorField<Real>&, 
               const Geometry::ListSet<Real,Geometry::Rectangle>&, 
               const Real&,
-              const Real&);
+              const IntegrationParameters<Real>&);
   
     template 
     Geometry::ListSet<Real,Geometry::Parallelotope> 
     integrate(const VectorField<Real>&, 
               const Geometry::ListSet<Real,Geometry::Parallelotope>&, 
               const Real&,
-              const Real&);
+              const IntegrationParameters<Real>&);
   
     template 
     Geometry::GridMaskSet<Real> 
@@ -65,15 +66,15 @@ namespace Ariadne {
               const Geometry::GridMaskSet<Real>&, 
               const Geometry::GridMaskSet<Real>&,
               const Real&,
-              const Real&);
+              const IntegrationParameters<Real>&);
   
   
     template 
-    Geometry::ListSet<Real,Geometry::Parallelotope> 
+    Geometry::ListSet<Real,Geometry::Zonotope> 
     reach(const VectorField<Real>&, 
           const Geometry::ListSet<Real,Geometry::Parallelotope>&, 
           const Real&,
-          const Real&);
+          const IntegrationParameters<Real>&);
   
     template 
     Geometry::GridMaskSet<Real> 
@@ -81,7 +82,13 @@ namespace Ariadne {
           const Geometry::GridMaskSet<Real>&, 
           const Geometry::GridMaskSet<Real>&, 
           const Real&,
-          const Real&);
+          const IntegrationParameters<Real>&);
   
+    template 
+    Geometry::GridMaskSet<Real> 
+    chainreach(const VectorField<Real>&, 
+          const Geometry::GridMaskSet<Real>&, 
+          const Geometry::GridMaskSet<Real>&, 
+          const IntegrationParameters<Real>&);
   }
 }

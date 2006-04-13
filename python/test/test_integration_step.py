@@ -36,9 +36,9 @@ def plot(fn,bb,set):
   for bs in set:
     eps.write(bs)
   eps.set_fill_colour("blue")
- # eps.write(set[0])
+  eps.write(set[0])
   eps.set_fill_colour("red")
-#  eps.write(set[-1])
+  eps.write(set[-1])
   eps.close()
 
 
@@ -66,6 +66,18 @@ for i in range(0,128):
 #print Rational(step_size)
 plot("integrationstep1",bb,reach_list)
 print len(step_sizes), "steps, sizes", step_sizes
+print "Done\n"
+
+print "Testing reach step of affine vector field on parallelotope"
+step_size=Real(0.25)
+reach_paral=reach_step(avf,Zonotope(init_paral),step_size)
+final_paral=integration_step(avf,init_paral,step_size)
+#print Rational(step_size)
+poly_hull=convex_hull(Polyhedron(init_paral),Polyhedron(final_paral))
+reach_list=[init_paral,reach_paral.bounding_box(),final_paral]
+plot("integrationstep2",bb,reach_list)
+print reach_paral, reach_paral.bounding_box()
+print "step size", step_size
 print "Done\n"
 
 print "Exiting"

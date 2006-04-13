@@ -106,7 +106,6 @@ matrix.o: matrix.cc ../../include/real_typedef.h \
   ../../include/linear_algebra/../numeric/../numeric/../declarations.h \
   ../../include/linear_algebra/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/linear_algebra/../numeric/function.h \
-  /ufs/collins/include/mpfr.h \
   ../../include/linear_algebra/../linear_algebra/vector.h \
   ../../include/linear_algebra/../linear_algebra/../declarations.h \
   ../../include/linear_algebra/../linear_algebra/../numeric/integer.h \

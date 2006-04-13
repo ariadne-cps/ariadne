@@ -34,6 +34,7 @@ namespace Ariadne {
 
     template class ListSet<Real,Rectangle>;
     template class ListSet<Real,Parallelotope>;
+    template class ListSet<Real,Zonotope>;
 
     template bool disjoint(const ListSet<Real,Rectangle>&, const ListSet<Real,Rectangle>&);
     template bool interiors_intersect(const ListSet<Real,Rectangle>&, const ListSet<Real,Rectangle>&);
@@ -44,9 +45,9 @@ namespace Ariadne {
     
     template std::ostream& operator<<(std::ostream&, const ListSet<Real,Rectangle>&);
     template std::ostream& operator<<(std::ostream&, const ListSet<Real,Parallelotope>&);
+    template std::ostream& operator<<(std::ostream&, const ListSet<Real,Zonotope>&);
 
     template std::istream& operator>>(std::istream&, ListSet<Real,Rectangle>&);
-    template std::istream& operator>>(std::istream&, ListSet<Real,Parallelotope>&);
 
   }
 }

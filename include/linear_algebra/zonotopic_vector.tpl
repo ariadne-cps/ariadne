@@ -29,11 +29,54 @@
 namespace Ariadne {
   namespace LinearAlgebra {      
 
+    template<typename R>
+    void zonotopic_vector<R>::minimize_generators() 
+    {
+      return;
+      /* Remove all zero columns from generators. */
+      /* TODO: Remove all linear combinations. */
+      std::vector<size_type> nzcols;
+      for(size_type j=0; j!=_generators.size2(); ++j) {
+        for(size_type i=0; i!=_generators.size1(); ++i) {
+          if(_generators(i,j)!=0) {
+            nzcols.push_back(i);
+            break;
+          }
+        }
+      }
+      
+      matrix<R> new_gens(this->_generators.size1(),nzcols.size());
+      for(size_type j=0; j!=new_gens.size2(); ++j) {
+        size_type k=nzcols[j];
+        for(size_type i=0; i!=new_gens.size1(); ++i) {
+          new_gens(i,j)=this->_generators(i,k);
+        }
+      }
+      
+      this->_generators=new_gens;
+    }    
+    
+    
+    template<typename R> 
+    LinearAlgebra::zonotopic_vector<R>
+    symmetrise(const LinearAlgebra::interval_vector<R>& iv)
+    {
+      std::cerr << "symmetrise(const interval_vector<R>&)" <<  std::endl;
+      std::cerr << "iv=" << iv << std::endl;
+      matrix<R> A(iv.size(),iv.size()+1);
+      for(size_type i=0; i!=A.size1(); ++i) {
+        A(i,i)=iv(i).radius();
+        A(i,iv.size())=iv(i).centre();
+      }
+      std::cerr << iv << " " << A << std::endl;
+      return zonotopic_vector<R>(vector<R>(iv.size()),A);
+    }
+ 
     template<typename R> 
     std::ostream&
     operator<<(std::ostream& os, const zonotopic_vector<R>& zv) 
     {
-      return os << zv.centre() << "+" << zv.generators() << "[-1,1]^" << zv.size();
+      return os << zv.centre() << "+" << zv.generators() << "[-1,1]^" << zv.number_of_generators();
     }
     
   }

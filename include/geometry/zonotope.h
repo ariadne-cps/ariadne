@@ -132,6 +132,11 @@ namespace Ariadne {
         return this->_centre;
       }
       
+      /*! \brief The radius of the zonotope. */
+      real_type radius() const {
+        return this->bounding_box().radius();
+      }
+      
       /*! \brief The matrix of principle directions. */
       matrix_type generators() const {
         return this->_generators;
@@ -158,7 +163,7 @@ namespace Ariadne {
       Rectangle<R> bounding_box() const;
       
       /*! \brief Returns the zonotope's vertices */
-      std::vector< Point<R> > vertices() const;
+      std::vector< state_type > vertices() const;
       
       /*! \brief Tests if the zonotope contains \a point. */
       bool contains(const state_type& point) const;
@@ -187,9 +192,10 @@ namespace Ariadne {
       // The linear inequalities defining the zonotope.
       void compute_linear_inequalities(matrix_type&, vector_type&) const;
 
-      Point<R> _possible_vertices(size_t &vert_num) const;
-      
-      std::vector< state_type > get_the_possible_vertices() const ;
+      // A possible vertex is the image of a vertex of the cube in 
+      // generator space under the affine transformation
+      state_type _possible_vertex(const size_type& vert_num) const;
+      std::vector< state_type > _get_possible_vertices() const ;
     };
   
     

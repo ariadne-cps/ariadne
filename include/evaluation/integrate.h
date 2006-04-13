@@ -34,9 +34,16 @@ namespace Ariadne {
   namespace Evaluation {
    
     template<typename R>
-    class IntegrationParameters {
-     public:
-      IntegrationParameters(const R& h, const R& dx, const R& nh);
+    struct IntegrationParameters {
+      R step_size;
+      R maximum_set_radius;
+      R lock_to_grid_time;
+      IntegrationParameters(const R& ss, const R& msr, const R& ltgr)
+        : step_size(ss), maximum_set_radius(msr), lock_to_grid_time(ltgr) { }
+      IntegrationParameters(const R& ss, const R& msr)
+        : step_size(ss), maximum_set_radius(msr), lock_to_grid_time(4*ss) { }
+      IntegrationParameters(const R& ss)
+        : step_size(ss), maximum_set_radius(ss), lock_to_grid_time(4*ss) { }
     };
     
     
@@ -57,7 +64,7 @@ namespace Ariadne {
     integrate(const VectorField<R>& vector_field, 
               const Geometry::ListSet<R,BS>& initial_set, 
               const R& time, 
-              const R& step_size);
+              const IntegrationParameters<R>& parameters);
 
     /*! \brief Integrate a set within a boundin box using a C1 algorithm. */
     template<typename R>
@@ -66,16 +73,16 @@ namespace Ariadne {
               const Geometry::GridMaskSet<R>& initial_set, 
               const Geometry::GridMaskSet<R>& bounding_set,
               const R& time, 
-              const R& step_size);
+              const IntegrationParameters<R>& parameters);
 
     
     /*! \brief Compute the reachable set. */
-    template<typename R, template<typename> class BS>
-    Geometry::ListSet<R,BS> 
+    template<typename R, template<typename> class BSR, template<typename> class BSA>
+    Geometry::ListSet<R,BSR> 
     reach(const VectorField<R>& vector_field, 
-          const Geometry::ListSet<R,BS>& initial_set, 
+          const Geometry::ListSet<R,BSA>& initial_set, 
           const R& time, 
-          const R& step_size);
+          const IntegrationParameters<R>& parameters);
 
     /*! \brief Integrate a set using a C1 algorithm. */
     template<typename R>
@@ -84,17 +91,15 @@ namespace Ariadne {
           const Geometry::GridMaskSet<R>& initial_set, 
           const Geometry::GridMaskSet<R>& bounding_set, 
           const R& time, 
-          const R& step_size);
+          const IntegrationParameters<R>& parameters);
 
     
-/*
     template<typename R>
     Ariadne::Geometry::GridMaskSet<R> 
     chainreach(const VectorField<R>& f, 
-               const Ariadne::Geometry::ListSet<R,Ariadne::Geometry::Rectangle>& is, 
-               const Ariadne::Geometry::FiniteGrid<R>& g, 
-               const Ariadne::Geometry::Rectangle<R>& bb);
-*/
+               const Geometry::GridMaskSet<R>& initial_set, 
+               const Geometry::GridMaskSet<R>& bounding_set, 
+               const IntegrationParameters<R>& parameters);
     
   }
 }

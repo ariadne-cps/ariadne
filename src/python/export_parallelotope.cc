@@ -70,6 +70,8 @@ void export_parallelotope() {
     .def("dimension", &RParallelotope::dimension)
     .def("contains", &RParallelotope::contains)
     .def("interior_contains", &RParallelotope::interior_contains)
+    .def("centre", &RParallelotope::centre)
+    .def("radius", &RParallelotope::radius)
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 }

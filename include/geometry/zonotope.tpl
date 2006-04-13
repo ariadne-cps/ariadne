@@ -116,6 +116,9 @@ namespace Ariadne {
     bool 
     Zonotope<R>::contains(const state_type& point) const 
     {
+      // FIXME: Own routine
+      return Polyhedron<R>(*this).contains(point);
+      
       if (point.dimension()!=this->dimension()) {
         throw std::domain_error("This object and parameter have different space dimensions");
       }  
@@ -140,7 +143,9 @@ namespace Ariadne {
     bool 
     Zonotope<R>::interior_contains(const state_type& point) const 
     {
-       using namespace Ariadne::LinearAlgebra;
+      // FIXME: Own routine
+      return Polyhedron<R>(*this).interior_contains(point);
+      using namespace Ariadne::LinearAlgebra;
       
       if (point.dimension()!=this->dimension()) {
        throw std::domain_error("This object and parameter have different space dimensions");
@@ -174,10 +179,11 @@ namespace Ariadne {
            offset(i) += abs(this->_generators(i,j));
         }
       }
-      return Rectangle<R>(this->centre()-offset, this->centre()-offset);
+      return Rectangle<R>(this->centre()-offset, this->centre()+offset);
     }
 
-    /* TO IMPROVE */
+
+
     template <typename R>
     std::vector< Point<R> > 
     Zonotope<R>::vertices() const
@@ -187,7 +193,7 @@ namespace Ariadne {
 
     template <typename R>
     std::vector< Point<R> > 
-    Zonotope<R>::get_the_possible_vertices() const
+    Zonotope<R>::_get_possible_vertices() const
     {
       size_t poss_vert=(1<<(this->_generators).size2());
       std::vector< Point<R> > possible_vertices(poss_vert);
@@ -195,7 +201,7 @@ namespace Ariadne {
       assert((this->_generators).size2()<32);
       for (size_t i=0; i<poss_vert; i++) {
         
-        possible_vertices[i]=this->_possible_vertices(i);
+        possible_vertices[i]=this->_possible_vertex(i);
       }
 
       return possible_vertices;
@@ -203,7 +209,7 @@ namespace Ariadne {
       
     template <typename R>
     Point<R> 
-    Zonotope<R>::_possible_vertices(size_t &i) const
+    Zonotope<R>::_possible_vertex(const size_t& i) const
     {
       Point<R> vertex(this->centre());
       const LinearAlgebra::matrix<R> &gen=this->_generators;
@@ -220,19 +226,12 @@ namespace Ariadne {
       }
       return vertex;
     }
-  
+
     
     template <typename R>
     Zonotope<R>::operator Polyhedron<R>() const 
     {
-      using namespace Ariadne::LinearAlgebra;
-      
-      matrix<R> A(0,0);
-      vector<R> b(0);
-      
-      this->compute_linear_inequalities(A,b);
-      
-      return Polyhedron<R>(A,b);
+      return Polyhedron<R>(this->_get_possible_vertices());
     }
     
     

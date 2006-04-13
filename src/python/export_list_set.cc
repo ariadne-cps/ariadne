@@ -26,6 +26,7 @@
 
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
+#include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
@@ -39,6 +40,7 @@ using namespace Ariadne::Geometry;
 using namespace boost::python;
 
 inline RParallelotope plsg(const RParallelotopeListSet& s, int n) { return ::get_item(s,n); }
+inline RZonotope zlsg(const RZonotopeListSet& s, int n) { return ::get_item(s,n); }
   
 void export_list_set() {
   typedef bool (*RectLSBinPred) (const RRectangleListSet&, const RRectangleListSet&);
@@ -87,6 +89,23 @@ def("regular_intersection", RectLSBinFun(&regular_intersection));
     .def("__getitem__", &plsg)
     .def("__setitem__", &RParallelotopeListSet::set)
     .def("__iter__", iterator<RParallelotopeListSet>())
+    .def(self_ns::str(self))    // __self_ns::str__
+  ;
+  
+  class_<RZonotopeListSet>("ZonotopeListSet",init<int>())
+    .def(init<RZonotope>())
+    .def(init<RZonotopeListSet>())
+    .def("dimension", &RZonotopeListSet::dimension)
+    .def("push_back", &RZonotopeListSet::push_back)
+//    .def("adjoin", ZntpLSadjPltp(&RZonotopeListSet::adjoin))
+//    .def("adjoin", ZntpLSadjPltpLS(&RZonotopeListSet::adjoin))
+    .def("size", &RZonotopeListSet::size)
+    .def("__len__", &RZonotopeListSet::size)
+//    .def("__getitem__", &RParallelotopeListSet::get, return_value_policy<copy_const_reference>())
+//    .def("__getitem__", &get_item<RParallelotopeListSet>)
+    .def("__getitem__", &zlsg)
+    .def("__setitem__", &RZonotopeListSet::set)
+    .def("__iter__", iterator<RZonotopeListSet>())
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 

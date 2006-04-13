@@ -79,6 +79,12 @@ namespace Ariadne {
                                        const Grid<Real>& g);
 
     template
+    GridCellListSet<Real>
+    over_approximation_of_intersection(const Zonotope<Real>& z, 
+                                       const Rectangle<Real>& r,
+                                       const Grid<Real>& g);
+
+    template
     GridMaskSet<Real>
     over_approximation_of_intersection(const ListSet<Real,Rectangle>& ls, 
                                        const Rectangle<Real>& r, 

@@ -30,6 +30,7 @@ namespace Ariadne {
   namespace LinearAlgebra {
     
     template class zonotopic_vector<Real>;
+    template zonotopic_vector<Real> symmetrise(const interval_vector<Real>&);
 
     template std::ostream& operator<<(std::ostream&, const zonotopic_vector<Real>&);
   }

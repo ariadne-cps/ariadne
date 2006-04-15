@@ -1,5 +1,5 @@
 /***************************************************************************
- *            integration_step.tpl
+ *            integrator.tpl
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -52,11 +52,14 @@
 #include "../geometry/rectangle.h"
 #include "../geometry/parallelotope.h"
 #include "../geometry/zonotope.h"
+#include "../geometry/list_set.h"
+#include "../geometry/grid.h"
+#include "../geometry/grid_set.h"
 
 #include "../evaluation/vector_field.h"
 #include "../evaluation/affine_vector_field.h"
 
-#include "../evaluation/integration_step.h"
+#include "../evaluation/integrator.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -128,128 +131,26 @@ namespace Ariadne {
     }
     
     
-    
-    
-    
-    
-    template<typename R>
-    bool
-    check_flow_bounds(const Evaluation::VectorField<R>& vf,
-                      const Geometry::Rectangle<R>& r,
-                      const Geometry::Rectangle<R>& b,
-                      const R& h)
-    {
-      using namespace Geometry;
-      return subset(r+Interval<R>(0,h)*vf.apply(b),b);
-    }
-    
-    
-    template<typename R>
-    Geometry::Rectangle<R>
-    compute_flow_bounds(const Evaluation::VectorField<R>& vf,
-                        const Geometry::Rectangle<R>& r,
-                        const R& h,
-                        const unsigned int& maximum_iterations)
-    {
-#ifdef DEBUG
-      std::cerr << "compute_flow_bounds(VectorField<R>, Rectangle<R>, R, uint)\n";
-      std::cerr << "r=" << r << "  h=" << h << "  max_iter=" << maximum_iterations << std::endl;
-#endif
 
-      using namespace Geometry;
-      typedef typename numerical_traits<R>::field_extension_type F;
-      uint iteration=0;
-      R multiplier=1.125;
-      F t=h;
-      Rectangle<R> reach(vf.dimension());
-      Rectangle<R> bounds(vf.dimension());
-      reach=r;
-      
-      while(t>0) {
-        bounds=reach+Interval<R>(0,multiplier*h)*vf.apply(reach);
-        LinearAlgebra::interval_vector<R> df=vf.apply(bounds);
-        
-        F dt=t;
-        for(dimension_type i=0; i!=vf.dimension(); ++i) {
-          if(df(i).upper()>0) {
-            dt=min(dt,F((bounds[i].upper()-reach[i].upper())/df(i).upper()));
-          }
-          if(df(i).lower()<0) {
-            dt=min(dt,F((bounds[i].lower()-reach[i].lower())/df(i).lower()));
-          }
-        }
-        reach=bounds;
-        t-=dt;
-        
-#ifdef DEBUG
-        std::cerr << "t=" << convert_to<double>(t) << "  reach="  << reach << std::endl;
-#endif
-        ++iteration;
-        if(iteration==maximum_iterations) {
-          throw std::runtime_error("Cannot find bounding box for flow");
-        }
-      }
-      return reach;
-    }
-    
-    template<typename R>
-    Geometry::Rectangle<R>
-    estimate_flow_bounds(const Evaluation::VectorField<R>& vf,
-                         const Geometry::Rectangle<R>& r,
-                         R& h)
-    {
-#ifdef DEBUG
-      std::cerr << "estimate_flow_bounds" << std::endl;
-#endif
 
-      unsigned int max_iterations=16;
-      
-      Geometry::Rectangle<R> bounds(vf.dimension());
-      while(bounds.empty_interior()) {
-        try {
-          bounds=compute_flow_bounds(vf,r,h,max_iterations);
-        }
-        catch(std::runtime_error) { 
-          h/=2;
-          max_iterations*=2;
-        }
-      }
-#ifdef DEBUG
-      std::cerr << "bounds=" << bounds << std::endl;
-#endif
-      return bounds;
-    }
-    
+
 
     template<typename R>
-    Geometry::Rectangle<R>
-    refine_flow_bounds(const Evaluation::VectorField<R>& vf,
-                       const Geometry::Point<R>& x,
-                       const Geometry::Rectangle<R>& b,
-                       const R& h)
+    C1LohnerIntegrator<R>::C1LohnerIntegrator(const R& maximum_step_size, const R& lock_to_grid_time, const R& maximum_basic_set_radius)
+      : C1Integrator<R>(maximum_step_size,lock_to_grid_time,maximum_basic_set_radius)
     {
-      using namespace Geometry;
-      using namespace LinearAlgebra;
-      Rectangle<R> rx(x,x);
-      Rectangle<R> xb=rx+Interval<R>(0,h)*vf.apply(b);
-      Rectangle<R> xxb=rx+Interval<R>(0,h)*vf.apply(xb);
-#ifdef DEBUG
-      std::cerr << "new bounds " << xxb << "," << xb << " vs old bounds " << b << "  " << subset(xb,b) << std::endl;
-#endif
-      interval_vector<R> ddphi=vf.derivative(xb)*vf.apply(xb);
-      interval_vector<R> dfx=vf.apply(x);
-      interval_vector<R> hdfx=(h*dfx);
-      interval_vector<R> hhddphi=(R(h*h/2)*ddphi);
-      interval_vector<R> dx=hdfx+hhddphi;
-      return rx+dx;
     }
-    
-    
+
+
+
+
+
+
     template<typename R>
     Geometry::Rectangle<R> 
-    integration_step(const VectorField<R>& vector_field, 
-                     const Geometry::Rectangle<R>& initial_set, 
-                     R& step_size) 
+    C0LohnerIntegrator<R>::integration_step(const VectorField<R>& vector_field, 
+                                            const Geometry::Rectangle<R>& initial_set, 
+                                            R& step_size) const
     {
       using namespace Geometry;
       using namespace LinearAlgebra;
@@ -282,10 +183,53 @@ namespace Ariadne {
     }
 
     template<typename R>
+    Geometry::Rectangle<R> 
+    C0LohnerIntegrator<R>::reachability_step(const VectorField<R>& vector_field, 
+                                             const Geometry::Rectangle<R>& initial_set, 
+                                             R& step_size) const
+    {
+      using namespace Geometry;
+      using namespace LinearAlgebra;
+
+#ifdef DEBUG
+      std::cerr << "integrate(const VectorField<R>& vf, const Geometry::Rectangle<R>& r, const R& t)" << std::endl;
+#endif
+      assert(vector_field.dimension()==initial_set.dimension());
+      
+      const VectorField<R>& vf(vector_field);
+      Rectangle<R> r=initial_set;
+      R& h=step_size;
+
+      Geometry::Rectangle<R> q=estimate_flow_bounds(vf,r,h);
+      
+      LinearAlgebra::interval_vector<R> fq=vf.apply(q);
+      
+      r=r+(Interval<R>(R(0),h)*fq);
+
+#ifdef DEBUG
+      std::cerr << "suggested stepsize=" << step_size << std::endl;
+                
+      std::cerr << "stepsize=" << h << std::endl;
+      std::cerr << "bound=" << q << std::endl;
+
+      std::cerr << "derivative=" << fq << std::endl;
+      std::cerr << "position=" << r << std::endl;
+#endif
+
+      return r;
+    }
+    
+
+
+
+
+
+
+    template<typename R>
     Geometry::Parallelotope<R> 
-    integration_step(const VectorField<R>& vector_field, 
-                     const Geometry::Parallelotope<R>& initial_set, 
-                     R& step_size) 
+    C1LohnerIntegrator<R>::integration_step(const VectorField<R>& vector_field, 
+                                            const Geometry::Parallelotope<R>& initial_set, 
+                                            R& step_size) const
     {
       const VectorField<R>* cvf_ptr=&vector_field;
       const AffineVectorField<R>* cavf_ptr=dynamic_cast< const AffineVectorField<R>* >(cvf_ptr);
@@ -317,7 +261,7 @@ namespace Ariadne {
       
       R err=norm(p.generators())/65536;
       
-      Rectangle<R> b=estimate_flow_bounds(vf,p.bounding_box(),h);
+      Rectangle<R> b=this->estimate_flow_bounds(vf,p.bounding_box(),h);
 #ifdef DEBUG
       std::cerr << "suggested stepsize=" << step_size << std::endl;
       std::cerr << "stepsize=" << h << std::endl;
@@ -344,7 +288,8 @@ namespace Ariadne {
       interval_matrix<R> dphi=exp(hdf);
       
       Point<R> c=p.centre();
-      Rectangle<R> phic=refine_flow_bounds(vf,c,b,h);
+      Rectangle<R> rc=Geometry::Rectangle<R>(c,c);
+      Rectangle<R> phic=refine_flow_bounds(vf,rc,b,h);
       
       interval_vector<R> phicv=phic.position_vectors();
       interval_matrix<R> zv(dphi*p.generators());
@@ -369,9 +314,9 @@ namespace Ariadne {
 
     template<typename R>
     Geometry::Parallelotope<R> 
-    integration_step(const AffineVectorField<R>& vector_field, 
-                     const Geometry::Parallelotope<R>& initial_set, 
-                     R& step_size) 
+    C1LohnerIntegrator<R>::integration_step(const AffineVectorField<R>& vector_field, 
+                                            const Geometry::Parallelotope<R>& initial_set, 
+                                            R& step_size) const
     {
 #ifdef DEBUG
       std::cerr << "integration_step(AffineVectorField<R>, Parallelotope<R>, R)\n";
@@ -414,59 +359,13 @@ namespace Ariadne {
       return p;      
     }
     
-    template<typename R>
-    Geometry::Rectangle<R> 
-    reach_step(const VectorField<R>& vector_field, 
-               const Geometry::Rectangle<R>& initial_set, 
-               R& step_size) 
-    {
-      using namespace Geometry;
-      using namespace LinearAlgebra;
 
-#ifdef DEBUG
-      std::cerr << "integrate(const VectorField<R>& vf, const Geometry::Rectangle<R>& r, const R& t)" << std::endl;
-#endif
-      assert(vector_field.dimension()==initial_set.dimension());
-      
-      const VectorField<R>& vf(vector_field);
-      Rectangle<R> r=initial_set;
-      R& h=step_size;
-
-      Geometry::Rectangle<R> q=estimate_flow_bounds(vf,r,h);
-      
-      LinearAlgebra::interval_vector<R> fq=vf.apply(q);
-      
-      r=r+(Interval<R>(R(0),h)*fq);
-
-#ifdef DEBUG
-      std::cerr << "suggested stepsize=" << step_size << std::endl;
-                
-      std::cerr << "stepsize=" << h << std::endl;
-      std::cerr << "bound=" << q << std::endl;
-
-      std::cerr << "derivative=" << fq << std::endl;
-      std::cerr << "position=" << r << std::endl;
-#endif
-
-      return r;
-    }
     
-    
-    template<typename R>
-    Geometry::Parallelotope<R> 
-    reach_step(const VectorField<R>& vector_field, 
-               const Geometry::Parallelotope<R>& initial_set, 
-               R& step_size)
-    {
-      //FIXME: Return a parallelotope
-      return Geometry::Parallelotope<R>(reach_step(vector_field,Geometry::Zonotope<R>(initial_set),step_size).bounding_box());
-    }
-
     template<typename R>
     Geometry::Zonotope<R> 
-    reach_step(const VectorField<R>& vector_field, 
-               const Geometry::Zonotope<R>& initial_set, 
-               R& step_size)
+    C1LohnerIntegrator<R>::reachability_step(const VectorField<R>& vector_field, 
+                                             const Geometry::Zonotope<R>& initial_set, 
+                                             R& step_size) const
     {
 
 #ifdef DEBUG
@@ -487,7 +386,7 @@ namespace Ariadne {
       const matrix<R> id=identity_matrix<R>(n);
       
       /* Throws exception if we can't find flow bounds for given stepsize. */
-      Rectangle<R> b=compute_flow_bounds(vf,z.bounding_box(),h,256);
+      Rectangle<R> b=estimate_flow_bounds(vf,z.bounding_box(),h,256);
       
       interval_vector<R> f=vf.apply(b);
       interval_matrix<R> df=vf.derivative(b);
@@ -495,7 +394,8 @@ namespace Ariadne {
       interval_matrix<R> dphi=id+Interval<R>(0,h)*df;
       
       Point<R> c=z.centre();
-      Rectangle<R> phic=refine_flow_bounds(vf,c,b,R(h/2));
+      Rectangle<R> rc=Geometry::Rectangle<R>(c,c);
+      Rectangle<R> phic=refine_flow_bounds(vf,rc,b,R(h/2));
       
       interval_vector<R> fh=(R(h/2)*f);
       

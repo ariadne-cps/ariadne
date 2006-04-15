@@ -45,25 +45,27 @@ A=Matrix("[-0.5,-0.75;+1.25,-0.5]")
 b=Vector("[0,0]")
 avf=AffineVectorField(A,b)
 
+lohner=C1LohnerIntegrator(0.125,0.5,0.0625)
+  
 print "Testing integration of affine map on parallelotope"
 initial_rectangle=Rectangle("[0.96,1.04]x[0.46,0.54]")
 initial_parallelotope=Parallelotope(initial_rectangle)
 initial_set=ParallelotopeListSet(initial_parallelotope)
 for i in range(0,16):
-  initial_set.push_back(integrate(avf,initial_set[-1],Real(0.125),Real(0.0625)))
-initial_set.push_back(integrate(avf,initial_set[0],Real(2.0),Real(0.0625)))
+  initial_set.push_back(lohner.integrate(avf,initial_set[-1],Real(0.125)))
+initial_set.push_back(lohner.integrate(avf,initial_set[0],Real(2.0)))
 plot("integrate1",bb,initial_set)
 print "Done\n"
 
 print "Testing integration of affine map on parallelotope list set"
 initial_set=ParallelotopeListSet(initial_parallelotope.subdivide())
-final_set=integrate(avf,initial_set,Real(2.0),IntegrationParameters(0.125,0.0625))
+final_set=lohner.integrate(avf,initial_set,Real(2.0))
 plot("integrate2",bb,[initial_set,final_set])
 print "Done\n"
 
 print "Testing reach of affine map on parallelotope list set"
 initial_set=ParallelotopeListSet(initial_parallelotope.subdivide())
-reach_set=reach(avf,initial_set,Real(2.0),IntegrationParameters(0.125,0.0625))
+reach_set=lohner.reach(avf,initial_set,Real(2.0))
 plot("integrate3",bb,reach_set)
 print "Done\n"
 
@@ -82,7 +84,7 @@ bounds_set=GridMaskSet(grid,bounds)
 bounds_set.adjoin(GridRectangle(grid,bounds))
 #print "bounding set =",bounds_set
 for i in range(0,2):
-  initial_set=integrate(avf,initial_set,bounds_set,Real(2.0),IntegrationParameters(0.125,0.0625))
+  initial_set=lohner.integrate(avf,initial_set,bounds_set,Real(2.0))
   reach_set.adjoin(initial_set)
 plot("integrate4",bb,reach_set)
 print "Done\n"
@@ -101,20 +103,20 @@ reach_set.adjoin(initial_set)
 bounds_set=GridMaskSet(grid,bounds)
 bounds_set.adjoin(GridRectangle(grid,bounds))
 #print "bounding set =",bounds_set
-reach_set=reach(avf,initial_set,bounds_set,Real(1.5),IntegrationParameters(0.125,0.125))
-final_set=integrate(avf,initial_set,bounds_set,Real(1.5),IntegrationParameters(0.125,0.125))
+reach_set=lohner.reach(avf,initial_set,bounds_set,Real(1.5))
+final_set=lohner.integrate(avf,initial_set,bounds_set,Real(1.5))
 plot("integrate5",bb,[initial_set,reach_set,final_set])
 print "Done\n"
 
 
-
+lohner=C1LohnerIntegrator(0.05,0.1,0.1)
 print "Testing integration of lorenz system on rectangle"
 h=Real(1./32)
 ls=LorenzSystem(Real(8./3.),Real(28.0),Real(10.0))
 r0=Rectangle("[1.0,1.01]x[1.0,1.01]x[1.0,1.01]")
 r=[r0]
 for i in range(0,4):
-  r.append(integration_step(ls,r[-1],h))
+  r.append(lohner.integration_step(ls,r[-1],h))
 plot("integrate6",bb,r)
 print "Done\n"
 
@@ -122,13 +124,13 @@ print "Testing integration of lorenz system on parallelotope"
 p0=Parallelotope(r0)
 p=[p0]
 for i in range(0,1):
-  p.append(integration_step(ls,p[-1],h))
+  p.append(lohner.integration_step(ls,p[-1],h))
 plot("integrate7",bb,p)
 print "Done\n"
 
 print "Testing integration of lorenz system on list set"
 initial=ParallelotopeListSet(p0)
-final=integrate(ls,initial,Real(0.14),IntegrationParameters(0.05,0.1))
+final=lohner.integrate(ls,initial,Real(0.14))
 #print final
 eps=EpsPlot("integrate8.eps",bb)
 eps.set_fill_colour("blue")
@@ -150,7 +152,7 @@ initial.adjoin(over_approximation(r0,grid))
 bounding_set=GridMaskSet(grid,lr)
 bounding_set.adjoin(GridRectangle(grid,lr))
 
-final=integrate(ls,initial,bounding_set,Real(1.0),IntegrationParameters(Real(0.1)))
+final=lohner.integrate(ls,initial,bounding_set,Real(1.0))
 eps=EpsPlot("integrate8.eps",bb)
 eps.set_fill_colour("green")
 eps.write(final)

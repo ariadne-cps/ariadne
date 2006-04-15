@@ -1,5 +1,5 @@
 /***************************************************************************
- *            python/export_integrate.cc
+ *            python/export_integrator.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
@@ -29,8 +29,8 @@
 
 #include "evaluation/vector_field.h"
 
-#include "evaluation/integration_step.h"
-#include "evaluation/integrate.h"
+#include "evaluation/integrator.h"
+#include "evaluation/lohner_integrator.h"
 
 
 #include "python/typedefs.h"
@@ -40,48 +40,41 @@ using namespace Ariadne::Evaluation;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-typedef IntegrationParameters<Real> RIntegrationParameters;
-
-RZonotopeListSet inline reach_zonotope_parallelotope_list_set(
-  const RVectorFieldBase& vf, const RParallelotopeListSet& ls, const Real& t, const RIntegrationParameters& p)
-{
-  return reach<Real,Geometry::Zonotope>(vf,ls,t,p);
-}
+typedef Integrator<Real> RIntegrator;
+typedef C0Integrator<Real> RC0Integrator;
+typedef C1Integrator<Real> RC1Integrator;
+typedef C1LohnerIntegrator<Real> RC1LohnerIntegrator;
 
 void export_integrate() {
-  typedef RRectangle (*IntStepRectFunc) (const RVectorFieldBase&, const RRectangle&, Real&);
-  typedef RParallelotope (*IntStepPltpFunc) (const RVectorFieldBase&, const RParallelotope&, Real&);
-  typedef RZonotope (*IntStepZntpFunc) (const RVectorFieldBase&, const RZonotope&, Real&);
-  typedef RRectangle (*IntRectFunc) (const RVectorFieldBase&, const RRectangle&, const Real&, const Real&);
-  typedef RParallelotope (*IntPltpFunc) (const RVectorFieldBase&, const RParallelotope&, const Real&, const Real&);
-  typedef RRectangleListSet (*IntLSRectFunc) (const RVectorFieldBase&, const RRectangleListSet&, const Real&, const RIntegrationParameters&);
-  typedef RZonotopeListSet (*IntLSZNtpFunc) (const RVectorFieldBase&, const RZonotopeListSet&, const Real&, const RIntegrationParameters&);
-  typedef RZonotopeListSet (*ReachLSPltpFunc) (const RVectorFieldBase&, const RParallelotopeListSet&, const Real&, const RIntegrationParameters&);
-  typedef RParallelotopeListSet (*IntLSPltpFunc) (const RVectorFieldBase&, const RParallelotopeListSet&, const Real&, const RIntegrationParameters&);
-  typedef RGridMaskSet (*IntGMSFunc) (const RVectorFieldBase&, const RGridMaskSet&, const RGridMaskSet&, const Real&, const RIntegrationParameters&);
-   typedef RGridMaskSet (*CRGMSFunc) (const RVectorFieldBase&, const RGridMaskSet&, const RGridMaskSet&, const RIntegrationParameters&);
+  typedef RRectangle (RC1LohnerIntegrator::*IntStepRectFunc) (const RVectorFieldBase&, const RRectangle&, Real&) const;
+  typedef RParallelotope (RC1LohnerIntegrator::*IntStepPltpFunc) (const RVectorFieldBase&, const RParallelotope&, Real&) const;
+  typedef RRectangle (RC1Integrator::*RchStepRectFunc) (const RVectorFieldBase&, const RRectangle&, Real&) const;
+  typedef RZonotope (RC1Integrator::*RchStepPltpFunc) (const RVectorFieldBase&, const RParallelotope&, Real&) const;
+  typedef RZonotope (RC1Integrator::*RchStepZntpFunc) (const RVectorFieldBase&, const RZonotope&, Real&) const;
+  typedef RRectangle (RC1LohnerIntegrator::*IntRectFunc) (const RVectorFieldBase&, const RRectangle&, const Real&) const;
+  typedef RParallelotope (RC1LohnerIntegrator::*IntPltpFunc) (const RVectorFieldBase&, const RParallelotope&, const Real&) const;
+  typedef RRectangleListSet (RC1LohnerIntegrator::*IntLSRectFunc) (const RVectorFieldBase&, const RRectangleListSet&, const Real&) const;
+  typedef RZonotopeListSet (RC1LohnerIntegrator::*IntLSZNtpFunc) (const RVectorFieldBase&, const RZonotopeListSet&, const Real&) const;
+  typedef RZonotopeListSet (RC1LohnerIntegrator::*ReachLSPltpFunc) (const RVectorFieldBase&, const RParallelotopeListSet&, const Real&) const;
+  typedef RParallelotopeListSet (RC1LohnerIntegrator::*IntLSPltpFunc) (const RVectorFieldBase&, const RParallelotopeListSet&, const Real&) const;
+  typedef RGridMaskSet (RC1Integrator::*IntGMSFunc) (const RVectorFieldBase&, const RGridMaskSet&, const RGridMaskSet&, const Real&) const;
+  typedef RGridMaskSet (RC1LohnerIntegrator::*CRGMSFunc) (const RVectorFieldBase&, const RGridMaskSet&, const RGridMaskSet&) const;
  
-  class_<RIntegrationParameters>("IntegrationParameters",init<Real,Real,Real>())
-    .def(init<Real>()) 
-    .def(init<double>()) 
-    .def(init<double,double>()) 
-    .def_readwrite("step_size", &RIntegrationParameters::step_size)
-    .def_readwrite("maximum_set_radius", &RIntegrationParameters::maximum_set_radius)
-  ;
+  class_<RC1LohnerIntegrator>("C1LohnerIntegrator",init<Real,Real,Real>())
+    .def(init<double,double,double>()) 
+    .def_readwrite("maximum_step_size", &RC1LohnerIntegrator::maximum_step_size)
+    .def_readwrite("maximum_basic_set_radius", &RC1LohnerIntegrator::maximum_basic_set_radius)
+    .def("integration_step", IntStepRectFunc(&RC1Integrator::integration_step))
+    .def("integration_step", IntStepPltpFunc(&RC1LohnerIntegrator::integration_step))
+    .def("reach_step", RchStepPltpFunc(&RC1LohnerIntegrator::reachability_step))
+    .def("reach_step", RchStepZntpFunc(&RC1LohnerIntegrator::reachability_step))
+    .def("integrate", IntRectFunc(&RC1LohnerIntegrator::integrate))
+    .def("integrate", IntPltpFunc(&RC1LohnerIntegrator::integrate))
+    .def("integrate", IntLSPltpFunc(&RC1LohnerIntegrator::integrate))
+    .def("integrate", IntGMSFunc(&RC1Integrator::integrate))
+    .def("reach", ReachLSPltpFunc(&RC1LohnerIntegrator::reach))
+    .def("reach", IntGMSFunc(&RC1Integrator::reach))
+    .def("chainreach", CRGMSFunc(&RC1LohnerIntegrator::chainreach), "chain reach of a set" )
+    ;
 
-  def("integration_step", IntStepRectFunc(&integration_step), "integrate a vector field over a set for a time up to time h");
-  def("integration_step", IntStepPltpFunc(&integration_step));
-  def("reach_step", IntStepRectFunc(&reach_step));
-  def("reach_step", IntStepPltpFunc(&reach_step));
-  def("reach_step", IntStepZntpFunc(&reach_step));
-  def("integrate", IntRectFunc(&integrate));
-  def("integrate", IntPltpFunc(&integrate));
-  def("integrate", IntLSRectFunc(&integrate));
-  def("integrate", IntLSPltpFunc(&integrate));
-  def("integrate", IntGMSFunc(&integrate));
-  def("reach", ReachLSPltpFunc(&reach));
-//  def("reach", ReachLSPltpFunc(&reach<Real,Geometry::Zonotope,Geometry::Parallelotope>));
-//  def("reach", &reach_zonotope_parallelotope_list_set);
-  def("reach", IntGMSFunc(&reach));
-  def("chainreach", CRGMSFunc(&chainreach), "chain reach of a set" );
 }

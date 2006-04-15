@@ -24,3 +24,6 @@ check:
 
 dep: 
 	(cd ${SRCDIR}; ${MAKE} dep);
+
+pycheck: python
+	for file in python/test/*.py; do echo $$file; $$file; done

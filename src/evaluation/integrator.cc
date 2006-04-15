@@ -1,5 +1,5 @@
 /***************************************************************************
- *            integration_step.cc
+ *            integrator.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -22,39 +22,18 @@
  */
 
 
-#include "evaluation/integration_step.h"
-#include "evaluation/integration_step.tpl"
+#include "evaluation/integrator.h"
+#include "evaluation/lohner_integrator.h"
+
+#include "evaluation/integrator.tpl"
+#include "evaluation/lohner_integrator.tpl"
 
 #include "real_typedef.h"
 
 namespace Ariadne {
   namespace Evaluation {
 
-    template 
-    Geometry::Rectangle<Real> 
-    integration_step(const VectorField<Real>&, const Geometry::Rectangle<Real>&, Real& step_size);
-  
-    template 
-    Geometry::Parallelotope<Real> 
-    integration_step(const VectorField<Real>&, const Geometry::Parallelotope<Real>&, Real& step_size);
-  
-    template 
-    Geometry::Parallelotope<Real> 
-    integration_step(const AffineVectorField<Real>&, const Geometry::Parallelotope<Real>&, Real& step_size);
-  
-    
-    template 
-    Geometry::Rectangle<Real> 
-    reach_step(const VectorField<Real>&, const Geometry::Rectangle<Real>&, Real& step_size);
-  
-    template 
-    Geometry::Parallelotope<Real> 
-    reach_step(const VectorField<Real>&, const Geometry::Parallelotope<Real>&, Real& step_size);
-  
-    template 
-    Geometry::Zonotope<Real> 
-    reach_step(const VectorField<Real>&, const Geometry::Zonotope<Real>&, Real& step_size);
-  
-
+    template class C0LohnerIntegrator<Real>;
+    template class C1LohnerIntegrator<Real>;
   }
 }

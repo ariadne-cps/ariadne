@@ -246,7 +246,6 @@ namespace Ariadne {
 
     /*! The convex hull of \f$[-1,1]*v\f$. */
     template<typename R> 
-    inline
     LinearAlgebra::zonotopic_vector<R>
     symmetrise(const LinearAlgebra::interval_vector<R>& iv);
       

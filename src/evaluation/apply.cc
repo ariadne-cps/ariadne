@@ -29,7 +29,10 @@
 namespace Ariadne {
   namespace Evaluation {
 
-    template 
+    template class C0Applicator<Real>;
+    template class C1Applicator<Real>;
+
+/*  template 
     Geometry::Rectangle<Real> 
     apply(const Map<Real>&, const Geometry::Rectangle<Real>&);
   
@@ -47,6 +50,6 @@ namespace Ariadne {
                const Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Rectangle>&, 
                const Ariadne::Geometry::FiniteGrid<Real>&, 
                const Ariadne::Geometry::Rectangle<Real>&);
-  
+*/
   }
 }

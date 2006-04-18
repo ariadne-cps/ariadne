@@ -42,9 +42,13 @@ cb=Rectangle("[-4,4]x[-4,4]") # cutoff box
 epsbb=Rectangle("[-4.1,4.1]x[-4.1,4.1]") # eps bounding box
 cb=Rectangle(gbb) # cutoff box
 epsbb=Rectangle(gbb) # eps bounding box
-i=RectangleListSet(ir)
+i=GridMaskSet(g)
+b=GridMaskSet(g)
+i.adjoin(over_approximation(ir,g))
+b.adjoin(over_approximation(gbb,g))
 
-cr=chainreach(h,i,g,cb)
+
+cr=chainreach(h,i,b)
 ptcr=PartitionTreeSet(cr)
 
 

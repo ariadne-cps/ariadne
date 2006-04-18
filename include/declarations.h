@@ -101,7 +101,7 @@ template <typename R> class HenonMap;
 template <typename R> class LorenzSystem;
 }}
 
-namespace Ariadne {
+namespace Ariadne { namespace Base {
 /*! \brief An unsigned integral type used to represent a coordinate in state space. */
 typedef unsigned short dimension_type;
 /*! \brief An unsigned integral type used to represent the size of a list. */
@@ -111,15 +111,15 @@ typedef int index_type;
 /*! \brief The type of a machine byte. */
 typedef unsigned char byte_type; 
  
-namespace Base {
 /*! \brief An array of boolean values. */
 typedef array<bool> BooleanArray;
 /*! \brief An array of unsigned integer values. */
 typedef array<size_type> SizeArray;
 /*! \brief An array of integer values. */
 typedef array<index_type> IndexArray;
-}
+}}
 
+namespace Ariadne {
 using namespace Base;
 using namespace Numeric;
 }

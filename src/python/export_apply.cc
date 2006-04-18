@@ -35,14 +35,33 @@ using namespace Ariadne::Evaluation;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-typedef RRectangle (*MapRectBinFun) (const RMapBase&, const RRectangle&);
-typedef RParallelotope (*MapPltpBinFun) (const RMapBase&, const RParallelotope&);
-typedef RParallelotopeListSet (*MapLSPltpBinFun) (const RMapBase&, const RParallelotopeListSet&);
-typedef RGridMaskSet (*CRFun) (const RMapBase&, const RRectangleListSet&, const RFiniteGrid&, const RRectangle&);
+typedef C0Applicator<Real> RC0Applicator;
+typedef C1Applicator<Real> RC1Applicator;
+
+typedef RRectangle (RC0Applicator::*ApplMapRectBinFunc) (const RMapBase&, const RRectangle&) const;
+typedef RParallelotope (RC1Applicator::*ApplMapPltpBinFunc) (const RMapBase&, const RParallelotope&) const;
+typedef RParallelotopeListSet (RC1Applicator::*ApplMapLSPltpBinFunc) (const RMapBase&, const RParallelotopeListSet&) const;
+typedef RGridMaskSet (RC1Applicator::*ApplMapGMSFunc) (const RMapBase&, const RGridMaskSet&, const RGridMaskSet&) const;
+
+typedef RRectangle (*MapRectBinFunc) (const RMapBase&, const RRectangle&);
+typedef RParallelotope (*MapPltpBinFunc) (const RMapBase&, const RParallelotope&);
+typedef RParallelotopeListSet (*MapLSPltpBinFunc) (const RMapBase&, const RParallelotopeListSet&);
+typedef RGridMaskSet (*MapGMSFunc) (const RMapBase&, const RGridMaskSet&, const RGridMaskSet&);
 
 void export_apply() {
-  def("apply", MapRectBinFun(&apply), "apply the image of a map to a set" );
-  def("apply", MapPltpBinFun(&apply), "apply the image of a map to a set" );
-  def("apply", MapLSPltpBinFun(&apply), "apply the image of a map to a set" );
-  def("chainreach", CRFun(&chainreach), "chain reach of a set" );
+
+  class_<RC1Applicator>("C1Applicator",init<>())
+    .def("apply", ApplMapRectBinFunc(&RC0Applicator::apply), "apply the image of a map to a set" )
+    .def("apply", ApplMapPltpBinFunc(&RC1Applicator::apply), "apply the image of a map to a set" )
+    .def("apply", ApplMapLSPltpBinFunc(&RC1Applicator::apply), "apply the image of a map to a set" )
+    .def("apply", ApplMapGMSFunc(&RC1Applicator::apply), "apply the image of a map to a set" )
+    .def("chainreach", ApplMapGMSFunc(&RC1Applicator::chainreach), "Compute the chain reachable set")
+  ;
+  
+  def("apply", MapRectBinFunc(&apply), "apply the image of a map to a set" );
+  def("apply", MapPltpBinFunc(&apply), "apply the image of a map to a set" );
+  def("apply", MapLSPltpBinFunc(&apply), "apply the image of a map to a set" );
+  def("apply", MapGMSFunc(&apply), "apply the image of a map to a set" );
+  def("chainreach", MapGMSFunc(&chainreach), "Compute the chain reachable set");
+  
 }

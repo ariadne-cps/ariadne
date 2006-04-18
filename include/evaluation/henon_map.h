@@ -56,7 +56,7 @@ namespace Ariadne {
       /*! \brief  The map applied to a rectangle basic set. */
       virtual Geometry::Rectangle<R> apply(const Geometry::Rectangle<R>& r) const;
       /*! \brief  The map applied to a parallelotope basic set. */
-      virtual Geometry::Parallelotope<R> apply(const Geometry::Parallelotope<R>& p) const;
+      virtual Geometry::Parallelotope<R> apply(const Geometry::Parallelotope<R>& r) const;
       
       /*! \brief  The derivative of the map at a point. */
       virtual LinearAlgebra::Matrix<R> derivative(const state_type& x) const;
@@ -93,6 +93,13 @@ namespace Ariadne {
     }
      
     template <typename R>
+    Geometry::Parallelotope<R>
+    HenonMap<R>::apply(const Geometry::Parallelotope<R>& A) const
+    {
+      return C1Applicator<R>().apply(*this,A);
+    }
+     
+    template <typename R>
     Geometry::Rectangle<R>
     HenonMap<R>::apply(const Geometry::Rectangle<R>& A) const
     {
@@ -102,13 +109,6 @@ namespace Ariadne {
       return result;
     }
      
-    template <typename R>
-    Geometry::Parallelotope<R>
-    HenonMap<R>::apply(const Geometry::Parallelotope<R>& p) const
-    {
-      return Evaluation::apply(*this,p);
-    }
-
     template <typename R>
     LinearAlgebra::Matrix<R>
     HenonMap<R>::derivative(const Geometry::Point<R>& x) const

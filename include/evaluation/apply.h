@@ -36,29 +36,104 @@
 namespace Ariadne {
   namespace Evaluation {
 
+    /*! \brief A class for computing the image of a set under a map. */
+    template<typename R, template<typename> class BS>
+    class Applicator {
+     public:
+      /*! \brief Compute the image of a basic set under a continuous function. */
+      virtual ~Applicator();
+      
+      /*! \brief Compute the image of a basic set under a continuous function. */
+      virtual BS<R> apply(const Map<R>& f, const BS<R>& s) const = 0;
+
+      /*! \brief Compute the image of a list set under a map. */
+      virtual 
+      Geometry::ListSet<R,BS> 
+      apply(const Map<R>& f, const Geometry::ListSet<R,BS>& ds) const;
+       
+      /*! \brief Compute the image of \a map starting in \a initial_set while remaining in \a bounding_set. */
+      virtual
+      Geometry::GridMaskSet<R> 
+      apply(const Map<R>& map, 
+            const Geometry::GridMaskSet<R>& initial_set,
+            const Geometry::GridMaskSet<R>& bounding_set) const;
+
+      /*! \brief Compute the chain-reachable set of \a map starting in \a initial_set while staying within \a bounding_set. */
+      virtual
+      Geometry::GridMaskSet<R> 
+      chainreach(const Map<R>& map, 
+                 const Geometry::GridMaskSet<R>& initial_set, 
+                 const Geometry::GridMaskSet<R>& bounding_set) const;
+    };
+    
+    /*! \brief A class for computing the image of a continuous map on a rectangle. */
+    template<typename R>
+    class C0Applicator
+      : public Applicator<R,Geometry::Rectangle> 
+    {
+     public:
+      /*! \brief Compute the image of a rectangle under a continuous function. */
+      virtual Geometry::Rectangle<R> apply(const Map<R>& f, const Geometry::Rectangle<R>& r) const;
+    };
+
+    /*! \brief A class for computing the image of a differentiable map on a parallelotope. */
+    template<typename R>
+    class C1Applicator
+      : public Applicator<R,Geometry::Parallelotope> 
+    {
+     public:
+      /*! \brief Compute the image of a parallelotope under a continuous function. */
+      virtual Geometry::Parallelotope<R> apply(const Map<R>& f, const Geometry::Parallelotope<R>& p) const;
+    };
+
+    
+    
+    
     /*! \brief Compute the image of a rectangle under a continuous function. */
     template<typename R>
     Geometry::Rectangle<R> 
-    apply(const Map<R>& f, const Geometry::Rectangle<R>& p);
-
+    apply(const Map<R>& f, const Geometry::Rectangle<R>& s) {
+      return C0Applicator<R>().apply(f,s);
+    }
+    
     /*! \brief Compute the image of a parallelotope under a differentiable function. */
     template<typename R>
+    inline
     Geometry::Parallelotope<R> 
-    apply(const Map<R>& f, const Geometry::Parallelotope<R>& p);
-
-    /*! \brief Compute the image of a list set under a map. */
-    template<typename R, template<typename> class BS>
-    Geometry::ListSet<R,BS> 
-    apply(const Map<R>& f, const Geometry::ListSet<R,BS>& ds);
-     
+    apply(const Map<R>& f, const Geometry::Parallelotope<R>& s) {
+      return C1Applicator<R>().apply(f,s);
+    }
+    
+    /*! \brief Compute the image of a parallelotope under a differentiable function. */
+    template<typename R>
+    inline
+    Geometry::ListSet<R,Geometry::Parallelotope>
+    apply(const Map<R>& f, const Geometry::ListSet<R,Geometry::Parallelotope>& s) {
+      return C1Applicator<R>().Applicator<R,Geometry::Parallelotope>::apply(f,s);
+    }
+    
     /*! \brief Compute the chain-reachable set of \a map starting in \a initial_set on the grid \a grid while staying within \a bounds. */
     template<typename R>
+    inline
+    Geometry::GridMaskSet<R> 
+    apply(const Map<R>& map, 
+          const Geometry::GridMaskSet<R>& initial_set, 
+          const Geometry::GridMaskSet<R>& bounding_set) 
+    {
+      return C1Applicator<R>().Applicator<R,Geometry::Parallelotope>::apply(map,initial_set,bounding_set);
+    }
+
+    /*! \brief Compute the chain-reachable set of \a map starting in \a initial_set on the grid \a grid while staying within \a bounds. */
+    template<typename R>
+    inline
     Geometry::GridMaskSet<R> 
     chainreach(const Map<R>& map, 
-               const Geometry::ListSet<R,Geometry::Rectangle>& initial_set, 
-               const Geometry::FiniteGrid<R>& grid, 
-               const Geometry::Rectangle<R>& bounds);
-    
+               const Geometry::GridMaskSet<R>& initial_set, 
+               const Geometry::GridMaskSet<R>& bounding_set) 
+    {
+      return C1Applicator<R>().chainreach(map,initial_set,bounding_set);
+    }
+
   }
 }
 

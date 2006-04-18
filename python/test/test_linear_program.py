@@ -27,9 +27,9 @@ from ariadne.geometry import EpsPlot, Point, Rectangle, Parallelotope, disjoint
 
 import sys
 
-A=Matrix(3,2)
-b=Vector(3)
-c=Vector(2)
+A=RationalMatrix(3,2)
+b=RationalVector(3)
+c=RationalVector(2)
 A[0,0]=2.
 A[0,1]=1.
 A[1,0]=1.
@@ -49,7 +49,7 @@ print lp.optimizing_point()
 print lp.optimal_value()
 
 
-T=Matrix(4,4)
+T=RationalMatrix(4,4)
 T[0,0]=0.5
 T[0,1]=0.25
 T[0,3]=4.0
@@ -133,7 +133,7 @@ for i in range(0,n):
   T[3*n,2*n]-=T[2*n+i,2*n]
   
 print T
-TT=FMatrix(T)
+TT=RationalMatrix(T)
 
 lp=RationalLinearProgram(T)
 print lp

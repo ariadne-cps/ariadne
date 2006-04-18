@@ -45,7 +45,6 @@ void export_henon_map() {
     .def("__call__", ParallelotopeMap(&RHenonMap::apply))
     .def("apply", PointMap(&RHenonMap::apply))
     .def("apply", RectangleMap(&RHenonMap::apply))
-    .def("apply", ParallelotopeMap(&RHenonMap::apply))
     .def("derivative", PointDerivative(&RHenonMap::derivative))
     .def("derivative", RectangleDerivative(&RHenonMap::derivative))
     .def(self_ns::str(self))    // __self_ns::str__

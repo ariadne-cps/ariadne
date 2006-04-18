@@ -286,6 +286,7 @@ apply.o: apply.cc ../../include/evaluation/apply.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/../base/array_operations.h \
   ../../include/evaluation/../geometry/../geometry/../geometry/../base/../declarations.h \
   ../../include/evaluation/../geometry/../geometry/lattice_set.h \
+  ../../include/evaluation/../geometry/lattice_set.h \
   ../../include/evaluation/../evaluation/apply.h \
   ../../include/real_typedef.h ../../include/numeric/numerical_types.h
 

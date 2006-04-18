@@ -75,7 +75,6 @@ namespace Ariadne {
         return this->apply(A); }
       Geometry::Polyhedron<R> operator() (const Geometry::Polyhedron<R>& A) const {
         return this->apply(A); }
-    
     };
   
     

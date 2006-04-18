@@ -43,6 +43,7 @@
 #include "../geometry/parallelotope.h"
 #include "../geometry/list_set.h"
 #include "../geometry/grid_set.h"
+#include "../geometry/lattice_set.h"
 
 #include "../evaluation/apply.h"
 #include "../evaluation/map.h"
@@ -53,7 +54,7 @@ namespace Ariadne {
    
     template<typename R>
     Geometry::Rectangle<R> 
-    apply(const Map<R>& f, const Geometry::Rectangle<R>& r) 
+    C0Applicator<R>::apply(const Map<R>& f, const Geometry::Rectangle<R>& r) const
     {
       return f.apply(r);
     }
@@ -61,7 +62,7 @@ namespace Ariadne {
     
     template<typename R>
     Geometry::Parallelotope<R> 
-    apply(const Map<R>& f, const Geometry::Parallelotope<R>& p) 
+    C1Applicator<R>::apply(const Map<R>& f, const Geometry::Parallelotope<R>& p) const 
     {
       typedef typename numerical_traits<R>::field_extension_type F;
 
@@ -101,44 +102,74 @@ namespace Ariadne {
     }
 
     template<typename R, template<typename> class BS>
+    Applicator<R,BS>::~Applicator() 
+    {
+    }
+    
+    template<typename R, template<typename> class BS>
     Geometry::ListSet<R,BS> 
-    apply(const Map<R>& f, const Geometry::ListSet<R,BS>& ds) {
+    Applicator<R,BS>::apply(const Map<R>& f, const Geometry::ListSet<R,BS>& ds) const 
+    {
       Geometry::ListSet<R,BS> result(f.result_dimension());
       for(typename Geometry::ListSet<R,BS>::const_iterator iter=ds.begin(); iter!=ds.end(); ++iter) {
-        result.push_back(apply(f,*iter));
+        result.push_back(this->apply(f,*iter));
       }
       return result;
     }
      
     
-    template<typename R>
+    template<typename R, template<typename> class BS>
     Geometry::GridMaskSet<R> 
-    chainreach(const Map<R>& f, 
-               const Geometry::ListSet<R,Ariadne::Geometry::Rectangle>& is, 
-               const Geometry::FiniteGrid<R>& g, 
-               const Geometry::Rectangle<R>& bb) 
+    Applicator<R,BS>::apply(const Map<R>& f, 
+                            const Geometry::GridMaskSet<R>& is, 
+                            const Geometry::GridMaskSet<R>& bs) const 
     {
-      typedef typename Ariadne::Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
+      typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
       
-      Geometry::GridMaskSet<R> result(g);
-      Geometry::GridMaskSet<R> found=over_approximation_of_intersection(is,bb,g);
-      Geometry::GridMaskSet<R> image(g);
+      const Geometry::Grid<R>& g=is.grid();
+      Geometry::LatticeRectangle bd=is.bounds();
+      Geometry::GridMaskSet<R> image(g,bd);
+      Geometry::Rectangle<R> bb=is.bounding_box();
       
+      for(gms_const_iterator iter=is.begin(); iter!=is.end(); ++iter) {
+        Geometry::Rectangle<R> r=*iter;
+        BS<R> p=convert_to< BS<R> >(r);
+        BS<R> fp=this->apply(f,p);
+        image.adjoin(over_approximation_of_intersection(fp,bb,g));
+      }
+      return regular_intersection(image,bs);
+    }
+    
+    
+    template<typename R, template<typename> class BS>
+    Geometry::GridMaskSet<R> 
+    Applicator<R,BS>::chainreach(const Map<R>& f, 
+                                 const Geometry::GridMaskSet<R>& is, 
+                                 const Geometry::GridMaskSet<R>& bs) const
+    {
+      typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
+      
+      const Geometry::Grid<R>& g=is.grid();
+      Geometry::LatticeRectangle bd=is.bounds();
+      Geometry::Rectangle<R> bb=is.bounding_box();
+      Geometry::GridMaskSet<R> result(g,bd);
+      Geometry::GridMaskSet<R> found(g,bd);
+      Geometry::GridMaskSet<R> image(g,bd);
+      
+      found=is;
       while(!subset(found,result)) {
         found=difference(found,result);
         result.adjoin(found);
-        image=Geometry::GridMaskSet<R>(g);
+        image=Geometry::GridMaskSet<R>(g,bd);
         uint size=0;
         for(gms_const_iterator iter=found.begin(); iter!=found.end(); ++iter) {
           ++size;
           Geometry::Rectangle<R> r=*iter;
-          Geometry::Parallelotope<R> pp(r);
-          Geometry::Parallelotope<R> fp(Ariadne::Evaluation::apply(f,pp));
-          Geometry::GridCellListSet<R> oai=over_approximation_of_intersection(fp,bb,g);
-          image.adjoin(oai);
+          BS<R> p=convert_to< BS<R> >(r);
+          BS<R> fp=this->apply(f,p);
+          image.adjoin(over_approximation_of_intersection(fp,bb,g));
         }
-        std::cerr << size << std::endl;
-        found=image;
+        found=regular_intersection(image,bs);
       }
       return result;
     }

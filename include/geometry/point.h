@@ -49,10 +49,10 @@ namespace Ariadne {
     class Point {
      public:
       typedef R real_type;
-      typedef LinearAlgebra::vector<R> vector_type;
+      typedef LinearAlgebra::Vector<R> Vector_type;
      
       typedef real_type value_type;
-      typedef vector_type difference_type;
+      typedef Vector_type difference_type;
      public:
       /*! \brief Default constructor. */
       Point() : _vector(0) { }
@@ -74,8 +74,8 @@ namespace Ariadne {
         }
       }
 
-      /*! \brief Construct a point from a position vector. */
-      explicit Point(const vector_type& position) : _vector(position) { }
+      /*! \brief Construct a point from a position Vector. */
+      explicit Point(const Vector_type& position) : _vector(position) { }
 
       /*! \brief Construct a point from a string literal. */
       explicit Point(const std::string& s);
@@ -112,7 +112,7 @@ namespace Ariadne {
       /*! \brief Subcripting operator. */
       real_type& operator[] (size_type index) {
         if(this->_vector.size() <= index) { 
-          throw std::out_of_range("Out of the vector's range.");
+          throw std::out_of_range("Out of the Vector's range.");
         }
         return  (this->_vector[index]);
       }
@@ -120,26 +120,26 @@ namespace Ariadne {
       /*! \brief Subcripting operator. */
       const real_type& operator[](size_type index) const {
         if(this->_vector.size() <= index) { 
-            throw std::out_of_range("Out of the vector's range.");
+            throw std::out_of_range("Out of the Vector's range.");
         }
         return  (this->_vector[index]);
       }
 
-      /*! \brief The position vector of the point. */
-      const vector_type& position_vector() const {
+      /*! \brief The position Vector of the point. */
+      const Vector_type& position_vector() const {
         return this->_vector; 
       }
       
       real_type get(size_type index) const {
         if(this->_vector.size() <= index) { 
-          throw std::out_of_range("Out of the vector's range.");
+          throw std::out_of_range("Out of the Vector's range.");
         }
         return  (this->_vector[index]);
       }
 
       void set(size_type index, const real_type& r) {
         if(this->_vector.size() <= index) {
-          throw std::out_of_range("Out of the vector's range.");
+          throw std::out_of_range("Out of the Vector's range.");
         }
         this->_vector[index]=r;
       }
@@ -147,13 +147,13 @@ namespace Ariadne {
       friend std::ostream& operator<< <>(std::ostream& os, const Point<real_type>& state);
       friend std::istream& operator>> <> (std::istream& is, Point<real_type>& state);
      private:
-      vector_type _vector;
+      Vector_type _vector;
     };
 
 
     template <typename R>
     inline
-    LinearAlgebra::vector<R>
+    LinearAlgebra::Vector<R>
     operator-(const Point<R>& s1, const Point<R>& s2)
     {
       return s1.position_vector() - s2.position_vector();
@@ -162,7 +162,7 @@ namespace Ariadne {
     template <typename R>
     inline
     Point<R> 
-    operator+(const Point<R>& s, const LinearAlgebra::vector<R>& v)
+    operator+(const Point<R>& s, const LinearAlgebra::Vector<R>& v)
     {
       return Point<R>(s.position_vector() + v);
     }
@@ -170,7 +170,7 @@ namespace Ariadne {
     template <typename R>
     inline
     Point<R> 
-    operator-(const Point<R>& s, const LinearAlgebra::vector<R>& v)
+    operator-(const Point<R>& s, const LinearAlgebra::Vector<R>& v)
     {
       return Point<R>(s.position_vector() - v);
     }

@@ -42,7 +42,7 @@ b[2]=1.
 c[0]=4.
 c[1]=5.
 
-lp=LinearProgram(A,b,c)
+lp=RationalLinearProgram(A,b,c)
 print lp
 lp.solve()
 print lp.optimizing_point()
@@ -66,7 +66,7 @@ T[3,1]=-4.0
 T[3,2]=1.0
 T[3,3]=-30.0
 
-lp=LinearProgram(T)
+lp=RationalLinearProgram(T)
 print lp
 lp.solve()
 print lp.optimizing_point()
@@ -108,7 +108,7 @@ Ao=A*o
 #  Need to minimise sum of auxiliary variables -> add sum of last rows to get
 #  value function.
 
-T=QMatrix(3*n+1,2*n+1)
+T=RationalMatrix(3*n+1,2*n+1)
 a=r.lower_corner()
 b=r.upper_corner()
 rh=(c-a)-Ao
@@ -133,9 +133,9 @@ for i in range(0,n):
   T[3*n,2*n]-=T[2*n+i,2*n]
   
 print T
-TT=QMatrix(T)
+TT=FMatrix(T)
 
-lp=QLinearProgram(T)
+lp=RationalLinearProgram(T)
 print lp
 lp.solve()
 u=lp.optimizing_point()

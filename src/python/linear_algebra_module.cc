@@ -25,19 +25,19 @@
 #include <boost/python.hpp>
 
 void export_vector();
-void export_matrix();
+void export_Matrix();
 void export_linear_program();
 
-void export_interval_vector();
-void export_interval_matrix();
+void export_IntervalVector();
+void export_IntervalMatrix();
 
 
 BOOST_PYTHON_MODULE(linear_algebra)
 {
   export_vector();
-  export_matrix();
+  export_Matrix();
   export_linear_program();
   
-  export_interval_vector();
-  export_interval_matrix();
+  export_IntervalVector();
+  export_IntervalMatrix();
 }

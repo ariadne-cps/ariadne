@@ -1,5 +1,5 @@
 /***************************************************************************
- *            tensor.cc
+ *            Tensor.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it Pieter.Collins@cwi.nl
@@ -29,29 +29,29 @@
 namespace Ariadne {
   namespace LinearAlgebra {
     
-    template class tensor<Float64>;
-    template class tensor<Real>;
-    template class tensor<Field>;
+    template class Tensor<Float64>;
+    template class Tensor<Real>;
+    template class Tensor<Field>;
 
-    template vector<Float64> product(const tensor<Float64>&, const vector<Float64>&, const vector<Float64>&);
-    template vector<Real> product(const tensor<Real>&, const vector<Real>&, const vector<Real>&);
-    template vector<Field> product(const tensor<Field>&, const vector<Field>&, const vector<Field>&);
+    template Vector<Float64> product(const Tensor<Float64>&, const Vector<Float64>&, const Vector<Float64>&);
+    template Vector<Real> product(const Tensor<Real>&, const Vector<Real>&, const Vector<Real>&);
+    template Vector<Field> product(const Tensor<Field>&, const Vector<Field>&, const Vector<Field>&);
     
-    template matrix<Float64> product(const tensor<Float64>&, const vector<Float64>&);
-    template matrix<Real> product(const tensor<Real>&, const vector<Real>&);
-    template matrix<Field> product(const tensor<Field>&, const vector<Field>&);
+    template Matrix<Float64> product(const Tensor<Float64>&, const Vector<Float64>&);
+    template Matrix<Real> product(const Tensor<Real>&, const Vector<Real>&);
+    template Matrix<Field> product(const Tensor<Field>&, const Vector<Field>&);
     
-    template tensor<Float64> product(const tensor<Float64>&, const matrix<Float64>&);
-    template tensor<Real> product(const tensor<Real>&, const matrix<Real>&);
-    template tensor<Field> product(const tensor<Field>&, const matrix<Field>&);
+    template Tensor<Float64> product(const Tensor<Float64>&, const Matrix<Float64>&);
+    template Tensor<Real> product(const Tensor<Real>&, const Matrix<Real>&);
+    template Tensor<Field> product(const Tensor<Field>&, const Matrix<Field>&);
     
-    template tensor<Float64> product(const tensor<Float64>&, const matrix<Float64>&, const matrix<Float64>&);
-    template tensor<Real> product(const tensor<Real>&, const matrix<Real>&, const matrix<Real>&);
-    template tensor<Field> product(const tensor<Field>&, const matrix<Field>&, const matrix<Field>&);
+    template Tensor<Float64> product(const Tensor<Float64>&, const Matrix<Float64>&, const Matrix<Float64>&);
+    template Tensor<Real> product(const Tensor<Real>&, const Matrix<Real>&, const Matrix<Real>&);
+    template Tensor<Field> product(const Tensor<Field>&, const Matrix<Field>&, const Matrix<Field>&);
     
-    template std::ostream& operator<<(std::ostream&, const tensor<Float64>&);
-    template std::ostream& operator<<(std::ostream&, const tensor<Real>&);
-    template std::ostream& operator<<(std::ostream&, const tensor<Field>&);
+    template std::ostream& operator<<(std::ostream&, const Tensor<Float64>&);
+    template std::ostream& operator<<(std::ostream&, const Tensor<Real>&);
+    template std::ostream& operator<<(std::ostream&, const Tensor<Field>&);
     
   }
 }

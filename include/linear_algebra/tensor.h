@@ -38,17 +38,17 @@ namespace Ariadne {
   namespace LinearAlgebra {
     
     
-    /*! A tensor representing a second derivative. */
+    /*! \brief A Tensor representing a second derivative. */
     template<typename R> 
-    class tensor {
+    class Tensor {
      public:
-      tensor(size_type m, size_type n1, size_type n2)
+      Tensor(size_type m, size_type n1, size_type n2)
         : _sizes(3), _elements(m*n1*n2,R(0)) 
       { _sizes[0]=m; _sizes[1]=n1; _sizes[2]=n2; }
       
-      tensor(const tensor<R>& other) : _sizes(other._sizes), _elements(other._elements) { }
+      Tensor(const Tensor<R>& other) : _sizes(other._sizes), _elements(other._elements) { }
 
-      tensor<R>& operator=(const tensor<R>& other) {
+      Tensor<R>& operator=(const Tensor<R>& other) {
         if(this!=&other) {
           this->_sizes=other._sizes;
           this->_elements=other._elements;
@@ -71,25 +71,25 @@ namespace Ariadne {
     };
   
     template<typename R>
-    vector<R>
-    product(const tensor<R>& T, const vector<R>& v1, const vector<R>& v2);
+    Vector<R>
+    product(const Tensor<R>& T, const Vector<R>& v1, const Vector<R>& v2);
     
     template<typename R>
-    matrix<R>
-    product(const tensor<R>& T, const vector<R>& v1);
+    Matrix<R>
+    product(const Tensor<R>& T, const Vector<R>& v1);
     
     template<typename R>
-    tensor<R>
-    product(const tensor<R>& T, const matrix<R>& A1);
+    Tensor<R>
+    product(const Tensor<R>& T, const Matrix<R>& A1);
 
     template<typename R>
     std::ostream&
-    operator<< (std::ostream& os, const tensor<R>& T); 
+    operator<< (std::ostream& os, const Tensor<R>& T); 
 
     template<typename R>
     inline 
-    matrix<R> 
-    operator*(const tensor<R>& T, const vector<R>& v)
+    Matrix<R> 
+    operator*(const Tensor<R>& T, const Vector<R>& v)
     { 
       return product(T,v); 
     }

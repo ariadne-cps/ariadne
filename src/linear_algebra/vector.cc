@@ -1,5 +1,5 @@
 /***************************************************************************
- *            vector.cc
+ *            <vector>.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it Pieter.Collins@cwi.nl
@@ -29,13 +29,13 @@
 namespace Ariadne {
   namespace LinearAlgebra {
     
-    template class vector<Real>;
-    template class vector<Field>;
+    template class Vector<Real>;
+    template class Vector<Field>;
 
-    template std::ostream& operator<<(std::ostream&, const vector<Real>&);
-    template std::ostream& operator<<(std::ostream&, const vector<Field>&);
+    template std::ostream& operator<<(std::ostream&, const Vector<Real>&);
+    template std::ostream& operator<<(std::ostream&, const Vector<Field>&);
     
-    template std::istream& operator>>(std::istream&, vector<Real>&);
-    template std::istream& operator>>(std::istream&, vector<Field>&);
+    template std::istream& operator>>(std::istream&, Vector<Real>&);
+    template std::istream& operator>>(std::istream&, Vector<Field>&);
   }
 }

@@ -1,12 +1,11 @@
 /***************************************************************************
- *            linear_algebra.h
+ *            constraint_system.cc
  *
- *  Mon May  3 12:31:15 2004
- *  Copyright  2004  Alberto Casagrande
- *  casagrande@dimi.uniud.it
+ *  Copyright  2006  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it Pieter.Collins@cwi.nl
  ****************************************************************************/
 
-/*
+ /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
@@ -22,15 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file linear_algebra.h
- *  \brief Basic linear algebra.
- */
+#include "real_typedef.h"
 
-#ifndef _ARIADNE_LINEAR_ALGEBRA_H
-#define _ARIADNE_LINEAR_ALGEBRA_H
+#include "linear_algebra/constraint_system.h"
+#include "linear_algebra/constraint_system.tpl"
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
-#include "../linear_algebra/constraint_system.h"
+namespace Ariadne {
+  namespace LinearAlgebra {
+    
+    template class ConstraintSystem<Real>;
 
-#endif /* _ARIADNE_LINEAR_ALGEBRA_H */
+  }
+}

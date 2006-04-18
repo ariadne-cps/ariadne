@@ -59,7 +59,7 @@ namespace Ariadne {
     order_around_a_point(const std::vector< Geometry::Point<R> > &vertices, 
                          const Geometry::Point<R> &centre)
     {
-      std::vector< LinearAlgebra::vector<R> > vert_pos(vertices.size());
+      std::vector< LinearAlgebra::Vector<R> > vert_pos(vertices.size());
       
       for (size_t i=0; i< vertices.size(); i++) {
         vert_pos[i]=vertices[i].position_vector()-

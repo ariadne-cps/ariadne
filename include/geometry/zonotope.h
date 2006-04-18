@@ -34,7 +34,7 @@
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 
-#include "../linear_algebra/zonotopic_vector.h"
+#include "../linear_algebra/transformation_system.h"
 
 #include "../numeric/interval.h"
 
@@ -62,29 +62,29 @@ namespace Ariadne {
       typedef R real_type;
       /*! \brief The type of denotable point contained by the rectangle. */
       typedef Point<R> state_type;
-      /*! \brief The type of vectors. */
-      typedef Ariadne::LinearAlgebra::vector<R> vector_type;
-      /*! \brief The type of matrix giving principal directions. */
-      typedef Ariadne::LinearAlgebra::matrix<R> matrix_type;
+      /*! \brief The type of Vectors. */
+      typedef Ariadne::LinearAlgebra::Vector<R> Vector_type;
+      /*! \brief The type of Matrix giving principal directions. */
+      typedef Ariadne::LinearAlgebra::Matrix<R> Matrix_type;
 
      private:
       /* Zonotope's centre. */
       state_type _centre;
       
       /* Zonotope's principal directions. */
-      matrix_type _generators;
+      Matrix_type _generators;
      public:
       /*! \brief Default constructor constructs an empty zonotope of dimension \a n. */
       explicit Zonotope(size_type n = 0)
         : _centre(n),  _generators(n,0) { }
       
       /*! \brief Construct from centre and directions. */
-      explicit Zonotope(const state_type& c, const matrix_type& m)
+      explicit Zonotope(const state_type& c, const Matrix_type& m)
         : _centre(c), _generators(m)
       {
         if (c.dimension()!=m.size1()) {
           throw std::domain_error(
-              "The the matrix of principal directions does not have the same number of rows as the point dimension.");
+              "The the Matrix of principal directions does not have the same number of rows as the point dimension.");
         }
 
         this->minimize_generators();
@@ -137,8 +137,8 @@ namespace Ariadne {
         return this->bounding_box().radius();
       }
       
-      /*! \brief The matrix of principle directions. */
-      matrix_type generators() const {
+      /*! \brief The Matrix of principle directions. */
+      Matrix_type generators() const {
         return this->_generators;
       }
      
@@ -183,14 +183,14 @@ namespace Ariadne {
       friend std::ostream& operator<< <> (std::ostream& os, const Zonotope<R>& r);
       friend std::istream& operator>> <> (std::istream& is, Zonotope<R>& r);
      private:
-      // Minimize the generator matrix
+      // Minimize the generator Matrix
       void minimize_generators(void);
       
-      // Order the generator matrix by norm.
+      // Order the generator Matrix by norm.
       void sort_generators(void);
       
       // The linear inequalities defining the zonotope.
-      void compute_linear_inequalities(matrix_type&, vector_type&) const;
+      void compute_linear_inequalities(Matrix_type&, Vector_type&) const;
 
       // A possible vertex is the image of a vertex of the cube in 
       // generator space under the affine transformation
@@ -400,11 +400,11 @@ namespace Ariadne {
     
     template<typename R>
     Zonotope<R>
-    operator+(const Rectangle<R>& r, const LinearAlgebra::zonotopic_vector<R>& v);
+    operator+(const Rectangle<R>& r, const LinearAlgebra::TransformationSystem<R>& v);
     
     template<typename R>
     Zonotope<R>
-    operator+(const Zonotope<R>& z, const LinearAlgebra::zonotopic_vector<R>& v);
+    operator+(const Zonotope<R>& z, const LinearAlgebra::TransformationSystem<R>& v);
     
 
   }

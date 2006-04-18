@@ -35,11 +35,11 @@
 
 #include "../declarations.h"
 
-#include "../linear_algebra/constraint.h"
+#include "../linear_algebra/constraint_system.h"
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 
-#include "../geometry/generator.h"
+#include "../linear_algebra/generator_system.h"
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
 
@@ -92,8 +92,8 @@ namespace Ariadne {
       typedef R real_type;
       typedef Point<R> state_type;
       typedef std::vector< Point<R> > state_list_type;
-      typedef LinearAlgebra::vector<R> vector_type;
-      typedef LinearAlgebra::matrix<R> matrix_type;
+      typedef LinearAlgebra::Vector<R> Vector_type;
+      typedef LinearAlgebra::Matrix<R> Matrix_type;
      public:
       friend class Parallelotope<R>;
     
@@ -120,9 +120,9 @@ namespace Ariadne {
        */
       Polyhedron(LinearAlgebra::GeneratorSystem<R>& gen);
       
-      /*! \brief Construct the polyhedron defined by the matrix equations \f$Ax\leq b\f$.
+      /*! \brief Construct the polyhedron defined by the Matrix equations \f$Ax\leq b\f$.
        */
-      Polyhedron(const matrix_type& A, const vector_type& b);
+      Polyhedron(const Matrix_type& A, const Vector_type& b);
       
       /*! \brief Construct the polyhedron defined as the convex hull of a list of points.
        */

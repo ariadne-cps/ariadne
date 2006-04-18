@@ -23,7 +23,7 @@
  */
  
 /*! \file vector.h
- *  \brief vector_types and vector operations.
+ *  \brief Vector types and vector operations.
   */
 
 #ifndef _ARIADNE_VECTOR_H
@@ -44,21 +44,21 @@ namespace Ariadne {
 
     /*! \brief A vector over \a R. */
     template<typename R>
-    class vector
+    class Vector
       : public boost::numeric::ublas::vector<R> 
     {
       typedef boost::numeric::ublas::vector<R> _Base;
      public:
-      vector() : _Base() { }
-      vector(const size_type& n) : _Base(n) { }
-      template<typename E> vector(const boost::numeric::ublas::vector_expression<E>& v) : _Base(v()) { }
-      explicit vector(const std::string& s); 
+      Vector() : _Base() { }
+      Vector(const size_type& n) : _Base(n) { }
+      template<typename E> Vector(const boost::numeric::ublas::vector_expression<E>& v) : _Base(v()) { }
+      explicit Vector(const std::string& s); 
     };
     
     
     template <typename R>
-    inline vector<R> zero_vector(dimension_type n) {
-      vector<R> v(n);
+    inline Vector<R> zero_vector(dimension_type n) {
+      Vector<R> v(n);
       for (dimension_type i=0; i<n; ++i) {
         v(i)=0;
       }
@@ -66,8 +66,8 @@ namespace Ariadne {
     }
     
     template <typename R>
-    inline vector<R> ones_vector(dimension_type n) {
-      vector<R> v(n);
+    inline Vector<R> ones_vector(dimension_type n) {
+      Vector<R> v(n);
       for (dimension_type i=0; i<n; ++i) {
         v(i)=1;
       }
@@ -75,14 +75,14 @@ namespace Ariadne {
     }
     
     template <typename R>
-    inline vector<R> unit_vector(dimension_type n, dimension_type i) {
-      vector<R> v(n);
+    inline Vector<R> unit_vector(dimension_type n, dimension_type i) {
+      Vector<R> v(n);
       v(i)=1;
       return v;
     }
     
     template <typename R>
-    inline bool linear_multiple(const vector<R> u, const vector<R>& v) {
+    inline bool linear_multiple(const Vector<R> u, const Vector<R>& v) {
       assert(u.dimension()==v.dimension());
       R multiple=0;
       for (dimension_type i=0; i<u.dimension(); ++i) {
@@ -104,7 +104,7 @@ namespace Ariadne {
     template<typename R>
     inline
     R
-    norm(const vector<R>& v) {
+    norm(const Vector<R>& v) {
       R norm=R(0);
       for (size_type i=0; i<v.size(); ++i) {
         norm=std::max(norm,R(abs(v(i))));
@@ -113,7 +113,7 @@ namespace Ariadne {
     }
     
     template <typename R>
-    inline Integer common_denominator(const vector<R>& b) 
+    inline Integer common_denominator(const Vector<R>& b) 
     {
       Integer denom=1;
       for (dimension_type i=0; i< b.size(); ++i) {
@@ -123,7 +123,7 @@ namespace Ariadne {
     }
 
     template <typename R>
-    inline R norm_infinite(const vector<R>& b) 
+    inline R norm_infinite(const Vector<R>& b) 
     {
       R norm=0.0;
       for (size_t i=0; i< b.size(); i++) {
@@ -134,11 +134,11 @@ namespace Ariadne {
     
     template <typename R>
     std::ostream&
-    operator<<(std::ostream& os, const vector<R>& v);
+    operator<<(std::ostream& os, const Vector<R>& v);
     
     template <typename R>
     std::istream&
-    operator>>(std::istream& is, vector<R>& v);
+    operator>>(std::istream& is, Vector<R>& v);
 
   }
 }

@@ -41,132 +41,132 @@ namespace Ariadne {
 
     /*! \brief A matrix of intervals. */
     template<typename R>
-    class interval_matrix : public boost::numeric::ublas::matrix< Interval<R> >
+    class IntervalMatrix : public boost::numeric::ublas::matrix< Interval<R> >
     {
      private:
       typedef boost::numeric::ublas::matrix< Interval<R> > Base;
      public:
-      interval_matrix() : Base() { }
-      interval_matrix(const size_type& r, const size_type& c) : Base(r,c) { }
-      template<typename E> interval_matrix(const boost::numeric::ublas::matrix_expression<E>& A) : Base(A()) { }
-      interval_matrix(const matrix<R>& A, const R& r);
+      IntervalMatrix() : Base() { }
+      IntervalMatrix(const size_type& r, const size_type& c) : Base(r,c) { }
+      template<typename E> IntervalMatrix(const boost::numeric::ublas::matrix_expression<E>& A) : Base(A()) { }
+      IntervalMatrix(const Matrix<R>& A, const R& r);
       
-      matrix<R> centre() const;
+      Matrix<R> centre() const;
       R radius() const;
       
       Interval<R> norm() const;
       R upper_norm() const;
       R upper_log_norm() const;
       
-      interval_matrix<R> inverse() const;
+      IntervalMatrix<R> inverse() const;
     };
 
     template <typename R>
     std::ostream& 
-    operator<<(std::ostream& os, const interval_matrix<R>& A);
+    operator<<(std::ostream& os, const IntervalMatrix<R>& A);
         
     /*! \brief A matrix \f$A\f$ such that for all zonotopes \f$Z\f$, \f$AZ\subset \overline{\underline{A}}\f$. */
     template<typename R>
-    matrix<R>
-    over_approximation(const interval_matrix<R>& A); 
+    Matrix<R>
+    over_approximation(const IntervalMatrix<R>& A); 
         
     /*! \brief An interval matrix exponential. */
     template<typename R>
-    interval_matrix<R>
-    exp(const interval_matrix<R>& A); 
+    IntervalMatrix<R>
+    exp(const IntervalMatrix<R>& A); 
         
     /*! \brief The interval matrix inverse. */
     template<typename R>
-    interval_matrix<R>
-    approximate(const matrix<typename numerical_traits<R>::field_extension_type>& A,const R& e); 
+    IntervalMatrix<R>
+    approximate(const Matrix<typename numerical_traits<R>::field_extension_type>& A,const R& e); 
         
     
     template <typename R>
-    interval_vector<R> 
-    prod(const matrix<R>& A, const interval_vector<R>& v);
+    IntervalVector<R> 
+    prod(const Matrix<R>& A, const IntervalVector<R>& v);
         
     template <typename R>
-    interval_vector<R> 
-    prod(const interval_matrix<R>& A, const vector<R>& v);
+    IntervalVector<R> 
+    prod(const IntervalMatrix<R>& A, const Vector<R>& v);
         
     template <typename R>
-    interval_vector<R> 
-    prod(const interval_matrix<R>& A, const interval_vector<R>& v);
+    IntervalVector<R> 
+    prod(const IntervalMatrix<R>& A, const IntervalVector<R>& v);
         
     template <typename R>
-    interval_matrix<R> 
-    prod(const interval_matrix<R>& A, const matrix<R>& B);
+    IntervalMatrix<R> 
+    prod(const IntervalMatrix<R>& A, const Matrix<R>& B);
       
     template <typename R>
-    interval_matrix<R> 
-    prod(const matrix<R>& A, const interval_matrix<R>& B);
+    IntervalMatrix<R> 
+    prod(const Matrix<R>& A, const IntervalMatrix<R>& B);
       
     template <typename R>
-    interval_matrix<R> 
-    prod(const interval_matrix<R>& A, const interval_matrix<R>& B);
+    IntervalMatrix<R> 
+    prod(const IntervalMatrix<R>& A, const IntervalMatrix<R>& B);
       
     template<typename R>
-    interval_matrix<R>
-    fprod(const matrix<typename numerical_traits<R>::field_extension_type>& A, 
-         const interval_matrix<R>& B);
+    IntervalMatrix<R>
+    fprod(const Matrix<typename numerical_traits<R>::field_extension_type>& A, 
+         const IntervalMatrix<R>& B);
     
 
     template<typename R>
     inline
-    interval_vector<R>
-    operator*(const matrix<R>& A, const interval_vector<R>& B) {
+    IntervalVector<R>
+    operator*(const Matrix<R>& A, const IntervalVector<R>& B) {
       return prod(A,B);
     }
       
     template<typename R>
     inline
-    interval_vector<R>
-    operator*(const interval_matrix<R>& A, const vector<R>& B) {
+    IntervalVector<R>
+    operator*(const IntervalMatrix<R>& A, const Vector<R>& B) {
       return prod(A,B);
     }
     
     template<typename R>
     inline
-    interval_vector<R>
-    operator*(const interval_matrix<R>& A, const interval_vector<R>& B) {
+    IntervalVector<R>
+    operator*(const IntervalMatrix<R>& A, const IntervalVector<R>& B) {
       return prod(A,B);
     }
     
     
     template<typename R>
     inline
-    interval_matrix<R>
-    operator*(const interval_matrix<R>& A, const matrix<R>& B) {
+    IntervalMatrix<R>
+    operator*(const IntervalMatrix<R>& A, const Matrix<R>& B) {
       return prod(A,B);
     }
     
     template<typename R>
     inline
-    interval_matrix<R>
-    operator*(const matrix<R>& A, const interval_matrix<R>& B) {
+    IntervalMatrix<R>
+    operator*(const Matrix<R>& A, const IntervalMatrix<R>& B) {
       return prod(A,B);
     }
     
     template<typename R>
     inline
-    interval_matrix<R>
-    operator*(const interval_matrix<R>& A, const interval_matrix<R>& B) {
+    IntervalMatrix<R>
+    operator*(const IntervalMatrix<R>& A, const IntervalMatrix<R>& B) {
       return prod(A,B);
     }
     
     template<typename R>
     inline
-    interval_matrix<R>
-    operator*(const matrix<typename numerical_traits<R>::field_extension_type>& A, 
-              const interval_matrix<R>& B) {
+    IntervalMatrix<R>
+    operator*(const Matrix<typename numerical_traits<R>::field_extension_type>& A, 
+              const IntervalMatrix<R>& B) {
       return fprod(A,B);
     }
 
-    /*! \brief The range of supremum norms of matrices in the interval matrix. */
+    /*! \brief The range of supremum norms of matrices in the interval Matrix. */
     template<typename R>
     inline
     Interval<R>
-    norm(const interval_matrix<R>& A)
+    norm(const IntervalMatrix<R>& A)
     { 
       return A.norm();
     }
@@ -176,7 +176,7 @@ namespace Ariadne {
     template<typename R>
     inline
     R
-    upper_norm(const interval_matrix<R>& A)
+    upper_norm(const IntervalMatrix<R>& A)
     {    
       return A.upper_norm();
     }
@@ -188,7 +188,7 @@ namespace Ariadne {
     template<typename R>
     inline
     R
-    upper_log_norm(const interval_matrix<R>& A)
+    upper_log_norm(const IntervalMatrix<R>& A)
     {
       return A.upper_log_norm();
     }
@@ -196,8 +196,8 @@ namespace Ariadne {
     /*! \brief The interval matrix inverse. */
     template<typename R>
     inline
-    interval_matrix<R>
-    inverse(const interval_matrix<R>& A)
+    IntervalMatrix<R>
+    inverse(const IntervalMatrix<R>& A)
     {
       return A.inverse(); 
     }

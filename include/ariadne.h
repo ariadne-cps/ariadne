@@ -67,7 +67,7 @@ namespace Evaluation {}
 
 /*! \brief Classes defining a hybrid system.
  */
-namespace HybridDefinitions {}
+namespace HybridSystem {}
 
 }
 

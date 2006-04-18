@@ -38,7 +38,7 @@ inline void rpoint_setitem_from_double(RPoint& p, uint i, double x) {
   p.set(i,Ariadne::convert_to<Real>(x));
 }
 
-inline RPoint rpoint_add_rvector(const RPoint& p, const RVector& v) {
+inline RPoint rpoint_add_rVector(const RPoint& p, const RVector& v) {
   return p+v;
 }
 
@@ -58,7 +58,7 @@ void export_point() {
     .def("__setitem__", &rpoint_setitem_from_double)
     .def("__eq__", &RPoint::operator==)
     .def("__ne__", &RPoint::operator!=)
-    .def("__add__", &rpoint_add_rvector)
+    .def("__add__", &rpoint_add_rVector)
     .def("__sub__", &rpoint_sub_rpoint)
     .def(self_ns::str(self))    // __self_ns::str__
   ;

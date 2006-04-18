@@ -107,7 +107,7 @@ namespace Ariadne {
       explicit Rectangle(const std::string& s);
       
       /*! \brief Construct from an interval vector. */
-      explicit Rectangle(const LinearAlgebra::interval_vector<R>& iv);
+      explicit Rectangle(const LinearAlgebra::IntervalVector<R>& iv);
       
       /*! \brief Copy constructor. */
       Rectangle(const Rectangle<R>& original)
@@ -244,8 +244,8 @@ namespace Ariadne {
       }
       
       
-      /*! \brief The set of position vectors of the rectangle. */
-      LinearAlgebra::interval_vector<R> position_vectors() const;
+      /*! \brief The set of position Vectors of the rectangle. */
+      LinearAlgebra::IntervalVector<R> position_vectors() const;
       
       /*! \brief Expand the Rectangle by \a delta in each direction. */
       Rectangle<R>& expand_by(const real_type& delta);
@@ -515,7 +515,7 @@ namespace Ariadne {
     inline
     Geometry::Rectangle<R> 
     operator+(const Geometry::Rectangle<R>& r, 
-              const LinearAlgebra::vector<R>& v)
+              const LinearAlgebra::Vector<R>& v)
     {
       Geometry::Rectangle<R> result(r.dimension());
       assert(r.dimension()==v.size());
@@ -531,7 +531,7 @@ namespace Ariadne {
     inline
     Geometry::Rectangle<R> 
     operator+(const Geometry::Rectangle<R>& r, 
-              const LinearAlgebra::interval_vector<R>& v)
+              const LinearAlgebra::IntervalVector<R>& v)
     {
       Geometry::Rectangle<R> result(r.dimension());
       assert(r.dimension()==v.size());

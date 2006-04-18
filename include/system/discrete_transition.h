@@ -38,7 +38,7 @@ class DiscreteTransition
   public:
     typedef RESET ResetMap;
     typedef LOC DiscreteLocation;
-    typedef typename DiscreteLocation::vector_typeField vector_typeField;
+    typedef typename DiscreteLocation::Vector_typeField Vector_typeField;
     typedef typename ResetMap::DenotableSet DenotableSet;
     typedef typename DenotableSet::BasicSet BasicSet;
     typedef typename BasicSet::state_type state_type;

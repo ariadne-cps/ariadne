@@ -44,7 +44,7 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/interval_vector.h"
-#include "../linear_algebra/zonotopic_vector.h"
+#include "../linear_algebra/transformation_system.h"
 
 #include "../linear_algebra/matrix.h"
 #include "../linear_algebra/interval_matrix.h"
@@ -190,7 +190,7 @@ namespace Ariadne {
       
       while(t>0) {
         bounds=reach+Interval<R>(0,multiplier*h)*vf.apply(reach);
-        LinearAlgebra::interval_vector<R> df=vf.apply(bounds);
+        LinearAlgebra::IntervalVector<R> df=vf.apply(bounds);
         
         F dt=t;
         for(dimension_type i=0; i!=vf.dimension(); ++i) {
@@ -263,11 +263,11 @@ namespace Ariadne {
 #ifdef DEBUG
       std::cerr << "new bounds " << xxb << "," << xb << " vs old bounds " << b << "  " << subset(xb,b) << std::endl;
 #endif
-      interval_vector<R> ddphi=vf.derivative(xb)*vf.apply(xb);
-      interval_vector<R> dfx=vf.apply(rx);
-      interval_vector<R> hdfx=(h*dfx);
-      interval_vector<R> hhddphi=(R(h*h/2)*ddphi);
-      interval_vector<R> dx=hdfx+hhddphi;
+      IntervalVector<R> ddphi=vf.derivative(xb)*vf.apply(xb);
+      IntervalVector<R> dfx=vf.apply(rx);
+      IntervalVector<R> hdfx=(h*dfx);
+      IntervalVector<R> hhddphi=(R(h*h/2)*ddphi);
+      IntervalVector<R> dx=hdfx+hhddphi;
       return rx+dx;
     }
     

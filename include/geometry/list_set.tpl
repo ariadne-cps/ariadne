@@ -127,7 +127,7 @@ namespace Ariadne {
                          const ListSet<R,BS>& B)
     {
       ListSet<R,BS> ds_inter;
-      std::vector< BS<R> >& vector=ds_inter._vector;
+      std::vector< BS<R> >& vec=ds_inter._vector;
 
       #ifdef DEBUG
         std::cout << __FILE__ << ":" << __LINE__ << std::endl;
@@ -140,7 +140,7 @@ namespace Ariadne {
       for (size_type i=0; i<A.size(); i++) {
         for (size_type j=0; j<B.size(); j++) {
           if (interiors_intersect(A[i],B[j])) {
-              vector.push_back(regular_intersection(A[i],B[j]));
+              vec.push_back(regular_intersection(A[i],B[j]));
           }
         }
       }

@@ -30,7 +30,7 @@ namespace Ariadne {
     
     template <typename R>
     std::ostream&
-    operator<<(std::ostream& os, const interval_vector<R>& v)
+    operator<<(std::ostream& os, const IntervalVector<R>& v)
     {
       os << "[";
       if(v.size()>0) {

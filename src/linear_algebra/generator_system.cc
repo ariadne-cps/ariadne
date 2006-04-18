@@ -1,5 +1,5 @@
 /***************************************************************************
- *            zonotopic_vector.cc
+ *            generator_system.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it Pieter.Collins@cwi.nl
@@ -23,15 +23,13 @@
  
 #include "real_typedef.h"
 
-#include "linear_algebra/zonotopic_vector.h"
-#include "linear_algebra/zonotopic_vector.tpl"
+#include "linear_algebra/generator_system.h"
+#include "linear_algebra/generator_system.tpl"
 
 namespace Ariadne {
   namespace LinearAlgebra {
     
-    template class zonotopic_vector<Real>;
-    template zonotopic_vector<Real> symmetrise(const interval_vector<Real>&);
+    template class GeneratorSystem<Real>;
 
-    template std::ostream& operator<<(std::ostream&, const zonotopic_vector<Real>&);
   }
 }

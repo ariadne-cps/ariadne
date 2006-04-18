@@ -86,7 +86,7 @@ namespace Ariadne {
       /*! \brief The equality operator (not implemented).
        *
        * Not currently implemented, since it requires matching the columns of 
-       * the matrix of principal directions. 
+       * the Matrix of principal directions. 
        */
       bool operator==(const Simplex<real_type>& A) const
       {

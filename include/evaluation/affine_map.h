@@ -54,13 +54,13 @@ namespace Ariadne {
       typedef R real_type;
       typedef Geometry::Point<R> state_type;
       
-      typedef Ariadne::LinearAlgebra::matrix<R> matrix_type;
-      typedef Ariadne::LinearAlgebra::vector<R> vector_type;
+      typedef Ariadne::LinearAlgebra::Matrix<R> Matrix_type;
+      typedef Ariadne::LinearAlgebra::Vector<R> Vector_type;
       
       explicit AffineMap() {}
-      explicit AffineMap(const matrix_type& A, const vector_type& b) : _A(A), _b(b) { }
-      explicit AffineMap(const matrix_type& A) : _A(A), _b(A.size2()) { }
-      explicit AffineMap(const vector_type& b) : _A(b.size(),b.size()), _b(b) { }
+      explicit AffineMap(const Matrix_type& A, const Vector_type& b) : _A(A), _b(b) { }
+      explicit AffineMap(const Matrix_type& A) : _A(A), _b(A.size2()) { }
+      explicit AffineMap(const Vector_type& b) : _A(b.size(),b.size()), _b(b) { }
       
       AffineMap(const AffineMap<real_type>& T) : _A(T._A), _b(T._b) { }
       AffineMap<real_type>& operator=(const AffineMap<real_type>& T) {
@@ -85,9 +85,9 @@ namespace Ariadne {
       Geometry::Polyhedron<R> operator() (const Geometry::Polyhedron<R>& A) const;
       
       /*! \brief  The linear transformation of the map. */
-      const LinearAlgebra::matrix<R>& A() const { return _A; }
+      const LinearAlgebra::Matrix<R>& A() const { return _A; }
       /*! \brief  The offset vector of the map. */
-      const LinearAlgebra::vector<R>& b() const { return _b; }
+      const LinearAlgebra::Vector<R>& b() const { return _b; }
       
       /*! \brief  The dimension of the argument. */
       dimension_type argument_dimension() const {
@@ -103,8 +103,8 @@ namespace Ariadne {
   
       std::string name() const { return "AffineMap"; }
      private:
-      matrix_type _A;
-      vector_type _b;
+      Matrix_type _A;
+      Vector_type _b;
     };
       
     

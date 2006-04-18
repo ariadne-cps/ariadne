@@ -69,7 +69,7 @@ namespace Ariadne {
       Utility::read_vector(is, v, '(', ')');
       last_size = v.size();
 
-      state._vector=LinearAlgebra::vector<R>(v.size());
+      state._vector=LinearAlgebra::Vector<R>(v.size());
       for(size_t i=0; i!=v.size(); ++i) {
         state._vector[i]=v[i];
       }

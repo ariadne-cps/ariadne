@@ -22,7 +22,7 @@
  */
  
 /*! \file interval_vector.h
- *  \brief vector_types of intervals.
+ *  \brief Vectors of intervals.
   */
 
 #ifndef _ARIADNE_INTERVAL_VECTOR_H
@@ -40,32 +40,32 @@ namespace Ariadne {
     
     /*! \brief A vector of intervals. */
     template<typename R>
-    class interval_vector : public boost::numeric::ublas::vector< Interval<R> >
+    class IntervalVector : public boost::numeric::ublas::vector< Interval<R> >
     {
      private:
       typedef boost::numeric::ublas::vector< Interval<R> > _Base;
      public:
-      template<typename E> interval_vector(const boost::numeric::ublas::vector_expression<E> v) :_Base(v()) { }
-      interval_vector() : _Base() { }
-      interval_vector(const size_type& n) : _Base(n) { }
-      interval_vector(const vector<R>& v);
-      interval_vector(const vector<R>& v, const R& r);
+      template<typename E> IntervalVector(const boost::numeric::ublas::vector_expression<E> v) :_Base(v()) { }
+      IntervalVector() : _Base() { }
+      IntervalVector(const size_type& n) : _Base(n) { }
+      IntervalVector(const Vector<R>& v);
+      IntervalVector(const Vector<R>& v, const R& r);
       
-      vector<R> centre() const;
+      Vector<R> centre() const;
       R radius() const;
       
       Interval<R> norm() const;
       R upper_norm() const;
     };
       
-    template <typename R> interval_vector<R> operator+(const interval_vector<R>& iv1, const interval_vector<R> iv2);
-    template <typename R> interval_vector<R> operator*(const Interval<R>& s, const interval_vector<R>& iv);
-    template <typename R> interval_vector<R> operator*(const R& s, const interval_vector<R>& iv);
+    template <typename R> IntervalVector<R> operator+(const IntervalVector<R>& iv1, const IntervalVector<R> iv2);
+    template <typename R> IntervalVector<R> operator*(const Interval<R>& s, const IntervalVector<R>& iv);
+    template <typename R> IntervalVector<R> operator*(const R& s, const IntervalVector<R>& iv);
 
     
     template <typename R>
     inline
-    interval_vector<R>::interval_vector(const vector<R>& v)
+    IntervalVector<R>::IntervalVector(const Vector<R>& v)
       : _Base(v.size()) 
     { 
       for(size_type i=0; i!=this->size(); ++i) {
@@ -75,7 +75,7 @@ namespace Ariadne {
     
     template <typename R>
     inline
-    interval_vector<R>::interval_vector(const vector<R>& v, const R& r)
+    IntervalVector<R>::IntervalVector(const Vector<R>& v, const R& r)
       : _Base(v.size()) 
     { 
       for(size_type i=0; i!=this->size(); ++i) {
@@ -85,11 +85,11 @@ namespace Ariadne {
       
     template <typename R>
     inline
-    vector<R> 
-    interval_vector<R>::centre() const
+    Vector<R> 
+    IntervalVector<R>::centre() const
     {
-      vector<R> result(this->size());
-      const interval_vector<R>& v=*this;
+      Vector<R> result(this->size());
+      const IntervalVector<R>& v=*this;
       for(size_type i=0; i!=v.size(); ++i) {
         result(i) = v(i).centre();
       }
@@ -99,9 +99,9 @@ namespace Ariadne {
     template <typename R>
     inline
     R
-    interval_vector<R>::radius() const
+    IntervalVector<R>::radius() const
     {
-      const interval_vector<R>& v=*this;
+      const IntervalVector<R>& v=*this;
       R result=0;
       for(size_type i=0; i!=v.size(); ++i) {
         result = max(result,v(i).length());
@@ -112,9 +112,9 @@ namespace Ariadne {
     template<typename R>
     inline
     Interval<R>
-    interval_vector<R>::norm() const 
+    IntervalVector<R>::norm() const 
     {
-      const interval_vector<R>& v=*this;
+      const IntervalVector<R>& v=*this;
       R lower_bound=0;
       R upper_bound=0;
       for (size_type i=0; i<v.size(); i++) {
@@ -129,9 +129,9 @@ namespace Ariadne {
     template<typename R>
     inline
     R
-    interval_vector<R>::upper_norm() const 
+    IntervalVector<R>::upper_norm() const 
     {
-      const interval_vector<R>& v=*this;
+      const IntervalVector<R>& v=*this;
       R upper_bound=0;
       for (size_type i=0; i<v.size(); i++) {
         upper_bound=max(upper_bound,R(max(abs(v(i).lower()),abs(v(i).upper()))));
@@ -143,10 +143,10 @@ namespace Ariadne {
     
     template <typename R>
     inline
-    interval_vector<R> 
-    operator+(const interval_vector<R>& iv, const vector<R> v)
+    IntervalVector<R> 
+    operator+(const IntervalVector<R>& iv, const Vector<R> v)
     {
-      interval_vector<R> result(v.size());
+      IntervalVector<R> result(v.size());
       for(size_type i=0; i!=result.size(); ++i) {
         result(i)=v(i)+iv(i);
       }
@@ -155,10 +155,10 @@ namespace Ariadne {
 
     template <typename R>
     inline
-    interval_vector<R> 
-    operator+(const vector<R>& v, const interval_vector<R> iv)
+    IntervalVector<R> 
+    operator+(const Vector<R>& v, const IntervalVector<R> iv)
     {
-      interval_vector<R> result(v.size());
+      IntervalVector<R> result(v.size());
       for(size_type i=0; i!=result.size(); ++i) {
         result(i)=v(i)+iv(i);
       }
@@ -167,10 +167,10 @@ namespace Ariadne {
 
     template <typename R>
     inline
-    interval_vector<R> 
-    operator+(const interval_vector<R>& iv1, const interval_vector<R> iv2)
+    IntervalVector<R> 
+    operator+(const IntervalVector<R>& iv1, const IntervalVector<R> iv2)
     {
-      interval_vector<R> result(iv1.size());
+      IntervalVector<R> result(iv1.size());
       for(size_type i=0; i!=result.size(); ++i) {
         result(i)=iv1(i)+iv2(i);
       }
@@ -179,10 +179,10 @@ namespace Ariadne {
 
     template<typename R>
     inline
-    interval_vector<R>
-    operator*(const Interval<R>& s, const interval_vector<R>& v)
+    IntervalVector<R>
+    operator*(const Interval<R>& s, const IntervalVector<R>& v)
     {
-      interval_vector<R> result(v.size());
+      IntervalVector<R> result(v.size());
       for(size_type i=0; i!=result.size(); ++i) {
         result(i)=s*v(i);
       }
@@ -191,18 +191,18 @@ namespace Ariadne {
 
     template<typename R>
     inline
-    interval_vector<R>
-    operator*(const R& s, const interval_vector<R>& v)
+    IntervalVector<R>
+    operator*(const R& s, const IntervalVector<R>& v)
     {
       return Interval<R>(s)*v;
     }
 
     template<typename R>
     inline
-    interval_vector<R>
-    operator*(const Interval<R>& s, const vector<R>& v)
+    IntervalVector<R>
+    operator*(const Interval<R>& s, const Vector<R>& v)
     {
-      return s*interval_vector<R>(v); 
+      return s*IntervalVector<R>(v); 
     }
 
 
@@ -210,7 +210,7 @@ namespace Ariadne {
     template<typename R>
     inline
     Interval<R>
-    norm(const interval_vector<R>& v)
+    norm(const IntervalVector<R>& v)
     {
       return v.norm();
     }
@@ -218,14 +218,14 @@ namespace Ariadne {
     template<typename R>
     inline
     R
-    upper_norm(const interval_vector<R>& v)
+    upper_norm(const IntervalVector<R>& v)
     {
       return v.upper_norm();
     }
     
     template <typename R>
     std::ostream&
-    operator<<(std::ostream& os, const interval_vector<R>& v);
+    operator<<(std::ostream& os, const IntervalVector<R>& v);
     
   }
 }  

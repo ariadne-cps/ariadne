@@ -46,9 +46,9 @@ namespace Ariadne {
      public:
       typedef R real_type;
       typedef Geometry::Point<R> state_type;
-      typedef LinearAlgebra::vector<R> vector_type;
-      typedef LinearAlgebra::matrix<R> matrix_type;
-      typedef LinearAlgebra::interval_matrix<R> interval_matrix_type;
+      typedef LinearAlgebra::Vector<R> Vector_type;
+      typedef LinearAlgebra::Matrix<R> Matrix_type;
+      typedef LinearAlgebra::IntervalMatrix<R> IntervalMatrix_type;
       
       virtual ~Map();
       
@@ -58,8 +58,8 @@ namespace Ariadne {
       virtual Geometry::Parallelotope<R> apply(const Geometry::Parallelotope<R>& A) const;
       virtual Geometry::Polyhedron<R> apply(const Geometry::Polyhedron<R>& A) const;
     
-      virtual LinearAlgebra::matrix<R> derivative(const state_type& r) const;
-      virtual LinearAlgebra::interval_matrix<R> derivative(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::Matrix<R> derivative(const state_type& r) const;
+      virtual LinearAlgebra::IntervalMatrix<R> derivative(const Geometry::Rectangle<R>& r) const;
         
       template<template<typename> class BS>
       inline Geometry::ListSet<R,BS> apply(const Geometry::ListSet<R,BS>& A) const;

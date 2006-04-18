@@ -1,5 +1,5 @@
 /***************************************************************************
- *            zonotopic_vector.h
+ *            transformation_system.h
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file zonotopic_vector.h
- *  \brief Zonotopic vectors (affine images of cuboids).
+/*! \file transformation_system.h
+ *  \brief Zonotopic Vectors (affine images of cuboids).
  */
 
 #ifndef _ARIADNE_ZONOTOPIC_VECTOR_H
@@ -38,43 +38,40 @@
 
 namespace Ariadne {
   namespace LinearAlgebra {
-    template < typename R > class zonotopic_vector;
+    template < typename R > class TransformationSystem;
 
-    template<typename R> std::ostream& operator<<(std::ostream&, const zonotopic_vector<R>&);
+    template<typename R> std::ostream& operator<<(std::ostream&, const TransformationSystem<R>&);
 
-    /*! \brief A zonotopic vector set. 
-     * 
-     * A zonotope is a set of the form \f$c+Ae\f$, where \f$||e||_{infty}\leq1\f$.
-     * The intersection and membership tests are performed using algorithms from: <br>
-     * Guibas, Leonidas J.; Nguyen, An; Zhang, Li, "Zonotopes as bounding volumes."  <i>Proceedings of the Fourteenth Annual ACM-SIAM Symposium on Discrete Algorithms</i> (Baltimore, MD, 2003),  803--812, ACM, New York, 2003.
+    /*! \brief An affine transformation of the unit ball in the supremum norm, representing a zonotopic vector.
+     *
      */
     template <typename R>
-    class zonotopic_vector {
+    class TransformationSystem {
      public:
-      /*! \brief Default constructor constructs a zonotopic vector representation of the origin of dimension \a n. */
-      explicit zonotopic_vector(size_type n = 0)
+      /*! \brief Default constructor constructs a zonotopic Vector representation of the origin of dimension \a n. */
+      explicit TransformationSystem(size_type n = 0)
         : _centre(n),  _generators(n,0) { }
       
       /*! \brief Construct from centre and directions. */
-      explicit zonotopic_vector(const vector<R>& c, const matrix<R>& m)
+      explicit TransformationSystem(const Vector<R>& c, const Matrix<R>& m)
         : _centre(c), _generators(m)
       {
         if (c.size()!=m.size1()) {
           throw std::domain_error(
-              "The the matrix of principal directions does not have the same number of rows as the point dimension.");
+              "The the Matrix of principal directions does not have the same number of rows as the point dimension.");
         }
 
         this->minimize_generators();
       }
        
-      /*! \brief Construct from a vector. */
-      zonotopic_vector(const vector<R>& v)
+      /*! \brief Construct from a Vector. */
+      TransformationSystem(const Vector<R>& v)
         : _centre(v), _generators(v.size(),0)
       {
       }
 
-      /*! \brief Construct from an interval vector. */
-      zonotopic_vector(const interval_vector<R>& iv)
+      /*! \brief Construct from an interval Vector. */
+      TransformationSystem(const IntervalVector<R>& iv)
         : _centre(iv.size()), _generators(iv.size(),iv.size())
       {
         for(size_type i=0; i!=this->size(); ++i) {
@@ -86,20 +83,20 @@ namespace Ariadne {
       }
 
       /*! \brief Construct from directions. */
-      explicit zonotopic_vector(const matrix<R>& m)
+      explicit TransformationSystem(const Matrix<R>& m)
         : _centre(m.size1()), _generators(m)
       {
         this->minimize_generators();
       }
        
       /*! \brief Copy constructor. */
-      zonotopic_vector(const zonotopic_vector<R>& v)
+      TransformationSystem(const TransformationSystem<R>& v)
         : _centre(v._centre), _generators(v._generators)
       {
       }
 
       /*! \brief Copy assignment operator. */
-      zonotopic_vector<R>& operator=(const zonotopic_vector<R>& original) {
+      TransformationSystem<R>& operator=(const TransformationSystem<R>& original) {
         if(this != &original) {
           this->_centre = original._centre;
           this->_generators = original._generators;
@@ -108,8 +105,8 @@ namespace Ariadne {
       }
       
       /*! \brief A rectangle containing the given zonotope. */
-      inline interval_vector<R> bounding_box() const {
-        interval_vector<R> unit(this->size());
+      inline IntervalVector<R> bounding_box() const {
+        IntervalVector<R> unit(this->size());
         for(size_type i=0; i!=this->size(); ++i) {
           unit[i]=Interval<R>(-1,1);
         }
@@ -127,65 +124,65 @@ namespace Ariadne {
       }
       
       /*! \brief The centre of the zonotope. */
-      inline vector<R> centre() const {
+      inline Vector<R> centre() const {
         return this->_centre;
       }
       
-      /*! \brief The matrix of principle directions. */
-      inline matrix<R> generators() const {
+      /*! \brief The Matrix of principle directions. */
+      inline Matrix<R> generators() const {
         return this->_generators;
       }
      private:
-      // Minimize the generator matrix
+      // Minimize the generator Matrix
       void minimize_generators(void);
      private:
-      /* Zonotopic vector's centre. */
-      vector<R> _centre;
-      /* Zonotopic vector's principal directions. */
-      matrix<R> _generators;
+      /* Zonotopic Vector's centre. */
+      Vector<R> _centre;
+      /* Zonotopic Vector's principal directions. */
+      Matrix<R> _generators;
     
     };
   
 
   
-    /*! \brief The scalar multiple of a zonotopic vector. */
+    /*! \brief The scalar multiple of a zonotopic Vector. */
     template<typename R> 
     inline
-    zonotopic_vector<R> operator*(const R& s, const zonotopic_vector<R>& v)
+    TransformationSystem<R> operator*(const R& s, const TransformationSystem<R>& v)
     {
-      return zonotopic_vector<R>(s*v.centre(),s*v.generators());
+      return TransformationSystem<R>(s*v.centre(),s*v.generators());
     }
     
-    /*! \brief The scalar multiple of a zonotopic vector. */
+    /*! \brief The scalar multiple of a zonotopic Vector. */
     template<typename R> 
     inline
-    zonotopic_vector<R> operator*(const zonotopic_vector<R>& v, const R& s)
+    TransformationSystem<R> operator*(const TransformationSystem<R>& v, const R& s)
     {
       return s*v;
     }
     
-    /*! \brief The scalar multiple of a zonotopic vector. */
+    /*! \brief The scalar multiple of a zonotopic Vector. */
     template<typename R> 
     inline
-    zonotopic_vector<R> operator/(const zonotopic_vector<R>& v, const R& s)
+    TransformationSystem<R> operator/(const TransformationSystem<R>& v, const R& s)
     {
       return (1/s)*v;
     }
     
-    /*! \brief The sum of two zonotopic vectors. */
+    /*! \brief The sum of two zonotopic Vectors. */
     template<typename R> 
     inline
-    zonotopic_vector<R> operator+(const zonotopic_vector<R>& u, 
-                                  const zonotopic_vector<R>& v)
+    TransformationSystem<R> operator+(const TransformationSystem<R>& u, 
+                                  const TransformationSystem<R>& v)
     {
       if (u.size()!=v.size()) {
         throw std::domain_error(
-          "operator+(zonotopic_vector<R>,const zonotopic_vector<R>& v): the two zonotopes have different dimension.");
+          "operator+(TransformationSystem<R>,const TransformationSystem<R>& v): the two zonotopes have different dimension.");
       }
       size_type m=u.generators().size2();
       size_type n=v.generators().size2();
       
-      matrix<R> gen(u.size(),m+n);
+      Matrix<R> gen(u.size(),m+n);
       
       for (size_type i=0; i!=u.size(); ++i) {
         for (size_type j=0; j!=m; ++j) {
@@ -195,59 +192,59 @@ namespace Ariadne {
           gen(i,j+m)=v.generators()(i,j);
         }
       }
-      return zonotopic_vector<R>(u.centre()+v.centre(),gen);
+      return TransformationSystem<R>(u.centre()+v.centre(),gen);
     }
    
-    /*! \brief The sum of a zonotopic vector and a vector. */
+    /*! \brief The sum of a zonotopic Vector and a Vector. */
     template<typename R> 
     inline
-    zonotopic_vector<R> operator+(const zonotopic_vector<R>& u, 
-                                  const vector<R>& v)
+    TransformationSystem<R> operator+(const TransformationSystem<R>& u, 
+                                  const Vector<R>& v)
     {
-      return zonotopic_vector<R>(u.centre()+v,u.generators());
+      return TransformationSystem<R>(u.centre()+v,u.generators());
     }
     
-    /*! \brief The sum of a zonotopic vector and an interval vector. */
+    /*! \brief The sum of a zonotopic Vector and an interval Vector. */
     template<typename R> 
     inline
-    zonotopic_vector<R> operator+(const zonotopic_vector<R>& u, 
-                                  const interval_vector<R>& v)
+    TransformationSystem<R> operator+(const TransformationSystem<R>& u, 
+                                  const IntervalVector<R>& v)
     {
-      return u+zonotopic_vector<R>(v);
+      return u+TransformationSystem<R>(v);
     }
     
-    /*! \brief The sum of an interval vector and a zonotopic vector. */
+    /*! \brief The sum of an interval Vector and a zonotopic Vector. */
     template<typename R> 
     inline
-    zonotopic_vector<R> operator+(const interval_vector<R>& u, 
-                                  const zonotopic_vector<R>& v)
+    TransformationSystem<R> operator+(const IntervalVector<R>& u, 
+                                  const TransformationSystem<R>& v)
     {
-      return zonotopic_vector<R>(u)+v;
+      return TransformationSystem<R>(u)+v;
     }
     
-    /*! \brief The sum of a vector and a zonotopic_vector. */
+    /*! \brief The sum of a Vector and a TransformationSystem. */
     template<typename R> 
     inline
-    zonotopic_vector<R> operator+(const vector<R>& u, 
-                                  const zonotopic_vector<R>& v)
+    TransformationSystem<R> operator+(const Vector<R>& u, 
+                                  const TransformationSystem<R>& v)
     {
-      return zonotopic_vector<R>(u+v.centre(),v.generators());
+      return TransformationSystem<R>(u+v.centre(),v.generators());
     }
     
-    /*! \brief The product of a matrix and a zonotopic_vector. */
+    /*! \brief The product of a Matrix and a TransformationSystem. */
     template<typename R> 
     inline
-    zonotopic_vector<R> operator*(const matrix<R>& A, 
-                                  const zonotopic_vector<R>& v)
+    TransformationSystem<R> operator*(const Matrix<R>& A, 
+                                  const TransformationSystem<R>& v)
     {
-      return zonotopic_vector<R>(A*v.centre(),A*v.generators());
+      return TransformationSystem<R>(A*v.centre(),A*v.generators());
     }
     
 
     /*! The convex hull of \f$[-1,1]*v\f$. */
     template<typename R> 
-    LinearAlgebra::zonotopic_vector<R>
-    symmetrise(const LinearAlgebra::interval_vector<R>& iv);
+    LinearAlgebra::TransformationSystem<R>
+    symmetrise(const LinearAlgebra::IntervalVector<R>& iv);
       
     
   }

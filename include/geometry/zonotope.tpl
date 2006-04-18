@@ -44,10 +44,10 @@ namespace Ariadne {
       using namespace LinearAlgebra;
 
       if(r.lower_bound(0) > r.upper_bound(0)) {
-        this->_generators=matrix_type(r.dimension(),0);
+        this->_generators=Matrix_type(r.dimension(),0);
       }
             
-      this->_generators=matrix_type(r.dimension(),r.dimension());
+      this->_generators=Matrix_type(r.dimension(),r.dimension());
       for(size_type i=0; i!=dimension(); ++i) {
         this->_centre[i] = (r.lower_bound(i)+r.upper_bound(i))/2;
         this->_generators(i,i) = (r.upper_bound(i)-r.lower_bound(i))/2;
@@ -80,8 +80,8 @@ namespace Ariadne {
     {
       using namespace LinearAlgebra;
             
-      const matrix_type &this_gen=this->_generators;
-      const matrix_type &A_gen=A._generators;
+      const Matrix_type &this_gen=this->_generators;
+      const Matrix_type &A_gen=A._generators;
       size_type directions=this->number_of_generators();
 
       if (!have_same_dimensions(this_gen,A_gen)) {
@@ -125,12 +125,12 @@ namespace Ariadne {
       
       if (this->empty()) { return false; }
     
-      matrix_type A(0,0);
-      vector_type b(0);
+      Matrix_type A(0,0);
+      Vector_type b(0);
               
       this->compute_linear_inequalities(A,b);
 
-      vector_type result(A*point.position_vector()-b);
+      Vector_type result(A*point.position_vector()-b);
 
       for (size_type i=0; i<result.size(); i++) {
          if (result(i)<0) return false;
@@ -153,12 +153,12 @@ namespace Ariadne {
     
       if (this->empty_interior()) { return false; }
   
-      matrix_type A(0,0);
-      vector_type b(0);
+      Matrix_type A(0,0);
+      Vector_type b(0);
               
       this->compute_linear_inequalities(A,b);
 
-      vector_type result(A*point.position_vector()-b);
+      Vector_type result(A*point.position_vector()-b);
       
       for (size_type i=0; i<result.size(); i++) {
          if (result(i)<=0) return false;
@@ -172,7 +172,7 @@ namespace Ariadne {
     Zonotope<R>::bounding_box() const 
     {
       using namespace Ariadne::LinearAlgebra;
-      vector_type offset(this->dimension());
+      Vector_type offset(this->dimension());
       
       for(size_type i=0; i!=this->dimension(); ++i) {
         for(size_type j=0; j!=this->_generators.size2(); ++j) {
@@ -212,7 +212,7 @@ namespace Ariadne {
     Zonotope<R>::_possible_vertex(const size_t& i) const
     {
       Point<R> vertex(this->centre());
-      const LinearAlgebra::matrix<R> &gen=this->_generators;
+      const LinearAlgebra::Matrix<R> &gen=this->_generators;
       
       for (size_t j=0; j<gen.size1(); j++) {
         for (size_t k=0; k<gen.size2(); k++) {
@@ -245,13 +245,13 @@ namespace Ariadne {
       
       std::cerr << "over_approximating_parallelotope(const Geometry::Zonotope<R>& z)" << std::endl;
       dimension_type n=z.dimension();
-      LinearAlgebra::matrix<R> A(n,n);
+      LinearAlgebra::Matrix<R> A(n,n);
       for(dimension_type i=0; i!=n; ++i) {
         for(dimension_type j=0; j!=n; ++j) {
           A(i,j)=z.generators()(i,j);
         }
       }
-      LinearAlgebra::matrix<F> B=LinearAlgebra::inverse(A);
+      LinearAlgebra::Matrix<F> B=LinearAlgebra::inverse(A);
       const Point<R>& c=z.centre();
       
       Parallelotope<R> p(c,A);
@@ -273,7 +273,7 @@ namespace Ariadne {
       using namespace LinearAlgebra;
            
       size_type i,j,i2,j2;
-      matrix_type &gen=this->_generators;
+      Matrix_type &gen=this->_generators;
       gen=remove_null_columns_but_one(gen);
       size_type rows=gen.size1();
       
@@ -326,7 +326,7 @@ namespace Ariadne {
       }
       
       if (min_cols!= cols) {
-        matrix_type new_gen(rows,min_cols);
+        Matrix_type new_gen(rows,min_cols);
 
         j2=0;
         for (j=0; j< cols; j++) {
@@ -359,7 +359,7 @@ namespace Ariadne {
     template<typename R>
     inline
     bool 
-    norm_grtr(const LinearAlgebra::vector<R>& v1, const LinearAlgebra::vector<R>& v2) 
+    norm_grtr(const LinearAlgebra::Vector<R>& v1, const LinearAlgebra::Vector<R>& v2) 
     {
       return LinearAlgebra::norm(v1)>LinearAlgebra::norm(v2);
     }
@@ -368,7 +368,7 @@ namespace Ariadne {
     void 
     Zonotope<R>::sort_generators(void)
     {
-      std::vector< LinearAlgebra::vector<R> > generator_vectors;
+      std::vector< LinearAlgebra::Vector<R> > generator_vectors;
       for(size_type j=0; j!=this->number_of_generators(); ++j) {
         generator_vectors.push_back(column(this->_generators,j));
       }
@@ -386,13 +386,13 @@ namespace Ariadne {
     
     template<typename R>
     void 
-    Zonotope<R>::compute_linear_inequalities(matrix_type& A, vector_type& b) const
+    Zonotope<R>::compute_linear_inequalities(Matrix_type& A, Vector_type& b) const
     {
-      throw std::runtime_error("Zonotope<R>::compute_linear_inequalities(matrix_type&, vector_type&) const not implemented");
+      throw std::runtime_error("Zonotope<R>::compute_linear_inequalities(Matrix_type&, Vector_type&) const not implemented");
       using namespace Ariadne::LinearAlgebra;
      
-      const matrix_type &gen=this->_generators;
-      matrix_type Space=trans(gen);
+      const Matrix_type &gen=this->_generators;
+      Matrix_type Space=trans(gen);
       R b2;
       size_type ngen=this->number_of_generators();
       
@@ -402,17 +402,17 @@ namespace Ariadne {
       //A=lu_decompose(Space,col,row); 
 
       if (col.size()==row.size()) {
-        A=matrix_type(2*ngen,this->dimension());
-        b=vector_type(2*ngen);
-        Space=matrix_type();
+        A=Matrix_type(2*ngen,this->dimension());
+        b=Vector_type(2*ngen);
+        Space=Matrix_type();
       } 
       else { 
         remove_null_columns(A,row,col);
         Space=compute_space(A,row,col);
 
-        A=matrix_type(2*ngen+2*Space.size1(),
+        A=Matrix_type(2*ngen+2*Space.size1(),
                         this->dimension());
-        b=vector_type(2*ngen+2*Space.size1());
+        b=Vector_type(2*ngen+2*Space.size1());
       }
       // TO IMPROVE: we new compute both (col_i)^T(cols_j) and 
       // (col_j)^T(cols_i)
@@ -464,7 +464,7 @@ namespace Ariadne {
       dimension_type col_A=A._generators.size2(); 
       dimension_type col_B=B._generators.size2(); 
       
-      matrix<R> gen(A.dimension(), col_A+col_B);
+      Matrix<R> gen(A.dimension(), col_A+col_B);
 
       for (size_type i=0; i!=col_A; ++i) {
          for (size_type j=0; j!=A.dimension(); ++j) {
@@ -495,7 +495,7 @@ namespace Ariadne {
       dimension_type col_A=A._generators.size2();
       dimension_type col_B=B._generators.size2(); 
       
-      matrix<R> gen(A.dimension(), col_A+col_B);
+      Matrix<R> gen(A.dimension(), col_A+col_B);
 
       for (size_type i=0; i!=col_A; ++i) {
          for (size_type j=0; j!=A.dimension(); ++j) {
@@ -517,21 +517,21 @@ namespace Ariadne {
     
     template<typename R>
     Zonotope<R>
-    operator+(const Rectangle<R>& r, const LinearAlgebra::zonotopic_vector<R>& v)
+    operator+(const Rectangle<R>& r, const LinearAlgebra::TransformationSystem<R>& v)
     {
-      std::cerr << "operator+(const Rectangle<R>& r, const zonotopic_vector<R>& v)" << std::endl;
+      //std::cerr << "operator+(const Rectangle<R>& r, const TransformationSystem<R>& v)" << std::endl;
       dimension_type n=r.dimension();
-      LinearAlgebra::matrix<R> r_generators(n,n);
+      LinearAlgebra::Matrix<R> r_generators(n,n);
       for(size_type i=0; i!=n; ++i) {
         r_generators(i,i)=(r[i].upper()-r[i].lower())/2;
       }
-      std::cerr << LinearAlgebra::concatenate_columns(v.generators(),r_generators) << std::endl;
+      //std::cerr << LinearAlgebra::concatenate_columns(v.generators(),r_generators) << std::endl;
       return Zonotope<R>(r.centre()+v.centre(),LinearAlgebra::concatenate_columns(v.generators(),r_generators));
     }
     
     template<typename R>
     Zonotope<R>
-    operator+(const Zonotope<R>& z, const LinearAlgebra::zonotopic_vector<R>& v)
+    operator+(const Zonotope<R>& z, const LinearAlgebra::TransformationSystem<R>& v)
     {
       return Zonotope<R>(z.centre()+v.centre(),LinearAlgebra::concatenate_columns(z.generators(),v.generators()));
     }

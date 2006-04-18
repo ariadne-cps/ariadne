@@ -34,7 +34,7 @@ using namespace boost::python;
 void export_linear_program() {
   typedef const FMatrix& (FLinearProgram::*MatrixConst) () const;
 
-  class_<FLinearProgram>("FLinearProgram",init<FMatrix,FVector,FVector>())
+  class_<FLinearProgram>("RationalLinearProgram",init<FMatrix,FVector,FVector>())
     .def(init<FMatrix>())
     .def("solve",&FLinearProgram::solve)
     .def("is_satisfiable",&FLinearProgram::is_satisfiable)

@@ -31,7 +31,7 @@
 
 namespace Ariadne {
 
-namespace SystemDescription {
+namespace HybridSystem {
 
 /*! \typedef DiscreteLocationID
  *  \brief It's the type of the discrete location's univocal identifier. 
@@ -56,7 +56,7 @@ class DiscreteLocation
   
     /*! \brief The vector field which rules the flow in 
      * the discrete location. */
-    vector_typeField *_field;
+    Vector_typeField *_field;
   
     /*! \brief The invariant region of the discrete location. */ 
     Ariadne::Geometry::AbstractDenotableSet *_invariant;
@@ -74,7 +74,7 @@ class DiscreteLocation
      * \param field is the flow of the discrete location.
      * \param inv is the invariant of the discrete location.
      */
-    DiscreteLocation(const std::string &name, vector_typeField *field, 
+    DiscreteLocation(const std::string &name, Vector_typeField *field, 
         Ariadne::Geometry::AbstractDenotableSet *inv);
     
     /*! \brief This is the destructor of the discrete 
@@ -89,7 +89,7 @@ class DiscreteLocation
      *
      * \return The vector field of the discrete location.
      */
-    const vector_typeField* field() const {
+    const Vector_typeField* field() const {
       return this->_field;
     }
     

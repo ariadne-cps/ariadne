@@ -59,9 +59,9 @@ namespace Ariadne {
       virtual Geometry::Parallelotope<R> apply(const Geometry::Parallelotope<R>& p) const;
       
       /*! \brief  The derivative of the map at a point. */
-      virtual LinearAlgebra::matrix<R> derivative(const state_type& x) const;
+      virtual LinearAlgebra::Matrix<R> derivative(const state_type& x) const;
       /*! \brief  The derivative of the map over a rectangular basic set. */
-      virtual LinearAlgebra::interval_matrix<R> derivative(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::IntervalMatrix<R> derivative(const Geometry::Rectangle<R>& r) const;
             
       /*! \brief  The parameter a. */
       const real_type& a() const { return _a; }
@@ -110,10 +110,10 @@ namespace Ariadne {
     }
 
     template <typename R>
-    LinearAlgebra::matrix<R>
+    LinearAlgebra::Matrix<R>
     HenonMap<R>::derivative(const Geometry::Point<R>& x) const
     {
-      LinearAlgebra::matrix<R> result(2,2); 
+      LinearAlgebra::Matrix<R> result(2,2); 
       result(0,0) = -2*x[0];
       result(0,1) = -_b;
       result(1,0) = 1;
@@ -122,10 +122,10 @@ namespace Ariadne {
     }
      
     template <typename R>
-    LinearAlgebra::interval_matrix<R>
+    LinearAlgebra::IntervalMatrix<R>
     HenonMap<R>::derivative(const Geometry::Rectangle<R>& r) const
     {
-      LinearAlgebra::interval_matrix<R> result(2,2); 
+      LinearAlgebra::IntervalMatrix<R> result(2,2); 
       result(0,0) = R(-2)*r[0];
       result(0,1) = Interval<R>(-_b);
       result(1,0) = Interval<R>(1);

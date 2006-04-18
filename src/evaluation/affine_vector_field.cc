@@ -38,11 +38,11 @@ namespace Ariadne {
 namespace Ariadne {
   namespace LinearAlgebra {
     
-    template matrix<Real> exp_Ah_approx(const matrix<Real>& A, 
+    template Matrix<Real> exp_Ah_approx(const Matrix<Real>& A, 
                                           const Real& h, 
                                           const Real& e);
     
-    template matrix<Real> exp_Ah_sub_id_div_A_approx(const matrix<Real>& A, 
+    template Matrix<Real> exp_Ah_sub_id_div_A_approx(const Matrix<Real>& A, 
                                                        const Real& h, 
                                                        const Real& e);
 

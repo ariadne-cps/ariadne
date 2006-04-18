@@ -2,6 +2,9 @@ include ./config.mk
 
 all:  python 
 
+doc:
+	doxygen;
+
 lib: 
 	(cd ${SRCDIR}; ${MAKE} lib);
 
@@ -16,7 +19,7 @@ clean:
 	(cd ${EXAMPLEDIR}; ${MAKE} clean; cd ..; )
 	(cd ${TESTDIR}; ${MAKE} clean; cd ..; )
 
-install:
+install: lib
 	(cd ${SRCDIR}; ${MAKE} install);
 
 check:
@@ -25,5 +28,5 @@ check:
 dep: 
 	(cd ${SRCDIR}; ${MAKE} dep);
 
-pycheck: python
+pycheck: python install
 	for file in python/test/*.py; do echo $$file; $$file; done

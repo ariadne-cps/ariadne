@@ -1,9 +1,9 @@
 /***************************************************************************
- *            linear_algebra.h
+ *            constraint_system.tpl
  *
- *  Mon May  3 12:31:15 2004
- *  Copyright  2004  Alberto Casagrande
- *  casagrande@dimi.uniud.it
+ *  Thu Feb  16 08:54:28 2005
+ *  Copyright  2006  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it  Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,16 +21,10 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-/*! \file linear_algebra.h
- *  \brief Basic linear algebra.
- */
 
-#ifndef _ARIADNE_LINEAR_ALGEBRA_H
-#define _ARIADNE_LINEAR_ALGEBRA_H
+#include "constraint_system.h"
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
-#include "../linear_algebra/constraint_system.h"
-
-#endif /* _ARIADNE_LINEAR_ALGEBRA_H */
+namespace Ariadne {
+  namespace LinearAlgebra {
+  }
+}

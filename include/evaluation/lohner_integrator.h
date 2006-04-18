@@ -70,7 +70,7 @@ namespace Ariadne {
       /*! \brief A C1 algorithm for integrating forward a parallelotope.
        *
        * The algorithm first finds \f$B_{n+1}\f$ such that \f$R_{n+1}\subset B_{n+1}\f$. 
-       * It then computes an interval matrix \f$ \mathcal{A}_{n} \f$ such that \f$ Df(B_{n+1}) \in \mathcal{A}_{n} \f$.
+       * It then computes an interval Matrix \f$ \mathcal{A}_{n} \f$ such that \f$ Df(B_{n+1}) \in \mathcal{A}_{n} \f$.
        * It then computes a rectangle \f$ C_{n+1} \f$ such that \f$ \Phi(t,C_{n})\in C_{n+1} \f$.
        * We then compute \f$ \mathcal{P}_{n} \f$ such that \f$ D\Phi(h,R_{n}) \subset \mathcal{P}_{n} \f$.
        * We then compute \f$ A_{n+1} \f$ such that \f$ A_{n+1} e \supset \mathcal{P}_{n} e \f$.

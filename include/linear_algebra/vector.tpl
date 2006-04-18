@@ -34,7 +34,7 @@ namespace Ariadne {
   namespace LinearAlgebra {
 
     template <typename R>
-    vector<R>::vector(const std::string& s)
+    Vector<R>::Vector(const std::string& s)
       : _Base(1)
     {  
       std::istringstream ss(s); 
@@ -43,7 +43,7 @@ namespace Ariadne {
 
     template <typename R>
     std::ostream&
-    operator<<(std::ostream& os, const vector<R>& v)
+    operator<<(std::ostream& os, const Vector<R>& v)
     {
       os << "[";
       if(v.size()>0) {
@@ -58,11 +58,11 @@ namespace Ariadne {
     
     template <typename R>
     std::istream&
-    operator>>(std::istream& is, vector<R>& v)
+    operator>>(std::istream& is, Vector<R>& v)
     {
       std::vector<R> stdvec;
       is >> stdvec;
-      v=vector<R>(stdvec.size());
+      v=Vector<R>(stdvec.size());
       for(size_type i=0; i!=v.size(); ++i) {
         v(i)=stdvec[i];
       }

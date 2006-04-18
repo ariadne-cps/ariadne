@@ -47,9 +47,9 @@ namespace Ariadne {
     }
     
     template<typename R>
-    LinearProgram<R>::LinearProgram(const matrix_type& A,
-                                       const vector_type& b,
-                                       const vector_type& c)
+    LinearProgram<R>::LinearProgram(const Matrix_type& A,
+                                       const Vector_type& b,
+                                       const Vector_type& c)
       : _tableau(), 
         _variable_indices(b.size()+c.size())
     {
@@ -68,7 +68,7 @@ namespace Ariadne {
       
       size_type n=nv+ne+na;
       size_type nfv=nv;
-      _tableau=matrix_type(nc+1,nfv+1);
+      _tableau=Matrix_type(nc+1,nfv+1);
       
       assert(ne==0);
       
@@ -104,7 +104,7 @@ namespace Ariadne {
     }
     
     template<typename R>
-    LinearProgram<R>::LinearProgram(const matrix_type& T)
+    LinearProgram<R>::LinearProgram(const Matrix_type& T)
       : _tableau(T),
         _variable_indices()
     {
@@ -237,10 +237,10 @@ namespace Ariadne {
     }
     
     template<typename R>
-    typename LinearProgram<R>::vector_type
+    typename LinearProgram<R>::Vector_type
     LinearProgram<R>::optimizing_point() const 
     {
-      vector_type result(this->number_of_free_variables());
+      Vector_type result(this->number_of_free_variables());
  
       size_type m=this->number_of_constraints();
       size_type n=this->number_of_free_variables();
@@ -266,7 +266,7 @@ namespace Ariadne {
     
     template<typename R>
     R 
-    LinearProgram<R>::objective_function(const vector_type& v) const
+    LinearProgram<R>::objective_function(const Vector_type& v) const
     {
       assert(false);
     }
@@ -620,7 +620,7 @@ namespace Ariadne {
       // Variable(j) is bound to be nonnegative in `cs'.
       std::deque<bool> nonnegative_variable(cs_num_cols - 1, false);
     
-      // Process each row of the `cs' matrix.
+      // Process each row of the `cs' Matrix.
       for (size_type i = cs_num_rows; i-- > 0; ) {
         const Linear_Row& cs_i = cs[i];
         bool found_a_nonzero_coeff = false;
@@ -914,7 +914,7 @@ namespace Ariadne {
         for (size_type i = new_cost.size(); i-- > 0; )
           neg_assign(new_cost[i]);
     
-      // Substitute properly the cost funcion in the `costs' matrix_type.
+      // Substitute properly the cost funcion in the `costs' Matrix_type.
       const size_type cost_zero_size = working_cost.size();
       Row tmp_cost = Row(new_cost, cost_zero_size, cost_zero_size);
       tmp_cost.swap(working_cost);

@@ -37,7 +37,7 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
-#include "../linear_algebra/constraint.h"
+#include "../linear_algebra/constraint_system.h"
 
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
@@ -79,15 +79,15 @@ namespace Ariadne {
     }    
     
     template <typename R>
-    Polyhedron<R>::Polyhedron(const matrix_type& A, const vector_type& b)
+    Polyhedron<R>::Polyhedron(const Matrix_type& A, const Vector_type& b)
     //: _ppl_poly(A.size1()) 
     {
-      vector_type rw;
+      Vector_type rw;
       real_type cnst;
       Parma_Polyhedra_Library::Constraint_System cs;
       
       for(size_type i=0; i!=A.size1(); ++i) {
-        //    rw=vector_type(row(A,i));
+        //    rw=Vector_type(row(A,i));
         rw=row(A,i);
         cnst=b[i];
         cs.insert(_convert_to_PPL_constraint(rw,cnst));
@@ -333,7 +333,7 @@ namespace Ariadne {
             
       for (size_type k=0; k<gen_A.number_of_points(); k++) {
         Ariadne::LinearAlgebra::GeneratorSystem<R> gen_B(B._ppl_poly.generators());
-        for (size_type i=0; i<gen_B.space_dimension(); i++) {
+        for (size_type i=0; i<gen_B.dimension(); i++) {
           for (size_type j=0; j<gen_B.number_of_points() ; j++) {
             gen_B._points(i,j)+=gen_A._points(i,k);
           }
@@ -384,10 +384,10 @@ namespace Ariadne {
     }
     
     
-    /* Convert the vector \a v and constant \a c into the constraint $v\cdot x\leq c$. */
+    /* Convert the <vector> \a v and constant \a c into the constraint $v\cdot x\leq c$. */
     template<typename R>
     Parma_Polyhedra_Library::Constraint
-    _convert_to_PPL_constraint(const Ariadne::LinearAlgebra::vector<R>&  v, 
+    _convert_to_PPL_constraint(const Ariadne::LinearAlgebra::Vector<R>&  v, 
                                const R& s) 
     {
       Parma_Polyhedra_Library::Linear_Expression e;

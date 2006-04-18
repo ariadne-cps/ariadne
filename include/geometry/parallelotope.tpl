@@ -50,7 +50,7 @@ namespace Ariadne {
     Rectangle<R> 
     Parallelotope<R>::bounding_box() const 
     {
-      vector_type offset(this->dimension());
+      Vector_type offset(this->dimension());
       for(size_t i=0; i!=this->dimension(); ++i) {
         for(size_t j=0; j!=this->dimension(); ++j) {
           offset[i] += abs(this->_generators(i,j));
@@ -74,13 +74,13 @@ namespace Ariadne {
       size_type n = this->dimension();
       
       /* Express in form invs * x - offst in [-bnds,+bnds] */
-      matrix_type invs;
-      vector_type offst;
-      vector_type bnds;
+      Matrix_type invs;
+      Vector_type offst;
+      Vector_type bnds;
       this->compute_linear_inequalities(invs,offst,bnds);
       
-      matrix_type A(2*n,n);
-      vector_type b(2*n);
+      Matrix_type A(2*n,n);
+      Vector_type b(2*n);
       
       for(uint i=0; i!=n; ++i) {
         for(uint j=0; j!=n; ++j) {
@@ -111,11 +111,11 @@ namespace Ariadne {
     /*! \brief Tests if the parallelotope contains \a point. */
     template <typename R>
     bool Parallelotope<R>::contains(const state_type& point) const {
-      matrix_type inv_gen(LinearAlgebra::inverse(this->_generators));
+      Matrix_type inv_gen(LinearAlgebra::inverse(this->_generators));
       const state_type &centre=this->_centre;
-      vector_type v(point.position_vector()-centre.position_vector());
+      Vector_type v(point.position_vector()-centre.position_vector());
 
-      vector_type e=prod(inv_gen,v);
+      Vector_type e=prod(inv_gen,v);
 
       for (size_t i=0; i<e.size(); i++) 
         if (abs(e(i))>1) return false;
@@ -126,11 +126,11 @@ namespace Ariadne {
     /*! \brief Tests if the interior of the parallelotope contains \a point. */
     template<typename R>
     bool Parallelotope<R>::interior_contains(const state_type& point) const {
-      matrix_type inv_gen=LinearAlgebra::inverse(this->_generators);
+      Matrix_type inv_gen=LinearAlgebra::inverse(this->_generators);
       const state_type &centre=this->_centre;
-      vector_type v(point.position_vector()-centre.position_vector());
+      Vector_type v(point.position_vector()-centre.position_vector());
 
-      vector_type e=inv_gen*v;
+      Vector_type e=inv_gen*v;
 
       for (size_t i=0; i<e.size(); i++) 
         if (abs(e(i))>=1) return false;
@@ -145,12 +145,12 @@ namespace Ariadne {
       size_type n=this->dimension();
       ListSet<R,Geometry::Parallelotope> result(this->dimension());
       
-      matrix_type new_generators=generators();
+      Matrix_type new_generators=generators();
       
       R max_norm=0;
       size_type max_column=0;
       for(size_type j=0; j!=n; ++j) {
-        R norm = LinearAlgebra::norm(LinearAlgebra::vector<R>(column(new_generators,j)));
+        R norm = LinearAlgebra::norm(LinearAlgebra::Vector<R>(column(new_generators,j)));
         if(norm>max_norm) {
           max_norm=norm;
           max_column=j;
@@ -162,9 +162,9 @@ namespace Ariadne {
         new_generators(i,j)/=2;
       }
       
-      state_type new_centre=this->centre()-LinearAlgebra::vector<R>(column(new_generators,j)/2);
+      state_type new_centre=this->centre()-LinearAlgebra::Vector<R>(column(new_generators,j)/2);
       result.adjoin(Parallelotope<R>(new_centre,new_generators));
-      new_centre=new_centre+LinearAlgebra::vector<R>(column(new_generators,j));
+      new_centre=new_centre+LinearAlgebra::Vector<R>(column(new_generators,j));
       result.adjoin(Parallelotope(new_centre,new_generators));
 
       return result;
@@ -176,11 +176,11 @@ namespace Ariadne {
     {
       size_type n=this->dimension();
       ListSet<R,Geometry::Parallelotope> result(this->dimension());
-      matrix_type new_generators=this->generators()/2;
+      Matrix_type new_generators=this->generators()/2;
       
       state_type first_centre=this->centre();
       for(size_type i=0; i!=n; ++i) {
-        first_centre=first_centre-LinearAlgebra::vector<R>((this->generator(i))/2);
+        first_centre=first_centre-LinearAlgebra::Vector<R>((this->generator(i))/2);
       }
       
       array<index_type> lower(n,0);
@@ -206,7 +206,7 @@ namespace Ariadne {
 
     template<typename R>
     void 
-    Parallelotope<R>::compute_linear_inequalities(matrix_type& A, vector_type& o, vector_type& b) const
+    Parallelotope<R>::compute_linear_inequalities(Matrix_type& A, Vector_type& o, Vector_type& b) const
     {
       _compute_linear_inequalities(A,o,b,this->centre().position_vector(),this->generators(),typename numerical_traits<R>::algebraic_category());
     }
@@ -214,11 +214,11 @@ namespace Ariadne {
     template<typename R>
     inline
     void
-    _compute_linear_inequalities(LinearAlgebra::matrix<R>& A,   
-                                 LinearAlgebra::vector<R>& o, 
-                                 LinearAlgebra::vector<R>& b, 
-                                 const LinearAlgebra::vector<R>& c, 
-                                 const LinearAlgebra::matrix<R>& G, 
+    _compute_linear_inequalities(LinearAlgebra::Matrix<R>& A,   
+                                 LinearAlgebra::Vector<R>& o, 
+                                 LinearAlgebra::Vector<R>& b, 
+                                 const LinearAlgebra::Vector<R>& c, 
+                                 const LinearAlgebra::Matrix<R>& G, 
                                  const field_tag&)
     {
       size_type n=c.size();
@@ -226,7 +226,7 @@ namespace Ariadne {
       A=LinearAlgebra::inverse(G);
       o=A*c;
       
-      b=LinearAlgebra::vector<R>(n);
+      b=LinearAlgebra::Vector<R>(n);
       for(size_type i=0; i!=n; ++i) {
         b[i]=1;
       }
@@ -235,18 +235,18 @@ namespace Ariadne {
     template<typename R>
     inline
     void
-    _compute_linear_inequalities(LinearAlgebra::matrix<R>& A,   
-                                 LinearAlgebra::vector<R>& o, 
-                                 LinearAlgebra::vector<R>& b, 
-                                 const LinearAlgebra::vector<R>& c, 
-                                 const LinearAlgebra::matrix<R>& G, 
+    _compute_linear_inequalities(LinearAlgebra::Matrix<R>& A,   
+                                 LinearAlgebra::Vector<R>& o, 
+                                 LinearAlgebra::Vector<R>& b, 
+                                 const LinearAlgebra::Vector<R>& c, 
+                                 const LinearAlgebra::Matrix<R>& G, 
                                  const ring_tag&)
     {
       typedef typename numerical_traits<R>::field_extension_type F;
       
       size_type n=c.size();
       
-      LinearAlgebra::matrix<F> M(n,n);
+      LinearAlgebra::Matrix<F> M(n,n);
       for(size_type i=0; i!=n; ++i) {
         for(size_type j=0; j!=n; ++j) {
           M(i,j) = convert_to<F>(G(i,j));
@@ -254,7 +254,7 @@ namespace Ariadne {
       }
       M=LinearAlgebra::inverse(M);
       
-      LinearAlgebra::vector<Integer> multipliers = row_common_denominators(M);
+      LinearAlgebra::Vector<Integer> multipliers = row_common_denominators(M);
       
       A.resize(n,n);
       for(size_type i=0; i!=n; ++i) {
@@ -274,14 +274,14 @@ namespace Ariadne {
   
   
     template<typename R>
-    LinearAlgebra::vector<typename numerical_traits<R>::field_extension_type>
+    LinearAlgebra::Vector<typename numerical_traits<R>::field_extension_type>
     Parallelotope<R>::coordinates(const state_type& s) const {
       typedef typename numerical_traits<R>::field_extension_type F;
-      LinearAlgebra::vector<F> diff(this->dimension());
+      LinearAlgebra::Vector<F> diff(this->dimension());
       for(size_type i=0; i!=diff.size(); ++i) {
         diff(i)=s[i]-this->_centre[i];
       }
-      LinearAlgebra::matrix<F> inv = LinearAlgebra::inverse(this->_generators);
+      LinearAlgebra::Matrix<F> inv = LinearAlgebra::inverse(this->_generators);
       return prod(inv,diff);
     }
 
@@ -307,12 +307,12 @@ namespace Ariadne {
       // 
       // Need to minimise sum of auxiliary variables -> add sum of last rows 
       // to get value function.
-      LinearAlgebra::matrix<Rational> T(3*n+1,2*n+1);
+      LinearAlgebra::Matrix<Rational> T(3*n+1,2*n+1);
 
       const Geometry::Point<R>& a=r.lower_corner();
       const Geometry::Point<R>& b=r.upper_corner();
       const Geometry::Point<R>& c=p.centre();
-      const LinearAlgebra::matrix<R>& A=p.generators();
+      const LinearAlgebra::Matrix<R>& A=p.generators();
 
       for(size_type i=0; i!=n; ++i) {
         T(i,i)=1;
@@ -365,7 +365,7 @@ namespace Ariadne {
     Parallelotope<R>::vertex(const size_type& i) const
     {
       Point<R> vertex(this->centre());
-      const LinearAlgebra::matrix<R>& gen=this->_generators;
+      const LinearAlgebra::Matrix<R>& gen=this->_generators;
       
       for (size_type j=0; j<gen.size1(); ++j) {
         for (size_type k=0; k<gen.size2(); ++k) {

@@ -29,6 +29,44 @@
  * \brief Miscellaneous documentation pages
  */
 
+/*! \mainpage
+ *
+ * \section Introduction
+ * 
+ * Ariadne is a C++ package for set-based analysis of dynamical and control systems, including reachability analysis and verification.
+ * 
+ * \section Requirements
+ * 
+ * To compile Ariadne, you will need a C++ compiler (we recommend g++ version 4.0.2 or higher, which can be downloaded from <a href="http://gcc.gnu.org/">http://gcc.gnu.org</a>).
+ *
+ * You will also need the following libraries:
+ *   - The GNU Multiple-Precision Library (version 4.1.2 or higher)  <a href="http://www.swox.com/gmp/">http://www.swox.com/gmp/</a>).
+ *   - MPFR Library (version 2.0.1 or higher) <a href="http://www.mpfr.org/">http://www.mpfr.org/</a>.
+ *   - The Boost C++ Libraries (version 1.33.1) <a href="http://www.boost.org/">http://www.boost.org/</a>.
+ *   - The Parma Polyhedra Library (version 0.8) <a href="http://www.cs.unipr.it/ppl/">http://www.cs.unipr.it/ppl/</a>.
+ *
+ * For the Python interface, you will also need:
+ *   - Python (version 2.4) <a href="http://www.python.org/">http://www.python.org/</a>.
+ *
+ * To make this documentation, you have used:
+ *   - Doxygen (version 1.4.6 or higher is recommended) 
+ *        <a href="http://www.stack.nl/~dimitri/doxygen/">http://www.stack.nl/~dimitri/doxygen/</a>
+ *
+ * \section Installation
+ *
+ * From the ariadne/trunk/ directory of the main tree, type\n
+ * <tt>> make install</tt>\n
+ * to make and install the library. 
+ *
+ * The default installation directory for the library is $HOME/lib/, and for the Python interface is $HOME/python/.
+ * These defaults can be changed by editing the PREFIX variable in the file config.mk, or, for more control, the 
+ * variables LIBPREFIX and PYTHONPREFIX.
+ */
+
+
+
+ 
+ 
 /*! \page real Real Number Types
  *
  * \section Introduction
@@ -290,7 +328,7 @@
  * We can then represent arbitrary elements be a <em>convergent sequence</em> of approximations.
  * In terms of a concrete representation on a computer, we can think of a such a sequence as a neverending <em>stream</em> of data.
  *
- * The material in this section is heavily influenced by the book \ref weihrauch2000 "Computational Analysis" by Klaus Weihrauch.
+ * The material in this section is heavily influenced by the book "Computational Analysis" by Klaus Weihrauch.
  *
  * \section state Representation of points in Euclidean space
  *
@@ -521,14 +559,14 @@
  * \section set_functions  Computations on sets.
  *
  * A valid arbitrary-precision computation on sets is defined as follows
- * If \f$f\f$ is a mathematical function, and \tt BS is a basic set type,
- * then a valid representation \tt f of \f$f\f$ is a function which, 
+ * If \f$f\f$ is a mathematical function, and \c BS is a basic set type,
+ * then a valid representation \c f of \f$f\f$ is a function which, 
  * for any basic set \f$A\f$, returns a set \f$B\f$ such that \f$f(A)\subset B\f$,
  * and such that whenever \f$A_n\f$ is a decreasing sequence of sets with \f$\bigcap_{n=1}^{\infty} A_n=\{x\}\f$,
  * then \f$\bigcap_{n=1}^{\infty} B_n=\{y\}\f$, where \f$y=f(x)\f$.
  *
  * A valid fixed-precision computation on sets is an over-approximation. 
- * In other words, a valid representation \tt f of \f$f\f$ is a function which,
+ * In other words, a valid representation \c f of \f$f\f$ is a function which,
  * for any basic set \f$A\f$, returns a set \f$B\f$ such that \f$f(A)\subset B\f$.
  * No guarentees on the accuracy are required.
  * Note that it does not make sense to consider a sequence \f$A_n\f$ converging to a point for fixed-precision types. 
@@ -538,11 +576,11 @@
  * A arbitrary-precision computation on points may be \em exact or \em approximate.
  * Examples of exact operations are polynomial functions on a ring (e.g. dyadic numbers)
  * and rational functions on a field (e.g. rational numbers). If \f$f\f$ is a mathematical function, 
- * then \tt f(x) computes \f$f(x)\f$ exactly if possible, and is undefined (compile-time or run-time error) otherwise.
- * \tt f(x,e) computes \f$f(x)\f$ with an error of at most \tt e.
+ * then \c f(x) computes \f$f(x)\f$ exactly if possible, and is undefined (compile-time or run-time error) otherwise.
+ * \c f(x,e) computes \f$f(x)\f$ with an error of at most \c e.
  * 
- * Note that even if \tt f is exact, it is impossible to compute 
- * the action of \f$f\f$ on a set just from the action of \tt f on points,
+ * Note that even if \c f is exact, it is impossible to compute 
+ * the action of \f$f\f$ on a set just from the action of \c f on points,
  * unless a modulus of continuity for \f$f\f$ is known.
  *
  * All fixed-precision computations on points are approximate. Further, the accuracy of the approximation is often unknown,

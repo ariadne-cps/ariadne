@@ -1,5 +1,5 @@
 /***************************************************************************
- *            zonotopic_vector.tpl
+ *            transformation_system.tpl
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -23,14 +23,14 @@
  
 
 #include <iostream>
-#include "zonotopic_vector.h"
+#include "transformation_system.h"
 
 
 namespace Ariadne {
   namespace LinearAlgebra {      
 
     template<typename R>
-    void zonotopic_vector<R>::minimize_generators() 
+    void TransformationSystem<R>::minimize_generators() 
     {
       return;
       /* Remove all zero columns from generators. */
@@ -45,7 +45,7 @@ namespace Ariadne {
         }
       }
       
-      matrix<R> new_gens(this->_generators.size1(),nzcols.size());
+      Matrix<R> new_gens(this->_generators.size1(),nzcols.size());
       for(size_type j=0; j!=new_gens.size2(); ++j) {
         size_type k=nzcols[j];
         for(size_type i=0; i!=new_gens.size1(); ++i) {
@@ -58,23 +58,23 @@ namespace Ariadne {
     
     
     template<typename R> 
-    LinearAlgebra::zonotopic_vector<R>
-    symmetrise(const LinearAlgebra::interval_vector<R>& iv)
+    LinearAlgebra::TransformationSystem<R>
+    symmetrise(const LinearAlgebra::IntervalVector<R>& iv)
     {
-      std::cerr << "symmetrise(const interval_vector<R>&)" <<  std::endl;
-      std::cerr << "iv=" << iv << std::endl;
-      matrix<R> A(iv.size(),iv.size()+1);
+      //std::cerr << "symmetrise(const IntervalVector<R>&)" <<  std::endl;
+      //std::cerr << "iv=" << iv << std::endl;
+      Matrix<R> A(iv.size(),iv.size()+1);
       for(size_type i=0; i!=A.size1(); ++i) {
         A(i,i)=iv(i).radius();
         A(i,iv.size())=iv(i).centre();
       }
-      std::cerr << iv << " " << A << std::endl;
-      return zonotopic_vector<R>(vector<R>(iv.size()),A);
+      //std::cerr << iv << " " << A << std::endl;
+      return TransformationSystem<R>(Vector<R>(iv.size()),A);
     }
  
     template<typename R> 
     std::ostream&
-    operator<<(std::ostream& os, const zonotopic_vector<R>& zv) 
+    operator<<(std::ostream& os, const TransformationSystem<R>& zv) 
     {
       return os << zv.centre() << "+" << zv.generators() << "[-1,1]^" << zv.number_of_generators();
     }

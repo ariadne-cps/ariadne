@@ -70,14 +70,14 @@ namespace Ariadne {
     
     
     template<typename R>
-    LinearAlgebra::matrix<R> 
+    LinearAlgebra::Matrix<R> 
     Map<R>::derivative(const Geometry::Point<R>& x) const 
     {
       throw std::invalid_argument("Derivative at point not implemented."); 
     }
 
     template<typename R>
-    LinearAlgebra::interval_matrix<R> 
+    LinearAlgebra::IntervalMatrix<R> 
     Map<R>::derivative(const Geometry::Rectangle<R>& r) const 
     {
       throw std::invalid_argument("Derivative on Rectangle not implemented."); 

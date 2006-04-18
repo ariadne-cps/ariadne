@@ -1,5 +1,5 @@
 /***************************************************************************
- *            matrix.cc
+ *            Matrix.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it Pieter.Collins@cwi.nl
@@ -32,81 +32,81 @@
 namespace Ariadne {
   namespace LinearAlgebra {
     
-    template class matrix<Real>;
-    template class matrix<Field>;
+    template class Matrix<Real>;
+    template class Matrix<Field>;
 
-    template std::ostream& operator<<(std::ostream&, const matrix<Real>&);
-    template std::ostream& operator<<(std::ostream&, const matrix<Field>&);
+    template std::ostream& operator<<(std::ostream&, const Matrix<Real>&);
+    template std::ostream& operator<<(std::ostream&, const Matrix<Field>&);
     
-    template std::istream& operator>>(std::istream&, matrix<Real>&);
-    template std::istream& operator>>(std::istream&, matrix<Field>&);
+    template std::istream& operator>>(std::istream&, Matrix<Real>&);
+    template std::istream& operator>>(std::istream&, Matrix<Field>&);
     
-    template matrix<Real> zero_matrix(size_type r, size_type c);
-    template matrix<Field> zero_matrix(size_type r, size_type c);
+    template Matrix<Real> zero_Matrix(size_type r, size_type c);
+    template Matrix<Field> zero_Matrix(size_type r, size_type c);
 
-    template matrix<Real> concatenate_columns(const matrix<Real>& A1,
-                                                const matrix<Real>& A2);
-    template matrix<Field> concatenate_columns(const matrix<Field>& A1,
-                                                  const matrix<Field>& A2);
+    template Matrix<Real> concatenate_columns(const Matrix<Real>& A1,
+                                                const Matrix<Real>& A2);
+    template Matrix<Field> concatenate_columns(const Matrix<Field>& A1,
+                                                  const Matrix<Field>& A2);
 
-    template matrix<Real> exp_approx(const matrix<Real> &A, 
+    template Matrix<Real> exp_approx(const Matrix<Real> &A, 
                                        const Real& e); 
     
-    template matrix<Field> exp_approx(const matrix<Field> &A, 
+    template Matrix<Field> exp_approx(const Matrix<Field> &A, 
                                          const Field& e); 
 
     
-    template void lu_local_dec(matrix<Field>& A, 
+    template void lu_local_dec(Matrix<Field>& A, 
                                const array<size_type>& row, 
                                const array<size_type>& col, 
                                const size_type& rows, 
                                const size_type& columns, 
                                const size_type& p);
     
-    template matrix<Field> lu_decompose(const matrix<Field>& A, 
+    template Matrix<Field> lu_decompose(const Matrix<Field>& A, 
                                            array<size_type>& p_col, 
                                            array<size_type>& p_row);
                               
-    template matrix<Field> lu_decompose(const matrix<Field> &A, 
+    template Matrix<Field> lu_decompose(const Matrix<Field> &A, 
                                            array<size_type>& p_array);
 
-    template vector<Field> lu_solve(const matrix<Field>& A, 
+    template Vector<Field> lu_solve(const Matrix<Field>& A, 
                                        const array<size_type>& p_array, 
-                                       const vector<Field>& b);
+                                       const Vector<Field>& b);
                                        
-    template matrix<Field> Householder_QR(const matrix<Field> &A);
+    template Matrix<Field> Householder_QR(const Matrix<Field> &A);
 
-    template matrix<Real> hermitian(const matrix<Real>& m);
+    template Matrix<Real> hermitian(const Matrix<Real>& m);
     
-    template Integer common_denominator(const matrix<Real>& A);
+    template Integer common_denominator(const Matrix<Real>& A);
     
-    template vector<Integer> row_common_denominators(const matrix<Real>& A);
-    template vector<Integer> row_common_denominators(const matrix<Field>& A);
+    template Vector<Integer> row_common_denominators(const Matrix<Real>& A);
+    template Vector<Integer> row_common_denominators(const Matrix<Field>& A);
 
-    template void transform_linear_inequalities(const matrix<Real>& T, 
-                                                matrix<Real>& A, 
-                                                vector<Real>& b);
+    template void transform_linear_inequalities(const Matrix<Real>& T, 
+                                                Matrix<Real>& A, 
+                                                Vector<Real>& b);
     
-    template bool independent_rows(matrix<Real> A);
+    template bool independent_rows(Matrix<Real> A);
 
-    template bool have_same_dimensions(const matrix<Real> &A,  const matrix<Real> &B);
+    template bool have_same_dimensions(const Matrix<Real> &A,  const Matrix<Real> &B);
     
-    template bool equivalent_columns(const matrix<Real> &A, 
+    template bool equivalent_columns(const Matrix<Real> &A, 
                                      const size_type &A_col, 
-                                     const matrix<Real> &B, 
+                                     const Matrix<Real> &B, 
                                      const size_type &B_col);
     
   
-    template size_type find_first_not_null_in_col(const matrix<Real> &A, 
+    template size_type find_first_not_null_in_col(const Matrix<Real> &A, 
                                                   const size_type &col);
     
-    template matrix<Real> remove_null_columns_but_one(const matrix<Real> &A);
+    template Matrix<Real> remove_null_columns_but_one(const Matrix<Real> &A);
     
-    template void remove_null_columns(const matrix<Real>& A, 
+    template void remove_null_columns(const Matrix<Real>& A, 
                                       array<size_type>& row, 
                                       array<size_type>& col);
 
-    template matrix<Field> compute_space(const matrix<Field>& SA, 
+    template Matrix<Field> compute_space(const Matrix<Field>& SA, 
                                             array<size_type>& row,
                                             const array<size_type>& col);
     

@@ -31,21 +31,12 @@
 #include <gmpxx.h>
 
 #include "../declarations.h"
+#include "../numeric/integer.h"
 #include "../numeric/dyadic.h"
 #include "../utility/stlio.h"
 
 namespace Ariadne {
   namespace Numeric {
-    /*! \brief An integer
-     *
-     * An element of the ring of integers.
-     * Must allow denotation of any integer, including arbitrarily large values.
-     * Integer quotient and remainder must be supported.
-     *
-     * Currently implemented using mpz_class from the GNU Multiple Precision Library.
-     */
-    typedef mpz_class Integer;
-  
     /*! \brief A 64-bit fixed-precision floating point number.
      *
      * Standard operations are not exact, but must support interval arithmetic.

@@ -44,10 +44,10 @@ template<typename T> class numerical_traits;
 }}
 
 namespace Ariadne { namespace LinearAlgebra {
-template<typename R> class vector;
-template<typename R> class matrix;
-template<typename R> class interval_vector;
-template<typename R> class interval_matrix;
+template<typename R> class Vector;
+template<typename R> class Matrix;
+template<typename R> class IntervalVector;
+template<typename R> class IntervalMatrix;
 template<typename R> class LinearProgram;
 }}
 
@@ -111,12 +111,14 @@ typedef int index_type;
 /*! \brief The type of a machine byte. */
 typedef unsigned char byte_type; 
  
+namespace Base {
 /*! \brief An array of boolean values. */
-typedef Base::array<bool> BooleanArray;
+typedef array<bool> BooleanArray;
 /*! \brief An array of unsigned integer values. */
-typedef Base::array<size_type> SizeArray;
+typedef array<size_type> SizeArray;
 /*! \brief An array of integer values. */
-typedef Base::array<index_type> IndexArray;
+typedef array<index_type> IndexArray;
+}
 
 using namespace Base;
 using namespace Numeric;

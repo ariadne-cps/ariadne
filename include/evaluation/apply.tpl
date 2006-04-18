@@ -68,27 +68,27 @@ namespace Ariadne {
       const size_type m=p.dimension();
       const size_type n=p.dimension();
       
-      LinearAlgebra::interval_vector<R> cuboid_vector(m);
+      LinearAlgebra::IntervalVector<R> cuboid_vector(m);
       const Interval<R> unit_interval(-1,1);
       for(size_type i=0; i!=cuboid_vector.size(); ++i) {
         cuboid_vector(i)=Interval<R>(-1,1);
       }
             
       const Geometry::Point<R>& c=p.centre();
-      const LinearAlgebra::matrix<R>& g=p.generators();
+      const LinearAlgebra::Matrix<R>& g=p.generators();
       
       Geometry::Point<R> img_centre=f.apply(c);
-      LinearAlgebra::interval_matrix<R> df_on_set = f.derivative(p.bounding_box());
-      LinearAlgebra::matrix<R> df_at_centre = f.derivative(c);
+      LinearAlgebra::IntervalMatrix<R> df_on_set = f.derivative(p.bounding_box());
+      LinearAlgebra::Matrix<R> df_at_centre = f.derivative(c);
       
-      LinearAlgebra::matrix<R> img_generators = df_at_centre*g;
+      LinearAlgebra::Matrix<R> img_generators = df_at_centre*g;
       
-      LinearAlgebra::matrix<F> img_generators_inverse = LinearAlgebra::inverse(img_generators);
+      LinearAlgebra::Matrix<F> img_generators_inverse = LinearAlgebra::inverse(img_generators);
       
-      LinearAlgebra::interval_matrix<R> img_generators_on_set = df_on_set * g;
-      LinearAlgebra::interval_matrix<R> cuboid_transform = img_generators_inverse * img_generators_on_set;
+      LinearAlgebra::IntervalMatrix<R> img_generators_on_set = df_on_set * g;
+      LinearAlgebra::IntervalMatrix<R> cuboid_transform = img_generators_inverse * img_generators_on_set;
       
-      LinearAlgebra::interval_vector<R> new_cuboid = cuboid_transform * cuboid_vector;
+      LinearAlgebra::IntervalVector<R> new_cuboid = cuboid_transform * cuboid_vector;
       
       R new_cuboid_sup(0);
       for(size_type j=0; j!=n; ++j) {

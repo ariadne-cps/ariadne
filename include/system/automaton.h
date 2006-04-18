@@ -89,7 +89,7 @@ class HybridAutomaton
   typedef LDT LeavingTrans;
   typedef typename LeavingTrans::DiscreteLocation DiscreteLocation;
   typedef typename LeavingTrans::ResetMap ResetMap;
-  typedef typename DiscreteLocation::vector_typeField vector_typeField;
+  typedef typename DiscreteLocation::Vector_typeField Vector_typeField;
   typedef typename ResetMap::DenotableSet DenotableSet;
   typedef typename DenotableSet::BasicSet BasicSet;
   typedef typename BasicSet::state_type state_type;
@@ -144,14 +144,14 @@ class HybridAutomaton
    */
   inline void add_location(DiscreteLocation &A) {
     
-    if ((this->dimension()!=0)&&((A.vector_field()).dimension()!=this->dimension())) {
+    if ((this->dimension()!=0)&&((A.Vector_field()).dimension()!=this->dimension())) {
       throw std::invalid_argument("The automaton has a different space dimension with respect to the discrete location's continuous objects.");
     }
     
-    this->_dimension=(A.vector_field()).dimension();
+    this->_dimension=(A.Vector_field()).dimension();
     
     /* If this location is already present into the 
-     * location vector there is nothing to do. */
+     * location <vector> there is nothing to do. */
     for (size_t i=0; i<(this->_locations).size(); i++) {
       if (A.name()== this->_locations[i].name()) {
         
@@ -162,7 +162,7 @@ class HybridAutomaton
     }
     
     /* if it is a new location, insert it into the locations
-     * vector and upgrade its id. */
+     * <vector> and upgrade its id. */
     A._set_id((this->_locations).size());
     
     (this->_locations).push_back(A);

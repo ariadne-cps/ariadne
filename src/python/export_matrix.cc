@@ -1,5 +1,5 @@
 /***************************************************************************
- *            python/export_matrix.cc
+ *            python/export_Matrix.cc
  *
  *  17 November 2005
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
@@ -38,25 +38,25 @@ using namespace Ariadne;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-inline Field qmatrix_getitem(const FMatrix& A, tuple index) {
+inline Field fmatrix_getitem(const FMatrix& A, tuple index) {
   uint i=extract<uint>(index[0]);
   uint j=extract<uint>(index[1]);
   return A(i,j);
 }
 
-inline void qmatrix_setitem(FMatrix& A, tuple index, Field x) {
+inline void fmatrix_setitem(FMatrix& A, tuple index, Field x) {
   uint i=extract<uint>(index[0]);
   uint j=extract<uint>(index[1]);
   A(i,j)=x;
 }
 
-inline void qmatrix_setitem_from_real(FMatrix& A, tuple index, Real x) {
+inline void fmatrix_setitem_from_real(FMatrix& A, tuple index, Real x) {
   uint i=extract<uint>(index[0]);
   uint j=extract<uint>(index[1]);
   A(i,j)=Ariadne::convert_to<Field>(x);
 }
 
-inline void qmatrix_setitem_from_double(FMatrix& A, tuple index, double x) {
+inline void fmatrix_setitem_from_double(FMatrix& A, tuple index, double x) {
   uint i=extract<uint>(index[0]);
   uint j=extract<uint>(index[1]);
   A(i,j)=Ariadne::convert_to<Field>(x);
@@ -84,13 +84,13 @@ inline RVector rmatrix_vprod(const RMatrix& A, const RVector v) {
   return prod(A,v);
 }
 
-inline RInterval imatrix_getitem(const RIntervalMatrix& A, tuple index) {
+inline RInterval iMatrix_getitem(const RIntervalMatrix& A, tuple index) {
   uint i=extract<uint>(index[0]);
   uint j=extract<uint>(index[1]);
   return A(i,j);
 }
 
-inline void imatrix_setitem(RIntervalMatrix& A, tuple index, RInterval x) {
+inline void iMatrix_setitem(RIntervalMatrix& A, tuple index, RInterval x) {
   uint i=extract<uint>(index[0]);
   uint j=extract<uint>(index[1]);
   A(i,j)=x;
@@ -100,7 +100,7 @@ inline FMatrix rmatrix_inverse(const RMatrix& A) {
   return LinearAlgebra::inverse(A);
 }
 
-void export_matrix() {
+void export_Matrix() {
   class_<RMatrix>("Matrix",init<int,int>())
     .def(init<std::string>())
     .def(init<RMatrix>())
@@ -114,21 +114,21 @@ void export_matrix() {
   def("inverse",&rmatrix_inverse);
   def("exp_approx",&LinearAlgebra::exp_approx<Real>);
 
-  class_<FMatrix>("KMatrix",init<int,int>())
+  class_<FMatrix>("RationalMatrix",init<int,int>())
     .def(init<FMatrix>())
-    .def("__getitem__",&qmatrix_getitem)
-    .def("__setitem__",&qmatrix_setitem)
-    .def("__setitem__",&qmatrix_setitem_from_real)
-    .def("__setitem__",&qmatrix_setitem_from_double)
+    .def("__getitem__",&fmatrix_getitem)
+    .def("__setitem__",&fmatrix_setitem)
+    .def("__setitem__",&fmatrix_setitem_from_real)
+    .def("__setitem__",&fmatrix_setitem_from_double)
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 }
 
-void export_interval_matrix() {
+void export_IntervalMatrix() {
   class_<RIntervalMatrix>("IntervalMatrix",init<int,int>())
     .def(init<RIntervalMatrix>())
-    .def("__getitem__",&imatrix_getitem)
-    .def("__setitem__",&imatrix_setitem)
+    .def("__getitem__",&iMatrix_getitem)
+    .def("__setitem__",&iMatrix_setitem)
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 }

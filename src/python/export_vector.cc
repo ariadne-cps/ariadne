@@ -63,19 +63,19 @@ inline void ivector_setitem(RIntervalVector& v, uint i, RInterval x) {
   v(i)=x;
 }
 
-inline Field qvector_getitem(const FVector& v, uint i) {
+inline Field fvector_getitem(const FVector& v, uint i) {
   return v(i);
 }
 
-inline void qvector_setitem(FVector& v, uint i, Field x) {
+inline void fvector_setitem(FVector& v, uint i, Field x) {
   v(i)=x;
 }
 
-inline void qvector_setitem_from_real(FVector& v, uint i, Real x) {
+inline void fvector_setitem_from_real(FVector& v, uint i, Real x) {
   v(i)=Ariadne::convert_to<Field>(x);
 }
 
-inline void qvector_setitem_from_double(FVector& v, uint i, double x) {
+inline void fvector_setitem_from_double(FVector& v, uint i, double x) {
   v(i)=Ariadne::convert_to<Field>(x);
 }
 
@@ -93,19 +93,19 @@ void export_vector() {
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 
-  class_<FVector>("KVector",init<int>())
+  class_<FVector>("RationalVector",init<int>())
     .def(init<FVector>())
     .def("__len__", &FVector::size)
-    .def("__getitem__",&qvector_getitem)
-    .def("__setitem__",&qvector_setitem)
-    .def("__setitem__",&qvector_setitem_from_real)
-    .def("__setitem__",&qvector_setitem_from_double)
+    .def("__getitem__",&fvector_getitem)
+    .def("__setitem__",&fvector_setitem)
+    .def("__setitem__",&fvector_setitem_from_real)
+    .def("__setitem__",&fvector_setitem_from_double)
     .def(self_ns::str(self))    // __self_ns::str__
   ;
   
 }
 
-void export_interval_vector() {
+void export_IntervalVector() {
   class_<RIntervalVector>("IntervalVector",init<int>())
     .def(init<RIntervalVector>())
     .def("__len__", &RIntervalVector::size)

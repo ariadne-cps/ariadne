@@ -37,16 +37,16 @@ namespace Ariadne {
   namespace LinearAlgebra {
 
     template <typename R>
-    matrix<R>::matrix(const std::string& s) 
+    Matrix<R>::Matrix(const std::string& s) 
     {
         std::stringstream ss(s);
         ss >> *this;
     }
     
     template <typename R>
-    matrix<R> zero_matrix(size_type r, size_type c) 
+    Matrix<R> zero_Matrix(size_type r, size_type c) 
     {
-      matrix<R> A(r,c);
+      Matrix<R> A(r,c);
       for (size_type i=0; i<r; ++i) {
         for (size_type j=0; j<c; ++j) {
           A(i,j)=0.0;
@@ -57,9 +57,9 @@ namespace Ariadne {
   
     template<typename R>
     R
-    matrix<R>::norm() const
+    Matrix<R>::norm() const
     {
-      const matrix<R>& A=*this;
+      const Matrix<R>& A=*this;
       R result=0;
       for(size_type i=0; i!=A.size1(); ++i) {
         R row_sum=0;
@@ -73,9 +73,9 @@ namespace Ariadne {
         
     template<typename R>
     R
-    matrix<R>::log_norm() const 
+    Matrix<R>::log_norm() const 
     {
-      const matrix<R>& A=*this;
+      const Matrix<R>& A=*this;
       R result=0;
       for(size_type i=0; i!=A.size1(); ++i) {
         R row_sum=A(i,i);
@@ -90,10 +90,10 @@ namespace Ariadne {
     }
         
     template<typename R>
-    matrix<R>
-    concatenate_columns(const matrix<R>& A1, const matrix<R>& A2) {
+    Matrix<R>
+    concatenate_columns(const Matrix<R>& A1, const Matrix<R>& A2) {
       assert(A1.size1()==A2.size1());
-      LinearAlgebra::matrix<R> result(A1.size1(),A1.size2()+A2.size2());
+      LinearAlgebra::Matrix<R> result(A1.size1(),A1.size2()+A2.size2());
       for(size_type i=0; i!=result.size1(); ++i) {
         for(size_type j=0; j!=A1.size2(); ++j) {
           result(i,j)=A1(i,j);
@@ -109,14 +109,14 @@ namespace Ariadne {
    
     
     template <typename R>
-    matrix<R>
-    exp_approx(const matrix<R>& A, 
+    Matrix<R>
+    exp_approx(const Matrix<R>& A, 
                const R& e) 
     {
-      matrix<R> result=identity_matrix<R>(A.size1());
+      Matrix<R> result=identity_matrix<R>(A.size1());
       
       R norm_A=norm(A);
-      matrix<R> term=result;
+      Matrix<R> term=result;
       uint n=0;
       while(norm(term)*n >= e*(n-norm_A)) {
         ++n;
@@ -129,7 +129,7 @@ namespace Ariadne {
 
     template <typename R>
     void 
-    lu_local_dec(matrix<R> &A, 
+    lu_local_dec(Matrix<R> &A, 
                  const array<size_type> &row, const array<size_type> &col, 
                  const size_type &rows, const size_type &columns, 
                  const size_type &p) 
@@ -137,10 +137,10 @@ namespace Ariadne {
       size_type i,j;
       R coef;
   
-      // perform lu decomposition on the sub matrix
+      // perform lu decomposition on the sub Matrix
       for (i=p+1; i< rows; i++) {
         if (A(row[p],col[p])==0.0)  
-	  throw std::runtime_error("matrix_type is singular");
+	  throw std::runtime_error("Matrix_type is singular");
         coef=A(row[i],col[p])/A(row[p],col[p]);
     
         for (j=p+1; j< columns; j++) 
@@ -152,21 +152,21 @@ namespace Ariadne {
     }
    
     template <typename R>
-    matrix<R> 
-    lu_decompose(const matrix<R> &A, 
+    Matrix<R> 
+    lu_decompose(const Matrix<R> &A, 
                  array<size_type> &p_col, 
                  array<size_type> &p_row) 
     {
       using std::swap;
       
-      //create output matrix
-      matrix<R> lu_A(A);
+      //create output Matrix
+      Matrix<R> lu_A(A);
   
       size_type rows,columns;
       rows=A.size1();
       columns=A.size2();
 
-      // create the two pivot vectors
+      // create the two pivot Vectors
       array<size_type> row(rows);
       p_col=array<size_type>(columns);
 
@@ -198,7 +198,7 @@ namespace Ariadne {
           // value in the i-th row
           swap(p_col[i],p_col[j]);
 
-          // perform lu decomposition on the sub matrix A(i..rows,i..columns)
+          // perform lu decomposition on the sub Matrix A(i..rows,i..columns)
           lu_local_dec(lu_A, row, p_col, rows, columns, i);
        
           i++;
@@ -214,19 +214,19 @@ namespace Ariadne {
     }
     
     /* PAY ATTENTION!!! 
-     * I supose that matrix is row based i.e. 
+     * I supose that Matrix is row based i.e. 
      * A(i,j) is the element in the i-th row and in the j-th column 
      */
     template <typename R>
-    matrix<R> 
-    lu_decompose(const matrix<R> &A, 
+    Matrix<R> 
+    lu_decompose(const Matrix<R> &A, 
                  array<size_type> &p_array) 
     {
       R max,sum,p_val;
       size_type i,j,k, rows=A.size1(), cols=A.size2(), pivot=0;
       
-      vector<R> scale(rows);
-      matrix<R> O=A;
+      Vector<R> scale(rows);
+      Matrix<R> O=A;
       
       for (i=0; i<rows; i++) {
         max=0.0;
@@ -236,7 +236,7 @@ namespace Ariadne {
           }
         }
         if (max==0) {
-          throw std::runtime_error("matrix_type is singular");
+          throw std::runtime_error("Matrix_type is singular");
         }
         scale(i)=1.0/max;
       }
@@ -277,7 +277,7 @@ namespace Ariadne {
         p_array[j]=pivot;
         
         if ( O(j,j) == 0 ) {
-          throw std::runtime_error("matrix_type is singular");
+          throw std::runtime_error("Matrix_type is singular");
         }
     
         if (j < cols-1) {
@@ -295,14 +295,14 @@ namespace Ariadne {
      * A(i,j) is the element in the i-th row and in the j-th column 
      */
     template <typename R>
-    vector<R> 
-    lu_solve(const matrix<R> &A, 
+    Vector<R> 
+    lu_solve(const Matrix<R> &A, 
              const array<size_type> &p_array, 
-             const vector<R> &b) 
+             const Vector<R> &b) 
     {
       size_type i_diag=0, idx_p, rows=A.size1(), cols=A.size2(),i,j;
       R sum;
-      vector<R> sol(cols);
+      Vector<R> sol(cols);
    
       for (i=0; i<rows&& i<cols; i++) {
         sol(i)=b(i);
@@ -349,12 +349,12 @@ namespace Ariadne {
     /* WARNING!!! The following function has some precision problems */ 
     template <typename R>
     inline
-    matrix<R> 
-    Householder_QR(const matrix<R> &A) {
+    Matrix<R> 
+    Householder_QR(const Matrix<R> &A) {
 
       size_type dim1=A.size1(),dim2=A.size2();
-      vector<R> x(dim1);
-      matrix<R> Q=identity_matrix<R>(dim1),QA=A,Qi;
+      Vector<R> x(dim1);
+      Matrix<R> Q=identity_matrix<R>(dim1),QA=A,Qi;
       R norm,coef;
 
       for (size_type i=0; i< dim2; i++) {
@@ -392,31 +392,31 @@ namespace Ariadne {
     }
    
     template <typename R>
-    matrix<R>
-    hermitian(const matrix<R>& m) {
+    Matrix<R>
+    hermitian(const Matrix<R>& m) {
        return herm(m);
     }
     
     template <typename R>
-    matrix<typename numerical_traits<R>::field_extension_type> 
-    matrix<R>::inverse() const
+    Matrix<typename numerical_traits<R>::field_extension_type> 
+    Matrix<R>::inverse() const
     {
       return _inverse(*this,typename numerical_traits<R>::algebraic_category());
     }
     
     template <typename R>
     inline
-    matrix<typename numerical_traits<R>::field_extension_type> 
-    _inverse(const matrix<R> &A, const field_tag&) 
+    Matrix<typename numerical_traits<R>::field_extension_type> 
+    _inverse(const Matrix<R> &A, const field_tag&) 
     {
       size_type rows=A.size1(), cols=A.size2(),i,j;
       
-      matrix<R> inv_A(cols,rows);
-      vector<R> Id_vect(rows), Id_sol;
+      Matrix<R> inv_A(cols,rows);
+      Vector<R> Id_vect(rows), Id_sol;
       array<size_type> p_array(rows);
       
 
-      matrix<R> lu_A=lu_decompose(A, p_array);
+      Matrix<R> lu_A=lu_decompose(A, p_array);
      
       for (j=0; j<rows; j++) {
         for (i=0; i<rows; i++)
@@ -435,10 +435,10 @@ namespace Ariadne {
     
     template <typename R>
     inline
-    matrix<typename numerical_traits<R>::field_extension_type> 
-    _inverse(const matrix<R>& A, const ring_tag&) 
+    Matrix<typename numerical_traits<R>::field_extension_type> 
+    _inverse(const Matrix<R>& A, const ring_tag&) 
     {
-      matrix<typename numerical_traits<R>::field_extension_type> result(A.size1(),A.size2());
+      Matrix<typename numerical_traits<R>::field_extension_type> result(A.size1(),A.size2());
       for(size_type i=0; i!=result.size1(); ++i) {
         for(size_type j=0; j!=result.size2(); ++j) {
           result(i,j)=A(i,j);
@@ -448,16 +448,16 @@ namespace Ariadne {
     }
     
     template <typename R>
-    vector<typename numerical_traits<R>::field_extension_type> 
-    matrix<R>::solve(const vector<R>& v) const
+    Vector<typename numerical_traits<R>::field_extension_type> 
+    Matrix<R>::solve(const Vector<R>& v) const
     {
-      return this->inverse()*vector<F>(v);
+      return this->inverse()*Vector<F>(v);
     }
     
     
     template <typename R>
     Integer 
-    common_denominator(const matrix<R>& A)
+    common_denominator(const Matrix<R>& A)
     {
       Integer denom=1;
       for (size_type i=0; i<A.size1(); ++i) {
@@ -469,10 +469,10 @@ namespace Ariadne {
     }
     
     template <typename R>
-    vector<Integer> 
-    row_common_denominators(const matrix<R>& A) 
+    Vector<Integer> 
+    row_common_denominators(const Matrix<R>& A) 
     {
-      vector<Integer> denoms(A.size1());
+      Vector<Integer> denoms(A.size1());
       for(size_type i=0; i!=A.size1(); ++i) {
         Integer denom=1;
         for(size_type j=0; j!=A.size2(); ++j) {
@@ -488,18 +488,18 @@ namespace Ariadne {
     /* \brief Transforms the linear inequalities $Ax\leq b$ to $AT^{-1}y \leq b$. */
     template <typename R>
     void 
-    transform_linear_inequalities(const matrix<R>& T, 
-                                  matrix<R>& A, 
-                                  vector<R>& b) 
+    transform_linear_inequalities(const Matrix<R>& T, 
+                                  Matrix<R>& A, 
+                                  Vector<R>& b) 
     {
       return transform_linear_inequalities(T,A,b, typename numerical_traits<R>::algebraic_category());
     }
     
     template <typename R>
     void 
-    transform_linear_inequalities(const matrix<R>& T, 
-                                  matrix<R>& A, 
-                                  vector<R>& b,
+    transform_linear_inequalities(const Matrix<R>& T, 
+                                  Matrix<R>& A, 
+                                  Vector<R>& b,
                                   const field_tag& ft) 
     {
       A=A*inverse(T);
@@ -507,9 +507,9 @@ namespace Ariadne {
     
     template <typename R>
     void 
-    transform_linear_inequalities(const matrix<R>& T, 
-                                  matrix<R>& A, 
-                                  vector<R>& b,
+    transform_linear_inequalities(const Matrix<R>& T, 
+                                  Matrix<R>& A, 
+                                  Vector<R>& b,
                                   const ring_tag& rt) 
     {
       typedef typename numerical_traits<R>::field_extension_type F;
@@ -522,18 +522,18 @@ namespace Ariadne {
         throw std::domain_error("Invalid linear transformation");
       }
       
-      matrix<F> Trat(T.size1(),T.size2());
+      Matrix<F> Trat(T.size1(),T.size2());
       for(size_type i=0; i!=n; ++i) {
         for(size_type j=0; j!=n; ++j) {
           Trat(i,j)=convert_to<F>(T(i,j));
         }
       }
-      matrix<F> Tinv=inverse(Trat);
+      Matrix<F> Tinv=inverse(Trat);
       Trat.clear();
       
       Integer multiplier=common_denominator(Tinv);
       
-      matrix<Integer> iTinv(n,n);
+      Matrix<Integer> iTinv(n,n);
       for(size_type i=0; i!=n; ++i) {
         for(size_type j=0; j!=n; ++j) {
           iTinv(i,j) = numerator(Tinv(i,j)) * (multiplier/denominator(Tinv(i,j)));
@@ -541,7 +541,7 @@ namespace Ariadne {
       }
       
       R rmultiplier = convert_to<R>(multiplier);
-      matrix<R> rTinv(n,n);
+      Matrix<R> rTinv(n,n);
        for(size_type i=0; i!=n; ++i) {
         for(size_type j=0; j!=n; ++j) {
           rTinv(i,j) = convert_to<R>(iTinv(i,j));
@@ -554,7 +554,7 @@ namespace Ariadne {
    
     template <class R>
     bool 
-    independent_rows(matrix<R> A) 
+    independent_rows(Matrix<R> A) 
     {
      const size_type rows = A.size1(),cols = A.size2();
      size_type i,j,i2,j2;
@@ -579,18 +579,18 @@ namespace Ariadne {
  
     template <typename R>
     bool 
-    have_same_dimensions(const matrix<R> &A,  const matrix<R> &B) 
+    have_same_dimensions(const Matrix<R> &A,  const Matrix<R> &B) 
     {
       return (A.size1()==B.size1() && A.size2()==B.size2());
     }
     
     template <typename R>
     bool 
-    equivalent_columns(const matrix<R> &A, const size_type &A_col, 
-                       const matrix<R> &B, const size_type &B_col) 
+    equivalent_columns(const Matrix<R> &A, const size_type &A_col, 
+                       const Matrix<R> &B, const size_type &B_col) 
     {
       if (A.size1()!=B.size1()) {
-        throw std::domain_error("The two matrix have a diffentent number of rows"); 
+        throw std::domain_error("The two Matrix have a diffentent number of rows"); 
       }
       for (size_type i=0; i<A.size1(); i++) {
         if (A(i,A_col)!=B(i,B_col)) {
@@ -602,7 +602,7 @@ namespace Ariadne {
   
     template<typename R>
     size_type 
-    find_first_not_null_in_col(const matrix<R> &A, 
+    find_first_not_null_in_col(const Matrix<R> &A, 
                                const size_type &col) 
     {
       size_type i=0;
@@ -615,8 +615,8 @@ namespace Ariadne {
     }
     
     template <class R>
-    matrix<R> 
-    remove_null_columns_but_one(const matrix<R> &A) 
+    Matrix<R> 
+    remove_null_columns_but_one(const Matrix<R> &A) 
     {
       size_type directions=0;
       size_type rows=A.size1();
@@ -634,7 +634,7 @@ namespace Ariadne {
         }
       }
 
-      matrix<R> new_A(rows,std::max(1u,directions));
+      Matrix<R> new_A(rows,std::max(1u,directions));
 
       size_type j2=0;
       for(size_type j=0; j!=cols; ++j) {
@@ -651,7 +651,7 @@ namespace Ariadne {
     
     template <typename R>
     void 
-    remove_null_columns(const matrix<R> &A, 
+    remove_null_columns(const Matrix<R> &A, 
                         array<size_type> &row, array<size_type> &col) 
     {
       using std::swap;
@@ -685,8 +685,8 @@ namespace Ariadne {
 
 
     template <typename R>
-    matrix<R> 
-    compute_space(const matrix<R> &SA, 
+    Matrix<R> 
+    compute_space(const Matrix<R> &SA, 
                   array<size_type> &row,const array<size_type> &col) 
     {
       size_type cols=col.size(), rows=row.size();
@@ -696,7 +696,7 @@ namespace Ariadne {
       size_type SA_cols=SA.size2(), A_rows=SA_cols-rows;
       size_type i,j,k,j2;
    
-      matrix<R> A(A_rows,SA_cols);
+      Matrix<R> A(A_rows,SA_cols);
 
       k=0;
       for (i=0; i<SA_cols; i++) {
@@ -734,7 +734,7 @@ namespace Ariadne {
 
     template <typename R>
     std::ostream&
-    operator<<(std::ostream& os, const matrix<R>& A)
+    operator<<(std::ostream& os, const Matrix<R>& A)
     {
       for(uint i=0; i!=A.size1(); ++i) {
         for(uint j=0; j!=A.size2(); ++j) {
@@ -749,7 +749,7 @@ namespace Ariadne {
      
     template <typename R>
     std::istream&
-    operator>>(std::istream& is, matrix<R>& A)
+    operator>>(std::istream& is, Matrix<R>& A)
     {
       char c;
       is >> c;
@@ -770,7 +770,7 @@ namespace Ariadne {
           }
         }
         if(is) {
-          A=matrix<R>(v.size(),v.front().size());
+          A=Matrix<R>(v.size(),v.front().size());
           for(size_type i=0; i!=A.size1(); ++i) {
             assert(v[i].size()==A.size2());
             for(size_type j=0; j!=A.size2(); ++j) {

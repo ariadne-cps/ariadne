@@ -35,28 +35,28 @@ namespace Ariadne {
     }
      
     template<typename R>
-    LinearAlgebra::vector<R> 
+    LinearAlgebra::Vector<R> 
     VectorField<R>::apply(const Geometry::Point<R>& x) const
     {
       throw std::invalid_argument("Not implemented."); 
     }
     
     template<typename R>
-    LinearAlgebra::interval_vector<R>
+    LinearAlgebra::IntervalVector<R>
     VectorField<R>::apply(const Geometry::Rectangle<R>& x) const
     {
       throw std::invalid_argument("Not implemented."); 
     }
     
     template<typename R>
-    LinearAlgebra::matrix<R> 
+    LinearAlgebra::Matrix<R> 
     VectorField<R>::derivative(const Geometry::Point<R>& x) const 
     {
       throw std::invalid_argument("Not implemented."); 
     }
     
     template<typename R>
-    LinearAlgebra::interval_matrix<R> 
+    LinearAlgebra::IntervalMatrix<R> 
     VectorField<R>::derivative(const Geometry::Rectangle<R>& A) const 
     {
       throw std::invalid_argument("Not implemented."); 

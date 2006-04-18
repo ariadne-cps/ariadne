@@ -73,7 +73,7 @@ namespace Ariadne {
     }
     
     template <typename R>
-    Rectangle<R>::Rectangle(const LinearAlgebra::interval_vector<R>& iv) 
+    Rectangle<R>::Rectangle(const LinearAlgebra::IntervalVector<R>& iv) 
       : _lower_corner(iv.size()), _upper_corner(iv.size())
     {
       for(dimension_type i=0; i!=this->dimension(); ++i) {
@@ -96,10 +96,10 @@ namespace Ariadne {
     }
       
     template <typename R>
-    LinearAlgebra::interval_vector<R> 
+    LinearAlgebra::IntervalVector<R> 
     Rectangle<R>::position_vectors() const 
     {
-      LinearAlgebra::interval_vector<R> result(this->dimension());
+      LinearAlgebra::IntervalVector<R> result(this->dimension());
       for(size_type i=0; i!=result.size(); ++i) {
         result(i)=this->operator[](i);
       }
@@ -153,7 +153,7 @@ namespace Ariadne {
       lattice_iterator end(finish,lower,upper);
 
       Point<R> lwr_crnr=this->lower_corner();
-      LinearAlgebra::vector<R> offst=(this->upper_corner()-this->lower_corner())/2;
+      LinearAlgebra::Vector<R> offst=(this->upper_corner()-this->lower_corner())/2;
       for(lattice_iterator iter(lower,lower,upper); iter!=end; ++iter) {
         array<index_type> ary=*iter;
         state_type new_lwr_crnr=lwr_crnr;

@@ -36,13 +36,13 @@ namespace Ariadne {
   namespace LinearAlgebra {
 
     template<typename R>
-    vector<R>
-    product(const tensor<R>& T, const vector<R>& v1, const vector<R>& v2) 
+    Vector<R>
+    product(const Tensor<R>& T, const Vector<R>& v1, const Vector<R>& v2) 
     {
       assert(T.size(1)==v1.size());
       assert(T.size(2)==v2.size());
       
-      vector<R> result(T.size(0));
+      Vector<R> result(T.size(0));
       for(size_type i=0; i!=T.size(0); ++i) {
         for(size_type j=0; j!=T.size(1); ++j) {
           for(size_type k=0; k!=T.size(2); ++k) {
@@ -54,12 +54,12 @@ namespace Ariadne {
     }
       
     template<typename R>
-    matrix<R>
-    product(const tensor<R>& T, const vector<R>& v1) 
+    Matrix<R>
+    product(const Tensor<R>& T, const Vector<R>& v1) 
     {
       assert(T.size(1)==v1.size());
       
-      matrix<R> result(T.size(0),T.size(1));
+      Matrix<R> result(T.size(0),T.size(1));
       for(size_type i=0; i!=T.size(0); ++i) {
         for(size_type j=0; j!=T.size(1); ++j) {
           for(size_type k=0; k!=T.size(2); ++k) {
@@ -71,12 +71,12 @@ namespace Ariadne {
     }
 
     template<typename R>
-    tensor<R>
-    product(const tensor<R>& T, const matrix<R>& A1) 
+    Tensor<R>
+    product(const Tensor<R>& T, const Matrix<R>& A1) 
     {
       assert(T.size(1)==A1.size1());
       
-      tensor<R> result(T.size(0),A1.size2(),T.size(2));
+      Tensor<R> result(T.size(0),A1.size2(),T.size(2));
       for(size_type i=0; i!=result.size(0); ++i) {
         for(size_type j=0; j!=result.size(1); ++j) {
           for(size_type k=0; k!=result.size(2); ++k) {
@@ -90,13 +90,13 @@ namespace Ariadne {
     }
 
     template<typename R>
-    tensor<R>
-    product(const tensor<R>& T, const matrix<R>& A1, const matrix<R>& A2) 
+    Tensor<R>
+    product(const Tensor<R>& T, const Matrix<R>& A1, const Matrix<R>& A2) 
     {
       assert(T.size(1)==A1.size1());
       assert(T.size(2)==A2.size1());
       
-      tensor<R> result(T.size(0),A1.size2(),A2.size2());
+      Tensor<R> result(T.size(0),A1.size2(),A2.size2());
       for(size_type i=0; i!=T.size(0); ++i) {
         for(size_type j=0; j!=A1.size2(); ++j) {
           for(size_type k=0; k!=A2.size2(); ++k) {
@@ -113,7 +113,7 @@ namespace Ariadne {
     
     template<typename R>
     std::ostream&
-    operator<< (std::ostream& os, const tensor<R>& T)
+    operator<< (std::ostream& os, const Tensor<R>& T)
     {
       return os;
     }

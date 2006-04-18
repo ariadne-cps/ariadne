@@ -44,7 +44,7 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/interval_vector.h"
-#include "../linear_algebra/zonotopic_vector.h"
+#include "../linear_algebra/transformation_system.h"
 
 #include "../linear_algebra/matrix.h"
 #include "../linear_algebra/interval_matrix.h"
@@ -68,21 +68,21 @@ namespace Ariadne {
     class IntervalParallelotope
     {
      public:
-      IntervalParallelotope(const LinearAlgebra::interval_vector<R>& c, const LinearAlgebra::interval_matrix<R>& A) : _c(c), _A(A) { }
+      IntervalParallelotope(const LinearAlgebra::IntervalVector<R>& c, const LinearAlgebra::IntervalMatrix<R>& A) : _c(c), _A(A) { }
       
       size_type dimension() const { return _c.size(); }
       
-      const LinearAlgebra::interval_vector<R>& centre() const { return _c; }
-      LinearAlgebra::interval_vector<R>& centre() { return _c; }
+      const LinearAlgebra::IntervalVector<R>& centre() const { return _c; }
+      LinearAlgebra::IntervalVector<R>& centre() { return _c; }
 
-      const LinearAlgebra::interval_matrix<R>& generators() const { return _A; }
-      LinearAlgebra::interval_matrix<R>& generators() { return _A; }
+      const LinearAlgebra::IntervalMatrix<R>& generators() const { return _A; }
+      LinearAlgebra::IntervalMatrix<R>& generators() { return _A; }
 
       Geometry::Parallelotope<R> over_approximating_parallelotope() const;
       Geometry::Parallelotope<R> over_approximating_parallelotope(R err) const;
      private:
-      LinearAlgebra::interval_vector<R> _c;
-      LinearAlgebra::interval_matrix<R> _A;
+      LinearAlgebra::IntervalVector<R> _c;
+      LinearAlgebra::IntervalMatrix<R> _A;
     };
    
     template<typename R>
@@ -103,20 +103,20 @@ namespace Ariadne {
       
       size_type n=this->dimension();
       
-      LinearAlgebra::interval_matrix<R> A=this->generators();
+      LinearAlgebra::IntervalMatrix<R> A=this->generators();
       
-      LinearAlgebra::vector<R> cmid=this->centre().centre();
-      LinearAlgebra::matrix<R> Amid=this->generators().centre();
+      LinearAlgebra::Vector<R> cmid=this->centre().centre();
+      LinearAlgebra::Matrix<R> Amid=this->generators().centre();
       
-      LinearAlgebra::matrix<R> D(n,n);
+      LinearAlgebra::Matrix<R> D(n,n);
       for(size_type i=0; i!=n; ++i) {
         D(i,i)=this->centre()(i).radius();
       }
       
-      LinearAlgebra::matrix<F> AinvF=LinearAlgebra::inverse(Amid);
-      LinearAlgebra::interval_matrix<R> Ainv=LinearAlgebra::approximate(AinvF, proposed_err);
+      LinearAlgebra::Matrix<F> AinvF=LinearAlgebra::inverse(Amid);
+      LinearAlgebra::IntervalMatrix<R> Ainv=LinearAlgebra::approximate(AinvF, proposed_err);
       
-      R err = upper_norm(Ainv*LinearAlgebra::interval_matrix<R>(D+A));
+      R err = upper_norm(Ainv*LinearAlgebra::IntervalMatrix<R>(D+A));
 #ifdef DEBUG
       std::cerr << "error=" << err << std::endl;
 #endif
@@ -167,7 +167,7 @@ namespace Ariadne {
       
       Geometry::Rectangle<R> q=estimate_flow_bounds(vf,r,h);
       
-      LinearAlgebra::interval_vector<R> fq=vf.apply(q);
+      LinearAlgebra::IntervalVector<R> fq=vf.apply(q);
       r=r+(h*fq);
 #ifdef DEBUG
       std::cerr << "suggested stepsize=" << step_size << std::endl;
@@ -202,7 +202,7 @@ namespace Ariadne {
 
       Geometry::Rectangle<R> q=estimate_flow_bounds(vf,r,h);
       
-      LinearAlgebra::interval_vector<R> fq=vf.apply(q);
+      LinearAlgebra::IntervalVector<R> fq=vf.apply(q);
       
       r=r+(Interval<R>(R(0),h)*fq);
 
@@ -257,7 +257,7 @@ namespace Ariadne {
       Parallelotope<R> p=initial_set;
       const size_type n=p.dimension();
       R& h=step_size;
-      const matrix<R> id=identity_matrix<R>(n);
+      const Matrix<R> id=identity_matrix<R>(n);
       
       R err=norm(p.generators())/65536;
       
@@ -268,8 +268,8 @@ namespace Ariadne {
       std::cerr << "bound=" << b << std::endl;
 #endif
       
-      interval_vector<R> f=vf.apply(b);
-      interval_matrix<R> df=vf.derivative(b);
+      IntervalVector<R> f=vf.apply(b);
+      IntervalMatrix<R> df=vf.derivative(b);
       
       R l=upper_log_norm(df);
 
@@ -284,15 +284,15 @@ namespace Ariadne {
       
       //integration_step(): the varaible l is useless!
       
-      interval_matrix<R> hdf=h*df;
-      interval_matrix<R> dphi=exp(hdf);
+      IntervalMatrix<R> hdf=h*df;
+      IntervalMatrix<R> dphi=exp(hdf);
       
       Point<R> c=p.centre();
       Rectangle<R> rc=Geometry::Rectangle<R>(c,c);
       Rectangle<R> phic=refine_flow_bounds(vf,rc,b,h);
       
-      interval_vector<R> phicv=phic.position_vectors();
-      interval_matrix<R> zv(dphi*p.generators());
+      IntervalVector<R> phicv=phic.position_vectors();
+      IntervalMatrix<R> zv(dphi*p.generators());
 
       IntervalParallelotope<R> ip(phicv,zv);
       p=ip.over_approximating_parallelotope();
@@ -303,8 +303,8 @@ namespace Ariadne {
 
       std::cerr << "centre=" << c << std::endl;
       std::cerr << "bounds on centre=" << phic << std::endl;
-      std::cerr << "bounds on centre vector=" << phicv << std::endl;
-      std::cerr << "zonotopic vector to add to image of centre=" << zv << std::endl;
+      std::cerr << "bounds on centre <vector>=" << phicv << std::endl;
+      std::cerr << "zonotopic <vector> to add to image of centre=" << zv << std::endl;
       std::cerr << "approximating interval parallelotope=" << ip << std::endl;
       std::cerr << "new approximation=" << p << std::endl;
 #endif  
@@ -336,12 +336,12 @@ namespace Ariadne {
       //std::cerr << "step size=" << h << std::endl;
 #endif
 
-      LinearAlgebra::matrix<R> D=LinearAlgebra::exp_Ah_approx(vf.A(),h,max_error);
+      LinearAlgebra::Matrix<R> D=LinearAlgebra::exp_Ah_approx(vf.A(),h,max_error);
       /* Write phi(x)=D x0 + P b */
-      LinearAlgebra::matrix<R> P=LinearAlgebra::exp_Ah_sub_id_div_A_approx(vf.A(),h,max_error);
+      LinearAlgebra::Matrix<R> P=LinearAlgebra::exp_Ah_sub_id_div_A_approx(vf.A(),h,max_error);
       
-      LinearAlgebra::interval_matrix<R> iD(LinearAlgebra::interval_matrix<R>(D,max_error));
-      LinearAlgebra::interval_matrix<R> iP(LinearAlgebra::interval_matrix<R>(P,max_error));
+      LinearAlgebra::IntervalMatrix<R> iD(LinearAlgebra::IntervalMatrix<R>(D,max_error));
+      LinearAlgebra::IntervalMatrix<R> iP(LinearAlgebra::IntervalMatrix<R>(P,max_error));
       
       IntervalParallelotope<R> img(iD*p.centre().position_vector()+iP*vf.b(),iD*p.generators());
       p=img.over_approximating_parallelotope();      
@@ -383,29 +383,28 @@ namespace Ariadne {
       Zonotope<R> z=initial_set;
       const size_type n=z.dimension();
       R h=step_size;
-      const matrix<R> id=identity_matrix<R>(n);
+      const Matrix<R> id=identity_matrix<R>(n);
       
       /* Throws exception if we can't find flow bounds for given stepsize. */
       Rectangle<R> b=estimate_flow_bounds(vf,z.bounding_box(),h,256);
       
-      interval_vector<R> f=vf.apply(b);
-      interval_matrix<R> df=vf.derivative(b);
+      IntervalVector<R> f=vf.apply(b);
+      IntervalMatrix<R> df=vf.derivative(b);
       
-      interval_matrix<R> dphi=id+Interval<R>(0,h)*df;
+      IntervalMatrix<R> dphi=id+Interval<R>(0,h)*df;
       
       Point<R> c=z.centre();
       Rectangle<R> rc=Geometry::Rectangle<R>(c,c);
       Rectangle<R> phic=refine_flow_bounds(vf,rc,b,R(h/2));
       
-      interval_vector<R> fh=(R(h/2)*f);
+      IntervalVector<R> fh=(R(h/2)*f);
       
-      zonotopic_vector<R> zfh=symmetrise(fh);
+      TransformationSystem<R> zfh=symmetrise(fh);
       
-      matrix<R> mdf=over_approximation(dphi)*z.generators();
-      zonotopic_vector<R> zv=zfh+zonotopic_vector<R>(vector<R>(n),mdf);
+      Matrix<R> mdf=over_approximation(dphi)*z.generators();
+      TransformationSystem<R> zv=zfh+TransformationSystem<R>(Vector<R>(n),mdf);
       
       z=phic+zv;
-#define DEBUG
 #ifdef DEBUG
       std::cerr << "suggested stepsize=" << step_size << std::endl;
         
@@ -421,7 +420,7 @@ namespace Ariadne {
       
       std::cerr << "flow times stepsize=" << fh << std::endl;
       std::cerr << "symmetrised flow=" << zfh << std::endl;
-      std::cerr << "over approximating matrix=" << mdf << std::endl;
+      std::cerr << "over approximating Matrix=" << mdf << std::endl;
       
       std::cerr << "approximating zonotope " << z;
 #endif

@@ -195,14 +195,14 @@ namespace std {
   template <typename T> 
   inline
   ostream& 
-  operator<< (ostream &os, const std::valarray<T>& v) {
+  operator<< (std::ostream &os, const std::valarray<T>& v) {
     return Ariadne::Utility::write_sequence(os,v.begin(),v.end());
   }
   
   template <typename T> 
   inline
   istream& 
-  operator>> (istream &is, vector<T>& v) {
+  operator>> (std::istream &is, std::vector<T>& v) {
     return Ariadne::Utility::read_vector(is,v);
   }
 } // namespace std

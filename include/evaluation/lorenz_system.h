@@ -56,14 +56,14 @@ namespace Ariadne {
        : _b(beta), _p(rho), _s(sigma) { }
       
       /*! \brief  The vector field applied to a state. */
-      virtual LinearAlgebra::vector<R> apply(const state_type& x) const;
+      virtual LinearAlgebra::Vector<R> apply(const state_type& x) const;
       /*! \brief  The map applied to a rectangle basic set. */
-      virtual LinearAlgebra::interval_vector<R> apply(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::IntervalVector<R> apply(const Geometry::Rectangle<R>& r) const;
      
       /*! \brief  The derivative of the map at a point. */
-      virtual LinearAlgebra::matrix<R> derivative(const state_type& x) const;
+      virtual LinearAlgebra::Matrix<R> derivative(const state_type& x) const;
       /*! \brief  The derivative of the map over a rectangular basic set. */
-      virtual LinearAlgebra::interval_matrix<R> derivative(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::IntervalMatrix<R> derivative(const Geometry::Rectangle<R>& r) const;
             
       /*! \brief  The parameter \f$\beta\f$. */
       const real_type& beta() const { return _b; }
@@ -85,10 +85,10 @@ namespace Ariadne {
     };
       
     template <typename R>
-    LinearAlgebra::vector<R>
+    LinearAlgebra::Vector<R>
     LorenzSystem<R>::apply(const Geometry::Point<R>& x) const
     {
-      LinearAlgebra::vector<R> result(3); 
+      LinearAlgebra::Vector<R> result(3); 
       result(0)=_s*(x[1]-x[0]);
       result(0)=_p*x[0]-x[1]-x[0]*x[2];
       result(0)=-_b*x[2]+x[0]*x[1];
@@ -96,10 +96,10 @@ namespace Ariadne {
     }
      
     template <typename R>
-    LinearAlgebra::interval_vector<R>
+    LinearAlgebra::IntervalVector<R>
     LorenzSystem<R>::apply(const Geometry::Rectangle<R>& X) const
     {
-      LinearAlgebra::interval_vector<R> result(3); 
+      LinearAlgebra::IntervalVector<R> result(3); 
       result(0)=_s*(X[1]-X[0]);
       result(0)=_p*X[0]-X[1]-X[0]*X[2];
       result(0)=X[0]*X[1]-_b*X[2];
@@ -107,10 +107,10 @@ namespace Ariadne {
     }
      
     template <typename R>
-    LinearAlgebra::matrix<R>
+    LinearAlgebra::Matrix<R>
     LorenzSystem<R>::derivative(const Geometry::Point<R>& x) const
     {
-      LinearAlgebra::matrix<R> result(3,3); 
+      LinearAlgebra::Matrix<R> result(3,3); 
       result(0,0) = -_s;
       result(0,1) = _s;
       result(0,2) = 0;
@@ -124,10 +124,10 @@ namespace Ariadne {
     }
      
     template <typename R>
-    LinearAlgebra::interval_matrix<R>
+    LinearAlgebra::IntervalMatrix<R>
     LorenzSystem<R>::derivative(const Geometry::Rectangle<R>& X) const
     {
-      LinearAlgebra::interval_matrix<R> result(3,3); 
+      LinearAlgebra::IntervalMatrix<R> result(3,3); 
       result(0,0) = -_s;
       result(0,1) = _s;
       result(0,2) = 0;

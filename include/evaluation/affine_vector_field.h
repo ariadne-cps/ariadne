@@ -23,7 +23,7 @@
  */
  
  /*! \file affine_vector_field.h
- *  \brief vector_type fields of affine form of the form \f$\dot{x}=Ax+b\f$.
+ *  \brief Vector_type fields of affine form of the form \f$\dot{x}=Ax+b\f$.
  */
 
 #ifndef _AFFINE_VECTOR_FIELD_H
@@ -50,25 +50,25 @@ namespace Ariadne {
      public:
       typedef typename Geometry::Point<R> state_type;
       
-      typedef LinearAlgebra::matrix<R> matrix_type;
-      typedef LinearAlgebra::vector<R> vector_type;
+      typedef LinearAlgebra::Matrix<R> matrix_type;
+      typedef LinearAlgebra::Vector<R> mector_type;
     
-      typedef LinearAlgebra::interval_vector<R> Intervalvector_type;
-      typedef LinearAlgebra::interval_matrix<R> Intervalmatrix_type;
+      typedef LinearAlgebra::IntervalVector<R> IntervalVector_type;
+      typedef LinearAlgebra::IntervalMatrix<R> IntervalMatrix_type;
     
       virtual ~AffineVectorField();
       
       AffineVectorField(const AffineVectorField<R>& F) : _A(F.A()), _b(F.b()) { }
-      AffineVectorField(const matrix_type &A, const vector_type &b) : _A(A), _b(b) { }
+      AffineVectorField(const LinearAlgebra::Matrix<R> &A, const LinearAlgebra::Vector<R> &b) : _A(A), _b(b) { }
     
-      LinearAlgebra::vector<R> apply(const Geometry::Point<R>& s) const;
-      LinearAlgebra::interval_vector<R> apply(const Geometry::Rectangle<R>& r) const;
+      LinearAlgebra::Vector<R> apply(const Geometry::Point<R>& s) const;
+      LinearAlgebra::IntervalVector<R> apply(const Geometry::Rectangle<R>& r) const;
     
-      LinearAlgebra::matrix<R> derivative(const Geometry::Point<R>& x) const;
-      LinearAlgebra::interval_matrix<R> derivative(const Geometry::Rectangle<R>& r) const;
+      LinearAlgebra::Matrix<R> derivative(const Geometry::Point<R>& x) const;
+      LinearAlgebra::IntervalMatrix<R> derivative(const Geometry::Rectangle<R>& r) const;
       
-      const LinearAlgebra::matrix<R>& A() const { return this->_A; }
-      const LinearAlgebra::vector<R>& b() const { return this->_b; }
+      const LinearAlgebra::Matrix<R>& A() const { return this->_A; }
+      const LinearAlgebra::Vector<R>& b() const { return this->_b; }
       
       dimension_type dimension() const {
         return this->_b.size();
@@ -77,8 +77,8 @@ namespace Ariadne {
       std::string name() const { return "AffineVectorField"; }
       
      private:
-      LinearAlgebra::matrix<R> _A;
-      LinearAlgebra::vector<R> _b;
+      LinearAlgebra::Matrix<R> _A;
+      LinearAlgebra::Vector<R> _b;
     };
  
   }
@@ -87,15 +87,15 @@ namespace Ariadne {
 namespace Ariadne {
   namespace LinearAlgebra {
     template <typename R>
-    matrix<R> 
-    exp_Ah_approx(const matrix<R>& A, 
+    Matrix<R> 
+    exp_Ah_approx(const Matrix<R>& A, 
                   const R& h, 
                   const R& e); 
 
     /*! \brief Compute \f$A^{-1}(e^{Ah}-I) = h\sum_{n=0}^{\infty} \frac{{(Ah)}^{n}}{(n+1)!}\f$. */
     template <typename R> 
-    matrix<R> 
-    exp_Ah_sub_id_div_A_approx(const matrix<R>& A, 
+    Matrix<R> 
+    exp_Ah_sub_id_div_A_approx(const Matrix<R>& A, 
                                const R& h, 
                                const R& e); 
 

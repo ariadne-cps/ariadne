@@ -1,5 +1,5 @@
 /***************************************************************************
- *            constraint.h
+ *            constraint_system.h
  *
  *  Thu Feb  3 09:31:28 2005
  *  Copyright  2005  Alberto Casagrande
@@ -22,7 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file constraint.h
+/*! \file constraint_system.h
  *  \brief Linear inequalities and constraints.
  */
  
@@ -53,8 +53,8 @@ class ConstraintSystem {
     STRICT_INEQUALITY
   };
   
-  typedef ::Ariadne::LinearAlgebra::matrix<R> matrix_type;
-  typedef ::Ariadne::LinearAlgebra::vector<R> vector_type;
+  typedef ::Ariadne::LinearAlgebra::Matrix<R> Matrix_type;
+  typedef ::Ariadne::LinearAlgebra::Vector<R> Vector_type;
 
   typedef std::vector<RelType> Rel_vector_type;
   
@@ -62,7 +62,7 @@ class ConstraintSystem {
   
   ConstraintSystem(const Parma_Polyhedra_Library::Constraint_System& ppl_cs);
   
-  ConstraintSystem(matrix_type new_C, vector_type new_d)
+  ConstraintSystem(Matrix_type new_C, Vector_type new_d)
     : _C(new_C), _d(new_d), _rel_types(new_C.size1()) 
   { 
     for(size_type i=0; i!=_rel_types.size(); ++i) {
@@ -70,7 +70,7 @@ class ConstraintSystem {
     }
   }
 
-  ConstraintSystem(matrix_type new_C, vector_type new_d , Rel_vector_type new_r_type)
+  ConstraintSystem(Matrix_type new_C, Vector_type new_d , Rel_vector_type new_r_type)
     : _C(new_C), _d(new_d), _rel_types(new_r_type) 
   { }
 
@@ -121,8 +121,8 @@ class ConstraintSystem {
     return *this;
   }
  private:
-  matrix_type _C;
-  vector_type _d;
+  Matrix_type _C;
+  Vector_type _d;
   Rel_vector_type _rel_types;
  private:  
   inline bool any_equality() const{
@@ -256,8 +256,8 @@ ConstraintSystem<R>::expand_by(const R& delta)
   }
 
   if (delta<0) {
-    matrix_type new_C(1, dim);
-    vector_type new_d(1);
+    Matrix_type new_C(1, dim);
+    Vector_type new_d(1);
     this->_rel_types.resize(1);
     for (size_t i=0; i< dim; i++) {
       new_C(1,i)=0;
@@ -281,8 +281,8 @@ void
 ConstraintSystem<R>::reset_dimensions(const size_t& dim, 
                                       const size_t& nb_constraints) 
 {
-  matrix_type new_C(nb_constraints,dim);
-  vector_type new_d(nb_constraints);
+  Matrix_type new_C(nb_constraints,dim);
+  Vector_type new_d(nb_constraints);
   
   Rel_vector_type new_r_type(nb_constraints);
   
@@ -302,8 +302,8 @@ ConstraintSystem<R>::expand_equality_by(const R& delta)
   
   R den=denominator(delta), num=numerator(delta);
   
-  matrix_type new_C(new_constr, dim);
-  vector_type new_d(new_constr);
+  Matrix_type new_C(new_constr, dim);
+  Vector_type new_d(new_constr);
   
   /* TODO: REIMPLEMENT */
   for (size_t i=0; i<this->number_of_constraints(); ++i) {

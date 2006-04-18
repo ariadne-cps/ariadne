@@ -32,34 +32,34 @@ namespace Ariadne {
     }
     
     template<typename R>
-    LinearAlgebra::vector<R>
+    LinearAlgebra::Vector<R>
     AffineVectorField<R>::apply(const Geometry::Point<R>& s) const 
     { 
       return this->_A*s.position_vector()+this->_b; 
     }
     
     template<typename R>
-    LinearAlgebra::interval_vector<R> 
+    LinearAlgebra::IntervalVector<R> 
     AffineVectorField<R>::apply(const Geometry::Rectangle<R>& r) const 
     {
-      LinearAlgebra::interval_vector<R> iv(this->dimension());
+      LinearAlgebra::IntervalVector<R> iv(this->dimension());
       for(dimension_type i=0; i!=this->dimension(); ++i) {
         iv(i)=r.interval(i);
       }
-      return LinearAlgebra::interval_vector<R>(this->_A*iv)+(this->_b);
+      return LinearAlgebra::IntervalVector<R>(this->_A*iv)+(this->_b);
     }
   
     template<typename R>
-    LinearAlgebra::matrix<R>
+    LinearAlgebra::Matrix<R>
     AffineVectorField<R>::derivative(const state_type& x) const 
     { 
       return this->_A; 
     }
     
     template<typename R>
-    LinearAlgebra::interval_matrix<R> 
+    LinearAlgebra::IntervalMatrix<R> 
     AffineVectorField<R>::derivative(const Rectangle& r) const { 
-      LinearAlgebra::interval_matrix<R> result(this->dimension(),this->dimension());
+      LinearAlgebra::IntervalMatrix<R> result(this->dimension(),this->dimension());
       for(dimension_type i=0; i!=this->dimension(); ++i) {
         for(dimension_type j=0; j!=this->dimension(); ++j) {
           result(i,j)=this->_A(i,j);
@@ -76,15 +76,15 @@ namespace Ariadne {
   namespace LinearAlgebra {
 
     template <typename R>
-    matrix<R>
-    exp_Ah_approx(const matrix<R>& A, 
+    Matrix<R>
+    exp_Ah_approx(const Matrix<R>& A, 
                   const R& h, 
                   const R& e) 
     {
-      matrix<R> result=identity_matrix<R>(A.size1());
+      Matrix<R> result=identity_matrix<R>(A.size1());
       
       R norm_Ah=h*norm(A);
-      matrix<R> AhpowNdivfN=result;
+      Matrix<R> AhpowNdivfN=result;
       uint n=0;
       while(norm(AhpowNdivfN)*n >= e*(n-norm_Ah)) {
         ++n;
@@ -95,15 +95,15 @@ namespace Ariadne {
     }
     
     template <typename R> 
-    matrix<R> 
-    exp_Ah_sub_id_div_A_approx(const matrix<R>& A, 
+    Matrix<R> 
+    exp_Ah_sub_id_div_A_approx(const Matrix<R>& A, 
                                const R& h, 
                                const R& e)
     {
-      matrix<R> result=h*identity_matrix<R>(A.size1());
+      Matrix<R> result=h*identity_matrix<R>(A.size1());
       
       R norm_Ah=h*norm(A);
-      matrix<R> AhpowNdivfN=result;
+      Matrix<R> AhpowNdivfN=result;
       uint n=0;
       while(norm(AhpowNdivfN)*n >= e*(n-norm_Ah)) {
         ++n;

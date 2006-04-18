@@ -34,8 +34,8 @@ namespace Ariadne {
     template Zonotope<Real> minkowski_sum(const Zonotope<Real>& z1, const Zonotope<Real>& z2);
     template Zonotope<Real> minkowski_difference(const Zonotope<Real>& z1, const Zonotope<Real>& z2);
 
-    template Zonotope<Real> operator+(const Rectangle<Real>& r, const LinearAlgebra::zonotopic_vector<Real>& z);
-    template Zonotope<Real> operator+(const Zonotope<Real>& r, const LinearAlgebra::zonotopic_vector<Real>& z);
+    template Zonotope<Real> operator+(const Rectangle<Real>& r, const LinearAlgebra::TransformationSystem<Real>& z);
+    template Zonotope<Real> operator+(const Zonotope<Real>& r, const LinearAlgebra::TransformationSystem<Real>& z);
     
     template std::ostream& operator<<(std::ostream&, const Zonotope<Real>&);
     template std::istream& operator>>(std::istream&, Zonotope<Real>&);

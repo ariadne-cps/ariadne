@@ -60,7 +60,7 @@ class DiscreteLocation{
     std::string _name;
   
     /*! \brief The discrete location's vector field. */
-    vector_typeField _vfield;
+    Vector_typeField _vfield;
   
     /*! \brief The discrete location's invariant. */
     DenotableSet _invariant;
@@ -75,7 +75,7 @@ class DiscreteLocation{
      * \param vfield is the location's vector field.
      */
     DiscreteLocation(const std::string &name, 
-                    const vector_typeField &vfield):
+                    const Vector_typeField &vfield):
         _name(name), _vfield(vfield), 
         _invariant(vfield.dimension()) {}
           
@@ -88,7 +88,7 @@ class DiscreteLocation{
      * \param invariant is the location's invariant.
      */
     DiscreteLocation(const std::string &name, 
-                    const vector_typeField &vfield, 
+                    const Vector_typeField &vfield, 
                     const DenotableSet &invariant):
           
         _name(name), _vfield(vfield), 
@@ -141,7 +141,7 @@ class DiscreteLocation{
      *
      * \return The discrete location's vector field.
      */
-    inline const vector_typeField& vector_field() const {
+    inline const Vector_typeField& Vector_field() const {
       return this->_vfield;  
     }
     

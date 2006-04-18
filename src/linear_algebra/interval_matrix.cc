@@ -1,5 +1,5 @@
 /***************************************************************************
- *            matrix.cc
+ *            Matrix.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it Pieter.Collins@cwi.nl
@@ -28,38 +28,38 @@
 
 namespace Ariadne {
   namespace LinearAlgebra {
-    template class interval_matrix<Real>;
-    template class interval_matrix<Field>;
+    template class IntervalMatrix<Real>;
+    template class IntervalMatrix<Field>;
       
-    template std::ostream& operator<<(std::ostream&, const interval_matrix<Real>&);
-    template std::ostream& operator<<(std::ostream&, const interval_matrix<Field>&);
+    template std::ostream& operator<<(std::ostream&, const IntervalMatrix<Real>&);
+    template std::ostream& operator<<(std::ostream&, const IntervalMatrix<Field>&);
            
-    template interval_vector<Real> prod(const matrix<Real>&, const interval_vector<Real>&);
-    template interval_vector<Field> prod(const matrix<Field>&, const interval_vector<Field>&);
+    template IntervalVector<Real> prod(const Matrix<Real>&, const IntervalVector<Real>&);
+    template IntervalVector<Field> prod(const Matrix<Field>&, const IntervalVector<Field>&);
     
-    template interval_vector<Real> prod(const interval_matrix<Real>&, const vector<Real>&);
-    template interval_vector<Field> prod(const interval_matrix<Field>&, const vector<Field>&);
+    template IntervalVector<Real> prod(const IntervalMatrix<Real>&, const Vector<Real>&);
+    template IntervalVector<Field> prod(const IntervalMatrix<Field>&, const Vector<Field>&);
     
-    template interval_vector<Real> prod(const interval_matrix<Real>&, const interval_vector<Real>&);
-    template interval_vector<Field> prod(const interval_matrix<Field>&, const interval_vector<Field>&);
+    template IntervalVector<Real> prod(const IntervalMatrix<Real>&, const IntervalVector<Real>&);
+    template IntervalVector<Field> prod(const IntervalMatrix<Field>&, const IntervalVector<Field>&);
     
-    template interval_matrix<Real> prod(const matrix<Real>&, const interval_matrix<Real>&);
-    template interval_matrix<Field> prod(const matrix<Field>&, const interval_matrix<Field>&);
+    template IntervalMatrix<Real> prod(const Matrix<Real>&, const IntervalMatrix<Real>&);
+    template IntervalMatrix<Field> prod(const Matrix<Field>&, const IntervalMatrix<Field>&);
     
-    template interval_matrix<Real> prod(const interval_matrix<Real>&, const matrix<Real>&);
-    template interval_matrix<Field> prod(const interval_matrix<Field>&, const matrix<Field>&);
+    template IntervalMatrix<Real> prod(const IntervalMatrix<Real>&, const Matrix<Real>&);
+    template IntervalMatrix<Field> prod(const IntervalMatrix<Field>&, const Matrix<Field>&);
     
-    template interval_matrix<Real> prod(const interval_matrix<Real>&, const interval_matrix<Real>&);
-    template interval_matrix<Field> prod(const interval_matrix<Field>&, const interval_matrix<Field>&);
+    template IntervalMatrix<Real> prod(const IntervalMatrix<Real>&, const IntervalMatrix<Real>&);
+    template IntervalMatrix<Field> prod(const IntervalMatrix<Field>&, const IntervalMatrix<Field>&);
     
-    template interval_matrix<Real> fprod(const matrix<Field>&, const interval_matrix<Real>&);
+    template IntervalMatrix<Real> fprod(const Matrix<Field>&, const IntervalMatrix<Real>&);
      
-    template matrix<Real> over_approximation(const interval_matrix<Real>&);
-    template matrix<Field> over_approximation(const interval_matrix<Field>&);
+    template Matrix<Real> over_approximation(const IntervalMatrix<Real>&);
+    template Matrix<Field> over_approximation(const IntervalMatrix<Field>&);
 
-    template interval_matrix<Real> approximate(const matrix<Field>& A,const Real& e); 
+    template IntervalMatrix<Real> approximate(const Matrix<Field>& A,const Real& e); 
 
-    template interval_matrix<Real> exp(const interval_matrix<Real>& A); 
+    template IntervalMatrix<Real> exp(const IntervalMatrix<Real>& A); 
 
   }
 }

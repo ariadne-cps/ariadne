@@ -42,13 +42,13 @@ typedef Numeric::Rational Rational;
 typedef Interval<Real> RInterval;
 typedef Interval<Field> FInterval;
 
-typedef LinearAlgebra::vector<Real> RVector;
-typedef LinearAlgebra::matrix<Real> RMatrix;
-typedef LinearAlgebra::interval_vector<Real> RIntervalVector;
-typedef LinearAlgebra::interval_matrix<Real> RIntervalMatrix;
+typedef LinearAlgebra::Vector<Real> RVector;
+typedef LinearAlgebra::Matrix<Real> RMatrix;
+typedef LinearAlgebra::IntervalVector<Real> RIntervalVector;
+typedef LinearAlgebra::IntervalMatrix<Real> RIntervalMatrix;
 
-typedef LinearAlgebra::vector<Field> FVector;
-typedef LinearAlgebra::matrix<Field> FMatrix;
+typedef LinearAlgebra::Vector<Field> FVector;
+typedef LinearAlgebra::Matrix<Field> FMatrix;
 typedef LinearAlgebra::LinearProgram<Field> FLinearProgram;
 
 typedef Geometry::Point<Real> RPoint;

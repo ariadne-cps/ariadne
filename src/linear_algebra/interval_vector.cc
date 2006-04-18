@@ -1,5 +1,5 @@
 /***************************************************************************
- *            vector.cc
+ *            <vector>.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it Pieter.Collins@cwi.nl
@@ -32,11 +32,11 @@
 namespace Ariadne {
   namespace LinearAlgebra {
     
-    template class interval_vector<Real>;
-    template class interval_vector<Field>;
+    template class IntervalVector<Real>;
+    template class IntervalVector<Field>;
 
-    template std::ostream& operator<<(std::ostream&, const interval_vector<Real>&);
-    template std::ostream& operator<<(std::ostream&, const interval_vector<Field>&);
+    template std::ostream& operator<<(std::ostream&, const IntervalVector<Real>&);
+    template std::ostream& operator<<(std::ostream&, const IntervalVector<Field>&);
 
   }
 }

@@ -39,7 +39,7 @@ inline void _print_ds_(std::ostream &os,
 }
 
 namespace Ariadne {  
-namespace HybridDefinitions {
+namespace HybridSystem {
   
 template <typename LOC>
 class LocationDenotableSet;
@@ -94,7 +94,7 @@ class LocationDenotableSet {
   
   /*! \brief A denotable set constructor. */
   LocationDenotableSet(const DiscreteLocation &loc): 
-    location(loc), set((loc.vector_field()).dimension()) {}
+    location(loc), set((loc.Vector_field()).dimension()) {}
   
   /*! \brief A denotable set constructor. */
   LocationDenotableSet(const DiscreteLocation &loc, 
@@ -270,7 +270,7 @@ class HybridDenotableSet {
   
   inline const LDS&operator[](const size_t &index) const{
     if (index>=this->size()) {
-      throw std::invalid_argument("Index is bigger than vector size.");  
+      throw std::invalid_argument("Index is bigger than <vector> size.");  
     }
     
     return this->_location_set[index];
@@ -284,7 +284,7 @@ class HybridDenotableSet {
     std::vector<LocationDenotableSet> l_set=this->_location_set;
     
     if (index>=this->size()) {
-      throw std::invalid_argument("Index is bigger than vector size.");  
+      throw std::invalid_argument("Index is bigger than <vector> size.");  
     }
     
     for (i=0; i< index; i++) {
@@ -326,7 +326,7 @@ class HybridDenotableSet {
         }      
       }
       if (not_found) {
-        throw std::invalid_argument("A discrete location is not present into the vector.");
+        throw std::invalid_argument("A discrete location is not present into the <vector>.");
       }
     }
     

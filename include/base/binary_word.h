@@ -28,12 +28,12 @@
  * Binary words are generally useful objects. 
  * This file provides a class of binary words of 
  * arbitrary size, complementing the STL bitset and
- * vector<bool> classes. The main purpose of giving 
+ * Vector<bool> classes. The main purpose of giving 
  * this class is to have a known implementation of 
  * binary words which may help in giving efficient
  * implementations of the list classes described below.
  * The most efficient implementation may, in fact, be an
- * STL vector<bool>. Hence another purpose of this class
+ * STL Vector<bool>. Hence another purpose of this class
  * is to provide a known interface for binary words.
  *
  * We give a number of classes representing sets of binary words. 
@@ -102,7 +102,7 @@ namespace Ariadne {
       /*! \brief Default constructor creates a zero-length word.  */
       BinaryWord() : _rep() { }
       
-      /*! \brief Conversion from a std:vector<bool>. */
+      /*! \brief Conversion from a std:Vector<bool>. */
       BinaryWord(const std::vector<bool>& v) : _rep(v) { }
       
       /*! \brief Create a word of length \a n from the boolean array starting at \a p. */

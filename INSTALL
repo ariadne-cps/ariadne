@@ -1,0 +1,34 @@
+To install Ariadne, you will need the following packages:
+  GNU Multiple Precision Library (v>=4.1.2) http://www.swox.com/gmp/
+  MPFR Library (v>=2.0.1)                   http://www.mpfr.org/
+  Boost C++ Libraries (v1.33.1)             http://www.boost.org/
+  Parma Polyhedra Library (v0.8)            http://www.cs.unipr.it/ppl/
+
+To compile the library, you will need a C++ compiler.
+  GCC/G++ (v>=4.0.2)                        http://gcc.gnu.org/
+
+For the Python interface, you will also need
+  Python (v2.4)                             http://www.python.org/
+
+To generate the documentation, you will need
+  Doxygen (v>=1.4.4)                      http://www.stack.nl/~dimitri/doxygen/
+
+Since the current version is a beta version, we have only tested against the 
+libraries stated above. Any other versions (including newer versions) may not 
+work.
+
+To compile Ariadne, including the Python interface, change to directory trunk/ 
+in the source tree, and type
+> make install
+The shared object files in $(PREFIX)/lib/ , and the Python interface in 
+$(PREFIX)/python/ . To change these settings, edit the file config.mk .
+
+To compile without Python, type
+> make lib
+and install the resulting library libariadne.so manually.
+
+To make the documentation, type
+> make doc
+or 
+> doxygen
+The main page of the html documentation will appear in html/index.html .

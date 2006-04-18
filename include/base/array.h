@@ -377,14 +377,14 @@ namespace Ariadne {
     class array_vector {
       friend std::ostream& operator<< < >(std::ostream&, const array_vector<T>&);
      private:
-      typedef typename std::vector<T>::iterator vector_iterator;
-      typedef typename std::vector<T>::const_iterator vector_const_iterator;
+      typedef typename std::vector<T>::iterator Vector_iterator;
+      typedef typename std::vector<T>::const_iterator Vector_const_iterator;
      public:
       typedef T array_value_type;
       typedef typename std::vector<T>::size_type array_size_type;
       typedef typename std::vector<T>::size_type size_type;
-      typedef range<vector_iterator> reference;
-      typedef range<vector_const_iterator> const_reference;
+      typedef range<Vector_iterator> reference;
+      typedef range<Vector_const_iterator> const_reference;
       typedef _array_vector_iterator<T> const_iterator;
      public:
       /*!\brief Construct a vector to hold arrays of size as. */
@@ -426,13 +426,13 @@ namespace Ariadne {
       
       /*!\brief Returns the nth array of the vector. */
       reference operator[] (size_type i) {
-        vector_iterator first=_elements.begin()+(i*array_size()); 
+        Vector_iterator first=_elements.begin()+(i*array_size()); 
         return reference(first,first+array_size()); 
       }
       
       /*!\brief Returns the nth array of the vector. */
       const_reference operator[] (size_type i) const {
-        vector_const_iterator first=_elements.begin()+(i*array_size()); 
+        Vector_const_iterator first=_elements.begin()+(i*array_size()); 
         return const_reference(first,first+array_size()); 
       }
       

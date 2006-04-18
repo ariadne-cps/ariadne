@@ -58,22 +58,22 @@ namespace Ariadne {
       typedef R real_type;
       /*! \brief The type of denotable point contained by the rectangle. */
       typedef Point<R> state_type;
-      /*! \brief The type of matrix giving principal directions. */
-      typedef LinearAlgebra::vector<R> vector_type;
-      /*! \brief The type of matrix giving principal directions. */
-      typedef LinearAlgebra::matrix<R> matrix_type;
+      /*! \brief The type of Matrix giving principal directions. */
+      typedef LinearAlgebra::Vector<R> Vector_type;
+      /*! \brief The type of Matrix giving principal directions. */
+      typedef LinearAlgebra::Matrix<R> Matrix_type;
      public:
       /*! \brief Default constructor constructs an empty parallelotope of dimension \a n. */
       explicit Parallelotope(size_type n = 0)
         : _centre(n),  _generators(n,n) { }
       
       /*! \brief Construct from centre and directions. */
-      explicit Parallelotope(const vector_type& c, const matrix_type& m)
+      explicit Parallelotope(const Vector_type& c, const Matrix_type& m)
         : _centre(c), _generators(m)
       {
         if (m.size1()!=m.size2()) {
           throw std::domain_error(
-              "The the matrix of principal directions is not a square matrix");
+              "The the Matrix of principal directions is not a square Matrix");
         }
         
         if (c.size()!=m.size1()) {
@@ -82,12 +82,12 @@ namespace Ariadne {
       }
       
       /*! \brief Construct from centre and directions. */
-      explicit Parallelotope(const state_type& c, const matrix_type& m)
+      explicit Parallelotope(const state_type& c, const Matrix_type& m)
         : _centre(c), _generators(m)
       {
         if (m.size1()!=m.size2()) {
           throw std::domain_error(
-              "The the matrix of principal directions is not a square matrix");
+              "The the Matrix of principal directions is not a square Matrix");
         }
         
         if (c.dimension()!=m.size1()) {
@@ -163,12 +163,12 @@ namespace Ariadne {
       }
       
       /*! \brief The \a n th of principle direction. */
-      vector_type generator(size_type n) const {
+      Vector_type generator(size_type n) const {
         return column(this->_generators,n);
       }
       
-      /*! \brief The matrix of principle directions. */
-      matrix_type generators() const {
+      /*! \brief The Matrix of principle directions. */
+      Matrix_type generators() const {
         return this->_generators;
       }
      
@@ -204,13 +204,13 @@ namespace Ariadne {
       
       friend std::istream& operator>> <> (std::istream& is, Parallelotope<R>& r);
      private:
-      void compute_linear_inequalities(matrix_type&, vector_type&, vector_type&) const;
-      LinearAlgebra::vector<F> coordinates(const state_type& s) const;
+      void compute_linear_inequalities(Matrix_type&, Vector_type&, Vector_type&) const;
+      LinearAlgebra::Vector<F> coordinates(const state_type& s) const;
      private:
       /* Parallelotope's centre. */
       state_type _centre;
       /* Parallelotope's principal directions. */
-      matrix_type _generators;
+      Matrix_type _generators;
       
     };
   

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            vector_field.cc
+ *            Vector_field.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl

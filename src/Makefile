@@ -37,7 +37,7 @@ python: lib
 	(cd ${PYTHONDIR}; ${MAKE} all)
 
 install: lib python
-	cp -f libariadne.so ${PREFIX}/lib/libariadne.so
+	cp -f libariadne.so ${LIBPREFIX}/libariadne.so
 	(cd ${PYTHONDIR}; ${MAKE} install)
 
 

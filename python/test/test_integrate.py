@@ -38,7 +38,7 @@ def plot(fn,bb,set):
   eps.write(set[-1])
   eps.close()
 
-grid=InfiniteGrid(2,Real(0.03125))
+grid=RegularGrid(2,Real(0.03125))
 bb=Rectangle("[-2,2]x[-2,2]")
 
 A=Matrix("[-0.5,-0.75;+1.25,-0.5]")
@@ -70,17 +70,18 @@ plot("integrate3",bb,reach_set)
 print "Done\n"
 
 print "Testing integration of affine map on grid mask set"
-grid=InfiniteGrid(2,Real(0.02))
+grid=RegularGrid(2,Real(0.02))
 bounding_box=Rectangle("[-2,2]x[-2,2]")
-bounds=over_approximation(bounding_box,grid).position()
+bounds=over_approximation(bounding_box,grid).lattice_set()
 gcl=over_approximation(initial_parallelotope,grid)
+finitegrid=FiniteGrid(grid,bounds)
 #print "Cell list =",gcl
-initial_set=GridMaskSet(grid,bounds)
+initial_set=GridMaskSet(finitegrid)
 initial_set.adjoin(gcl)
-reach_set=GridMaskSet(grid,bounds)
+reach_set=GridMaskSet(finitegrid)
 reach_set.adjoin(initial_set)
 #print "init_set =", init_set
-bounds_set=GridMaskSet(grid,bounds)
+bounds_set=GridMaskSet(finitegrid)
 bounds_set.adjoin(GridRectangle(grid,bounds))
 #print "bounding set =",bounds_set
 for i in range(0,2):
@@ -90,17 +91,18 @@ plot("integrate4",bb,reach_set)
 print "Done\n"
 
 print "Testing reach of affine map on grid mask set"
-grid=InfiniteGrid(2,Real(0.0625))
+grid=RegularGrid(2,Real(0.0625))
 bounding_box=Rectangle("[-2,2]x[-2,2]")
-bounds=over_approximation(bounding_box,grid).position()
+bounds=over_approximation(bounding_box,grid).lattice_set()
+finitegrid=FiniteGrid(grid,bounds)
 gcl=over_approximation(initial_parallelotope,grid)
 #print "Cell list =",gcl
-initial_set=GridMaskSet(grid,bounds)
+initial_set=GridMaskSet(finitegrid)
 initial_set.adjoin(gcl)
-reach_set=GridMaskSet(grid,bounds)
+reach_set=GridMaskSet(finitegrid)
 reach_set.adjoin(initial_set)
 #print "init_set =", init_set
-bounds_set=GridMaskSet(grid,bounds)
+bounds_set=GridMaskSet(finitegrid)
 bounds_set.adjoin(GridRectangle(grid,bounds))
 #print "bounding set =",bounds_set
 reach_set=lohner.reach(avf,initial_set,bounds_set,Real(1.5))

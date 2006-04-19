@@ -68,20 +68,20 @@ namespace Ariadne {
     }
 
     template<typename R>
-    FiniteGrid<R>*
-    FiniteGrid<R>::clone() const
+    IrregularGrid<R>*
+    IrregularGrid<R>::clone() const
     {
       std::cerr << "WARNING: Cloning FiniteGrid<R> causes memory leak" << std::endl;
-      return new FiniteGrid<R>(*this);
+      return new IrregularGrid<R>(*this);
     }
 
     template<typename R>
-    FiniteGrid<R>::~FiniteGrid()
+    IrregularGrid<R>::~IrregularGrid()
     {
     }
 
     template<typename R>
-    FiniteGrid<R>::FiniteGrid(const Rectangle<R>& r, size_type n)
+    IrregularGrid<R>::IrregularGrid(const Rectangle<R>& r, size_type n)
       : _subdivision_coordinates(r.dimension())
     {
       for(dimension_type i=0; i!=r.dimension(); ++i) {
@@ -98,7 +98,7 @@ namespace Ariadne {
     }
 
     template<typename R>
-    FiniteGrid<R>::FiniteGrid(const Rectangle<R>& r, SizeArray sz)
+    IrregularGrid<R>::IrregularGrid(const Rectangle<R>& r, SizeArray sz)
       : _subdivision_coordinates(r.dimension())
     {
       for(dimension_type i=0; i!=r.dimension(); ++i) {
@@ -115,14 +115,14 @@ namespace Ariadne {
     }
 
     template<typename R>
-    FiniteGrid<R>::FiniteGrid(const array< std::vector<R> >& sp)
+    IrregularGrid<R>::IrregularGrid(const array< std::vector<R> >& sp)
       : _subdivision_coordinates(sp)
     {
       create();
     }
 
     template<typename R>
-    FiniteGrid<R>::FiniteGrid(const ListSet<R,Rectangle>& ls)
+    IrregularGrid<R>::IrregularGrid(const ListSet<R,Rectangle>& ls)
       : _subdivision_coordinates(ls.dimension())
     {
       for(typename ListSet<R,Rectangle>::const_iterator riter=ls.begin(); riter!=ls.end(); ++riter) {
@@ -135,7 +135,7 @@ namespace Ariadne {
     }
 
     template<typename R>
-    FiniteGrid<R>::FiniteGrid(const FiniteGrid<R>& g1, FiniteGrid<R>& g2)
+    IrregularGrid<R>::IrregularGrid(const IrregularGrid<R>& g1, IrregularGrid<R>& g2)
       : _subdivision_coordinates(g1.dimension())
     {
       for(dimension_type d=0; d!=dimension(); ++d) {
@@ -150,7 +150,7 @@ namespace Ariadne {
 
     template<typename R>
     void
-    FiniteGrid<R>::create()
+    IrregularGrid<R>::create()
     {
        for(dimension_type i=0; i!=dimension(); ++i) {
         std::vector<R>& pos=_subdivision_coordinates[i];
@@ -162,14 +162,14 @@ namespace Ariadne {
 
     template<typename R>
     GridRectangle<R>
-    FiniteGrid<R>::bounding_box() const
+    IrregularGrid<R>::bounding_box() const
     { 
       return GridRectangle<R>(*this,bounds());
     }
     
     template<typename R>
     array< std::vector<index_type> >
-    FiniteGrid<R>::index_translation(const FiniteGrid<R>& from, const FiniteGrid<R>& to)
+    IrregularGrid<R>::index_translation(const IrregularGrid<R>& from, const IrregularGrid<R>& to)
     {
       assert(from.dimension()==to.dimension());
       array< std::vector<index_type> > result(from.dimension());
@@ -184,12 +184,29 @@ namespace Ariadne {
 
 
     template<typename R>
-    InfiniteGrid<R>*
-    InfiniteGrid<R>::clone() const
+    RegularGrid<R>*
+    RegularGrid<R>::clone() const
     {
       std::cerr << "WARNING: Cloning InfiniteGrid<R> causes memory leak" << std::endl;
-      return new InfiniteGrid<R>(*this);
+      return new RegularGrid<R>(*this);
     }
+
+
+
+    template<typename R>
+    FiniteGrid<R>::FiniteGrid(const Rectangle<R>& bb, const size_type& s)
+      : _grid_ptr(0), _bounds(bb.dimension())
+    {
+      array<R> subdivision_lengths(bb.dimension());
+      for(dimension_type i=0; i!=bb.dimension(); ++i) {
+        subdivision_lengths[i]=bb[i].length()/s;
+      }
+      this->_grid_ptr=new RegularGrid<R>(subdivision_lengths);
+      GridRectangle<R> bounding_box=over_approximation(bb,*_grid_ptr);
+      this->_bounds=bounding_box.lattice_set();
+    }
+
+
 
     template<typename R>
     std::ostream&
@@ -200,16 +217,23 @@ namespace Ariadne {
 
     template<typename R>
     std::ostream&
-    FiniteGrid<R>::write(std::ostream& os) const
+    IrregularGrid<R>::write(std::ostream& os) const
     {
-      return os << "FiniteGrid(" << this->_subdivision_coordinates << ")";
+      return os << "IrregularGrid(" << this->_subdivision_coordinates << ")";
     }
 
     template<typename R>
     std::ostream&
-    InfiniteGrid<R>::write(std::ostream& os) const
+    RegularGrid<R>::write(std::ostream& os) const
     {
-        return os << "InfiniteGrid( subdivision_lengths=" << this->_subdivision_lengths << " )\n";
+        return os << "RegularGrid( subdivision_lengths=" << this->_subdivision_lengths << " )\n";
+    }
+
+    template<typename R>
+    std::ostream&
+    operator<<(std::ostream& os, const FiniteGrid<R>& fg)
+    {
+      return os << "FiniteGrid(grid=" << fg.grid() << ", bounds=" << fg.bounds() << ")";
     }
 
   }

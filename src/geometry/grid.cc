@@ -30,10 +30,13 @@ namespace Ariadne {
   namespace Geometry {
 
     template class Grid<Real>;
+    template class IrregularGrid<Real>;
+    template class RegularGrid<Real>;
+
     template class FiniteGrid<Real>;
-    template class InfiniteGrid<Real>;
 
     template std::ostream& operator<<(std::ostream&, const Grid<Real>&);
+    template std::ostream& operator<<(std::ostream&, const FiniteGrid<Real>&);
  
   }
 }

@@ -639,7 +639,7 @@ namespace Ariadne {
       const Geometry::Grid<R>& g=initial_set.grid();
       const Geometry::GridMaskSet<R>& is=initial_set;
       const Geometry::Rectangle<R>& bb=bounding_set.bounding_box();
-      const Geometry::LatticeRectangle lb=over_approximation(bb,g).position();
+      const Geometry::LatticeRectangle lb=over_approximation(bb,g).lattice_set();
       
       Geometry::GridMaskSet<R> stored(g,lb);
       Geometry::GridMaskSet<R> found(g,lb);
@@ -692,7 +692,7 @@ namespace Ariadne {
       const Geometry::Grid<R>& g=initial_set.grid();
       const Geometry::GridMaskSet<R>& is=initial_set;
       const Geometry::Rectangle<R>& bb=bounding_set.bounding_box();
-      const Geometry::LatticeRectangle lb=over_approximation(bb,g).position();
+      const Geometry::LatticeRectangle lb=over_approximation(bb,g).lattice_set();
       
       Geometry::GridMaskSet<R> result(g,lb);
       Geometry::GridMaskSet<R> found(g,lb);

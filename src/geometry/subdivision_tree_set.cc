@@ -152,7 +152,9 @@ namespace Ariadne {
     
     SubdivisionTreeSet::SubdivisionTreeSet(const LatticeMaskSet& ms) 
       : _subdivisions(ms.dimension()), _words()
-    {
+    {      
+      //std::cerr << "SubdivisionTreeSet(const LatticeMaskSet& ms)" << std::endl;
+      
       dimension_type n=ms.dimension();
 
       LatticeRectangle bounds=ms.bounds();
@@ -161,6 +163,7 @@ namespace Ariadne {
       SizeArray depths(this->dimension());
       size_type depth=0;
 
+      //std::cerr << "Computing sizes" << std::endl;
       /* Compute grid sizes as powers of two */
       for(dimension_type i=0; i!=n; ++i) {
         depths[i]=log_ceil(2,grid_sizes[i]);
@@ -168,7 +171,13 @@ namespace Ariadne {
         depth+=depths[i];
       }
       
+      if(grid_sizes!=new_sizes) {
+        throw std::runtime_error("Can only convert LatticeMaskSet to SubdivisionTreeSet "
+                                 "if all dimensions are subdivided as powers of two.");
+      }
+      
 
+      //std::cerr << "Computing subdivision coordinates" << std::endl;
       /* Compute subdivision coordinates */
       std::vector<dimension_type> sc;
       for(size_type i=0; i!=depth; ++i) {
@@ -194,10 +203,12 @@ namespace Ariadne {
       std::vector<bool> mask;
       BinaryWord word;
       
+      //std::cerr << "Computing tree" << std::endl;
       do {
         //TODO: Construct full tree, then reduce
         SubdivisionTreeCell c(subdivisions,word);
         LatticeRectangle r=compute_block(c,bounds);
+        std::cerr << word << "  " << c << "  " << r << std::endl;
         if(subset(r,ms)) {
           //std::cerr <<  c.bounds() << " " << r << " subset" << std::endl;
           tree.push_back(leaf);
@@ -225,11 +236,13 @@ namespace Ariadne {
         }
       } 
       while(!word.empty());
+      //std::cerr << "Done computing tree" << std::endl;
       
       this->_subdivisions=subdivisions;
       this->_words=MaskedBinaryTree(tree,mask);
     
       this->reduce();
+      //std::cerr << "Finished SubdivisionTreeSet(const LatticeMaskSet& ms)" << std::endl;
     }
 
     SizeArray

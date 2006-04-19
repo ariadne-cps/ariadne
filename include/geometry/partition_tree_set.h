@@ -265,7 +265,11 @@ namespace Ariadne {
         : _bounding_box(r), _unit_set(s,t,m)
       { }
 
-      /*! \brief Convert from a GridMaskSet. */
+      /*! \brief Convert from a GridMaskSet.
+       *
+       *  To ensure that the conversion is exact, and uses the same cells, the lattice rectangle must 
+       *  have sides which are a power of two.
+       */
       PartitionTreeSet(const GridMaskSet<R>& gms);
 
       /*! \brief Convert to a list of rectangles on a grid. */

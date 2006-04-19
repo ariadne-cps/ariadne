@@ -70,9 +70,10 @@ typedef Geometry::LatticeCellListSet LatticeCellListSet;
 typedef Geometry::LatticeRectangleListSet LatticeRectangleListSet;
 typedef Geometry::LatticeTransformation LatticeTransformation;
 
-typedef Geometry::Grid<Real> RGridBase;
+typedef Geometry::Grid<Real> RGrid;
+typedef Geometry::RegularGrid<Real> RRegularGrid;
+typedef Geometry::IrregularGrid<Real> RIrregularGrid;
 typedef Geometry::FiniteGrid<Real> RFiniteGrid;
-typedef Geometry::InfiniteGrid<Real> RInfiniteGrid;
 typedef Geometry::GridCell<Real> RGridCell;
 typedef Geometry::GridRectangle<Real> RGridRectangle;
 typedef Geometry::GridCellListSet<Real> RGridCellListSet;

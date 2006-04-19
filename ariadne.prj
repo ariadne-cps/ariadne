@@ -95,7 +95,6 @@ module.include.files=\
 	evaluation/vector_field.h\
 	geometry/approximate_set.h\
 	geometry/approximation_type.h\
-	geometry/generator.h\
 	geometry/geometry.h\
 	geometry/geometry_declarations.h\
 	geometry/grid_operations.h\
@@ -111,7 +110,6 @@ module.include.files=\
 	geometry/rectangle.h\
 	geometry/simplex.h\
 	geometry/zonotope.h\
-	linear_algebra/constraint.h\
 	linear_algebra/linear_algebra.h\
 	linear_algebra/matrix.h\
 	linear_algebra/vector.h\

@@ -39,7 +39,7 @@ using namespace Ariadne;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-struct RGrid : RGridBase, wrapper<RGridBase>
+struct RGridWrap : RGrid, wrapper<RGrid>
 {
   RGrid* clone() const { return this->get_override("clone")(); }
   dimension_type dimension() const { return this->get_override("dimension")(); }
@@ -49,92 +49,79 @@ struct RGrid : RGridBase, wrapper<RGridBase>
   std::ostream& write(std::ostream& os) const { return this->get_override("write")(); }
 };
 
-inline RGridRectangle over_approximation_rectangle(const RRectangle& r, const RGridBase& g) {
-  return Ariadne::Geometry::over_approximation(r,g);
-}
-inline RGridCellListSet over_approximation_parallelotope(const RParallelotope& p, const RGridBase& g) {
-  return Ariadne::Geometry::over_approximation(p,g);
-}
-inline RGridMaskSet over_approximation_rectangle_list_set(const RRectangleListSet& rls, const RFiniteGrid& g) {
-  return Ariadne::Geometry::over_approximation(rls,g);
-}
-inline RGridMaskSet over_approximation_parallelotope_list_set(const RParallelotopeListSet& pls, const RFiniteGrid& g) {
-  return Ariadne::Geometry::over_approximation(pls,g);
-}
+typedef RGridRectangle (*ApprxRectGridFunc) (const RRectangle&, const RGrid&);
+typedef RGridCellListSet (*ApprxPltpGridFunc) (const RParallelotope&, const RGrid&);
+typedef RGridMaskSet (*ApprxLSRectFGridFunc) (const RRectangleListSet&, const RFiniteGrid&);
+typedef RGridMaskSet (*ApprxLSPltpFGridFunc) (const RParallelotopeListSet&, const RFiniteGrid&);
 
-inline void grid_cell_list_set_adjoin_grid_cell(RGridMaskSet& gms, const RGridCell& gc) {
-  return gms.adjoin(gc);
-}
-inline RGridMaskSet grid_mask_set_join(const RGridMaskSet& gms1, const RGridMaskSet& gms2) {
-  return Ariadne::Geometry::join(gms1,gms2);
-}
-inline RGridMaskSet grid_mask_set_difference(const RGridMaskSet& gms1, const RGridMaskSet& gms2) {
-  return Ariadne::Geometry::difference(gms1,gms2);
-}
-inline RGridMaskSet grid_mask_set_regular_intersection(const RGridMaskSet& gms1, const RGridMaskSet& gms2) {
-  return Ariadne::Geometry::regular_intersection(gms1,gms2);
-}
-inline void grid_mask_set_adjoin_grid_cell(RGridMaskSet& gms, const RGridCell& gc) {
-  gms.adjoin(gc);
-}
-inline void grid_mask_set_adjoin_grid_rectangle(RGridMaskSet& gms, const RGridRectangle& gr) {
-  gms.adjoin(gr);
-}
-inline void grid_mask_set_adjoin_grid_cell_list_set(RGridMaskSet& gms, const RGridCellListSet& gcls) {
-  gms.adjoin(gcls);
-}
-inline void grid_mask_set_adjoin_grid_rectangle_list_set(RGridMaskSet& gms, const RGridRectangleListSet& grls) {
-  gms.adjoin(grls);
-}
-inline void grid_mask_set_adjoin_grid_mask_set(RGridMaskSet& gms, const RGridMaskSet& agms) {
-  gms.adjoin(agms);
-}
+typedef void (RGridMaskSet::*GMSAdjCellFunc) (const RGridCell&);
+typedef void (RGridMaskSet::*GMSAdjRectFunc) (const RGridRectangle&);
+typedef void (RGridMaskSet::*GMSAdjCellLSFunc) (const RGridCellListSet&);
+typedef void (RGridMaskSet::*GMSAdjRectLSFunc) (const RGridRectangleListSet&);
+typedef void (RGridMaskSet::*GMSAdjGMSFunc) (const RGridMaskSet&);
+
+typedef RGridMaskSet (*GMSBinFunc) (const RGridMaskSet&, const RGridMaskSet&);
 
 
 void export_grid_set() {
 
-  class_<RGrid, boost::noncopyable>("Grid")
-    .def("dimension", pure_virtual(&RGridBase::dimension))
-    .def("subdivision_coordinate", pure_virtual(&RGridBase::subdivision_coordinate))
-    .def("subdivision_index", pure_virtual(&RGridBase::subdivision_index))
-    .def("subdivision_lower_index", &RGridBase::subdivision_lower_index)
-    .def("subdivision_upper_index", &RGridBase::subdivision_upper_index)
-    .def("bounds_enclose", pure_virtual(&RGridBase::bounds_enclose))
+  class_<RGridWrap, boost::noncopyable>("Grid")
+    .def("dimension", pure_virtual(&RGrid::dimension))
+    .def("subdivision_coordinate", pure_virtual(&RGrid::subdivision_coordinate))
+    .def("subdivision_index", pure_virtual(&RGrid::subdivision_index))
+    .def("subdivision_lower_index", &RGrid::subdivision_lower_index)
+    .def("subdivision_upper_index", &RGrid::subdivision_upper_index)
+    .def("bounds_enclose", pure_virtual(&RGrid::bounds_enclose))
     .def(self_ns::str(self))    // __str__
     ;
 
-  class_< RFiniteGrid, bases<RGridBase> >("FiniteGrid",init<RRectangle,SizeArray>())
+  class_< RIrregularGrid, bases<RGrid> >("RegularGrid",init<RRectangle,SizeArray>())
     .def(init<RRectangle,uint>())
     .def(init<RRectangleListSet>())
-    .def("dimension", &RFiniteGrid::dimension)
-    .def("subdivision_coordinate", &RFiniteGrid::subdivision_coordinate)
-    .def("subdivision_index", &RFiniteGrid::subdivision_index)
-    .def("subdivision_lower_index", &RFiniteGrid::subdivision_lower_index)
-    .def("subdivision_upper_index", &RFiniteGrid::subdivision_upper_index)
-    .def("bounds_enclose", &RFiniteGrid::bounds_enclose)
+    .def("dimension", &RIrregularGrid::dimension)
+    .def("subdivision_coordinate", &RIrregularGrid::subdivision_coordinate)
+    .def("subdivision_index", &RIrregularGrid::subdivision_index)
+    .def("subdivision_lower_index", &RIrregularGrid::subdivision_lower_index)
+    .def("subdivision_upper_index", &RIrregularGrid::subdivision_upper_index)
+    .def("bounds_enclose", &RIrregularGrid::bounds_enclose)
     .def(self_ns::str(self))    // __str__
     ;
 
-  class_< RInfiniteGrid, bases<RGridBase> >("InfiniteGrid",init<const array<Real>&>())
+  class_< RRegularGrid, bases<RGrid> >("RegularGrid",init<const array<Real>&>())
     .def(init<uint,Real>())
-    .def("dimension", &RInfiniteGrid::dimension)
-    .def("subdivision_coordinate", &RInfiniteGrid::subdivision_coordinate)
-    .def("subdivision_index", &RInfiniteGrid::subdivision_index)
-    .def("subdivision_lower_index", &RInfiniteGrid::subdivision_lower_index)
-    .def("subdivision_upper_index", &RInfiniteGrid::subdivision_upper_index)
-    .def("bounds_enclose", &RInfiniteGrid::bounds_enclose)
+    .def(init<uint,double>())
+    .def("dimension", &RRegularGrid::dimension)
+    .def("subdivision_coordinate", &RRegularGrid::subdivision_coordinate)
+    .def("subdivision_index", &RRegularGrid::subdivision_index)
+    .def("subdivision_lower_index", &RRegularGrid::subdivision_lower_index)
+    .def("subdivision_upper_index", &RRegularGrid::subdivision_upper_index)
+    .def("bounds_enclose", &RRegularGrid::bounds_enclose)
+    .def(self_ns::str(self))    // __str__
+    ;
+
+  class_< RFiniteGrid>("FiniteGrid",init<RRectangle,size_type>())
+    .def(init<const RGrid&,LatticeRectangle>())
+    .def(init<const RGrid&,RRectangle>())
+    .def("dimension", &RFiniteGrid::dimension)
+    .def("subdivision_coordinate", &RFiniteGrid::subdivision_coordinate)
+    .def("subdivision_lower_index", &RFiniteGrid::subdivision_lower_index)
+    .def("subdivision_upper_index", &RFiniteGrid::subdivision_upper_index)
+    .def("grid", &RFiniteGrid::grid,return_internal_reference<>())
+//    .def("grid", &RFiniteGrid::grid,return_value_policy<reference_existing_object>())
+    .def("bounds", &RFiniteGrid::bounds,return_value_policy<copy_const_reference>())
     .def(self_ns::str(self))    // __str__
     ;
 
   class_<RGridCell>("GridCell",init<const RGrid&,LatticeCell>())
     .def("dimension", &RGridCell::dimension)
+    .def("lattice_set", &RGridCell::lattice_set,return_value_policy<copy_const_reference>())
     .def(self_ns::str(self))    // __str__
     ;
   
-  class_<RGridRectangle>("GridRectangle",init<const RGridBase&,LatticeRectangle>())
+  class_<RGridRectangle>("GridRectangle",init<const RGrid&,LatticeRectangle>())
     .def(init<RGridCell>()) 
     .def("dimension", &RGridRectangle::dimension)
-    .def("position", &RGridRectangle::position,return_value_policy<copy_const_reference>())
+    .def("lattice_set", &RGridRectangle::lattice_set,return_value_policy<copy_const_reference>())
     .def(self_ns::str(self))    // __str__
     ;
   
@@ -168,8 +155,6 @@ void export_grid_set() {
     ;
     
   class_<RGridMaskSet>("GridMaskSet",init<const RFiniteGrid&>())
-    .def(init<const RGridBase&, LatticeRectangle>())
-    .def(init<const RInfiniteGrid&, LatticeRectangle>())
     .def(init<RGridRectangleListSet>())
     .def(init<RGridCellListSet>())
     .def(init<RGridMaskSet>())
@@ -180,11 +165,11 @@ void export_grid_set() {
     .def("clear", &RGridMaskSet::clear)
     .def("bounds", &RGridMaskSet::bounds,return_value_policy<copy_const_reference>())
     .def("lattice_set", &RGridMaskSet::lattice_set,return_value_policy<copy_const_reference>())
-    .def("adjoin", &grid_mask_set_adjoin_grid_cell)
-    .def("adjoin", &grid_mask_set_adjoin_grid_rectangle)
-    .def("adjoin", &grid_mask_set_adjoin_grid_cell_list_set)
-    .def("adjoin", &grid_mask_set_adjoin_grid_rectangle_list_set)
-    .def("adjoin", &grid_mask_set_adjoin_grid_mask_set)
+    .def("adjoin", GMSAdjCellFunc(&RGridMaskSet::adjoin))
+    .def("adjoin", GMSAdjRectFunc(&RGridMaskSet::adjoin))
+    .def("adjoin", GMSAdjCellLSFunc(&RGridMaskSet::adjoin))
+    .def("adjoin", GMSAdjRectLSFunc(&RGridMaskSet::adjoin))
+    .def("adjoin", GMSAdjGMSFunc(&RGridMaskSet::adjoin))
     .def("neighbourhood", &RGridMaskSet::neighbourhood)
     .def("adjoining", &RGridMaskSet::adjoining)
     .def("size", &RGridMaskSet::size)
@@ -194,12 +179,12 @@ void export_grid_set() {
     .def(self_ns::str(self))    // __str__
     ;
     
-  def("join",&grid_mask_set_join);
-  def("difference",&grid_mask_set_difference);
-  def("regular_intersection",&grid_mask_set_regular_intersection);
+  def("join",GMSBinFunc(&Geometry::join));
+  def("difference",GMSBinFunc(&Geometry::difference));
+  def("regular_intersection",GMSBinFunc(&Geometry::regular_intersection));
     
-  def("over_approximation",&over_approximation_rectangle);
-  def("over_approximation",&over_approximation_parallelotope);
-  def("over_approximation",&over_approximation_rectangle_list_set);
-  def("over_approximation",&over_approximation_parallelotope_list_set);
+  def("over_approximation",ApprxRectGridFunc(&Geometry::over_approximation));
+  def("over_approximation",ApprxPltpGridFunc(&Geometry::over_approximation));
+  def("over_approximation",ApprxLSRectFGridFunc(&Geometry::over_approximation));
+  def("over_approximation",ApprxLSPltpFGridFunc(&Geometry::over_approximation));
 }

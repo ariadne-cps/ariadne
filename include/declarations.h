@@ -70,8 +70,9 @@ class LatticeRectangleListSet;
 class LatticeTransformation;
   
 template<typename R> class Grid;
+template<typename R> class RegularGrid;
+template<typename R> class IrregularGrid;
 template<typename R> class FiniteGrid;
-template<typename R> class InfiniteGrid;
 template<typename R> class GridCell;
 template<typename R> class GridRectangle;
 template<typename R> class GridMaskSet;

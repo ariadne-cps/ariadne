@@ -41,58 +41,58 @@ namespace Ariadne {
 
     template<typename R>
     GridRectangle<R>::GridRectangle(const Grid<R>& g)
-      : _grid(g), _position(g.dimension())
+      : _grid(g), _lattice_set(g.dimension())
     { 
       //std::cerr << "GridRectangle<R>::GridRectangle(const Grid<R>& g)" << std::endl;
-      _position.set_lower_bound(0,1);
-      _position.set_upper_bound(0,0);
+      _lattice_set.set_lower_bound(0,1);
+      _lattice_set.set_upper_bound(0,0);
     }
 
     template<typename R>
     GridRectangle<R>::GridRectangle(const Grid<R>& g, const LatticeRectangle& b)
-      : _grid(g), _position(b)
+      : _grid(g), _lattice_set(b)
     {
       assert(g.dimension()==b.dimension());
     }
 
     template<typename R>
     GridRectangle<R>::GridRectangle(const Grid<R>& g, const IndexArray& l, const IndexArray& u)
-      : _grid(g), _position(l,u)
+      : _grid(g), _lattice_set(l,u)
     {
       assert(g.dimension()==l.size());
     }
 
     template<typename R>
     GridRectangle<R>::GridRectangle(const Grid<R>& g, const Rectangle<R>& r)
-      : _grid(g), _position(g.dimension())
+      : _grid(g), _lattice_set(g.dimension())
     {
       assert(g.dimension()==r.dimension());
       for(dimension_type i=0; i!=dimension(); ++i) {
         /* TODO: Catch and rethrow exceptions */
-        _position.set_lower_bound(i,g.subdivision_index(i,r.lower_bound(i)));
-        _position.set_upper_bound(i,g.subdivision_index(i,r.upper_bound(i)));
+        _lattice_set.set_lower_bound(i,g.subdivision_index(i,r.lower_bound(i)));
+        _lattice_set.set_upper_bound(i,g.subdivision_index(i,r.upper_bound(i)));
       }
     }
 
     template<typename R>
     GridRectangle<R>::GridRectangle(const GridCell<R>& c)
-      : _grid(c._grid), _position(c.position())
+      : _grid(c._grid), _lattice_set(c.lattice_set())
     {
     }
 
 
     template<typename R>
     GridCell<R>::GridCell(const Grid<R>& g, const LatticeCell& pos)
-      : _grid(g), _position(pos)
+      : _grid(g), _lattice_set(pos)
     {
-      assert(_position.dimension()==_grid.dimension());
+      assert(_lattice_set.dimension()==_grid.dimension());
     }
 
     template<typename R>
     GridCell<R>::GridCell(const Grid<R>& g, const IndexArray& pos)
-      : _grid(g), _position(pos)
+      : _grid(g), _lattice_set(pos)
     {
-      assert(_position.dimension()==_grid.dimension());
+      assert(_lattice_set.dimension()==_grid.dimension());
     }
 
 
@@ -102,8 +102,8 @@ namespace Ariadne {
       Rectangle<R> result(dimension());
 
       for(dimension_type i=0; i!=dimension(); ++i) {
-        result.set_lower_bound(i, _grid.subdivision_coordinate(i,_position.lower_bound(i)));
-        result.set_upper_bound(i, _grid.subdivision_coordinate(i,_position.upper_bound(i)));
+        result.set_lower_bound(i, _grid.subdivision_coordinate(i,_lattice_set.lower_bound(i)));
+        result.set_upper_bound(i, _grid.subdivision_coordinate(i,_lattice_set.upper_bound(i)));
       }
 
       return result;
@@ -118,8 +118,8 @@ namespace Ariadne {
       
       Rectangle<R> result(dimension());
       for(size_type i=0; i!=dimension(); ++i) {
-        result.set_lower_bound(i, _grid.subdivision_coordinate(i,_position.lower_bound(i)));
-        result.set_upper_bound(i, _grid.subdivision_coordinate(i,_position.upper_bound(i)));
+        result.set_lower_bound(i, _grid.subdivision_coordinate(i,_lattice_set.lower_bound(i)));
+        result.set_upper_bound(i, _grid.subdivision_coordinate(i,_lattice_set.upper_bound(i)));
       }
 
       return result;
@@ -147,7 +147,7 @@ namespace Ariadne {
     bool
     interiors_intersect(const GridRectangle<R>& A, const GridRectangle<R>& B) {
       assert(A.grid() == B.grid());
-      return interiors_intersect(A.position(),B.position());
+      return interiors_intersect(A.lattice_set(),B.lattice_set());
     }
 
     /*! \brief Tests intersection of interiors */
@@ -155,7 +155,7 @@ namespace Ariadne {
     bool
     interiors_intersect(const GridRectangle<R>& A, const GridMaskSet<R>& B) {
       assert(A.grid() == B.grid());
-      return interiors_intersect(A._position,B._lattice_set);
+      return interiors_intersect(A._lattice_set,B._lattice_set);
     }
 
     /*! \brief Tests intersection of interiors */
@@ -176,7 +176,7 @@ namespace Ariadne {
     {
       assert(A.dimension() == B.dimension());
       if(A.grid()==B.grid()) {
-        return subset(A.position(),B.position());
+        return subset(A.lattice_set(),B.lattice_set());
       }
       return subset(Rectangle<R>(A),Rectangle<R>(B));
     }
@@ -187,7 +187,7 @@ namespace Ariadne {
     subset(const GridRectangle<R>& A, const GridMaskSet<R>& B)
     {
       assert(A.grid()==B.grid());
-      return subset(A.position(),B.lattice_set()); 
+      return subset(A.lattice_set(),B.lattice_set()); 
     }
 
     /*! \brief Tests if A is a subset of B. */
@@ -300,38 +300,34 @@ namespace Ariadne {
   
     template<typename R>
     GridMaskSet<R>::GridMaskSet(const FiniteGrid<R>& g)
-      : _grid_ptr(&g), _lattice_set(g.bounds()) 
+      : _grid_ptr(&g.grid()), _lattice_set(g.bounds()) 
     { 
-    }
-
-    template<typename R>
-    GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const LatticeRectangle& b)
-      : _grid_ptr(&g), _lattice_set(b) 
-    {
-      const FiniteGrid<R>* finite_grid_ptr=dynamic_cast<const FiniteGrid<R>*>(_grid_ptr);
-      if(finite_grid_ptr) {
-        assert(subset(b,finite_grid_ptr->bounds()));
-      }
-    }
-  
-    template<typename R>
-    GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const LatticeMaskSet& ms)
-      : _grid_ptr(&g), _lattice_set(ms)
-    {
-      const FiniteGrid<R>* finite_grid_ptr=dynamic_cast<const FiniteGrid<R>*>(_grid_ptr);
-      if(finite_grid_ptr) {
-        assert(subset(ms.bounds(),finite_grid_ptr->bounds()));
-      }
     }
 
     template<typename R>
     GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const LatticeRectangle& b, const BooleanArray& m)
       : _grid_ptr(&g), _lattice_set(b,m)
     {
-      const FiniteGrid<R>* finite_grid_ptr=dynamic_cast<const FiniteGrid<R>*>(_grid_ptr);
-      if(finite_grid_ptr) {
-        assert(subset(b,finite_grid_ptr->bounds()));
+      const IrregularGrid<R>* irregular_grid_ptr=dynamic_cast<const IrregularGrid<R>*>(_grid_ptr);
+      if(irregular_grid_ptr) {
+        assert(subset(b,irregular_grid_ptr->bounds()));
       }
+    }
+
+    template<typename R>
+    GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const LatticeMaskSet& ms)
+      : _grid_ptr(&g), _lattice_set(ms)
+    {
+      const IrregularGrid<R>* irregular_grid_ptr=dynamic_cast<const IrregularGrid<R>*>(_grid_ptr);
+      if(irregular_grid_ptr) {
+        assert(subset(ms.bounds(),irregular_grid_ptr->bounds()));
+      }
+    }
+
+    template<typename R>
+    GridMaskSet<R>::GridMaskSet(const FiniteGrid<R>& fg, const BooleanArray& m)
+      : _grid_ptr(&fg.grid()), _lattice_set(fg.bounds(),m)
+    {
     }
 
     template<typename R>
@@ -345,28 +341,22 @@ namespace Ariadne {
       : _grid_ptr(&gcls.grid()),
         _lattice_set(gcls.dimension())
     {
-      const FiniteGrid<R>* finite_grid_ptr=dynamic_cast<const FiniteGrid<R>*>(_grid_ptr);
-      if(finite_grid_ptr) {
-        _lattice_set=LatticeMaskSet(finite_grid_ptr->bounds());
-      }
-      else {
-        _lattice_set=LatticeMaskSet(gcls.lattice_set().bounds());
-      }
+      _lattice_set=LatticeMaskSet(gcls.lattice_set().bounds());
       _lattice_set.adjoin(gcls.lattice_set());
     }
     
     template<typename R>
     GridMaskSet<R>::GridMaskSet(const GridRectangleListSet<R>& grls)
       : _grid_ptr(&grls.grid()),
-        _lattice_set(dynamic_cast<const FiniteGrid<R>*>(_grid_ptr)->bounds())
+        _lattice_set(grls.lattice_set().bounds())
     {
-      _lattice_set.adjoin(grls._lattice_set);
+      _lattice_set.adjoin(grls.lattice_set());
     }
 
     template<typename R>
     GridMaskSet<R>::GridMaskSet(const ListSet<R,Rectangle>& rls) 
-      : _grid_ptr(new FiniteGrid<R>(rls)), 
-        _lattice_set(dynamic_cast<const FiniteGrid<R>*>(_grid_ptr)->bounds())
+      : _grid_ptr(new IrregularGrid<R>(rls)), 
+        _lattice_set(dynamic_cast<const IrregularGrid<R>*>(_grid_ptr)->bounds())
     {
       //FIXME: Memory leak!    
 
@@ -426,7 +416,7 @@ namespace Ariadne {
 
     template<typename R>
     GridRectangleListSet<R>::GridRectangleListSet(const ListSet<R,Rectangle>& s)
-      : _grid_ptr(new FiniteGrid<R>(s)), _lattice_set(s.dimension())
+      : _grid_ptr(new IrregularGrid<R>(s)), _lattice_set(s.dimension())
     {
       //std::cerr << "GridRectangleListSet<R>::GridRectangleListSet(const ListSet<R,Rectangle>& s)" << std::endl;
       typedef typename ListSet<R,Rectangle>::const_iterator list_set_const_iterator;
@@ -445,7 +435,7 @@ namespace Ariadne {
       for(dimension_type i=0; i!=pts.dimension(); ++i) {
         sizes[i]=pow(2,sizes[i]);
       }
-      _grid_ptr=new FiniteGrid<R>(pts.bounding_box(),sizes);
+      _grid_ptr=new IrregularGrid<R>(pts.bounding_box(),sizes);
       for(typename PartitionTreeSet<R>::const_iterator iter=pts.begin(); iter!=pts.end(); ++iter) {
         Rectangle<R> rect(*iter);
         GridRectangle<R> grect(this->grid(),rect);
@@ -467,10 +457,10 @@ namespace Ariadne {
       assert(false);
       assert(g.dimension()==s.dimension());
 
-      const FiniteGrid<R>* to=dynamic_cast<const FiniteGrid<R>*>(&g);
-      const FiniteGrid<R>* from=dynamic_cast<const FiniteGrid<R>*>(&s.grid());
+      const IrregularGrid<R>* to=dynamic_cast<const IrregularGrid<R>*>(&g);
+      const IrregularGrid<R>* from=dynamic_cast<const IrregularGrid<R>*>(&s.grid());
 
-      array< std::vector<index_type> > tr = FiniteGrid<R>::index_translation(*from,*to);
+      array< std::vector<index_type> > tr = IrregularGrid<R>::index_translation(*from,*to);
       //translate_cell_coordinates(&_lattice_set, s._lattice_set, tr);
     }
 
@@ -481,10 +471,10 @@ namespace Ariadne {
       //TODO: re-write this function
       assert(false);
 
-      const FiniteGrid<R>* to=dynamic_cast<const FiniteGrid<R>*>(&g);
-      const FiniteGrid<R>* from=dynamic_cast<const FiniteGrid<R>*>(&s.grid());
+      const IrregularGrid<R>* to=dynamic_cast<const IrregularGrid<R>*>(&g);
+      const IrregularGrid<R>* from=dynamic_cast<const IrregularGrid<R>*>(&s.grid());
 
-      array< std::vector<index_type> > tr = FiniteGrid<R>::index_translation(*from,*to);
+      array< std::vector<index_type> > tr = IrregularGrid<R>::index_translation(*from,*to);
       //translate_rectangle_coordinates(&_lattice_set, s._lattice_set, tr);
     }
 
@@ -545,7 +535,7 @@ namespace Ariadne {
       }
       Rectangle<R> bb=p.bounding_box();
       GridRectangle<R> gbb=over_approximation(bb,g);
-      LatticeRectangle block=gbb.position();
+      LatticeRectangle block=gbb.lattice_set();
 
       for(LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
         GridCell<R> cell(g,*iter);
@@ -566,7 +556,7 @@ namespace Ariadne {
       assert(g.dimension()==ls.dimension());
 
       for(typename ListSet<R,BS>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
-       result.adjoin(over_approximation(*iter,g));
+       result.adjoin(over_approximation(*iter,g.grid()));
       }
         
       return result;
@@ -591,7 +581,7 @@ namespace Ariadne {
       GridCellListSet<R> result(g);
       GridRectangle<R> gbb=over_approximation_of_intersection(p.bounding_box(),r,g);
       if(!gbb.empty()) {
-        LatticeRectangle block=gbb.position();
+        LatticeRectangle block=gbb.lattice_set();
         for(LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
           GridCell<R> cell(g,*iter);
           if(!disjoint(Rectangle<R>(cell),p)) {
@@ -612,7 +602,7 @@ namespace Ariadne {
       GridRectangle<R> gbb=over_approximation_of_intersection(z.bounding_box(),r,g);
 
       if(!gbb.empty()) {
-        LatticeRectangle block=gbb.position();
+        LatticeRectangle block=gbb.lattice_set();
         for(LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
           GridCell<R> cell(g,*iter);
           if(!disjoint(Rectangle<R>(cell),z)) {
@@ -633,7 +623,7 @@ namespace Ariadne {
       assert(g.dimension()==ls.dimension());
 
       for(typename ListSet<R,BS>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
-       result.adjoin(over_approximation_of_intersection(*iter,r,g));
+       result.adjoin(over_approximation_of_intersection(*iter,r,g.grid()));
       }
         
       return result;
@@ -658,7 +648,7 @@ namespace Ariadne {
       os.flush();
       for(size_type i=0; i!=set.size(); ++i) {
         if(i!=0) { os << ", "; }
-        os << set[i].position();
+        os << set[i].lattice_set();
       }
       os << " ]\n";
       os << ")" << std::endl;
@@ -687,7 +677,7 @@ namespace Ariadne {
       os.flush();
       for(size_type i=0; i!=set.size(); ++i) {
         if(i!=0) { os << ", "; }
-        os <<  set[i].position();
+        os <<  set[i].lattice_set();
       }
       os << " ]\n";
       os << ")" << std::endl;

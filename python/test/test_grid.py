@@ -29,8 +29,13 @@ import sys
 bb=Rectangle("[-3,3]x[-3,3]")
 print bb,"\n"
 
-g=FiniteGrid(bb,16);
-print g
+g=RegularGrid(2,0.0625);
+fg=FiniteGrid(g,bb);
+print g,fg,fg.grid()
+if g==fg.grid():
+  print "Grids equal"
+else:
+  print "Grids not equal"
 print
 
 r1=Rectangle("[-0.2,0.3]x[0.1,0.9]")
@@ -60,10 +65,12 @@ print "Subdivided: ",sp
 ap=over_approximation(p,g)
 print sp
 print ap
-asp=over_approximation(sp,g)
+asp=over_approximation(sp,fg)
 print asp
-afp=GridMaskSet(over_approximation(sp[0],g))
+afp=GridMaskSet(fg)
+afp.adjoin(over_approximation(sp[0],g))
 print afp, asp
+print afp.bounds(),asp.bounds()
 cafp=difference(asp,afp)
 
 print "Stepping through RectangleListSet using index"
@@ -99,7 +106,6 @@ for i in range(0,len(grls)):
 print "Iterating through GridRectangleListSet"
 for rect in grls:
   print rect
-
   
 eps=EpsPlot("gr1.eps",bb)
 eps.set_fill_colour("blue")
@@ -132,7 +138,13 @@ eps.set_fill_colour("green")
 eps.write(gms)
 eps.close()
 
-pts=PartitionTreeSet(gms.neighbourhood())
+
+print "Computing one-box neighbourhood"
+gmsn=gms.neighbourhood()
+print "Converting to partition tree set"
+print gmsn.bounding_box()
+pts=PartitionTreeSet(gmsn)
+print "Done..."
 grls=GridRectangleListSet(pts)
 gms=GridMaskSet(grls)
 gms.clear()

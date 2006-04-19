@@ -127,9 +127,9 @@ namespace Ariadne {
     {
       LinearAlgebra::IntervalMatrix<R> result(2,2); 
       result(0,0) = R(-2)*r[0];
-      result(0,1) = Interval<R>(-_b);
-      result(1,0) = Interval<R>(1);
-      result(1,1) = Interval<R>(0);
+      result(0,1) = Interval<R>(R(-_b));
+      result(1,0) = Interval<R>(R(1));
+      result(1,1) = Interval<R>(R(0));
       return result;
     }
      

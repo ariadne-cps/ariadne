@@ -2,6 +2,7 @@ include ../../config.mk
 
 OBJ = map.o vector_field.o \
 	affine_map.o affine_vector_field.o \
+	polynomial_map.o \
 	apply.o \
 	integrator.o \
 
@@ -226,6 +227,58 @@ affine_vector_field.o: affine_vector_field.cc \
   ../../include/evaluation/../evaluation/../evaluation/../linear_algebra/interval_matrix.h \
   ../../include/evaluation/affine_vector_field.tpl \
   ../../include/evaluation/../evaluation/affine_vector_field.h \
+  ../../include/real_typedef.h ../../include/numeric/numerical_types.h
+
+polynomial_map.o: polynomial_map.cc \
+  ../../include/evaluation/polynomial_map.h \
+  ../../include/evaluation/../evaluation/map.h \
+  ../../include/evaluation/../evaluation/../declarations.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/vector.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/../declarations.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/../numeric/integer.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/../numeric/../declarations.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/../numeric/../utility/stlio.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/../numeric/../utility/../base/array.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/../numeric/../utility/../base/../declarations.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/matrix.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/interval_matrix.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/../numeric/interval.h \
+  ../../include/evaluation/../linear_algebra/matrix.h \
+  ../../include/evaluation/polynomial_map.tpl \
+  ../../include/evaluation/polynomial_map.h \
+  ../../include/evaluation/../linear_algebra/vector.h \
+  ../../include/evaluation/../utility/stlio.h \
+  ../../include/evaluation/../base/array.h \
+  ../../include/evaluation/../numeric/interval.h \
+  ../../include/evaluation/../geometry/point.h \
+  ../../include/evaluation/../geometry/../declarations.h \
+  ../../include/evaluation/../geometry/../base/array.h \
+  ../../include/evaluation/../geometry/../linear_algebra/vector.h \
+  ../../include/evaluation/../geometry/rectangle.h \
+  ../../include/evaluation/../geometry/../numeric/arithmetic.h \
+  ../../include/evaluation/../geometry/../numeric/../numeric/numerical_types.h \
+  ../../include/evaluation/../geometry/../numeric/../numeric/../declarations.h \
+  ../../include/evaluation/../geometry/../numeric/../numeric/../numeric/integer.h \
+  ../../include/evaluation/../geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/evaluation/../geometry/../numeric/../numeric/../utility/stlio.h \
+  ../../include/evaluation/../geometry/../numeric/../numeric/approximation.h \
+  ../../include/evaluation/../geometry/../numeric/../numeric/../numeric/numerical_types.h \
+  ../../include/evaluation/../geometry/../numeric/interval.h \
+  ../../include/evaluation/../geometry/../geometry/point.h \
+  ../../include/evaluation/../geometry/polyhedron.h \
+  /ufs/collins/include/ppl.hh \
+  ../../include/evaluation/../geometry/../linear_algebra/constraint_system.h \
+  ../../include/evaluation/../geometry/../linear_algebra/../declarations.h \
+  ../../include/evaluation/../geometry/../linear_algebra/../numeric/numerical_types.h \
+  ../../include/evaluation/../geometry/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/evaluation/../geometry/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/evaluation/../geometry/../linear_algebra/matrix.h \
+  ../../include/evaluation/../geometry/../linear_algebra/generator_system.h \
+  ../../include/evaluation/../geometry/../geometry/rectangle.h \
+  ../../include/evaluation/../geometry/list_set.h \
+  ../../include/evaluation/../geometry/../base/utility.h \
+  ../../include/evaluation/../geometry/../base/../declarations.h \
   ../../include/real_typedef.h ../../include/numeric/numerical_types.h
 
 apply.o: apply.cc ../../include/evaluation/apply.h \

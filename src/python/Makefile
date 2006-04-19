@@ -706,42 +706,29 @@ export_polynomial_map.o: export_polynomial_map.cc \
   ../../include/geometry/../linear_algebra/../numeric/../declarations.h \
   ../../include/geometry/../linear_algebra/../numeric/../utility/stlio.h \
   ../../include/geometry/../linear_algebra/../numeric/../utility/../base/array.h \
+  ../../include/geometry/rectangle.h \
+  ../../include/geometry/../numeric/arithmetic.h \
+  ../../include/geometry/../numeric/../numeric/numerical_types.h \
+  ../../include/geometry/../numeric/../numeric/../declarations.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/integer.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../numeric/../numeric/../utility/stlio.h \
+  ../../include/geometry/../numeric/../numeric/approximation.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
+  ../../include/geometry/../numeric/interval.h \
+  ../../include/geometry/../numeric/../declarations.h \
+  ../../include/geometry/../geometry/point.h \
   ../../include/evaluation/polynomial_map.h \
-  ../../include/evaluation/../linear_algebra/vector.h \
+  ../../include/evaluation/../evaluation/map.h \
+  ../../include/evaluation/../evaluation/../declarations.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/vector.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/matrix.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/../declarations.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/../numeric/integer.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/interval_matrix.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/../numeric/interval.h \
   ../../include/evaluation/../linear_algebra/matrix.h \
-  ../../include/evaluation/../linear_algebra/../declarations.h \
-  ../../include/evaluation/../linear_algebra/../numeric/integer.h \
-  ../../include/evaluation/../utility/stlio.h \
-  ../../include/evaluation/../base/array.h \
-  ../../include/evaluation/../numeric/interval.h \
-  ../../include/evaluation/../numeric/../declarations.h \
-  ../../include/evaluation/../geometry/point.h \
-  ../../include/evaluation/../geometry/rectangle.h \
-  ../../include/evaluation/../geometry/../declarations.h \
-  ../../include/evaluation/../geometry/../numeric/arithmetic.h \
-  ../../include/evaluation/../geometry/../numeric/../numeric/numerical_types.h \
-  ../../include/evaluation/../geometry/../numeric/../numeric/../declarations.h \
-  ../../include/evaluation/../geometry/../numeric/../numeric/../numeric/integer.h \
-  ../../include/evaluation/../geometry/../numeric/../numeric/../numeric/dyadic.h \
-  ../../include/evaluation/../geometry/../numeric/../numeric/../utility/stlio.h \
-  ../../include/evaluation/../geometry/../numeric/../numeric/approximation.h \
-  ../../include/evaluation/../geometry/../numeric/../numeric/../numeric/numerical_types.h \
-  ../../include/evaluation/../geometry/../numeric/interval.h \
-  ../../include/evaluation/../geometry/../geometry/point.h \
-  ../../include/evaluation/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
-  ../../include/evaluation/../geometry/../linear_algebra/constraint_system.h \
-  ../../include/evaluation/../geometry/../linear_algebra/../declarations.h \
-  ../../include/evaluation/../geometry/../linear_algebra/../numeric/numerical_types.h \
-  ../../include/evaluation/../geometry/../linear_algebra/../linear_algebra/vector.h \
-  ../../include/evaluation/../geometry/../linear_algebra/../linear_algebra/matrix.h \
-  ../../include/evaluation/../geometry/../linear_algebra/vector.h \
-  ../../include/evaluation/../geometry/../linear_algebra/matrix.h \
-  ../../include/evaluation/../geometry/../linear_algebra/generator_system.h \
-  ../../include/evaluation/../geometry/../geometry/rectangle.h \
-  ../../include/evaluation/../geometry/list_set.h \
-  ../../include/evaluation/../geometry/../base/utility.h \
-  ../../include/evaluation/../geometry/../base/../declarations.h \
   ../../include/python/typedefs.h ../../include/python/../real_typedef.h \
   ../../include/python/../numeric/numerical_types.h \
   ../../include/python/../declarations.h

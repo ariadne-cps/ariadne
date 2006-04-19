@@ -71,16 +71,20 @@ namespace Ariadne {
     class Interval : public boost::numeric::interval<R> {
      public:
       /*! \brief Default constructer constructs what?? */
-     Interval()
-        : boost::numeric::interval<R>() { }
+      Interval()
+        : boost::numeric::interval<R>(0,0) { }
+      /*! \brief Construct a one-point interval. */
+      Interval(const R& x)
+        : boost::numeric::interval<R>(x) { }
+      /*! \brief Construct from a boost interval. */
       Interval(const boost::numeric::interval<R>& ivl)
         : boost::numeric::interval<R>(ivl) { }
       /*! \brief Construct from lower and upper bounds. */
       Interval(const R& l, const R& u)
         : boost::numeric::interval<R>(l,u) { }
       /*! \brief Assignment operator. */
-      const Interval<R>& operator=(const R &r) {
-        *this=Interval<R>(r,r);
+      const Interval<R>& operator=(const R& x) {
+        *this=Interval<R>(x,x);
         return *this;
       }
       
@@ -141,6 +145,18 @@ namespace Ariadne {
       return (ivl1.lower()>=ivl2.lower() && ivl1.upper()<=ivl2.upper());
     }
 
+    /*! \brief Integer power. */
+    template<typename R, typename N>
+    inline
+    Interval<R> 
+    pow(const Interval<R>& x, const N& n) {
+      Interval<R> result=R(1);
+      for(N i=0; i!=n; ++i) {
+        result*=x;
+      }
+      return result;
+    }
+  
 
 
     

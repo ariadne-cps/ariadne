@@ -43,7 +43,7 @@ void export_interval()
     .def(init<int,int>())
     .def(init<double,double>())
     .def(init<Real,Real>())
-    .def(init<double>())
+//    .def(init<double>())
     .def(init<Real>())
     .def(-self)        // __neg__
     .def(self + self)  // __add__

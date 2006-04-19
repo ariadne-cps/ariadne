@@ -94,7 +94,10 @@ template<typename R> bool subset(const Polyhedron<R>&, const Polyhedron<R>&);
 namespace Ariadne { namespace Evaluation {
 template <typename R> class Map;
 template <typename R> class AffineMap;
+template <typename R> class Monomial;
+template <typename R> class Polynomial;
 template <typename R> class PolynomialMap;
+template <typename R> class PolynomialMatrix;
 template <typename R> class VectorField;
 template <typename R> class AffineVectorField;
 

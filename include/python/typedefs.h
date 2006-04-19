@@ -87,7 +87,10 @@ typedef Geometry::PartitionTreeSet<Real> RPartitionTreeSet;
 
 typedef Evaluation::Map<Real> RMapBase;
 typedef Evaluation::AffineMap<Real> RAffineMap;
+typedef Evaluation::Monomial<Real> RMonomial;
+typedef Evaluation::Polynomial<Real> RPolynomial;
 typedef Evaluation::PolynomialMap<Real> RPolynomialMap;
+typedef Evaluation::PolynomialMatrix<Real> RPolynomialMatrix;
 typedef Evaluation::VectorField<Real> RVectorFieldBase;
 typedef Evaluation::AffineVectorField<Real> RAffineVectorField;
 

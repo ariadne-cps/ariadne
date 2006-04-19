@@ -99,8 +99,12 @@ namespace Ariadne {
       size_type size() const { return _size; }
       /*! \brief The maximum possible size of the array. */
       size_type max_size() const { return (size_type) (-1); }
-      /*! \brief Resizes the array to hold \a n elements. If \a n is larger than the current size, the extra elements are uninitialised. */
-      void resize(size_type n) { if(size()!=n) { delete[] _ptr; _size=n; _ptr=new value_type[_size]; } }
+      /*! \brief Resizes the array to hold \a n elements. If \a n is larger than the current size, the extra elements are initialised. */
+      void resize(size_type n) { if(size()!=n) { pointer _new_ptr=new value_type[n]; 
+        for(size_type i=0; i!=n; ++i) { if(i<_size) { _new_ptr[i]=_ptr[i]; } else { _new_ptr[i]=value_type(); } }
+        delete[] _ptr; _size=n; _ptr=_new_ptr; } }
+      /*! \brief Reallocates the array to hold \a n elements. The new elements are uninitialised. */
+      void reallocate(size_type n) { if(size()!=n) { delete[] _ptr; _size=n; _ptr=new value_type[_size]; } }
       
       /*! \brief The \a n'th element. */
       reference operator[](size_type i) { return _ptr[i]; } 

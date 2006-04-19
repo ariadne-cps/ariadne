@@ -75,7 +75,7 @@ namespace Ariadne {
     prod(const Matrix<R>& A, const IntervalVector<R>& v) {
       IntervalVector<R> result(A.size1());
       for (size_type i=0; i!=result.size(); ++i) {
-        result(i)=Interval<R>(0);
+        result(i)=R(0);
         for (size_type j=0; j!=v.size(); ++j) {
           result(i)+=A(i,j)*v(j);
         }
@@ -88,7 +88,7 @@ namespace Ariadne {
     prod(const IntervalMatrix<R>& A, const Vector<R>& v) {
       IntervalVector<R> result(A.size1());
       for (size_type i=0; i!=result.size(); ++i) {
-        result(i)=Interval<R>(0);
+        result(i)=R(0);
         for (size_type j=0; j!=v.size(); ++j) {
           result(i)+=A(i,j)*v(j);
         }
@@ -101,7 +101,7 @@ namespace Ariadne {
     prod(const IntervalMatrix<R>& A, const IntervalVector<R>& v) {
       IntervalVector<R> result(A.size1());
       for (size_type i=0; i!=result.size(); ++i) {
-        result(i)=Interval<R>(0);
+        result(i)=R(0);
         for (size_type j=0; j!=v.size(); ++j) {
           result(i)+=A(i,j)*v(j);
         }
@@ -115,7 +115,7 @@ namespace Ariadne {
       IntervalMatrix<R> result(A.size1(),B.size2());
       for (size_type i=0; i!=A.size1(); ++i) {
         for (size_type j=0; j!=B.size2(); ++j) {
-          result(i,j)=Interval<R>(0);
+          result(i,j)=R(0);
           for (size_type k=0; k!=A.size2(); ++k) {
             result(i,j)+=A(i,k)*B(k,j);
           }
@@ -130,7 +130,7 @@ namespace Ariadne {
       IntervalMatrix<R> result(A.size1(),B.size2());
       for (size_type i=0; i!=A.size1(); ++i) {
         for (size_type j=0; j!=B.size2(); ++j) {
-          result(i,j)=Interval<R>(0);
+          result(i,j)=R(0);
           for (size_type k=0; k!=A.size2(); ++k) {
             result(i,j)+=A(i,k)*B(k,j);
           }
@@ -145,7 +145,7 @@ namespace Ariadne {
       IntervalMatrix<R> result(A.size1(),B.size2());
       for (size_type i=0; i!=A.size1(); ++i) {
         for (size_type j=0; j!=B.size2(); ++j) {
-          result(i,j)=Interval<R>(0);
+          result(i,j)=R(0);
           for (size_type k=0; k!=A.size2(); ++k) {
             result(i,j)+=A(i,k)*B(k,j);
           }
@@ -348,7 +348,7 @@ namespace Ariadne {
       unsigned int n=1;
       while(term.upper_norm()>err) {
         n=n+1;
-        term=(term*A)/Interval<R>(n);
+        term=(term*A)/Interval<R>(R(n));
         result+=term;
       }
       term=Interval<R>(-1,1)*term;

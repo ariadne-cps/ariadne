@@ -33,28 +33,27 @@
 #include <string>
 #include <sstream>
 
-#include <list>
-#include <set>
-#include <vector>
-#include <valarray>
-
-#include "../linear_algebra/vector.h"
+#include "../evaluation/map.h"
 #include "../linear_algebra/matrix.h"
-
-#include "../utility/stlio.h"
-#include "../base/array.h"
-#include "../numeric/interval.h"
-
-#include "../geometry/point.h"
-#include "../geometry/rectangle.h"
-#include "../geometry/polyhedron.h"
-#include "../geometry/list_set.h"
 
 namespace Ariadne {
   namespace Evaluation {
+    template<typename R> class Monomial;
+    template<typename R> class Polynomial;
     template<typename R> class PolynomialMap;
+    template<typename R> class PolynomialMatrix;
 
+    template<typename R> std::ostream& operator<<(std::ostream&, const Monomial<R>&);
+    template<typename R> std::ostream& operator<<(std::ostream&, const Polynomial<R>&);
     template<typename R> std::ostream& operator<<(std::ostream&, const PolynomialMap<R>&);
+    template<typename R> std::ostream& operator<<(std::ostream&, const PolynomialMatrix<R>&);
+   
+    template<typename R> std::istream& operator>>(std::istream&, Monomial<R>&);
+    template<typename R> std::istream& operator>>(std::istream&, Polynomial<R>&);
+    template<typename R> std::istream& operator>>(std::istream&, PolynomialMap<R>&);
+   
+    /*! \brief Graded lexicographical ordering. */
+    template<typename R> bool operator<(const Monomial<R>&, const Monomial<R>&);
     
     /*! \brief A monomial in several variables. */
     template<typename R>
@@ -65,28 +64,56 @@ namespace Ariadne {
       /*! \brief The type of denotable state accepted as argument. */
       typedef Geometry::Point<R> state_type;
      public:
-      Monomial(size_type n) : _coefficient(0), _multi_index(n,0) { }
-      Monomial(real_type a, array<size_type>& i) : _coefficient(a), _multi_index(i) { }
+      /*! \brief Construct from a string literal. 
+       *
+       *  The literal must be of the form <tt>c x_0^a0 x_1^a1 ... a_n^an</tt>,
+       *  where \c c is a denotable real number and \c a0,...\c an are positive integers.
+       *  Terms may be omitted.
+       */
+      Monomial(const std::string& s);
+      /*! \brief Default constructor. */
+      Monomial() : _coefficient(0), _multi_index() { }
+      /*! \brief The zero monomial in \a n variables. */
+      Monomial(const size_type& n) : _coefficient(0), _multi_index(n,0) { }
+      /*! \brief Construct a monomial from a real number and an array of indices. */
+      Monomial(const real_type& a, const array<size_type>& i) : _coefficient(a), _multi_index(i) { }
      
-      size_type argument_dimension() const { return _multi_index.size(); }
+      /*! \brief The dimension of the argument.
+       *
+       *  Includes variables with index 0.
+       */
+      dimension_type argument_dimension() const { return _multi_index.size(); }
+      /*! \brief The coefficient of the monomial. */
       const real_type& coefficient() const { return _coefficient; }
+      /*! \brief The index of the \a j th variable. */
+      const size_type& index(const dimension_type& j) const { return _multi_index[j]; }
+      /*! \brief The multi index of the monomial. */
       const array<size_type>& multi_index() const { return _multi_index; }
-      const size_type& index(size_type n) const { return _multi_index[n]; }
-    
-      real_type operator() (const state_type& s) const {
-        assert(s.size() == this->dimension());
-        real_type result=_coefficient;
-        for(size_type k=0; k!=this->dimension(); ++k) {
-          result *= s[k]^_multi_index[k];
-        }
-        return result;
-      }
+      /*! \brief The degree of the monomial, equal to the sum of the indices of the multi-index. */
+      size_type degree() const;
       
+      /*! \brief Compute the image of a point under the monomial. */
+      R apply(const Geometry::Point<R>& s) const;
+      /*! \brief Compute the image of a rectangle under the monomial. */
+      Interval<R> apply(const Geometry::Rectangle<R>& s) const;
      private:
+      friend std::istream& operator>> <> (std::istream&, Monomial<R>&);
+      friend class Polynomial<R>;
+      friend class PolynomialMap<R>;
+     private:
+      void _resize(const dimension_type& n);
       real_type _coefficient;
       array<size_type> _multi_index;
     };
-     
+    
+    /*! \brief Unary minus. */
+    template<typename R>
+    inline Monomial<R> operator-(const Monomial<R>& m) 
+    {
+      return Monomial<R>(-m.coefficient(), m.multi_index());
+    }
+    
+    
     /*! \brief A polynomial in several variables. */
     template<typename R>
     class Polynomial {
@@ -95,87 +122,111 @@ namespace Ariadne {
       typedef R real_type;
       /*! \brief The type of denotable state contained by the simplex. */
       typedef Geometry::Point<R> state_type;
-     private:
-      /* Simplex's vertices. */
-      std::vector< Monomial<real_type> > _terms;
      public:
-      Polynomial() : _terms(1,Monomial<R>(0)) { }
-      Polynomial(size_type m) : _terms(1,Monomial<R>(m)) { }
-      Polynomial(const std::vector< Monomial<real_type> >& t) : _terms(t) { }
-      Polynomial(const std::vector<real_type>& , std::vector< array<size_type> >&);
+      /*! \brief Construct from a string literal. */
+      Polynomial(const std::string &);
+      /*! \brief Default constructor. */
+      Polynomial() : _argument_dimension(0), _terms() { }
+      /*! \brief The zero polynomial in \a n variables. */
+      Polynomial(const size_type& m) : _argument_dimension(m), _terms() { }
 
-      size_type argument_dimension() const { return _terms[0].argument_dimension(); }
+      /*! \brief The dimension of the argument. */
+      dimension_type argument_dimension() const { return _argument_dimension; }
+      /*! \brief The \a j th term. */
       const Monomial<R>& term(size_type j) const { return _terms[j]; }
+      /*! \brief The total number of (nonzero) terms. */
       size_type number_of_terms() const { return _terms.size(); }
       
-      real_type operator() (const state_type& s) const {
-        assert(s.size() == this->argument_dimension());
-        real_type result=0;
-        for(size_type j=0; j!=term.size(); ++j) {
-          result += _terms[j](s);
-        }
-        return result;
-      }
+      /*! \brief Compute the image of a point under the polynomial. */
+      R apply(const Geometry::Point<R>& s) const;
+      /*! \brief Compute an over-approximation to a rectangle using interval arithmetic. */
+      Interval<R> apply(const Geometry::Rectangle<R>& s) const;
+     private:
+      void _sort();
+      void _set_argument_dimension(const dimension_type& n);
+      dimension_type _compute_maximum_term_dimension() const;
+     private:
+      friend class PolynomialMap<R>;
+      friend std::istream& operator>> <> (std::istream&, Polynomial<R>&);
+     private:
+      /* Polynomials's terms. */
+      dimension_type _argument_dimension;
+      std::vector< Monomial<real_type> > _terms;
     };
 
     /*! \brief A polynomial map with multivalued output. */
     template <typename R>
-    class PolynomialMap {
+    class PolynomialMap : public Map<R> {
      public:
       /*! \brief The type of denotable real number used for the corners. */
       typedef R real_type;
       /*! \brief The type of denotable state contained by the simplex. */
       typedef Geometry::Point<R> state_type;
+     public:
+      /*! \brief Construct from a string literal. */
+      PolynomialMap(const std::string& s);
+      /*! \brief The zero polynomial map in \a n variables with \a m dimensional image. */
+      PolynomialMap(const dimension_type& m, const dimension_type& n)
+        : _argument_dimension(n), _components(m,Polynomial<R>(n)) { }
+      /*! \brief Construct from an array of polynomials. */
+      PolynomialMap(const array< Polynomial<R> >& c) : _components(c) { 
+        this->_set_argument_dimension(this->_compute_maximum_component_dimension()); }
+      
+      /*! \brief The \a i th component polynomial. */
+      const Polynomial<R>& component(size_type i) const { return _components[i]; }
+      /*! \brief The dimension of the argument. */
+      dimension_type argument_dimension() const { return _argument_dimension; }
+      /*! \brief The dimension of the result. */
+      dimension_type result_dimension() const { return _components.size(); }
+      
+      /*! \brief Compute the image of a point under the polynomial map. */
+      Geometry::Point<R> apply(const Geometry::Point<R>& s) const;
+      /*! \brief Compute an over-approximation to the image of a rectangle under the polynomial map. */
+      Geometry::Rectangle<R> apply(const Geometry::Rectangle<R>& s) const;
+      
+      /*! \brief Compute the derivate of the map at a point. */
+      LinearAlgebra::Matrix<R> derivative(const Geometry::Point<R>& s) const;
+      /*! \brief Compute an over-approximation to the the derivate of the map over a rectangle. */
+      LinearAlgebra::IntervalMatrix<R> derivative(const Geometry::Rectangle<R>& s) const;
+      
+      /*! \brief Compute a closed form for the derivative of the map. */
+      const PolynomialMatrix<R>& derivative() const;
+      
+      std::string name() const { return "PolynomialMap"; }
+     private:
+      void _compute_derivative() const;
+      void _set_argument_dimension(const dimension_type& n);
+      dimension_type _compute_maximum_component_dimension() const;
+     private:
+      friend std::istream& operator>> <> (std::istream&, PolynomialMap<R>&);
+      friend std::ostream& operator<< <> (std::ostream&, const PolynomialMap<R>&);
      private:
       /* Components of the map. */
+      dimension_type _argument_dimension;
       array< Polynomial<R> > _components;
-     public:
-      PolynomialMap(size_type m, size_type n) : _components(n) { _components[0] = Polynomial<R>(m); }
-      PolynomialMap(const array< Polynomial<R> >& c) : _components(c) { }
-      
-      const Polynomial<R>& component(size_type i) const { return _components[i]; }
-      const array< Polynomial<R> >& components() const { return _components; }
-      size_type argument_dimension() const { return _components[0].argument_dimension(); }
-      size_type result_dimension() const { return _components.size(); }
-      
-      state_type operator() (const state_type& s) const {
-        assert(s.dimension() == this->argument_dimension());
-        state_type result(this->result_dimension());
-        for(size_type i=0; i!=this->result_dimension(); ++i) {
-          result[i] = _components[i](s);
-        }
-        return result;
-      }
+      mutable PolynomialMatrix<R> _derivative;
     };
     
+    /*! \brief A matrix with polynomial entries. */
     template <typename R>
-    std::ostream&
-    operator<<(std::ostream& os, const Monomial<R>& m) 
-    {
-      return os;
-    }
-
-    template <typename R>
-    std::ostream&
-    operator<<(std::ostream& os, const Polynomial<R>& p) 
-    {
-      for(size_type j=0; j!=p.number_of_terms(); ++j) {
-        const Monomial<R>& m = p.term(j);
-        os << " + " << m.coefficient();
-        for(size_type k=0; k!=m.argument_dimension(); ++k) {
-          os << " * x" << k << "^" << m.index(k);
-        }
-      }
-      return os;
-    }
-
-    template <typename R>
-    std::ostream&
-    operator<<(std::ostream& os, const PolynomialMap<R>& p) 
-    {
-      return os << p.components(); 
-    }
+    class PolynomialMatrix {
+     public:
+      PolynomialMatrix() : _matrix() { }
+      PolynomialMatrix(const size_type& r, const size_type& c) : _matrix(r,c) { }
+     
+      size_type number_of_rows() const { return _matrix.size1(); }
+      size_type number_of_columns() const { return _matrix.size2(); }
+      
+      void set(const size_type& i, const size_type& j, const Polynomial<R>& p) { this->_matrix(i,j)=p; }
+      const Polynomial<R>& get(const size_type& i, const size_type& j) const { return _matrix(i,j); }
+      const Polynomial<R>& operator() (const size_type& i, const size_type& j) const { return this->get(i,j); }
+     private:
+      friend class PolynomialMap<R>;
+     private:
+      boost::numeric::ublas::matrix< Polynomial<R> > _matrix;
+    };
     
+
   }
 }
 

@@ -136,7 +136,7 @@ namespace Ariadne {
     inline
     R 
     pow(const R& x, const N& n) {
-      R result=1;
+      R result=R(1);
       for(N i=0; i!=n; ++i) {
         result*=x;
       }

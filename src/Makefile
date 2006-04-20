@@ -18,13 +18,13 @@ base:
 numeric: 
 	(cd numeric; ${MAKE} all)
 
-linear_algebra: numeric
+linear_algebra:
 	(cd linear_algebra; ${MAKE} all)
 
-geometry: base numeric linear_algebra
+geometry:
 	(cd geometry; ${MAKE} all)
 
-evaluation: base numeric linear_algebra geometry 
+evaluation:
 	(cd evaluation; ${MAKE} all)
 
 libariadne.so: base numeric linear_algebra geometry evaluation

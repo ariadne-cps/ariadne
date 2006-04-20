@@ -64,7 +64,6 @@ matrix.o: matrix.cc ../../include/real_typedef.h \
   ../../include/linear_algebra/../numeric/../numeric/../declarations.h \
   ../../include/linear_algebra/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/linear_algebra/../numeric/function.h \
-  /ufs/collins/include/mpfr.h \
   ../../include/linear_algebra/../linear_algebra/vector.h \
   ../../include/linear_algebra/../linear_algebra/../declarations.h \
   ../../include/linear_algebra/../linear_algebra/../numeric/integer.h \
@@ -153,7 +152,6 @@ constraint_system.o: constraint_system.cc ../../include/real_typedef.h \
   ../../include/numeric/../numeric/dyadic.h \
   ../../include/numeric/../utility/stlio.h \
   ../../include/linear_algebra/constraint_system.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/linear_algebra/../declarations.h \
   ../../include/linear_algebra/../numeric/numerical_types.h \
   ../../include/linear_algebra/../linear_algebra/vector.h \
@@ -174,7 +172,6 @@ generator_system.o: generator_system.cc ../../include/real_typedef.h \
   ../../include/numeric/../numeric/dyadic.h \
   ../../include/numeric/../utility/stlio.h \
   ../../include/linear_algebra/generator_system.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/linear_algebra/../declarations.h \
   ../../include/linear_algebra/../linear_algebra/vector.h \
   ../../include/linear_algebra/../linear_algebra/../declarations.h \

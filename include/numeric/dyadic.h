@@ -40,6 +40,7 @@
 #include <gmpxx.h>
 #include <iostream>
 
+
 namespace Ariadne { 
 namespace Synaps {
 
@@ -60,9 +61,17 @@ class dyadic
     : num_(n), exp_(0) { normalize_(); }
   dyadic(const numerator_type& n, exponent_type d)
     : num_(n), exp_(d) { normalize_(); }
+
+/* These definitions conflict with the template function denominator
+#if __GNU_MP_VERSION_MINOR < 2 
   template<class T> dyadic(const __gmp_expr<__gmpz_value, T>& n) { 
     *this=dyadic(mpz_class(n)); }
-
+#else 
+  template<class T> dyadic(const __gmp_expr<T, T>& n) { 
+    *this=dyadic(mpz_class(n)); }
+#endif
+*/
+  
   dyadic& operator+= (const dyadic& r);
   dyadic& operator-= (const dyadic& r);
   dyadic& operator*= (const dyadic& r);

@@ -269,7 +269,7 @@ namespace Ariadne {
     bool
     interiors_intersect(const Polyhedron<R>& A, const Polyhedron<R>& B)
     {
-      return !( (A._ppl_poly).is_disjoint_from(B._interior_poly) );        
+      return !( (A._ppl_poly).is_disjoint_from(B._ppl_interior()) );        
     }
     
     template <typename R>
@@ -360,9 +360,12 @@ namespace Ariadne {
     template<typename R> 
     const Parma_Polyhedra_Library::NNC_Polyhedron& 
     Polyhedron<R>::_ppl_interior() const
-    {      
-      Ariadne::LinearAlgebra::ConstraintSystem<real_type> cs(this->_ppl_poly.constraints());
-      this->_interior_poly=Parma_Polyhedra_Library::NNC_Polyhedron(cs.open_ppl_constraint_system());
+    {     
+      if (this->_interior_poly.space_dimension()==0) {
+        Ariadne::LinearAlgebra::ConstraintSystem<real_type> cs(this->_ppl_poly.constraints());
+        this->_interior_poly=Parma_Polyhedra_Library::NNC_Polyhedron(cs.open_ppl_constraint_system());
+      }
+
       return this->_interior_poly;
     }
     

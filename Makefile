@@ -30,3 +30,4 @@ dep:
 
 pycheck: python install
 	for file in python/test/*.py; do echo $$file; $$file; done
+

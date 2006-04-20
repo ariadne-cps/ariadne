@@ -38,39 +38,41 @@ using namespace Ariadne;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-using Postscript::epsfstream;
+typedef Postscript::epsfstream<Real> Repsfstream;
 
-inline void write_rectangle(epsfstream& eps, const RRectangle& r) { eps << r; }
-inline void write_grid_rectangle(epsfstream& eps, const RGridRectangle& r) { eps << RRectangle(r); }
-inline void write_grid_cell(epsfstream& eps, const RGridCell& r) { eps << RRectangle(r); }
-inline void write_parallelotope(epsfstream& eps, const RParallelotope& p) { eps << p; }
-inline void write_zonotope(epsfstream& eps, const RZonotope& z) { eps << z; }
-inline void write_polyhedron(epsfstream& eps, const RPolyhedron& p) { eps << p; }
-inline void write_rectangle_list_set(epsfstream& eps, const RRectangleListSet& r) { eps << r; }
-inline void write_parallelotope_list_set(epsfstream& eps, const RParallelotopeListSet& s) { eps << s; }
-inline void write_zonotope_list_set(epsfstream& eps, const RZonotopeListSet& s) { eps << s; }
-inline void write_polyhedron_list_set(epsfstream& eps, const RPolyhedronListSet& s) { eps << s; }
-inline void write_grid_mask_set(epsfstream& eps, const RGridMaskSet& s) { eps << s; }
-inline void write_grid_cell_list_set(epsfstream& eps, const RGridCellListSet& s) { eps << s; }
-inline void write_grid_rectangle_list_set(epsfstream& eps, const RGridRectangleListSet& s) { eps << s; }
-inline void write_partition_tree(epsfstream& eps, const RPartitionTree& s) { eps << s; }
-inline void write_partition_tree_set(epsfstream& eps, const RPartitionTreeSet& s) { eps << s; }
-inline void epsfstream_open(epsfstream& eps, const Ariadne::Geometry::Rectangle<Real>& bbox) { eps.open(bbox); }
+inline void write_rectangle(Repsfstream& eps, const RRectangle& r) { eps << r; }
+inline void write_grid_rectangle(Repsfstream& eps, const RGridRectangle& r) { eps << RRectangle(r); }
+inline void write_grid_cell(Repsfstream& eps, const RGridCell& r) { eps << RRectangle(r); }
+inline void write_parallelotope(Repsfstream& eps, const RParallelotope& p) { eps << p; }
+inline void write_zonotope(Repsfstream& eps, const RZonotope& z) { eps << z; }
+inline void write_polyhedron(Repsfstream& eps, const RPolyhedron& p) { eps << p; }
+inline void write_rectangle_list_set(Repsfstream& eps, const RRectangleListSet& r) { eps << r; }
+inline void write_parallelotope_list_set(Repsfstream& eps, const RParallelotopeListSet& s) { eps << s; }
+inline void write_zonotope_list_set(Repsfstream& eps, const RZonotopeListSet& s) { eps << s; }
+inline void write_polyhedron_list_set(Repsfstream& eps, const RPolyhedronListSet& s) { eps << s; }
+inline void write_grid_mask_set(Repsfstream& eps, const RGridMaskSet& s) { eps << s; }
+inline void write_grid_cell_list_set(Repsfstream& eps, const RGridCellListSet& s) { eps << s; }
+inline void write_grid_rectangle_list_set(Repsfstream& eps, const RGridRectangleListSet& s) { eps << s; }
+inline void write_partition_tree(Repsfstream& eps, const RPartitionTree& s) { eps << s; }
+inline void write_partition_tree_set(Repsfstream& eps, const RPartitionTreeSet& s) { eps << s; }
+inline void Repsfstream_open(Repsfstream& eps, const Ariadne::Geometry::Rectangle<Real>& bbox) { eps.open(bbox); }
 
 void export_postscript_output()
 {
-  class_<epsfstream>("EpsPlot",init<const char*,RRectangle>())
-    .def("open",&epsfstream_open)
-    .def("close",&epsfstream::close)
-    .def("set_pen_colour",&epsfstream::set_pen_colour)
-    .def("set_fill_colour",&epsfstream::set_fill_colour)
-    .def("set_line_style",&epsfstream::set_line_style)
-    .def("set_fill_style",&epsfstream::set_fill_style)
+  class_<Repsfstream>("EpsPlot",init<const char*,RRectangle>())
+    .def(init<const char*,RRectangle, const unsigned int&, const unsigned int&>())
+    .def("open",&Repsfstream_open)
+    .def("close",&Repsfstream::close)
+    .def("set_pen_colour",&Repsfstream::set_pen_colour)
+    .def("set_fill_colour",&Repsfstream::set_fill_colour)
+    .def("set_line_style",&Repsfstream::set_line_style)
+    .def("set_fill_style",&Repsfstream::set_fill_style)
     .def("write",&write_rectangle)
     .def("write",&write_grid_rectangle)
     .def("write",&write_grid_cell)
     .def("write",&write_parallelotope)
     .def("write",&write_zonotope)
+    .def("write",&write_parallelotope)
     .def("write",&write_polyhedron)
     .def("write",&write_rectangle_list_set)
     .def("write",&write_parallelotope_list_set)

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            python/export_rectangle.cc
+ *            python/export_polynomial_map.cc
  *
  *  21 October 2005
  *  Copyright  2005  Alberto Casagrande, Pieter Collins

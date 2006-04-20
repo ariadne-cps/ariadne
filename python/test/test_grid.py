@@ -148,7 +148,7 @@ print "Done..."
 grls=GridRectangleListSet(pts)
 gms=GridMaskSet(grls)
 gms.clear()
-gms.adjoin(grls[0*(len(grls)-6)])
+gms.adjoin(grls[0])
 eps=EpsPlot("gr4.eps",bb)
 eps.set_fill_colour("magenta")
 eps.write(grls)

@@ -38,6 +38,8 @@ namespace Ariadne {
     template Real sin_approx(const Real& x, const Real& e);
     template Real cos_approx(const Real& x, const Real& e);
 
+#ifndef RATIONAL_REAL
     template Rational sqrt_approx(const Rational& x, const Rational& e);
+#endif
   } 
 }

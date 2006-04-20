@@ -162,9 +162,7 @@ namespace Ariadne {
       /* FIXME: Write this code! */
       return IntervalMatrix<R>(A.size1(),B.size2());
     }
-    
 
-    
     template<typename R>
     IntervalMatrix<R>::IntervalMatrix(const Matrix<R>& A, const R& r)
       : Base(A.size1(),A.size2()) 

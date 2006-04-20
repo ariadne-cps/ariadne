@@ -59,13 +59,7 @@ namespace Ariadne {
     template<typename R>
     LinearAlgebra::IntervalMatrix<R> 
     AffineVectorField<R>::derivative(const Rectangle& r) const { 
-      LinearAlgebra::IntervalMatrix<R> result(this->dimension(),this->dimension());
-      for(dimension_type i=0; i!=this->dimension(); ++i) {
-        for(dimension_type j=0; j!=this->dimension(); ++j) {
-          result(i,j)=this->_A(i,j);
-        }
-      }
-      return result;
+    return LinearAlgebra::IntervalMatrix<R>(this->_A);
     }
     
   }

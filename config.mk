@@ -22,6 +22,7 @@ TESTDIR = test
 EXAMPLEDIR = examples
 PYTHONDIR=python
 
+LIBPPL = -lppl
 LIBGMPXX = -lgmpxx -lgmp
 
 SUBDIRS=${INCLUDEDIR} ${SRCDIR} ${TESTDIR} ${EXAMPLEDIR}

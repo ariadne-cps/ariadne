@@ -41,10 +41,13 @@ all: ${TESTS}
 	@./test_list_set
 	@./test_grid
 
+test_array: test_array.cc test.h
 	${CXX} ${CXXFLAGS} ${LDXXFLAGS} test_array.cc -o test_array
 
+test_arithmetic: test_arithmetic.cc test.h
 	${CXX} ${CXXFLAGS} ${LDXXFLAGS} test_arithmetic.cc -o test_arithmetic
 
+test_binary_word: test_binary_word.cc test.h
 	${CXX} ${CXXFLAGS} ${LDXXFLAGS} test_binary_word.cc -o test_binary_word
 
 	${CXX} ${CXXFLAGS} ${LDXXFLAGS} test_polyhedron.cc -o test_polyhedron

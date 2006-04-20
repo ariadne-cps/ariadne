@@ -62,7 +62,6 @@ map.o: map.cc ../../include/evaluation/map.h \
   ../../include/evaluation/../geometry/parallelotope.h \
   ../../include/evaluation/../geometry/../linear_algebra/matrix.h \
   ../../include/evaluation/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../geometry/../linear_algebra/constraint_system.h \
   ../../include/evaluation/../geometry/../linear_algebra/../declarations.h \
   ../../include/evaluation/../geometry/../linear_algebra/../numeric/numerical_types.h \
@@ -151,7 +150,6 @@ affine_map.o: affine_map.cc ../../include/evaluation/affine_map.h \
   ../../include/evaluation/../geometry/../linear_algebra/../linear_algebra/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/../linear_algebra/../linear_algebra/interval_matrix.h \
   ../../include/evaluation/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../geometry/../linear_algebra/constraint_system.h \
   ../../include/evaluation/../geometry/../linear_algebra/../declarations.h \
   ../../include/evaluation/../geometry/../linear_algebra/../numeric/numerical_types.h \
@@ -214,7 +212,6 @@ affine_vector_field.o: affine_vector_field.cc \
   ../../include/evaluation/../evaluation/../geometry/../linear_algebra/../linear_algebra/interval_vector.h \
   ../../include/evaluation/../evaluation/../geometry/../linear_algebra/../linear_algebra/interval_matrix.h \
   ../../include/evaluation/../evaluation/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../evaluation/../geometry/../linear_algebra/constraint_system.h \
   ../../include/evaluation/../evaluation/../geometry/../linear_algebra/../declarations.h \
   ../../include/evaluation/../evaluation/../geometry/../linear_algebra/../numeric/numerical_types.h \
@@ -267,7 +264,6 @@ polynomial_map.o: polynomial_map.cc \
   ../../include/evaluation/../geometry/../numeric/interval.h \
   ../../include/evaluation/../geometry/../geometry/point.h \
   ../../include/evaluation/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../geometry/../linear_algebra/constraint_system.h \
   ../../include/evaluation/../geometry/../linear_algebra/../declarations.h \
   ../../include/evaluation/../geometry/../linear_algebra/../numeric/numerical_types.h \
@@ -363,7 +359,6 @@ integrator.o: integrator.cc ../../include/evaluation/integrator.h \
   ../../include/evaluation/../numeric/../numeric/approximation.h \
   ../../include/evaluation/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/evaluation/../numeric/function.h \
-  /ufs/collins/include/mpfr.h \
   ../../include/evaluation/../numeric/interval.h \
   ../../include/evaluation/../numeric/../declarations.h \
   ../../include/evaluation/../linear_algebra/vector.h \
@@ -431,7 +426,6 @@ integrator.o: integrator.cc ../../include/evaluation/integrator.h \
   ../../include/evaluation/../evaluation/../evaluation/../geometry/parallelotope.h \
   ../../include/evaluation/../evaluation/../evaluation/../geometry/zonotope.h \
   ../../include/evaluation/../evaluation/../evaluation/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../evaluation/../evaluation/../geometry/../linear_algebra/constraint_system.h \
   ../../include/evaluation/../evaluation/../evaluation/../geometry/../linear_algebra/../declarations.h \
   ../../include/evaluation/../evaluation/../evaluation/../geometry/../linear_algebra/../numeric/numerical_types.h \

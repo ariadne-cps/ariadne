@@ -115,7 +115,8 @@ namespace Ariadne {
     inline Integer denominator(const Dyadic& num) {
       return num.denominator();
     }
-  
+    
+    
   
     inline Integer numerator(const Rational& num){ 
       return num.get_num(); }

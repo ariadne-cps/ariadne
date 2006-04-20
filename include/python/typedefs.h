@@ -68,7 +68,6 @@ typedef Geometry::LatticeRectangle LatticeRectangle;
 typedef Geometry::LatticeMaskSet LatticeMaskSet;
 typedef Geometry::LatticeCellListSet LatticeCellListSet;
 typedef Geometry::LatticeRectangleListSet LatticeRectangleListSet;
-typedef Geometry::LatticeTransformation LatticeTransformation;
 
 typedef Geometry::Grid<Real> RGrid;
 typedef Geometry::RegularGrid<Real> RRegularGrid;
@@ -84,6 +83,8 @@ typedef Geometry::PartitionScheme<Real> RPartitionScheme;
 typedef Geometry::PartitionTree<Real> RPartitionTree;
 typedef Geometry::PartitionTreeCell<Real> RPartitionTreeCell;
 typedef Geometry::PartitionTreeSet<Real> RPartitionTreeSet;
+
+typedef Evaluation::LatticeMap LatticeMap;
 
 typedef Evaluation::Map<Real> RMapBase;
 typedef Evaluation::AffineMap<Real> RAffineMap;

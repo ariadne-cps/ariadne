@@ -33,6 +33,61 @@
 namespace Ariadne {
   namespace Geometry {
     
+    template<typename Ptr>
+    class array_less {
+     public:
+      array_less(size_type n) : _array_size(n) { }
+      bool operator() (Ptr p1, Ptr p2) {
+        Ptr p1_end=p1+_array_size;
+        while(p1!=p1_end) {
+          if(*p1<*p2) {
+            return true;
+          }
+          else if(*p2<*p1) {
+            return false;
+          }
+          ++p1;
+          ++p2;
+        }
+        return false;
+      }
+     private:
+      size_type _array_size;
+    };
+      
+    template<typename Ptr>
+    class array_eq {
+     public:
+      array_eq(size_type n) : _array_size(n) { }
+      bool operator() (Ptr p1, Ptr p2) {
+        Ptr p1_end=p1+_array_size;
+        while(p1!=p1_end) {
+          if(*p1!=*p2) {
+            return false;
+          }
+          ++p1;
+          ++p2;
+        }
+        return true;
+      }
+     private:
+      size_type _array_size;
+    };
+      
+    bool
+    operator<(const LatticeCell& lc1, const LatticeCell& lc2) {
+      assert(lc1.dimension()==lc2.dimension());
+      for(dimension_type i=0; i!=lc1.dimension(); ++i) {
+        if(lc1.lower_bound(i)<lc2.lower_bound(i)) { 
+          return true;
+        }
+        else if(lc1.lower_bound(i)>lc2.lower_bound(i)) {
+          return false;
+        }
+      }
+      return false;
+    }
+
     LatticeRectangle::LatticeRectangle(const std::string& s)
       : _lower(), _upper()
     {
@@ -163,23 +218,18 @@ namespace Ariadne {
 
 
 
-    LatticeRectangle
-    LatticeRectangleListSet::bounds() const
-    { 
-      assert(!this->empty());
-
-      LatticeRectangle r=(*this)[0];
-      IndexArray lower(r.lower());
-      IndexArray upper(r.upper());
-
-      for(size_type i=1; i!=this->size(); ++i) {
-        r=(*this)[i];
-        assign_min(lower,r.lower());
-        assign_max(upper,r.upper());
-      }
-      return LatticeRectangle(lower,upper);
+    LatticeCellListSet::LatticeCellListSet(const LatticeCell& c) 
+      : _list(c.dimension()) 
+    {
+      this->adjoin(c); 
     }
-
+    
+    LatticeCellListSet::LatticeCellListSet(const LatticeRectangle& r) 
+      : _list(r.dimension()) 
+    {
+      this->adjoin(r); 
+    }
+    
     LatticeCellListSet::LatticeCellListSet(const LatticeMaskSet& ms) 
       : _list(ms.dimension()) 
     {
@@ -209,21 +259,36 @@ namespace Ariadne {
       return LatticeRectangle(lower,upper);
     }
     
-    
+    void
+    LatticeCellListSet::unique_sort()
+    {
+      dimension_type n=this->dimension();
+      
+      std::vector<index_type*> pointers(this->size());
+      index_type* ptr=&(*this->_list.begin())[0];
+      for(size_type i=0; i!=this->size(); ++i) {
+        pointers[i]=ptr;
+        ptr+=n;
+      }
+      
+      std::sort(pointers.begin(),pointers.end(),array_less<index_type*>(n));
+      std::vector<index_type*>::iterator p=std::unique(pointers.begin(),pointers.end(), array_eq<index_type*>(n));
+      pointers.erase(p,pointers.end());
+      
+      array_vector<index_type> sorted(n);
+      sorted.resize(pointers.size());
+      for(size_type i=0; i!=sorted.size(); ++i) {
+        sorted[i]=range<index_type*>(pointers[i],pointers[i]+n);
+      }
+      
+      this->_list.swap(sorted);
+    }
 
     void 
     LatticeCellListSet::adjoin(const LatticeRectangle& r) 
     { 
       assert(this->dimension() == r.dimension());
       for(LatticeRectangle::const_iterator i=r.begin(); i!=r.end(); ++i) {
-        this->adjoin(*i);
-      }
-    }
-
-    void 
-    LatticeCellListSet::adjoin(const LatticeMaskSet& ms) {
-      assert(this->dimension() == ms.dimension());
-      for(LatticeMaskSet::const_iterator i=ms.begin(); i!=ms.end(); ++i) {
         this->adjoin(*i);
       }
     }
@@ -242,13 +307,41 @@ namespace Ariadne {
       }
     }
 
-
-    LatticeMaskSet::LatticeMaskSet(const LatticeMaskSet& ms)
-      : _bounds(ms._bounds), _mask(ms._mask)
-    {
-      this->_compute_cached_attributes();
+    void 
+    LatticeCellListSet::adjoin(const LatticeMaskSet& ms) {
+      assert(this->dimension() == ms.dimension());
+      for(LatticeMaskSet::const_iterator i=ms.begin(); i!=ms.end(); ++i) {
+        this->adjoin(*i);
+      }
     }
-    
+
+
+    LatticeRectangle
+    LatticeRectangleListSet::bounds() const
+    { 
+      assert(!this->empty());
+
+      LatticeRectangle r=(*this)[0];
+      IndexArray lower(r.lower());
+      IndexArray upper(r.upper());
+
+      for(size_type i=1; i!=this->size(); ++i) {
+        r=(*this)[i];
+        assign_min(lower,r.lower());
+        assign_max(upper,r.upper());
+      }
+      return LatticeRectangle(lower,upper);
+    }
+
+    void
+    LatticeRectangleListSet::adjoin(const LatticeRectangleListSet& rls)
+    {
+      for(LatticeRectangleListSet::const_iterator rect_iter=rls.begin(); rect_iter!=rls.end(); ++rect_iter) {
+        this->adjoin(*rect_iter);
+      }
+    }
+
+
     LatticeMaskSet::LatticeMaskSet(const LatticeRectangle& bd, const LatticeCellListSet& cls)
       : _bounds(bd)
     {
@@ -261,6 +354,12 @@ namespace Ariadne {
     {
       this->_compute_cached_attributes();
       this->adjoin(rls);
+    }
+    
+    LatticeMaskSet::LatticeMaskSet(const LatticeMaskSet& ms)
+      : _bounds(ms._bounds), _mask(ms._mask)
+    {
+      this->_compute_cached_attributes();
     }
     
 
@@ -376,20 +475,6 @@ namespace Ariadne {
     }
 
     void 
-    LatticeMaskSet::adjoin(const LatticeMaskSet& lm) {
-      //std::cerr << "LatticeMaskSet::adjoin(const LatticeMaskSet&)" << std::endl;
-      if(this->bounds()==lm.bounds()) {
-        this->_mask |= lm._mask;
-      }
-      else {
-        assert(subset(lm.bounds(),this->bounds()));
-        for(LatticeMaskSet::const_iterator iter=lm.begin(); iter!=lm.end(); ++iter) {
-          this->adjoin(*iter);
-        }
-      }
-    }
-
-    void 
     LatticeMaskSet::adjoin(const LatticeCellListSet& cl) {
       for(LatticeCellListSet::const_iterator i=cl.begin(); i!=cl.end(); ++i) {
         this->adjoin(*i);
@@ -400,6 +485,20 @@ namespace Ariadne {
     LatticeMaskSet::adjoin(const LatticeRectangleListSet& rl) {
       for(LatticeRectangleListSet::const_iterator i=rl.begin(); i!=rl.end(); ++i) {
         this->adjoin(*i);
+      }
+    }
+
+    void 
+    LatticeMaskSet::adjoin(const LatticeMaskSet& lm) {
+      //std::cerr << "LatticeMaskSet::adjoin(const LatticeMaskSet&)" << std::endl;
+      if(this->bounds()==lm.bounds()) {
+        this->_mask |= lm._mask;
+      }
+      else {
+        assert(subset(lm.bounds(),this->bounds()));
+        for(LatticeMaskSet::const_iterator iter=lm.begin(); iter!=lm.end(); ++iter) {
+          this->adjoin(*iter);
+        }
       }
     }
 

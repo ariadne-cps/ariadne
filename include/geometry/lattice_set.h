@@ -69,7 +69,8 @@ namespace Ariadne {
     LatticeMaskSet join(const LatticeMaskSet&, const LatticeMaskSet&);
     LatticeMaskSet difference(const LatticeMaskSet&, const LatticeMaskSet&);
 
-
+    bool operator<(const LatticeCell& lc1, const LatticeCell& lc2);
+    
     std::istream& operator>>(std::istream& os, LatticeRectangle&);
     
     std::ostream& operator<<(std::ostream& os, const LatticeCell&);
@@ -105,10 +106,16 @@ namespace Ariadne {
       LatticeCell(const IndexArray& l) : _lower(l) { }
       LatticeCell(const LatticeCell& c) : _lower(c._lower) { }
       
+      /*!\brief Addignment operator. */
+      LatticeCell& operator=(const LatticeCell& c) {
+        if(this!=&c) { _lower=c._lower; } return *this; }
       /*!\brief Equality operator. */
       bool operator==(const LatticeCell& c) const { 
         return this->_lower==c._lower; }
-        
+      /*!\brief Inequality operator. */
+      bool operator!=(const LatticeCell& c) const { 
+        return !(*this==c); }
+         
       /*!\brief The dimension of the cell. */
       dimension_type dimension() const { return this->_lower.size(); }
       /*!\brief The \a i th interval. */
@@ -265,11 +272,16 @@ namespace Ariadne {
       LatticeCellListSet(dimension_type n) 
         : _list(n) { }
 
+      LatticeCellListSet(const LatticeCell& c);
+      LatticeCellListSet(const LatticeRectangle& r);
+      LatticeCellListSet(const LatticeMaskSet& ms);
+      LatticeCellListSet(const LatticeRectangleListSet& rls);
+      
       LatticeCellListSet(const LatticeCellListSet& cls) 
         : _list(cls._list) { }
       
-      LatticeCellListSet(const LatticeMaskSet& ms);
-      LatticeCellListSet(const LatticeRectangleListSet& rls);
+      LatticeCellListSet& operator=(const LatticeCellListSet& cls) {
+        if(this!=&cls) { this->_list=cls._list; } return *this; }
       
       dimension_type dimension() const { return _list.array_size(); }
       size_type empty() const { return _list.empty(); }
@@ -281,21 +293,24 @@ namespace Ariadne {
       /*! \brief Adjoins a LatticeCell to the set. */
       void adjoin(const LatticeCell& c) { 
         assert(this->dimension() == c.dimension());
-        this->_list.push_back(c.lower()); 
+        this->_list.push_back(c.position()); 
       }
       /*! \brief Adjoins all cells in a LatticeRectangle to the set. */
       void adjoin(const LatticeRectangle& r);
+      /*! \brief Adjoins a LatticeCellListSet to the set. */
+      void adjoin(const LatticeCellListSet& cl);
+      /*! \brief Adjoins a LatticeRectangleListSet to the set. */
+      void adjoin(const LatticeRectangleListSet& rl);
       /*! \brief Adjoins a LatticeMaskSet to the set. */
       void adjoin(const LatticeMaskSet& ms);
-      /*! \brief Adjoins a LatticeCellListSet to the set. */
-        void adjoin(const LatticeCellListSet& cl);
-      /*! \brief Adjoins a LatticeRectangleListSet to the set. */
-        void adjoin(const LatticeRectangleListSet& rl);
       
       /*! \brief Constant iterator to the beginning of the cells in the set. */
       const_iterator begin() const { return const_iterator(_list.begin()); }
       /*! \brief Constant iterator to the end of the cells in the set. */
       const_iterator end() const { return const_iterator(_list.end()); }
+      
+      /*! \brief Sorts the cells lexicographically, removing duplicates. */
+      void unique_sort(); 
      private:
       array_vector<index_type> _list;
     };
@@ -336,12 +351,12 @@ namespace Ariadne {
         this->_list.push_back(r.lower()); 
         this->_list.push_back(r.upper()); 
       }
-      /*! \brief Adjoins a LatticeMaskSet to the set. */
-      void adjoin(const LatticeMaskSet& ms);
       /*! \brief Adjoins a LatticeCellListSet to the set. */
       void adjoin(const LatticeCellListSet& cl);
       /*! \brief Adjoins a LatticeRectangleListSet to the set. */
-      void adjoin_rectangles(const LatticeRectangleListSet& rl);
+      void adjoin(const LatticeRectangleListSet& rl);
+      /*! \brief Adjoins a LatticeMaskSet to the set. */
+      void adjoin(const LatticeMaskSet& ms);
       
       /*! \brief Constant iterator to the beginning of the cells in the set. */
       const_iterator begin() const  { return const_iterator(_list.begin()); }
@@ -402,12 +417,12 @@ namespace Ariadne {
       /*! \brief Adjoins a LatticeRectangle to the set. */
       void adjoin(const LatticeRectangle& r);
 
-      /*! \brief Adjoins a LatticeMaskSet to the set. */
-      void adjoin(const LatticeMaskSet& ms);
       /*! \brief Adjoins a GridCellListSet to the set. */
       void adjoin(const LatticeCellListSet& cl);
       /*! \brief Adjoins a GridRectangleListSet to the set. */
       void adjoin(const LatticeRectangleListSet& rl);
+      /*! \brief Adjoins a LatticeMaskSet to the set. */
+      void adjoin(const LatticeMaskSet& ms);
         
       /*! \brief The one-box neighbourhood on the same grid. */
       LatticeMaskSet neighbourhood() const;

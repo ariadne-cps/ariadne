@@ -36,6 +36,7 @@
 #include <deque>
 #include <valarray>
 #include <set>
+#include <map>
 
 #include "../base/array.h"
 
@@ -47,13 +48,28 @@ namespace Ariadne {
     write_sequence(std::ostream& os, InputIterator first, InputIterator last, char opening='[', char closing=']', char separator=',') 
     {
       os << opening;
-      if(first!=last) {
+      while(first!=last) {
         os << (*first);
         ++first;
-        while(first != last) {
-          os.flush();
-          os << separator << (*first);
-          ++first;
+        if(first!=last) {
+          os << separator;
+        }
+      }
+      os << closing;
+      return os;
+    }
+    
+    template<typename InputIterator>
+    inline
+    std::ostream&
+    write_map_sequence(std::ostream& os, InputIterator first, InputIterator last, char opening='{', char closing='}', char separator=',') 
+    {
+      os << opening;
+      while(first!=last) {
+        os << first->first << ":" << first->second;
+        ++first;
+        if(first != last) {
+          os << separator;
         }
       }
       os << closing;
@@ -176,14 +192,6 @@ namespace std {
     return Ariadne::Utility::write_sequence(os,l.begin(),l.end());
   }
   
-  template <typename T, typename C> 
-  inline 
-  std::ostream& 
-  operator<<(std::ostream &os, const std::set<T,C>& s) 
-  {
-    return Ariadne::Utility::write_sequence(os,s.begin(), s.end(), '{', '}');
-  }
-  
   template <typename T> 
   inline
   std::ostream& 
@@ -197,6 +205,22 @@ namespace std {
   ostream& 
   operator<< (std::ostream &os, const std::valarray<T>& v) {
     return Ariadne::Utility::write_sequence(os,v.begin(),v.end());
+  }
+  
+  template <typename T, typename C> 
+  inline 
+  std::ostream& 
+  operator<<(std::ostream &os, const std::set<T,C>& s) 
+  {
+    return Ariadne::Utility::write_sequence(os,s.begin(), s.end(), '{', '}');
+  }
+  
+  template <typename K, typename T, typename C> 
+  inline 
+  std::ostream& 
+  operator<<(std::ostream &os, const std::map<K,T,C>& m) 
+  {
+    return Ariadne::Utility::write_map_sequence(os,m.begin(), m.end(), '{', '}');
   }
   
   template <typename T> 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            doc.h
+ *            documentation.h
  *
  *  Wed 16 Sept 2004
  *  Copyright  2004  Pieter Collins
@@ -22,8 +22,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _ARIADNE_DOC_H
-#define _ARIADNE_DOC_H
+#ifndef _ARIADNE_DOCUMENTATION_H
+#define _ARIADNE_DOCUMENTATION_H
 
 /*! \file documentation.h
  * \brief Miscellaneous documentation pages
@@ -337,15 +337,14 @@
  * state, plus an error bound in terms of the sup norm or Euclidean norm.
  *
  * \code
- * template<class R>
- * class State
+ * concept State
  * {
- *   typedef R Real;
+ *   typename real_type;
  *
  *   State(const State &);
  *   State& operator=(const State &);
  *
- *   Real operator[] (size_type) const;
+ *   real_type operator[] (size_type) const;
  * };
  * \endcode
  *
@@ -359,43 +358,40 @@
  * // The basic set concept.
  * concept BasicSet
  * {
- *   typename Real;
- *   typename State;
+ *   typename real_type; // The type of denotable real number used for the representation.
+ *   typename state_type; // The type of denotable point the set contains.
  *
- *   BasicSet(const BasicSet &);
- *   BasicSet & operator=(const BasicSet &);
+ *   BasicSet(const BasicSet &); // Copy constructor.
+ *   BasicSet & operator=(const BasicSet &); // Assignment operator.
  *
- *   bool operator==(const BasicSet &) const;
- *   bool operator!=(const BasicSet &) const;
+ *   bool operator==(const BasicSet &) const; // Equality operator.
+ *   bool operator!=(const BasicSet &) const; // Inequality operator.
  *
- *   size_type dimension() const;
- *   bool empty() const;
- *   bool contains(const State &) const;
+ *   dimension_type dimension() const; // The dimension of the set.
+ *   bool empty() const; // Returns true if the set is empty.
+ *   bool empty_interior() const; // Returns true if the interior of the set is empty.
+ *   bool contains(const State &) const; // Returns true if the set contains a given state.
+ *   bool interior_contains(const State &) const; // Returns true if the interior of the set contains a given state.
  *
- *   //Optional
- *   State centre() const;
- *   Real min_radius() const;
- *   Real max_radius() const;
- *   Real volume() const;
+ *   state_type centre() const; // A point in the set (typically, the "centre" point, if this makes sense).
+ *   State radius() const; // The maximum distance from the centre to another point in the set in an appropriate metric. 
+ *   Real volume() const; // The volume of the set. (Optional).
  *
- *   //Optional
- *   Rectangle<Real> bounding_box() const;
- *   Sphere<Real> bounding_sphere() const;
+ *   Rectangle<real_type> bounding_box() const; // A rectangle containing the set.
+ *   Sphere<real_type> bounding_sphere() const; // A sphere containing the set. (Optional)
  * };
  *
  *  // Optional, since the intersection of two basic sets need not be a basic set.
- *  BasicSet regular_intersection(const BasicSet &, const BasicSet &);
+ *  BasicSet regular_intersection(const BasicSet &, const BasicSet &); // The closure of the intersection of the interiors of the two sets.
  *
- *  bool interiors_intersect(const BasicSet &, const BasicSet &);
- *  bool disjoint(const BasicSet &, const BasicSet &);
- *  bool inner_subset(const BasicSet &, const BasicSet &);
- *
- *  // Optional, but highly recommended.
- *  bool subset(const BasicSet &, const BasicSet &);
+ *  bool interiors_intersect(const BasicSet &, const BasicSet &); // Returns true if the interiors of the two sets intersect.
+ *  bool disjoint(const BasicSet &, const BasicSet &); // Returns true if the two sets are disjoint.
+ *  bool inner_subset(const BasicSet &, const BasicSet &); // Returns true if the first argument is a subset of the interior of the second.
+ *  bool subset(const BasicSet &, const BasicSet &); // Returns true if the first argument is a subset of the second.
  * \endcode
  *
- * Classes fulfilling the \c BasicSet concept are \c Rectangle (or \c Cuboid), \c Simplex, \c Parallelopiped, \c Polytope and \c Ellipsoid.
- * Actually, these are templates, parameterised by the real number type \c Real.
+ * Classes fulfilling the \c BasicSet concept are \c Rectangle (or \c Cuboid), \c Simplex, \c Parallelotope, \c Zonotope, \c Polytope and \c Ellipsoid.
+ * Actually, these are templates, parameterised by the real number type \c real_type.
  *
  * \subsection rectangle Rectangles
  * A \c Rectangle describes a cuboid in Euclidean space.
@@ -403,10 +399,11 @@
   * templace<class R>
  * class Rectangle
  * {
- *   typedef R Real;
- *   typedef State<R> State;
+ *   typedef R real_type;
+ *   typedef Point<R> state_type;
  *
- *   Rectangle(const State &, const State &);
+ *   Rectangle(const state_type &, const state_type &);
+ *   Rectangle(const IntervalVector<real_type> &);
  *
  *   Rectangle(const Rectangle &);
  *   Rectangle & operator=(const Rectangle &);
@@ -416,16 +413,21 @@
  *
  *   size_type dimension() const;
  *   bool empty() const;
+ *   bool empty_interior() const;
  *   bool contains(const State &) const;
+ *   bool interior_contains(const State &) const;
+ *
+ *   state_type centre() const;
+ *   real_type radius() const;
+ *   Rectangle<real_type> bounding_box() const;
  *
  *   // Simple operations
- *   Real lower(size_type) const;
- *   Real upper(size_type) const;
- *   Interval<Real> interval(size_type) const;
+ *   real_type lower_bound(dimension_type) const;
+ *   real_type upper_bound(dimension_type) const;
+ *   Interval<real_type> operator[] (dimension_type) const;
  *
- *   State lower_corner() const;
- *   State upper_corner() const;
- *   Interval<Real> operator[] (size_type) const;
+ *   state_type lower_corner() const;
+ *   state_type upper_corner() const;
  * };
  * 
  * Rectangle regular_intersection(const Rectangle&, const Rectangle&);
@@ -468,13 +470,13 @@
  *
  * \section denotable_set Denotable Sets
  *
- * A DenotableSet implements a set as a union of basic sets type \c DenotableSet::BasicSet.
+ * A DenotableSet implements a set as a union of basic sets type \c DenotableSet::basic_set_type.
  * \code
  * concept DenotableSet
  * {
- *   typename Real;
- *   typename State;
- *   typename BasicSet;
+ *   typename real_type;
+ *   typename state_type;
+ *   typename basic_set_type;
  *
  *   typename const_iterator; // Must satisfy the requirements of a ForwardIterator.
  *
@@ -486,11 +488,13 @@
  *   // No equality operator required.
  *
  *   // Set-theoretic operations
- *   size_type dimension() const;
+ *   dimension_type dimension() const;
  *   bool empty() const;
- *   bool contains(const State &) const;
+ *   bool contains(const state_type &) const;
  *
- *   void adjoin(const BasicSet &);
+ *   Rectangle<real_type> bounding_box() const; // Optional.
+ *
+ *   void adjoin(const basic_set_type &);
  *   void adjoin(const DenotableSet &);
  *
  *   // List operations
@@ -498,47 +502,24 @@
  *   const_iterator end() const;
  *
  *   size_type size() const; // Only required if the iterator is a RandomAccessIterator.
- *   BasicSet operator[] (size_type) const; // Only required if the iterator is a RandomAccessIterator.
+ *   basic_set_type operator[] (size_type) const; // Only required if the iterator is a RandomAccessIterator.
  *
- *   void push_back(const BasicSet &); // Only used if the DenotableSet is an ordered list.
- *   void insert(const BasicSet &); // Only used if the DenotableSet is an unordered or sorted list.
+ *   void push_back(const basic_set_type &); // Only used if the DenotableSet is an ordered list. (Optional)
+ *   basic_set_type pop_back(); // Only used if the DenotableSet is an ordered list. (Optional)
  *
- *   // Miscellaneous operations
- *   Rectangle<Real> bounding_box() const; // Optional.
+ *   void insert(const basic_set_type &); // Only used if the DenotableSet is an unordered or sorted list. (Optional)
+ *   void remove(const basic_set_type &); // Only used if the DenotableSet is an unordered or sorted list. (Optional)
  * };
  *
  * DenotableSet join(const DenotableSet &, const DenotableSet &);
+ * DenotableSet regular_intersection(const BasicSet &, const DenotableSet &); // Optional.
  *
- * bool inner_subset(const BasicSet &, const DenotableSet &);
  * bool subset(const BasicSet &, const DenotableSet &); // Optional, but highly recommended.
  *
- * bool interiors_intersect(const DenotableSet &, const DenotableSet &);
+ * bool interiors_intersect(const DenotableSet &, const DenotableSet &); // Optional, but highly recommended.
  * bool disjoint(const DenotableSet &, const DenotableSet &);
- * bool inner_subset(const DenotableSet &, const DenotableSet &);
- * bool subset(const BasicSet &, const DenotableSet &); // Optional, but highly recommended.
+ * bool subset(const DenotableSet &, const DenotableSet &); // Optional, but highly recommended.
  *
- * DenotableSet regular_intersection(const BasicS &, const DenotableSet &); // Optional.
- * \endcode
- *
- * We can define approximations as follows.
- * \code
- * template<class P, class R=P::real_type>
- * class StateApproximation {
- *   typedef R point_type;
- *   typedef R real_type;
- *
- *   point_type& approximation() const;
- *   real_type error() const;
- * };
- *
- * template<class S>
- * class SetApproximation { 
- *   typedef S::real_type real_type;
- *   typedef S::point_type point_type;
- *   typedef S set_type;
- *   set_type& approximation() const;
- *   real_type error() const;
- * };
  * \endcode
  */
 
@@ -695,4 +676,4 @@
  * 
  */
  
-#endif /* _ARIADNE_DOC_H */
+#endif /* _ARIADNE_DOCUMENTATION_H */

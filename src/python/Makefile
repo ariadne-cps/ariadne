@@ -26,7 +26,7 @@ EVALUATION_OBJ = evaluation_module.o \
 	export_apply.o \
 	export_henon_map.o export_lorenz_system.o \
 	export_integrate.o \
-
+	export_lattice_map.o
 
 all: python
 
@@ -1037,6 +1037,27 @@ export_integrate.o: export_integrate.cc \
   ../../include/evaluation/../evaluation/integrator.h \
   ../../include/python/typedefs.h ../../include/python/../real_typedef.h \
   ../../include/python/../numeric/numerical_types.h \
+  ../../include/python/../declarations.h
+
+export_lattice_map.o: export_lattice_map.cc \
+  ../../include/evaluation/lattice_map.h \
+  ../../include/evaluation/../geometry/lattice_set.h \
+  ../../include/evaluation/../geometry/../base/array.h \
+  ../../include/evaluation/../geometry/../base/../declarations.h \
+  ../../include/evaluation/../geometry/../base/iterator.h \
+  ../../include/evaluation/../geometry/../base/../base/array.h \
+  ../../include/evaluation/../geometry/../numeric/interval.h \
+  ../../include/evaluation/../geometry/../numeric/../declarations.h \
+  ../../include/evaluation/../geometry/../base/array_operations.h \
+  ../../include/python/typedefs.h ../../include/python/../real_typedef.h \
+  ../../include/python/../numeric/numerical_types.h \
+  ../../include/python/../numeric/../declarations.h \
+  ../../include/python/../numeric/../numeric/integer.h \
+  ../../include/python/../numeric/../numeric/../declarations.h \
+  ../../include/python/../numeric/../numeric/../utility/stlio.h \
+  ../../include/python/../numeric/../numeric/../utility/../base/array.h \
+  ../../include/python/../numeric/../numeric/dyadic.h \
+  ../../include/python/../numeric/../utility/stlio.h \
   ../../include/python/../declarations.h
 
 linear_algebra_module.o: linear_algebra_module.cc

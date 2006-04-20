@@ -5,7 +5,7 @@ OBJ = map.o vector_field.o \
 	polynomial_map.o \
 	apply.o \
 	integrator.o \
-
+	lattice_map.o
 
 all: ${OBJ}
 
@@ -448,4 +448,16 @@ integrator.o: integrator.cc ../../include/evaluation/integrator.h \
   ../../include/evaluation/../evaluation/../evaluation/../evaluation/../linear_algebra/interval_matrix.h \
   ../../include/evaluation/lohner_integrator.tpl \
   ../../include/real_typedef.h ../../include/numeric/numerical_types.h
+
+lattice_map.o: lattice_map.cc ../../include/evaluation/lattice_map.h \
+  ../../include/evaluation/../geometry/lattice_set.h \
+  ../../include/evaluation/../geometry/../base/array.h \
+  ../../include/evaluation/../geometry/../base/../declarations.h \
+  ../../include/evaluation/../geometry/../base/iterator.h \
+  ../../include/evaluation/../geometry/../base/../base/array.h \
+  ../../include/evaluation/../geometry/../numeric/interval.h \
+  ../../include/evaluation/../geometry/../numeric/../declarations.h \
+  ../../include/evaluation/../geometry/../base/array_operations.h \
+  ../../include/utility/stlio.h ../../include/utility/../base/array.h \
+  ../../include/geometry/lattice_set.h ../../include/debug.h
 

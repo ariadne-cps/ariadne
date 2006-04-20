@@ -2,11 +2,12 @@ include ../config.mk
 
 TESTS = test_array test_arithmetic test_binary_word \
   test_polyhedron test_rectangle test_point \
-  test_linear_algebra test_interval test_list_set test_grid  
+  test_linear_algebra test_interval test_list_set test_grid \
+  test_lattice
 #  test_partition_tree \
 #  test_epsfstream \
 
-CXXFLAGS += -Wall
+CXXFLAGS += -Wall -I../include/ -I../
 LDXXFLAGS += -L../src/ -lariadne -lgmp -lgmpxx -lppl 
 
 dep:  

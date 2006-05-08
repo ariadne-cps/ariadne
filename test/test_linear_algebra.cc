@@ -25,8 +25,9 @@
 #include <iostream>
 #include <string>
 
-#include "numerical_type.h"
-#include "linear_algebra.h"
+#include "numeric/numerical_types.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
 #include "test.h"
 

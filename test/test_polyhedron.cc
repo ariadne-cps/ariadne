@@ -26,11 +26,11 @@
 #include <string>
 
 #include "ariadne.h"
-#include "exception.h"
-#include "utility.h"
-#include "numerical_type.h"
-#include "point.h"
-#include "polyhedron.h"
+#include "base/exception.h"
+#include "base/utility.h"
+#include "numeric/numerical_types.h"
+#include "geometry/point.h"
+#include "geometry/polyhedron.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Geometry;

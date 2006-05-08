@@ -70,7 +70,9 @@ namespace Ariadne {
       typedef R real_type;
       /*! \brief The type of denotable point contained by the rectangle. */
       typedef Point<R> state_type;
-
+      /*! \brief An iterator through the vertices of the rectangle. */
+      typedef typename array< Point<R> >::const_iterator const_vertex_iterator;
+    
      public:
       /*! \brief Construct an empty rectangle of dimension \a n. */
       explicit Rectangle(size_type n=0)
@@ -261,10 +263,11 @@ namespace Ariadne {
       Rectangle<R> quadrant(const BinaryWord& q) const;
       /*! \brief Subdivide into smaller pieces. */
       ListSet<R,Geometry::Rectangle> subdivide() const;
+      /*! The vertices of the rectangle. */
+      array<state_type> vertices() const;
       
       /*! \brief Tests if \a point is included into a rectangle. */
       bool contains(const state_type& p) const;
-      
       /*! \brief Tests if \a point is included into the interior a rectangle. */
       bool interior_contains(const state_type& p) const;
 

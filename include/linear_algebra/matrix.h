@@ -1,4 +1,4 @@
-/***************************************************************************
+ /***************************************************************************
  *            matrix.h
  *
  *  Mon May  3 12:31:15 2004
@@ -49,15 +49,44 @@ namespace Ariadne {
      public:
       Matrix() : Base() { }
       Matrix(const size_type& r, const size_type& c) : Base(r,c) { }
+      Matrix(const size_type& r, const size_type& c, const R* ptr, const size_type& ld) : Base(r,c) { 
+        for(size_type i=0; i!=r; ++i) { for(size_type j=0; j!=c; ++j) { Base::operator()(i,j)=ptr[i*ld+j]; } } }
       template<typename E> Matrix(const boost::numeric::ublas::matrix_expression<E>& A) : Base(A()) { }
-      
-      Matrix(const std::string& s);
+            Matrix(const std::string& s);
+
+      bool operator==(const Matrix<R>& other) const { 
+        const Matrix<R>& self=*this;
+        if(self.number_of_rows() != other.number_of_rows() ||
+           self.number_of_columns() != other.number_of_columns()) 
+        {
+          return false; 
+        }
+        for(size_type i=0; i!=this->number_of_rows(); ++i) {
+          for(size_type j=0; j!=this->number_of_columns(); ++j) {
+            if(self(i,j)!=other(i,j)) {
+              return false;
+            }
+          }
+        }
+        return true;
+      }
+
+      size_type number_of_rows() const { return Base::size1(); }
+      size_type number_of_columns() const { return Base::size2(); }
 
       R norm() const;
       R log_norm() const;
       
+      Matrix<R> transpose() const;
+
+      bool singular() const;
+      R determinant() const;
+      
       Matrix<F> inverse() const;
       Vector<F> solve(const Vector<R>& v) const;
+
+      R* begin() { return &(*this)(0,0); }
+      const R* begin() const { return const_cast< Matrix<R>* >(this)->begin(); }
     };
     
     using boost::numeric::ublas::identity_matrix;

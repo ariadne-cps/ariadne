@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include <base/arithmetic.h>
+#include "numeric/arithmetic.h"
 
 #include "test.h"
 

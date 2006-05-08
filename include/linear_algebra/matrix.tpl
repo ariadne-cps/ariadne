@@ -32,6 +32,7 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
+#include "../linear_algebra/lu_matrix.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {
@@ -89,6 +90,37 @@ namespace Ariadne {
       return result;
     }
         
+    template <typename R>
+    Matrix<R>
+    Matrix<R>::transpose() const
+    {
+      size_type m=this->number_of_rows();
+      size_type n=this->number_of_columns();
+      const Matrix<R>& self=*this;
+
+      Matrix<R> result(n,m);
+      for(size_type i=0; i!=n; ++i) {
+        for(size_type j=0; j!=m; ++j) {
+          result(i,j)=self(i,j);
+        }
+      }
+      return result;
+    }
+
+
+    template <typename R>
+    bool
+    Matrix<R>::singular() const { 
+      return LUMatrix<R>(*this).singular(); 
+    }
+
+    template <typename R>
+    R 
+    Matrix<R>::determinant() const 
+    {
+      return LUMatrix<R>(*this).determinant(); 
+    }
+
     template<typename R>
     Matrix<R>
     concatenate_columns(const Matrix<R>& A1, const Matrix<R>& A2) {
@@ -396,6 +428,7 @@ namespace Ariadne {
     hermitian(const Matrix<R>& m) {
        return herm(m);
     }
+    
     
     template <typename R>
     Matrix<typename numerical_traits<R>::field_extension_type> 

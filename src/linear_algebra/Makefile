@@ -64,10 +64,22 @@ matrix.o: matrix.cc ../../include/real_typedef.h \
   ../../include/linear_algebra/../numeric/../numeric/../declarations.h \
   ../../include/linear_algebra/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/linear_algebra/../numeric/function.h \
+  /ufs/collins/include/mpfr.h \
   ../../include/linear_algebra/../linear_algebra/vector.h \
   ../../include/linear_algebra/../linear_algebra/../declarations.h \
   ../../include/linear_algebra/../linear_algebra/../numeric/integer.h \
-  ../../include/linear_algebra/../linear_algebra/matrix.h
+  ../../include/linear_algebra/../linear_algebra/matrix.h \
+  ../../include/linear_algebra/../linear_algebra/lu_matrix.h \
+  ../../include/blas/geset.hpp ../../include/blas/blas.hpp \
+  ../../include/blas/fblas.hpp /ufs/collins/include/cblas.h \
+  ../../include/blas/trcpy.hpp ../../include/blas/gemm.hpp \
+  ../../include/blas/trmm.hpp ../../include/lapack/laswp.hpp \
+  ../../include/lapack/lapack.hpp ../../include/blas/blas.hpp \
+  ../../include/lapack/getrf.hpp ../../include/blas/iamax.hpp \
+  ../../include/blas/swap.hpp ../../include/blas/scal.hpp \
+  ../../include/blas/ger.hpp ../../include/lapack/getrs.hpp \
+  ../../include/linear_algebra/../linear_algebra/../base/array.h \
+  ../../include/linear_algebra/../linear_algebra/../linear_algebra/matrix.h
 
 tensor.o: tensor.cc ../../include/real_typedef.h \
   ../../include/numeric/numerical_types.h \
@@ -152,6 +164,7 @@ constraint_system.o: constraint_system.cc ../../include/real_typedef.h \
   ../../include/numeric/../numeric/dyadic.h \
   ../../include/numeric/../utility/stlio.h \
   ../../include/linear_algebra/constraint_system.h \
+  /ufs/collins/include/ppl.hh \
   ../../include/linear_algebra/../declarations.h \
   ../../include/linear_algebra/../numeric/numerical_types.h \
   ../../include/linear_algebra/../linear_algebra/vector.h \
@@ -172,6 +185,7 @@ generator_system.o: generator_system.cc ../../include/real_typedef.h \
   ../../include/numeric/../numeric/dyadic.h \
   ../../include/numeric/../utility/stlio.h \
   ../../include/linear_algebra/generator_system.h \
+  /ufs/collins/include/ppl.hh \
   ../../include/linear_algebra/../declarations.h \
   ../../include/linear_algebra/../linear_algebra/vector.h \
   ../../include/linear_algebra/../linear_algebra/../declarations.h \

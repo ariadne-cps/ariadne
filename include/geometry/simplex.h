@@ -107,12 +107,12 @@ namespace Ariadne {
         return (this->_vertices)[0].dimension();
       }
       
-      /*! \brief True if the rectangle is empty. */
+      /*! \brief True if the simplex is empty. */
       bool empty() const {
         throw std::domain_error("Simplex::empty() not implemented.");
       }
       
-      /*! \brief True if the rectangle has empty interior. */
+      /*! \brief True if the simplex has empty interior. */
       bool empty_interior() const {
         throw std::domain_error("Simplex::empty_interior() not implemented.");
       }
@@ -239,7 +239,7 @@ namespace Ariadne {
     inline bool inner_subset(const Rectangle<R>& A,
                              const Simplex<R>& B) 
     {
-      return inner_subset(B,A);
+      return inner_subset(Polyhedron<R>(A),Polyhedron<R>(B));
     }
 
     /*! \brief Tests inclusion of \a A in the interior of \a B. */
@@ -255,14 +255,46 @@ namespace Ariadne {
     inline bool inner_subset(const Polyhedron<R>& A,
                              const Simplex<R>& B) 
     {
-      return inner_subset(B,A);
+      return inner_subset(A,Polyhedron<R>(B));
     }
 
     
     /*! \brief Tests inclusion of \a A in \a B. */
     template <typename R>
-    inline bool subset(const Simplex<R>& A, 
-                const Simplex<R>& B) 
+    inline bool subset(const Simplex<R>& A,
+                       const Rectangle<R>& B)
+    {
+      return subset(Polyhedron<R>(A),Polyhedron<R>(B));
+    }
+    
+    /*! \brief Tests inclusion of \a A in \a B. */
+    template <typename R>
+    inline bool subset(const Rectangle<R>& A,
+                       const Simplex<R>& B)
+    {
+      return subset(Polyhedron<R>(A),Polyhedron<R>(B));
+    }
+    
+    /*! \brief Tests inclusion of \a A in \a B. */
+    template <typename R>
+    inline bool subset(const Simplex<R>& A,
+                       const Polyhedron<R>& B)
+    {
+      return subset(Polyhedron<R>(A),B);
+    }
+    
+    /*! \brief Tests inclusion of \a A in \a B. */
+    template <typename R>
+    inline bool subset(const Polyhedron<R>& A,
+                       const Simplex<R>& B)
+    {
+      return subset(A,Polyhedron<R>(B));
+    }
+    
+    /*! \brief Tests inclusion of \a A in \a B. */
+    template <typename R>
+    inline bool subset(const Simplex<R>& A,
+                       const Simplex<R>& B)
     {
       return subset(Polyhedron<R>(A),Polyhedron<R>(B));
     }

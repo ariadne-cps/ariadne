@@ -82,8 +82,18 @@ namespace Ariadne {
     }
     
     template <typename R>
+    inline R inner_product(const Vector<R> u, const Vector<R>& v) {
+      assert(u.size()==v.size());
+      R result=0;
+      for(size_type i=0; i!=u.size(); ++i) {
+        result+=u(i)*v(i);
+      }
+      return result;
+    }
+
+    template <typename R>
     inline bool linear_multiple(const Vector<R> u, const Vector<R>& v) {
-      assert(u.dimension()==v.dimension());
+      assert(u.size()==v.size());
       R multiple=0;
       for (dimension_type i=0; i<u.dimension(); ++i) {
         if(u(i)==0 && multiple!=0 && v(i)!=0) {

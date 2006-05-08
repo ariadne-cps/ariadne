@@ -168,6 +168,28 @@ namespace Ariadne {
     }
 
 
+    template<typename R>
+    array< Point<R> >
+    Rectangle<R>::vertices() const
+    {
+      size_type number_of_vertices=(1<<this->dimension());
+      array< Point<R> > result(number_of_vertices);
+      Point<R> vertex(this->dimension());
+      
+      for (size_type i=0; i<number_of_vertices; ++i) {
+        for (size_type j=0; j<this->dimension(); ++j) {
+          if ((1<<j)&(i)) {
+            vertex[j]=this->upper_bound(j);
+          } 
+          else {
+            vertex[j]=this->lower_bound(j);
+          }
+        }
+        result[i]=vertex;
+      }
+      return result;   
+    }
+    
     /* Compute all points in A on the grid of vertices of rectangles in the cover */
     template <typename R>
     void

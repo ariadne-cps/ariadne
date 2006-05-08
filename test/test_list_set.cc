@@ -26,12 +26,12 @@
 #include <string>
 
 #include "ariadne.h"
-#include "exception.h"
-#include "utility.h"
-#include "numerical_type.h"
-#include "point.h"
-#include "rectangle.h"
-#include "list_set.h"
+#include "base/exception.h"
+#include "base/utility.h"
+#include "numeric/numerical_types.h"
+#include "geometry/point.h"
+#include "geometry/rectangle.h"
+#include "geometry/list_set.h"
 
 #include "test.h"
 

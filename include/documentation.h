@@ -672,8 +672,147 @@
  * \internal 
  *    Use \c f.approx(p) or f.approximate(p) for function objects?
  *    Use \c f_approx(p) or f_approximate(p) for functions?     
- 
  * 
+ */
+ 
+/*! \page integration Integration methods
+ *
+ * \section taylor Taylor methods 
+ * All integration methods are based on Taylor expansion of solutions curves.
+ * 
+ * \f[ \begin{array}{rl} \displaystyle
+ *      \frac{dx}{dt} &= f(x(t)) \\
+ *  \frac{d^2x}{dt^2} &= Df(x(t))f(x(t)) \\
+ *  \frac{d^3x}{dt^3} &= D^2f(x(t))f(x(t))f(x(t))+Df(x(t))Df(x(t))f(x(t)) \\
+ *  \frac{d^4x}{dt^4} &= D^3f(x(t))f(x(t))f(x(t))f(x(t)) + 4D^2f(x(t))Df(x(t))f(x(t))f(x(t)) + Df(x(t))Df(x(t))Df(x(t))f(x(t)) \\
+ *  \frac{d^5x}{dt^5} &= D^4f(x(t))f(x(t))f(x(t))f(x(t))f(x(t)) + 7D^3f(x(t))Df(x(t))f(x(t))f(x(t))f(x(t)) \\
+ *                    &\ \qquad + 4D^2f(x(t))D^2f(x(t))f(x(t))f(x(t))f(x(t)) + 11D^2f(x(t))Df(x(t))Df(x(t))f(x(t))f(x(t)) \\
+ *                    &\ \qquad + Df(x(t))Df(x(t))Df(x(t))Df(x(t))f(x(t)) \end{array} \f]
+ *
+ *
+ * \subsection euler Euler method
+ * \f[ x_1 = x_0 + hf(x_0) \approx x(h) \f]
+ * One-step error
+ * \f[ ||x_1-x(h)|| = h ||f(x_0)-f(\xi)|| = \frac{h^2}{2} || Df(\xi)f(\xi) || \f]
+ *
+ * \subsection second_order_taylor 2nd Order Taylor Method
+ * \f[ x_1 = x_0 + hf(x_0) + \frac{h^2}{2} Df(x_0)f(x_0) \approx x(h) \f]
+ * One-step error
+ * \f[ ||x_1-x(h)|| = \frac{h^2}{2} || Df(x_0)f(x_0)-Df(\xi)f(\xi)|| = \frac{h^3}{6} || D^2f(\xi)f(\xi)f(\xi) + Df(\xi)Df(\xi)f(\xi) || \f]
+ *
+ * \subsection second_order_rk 2nd Order Runge-Kutta Method
+ * 
+ * \f[ x_1 = x_0 + \frac{h}{2}\left( f(x_0)+f(x_0+hf(x_0))\right) \approx x_0 + hf(x_0) + \frac{h^2}{2} Df(x_0)f(x_0) 
+ *      + \frac{h^3}{4} D^2f(\xi)f(\xi)f(\xi) \f]
+ */
+
+/*! \page zonotope Zonotopic reduction methods
+ *
+ * Throughout this sections, we use the supremum norm on \f$R^n\f$, and the correspoinding operator norm on \f$\mathbb{R}^{m\times n}\f$.
+ * 
+ * Given a zonotope \f$ Z=\{ c+Ae \mid ||e||\leq 1 \}\subset \mathbb{R}^n\f$, where \f$A\in \mathbb{R}^{n\times p}\f$, 
+ * we wish to compute a zonotope \f$Z' = \{ c + A' e' \mid ||e'||\leq 1\}\f$ with fewer generators 
+ * i.e. \f$A'\in \mathbb{R}^{n\times p'}\f$ with \f$p'<p\f$.
+ * The general reduction method is to choose \f$ A'\f$ such that \f$ A = A' B\f$ with \f$||B||\leq 1\f$.
+ * The key to zonotopic reduction is to choose a method with good properties.
+ *
+ * A simple criterion to note is that if \f$\sum_{j=1}^{p} |b_{ij}|<1\f$ for some \f$i\f$, then we can improve the approximation by taking
+ * \f$D=\mathrm{diag}(d_{i})\f$ with \f$d_{i}=\sum_{j=1}^{p} |b_{ij}|\f$, 
+ * and \f$B'= D^{-1}B\f$ which has \f$b'_{ij}=b_{ij}/\sum_{k=1}^{p} |b_{ik}|\f$.
+ * 
+ * It is clear that if the rows of \f$B\f$ are close to a set of mutually orthogonal coordinate vectors, then the approximation is good, 
+ * since the image of \f$B\f$ is close to the unit ball. This suggests the following algorithm:
+ * 
+ *
+ * \section interval_zonotope Interval zonotopic reduction
+ *
+ * An <em>interval zonotope</em> is a set of the form \f$ \{ y = c + A e \mid c\in R,\ A\in\mathcal{A} \text{ and } ||e||\leq1 \} 
+ * = R + \mathcal{A} B\f$.
+ * To reduce an interval zonotope, we first write \f$ R = \{ c + Be\mid ||e||\leq 1 \}\f$ and combine this in \f$\mathcal{A}\f$.
+ * To reduce \f$ \mathcal{A} \f$, write \f$ \mathcal{A} = A \mathcal{B} \mathcal{A} \f$ where \f$ A\in\mathcal{A}\f$ and \f$A\mathcal{B}\ni I\f$.
+ * Then take \f$ \mathcal{C} = \mathcal{B} \mathcal{A} \f$ and \f$ || \mathcal{C} || 
+ *   = \sup_{i]1}^{n} \sum_{j=1}^{p} \max |\mathcal{C}_{ij}| \f$, 
+ * where \f$ \max |\mathcal{C}_{ij}| = \max\{ |x| \mid x\in \mathcal{C}_{ij}\f$.
+ * 
+ */
+ 
+/*! \page references References
+ *
+ * \section computable_analysis_references Computable Analysis
+ *
+ * Klaus Weihrauch, <em>Computable Analysis</em>, Springer, 2000.
+ * 
+ * \section interval_references Interval Arithmetic
+ * Ramon E. Moore, <em>Methods and applications of interval analysis</em>,
+ *   SIAM Studies in Applied Mathematics, 2.
+ * Society for Industrial and Applied Mathematics (SIAM), Philadelphia, Pa., 1979. xi+190 pp. ISBN 0-89871-161-4 
+ *
+ * Baker R. Kearfott, "Interval computations: introduction, uses, and resources",
+ *   <em>Euromath Bull.</em> <b>2</b> (1996), no. 1, 95--112. 
+ *
+ * Marcel Gavriliu, "Towards more efficient interval analysis: corner forms and a remainder Newton method", 
+ *   Ph.D. Thesis, California Institute of Technology, 2005. <br>
+ *
+ * R. Krawczyk, "A class of interval-Newton-operators",
+ *   <em>Computing</em> <b>37</b> (1986), no. 2, 179--183.
+ *
+ * Arnold Neumaier, <em>Interval methods for systems of equations</em>,
+ *   Encyclopedia of Mathematics and its Applications, 37.
+ *   Cambridge University Press, Cambridge, 1990. xvi+255 pp. ISBN 0-521-33196-X 
+ *
+ * A. Neumaier, "The wrapping effect, ellipsoid arithmetic, stability and confidence regions",
+ *   <em>Computing Supplementum</em> <b>9</b> (1993), 175-190.
+ * 
+ * \section zonotope_references Zonotopes
+ *
+ * K. Fukuda, "From the zonotope construction to the Minkowski addition of convex polytopes", Preprint, 2003. 
+ *
+ * Leonidas J. Guibas, An Nguyen and Li Zhang, "Zonotopes as bounding volumes", Preprint.
+ *
+ * Ari Ingimundarson, Jose Manuel Bravo, Vicenc Puig and Teodoro Alama, 
+ *   "Robust Fault Diagnosis using Parallelotope-based Set-membership Consistency Tests",
+ *   In <em>Proceedings of CDC-ECC 2005</em>.
+ *
+ * \section integration_references Integration
+ *
+ * Rudolf J. Lohner, "Enclosing the solutions of ordinary initial and boundary value problems",
+ *   <em>Computer Arithmetic</em>, 255--286, Teubner, Stuttgart, 1987. 
+ *
+ * Rudolf J. Lohner, "Enclosing the solutions of ordinary initial and boundary value problems",
+ *   <em>Computer Arithmetic</em>, 255--286, Teubner, Stuttgart, 1987. 
+ *
+ * Rudolf J. Lohner, "Computation of guaranteed enclosures for the solutions of ordinary initial and boundary value problems",
+ *   <em>Computational ordinary differential equations (London, 1989)</em>,  425--435.
+ *
+ * N. S. Nedialkov, K. R. Jackson and G. F. Corliss,
+ *   "Validated solutions of initial value problems for ordinary differential equations",
+ *   <em>Appl. Math. Comput.</em> <b>105</b> (1999), no. 1, 21--68.
+ *
+ * Piotr Zgliczynski, "C^1 Lohner algorithm", <i>Found. Comput. Math.</i> <b>2</b> (2002), no. 4, 429--465.
+ *
+ * \section reachability_references Reachability Analysis and Control
+ *
+ * Antoine Girard, Colas Le Guernic and Oded Maler, 
+ * "Efficient Computation of Reachable Sets of Linear Time-Invariant Systems with Inputs",
+ * 
+ * Antoine Girard, "Reachability of Uncertain Linear Systems using Zonotopes," 
+ *   in <em>Proceedings of HSCC 2005</em>, LNCS 3414, pp 291--305, 2005.
+ * 
+ * Alex Kurzhanskiy and Pravin Varaiya, "Ellipsoidal Techniques for Reachability Analysis of Discrete-Time Linear Systems",
+ *
+ * Alexander Kurzhanski and Pravin Varaiya, "On ellipsoidal techniques for reachability analysis", 
+ *   <em>Optim. Methods Softw.</em> <b>17</b> (2002), no. 2, 207--237
+ *
+ * S. V. Rakovic and D. Q. Mayne, "Set Robust Control Invariance for Linear Discrete Time Systems", 
+ *   in <em>Proceedings of CDC-ECC 2005</em>.
+ *
+ * F. Lydoire and P. Poignet, "Nonlinear Model Predictive Control via Interval Analysis", 
+ *   in <em>Proceedings of CDC-ECC 2005</em>.
+ *
+ * Dietmar Szolnoki, "Set oriented methods for computing reachable sets and control sets",
+ *   <em>Discrete Contin. Dyn. Syst. Ser. B</em> <b>3</b> (2003), no. 3, 361--382.
+ *
+ 
  */
  
 #endif /* _ARIADNE_DOCUMENTATION_H */

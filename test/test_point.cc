@@ -25,7 +25,7 @@
 #include <iostream>
 #include <string>
 
-#include "point.h"
+#include "geometry/point.h"
 
 #include "test.h"
 

@@ -25,10 +25,10 @@
 #include <iostream>
 #include <vector>
 
-#include <ariadne.h>
+#include "ariadne.h"
 
-#include <base/array.h>
-#include <base/numerical_type.h>
+#include "base/array.h"
+#include "numeric/numerical_types.h"
 
 #include "test.h"
 

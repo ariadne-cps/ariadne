@@ -1,6 +1,6 @@
 #include "ariadne.h"
-#include "numerical_type.h"
-#include "interval.h"
+#include "numeric/numerical_types.h"
+#include "numeric/interval.h"
 
 #include <iostream>
 #include <string>

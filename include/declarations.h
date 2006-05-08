@@ -59,6 +59,8 @@ template<typename R> class Parallelotope;
 template<typename R> class Zonotope;
 template<typename R> class Simplex;
 template<typename R> class Polyhedron;
+template<typename R> class Sphere;
+template<typename R> class Ellipsoid;
 
 template<typename R, template<typename> class BS> class ListSet;
 

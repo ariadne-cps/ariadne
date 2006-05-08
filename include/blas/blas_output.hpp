@@ -1,7 +1,11 @@
-/*  blas_output.hh
+/*
+ * Copyright (C) 2006 Pieter Collins <Pieter.Collins@cwi.nl>
  *
- *  Copyright (C) 2004 Pieter Collins <Pieter.Collins@cwi.nl>
- *
+ * Based on the BLAS implementation in Gnu Scientific Library 1.8
+ * Copyright (C) 1996, 1997, 1998, 1999, 2000 Gerard Jungman
+ */
+
+/*  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
@@ -18,7 +22,7 @@
  */
 
 /*! \file blas_output.hh
- *  \brief Templated BLAS operations in C++.
+ *  \brief Output routines for BLAS vectors and matrices.
  */
 
 #ifndef __BLAS_OUTPUT_HPP__

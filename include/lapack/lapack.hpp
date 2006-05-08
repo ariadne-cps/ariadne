@@ -1,7 +1,12 @@
-/*  lapack.hpp
+/*
+ * Copyright (C) 2006 Pieter Collins <Pieter.Collins@cwi.nl>
  *
- *  Copyright (C) 2004 Pieter Collins <Pieter.Collins@cwi.nl>
- *
+ * Based on the routine in LAPACK (version 3.0)
+ *   Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+ *   Courant Institute, Argonne National Lab, and Rice University
+ */
+
+/*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or

@@ -1,7 +1,11 @@
-/*  blas.hpp
+/*
+ * Copyright (C) 2006 Pieter Collins <Pieter.Collins@cwi.nl>
  *
- *  Copyright (C) 2004 Pieter Collins <Pieter.Collins@cwi.nl>
- *
+ * Based on the BLAS implementation in Gnu Scientific Library 1.8
+ * Copyright (C) 1996, 1997, 1998, 1999, 2000 Gerard Jungman
+ */
+
+/*  
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
@@ -91,8 +95,11 @@ real asum(const int N, const real *X, const int incX);
 template<typename real> 
 real asum(const int N, const complex<real> *X, const int incX);
 
-template<typename scalar> 
-int iamax(const int N, const scalar *X, const int incX);
+template<typename real> 
+int iamax(const int N, const real *X, const int incX);
+
+template<typename real> 
+int iamax(const int N, const complex<real> *X, const int incX);
 
 /*
  * Functions for real scalars only

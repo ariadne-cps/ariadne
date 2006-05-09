@@ -28,13 +28,13 @@
 #ifndef _ARIADNE_QR_MATRIX_H
 #define _ARIADNE_QR_MATRIX_H
 
-#include <blas/gecpy.hpp>
-#include <blas/trset.hpp>
-#include <blas/gemm.hpp>
-#include <lapack/larf.hpp>
-#include <lapack/larfg.hpp>
-#include <lapack/geqrf.hpp>
-#include <lapack/orgqr.hpp>
+#include <tblas/gecpy.hpp>
+#include <tblas/trset.hpp>
+#include <tblas/gemm.hpp>
+#include <tlapack/larf.hpp>
+#include <tlapack/larfg.hpp>
+#include <tlapack/geqrf.hpp>
+#include <tlapack/orgqr.hpp>
 
 #include "../declarations.h"
 #include "../base/array.h"
@@ -71,12 +71,12 @@ namespace Ariadne {
       int m=this->number_of_rows();
       int n=this->number_of_columns();
       array<Real> tau(m);
-      array<Real> work(BLAS::max(m,n));
-      LAPACK::geqrf(BLAS::RowMajor,m,n,this->_R.data().begin(),n,tau.begin(),work.begin());
-      BLAS::gecpy(BLAS::RowMajor,m,m,_R.begin(),n,_Q.begin(),m);
-      //BLAS::copy(m*m,_R.data().begin(),1,_Q.data().begin(),1);
-      LAPACK::orgqr(BLAS::RowMajor,m,m,m,this->_Q.data().begin(),m,tau.begin(),work.begin());
-      BLAS::trset(BLAS::RowMajor,BLAS::Lower,BLAS::Unit,m,n,Real(0),_R.begin(),n);
+      array<Real> work(TBLAS::max(m,n));
+      TLAPACK::geqrf(TBLAS::RowMajor,m,n,this->_R.data().begin(),n,tau.begin(),work.begin());
+      TBLAS::gecpy(TBLAS::RowMajor,m,m,_R.begin(),n,_Q.begin(),m);
+      //TBLAS::copy(m*m,_R.data().begin(),1,_Q.data().begin(),1);
+      TLAPACK::orgqr(TBLAS::RowMajor,m,m,m,this->_Q.data().begin(),m,tau.begin(),work.begin());
+      TBLAS::trset(TBLAS::RowMajor,TBLAS::Lower,TBLAS::Unit,m,n,Real(0),_R.begin(),n);
     }
 
     template <typename Real>
@@ -87,7 +87,7 @@ namespace Ariadne {
       int n=this->number_of_columns();
 
       Matrix<Real> result(m,n);
-      BLAS::gemm(BLAS::RowMajor,BLAS::NoTrans,BLAS::NoTrans,m,n,m,Real(1),_Q.begin(),m,_R.begin(),n,Real(0),result.begin(),n);
+      TBLAS::gemm(TBLAS::RowMajor,TBLAS::NoTrans,TBLAS::NoTrans,m,n,m,Real(1),_Q.begin(),m,_R.begin(),n,Real(0),result.begin(),n);
       return result;
     }
 

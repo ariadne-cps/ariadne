@@ -9,7 +9,7 @@ TESTS = test_array test_arithmetic test_binary_word \
 #  test_epsfstream \
 
 CXXFLAGS += -Wall -I../include/ -I../
-LDXXFLAGS += -L../src/ -lariadne -lgmp -lgmpxx -lppl -lcblas -lblas
+LDXXFLAGS += -L../src/ -lariadne -lgmp -lgmpxx -lppl #-lblas
 
 all: ${TESTS}
 
@@ -102,10 +102,13 @@ test_binary_word: test_binary_word.cc ../include/ariadne.h \
   ../include/geometry/../geometry/point.h test.h
 	-${CXX} ${CXXFLAGS} test_binary_word.cc  ${LDXXFLAGS} -o test_binary_word
 
-test_matrix: test_matrix.cc ../include/blas/blas.hpp \
-  ../include/blas/fblas.hpp ../include/blas/blas.hpp \
-  /ufs/collins/include/cblas.h ../include/blas/xerbla.hpp \
-  ../include/blas/blas_output.hpp ../include/lapack/lapack.hpp \
+test_matrix: test_matrix.cc /ufs/collins/include/tblas/tblas.hpp \
+  /ufs/collins/include/tblas/fblas.hpp \
+  /ufs/collins/include/tblas/xerbla.hpp \
+  /ufs/collins/include/tblas/tblas.hpp \
+  /ufs/collins/include/tblas/output.hpp \
+  /ufs/collins/include/tlapack/tlapack.hpp \
+  /ufs/collins/include/tblas/gemv.hpp ../include/declarations.h \
   ../include/numeric/numerical_types.h \
   ../include/numeric/../declarations.h \
   ../include/numeric/../numeric/integer.h \
@@ -133,23 +136,33 @@ test_matrix: test_matrix.cc ../include/blas/blas.hpp \
   ../include/linear_algebra/../linear_algebra/vector.h \
   ../include/linear_algebra/../linear_algebra/matrix.h \
   ../include/linear_algebra/../linear_algebra/lu_matrix.h \
-  ../include/blas/geset.hpp ../include/blas/trcpy.hpp \
-  ../include/blas/gemm.hpp ../include/blas/trmm.hpp \
-  ../include/lapack/laswp.hpp ../include/lapack/lapack.hpp \
-  ../include/lapack/getrf.hpp ../include/blas/iamax.hpp \
-  ../include/blas/scal.hpp ../include/blas/swap.hpp \
-  ../include/blas/ger.hpp ../include/lapack/getrs.hpp \
+  /ufs/collins/include/tblas/geset.hpp \
+  /ufs/collins/include/tblas/trcpy.hpp \
+  /ufs/collins/include/tblas/gemm.hpp /ufs/collins/include/tblas/trmm.hpp \
+  /ufs/collins/include/tlapack/laswp.hpp \
+  /ufs/collins/include/tlapack/tlapack.hpp \
+  /ufs/collins/include/tlapack/getrf.hpp \
+  /ufs/collins/include/tblas/iamax.hpp \
+  /ufs/collins/include/tblas/scal.hpp /ufs/collins/include/tblas/swap.hpp \
+  /ufs/collins/include/tblas/ger.hpp \
+  /ufs/collins/include/tlapack/getrs.hpp \
   ../include/linear_algebra/../linear_algebra/../declarations.h \
   ../include/linear_algebra/../linear_algebra/../base/array.h \
   ../include/linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
   ../include/linear_algebra/lu_matrix.h \
-  ../include/linear_algebra/qr_matrix.h ../include/blas/gecpy.hpp \
-  ../include/blas/trset.hpp ../include/lapack/larf.hpp \
-  ../include/lapack/larfg.hpp ../include/blas/nrm2.hpp \
-  ../include/lapack/geqrf.hpp ../include/lapack/larf.hpp \
-  ../include/lapack/larfg.hpp ../include/lapack/orgqr.hpp \
-  ../include/linear_algebra/svd_matrix.h ../include/blas/copy.hpp \
-  ../include/lapack/gesvd.hpp
+  ../include/linear_algebra/qr_matrix.h \
+  /ufs/collins/include/tblas/gecpy.hpp \
+  /ufs/collins/include/tblas/trset.hpp \
+  /ufs/collins/include/tlapack/larf.hpp \
+  /ufs/collins/include/tlapack/larfg.hpp \
+  /ufs/collins/include/tblas/nrm2.hpp \
+  /ufs/collins/include/tlapack/geqrf.hpp \
+  /ufs/collins/include/tlapack/larf.hpp \
+  /ufs/collins/include/tlapack/larfg.hpp \
+  /ufs/collins/include/tlapack/orgqr.hpp \
+  ../include/linear_algebra/svd_matrix.h \
+  /ufs/collins/include/tblas/copy.hpp \
+  /ufs/collins/include/tlapack/gesvd.hpp
 	-${CXX} ${CXXFLAGS} test_matrix.cc  ${LDXXFLAGS} -o test_matrix
 
 test_polyhedron: test_polyhedron.cc ../include/ariadne.h \

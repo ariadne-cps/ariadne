@@ -29,7 +29,9 @@
 #define _ARIADNE_DECLARATIONS_H
 
 #include <iosfwd>
-  
+
+#define NO_CBLAS
+
 namespace Ariadne { namespace Base {
 template<typename T, unsigned int N=0> class array;
 template<typename T> class sequence;

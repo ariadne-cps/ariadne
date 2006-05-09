@@ -21,10 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <blas/blas.hpp>
-#include <blas/blas_output.hpp>
-#include <lapack/lapack.hpp>
+#define NO_CBLAS
 
+#include <tblas/tblas.hpp>
+#include <tblas/output.hpp>
+#include <tlapack/tlapack.hpp>
+
+#include <tblas/gemv.hpp>
+
+#include "declarations.h"
 #include "numeric/numerical_types.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/vector.tpl"

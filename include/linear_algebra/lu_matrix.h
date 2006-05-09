@@ -29,13 +29,13 @@
 #ifndef _ARIADNE_LU_MATRIX_H
 #define _ARIADNE_LU_MATRIX_H
 
-#include <blas/geset.hpp>
-#include <blas/trcpy.hpp>
-#include <blas/gemm.hpp>
-#include <blas/trmm.hpp>
-#include <lapack/laswp.hpp>
-#include <lapack/getrf.hpp>
-#include <lapack/getrs.hpp>
+#include <tblas/geset.hpp>
+#include <tblas/trcpy.hpp>
+#include <tblas/gemm.hpp>
+#include <tblas/trmm.hpp>
+#include <tlapack/laswp.hpp>
+#include <tlapack/getrf.hpp>
+#include <tlapack/getrs.hpp>
 
 #include "../declarations.h"
 #include "../base/array.h"
@@ -53,7 +53,7 @@ namespace Ariadne {
       size_type number_of_rows() const { return _elements.number_of_rows(); }
       size_type number_of_columns() const { return _elements.number_of_columns(); }
       R operator() (const size_type& i, const size_type& j) const { 
-        R result=0; for(int k=0; k<=BLAS::min(i,j); ++k) { result(i,j)+= (i==k ? R(1) : _elements(i,k)) * _elements(k,j); } return result; }
+        R result=0; for(int k=0; k<=min(i,j); ++k) { result(i,j)+= (i==k ? R(1) : _elements(i,k)) * _elements(k,j); } return result; }
 
       Matrix<R> P() const;
       Matrix<R> L() const;
@@ -76,7 +76,7 @@ namespace Ariadne {
     {
       int m=this->number_of_rows();
       int n=this->number_of_columns();
-      LAPACK::getrf(BLAS::RowMajor,m,n,this->_elements.begin(),n,
+      TLAPACK::getrf(TBLAS::RowMajor,m,n,this->_elements.begin(),n,
                     this->_pivots.begin());
     }
 
@@ -87,8 +87,8 @@ namespace Ariadne {
     {
       int m=this->number_of_rows();
       Matrix<R> result(m,m);
-      BLAS::geset(BLAS::RowMajor,m,m,R(0),R(1),result.data().begin(),m);
-      LAPACK::laswp(BLAS::RowMajor,m,result.data().begin(),m,
+      TBLAS::geset(TBLAS::RowMajor,m,m,R(0),R(1),result.data().begin(),m);
+      TLAPACK::laswp(TBLAS::RowMajor,m,result.data().begin(),m,
                     0,m,this->_pivots.begin(),-1);
 
       return result;
@@ -101,8 +101,8 @@ namespace Ariadne {
     {
       int m=this->number_of_rows();
       Matrix<R> result(m,m);
-      BLAS::geset(BLAS::RowMajor,m,m,R(0),R(1),result.begin(),m);
-      BLAS::trcpy(BLAS::RowMajor,BLAS::Lower,BLAS::Unit,
+      TBLAS::geset(TBLAS::RowMajor,m,m,R(0),R(1),result.begin(),m);
+      TBLAS::trcpy(TBLAS::RowMajor,TBLAS::Lower,TBLAS::Unit,
                   m,m,
                   this->_elements.begin(), m,
                   result.begin(), m);
@@ -117,8 +117,8 @@ namespace Ariadne {
       int m=this->number_of_rows();
       int n=this->number_of_columns();
       Matrix<R> result(m,n);
-      BLAS::geset(BLAS::RowMajor,m,n,R(0),R(0),result.begin(),n);
-      BLAS::trcpy(BLAS::RowMajor,BLAS::Upper,BLAS::NonUnit,
+      TBLAS::geset(TBLAS::RowMajor,m,n,R(0),R(0),result.begin(),n);
+      TBLAS::trcpy(TBLAS::RowMajor,TBLAS::Upper,TBLAS::NonUnit,
                   m,n,
                   this->_elements.begin(),n,
                   result.begin(),n);
@@ -133,18 +133,18 @@ namespace Ariadne {
       size_type n=this->number_of_columns();
       Matrix<R> result(m,n);
         
-      /* No BLAS routine */
+      /* No TBLAS routine */
       for(size_type i=0; i!=m; ++i) {
         for(size_type j=0; j!=n; ++j) {
           result(i,j)=0;
-          for(size_type k=0; k<=BLAS::min(i,j); ++k) {
+          for(size_type k=0; k<=TBLAS::min(i,j); ++k) {
             if(i==k) { result(i,j)+=_elements(k,j); }
             else { result(i,j)+=_elements(i,k)*_elements(k,j); }
           }
         }
       }
       /* Fixme: Apply permutation */
-      LAPACK::laswp(BLAS::RowMajor,n,result.data().begin(),n,0,n,this->_pivots.begin(),-1);
+      TLAPACK::laswp(TBLAS::RowMajor,n,result.data().begin(),n,0,n,this->_pivots.begin(),-1);
       return result;
     }
 
@@ -177,8 +177,8 @@ namespace Ariadne {
     {
       size_type n=this->number_of_rows();
       Matrix<R> result(n,n);
-      BLAS::geset(BLAS::RowMajor,n,n,R(0),R(1),result.begin(),n);
-      LAPACK::getrs(BLAS::RowMajor,BLAS::NoTrans,n,n,this->_elements.begin(),n,this->_pivots.begin(),result.begin(),n);
+      TBLAS::geset(TBLAS::RowMajor,n,n,R(0),R(1),result.begin(),n);
+      TLAPACK::getrs(TBLAS::RowMajor,TBLAS::NoTrans,n,n,this->_elements.begin(),n,this->_pivots.begin(),result.begin(),n);
       return result;
     }
 

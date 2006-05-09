@@ -70,14 +70,20 @@ matrix.o: matrix.cc ../../include/real_typedef.h \
   ../../include/linear_algebra/../linear_algebra/../numeric/integer.h \
   ../../include/linear_algebra/../linear_algebra/matrix.h \
   ../../include/linear_algebra/../linear_algebra/lu_matrix.h \
-  ../../include/blas/geset.hpp ../../include/blas/blas.hpp \
-  ../../include/blas/fblas.hpp /ufs/collins/include/cblas.h \
-  ../../include/blas/trcpy.hpp ../../include/blas/gemm.hpp \
-  ../../include/blas/trmm.hpp ../../include/lapack/laswp.hpp \
-  ../../include/lapack/lapack.hpp ../../include/blas/blas.hpp \
-  ../../include/lapack/getrf.hpp ../../include/blas/iamax.hpp \
-  ../../include/blas/swap.hpp ../../include/blas/scal.hpp \
-  ../../include/blas/ger.hpp ../../include/lapack/getrs.hpp \
+  /ufs/collins/include/tblas/geset.hpp \
+  /ufs/collins/include/tblas/tblas.hpp \
+  /ufs/collins/include/tblas/fblas.hpp \
+  /ufs/collins/include/tblas/xerbla.hpp \
+  /ufs/collins/include/tblas/trcpy.hpp \
+  /ufs/collins/include/tblas/gemm.hpp /ufs/collins/include/tblas/trmm.hpp \
+  /ufs/collins/include/tlapack/laswp.hpp \
+  /ufs/collins/include/tlapack/tlapack.hpp \
+  /ufs/collins/include/tblas/tblas.hpp \
+  /ufs/collins/include/tlapack/getrf.hpp \
+  /ufs/collins/include/tblas/iamax.hpp \
+  /ufs/collins/include/tblas/scal.hpp /ufs/collins/include/tblas/swap.hpp \
+  /ufs/collins/include/tblas/ger.hpp \
+  /ufs/collins/include/tlapack/getrs.hpp \
   ../../include/linear_algebra/../linear_algebra/../base/array.h \
   ../../include/linear_algebra/../linear_algebra/../linear_algebra/matrix.h
 

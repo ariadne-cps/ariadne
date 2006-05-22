@@ -40,7 +40,13 @@ namespace Ariadne {
       mpf_div(r.get_mpf_t(),x1.get_mpf_t(),x2.get_mpf_t());
       return r;
     }
- 
+
+    template<>
+    Rational
+    div_prec(const Rational& x1, const Rational& x2, const uint& n) 
+    {
+      return x1/x2;
+    }
 
     template<>
     Float64 

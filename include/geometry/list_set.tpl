@@ -70,6 +70,31 @@ namespace Ariadne {
 
     template <typename R, template <typename> class BS>
     bool
+    interiors_intersect(const ListSet<R,BS>& A, const BS<R>& B)
+    {
+      if (A.dimension()!=B.dimension()) {
+        throw std::invalid_argument("The two denotable sets have different space dimensions.");
+      }
+
+      size_type i;
+
+      for (i=0; i<A.size() ; i++) {
+         if (interiors_intersect(A[i],B)) { return true; }
+      }
+
+      return false;
+    }
+
+    template <typename R, template <typename> class BS>
+    bool
+    interiors_intersect(const BS<R>& A, const ListSet<R,BS>& B)
+    {
+      return interiors_intersect(B,A);
+    }
+
+
+    template <typename R, template <typename> class BS>
+    bool
     inner_subset(const ListSet<R,BS>& A,
                  const ListSet<R,BS>& B)
     {
@@ -95,7 +120,6 @@ namespace Ariadne {
 
       throw std::runtime_error("Not implemented");
     }
-
     
     template <typename R, template <typename> class BS>
     ListSet<R,BS>
@@ -160,7 +184,7 @@ namespace Ariadne {
     std::ostream& operator<<(std::ostream& os,
                              const ListSet<R,BS>& A)
     {
-      os << "ListSet<" << name<R>() << ",BS>(\n  ";
+      os << "ListSet<" << name<R>() << ",BS>{\n  ";
       os << "[";
       if (A.size() >0 ) {
         os << A[0];

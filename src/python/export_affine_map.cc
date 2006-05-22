@@ -45,6 +45,9 @@ typedef RRectangle (RAffineMap::*AffMapCallRectangle) (const RRectangle&) const;
 typedef RSimplex (RAffineMap::*AffMapCallSimplex) (const RSimplex&) const;
 typedef RZonotope (RAffineMap::*AffMapCallZonotope) (const RZonotope&) const;
 typedef RPolyhedron (RAffineMap::*AffMapCallPolyhedron) (const RPolyhedron&) const;
+typedef RParallelotopeListSet (RAffineMap::*AffMapCallParallelotopeListSet) (const RParallelotopeListSet&) const;
+typedef RZonotopeListSet (RAffineMap::*AffMapCallZonotopeListSet) (const RZonotopeListSet&) const;
+typedef RParallelotopeListSet (RAffineMap::*AffMapCallGridMaskSet) (const RGridMaskSet&) const;
 
 AffMapCallPoint affine_map_call_point=&RAffineMap::operator();
 AffMapCallSimplex affine_map_call_simplex=&RAffineMap::operator();
@@ -52,6 +55,9 @@ AffMapCallRectangle affine_map_call_rectangle=&RAffineMap::operator();
 AffMapCallParallelotope affine_map_call_parallelotope=&RAffineMap::operator();
 AffMapCallZonotope affine_map_call_zonotope=&RAffineMap::operator();
 AffMapCallPolyhedron affine_map_call_polyhedron=&RAffineMap::operator();
+AffMapCallParallelotopeListSet affine_map_call_parallelotope_list_set=&RAffineMap::operator();
+AffMapCallZonotopeListSet affine_map_call_zonotope_list_set=&RAffineMap::operator();
+AffMapCallGridMaskSet affine_map_call_grid_mask_set=&RAffineMap::operator();
 
 void export_affine_map() {
 
@@ -64,6 +70,9 @@ void export_affine_map() {
     .def("__call__", affine_map_call_simplex)
     .def("__call__", affine_map_call_polyhedron)
     .def("__call__", affine_map_call_zonotope)
+    .def("__call__", affine_map_call_parallelotope_list_set)
+    .def("__call__", affine_map_call_zonotope_list_set)
+    .def("__call__", affine_map_call_grid_mask_set)
 //    .def(self_ns::str(self))    // __self_ns::str__
   ;
 }

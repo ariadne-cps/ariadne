@@ -29,37 +29,47 @@
 namespace Ariadne {
   namespace LinearAlgebra {
     template class IntervalMatrix<Real>;
-    template class IntervalMatrix<Field>;
       
     template std::ostream& operator<<(std::ostream&, const IntervalMatrix<Real>&);
-    template std::ostream& operator<<(std::ostream&, const IntervalMatrix<Field>&);
            
     template IntervalVector<Real> prod(const Matrix<Real>&, const IntervalVector<Real>&);
-    template IntervalVector<Field> prod(const Matrix<Field>&, const IntervalVector<Field>&);
     
     template IntervalVector<Real> prod(const IntervalMatrix<Real>&, const Vector<Real>&);
-    template IntervalVector<Field> prod(const IntervalMatrix<Field>&, const Vector<Field>&);
     
     template IntervalVector<Real> prod(const IntervalMatrix<Real>&, const IntervalVector<Real>&);
-    template IntervalVector<Field> prod(const IntervalMatrix<Field>&, const IntervalVector<Field>&);
     
     template IntervalMatrix<Real> prod(const Matrix<Real>&, const IntervalMatrix<Real>&);
-    template IntervalMatrix<Field> prod(const Matrix<Field>&, const IntervalMatrix<Field>&);
     
     template IntervalMatrix<Real> prod(const IntervalMatrix<Real>&, const Matrix<Real>&);
-    template IntervalMatrix<Field> prod(const IntervalMatrix<Field>&, const Matrix<Field>&);
     
     template IntervalMatrix<Real> prod(const IntervalMatrix<Real>&, const IntervalMatrix<Real>&);
-    template IntervalMatrix<Field> prod(const IntervalMatrix<Field>&, const IntervalMatrix<Field>&);
     
     template IntervalMatrix<Real> fprod(const Matrix<Field>&, const IntervalMatrix<Real>&);
      
     template Matrix<Real> over_approximation(const IntervalMatrix<Real>&);
-    template Matrix<Field> over_approximation(const IntervalMatrix<Field>&);
 
     template IntervalMatrix<Real> approximate(const Matrix<Field>& A,const Real& e); 
 
     template IntervalMatrix<Real> exp(const IntervalMatrix<Real>& A); 
 
+#ifndef REAL_IS_A_FIELD
+    template class IntervalMatrix<Field>;
+    
+    template std::ostream& operator<<(std::ostream&, const IntervalMatrix<Field>&);
+    
+    template IntervalVector<Field> prod(const Matrix<Field>&, const IntervalVector<Field>&);
+    
+    template IntervalVector<Field> prod(const IntervalMatrix<Field>&, const Vector<Field>&);
+    
+    template IntervalVector<Field> prod(const IntervalMatrix<Field>&, const IntervalVector<Field>&);
+    
+    template IntervalMatrix<Field> prod(const Matrix<Field>&, const IntervalMatrix<Field>&);
+    
+    template IntervalMatrix<Field> prod(const IntervalMatrix<Field>&, const Matrix<Field>&);
+    
+    template IntervalMatrix<Field> prod(const IntervalMatrix<Field>&, const IntervalMatrix<Field>&);
+    
+    template Matrix<Field> over_approximation(const IntervalMatrix<Field>&);
+#endif
   }
 }

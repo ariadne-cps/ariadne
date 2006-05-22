@@ -469,8 +469,24 @@ namespace Ariadne {
       return this->integrate_list_set(vector_field,initial_set,time);
     }
     
+    template<typename R>
+    Geometry::Zonotope<R>
+    C1Integrator<R>::integrate(const VectorField<R>& vector_field, 
+                               const Geometry::Zonotope<R>& initial_set, 
+                               const R& time) const
+    {
+      return this->integrate_basic_set(vector_field,initial_set,time);
+    }
     
-    
+    template<typename R>
+    Geometry::ListSet<R,Geometry::Zonotope> 
+    C1Integrator<R>::integrate(const VectorField<R>& vector_field, 
+                               const Geometry::ListSet<R,Geometry::Zonotope>& initial_set, 
+                               const R& time) const
+    {
+      return this->integrate_list_set(vector_field,initial_set,time);
+    }
+   
     template<typename R>
     Geometry::GridMaskSet<R> 
     C1Integrator<R>::integrate(const Evaluation::VectorField<R>& vector_field, 
@@ -546,10 +562,10 @@ namespace Ariadne {
       }
       return result;
     }
-    
-    
+   
+        
     template<typename R>
-    Geometry::ListSet<R,Geometry::Zonotope> 
+    Geometry::ListSet<R,Geometry::Parallelotope> 
     C1Integrator<R>::reach(const VectorField<R>& vector_field, 
                            const Geometry::ListSet<R,Geometry::Parallelotope>& initial_set, 
                            const R& time) const
@@ -564,13 +580,84 @@ namespace Ariadne {
       R t=time;
       R h=step_size;
       Geometry::Parallelotope<R> bs(initial_set.dimension());
-      Geometry::Zonotope<R> rs(initial_set.dimension());
+      Geometry::Parallelotope<R> rs(initial_set.dimension());
       
       std::multiset< std::pair< R,Geometry::Parallelotope<R> >, pair_first_less< R,Geometry::Parallelotope<R> > > working_sets;
-      Geometry::ListSet<R,Geometry::Zonotope> reach_set(initial_set.dimension());
+      Geometry::ListSet< R,Geometry::Parallelotope > reach_set(initial_set.dimension());
       
       typedef typename Geometry::ListSet<R,Geometry::Parallelotope>::const_iterator list_set_const_iterator;
       typedef std::pair< R,Geometry::Parallelotope<R> > timed_set;
+      for(list_set_const_iterator bs_iter=initial_set.begin(); bs_iter!=initial_set.end(); ++bs_iter) {
+        working_sets.insert(timed_set(time,*bs_iter));
+      }
+      
+      while(!working_sets.empty()) {
+        
+	timed_set ts=*working_sets.begin();
+        working_sets.erase(working_sets.begin());
+        t=ts.first;
+        bs=ts.second;
+        h=step_size;
+
+        if(bs.radius()>maximum_set_radius) {
+          Geometry::ListSet<R,Geometry::Parallelotope> subdivisions=bs.subdivide();
+          for(list_set_const_iterator subdiv_iter=subdivisions.begin(); 
+              subdiv_iter!=subdivisions.end(); ++subdiv_iter)
+          {
+            working_sets.insert(timed_set(t,*subdiv_iter));
+          }
+        }
+        else {
+          do {
+#ifdef DEBUG
+        std::cerr << "time left=" << t << "  stepsize=" << h << "  centre=" 
+		 << bs.centre()  << std::endl;
+#endif
+            h=min(t,h);
+            rs=(this->reachability_step(vf,bs,h)).over_approximating_parallelotope();
+            reach_set.adjoin(rs);
+#ifdef DEBUG
+        std::cerr << "rs.centre=" << rs.centre() << std::endl;
+#endif
+            
+            bs=integration_step(vf,bs,h);
+            t=t-h;
+            h=min(R(2*h),step_size);
+          } while(t!=0 && bs.radius()<=maximum_set_radius);
+          if(t!=0) {
+            working_sets.insert(timed_set(t,bs));
+          }
+        }
+      }
+      
+      return reach_set;
+    }
+
+
+    template<typename R>
+    Geometry::ListSet<R,Geometry::Zonotope> 
+    C1Integrator<R>::reach(const VectorField<R>& vector_field, 
+                           const Geometry::ListSet<R,Geometry::Zonotope>& initial_set, 
+                           const R& time) const
+    {
+      const VectorField<R>& vf=vector_field;
+      R step_size=this->maximum_step_size();
+      R maximum_set_radius=this->maximum_basic_set_radius();
+#ifdef DEBUG
+        std::cerr << "C1Integrator<R>::reach(const VectorField<R>& vector_field,const Geometry::ListSet<R,Geometry::Zonotope>& initial_set, const R& time)" << std::endl;
+        std::cerr << "step_size=" << step_size << "  maximum_set_radius()=" << maximum_set_radius << std::endl<<std::flush;
+#endif
+      
+      R t=time;
+      R h=step_size;
+      Geometry::Zonotope<R> bs(initial_set.dimension());
+      Geometry::Zonotope<R> rs(initial_set.dimension());
+      
+      std::multiset< std::pair< R,Geometry::Zonotope<R> >, pair_first_less< R,Geometry::Zonotope<R> > > working_sets;
+      Geometry::ListSet<R,Geometry::Zonotope> reach_set(initial_set.dimension());
+      
+      typedef typename Geometry::ListSet<R,Geometry::Zonotope>::const_iterator list_set_const_iterator;
+      typedef std::pair< R,Geometry::Zonotope<R> > timed_set;
       for(list_set_const_iterator bs_iter=initial_set.begin(); bs_iter!=initial_set.end(); ++bs_iter) {
         working_sets.insert(timed_set(time,*bs_iter));
       }
@@ -586,8 +673,8 @@ namespace Ariadne {
         h=step_size;
         
 
-        if(bs.radius()>this->maximum_basic_set_radius()) {
-          Geometry::ListSet<R,Geometry::Parallelotope> subdivisions=bs.subdivide();
+        if(bs.radius()>maximum_set_radius) {
+          Geometry::ListSet<R,Geometry::Zonotope> subdivisions=bs.subdivide();
           for(list_set_const_iterator subdiv_iter=subdivisions.begin(); 
               subdiv_iter!=subdivisions.end(); ++subdiv_iter)
           {
@@ -597,28 +684,29 @@ namespace Ariadne {
         else {
           do {
 #ifdef DEBUG
-        std::cerr << "time left=" << t << "  stepsize=" << h << "  centre=" << bs.centre() 
-                  << "  size()=" << bs.size()() << std::endl;
+        std::cerr << "time left=" << t << "  stepsize=" << h << "  centre=" 
+	          << bs.centre() << std::endl;
 #endif
             h=min(t,h);
             rs=this->reachability_step(vf,bs,h);
             reach_set.adjoin(rs);
 #ifdef DEBUG
-        std::cerr << "rs.centre=" << rs.centre() << "  size()=" << rs.size()() 
-                  << "  new size=" << reach_set.size() << std::endl;
+        std::cerr << "rs.centre=" << rs.centre() << std::endl;
 #endif
             
             bs=integration_step(vf,bs,h);
             t=t-h;
             h=min(R(2*h),step_size);
-          } while(t!=0 && bs.radius()<=this->maximum_basic_set_radius());
-          if(t==0) {
-          } else {
+          } while(t!=0 && bs.radius()<=maximum_set_radius);
+          if(t!=0) {
             working_sets.insert(timed_set(t,bs));
           }
         }
       }
       
+#ifdef DEBUG
+        std::cerr << "Exiting reach"<< std::endl;
+#endif
       return reach_set;
     }
 
@@ -648,8 +736,10 @@ namespace Ariadne {
       found.adjoin(is);
       
       int steps=quotient(time,this->lock_to_grid_time());
+      if (steps==0) steps=1;
+
       R time_step=time/steps;
-      
+     
       for(int step=0; step!=steps; ++step) {
         found=difference(found,stored);
         stored.adjoin(found);
@@ -658,15 +748,15 @@ namespace Ariadne {
         found=image;
       }
       
-      Geometry::ListSet<R,Geometry::Parallelotope> parallelotope_list;
-      Geometry::ListSet<R,Geometry::Zonotope> zonotope_list;
+      Geometry::ListSet<R,Geometry::Zonotope> input_list;
+      Geometry::ListSet<R,Geometry::Zonotope> output_list;
       for(gms_const_iterator iter=stored.begin(); iter!=stored.end(); ++iter) {
-        Geometry::Rectangle<R> r=*iter;
-        Geometry::Parallelotope<R> pp(r);
-        parallelotope_list.adjoin(pp);
+        //Geometry::Rectangle<R> r=*iter;
+        //Geometry::Zonotope<R> z(r);
+        input_list.adjoin(Geometry::Zonotope<R>(*iter));
       }
-      zonotope_list=this->reach(vector_field,parallelotope_list,time_step);
-      for(zls_const_iterator iter=zonotope_list.begin(); iter!=zonotope_list.end(); ++iter) {
+      output_list=this->reach(vector_field,input_list,time_step);
+      for(zls_const_iterator iter=output_list.begin(); iter!=output_list.end(); ++iter) {
         Geometry::Zonotope<R> fz=*iter;
         Geometry::GridCellListSet<R> oai=over_approximation_of_intersection(fz,bb,g);
         result.adjoin(oai);

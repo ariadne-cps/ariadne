@@ -48,6 +48,8 @@ namespace Ariadne {
     bool disjoint(const BS<R>& , const ListSet<R,BS>& );
     template <typename R, template<typename> class BS>
     bool interiors_intersect(const BS<R>& , const ListSet<R,BS>& );
+    template <typename R, template<typename> class BS>
+    bool interiors_intersect(const ListSet<R,BS>& , const BS<R>&); 
 
     template <typename R, template<typename> class BS>
     bool disjoint(const ListSet<R,BS>& , const ListSet<R,BS>& );
@@ -155,9 +157,9 @@ namespace Ariadne {
       * \param set is the new set.
       */
       void set(size_type index, const BS<R>& set) {
-        if (this->size()<=index)
-          throw std::invalid_argument("Invalid index in ListSet:;set(size_type, const BasicSet& ).");
-
+        if (this->size()<=index) 
+          throw std::invalid_argument("Invalid index in ListSet::set(size_type, const BasicSet& ).");
+	
         this->_vector[index]=set;
       }
 
@@ -215,6 +217,16 @@ namespace Ariadne {
         return *this;
       }
 
+      template <template<typename> class BS2>
+      operator ListSet<R,BS2> () const {
+         ListSet<R,BS2> result(this->dimension());
+
+	 for (size_type i=0; i<this->size(); i++) 
+           result.push_back((BS2<R>)((*this)[i]));
+      
+	 return result;
+      }
+      
       /*! \brief Checks if a denotable set includes a point.
       *
       * This method checks whenever the current denotable set

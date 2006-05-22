@@ -21,7 +21,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-
 from ariadne.base import *
 from ariadne.numeric import *
 from ariadne.evaluation import *
@@ -42,7 +41,7 @@ A[0,1]=-1
 A[1,0]=+1
 A[1,1]=-0.25
 dyn=AffineVectorField(A,b)
-inv=Parallelotope(Rectangle("[-1,1]x[-1,1]"))
+inv=Zonotope(Rectangle("[-1,1]x[-1,1]"))
 n1=DiscreteNode(dyn,inv)
 
 n2=DiscreteNode(dyn,inv)
@@ -52,13 +51,13 @@ A[0,1]=0
 A[1,0]=0
 A[1,1]=-7
 res=AffineMap(A,b)
-act=Parallelotope(Rectangle("[-0.2,0]x[-0.2,0]"))
+act=Zonotope(Rectangle("[-0.2,0]x[-0.2,0]"))
 
 eps.write(act)
 
 e1=DiscreteTransition(n1,n2,res,act)
 
-act=Parallelotope(Rectangle("[0,0.2]x[0,0.2]"))
+act=Zonotope(Rectangle("[0,0.2]x[0,0.2]"))
 
 eps.write(act)
 
@@ -69,12 +68,15 @@ h=HybridAutomaton("H")
 h.add(e1)
 h.add(e2)
 
-c_init=Parallelotope(Rectangle("[-0.8,-0.7]x[0.7,0.8]"))
-reach=bounded_time_reachability(h, n1, c_init, MPFloat(20.0), MPFloat(0.1))
-
+c_init=Zonotope(Rectangle("[-0.8,-0.7]x[0.7,0.8]"))
+reach=bounded_time_reachability(h, n1, c_init, 16.0, 0.05, 7, 0, 'yes') 
 
 eps.set_fill_colour("blue")
-for bs in reach:
-  eps.write(bs)
+for bs in reach[0].reached_regions():
+  eps.write(bs.continuous_set())
+
+eps.set_fill_colour("red")
+for bs in reach[1].reached_regions():
+  eps.write(bs.continuous_set())
 eps.close()
 

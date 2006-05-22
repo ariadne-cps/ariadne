@@ -241,12 +241,36 @@ namespace Ariadne {
       return this->_ppl_poly.contains(_from_Point_to_PPL_Polyhedron(point));
     }
     
+    /* TO REIMPLEMENT */
     /*! \brief A rectangle containing the polyhedron. */
     template <typename R>
     Rectangle<R> 
     Polyhedron<R>::bounding_box() const 
     {
-      throw std::runtime_error("Polyhedron::bounding_box() const not implemented.");
+      if (this->empty())
+        return Rectangle<R>(this->dimension());
+    
+      dimension_type dim=this->dimension();
+      state_type u_corner(dim), l_corner(dim);
+    
+      state_list_type verts=this->vertices();
+
+      for (dimension_type i=0; i<dim; i++) {
+	u_corner[i]=verts[0][i];
+	l_corner[i]=verts[0][i];
+      }
+
+      for (size_type j=0; j<verts.size(); j++) {
+        for (dimension_type i=0; i<dim; i++) {
+          if (verts[j][i]<u_corner[i])
+	    u_corner[i]=verts[j][i];
+	  if (verts[j][i]>l_corner[i])
+	    l_corner[i]=verts[j][i];
+	}
+      }
+
+      return Rectangle<R>(l_corner, u_corner);
+      //throw std::runtime_error("Polyhedron::bounding_box() const not implemented.");
     }
     
     template <typename R>

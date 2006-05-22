@@ -130,5 +130,24 @@ namespace Ariadne {
       return Geometry::Polyhedron<R>(vert);
     }    
 
+    /* TO IMPROVE */
+    template <typename R>
+    Geometry::ListSet<R,Geometry::Parallelotope>
+    AffineMap<R>::operator() (const Geometry::GridMaskSet<R>& cms) const
+    {
+      using namespace Ariadne::Geometry;
+
+      ListSet<R,Rectangle> lrs=ListSet<R,Rectangle>(cms);
+
+      ListSet<R,Geometry::Parallelotope> output(cms.dimension());
+
+      for (size_t i=0; i< lrs.size(); i++) {
+	Parallelotope<R> p=(*this)(Parallelotope<R>(lrs[i]));
+
+	output.push_back(p);
+      }
+      
+      return output;
+    }  
   }
 }

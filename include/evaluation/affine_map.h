@@ -39,6 +39,8 @@
 #include "../geometry/parallelotope.h"
 #include "../geometry/zonotope.h"
 #include "../geometry/polyhedron.h"
+#include "../geometry/list_set.h"
+#include "../geometry/grid_set.h"
 
 #include "../evaluation/map.h"
 
@@ -83,6 +85,21 @@ namespace Ariadne {
       
       /*! \brief  The map applied to a polyhedron basic set. */
       Geometry::Polyhedron<R> operator() (const Geometry::Polyhedron<R>& A) const;
+      
+      /*! \brief  The map applied to a list of basic sets. */
+      template <template<class> class BS>
+      Geometry::ListSet<R,BS> operator() (const Geometry::ListSet<R,BS>& A) const {
+        Geometry::ListSet<R,BS> output(A.dimension());
+
+        for (size_type i=0; i<A.size(); i++) { 
+          output.push_back((*this)(A[i]));
+        }
+
+        return output;
+      }
+
+      /*! \brief  The map applied to a gridmaskset. */
+      Geometry::ListSet<R,Geometry::Parallelotope> operator() (const Geometry::GridMaskSet<R>& ) const;
       
       /*! \brief  The linear transformation of the map. */
       const LinearAlgebra::Matrix<R>& A() const { return _A; }

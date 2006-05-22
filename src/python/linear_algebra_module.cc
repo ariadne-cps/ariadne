@@ -24,9 +24,9 @@
 
 #include <boost/python.hpp>
 
-void export_vector();
+void export_Vector();
 void export_Matrix();
-void export_linear_program();
+void export_Linear_Program();
 
 void export_IntervalVector();
 void export_IntervalMatrix();
@@ -34,9 +34,9 @@ void export_IntervalMatrix();
 
 BOOST_PYTHON_MODULE(linear_algebra)
 {
-  export_vector();
+  export_Vector();
   export_Matrix();
-  export_linear_program();
+  export_Linear_Program();
   
   export_IntervalVector();
   export_IntervalMatrix();

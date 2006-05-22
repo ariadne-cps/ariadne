@@ -85,14 +85,15 @@ print pts
 print npts
  
 
-eps=EpsPlot("pt.eps",bb)
+eps=EpsPlot("pt.eps",bb,0,1,"a","b")
 eps.set_fill_colour("green")
-eps.write(pts)
-eps.set_fill_style(0)
+eps.write(bb)
+#eps.write(pts)
+#eps.set_fill_style(0)
 #eps.write(pts.partition_tree())
-eps.set_fill_colour("blue")
+#eps.set_fill_colour("blue")
 #eps.write(grls)
 #eps.write(gms)
-eps.set_fill_colour("red")
+#eps.set_fill_colour("red")
 #eps.write(npts)
 eps.close()

@@ -39,7 +39,12 @@ void export_rectangle() {
   typedef bool (*RectBinPred) (const RRectangle&, const RRectangle&);
   typedef RRectangle (*RectBinFunc) (const RRectangle&, const RRectangle&);
   
+  typedef bool (RRectangle::*RectPred)(const RRectangle &) const;
+  typedef bool (RRectangle::*PointPred) (const RPoint&) const;
+
+  def("convex_hull", RectBinFunc(&rectangular_hull));
   def("regular_intersection", RectBinFunc(&regular_intersection));
+  def("touching_intersection", RectBinFunc(&regular_intersection));
   def("interiors_intersect", RectBinPred(&interiors_intersect));
   def("disjoint", RectBinPred(&disjoint));
   def("inner_subset", RectBinPred(&inner_subset));
@@ -54,7 +59,8 @@ void export_rectangle() {
     .def("empty", &RRectangle::empty)
     .def("empty_interior", &RRectangle::empty_interior)
     .def("dimension", &RRectangle::dimension)
-    .def("contains", &RRectangle::contains)
+    .def("contains", RectPred(&RRectangle::contains) )
+    .def("contains", PointPred(&RRectangle::contains))
     .def("interior_contains", &RRectangle::interior_contains)
     .def("centre", &RRectangle::centre)
     .def("radius", &RRectangle::radius)

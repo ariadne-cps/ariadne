@@ -61,6 +61,7 @@ void export_postscript_output()
 {
   class_<Repsfstream>("EpsPlot",init<const char*,RRectangle>())
     .def(init<const char*,RRectangle, const unsigned int&, const unsigned int&>())
+    .def(init<const char*,RRectangle, const unsigned int&, const unsigned int&, const char*, const char*>())
     .def("open",&Repsfstream_open)
     .def("close",&Repsfstream::close)
     .def("set_pen_colour",&Repsfstream::set_pen_colour)

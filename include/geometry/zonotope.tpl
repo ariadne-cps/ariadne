@@ -30,6 +30,9 @@
 
 #include "../base/array.h"
 #include "../linear_algebra/vector.h"
+
+#include "../geometry/list_set.h"
+#include "../geometry/lattice_set.h"
 #include "../geometry/rectangle.h"
 #include "../geometry/parallelotope.h"
 #include "../geometry/polyhedron.h"
@@ -138,7 +141,87 @@ namespace Ariadne {
       
       return true;
     }
+     
+    template<typename R>
+    bool 
+    Zonotope<R>::contains(const Rectangle<R>& rect) const 
+    {
+      if (this->empty()) 
+        return false;
+    
+      for (size_type i=0; i< (size_type)(1<<rect.dimension()); i++)
+        if (!this->contains(rect.vertex(i)))
+	  return false;
+
+      return true;
+    }
+     
+    template <typename R>
+    ListSet<R,Zonotope>
+    Zonotope<R>::subdivide() const 
+    {
+      //size_type n=this->dimension();
+      size_type m=(this->generators()).size2();
+      ListSet<R,Geometry::Zonotope> result(this->dimension());
+      Matrix_type new_generators=this->generators()/2;
       
+      state_type first_centre=this->centre();
+      for(size_type i=0; i<m; i++) {
+        first_centre=first_centre-LinearAlgebra::Vector<R>((this->generator(i))/2);
+      }
+      
+      array<index_type> lower(m,0);
+      array<index_type> upper(m,2);
+      array<index_type> finish(m,0);
+      finish[m-1]=2;
+      lattice_iterator end(finish,lower,upper);
+
+      for(lattice_iterator iter(lower,lower,upper); iter!=end; ++iter) {
+        array<index_type> ary=*iter;
+        state_type new_centre=first_centre;
+        for(size_type i=0; i<m; i++) {
+          if(ary[i]==1) {
+            new_centre=new_centre+this->generator(i);
+          }
+        }
+        result.adjoin(Zonotope(new_centre,new_generators));
+      }
+      return result;
+    }
+    
+    template <typename R>
+    ListSet<R,Zonotope>
+    Zonotope<R>::divide() const 
+    {
+      size_type n=this->dimension();
+      size_type m=(this->generators()).size2();
+      ListSet<R,Geometry::Zonotope> result(this->dimension());
+      
+      Matrix_type new_generators=this->generators();
+      
+      R max_norm=0;
+      size_type max_column=0;
+      for(size_type j=0; j<m; j++) {
+        R norm = LinearAlgebra::norm(LinearAlgebra::Vector<R>(column(new_generators,j)));
+        if(norm>max_norm) {
+          max_norm=norm;
+          max_column=j;
+        }
+      }
+      
+      size_type j=max_column;
+      for(size_type i=0; i!=n; ++i) {
+        new_generators(i,j)/=2;
+      }
+      
+      state_type new_centre=this->centre()-LinearAlgebra::Vector<R>(column(new_generators,j)/2);
+      result.adjoin(Zonotope<R>(new_centre,new_generators));
+      new_centre=new_centre+LinearAlgebra::Vector<R>(column(new_generators,j));
+      result.adjoin(Zonotope(new_centre,new_generators));
+
+      return result;
+    }
+    
     template<typename R>
     bool 
     Zonotope<R>::interior_contains(const state_type& point) const 
@@ -243,7 +326,6 @@ namespace Ariadne {
       typedef typename numerical_traits<R>::field_extension_type F;
       const Zonotope<R>& z=*this;
       
-      std::cerr << "over_approximating_parallelotope(const Geometry::Zonotope<R>& z)" << std::endl;
       dimension_type n=z.dimension();
       LinearAlgebra::Matrix<R> A(n,n);
       for(dimension_type i=0; i!=n; ++i) {
@@ -256,11 +338,9 @@ namespace Ariadne {
       
       Parallelotope<R> p(c,A);
       while(!subset(z,p)) {
-        std::cerr << "A=" << A << std::endl;
         A*=2;
         p=Parallelotope<R>(c,A);
       }
-      std::cerr << "A=" << A << std::endl;
       return p;
     }        
     

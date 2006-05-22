@@ -19,6 +19,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+from ariadne.base import *
+from ariadne.geometry import *
 
 class DiscreteNode:
   _number = 0
@@ -33,6 +35,8 @@ class DiscreteNode:
     return self._invariant
   def name(self):
     return self._name
+  def set_name(self, name):
+    self._name=name
   def __repr__(self):
     return "%s" % self._name
   def __str__(self):
@@ -67,6 +71,8 @@ class DiscreteTransition:
     return self._activation
   def name(self):
     return self._name
+  def set_name(self, name):
+    self._name=name
   def __repr__(self):
     return "%s" % self._name
   def __str__(self):
@@ -143,11 +149,13 @@ class HybridAutomaton:
 class HybridRegion:
   def __init__(self,discrete_node, set):
     self._discrete_node=discrete_node
-    self._set=[set]
+    self._set=set
   def discrete_node(self):
     return self._discrete_node
   def continuous_set(self):
     return self._set
+  def continuous_adjoin(self,c_set):
+    self._set.adjoin(c_set)
   def __repf__(self):
     return "HybridRegion = [ \n%s%s]" % (self._discrete_node.__str__(), self._set.__str__())
 
@@ -157,17 +165,74 @@ class HybridReachSet:
   def add_a_hybrid_region(self,d_node, c_set):
     for i in self._discrete_list:
       if (i.discrete_node()==d_node):
-        list=i.continuous_set()
-	list.append(c_set)
+        i.continuous_adjoin(c_set)
 	return
     region=HybridRegion(d_node, c_set)
     self._discrete_list.append(region)
-  def reached_region(self,d_node):
+  def reached_region_on(self,d_node):
     for i in self._discrete_list:
       if (i.discrete_node()==d_node):
         return i.continuous_set()
-  def reached_region(self):
-    reach_set=[]
+  def reached_regions(self):
+    return self._discrete_list
+
+
+class HybridGridRegion:
+  def __init__(self,discrete_node, grid_dimension):
+    self._discrete_node=discrete_node
+    invariant=discrete_node.invariant()
+    grid=RegularGrid(invariant.dimension(),grid_dimension)
+    bounds=over_approximation(invariant.bounding_box(),grid).lattice_set()
+    self._finite_grid=FiniteGrid(grid,bounds)
+    self._bounds_set=GridMaskSet(self._finite_grid)
+    (self._bounds_set).adjoin(GridRectangle(grid,bounds))
+    self._set=GridMaskSet(self._finite_grid)
+    self._grid=grid
+  def discrete_node(self):
+    return self._discrete_node
+  def continuous_set(self):
+    return self._set
+  def join_over_approximation(self,c_set):
+    self._set.adjoin(over_approximation(c_set,self._finite_grid))
+  def join_under_approximation(self,c_set):
+    self._set.adjoin(under_approximation(c_set,self._finite_grid))
+  def grid_over_approximation(self,c_set):
+    output=GridMaskSet(self._finite_grid)
+    output.adjoin(over_approximation(c_set,self._finite_grid))
+    return output
+  def grid(self):
+    return self._grid
+  def finite_grid(self):
+    return self._finite_grid;
+  def bounds_set(self):
+    return self._bounds_set
+  def __repf__(self):
+    return "HybridRegion = [ \n%s%s]" % (self._discrete_node.__str__(), self._set.__str__())
+
+class HybridGridReachSet:
+  def __init__(self, H, grid_dimension):
+    self._discrete_list=[]
+    for dnode in H.discrete_nodes():
+      (self._discrete_list).append(HybridGridRegion(dnode,grid_dimension))
+  def grid_over_approximation(self,d_node, c_set):
     for i in self._discrete_list:
-      reach_set.extend(i.continuous_set())
-    return reach_set
+      if (i.discrete_node()==d_node):
+	output=i.grid_over_approximation(c_set)
+	return output
+  def join_over_approximation(self,d_node, c_set):
+    for i in self._discrete_list:
+      if (i.discrete_node()==d_node):
+        i.join_over_approximation(c_set)
+	return
+  def join_under_approximation(self,d_node, c_set):
+    for i in self._discrete_list:
+      if (i.discrete_node()==d_node):
+        i.join_under_approximation(c_set)
+	return
+  def reached_region_on(self,d_node):
+    for i in self._discrete_list:
+      if (i.discrete_node()==d_node):
+        return i
+  def reached_regions(self):
+    return self._discrete_list
+

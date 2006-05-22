@@ -72,7 +72,12 @@ class LatticeMaskSet;
 class LatticeCellListSet;
 class LatticeRectangleListSet;
 class LatticeTransformation;
-  
+
+typedef enum {
+ REGULAR,
+ IRREGULAR
+} grid_type;
+
 template<typename R> class Grid;
 template<typename R> class RegularGrid;
 template<typename R> class IrregularGrid;

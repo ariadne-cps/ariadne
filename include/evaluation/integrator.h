@@ -119,6 +119,12 @@ namespace Ariadne {
       virtual Geometry::Parallelotope<R> integration_step(const Evaluation::VectorField<R>&,
                                                           const Geometry::Parallelotope<R>&,
                                                           R&) const = 0;
+
+       /*! \brief An algorithm for integrating forward a zonotope. */
+      virtual Geometry::Zonotope<R> integration_step(const Evaluation::VectorField<R>&,
+                                                          const Geometry::Zonotope<R>&,
+                                                          R&) const = 0;
+
      private:
       R _minimum_step_size;
       R _maximum_step_size;
@@ -192,6 +198,13 @@ namespace Ariadne {
       virtual Geometry::Parallelotope<R> integrate(const Evaluation::VectorField<R>&,
                                                    const Geometry::Parallelotope<R>&,
                                                    const R&) const;
+      
+      /*! \brief A C1 algorithm for integrating forward a zonotope.
+       */
+      virtual Geometry::Zonotope<R> integrate(const Evaluation::VectorField<R>&,
+                                                   const Geometry::Zonotope<R>&,
+                                                   const R&) const;
+      
       /*! \brief A C1 algorithm for integrating forward a parallelotope.
        *
        * The algorithm first finds \f$B_{n+1}\f$ such that \f$R_{n+1}\subset B_{n+1}\f$. 
@@ -204,6 +217,19 @@ namespace Ariadne {
                                                                      const Geometry::ListSet<R,Geometry::Parallelotope>&,
                                                                      const R&) const;
 
+      /*! \brief A C1 algorithm for integrating forward a zonotope.
+       *
+       * The algorithm first finds \f$B_{n+1}\f$ such that \f$R_{n+1}\subset B_{n+1}\f$. 
+       * It then computes an interval matrix \f$ \mathcal{A}_{n} \f$ such that \f$ Df(B_{n+1}) \in \mathcal{A}_{n} \f$.
+       * It then computes a rectangle \f$ \mathcal{c}_{n+1} \f$ such that \f$ \Phi(t,c_{n})\in \mathcal{c}_{n+1} \f$.
+       * We then compute \f$ \mathcal{P}_{n} \f$ such that \$f D\Phi(h,R_{n}) \subset \mathcal{P}_{n} \f$.
+       * We then compute \f$ A_{n+1} \f$ such that \f$ A_{n+1} \mathcal{e} \supset \mathcal{P}_{n} \mathcal{e} \f$.
+       */
+      virtual Geometry::ListSet<R,Geometry::Zonotope> integrate(const Evaluation::VectorField<R>&,
+                                                                     const Geometry::ListSet<R,Geometry::Zonotope>&,
+                                                                     const R&) const;
+
+      
       /*! \brief Integrate \a intial_set for time \a time under \a vector_field, while remaining in \a bounding_set. */
       virtual Geometry::GridMaskSet<R> integrate(const Evaluation::VectorField<R>& vector_field,
                                                  const Geometry::GridMaskSet<R>& initial_set,
@@ -212,18 +238,31 @@ namespace Ariadne {
 
 
       /*! \brief A C1 algorithm for integrating forward a set of parallelotopes up to a certain time. */
-      virtual Geometry::ListSet<R,Geometry::Zonotope> reach(const Evaluation::VectorField<R>&,
+      virtual Geometry::ListSet<R,Geometry::Parallelotope> reach(const Evaluation::VectorField<R>&,
                                                             const Geometry::ListSet<R,Geometry::Parallelotope>&,
                                                             const R&) const;
 
       /*! \brief A C1 algorithm for integrating forward a set of zonotopes up to a certain time. */
-      /*
       virtual Geometry::ListSet<R,Geometry::Zonotope> reach(const Evaluation::VectorField<R>&,
                                                             const Geometry::ListSet<R,Geometry::Zonotope>&,
                                                             const R&) const;
-      */
 
+      inline Geometry::ListSet<R,Geometry::Parallelotope> reach(
+		      const VectorField<R>& vector_field, 
+		      const Geometry::Parallelotope<R>& initial_set, 
+		      const R& time) const
+      {
+        return this->reach(vector_field, initial_set.subdivide(), time);
+      }
 
+      inline Geometry::ListSet<R,Geometry::Zonotope> reach(
+		      const VectorField<R>& vector_field,
+		      const Geometry::Zonotope<R>& initial_set, 
+		      const R& time) const
+      {
+        return this->reach(vector_field, initial_set.subdivide(), time);
+      }
+    
       /*! \brief Integrate \a intial_set for times up to \a time under \a vector_field, while remaining in \a bounding_set. */
       virtual Geometry::GridMaskSet<R> reach(const Evaluation::VectorField<R>& vector_field,
                                              const Geometry::GridMaskSet<R>& initial_set,
@@ -241,6 +280,10 @@ namespace Ariadne {
                                                           const Geometry::Parallelotope<R>&,
                                                           R&) const = 0;
 
+      /*! \brief A C1 algorithm for integrating forward a zonotope. */
+      virtual Geometry::Zonotope<R> integration_step(const Evaluation::VectorField<R>&,
+                                                          const Geometry::Zonotope<R>&,
+                                                          R&) const = 0;
 
       /*! \brief A C1 algorithm for integrating forward a rectangle up to a certain time. 
        */

@@ -41,6 +41,8 @@
 #include "../linear_algebra/matrix.h"
 #include "../evaluation/affine_map.h"
 
+#define SCALE_DIMENSION 3.5 
+
 namespace Ariadne {
   namespace Postscript {
     
@@ -168,6 +170,36 @@ namespace Ariadne {
 	this->open(proj_bbox);
       }
 
+      epsfstream(const char* fn, const Ariadne::Geometry::Rectangle<R>& bbox, const unsigned int &x,  const unsigned int& y, const char* x_name, const char* y_name)
+       : std::ofstream(fn), line_colour("black"), fill_colour("green"), line_style(true), fill_style(true)
+      {
+	if (bbox.dimension()<=x)
+	  throw std::runtime_error("epsfstream: the given x dimension is greater than the space dimension."); 
+	if (bbox.dimension()<=y)
+	  throw std::runtime_error("epsfstream: the given y dimension is greater than the space dimension."); 
+	
+        Ariadne::LinearAlgebra::Matrix<R> p_matrix(2,bbox.dimension());
+        Ariadne::LinearAlgebra::Vector<R> p_vector(2);
+	
+        p_matrix(0,x)=1.0;
+        p_matrix(1,y)=1.0;
+
+	this->p_map=ProjectionMap(p_matrix,p_vector);
+
+        Ariadne::Geometry::Rectangle<R> proj_bbox=this->p_map(bbox);
+	
+	Ariadne::Geometry::Point<R> l(proj_bbox.lower_corner());
+	Ariadne::Geometry::Point<R> u(proj_bbox.upper_corner());
+
+	l[0]-=((u[0]-l[0])/SCALE_DIMENSION);
+	l[1]-=((u[1]-l[1])/SCALE_DIMENSION);
+	//u[0]+=SCALE_DIMENSION;u[1]+=SCALE_DIMENSION;
+	
+	proj_bbox=Ariadne::Geometry::Rectangle<R>(l,u);
+	this->open(proj_bbox);
+
+	this->trace_scale(proj_bbox,6,6,x_name,y_name);
+      }
       
       ~epsfstream() {
         this->close();
@@ -178,6 +210,140 @@ namespace Ariadne {
       //template<typename R> 
       inline void open(const Ariadne::Geometry::Rectangle<R>& bbox) {
         open(convert_to_double_rectangle(bbox));
+      }
+
+      void
+      trace_scale(const Ariadne::Geometry::Rectangle<R>& bb, const int &x_step, 
+		      const int &y_step, const char* x_name, const char* y_name) 
+      {
+        R lx=bb.lower_bound(0);
+        R ly=bb.lower_bound(1);
+        R ux=bb.upper_bound(0);
+        R uy=bb.upper_bound(1);
+
+	R scale_x=((ux-lx)/(SCALE_DIMENSION + 1));
+	R scale_y=((uy-ly)/(SCALE_DIMENSION + 1));
+
+        lx=lx+0.8*scale_x;
+        ly=ly+0.8*scale_y;
+
+        double rlx=convert_to<double>(lx);
+        double rly=convert_to<double>(ly);
+        double rux=convert_to<double>(ux);
+        double ruy=convert_to<double>(ux);
+
+        double lscale_x=convert_to<double>(scale_x);
+        double lscale_y=convert_to<double>(scale_y);
+
+	double setlinewidth = ((rux-rlx)+(ruy-rly))/(SCALE_DIMENSION*300);
+		
+	double fontsize = ((rux-rlx)+(ruy-rly))/(SCALE_DIMENSION*20);
+		
+        *this << setlinewidth << " setlinewidth"<< std::endl
+	      << "fillcolour black" << std::endl
+	      << "/Times-Roman findfont" << std::endl
+	      << fontsize  << " scalefont" << std::endl
+	      << "setfont" << std::endl;
+	
+        *this << "newpath" << std::endl
+	    << rlx << ' ' << rly << " moveto"<< std::endl
+            << rux << ' ' << rly << " lineto"<< std::endl
+            << "stroke"<< std::endl;
+	    
+	size_t prec=this->precision();
+
+	if (x_step>0) {
+	  for (double i=rlx; i< rux; i=i+((rux-rlx)/(x_step))) {
+	  
+	    *this << "newpath" << std::endl
+	        << i << ' ' << rly - 0.05*lscale_y << " moveto"<< std::endl
+                << i << ' ' << rly + 0.05*lscale_y << " lineto"<< std::endl
+                << "stroke"<< std::endl;
+
+	    *this << "newpath" << std::endl
+  	        << i-0.05*lscale_x << ' ' << rly - 0.2*lscale_y 
+		<< " moveto"<< std::endl;
+
+	    this->precision(1);
+            *this << "("<< i << ") show"<< std::endl;
+	    this->precision(prec);
+	  }
+
+	  *this << "newpath" << std::endl
+	        << rux << ' ' << rly - 0.05*lscale_y << " moveto"<< std::endl
+                << rux << ' ' << rly + 0.05*lscale_y << " lineto"<< std::endl
+                << "stroke"<< std::endl;
+
+	  *this << "newpath" << std::endl
+  	        << rux-0.05*lscale_x << ' ' << rly - 0.2*lscale_y 
+		<< " moveto"<< std::endl;
+
+	  this->precision(1);
+          *this << "("<< rux << ") show"<< std::endl;
+	  this->precision(prec);
+	  
+          *this << "/Times-Roman findfont" << std::endl
+	      << 1.5* fontsize  << " scalefont" << std::endl
+	      << "setfont" << std::endl
+	      << "newpath" << std::endl
+	      << (rux+rlx)/2 << ' ' << rly - 0.5*lscale_y
+	      << " moveto"<< std::endl
+	      << "("<< x_name << ") show"<< std::endl
+	      << "/Times-Roman findfont" << std::endl
+	      << fontsize  << " scalefont" << std::endl
+	      << "setfont" << std::endl;
+	}
+	
+	*this << "newpath" << std::endl
+	    << rlx << ' ' << rly << " moveto"<< std::endl
+            << rlx << ' ' << ruy << " lineto"<< std::endl
+            << "stroke"<< std::endl;
+
+        if (y_step>0) {
+	  for (double i=rly; i<= ruy; i=i+((ruy-rly)/(y_step))) {
+	  
+	    *this << "newpath" << std::endl
+	        << rlx - 0.05*lscale_x << ' ' << i << " moveto"<< std::endl
+                << rlx + 0.05*lscale_x << ' ' << i << " lineto"<< std::endl
+                << "stroke"<< std::endl;
+
+	    *this << "newpath" << std::endl
+	        << rlx - 0.25*lscale_x << ' ' << i-0.05*lscale_y 
+		<< " moveto"<< std::endl;
+
+            this->precision(1);
+            *this << "("<< i << ") show"<< std::endl;
+	    this->precision(prec);
+	  }
+          
+	  *this << "newpath" << std::endl
+	        << rlx - 0.05*lscale_x << ' ' << ruy << " moveto"<< std::endl
+                << rlx + 0.05*lscale_x << ' ' << ruy << " lineto"<< std::endl
+                << "stroke"<< std::endl;
+
+	  *this << "newpath" << std::endl
+	        << rlx - 0.25*lscale_x << ' ' << ruy-0.05*lscale_y 
+		<< " moveto"<< std::endl;
+
+          this->precision(1);
+          *this << "("<< ruy << ") show"<< std::endl;
+	  this->precision(prec);
+
+          *this << "/Times-Roman findfont" << std::endl
+	      << 1.5* fontsize  << " scalefont" << std::endl
+	      << "setfont" << std::endl
+	      << "newpath" << std::endl
+	      << rlx - 0.5*lscale_x << ' ' << (ruy+rly)/2 
+	      << " moveto"<< std::endl
+	      << "90 rotate" << std::endl
+	      << "("<< y_name << ") show"<< std::endl
+	      << "/Times-Roman findfont" << std::endl
+	      << fontsize  << " scalefont" << std::endl
+	      << "setfont" << std::endl;
+	}
+	
+	*this << "linewidth setlinewidth" << std::endl
+	      << "fillcolour green" << std::endl;
       }
       
       void open(const Ariadne::Geometry::Rectangle<double>& bbox) {
@@ -248,7 +414,7 @@ namespace Ariadne {
 
     };
 
-    
+        
     template<typename R>
     epsfstream<R>&
     trace(epsfstream<R>& eps, const Ariadne::Geometry::Rectangle<R>& r)

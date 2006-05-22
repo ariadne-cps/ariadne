@@ -28,7 +28,7 @@ from ariadne.linear_algebra import *
 import sys
 
 def plot(fn,bb,set):
-  eps=EpsPlot(fn+".eps",bb)
+  eps=EpsPlot(fn+".eps",bb,0,1)
   eps.set_fill_colour("green")
   for bs in set:
     eps.write(bs)
@@ -40,6 +40,7 @@ def plot(fn,bb,set):
 
 grid=RegularGrid(2,Real(0.03125))
 bb=Rectangle("[-2,2]x[-2,2]")
+bbb=Rectangle("[0.8,1.05]x[0.93,1.05]x[-2,2]")
 
 A=Matrix("[-0.5,-0.75;+1.25,-0.5]")
 b=Vector("[0,0]")
@@ -119,7 +120,7 @@ r0=Rectangle("[1.0,1.01]x[1.0,1.01]x[1.0,1.01]")
 r=[r0]
 for i in range(0,4):
   r.append(lohner.integration_step(ls,r[-1],h))
-plot("integrate6",bb,r)
+plot("integrate6",bbb,r)
 print "Done\n"
 
 print "Testing integration of lorenz system on parallelotope"
@@ -127,14 +128,14 @@ p0=Parallelotope(r0)
 p=[p0]
 for i in range(0,1):
   p.append(lohner.integration_step(ls,p[-1],h))
-plot("integrate7",bb,p)
+plot("integrate7",bbb,p)
 print "Done\n"
 
 print "Testing integration of lorenz system on list set"
 initial=ParallelotopeListSet(p0)
 final=lohner.integrate(ls,initial,Real(0.14))
 #print final
-eps=EpsPlot("integrate8.eps",bb)
+eps=EpsPlot("integrate8.eps",bbb,0,1)
 eps.set_fill_colour("blue")
 eps.write(initial)
 eps.set_fill_colour("green")
@@ -155,8 +156,9 @@ bounding_set=GridMaskSet(grid,lr)
 bounding_set.adjoin(GridRectangle(grid,lr))
 
 final=lohner.integrate(ls,initial,bounding_set,Real(1.0))
-eps=EpsPlot("integrate8.eps",bb)
+eps=EpsPlot("integrate8.eps",bbb,0,1)
 eps.set_fill_colour("green")
 eps.write(final)
 eps.close
 print "Done\n"
+

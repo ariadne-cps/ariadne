@@ -31,7 +31,7 @@ using namespace Ariadne;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-void export_linear_program() {
+void export_Linear_Program() {
   typedef const FMatrix& (FLinearProgram::*MatrixConst) () const;
 
   class_<FLinearProgram>("RationalLinearProgram",init<FMatrix,FVector,FVector>())

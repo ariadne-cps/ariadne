@@ -204,7 +204,7 @@ namespace std {
   inline
   ostream& 
   operator<< (std::ostream &os, const std::valarray<T>& v) {
-    return Ariadne::Utility::write_sequence(os,v.begin(),v.end());
+    return Ariadne::Utility::write_sequence(os,&(v[0]),&(v[v.size()-1]));
   }
   
   template <typename T, typename C> 

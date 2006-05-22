@@ -23,4 +23,6 @@ else
     AC_MSG_WARN([Doxygen is not installed. You can not generate Ariadne's documentation.])
 fi
 
+
+AC_CONFIG_FILES([Makefile src/Makefile src/base/Makefile src/evaluation/Makefile src/geometry/Makefile src/linear_algebra/Makefile src/numeric/Makefile src/python/Makefile])
 AC_OUTPUT

@@ -39,6 +39,7 @@ namespace Ariadne {
     template<> int quotient(const Rational& x, const Rational& y) 
     {
       assert(y>=0);
+
       Rational d = x/y;
       Integer qz= d.get_num() / d.get_den();
       if(d<0 && qz*y!=x) {

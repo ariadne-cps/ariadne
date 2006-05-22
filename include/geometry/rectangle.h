@@ -39,7 +39,7 @@
 
 namespace Ariadne {
   namespace Geometry {
- 
+
     /* Forward declaration of friends. */
     template<typename R> Rectangle<R> rectangular_hull(const Rectangle<R>&, const Rectangle<R>&);
     template<typename R> Rectangle<R> regular_intersection(const Rectangle<R>&, const Rectangle<R>&);
@@ -59,7 +59,6 @@ namespace Ariadne {
      private:
       Rectangle<R>& _r; const size_type& _n;
     };
-    
     
     /*! \brief A cuboid of arbitrary dimension.
      */
@@ -116,6 +115,35 @@ namespace Ariadne {
         : _lower_corner(original._lower_corner),
           _upper_corner(original._upper_corner)
       { }
+    
+      /*! \brief The \a i th vertex. */
+      state_type vertex(size_type i) const 
+      {
+        size_type dim=this->_lower_corner.dimension();
+	state_type output(dim); 
+	      
+        if (i >= (size_type)(1<<dim))
+           throw std::domain_error("Rectangle::vertex(i): Wrong vertex index.");
+	     
+	for (size_type j=0; j<dim; j++) {
+          if (i%2)
+	    output[j]=this->_lower_corner[j];
+	  else
+	    output[j]=this->_upper_corner[j];
+	  i=i/2;
+        }
+
+	return output;
+      }
+      
+      /*! \brief Convert to a paralletope. */
+      operator Parallelotope<R> () const;
+      
+      /*! \brief Convert to a zonotope. */
+      operator Zonotope<R> () const;
+      
+      /*! \brief Convert to a polyhedron. */
+      operator Polyhedron<R> () const;
       
       /*! \brief Copy assignment operator. */
       Rectangle<R>& operator=(const Rectangle<R>& original) {
@@ -263,11 +291,16 @@ namespace Ariadne {
       Rectangle<R> quadrant(const BinaryWord& q) const;
       /*! \brief Subdivide into smaller pieces. */
       ListSet<R,Geometry::Rectangle> subdivide() const;
+      
       /*! The vertices of the rectangle. */
       array<state_type> vertices() const;
       
       /*! \brief Tests if \a point is included into a rectangle. */
       bool contains(const state_type& p) const;
+     
+      /*! \brief Tests if the rectangle contains a \a rectangle. */
+      bool contains(const Rectangle<R>& rect) const; 
+      
       /*! \brief Tests if \a point is included into the interior a rectangle. */
       bool interior_contains(const state_type& p) const;
 
@@ -308,7 +341,25 @@ namespace Ariadne {
       }
       return true;
     }
-      
+
+    template <typename R>
+    inline
+    bool 
+    Rectangle<R>::contains(const Rectangle& r) const 
+    {
+      if (this->empty()) {
+        return false;
+      }
+      if (r.dimension()!=this->dimension()) {
+        throw std::domain_error("This object and parameter have different space dimensions");
+      }
+      for (size_type i=0; i<this->dimension(); i++) {
+        if (r._lower_corner[i] < this->_lower_corner[i]) { return false; }
+        if (r._upper_corner[i] > this->_upper_corner[i]) { return false; }
+      }
+      return true;
+    }
+
     template <typename R>
     inline
     bool 
@@ -347,7 +398,7 @@ namespace Ariadne {
       }
       return false;
     }
-    
+   
     /*! \brief Tests intersection of interiors */
     template <typename R>
     inline

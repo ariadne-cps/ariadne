@@ -33,28 +33,19 @@ namespace Ariadne {
   namespace LinearAlgebra {
     
     template class Matrix<Real>;
-    template class Matrix<Field>;
 
     template std::ostream& operator<<(std::ostream&, const Matrix<Real>&);
-    template std::ostream& operator<<(std::ostream&, const Matrix<Field>&);
     
     template std::istream& operator>>(std::istream&, Matrix<Real>&);
-    template std::istream& operator>>(std::istream&, Matrix<Field>&);
     
     template Matrix<Real> zero_Matrix(size_type r, size_type c);
-    template Matrix<Field> zero_Matrix(size_type r, size_type c);
 
     template Matrix<Real> concatenate_columns(const Matrix<Real>& A1,
                                                 const Matrix<Real>& A2);
-    template Matrix<Field> concatenate_columns(const Matrix<Field>& A1,
-                                                  const Matrix<Field>& A2);
 
     template Matrix<Real> exp_approx(const Matrix<Real> &A, 
                                        const Real& e); 
     
-    template Matrix<Field> exp_approx(const Matrix<Field> &A, 
-                                         const Field& e); 
-
     
     template void lu_local_dec(Matrix<Field>& A, 
                                const array<size_type>& row, 
@@ -81,7 +72,6 @@ namespace Ariadne {
     template Integer common_denominator(const Matrix<Real>& A);
     
     template Vector<Integer> row_common_denominators(const Matrix<Real>& A);
-    template Vector<Integer> row_common_denominators(const Matrix<Field>& A);
 
     template void transform_linear_inequalities(const Matrix<Real>& T, 
                                                 Matrix<Real>& A, 
@@ -110,5 +100,20 @@ namespace Ariadne {
                                             array<size_type>& row,
                                             const array<size_type>& col);
     
+#ifndef REAL_IS_A_FIELD
+    template class Matrix<Field>;
+    
+    template std::ostream& operator<<(std::ostream&, const Matrix<Field>&);
+    template std::istream& operator>>(std::istream&, Matrix<Field>&);
+    
+    template Matrix<Field> zero_Matrix(size_type r, size_type c);
+    
+    template Matrix<Field> concatenate_columns(const Matrix<Field>& A1,
+                                                  const Matrix<Field>& A2);
+    template Matrix<Field> exp_approx(const Matrix<Field> &A, 
+                                         const Field& e); 
+
+    template Vector<Integer> row_common_denominators(const Matrix<Field>& A);
+#endif
   }
 }

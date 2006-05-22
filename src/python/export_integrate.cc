@@ -53,10 +53,15 @@ void export_integrate() {
   typedef RZonotope (RC1Integrator::*RchStepZntpFunc) (const RVectorFieldBase&, const RZonotope&, Real&) const;
   typedef RRectangle (RC1LohnerIntegrator::*IntRectFunc) (const RVectorFieldBase&, const RRectangle&, const Real&) const;
   typedef RParallelotope (RC1LohnerIntegrator::*IntPltpFunc) (const RVectorFieldBase&, const RParallelotope&, const Real&) const;
+  typedef RZonotope (RC1LohnerIntegrator::*IntZltzFunc) (const RVectorFieldBase&, const RZonotope&, const Real&) const;
   typedef RRectangleListSet (RC1LohnerIntegrator::*IntLSRectFunc) (const RVectorFieldBase&, const RRectangleListSet&, const Real&) const;
   typedef RZonotopeListSet (RC1LohnerIntegrator::*IntLSZNtpFunc) (const RVectorFieldBase&, const RZonotopeListSet&, const Real&) const;
-  typedef RZonotopeListSet (RC1LohnerIntegrator::*ReachLSPltpFunc) (const RVectorFieldBase&, const RParallelotopeListSet&, const Real&) const;
+  typedef RParallelotopeListSet (RC1LohnerIntegrator::*ReachLSPltpFunc) (const RVectorFieldBase&, const RParallelotopeListSet&, const Real&) const;
+  typedef RZonotopeListSet (RC1LohnerIntegrator::*ReachLSPltzFunc) (const RVectorFieldBase&, const RZonotopeListSet&, const Real&) const;
+  typedef RParallelotopeListSet (RC1LohnerIntegrator::*ReachLSPpFunc) (const RVectorFieldBase&, const RParallelotope&, const Real&) const;
+  typedef RZonotopeListSet (RC1LohnerIntegrator::*ReachLSZzFunc) (const RVectorFieldBase&, const RZonotope&, const Real&) const;
   typedef RParallelotopeListSet (RC1LohnerIntegrator::*IntLSPltpFunc) (const RVectorFieldBase&, const RParallelotopeListSet&, const Real&) const;
+  typedef RZonotopeListSet (RC1LohnerIntegrator::*IntLSZltzFunc) (const RVectorFieldBase&, const RZonotopeListSet&, const Real&) const;
   typedef RGridMaskSet (RC1Integrator::*IntGMSFunc) (const RVectorFieldBase&, const RGridMaskSet&, const RGridMaskSet&, const Real&) const;
   typedef RGridMaskSet (RC1LohnerIntegrator::*CRGMSFunc) (const RVectorFieldBase&, const RGridMaskSet&, const RGridMaskSet&) const;
  
@@ -70,9 +75,14 @@ void export_integrate() {
     .def("reach_step", RchStepZntpFunc(&RC1LohnerIntegrator::reachability_step))
     .def("integrate", IntRectFunc(&RC1LohnerIntegrator::integrate))
     .def("integrate", IntPltpFunc(&RC1LohnerIntegrator::integrate))
+    .def("integrate", IntZltzFunc(&RC1LohnerIntegrator::integrate))
     .def("integrate", IntLSPltpFunc(&RC1LohnerIntegrator::integrate))
+    .def("integrate", IntLSZltzFunc(&RC1LohnerIntegrator::integrate))
     .def("integrate", IntGMSFunc(&RC1Integrator::integrate))
     .def("reach", ReachLSPltpFunc(&RC1LohnerIntegrator::reach))
+    .def("reach", ReachLSPltzFunc(&RC1LohnerIntegrator::reach))
+    .def("reach", ReachLSPpFunc(&RC1LohnerIntegrator::reach))
+    .def("reach", ReachLSZzFunc(&RC1LohnerIntegrator::reach))
     .def("reach", IntGMSFunc(&RC1Integrator::reach))
     .def("chainreach", CRGMSFunc(&RC1LohnerIntegrator::chainreach), "chain reach of a set" )
     ;

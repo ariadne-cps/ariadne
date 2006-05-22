@@ -309,7 +309,7 @@ namespace Ariadne {
       R err=e/2;
       IntervalMatrix<R> result(A.size1(),A.size2());
       for(size_type i=0; i!=result.size1(); ++i) {
-        for(size_type j=0; j!=result.size1(); ++j) {
+        for(size_type j=0; j!=result.size2(); ++j) {
           R lower=Ariadne::approximate<R>(A(i,j),err)-err;
           R upper=Ariadne::approximate<R>(A(i,j),err)+err;
           result(i,j)=Interval<R>(lower,upper);

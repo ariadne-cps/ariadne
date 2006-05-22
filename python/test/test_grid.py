@@ -139,6 +139,14 @@ eps.write(gms)
 eps.close()
 
 
+eps=EpsPlot("gr4.eps",bb)
+eps.set_fill_colour("red")
+eps.write(p)
+eps.set_fill_colour("blue")
+eps.write(under_approximation(p,g))
+eps.close()
+
+
 print "Computing one-box neighbourhood"
 gmsn=gms.neighbourhood()
 print "Converting to partition tree set"
@@ -149,7 +157,7 @@ grls=GridRectangleListSet(pts)
 gms=GridMaskSet(grls)
 gms.clear()
 gms.adjoin(grls[0])
-eps=EpsPlot("gr4.eps",bb)
+eps=EpsPlot("gr5.eps",bb)
 eps.set_fill_colour("magenta")
 eps.write(grls)
 eps.set_fill_colour("green")

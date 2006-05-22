@@ -122,7 +122,21 @@ namespace Ariadne {
       
       return true;
     }
-      
+    
+    template<typename R>
+    bool 
+    Parallelotope<R>::contains(const Rectangle<R>& rect) const 
+    {
+      if (this->empty()) 
+        return false;
+    
+      for (size_type i=0; i< (size_type)(1<<rect.dimension()); i++)
+        if (!this->contains(rect.vertex(i)))
+	  return false;
+
+      return true;
+    }
+    
     /*! \brief Tests if the interior of the parallelotope contains \a point. */
     template<typename R>
     bool Parallelotope<R>::interior_contains(const state_type& point) const {
@@ -291,8 +305,15 @@ namespace Ariadne {
     {
       const Parallelotope<R>& p=*this;
       assert(p.dimension()==r.dimension());
+      /*
       dimension_type n=p.dimension();
-      
+     
+      This method has some problems. It fails when the parameters are
+      [1,17/16]x[19/16,5/4] and 
+        Parallelotope(
+	  centre=(1/2, 1/10)
+	  directions=[ 1,1/2; 1/2,3/5 ]
+	)
       // Construct tableau for testing intersection of rectangle and point
       // Rectangle  a<=x<=b
       // Parallelotope  x==c+Ae,  -1<=e<=1
@@ -349,7 +370,7 @@ namespace Ariadne {
       LinearAlgebra::LinearProgram<Rational> lp(T);
       
       bool result=(lp.optimal_value()!=0);
-      /*
+      
       if(result!=Geometry::disjoint(Polyhedron<R>(*this), Polyhedron<R>(r))) {
         std::cerr << "Incorrect result for \n  " << r << "\nand\n" << *this << "\n";
         std::cerr << T << "\n" << lp.tableau() << "\n";
@@ -357,7 +378,8 @@ namespace Ariadne {
         assert(false);
       }
       */
-      return result;
+      
+      return Geometry::disjoint(Polyhedron<R>(*this), Polyhedron<R>(r));
     }
     
     template <typename R>

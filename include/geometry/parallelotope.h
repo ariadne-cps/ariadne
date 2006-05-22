@@ -176,10 +176,10 @@ namespace Ariadne {
       Rectangle<R> bounding_box() const;
       
       /*! \brief The \a i th vertex. */
-      Point<R> vertex(const size_type& i) const;
+      state_type vertex(const size_type& i) const;
       
       /*! \brief The vertices of the parallelotope. */
-      std::vector< Point<R> > vertices() const;
+      std::vector< state_type > vertices() const;
       
       /*! \brief Convert to a zonotope. */
       operator Zonotope<R> () const;
@@ -190,6 +190,9 @@ namespace Ariadne {
       /*! \brief Tests if the parallelotope contains \a point. */
       bool contains(const state_type& point) const;
       
+      /*! \brief Tests if the parallelotope contains a \a rectangle. */
+      bool contains(const Rectangle<R>& rect) const; 
+    
       /*! \brief Tests if the interior of the parallelotope contains \a point. */
       bool interior_contains(const state_type& point) const;
 
@@ -240,7 +243,6 @@ namespace Ariadne {
     {
       return disjoint(B,A);
     }
-    
     
     /*! \brief Tests intersection of interiors */
     template <typename R>

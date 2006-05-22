@@ -80,7 +80,7 @@ inline void fvector_setitem_from_double(FVector& v, uint i, double x) {
 }
 
 
-void export_vector() {
+void export_Vector() {
   class_<RVector>("Vector",init<int>())
     .def(init<std::string>())
     .def(init<RVector>())
@@ -93,6 +93,7 @@ void export_vector() {
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 
+#ifndef REAL_IS_A_FIELD
   class_<FVector>("RationalVector",init<int>())
     .def(init<FVector>())
     .def("__len__", &FVector::size)
@@ -102,7 +103,8 @@ void export_vector() {
     .def("__setitem__",&fvector_setitem_from_double)
     .def(self_ns::str(self))    // __self_ns::str__
   ;
-  
+#endif
+
 }
 
 void export_IntervalVector() {

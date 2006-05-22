@@ -69,6 +69,7 @@ typedef Geometry::LatticeMaskSet LatticeMaskSet;
 typedef Geometry::LatticeCellListSet LatticeCellListSet;
 typedef Geometry::LatticeRectangleListSet LatticeRectangleListSet;
 
+typedef Geometry::grid_type grid_type;
 typedef Geometry::Grid<Real> RGrid;
 typedef Geometry::RegularGrid<Real> RRegularGrid;
 typedef Geometry::IrregularGrid<Real> RIrregularGrid;

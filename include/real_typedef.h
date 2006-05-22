@@ -33,12 +33,25 @@
 
 namespace Ariadne {
 
-//typedef double Real;
-typedef Ariadne::MPFloat Real;
-//typedef Ariadne::Dyadic Real;
+#ifdef DOUBLE_REAL
+#define REAL_IS_A_FIELD
+typedef double Real;
+#endif
 
-//typedef Ariadne::Rational Real;
-//#define RATIONAL_REAL
+#ifdef MPFLOAT_REAL
+#undef REAL_IS_A_FIELD
+typedef Ariadne::MPFloat Real;
+#endif
+
+#ifdef DYADIC_REAL
+#undef REAL_IS_A_FIELD
+typedef Ariadne::Dyadic Real;
+#endif 
+
+#ifdef RATIONAL_REAL
+#define REAL_IS_A_FIELD
+typedef Ariadne::Rational Real;
+#endif
 
 typedef Ariadne::numerical_traits<Real>::field_extension_type Field;
 }

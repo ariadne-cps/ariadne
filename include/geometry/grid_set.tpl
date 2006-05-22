@@ -33,6 +33,7 @@
 #include "../geometry/rectangle.h"
 #include "../geometry/parallelotope.h"
 #include "../geometry/zonotope.h"
+#include "../geometry/polyhedron.h"
 #include "../geometry/list_set.h"
 #include "../geometry/partition_tree_set.h"
 
@@ -43,7 +44,6 @@ namespace Ariadne {
     GridRectangle<R>::GridRectangle(const Grid<R>& g)
       : _grid(g), _lattice_set(g.dimension())
     { 
-      //std::cerr << "GridRectangle<R>::GridRectangle(const Grid<R>& g)" << std::endl;
       _lattice_set.set_lower_bound(0,1);
       _lattice_set.set_upper_bound(0,0);
     }
@@ -124,8 +124,6 @@ namespace Ariadne {
 
       return result;
     }
-
-
 
 
     template<typename R>
@@ -257,13 +255,9 @@ namespace Ariadne {
       return GridMaskSet<R>(A.grid(), A.bounds(), A.mask() - B.mask());
     }
 
-
-
-
     template<typename R>
     GridMaskSet<R>::operator ListSet<R,Rectangle>() const
     {
-      //std::cerr << "GridMaskSet<R>::operator ListSet<R,Rectangle>() const" << std::endl;
       ListSet<R,Rectangle> result(this->dimension());
       for(typename GridMaskSet::const_iterator riter=begin(); riter!=end(); ++riter) {
         Rectangle<R> r(*riter);
@@ -276,7 +270,6 @@ namespace Ariadne {
     template<typename R>
     GridCellListSet<R>::operator ListSet<R,Rectangle>() const
     {
-      //std::cerr << "GridCellListSet<R>::operator ListSet<R,Rectangle>() const" << std::endl;
       ListSet<R,Rectangle> result(dimension());
       for(size_type i=0; i!=size(); ++i) {
         result.push_back((*this)[i]);
@@ -287,7 +280,6 @@ namespace Ariadne {
     template<typename R>
     GridRectangleListSet<R>::operator ListSet<R,Rectangle>() const
     {
-      //std::cerr << "GridRectangleListSet<R>::operator ListSet<R,Rectangle>() const" << std::endl;
       ListSet<R,Rectangle> result(dimension());
       for(size_type i=0; i!=size(); ++i) {
         result.push_back((*this)[i]);
@@ -418,7 +410,6 @@ namespace Ariadne {
     GridRectangleListSet<R>::GridRectangleListSet(const ListSet<R,Rectangle>& s)
       : _grid_ptr(new IrregularGrid<R>(s)), _lattice_set(s.dimension())
     {
-      //std::cerr << "GridRectangleListSet<R>::GridRectangleListSet(const ListSet<R,Rectangle>& s)" << std::endl;
       typedef typename ListSet<R,Rectangle>::const_iterator list_set_const_iterator;
       for(list_set_const_iterator iter=s.begin(); iter!=s.end(); ++iter) {
         this->adjoin(GridRectangle<R>(grid(),*iter));
@@ -430,7 +421,6 @@ namespace Ariadne {
     GridRectangleListSet<R>::GridRectangleListSet(const PartitionTreeSet<R>& pts)
       : _grid_ptr(0),_lattice_set(pts.dimension()) 
     {
-      //std::cerr << "GridRectangleListSet<R>::GridRectangleListSet(const PartitionTreeSet<R>& pts)" << std::endl;
       SizeArray sizes=pts.depths();
       for(dimension_type i=0; i!=pts.dimension(); ++i) {
         sizes[i]=pow(2,sizes[i]);
@@ -509,7 +499,6 @@ namespace Ariadne {
     GridRectangle<R>
     over_approximation(const Rectangle<R>& r, const Grid<R>& g) 
     {
-      //std::cerr << "over_approximation<" << name<R>() << ">(const Rectangle<R>& r, const Grid<R>& g)" << std::endl;
       
       if(r.empty()) {
         return GridRectangle<R>(g);
@@ -523,10 +512,58 @@ namespace Ariadne {
       return GridRectangle<R>(g,lower,upper);
     }
     
+    template<typename R>
+    GridRectangle<R>
+    under_approximation(const Rectangle<R>& r, const Grid<R>& g) 
+    {
+      
+      if(r.empty()) {
+        return GridRectangle<R>(g);
+      }
+      IndexArray lower(r.dimension());
+      IndexArray upper(r.dimension());
+      for(size_type i=0; i!=r.dimension(); ++i) {
+        lower[i]=g.subdivision_lower_index(i,r.lower_bound(i))+1;
+        upper[i]=g.subdivision_upper_index(i,r.upper_bound(i))-1;
+      }
+
+      return GridRectangle<R>(g,lower,upper);
+    }
     
     template<typename R>
     GridCellListSet<R>
-    over_approximation(const Parallelotope<R>& p, const Grid<R>& g) 
+    over_approximation(const Zonotope<R>& p, const Grid<R>& g) 
+    {
+      GridCellListSet<R> result(g);
+      assert(g.dimension()==p.dimension());
+      if(p.empty()) {
+        return result; 
+      }
+      Rectangle<R> bb=p.bounding_box();
+
+      GridRectangle<R> gbb=over_approximation(bb,g);
+      LatticeRectangle block=gbb.lattice_set();
+
+      for(LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
+        GridCell<R> cell(g,*iter);
+        if(!disjoint(Rectangle<R>(cell),p)) {
+          result.adjoin(cell);
+        }
+      }
+
+      return result;
+    }
+
+    template<typename R>
+    inline
+    GridCellListSet<R>
+    over_approximation(const Parallelotope<R>& p, const Grid<R>& g) {
+       return over_approximation(Zonotope<R>(p), g);
+    }
+    
+    template<typename R>
+    GridCellListSet<R>
+    under_approximation(const Zonotope<R>& p, const Grid<R>& g) 
     {
       GridCellListSet<R> result(g);
       assert(g.dimension()==p.dimension());
@@ -539,29 +576,190 @@ namespace Ariadne {
 
       for(LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
         GridCell<R> cell(g,*iter);
-        if(!disjoint(Rectangle<R>(cell),p)) {
+        if(p.contains(Rectangle<R>(cell))) {
           result.adjoin(cell);
         }
       }
       return result;
     }
 
+    template<typename R>
+    inline
+    GridCellListSet<R>
+    under_approximation(const Parallelotope<R>& p, const Grid<R>& g) {
+       return under_approximation(Zonotope<R>(p), g);
+    }
+   
+    template<typename R>
+    GridRectangle<R>
+    over_approximation(const Rectangle<R>& r, const FiniteGrid<R>& g) 
+    {
+      Rectangle<R> rect=regular_intersection(r,g.bounding_box());
+     
+      if(rect.empty()) {
+        return GridRectangle<R>(g.grid());
+      }
+      IndexArray lower(rect.dimension());
+      IndexArray upper(rect.dimension());
+      
+      for(size_type i=0; i!=rect.dimension(); ++i) {
+        lower[i]=g.subdivision_lower_index(i,rect.lower_bound(i));
+        upper[i]=g.subdivision_upper_index(i,rect.upper_bound(i));
+      }
+      return GridRectangle<R>(g.grid(),lower,upper);
+    }
+    
+    template<typename R>
+    GridRectangle<R>
+    under_approximation(const Rectangle<R>& r, const FiniteGrid<R>& g) 
+    {
+      Rectangle<R> rect=regular_intersection(r,g.bounding_box());
+     
+      if(rect.empty()) {
+        return GridRectangle<R>(g.grid());
+      }
+      IndexArray lower(rect.dimension());
+      IndexArray upper(rect.dimension());
+      
+      for(size_type i=0; i!=rect.dimension(); ++i) {
+        lower[i]=g.subdivision_lower_index(i,rect.lower_bound(i))+1;
+        upper[i]=g.subdivision_upper_index(i,rect.upper_bound(i))-1;
+      }
+       
+      return GridRectangle<R>(g.grid(),lower,upper);
+    }
+   
+    template<typename R>
+    GridCellListSet<R>
+    over_approximation(const Zonotope<R>& p, const FiniteGrid<R>& g) 
+    {
+      GridCellListSet<R> result(g);
+      assert(g.dimension()==p.dimension());
+      if(p.empty()) {
+        return result; 
+      }
+      
+      Rectangle<R> bb=regular_intersection(Polyhedron<R>(p),
+                              Polyhedron<R>(g.bounding_box())).bounding_box();
+      
+      //Rectangle<R> bb=p.bounding_box();
+
+      if (bb.empty())
+      	return result;
+
+      GridRectangle<R> gbb=over_approximation(bb,g);
+      LatticeRectangle block=gbb.lattice_set();
+
+      for(LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
+        GridCell<R> cell(g.grid(),*iter);
+        if(!disjoint(Rectangle<R>(cell),p)) {
+          result.adjoin(cell);
+        }
+      }
+
+      return result;
+    }
+
+    template<typename R>
+    inline
+    GridCellListSet<R>
+    over_approximation(const Parallelotope<R>& p, const FiniteGrid<R>& g) {
+       return over_approximation(Zonotope<R>(p), g);
+    }
+    
+    template<typename R>
+    GridCellListSet<R>
+    under_approximation(const Zonotope<R>& p, const FiniteGrid<R>& g) 
+    {
+      GridCellListSet<R> result(g);
+      assert(g.dimension()==p.dimension());
+      if(p.empty()) {
+        return result; 
+      }
+      Rectangle<R> bb=regular_intersection(Polyhedron<R>(p),
+      				Polyhedron<R>(g.bounding_box())).bounding_box();
+      //Rectangle<R> bb=p.bounding_box();
+
+      if (bb.empty())
+      	return result;
+      
+      GridRectangle<R> gbb=over_approximation(bb,g);
+      LatticeRectangle block=gbb.lattice_set();
+
+      for(LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
+        GridCell<R> cell(g.grid(),*iter);
+        if(p.contains(Rectangle<R>(cell))) {
+          result.adjoin(cell);
+        }
+      }
+
+      return result;
+    }
+
+    template<typename R>
+    inline
+    GridCellListSet<R>
+    under_approximation(const Parallelotope<R>& p, const FiniteGrid<R>& g) {
+       return under_approximation(Zonotope<R>(p), g);
+    }
+    
     template<typename R, template<typename> class BS>
     GridMaskSet<R>
     over_approximation(const ListSet<R,BS>& ls, const FiniteGrid<R>& g) 
     {
-      //std::cerr << "GridMaskSet<R>::over_approximation(const ListSet<R,BS>& ls, const FiniteGrid<R>& g) " << std::endl;
       GridMaskSet<R> result(g);
       
       assert(g.dimension()==ls.dimension());
 
       for(typename ListSet<R,BS>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
-       result.adjoin(over_approximation(*iter,g.grid()));
+       result.adjoin(over_approximation(*iter,g));
+      }
+        
+      return result;
+    }
+     
+    template<typename R, template<typename> class BS>
+    GridMaskSet<R>
+    under_approximation(const ListSet<R,BS>& ls, const FiniteGrid<R>& g) 
+    {
+      GridMaskSet<R> result(g);
+      
+      assert(g.dimension()==ls.dimension());
+      for(typename ListSet<R,BS>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
+       result.adjoin(under_approximation(*iter,g.grid()));
       }
         
       return result;
     }
 
+    template<typename R>
+    GridMaskSet<R>
+    over_approximation(const GridMaskSet<R>& gm, const FiniteGrid<R>& g) 
+    {
+      GridMaskSet<R> result(g);
+      
+      assert(g.dimension()==gm.dimension());
+
+      for(size_t i=0; i< gm.size(); i++) 
+        result.adjoin(over_approximation(Rectangle<R>(gm[i]),g));
+        
+      return result;
+    }
+    
+    template<typename R>
+    GridMaskSet<R>
+    under_approximation(const GridMaskSet<R>& gm, const FiniteGrid<R>& g) 
+    {
+      GridMaskSet<R> result(g);
+      
+      assert(g.dimension()==gm.dimension());
+      for(size_t i=0; i< gm.size(); i++) {
+        result.adjoin(under_approximation(Rectangle<R>(gm[i]),g));
+      }
+        
+      return result;
+    }
+    
     template<typename R>
     GridRectangle<R>
     over_approximation_of_intersection(const Rectangle<R>& r1, 
@@ -577,7 +775,6 @@ namespace Ariadne {
                                        const Rectangle<R>& r,
                                        const Grid<R>& g) 
     {
-      //std::cerr << "over_approximation_of_intersection(Parallelotope<R>, GridRectangle<R>, Grid<R>)" << std::endl;
       GridCellListSet<R> result(g);
       GridRectangle<R> gbb=over_approximation_of_intersection(p.bounding_box(),r,g);
       if(!gbb.empty()) {
@@ -617,7 +814,6 @@ namespace Ariadne {
     GridMaskSet<R>
     over_approximation_of_intersection(const ListSet<R,BS>& ls, const Rectangle<R>& r, const FiniteGrid<R>& g) 
     {
-      //std::cerr << "GridMaskSet<R>::over_approximation(const ListSet<R,BS>& ls, const FiniteGrid<R>& g) " << std::endl;
       GridMaskSet<R> result(g);
       
       assert(g.dimension()==ls.dimension());

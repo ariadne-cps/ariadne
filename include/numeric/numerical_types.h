@@ -116,8 +116,6 @@ namespace Ariadne {
       return num.denominator();
     }
     
-    
-  
     inline Integer numerator(const Rational& num){ 
       return num.get_num(); }
   

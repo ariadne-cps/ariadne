@@ -33,10 +33,13 @@ namespace Ariadne {
   namespace LinearAlgebra {
     
     template class IntervalVector<Real>;
-    template class IntervalVector<Field>;
 
     template std::ostream& operator<<(std::ostream&, const IntervalVector<Real>&);
+    
+#ifndef REAL_IS_A_FIELD
+    template class IntervalVector<Field>;
+    
     template std::ostream& operator<<(std::ostream&, const IntervalVector<Field>&);
-
+#endif
   }
 }

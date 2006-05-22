@@ -39,6 +39,9 @@
 #include "../geometry/lattice_set.h" 
 #include "../geometry/list_set.h" 
 #include "../geometry/grid_set.h" 
+#include "../geometry/parallelotope.h" 
+#include "../geometry/zonotope.h" 
+#include "../geometry/polyhedron.h" 
 
 namespace Ariadne {
   namespace Geometry {
@@ -94,7 +97,25 @@ namespace Ariadne {
         this->_upper_corner[i]=std::max(p1[i],p2[i]);
       }
     }
-      
+    
+    template <typename R>
+    Rectangle<R>::operator Parallelotope<R>() const 
+    {
+       return Parallelotope<R>(*this); 	
+    }
+    
+    template <typename R>
+    Rectangle<R>::operator Zonotope<R>() const 
+    {
+       return Zonotope<R>(*this); 	
+    }
+    
+    template <typename R>
+    Rectangle<R>::operator Polyhedron<R>() const 
+    {
+       return Polyhedron<R>(*this); 	
+    }
+    
     template <typename R>
     LinearAlgebra::IntervalVector<R> 
     Rectangle<R>::position_vectors() const 

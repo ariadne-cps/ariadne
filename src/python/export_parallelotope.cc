@@ -39,14 +39,44 @@ using namespace Ariadne::Geometry;
 #include <boost/python.hpp>
 using namespace boost::python;
 
+template <template <typename> class BS>
+inline
+Parallelotope<Real> 
+touching_intersection(const Parallelotope<Real> &a, 
+		      const BS<Real> &b) {
+	
+  if (interiors_intersect(a,b))
+    return a;
+
+  return Parallelotope<Real>(a.dimension());
+}
+
+template Parallelotope<Real> touching_intersection(
+		const Parallelotope<Real> &,  
+		const Rectangle<Real> &);
+
+template Parallelotope<Real> touching_intersection(
+		const Parallelotope<Real> &,  
+		const Parallelotope<Real> &);
+
 void export_parallelotope() {
   typedef bool (*PltpPltpBinPred) (const RParallelotope&, const RParallelotope&);
   typedef bool (*PltpRectBinPred) (const RParallelotope&, const RRectangle&);
   typedef bool (*RectPltpBinPred) (const RRectangle&, const RParallelotope&);
   
+  typedef RParallelotope (*PltpRectBinFun) (const RParallelotope&, 
+		                            const RRectangle&);
+  typedef RParallelotope (*PltpPltpBinFun) (const RParallelotope&, 
+		                            const RParallelotope&);
+  
+  typedef bool (RParallelotope::*RectPred)(const RRectangle &) const;
+  typedef bool (RParallelotope::*PointPred) (const RPoint&) const;
+  
   def("interiors_intersect", PltpPltpBinPred(&interiors_intersect));
   def("interiors_intersect", PltpRectBinPred(&interiors_intersect));
   def("interiors_intersect", RectPltpBinPred(&interiors_intersect));
+  def("touching_intersection", PltpRectBinFun(&touching_intersection));
+  def("touching_intersection", PltpPltpBinFun(&touching_intersection));
   def("disjoint", PltpPltpBinPred(&disjoint));
   def("disjoint", PltpRectBinPred(&disjoint));
   def("disjoint", RectPltpBinPred(&disjoint));
@@ -68,7 +98,8 @@ void export_parallelotope() {
     .def("empty", &RParallelotope::empty)
     .def("empty_interior", &RParallelotope::empty_interior)
     .def("dimension", &RParallelotope::dimension)
-    .def("contains", &RParallelotope::contains)
+    .def("contains", RectPred(&RParallelotope::contains) )
+    .def("contains", PointPred(&RParallelotope::contains))
     .def("interior_contains", &RParallelotope::interior_contains)
     .def("centre", &RParallelotope::centre)
     .def("radius", &RParallelotope::radius)

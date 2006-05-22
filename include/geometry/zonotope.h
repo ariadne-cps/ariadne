@@ -77,6 +77,15 @@ namespace Ariadne {
       /*! \brief Default constructor constructs an empty zonotope of dimension \a n. */
       explicit Zonotope(size_type n = 0)
         : _centre(n),  _generators(n,0) { }
+     
+      /*! \brief Construct from centre and directions. */
+      explicit Zonotope(const Vector_type& c, const Matrix_type& m)
+        : _centre(c), _generators(m)
+      {
+        if (c.size()!=m.size1()) {
+          throw std::domain_error("The centre and directions have different dimensions.");
+        }
+      }
       
       /*! \brief Construct from centre and directions. */
       explicit Zonotope(const state_type& c, const Matrix_type& m)
@@ -137,6 +146,11 @@ namespace Ariadne {
         return this->bounding_box().radius();
       }
       
+      /*! \brief The \a n th of principle direction. */
+      Vector_type generator(size_type n) const {
+        return column(this->_generators,n);
+      }
+      
       /*! \brief The Matrix of principle directions. */
       Matrix_type generators() const {
         return this->_generators;
@@ -167,10 +181,19 @@ namespace Ariadne {
       
       /*! \brief Tests if the zonotope contains \a point. */
       bool contains(const state_type& point) const;
+     
+      /*! \brief Tests if the zonotope contains a \a rectangle. */
+      bool contains(const Rectangle<R>& rect) const; 
       
       /*! \brief Tests if the interior of the zonotope contains \a point. */
       bool interior_contains(const state_type& point) const;
 
+      /*! \brief Subdivide into two smaller pieces. */
+      ListSet<R,Geometry::Zonotope> divide() const;
+      
+      /*! \brief Subdivide into smaller pieces in each dimension. */
+      ListSet<R,Geometry::Zonotope> subdivide() const;
+      
       /*! \brief Convert to a polyhedron. */
       operator Polyhedron<R> () const;
       
@@ -265,7 +288,10 @@ namespace Ariadne {
     bool 
     interiors_intersect(const Zonotope<R>& A, const Zonotope<R>& B) 
     {
-      return !minkowski_sum(A,B).interior_contains(Point<R>(A.dimension()));
+      //return !minkowski_sum(A,B).interior_contains(Point<R>(A.dimension()));
+      
+      return interiors_intersect(Polyhedron<R>(A),Polyhedron<R>(B));
+      
     }
    
     /*! \brief Tests intersection of interiors */

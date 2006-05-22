@@ -27,6 +27,7 @@
 #include "linear_algebra/linear_algebra.h"
 
 #include "geometry/parallelotope.h"
+#include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
@@ -43,6 +44,7 @@ struct RGridWrap : RGrid, wrapper<RGrid>
 {
   RGrid* clone() const { return this->get_override("clone")(); }
   dimension_type dimension() const { return this->get_override("dimension")(); }
+  grid_type type() const { return this->get_override("type")(); }
   real_type subdivision_coordinate(dimension_type d, index_type n) const { return this->get_override("subdivision_coordinate")(); }
   index_type subdivision_interval(dimension_type d, const real_type& x) const { return this->get_override("subdivision_interval")(); }
   bool bounds_enclose(const RRectangle& r) const { return this->get_override("bounds_enclose")(); }
@@ -51,8 +53,14 @@ struct RGridWrap : RGrid, wrapper<RGrid>
 
 typedef RGridRectangle (*ApprxRectGridFunc) (const RRectangle&, const RGrid&);
 typedef RGridCellListSet (*ApprxPltpGridFunc) (const RParallelotope&, const RGrid&);
+typedef RGridCellListSet (*ApprxZltpGridFunc) (const RZonotope&, const RGrid&);
+typedef RGridRectangle (*ApprxRectFGridFunc) (const RRectangle&, const RFiniteGrid&);
+typedef RGridCellListSet (*ApprxPltpFGridFunc) (const RParallelotope&, const RFiniteGrid&);
+typedef RGridCellListSet (*ApprxZltpFGridFunc) (const RZonotope&, const RFiniteGrid&);
 typedef RGridMaskSet (*ApprxLSRectFGridFunc) (const RRectangleListSet&, const RFiniteGrid&);
 typedef RGridMaskSet (*ApprxLSPltpFGridFunc) (const RParallelotopeListSet&, const RFiniteGrid&);
+typedef RGridMaskSet (*ApprxLSZltpFGridFunc) (const RZonotopeListSet&, const RFiniteGrid&);
+typedef RGridMaskSet (*ApprxGridltpFGridFunc) (const RGridMaskSet&, const RFiniteGrid&);
 
 typedef void (RGridMaskSet::*GMSAdjCellFunc) (const RGridCell&);
 typedef void (RGridMaskSet::*GMSAdjRectFunc) (const RGridRectangle&);
@@ -60,8 +68,10 @@ typedef void (RGridMaskSet::*GMSAdjCellLSFunc) (const RGridCellListSet&);
 typedef void (RGridMaskSet::*GMSAdjRectLSFunc) (const RGridRectangleListSet&);
 typedef void (RGridMaskSet::*GMSAdjGMSFunc) (const RGridMaskSet&);
 
-typedef RGridMaskSet (*GMSBinFunc) (const RGridMaskSet&, const RGridMaskSet&);
+typedef bool (*GMSBinPred) (const RGridMaskSet&, const RGridMaskSet&);
+typedef bool (*GMSRectPred) (const RGridMaskSet&, const RRectangle&);
 
+typedef RGridMaskSet (*GMSBinFunc) (const RGridMaskSet&, const RGridMaskSet&);
 
 void export_grid_set() {
 
@@ -107,7 +117,6 @@ void export_grid_set() {
     .def("subdivision_lower_index", &RFiniteGrid::subdivision_lower_index)
     .def("subdivision_upper_index", &RFiniteGrid::subdivision_upper_index)
     .def("grid", &RFiniteGrid::grid,return_internal_reference<>())
-//    .def("grid", &RFiniteGrid::grid,return_value_policy<reference_existing_object>())
     .def("bounds", &RFiniteGrid::bounds,return_value_policy<copy_const_reference>())
     .def(self_ns::str(self))    // __str__
     ;
@@ -182,9 +191,28 @@ void export_grid_set() {
   def("join",GMSBinFunc(&Geometry::join));
   def("difference",GMSBinFunc(&Geometry::difference));
   def("regular_intersection",GMSBinFunc(&Geometry::regular_intersection));
+  def("interiors_intersect",GMSBinPred(&Geometry::interiors_intersect));
+  def("interiors_intersect",GMSRectPred(&Geometry::interiors_intersect));
     
   def("over_approximation",ApprxRectGridFunc(&Geometry::over_approximation));
   def("over_approximation",ApprxPltpGridFunc(&Geometry::over_approximation));
+  def("over_approximation",ApprxZltpGridFunc(&Geometry::over_approximation));
+  def("over_approximation",ApprxRectFGridFunc(&Geometry::over_approximation));
+  def("over_approximation",ApprxPltpFGridFunc(&Geometry::over_approximation));
+  def("over_approximation",ApprxZltpFGridFunc(&Geometry::over_approximation));
   def("over_approximation",ApprxLSRectFGridFunc(&Geometry::over_approximation));
   def("over_approximation",ApprxLSPltpFGridFunc(&Geometry::over_approximation));
+  def("over_approximation",ApprxLSZltpFGridFunc(&Geometry::over_approximation));
+  def("over_approximation",ApprxGridltpFGridFunc(&Geometry::over_approximation));
+
+  def("under_approximation",ApprxRectGridFunc(&Geometry::under_approximation));
+  def("under_approximation",ApprxPltpGridFunc(&Geometry::under_approximation));
+  def("under_approximation",ApprxZltpGridFunc(&Geometry::under_approximation));
+  def("under_approximation",ApprxRectFGridFunc(&Geometry::under_approximation));
+  def("under_approximation",ApprxPltpFGridFunc(&Geometry::under_approximation));
+  def("under_approximation",ApprxZltpFGridFunc(&Geometry::under_approximation));
+  def("under_approximation",ApprxLSRectFGridFunc(&Geometry::under_approximation));
+  def("under_approximation",ApprxLSPltpFGridFunc(&Geometry::under_approximation));
+  def("under_approximation",ApprxLSZltpFGridFunc(&Geometry::under_approximation));
+  def("under_approximation",ApprxGridltpFGridFunc(&Geometry::under_approximation));
 }

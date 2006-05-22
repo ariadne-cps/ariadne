@@ -425,6 +425,8 @@ namespace Ariadne {
     LatticeMaskSet::adjoin(const LatticeRectangle& r) {
       assert(subset(r,this->bounds()));
 
+      if (r.empty()) return;
+
       dimension_type n=this->dimension();
       const IndexArray& rlower(r.lower());
       const IndexArray& rupper(r.upper());
@@ -432,7 +434,8 @@ namespace Ariadne {
       const SizeArray& gstrides(this->strides());
 
       if(n==1) {
-        for(size_type i=rlower[0]-glower[0]; i!=size_type(rupper[0]-glower[0]); ++i) {
+        for(size_type i=rlower[0]-glower[0]; 
+			i!=size_type(rupper[0]-glower[0]); ++i) {
           _mask[i]=true;
         }
         return;
@@ -446,12 +449,15 @@ namespace Ariadne {
             _mask[index]=true;
           }
         }
+
         return;
       }
+
 
       if(n==0) {
         return;
       }
+
 
       /* dim>2 */
       SizeArray rsizes=r.sizes();
@@ -490,7 +496,6 @@ namespace Ariadne {
 
     void 
     LatticeMaskSet::adjoin(const LatticeMaskSet& lm) {
-      //std::cerr << "LatticeMaskSet::adjoin(const LatticeMaskSet&)" << std::endl;
       if(this->bounds()==lm.bounds()) {
         this->_mask |= lm._mask;
       }
@@ -560,12 +565,10 @@ namespace Ariadne {
     bool 
     interiors_intersect(const LatticeRectangle& r, const LatticeMaskSet& ms) 
     {
-      //std::cerr << "interiors_intersect(const LatticeRectangle& r, const LatticeMaskSet& ms)" << std::endl;
       LatticeRectangle rstr=regular_intersection(r,ms.bounds());
       if(rstr.empty()) {
         return false;
       }
-      //std::cerr << "LatticeRectangle: " << r << std::endl;
       for(LatticeRectangle::const_iterator i=rstr.begin(); i!=rstr.end(); ++i) {
         if(subset(*i,ms)) {
           return true;
@@ -577,7 +580,6 @@ namespace Ariadne {
     bool 
     interiors_intersect(const LatticeMaskSet& a, const LatticeMaskSet& b) 
     {
-      //std::cerr << "interiors_intersect(const LatticeMaskSet& r, const LatticeMaskSet& ms)" << std::endl;
       assert(a.bounds()==b.bounds());
       BooleanArray::const_iterator aiter=a.mask().begin();
       BooleanArray::const_iterator biter=a.mask().begin();
@@ -603,8 +605,6 @@ namespace Ariadne {
     bool 
     subset(const LatticeCell& c, const LatticeMaskSet& ms) 
     {
-      //std::cerr << "subset(const LatticeCell& c, const LatticeMaskSet& ms)" << std::endl; 
-      //std::cerr << "LatticeCell: " << c << std::endl;
       return ms.mask()[ms.index(c.lower())];
     }
     
@@ -627,14 +627,12 @@ namespace Ariadne {
     bool 
     subset(const LatticeRectangle& r, const LatticeMaskSet& ms) 
     {
-      //std::cerr << "subset(const LatticeRectangle& r, const LatticeMaskSet& ms)" << std::endl; 
       if(r.empty()) {
         return true;
       }
       if(!subset(r,ms.bounds())) {
         return false;
       }
-      //std::cerr << "LatticeRectangle: " << r << std::endl;
       for(LatticeRectangle::const_iterator i=r.begin(); i!=r.end(); ++i) {
         if(!subset(*i,ms)) {
           return false;

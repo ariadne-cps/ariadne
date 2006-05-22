@@ -23,6 +23,7 @@
 
 #include "geometry/rectangle.tpl"
 #include "geometry/parallelotope.tpl"
+#include "geometry/zonotope.tpl"
 
 #include "geometry/list_set.h"
 #include "geometry/list_set.tpl"
@@ -36,8 +37,19 @@ namespace Ariadne {
     template class ListSet<Real,Parallelotope>;
     template class ListSet<Real,Zonotope>;
 
+    template  ListSet<Real,Rectangle>::operator  ListSet<Real,Parallelotope>() const;
+    template  ListSet<Real,Rectangle>::operator  ListSet<Real,Zonotope>() const;
+    template  ListSet<Real,Parallelotope>::operator  ListSet<Real,Zonotope>() const;
+    
+
     template bool disjoint(const ListSet<Real,Rectangle>&, const ListSet<Real,Rectangle>&);
     template bool interiors_intersect(const ListSet<Real,Rectangle>&, const ListSet<Real,Rectangle>&);
+    template bool interiors_intersect(const ListSet<Real,Parallelotope>&, const ListSet<Real,Parallelotope>&);
+    template bool interiors_intersect(const ListSet<Real,Zonotope>&, const ListSet<Real,Zonotope>&);
+    template bool interiors_intersect(const Parallelotope<Real>&, const ListSet<Real,Parallelotope>&);
+    template bool interiors_intersect(const ListSet<Real,Parallelotope>&, const Parallelotope<Real> &);
+    template bool interiors_intersect(const Zonotope<Real>&, const ListSet<Real,Zonotope>&);
+    template bool interiors_intersect(const ListSet<Real,Zonotope>&, const Zonotope<Real> &);
     template bool inner_subset(const ListSet<Real,Rectangle>&, const ListSet<Real,Rectangle>&);
     template bool subset(const ListSet<Real,Rectangle>&, const ListSet<Real,Rectangle>&);
     template ListSet<Real,Rectangle> regular_intersection(const ListSet<Real,Rectangle>&, const ListSet<Real,Rectangle>&);

@@ -16,7 +16,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
- *over
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Templece Place - Suite 330, Boston, MA 02111-1307, USA.
@@ -48,6 +48,10 @@ namespace Ariadne {
 
     template<typename R> bool interiors_intersect(const GridRectangle<R>&, const GridRectangle<R>&);
     template<typename R> bool interiors_intersect(const Rectangle<R>&, const GridMaskSet<R>&);
+    template<typename R> 
+    inline bool 
+    interiors_intersect(const GridMaskSet<R>& gm, const Rectangle<R>& r)
+    { return interiors_intersect(r,gm); }
     template<typename R> bool interiors_intersect(const GridRectangle<R>&, const GridMaskSet<R>&);
     template<typename R> bool interiors_intersect(const GridMaskSet<R>&, const GridMaskSet<R>&);
     template<typename R> bool subset(const GridRectangle<R>&, const GridRectangle<R>&);
@@ -75,10 +79,58 @@ namespace Ariadne {
     GridCellListSet<R>
     over_approximation(const Zonotope<R>& p, const Grid<R>& g);
 
+    template<typename R>
+    GridRectangle<R>
+    over_approximation(const Rectangle<R>& p, const FiniteGrid<R>& g);
+
+    template<typename R>
+    GridCellListSet<R>
+    over_approximation(const Parallelotope<R>& p, const FiniteGrid<R>& g);
+    
+    template<typename R>
+    GridCellListSet<R>
+    over_approximation(const Zonotope<R>& p, const FiniteGrid<R>& g);
+    
     template<typename R, template<typename> class BS>
     GridMaskSet<R>
     over_approximation(const ListSet<R,BS>& ls, const FiniteGrid<R>& g); 
 
+    template<typename R>
+    GridMaskSet<R>
+    over_approximation(const GridMaskSet<R>& gm, const FiniteGrid<R>& g);
+    
+    template<typename R>
+    GridRectangle<R>
+    under_approximation(const Rectangle<R>& p, const Grid<R>& g);
+
+    template<typename R>
+    GridCellListSet<R>
+    under_approximation(const Parallelotope<R>& p, const Grid<R>& g);
+
+    template<typename R>
+    GridCellListSet<R>
+    under_approximation(const Zonotope<R>& p, const Grid<R>& g);
+
+    template<typename R>
+    GridRectangle<R>
+    under_approximation(const Rectangle<R>& p, const FiniteGrid<R>& g);
+
+    template<typename R>
+    GridCellListSet<R>
+    under_approximation(const Parallelotope<R>& p, const FiniteGrid<R>& g);
+    
+    template<typename R>
+    GridCellListSet<R>
+    under_approximation(const Zonotope<R>& p, const FiniteGrid<R>& g);
+    
+    template<typename R, template<typename> class BS>
+    GridMaskSet<R>
+    under_approximation(const ListSet<R,BS>& ls, const FiniteGrid<R>& g); 
+
+    template<typename R>
+    GridMaskSet<R>
+    under_approximation(const GridMaskSet<R>& gm, const FiniteGrid<R>& g);
+    
     template<typename R>
     GridRectangle<R>
     over_approximation_of_intersection(const Rectangle<R>& r1, 
@@ -534,6 +586,16 @@ namespace Ariadne {
 
       /*! \brief The rectangle bounding the region of the mask. */
       GridRectangle<R> bounding_box() const { return GridRectangle<R>(grid(),bounds()); }
+     
+      template <template<typename> class BS>
+      operator ListSet<R,BS> () const {
+         ListSet<R,BS> result(this->dimension());
+
+	 for (size_type i=0; i<this->size(); i++) 
+           result.push_back((BS<R>)((Rectangle<R>)((*this)[i])));
+      
+	 return result;
+      }
       
       /*! \brief Removes all cells. */
       void clear() {
@@ -549,25 +611,36 @@ namespace Ariadne {
       /*! \brief Adjoins a rectangle to the set. */
       void adjoin(const GridRectangle<R>& r) {
         assert(r.grid()==this->grid());
+	
+	if (r.empty()) return;
         this->_lattice_set.adjoin(r._lattice_set);
       }
 
       /*! \brief Adjoins a GridMaskSet to the set. */
       void adjoin(const GridMaskSet<R>& gms) {
-        //std::cerr << "GridMaskSet<R>::adjoin(const GridMaskSet<R>&)" << std::endl;
         assert(gms.grid()==this->grid());
-        this->_lattice_set.adjoin(gms._lattice_set);
+
+	if (gms.empty()) 
+	  return;
+        
+	this->_lattice_set.adjoin(gms._lattice_set);
       }
 
       /*! \brief Adjoins a GridCellListSet to the set. */
       void adjoin(const GridCellListSet<R>& cls) {
         assert(cls.grid()==this->grid());
+	
+	if (cls.empty()) 
+	  return;
+	
         this->_lattice_set.adjoin(cls._lattice_set);
       }
 
       /*! \brief Adjoins a GridRectangleListSet to the set. */
       void adjoin(const GridRectangleListSet<R>& rls) {
         assert(rls.grid()==this->grid());
+	
+	if (rls.empty()) return;
         this->_lattice_set.adjoin(rls._lattice_set);
       }
 

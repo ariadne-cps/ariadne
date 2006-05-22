@@ -189,9 +189,9 @@ namespace Ariadne {
       /*!\brief Set the upper bound in the \a i th dimension to \a n. */
       void set_upper_bound(dimension_type i, index_type n) { this->_upper[i]=n; }
 
-      /*!\brief The position of the lower corner in the latiice. */
+      /*!\brief The position of the lower corner in the lattice. */
       const IndexArray& lower() const { return this->_lower; }
-      /*!\brief The position of the upper corner in the latiice. */
+      /*!\brief The position of the upper corner in the lattice. */
       const IndexArray& upper() const { return this->_upper; }
 
       /*! \brief The number of cells in each dimension. */
@@ -410,8 +410,8 @@ namespace Ariadne {
 
       /*! \brief Adjoins a LatticeCell to the set. */
       void adjoin(const LatticeCell& c) { 
-        assert(subset(c,this->bounds()));
-        this->_mask[this->index(c.position())]=true;
+        if (subset(c,this->bounds()))
+           this->_mask[this->index(c.position())]=true;
       }
       
       /*! \brief Adjoins a LatticeRectangle to the set. */

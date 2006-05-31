@@ -7,12 +7,12 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can rediself_ns::stribute it and/or modify
+ *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
- *  This program is diself_ns::stributed in the hope that it will be useful,
+ *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
@@ -28,6 +28,7 @@ void export_lattice_map();
 void export_apply();
 void export_map();
 void export_affine_map();
+void export_affine_map_with_set();
 void export_polynomial_map();
 void export_henon_map();
  
@@ -42,6 +43,7 @@ BOOST_PYTHON_MODULE(evaluation)
   export_apply();
   export_map();
   export_affine_map();
+  export_affine_map_with_set();
   export_polynomial_map();
   export_henon_map();
   

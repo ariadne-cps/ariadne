@@ -7,7 +7,7 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can rediself_ns::stribute it and/or modify
+ *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
@@ -59,7 +59,6 @@ template Zonotope<Real> touching_intersection(const Zonotope<Real> &,
 template Zonotope<Real> touching_intersection(const Zonotope<Real> &,  
                                               const Zonotope<Real> &);
 
-
 void export_zonotope() {
   typedef RZonotope (*ZntpZntpBinFunc) (const RZonotope&, const RZonotope&);
   typedef bool (*ZntpZntpBinPred) (const RZonotope&, const RZonotope&);
@@ -70,6 +69,8 @@ void export_zonotope() {
 
   typedef RZonotope (*ZntpRectBinFun) (const RZonotope&, const RRectangle&);
   typedef RZonotope (*ZntpPltpBinFun) (const RZonotope&, const RParallelotope&);
+  typedef RZonotope (*RectZntpBinFun) (const RRectangle&, const RZonotope&);
+  typedef RZonotope (*PltpZntpBinFun) (const RParallelotope&, const RZonotope&);
   typedef RZonotope (*ZntpZntpBinFun) (const RZonotope&, const RZonotope&);
   
   typedef bool (RZonotope::*RectPred)(const RRectangle &) const;
@@ -99,7 +100,7 @@ void export_zonotope() {
   def("subset", RectZntpBinPred(&subset));
   def("subset", PltpZntpBinPred(&subset));
   def("subset", ZntpPltpBinPred(&subset));
-  def("minkowski_sum", ZntpZntpBinFunc(&minkowski_sum));
+  //def("minkowski_sum", ZntpZntpBinFunc(&minkowski_sum));
 
   class_<RZonotope>("Zonotope",init<int>())
     .def(init<RPoint,RMatrix>())
@@ -117,6 +118,12 @@ void export_zonotope() {
     //.def("==", &RZonotope::operator==)
     //.def("!=", &RZonotope::operator!=)
     .def("interior_contains", &RZonotope::interior_contains)
+    .def("__add__", ZntpRectBinFun(&minkowski_sum))
+    .def("__add__", ZntpPltpBinFun(&minkowski_sum))
+    .def("__add__", ZntpZntpBinFunc(&minkowski_sum))
+    .def("__sub__", ZntpRectBinFun(&minkowski_difference))
+    .def("__sub__", ZntpPltpBinFun(&minkowski_difference))
+    .def("__sub__", ZntpZntpBinFunc(&minkowski_difference))
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 }

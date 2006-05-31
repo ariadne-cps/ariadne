@@ -66,7 +66,7 @@ namespace Ariadne {
      public:
       /*! \brief Construct from a string literal. 
        *
-       *  The literal must be of the form <tt>c x_0^a0 x_1^a1 ... a_n^an</tt>,
+       *  The literal must be of the form <tt>c x_0^a0 x_1^a1 ... x_n^an</tt>,
        *  where \c c is a denotable real number and \c a0,...\c an are positive integers.
        *  Terms may be omitted.
        */

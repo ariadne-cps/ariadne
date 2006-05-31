@@ -29,7 +29,16 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template class Rectangle<Real>;
+    template class Rectangle<Real>; 
+
+    template Rectangle<Real> regular_intersection(const Rectangle<Real>&, 
+                                         const Rectangle<Real>&);
+
+    template Rectangle<Real> minkowski_sum(const Rectangle<Real>& A, 
+                                  const Rectangle<Real>& B);
+
+    template Rectangle<Real> minkowski_difference(const Rectangle<Real>& A, 
+                                         const Rectangle<Real>& B);
 
     template std::ostream& operator<<(std::ostream&, const Rectangle<Real>&);
     template std::istream& operator>>(std::istream&, Rectangle<Real>&);

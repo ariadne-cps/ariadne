@@ -1,8 +1,8 @@
 /***************************************************************************
- *            python/export_vector_field.cc
+ *            affine_multimap.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -11,7 +11,7 @@
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
- *  This program is diself_ns::stributed in the hope that it will be useful,
+ *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
@@ -21,23 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "evaluation/vector_field.h"
+#include "evaluation/affine_multimap.h"
+#include "evaluation/affine_multimap.tpl"
 
-#include "python/typedefs.h"
-using namespace Ariadne;
+#include "real_typedef.h"
 
-#include <boost/python.hpp>
-using namespace boost::python;
+namespace Ariadne {
+  namespace Evaluation {
 
-struct RVectorField : RVectorFieldBase, wrapper<RVectorFieldBase>
-{
-  dimension_type dimension() const { return this->get_override("dimension")(); }
-  std::string name() const { return this->get_override("name")(); }
-};
+    template class AffineMultiMap<Real,Geometry::Rectangle>;
+    template class AffineMultiMap<Real,Geometry::Parallelotope>;
+    template class AffineMultiMap<Real,Geometry::Zonotope>;
 
-void export_vector_field() {
-  class_<RVectorField, boost::noncopyable>("VectorField")
-    .def("dimension", pure_virtual(&RVectorFieldBase::dimension))
-    .def("name", pure_virtual(&RVectorFieldBase::name))
-  ;
+  }
 }

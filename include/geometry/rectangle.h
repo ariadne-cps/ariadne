@@ -40,6 +40,15 @@
 namespace Ariadne {
   namespace Geometry {
 
+    template<> 
+    inline bool is_a<Rectangle,Rectangle>() { return true; }
+    template<> 
+    inline bool is_a<Rectangle,Parallelotope>() { return true; }
+    template<> 
+    inline bool is_a<Rectangle,Zonotope>() { return true; }
+    template<> 
+    inline bool is_a<Rectangle,Polyhedron>() { return true; }
+
     /* Forward declaration of friends. */
     template<typename R> Rectangle<R> rectangular_hull(const Rectangle<R>&, const Rectangle<R>&);
     template<typename R> Rectangle<R> regular_intersection(const Rectangle<R>&, const Rectangle<R>&);
@@ -539,6 +548,9 @@ namespace Ariadne {
       }
       return C;
     }
+    
+    template<typename R> Rectangle<R> minkowski_sum(const Rectangle<R>& A, const Rectangle<R>& B);
+    template<typename R> Rectangle<R> minkowski_difference(const Rectangle<R>& A, const Rectangle<R>& B);
 
     /*! \brief The smallest rectangle containing \a A and \a B. */
     template <typename R>

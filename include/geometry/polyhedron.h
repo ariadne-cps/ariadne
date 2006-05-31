@@ -51,6 +51,9 @@ namespace Parma_Polyhedra_Library {
 namespace Ariadne {  
   namespace Geometry {
 
+    template<> 
+    inline bool is_a<Polyhedron,Polyhedron>() { return true; }
+
     template<typename R> bool disjoint(const Polyhedron<R>& A, 
                                        const Polyhedron<R>& B);
     template<typename R> bool interiors_intersect(const Polyhedron<R>& A, 
@@ -257,7 +260,12 @@ namespace Ariadne {
     Polyhedron<R> 
     minkowski_sum(const Polyhedron<R>& A, const Polyhedron<R>& B);
 
-
+    /*! \brief Performs the Minkoswi sum of a polyhedron and a basic set */
+    template<typename R, template <typename> class BS> 
+    inline Polyhedron<R> 
+    minkowski_sum(const Polyhedron<R>& A, const BS<R>& B) {
+      return minkowski_sum(A, Polyhedron<R>(B));
+    }
 
     template <typename R>
     inline 

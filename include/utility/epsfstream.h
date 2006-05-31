@@ -29,6 +29,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <string.h>
 
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
@@ -281,12 +282,14 @@ namespace Ariadne {
 	  this->precision(1);
           *this << "("<< rux << ") show"<< std::endl;
 	  this->precision(prec);
-	  
+	 
+          double x_name_len=((double)strlen(x_name))/28;
+
           *this << "/Times-Roman findfont" << std::endl
 	      << 1.5* fontsize  << " scalefont" << std::endl
 	      << "setfont" << std::endl
 	      << "newpath" << std::endl
-	      << (rux+rlx)/2 << ' ' << rly - 0.5*lscale_y
+	      << (rux+rlx-x_name_len)/2 << ' ' << rly - 0.5*lscale_y
 	      << " moveto"<< std::endl
 	      << "("<< x_name << ") show"<< std::endl
 	      << "/Times-Roman findfont" << std::endl
@@ -308,7 +311,7 @@ namespace Ariadne {
                 << "stroke"<< std::endl;
 
 	    *this << "newpath" << std::endl
-	        << rlx - 0.25*lscale_x << ' ' << i-0.05*lscale_y 
+	        << rlx - 0.30*lscale_x << ' ' << i-0.05*lscale_y 
 		<< " moveto"<< std::endl;
 
             this->precision(1);
@@ -322,24 +325,28 @@ namespace Ariadne {
                 << "stroke"<< std::endl;
 
 	  *this << "newpath" << std::endl
-	        << rlx - 0.25*lscale_x << ' ' << ruy-0.05*lscale_y 
+	        << rlx - 0.30*lscale_x << ' ' << ruy-0.05*lscale_y 
 		<< " moveto"<< std::endl;
 
           this->precision(1);
           *this << "("<< ruy << ") show"<< std::endl;
 	  this->precision(prec);
 
+          double y_name_len=((double)strlen(y_name))/28;
+
           *this << "/Times-Roman findfont" << std::endl
 	      << 1.5* fontsize  << " scalefont" << std::endl
 	      << "setfont" << std::endl
 	      << "newpath" << std::endl
-	      << rlx - 0.5*lscale_x << ' ' << (ruy+rly)/2 
+	      << rlx - 0.5*lscale_x << ' ' << (ruy+rly-y_name_len)/2 
 	      << " moveto"<< std::endl
 	      << "90 rotate" << std::endl
 	      << "("<< y_name << ") show"<< std::endl
 	      << "/Times-Roman findfont" << std::endl
 	      << fontsize  << " scalefont" << std::endl
-	      << "setfont" << std::endl;
+	      << "setfont" << std::endl
+	      << "stroke" << std::endl
+	      << "-90 rotate" << std::endl;
 	}
 	
 	*this << "linewidth setlinewidth" << std::endl
@@ -420,7 +427,7 @@ namespace Ariadne {
     trace(epsfstream<R>& eps, const Ariadne::Geometry::Rectangle<R>& r)
     {
       Ariadne::Geometry::Rectangle<R> proj_r=eps.projection()(r);
-	      
+
       double rlx=convert_to<double>(proj_r.lower_bound(0));
       double rux=convert_to<double>(proj_r.upper_bound(0));
       double rly=convert_to<double>(proj_r.lower_bound(1));

@@ -7,7 +7,7 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can rediself_ns::stribute it and/or modify
+ *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
@@ -55,12 +55,36 @@ inline RVector rvector_sub_rvector(const RVector& u, RVector& v) {
   return RVector(u-v);
 }
 
+inline RIntervalVector 
+ivector_add_rvector(const RIntervalVector& u, RVector& v) {
+  return RIntervalVector(u+v);
+}
+
+inline RIntervalVector 
+rvector_add_ivector(const RVector& u, RIntervalVector& v) {
+  return RIntervalVector(u+v);
+}
+
+inline RIntervalVector 
+ivector_add_ivector(const RIntervalVector& u, 
+				RIntervalVector& v) {
+  return RIntervalVector(u+v);
+}
+
 inline RInterval ivector_getitem(const RIntervalVector& v, uint i) {
   return v(i);
 }
 
 inline void ivector_setitem(RIntervalVector& v, uint i, RInterval x) {
   v(i)=x;
+}
+
+inline void ivector_setitem_from_real(RIntervalVector& v, uint i, Real x) {
+  v(i)=RInterval(x);
+}
+
+inline void ivector_setitem_from_double(RIntervalVector& v, uint i, double x) {
+  v(i)=RInterval(Ariadne::Base::convert_to<Real>(x));
 }
 
 inline Field fvector_getitem(const FVector& v, uint i) {
@@ -108,11 +132,15 @@ void export_Vector() {
 }
 
 void export_IntervalVector() {
-  class_<RIntervalVector>("IntervalVector",init<int>())
+  class_< RIntervalVector >("IntervalVector",init<int>())
     .def(init<RIntervalVector>())
     .def("__len__", &RIntervalVector::size)
     .def("__getitem__",&ivector_getitem)
     .def("__setitem__",&ivector_setitem)
+    .def("__setitem__",&ivector_setitem_from_double)
+    .def("__add__",&ivector_add_rvector)
+    .def("__add__",&rvector_add_ivector)
+    .def("__add__",&ivector_add_ivector)
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 }

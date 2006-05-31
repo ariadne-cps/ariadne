@@ -119,7 +119,7 @@ namespace Ariadne {
       bool invertible() const { assert(false); return false; }
   
       std::string name() const { return "AffineMap"; }
-     private:
+     protected:
       Matrix_type _A;
       Vector_type _b;
     };

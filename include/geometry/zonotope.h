@@ -43,9 +43,12 @@
 namespace Ariadne {
   namespace Geometry {
 
+    template<> 
+    inline bool is_a<Zonotope,Zonotope>() { return true; }
+    template<> 
+    inline bool is_a<Zonotope,Polyhedron>() { return true; }
+
     /* Forward declaration of friends. */
-    template<typename R> Zonotope<R> minkowski_sum(const Zonotope<R>& A, const Zonotope<R>& B);
-    template<typename R> Zonotope<R> minkowski_difference(const Zonotope<R>& A, const Zonotope<R>& B);
     template<typename R> std::ostream& operator<<(std::ostream&, const Zonotope<R>&);
     template<typename R> std::istream& operator>>(std::istream&, Zonotope<R>&);
 
@@ -137,7 +140,7 @@ namespace Ariadne {
       }
       
       /*! \brief The centre of the zonotope. */
-      state_type centre() const {
+      const state_type &centre() const {
         return this->_centre;
       }
       
@@ -152,7 +155,7 @@ namespace Ariadne {
       }
       
       /*! \brief The Matrix of principle directions. */
-      Matrix_type generators() const {
+      const Matrix_type &generators() const {
         return this->_generators;
       }
      
@@ -201,8 +204,8 @@ namespace Ariadne {
       Parallelotope<R> over_approximating_parallelotope() const;
       
      private: 
-      friend Zonotope<R> minkowski_sum <> (const Zonotope<R>& A, const Zonotope<R>& B);
-      friend Zonotope<R> minkowski_difference <> (const Zonotope<R>& A, const Zonotope<R>& B);       
+/*      friend Zonotope<R> minkowski_sum <> (const Zonotope<R>& A, const Zonotope<R>& B);
+      friend Zonotope<R> minkowski_difference <> (const Zonotope<R>& A, const Zonotope<R>& B);       */
       friend std::ostream& operator<< <> (std::ostream& os, const Zonotope<R>& r);
       friend std::istream& operator>> <> (std::istream& is, Zonotope<R>& r);
      private:
@@ -222,20 +225,49 @@ namespace Ariadne {
     };
   
     
-    
-
-    
     /*! \brief Performs the Minkoswi sum of two zonotopes */
     template<typename R> 
     Zonotope<R> 
     minkowski_sum(const Zonotope<R>& A, const Zonotope<R>& B);
-   
+
     /*! \brief Performs the Minkoswi difference of two zonotopes */
     template<typename R> 
     Zonotope<R> 
-    minkowski_difference(const Zonotope<R>& A, const Zonotope<R>& B);
-    
-    
+    minkowski_difference(const Zonotope<R>& A, const Zonotope<R>& B); 
+
+    /*! \brief Performs the Minkoswi sum of a zonotope and a basic set */
+    template<typename R, template <typename> class BS> 
+    inline Zonotope<R> 
+    minkowski_sum(const Zonotope<R>& A, const BS<R>& B) {
+      return minkowski_sum(A, Zonotope<R>(B));
+    }
+
+    /*! \brief Performs the Minkoswi difference of a zonotope and a basic set */
+    template<typename R, template <typename> class BS> 
+    inline
+    Zonotope<R> 
+    minkowski_difference(const Zonotope<R>& A, const BS<R>& B)
+    {
+       return minkowski_difference(A, Zonotope<R>(B));
+    }
+
+    /*! \brief Performs the Minkoswi sum of a zonotope and a basic set */
+    template<typename R, template <typename> class BS> 
+    inline Zonotope<R> 
+    minkowski_sum(const BS<R>& A, const Zonotope<R>& B) {
+      return minkowski_sum(B, Zonotope<R>(A));
+    }
+
+    /*! \brief Performs the Minkoswi difference of a zonotope and a basic set */
+    template<typename R, template <typename> class BS> 
+    inline
+    Zonotope<R> 
+    minkowski_difference(const BS<R>& A, const Zonotope<R>& B)
+    {
+       return minkowski_difference(B, Zonotope<R>(A));
+    }
+
+
     /*! \brief Tests disjointness */
     template <typename R>
     inline

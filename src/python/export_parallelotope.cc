@@ -7,7 +7,7 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can rediself_ns::stribute it and/or modify
+ *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
@@ -27,6 +27,7 @@
 #include "geometry/parallelotope.h"
 
 #include "geometry/rectangle.h"
+#include "geometry/zonotope.h"
 #include "geometry/polyhedron.h"
 #include "geometry/list_set.h"
 
@@ -72,6 +73,8 @@ void export_parallelotope() {
   typedef bool (RParallelotope::*RectPred)(const RRectangle &) const;
   typedef bool (RParallelotope::*PointPred) (const RPoint&) const;
   
+  typedef RZonotope (*PltpZntpBinFun) (const RParallelotope&, const RZonotope&);
+
   def("interiors_intersect", PltpPltpBinPred(&interiors_intersect));
   def("interiors_intersect", PltpRectBinPred(&interiors_intersect));
   def("interiors_intersect", RectPltpBinPred(&interiors_intersect));
@@ -103,6 +106,8 @@ void export_parallelotope() {
     .def("interior_contains", &RParallelotope::interior_contains)
     .def("centre", &RParallelotope::centre)
     .def("radius", &RParallelotope::radius)
+    .def("__add__", PltpZntpBinFun(&minkowski_sum))
+    .def("__sub__", PltpZntpBinFun(&minkowski_difference))
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 }

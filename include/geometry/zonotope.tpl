@@ -529,7 +529,7 @@ namespace Ariadne {
       }
     }
     
-    
+
     template<typename R> 
     Zonotope<R> 
     minkowski_sum(const Zonotope<R>& A, const Zonotope<R>& B)
@@ -541,25 +541,27 @@ namespace Ariadne {
               "minkowski_sum: the two zonotopes have different dimension.");
       }
       
-      dimension_type col_A=A._generators.size2(); 
-      dimension_type col_B=B._generators.size2(); 
+      const Matrix<R> &A_gen=A.generators();
+      const Matrix<R> &B_gen=B.generators();
+      
+      dimension_type col_A=(A_gen).size2(); 
+      dimension_type col_B=(B_gen).size2(); 
       
       Matrix<R> gen(A.dimension(), col_A+col_B);
 
       for (size_type i=0; i!=col_A; ++i) {
          for (size_type j=0; j!=A.dimension(); ++j) {
-            gen(j,i)=A._generators(j,i);
+            gen(j,i)=A_gen(j,i);
          }
       }
 
-      
       for (size_type i=0; i!=col_B; ++i) {
         for (size_type j=0; j!=A.dimension(); ++j) {
-          gen(j,i+col_A)=B._generators(j,i);
+          gen(j,i+col_A)=B_gen(j,i);
         }
       }
       
-      return Zonotope<R>(A._centre+(B._centre).position_vector(),gen);
+      return Zonotope<R>(A.centre()+(B.centre()).position_vector(),gen);
     }
    
     template<typename R> 
@@ -572,29 +574,31 @@ namespace Ariadne {
               "minkowski_difference: the two zonotopes have different dimension.");
       }
       
-      dimension_type col_A=A._generators.size2();
-      dimension_type col_B=B._generators.size2(); 
+      const Matrix<R> &A_gen=A.generators();
+      const Matrix<R> &B_gen=B.generators();
+      
+      dimension_type col_A=(A_gen).size2(); 
+      dimension_type col_B=(B_gen).size2(); 
       
       Matrix<R> gen(A.dimension(), col_A+col_B);
 
       for (size_type i=0; i!=col_A; ++i) {
          for (size_type j=0; j!=A.dimension(); ++j) {
-          gen(j,i)=A._generators(j,i);
+          gen(j,i)=A_gen(j,i);
         }
       }
 
       
       for (size_type i=0; i!=col_B; ++i) {
         for (size_type j=0; j!=A.dimension(); ++j) {
-          gen(j,i+col_A)=B._generators(j,i);
+          gen(j,i+col_A)=B_gen(j,i);
          }
       }
       
-      return Zonotope<R>(A._centre-(B._centre).position_vector(), 
+      return Zonotope<R>(A.centre()-(B.centre()).position_vector(), 
                          remove_null_columns_but_one(gen));
     }
 
-    
     template<typename R>
     Zonotope<R>
     operator+(const Rectangle<R>& r, const LinearAlgebra::TransformationSystem<R>& v)

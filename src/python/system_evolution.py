@@ -147,7 +147,7 @@ def bounded_time_reachability_with_reach_set(H, d_node, c_set, time, time_step, 
 
 def bounded_time_reachability(H, d_node, c_set, time, time_step, approx, max_jump,verbatim):
   #reach_set=HybridReachSet()
-  approx=1.0/(2**approx)
+  #approx=1.0/(2**approx)
   reach_set=HybridGridReachSet(H, approx)
   flowed_set=HybridGridReachSet(H, approx)
   bounded_time_reachability_with_reach_set(H, d_node, c_set, time, time_step, reach_set, flowed_set, max_jump, verbatim)

@@ -7,7 +7,7 @@
  ****************************************************************************/
 
 /*
- *  This program is free software; you can rediself_ns::stribute it and/or modify
+ *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
@@ -25,8 +25,9 @@
 
 
 #include "geometry/rectangle.h"
-#include "geometry/list_set.h"
 
+#include "geometry/zonotope.h"
+#include "geometry/list_set.h"
 
 #include "python/typedefs.h"
 using namespace Ariadne;
@@ -38,7 +39,8 @@ using namespace boost::python;
 void export_rectangle() {
   typedef bool (*RectBinPred) (const RRectangle&, const RRectangle&);
   typedef RRectangle (*RectBinFunc) (const RRectangle&, const RRectangle&);
-  
+  typedef RZonotope (*RectZntpBinFunc) (const RRectangle&, const RZonotope&);
+
   typedef bool (RRectangle::*RectPred)(const RRectangle &) const;
   typedef bool (RRectangle::*PointPred) (const RPoint&) const;
 
@@ -73,6 +75,10 @@ void export_rectangle() {
     .def("upper_corner", &RRectangle::upper_corner)
     .def("lower_bound", &RRectangle::lower_bound, return_value_policy<copy_const_reference>())
     .def("upper_bound", &RRectangle::upper_bound, return_value_policy<copy_const_reference>())
+    .def("__add__", (RectBinFunc)(&minkowski_sum))
+    .def("__add__", (RectZntpBinFunc)(&minkowski_sum))
+    .def("__sub__", (RectBinFunc)(&minkowski_difference))
+    .def("__sub__", (RectZntpBinFunc)(&minkowski_difference))
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 }

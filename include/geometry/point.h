@@ -40,6 +40,11 @@
 namespace Ariadne {
   namespace Geometry {
     
+    template<template <typename> class BS1, template <typename> class BS2> 
+    inline bool is_a(){ return false; }
+
+    template<> inline bool is_a<Point, Point>(){ return true; }
+
     /* Forward declaration of friends. */
     template<typename R> std::ostream& operator<<(std::ostream&, const Point<R>&);
     template<typename R> std::istream& operator>>(std::istream&, Point<R>&);

@@ -22,15 +22,15 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 from ariadne.base import *
+from ariadne.system import *
+from ariadne.system_evolution import *
 from ariadne.numeric import *
 from ariadne.evaluation import *
 from ariadne.geometry import *
 from ariadne.linear_algebra import *
-from ariadne.system import *
-from ariadne.system_evolution import *
 import sys
 
-eps=EpsPlot("hybrid_evolution.eps",Rectangle("[-1,1]x[-1,1]"))
+eps=EpsPlot("hybrid_evolution.eps",Rectangle("[-1,1]x[-1,1]"),0,1,"Provadatw","b")
 eps.set_fill_colour("yellow")
 
 b=Vector(2)
@@ -69,7 +69,7 @@ h.add(e1)
 h.add(e2)
 
 c_init=Zonotope(Rectangle("[-0.8,-0.7]x[0.7,0.8]"))
-reach=bounded_time_reachability(h, n1, c_init, 16.0, 0.05, 7, 0, 'yes') 
+reach=bounded_time_reachability(h, n1, c_init, 16.0, 0.05, 2**8, 0, 'yes') 
 
 eps.set_fill_colour("blue")
 for bs in reach[0].reached_regions():

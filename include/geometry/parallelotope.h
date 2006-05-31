@@ -43,6 +43,13 @@
 namespace Ariadne {
   namespace Geometry {
  
+    template<> 
+    inline bool is_a<Parallelotope,Parallelotope>() { return true; }
+    template<> 
+    inline bool is_a<Parallelotope,Zonotope>() { return true; }
+    template<>
+    inline bool is_a<Parallelotope,Polyhedron>() { return true; }
+
     /* Forward declaration of friends. */
     template<typename R> std::ostream& operator<<(std::ostream&, const Parallelotope<R>&);
     template<typename R> std::istream& operator>>(std::istream&, Parallelotope<R>&);
@@ -216,7 +223,23 @@ namespace Ariadne {
       Matrix_type _generators;
       
     };
-  
+ 
+    /*! \brief Performs the Minkoswi sum of two parallelotopes */
+    template<typename R> 
+    Parallelotope<R> 
+    minkowski_sum(const Parallelotope<R>& A, const Parallelotope<R>& B) {
+        throw std::domain_error("minkowski_sum(const Parallelotope<R>& A, const Parallelotope<R>& B): not implemented.");
+
+	return Parallelotope<R>(A.dimension());
+    }
+
+    /*! \brief Performs the Minkoswi sum of a zonotope and a basic set */
+    template<typename R, template <typename> class BS> 
+    inline Parallelotope<R> 
+    minkowski_sum(const Parallelotope<R>& A, const BS<R>& B) {
+      return minkowski_sum(A, Parallelotope<R>(B) );
+    }
+
     /*! \brief Tests disjointness */
     template <typename R>
     inline

@@ -61,9 +61,6 @@ namespace Ariadne {
       virtual LinearAlgebra::Matrix<R> derivative(const state_type& r) const;
       virtual LinearAlgebra::IntervalMatrix<R> derivative(const Geometry::Rectangle<R>& r) const;
         
-      template<template<typename> class BS>
-      inline Geometry::ListSet<R,BS> apply(const Geometry::ListSet<R,BS>& A) const;
-      
       virtual dimension_type argument_dimension() const = 0;
       virtual dimension_type result_dimension() const = 0;
     
@@ -71,10 +68,19 @@ namespace Ariadne {
 
       state_type operator() (const state_type& x) const {
         return this->apply(x); }
-      Geometry::Rectangle<R> operator() (const Geometry::Rectangle<R>& A) const {
-        return this->apply(A); }
-      Geometry::Polyhedron<R> operator() (const Geometry::Polyhedron<R>& A) const {
-        return this->apply(A); }
+
+      template<template <typename> class BS>
+      inline
+      BS<R> 
+      operator() (const BS<R>& A) const 
+      {
+        return this->apply(A); 
+      }
+
+      template<template<typename> class BS>
+      inline 
+      Geometry::ListSet<R,BS> apply(const Geometry::ListSet<R,BS>& A) const;
+      
     };
   
     

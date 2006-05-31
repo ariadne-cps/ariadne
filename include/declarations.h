@@ -105,6 +105,7 @@ class LatticeMap;
 
 template <typename R> class Map;
 template <typename R> class AffineMap;
+template <typename R, template<typename> class BS > class AffineMultiMap;
 template <typename R> class Monomial;
 template <typename R> class Polynomial;
 template <typename R> class PolynomialMap;

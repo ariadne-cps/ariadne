@@ -39,6 +39,11 @@
 namespace Ariadne {
   namespace Geometry {
 
+    template<> 
+    inline bool is_a<Simplex,Simplex>() { return true; }
+    template<> 
+    inline bool is_a<Simplex,Polyhedron>() { return true; }
+
     /* Forward declaration of friends. */
     template<typename R> std::ostream& operator<<(std::ostream&, const Simplex<R>&);
     template<typename R> std::istream& operator>>(std::istream&, Simplex<R>&);
@@ -74,6 +79,14 @@ namespace Ariadne {
       Simplex(const Simplex<R>& original)
         : _vertices(original._vertices)
       { }
+
+      /*! \brief Construct from a rectangle. 
+       *
+       * It returns an error since, it can not be doen without errors.
+       */
+      Simplex(const Rectangle<R>& r){ 
+        throw std::runtime_error("Simplex(const Rectangle<R>& r): errorless conversion can not be accomplished.");
+      }
       
       /*! \brief Copy assignment operator. */
       Simplex<R>& operator=(const Simplex<R>& original) {
@@ -140,7 +153,16 @@ namespace Ariadne {
       friend std::ostream& operator<< <> (std::ostream& os, const Simplex<R>& r);
       friend std::istream& operator>> <> (std::istream& is, Simplex<R>& r);
     };
-    
+
+    /*! \brief Performs the Minkoswi sum of two simplices */
+    template<typename R> 
+    Simplex<R> 
+    minkowski_sum(const Simplex<R>& A, const Simplex<R>& B) {
+        throw std::domain_error("minkowski_sum(const Simplex<R>& A, const Simplex<R>& B): not implemented.");
+
+	return Simplex<R>(A.dimension());
+    }
+
     /*! \brief Tests disjointness */
     template <typename R>
     inline bool disjoint(const Simplex<R>& A, const Simplex<R>& B) 

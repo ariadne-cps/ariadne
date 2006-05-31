@@ -149,6 +149,9 @@ namespace Ariadne {
         typename std::vector<R>::const_iterator pos;
         assert(d<this->dimension());
         if(x<_subdivision_coordinates[d].front() || x>_subdivision_coordinates[d].back()) {
+	  std::cerr << "d.front()=" << _subdivision_coordinates[d].front() << 
+	  	" d.back()=" << _subdivision_coordinates[d].back() <<
+		" x="<< x <<std::endl<<std::flush;
           throw std::runtime_error("point does not lie in extent of finite grid");
         }
         pos = std::upper_bound(_subdivision_coordinates[d].begin(),

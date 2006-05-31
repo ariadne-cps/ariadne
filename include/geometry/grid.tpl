@@ -270,26 +270,33 @@ namespace Ariadne {
       const size_t &dim=this->dimension();
       const LatticeRectangle &bounds=this->_bounds;
 	   
-      Point<R> l(dim),u(dim);
-      
       switch(this->_grid_type) {
         case REGULAR:
 	   {
 	     const RegularGrid<R> *this_grid=
 	                               ((RegularGrid<R> *)(this->_grid_ptr));
 	     
+             Point<R> l(dim),u(dim);
+	     
 	     for (dimension_type i=0; i< dim; i++) {
 	       l[i]=this_grid->subdivision_length(i)*bounds.lower_bound(i);
 	       u[i]=this_grid->subdivision_length(i)*bounds.upper_bound(i);
              }
+             
+	     return Rectangle<R>(l,u);
 	   }
-	   break;
 	case IRREGULAR:
-        default:
+	  {
+	     const IrregularGrid<R> *this_grid=
+	                               ((IrregularGrid<R> *)(this->_grid_ptr));
+	   
+	     return (Rectangle<R>)(this_grid->bounding_box());
+	   }
+	default:
            throw std::runtime_error("FiniteGrid<R>::bounding_box(): not implemented for this grid type.");
       }
-
-      return Rectangle<R>(l,u);
+           
+      return Rectangle<R>(0);
     }
 
 

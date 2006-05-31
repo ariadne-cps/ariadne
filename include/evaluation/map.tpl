@@ -39,7 +39,7 @@ namespace Ariadne {
     Map<R>::~Map() 
     {
     }
-    
+  
     template<typename R>
     Geometry::Point<R> 
     Map<R>::apply(const Geometry::Point<R>& x) const 
@@ -67,7 +67,6 @@ namespace Ariadne {
     {
       throw std::invalid_argument("Not implemented."); 
     }
-    
     
     template<typename R>
     LinearAlgebra::Matrix<R> 

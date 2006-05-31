@@ -1,4 +1,8 @@
-AC_INIT([ariadne], [0.0.0])
+AC_PREREQ(2.57)
+AC_INIT(ariadne, 0.0.0)
+AM_INIT_AUTOMAKE
+AC_CONFIG_SRCDIR([src])
+AC_CONFIG_HEADER([config.h])
 
 dnl Checks for programs.
 AC_PROG_CXX

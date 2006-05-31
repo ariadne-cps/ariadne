@@ -20,9 +20,10 @@ GEOMETRY_OBJ = geometry_module.o \
 	export_partition_tree_set.o export_postscript_output.o
 
 EVALUATION_OBJ = evaluation_module.o \
-	export_map.o export_affine_map.o export_polynomial_map.o \
-	export_vector_field.o export_affine_vector_field.o \
-	export_apply.o export_henon_map.o export_lorenz_system.o \
+        export_map.o export_affine_map.o export_affine_multimap.o \
+	export_polynomial_map.o export_vector_field.o \
+	export_affine_vector_field.o export_apply.o \
+	export_henon_map.o export_lorenz_system.o \
 	export_integrate.o export_lattice_map.o
 
 all: python 
@@ -160,6 +161,20 @@ export_rectangle.o: export_rectangle.cc \
   ../../include/geometry/../geometry/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../linear_algebra/../declarations.h \
   ../../include/geometry/../geometry/../linear_algebra/../numeric/integer.h \
+  ../../include/geometry/zonotope.h \
+  ../../include/geometry/../linear_algebra/vector.h \
+  ../../include/geometry/../linear_algebra/matrix.h \
+  ../../include/geometry/../linear_algebra/../declarations.h \
+  ../../include/geometry/../linear_algebra/../numeric/integer.h \
+  ../../include/geometry/../linear_algebra/transformation_system.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/interval_vector.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/../declarations.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/../numeric/interval.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/interval_matrix.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/geometry/list_set.h \
   ../../include/geometry/../base/utility.h \
   ../../include/geometry/../base/../declarations.h \
@@ -193,11 +208,19 @@ export_parallelotope.o: export_parallelotope.cc \
   ../../include/geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/geometry/../numeric/../numeric/approximation.h \
   ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
+  ../../include/geometry/zonotope.h \
+  ../../include/geometry/../linear_algebra/transformation_system.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/interval_vector.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/../declarations.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/../numeric/interval.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/interval_matrix.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/geometry/polyhedron.h \
   ../../include/geometry/../linear_algebra/constraint_system.h \
   ../../include/geometry/../linear_algebra/../numeric/numerical_types.h \
-  ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
-  ../../include/geometry/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/geometry/../linear_algebra/generator_system.h \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/list_set.h \

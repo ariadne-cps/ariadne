@@ -85,7 +85,7 @@ void export_grid_set() {
     .def(self_ns::str(self))    // __str__
     ;
 
-  class_< RIrregularGrid, bases<RGrid> >("RegularGrid",init<RRectangle,SizeArray>())
+  class_< RIrregularGrid, bases<RGrid> >("IrregularGrid",init<RRectangle,SizeArray>())
     .def(init<RRectangle,uint>())
     .def(init<RRectangleListSet>())
     .def("dimension", &RIrregularGrid::dimension)

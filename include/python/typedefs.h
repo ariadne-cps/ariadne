@@ -89,6 +89,9 @@ typedef Evaluation::LatticeMap LatticeMap;
 
 typedef Evaluation::Map<Real> RMapBase;
 typedef Evaluation::AffineMap<Real> RAffineMap;
+typedef Evaluation::AffineMultiMap<Real,Geometry::Rectangle> RAffineMultiMapRect;
+typedef Evaluation::AffineMultiMap<Real,Geometry::Parallelotope> RAffineMultiMapPltp;
+typedef Evaluation::AffineMultiMap<Real,Geometry::Zonotope> RAffineMultiMapZntp;
 typedef Evaluation::Monomial<Real> RMonomial;
 typedef Evaluation::Polynomial<Real> RPolynomial;
 typedef Evaluation::PolynomialMap<Real> RPolynomialMap;

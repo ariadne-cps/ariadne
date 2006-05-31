@@ -181,7 +181,7 @@ class HybridGridRegion:
   def __init__(self,discrete_node, grid_dimension):
     self._discrete_node=discrete_node
     invariant=discrete_node.invariant()
-    grid=RegularGrid(invariant.dimension(),grid_dimension)
+    grid=IrregularGrid(invariant.bounding_box(),grid_dimension)
     bounds=over_approximation(invariant.bounding_box(),grid).lattice_set()
     self._finite_grid=FiniteGrid(grid,bounds)
     self._bounds_set=GridMaskSet(self._finite_grid)

@@ -81,6 +81,8 @@ namespace Ariadne {
         }
       }
       
+      throw std::domain_error("AffineMap<R>::operator() (const Geometry::Rectangle<R>& r): this is not an exact operation.");
+
       return Geometry::Rectangle<R>(imv);
     }
      

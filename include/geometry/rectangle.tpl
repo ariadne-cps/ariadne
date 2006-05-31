@@ -65,6 +65,51 @@ namespace Ariadne {
       }
     }
     
+    template<typename R> 
+    Rectangle<R> 
+    minkowski_sum(const Rectangle<R>& A, const Rectangle<R>& B)
+    {
+      using namespace Ariadne::LinearAlgebra;
+
+      if (A.dimension()!=B.dimension())
+        throw std::domain_error(
+              "minkowski_sum: the two rectangles have different dimension.");
+
+      Point<R> lower(A.dimension()), upper(A.dimension());
+
+      for(dimension_type i=0; i<A.dimension(); i++) {
+        lower[i]=A.lower_bound(i)+B.lower_bound(i);
+        upper[i]=A.upper_bound(i)+B.upper_bound(i);
+      }
+
+      return Rectangle<R>(lower,upper);
+
+    }
+
+    template<typename R> 
+    Rectangle<R> 
+    minkowski_difference(const Rectangle<R>& A, const Rectangle<R>& B)
+    {
+      using namespace Ariadne::LinearAlgebra;
+
+      if (A.dimension()!=B.dimension())
+        throw std::domain_error(
+              "minkowski_difference: the two rectangles have different dimension.");
+
+
+      Point<R> lower(A.dimension()), upper(A.dimension());
+
+      for(dimension_type i=0; i<A.dimension(); i++) {
+        lower[i]=A.lower_bound(i)-B.lower_bound(i);
+        upper[i]=A.upper_bound(i)-B.upper_bound(i);
+
+	if ( lower[i]>upper[i])
+	   return Rectangle<R>(A.dimension());
+      }
+
+      return Rectangle<R>(lower,upper);
+    }
+
     template <typename R>
     Rectangle<R>::Rectangle(const std::vector< Interval<real_type> >& v)
       : _lower_corner(v.size()), _upper_corner(v.size())

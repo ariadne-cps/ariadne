@@ -16,7 +16,6 @@ clean:
 	rm -f *.eps
 	rm -rf latex html
 	(cd ${SRCDIR}; ${MAKE} clean; cd ..; )
-	(cd ${EXAMPLEDIR}; ${MAKE} clean; cd ..; )
 	(cd ${TESTDIR}; ${MAKE} clean; cd ..; )
 
 install: lib

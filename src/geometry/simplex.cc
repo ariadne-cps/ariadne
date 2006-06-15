@@ -30,6 +30,8 @@ namespace Ariadne {
   namespace Geometry {
 
     template class Simplex<Real>;
+ 
+    template Simplex<Real> scale(const Simplex<Real>& s, const Real& factor);
 
     template std::ostream& operator<<(std::ostream&, const Simplex<Real>&);
     template std::istream& operator>>(std::istream&, Simplex<Real>&);

@@ -27,7 +27,14 @@
 #include "numeric/arithmetic.h"
 #include "numeric/approximation.h"
 
+#include "numeric/interval.h"
+
 #include "real_typedef.h"
+
+#include "geometry/rectangle.h"
+#include "geometry/parallelotope.h"
+#include "geometry/zonotope.h"
+
 using namespace Ariadne;
 
 #include <boost/python.hpp>
@@ -160,7 +167,15 @@ inline bool ge_qz(const Rational& n1, const Integer& n2) { return n1>=n2; }
 inline Integer numerator_q(const Rational& q) { return numerator(q); }
 inline Integer denominator_q(const Rational& q) { return denominator(q); }
 
+template<typename R1, typename R2> inline Interval<R2> 
+addinvltoanum(const R1& r, const Interval<R2>& i) { return i+R2(r); }
+template<typename R1, typename R2> inline Interval<R2> 
+subinvltoanum(const R1& r, const Interval<R2>& i) { return i-R2(r); }
+template<typename R1, typename R2> inline Interval<R2> 
+mulinvltoanum(const R1& r, const Interval<R2>& i) { return i*R2(r); }
 
+template<typename R, template <typename> class BS > inline BS<R>
+scale(const R& r, const BS<R>& s) { return Geometry::scale(s,r); }
 
 void export_numeric() {
   class_<Integer>("Integer")
@@ -188,6 +203,9 @@ void export_numeric() {
     .def("__ge__", &le_zx)
     .def("__div__", &div_zz)
     .def(self_ns::str(self))
+    .def("__add__", &addinvltoanum<Integer,Integer>) 
+    .def("__sub__", &subinvltoanum<Integer,Integer>) 
+    .def("__mul__", &mulinvltoanum<Integer,Integer>)
   ;
 
   class_<MPFloat>("MPFloat")
@@ -230,6 +248,14 @@ void export_numeric() {
     .def("exponent", &exponent_f)
     .def("mantissa", &mantissa_f)
     .def(self_ns::str(self))
+    .def("__add__", &addinvltoanum<MPFloat,MPFloat>) 
+    .def("__sub__", &subinvltoanum<MPFloat,MPFloat>) 
+    .def("__mul__", &mulinvltoanum<MPFloat,MPFloat>)
+#ifdef MPFLOAT_REAL
+    .def("__mul__", &scale<MPFloat,Geometry::Rectangle>)
+    .def("__mul__", &scale<MPFloat,Geometry::Parallelotope>)
+    .def("__mul__", &scale<MPFloat,Geometry::Zonotope>)
+#endif
   ;
 
   class_<Dyadic>("Dyadic")
@@ -271,6 +297,14 @@ void export_numeric() {
     .def("exponent", &exponent_d)
     .def("mantissa", &mantissa_d)
     .def(self_ns::str(self))
+    .def("__add__", &addinvltoanum<Dyadic,Dyadic>) 
+    .def("__sub__", &subinvltoanum<Dyadic,Dyadic>) 
+    .def("__mul__", &mulinvltoanum<Dyadic,Dyadic>)
+#ifdef DYADIC_REAL
+    .def("__mul__", &scale<Dyadic,Geometry::Rectangle>)
+    .def("__mul__", &scale<Dyadic,Geometry::Parallelotope>)
+    .def("__mul__", &scale<Dyadic,Geometry::Zonotope>)
+#endif
   ;
 
   class_<Rational>("Rational")
@@ -319,6 +353,14 @@ void export_numeric() {
     .def("numerator", &numerator_q)
     .def("denominator", &denominator_q)
     .def(self_ns::str(self))
+    .def("__add__", &addinvltoanum<Rational,Rational>) 
+    .def("__sub__", &subinvltoanum<Rational,Rational>) 
+    .def("__mul__", &mulinvltoanum<Rational,Rational>)
+#ifdef RATIONAL_REAL
+    .def("__mul__", &scale<Rational,Geometry::Rectangle>)
+    .def("__mul__", &scale<Rational,Geometry::Parallelotope>)
+    .def("__mul__", &scale<Rational,Geometry::Zonotope>)
+#endif
   ;
   
 /*

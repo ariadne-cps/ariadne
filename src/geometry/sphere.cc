@@ -31,6 +31,8 @@ namespace Ariadne {
 
     template class Sphere<Real>;
 
+//    template Sphere<Real> scale(const Sphere<Real>& s, const Real& factor);
+
     template std::ostream& operator<<(std::ostream&, const Sphere<Real>&);
     template std::istream& operator>>(std::istream&, Sphere<Real>&);
 

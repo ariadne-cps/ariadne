@@ -667,7 +667,7 @@ namespace Ariadne {
         }
       }
 
-      Matrix<R> new_A(rows,std::max(1u,directions));
+      Matrix<R> new_A(rows,std::max((size_t)1,directions));
 
       size_type j2=0;
       for(size_type j=0; j!=cols; ++j) {

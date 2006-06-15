@@ -105,20 +105,51 @@ namespace Ariadne {
       }
       
       /*! \brief Construct from an array of intervals. */
-      explicit Rectangle(const array< Interval<real_type> >& a);
+      explicit Rectangle(const array< Interval<real_type> >& a)
+        : _lower_corner(a.size()), _upper_corner(a.size())
+      {
+        for(dimension_type i=0; i!=a.size(); ++i) {
+          this->_lower_corner[i] = a[i].lower();
+          this->_upper_corner[i] = a[i].upper();
+        }
+      }
       
       /*! \brief Construct from a std::vector of intervals. */
-      explicit Rectangle(const std::vector< Interval<real_type> >& v);
-      
+      explicit Rectangle(const std::vector< Interval<real_type> >& v)
+        : _lower_corner(v.size()), _upper_corner(v.size())
+      {
+        for(dimension_type i=0; i!=v.size(); ++i) {
+          this->_lower_corner[i] = v[i].lower();
+          this->_upper_corner[i] = v[i].upper();
+        }
+      }
+
       /*! \brief Construct from two corners. */
-      explicit Rectangle(const state_type& p1, const state_type& p2);
+      explicit Rectangle(const state_type& p1, const state_type& p2) 
+        : _lower_corner(p1.dimension()), _upper_corner(p2.dimension())
+      {
+        if (p1.dimension()!=p2.dimension()) {
+          throw std::domain_error("The parameters have different space dimensions");
+        }
+        for (size_type i=0; i!=this->dimension(); ++i) {
+          this->_lower_corner[i]=std::min(p1[i],p2[i]);
+          this->_upper_corner[i]=std::max(p1[i],p2[i]);
+        }
+      }
       
       /*! \brief Construct from a string literal. */
       explicit Rectangle(const std::string& s);
       
       /*! \brief Construct from an interval vector. */
-      explicit Rectangle(const LinearAlgebra::IntervalVector<R>& iv);
-      
+      explicit Rectangle(const LinearAlgebra::IntervalVector<R>& iv)
+        : _lower_corner(iv.size()), _upper_corner(iv.size())
+      {
+        for(dimension_type i=0; i!=this->dimension(); ++i) {
+          this->_lower_corner[i]=iv[i].lower();
+          this->_upper_corner[i]=iv[i].upper();
+        }
+      }
+
       /*! \brief Copy constructor. */
       Rectangle(const Rectangle<R>& original)
         : _lower_corner(original._lower_corner),
@@ -608,6 +639,20 @@ namespace Ariadne {
       return result;
     }
 
+    /*! \brief Scale a rectangle. */
+    template<typename R>
+    inline
+    Geometry::Rectangle<R> 
+    scale(const Geometry::Rectangle<R>& r, const R& scale_factor) {
+
+      Geometry::Rectangle<R> result(r.dimension());
+      
+      for(size_type i=0; i!=result.dimension(); ++i) {
+        result.set_interval(i,scale_factor*r[i]);
+      }
+
+      return result;
+    }
   }
 }
 

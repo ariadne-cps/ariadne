@@ -63,8 +63,11 @@ namespace Ariadne {
       /*! \brief Default constructor constructs standard simplex of dimension \a n. */
       Sphere(size_type n = 0);
     
-      /*! \brief Construct from list of vertices. */
+      /*! \brief Construct from centre and radius. */
       explicit Sphere(const state_type& c, const real_type& r);
+     
+      /*! \brief Construct from centre and radius. */
+      explicit Sphere(const state_type& c, real_type r);
      
       /*! \brief Construct from a string literal. */
       explicit Sphere(const std::string& s);
@@ -269,6 +272,21 @@ namespace Ariadne {
       return true;
     }
 
+    /*! \brief Scale a sphere. */
+    template<typename R>
+    inline
+    Geometry::Sphere<R> 
+    scale(const Geometry::Sphere<R>& s, const R& scale_factor) {
+
+      const Geometry::Point<R>& centre=s.centre();
+      Geometry::Point<R> new_centre(s.dimension());
+
+      for(size_type i=0; i!=s.dimension(); ++i) {
+        new_centre[i]=scale_factor*centre[i];
+      }
+
+      return Geometry::Sphere<R>(new_centre, scale_factor*s.radius());
+    }
 
     template <typename R>
     std::ostream&

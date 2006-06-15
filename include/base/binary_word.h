@@ -73,6 +73,7 @@
 #include <vector>
 #include <iosfwd>
 #include <stdexcept>
+#include <cassert>
 
 #include "../declarations.h"
 

@@ -264,6 +264,23 @@ namespace Ariadne {
       return true;
     }
 
+    /*! \brief Scale a ellipsoid. */
+    template<typename R>
+    inline
+    Geometry::Ellipsoid<R> 
+    scale(const Geometry::Ellipsoid<R>& s, const R& scale_factor) {
+
+      const Geometry::Point<R>& centre=s.centre();
+      const LinearAlgebra::Matrix<R>& bilinear_form=s.bilinear_form();
+      
+      Geometry::Point<R> new_centre(s.dimension());
+
+      for(size_type i=0; i!=s.dimension(); ++i) {
+        new_centre[i]=scale_factor*centre[i];
+      }
+
+      return Geometry::Ellipsoid<R>(new_centre, scale_factor*bilinear_form);
+    }
 
     template <typename R>
     std::ostream&

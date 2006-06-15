@@ -1,5 +1,5 @@
 /***************************************************************************
- *            rectangle.h
+ *            rectangle.tpl
  *
  *  Mon 2 May 2005
  *  Copyright 2005  Alberto Casagrande, Pieter Collins
@@ -26,10 +26,12 @@
 #include <string>
 #include <sstream>
 #include <exception>
-
+/*
 #include <vector>
+#include <list>
 #include <set>
 #include <valarray>
+*/
 
 #include "rectangle.h"
 
@@ -52,17 +54,6 @@ namespace Ariadne {
     {
       std::stringstream ss(s);
       ss >> *this;
-    }
-    
-    /*! \brief Construct from an array of intervals. */
-    template <typename R>
-    Rectangle<R>::Rectangle(const array< Interval<real_type> >& a)
-      : _lower_corner(a.size()), _upper_corner(a.size())
-    {
-      for(dimension_type i=0; i!=a.size(); ++i) {
-        this->_lower_corner[i] = a[i].lower();
-        this->_upper_corner[i] = a[i].upper();
-      }
     }
     
     template<typename R> 
@@ -110,39 +101,6 @@ namespace Ariadne {
       return Rectangle<R>(lower,upper);
     }
 
-    template <typename R>
-    Rectangle<R>::Rectangle(const std::vector< Interval<real_type> >& v)
-      : _lower_corner(v.size()), _upper_corner(v.size())
-    {
-      for(dimension_type i=0; i!=v.size(); ++i) {
-        this->_lower_corner[i] = v[i].lower();
-        this->_upper_corner[i] = v[i].upper();
-      }
-    }
-    
-    template <typename R>
-    Rectangle<R>::Rectangle(const LinearAlgebra::IntervalVector<R>& iv) 
-      : _lower_corner(iv.size()), _upper_corner(iv.size())
-    {
-      for(dimension_type i=0; i!=this->dimension(); ++i) {
-        this->_lower_corner[i]=iv[i].lower();
-        this->_upper_corner[i]=iv[i].upper();
-      }
-    }
-      
-    template <typename R>
-    Rectangle<R>::Rectangle(const state_type& p1, const state_type& p2)
-      : _lower_corner(p1.dimension()), _upper_corner(p2.dimension())
-    {
-      if (p1.dimension()!=p2.dimension()) {
-        throw std::domain_error("The parameters have different space dimensions");
-      }
-      for (size_type i=0; i!=this->dimension(); ++i) {
-        this->_lower_corner[i]=std::min(p1[i],p2[i]);
-        this->_upper_corner[i]=std::max(p1[i],p2[i]);
-      }
-    }
-    
     template <typename R>
     Rectangle<R>::operator Parallelotope<R>() const 
     {

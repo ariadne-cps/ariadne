@@ -89,12 +89,11 @@ namespace Ariadne {
       }
       
       /*! \brief Equality operator. */
-      bool operator==(const Interval<R>& ivl) { 
+      bool operator==(const Interval<R>& ivl) const { 
         return this->lower()==ivl.lower() && this->upper()==ivl.upper(); }
       /*! \brief Inequality operator. */
-      bool operator!=(const Interval<R>& ivl) { 
+      bool operator!=(const Interval<R>& ivl) const { 
         return !(*this==ivl); }
-
 
       /*! \brief Tests if the interval contains \a r. */
       bool contains(const R& r) const { return this->lower()<=r && r<=this->upper(); }

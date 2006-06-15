@@ -39,7 +39,13 @@
 
 namespace Ariadne {
   namespace Geometry {
-    
+   
+    template<typename> class Rectangle;
+    template<typename> class Parallelotope;
+    template<typename> class Zonotope;
+    template<typename> class Sphere;
+    template<typename> class Ellipsoid;
+
     template<template <typename> class BS1, template <typename> class BS2> 
     inline bool is_a(){ return false; }
 
@@ -148,6 +154,24 @@ namespace Ariadne {
         }
         this->_vector[index]=r;
       }
+
+      /*! \brief Convert to a rectangle. */
+      operator Rectangle<R>() const;
+
+      /*! \brief Convert to a sphere. */
+//      operator Sphere<R>();
+
+      /*! \brief Convert to a ellipsoid. */
+//      operator Ellipsoid<R>();
+ 
+      /*! \brief Convert to a parallelotope. */
+      operator Parallelotope<R>() const;
+
+      /*! \brief Convert to a zonotope. */
+      operator Zonotope<R>() const;
+
+      /*! \brief Convert to a polyhedron. */
+      operator Polyhedron<R>() const;
 
       friend std::ostream& operator<< <>(std::ostream& os, const Point<real_type>& state);
       friend std::istream& operator>> <> (std::istream& is, Point<real_type>& state);

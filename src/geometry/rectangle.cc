@@ -40,6 +40,9 @@ namespace Ariadne {
     template Rectangle<Real> minkowski_difference(const Rectangle<Real>& A, 
                                          const Rectangle<Real>& B);
 
+
+    template Rectangle<Real> scale(const Rectangle<Real>& s, const Real& factor);
+
     template std::ostream& operator<<(std::ostream&, const Rectangle<Real>&);
     template std::istream& operator>>(std::istream&, Rectangle<Real>&);
 

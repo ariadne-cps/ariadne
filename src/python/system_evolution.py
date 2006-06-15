@@ -91,8 +91,10 @@ def try_to_reset_from(H, d_node, c_set, time, time_step, reach_set, flowed_set, 
       dest_d_node=trans.destination()
       dest_c_set=reset(c_set)
       grid_c_set=reach_set.grid_over_approximation(dest_d_node, dest_c_set)
-      #new_c_set=ZonotopeListSet(RectangleListSet(grid_c_set))
-      new_c_set=ZonotopeListSet(RectangleListSet(PartitionTreeSet(grid_c_set)))
+      try:
+       new_c_set=ZonotopeListSet(RectangleListSet(PartitionTreeSet(grid_c_set)))
+      except:
+       new_c_set=ZonotopeListSet(RectangleListSet(grid_c_set))
       if (verbatim == 'yes'):
         print 'done'
       bounded_time_reachability_with_reach_set(H, dest_d_node, new_c_set, time, time_step, reach_set, flowed_set, max_jump, verbatim)

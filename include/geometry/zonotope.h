@@ -454,6 +454,23 @@ namespace Ariadne {
       return subset(Polyhedron<R>(A), Polyhedron<R>(B));
     }
     
+    /*! \brief Scale a zonotope. */
+    template<typename R>
+    inline
+    Geometry::Zonotope<R> 
+    scale(const Geometry::Zonotope<R>& z, const R& scale_factor) {
+
+      const Geometry::Point<R>& centre=z.centre();
+      const LinearAlgebra::Matrix<R>& generators=z.generators();
+      
+      Geometry::Point<R> new_centre(z.dimension());
+
+      for(size_type i=0; i!=z.dimension(); ++i) {
+        new_centre[i]=scale_factor*centre[i];
+      }
+
+      return Geometry::Zonotope<R>(new_centre, scale_factor*generators);
+    }
 
     
     template<typename R>

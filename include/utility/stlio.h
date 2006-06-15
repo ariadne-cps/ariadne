@@ -38,6 +38,8 @@
 #include <set>
 #include <map>
 
+#include <cassert>
+
 #include "../base/array.h"
 
 namespace Ariadne {

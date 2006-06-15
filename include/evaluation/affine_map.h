@@ -74,8 +74,15 @@ namespace Ariadne {
       /*! \brief  The map applied to a simplex basic set. */
       Geometry::Simplex<R> operator() (const Geometry::Simplex<R>& A) const;
       
-      /*! \brief  The map applied to a rectangle basic set. */
+      /*! \brief  The map applied to a rectangle basic set. 
+       *
+       * This operator is not exact on rectangles. If you want to apply 
+       * an affine map use the AffineMap<R>::apply(const Rectangle&) method.
+       */
       Geometry::Rectangle<R> operator() (const Geometry::Rectangle<R>& A) const;
+      
+      /*! \brief  The map applied to a rectangle basic set. */
+      Geometry::Rectangle<R> apply(const Geometry::Rectangle<R>& A) const;
       
       /*! \brief  The map applied to a parallelotope basic set. */
       Geometry::Parallelotope<R> operator() (const Geometry::Parallelotope<R>& A) const;

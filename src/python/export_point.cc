@@ -24,6 +24,7 @@
 
 
 #include "geometry/point.h"
+#include "geometry/rectangle.h"
 #include "linear_algebra/vector.h"
 
 #include <boost/python.hpp>
@@ -46,6 +47,9 @@ inline RVector rpoint_sub_rpoint(const RPoint& p, const RPoint& q) {
   return p-q;
 }
 
+inline RRectangle rectangle_expanded(const RPoint& p, const Real& r) {
+  return (((RRectangle)p).expand_by(r));
+}
 
 void export_point() {
   class_<RPoint>("Point",init<int>())
@@ -60,6 +64,7 @@ void export_point() {
     .def("__ne__", &RPoint::operator!=)
     .def("__add__", &rpoint_add_rVector)
     .def("__sub__", &rpoint_sub_rpoint)
+    .def("rectangle_expanded_by", &rectangle_expanded)
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 }

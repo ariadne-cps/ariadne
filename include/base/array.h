@@ -36,6 +36,8 @@
 #include <vector>
 #include <iterator>
 
+#include <cassert>
+
 #include "../declarations.h"
 
 

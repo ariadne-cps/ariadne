@@ -55,7 +55,7 @@ void export_apply() {
     .def("apply", ApplMapGMSFunc(&RC1Applicator::apply), "apply the image of a map to a set" )
     .def("chainreach", ApplMapGMSFunc(&RC1Applicator::chainreach), "Compute the chain reachable set")
   ;
-  
+ 
   def("apply", MapRectBinFunc(&apply), "apply the image of a map to a set" );
   def("apply", MapPltpBinFunc(&apply), "apply the image of a map to a set" );
   def("apply", MapGMSFunc(&apply), "apply the image of a map to a set" );

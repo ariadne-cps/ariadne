@@ -213,7 +213,7 @@ namespace Ariadne {
       const Parma_Polyhedra_Library::NNC_Polyhedron& _ppl_interior() const;
      private:
       /* The polyhedron data structure. */
-      Parma_Polyhedra_Library::NNC_Polyhedron _ppl_poly; //(thanks Parma, I LOVE you! :-) )
+      Parma_Polyhedra_Library::NNC_Polyhedron _ppl_poly; 
     
       /* This is mutable since we do not compute it unless needed */
       mutable Parma_Polyhedra_Library::NNC_Polyhedron _interior_poly;

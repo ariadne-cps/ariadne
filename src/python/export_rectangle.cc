@@ -40,6 +40,7 @@ void export_rectangle() {
   typedef bool (*RectBinPred) (const RRectangle&, const RRectangle&);
   typedef RRectangle (*RectBinFunc) (const RRectangle&, const RRectangle&);
   typedef RZonotope (*RectZntpBinFunc) (const RRectangle&, const RZonotope&);
+  typedef RRectangle (*RectRealBinFunc) (const RRectangle&, const Real&);
 
   typedef bool (RRectangle::*RectPred)(const RRectangle &) const;
   typedef bool (RRectangle::*PointPred) (const RPoint&) const;
@@ -57,6 +58,7 @@ void export_rectangle() {
   class_<RRectangle>("Rectangle",init<int>())
     .def(init<RPoint,RPoint>())
     .def(init<RRectangle>())
+    .def(init< RIntervalVector >())
     .def(init<std::string>())
     .def("empty", &RRectangle::empty)
     .def("empty_interior", &RRectangle::empty_interior)
@@ -79,6 +81,7 @@ void export_rectangle() {
     .def("__add__", (RectZntpBinFunc)(&minkowski_sum))
     .def("__sub__", (RectBinFunc)(&minkowski_difference))
     .def("__sub__", (RectZntpBinFunc)(&minkowski_difference))
+    .def("__mul__", (RectRealBinFunc)(&scale))
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 }

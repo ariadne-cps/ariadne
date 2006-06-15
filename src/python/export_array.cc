@@ -29,6 +29,7 @@
 #include "python/typedefs.h"
 #include "python/python_utilities.h"
 using namespace Ariadne;
+using namespace Ariadne::Base;
 
 #include <boost/python.hpp>
 using namespace boost::python;
@@ -57,4 +58,5 @@ void export_array() {
     .def("__setitem__", &set_item<SizeArray>)
     .def(self_ns::str(self))    // __self_ns::str__
   ;
+
 }

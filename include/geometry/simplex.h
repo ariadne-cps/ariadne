@@ -321,7 +321,24 @@ namespace Ariadne {
       return subset(Polyhedron<R>(A),Polyhedron<R>(B));
     }
     
-    
+
+    /*! \brief Scale a simplex. */
+    template<typename R>
+    inline
+    Geometry::Simplex<R> 
+    scale(const Geometry::Simplex<R>& s, const R& scale_factor) {
+      
+      const array< Geometry::Point<R> >& vertices=s.vertices();
+      array< Geometry::Point<R> > new_vertices(vertices.size());
+      
+      for(size_type i=0; i!=vertices.size(); ++i) {
+        for(size_type j=0; j!=vertices[i].dimension(); ++j) {
+          new_vertices[i][j]=scale_factor*vertices[i][j];
+        }
+      }
+
+      return Geometry::Simplex<R>(new_vertices);
+    }
 
     template <typename R>
     std::ostream&

@@ -134,7 +134,6 @@ namespace Ariadne {
       bool line_style;
       bool fill_style;
       
-      //template<typename R>
       epsfstream(const char* fn, const Ariadne::Geometry::Rectangle<R>& bbox)
        : std::ofstream(fn), line_colour("black"), fill_colour("green"), line_style(true), fill_style(true)
       {
@@ -149,7 +148,6 @@ namespace Ariadne {
         this->open(bbox);
       }
 
-      //template<typename R>
       epsfstream(const char* fn, const Ariadne::Geometry::Rectangle<R>& bbox, const unsigned int &x,  const unsigned int& y)
        : std::ofstream(fn), line_colour("black"), fill_colour("green"), line_style(true), fill_style(true)
       {
@@ -166,7 +164,7 @@ namespace Ariadne {
 
 	this->p_map=ProjectionMap(p_matrix,p_vector);
 
-        Ariadne::Geometry::Rectangle<R> proj_bbox=this->p_map(bbox);
+        Ariadne::Geometry::Rectangle<R> proj_bbox=(this->p_map).apply(bbox);
 	
 	this->open(proj_bbox);
       }
@@ -187,8 +185,8 @@ namespace Ariadne {
 
 	this->p_map=ProjectionMap(p_matrix,p_vector);
 
-        Ariadne::Geometry::Rectangle<R> proj_bbox=this->p_map(bbox);
-	
+        Ariadne::Geometry::Rectangle<R> proj_bbox=(this->p_map).apply(bbox);
+
 	Ariadne::Geometry::Point<R> l(proj_bbox.lower_corner());
 	Ariadne::Geometry::Point<R> u(proj_bbox.upper_corner());
 
@@ -426,7 +424,7 @@ namespace Ariadne {
     epsfstream<R>&
     trace(epsfstream<R>& eps, const Ariadne::Geometry::Rectangle<R>& r)
     {
-      Ariadne::Geometry::Rectangle<R> proj_r=eps.projection()(r);
+      Ariadne::Geometry::Rectangle<R> proj_r=(eps.projection()).apply(r);
 
       double rlx=convert_to<double>(proj_r.lower_bound(0));
       double rux=convert_to<double>(proj_r.upper_bound(0));

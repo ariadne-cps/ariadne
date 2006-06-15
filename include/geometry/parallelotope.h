@@ -101,7 +101,7 @@ namespace Ariadne {
           throw std::domain_error("The centre and directions have different dimensions.");
         }
       }
-      
+       
       /*! \brief Construct from a Rectangle. */
       explicit Parallelotope(const Rectangle<real_type>& r)
         : _centre(r.dimension()), _generators(r.dimension(),r.dimension())
@@ -367,6 +367,24 @@ namespace Ariadne {
                          const ListSet<R, Parallelotope >& cover) 
     {
       throw std::domain_error("subset_of_open_cover(Parallelotope, std::vector<Parallelotope>) not implemented");
+    }
+
+    /*! \brief Scale a parallelotope. */
+    template<typename R>
+    inline
+    Geometry::Parallelotope<R> 
+    scale(const Geometry::Parallelotope<R>& p, const R& scale_factor) {
+
+      const Geometry::Point<R>& centre=p.centre();
+      const LinearAlgebra::Matrix<R>& generators=p.generators();
+      
+      Geometry::Point<R> new_centre(p.dimension());
+
+      for(size_type i=0; i!=p.dimension(); ++i) {
+        new_centre[i]=scale_factor*centre[i];
+      }
+
+      return Geometry::Parallelotope<R>(new_centre, scale_factor*generators);
     }
 
     

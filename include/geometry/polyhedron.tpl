@@ -317,7 +317,7 @@ namespace Ariadne {
                          const Polyhedron<R>& B) 
     {
       Polyhedron<R> intersctn(A);        
-      intersctn._ppl_poly.intersection_assign(B._ppl_interior());
+      intersctn._ppl_poly.intersection_assign(B._ppl_poly);
       return intersctn;
     }    
     
@@ -328,7 +328,7 @@ namespace Ariadne {
                  const Polyhedron<R>& B) 
     {
       Polyhedron<R> intersctn(A);        
-      intersctn._ppl_poly.intersection_assign(B._ppl_poly);
+      intersctn._ppl_poly.intersection_assign(B._ppl_interior());
       return intersctn;
     }
 

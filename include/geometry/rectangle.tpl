@@ -480,13 +480,20 @@ namespace Ariadne {
         os << "upper=" << (r._upper_corner) << " }" ;
       */
       
-      if(r.empty()) {
+      /*if(r.empty()) {
         os << "Empty";
       }
       else if(r.dimension() > 0) {
         os << r[0];
         for(size_type i=1; i!=r.dimension(); ++i) {
           os << "x" << r[i];
+        }
+      }
+      */
+      if(r.dimension() > 0) {
+        os << "["<<r._lower_corner[0]<<","<<r._upper_corner[0]<<"]";
+        for(size_type i=1; i!=r.dimension(); ++i) {
+          os << "x["<<r._lower_corner[i]<<","<<r._upper_corner[i]<<"]";
         }
       }
       else {

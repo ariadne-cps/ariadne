@@ -543,7 +543,7 @@ namespace Ariadne {
       for(size_type i=0; i != C.dimension(); ++i) {
         C._lower_corner[i] = max(A._lower_corner[i],B._lower_corner[i]);
         C._upper_corner[i] = min(A._upper_corner[i],B._upper_corner[i]);
-        if(C._lower_corner[i] > C._upper_corner[i]) {
+        if(C._lower_corner[i] >= C._upper_corner[i]) {
           C._lower_corner[0]=1;
           C._upper_corner[0]=0;
           return C;
@@ -571,7 +571,7 @@ namespace Ariadne {
       for(size_type i=0; i != C.dimension(); ++i) {
         C._lower_corner[i] = std::max(A._lower_corner[i],B._lower_corner[i]);
         C._upper_corner[i] = std::min(A._upper_corner[i],B._upper_corner[i]);
-        if(C._lower_corner[i] >= C._upper_corner[i]) {
+        if(C._lower_corner[i] > C._upper_corner[i]) {
           C._lower_corner[0]=1;
           C._upper_corner[0]=0;
           return C;

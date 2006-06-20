@@ -92,11 +92,7 @@ namespace Ariadne {
       array< std::vector<index_type> > _transformation;
     };
 
- 
-      
- 
-
-
+    
     /*! \brief A cell in a unit grid. */
     class LatticeCell {
       friend class LatticeRectangleIterator;
@@ -141,6 +137,7 @@ namespace Ariadne {
       IndexArray _lower;
     };
     
+
     /*! \brief A block of indices in a grid. */
     class LatticeRectangle {
       friend class LatticeRectangleIterator;
@@ -210,6 +207,7 @@ namespace Ariadne {
       IndexArray _upper;
     };
     
+    
     /*! \brief An iterator for positions in rectangular piece of a grid. */
     class LatticeRectangleIterator 
       : public boost::iterator_facade<LatticeRectangleIterator,
@@ -230,7 +228,7 @@ namespace Ariadne {
       void increment() {
         dimension_type d=0;
         _position[d]+=1;
-        while(_position[d]==_upper[d] && (d+1u)!=_position.size() ) {
+        while(_position[d]>=_upper[d] && (d+1u)!=_position.size() ) {
           _position[d]=_lower[d];
           d+=1;
           _position[d]+=1;

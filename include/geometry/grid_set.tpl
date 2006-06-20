@@ -115,7 +115,8 @@ namespace Ariadne {
       if(this->empty()) {
         return Rectangle<R>();
       }
-      
+     
+
       Rectangle<R> result(dimension());
       for(size_type i=0; i!=dimension(); ++i) {
         result.set_lower_bound(i, _grid.subdivision_coordinate(i,_lattice_set.lower_bound(i)));
@@ -499,7 +500,6 @@ namespace Ariadne {
     GridRectangle<R>
     over_approximation(const Rectangle<R>& r, const Grid<R>& g) 
     {
-      
       if(r.empty()) {
         return GridRectangle<R>(g);
       }
@@ -509,6 +509,7 @@ namespace Ariadne {
         lower[i]=g.subdivision_lower_index(i,r.lower_bound(i));
         upper[i]=g.subdivision_upper_index(i,r.upper_bound(i));
       }
+
       return GridRectangle<R>(g,lower,upper);
     }
     
@@ -570,6 +571,7 @@ namespace Ariadne {
       if(p.empty()) {
         return result; 
       }
+      
       Rectangle<R> bb=p.bounding_box();
       GridRectangle<R> gbb=over_approximation(bb,g);
       LatticeRectangle block=gbb.lattice_set();
@@ -606,6 +608,7 @@ namespace Ariadne {
         lower[i]=g.subdivision_lower_index(i,rect.lower_bound(i));
         upper[i]=g.subdivision_upper_index(i,rect.upper_bound(i));
       }
+
       return GridRectangle<R>(g.grid(),lower,upper);
     }
     
@@ -642,8 +645,6 @@ namespace Ariadne {
       Rectangle<R> bb=regular_intersection(Polyhedron<R>(p),
                               Polyhedron<R>(g.bounding_box())).bounding_box();
       
-      //Rectangle<R> bb=p.bounding_box();
-
       if (bb.empty())
       	return result;
 
@@ -651,6 +652,7 @@ namespace Ariadne {
       LatticeRectangle block=gbb.lattice_set();
 
       for(LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
+
         GridCell<R> cell(g.grid(),*iter);
         if(!disjoint(Rectangle<R>(cell),p)) {
           result.adjoin(cell);
@@ -680,13 +682,16 @@ namespace Ariadne {
       				Polyhedron<R>(g.bounding_box())).bounding_box();
       //Rectangle<R> bb=p.bounding_box();
 
-      if (bb.empty())
+      if (bb.empty()) {
       	return result;
+      }
       
       GridRectangle<R> gbb=over_approximation(bb,g);
       LatticeRectangle block=gbb.lattice_set();
 
-      for(LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
+      for(LatticeRectangle::const_iterator iter=block.begin(); 
+            iter!=block.end(); ++iter) {
+
         GridCell<R> cell(g.grid(),*iter);
         if(p.contains(Rectangle<R>(cell))) {
           result.adjoin(cell);
@@ -726,7 +731,7 @@ namespace Ariadne {
       
       assert(g.dimension()==ls.dimension());
       for(typename ListSet<R,BS>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
-       result.adjoin(under_approximation(*iter,g.grid()));
+       result.adjoin(under_approximation(*iter,g));
       }
         
       return result;

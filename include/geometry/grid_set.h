@@ -110,7 +110,7 @@ namespace Ariadne {
     template<typename R>
     GridCellListSet<R>
     under_approximation(const Zonotope<R>& p, const Grid<R>& g);
-
+   
     template<typename R>
     GridRectangle<R>
     under_approximation(const Rectangle<R>& p, const FiniteGrid<R>& g);

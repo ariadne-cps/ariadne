@@ -27,7 +27,13 @@ from ariadne.linear_algebra import *
 from ariadne.system import *
 import sys
 
+def write_reached(eps,reached,color):
+  eps.set_fill_colour(color)
+  for bs in reached.reached_regions():
+    eps.write(bs.continuous_set())
+
 def try_to_grid_reset_from(H, d_node, c_set, time, time_step, reach_set, flowed_set, max_jump, verbatim):
+  eps.write(bs.continuous_set())
   if (max_jump==0):
     return
   for trans in H.get_discrete_transitions_leaving(d_node):
@@ -76,7 +82,7 @@ def bounded_time_grid_reachability(H, d_node, c_set, time, time_step, approx, ma
   bounded_time_grid_reachability_with_reach_set(H, d_node, c_set, time, time_step, reach_set, flowed_set, max_jump, verbatim)
   return [reach_set, flowed_set]
 
-def try_to_reset_from(H, d_node, c_set, time, time_step, reach_set, flowed_set, max_jump, verbatim):
+def try_to_reset_from(H, d_node, c_set, time, time_step, reach_set, flowed_set, max_jump, eps_img, verbatim):
   if (max_jump<=0):
     return
   for trans in H.get_discrete_transitions_leaving(d_node):
@@ -95,12 +101,18 @@ def try_to_reset_from(H, d_node, c_set, time, time_step, reach_set, flowed_set, 
        new_c_set=ZonotopeListSet(RectangleListSet(PartitionTreeSet(grid_c_set)))
       except:
        new_c_set=ZonotopeListSet(RectangleListSet(grid_c_set))
+      #new_c_set=dest_c_set
       if (verbatim == 'yes'):
         print 'done'
-      bounded_time_reachability_with_reach_set(H, dest_d_node, new_c_set, time, time_step, reach_set, flowed_set, max_jump, verbatim)
+      if not (len(eps_img)==0):
+        for eps in eps_img:
+          write_reached(eps,reach_set,"blue")
+          write_reached(eps,flowed_set,"red")
+      bounded_time_reachability_with_reach_set(H, dest_d_node, new_c_set, time, time_step, reach_set, flowed_set, max_jump, eps_img, verbatim)
+      print 'Backtracing...'
 	
 
-def bounded_time_reachability_with_reach_set(H, d_node, c_set, time, time_step, reach_set, flowed_set, max_jump, verbatim):
+def bounded_time_reachability_with_reach_set(H, d_node, c_set, time, time_step, reach_set, flowed_set, max_jump, eps_img, verbatim):
   if not (d_node in H.discrete_nodes()):
     raise 'bounded_time_reachability(...): initial discrete node does not belong to the automaton'
   if (verbatim == 'yes'):
@@ -110,7 +122,7 @@ def bounded_time_reachability_with_reach_set(H, d_node, c_set, time, time_step, 
   last_reached=touching_intersection(last_reached,inv)
   vf=d_node.dynamic()
   #lohner=C1LohnerIntegrator(0.125,0.5,0.0625)
-  lohner=C1LohnerIntegrator(0.125,0.005,0.0625)
+  lohner=C1LohnerIntegrator(0.125,0.005,5)
   grid_c_set=flowed_set.grid_over_approximation(d_node, c_set)
   already_flowed_set=(flowed_set.reached_region_on(d_node)).continuous_set()
   new_set=difference(grid_c_set,already_flowed_set)
@@ -118,40 +130,40 @@ def bounded_time_reachability_with_reach_set(H, d_node, c_set, time, time_step, 
   flowed_set.join_under_approximation(d_node, last_reached)
   while ((time>=0) and (new_flow)):
     if (verbatim == 'yes'):
-      print 'Time %.2f' % time
-    #  print 'Computing reached region...',
+      print 'Time %.3f' % time
+      print 'Computing reached region...'
     reached=lohner.reach(vf, last_reached, Real(time_step))
-    #if (verbatim == 'yes'):
-    #  print 'done'
-    #  print 'Memoizing reached region...',
+    if (verbatim == 'yes'):
+      print 'done'
+      print 'Memoizing reached region...'
     reached=touching_intersection(reached,inv)
     #reach_set.add_a_hybrid_region(d_node, reached)
     reach_set.join_over_approximation(d_node,reached)
-    #if (verbatim == 'yes'):
-    #  print 'done'
-    try_to_reset_from(H, d_node, reached, time, time_step, reach_set, flowed_set, max_jump, verbatim)
-    #if (verbatim == 'yes'):
-    #  print 'Integrating region...',
+    if (verbatim == 'yes'):
+      print 'done'
+    try_to_reset_from(H, d_node, reached, time, time_step, reach_set, flowed_set, max_jump, eps_img, verbatim)
+    if (verbatim == 'yes'):
+      print 'Integrating region...'
     last_reached=lohner.integrate(vf, last_reached, Real(time_step))
     last_reached=touching_intersection(last_reached,inv)
-    #if (verbatim == 'yes'):
-    #  print 'done'
-    #  print 'Memoizing flowed region...',
+    if (verbatim == 'yes'):
+      print 'done'
+      print 'Memoizing flowed region...'
     grid_c_set=flowed_set.grid_over_approximation(d_node, last_reached)
     already_flowed_set=(flowed_set.reached_region_on(d_node)).continuous_set()
     new_set=difference(grid_c_set,already_flowed_set)
     new_flow=not (new_set.empty())
     flowed_set.join_under_approximation(d_node, last_reached)
-    #new_flow=interiors_intersect(last_reached,inv)
-    #if (verbatim == 'yes'):
-    #  print 'done'
+    new_flow=interiors_intersect(last_reached,inv)
+    if (verbatim == 'yes'):
+      print 'done'
     time=time-time_step
 
-def bounded_time_reachability(H, d_node, c_set, time, time_step, approx, max_jump,verbatim):
+def bounded_time_reachability(H, d_node, c_set, time, time_step, approx, max_jump, eps_img, verbatim):
   #reach_set=HybridReachSet()
   #approx=1.0/(2**approx)
   reach_set=HybridGridReachSet(H, approx)
   flowed_set=HybridGridReachSet(H, approx)
-  bounded_time_reachability_with_reach_set(H, d_node, c_set, time, time_step, reach_set, flowed_set, max_jump, verbatim)
+  bounded_time_reachability_with_reach_set(H, d_node, c_set, time, time_step, reach_set, flowed_set, max_jump, eps_img, verbatim)
   return [reach_set, flowed_set]
  

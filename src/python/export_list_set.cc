@@ -56,7 +56,7 @@ touching_intersection(const ListSet<R,BS>& ls, const BS2<R>& bs)
   ListSet<R,BS> output(ls.dimension());
     
   for (size_t i=0; i< ls.size(); i++) {
-    if (interiors_intersect(ls[i],bs))
+    if (!(disjoint(ls[i],bs)))
       output.adjoin(ls[i]);
   }
 
@@ -135,6 +135,7 @@ def("regular_intersection", RectLSBinFun(&regular_intersection));
     .def("dimension", &RRectangleListSet::dimension)
     .def("push_back", &RRectangleListSet::push_back)
     .def("size", &RRectangleListSet::size)
+    .def("empty", &RRectangleListSet::empty)
     .def("__len__", &RRectangleListSet::size)
     .def("__getitem__", &RRectangleListSet::get, return_value_policy<copy_const_reference>())
     .def("__setitem__", &RRectangleListSet::set)
@@ -151,6 +152,7 @@ def("regular_intersection", RectLSBinFun(&regular_intersection));
     .def("adjoin", PltpLSadjPltp(&RParallelotopeListSet::adjoin))
     .def("adjoin", PltpLSadjPltpLS(&RParallelotopeListSet::adjoin))
     .def("size", &RParallelotopeListSet::size)
+    .def("empty", &RParallelotopeListSet::empty)
     .def("__len__", &RParallelotopeListSet::size)
 //    .def("__getitem__", &RParallelotopeListSet::get, return_value_policy<copy_const_reference>())
 //    .def("__getitem__", &get_item<RParallelotopeListSet>)
@@ -170,6 +172,7 @@ def("regular_intersection", RectLSBinFun(&regular_intersection));
     .def("adjoin", ZltzLSadjZltz(&RZonotopeListSet::adjoin))
     .def("adjoin", ZltzLSadjZltzLZ(&RZonotopeListSet::adjoin))
     .def("size", &RZonotopeListSet::size)
+    .def("empty", &RZonotopeListSet::empty)
     .def("__len__", &RZonotopeListSet::size)
 //    .def("__getitem__", &RParallelotopeListSet::get, return_value_policy<copy_const_reference>())
 //    .def("__getitem__", &get_item<RParallelotopeListSet>)

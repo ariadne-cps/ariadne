@@ -224,7 +224,15 @@ namespace Ariadne {
       }
       Parma_Polyhedra_Library::NNC_Polyhedron p(this->_ppl_poly);
       p.topological_closure_assign();
-      
+
+#ifdef DEBUG 
+      std::cerr << "Polyhedron<R>::contains(const state_type& point) const" << std::endl;
+      std::cerr << *this << std::endl;
+      std::cerr << _from_Point_to_PPL_Polyhedron(point) << std::endl;
+ 
+      std::cerr << p.contains(_from_Point_to_PPL_Polyhedron(point)) << std::endl;
+#endif
+
       return p.contains(_from_Point_to_PPL_Polyhedron(point));
       
     }

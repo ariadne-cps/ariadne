@@ -149,9 +149,11 @@ namespace Ariadne {
       if (this->empty()) 
         return false;
     
-      for (size_type i=0; i< (size_type)(1<<rect.dimension()); i++)
-        if (!this->contains(rect.vertex(i)))
+      for (size_type i=0; i< (size_type)(1<<rect.dimension()); i++) {
+        if (!this->contains(rect.vertex(i))) {
 	  return false;
+        }
+      }
 
       return true;
     }
@@ -627,9 +629,13 @@ namespace Ariadne {
     operator<<(std::ostream& os, const Zonotope<R>& z) 
     {
       if(z.dimension() > 0) {
-        os << "Zonotope(\n  centre=" << z.centre();
-        os << "\n  directions=" << z.generators();
-        os << "\n) ";
+        if (!(z.empty())) {
+          os << "Zonotope(\n  centre=" << z.centre();
+          os << "\n  directions=" << z.generators();
+          os << "\n) ";
+        } else {
+          os << "Zonotope( Empty )" << std::endl;
+        }
       }
 
       return os;

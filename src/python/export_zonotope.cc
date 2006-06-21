@@ -46,10 +46,10 @@ Zonotope<Real>
 touching_intersection(const Zonotope<Real> &a, 
 		      const BS<Real> &b) {
 	
-  if (interiors_intersect(a,b))
-    return a;
-
-  return Zonotope<Real>(a.dimension());
+  if (disjoint(a,b))
+    return Zonotope<Real>(a.dimension());
+  
+  return a;
 }
 
 template Zonotope<Real> touching_intersection(const Zonotope<Real> &,  

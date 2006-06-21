@@ -166,7 +166,7 @@ namespace Ariadne {
       
       /*! \brief True if the zonotope is empty. */
       bool empty() const {
-        if ((this->_generators.size1()>0)||
+        if ((this->_generators.size1()>0)&&
 	    (this->_generators.size2()>0))
 	    return false;
 

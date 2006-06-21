@@ -564,21 +564,21 @@ namespace Ariadne {
     
     template<typename R>
     GridCellListSet<R>
-    under_approximation(const Zonotope<R>& p, const Grid<R>& g) 
+    under_approximation(const Zonotope<R>& z, const Grid<R>& g) 
     {
       GridCellListSet<R> result(g);
-      assert(g.dimension()==p.dimension());
-      if(p.empty()) {
+      assert(g.dimension()==z.dimension());
+      if(z.empty()) {
         return result; 
       }
       
-      Rectangle<R> bb=p.bounding_box();
+      Rectangle<R> bb=z.bounding_box();
       GridRectangle<R> gbb=over_approximation(bb,g);
       LatticeRectangle block=gbb.lattice_set();
 
       for(LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
         GridCell<R> cell(g,*iter);
-        if(p.contains(Rectangle<R>(cell))) {
+        if(z.contains(Rectangle<R>(cell))) {
           result.adjoin(cell);
         }
       }
@@ -680,7 +680,6 @@ namespace Ariadne {
       }
       Rectangle<R> bb=regular_intersection(Polyhedron<R>(p),
       				Polyhedron<R>(g.bounding_box())).bounding_box();
-      //Rectangle<R> bb=p.bounding_box();
 
       if (bb.empty()) {
       	return result;

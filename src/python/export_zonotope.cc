@@ -100,7 +100,7 @@ void export_zonotope() {
   def("subset", RectZntpBinPred(&subset));
   def("subset", PltpZntpBinPred(&subset));
   def("subset", ZntpPltpBinPred(&subset));
-  //def("minkowski_sum", ZntpZntpBinFunc(&minkowski_sum));
+  def("minkowski_sum", ZntpZntpBinFunc(&minkowski_sum));
 
   class_<RZonotope>("Zonotope",init<int>())
     .def(init<RPoint,RMatrix>())

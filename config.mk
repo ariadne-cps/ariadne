@@ -41,9 +41,9 @@ ifeq ($(DEBUG),yes)
 	CXXFLAGS += -g -DDEBUG -Wall -Wextra
 	LIBS = libariadne.so
 else
-	#CXXFLAGS += -O2 -fPIC -Wall  
-	CXXFLAGS += -O2 -fPIC -Wall -march=athlon64 -pipe 
-	CXXFLAGS += -fomit-frame-pointer -funswitch-loops -fgcse-after-reload 
+	CXXFLAGS += -O2 -fPIC -Wall  
+	#CXXFLAGS += -O2 -fPIC -Wall -march=athlon64 -pipe 
+	#CXXFLAGS += -fomit-frame-pointer -funswitch-loops -fgcse-after-reload 
 	LIBS = libariadne.so
 endif
 
@@ -52,5 +52,4 @@ ifeq ($(VERBATIM),yes)
 endif
 
 CXXFLAGS +=  -I${LOCALDIR}/${INCLUDEDIR} 
-LDXXFLAGS = -L${LOCALDIR}/${SRCDIR} 
-
+LDXXFLAGS = -L${LOCALDIR}/${SRCDIR}

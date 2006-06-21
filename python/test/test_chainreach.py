@@ -35,7 +35,7 @@ a=params[0]
 b=params[1]
 
 h=HenonMap(a,b)
-gbb=Rectangle("[-10,4]x[-7,7]") # grid bounding box
+gbb=Rectangle("[-11,5]x[-8,8]") # grid bounding box
 g=FiniteGrid(gbb,128); # grid
 ir=Rectangle("[1.499,1.501]x[0.499,0.501]") # initial state
 cb=Rectangle("[-4,4]x[-4,4]") # cutoff box

@@ -135,7 +135,7 @@ def bounded_time_reachability_with_reach_set(H, d_node, c_set, time, time_step, 
     reached=lohner.reach(vf, last_reached, Real(time_step))
     if (verbatim == 'yes'):
       print 'done'
-      print 'Memoizing reached region...'
+      print 'Memorizing reached region...'
     reached=touching_intersection(reached,inv)
     #reach_set.add_a_hybrid_region(d_node, reached)
     reach_set.join_over_approximation(d_node,reached)
@@ -148,7 +148,7 @@ def bounded_time_reachability_with_reach_set(H, d_node, c_set, time, time_step, 
     last_reached=touching_intersection(last_reached,inv)
     if (verbatim == 'yes'):
       print 'done'
-      print 'Memoizing flowed region...'
+      print 'Memorizing flowed region...'
     grid_c_set=flowed_set.grid_over_approximation(d_node, last_reached)
     already_flowed_set=(flowed_set.reached_region_on(d_node)).continuous_set()
     new_set=difference(grid_c_set,already_flowed_set)
@@ -166,4 +166,3 @@ def bounded_time_reachability(H, d_node, c_set, time, time_step, approx, max_jum
   flowed_set=HybridGridReachSet(H, approx)
   bounded_time_reachability_with_reach_set(H, d_node, c_set, time, time_step, reach_set, flowed_set, max_jump, eps_img, verbatim)
   return [reach_set, flowed_set]
- 

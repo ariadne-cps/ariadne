@@ -41,7 +41,7 @@ def plot(fn,bb,set):
   eps.write(set[-1])
   eps.close()
 
-
+lohner=C1LohnerIntegrator(0.125,0.5,0.0625)
 
 bb=Rectangle("[-2,2]x[-2,2]")
 
@@ -59,7 +59,7 @@ step_sizes=[step_size]
 #print Rational(step_size)
 for i in range(0,128):
   #print "before:",Rational(step_size)
-  reach_list.append(integration_step(avf,reach_list[-1],step_size))
+  reach_list.append(lohner.integration_step(avf,reach_list[-1],step_size))
   #print Rational(step_size)
   step_sizes.append(step_size)
   step_size=min(step_size*2,step_sizes[0])
@@ -70,8 +70,8 @@ print "Done\n"
 
 print "Testing reach step of affine vector field on parallelotope"
 step_size=Real(0.25)
-reach_paral=reach_step(avf,Zonotope(init_paral),step_size)
-final_paral=integration_step(avf,init_paral,step_size)
+reach_paral=lohner.reach_step(avf,Zonotope(init_paral),step_size)
+final_paral=lohner.integration_step(avf,init_paral,step_size)
 #print Rational(step_size)
 poly_hull=convex_hull(Polyhedron(init_paral),Polyhedron(final_paral))
 reach_list=[init_paral,reach_paral.bounding_box(),final_paral]

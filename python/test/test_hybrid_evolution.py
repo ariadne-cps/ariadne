@@ -69,7 +69,7 @@ h.add(e1)
 h.add(e2)
 
 c_init=Zonotope(Rectangle("[-0.8,-0.7]x[0.7,0.8]"))
-reach=bounded_time_reachability(h, n1, c_init, 16.0, 0.05, 2**8, 0, 'yes') 
+reach=bounded_time_reachability(h, n1, c_init, 0.25, 0.125, 2**8, 2**8, 0, 'yes') 
 
 eps.set_fill_colour("blue")
 for bs in reach[0].reached_regions():
@@ -79,4 +79,3 @@ eps.set_fill_colour("red")
 for bs in reach[1].reached_regions():
   eps.write(bs.continuous_set())
 eps.close()
-

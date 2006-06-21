@@ -129,13 +129,21 @@ export_point.o: export_point.cc ../../include/geometry/point.h \
   ../../include/geometry/../linear_algebra/../numeric/../declarations.h \
   ../../include/geometry/../linear_algebra/../numeric/../utility/stlio.h \
   ../../include/geometry/../linear_algebra/../numeric/../utility/../base/array.h \
+  ../../include/geometry/rectangle.h \
+  ../../include/geometry/../numeric/arithmetic.h \
+  ../../include/geometry/../numeric/../numeric/numerical_types.h \
+  ../../include/geometry/../numeric/../numeric/../declarations.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/integer.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../numeric/../numeric/../utility/stlio.h \
+  ../../include/geometry/../numeric/../numeric/approximation.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
+  ../../include/geometry/../numeric/interval.h \
+  ../../include/geometry/../numeric/../declarations.h \
+  ../../include/geometry/../geometry/point.h \
   ../../include/linear_algebra/vector.h ../../include/python/typedefs.h \
   ../../include/python/../real_typedef.h \
   ../../include/python/../numeric/numerical_types.h \
-  ../../include/python/../numeric/../declarations.h \
-  ../../include/python/../numeric/../numeric/integer.h \
-  ../../include/python/../numeric/../numeric/dyadic.h \
-  ../../include/python/../numeric/../utility/stlio.h \
   ../../include/python/../declarations.h
 
 export_rectangle.o: export_rectangle.cc \
@@ -218,7 +226,7 @@ export_parallelotope.o: export_parallelotope.cc \
   ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/interval_matrix.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
-  ../../include/geometry/polyhedron.h \
+  ../../include/geometry/polyhedron.h /ufs/collins/include/ppl.hh \
   ../../include/geometry/../linear_algebra/constraint_system.h \
   ../../include/geometry/../linear_algebra/../numeric/numerical_types.h \
   ../../include/geometry/../linear_algebra/generator_system.h \
@@ -266,7 +274,7 @@ export_zonotope.o: export_zonotope.cc ../../include/geometry/zonotope.h \
   ../../include/geometry/../numeric/../numeric/approximation.h \
   ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/parallelotope.h \
-  ../../include/geometry/polyhedron.h \
+  ../../include/geometry/polyhedron.h /ufs/collins/include/ppl.hh \
   ../../include/geometry/../linear_algebra/constraint_system.h \
   ../../include/geometry/../linear_algebra/../numeric/numerical_types.h \
   ../../include/geometry/../linear_algebra/generator_system.h \
@@ -303,7 +311,7 @@ export_simplex.o: export_simplex.cc ../../include/geometry/simplex.h \
   ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/../numeric/interval.h \
   ../../include/geometry/../numeric/../declarations.h \
-  ../../include/geometry/polyhedron.h \
+  ../../include/geometry/polyhedron.h /ufs/collins/include/ppl.hh \
   ../../include/geometry/../linear_algebra/constraint_system.h \
   ../../include/geometry/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../numeric/numerical_types.h \
@@ -347,7 +355,7 @@ export_polyhedron.o: export_polyhedron.cc ../../include/utility/stlio.h \
   ../../include/geometry/../linear_algebra/matrix.h \
   ../../include/geometry/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../numeric/integer.h \
-  ../../include/geometry/polyhedron.h \
+  ../../include/geometry/polyhedron.h /ufs/collins/include/ppl.hh \
   ../../include/geometry/../linear_algebra/constraint_system.h \
   ../../include/geometry/../linear_algebra/../numeric/numerical_types.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
@@ -415,7 +423,7 @@ export_list_set.o: export_list_set.cc ../../include/geometry/rectangle.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/interval_matrix.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
-  ../../include/geometry/polyhedron.h \
+  ../../include/geometry/polyhedron.h /ufs/collins/include/ppl.hh \
   ../../include/geometry/../linear_algebra/constraint_system.h \
   ../../include/geometry/../linear_algebra/../numeric/numerical_types.h \
   ../../include/geometry/../linear_algebra/generator_system.h \
@@ -463,6 +471,7 @@ export_grid_set.o: export_grid_set.cc \
   ../../include/linear_algebra/../linear_algebra/../numeric/../utility/../base/../declarations.h \
   ../../include/linear_algebra/../linear_algebra/matrix.h \
   ../../include/linear_algebra/../linear_algebra/constraint_system.h \
+  /ufs/collins/include/ppl.hh \
   ../../include/linear_algebra/../linear_algebra/../numeric/numerical_types.h \
   ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/integer.h \
   ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/dyadic.h \
@@ -618,7 +627,7 @@ export_postscript_output.o: export_postscript_output.cc \
   ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/interval_matrix.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
-  ../../include/geometry/polyhedron.h \
+  ../../include/geometry/polyhedron.h /ufs/collins/include/ppl.hh \
   ../../include/geometry/../linear_algebra/constraint_system.h \
   ../../include/geometry/../linear_algebra/../numeric/numerical_types.h \
   ../../include/geometry/../linear_algebra/generator_system.h \
@@ -741,7 +750,7 @@ export_affine_map.o: export_affine_map.cc ../../include/geometry/point.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/interval_matrix.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
-  ../../include/geometry/polyhedron.h \
+  ../../include/geometry/polyhedron.h /ufs/collins/include/ppl.hh \
   ../../include/geometry/../linear_algebra/constraint_system.h \
   ../../include/geometry/../linear_algebra/../numeric/numerical_types.h \
   ../../include/geometry/../linear_algebra/generator_system.h \
@@ -780,6 +789,96 @@ export_affine_map.o: export_affine_map.cc ../../include/geometry/point.h \
   ../../include/evaluation/../evaluation/../linear_algebra/vector.h \
   ../../include/evaluation/../evaluation/../linear_algebra/matrix.h \
   ../../include/evaluation/../evaluation/../linear_algebra/interval_matrix.h \
+  ../../include/python/typedefs.h ../../include/python/../real_typedef.h \
+  ../../include/python/../numeric/numerical_types.h \
+  ../../include/python/../declarations.h \
+  ../../include/python/python_utilities.h
+
+export_affine_multimap.o: export_affine_multimap.cc \
+  ../../include/geometry/point.h ../../include/geometry/../declarations.h \
+  ../../include/geometry/../base/array.h \
+  ../../include/geometry/../base/../declarations.h \
+  ../../include/geometry/../linear_algebra/vector.h \
+  ../../include/geometry/../linear_algebra/../declarations.h \
+  ../../include/geometry/../linear_algebra/../numeric/integer.h \
+  ../../include/geometry/../linear_algebra/../numeric/../declarations.h \
+  ../../include/geometry/../linear_algebra/../numeric/../utility/stlio.h \
+  ../../include/geometry/../linear_algebra/../numeric/../utility/../base/array.h \
+  ../../include/geometry/rectangle.h \
+  ../../include/geometry/../numeric/arithmetic.h \
+  ../../include/geometry/../numeric/../numeric/numerical_types.h \
+  ../../include/geometry/../numeric/../numeric/../declarations.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/integer.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../numeric/../numeric/../utility/stlio.h \
+  ../../include/geometry/../numeric/../numeric/approximation.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
+  ../../include/geometry/../numeric/interval.h \
+  ../../include/geometry/../numeric/../declarations.h \
+  ../../include/geometry/../geometry/point.h \
+  ../../include/geometry/parallelotope.h \
+  ../../include/geometry/../linear_algebra/matrix.h \
+  ../../include/geometry/simplex.h ../../include/geometry/zonotope.h \
+  ../../include/geometry/../linear_algebra/transformation_system.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/interval_vector.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/../declarations.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/../numeric/interval.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/interval_matrix.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/geometry/polyhedron.h /ufs/collins/include/ppl.hh \
+  ../../include/geometry/../linear_algebra/constraint_system.h \
+  ../../include/geometry/../linear_algebra/../numeric/numerical_types.h \
+  ../../include/geometry/../linear_algebra/generator_system.h \
+  ../../include/geometry/../geometry/rectangle.h \
+  ../../include/evaluation/affine_multimap.h \
+  ../../include/evaluation/../linear_algebra/vector.h \
+  ../../include/evaluation/../linear_algebra/matrix.h \
+  ../../include/evaluation/../linear_algebra/interval_matrix.h \
+  ../../include/evaluation/../geometry/point.h \
+  ../../include/evaluation/../geometry/simplex.h \
+  ../../include/evaluation/../geometry/rectangle.h \
+  ../../include/evaluation/../geometry/parallelotope.h \
+  ../../include/evaluation/../geometry/zonotope.h \
+  ../../include/evaluation/../geometry/polyhedron.h \
+  ../../include/evaluation/../geometry/list_set.h \
+  ../../include/evaluation/../geometry/../declarations.h \
+  ../../include/evaluation/../geometry/../base/utility.h \
+  ../../include/evaluation/../geometry/../base/../declarations.h \
+  ../../include/evaluation/../geometry/grid_set.h \
+  ../../include/evaluation/../geometry/../base/array.h \
+  ../../include/evaluation/../geometry/../geometry/rectangle.h \
+  ../../include/evaluation/../geometry/../geometry/grid.h \
+  ../../include/evaluation/../geometry/../geometry/../declarations.h \
+  ../../include/evaluation/../geometry/../geometry/../base/array.h \
+  ../../include/evaluation/../geometry/../geometry/../numeric/arithmetic.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/lattice_set.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../base/array.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../base/iterator.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../base/../base/array.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../numeric/interval.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../base/array_operations.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/../base/../declarations.h \
+  ../../include/evaluation/../geometry/../geometry/lattice_set.h \
+  ../../include/evaluation/../evaluation/affine_map.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/vector.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/matrix.h \
+  ../../include/evaluation/../evaluation/../linear_algebra/interval_matrix.h \
+  ../../include/evaluation/../evaluation/../geometry/point.h \
+  ../../include/evaluation/../evaluation/../geometry/simplex.h \
+  ../../include/evaluation/../evaluation/../geometry/rectangle.h \
+  ../../include/evaluation/../evaluation/../geometry/parallelotope.h \
+  ../../include/evaluation/../evaluation/../geometry/zonotope.h \
+  ../../include/evaluation/../evaluation/../geometry/polyhedron.h \
+  ../../include/evaluation/../evaluation/../geometry/list_set.h \
+  ../../include/evaluation/../evaluation/../geometry/grid_set.h \
+  ../../include/evaluation/../evaluation/../evaluation/map.h \
+  ../../include/evaluation/../evaluation/../evaluation/../declarations.h \
+  ../../include/evaluation/../evaluation/../evaluation/../linear_algebra/vector.h \
+  ../../include/evaluation/../evaluation/../evaluation/../linear_algebra/matrix.h \
+  ../../include/evaluation/../evaluation/../evaluation/../linear_algebra/interval_matrix.h \
   ../../include/python/typedefs.h ../../include/python/../real_typedef.h \
   ../../include/python/../numeric/numerical_types.h \
   ../../include/python/../declarations.h \
@@ -883,7 +982,7 @@ export_affine_vector_field.o: export_affine_vector_field.cc \
   ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/interval_matrix.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
-  ../../include/geometry/polyhedron.h \
+  ../../include/geometry/polyhedron.h /ufs/collins/include/ppl.hh \
   ../../include/geometry/../linear_algebra/constraint_system.h \
   ../../include/geometry/../linear_algebra/../numeric/numerical_types.h \
   ../../include/geometry/../linear_algebra/generator_system.h \

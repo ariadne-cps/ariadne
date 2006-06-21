@@ -25,7 +25,7 @@
 
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
-#include "evaluation/polynomial_map.h"
+#include "system/polynomial_map.h"
 
 #include "python/typedefs.h"
 using namespace Ariadne;

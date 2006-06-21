@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 ##############################################################################
-#            test_system.py
+#            test_hybrid_system.py
 #
 #  Copyright 2006  Alberto Casagrande, Pieter Collins 
 #  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
@@ -24,10 +24,13 @@
 
 from ariadne.base import *
 from ariadne.numeric import *
-from ariadne.evaluation import *
-from ariadne.geometry import *
 from ariadne.linear_algebra import *
+from ariadne.geometry import *
 from ariadne.system import *
+from ariadne.evaluation import *
+
+from ariadne.hybrid_system import *
+
 import sys
 
 b=Vector(2)

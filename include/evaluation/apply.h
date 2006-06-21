@@ -31,7 +31,7 @@
 
 #include "../declarations.h"
 
-#include "../evaluation/map.h"
+#include "../system/map.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -44,24 +44,24 @@ namespace Ariadne {
       virtual ~Applicator();
       
       /*! \brief Compute the image of a basic set under a continuous function. */
-      virtual BS<R> apply(const Map<R>& f, const BS<R>& s) const = 0;
+      virtual BS<R> apply(const System::Map<R>& f, const BS<R>& s) const = 0;
 
       /*! \brief Compute the image of a list set under a map. */
       virtual 
       Geometry::ListSet<R,BS> 
-      apply(const Map<R>& f, const Geometry::ListSet<R,BS>& ds) const;
+      apply(const System::Map<R>& f, const Geometry::ListSet<R,BS>& ds) const;
        
       /*! \brief Compute the image of \a map starting in \a initial_set while remaining in \a bounding_set. */
       virtual
       Geometry::GridMaskSet<R> 
-      apply(const Map<R>& map, 
+      apply(const System::Map<R>& map, 
             const Geometry::GridMaskSet<R>& initial_set,
             const Geometry::GridMaskSet<R>& bounding_set) const;
 
       /*! \brief Compute the chain-reachable set of \a map starting in \a initial_set while staying within \a bounding_set. */
       virtual
       Geometry::GridMaskSet<R> 
-      chainreach(const Map<R>& map, 
+      chainreach(const System::Map<R>& map, 
                  const Geometry::GridMaskSet<R>& initial_set, 
                  const Geometry::GridMaskSet<R>& bounding_set) const;
     };
@@ -73,7 +73,7 @@ namespace Ariadne {
     {
      public:
       /*! \brief Compute the image of a rectangle under a continuous function. */
-      virtual Geometry::Rectangle<R> apply(const Map<R>& f, const Geometry::Rectangle<R>& r) const;
+      virtual Geometry::Rectangle<R> apply(const System::Map<R>& f, const Geometry::Rectangle<R>& r) const;
     };
 
     /*! \brief A class for computing the image of a differentiable map on a parallelotope. */
@@ -83,7 +83,7 @@ namespace Ariadne {
     {
      public:
       /*! \brief Compute the image of a parallelotope under a continuous function. */
-      virtual Geometry::Parallelotope<R> apply(const Map<R>& f, const Geometry::Parallelotope<R>& p) const;
+      virtual Geometry::Parallelotope<R> apply(const System::Map<R>& f, const Geometry::Parallelotope<R>& p) const;
     };
 
     
@@ -92,7 +92,7 @@ namespace Ariadne {
     /*! \brief Compute the image of a rectangle under a continuous function. */
     template<typename R>
     Geometry::Rectangle<R> 
-    apply(const Map<R>& f, const Geometry::Rectangle<R>& s) {
+    apply(const System::Map<R>& f, const Geometry::Rectangle<R>& s) {
       return C0Applicator<R>().apply(f,s);
     }
     
@@ -100,7 +100,7 @@ namespace Ariadne {
     template<typename R>
     inline
     Geometry::Parallelotope<R> 
-    apply(const Map<R>& f, const Geometry::Parallelotope<R>& s) {
+    apply(const System::Map<R>& f, const Geometry::Parallelotope<R>& s) {
       return C1Applicator<R>().apply(f,s);
     }
     
@@ -108,7 +108,7 @@ namespace Ariadne {
     template<typename R>
     inline
     Geometry::ListSet<R,Geometry::Parallelotope>
-    apply(const Map<R>& f, const Geometry::ListSet<R,Geometry::Parallelotope>& s) {
+    apply(const System::Map<R>& f, const Geometry::ListSet<R,Geometry::Parallelotope>& s) {
       return C1Applicator<R>().Applicator<R,Geometry::Parallelotope>::apply(f,s);
     }
     
@@ -116,7 +116,7 @@ namespace Ariadne {
     template<typename R>
     inline
     Geometry::GridMaskSet<R> 
-    apply(const Map<R>& map, 
+    apply(const System::Map<R>& map, 
           const Geometry::GridMaskSet<R>& initial_set, 
           const Geometry::GridMaskSet<R>& bounding_set) 
     {
@@ -127,7 +127,7 @@ namespace Ariadne {
     template<typename R>
     inline
     Geometry::GridMaskSet<R> 
-    chainreach(const Map<R>& map, 
+    chainreach(const System::Map<R>& map, 
                const Geometry::GridMaskSet<R>& initial_set, 
                const Geometry::GridMaskSet<R>& bounding_set) 
     {

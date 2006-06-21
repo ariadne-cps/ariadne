@@ -38,7 +38,7 @@
 #include "../linear_algebra/interval_matrix.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  namespace System {
 
     /*! \brief Base class for (differentiable) functions. */
     template<typename R>

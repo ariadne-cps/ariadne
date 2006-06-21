@@ -56,8 +56,8 @@
 #include "../geometry/grid.h"
 #include "../geometry/grid_set.h"
 
-#include "../evaluation/vector_field.h"
-#include "../evaluation/affine_vector_field.h"
+#include "../system/vector_field.h"
+#include "../system/affine_vector_field.h"
 
 #include "../evaluation/integrator.h"
 
@@ -157,7 +157,7 @@ namespace Ariadne {
     
     template<typename R>
     bool
-    Integrator<R>::check_flow_bounds(const Evaluation::VectorField<R>& vf,
+    Integrator<R>::check_flow_bounds(const System::VectorField<R>& vf,
                                      const Geometry::Rectangle<R>& r,
                                      const Geometry::Rectangle<R>& b,
                                      const R& h) const
@@ -169,7 +169,7 @@ namespace Ariadne {
     
     template<typename R>
     Geometry::Rectangle<R>
-    Integrator<R>::estimate_flow_bounds(const Evaluation::VectorField<R>& vf,
+    Integrator<R>::estimate_flow_bounds(const System::VectorField<R>& vf,
                                         const Geometry::Rectangle<R>& r,
                                         const R& h,
                                         const unsigned int& maximum_iterations) const
@@ -217,7 +217,7 @@ namespace Ariadne {
     
     template<typename R>
     Geometry::Rectangle<R>
-    Integrator<R>::estimate_flow_bounds(const Evaluation::VectorField<R>& vf,
+    Integrator<R>::estimate_flow_bounds(const System::VectorField<R>& vf,
                                         const Geometry::Rectangle<R>& r,
                                         R& h) const
     {
@@ -247,11 +247,12 @@ namespace Ariadne {
 
     template<typename R>
     Geometry::Rectangle<R>
-    Integrator<R>::refine_flow_bounds(const Evaluation::VectorField<R>& vector_field,
+    Integrator<R>::refine_flow_bounds(const System::VectorField<R>& vector_field,
                                       const Geometry::Rectangle<R>& initial_set,
                                       const Geometry::Rectangle<R>& estimated_bounds,
                                       const R& h) const
     {
+      using namespace System;
       using namespace Geometry;
       using namespace LinearAlgebra;
       const VectorField<R>& vf=vector_field;
@@ -280,7 +281,7 @@ namespace Ariadne {
     template<typename R>
     template<template <typename> class BS>
     BS<R> 
-    Integrator<R>::integrate_basic_set(const Evaluation::VectorField<R>& vector_field, 
+    Integrator<R>::integrate_basic_set(const System::VectorField<R>& vector_field, 
                                        const BS<R>& initial_set, 
                                        const R& time) const
     {
@@ -288,7 +289,7 @@ namespace Ariadne {
         return initial_set;
       }
       
-      const VectorField<R>& vf=vector_field;
+      const System::VectorField<R>& vf=vector_field;
       BS<R> r(initial_set);
       R t=time;
       R h=this->maximum_step_size();
@@ -304,7 +305,7 @@ namespace Ariadne {
     template<typename R>
     template<template<typename> class BS>
     Geometry::ListSet<R,BS> 
-    Integrator<R>::integrate_list_set(const VectorField<R>& vector_field, 
+    Integrator<R>::integrate_list_set(const System::VectorField<R>& vector_field, 
                                       const Geometry::ListSet<R,BS>& initial_set, 
                                       const R& time) const
     {
@@ -312,7 +313,7 @@ namespace Ariadne {
         return initial_set;
       }
 
-      const VectorField<R>& vf=vector_field;
+      const System::VectorField<R>& vf=vector_field;
       R step_size=this->maximum_step_size();
       R maximum_set_radius=this->maximum_basic_set_radius();
 #ifdef DEBUG
@@ -375,7 +376,7 @@ namespace Ariadne {
 
     template<typename R>
     Geometry::Rectangle<R>
-    C0Integrator<R>::integrate(const Evaluation::VectorField<R>& vector_field,
+    C0Integrator<R>::integrate(const System::VectorField<R>& vector_field,
                                const Geometry::Rectangle<R>& initial_set,
                                const R& time) const
     {
@@ -384,7 +385,7 @@ namespace Ariadne {
 
     template<typename R>
     Geometry::ListSet<R,Geometry::Rectangle>
-    C0Integrator<R>::integrate(const Evaluation::VectorField<R>& vector_field,
+    C0Integrator<R>::integrate(const System::VectorField<R>& vector_field,
                                const Geometry::ListSet<R,Geometry::Rectangle>& initial_set,
                                const R& time) const
     {
@@ -393,7 +394,7 @@ namespace Ariadne {
 
     template<typename R>
     Geometry::ListSet<R,Geometry::Rectangle>
-    C0Integrator<R>::reach(const Evaluation::VectorField<R>& vector_field,
+    C0Integrator<R>::reach(const System::VectorField<R>& vector_field,
                            const Geometry::ListSet<R,Geometry::Rectangle>& initial_set,
                            const R& time) const
     {
@@ -402,7 +403,7 @@ namespace Ariadne {
 
     template<typename R>
     Geometry::Parallelotope<R>
-    C0Integrator<R>::integration_step(const Evaluation::VectorField<R>& vector_field, 
+    C0Integrator<R>::integration_step(const System::VectorField<R>& vector_field, 
                                       const Geometry::Parallelotope<R>& initial_set, 
                                       R& time) const
     {
@@ -415,7 +416,7 @@ namespace Ariadne {
 
     template<typename R>
     Geometry::Rectangle<R> 
-    C1Integrator<R>::integration_step(const Evaluation::VectorField<R>& vf,
+    C1Integrator<R>::integration_step(const System::VectorField<R>& vf,
                                       const Geometry::Rectangle<R>& is,
                                       R& h) const 
     {
@@ -424,7 +425,7 @@ namespace Ariadne {
 
     template<typename R>
     Geometry::Rectangle<R> 
-    C1Integrator<R>::reachability_step(const Evaluation::VectorField<R>& vf,
+    C1Integrator<R>::reachability_step(const System::VectorField<R>& vf,
                                        const Geometry::Rectangle<R>& is,
                                        R& h) const 
     {
@@ -433,7 +434,7 @@ namespace Ariadne {
 
     template<typename R>
     Geometry::Zonotope<R> 
-    C1Integrator<R>::reachability_step(const Evaluation::VectorField<R>& vf,
+    C1Integrator<R>::reachability_step(const System::VectorField<R>& vf,
                                        const Geometry::Parallelotope<R>& is,
                                        R& h) const 
     {
@@ -444,7 +445,7 @@ namespace Ariadne {
 
     template<typename R>
     Geometry::Rectangle<R>
-    C1Integrator<R>::integrate(const VectorField<R>& vector_field, 
+    C1Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
                                const Geometry::Rectangle<R>& initial_set, 
                                const R& time) const
     {
@@ -453,7 +454,7 @@ namespace Ariadne {
     
     template<typename R>
     Geometry::Parallelotope<R>
-    C1Integrator<R>::integrate(const VectorField<R>& vector_field, 
+    C1Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
                                const Geometry::Parallelotope<R>& initial_set, 
                                const R& time) const
     {
@@ -462,7 +463,7 @@ namespace Ariadne {
     
     template<typename R>
     Geometry::ListSet<R,Geometry::Parallelotope> 
-    C1Integrator<R>::integrate(const VectorField<R>& vector_field, 
+    C1Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
                                const Geometry::ListSet<R,Geometry::Parallelotope>& initial_set, 
                                const R& time) const
     {
@@ -471,7 +472,7 @@ namespace Ariadne {
     
     template<typename R>
     Geometry::Zonotope<R>
-    C1Integrator<R>::integrate(const VectorField<R>& vector_field, 
+    C1Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
                                const Geometry::Zonotope<R>& initial_set, 
                                const R& time) const
     {
@@ -480,7 +481,7 @@ namespace Ariadne {
     
     template<typename R>
     Geometry::ListSet<R,Geometry::Zonotope> 
-    C1Integrator<R>::integrate(const VectorField<R>& vector_field, 
+    C1Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
                                const Geometry::ListSet<R,Geometry::Zonotope>& initial_set, 
                                const R& time) const
     {
@@ -489,12 +490,13 @@ namespace Ariadne {
    
     template<typename R>
     Geometry::GridMaskSet<R> 
-    C1Integrator<R>::integrate(const Evaluation::VectorField<R>& vector_field, 
+    C1Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
                                const Geometry::GridMaskSet<R>& initial_set,
                                const Geometry::GridMaskSet<R>& bounding_set,
                                const R& time) const
     {
       assert(initial_set.grid()==bounding_set.grid());
+      using namespace System;
       using namespace Geometry;
       using namespace LinearAlgebra;
       
@@ -566,11 +568,11 @@ namespace Ariadne {
         
     template<typename R>
     Geometry::ListSet<R,Geometry::Parallelotope> 
-    C1Integrator<R>::reach(const VectorField<R>& vector_field, 
+    C1Integrator<R>::reach(const System::VectorField<R>& vector_field, 
                            const Geometry::ListSet<R,Geometry::Parallelotope>& initial_set, 
                            const R& time) const
     {
-      const VectorField<R>& vf=vector_field;
+      const System::VectorField<R>& vf=vector_field;
       R step_size=this->maximum_step_size();
       R maximum_set_radius=this->maximum_basic_set_radius();
 #ifdef DEBUG
@@ -636,11 +638,11 @@ namespace Ariadne {
 
     template<typename R>
     Geometry::ListSet<R,Geometry::Zonotope> 
-    C1Integrator<R>::reach(const VectorField<R>& vector_field, 
+    C1Integrator<R>::reach(const System::VectorField<R>& vector_field, 
                            const Geometry::ListSet<R,Geometry::Zonotope>& initial_set, 
                            const R& time) const
     {
-      const VectorField<R>& vf=vector_field;
+      const System::VectorField<R>& vf=vector_field;
       R step_size=this->maximum_step_size();
       R maximum_set_radius=this->maximum_basic_set_radius();
 #ifdef DEBUG
@@ -712,7 +714,7 @@ namespace Ariadne {
 
     template<typename R>
     Geometry::GridMaskSet<R> 
-    C1Integrator<R>::reach(const VectorField<R>& vector_field, 
+    C1Integrator<R>::reach(const System::VectorField<R>& vector_field, 
                            const Geometry::GridMaskSet<R>& initial_set,
                            const Geometry::GridMaskSet<R>& bounding_set,
                            const R& time) const
@@ -768,7 +770,7 @@ namespace Ariadne {
     
     template<typename R>
     Geometry::GridMaskSet<R> 
-    Integrator<R>::chainreach(const Evaluation::VectorField<R>& vf, 
+    Integrator<R>::chainreach(const System::VectorField<R>& vf, 
                               const Geometry::GridMaskSet<R>& initial_set, 
                               const Geometry::GridMaskSet<R>& bounding_set) const
     {

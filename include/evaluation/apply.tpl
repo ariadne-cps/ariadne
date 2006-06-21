@@ -45,8 +45,9 @@
 #include "../geometry/grid_set.h"
 #include "../geometry/lattice_set.h"
 
+#include "../system/map.h"
+
 #include "../evaluation/apply.h"
-#include "../evaluation/map.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -54,7 +55,7 @@ namespace Ariadne {
    
     template<typename R>
     Geometry::Rectangle<R> 
-    C0Applicator<R>::apply(const Map<R>& f, const Geometry::Rectangle<R>& r) const
+    C0Applicator<R>::apply(const System::Map<R>& f, const Geometry::Rectangle<R>& r) const
     {
       return f.apply(r);
     }
@@ -62,7 +63,7 @@ namespace Ariadne {
     
     template<typename R>
     Geometry::Parallelotope<R> 
-    C1Applicator<R>::apply(const Map<R>& f, const Geometry::Parallelotope<R>& p) const 
+    C1Applicator<R>::apply(const System::Map<R>& f, const Geometry::Parallelotope<R>& p) const 
     {
       typedef typename numerical_traits<R>::field_extension_type F;
 
@@ -108,7 +109,7 @@ namespace Ariadne {
     
     template<typename R, template<typename> class BS>
     Geometry::ListSet<R,BS> 
-    Applicator<R,BS>::apply(const Map<R>& f, const Geometry::ListSet<R,BS>& ds) const 
+    Applicator<R,BS>::apply(const System::Map<R>& f, const Geometry::ListSet<R,BS>& ds) const 
     {
       Geometry::ListSet<R,BS> result(f.result_dimension());
       for(typename Geometry::ListSet<R,BS>::const_iterator iter=ds.begin(); iter!=ds.end(); ++iter) {
@@ -120,7 +121,7 @@ namespace Ariadne {
     
     template<typename R, template<typename> class BS>
     Geometry::GridMaskSet<R> 
-    Applicator<R,BS>::apply(const Map<R>& f, 
+    Applicator<R,BS>::apply(const System::Map<R>& f, 
                             const Geometry::GridMaskSet<R>& is, 
                             const Geometry::GridMaskSet<R>& bs) const 
     {
@@ -143,7 +144,7 @@ namespace Ariadne {
     
     template<typename R, template<typename> class BS>
     Geometry::GridMaskSet<R> 
-    Applicator<R,BS>::chainreach(const Map<R>& f, 
+    Applicator<R,BS>::chainreach(const System::Map<R>& f, 
                                  const Geometry::GridMaskSet<R>& is, 
                                  const Geometry::GridMaskSet<R>& bs) const
     {

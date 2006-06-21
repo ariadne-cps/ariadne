@@ -22,11 +22,11 @@
  */
  
 
-#include "../evaluation/affine_map.h"
+#include "../system/affine_map.h"
 
 
 namespace Ariadne {
-  namespace Evaluation {
+  namespace System {
 
   
     template <typename R>

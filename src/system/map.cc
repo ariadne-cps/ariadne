@@ -1,5 +1,5 @@
 /***************************************************************************
- *            Vector_field.cc
+ *            map.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -21,15 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "evaluation/vector_field.h"
-#include "evaluation/vector_field.tpl"
+#include "system/map.h"
+#include "system/map.tpl"
 
 #include "real_typedef.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  namespace System {
 
-    template class VectorField<Real>;
+    template class Map<Real>;
       
   }
 }

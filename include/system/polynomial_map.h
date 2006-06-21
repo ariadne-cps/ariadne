@@ -33,11 +33,11 @@
 #include <string>
 #include <sstream>
 
-#include "../evaluation/map.h"
+#include "../system/map.h"
 #include "../linear_algebra/matrix.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  namespace System {
     template<typename R> class Monomial;
     template<typename R> class Polynomial;
     template<typename R> class PolynomialMap;

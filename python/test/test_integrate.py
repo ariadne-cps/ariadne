@@ -22,9 +22,11 @@
 
 from ariadne import Real
 from ariadne.base import *
-from ariadne.evaluation import *
-from ariadne.geometry import *
+from ariadne.numeric import *
 from ariadne.linear_algebra import *
+from ariadne.geometry import *
+from ariadne.system import *
+from ariadne.evaluation import *
 import sys
 
 def plot(fn,bb,set):
@@ -161,4 +163,3 @@ eps.set_fill_colour("green")
 eps.write(final)
 eps.close
 print "Done\n"
-

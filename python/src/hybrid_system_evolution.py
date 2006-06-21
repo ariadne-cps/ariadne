@@ -19,12 +19,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+from ariadne import Real
 from ariadne.base import *
 from ariadne.numeric import *
-from ariadne.evaluation import *
-from ariadne.geometry import *
 from ariadne.linear_algebra import *
+from ariadne.geometry import *
 from ariadne.system import *
+from ariadne.evaluation import *
+
+from ariadne.hybrid_system import *
+
 import sys
 
 def write_reached(eps,reached,color):

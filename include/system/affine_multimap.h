@@ -42,10 +42,10 @@
 #include "../geometry/list_set.h"
 #include "../geometry/grid_set.h"
 
-#include "../evaluation/affine_map.h"
+#include "../system/affine_map.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  namespace System {
 
     /*! \brief An affine multimap on Euclidean space. */
     template <typename R, template<typename> class BS>

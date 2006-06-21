@@ -24,31 +24,11 @@
 
 #include <boost/python.hpp>
 
-void export_lattice_map();
 void export_apply();
-void export_map();
-void export_affine_map();
-void export_affine_map_with_set();
-void export_polynomial_map();
-void export_henon_map();
- 
 void export_integrate();
-void export_vector_field();
-void export_affine_vector_field();
-void export_lorenz_system();
 
 BOOST_PYTHON_MODULE(evaluation)
 {
-  export_lattice_map();
   export_apply();
-  export_map();
-  export_affine_map();
-  export_affine_map_with_set();
-  export_polynomial_map();
-  export_henon_map();
-  
   export_integrate();
-  export_vector_field();
-  export_affine_vector_field();
-  export_lorenz_system();
 }

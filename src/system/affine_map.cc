@@ -1,5 +1,5 @@
 /***************************************************************************
- *            affine_multimap.cc
+ *            affine_map.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -21,17 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "evaluation/affine_multimap.h"
-#include "evaluation/affine_multimap.tpl"
+#include "system/affine_map.h"
+#include "system/affine_map.tpl"
 
 #include "real_typedef.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  namespace System {
 
-    template class AffineMultiMap<Real,Geometry::Rectangle>;
-    template class AffineMultiMap<Real,Geometry::Parallelotope>;
-    template class AffineMultiMap<Real,Geometry::Zonotope>;
+    template class AffineMap<Real>;
 
   }
 }

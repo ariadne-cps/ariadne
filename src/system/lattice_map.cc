@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "evaluation/lattice_map.h"
+#include "system/lattice_map.h"
 
 #include <iostream>
 #include "utility/stlio.h"
@@ -31,7 +31,7 @@
 Ariadne::dbgstream cdbg(std::cerr,0);
 
 namespace Ariadne {
-  namespace Evaluation {
+  namespace System {
     
     void
     LatticeMap::adjoin_to_image(const Geometry::LatticeCell& lc, const Geometry::LatticeCell& img)

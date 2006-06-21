@@ -56,8 +56,8 @@
 #include "../geometry/grid.h"
 #include "../geometry/grid_set.h"
 
-#include "../evaluation/vector_field.h"
-#include "../evaluation/affine_vector_field.h"
+#include "../system/vector_field.h"
+#include "../system/affine_vector_field.h"
 
 #include "../evaluation/integrator.h"
 
@@ -209,21 +209,18 @@ namespace Ariadne {
 
     template<typename R>
     Geometry::Rectangle<R> 
-    C0LohnerIntegrator<R>::integration_step(const VectorField<R>& vector_field, 
+    C0LohnerIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
                                             const Geometry::Rectangle<R>& initial_set, 
                                             R& step_size) const
     {
-      using namespace Geometry;
-      using namespace LinearAlgebra;
-      
 #ifdef DEBUG      
       std::cerr << "integrate(const VectorField<R>& vf, const Geometry::Rectangle<R>& r, const R& t)" << std::endl;
 #endif
 
       assert(vector_field.dimension()==initial_set.dimension());
       
-      const VectorField<R>& vf(vector_field);
-      Rectangle<R> r=initial_set;
+      const System::VectorField<R>& vf(vector_field);
+      Geometry::Rectangle<R> r=initial_set;
       R& h=step_size;
       
       Geometry::Rectangle<R> q=estimate_flow_bounds(vf,r,h);
@@ -245,20 +242,17 @@ namespace Ariadne {
 
     template<typename R>
     Geometry::Rectangle<R> 
-    C0LohnerIntegrator<R>::reachability_step(const VectorField<R>& vector_field, 
+    C0LohnerIntegrator<R>::reachability_step(const System::VectorField<R>& vector_field, 
                                              const Geometry::Rectangle<R>& initial_set, 
                                              R& step_size) const
     {
-      using namespace Geometry;
-      using namespace LinearAlgebra;
-
 #ifdef DEBUG
       std::cerr << "integrate(const VectorField<R>& vf, const Geometry::Rectangle<R>& r, const R& t)" << std::endl;
 #endif
       assert(vector_field.dimension()==initial_set.dimension());
       
-      const VectorField<R>& vf(vector_field);
-      Rectangle<R> r=initial_set;
+      const System::VectorField<R>& vf(vector_field);
+      Geometry::Rectangle<R> r=initial_set;
       R& h=step_size;
 
       Geometry::Rectangle<R> q=estimate_flow_bounds(vf,r,h);
@@ -282,12 +276,12 @@ namespace Ariadne {
     
     template<typename R>
     Geometry::Parallelotope<R> 
-    C1LohnerIntegrator<R>::integration_step(const VectorField<R>& vector_field, 
+    C1LohnerIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
                                             const Geometry::Parallelotope<R>& initial_set, 
                                             R& step_size) const
     {
-      const VectorField<R>* cvf_ptr=&vector_field;
-      const AffineVectorField<R>* cavf_ptr=dynamic_cast< const AffineVectorField<R>* >(cvf_ptr);
+      const System::VectorField<R>* cvf_ptr=&vector_field;
+      const System::AffineVectorField<R>* cavf_ptr=dynamic_cast< const System::AffineVectorField<R>* >(cvf_ptr);
 
 #ifdef DEBUG
       if(cavf_ptr) { std::cerr << typeid(*cavf_ptr).name(); } else { std::cerr << "void"; } std::cerr << std::endl;
@@ -303,28 +297,25 @@ namespace Ariadne {
 
       typedef typename numerical_traits<R>::field_extension_type F;
        
-      using namespace LinearAlgebra;
-      using namespace Geometry;
-
       assert(vector_field.dimension()==initial_set.dimension());
 
-      const VectorField<R>& vf(vector_field);
-      Parallelotope<R> p=initial_set;
+      const System::VectorField<R>& vf(vector_field);
+      Geometry::Parallelotope<R> p=initial_set;
       const size_type n=p.dimension();
       R& h=step_size;
-      const Matrix<R> id=identity_matrix<R>(n);
+      const LinearAlgebra::Matrix<R> id=LinearAlgebra::identity_matrix<R>(n);
       
       R err=norm(p.generators())/65536;
       
-      Rectangle<R> b=this->estimate_flow_bounds(vf,p.bounding_box(),h);
+      Geometry::Rectangle<R> b=this->estimate_flow_bounds(vf,p.bounding_box(),h);
 #ifdef DEBUG
       std::cerr << "suggested stepsize=" << step_size << std::endl;
       std::cerr << "stepsize=" << h << std::endl;
       std::cerr << "bound=" << b << std::endl;
 #endif
       
-      IntervalVector<R> f=vf.apply(b);
-      IntervalMatrix<R> df=vf.derivative(b);
+      LinearAlgebra::IntervalVector<R> f=vf.apply(b);
+      LinearAlgebra::IntervalMatrix<R> df=vf.derivative(b);
       
       R l=upper_log_norm(df);
 
@@ -339,15 +330,15 @@ namespace Ariadne {
       
       //integration_step(): the varaible l is useless!
       
-      IntervalMatrix<R> hdf=h*df;
-      IntervalMatrix<R> dphi=exp(hdf);
+      LinearAlgebra::IntervalMatrix<R> hdf=h*df;
+      LinearAlgebra::IntervalMatrix<R> dphi=exp(hdf);
       
-      Point<R> c=p.centre();
-      Rectangle<R> rc=Geometry::Rectangle<R>(c,c);
-      Rectangle<R> phic=refine_flow_bounds(vf,rc,b,h);
+      Geometry::Point<R> c=p.centre();
+      Geometry::Rectangle<R> rc=Geometry::Rectangle<R>(c,c);
+      Geometry::Rectangle<R> phic=refine_flow_bounds(vf,rc,b,h);
       
-      IntervalVector<R> phicv=phic.position_vectors();
-      IntervalMatrix<R> zv(dphi*p.generators());
+      LinearAlgebra::IntervalVector<R> phicv=phic.position_vectors();
+      LinearAlgebra::IntervalMatrix<R> zv(dphi*p.generators());
 
       IntervalParallelotope<R> ip(phicv,zv);
       p=ip.over_approximating_parallelotope();
@@ -362,21 +353,21 @@ namespace Ariadne {
       std::cerr << "zonotopic <vector> to add to image of centre=" << zv << std::endl;
       std::cerr << "approximating interval parallelotope=" << ip << std::endl;
       std::cerr << "new approximation=" << p << std::endl;
+      std::cerr << "Done integration step\n\n\n" << std::endl;
 #endif  
-
       return p;
     }
 
     template<typename R>
     Geometry::Parallelotope<R> 
-    C1LohnerIntegrator<R>::integration_step(const AffineVectorField<R>& vector_field, 
+    C1LohnerIntegrator<R>::integration_step(const System::AffineVectorField<R>& vector_field, 
                                             const Geometry::Parallelotope<R>& initial_set, 
                                             R& step_size) const
     {
 #ifdef DEBUG
       std::cerr << "integration_step(AffineVectorField<R>, Parallelotope<R>, R)\n";
 #endif
-      const AffineVectorField<R>& vf=vector_field;
+      const System::AffineVectorField<R>& vf=vector_field;
       Geometry::Parallelotope<R> p=initial_set;
       R& h=step_size;
       
@@ -417,12 +408,12 @@ namespace Ariadne {
 
 template<typename R>
     Geometry::Zonotope<R> 
-    C1LohnerIntegrator<R>::integration_step(const VectorField<R>& vector_field, 
+    C1LohnerIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
                                             const Geometry::Zonotope<R>& initial_set, 
                                             R& step_size) const
     {
-      const VectorField<R>* cvf_ptr=&vector_field;
-      const AffineVectorField<R>* cavf_ptr=dynamic_cast< const AffineVectorField<R>* >(cvf_ptr);
+      const System::VectorField<R>* cvf_ptr=&vector_field;
+      const System::AffineVectorField<R>* cavf_ptr=dynamic_cast< const System::AffineVectorField<R>* >(cvf_ptr);
 
 #ifdef DEBUG
       if(cavf_ptr) { std::cerr << typeid(*cavf_ptr).name(); } else { std::cerr << "void"; } std::cerr << std::endl;
@@ -440,6 +431,7 @@ template<typename R>
        
       using namespace LinearAlgebra;
       using namespace Geometry;
+      using namespace System;
 
       assert(vector_field.dimension()==initial_set.dimension());
 
@@ -504,14 +496,14 @@ template<typename R>
 
     template<typename R>
     Geometry::Zonotope<R> 
-    C1LohnerIntegrator<R>::integration_step(const AffineVectorField<R>& vector_field, 
+    C1LohnerIntegrator<R>::integration_step(const System::AffineVectorField<R>& vector_field, 
                                             const Geometry::Zonotope<R>& initial_set, 
                                             R& step_size) const
     {
 #ifdef DEBUG
       std::cerr << "integration_step(AffineVectorField<R>, Parallelotope<R>, R)\n";
 #endif
-      const AffineVectorField<R>& vf=vector_field;
+      const System::AffineVectorField<R>& vf=vector_field;
       Geometry::Zonotope<R> p=initial_set;
       R& h=step_size;
       
@@ -552,7 +544,7 @@ template<typename R>
     
     template<typename R>
     Geometry::Zonotope<R> 
-    C1LohnerIntegrator<R>::reachability_step(const VectorField<R>& vector_field, 
+    C1LohnerIntegrator<R>::reachability_step(const System::VectorField<R>& vector_field, 
                                              const Geometry::Zonotope<R>& initial_set, 
                                              R& step_size) const
     {
@@ -565,6 +557,7 @@ template<typename R>
 
       using namespace LinearAlgebra;
       using namespace Geometry;
+      using namespace System;
 
       assert(vector_field.dimension()==initial_set.dimension());
 

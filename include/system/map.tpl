@@ -30,10 +30,10 @@
 #include "../geometry/parallelotope.h"
 #include "../geometry/polyhedron.h"
 
-#include "../evaluation/map.h"
+#include "../system/map.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  namespace System {
 
     template<typename R>
     Map<R>::~Map() 

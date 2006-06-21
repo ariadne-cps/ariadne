@@ -1,5 +1,5 @@
 /***************************************************************************
- *            affine_vector_field.cc
+ *            polynomial_map.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -21,30 +21,28 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "evaluation/affine_vector_field.h"
-#include "evaluation/affine_vector_field.tpl"
+#include "system/polynomial_map.h"
+#include "system/polynomial_map.tpl"
 
 #include "real_typedef.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  namespace System {
 
-    template class AffineVectorField<Real>;
+    template class Monomial<Real>;
+    template class Polynomial<Real>;
+    template class PolynomialMap<Real>;
+    template class PolynomialMatrix<Real>;
 
-  }
-}
-
-
-namespace Ariadne {
-  namespace LinearAlgebra {
+    template bool operator<(const Monomial<Real>&, const Monomial<Real>&);
     
-    template Matrix<Real> exp_Ah_approx(const Matrix<Real>& A, 
-                                          const Real& h, 
-                                          const Real& e);
-    
-    template Matrix<Real> exp_Ah_sub_id_div_A_approx(const Matrix<Real>& A, 
-                                                       const Real& h, 
-                                                       const Real& e);
+    template std::ostream& operator<<(std::ostream&, const Monomial<Real>&);
+    template std::ostream& operator<<(std::ostream&, const Polynomial<Real>&);
+    template std::ostream& operator<<(std::ostream&, const PolynomialMap<Real>&);
+    template std::ostream& operator<<(std::ostream&, const PolynomialMatrix<Real>&);
 
+    template std::istream& operator>>(std::istream&, Monomial<Real>&);
+    template std::istream& operator>>(std::istream&, Polynomial<Real>&);
+    template std::istream& operator>>(std::istream&, PolynomialMap<Real>&);
   }
 }

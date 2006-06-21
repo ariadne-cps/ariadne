@@ -34,7 +34,7 @@
 
 
 namespace Ariadne {
-  namespace Evaluation {
+  namespace System {
 
     /*! \brief A combinatorial map on a lattice. */
     class LatticeMap {

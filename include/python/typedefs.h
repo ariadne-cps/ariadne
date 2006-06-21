@@ -85,22 +85,22 @@ typedef Geometry::PartitionTree<Real> RPartitionTree;
 typedef Geometry::PartitionTreeCell<Real> RPartitionTreeCell;
 typedef Geometry::PartitionTreeSet<Real> RPartitionTreeSet;
 
-typedef Evaluation::LatticeMap LatticeMap;
+typedef System::LatticeMap LatticeMap;
 
-typedef Evaluation::Map<Real> RMapBase;
-typedef Evaluation::AffineMap<Real> RAffineMap;
-typedef Evaluation::AffineMultiMap<Real,Geometry::Rectangle> RAffineMultiMapRect;
-typedef Evaluation::AffineMultiMap<Real,Geometry::Parallelotope> RAffineMultiMapPltp;
-typedef Evaluation::AffineMultiMap<Real,Geometry::Zonotope> RAffineMultiMapZntp;
-typedef Evaluation::Monomial<Real> RMonomial;
-typedef Evaluation::Polynomial<Real> RPolynomial;
-typedef Evaluation::PolynomialMap<Real> RPolynomialMap;
-typedef Evaluation::PolynomialMatrix<Real> RPolynomialMatrix;
-typedef Evaluation::VectorField<Real> RVectorFieldBase;
-typedef Evaluation::AffineVectorField<Real> RAffineVectorField;
+typedef System::Map<Real> RMapBase;
+typedef System::AffineMap<Real> RAffineMap;
+typedef System::AffineMultiMap<Real,Geometry::Rectangle> RAffineMultiMapRect;
+typedef System::AffineMultiMap<Real,Geometry::Parallelotope> RAffineMultiMapPltp;
+typedef System::AffineMultiMap<Real,Geometry::Zonotope> RAffineMultiMapZntp;
+typedef System::Monomial<Real> RMonomial;
+typedef System::Polynomial<Real> RPolynomial;
+typedef System::PolynomialMap<Real> RPolynomialMap;
+typedef System::PolynomialMatrix<Real> RPolynomialMatrix;
+typedef System::VectorField<Real> RVectorFieldBase;
+typedef System::AffineVectorField<Real> RAffineVectorField;
 
-typedef Evaluation::HenonMap<Real> RHenonMap;
-typedef Evaluation::LorenzSystem<Real> RLorenzSystem;
+typedef System::HenonMap<Real> RHenonMap;
+typedef System::LorenzSystem<Real> RLorenzSystem;
 
 }
 

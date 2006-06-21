@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "evaluation/vector_field.h"
+#include "system/vector_field.h"
 
 #include "python/typedefs.h"
 using namespace Ariadne;

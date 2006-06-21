@@ -21,13 +21,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+from ariadne import Real
 from ariadne.base import *
-from ariadne.system import *
-from ariadne.system_evolution import *
 from ariadne.numeric import *
-from ariadne.evaluation import *
-from ariadne.geometry import *
 from ariadne.linear_algebra import *
+from ariadne.geometry import *
+from ariadne.system import *
+from ariadne.evaluation import *
+
+from ariadne.hybrid_system import *
+from ariadne.hybrid_system_evolution import *
+
 import sys
 
 eps=EpsPlot("hybrid_evolution.eps",Rectangle("[-1,1]x[-1,1]"),0,1,"Provadatw","b")

@@ -22,7 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "evaluation/henon_map.h"
+#include "system/henon_map.h"
 
 #include "python/typedefs.h"
 using namespace Ariadne;

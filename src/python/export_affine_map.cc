@@ -29,7 +29,7 @@
 #include "geometry/simplex.h"
 #include "geometry/zonotope.h"
 #include "geometry/polyhedron.h"
-#include "evaluation/affine_map.h"
+#include "system/affine_map.h"
 
 
 #include "python/typedefs.h"

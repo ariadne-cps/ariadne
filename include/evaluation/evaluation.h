@@ -30,8 +30,8 @@
 
 #include "../evaluation/evaluation_declarations.h"
 
-#include "../evaluation/map.h"
-#include "../evaluation/affine_map.h"
-#include "../evaluation/polynomial_map.h"
+#include "../system/map.h"
+#include "../system/affine_map.h"
+#include "../system/polynomial_map.h"
 
 #endif /* _ARIADNE_EVALUATION_H */

@@ -23,9 +23,10 @@
 from ariadne import Real
 from ariadne.base import *
 from ariadne.numeric import *
-from ariadne.evaluation import *
-from ariadne.geometry import *
 from ariadne.linear_algebra import *
+from ariadne.geometry import *
+from ariadne.system import *
+from ariadne.evaluation import *
 import sys
 
 Real.__repr__=Real.__str__
@@ -53,8 +54,9 @@ init_rect=Rectangle("[0.96,1.04]x[0.46,0.54]")
 init_paral=Parallelotope(init_rect)
 
 print "Testing integration step of affine vector field on parallelotope"
-reach_list=[init_paral]
 step_size=Real(0.125)
+next_paral=lohner.integration_step(avf,init_paral,step_size)
+reach_list=[init_paral]
 step_sizes=[step_size]
 #print Rational(step_size)
 for i in range(0,128):
@@ -70,13 +72,13 @@ print "Done\n"
 
 print "Testing reach step of affine vector field on parallelotope"
 step_size=Real(0.25)
-reach_paral=lohner.reach_step(avf,Zonotope(init_paral),step_size)
-final_paral=lohner.integration_step(avf,init_paral,step_size)
+#reach_paral=lohner.reach_step(avf,Zonotope(init_paral),step_size)
+#final_paral=lohner.integration_step(avf,init_paral,step_size)
 #print Rational(step_size)
-poly_hull=convex_hull(Polyhedron(init_paral),Polyhedron(final_paral))
-reach_list=[init_paral,reach_paral.bounding_box(),final_paral]
-plot("integrationstep2",bb,reach_list)
-print reach_paral, reach_paral.bounding_box()
+#poly_hull=convex_hull(Polyhedron(init_paral),Polyhedron(final_paral))
+#reach_list=[init_paral,reach_paral.bounding_box(),final_paral]
+#plot("integrationstep2",bb,reach_list)
+#print reach_paral, reach_paral.bounding_box()
 print "step size", step_size
 print "Done\n"
 

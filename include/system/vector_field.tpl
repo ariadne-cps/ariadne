@@ -23,11 +23,11 @@
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
 #include "../geometry/parallelotope.h"
-#include "../evaluation/vector_field.h"
+#include "../system/vector_field.h"
 
 
 namespace Ariadne {
-  namespace Evaluation {
+  namespace System {
 
     template<typename R>
     VectorField<R>::~VectorField() 

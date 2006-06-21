@@ -61,13 +61,13 @@ namespace LinearAlgebra {}
  */
 namespace Geometry {}
 
+/*! \brief Classes defining a dynamic system.
+ */
+namespace System {}
+
 /*! \brief Classes for defining maps and vector fields, and computing system trajectories.
  */
 namespace Evaluation {}
-
-/*! \brief Classes defining a hybrid system.
- */
-namespace HybridSystem {}
 
 }
 

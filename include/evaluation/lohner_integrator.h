@@ -45,12 +45,12 @@ namespace Ariadne {
 
       /*! \brief A C0 algorithm for integrating forward a rectangle.
        */
-      virtual Geometry::Rectangle<R> integration_step(const Evaluation::VectorField<R>&,
+      virtual Geometry::Rectangle<R> integration_step(const System::VectorField<R>&,
                                                       const Geometry::Rectangle<R>&,
                                                       R&) const;
 
       /*! \brief A C0 algorithm for integrating forward a zonotope up to a certain time. */
-      virtual Geometry::Rectangle<R> reachability_step(const Evaluation::VectorField<R>&,
+      virtual Geometry::Rectangle<R> reachability_step(const System::VectorField<R>&,
                                                        const Geometry::Rectangle<R>&,
                                                        R&) const;
      };
@@ -75,12 +75,12 @@ namespace Ariadne {
        * We then compute \f$ \mathcal{P}_{n} \f$ such that \f$ D\Phi(h,R_{n}) \subset \mathcal{P}_{n} \f$.
        * We then compute \f$ A_{n+1} \f$ such that \f$ A_{n+1} e \supset \mathcal{P}_{n} e \f$.
        */
-      virtual Geometry::Parallelotope<R> integration_step(const Evaluation::VectorField<R>&,
+      virtual Geometry::Parallelotope<R> integration_step(const System::VectorField<R>&,
                                                           const Geometry::Parallelotope<R>&,
                                                           R&) const;
 
       /*! \brief A specialized algorithm for integrating forward a parallelotope under an affine vector field. */
-      virtual Geometry::Parallelotope<R> integration_step(const Evaluation::AffineVectorField<R>&,
+      virtual Geometry::Parallelotope<R> integration_step(const System::AffineVectorField<R>&,
                                                           const Geometry::Parallelotope<R>&,
                                                           R&) const;
 
@@ -92,18 +92,18 @@ namespace Ariadne {
        * We then compute \f$ \mathcal{P}_{n} \f$ such that \f$ D\Phi(h,R_{n}) \subset \mathcal{P}_{n} \f$.
        * We then compute \f$ A_{n+1} \f$ such that \f$ A_{n+1} e \supset \mathcal{P}_{n} e \f$.
        */
-      virtual Geometry::Zonotope<R> integration_step(const Evaluation::VectorField<R>&,
+      virtual Geometry::Zonotope<R> integration_step(const System::VectorField<R>&,
                                                           const Geometry::Zonotope<R>&,
                                                           R&) const;
 
       /*! \brief A specialized algorithm for integrating forward a parallelotope under an affine vector field. */
-      virtual Geometry::Zonotope<R> integration_step(const Evaluation::AffineVectorField<R>&,
+      virtual Geometry::Zonotope<R> integration_step(const System::AffineVectorField<R>&,
                                                           const Geometry::Zonotope<R>&,
                                                           R&) const;
 
       
       /*! \brief A C1 algorithm for integrating forward a zonotope for a time up to time \a step_size. */
-      virtual Geometry::Zonotope<R> reachability_step(const Evaluation::VectorField<R>&,
+      virtual Geometry::Zonotope<R> reachability_step(const System::VectorField<R>&,
                                                       const Geometry::Zonotope<R>&,
                                                       R& step_size) const;
      private:

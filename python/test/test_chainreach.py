@@ -23,9 +23,10 @@
 from ariadne import Real
 from ariadne.base import *
 from ariadne.numeric import *
-from ariadne.evaluation import *
-from ariadne.geometry import *
 from ariadne.linear_algebra import *
+from ariadne.geometry import *
+from ariadne.system import *
+from ariadne.evaluation import *
 import sys
 
 params=Point(2)

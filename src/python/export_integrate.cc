@@ -27,7 +27,7 @@
 #include "geometry/grid_set.h"
 #include "geometry/list_set.h"
 
-#include "evaluation/vector_field.h"
+#include "system/vector_field.h"
 
 #include "evaluation/integrator.h"
 #include "evaluation/lohner_integrator.h"

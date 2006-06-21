@@ -35,11 +35,12 @@
 #include "../geometry/rectangle.h"
 #include "../geometry/parallelotope.h"
 
-#include "../evaluation/map.h"
+#include "../system/map.h"
+
 #include "../evaluation/apply.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  namespace System {
 
     /*! \brief The Henon map. */
     template <typename R>
@@ -96,7 +97,7 @@ namespace Ariadne {
     Geometry::Parallelotope<R>
     HenonMap<R>::apply(const Geometry::Parallelotope<R>& A) const
     {
-      return C1Applicator<R>().apply(*this,A);
+      return Evaluation::C1Applicator<R>().apply(*this,A);
     }
      
     template <typename R>

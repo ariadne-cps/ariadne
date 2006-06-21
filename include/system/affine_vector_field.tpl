@@ -21,10 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "../evaluation/affine_vector_field.h"
+#include "../system/affine_vector_field.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  namespace System {
 
     template<typename R>
     AffineVectorField<R>::~AffineVectorField() 

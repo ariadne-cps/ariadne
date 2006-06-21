@@ -34,11 +34,11 @@
 #include "../linear_algebra/interval_vector.h"
 #include "../linear_algebra/interval_matrix.h"
 
-#include "../evaluation/vector_field.h"
-#include "../evaluation/affine_map.h"
+#include "../system/vector_field.h"
+#include "../system/affine_map.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  namespace System {
 
     /*! \brief An affine vector field in Euclidean space. */
     template <typename R>

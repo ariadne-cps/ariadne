@@ -4,9 +4,10 @@ BASEDIR=base/
 NUMERICDIR=numeric/
 LINEARALGEBRADIR=linear_algebra/
 GEOMETRYDIR=geometry/
+SYSTEMDIR=system/
 EVALUATIONDIR=evaluation/
 
-.PHONY: lib base numeric linear_algebra geometry evaluation python check clean
+.PHONY: lib base numeric linear_algebra geometry system evaluation python check clean
 
 all: lib python
 
@@ -24,11 +25,14 @@ linear_algebra:
 geometry:
 	(cd geometry; ${MAKE} all)
 
+system:
+	(cd system; ${MAKE} all)
+
 evaluation:
 	(cd evaluation; ${MAKE} all)
 
-libariadne.so: base numeric linear_algebra geometry evaluation
-	${CXX} ${LDXXFLAGS} -shared -o libariadne.so base/*.o numeric/*.o linear_algebra/*.o geometry/*.o evaluation/*.o ${LIBPPL} ${LIBGMPXX} ${RPATHFLAGS}
+libariadne.so: base numeric linear_algebra geometry system evaluation
+	${CXX} ${LDXXFLAGS} -shared -o libariadne.so base/*.o numeric/*.o linear_algebra/*.o geometry/*.o system/*.o evaluation/*.o ${LIBPPL} ${LIBGMPXX} ${RPATHFLAGS}
 
 libariadne.a: ${OBJ}
 	${CXX} ${LDXXFLAGS} -o libariadne.a ${OBJ} -lppl -lgmpxx -lgmp
@@ -48,6 +52,7 @@ clean:
 	(cd ${NUMERICDIR}; ${MAKE} clean )
 	(cd ${LINEARALGEBRADIR}; ${MAKE} clean )
 	(cd ${GEOMETRYDIR}; ${MAKE} clean )
+	(cd ${SYSTEMDIR}; ${MAKE} clean )
 	(cd ${EVALUATIONDIR}; ${MAKE} clean )
 	(cd ${PYTHONDIR}; ${MAKE} clean )
 
@@ -57,5 +62,6 @@ dep:
 	(cd ${NUMERICDIR}; ${MAKE} dep )
 	(cd ${LINEARALGEBRADIR}; ${MAKE} dep )
 	(cd ${GEOMETRYDIR}; ${MAKE} dep )
+	(cd ${SYSTEMDIR}; ${MAKE} dep )
 	(cd ${EVALUATIONDIR}; ${MAKE} dep )
 	(cd ${PYTHONDIR}; ${MAKE} dep )

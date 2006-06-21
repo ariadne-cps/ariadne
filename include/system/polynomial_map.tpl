@@ -44,7 +44,7 @@
 #include "../geometry/list_set.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  namespace System {
 
     template<typename R>
     Monomial<R>::Monomial(const std::string& s) 

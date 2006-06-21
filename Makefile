@@ -20,6 +20,7 @@ clean:
 
 install: lib
 	(cd ${SRCDIR}; ${MAKE} install);
+	(cd ${PYTHONDIR}; ${MAKE} install);
 
 check:
 	(cd ${TESTDIR}; ${MAKE});

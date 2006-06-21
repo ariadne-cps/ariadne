@@ -1,5 +1,5 @@
 /***************************************************************************
- *            affine_map.cc
+ *            Vector_field.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -21,15 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "evaluation/affine_map.h"
-#include "evaluation/affine_map.tpl"
+#include "system/vector_field.h"
+#include "system/vector_field.tpl"
 
 #include "real_typedef.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  namespace System {
 
-    template class AffineMap<Real>;
-
+    template class VectorField<Real>;
+      
   }
 }

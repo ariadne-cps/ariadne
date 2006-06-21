@@ -100,7 +100,7 @@ template<typename R> bool subset(const Polyhedron<R>&, const Polyhedron<R>&);
 }}
 
 
-namespace Ariadne { namespace Evaluation {
+namespace Ariadne { namespace System {
 class LatticeMap;
 
 template <typename R> class Map;
@@ -115,6 +115,10 @@ template <typename R> class AffineVectorField;
 
 template <typename R> class HenonMap;
 template <typename R> class LorenzSystem;
+}}
+
+
+namespace Ariadne { namespace Evaluation {
 }}
 
 namespace Ariadne { namespace Base {

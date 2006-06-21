@@ -42,11 +42,11 @@
 #include "../geometry/list_set.h"
 #include "../geometry/grid_set.h"
 
-#include "../evaluation/map.h"
+#include "../system/map.h"
 
 
 namespace Ariadne {
-  namespace Evaluation {
+  namespace System {
 
     /*! \brief An affine map on Euclidean space. */
     template <typename R>

@@ -3,7 +3,7 @@
 #include "real_typedef.h"
 
 #include "geometry/lattice_set.h"
-#include "evaluation/lattice_map.h"
+#include "system/lattice_map.h"
 
 using namespace Ariadne;
 using namespace Geometry;

@@ -57,6 +57,7 @@ apply.o: apply.cc ../../include/evaluation/apply.h \
   ../../include/evaluation/../geometry/../numeric/../numeric/approximation.h \
   ../../include/evaluation/../geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/evaluation/../geometry/../numeric/interval.h \
+  ../../include/evaluation/../geometry/../linear_algebra/interval_vector.h \
   ../../include/evaluation/../geometry/../geometry/point.h \
   ../../include/evaluation/../geometry/../geometry/../declarations.h \
   ../../include/evaluation/../geometry/../geometry/../base/array.h \
@@ -127,6 +128,7 @@ integrator.o: integrator.cc ../../include/evaluation/integrator.h \
   ../../include/evaluation/../geometry/../declarations.h \
   ../../include/evaluation/../geometry/../numeric/arithmetic.h \
   ../../include/evaluation/../geometry/../numeric/interval.h \
+  ../../include/evaluation/../geometry/../linear_algebra/interval_vector.h \
   ../../include/evaluation/../geometry/../geometry/point.h \
   ../../include/evaluation/../geometry/../geometry/../declarations.h \
   ../../include/evaluation/../geometry/../geometry/../base/array.h \

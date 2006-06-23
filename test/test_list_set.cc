@@ -23,9 +23,11 @@
  */
 
 #include <iostream>
+#include <fstream>
 #include <string>
 
 #include "ariadne.h"
+#include "real_typedef.h"
 #include "base/exception.h"
 #include "base/utility.h"
 #include "numeric/numerical_types.h"
@@ -39,61 +41,61 @@ using namespace Ariadne;
 using namespace Ariadne::Geometry;
 using namespace std;
 
-template class ListSet<Rational, Rectangle>;
-template class ListSet<double, Rectangle>;
-
 int main() {
   cout << "test_list_set: " << flush;
+  ofstream clog("test_list_set.log");
+  
+  Point<Real> s0("(0,0)");
+  Point<Real> s1("(1,1)");
+  Point<Real> s2("(1.375,1.375)");
+  Point<Real> s3("(1.5,1.5)");
+  
+  clog << s0 << " " << s1 << " " << s2 << " " << s3 << endl;
+  
+  typedef ListSet<Real, Rectangle> ListSet;
+  typedef Rectangle<Real> Rectangle;
+  typedef Point<Real> Point;
 
-    Point<Rational> s0(2,Rational(0));
-    Point<Rational> s1(2,Rational(1));
-    Point<Rational> s2(2,Rational(4,3));
-    Point<Rational> s3(2,Rational(3,2));
+  Rectangle r0(s0,s1);
+  Rectangle r1(s1,s2);
+  Rectangle r2(s2,s3);
+  ListSet ds1,ds2;
 
-    typedef ListSet<Rational, Rectangle> ListSet;
-    typedef Rectangle<Rational> Rectangle;
-    typedef Point<Rational> Point;
+  ds1.inplace_union(r0);
+  ds1.inplace_union(r1);
+  ds1.inplace_union(r2);
 
-    Rectangle r0(s0,s1);
-    Rectangle r1(s1,s2);
-    Rectangle r2(s2,s3);
-    ListSet ds1,ds2;
+  string input("[ [[0,1],[0,1]], [[1,4/3],[1,4/3]], [[4/3,3/2],[4/3,3/2]] ]");
+  stringstream is(input);
+  is >> ds2;
 
-    ds1.inplace_union(r0);
-    ds1.inplace_union(r1);
-    ds1.inplace_union(r2);
+  test_assert(ds1[0]==ds2[0] && ds1[1]==ds2[1] && ds1[2]==ds2[2], "stream input");
 
-    string input("[ [[0,1],[0,1]], [[1,4/3],[1,4/3]], [[4/3,3/2],[4/3,3/2]] ]");
+  /* Test input format */
+  try {
+    string input("[ ] "
+                 "[ [0,2] ] "
+                 "[ [0,1], [3/4,4/3], [1,3/2] ] "
+                 "{ lower_corner=[0,1], upper_corner=[1,4/3] } " );
     stringstream is(input);
-    is >> ds2;
+  }
+  catch(invalid_input& e) {
+    cout << "FAILED\n";
+    cout << "  invalid_input: " << e.what() << "\n";
+    return 1;
+  }
+  catch(std::invalid_argument& e) {
+    cout << "FAILED\n";
+    cout << "  std::invalid_argument: " << e.what() << "\n";
+    return 1;
+  }
+  catch(...) {
+    cout << "FAILED\n";
+    cout << "  Unknown error\n";
+    return 1;
+  }
 
-    test_assert(ds1[0]==ds2[0] && ds1[1]==ds2[1] && ds1[2]==ds2[2], "stream input");
+  cout << "PASS\n";
 
-    /* Test input format */
-    try {
-      string input("[ ] "
-                   "[ [0,2] ] "
-                   "[ [0,1], [3/4,4/3], [1,3/2] ] "
-                   "{ lower_corner=[0,1], upper_corner=[1,4/3] } " );
-      stringstream is(input);
-    }
-    catch(invalid_input& e) {
-      cout << "FAILED\n";
-      cout << "  invalid_input: " << e.what() << "\n";
-      return 1;
-    }
-    catch(std::invalid_argument& e) {
-      cout << "FAILED\n";
-      cout << "  std::invalid_argument: " << e.what() << "\n";
-      return 1;
-    }
-    catch(...) {
-      cout << "FAILED\n";
-      cout << "  Unknown error\n";
-      return 1;
-    }
-
-    cout << "PASS\n";
-
-    return 0;
+  return 0;
 }

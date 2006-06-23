@@ -52,6 +52,10 @@ map.o: map.cc ../../include/system/map.h \
   ../../include/system/../geometry/../numeric/../numeric/approximation.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/system/../geometry/../numeric/interval.h \
+  ../../include/system/../geometry/../linear_algebra/interval_vector.h \
+  ../../include/system/../geometry/../linear_algebra/../declarations.h \
+  ../../include/system/../geometry/../linear_algebra/../numeric/interval.h \
+  ../../include/system/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/system/../geometry/../geometry/point.h \
   ../../include/system/../geometry/list_set.h \
   ../../include/system/../geometry/../base/utility.h \
@@ -61,9 +65,7 @@ map.o: map.cc ../../include/system/map.h \
   ../../include/system/../geometry/polyhedron.h \
   /ufs/collins/include/ppl.hh \
   ../../include/system/../geometry/../linear_algebra/constraint_system.h \
-  ../../include/system/../geometry/../linear_algebra/../declarations.h \
   ../../include/system/../geometry/../linear_algebra/../numeric/numerical_types.h \
-  ../../include/system/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/system/../geometry/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/system/../geometry/../linear_algebra/generator_system.h \
   ../../include/system/../geometry/../geometry/rectangle.h \
@@ -102,6 +104,7 @@ vector_field.o: vector_field.cc ../../include/system/vector_field.h \
   ../../include/system/../geometry/../numeric/../numeric/approximation.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/system/../geometry/../numeric/interval.h \
+  ../../include/system/../geometry/../linear_algebra/interval_vector.h \
   ../../include/system/../geometry/../geometry/point.h \
   ../../include/system/../geometry/parallelotope.h \
   ../../include/system/../geometry/../linear_algebra/matrix.h \
@@ -136,21 +139,20 @@ affine_map.o: affine_map.cc ../../include/system/affine_map.h \
   ../../include/system/../geometry/../numeric/../numeric/approximation.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/system/../geometry/../numeric/interval.h \
+  ../../include/system/../geometry/../linear_algebra/interval_vector.h \
+  ../../include/system/../geometry/../linear_algebra/../declarations.h \
+  ../../include/system/../geometry/../linear_algebra/../numeric/interval.h \
+  ../../include/system/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/system/../geometry/parallelotope.h \
   ../../include/system/../geometry/../linear_algebra/matrix.h \
   ../../include/system/../geometry/zonotope.h \
   ../../include/system/../geometry/../linear_algebra/transformation_system.h \
-  ../../include/system/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/system/../geometry/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/system/../geometry/../linear_algebra/../linear_algebra/interval_vector.h \
-  ../../include/system/../geometry/../linear_algebra/../linear_algebra/../declarations.h \
-  ../../include/system/../geometry/../linear_algebra/../linear_algebra/../numeric/interval.h \
-  ../../include/system/../geometry/../linear_algebra/../linear_algebra/../linear_algebra/vector.h \
   ../../include/system/../geometry/../linear_algebra/../linear_algebra/interval_matrix.h \
   ../../include/system/../geometry/polyhedron.h \
   /ufs/collins/include/ppl.hh \
   ../../include/system/../geometry/../linear_algebra/constraint_system.h \
-  ../../include/system/../geometry/../linear_algebra/../declarations.h \
   ../../include/system/../geometry/../linear_algebra/../numeric/numerical_types.h \
   ../../include/system/../geometry/../linear_algebra/generator_system.h \
   ../../include/system/../geometry/../geometry/rectangle.h \
@@ -208,21 +210,20 @@ affine_multimap.o: affine_multimap.cc \
   ../../include/system/../geometry/../numeric/../numeric/approximation.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/system/../geometry/../numeric/interval.h \
+  ../../include/system/../geometry/../linear_algebra/interval_vector.h \
+  ../../include/system/../geometry/../linear_algebra/../declarations.h \
+  ../../include/system/../geometry/../linear_algebra/../numeric/interval.h \
+  ../../include/system/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/system/../geometry/parallelotope.h \
   ../../include/system/../geometry/../linear_algebra/matrix.h \
   ../../include/system/../geometry/zonotope.h \
   ../../include/system/../geometry/../linear_algebra/transformation_system.h \
-  ../../include/system/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/system/../geometry/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/system/../geometry/../linear_algebra/../linear_algebra/interval_vector.h \
-  ../../include/system/../geometry/../linear_algebra/../linear_algebra/../declarations.h \
-  ../../include/system/../geometry/../linear_algebra/../linear_algebra/../numeric/interval.h \
-  ../../include/system/../geometry/../linear_algebra/../linear_algebra/../linear_algebra/vector.h \
   ../../include/system/../geometry/../linear_algebra/../linear_algebra/interval_matrix.h \
   ../../include/system/../geometry/polyhedron.h \
   /ufs/collins/include/ppl.hh \
   ../../include/system/../geometry/../linear_algebra/constraint_system.h \
-  ../../include/system/../geometry/../linear_algebra/../declarations.h \
   ../../include/system/../geometry/../linear_algebra/../numeric/numerical_types.h \
   ../../include/system/../geometry/../linear_algebra/generator_system.h \
   ../../include/system/../geometry/../geometry/rectangle.h \
@@ -302,6 +303,7 @@ affine_vector_field.o: affine_vector_field.cc \
   ../../include/system/../system/../geometry/../numeric/../numeric/approximation.h \
   ../../include/system/../system/../geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/system/../system/../geometry/../numeric/interval.h \
+  ../../include/system/../system/../geometry/../linear_algebra/interval_vector.h \
   ../../include/system/../system/../geometry/parallelotope.h \
   ../../include/system/../system/../geometry/../linear_algebra/matrix.h \
   ../../include/system/../system/../geometry/zonotope.h \
@@ -377,13 +379,15 @@ polynomial_map.o: polynomial_map.cc ../../include/system/polynomial_map.h \
   ../../include/system/../geometry/../numeric/../numeric/approximation.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/system/../geometry/../numeric/interval.h \
+  ../../include/system/../geometry/../linear_algebra/interval_vector.h \
+  ../../include/system/../geometry/../linear_algebra/../declarations.h \
+  ../../include/system/../geometry/../linear_algebra/../numeric/interval.h \
+  ../../include/system/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/system/../geometry/../geometry/point.h \
   ../../include/system/../geometry/polyhedron.h \
   /ufs/collins/include/ppl.hh \
   ../../include/system/../geometry/../linear_algebra/constraint_system.h \
-  ../../include/system/../geometry/../linear_algebra/../declarations.h \
   ../../include/system/../geometry/../linear_algebra/../numeric/numerical_types.h \
-  ../../include/system/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/system/../geometry/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/system/../geometry/../linear_algebra/matrix.h \
   ../../include/system/../geometry/../linear_algebra/generator_system.h \

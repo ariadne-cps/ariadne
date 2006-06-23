@@ -1,3 +1,28 @@
+/***************************************************************************
+ *            test_lattice.cc
+ *
+ *  Copyright  2006  Pieter Collins, Alberto Casagrande
+ *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
+ ****************************************************************************/
+
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+#include <iostream>
+#include <fstream>
 
 #include "declarations.h"
 #include "real_typedef.h"
@@ -7,10 +32,13 @@
 
 using namespace Ariadne;
 using namespace Geometry;
-using namespace Evaluation;
+using namespace System;
 using namespace std;
 
 int main() {
+  cout << "test_lattice: " << flush;
+  ofstream clog("test_lattice.log");
+  
   IndexArray argary=IndexArray(3);
   argary[0]=-1;
   argary[1]=2;
@@ -33,31 +61,34 @@ int main() {
   lm.adjoin_to_image(arglc,imglcls);
   imgary[1]=3;
   lm.adjoin_to_image(arglc,LatticeCell(imgary));
-  cout << lm << endl << endl;
+  clog << lm << endl << endl;
   
   argary[0]=0;
   argary[1]=0;
   argary[2]=0;
   LatticeCell arglc2=LatticeCell(argary);
   
-  cout << arglc2 << " " << lm(arglc2) << endl;
-  cout << arglc2 << " " << lm.apply(arglc2) << endl;
-  cout << arglc << " " << lm(arglc) << endl;
-  cout << arglc << " " << lm.apply(arglc) << endl;
-  cout << endl;
+  clog << arglc2 << " " << lm(arglc2) << endl;
+  clog << arglc2 << " " << lm.apply(arglc2) << endl;
+  clog << arglc << " " << lm(arglc) << endl;
+  clog << arglc << " " << lm.apply(arglc) << endl;
+  clog << endl;
   
-  cout << LatticeRectangle(arglc) << " " << lm(LatticeRectangle(arglc)) << endl;
+  clog << LatticeRectangle(arglc) << " " << lm(LatticeRectangle(arglc)) << endl;
   LatticeCellListSet lcls(0);
-  cout << lm(arglc2) << endl;
+  clog << lm(arglc2) << endl;
   lcls=lm.apply(arglc2);
-  cout << arglc2 << " " << lcls << endl;
+  clog << arglc2 << " " << lcls << endl;
   lcls=lm(arglc);
-  cout << lcls << endl;
+  clog << lcls << endl;
   lcls.adjoin(LatticeCell(imgary));
-  cout << lcls << endl;
+  clog << lcls << endl;
   lcls=lm(LatticeCellListSet(arglc));
-  cout << lm << endl;
-  cout << "Passed" << endl;
+  clog << lm << endl;
+
+  
+  clog.close();
+  cout << "PASS" << endl;
   
   return 0;
 }

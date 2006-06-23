@@ -23,8 +23,10 @@
  */
 
 #include <iostream>
+#include <fstream>
 #include <string>
 
+#include "real_typedef.h"
 #include "geometry/point.h"
 
 #include "test.h"
@@ -33,23 +35,28 @@ using namespace Ariadne;
 using namespace Ariadne::Geometry;
 using namespace std;
 
+
 int main() {
     cout << "test_point: " << flush;
+    ofstream clog("test_point.log");
+  
+    Point<Real> s1(3);
+    Point<Real> s2(4);
+    Point<Real> s3(2);
+    s3[0]=Real(2,3);
+    s3[1]=Real(2,3);
+    Point<Real> s4(s1);
+    Point<Real> s5;
 
-    Point<Rational> s1(3);
-    Point<Rational> s2(4);
-    Point<Rational> s3(2,Rational(2,3));
-    Point<Rational> s4(s1);
-    Point<Rational> s5;
-
-    s1[1] = Rational(0.75);
+    s1[1] = Real(0.75);
     s5=s1;
 
     test_assert(s1==s1 && s1!=s2 && s1!=s3 && s1!=s4 && s1==s5,
-		    "equality tests");
+                "equality tests");
 
+    clog << s1 << " " << s2 << " " << s3 << " " << s4 << " " << s5 << endl;
     /* Test output format */
-    string str1("[1, 3/2]");
+    string str1("(1, 1.5)");
     string str2;
     istringstream is(str1);
     is >> s1;
@@ -57,28 +64,30 @@ int main() {
     ss << s1;
     getline(ss,str2);
     
+    clog << str1 << " " << str2 << endl;
+    
     test_assert(str1 == str2,"stream output test");
     
     /* Test input format */
     try {
-	string input("[0,3/4,0] [1,1,1,1] [2/3,2/3] \n");
-	stringstream is(input);
-	
-	is >> s1 >> s2 >> s3;
+      string input("(0,0.75,0) (1,1,1,1) (0.666,0.666) \n");
+      stringstream is(input);
+      
+      is >> s1 >> s2 >> s3;
     } 
     catch(std::invalid_argument& e) {
-	cerr << "std::invalid_argument " << e.what() << "\n";
-	return 1;
+      cerr << "std::invalid_argument " << e.what() << "\n";
+      return 1;
     }
     catch(std::runtime_error& e) {
-	cerr << "std::runtime_error " << e.what() << "\n";
-	return 1;
+      cerr << "std::runtime_error " << e.what() << "\n";
+      return 1;
     }
     catch(...) {
-	cerr << "Unknown error\n";
-	return 1;
+      cerr << "Unknown error\n";
+      return 1;
     }
-	
+        
     cout << "PASS\n";
 
     return 0;

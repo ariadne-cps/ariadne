@@ -23,9 +23,13 @@
  */
 
 #include <iostream>
+#include <fstream>
 #include <string>
 
+#include <vector>
+
 #include "ariadne.h"
+#include "real_typedef.h"
 #include "base/exception.h"
 #include "base/utility.h"
 #include "numeric/numerical_types.h"
@@ -41,14 +45,21 @@ template class Polyhedron<Rational>;
 
 int main() {
   cout << "test_polyhedron: " << flush;
-
-  typedef Rational Real;
-  typedef Polyhedron<Real> Polyhedron;
-  typedef Point<Real> Point;
-  typedef Interval<Real> Interval;
-    
-  Point s1(4,Rational(1));
-  Point s2(4,Rational(4,3));
+  ofstream clog("test_polyhedron.log");
+  
+  Point<Real> s1(2);
+  s1[0]=Real(1);
+  s1[1]=Real(1);
+  Point<Real> s2(2);
+  s2[0]=Real(4,3);
+  Point<Real> s3(2);
+  s3[1]=Real(4,3);
+  
+  std::vector< Point<Real> > pl;
+  pl.push_back(s1);
+  pl.push_back(s2);
+  pl.push_back(s3);
+  
 /*
   Polyhedron p1(s1,s2);
   Polyhedron p2(s2,s1);
@@ -56,30 +67,10 @@ int main() {
   Polyhedron p4;
 */
     
-  Polyhedron p;
-  std::cout << p;
+  Polyhedron<Real> p(pl);
+  clog << p << endl;
   
-  /* Test input format */
-  try {
-    string input("[ ]  [ [0,2] ]  [ [0,1], [3/4,4/3], [1,3/2] ]  { lower_corner=[0,1], upper_corner=[1,4/3] }");
-    stringstream is(input);
-  } 
-  catch(invalid_input& e) {
-    cout << "FAILED\n";
-    cout << "  invalid_input: " << e.what() << "\n";
-    return 1;
-  }
-  catch(std::invalid_argument& e) {
-    cout << "FAILED\n";
-    cout << "  std::invalid_argument: " << e.what() << "\n";
-    return 1;
-  }
-  catch(...) {
-    cout << "FAILED\n";
-    cout << "  Unknown error\n"; 
-    return 1;
-  }
-
+  clog.close();
   cout << "INCOMPLETE\n";
 
   return 0;

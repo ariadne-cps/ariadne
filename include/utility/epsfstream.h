@@ -137,9 +137,11 @@ namespace Ariadne {
       epsfstream(const char* fn, const Ariadne::Geometry::Rectangle<R>& bbox)
        : std::ofstream(fn), line_colour("black"), fill_colour("green"), line_style(true), fill_style(true)
       {
-        if (bbox.dimension()!=2)
+        if (bbox.dimension()!=2) {
+          std::cerr << bbox.dimension() << bbox << std::endl;
           throw std::runtime_error("epsfstream: the bounding box hasn't dimension 2."); 
-
+        }
+        
         Ariadne::LinearAlgebra::identity_matrix<R> p_matrix(2);
         Ariadne::LinearAlgebra::Vector<R> p_vector(2);
         

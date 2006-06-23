@@ -27,13 +27,15 @@
 #include <string>
 
 #include "ariadne.h"
+#include "real_typedef.h"
 #include "base/exception.h"
 #include "base/utility.h"
+#include "base/binary_word.h"
 #include "numeric/numerical_types.h"
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
-#include "base/binary_word.h"
 #include "geometry/grid_set.h"
+#include "geometry/list_set.h"
 
 #include "test.h"
 
@@ -41,101 +43,78 @@ using namespace Ariadne;
 using namespace Ariadne::Geometry;
 using namespace std;
 
-template class Rectangle<Rational>;
-template class Grid<Rational>;
-template class FiniteGrid<Rational>;
-template class InfiniteGrid<Rational>;
-
-template class GridCell<Rational>;
-template class GridRectangle<Rational>;
-
-template class GridRectangleListSet<Rational>;
-template class GridCellListSet<Rational>;
-template class GridMaskSet<Rational>;
-
-template class Rectangle<Dyadic>;
-template class Grid<Dyadic>;
-template class FiniteGrid<Dyadic>;
-template class InfiniteGrid<Dyadic>;
-
-template class GridCell<Dyadic>;
-template class GridRectangle<Dyadic>;
-
-template class GridRectangleListSet<Dyadic>;
-template class GridCellListSet<Dyadic>;
-template class GridMaskSet<Dyadic>;
 
 int main() {
 
   cout << "test_grid: " << flush;
   ofstream clog("test_grid.log");
 
-  ListSet<Rational,Rectangle> ls;
-  Rectangle< Rational > r;
+  ListSet<Real,Rectangle> ls;
+  Rectangle< Real > r;
   
-  string input("[[0,5/6],[0,4/3]], [[2/3,1],[1,4/3]], [[4/3,3/2],[4/3,5/2]] ");
+  string input("[0,0.75]x[0,0.625]  [0.625,1]x[1,1.25]  [1.25,1.5]x[1.25,2.5] ");
   stringstream is(input);
-  for (int i=0; i< 4; i++) {
-	  is >> r;
-  	ls.push_back(r);
+  for (int i=0; i< 3; i++) {
+    is >> r;
+    clog << "r=" << r << endl;
+    ls.push_back(r);
   }
   clog << ls << endl;
 
-  FiniteGrid<Rational> gr(ls);
-  GridRectangleListSet<Rational> grls(gr,ls);
+  RegularGrid<Real> gr(2,0.125);
+  GridRectangleListSet<Real> grls(gr,ls);
   clog << grls << endl;
-  clog << ListSet<Rational,Rectangle>(grls) << endl;
+  clog << ListSet<Real,Rectangle>(grls) << endl;
 
-  GridCellListSet<Rational> gcls(grls);
+  GridCellListSet<Real> gcls(grls);
   clog << gcls << endl;
-  clog << ListSet<Rational,Rectangle>(gcls) << endl;
+  clog << ListSet<Real,Rectangle>(gcls) << endl;
 
-  GridMaskSet<Rational> gms(grls);
+  GridMaskSet<Real> gms(grls);
   clog << gms << endl;
 
-  GridMaskSet<Rational> gcms(gcls);
+  GridMaskSet<Real> gcms(gcls);
   clog << gcms << endl;
-  GridCellListSet<Rational> gclms(gms);
+  GridCellListSet<Real> gclms(gms);
   clog << gclms << endl;
 
-  clog << ListSet<Rational,Rectangle>(gms) << endl;
+  clog << ListSet<Real,Rectangle>(gms) << endl;
 
-  ListSet<Rational,Rectangle> ls1,ls2;
+  ListSet<Real,Rectangle> ls1,ls2;
   ls1.push_back(ls[0]);
   ls1.push_back(ls[2]);
   ls2.push_back(ls[1]);
 
-  FiniteGrid<Rational> fg1(ls1);
-  FiniteGrid<Rational> fg2(ls2);
+  IrregularGrid<Real> igr1(ls1);
+  IrregularGrid<Real> igr2(ls2);
 
-  FiniteGrid<Rational> fgj(fg1,fg2);
+  IrregularGrid<Real> igrj(igr1,igr2);
 
-  clog << fg1 << "\n" << fg2 << "\n" << fgj << "\n";
-  clog << FiniteGrid<Rational>::index_translation(fg1,fgj) << "\n";
-  clog << FiniteGrid<Rational>::index_translation(fg2,fgj) << "\n";
+  clog << igr1 << "\n" << igr2 << "\n" << igrj << "\n";
 
-  FiniteGrid<Rational> gr1(ls1);
-  GridRectangleListSet<Rational> grls1(gr1,ls1);
-  GridRectangleListSet<Rational> grlsj1(fgj,grls1);
+  IrregularGrid<Real> gr1(ls1);
+  GridRectangleListSet<Real> grls1(gr1,ls1);
+  GridRectangleListSet<Real> grlsj1(igrj,grls1);
   clog << grlsj1 << "\n";
 
-  FiniteGrid<Rational> gr2(ls2);
-  GridRectangleListSet<Rational> grls2(gr2,ls2);
-  GridRectangleListSet<Rational> grlsj2(fgj,grls2);
+  IrregularGrid<Real> gr2(ls2);
+  GridRectangleListSet<Real> grls2(gr2,ls2);
+  GridRectangleListSet<Real> grlsj2(igrj,grls2);
   clog << grlsj2 << "\n";
 
-  GridCellListSet<Rational> gcls1(grls1);
+  GridCellListSet<Real> gcls1(grls1);
   clog << gcls1 << "\n";
-  GridRectangleListSet<Rational> grlsc1(fgj,gcls1);
+  GridRectangleListSet<Real> grlsc1(igrj,gcls1);
   clog << grlsc1 << "\n";
 
-  GridMaskSet<Rational> gms1(fgj,grlsj1);
-  GridMaskSet<Rational> gms2(fgj,grlsj2);
-  clog << regular_intersection(gms1,gms2);
-  clog << join(gms1,gms2);
+  FiniteGrid<Real> fgr=FiniteGrid<Real>(igrj,igrj.bounding_box());
+  //GridMaskSet<Real> gms1(fgr,grlsj1);
+  //GridMaskSet<Real> gms2(fgr,grlsj2);
+  //clog << regular_intersection(gms1,gms2);
+  //clog << join(gms1,gms2);
 
   clog.close();
-  cout << "PASS\n";
+  cout << "INCOMPLETE\n";
 
   return 0;
 }

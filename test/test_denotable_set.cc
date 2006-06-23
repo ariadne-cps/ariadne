@@ -70,25 +70,25 @@ int main() {
  
     /* Test input format */
     try {
-	string input("[ ]  [ [0,2] ]  [ [0,1], [3/4,4/3], [1,3/2] ]  { lower_corner=[0,1], upper_corner=[1,4/3] }");
-	stringstream is(input);
+        string input("[ ]  [ [0,2] ]  [ [0,1], [3/4,4/3], [1,3/2] ]  { lower_corner=[0,1], upper_corner=[1,4/3] }");
+        stringstream is(input);
    } 
     catch(invalid_input& e) {
-	cout << "FAILED\n";
-	cout << "  invalid_input: " << e.what() << "\n";
-	return 1;
+        cout << "FAILED\n";
+        cout << "  invalid_input: " << e.what() << "\n";
+        return 1;
     }
     catch(std::invalid_argument& e) {
-	cout << "FAILED\n";
-	cout << "  std::invalid_argument: " << e.what() << "\n";
-	return 1;
+        cout << "FAILED\n";
+        cout << "  std::invalid_argument: " << e.what() << "\n";
+        return 1;
     }
     catch(...) {
-	cout << "FAILED\n";
-	cout << "  Unknown error\n"; 
-	return 1;
+        cout << "FAILED\n";
+        cout << "  Unknown error\n"; 
+        return 1;
     }
-	
+        
     cout << "PASS\n";
 
     return 0;

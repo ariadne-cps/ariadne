@@ -153,7 +153,7 @@ namespace Ariadne {
         if(i!=0) {
           os << ", ";
         }
-        write_sequence(os,a[i].begin(),a[i].end());
+        Utility::write_sequence(os,a[i].begin(),a[i].end());
         os.flush();
       }
       os << " ]";

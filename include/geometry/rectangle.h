@@ -35,6 +35,9 @@
 
 #include "../numeric/arithmetic.h"
 #include "../numeric/interval.h"
+
+#include "../linear_algebra/interval_vector.h"
+
 #include "../geometry/point.h"
 
 namespace Ariadne {

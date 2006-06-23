@@ -23,8 +23,10 @@
  */
 
 #include <iostream>
+#include <fstream>
 #include <string>
 
+#include "real_typedef.h"
 #include "numeric/numerical_types.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
@@ -37,11 +39,12 @@ using namespace std;
 
 int main() {
     cout << "test_linear_algebra: " << flush;
+    ofstream clog("test_linear_algebra.log");
 
-    Ariadne::LinearAlgebra::matrix< Rational > A(3,3), LU(3,3);
-    Ariadne::LinearAlgebra::matrix< Dyadic > Aq(3,3), QT, R;
-    Ariadne::LinearAlgebra::vector< Rational > b(3), x(3);
-    Ariadne::LinearAlgebra::vector< dimension_type > pivot(3);
+    Matrix< Rational > A(3,3), LU(3,3);
+    Matrix< Rational > Aq(3,3), QT, R;
+    Vector< Rational > b(3), x(3);
+    Vector< dimension_type > pivot(3);
     
     A(0,0)=Rational(7,3);A(0,1)=4;A(0,2)=-1;
     A(1,0)=-13;A(1,1)=Rational(10,9);A(1,2)=6;
@@ -53,22 +56,23 @@ int main() {
    
     test_assert(1==13*A(2,1),"mutiplication");
    
-    LU=lu_decompose(A,pivot);
+    // Matrix< Rational > LU=lu_decompose(A,pivot);
     
-    x=lu_solve(LU,pivot,b);
-	   
+    // x=lu_solve(LU,pivot,b);
+  
     test_assert(x(0)==x(1)==x(2)==1,"lu_solve");
 
  /*   for (unsigned int i=0; i< A.size1(); i++) {
        for (unsigned int j=0; j< A.size2(); j++) {
-	   Aq(i,j)=(Dyadic)A(i,j);
+         Aq(i,j)=(Dyadic)A(i,j);
        }
     }
    
     QT=hermitian(Householder_QR(Aq));
     R=prod(QT,Aq); */
     
-    cout << "PASS\n";
+    clog.close();
+    cout << "INCOMPLETE\n";
 
     return 0;
 }

@@ -23,6 +23,7 @@
  */
 
 #include <iostream>
+#include <fstream>
 #include <vector>
 
 #include "ariadne.h"
@@ -43,6 +44,7 @@ template class array<Rational,4>;
 
 int main() {
   cout << "test_array: " << flush;
+  ofstream clog("test_array.log");
 
   array<double> a0,a1,a2,a3,a4;
   array<double> aa0,aa1,aa2,aa3,aa4;
@@ -56,6 +58,7 @@ int main() {
   a1.resize(4);
   a2.assign(input+4,input+8);
   
+  clog << "a0=" << a0 << " a1=" << a1 << " a2=" << a2 << endl;
   test_assert(a0[2]==2.5,"array assignment");
 
   array_vector<double> fsav(4);
@@ -64,9 +67,16 @@ int main() {
   fsav.push_back(a1);
   fsav.push_back(a2);
   fsav.pop_back();
+  clog << fsav << endl;
 
   test_assert(fsav.size()==2,"array_vector.size");
   test_assert(fsav.length()==8,"array_vector.length");
+
+  array_reference<array_vector<double>::element_iterator> aref=fsav[1];
+  test_assert(aref==a1,"array reference equality");
+  array_reference<array_vector<double>::element_const_iterator> acref=fsav[1];
+  test_assert(acref==a1,"array const reference equality");
+  array<double> atmp=fsav[1];
   test_assert(fsav[1]==a1,"array_vector.operator[]");
 
   array_vector<double>::const_iterator fsavi=fsav.begin();
@@ -98,6 +108,9 @@ int main() {
   ++vai;
   test_assert(vai==va.end(),"vector<array>::iterator::end()");
 
+  clog << fsav;
+  
+  clog.close();
   cout << "PASS\n";
 
   return 0;

@@ -9,7 +9,7 @@
 /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation; either version 2 of the License, or5
  *  (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
@@ -348,20 +348,31 @@ namespace Ariadne {
     /*! \brief A reference to an array of values. */
     template<typename Iter>
     class array_reference {
+      typedef array_reference<Iter> Self;
      public:
-      typedef Iter iterator;
-      typedef typename Iter::value_type value_type;
-      typedef typename Iter::reference reference;
-      typedef typename Iter::pointer pointer;
+      typedef typename std::iterator_traits<Iter>::value_type value_type;
+      typedef typename std::iterator_traits<Iter>::reference reference;
+      typedef typename std::iterator_traits<Iter>::pointer pointer;
       typedef typename array<value_type>::size_type size_type;
+      typedef Iter iterator;
       
       ~array_reference() { }
       array_reference(array<value_type>& a) : _size(a.size()), _begin(a.begin()) { }
       array_reference(const size_type& s, iterator b) : _size(s), _begin(b) { }
+      template<typename I> array_reference(const array_reference<I>& a) : _size(a.size()), _begin(a.begin()) { }
       
-      array_reference<Iter>& operator=(const array<value_type>& a) { _assign(a.begin(),a.end()); return *this; }
-      template<typename RanIter> array_reference<Iter>& operator=(const range<RanIter>& r) { 
-        _assign(r.begin(),r.end()); return *this; }
+      Self& operator=(const array<value_type>& a) { 
+        assert(this->size()==a.size()); _assign(a.begin(),a.end()); return *this; }
+      template<typename Iter2> Self& operator=(const array_reference<Iter2>& a) { 
+        assert(this->size()==a.size()); _assign(a.begin(),a.end()); return *this; }
+      template<typename RanIter> Self& operator=(const range<RanIter>& r) { 
+        assert(this->size()==r.size()); _assign(r.begin(),r.end()); return *this; }
+      
+      bool operator==(const array<value_type>& a) { return this->_equals(a.begin(),a.end()); }  
+      bool operator!=(const array<value_type>& a) { return !((*this)==a); }
+      
+      template<typename I> bool operator==(const array_reference<I>& a) { return this->_equals(a.begin(),a.end()); }  
+      template<typename I> bool operator!=(const array_reference<I>& a) { return !((*this)==a); }
       
       operator array<value_type>() const { return array<value_type>(begin(),end()); }
       
@@ -376,37 +387,49 @@ namespace Ariadne {
      private:
       template<typename FwdIter> void _assign(FwdIter b, FwdIter e) { 
         iterator curr=_begin; while(b!=e) { *curr=*b; ++curr; ++b; } }
+      template<typename FwdIter> bool _equals(FwdIter b, FwdIter e) { 
+        if(std::distance(b,e)!=int(this->size())) { return false; }
+        iterator curr=_begin; while(b!=e) { if(*curr!=*b) { return false; } ++curr; ++b; }
+        return true;
+      }
      private:
       size_type _size;
       iterator _begin;
     };
     
     
+
     
     
-    template<typename Base>
+    
+    template<typename BaseIter>
     class _array_vector_iterator
       : public std::iterator<std::random_access_iterator_tag,
-                             array<typename Base::value_type>,
-                             range<Base>
+                             array_reference<BaseIter>,
+                             array_reference<BaseIter>
                             >
     {
      private:
-      typedef Base element_iterator;
-      typedef _array_vector_iterator<Base> Self;
+      typedef typename BaseIter::value_type element_type;
+      typedef _array_vector_iterator<BaseIter> Self;
+      typedef BaseIter element_iterator;
      public:
-      typedef size_t size_type;
-      typedef typename Base::difference_type difference_type;
-      typedef range<Base> reference;
+      typedef typename array<element_type>::size_type size_type;
+      typedef typename BaseIter::difference_type difference_type;
+      typedef array_reference<BaseIter> reference;
      private:
       size_type _array_size;
       element_iterator _curr;
      public:
       _array_vector_iterator(size_type n, element_iterator ptr)
         : _array_size(n), _curr(ptr) { }
-      bool operator==(const Self& other) const { return _curr==other._curr; }
-      bool operator!=(const Self& other) const { return !(*this==other); }
-      reference operator*() const { return reference(_curr,_curr+_array_size); }
+      template<typename B> _array_vector_iterator(const _array_vector_iterator<B>& iter) 
+        : _array_size((*iter).size()), _curr((*iter).begin()) { }
+      template<typename B> bool operator==(const _array_vector_iterator<B>& other) const { 
+        return _curr==(*other).begin(); }
+      template<typename B> bool operator!=(const _array_vector_iterator<B>& other) const { 
+        return !(*this==other); }
+      reference operator*() const { return reference(_array_size,_curr); }
       Self& operator++() { _curr+=_array_size; return *this; }
       Self& operator--() { _curr-=_array_size; return *this; }
       Self& operator+=(difference_type i) { _curr+=(i*_array_size); return *this; }
@@ -434,6 +457,8 @@ namespace Ariadne {
       typedef array_reference<vector_const_iterator> const_reference;
       typedef _array_vector_iterator<vector_iterator> iterator;
       typedef _array_vector_iterator<vector_const_iterator> const_iterator;
+      typedef vector_iterator element_iterator;
+      typedef vector_const_iterator element_const_iterator;
      public:
       /*!\brief Construct a vector to hold arrays of size as. */
       array_vector(array_size_type as) : _array_size(as), _elements() { }

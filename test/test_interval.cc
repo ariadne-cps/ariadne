@@ -1,8 +1,10 @@
 #include "ariadne.h"
+#include "real_typedef.h"
 #include "numeric/numerical_types.h"
 #include "numeric/interval.h"
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <sstream>
 
@@ -12,11 +14,13 @@ using namespace Ariadne;
 using namespace std;
 
 template class Interval<double>;
+template class Interval<MPFloat>;
 template class Interval<Dyadic>;
 template class Interval<Rational>;
 
 int main() {
   cout << "test_interval: " << flush;
+  ofstream clog("test_interval.log");
   
   Interval<double> ivld1(1.1,2.2);
   Interval<double> ivld2;
@@ -26,13 +30,13 @@ int main() {
   Interval<Rational> ivlr2(Rational(11,10),Rational(22,10));
   Interval<Rational> ivlr3(Rational(21,10),Rational(32,10));
   
-  Dyadic f1=1.5;
-  Dyadic f2=2.25;
-  Dyadic f3=3.125;
-  Dyadic f4=4.0625;
-  Interval<Dyadic> ivlf1;
-  Interval<Dyadic> ivlf2(f1,f2);
-  Interval<Dyadic> ivlf3(f3,f4);
+  MPFloat f1=1.5;
+  MPFloat f2=2.25;
+  MPFloat f3=3.125;
+  MPFloat f4=4.0625;
+  Interval<MPFloat> ivlf1;
+  Interval<MPFloat> ivlf2(f1,f2);
+  Interval<MPFloat> ivlf3(f3,f4);
   
   try {
     string input("[1.1,2.2] ");
@@ -40,7 +44,7 @@ int main() {
     
     iss >> ivld2;
     test_assert(ivld1.lower()==ivld2.lower() && ivld1.upper()==ivld2.upper(),
-		"construction from stream");
+                "construction from stream");
     
     try {
       test_assert(ivld1==ivld2, "operator==");
@@ -57,7 +61,7 @@ int main() {
     ivlr1 = ivlr2-ivlr3;
     ivlr1 = ivlr2*ivlr3;
     ivlr1 = ivlr2/ivlr3;
-    //  ivlr1 = sin(ivlr2);
+    //ivlr1 = sin(ivlr2);
     
     ivlf1 = ivlf2+ivlf3;
     ivlf1 = ivlf2-ivlf3;
@@ -66,12 +70,15 @@ int main() {
     //     cerr << ivlf1  << " = " << ivlf2  << " / " << ivlf3 << "\n";
     //  ivlf1 = sin(ivlf2);
    
-    cout << "INCOMPLETE\n";
   }
   catch(exception& e) {
     cout << "EXCEPTION " << e.what() << "\n";
     return 1;
   }
+  
+  clog.close();
+  cout << "INCOMPLETE - Interval<Dyadic> not fully implemented\n";
+  cout << "                          - Transcendental functions not fully implemented\n";
   
   return 0;
 }

@@ -23,6 +23,9 @@
 
 #define NO_CBLAS
 
+#include <iostream>
+#include <fstream>
+
 #include <tblas/tblas.hpp>
 #include <tblas/output.hpp>
 #include <tlapack/tlapack.hpp>
@@ -39,62 +42,68 @@
 #include "linear_algebra/qr_matrix.h"
 #include "linear_algebra/svd_matrix.h"
 
+#undef DEBUG
+
 using namespace std;
 using namespace Ariadne::LinearAlgebra;
 
 int main() {
+  cout << "test_matrix: " << flush;
+  ofstream clog("test_matrix.log");
+  
   int m=3;
   int n=3;
   double Aptr[9]={-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0};
   
   Matrix<double> A(m,n,Aptr,n);
 
-  std::cout << "Testing LU\n";
+  clog << "Testing LU\n";
   {
     LUMatrix<double> LU(A);
     Matrix<double> P=LU.P();
     Matrix<double> L=LU.L();
     Matrix<double> U=LU.U();
-    std::cout << "A=" << A << "\n";
-    std::cout << "P=" << P << "\n";
-    std::cout << "L=" << L << "\n";
-    std::cout << "U=" << U << "\n";
-    std::cout << "P*L*U=" << P*L*U << "\n";
-    std::cout << "LU=" << Matrix<double>(LU) << "\n";
+    clog << "A=" << A << "\n";
+    clog << "P=" << P << "\n";
+    clog << "L=" << L << "\n";
+    clog << "U=" << U << "\n";
+    clog << "P*L*U=" << P*L*U << "\n";
+    clog << "LU=" << Matrix<double>(LU) << "\n";
   }
 
-  std::cout << "Testing QR\n";
+  clog << "Testing QR\n";
   {
     QRMatrix<double> QR(A);
     Matrix<double> Q=QR.Q();
     Matrix<double> R=QR.R();
-    std::cout << "A=" << A << "\n";
-    std::cout << "Q=" << Q << "\n";
-    std::cout << "R=" << R << "\n";
-    std::cout << "Q*Q^T=" << Q*Q.transpose() << "\n";
-    std::cout << "Q*R=" << Q*R << "\n";
-    std::cout << "QR=" << Matrix<double>(QR) << "\n";
+    clog << "A=" << A << "\n";
+    clog << "Q=" << Q << "\n";
+    clog << "R=" << R << "\n";
+    clog << "Q*Q^T=" << Q*Q.transpose() << "\n";
+    clog << "Q*R=" << Q*R << "\n";
+    clog << "QR=" << Matrix<double>(QR) << "\n";
   }
 
-  std::cout << "Testing SVD\n";
+  clog << "Testing SVD\n";
   {
     SVDMatrix<double> SVD(A);
     Vector<double> S=SVD.S();
     Matrix<double> U=SVD.U();
     Matrix<double> V=SVD.V();
     Matrix<double> D=SVD.D();
-    std::cout << "A=" << A << "\n";
-    std::cout << "S=" << S << "\n";
-    std::cout << "D=" << D << "\n";
-    std::cout << "U=" << U << "\n";
-    std::cout << "V=" << V << "\n";
-    std::cout << "U*U^T=" << U*U.transpose() << "\n";
-    std::cout << "V*V^T=" << V*V.transpose() << "\n";
-    std::cout << "U*D*V^T" << U*D*V.transpose() << "\n";
-    std::cout << "SVD=" << Matrix<double>(SVD) << "\n";
+    clog << "A=" << A << "\n";
+    clog << "S=" << S << "\n";
+    clog << "D=" << D << "\n";
+    clog << "U=" << U << "\n";
+    clog << "V=" << V << "\n";
+    clog << "U*U^T=" << U*U.transpose() << "\n";
+    clog << "V*V^T=" << V*V.transpose() << "\n";
+    clog << "U*D*V^T" << U*D*V.transpose() << "\n";
+    clog << "SVD=" << Matrix<double>(SVD) << "\n";
   }
 
-  std::cout << "Passed\n";
+  clog.close();
+  cout << "PASS\n";
 
   return 0;
 }

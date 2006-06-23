@@ -27,13 +27,15 @@
 #include <string>
 
 #include "ariadne.h"
-#include "exception.h"
-#include "utility.h"
-#include "numerical_type.h"
-#include "point.h"
-#include "rectangle.h"
-#include "binary_word.h"
-#include "partition_tree_set.h"
+#include "real_typedef.h"
+#include "base/exception.h"
+#include "base/utility.h"
+#include "base/binary_word.h"
+#include "numeric/numerical_types.h"
+#include "geometry/point.h"
+#include "geometry/rectangle.h"
+#include "geometry/list_set.h"
+#include "geometry/partition_tree_set.h"
 
 #include "test.h"
 
@@ -41,45 +43,42 @@ using namespace std;
 using namespace Ariadne;
 using namespace Ariadne::Geometry;
 
-template class Rectangle<Dyadic>;
-template class PartitionScheme<Dyadic>;
-template class PartitionTreeCell<Dyadic>;
-template class PartitionTree<Dyadic>;
-template class PartitionTreeSet<Dyadic>;
-
 int main() {
 
   cout << "test_partition_grid: " << flush;
   ofstream clog("test_partition_grid.log");
-//  ostream& clog=cerr;
 
   std::vector<Ariadne::dimension_type> seqa;
 
-  Rectangle<Dyadic> r;
-  SubdivisionSequence seq;
-  BinaryWord bna;
+  Rectangle<Real> r;
+  SubdivisionSequence seq(2);
+  BinaryWord bnw;
+  BooleanArray bna;
+  BinaryTree bnt;
   BooleanArray bla;
 
-  string input("[[0,1],[0,3]]" "[0,1]" "[0,0,1,0,0,1,1,1,0,1,1]" "[1,0,1,1,0,1]");
+  string input("[0,1]x[0,3]" "[0,1]" "[0,0,1,0,0,1,1,1,0,1,1]" "[1,0,1,1,0,1]");
   stringstream is(input);
-  is >> r >> seqa >> bna; //>> bla;
+  is >> r >> seqa >> bnw; //>> bla;
+  bna=BooleanArray(bnw.begin(),bnw.begin()+bnw.size());
+  bnt=BinaryTree(bna);
   seq=SubdivisionSequence(seqa.begin(),seqa.begin(),seqa.end());
 
   clog << r << "  " << seq << "  " << bna << "  " << bla << " " << endl;
 
-  PartitionScheme<Dyadic> pg(r,seq);
-  PartitionTree<Dyadic> pt(pg,bna);
-  PartitionTreeSet<Dyadic> pts(pg,bna,bla);
+  PartitionScheme<Real> pg(r,seq);
+  PartitionTree<Real> pt(pg,bnt);
+  PartitionTreeSet<Real> pts(pg,bnt,bla);
 
-  PartitionTree<Dyadic>::const_iterator ptree_iter=pt.begin();
-  PartitionTree<Dyadic>::const_iterator ptree_end=pt.end();
+  PartitionTree<Real>::const_iterator ptree_iter=pt.begin();
+  PartitionTree<Real>::const_iterator ptree_end=pt.end();
 
-  PartitionTreeSet<Dyadic>::const_iterator ptreeset_iter=pts.begin();
-  PartitionTreeSet<Dyadic>::const_iterator ptreeset_end=pts.end();
+  PartitionTreeSet<Real>::const_iterator ptreeset_iter=pts.begin();
+  PartitionTreeSet<Real>::const_iterator ptreeset_end=pts.end();
 
   clog << pt << endl;
   clog << pts << endl;
-  clog << ListSet<Dyadic,Rectangle>(pts) << endl;
+  clog << ListSet<Real,Rectangle>(pts) << endl;
 
   clog.close();
   cout << "PASS\n";

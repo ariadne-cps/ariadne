@@ -23,16 +23,18 @@
  */
 
 #include <iostream>
+#include <fstream>
 #include <string>
 
 #include "ariadne.h"
-#include "exception.h"
-#include "utility.h"
-#include "numerical_type.h"
-#include "state.h"
-#include "rectangle.h"
-#include "list_set.h"
-#include "epsfstream.h"
+#include "real_typedef.h"
+#include "base/exception.h"
+#include "base/utility.h"
+#include "numeric/numerical_types.h"
+#include "geometry/point.h"
+#include "geometry/rectangle.h"
+#include "geometry/list_set.h"
+#include "utility/epsfstream.h"
 
 #include "test.h"
 
@@ -41,27 +43,27 @@ using namespace Ariadne::Geometry;
 using namespace Ariadne::Postscript;
 using namespace std;
 
-template class ListSet<Rational, Rectangle>;
-template class ListSet<Dyadic, Rectangle>;
-template class ListSet<double, Rectangle>;
-
 int main() {
   cout << "test_epsfstream: " << flush;
-
-  Rectangle<double> bbox, r1, r2;
-  Rectangle<Rational> r3;
-  Rectangle<Dyadic> r4;
-  string input("[ [-0.1,1.1], [-0.2, 3.2] ] "
-               "[ [ 0.0,1.0], [0.0,2.0] ] "
-               "[ [ 0.5,1.0], [1.0,3.0] ] "
-               "[ [ 0,1/3], [7/3,3] ] "
-               "[ [ 0.06125, 0.125], [0.5,2.75] ] "
+  ofstream clog("test_epsfstream.log");
+  
+  Rectangle<Real> bbox(2), r1, r2;
+  Rectangle<Real> r3;
+  Rectangle<Real> r4;
+  string input("[-0.125,1.125]x[-0.25, 3.25] "
+               "[ 0.0,1.0]x[0.0,2.0] "
+               "[ 0.5,1.0]x[1.0,3.0] "
+               "[ 0,0.3333333]x[2.3333,3] "
+               "[ 0.06125,0.125]x[0.5,2.75] "
                );
   stringstream iss(input);
 
   iss >> bbox >> r1 >> r2 >> r3 >> r4;
-
-  epsfstream eps("../output_file.eps",bbox);
+  
+  clog << bbox << "\n";
+  clog << r1 << " " << r2 << " "<< r3 << " " << r4 << std::endl;
+  
+  epsfstream<Real> eps("../test_epsfstream.eps",bbox);
 
   eps << r1 << r2 << r3 << r4;
 
@@ -89,6 +91,7 @@ int main() {
     return 1;
   }
 
+  clog.close();
   cout << "PASS\n";
 
   return 0;

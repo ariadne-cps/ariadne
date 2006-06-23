@@ -85,11 +85,13 @@ namespace Ariadne {
       
     template <typename R>
     Geometry::Point<R>
-    HenonMap<R>::apply(const Geometry::Point<R>& x) const
+    HenonMap<R>::apply(const Geometry::Point<R>& p) const
     {
-      state_type result(2); 
-      result[0]=_a-x[0]*x[0]-_b*x[1]; 
-      result[1]=x[0]; 
+      Geometry::Point<R> result(2); 
+      const R& x=p[0];
+      const R& y=p[0];
+      result[0]=_a-x*x-_b*y; 
+      result[1]=x; 
       return result;
     }
      

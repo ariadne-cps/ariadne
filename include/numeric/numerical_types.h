@@ -33,6 +33,7 @@
 #include "../declarations.h"
 #include "../numeric/integer.h"
 #include "../numeric/dyadic.h"
+#include "../numeric/numerical_traits.h"
 #include "../utility/stlio.h"
 
 namespace Ariadne {
@@ -124,14 +125,6 @@ namespace Ariadne {
   
   
     /* numerical traits */
-    /*! \brief Tags a class representing a ring. */
-    class ring_tag { };
-    /*! \brief Tags a class representing a field. */
-    class field_tag { };
-      
-    /*! \brief Typedef's describing a numerical type. */
-    template<typename T> class numerical_traits;
-      
     template<> class numerical_traits<Integer> {
      public:
       typedef field_tag algebraic_category;
@@ -165,8 +158,6 @@ namespace Ariadne {
   }
   
   namespace Base {
-    template<typename R> inline std::string name() 
-    { throw std::runtime_error("name(): Unknow type");}
 
     template<> inline std::string name<Numeric::Float64>() { return "Float64"; }
     template<> inline std::string name<Numeric::MPFloat>() { return "MPFloat"; }

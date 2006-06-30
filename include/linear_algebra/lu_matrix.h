@@ -77,7 +77,7 @@ namespace Ariadne {
       int m=this->number_of_rows();
       int n=this->number_of_columns();
       TLAPACK::getrf(TBLAS::RowMajor,m,n,this->_elements.begin(),n,
-                    this->_pivots.begin());
+                    this->_pivots.begin());      
     }
 
     template <typename R>

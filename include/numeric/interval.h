@@ -36,6 +36,8 @@
 
 #include "../declarations.h"
 
+#include "../numeric/numerical_traits.h"
+
 /* No input routine for intervals defined by boost */
 namespace boost {
   namespace numeric {
@@ -70,12 +72,12 @@ namespace Ariadne {
     template<typename R>
     class Interval : public boost::numeric::interval<R> {
      public:
-      /*! \brief Default constructer constructs what?? */
+      /*! \brief Default constructer constructs one-point interval containing zero. */
       Interval()
         : boost::numeric::interval<R>(0,0) { }
       /*! \brief Construct a one-point interval. */
-      Interval(const R& x)
-        : boost::numeric::interval<R>(x) { }
+      template<typename Rl> Interval(const Rl& x)
+        : boost::numeric::interval<R>(R(x),R(x)) { }
       /*! \brief Construct from a boost interval. */
       Interval(const boost::numeric::interval<R>& ivl)
         : boost::numeric::interval<R>(ivl) { }
@@ -83,8 +85,13 @@ namespace Ariadne {
       Interval(const R& l, const R& u)
         : boost::numeric::interval<R>(l,u) { }
       /*! \brief Assignment operator. */
-      const Interval<R>& operator=(const R& x) {
+      Interval<R>& operator=(const R& x) {
         *this=Interval<R>(x,x);
+        return *this;
+      }
+      /*! \brief Copy assignment operator. */
+      Interval<R>& operator=(const Interval<R>& x) {
+        if(this!=&x) { *this=Interval<R>(x.lower(),x.upper()); }
         return *this;
       }
       
@@ -94,6 +101,13 @@ namespace Ariadne {
       /*! \brief Inequality operator. */
       bool operator!=(const Interval<R>& ivl) const { 
         return !(*this==ivl); }
+
+      /*! \brief Equality operator. */
+      bool operator==(const R& x) const { 
+        return this->lower()==x && this->upper()==x; }
+      /*! \brief Inequality operator. */
+      bool operator!=(const R& x) const { 
+        return !(*this==x); }
 
       /*! \brief Tests if the interval contains \a r. */
       bool contains(const R& r) const { return this->lower()<=r && r<=this->upper(); }
@@ -157,6 +171,11 @@ namespace Ariadne {
     }
   
 
+    template<typename R> class numerical_traits< Interval<R> > {
+     public:
+      typedef field_tag algebraic_category;
+      typedef Interval<R> field_extension_type;
+    };
 
     
     template<typename R>

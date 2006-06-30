@@ -58,7 +58,9 @@ namespace Ariadne {
       R upper_norm() const;
     };
       
+    template <typename R> IntervalVector<R> operator-(const IntervalVector<R>& iv);
     template <typename R> IntervalVector<R> operator+(const IntervalVector<R>& iv1, const IntervalVector<R> iv2);
+    template <typename R> IntervalVector<R> operator-(const IntervalVector<R>& iv1, const IntervalVector<R> iv2);
     template <typename R> IntervalVector<R> operator*(const Interval<R>& s, const IntervalVector<R>& iv);
     template <typename R> IntervalVector<R> operator*(const R& s, const IntervalVector<R>& iv);
 
@@ -168,11 +170,35 @@ namespace Ariadne {
     template <typename R>
     inline
     IntervalVector<R> 
+    operator-(const IntervalVector<R>& iv)
+    {
+      IntervalVector<R> result(iv.size());
+      for(size_type i=0; i!=result.size(); ++i) {
+        result(i)=-iv(i);
+      }
+      return result;
+    }
+
+    template <typename R>
+    inline
+    IntervalVector<R> 
     operator+(const IntervalVector<R>& iv1, const IntervalVector<R> iv2)
     {
       IntervalVector<R> result(iv1.size());
       for(size_type i=0; i!=result.size(); ++i) {
         result(i)=iv1(i)+iv2(i);
+      }
+      return result;
+    }
+
+    template <typename R>
+    inline
+    IntervalVector<R> 
+    operator-(const IntervalVector<R>& iv1, const IntervalVector<R> iv2)
+    {
+      IntervalVector<R> result(iv1.size());
+      for(size_type i=0; i!=result.size(); ++i) {
+        result(i)=iv1(i)-iv2(i);
       }
       return result;
     }

@@ -44,42 +44,42 @@ namespace Ariadne {
     Geometry::Point<R> 
     Map<R>::apply(const Geometry::Point<R>& x) const 
     {
-      throw std::invalid_argument("Not implemented."); 
+      throw std::invalid_argument(this->name()+"::apply(Point) not implemented."); 
     }
     
     template<typename R>
     Geometry::Rectangle<R>
     Map<R>::apply(const Geometry::Rectangle<R>& r) const 
     {
-      throw std::invalid_argument("Not implemented."); 
+      throw std::invalid_argument(this->name()+"::apply(Rectangle) not implemented."); 
     }
     
     template<typename R>
     Geometry::Parallelotope<R>
     Map<R>::apply(const Geometry::Parallelotope<R>& p) const 
     {
-      throw std::invalid_argument("Not implemented."); 
+      throw std::invalid_argument(this->name()+"::apply(Parallelotope) not implemented."); 
     }
     
     template<typename R>
     Geometry::Polyhedron<R>
     Map<R>::apply(const Geometry::Polyhedron<R>& p) const 
     {
-      throw std::invalid_argument("Not implemented."); 
+      throw std::invalid_argument(this->name()+"::apply(Polyhedron) not implemented."); 
     }
     
     template<typename R>
     LinearAlgebra::Matrix<R> 
     Map<R>::derivative(const Geometry::Point<R>& x) const 
     {
-      throw std::invalid_argument("Derivative at point not implemented."); 
+      throw std::invalid_argument(this->name()+"::derivative(Point) not implemented."); 
     }
 
     template<typename R>
     LinearAlgebra::IntervalMatrix<R> 
     Map<R>::derivative(const Geometry::Rectangle<R>& r) const 
     {
-      throw std::invalid_argument("Derivative on Rectangle not implemented."); 
+      throw std::invalid_argument(this->name()+"::derivative(Rectangle) not implemented."); 
     }
     
     

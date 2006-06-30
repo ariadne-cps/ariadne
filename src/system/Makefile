@@ -38,6 +38,7 @@ map.o: map.cc ../../include/system/map.h \
   ../../include/system/../linear_algebra/interval_matrix.h \
   ../../include/system/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/system/../linear_algebra/../numeric/interval.h \
+  ../../include/system/../linear_algebra/../numeric/../numeric/numerical_traits.h \
   ../../include/system/map.tpl ../../include/system/../geometry/point.h \
   ../../include/system/../geometry/../declarations.h \
   ../../include/system/../geometry/../base/array.h \
@@ -48,6 +49,7 @@ map.o: map.cc ../../include/system/map.h \
   ../../include/system/../geometry/../numeric/../numeric/../declarations.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/integer.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/system/../geometry/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/system/../geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/system/../geometry/../numeric/../numeric/approximation.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/numerical_types.h \
@@ -76,6 +78,7 @@ vector_field.o: vector_field.cc ../../include/system/vector_field.h \
   ../../include/system/../declarations.h \
   ../../include/system/../numeric/interval.h \
   ../../include/system/../numeric/../declarations.h \
+  ../../include/system/../numeric/../numeric/numerical_traits.h \
   ../../include/system/../linear_algebra/vector.h \
   ../../include/system/../linear_algebra/../declarations.h \
   ../../include/system/../linear_algebra/../numeric/integer.h \
@@ -100,6 +103,7 @@ vector_field.o: vector_field.cc ../../include/system/vector_field.h \
   ../../include/system/../geometry/../numeric/../numeric/../declarations.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/integer.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/system/../geometry/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/system/../geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/system/../geometry/../numeric/../numeric/approximation.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/numerical_types.h \
@@ -123,6 +127,7 @@ affine_map.o: affine_map.cc ../../include/system/affine_map.h \
   ../../include/system/../linear_algebra/interval_matrix.h \
   ../../include/system/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/system/../linear_algebra/../numeric/interval.h \
+  ../../include/system/../linear_algebra/../numeric/../numeric/numerical_traits.h \
   ../../include/system/../geometry/point.h \
   ../../include/system/../geometry/../declarations.h \
   ../../include/system/../geometry/../base/array.h \
@@ -135,6 +140,7 @@ affine_map.o: affine_map.cc ../../include/system/affine_map.h \
   ../../include/system/../geometry/../numeric/../numeric/../declarations.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/integer.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/system/../geometry/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/system/../geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/system/../geometry/../numeric/../numeric/approximation.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/numerical_types.h \
@@ -194,6 +200,7 @@ affine_multimap.o: affine_multimap.cc \
   ../../include/system/../linear_algebra/interval_matrix.h \
   ../../include/system/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/system/../linear_algebra/../numeric/interval.h \
+  ../../include/system/../linear_algebra/../numeric/../numeric/numerical_traits.h \
   ../../include/system/../geometry/point.h \
   ../../include/system/../geometry/../declarations.h \
   ../../include/system/../geometry/../base/array.h \
@@ -206,6 +213,7 @@ affine_multimap.o: affine_multimap.cc \
   ../../include/system/../geometry/../numeric/../numeric/../declarations.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/integer.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/system/../geometry/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/system/../geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/system/../geometry/../numeric/../numeric/approximation.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/numerical_types.h \
@@ -276,6 +284,7 @@ affine_vector_field.o: affine_vector_field.cc \
   ../../include/system/../linear_algebra/matrix.h \
   ../../include/system/../linear_algebra/interval_vector.h \
   ../../include/system/../linear_algebra/../numeric/interval.h \
+  ../../include/system/../linear_algebra/../numeric/../numeric/numerical_traits.h \
   ../../include/system/../linear_algebra/../linear_algebra/vector.h \
   ../../include/system/../linear_algebra/interval_matrix.h \
   ../../include/system/../linear_algebra/../linear_algebra/matrix.h \
@@ -299,6 +308,7 @@ affine_vector_field.o: affine_vector_field.cc \
   ../../include/system/../system/../geometry/../numeric/../numeric/../declarations.h \
   ../../include/system/../system/../geometry/../numeric/../numeric/../numeric/integer.h \
   ../../include/system/../system/../geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/system/../system/../geometry/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/system/../system/../geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/system/../system/../geometry/../numeric/../numeric/approximation.h \
   ../../include/system/../system/../geometry/../numeric/../numeric/../numeric/numerical_types.h \
@@ -358,6 +368,7 @@ polynomial_map.o: polynomial_map.cc ../../include/system/polynomial_map.h \
   ../../include/system/../system/../linear_algebra/interval_matrix.h \
   ../../include/system/../system/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/system/../system/../linear_algebra/../numeric/interval.h \
+  ../../include/system/../system/../linear_algebra/../numeric/../numeric/numerical_traits.h \
   ../../include/system/../linear_algebra/matrix.h \
   ../../include/system/polynomial_map.tpl \
   ../../include/system/polynomial_map.h \
@@ -375,6 +386,7 @@ polynomial_map.o: polynomial_map.cc ../../include/system/polynomial_map.h \
   ../../include/system/../geometry/../numeric/../numeric/../declarations.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/integer.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/system/../geometry/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/system/../geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/system/../geometry/../numeric/../numeric/approximation.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/numerical_types.h \
@@ -405,6 +417,7 @@ lattice_map.o: lattice_map.cc ../../include/system/lattice_map.h \
   ../../include/system/../geometry/../base/../base/array.h \
   ../../include/system/../geometry/../numeric/interval.h \
   ../../include/system/../geometry/../numeric/../declarations.h \
+  ../../include/system/../geometry/../numeric/../numeric/numerical_traits.h \
   ../../include/system/../geometry/../base/array_operations.h \
   ../../include/utility/stlio.h ../../include/utility/../base/array.h \
   ../../include/geometry/lattice_set.h ../../include/debug.h

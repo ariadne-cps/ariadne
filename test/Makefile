@@ -8,6 +8,7 @@ TESTS = test_array test_arithmetic test_binary_word \
   test_lattice \
   test_partition_tree \
   test_epsfstream \
+  test_interval_newton \
   test_integration_step 
 
 CXXFLAGS += -Wall -I../include/ -I../
@@ -50,6 +51,7 @@ all: ${TESTS}
 	-./test_lattice
 	-./test_partition_tree
 	-./test_epsfstream
+	-./test_interval_newton
 	-./test_integration_step
 
 test_array: test_array.cc ../include/ariadne.h ../include/base/array.h \
@@ -60,6 +62,7 @@ test_array: test_array.cc ../include/ariadne.h ../include/base/array.h \
   ../include/numeric/../numeric/../utility/stlio.h \
   ../include/numeric/../numeric/../utility/../base/array.h \
   ../include/numeric/../numeric/dyadic.h \
+  ../include/numeric/../numeric/numerical_traits.h \
   ../include/numeric/../utility/stlio.h test.h
 	-${CXX} ${CXXFLAGS} test_array.cc  ${LDXXFLAGS} -o test_array
 
@@ -72,6 +75,7 @@ test_arithmetic: test_arithmetic.cc ../include/numeric/arithmetic.h \
   ../include/numeric/../numeric/../numeric/../utility/../base/array.h \
   ../include/numeric/../numeric/../numeric/../utility/../base/../declarations.h \
   ../include/numeric/../numeric/../numeric/dyadic.h \
+  ../include/numeric/../numeric/../numeric/numerical_traits.h \
   ../include/numeric/../numeric/../utility/stlio.h \
   ../include/numeric/../numeric/approximation.h \
   ../include/numeric/../numeric/../numeric/numerical_types.h test.h
@@ -90,6 +94,7 @@ test_binary_word: test_binary_word.cc ../include/ariadne.h \
   ../include/numeric/../numeric/../utility/stlio.h \
   ../include/numeric/../numeric/../utility/../base/array.h \
   ../include/numeric/../numeric/dyadic.h \
+  ../include/numeric/../numeric/numerical_traits.h \
   ../include/numeric/../utility/stlio.h ../include/base/utility.h \
   ../include/geometry/point.h ../include/geometry/../declarations.h \
   ../include/geometry/../base/array.h \
@@ -104,6 +109,7 @@ test_binary_word: test_binary_word.cc ../include/ariadne.h \
   ../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../include/geometry/../numeric/interval.h \
   ../include/geometry/../numeric/../declarations.h \
+  ../include/geometry/../numeric/../numeric/numerical_traits.h \
   ../include/geometry/../linear_algebra/interval_vector.h \
   ../include/geometry/../linear_algebra/../numeric/interval.h \
   ../include/geometry/../linear_algebra/../linear_algebra/vector.h \
@@ -112,11 +118,11 @@ test_binary_word: test_binary_word.cc ../include/ariadne.h \
 
 test_matrix: test_matrix.cc /ufs/collins/include/tblas/tblas.hpp \
   /ufs/collins/include/tblas/fblas.hpp \
-  /ufs/collins/include/tblas/xerbla.hpp \
+  /ufs/collins/include/tblas/amax.hpp \
   /ufs/collins/include/tblas/tblas.hpp \
-  /ufs/collins/include/tblas/amax.hpp /ufs/collins/include/tblas/asum.hpp \
-  /ufs/collins/include/tblas/axpy.hpp /ufs/collins/include/tblas/copy.hpp \
-  /ufs/collins/include/tblas/dot.hpp /ufs/collins/include/tblas/gbmv.hpp \
+  /ufs/collins/include/tblas/asum.hpp /ufs/collins/include/tblas/axpy.hpp \
+  /ufs/collins/include/tblas/copy.hpp /ufs/collins/include/tblas/dot.hpp \
+  /ufs/collins/include/tblas/gbmv.hpp \
   /ufs/collins/include/tblas/gecpy.hpp \
   /ufs/collins/include/tblas/gemm.hpp /ufs/collins/include/tblas/gemv.hpp \
   /ufs/collins/include/tblas/ger.hpp /ufs/collins/include/tblas/geset.hpp \
@@ -166,6 +172,7 @@ test_matrix: test_matrix.cc /ufs/collins/include/tblas/tblas.hpp \
   ../include/numeric/../numeric/../utility/../base/array.h \
   ../include/numeric/../numeric/../utility/../base/../declarations.h \
   ../include/numeric/../numeric/dyadic.h \
+  ../include/numeric/../numeric/numerical_traits.h \
   ../include/numeric/../utility/stlio.h \
   ../include/linear_algebra/vector.h \
   ../include/linear_algebra/../declarations.h \
@@ -223,6 +230,7 @@ test_polyhedron: test_polyhedron.cc ../include/ariadne.h \
   ../include/numeric/../numeric/../utility/../base/array.h \
   ../include/numeric/../numeric/../utility/../base/../declarations.h \
   ../include/numeric/../numeric/dyadic.h \
+  ../include/numeric/../numeric/numerical_traits.h \
   ../include/numeric/../utility/stlio.h ../include/base/exception.h \
   ../include/base/utility.h ../include/base/../declarations.h \
   ../include/numeric/numerical_types.h ../include/geometry/point.h \
@@ -250,6 +258,7 @@ test_polyhedron: test_polyhedron.cc ../include/ariadne.h \
   ../include/geometry/../geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../include/geometry/../geometry/../numeric/interval.h \
   ../include/geometry/../geometry/../numeric/../declarations.h \
+  ../include/geometry/../geometry/../numeric/../numeric/numerical_traits.h \
   ../include/geometry/../geometry/../linear_algebra/interval_vector.h \
   ../include/geometry/../geometry/../linear_algebra/../declarations.h \
   ../include/geometry/../geometry/../linear_algebra/../numeric/interval.h \
@@ -266,6 +275,7 @@ test_rectangle: test_rectangle.cc ../include/ariadne.h \
   ../include/numeric/../numeric/../utility/../base/array.h \
   ../include/numeric/../numeric/../utility/../base/../declarations.h \
   ../include/numeric/../numeric/dyadic.h \
+  ../include/numeric/../numeric/numerical_traits.h \
   ../include/numeric/../utility/stlio.h ../include/base/exception.h \
   ../include/base/utility.h ../include/base/../declarations.h \
   ../include/geometry/rectangle.h ../include/geometry/../declarations.h \
@@ -276,6 +286,7 @@ test_rectangle: test_rectangle.cc ../include/ariadne.h \
   ../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../include/geometry/../numeric/interval.h \
   ../include/geometry/../numeric/../declarations.h \
+  ../include/geometry/../numeric/../numeric/numerical_traits.h \
   ../include/geometry/../linear_algebra/interval_vector.h \
   ../include/geometry/../linear_algebra/../declarations.h \
   ../include/geometry/../linear_algebra/../numeric/interval.h \
@@ -299,6 +310,7 @@ test_point: test_point.cc ../include/real_typedef.h \
   ../include/numeric/../numeric/../utility/../base/array.h \
   ../include/numeric/../numeric/../utility/../base/../declarations.h \
   ../include/numeric/../numeric/dyadic.h \
+  ../include/numeric/../numeric/numerical_traits.h \
   ../include/numeric/../utility/stlio.h ../include/geometry/point.h \
   ../include/geometry/../declarations.h \
   ../include/geometry/../base/array.h \
@@ -316,6 +328,7 @@ test_linear_algebra: test_linear_algebra.cc ../include/real_typedef.h \
   ../include/numeric/../numeric/../utility/../base/array.h \
   ../include/numeric/../numeric/../utility/../base/../declarations.h \
   ../include/numeric/../numeric/dyadic.h \
+  ../include/numeric/../numeric/numerical_traits.h \
   ../include/numeric/../utility/stlio.h \
   ../include/numeric/numerical_types.h ../include/linear_algebra/vector.h \
   ../include/linear_algebra/../declarations.h \
@@ -332,6 +345,7 @@ test_interval: test_interval.cc ../include/ariadne.h \
   ../include/numeric/../numeric/../utility/../base/array.h \
   ../include/numeric/../numeric/../utility/../base/../declarations.h \
   ../include/numeric/../numeric/dyadic.h \
+  ../include/numeric/../numeric/numerical_traits.h \
   ../include/numeric/../utility/stlio.h \
   ../include/numeric/numerical_types.h ../include/numeric/interval.h \
   test.h
@@ -346,6 +360,7 @@ test_list_set: test_list_set.cc ../include/ariadne.h \
   ../include/numeric/../numeric/../utility/../base/array.h \
   ../include/numeric/../numeric/../utility/../base/../declarations.h \
   ../include/numeric/../numeric/dyadic.h \
+  ../include/numeric/../numeric/numerical_traits.h \
   ../include/numeric/../utility/stlio.h ../include/base/exception.h \
   ../include/base/utility.h ../include/base/../declarations.h \
   ../include/numeric/numerical_types.h ../include/geometry/point.h \
@@ -362,6 +377,7 @@ test_list_set: test_list_set.cc ../include/ariadne.h \
   ../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../include/geometry/../numeric/interval.h \
   ../include/geometry/../numeric/../declarations.h \
+  ../include/geometry/../numeric/../numeric/numerical_traits.h \
   ../include/geometry/../linear_algebra/interval_vector.h \
   ../include/geometry/../linear_algebra/../numeric/interval.h \
   ../include/geometry/../linear_algebra/../linear_algebra/vector.h \
@@ -378,6 +394,7 @@ test_grid: test_grid.cc ../include/ariadne.h ../include/real_typedef.h \
   ../include/numeric/../numeric/../utility/../base/array.h \
   ../include/numeric/../numeric/../utility/../base/../declarations.h \
   ../include/numeric/../numeric/dyadic.h \
+  ../include/numeric/../numeric/numerical_traits.h \
   ../include/numeric/../utility/stlio.h ../include/base/exception.h \
   ../include/base/utility.h ../include/base/../declarations.h \
   ../include/base/binary_word.h ../include/numeric/numerical_types.h \
@@ -394,6 +411,7 @@ test_grid: test_grid.cc ../include/ariadne.h ../include/real_typedef.h \
   ../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../include/geometry/../numeric/interval.h \
   ../include/geometry/../numeric/../declarations.h \
+  ../include/geometry/../numeric/../numeric/numerical_traits.h \
   ../include/geometry/../linear_algebra/interval_vector.h \
   ../include/geometry/../linear_algebra/../numeric/interval.h \
   ../include/geometry/../linear_algebra/../linear_algebra/vector.h \
@@ -424,12 +442,14 @@ test_lattice: test_lattice.cc ../include/declarations.h \
   ../include/numeric/../numeric/../utility/../base/array.h \
   ../include/numeric/../numeric/../utility/../base/../declarations.h \
   ../include/numeric/../numeric/dyadic.h \
+  ../include/numeric/../numeric/numerical_traits.h \
   ../include/numeric/../utility/stlio.h ../include/geometry/lattice_set.h \
   ../include/geometry/../base/array.h \
   ../include/geometry/../base/iterator.h \
   ../include/geometry/../base/../base/array.h \
   ../include/geometry/../numeric/interval.h \
   ../include/geometry/../numeric/../declarations.h \
+  ../include/geometry/../numeric/../numeric/numerical_traits.h \
   ../include/geometry/../base/array_operations.h \
   ../include/geometry/../base/../declarations.h \
   ../include/system/lattice_map.h \
@@ -445,6 +465,7 @@ test_partition_tree: test_partition_tree.cc ../include/ariadne.h \
   ../include/numeric/../numeric/../utility/../base/array.h \
   ../include/numeric/../numeric/../utility/../base/../declarations.h \
   ../include/numeric/../numeric/dyadic.h \
+  ../include/numeric/../numeric/numerical_traits.h \
   ../include/numeric/../utility/stlio.h ../include/base/exception.h \
   ../include/base/utility.h ../include/base/../declarations.h \
   ../include/base/binary_word.h ../include/numeric/numerical_types.h \
@@ -461,6 +482,7 @@ test_partition_tree: test_partition_tree.cc ../include/ariadne.h \
   ../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../include/geometry/../numeric/interval.h \
   ../include/geometry/../numeric/../declarations.h \
+  ../include/geometry/../numeric/../numeric/numerical_traits.h \
   ../include/geometry/../linear_algebra/interval_vector.h \
   ../include/geometry/../linear_algebra/../numeric/interval.h \
   ../include/geometry/../linear_algebra/../linear_algebra/vector.h \
@@ -492,6 +514,7 @@ test_epsfstream: test_epsfstream.cc ../include/ariadne.h \
   ../include/numeric/../numeric/../utility/../base/array.h \
   ../include/numeric/../numeric/../utility/../base/../declarations.h \
   ../include/numeric/../numeric/dyadic.h \
+  ../include/numeric/../numeric/numerical_traits.h \
   ../include/numeric/../utility/stlio.h ../include/base/exception.h \
   ../include/base/utility.h ../include/base/../declarations.h \
   ../include/numeric/numerical_types.h ../include/geometry/point.h \
@@ -508,6 +531,7 @@ test_epsfstream: test_epsfstream.cc ../include/ariadne.h \
   ../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../include/geometry/../numeric/interval.h \
   ../include/geometry/../numeric/../declarations.h \
+  ../include/geometry/../numeric/../numeric/numerical_traits.h \
   ../include/geometry/../linear_algebra/interval_vector.h \
   ../include/geometry/../linear_algebra/../numeric/interval.h \
   ../include/geometry/../linear_algebra/../linear_algebra/vector.h \
@@ -589,6 +613,65 @@ test_epsfstream: test_epsfstream.cc ../include/ariadne.h \
   test.h
 	-${CXX} ${CXXFLAGS} test_epsfstream.cc  ${LDXXFLAGS} -o test_epsfstream
 
+test_interval_newton: test_interval_newton.cc ../include/geometry/point.h \
+  ../include/geometry/../declarations.h \
+  ../include/geometry/../base/array.h \
+  ../include/geometry/../base/../declarations.h \
+  ../include/geometry/../linear_algebra/vector.h \
+  ../include/geometry/../linear_algebra/../declarations.h \
+  ../include/geometry/../linear_algebra/../numeric/integer.h \
+  ../include/geometry/../linear_algebra/../numeric/../declarations.h \
+  ../include/geometry/../linear_algebra/../numeric/../utility/stlio.h \
+  ../include/geometry/../linear_algebra/../numeric/../utility/../base/array.h \
+  ../include/geometry/rectangle.h \
+  ../include/geometry/../numeric/arithmetic.h \
+  ../include/geometry/../numeric/../numeric/numerical_types.h \
+  ../include/geometry/../numeric/../numeric/../declarations.h \
+  ../include/geometry/../numeric/../numeric/../numeric/integer.h \
+  ../include/geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../include/geometry/../numeric/../numeric/../numeric/numerical_traits.h \
+  ../include/geometry/../numeric/../numeric/../utility/stlio.h \
+  ../include/geometry/../numeric/../numeric/approximation.h \
+  ../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
+  ../include/geometry/../numeric/interval.h \
+  ../include/geometry/../numeric/../declarations.h \
+  ../include/geometry/../numeric/../numeric/numerical_traits.h \
+  ../include/geometry/../linear_algebra/interval_vector.h \
+  ../include/geometry/../linear_algebra/../numeric/interval.h \
+  ../include/geometry/../linear_algebra/../linear_algebra/vector.h \
+  ../include/geometry/../geometry/point.h ../include/system/henon_map.h \
+  ../include/system/../linear_algebra/matrix.h \
+  ../include/system/../linear_algebra/../declarations.h \
+  ../include/system/../linear_algebra/../numeric/integer.h \
+  ../include/system/../geometry/point.h \
+  ../include/system/../geometry/rectangle.h \
+  ../include/system/../geometry/parallelotope.h \
+  ../include/system/../geometry/../declarations.h \
+  ../include/system/../geometry/../numeric/interval.h \
+  ../include/system/../geometry/../linear_algebra/vector.h \
+  ../include/system/../geometry/../linear_algebra/matrix.h \
+  ../include/system/../geometry/../geometry/point.h \
+  ../include/system/../system/map.h \
+  ../include/system/../system/../declarations.h \
+  ../include/system/../system/../linear_algebra/vector.h \
+  ../include/system/../system/../linear_algebra/matrix.h \
+  ../include/system/../system/../linear_algebra/interval_matrix.h \
+  ../include/system/../system/../linear_algebra/../linear_algebra/matrix.h \
+  ../include/system/../system/../linear_algebra/../declarations.h \
+  ../include/system/../system/../linear_algebra/../numeric/interval.h \
+  ../include/system/../evaluation/apply.h \
+  ../include/system/../evaluation/../declarations.h \
+  ../include/system/../evaluation/../system/map.h \
+  ../include/evaluation/newton.h ../include/evaluation/../declarations.h \
+  ../include/geometry/rectangle.h ../include/system/map.h \
+  ../include/system/vector_field.h ../include/system/../declarations.h \
+  ../include/system/../numeric/interval.h \
+  ../include/system/../linear_algebra/vector.h \
+  ../include/system/../linear_algebra/interval_vector.h \
+  ../include/system/../linear_algebra/interval_matrix.h test.h \
+  ../include/real_typedef.h ../include/numeric/numerical_types.h
+	-${CXX} ${CXXFLAGS} test_interval_newton.cc  ${LDXXFLAGS} -o test_interval_newton
+
 test_integration_step: test_integration_step.cc ../include/ariadne.h \
   ../include/real_typedef.h ../include/numeric/numerical_types.h \
   ../include/numeric/../declarations.h \
@@ -598,6 +681,7 @@ test_integration_step: test_integration_step.cc ../include/ariadne.h \
   ../include/numeric/../numeric/../utility/../base/array.h \
   ../include/numeric/../numeric/../utility/../base/../declarations.h \
   ../include/numeric/../numeric/dyadic.h \
+  ../include/numeric/../numeric/numerical_traits.h \
   ../include/numeric/../utility/stlio.h \
   ../include/numeric/numerical_types.h ../include/linear_algebra/vector.h \
   ../include/linear_algebra/../declarations.h \
@@ -611,6 +695,7 @@ test_integration_step: test_integration_step.cc ../include/ariadne.h \
   ../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../include/geometry/../numeric/interval.h \
   ../include/geometry/../numeric/../declarations.h \
+  ../include/geometry/../numeric/../numeric/numerical_traits.h \
   ../include/geometry/../linear_algebra/interval_vector.h \
   ../include/geometry/../linear_algebra/../declarations.h \
   ../include/geometry/../linear_algebra/../numeric/interval.h \

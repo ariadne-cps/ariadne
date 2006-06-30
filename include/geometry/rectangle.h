@@ -68,6 +68,7 @@ namespace Ariadne {
       operator Interval<R> () const { return _r[_n]; }
       R lower() const { return _r.lower_bound(_n); }
       R upper() const { return _r.upper_bound(_n); }
+      R centre() const { return (this->lower()+this->upper())/2; }
      private:
       Rectangle<R>& _r; const size_type& _n;
     };
@@ -163,20 +164,20 @@ namespace Ariadne {
       state_type vertex(size_type i) const 
       {
         size_type dim=this->_lower_corner.dimension();
-	state_type output(dim); 
-	      
+        state_type output(dim); 
+              
         if (i >= (size_type)(1<<dim))
            throw std::domain_error("Rectangle::vertex(i): Wrong vertex index.");
-	     
-	for (size_type j=0; j<dim; j++) {
+             
+        for (size_type j=0; j<dim; j++) {
           if (i%2)
-	    output[j]=this->_lower_corner[j];
-	  else
-	    output[j]=this->_upper_corner[j];
-	  i=i/2;
+            output[j]=this->_lower_corner[j];
+          else
+            output[j]=this->_upper_corner[j];
+          i=i/2;
         }
 
-	return output;
+        return output;
       }
       
       /*! \brief Convert to a paralletope. */
@@ -480,8 +481,8 @@ namespace Ariadne {
         throw std::domain_error("The two parameters have different space dimensions");
       }
       for (size_type i=0; i< A.dimension(); i++) {
-        if((A.lower_bound(i) >= B.lower_bound(i))||
-            (B.upper_bound(i) >= A.upper_bound(i))) 
+        if((A.lower_bound(i) <= B.lower_bound(i))||
+            (B.upper_bound(i) <= A.upper_bound(i))) 
         {
           return false;
         }
@@ -507,8 +508,8 @@ namespace Ariadne {
         throw std::domain_error("The two parameters have different space dimensions");
       }
       for(size_type i=0; i< A.dimension(); i++) {
-        if((A.lower_bound(i) > B.lower_bound(i))||
-            (B.upper_bound(i) > A.upper_bound(i))) 
+        if((A.lower_bound(i) < B.lower_bound(i))||
+            (B.upper_bound(i) < A.upper_bound(i))) 
         {
           return false;
         }
@@ -638,6 +639,38 @@ namespace Ariadne {
       
       for(size_type i=0; i!=result.dimension(); ++i) {
         result.set_interval(i,r[i]+v(i));
+      }
+      return result;
+    }
+
+    /*! \brief Subtracts a vector from a rectangle. */
+    template<typename R>
+    inline
+    Geometry::Rectangle<R> 
+    operator-(const Geometry::Rectangle<R>& r, 
+              const LinearAlgebra::Vector<R>& v)
+    {
+      Geometry::Rectangle<R> result(r.dimension());
+      assert(r.dimension()==v.size());
+      
+      for(size_type i=0; i!=result.dimension(); ++i) {
+        result.set_interval(i,r[i]-v(i));
+      }
+      return result;
+    }
+
+    /*! \brief Subtracts an interval vector from a rectangle. */
+    template<typename R>
+    inline
+    Geometry::Rectangle<R> 
+    operator-(const Geometry::Rectangle<R>& r, 
+              const LinearAlgebra::IntervalVector<R>& v)
+    {
+      Geometry::Rectangle<R> result(r.dimension());
+      assert(r.dimension()==v.size());
+      
+      for(size_type i=0; i!=result.dimension(); ++i) {
+        result.set_interval(i,r[i]-v(i));
       }
       return result;
     }

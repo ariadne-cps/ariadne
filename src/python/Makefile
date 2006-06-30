@@ -104,6 +104,7 @@ export_array.o: export_array.cc ../../include/base/array.h \
   ../../include/python/../numeric/../numeric/../declarations.h \
   ../../include/python/../numeric/../numeric/../utility/stlio.h \
   ../../include/python/../numeric/../numeric/dyadic.h \
+  ../../include/python/../numeric/../numeric/numerical_traits.h \
   ../../include/python/../numeric/../utility/stlio.h \
   ../../include/python/../declarations.h \
   ../../include/python/python_utilities.h
@@ -121,6 +122,7 @@ export_binary_tree.o: export_binary_tree.cc \
   ../../include/python/../numeric/../numeric/../utility/stlio.h \
   ../../include/python/../numeric/../numeric/../utility/../base/array.h \
   ../../include/python/../numeric/../numeric/dyadic.h \
+  ../../include/python/../numeric/../numeric/numerical_traits.h \
   ../../include/python/../numeric/../utility/stlio.h \
   ../../include/python/../declarations.h \
   ../../include/python/python_utilities.h
@@ -143,11 +145,13 @@ export_point.o: export_point.cc ../../include/geometry/point.h \
   ../../include/geometry/../numeric/../numeric/../declarations.h \
   ../../include/geometry/../numeric/../numeric/../numeric/integer.h \
   ../../include/geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/geometry/../numeric/../numeric/approximation.h \
   ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/../numeric/interval.h \
   ../../include/geometry/../numeric/../declarations.h \
+  ../../include/geometry/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../linear_algebra/interval_vector.h \
   ../../include/geometry/../linear_algebra/../numeric/interval.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
@@ -169,11 +173,13 @@ export_rectangle.o: export_rectangle.cc \
   ../../include/geometry/../numeric/../numeric/../numeric/../utility/../base/array.h \
   ../../include/geometry/../numeric/../numeric/../numeric/../utility/../base/../declarations.h \
   ../../include/geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/geometry/../numeric/../numeric/approximation.h \
   ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/../numeric/interval.h \
   ../../include/geometry/../numeric/../declarations.h \
+  ../../include/geometry/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../linear_algebra/interval_vector.h \
   ../../include/geometry/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../numeric/interval.h \
@@ -206,6 +212,7 @@ export_parallelotope.o: export_parallelotope.cc \
   ../../include/geometry/../declarations.h \
   ../../include/geometry/../numeric/interval.h \
   ../../include/geometry/../numeric/../declarations.h \
+  ../../include/geometry/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../numeric/integer.h \
@@ -224,6 +231,7 @@ export_parallelotope.o: export_parallelotope.cc \
   ../../include/geometry/../numeric/../numeric/../declarations.h \
   ../../include/geometry/../numeric/../numeric/../numeric/integer.h \
   ../../include/geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/geometry/../numeric/../numeric/approximation.h \
   ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
@@ -267,6 +275,7 @@ export_zonotope.o: export_zonotope.cc ../../include/geometry/zonotope.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../numeric/interval.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../numeric/../declarations.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/interval_matrix.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
@@ -282,6 +291,7 @@ export_zonotope.o: export_zonotope.cc ../../include/geometry/zonotope.h \
   ../../include/geometry/../numeric/../numeric/../declarations.h \
   ../../include/geometry/../numeric/../numeric/../numeric/integer.h \
   ../../include/geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/geometry/../numeric/../numeric/approximation.h \
   ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
@@ -319,11 +329,13 @@ export_simplex.o: export_simplex.cc ../../include/geometry/simplex.h \
   ../../include/geometry/../numeric/../numeric/../declarations.h \
   ../../include/geometry/../numeric/../numeric/../numeric/integer.h \
   ../../include/geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/geometry/../numeric/../numeric/approximation.h \
   ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/../numeric/interval.h \
   ../../include/geometry/../numeric/../declarations.h \
+  ../../include/geometry/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../linear_algebra/interval_vector.h \
   ../../include/geometry/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../numeric/interval.h \
@@ -354,11 +366,13 @@ export_polyhedron.o: export_polyhedron.cc ../../include/utility/stlio.h \
   ../../include/geometry/../numeric/../numeric/../numeric/../declarations.h \
   ../../include/geometry/../numeric/../numeric/../numeric/../utility/stlio.h \
   ../../include/geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/geometry/../numeric/../numeric/approximation.h \
   ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/../numeric/interval.h \
   ../../include/geometry/../numeric/../declarations.h \
+  ../../include/geometry/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../linear_algebra/interval_vector.h \
   ../../include/geometry/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../numeric/interval.h \
@@ -391,6 +405,7 @@ export_lattice_set.o: export_lattice_set.cc \
   ../../include/geometry/../base/../base/array.h \
   ../../include/geometry/../numeric/interval.h \
   ../../include/geometry/../numeric/../declarations.h \
+  ../../include/geometry/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../base/array_operations.h \
   ../../include/python/typedefs.h ../../include/python/../real_typedef.h \
   ../../include/python/../numeric/numerical_types.h \
@@ -400,6 +415,7 @@ export_lattice_set.o: export_lattice_set.cc \
   ../../include/python/../numeric/../numeric/../utility/stlio.h \
   ../../include/python/../numeric/../numeric/../utility/../base/array.h \
   ../../include/python/../numeric/../numeric/dyadic.h \
+  ../../include/python/../numeric/../numeric/numerical_traits.h \
   ../../include/python/../numeric/../utility/stlio.h \
   ../../include/python/../declarations.h
 
@@ -414,11 +430,13 @@ export_list_set.o: export_list_set.cc ../../include/geometry/rectangle.h \
   ../../include/geometry/../numeric/../numeric/../numeric/../utility/../base/array.h \
   ../../include/geometry/../numeric/../numeric/../numeric/../utility/../base/../declarations.h \
   ../../include/geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/geometry/../numeric/../numeric/approximation.h \
   ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/../numeric/interval.h \
   ../../include/geometry/../numeric/../declarations.h \
+  ../../include/geometry/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../linear_algebra/interval_vector.h \
   ../../include/geometry/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../numeric/interval.h \
@@ -492,12 +510,14 @@ export_grid_set.o: export_grid_set.cc \
   ../../include/linear_algebra/../linear_algebra/../numeric/numerical_types.h \
   ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/integer.h \
   ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/dyadic.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/numerical_traits.h \
   ../../include/linear_algebra/../linear_algebra/../linear_algebra/vector.h \
   ../../include/linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/geometry/parallelotope.h \
   ../../include/geometry/../declarations.h \
   ../../include/geometry/../numeric/interval.h \
   ../../include/geometry/../numeric/../declarations.h \
+  ../../include/geometry/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/matrix.h \
   ../../include/geometry/../geometry/point.h \
@@ -569,11 +589,13 @@ export_partition_tree_set.o: export_partition_tree_set.cc \
   ../../include/geometry/../numeric/../numeric/../numeric/../utility/stlio.h \
   ../../include/geometry/../numeric/../numeric/../numeric/../utility/../base/array.h \
   ../../include/geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/geometry/../numeric/../numeric/approximation.h \
   ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/../numeric/interval.h \
   ../../include/geometry/../numeric/../declarations.h \
+  ../../include/geometry/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../linear_algebra/interval_vector.h \
   ../../include/geometry/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../numeric/interval.h \
@@ -623,11 +645,13 @@ export_postscript_output.o: export_postscript_output.cc \
   ../../include/geometry/../numeric/../numeric/../numeric/../utility/../base/array.h \
   ../../include/geometry/../numeric/../numeric/../numeric/../utility/../base/../declarations.h \
   ../../include/geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/geometry/../numeric/../numeric/approximation.h \
   ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/../numeric/interval.h \
   ../../include/geometry/../numeric/../declarations.h \
+  ../../include/geometry/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../linear_algebra/interval_vector.h \
   ../../include/geometry/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../numeric/interval.h \
@@ -728,11 +752,13 @@ export_apply.o: export_apply.cc ../../include/geometry/rectangle.h \
   ../../include/geometry/../numeric/../numeric/../numeric/../utility/../base/array.h \
   ../../include/geometry/../numeric/../numeric/../numeric/../utility/../base/../declarations.h \
   ../../include/geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/geometry/../numeric/../numeric/approximation.h \
   ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/../numeric/interval.h \
   ../../include/geometry/../numeric/../declarations.h \
+  ../../include/geometry/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../linear_algebra/interval_vector.h \
   ../../include/geometry/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../numeric/interval.h \
@@ -789,11 +815,13 @@ export_integrate.o: export_integrate.cc \
   ../../include/geometry/../numeric/../numeric/../numeric/../utility/../base/array.h \
   ../../include/geometry/../numeric/../numeric/../numeric/../utility/../base/../declarations.h \
   ../../include/geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/geometry/../numeric/../numeric/approximation.h \
   ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/../numeric/interval.h \
   ../../include/geometry/../numeric/../declarations.h \
+  ../../include/geometry/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../linear_algebra/interval_vector.h \
   ../../include/geometry/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../numeric/interval.h \
@@ -857,6 +885,7 @@ export_lattice_map.o: export_lattice_map.cc \
   ../../include/system/../geometry/../base/../base/array.h \
   ../../include/system/../geometry/../numeric/interval.h \
   ../../include/system/../geometry/../numeric/../declarations.h \
+  ../../include/system/../geometry/../numeric/../numeric/numerical_traits.h \
   ../../include/system/../geometry/../base/array_operations.h \
   ../../include/python/typedefs.h ../../include/python/../real_typedef.h \
   ../../include/python/../numeric/numerical_types.h \
@@ -866,6 +895,7 @@ export_lattice_map.o: export_lattice_map.cc \
   ../../include/python/../numeric/../numeric/../utility/stlio.h \
   ../../include/python/../numeric/../numeric/../utility/../base/array.h \
   ../../include/python/../numeric/../numeric/dyadic.h \
+  ../../include/python/../numeric/../numeric/numerical_traits.h \
   ../../include/python/../numeric/../utility/stlio.h \
   ../../include/python/../declarations.h
 
@@ -882,11 +912,13 @@ export_map.o: export_map.cc ../../include/system/map.h \
   ../../include/system/../linear_algebra/interval_matrix.h \
   ../../include/system/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/system/../linear_algebra/../numeric/interval.h \
+  ../../include/system/../linear_algebra/../numeric/../numeric/numerical_traits.h \
   ../../include/python/typedefs.h ../../include/python/../real_typedef.h \
   ../../include/python/../numeric/numerical_types.h \
   ../../include/python/../numeric/../declarations.h \
   ../../include/python/../numeric/../numeric/integer.h \
   ../../include/python/../numeric/../numeric/dyadic.h \
+  ../../include/python/../numeric/../numeric/numerical_traits.h \
   ../../include/python/../numeric/../utility/stlio.h \
   ../../include/python/../declarations.h
 
@@ -906,11 +938,13 @@ export_affine_map.o: export_affine_map.cc ../../include/geometry/point.h \
   ../../include/geometry/../numeric/../numeric/../declarations.h \
   ../../include/geometry/../numeric/../numeric/../numeric/integer.h \
   ../../include/geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/geometry/../numeric/../numeric/approximation.h \
   ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/../numeric/interval.h \
   ../../include/geometry/../numeric/../declarations.h \
+  ../../include/geometry/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../linear_algebra/interval_vector.h \
   ../../include/geometry/../linear_algebra/../numeric/interval.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
@@ -985,11 +1019,13 @@ export_affine_multimap.o: export_affine_multimap.cc \
   ../../include/geometry/../numeric/../numeric/../declarations.h \
   ../../include/geometry/../numeric/../numeric/../numeric/integer.h \
   ../../include/geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/geometry/../numeric/../numeric/approximation.h \
   ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/../numeric/interval.h \
   ../../include/geometry/../numeric/../declarations.h \
+  ../../include/geometry/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../linear_algebra/interval_vector.h \
   ../../include/geometry/../linear_algebra/../numeric/interval.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
@@ -1076,11 +1112,13 @@ export_polynomial_map.o: export_polynomial_map.cc \
   ../../include/geometry/../numeric/../numeric/../declarations.h \
   ../../include/geometry/../numeric/../numeric/../numeric/integer.h \
   ../../include/geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/geometry/../numeric/../numeric/approximation.h \
   ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/../numeric/interval.h \
   ../../include/geometry/../numeric/../declarations.h \
+  ../../include/geometry/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../linear_algebra/interval_vector.h \
   ../../include/geometry/../linear_algebra/../numeric/interval.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
@@ -1105,6 +1143,7 @@ export_vector_field.o: export_vector_field.cc \
   ../../include/system/../declarations.h \
   ../../include/system/../numeric/interval.h \
   ../../include/system/../numeric/../declarations.h \
+  ../../include/system/../numeric/../numeric/numerical_traits.h \
   ../../include/system/../linear_algebra/vector.h \
   ../../include/system/../linear_algebra/../declarations.h \
   ../../include/system/../linear_algebra/../numeric/integer.h \
@@ -1123,13 +1162,15 @@ export_vector_field.o: export_vector_field.cc \
   ../../include/python/../numeric/../declarations.h \
   ../../include/python/../numeric/../numeric/integer.h \
   ../../include/python/../numeric/../numeric/dyadic.h \
+  ../../include/python/../numeric/../numeric/numerical_traits.h \
   ../../include/python/../numeric/../utility/stlio.h \
   ../../include/python/../declarations.h
 
 export_affine_vector_field.o: export_affine_vector_field.cc \
   ../../include/numeric/interval.h \
-  ../../include/numeric/../declarations.h ../../include/geometry/point.h \
-  ../../include/geometry/../declarations.h \
+  ../../include/numeric/../declarations.h \
+  ../../include/numeric/../numeric/numerical_traits.h \
+  ../../include/geometry/point.h ../../include/geometry/../declarations.h \
   ../../include/geometry/../base/array.h \
   ../../include/geometry/../base/../declarations.h \
   ../../include/geometry/../linear_algebra/vector.h \
@@ -1144,6 +1185,7 @@ export_affine_vector_field.o: export_affine_vector_field.cc \
   ../../include/geometry/../numeric/../numeric/../declarations.h \
   ../../include/geometry/../numeric/../numeric/../numeric/integer.h \
   ../../include/geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/geometry/../numeric/../numeric/approximation.h \
   ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
@@ -1235,11 +1277,13 @@ export_henon_map.o: export_henon_map.cc ../../include/system/henon_map.h \
   ../../include/system/../geometry/../numeric/../numeric/../declarations.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/integer.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/system/../geometry/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/system/../geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/system/../geometry/../numeric/../numeric/approximation.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/system/../geometry/../numeric/interval.h \
   ../../include/system/../geometry/../numeric/../declarations.h \
+  ../../include/system/../geometry/../numeric/../numeric/numerical_traits.h \
   ../../include/system/../geometry/../linear_algebra/interval_vector.h \
   ../../include/system/../geometry/../linear_algebra/../numeric/interval.h \
   ../../include/system/../geometry/../linear_algebra/../linear_algebra/vector.h \
@@ -1272,6 +1316,7 @@ export_lorenz_system.o: export_lorenz_system.cc \
   ../../include/system/../linear_algebra/../numeric/../utility/../base/../declarations.h \
   ../../include/system/../linear_algebra/interval_vector.h \
   ../../include/system/../linear_algebra/../numeric/interval.h \
+  ../../include/system/../linear_algebra/../numeric/../numeric/numerical_traits.h \
   ../../include/system/../linear_algebra/../linear_algebra/vector.h \
   ../../include/system/../linear_algebra/matrix.h \
   ../../include/system/../linear_algebra/interval_matrix.h \
@@ -1286,6 +1331,7 @@ export_lorenz_system.o: export_lorenz_system.cc \
   ../../include/system/../geometry/../numeric/../numeric/../declarations.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/integer.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/system/../geometry/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/system/../geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/system/../geometry/../numeric/../numeric/approximation.h \
   ../../include/system/../geometry/../numeric/../numeric/../numeric/numerical_types.h \
@@ -1315,6 +1361,7 @@ export_vector.o: export_vector.cc ../../include/numeric/numerical_types.h \
   ../../include/numeric/../numeric/../utility/../base/array.h \
   ../../include/numeric/../numeric/../utility/../base/../declarations.h \
   ../../include/numeric/../numeric/dyadic.h \
+  ../../include/numeric/../numeric/numerical_traits.h \
   ../../include/numeric/../utility/stlio.h \
   ../../include/numeric/interval.h ../../include/linear_algebra/vector.h \
   ../../include/linear_algebra/../declarations.h \
@@ -1327,7 +1374,9 @@ export_vector.o: export_vector.cc ../../include/numeric/numerical_types.h \
   ../../include/python/../declarations.h
 
 export_matrix.o: export_matrix.cc ../../include/numeric/interval.h \
-  ../../include/numeric/../declarations.h ../../include/numeric/integer.h \
+  ../../include/numeric/../declarations.h \
+  ../../include/numeric/../numeric/numerical_traits.h \
+  ../../include/numeric/integer.h \
   ../../include/numeric/../utility/stlio.h \
   ../../include/numeric/../utility/../base/array.h \
   ../../include/numeric/../utility/../base/../declarations.h \
@@ -1343,6 +1392,7 @@ export_matrix.o: export_matrix.cc ../../include/numeric/interval.h \
   ../../include/python/../numeric/../declarations.h \
   ../../include/python/../numeric/../numeric/integer.h \
   ../../include/python/../numeric/../numeric/dyadic.h \
+  ../../include/python/../numeric/../numeric/numerical_traits.h \
   ../../include/python/../numeric/../utility/stlio.h \
   ../../include/python/../declarations.h \
   ../../include/python/python_utilities.h
@@ -1364,6 +1414,7 @@ export_linear_program.o: export_linear_program.cc \
   ../../include/python/../numeric/../declarations.h \
   ../../include/python/../numeric/../numeric/integer.h \
   ../../include/python/../numeric/../numeric/dyadic.h \
+  ../../include/python/../numeric/../numeric/numerical_traits.h \
   ../../include/python/../numeric/../utility/stlio.h \
   ../../include/python/../declarations.h
 

@@ -1,6 +1,6 @@
 include ../../config.mk
 
-OBJ = apply.o integrator.o
+OBJ = newton.o apply.o integrator.o
 
 all: ${OBJ}
 
@@ -22,6 +22,56 @@ dep:
 
 ### Do Not edit this line
 ### Everything below is auto-generated
+newton.o: newton.cc ../../include/evaluation/newton.h \
+  ../../include/evaluation/../declarations.h \
+  ../../include/geometry/rectangle.h \
+  ../../include/geometry/../declarations.h \
+  ../../include/geometry/../numeric/arithmetic.h \
+  ../../include/geometry/../numeric/../numeric/numerical_types.h \
+  ../../include/geometry/../numeric/../numeric/../declarations.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/integer.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/../declarations.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/../utility/stlio.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/../utility/../base/array.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/../utility/../base/../declarations.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/numerical_traits.h \
+  ../../include/geometry/../numeric/../numeric/../utility/stlio.h \
+  ../../include/geometry/../numeric/../numeric/approximation.h \
+  ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
+  ../../include/geometry/../numeric/interval.h \
+  ../../include/geometry/../numeric/../declarations.h \
+  ../../include/geometry/../numeric/../numeric/numerical_traits.h \
+  ../../include/geometry/../linear_algebra/interval_vector.h \
+  ../../include/geometry/../linear_algebra/../declarations.h \
+  ../../include/geometry/../linear_algebra/../numeric/interval.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/../declarations.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/../numeric/integer.h \
+  ../../include/geometry/../geometry/point.h \
+  ../../include/geometry/../geometry/../declarations.h \
+  ../../include/geometry/../geometry/../base/array.h \
+  ../../include/geometry/../geometry/../linear_algebra/vector.h \
+  ../../include/system/map.h ../../include/system/../declarations.h \
+  ../../include/system/../linear_algebra/vector.h \
+  ../../include/system/../linear_algebra/matrix.h \
+  ../../include/system/../linear_algebra/../declarations.h \
+  ../../include/system/../linear_algebra/../numeric/integer.h \
+  ../../include/system/../linear_algebra/interval_matrix.h \
+  ../../include/system/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/system/../linear_algebra/../numeric/interval.h \
+  ../../include/system/vector_field.h \
+  ../../include/system/../numeric/interval.h \
+  ../../include/system/../linear_algebra/interval_vector.h \
+  ../../include/evaluation/newton.tpl \
+  ../../include/evaluation/../linear_algebra/interval_vector.h \
+  ../../include/evaluation/../linear_algebra/matrix.h \
+  ../../include/evaluation/../linear_algebra/interval_matrix.h \
+  ../../include/evaluation/../geometry/point.h \
+  ../../include/evaluation/../geometry/rectangle.h \
+  ../../include/evaluation/../system/vector_field.h \
+  ../../include/real_typedef.h ../../include/numeric/numerical_types.h
+
 apply.o: apply.cc ../../include/evaluation/apply.h \
   ../../include/evaluation/../declarations.h \
   ../../include/evaluation/../system/map.h \
@@ -37,6 +87,7 @@ apply.o: apply.cc ../../include/evaluation/apply.h \
   ../../include/evaluation/../system/../linear_algebra/interval_matrix.h \
   ../../include/evaluation/../system/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/evaluation/../system/../linear_algebra/../numeric/interval.h \
+  ../../include/evaluation/../system/../linear_algebra/../numeric/../numeric/numerical_traits.h \
   ../../include/evaluation/apply.tpl \
   ../../include/evaluation/../numeric/interval.h \
   ../../include/evaluation/../linear_algebra/vector.h \
@@ -53,6 +104,7 @@ apply.o: apply.cc ../../include/evaluation/apply.h \
   ../../include/evaluation/../geometry/../numeric/../numeric/../declarations.h \
   ../../include/evaluation/../geometry/../numeric/../numeric/../numeric/integer.h \
   ../../include/evaluation/../geometry/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/evaluation/../geometry/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/evaluation/../geometry/../numeric/../numeric/../utility/stlio.h \
   ../../include/evaluation/../geometry/../numeric/../numeric/approximation.h \
   ../../include/evaluation/../geometry/../numeric/../numeric/../numeric/numerical_types.h \
@@ -101,6 +153,7 @@ integrator.o: integrator.cc ../../include/evaluation/integrator.h \
   ../../include/evaluation/../numeric/../numeric/../numeric/../declarations.h \
   ../../include/evaluation/../numeric/../numeric/../numeric/../utility/stlio.h \
   ../../include/evaluation/../numeric/../numeric/../numeric/dyadic.h \
+  ../../include/evaluation/../numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/evaluation/../numeric/../numeric/../utility/stlio.h \
   ../../include/evaluation/../numeric/../numeric/approximation.h \
   ../../include/evaluation/../numeric/../numeric/../numeric/numerical_types.h \
@@ -108,6 +161,7 @@ integrator.o: integrator.cc ../../include/evaluation/integrator.h \
   /ufs/collins/include/mpfr.h \
   ../../include/evaluation/../numeric/interval.h \
   ../../include/evaluation/../numeric/../declarations.h \
+  ../../include/evaluation/../numeric/../numeric/numerical_traits.h \
   ../../include/evaluation/../linear_algebra/vector.h \
   ../../include/evaluation/../linear_algebra/../declarations.h \
   ../../include/evaluation/../linear_algebra/../numeric/integer.h \

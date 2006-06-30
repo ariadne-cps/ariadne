@@ -128,15 +128,15 @@ namespace Ariadne {
     LorenzSystem<R>::derivative(const Geometry::Rectangle<R>& X) const
     {
       LinearAlgebra::IntervalMatrix<R> result(3,3); 
-      result(0,0) = -_s;
+      result(0,0) = R(-_s);
       result(0,1) = _s;
-      result(0,2) = 0;
+      result(0,2) = R(0);
       result(1,0) = _p-X[2];
-      result(1,1) = -1;
+      result(1,1) = R(-1);
       result(1,2) = -X[0];
       result(2,0) = X[1];
       result(2,1) = X[0];
-      result(2,2) = -_b;
+      result(2,2) = R(-_b);
       return result;
     }
      

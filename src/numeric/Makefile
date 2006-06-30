@@ -31,6 +31,7 @@ arithmetic.o: arithmetic.cc ../../include/numeric/arithmetic.h \
   ../../include/numeric/../numeric/../numeric/../utility/../base/array.h \
   ../../include/numeric/../numeric/../numeric/../utility/../base/../declarations.h \
   ../../include/numeric/../numeric/../numeric/dyadic.h \
+  ../../include/numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/numeric/../numeric/../utility/stlio.h \
   ../../include/numeric/../numeric/approximation.h \
   ../../include/numeric/../numeric/../numeric/numerical_types.h \
@@ -47,6 +48,7 @@ function.o: function.cc ../../include/numeric/function.h \
   ../../include/numeric/../numeric/../numeric/../utility/../base/array.h \
   ../../include/numeric/../numeric/../numeric/../utility/../base/../declarations.h \
   ../../include/numeric/../numeric/../numeric/dyadic.h \
+  ../../include/numeric/../numeric/../numeric/numerical_traits.h \
   ../../include/numeric/../numeric/../utility/stlio.h \
   ../../include/numeric/function.tpl ../../include/numeric/function.h \
   ../../include/numeric/../numeric/integer.h \

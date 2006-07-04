@@ -740,6 +740,8 @@
  *
  * \section computable_analysis_references Computable Analysis
  *
+ * Ker-I Ko <em>Complexity Theory of Real Functions</em>, Birkh\"aser, 1991, ISBN 3-7643-3586-6.
+ * 
  * Klaus Weihrauch, <em>Computable Analysis</em>, Springer, 2000.
  * 
  * \section interval_references Interval Arithmetic
@@ -778,9 +780,6 @@
  * Rudolf J. Lohner, "Enclosing the solutions of ordinary initial and boundary value problems",
  *   <em>Computer Arithmetic</em>, 255--286, Teubner, Stuttgart, 1987. 
  *
- * Rudolf J. Lohner, "Enclosing the solutions of ordinary initial and boundary value problems",
- *   <em>Computer Arithmetic</em>, 255--286, Teubner, Stuttgart, 1987. 
- *
  * Rudolf J. Lohner, "Computation of guaranteed enclosures for the solutions of ordinary initial and boundary value problems",
  *   <em>Computational ordinary differential equations (London, 1989)</em>,  425--435.
  *
@@ -812,7 +811,19 @@
  * Dietmar Szolnoki, "Set oriented methods for computing reachable sets and control sets",
  *   <em>Discrete Contin. Dyn. Syst. Ser. B</em> <b>3</b> (2003), no. 3, 361--382.
  *
- 
+ * \section spacial_data_structure_references Spacial Data Structures
+ *
+ * Hanan Samet, <em>The Design and Analysis of Spacial Data Structures</em>, Addison-Wesley, 1990, ISBN 0-201-50255-0.
+ *
+ * \section algebraic_topology_references Algebraic Topology
+ *
+ * Tomasz Kaczynski, Konstantin Mischaikow, Marian Mrozek, <em>Computational Homology</em>, Springer-Verlag, 2004, ISBN 0-387-40853-3.
+ *
+ * Afra J. Zomorodian, <em>Topology for Computing</em>, Cambridge University Press, 2005, ISBN 0-521-83666-2.
+ *
+ * \section automatic_differentiation_references Automatic Differentiation
+ *
+ * Andreas Giewank, <em>Evaluating Derivatives</em>, SIAM, 2000, ISBN 0-89871-451-6.
  */
  
 #endif /* _ARIADNE_DOCUMENTATION_H */

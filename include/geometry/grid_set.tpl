@@ -763,6 +763,147 @@ namespace Ariadne {
         
       return result;
     }
+
+/* NEW CODE */ 
+ 
+    template<typename R>
+    inline
+    GridRectangle<R>
+    over_approximation(const Rectangle<R>& r, const GridMaskSet<R>& gms) 
+    {
+      return over_approximation(r,gms.grid());
+    }
+    
+    template<typename R>
+    inline
+    GridRectangle<R>
+    under_approximation(const Rectangle<R>& r, const GridMaskSet<R>& gms) 
+    {
+      return under_approximation(r,gms.grid());
+    }
+    
+    template<typename R, template < typename R > class BS >
+    GridCellListSet<R>
+    over_approximation_not_intersecting(const BS<R>& bs, 
+                                        const GridMaskSet<R>& gms) 
+    {
+      GridCellListSet<R> result(gms.grid());
+      assert(gms.dimension()==bs.dimension());
+      if(bs.empty()) {
+        return result; 
+      }
+
+      GridMaskSet<R> new_gms(gms);
+      Rectangle<R> bb_gms=Rectangle<R>(new_gms.bounding_box());
+      bb_gms=regular_intersection(bs.bounding_box(),bb_gms);
+      
+      new_gms.adjoin(over_approximation(bb_gms,gms.grid()));
+      
+      new_gms=difference(new_gms,gms);
+
+      size_type new_gms_elem=new_gms.size();      
+
+      for (size_type i=0; i< new_gms_elem; i++) {
+        GridCell<R> cell(new_gms[i]);
+        if(!disjoint(Rectangle<R>(cell),bs)) {
+          result.adjoin(cell);
+        }
+      }
+
+      return result;
+    }
+
+    template<typename R, template < typename R > class BS >
+    GridCellListSet<R>
+    under_approximation_not_intersecting(const BS<R>& bs, 
+                                         const GridMaskSet<R>& gms) 
+    {
+      GridCellListSet<R> result(gms.grid());
+      assert(gms.dimension()==bs.dimension());
+      if(bs.empty()) {
+        return result; 
+      }
+      
+      GridMaskSet<R> new_gms(gms);
+      Rectangle<R> bb_gms=Rectangle<R>(new_gms.bounding_box());
+      bb_gms=regular_intersection(bs.bounding_box(),bb_gms);
+      
+      new_gms.adjoin(over_approximation(bb_gms,gms.grid()));
+
+      new_gms=difference(new_gms,gms);
+
+      size_type new_gms_elem=new_gms.size();      
+
+      for (size_type i=0; i< new_gms_elem; i++) {
+        GridCell<R> cell(new_gms[i]);
+        if(bs.contains(Rectangle<R>(cell))) {
+          result.adjoin(cell);
+        }
+      }
+      
+      return result;
+    }
+
+    template<typename R, template<typename> class BS>
+    GridMaskSet<R>
+    join_over_approximation(const GridMaskSet<R>& gms, const BS<R>& bs) 
+    {
+      GridMaskSet<R> result(gms);
+      
+      assert(gms.dimension()==bs.dimension());
+
+      result.adjoin(over_approximation_not_intersecting(bs,gms));
+        
+      return result;
+    }
+
+    template<typename R, template<typename> class BS>
+    GridMaskSet<R>
+    join_under_approximation(const GridMaskSet<R>& gms, const BS<R>& bs) 
+    {
+      GridMaskSet<R> result(gms);
+      
+      assert(gms.dimension()==bs.dimension());
+
+      result.adjoin(under_approximation_not_intersecting(bs,gms));
+        
+      return result;
+    }
+
+    template<typename R, template<typename> class BS>
+    GridMaskSet<R>
+    join_over_approximation(const GridMaskSet<R>& gms, const ListSet<R,BS>& ls) 
+    {
+      GridMaskSet<R> result(gms);
+      
+      assert(gms.dimension()==ls.dimension());
+
+      for(typename ListSet<R,BS>::const_iterator iter=ls.begin(); 
+                                              iter!=ls.end(); ++iter) {
+
+       result.adjoin(over_approximation_not_intersecting(*iter,gms));
+      }
+        
+      return result;
+    }
+     
+    template<typename R, template<typename> class BS>
+    GridMaskSet<R>
+    join_under_approximation(const GridMaskSet<R>& gms, 
+                             const ListSet<R,BS>& ls) 
+    {
+      GridMaskSet<R> result(gms);
+      
+      assert(gms.dimension()==ls.dimension());
+      for(typename ListSet<R,BS>::const_iterator iter=ls.begin(); 
+                                               iter!=ls.end(); ++iter) {
+       result.adjoin(under_approximation_not_intersecting(*iter,gms));
+      }
+        
+      return result;
+    }
+ 
+/* END NEW CODE */ 
     
     template<typename R>
     GridRectangle<R>

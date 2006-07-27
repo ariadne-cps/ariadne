@@ -65,7 +65,6 @@ map.o: map.cc ../../include/system/map.h \
   ../../include/system/../geometry/parallelotope.h \
   ../../include/system/../geometry/../linear_algebra/matrix.h \
   ../../include/system/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/system/../geometry/../linear_algebra/constraint_system.h \
   ../../include/system/../geometry/../linear_algebra/../numeric/numerical_types.h \
   ../../include/system/../geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -157,7 +156,6 @@ affine_map.o: affine_map.cc ../../include/system/affine_map.h \
   ../../include/system/../geometry/../linear_algebra/../linear_algebra/interval_vector.h \
   ../../include/system/../geometry/../linear_algebra/../linear_algebra/interval_matrix.h \
   ../../include/system/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/system/../geometry/../linear_algebra/constraint_system.h \
   ../../include/system/../geometry/../linear_algebra/../numeric/numerical_types.h \
   ../../include/system/../geometry/../linear_algebra/generator_system.h \
@@ -230,7 +228,6 @@ affine_multimap.o: affine_multimap.cc \
   ../../include/system/../geometry/../linear_algebra/../linear_algebra/interval_vector.h \
   ../../include/system/../geometry/../linear_algebra/../linear_algebra/interval_matrix.h \
   ../../include/system/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/system/../geometry/../linear_algebra/constraint_system.h \
   ../../include/system/../geometry/../linear_algebra/../numeric/numerical_types.h \
   ../../include/system/../geometry/../linear_algebra/generator_system.h \
@@ -323,7 +320,6 @@ affine_vector_field.o: affine_vector_field.cc \
   ../../include/system/../system/../geometry/../linear_algebra/../linear_algebra/interval_vector.h \
   ../../include/system/../system/../geometry/../linear_algebra/../linear_algebra/interval_matrix.h \
   ../../include/system/../system/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/system/../system/../geometry/../linear_algebra/constraint_system.h \
   ../../include/system/../system/../geometry/../linear_algebra/../declarations.h \
   ../../include/system/../system/../geometry/../linear_algebra/../numeric/numerical_types.h \
@@ -397,7 +393,6 @@ polynomial_map.o: polynomial_map.cc ../../include/system/polynomial_map.h \
   ../../include/system/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/system/../geometry/../geometry/point.h \
   ../../include/system/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/system/../geometry/../linear_algebra/constraint_system.h \
   ../../include/system/../geometry/../linear_algebra/../numeric/numerical_types.h \
   ../../include/system/../geometry/../linear_algebra/../linear_algebra/matrix.h \

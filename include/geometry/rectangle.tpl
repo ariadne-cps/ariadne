@@ -26,12 +26,6 @@
 #include <string>
 #include <sstream>
 #include <exception>
-/*
-#include <vector>
-#include <list>
-#include <set>
-#include <valarray>
-*/
 
 #include "rectangle.h"
 
@@ -94,8 +88,8 @@ namespace Ariadne {
         lower[i]=A.lower_bound(i)-B.lower_bound(i);
         upper[i]=A.upper_bound(i)-B.upper_bound(i);
 
-      if ( lower[i]>upper[i])
-        return Rectangle<R>(A.dimension());
+	if ( lower[i]>upper[i])
+	   return Rectangle<R>(A.dimension());
       }
 
       return Rectangle<R>(lower,upper);
@@ -110,13 +104,13 @@ namespace Ariadne {
     template <typename R>
     Rectangle<R>::operator Zonotope<R>() const 
     {
-       return Zonotope<R>(*this);
+       return Zonotope<R>(*this); 	
     }
     
     template <typename R>
     Rectangle<R>::operator Polyhedron<R>() const 
     {
-       return Polyhedron<R>(*this);
+       return Polyhedron<R>(*this); 	
     }
     
     template <typename R>

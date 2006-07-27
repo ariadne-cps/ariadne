@@ -246,7 +246,7 @@ export_parallelotope.o: export_parallelotope.cc \
   ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../numeric/interval.h \
-  ../../include/geometry/polyhedron.h /ufs/collins/include/ppl.hh \
+  ../../include/geometry/polyhedron.h \
   ../../include/geometry/../linear_algebra/constraint_system.h \
   ../../include/geometry/../linear_algebra/../numeric/numerical_types.h \
   ../../include/geometry/../linear_algebra/generator_system.h \
@@ -297,7 +297,7 @@ export_zonotope.o: export_zonotope.cc ../../include/geometry/zonotope.h \
   ../../include/geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/../linear_algebra/interval_vector.h \
   ../../include/geometry/parallelotope.h \
-  ../../include/geometry/polyhedron.h /ufs/collins/include/ppl.hh \
+  ../../include/geometry/polyhedron.h \
   ../../include/geometry/../linear_algebra/constraint_system.h \
   ../../include/geometry/../linear_algebra/../numeric/numerical_types.h \
   ../../include/geometry/../linear_algebra/generator_system.h \
@@ -340,7 +340,7 @@ export_simplex.o: export_simplex.cc ../../include/geometry/simplex.h \
   ../../include/geometry/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../numeric/interval.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
-  ../../include/geometry/polyhedron.h /ufs/collins/include/ppl.hh \
+  ../../include/geometry/polyhedron.h \
   ../../include/geometry/../linear_algebra/constraint_system.h \
   ../../include/geometry/../linear_algebra/../numeric/numerical_types.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -387,7 +387,7 @@ export_polyhedron.o: export_polyhedron.cc ../../include/utility/stlio.h \
   ../../include/geometry/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/matrix.h \
   ../../include/geometry/../linear_algebra/../numeric/integer.h \
-  ../../include/geometry/polyhedron.h /ufs/collins/include/ppl.hh \
+  ../../include/geometry/polyhedron.h \
   ../../include/geometry/../linear_algebra/constraint_system.h \
   ../../include/geometry/../linear_algebra/../numeric/numerical_types.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/matrix.h \
@@ -458,7 +458,7 @@ export_list_set.o: export_list_set.cc ../../include/geometry/rectangle.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/interval_matrix.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../numeric/interval.h \
-  ../../include/geometry/polyhedron.h /ufs/collins/include/ppl.hh \
+  ../../include/geometry/polyhedron.h \
   ../../include/geometry/../linear_algebra/constraint_system.h \
   ../../include/geometry/../linear_algebra/../numeric/numerical_types.h \
   ../../include/geometry/../linear_algebra/generator_system.h \
@@ -506,39 +506,25 @@ export_grid_set.o: export_grid_set.cc \
   ../../include/linear_algebra/../linear_algebra/../numeric/../utility/../base/../declarations.h \
   ../../include/linear_algebra/../linear_algebra/matrix.h \
   ../../include/linear_algebra/../linear_algebra/constraint_system.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/linear_algebra/../linear_algebra/../numeric/numerical_types.h \
   ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/integer.h \
   ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/dyadic.h \
   ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/numerical_traits.h \
   ../../include/linear_algebra/../linear_algebra/../linear_algebra/vector.h \
   ../../include/linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
-  ../../include/geometry/parallelotope.h \
+  ../../include/geometry/polyhedron.h \
   ../../include/geometry/../declarations.h \
-  ../../include/geometry/../numeric/interval.h \
-  ../../include/geometry/../numeric/../declarations.h \
-  ../../include/geometry/../numeric/../numeric/numerical_traits.h \
+  ../../include/geometry/../linear_algebra/constraint_system.h \
   ../../include/geometry/../linear_algebra/vector.h \
   ../../include/geometry/../linear_algebra/matrix.h \
+  ../../include/geometry/../linear_algebra/generator_system.h \
+  ../../include/geometry/../linear_algebra/../declarations.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/geometry/../geometry/point.h \
   ../../include/geometry/../geometry/../declarations.h \
   ../../include/geometry/../geometry/../base/array.h \
   ../../include/geometry/../geometry/../linear_algebra/vector.h \
-  ../../include/geometry/zonotope.h \
-  ../../include/geometry/../linear_algebra/transformation_system.h \
-  ../../include/geometry/../linear_algebra/../linear_algebra/vector.h \
-  ../../include/geometry/../linear_algebra/../linear_algebra/matrix.h \
-  ../../include/geometry/../linear_algebra/../linear_algebra/interval_vector.h \
-  ../../include/geometry/../linear_algebra/../linear_algebra/../declarations.h \
-  ../../include/geometry/../linear_algebra/../linear_algebra/../numeric/interval.h \
-  ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/vector.h \
-  ../../include/geometry/../linear_algebra/../linear_algebra/interval_matrix.h \
-  ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
-  ../../include/geometry/list_set.h \
-  ../../include/geometry/../base/utility.h \
-  ../../include/geometry/../base/../declarations.h \
-  ../../include/geometry/grid_set.h \
-  ../../include/geometry/../base/array.h \
   ../../include/geometry/../geometry/rectangle.h \
   ../../include/geometry/../geometry/../numeric/arithmetic.h \
   ../../include/geometry/../geometry/../numeric/../numeric/numerical_types.h \
@@ -546,8 +532,27 @@ export_grid_set.o: export_grid_set.cc \
   ../../include/geometry/../geometry/../numeric/../numeric/../declarations.h \
   ../../include/geometry/../geometry/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/geometry/../geometry/../numeric/interval.h \
+  ../../include/geometry/../geometry/../numeric/../declarations.h \
+  ../../include/geometry/../geometry/../numeric/../numeric/numerical_traits.h \
   ../../include/geometry/../geometry/../linear_algebra/interval_vector.h \
+  ../../include/geometry/../geometry/../linear_algebra/../declarations.h \
+  ../../include/geometry/../geometry/../linear_algebra/../numeric/interval.h \
+  ../../include/geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
   ../../include/geometry/../geometry/../geometry/point.h \
+  ../../include/geometry/parallelotope.h \
+  ../../include/geometry/../numeric/interval.h \
+  ../../include/geometry/zonotope.h \
+  ../../include/geometry/../linear_algebra/transformation_system.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/interval_vector.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/interval_matrix.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/../declarations.h \
+  ../../include/geometry/../linear_algebra/../linear_algebra/../numeric/interval.h \
+  ../../include/geometry/rectangle.h ../../include/geometry/list_set.h \
+  ../../include/geometry/../base/utility.h \
+  ../../include/geometry/../base/../declarations.h \
+  ../../include/geometry/grid_set.h \
+  ../../include/geometry/../base/array.h \
   ../../include/geometry/../geometry/grid.h \
   ../../include/geometry/../geometry/../geometry/lattice_set.h \
   ../../include/geometry/../geometry/../geometry/../base/array.h \
@@ -673,7 +678,7 @@ export_postscript_output.o: export_postscript_output.cc \
   ../../include/geometry/../linear_algebra/../linear_algebra/interval_matrix.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../numeric/interval.h \
-  ../../include/geometry/polyhedron.h /ufs/collins/include/ppl.hh \
+  ../../include/geometry/polyhedron.h \
   ../../include/geometry/../linear_algebra/constraint_system.h \
   ../../include/geometry/../linear_algebra/../numeric/numerical_types.h \
   ../../include/geometry/../linear_algebra/generator_system.h \
@@ -959,7 +964,7 @@ export_affine_map.o: export_affine_map.cc ../../include/geometry/point.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../numeric/interval.h \
-  ../../include/geometry/polyhedron.h /ufs/collins/include/ppl.hh \
+  ../../include/geometry/polyhedron.h \
   ../../include/geometry/../linear_algebra/constraint_system.h \
   ../../include/geometry/../linear_algebra/../numeric/numerical_types.h \
   ../../include/geometry/../linear_algebra/generator_system.h \
@@ -1040,7 +1045,7 @@ export_affine_multimap.o: export_affine_multimap.cc \
   ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../numeric/interval.h \
-  ../../include/geometry/polyhedron.h /ufs/collins/include/ppl.hh \
+  ../../include/geometry/polyhedron.h \
   ../../include/geometry/../linear_algebra/constraint_system.h \
   ../../include/geometry/../linear_algebra/../numeric/numerical_types.h \
   ../../include/geometry/../linear_algebra/generator_system.h \
@@ -1204,7 +1209,7 @@ export_affine_vector_field.o: export_affine_vector_field.cc \
   ../../include/geometry/../linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../declarations.h \
   ../../include/geometry/../linear_algebra/../linear_algebra/../numeric/interval.h \
-  ../../include/geometry/polyhedron.h /ufs/collins/include/ppl.hh \
+  ../../include/geometry/polyhedron.h \
   ../../include/geometry/../linear_algebra/constraint_system.h \
   ../../include/geometry/../linear_algebra/../numeric/numerical_types.h \
   ../../include/geometry/../linear_algebra/generator_system.h \

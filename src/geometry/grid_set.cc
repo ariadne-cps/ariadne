@@ -137,6 +137,86 @@ namespace Ariadne {
     under_approximation(const GridMaskSet<Real>& gm, const FiniteGrid<Real>& g);
     
     template
+    GridMaskSet<Real>
+    join_over_approximation(const GridMaskSet<Real>& gms,
+		            const Rectangle<Real>& p); 
+
+    template
+    GridMaskSet<Real>
+    join_over_approximation(const GridMaskSet<Real>& gms,
+		            const Parallelotope<Real>& p); 
+
+    template
+    GridMaskSet<Real>
+    join_over_approximation(const GridMaskSet<Real>& gms,
+		            const Zonotope<Real>& z); 
+
+    template
+    GridMaskSet<Real>
+    join_over_approximation(const GridMaskSet<Real>& gms,
+		            const Polyhedron<Real>& z);
+    
+    template
+    GridMaskSet<Real>
+    join_over_approximation(const GridMaskSet<Real>& gms,
+		            const ListSet<Real,Rectangle>& lr); 
+
+    template
+    GridMaskSet<Real>
+    join_over_approximation(const GridMaskSet<Real>& gms,
+		            const ListSet<Real,Parallelotope>& lp); 
+
+    template
+    GridMaskSet<Real>
+    join_over_approximation(const GridMaskSet<Real>& gms,
+		            const ListSet<Real,Zonotope>& lz);
+
+    template
+    GridMaskSet<Real>
+    join_over_approximation(const GridMaskSet<Real>& gms,
+		            const ListSet<Real,Polyhedron>& lp);
+
+    template
+    GridMaskSet<Real>
+    join_under_approximation(const GridMaskSet<Real>& gms,
+		            const Rectangle<Real>& p); 
+
+    template
+    GridMaskSet<Real>
+    join_under_approximation(const GridMaskSet<Real>& gms,
+		             const Parallelotope<Real>& p); 
+
+    template
+    GridMaskSet<Real>
+    join_under_approximation(const GridMaskSet<Real>& gms,
+                             const Zonotope<Real>& z); 
+
+    template
+    GridMaskSet<Real>
+    join_under_approximation(const GridMaskSet<Real>& gms,
+                             const Polyhedron<Real>& z);
+    
+    template
+    GridMaskSet<Real>
+    join_under_approximation(const GridMaskSet<Real>& gms,
+                             const ListSet<Real,Rectangle>& p); 
+
+    template
+    GridMaskSet<Real>
+    join_under_approximation(const GridMaskSet<Real>& gms,
+                             const ListSet<Real,Parallelotope>& p); 
+
+    template
+    GridMaskSet<Real>
+    join_under_approximation(const GridMaskSet<Real>& gms,
+		            const ListSet<Real,Zonotope>& z); 
+
+    template
+    GridMaskSet<Real>
+    join_under_approximation(const GridMaskSet<Real>& gms,
+		            const ListSet<Real,Polyhedron>& z); 
+    
+    template
     GridRectangle<Real>
     over_approximation_of_intersection(const Rectangle<Real>& r1, 
                                        const Rectangle<Real>& r2,

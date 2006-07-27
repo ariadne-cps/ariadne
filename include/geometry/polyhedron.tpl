@@ -236,7 +236,23 @@ namespace Ariadne {
       return p.contains(_from_Point_to_PPL_Polyhedron(point));
       
     }
+   
+    template<typename R>
+    bool 
+    Polyhedron<R>::contains(const Rectangle<R>& rect) const 
+    {
+      if (this->empty()) 
+        return false;
     
+      for (size_type i=0; i< (size_type)(1<<rect.dimension()); i++) {
+        if (!this->contains(rect.vertex(i))) {
+	  return false;
+        }
+      }
+
+      return true;
+    }
+ 
     /*! \brief Tests if a point is an element of the interior of the polyhedron.
      */
     template <typename R>

@@ -163,6 +163,9 @@ namespace Ariadne {
       /*! \brief Tests if a Point is an element of the Polyhedron.
        */
       bool contains(const state_type& point) const;
+
+      /*! \brief Tests if the Polyhedron contains a \a Rectangle. */
+      bool contains(const Rectangle<R>& rect) const; 
       
       /*! \brief Tests if a point is an element of the interior of the polyhedron.
        */

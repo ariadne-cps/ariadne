@@ -158,7 +158,6 @@ integrator.o: integrator.cc ../../include/evaluation/integrator.h \
   ../../include/evaluation/../numeric/../numeric/approximation.h \
   ../../include/evaluation/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/evaluation/../numeric/function.h \
-  /ufs/collins/include/mpfr.h \
   ../../include/evaluation/../numeric/interval.h \
   ../../include/evaluation/../numeric/../declarations.h \
   ../../include/evaluation/../numeric/../numeric/numerical_traits.h \
@@ -228,7 +227,6 @@ integrator.o: integrator.cc ../../include/evaluation/integrator.h \
   ../../include/evaluation/../system/../system/../geometry/parallelotope.h \
   ../../include/evaluation/../system/../system/../geometry/zonotope.h \
   ../../include/evaluation/../system/../system/../geometry/polyhedron.h \
-  /ufs/collins/include/ppl.hh \
   ../../include/evaluation/../system/../system/../geometry/../linear_algebra/constraint_system.h \
   ../../include/evaluation/../system/../system/../geometry/../linear_algebra/../declarations.h \
   ../../include/evaluation/../system/../system/../geometry/../linear_algebra/../numeric/numerical_types.h \

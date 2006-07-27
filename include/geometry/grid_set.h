@@ -131,6 +131,22 @@ namespace Ariadne {
     GridMaskSet<R>
     under_approximation(const GridMaskSet<R>& gm, const FiniteGrid<R>& g);
     
+    template<typename R, template <typename R> class BS>
+    GridMaskSet<R>
+    join_over_approximation(const GridMaskSet<R>& gms, const BS<R>& bs);
+
+    template<typename R, template <typename R> class BS>
+    GridMaskSet<R>
+    join_under_approximation(const GridMaskSet<R>& gms, const BS<R>& bs);
+    
+    template<typename R, template <typename R> class BS>
+    GridMaskSet<R>
+    join_over_approximation(const GridMaskSet<R>& gms,const ListSet<R,BS>& ls);
+
+    template<typename R, template <typename R> class BS>
+    GridMaskSet<R>
+    join_under_approximation(const GridMaskSet<R>& gms,const ListSet<R,BS>& ls);
+
     template<typename R>
     GridRectangle<R>
     over_approximation_of_intersection(const Rectangle<R>& r1, 

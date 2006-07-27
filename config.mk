@@ -11,8 +11,8 @@ PYTHONPREFIX=${PREFIX}/python/
 
 LOCALDIR = ../..
 
-CC = gcc
-CXX = g++
+CC = gcc-4.0
+CXX = g++-4.0
 
 MAKE = make
 
@@ -43,7 +43,7 @@ ifeq ($(DEBUG),yes)
 else
 	CXXFLAGS += -O2 -fPIC -Wall  
 	#CXXFLAGS += -O2 -fPIC -Wall -march=athlon64 -pipe 
-	#CXXFLAGS += -fomit-frame-pointer -funswitch-loops -fgcse-after-reload 
+	CXXFLAGS += -fomit-frame-pointer -funswitch-loops -fgcse-after-reload 
 	LIBS = libariadne.so
 endif
 

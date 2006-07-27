@@ -194,9 +194,11 @@ class HybridGridRegion:
   def continuous_set(self):
     return self._set
   def join_over_approximation(self,c_set):
-    self._set.adjoin(over_approximation(c_set,self._finite_grid))
+#    self._set.adjoin(over_approximation(c_set,self._finite_grid))
+    self._set=join_over_approximation(self._set,c_set)
   def join_under_approximation(self,c_set):
-    self._set.adjoin(under_approximation(c_set,self._finite_grid))
+#    self._set.adjoin(under_approximation(c_set,self._finite_grid))
+    self._set=join_under_approximation(self._set,c_set)
   def grid_over_approximation(self,c_set):
     output=GridMaskSet(self._finite_grid)
     output.adjoin(over_approximation(c_set,self._finite_grid))

@@ -72,13 +72,13 @@ print "Done\n"
 
 print "Testing reach step of affine vector field on parallelotope"
 step_size=Real(0.25)
-#reach_paral=lohner.reach_step(avf,Zonotope(init_paral),step_size)
-#final_paral=lohner.integration_step(avf,init_paral,step_size)
-#print Rational(step_size)
-#poly_hull=convex_hull(Polyhedron(init_paral),Polyhedron(final_paral))
-#reach_list=[init_paral,reach_paral.bounding_box(),final_paral]
-#plot("integrationstep2",bb,reach_list)
-#print reach_paral, reach_paral.bounding_box()
+reach_paral=lohner.reach_step(avf,Zonotope(init_paral),step_size)
+final_paral=lohner.integration_step(avf,init_paral,step_size)
+print Rational(step_size)
+poly_hull=convex_hull(Polyhedron(init_paral),Polyhedron(final_paral))
+reach_list=[init_paral,reach_paral.bounding_box(),final_paral]
+plot("integrationstep2",bb,reach_list)
+print reach_paral, reach_paral.bounding_box()
 print "step size", step_size
 print "Done\n"
 

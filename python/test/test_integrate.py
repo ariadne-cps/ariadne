@@ -54,6 +54,7 @@ print "Testing integration of affine map on parallelotope"
 initial_rectangle=Rectangle("[0.96,1.04]x[0.46,0.54]")
 initial_parallelotope=Parallelotope(initial_rectangle)
 initial_set=ParallelotopeListSet(initial_parallelotope)
+lohner.integration_step(avf,initial_set[-1],Real(0.125))
 for i in range(0,16):
   initial_set.push_back(lohner.integrate(avf,initial_set[-1],Real(0.125)))
 initial_set.push_back(lohner.integrate(avf,initial_set[0],Real(2.0)))

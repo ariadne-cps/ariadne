@@ -22,8 +22,8 @@
  */
  
 #include "declarations.h"
-#include "declarations.h"
 
+/*
 #include <tblas/tblas.hpp>
 
 namespace TBLAS {
@@ -69,15 +69,15 @@ iamax (const int N, const Ariadne::Interval<real> *X, const int incX)
   return result;
 }
 }
-
+*/
 #include "interval_matrix.h"
 
 #include "../numeric/arithmetic.h"
-#include "../numeric/interval.h"
+//#include "../numeric/interval.h"
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 #include "../linear_algebra/interval_vector.h"
-#include "../linear_algebra/lu_matrix.h"
+//#include "../linear_algebra/lu_matrix.h"
 
 
 namespace Ariadne {
@@ -319,9 +319,15 @@ namespace Ariadne {
     IntervalMatrix<R>
     IntervalMatrix<R>::inverse() const
     {
+      /* TO FIX
       LUMatrix< Interval<R> > lu(*this);
       IntervalMatrix<R> luinv=lu.inverse();
       return luinv;
+      */
+     
+      throw std::domain_error("Not implemented yet.");
+
+      return IntervalMatrix<R>();
     }
 
     template<typename R>

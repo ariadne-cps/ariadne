@@ -44,11 +44,12 @@ init_file:
 	if [ "${REAL_TYPE}" == "RATIONAL" ]; then \
 	  echo 'Rational' >> __init__.py; \
 	elif [ "${REAL_TYPE}" == "MPFLOAT" ]; then \
-	  echo -n 'MPFloat' >> __init__.py; \
+	  echo 'MPFloat' >> __init__.py; \
 	else \
 	  echo "Unknown REAL type"; \
 	  false; \
-	fi
+	fi 
+	@echo "numeric.Real=Real" >> __init__.py
 
 base.so: ${BASE_OBJ}
 	${CXX} -shared -o base.so ${LDXXFLAGS} ${BASE_OBJ} ${LDLIBS} ${RPATHFLAGS}

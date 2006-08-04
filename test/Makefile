@@ -17,7 +17,7 @@ LDXXFLAGS += -L../src/ -lariadne -lgmp -lgmpxx -lppl #-lblas
 all: ${TESTS}
 
 clean:
-	-rm -rf core *.log ${TESTS} 
+	-rm -rf core *.log *.eps ${TESTS} 
 
 dep:  
 	@sed -e '/^### Do Not edit this line$$/,$$d' Makefile \

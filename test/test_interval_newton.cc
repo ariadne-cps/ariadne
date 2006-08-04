@@ -33,7 +33,7 @@ int main() {
 
   fp=h(fp);
   
-  cout << "Pass\n";
+  cout << "PASS\n";
 
   return 0;
 }

@@ -23,61 +23,15 @@
  
 #include "declarations.h"
 
-/*
-#include <tblas/tblas.hpp>
 
-namespace TBLAS {
-  
-template<typename real>
-int
-iamax (const int N, const Ariadne::Interval<real> *X, const int incX)
-{
-#ifdef DEBUG
-  std::cerr << "TBLAS::iamax(const int N, const Ariadne::Interval<real> *X, const int incX)\n";
-#endif
-
-  real mx = 0;
-  int ix = 0;
-  int i;
-  int result = 0;
-
-  if (incX <= 0) {
-    return 0;
-  }
-
-  for (i = 0; i < N; i++) {
-    real av=0;
-    if(X[ix].lower() > av) {
-      av=X[ix].lower(); }
-    else if(X[ix].upper() < av) {
-      av=-X[ix].upper(); 
-    }
-    
-#ifdef DEBUG
-    std::cerr << X[ix] << ":" << av << "  ";
-#endif
-    if (av > mx) {
-      mx = av;
-      result = i;
-    }
-    ix += incX;
-  }
-#ifdef DEBUG
-  std::cerr << "\n";
-#endif
-
-  return result;
-}
-}
-*/
 #include "interval_matrix.h"
 
 #include "../numeric/arithmetic.h"
-//#include "../numeric/interval.h"
+#include "../numeric/interval.h"
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 #include "../linear_algebra/interval_vector.h"
-//#include "../linear_algebra/lu_matrix.h"
+#include "../linear_algebra/lu_matrix.h"
 
 
 namespace Ariadne {
@@ -319,15 +273,11 @@ namespace Ariadne {
     IntervalMatrix<R>
     IntervalMatrix<R>::inverse() const
     {
-      /* TO FIX
       LUMatrix< Interval<R> > lu(*this);
       IntervalMatrix<R> luinv=lu.inverse();
       return luinv;
-      */
      
       throw std::domain_error("IntervalMatrix<R>::inverse() const not implemented.");
-
-      return IntervalMatrix<R>();
     }
 
     template<typename R>

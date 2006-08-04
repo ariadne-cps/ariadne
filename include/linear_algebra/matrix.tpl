@@ -171,8 +171,9 @@ namespace Ariadne {
   
       // perform lu decomposition on the sub Matrix
       for (i=p+1; i< rows; i++) {
-        if (A(row[p],col[p])==0.0)  
-	  throw std::runtime_error("Matrix_type is singular");
+        if (A(row[p],col[p])==0.0) {
+          throw std::runtime_error("Matrix_type is singular");
+        }
         coef=A(row[i],col[p])/A(row[p],col[p]);
     
         for (j=p+1; j< columns; j++) 

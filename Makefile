@@ -25,7 +25,7 @@ install: lib
 install-lib: lib
 	(cd ${SRCDIR}; ${MAKE} install-lib);
 
-check:
+check: install-lib
 	(cd ${TESTDIR}; ${MAKE});
 
 dep: 

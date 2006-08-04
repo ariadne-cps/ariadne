@@ -60,7 +60,9 @@ int main() {
   
   clog << "a0=" << a0 << " a1=" << a1 << " a2=" << a2 << endl;
   test_assert(a0[2]==2.5,"array assignment");
-
+  a0[2]=2.3;
+  test_assert(a0[2]==2.3,"array element assignment");
+  
   array_vector<double> fsav(4);
 
   fsav.push_back(a0);

@@ -30,6 +30,7 @@
 #include "numeric/numerical_types.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
+#include "linear_algebra/matrix.h"
 
 #include "test.h"
 
@@ -56,11 +57,9 @@ int main() {
    
     test_assert(1==13*A(2,1),"mutiplication");
    
-    // Matrix< Rational > LU=lu_decompose(A,pivot);
-    
-    // x=lu_solve(LU,pivot,b);
+    x=A.solve(b);
   
-    test_assert(x(0)==x(1)==x(2)==1,"lu_solve");
+    test_assert(x(0)==1 && x(1)==1 && x(2)==1,"lu_solve");
 
  /*   for (unsigned int i=0; i< A.size1(); i++) {
        for (unsigned int j=0; j< A.size2(); j++) {

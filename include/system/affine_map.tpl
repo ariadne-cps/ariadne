@@ -66,21 +66,22 @@ namespace Ariadne {
     Geometry::Rectangle<R>
     AffineMap<R>::apply(const Geometry::Rectangle<R>& r) const
     {
+      //std::cerr << "AffineMap<R>::apply(const Geometry::Rectangle<R>& r) const\n";
+
       const Matrix_type& A=this->A();
       const Vector_type& b=this->b();
       if (A.size2()!=r.dimension()) {
         throw std::domain_error("AffineMap<R>::operator() (const Geometry::Rectangle<R>& r): the map does not have the same dimension of the rectangle.");
       }
-      
-      Base::array<Interval<R> > imv(r.dimension());
-      
-      for(size_t j=0; j<A.size1(); j++) {
-        imv[j]=b[j];
+                
+      Base::array< Interval<R> > imv(2);
+      for(size_t j=0; j!=A.size1(); ++j) {
+        imv[j]=Interval<R>(b[j]);
         for(size_t i=0; i!=r.dimension(); ++i) {
            imv[j]+=A(j,i)*r[i];
         }
       }
-      
+      //std::cerr << "Result =" << Geometry::Rectangle<R>(imv) << std::endl;
       return Geometry::Rectangle<R>(imv);
     }
 

@@ -22,6 +22,9 @@ install: lib
 	(cd ${SRCDIR}; ${MAKE} install);
 	(cd ${PYTHONDIR}; ${MAKE} install);
 
+install-lib: lib
+	(cd ${SRCDIR}; ${MAKE} install-lib);
+
 check:
 	(cd ${TESTDIR}; ${MAKE});
 
@@ -30,4 +33,3 @@ dep:
 
 pycheck: python install
 	for file in python/test/*.py; do echo $$file; $$file; done
-

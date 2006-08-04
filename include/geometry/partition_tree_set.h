@@ -325,6 +325,26 @@ namespace Ariadne {
       SubdivisionTreeSet _unit_set;
     };
 
+    
+    /*! \brief Compute an outer approximation to set \a s based on the partition scheme \a ps to depth a d. */
+    template<typename R, class S>
+    PartitionTreeSet<R> outer_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth);
+    
+    /*! \brief Compute an inner approximation to set \a s based on the partition scheme \a ps to depth a d. */
+    template<typename R, class S>
+    PartitionTreeSet<R> inner_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth);
+    
+    /*! \brief Compute an over approximation to set \a s based on the partition scheme \a ps to depth a d.
+     *
+     * This function may fail if the set \a s is not regular. 
+     */
+    template<typename R, class S>
+    PartitionTreeSet<R> over_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth);
+    
+    /*! \brief Compute an under approximation to set \a s based on the partition scheme \a ps to depth a d. */
+    template<typename R, class S>
+    PartitionTreeSet<R> under_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth);
+    
   }
 }
 

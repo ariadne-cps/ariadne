@@ -39,6 +39,7 @@
 #include "../linear_algebra/matrix.h"
 
 #include "../geometry/point.h"
+#include "../geometry/polyhedron.h"
 
 namespace Ariadne {
   namespace Geometry {

@@ -49,13 +49,14 @@ namespace Ariadne {
      public:
       Matrix() : Base() { }
       Matrix(const size_type& r, const size_type& c) : Base(r,c) { }
-      Matrix(const size_type& r, const size_type& c, const R* ptr, 
-                    const size_type& ld) : Base(r,c) { 
+      Matrix(const size_type& r, const size_type& c, 
+             const R* ptr, const size_type& ld) : Base(r,c) 
+      { 
         for(size_type i=0; i!=r; ++i) { 
-	   for(size_type j=0; j!=c; ++j) { 
-	     Base::operator()(i,j)=ptr[i*ld+j];
-	   } 
-	} 
+          for(size_type j=0; j!=c; ++j) { 
+            Base::operator()(i,j)=ptr[i*ld+j];
+          } 
+        } 
       }
 
       template<typename E> Matrix(const boost::numeric::ublas::matrix_expression<E>& A) : Base(A()) { }

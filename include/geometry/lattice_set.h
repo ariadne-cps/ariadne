@@ -56,6 +56,9 @@ namespace Ariadne {
     class LatticeMaskSet;
     class LatticeMaskSetIterator;
 
+    bool disjoint(const LatticeRectangle&, const LatticeRectangle&);
+    bool disjoint(const LatticeRectangle&, const LatticeMaskSet&);
+    bool disjoint(const LatticeMaskSet&, const LatticeMaskSet&);
     bool interiors_intersect(const LatticeRectangle&, const LatticeRectangle&);
     bool interiors_intersect(const LatticeRectangle&, const LatticeMaskSet&);
     bool interiors_intersect(const LatticeMaskSet&, const LatticeMaskSet&);
@@ -202,6 +205,9 @@ namespace Ariadne {
       const_iterator begin() const;
       /*!\brief A constant iterator to the past-the-end cell of the lattice rectangle. */
       const_iterator end() const;
+      
+      /*!\brief The one-box neighbourhood of the rectangle. */
+      LatticeRectangle neighbourhood() const;
      private:
       IndexArray _lower;
       IndexArray _upper;

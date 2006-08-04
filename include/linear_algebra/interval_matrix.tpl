@@ -325,7 +325,7 @@ namespace Ariadne {
       return luinv;
       */
      
-      throw std::domain_error("Not implemented yet.");
+      throw std::domain_error("IntervalMatrix<R>::inverse() const not implemented.");
 
       return IntervalMatrix<R>();
     }

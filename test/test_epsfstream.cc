@@ -63,10 +63,13 @@ int main() {
   clog << bbox << "\n";
   clog << r1 << " " << r2 << " "<< r3 << " " << r4 << std::endl;
   
-  epsfstream<Real> eps("../test_epsfstream.eps",bbox);
-
-  eps << r1 << r2 << r3 << r4;
-
+  epsfstream<Real> eps("test_epsfstream.eps",bbox);
+  eps << r1;
+  eps.set_fill_colour("blue");
+  eps << r2;
+  eps.set_fill_colour("red");
+  eps << r3 << r4;
+  eps.close();
 
   try {
     string input("[ ] "

@@ -89,11 +89,6 @@ namespace Ariadne {
         *this=Interval<R>(x,x);
         return *this;
       }
-      /*! \brief Copy assignment operator. */
-      Interval<R>& operator=(const Interval<R>& x) {
-        if(this!=&x) { *this=Interval<R>(x.lower(),x.upper()); }
-        return *this;
-      }
       
       /*! \brief Equality operator. */
       bool operator==(const Interval<R>& ivl) const { 

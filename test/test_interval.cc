@@ -51,6 +51,10 @@ int main() {
     }
     catch(...) { }
     
+    Interval<MPFloat>& ivlf1ref=ivlf1;
+    ivlf1ref=Interval<MPFloat>(5.25,7.375);
+    test_assert(ivlf1ref.lower()==MPFloat(5.25),"copy assignment");
+    
     ivld1 = ivld2+ivld3;
     ivld1 = ivld2-ivld3;
     ivld1 = ivld2*ivld3;

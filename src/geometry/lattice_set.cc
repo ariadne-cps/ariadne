@@ -150,6 +150,19 @@ namespace Ariadne {
       return false;
     }
     
+    LatticeRectangle
+    LatticeRectangle::neighbourhood() const
+    {
+      dimension_type n=this->dimension();
+      IndexArray lower(n);
+      IndexArray upper(n);
+      for(dimension_type i=0; i!=n; ++i) {
+        lower[i]=this->lower_bound(i)-1;
+        upper[i]=this->upper_bound(i)+1;
+      }
+      return LatticeRectangle(lower,upper);
+    }
+
     std::istream& 
     operator>>(std::istream& is, LatticeRectangle& r)
     {
@@ -435,7 +448,7 @@ namespace Ariadne {
 
       if(n==1) {
         for(size_type i=rlower[0]-glower[0]; 
-			i!=size_type(rupper[0]-glower[0]); ++i) {
+          i!=size_type(rupper[0]-glower[0]); ++i) {
           _mask[i]=true;
         }
         return;
@@ -549,6 +562,31 @@ namespace Ariadne {
       return LatticeMaskSet(A.bounds(),A.mask() - B.mask());
     }
 
+    bool 
+    disjoint(const LatticeRectangle& r1, const LatticeRectangle& r2) 
+    {
+      for(dimension_type i=0; i!=r1.dimension(); ++i) {
+        if(r1.upper_bound(i)<r2.lower_bound(i)
+            || r1.upper_bound(i)<r2.lower_bound(i))
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+    
+    bool 
+    disjoint(const LatticeRectangle& r, const LatticeMaskSet& ms) 
+    {
+      return !interiors_intersect(r.neighbourhood(),ms);
+    }
+    
+    bool 
+    disjoint(const LatticeMaskSet& ms1, const LatticeMaskSet& ms2) 
+    {
+      return !interiors_intersect(ms1.neighbourhood(),ms2);
+    }
+    
     bool 
     interiors_intersect(const LatticeRectangle& r1, const LatticeRectangle& r2) 
     {

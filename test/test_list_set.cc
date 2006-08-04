@@ -59,14 +59,20 @@ int main() {
   Rectangle r0(s0,s1);
   Rectangle r1(s1,s2);
   Rectangle r2(s2,s3);
-  ListSet ds1,ds2;
-
+  
+  clog << r0 << " " << r1 << " " << r2 << endl;
+  
+  ListSet ds1;
   ds1.inplace_union(r0);
   ds1.inplace_union(r1);
   ds1.inplace_union(r2);
 
-  string input("[ [[0,1],[0,1]], [[1,4/3],[1,4/3]], [[4/3,3/2],[4/3,3/2]] ]");
+  clog << ds1 << endl;
+  
+  string input("[ [0,1]x[0,1], [1,1.375]x[1,1.375], [1.375,1.5]x[1.375,1.5] ]");
   stringstream is(input);
+  
+  ListSet ds2;
   is >> ds2;
 
   test_assert(ds1[0]==ds2[0] && ds1[1]==ds2[1] && ds1[2]==ds2[2], "stream input");

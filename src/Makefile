@@ -45,6 +45,10 @@ install: lib python
 	cp -f libariadne.so ${LIBPREFIX}/libariadne.so
 	(cd ${PYTHONDIR}; ${MAKE} install)
 
+install-lib: lib
+	mkdir -p ${LIBPREFIX}
+	cp -f libariadne.so ${LIBPREFIX}/libariadne.so
+
 
 clean:                                                                          
 	rm -f *.bak *.o *~ *% core libariadne.*

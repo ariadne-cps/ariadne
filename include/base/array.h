@@ -37,6 +37,7 @@
 #include <iterator>
 
 #include <cassert>
+#include <iostream>
 
 #include "../declarations.h"
 

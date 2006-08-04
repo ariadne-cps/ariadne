@@ -22,6 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "geometry/parallelotope.h"
 #include "geometry/partition_tree_set.h"
 #include "geometry/partition_tree_set.tpl"
 
@@ -35,6 +36,16 @@ namespace Ariadne {
     template class PartitionTreeCell<Real>;
     template class PartitionTreeSet<Real>;
 
+    template PartitionTreeSet<Real> outer_approximation(const Parallelotope<Real>&, const PartitionScheme<Real>&, const uint);
+    template PartitionTreeSet<Real> inner_approximation(const Parallelotope<Real>&, const PartitionScheme<Real>&, const uint);
+    template PartitionTreeSet<Real> over_approximation(const Parallelotope<Real>&, const PartitionScheme<Real>&, const uint);
+    template PartitionTreeSet<Real> under_approximation(const Parallelotope<Real>&, const PartitionScheme<Real>&, const uint);
+    
+    template PartitionTreeSet<Real> outer_approximation(const GridMaskSet<Real>&, const PartitionScheme<Real>&, const uint);
+    template PartitionTreeSet<Real> inner_approximation(const GridMaskSet<Real>&, const PartitionScheme<Real>&, const uint);
+    template PartitionTreeSet<Real> over_approximation(const GridMaskSet<Real>&, const PartitionScheme<Real>&, const uint);
+    template PartitionTreeSet<Real> under_approximation(const GridMaskSet<Real>&, const PartitionScheme<Real>&, const uint);
+    
     template std::ostream& operator<<(std::ostream&, const PartitionScheme<Real>&);
     template std::ostream& operator<<(std::ostream&, const PartitionTree<Real>&);
     template std::ostream& operator<<(std::ostream&, const PartitionTreeCell<Real>&);

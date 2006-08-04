@@ -227,8 +227,6 @@ void export_grid_set() {
   def("under_approximation",ApprxPltpFGridFunc(&Geometry::under_approximation));
   def("under_approximation",ApprxZltpFGridFunc(&Geometry::under_approximation));
   def("under_approximation",ApprxLSRectFGridFunc(&Geometry::under_approximation));
-  def("under_approximation",ApprxLSPltpFGridFunc(&Geometry::under_approximation));
-  def("under_approximation",ApprxLSZltpFGridFunc(&Geometry::under_approximation));
   def("under_approximation",ApprxGridltpFGridFunc(&Geometry::under_approximation));
 
 

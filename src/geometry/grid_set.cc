@@ -40,9 +40,15 @@ namespace Ariadne {
     template class GridCellListSetIterator<Real>;
     template class GridRectangleListSetIterator<Real>;
 
+    template bool disjoint(const Rectangle<Real>&, const GridMaskSet<Real>&);
+    template bool disjoint(const GridMaskSet<Real>&, const Rectangle<Real>&);
+    template bool disjoint(const GridRectangle<Real>&, const GridMaskSet<Real>&);
+    template bool disjoint(const GridMaskSet<Real>&, const GridRectangle<Real>&);
+    template bool disjoint(const GridMaskSet<Real>&, const GridMaskSet<Real>&);
     template bool interiors_intersect(const Rectangle<Real>&, const GridMaskSet<Real>&);
     template bool interiors_intersect(const GridMaskSet<Real>&, const Rectangle<Real>&);
     template bool interiors_intersect(const GridRectangle<Real>&, const GridMaskSet<Real>&);
+    template bool interiors_intersect(const GridMaskSet<Real>&, const GridRectangle<Real>&);
     template bool interiors_intersect(const GridMaskSet<Real>&, const GridMaskSet<Real>&);
     template bool inner_subset(const Rectangle<Real>&, const GridMaskSet<Real>&);
     template bool subset(const Rectangle<Real>&, const GridMaskSet<Real>&);
@@ -78,22 +84,28 @@ namespace Ariadne {
     template
     GridMaskSet<Real>
     over_approximation(const ListSet<Real,Rectangle>& ls, 
-		       const FiniteGrid<Real>& g);
+                       const FiniteGrid<Real>& g);
 
     template
     GridMaskSet<Real>
     over_approximation(const ListSet<Real,Parallelotope>& ls, 
-		       const FiniteGrid<Real>& g); 
+                       const FiniteGrid<Real>& g); 
 
     template
     GridMaskSet<Real>
     over_approximation(const ListSet<Real,Zonotope>& ls, 
-		       const FiniteGrid<Real>& g); 
+                       const FiniteGrid<Real>& g); 
 
     template
     GridMaskSet<Real>
     over_approximation(const GridMaskSet<Real>& gm, const FiniteGrid<Real>& g); 
     
+    template
+    GridMaskSet<Real>
+    over_approximation(const PartitionTreeSet<Real>& gm, const FiniteGrid<Real>& g); 
+    
+
+
     template GridRectangle<Real>
     under_approximation(const Rectangle<Real>& p, const Grid<Real>& g);
 
@@ -111,26 +123,17 @@ namespace Ariadne {
     template
     GridCellListSet<Real>
     under_approximation(const Parallelotope<Real>& p, 
-		        const FiniteGrid<Real>& g); 
+                        const FiniteGrid<Real>& g); 
     
     template
     GridCellListSet<Real>
     under_approximation(const Zonotope<Real>& p, const FiniteGrid<Real>& g); 
     
+    
     template
     GridMaskSet<Real>
     under_approximation(const ListSet<Real,Rectangle>& ls, 
-		        const FiniteGrid<Real>& g); 
-
-    template
-    GridMaskSet<Real>
-    under_approximation(const ListSet<Real,Parallelotope>& ls, 
-		        const FiniteGrid<Real>& g); 
-
-    template
-    GridMaskSet<Real>
-    under_approximation(const ListSet<Real,Zonotope>& ls, 
-		        const FiniteGrid<Real>& g); 
+                        const FiniteGrid<Real>& g); 
 
     template
     GridMaskSet<Real>
@@ -138,53 +141,59 @@ namespace Ariadne {
     
     template
     GridMaskSet<Real>
-    join_over_approximation(const GridMaskSet<Real>& gms,
-		            const Rectangle<Real>& p); 
-
-    template
-    GridMaskSet<Real>
-    join_over_approximation(const GridMaskSet<Real>& gms,
-		            const Parallelotope<Real>& p); 
-
-    template
-    GridMaskSet<Real>
-    join_over_approximation(const GridMaskSet<Real>& gms,
-		            const Zonotope<Real>& z); 
-
-    template
-    GridMaskSet<Real>
-    join_over_approximation(const GridMaskSet<Real>& gms,
-		            const Polyhedron<Real>& z);
+    under_approximation(const PartitionTreeSet<Real>& gm, const FiniteGrid<Real>& g); 
+    
+    
     
     template
     GridMaskSet<Real>
     join_over_approximation(const GridMaskSet<Real>& gms,
-		            const ListSet<Real,Rectangle>& lr); 
+                            const Rectangle<Real>& p); 
 
     template
     GridMaskSet<Real>
     join_over_approximation(const GridMaskSet<Real>& gms,
-		            const ListSet<Real,Parallelotope>& lp); 
+                            const Parallelotope<Real>& p); 
 
     template
     GridMaskSet<Real>
     join_over_approximation(const GridMaskSet<Real>& gms,
-		            const ListSet<Real,Zonotope>& lz);
+                            const Zonotope<Real>& z); 
 
     template
     GridMaskSet<Real>
     join_over_approximation(const GridMaskSet<Real>& gms,
-		            const ListSet<Real,Polyhedron>& lp);
+                            const Polyhedron<Real>& z);
+    
+    template
+    GridMaskSet<Real>
+    join_over_approximation(const GridMaskSet<Real>& gms,
+                            const ListSet<Real,Rectangle>& lr); 
+
+    template
+    GridMaskSet<Real>
+    join_over_approximation(const GridMaskSet<Real>& gms,
+                            const ListSet<Real,Parallelotope>& lp); 
+
+    template
+    GridMaskSet<Real>
+    join_over_approximation(const GridMaskSet<Real>& gms,
+                            const ListSet<Real,Zonotope>& lz);
+
+    template
+    GridMaskSet<Real>
+    join_over_approximation(const GridMaskSet<Real>& gms,
+                            const ListSet<Real,Polyhedron>& lp);
 
     template
     GridMaskSet<Real>
     join_under_approximation(const GridMaskSet<Real>& gms,
-		            const Rectangle<Real>& p); 
+                            const Rectangle<Real>& p); 
 
     template
     GridMaskSet<Real>
     join_under_approximation(const GridMaskSet<Real>& gms,
-		             const Parallelotope<Real>& p); 
+                             const Parallelotope<Real>& p); 
 
     template
     GridMaskSet<Real>
@@ -209,12 +218,12 @@ namespace Ariadne {
     template
     GridMaskSet<Real>
     join_under_approximation(const GridMaskSet<Real>& gms,
-		            const ListSet<Real,Zonotope>& z); 
+                            const ListSet<Real,Zonotope>& z); 
 
     template
     GridMaskSet<Real>
     join_under_approximation(const GridMaskSet<Real>& gms,
-		            const ListSet<Real,Polyhedron>& z); 
+                            const ListSet<Real,Polyhedron>& z); 
     
     template
     GridRectangle<Real>
@@ -247,14 +256,13 @@ namespace Ariadne {
     
     template std::ostream& operator<<(std::ostream&, const GridCell<Real>&);
     template std::ostream& operator<<(std::ostream&, 
-		                const GridRectangle<Real>&);
+                                const GridRectangle<Real>&);
     template std::ostream& operator<<(std::ostream&, 
-		                const GridRectangleListSet<Real>&);
+                                const GridRectangleListSet<Real>&);
     template std::ostream& operator<<(std::ostream&,
-		                const GridCellListSet<Real>&);
+                                const GridCellListSet<Real>&);
     template std::ostream& operator<<(std::ostream&, 
-		                const GridMaskSet<Real>&);
+                                const GridMaskSet<Real>&);
  
   }
 }
-

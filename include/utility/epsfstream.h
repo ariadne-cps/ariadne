@@ -134,19 +134,27 @@ namespace Ariadne {
       bool line_style;
       bool fill_style;
       
+      epsfstream()
+        : std::ofstream(), line_colour("black"), fill_colour("green"), line_style(true), fill_style(true)
+      {
+        Ariadne::LinearAlgebra::identity_matrix<R> p_matrix(2);
+        Ariadne::LinearAlgebra::Vector<R> p_vector(2);
+                
+        this->p_map=ProjectionMap(p_matrix,p_vector);
+      }
+      
       epsfstream(const char* fn, const Ariadne::Geometry::Rectangle<R>& bbox)
-       : std::ofstream(fn), line_colour("black"), fill_colour("green"), line_style(true), fill_style(true)
+        : std::ofstream(fn), line_colour("black"), fill_colour("green"), line_style(true), fill_style(true)
       {
         if (bbox.dimension()!=2) {
-          std::cerr << bbox.dimension() << bbox << std::endl;
-          throw std::runtime_error("epsfstream: the bounding box hasn't dimension 2."); 
+           throw std::runtime_error("epsfstream: the bounding box hasn't dimension 2."); 
         }
         
         Ariadne::LinearAlgebra::identity_matrix<R> p_matrix(2);
         Ariadne::LinearAlgebra::Vector<R> p_vector(2);
-        
+                
         this->p_map=ProjectionMap(p_matrix,p_vector);
-        
+ 
         this->open(bbox);
       }
 
@@ -206,7 +214,28 @@ namespace Ariadne {
         this->close();
       }
 
-      inline const ProjectionMap &projection() const { return this->p_map; }
+      inline const ProjectionMap& projection() const { return this->p_map; }
+
+      //template<typename R> 
+      inline void open(const char* fn, const Ariadne::Geometry::Rectangle<R>& bbox)
+      {
+        std::ofstream::open(fn);
+        this->line_colour="black";
+        this->fill_colour="green";
+        this->line_style=true;
+        this->fill_style=true;
+        
+        if (bbox.dimension()!=2) {
+           throw std::runtime_error("epsfstream: the bounding box hasn't dimension 2."); 
+        }
+        
+        Ariadne::LinearAlgebra::identity_matrix<R> p_matrix(2);
+        Ariadne::LinearAlgebra::Vector<R> p_vector(2);
+                
+        this->p_map=ProjectionMap(p_matrix,p_vector);
+ 
+        this->open(bbox);
+      }
 
       //template<typename R> 
       inline void open(const Ariadne::Geometry::Rectangle<R>& bbox) {
@@ -426,8 +455,8 @@ namespace Ariadne {
     epsfstream<R>&
     trace(epsfstream<R>& eps, const Ariadne::Geometry::Rectangle<R>& r)
     {
-      Ariadne::Geometry::Rectangle<R> proj_r=(eps.projection()).apply(r);
-
+      Ariadne::Geometry::Rectangle<R> proj_r=eps.projection().apply(r);
+      
       double rlx=convert_to<double>(proj_r.lower_bound(0));
       double rux=convert_to<double>(proj_r.upper_bound(0));
       double rly=convert_to<double>(proj_r.lower_bound(1));
@@ -450,21 +479,22 @@ namespace Ariadne {
       if (vertices[0].dimension()>2) {
         std::vector< Geometry::Point<R> > proj_vert(vertices.size());
 
-        for (size_t j=0; j<vertices.size(); j++)
+        for (size_t j=0; j<vertices.size(); j++) {
           proj_vert[j]=eps.projection()(vertices[j]);
-        
+        }
         return trace(eps, proj_vert);
       }
       
-      Geometry::Point<R> baricentre=vertices[0];
+      Geometry::Point<R> baricentre(2);
 
-      for (size_t j=1; j<vertices.size(); j++) 
-        for (size_t i=0; i<2; i++) 
+      for (size_t j=0; j<vertices.size(); j++) {
+        for (size_t i=0; i<2; i++) {
           baricentre[i]=baricentre[i]+vertices[j][i];
-
-      for (size_t i=0; i<2; i++) 
+        }
+      }
+      for (size_t i=0; i<2; i++) {
         baricentre[i]/=vertices.size();
-
+      }
       return trace(eps, vertices, baricentre);
     }
     
@@ -495,6 +525,8 @@ namespace Ariadne {
         eps << ordered_vertices[i][0] << ' ' << ordered_vertices[i][1] 
             << " lineto\n";
       }
+      eps << ordered_vertices[0][0] << ' ' << ordered_vertices[0][1] 
+          << " lineto\n";
       return eps;
     }
 
@@ -526,8 +558,8 @@ namespace Ariadne {
     epsfstream<R>&
     operator<<(epsfstream<R>& eps, const Ariadne::Geometry::Rectangle<R>& r) 
     {
+      //std::cerr << "operator<<(epsfstream<R>& eps, const Ariadne::Geometry::Rectangle<R>& r)\n";
       assert(r.dimension()>=2);
-
       if(eps.fill_style) {
         trace(eps,r);
         eps << eps.fill_colour << " fill\n";

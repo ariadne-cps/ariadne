@@ -61,8 +61,8 @@ namespace Ariadne {
       AffineVectorField(const AffineVectorField<R>& F) : _A(F.A()), _b(F.b()) { }
       AffineVectorField(const LinearAlgebra::Matrix<R> &A, const LinearAlgebra::Vector<R> &b) : _A(A), _b(b) { }
     
-      LinearAlgebra::Vector<R> apply(const Geometry::Point<R>& s) const;
-      LinearAlgebra::IntervalVector<R> apply(const Geometry::Rectangle<R>& r) const;
+      LinearAlgebra::Vector<R> operator() (const Geometry::Point<R>& s) const;
+      LinearAlgebra::IntervalVector<R> operator() (const Geometry::Rectangle<R>& r) const;
     
       LinearAlgebra::Matrix<R> derivative(const Geometry::Point<R>& x) const;
       LinearAlgebra::IntervalMatrix<R> derivative(const Geometry::Rectangle<R>& r) const;
@@ -81,6 +81,8 @@ namespace Ariadne {
       LinearAlgebra::Vector<R> _b;
     };
  
+    template<typename R> std::ostream& operator<<(std::ostream& os, const AffineVectorField<R>& vf);
+    
   }
 }
 

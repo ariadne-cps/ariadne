@@ -40,9 +40,6 @@ using namespace Ariadne;
 using namespace Ariadne::Geometry;
 using namespace std;
 
-template class Polyhedron<Rational>;
-//template class Polyhedron<double>;
-
 int main() {
   cout << "test_polyhedron: " << flush;
   ofstream clog("test_polyhedron.log");
@@ -55,20 +52,24 @@ int main() {
   Point<Real> s3(2);
   s3[1]=Real(4,3);
   
-  std::vector< Point<Real> > pl;
-  pl.push_back(s1);
-  pl.push_back(s2);
-  pl.push_back(s3);
+  std::vector< Point<Real> > ptl;
+  ptl.push_back(s1);
+  ptl.push_back(s2);
+  ptl.push_back(s3);
   
-/*
-  Polyhedron p1(s1,s2);
-  Polyhedron p2(s2,s1);
-  Polyhedron p3;
-  Polyhedron p4;
-*/
-    
-  Polyhedron<Real> p(pl);
+  Polyhedron<Real> p(ptl);
   clog << p << endl;
+  
+  Point<Rational> qs1(s1);
+  Point<Rational> qs2(s2);
+  Point<Rational> qs3(s3);
+  std::vector< Point<Rational> > qptl;
+  qptl.push_back(qs1);
+  qptl.push_back(qs2);
+  qptl.push_back(qs3);
+  
+  Polyhedron<Rational> qp(qptl);
+  clog << qp << endl;
   
   clog.close();
   cout << "INCOMPLETE\n";

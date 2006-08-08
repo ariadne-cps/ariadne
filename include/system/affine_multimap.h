@@ -47,86 +47,55 @@
 namespace Ariadne {
   namespace System {
 
-    /*! \brief An affine multimap on Euclidean space. */
-    template <typename R, template<typename> class BS>
-    class AffineMultiMap : public AffineMap<R> 
+    /*! \brief An affine multimap on Euclidean space, with the form \f$x\mapsto Ax+S \f$ for some basic set \f$S\f$. 
+     */
+    template <typename R,template <typename> class BS>
+    class AffineMultiMap
     {
      public:
       typedef R real_type;
       typedef Geometry::Point<R> state_type;
-      
-      typedef Ariadne::LinearAlgebra::Matrix<R> Matrix_type;
-      typedef Ariadne::LinearAlgebra::Vector<R> Vector_type;
-      typedef BS<R> Set_type;
+      typedef LinearAlgebra::Matrix<R> matrix_type;
+      typedef LinearAlgebra::Vector<R> vector_type;
+      typedef BS<R> set_type;
 
-      explicit AffineMultiMap() {}
-      explicit AffineMultiMap(const Matrix_type& A, const Vector_type& b):
-                               AffineMap<R>(A,b), _S(A.size1()) { }
-
-      explicit AffineMultiMap(const Matrix_type& A, const Set_type& S):
-                               AffineMap<R>(A), _S(S) { }
-
-      explicit AffineMultiMap(const Matrix_type& A) : 
-                               AffineMap<R>(A), _S(A.size1()) { }
-
-      explicit AffineMultiMap(const Set_type& S) :  _S(S) { 
-
-        this->_A=Matrix_type(S.dimension(),S.dimension());
-        this->_b=Vector_type(S.dimension());
-      }
-      
-      AffineMultiMap(const AffineMultiMap<R,BS>& T) : 
-                               AffineMap<R>((AffineMap<R> &)T), _S(T._S) { }
-
-      AffineMultiMap<R,BS>& 
-      operator=(const AffineMultiMap<R,BS>& T) 
-      {
-        this->_A=T._A; 
-	this->_b=T._b; 
-	this->_S=T._S; 
-	return *this; 
+      explicit AffineMultiMap(const matrix_type& A, const set_type& S)
+        : _A(A), _S(S) { }
+        
+      AffineMultiMap<R,BS>& operator=(const AffineMultiMap<R,BS>& T) {
+        this->_A=T._A; this->_S=T._S; return *this; 
       }
       
       /*! \brief  The map applied to a state. */
-      Set_type operator() (const state_type& x) const;
+      BS<R> operator() (const Geometry::Point<R>& x) const;
         
-      /*! \brief  The map applied to a basic set. */
-      template<template<typename> class BS2>
-      inline
-      BS2<R> operator() (const BS2<R>& A) const {
-         AffineMap<real_type> *amap = (AffineMap<real_type> *)this;
-
-         if (Geometry::is_a<BS,BS2>())
-	   return Geometry::minkowski_sum((*amap)(A), (BS2<R>)(this->_S));
-         
-         throw std::invalid_argument("AffineMultiMap<R,BS>::operator() (const BS2<R>& A)");
-
-	 return BS<R>(A.dimension());
-      }
+      /*! \brief  The map applied to a BS<R>. */
+      BS<R> operator() (const BS<R>& z) const;
            
-      /*! \brief  The map applied to a list of basic sets. */
-      template <template<class> class BS2>
-      Geometry::ListSet<R,BS2> operator() (const Geometry::ListSet<R,BS2>& A) const {
-        Geometry::ListSet<R,BS2> output(A.dimension());
-
-        for (size_type i=0; i<A.size(); i++) { 
-          output.push_back((*this)(A[i]));
-        }
-
-        return output;
-      }
-
-      /*! \brief  The map applied to a gridmaskset. */
-      Geometry::ListSet<R,Geometry::Zonotope> operator() (const Geometry::GridMaskSet<R>& ) const;
+      /*! \brief  The map applied to a grid mask set. */
+      Geometry::ListSet<R,BS> operator() (const Geometry::GridMaskSet<R>& ) const;
+      
+      /*! \brief  The matrix of the map. */
+      const LinearAlgebra::Matrix<R>& A() const { return _A; }
       
       /*! \brief  The offset set of the map. */
       const BS<R>& S() const { return _S; }
       
-      bool invertible() const { return false; }
+      /*! \brief  The dimension of the argument. */
+      dimension_type argument_dimension() const {
+        return _A.size2();
+      }
+      
+      /*! \brief The dimension of the result. */
+      dimension_type result_dimension() const {
+        return _A.size1();
+      }
+      
 
       std::string name() const { return "AffineMultiMap"; }
      private:
-      Set_type _S;
+      matrix_type _A;
+      set_type _S;
     };
       
     
@@ -135,4 +104,3 @@ namespace Ariadne {
 
 
 #endif /* _ARIADNE_AFFINE_MULTIMAP_H */
-

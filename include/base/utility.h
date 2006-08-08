@@ -37,7 +37,7 @@ namespace Ariadne {
     /*! \brief Convert an element \a x of type \a Arg to type \a Res. */
     template<typename Res, typename Arg> inline Res convert_to(const Arg& x) { return Res(x); }
 
-    /*! \brief Convert an element \a x of type \a Arg to type \a Res. */
+    /*! \brief The name of class T. */
     template<typename T> inline std::string name();
     
   }    

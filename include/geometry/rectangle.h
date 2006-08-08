@@ -128,6 +128,12 @@ namespace Ariadne {
         }
       }
 
+      /*! \brief Construct a degenerate rectangle from a single point. */
+      explicit Rectangle(const state_type& p) 
+        : _lower_corner(p), _upper_corner(p)
+      {
+      }
+      
       /*! \brief Construct from two corners. */
       explicit Rectangle(const state_type& p1, const state_type& p2) 
         : _lower_corner(p1.dimension()), _upper_corner(p2.dimension())
@@ -179,15 +185,6 @@ namespace Ariadne {
 
         return output;
       }
-      
-      /*! \brief Convert to a paralletope. */
-      operator Parallelotope<R> () const;
-      
-      /*! \brief Convert to a zonotope. */
-      operator Zonotope<R> () const;
-      
-      /*! \brief Convert to a polyhedron. */
-      operator Polyhedron<R> () const;
       
       /*! \brief Copy assignment operator. */
       Rectangle<R>& operator=(const Rectangle<R>& original) {
@@ -317,14 +314,14 @@ namespace Ariadne {
         this->_upper_corner[n] = r;
       }
       
-      
-      /*! \brief The set of position Vectors of the rectangle. */
+      /*! \brief Convert to a rational polyhedron. */
+      operator Polyhedron<Rational> () const;
+            
+      /*! \brief The set of position vectors of the rectangle. */
       LinearAlgebra::IntervalVector<R> position_vectors() const;
       
       /*! \brief Expand the Rectangle by \a delta in each direction. */
       Rectangle<R>& expand_by(const real_type& delta);
-      
-
       
       /*! \brief Compute a quadrant of the Rectangle determined by \a q.
        *
@@ -337,7 +334,7 @@ namespace Ariadne {
       ListSet<R,Geometry::Rectangle> subdivide() const;
       
       /*! The vertices of the rectangle. */
-      array<state_type> vertices() const;
+      std::vector<state_type> vertices() const;
       
       /*! \brief Tests if \a point is included into a rectangle. */
       bool contains(const state_type& p) const;
@@ -532,6 +529,7 @@ namespace Ariadne {
       return A.subset(B);
     }
     
+
     /*! \brief The intersections of \a A and \a B. */
     template <typename R>
     inline
@@ -611,6 +609,18 @@ namespace Ariadne {
       return C;
     }
     
+    /*! \brief The difference between two rectangles. */
+    template<typename R>
+    inline
+    LinearAlgebra::IntervalVector<R> 
+    operator-(const Geometry::Rectangle<R>& r1, 
+              const Geometry::Rectangle<R>& r2)
+    {
+      assert(r1.dimension()==r2.dimension());
+      
+      return r1.position_vectors()-r2.position_vectors();
+    }
+
     /*! \brief Adds a vector to a rectangle. */
     template<typename R>
     inline

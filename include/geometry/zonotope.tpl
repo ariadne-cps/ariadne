@@ -42,18 +42,11 @@ namespace Ariadne {
     
     template<typename R>
     Zonotope<R>::Zonotope(const Rectangle<R>& r)
-      : _centre(r.dimension())
+      : _central_block(r.dimension()), _generators(r.dimension(),r.dimension())
     {
-      using namespace LinearAlgebra;
-
-      if(r.lower_bound(0) > r.upper_bound(0)) {
-        this->_generators=Matrix_type(r.dimension(),0);
-      }
-            
-      this->_generators=Matrix_type(r.dimension(),r.dimension());
       for(size_type i=0; i!=dimension(); ++i) {
-        this->_centre[i] = (r.lower_bound(i)+r.upper_bound(i))/2;
-        this->_generators(i,i) = (r.upper_bound(i)-r.lower_bound(i))/2;
+        this->_central_block[i] = r[i].centre();
+        this->_generators(i,i) = r[i].radius();
       }
 
       this->_generators=remove_null_columns_but_one(this->_generators);
@@ -61,16 +54,14 @@ namespace Ariadne {
 
     template<typename R>
     Zonotope<R>::Zonotope(const Parallelotope<R>& p)
-      : _centre(p.centre()), _generators(p.generators())
+      : _central_block(p.centre()), _generators(p.generators())
     {
-      using namespace Ariadne::LinearAlgebra;
-
       this->minimize_generators();
     }
 
     template<typename R>
     Zonotope<R>::Zonotope(const std::string& s)
-      : _centre(), _generators()
+      : _central_block(), _generators()
     {
       std::stringstream ss(s);
       ss >> *this;
@@ -83,8 +74,8 @@ namespace Ariadne {
     {
       using namespace LinearAlgebra;
             
-      const Matrix_type &this_gen=this->_generators;
-      const Matrix_type &A_gen=A._generators;
+      const matrix_type &this_gen=this->_generators;
+      const matrix_type &A_gen=A._generators;
       size_type directions=this->number_of_generators();
 
       if (!have_same_dimensions(this_gen,A_gen)) {
@@ -115,57 +106,27 @@ namespace Ariadne {
       return true;
     }
     
-    template<typename R>
-    bool 
-    Zonotope<R>::contains(const state_type& point) const 
+    template <typename R>
+    Rectangle<R>
+    Zonotope<R>::bounding_box() const
     {
-      // FIXME: Own routine
-      return Polyhedron<R>(*this).contains(point);
-      
-      if (point.dimension()!=this->dimension()) {
-        throw std::domain_error("This object and parameter have different space dimensions");
-      }  
-      
-      if (this->empty()) { return false; }
-    
-      Matrix_type A(0,0);
-      Vector_type b(0);
-              
-      this->compute_linear_inequalities(A,b);
-
-      Vector_type result(A*point.position_vector()-b);
-
-      for (size_type i=0; i<result.size(); i++) {
-         if (result(i)<0) return false;
+      LinearAlgebra::IntervalVector<R> e(this->number_of_generators());
+      for(size_type j=0; j!=this->number_of_generators(); ++j) {
+        e[j]=Interval<R>(-1,1);
       }
-      
-      return true;
+      return this->central_block()+this->generators()*e;
     }
-     
-    template<typename R>
-    bool 
-    Zonotope<R>::contains(const Rectangle<R>& rect) const 
-    {
-      if (this->empty()) 
-        return false;
-    
-      for (size_type i=0; i< (size_type)(1<<rect.dimension()); i++) {
-        if (!this->contains(rect.vertex(i))) {
-	  return false;
-        }
-      }
 
-      return true;
-    }
-     
+
     template <typename R>
     ListSet<R,Zonotope>
     Zonotope<R>::subdivide() const 
     {
+      // FIXME: What to do about central block?
       //size_type n=this->dimension();
       size_type m=(this->generators()).size2();
       ListSet<R,Geometry::Zonotope> result(this->dimension());
-      Matrix_type new_generators=this->generators()/2;
+      matrix_type new_generators=this->generators()/2;
       
       state_type first_centre=this->centre();
       for(size_type i=0; i<m; i++) {
@@ -199,7 +160,7 @@ namespace Ariadne {
       size_type m=(this->generators()).size2();
       ListSet<R,Geometry::Zonotope> result(this->dimension());
       
-      Matrix_type new_generators=this->generators();
+      matrix_type new_generators=this->generators();
       
       R max_norm=0;
       size_type max_column=0;
@@ -224,99 +185,98 @@ namespace Ariadne {
       return result;
     }
     
+
+
+    template<typename R>
+    bool 
+    Zonotope<R>::contains(const state_type& point) const 
+    {
+      return Polyhedron<Rational>(*this).contains(Point<Rational>(point));
+    }
+
+    
     template<typename R>
     bool 
     Zonotope<R>::interior_contains(const state_type& point) const 
     {
       // FIXME: Own routine
-      return Polyhedron<R>(*this).interior_contains(point);
-      using namespace Ariadne::LinearAlgebra;
-      
-      if (point.dimension()!=this->dimension()) {
-       throw std::domain_error("This object and parameter have different space dimensions");
-      } 
-    
-      if (this->empty_interior()) { return false; }
-  
-      Matrix_type A(0,0);
-      Vector_type b(0);
-              
-      this->compute_linear_inequalities(A,b);
+      Point<Rational> rational_point=convert_to< Point<Rational> >(point);
+      return Polyhedron<Rational>(*this).interior_contains(rational_point);
+    }
 
-      Vector_type result(A*point.position_vector()-b);
-      
-      for (size_type i=0; i<result.size(); i++) {
-         if (result(i)<=0) return false;
+
+    template<typename R>
+    bool 
+    Zonotope<R>::superset(const Rectangle<R>& rect) const 
+    {
+      if (this->empty()) {
+        return false;
       }
-      
+      for (size_type i=0; i< (size_type)(1<<rect.dimension()); i++) {
+        if (!this->contains(rect.vertex(i))) {
+          return false;
+        }
+      }
+
       return true;
     }
-      
-    template<typename R>
-    Rectangle<R> 
-    Zonotope<R>::bounding_box() const 
-    {
-      using namespace Ariadne::LinearAlgebra;
-      Vector_type offset(this->dimension());
-      
-      for(size_type i=0; i!=this->dimension(); ++i) {
-        for(size_type j=0; j!=this->_generators.size2(); ++j) {
-           offset(i) += abs(this->_generators(i,j));
-        }
-      }
-      return Rectangle<R>(this->centre()-offset, this->centre()+offset);
-    }
-
+     
 
 
     template <typename R>
-    std::vector< Point<R> > 
+    std::vector< Point<Rational> > 
     Zonotope<R>::vertices() const
     {
-      return Polyhedron<R>(*this).vertices();
+      return Polyhedron<Rational>(*this).vertices();
     }
 
     template <typename R>
     std::vector< Point<R> > 
-    Zonotope<R>::_get_possible_vertices() const
+    Zonotope<R>::approximate_vertices() const
     {
-      size_t poss_vert=(1<<(this->_generators).size2());
-      std::vector< Point<R> > possible_vertices(poss_vert);
-
-      assert((this->_generators).size2()<32);
-      for (size_t i=0; i<poss_vert; i++) {
-        
-        possible_vertices[i]=this->_possible_vertex(i);
-      }
-
-      return possible_vertices;
+      return Polyhedron<R>(this->centre(),this->_extended_generators()).vertices();
     }
-      
+
     template <typename R>
-    Point<R> 
-    Zonotope<R>::_possible_vertex(const size_t& i) const
+    LinearAlgebra::Matrix<R>  
+    Zonotope<R>::_extended_generators() const
     {
-      Point<R> vertex(this->centre());
-      const LinearAlgebra::Matrix<R> &gen=this->_generators;
-      
-      for (size_t j=0; j<gen.size1(); j++) {
-        for (size_t k=0; k<gen.size2(); k++) {
-          if ((1<<k)&(i)) {
-            vertex[j]+=gen(j,k);
-          } 
-          else {
-            vertex[j]-=gen(j,k);
-          }
+      size_type number_of_extra_generators=0;
+      for(dimension_type i=0; i!=this->dimension(); ++i) {
+        if(this->_central_block[i].lower()==this->_central_block[i].upper()) {
+          ++number_of_extra_generators;
         }
       }
-      return vertex;
+      if(number_of_extra_generators==0) {
+        return this->_generators;
+      }
+      else {
+        LinearAlgebra::Matrix<R> result(this->dimension(),
+            this->number_of_generators()+number_of_extra_generators);
+        for(dimension_type i=0; i!=this->dimension(); ++i) {
+          for(size_type j=0; j!=this->number_of_generators(); ++j) {
+            result(i,j)=this->_generators(i,j);
+          }
+        }
+        size_type j=this->number_of_generators();
+        for(dimension_type i=0; i!=this->dimension(); ++i) {
+          R radius=this->_central_block[i].radius();
+          if(radius!=0) {
+            result(i,j)=radius;
+            ++j;
+          }
+        }
+        return result;
+      }
     }
-
-    
+      
     template <typename R>
-    Zonotope<R>::operator Polyhedron<R>() const 
+    Zonotope<R>::operator Polyhedron<Rational>() const 
     {
-      return Polyhedron<R>(this->_get_possible_vertices());
+      Point<Rational> c(this->centre());
+      LinearAlgebra::Matrix<Rational> g(this->_extended_generators());
+      return Polyhedron<Rational>(c,g);
+      //return Polyhedron<Rational>(this->_possible_vertices());
     }
     
     
@@ -355,7 +315,7 @@ namespace Ariadne {
       using namespace LinearAlgebra;
            
       size_type i,j,i2,j2;
-      Matrix_type &gen=this->_generators;
+      matrix_type &gen=this->_generators;
       gen=remove_null_columns_but_one(gen);
       size_type rows=gen.size1();
       
@@ -408,7 +368,7 @@ namespace Ariadne {
       }
       
       if (min_cols!= cols) {
-        Matrix_type new_gen(rows,min_cols);
+        matrix_type new_gen(rows,min_cols);
 
         j2=0;
         for (j=0; j< cols; j++) {
@@ -468,13 +428,13 @@ namespace Ariadne {
     
     template<typename R>
     void 
-    Zonotope<R>::compute_linear_inequalities(Matrix_type& A, Vector_type& b) const
+    Zonotope<R>::compute_linear_inequalities(matrix_type& A, vector_type& b) const
     {
-      throw std::runtime_error("Zonotope<R>::compute_linear_inequalities(Matrix_type&, Vector_type&) const not implemented");
+      throw std::runtime_error("Zonotope<R>::compute_linear_inequalities(matrix_type&, vector_type&) const not implemented");
       using namespace Ariadne::LinearAlgebra;
      
-      const Matrix_type &gen=this->_generators;
-      Matrix_type Space=trans(gen);
+      const matrix_type &gen=this->_generators;
+      matrix_type Space=trans(gen);
       R b2;
       size_type ngen=this->number_of_generators();
       
@@ -484,17 +444,17 @@ namespace Ariadne {
       //A=lu_decompose(Space,col,row); 
 
       if (col.size()==row.size()) {
-        A=Matrix_type(2*ngen,this->dimension());
-        b=Vector_type(2*ngen);
-        Space=Matrix_type();
+        A=matrix_type(2*ngen,this->dimension());
+        b=vector_type(2*ngen);
+        Space=matrix_type();
       } 
       else { 
         remove_null_columns(A,row,col);
         Space=compute_space(A,row,col);
 
-        A=Matrix_type(2*ngen+2*Space.size1(),
+        A=matrix_type(2*ngen+2*Space.size1(),
                         this->dimension());
-        b=Vector_type(2*ngen+2*Space.size1());
+        b=vector_type(2*ngen+2*Space.size1());
       }
       // TO IMPROVE: we new compute both (col_i)^T(cols_j) and 
       // (col_j)^T(cols_i)
@@ -511,7 +471,7 @@ namespace Ariadne {
         
         b2=0.0;
         for (size_type k=0; k< this->dimension(); k++) {
-          b2+=gen(k,i)*this->_centre[k];
+          b2+=gen(k,i)*this->centre()[k];
         }
 
         b(2*i+1)=b(2*i)+b2;
@@ -624,6 +584,16 @@ namespace Ariadne {
     
     
     
+    template<typename R>
+    Zonotope<R>
+    Zonotope<R>::over_approximation(const Rectangle<R> &c, const LinearAlgebra::IntervalMatrix<R>& A)
+    {
+      LinearAlgebra::Matrix<R> Amid=A.centre();
+      return Zonotope<R>(c+A.radius_row_sum(),A.centre());
+    }
+    
+
+
     template <typename R>
     std::ostream&
     operator<<(std::ostream& os, const Zonotope<R>& z) 

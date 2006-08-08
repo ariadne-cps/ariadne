@@ -663,7 +663,7 @@ namespace Ariadne {
 
       for(LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
         GridCell<R> cell(g,*iter);
-        if(z.contains(Rectangle<R>(cell))) {
+        if(z.superset(Rectangle<R>(cell))) {
           result.adjoin(cell);
         }
       }
@@ -727,8 +727,7 @@ namespace Ariadne {
         return result; 
       }
       
-      Rectangle<R> bb=regular_intersection(Polyhedron<R>(p),
-                              Polyhedron<R>(g.bounding_box())).bounding_box();
+      Rectangle<R> bb=regular_intersection(p.bounding_box(),g.bounding_box());
       
       if (bb.empty()) {
         return result;
@@ -764,8 +763,7 @@ namespace Ariadne {
       if(p.empty()) {
         return result; 
       }
-      Rectangle<R> bb=regular_intersection(Polyhedron<R>(p),
-                        Polyhedron<R>(g.bounding_box())).bounding_box();
+      Rectangle<R> bb=regular_intersection(p.bounding_box(),g.bounding_box());
 
       if (bb.empty()) {
         return result;
@@ -778,7 +776,7 @@ namespace Ariadne {
             iter!=block.end(); ++iter) {
 
         GridCell<R> cell(g.grid(),*iter);
-        if(p.contains(Rectangle<R>(cell))) {
+        if(subset(Rectangle<R>(cell),p)) {
           result.adjoin(cell);
         }
       }
@@ -944,7 +942,7 @@ namespace Ariadne {
 
       for (size_type i=0; i< new_gms_elem; i++) {
         GridCell<R> cell(new_gms[i]);
-        if(bs.contains(Rectangle<R>(cell))) {
+        if(subset(Rectangle<R>(cell),bs)) {
           result.adjoin(cell);
         }
       }

@@ -53,11 +53,16 @@ namespace Ariadne {
       virtual ~Map();
       
       // I'm not sure if virtual functions are the way to go here; too restrictive? //
-      virtual state_type apply(const state_type& x) const;
-      virtual Geometry::Rectangle<R> apply(const Geometry::Rectangle<R>& A) const;
-      virtual Geometry::Parallelotope<R> apply(const Geometry::Parallelotope<R>& A) const;
-      virtual Geometry::Polyhedron<R> apply(const Geometry::Polyhedron<R>& A) const;
+      virtual Geometry::Point<R> operator() (const Geometry::Point<R>& x) const;
+      virtual Geometry::Rectangle<R> operator() (const Geometry::Rectangle<R>& A) const;
+      virtual Geometry::Parallelotope<R> operator() (const Geometry::Parallelotope<R>& A) const;
+      virtual Geometry::Zonotope<R> operator() (const Geometry::Zonotope<R>& A) const;
+      virtual Geometry::Simplex<R> operator() (const Geometry::Simplex<R>& A) const;
+      virtual Geometry::Polyhedron<R> operator() (const Geometry::Polyhedron<R>& A) const;
     
+      template<template<typename> class BS>
+      Geometry::ListSet<R,BS> operator() (const Geometry::ListSet<R,BS>& A) const;
+ 
       virtual LinearAlgebra::Matrix<R> derivative(const state_type& r) const;
       virtual LinearAlgebra::IntervalMatrix<R> derivative(const Geometry::Rectangle<R>& r) const;
         
@@ -66,21 +71,6 @@ namespace Ariadne {
     
       virtual std::string name() const = 0;
 
-      state_type operator() (const state_type& x) const {
-        return this->apply(x); }
-
-      template<template <typename> class BS>
-      inline
-      BS<R> 
-      operator() (const BS<R>& A) const 
-      {
-        return this->apply(A); 
-      }
-
-      template<template<typename> class BS>
-      inline 
-      Geometry::ListSet<R,BS> apply(const Geometry::ListSet<R,BS>& A) const;
-      
     };
   
     

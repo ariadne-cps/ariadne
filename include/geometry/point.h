@@ -36,6 +36,13 @@
 #include "../base/array.h"
 #include "../linear_algebra/vector.h"
 
+#include <gmpxx.h>
+
+namespace Ariadne { 
+  namespace Numeric {
+    typedef mpq_class Rational;
+  } 
+}
 
 namespace Ariadne {
   namespace Geometry {
@@ -100,6 +107,12 @@ namespace Ariadne {
         return *this; 
       }
       
+      #ifndef RATIONAL_REAL
+      /*! \brief Convert to a rational point. */
+      operator Point<Rational> () const;
+      #endif 
+
+
       /*! \brief Checks equivalence between two states. */
       bool operator==(const Point<R>& A) const {
         /* Return false if states have different dimensions */
@@ -154,24 +167,6 @@ namespace Ariadne {
         }
         this->_vector[index]=r;
       }
-
-      /*! \brief Convert to a rectangle. */
-      operator Rectangle<R>() const;
-
-      /*! \brief Convert to a sphere. */
-//      operator Sphere<R>();
-
-      /*! \brief Convert to a ellipsoid. */
-//      operator Ellipsoid<R>();
- 
-      /*! \brief Convert to a parallelotope. */
-      operator Parallelotope<R>() const;
-
-      /*! \brief Convert to a zonotope. */
-      operator Zonotope<R>() const;
-
-      /*! \brief Convert to a polyhedron. */
-      operator Polyhedron<R>() const;
 
       friend std::ostream& operator<< <>(std::ostream& os, const Point<real_type>& state);
       friend std::istream& operator>> <> (std::istream& is, Point<real_type>& state);

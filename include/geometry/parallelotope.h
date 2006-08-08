@@ -149,15 +149,12 @@ namespace Ariadne {
       
       /*! \brief True if the parallelotope is empty. */
       bool empty() const {
-        // FIXME: This is probably ok since we're not talking about interior.
-        return false;
+        return this->_centre.dimension()==0;
       }
       
       /*! \brief True if the paralleltope has empty interior. */
       bool empty_interior() const {
-        using namespace Ariadne::LinearAlgebra;
-
-        return !independent_rows(this->_generators);     
+        return !LinearAlgebra::independent_rows(this->_generators);     
       }
       
       /*! \brief The centre of the parallelotope. */
@@ -183,18 +180,18 @@ namespace Ariadne {
       /*! \brief A rectangle containing the given parallelotope. */
       Rectangle<R> bounding_box() const;
       
-      /*! \brief The \a i th vertex. */
-      state_type vertex(const size_type& i) const;
-      
       /*! \brief The vertices of the parallelotope. */
-      std::vector< state_type > vertices() const;
+      std::vector< Point<Rational> > vertices() const;
+      
+      /*! \brief Approximations to the vertices (for graphical output). */
+      std::vector< state_type > approximate_vertices() const;
       
       /*! \brief Convert to a zonotope. */
       operator Zonotope<R> () const;
       
       /*! \brief Convert to a polyhedron. */
-      operator Polyhedron<R> () const;
-       
+      operator Polyhedron<Rational> () const;
+      
       /*! \brief Tests if the parallelotope contains \a point. */
       bool contains(const state_type& point) const;
       
@@ -213,6 +210,9 @@ namespace Ariadne {
       /*! \brief Tests disjointness from a rectangle. */
       bool disjoint(const Rectangle<R>& r) const;
       
+      /*! \brief Computes an over approximation from an "interval parallelotope". */
+      static Parallelotope<R> over_approximation(const Rectangle<R>& c, const LinearAlgebra::IntervalMatrix<R>& A);
+      
       friend std::istream& operator>> <> (std::istream& is, Parallelotope<R>& r);
      private:
       void compute_linear_inequalities(Matrix_type&, Vector_type&, Vector_type&) const;
@@ -227,27 +227,27 @@ namespace Ariadne {
  
     /*! \brief Performs the Minkoswi sum of two parallelotopes */
     template<typename R> 
-    Parallelotope<R> 
+    Zonotope<R> 
     minkowski_sum(const Parallelotope<R>& A, const Parallelotope<R>& B) {
-        throw std::domain_error("minkowski_sum(const Parallelotope<R>& A, const Parallelotope<R>& B): not implemented.");
-
-	return Parallelotope<R>(A.dimension());
+      return minkowski_sum(Zonotope<R>(A),Zonotope<R>(B));
     }
 
-    /*! \brief Performs the Minkoswi sum of a zonotope and a basic set */
-    template<typename R, template <typename> class BS> 
-    inline Parallelotope<R> 
-    minkowski_sum(const Parallelotope<R>& A, const BS<R>& B) {
-      return minkowski_sum(A, Parallelotope<R>(B) );
+    /*! \brief Performs the Minkoswi sum of two parallelotopes */
+    template<typename R> 
+    Zonotope<R> 
+    minkowski_difference(const Parallelotope<R>& A, const Parallelotope<R>& B) {
+      return minkowski_difference(Zonotope<R>(A),Zonotope<R>(B));
     }
 
+
+    
     /*! \brief Tests disjointness */
     template <typename R>
     inline
     bool 
     disjoint(const Parallelotope<R>& A, const Parallelotope<R>& B) 
     {
-      return disjoint(Polyhedron<R>(A),Polyhedron<R>(B));
+      return disjoint(Polyhedron<Rational>(A),Polyhedron<Rational>(B));
     }
     
     /*! \brief Tests disjointness */
@@ -275,7 +275,7 @@ namespace Ariadne {
     interiors_intersect(const Parallelotope<R>& A,
                         const Parallelotope<R>& B) 
     {
-      return interiors_intersect(Polyhedron<R>(A), Polyhedron<R>(B));
+      return interiors_intersect(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
     
     /*! \brief Tests intersection of interiors */
@@ -285,7 +285,7 @@ namespace Ariadne {
     interiors_intersect(const Parallelotope<R>& A,
                         const Rectangle<R>& B) 
     {
-      return interiors_intersect(Polyhedron<R>(A), Polyhedron<R>(B));
+      return interiors_intersect(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
     
     /*! \brief Tests intersection of interiors */
@@ -295,7 +295,7 @@ namespace Ariadne {
     interiors_intersect(const Rectangle<R>& A,
                         const Parallelotope<R>& B) 
     {
-      return interiors_intersect(Polyhedron<R>(A), Polyhedron<R>(B));
+      return interiors_intersect(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
     
     
@@ -306,7 +306,7 @@ namespace Ariadne {
     inner_subset(const Parallelotope<R>& A,
                  const Parallelotope<R>& B) 
     {
-      return inner_subset(Polyhedron<R>(A), Polyhedron<R>(B));
+      return inner_subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
 
     /*! \brief Tests inclusion of \a A in the interior of \a B. */
@@ -316,7 +316,7 @@ namespace Ariadne {
     inner_subset(const Parallelotope<R>& A,
                  const Rectangle<R>& B) 
     {
-      return inner_subset(Polyhedron<R>(A), Polyhedron<R>(B));
+      return inner_subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
 
     /*! \brief Tests inclusion of \a A in the interior of \a B. */
@@ -326,7 +326,7 @@ namespace Ariadne {
     inner_subset(const Rectangle<R>& A,
                  const Parallelotope<R>& B) 
     {
-      return inner_subset(Polyhedron<R>(A), Polyhedron<R>(B));
+      return inner_subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
 
     /*! \brief Tests inclusion */
@@ -336,7 +336,7 @@ namespace Ariadne {
     subset(const Parallelotope<R>& A, 
            const Parallelotope<R>& B) 
     {
-      return subset(Polyhedron<R>(A), Polyhedron<R>(B));
+      return subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
     
     /*! \brief Tests inclusion */
@@ -346,7 +346,7 @@ namespace Ariadne {
     subset(const Parallelotope<R>& A, 
            const Rectangle<R>& B) 
     {
-      return subset(Polyhedron<R>(A), Polyhedron<R>(B));
+      return subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
     
     /*! \brief Tests inclusion */
@@ -356,7 +356,7 @@ namespace Ariadne {
     subset(const Rectangle<R>& A, 
            const Parallelotope<R>& B) 
     {
-      return subset(Polyhedron<R>(A), Polyhedron<R>(B));
+      return subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
     
 
@@ -367,7 +367,7 @@ namespace Ariadne {
     subset_of_open_cover(const Parallelotope<R>& A,
                          const ListSet<R, Parallelotope >& cover) 
     {
-      throw std::domain_error("subset_of_open_cover(Parallelotope, std::vector<Parallelotope>) not implemented");
+      throw std::domain_error("subset_of_open_cover(Parallelotope, ListSet<Parallelotope>) not implemented");
     }
 
     /*! \brief Scale a parallelotope. */
@@ -396,7 +396,7 @@ namespace Ariadne {
     inner_subset(const Parallelotope<R>& A,
                  const ListSet<R,Parallelotope>& B) 
     {
-      throw std::domain_error("subset_of_closed_cover(Parallelotope, std::vector<Parallelotope>) not implemented");
+      throw std::domain_error("inner_subset(Parallelotope, ListSet<Parallelotope>) not implemented");
     }
 
   }

@@ -24,155 +24,158 @@
 
 #include "../system/affine_map.h"
 
+#include "../numeric/numerical_types.h"
+
 
 namespace Ariadne {
   namespace System {
 
-  
     template <typename R>
     Geometry::Point<R>
-    AffineMap<R>::operator() (const Geometry::Point<R>& s) const
-    {
-      const Matrix_type& A=this->A();
-      if (A.size2()!=s.dimension()) {
-        throw std::domain_error("AffineMap<R>::operator() (const Point& s): the map does not have the same dimension of the point.");
-      }
-      const Vector_type& pv=s.position_vector();
-      Vector_type v=prod(A,pv);
-      v+= this->b();
-      return Geometry::Point<R>(v);
-    }
-    
-    template <typename R>
-    Geometry::Simplex<R>
-    AffineMap<R>::operator() (const Geometry::Simplex<R>& s) const
-    {
-      const Matrix_type& A=this->A();
-      if (A.size2()!=s.dimension()) {
-        throw std::domain_error("AffineMap<R>::operator() (const Geometry::Simplex<R>& s): the map does not have the same dimension of the simplex.");
-      }
-      
-      const array<state_type>&  v=s.vertices();
-      array<state_type> new_v(s.dimension());
-      
-      for(size_t i=0; i<s.dimension(); i++) {
-        new_v[i]= (*this)(v[i]);
-      }
-     
-      return Geometry::Simplex<R>(new_v);
-    }
-
-    template <typename R>
-    Geometry::Rectangle<R>
-    AffineMap<R>::apply(const Geometry::Rectangle<R>& r) const
+    AffineMap<R>::operator() (const Geometry::Point<R>& pt) const
     {
       //std::cerr << "AffineMap<R>::apply(const Geometry::Rectangle<R>& r) const\n";
 
-      const Matrix_type& A=this->A();
-      const Vector_type& b=this->b();
-      if (A.size2()!=r.dimension()) {
-        throw std::domain_error("AffineMap<R>::operator() (const Geometry::Rectangle<R>& r): the map does not have the same dimension of the rectangle.");
+      if (this->argument_dimension()!=pt.dimension()) {
+        throw std::domain_error("AffineMap<R>::operator() (const Geometry::Point<R>& r): the map does not have the same dimension of the point.");
       }
-                
-      Base::array< Interval<R> > imv(2);
-      for(size_t j=0; j!=A.size1(); ++j) {
-        imv[j]=Interval<R>(b[j]);
-        for(size_t i=0; i!=r.dimension(); ++i) {
-           imv[j]+=A(j,i)*r[i];
-        }
-      }
-      //std::cerr << "Result =" << Geometry::Rectangle<R>(imv) << std::endl;
-      return Geometry::Rectangle<R>(imv);
+      return Geometry::Point<R>(this->A()*pt.position_vector()+this->b());
     }
+    
 
     template <typename R>
     Geometry::Rectangle<R>
     AffineMap<R>::operator() (const Geometry::Rectangle<R>& r) const
     {
-      throw std::domain_error("AffineMap<R>::operator() (const Geometry::Rectangle<R>& r): this is not an exact operation.");
+      //std::cerr << "AffineMap<R>::apply(const Geometry::Rectangle<R>& r) const\n";
 
-      const Matrix_type& A=this->A();
-      const Vector_type& b=this->b();
-      if (A.size2()!=r.dimension()) {
-        throw std::domain_error("AffineMap<R>::operator() (const Geometry::Rectangle<R>& r): the map does not have the same dimension of the rectangle.");
+      if (this->argument_dimension()!=r.dimension()) {
+        throw std::domain_error("AffineMap<R>::apply(const Geometry::Rectangle<R>& r): the map does not have the same dimension of the rectangle.");
       }
-      
-      Base::array<Interval<R> > imv(r.dimension());
-      
-      for(size_t j=0; j<A.size1(); j++) {
-        imv[j]=b[j];
-        for(size_t i=0; i!=r.dimension(); ++i) {
-           imv[j]+=A(j,i)*r[i];
-        }
-      }
-      
-      return Geometry::Rectangle<R>(imv);
+      return Geometry::Rectangle<R>(this->A()*r.position_vectors()+this->b());
     }
-     
+    
     template <typename R>
     Geometry::Parallelotope<R>
     AffineMap<R>::operator() (const Geometry::Parallelotope<R>& p) const
     {
-      const Matrix_type& A=this->A();
-      if (A.size2()!=p.dimension()) {
+      if (this->argument_dimension()!=p.dimension()) {
         throw std::domain_error("AffineMap<R>::operator() (const Geometry::Parallelotope<R>& p): the map does not have the same dimension of the parallelotope.");
       }
-      state_type new_centre=(*this)(p.centre());
-      return Geometry::Parallelotope<R>(new_centre,A*p.generators());
+      return Geometry::Parallelotope<R>::over_approximation(
+          this->operator()(Geometry::Rectangle<R>(p.centre())),
+          this->A()*LinearAlgebra::IntervalMatrix<R>(p.generators()));
     }
 
     template <typename R>
     Geometry::Zonotope<R>
     AffineMap<R>::operator() (const Geometry::Zonotope<R>& z) const
     {
-      const Matrix_type& A=this->A();
-      if (A.size2()!=z.dimension()) {
+      if (this->argument_dimension()!=z.dimension()) {
         throw std::domain_error("AffineMap<R>::operator() (const Geometry::Zonotope<R>& z): the map does not have the same dimension of the zonotope."); 
       }
-      
-      state_type new_centre=(*this)(z.centre());
-      return Geometry::Zonotope<R>(new_centre,A*z.generators());
+      return Geometry::Zonotope<R>::over_approximation(
+        this->operator()(z.central_block()),
+        this->A()*LinearAlgebra::IntervalMatrix<R>(z.generators()));
     }    
     
-    /* TO IMPROVE */
-    template <typename R>
-    Geometry::Polyhedron<R>
-    AffineMap<R>::operator() (const Geometry::Polyhedron<R>& p) const
-    {
-      const Matrix_type& A=this->A();
-      if (A.size2()!=p.dimension()) {
-        throw std::domain_error("AffineMap<R>::operator() (const Geometry::Polyhedron<R>& p): the map does not have the same dimension of the polyhedron.");
-      }
-
-      std::vector< Geometry::Point<R> > vert=p.vertices();
-      LinearAlgebra::Vector<R> new_point_pos;
-
-      for (size_t i=0; i< vert.size(); i++) {
-       new_point_pos=this->b()+prod(A,vert[i].position_vector());
-       vert[i]=Geometry::Point<R>(new_point_pos); 
-      }
-
-      return Geometry::Polyhedron<R>(vert);
-    }    
-
-    /* TO IMPROVE */
     template <typename R>
     Geometry::ListSet<R,Geometry::Parallelotope>
-    AffineMap<R>::operator() (const Geometry::GridMaskSet<R>& cms) const
+    AffineMap<R>::operator() (const Geometry::GridMaskSet<R>& gms) const
     {
-      using namespace Ariadne::Geometry;
+      Geometry::ListSet<R,Geometry::Parallelotope> result(gms.dimension());
 
-      ListSet<R,Rectangle> lrs=ListSet<R,Rectangle>(cms);
-
-      ListSet<R,Geometry::Parallelotope> output(cms.dimension());
-
-      for (size_t i=0; i< lrs.size(); i++) {
-	Parallelotope<R> p=(*this)(Parallelotope<R>(lrs[i]));
-
-	output.push_back(p);
+      for(typename Geometry::GridMaskSet<R>::const_iterator iter=gms.begin();
+          iter!=gms.end(); ++iter) {
+        result.push_back(this->operator()(Geometry::Parallelotope<R>(*iter)));
       }
       
-      return output;
+      return result;
     }  
+
+    template<typename R>
+    std::ostream& 
+    operator<<(std::ostream& os, const AffineMap<R>& f)
+    {
+      return os << "AffineMap(\n  matrix=" << f.A() << ",\n"
+                << "  vector=" << f.b() << "\n)\n";
+    }
+    
+/*
+    Geometry::Point<Rational>
+    AffineMap<Rational>::operator() (const Geometry::Point<Rational>& pt) const
+    {
+      if (this->argument_dimension()!=pt.dimension()) {
+        throw std::domain_error("AffineMap<R>::operator() (const Point&): "
+          "the map does not have the same dimension of the point.");
+      }
+      return Geometry::Point<Rational>(this->A()*pt.position_vector()+this->b());
+    }
+    
+    Geometry::Rectangle<Rational>
+    AffineMap<Rational>::operator() (const Geometry::Rectangle<Rational>& r) const
+    {
+      if (this->argument_dimension()!=r.dimension()) {
+        throw std::domain_error("AffineMap<R>::operator() (const Rectangle&): "
+          "the map does not have the same dimension of the rectangle.");
+      }
+      return Geometry::Rectangle<Rational>(this->A()*r.position_vectors()+this->b());
+    }
+    
+    Geometry::Parallelotope<Rational>
+    AffineMap<Rational>::operator() (const Geometry::Parallelotope<Rational>& p) const
+    {
+      if (this->argument_dimension()!=p.dimension()) {
+        throw std::domain_error("AffineMap<R>::operator() (const Parallelotope&): "
+          "the map does not have the same dimension of the rectangle.");
+      }
+      return Geometry::Parallelotope<Rational>(
+        this->operator() (p.centre()),A()*p.generators());
+    }
+    
+    Geometry::Zonotope<Rational>
+    AffineMap<Rational>::operator() (const Geometry::Zonotope<Rational>& z) const
+    {
+      if (this->argument_dimension()!=z.dimension()) {
+        throw std::domain_error("AffineMap<Rational>::operator() (const Zonotope<Rational>&): "
+          "the map does not have the same dimension of the simplex.");
+      }
+
+      return Geometry::Zonotope<Rational>(
+          this->operator() (z.central_block()),this->A()*z.generators());
+    }
+
+    Geometry::Simplex<Rational>
+    AffineMap<Rational>::operator() (const Geometry::Simplex<Rational>& s) const
+    {
+      if (this->argument_dimension()!=s.dimension()) {
+        throw std::domain_error("AffineMap<Rational>::operator() (const Simplex<Rational>&): "
+          "the map does not have the same dimension of the simplex.");
+      }
+      
+      array< Geometry::Point<Rational> > new_vertices=s.vertices();
+      for (size_type i=0; i< new_vertices.size(); ++i) {
+        new_vertices[i]=this->operator() (new_vertices[i]);
+      }
+      return Geometry::Simplex<Rational>(new_vertices);
+    }a
+
+    
+    Geometry::Polyhedron<Rational>
+    AffineMap<Rational>::operator() (const Geometry::Polyhedron<Rational>& p) const
+    {
+      if (this->argument_dimension()!=p.dimension()) {
+        throw std::domain_error("AffineMap<Rational>::operator() (const Polyhedron<Rational>&): "
+          "the map does not have the same dimension of the polyhedron.");
+      }
+
+      std::vector< Geometry::Point<Rational> > new_vertices=p.vertices();
+      for (size_type i=0; i< new_vertices.size(); ++i) {
+        new_vertices[i]=this->operator() (new_vertices[i]);
+      }
+      return Geometry::Polyhedron<Rational>(new_vertices);
+    }    
+*/
+
   }
 }

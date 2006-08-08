@@ -81,6 +81,18 @@ namespace Ariadne {
       return Polyhedron<R>(vert_vec);
     }
     
+/*
+    template<typename R>
+    Simplex<R>::operator Polyhedron<Rational> () const 
+    {
+      std::vector< Point<Rational> > vert_vec(this->_vertices.size());
+      for(size_type i=0; i!=this->_vertices.size(); ++i) {
+        vert_vec[i]=Point<Rational>(this->_vertices[i]);
+      }
+      return Polyhedron<Rational>(vert_vec);
+    }
+*/
+
     template <typename R>
     std::ostream&
     operator<<(std::ostream& os, const Simplex<R>& s) 

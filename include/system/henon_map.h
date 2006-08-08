@@ -53,11 +53,11 @@ namespace Ariadne {
       inline explicit HenonMap(real_type a=real_type(1.5),real_type b=real_type(0.3)) : _a(a), _b(b) { }
       
       /*! \brief  The map applied to a state. */
-      virtual state_type apply(const state_type& x) const;
+      virtual state_type operator() (const state_type& x) const;
       /*! \brief  The map applied to a rectangle basic set. */
-      virtual Geometry::Rectangle<R> apply(const Geometry::Rectangle<R>& r) const;
+      virtual Geometry::Rectangle<R> operator() (const Geometry::Rectangle<R>& r) const;
       /*! \brief  The map applied to a parallelotope basic set. */
-      virtual Geometry::Parallelotope<R> apply(const Geometry::Parallelotope<R>& r) const;
+      virtual Geometry::Parallelotope<R> operator() (const Geometry::Parallelotope<R>& r) const;
       
       /*! \brief  The derivative of the map at a point. */
       virtual LinearAlgebra::Matrix<R> derivative(const state_type& x) const;
@@ -85,7 +85,7 @@ namespace Ariadne {
       
     template <typename R>
     Geometry::Point<R>
-    HenonMap<R>::apply(const Geometry::Point<R>& p) const
+    HenonMap<R>::operator() (const Geometry::Point<R>& p) const
     {
       Geometry::Point<R> result(2); 
       const R& x=p[0];
@@ -96,20 +96,20 @@ namespace Ariadne {
     }
      
     template <typename R>
-    Geometry::Parallelotope<R>
-    HenonMap<R>::apply(const Geometry::Parallelotope<R>& A) const
-    {
-      return Evaluation::C1Applicator<R>().apply(*this,A);
-    }
-     
-    template <typename R>
     Geometry::Rectangle<R>
-    HenonMap<R>::apply(const Geometry::Rectangle<R>& A) const
+    HenonMap<R>::operator() (const Geometry::Rectangle<R>& A) const
     {
       Geometry::Rectangle<R> result(2); 
       result[0]=_a-A[0]*A[0]-_b*A[1]; 
       result[1]=A[0]; 
       return result;
+    }
+     
+    template <typename R>
+    Geometry::Parallelotope<R>
+    HenonMap<R>::operator() (const Geometry::Parallelotope<R>& A) const
+    {
+      return Evaluation::C1Applicator<R>().apply(*this,A);
     }
      
     template <typename R>

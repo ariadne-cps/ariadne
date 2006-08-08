@@ -30,6 +30,7 @@ namespace Ariadne {
   namespace LinearAlgebra {
     
     template class ConstraintSystem<Real>;
+    template class ConstraintSystem<Rational>;
 
   }
 }

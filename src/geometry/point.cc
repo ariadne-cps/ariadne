@@ -30,9 +30,12 @@ namespace Ariadne {
   namespace Geometry {
 
     template class Point<Real>;
-
     template std::ostream& operator<<(std::ostream&, const Point<Real>&);
     template std::istream& operator>>(std::istream&, Point<Real>&);
+
+    template class Point<Rational>;
+    template std::ostream& operator<<(std::ostream&, const Point<Rational>&);
+    template std::istream& operator>>(std::istream&, Point<Rational>&);
 
   }
 }

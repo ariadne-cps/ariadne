@@ -67,33 +67,13 @@ namespace Ariadne {
 
     
     template <typename R>
-    Parallelotope<R>::operator Polyhedron<R>() const 
+    Parallelotope<R>::operator Polyhedron<Rational>() const 
     {
-      using namespace ::Ariadne::LinearAlgebra;
-      
-      size_type n = this->dimension();
-      
-      /* Express in form invs * x - offst in [-bnds,+bnds] */
-      Matrix_type invs;
-      Vector_type offst;
-      Vector_type bnds;
-      this->compute_linear_inequalities(invs,offst,bnds);
-      
-      Matrix_type A(2*n,n);
-      Vector_type b(2*n);
-      
-      for(uint i=0; i!=n; ++i) {
-        for(uint j=0; j!=n; ++j) {
-          A(i,j) = -invs(i,j);
-          A(i+n,j) = invs(i,j);
-        }
-        b(i) = bnds(i)-offst(i);
-        b(i+n) = bnds(i)+offst(i);
-      }
-
-      return Polyhedron<R>(A,b);
+      Point<Rational> c(this->_centre);
+      LinearAlgebra::Matrix<Rational> g(this->_generators);
+      return Polyhedron<Rational>(c,g);
     }
-
+    
     /*! \brief The equality operator */
     template <typename R>
     bool Parallelotope<R>::operator==(const Parallelotope<R>& A) const {
@@ -130,10 +110,11 @@ namespace Ariadne {
       if (this->empty()) 
         return false;
     
-      for (size_type i=0; i< (size_type)(1<<rect.dimension()); i++)
-        if (!this->contains(rect.vertex(i)))
-	  return false;
-
+      for (size_type i=0; i< (size_type)(1<<rect.dimension()); i++) {
+        if (!this->contains(rect.vertex(i))) {
+          return false;
+        }
+      }
       return true;
     }
     
@@ -218,74 +199,7 @@ namespace Ariadne {
     
 
 
-    template<typename R>
-    void 
-    Parallelotope<R>::compute_linear_inequalities(Matrix_type& A, Vector_type& o, Vector_type& b) const
-    {
-      _compute_linear_inequalities(A,o,b,this->centre().position_vector(),this->generators(),typename numerical_traits<R>::algebraic_category());
-    }
-    
-    template<typename R>
-    inline
-    void
-    _compute_linear_inequalities(LinearAlgebra::Matrix<R>& A,   
-                                 LinearAlgebra::Vector<R>& o, 
-                                 LinearAlgebra::Vector<R>& b, 
-                                 const LinearAlgebra::Vector<R>& c, 
-                                 const LinearAlgebra::Matrix<R>& G, 
-                                 const field_tag&)
-    {
-      size_type n=c.size();
-      
-      A=LinearAlgebra::inverse(G);
-      o=A*c;
-      
-      b=LinearAlgebra::Vector<R>(n);
-      for(size_type i=0; i!=n; ++i) {
-        b[i]=1;
-      }
-    }
-      
-    template<typename R>
-    inline
-    void
-    _compute_linear_inequalities(LinearAlgebra::Matrix<R>& A,   
-                                 LinearAlgebra::Vector<R>& o, 
-                                 LinearAlgebra::Vector<R>& b, 
-                                 const LinearAlgebra::Vector<R>& c, 
-                                 const LinearAlgebra::Matrix<R>& G, 
-                                 const ring_tag&)
-    {
-      typedef typename numerical_traits<R>::field_extension_type F;
-      
-      size_type n=c.size();
-      
-      LinearAlgebra::Matrix<F> M(n,n);
-      for(size_type i=0; i!=n; ++i) {
-        for(size_type j=0; j!=n; ++j) {
-          M(i,j) = convert_to<F>(G(i,j));
-        }
-      }
-      M=LinearAlgebra::inverse(M);
-      
-      LinearAlgebra::Vector<Integer> multipliers = row_common_denominators(M);
-      
-      A.resize(n,n);
-      for(size_type i=0; i!=n; ++i) {
-        for(size_type j=0; j!=n; ++j) {
-          A(i,j) = Integer(numerator(M(i,j)) * (multipliers(i)/denominator(M(i,j))));
-        }
-      }
-
-      o = A * c;
-      
-      b.resize(n);
-      for(size_type i=0; i!=n; ++i) {
-        b(i)=multipliers(i);
-      }
-    }
-      
-  
+ 
   
     template<typename R>
     LinearAlgebra::Vector<typename numerical_traits<R>::field_extension_type>
@@ -311,9 +225,9 @@ namespace Ariadne {
       This method has some problems. It fails when the parameters are
       [1,17/16]x[19/16,5/4] and 
         Parallelotope(
-	  centre=(1/2, 1/10)
-	  directions=[ 1,1/2; 1/2,3/5 ]
-	)
+          centre=(1/2, 1/10)
+          directions=[ 1,1/2; 1/2,3/5 ]
+        )
       // Construct tableau for testing intersection of rectangle and point
       // Rectangle  a<=x<=b
       // Parallelotope  x==c+Ae,  -1<=e<=1
@@ -378,44 +292,85 @@ namespace Ariadne {
         assert(false);
       }
       */
-      
-      return Geometry::disjoint(Polyhedron<R>(*this), Polyhedron<R>(r));
+      return Geometry::disjoint(Polyhedron<Rational>(*this), Polyhedron<Rational>(r));
     }
     
-    template <typename R>
-    Point<R> 
-    Parallelotope<R>::vertex(const size_type& i) const
+    template<typename R>
+    std::vector< Point<Rational> > 
+    Parallelotope<R>::vertices() const
     {
-      Point<R> vertex(this->centre());
-      const LinearAlgebra::Matrix<R>& gen=this->_generators;
-      
-      for (size_type j=0; j<gen.size1(); ++j) {
-        for (size_type k=0; k<gen.size2(); ++k) {
-          if ((1<<k)&(i)) {
-            vertex[j]+=gen(j,k);
-          } 
-          else {
-            vertex[j]-=gen(j,k);
-          }
+      std::vector< Point<Rational> > result;
+
+      dimension_type d=this->dimension();
+      assert(d<32);      
+      Point<Rational> c(this->centre());
+      LinearAlgebra::Matrix<Rational> g(this->generators());
+      LinearAlgebra::Vector<Rational> e(d);
+
+      size_type nv=(1<<d);
+      result.reserve(nv);
+
+      for (size_type i=0; i<nv; ++i) {
+        for(size_type j=0; j!=d; ++j) {
+          e[j]=(i&(1<<d) ? 1 : -1);
         }
+        result.push_back(c+g*e);
       }
-      return vertex;
+      return result;
     }
     
     template<typename R>
     std::vector< Point<R> > 
-    Parallelotope<R>::vertices() const
+    Parallelotope<R>::approximate_vertices() const
     {
-      size_type vert_num=(1<<(this->_generators).size2());
-      std::vector< Point<R> > vert(1<<(this->_generators).size2());
+      std::vector< Point<R> > result;
+      
+      dimension_type d=this->dimension();
+      assert(d<32);      
+      const Point<R>& c(this->centre());
+      const LinearAlgebra::Matrix<R>& g(this->generators());
+      LinearAlgebra::Vector<R> e(d);
 
-      assert((this->_generators).size2()<32);
-      for (size_type i=0; i<vert_num; ++i) {
-        vert[i]=this->vertex(i);
+      size_type nv=(1<<d);
+      result.reserve(nv);
+
+      for (size_type i=0; i<nv; ++i) {
+        for(size_type j=0; j!=d; ++j) {
+          e[j]=(i&(1<<d) ? 1 : -1);
+        }
+        result.push_back(c+g*e);
       }
-      return vert;
+      return result;
     }
     
+    template<typename R>
+    Parallelotope<R>
+    Parallelotope<R>::over_approximation(const Rectangle<R> &c, const LinearAlgebra::IntervalMatrix<R>& A)
+    {
+      #ifdef DEBUG
+      std::cerr << "IntervalParallelotope<R>::over_approximating_parallelotope() const" << std::endl;
+#endif
+      size_type n=c.dimension();
+      
+      Point<R> cmid=c.centre();
+      LinearAlgebra::Matrix<R> Amid=A.centre();
+      
+      LinearAlgebra::Matrix<R> D(n,n);
+      for(size_type i=0; i!=n; ++i) {
+        D(i,i)=c[i].radius();
+      }
+      
+      LinearAlgebra::IntervalMatrix<R> Ainv=LinearAlgebra::inverse(LinearAlgebra::IntervalMatrix<R>(Amid));
+      
+      R err = upper_norm(Ainv*D)+upper_norm(Ainv*A);
+#ifdef DEBUG
+      std::cerr << "error=" << err << std::endl;
+#endif
+      return Geometry::Parallelotope<R>(cmid,err*Amid);
+    }
+    
+
+
     template <typename R>
     std::ostream&
     operator<<(std::ostream& os, const Parallelotope<R>& p) 

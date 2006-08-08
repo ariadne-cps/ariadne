@@ -37,12 +37,10 @@ typedef RIntervalMatrix (RLorenzSystem::* RectangleDerivative) (const RRectangle
 void export_lorenz_system() {
   class_<RLorenzSystem, bases<RVectorFieldBase> >("LorenzSystem",init<Real,Real,Real>())
     .def("dimension", &RLorenzSystem::dimension)
-    .def("__call__", PointMap(&RLorenzSystem::apply))
-    .def("__call__", RectangleMap(&RLorenzSystem::apply))
-    .def("apply", PointMap(&RLorenzSystem::apply))
-    .def("apply", RectangleMap(&RLorenzSystem::apply))
+    .def("__call__", PointMap(&RLorenzSystem::operator()))
+    .def("__call__", RectangleMap(&RLorenzSystem::operator()))
     .def("derivative", PointDerivative(&RLorenzSystem::derivative))
     .def("derivative", RectangleDerivative(&RLorenzSystem::derivative))
-    .def(self_ns::str(self))    // __self_ns::str__
+    .def(self_ns::str(self))
   ;
 }

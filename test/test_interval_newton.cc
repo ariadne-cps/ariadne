@@ -16,7 +16,7 @@ using namespace Ariadne;
 
 int main() {
   cout << "test_interval_newton: " << flush;
-  ofstream clog("test_partition_tree.log");
+  ofstream clog("test_interval_newton.log");
 
   System::HenonMap<Real> h(1.5,0.375);
   Geometry::Rectangle<Real> r("[-2.125,-2]x[-2.125,-2]");

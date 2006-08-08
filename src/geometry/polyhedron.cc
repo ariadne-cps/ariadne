@@ -43,5 +43,19 @@ namespace Ariadne {
     
     template std::ostream& operator<<(std::ostream&, const Polyhedron<Real>&);
 
+    template class Polyhedron<Rational>;
+
+    template bool disjoint(const Polyhedron<Rational>&, const Polyhedron<Rational>&);
+    template bool interiors_intersect(const Polyhedron<Rational>&, const Polyhedron<Rational>&);
+    template bool inner_subset(const Polyhedron<Rational>&, const Polyhedron<Rational>&);
+    template bool subset(const Polyhedron<Rational>&, const Polyhedron<Rational>&);
+    
+    template Polyhedron<Rational> regular_intersection(const Polyhedron<Rational>&, const Polyhedron<Rational>&);
+    template Polyhedron<Rational> intersection(const Polyhedron<Rational>&, const Polyhedron<Rational>&);
+    template Polyhedron<Rational> convex_hull(const Polyhedron<Rational>&, const Polyhedron<Rational>&);
+    template Polyhedron<Rational> minkowski_sum(const Polyhedron<Rational>&, const Polyhedron<Rational>&);
+    
+    template std::ostream& operator<<(std::ostream&, const Polyhedron<Rational>&);
+
   }
 }

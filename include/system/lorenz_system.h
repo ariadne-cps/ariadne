@@ -56,9 +56,9 @@ namespace Ariadne {
        : _b(beta), _p(rho), _s(sigma) { }
       
       /*! \brief  The vector field applied to a state. */
-      virtual LinearAlgebra::Vector<R> apply(const state_type& x) const;
+      virtual LinearAlgebra::Vector<R> operator() (const state_type& x) const;
       /*! \brief  The map applied to a rectangle basic set. */
-      virtual LinearAlgebra::IntervalVector<R> apply(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::IntervalVector<R> operator() (const Geometry::Rectangle<R>& r) const;
      
       /*! \brief  The derivative of the map at a point. */
       virtual LinearAlgebra::Matrix<R> derivative(const state_type& x) const;
@@ -86,7 +86,7 @@ namespace Ariadne {
       
     template <typename R>
     LinearAlgebra::Vector<R>
-    LorenzSystem<R>::apply(const Geometry::Point<R>& x) const
+    LorenzSystem<R>::operator() (const Geometry::Point<R>& x) const
     {
       LinearAlgebra::Vector<R> result(3); 
       result(0)=_s*(x[1]-x[0]);
@@ -97,7 +97,7 @@ namespace Ariadne {
      
     template <typename R>
     LinearAlgebra::IntervalVector<R>
-    LorenzSystem<R>::apply(const Geometry::Rectangle<R>& X) const
+    LorenzSystem<R>::operator() (const Geometry::Rectangle<R>& X) const
     {
       LinearAlgebra::IntervalVector<R> result(3); 
       result(0)=_s*(X[1]-X[0]);

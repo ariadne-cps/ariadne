@@ -24,8 +24,11 @@ from ariadne.geometry import *
 
 r=Rectangle("[0,3]x[2,4]")
 p=Parallelotope(r)
-q=Polyhedron(p)
-
+try:
+  q=Polyhedron(p)
+except:
+  print "Cannot convert from Parallelotope to Polyhedron"
+    
 print r
 print p
 print q

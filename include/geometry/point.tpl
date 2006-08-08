@@ -25,6 +25,7 @@
 
 
 #include "point.h"
+#include "../numeric/numerical_types.h"
 
 #include <iostream>
 #include <string>
@@ -33,57 +34,9 @@
 
 #include "../utility/stlio.h"
 
-#include "../geometry/rectangle.h"
-#include "../geometry/parallelotope.h"
-#include "../geometry/zonotope.h"
-#include "../geometry/polyhedron.h"
-
 namespace Ariadne {
   namespace Geometry {
 
-/*
-    template <typename R>
-    Point<R>::operator Sphere<R>() const 
-    {
-       return Sphere<R>(*this,0); 	
-    }
-
-    template <typename R>
-    Point<R>::operator Ellipsoid<R>() const 
-    {
-       return Ellipsoid<R>(*this,0); 	
-    }
-*/
-
-    template <typename R>
-    Point<R>::operator Rectangle<R>() const 
-    {
-       return Rectangle<R>(*this,*this); 	
-    }
-
-    template <typename R>
-    Point<R>::operator Parallelotope<R>() const 
-    {
-       LinearAlgebra::Matrix<R> A(this->dimension(),this->dimension());
-
-       return Parallelotope<R>(*this,A); 	
-    }
-
-    template <typename R>
-    Point<R>::operator Zonotope<R>() const 
-    {
-       LinearAlgebra::Matrix<R> A(this->dimension(),this->dimension());
-
-       return Zonotope<R>(*this,A); 	
-    }
-
-    template <typename R>
-    Point<R>::operator Polyhedron<R>() const 
-    {
-       return Polyhedron<R>(Rectangle<R>(*this)); 	
-    }
-
-    /*! \brief Construct a point from a string literal. */
     template<typename R>
     Point<R>::Point(const std::string& s) : _vector(1)
     {
@@ -91,6 +44,20 @@ namespace Ariadne {
       ss >> *this;
     }
 
+    #ifndef RATIONAL_REAL
+    template<typename R>
+    Point<R>::operator Point<Rational> ()  const
+    {
+      const Point<R>& self=*this;
+      Point<Rational> result(self.dimension());
+      for(size_type i=0; i!=self.dimension(); ++i) {
+        result[i]=self[i];
+      }
+      return result;
+    }
+    #endif 
+    
+    
     template <typename R>
     std::ostream& operator<<(std::ostream& os, const Point<R>& state)
     {

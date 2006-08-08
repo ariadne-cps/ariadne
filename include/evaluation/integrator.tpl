@@ -163,7 +163,7 @@ namespace Ariadne {
                                      const R& h) const
     {
       using namespace Geometry;
-      return subset(r+Interval<R>(0,h)*vf.apply(b),b);
+      return subset(r+Interval<R>(0,h)*vf(b),b);
     }
     
     
@@ -189,8 +189,8 @@ namespace Ariadne {
       reach=r;
       
       while(t>0) {
-        bounds=reach+Interval<R>(0,multiplier*h)*vf.apply(reach);
-        LinearAlgebra::IntervalVector<R> df=vf.apply(bounds);
+        bounds=reach+Interval<R>(0,multiplier*h)*vf(reach);
+        LinearAlgebra::IntervalVector<R> df=vf(bounds);
         
         F dt=t;
         for(dimension_type i=0; i!=vf.dimension(); ++i) {
@@ -259,13 +259,13 @@ namespace Ariadne {
       Rectangle<R> rx=initial_set;
       Rectangle<R> b=estimated_bounds;
       
-      Rectangle<R> xb=rx+Interval<R>(0,h)*vf.apply(b);
-      Rectangle<R> xxb=rx+Interval<R>(0,h)*vf.apply(xb);
+      Rectangle<R> xb=rx+Interval<R>(0,h)*vf(b);
+      Rectangle<R> xxb=rx+Interval<R>(0,h)*vf(xb);
 #ifdef DEBUG
       std::cerr << "new bounds " << xxb << "," << xb << " vs old bounds " << b << "  " << subset(xb,b) << std::endl;
 #endif
-      IntervalVector<R> ddphi=vf.derivative(xb)*vf.apply(xb);
-      IntervalVector<R> dfx=vf.apply(rx);
+      IntervalVector<R> ddphi=vf.derivative(xb)*vf(xb);
+      IntervalVector<R> dfx=vf(rx);
       IntervalVector<R> hdfx=(h*dfx);
       IntervalVector<R> hhddphi=(R(h*h/2)*ddphi);
       IntervalVector<R> dx=hdfx+hhddphi;

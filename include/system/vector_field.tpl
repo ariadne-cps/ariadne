@@ -36,30 +36,30 @@ namespace Ariadne {
      
     template<typename R>
     LinearAlgebra::Vector<R> 
-    VectorField<R>::apply(const Geometry::Point<R>& x) const
+    VectorField<R>::operator() (const Geometry::Point<R>& x) const
     {
-      throw std::invalid_argument("Not implemented."); 
+      throw std::invalid_argument(this->name()+"::operator() (Point) not implemented."); 
     }
     
     template<typename R>
     LinearAlgebra::IntervalVector<R>
-    VectorField<R>::apply(const Geometry::Rectangle<R>& x) const
+    VectorField<R>::operator() (const Geometry::Rectangle<R>& x) const
     {
-      throw std::invalid_argument("Not implemented."); 
+      throw std::invalid_argument(this->name()+"::operator() (Rectangle) not implemented."); 
     }
     
     template<typename R>
     LinearAlgebra::Matrix<R> 
     VectorField<R>::derivative(const Geometry::Point<R>& x) const 
     {
-      throw std::invalid_argument("Not implemented."); 
+      throw std::invalid_argument(this->name()+"::derivative(Point) not implemented."); 
     }
     
     template<typename R>
     LinearAlgebra::IntervalMatrix<R> 
     VectorField<R>::derivative(const Geometry::Rectangle<R>& A) const 
     {
-      throw std::invalid_argument("Not implemented."); 
+      throw std::invalid_argument(this->name()+"::derivative(Rectangle) not implemented."); 
     }
     
   }

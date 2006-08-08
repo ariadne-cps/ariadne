@@ -62,7 +62,6 @@ void export_polyhedron() {
     .def(init<RPointList>())
     .def(init<RPolyhedron>())
     .def(init<RRectangle>())
-    .def(init<RParallelotope>())
     .def("dimension", &RPolyhedron::dimension)
     .def("vertices", &RPolyhedron::vertices)
     .def("bounding_box", &RPolyhedron::bounding_box)

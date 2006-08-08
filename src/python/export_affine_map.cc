@@ -39,26 +39,23 @@ using namespace Ariadne;
 #include <boost/python.hpp>
 using namespace boost::python;
 
+typedef System::Map<Real> RMap;
+
 typedef RPoint (RAffineMap::*AffMapCallPoint) (const RPoint&) const;
 typedef RParallelotope (RAffineMap::*AffMapCallParallelotope) (const RParallelotope&) const;
 typedef RRectangle (RAffineMap::*AffMapCallRectangle) (const RRectangle&) const;
-typedef RSimplex (RAffineMap::*AffMapCallSimplex) (const RSimplex&) const;
 typedef RZonotope (RAffineMap::*AffMapCallZonotope) (const RZonotope&) const;
+typedef RSimplex (RAffineMap::*AffMapCallSimplex) (const RSimplex&) const;
 typedef RPolyhedron (RAffineMap::*AffMapCallPolyhedron) (const RPolyhedron&) const;
-typedef RParallelotopeListSet (RAffineMap::*AffMapCallParallelotopeListSet) (const RParallelotopeListSet&) const;
-typedef RZonotopeListSet (RAffineMap::*AffMapCallZonotopeListSet) (const RZonotopeListSet&) const;
-typedef RParallelotopeListSet (RAffineMap::*AffMapCallGridMaskSet) (const RGridMaskSet&) const;
+typedef RPolyhedron (RMap::*MapCallPolyhedron) (const RPolyhedron&) const;
+typedef RSimplex (RMap::*MapCallSimplex) (const RSimplex&) const;
 
 AffMapCallPoint affine_map_call_point=&RAffineMap::operator();
-AffMapCallSimplex affine_map_call_simplex=&RAffineMap::operator();
 AffMapCallRectangle affine_map_call_rectangle=&RAffineMap::operator();
-AffMapCallRectangle affine_map_apply_rectangle=&RAffineMap::apply;
 AffMapCallParallelotope affine_map_call_parallelotope=&RAffineMap::operator();
 AffMapCallZonotope affine_map_call_zonotope=&RAffineMap::operator();
-AffMapCallPolyhedron affine_map_call_polyhedron=&RAffineMap::operator();
-AffMapCallParallelotopeListSet affine_map_call_parallelotope_list_set=&RAffineMap::operator();
-AffMapCallZonotopeListSet affine_map_call_zonotope_list_set=&RAffineMap::operator();
-AffMapCallGridMaskSet affine_map_call_grid_mask_set=&RAffineMap::operator();
+MapCallSimplex affine_map_call_simplex=&RMap::operator();
+MapCallPolyhedron affine_map_call_polyhedron=&RMap::operator();
 
 
 void export_affine_map() {
@@ -67,15 +64,11 @@ void export_affine_map() {
     .def("argument_dimension", &RAffineMap::argument_dimension)
     .def("result_dimension", &RAffineMap::result_dimension)
     .def("__call__", affine_map_call_point)
-    .def("__call__", affine_map_call_parallelotope)
     .def("__call__", affine_map_call_rectangle)
-    .def("apply", affine_map_apply_rectangle)
+    .def("__call__", affine_map_call_parallelotope)
+    .def("__call__", affine_map_call_zonotope)
     .def("__call__", affine_map_call_simplex)
     .def("__call__", affine_map_call_polyhedron)
-    .def("__call__", affine_map_call_zonotope)
-    .def("__call__", affine_map_call_parallelotope_list_set)
-    .def("__call__", affine_map_call_zonotope_list_set)
-    .def("__call__", affine_map_call_grid_mask_set)
-//    .def(self_ns::str(self))    // __self_ns::str__
+    .def(self_ns::str(self))
   ;
 }

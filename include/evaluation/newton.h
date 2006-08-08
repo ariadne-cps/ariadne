@@ -73,8 +73,8 @@ namespace Ariadne {
       DifferenceMap(const Map<R>& f) : _base(f) { assert(f.argument_dimension()==f.result_dimension()); }
       DifferenceMap(const HenonMap<R>& f) : _base(f) { }
       virtual dimension_type dimension() const { return _base.argument_dimension(); }
-      virtual LinearAlgebra::IntervalVector<R> apply(const Geometry::Rectangle<R>& r) const {
-        return Geometry::minkowski_difference(_base.apply(r),r).position_vectors(); }
+      virtual LinearAlgebra::IntervalVector<R> operator() (const Geometry::Rectangle<R>& r) const {
+        return _base(r)-r; }
       virtual LinearAlgebra::IntervalMatrix<R> derivative(const Geometry::Rectangle<R>& r) const {
         LinearAlgebra::IntervalMatrix<R> d=_base.derivative(r);
         LinearAlgebra::Matrix<R> i=LinearAlgebra::identity_matrix<R>(this->dimension());

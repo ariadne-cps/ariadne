@@ -210,6 +210,23 @@ namespace Ariadne {
       return diameter/2;
     }
 
+    /*! \brief Sums of the radii in each row. */
+    template<typename R>
+    IntervalVector<R>
+    IntervalMatrix<R>::radius_row_sum() const
+    { 
+      IntervalVector<R> result(this->size1());
+      const IntervalMatrix<R>& self=*this;
+      for(dimension_type i=0; i!=self.size1(); ++i) {
+        R radius=0;
+        for(dimension_type j=0; j!=self.size2(); ++j) {
+          radius+=self(i,j).length();
+        }
+        radius /= 2;
+        result[i]=Interval<R>(-radius,radius);
+      }
+      return result;
+    }
 
 
     template<typename R>

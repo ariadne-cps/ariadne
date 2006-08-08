@@ -174,7 +174,7 @@ namespace Ariadne {
 
         this->p_map=ProjectionMap(p_matrix,p_vector);
 
-        Ariadne::Geometry::Rectangle<R> proj_bbox=(this->p_map).apply(bbox);
+        Ariadne::Geometry::Rectangle<R> proj_bbox=this->p_map(bbox);
         
         this->open(proj_bbox);
       }
@@ -195,7 +195,7 @@ namespace Ariadne {
 
         this->p_map=ProjectionMap(p_matrix,p_vector);
 
-        Ariadne::Geometry::Rectangle<R> proj_bbox=(this->p_map).apply(bbox);
+        Ariadne::Geometry::Rectangle<R> proj_bbox=this->p_map(bbox);
 
         Ariadne::Geometry::Point<R> l(proj_bbox.lower_corner());
         Ariadne::Geometry::Point<R> u(proj_bbox.upper_corner());
@@ -455,7 +455,7 @@ namespace Ariadne {
     epsfstream<R>&
     trace(epsfstream<R>& eps, const Ariadne::Geometry::Rectangle<R>& r)
     {
-      Ariadne::Geometry::Rectangle<R> proj_r=eps.projection().apply(r);
+      Ariadne::Geometry::Rectangle<R> proj_r=eps.projection()(r);
       
       double rlx=convert_to<double>(proj_r.lower_bound(0));
       double rux=convert_to<double>(proj_r.upper_bound(0));
@@ -575,13 +575,14 @@ namespace Ariadne {
     epsfstream<R>&
     operator<<(epsfstream<R>& eps, const Ariadne::Geometry::Parallelotope<R>& p)
     {
-      
+      const Ariadne::Geometry::Point<R>& centre=p.centre();
+      std::vector< Ariadne::Geometry::Point<R> > vertices=p.approximate_vertices();      
       if(eps.fill_style) {
-        trace(eps,p.vertices(),p.centre());
+        trace(eps,vertices,centre);
         eps << eps.fill_colour << " fill\n";
       }
       if(eps.line_style) {
-        trace(eps,p.vertices(),p.centre());
+        trace(eps,vertices,centre);
         eps << eps.line_colour << " stroke\n";
       }
       return eps;
@@ -591,12 +592,14 @@ namespace Ariadne {
     epsfstream<R>&
     operator<<(epsfstream<R>& eps, const Ariadne::Geometry::Zonotope<R>& z)
     {
+      const Ariadne::Geometry::Point<R>& centre=z.centre();
+      std::vector< Ariadne::Geometry::Point<R> > vertices=z.approximate_vertices();
       if(eps.fill_style) {
-        trace(eps,z.vertices(),z.centre());
+        trace(eps,vertices,centre);
         eps << eps.fill_colour << " fill\n";
       }
       if(eps.line_style) {
-        trace(eps,z.vertices(),z.centre());
+        trace(eps,vertices,centre);
         eps << eps.line_colour << " stroke\n";
       }
       return eps;

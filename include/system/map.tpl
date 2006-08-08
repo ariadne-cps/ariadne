@@ -28,6 +28,8 @@
 #include "../geometry/rectangle.h"
 #include "../geometry/list_set.h"
 #include "../geometry/parallelotope.h"
+#include "../geometry/zonotope.h"
+#include "../geometry/simplex.h"
 #include "../geometry/polyhedron.h"
 
 #include "../system/map.h"
@@ -42,30 +44,44 @@ namespace Ariadne {
   
     template<typename R>
     Geometry::Point<R> 
-    Map<R>::apply(const Geometry::Point<R>& x) const 
+    Map<R>::operator() (const Geometry::Point<R>& x) const 
     {
-      throw std::invalid_argument(this->name()+"::apply(Point) not implemented."); 
+      throw std::invalid_argument(this->name()+"::operator() (Point) not implemented."); 
     }
     
     template<typename R>
     Geometry::Rectangle<R>
-    Map<R>::apply(const Geometry::Rectangle<R>& r) const 
+    Map<R>::operator() (const Geometry::Rectangle<R>& r) const 
     {
-      throw std::invalid_argument(this->name()+"::apply(Rectangle) not implemented."); 
+      throw std::invalid_argument(this->name()+"::operator() (Rectangle) not implemented."); 
     }
     
     template<typename R>
     Geometry::Parallelotope<R>
-    Map<R>::apply(const Geometry::Parallelotope<R>& p) const 
+    Map<R>::operator() (const Geometry::Parallelotope<R>& p) const 
     {
-      throw std::invalid_argument(this->name()+"::apply(Parallelotope) not implemented."); 
+      throw std::invalid_argument(this->name()+"::operator() (Parallelotope) not implemented."); 
+    }
+    
+    template<typename R>
+    Geometry::Zonotope<R>
+    Map<R>::operator() (const Geometry::Zonotope<R>& p) const 
+    {
+      throw std::invalid_argument(this->name()+"::operator() (Zonotope) not implemented."); 
+    }
+    
+    template<typename R>
+    Geometry::Simplex<R>
+    Map<R>::operator() (const Geometry::Simplex<R>& p) const 
+    {
+      throw std::invalid_argument(this->name()+"::operator() (Simplex) not implemented."); 
     }
     
     template<typename R>
     Geometry::Polyhedron<R>
-    Map<R>::apply(const Geometry::Polyhedron<R>& p) const 
+    Map<R>::operator() (const Geometry::Polyhedron<R>& p) const 
     {
-      throw std::invalid_argument(this->name()+"::apply(Polyhedron) not implemented."); 
+      throw std::invalid_argument(this->name()+"::operator() (Polyhedron) not implemented."); 
     }
     
     template<typename R>
@@ -86,11 +102,11 @@ namespace Ariadne {
     template<typename R>
     template<template<typename> class BS>
     Geometry::ListSet<R,BS> 
-    Map<R>::apply(const Geometry::ListSet<R,BS>& A) const 
+    Map<R>::operator() (const Geometry::ListSet<R,BS>& A) const 
     { 
       Geometry::ListSet<R,BS> trans_ds(A.dimension());
-      for (size_t i=0; i< A.size(); i++) {
-        trans_ds.inplace_union(this->apply(A[i]));
+      for (size_t i=0; i< A.size(); ++i) {
+        trans_ds.inplace_union((*this)(A[i]));
       }
       return trans_ds;
     }  

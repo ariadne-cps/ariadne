@@ -117,6 +117,18 @@ apply.o: apply.cc ../../include/evaluation/apply.h \
   ../../include/evaluation/../geometry/parallelotope.h \
   ../../include/evaluation/../geometry/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/../linear_algebra/matrix.h \
+  ../../include/evaluation/../geometry/../geometry/polyhedron.h \
+  /ufs/collins/include/ppl.hh \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/constraint_system.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/../declarations.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/../numeric/numerical_types.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/matrix.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/interval_vector.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/generator_system.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/point.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/rectangle.h \
   ../../include/evaluation/../geometry/list_set.h \
   ../../include/evaluation/../geometry/../base/utility.h \
   ../../include/evaluation/../geometry/../base/../declarations.h \
@@ -158,6 +170,7 @@ integrator.o: integrator.cc ../../include/evaluation/integrator.h \
   ../../include/evaluation/../numeric/../numeric/approximation.h \
   ../../include/evaluation/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/evaluation/../numeric/function.h \
+  /ufs/collins/include/mpfr.h \
   ../../include/evaluation/../numeric/interval.h \
   ../../include/evaluation/../numeric/../declarations.h \
   ../../include/evaluation/../numeric/../numeric/numerical_traits.h \
@@ -189,6 +202,18 @@ integrator.o: integrator.cc ../../include/evaluation/integrator.h \
   ../../include/evaluation/../geometry/parallelotope.h \
   ../../include/evaluation/../geometry/../linear_algebra/vector.h \
   ../../include/evaluation/../geometry/../linear_algebra/matrix.h \
+  ../../include/evaluation/../geometry/../geometry/polyhedron.h \
+  /ufs/collins/include/ppl.hh \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/constraint_system.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/../declarations.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/../numeric/numerical_types.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/vector.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/matrix.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/interval_vector.h \
+  ../../include/evaluation/../geometry/../geometry/../linear_algebra/generator_system.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/point.h \
+  ../../include/evaluation/../geometry/../geometry/../geometry/rectangle.h \
   ../../include/evaluation/../geometry/zonotope.h \
   ../../include/evaluation/../geometry/../linear_algebra/transformation_system.h \
   ../../include/evaluation/../geometry/list_set.h \
@@ -215,6 +240,7 @@ integrator.o: integrator.cc ../../include/evaluation/integrator.h \
   ../../include/evaluation/../system/affine_vector_field.h \
   ../../include/evaluation/../system/../system/vector_field.h \
   ../../include/evaluation/../system/../system/affine_map.h \
+  ../../include/evaluation/../system/../system/../numeric/numerical_types.h \
   ../../include/evaluation/../system/../system/../linear_algebra/vector.h \
   ../../include/evaluation/../system/../system/../linear_algebra/matrix.h \
   ../../include/evaluation/../system/../system/../linear_algebra/interval_matrix.h \
@@ -227,15 +253,6 @@ integrator.o: integrator.cc ../../include/evaluation/integrator.h \
   ../../include/evaluation/../system/../system/../geometry/parallelotope.h \
   ../../include/evaluation/../system/../system/../geometry/zonotope.h \
   ../../include/evaluation/../system/../system/../geometry/polyhedron.h \
-  ../../include/evaluation/../system/../system/../geometry/../linear_algebra/constraint_system.h \
-  ../../include/evaluation/../system/../system/../geometry/../linear_algebra/../declarations.h \
-  ../../include/evaluation/../system/../system/../geometry/../linear_algebra/../numeric/numerical_types.h \
-  ../../include/evaluation/../system/../system/../geometry/../linear_algebra/../linear_algebra/vector.h \
-  ../../include/evaluation/../system/../system/../geometry/../linear_algebra/../linear_algebra/matrix.h \
-  ../../include/evaluation/../system/../system/../geometry/../linear_algebra/vector.h \
-  ../../include/evaluation/../system/../system/../geometry/../linear_algebra/matrix.h \
-  ../../include/evaluation/../system/../system/../geometry/../linear_algebra/generator_system.h \
-  ../../include/evaluation/../system/../system/../geometry/../geometry/rectangle.h \
   ../../include/evaluation/../system/../system/../geometry/list_set.h \
   ../../include/evaluation/../system/../system/../geometry/grid_set.h \
   ../../include/evaluation/../system/../system/../system/map.h \

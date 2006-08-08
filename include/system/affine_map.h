@@ -29,6 +29,8 @@
 #ifndef _ARIADNE_AFFINE_MAP_H
 #define _ARIADNE_AFFINE_MAP_H
 
+#include "../numeric/numerical_types.h"
+
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 #include "../linear_algebra/interval_matrix.h"
@@ -68,44 +70,19 @@ namespace Ariadne {
       AffineMap<real_type>& operator=(const AffineMap<real_type>& T) {
         this->_A=T._A; this->_b=T._b; return *this; }
       
-      /*! \brief  The map applied to a state. */
-      state_type operator() (const state_type& x) const;
-        
-      /*! \brief  The map applied to a simplex basic set. */
-      Geometry::Simplex<R> operator() (const Geometry::Simplex<R>& A) const;
+      /*! \brief  An approximation to the image of a point. DEPRECATED. */
+      Geometry::Point<R> operator() (const Geometry::Point<R>& A) const;
       
-      /*! \brief  The map applied to a rectangle basic set. 
-       *
-       * This operator is not exact on rectangles. If you want to apply 
-       * an affine map use the AffineMap<R>::apply(const Rectangle&) method.
-       */
+      /*! \brief  The map applied to a rectangle. */
       Geometry::Rectangle<R> operator() (const Geometry::Rectangle<R>& A) const;
-      
-      /*! \brief  The map applied to a rectangle basic set. */
-      Geometry::Rectangle<R> apply(const Geometry::Rectangle<R>& A) const;
-      
+
       /*! \brief  The map applied to a parallelotope basic set. */
       Geometry::Parallelotope<R> operator() (const Geometry::Parallelotope<R>& A) const;
       
       /*! \brief  The map applied to a zonotope basic set. */
       Geometry::Zonotope<R> operator() (const Geometry::Zonotope<R>& A) const;
-      
-      /*! \brief  The map applied to a polyhedron basic set. */
-      Geometry::Polyhedron<R> operator() (const Geometry::Polyhedron<R>& A) const;
-      
-      /*! \brief  The map applied to a list of basic sets. */
-      template <template<class> class BS>
-      Geometry::ListSet<R,BS> operator() (const Geometry::ListSet<R,BS>& A) const {
-        Geometry::ListSet<R,BS> output(A.dimension());
-
-        for (size_type i=0; i<A.size(); i++) { 
-          output.push_back((*this)(A[i]));
-        }
-
-        return output;
-      }
-
-      /*! \brief  The map applied to a gridmaskset. */
+              
+      /*! \brief  The map applied to a grid mask set. */
       Geometry::ListSet<R,Geometry::Parallelotope> operator() (const Geometry::GridMaskSet<R>& ) const;
       
       /*! \brief  The linear transformation of the map. */
@@ -131,7 +108,59 @@ namespace Ariadne {
       Vector_type _b;
     };
       
+    template<typename R>
+    std::ostream& operator<<(std::ostream&, const AffineMap<R>&);
     
+    /*! \brief An affine map on Euclidean space. */
+/*
+    template <>
+    class AffineMap<Rational> : public Map<Rational> 
+    {
+     public:
+      typedef Rational real_type;
+      typedef Geometry::Point<Rational> state_type;
+      
+      typedef LinearAlgebra::Matrix<Rational> Matrix_type;
+      typedef LinearAlgebra::Vector<Rational> Vector_type;
+      
+      explicit AffineMap() {}
+      explicit AffineMap(const Matrix_type& A, const Vector_type& b) : _A(A), _b(b) { }
+      explicit AffineMap(const Matrix_type& A) : _A(A), _b(A.size2()) { }
+      explicit AffineMap(const Vector_type& b) : _A(b.size(),b.size()), _b(b) { }
+      
+      AffineMap(const AffineMap<real_type>& T) : _A(T._A), _b(T._b) { }
+      AffineMap<real_type>& operator=(const AffineMap<real_type>& T) {
+        this->_A=T._A; this->_b=T._b; return *this; }
+      
+      Geometry::Point<Rational> operator() (const Geometry::Point<Rational>& x) const;
+        
+      Geometry::Rectangle<Rational> operator() (const Geometry::Rectangle<Rational>& A) const;
+        
+      Geometry::Parallelotope<Rational> operator() (const Geometry::Parallelotope<Rational>& A) const;
+      
+      Geometry::Zonotope<Rational> operator() (const Geometry::Zonotope<Rational>& A) const;
+      
+      Geometry::Simplex<Rational> operator() (const Geometry::Simplex<Rational>& A) const;
+      
+      Geometry::Polyhedron<Rational> operator() (const Geometry::Polyhedron<Rational>& A) const;
+      
+      Geometry::ListSet<Rational,Geometry::Parallelotope> operator() (const Geometry::GridMaskSet<Rational>& ) const;
+      
+      const LinearAlgebra::Matrix<Rational>& A() const { return _A; }
+      const LinearAlgebra::Vector<Rational>& b() const { return _b; }
+      
+      dimension_type argument_dimension() const { return _A.size2(); }
+      dimension_type result_dimension() const { return _b.size(); }
+      
+      bool invertible() const { assert(false); }
+  
+      std::string name() const { return "AffineMap"; }
+     protected:
+      Matrix_type _A;
+      Vector_type _b;
+    }; 
+*/
+
   }
 }
 

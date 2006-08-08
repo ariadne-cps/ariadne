@@ -23,44 +23,51 @@
  
 
 #include "../system/affine_map.h"
-#include "../system/affine_multimap.h"
+#include "affine_multimap.h"
 
 namespace Ariadne {
   namespace System {
 
     template <typename R, template<typename> class BS>
     BS<R>
-    AffineMultiMap<R,BS>::operator() (const Geometry::Point<R>& s) const
+    AffineMultiMap<R,BS>::operator() (const Geometry::Point<R>& pt) const
     {
       using namespace Ariadne::LinearAlgebra;
 
-      const Matrix_type& A=this->A();
-      const Vector_type& b=this->b();
-      if (A.size2()!=s.dimension()) {
-        throw std::domain_error("AffineMultiMap<R,BS>::operator() (const Point& s): the map does not have the same dimension of the point.");
+      if (this->argument_dimension()!=pt.dimension()) {
+        throw std::domain_error("AffineMultiMap<R,BS>::operator() (const Point&): the map does not have the same dimension of the point.");
       }
-      const Vector_type& pv=s.position_vector();
-      Vector_type v=prod(A,pv);
-      
-      AffineMap<R> map(identity_matrix<R>(s.dimension()),v+b); 
-      return map(this->_S);
+      IntervalVector<R> iv=this->A()*IntervalVector<R>(pt.position_vector());
+      return minkowski_sum(this->S(),BS<R>(Geometry::Rectangle<R>(iv)));
+    }
+    
+    template <typename R, template<typename> class BS>
+    BS<R>
+    AffineMultiMap<R,BS>::operator() (const BS<R>& bs) const
+    {
+      using namespace Ariadne::LinearAlgebra;
+      using namespace Ariadne::Geometry;
+
+      if (this->argument_dimension()!=bs.dimension()) {
+        throw std::domain_error("AffineMultiMap<R,BS>::operator() (const Point&): the map does not have the same dimension of the point.");
+      }
+      return minkowski_sum(AffineMap<R>(this->A())(bs),this->S());
     }
     
     /* TO IMPROVE */
     template <typename R, template<typename> class BS>
-    Geometry::ListSet<R,Geometry::Zonotope>
-    AffineMultiMap<R,BS>::operator() (const Geometry::GridMaskSet<R>& cms) const
+    Geometry::ListSet<R,BS>
+    AffineMultiMap<R,BS>::operator() (const Geometry::GridMaskSet<R>& gms) const
     {
       using namespace Ariadne::Geometry;
 
-      ListSet<R,Rectangle> lrs=ListSet<R,Rectangle>(cms);
+      ListSet<R,Rectangle> lrs=ListSet<R,Rectangle>(gms);
+      ListSet<R,BS> output(gms.dimension());
 
-      ListSet<R,Geometry::Zonotope> output(cms.dimension());
-
-      for (size_t i=0; i< lrs.size(); i++) {
-	Zonotope<R> p=(*this)(Zonotope<R>(lrs[i]));
-
-	output.push_back(p);
+      for (size_type i=0; i< lrs.size(); ++i) {
+        BS<R> rz(lrs[i]);
+        BS<R> p=this->operator()(rz);
+        output.push_back(p);
       }
       
       return output;

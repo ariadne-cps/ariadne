@@ -57,7 +57,7 @@ namespace Ariadne {
     Geometry::Rectangle<R> 
     C0Applicator<R>::apply(const System::Map<R>& f, const Geometry::Rectangle<R>& r) const
     {
-      return f.apply(r);
+      return f(r);
     }
     
     
@@ -79,7 +79,7 @@ namespace Ariadne {
       const Geometry::Point<R>& c=p.centre();
       const LinearAlgebra::Matrix<R>& g=p.generators();
       
-      Geometry::Point<R> img_centre=f.apply(c);
+      Geometry::Point<R> img_centre=f(c);
       LinearAlgebra::IntervalMatrix<R> df_on_set = f.derivative(p.bounding_box());
       LinearAlgebra::Matrix<R> df_at_centre = f.derivative(c);
       

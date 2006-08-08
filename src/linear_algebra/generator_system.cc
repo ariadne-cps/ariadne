@@ -30,6 +30,7 @@ namespace Ariadne {
   namespace LinearAlgebra {
     
     template class GeneratorSystem<Real>;
+    template class GeneratorSystem<Rational>;
 
   }
 }

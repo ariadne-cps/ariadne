@@ -57,7 +57,9 @@ namespace Ariadne {
       Interval<R> norm() const;
       R upper_norm() const;
       R upper_log_norm() const;
-      
+      /*! \brief Sums of the radii in each row. */
+      IntervalVector<R> radius_row_sum() const;
+    
       IntervalMatrix<R> inverse() const;
     };
 
@@ -162,6 +164,7 @@ namespace Ariadne {
       return fprod(A,B);
     }
 
+        
     /*! \brief The range of supremum norms of matrices in the interval Matrix. */
     template<typename R>
     inline

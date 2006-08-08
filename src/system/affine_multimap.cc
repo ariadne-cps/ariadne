@@ -30,7 +30,6 @@ namespace Ariadne {
   namespace System {
 
     template class AffineMultiMap<Real,Geometry::Rectangle>;
-    template class AffineMultiMap<Real,Geometry::Parallelotope>;
     template class AffineMultiMap<Real,Geometry::Zonotope>;
 
   }

@@ -154,15 +154,6 @@ namespace Ariadne {
       friend std::istream& operator>> <> (std::istream& is, Simplex<R>& r);
     };
 
-    /*! \brief Performs the Minkoswi sum of two simplices */
-    template<typename R> 
-    Simplex<R> 
-    minkowski_sum(const Simplex<R>& A, const Simplex<R>& B) {
-        throw std::domain_error("minkowski_sum(const Simplex<R>& A, const Simplex<R>& B): not implemented.");
-
-	return Simplex<R>(A.dimension());
-    }
-
     /*! \brief Tests disjointness */
     template <typename R>
     inline bool disjoint(const Simplex<R>& A, const Simplex<R>& B) 

@@ -30,6 +30,7 @@ namespace Ariadne {
   namespace System {
 
     template class AffineMap<Real>;
-
+    template std::ostream& operator<<(std::ostream&, const AffineMap<Real>&);
+    
   }
 }

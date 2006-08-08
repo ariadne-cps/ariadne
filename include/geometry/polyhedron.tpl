@@ -72,6 +72,44 @@ namespace Ariadne {
     {
     }
     
+    template <typename R>
+    Polyhedron<R>::Polyhedron(const state_type& c, const matrix_type& G)
+    {
+      size_type n=G.size2();
+      if(G.size1()==G.size2()) {
+        try {
+          /* Use formulae (-Ginv)*x <= 1-Ginv*c and Ginv*x <= 1+Ginv*c */
+          
+          matrix_type Ginv=G.inverse();
+          vector_type o=Ginv*c.position_vector();
+          matrix_type A(2*n,n);
+          vector_type b(2*n);
+          for(size_type i=0; i!=n; ++i) {
+            for(size_type j=0; j!=n; ++j) {
+              A(i,j)=-Ginv(i,j);
+              A(n+i,j)=Ginv(i,j);
+            }
+            b(i)=1-o[i];
+            b(n+i)=1+o(i);
+          }
+          (*this)=Polyhedron<R>(A,b);
+        }
+        catch(...) {
+        }
+      }
+      
+      std::vector< Point<R> > v;
+      v.reserve(2<<n);
+      LinearAlgebra::Vector<R> e(n);
+      for(dimension_type k=0; k!=(2<<n); ++k) {
+        for(size_type i=0; i!=n; ++i) {
+          e[i]=(k&(2<<i)) ? +1 : -1;
+        }
+        v.push_back(c+G*e);
+      }
+      (*this)=Polyhedron<R>(v);
+    }
+      
     template<typename R>
     Polyhedron<R>::Polyhedron(Ariadne::LinearAlgebra::GeneratorSystem<R>& gen)
       : _ppl_poly(Parma_Polyhedra_Library::Generator_System(gen)) 
@@ -79,10 +117,9 @@ namespace Ariadne {
     }    
     
     template <typename R>
-    Polyhedron<R>::Polyhedron(const Matrix_type& A, const Vector_type& b)
-    //: _ppl_poly(A.size1()) 
+    Polyhedron<R>::Polyhedron(const matrix_type& A, const vector_type& b)
     {
-      Vector_type rw;
+      vector_type rw;
       real_type cnst;
       Parma_Polyhedra_Library::Constraint_System cs;
       
@@ -125,6 +162,26 @@ namespace Ariadne {
     }
     
 
+    template <typename R>
+    Polyhedron<R>::Polyhedron(const LinearAlgebra::IntervalVector<R>& iv)
+      : _ppl_poly(iv.size())
+    {
+      Parma_Polyhedra_Library::Constraint_System cs;
+      Rational num;
+      for (size_t i=0; i<iv.size(); ++i) {
+        num=convert_to<Rational>(iv[i].upper());
+        cs.insert(
+                  (Parma_Polyhedra_Library::Variable(i))*denominator(num) <= numerator(num)
+                  );
+        
+        num=convert_to<Rational>(iv[i].lower());
+        cs.insert(
+                  (Parma_Polyhedra_Library::Variable(i))*denominator(num) >= numerator(num)
+                  );
+      }
+      _ppl_poly.add_constraints_and_minimize(cs);
+    }
+    
     template <typename R>
     Polyhedron<R>::Polyhedron(const Rectangle<R>& r)
       : _ppl_poly(r.dimension())
@@ -179,6 +236,10 @@ namespace Ariadne {
     typename Polyhedron<R>::state_list_type
     Polyhedron<R>::vertices() const 
     {
+      if(name<R>()!=name<Rational>()) {
+        std::cerr<< std::string("Warning: Polyhedron<")+name<R>()+">::vertices() is not exact.\n" ;
+      }
+      
       state_list_type result;
       const Parma_Polyhedra_Library::Generator_System& gs = this->_ppl_poly.minimized_generators();
       state_type point(this->dimension());
@@ -197,6 +258,9 @@ namespace Ariadne {
       return result;
     }
     
+   
+      
+      
     /*! \brief Checks for emptyness.
      */
     template <typename R>
@@ -246,7 +310,7 @@ namespace Ariadne {
     
       for (size_type i=0; i< (size_type)(1<<rect.dimension()); i++) {
         if (!this->contains(rect.vertex(i))) {
-	  return false;
+          return false;
         }
       }
 
@@ -280,17 +344,19 @@ namespace Ariadne {
       state_list_type verts=this->vertices();
 
       for (dimension_type i=0; i<dim; i++) {
-	u_corner[i]=verts[0][i];
-	l_corner[i]=verts[0][i];
+        u_corner[i]=verts[0][i];
+        l_corner[i]=verts[0][i];
       }
 
       for (size_type j=0; j<verts.size(); j++) {
         for (dimension_type i=0; i<dim; i++) {
-          if (verts[j][i]<u_corner[i])
-	    u_corner[i]=verts[j][i];
-	  if (verts[j][i]>l_corner[i])
-	    l_corner[i]=verts[j][i];
-	}
+          if (verts[j][i]<u_corner[i]) {
+            u_corner[i]=verts[j][i];
+          }
+          if (verts[j][i]>l_corner[i]) {
+            l_corner[i]=verts[j][i];
+          }
+        }
       }
 
       return Rectangle<R>(l_corner, u_corner);

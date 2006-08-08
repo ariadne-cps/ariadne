@@ -66,39 +66,40 @@ namespace Ariadne {
       /*! \brief The type of denotable point contained by the rectangle. */
       typedef Point<R> state_type;
       /*! \brief The type of Vectors. */
-      typedef Ariadne::LinearAlgebra::Vector<R> Vector_type;
+      typedef Ariadne::LinearAlgebra::Vector<R> vector_type;
       /*! \brief The type of Matrix giving principal directions. */
-      typedef Ariadne::LinearAlgebra::Matrix<R> Matrix_type;
+      typedef Ariadne::LinearAlgebra::Matrix<R> matrix_type;
 
      private:
       /* Zonotope's centre. */
-      state_type _centre;
+      Rectangle<R> _central_block;
       
       /* Zonotope's principal directions. */
-      Matrix_type _generators;
+      matrix_type _generators;
      public:
       /*! \brief Default constructor constructs an empty zonotope of dimension \a n. */
       explicit Zonotope(size_type n = 0)
-        : _centre(n),  _generators(n,0) { }
+        : _central_block(n),  _generators(n,0) { }
      
       /*! \brief Construct from centre and directions. */
-      explicit Zonotope(const Vector_type& c, const Matrix_type& m)
-        : _centre(c), _generators(m)
-      {
-        if (c.size()!=m.size1()) {
-          throw std::domain_error("The centre and directions have different dimensions.");
-        }
-      }
-      
-      /*! \brief Construct from centre and directions. */
-      explicit Zonotope(const state_type& c, const Matrix_type& m)
-        : _centre(c), _generators(m)
+      explicit Zonotope(const state_type& c, const matrix_type& m)
+        : _central_block(c), _generators(m)
       {
         if (c.dimension()!=m.size1()) {
           throw std::domain_error(
               "The the Matrix of principal directions does not have the same number of rows as the point dimension.");
         }
-
+        this->minimize_generators();
+      }
+       
+      /*! \brief Construct from central block and directions. */
+      explicit Zonotope(const Rectangle<R>& c, const LinearAlgebra::Matrix<R>& m)
+        : _central_block(c), _generators(m)
+      {
+        if (c.dimension()!=m.size1()) {
+          throw std::domain_error(
+              "The the Matrix of principal directions does not have the same number of rows as the point dimension.");
+        }
         this->minimize_generators();
       }
        
@@ -113,14 +114,14 @@ namespace Ariadne {
       
       /*! \brief Copy constructor. */
       Zonotope(const Zonotope<R>& original)
-        : _centre(original._centre),
+        : _central_block(original._central_block),
           _generators(original._generators)
       { }
       
       /*! \brief Copy assignment operator. */
       Zonotope<R>& operator=(const Zonotope<R>& original) {
         if(this != &original) {
-          this->_centre = original._centre;
+          this->_central_block = original._central_block;
           this->_generators = original._generators;
         }
         return *this;
@@ -136,12 +137,12 @@ namespace Ariadne {
 
       /*! \brief The dimension of the Euclidean space the zonotope lies in. */
       dimension_type dimension() const {
-        return this->_centre.dimension();
+        return this->_central_block.dimension();
       }
       
       /*! \brief The centre of the zonotope. */
-      const state_type &centre() const {
-        return this->_centre;
+      state_type centre() const {
+        return this->_central_block.centre();
       }
       
       /*! \brief The radius of the zonotope. */
@@ -149,13 +150,16 @@ namespace Ariadne {
         return this->bounding_box().radius();
       }
       
+      /*! \brief The central block, usually used to store small roundoff errors. */
+      Rectangle<R> central_block() const { return this->_central_block; }
+
       /*! \brief The \a n th of principle direction. */
-      Vector_type generator(size_type n) const {
+      vector_type generator(size_type n) const {
         return column(this->_generators,n);
       }
       
-      /*! \brief The Matrix of principle directions. */
-      const Matrix_type &generators() const {
+      /*! \brief The matrix of principle directions. */
+      const matrix_type& generators() const {
         return this->_generators;
       }
      
@@ -166,35 +170,32 @@ namespace Ariadne {
       
       /*! \brief True if the zonotope is empty. */
       bool empty() const {
-        if ((this->_generators.size1()>0)&&
-	    (this->_generators.size2()>0))
-	    return false;
-
-	return true;
+        return this->_central_block.empty();
       }
       
       /*! \brief True if the zonotope has empty interior. */
       bool empty_interior() const {
-        using namespace Ariadne::LinearAlgebra;
-
-        return !independent_rows(this->_generators);
+        return !LinearAlgebra::independent_rows(this->_generators);
       }
       
       /*! \brief A rectangle containing the given zonotope. */
       Rectangle<R> bounding_box() const;
       
       /*! \brief Returns the zonotope's vertices */
-      std::vector< state_type > vertices() const;
+      std::vector< Point<Rational> > vertices() const;
       
-      /*! \brief Tests if the zonotope contains \a point. */
+      /*! \brief Approximate vertices (for graphical output). */
+      std::vector< Point<R> > approximate_vertices() const;
+      
+      /*! \brief Tests if the zonotope contains point. */
       bool contains(const state_type& point) const;
      
-      /*! \brief Tests if the zonotope contains a \a rectangle. */
-      bool contains(const Rectangle<R>& rect) const; 
-      
-      /*! \brief Tests if the interior of the zonotope contains \a point. */
+      /*! \brief Tests if the interior of the zonotope contains point. */
       bool interior_contains(const state_type& point) const;
 
+      /*! \brief Tests if the zonotope is a superset of a rectangle. */
+      bool superset(const Rectangle<R>& rect) const; 
+      
       /*! \brief Subdivide into two smaller pieces. */
       ListSet<R,Geometry::Zonotope> divide() const;
       
@@ -202,14 +203,15 @@ namespace Ariadne {
       ListSet<R,Geometry::Zonotope> subdivide() const;
       
       /*! \brief Convert to a polyhedron. */
-      operator Polyhedron<R> () const;
+      operator Polyhedron<Rational> () const;
       
       /*! \brief Construct a parallelopic over-approximation. */
       Parallelotope<R> over_approximating_parallelotope() const;
       
+      /*! \brief Computes an over approximation from an "interval zonotope". */
+      static Zonotope<R> over_approximation(const Rectangle<R>& c, const LinearAlgebra::IntervalMatrix<R>& A);
+      
      private: 
-/*      friend Zonotope<R> minkowski_sum <> (const Zonotope<R>& A, const Zonotope<R>& B);
-      friend Zonotope<R> minkowski_difference <> (const Zonotope<R>& A, const Zonotope<R>& B);       */
       friend std::ostream& operator<< <> (std::ostream& os, const Zonotope<R>& r);
       friend std::istream& operator>> <> (std::istream& is, Zonotope<R>& r);
      private:
@@ -220,12 +222,19 @@ namespace Ariadne {
       void sort_generators(void);
       
       // The linear inequalities defining the zonotope.
-      void compute_linear_inequalities(Matrix_type&, Vector_type&) const;
+      void compute_linear_inequalities(matrix_type&, vector_type&) const;
+
+      // An extended generator is obtained by treating the errors in the central 
+      // block as generators aligned to some coordinate axis.
+      LinearAlgebra::Matrix<R> _extended_generators() const;
+      
+      // A possible vertex is the image of a vertex of the cube in 
+      // generator space under the affine transformation
+      std::vector< Point<Rational> > _possible_vertices() const ;
 
       // A possible vertex is the image of a vertex of the cube in 
       // generator space under the affine transformation
-      state_type _possible_vertex(const size_type& vert_num) const;
-      std::vector< state_type > _get_possible_vertices() const ;
+      std::vector< Point<R> > _approximate_possible_vertices() const ;
     };
   
     
@@ -324,9 +333,7 @@ namespace Ariadne {
     bool 
     interiors_intersect(const Zonotope<R>& A, const Zonotope<R>& B) 
     {
-      //return !minkowski_sum(A,B).interior_contains(Point<R>(A.dimension()));
-      
-      return interiors_intersect(Polyhedron<R>(A),Polyhedron<R>(B));
+      return interiors_intersect(Polyhedron<Rational>(A),Polyhedron<Rational>(B));
       
     }
    
@@ -336,7 +343,6 @@ namespace Ariadne {
     bool 
     interiors_intersect(const Rectangle<R>& A, const Zonotope<R>& B) 
     {
-      Zonotope<R> z_A(A);
       return interiors_intersect(Zonotope<R>(A),B);
     }
 
@@ -373,7 +379,7 @@ namespace Ariadne {
     bool 
     inner_subset(const Zonotope<R>& A, const Zonotope<R>& B) 
     {
-      return inner_subset(Polyhedron<R>(A), Polyhedron<R>(B));
+      return inner_subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
 
     /*! \brief Tests inclusion of \a A in the interior of \a B. */
@@ -382,7 +388,7 @@ namespace Ariadne {
     bool 
     inner_subset(const Rectangle<R>& A, const Zonotope<R>& B) 
     {
-      return inner_subset(Polyhedron<R>(A), Polyhedron<R>(B));
+      return inner_subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
 
     /*! \brief Tests inclusion of \a A in the interior of \a B. */
@@ -391,7 +397,7 @@ namespace Ariadne {
     bool 
     inner_subset(const Zonotope<R>& A, const Rectangle<R>& B) 
     {
-      return inner_subset(Polyhedron<R>(A), Polyhedron<R>(B));
+      return inner_subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
 
     /*! \brief Tests inclusion of \a A in the interior of \a B. */
@@ -400,7 +406,7 @@ namespace Ariadne {
     bool 
     inner_subset(const Parallelotope<R>& A, const Zonotope<R>& B) 
     {
-      return inner_subset(Polyhedron<R>(A), Polyhedron<R>(B));
+      return inner_subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
 
     /*! \brief Tests inclusion of \a A in the interior of \a B. */
@@ -409,7 +415,7 @@ namespace Ariadne {
     bool 
     inner_subset(const Zonotope<R>& A, const Parallelotope<R>& B) 
     {
-      return inner_subset(Polyhedron<R>(A), Polyhedron<R>(B));
+      return inner_subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
 
 
@@ -419,7 +425,7 @@ namespace Ariadne {
     bool 
     subset(const Zonotope<R>& A, const Zonotope<R>& B) 
     {
-      return subset(Polyhedron<R>(A), Polyhedron<R>(B));
+      return subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
 
     /*! \brief Tests inclusion of \a A in \a B. */
@@ -428,7 +434,7 @@ namespace Ariadne {
     bool 
     subset(const Rectangle<R>& A, const Zonotope<R>& B) 
     {
-      return subset(Polyhedron<R>(A), Polyhedron<R>(B));
+      return B.superset(A);
     }
 
     /*! \brief Tests inclusion of \a A in the interior of \a B. */
@@ -437,7 +443,7 @@ namespace Ariadne {
     bool 
     subset(const Zonotope<R>& A, const Rectangle<R>& B) 
     {
-      return subset(Polyhedron<R>(A), Polyhedron<R>(B));
+      return subset(A.bounding_box(),B);
     }
 
     /*! \brief Tests inclusion of \a A in the interior of \a B. */
@@ -446,7 +452,7 @@ namespace Ariadne {
     bool 
     subset(const Parallelotope<R>& A, const Zonotope<R>& B) 
     {
-      return subset(Polyhedron<R>(A), Polyhedron<R>(B));
+      return subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
 
     /*! \brief Tests inclusion of \a A in the interior of \a B. */
@@ -455,7 +461,7 @@ namespace Ariadne {
     bool 
     subset(const Zonotope<R>& A, const Parallelotope<R>& B) 
     {
-      return subset(Polyhedron<R>(A), Polyhedron<R>(B));
+      return subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
     
     /*! \brief Scale a zonotope. */
@@ -464,16 +470,11 @@ namespace Ariadne {
     Geometry::Zonotope<R> 
     scale(const Geometry::Zonotope<R>& z, const R& scale_factor) {
 
-      const Geometry::Point<R>& centre=z.centre();
-      const LinearAlgebra::Matrix<R>& generators=z.generators();
-      
-      Geometry::Point<R> new_centre(z.dimension());
-
-      for(size_type i=0; i!=z.dimension(); ++i) {
-        new_centre[i]=scale_factor*centre[i];
-      }
-
-      return Geometry::Zonotope<R>(new_centre, scale_factor*generators);
+      Geometry::Rectangle<R> new_central_block=scale(z.central_block(),scale_factor);
+      LinearAlgebra::IntervalMatrix<R> new_interval_generators=z.generators()*Interval<R>(scale_factor);
+      new_central_block=new_central_block+new_interval_generators.radius_row_sum();
+      LinearAlgebra::Matrix<R> new_generators=new_interval_generators.centre();
+      return Geometry::Zonotope<R>(new_central_block, new_generators);
     }
 
     

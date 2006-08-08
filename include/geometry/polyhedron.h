@@ -38,6 +38,7 @@
 #include "../linear_algebra/constraint_system.h"
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
+#include "../linear_algebra/interval_vector.h"
 
 #include "../linear_algebra/generator_system.h"
 #include "../geometry/point.h"
@@ -95,8 +96,8 @@ namespace Ariadne {
       typedef R real_type;
       typedef Point<R> state_type;
       typedef std::vector< Point<R> > state_list_type;
-      typedef LinearAlgebra::Vector<R> Vector_type;
-      typedef LinearAlgebra::Matrix<R> Matrix_type;
+      typedef LinearAlgebra::Vector<R> vector_type;
+      typedef LinearAlgebra::Matrix<R> matrix_type;
      public:
       friend class Parallelotope<R>;
     
@@ -125,15 +126,22 @@ namespace Ariadne {
       
       /*! \brief Construct the polyhedron defined by the Matrix equations \f$Ax\leq b\f$.
        */
-      Polyhedron(const Matrix_type& A, const Vector_type& b);
+      Polyhedron(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b);
+      
+      /*! \brief Construct the polyhedron defined by the rectilinear generating system \f$c+Ae\f$.
+       */
+      Polyhedron(const Point<R>& c, const LinearAlgebra::Matrix<R>& A);
       
       /*! \brief Construct the polyhedron defined as the convex hull of a list of points.
        */
-      Polyhedron(const state_list_type& points);
+      Polyhedron(const std::vector< Point<R> >& points);
       
+      /*! \brief Construct a polyhedron from an interval vector. */
+      Polyhedron(const LinearAlgebra::IntervalVector<R>& iv);
+            
       /*! \brief Construct a polyhedron from a rectangle. */
       Polyhedron(const Rectangle<R>& rect);
-      
+            
       /*! \brief Copy constructor. 
        */
       Polyhedron(const Polyhedron<R>& original);
@@ -159,7 +167,7 @@ namespace Ariadne {
     
       /*! \brief The vertices of the Polyhedron. */
       state_list_type vertices() const; 
-      
+           
       /*! \brief Tests if a Point is an element of the Polyhedron.
        */
       bool contains(const state_type& point) const;

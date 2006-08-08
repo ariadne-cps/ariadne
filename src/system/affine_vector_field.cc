@@ -30,7 +30,7 @@ namespace Ariadne {
   namespace System {
 
     template class AffineVectorField<Real>;
-
+    template std::ostream& operator<<(std::ostream&, const AffineVectorField<Real>&);
   }
 }
 

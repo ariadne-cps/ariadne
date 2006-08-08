@@ -39,6 +39,7 @@ arithmetic.o: arithmetic.cc ../../include/numeric/arithmetic.h \
   ../../include/numeric/numerical_types.h
 
 function.o: function.cc ../../include/numeric/function.h \
+  /ufs/collins/include/mpfr.h \
   ../../include/numeric/../numeric/numerical_types.h \
   ../../include/numeric/../numeric/../declarations.h \
   ../../include/numeric/../numeric/../numeric/integer.h \

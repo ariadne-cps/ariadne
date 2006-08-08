@@ -54,7 +54,7 @@ namespace Ariadne {
       while(true) {
         if(debug_level>0) { std::cerr << "Testing for root in " << r << "\n"; }
         Geometry::Point<Real> m=r.centre();
-        Geometry::Rectangle<Real> mr=m;
+        Geometry::Rectangle<Real> mr(m);
         LinearAlgebra::IntervalVector<Real> w=f(mr);
         LinearAlgebra::IntervalMatrix<Real> A=f.derivative(r);
         LinearAlgebra::IntervalMatrix<Real> Ainv=A.inverse();

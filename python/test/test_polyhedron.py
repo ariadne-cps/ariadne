@@ -24,7 +24,7 @@
 from ariadne.base import *
 from ariadne.geometry import *
 from ariadne.linear_algebra import *
-from ariadne.evaluation import *
+from ariadne.system import *
 
 sl=PointList()
 s=Point(2)

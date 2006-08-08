@@ -64,141 +64,6 @@
 namespace Ariadne {
   namespace Evaluation {
     
-    template<typename R>
-    class IntervalParallelotope
-    {
-     public:
-      IntervalParallelotope(const LinearAlgebra::IntervalVector<R>& c, const LinearAlgebra::IntervalMatrix<R>& A) : _c(c), _A(A) { }
-      
-      size_type dimension() const { return _c.size(); }
-      
-      const LinearAlgebra::IntervalVector<R>& centre() const { return _c; }
-      LinearAlgebra::IntervalVector<R>& centre() { return _c; }
-
-      const LinearAlgebra::IntervalMatrix<R>& generators() const { return _A; }
-      LinearAlgebra::IntervalMatrix<R>& generators() { return _A; }
-
-      Geometry::Parallelotope<R> over_approximating_parallelotope() const;
-      Geometry::Parallelotope<R> over_approximating_parallelotope(R err) const;
-     private:
-      LinearAlgebra::IntervalVector<R> _c;
-      LinearAlgebra::IntervalMatrix<R> _A;
-    };
-   
-    template<typename R>
-    inline Geometry::Parallelotope<R> 
-    IntervalParallelotope<R>::over_approximating_parallelotope() const 
-    {
-       return this->over_approximating_parallelotope(R(R(1)/65536));
-    }
-    
-    template<typename R>
-    Geometry::Parallelotope<R> 
-    IntervalParallelotope<R>::over_approximating_parallelotope(R proposed_err) const 
-    {
-#ifdef DEBUG
-      std::cerr << "IntervalParallelotope<R>::over_approximating_parallelotope() const" << std::endl;
-#endif
-      typedef typename numerical_traits<R>::field_extension_type F;
-      
-      size_type n=this->dimension();
-      
-      LinearAlgebra::IntervalMatrix<R> A=this->generators();
-      
-      LinearAlgebra::Vector<R> cmid=this->centre().centre();
-      LinearAlgebra::Matrix<R> Amid=this->generators().centre();
-      
-      LinearAlgebra::Matrix<R> D(n,n);
-      for(size_type i=0; i!=n; ++i) {
-        D(i,i)=this->centre()(i).radius();
-      }
-      
-      LinearAlgebra::Matrix<F> AinvF=LinearAlgebra::inverse(Amid);
-      LinearAlgebra::IntervalMatrix<R> Ainv=LinearAlgebra::approximate(AinvF, proposed_err);
-      
-      R err = upper_norm(Ainv*LinearAlgebra::IntervalMatrix<R>(D+A));
-#ifdef DEBUG
-      std::cerr << "error=" << err << std::endl;
-#endif
-      return Geometry::Parallelotope<R>(cmid,err*Amid);
-    }
-    
-    template<typename R>
-    std::ostream& 
-    operator<<(std::ostream& os, const IntervalParallelotope<R>& ip)
-    {
-      return os << "IntervalParallelotope(\n  centre=" << ip.centre() << "\n  generators=" << ip.generators() << "\n)\n";
-    }
-    
-
-    template<typename R>
-    class IntervalZonotope
-    {
-     public:
-      IntervalZonotope(const LinearAlgebra::IntervalVector<R>& c, const LinearAlgebra::IntervalMatrix<R>& A) : _c(c), _A(A) { }
-      
-      size_type dimension() const { return _c.size(); }
-      
-      const LinearAlgebra::IntervalVector<R>& centre() const { return _c; }
-      LinearAlgebra::IntervalVector<R>& centre() { return _c; }
-
-      const LinearAlgebra::IntervalMatrix<R>& generators() const { return _A; }
-      LinearAlgebra::IntervalMatrix<R>& generators() { return _A; }
-
-      Geometry::Zonotope<R> over_approximating_zonotope() const;
-      Geometry::Zonotope<R> over_approximating_zonotope(R err) const;
-     private:
-      LinearAlgebra::IntervalVector<R> _c;
-      LinearAlgebra::IntervalMatrix<R> _A;
-    };
-   
-    template<typename R>
-    inline Geometry::Zonotope<R> 
-    IntervalZonotope<R>::over_approximating_zonotope() const 
-    {
-       return this->over_approximating_zonotope(R(R(1)/65536));
-    }
-    
-    template<typename R>
-    Geometry::Zonotope<R> 
-    IntervalZonotope<R>::over_approximating_zonotope(R proposed_err) const 
-    {
-#ifdef DEBUG
-      std::cerr << "IntervalZonotope<R>::over_approximating_zonotope() const" << std::endl;
-      std::cerr << *this << std::endl;
-#endif
-      typedef typename numerical_traits<R>::field_extension_type F;
-      
-      LinearAlgebra::IntervalMatrix<R> A=this->generators();
-      
-      size_type n=this->dimension();
-      size_type m=A.size2();
-      
-      LinearAlgebra::Vector<R> cmid=this->centre().centre();
-      LinearAlgebra::Matrix<R> Amid=this->generators().centre();
-      
-      LinearAlgebra::Matrix<R> D(n,m);
-      for(size_type i=0; i!=std::min(n,m); ++i) {
-        D(i,i)=this->centre()(i).radius();
-      }
-      
-      LinearAlgebra::Matrix<F> AinvF=LinearAlgebra::inverse(Amid);
-      LinearAlgebra::IntervalMatrix<R> Ainv=LinearAlgebra::approximate(AinvF, proposed_err);
-      
-      R err = upper_norm(Ainv*LinearAlgebra::IntervalMatrix<R>(D+A));
-#ifdef DEBUG
-      std::cerr << "error=" << err << std::endl;
-#endif
-      return Geometry::Zonotope<R>(cmid,err*Amid);
-    }
-    
-    template<typename R>
-    std::ostream& 
-    operator<<(std::ostream& os, const IntervalZonotope<R>& ip)
-    {
-      return os << "IntervalZonotope(\n  centre=" << ip.centre() << "\n  generators=" << ip.generators() << "\n)\n";
-    }
-
 
 
     template<typename R>
@@ -225,7 +90,7 @@ namespace Ariadne {
       
       Geometry::Rectangle<R> q=estimate_flow_bounds(vf,r,h);
       
-      LinearAlgebra::IntervalVector<R> fq=vf.apply(q);
+      LinearAlgebra::IntervalVector<R> fq=vf(q);
       r=r+(h*fq);
 #ifdef DEBUG
       std::cerr << "suggested stepsize=" << step_size << std::endl;
@@ -257,7 +122,7 @@ namespace Ariadne {
 
       Geometry::Rectangle<R> q=estimate_flow_bounds(vf,r,h);
       
-      LinearAlgebra::IntervalVector<R> fq=vf.apply(q);
+      LinearAlgebra::IntervalVector<R> fq=vf(q);
       
       r=r+(Interval<R>(R(0),h)*fq);
 
@@ -314,7 +179,7 @@ namespace Ariadne {
       std::cerr << "bound=" << b << std::endl;
 #endif
       
-      LinearAlgebra::IntervalVector<R> f=vf.apply(b);
+      LinearAlgebra::IntervalVector<R> f=vf(b);
       LinearAlgebra::IntervalMatrix<R> df=vf.derivative(b);
       
       R l=upper_log_norm(df);
@@ -336,13 +201,10 @@ namespace Ariadne {
       Geometry::Point<R> c=p.centre();
       Geometry::Rectangle<R> rc=Geometry::Rectangle<R>(c,c);
       Geometry::Rectangle<R> phic=refine_flow_bounds(vf,rc,b,h);
-      
-      LinearAlgebra::IntervalVector<R> phicv=phic.position_vectors();
       LinearAlgebra::IntervalMatrix<R> zv(dphi*p.generators());
 
-      IntervalParallelotope<R> ip(phicv,zv);
-      p=ip.over_approximating_parallelotope();
-
+      p=Geometry::Parallelotope<R>::over_approximation(phic,zv);
+      
 #ifdef DEBUG
       std::cerr << "stepsize*jacobian=" << hdf << std::endl;
       std::cerr << "flow derivative=" << dphi << std::endl;
@@ -388,10 +250,11 @@ namespace Ariadne {
       
       LinearAlgebra::IntervalMatrix<R> iD(LinearAlgebra::IntervalMatrix<R>(D,max_error));
       LinearAlgebra::IntervalMatrix<R> iP(LinearAlgebra::IntervalMatrix<R>(P,max_error));
+      LinearAlgebra::IntervalVector<R> iC=iD*p.centre().position_vector()+iP*vf.b();
       
-      IntervalParallelotope<R> img(iD*p.centre().position_vector()+iP*vf.b(),iD*p.generators());
-      p=img.over_approximating_parallelotope();      
-
+      p=Geometry::Parallelotope<R>::over_approximation(Geometry::Rectangle<R>(iC),iD*p.generators());
+      //IntervalParallelotope<R> img(iD*p.centre().position_vector()+iP*vf.b(),iD*p.generators());
+      
 #ifdef DEBUG
       std::cerr << "twist=" << P << std::endl;
       std::cerr << "approximate derivative=" << D << std::endl;
@@ -450,7 +313,7 @@ template<typename R>
       std::cerr << "bound=" << b << std::endl;
 #endif
       
-      IntervalVector<R> f=vf.apply(b);
+      IntervalVector<R> f=vf(b);
       IntervalMatrix<R> df=vf.derivative(b);
       
       R l=upper_log_norm(df);
@@ -473,12 +336,10 @@ template<typename R>
       Rectangle<R> rc=Geometry::Rectangle<R>(c,c);
       Rectangle<R> phic=refine_flow_bounds(vf,rc,b,h);
       
-      IntervalVector<R> phicv=phic.position_vectors();
       IntervalMatrix<R> zv(dphi*p.generators());
 
-      IntervalZonotope<R> ip(phicv,zv);
-      p=ip.over_approximating_zonotope();
-
+      p=Geometry::Zonotope<R>::over_approximation(phic,zv);
+      
 #ifdef DEBUG
       std::cerr << "stepsize*jacobian=" << hdf << std::endl;
       std::cerr << "flow derivative=" << dphi << std::endl;
@@ -487,7 +348,6 @@ template<typename R>
       std::cerr << "bounds on centre=" << phic << std::endl;
       std::cerr << "bounds on centre <vector>=" << phicv << std::endl;
       std::cerr << "zonotopic <vector> to add to image of centre=" << zv << std::endl;
-      std::cerr << "approximating interval zonotope=" << ip << std::endl;
       std::cerr << "new approximation=" << p << std::endl;
 #endif  
 
@@ -524,10 +384,9 @@ template<typename R>
       
       LinearAlgebra::IntervalMatrix<R> iD(LinearAlgebra::IntervalMatrix<R>(D,max_error));
       LinearAlgebra::IntervalMatrix<R> iP(LinearAlgebra::IntervalMatrix<R>(P,max_error));
+      LinearAlgebra::IntervalVector<R> iC=iD*p.centre().position_vector()+iP*vf.b();
+      p=Geometry::Zonotope<R>::over_approximation(Geometry::Rectangle<R>(iC),iD*p.generators());
       
-      IntervalZonotope<R> img(iD*p.centre().position_vector()+iP*vf.b(),iD*p.generators());
-      p=img.over_approximating_zonotope();      
-
 #ifdef DEBUG
       std::cerr << "twist=" << P << std::endl;
       std::cerr << "approximate derivative=" << D << std::endl;
@@ -570,7 +429,7 @@ template<typename R>
       /* Throws exception if we can't find flow bounds for given stepsize. */
       Rectangle<R> b=estimate_flow_bounds(vf,z.bounding_box(),h,256);
       
-      IntervalVector<R> f=vf.apply(b);
+      IntervalVector<R> f=vf(b);
       IntervalMatrix<R> df=vf.derivative(b);
       
       IntervalMatrix<R> dphi=id+Interval<R>(0,h)*df;

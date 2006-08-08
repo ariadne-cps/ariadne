@@ -30,6 +30,7 @@ check: install-lib
 
 dep: 
 	(cd ${SRCDIR}; ${MAKE} dep);
+	(cd ${TESTDIR}; ${MAKE} dep);
 
 pycheck: python install
 	for file in python/test/*.py; do echo $$file; $$file; done

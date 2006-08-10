@@ -1,8 +1,7 @@
 /***************************************************************************
- *            test_polyhedron.cc
+ *            test_simplex.cc
  *
- *  2 May 2005
- *  Copyright  2005  Pieter Collins
+ *  Copyright  2006  Pieter Collins
  *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
  ****************************************************************************/
 
@@ -26,14 +25,13 @@
 #include <fstream>
 #include <string>
 
-#include <vector>
-
 #include "ariadne.h"
 #include "real_typedef.h"
 #include "base/exception.h"
 #include "base/utility.h"
 #include "numeric/numerical_types.h"
 #include "geometry/point.h"
+#include "geometry/simplex.h"
 #include "geometry/polyhedron.h"
 
 #include "test.h"
@@ -43,50 +41,34 @@ using namespace Ariadne::Geometry;
 using namespace std;
 
 int main() {
-  cout << "test_polyhedron: " << flush;
-  ofstream clog("test_polyhedron.log");
+  cout << "test_simplex: " << flush;
+  ofstream clog("test_simplex.log");
   
-  Point<Real> s1("(1.0,1.0)");
-  Point<Real> s2("(1.375,1.0)");
-  Point<Real> s3("(1.375,1.375)");
-  Point<Real> s4("(1.25,1.25)");
-  Point<Real> s5("(0.75,1.25)");
-  
-  std::vector< Point<Real> > ptl;
-  ptl.push_back(s1);
-  ptl.push_back(s2);
-  ptl.push_back(s3);
-  
-  Polyhedron<Real> p(ptl);
-  clog << p << endl;
-  
-  assert(p.contains(s1));
-  assert(!p.interior_contains(s1));
-  assert(p.contains(s4));
-  assert(p.interior_contains(s4));
-  assert(!p.contains(s5));
-  assert(!p.interior_contains(s5));
-  
-  Point<Rational> qs1(s1);
-  Point<Rational> qs2(s2);
-  Point<Rational> qs3(s3);
-  Point<Rational> qs4(s4);
-  Point<Rational> qs5(s5);
-  std::vector< Point<Rational> > qptl;
-  qptl.push_back(qs1);
-  qptl.push_back(qs2);
-  qptl.push_back(qs3);
-  
-  Polyhedron<Rational> qp(qptl);
-  clog << qp << endl;
-  
-  assert(qp.contains(qs1));
-  assert(!qp.interior_contains(qs1));
-  assert(qp.contains(qs4));
-  assert(qp.interior_contains(qs4));
-  assert(!qp.contains(qs5));
-  assert(!qp.interior_contains(qs5));
+  Point<Real> v0("(0.125,-0.25)");
+  Point<Real> v1("(1.0,-0.5)");
+  Point<Real> v2("(-0.25,0.75)");
 
+  std::vector< Point<Real> > pl;
+  pl.push_back(v0);
+  pl.push_back(v1);
+  pl.push_back(v2);
+
+  Simplex<Real> s(pl);
+  clog << s << endl;
+
+  Point<Real> pt1,pt2,pt3;
+
+  pt1=Point<Real>("(17.0,15.0)");
+  pt2=Point<Real>("(0.125,-0.25)");
+  pt3=Point<Real>("(0.0,0.0)");
+
+  assert(!s.contains(pt1));
+  assert(s.contains(pt2));
+  assert(!s.interior_contains(pt2));
+  assert(s.interior_contains(pt3));
+
+  Polyhedron<Real> ply(s);
+  clog << ply << endl;
   clog.close();
   cout << "INCOMPLETE\n";
 

@@ -42,18 +42,20 @@
 
 namespace Ariadne {
   namespace Geometry {
+    class SubdivisionSequence;
     class SubdivisionTreeCell;
     class SubdivisionTree;
     class SubdivisionTreeSet;
     
     std::ostream& operator<<(std::ostream&, const SubdivisionTreeCell&);
+    std::ostream& operator<<(std::ostream&, const SubdivisionSequence&);
+    std::istream& operator>>(std::istream&, SubdivisionSequence&);
     
     class LatticeMaskSet;
     class LatticeRectangle;
       
     /*! \brief A sequence of coordinate giving axes of subdivision for a subdivision tree. */
     class SubdivisionSequence
-      : public sequence<dimension_type> 
     {
      public:
       SubdivisionSequence(const dimension_type& n)
@@ -64,13 +66,26 @@ namespace Ariadne {
         : _sequence(b,tb,te), _dimension(_compute_dimension())
       { }
 
+      SubdivisionSequence(const std::string& str);
+       
+      bool operator==(const SubdivisionSequence& ss) const {
+        return this->_sequence==ss._sequence && this->_dimension==ss._dimension; }
+
+      bool operator!=(const SubdivisionSequence& ss) const {
+        return !(*this==ss); }
+
       dimension_type dimension() const { 
         return _dimension; }
+      size_type body_size() const { return _sequence.body_size(); }
+      size_type tail_size() const { return _sequence.tail_size(); }
       dimension_type operator[](const size_type& i) const { 
         return _sequence[i]; }
      private:
       dimension_type _compute_dimension();
       sequence<dimension_type> _default(dimension_type n);
+      
+      friend std::ostream& operator<<(std::ostream&, const SubdivisionSequence&);
+      friend std::istream& operator>>(std::istream&, SubdivisionSequence&);
      private:
       sequence<dimension_type> _sequence;
       dimension_type _dimension;

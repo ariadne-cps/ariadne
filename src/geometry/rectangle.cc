@@ -28,24 +28,17 @@
 
 namespace Ariadne {
   namespace Geometry {
-
     template class Rectangle<Real>; 
+    template bool subset(const Rectangle<Real>&, 
+                         const ListSet<Real,Geometry::Rectangle>&);
 
-    template Rectangle<Real> regular_intersection(const Rectangle<Real>&, 
-                                         const Rectangle<Real>&);
-
-    template Rectangle<Real> minkowski_sum(const Rectangle<Real>& A, 
-                                  const Rectangle<Real>& B);
-
-    template Rectangle<Real> minkowski_difference(const Rectangle<Real>& A, 
-                                         const Rectangle<Real>& B);
-
-
-    template Rectangle<Real> scale(const Rectangle<Real>& s, const Real& factor);
-
-    template std::ostream& operator<<(std::ostream&, const Rectangle<Real>&);
-    template std::istream& operator>>(std::istream&, Rectangle<Real>&);
-
-    template std::ostream& operator<<(std::ostream&, const Rectangle<double>&);
+    #ifndef RATIONAL_REAL
+    template class Rectangle<double>; 
+    #endif
+      
+    #ifndef DOUBLE_REAL  
+    template class Rectangle<Rational>; 
+    #endif
+    
   }
 }

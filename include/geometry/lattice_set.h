@@ -154,7 +154,7 @@ namespace Ariadne {
       explicit LatticeRectangle(dimension_type n) : _lower(n), _upper(n) { }
       /*!\brief A lattice rectangle specified by lower and upper corners. */
       explicit LatticeRectangle(const IndexArray& l, const IndexArray& u)
-        : _lower(l), _upper(u) { }
+        : _lower(l), _upper(u) { assert(l.size()==u.size()); }
       /*!\brief A lattice rectangle defined by a string literal. */
       explicit LatticeRectangle(const std::string& s);
       /*!\brief Convert from a lattice cell. */

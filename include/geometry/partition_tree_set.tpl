@@ -46,12 +46,12 @@ namespace Ariadne {
     PartitionTreeCell<R>::operator Rectangle<R>() const {
       Rectangle<R> result(this->dimension());
       for(dimension_type i=0; i!=this->dimension(); ++i) {
-        result.set_lower_bound( i,
-          _bounding_box.lower_bound(i)+_unit_cell.lower_bound(i)
-            *(_bounding_box.upper_bound(i)-_bounding_box.lower_bound(i)) ); 
-        result.set_upper_bound( i,
-          _bounding_box.lower_bound(i)+_unit_cell.upper_bound(i)
-            *(_bounding_box.upper_bound(i)-_bounding_box.lower_bound(i)) ); 
+        result[i]=Interval<R>(
+            _bounding_box.lower_bound(i)+_unit_cell.lower_bound(i)
+                *(_bounding_box.upper_bound(i)-_bounding_box.lower_bound(i)),
+            _bounding_box.lower_bound(i)+_unit_cell.upper_bound(i)
+                *(_bounding_box.upper_bound(i)-_bounding_box.lower_bound(i)) 
+          ); 
       }
       return result;
     }

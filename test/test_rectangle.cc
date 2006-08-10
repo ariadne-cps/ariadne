@@ -50,7 +50,8 @@ int main() {
     Point<Real> s2("(1.5,1.5)");
     Point<Real> s3("(1.375,1.375)");
     Point<Real> s4("(2,2)");
-    Rectangle<Real> r0;
+    Point<Real> s5("(0.75,0.125)");
+    Rectangle<Real> r0(2);
     Rectangle<Real> r1(s1,s2);
     Rectangle<Real> r2(s3,s4);
     Rectangle<Real> r3(s3,s2);
@@ -66,8 +67,8 @@ int main() {
     iss >> r1 >> r2 >> r3 >> r4 >> r5 >> r6;
     Rectangle<Real> r7=r1;
     
-    clog << r1 << " " << r2 << " " << r3 << " " << r4 << " "
-         << r5 << " " << r6 << " " << r7 << endl;
+    clog << "r1=" << r1 << ", r2=" << r2 << ", r3=" << r3 << ", r4=" << r4 << "\n"
+         << "r5=" << r5 << ", r6=" << r6 << ", r7=" << r7 << endl;
     
     test_assert(r1==r7,"equality");
     
@@ -80,19 +81,36 @@ int main() {
     cover2.push_back(r3);
     cover2.push_back(r5);
 
+    clog << "r0=" << r0 << ", r0.dimension()=" << r0.dimension() << ", r0.empty()=" << r0.empty() << endl;
+    clog << "r1=" << r1 << ", r1.dimension()=" << r1.dimension() << ", r1.empty()=" << r1.empty() << endl;
     test_assert(!r1.empty(),"empty");
     test_assert(r0.empty(),"empty");
 
     test_assert(!disjoint(r1,r1),"disjoint");
     test_assert(interiors_intersect (r1,r1),"intersects_interior");
     test_assert(subset(r1,r1),"is_subset_of");
+    clog << "r1=" << r1 << ", s1=" << s1 << ", s3=" << s3 << ", s5=" << s5 << endl;
+    test_assert(r1.contains(s1),"contains");
+    test_assert(!r1.contains(s3),"contains");
+    test_assert(r1.contains(s5),"contains");
+    test_assert(!r1.interior_contains(s1),"interior_contains");
+    test_assert(!r1.interior_contains(s3),"interior_contains");
+    test_assert(r1.interior_contains(s5),"interior_contains");
     //test_assert(!subset_of_interior(r1,r1),"subset_of_interior");
     //test_assert(subset_of_open_cover(r1,cover1),"subset_of_open_cover");
     //test_assert(!subset_of_open_cover(r1,cover2),"subset_of_open_cover");
        
     r4=regular_intersection(r1,r2);
+    clog << "r1=" << r1 << ",r2=" << r2 << ",r4=" << r4 << ",r6=" << r6 << endl;
     test_assert(r4==r6,"regular_intersection");
 
+    clog << "r1=" << r1;
+    r1[1]=Interval<Real>(0.0,0.5);
+    clog << " r1=" << r1;
+    test_assert(r1==r6,"operator[]");
+    r1[1].lower()=-2.25;
+    clog << " r1=" << r1 << endl;
+    
     try {
         string input("[ ]  [ [0,2] ]  [ [0,1], [3/4,4/3], [1,3/2] ] "
                      "{ lower_corner=[0,1], upper_corner=[1,4/3] }");

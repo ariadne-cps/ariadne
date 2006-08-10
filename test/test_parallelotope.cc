@@ -1,8 +1,7 @@
 /***************************************************************************
- *            test_polyhedron.cc
+ *            test_zonotope.cc
  *
- *  2 May 2005
- *  Copyright  2005  Pieter Collins
+ *  Copyright  2006  Pieter Collins
  *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
  ****************************************************************************/
 
@@ -34,58 +33,49 @@
 #include "base/utility.h"
 #include "numeric/numerical_types.h"
 #include "geometry/point.h"
-#include "geometry/polyhedron.h"
-
-#include "test.h"
+#include "geometry/rectangle.h"
+#include "geometry/parallelotope.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Geometry;
 using namespace std;
 
 int main() {
-  cout << "test_polyhedron: " << flush;
-  ofstream clog("test_polyhedron.log");
+  cout << "test_parallelotope: " << flush;
+  ofstream clog("test_parallelotope.log");
   
-  Point<Real> s1("(1.0,1.0)");
-  Point<Real> s2("(1.375,1.0)");
-  Point<Real> s3("(1.375,1.375)");
-  Point<Real> s4("(1.25,1.25)");
-  Point<Real> s5("(0.75,1.25)");
+  Rectangle<Real> r1=Rectangle<Real>("[9,11]x[5,11]x[-1,1]");
+  Rectangle<Real> r2=Rectangle<Real>("[5,6]x[3,4]x[-0.5,0.5]");
+
+  Parallelotope<Real> p1=Parallelotope<Real>(r1);
+  Parallelotope<Real> p2=Parallelotope<Real>(r2);
+
+  clog << p1 << p2 << endl;
+
+  Point<Real> pt1,pt2,pt3,pt4,pt5,pt6;
+  pt1=Point<Real>("(17.0,15.0,-0.5) ");
+  pt2=Point<Real>("(17.0,8.0,-0.5) ");
+  pt3=Point<Real>("(14.0,15.0,-0.5) ");
+  pt4=Point<Real>("(14.0,15.0,-0.5) ");
+  pt5=Point<Real>("(14.0,15.0,-0.5) ");
+  pt6=Point<Real>("(15.5,11.5,0) ");
+
+
+  clog << pt1 << pt2 << pt3 << pt4 << pt5 << pt6 << endl;
   
-  std::vector< Point<Real> > ptl;
-  ptl.push_back(s1);
-  ptl.push_back(s2);
-  ptl.push_back(s3);
-  
-  Polyhedron<Real> p(ptl);
-  clog << p << endl;
-  
-  assert(p.contains(s1));
-  assert(!p.interior_contains(s1));
-  assert(p.contains(s4));
-  assert(p.interior_contains(s4));
-  assert(!p.contains(s5));
-  assert(!p.interior_contains(s5));
-  
-  Point<Rational> qs1(s1);
-  Point<Rational> qs2(s2);
-  Point<Rational> qs3(s3);
-  Point<Rational> qs4(s4);
-  Point<Rational> qs5(s5);
-  std::vector< Point<Rational> > qptl;
-  qptl.push_back(qs1);
-  qptl.push_back(qs2);
-  qptl.push_back(qs3);
-  
-  Polyhedron<Rational> qp(qptl);
-  clog << qp << endl;
-  
-  assert(qp.contains(qs1));
-  assert(!qp.interior_contains(qs1));
-  assert(qp.contains(qs4));
-  assert(qp.interior_contains(qs4));
-  assert(!qp.contains(qs5));
-  assert(!qp.interior_contains(qs5));
+  assert(!p1.contains(pt1));
+  assert(!p1.contains(pt2));
+  assert(!p1.contains(pt3));
+  assert(!p1.contains(pt4));
+  assert(!p1.contains(pt5));
+  assert(!p1.contains(pt6));
+
+  assert(!p1.interior_contains(pt1));
+  assert(!p1.interior_contains(pt2));
+  assert(!p1.interior_contains(pt3));
+  assert(!p1.interior_contains(pt4));
+  assert(!p1.interior_contains(pt5));
+  assert(!p1.interior_contains(pt6));
 
   clog.close();
   cout << "INCOMPLETE\n";

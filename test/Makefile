@@ -4,7 +4,8 @@ TESTS = \
   test_array test_arithmetic test_binary_word \
   test_matrix \
   test_point \
-  test_rectangle test_parallelotope test_zonotope test_polyhedron \
+  test_rectangle test_parallelotope test_zonotope \
+  test_simplex test_polyhedron \
   test_linear_algebra test_interval test_list_set \
   test_grid \
   test_lattice \
@@ -47,6 +48,7 @@ all: ${TESTS}
 	-./test_rectangle
 	-./test_parallelotope
 	-./test_zonotope
+	-./test_simplex
 	-./test_polyhedron
 	-./test_linear_algebra
 	-./test_interval
@@ -392,6 +394,50 @@ test_zonotope: test_zonotope.cc ../include/ariadne.h \
   ../include/geometry/../linear_algebra/../linear_algebra/../numeric/interval.h \
   test.h
 	-${CXX} ${CXXFLAGS} test_zonotope.cc  ${LDXXFLAGS} -o test_zonotope
+
+test_simplex: test_simplex.cc ../include/ariadne.h \
+  ../include/real_typedef.h ../include/numeric/numerical_types.h \
+  ../include/numeric/../declarations.h \
+  ../include/numeric/../numeric/integer.h \
+  ../include/numeric/../numeric/../declarations.h \
+  ../include/numeric/../numeric/../utility/stlio.h \
+  ../include/numeric/../numeric/../utility/../base/array.h \
+  ../include/numeric/../numeric/../utility/../base/../declarations.h \
+  ../include/numeric/../numeric/dyadic.h \
+  ../include/numeric/../numeric/numerical_traits.h \
+  ../include/numeric/../utility/stlio.h ../include/base/exception.h \
+  ../include/base/utility.h ../include/base/../declarations.h \
+  ../include/numeric/numerical_types.h ../include/geometry/point.h \
+  ../include/geometry/../declarations.h \
+  ../include/geometry/../base/array.h \
+  ../include/geometry/../linear_algebra/vector.h \
+  ../include/geometry/../linear_algebra/../declarations.h \
+  ../include/geometry/../linear_algebra/../numeric/integer.h \
+  ../include/geometry/simplex.h ../include/geometry/../geometry/point.h \
+  ../include/geometry/polyhedron.h /ufs/collins/include/ppl.hh \
+  ../include/geometry/../linear_algebra/constraint_system.h \
+  ../include/geometry/../linear_algebra/../numeric/numerical_types.h \
+  ../include/geometry/../linear_algebra/../linear_algebra/vector.h \
+  ../include/geometry/../linear_algebra/../linear_algebra/matrix.h \
+  ../include/geometry/../linear_algebra/../linear_algebra/../declarations.h \
+  ../include/geometry/../linear_algebra/../linear_algebra/../numeric/integer.h \
+  ../include/geometry/../linear_algebra/matrix.h \
+  ../include/geometry/../linear_algebra/interval_vector.h \
+  ../include/geometry/../linear_algebra/../numeric/interval.h \
+  ../include/geometry/../linear_algebra/../numeric/../declarations.h \
+  ../include/geometry/../linear_algebra/../numeric/../numeric/numerical_traits.h \
+  ../include/geometry/../linear_algebra/generator_system.h \
+  ../include/geometry/../geometry/rectangle.h \
+  ../include/geometry/../geometry/../declarations.h \
+  ../include/geometry/../geometry/../numeric/arithmetic.h \
+  ../include/geometry/../geometry/../numeric/../numeric/numerical_types.h \
+  ../include/geometry/../geometry/../numeric/../numeric/approximation.h \
+  ../include/geometry/../geometry/../numeric/../numeric/../declarations.h \
+  ../include/geometry/../geometry/../numeric/../numeric/../numeric/numerical_types.h \
+  ../include/geometry/../geometry/../numeric/interval.h \
+  ../include/geometry/../geometry/../linear_algebra/interval_vector.h \
+  ../include/geometry/../geometry/../geometry/point.h test.h
+	-${CXX} ${CXXFLAGS} test_simplex.cc  ${LDXXFLAGS} -o test_simplex
 
 test_polyhedron: test_polyhedron.cc ../include/ariadne.h \
   ../include/real_typedef.h ../include/numeric/numerical_types.h \

@@ -118,7 +118,10 @@ namespace Ariadne {
       /*! \brief Create a word of length \a n from the chunk of memory starting at \a p. */
       BinaryWord(size_type n, const void* p) : _rep(n,reinterpret_cast<const bool*>(p)) { }
       
-      /*! Equality operator. */
+      /*! \brief Create a string. */
+      BinaryWord(const std::string& str);
+      
+     /*! Equality operator. */
       bool operator==(const BinaryWord& w) const { return this->_rep==w._rep; }
       
       /*! Inequality operator. */

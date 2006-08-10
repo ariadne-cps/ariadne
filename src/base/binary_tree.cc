@@ -1,3 +1,4 @@
+
 /***************************************************************************
  *            binary_tree.cc
  *
@@ -21,6 +22,10 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#include <iostream>
+#include <string>
+#include <sstream>
 
 #include "base/binary_tree.h"
 
@@ -157,7 +162,12 @@ namespace Ariadne {
       while(true);
     }
     
-    
+    BinaryWord::BinaryWord(const std::string& str)
+    {
+      std::stringstream ss(str);
+      ss >> *this;
+    }
+
     std::istream& operator>>(std::istream& is, BinaryWord& b)
     {
       std::vector<bool> v;

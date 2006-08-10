@@ -42,7 +42,7 @@ namespace Ariadne {
 
     template <typename R>
     Rectangle<R>::Rectangle(const std::string& s)
-      : _lower_corner(1), _upper_corner(1)
+      : _bounds()
     {
       std::stringstream ss(s);
       ss >> *this;
@@ -57,80 +57,32 @@ namespace Ariadne {
       return Polyhedron<Rational>(rpv);
     }
     
-    template<typename R> 
-    Rectangle<R> 
-    minkowski_sum(const Rectangle<R>& A, const Rectangle<R>& B)
-    {
-      if (A.dimension()!=B.dimension()) {
-        throw std::domain_error(
-              "minkowski_sum: the two rectangles have different dimension.");
-      }
-      
-      Rectangle<R> result(A.dimension());
-      for(dimension_type i=0; i!=A.dimension(); ++i) {
-        result.set_interval(i,A[i]+B[i]);
-      }
 
-      return result;
-
-    }
-
-    template<typename R> 
-    Rectangle<R> 
-    minkowski_difference(const Rectangle<R>& A, const Rectangle<R>& B)
-    {
-      if (A.dimension()!=B.dimension()) {
-        throw std::domain_error(
-              "minkowski_difference: the two rectangles have different dimension.");
-      }
-
-      Rectangle<R> result(A.dimension());
-      for(dimension_type i=0; i!=A.dimension(); i++) {
-          result.set_interval(i,A[i]-B[i]);
-      }
-      return result;
-    }
-    
-
-    template <typename R>
-    LinearAlgebra::IntervalVector<R> 
-    Rectangle<R>::position_vectors() const 
-    {
-      LinearAlgebra::IntervalVector<R> result(this->dimension());
-      for(size_type i=0; i!=result.size(); ++i) {
-        result(i)=this->operator[](i);
-      }
-      return result;
-    }
-      
     template <typename R>
     Rectangle<R>& 
     Rectangle<R>::expand_by(const real_type& delta) 
     {
+      Interval<R> expand(-delta,delta);
       for (size_type j=0; j< this->dimension(); ++j) {
-      this->_upper_corner[j]+=delta;
-        this->_lower_corner[j]-=delta;
+        this->_bounds[j]+=expand;
       }
       return *this;
     }
       
+    
     template <typename R>
     Rectangle<R>
-    Rectangle<R>::quadrant(const BinaryWord& q) const 
+    Rectangle<R>::quadrant(const BinaryWord& w) const 
     {
-      assert(q.size() == this->dimension());
+      assert(w.size() == this->dimension());
       Rectangle<R> quadrant(this->dimension());
       
-      for (size_type j=0; j< this->dimension(); j++) {
-        if (q[j]) {
-          quadrant._lower_corner[j]=(this->_upper_corner[j]+
-                                      this->_lower_corner[j])/2;
-          quadrant._upper_corner[j]=this->_upper_corner[j];
+      for (size_type i=0; i!=this->dimension(); ++i) {
+        if(w[i]) {
+          quadrant[i]=Interval<R>(this->interval(i).centre(),this->upper_bound(i));
         } 
         else {
-          quadrant._upper_corner[j]=(this->_upper_corner[j]+
-                                      this->_lower_corner[j])/2;
-          quadrant._lower_corner[j]=this->_lower_corner[j];
+          quadrant[i]=Interval<R>(this->lower_bound(i),this->interval(i).centre());
         }
       }
       return quadrant;
@@ -187,56 +139,76 @@ namespace Ariadne {
       return result;   
     }
     
-    
-    /*! \brief Tests inclusion in an open cover.
-     */
     template <typename R>
-    bool 
-    Rectangle<R>::subset_of_open_cover(const ListSet<R,Geometry::Rectangle>& cover) const
+    Point<R> 
+    Rectangle<R>::vertex(size_type i) const 
     {
-      throw std::domain_error("subset_of_open_cover(Simplex, std::vector<Simplex>) not implemented");
+      size_type d=this->dimension();
+      state_type result(d); 
+            
+      if (i >= (size_type)(1<<d)) {
+         throw std::domain_error("Rectangle::vertex(i): Wrong vertex index.");
+      }
+      
+      for (size_type j=0; j<d; ++j) {
+        if (i%2) {
+          result[j]=this->lower_bound(j);
+        }
+        else {
+          result[j]=this->upper_bound(j);
+        }
+        i=i/2;
+      }
+
+      return result;
     }
     
-    /*! \brief Tests inclusion in the interior of a denotable set.
-     * FIXME: Use some kind of GridSet for this operation.
-     * WARNING: Maybe this is the wrong routing...
-     */
+
     template <typename R>
     bool 
-    Rectangle<R>::inner_subset(const ListSet<R,Geometry::Rectangle>& B) const
+    subset_of_open_cover(const Rectangle<R>& A, 
+                         const ListSet<R,Geometry::Rectangle>& U)
     {
-      return Geometry::inner_subset(*this, GridMaskSet<R>(B));
+      throw std::domain_error("subset_of_open_cover(Rectangle, ListSet<Rectangle>) not implemented");
     }
     
-    /*! \brief Tests inclusion. 
-     *  FIXME: Convert B to GridMaskSet<R> .
-     */
     template <typename R>
     bool 
-    Rectangle<R>::subset(const ListSet<R,Geometry::Rectangle>& B) const
+    inner_subset(const Rectangle<R>& A, 
+                 const ListSet<R,Geometry::Rectangle>& B)
     {
-      return Geometry::subset(*this, GridMaskSet<R>(B));
+      return Geometry::inner_subset(A, GridMaskSet<R>(B));
     }
+    
+    template <typename R>
+    bool 
+    subset(const Rectangle<R>& A, 
+           const ListSet<R,Geometry::Rectangle>& B)
+    {
+      return Geometry::subset(A, GridMaskSet<R>(B));
+    }
+    
     
     template <typename R>
     std::ostream&
-    operator<<(std::ostream& os, const Rectangle<R>& r) 
+    Rectangle<R>::write(std::ostream& os) const 
     {
-      if(r.dimension() > 0) {
-        os << "["<<r._lower_corner[0]<<","<<r._upper_corner[0]<<"]";
-        for(size_type i=1; i!=r.dimension(); ++i) {
-          os << "x["<<r._lower_corner[i]<<","<<r._upper_corner[i]<<"]";
-        }
+      const Rectangle<R>& self=*this;
+      if(self.dimension()==0) {
+        os << "EmptyRectangle";
       }
       else {
-        os << "ZeroDimensionalRectangle";
+        os << "[" << self.lower_bound(0) << "," << self.upper_bound(0) << "]";
+        for(dimension_type i=1; i!=self.dimension(); ++i) {
+          os << "x[" << self.lower_bound(i) << "," << self.upper_bound(i) << "]";
+        }
       }
       return os;
     }
     
     template <typename R>
     std::istream& 
-    operator>>(std::istream& is, Rectangle<R>& r)
+    Rectangle<R>::read(std::istream& is)
     {
      
       char c;
@@ -258,7 +230,7 @@ namespace Ariadne {
         if(is) {
           is.putback(c);
         }
-        r=Rectangle<R>(v.begin(),v.end());
+        (*this)=Rectangle<R>(v.begin(),v.end());
       }
       else {
         /* representation as lower and upper corners */

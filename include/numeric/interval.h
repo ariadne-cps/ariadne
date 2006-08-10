@@ -69,21 +69,38 @@ namespace Ariadne {
      *
      * Currently implemented as a wrapper around the boost::numeric::interval class template from the Boost C++ library.
      */
+    //using namespace boost::numeric::interval_lib;
+
+//typedef boost::numeric::interval< double, policies< rounded_math<double>,checking_base<double> > > dInterval;
     template<typename R>
-    class Interval : public boost::numeric::interval<R> {
+    class Interval : public
+        boost::numeric::interval<R, 
+            boost::numeric::interval_lib::policies< 
+                boost::numeric::interval_lib::rounded_math<R>,
+                boost::numeric::interval_lib::checking_base<R> 
+            > 
+        >
+    {
+      typedef boost::numeric::interval<R, 
+            boost::numeric::interval_lib::policies< 
+                boost::numeric::interval_lib::rounded_math<R>,
+                boost::numeric::interval_lib::checking_base<R> 
+            > 
+        > _boost_interval;
+
      public:
-      /*! \brief Default constructer constructs one-point interval containing zero. */
+      /*! \brief Default constructer constructs empty interval. */
       Interval()
-        : boost::numeric::interval<R>(0,0) { }
+        : _boost_interval(1,0) { }
       /*! \brief Construct a one-point interval. */
       template<typename Rl> Interval(const Rl& x)
-        : boost::numeric::interval<R>(R(x),R(x)) { }
+        : _boost_interval(R(x),R(x)) { }
       /*! \brief Construct from a boost interval. */
-      Interval(const boost::numeric::interval<R>& ivl)
-        : boost::numeric::interval<R>(ivl) { }
+      Interval(const _boost_interval& ivl)
+        : _boost_interval(ivl) { }
       /*! \brief Construct from lower and upper bounds. */
       Interval(const R& l, const R& u)
-        : boost::numeric::interval<R>(l,u) { }
+        : _boost_interval(l,u) { }
       /*! \brief Assignment operator. */
       Interval<R>& operator=(const R& x) {
         *this=Interval<R>(x,x);
@@ -104,6 +121,8 @@ namespace Ariadne {
       bool operator!=(const R& x) const { 
         return !(*this==x); }
 
+      /*! \brief Tests if the interval is empty . */
+      bool empty() const { return this->lower()>this->upper(); }
       /*! \brief Tests if the interval contains \a r. */
       bool contains(const R& r) const { return this->lower()<=r && r<=this->upper(); }
       /*! \brief Tests if the interior of the interval contains \a r. */
@@ -115,13 +134,53 @@ namespace Ariadne {
       R radius() const { return (this->upper()-this->lower())/2; }
       /*! \brief The length of the interval, given by \f$b-a\f$. */
       R length() const { return this->upper()-this->lower(); }
+      
+      static bool equal(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      static bool disjoint(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      static bool interiors_intersect(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      static bool subset(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      static bool inner_subset(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      
+      static Interval<R> intersection(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      static Interval<R> regular_intersection(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      static Interval<R> hull(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      
+      template<typename N> static Interval<R> pow(const Interval<R>& x, const N& n);
+      
+      std::ostream& write(std::ostream& os) const;
+      std::istream& read(std::istream& is);
     };
     
+    /* A reference to an interval. */
+    template <typename R>
+    class IntervalReference {
+     public:
+      IntervalReference(R& l, R& u) : _lower(&l), _upper(&u) { }
+      IntervalReference(Interval<R>& ivl)
+        : _lower(&const_cast<R&>(ivl.lower())), _upper(&const_cast<R&>(ivl.upper())) { }
+      void operator=(const Interval<R>& ivl) { *_lower=ivl.lower(); *_upper=ivl.upper(); }
+      operator Interval<R> () const { return Interval<R>(*_lower,*_upper); }
+      R lower() const { return *_lower; }
+      R upper() const { return *_upper; }
+      R centre() const { return (*_lower+*_upper)/2; }
+     private:
+      R* _lower; R* _upper;
+    };
+    
+    /*! \brief Tests equality. */
+    template<typename R>
+    inline
+    bool
+    Interval<R>::equal(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    {
+      return (ivl1.upper()==ivl2.lower() || ivl1.lower()==ivl2.upper());
+    }
+
     /*! \brief Tests disjointness. */
     template<typename R>
     inline
     bool
-    disjoint(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    Interval<R>::disjoint(const Interval<R>& ivl1, const Interval<R>& ivl2)
     {
       return (ivl1.upper()<ivl2.lower() || ivl1.lower()>ivl2.upper());
     }
@@ -130,7 +189,7 @@ namespace Ariadne {
     template<typename R>
     inline
     bool
-    interiors_intersect(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    Interval<R>::interiors_intersect(const Interval<R>& ivl1, const Interval<R>& ivl2)
     {
       return (ivl1.upper()>ivl2.lower() && ivl1.lower()<ivl2.upper());
     }
@@ -139,7 +198,7 @@ namespace Ariadne {
     template<typename R>
     inline
     bool
-    inner_subset(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    Interval<R>::inner_subset(const Interval<R>& ivl1, const Interval<R>& ivl2)
     {
       return (ivl1.lower()>ivl2.lower() && ivl1.upper()<ivl2.upper());
     }
@@ -148,16 +207,59 @@ namespace Ariadne {
     template<typename R>
     inline
     bool
-    subset(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    Interval<R>::subset(const Interval<R>& ivl1, const Interval<R>& ivl2)
     {
       return (ivl1.lower()>=ivl2.lower() && ivl1.upper()<=ivl2.upper());
     }
 
+    /*! \brief The intersection of \a ivl1 and \a ivl2. */
+    template<typename R>
+    inline
+    Interval<R>
+    Interval<R>::intersection(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    {
+      return Interval<R>(std::max(ivl1.lower(),ivl2.lower()),
+                         std::min(ivl1.upper(),ivl2.upper()));
+    }
+
+    /*! \brief The closure of the intersection of the interiors of \a ivl1 and \a ivl2. */
+    template<typename R>
+    inline
+    Interval<R>
+    Interval<R>::regular_intersection(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    {
+      if(ivl1.upper()==ivl2.lower() || ivl1.lower()==ivl2.upper()) {
+        return Interval<R>(1,0);
+      }
+      else {
+        return intersection(ivl1,ivl2);
+      }
+    }
+
+    /*! \brief The smallest interval containing \a ivl1 and \a ivl2. */
+    template<typename R>
+    inline
+    Interval<R>
+    Interval<R>::hull(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    {
+      if(ivl1.empty()) {
+        return ivl2;
+      }
+      if(ivl2.empty()) {
+        return ivl1;
+      }
+      return Interval<R>(std::min(ivl1.lower(),ivl2.lower()),
+                         std::max(ivl1.upper(),ivl2.upper()));
+    }
+    
+    
     /*! \brief Integer power. */
-    template<typename R, typename N>
+    template<typename R>
+    template<typename N>
     inline
     Interval<R> 
-    pow(const Interval<R>& x, const N& n) {
+    Interval<R>::pow(const Interval<R>& x, const N& n) 
+    {
       Interval<R> result=R(1);
       for(N i=0; i!=n; ++i) {
         result*=x;
@@ -165,6 +267,36 @@ namespace Ariadne {
       return result;
     }
   
+    template<typename R>
+    inline
+    std::ostream&
+    Interval<R>::write(std::ostream& os) const
+    {
+      if(this->empty()) {
+        return os << "[1,0]";
+      }
+      else {
+        return os << "[" << this->lower() << "," << this->upper() << "]";
+      }
+      //const _boost_interval& boost_ivl(*this);
+      //return os << boost_ivl;
+    }
+    
+    template<typename R>
+    inline
+    std::istream&
+    Interval<R>::read(std::istream& is)
+    {
+      char c;
+      R l;
+      R u;
+      is >> c >> l >> c >> u >> c;
+      (*this)=Interval<R>(l,u);
+      //_boost_interval& boost_ivl(*this);
+      //is >> boost_ivl;
+      return is;
+    }
+    
 
     template<typename R> class numerical_traits< Interval<R> > {
      public:
@@ -178,8 +310,7 @@ namespace Ariadne {
     std::ostream&
     operator<<(std::ostream& os, const Interval<R>& ivl)
     {
-      const boost::numeric::interval<R>& boost_ivl(ivl);
-      return os << boost_ivl;
+      return ivl.write(os);
     }
     
     template<typename R>
@@ -187,9 +318,7 @@ namespace Ariadne {
     std::istream&
     operator>>(std::istream& is, Interval<R>& ivl)
     {
-      boost::numeric::interval<R>& boost_ivl(ivl);
-      is >> boost_ivl;
-      return is;
+      return ivl.read(is);
     }
     
   } // namespace Numeric

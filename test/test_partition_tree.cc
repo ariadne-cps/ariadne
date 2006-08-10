@@ -56,30 +56,30 @@ int main() {
 
   std::vector<Ariadne::dimension_type> seqa;
 
-  Rectangle<Real> bb;
+  Rectangle<Real> bb("[0,1]x[0,3]");
   SubdivisionSequence seq(2);
   BinaryWord bnw;
   BooleanArray bna;
   BinaryTree bnt;
   BooleanArray bla;
 
-  string input("[0,1]x[0,3]" "[0,1]" "[0,0,1,0,0,1,1,1,0,1,1]" "[1,0,1,1,0,1]" 
-               "[0.125,0.25]" "[2,1;0.5,1] " 
-               " [-4,4]x[-4,4]  [1,1,0,1,0,0,1,0,1,0,1,1,0,0,0] [0,1,0,1,0,1,0,1]");
+  string input(" [1,1,0,1,0,0,1,0,1,0,1,1,0,0,0] [0,1,0,1,0,1,0,1]");
   stringstream is(input);
-  is >> bb >> seqa;
-  is >> bnw;
+
+  seqa.resize(2); seqa[0]=0; seqa[1]=1;
+  seq=SubdivisionSequence(seqa.begin(),seqa.begin(),seqa.end());
+  bnw=BinaryWord("[0,0,1,0,0,1,1,1,0,1,1]");
   bna=BooleanArray(bnw.begin(),bnw.begin()+bnw.size());
   bnt=BinaryTree(bna);
-  is >> bnw;
+  bnw=BinaryWord("[1,0,1,1,0,1]");
   bla=BooleanArray(bnw.begin(),bnw.begin()+bnw.size());
-  seq=SubdivisionSequence(seqa.begin(),seqa.begin(),seqa.end());
 
-  clog << bb << "  " << seq << "  " << bna << "  " << bla << " " << endl;
+  clog << "bb=" << bb << "  seq=" << seq << "  bna=" << bna << "  bla=" << bla << endl;
 
   PartitionScheme<Real> pg(bb,seq);
   PartitionTree<Real> pt(pg,bnt);
   PartitionTreeSet<Real> pts(pg,bnt,bla);
+  ListSet<Real,Rectangle> rls(pts);
 
   PartitionTree<Real>::const_iterator ptree_iter=pt.begin();
   PartitionTree<Real>::const_iterator ptree_end=pt.end();
@@ -90,37 +90,41 @@ int main() {
   IntervalVector<Real> iv(2);
   iv[0]=Interval<Real>(-0.5,0.5);
   iv[1]=Interval<Real>(-0.5,0.5);
-  Vector<Real> c;
-  Matrix<Real> A;
-  is >> c >> A >> bb;
+  Vector<Real> c("[0.125,0.25]");
+  Matrix<Real> A("[2,1;0.5,1]");
+  bb=Rectangle<Real>("[-4,4]x[-4,4]");
   Parallelotope<Real> pltp(c,A);
+  clog << "pltp=" << pltp << endl << "bb=" << bb << endl;
+
+
   seq=SubdivisionSequence(2);
+  clog << "seq=" << seq << " " << seq.body_size() << " " << seq.tail_size() << " " << seq.dimension() << endl;
+
+  
+  clog << "pt=" << pt << endl;
+  clog << "pts=" << pts << endl;
+  clog << "rls=" << rls << endl;
+  clog << "pltp=" << pltp << endl;
   pg=PartitionScheme<Real>(bb,seq);
   uint dpth=12;
-  PartitionTreeSet<Real> ptsoa=over_approximation< Real, Parallelotope<Real>  >(pltp,pg,dpth);
   PartitionTreeSet<Real> ptsua=under_approximation< Real, Parallelotope<Real>  >(pltp,pg,dpth);
-  PartitionTreeSet<Real> ptsouta=outer_approximation< Real, Parallelotope<Real>  >(pltp,pg,dpth);
+  clog << "ptsua=" << ptsua << endl;
+  PartitionTreeSet<Real> ptsoa=over_approximation< Real, Parallelotope<Real>  >(pltp,pg,dpth);
+  clog << "ptsoa=" << ptsoa << endl;
   PartitionTreeSet<Real> ptsina=inner_approximation< Real, Parallelotope<Real>  >(pltp,pg,dpth);
+  clog << "ptsina=" << ptsina << endl;
+  PartitionTreeSet<Real> ptsouta=outer_approximation< Real, Parallelotope<Real>  >(pltp,pg,dpth);
+  clog << "ptsouta=" << ptsouta << endl;
+
   RegularGrid<Real> rg(2,Real(0.125));
   Grid<Real>& g=rg;
-  LatticeRectangle lr(2);
-  is >> lr;
   FiniteGrid<Real> fg(g,bb);
   ListSet<Real,Rectangle> lsua=ptsua;
-  GridMaskSet<Real> gmsouta=under_approximation(ptsouta,fg);
-  GridMaskSet<Real> gmsina=over_approximation(ptsina,fg);
-  
-  
-  clog << pt << endl;
-  clog << pts << endl;
-  clog << ListSet<Real,Rectangle>(pts) << endl;
-  clog << pltp << endl;
-  clog << ptsua << endl;
-  clog << ptsoa << endl;
-  clog << ptsina << endl;
-  clog << ptsouta << endl;
-  clog << gmsina << endl;
-  clog << gmsouta << endl;
+  clog << "lsua=" << lsua << endl;
+  GridMaskSet<Real> gmsina=under_approximation(ptsina,fg);
+  clog << "gmsina=" << gmsina << endl;
+  GridMaskSet<Real> gmsouta=over_approximation(ptsouta,fg);
+  clog << "gmsouta=" << gmsouta << endl;
 
   clog.close();
 

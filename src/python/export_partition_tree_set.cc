@@ -44,7 +44,7 @@ RRectangle convert_to_rectangle(const RPartitionTreeCell& ptc) {
 void export_partition_tree_set() {
   class_<SubdivisionSequence>("SubdivisionSequence",init<unsigned int>())
     .def("dimension", &SubdivisionSequence::dimension)
-    .def("__getitem__", &SubdivisionSequence::get)
+    .def("__getitem__", &SubdivisionSequence::operator[])
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 

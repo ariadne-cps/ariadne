@@ -45,6 +45,7 @@ namespace Ariadne {
       : _grid(g), _lattice_set(g.dimension())
     { 
       _lattice_set.set_lower_bound(0,1);
+      //_lattice_set.set_lower_bound(0,0);
       _lattice_set.set_upper_bound(0,0);
     }
 
@@ -92,7 +93,8 @@ namespace Ariadne {
     GridCell<R>::GridCell(const Grid<R>& g, const IndexArray& pos)
       : _grid(g), _lattice_set(pos)
     {
-      assert(_lattice_set.dimension()==_grid.dimension());
+      assert(_lattice_set.
+dimension()==_grid.dimension());
     }
 
 
@@ -102,8 +104,9 @@ namespace Ariadne {
       Rectangle<R> result(dimension());
 
       for(dimension_type i=0; i!=dimension(); ++i) {
-        result.set_lower_bound(i, _grid.subdivision_coordinate(i,_lattice_set.lower_bound(i)));
-        result.set_upper_bound(i, _grid.subdivision_coordinate(i,_lattice_set.upper_bound(i)));
+        result[i]=Interval<R>(
+            _grid.subdivision_coordinate(i,_lattice_set.lower_bound(i)),
+            _grid.subdivision_coordinate(i,_lattice_set.upper_bound(i)));
       }
 
       return result;
@@ -113,14 +116,14 @@ namespace Ariadne {
     template<typename R>
     GridRectangle<R>::operator Rectangle<R>() const {
       if(this->empty()) {
-        return Rectangle<R>();
+        return Rectangle<R>(this->dimension());
       }
      
-
       Rectangle<R> result(dimension());
       for(size_type i=0; i!=dimension(); ++i) {
-        result.set_lower_bound(i, _grid.subdivision_coordinate(i,_lattice_set.lower_bound(i)));
-        result.set_upper_bound(i, _grid.subdivision_coordinate(i,_lattice_set.upper_bound(i)));
+        result[i]=Interval<R>(
+            _grid.subdivision_coordinate(i,_lattice_set.lower_bound(i)),
+            _grid.subdivision_coordinate(i,_lattice_set.upper_bound(i)));
       }
 
       return result;
@@ -278,6 +281,7 @@ namespace Ariadne {
     bool
     subset(const Rectangle<R>& A, const GridRectangle<R>& B)
     {
+      assert(A.dimension()==B.dimension());
       return subset(A,Rectangle<R>(B));
     }
     

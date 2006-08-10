@@ -21,6 +21,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <exception>
+
 #include "numeric/arithmetic.h"
 
 #include "geometry/rectangle.h"
@@ -35,6 +40,24 @@ namespace Ariadne {
     const bool left=BinaryTree::left;
     const bool right=BinaryTree::right;
     
+    SubdivisionSequence::SubdivisionSequence(const std::string& str)
+    {
+      std::stringstream ss(str);
+      ss >> *this;
+    }
+
+    std::ostream&
+    operator<<(std::ostream& os, const SubdivisionSequence& ss)
+    {
+      return os << ss._sequence;
+    }
+
+    std::istream&
+    operator>>(std::istream& os, SubdivisionSequence& ss)
+    {
+      throw std::domain_error("SubdivisionSequence::read(const std::ostream& os) not implemented");
+    }
+
     sequence<dimension_type> 
     SubdivisionSequence::_default(dimension_type n) {
       dimension_type coords[n];

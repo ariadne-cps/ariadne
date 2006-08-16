@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "../declarations.h"
-
-#include "../linear_algebra/interval_vector.h"
+#include "newton.h"
 
 #include "../linear_algebra/matrix.h"
+#include "../linear_algebra/interval_vector.h"
 #include "../linear_algebra/interval_matrix.h"
 
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
 
 #include "../system/vector_field.h"
+
 
 namespace Ariadne {
   static int debug_level=0;
@@ -53,15 +53,22 @@ namespace Ariadne {
       Geometry::Rectangle<Real> r=x;
       while(true) {
         if(debug_level>0) { std::cerr << "Testing for root in " << r << "\n"; }
+        if(debug_level>0) { std::cerr << "  e=" << r.radius() << "  r=" << r << std::endl; }
         Geometry::Point<Real> m=r.centre();
+        if(debug_level>0) { std::cerr << "  m=" << m << std::endl; }
         Geometry::Rectangle<Real> mr(m);
+        if(debug_level>0) { std::cerr << "  mr=" << mr << std::endl; }
         LinearAlgebra::IntervalVector<Real> w=f(mr);
+        if(debug_level>0) { std::cerr << "  f(mr)=" << w << std::endl; }
         LinearAlgebra::IntervalMatrix<Real> A=f.derivative(r);
+        if(debug_level>0) { std::cerr << "  Df(r)=" << A << std::endl; }
         LinearAlgebra::IntervalMatrix<Real> Ainv=A.inverse();
+        if(debug_level>0) { std::cerr << "  inverse(Df(r))=" << Ainv << std::endl; }
         LinearAlgebra::IntervalVector<Real> dr=Ainv * w;
+        if(debug_level>0) { std::cerr << "  dr=" << dr << std::endl; }
         Geometry::Rectangle<Real> nr= mr - dr;
+        if(debug_level>0) { std::cerr << "  nr=" << nr << std::endl; } 
         if(debug_level>0) {
-          std::cerr << "e=" << r.radius() << "  x=" << r << "  m=" << m << std::flush;
           std::cerr << "  f(x)=" << f(r) << std::flush;
           std::cerr << "  f(m)=" << f(mr).centre() << std::flush;
           std::cerr << "  Df(x) =" << A << "  inv=" << inverse(A) << "  I=" << A*inverse(A) << std::flush;

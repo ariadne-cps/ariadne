@@ -1,8 +1,7 @@
 /***************************************************************************
- *            map.h
+ *            multimap.h
  *
- *  Wed Feb  2 18:33:10 2005
- *  Copyright  2005, 2006  Alberto Casagrande, Pieter Collins
+ *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it
  ****************************************************************************/
 
@@ -22,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file map.h
- *  \brief Map interface.
+/*! \file multimap.h
+ *  \brief Mulitvalued map interface.
  */
 
-#ifndef _ARIADNE_MAP_H
-#define _ARIADNE_MAP_H
+#ifndef _ARIADNE_MULTIMAP_H
+#define _ARIADNE_MULTIMAP_H
 
 #include <string>
 
@@ -36,9 +35,9 @@
 namespace Ariadne {
   namespace System {
 
-    /*! \brief Base class for (differentiable) functions. */
+    /*! \brief Base class for multivalued functions. */
     template<typename R>
-    class Map {
+    class MultiMap {
      public:
       typedef R real_type;
       typedef Geometry::Point<R> state_type;
@@ -46,27 +45,19 @@ namespace Ariadne {
       typedef LinearAlgebra::Matrix<R> matrix_type;
       typedef LinearAlgebra::IntervalMatrix<R> interval_matrix_type;
       
-      /*! \brief Virtual destructor. */
-      virtual ~Map();
+      virtual ~MultiMap();
       
-      /*! \brief The image of a point, if this can be computed exactly. */
-      virtual Geometry::Point<R> operator() (const Geometry::Point<R>& x) const;
-      /*! \brief An over-approximation to the image of a rectangle. */
-      virtual Geometry::Rectangle<R> operator() (const Geometry::Rectangle<R>& A) const;
-      /*! \brief An over-approximation to the image of a parallelotope. */
-      virtual Geometry::Parallelotope<R> operator() (const Geometry::Parallelotope<R>& A) const;
-      /*! \brief An over-approximation to the image of a zonotope. */
-      virtual Geometry::Zonotope<R> operator() (const Geometry::Zonotope<R>& A) const;
-      /*! \brief An over-approximation to the image of a simplex. */
-      virtual Geometry::Simplex<R> operator() (const Geometry::Simplex<R>& A) const;
-      /*! \brief An over-approximation to the image of a polyhedron. */
-      virtual Geometry::Polyhedron<R> operator() (const Geometry::Polyhedron<R>& A) const;
+      /*! \brief A minimal cover of the image of a rectangle. */
+      virtual Geometry::ListSet<R,Geometry::Rectangle> operator() (const Geometry::Rectangle<R>& A) const;
+      /*! \brief A minimal cover of the image of a parallelotope. */
+      virtual Geometry::ListSet<R,Geometry::Parallelotope> operator() (const Geometry::Parallelotope<R>& A) const;
+      /*! \brief A minimal cover of the image of a zonotope. */
+      virtual Geometry::ListSet<R,Geometry::Zonotope> operator() (const Geometry::Zonotope<R>& A) const;
+      /*! \brief A minimal cover of the image of a simplex. */
+      virtual Geometry::ListSet<R,Geometry::Simplex> operator() (const Geometry::Simplex<R>& A) const;
+      /*! \brief A minimal cover of the image of a polyhedron. */
+      virtual Geometry::ListSet<R,Geometry::Polyhedron> operator() (const Geometry::Polyhedron<R>& A) const;
     
-      /*! \brief The derivative at a point, if this can be computed exactly. */
-      virtual LinearAlgebra::Matrix<R> derivative(const Geometry::Point<R>& r) const;
-      /*! \brief The derivatives over a rectangle. */
-      virtual LinearAlgebra::IntervalMatrix<R> derivative(const Geometry::Rectangle<R>& r) const;
-        
       /*! \brief The dimension of the domain space. */
       virtual dimension_type argument_dimension() const = 0;
       /*! \brief The dimension of the range space. */
@@ -74,11 +65,10 @@ namespace Ariadne {
     
       /*! \brief The name of the map. */
       virtual std::string name() const = 0;
-
     };
   
     
   }
 }
 
-#endif /* _ARIADNE_MAP_H */
+#endif /* _ARIADNE_MULTIMAP_H */

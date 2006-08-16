@@ -57,14 +57,13 @@ namespace Ariadne {
      public:
       typedef R real_type;
       typedef Geometry::Point<R> state_type;
-      
-      typedef Ariadne::LinearAlgebra::Matrix<R> Matrix_type;
-      typedef Ariadne::LinearAlgebra::Vector<R> Vector_type;
+      typedef LinearAlgebra::Vector<R> vector_type;
+      typedef LinearAlgebra::Matrix<R> matrix_type;
       
       explicit AffineMap() {}
-      explicit AffineMap(const Matrix_type& A, const Vector_type& b) : _A(A), _b(b) { }
-      explicit AffineMap(const Matrix_type& A) : _A(A), _b(A.size2()) { }
-      explicit AffineMap(const Vector_type& b) : _A(b.size(),b.size()), _b(b) { }
+      explicit AffineMap(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b) : _A(A), _b(b) { }
+      explicit AffineMap(const LinearAlgebra::Matrix<R>& A) : _A(A), _b(A.size2()) { }
+      explicit AffineMap(const LinearAlgebra::Vector<R>& b) : _A(b.size(),b.size()), _b(b) { }
       
       AffineMap(const AffineMap<real_type>& T) : _A(T._A), _b(T._b) { }
       AffineMap<real_type>& operator=(const AffineMap<real_type>& T) {
@@ -104,62 +103,12 @@ namespace Ariadne {
   
       std::string name() const { return "AffineMap"; }
      protected:
-      Matrix_type _A;
-      Vector_type _b;
+      LinearAlgebra::Matrix<R> _A;
+      LinearAlgebra::Vector<R> _b;
     };
       
     template<typename R>
     std::ostream& operator<<(std::ostream&, const AffineMap<R>&);
-    
-    /*! \brief An affine map on Euclidean space. */
-/*
-    template <>
-    class AffineMap<Rational> : public Map<Rational> 
-    {
-     public:
-      typedef Rational real_type;
-      typedef Geometry::Point<Rational> state_type;
-      
-      typedef LinearAlgebra::Matrix<Rational> Matrix_type;
-      typedef LinearAlgebra::Vector<Rational> Vector_type;
-      
-      explicit AffineMap() {}
-      explicit AffineMap(const Matrix_type& A, const Vector_type& b) : _A(A), _b(b) { }
-      explicit AffineMap(const Matrix_type& A) : _A(A), _b(A.size2()) { }
-      explicit AffineMap(const Vector_type& b) : _A(b.size(),b.size()), _b(b) { }
-      
-      AffineMap(const AffineMap<real_type>& T) : _A(T._A), _b(T._b) { }
-      AffineMap<real_type>& operator=(const AffineMap<real_type>& T) {
-        this->_A=T._A; this->_b=T._b; return *this; }
-      
-      Geometry::Point<Rational> operator() (const Geometry::Point<Rational>& x) const;
-        
-      Geometry::Rectangle<Rational> operator() (const Geometry::Rectangle<Rational>& A) const;
-        
-      Geometry::Parallelotope<Rational> operator() (const Geometry::Parallelotope<Rational>& A) const;
-      
-      Geometry::Zonotope<Rational> operator() (const Geometry::Zonotope<Rational>& A) const;
-      
-      Geometry::Simplex<Rational> operator() (const Geometry::Simplex<Rational>& A) const;
-      
-      Geometry::Polyhedron<Rational> operator() (const Geometry::Polyhedron<Rational>& A) const;
-      
-      Geometry::ListSet<Rational,Geometry::Parallelotope> operator() (const Geometry::GridMaskSet<Rational>& ) const;
-      
-      const LinearAlgebra::Matrix<Rational>& A() const { return _A; }
-      const LinearAlgebra::Vector<Rational>& b() const { return _b; }
-      
-      dimension_type argument_dimension() const { return _A.size2(); }
-      dimension_type result_dimension() const { return _b.size(); }
-      
-      bool invertible() const { assert(false); }
-  
-      std::string name() const { return "AffineMap"; }
-     protected:
-      Matrix_type _A;
-      Vector_type _b;
-    }; 
-*/
 
   }
 }

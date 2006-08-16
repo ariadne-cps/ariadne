@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numerical_traits.h
+ *            multimap.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -20,36 +20,16 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-/*! \file numerical_traits.h
- *  \brief Traits classes to define properties of numerical types.
- */
 
-#ifndef _ARIADNE_NUMERICAL_TRAITS_H
-#define _ARIADNE_NUMERICAL_TRAITS_H
+#include "system/multimap.h"
+#include "system/multimap.tpl"
+
+#include "real_typedef.h"
 
 namespace Ariadne {
-  namespace Numeric {
-    
-    /* numerical traits */
-    /*! \brief Tags a class representing a ring. */
-    class ring_tag { };
-    /*! \brief Tags a class representing a field. */
-    class field_tag { };
+  namespace System {
+
+    template class MultiMap<Real>;
       
-    /*! \brief Typedef's describing a numerical type. */
-    template<typename T> class numerical_traits;
   }
 }
-  
-namespace Ariadne {
-  namespace Base {
-    template<typename R> inline std::string name() { 
-      return "UnknownType";
-      //throw std::runtime_error("name(): Unknown type");
-    }
-  
-  }
-}
-
-#endif /* _ARIADNE_NUMERICAL_TRAITS_H */

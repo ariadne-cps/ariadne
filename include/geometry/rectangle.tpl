@@ -48,6 +48,7 @@ namespace Ariadne {
       ss >> *this;
     }
 
+
     template<typename R>
     Rectangle<R>::operator Polyhedron<Rational> () const {
       LinearAlgebra::IntervalVector<Rational> rpv(this->dimension());
@@ -56,7 +57,7 @@ namespace Ariadne {
       }
       return Polyhedron<Rational>(rpv);
     }
-    
+
 
     template <typename R>
     Rectangle<R>& 

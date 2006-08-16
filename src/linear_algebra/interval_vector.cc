@@ -27,19 +27,18 @@
 
 #include "linear_algebra/interval_vector.h"
 #include "linear_algebra/interval_vector.tpl"
+#include "linear_algebra/vector.tpl"
 
 
 namespace Ariadne {
   namespace LinearAlgebra {
     
+    template class Vector< Interval<Real> >;
     template class IntervalVector<Real>;
 
-    template std::ostream& operator<<(std::ostream&, const IntervalVector<Real>&);
-    
 #ifndef REAL_IS_A_FIELD
+    template class Vector< Interval<Field> >;
     template class IntervalVector<Field>;
-    
-    template std::ostream& operator<<(std::ostream&, const IntervalVector<Field>&);
 #endif
   }
 }

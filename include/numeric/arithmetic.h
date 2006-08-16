@@ -36,13 +36,37 @@
 
 namespace Ariadne {
   namespace Numeric {
-    
+      
+    /*! \brief Minimum. */
+    template<typename R, typename A1, typename A2>
+    inline
+    R 
+    min(const A1& x1, const A1& x2) {
+      //std::cerr << "min<" << name<R>() << ">" << std::endl;
+      return x1<x2 ? R(x1) : R(x2);
+    }
+  
     /*! \brief Minimum. */
     template<typename R>
     inline
     R 
     min(const R& x1, const R& x2) {
-      return (x1<x2) ? x1 : x2;
+      //std::cerr << "min<" << name<R>() << ">" << std::endl;
+      return x1<x2 ? x1 : x2;
+    }
+  
+    /*! \brief Interval minimum. */
+    template<typename R>
+    inline
+    Interval<R> 
+    min(const Interval<R>& x1, const Interval<R>& x2);
+  
+    template<typename R, typename A1, typename A2>
+    inline
+    R 
+    max(const A1& x1, const A1& x2) {
+      //std::cerr << "min<" << name<R>() << ">" << std::endl;
+      return x1>x2 ? R(x1) : R(x2);
     }
   
     /*! \brief Maximum. */
@@ -50,16 +74,30 @@ namespace Ariadne {
     inline
     R 
     max(const R& x1, const R& x2) {
-      return (x1>x2) ? x1 : x2;
+      //std::cerr << "max<" << name<R>() << ">" << std::endl;
+      return x1>x2 ? x1 : x2;
     }
+  
+    /*! \brief Interval maximum. */
+    template<typename R>
+    inline
+    Interval<R> 
+    max(const Interval<R>& x1, const Interval<R>& x2);
   
     /*! \brief Absolute value. */
     template<typename R>
     inline
     R 
     abs(const R& x) {
-      return (x>=R(0)) ? x : R(-x);
+      //std::cerr << "abs<" << name<R>() << ">" << std::endl;
+      return x>=R(0) ? x : R(-x);
     }
+  
+    /*! \brief Interval absolute value. */
+    template<typename R>
+    inline
+    Interval<R> 
+    abs(const Interval<R>& x1, const Interval<R>& x2);
   
     /*! \brief Unary negation. */
     template<typename R> 

@@ -40,69 +40,156 @@
 namespace Ariadne {
   namespace LinearAlgebra {
 
-    /*! \brief A matrix over \a R. */
-    template<typename R>
-    class Matrix : public boost::numeric::ublas::matrix<R> 
-    {
-      typedef boost::numeric::ublas::matrix<R> Base;
-      typedef typename numerical_traits<R>::field_extension_type F;
-     public:
-      Matrix() : Base() { }
-      Matrix(const size_type& r, const size_type& c) : Base(r,c) { }
-      Matrix(const size_type& r, const size_type& c, 
-             const R* ptr, const size_type& ld) : Base(r,c) 
-      { 
-        for(size_type i=0; i!=r; ++i) { 
-          for(size_type j=0; j!=c; ++j) { 
-            Base::operator()(i,j)=ptr[i*ld+j];
-          } 
-        } 
-      }
-
-      template<typename E> Matrix(const boost::numeric::ublas::matrix_expression<E>& A) : Base(A()) { }
-            
-      Matrix(const std::string& s);
-
-      bool operator==(const Matrix<R>& other) const { 
-        const Matrix<R>& self=*this;
-        if(self.number_of_rows() != other.number_of_rows() ||
-           self.number_of_columns() != other.number_of_columns()) 
-        {
-          return false; 
-        }
-        for(size_type i=0; i!=this->number_of_rows(); ++i) {
-          for(size_type j=0; j!=this->number_of_columns(); ++j) {
-            if(self(i,j)!=other(i,j)) {
-              return false;
-            }
-          }
-        }
-        return true;
-      }
-
-      size_type number_of_rows() const { return Base::size1(); }
-      size_type number_of_columns() const { return Base::size2(); }
-
-      R norm() const;
-      R log_norm() const;
-      
-      Matrix<R> transpose() const;
-
-      bool singular() const;
-      R determinant() const;
-      
-      Matrix<F> inverse() const;
-      Vector<F> solve(const Vector<R>& v) const;
-
-      R* begin() { return &(*this)(0,0); }
-      const R* begin() const { return const_cast< Matrix<R>* >(this)->begin(); }
-    };
-    
     using boost::numeric::ublas::identity_matrix;
     using boost::numeric::ublas::herm;
     using boost::numeric::ublas::matrix_row;
     using boost::numeric::ublas::matrix_column;
   
+    /*! \brief A matrix over \a R. */
+    template<typename R>
+    class Matrix : public boost::numeric::ublas::matrix<R> 
+    {
+      typedef boost::numeric::ublas::matrix<R> _Base;
+      typedef boost::numeric::ublas::matrix<R> _boost_matrix;
+      typedef typename numerical_traits<R>::field_extension_type F;
+     public:
+      /*! \brief Construct a 0 by 0 matrix. */
+      Matrix() : _Base() { }
+      /*! \brief Construct an \a r by \a c matrix, all of whose entries are zero. */
+      Matrix(const size_type& r, const size_type& c) : _Base(r,c) { }
+      /*! \brief Construct an \a r by \a c matrix from the array beginning at \a ptr, 
+       *  incrementing the input row elements by \a ri and input columns by \a ci. */
+      Matrix(const size_type& r, const size_type& c, 
+             const R* ptr, const size_type& ri, const size_type& ci) : _Base(r,c) 
+      { 
+        for(size_type i=0; i!=r; ++i) { 
+          for(size_type j=0; j!=c; ++j) { 
+            _Base::operator()(i,j)=ptr[i*r+j*ci];
+          } 
+        } 
+      }
+
+      template<typename E> Matrix(const boost::numeric::ublas::matrix_expression<E>& A) : _Base(A) { }
+            
+      /*! \brief Construct from a string literal of the form "[a11,a12,...,a1n; a21,a22,...,a2n;...;am1,am2,...amn]". */
+      explicit Matrix(const std::string& s);
+
+#ifdef DOXYGEN
+      /*! \brief Copy constructor. */
+      Matrix(const Matrix<R>& A);
+      /*! \brief Copy assignment operator. */
+      Matrix<R>& operator=(const Matrix<R>& A);
+#endif
+      
+      /*! \brief The equality operator. */
+      bool operator==(const Matrix<R>& A) const;
+      /*! \brief The inequality operator. */
+      bool operator!=(const Matrix<R>& A) const;
+
+    
+     
+      /*! \brief The number of elements in the \a d th dimension. */
+      size_type size(const size_type& d) const {
+        if(d==0) { return _Base::size1(); } 
+        else if(d==1) { return _Base::size2(); }
+        else { assert(false); } 
+      }
+      /*! \brief The number of rows of the matrix. */
+      size_type number_of_rows() const { return _Base::size1(); }
+      /*! \brief The number of columns of the matrix. */
+      size_type number_of_columns() const { return _Base::size2(); }
+      
+      /*! \brief A constant reference to \a i,\a j th element. */
+      const R& operator() (const size_type& i, const size_type& j) const { 
+        return this->_Base::operator()(i,j); }
+      /*! \brief A reference to \a i,\a j th element. */
+      R& operator() (const size_type& i, const size_type& j) { 
+        return this->_Base::operator()(i,j); }
+      
+      /*! \brief An \a r by \a c matrix, all of whose entries are zero. */
+      static Matrix<R> zero(const size_type r, const size_type c) {
+        return Matrix<R>(r,c); }
+      /*! \brief The \a n by \a n identity matrix. */
+      static Matrix<R> identity(const size_type n) {
+        Matrix<R> result(n,n); 
+        for(size_type i=0; i!=n; ++i) { result(i,i)=R(1); } 
+        return result;
+      }
+      
+      /* Concatenate the columns of two matrices. */
+      static Matrix<R> concatenate_columns(const Matrix<R>& A1, const Matrix<R>& A2);
+      
+      /*! \brief The operator norm with respect to the supremum norm on vectors. 
+       * Equal to the supremum over all rows of the sum of absolute values.
+       */
+      F norm() const;
+
+      /*! \brief The logarithmic norm. */
+      F log_norm() const;
+      
+      /*! \brief True if the matrix is singular. */
+      bool singular() const;
+      /*! \brief The determinant of the matrix. */
+      F determinant() const;
+      
+      /*! \brief The transposed matrix. */
+      Matrix<R> transpose() const;
+
+      /*! \brief The inverse of the matrix. */
+      Matrix<F> inverse() const;
+      /*! \brief The solution of the linear equation \f$ Ax=b\f$. */
+      Vector<F> solve(const Vector<R>& b) const;
+
+      /*! \brief A pointer to the first element of the array of values. */
+      R* begin() { return &(*this)(0,0); }
+      /*! \brief A constant pointer to the first element of the array of values. */
+      const R* begin() const { return const_cast< Matrix<R>* >(this)->begin(); }
+
+      /*! \brief Write to an output stream . */
+      std::ostream& write(std::ostream& os) const;
+      /*! \brief Read from an input stream . */
+      std::istream& read(std::istream& is);
+
+#ifdef DOXYGEN
+      /*! \brief The additive inverse of the matrix \a A. */
+      friend Matrix<R> operator-<>(const Matrix<R>& A);
+      /*! \brief The sum of \a A1 and \a A2. */
+      friend Matrix<R> operator+<>(const Matrix<R>& A1, const Matrix<R>& A2);
+      /*! \brief The difference of \a A1 and \a A2. */
+      friend Matrix<R> operator-<>(const Matrix<R>& A1, const Matrix<R>& A2);
+      /*! \brief The scalar product of \a A by \a s. */
+      friend Matrix<R> operator*<>(const R& s, const Matrix<R>& A);
+      /*! \brief The scalar product of \a A by \a s. */
+      friend Matrix<R> operator*<>(const Matrix<R>& A, const R& s);
+      /*! \brief The scalar product of \a A by the reciprocal of \a s. */
+      friend Matrix<R> operator/<>(const Matrix<R>& A, const R& s);
+      /*! \brief The product of matrix \a A1 with matrix \a A2. */
+      friend Matrix<R> operator*<>(const Matrix<R>& A1, const Matrix<R>& A2);
+      /*! \brief The product of matrix \a A with vector \a v. */
+      friend Vector<R> operator*<>(const Matrix<R>& A, const Vector<R>& v);
+
+      /*! \brief The inverse of \a A. */
+      friend Matrix<R> inverse<>(const Matrix<R>& A);
+      /*! \brief Solve the linear system \f$Ax=b\f$. */
+      friend Matrix<R> solve<>(const Matrix<R>& A, const Vector<R>& b);
+
+      /*! \brief Catenate the columns of \a A1 with those of \a A2. */
+      friend Matrix<R> concatenate_columns<>(const Matrix<R>& A1, const Matrix<R>& A2);
+      /*! \brief Checks if the matrices have the same dimensions. */
+      friend bool have_same_dimensions<>(const Matrix<R>& A1, const Matrix<R>& A2);
+#endif 
+
+    };
+  
+    template<typename R>
+    inline
+    bool
+    have_same_dimensions(const Matrix<R>& A1, const Matrix<R>& A2) 
+    {
+      return A1.number_of_rows()==A2.number_of_rows() 
+          && A1.number_of_columns()==A2.number_of_columns();
+    }
+    
     template<typename R>
     inline
     Vector<R>
@@ -117,18 +204,7 @@ namespace Ariadne {
       return boost::numeric::ublas::prod(A,B);
     }
     
-
-    template <typename R>
-    Matrix<R> zero_Matrix(size_type r, size_type c);
-  
-    template <typename R>
-    inline
-    Matrix<R> zero_Matrix(size_type n)
-    {
-      return zero_Matrix<R>(n,n);
-    }
-    
-  
+ 
     template<typename R>
     inline
     R
@@ -162,45 +238,13 @@ namespace Ariadne {
     }
     
     template<typename R>
+    inline
     Matrix<R>
-    exp_approx(const Matrix<R>& A, const R& e);
+    concatenate_columns(const Matrix<R>& A1, const Matrix<R>& A2) {
+      return Matrix<R>::concatenate_columns(A1,A2);
+    }
     
-    template<typename R>
-    Matrix<R>
-    concatenate_columns(const Matrix<R>& A1, const Matrix<R>& A2);
-
-    template <typename R>
-    void 
-    lu_local_dec(Matrix<R>& A, 
-                 const array<size_type>& row, const array<size_type>& col, 
-                 const size_type& rows, const size_type& columns, 
-                 const size_type& p);
-   
-    template <typename R>
-    Matrix<R> 
-    lu_decompose(const Matrix<R>& A, 
-                 array<size_type>& p_col, 
-                 array<size_type>& p_row);
-                              
-    /* PAY ATTENTION!!! 
-     * I supose that matrix is row based i.e. 
-     * A(i,j) is the element in the i-th row and in the j-th column 
-     */
-    template <typename R>
-    Matrix<R> 
-    lu_decompose(const Matrix<R> &A, 
-                 array<size_type>& p_array);
-
-    
-    /* PAY ATTENTION!!! 
-     * I supose that boost::numeric::ublas::matrix is row based i.e. 
-     * A(i,j) is the element in the i-th row and in the j-th column 
-     */
-    template <typename R>
-    Vector<R> 
-    lu_solve(const Matrix<R>& A, 
-             const array<size_type>& p_array, 
-             const Vector<R>& b);
+        
              
     /* WARNING!!! The following function has some precision problems */ 
     template <typename R>
@@ -212,6 +256,8 @@ namespace Ariadne {
     Matrix<R>
     hermitian(const Matrix<R>& m);
     
+        
+        
     template <typename R>
     Integer 
     common_denominator(const Matrix<R>& A);
@@ -222,19 +268,9 @@ namespace Ariadne {
 
     
     
-    /* \brief Transforms the linear inequalities $Ax\leq b$ to $AT^{-1}y \leq b$. */
-    template <typename R>
-    void 
-    transform_linear_inequalities(const Matrix<R>& R, 
-                                  Matrix<R>& A, 
-                                  Vector<R>& b);
-    
     template <class R>
     bool independent_rows(Matrix<R> A);
 
-    template <typename R>
-    bool 
-    have_same_dimensions(const Matrix<R> &A,  const Matrix<R> &B);
     
     template <typename R>
     bool 
@@ -267,11 +303,15 @@ namespace Ariadne {
     
     template <typename R>
     std::ostream&
-    operator<<(std::ostream& os, const Matrix<R>& A);
+    operator<<(std::ostream& os, const Matrix<R>& A) {
+      return A.write(os);
+    }
 
     template <typename R>
     std::istream&
-    operator>>(std::istream& is, Matrix<R>& A);
+    operator>>(std::istream& is, Matrix<R>& A) {
+      return A.read(is); 
+    }
 
   }
 }

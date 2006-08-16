@@ -361,11 +361,9 @@
  *   typename real_type; // The type of denotable real number used for the representation.
  *   typename state_type; // The type of denotable point the set contains.
  *
+ *   BasicSet(const std::string &); // Construct from a string literal.
  *   BasicSet(const BasicSet &); // Copy constructor.
  *   BasicSet & operator=(const BasicSet &); // Assignment operator.
- *
- *   bool operator==(const BasicSet &) const; // Equality operator.
- *   bool operator!=(const BasicSet &) const; // Inequality operator.
  *
  *   dimension_type dimension() const; // The dimension of the set.
  *   bool empty() const; // Returns true if the set is empty.
@@ -381,92 +379,35 @@
  *   Sphere<real_type> bounding_sphere() const; // A sphere containing the set. (Optional)
  * };
  *
- *  // Optional, since the intersection of two basic sets need not be a basic set.
- *  BasicSet regular_intersection(const BasicSet &, const BasicSet &); // The closure of the intersection of the interiors of the two sets.
- *
- *  bool interiors_intersect(const BasicSet &, const BasicSet &); // Returns true if the interiors of the two sets intersect.
+ *  bool equal(const BasicSet &, const BasicSet &); // Returns true if the two sets are equal.
  *  bool disjoint(const BasicSet &, const BasicSet &); // Returns true if the two sets are disjoint.
+ *  bool interiors_intersect(const BasicSet &, const BasicSet &); // Returns true if the interiors of the two sets intersect.
  *  bool inner_subset(const BasicSet &, const BasicSet &); // Returns true if the first argument is a subset of the interior of the second.
  *  bool subset(const BasicSet &, const BasicSet &); // Returns true if the first argument is a subset of the second.
+ *
+ *  // Optional, depending on whether the operation yields a basic set of the same type.
+ *  BasicSet regular_intersection(const BasicSet &, const BasicSet &); // The closure of the intersection of the interiors of the two sets.
+ *  BasicSet intersection(const BasicSet &, const BasicSet &); // The intersection of the two (closed) sets.
+ *  BasicSet convex_hull(const BasicSet &, const BasicSet &); // The convex hull of the two sets.
+ *  BasicSet minkowski_sum(const BasicSet &, const BasicSet &); // The Minkowski (pointwise) sum of the two sets.
+ *  BasicSet minkowski_difference(const BasicSet &, const BasicSet &); // The Minkowski (pointwise) difference of the two sets.
+ *
  * \endcode
  *
  * Classes fulfilling the \c BasicSet concept are \c Rectangle (or \c Cuboid), \c Simplex, \c Parallelotope, \c Zonotope, \c Polytope and \c Ellipsoid.
  * Actually, these are templates, parameterised by the real number type \c real_type.
  *
- * \subsection rectangle Rectangles
- * A \c Rectangle describes a cuboid in Euclidean space.
- * \code
-  * templace<class R>
- * class Rectangle
- * {
- *   typedef R real_type;
- *   typedef Point<R> state_type;
- *
- *   Rectangle(const state_type &, const state_type &);
- *   Rectangle(const IntervalVector<real_type> &);
- *
- *   Rectangle(const Rectangle &);
- *   Rectangle & operator=(const Rectangle &);
- *
- *   bool operator==(const Rectangle &) const;
- *   bool operator!=(const Rectangle &) const;
- *
- *   size_type dimension() const;
- *   bool empty() const;
- *   bool empty_interior() const;
- *   bool contains(const State &) const;
- *   bool interior_contains(const State &) const;
- *
- *   state_type centre() const;
- *   real_type radius() const;
- *   Rectangle<real_type> bounding_box() const;
- *
- *   // Simple operations
- *   real_type lower_bound(dimension_type) const;
- *   real_type upper_bound(dimension_type) const;
- *   Interval<real_type> operator[] (dimension_type) const;
- *
- *   state_type lower_corner() const;
- *   state_type upper_corner() const;
- * };
- * 
- * Rectangle regular_intersection(const Rectangle&, const Rectangle&);
- *
- * bool interiors_intersect(const Rectangle&, const Rectangle&);
- * bool disjoint(const Rectangle&, const Rectangle&);
- * bool subset(const Rectangle&, const Rectangle&);
- * bool inner_subset(const Rectangle&, const Rectangle&);
- * \endcode
- *
- * \subsection ellipsoids Ellipsoids
- *
- * \code
- * // An ellipsoid in Euclidean space
- * templace<class R>
- * class Ellispsoid {
- *  ...
- * };
- *
- * \\ No regular_intersection function.
- *
- * bool interiors_intersect(const Ellipsoid &, const Ellipsoid &);
- * bool disjoint(const Ellipsoid &, const Ellipsoid &);
- * bool inner_subset(const Ellipsoid &, const Ellipsoid &);
- * bool subset(const Ellipsoid &, const Ellipsoid &);
- * \endcode
- *
  * Additionally, we have mixed comparison operators.
  * \code
- * bool interiors_intersect(const Rectangle &, const Ellipsoid &);
- * bool interiors_intersect(const Ellipsoid &, const Rectangle &);
- * bool disjoint(const Rectangle &, const Ellipsoid &);
- * bool disjoint(const Ellipsoid &, const Rectangle &);
- * bool inner_subset(const Rectangle &, const Ellipsoid &);
- * bool inner_subset(const Ellipsoid &, const Rectangle &);
- * bool subset(const Rectangle &, const Ellipsoid &);
- * bool subset(const Ellipsoid &, const Rectangle &);
+ * bool disjoint(const BasicSet1 &, const BasicSet2 &);
+ * bool interiors_intersect(const BasicSet1 &, const BasicSet2 &);
+ * bool inner_subset(const BasicSet1 &, const BasicSet2 &);
+ * bool subset(const BasicSet1 &, const BasicSet2 &);
  * \endcode
  *
+ * The operations \c disjoint, \c interiors_intersect and \c inner_subset are \em robust,
+ * which means that if true, they remain true under a sufficiently small perturbation of
+ * the arguments.
  *
  * \section denotable_set Denotable Sets
  *
@@ -512,15 +453,38 @@
  * };
  *
  * DenotableSet join(const DenotableSet &, const DenotableSet &);
- * DenotableSet regular_intersection(const BasicSet &, const DenotableSet &); // Optional.
  *
+ * bool inner_subset(const BasicSet &, const DenotableSet &); // Optional, but highly recommended.
  * bool subset(const BasicSet &, const DenotableSet &); // Optional, but highly recommended.
  *
- * bool interiors_intersect(const DenotableSet &, const DenotableSet &); // Optional, but highly recommended.
  * bool disjoint(const DenotableSet &, const DenotableSet &);
- * bool subset(const DenotableSet &, const DenotableSet &); // Optional, but highly recommended.
+ * bool interiors_intersect(const DenotableSet &, const DenotableSet &);
+ * bool inner_subset(const DenotableSet &, const DenotableSet &);
+ * bool subset(const DenotableSet &, const DenotableSet &);
  *
+ * DenotableSet regular_intersection(const BasicSet &, const DenotableSet &); // Optional.
  * \endcode
+ *
+ * \section set_approximation Approximating Sets
+ *
+ * Ariadne provides operators for approximating sets. All the operators have one
+ * of the following forms.
+ *
+ * \code
+ * Result outer_approximation(Argument,Error); // inner_subset(Argument,Result)
+ * Result over_approximation(Argument,Error);  // postcondition: subset(Argument,Result)
+ * Result approximation(Argument,Error);       // postcondition: error specified by Error
+ * Result lower_approximation(Argument,Error); // postcondition: 
+ * Result under_approximation(Argument,Error); // postcondition: subset(Result,Argument)
+ * Result inner_approximation(Argument,Error); // postcondition: inner_subset(Result,Argument)
+ * \endcode
+ *
+ * The error specification depends on the type of approximation used. 
+ *  - When approximating by a GridSet, the error is determined by the grid.
+ *  - When approximating by a PartitionTreeSet, the error is determined by the 
+ *       partition scheme and the depth.
+ *  - When approximating by a ListSet, the error is a metric error bound.
+ *
  */
 
 /*! \page evaluation Function Evaluation

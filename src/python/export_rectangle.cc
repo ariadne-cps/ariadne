@@ -68,7 +68,7 @@ void export_rectangle() {
     .def("interior_contains", &RRectangle::interior_contains)
     .def("centre", &RRectangle::centre)
     .def("radius", &RRectangle::radius)
-    .def("__getitem__", &RRectangle::interval)
+    .def("__getitem__", &RRectangle::interval, return_value_policy<copy_const_reference>())
     .def("__setitem__", &RRectangle::set_interval)
     .def("set_lower_bound", &RRectangle::set_lower_bound)
     .def("set_upper_bound", &RRectangle::set_upper_bound)
@@ -82,6 +82,6 @@ void export_rectangle() {
     .def("__sub__", (RectBinFunc)(&minkowski_difference))
     .def("__sub__", (RectZntpBinFunc)(&minkowski_difference))
     .def("__mul__", (RectRealBinFunc)(&scale))
-    .def(self_ns::str(self))    // __self_ns::str__
+    .def(self_ns::str(self))
   ;
 }

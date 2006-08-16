@@ -1,8 +1,8 @@
-/***************************************************************************
- *            evaluation.h
+ /***************************************************************************
+ *            matrix_function.h
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2004-6  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,17 +21,30 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file evaluation.h
- *  \brief Top-level header file for the Evaluation module.
+/*! \file matrix_function.h
+ *  \brief Algebraic and transcendental functions on matrices. 
  */
 
-#ifndef _ARIADNE_EVALUATION_H
-#define _ARIADNE_EVALUATION_H
+#ifndef _ARIADNE_MATRIX_FUNCTION_H
+#define _ARIADNE_MATRIX_FUNCTION_H
 
-#include "../evaluation/evaluation_declarations.h"
+#include <iosfwd>
 
-#include "../system/map.h"
-#include "../system/affine_map.h"
-#include "../system/polynomial_map.h"
+#include "../declarations.h"
 
-#endif /* _ARIADNE_EVALUATION_H */
+namespace Ariadne {
+  namespace LinearAlgebra {
+
+    template<typename R>
+    Matrix<R>
+    exp_approx(const Matrix<R>& A, const R& e);
+
+    template<typename R>
+    IntervalMatrix<R>
+    exp(const IntervalMatrix<R>& A); 
+
+  }
+}
+
+
+#endif /* _ARIADNE_MATRIX_FUNCTION_H */

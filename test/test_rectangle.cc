@@ -1,9 +1,8 @@
 /***************************************************************************
  *            test_rectangle.cc
  *
- *  2 May 2005
- *  Copyright  2005  Pieter Collins
- *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
+ *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -70,7 +69,7 @@ int main() {
     clog << "r1=" << r1 << ", r2=" << r2 << ", r3=" << r3 << ", r4=" << r4 << "\n"
          << "r5=" << r5 << ", r6=" << r6 << ", r7=" << r7 << endl;
     
-    test_assert(r1==r7,"equality");
+    test_assert(equal(r1,r7),"equality");
     
     ListSet<Real,Rectangle> cover1,cover2;
     cover1.push_back(r2);
@@ -81,10 +80,12 @@ int main() {
     cover2.push_back(r3);
     cover2.push_back(r5);
 
-    clog << "r0=" << r0 << ", r0.dimension()=" << r0.dimension() << ", r0.empty()=" << r0.empty() << endl;
-    clog << "r1=" << r1 << ", r1.dimension()=" << r1.dimension() << ", r1.empty()=" << r1.empty() << endl;
+    clog << "r0=" << r0 << ", r0.dimension()=" << r0.dimension()
+         << ", r0.empty()=" << r0.empty() << ", r0.empty_interior()=" << r0.empty_interior() << endl;
+    clog << "r1=" << r1 << ", r1.dimension()=" << r1.dimension()
+         << ", r1.empty()=" << r1.empty() << ", r0.empty_interior()=" << r0.empty_interior()  << endl;
     test_assert(!r1.empty(),"empty");
-    test_assert(r0.empty(),"empty");
+    test_assert(r0.empty_interior(),"empty");
 
     test_assert(!disjoint(r1,r1),"disjoint");
     test_assert(interiors_intersect (r1,r1),"intersects_interior");
@@ -108,7 +109,7 @@ int main() {
     r1[1]=Interval<Real>(0.0,0.5);
     clog << " r1=" << r1;
     test_assert(r1==r6,"operator[]");
-    r1[1].lower()=-2.25;
+    //r1[1].lower()=-2.25;
     clog << " r1=" << r1 << endl;
     
     try {

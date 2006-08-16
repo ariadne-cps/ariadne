@@ -34,6 +34,8 @@
 
 #include "../declarations.h"
 
+#include "linear_algebra/interval_vector.h"
+#include "linear_algebra/interval_matrix.h"
 #include "geometry/rectangle.h"
 #include "system/map.h"
 #include "system/vector_field.h"
@@ -77,7 +79,7 @@ namespace Ariadne {
         return _base(r)-r; }
       virtual LinearAlgebra::IntervalMatrix<R> derivative(const Geometry::Rectangle<R>& r) const {
         LinearAlgebra::IntervalMatrix<R> d=_base.derivative(r);
-        LinearAlgebra::Matrix<R> i=LinearAlgebra::identity_matrix<R>(this->dimension());
+        LinearAlgebra::IntervalMatrix<R> i=LinearAlgebra::IntervalMatrix<R>::identity(this->dimension());
         return d-i; }
       virtual std::string name() const { return "DifferenceMap"; }
      private:

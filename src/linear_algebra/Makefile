@@ -3,7 +3,8 @@ include ../../config.mk
 OBJ =   vector.o matrix.o tensor.o \
 	interval_vector.o interval_matrix.o \
 	constraint_system.o generator_system.o transformation_system.o \
-	linear_program.o
+	linear_program.o \
+	matrix_function.o
   
 all: ${OBJ}
 
@@ -39,6 +40,11 @@ vector.o: vector.cc ../../include/real_typedef.h \
   ../../include/linear_algebra/vector.h \
   ../../include/linear_algebra/../declarations.h \
   ../../include/linear_algebra/../numeric/integer.h \
+  ../../include/linear_algebra/../numeric/arithmetic.h \
+  ../../include/linear_algebra/../numeric/../numeric/numerical_types.h \
+  ../../include/linear_algebra/../numeric/../numeric/approximation.h \
+  ../../include/linear_algebra/../numeric/../numeric/../declarations.h \
+  ../../include/linear_algebra/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/linear_algebra/vector.tpl \
   ../../include/linear_algebra/vector.h \
   ../../include/linear_algebra/../utility/stlio.h
@@ -70,6 +76,7 @@ matrix.o: matrix.cc ../../include/real_typedef.h \
   ../../include/linear_algebra/../linear_algebra/vector.h \
   ../../include/linear_algebra/../linear_algebra/../declarations.h \
   ../../include/linear_algebra/../linear_algebra/../numeric/integer.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/arithmetic.h \
   ../../include/linear_algebra/../linear_algebra/matrix.h \
   ../../include/linear_algebra/../linear_algebra/lu_matrix.h \
   /ufs/collins/include/tblas/geset.hpp \
@@ -159,6 +166,11 @@ tensor.o: tensor.cc ../../include/real_typedef.h \
   ../../include/linear_algebra/../linear_algebra/vector.h \
   ../../include/linear_algebra/../linear_algebra/../declarations.h \
   ../../include/linear_algebra/../linear_algebra/../numeric/integer.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/arithmetic.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/numerical_types.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/approximation.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/../declarations.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/linear_algebra/../linear_algebra/matrix.h
 
 interval_vector.o: interval_vector.cc ../../include/numeric/arithmetic.h \
@@ -180,11 +192,16 @@ interval_vector.o: interval_vector.cc ../../include/numeric/arithmetic.h \
   ../../include/linear_algebra/../numeric/interval.h \
   ../../include/linear_algebra/../numeric/../declarations.h \
   ../../include/linear_algebra/../numeric/../numeric/numerical_traits.h \
+  ../../include/linear_algebra/../numeric/../numeric/arithmetic.h \
   ../../include/linear_algebra/../linear_algebra/vector.h \
   ../../include/linear_algebra/../linear_algebra/../declarations.h \
   ../../include/linear_algebra/../linear_algebra/../numeric/integer.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/arithmetic.h \
   ../../include/linear_algebra/interval_vector.tpl \
-  ../../include/linear_algebra/interval_vector.h
+  ../../include/linear_algebra/interval_vector.h \
+  ../../include/linear_algebra/vector.tpl \
+  ../../include/linear_algebra/vector.h \
+  ../../include/linear_algebra/../utility/stlio.h
 
 interval_matrix.o: interval_matrix.cc ../../include/real_typedef.h \
   ../../include/numeric/numerical_types.h \
@@ -205,15 +222,17 @@ interval_matrix.o: interval_matrix.cc ../../include/real_typedef.h \
   ../../include/linear_algebra/../numeric/interval.h \
   ../../include/linear_algebra/../numeric/../declarations.h \
   ../../include/linear_algebra/../numeric/../numeric/numerical_traits.h \
+  ../../include/linear_algebra/../numeric/../numeric/arithmetic.h \
+  ../../include/linear_algebra/../numeric/../numeric/../numeric/numerical_types.h \
+  ../../include/linear_algebra/../numeric/../numeric/../numeric/approximation.h \
+  ../../include/linear_algebra/../numeric/../numeric/../numeric/../declarations.h \
+  ../../include/linear_algebra/../numeric/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/linear_algebra/interval_matrix.tpl \
   ../../include/declarations.h \
   ../../include/linear_algebra/interval_matrix.h \
   ../../include/linear_algebra/../numeric/arithmetic.h \
-  ../../include/linear_algebra/../numeric/../numeric/numerical_types.h \
-  ../../include/linear_algebra/../numeric/../numeric/approximation.h \
-  ../../include/linear_algebra/../numeric/../numeric/../declarations.h \
-  ../../include/linear_algebra/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/linear_algebra/../linear_algebra/vector.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/arithmetic.h \
   ../../include/linear_algebra/../linear_algebra/interval_vector.h \
   ../../include/linear_algebra/../linear_algebra/../numeric/interval.h \
   ../../include/linear_algebra/../linear_algebra/../linear_algebra/vector.h \
@@ -284,7 +303,14 @@ interval_matrix.o: interval_matrix.cc ../../include/real_typedef.h \
   /ufs/collins/include/tlapack/getrf.hpp \
   /ufs/collins/include/tlapack/getrs.hpp \
   ../../include/linear_algebra/../linear_algebra/../base/array.h \
-  ../../include/linear_algebra/../linear_algebra/../linear_algebra/matrix.h
+  ../../include/linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/linear_algebra/matrix.tpl \
+  ../../include/linear_algebra/matrix.h \
+  ../../include/linear_algebra/../base/array.h \
+  ../../include/linear_algebra/../numeric/integer.h \
+  ../../include/linear_algebra/../numeric/function.h \
+  /ufs/collins/include/mpfr.h \
+  ../../include/linear_algebra/../numeric/../numeric/numerical_types.h
 
 constraint_system.o: constraint_system.cc ../../include/real_typedef.h \
   ../../include/numeric/numerical_types.h \
@@ -304,6 +330,11 @@ constraint_system.o: constraint_system.cc ../../include/real_typedef.h \
   ../../include/linear_algebra/../linear_algebra/vector.h \
   ../../include/linear_algebra/../linear_algebra/../declarations.h \
   ../../include/linear_algebra/../linear_algebra/../numeric/integer.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/arithmetic.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/numerical_types.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/approximation.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/../declarations.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/linear_algebra/../linear_algebra/matrix.h \
   ../../include/linear_algebra/constraint_system.tpl \
   ../../include/linear_algebra/constraint_system.h
@@ -325,13 +356,14 @@ generator_system.o: generator_system.cc ../../include/real_typedef.h \
   ../../include/linear_algebra/../linear_algebra/vector.h \
   ../../include/linear_algebra/../linear_algebra/../declarations.h \
   ../../include/linear_algebra/../linear_algebra/../numeric/integer.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/arithmetic.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/numerical_types.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/approximation.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/../declarations.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/linear_algebra/../linear_algebra/matrix.h \
   ../../include/linear_algebra/generator_system.tpl \
   ../../include/linear_algebra/../numeric/arithmetic.h \
-  ../../include/linear_algebra/../numeric/../numeric/numerical_types.h \
-  ../../include/linear_algebra/../numeric/../numeric/approximation.h \
-  ../../include/linear_algebra/../numeric/../numeric/../declarations.h \
-  ../../include/linear_algebra/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/linear_algebra/generator_system.h
 
 transformation_system.o: transformation_system.cc \
@@ -349,11 +381,17 @@ transformation_system.o: transformation_system.cc \
   ../../include/linear_algebra/../linear_algebra/vector.h \
   ../../include/linear_algebra/../linear_algebra/../declarations.h \
   ../../include/linear_algebra/../linear_algebra/../numeric/integer.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/arithmetic.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/numerical_types.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/approximation.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/../declarations.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/linear_algebra/../linear_algebra/matrix.h \
   ../../include/linear_algebra/../linear_algebra/interval_vector.h \
   ../../include/linear_algebra/../linear_algebra/../numeric/interval.h \
   ../../include/linear_algebra/../linear_algebra/../numeric/../declarations.h \
   ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/numerical_traits.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/arithmetic.h \
   ../../include/linear_algebra/../linear_algebra/../linear_algebra/vector.h \
   ../../include/linear_algebra/../linear_algebra/interval_matrix.h \
   ../../include/linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
@@ -378,5 +416,39 @@ linear_program.o: linear_program.cc ../../include/real_typedef.h \
   ../../include/linear_algebra/linear_program.tpl \
   ../../include/linear_algebra/linear_program.h \
   ../../include/linear_algebra/../linear_algebra/vector.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/arithmetic.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/numerical_types.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/approximation.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/../declarations.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/../numeric/numerical_types.h \
   ../../include/utility/stlio.h
+
+matrix_function.o: matrix_function.cc ../../include/real_typedef.h \
+  ../../include/numeric/numerical_types.h \
+  ../../include/numeric/../declarations.h \
+  ../../include/numeric/../numeric/integer.h \
+  ../../include/numeric/../numeric/../declarations.h \
+  ../../include/numeric/../numeric/../utility/stlio.h \
+  ../../include/numeric/../numeric/../utility/../base/array.h \
+  ../../include/numeric/../numeric/../utility/../base/../declarations.h \
+  ../../include/numeric/../numeric/dyadic.h \
+  ../../include/numeric/../numeric/numerical_traits.h \
+  ../../include/numeric/../utility/stlio.h \
+  ../../include/linear_algebra/matrix_function.h \
+  ../../include/linear_algebra/../declarations.h \
+  ../../include/linear_algebra/matrix_function.tpl \
+  ../../include/linear_algebra/matrix_function.h \
+  ../../include/linear_algebra/../linear_algebra/matrix.h \
+  ../../include/linear_algebra/../linear_algebra/../declarations.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/integer.h \
+  ../../include/linear_algebra/../linear_algebra/interval_matrix.h \
+  ../../include/linear_algebra/../linear_algebra/../linear_algebra/matrix.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/interval.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../declarations.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/numerical_traits.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/arithmetic.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/../numeric/numerical_types.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/../numeric/approximation.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/../numeric/../declarations.h \
+  ../../include/linear_algebra/../linear_algebra/../numeric/../numeric/../numeric/../numeric/numerical_types.h
 

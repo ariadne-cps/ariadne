@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "apply.h"
+
 #include <iosfwd>
 #include <string>
 #include <sstream>
@@ -47,7 +49,6 @@
 
 #include "../system/map.h"
 
-#include "../evaluation/apply.h"
 
 namespace Ariadne {
   namespace Evaluation {

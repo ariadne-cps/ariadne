@@ -21,6 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include <sstream>
+#include <string>
+
 #include "declarations.h"
 
 
@@ -37,44 +40,24 @@
 namespace Ariadne {
   namespace LinearAlgebra {
 
-    template <typename R>
-    std::ostream&
-    operator<<(std::ostream& os, const IntervalMatrix<R>& A)
-    {
-      if(A.size1()==0 || A.size2()==0) {
-        return os << "[ ]";
-      }
-      
-      for(uint i=0; i!=A.size1(); ++i) {
-        for(uint j=0; j!=A.size2(); ++j) {
-          os << (j==0 ? (i==0 ? "[ " : "; ") : ",");
-          os << A(i,j);
-        }
-      }
-      os << " ]";
-      return os;
+    template<typename R>
+    IntervalMatrix<R> 
+    IntervalMatrix<R>::zero(const size_type r, const size_type c) {
+      return IntervalMatrix<R>(r,c); 
     }
-     
-    template <>
-    std::ostream&
-    operator<<(std::ostream& os, const IntervalMatrix<Rational>& A)
-    {
-      if(A.size1()==0 || A.size2()==0) {
-        return os << "[ ]";
-      }
-      
-      for(uint i=0; i!=A.size1(); ++i) {
-        for(uint j=0; j!=A.size2(); ++j) {
-          os << (j==0 ? (i==0 ? "[ " : "; ") : ",");
-          double l=Ariadne::convert_to<double>(A(i,j).lower());
-          double u=Ariadne::convert_to<double>(A(i,j).upper());
-          os << Ariadne::Interval<double>(l,u);
-        }
-      }
-      os << " ]";
-      return os;
+    
+    template<typename R>
+    IntervalMatrix<R> 
+    IntervalMatrix<R>::identity(const size_type n) {
+      IntervalMatrix<R> result(n,n); 
+      for(size_type i=0; i!=n; ++i) { result(i,i)=Interval<R>(1); } 
+      return result;
     }
-     
+    
+  
+    
+      
+
     template <typename R>
     IntervalVector<R> 
     prod(const Matrix<R>& A, const IntervalVector<R>& v) {
@@ -169,17 +152,6 @@ namespace Ariadne {
     }
 
     template<typename R>
-    IntervalMatrix<R>::IntervalMatrix(const Matrix<R>& A, const R& r)
-      : Base(A.size1(),A.size2()) 
-    { 
-      for(size_type i=0; i!=A.size1(); ++i) {
-        for(size_type j=0; j!=A.size2(); ++j) {
-          Base::operator()(i,j)=Interval<R>(A(i,j)-r,A(i,j)+r);
-        }
-      }
-    }
-    
-    template<typename R>
     Matrix<R>
     IntervalMatrix<R>::centre() const
     {
@@ -196,7 +168,7 @@ namespace Ariadne {
     
     template<typename R>
     R
-    IntervalMatrix<R>::radius() const
+    IntervalMatrix<R>::radius_norm() const
     {
       const IntervalMatrix<R>& A=*this;
       R diameter=0;
@@ -210,7 +182,6 @@ namespace Ariadne {
       return diameter/2;
     }
 
-    /*! \brief Sums of the radii in each row. */
     template<typename R>
     IntervalVector<R>
     IntervalMatrix<R>::radius_row_sum() const
@@ -230,62 +201,20 @@ namespace Ariadne {
 
 
     template<typename R>
-    Interval<R>
-    IntervalMatrix<R>::norm() const 
-    {
-      const IntervalMatrix<R>& A=*this;
-      R lower_bound=0;
-      R upper_bound=0;
-      for(size_type i=0; i!=A.size1(); ++i) {
-        R lower_row_sum=0;
-        R upper_row_sum=0;
-        for(size_type j=0; j!=A.size2(); ++j) {
-          if(!(A(i,j).lower()<=0 && A(i,j).upper()>=0)) {
-            lower_row_sum+=min( abs(A(i,j).lower()), abs(A(i,j).upper()) );
-          }
-          upper_row_sum+=max( abs(A(i,j).lower()), abs(A(i,j).upper()) );
-        }
-        lower_bound=max(lower_bound,lower_row_sum);
-        upper_bound=max(upper_bound,upper_row_sum);
-      }
-      return Interval<R>(lower_bound,upper_bound);
-    }
-        
-    template<typename R>
     R
     IntervalMatrix<R>::upper_norm() const
     {
-      const IntervalMatrix<R>& A=*this;
-      R upper_bound=0;
-      for(size_type i=0; i!=A.size1(); ++i) {
-         R upper_row_sum=0;
-        for(size_type j=0; j!=A.size2(); ++j) {
-          upper_row_sum+=max( abs(A(i,j).lower()), abs(A(i,j).upper()) );
-        }
-        upper_bound=max(upper_bound,upper_row_sum);
-      }
-      return upper_bound;
+      return this->norm().upper();
     }
         
     template<typename R>
     R
     IntervalMatrix<R>::upper_log_norm() const
     {
-      const IntervalMatrix<R>& A=*this;
-      R upper_bound=0;
-      for(size_type i=0; i!=A.size1(); ++i) {
-         R upper_row_sum=A(i,i).upper();
-        for(size_type j=0; j!=A.size2(); ++j) {
-          if(i!=j) {
-           upper_row_sum+=max( abs(A(i,j).lower()), abs(A(i,j).upper()) );
-          }
-         }
-        upper_bound=max(upper_bound,upper_row_sum);
-      }
-      return upper_bound;
+      return this->log_norm().upper();
     }
         
-
+/*
     template<typename R>
     IntervalMatrix<R>
     IntervalMatrix<R>::inverse() const
@@ -296,7 +225,9 @@ namespace Ariadne {
      
       throw std::domain_error("IntervalMatrix<R>::inverse() const not implemented.");
     }
-
+*/
+    
+    
     template<typename R>
     Matrix<R>
     over_approximation(const IntervalMatrix<R>& A)
@@ -337,18 +268,20 @@ namespace Ariadne {
     IntervalMatrix<R>
     approximate(const Matrix<typename numerical_traits<R>::field_extension_type>& A, const R& e)
     {
-      R err=e/2;
+      R abserr=e/(2*A.number_of_columns());
+      Interval<R> err(-abserr,abserr);
       IntervalMatrix<R> result(A.size1(),A.size2());
       for(size_type i=0; i!=result.size1(); ++i) {
         for(size_type j=0; j!=result.size2(); ++j) {
-          R lower=Ariadne::approximate<R>(A(i,j),err)-err;
-          R upper=Ariadne::approximate<R>(A(i,j),err)+err;
-          result(i,j)=Interval<R>(lower,upper);
+          const R& Aij=A(i,j);
+          result(i,j)=err+Aij;
         }
       }
       return result;
     }
       
+     
+/*
     template<typename R>
     IntervalMatrix<R>
     identity_IntervalMatrix(const size_type& n) 
@@ -359,33 +292,9 @@ namespace Ariadne {
       }
       return result;
     }
+*/
     
-    template<typename R>
-    IntervalMatrix<R>
-    exp(const IntervalMatrix<R>& A) 
-    {
-      assert(A.size1()==A.size2());
-      R err=A.radius()/65536;
-      if(err==0) {
-        err=A.upper_norm()/65536;
-        err/=65536;
-        err/=65536;
-      }
-            
-      IntervalMatrix<R> result=identity_IntervalMatrix<R>(A.size1())+A;
-      IntervalMatrix<R> term=A;
-      unsigned int n=1;
-      while(term.upper_norm()>err) {
-        n=n+1;
-        term=(term*A)/Interval<R>(R(n));
-        result+=term;
-      }
-      term=Interval<R>(-1,1)*term;
-      result+=term;
-      
-      return result;
-    }
-    
+ 
     
   }
 }

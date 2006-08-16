@@ -44,18 +44,28 @@ namespace Ariadne {
     template<typename Real>
     class SVDMatrix {
      public:
+      /*! \brief Construct from an ordinary matrix. */
       SVDMatrix(const Matrix<Real>& A);
       
+      /*! \brief The number of rows. */
       size_type number_of_rows() const { return _U.number_of_rows(); }
+      /*! \brief The number of columns. */
       size_type number_of_columns() const { return _Vt.number_of_rows(); }
+      /*! \brief The \a i,\a j th element. */
       Real operator() (const size_type& i, const size_type& j) const;
 
+      /*! \brief A vector containing the singular values in decreasing order. */
       const Vector<Real>& S() const { return _S; }
+      /*! \brief The left orthogonal factor. */
       const Matrix<Real>& U() const { return _U; }
+      /*! \brief The right orthogonal factor. */
       const Matrix<Real> V() const { return _Vt.transpose(); }
+      /*! \brief The transpose of the right orthogonal factor. */
       const Matrix<Real>& Vt() const { return _Vt; }
+      /*! \brief The diagonal matrix of singular values. */
       Matrix<Real> D() const;
       
+      /*! \brief Convert to an ordinary matrix. */
       operator Matrix<Real> () const;
      private:
       Vector<Real> _S;

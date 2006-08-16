@@ -163,6 +163,10 @@ namespace Ariadne {
     template<> inline std::string name<Numeric::MPFloat>() { return "MPFloat"; }
     template<> inline std::string name<Numeric::Dyadic>() { return "Dyadic"; }
     template<> inline std::string name<Numeric::Rational>() { return "Rational"; }
+    template<> inline std::string name<Numeric::Interval<Numeric::Float64> >() { return "Interval<Float64>"; }
+    template<> inline std::string name<Numeric::Interval<Numeric::MPFloat> >() { return "Interval<MPFloat>"; }
+    template<> inline std::string name<Numeric::Interval<Numeric::Dyadic> >() { return "Interval<Dyadic>"; }
+    template<> inline std::string name<Numeric::Interval<Numeric::Rational> >() { return "Interval<Rational>"; }
     
     template<typename R> inline R convert_to(const Numeric::MPFloat& x) 
     { return R(x); }
@@ -172,10 +176,6 @@ namespace Ariadne {
     { return R(x); }
     template<typename R> inline R convert_to(const double& x) 
     { return R(x); } 
-
-    template<> inline double convert_to<double>(const Numeric::MPFloat& x) { return x.get_d(); }
-    template<> inline double convert_to<double>(const Numeric::Dyadic& x) { return x.get_d(); }
-    template<> inline double convert_to<double>(const Numeric::Rational& x) { return x.get_d(); }
 
   }
 

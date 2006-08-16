@@ -30,13 +30,9 @@ namespace Ariadne {
   namespace LinearAlgebra {
     
     template class Vector<Real>;
-    template std::ostream& operator<<(std::ostream&, const Vector<Real>&);
-    template std::istream& operator>>(std::istream&, Vector<Real>&);
 
 #ifndef REAL_IS_A_FIELD
     template class Vector<Field>;
-    template std::ostream& operator<<(std::ostream&, const Vector<Field>&);
-    template std::istream& operator>>(std::istream&, Vector<Field>&);
 #endif
   }
 }

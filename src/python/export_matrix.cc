@@ -30,6 +30,7 @@
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/interval_matrix.h"
+#include "linear_algebra/matrix_function.h"
 
 #include "python/typedefs.h"
 #include "python/python_utilities.h"
@@ -129,6 +130,7 @@ void export_Matrix() {
 void export_IntervalMatrix() {
   class_<RIntervalMatrix>("IntervalMatrix",init<int,int>())
     .def(init<RIntervalMatrix>())
+    .def(init<std::string>())
     .def("__getitem__",&iMatrix_getitem)
     .def("__setitem__",&iMatrix_setitem)
     .def(self_ns::str(self))    // __self_ns::str__

@@ -34,7 +34,7 @@ using namespace Ariadne;
 using namespace boost::python;
 
 void export_polynomial_map() {
-
+/*
   typedef Real (RPolynomial::* PolyApplyPointFunc) (const RPoint&) const;
   typedef RInterval (RPolynomial::* PolyApplyRectFunc) (const RRectangle&) const;
   typedef RPoint (RPolynomialMap::* PolyMapApplyPointFunc) (const RPoint&) const;
@@ -67,8 +67,9 @@ void export_polynomial_map() {
     .def("result_dimension", &RPolynomialMap::result_dimension)
     .def(self_ns::str(self))
   ;
+  
   class_<RPolynomialMatrix>("PolynomialMatrix",init<uint,uint>())
     .def(self_ns::str(self))
   ;
-  
+*/
 }

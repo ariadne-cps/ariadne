@@ -25,13 +25,13 @@
 
 #include "linear_algebra/interval_matrix.h"
 #include "linear_algebra/interval_matrix.tpl"
+#include "linear_algebra/matrix.tpl"
 
 namespace Ariadne {
   namespace LinearAlgebra {
+    template class Matrix< Interval<Real> >;
     template class IntervalMatrix<Real>;
       
-    template std::ostream& operator<<(std::ostream&, const IntervalMatrix<Real>&);
-           
     template IntervalVector<Real> prod(const Matrix<Real>&, const IntervalVector<Real>&);
     
     template IntervalVector<Real> prod(const IntervalMatrix<Real>&, const Vector<Real>&);
@@ -50,13 +50,10 @@ namespace Ariadne {
 
     template IntervalMatrix<Real> approximate(const Matrix<Field>& A,const Real& e); 
 
-    template IntervalMatrix<Real> exp(const IntervalMatrix<Real>& A); 
-
 #ifndef REAL_IS_A_FIELD
+    template class Matrix< Interval<Field> >;
     template class IntervalMatrix<Field>;
-    
-    template std::ostream& operator<<(std::ostream&, const IntervalMatrix<Field>&);
-    
+   
     template IntervalVector<Field> prod(const Matrix<Field>&, const IntervalVector<Field>&);
     
     template IntervalVector<Field> prod(const IntervalMatrix<Field>&, const Vector<Field>&);

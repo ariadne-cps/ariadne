@@ -204,7 +204,8 @@ EXTRACT_LOCAL_CLASSES  = YES
 # various overviews, but no documentation section is generated. 
 # This option has no effect if EXTRACT_ALL is enabled.
 
-HIDE_UNDOC_MEMBERS     = YES
+HIDE_UNDOC_MEMBERS     = NO 
+                         #YES
 
 # If the HIDE_UNDOC_CLASSES tag is set to YES, Doxygen will hide all 
 # undocumented classes that are normally visible in the class hierarchy. 
@@ -876,7 +877,7 @@ INCLUDE_FILE_PATTERNS  =
 # or name=definition (no spaces). If the definition and the = are 
 # omitted =1 is assumed.
 
-PREDEFINED             = 
+PREDEFINED             = DOXYGEN
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then 
 # this tag can be used to specify a list of macro names that should be expanded. 

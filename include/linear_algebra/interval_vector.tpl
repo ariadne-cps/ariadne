@@ -24,24 +24,12 @@
 #include "interval_vector.h"
 
 #include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
 
 namespace Ariadne {
   namespace LinearAlgebra {
-    
-    template <typename R>
-    std::ostream&
-    operator<<(std::ostream& os, const IntervalVector<R>& v)
-    {
-      os << "[";
-      if(v.size()>0) {
-        os << v(0);
-      }
-      for(uint i=1; i!=v.size(); ++i) {
-        os << "," << v(i);
-      }
-      os << "]";
-      return os;
-    }
     
   }
 }

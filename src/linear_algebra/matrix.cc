@@ -33,38 +33,7 @@ namespace Ariadne {
   namespace LinearAlgebra {
     
     template class Matrix<Real>;
-
-    template std::ostream& operator<<(std::ostream&, const Matrix<Real>&);
     
-    template std::istream& operator>>(std::istream&, Matrix<Real>&);
-    
-    template Matrix<Real> zero_Matrix(size_type r, size_type c);
-
-    template Matrix<Real> concatenate_columns(const Matrix<Real>& A1,
-                                                const Matrix<Real>& A2);
-
-    template Matrix<Real> exp_approx(const Matrix<Real> &A, 
-                                       const Real& e); 
-    
-    
-    template void lu_local_dec(Matrix<Field>& A, 
-                               const array<size_type>& row, 
-                               const array<size_type>& col, 
-                               const size_type& rows, 
-                               const size_type& columns, 
-                               const size_type& p);
-    
-    template Matrix<Field> lu_decompose(const Matrix<Field>& A, 
-                                           array<size_type>& p_col, 
-                                           array<size_type>& p_row);
-                              
-    template Matrix<Field> lu_decompose(const Matrix<Field> &A, 
-                                           array<size_type>& p_array);
-
-    template Vector<Field> lu_solve(const Matrix<Field>& A, 
-                                       const array<size_type>& p_array, 
-                                       const Vector<Field>& b);
-                                       
     template Matrix<Field> Householder_QR(const Matrix<Field> &A);
 
     template Matrix<Real> hermitian(const Matrix<Real>& m);
@@ -79,8 +48,6 @@ namespace Ariadne {
     
     template bool independent_rows(Matrix<Real> A);
 
-    template bool have_same_dimensions(const Matrix<Real> &A,  const Matrix<Real> &B);
-    
     template bool equivalent_columns(const Matrix<Real> &A, 
                                      const size_type &A_col, 
                                      const Matrix<Real> &B, 
@@ -102,17 +69,7 @@ namespace Ariadne {
     
 #ifndef REAL_IS_A_FIELD
     template class Matrix<Field>;
-    
-    template std::ostream& operator<<(std::ostream&, const Matrix<Field>&);
-    template std::istream& operator>>(std::istream&, Matrix<Field>&);
-    
-    template Matrix<Field> zero_Matrix(size_type r, size_type c);
-    
-    template Matrix<Field> concatenate_columns(const Matrix<Field>& A1,
-                                                  const Matrix<Field>& A2);
-    template Matrix<Field> exp_approx(const Matrix<Field> &A, 
-                                         const Field& e); 
-
+     
     template Vector<Integer> row_common_denominators(const Matrix<Field>& A);
 #endif
   }

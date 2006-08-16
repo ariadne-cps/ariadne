@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_linear_algebra.cc
+ *            test_matrix.cc
  *
  *  Copyright  2006  Pieter Collins, Alberto Casagrande
  *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
@@ -26,82 +26,86 @@
 #include <iostream>
 #include <fstream>
 
-#include <tblas/tblas.hpp>
-#include <tblas/output.hpp>
-#include <tlapack/tlapack.hpp>
-
-#include <tblas/gemv.hpp>
-
 #include "declarations.h"
+#include "real_typedef.h"
 #include "numeric/numerical_types.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/vector.tpl"
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/matrix.tpl"
-#include "linear_algebra/lu_matrix.h"
-#include "linear_algebra/qr_matrix.h"
-#include "linear_algebra/svd_matrix.h"
-
-#undef DEBUG
+#include "linear_algebra/interval_matrix.h"
+#include "linear_algebra/interval_matrix.tpl"
 
 using namespace std;
+using namespace Ariadne;
 using namespace Ariadne::LinearAlgebra;
 
 int main() {
   cout << "test_matrix: " << flush;
   ofstream clog("test_matrix.log");
   
-  int m=3;
-  int n=3;
-  double Aptr[9]={-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0};
+  Real x=2.25;
+  Interval<Real> ix(1.5,2.25);
+  Real Aptr[9]={-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0};
+  Interval<Real> iAptr[4]={-1.0,3.0, -1.0,1.0};
   
-  Matrix<double> A(m,n,Aptr,n);
+  Matrix<Real> A0;
+  clog << "A0=" << A0 << endl;
+  Matrix<Real> A1(3,2);
+  clog << "A1=" << A1 << endl;
+  Matrix<Real> A2(3,3,Aptr,3,1);
+  clog << "A2=" << A2 << endl;
+  Matrix<Real> A3("[-1.0,3.0,1.0; -1.0,1.0,2.0; 2.0,1.0,1.0]");
+  clog << "A3=" << A3 << endl;
 
-  clog << "Testing LU\n";
-  {
-    LUMatrix<double> LU(A);
-    Matrix<double> P=LU.P();
-    Matrix<double> L=LU.L();
-    Matrix<double> U=LU.U();
-    clog << "A=" << A << "\n";
-    clog << "P=" << P << "\n";
-    clog << "L=" << L << "\n";
-    clog << "U=" << U << "\n";
-    clog << "P*L*U=" << P*L*U << "\n";
-    clog << "LU=" << Matrix<double>(LU) << "\n";
-  }
+  clog << "A1(0,0)= " << A1(0,0) << endl;
+  clog << "A2(0,0)= " << A2(0,0) << endl;
+  assert(A2==A3);
+  
+  A0=Matrix<Real>::zero(2,3);
+  clog << "A0= " << A0 << endl;
+  A1=Matrix<Real>::identity(4);
+  clog << "A1= " << A1 << endl;
+  clog << endl;
+  
+  A1=Matrix<Real>("[2,1,1;1,1,-1;1,-1,3]");
+  
+  A0=-A1;
+  clog << A0 << " = -" << A1 << endl;
+  A0=A1+A2;
+  clog << A0 << " = " << A1 << " + " << A2 << endl;
+  A0=A1-A2;
+  clog << A0 << " = " << A1 << " - " << A2 << endl;
+  A0=x*A2;
+  clog << A0 << " = " << x << " * " << A2 << endl;
+  A0=A1*x;
+  clog << A0 << " = " << A1 << " * " << x << endl;
+  A0=A1/x;
+  clog << A0 << " = " << A1 << " / " << x << endl;
+  A0=A1*A2;
+  clog << A0 << " = " << A1 << " * " << A2 << endl;
+  clog << endl;
 
-  clog << "Testing QR\n";
-  {
-    QRMatrix<double> QR(A);
-    Matrix<double> Q=QR.Q();
-    Matrix<double> R=QR.R();
-    clog << "A=" << A << "\n";
-    clog << "Q=" << Q << "\n";
-    clog << "R=" << R << "\n";
-    clog << "Q*Q^T=" << Q*Q.transpose() << "\n";
-    clog << "Q*R=" << Q*R << "\n";
-    clog << "QR=" << Matrix<double>(QR) << "\n";
-  }
+  
+  IntervalMatrix<Real> iA0;
+  clog << "iA1= " << iA0 << endl;
+  IntervalMatrix<Real> iA1(3,2);
+  clog << "iA2= " << iA1 << endl;
+  IntervalMatrix<Real> iA2(2,2,iAptr,3,1);
+  clog << "iA3= " << iA2 << endl;
+  IntervalMatrix<Real> iA3(A1);
+  clog << "iA4= " << iA3 << endl;
+  IntervalMatrix<Real> iA4("[[1.875,2.125],[0.75,1.25];[-1.25,-0.875],[0.5,1.75]]");
+  clog << "iA5= " << iA4 << endl;
+  
+  iA0=IntervalMatrix<Real>::zero(2,3);
+  clog << "iA0= " << iA0 << endl;
+  iA1=IntervalMatrix<Real>::identity(4);
+  clog << "iA1= " << iA1 << endl;
 
-  clog << "Testing SVD\n";
-  {
-    SVDMatrix<double> SVD(A);
-    Vector<double> S=SVD.S();
-    Matrix<double> U=SVD.U();
-    Matrix<double> V=SVD.V();
-    Matrix<double> D=SVD.D();
-    clog << "A=" << A << "\n";
-    clog << "S=" << S << "\n";
-    clog << "D=" << D << "\n";
-    clog << "U=" << U << "\n";
-    clog << "V=" << V << "\n";
-    clog << "U*U^T=" << U*U.transpose() << "\n";
-    clog << "V*V^T=" << V*V.transpose() << "\n";
-    clog << "U*D*V^T" << U*D*V.transpose() << "\n";
-    clog << "SVD=" << Matrix<double>(SVD) << "\n";
-  }
-
+  clog << "iA4.norm()=" << iA4.norm() << endl;
+  clog << "iA4.upper_norm()=" << iA4.upper_norm() << endl;
+  
   clog.close();
   cout << "PASS\n";
 

@@ -23,6 +23,8 @@
  
 //#define DEBUG
 
+#include "integrator.h"
+
 #include <iosfwd>
 #include <string>
 #include <sstream>
@@ -59,7 +61,6 @@
 #include "../system/vector_field.h"
 #include "../system/affine_vector_field.h"
 
-#include "../evaluation/integrator.h"
 
 namespace Ariadne {
   namespace Evaluation {

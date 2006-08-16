@@ -343,11 +343,12 @@ namespace Ariadne {
       return result;
     }
     
+    
     template<typename R>
     Parallelotope<R>
     Parallelotope<R>::over_approximation(const Rectangle<R> &c, const LinearAlgebra::IntervalMatrix<R>& A)
     {
-      #ifdef DEBUG
+#ifdef DEBUG
       std::cerr << "IntervalParallelotope<R>::over_approximating_parallelotope() const" << std::endl;
 #endif
       size_type n=c.dimension();
@@ -361,11 +362,8 @@ namespace Ariadne {
       }
       
       LinearAlgebra::IntervalMatrix<R> Ainv=LinearAlgebra::inverse(LinearAlgebra::IntervalMatrix<R>(Amid));
-      
       R err = upper_norm(Ainv*D)+upper_norm(Ainv*A);
-#ifdef DEBUG
-      std::cerr << "error=" << err << std::endl;
-#endif
+
       return Geometry::Parallelotope<R>(cmid,err*Amid);
     }
     

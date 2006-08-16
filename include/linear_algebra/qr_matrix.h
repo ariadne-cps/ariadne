@@ -47,16 +47,23 @@ namespace Ariadne {
     template<typename Real>
     class QRMatrix {
      public:
+      /*! \brief Construct from an ordinary matrix. */
       QRMatrix(const Matrix<Real>& A);
       
+      /*! \brief The number of rows. */
       size_type number_of_rows() const { return _R.number_of_rows(); }
+      /*! \brief The number of columns. */
       size_type number_of_columns() const { return _R.number_of_columns(); }
+      /*! \brief The \a i,\a j th element. */
       Real operator() (const size_type& i, const size_type& j) const { 
         Real result=0; for(int k=0; k!=j; ++k) { result(i,j)+= _Q(i,k) * _R(k,j); } return result; }
 
+      /*! \brief The orthogonal factor. */
       const Matrix<Real>& Q() const { return _Q; }
+      /*! \brief The upper-triangular factor. */
       const Matrix<Real>& R() const { return _R; }
       
+      /*! \brief Convert to an ordinary matrix. */
       operator Matrix<Real> () const;
      private:
       Matrix<Real> _Q;

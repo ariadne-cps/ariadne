@@ -28,6 +28,8 @@
 #ifndef _ARIADNE_INTERVAL_VECTOR_H
 #define _ARIADNE_INTERVAL_VECTOR_H 
 
+#include <iosfwd>
+
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
 
@@ -40,50 +42,47 @@ namespace Ariadne {
     
     /*! \brief A vector of intervals. */
     template<typename R>
-    class IntervalVector : public boost::numeric::ublas::vector< Interval<R> >
+    class IntervalVector : public Vector< Interval<R> >
     {
      private:
-      typedef boost::numeric::ublas::vector< Interval<R> > _Base;
+      typedef Vector< Interval<R> > _Base;
      public:
-      template<typename E> IntervalVector(const boost::numeric::ublas::vector_expression<E> v) :_Base(v()) { }
-      IntervalVector() : _Base() { }
-      IntervalVector(const size_type& n) : _Base(n) { }
-      IntervalVector(const Vector<R>& v);
-      IntervalVector(const Vector<R>& v, const R& r);
+      /*! \brief Construct an interval vector of size zero. */
+      explicit IntervalVector() : _Base() { }
+      /*! \brief Construct an interval vector of size \a n, all of whose entries are the interval \f$[0,0]\f$. */
+      explicit IntervalVector(const size_type& n) : _Base(n) { 
+        for(size_type i=0; i!=n; ++i) { (*this)(i)=Interval<R>(0); } }
+      /*! \brief Construct an interval vector of size \a n from the array starting at \a ptr. */
+      explicit IntervalVector(const size_type& n, const Interval<R>* ptr) : _Base(n,ptr) { }
+      /*! \brief Construct an interval vector centred at \a v of radius \a r. */
+      explicit IntervalVector(const Vector<R>& v, const R& r) : _Base(v.size()) 
+      { 
+        for(size_type i=0; i!=this->size(); ++i) {
+          this->_Base::operator()(i) = v(i) + Interval<R>(-r,r); }
+      }
+      /*! \brief Convert from a vector. */
+      IntervalVector(const Vector<R>& v) : _Base(v) { }
       
+      /* Convert from a vector expression. */
+      template<typename E> IntervalVector(const boost::numeric::ublas::vector_expression<E>& v) : _Base(v) { }
+ 
+      /*! \brief Construct from a string literal of the form "[[l1,u1],[l2,u2],...,[ln,un]]". */
+      explicit IntervalVector(const std::string& str) : _Base(str) { }
+
+#ifdef DOXYGEN
+      /*! \brief Copy constructor. */
+      IntervalVector(const IntervalVector<R>& v);
+      /*! \brief Copy assignment operator. */
+      IntervalVector<R>& operator=(const IntervalVector<R>& v);
+#endif
+      /*! \brief The centre of the interval vector. */
       Vector<R> centre() const;
+      /*! \brief The maximum distance of an element of the interval vector from the centre in the supremum norm. */
       R radius() const;
       
-      Interval<R> norm() const;
+      /*! \brief The highest possible supremum norm. */
       R upper_norm() const;
     };
-      
-    template <typename R> IntervalVector<R> operator-(const IntervalVector<R>& iv);
-    template <typename R> IntervalVector<R> operator+(const IntervalVector<R>& iv1, const IntervalVector<R> iv2);
-    template <typename R> IntervalVector<R> operator-(const IntervalVector<R>& iv1, const IntervalVector<R> iv2);
-    template <typename R> IntervalVector<R> operator*(const Interval<R>& s, const IntervalVector<R>& iv);
-    template <typename R> IntervalVector<R> operator*(const R& s, const IntervalVector<R>& iv);
-
-    
-    template <typename R>
-    inline
-    IntervalVector<R>::IntervalVector(const Vector<R>& v)
-      : _Base(v.size()) 
-    { 
-      for(size_type i=0; i!=this->size(); ++i) {
-        _Base::operator()(i) = Interval<R>(v(i),v(i));
-      }
-    }
-    
-    template <typename R>
-    inline
-    IntervalVector<R>::IntervalVector(const Vector<R>& v, const R& r)
-      : _Base(v.size()) 
-    { 
-      for(size_type i=0; i!=this->size(); ++i) {
-        _Base::operator()(i) = Interval<R>(v(i)-r,v(i)+r);
-      }
-    }
       
     template <typename R>
     inline
@@ -113,106 +112,47 @@ namespace Ariadne {
     
     template<typename R>
     inline
-    Interval<R>
-    IntervalVector<R>::norm() const 
-    {
-      const IntervalVector<R>& v=*this;
-      R lower_bound=0;
-      R upper_bound=0;
-      for (size_type i=0; i<v.size(); i++) {
-        if(!(v(i).lower()<=0 && v(i).upper()>=0)) {
-          lower_bound=min(lower_bound,R(min(abs(v(i).lower()),abs(v(i).upper()))));
-        }
-        upper_bound=max(upper_bound,R(max(abs(v(i).lower()),abs(v(i).upper()))));
-      }
-      return Interval<R>(lower_bound,upper_bound);
-    }
-    
-    template<typename R>
-    inline
     R
     IntervalVector<R>::upper_norm() const 
     {
       const IntervalVector<R>& v=*this;
       R upper_bound=0;
       for (size_type i=0; i<v.size(); i++) {
-        upper_bound=max(upper_bound,R(max(abs(v(i).lower()),abs(v(i).upper()))));
+        upper_bound=max(upper_bound,abs(v(i)).upper());
       }
       return upper_bound;
     }
     
-    
-    
     template <typename R>
     inline
     IntervalVector<R> 
-    operator+(const IntervalVector<R>& iv, const Vector<R> v)
+    operator+(const IntervalVector<R>& iv, const Vector<R>& v)
     {
-      IntervalVector<R> result(v.size());
-      for(size_type i=0; i!=result.size(); ++i) {
-        result(i)=v(i)+iv(i);
-      }
-      return result;
+      return iv+IntervalVector<R>(v);
     }
 
     template <typename R>
     inline
     IntervalVector<R> 
-    operator+(const Vector<R>& v, const IntervalVector<R> iv)
+    operator+(const Vector<R>& v, const IntervalVector<R>& iv)
     {
-      IntervalVector<R> result(v.size());
-      for(size_type i=0; i!=result.size(); ++i) {
-        result(i)=v(i)+iv(i);
-      }
-      return result;
+      return IntervalVector<R>(v)+iv;
     }
 
     template <typename R>
     inline
     IntervalVector<R> 
-    operator-(const IntervalVector<R>& iv)
+    operator-(const IntervalVector<R>& iv, const Vector<R>& v)
     {
-      IntervalVector<R> result(iv.size());
-      for(size_type i=0; i!=result.size(); ++i) {
-        result(i)=-iv(i);
-      }
-      return result;
+      return iv-IntervalVector<R>(v);
     }
 
     template <typename R>
     inline
     IntervalVector<R> 
-    operator+(const IntervalVector<R>& iv1, const IntervalVector<R> iv2)
+    operator-(const Vector<R>& v, const IntervalVector<R>& iv)
     {
-      IntervalVector<R> result(iv1.size());
-      for(size_type i=0; i!=result.size(); ++i) {
-        result(i)=iv1(i)+iv2(i);
-      }
-      return result;
-    }
-
-    template <typename R>
-    inline
-    IntervalVector<R> 
-    operator-(const IntervalVector<R>& iv1, const IntervalVector<R> iv2)
-    {
-      IntervalVector<R> result(iv1.size());
-      for(size_type i=0; i!=result.size(); ++i) {
-        result(i)=iv1(i)-iv2(i);
-      }
-      return result;
-    }
-
-    template<typename R>
-    inline
-    IntervalVector<R>
-    operator*(const Interval<R>& s, const IntervalVector<R>& v)
-    {
-      IntervalVector<R> result(v.size());
-      for(size_type i=0; i!=result.size(); ++i) {
-        result(i)=s*v(i);
-      }
-      return result;
+      return IntervalVector<R>(v)-iv;
     }
 
     template<typename R>
@@ -231,6 +171,37 @@ namespace Ariadne {
       return s*IntervalVector<R>(v); 
     }
 
+    template<typename R>
+    inline
+    IntervalVector<R>
+    operator*(const IntervalVector<R>& v, const R& s)
+    {
+      return Interval<R>(s)*v;
+    }
+
+    template<typename R>
+    inline
+    IntervalVector<R>
+    operator*(const Vector<R>& v, const Interval<R>& s)
+    {
+      return s*IntervalVector<R>(v); 
+    }
+
+    template<typename R>
+    inline
+    IntervalVector<R>
+    operator/(const IntervalVector<R>& v, const R& s)
+    {
+      return v/Interval<R>(s); 
+    }
+
+    template<typename R>
+    inline
+    IntervalVector<R>
+    operator/(const Vector<R>& v, const Interval<R>& s)
+    {
+      return IntervalVector<R>(v)/s; 
+    }
 
     
     template<typename R>
@@ -250,8 +221,21 @@ namespace Ariadne {
     }
     
     template <typename R>
+    inline
     std::ostream&
-    operator<<(std::ostream& os, const IntervalVector<R>& v);
+    operator<<(std::ostream& os, const IntervalVector<R>& v)
+    {
+      return v.write(os); 
+    }
+    
+    template <typename R>
+    inline
+    std::istream&
+    operator>>(std::istream& is, IntervalVector<R>& v)
+    {
+      return v.read(is); 
+    }
+    
     
   }
 }  

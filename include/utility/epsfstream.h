@@ -83,7 +83,7 @@ namespace Ariadne {
             pointers[i].radiant=-acos(0.0);
         } else {
           tangent_R=vert_pos[i](0)/vert_pos[i](1);
-          tangent=convert_to<double>(tangent_R);
+          tangent=approximate_by<double>(tangent_R);
           pointers[i].radiant=atan(tangent);
         
           if (vert_pos[i](1) <0)
@@ -107,8 +107,8 @@ namespace Ariadne {
     convert_to_double_rectangle(const Ariadne::Geometry::Rectangle<R>& r) {
       Ariadne::Geometry::Rectangle<double> result(r.dimension());
       for(dimension_type i=0; i!=result.dimension(); ++i) {
-        result.set_lower_bound(i,convert_to<double>(r.lower_bound(i)));
-        result.set_upper_bound(i,convert_to<double>(r.upper_bound(i)));
+        result.set_lower_bound(i,approximate_by<double>(r.lower_bound(i)));
+        result.set_upper_bound(i,approximate_by<double>(r.upper_bound(i)));
       }
       return result;
     }
@@ -257,13 +257,13 @@ namespace Ariadne {
         lx=lx+0.8*scale_x;
         ly=ly+0.8*scale_y;
 
-        double rlx=convert_to<double>(lx);
-        double rly=convert_to<double>(ly);
-        double rux=convert_to<double>(ux);
-        double ruy=convert_to<double>(ux);
+        double rlx=approximate_by<double>(lx);
+        double rly=approximate_by<double>(ly);
+        double rux=approximate_by<double>(ux);
+        double ruy=approximate_by<double>(ux);
 
-        double lscale_x=convert_to<double>(scale_x);
-        double lscale_y=convert_to<double>(scale_y);
+        double lscale_x=approximate_by<double>(scale_x);
+        double lscale_y=approximate_by<double>(scale_y);
 
         double setlinewidth = ((rux-rlx)+(ruy-rly))/(SCALE_DIMENSION*300);
                 
@@ -457,10 +457,10 @@ namespace Ariadne {
     {
       Ariadne::Geometry::Rectangle<R> proj_r=eps.projection()(r);
       
-      double rlx=convert_to<double>(proj_r.lower_bound(0));
-      double rux=convert_to<double>(proj_r.upper_bound(0));
-      double rly=convert_to<double>(proj_r.lower_bound(1));
-      double ruy=convert_to<double>(proj_r.upper_bound(1));
+      double rlx=approximate_by<double>(proj_r.lower_bound(0));
+      double rux=approximate_by<double>(proj_r.upper_bound(0));
+      double rly=approximate_by<double>(proj_r.lower_bound(1));
+      double ruy=approximate_by<double>(proj_r.upper_bound(1));
 
       eps << rlx << ' ' << rly << " moveto\n"
           << rux << ' ' << rly << " lineto\n"

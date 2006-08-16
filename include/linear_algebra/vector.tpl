@@ -34,40 +34,40 @@ namespace Ariadne {
   namespace LinearAlgebra {
 
     template <typename R>
-    Vector<R>::Vector(const std::string& s)
+    Vector<R>::Vector(const std::string& str)
       : _Base(1)
     {  
-      std::istringstream ss(s); 
+      std::istringstream ss(str); 
       ss >> *this; 
     }      
 
     template <typename R>
     std::ostream&
-    operator<<(std::ostream& os, const Vector<R>& v)
-    {
+    Vector<R>::write(std::ostream& os) const
+    {  
       os << "[";
-      if(v.size()>0) {
-        os << v[0];
-      }
-      for(uint i=1; i!=v.size(); ++i) {
-        os << "," << v[i];
+      if(this->size()>0) {
+        os << (*this)(0);
+        for(uint i=1; i!=this->size(); ++i) {
+          os << "," << (*this)(i);
+        }
       }
       os << "]";
       return os;
-    }
-    
+    }      
+
     template <typename R>
     std::istream&
-    operator>>(std::istream& is, Vector<R>& v)
-    {
+    Vector<R>::read(std::istream& is)
+    {  
       std::vector<R> stdvec;
       is >> stdvec;
-      v=Vector<R>(stdvec.size());
-      for(size_type i=0; i!=v.size(); ++i) {
-        v(i)=stdvec[i];
+      *this=Vector<R>(stdvec.size());
+      for(size_type i=0; i!=this->size(); ++i) {
+        (*this)(i)=stdvec[i];
       }
       return is;
-    }
+    }      
 
   }
 }

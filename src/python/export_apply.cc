@@ -26,6 +26,9 @@
 #include "geometry/parallelotope.h"
 #include "geometry/list_set.h"
 #include "geometry/grid_set.h"
+
+#include "system/map.h"
+
 #include "evaluation/apply.h"
 
 #include "python/typedefs.h"

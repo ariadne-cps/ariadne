@@ -1,11 +1,11 @@
 /***************************************************************************
- *            numerical_traits.h
+ *            Matrix.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  casagrande@dimi.uniud.it Pieter.Collins@cwi.nl
  ****************************************************************************/
 
-/*
+ /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
@@ -21,35 +21,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file numerical_traits.h
- *  \brief Traits classes to define properties of numerical types.
- */
+#include "real_typedef.h"
 
-#ifndef _ARIADNE_NUMERICAL_TRAITS_H
-#define _ARIADNE_NUMERICAL_TRAITS_H
+#include "linear_algebra/matrix_function.h"
+#include "linear_algebra/matrix_function.tpl"
 
 namespace Ariadne {
-  namespace Numeric {
+  namespace LinearAlgebra {
     
-    /* numerical traits */
-    /*! \brief Tags a class representing a ring. */
-    class ring_tag { };
-    /*! \brief Tags a class representing a field. */
-    class field_tag { };
-      
-    /*! \brief Typedef's describing a numerical type. */
-    template<typename T> class numerical_traits;
-  }
-}
-  
-namespace Ariadne {
-  namespace Base {
-    template<typename R> inline std::string name() { 
-      return "UnknownType";
-      //throw std::runtime_error("name(): Unknown type");
-    }
-  
-  }
-}
+    template Matrix<Real> exp_approx(const Matrix<Real> &A, 
+                                     const Real& e); 
 
-#endif /* _ARIADNE_NUMERICAL_TRAITS_H */
+    template IntervalMatrix<Real> exp(const IntervalMatrix<Real>& A); 
+
+
+#ifndef REAL_IS_A_FIELD
+    template Matrix<Field> exp_approx(const Matrix<Field> &A, 
+                                      const Field& e); 
+#endif
+  }
+}

@@ -36,6 +36,24 @@
 namespace Ariadne {
   namespace Numeric {
     
+    /*! \brief Approximate \a x by an element of \p Res. */
+    template<typename Res, typename Arg> inline Res approximate_by(const Arg& x);
+    
+    template<> inline double approximate_by(const double& x) {
+      return x;
+    }
+    template<> inline double approximate_by(const MPFloat& x) { 
+      return x.get_d(); 
+    }
+    
+    template<> inline double approximate_by(const Dyadic& x) {
+      return x.get_d();
+    }
+    
+    template<> inline double approximate_by(const Rational& q) {
+      return q.get_d();
+    }
+    
     /*! \brief Approximate \a x by an element of \p Res with accuracy \a e. */
     template<typename Res, typename Arg, typename Err> inline Res approximate(const Arg& x, const Err& e);
     

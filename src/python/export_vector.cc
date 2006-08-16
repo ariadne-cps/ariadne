@@ -119,6 +119,7 @@ void export_Vector() {
 
 #ifndef REAL_IS_A_FIELD
   class_<FVector>("RationalVector",init<int>())
+    .def(init<std::string>())
     .def(init<FVector>())
     .def("__len__", &FVector::size)
     .def("__getitem__",&fvector_getitem)
@@ -133,6 +134,7 @@ void export_Vector() {
 
 void export_IntervalVector() {
   class_< RIntervalVector >("IntervalVector",init<int>())
+    .def(init<std::string>())
     .def(init<RIntervalVector>())
     .def("__len__", &RIntervalVector::size)
     .def("__getitem__",&ivector_getitem)

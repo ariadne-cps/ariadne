@@ -1,9 +1,8 @@
 /***************************************************************************
  *            test_array.cc
  *
- *  2 May 2005
- *  Copyright  2005  Pieter Collins
- *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
+ *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*

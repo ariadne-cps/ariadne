@@ -29,6 +29,8 @@
 #ifndef _ARIADNE_LU_MATRIX_H
 #define _ARIADNE_LU_MATRIX_H
 
+#include <algorithm>
+
 #include <tblas/geset.hpp>
 #include <tblas/trcpy.hpp>
 #include <tblas/gemm.hpp>
@@ -45,33 +47,44 @@ namespace Ariadne {
   namespace LinearAlgebra {
 
     /*! \brief A matrix stored in LU product form. */
-    template<typename R>
+    template<typename Real>
     class LUMatrix {
      public:
-      LUMatrix(const Matrix<R>& A);
+      /*! \brief Construct from an ordinary matrix. */
+      LUMatrix(const Matrix<Real>& A);
       
+      /*! \brief The number of rows. */
       size_type number_of_rows() const { return _elements.number_of_rows(); }
+      /*! \brief The number of columns. */
       size_type number_of_columns() const { return _elements.number_of_columns(); }
-      R operator() (const size_type& i, const size_type& j) const { 
-        R result=0; for(int k=0; k<=min(i,j); ++k) { result(i,j)+= (i==k ? R(1) : _elements(i,k)) * _elements(k,j); } return result; }
+      /*! \brief The \a i,\a j th element. */
+      Real operator() (const size_type& i, const size_type& j) const { 
+        Real result=0; for(int k=0; k<=std::min(i,j); ++k) { result(i,j)+= (i==k ? Real(1) : _elements(i,k)) * _elements(k,j); } return result; }
 
-      Matrix<R> P() const;
-      Matrix<R> L() const;
-      Matrix<R> U() const;
+      /*! \brief The pivoting permutation. */
+      Matrix<Real> P() const;
+      /*! \brief The lower-triangular factor. */
+      Matrix<Real> L() const;
+      /*! \brief The upper-triangular factor. */
+      Matrix<Real> U() const;
       
-      R determinant() const;
+      /*! \brief The determinant. */
+      Real determinant() const;
+      /*! \brief True if the matrix is singular (non-invertible). */
       bool singular() const;
 
-      operator Matrix<R> () const;
-      Matrix<R> inverse() const;
+      /*! \brief Convert to an ordinary matrix. */
+      operator Matrix<Real> () const;
+      /*! \brief The inverse. */
+      Matrix<Real> inverse() const;
      private:
-      Matrix<R> _elements;
+      Matrix<Real> _elements;
       array<int> _pivots;
     };
     
-    template <typename R>
+    template <typename Real>
     inline 
-    LUMatrix<R>::LUMatrix(const Matrix<R>& A) 
+    LUMatrix<Real>::LUMatrix(const Matrix<Real>& A) 
       : _elements(A), _pivots(A.number_of_rows()) 
     {
       int m=this->number_of_rows();
@@ -80,28 +93,28 @@ namespace Ariadne {
                     this->_pivots.begin());      
     }
 
-    template <typename R>
+    template <typename Real>
     inline
-    Matrix<R>
-    LUMatrix<R>::P() const
+    Matrix<Real>
+    LUMatrix<Real>::P() const
     {
       int m=this->number_of_rows();
-      Matrix<R> result(m,m);
-      TBLAS::geset(TBLAS::RowMajor,m,m,R(0),R(1),result.data().begin(),m);
+      Matrix<Real> result(m,m);
+      TBLAS::geset(TBLAS::RowMajor,m,m,Real(0),Real(1),result.data().begin(),m);
       TLAPACK::laswp(TBLAS::RowMajor,m,result.data().begin(),m,
                     0,m,this->_pivots.begin(),-1);
 
       return result;
     }
 
-    template <typename R>
+    template <typename Real>
     inline
-    Matrix<R>
-    LUMatrix<R>::L() const
+    Matrix<Real>
+    LUMatrix<Real>::L() const
     {
       int m=this->number_of_rows();
-      Matrix<R> result(m,m);
-      TBLAS::geset(TBLAS::RowMajor,m,m,R(0),R(1),result.begin(),m);
+      Matrix<Real> result(m,m);
+      TBLAS::geset(TBLAS::RowMajor,m,m,Real(0),Real(1),result.begin(),m);
       TBLAS::trcpy(TBLAS::RowMajor,TBLAS::Lower,TBLAS::Unit,
                   m,m,
                   this->_elements.begin(), m,
@@ -109,15 +122,15 @@ namespace Ariadne {
       return result;
     }
 
-    template <typename R>
+    template <typename Real>
     inline
-    Matrix<R>
-    LUMatrix<R>::U() const
+    Matrix<Real>
+    LUMatrix<Real>::U() const
     {
       int m=this->number_of_rows();
       int n=this->number_of_columns();
-      Matrix<R> result(m,n);
-      TBLAS::geset(TBLAS::RowMajor,m,n,R(0),R(0),result.begin(),n);
+      Matrix<Real> result(m,n);
+      TBLAS::geset(TBLAS::RowMajor,m,n,Real(0),Real(0),result.begin(),n);
       TBLAS::trcpy(TBLAS::RowMajor,TBLAS::Upper,TBLAS::NonUnit,
                   m,n,
                   this->_elements.begin(),n,
@@ -125,13 +138,13 @@ namespace Ariadne {
       return result;
     }
 
-    template <typename R>
+    template <typename Real>
     inline
-    LUMatrix<R>::operator Matrix<R> () const
+    LUMatrix<Real>::operator Matrix<Real> () const
     {
       size_type m=this->number_of_rows();
       size_type n=this->number_of_columns();
-      Matrix<R> result(m,n);
+      Matrix<Real> result(m,n);
         
       /* No TBLAS routine */
       for(size_type i=0; i!=m; ++i) {
@@ -148,36 +161,36 @@ namespace Ariadne {
       return result;
     }
 
-    template <typename R>
+    template <typename Real>
     inline
     bool
-    LUMatrix<R>::singular() const
+    LUMatrix<Real>::singular() const
     {
-      return this->determinant()==0; 
+      return this->determinant()==Real(0); 
     }
 
-    template <typename R>
+    template <typename Real>
     inline
-    R
-    LUMatrix<R>::determinant() const
+    Real
+    LUMatrix<Real>::determinant() const
     {
       assert(this->number_of_rows()==this->number_of_columns());
       size_type n=this->number_of_rows();
-      R result=0;
+      Real result=0;
       for(size_type i=0; i!=n; ++i) { 
         result+=this->_elements(i,i);
       }
       return result;
     }
 
-    template <typename R>
+    template <typename Real>
     inline
-    Matrix<R>
-    LUMatrix<R>::inverse() const
+    Matrix<Real>
+    LUMatrix<Real>::inverse() const
     {
       size_type n=this->number_of_rows();
-      Matrix<R> result(n,n);
-      TBLAS::geset(TBLAS::RowMajor,n,n,R(0),R(1),result.begin(),n);
+      Matrix<Real> result(n,n);
+      TBLAS::geset(TBLAS::RowMajor,n,n,Real(0),Real(1),result.begin(),n);
       TLAPACK::getrs(TBLAS::RowMajor,TBLAS::NoTrans,n,n,this->_elements.begin(),n,this->_pivots.begin(),result.begin(),n);
       return result;
     }

@@ -31,8 +31,6 @@
 
 #include "../declarations.h"
 
-#include "../system/map.h"
-
 namespace Ariadne {
   namespace Evaluation {
 

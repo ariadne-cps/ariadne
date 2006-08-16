@@ -37,7 +37,8 @@
 #include "../declarations.h"
 
 #include "../numeric/numerical_traits.h"
-
+#include "../numeric/arithmetic.h"
+ 
 /* No input routine for intervals defined by boost */
 namespace boost {
   namespace numeric {
@@ -92,8 +93,11 @@ namespace Ariadne {
       /*! \brief Default constructer constructs empty interval. */
       Interval()
         : _boost_interval(1,0) { }
+      /*! \brief Construct from lower and upper bounds. */
+      template<typename RL,typename RU> Interval(const RL& l, const RU& u)
+        : _boost_interval(R(l),R(u)) { }
       /*! \brief Construct a one-point interval. */
-      template<typename Rl> Interval(const Rl& x)
+      template<typename RX> Interval(const RX& x)
         : _boost_interval(R(x),R(x)) { }
       /*! \brief Construct from a boost interval. */
       Interval(const _boost_interval& ivl)
@@ -109,17 +113,17 @@ namespace Ariadne {
       
       /*! \brief Equality operator. */
       bool operator==(const Interval<R>& ivl) const { 
-        return this->lower()==ivl.lower() && this->upper()==ivl.upper(); }
+        return this->_boost_interval::operator==(ivl); }
       /*! \brief Inequality operator. */
-      bool operator!=(const Interval<R>& ivl) const { 
-        return !(*this==ivl); }
+      bool operator!=(const Interval<R>& ivl) const{ 
+        return this->_boost_interval::operator!=(ivl); }
 
-      /*! \brief Equality operator. */
+      /*! \brief Comparison operator. */
       bool operator==(const R& x) const { 
-        return this->lower()==x && this->upper()==x; }
+        return this->_boost_interval::operator==(x); }
       /*! \brief Inequality operator. */
       bool operator!=(const R& x) const { 
-        return !(*this==x); }
+        return this->_boost_interval::operator!=(x); }
 
       /*! \brief Tests if the interval is empty . */
       bool empty() const { return this->lower()>this->upper(); }
@@ -135,19 +139,50 @@ namespace Ariadne {
       /*! \brief The length of the interval, given by \f$b-a\f$. */
       R length() const { return this->upper()-this->lower(); }
       
-      static bool equal(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      static bool disjoint(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      static bool interiors_intersect(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      static bool subset(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      static bool inner_subset(const Interval<R>& ivl1, const Interval<R>& ivl2);
+#ifdef DOXYGEN
+      /*! \brief The interval of possible minima of \a x1 in \a ivl1 and \a x2 in \a ivl2. */
+      friend Interval<R> min(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      /*! \brief The interval of possible maxima of \a x1 in \a ivl1 and \a x2 in \a ivl2. */
+      friend Interval<R> max(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      /*! \brief The interval of possible absolute values of \a x in \a ivl. */
+      friend Interval<R> abs(const Interval<R>& ivl);
       
-      static Interval<R> intersection(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      static Interval<R> regular_intersection(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      static Interval<R> hull(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      /*! \brief Interval negation. */
+      friend Interval<R> operator-(const Interval<R>& ivl);
+      /*! \brief Interval addition. */
+      friend Interval<R> operator+(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      /*! \brief Interval subtraction. */
+      friend Interval<R> operator-(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      /*! \brief Interval multiplication. */
+      friend Interval<R> operator*(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      /*! \brief Interval division. */
+      friend Interval<R> operator/(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      /*! \brief Integer power. */
+      friend template<typename N> Interval<R> pow(const Interval<R>& x, const N& n);
+
+      /*! \brief Tests equality. */
+      friend bool equal<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      /*! \brief Tests disjointness. */
+      friend bool disjoint<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      /*! \brief Tests intersection of interiors. */
+      friend bool interiors_intersect<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      /*! \brief Tests if \a ivl1 is a subset of \a ivl2. */
+      friend bool subset<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      /*! \brief Tests if \a ivl1 is a subset of the interior of \a ivl2. */
+      friend bool inner_subset<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
       
-      template<typename N> static Interval<R> pow(const Interval<R>& x, const N& n);
+      /*! \brief The intersection of \a ivl1 and \a ivl2. */
+      friend Interval<R> intersection<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      /*! \brief The closure of the intersection of the interiors of \a ivl1 and \a ivl2. */
+      friend Interval<R> regular_intersection<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      /*! \brief The smallest interval containing \a ivl1 and \a ivl2. */
+      friend Interval<R> hull<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
       
+#endif
+      
+      /*! \brief Write to an output stream . */
       std::ostream& write(std::ostream& os) const;
+      /*! \brief Read from an input stream . */
       std::istream& read(std::istream& is);
     };
     
@@ -167,66 +202,97 @@ namespace Ariadne {
       R* _lower; R* _upper;
     };
     
-    /*! \brief Tests equality. */
+    /* Numerical traits for interval template class. */
+    template<typename R> class numerical_traits< Interval<R> > {
+     public:
+      typedef field_tag algebraic_category;
+      typedef Interval<R> field_extension_type;
+    };
+    
+    template<typename R>
+    inline
+    Interval<R> 
+    min(const Interval<R>& ivl1, const Interval<R>& ivl2) {
+      //std::cerr << "Interval::min<Interval<" << name<R>() << ">>" << std::endl;
+      //return Interval<R>(min(ivl1.lower(),ivl2.lower()),min(ivl1.upper(),ivl2.upper()));
+      return boost::numeric::min(ivl1,ivl2);
+    }
+  
+    template<typename R>
+    inline
+    Interval<R> 
+    max(const Interval<R>& ivl1, const Interval<R>& ivl2) {
+      //std::cerr << "Interval::max<Interval<" << name<R>() << ">>" << std::endl;
+      //return Interval<R>(max(ivl1.lower(),ivl2.lower()),max(ivl1.upper(),ivl2.upper()));
+      return boost::numeric::max(ivl1,ivl2);
+    }
+    
+    template<typename R>
+    inline
+    Interval<R> 
+    abs(const Interval<R>& ivl) {
+      using namespace ::Ariadne::Numeric;
+      //std::cerr << "Interval::abs<Interval<" << name<R>() << ">>" << std::endl;
+      //Can't use boost::numeric::abs because no comparison of GMP expressions.
+      //return boost::numeric::abs(ivl);
+      if(ivl.lower()>=0) { return ivl; } else if(ivl.upper() < 0) { return -ivl; } 
+      else { return Interval<R>(0,max(R(-ivl.lower()),ivl.upper())); }
+      //else { return Interval<R>(0,max<R>(-ivl.lower(),ivl.upper())); }
+    }
+  
     template<typename R>
     inline
     bool
-    Interval<R>::equal(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    equal(const Interval<R>& ivl1, const Interval<R>& ivl2)
     {
-      return (ivl1.upper()==ivl2.lower() || ivl1.lower()==ivl2.upper());
+      return (ivl1.lower()==ivl2.lower() || ivl1.upper()==ivl2.upper());
     }
 
-    /*! \brief Tests disjointness. */
     template<typename R>
     inline
     bool
-    Interval<R>::disjoint(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    disjoint(const Interval<R>& ivl1, const Interval<R>& ivl2)
     {
       return (ivl1.upper()<ivl2.lower() || ivl1.lower()>ivl2.upper());
     }
 
-    /*! \brief Tests intersection of interiors. */
     template<typename R>
     inline
     bool
-    Interval<R>::interiors_intersect(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    interiors_intersect(const Interval<R>& ivl1, const Interval<R>& ivl2)
     {
       return (ivl1.upper()>ivl2.lower() && ivl1.lower()<ivl2.upper());
     }
 
-    /*! \brief Tests if \a ivl1 is a subset of the interior of \a ivl2. */
     template<typename R>
     inline
     bool
-    Interval<R>::inner_subset(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    inner_subset(const Interval<R>& ivl1, const Interval<R>& ivl2)
     {
       return (ivl1.lower()>ivl2.lower() && ivl1.upper()<ivl2.upper());
     }
 
-    /*! \brief Tests if \a ivl1 is a subset of \a ivl2. */
     template<typename R>
     inline
     bool
-    Interval<R>::subset(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    subset(const Interval<R>& ivl1, const Interval<R>& ivl2)
     {
       return (ivl1.lower()>=ivl2.lower() && ivl1.upper()<=ivl2.upper());
     }
 
-    /*! \brief The intersection of \a ivl1 and \a ivl2. */
     template<typename R>
     inline
     Interval<R>
-    Interval<R>::intersection(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    intersection(const Interval<R>& ivl1, const Interval<R>& ivl2)
     {
       return Interval<R>(std::max(ivl1.lower(),ivl2.lower()),
                          std::min(ivl1.upper(),ivl2.upper()));
     }
 
-    /*! \brief The closure of the intersection of the interiors of \a ivl1 and \a ivl2. */
     template<typename R>
     inline
     Interval<R>
-    Interval<R>::regular_intersection(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    regular_intersection(const Interval<R>& ivl1, const Interval<R>& ivl2)
     {
       if(ivl1.upper()==ivl2.lower() || ivl1.lower()==ivl2.upper()) {
         return Interval<R>(1,0);
@@ -236,11 +302,10 @@ namespace Ariadne {
       }
     }
 
-    /*! \brief The smallest interval containing \a ivl1 and \a ivl2. */
     template<typename R>
     inline
     Interval<R>
-    Interval<R>::hull(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    hull(const Interval<R>& ivl1, const Interval<R>& ivl2)
     {
       if(ivl1.empty()) {
         return ivl2;
@@ -253,12 +318,10 @@ namespace Ariadne {
     }
     
     
-    /*! \brief Integer power. */
-    template<typename R>
-    template<typename N>
+    template<typename R,typename N>
     inline
     Interval<R> 
-    Interval<R>::pow(const Interval<R>& x, const N& n) 
+    pow(const Interval<R>& x, const N& n) 
     {
       Interval<R> result=R(1);
       for(N i=0; i!=n; ++i) {
@@ -296,15 +359,7 @@ namespace Ariadne {
       //is >> boost_ivl;
       return is;
     }
-    
-
-    template<typename R> class numerical_traits< Interval<R> > {
-     public:
-      typedef field_tag algebraic_category;
-      typedef Interval<R> field_extension_type;
-    };
-
-    
+        
     template<typename R>
     inline
     std::ostream&

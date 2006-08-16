@@ -30,7 +30,9 @@
 #include "numeric/numerical_types.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "linear_algebra/matrix.h"
+#include "linear_algebra/lu_matrix.h"
+#include "linear_algebra/qr_matrix.h"
+#include "linear_algebra/svd_matrix.h"
 
 #include "test.h"
 
@@ -39,9 +41,11 @@ using namespace Ariadne::LinearAlgebra;
 using namespace std;
 
 int main() {
-    cout << "test_linear_algebra: " << flush;
-    ofstream clog("test_linear_algebra.log");
+  cout << "test_linear_algebra: " << flush;
+  ofstream clog("test_linear_algebra.log");
 
+  {
+    
     Matrix< Rational > A(3,3), LU(3,3);
     Matrix< Rational > Aq(3,3), QT, R;
     Vector< Rational > b(3), x(3);
@@ -60,18 +64,60 @@ int main() {
     x=A.solve(b);
   
     test_assert(x(0)==1 && x(1)==1 && x(2)==1,"lu_solve");
+  
+  }
+  
+  Real Aptr[9]={-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0};
+  //Matrix<Real> A(3,3,Aptr,3);
+  Matrix<Real> A(3,3,Aptr,3,1);
 
- /*   for (unsigned int i=0; i< A.size1(); i++) {
-       for (unsigned int j=0; j< A.size2(); j++) {
-         Aq(i,j)=(Dyadic)A(i,j);
-       }
-    }
-   
-    QT=hermitian(Householder_QR(Aq));
-    R=prod(QT,Aq); */
+  clog << "Testing LU\n";
+  {
+    LUMatrix<Real> LU(A);
+    Matrix<Real> P=LU.P();
+    Matrix<Real> L=LU.L();
+    Matrix<Real> U=LU.U();
+    clog << "A=" << A << "\n";
+    clog << "P=" << P << "\n";
+    clog << "L=" << L << "\n";
+    clog << "U=" << U << "\n";
+    clog << "P*L*U=" << P*L*U << "\n";
+    clog << "LU=" << Matrix<Real>(LU) << "\n";
+  }
+
+  clog << "Testing QR\n";
+  {
+    QRMatrix<Real> QR(A);
+    Matrix<Real> Q=QR.Q();
+    Matrix<Real> R=QR.R();
+    clog << "A=" << A << "\n";
+    clog << "Q=" << Q << "\n";
+    clog << "R=" << R << "\n";
+    clog << "Q*Q^T=" << Q*Q.transpose() << "\n";
+    clog << "Q*R=" << Q*R << "\n";
+    clog << "QR=" << Matrix<Real>(QR) << "\n";
+  }
+
+  clog << "Testing SVD\n";
+  {
+    SVDMatrix<Real> SVD(A);
+    Vector<Real> S=SVD.S();
+    Matrix<Real> U=SVD.U();
+    Matrix<Real> V=SVD.V();
+    Matrix<Real> D=SVD.D();
+    clog << "A=" << A << "\n";
+    clog << "S=" << S << "\n";
+    clog << "D=" << D << "\n";
+    clog << "U=" << U << "\n";
+    clog << "V=" << V << "\n";
+    clog << "U*U^T=" << U*U.transpose() << "\n";
+    clog << "V*V^T=" << V*V.transpose() << "\n";
+    clog << "U*D*V^T" << U*D*V.transpose() << "\n";
+    clog << "SVD=" << Matrix<Real>(SVD) << "\n";
+  }
     
-    clog.close();
-    cout << "INCOMPLETE\n";
+  clog.close();
+  cout << "INCOMPLETE\n";
 
     return 0;
 }

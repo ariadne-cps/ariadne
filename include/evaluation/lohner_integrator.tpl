@@ -34,7 +34,7 @@
 #include <vector>
 #include <valarray>
 
-#include "../declarations.h"
+#include "lohner_integrator.h"
 
 #include "../utility/stlio.h"
 #include "../base/array.h"
@@ -64,8 +64,12 @@
 namespace Ariadne {
   namespace Evaluation {
     
-
-
+#ifdef DEBUG
+    static const int debug_level=1;
+#else
+    static const int debug_level=0;
+#endif
+    
     template<typename R>
     C1LohnerIntegrator<R>::C1LohnerIntegrator(const R& maximum_step_size, const R& lock_to_grid_time, const R& maximum_basic_set_radius)
       : C1Integrator<R>(maximum_step_size,lock_to_grid_time,maximum_basic_set_radius)
@@ -124,7 +128,7 @@ namespace Ariadne {
       
       LinearAlgebra::IntervalVector<R> fq=vf(q);
       
-      r=r+(Interval<R>(R(0),h)*fq);
+      r=r+LinearAlgebra::IntervalVector<R>(Interval<R>(R(0),h)*fq);
 
 #ifdef DEBUG
       std::cerr << "suggested stepsize=" << step_size << std::endl;
@@ -210,10 +214,9 @@ namespace Ariadne {
       std::cerr << "flow derivative=" << dphi << std::endl;
 
       std::cerr << "centre=" << c << std::endl;
-      std::cerr << "bounds on centre=" << phic << std::endl;
-      std::cerr << "bounds on centre <vector>=" << phicv << std::endl;
+      std::cerr << "rectangular centre=" << rc << std::endl;
+      std::cerr << "flow bounds=" << phic << std::endl;
       std::cerr << "zonotopic <vector> to add to image of centre=" << zv << std::endl;
-      std::cerr << "approximating interval parallelotope=" << ip << std::endl;
       std::cerr << "new approximation=" << p << std::endl;
       std::cerr << "Done integration step\n\n\n" << std::endl;
 #endif  
@@ -236,35 +239,37 @@ namespace Ariadne {
       R max_error=LinearAlgebra::norm(p.generators())/16;
       assert(max_error>0);
       
-#ifdef DEBUG
-      std::cerr << "parallelotope generators=" << p.generators() << std::endl;
-      std::cerr << "maximum allowed error=" << max_error << std::endl;
+      if(debug_level>0) { 
+        std::cerr << "parallelotope generators=" << p.generators() << std::endl;
+        std::cerr << "maximum allowed error=" << max_error << std::endl;
       
-      std::cerr << "jacobian=" << vf.A() << std::endl;
-      std::cerr << "step size=" << h << std::endl;
-#endif
+        std::cerr << "jacobian=" << vf.A() << std::endl;
+        std::cerr << "step size=" << h << std::endl;
+      }
+      
 
       LinearAlgebra::Matrix<R> D=LinearAlgebra::exp_Ah_approx(vf.A(),h,max_error);
-      /* Write phi(x)=D x0 + P b */
+      if(debug_level>0) { std::cerr << "approximate derivative=" << D << std::endl; }
       LinearAlgebra::Matrix<R> P=LinearAlgebra::exp_Ah_sub_id_div_A_approx(vf.A(),h,max_error);
+      if(debug_level>0) { std::cerr << "twist=" << P << std::endl; }
       
       LinearAlgebra::IntervalMatrix<R> iD(LinearAlgebra::IntervalMatrix<R>(D,max_error));
+      if(debug_level>0) { std::cerr << "approximating derivative=" << iD << std::endl; }
       LinearAlgebra::IntervalMatrix<R> iP(LinearAlgebra::IntervalMatrix<R>(P,max_error));
-      LinearAlgebra::IntervalVector<R> iC=iD*p.centre().position_vector()+iP*vf.b();
+      if(debug_level>0) { std::cerr << "approximating twist=" << iP << std::endl; }
+      //LinearAlgebra::IntervalVector<R> iC=iD*p.centre().position_vector()+iP*vf.b();
+      LinearAlgebra::IntervalVector<R> iv1=iD*p.centre().position_vector();
+      if(debug_level>0) { std::cerr << "iv1=" << iv1 << std::endl; }
+      LinearAlgebra::IntervalVector<R> iv2=iP*vf.b();
+      if(debug_level>0) { std::cerr << "iv2=" << iv2 << std::endl; }
+      LinearAlgebra::IntervalVector<R> iC=iv1+iv2;
+      
+      if(debug_level>0) { std::cerr << "interval centre=" << iC << std::endl; }
       
       p=Geometry::Parallelotope<R>::over_approximation(Geometry::Rectangle<R>(iC),iD*p.generators());
+      if(debug_level>0) { std::cerr << "parallelotope=" << p << std::endl; }
       //IntervalParallelotope<R> img(iD*p.centre().position_vector()+iP*vf.b(),iD*p.generators());
       
-#ifdef DEBUG
-      std::cerr << "twist=" << P << std::endl;
-      std::cerr << "approximate derivative=" << D << std::endl;
-      
-      std::cerr << "approximating derivative=" << iD << std::endl;
-      std::cerr << "approximating twist=" << iP << std::endl;
-      
-      std::cerr << "interval parallelotope=" << img << std::endl;
-      std::cerr << "parallelotope=" << p << std::endl;
-#endif
       return p;      
     }
     
@@ -346,7 +351,6 @@ template<typename R>
 
       std::cerr << "centre=" << c << std::endl;
       std::cerr << "bounds on centre=" << phic << std::endl;
-      std::cerr << "bounds on centre <vector>=" << phicv << std::endl;
       std::cerr << "zonotopic <vector> to add to image of centre=" << zv << std::endl;
       std::cerr << "new approximation=" << p << std::endl;
 #endif  
@@ -393,8 +397,8 @@ template<typename R>
       
       std::cerr << "approximating derivative=" << iD << std::endl;
       std::cerr << "approximating twist=" << iP << std::endl;
+      std::cerr << "bounds on centre=" << iC << std::endl;
       
-      std::cerr << "interval parallelotope=" << img << std::endl;
       std::cerr << "parallelotope=" << p << std::endl;
 #endif
       return p;      

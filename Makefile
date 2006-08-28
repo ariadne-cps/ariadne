@@ -32,5 +32,9 @@ dep:
 	(cd ${SRCDIR}; ${MAKE} dep);
 	(cd ${TESTDIR}; ${MAKE} dep);
 
+depclean: 
+	(cd ${SRCDIR}; ${MAKE} depclean);
+	(cd ${TESTDIR}; ${MAKE} depclean);
+
 pycheck: python install
 	for file in python/test/*.py; do echo $$file; $$file; done

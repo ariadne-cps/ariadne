@@ -69,3 +69,12 @@ dep:
 	(cd ${SYSTEMDIR}; ${MAKE} dep )
 	(cd ${EVALUATIONDIR}; ${MAKE} dep )
 	(cd ${PYTHONDIR}; ${MAKE} dep )
+
+depclean:  
+	(cd ${BASEDIR}; ${MAKE} depclean )
+	(cd ${NUMERICDIR}; ${MAKE} depclean )
+	(cd ${LINEARALGEBRADIR}; ${MAKE} depclean )
+	(cd ${GEOMETRYDIR}; ${MAKE} depclean )
+	(cd ${SYSTEMDIR}; ${MAKE} depclean )
+	(cd ${EVALUATIONDIR}; ${MAKE} depclean )
+	(cd ${PYTHONDIR}; ${MAKE} depclean )

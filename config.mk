@@ -11,8 +11,8 @@ PYTHONPREFIX=${PREFIX}/python/
 
 LOCALDIR = ../..
 
-CC = gcc-4.0
-CXX = g++-4.0
+CC = gcc
+CXX = g++
 
 MAKE = make
 

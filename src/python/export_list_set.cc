@@ -46,7 +46,7 @@ inline RZonotope zlsg(const RZonotopeListSet& s, int n) { return ::get_item(s,n)
 inline 
 bool interiors_intersect(const RZonotopeListSet& A, const RParallelotope& B) 
 {
-  return interiors_intersect(A,RZonotope(B));
+  return interiors_intersect(A,RZonotopeListSet(RZonotope(B)));
 }
 
 template <typename R, template<typename> class BS, template<typename> class BS2>
@@ -108,10 +108,10 @@ def("regular_intersection", RectLSBinFun(&regular_intersection));
   def("interiors_intersect", RectLSBinPred(&interiors_intersect));
   def("interiors_intersect", ParLSBinPred(&interiors_intersect));
   def("interiors_intersect", ZonLSBinPred(&interiors_intersect));
-  def("interiors_intersect", ParLSParBinPred(&interiors_intersect));
-  def("interiors_intersect", LSParParBinPred(&interiors_intersect));
-  def("interiors_intersect", LSZonZonBinPred(&interiors_intersect));
-  def("interiors_intersect", LSZonParBinPred(&interiors_intersect));
+  //def("interiors_intersect", ParLSParBinPred(&interiors_intersect));
+  //def("interiors_intersect", LSParParBinPred(&interiors_intersect));
+  //def("interiors_intersect", LSZonZonBinPred(&interiors_intersect));
+  //def("interiors_intersect", LSZonParBinPred(&interiors_intersect));
   def("touching_intersection", LTRlsrBinFun(&touching_intersection));
   def("touching_intersection", LTRlspBinFun(&touching_intersection));
   def("touching_intersection", LTRlszBinFun(&touching_intersection));

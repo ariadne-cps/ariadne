@@ -35,8 +35,11 @@
 namespace Ariadne {
   namespace System {
 
-    /*! \brief Base class for multivalued functions. */
-    template<typename R>
+    /*! \brief Abstract base class for multivalued functions.
+     *  \ingroup System
+     *  \ingroup DiscreteTime
+     */
+     template<typename R>
     class MultiMap {
      public:
       typedef R real_type;

@@ -71,6 +71,8 @@ namespace Ariadne {
                                                    const Polyhedron<R>& B);
     template<typename R> Polyhedron<R> minkowski_sum(const Polyhedron<R>& A,
                                                      const Polyhedron<R>& B);
+    template<typename R> Polyhedron<R> minkowski_difference(const Polyhedron<R>& A,
+                                                            const Polyhedron<R>& B);
     template<typename R> std::ostream& operator<<(std::ostream& os, 
                                                   const Polyhedron<R>& P);
                                                    
@@ -85,7 +87,8 @@ namespace Ariadne {
     Parma_Polyhedra_Library::NNC_Polyhedron 
     _from_Rectangle_to_closed_PPL_Polyhedron(const Rectangle<R>& r);
 
-    /*! \brief The polyhedron class.
+    /*! \ingroup BasicSet
+     *  \brief The polyhedron class.
      *
      * This is a wrapper from Parma Polyhedra Library Polyhedron class
      * to Ariadne representation.
@@ -93,14 +96,21 @@ namespace Ariadne {
     template <typename R>
     class Polyhedron {
      public:
+      /*! \brief The type of denotable real numbers used to describe the polyhedron. */
       typedef R real_type;
+      /*! \brief The type of denotable point contained by the polyhedron. */
       typedef Point<R> state_type;
+      /*! \brief The type of vector. */
+      typedef Ariadne::LinearAlgebra::Vector<R> vector_type;
+      /*! \brief The type of matrix. */
+      typedef Ariadne::LinearAlgebra::Matrix<R> matrix_type;
+      /*! \brief The type of a list of points. */
       typedef std::vector< Point<R> > state_list_type;
-      typedef LinearAlgebra::Vector<R> vector_type;
-      typedef LinearAlgebra::Matrix<R> matrix_type;
      public:
       friend class Parallelotope<R>;
     
+      //@{ 
+      //! \name Constructors
       /*! \brief Default constructor creates empty set. 
        */
       Polyhedron();
@@ -152,7 +162,19 @@ namespace Ariadne {
        * \return A reference to the current object.
        */
       Polyhedron<R>& operator=(const Polyhedron<R>& original);
+       //@}
       
+      
+      //@{
+      //! \name Modifying operations
+      /*! \brief Makes the polyhedron empty.
+       */
+      void clear();
+      //@}
+      
+      
+      //@{
+      //! \name Geometric operations
       /*! \brief Returns the polyhedron's space dimension.
        */
       size_type dimension() const;
@@ -161,10 +183,7 @@ namespace Ariadne {
        */
       bool empty() const;
       
-      /*! \brief Makes the polyhedron empty.
-       */
-      void clear();
-    
+   
       /*! \brief The vertices of the Polyhedron. */
       state_list_type vertices() const; 
            
@@ -187,32 +206,54 @@ namespace Ariadne {
        * WARNING: The metric error of the approximation may be larger than \a delta.
        */
       Polyhedron<R> over_approximation(const real_type& delta) const;
+      //@}
+      
 
-    private:
+      //@{
+      //! \name Geometric binary predicates
+      /*! \brief Tests disjointness. */
       friend bool Geometry::disjoint <>(const Polyhedron<R>& A, 
-                              const Polyhedron<R>& B);
-    
-      friend bool Geometry::interiors_intersect<>(const Polyhedron<R>& A, 
                                         const Polyhedron<R>& B);
-      
-      friend bool Geometry::inner_subset<>(const Polyhedron<R>& A, 
-                                 const Polyhedron<R>& B);
     
-      friend bool Geometry::subset<>(const Polyhedron<R>& A, 
-                           const Polyhedron<R>& B);
-    
-      friend Polyhedron<R> Geometry::intersection<>(const Polyhedron<R>& A, 
-                                          const Polyhedron<R>& B);
-    
-      friend Polyhedron<R> Geometry::regular_intersection<>(const Polyhedron<R>& A, 
+      /*! \brief Tests intersection of interiors. */
+      friend bool Geometry::interiors_intersect<>(const Polyhedron<R>& A, 
                                                   const Polyhedron<R>& B);
-    
-      friend Polyhedron<R> Geometry::convex_hull<>(const Polyhedron<R>& A, 
-                                         const Polyhedron<R>& B);
       
-      friend Polyhedron<R> Geometry::minkowski_sum<>(const Polyhedron<R>& A, 
+      /*! \brief Tests inclusion of \a A in interior of \a B. */
+      friend bool Geometry::inner_subset<>(const Polyhedron<R>& A, 
                                            const Polyhedron<R>& B);
     
+      /*! \brief Tests inclusion of \a A in \a B. */
+      friend bool Geometry::subset<>(const Polyhedron<R>& A, 
+                                     const Polyhedron<R>& B);
+    
+      //@}
+      
+
+      //@{
+      //! \name Geometric binary operations
+      /*! \brief The intersection of two polyhedra. */
+      friend Polyhedron<R> Geometry::intersection<>(const Polyhedron<R>& A, 
+                                                    const Polyhedron<R>& B);
+    
+      /*! \brief The closure of the intersection of the interiors of two polyhedra. */
+      friend Polyhedron<R> Geometry::regular_intersection<>(const Polyhedron<R>& A, 
+                                                            const Polyhedron<R>& B);
+    
+      /*! \brief The convex hull of two polyhedra. */
+      friend Polyhedron<R> Geometry::convex_hull<>(const Polyhedron<R>& A, 
+                                                   const Polyhedron<R>& B);
+      
+      /*! \brief The Minkowski (pointwise) sum of two polyhedra. */
+      friend Polyhedron<R> Geometry::minkowski_sum<>(const Polyhedron<R>& A, 
+                                                     const Polyhedron<R>& B);
+       //@}
+   
+      /*! \brief The Minkowski (pointwise) difference of two polyhedra. */
+      friend Polyhedron<R> Geometry::minkowski_difference<>(const Polyhedron<R>& A, 
+                                                            const Polyhedron<R>& B);
+       //@}
+   
       friend std::ostream& operator<< <>(std::ostream& os, 
                                          const Polyhedron<R>& P);
     
@@ -231,47 +272,42 @@ namespace Ariadne {
     };
 
 
-    /*! \brief Tests disjointness. */
     template <typename R>
     bool 
     disjoint(const Polyhedron<R>& A, const Polyhedron<R>& B);
     
-    /*! \brief Tests intersection of interiors. */
     template <typename R>
     bool
     interiors_intersect(const Polyhedron<R>& A, const Polyhedron<R>& B);
     
-    /*! \brief Tests inclusion of \a A in interior of \a B. */
     template <typename R>
     bool 
     inner_subset(const Polyhedron<R>& A, const Polyhedron<R>& B);
     
-    /*! \brief Tests inclusion of \a A in \a B. */
     template <typename R>
     bool 
     subset(const Polyhedron<R>& A, const Polyhedron<R>& B);
 
-    /*! \brief The closure of the intersection of the interiors of two polyhedra. */
     template <typename R>
     Polyhedron<R> 
     regular_intersection(const Polyhedron<R>& A, const Polyhedron<R>& B);
 
-    /*! \brief The intersection of two polyhedra. */
     template <typename R>
     Polyhedron<R> 
     intersection(const Polyhedron<R>& A, const Polyhedron<R>& B);
 
-    /*! \brief The convex hull of two polyhedra. */
     template <typename R>
     Polyhedron<R> 
     convex_hull(const Polyhedron<R>& A, const Polyhedron<R>& B);
 
-    /*! \brief The Minkowski (pointwise) sum of two polyhedra. */
     template <typename R>
     Polyhedron<R> 
     minkowski_sum(const Polyhedron<R>& A, const Polyhedron<R>& B);
 
-    /*! \brief Performs the Minkoswi sum of a polyhedron and a basic set */
+    template <typename R>
+    Polyhedron<R> 
+    minkowski_difference(const Polyhedron<R>& A, const Polyhedron<R>& B);
+
     template<typename R, template <typename> class BS> 
     inline Polyhedron<R> 
     minkowski_sum(const Polyhedron<R>& A, const BS<R>& B) {

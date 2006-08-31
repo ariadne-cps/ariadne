@@ -23,6 +23,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <string>
 
 #include "utility/stlio.h"
@@ -752,7 +753,7 @@ namespace Ariadne {
       }
       return os;
     }
-        
+    
     std::ostream& 
     operator<<(std::ostream& os, const LatticeMaskSet& ms) 
     {
@@ -770,6 +771,27 @@ namespace Ariadne {
     {
       return Utility::write_sequence(os,rls.begin(),rls.end(),'[',']',',');
     }
+    
+    
+    
+    class chompfstream : public std::ofstream { };
+    
+    chompfstream& 
+    operator<<(chompfstream& cfs, const LatticeMaskSet& ms) 
+    {
+      std::ostream& os=cfs;
+      dimension_type d=ms.dimension();
+      for(LatticeMaskSet::const_iterator iter=ms.begin(); iter!=ms.end(); ++iter) {
+        LatticeCell c=*iter;
+        for(size_type i=0; i!=d; ++i) {
+          uint k=c.lower_bound(i);
+          os << k << " ";
+        }
+        os << "\n";
+      }
+      return cfs;
+    }
+    
     
   } 
 }

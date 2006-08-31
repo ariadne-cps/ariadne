@@ -26,6 +26,7 @@ from ariadne.linear_algebra import *
 from ariadne.geometry import *
 from ariadne.system import *
 from ariadne.evaluation import *
+from ariadne.output import *
 from math import *
 import sys
 

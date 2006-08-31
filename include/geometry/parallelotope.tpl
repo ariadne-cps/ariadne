@@ -50,7 +50,7 @@ namespace Ariadne {
     Rectangle<R> 
     Parallelotope<R>::bounding_box() const 
     {
-      Vector_type offset(this->dimension());
+      vector_type offset(this->dimension());
       for(size_t i=0; i!=this->dimension(); ++i) {
         for(size_t j=0; j!=this->dimension(); ++j) {
           offset[i] += abs(this->_generators(i,j));
@@ -91,11 +91,11 @@ namespace Ariadne {
     /*! \brief Tests if the parallelotope contains \a point. */
     template <typename R>
     bool Parallelotope<R>::contains(const state_type& point) const {
-      Matrix_type inv_gen(LinearAlgebra::inverse(this->_generators));
+      matrix_type inv_gen(LinearAlgebra::inverse(this->_generators));
       const state_type &centre=this->_centre;
-      Vector_type v(point.position_vector()-centre.position_vector());
+      vector_type v(point.position_vector()-centre.position_vector());
 
-      Vector_type e=prod(inv_gen,v);
+      vector_type e=prod(inv_gen,v);
 
       for (size_t i=0; i<e.size(); i++) 
         if (abs(e(i))>1) return false;
@@ -105,7 +105,7 @@ namespace Ariadne {
     
     template<typename R>
     bool 
-    Parallelotope<R>::contains(const Rectangle<R>& rect) const 
+    Parallelotope<R>::superset(const Rectangle<R>& rect) const 
     {
       if (this->empty()) 
         return false;
@@ -121,11 +121,11 @@ namespace Ariadne {
     /*! \brief Tests if the interior of the parallelotope contains \a point. */
     template<typename R>
     bool Parallelotope<R>::interior_contains(const state_type& point) const {
-      Matrix_type inv_gen=LinearAlgebra::inverse(this->_generators);
+      matrix_type inv_gen=LinearAlgebra::inverse(this->_generators);
       const state_type &centre=this->_centre;
-      Vector_type v(point.position_vector()-centre.position_vector());
+      vector_type v(point.position_vector()-centre.position_vector());
 
-      Vector_type e=inv_gen*v;
+      vector_type e=inv_gen*v;
 
       for (size_t i=0; i<e.size(); i++) 
         if (abs(e(i))>=1) return false;
@@ -140,7 +140,7 @@ namespace Ariadne {
       size_type n=this->dimension();
       ListSet<R,Geometry::Parallelotope> result(this->dimension());
       
-      Matrix_type new_generators=generators();
+      matrix_type new_generators=generators();
       
       R max_norm=0;
       size_type max_column=0;
@@ -171,7 +171,7 @@ namespace Ariadne {
     {
       size_type n=this->dimension();
       ListSet<R,Geometry::Parallelotope> result(this->dimension());
-      Matrix_type new_generators=this->generators()/2;
+      matrix_type new_generators=this->generators()/2;
       
       state_type first_centre=this->centre();
       for(size_type i=0; i!=n; ++i) {

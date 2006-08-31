@@ -40,7 +40,9 @@
 namespace Ariadne {
   namespace LinearAlgebra {
     
-    /*! \brief A vector of intervals. */
+    /*! \ingroup LinearAlgebra
+     *  \brief A vector of intervals. 
+     */
     template<typename R>
     class IntervalVector : public Vector< Interval<R> >
     {

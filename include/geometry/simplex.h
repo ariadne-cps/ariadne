@@ -48,7 +48,8 @@ namespace Ariadne {
     template<typename R> std::ostream& operator<<(std::ostream&, const Simplex<R>&);
     template<typename R> std::istream& operator>>(std::istream&, Simplex<R>&);
 
-    /*! \brief A simplex of arbitrary dimension.
+    /*! \ingroup BasicSet
+     *  \brief A simplex of arbitrary dimension.
      */
     template <typename R>
     class Simplex {
@@ -63,6 +64,8 @@ namespace Ariadne {
       array<state_type> _vertices;
    
      public:
+      //@{
+      //! \name Constructors
       /*! \brief Default constructor constructs standard simplex of dimension \a n. */
       Simplex(size_type n = 0);
     
@@ -95,7 +98,10 @@ namespace Ariadne {
         }
         return *this;
       }
+      //@}
       
+      //@{
+      //! \name Comparison operators
       /*! \brief The equality operator (not implemented).
        *
        * Not currently implemented, since it requires matching the columns of 
@@ -111,10 +117,18 @@ namespace Ariadne {
         throw std::domain_error("Simplex::operator!=(...)  not implemented");
         return !(*this == A);
       }
+      //@}
       
+      
+      //@{
+      //! \name Conversion operators
       /*! \brief Convert to a polyhedron. */
       operator Polyhedron<R> () const;
+      //@}
       
+      
+      //@{
+      //! \name Geometric operations
       /*! \brief The dimension of the Euclidean space the rectangle lies in. */
       size_type dimension() const {
         return (this->_vertices)[0].dimension();
@@ -149,40 +163,36 @@ namespace Ariadne {
       bool interior_contains(const state_type& point) const {
         return Polyhedron<R>(*this).interior_contains(point);
       }
-    
+      //@}
+      
       friend std::ostream& operator<< <> (std::ostream& os, const Simplex<R>& r);
       friend std::istream& operator>> <> (std::istream& is, Simplex<R>& r);
     };
 
-    /*! \brief Tests disjointness */
     template <typename R>
     inline bool disjoint(const Simplex<R>& A, const Simplex<R>& B) 
     {
       return disjoint(Polyhedron<R>(A),Polyhedron<R>(B));
     }
     
-    /*! \brief Tests disjointness */
     template <typename R>
     inline bool disjoint(const Simplex<R>& A, const Rectangle<R>& B) 
     {
       return disjoint(Polyhedron<R>(A),Polyhedron<R>(B));
     }
     
-    /*! \brief Tests disjointness */
     template <typename R>
     inline bool disjoint(const Rectangle<R>& A, const Simplex<R>& B) 
     {
       return disjoint(B,A);
     }
     
-    /*! \brief Tests disjointness */
     template <typename R>
     inline bool disjoint(const Simplex<R>& A, const Polyhedron<R>& B) 
     {
       return disjoint(Polyhedron<R>(A),B);
     }
     
-    /*! \brief Tests disjointness */
     template <typename R>
     inline bool disjoint(const Polyhedron<R>& A, const Simplex<R>& B) 
     {
@@ -190,7 +200,6 @@ namespace Ariadne {
     }
     
     
-    /*! \brief Tests intersection of interiors */
     template <typename R>
     inline bool interiors_intersect(const Simplex<R>& A,
                                     const Simplex<R>& B) 
@@ -198,7 +207,6 @@ namespace Ariadne {
       return interiors_intersect(Polyhedron<R>(A),Polyhedron<R>(B));
     }
     
-    /*! \brief Tests intersection of interiors */
     template <typename R>
     inline bool interiors_intersect(const Simplex<R>& A,
                                     const Rectangle<R>& B) 
@@ -206,7 +214,6 @@ namespace Ariadne {
       return interiors_intersect(Polyhedron<R>(A),Polyhedron<R>(B));
     }
     
-    /*! \brief Tests intersection of interiors */
     template <typename R>
     inline bool interiors_intersect(const Rectangle<R>& A,
                                     const Simplex<R>& B) 
@@ -214,7 +221,6 @@ namespace Ariadne {
       return interiors_intersect(B,A);
     }
     
-    /*! \brief Tests intersection of interiors */
     template <typename R>
     inline bool interiors_intersect(const Simplex<R>& A,
                                     const Polyhedron<R>& B) 
@@ -222,7 +228,6 @@ namespace Ariadne {
       return interiors_intersect(Polyhedron<R>(A),B);
     }
     
-    /*! \brief Tests intersection of interiors */
     template <typename R>
     inline bool interiors_intersect(const Polyhedron<R>& A,
                                     const Simplex<R>& B) 
@@ -231,7 +236,6 @@ namespace Ariadne {
     }
     
     
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     inline bool inner_subset(const Simplex<R>& A,
                              const Simplex<R>& B) 
@@ -239,7 +243,6 @@ namespace Ariadne {
       return inner_subset(Polyhedron<R>(A),Polyhedron<R>(B));
     }
 
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     inline bool inner_subset(const Simplex<R>& A,
                              const Rectangle<R>& B) 
@@ -247,7 +250,6 @@ namespace Ariadne {
       return inner_subset(Polyhedron<R>(A),Polyhedron<R>(B));
     }
 
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     inline bool inner_subset(const Rectangle<R>& A,
                              const Simplex<R>& B) 
@@ -255,7 +257,6 @@ namespace Ariadne {
       return inner_subset(Polyhedron<R>(A),Polyhedron<R>(B));
     }
 
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     inline bool inner_subset(const Simplex<R>& A,
                              const Polyhedron<R>& B) 
@@ -263,7 +264,6 @@ namespace Ariadne {
       return inner_subset(Polyhedron<R>(A),B);
     }
 
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     inline bool inner_subset(const Polyhedron<R>& A,
                              const Simplex<R>& B) 
@@ -272,7 +272,6 @@ namespace Ariadne {
     }
 
     
-    /*! \brief Tests inclusion of \a A in \a B. */
     template <typename R>
     inline bool subset(const Simplex<R>& A,
                        const Rectangle<R>& B)
@@ -280,7 +279,6 @@ namespace Ariadne {
       return subset(Polyhedron<R>(A),Polyhedron<R>(B));
     }
     
-    /*! \brief Tests inclusion of \a A in \a B. */
     template <typename R>
     inline bool subset(const Rectangle<R>& A,
                        const Simplex<R>& B)
@@ -288,7 +286,6 @@ namespace Ariadne {
       return subset(Polyhedron<R>(A),Polyhedron<R>(B));
     }
     
-    /*! \brief Tests inclusion of \a A in \a B. */
     template <typename R>
     inline bool subset(const Simplex<R>& A,
                        const Polyhedron<R>& B)
@@ -296,7 +293,6 @@ namespace Ariadne {
       return subset(Polyhedron<R>(A),B);
     }
     
-    /*! \brief Tests inclusion of \a A in \a B. */
     template <typename R>
     inline bool subset(const Polyhedron<R>& A,
                        const Simplex<R>& B)
@@ -304,7 +300,6 @@ namespace Ariadne {
       return subset(A,Polyhedron<R>(B));
     }
     
-    /*! \brief Tests inclusion of \a A in \a B. */
     template <typename R>
     inline bool subset(const Simplex<R>& A,
                        const Simplex<R>& B)
@@ -313,7 +308,6 @@ namespace Ariadne {
     }
     
 
-    /*! \brief Scale a simplex. */
     template<typename R>
     inline
     Geometry::Simplex<R> 

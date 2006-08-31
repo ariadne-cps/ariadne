@@ -102,9 +102,11 @@ namespace Ariadne {
       MaskedBinaryTree::const_iterator _base;
     };
 
-    /*!\brief A partition grid of rectangles in Euclidean space.
+    /*! \brief A partition grid of rectangles in Euclidean space.
+     *  \ingroup PartitionTree
      */
-    template<typename R> class PartitionScheme {
+    template<typename R> 
+    class PartitionScheme {
       typedef R real_type;
     public:
       /*! \brief Construct from a bounding box \a bb with default subdivision coordinates. */
@@ -135,6 +137,8 @@ namespace Ariadne {
 
 
     /*! \brief A rectangle defined on a partition tree.
+     *  \ingroup BasicSet
+     *  \ingroup PartitionTree
      */
     template<typename R>
     class PartitionTreeCell {
@@ -182,6 +186,7 @@ namespace Ariadne {
 
 
     /*! \brief A tree structure following a PartitionScheme.
+     *  \ingroup PartitionTree
      */
     template<typename R>
     class PartitionTree {
@@ -234,6 +239,8 @@ namespace Ariadne {
 
 
     /*! \brief A denotable set on a partition grid, defined using a partition tree of cells.
+     *  \ingroup DenotableSet
+     *  \ingroup PartitionTree
      */
     template<typename R>
     class PartitionTreeSet {
@@ -320,28 +327,42 @@ namespace Ariadne {
       const_iterator begin() const { return const_iterator(_bounding_box,_unit_set.begin()); }
       /*! \brief Constant iterator to the end of the cells in the set. */
       const_iterator end() const { return const_iterator(_bounding_box,_unit_set.end()); }
+      
+#ifdef DOXYGEN
+      /*! \brief Compute an outer approximation to set \a s based on the partition scheme \a ps to depth a d. */
+      friend template<class Set>
+      PartitionTreeSet<R> outer_approximation(const Set& s, const PartitionScheme<R>& ps, const uint depth);
+
+      /*! \brief Compute an inner approximation to set \a s based on the partition scheme \a ps to depth a d. */
+      friend template<class Set>
+      PartitionTreeSet<R> inner_approximation(const Set& s, const PartitionScheme<R>& ps, const uint depth);
+
+      /*! \brief Compute an over approximation to set \a s based on the partition scheme \a ps to depth a d.
+       *
+       * This function may fail if the set \a s is not regular. 
+       */
+      friend template<class Set>
+      PartitionTreeSet<R> over_approximation(const Set& s, const PartitionScheme<R>& ps, const uint depth);
+
+      /*! \brief Compute an under approximation to set \a s based on the partition scheme \a ps to depth a d. */
+      friend template<class Set>
+      PartitionTreeSet<R> under_approximation(const Set& s, const PartitionScheme<R>& ps, const uint depth);
+#endif
      private:
       Rectangle<R> _bounding_box;
       SubdivisionTreeSet _unit_set;
     };
 
     
-    /*! \brief Compute an outer approximation to set \a s based on the partition scheme \a ps to depth a d. */
     template<typename R, class S>
     PartitionTreeSet<R> outer_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth);
     
-    /*! \brief Compute an inner approximation to set \a s based on the partition scheme \a ps to depth a d. */
     template<typename R, class S>
     PartitionTreeSet<R> inner_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth);
     
-    /*! \brief Compute an over approximation to set \a s based on the partition scheme \a ps to depth a d.
-     *
-     * This function may fail if the set \a s is not regular. 
-     */
     template<typename R, class S>
     PartitionTreeSet<R> over_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth);
     
-    /*! \brief Compute an under approximation to set \a s based on the partition scheme \a ps to depth a d. */
     template<typename R, class S>
     PartitionTreeSet<R> under_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth);
     

@@ -152,6 +152,21 @@ namespace Ariadne {
     }
 
     template<typename R>
+    bool
+    IntervalMatrix<R>::contains(const Matrix<R>& B) const
+    {
+      const IntervalMatrix<R>& A=*this;      
+      for(size_type i=0; i!=A.size1(); ++i) {
+        for(size_type j=0; j!=A.size2(); ++j) {
+          if(!A(i,j).contains(B(i,j))) {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    template<typename R>
     Matrix<R>
     IntervalMatrix<R>::centre() const
     {

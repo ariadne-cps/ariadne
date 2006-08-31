@@ -30,7 +30,7 @@
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
 
-#include "utility/epsfstream.h"
+#include "output/epsfstream.h"
 
 #include "python/typedefs.h"
 using namespace Ariadne;

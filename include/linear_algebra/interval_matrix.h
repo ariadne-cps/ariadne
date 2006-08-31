@@ -41,7 +41,9 @@
 namespace Ariadne {
   namespace LinearAlgebra {
 
-    /*! \brief A matrix of intervals. */
+    /*! \ingroup LinearAlgebra
+     *  \brief A matrix of intervals. 
+     */
     template<typename R>
     class IntervalMatrix : public Matrix< Interval<R> >
     {
@@ -79,6 +81,8 @@ namespace Ariadne {
       /*! \brief The \a n by \a n identity interval matrix. */
       static IntervalMatrix<R> identity(const size_type n);
       
+      /*! \brief Tests if the interval matrix contains a matrix. */
+      bool contains(const Matrix<R>& A) const;
       /*! \brief The centre of the interval matrix. */
       Matrix<R> centre() const;
       /*! \brief The sums of the radii in each row. */

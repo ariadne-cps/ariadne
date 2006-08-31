@@ -36,7 +36,10 @@
 namespace Ariadne {
   namespace System {
 
-    /*! \brief Base class for (differentiable) functions. */
+    /*! \brief Abstract base class for (differentiable) functions.
+     *  \ingroup System
+     *  \ingroup DiscreteTime
+     */
     template<typename R>
     class Map {
      public:

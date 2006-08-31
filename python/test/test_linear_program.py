@@ -23,7 +23,8 @@
 from ariadne.base import *
 from ariadne.numeric import * 
 from ariadne.linear_algebra import *
-from ariadne.geometry import EpsPlot, Point, Rectangle, Parallelotope, disjoint
+from ariadne.geometry import *
+from ariadne.output import *
 
 import sys
 

@@ -41,9 +41,10 @@
 namespace Ariadne {
   namespace LinearAlgebra {
 
-    /*! \brief Linear programming problems
+    /*! \ingroup LinearAlgebra
+     *  \brief Linear programming problems
      *
-     * FIXME: The dyadic version doesn't work properly due to divisions. 
+     *  FIXME: The dyadic version doesn't work properly due to divisions. 
      */
     template<typename R>
     class LinearProgram {

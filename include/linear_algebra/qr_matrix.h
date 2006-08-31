@@ -43,7 +43,8 @@
 namespace Ariadne {
   namespace LinearAlgebra {
 
-    /*! \brief A matrix stored in QR product form. */
+    /*! \ingroup LinearAlgebra
+     *  \brief A matrix stored in QR product form. */
     template<typename Real>
     class QRMatrix {
      public:

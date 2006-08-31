@@ -35,7 +35,10 @@
 namespace Ariadne {
   namespace System {
 
-    /*! \brief Base class for noisy control systems operating in discrete time. */
+    /*! \brief Abstract base class for noisy control systems operating in discrete time.
+     *  \ingroup System
+     *  \ingroup DiscreteTime
+     */
     template <typename R>
     class DiscreteTimeSystem
     {

@@ -33,7 +33,9 @@
 namespace Ariadne {
   namespace Evaluation {
    
-    /*! \brief Base class for integration schemes. */
+    /*! \brief Base class for integration schemes. 
+     *  \ingroup Integrate
+     */
     template<typename R>
     class Integrator {
      public:
@@ -134,7 +136,9 @@ namespace Ariadne {
 
     };
 
-    /*! \brief Base class for integration schemes which do not use the derivative of the vector field. */
+    /*! \brief Base class for integration schemes which do not use the derivative of the vector field. 
+     *  \ingroup Integrate
+     */
     template<typename R>
     class C0Integrator : public Integrator<R> {
      public:
@@ -180,7 +184,9 @@ namespace Ariadne {
     };
 
  
-    /*! \brief Base class for integration schemes which require at least a \f$C^1\f$ vector field. */
+    /*! \brief Base class for integration schemes which require at least a \f$C^1\f$ vector field.
+     *  \ingroup Integrate
+     */
     template<typename R>
     class C1Integrator : public Integrator<R> {
      public:

@@ -154,7 +154,9 @@ namespace Ariadne {
       std::vector< Monomial<real_type> > _terms;
     };
 
-    /*! \brief A polynomial map with multivalued output. */
+    /*! \brief A polynomial map with multivalued output.
+     *  \ingroup DiscreteTime
+     */
     template <typename R>
     class PolynomialMap : public Map<R> {
      public:

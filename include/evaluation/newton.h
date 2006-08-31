@@ -54,6 +54,9 @@ namespace Ariadne {
       std::string _what;
     };
     
+    /*! \brief Interval Newton solver.
+     *  \ingroup Solve
+     */
     template<typename Real>
     Geometry::Rectangle<Real>
     interval_newton(const System::VectorField<Real>& f, 

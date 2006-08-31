@@ -24,6 +24,7 @@ from ariadne.base import *
 from ariadne.evaluation import *
 from ariadne.geometry import *
 from ariadne.linear_algebra import *
+from ariadne.output import *
 import sys
 
 bb=Rectangle("[-3,3]x[-3,3]")

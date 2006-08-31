@@ -32,7 +32,10 @@
 #include <cmath>
 
 #include <gmpxx.h>
-#include <mpfr.h>
+
+extern "C" {
+  #include <mpfr.h>
+}
 
 #include <boost/numeric/interval.hpp>
 

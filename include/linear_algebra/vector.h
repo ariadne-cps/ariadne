@@ -43,7 +43,9 @@
 namespace Ariadne {
   namespace LinearAlgebra {
     
-    /*! \brief A vector over \a R. */
+    /*! \ingroup LinearAlgebra
+     *  \brief A vector over \a R. 
+     */
     template<typename R>
     class Vector
       : public boost::numeric::ublas::vector<R> 
@@ -55,8 +57,8 @@ namespace Ariadne {
       /*! \brief Construct the zero vector of size \a n. */
       explicit Vector(const size_type& n) : _Base(n) { }
       /*! \brief Construct a vector of size \a n from the array beginning at \a ptr. */
-      explicit Vector(const size_type& n, const R* ptr) : _Base(n) { 
-        for(size_type i=0; i!=n; ++i) { (*this)(i)=ptr[i]; } }
+      explicit Vector(const size_type& n, const R* ptr, const size_type& inc=1) : _Base(n) { 
+        for(size_type i=0; i!=n; ++i) { (*this)(i)=ptr[i*inc]; } }
 
       /* Convert from a vector expression. */
       template<typename E> Vector(const boost::numeric::ublas::vector_expression<E>& v) : _Base(v) { }

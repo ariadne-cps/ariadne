@@ -25,6 +25,7 @@ from ariadne.base import *
 from ariadne.evaluation import *
 from ariadne.geometry import *
 from ariadne.linear_algebra import *
+from ariadne.output import *
 import sys
 
 h=HenonMap(Real(1.5),Real(0.275))

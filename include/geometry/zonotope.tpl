@@ -527,6 +527,21 @@ namespace Ariadne {
     }
    
     template<typename R> 
+    Zonotope<R> 
+    minkowski_sum(const Rectangle<R>& A, const Zonotope<R>& B)
+    {
+      return minkowski_sum(Zonotope<R>(A),B);
+    }
+    
+    template<typename R> 
+    Zonotope<R> 
+    minkowski_sum(const Zonotope<R>& A, const Rectangle<R>& B)
+    {
+      return minkowski_sum(A,Zonotope<R>(B));
+    }
+    
+    
+    template<typename R> 
     Zonotope<R> minkowski_difference(const Zonotope<R>& A, const Zonotope<R>& B)
     {
       using namespace Ariadne::LinearAlgebra;
@@ -561,6 +576,22 @@ namespace Ariadne {
                          remove_null_columns_but_one(gen));
     }
 
+    template<typename R> 
+    Zonotope<R> 
+    minkowski_difference(const Rectangle<R>& A, const Zonotope<R>& B)
+    {
+      return minkowski_difference(Zonotope<R>(A),B);
+    }
+    
+    template<typename R> 
+    Zonotope<R> 
+    minkowski_difference(const Zonotope<R>& A, const Rectangle<R>& B)
+    {
+      return minkowski_difference(A,Zonotope<R>(B));
+    }
+    
+    
+    
     template<typename R>
     Zonotope<R>
     operator+(const Rectangle<R>& r, const LinearAlgebra::TransformationSystem<R>& v)

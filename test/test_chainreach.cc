@@ -24,7 +24,6 @@
 #include <fstream>
 
 #include "real_typedef.h"
-#include "utility/epsfstream.h"
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
 #include "geometry/grid.h"
@@ -32,6 +31,7 @@
 #include "geometry/partition_tree_set.h"
 #include "system/henon_map.h"
 #include "evaluation/apply.h"
+#include "output/epsfstream.h"
 
 #include "test.h"
 

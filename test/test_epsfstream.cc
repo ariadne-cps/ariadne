@@ -34,7 +34,7 @@
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
 #include "geometry/list_set.h"
-#include "utility/epsfstream.h"
+#include "output/epsfstream.h"
 
 #include "test.h"
 

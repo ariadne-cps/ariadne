@@ -38,17 +38,26 @@
 
 namespace Ariadne {
   namespace Numeric {
+
+#ifdef DOXYGEN
     /*! \brief A 64-bit fixed-precision floating point number.
+     *  \ingroup Numeric
      *
      * Standard operations are not exact, but must support interval arithmetic.
      *
      * Currently implemented by the built-in type double.
      */
+    class Float64;
+#else
     typedef double Float64;
-    
+#endif
+     
+
+#ifdef DOXYGEN
     /*! \brief A dyadic rational (i.e. of form \f$m/2^n\f$).
-    *
-    * An element of the ring of dyadic rationals.
+    *   \ingroup Numeric
+    * 
+    * A element of the ring of dyadic rationals.
     * Must allow denotation of any dyadic rational.
     * May be created without loss of precision from any integral or floating point type,
     * or from any rational of the form m/2^n.
@@ -59,23 +68,38 @@ namespace Ariadne {
     *
     * FIXME: mpf_class does not implement addition, subtraction and multiplication exactly.
     */
+    class Dyadic { };
+#else
     typedef Synaps::dyadic Dyadic;
+#endif
     
+
+#ifdef DOXYGEN
     /*! \brief A multiple-precision floating-point type.
-     *
+     *  \ingroup Numeric
+     * 
      * Currently implemented using mpf_class from the GNU Multiple Precision library.
      */
+    class MPFloat { };
+#else
     typedef mpf_class MPFloat;
+#endif
     
+
+#ifdef DOXYGEN
     /*! \brief A rational number.
-    *
+    *   \ingroup Numeric
+    * 
     * An element of the field of rationals.
     * Must allow denotation of any rational.
     * May be created without loss of precision from any integral or floating point type, and from a dyadic.
     *
     * Currently implemented using mpq_class from the GNU Multiple Precision library.
     */
+    class Rational { };
+#else
     typedef mpq_class Rational;
+#endif
   
   
     inline Integer precision(const MPFloat& num) {

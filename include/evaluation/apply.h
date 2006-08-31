@@ -34,7 +34,9 @@
 namespace Ariadne {
   namespace Evaluation {
 
-    /*! \brief A class for computing the image of a set under a map. */
+    /*! \brief A class for computing the image of a set under a map. 
+     *  \ingroup Applicators
+     */
     template<typename R, template<typename> class BS>
     class Applicator {
      public:
@@ -87,14 +89,18 @@ namespace Ariadne {
     
     
     
-    /*! \brief Compute the image of a rectangle under a continuous function. */
+    /*! \brief Compute the image of a rectangle under a continuous function. 
+     *  \ingroup Apply
+     */
     template<typename R>
     Geometry::Rectangle<R> 
     apply(const System::Map<R>& f, const Geometry::Rectangle<R>& s) {
       return C0Applicator<R>().apply(f,s);
     }
     
-    /*! \brief Compute the image of a parallelotope under a differentiable function. */
+    /*! \brief Compute the image of a parallelotope under a differentiable function. 
+     *  \ingroup Apply
+     */
     template<typename R>
     inline
     Geometry::Parallelotope<R> 
@@ -102,7 +108,9 @@ namespace Ariadne {
       return C1Applicator<R>().apply(f,s);
     }
     
-    /*! \brief Compute the image of a parallelotope under a differentiable function. */
+    /*! \brief Compute the image of a parallelotope under a differentiable function.  
+     *  \ingroup Apply
+     */
     template<typename R>
     inline
     Geometry::ListSet<R,Geometry::Parallelotope>
@@ -110,7 +118,9 @@ namespace Ariadne {
       return C1Applicator<R>().Applicator<R,Geometry::Parallelotope>::apply(f,s);
     }
     
-    /*! \brief Compute the chain-reachable set of \a map starting in \a initial_set on the grid \a grid while staying within \a bounds. */
+    /*! \brief Compute the chain-reachable set of \a map starting in \a initial_set on the grid \a grid while staying within \a bounds.  
+     *  \ingroup Apply
+     */
     template<typename R>
     inline
     Geometry::GridMaskSet<R> 
@@ -121,7 +131,9 @@ namespace Ariadne {
       return C1Applicator<R>().Applicator<R,Geometry::Parallelotope>::apply(map,initial_set,bounding_set);
     }
 
-    /*! \brief Compute the chain-reachable set of \a map starting in \a initial_set on the grid \a grid while staying within \a bounds. */
+    /*! \brief Compute the chain-reachable set of \a map starting in \a initial_set on the grid \a grid while staying within \a bounds.  
+     *  \ingroup Apply
+     */
     template<typename R>
     inline
     Geometry::GridMaskSet<R> 

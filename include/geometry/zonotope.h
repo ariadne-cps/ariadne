@@ -52,7 +52,8 @@ namespace Ariadne {
     template<typename R> std::ostream& operator<<(std::ostream&, const Zonotope<R>&);
     template<typename R> std::istream& operator>>(std::istream&, Zonotope<R>&);
 
-    /*! \brief A zonotope of arbitrary dimension.
+    /*! \ingroup BasicSet
+     *  \brief A zonotope of arbitrary dimension.
      * 
      * A zonotope is a set of the form \f$c+Ae\f$, where \f$||e||_{infty}\leq1\f$.
      * The intersection and membership tests are performed using algorithms from: <br>
@@ -65,9 +66,9 @@ namespace Ariadne {
       typedef R real_type;
       /*! \brief The type of denotable point contained by the rectangle. */
       typedef Point<R> state_type;
-      /*! \brief The type of Vectors. */
+      /*! \brief The type of vectors. */
       typedef Ariadne::LinearAlgebra::Vector<R> vector_type;
-      /*! \brief The type of Matrix giving principal directions. */
+      /*! \brief The type of matrix giving principal directions. */
       typedef Ariadne::LinearAlgebra::Matrix<R> matrix_type;
 
      private:
@@ -77,6 +78,8 @@ namespace Ariadne {
       /* Zonotope's principal directions. */
       matrix_type _generators;
      public:
+      //@{
+      //! \name Constructors
       /*! \brief Default constructor constructs an empty zonotope of dimension \a n. */
       explicit Zonotope(size_type n = 0)
         : _central_block(n),  _generators(n,0) { }
@@ -126,7 +129,10 @@ namespace Ariadne {
         }
         return *this;
       }
+      //@}
       
+      //@{ 
+      //! \name Comparison operators
       /*! \brief The equality operator. */
       bool operator==(const Zonotope<real_type>& A) const;
       
@@ -134,12 +140,10 @@ namespace Ariadne {
       bool operator!=(const Zonotope<real_type>& A) const {
         return !(*this == A);
       }
+      //@}
 
-      /*! \brief The dimension of the Euclidean space the zonotope lies in. */
-      dimension_type dimension() const {
-        return this->_central_block.dimension();
-      }
-      
+      //@{ 
+      //! \name Data access
       /*! \brief The centre of the zonotope. */
       state_type centre() const {
         return this->_central_block.centre();
@@ -166,6 +170,25 @@ namespace Ariadne {
       /*! \brief The number of generators of the zonotope. */
       size_type number_of_generators() const {
         return this->_generators.size2();
+      }
+      //@}
+      
+      
+      //@{
+      //! \name Conversion and approximation operators
+      /*! \brief Convert to a polyhedron. */
+      operator Polyhedron<Rational> () const;
+      
+      /*! \brief Construct a parallelopic over-approximation. */
+      Parallelotope<R> over_approximating_parallelotope() const;
+      //@}
+      
+
+      //@{
+      //! \name Geometric operations.
+      /*! \brief The dimension of the Euclidean space the zonotope lies in. */
+      dimension_type dimension() const {
+        return this->_central_block.dimension();
       }
       
       /*! \brief True if the zonotope is empty. */
@@ -201,17 +224,49 @@ namespace Ariadne {
       
       /*! \brief Subdivide into smaller pieces in each dimension. */
       ListSet<R,Geometry::Zonotope> subdivide() const;
+      //@}
       
-      /*! \brief Convert to a polyhedron. */
-      operator Polyhedron<Rational> () const;
+#ifdef DOXYGEN
+      //@{
+      //! \name Geometric binary predicates
+      /*! \brief Tests disjointness */
+      friend bool disjoint(const Zonotope<R>& A, const Zonotope<R>& B);
+      friend bool disjoint(const Rectangle<R>& A, const Zonotope<R>& B);
+      friend bool disjoint(const Zonotope<R>& A, const Rectangle<R>& B);
+      /*! \brief Tests intersection of interiors */
+      friend bool interiors_intersect(const Zonotope<R>& A, const Zonotope<R>& B);
+      friend bool interiors_intersect(const Rectangle<R>& A, const Zonotope<R>& B);
+      friend bool interiors_intersect(const Zonotope<R>& A, const Rectangle<R>& B);
+      /*! \brief Tests inclusion of \a A in the interior of \a B. */
+      friend bool inner_subset(const Zonotope<R>& A, const Zonotope<R>& B);
+      friend bool inner_subset(const Rectangle<R>& A, const Zonotope<R>& B);
+      friend bool inner_subset(const Zonotope<R>& A, const Rectangle<R>& B);
+      /*! \brief Tests inclusion of \a A in \a B. */
+      friend bool subset(const Zonotope<R>& A, const Zonotope<R>& B);
+      friend bool subset(const Rectangle<R>& A, const Zonotope<R>& B);
+      friend bool subset(const Zonotope<R>& A, const Rectangle<R>& B);
+      //@}
       
-      /*! \brief Construct a parallelopic over-approximation. */
-      Parallelotope<R> over_approximating_parallelotope() const;
-      
+      //@{
+      //! \name Geometric binary operations
+      /*! \brief The Minkoswi sum of two zonotopes */
+      friend Zonotope<R> minkowski_sum(const Zonotope<R>& A, const Zonotope<R>& B);
+      /*! \brief The Minkoswi sum of a zonotope and a rectangle. */
+      friend Zonotope<R> minkowski_sum(const Rectangle<R>& A, const Zonotope<R>& B);
+      /*! \brief The Minkoswi sum of a rectangle and a zonotope. */
+      friend Zonotope<R> minkowski_sum(const Zonotope<R>& A, const Rectangle<R>& B);
+      /*! \brief The Minkoswi difference of two zonotopes */
+      friend Zonotope<R> minkowski_difference(const Zonotope<R>& A, const Zonotope<R>& B);
+      /*! \brief The Minkoswi difference of a rectangle and a zonotope. */
+      friend Zonotope<R> minkowski_difference(const Rectangle<R>& A, const Zonotope<R>& B);
+      /*! \brief The Minkoswi difference of a zonotope and a rectangle. */
+      friend Zonotope<R> minkowski_difference(const Zonotope<R>& A, const Rectangle<R>& B);
+      //@}
+#endif
+
       /*! \brief Computes an over approximation from an "interval zonotope". */
       static Zonotope<R> over_approximation(const Rectangle<R>& c, const LinearAlgebra::IntervalMatrix<R>& A);
-      
-     private: 
+           
       friend std::ostream& operator<< <> (std::ostream& os, const Zonotope<R>& r);
       friend std::istream& operator>> <> (std::istream& is, Zonotope<R>& r);
      private:
@@ -238,50 +293,34 @@ namespace Ariadne {
     };
   
     
-    /*! \brief Performs the Minkoswi sum of two zonotopes */
     template<typename R> 
     Zonotope<R> 
     minkowski_sum(const Zonotope<R>& A, const Zonotope<R>& B);
 
-    /*! \brief Performs the Minkoswi difference of two zonotopes */
+    template<typename R> 
+    Zonotope<R> 
+    minkowski_sum(const Rectangle<R>& A, const Zonotope<R>& B);
+
+    template<typename R> 
+    Zonotope<R> 
+    minkowski_sum(const Zonotope<R>& A, const Rectangle<R>& B);
+
+    
     template<typename R> 
     Zonotope<R> 
     minkowski_difference(const Zonotope<R>& A, const Zonotope<R>& B); 
 
-    /*! \brief Performs the Minkoswi sum of a zonotope and a basic set */
-    template<typename R, template <typename> class BS> 
-    inline Zonotope<R> 
-    minkowski_sum(const Zonotope<R>& A, const BS<R>& B) {
-      return minkowski_sum(A, Zonotope<R>(B));
-    }
-
-    /*! \brief Performs the Minkoswi difference of a zonotope and a basic set */
-    template<typename R, template <typename> class BS> 
-    inline
+    template<typename R> 
     Zonotope<R> 
-    minkowski_difference(const Zonotope<R>& A, const BS<R>& B)
-    {
-       return minkowski_difference(A, Zonotope<R>(B));
-    }
+    minkowski_difference(const Rectangle<R>& A, const Zonotope<R>& B);
 
-    /*! \brief Performs the Minkoswi sum of a zonotope and a basic set */
-    template<typename R, template <typename> class BS> 
-    inline Zonotope<R> 
-    minkowski_sum(const BS<R>& A, const Zonotope<R>& B) {
-      return minkowski_sum(B, Zonotope<R>(A));
-    }
-
-    /*! \brief Performs the Minkoswi difference of a zonotope and a basic set */
-    template<typename R, template <typename> class BS> 
-    inline
+    template<typename R> 
     Zonotope<R> 
-    minkowski_difference(const BS<R>& A, const Zonotope<R>& B)
-    {
-       return minkowski_difference(B, Zonotope<R>(A));
-    }
+    minkowski_difference(const Zonotope<R>& A, const Rectangle<R>& B);
 
 
-    /*! \brief Tests disjointness */
+
+
     template <typename R>
     inline
     bool 
@@ -290,7 +329,6 @@ namespace Ariadne {
       return !minkowski_difference(A,B).contains(Point<R>(A.dimension()));
     }
     
-    /*! \brief Tests disjointness */
     template <typename R>
     inline
     bool 
@@ -299,7 +337,6 @@ namespace Ariadne {
       return disjoint(Zonotope<R>(A),B);
     }
 
-    /*! \brief Tests disjointness */
     template <typename R>
     inline
     bool 
@@ -308,7 +345,6 @@ namespace Ariadne {
       return disjoint(B,A);
     }
 
-    /*! \brief Tests disjointness */
     template <typename R>
     inline
     bool 
@@ -317,7 +353,6 @@ namespace Ariadne {
       return disjoint(Zonotope<R>(A),B);
     }
 
-    /*! \brief Tests disjointness */
     template <typename R>
     inline
     bool 
@@ -327,7 +362,7 @@ namespace Ariadne {
     }
 
     
-    /*! \brief Tests intersection of interiors */
+    
     template <typename R>
     inline
     bool 
@@ -337,7 +372,6 @@ namespace Ariadne {
       
     }
    
-    /*! \brief Tests intersection of interiors */
     template <typename R>
     inline
     bool 
@@ -346,7 +380,6 @@ namespace Ariadne {
       return interiors_intersect(Zonotope<R>(A),B);
     }
 
-    /*! \brief Tests intersection of interiors */
     template <typename R>
     inline
     bool 
@@ -355,7 +388,6 @@ namespace Ariadne {
       return interiors_intersect(B,A);
     }
     
-    /*! \brief Tests intersection of interiors */
     template <typename R>
     inline
     bool 
@@ -364,7 +396,6 @@ namespace Ariadne {
       return interiors_intersect(Zonotope<R>(A),B);
     }
     
-    /*! \brief Tests intersection of interiors */
     template <typename R>
     inline
     bool 
@@ -373,7 +404,8 @@ namespace Ariadne {
       return interiors_intersect(B,A);
     }
 
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
+    
+    
     template <typename R>
     inline
     bool 
@@ -382,7 +414,6 @@ namespace Ariadne {
       return inner_subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
 
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     inline
     bool 
@@ -391,7 +422,6 @@ namespace Ariadne {
       return inner_subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
 
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     inline
     bool 
@@ -400,7 +430,6 @@ namespace Ariadne {
       return inner_subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
 
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     inline
     bool 
@@ -409,7 +438,6 @@ namespace Ariadne {
       return inner_subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
 
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     inline
     bool 
@@ -418,8 +446,8 @@ namespace Ariadne {
       return inner_subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
 
+    
 
-    /*! \brief Tests inclusion of \a A in \a B. */
     template <typename R>
     inline
     bool 
@@ -428,7 +456,6 @@ namespace Ariadne {
       return subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
 
-    /*! \brief Tests inclusion of \a A in \a B. */
     template <typename R>
     inline
     bool 
@@ -437,7 +464,6 @@ namespace Ariadne {
       return B.superset(A);
     }
 
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     inline
     bool 
@@ -446,7 +472,6 @@ namespace Ariadne {
       return subset(A.bounding_box(),B);
     }
 
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     inline
     bool 
@@ -455,7 +480,6 @@ namespace Ariadne {
       return subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
 
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     inline
     bool 
@@ -464,7 +488,8 @@ namespace Ariadne {
       return subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
     }
     
-    /*! \brief Scale a zonotope. */
+    
+    
     template<typename R>
     inline
     Geometry::Zonotope<R> 

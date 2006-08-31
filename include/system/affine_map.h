@@ -50,7 +50,9 @@
 namespace Ariadne {
   namespace System {
 
-    /*! \brief An affine map on Euclidean space. */
+    /*! \brief An affine map on Euclidean space. 
+     *  \ingroup DiscreteTime
+     */
     template <typename R>
     class AffineMap : public Map<R> 
     {

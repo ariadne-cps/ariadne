@@ -45,7 +45,9 @@ namespace Ariadne {
     using boost::numeric::ublas::matrix_row;
     using boost::numeric::ublas::matrix_column;
   
-    /*! \brief A matrix over \a R. */
+    /*! \ingroup LinearAlgebra
+     *  \brief A matrix over \a R. 
+     */
     template<typename R>
     class Matrix : public boost::numeric::ublas::matrix<R> 
     {
@@ -60,7 +62,7 @@ namespace Ariadne {
       /*! \brief Construct an \a r by \a c matrix from the array beginning at \a ptr, 
        *  incrementing the input row elements by \a ri and input columns by \a ci. */
       Matrix(const size_type& r, const size_type& c, 
-             const R* ptr, const size_type& ri, const size_type& ci) : _Base(r,c) 
+             const R* ptr, const size_type& ri, const size_type& ci=1) : _Base(r,c) 
       { 
         for(size_type i=0; i!=r; ++i) { 
           for(size_type j=0; j!=c; ++j) { 

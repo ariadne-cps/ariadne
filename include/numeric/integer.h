@@ -35,7 +35,9 @@
 
 namespace Ariadne {
   namespace Numeric {
-    /*! \brief An integer
+#ifdef DOXYGEN
+    /*! \brief An integer.
+     *  \ingroup Numeric
      *
      * An element of the ring of integers.
      * Must allow denotation of any integer, including arbitrarily large values.
@@ -43,13 +45,16 @@ namespace Ariadne {
      *
      * Currently implemented using mpz_class from the GNU Multiple Precision Library.
      */
+    class Integer { };
+#else
     typedef mpz_class Integer;
+#endif
   }
-  
+
   namespace Base {
     template<typename I> inline I convert_to(const Numeric::Integer& n) 
     { return I(n); }
-	  
+
     template<> inline int convert_to<int>(const Numeric::Integer& n) { return n.get_si(); }
     template<> inline long convert_to<long>(const Numeric::Integer& n) { return n.get_si(); }
   }

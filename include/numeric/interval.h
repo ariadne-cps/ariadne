@@ -60,7 +60,8 @@ namespace Ariadne {
   namespace Numeric {
     /*!
      * \brief A templated class representing an interval of real numbers.
-     *
+     * \ingroup Numeric
+     * 
      * An interval of real numbers with endpoints of type \a R.
      * All operations on an interval must be guarenteed to return an interval contining the exact result.
      * If \a val of real numbers with endpoints of type \a R.

@@ -48,11 +48,12 @@ namespace Ariadne {
     template<typename R> std::ostream& operator<<(std::ostream&, const Grid<R>&);
     template<typename R> std::ostream& operator<<(std::ostream&, const FiniteGrid<R>&);
    
-    /*!\brief Base type for defining a grid.
-     * We use inheritence and abstract functions here partly for ease of 
-     * development and partly since the grid coordinates only play a role when
-     * converting to rectangles and should occur with linear complexity in the 
-     * space dimension.
+    /*! \brief Base type for defining a grid.
+     *  \ingroup Grid
+     *  We use inheritence and abstract functions here partly for ease of 
+     *  development and partly since the grid coordinates only play a role when
+     *  converting to rectangles and should occur with linear complexity in the 
+     *  space dimension.
      */
     template<typename R>
     class Grid {
@@ -113,7 +114,9 @@ namespace Ariadne {
    };
 
 
-    /*!\brief A finite, nonuniform grid of rectangles in Euclidean space. */
+    /*! \brief A finite, nonuniform grid of rectangles in Euclidean space. 
+     *  \ingroup Grid
+     */
     template<typename R>
     class IrregularGrid : public Grid<R> {
       typedef R real_type;
@@ -149,9 +152,9 @@ namespace Ariadne {
         typename std::vector<R>::const_iterator pos;
         assert(d<this->dimension());
         if(x<_subdivision_coordinates[d].front() || x>_subdivision_coordinates[d].back()) {
-	  std::cerr << "d.front()=" << _subdivision_coordinates[d].front() << 
-	  	" d.back()=" << _subdivision_coordinates[d].back() <<
-		" x="<< x <<std::endl<<std::flush;
+          std::cerr << "d.front()=" << _subdivision_coordinates[d].front()
+                    <<  " d.back()=" << _subdivision_coordinates[d].back()
+                    <<  " x="<< x <<std::endl<<std::flush;
           throw std::runtime_error("point does not lie in extent of finite grid");
         }
         pos = std::upper_bound(_subdivision_coordinates[d].begin(),
@@ -223,7 +226,8 @@ namespace Ariadne {
 
 
 
-    /*!\brief An infinite, uniform grid of rectangles in Euclidean space.
+    /*! \brief An infinite, uniform grid of rectangles in Euclidean space.
+     *  \ingroup Grid
      */
     template<typename R> class RegularGrid : public Grid<R> {
       typedef R real_type;
@@ -272,7 +276,8 @@ namespace Ariadne {
       array<R> _subdivision_lengths;
     };
 
-    /*!\brief A finite grid, suitable for defining a GridMaskSet. 
+    /*! \brief A finite grid, suitable for defining a GridMaskSet. 
+     *  \ingroup Grid
      */
     template<typename R> class FiniteGrid {
       typedef R real_type;
@@ -290,7 +295,7 @@ namespace Ariadne {
        * bounding box. */
       FiniteGrid(const Grid<R>& g, const Rectangle<R>& bb) 
         : _grid_ptr(&g), _grid_type(g.type()), 
-	      _bounds(over_approximation(bb,g).lattice_set())
+          _bounds(over_approximation(bb,g).lattice_set())
       { }
       
       /*! \brief Return the grid type. */
@@ -304,7 +309,7 @@ namespace Ariadne {
      
       /*! \brief The bounding box of the finite grid. */
       Rectangle<R> bounding_box() const;
-	      
+
       /*! \brief The dimension of the grid. */
       dimension_type dimension() const;
 

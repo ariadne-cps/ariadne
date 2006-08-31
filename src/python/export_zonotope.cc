@@ -44,8 +44,8 @@ template <template <typename> class BS>
 inline
 Zonotope<Real> 
 touching_intersection(const Zonotope<Real> &a, 
-		      const BS<Real> &b) {
-	
+                      const BS<Real> &b) 
+{
   if (disjoint(a,b))
     return Zonotope<Real>(a.dimension());
   
@@ -53,9 +53,9 @@ touching_intersection(const Zonotope<Real> &a,
 }
 
 template Zonotope<Real> touching_intersection(const Zonotope<Real> &,  
-      	                                      const Rectangle<Real> &);
+                                              const Rectangle<Real> &);
 template Zonotope<Real> touching_intersection(const Zonotope<Real> &,  
-               	                              const Parallelotope<Real> &);
+                                              const Parallelotope<Real> &);
 template Zonotope<Real> touching_intersection(const Zonotope<Real> &,  
                                               const Zonotope<Real> &);
 
@@ -119,10 +119,8 @@ void export_zonotope() {
     //.def("!=", &RZonotope::operator!=)
     .def("interior_contains", &RZonotope::interior_contains)
     .def("__add__", ZntpRectBinFun(&minkowski_sum))
-    .def("__add__", ZntpPltpBinFun(&minkowski_sum))
     .def("__add__", ZntpZntpBinFunc(&minkowski_sum))
     .def("__sub__", ZntpRectBinFun(&minkowski_difference))
-    .def("__sub__", ZntpPltpBinFun(&minkowski_difference))
     .def("__sub__", ZntpZntpBinFunc(&minkowski_difference))
     .def(self_ns::str(self))    // __self_ns::str__
   ;

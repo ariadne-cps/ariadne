@@ -28,6 +28,7 @@ from ariadne.linear_algebra import *
 from ariadne.geometry import *
 from ariadne.system import *
 from ariadne.evaluation import *
+from ariadne.output import *
 
 from ariadne.hybrid_system import *
 from ariadne.hybrid_system_evolution import *

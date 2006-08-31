@@ -44,7 +44,8 @@ namespace Ariadne {
 
     template<typename R> R euclidean_norm_square(const LinearAlgebra::Vector<R>&);
     
-    /*! \brief A ball \f$||x-c||\leq r\f$ of arbitrary dimension.
+    /*! \ingroup BasicSet
+     *  \brief A ball \f$||x-c||\leq r\f$ of arbitrary dimension.
      */
     template <typename R>
     class Sphere {
@@ -60,6 +61,8 @@ namespace Ariadne {
       real_type _radius;
      
      public:
+      //@{ 
+      //! \name Constructors
       /*! \brief Default constructor constructs standard simplex of dimension \a n. */
       Sphere(size_type n = 0);
     
@@ -85,7 +88,11 @@ namespace Ariadne {
         }
         return *this;
       }
+      //@}
       
+      
+      //@{ 
+      //! \name Comparison operators
       /*! \brief The equality operator (not implemented).
        *
        * Not currently implemented, since it requires matching the columns of 
@@ -100,7 +107,25 @@ namespace Ariadne {
       bool operator!=(const Sphere<R>& other) const {
         return !(*this == other);
       }
+      //@}
       
+      
+      //@{ 
+      //! \name Data elements
+      /*! \brief The centre of the ball. */
+      const state_type& centre() const {
+        return this->_centre;
+      }
+      
+      /*! \brief The radius of the ball. */
+      const real_type& radius() const {
+        return this->_radius;
+      }
+      //@}
+      
+      
+      //@{ 
+      //! \name Geometric operations
       /*! \brief The dimension of the Euclidean space the rectangle lies in. */
       size_type dimension() const {
         return this->_centre.dimension();
@@ -116,16 +141,6 @@ namespace Ariadne {
         return this->_radius <= R(0);
       }
       
-      /*! \brief The centre of the ball. */
-      const state_type& centre() const {
-        return this->_centre;
-      }
-      
-      /*! \brief The radius of the ball. */
-      const real_type& radius() const {
-        return this->_radius;
-      }
-      
       /*! \brief Tests if \a point is included into a simplex. */
       bool contains(const state_type& point) const {
         return euclidean_norm_square(point-this->_centre) <= this->_radius * this->_radius;
@@ -135,7 +150,37 @@ namespace Ariadne {
       bool interior_contains(const state_type& point) const {
         return euclidean_norm_square(point-this->_centre) < this->_radius * this->_radius;
       }
+      //@}
+      
+#ifdef DOXYGEN
+    //@{
+    //! \name Geometric binary predicates
+    /*! \brief Tests disjointness */
+    friend bool disjoint(const Sphere<R>& A, const Sphere<R>& B);
+    friend bool disjoint(const Rectangle<R>& A, const Sphere<R>& B);
+    friend bool disjoint(const Sphere<R>& A, const Rectangle<R>& B);
+    /*! \brief Tests intersection of interiors */
+    friend bool interiors_intersect(const Sphere<R>& A, const Sphere<R>& B);
+    friend bool interiors_intersect(const Rectangle<R>& A, const Sphere<R>& B);
+    friend bool interiors_intersect(const Sphere<R>& A, const Rectangle<R>& B);
+    /*! \brief Tests inclusion of \a A in the interior of \a B. */
+    friend bool inner_subset(const Sphere<R>& A, const Sphere<R>& B);
+    friend bool inner_subset(const Rectangle<R>& A, const Sphere<R>& B);
+    friend bool inner_subset(const Sphere<R>& A, const Rectangle<R>& B);
+    /*! \brief Tests inclusion of \a A in \a B. */
+    friend bool subset(const Sphere<R>& A, const Sphere<R>& B);
+    friend bool subset(const Rectangle<R>& A, const Sphere<R>& B);
+    friend bool subset(const Sphere<R>& A, const Rectangle<R>& B);
+    //@}
     
+    //@{
+    //! \name Geometric binary operations
+    /*! \brief The Minkoswi sum of two spheres */
+    friend Sphere<R> minkowski_sum(const Sphere<R>& A, const Sphere<R>& B);
+   /*! \brief The Minkoswi difference of two spheres */
+    friend Sphere<R> minkowski_difference(const Sphere<R>& A, const Sphere<R>& B);
+    //@}
+#endif      
       friend std::ostream& operator<< <> (std::ostream& os, const Sphere<R>& r);
       friend std::istream& operator>> <> (std::istream& is, Sphere<R>& r);
     };
@@ -157,7 +202,6 @@ namespace Ariadne {
       return result;
     }
       
-    /*! \brief Tests disjointness */
     template <typename R>
     inline bool disjoint(const Sphere<R>& A, const Sphere<R>& B) 
     {
@@ -165,14 +209,12 @@ namespace Ariadne {
         square(A.radius()+B.radius());
     }
     
-    /*! \brief Tests disjointness */
     template <typename R>
     inline bool disjoint(const Sphere<R>& A, const Rectangle<R>& B) 
     {
       throw std::runtime_error("bool disjoint(const Sphere<R>&, const Rectangle<R>&) not implemented");
     }
     
-    /*! \brief Tests disjointness */
     template <typename R>
     inline bool disjoint(const Rectangle<R>& A, const Sphere<R>& B) 
     {
@@ -180,7 +222,6 @@ namespace Ariadne {
     }
     
     
-    /*! \brief Tests intersection of interiors */
     template <typename R>
     inline bool interiors_intersect(const Sphere<R>& A,
                                     const Sphere<R>& B) 
@@ -189,7 +230,6 @@ namespace Ariadne {
         square(A.radius()+B.radius());
     }
     
-    /*! \brief Tests intersection of interiors */
     template <typename R>
     inline bool interiors_intersect(const Sphere<R>& A,
                                     const Rectangle<R>& B) 
@@ -197,7 +237,6 @@ namespace Ariadne {
       throw std::runtime_error("bool disjoint(const Sphere<R>&, const Rectangle<R>&) not implemented");
     }
     
-    /*! \brief Tests intersection of interiors */
     template <typename R>
     inline bool interiors_intersect(const Rectangle<R>& A,
                                     const Sphere<R>& B) 
@@ -206,7 +245,6 @@ namespace Ariadne {
     }
     
     
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     inline bool inner_subset(const Sphere<R>& A,
                              const Sphere<R>& B) 
@@ -214,7 +252,6 @@ namespace Ariadne {
       return A.radius()<B.radius && euclidean_norm_square(A.centre()-B.centre()) < square(B.centre()-A.centre());
     }
 
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     inline bool inner_subset(const Sphere<R>& A,
                              const Rectangle<R>& B) 
@@ -227,7 +264,6 @@ namespace Ariadne {
       return true;
     }
 
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     inline bool inner_subset(const Rectangle<R>& A,
                              const Sphere<R>& B) 
@@ -242,7 +278,6 @@ namespace Ariadne {
     }
 
     
-    /*! \brief Tests inclusion of \a A in \a B. */
     template <typename R>
     inline bool subset(const Sphere<R>& A, 
                        const Sphere<R>& B) 
@@ -250,7 +285,6 @@ namespace Ariadne {
       return A.radius()<=B.radius && euclidean_norm_square(A.centre()-B.centre()) <= square(B.centre()-A.centre());
     }
     
-    /*! \brief Tests inclusion of \a A in \a B. */
     template <typename R>
     inline bool subset(const Sphere<R>& A, 
                        const Rectangle<R>& B) 
@@ -258,7 +292,6 @@ namespace Ariadne {
       return subset(A.bounding_box(),B);
     }
     
-    /*! \brief Tests inclusion of \a A in \a B. */
     template <typename R>
     inline bool subset(const Rectangle<R>& A, 
                        const Sphere<R>& B) 
@@ -272,7 +305,6 @@ namespace Ariadne {
       return true;
     }
 
-    /*! \brief Scale a sphere. */
     template<typename R>
     inline
     Geometry::Sphere<R> 

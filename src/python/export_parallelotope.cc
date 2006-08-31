@@ -44,8 +44,8 @@ template <template <typename> class BS>
 inline
 Parallelotope<Real> 
 touching_intersection(const Parallelotope<Real> &a, 
-		      const BS<Real> &b) {
-	
+                      const BS<Real> &b) {
+        
   if (interiors_intersect(a,b))
     return a;
 
@@ -53,12 +53,12 @@ touching_intersection(const Parallelotope<Real> &a,
 }
 
 template Parallelotope<Real> touching_intersection(
-		const Parallelotope<Real> &,  
-		const Rectangle<Real> &);
+                const Parallelotope<Real> &,  
+                const Rectangle<Real> &);
 
 template Parallelotope<Real> touching_intersection(
-		const Parallelotope<Real> &,  
-		const Parallelotope<Real> &);
+                const Parallelotope<Real> &,  
+                const Parallelotope<Real> &);
 
 void export_parallelotope() {
   typedef bool (*PltpPltpBinPred) (const RParallelotope&, const RParallelotope&);
@@ -66,14 +66,15 @@ void export_parallelotope() {
   typedef bool (*RectPltpBinPred) (const RRectangle&, const RParallelotope&);
   
   typedef RParallelotope (*PltpRectBinFun) (const RParallelotope&, 
-		                            const RRectangle&);
+                                            const RRectangle&);
   typedef RParallelotope (*PltpPltpBinFun) (const RParallelotope&, 
-		                            const RParallelotope&);
+                                            const RParallelotope&);
   
   typedef bool (RParallelotope::*RectPred)(const RRectangle &) const;
   typedef bool (RParallelotope::*PointPred) (const RPoint&) const;
   
-  typedef RZonotope (*PltpZntpBinFun) (const RParallelotope&, const RZonotope&);
+  typedef RZonotope (*PltpZntpZntpBinFun) (const RParallelotope&, const RZonotope&);
+  typedef RZonotope (*PltpPltpZntpBinFun) (const RParallelotope&, const RParallelotope&);
 
   def("interiors_intersect", PltpPltpBinPred(&interiors_intersect));
   def("interiors_intersect", PltpRectBinPred(&interiors_intersect));
@@ -106,8 +107,8 @@ void export_parallelotope() {
     .def("interior_contains", &RParallelotope::interior_contains)
     .def("centre", &RParallelotope::centre)
     .def("radius", &RParallelotope::radius)
-    .def("__add__", PltpZntpBinFun(&minkowski_sum))
-    .def("__sub__", PltpZntpBinFun(&minkowski_difference))
+    .def("__add__", PltpPltpZntpBinFun(&minkowski_sum))
+    .def("__sub__", PltpPltpZntpBinFun(&minkowski_difference))
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 }

@@ -209,6 +209,8 @@ namespace Ariadne {
     template<typename R> std::ostream& operator<<(std::ostream&, const GridMaskSet<R>&);
     
     /*! \brief A cell in a grid.
+     *  \ingroup BasicSet
+     *  \ingroup Grid
      */
     template<typename R>
     class GridCell {
@@ -243,6 +245,8 @@ namespace Ariadne {
 
 
     /*! \brief A rectangle in a grid.
+     *  \ingroup BasicSet
+     *  \ingroup Grid
      */
     template<typename R>
     class GridRectangle {
@@ -334,6 +338,8 @@ namespace Ariadne {
 
 
     /*! \brief A denotable set on a grid, defined using a list of cells.
+     *  \ingroup DenotableSet
+     *  \ingroup Grid
      */
     template<typename R>
     class GridCellListSet {
@@ -428,6 +434,8 @@ namespace Ariadne {
 
 
     /*! \brief A denotable set on a grid, defined using a list of rectangles.
+     *  \ingroup DenotableSet
+     *  \ingroup Grid
      */
     template<typename R>
     class GridRectangleListSet {
@@ -529,7 +537,10 @@ namespace Ariadne {
 
     
     
-    /*! \brief A denotable set on a finite grid, defined using a mask. */
+    /*! \brief A denotable set on a finite grid, defined using a mask. 
+     *  \ingroup DenotableSet
+     *  \ingroup Grid
+     */
     template<typename R>
     class GridMaskSet {
       friend class GridCellListSet<R>;

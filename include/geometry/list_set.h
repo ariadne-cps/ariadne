@@ -43,34 +43,15 @@ namespace Ariadne {
 
     template<typename R> class Rectangle;
     template<typename R, template<typename> class BS> class ListSet;
-
-    template <typename R, template<typename> class BS>
-    bool disjoint(const BS<R>& , const ListSet<R,BS>& );
-    template <typename R, template<typename> class BS>
-    bool interiors_intersect(const BS<R>& , const ListSet<R,BS>& );
-    template <typename R, template<typename> class BS>
-    bool interiors_intersect(const ListSet<R,BS>& , const BS<R>&); 
-
-    template <typename R, template<typename> class BS>
-    bool disjoint(const ListSet<R,BS>& , const ListSet<R,BS>& );
-    template <typename R, template<typename> class BS>
-    bool interiors_intersect(const ListSet<R,BS>& , const ListSet<R,BS>& );
-    template <typename R, template<typename> class BS>
-    bool inner_subset(const ListSet<R,BS>& , const ListSet<R,BS>& );
-    template <typename R, template<typename> class BS>
-    bool subset(const ListSet<R,BS>& , const ListSet<R,BS>& );
-    template <typename R, template<typename> class BS>
-    ListSet<R,BS> regular_intersection(const ListSet<R,BS>& , const ListSet<R,BS>& );
-
-    /*! \brief Stream insertion operator. */
-    template <typename R, template<typename> class BS>
-    std::ostream& operator<< (std::ostream& is, const ListSet<R,BS>& S);
-
-    /*! \brief Stream extraction operator. */
-    template <typename R, template<typename> class BS>
-    std::istream& operator>> (std::istream& is, ListSet<R,BS>& S);
-
+  
+    template<typename R, template<typename> class BS>
+    std::ostream& operator<<(std::ostream&, const ListSet<R,BS>&);
+    template<typename R, template<typename> class BS>
+    std::istream& operator>>(std::istream&, ListSet<R,BS>&);
+    
     /*! \brief A finite union of basic sets, represented as a sequence.
+     *  \ingroup DenotableSet
+     *  \ingroup List
      */
     template<typename R, template<typename> class BS>
     class ListSet {
@@ -159,7 +140,7 @@ namespace Ariadne {
       void set(size_type index, const BS<R>& set) {
         if (this->size()<=index) 
           throw std::invalid_argument("Invalid index in ListSet::set(size_type, const BasicSet& ).");
-	
+        
         this->_vector[index]=set;
       }
 
@@ -221,10 +202,10 @@ namespace Ariadne {
       operator ListSet<R,BS2> () const {
          ListSet<R,BS2> result(this->dimension());
 
-	 for (size_type i=0; i<this->size(); i++) 
+         for (size_type i=0; i<this->size(); i++) 
            result.push_back((BS2<R>)((*this)[i]));
       
-	 return result;
+         return result;
       }
       
       /*! \brief Checks if a denotable set includes a point.
@@ -389,69 +370,80 @@ namespace Ariadne {
         this->adjoin(A);
       }
 
-      friend std::istream& operator>> <> (std::istream& is,
-                                          ListSet<R,BS>& S);
+#ifdef DOXYGEN
+      //@{ 
+      //! \name Geometric binary predicates
+      /*! \brief Tests disjointness.
+       */
+      friend bool disjoint(const ListSet<R,BS>& A,
+                           const ListSet<R,BS>& B);
 
-      friend bool disjoint <> (const ListSet<R,BS>& A,
+      /*! \brief Tests if the interior of \a A intersects the interior of \a B.
+       */
+      friend bool interiors_intersect(const ListSet<R,BS>& A,
+                                      const ListSet<R,BS>& B);
+
+      /*! \brief Tests inclusion of \a A in the interior of \a B.
+       */
+      friend bool inner_subset(const ListSet<R,BS>& A,
                                const ListSet<R,BS>& B);
 
-      friend bool disjoint<> (const BS<R>& A,
-                              const ListSet<R,BS>& B);
+      /*! \brief Tests inclusion of \A in \B.
+       */
+      friend bool subset(const ListSet<R,BS>& A,
+                         const ListSet<R,BS>& B);
+      //@}
+      
+      
+      //@{
+      //! \name Geometric binary operations
+      /*! \brief The union of \a A and \a B.
+       * <br><br>
+       * Note that 'union' is a reserved word in C++.
+       */
+      //FIXME: Compiler doesn't like this
+      //friend ListSet<R,BS> join<> (const ListSet<R,BS>& A,
+      //                             const ListSet<R,BS>& B);
+      friend ListSet<R,BS> join(const ListSet<R,BS>& A,
+                                const ListSet<R,BS>& B);
 
-      friend bool interiors_intersect<> (const ListSet<R,BS>& A,
-                                         const ListSet<R,BS>& B);
+      /*! \brief The closure of intersection of the interior of \a A with the interior of \a B.
+       */
+      friend ListSet<R,BS> regular_intersection(const ListSet<R,BS>& A,
+                                                const ListSet<R,BS>& B);
+      //@}
 
-      friend bool interiors_intersect<> (const BS<R>& A,
-                                         const ListSet<R,BS>& B);
 
-      friend bool inner_subset<> (const ListSet<R,BS>& A,
-                                  const ListSet<R,BS>& B);
+      //@{
+      //! \name Input/output operators
+      /*! \brief Stream insertion operator. */
+      friend std::ostream& operator<<(std::ostream& is, const ListSet<R,BS>& S);
 
-      friend bool subset<> (const ListSet<R,BS>& A,
-                                  const ListSet<R,BS>& B);
+      /*! \brief Stream extraction operator. */
+      friend std::istream& operator>>(std::istream& is, ListSet<R,BS>& S);
+      //@}
+#endif      
+      
+      friend std::ostream& operator<< <> (std::ostream& is, const ListSet<R,BS>& S);
 
-      friend ListSet<R,BS>
-      regular_intersection <> (const ListSet<R,BS>& A,
-                               const ListSet<R,BS>& B);
+      friend std::istream& operator>> <> (std::istream& is, ListSet<R,BS>& S);
+      //@}
+      
     };
 
 
 
-    /*! \brief Tests disjointness.
-     *
-     * Tests disjointness of two denotable sets.
-     * \param A is a denotable set.
-     * \param B is a denotable set.
-     * \return \a true if A and B are disjoint, \a false otherwise.
-     */
     template <typename R, template<class> class BS>
     bool
     disjoint (const ListSet<R,BS>& A,
               const ListSet<R,BS>& B);
 
-    /*! \brief Tests intersection of interiors.
-     *
-     * Tests intersection of a denotable set with the interior of an other
-     * denotable set.
-     * \param A is a denotable set.
-     * \param B is a denotable set.
-     * \return \a true if A intersects the interior of B,
-     * \a false otherwise.
-     */
     template <typename R, template <typename> class BS>
     bool
     interiors_intersect(const ListSet<R,BS>& A,
                         const ListSet<R,BS>& B);
 
 
-    /*! \brief Tests inclusion of interiors.
-     *
-     * Tests inclusion of a denotable set into the interior of a denotable set.
-     * \param A is a denotable set.
-     * \param B is a denotable set.
-     * \return \a true if A is a subset of the interior of B,
-     * \a false otherwise.
-     */
     template <typename R, template <typename> class BS>
     bool
     inner_subset(const ListSet<R,BS>& A,
@@ -460,44 +452,18 @@ namespace Ariadne {
 
 
 
-   /*! \brief Tests inclusion of interiors.
-     *
-     * Tests inclusion of a denotable set into the interior of a rectangle.
-     * \param A is a denotable set.
-     * \param B is a rectangle.
-     * \return \a true if A is a subset of the interior of B,
-     * \a false otherwise.
-     */
     template <typename R, template <typename> class BS>
     bool
     subset(const ListSet<R,BS>& A,
            const ListSet<R,BS>& B);
     
     
-    /*! \brief Makes union of two interiors.
-     *
-     * Evalutates the union of two denotable sets.
-     * \param A is a denotable set.
-     * \param B is a denotable set.
-     * \return The union of A and B.
-     */
-    //FIXME: Compiler doesn't like this
-    //friend ListSet<R,BS> join<> (const ListSet<R,BS>& A,
-    //                             const ListSet<R,BS>& B);
     template <typename R, template <typename> class BS>
     ListSet<R,BS>
     join(const ListSet<R,BS>& A,
          const ListSet<R,BS>& B);
     
 
-    /*! \brief Makes intersection of two interiors.
-     *
-     * Evalutates the closure of the intersection of a denotable set
-     * with the interiors of an other denotable sets.
-     * \param A is a denotable set.
-     * \param B is a denotable set.
-     * \return The closure of the intersection of A with the interiors of B.
-     */
     template <typename R, template <typename> class BS>
     ListSet<R,BS>
     regular_intersection(const ListSet<R,BS>& A,

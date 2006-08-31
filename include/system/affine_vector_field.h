@@ -40,7 +40,9 @@
 namespace Ariadne {
   namespace System {
 
-    /*! \brief An affine vector field in Euclidean space. */
+    /*! \brief An affine vector field in Euclidean space.
+     *  \ingroup ContinuousTime
+     */
     template <typename R>
     class AffineVectorField : public VectorField<R> 
     {

@@ -40,7 +40,9 @@
 namespace Ariadne {
   namespace LinearAlgebra {
 
-    /*! \brief A matrix stored in SVD product form. */
+    /*! \ingroup LinearAlgebra
+     *  \brief A matrix stored in SVD product form. 
+     */
     template<typename Real>
     class SVDMatrix {
      public:

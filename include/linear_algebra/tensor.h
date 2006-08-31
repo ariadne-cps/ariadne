@@ -38,7 +38,9 @@ namespace Ariadne {
   namespace LinearAlgebra {
     
     
-    /*! \brief A tensor representing a second derivative. */
+    /*! \ingroup LinearAlgebra
+     *  \brief A tensor representing a second derivative. 
+     */
     template<typename R> 
     class Tensor {
      public:

@@ -113,7 +113,7 @@ namespace Ariadne {
       Matrix<R> result(n,m);
       for(size_type i=0; i!=n; ++i) {
         for(size_type j=0; j!=m; ++j) {
-          result(i,j)=self(i,j);
+          result(i,j)=self(j,i);
         }
       }
       return result;

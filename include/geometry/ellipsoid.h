@@ -45,7 +45,8 @@ namespace Ariadne {
 
     template<typename R> R euclidean_norm_square(const LinearAlgebra::Vector<R>&);
     
-    /*! \brief An ellipsoid \f$(x-c)^T A (x-c)\leq 1\f$ of arbitrary dimension.
+    /*! \ingroup BasicSet
+     *  \brief An ellipsoid \f$(x-c)^T A (x-c)\leq 1\f$ of arbitrary dimension.
      */
     template <typename R>
     class Ellipsoid {
@@ -64,6 +65,8 @@ namespace Ariadne {
       matrix_type _bilinear_form;
      
      public:
+      //! \name Constructors 
+      //@{ 
       /*! \brief Default constructor constructs unit sphere centred at the origin. \a n. */
       Ellipsoid(size_type n = 0);
     
@@ -90,7 +93,10 @@ namespace Ariadne {
         }
         return *this;
       }
+      //@}
       
+      //@{
+      //! \brief Comparison operators
       /*! \brief The equality operator (not implemented).
        *
        * Not currently implemented, since it requires matching the columns of 
@@ -105,10 +111,23 @@ namespace Ariadne {
       bool operator!=(const Ellipsoid<R>& other) const {
         return !(*this == other);
       }
+      //@}
       
-      /*! A rectangle containing the ellipsoid. */
-      Rectangle<R> bounding_box() const;
+      //! \name Data elements
+      //@{
+      /*! \brief The centre of the ellipsoid. */
+      const state_type& centre() const {
+        return this->_centre;
+      }
       
+      /*! \brief The bilinear form describing axes of the ellipsoid. */
+      const matrix_type& bilinear_form() const {
+        return this->_bilinear_form;
+      }
+      //@}
+      
+      //! \name Geometric Operators
+      //@{
       /*! \brief The dimension of the Euclidean space the ellipsoid lies in. */
       size_type dimension() const {
         return this->_centre.dimension();
@@ -124,15 +143,8 @@ namespace Ariadne {
         return _bilinear_form.singular();
       }
       
-      /*! \brief The centre of the ellipsoid. */
-      const state_type& centre() const {
-        return this->_centre;
-      }
-      
-      /*! \brief The bilinear form describing axes of the ellipsoid. */
-      const matrix_type& bilinear_form() const {
-        return this->_bilinear_form;
-      }
+      /*! \brief A rectangle containing the ellipsoid. */
+      Rectangle<R> bounding_box() const;
       
       /*! \brief Tests if \a point is contained in the ellipsoid. */
       bool contains(const state_type& point) const {
@@ -145,27 +157,54 @@ namespace Ariadne {
         vector_type vec=point-this->_centre;
         return inner_product(vec,this->_bilinear_form*vec)<1;
       }
+      //@}
+      
+#ifdef DOXYGEN
+    //@{
+    //! \name Geometric binary predicates
+    /*! \brief Tests disjointness */
+    friend bool disjoint(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
+    friend bool disjoint(const Rectangle<R>& A, const Ellipsoid<R>& B);
+    friend bool disjoint(const Ellipsoid<R>& A, const Rectangle<R>& B);
+    /*! \brief Tests intersection of interiors */
+    friend bool interiors_intersect(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
+    friend bool interiors_intersect(const Rectangle<R>& A, const Ellipsoid<R>& B);
+    friend bool interiors_intersect(const Ellipsoid<R>& A, const Rectangle<R>& B);
+    /*! \brief Tests inclusion of \a A in the interior of \a B. */
+    friend bool inner_subset(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
+    friend bool inner_subset(const Rectangle<R>& A, const Ellipsoid<R>& B);
+    friend bool inner_subset(const Ellipsoid<R>& A, const Rectangle<R>& B);
+    /*! \brief Tests inclusion of \a A in \a B. */
+    friend bool subset(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
+    friend bool subset(const Rectangle<R>& A, const Ellipsoid<R>& B);
+    friend bool subset(const Ellipsoid<R>& A, const Rectangle<R>& B);
+    //@}
     
+    //@{
+    //! \name Geometric binary operations
+    /*! \brief The Minkoswi sum of two ellipsoids */
+    friend Ellipsoid<R> minkowski_sum(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
+    /*! \brief The Minkoswi difference of two ellipsoids */
+    friend Ellipsoid<R> minkowski_difference(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
+    //@}
+#endif
       friend std::ostream& operator<< <> (std::ostream& os, const Ellipsoid<R>& r);
       friend std::istream& operator>> <> (std::istream& is, Ellipsoid<R>& r);
     };
     
      
-    /*! \brief Tests disjointness */
     template <typename R>
     inline bool disjoint(const Ellipsoid<R>& A, const Ellipsoid<R>& B) 
     {
       throw std::runtime_error("bool disjoint(const Ellipsoid<R>&, const Ellipsoid<R>&) not implemented");
     }
     
-    /*! \brief Tests disjointness */
     template <typename R>
     inline bool disjoint(const Ellipsoid<R>& A, const Rectangle<R>& B) 
     {
       throw std::runtime_error("bool disjoint(const Ellipsoid<R>&, const Rectangle<R>&) not implemented");
     }
     
-    /*! \brief Tests disjointness */
     template <typename R>
     inline bool disjoint(const Rectangle<R>& A, const Ellipsoid<R>& B) 
     {
@@ -173,7 +212,6 @@ namespace Ariadne {
     }
     
     
-    /*! \brief Tests intersection of interiors */
     template <typename R>
     inline bool interiors_intersect(const Ellipsoid<R>& A,
                                     const Ellipsoid<R>& B) 
@@ -181,7 +219,6 @@ namespace Ariadne {
       throw std::runtime_error("bool interiors_intersect(const Ellipsoid<R>&, const Ellipsoid<R>&) not implemented");
     }
     
-    /*! \brief Tests intersection of interiors */
     template <typename R>
     inline bool interiors_intersect(const Ellipsoid<R>& A,
                                     const Rectangle<R>& B) 
@@ -189,7 +226,6 @@ namespace Ariadne {
       throw std::runtime_error("bool disjoint(const Ellipsoid<R>&, const Rectangle<R>&) not implemented");
     }
     
-    /*! \brief Tests intersection of interiors */
     template <typename R>
     inline bool interiors_intersect(const Rectangle<R>& A,
                                     const Ellipsoid<R>& B) 
@@ -198,7 +234,6 @@ namespace Ariadne {
     }
     
     
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     inline bool inner_subset(const Ellipsoid<R>& A,
                              const Ellipsoid<R>& B) 
@@ -206,7 +241,6 @@ namespace Ariadne {
       throw std::runtime_error("bool inner_subset(const Ellipsoid<R>&, const Ellipsoid<R>&) not implemented");
     }
 
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     inline bool inner_subset(const Ellipsoid<R>& A,
                              const Rectangle<R>& B) 
@@ -219,7 +253,6 @@ namespace Ariadne {
       return true;
     }
 
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
     template <typename R>
     inline bool inner_subset(const Rectangle<R>& A,
                              const Ellipsoid<R>& B) 
@@ -234,7 +267,6 @@ namespace Ariadne {
     }
 
     
-    /*! \brief Tests inclusion of \a A in \a B. */
     template <typename R>
     inline bool subset(const Ellipsoid<R>& A, 
                        const Ellipsoid<R>& B) 
@@ -242,7 +274,6 @@ namespace Ariadne {
       throw std::runtime_error("bool subset(const Ellipsoid<R>&, const Ellipsoid<R>&) not implemented");
     }
     
-    /*! \brief Tests inclusion of \a A in \a B. */
     template <typename R>
     inline bool subset(const Ellipsoid<R>& A, 
                        const Rectangle<R>& B) 
@@ -250,7 +281,6 @@ namespace Ariadne {
       return subset(A.bounding_box(),B);
     }
     
-    /*! \brief Tests inclusion of \a A in \a B. */
     template <typename R>
     inline bool subset(const Rectangle<R>& A, 
                        const Ellipsoid<R>& B) 
@@ -264,7 +294,6 @@ namespace Ariadne {
       return true;
     }
 
-    /*! \brief Scale a ellipsoid. */
     template<typename R>
     inline
     Geometry::Ellipsoid<R> 

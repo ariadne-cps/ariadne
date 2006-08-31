@@ -458,6 +458,13 @@ namespace Ariadne {
       return sum;
     }
       
+    template <typename R>
+    Polyhedron<R> 
+    minkowski_difference(const Polyhedron<R>& A, const Polyhedron<R>& B)
+    {
+      throw std::runtime_error("minkowski_difference(const Polyhedron<R>& A, const Polyhedron<R>& B) not implemented");
+    }
+      
 
     template <typename R>
     std::ostream& 

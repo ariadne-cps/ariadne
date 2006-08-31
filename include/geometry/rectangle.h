@@ -52,7 +52,8 @@ namespace Ariadne {
     template<> 
     inline bool is_a<Rectangle,Polyhedron>() { return true; }
 
-    /*! \brief A cuboid of arbitrary dimension.
+    /*! \ingroup BasicSet
+     *  \brief A cuboid of arbitrary dimension.
      */
     template <typename R>
     class Rectangle {
@@ -65,6 +66,8 @@ namespace Ariadne {
       typedef typename array< Point<R> >::const_iterator const_vertex_iterator;
     
      public:
+      //@{
+      //! \name Constructors
       /*! \brief Construct an empty rectangle with dimension \a n. */
       explicit Rectangle(size_type n=0)
         : _bounds(n)
@@ -143,7 +146,10 @@ namespace Ariadne {
         }
         return *this;
       }
+      //@}
       
+      //{@
+      //! \name Comparison operators
       /*! \brief The equality operator */
       bool operator==(const Rectangle<R>& A) const
       {
@@ -161,82 +167,17 @@ namespace Ariadne {
       bool operator!=(const Rectangle<R>& A) const {
         return !(*this == A);
       }
+      //@}
+      
+      //@{
+      //! \name Conversion operations
+      /*! \brief Convert to a rational polyhedron. */
+      operator Polyhedron<Rational> () const;
+      //@}
+        
 
-      /*! \brief The dimension of the Euclidean space the rectangle lies in. */
-      size_type dimension() const {
-        return this->_bounds.size();
-      }
-      
-      /*! \brief The set of position vectors of the rectangle. */
-      const LinearAlgebra::IntervalVector<R>& position_vectors() const {
-        return this->_bounds;
-      }
-      
-      /*! \brief Makes the rectangle empty. */
-      void clear() {
-        if(this->_bounds.size()!=0) {
-          this->_bounds[0]=Interval<R>();
-        }
-      }
-      
-      /*! \brief True if the rectangle is empty. */
-      bool empty() const {
-        if(this->dimension()==0) {
-          return true;
-        }
-        for(dimension_type i=0; i!=this->dimension(); ++i) {
-          if(this->_bounds[i].empty()) {
-            return true;
-          }
-        }
-        return false;
-      }
-      
-      /*! \brief True if the rectangle has empty interior. */
-      bool empty_interior() const {
-        if(this->dimension()==0) {
-          return true;
-        }
-        for(size_type i=0; i!=this->dimension(); ++i) {
-          if(this->_bounds[i].lower()>=this->_bounds[i].upper()) {
-            return true;
-          }
-        }
-        return false;
-      }
-      
-      /*! \brief The lower corner. */
-      Point<R> lower_corner() const {
-        Point<R> result(this->dimension());
-        for(dimension_type i=0; i!=this->dimension(); ++i) {
-          result[i]=this->lower_bound(i);
-        }
-        return result;
-      }
-      
-      /*! \brief The upper corner. */
-      Point<R> upper_corner() const {
-        Point<R> result(this->dimension());
-        for(dimension_type i=0; i!=this->dimension(); ++i) {
-          result[i]=this->upper_bound(i);
-        }
-        return result;
-      }
-      
-      /*! \brief The centre. */
-      Point<R> centre() const {
-        return Point<R>(this->_bounds.centre());
-      }
-      
-      /*! \brief The radius in the sup norm. */
-      R radius() const {
-        R diameter=0;
-        for(dimension_type i=0; i!=this->dimension(); ++i) {
-          diameter=max(diameter,this->_bounds[i].length());
-        }
-        return diameter/2;
-      }
-      
+      //@{
+      //! \name Data access
       /*! \brief Returns the projection onto the \a i th coordinate. */
       Interval<R>& operator[] (dimension_type i) {
         return this->_bounds[i];
@@ -265,6 +206,40 @@ namespace Ariadne {
         return this->_bounds[i].upper();
       }
       
+      /*! \brief The lower corner. */
+      Point<R> lower_corner() const {
+        Point<R> result(this->dimension());
+        for(dimension_type i=0; i!=this->dimension(); ++i) {
+          result[i]=this->lower_bound(i);
+        }
+        return result;
+      }
+      
+      /*! \brief The upper corner. */
+      Point<R> upper_corner() const {
+        Point<R> result(this->dimension());
+        for(dimension_type i=0; i!=this->dimension(); ++i) {
+          result[i]=this->upper_bound(i);
+        }
+        return result;
+      }
+      
+      /*! \brief The set of position vectors of the rectangle. */
+      const LinearAlgebra::IntervalVector<R>& position_vectors() const {
+        return this->_bounds;
+      }
+      //@}
+      
+      
+      //@{ 
+      //! \name Modifying operations
+      /*! \brief Makes the rectangle empty. */
+      void clear() {
+        if(this->_bounds.size()!=0) {
+          this->_bounds[0]=Interval<R>();
+        }
+      }
+      
       /*! \brief Sets the \a i th interval. */
       void set_interval(dimension_type i, Interval<R> x) {
         this->_bounds[i]=x;
@@ -279,12 +254,60 @@ namespace Ariadne {
       void set_upper_bound(dimension_type i, const R& u) {
         this->_bounds[i]=Interval<R>(this->_bounds[i].lower(),u);
       }
-      
+
       /*! \brief Expand the Rectangle by \a delta in each direction. */
       Rectangle<R>& expand_by(const R& delta);
+      //@}
+      
+      
+      //@{
+      //! \name Rectangle geometric operations
+      /*! \brief The dimension of the Euclidean space the rectangle lies in. */
+      size_type dimension() const {
+        return this->_bounds.size();
+      }
+      
+      /*! \brief True if the rectangle is empty. */
+      bool empty() const {
+        if(this->dimension()==0) {
+          return true;
+        }
+        for(dimension_type i=0; i!=this->dimension(); ++i) {
+          if(this->_bounds[i].empty()) {
+            return true;
+          }
+        }
+        return false;
+      }
+      
+      /*! \brief True if the rectangle has empty interior. */
+      bool empty_interior() const {
+        if(this->dimension()==0) {
+          return true;
+        }
+        for(size_type i=0; i!=this->dimension(); ++i) {
+          if(this->_bounds[i].lower()>=this->_bounds[i].upper()) {
+            return true;
+          }
+        }
+        return false;
+      }
+      
+      /*! \brief The centre. */
+      Point<R> centre() const {
+        return Point<R>(this->_bounds.centre());
+      }
+      
+      /*! \brief The radius in the sup norm. */
+      R radius() const {
+        R diameter=0;
+        for(dimension_type i=0; i!=this->dimension(); ++i) {
+          diameter=max(diameter,this->_bounds[i].length());
+        }
+        return diameter/2;
+      }
       
       /*! \brief Compute a quadrant of the Rectangle determined by \a q.
-       *
        *  \a q is a binary word such that the ith bit of q is 0 if the lower half
        *  of the rectangle in the ith coordinate is used, and 1 if the upper
        *  half is used.
@@ -293,19 +316,16 @@ namespace Ariadne {
       /*! \brief Subdivide into smaller pieces. */
       ListSet<R,Geometry::Rectangle> subdivide() const;
       
-      /*! The vertices of the rectangle. */
+      /*! \brief The vertices of the rectangle. */
       std::vector< Point<R> > vertices() const;
+
       /*! \brief The \a i th vertex. */
       Point<R> vertex(size_type i) const;
-      
       
       /*! \brief A rectangle containing the given rectangle; returns a copy. */
       Rectangle bounding_box() const {
         return *this;
       }
-        
-      /*! \brief Convert to a rational polyhedron. */
-      operator Polyhedron<Rational> () const;
         
       /*! \brief Tests if \a point is included into a rectangle. */
       bool contains(const Point<R>& pt) const;
@@ -315,25 +335,60 @@ namespace Ariadne {
       /*! \brief Set equality operator. */
       bool equals(const Rectangle<R>& r) const;
      
-      /*! \brief Tests disjointness with \a r. */
+      /* Tests disjointness with \a r. */
       bool disjoint(const Rectangle<R>& r) const;
-      /*! \brief Tests overlap with \a r. */
+      /* Tests overlap with \a r. */
       bool overlaps(const Rectangle<R>& r) const;
-      /*! \brief Tests inclusion in the interior of \a r. */
+      /* Tests inclusion in the interior of \a r. */
       bool inner_subset(const Rectangle<R>& r) const;
-      /*! \brief Tests if the rectangle is a subset of another rectangle \a r. */
+      /* Tests if the rectangle is a subset of another rectangle \a r. */
       bool subset(const Rectangle<R>& r) const;
+      //@}
       
+#ifdef DOXYGEN
+      //@{ 
+      //! \name Binary geometric predicates
+      /*! \brief Set equality operator. */
+      friend bool equals(const Rectangle<R>& A, const Rectangle<R>& B) const;
+     
+      /*! \brief Tests disjointness with \a r. */
+      friend bool disjoint(const Rectangle<R>& A, const Rectangle<R>& B) const;
+      /*! \brief Tests intersection of interiors of \a A and \a B. */
+      friend bool interiors_intersect(const Rectangle<R>& A, const Rectangle<R>& B) const;
+      /*! \brief Tests inclusion in the interior of \a r. */
+      friend bool inner_subset(const Rectangle<R>& A, const Rectangle<R>& B) const;
+      /*! \brief Tests if the rectangle is a subset of another rectangle \a r. */
+      friend bool subset(const Rectangle<R>& A, const Rectangle<R>& B) const;
+      //@{ 
+      //! \name Binary geometric operations
       /*! \brief The intersection of \a A and \a B. */
-      static Rectangle<R> intersection(const Rectangle<R>& A, const Rectangle<R>& B); 
+      friend Rectangle<R> intersection(const Rectangle<R>& A, const Rectangle<R>& B); 
       /*! \brief The closure of the intersection of the interiors of \a A and \a B. */
-      static Rectangle<R> regular_intersection(const Rectangle<R>& A, const Rectangle<R>& B); 
+      friend Rectangle<R> regular_intersection(const Rectangle<R>& A, const Rectangle<R>& B); 
       /*! \brief The smallest rectangle containing \a A and \a B. */
-      static Rectangle<R> rectangular_hull(const Rectangle<R>& A, const Rectangle<R>& B); 
+      friend Rectangle<R> rectangular_hull(const Rectangle<R>& A, const Rectangle<R>& B); 
       /*! \brief The componentwise sum of rectangles \a A and \a B. */
-      static Rectangle<R> minkowski_sum(const Rectangle<R>& A, const Rectangle<R>& B); 
+      friend Rectangle<R> minkowski_sum(const Rectangle<R>& A, const Rectangle<R>& B); 
       /*! \brief The componentwise difference of rectangles \a A and \a B. */
-      static Rectangle<R> minkowski_difference(const Rectangle<R>& A, const Rectangle<R>& B); 
+      friend Rectangle<R> minkowski_difference(const Rectangle<R>& A, const Rectangle<R>& B); 
+      
+      /*! \brief The difference between two rectangles. */
+      friend LinearAlgebra::IntervalVector<R> operator-(const Rectangle<R>& A, 
+                                                        const Rectangle& B);
+      /*! \brief Adds a vector to a rectangle. */
+      friend Rectangle<R> operator+(const Rectangle<R>& r, 
+                                    const LinearAlgebra::Vector<R>& v);
+      /*! \brief Adds an interval vector to a rectangle. */
+      friend Rectangle<R> operator+(const Rectangle<R>& r, 
+                                    const LinearAlgebra::IntervalVector<R>& v);
+      /*! \brief Subtracts a vector from a rectangle. */
+      friend Rectangle<R> operator-(const Rectangle<R>& r, 
+                                    const LinearAlgebra::Vector<R>& v);
+      /*! \brief Subtracts an interval vector from a rectangle. */
+      friend Rectangle<R> operator-(const Rectangle<R>& r, 
+                                    const LinearAlgebra::IntervalVector<R>& v);
+      //@}
+#endif
       
       std::ostream& write(std::ostream& os) const;
       std::istream& read(std::istream& is);
@@ -380,14 +435,13 @@ namespace Ariadne {
     template <typename R>
     inline
     bool 
-    Rectangle<R>::equals(const Rectangle<R>& r) const
+    equal(const Rectangle<R>& A, const Rectangle<R>& B)
     {
-      const Rectangle<R>& self=*this;
-      if(self.dimension()!=r.dimension()) {
+      if(A.dimension()!=B.dimension()) {
         return false;
       }
-      for(size_type i=0; i!=self.dimension(); ++i) {
-        if(!equal(self[i],r[i])) {
+      for(size_type i=0; i!=A.dimension(); ++i) {
+        if(!equal(A[i],B[i])) {
           return false;
         }
       }
@@ -397,14 +451,13 @@ namespace Ariadne {
     template <typename R>
     inline
     bool 
-    Rectangle<R>::disjoint(const Rectangle<R>& r) const
+    disjoint(const Rectangle<R>& A, const Rectangle<R>& B)
     {
-      const Rectangle<R>& self=*this;
-      if(self.dimension()!=r.dimension()) {
+      if(A.dimension()!=B.dimension()) {
         throw std::domain_error("disjoint(Rectangle,Rectangle): The two rectangles have different dimensions");
       }
-      for(size_type i=0; i!=self.dimension(); ++i) {
-        if(Numeric::disjoint(self[i],r[i])) {
+      for(size_type i=0; i!=A.dimension(); ++i) {
+        if(Numeric::disjoint(A[i],B[i])) {
           return true;
         }
       }
@@ -414,14 +467,13 @@ namespace Ariadne {
     template <typename R>
     inline
     bool 
-    Rectangle<R>::overlaps(const Rectangle<R>& r) const
+    interiors_intersect(const Rectangle<R>& A, const Rectangle<R>& B)
     {
-      const Rectangle<R>& self=*this;
-      if (self.dimension()!=r.dimension()) {
+      if (A.dimension()!=B.dimension()) {
         throw std::domain_error("interiors_intersect(Rectangle,Rectangle): The two rectangles have different dimensions");
       }
-      for(size_type i=0; i!=self.dimension(); ++i) {
-        if(!Numeric::interiors_intersect(self[i],r[i])) {
+      for(size_type i=0; i!=A.dimension(); ++i) {
+        if(!Numeric::interiors_intersect(A[i],B[i])) {
           return false;
         }
       }
@@ -431,14 +483,13 @@ namespace Ariadne {
     template <typename R>
     inline
     bool 
-    Rectangle<R>::inner_subset(const Rectangle<R>& r) const
+    inner_subset(const Rectangle<R>& A, const Rectangle<R>& B)
     {
-      const Rectangle<R>& self=*this;
-      if (self.dimension()!=r.dimension()) {
+      if (A.dimension()!=B.dimension()) {
         throw std::domain_error("inner_subset(Rectangle,Rectangle): The two rectangles have different dimensions");
       }
-      for (size_type i=0; i!=self.dimension(); ++i) {
-        if(!Numeric::inner_subset(self[i],r[i])) {
+      for (size_type i=0; i!=A.dimension(); ++i) {
+        if(!Numeric::inner_subset(A[i],B[i])) {
           return false;
         }
       }
@@ -448,14 +499,13 @@ namespace Ariadne {
     template <typename R>
     inline
     bool 
-    Rectangle<R>::subset(const Rectangle<R>& r) const
+    subset(const Rectangle<R>& A, const Rectangle<R>& B)
     {
-      const Rectangle<R>& self=*this;
-      if (self.dimension()!=r.dimension()) {
+      if (A.dimension()!=B.dimension()) {
         throw std::domain_error("subset(Rectangle,Rectangle): The two rectangles have different dimensions");
       }
-      for (size_type i=0; i< self.dimension(); ++i) {
-        if(!Numeric::subset(self[i],r[i])) {
+      for (size_type i=0; i< A.dimension(); ++i) {
+        if(!Numeric::subset(A[i],B[i])) {
           return false;
         }
       }
@@ -466,7 +516,7 @@ namespace Ariadne {
     template <typename R>
     inline
     Rectangle<R> 
-    Rectangle<R>::intersection(const Rectangle<R>& A, const Rectangle<R>& B)
+    intersection(const Rectangle<R>& A, const Rectangle<R>& B)
     {
       Rectangle<R> C(A.dimension());
       if (A.dimension()!=B.dimension()) {
@@ -481,7 +531,7 @@ namespace Ariadne {
     template <typename R>
     inline
     Rectangle<R> 
-    Rectangle<R>::regular_intersection(const Rectangle<R>& A, const Rectangle<R>& B)
+    regular_intersection(const Rectangle<R>& A, const Rectangle<R>& B)
     {
       Rectangle<R> C(A.dimension());
       if (A.dimension()!=B.dimension()) {
@@ -496,7 +546,7 @@ namespace Ariadne {
     template <typename R>
     inline
     Rectangle<R>
-    Rectangle<R>::rectangular_hull(const Rectangle<R>& A, const Rectangle<R>& B)
+    rectangular_hull(const Rectangle<R>& A, const Rectangle<R>& B)
     {
       Rectangle<R> C(A.dimension());
       if (A.dimension()!=B.dimension()) {
@@ -510,7 +560,7 @@ namespace Ariadne {
 
     template<typename R> 
     Rectangle<R> 
-    Rectangle<R>::minkowski_sum(const Rectangle<R>& A, const Rectangle<R>& B)
+    minkowski_sum(const Rectangle<R>& A, const Rectangle<R>& B)
     {
       Rectangle<R> C(A.dimension());
       if (A.dimension()!=B.dimension()) {
@@ -525,7 +575,7 @@ namespace Ariadne {
 
     template<typename R> 
     Rectangle<R> 
-    Rectangle<R>::minkowski_difference(const Rectangle<R>& A, const Rectangle<R>& B)
+    minkowski_difference(const Rectangle<R>& A, const Rectangle<R>& B)
     {
       Rectangle<R> C(A.dimension());
       if (A.dimension()!=B.dimension()) {
@@ -538,132 +588,28 @@ namespace Ariadne {
       return C;
     }
     
-
     
-    /*! \brief Tests equality of \a A and \a B. */
-    template <typename R>
-    inline
-    bool 
-    equal(const Rectangle<R>& A, const Rectangle<R>& B)
-    {
-      return A.equals(B);
-    }
-
-    /*! \brief Tests disjointness of \a A and \a B. */
-    template <typename R>
-    inline
-    bool 
-    disjoint(const Rectangle<R>& A, const Rectangle<R>& B)
-    {
-      return A.disjoint(B);
-    }
-
-   
-    /*! \brief Tests intersection of the interior of \a A with the interior of \a B. */
-    template <typename R>
-    inline
-    bool 
-    interiors_intersect(const Rectangle<R>& A, const Rectangle<R>& B)
-    {
-      return A.overlaps(B);
-    }
-    
-    
-    /*! \brief Tests if \a A is a subset of the interior of \a B. */
-    template <typename R>
-    inline
-    bool 
-    inner_subset(const Rectangle<R>& A, const Rectangle<R>& B)
-    {
-      return A.inner_subset(B);
-    }
-    
-    
-    /*! \brief Tests if \a A is a subset of \a B. */
-    template <typename R>
-    inline
-    bool 
-    subset(const Rectangle<R>& A, const Rectangle<R>& B) 
-    {
-      return A.subset(B);
-    }
-    
-    
-    
-    /*! \brief Tests inclusion of \a A in \a B. */    
     template <typename R> 
     inline
     bool 
     subset(const Rectangle<R>& A, ListSet<R,Geometry::Rectangle>& B);
     
-    /*! \brief Tests inclusion in the interior of \a set. */
+
     template <typename R> 
     inline
     bool 
     inner_subset(const Rectangle<R>& A, 
                  const ListSet<R,Geometry::Rectangle>& B);
     
-    /*! \brief Tests inclusion in an open cover. */
+
     template <typename R> 
     inline
     bool 
     subset_of_open_cover(const Rectangle<R>& A, 
                          const ListSet<R,Geometry::Rectangle>& U);
-
-
-
-
-    
-    /*! \brief The intersection of \a A and \a B. */
-    template <typename R>
-    inline
-    Rectangle<R> 
-    intersection(const Rectangle<R>& A, const Rectangle<R>& B)
-    {
-      return Rectangle<R>::intersection(A,B);
-    }
-    
-    /*! \brief The closure of the intersection of the interiors of \a A and \a B. */
-    template <typename R>
-    inline
-    Rectangle<R>
-    regular_intersection(const Rectangle<R>& A, const Rectangle<R>& B)
-    {
-      return Rectangle<R>::regular_intersection(A,B);
-    }
-    
-    /*! \brief The smallest rectangle containing \a A and \a B. */
-    template <typename R>
-    inline
-    Rectangle<R>
-    rectangular_hull(const Rectangle<R>& A, const Rectangle<R>& B)
-    {
-      return Rectangle<R>::rectangular_hull(A,B);
-    }
-    
-    /*! \brief The componentwise sum of rectangles \a A and \a B. */
-    template <typename R>
-    inline
-    Rectangle<R> 
-    minkowski_sum(const Rectangle<R>& A, const Rectangle<R>& B)
-    {
-      return Rectangle<R>::minkowski_sum(A,B);
-    }
-    
-    /*! \brief The componentwise difference of rectangles \a A and \a B. */
-    template<typename R> 
-    inline
-    Rectangle<R> 
-    minkowski_difference(const Rectangle<R>& A, const Rectangle<R>& B)
-    { 
-      return Rectangle<R>::minkowski_difference(A,B);
-    }
-    
-
     
     
     
-    /*! \brief The difference between two rectangles. */
     template<typename R>
     inline
     LinearAlgebra::IntervalVector<R> 
@@ -675,7 +621,6 @@ namespace Ariadne {
       return r1.position_vectors()-r2.position_vectors();
     }
 
-    /* Adds a vector expression to a rectangle. */
     template<typename R, typename E>
     inline
     Geometry::Rectangle<R> 
@@ -687,7 +632,6 @@ namespace Ariadne {
       return r+iv; 
     }
       
-      /*! \brief Adds a vector to a rectangle. */
     template<typename R>
     inline
     Geometry::Rectangle<R> 
@@ -703,7 +647,6 @@ namespace Ariadne {
       return result;
     }
 
-    /*! \brief Adds an interval vector to a rectangle. */
     template<typename R>
     inline
     Geometry::Rectangle<R> 
@@ -719,7 +662,6 @@ namespace Ariadne {
       return result;
     }
 
-    /*! \brief Subtracts a vector from a rectangle. */
     template<typename R>
     inline
     Geometry::Rectangle<R> 
@@ -735,7 +677,6 @@ namespace Ariadne {
       return result;
     }
 
-    /*! \brief Subtracts an interval vector from a rectangle. */
     template<typename R>
     inline
     Geometry::Rectangle<R> 
@@ -751,7 +692,6 @@ namespace Ariadne {
       return result;
     }
 
-    /*! \brief Scale a rectangle. */
     template<typename R>
     inline
     Geometry::Rectangle<R> 

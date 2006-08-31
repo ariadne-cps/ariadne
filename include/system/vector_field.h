@@ -34,7 +34,10 @@
 namespace Ariadne {
   namespace System {
 
-    /*! \brief Abstract base class for (differentiable) vector fields. */
+    /*! \brief Abstract base class for (differentiable) vector fields.
+     *  \ingroup System
+     *  \ingroup ContinuousTime
+     */
     template <typename R>
     class VectorField {
      public:

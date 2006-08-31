@@ -66,5 +66,3 @@ h.add(e1)
 h.add(e2)
 
 print h
-
-

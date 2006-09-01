@@ -46,53 +46,11 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template<typename R>
-    Rectangle<R> 
-    Parallelotope<R>::bounding_box() const 
-    {
-      vector_type offset(this->dimension());
-      for(size_t i=0; i!=this->dimension(); ++i) {
-        for(size_t j=0; j!=this->dimension(); ++j) {
-          offset[i] += abs(this->_generators(i,j));
-        }
-      }
-      return Rectangle<R>(this->centre()-offset, this->centre()+offset);
-    }
-   
-    template <typename R>
-    Parallelotope<R>::operator Zonotope<R>() const 
-    {
-      return Zonotope<R>(*this); 
-    }
-
-    
-    template <typename R>
-    Parallelotope<R>::operator Polyhedron<Rational>() const 
-    {
-      Point<Rational> c(this->_centre);
-      LinearAlgebra::Matrix<Rational> g(this->_generators);
-      return Polyhedron<Rational>(c,g);
-    }
-    
-    /*! \brief The equality operator */
-    template <typename R>
-    bool Parallelotope<R>::operator==(const Parallelotope<R>& A) const {
-      Zonotope<R> z_this(*this), z_A(A);
-
-      return z_this==z_A;
-    }
-      
-    /*! \brief The inequality operator */
-    template <typename R>
-    bool Parallelotope<R>::operator!=(const Parallelotope<R>& A) const {
-      return !(*this == A);
-    }  
-     
     /*! \brief Tests if the parallelotope contains \a point. */
     template <typename R>
     bool Parallelotope<R>::contains(const state_type& point) const {
-      matrix_type inv_gen(LinearAlgebra::inverse(this->_generators));
-      const state_type &centre=this->_centre;
+      matrix_type inv_gen(LinearAlgebra::inverse(this->generators()));
+      state_type centre=this->centre();
       vector_type v(point.position_vector()-centre.position_vector());
 
       vector_type e=prod(inv_gen,v);
@@ -103,26 +61,11 @@ namespace Ariadne {
       return true;
     }
     
-    template<typename R>
-    bool 
-    Parallelotope<R>::superset(const Rectangle<R>& rect) const 
-    {
-      if (this->empty()) 
-        return false;
-    
-      for (size_type i=0; i< (size_type)(1<<rect.dimension()); i++) {
-        if (!this->contains(rect.vertex(i))) {
-          return false;
-        }
-      }
-      return true;
-    }
-    
     /*! \brief Tests if the interior of the parallelotope contains \a point. */
     template<typename R>
     bool Parallelotope<R>::interior_contains(const state_type& point) const {
-      matrix_type inv_gen=LinearAlgebra::inverse(this->_generators);
-      const state_type &centre=this->_centre;
+      matrix_type inv_gen=LinearAlgebra::inverse(this->generators());
+      state_type centre=this->centre();
       vector_type v(point.position_vector()-centre.position_vector());
 
       vector_type e=inv_gen*v;
@@ -140,7 +83,7 @@ namespace Ariadne {
       size_type n=this->dimension();
       ListSet<R,Geometry::Parallelotope> result(this->dimension());
       
-      matrix_type new_generators=generators();
+      matrix_type new_generators=this->generators();
       
       R max_norm=0;
       size_type max_column=0;
@@ -197,104 +140,17 @@ namespace Ariadne {
       return result;
     }
     
-
-
- 
-  
+    
     template<typename R>
     LinearAlgebra::Vector<typename numerical_traits<R>::field_extension_type>
     Parallelotope<R>::coordinates(const state_type& s) const {
       typedef typename numerical_traits<R>::field_extension_type F;
-      LinearAlgebra::Vector<F> diff(this->dimension());
-      for(size_type i=0; i!=diff.size(); ++i) {
-        diff(i)=s[i]-this->_centre[i];
-      }
-      LinearAlgebra::Matrix<F> inv = LinearAlgebra::inverse(this->_generators);
+      LinearAlgebra::Vector<F> diff=s-this->centre();
+      LinearAlgebra::Matrix<F> inv = LinearAlgebra::inverse(this->generators());
       return prod(inv,diff);
     }
 
-    template<typename R>
-    bool
-    Parallelotope<R>::disjoint(const Rectangle<R>& r) const
-    {
-      const Parallelotope<R>& p=*this;
-      assert(p.dimension()==r.dimension());
-      /*
-      dimension_type n=p.dimension();
-     
-      This method has some problems. It fails when the parameters are
-      [1,17/16]x[19/16,5/4] and 
-        Parallelotope(
-          centre=(1/2, 1/10)
-          directions=[ 1,1/2; 1/2,3/5 ]
-        )
-      // Construct tableau for testing intersection of rectangle and point
-      // Rectangle  a<=x<=b
-      // Parallelotope  x==c+Ae,  -1<=e<=1
-      // 
-      // Translate x'=x-a,  e'=e+1
-      //   0<=x'<=b-a
-      //   0<=e'<=2
-      //   x'+a==c+A(e'-1) ->  x'-Ae' == c-a-A1
-      //  
-      // Introduce slack variables for first two inequalities
-      // Introduce auxiliary variables for last equality, changing sign of RHS if necessary
-      // 
-      // Need to minimise sum of auxiliary variables -> add sum of last rows 
-      // to get value function.
-      LinearAlgebra::Matrix<Rational> T(3*n+1,2*n+1);
 
-      const Geometry::Point<R>& a=r.lower_corner();
-      const Geometry::Point<R>& b=r.upper_corner();
-      const Geometry::Point<R>& c=p.centre();
-      const LinearAlgebra::Matrix<R>& A=p.generators();
-
-      for(size_type i=0; i!=n; ++i) {
-        T(i,i)=1;
-        T(i,2*n)=Rational(b[i])-Rational(a[i]);
-        T(n+i,n+i)=1;
-        T(n+i,2*n)=2;
-
-        // Compute rhs = c[i]-a[i]-(A*1)[i]
-        Rational rhs=Rational(c[i]) - Rational(a[i]);
-        for(size_type j=0; j!=n; ++j) {
-          rhs-=Rational(A(i,j));
-        }
-        
-        if(rhs>=0) {
-          T(2*n+i,i)=1;
-          for(size_type j=0; j!=n; ++j) {
-            T(2*n+i,n+j)=-A(i,j);
-          }
-          T(2*n+i,2*n)=rhs;
-        }
-        else {
-          T(2*n+i,i)=-1;
-          for(size_type j=0; j!=n; ++j) {
-            T(2*n+i,n+j)=A(i,j);
-          }
-          T(2*n+i,2*n)=-rhs;
-        }
-        for(size_type j=0; j!=2u*n; ++j) {
-          T(3*n,j)-=T(2*n+i,j);
-        }
-        T(3*n,2*n)-=T(2*n+i,2*n);
-      }
-      
-      LinearAlgebra::LinearProgram<Rational> lp(T);
-      
-      bool result=(lp.optimal_value()!=0);
-      
-      if(result!=Geometry::disjoint(Polyhedron<R>(*this), Polyhedron<R>(r))) {
-        std::cerr << "Incorrect result for \n  " << r << "\nand\n" << *this << "\n";
-        std::cerr << T << "\n" << lp.tableau() << "\n";
-        std::cerr << convert_to<double>(lp.tableau()(3*n,2*n)) << "\n";
-        assert(false);
-      }
-      */
-      return Geometry::disjoint(Polyhedron<Rational>(*this), Polyhedron<Rational>(r));
-    }
-    
     template<typename R>
     std::vector< Point<Rational> > 
     Parallelotope<R>::vertices() const
@@ -318,6 +174,7 @@ namespace Ariadne {
       }
       return result;
     }
+    
     
     template<typename R>
     std::vector< Point<R> > 

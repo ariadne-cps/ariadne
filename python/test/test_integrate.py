@@ -57,8 +57,10 @@ initial_parallelotope=Parallelotope(initial_rectangle)
 initial_set=ParallelotopeListSet(initial_parallelotope)
 lohner.integration_step(avf,initial_set[-1],Real(0.125))
 for i in range(0,16):
-  initial_set.push_back(lohner.integrate(avf,initial_set[-1],Real(0.125)))
-initial_set.push_back(lohner.integrate(avf,initial_set[0],Real(2.0)))
+  p=Parallelotope(initial_set[-1])
+  initial_set.push_back(lohner.integrate_parallelotope(avf,initial_set[-1],Real(0.125)))
+p=Parallelotope(initial_set[0])
+initial_set.push_back(lohner.integrate(avf,p,Real(2.0)))
 plot("integrate1",bb,initial_set)
 print "Done\n"
 

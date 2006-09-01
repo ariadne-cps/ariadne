@@ -53,13 +53,6 @@ namespace Ariadne {
     }
 
     template<typename R>
-    Zonotope<R>::Zonotope(const Parallelotope<R>& p)
-      : _central_block(p.centre()), _generators(p.generators())
-    {
-      this->minimize_generators();
-    }
-
-    template<typename R>
     Zonotope<R>::Zonotope(const std::string& s)
       : _central_block(), _generators()
     {
@@ -70,15 +63,15 @@ namespace Ariadne {
     
     template<typename R>
     bool 
-    Zonotope<R>::operator==(const Zonotope<real_type>& A) const
+    Zonotope<R>::equal(const Zonotope<real_type>& A, const Zonotope<real_type>& B)
     {
       using namespace LinearAlgebra;
             
-      const matrix_type &this_gen=this->_generators;
       const matrix_type &A_gen=A._generators;
-      size_type directions=this->number_of_generators();
+      const matrix_type &B_gen=B._generators;
+      size_type directions=A.number_of_generators();
 
-      if (!have_same_dimensions(this_gen,A_gen)) {
+      if (!have_same_dimensions(A_gen,B_gen)) {
         return false;
       }
       array<bool> not_found(directions,true);
@@ -90,7 +83,7 @@ namespace Ariadne {
         searching_for_equiv=true;
         while ((j2< directions)&&(searching_for_equiv)) {
           if (not_found[j2]) {
-            if (equivalent_columns(this_gen, j, A_gen, j2)) { 
+            if (equivalent_columns(A_gen, j, B_gen, j2)) { 
               searching_for_equiv=false;
               not_found[j2]=false;
             }
@@ -207,13 +200,13 @@ namespace Ariadne {
 
     template<typename R>
     bool 
-    Zonotope<R>::superset(const Rectangle<R>& rect) const 
+    Zonotope<R>::subset(const Rectangle<R>& r,const Zonotope<R>& z)
     {
-      if (this->empty()) {
+      if (z.empty()) {
         return false;
       }
-      for (size_type i=0; i< (size_type)(1<<rect.dimension()); i++) {
-        if (!this->contains(rect.vertex(i))) {
+      for (size_type i=0; i<(size_type)(1<<r.dimension()); ++i) {
+        if (!z.contains(r.vertex(i))) {
           return false;
         }
       }
@@ -299,7 +292,7 @@ namespace Ariadne {
       const Point<R>& c=z.centre();
       
       Parallelotope<R> p(c,A);
-      while(!subset(z,p)) {
+      while(!Geometry::subset(z,p)) {
         A*=2;
         p=Parallelotope<R>(c,A);
       }
@@ -492,9 +485,92 @@ namespace Ariadne {
     }
     
 
+      /*
+    template<typename R>
+    bool
+    Zonotope<R>::disjoint(const Rectangle<R>& r) const
+    {
+      const Zonotope<R>& z=*this;
+      assert(z.dimension()==r.dimension());
+      dimension_type n=z.dimension();
+      dimension_type m=z.number_of_generators();
+    
+      This method has some problems. It fails when the parameters are
+      [1,17/16]x[19/16,5/4] and 
+        Zonotope(
+          centre=(1/2, 1/10)
+          directions=[ 1,1/2; 1/2,3/5 ]
+        )
+      // Construct tableau for testing intersection of rectangle and point
+      // Rectangle  a<=x<=b
+      // Parallelotope  x==c+Ae,  -1<=e<=1
+      // 
+      // Translate x'=x-a,  e'=e+1
+      //   0<=x'<=b-a
+      //   0<=e'<=2
+      //   x'+a==c+A(e'-1) ->  x'-Ae' == c-a-A1
+      //  
+      // Introduce slack variables for first two inequalities
+      // Introduce auxiliary variables for last equality, changing sign of RHS if necessary
+      // 
+      // Need to minimise sum of auxiliary variables -> add sum of last rows 
+      // to get value function.
+      LinearAlgebra::Matrix<Rational> T(3*n+1,2*m+1);
+
+      const Geometry::Point<R>& a=r.lower_corner();
+      const Geometry::Point<R>& b=r.upper_corner();
+      const Geometry::Point<R>& c=z.centre();
+      const LinearAlgebra::Matrix<R>& A=z.generators();
+
+      for(size_type i=0; i!=n; ++i) {
+        T(i,i)=1;
+        T(i,2*m)=Rational(b[i])-Rational(a[i]);
+        T(n+i,m+i)=1;
+        T(n+i,2*m)=2;
+
+        // Compute rhs = c[i]-a[i]-(A*1)[i]
+        Rational rhs=Rational(c[i]) - Rational(a[i]);
+        for(size_type j=0; j!=m; ++j) {
+          rhs-=Rational(A(i,j));
+        }
+        
+        if(rhs>=0) {
+          T(2*n+i,i)=1;
+          for(size_type j=0; j!=n; ++j) {
+            T(2*n+i,m+j)=-A(i,j);
+          }
+          T(2*n+i,2*m)=rhs;
+        }
+        else {
+          T(2*n+i,i)=-1;
+          for(size_type j=0; j!=m; ++j) {
+            T(2*n+i,m+j)=A(i,j);
+          }
+          T(2*n+i,2*m)=-rhs;
+        }
+        for(size_type j=0; j!=2*m; ++j) {
+          T(3*n,j)-=T(2*n+i,j);
+        }
+        T(3*n,2*m)-=T(2*n+i,2*m);
+      }
+      
+      LinearAlgebra::LinearProgram<Rational> lp(T);
+      
+      bool result=(lp.optimal_value()!=0);
+      
+      if(result!=Geometry::disjoint(Polyhedron<R>(*this), Polyhedron<R>(r))) {
+        std::cerr << "Incorrect result for \n  " << r << "\nand\n" << *this << "\n";
+        std::cerr << T << "\n" << lp.tableau() << "\n";
+        std::cerr << convert_to<double>(lp.tableau()(3*n,2*m)) << "\n";
+        assert(false);
+      }
+      return Geometry::disjoint(Polyhedron<Rational>(*this), Polyhedron<Rational>(r));
+    }
+    */
+   
     template<typename R> 
     Zonotope<R> 
-    minkowski_sum(const Zonotope<R>& A, const Zonotope<R>& B)
+    Zonotope<R>::minkowski_sum(const Zonotope<R>& A, const Zonotope<R>& B)
     {
       using namespace Ariadne::LinearAlgebra;
      
@@ -526,23 +602,11 @@ namespace Ariadne {
       return Zonotope<R>(A.centre()+(B.centre()).position_vector(),gen);
     }
    
-    template<typename R> 
-    Zonotope<R> 
-    minkowski_sum(const Rectangle<R>& A, const Zonotope<R>& B)
-    {
-      return minkowski_sum(Zonotope<R>(A),B);
-    }
+ 
     
     template<typename R> 
     Zonotope<R> 
-    minkowski_sum(const Zonotope<R>& A, const Rectangle<R>& B)
-    {
-      return minkowski_sum(A,Zonotope<R>(B));
-    }
-    
-    
-    template<typename R> 
-    Zonotope<R> minkowski_difference(const Zonotope<R>& A, const Zonotope<R>& B)
+    Zonotope<R>::minkowski_difference(const Zonotope<R>& A, const Zonotope<R>& B)
     {
       using namespace Ariadne::LinearAlgebra;
      
@@ -576,20 +640,7 @@ namespace Ariadne {
                          remove_null_columns_but_one(gen));
     }
 
-    template<typename R> 
-    Zonotope<R> 
-    minkowski_difference(const Rectangle<R>& A, const Zonotope<R>& B)
-    {
-      return minkowski_difference(Zonotope<R>(A),B);
-    }
-    
-    template<typename R> 
-    Zonotope<R> 
-    minkowski_difference(const Zonotope<R>& A, const Rectangle<R>& B)
-    {
-      return minkowski_difference(A,Zonotope<R>(B));
-    }
-    
+
     
     
     template<typename R>

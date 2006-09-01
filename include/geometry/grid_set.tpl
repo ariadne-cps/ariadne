@@ -667,7 +667,7 @@ dimension()==_grid.dimension());
 
       for(LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
         GridCell<R> cell(g,*iter);
-        if(z.superset(Rectangle<R>(cell))) {
+        if(subset(Rectangle<R>(cell),z)) {
           result.adjoin(cell);
         }
       }

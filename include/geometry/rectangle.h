@@ -321,35 +321,23 @@ namespace Ariadne {
 
       /*! \brief The \a i th vertex. */
       Point<R> vertex(size_type i) const;
-      
-      /*! \brief A rectangle containing the given rectangle; returns a copy. */
-      Rectangle bounding_box() const {
-        return *this;
-      }
         
       /*! \brief Tests if \a point is included into a rectangle. */
       bool contains(const Point<R>& pt) const;
       /*! \brief Tests if \a point is included into the interior a rectangle. */
       bool interior_contains(const Point<R>& pt) const;
-
-      /*! \brief Set equality operator. */
-      bool equals(const Rectangle<R>& r) const;
-     
-      /* Tests disjointness with \a r. */
-      bool disjoint(const Rectangle<R>& r) const;
-      /* Tests overlap with \a r. */
-      bool overlaps(const Rectangle<R>& r) const;
-      /* Tests inclusion in the interior of \a r. */
-      bool inner_subset(const Rectangle<R>& r) const;
-      /* Tests if the rectangle is a subset of another rectangle \a r. */
-      bool subset(const Rectangle<R>& r) const;
+      
+      /*! \brief A rectangle containing the given rectangle; returns a copy. */
+      Rectangle bounding_box() const {
+        return *this;
+      }
       //@}
       
 #ifdef DOXYGEN
       //@{ 
       //! \name Binary geometric predicates
       /*! \brief Set equality operator. */
-      friend bool equals(const Rectangle<R>& A, const Rectangle<R>& B) const;
+      friend bool equal(const Rectangle<R>& A, const Rectangle<R>& B) const;
      
       /*! \brief Tests disjointness with \a r. */
       friend bool disjoint(const Rectangle<R>& A, const Rectangle<R>& B) const;

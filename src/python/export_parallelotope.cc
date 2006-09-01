@@ -40,16 +40,16 @@ using namespace Ariadne::Geometry;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template <template <typename> class BS>
+template <template <typename> class BS1, template<typename> class BS2>
 inline
-Parallelotope<Real> 
-touching_intersection(const Parallelotope<Real> &a, 
-                      const BS<Real> &b) {
-        
-  if (interiors_intersect(a,b))
-    return a;
-
-  return Parallelotope<Real>(a.dimension());
+BS1<Real> 
+touching_intersection(const BS1<Real> &a, 
+                      const BS2<Real> &b) 
+{
+  if (disjoint(a,b))
+    return BS1<Real>(a.dimension());
+  
+  return a;
 }
 
 template Parallelotope<Real> touching_intersection(
@@ -61,54 +61,50 @@ template Parallelotope<Real> touching_intersection(
                 const Parallelotope<Real> &);
 
 void export_parallelotope() {
-  typedef bool (*PltpPltpBinPred) (const RParallelotope&, const RParallelotope&);
-  typedef bool (*PltpRectBinPred) (const RParallelotope&, const RRectangle&);
-  typedef bool (*RectPltpBinPred) (const RRectangle&, const RParallelotope&);
-  
   typedef RParallelotope (*PltpRectBinFun) (const RParallelotope&, 
                                             const RRectangle&);
   typedef RParallelotope (*PltpPltpBinFun) (const RParallelotope&, 
                                             const RParallelotope&);
-  
-  typedef bool (RParallelotope::*RectPred)(const RRectangle &) const;
-  typedef bool (RParallelotope::*PointPred) (const RPoint&) const;
-  
-  typedef RZonotope (*PltpZntpZntpBinFun) (const RParallelotope&, const RZonotope&);
-  typedef RZonotope (*PltpPltpZntpBinFun) (const RParallelotope&, const RParallelotope&);
+  typedef bool (*PltpPltpBinPred) (const RParallelotope&, 
+                                   const RParallelotope&);
+  typedef bool (*ZntpZntpBinPred) (const RZonotope&, 
+                                   const RZonotope&);
 
-  def("interiors_intersect", PltpPltpBinPred(&interiors_intersect));
-  def("interiors_intersect", PltpRectBinPred(&interiors_intersect));
-  def("interiors_intersect", RectPltpBinPred(&interiors_intersect));
   def("touching_intersection", PltpRectBinFun(&touching_intersection));
   def("touching_intersection", PltpPltpBinFun(&touching_intersection));
-  def("disjoint", PltpPltpBinPred(&disjoint));
-  def("disjoint", PltpRectBinPred(&disjoint));
-  def("disjoint", RectPltpBinPred(&disjoint));
-  def("inner_subset", PltpPltpBinPred(&inner_subset));
-  def("inner_subset", PltpRectBinPred(&inner_subset));
-  def("inner_subset", RectPltpBinPred(&inner_subset));
 
-  def("subset", PltpPltpBinPred(&subset));
-  def("subset", PltpRectBinPred(&subset));
-  def("subset", RectPltpBinPred(&subset));
-
+/*
+  class_< RParallelotope, bases<RZonotope> >("Parallelotope",init<int>())
+    .def(init<RPoint,RMatrix>())
+    .def(init<RParallelotope>())
+    .def(init<RRectangle>())
+    .def(init<std::string>())
+    .def("empty", &RParallelotope::empty)
+    .def("empty_interior", &RParallelotope::empty_interior)
+    .def("contains", &RParallelotope::contains)
+    .def("interior_contains", &RParallelotope::interior_contains)
+    .def("divide", &RParallelotope::divide)
+    .def("subdivide", &RParallelotope::subdivide)
+    .def(self_ns::str(self))
+  ;
+*/
+  // Can't use Python inheritence as the integration wrappers find Zonotope routine.
   class_<RParallelotope>("Parallelotope",init<int>())
     .def(init<RPoint,RMatrix>())
     .def(init<RParallelotope>())
     .def(init<RRectangle>())
     .def(init<std::string>())
-    .def("bounding_box", &RParallelotope::bounding_box)
-    .def("subdivide", &RParallelotope::subdivide)
-    .def("empty", &RParallelotope::empty)
+    .def("centre",&RZonotope::centre)
+    .def("generators",&RZonotope::generators, return_value_policy<copy_const_reference>())
+    .def("dimension", &RZonotope::dimension)
+    .def("empty", &RZonotope::empty)
     .def("empty_interior", &RParallelotope::empty_interior)
-    .def("dimension", &RParallelotope::dimension)
-    .def("contains", RectPred(&RParallelotope::contains) )
-    .def("contains", PointPred(&RParallelotope::contains))
+    .def("contains", &RParallelotope::contains)
     .def("interior_contains", &RParallelotope::interior_contains)
-    .def("centre", &RParallelotope::centre)
-    .def("radius", &RParallelotope::radius)
-    .def("__add__", PltpPltpZntpBinFun(&minkowski_sum))
-    .def("__sub__", PltpPltpZntpBinFun(&minkowski_difference))
-    .def(self_ns::str(self))    // __self_ns::str__
+    .def("divide", &RParallelotope::divide)
+    .def("subdivide", &RParallelotope::subdivide)
+    .def("bounding_box", &RZonotope::bounding_box)
+    .def(self_ns::str(self))
   ;
+  
 }

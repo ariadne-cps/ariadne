@@ -93,10 +93,7 @@ namespace Ariadne {
       
       //@{ 
       //! \name Comparison operators
-      /*! \brief The equality operator (not implemented).
-       *
-       * Not currently implemented, since it requires matching the columns of 
-       * the Matrix of principal directions. 
+      /*! \brief The equality operator.
        */
       bool operator==(const Sphere<R>& other) const
       {

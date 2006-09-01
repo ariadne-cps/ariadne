@@ -31,13 +31,6 @@ namespace Ariadne {
 
     template class Zonotope<Real>;
 
-    template Zonotope<Real> minkowski_sum(const Zonotope<Real>& z1, const Rectangle<Real>& z2);
-    template Zonotope<Real> minkowski_sum(const Rectangle<Real>& z1, const Zonotope<Real>& z2);
-    template Zonotope<Real> minkowski_sum(const Zonotope<Real>& z1, const Zonotope<Real>& z2);
-    template Zonotope<Real> minkowski_difference(const Zonotope<Real>& z1, const Rectangle<Real>& z2);
-    template Zonotope<Real> minkowski_difference(const Rectangle<Real>& z1, const Zonotope<Real>& z2);
-    template Zonotope<Real> minkowski_difference(const Zonotope<Real>& z1, const Zonotope<Real>& z2);
-
     template Zonotope<Real> operator+(const Rectangle<Real>& r, const LinearAlgebra::TransformationSystem<Real>& z);
     template Zonotope<Real> operator+(const Zonotope<Real>& r, const LinearAlgebra::TransformationSystem<Real>& z);
    

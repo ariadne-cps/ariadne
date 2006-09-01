@@ -100,26 +100,7 @@ namespace Ariadne {
       }
       //@}
       
-      //@{
-      //! \name Comparison operators
-      /*! \brief The equality operator (not implemented).
-       *
-       * Not currently implemented, since it requires matching the columns of 
-       * the Matrix of principal directions. 
-       */
-      bool operator==(const Simplex<real_type>& A) const
-      {
-        throw std::domain_error("Simplex::operator==(...)  not implemented");
-      }
-      
-      /*! \brief The inequality operator */
-      bool operator!=(const Simplex<real_type>& A) const {
-        throw std::domain_error("Simplex::operator!=(...)  not implemented");
-        return !(*this == A);
-      }
-      //@}
-      
-      
+    
       //@{
       //! \name Conversion operators
       /*! \brief Convert to a polyhedron. */

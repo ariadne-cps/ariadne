@@ -55,6 +55,8 @@ namespace Ariadne {
     template<> 
     inline bool is_a<Polyhedron,Polyhedron>() { return true; }
 
+    template<typename R> bool equal(const Polyhedron<R>& A, 
+                                       const Polyhedron<R>& B);
     template<typename R> bool disjoint(const Polyhedron<R>& A, 
                                        const Polyhedron<R>& B);
     template<typename R> bool interiors_intersect(const Polyhedron<R>& A, 
@@ -134,7 +136,7 @@ namespace Ariadne {
        */
       Polyhedron(LinearAlgebra::GeneratorSystem<R>& gen);
       
-      /*! \brief Construct the polyhedron defined by the Matrix equations \f$Ax\leq b\f$.
+      /*! \brief Construct the polyhedron defined by the matrix equations \f$Ax\leq b\f$.
        */
       Polyhedron(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b);
       
@@ -184,14 +186,14 @@ namespace Ariadne {
       bool empty() const;
       
    
-      /*! \brief The vertices of the Polyhedron. */
+      /*! \brief The vertices of the polyhedron. */
       state_list_type vertices() const; 
            
-      /*! \brief Tests if a Point is an element of the Polyhedron.
+      /*! \brief Tests if a point is an element of the polyhedron.
        */
       bool contains(const state_type& point) const;
 
-      /*! \brief Tests if the Polyhedron contains a \a Rectangle. */
+      /*! \brief Tests if the polyhedron contains a \a rectangle. */
       bool contains(const Rectangle<R>& rect) const; 
       
       /*! \brief Tests if a point is an element of the interior of the polyhedron.
@@ -201,7 +203,7 @@ namespace Ariadne {
       /*! \brief A rectangle containing the polyhedron. */
       Rectangle<R> bounding_box() const;
       
-      /*! \brief An over-approximation of the Polyhdron governed by the parameter \a delta.
+      /*! \brief An over-approximation of the polyhedron governed by the parameter \a delta.
        *
        * WARNING: The metric error of the approximation may be larger than \a delta.
        */
@@ -211,6 +213,9 @@ namespace Ariadne {
 
       //@{
       //! \name Geometric binary predicates
+      /*! \brief Tests equality. */
+      friend bool Geometry::equal <>(const Polyhedron<R>& A, 
+                                        const Polyhedron<R>& B);
       /*! \brief Tests disjointness. */
       friend bool Geometry::disjoint <>(const Polyhedron<R>& A, 
                                         const Polyhedron<R>& B);
@@ -247,7 +252,6 @@ namespace Ariadne {
       /*! \brief The Minkowski (pointwise) sum of two polyhedra. */
       friend Polyhedron<R> Geometry::minkowski_sum<>(const Polyhedron<R>& A, 
                                                      const Polyhedron<R>& B);
-       //@}
    
       /*! \brief The Minkowski (pointwise) difference of two polyhedra. */
       friend Polyhedron<R> Geometry::minkowski_difference<>(const Polyhedron<R>& A, 
@@ -272,6 +276,10 @@ namespace Ariadne {
     };
 
 
+    template <typename R>
+    bool 
+    equal(const Polyhedron<R>& A, const Polyhedron<R>& B);
+    
     template <typename R>
     bool 
     disjoint(const Polyhedron<R>& A, const Polyhedron<R>& B);

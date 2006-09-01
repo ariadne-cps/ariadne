@@ -653,8 +653,8 @@ namespace Ariadne {
       
       R t=time;
       R h=step_size;
-      Geometry::Zonotope<R> bs(initial_set.dimension());
-      Geometry::Zonotope<R> rs(initial_set.dimension());
+      Geometry::Zonotope<R> bs(initial_set.dimension(),initial_set.dimension());
+      Geometry::Zonotope<R> rs(initial_set.dimension(),initial_set.dimension()+1);
       
       std::multiset< std::pair< R,Geometry::Zonotope<R> >, pair_first_less< R,Geometry::Zonotope<R> > > working_sets;
       Geometry::ListSet<R,Geometry::Zonotope> reach_set(initial_set.dimension());

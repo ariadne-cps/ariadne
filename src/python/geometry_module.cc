@@ -39,9 +39,9 @@ BOOST_PYTHON_MODULE(geometry)
 {
   export_point();
   export_rectangle();
+  export_zonotope();
   export_parallelotope();
   export_simplex();
-  export_zonotope();
   export_polyhedron();
   export_list_set();
   export_lattice_set();

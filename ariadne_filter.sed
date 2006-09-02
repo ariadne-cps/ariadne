@@ -14,3 +14,4 @@ s/\,\ unbounded_array<Rational\,\ std::allocator<Rational\ >\ >//g
 s/\,\ unbounded_array<Interval<Dyadic\ >\,\ std::allocator<Interval<Dyadic\ >\ >\ >//g
 s/\,\ unbounded_array<Interval<Rational\ >\,\ std::allocator<Interval<Rational\ >\ >\ >//g
 s/ >/>/g
+s/basic_ostream<char, std::char_traits<char>>/ostream/g

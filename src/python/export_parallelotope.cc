@@ -73,7 +73,7 @@ void export_parallelotope() {
   def("touching_intersection", PltpRectBinFun(&touching_intersection));
   def("touching_intersection", PltpPltpBinFun(&touching_intersection));
 
-/*
+
   class_< RParallelotope, bases<RZonotope> >("Parallelotope",init<int>())
     .def(init<RPoint,RMatrix>())
     .def(init<RParallelotope>())
@@ -87,7 +87,7 @@ void export_parallelotope() {
     .def("subdivide", &RParallelotope::subdivide)
     .def(self_ns::str(self))
   ;
-*/
+/*
   // Can't use Python inheritence as the integration wrappers find Zonotope routine.
   class_<RParallelotope>("Parallelotope",init<int>())
     .def(init<RPoint,RMatrix>())
@@ -106,5 +106,5 @@ void export_parallelotope() {
     .def("bounding_box", &RZonotope::bounding_box)
     .def(self_ns::str(self))
   ;
-  
+*/
 }

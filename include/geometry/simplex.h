@@ -35,6 +35,8 @@
 
 #include "../base/array.h"
 #include "../geometry/point.h"
+#include "../geometry/point_list.h"
+#include "../geometry/polyhedron.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -61,7 +63,7 @@ namespace Ariadne {
      
      private:
       /* Simplex's vertices. */
-      array<state_type> _vertices;
+      LinearAlgebra::Matrix<R> _vertices;
    
      public:
       //@{
@@ -69,11 +71,11 @@ namespace Ariadne {
       /*! \brief Default constructor constructs standard simplex of dimension \a n. */
       Simplex(size_type n = 0);
     
+      /*! \brief Construct from matrix giving the vertices in column form. */
+      explicit Simplex(const LinearAlgebra::Matrix<R>& A);
+      
       /*! \brief Construct from list of vertices. */
-      explicit Simplex(const std::vector<state_type>& v);
-     
-      /*! \brief Construct from list of vertices. */
-      explicit Simplex(const array<state_type>& v);
+      explicit Simplex(const PointList<R>& v);
       
       /*! \brief Construct from a string literal. */
       explicit Simplex(const std::string& s);
@@ -103,8 +105,11 @@ namespace Ariadne {
     
       //@{
       //! \name Conversion operators
+      /*! \brief Convert to a Parma Polyhedra Library polyhedron. */
+      operator Parma_Polyhedra_Library::C_Polyhedron() const;
+
       /*! \brief Convert to a polyhedron. */
-      operator Polyhedron<R> () const;
+      operator Polyhedron<R>() const;
       //@}
       
       
@@ -112,7 +117,7 @@ namespace Ariadne {
       //! \name Geometric operations
       /*! \brief The dimension of the Euclidean space the rectangle lies in. */
       size_type dimension() const {
-        return (this->_vertices)[0].dimension();
+        return this->_vertices.size1();
       }
       
       /*! \brief True if the simplex is empty. */
@@ -126,185 +131,25 @@ namespace Ariadne {
       }
       
       /*! \brief The array of vertices. */
-      const array<state_type>& vertices() const {
-        return this->_vertices;
+      PointList<R> vertices() const {
+        return PointList<R>(this->_vertices);
       }
       
       /*! \brief The \a n th vertex. */
-      const state_type& vertex(size_type n) const {
-        return this->_vertices[n];
+      state_type vertex(size_type n) const {
+        return Point<R>(LinearAlgebra::Vector<R>(column(this->_vertices,n)));
       }
       
       /*! \brief Tests if \a point is included into a simplex. */
-      bool contains(const state_type& point) const {
-        return Polyhedron<R>(*this).contains(point);
-      }
+      bool contains(const state_type& point) const;
       
       /*! \brief Tests if \a point is included into the interior a simplex. */
-      bool interior_contains(const state_type& point) const {
-        return Polyhedron<R>(*this).interior_contains(point);
-      }
+      bool interior_contains(const state_type& point) const;
       //@}
-      
+
       friend std::ostream& operator<< <> (std::ostream& os, const Simplex<R>& r);
       friend std::istream& operator>> <> (std::istream& is, Simplex<R>& r);
     };
-
-    template <typename R>
-    inline bool disjoint(const Simplex<R>& A, const Simplex<R>& B) 
-    {
-      return disjoint(Polyhedron<R>(A),Polyhedron<R>(B));
-    }
-    
-    template <typename R>
-    inline bool disjoint(const Simplex<R>& A, const Rectangle<R>& B) 
-    {
-      return disjoint(Polyhedron<R>(A),Polyhedron<R>(B));
-    }
-    
-    template <typename R>
-    inline bool disjoint(const Rectangle<R>& A, const Simplex<R>& B) 
-    {
-      return disjoint(B,A);
-    }
-    
-    template <typename R>
-    inline bool disjoint(const Simplex<R>& A, const Polyhedron<R>& B) 
-    {
-      return disjoint(Polyhedron<R>(A),B);
-    }
-    
-    template <typename R>
-    inline bool disjoint(const Polyhedron<R>& A, const Simplex<R>& B) 
-    {
-      return disjoint(B,A);
-    }
-    
-    
-    template <typename R>
-    inline bool interiors_intersect(const Simplex<R>& A,
-                                    const Simplex<R>& B) 
-    {
-      return interiors_intersect(Polyhedron<R>(A),Polyhedron<R>(B));
-    }
-    
-    template <typename R>
-    inline bool interiors_intersect(const Simplex<R>& A,
-                                    const Rectangle<R>& B) 
-    {
-      return interiors_intersect(Polyhedron<R>(A),Polyhedron<R>(B));
-    }
-    
-    template <typename R>
-    inline bool interiors_intersect(const Rectangle<R>& A,
-                                    const Simplex<R>& B) 
-    {
-      return interiors_intersect(B,A);
-    }
-    
-    template <typename R>
-    inline bool interiors_intersect(const Simplex<R>& A,
-                                    const Polyhedron<R>& B) 
-    {
-      return interiors_intersect(Polyhedron<R>(A),B);
-    }
-    
-    template <typename R>
-    inline bool interiors_intersect(const Polyhedron<R>& A,
-                                    const Simplex<R>& B) 
-    {
-      return interiors_intersect(B,A);
-    }
-    
-    
-    template <typename R>
-    inline bool inner_subset(const Simplex<R>& A,
-                             const Simplex<R>& B) 
-    {
-      return inner_subset(Polyhedron<R>(A),Polyhedron<R>(B));
-    }
-
-    template <typename R>
-    inline bool inner_subset(const Simplex<R>& A,
-                             const Rectangle<R>& B) 
-    {
-      return inner_subset(Polyhedron<R>(A),Polyhedron<R>(B));
-    }
-
-    template <typename R>
-    inline bool inner_subset(const Rectangle<R>& A,
-                             const Simplex<R>& B) 
-    {
-      return inner_subset(Polyhedron<R>(A),Polyhedron<R>(B));
-    }
-
-    template <typename R>
-    inline bool inner_subset(const Simplex<R>& A,
-                             const Polyhedron<R>& B) 
-    {
-      return inner_subset(Polyhedron<R>(A),B);
-    }
-
-    template <typename R>
-    inline bool inner_subset(const Polyhedron<R>& A,
-                             const Simplex<R>& B) 
-    {
-      return inner_subset(A,Polyhedron<R>(B));
-    }
-
-    
-    template <typename R>
-    inline bool subset(const Simplex<R>& A,
-                       const Rectangle<R>& B)
-    {
-      return subset(Polyhedron<R>(A),Polyhedron<R>(B));
-    }
-    
-    template <typename R>
-    inline bool subset(const Rectangle<R>& A,
-                       const Simplex<R>& B)
-    {
-      return subset(Polyhedron<R>(A),Polyhedron<R>(B));
-    }
-    
-    template <typename R>
-    inline bool subset(const Simplex<R>& A,
-                       const Polyhedron<R>& B)
-    {
-      return subset(Polyhedron<R>(A),B);
-    }
-    
-    template <typename R>
-    inline bool subset(const Polyhedron<R>& A,
-                       const Simplex<R>& B)
-    {
-      return subset(A,Polyhedron<R>(B));
-    }
-    
-    template <typename R>
-    inline bool subset(const Simplex<R>& A,
-                       const Simplex<R>& B)
-    {
-      return subset(Polyhedron<R>(A),Polyhedron<R>(B));
-    }
-    
-
-    template<typename R>
-    inline
-    Geometry::Simplex<R> 
-    scale(const Geometry::Simplex<R>& s, const R& scale_factor) {
-      
-      const array< Geometry::Point<R> >& vertices=s.vertices();
-      array< Geometry::Point<R> > new_vertices(vertices.size());
-      
-      for(size_type i=0; i!=vertices.size(); ++i) {
-        for(size_type j=0; j!=vertices[i].dimension(); ++j) {
-          new_vertices[i][j]=scale_factor*vertices[i][j];
-        }
-      }
-
-      return Geometry::Simplex<R>(new_vertices);
-    }
 
     template <typename R>
     std::ostream&

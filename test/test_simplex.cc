@@ -44,22 +44,29 @@ int main() {
   cout << "test_simplex: " << flush;
   ofstream clog("test_simplex.log");
   
-  Point<Real> v0("(0.125,-0.25)");
+  Point<Real> v0("(-0.25,-0.125)");
   Point<Real> v1("(1.0,-0.5)");
-  Point<Real> v2("(-0.25,0.75)");
+  Point<Real> v2("(-0.375,0.75)");
 
-  std::vector< Point<Real> > pl;
+  clog << v0 << " " << v1 << " " << v2 << endl;
+  
+  PointList<Real> pl;
   pl.push_back(v0);
   pl.push_back(v1);
   pl.push_back(v2);
 
+  clog << "pl.dimension()=" << pl.dimension() << endl;
+  clog << "pl.size()=" << pl.size() << endl;
+  clog << "pl.capacity()=" << pl.capacity() << endl;
+  clog << "pl=" << pl << std::endl;
+  
   Simplex<Real> s(pl);
-  clog << s << endl;
+  clog << "s=" << flush << s << endl;
 
   Point<Real> pt1,pt2,pt3;
 
   pt1=Point<Real>("(17.0,15.0)");
-  pt2=Point<Real>("(0.125,-0.25)");
+  pt2=Point<Real>("(-0.25,-0.125)");
   pt3=Point<Real>("(0.0,0.0)");
 
   assert(!s.contains(pt1));
@@ -67,8 +74,6 @@ int main() {
   assert(!s.interior_contains(pt2));
   assert(s.interior_contains(pt3));
 
-  Polyhedron<Real> ply(s);
-  clog << ply << endl;
   clog.close();
   cout << "INCOMPLETE\n";
 

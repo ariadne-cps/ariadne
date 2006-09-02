@@ -21,7 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "../system/affine_vector_field.h"
+#include "affine_vector_field.h"
+
+#include "../linear_algebra/interval_vector.h"
+#include "../linear_algebra/interval_matrix.h"
+
+#include "../geometry/point.h"
+#include "../geometry/rectangle.h"
+#include "../geometry/zonotope.h"
+#include "../geometry/parallelotope.h"
+#include "../geometry/simplex.h"
+#include "../geometry/polyhedron.h"
 
 namespace Ariadne {
   namespace System {

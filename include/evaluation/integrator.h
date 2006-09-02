@@ -126,7 +126,9 @@ namespace Ariadne {
       virtual Geometry::Zonotope<R> integration_step(const System::VectorField<R>&,
                                                           const Geometry::Zonotope<R>&,
                                                           R&) const = 0;
-
+     protected:
+      /*! \brief Constructs a zonotopic generator for the convex hull of \a iv and \a -iv. */ 
+      static LinearAlgebra::Matrix<R> symmetrize(const LinearAlgebra::IntervalVector<R>& r);
      private:
       R _minimum_step_size;
       R _maximum_step_size;

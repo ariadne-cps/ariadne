@@ -30,133 +30,52 @@
 #define _ARIADNE_POLYHEDRON_H
 
 #include <iosfwd>
-#include <ppl.hh>
 #include <vector>
 
 #include "../declarations.h"
 
-#include "../linear_algebra/constraint_system.h"
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 #include "../linear_algebra/interval_vector.h"
 
-#include "../linear_algebra/generator_system.h"
+#include "../geometry/ppl_polyhedron.h"
 #include "../geometry/point.h"
+#include "../geometry/point_list.h"
 #include "../geometry/rectangle.h"
 
-namespace Parma_Polyhedra_Library {
-  // Import all the output operators into the main PPL namespace.
-  using IO_Operators::operator<<;
-}
- 
 namespace Ariadne {  
   namespace Geometry {
 
-    template<> 
-    inline bool is_a<Polyhedron,Polyhedron>() { return true; }
-
-    template<typename R> bool equal(const Polyhedron<R>& A, 
-                                       const Polyhedron<R>& B);
-    template<typename R> bool disjoint(const Polyhedron<R>& A, 
-                                       const Polyhedron<R>& B);
-    template<typename R> bool interiors_intersect(const Polyhedron<R>& A, 
-                                                  const Polyhedron<R>& B);
-    template<typename R> bool inner_subset(const Polyhedron<R>& A, 
-                                           const Polyhedron<R>& B);
-    template<typename R> bool subset(const Polyhedron<R>& A, 
-                                     const Polyhedron<R>& B);
-    template<typename R> Polyhedron<R> intersection(const Polyhedron<R>& A, 
-                                                    const Polyhedron<R>& B);
-    template<typename R> Polyhedron<R> regular_intersection(const Polyhedron<R>& A, 
-                                                            const Polyhedron<R>& B);
-    template<typename R> Polyhedron<R> convex_hull(const Polyhedron<R>& A, 
-                                                   const Polyhedron<R>& B);
-    template<typename R> Polyhedron<R> minkowski_sum(const Polyhedron<R>& A,
-                                                     const Polyhedron<R>& B);
-    template<typename R> Polyhedron<R> minkowski_difference(const Polyhedron<R>& A,
-                                                            const Polyhedron<R>& B);
-    template<typename R> std::ostream& operator<<(std::ostream& os, 
-                                                  const Polyhedron<R>& P);
-                                                   
-                                                   
-    /* Transforms an Point into a Parma_Polyhedra_Library::C_Polyhedron */
-    template <typename R>
-    Parma_Polyhedra_Library::NNC_Polyhedron 
-    _from_Point_to_PPL_Polyhedron(const Point<R>& s); 
-    
-    /* Transforms an Rectangle into a Parma_Polyhedra_Library::C_Polyhedron */
-    template <typename R>
-    Parma_Polyhedra_Library::NNC_Polyhedron 
-    _from_Rectangle_to_closed_PPL_Polyhedron(const Rectangle<R>& r);
 
     /*! \ingroup BasicSet
-     *  \brief The polyhedron class.
-     *
-     * This is a wrapper from Parma Polyhedra Library Polyhedron class
-     * to Ariadne representation.
+     *  \brief A polyhedron (bounded polyhedral set) described by its vertices.
      */ 
-    template <typename R>
+    template<typename R>
     class Polyhedron {
-     public:
-      /*! \brief The type of denotable real numbers used to describe the polyhedron. */
+      public:
+       /*! \brief The type of denotable real numbers used to describe the convex hull. */
       typedef R real_type;
-      /*! \brief The type of denotable point contained by the polyhedron. */
+      /*! \brief The type of denotable point contained by the convex hull. */
       typedef Point<R> state_type;
       /*! \brief The type of vector. */
       typedef Ariadne::LinearAlgebra::Vector<R> vector_type;
       /*! \brief The type of matrix. */
       typedef Ariadne::LinearAlgebra::Matrix<R> matrix_type;
       /*! \brief The type of a list of points. */
-      typedef std::vector< Point<R> > state_list_type;
+      typedef PointList<R>  state_list_type;
      public:
-      friend class Parallelotope<R>;
-    
-      //@{ 
-      //! \name Constructors
-      /*! \brief Default constructor creates empty set. 
-       */
-      Polyhedron();
-      
-      /*! \brief Construct an empty polyhedron with dimension \a dim.
-       *
-       * Builds a polyhedron with dimension \a dim.
-       * \param dim is the new polyhedron's number of dimensions.
-       */
-      Polyhedron(size_type dim);
-        
-      /*! \brief Construct a polyhedron from a constraint system.
-       *
-       * \param cs is the constraint system.
-       */
-      Polyhedron(LinearAlgebra::ConstraintSystem<R>& cs);
-      
-      /*! \brief Construct a polyhedron from a generator system.
-       *
-       * \param gen is the generator system.
-       */
-      Polyhedron(LinearAlgebra::GeneratorSystem<R>& gen);
-      
-      /*! \brief Construct the polyhedron defined by the matrix equations \f$Ax\leq b\f$.
-       */
-      Polyhedron(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b);
-      
-      /*! \brief Construct the polyhedron defined by the rectilinear generating system \f$c+Ae\f$.
-       */
-      Polyhedron(const Point<R>& c, const LinearAlgebra::Matrix<R>& A);
-      
-      /*! \brief Construct the polyhedron defined as the convex hull of a list of points.
-       */
-      Polyhedron(const std::vector< Point<R> >& points);
-      
-      /*! \brief Construct a polyhedron from an interval vector. */
-      Polyhedron(const LinearAlgebra::IntervalVector<R>& iv);
-            
-      /*! \brief Construct a polyhedron from a rectangle. */
-      Polyhedron(const Rectangle<R>& rect);
+      /*! \brief Construct from a matrix whose columns give the vertices. */
+      explicit Polyhedron(const LinearAlgebra::Matrix<R>& A);
+     
+      /*! \brief Convert from a list of vertices. */
+      Polyhedron(const PointList<R>& v);
+     
+      /*! \brief Convert from a rectangle. */
+      Polyhedron<R>(const Rectangle<R>& rect);
             
       /*! \brief Copy constructor. 
        */
-      Polyhedron(const Polyhedron<R>& original);
+      Polyhedron<R>(const Polyhedron<R>& original);
           
       /*! \brief Copy assignment operator. 
        *
@@ -164,61 +83,60 @@ namespace Ariadne {
        * \return A reference to the current object.
        */
       Polyhedron<R>& operator=(const Polyhedron<R>& original);
-       //@}
-      
+      //@}
+ 
+      /*! \brief The number of vertices of the convex set. */
+      size_type number_of_vertices() const;
+
+      /*! \brief The vertices of the convex set. */
+      PointList<R> vertices() const;
       
       //@{
-      //! \name Modifying operations
-      /*! \brief Makes the polyhedron empty.
-       */
-      void clear();
+      //! \name Conversion operations
+      /*! \brief Convert to a Parma Polyhedral Library closed polyhedron. */
+      operator Parma_Polyhedra_Library::C_Polyhedron () const;
       //@}
-      
-      
+
+
       //@{
       //! \name Geometric operations
       /*! \brief Returns the polyhedron's space dimension.
        */
-      size_type dimension() const;
+      dimension_type dimension() const;
       
       /*! \brief Checks for emptyness.
        */
       bool empty() const;
       
+      /*! \brief Checks for emptyness of the interior.
+       */
+      bool empty_interior() const;
    
+#ifdef DOXYGEN
       /*! \brief The vertices of the polyhedron. */
       state_list_type vertices() const; 
-           
+#endif
+
       /*! \brief Tests if a point is an element of the polyhedron.
        */
       bool contains(const state_type& point) const;
 
-      /*! \brief Tests if the polyhedron contains a \a rectangle. */
-      bool contains(const Rectangle<R>& rect) const; 
-      
       /*! \brief Tests if a point is an element of the interior of the polyhedron.
        */
       bool interior_contains(const state_type& point) const;
-      
+           
       /*! \brief A rectangle containing the polyhedron. */
       Rectangle<R> bounding_box() const;
       
-      /*! \brief An over-approximation of the polyhedron governed by the parameter \a delta.
-       *
-       * WARNING: The metric error of the approximation may be larger than \a delta.
-       */
-      Polyhedron<R> over_approximation(const real_type& delta) const;
-      //@}
-      
-
+#ifdef DOXYGEN
       //@{
       //! \name Geometric binary predicates
       /*! \brief Tests equality. */
-      friend bool Geometry::equal <>(const Polyhedron<R>& A, 
-                                        const Polyhedron<R>& B);
+      friend bool Geometry::equal<>(const Polyhedron<R>& A, 
+                                    const Polyhedron<R>& B);
       /*! \brief Tests disjointness. */
-      friend bool Geometry::disjoint <>(const Polyhedron<R>& A, 
-                                        const Polyhedron<R>& B);
+      friend bool Geometry::disjoint<>(const Polyhedron<R>& A, 
+                                       const Polyhedron<R>& B);
     
       /*! \brief Tests intersection of interiors. */
       friend bool Geometry::interiors_intersect<>(const Polyhedron<R>& A, 
@@ -238,181 +156,392 @@ namespace Ariadne {
       //@{
       //! \name Geometric binary operations
       /*! \brief The intersection of two polyhedra. */
-      friend Polyhedron<R> Geometry::intersection<>(const Polyhedron<R>& A, 
-                                                    const Polyhedron<R>& B);
+      friend Polyhedron<R> intersection<>(const Polyhedron<R>& A, 
+                                          const Polyhedron<R>& B);
     
       /*! \brief The closure of the intersection of the interiors of two polyhedra. */
-      friend Polyhedron<R> Geometry::regular_intersection<>(const Polyhedron<R>& A, 
-                                                            const Polyhedron<R>& B);
+      friend Polyhedron<R> regular_intersection<>(const Polyhedron<R>& A, 
+                                                  const Polyhedron<R>& B);
     
       /*! \brief The convex hull of two polyhedra. */
-      friend Polyhedron<R> Geometry::convex_hull<>(const Polyhedron<R>& A, 
-                                                   const Polyhedron<R>& B);
+      friend Polyhedron<R> convex_hull<>(const Polyhedron<R>& A, 
+                                         const Polyhedron<R>& B);
       
       /*! \brief The Minkowski (pointwise) sum of two polyhedra. */
-      friend Polyhedron<R> Geometry::minkowski_sum<>(const Polyhedron<R>& A, 
-                                                     const Polyhedron<R>& B);
+      friend Polyhedron<R> minkowski_sum<>(const Polyhedron<R>& A, 
+                                           const Polyhedron<R>& B);
    
       /*! \brief The Minkowski (pointwise) difference of two polyhedra. */
-      friend Polyhedron<R> Geometry::minkowski_difference<>(const Polyhedron<R>& A, 
-                                                            const Polyhedron<R>& B);
-       //@}
-   
-      friend std::ostream& operator<< <>(std::ostream& os, 
-                                         const Polyhedron<R>& P);
-    
-     
-     private:
-      /* Construct a polyhedron from a PPL constraint system. */
-      Polyhedron(Parma_Polyhedra_Library::Constraint_System& cs);
+      friend Polyhedron<R> minkowski_difference<>(const Polyhedron<R>& A, 
+                                                  const Polyhedron<R>& B);
+      //@}
+ #else
+      static bool equal(const Polyhedron<R>& A, const Polyhedron<R>& B);
+      static bool disjoint(const Polyhedron<R>& A, const Polyhedron<R>& B);
+      static bool interiors_intersect(const Polyhedron<R>& A, const Polyhedron<R>& B);
+      static bool subset(const Polyhedron<R>& A, const Polyhedron<R>& B);
+      static bool inner_subset(const Polyhedron<R>& A, const Polyhedron<R>& B);
       
-      const Parma_Polyhedra_Library::NNC_Polyhedron& _ppl_interior() const;
+      static Polyhedron<R> convex_hull(const Polyhedron<R>& A, const Polyhedron<R>& B);
+#endif
      private:
-      /* The polyhedron data structure. */
-      Parma_Polyhedra_Library::NNC_Polyhedron _ppl_poly; 
-    
-      /* This is mutable since we do not compute it unless needed */
-      mutable Parma_Polyhedra_Library::NNC_Polyhedron _interior_poly;
+      LinearAlgebra::Matrix<R> _vertices;
     };
-
-
-    template <typename R>
-    bool 
-    equal(const Polyhedron<R>& A, const Polyhedron<R>& B);
+   
+    template<typename R> std::ostream& operator<<(std::ostream& os, const Polyhedron<R>& p);
+    template<typename R> std::istream& operator>>(std::istream& os, Polyhedron<R>& p);
+   
     
-    template <typename R>
-    bool 
-    disjoint(const Polyhedron<R>& A, const Polyhedron<R>& B);
+    template<typename R> inline 
+    bool equal(const Polyhedron<R>& A, const Polyhedron<R>& B) {
+      return Polyhedron<R>::equal(A,B);
+    }
+   
+    template<typename R> inline 
+    bool disjoint(const Polyhedron<R>& A, const Polyhedron<R>& B) {
+      return Polyhedron<R>::disjoint(A,B);
+    }
     
-    template <typename R>
+    template<typename R> inline 
+    bool 
+    disjoint(const Polyhedron<R>& A, const Rectangle<R>& B) {
+      return Polyhedron<R>::disjoint(A,Polyhedron<R>(B));
+    }
+    
+    template<typename R> inline 
+    bool 
+    disjoint(const Rectangle<R>& A, const Polyhedron<R>& B) {
+      return Polyhedron<R>::disjoint(Polyhedron<R>(A),B);
+    }
+    
+    
+    template<typename R> inline 
     bool
-    interiors_intersect(const Polyhedron<R>& A, const Polyhedron<R>& B);
+    interiors_intersect(const Polyhedron<R>& A, const Polyhedron<R>& B) {
+      return Polyhedron<R>::interiors_intersect(A,B);
+    }
     
-    template <typename R>
-    bool 
-    inner_subset(const Polyhedron<R>& A, const Polyhedron<R>& B);
+    template<typename R> inline 
+    bool
+    interiors_intersect(const Polyhedron<R>& A, const Rectangle<R>& B) {
+      return Polyhedron<R>::interiors_intersect(A,Polyhedron<R>(B));
+    }
     
-    template <typename R>
+    template<typename R> inline 
+    bool
+    interiors_intersect(const Rectangle<R>& A, const Polyhedron<R>& B) {
+      return Polyhedron<R>::interiors_intersect(Polyhedron<R>(A),B);
+    }
+    
+   
+    template<typename R> inline 
     bool 
-    subset(const Polyhedron<R>& A, const Polyhedron<R>& B);
+    inner_subset(const Polyhedron<R>& A, const Polyhedron<R>& B) {
+      return Polyhedron<R>::inner_subset(A,B);
+    }
+    
+    template<typename R> inline 
+    bool 
+    inner_subset(const Polyhedron<R>& A, const Rectangle<R>& B) {
+      return Polyhedron<R>::inner_subset(A,Polyhedron<R>(B));
+    }
 
-    template <typename R>
+    template<typename R> inline 
+    bool 
+    inner_subset(const Rectangle<R>& A, const Polyhedron<R>& B) {
+      return Polyhedron<R>::inner_subset(Polyhedron<R>(A),B);
+    }
+      
+      
+    template<typename R> inline 
+    bool 
+    subset(const Polyhedron<R>& A, const Polyhedron<R>& B) {
+      return Polyhedron<R>::subset(A,B);
+    }
+
+    template<typename R> inline 
+    bool 
+    subset(const Polyhedron<R>& A, const Rectangle<R>& B) {
+      return Polyhedron<R>::subset(A,Polyhedron<R>(B));
+    }
+
+    template<typename R> inline 
+    bool 
+    subset(const Rectangle<R>& A, const Polyhedron<R>& B) {
+      return Polyhedron<R>::subset(Polyhedron<R>(A),B);
+    }
+
+
+    template<typename R> inline 
     Polyhedron<R> 
-    regular_intersection(const Polyhedron<R>& A, const Polyhedron<R>& B);
-
-    template <typename R>
-    Polyhedron<R> 
-    intersection(const Polyhedron<R>& A, const Polyhedron<R>& B);
-
-    template <typename R>
-    Polyhedron<R> 
-    convex_hull(const Polyhedron<R>& A, const Polyhedron<R>& B);
-
-    template <typename R>
-    Polyhedron<R> 
-    minkowski_sum(const Polyhedron<R>& A, const Polyhedron<R>& B);
-
-    template <typename R>
-    Polyhedron<R> 
-    minkowski_difference(const Polyhedron<R>& A, const Polyhedron<R>& B);
-
-    template<typename R, template <typename> class BS> 
-    inline Polyhedron<R> 
-    minkowski_sum(const Polyhedron<R>& A, const BS<R>& B) {
-      return minkowski_sum(A, Polyhedron<R>(B));
+    convex_hull(const Polyhedron<R>& A, const Polyhedron<R>& B) {
+      return Polyhedron<R>::convex_hull(A,B);
     }
+  
+    
+    
+    
+    /*! \ingroup BasicSet
+     *  \brief A polytope (not necessarily bounded polyhedral set) described by a system of linear inequalities.
+     */ 
+    template<typename R>
+    class Polytope {
+     public:
+      /*! \brief The type of denotable real numbers used to describe the polytope. */
+      typedef Rational real_type;
+      /*! \brief The type of denotable point contained by the polytope. */
+      typedef Point<R> state_type;
+      /*! \brief The type of vector. */
+      typedef Ariadne::LinearAlgebra::Vector<R> vector_type;
+      /*! \brief The type of matrix. */
+      typedef Ariadne::LinearAlgebra::Matrix<R> matrix_type;
+     public:
+      //@{ 
+      //! \name Constructors
+      /*! \brief Default constructor creates empty set. 
+       */
+      explicit Polytope<R>();
+      
+      /*! \brief Construct an empty polytope with dimension \a n.
+       */
+      explicit Polytope<R>(dimension_type n);
+     
+      /*! \brief Construct the polytope defined by the matrix equations \f$Ax\leq b\f$.
+       */
+      explicit Polytope<R>(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b);
+            
+      /*! \brief Convert from a rectangle. */
+      Polytope<R>(const Rectangle<R>& rect);
+            
+      /*! \brief Copy constructor. 
+       */
+      Polytope<R>(const Polytope<R>& original);
+          
+      /*! \brief Copy assignment operator. 
+       *
+       * \param original is the original polytope.
+       * \return A reference to the current object.
+       */
+      Polytope<R>& operator=(const Polytope<R>& original);
+      //@}
+      
+      
+      //@{
+      //! \name Conversion operations
+      /*! \brief Convert to a Parma Polyhedral Library closed polyhedron. */
+      operator Parma_Polyhedra_Library::C_Polyhedron () const;
+      //@}
 
-    template <typename R>
-    inline 
-    bool 
-    disjoint(const Polyhedron<R>& A, 
-             const Rectangle<R>& B)
-    {
-      return disjoint(A,Polyhedron<R>(B));
+      //@{
+      //! \name Data access
+      /*! \brief The matrix \f$A\f$ in the inequalities \f$Ax\leq b\f$. */
+      LinearAlgebra::Matrix<R> A() const { return _A; }
+      /*! \brief The vector \f$b\f$ in the inequalities \f$Ax\leq b\f$. */
+      LinearAlgebra::Vector<R> b() const { return _b; }
+      //@}
+
+
+      //@{
+      //! \name Geometric operations
+      /*! \brief Returns the polytope's space dimension.
+       */
+      dimension_type dimension() const;
+      
+      /*! \brief Checks for emptyness.
+       */
+      bool empty() const;
+      
+      /*! \brief Checks for emptyness of the interior.
+       */
+      bool empty_interior() const;
+   
+      /*! \brief The vertices of the polytope. */
+      PointList<Rational>  vertices() const; 
+           
+      /*! \brief Tests if a point is an element of the polytope.
+       */
+      bool contains(const state_type& point) const;
+
+      /*! \brief Tests if a point is an element of the interior of the polytope.
+       */
+      bool interior_contains(const state_type& point) const;
+           
+      /*! \brief A rectangle containing the polytope. */
+      Rectangle<R> bounding_box() const;
+      
+      /*! \brief An over-approximation of the polytope governed by the parameter \a delta.
+       *
+       * WARNING: The metric error of the approximation may be larger than \a delta.
+       */
+      Polytope<R> over_approximation(const R& delta) const;
+      //@}
+      
+
+#ifdef DOXYGEN
+      //@{
+      //! \name Geometric binary predicates
+      /*! \brief Tests equality. */
+      friend bool Geometry::equal<>(const Polytope<R>& A, 
+                                    const Polytope<R>& B);
+      /*! \brief Tests disjointness. */
+      friend bool Geometry::disjoint<>(const Polytope<R>& A, 
+                                       const Polytope<R>& B);
+    
+      /*! \brief Tests intersection of interiors. */
+      friend bool Geometry::interiors_intersect<>(const Polytope<R>& A, 
+                                                  const Polytope<R>& B);
+      
+      /*! \brief Tests inclusion of \a A in interior of \a B. */
+      friend bool Geometry::inner_subset<>(const Polytope<R>& A, 
+                                           const Polytope<R>& B);
+    
+      /*! \brief Tests inclusion of \a A in \a B. */
+      friend bool Geometry::subset<>(const Polytope<R>& A, 
+                                     const Polytope<R>& B);
+    
+      //@}
+      
+
+      //@{
+      //! \name Geometric binary operations
+      /*! \brief The intersection of two polyhedra. */
+      friend Polytope<R> intersection<>(const Polytope<R>& A, 
+                                          const Polytope<R>& B);
+    
+      /*! \brief The closure of the intersection of the interiors of two polyhedra. */
+      friend Polytope<R> regular_intersection<>(const Polytope<R>& A, 
+                                                  const Polytope<R>& B);
+    
+      /*! \brief The convex hull of two polyhedra. */
+      friend Polytope<R> convex_hull<>(const Polytope<R>& A, 
+                                         const Polytope<R>& B);
+      
+      /*! \brief The Minkowski (pointwise) sum of two polyhedra. */
+      friend Polytope<R> minkowski_sum<>(const Polytope<R>& A, 
+                                           const Polytope<R>& B);
+   
+      /*! \brief The Minkowski (pointwise) difference of two polyhedra. */
+      friend Polytope<R> minkowski_difference<>(const Polytope<R>& A, 
+                                                  const Polytope<R>& B);
+      //@}
+#else
+      static bool equal(const Polytope& A, const Polytope& B);
+      static bool disjoint(const Polytope& A, const Polytope& B);
+      static bool interiors_intersect(const Polytope& A, const Polytope& B);
+      static bool subset(const Polytope& A, const Polytope& B);
+      static bool inner_subset(const Polytope& A, const Polytope& B);
+      
+      static Polytope<R> intersection(const Polytope& A, const Polytope& B);
+      static Polytope<R> regular_intersection(const Polytope& A, const Polytope& B);
+#endif
+     private:
+       LinearAlgebra::Matrix<R> _A;
+       LinearAlgebra::Vector<R> _b;
+    };
+   
+    template<typename R> std::ostream& operator<<(std::ostream& os, const Polytope<R>& p);
+    template<typename R> std::istream& operator>>(std::istream& os, Polytope<R>& p);
+
+   
+   
+   
+
+
+    template<typename R> inline 
+    bool equal(const Polytope<R>& A, const Polytope<R>& B) {
+      return Polytope<R>::equal(A,B);
+    }
+   
+    template<typename R> inline 
+    bool disjoint(const Polytope<R>& A, const Polytope<R>& B) {
+      return Polytope<R>::disjoint(A,B);
     }
     
-    template <typename R>
-    inline 
+    template<typename R> inline 
     bool 
-    disjoint(const Rectangle<R>& A, 
-             const Polyhedron<R>& B)
-    {
-      return disjoint(B,A);
+    disjoint(const Polytope<R>& A, const Rectangle<R>& B) {
+      return Polytope<R>::disjoint(A,Polytope<R>(B));
+    }
+    
+    template<typename R> inline 
+    bool 
+    disjoint(const Rectangle<R>& A, const Polytope<R>& B) {
+      return Polytope<R>::disjoint(Polytope<R>(A),B);
+    }
+    
+    
+    template<typename R> inline 
+    bool
+    interiors_intersect(const Polytope<R>& A, const Polytope<R>& B) {
+      return Polytope<R>::interiors_intersect(A,B);
+    }
+    
+    template<typename R> inline 
+    bool
+    interiors_intersect(const Polytope<R>& A, const Rectangle<R>& B) {
+      return Polytope<R>::interiors_intersect(A,Polytope<R>(B));
+    }
+    
+    template<typename R> inline 
+    bool
+    interiors_intersect(const Rectangle<R>& A, const Polytope<R>& B) {
+      return Polytope<R>::interiors_intersect(Polytope<R>(A),B);
+    }
+    
+   
+    template<typename R> inline 
+    bool 
+    inner_subset(const Polytope<R>& A, const Polytope<R>& B) {
+      return Polytope<R>::inner_subset(A,B);
+    }
+    
+    template<typename R> inline 
+    bool 
+    inner_subset(const Polytope<R>& A, const Rectangle<R>& B) {
+      return Polytope<R>::inner_subset(A,Polytope<R>(B));
     }
 
-    template <typename R>
-    inline 
+    template<typename R> inline 
     bool 
-    interiors_intersect(const Polyhedron<R>& A,
-                        const Rectangle<R>& B) 
-    {
-       return interiors_intersect(A,Polyhedron<R>(B));
+    inner_subset(const Rectangle<R>& A, const Polytope<R>& B) {
+      return Polytope<R>::inner_subset(Polytope<R>(A),B);
     }
-    
-    template <typename R>
-    inline 
+      
+      
+    template<typename R> inline 
     bool 
-    interiors_intersect(const Rectangle<R>& A, 
-                        const Polyhedron<R>& B) 
-    {
-      return interiors_intersect(B,A);
-    }    
-    
-    template <typename R>
-    inline 
-    bool 
-    inner_subset(const Polyhedron<R>& A,
-                 const Rectangle<R>& B) 
-    {
-      return inner_subset(A,Polyhedron<R>(B));
-    }
-    
-    template <typename R>
-    inline 
-    bool 
-    inner_subset(const Rectangle<R>& A, 
-                 const Polyhedron<R>& B) 
-    {
-      return inner_subset(B,A);
-    }
-    
-    template <typename R>
-    inline 
-    bool 
-    subset(const Polyhedron<R>& A,
-           const Rectangle<R>& B) 
-    {
-      return subset(A,Polyhedron<R>(B));
-    }
-    
-    template <typename R>
-    inline 
-    bool 
-    subset(const Rectangle<R>& A,
-           const Polyhedron<R>& B) 
-    {
-      return subset(Polyhedron<R>(A),B);
+    subset(const Polytope<R>& A, const Polytope<R>& B) {
+      return Polytope<R>::subset(A,B);
     }
 
-    template <typename R>
-    inline 
-    Polyhedron<R> 
-    regular_intersection(const Polyhedron<R>& A, 
-                         const Rectangle<R>& B) 
-    {
-      return regular_intersection(A, Polyhedron<R>(B));
+    template<typename R> inline 
+    bool 
+    subset(const Polytope<R>& A, const Rectangle<R>& B) {
+      return Polytope<R>::subset(A,Polytope<R>(B));
     }
 
-    template <typename R>
-    inline 
-    Polyhedron<R> 
-    regular_intersection(const Rectangle<R>& A, 
-                         const Polyhedron<R>& B) 
-    {
-      return regular_intersection(B,A);
+    template<typename R> inline 
+    bool 
+    subset(const Rectangle<R>& A, const Polytope<R>& B) {
+      return Polytope<R>::subset(Polytope<R>(A),B);
     }
 
-}
+
+    template<typename R> inline 
+    Polytope<R> 
+    regular_intersection(const Polytope<R>& A, const Polytope<R>& B) {
+      return Polytope<R>::regular_intersection(A,B);
+    }
+
+    template<typename R> inline 
+    Polytope<R> 
+    intersection(const Polytope<R>& A, const Polytope<R>& B) {
+      return Polytope<R>::intersection(A,B);
+    }
+
+
+
+  }
 }
 
 #endif /* _ARIADNE_POLYHEDRON_H */

@@ -35,6 +35,8 @@
 #include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
 
+#include "output/epsfstream.h"
+
 #include "test.h"
 
 using namespace Ariadne;
@@ -70,6 +72,10 @@ int main() {
   pt5=Point<Real>("(14.0,5.0,-0.5)");
   pt6=Point<Real>("(15.5,11.5,0)");
 
+  Postscript::epsfstream eps("test_zonotope.eps",z3.bounding_box(),0,1);
+  eps << z3 << pt1 << pt2 << pt3 << pt4 << pt5 << pt6 << endl;
+  eps.close();
+  
   assert(z3.contains(pt1));
   assert(z3.contains(pt2));
   assert(z3.contains(pt3));
@@ -77,14 +83,21 @@ int main() {
   assert(!z3.contains(pt5));
   assert(z3.contains(pt6));
 
+  assert(z3.contains(z3.centre()));
+
   clog << pt1 << " " << pt2 << " " << pt3 << " " << pt4 << " " << pt5 << " " << pt6 << endl;
-  assert(z3.interior_contains(pt1));
-  assert(z3.interior_contains(pt2));
-  assert(z3.interior_contains(pt3));
-  assert(z3.interior_contains(pt4));
+  assert(!z3.interior_contains(pt1));
+  assert(!z3.interior_contains(pt2));
+  assert(!z3.interior_contains(pt3));
+  assert(!z3.interior_contains(pt4));
   assert(!z3.interior_contains(pt5));
   assert(z3.interior_contains(pt6));
 
+  assert(z3.interior_contains(z3.centre()));
+  
+  assert(!z3.empty());
+  assert(!z3.empty_interior());
+  
   clog.close();
   cout << "INCOMPLETE\n";
 

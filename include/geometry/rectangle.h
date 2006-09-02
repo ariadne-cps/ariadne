@@ -38,6 +38,7 @@
 
 #include "../linear_algebra/interval_vector.h"
 
+#include "../geometry/ppl_polyhedron.h"
 #include "../geometry/point.h"
 
 namespace Ariadne {
@@ -62,8 +63,6 @@ namespace Ariadne {
       typedef R real_type;
       /*! \brief The type of denotable point contained by the rectangle. */
       typedef Point<R> state_type;
-      /*! \brief An iterator through the vertices of the rectangle. */
-      typedef typename array< Point<R> >::const_iterator const_vertex_iterator;
     
      public:
       //@{
@@ -148,6 +147,14 @@ namespace Ariadne {
       }
       //@}
       
+      
+      //@{
+      //! \name Conversion operators
+      /*! \brief Convert to a Parma Polyhedra Library closed polyhedron. */
+      operator Parma_Polyhedra_Library::C_Polyhedron () const;
+      //@}
+      
+      
       //{@
       //! \name Comparison operators
       /*! \brief The equality operator */
@@ -169,12 +176,6 @@ namespace Ariadne {
       }
       //@}
       
-      //@{
-      //! \name Conversion operations
-      /*! \brief Convert to a rational polyhedron. */
-      operator Polyhedron<Rational> () const;
-      //@}
-        
 
       //@{
       //! \name Data access
@@ -317,7 +318,7 @@ namespace Ariadne {
       ListSet<R,Geometry::Rectangle> subdivide() const;
       
       /*! \brief The vertices of the rectangle. */
-      std::vector< Point<R> > vertices() const;
+      PointList<R> vertices() const;
 
       /*! \brief The \a i th vertex. */
       Point<R> vertex(size_type i) const;

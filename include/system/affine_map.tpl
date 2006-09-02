@@ -22,9 +22,18 @@
  */
  
 
-#include "../system/affine_map.h"
+#include "affine_map.h"
 
-#include "../numeric/numerical_types.h"
+#include "../linear_algebra/vector.h"
+#include "../linear_algebra/matrix.h"
+#include "../linear_algebra/interval_vector.h"
+#include "../linear_algebra/interval_matrix.h"
+
+#include "../geometry/point.h"
+#include "../geometry/rectangle.h"
+#include "../geometry/parallelotope.h"
+#include "../geometry/zonotope.h"
+
 
 
 namespace Ariadne {
@@ -79,6 +88,15 @@ namespace Ariadne {
         this->A()*LinearAlgebra::IntervalMatrix<R>(z.generators()));
     }    
     
+    template<typename R>
+    std::ostream& 
+    operator<<(std::ostream& os, const AffineMap<R>& f)
+    {
+      return os << "AffineMap(\n  matrix=" << f.A() << ",\n"
+                << "  vector=" << f.b() << "\n)\n";
+    }
+    
+/*
     template <typename R>
     Geometry::ListSet<R,Geometry::Parallelotope>
     AffineMap<R>::operator() (const Geometry::GridMaskSet<R>& gms) const
@@ -93,15 +111,6 @@ namespace Ariadne {
       return result;
     }  
 
-    template<typename R>
-    std::ostream& 
-    operator<<(std::ostream& os, const AffineMap<R>& f)
-    {
-      return os << "AffineMap(\n  matrix=" << f.A() << ",\n"
-                << "  vector=" << f.b() << "\n)\n";
-    }
-    
-/*
     Geometry::Point<Rational>
     AffineMap<Rational>::operator() (const Geometry::Point<Rational>& pt) const
     {

@@ -31,8 +31,8 @@
 #include "../base/array_operations.h"
 
 #include "../geometry/rectangle.h"
-#include "../geometry/parallelotope.h"
 #include "../geometry/zonotope.h"
+#include "../geometry/parallelotope.h"
 #include "../geometry/polyhedron.h"
 #include "../geometry/list_set.h"
 #include "../geometry/partition_tree_set.h"
@@ -94,7 +94,7 @@ namespace Ariadne {
       : _grid(g), _lattice_set(pos)
     {
       assert(_lattice_set.
-dimension()==_grid.dimension());
+      dimension()==_grid.dimension());
     }
 
 
@@ -644,13 +644,7 @@ dimension()==_grid.dimension());
       return result;
     }
 
-    template<typename R>
-    inline
-    GridCellListSet<R>
-    over_approximation(const Parallelotope<R>& p, const Grid<R>& g) {
-       return over_approximation(Zonotope<R>(p), g);
-    }
-    
+   
     template<typename R>
     GridCellListSet<R>
     under_approximation(const Zonotope<R>& z, const Grid<R>& g) 
@@ -674,13 +668,6 @@ dimension()==_grid.dimension());
       return result;
     }
 
-    template<typename R>
-    inline
-    GridCellListSet<R>
-    under_approximation(const Parallelotope<R>& p, const Grid<R>& g) {
-       return under_approximation(Zonotope<R>(p), g);
-    }
-   
     template<typename R>
     GridRectangle<R>
     over_approximation(const Rectangle<R>& r, const FiniteGrid<R>& g) 
@@ -752,13 +739,6 @@ dimension()==_grid.dimension());
     }
 
     template<typename R>
-    inline
-    GridCellListSet<R>
-    over_approximation(const Parallelotope<R>& p, const FiniteGrid<R>& g) {
-       return over_approximation(Zonotope<R>(p), g);
-    }
-    
-    template<typename R>
     GridCellListSet<R>
     under_approximation(const Zonotope<R>& p, const FiniteGrid<R>& g) 
     {
@@ -788,12 +768,6 @@ dimension()==_grid.dimension());
       return result;
     }
 
-    template<typename R>
-    inline
-    GridCellListSet<R>
-    under_approximation(const Parallelotope<R>& p, const FiniteGrid<R>& g) {
-       return under_approximation(Zonotope<R>(p), g);
-    }
     
     
     
@@ -1023,25 +997,6 @@ dimension()==_grid.dimension());
       return over_approximation(intersection(r1,Rectangle<R>(r2)),g);
     }
 
-    template<typename R>
-    GridCellListSet<R>
-    over_approximation_of_intersection(const Parallelotope<R>& p, 
-                                       const Rectangle<R>& r,
-                                       const Grid<R>& g) 
-    {
-      GridCellListSet<R> result(g);
-      GridRectangle<R> gbb=over_approximation_of_intersection(p.bounding_box(),r,g);
-      if(!gbb.empty()) {
-        LatticeRectangle block=gbb.lattice_set();
-        for(LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
-          GridCell<R> cell(g,*iter);
-          if(!disjoint(Rectangle<R>(cell),p)) {
-            result.adjoin(cell);
-          }
-        }
-      }
-      return result;
-    }
 
     template<typename R>
     GridCellListSet<R>

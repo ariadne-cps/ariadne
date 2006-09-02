@@ -24,6 +24,7 @@
 
 
 #include "geometry/point.h"
+#include "geometry/point_list.h"
 #include "geometry/rectangle.h"
 #include "linear_algebra/vector.h"
 
@@ -51,6 +52,10 @@ inline RRectangle rectangle_expanded(const RPoint& p, const Real& r) {
   return (((RRectangle)p).expand_by(r));
 }
 
+inline RPoint point_list_get(const RPointList& pl, const size_type& n) {
+  return pl[n];
+}
+
 void export_point() {
   class_<RPoint>("Point",init<int>())
     .def(init<RPoint>())
@@ -65,6 +70,14 @@ void export_point() {
     .def("__add__", &rpoint_add_rVector)
     .def("__sub__", &rpoint_sub_rpoint)
     .def("rectangle_expanded_by", &rectangle_expanded)
-    .def(self_ns::str(self))    // __self_ns::str__
+    .def(self_ns::str(self))
+  ;
+}
+
+void export_point_list() {
+  class_<RPointList>("PointList",init<>())
+    .def("size", &RPointList::size)
+    .def("append", &RPointList::push_back)
+    .def("__getitem__", &point_list_get)
   ;
 }

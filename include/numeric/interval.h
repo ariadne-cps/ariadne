@@ -97,7 +97,10 @@ namespace Ariadne {
       /*! \brief Construct from lower and upper bounds. */
       template<typename RL,typename RU> Interval(const RL& l, const RU& u)
         : _boost_interval(R(l),R(u)) { }
-      /*! \brief Construct a one-point interval. */
+       /*! \brief Construct an interval with possibly different real type. */
+      template<typename RX> Interval(const Interval<RX>& ivl)
+        : _boost_interval(R(ivl.lower()),R(ivl.upper())) { }
+     /*! \brief Construct a one-point interval. */
       template<typename RX> Interval(const RX& x)
         : _boost_interval(R(x),R(x)) { }
       /*! \brief Construct from a boost interval. */

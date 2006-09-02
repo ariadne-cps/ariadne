@@ -31,11 +31,8 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
-#include "../linear_algebra/interval_vector.h"
-#include "../linear_algebra/interval_matrix.h"
 
 #include "../system/vector_field.h"
-#include "../system/affine_map.h"
 
 namespace Ariadne {
   namespace System {

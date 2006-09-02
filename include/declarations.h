@@ -55,6 +55,7 @@ template<typename R> class LinearProgram;
 
 namespace Ariadne { namespace Geometry {
 template<typename R> class Point;
+template<typename R> class PointList;
 
 template<typename R> class Rectangle;
 template<typename R> class Parallelotope;

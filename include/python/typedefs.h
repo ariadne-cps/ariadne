@@ -52,6 +52,7 @@ typedef LinearAlgebra::Matrix<Field> FMatrix;
 typedef LinearAlgebra::LinearProgram<Field> FLinearProgram;
 
 typedef Geometry::Point<Real> RPoint;
+typedef Geometry::PointList<Real> RPointList;
 typedef Geometry::Rectangle<Real> RRectangle;
 typedef Geometry::Parallelotope<Real> RParallelotope;
 typedef Geometry::Zonotope<Real> RZonotope;

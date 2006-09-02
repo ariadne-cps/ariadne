@@ -21,9 +21,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "affine_multimap.h"
+
+#include "../linear_algebra/vector.h"
+#include "../linear_algebra/matrix.h"
+#include "../linear_algebra/interval_vector.h"
+#include "../linear_algebra/interval_matrix.h"
+
+#include "../geometry/point.h"
+#include "../geometry/rectangle.h"
+#include "../geometry/list_set.h"
+#include "../geometry/parallelotope.h"
+#include "../geometry/zonotope.h"
+#include "../geometry/simplex.h"
+#include "../geometry/polyhedron.h"
 
 #include "../system/affine_map.h"
-#include "affine_multimap.h"
 
 namespace Ariadne {
   namespace System {
@@ -54,23 +67,5 @@ namespace Ariadne {
       return minkowski_sum(AffineMap<R>(this->A())(bs),this->S());
     }
     
-    /* TO IMPROVE */
-    template <typename R, template<typename> class BS>
-    Geometry::ListSet<R,BS>
-    AffineMultiMap<R,BS>::operator() (const Geometry::GridMaskSet<R>& gms) const
-    {
-      using namespace Ariadne::Geometry;
-
-      ListSet<R,Rectangle> lrs=ListSet<R,Rectangle>(gms);
-      ListSet<R,BS> output(gms.dimension());
-
-      for (size_type i=0; i< lrs.size(); ++i) {
-        BS<R> rz(lrs[i]);
-        BS<R> p=this->operator()(rz);
-        output.push_back(p);
-      }
-      
-      return output;
-    }  
   }
 }

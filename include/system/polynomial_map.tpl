@@ -42,8 +42,6 @@
 
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
-#include "../geometry/polyhedron.h"
-#include "../geometry/list_set.h"
 
 
 namespace Ariadne {

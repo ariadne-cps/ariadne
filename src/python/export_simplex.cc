@@ -40,15 +40,8 @@ void export_simplex() {
   typedef bool (*SmplxSmplxBinPred) (const RSimplex&, const RSimplex&);
   typedef bool (*SmplxRectBinPred) (const RSimplex&, const RRectangle&);
 
-  def("interiors_intersect", SmplxRectBinPred(&interiors_intersect));
-  def("disjoint", SmplxSmplxBinPred(&disjoint));
-  def("interiors_intersect", SmplxSmplxBinPred(&interiors_intersect));
-  def("inner_subset", SmplxSmplxBinPred(&inner_subset));
-  def("subset", SmplxSmplxBinPred(&subset));
-
-  class_<RSimplex>("Simplex",init<int>())
-    .def(init< std::vector<RPoint> >())
-    .def(init< Ariadne::array<RPoint> >())
+   class_<RSimplex>("Simplex",init<int>())
+    .def(init< PointList<Real> >())
     .def(init<RSimplex>())
     .def(init<std::string>())
     .def("empty", &RSimplex::empty)
@@ -56,6 +49,6 @@ void export_simplex() {
     .def("dimension", &RSimplex::dimension)
     .def("contains", &RSimplex::contains)
     .def("interior_contains", &RSimplex::interior_contains)
-    .def(self_ns::str(self))    // __self_ns::str__
+    .def(self_ns::str(self))
   ;
 }

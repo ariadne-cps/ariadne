@@ -30,7 +30,14 @@ namespace Ariadne {
   namespace Geometry {
 
     template class Polyhedron<Real>;
+    template std::ostream& operator<<(std::ostream&, const Polyhedron<Real>&);
+    template std::istream& operator>>(std::istream&, Polyhedron<Real>&);
 
+    template class Polytope<Real>;
+    template std::ostream& operator<<(std::ostream&, const Polytope<Real>&);
+    template std::istream& operator>>(std::istream&, Polytope<Real>&);
+/*
+    
     template bool disjoint(const Polyhedron<Real>&, const Polyhedron<Real>&);
     template bool interiors_intersect(const Polyhedron<Real>&, const Polyhedron<Real>&);
     template bool inner_subset(const Polyhedron<Real>&, const Polyhedron<Real>&);
@@ -42,20 +49,8 @@ namespace Ariadne {
     template Polyhedron<Real> minkowski_sum(const Polyhedron<Real>&, const Polyhedron<Real>&);
     
     template std::ostream& operator<<(std::ostream&, const Polyhedron<Real>&);
-
-    template class Polyhedron<Rational>;
-
-    template bool disjoint(const Polyhedron<Rational>&, const Polyhedron<Rational>&);
-    template bool interiors_intersect(const Polyhedron<Rational>&, const Polyhedron<Rational>&);
-    template bool inner_subset(const Polyhedron<Rational>&, const Polyhedron<Rational>&);
-    template bool subset(const Polyhedron<Rational>&, const Polyhedron<Rational>&);
+    template std::istream& operator>>(std::istream&, Polyhedron<Real>&);
+*/
     
-    template Polyhedron<Rational> regular_intersection(const Polyhedron<Rational>&, const Polyhedron<Rational>&);
-    template Polyhedron<Rational> intersection(const Polyhedron<Rational>&, const Polyhedron<Rational>&);
-    template Polyhedron<Rational> convex_hull(const Polyhedron<Rational>&, const Polyhedron<Rational>&);
-    template Polyhedron<Rational> minkowski_sum(const Polyhedron<Rational>&, const Polyhedron<Rational>&);
-    
-    template std::ostream& operator<<(std::ostream&, const Polyhedron<Rational>&);
-
   }
 }

@@ -23,14 +23,15 @@
  
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
+#include "../linear_algebra/interval_vector.h"
+#include "../linear_algebra/interval_matrix.h"
 
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
-#include "../geometry/list_set.h"
-#include "../geometry/parallelotope.h"
-#include "../geometry/zonotope.h"
-#include "../geometry/simplex.h"
 #include "../geometry/polyhedron.h"
+#include "../geometry/simplex.h"
+#include "../geometry/zonotope.h"
+#include "../geometry/parallelotope.h"
 
 #include "../system/map.h"
 

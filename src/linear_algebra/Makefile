@@ -2,7 +2,6 @@ include ../../config.mk
 
 OBJ =   vector.o matrix.o tensor.o \
 	interval_vector.o interval_matrix.o \
-	constraint_system.o generator_system.o transformation_system.o \
 	linear_program.o \
 	matrix_function.o
   

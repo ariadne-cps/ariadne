@@ -58,8 +58,7 @@ namespace Ariadne {
     template std::ostream& operator<<(std::ostream&, const ListSet<Real,Rectangle>&);
     template std::ostream& operator<<(std::ostream&, const ListSet<Real,Parallelotope>&);
     template std::ostream& operator<<(std::ostream&, const ListSet<Real,Zonotope>&);
-    template std::ostream& operator<<(std::ostream&, const ListSet<Real,Polyhedron>&);
-
+ 
     template std::istream& operator>>(std::istream&, ListSet<Real,Rectangle>&);
 
   }

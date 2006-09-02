@@ -35,6 +35,7 @@
 #include "../declarations.h"
 #include "../base/array.h"
 #include "../linear_algebra/vector.h"
+#include "../linear_algebra/matrix.h"
 
 #include <gmpxx.h>
 

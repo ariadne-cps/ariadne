@@ -210,10 +210,8 @@ void export_grid_set() {
   def("interiors_intersect",GMSRectPred(&Geometry::interiors_intersect));
     
   def("over_approximation",ApprxRectGridFunc(&Geometry::over_approximation));
-  def("over_approximation",ApprxPltpGridFunc(&Geometry::over_approximation));
   def("over_approximation",ApprxZltpGridFunc(&Geometry::over_approximation));
   def("over_approximation",ApprxRectFGridFunc(&Geometry::over_approximation));
-  def("over_approximation",ApprxPltpFGridFunc(&Geometry::over_approximation));
   def("over_approximation",ApprxZltpFGridFunc(&Geometry::over_approximation));
   def("over_approximation",ApprxLSRectFGridFunc(&Geometry::over_approximation));
   def("over_approximation",ApprxLSPltpFGridFunc(&Geometry::over_approximation));
@@ -221,17 +219,14 @@ void export_grid_set() {
   def("over_approximation",ApprxGridltpFGridFunc(&Geometry::over_approximation));
 
   def("under_approximation",ApprxRectGridFunc(&Geometry::under_approximation));
-  def("under_approximation",ApprxPltpGridFunc(&Geometry::under_approximation));
   def("under_approximation",ApprxZltpGridFunc(&Geometry::under_approximation));
   def("under_approximation",ApprxRectFGridFunc(&Geometry::under_approximation));
-  def("under_approximation",ApprxPltpFGridFunc(&Geometry::under_approximation));
   def("under_approximation",ApprxZltpFGridFunc(&Geometry::under_approximation));
   def("under_approximation",ApprxLSRectFGridFunc(&Geometry::under_approximation));
   def("under_approximation",ApprxGridltpFGridFunc(&Geometry::under_approximation));
 
 
   def("join_over_approximation",GMSRectFunc(&Geometry::join_over_approximation));
-  def("join_over_approximation",GMSPltpFunc(&Geometry::join_over_approximation));
   def("join_over_approximation",GMSZntpFunc(&Geometry::join_over_approximation));
   def("join_over_approximation",GMSPlhdFunc(&Geometry::join_over_approximation));
   def("join_over_approximation",GMSLSRectFunc(&Geometry::join_over_approximation));
@@ -239,7 +234,6 @@ void export_grid_set() {
   def("join_over_approximation",GMSLSZntpFunc(&Geometry::join_over_approximation));
   def("join_over_approximation",GMSLSPlhdFunc(&Geometry::join_over_approximation));
   def("join_under_approximation",GMSRectFunc(&Geometry::join_under_approximation));
-  def("join_under_approximation",GMSPltpFunc(&Geometry::join_under_approximation));
   def("join_under_approximation",GMSZntpFunc(&Geometry::join_under_approximation));
   def("join_under_approximation",GMSPlhdFunc(&Geometry::join_under_approximation));
   def("join_under_approximation",GMSLSRectFunc(&Geometry::join_under_approximation));

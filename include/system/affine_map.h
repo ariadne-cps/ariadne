@@ -29,20 +29,10 @@
 #ifndef _ARIADNE_AFFINE_MAP_H
 #define _ARIADNE_AFFINE_MAP_H
 
-#include "../numeric/numerical_types.h"
+#include "../declarations.h"
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
-#include "../linear_algebra/interval_matrix.h"
-
-#include "../geometry/point.h"
-#include "../geometry/simplex.h"
-#include "../geometry/rectangle.h"
-#include "../geometry/parallelotope.h"
-#include "../geometry/zonotope.h"
-#include "../geometry/polyhedron.h"
-#include "../geometry/list_set.h"
-#include "../geometry/grid_set.h"
 
 #include "../system/map.h"
 

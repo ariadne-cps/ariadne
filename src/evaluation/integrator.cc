@@ -23,17 +23,11 @@
 
 
 #include "evaluation/integrator.h"
-#include "evaluation/lohner_integrator.h"
-
 #include "evaluation/integrator.tpl"
-#include "evaluation/lohner_integrator.tpl"
 
 #include "real_typedef.h"
 
 namespace Ariadne {
   namespace Evaluation {
-
-    template class C0LohnerIntegrator<Real>;
-    template class C1LohnerIntegrator<Real>;
   }
 }

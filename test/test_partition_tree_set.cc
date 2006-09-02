@@ -51,8 +51,8 @@ using namespace Ariadne::Postscript;
 
 int main() {
 
-  cout << "test_partition_tree: " << flush;
-  ofstream clog("test_partition_tree.log");
+  cout << "test_partition_tree_set: " << flush;
+  ofstream clog("test_partition_tree_set.log");
 
   std::vector<Ariadne::dimension_type> seqa;
 
@@ -106,7 +106,7 @@ int main() {
   clog << "rls=" << rls << endl;
   clog << "pltp=" << pltp << endl;
   pg=PartitionScheme<Real>(bb,seq);
-  uint dpth=12;
+  uint dpth=8;
   PartitionTreeSet<Real> ptsua=under_approximation< Real, Parallelotope<Real>  >(pltp,pg,dpth);
   clog << "ptsua=" << ptsua << endl;
   PartitionTreeSet<Real> ptsoa=over_approximation< Real, Parallelotope<Real>  >(pltp,pg,dpth);
@@ -128,7 +128,7 @@ int main() {
 
   clog.close();
 
-  epsfstream<Real> eps;
+  epsfstream eps;
   eps.open("test_partition_tree-1.eps",bb);
   eps.set_fill_colour("red");
   eps << ptsouta;

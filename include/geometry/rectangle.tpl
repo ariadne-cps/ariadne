@@ -27,13 +27,15 @@
 #include <sstream>
 #include <exception>
 
+#include <ppl.hh>
+
 #include "rectangle.h"
 
 #include "../base/binary_word.h" 
 #include "../base/array.h" 
 #include "../linear_algebra/interval_vector.h" 
-#include "../geometry/polyhedron.h" 
-#include "../geometry/lattice_set.h" 
+#include "../geometry/point.h" 
+#include "../geometry/point_list.h" 
 #include "../geometry/list_set.h" 
 #include "../geometry/grid_set.h" 
 
@@ -48,16 +50,11 @@ namespace Ariadne {
       ss >> *this;
     }
 
-
-    template<typename R>
-    Rectangle<R>::operator Polyhedron<Rational> () const {
-      LinearAlgebra::IntervalVector<Rational> rpv(this->dimension());
-      for(dimension_type i=0; i!=rpv.size(); ++i) {
-        rpv[i]=Interval<Rational>(Rational(this->lower_bound(i)),Rational(this->upper_bound(i)));
-      }
-      return Polyhedron<Rational>(rpv);
+    template <typename R>
+    Rectangle<R>::operator Parma_Polyhedra_Library::C_Polyhedron() const
+    {
+      return ppl_polyhedron(LinearAlgebra::IntervalVector<Rational>(this->position_vectors()));
     }
-
 
     template <typename R>
     Rectangle<R>& 
@@ -119,11 +116,11 @@ namespace Ariadne {
 
 
     template<typename R>
-    std::vector< Point<R> >
+    PointList<R>
     Rectangle<R>::vertices() const
     {
       size_type number_of_vertices=(1<<this->dimension());
-      std::vector< Point<R> > result(number_of_vertices);
+      PointList<R> result(this->dimension(),number_of_vertices);
       Point<R> vertex(this->dimension());
       
       for (size_type i=0; i<number_of_vertices; ++i) {

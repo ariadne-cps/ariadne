@@ -31,6 +31,5 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
-#include "../linear_algebra/constraint_system.h"
 
 #endif /* _ARIADNE_LINEAR_ALGEBRA_H */

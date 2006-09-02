@@ -25,6 +25,7 @@
 #include <boost/python.hpp>
 
 void export_point();
+void export_point_list();
 void export_rectangle();
 void export_parallelotope();
 void export_simplex();
@@ -38,6 +39,7 @@ void export_partition_tree_set();
 BOOST_PYTHON_MODULE(geometry)
 {
   export_point();
+  export_point_list();
   export_rectangle();
   export_zonotope();
   export_parallelotope();

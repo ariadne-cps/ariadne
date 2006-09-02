@@ -44,7 +44,6 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/interval_vector.h"
-#include "../linear_algebra/transformation_system.h"
 
 #include "../linear_algebra/matrix.h"
 #include "../linear_algebra/interval_matrix.h"
@@ -444,12 +443,10 @@ template<typename R>
       
       IntervalVector<R> fh=(R(h/2)*f);
       
-      TransformationSystem<R> zfh=symmetrise(fh);
-      
+      Matrix<R> zfh=symmetrize(fh);
       Matrix<R> mdf=over_approximation(dphi)*z.generators();
-      TransformationSystem<R> zv=zfh+TransformationSystem<R>(Vector<R>(n),mdf);
       
-      z=phic+zv;
+      z=Zonotope<R>(phic,zfh)+mdf;
 #ifdef DEBUG
       std::cerr << "suggested stepsize=" << step_size << std::endl;
         

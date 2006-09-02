@@ -91,20 +91,12 @@ namespace Ariadne {
 
     template<typename R>
     GridCellListSet<R>
-    over_approximation(const Parallelotope<R>& p, const Grid<R>& g);
-
-    template<typename R>
-    GridCellListSet<R>
     over_approximation(const Zonotope<R>& p, const Grid<R>& g);
 
     template<typename R>
     GridRectangle<R>
     over_approximation(const Rectangle<R>& p, const FiniteGrid<R>& g);
 
-    template<typename R>
-    GridCellListSet<R>
-    over_approximation(const Parallelotope<R>& p, const FiniteGrid<R>& g);
-    
     template<typename R>
     GridCellListSet<R>
     over_approximation(const Zonotope<R>& p, const FiniteGrid<R>& g);
@@ -130,20 +122,12 @@ namespace Ariadne {
 
     template<typename R>
     GridCellListSet<R>
-    under_approximation(const Parallelotope<R>& p, const Grid<R>& g);
-
-    template<typename R>
-    GridCellListSet<R>
     under_approximation(const Zonotope<R>& p, const Grid<R>& g);
    
     template<typename R>
     GridRectangle<R>
     under_approximation(const Rectangle<R>& p, const FiniteGrid<R>& g);
 
-    template<typename R>
-    GridCellListSet<R>
-    under_approximation(const Parallelotope<R>& p, const FiniteGrid<R>& g);
-    
     template<typename R>
     GridCellListSet<R>
     under_approximation(const Zonotope<R>& p, const FiniteGrid<R>& g);
@@ -184,12 +168,6 @@ namespace Ariadne {
                                        const Rectangle<R>& r2,
                                        const Grid<R>& g);
     
-    template<typename R>
-    GridCellListSet<R>
-    over_approximation_of_intersection(const Parallelotope<R>& p, 
-                                       const Rectangle<R>& r,
-                                       const Grid<R>& g);
-
     template<typename R>
     GridCellListSet<R>
     over_approximation_of_intersection(const Zonotope<R>& p, 

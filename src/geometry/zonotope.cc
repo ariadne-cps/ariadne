@@ -31,9 +31,6 @@ namespace Ariadne {
 
     template class Zonotope<Real>;
 
-    template Zonotope<Real> operator+(const Rectangle<Real>& r, const LinearAlgebra::TransformationSystem<Real>& z);
-    template Zonotope<Real> operator+(const Zonotope<Real>& r, const LinearAlgebra::TransformationSystem<Real>& z);
-   
     template Zonotope<Real> scale(const Zonotope<Real>& s, const Real& factor);
 
     template std::ostream& operator<<(std::ostream&, const Zonotope<Real>&);

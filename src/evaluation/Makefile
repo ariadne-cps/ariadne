@@ -1,6 +1,6 @@
 include ../../config.mk
 
-OBJ = newton.o apply.o integrator.o
+OBJ = newton.o apply.o integrator.o lohner_integrator.o
 
 all: ${OBJ}
 

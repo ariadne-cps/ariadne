@@ -26,8 +26,9 @@
 #include <iostream>
 #include <vector>
 
+#include <ppl.hh>
+
 #include "../utility/stlio.h"
-#include "../geometry/parallelotope.h"
 #include "../geometry/polyhedron.h"
 
 namespace Ariadne {
@@ -35,34 +36,27 @@ namespace Ariadne {
 
     template<typename R>
     Simplex<R>::Simplex(size_type n)
-      : _vertices(n+1,state_type(n)) 
+      : _vertices(n,n+1) 
     {
       for(size_type i=0; i!=n; ++i) {
-        _vertices[i][i]=1;
+        _vertices(i,i)=1;
       }
     }
   
     template<typename R>
-    Simplex<R>::Simplex(const std::vector<state_type>& v)
-      : _vertices(v.begin(),v.end())
+    Simplex<R>::Simplex(const LinearAlgebra::Matrix<R>& A)
+      : _vertices(A)
     {
-      size_type d=_vertices.size()-1;
-      for(size_type i=0; i!=d+1; ++i) {
-        if(_vertices[i].dimension()!=d) {
-          throw std::domain_error("The the list of vertices is invalid");
-        }
+      if(A.size1()+1u != A.size2()) {
+        throw std::runtime_error("A simplex of dimension d must have d+1 vertices");
       }
     }
-    
-    template<typename R>
-    Simplex<R>::Simplex(const array<state_type>& v)
-      : _vertices(v.begin(),v.end())
+     template<typename R>
+    Simplex<R>::Simplex(const PointList<R>& v)
+      : _vertices(v)
     {
-      size_type d=_vertices.size()-1;
-      for(size_type i=0; i!=d+1; ++i) {
-        if(_vertices[i].dimension()!=d) {
-          throw std::domain_error("The the list of vertices is invalid");
-        }
+      if(v.dimension()+1u != v.size()) {
+        throw std::runtime_error("A simplex of dimension d must have d+1 vertices");
       }
     }
     
@@ -75,24 +69,31 @@ namespace Ariadne {
     }
     
     template<typename R>
-    Simplex<R>::operator Polyhedron<R> () const 
+    Simplex<R>::operator Polyhedron<R>() const 
     {
-      std::vector<state_type> vert_vec(_vertices.begin(),_vertices.end());
-      return Polyhedron<R>(vert_vec);
+      return Polyhedron<R>(this->_vertices);
     }
     
-/*
     template<typename R>
-    Simplex<R>::operator Polyhedron<Rational> () const 
+    Simplex<R>::operator Parma_Polyhedra_Library::C_Polyhedron() const 
     {
-      std::vector< Point<Rational> > vert_vec(this->_vertices.size());
-      for(size_type i=0; i!=this->_vertices.size(); ++i) {
-        vert_vec[i]=Point<Rational>(this->_vertices[i]);
-      }
-      return Polyhedron<Rational>(vert_vec);
+      return ppl_polyhedron(this->_vertices);
     }
-*/
-
+    
+    template<typename R>
+    bool 
+    Simplex<R>::contains(const Point<R>& pt) const
+    {
+      return Polyhedron<R>(*this).contains(pt);
+    }      
+      
+    template<typename R>
+    bool 
+    Simplex<R>::interior_contains(const Point<R>& pt) const
+    {
+      return Polyhedron<R>(*this).interior_contains(pt);
+    }      
+      
     template <typename R>
     std::ostream&
     operator<<(std::ostream& os, const Simplex<R>& s) 
@@ -101,10 +102,11 @@ namespace Ariadne {
 //        os << "Empty";
 //     }
 //      else 
+      PointList<R> v=s.vertices();
       if(s.dimension() > 0) {
         os << "Simplex( vertices=";
-        Utility::write_sequence(os,s.vertices().begin(),s.vertices().end());
-        os << ")";
+        Utility::write_sequence(os,v.begin(),v.end());
+        os << " )";
       }
       return os;
     }

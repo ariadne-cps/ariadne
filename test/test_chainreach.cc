@@ -79,7 +79,7 @@ int main() {
   clog << "ptcr.size()=" << ptcr.size() << "  " << flush;
   clog << "ptcr.capacity()=" << ptcr.capacity() << endl;
 
-  epsfstream<Real> eps=epsfstream<Real>("test_chainreach-1.eps",epsbb);
+  epsfstream eps=epsfstream("test_chainreach-1.eps",epsbb);
   eps.set_pen_colour("black");
   eps.set_fill_colour("white");
   eps << cb;

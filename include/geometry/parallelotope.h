@@ -119,11 +119,8 @@ namespace Ariadne {
       bool interior_contains(const state_type& point) const;
 
       /*! \brief The vertices of the parallelotope. */
-      std::vector< Point<Rational> > vertices() const;
+      PointList<Rational> vertices() const;
       
-      /*! \brief Approximations to the vertices (for graphical output). */
-      std::vector< state_type > approximate_vertices() const;
-
       /*! \brief Subdivide into two smaller pieces. */
       ListSet<R,Geometry::Parallelotope> divide() const;
       
@@ -133,7 +130,9 @@ namespace Ariadne {
       
       /*! \brief Computes an over approximation from an "interval parallelotope". */
       static Parallelotope<R> over_approximation(const Rectangle<R>& c, const LinearAlgebra::IntervalMatrix<R>& A);
-      
+      /*! \brief Scale the parallelotope by at least \a sf. */
+      static Parallelotope<R> scale(const Parallelotope<R>& p, const R& sf);
+
       friend std::istream& operator>> <> (std::istream& is, Parallelotope<R>& r);
      private:
       static LinearAlgebra::Matrix<R> compute_generators(const Rectangle<R>& r);
@@ -141,7 +140,15 @@ namespace Ariadne {
       LinearAlgebra::Vector<F> coordinates(const state_type& s) const;
     };
  
-   
+    template<typename R>
+    inline
+    Parallelotope<R> 
+    scale(const Parallelotope<R>& p, const R& scale_factor) 
+    {
+      return Parallelotope<R>::scale(p,scale_factor);
+    }
+    
+
 
     template <typename R>
     inline
@@ -150,23 +157,6 @@ namespace Ariadne {
                          const ListSet<R, Parallelotope >& cover) 
     {
       throw std::domain_error("subset_of_open_cover(Parallelotope, ListSet<Parallelotope>) not implemented");
-    }
-
-    template<typename R>
-    inline
-    Geometry::Parallelotope<R> 
-    scale(const Geometry::Parallelotope<R>& p, const R& scale_factor) {
-
-      const Geometry::Point<R>& centre=p.centre();
-      const LinearAlgebra::Matrix<R>& generators=p.generators();
-      
-      Geometry::Point<R> new_centre(p.dimension());
-
-      for(size_type i=0; i!=p.dimension(); ++i) {
-        new_centre[i]=scale_factor*centre[i];
-      }
-
-      return Geometry::Parallelotope<R>(new_centre, scale_factor*generators);
     }
 
     

@@ -34,12 +34,10 @@
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 
-#include "../linear_algebra/transformation_system.h"
-
 #include "../numeric/interval.h"
 
+#include "../geometry/ppl_polyhedron.h"
 #include "../geometry/point.h"
-#include "../geometry/polyhedron.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -93,11 +91,18 @@ namespace Ariadne {
        explicit Zonotope(dimension_type n, size_type m)
         : _central_block(n),  _generators(n,m) { }
      
-     /*! \brief Construct from centre position vectorand directions. */
-      explicit Zonotope(const vector_type& c, const matrix_type& m)
-        : _central_block(c), _generators(m)
+      /*! \brief Construct a zonotope centred at zero from generators \a g. */
+      explicit Zonotope(const matrix_type& g)
+        : _central_block(g.size1()), _generators(g)
       {
-        if (c.size()!=m.size1()) {
+        this->minimize_generators();
+      }
+       
+     /*! \brief Construct from centre position vectorvand directions. */
+      explicit Zonotope(const vector_type& c, const matrix_type& g)
+        : _central_block(c), _generators(g)
+      {
+        if (c.size()!=g.size1()) {
           throw std::domain_error(
               "The the Matrix of principal directions does not have the same number of rows as the point dimension.");
         }
@@ -105,10 +110,10 @@ namespace Ariadne {
       }
        
      /*! \brief Construct from centre and directions. */
-      explicit Zonotope(const state_type& c, const matrix_type& m)
-        : _central_block(c), _generators(m)
+      explicit Zonotope(const state_type& c, const matrix_type& g)
+        : _central_block(c), _generators(g)
       {
-        if (c.dimension()!=m.size1()) {
+        if (c.dimension()!=g.size1()) {
           throw std::domain_error(
               "The the Matrix of principal directions does not have the same number of rows as the point dimension.");
         }
@@ -175,8 +180,8 @@ namespace Ariadne {
       
       //@{
       //! \name Conversion and approximation operators
-      /*! \brief Convert to a polyhedron. */
-      operator Polyhedron<Rational> () const;
+      /*! \brief Convert to a Parma Polyhedra Library closed polyhedron. */
+      operator Parma_Polyhedra_Library::C_Polyhedron () const;
       
       /*! \brief Construct a parallelopic over-approximation. */
       Parallelotope<R> over_approximating_parallelotope() const;
@@ -217,10 +222,7 @@ namespace Ariadne {
       bool interior_contains(const state_type& point) const;
 
       /*! \brief The vertices of the zonotope. */
-      std::vector< Point<Rational> > vertices() const;
-      
-      /*! \brief Approximate vertices (for graphical output). */
-      std::vector< Point<R> > approximate_vertices() const;
+      PointList<Rational> vertices() const;
       
       /*! \brief Subdivide into two smaller pieces. */
       ListSet<R,Geometry::Zonotope> divide() const;
@@ -277,17 +279,31 @@ namespace Ariadne {
       friend Zonotope<R> minkowski_difference(const Rectangle<R>& A, const Zonotope<R>& B);
       /*! \brief The Minkoswi difference of a zonotope and a rectangle. */
       friend Zonotope<R> minkowski_difference(const Zonotope<R>& A, const Rectangle<R>& B);
+
+      /*! \brief Adjoin generators to a zonotope. */
+      friend Zonotope<R> operator+(const Zonotope<R>& z, const LinearAlgebra::Matrix<R>& G);
       //@}
 #endif
 
       /*! \brief Computes an over approximation from an "interval zonotope". */
       static Zonotope<R> over_approximation(const Rectangle<R>& c, const LinearAlgebra::IntervalMatrix<R>& A);
+      /*! \brief Scale the zonotope by a real constant. */
+      static Zonotope<R> scale(const Zonotope<R>& z, const R& sf);
            
       friend std::ostream& operator<< <> (std::ostream& os, const Zonotope<R>& r);
       friend std::istream& operator>> <> (std::istream& is, Zonotope<R>& r);
      public:
       static bool equal(const Zonotope<R>&, const Zonotope<R>&);
+      static bool disjoint(const Zonotope<R>&, const Zonotope<R>&);
+      static bool disjoint(const Zonotope<R>&, const Rectangle<R>&);
+      static bool interiors_intersect(const Zonotope<R>&, const Zonotope<R>&);
+      static bool interiors_intersect(const Zonotope<R>&, const Rectangle<R>&);
+      static bool subset(const Zonotope<R>&, const Zonotope<R>&);
+      static bool subset(const Zonotope<R>&, const Rectangle<R>&);
       static bool subset(const Rectangle<R>&, const Zonotope<R>&);
+      static bool inner_subset(const Zonotope<R>&, const Zonotope<R>&);
+      static bool inner_subset(const Zonotope<R>&, const Rectangle<R>&);
+      static bool inner_subset(const Rectangle<R>&, const Zonotope<R>&);
       static Zonotope<R> minkowski_sum(const Zonotope<R>&, const Zonotope<R>&);
       static Zonotope<R> minkowski_difference(const Zonotope<R>&, const Zonotope<R>&);
     private:
@@ -332,7 +348,7 @@ namespace Ariadne {
     bool 
     disjoint(const Zonotope<R>& A, const Zonotope<R>& B) 
     {
-      return !minkowski_difference(A,B).contains(Point<R>(A.dimension()));
+      return Zonotope<R>::disjoint(A,B);
     }
     
     template <typename R>
@@ -340,7 +356,7 @@ namespace Ariadne {
     bool 
     disjoint(const Rectangle<R>& A, const Zonotope<R>& B) 
     {
-      return disjoint(Zonotope<R>(A),B);
+      return Zonotope<R>::disjoint(B,A);
     }
 
     template <typename R>
@@ -348,7 +364,7 @@ namespace Ariadne {
     bool 
     disjoint(const Zonotope<R>& A, const Rectangle<R>& B) 
     {
-      return disjoint(B,A);
+      return Zonotope<R>::disjoint(A,B);
     }
     
     
@@ -358,7 +374,7 @@ namespace Ariadne {
     bool 
     interiors_intersect(const Zonotope<R>& A, const Zonotope<R>& B) 
     {
-      return interiors_intersect(Polyhedron<Rational>(A),Polyhedron<Rational>(B));
+      return Zonotope<R>::interiors_intersect(A,B);
       
     }
    
@@ -367,7 +383,7 @@ namespace Ariadne {
     bool 
     interiors_intersect(const Rectangle<R>& A, const Zonotope<R>& B) 
     {
-      return interiors_intersect(Zonotope<R>(A),B);
+      return Zonotope<R>::interiors_intersect(B,A);
     }
 
     template <typename R>
@@ -375,7 +391,7 @@ namespace Ariadne {
     bool 
     interiors_intersect(const Zonotope<R>& A, const Rectangle<R>& B) 
     {
-      return interiors_intersect(B,A);
+      return Zonotope<R>::interiors_intersect(A,B);
     }
     
     
@@ -385,7 +401,7 @@ namespace Ariadne {
     bool 
     inner_subset(const Zonotope<R>& A, const Zonotope<R>& B) 
     {
-      return inner_subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
+      return Zonotope<R>::inner_subset(A,B);
     }
 
     template <typename R>
@@ -393,7 +409,7 @@ namespace Ariadne {
     bool 
     inner_subset(const Rectangle<R>& A, const Zonotope<R>& B) 
     {
-      return inner_subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
+      return Zonotope<R>::inner_subset(A,B);
     }
 
     template <typename R>
@@ -401,7 +417,7 @@ namespace Ariadne {
     bool 
     inner_subset(const Zonotope<R>& A, const Rectangle<R>& B) 
     {
-      return inner_subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
+      return Zonotope<R>::inner_subset(A,B);
     }
 
     
@@ -411,7 +427,7 @@ namespace Ariadne {
     bool 
     subset(const Zonotope<R>& A, const Zonotope<R>& B) 
     {
-      return subset(Polyhedron<Rational>(A), Polyhedron<Rational>(B));
+      return Zonotope<R>::subset(A,B);
     }
 
     template <typename R>
@@ -427,7 +443,7 @@ namespace Ariadne {
     bool 
     subset(const Zonotope<R>& A, const Rectangle<R>& B) 
     {
-      return subset(A.bounding_box(),B);
+      return Zonotope<R>::subset(A,B);
     }
 
     
@@ -483,29 +499,19 @@ namespace Ariadne {
       return Zonotope<R>::minkowski_difference(A,Zonotope<R>(B));
     }
 
-
-
-    template<typename R>
+    template<typename R> 
     inline
-    Geometry::Zonotope<R> 
-    scale(const Geometry::Zonotope<R>& z, const R& scale_factor) {
-
-      Geometry::Rectangle<R> new_central_block=scale(z.central_block(),scale_factor);
-      LinearAlgebra::IntervalMatrix<R> new_interval_generators=z.generators()*Interval<R>(scale_factor);
-      new_central_block=new_central_block+new_interval_generators.radius_row_sum();
-      LinearAlgebra::Matrix<R> new_generators=new_interval_generators.centre();
-      return Geometry::Zonotope<R>(new_central_block, new_generators);
+    Zonotope<R> 
+    operator+(const Zonotope<R>& z, const LinearAlgebra::Matrix<R>& A) 
+    {
+      return Zonotope<R>::minkowski_sum(z,Zonotope<R>(A));
     }
 
+
+
+
     
-    template<typename R>
-    Zonotope<R>
-    operator+(const Rectangle<R>& r, const LinearAlgebra::TransformationSystem<R>& v);
-    
-    template<typename R>
-    Zonotope<R>
-    operator+(const Zonotope<R>& z, const LinearAlgebra::TransformationSystem<R>& v);
-    
+  
 
   }
 }

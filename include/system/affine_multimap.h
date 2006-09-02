@@ -29,20 +29,8 @@
 #ifndef _ARIADNE_AFFINE_MULTIMAP_H
 #define _ARIADNE_AFFINE_MULTIMAP_H
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
-#include "../linear_algebra/interval_matrix.h"
+#include "multimap.h"
 
-#include "../geometry/point.h"
-#include "../geometry/simplex.h"
-#include "../geometry/rectangle.h"
-#include "../geometry/parallelotope.h"
-#include "../geometry/zonotope.h"
-#include "../geometry/polyhedron.h"
-#include "../geometry/list_set.h"
-#include "../geometry/grid_set.h"
-
-#include "../system/affine_map.h"
 
 namespace Ariadne {
   namespace System {
@@ -73,9 +61,6 @@ namespace Ariadne {
       /*! \brief  The map applied to a BS<R>. */
       BS<R> operator() (const BS<R>& z) const;
            
-      /*! \brief  The map applied to a grid mask set. */
-      Geometry::ListSet<R,BS> operator() (const Geometry::GridMaskSet<R>& ) const;
-      
       /*! \brief  The matrix of the map. */
       const LinearAlgebra::Matrix<R>& A() const { return _A; }
       

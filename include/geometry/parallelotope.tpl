@@ -34,10 +34,14 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
+#include "../linear_algebra/interval_vector.h"
+#include "../linear_algebra/interval_matrix.h"
 #include "../linear_algebra/linear_program.h"
 
 #include "../geometry/lattice_set.h" 
+
 #include "../geometry/point.h"
+#include "../geometry/point_list.h"
 #include "../geometry/rectangle.h"
 #include "../geometry/list_set.h"
 #include "../geometry/zonotope.h"
@@ -152,10 +156,10 @@ namespace Ariadne {
 
 
     template<typename R>
-    std::vector< Point<Rational> > 
+    PointList<Rational>
     Parallelotope<R>::vertices() const
     {
-      std::vector< Point<Rational> > result;
+      PointList<Rational> result;
 
       dimension_type d=this->dimension();
       assert(d<32);      
@@ -176,30 +180,7 @@ namespace Ariadne {
     }
     
     
-    template<typename R>
-    std::vector< Point<R> > 
-    Parallelotope<R>::approximate_vertices() const
-    {
-      std::vector< Point<R> > result;
-      
-      dimension_type d=this->dimension();
-      assert(d<32);      
-      const Point<R>& c(this->centre());
-      const LinearAlgebra::Matrix<R>& g(this->generators());
-      LinearAlgebra::Vector<R> e(d);
 
-      size_type nv=(1<<d);
-      result.reserve(nv);
-
-      for (size_type i=0; i<nv; ++i) {
-        for(size_type j=0; j!=d; ++j) {
-          e[j]=(i&(1<<d) ? 1 : -1);
-        }
-        result.push_back(c+g*e);
-      }
-      return result;
-    }
-    
     
     template<typename R>
     Parallelotope<R>
@@ -225,6 +206,21 @@ namespace Ariadne {
     }
     
 
+    template<typename R>
+    Parallelotope<R> 
+    Parallelotope<R>::scale(const Parallelotope<R>& p, const R& scale_factor) {
+
+      const Point<R>& centre=p.centre();
+      const LinearAlgebra::Matrix<R>& generators=p.generators();
+      
+      Point<R> new_centre(p.dimension());
+
+      for(size_type i=0; i!=p.dimension(); ++i) {
+        new_centre[i]=scale_factor*centre[i];
+      }
+
+      return Parallelotope<R>(new_centre, scale_factor*generators);
+    }
 
     template <typename R>
     std::ostream&

@@ -54,7 +54,11 @@ namespace Ariadne {
       return q.get_d();
     }
     
-    /*! \brief Approximate \a x by an element of \p Res with accuracy \a e. */
+    template<> inline MPFloat approximate_by(const Rational& q) {
+      return MPFloat(q.get_d());
+    }
+    
+     /*! \brief Approximate \a x by an element of \p Res with accuracy \a e. */
     template<typename Res, typename Arg, typename Err> inline Res approximate(const Arg& x, const Err& e);
     
     template<> inline double approximate(const double& x, const double& e) {

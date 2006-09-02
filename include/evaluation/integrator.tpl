@@ -46,7 +46,6 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/interval_vector.h"
-#include "../linear_algebra/transformation_system.h"
 
 #include "../linear_algebra/matrix.h"
 #include "../linear_algebra/interval_matrix.h"
@@ -104,6 +103,17 @@ namespace Ariadne {
     {
     }
 
+    template<typename R>
+    LinearAlgebra::Matrix<R>
+    Integrator<R>::symmetrize(const LinearAlgebra::IntervalVector<R>& iv)
+    {
+      LinearAlgebra::Matrix<R> A(iv.size(),iv.size()+1);
+      for(size_type i=0; i!=A.size1(); ++i) {
+        A(i,i)=iv(i).radius();
+        A(i,iv.size())=iv(i).centre();
+      }
+      return A;
+    }
 
     template<typename R>
     C1Integrator<R>::C1Integrator(const R& maximum_step_size, const R& lock_to_grid_time, const R& maximum_basic_set_radius)

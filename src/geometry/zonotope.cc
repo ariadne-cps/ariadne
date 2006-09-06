@@ -21,10 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "real_typedef.h"
-
 #include "geometry/zonotope.h"
 #include "geometry/zonotope.tpl"
+
+#include "real_typedef.h"
 
 namespace Ariadne {
   namespace Geometry {

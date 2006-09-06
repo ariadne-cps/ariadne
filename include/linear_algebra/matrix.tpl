@@ -28,7 +28,6 @@
 
 #include "../numeric/integer.h"
 #include "../numeric/arithmetic.h"
-#include "../numeric/function.h"
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
@@ -464,50 +463,7 @@ namespace Ariadne {
 
     
     
-    /* WARNING!!! The following function has some precision problems */ 
-    template <typename R>
-    inline
-    Matrix<R> 
-    Householder_QR(const Matrix<R> &A) {
 
-      size_type dim1=A.size1(),dim2=A.size2();
-      Vector<R> x(dim1);
-      Matrix<R> Q=identity_matrix<R>(dim1),QA=A,Qi;
-      R norm,coef;
-
-      for (size_type i=0; i< dim2; i++) {
-        
-        norm=0;
-        
-        for (size_type j=i; j< dim1; j++) {
-          norm+=QA(j,i)*QA(j,i);
-          x(j)=QA(j,i);
-        }
-        coef=norm-x(i)*x(i);
-        
-        if (x(i)>=0)  
-          x(i)-=sqrt_approx(norm,R(0.00000000001));
-        else 
-           x(i)+=sqrt_approx(norm,R(0.00000000001));
-      
-        coef+=x(i)*x(i);
-        
-        Qi=identity_matrix<R>(dim1);
-          
-        if (coef!=0) {
-          for (size_type j=i; j< dim2; j++) {
-            for (size_type k=i; k< dim1; k++) {
-               Qi(k,j)-=((2*x(k)*x(j))/coef);
-            }
-          }
-        }
-        
-        QA=prod(Qi,QA);
-        Q=prod(Q,Qi);
-      }
-     
-      return Q;
-    }
    
     template <typename R>
     Matrix<R>

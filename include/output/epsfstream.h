@@ -1,8 +1,7 @@
 /****************************************************************************
- * epsstream.h
+ *            epsfstream.h
  *
- *  22 June 2005
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
+ *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -31,6 +30,7 @@
 #include <algorithm>
 #include <string.h>
 
+#include "../numeric/approximation.h"
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
 #include "../geometry/list_set.h"

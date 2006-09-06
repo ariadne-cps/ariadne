@@ -28,7 +28,7 @@
 #include <sstream>
 #include <exception>
 
-#include "../utility/stlio.h"
+#include "../base/stlio.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {

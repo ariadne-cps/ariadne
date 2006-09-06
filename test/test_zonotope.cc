@@ -51,17 +51,22 @@ int main() {
   LinearAlgebra::Vector<Real> v("[0.0,1.0,-1.5]");
   LinearAlgebra::Matrix<Real> a("[2.0,1.0,-1.5; 1.0,1.0,0.5; 0.0,0.0,0.375]");
   
+  clog << "c=" << c << "\nv=" << v << "\na=" << a << endl;
+  
   Rectangle<Real> r1=Rectangle<Real>("[9,11]x[5,11]x[0,0]");
   Rectangle<Real> r2=Rectangle<Real>("[5,6]x[3,4]x[-0.5,0.5]");
+  clog << "r1=" << r1 << "\nr2=" << r2 << endl;
 
   Parallelotope<Real> p2=Parallelotope<Real>(r2);
+  clog << "p2=" << p2 << endl;
 
   Zonotope<Real> z1=Zonotope<Real>(r1);
+  clog << "z1=" << z1 << endl;
   Zonotope<Real> z2=Zonotope<Real>(p2);
+  clog << "z2=" << z2 << endl;
 
   Zonotope<Real> z3=minkowski_sum(z1,z2);
-
-  clog << z1 << z2 << z3 << endl;
+  clog << "z3=" << z3 << endl;
 
   Point<Real> pt1,pt2,pt3,pt4,pt5,pt6;
 

@@ -24,43 +24,67 @@
 #include <fstream>
 #include <iomanip>
 
-#include <boost/numeric/interval.hpp>
-#include <boost/numeric/interval/rounded_arith.hpp>
-#include <boost/numeric/interval/io.hpp>
-
-#include "real_typedef.h"
 #include "numeric/function.h"
+#include "numeric/float64.h"
+#include "numeric/mpfloat.h"
 
 #include "test.h"
 
 using namespace std;
 using namespace Ariadne;
-using boost::numeric::interval;
 
 template<typename R>
 void
 test_function(ostream& clog) 
 {
+  clog << "test_function<" << name<R>() << ">" << endl;
+  
   clog << setprecision(20);
   mpf_set_default_prec (8);
 
   { 
-    Numeric::rounding<R> rnd;
     R z(0);
     R o(1);
-      
-    R eol=rnd.exp_down(o);
-    R eou=rnd.exp_up(o);
-    clog << eol << " < " << eou << endl;
-    assert(eol < eou);
-    R ol=rnd.log_down(eol);
-    R ou=rnd.log_up(eou);
-    clog << ol << " < " << o << " < " << ou << endl;
-    assert(ol < o && o < ou);
-    R zl=rnd.log_down(ol);
-    R zu=rnd.log_up(ou);
-    clog << zl << " < " << z << " < " << zu << endl;
-    assert(zl < z && z < zu);
+    R t(2);
+    R fl,fu,zl,zu,ol,ou,tl,tu;
+    
+    clog << "sqrt" << endl;
+    fl=sqrt_down(t);
+    fu=sqrt_up(t);
+    clog << fl << " <= " << fu << endl;
+    assert(fl <= fu);
+    tl=mul_down(fl,fl);
+    tu=mul_up(fu,fu);
+    clog << tl << " <= " << t << " <= " << tu << endl;
+    assert(tl <= tu);
+    assert(tl <= t);
+    assert(t <= tu);
+
+    clog << "exp" << endl;
+    fl=exp_down(o);
+    fu=exp_up(o);
+    clog << fl << " <= " << fu << endl;
+    assert(fl <= fu);
+    ol=log_down(fl);
+    ou=log_up(fu);
+    clog << ol << " <= " << o << " <= " << ou << endl;
+    assert(ol <= o && o <= ou);
+    zl=log_down(ol);
+    zu=log_up(ou);
+    clog << zl << " <= " << z << " <= " << zu << endl;
+    assert(zl <= z && z <= zu);
+    
+    clog << "sin" << endl;
+    fl=sin_down(o);
+    fu=sin_up(o);
+    clog << fl << " <= " << fu << endl;
+    assert(fl <= fu);
+    ol=asin_down(fl);
+    ou=asin_up(fl);
+    clog << ol << " <= " << ou << endl;
+    assert(ol <= ou);
+    assert(ol <= o);
+    assert(o <= ou);
   }
   
   return;
@@ -71,7 +95,7 @@ int main() {
   ofstream clog("test_function.log");
 
   test_function<Float64>(clog);
-  //test_function<MPFloat>(clog);
+  test_function<MPFloat>(clog);
   
   clog.close();
   cout << "INCOMPLETE\n";

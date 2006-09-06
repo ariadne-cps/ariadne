@@ -26,7 +26,7 @@
 
 #include <ostream>
 
-#include "../utility/stlio.h"
+#include "../base/stlio.h"
 
 #include "../base/array_operations.h"
 

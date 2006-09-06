@@ -24,7 +24,10 @@
 #include "geometry/rectangle.h"
 #include "geometry/rectangle.tpl"
 
+#include "numeric/float64.h"
+#include "numeric/rational.h"
 #include "real_typedef.h"
+
 
 namespace Ariadne {
   namespace Geometry {
@@ -33,11 +36,11 @@ namespace Ariadne {
                          const ListSet<Real,Geometry::Rectangle>&);
 
     #ifndef RATIONAL_REAL
-    template class Rectangle<double>; 
+    template class Rectangle<Rational>; 
     #endif
       
     #ifndef DOUBLE_REAL  
-    template class Rectangle<Rational>; 
+    template class Rectangle<Float64>; 
     #endif
     
   }

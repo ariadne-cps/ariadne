@@ -31,7 +31,7 @@
 #include <vector>
 #include <valarray>
 
-#include "../utility/stlio.h"
+#include "../base/stlio.h"
 #include "../base/array.h"
 #include "../numeric/interval.h"
 

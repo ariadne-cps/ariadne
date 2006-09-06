@@ -28,7 +28,7 @@
 
 #include <ppl.hh>
 
-#include "../utility/stlio.h"
+#include "../base/stlio.h"
 #include "../geometry/polyhedron.h"
 
 namespace Ariadne {

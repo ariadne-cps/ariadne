@@ -25,7 +25,7 @@
 
 #include "partition_tree_set.h"
 
-#include "../utility/stlio.h"
+#include "../base/stlio.h"
 
 #include "../geometry/rectangle.h"
 #include "../geometry/list_set.h"

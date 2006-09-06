@@ -28,66 +28,18 @@
 #ifndef _ARIADNE_APPROXIMATION_H
 #define _ARIADNE_APPROXIMATION_H
 
-#include <gmpxx.h>
-
 #include "../declarations.h"
-#include "../numeric/numerical_types.h"
+#include "../numeric/numerical_traits.h"
 
 namespace Ariadne {
   namespace Numeric {
     
     /*! \brief Approximate \a x by an element of \p Res. */
-    template<typename Res, typename Arg> inline Res approximate_by(const Arg& x);
-    
-    template<> inline double approximate_by(const double& x) {
-      return x;
-    }
-    template<> inline double approximate_by(const MPFloat& x) { 
-      return x.get_d(); 
-    }
-    
-    template<> inline double approximate_by(const Dyadic& x) {
-      return x.get_d();
-    }
-    
-    template<> inline double approximate_by(const Rational& q) {
-      return q.get_d();
-    }
-    
-    template<> inline MPFloat approximate_by(const Rational& q) {
-      return MPFloat(q.get_d());
-    }
-    
+    template<typename Res, typename Arg> inline Res approximate_by(const Arg& x) { return conv_approx<Res>(x); }
+        
      /*! \brief Approximate \a x by an element of \p Res with accuracy \a e. */
-    template<typename Res, typename Arg, typename Err> inline Res approximate(const Arg& x, const Err& e);
+    template<typename Res, typename Arg, typename Err> Res approximate(const Arg& x, const Err& e);
     
-    template<> inline double approximate(const double& x, const double& e) {
-      return x;
-    }
-    
-    template<> inline Rational approximate(const Rational& q, const Rational& e) {
-      return q;
-    }
-    
-    template<> inline Dyadic approximate(const Rational& q, const Rational& e) {
-      Dyadic x=Dyadic(q);
-      assert(abs(Rational(x)-q)<e);
-      return x;
-    }
-      
-    template<> inline Dyadic approximate(const Rational& q, const Dyadic& e) {
-      return approximate<Dyadic>(q,Rational(e));
-    }
-      
-    template<> inline MPFloat approximate(const Rational& q, const Rational& e) {
-      MPFloat x=MPFloat(q);
-      assert(abs(Rational(x)-q)<e);
-      return x;
-    }
-      
-    template<> inline MPFloat approximate(const Rational& q, const MPFloat& e) {
-      return approximate<MPFloat>(q,Rational(e));
-    }
   }    
 }
 

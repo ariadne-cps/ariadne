@@ -2,7 +2,7 @@ include ../../config.mk
 
 CXXFLAGS += -I/usr/include/python2.4/
 LDXXFLAGS += -L../src
-LDLIBS = -lariadne -lboost_python ${LIBGMPXX} -lppl
+LDLIBS = -lariadne  -lmpfr -lboost_python -lppl ${LIBGMPXX} 
 
 BASE_OBJ=base_module.o \
 	export_array.o export_binary_tree.o 

@@ -38,6 +38,7 @@
 
 #include "../numeric/numerical_traits.h"
 #include "../numeric/arithmetic.h"
+#include "../numeric/rounding.h"
  
 /* No input routine for intervals defined by boost */
 namespace boost {
@@ -78,14 +79,16 @@ namespace Ariadne {
     class Interval : public
         boost::numeric::interval<R, 
             boost::numeric::interval_lib::policies< 
-                boost::numeric::interval_lib::rounded_math<R>,
+                //boost::numeric::interval_lib::rounded_math<R>,
+                rounded_math<R>,
                 boost::numeric::interval_lib::checking_base<R> 
             > 
         >
     {
       typedef boost::numeric::interval<R, 
             boost::numeric::interval_lib::policies< 
-                boost::numeric::interval_lib::rounded_math<R>,
+                //boost::numeric::interval_lib::rounded_math<R>,
+                rounded_math<R>,
                 boost::numeric::interval_lib::checking_base<R> 
             > 
         > _boost_interval;
@@ -137,7 +140,8 @@ namespace Ariadne {
       bool interior_contains(const R& r) const { return this->lower()<r && r<this->upper(); }
       
       /*! \brief The midpoint of the interval, given by \f$(a+b)/2\f$. */
-      R centre() const { return (this->lower()+this->upper())/2; }
+      R centre() const { 
+        return div_approx(add_approx(this->lower(),this->upper()),R(2)); }
       /*! \brief The radius of the interval, given by \f$(b-a)/2\f$. */
       R radius() const { return (this->upper()-this->lower())/2; }
       /*! \brief The length of the interval, given by \f$b-a\f$. */
@@ -201,7 +205,7 @@ namespace Ariadne {
       operator Interval<R> () const { return Interval<R>(*_lower,*_upper); }
       R lower() const { return *_lower; }
       R upper() const { return *_upper; }
-      R centre() const { return (*_lower+*_upper)/2; }
+      R centre() const { return Interval<R>(*this).centre(); }
      private:
       R* _lower; R* _upper;
     };

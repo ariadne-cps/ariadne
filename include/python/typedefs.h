@@ -30,6 +30,12 @@
 #define _ARIADNE_PYTHON_TYPEDEFS_H
 
 #include "../real_typedef.h"
+
+#include "../numeric/float64.h"
+#include "../numeric/mpfloat.h"
+#include "../numeric/dyadic.h"
+#include "../numeric/rational.h"
+
 #include "../declarations.h"
 
 namespace Ariadne {

@@ -33,8 +33,9 @@
 #include <string>
 #include <sstream>
 
-#include "../system/map.h"
+#include "../base/array.h"
 #include "../linear_algebra/matrix.h"
+#include "../system/map.h"
 
 namespace Ariadne {
   namespace System {

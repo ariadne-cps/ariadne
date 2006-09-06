@@ -27,6 +27,7 @@
 
 #include "ariadne.h"
 
+#include "base/stlio.h"
 #include "base/exception.h"
 #include "base/binary_word.h"
 #include "base/binary_tree.h"

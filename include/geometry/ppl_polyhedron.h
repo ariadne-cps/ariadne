@@ -34,6 +34,9 @@
 
 #include "../declarations.h"
 
+// For forward declaration only
+#include "../numeric/rational.h"
+
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 #include "../linear_algebra/interval_vector.h"

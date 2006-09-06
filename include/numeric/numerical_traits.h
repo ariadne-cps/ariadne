@@ -28,6 +28,8 @@
 #ifndef _ARIADNE_NUMERICAL_TRAITS_H
 #define _ARIADNE_NUMERICAL_TRAITS_H
 
+#include <string>
+
 namespace Ariadne {
   namespace Numeric {
     
@@ -39,17 +41,28 @@ namespace Ariadne {
       
     /*! \brief Typedef's describing a numerical type. */
     template<typename T> class numerical_traits;
-  }
+
+    template<> class numerical_traits<double> {
+     public:
+      typedef field_tag algebraic_category;
+      typedef double field_extension_type;
+    };
+  
+    /*! \brief The name of class T. */
+    template<typename T> inline std::string name();
+
+    /*! \brief Approximate \a x by an element of \p Res. */
+    template<typename Res, typename Arg> inline Res convert_to(const Arg& x) { return Res(x); }
+
+    /*! \brief Conversion. */
+    template<typename R,typename X> inline R conv_exact(const X& x) { return R(x); }
+    template<typename R,typename X> inline R conv_down(const X& x) { return R(x); }
+    template<typename R,typename X> inline R conv_up(const X& x) { return R(x); }
+    template<typename R,typename X> inline R conv_approx(const X& x) { return R(x); }
+    
+     
+  }   
 }
   
-namespace Ariadne {
-  namespace Base {
-    template<typename R> inline std::string name() { 
-      return "UnknownType";
-      //throw std::runtime_error("name(): Unknown type");
-    }
-  
-  }
-}
 
 #endif /* _ARIADNE_NUMERICAL_TRAITS_H */

@@ -59,7 +59,7 @@ namespace Ariadne {
         this->_generators(i,i) = r[i].radius();
       }
 
-      this->_generators=remove_null_columns_but_one(this->_generators);
+      //this->_generators=remove_null_columns_but_one(this->_generators);
     }
 
     template<typename R>
@@ -748,9 +748,9 @@ namespace Ariadne {
     {
       if(z.dimension() > 0) {
         if (!(z.empty())) {
-          os << "Zonotope(\n  centre=" << z.centre();
-          os << "\n  directions=" << z.generators();
-          os << "\n) ";
+          os << "Zonotope( centre=" << z.centre();
+          os << " directions=" << z.generators();
+          os << ") ";
         } else {
           os << "Zonotope( Empty )" << std::endl;
         }

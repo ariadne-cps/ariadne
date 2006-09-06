@@ -21,25 +21,34 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <mpfr.h>
+
 #include "numeric/function.h"
 #include "numeric/function.tpl"
 
 #include "numeric/numerical_types.h"
+#include "numeric/float64.h"
+#include "numeric/mpfloat.h"
 
 #include "real_typedef.h"
 
 namespace Ariadne {
   namespace Numeric {
-    template Real div_prec(const Real& x1, const Real& x2, const uint& pr);
-    
-    template Real div_approx(const Real& x1, const Real& x2, const Real& e);
-    template Real sqrt_approx(const Real& x, const Real& e);
-    template Real exp_approx(const Real& x, const Real& e);
-    template Real sin_approx(const Real& x, const Real& e);
-    template Real cos_approx(const Real& x, const Real& e);
 
-#ifndef RATIONAL_REAL
-    template Rational sqrt_approx(const Rational& x, const Rational& e);
-#endif
+    int 
+    mpfr_hypot(mpfr_t y, 
+               const __mpfr_struct* x1, 
+               const __mpfr_struct* x2, 
+               mpfr_rnd_t r)
+    {
+      mpfr_t z;
+      mpfr_init_set(z,y,GMP_RNDN);
+      mpfr_mul(y,x1,x1,r);
+      mpfr_mul(z,x2,x2,r);
+      mpfr_add(y,y,z,r);
+      mpfr_clear(z);
+      return mpfr_sqrt(y,y,r);
+    } 
+
   } 
 }

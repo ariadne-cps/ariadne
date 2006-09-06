@@ -24,7 +24,14 @@ int main() {
   
   clog << h << r << e << endl;
   
-  Geometry::Rectangle<Real> fr=Evaluation::interval_newton(System::DifferenceMap<Real>(h),r,e);
+  Geometry::Rectangle<Real> fr;
+  try {
+    fr=Evaluation::interval_newton(System::DifferenceMap<Real>(h),r,e);
+  }
+  catch(Evaluation::EvaluationException e) {
+    clog << "No solution found" << endl;
+    throw e;
+  }
   test_assert(fr.radius()<e,"interval_newton radius");
   clog << fr << endl;
 

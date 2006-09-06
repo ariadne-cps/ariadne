@@ -31,7 +31,7 @@
 #include <gmpxx.h>
 
 #include "../declarations.h"
-#include "../utility/stlio.h"
+#include "../numeric/numerical_traits.h"
 
 namespace Ariadne {
   namespace Numeric {
@@ -49,14 +49,19 @@ namespace Ariadne {
 #else
     typedef mpz_class Integer;
 #endif
-  }
-
-  namespace Base {
-    template<typename I> inline I convert_to(const Numeric::Integer& n) 
-    { return I(n); }
+  
+    template<> class numerical_traits<Integer> {
+     public:
+      typedef ring_tag algebraic_category;
+      typedef mpq_class field_extension_type;
+    };
 
     template<> inline int convert_to<int>(const Numeric::Integer& n) { return n.get_si(); }
     template<> inline long convert_to<long>(const Numeric::Integer& n) { return n.get_si(); }
+    
+    template<> inline int conv_down<int>(const int& n) { return n; }
+    template<> inline int conv_up<int>(const int& n) { return n; }
+    
   }
 }
 

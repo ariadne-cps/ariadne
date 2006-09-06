@@ -39,31 +39,37 @@
  *
  * The homepage of Ariadne is <a href="http://fsv.dimi.uniud.it/ariadne/">http://fsv.dimi.uniud.it/ariadne/</a>.
  *
- * You can check out the latest version on the Subversion repository by typing
+ * You can check out the latest version on the Subversion repository by typing:
  *
- * <tt>$ svn checkout https://fsv.dimi.uniud.it/svn/ariadne ariadne</tt>
+ *   \code svn checkout https://fsv.dimi.uniud.it/svn/ariadne ariadne \endcode
+ *
+ * To make the code documentation, change to the ariadne/trunk/ directory and type:
+ *
+ *   \code doxygen \endcode
  *
  * \section Requirements
  * 
  * To compile Ariadne, you will need a C++ compiler (we recommend g++ version 4.0.2 or higher, which can be downloaded from <a href="http://gcc.gnu.org/">http://gcc.gnu.org</a>).
  *
  * You will also need the following libraries:
- *   - The GNU Multiple-Precision Library (version 4.1.2 or higher)  <a href="http://www.swox.com/gmp/">http://www.swox.com/gmp/</a>).
+ *   - The GNU Multiple-Precision Library (version 4.1.2 or higher)  <a href="http://www.swox.com/gmp/">http://www.swox.com/gmp/</a>.
  *   - MPFR Library (version 2.0.1 or higher) <a href="http://www.mpfr.org/">http://www.mpfr.org/</a>.
  *   - The Boost C++ Libraries (version 1.33.1) <a href="http://www.boost.org/">http://www.boost.org/</a>.
  *   - The Parma Polyhedra Library (version 0.8 or higher) <a href="http://www.cs.unipr.it/ppl/">http://www.cs.unipr.it/ppl/</a>.
+ *   - TBLAS (version 0.4.0 or higher) <a href="http://homepages.cwi.nl/~collins/software/">http://homepages.cwi.nl/~collins/software/</a>.
+ *   - TLAPACK (version 0.4.0 or higher) <a href="http://homepages.cwi.nl/~collins/software/">http://homepages.cwi.nl/~collins/software/</a>.
  *
  * For the Python interface, you will also need:
  *   - Python (version 2.4) <a href="http://www.python.org/">http://www.python.org/</a>.
  *
- * To make this documentation, you have used:
+ * To make the source code documentation, you will need:
  *   - Doxygen (version 1.4.6 or higher is recommended) 
  *        <a href="http://www.stack.nl/~dimitri/doxygen/">http://www.stack.nl/~dimitri/doxygen/</a>
  *
  * \section Installation
  *
- * From the ariadne/trunk/ directory of the main tree, type\n
- * <tt>$ make install</tt>\n
+ * From the ariadne/trunk/ directory of the main tree, type
+ * \code make install\endcode
  * to make and install the library. 
  *
  * The default installation directory for the library is $HOME/lib/, and for the Python interface is $HOME/python/.

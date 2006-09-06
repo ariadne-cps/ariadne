@@ -23,6 +23,10 @@
  
 
 #include "arithmetic.h"
+#include "float64.h"
+#include "mpfloat.h"
+#include "dyadic.h"
+#include "rational.h"
 
 namespace Ariadne {
   namespace Numeric {

@@ -1,4 +1,3 @@
-
 /***************************************************************************
  *            binary_tree.cc
  *
@@ -29,14 +28,14 @@
 
 #include "base/binary_tree.h"
 
-#include "utility/stlio.h"
 #include "base/array.h"
-#include "numeric/arithmetic.h"
+#include "base/stlio.h"
 
 namespace Ariadne {
   namespace Base {
 
-
+  inline size_type pow2(size_type n) { return 1<<n; }
+  
   BinaryTree::BinaryTree(const Base::array<bool>& t)
     : _array(t.begin(),t.end()) 
   { 
@@ -59,13 +58,13 @@ namespace Ariadne {
      : _array(1) { _array[0]=leaf; }
 
     BinaryTree::BinaryTree(size_type d)
-      : _array(pow(2,d+1)-1)
+      : _array(pow2(d+1)-1)
     {
       size_type n=_array.size();
       _array[n-1]=leaf;
 
       for(size_type i=0; i!=d; ++i) {
-        size_type m=pow(2,i+1)-1;
+        size_type m=pow2(i+1)-1;
         for(size_type j=n-m; j!=n; ++j) {
           _array[j-m]=_array[j];
         }

@@ -34,9 +34,9 @@
 
 #include "polyhedron.h"
 
-#include "../utility/stlio.h"
-#include "../numeric/interval.h"
+#include "../base/stlio.h"
 
+#include "../numeric/interval.h"
 #include "../numeric/arithmetic.h"
 
 #include "../linear_algebra/vector.h"
@@ -202,6 +202,11 @@ namespace Ariadne {
     
     
     
+    
+    template <typename R>
+    Polytope<R>::Polytope() : _A(0,0), _b(0)
+    {
+    }
     
     template <typename R>
     Polytope<R>::operator Parma_Polyhedra_Library::C_Polyhedron() const

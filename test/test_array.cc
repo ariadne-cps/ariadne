@@ -27,6 +27,7 @@
 
 #include "ariadne.h"
 
+#include "base/stlio.h"
 #include "base/array.h"
 #include "numeric/numerical_types.h"
 

@@ -25,7 +25,7 @@
 
 #include <ostream>
 
-#include "../utility/stlio.h"
+#include "../base/stlio.h"
 
 #include "../numeric/arithmetic.h"
 

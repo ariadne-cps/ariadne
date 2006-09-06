@@ -25,6 +25,9 @@ install: lib
 install-lib: lib
 	(cd ${SRCDIR}; ${MAKE} install-lib);
 
+install-python: lib python
+	(cd ${SRCDIR}; ${MAKE} install-lib ${MAKE} install-python);
+
 check: install-lib
 	(cd ${TESTDIR}; ${MAKE});
 

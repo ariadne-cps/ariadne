@@ -29,6 +29,7 @@
 #include "ariadne.h"
 #include "real_typedef.h"
 #include "base/exception.h"
+#include "base/stlio.h"
 #include "base/utility.h"
 #include "base/binary_word.h"
 #include "numeric/numerical_types.h"

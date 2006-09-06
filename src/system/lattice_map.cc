@@ -21,13 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "system/lattice_map.h"
-
 #include <iostream>
-#include "utility/stlio.h"
-#include "geometry/lattice_set.h"
 
 #include "debug.h"
+
+#include "geometry/lattice_set.h"
+#include "system/lattice_map.h"
+
+#include "base/stlio.h"
+
 Ariadne::dbgstream cdbg(std::cerr,0);
 
 namespace Ariadne {

@@ -44,7 +44,7 @@ inline void rvector_setitem(RVector& v, uint i, Real x) {
 }
 
 inline void rvector_setitem_from_double(RVector& v, uint i, double x) {
-  v(i)=Ariadne::Base::convert_to<Real>(x);
+  v(i)=x;
 }
 
 inline RVector rvector_add_rvector(const RVector& u, RVector& v) {
@@ -84,7 +84,7 @@ inline void ivector_setitem_from_real(RIntervalVector& v, uint i, Real x) {
 }
 
 inline void ivector_setitem_from_double(RIntervalVector& v, uint i, double x) {
-  v(i)=RInterval(Ariadne::Base::convert_to<Real>(x));
+  v(i)=RInterval(x);
 }
 
 inline Field fvector_getitem(const FVector& v, uint i) {

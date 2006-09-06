@@ -26,22 +26,23 @@
 
 #include <gmpxx.h>
 #include <mpfr.h>
-#include <boost/numeric/interval.hpp>
-#include <boost/numeric/interval/rounded_arith.hpp>
-#include <boost/numeric/interval/io.hpp>
 
 #include "numeric/arithmetic.h"
+#include "numeric/interval.h"
+#include "numeric/float64.h"
+#include "numeric/mpfloat.h"
+#include "numeric/rational.h"
 
 #include "test.h"
 
 using namespace std;
+using namespace Ariadne::Numeric;
+using Ariadne::name;
 using Ariadne::Rational;
 using Ariadne::MPFloat;
 using Ariadne::Float64;
-using boost::numeric::interval;
 
-typedef MPFloat Real;
-//typedef Float64 Real;
+template<typename R> void test_arithmetic(ofstream&);
 
 int main() {
 
@@ -49,58 +50,88 @@ int main() {
   ofstream clog("test_arithmetic.log");
   clog << setprecision(20);
   mpf_set_default_prec (8);
+
+  test_arithmetic<Float64>(clog);
+  test_arithmetic<MPFloat>(clog);
+  test_arithmetic<Rational>(clog);
+  
+  clog.close();
+  cout << "INCOMPLETE\n";
+
+  return 0;
+}
+
+template<typename Real>
+void
+test_arithmetic(ofstream& clog)
+{
+  clog << "test_arithmetic<" << name<Real>() << ">" << endl;
+  
   Real f1(1.25);
   Real f2(2.25);
   Real f3;
   Real f4;
   //clog << "prec(f1)=" << f1.get_prec() << endl;
-  boost::numeric::interval_lib::rounded_arith_std<Real> rnd;
   
-  
-  f3=rnd.add_down(f1,f2);
-  f4=rnd.add_up(f1,f2);
+  f3=add_down(f1,f2);
+  f4=add_up(f1,f2);
   clog << f3 << " <= " << f1 << " + " << f2 << " <= " << f4 << endl;
-  f3=rnd.sub_down(f1,f2);
-  f4=rnd.sub_up(f1,f2);
+  f3=sub_down(f1,f2);
+  f4=sub_up(f1,f2);
   clog << f3 << " <= " << f1 << " - " << f2 << " <= " << f4 << endl;
-  f3=rnd.mul_down(f1,f2);
-  f4=rnd.mul_up(f1,f2);
+  f3=mul_down(f1,f2);
+  f4=mul_up(f1,f2);
   clog << f3 << " <= " << f1 << " * " << f2 << " <= " << f4 << endl;
-  f3=rnd.div_down(f1,f2);
-  f4=rnd.div_up(f1,f2);
+  f3=div_down(f1,f2);
+  f4=div_up(f1,f2);
   clog << f3 << " <= " << f1 << " / " << f2 << " <= " << f4 << endl;
-  f3=rnd.mul_down(f3,f2);
-  f4=rnd.mul_up(f4,f2);
+  f3=mul_down(f3,f2);
+  f4=mul_up(f4,f2);
   clog << f3 << " <= " << f1 << " <= " << f4 << endl;
   
   Real h=0.5;
   Real e=0.5;
   Real o=1.0;
-  Real l=rnd.add_down(o,e);
-  Real u=rnd.add_up(o,e);
+  Real l=add_down(o,e);
+  Real u=add_up(o,e);
   int n=0;
   while(l==u && n!=256) {
     e=e*h;
     ++n;
-    l=rnd.add_down(o,e);
-    u=rnd.add_up(o,e);
+    l=add_down(o,e);
+    u=add_up(o,e);
   }
   clog << l << " <= " << o << " + " << e << " <= " << u << endl;
   
   Real z=0.0;
   Real t=3.0;
-  Real tl=rnd.div_down(o,t);
-  Real tu=rnd.div_up(o,t);
+  Real tl=div_down(o,t);
+  Real tu=div_up(o,t);
   clog << tl << " <= " << tu << endl;
-  Real ol=rnd.mul_down(tl,t);
-  Real ou=rnd.mul_up(tu,t);
-  clog << ol << " <= " << ou << endl;
-  assert(ol<=o && o <=ou);
-  Real zl=rnd.sub_down(ol,o);
-  Real zu=rnd.sub_up(ou,o);
+  Real ol=mul_down(tl,t);
+  Real ou=mul_up(tu,t);
+  clog << ol << " <= " << o << " <= " << ou << endl;
+  Real zl=sub_down(ol,o);
+  Real zu=sub_up(ou,o);
   clog << "zl=" << zl << "  zu=" << zu << endl;
+  assert(tl<=tu);
+  assert(ol<=o);
+  assert(o<=ou);
+  assert(zl<=z);
+  assert(z<=zu);
   //assert(zl<=z && z <=zu);
   
+  Interval<Real> io(1);
+  Interval<Real> it(3);
+  Interval<Real> iao=(io/it)*it;
+  clog << iao << endl;
+  assert(in(o,iao));
+  Interval<Real> iaz=iao-io;
+  clog << iaz << endl;
+  assert(in(z,iaz)); 
+  clog << endl;
+  
+/*
   boost::numeric::interval<Real> io(1);
   boost::numeric::interval<Real> it(3);
   boost::numeric::interval<Real> iao=(io/it)*it;
@@ -109,9 +140,5 @@ int main() {
   boost::numeric::interval<Real> iaz=iao-io;
   clog << iaz << endl;
   assert(in(z,iaz));
-
-  clog.close();
-  cout << "INCOMPLETE\n";
-
-  return 0;
+*/
 }

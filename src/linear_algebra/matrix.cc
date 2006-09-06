@@ -34,8 +34,6 @@ namespace Ariadne {
     
     template class Matrix<Real>;
     
-    template Matrix<Field> Householder_QR(const Matrix<Field> &A);
-
     template Matrix<Real> hermitian(const Matrix<Real>& m);
     
     template Integer common_denominator(const Matrix<Real>& A);

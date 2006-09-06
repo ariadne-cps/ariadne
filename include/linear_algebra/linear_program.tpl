@@ -29,7 +29,7 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
-#include "utility/stlio.h"
+#include "../base/stlio.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {

@@ -30,13 +30,17 @@
 #define _ARIADNE_ARITHMETIC_H
 
 #include <algorithm>
+#include <cassert>
 
-#include "../numeric/numerical_types.h"
-#include "../numeric/approximation.h"
+#include "../declarations.h"
+#include "../numeric/numerical_traits.h"
+#include "../numeric/integer.h"
 
 namespace Ariadne {
   namespace Numeric {
-      
+
+    template<typename R> class Interval;
+
     /*! \brief Minimum. */
     template<typename R, typename A1, typename A2>
     inline
@@ -83,7 +87,7 @@ namespace Ariadne {
     inline
     Interval<R> 
     max(const Interval<R>& x1, const Interval<R>& x2);
-  
+ 
     /*! \brief Absolute value. */
     template<typename R>
     inline
@@ -93,6 +97,7 @@ namespace Ariadne {
       return x>=R(0) ? x : R(-x);
     }
   
+ 
     /*! \brief Interval absolute value. */
     template<typename R>
     inline

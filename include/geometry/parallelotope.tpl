@@ -29,7 +29,8 @@
 
 #include "parallelotope.h"
 
-#include "../utility/stlio.h"
+#include "../base/stlio.h"
+
 #include "../numeric/interval.h"
 
 #include "../linear_algebra/vector.h"

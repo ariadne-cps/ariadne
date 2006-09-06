@@ -3,7 +3,7 @@ include ../config.mk
 TESTS = \
   test_array test_binary_word \
   test_lattice \
-  test_arithmetic test_function test_interval \
+  test_mpfr test_arithmetic test_function test_interval \
   test_vector test_matrix test_linear_algebra \
   test_point \
   test_rectangle test_parallelotope test_zonotope \

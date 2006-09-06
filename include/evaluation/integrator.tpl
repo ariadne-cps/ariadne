@@ -38,10 +38,8 @@
 
 #include "../declarations.h"
 
-#include "../utility/stlio.h"
 #include "../base/array.h"
 #include "../numeric/arithmetic.h"
-#include "../numeric/function.h"
 #include "../numeric/interval.h"
 
 #include "../linear_algebra/vector.h"

@@ -70,6 +70,8 @@ int main() {
          << "r5=" << r5 << ", r6=" << r6 << ", r7=" << r7 << endl;
     
     test_assert(equal(r1,r7),"equality");
+    clog << "centre(r2)=" << r2.centre() << endl;
+    test_assert(r2.centre()==Point<Real>("(0.5,0.0625)"),"centre");
     
     ListSet<Real,Rectangle> cover1,cover2;
     cover1.push_back(r2);

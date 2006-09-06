@@ -24,9 +24,6 @@
 
 #include <vector>
 
-
-#include "utility/stlio.h"
-
 #include "geometry/rectangle.h"
 #include "geometry/polyhedron.h"
 

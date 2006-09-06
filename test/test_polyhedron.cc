@@ -111,6 +111,8 @@ int main() {
   assert(!qp.contains(qs5));
   assert(!qp.interior_contains(qs5));
 
+  Polytope<Real> ptp;
+  
   clog.close();
   cout << "INCOMPLETE\n";
 

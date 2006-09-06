@@ -32,6 +32,7 @@
 
 #define NO_CBLAS
 
+
 namespace Ariadne { namespace Base {
 template<typename T, size_t N=0> class array;
 template<typename T> class sequence;

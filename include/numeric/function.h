@@ -29,114 +29,136 @@
 #ifndef _ARIADNE_FUNCTION_H
 #define _ARIADNE_FUNCTION_H
 
-#include <cmath>
-
-#include <gmpxx.h>
-
-extern "C" {
-  #include <mpfr.h>
-}
-
-#include <boost/numeric/interval.hpp>
-
-#include "../numeric/numerical_types.h"
+#include "integer.h"
 
 namespace Ariadne {
   namespace Numeric {
-    template<typename R> class rounding;
-    
-    template<>
-    struct rounding<Float64> :
-      boost::numeric::interval_lib::rounded_arith_opp<Float64>
-    {
-     private:
-      typedef int mpfr_func(mpfr_t, const __mpfr_struct*, mp_rnd_t);
-    
-      Float64 invoke_mpfr(Float64 x, mpfr_func f, mp_rnd_t r) {
-        mpfr_t xx;
-        mpfr_init_set_d(xx, x, GMP_RNDN);
-        f(xx, xx, r);
-        Float64 res = mpfr_get_d(xx, r);
-        mpfr_clear(xx);
-        return res;
-      }
-     public:
-      Float64 exp_down(Float64 x) { return invoke_mpfr(x, mpfr_exp, GMP_RNDD); } 
-      Float64 log_down(Float64 x) { return invoke_mpfr(x, mpfr_log, GMP_RNDD); } 
-      Float64 sin_down(Float64 x) { return invoke_mpfr(x, mpfr_sin, GMP_RNDD); } 
-      Float64 cos_down(Float64 x) { return invoke_mpfr(x, mpfr_cos, GMP_RNDD); } 
-      Float64 tan_down(Float64 x) { return invoke_mpfr(x, mpfr_tan, GMP_RNDD); } 
-      Float64 asin_down(Float64 x) { return invoke_mpfr(x, mpfr_asin, GMP_RNDD); } 
-      Float64 acos_down(Float64 x) { return invoke_mpfr(x, mpfr_acos, GMP_RNDD); } 
-      Float64 atan_down(Float64 x) { return invoke_mpfr(x, mpfr_atan, GMP_RNDD); } 
-      Float64 sinh_down(Float64 x) { return invoke_mpfr(x, mpfr_sinh, GMP_RNDD); } 
-      Float64 cosh_down(Float64 x) { return invoke_mpfr(x, mpfr_cosh, GMP_RNDD); } 
-      Float64 tanh_down(Float64 x) { return invoke_mpfr(x, mpfr_tanh, GMP_RNDD); }
-      Float64 asinh_down(Float64 x) { return invoke_mpfr(x, mpfr_asinh, GMP_RNDD); } 
-      Float64 acosh_down(Float64 x) { return invoke_mpfr(x, mpfr_acosh, GMP_RNDD); } 
-      Float64 atanh_down(Float64 x) { return invoke_mpfr(x, mpfr_atanh, GMP_RNDD); }
-    
-      Float64 exp_up (Float64 x) { return invoke_mpfr(x, mpfr_exp, GMP_RNDU); }
-      Float64 log_up (Float64 x) { return invoke_mpfr(x, mpfr_log, GMP_RNDU); }
-      Float64 sin_up (Float64 x) { return invoke_mpfr(x, mpfr_sin, GMP_RNDU); }
-      Float64 cos_up (Float64 x) { return invoke_mpfr(x, mpfr_cos, GMP_RNDU); }
-      Float64 tan_up (Float64 x) { return invoke_mpfr(x, mpfr_tan, GMP_RNDU); }
-      Float64 asin_up (Float64 x) { return invoke_mpfr(x, mpfr_asin, GMP_RNDU); }
-      Float64 acos_up (Float64 x) { return invoke_mpfr(x, mpfr_acos, GMP_RNDU); }
-      Float64 atan_up (Float64 x) { return invoke_mpfr(x, mpfr_atan, GMP_RNDU); }
-      Float64 sinh_up (Float64 x) { return invoke_mpfr(x, mpfr_sinh, GMP_RNDU); }
-      Float64 cosh_up (Float64 x) { return invoke_mpfr(x, mpfr_cosh, GMP_RNDU); }
-      Float64 tanh_up (Float64 x) { return invoke_mpfr(x, mpfr_tanh, GMP_RNDU); }
-      Float64 asinh_up (Float64 x) { return invoke_mpfr(x, mpfr_asinh, GMP_RNDU); }
-      Float64 acosh_up (Float64 x) { return invoke_mpfr(x, mpfr_acosh, GMP_RNDU); }
-      Float64 atanh_up (Float64 x) { return invoke_mpfr(x, mpfr_atanh, GMP_RNDU); }
-    };
-    
-    template<>
-    struct rounding<MPFloat> :
-      boost::numeric::interval_lib::rounded_arith_opp<Float64>
-    {
-     public:
-      MPFloat exp_down(MPFloat x); 
-      MPFloat log_down(MPFloat x);
-      MPFloat sin_down(MPFloat x);
-      MPFloat cos_down(MPFloat x);
-      MPFloat tan_down(MPFloat x);
-      MPFloat asin_down(MPFloat x);
-      MPFloat atan_down(MPFloat x);
-      MPFloat sinh_down(MPFloat x);
-      MPFloat cosh_down(MPFloat x);
-      MPFloat tanh_down(MPFloat x);
-      MPFloat asinh_down(MPFloat x);
-      MPFloat acosh_down(MPFloat x);
-      MPFloat atanh_down(MPFloat x);
-    
-      MPFloat exp_up (MPFloat x);
-      MPFloat log_up (MPFloat x);
-      MPFloat sin_up (MPFloat x);
-      MPFloat cos_up (MPFloat x);
-      MPFloat tan_up (MPFloat x);
-      MPFloat asin_up (MPFloat x); 
-      MPFloat acos_up (MPFloat x);
-      MPFloat atan_up (MPFloat x); 
-      MPFloat sinh_up (MPFloat x);
-      MPFloat cosh_up (MPFloat x);
-      MPFloat tanh_up (MPFloat x); 
-      MPFloat asinh_up (MPFloat x);
-      MPFloat acosh_up (MPFloat x);
-      MPFloat atanh_up (MPFloat x);
-    };
-  
-    template<typename R> R div_prec(const R& x, const R& x2, const uint& precision);
+
+    /*! \brief Conversion. */
+    template<typename R,typename X> inline R conv_exact(const X& x);
+    template<typename R,typename X> inline R conv_down(const X& x);
+    template<typename R,typename X> inline R conv_up(const X& x);
+    template<typename R,typename X> inline R conv_approx(const X& x);
+
+    /*! \brief Minumum. */
+    template<typename R> R max(const R& x);
+
+    /*! \brief Maximum . */
+    template<typename R> R max(const R& x);
    
-    template<typename R> R div_approx(const R& x, const R& x2, const R& e);
-    template<typename R> R sqrt_approx(const R& x, const R& e);
-    template<typename R> R exp_approx(const R& x, const R& e);
-    template<typename R> R exp_down(const R& x, const R& e);
-    template<typename R> R exp_up(const R& x, const R& e);
-    template<typename R> R cos_approx(const R& x, const R& e);
-    template<typename R> R sin_approx(const R& x, const R& e);
-  
+     /*! \brief Median . */
+    template<typename R> R med_exact(const R& x1, const R& x2);
+    template<typename R> R med_approx(const R& x1, const R& x2);
+   
+   /*! \brief Unary negation. */
+    template<typename R> R neg_exact(const R& x);
+    template<typename R> R neg_down(const R& x);
+    template<typename R> R neg_up(const R& x);
+   
+    /*! \brief Absolute value. */
+    template<typename R> R abs_exact(const R& x);
+    template<typename R> R abs_down(const R& x);
+    template<typename R> R abs_up(const R& x);
+   
+    /*! \brief Addition. */
+    template<typename R> R add_exact(const R& x1,const R& x2);
+    template<typename R> R add_down(const R& x1,const R& x2);
+    template<typename R> R add_up(const R& x1,const R& x2);
+    template<typename R> R add_approx(const R& x1,const R& x2);
+    
+    /*! \brief Subtraction. */
+    template<typename R> R sub_exact(const R& x1,const R& x2);
+    template<typename R> R sub_down(const R& x1,const R& x2);
+    template<typename R> R sub_up(const R& x1,const R& x2);
+    template<typename R> R sub_approx(const R& x1,const R& x2);
+    
+     /*! \brief Multiplication. */
+    template<typename R> R mul_exact(const R& x1,const R& x2);
+    template<typename R> R mul_down(const R& x1,const R& x2);
+    template<typename R> R mul_up(const R& x1,const R& x2);
+    template<typename R> R mul_approx(const R& x1,const R& x2);
+    
+    /*! \brief Division. */
+    template<typename R> R div_exact(const R& x1,const R& x2);
+    template<typename R> R div_down(const R& x1,const R& x2);
+    template<typename R> R div_up(const R& x1,const R& x2);
+    template<typename R> R div_approx(const R& x1,const R& x2);
+    
+    /*! \brief Integer bounds. */
+    template<typename R> Integer int_down(const R& x);
+    template<typename R> Integer int_up(const R& x);
+
+    /*! \brief Integer quotient. */
+    template<typename R> Integer quotient(const R& x);
+
+
+
+    /*! \brief Square root. */
+    template<typename R> R sqrt_down(const R& x);
+    template<typename R> R sqrt_up(const R& x);
+    template<typename R> R sqrt_approx(const R& x);
+
+    /*! \brief Hypoteneuse. */
+    template<typename R> R hypot_down(const R& x1,const R& x2);
+    template<typename R> R hypot_up(const R& x1,const R& x2);
+    template<typename R> R hypot_approx(const R& x1,const R& x2);
+   
+    /*! \brief Exponential. */
+    template<typename R> R exp_down(const R& x);
+    template<typename R> R exp_up(const R& x);
+
+    /*! \brief Natural logarithm. */
+    template<typename R> R log_down(const R& x);
+    template<typename R> R log_up(const R& x);
+
+    /*! \brief Sine function. */
+    template<typename R> R sin_down(const R& x);
+    template<typename R> R sin_up(const R& x);
+
+    /*! \brief Cosine function. */
+    template<typename R> R cos_down(const R& x);
+    template<typename R> R cos_up(const R& x);
+
+    /*! \brief Tangent function. */
+    template<typename R> R tan_down(const R& x);
+    template<typename R> R tan_up(const R& x);
+
+    /*! \brief Hyperbolic sine function. */
+    template<typename R> R sinh_down(const R& x);
+    template<typename R> R sinh_up(const R& x);
+
+    /*! \brief Hyperbolic cosine function. */
+    template<typename R> R cosh_down(const R& x);
+    template<typename R> R cosh_up(const R& x);
+
+    /*! \brief Hyperbolic tangent function. */
+    template<typename R> R tanh_down(const R& x);
+    template<typename R> R tanh_up(const R& x);
+
+    /*! \brief Inverse sine function. */
+    template<typename R> R asin_down(const R& x);
+    template<typename R> R asin_up(const R& x);
+
+    /*! \brief Inverse cosine function. */
+    template<typename R> R acos_down(const R& x);
+    template<typename R> R acos_up(const R& x);
+
+    /*! \brief Inverse tangent function. */
+    template<typename R> R atan_down(const R& x);
+    template<typename R> R atan_up(const R& x);
+
+    /*! \brief Inverse hyperbolic sine function. */
+    template<typename R> R asinh_down(const R& x);
+    template<typename R> R asinh_up(const R& x);
+
+    /*! \brief Inverse hyperbolic cosine function. */
+    template<typename R> R acosh_down(const R& x);
+    template<typename R> R acosh_up(const R& x);
+
+    /*! \brief Inverse hyperbolic tangent function. */
+    template<typename R> R atanh_down(const R& x);
+    template<typename R> inline R atanh_up(const R& x);
+
   }
 }
 

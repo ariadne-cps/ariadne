@@ -40,7 +40,7 @@ libariadne.a: ${OBJ}
 python: lib
 	(cd ${PYTHONDIR}; ${MAKE} all)
 
-install: lib python
+install: install-lib install-python
 	mkdir -p ${LIBPREFIX}
 	cp -f libariadne.so ${LIBPREFIX}/libariadne.so
 	(cd ${PYTHONDIR}; ${MAKE} install)
@@ -48,6 +48,11 @@ install: lib python
 install-lib: lib
 	mkdir -p ${LIBPREFIX}
 	cp -f libariadne.so ${LIBPREFIX}/libariadne.so
+
+install-python: lib python
+	mkdir -p ${LIBPREFIX}
+	cp -f libariadne.so ${LIBPREFIX}/libariadne.so
+	(cd ${PYTHONDIR}; ${MAKE} install)
 
 
 clean:                                                                          

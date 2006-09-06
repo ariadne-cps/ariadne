@@ -146,7 +146,7 @@ namespace Ariadne {
     std::ostream& operator<<(std::ostream& os, const BinaryTree& t);
     
   } // namespace Base
-} // namespace Ariadne
+}// namespace Ariadne
 
 
 #endif /* _ARIADNE_BINARY_TREE_H */

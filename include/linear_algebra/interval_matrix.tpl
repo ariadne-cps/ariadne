@@ -31,6 +31,7 @@
 
 #include "../numeric/arithmetic.h"
 #include "../numeric/interval.h"
+#include "../numeric/approximation.h"
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 #include "../linear_algebra/interval_vector.h"
@@ -253,30 +254,18 @@ namespace Ariadne {
       assert(A.size1()==A.size2());
       dimension_type n=A.size1();
       
-      IntervalMatrix<F> AF(n,n);
-      for(size_type i=0; i!=n; ++i) {
-        for(size_type j=0; j!=n; ++j) {
-          AF(i,j)=Interval<F>(A(i,j).lower(),A(i,j).upper());
-        }
-      }
-
       Matrix<R> Amid(n,n);
       for(size_type i=0; i!=n; ++i) {
         for(size_type j=0; j!=n; ++j) {
           Amid(i,j)=(A(i,j).upper()+A(i,j).lower())/2;
         }
       }
+      IntervalMatrix<R> I=inverse(IntervalMatrix<R>(Amid))*A;
       
-      R Aaccuracy=upper_norm(IntervalMatrix<R> (A-Amid));
-      R approx_accuracy=Aaccuracy/1024;
+      R excess=norm(I).upper();
       
-      Matrix<F> Amidinv=inverse(Amid);
-      IntervalMatrix<F> E=Amidinv*AF;
-      
-      F excess=norm(E).upper();
-      R approx_excess=Ariadne::approximate<R>(excess,approx_accuracy)+approx_accuracy;
-      
-      return approx_excess*Amid;
+      // FIXME: Outer bound on multiplication
+      return excess*Amid;
     }
     
     template<typename R>

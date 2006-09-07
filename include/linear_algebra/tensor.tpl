@@ -37,7 +37,7 @@ namespace Ariadne {
 
     template<typename R>
     Vector<R>
-    product(const Tensor<R>& T, const Vector<R>& v1, const Vector<R>& v2) 
+    Tensor<R>::product(const Tensor<R>& T, const Vector<R>& v1, const Vector<R>& v2) 
     {
       assert(T.size(1)==v1.size());
       assert(T.size(2)==v2.size());
@@ -55,7 +55,7 @@ namespace Ariadne {
       
     template<typename R>
     Matrix<R>
-    product(const Tensor<R>& T, const Vector<R>& v1) 
+    Tensor<R>::product(const Tensor<R>& T, const Vector<R>& v1) 
     {
       assert(T.size(1)==v1.size());
       
@@ -72,7 +72,7 @@ namespace Ariadne {
 
     template<typename R>
     Tensor<R>
-    product(const Tensor<R>& T, const Matrix<R>& A1) 
+    Tensor<R>::product(const Tensor<R>& T, const Matrix<R>& A1) 
     {
       assert(T.size(1)==A1.size1());
       
@@ -91,7 +91,7 @@ namespace Ariadne {
 
     template<typename R>
     Tensor<R>
-    product(const Tensor<R>& T, const Matrix<R>& A1, const Matrix<R>& A2) 
+    Tensor<R>::product(const Tensor<R>& T, const Matrix<R>& A1, const Matrix<R>& A2) 
     {
       assert(T.size(1)==A1.size1());
       assert(T.size(2)==A2.size1());
@@ -113,9 +113,9 @@ namespace Ariadne {
     
     template<typename R>
     std::ostream&
-    operator<< (std::ostream& os, const Tensor<R>& T)
+    Tensor<R>::write(std::ostream& os) const
     {
-      return os;
+      return os << "Tensor(...)";
     }
     
   }

@@ -21,17 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "real_typedef.h"
-
 #include "linear_algebra/linear_program.h"
 #include "linear_algebra/linear_program.tpl"
 
-
+#include "numeric/rational.h"
 namespace Ariadne {
   namespace LinearAlgebra {
     
-    template class LinearProgram<Field>;
-    template std::ostream& operator<<(std::ostream&, const LinearProgram<Field>&);
+    template class LinearProgram<Rational>;
 
   }
 }

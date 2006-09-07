@@ -196,14 +196,10 @@ namespace Ariadne {
       }
       
       /*! \brief True if the zonotope is empty. */
-      bool empty() const {
-        return this->_central_block.empty();
-      }
+      bool empty() const { return false; }
       
       /*! \brief True if the zonotope has empty interior. */
-      bool empty_interior() const {
-        return !LinearAlgebra::independent_rows(this->_generators);
-      }
+      bool empty_interior() const;
       
       /*! \brief The centre of the zonotope. */
       state_type centre() const {

@@ -154,6 +154,9 @@ namespace Ariadne {
        */
       real_type optimal_value() const;
       
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream& os) const;
+
      private:
       // An enumerated type describing the internal status of the LP problem.
       enum Status {
@@ -246,11 +249,15 @@ namespace Ariadne {
        * Coefficient of the _tableau.
        */
       size_type steepest_edge() const;
+
     };
 
     template<typename R>
+    inline
     std::ostream& 
-    operator<<(std::ostream& os, const LinearProgram<R>& lp);
+    operator<<(std::ostream& os, const LinearProgram<R>& lp) {
+      return lp.write(os);
+    }
     
     
     

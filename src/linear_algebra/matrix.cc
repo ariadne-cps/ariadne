@@ -24,51 +24,21 @@
 #include <cstdlib>
 #include <cstdio>
 
-#include "real_typedef.h"
-
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/matrix.tpl"
+
+#include "numeric/float64.h"
+#include "numeric/mpfloat.h"
+#include "numeric/rational.h"
+
+#include "real_typedef.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {
     
-    template class Matrix<Real>;
-    
-    template Matrix<Real> hermitian(const Matrix<Real>& m);
-    
-    template Integer common_denominator(const Matrix<Real>& A);
-    
-    template Vector<Integer> row_common_denominators(const Matrix<Real>& A);
-
-    template void transform_linear_inequalities(const Matrix<Real>& T, 
-                                                Matrix<Real>& A, 
-                                                Vector<Real>& b);
-    
-    template bool independent_rows(Matrix<Real> A);
-
-    template bool equivalent_columns(const Matrix<Real> &A, 
-                                     const size_type &A_col, 
-                                     const Matrix<Real> &B, 
-                                     const size_type &B_col);
-    
+    template class Matrix<Float64>;
+    template class Matrix<MPFloat>;
+    template class Matrix<Rational>;
   
-    template size_type find_first_not_null_in_col(const Matrix<Real> &A, 
-                                                  const size_type &col);
-    
-    template Matrix<Real> remove_null_columns_but_one(const Matrix<Real> &A);
-    
-    template void remove_null_columns(const Matrix<Real>& A, 
-                                      array<size_type>& row, 
-                                      array<size_type>& col);
-
-    template Matrix<Field> compute_space(const Matrix<Field>& SA, 
-                                            array<size_type>& row,
-                                            const array<size_type>& col);
-    
-#ifndef REAL_IS_A_FIELD
-    template class Matrix<Field>;
-     
-    template Vector<Integer> row_common_denominators(const Matrix<Field>& A);
-#endif
   }
 }

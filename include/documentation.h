@@ -53,9 +53,9 @@
  *
  * You will also need the following libraries:
  *   - The GNU Multiple-Precision Library (version 4.1.2 or higher)  <a href="http://www.swox.com/gmp/">http://www.swox.com/gmp/</a>.
- *   - MPFR Library (version 2.0.1 or higher) <a href="http://www.mpfr.org/">http://www.mpfr.org/</a>.
+ *   - MPFR Library (version 2.2.0 or higher with patches 8 and 12) <a href="http://www.mpfr.org/">http://www.mpfr.org/</a>.
  *   - The Boost C++ Libraries (version 1.33.1) <a href="http://www.boost.org/">http://www.boost.org/</a>.
- *   - The Parma Polyhedra Library (version 0.8 or higher) <a href="http://www.cs.unipr.it/ppl/">http://www.cs.unipr.it/ppl/</a>.
+ *   - The Parma Polyhedra Library (version 0.9 or higher) <a href="http://www.cs.unipr.it/ppl/">http://www.cs.unipr.it/ppl/</a>.
  *   - TBLAS (version 0.4.0 or higher) <a href="http://homepages.cwi.nl/~collins/software/">http://homepages.cwi.nl/~collins/software/</a>.
  *   - TLAPACK (version 0.4.0 or higher) <a href="http://homepages.cwi.nl/~collins/software/">http://homepages.cwi.nl/~collins/software/</a>.
  *
@@ -69,7 +69,10 @@
  * \section Installation
  *
  * From the ariadne/trunk/ directory of the main tree, type
- * \code make install\endcode
+ * \code 
+ * make dep
+ * make install
+ *\endcode
  * to make and install the library. 
  *
  * The default installation directory for the library is $HOME/lib/, and for the Python interface is $HOME/python/.

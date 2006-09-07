@@ -7,7 +7,7 @@ GEOMETRYDIR=geometry/
 SYSTEMDIR=system/
 EVALUATIONDIR=evaluation/
 
-.PHONY: lib base numeric linear_algebra geometry system evaluation python check clean
+.PHONY: lib base numeric linear_algebra geometry system evaluation python install clean
 
 all: lib python
 
@@ -31,14 +31,14 @@ system:
 evaluation:
 	(cd evaluation; ${MAKE} all)
 
+python: lib
+	(cd ${PYTHONDIR}; ${MAKE} all)
+
 libariadne.so: base numeric linear_algebra geometry system evaluation
 	${CXX} ${LDXXFLAGS} -shared -o libariadne.so base/*.o numeric/*.o linear_algebra/*.o geometry/*.o system/*.o evaluation/*.o ${LIBPPL} ${LIBGMPXX} ${RPATHFLAGS}
 
 libariadne.a: ${OBJ}
 	${CXX} ${LDXXFLAGS} -o libariadne.a ${OBJ} -lppl -lgmpxx -lgmp
-
-python: lib
-	(cd ${PYTHONDIR}; ${MAKE} all)
 
 install: install-lib install-python
 	mkdir -p ${LIBPREFIX}

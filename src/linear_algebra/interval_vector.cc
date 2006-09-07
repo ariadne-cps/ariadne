@@ -23,22 +23,24 @@
  
 #include "numeric/arithmetic.h"
 
-#include "real_typedef.h"
-
 #include "linear_algebra/interval_vector.h"
 #include "linear_algebra/interval_vector.tpl"
 #include "linear_algebra/vector.tpl"
 
+#include "numeric/float64.h"
+#include "numeric/mpfloat.h"
+#include "numeric/rational.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {
     
-    template class Vector< Interval<Real> >;
-    template class IntervalVector<Real>;
+    template class Vector< Interval<Float64> >;
+    template class IntervalVector<Float64>;
+    template class Vector< Interval<MPFloat> >;
+    template class IntervalVector<MPFloat>;
 
-#ifndef REAL_IS_A_FIELD
-    template class Vector< Interval<Field> >;
-    template class IntervalVector<Field>;
-#endif
+    template class Vector< Interval<Rational> >;
+    template class IntervalVector<Rational>;
+
   }
 }

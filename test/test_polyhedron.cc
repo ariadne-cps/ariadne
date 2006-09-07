@@ -31,10 +31,11 @@
 #include <ppl.hh>
 
 #include "ariadne.h"
-#include "real_typedef.h"
 #include "base/exception.h"
 #include "base/utility.h"
-#include "numeric/numerical_types.h"
+#include "numeric/float64.h"
+#include "numeric/mpfloat.h"
+#include "numeric/rational.h"
 #include "geometry/point.h"
 #include "geometry/point_list.h"
 #include "geometry/polyhedron.h"
@@ -49,31 +50,35 @@ using namespace std;
 
 using namespace Parma_Polyhedra_Library::IO_Operators;
 
-Parma_Polyhedra_Library::C_Polyhedron ppl_polyhedron(const Point<Real>& pt) {
-  return ppl_polyhedron(LinearAlgebra::Vector<Rational>(pt.position_vector())); }
+
+int
+test_ppl_polyhedron(ostream& clog)
+{
+  return 0;
+}  
+
+template<typename R>
+int 
+test_polyhedron(ostream& clog) 
+{
+  clog << "test_polyhedron<" << name<R>() << ">" << endl;
+  Point<R> s1("(1.0,0.875)");
+  Point<R> s2("(1.375,0.5)");
+  Point<R> s3("(1.50,1.25)");
+  Point<R> s4("(1.25,1.03125)");
+  Point<R> s5("(0.75,1.25)");
   
-int main() {
-  cout << "test_polyhedron: " << flush;
-  ofstream clog("test_polyhedron.log");
-  
-  Point<Real> s1("(1.0,0.875)");
-  Point<Real> s2("(1.375,0.5)");
-  Point<Real> s3("(1.50,1.25)");
-  Point<Real> s4("(1.25,1.03125)");
-  Point<Real> s5("(0.75,1.25)");
-  
-  PointList<Real> ptl;
+  PointList<R> ptl;
   ptl.push_back(s1);
   ptl.push_back(s2);
   ptl.push_back(s3);
   clog << ptl << endl;
  
-  Polyhedron<Real> p(ptl);
+  Polyhedron<R> p(ptl);
   clog << p << endl;
   
   Parma_Polyhedra_Library::C_Polyhedron ppl_p(p);
   clog << ppl_p.generators() << endl;
-  clog << PointList<Real>(generators(ppl_p)) << endl;
   
   clog << ppl_p.constraints() << endl;
   clog << constraints_matrix(ppl_p) << " " << constraints_vector(ppl_p) << endl;
@@ -83,7 +88,7 @@ int main() {
   
   Parma_Polyhedra_Library::C_Polyhedron ppl_s=ppl_polyhedron(s4);
   clog << ppl_s.generators() << endl;
-  
+
   assert(p.contains(s1));
   assert(!p.interior_contains(s1));
   assert(p.contains(s4));
@@ -91,30 +96,39 @@ int main() {
   assert(!p.contains(s5));
   assert(!p.interior_contains(s5));
   
-  Point<Rational> qs1(s1);
-  Point<Rational> qs2(s2);
-  Point<Rational> qs3(s3);
-  Point<Rational> qs4(s4);
-  Point<Rational> qs5(s5);
-  PointList<Rational> qptl;
-  qptl.push_back(qs1);
-  qptl.push_back(qs2);
-  qptl.push_back(qs3);
-  
-  Polyhedron<Rational> qp(qptl);
-  clog << qp << endl;
-  
-  assert(qp.contains(qs1));
-  assert(!qp.interior_contains(qs1));
-  assert(qp.contains(qs4));
-  assert(qp.interior_contains(qs4));
-  assert(!qp.contains(qs5));
-  assert(!qp.interior_contains(qs5));
+  return 0;
+}
 
-  Polytope<Real> ptp;
+
+
+template<typename R>
+int 
+test_polytope(ostream& clog) 
+{
+  clog << "test_polytope<" << name<R>() << ">" << endl;
+  LinearAlgebra::Matrix<R> A("(1.0,0.875;-1,1.125;0.125,-2.25)");
+  LinearAlgebra::Vector<R> b("(1.375,0.5,0.25)");
+  Polytope<R> ptp;
   
+  ptp=Polytope<R>(A,b);
+  
+  return 0;
+}
+
+
+
+int main() {
+  cout << "test_polyhedron: " << flush;
+  ofstream clog("test_polyhedron.log");
+
+  test_ppl_polyhedron(clog);
+  
+  test_polyhedron<Float64>(clog);
+  test_polyhedron<MPFloat>(clog);
+  test_polyhedron<Rational>(clog);
+  
+  test_polytope<Float64>(clog);
+
   clog.close();
   cout << "INCOMPLETE\n";
-
-  return 0;
 }

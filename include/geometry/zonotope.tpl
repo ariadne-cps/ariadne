@@ -47,6 +47,9 @@
 #include "../geometry/parallelotope.h"
 #include "../geometry/list_set.h"
 
+// include for column operations
+#include "../linear_algebra/matrix.tpl" 
+
 namespace Ariadne {
   namespace Geometry {
     
@@ -71,6 +74,13 @@ namespace Ariadne {
     }
          
     
+    template<typename R>
+    bool 
+    Zonotope<R>::empty_interior() const 
+    {
+      return !LinearAlgebra::independent_rows(this->_generators);
+    }
+      
     template<typename R>
     Geometry::Zonotope<R> 
     scale(const Geometry::Zonotope<R>& z, const R& scale_factor) 

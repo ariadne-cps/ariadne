@@ -124,23 +124,23 @@ namespace Ariadne {
       /*! \brief The operator norm with respect to the supremum norm on vectors. 
        * Equal to the supremum over all rows of the sum of absolute values.
        */
-      F norm() const;
+      R norm() const;
 
       /*! \brief The logarithmic norm. */
-      F log_norm() const;
+      R log_norm() const;
       
       /*! \brief True if the matrix is singular. */
       bool singular() const;
       /*! \brief The determinant of the matrix. */
-      F determinant() const;
+      R determinant() const;
       
       /*! \brief The transposed matrix. */
       Matrix<R> transpose() const;
 
       /*! \brief The inverse of the matrix. */
-      Matrix<F> inverse() const;
+      Matrix<R> inverse() const;
       /*! \brief The solution of the linear equation \f$ Ax=b\f$. */
-      Vector<F> solve(const Vector<R>& b) const;
+      Vector<R> solve(const Vector<R>& b) const;
 
       /*! \brief A pointer to the first element of the array of values. */
       R* begin() { return &(*this)(0,0); }
@@ -225,7 +225,7 @@ namespace Ariadne {
 
     template <typename R>
     inline
-    Matrix<typename numerical_traits<R>::field_extension_type> 
+    Matrix<R> 
     inverse(const Matrix<R>& A)
     {
       return A.inverse();
@@ -233,7 +233,7 @@ namespace Ariadne {
     
     template <typename R>
     inline
-    Vector<typename numerical_traits<R>::field_extension_type> 
+    Vector<R> 
     solve(const Matrix<R>& A, const Vector<R>& v)
     {
       return A.solve(v);
@@ -246,28 +246,23 @@ namespace Ariadne {
       return Matrix<R>::concatenate_columns(A1,A2);
     }
     
+    template <typename R>
+    std::ostream&
+    operator<<(std::ostream& os, const Matrix<R>& A) {
+      return A.write(os);
+    }
+
+    template <typename R>
+    std::istream&
+    operator>>(std::istream& is, Matrix<R>& A) {
+      return A.read(is); 
+    }
+
         
              
-    /* WARNING!!! The following function has some precision problems */ 
-    template <typename R>
-    inline
-    Matrix<R> 
-    Householder_QR(const Matrix<R> &A);
-
-    template <typename R>
-    Matrix<R>
-    hermitian(const Matrix<R>& m);
     
+/*        
         
-        
-    template <typename R>
-    Integer 
-    common_denominator(const Matrix<R>& A);
-    
-    template <typename R>
-    Vector<Integer> 
-    row_common_denominators(const Matrix<R>& A);
-
     
     
     template <class R>
@@ -302,18 +297,7 @@ namespace Ariadne {
     compute_space(const Matrix<R>& SA, 
                   array<size_type>& row,
                   const array<size_type>& col);
-    
-    template <typename R>
-    std::ostream&
-    operator<<(std::ostream& os, const Matrix<R>& A) {
-      return A.write(os);
-    }
-
-    template <typename R>
-    std::istream&
-    operator>>(std::istream& is, Matrix<R>& A) {
-      return A.read(is); 
-    }
+*/
 
   }
 }

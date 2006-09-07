@@ -44,6 +44,7 @@
 #include "../linear_algebra/interval_vector.h"
 
 #include "../linear_algebra/matrix.h"
+#include "../linear_algebra/matrix_function.h"
 #include "../linear_algebra/interval_matrix.h"
 
 #include "../geometry/rectangle.h"

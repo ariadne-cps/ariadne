@@ -21,43 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/float64.h"
-#include "real_typedef.h"
-
 #include "linear_algebra/tensor.h"
 #include "linear_algebra/tensor.tpl"
+
+#include "numeric/float64.h"
+#include "numeric/mpfloat.h"
+#include "numeric/rational.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {
     
-#ifndef DOUBLE_REAL
     template class Tensor<Float64>;
-    template Vector<Float64> product(const Tensor<Float64>&, const Vector<Float64>&, const Vector<Float64>&);
-    template Matrix<Float64> product(const Tensor<Float64>&, const Vector<Float64>&);
-    template Tensor<Float64> product(const Tensor<Float64>&, const Matrix<Float64>&);
-    template Tensor<Float64> product(const Tensor<Float64>&, const Matrix<Float64>&, const Matrix<Float64>&);
-    template std::ostream& operator<<(std::ostream&, const Tensor<Float64>&);
-#endif
-    
-    template class Tensor<Real>;
-    template Vector<Real> product(const Tensor<Real>&, const Vector<Real>&, const Vector<Real>&);
-    template Matrix<Real> product(const Tensor<Real>&, const Vector<Real>&);
-    template Tensor<Real> product(const Tensor<Real>&, const Matrix<Real>&);
-    template Tensor<Real> product(const Tensor<Real>&, const Matrix<Real>&, const Matrix<Real>&);
-    template std::ostream& operator<<(std::ostream&, const Tensor<Real>&);
- 
-#ifndef REAL_IS_A_FIELD
-    template class Tensor<Field>;
-    
-    template Vector<Field> product(const Tensor<Field>&, const Vector<Field>&, const Vector<Field>&);
-    
-    template Matrix<Field> product(const Tensor<Field>&, const Vector<Field>&);
-    
-    template Tensor<Field> product(const Tensor<Field>&, const Matrix<Field>&);
-    
-    template Tensor<Field> product(const Tensor<Field>&, const Matrix<Field>&, const Matrix<Field>&);
-    
-    template std::ostream& operator<<(std::ostream&, const Tensor<Field>&);
-#endif
+    template class Tensor<MPFloat>;
+    template class Tensor<Rational>;
+
   }
 }

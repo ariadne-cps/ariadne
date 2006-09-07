@@ -21,18 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "real_typedef.h"
-
 #include "linear_algebra/vector.h"
 #include "linear_algebra/vector.tpl"
+
+#include "numeric/float64.h"
+#include "numeric/mpfloat.h"
+#include "numeric/rational.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {
     
-    template class Vector<Real>;
+    template class Vector<Float64>;
+    template class Vector<MPFloat>;
+    template class Vector<Rational>;
 
-#ifndef REAL_IS_A_FIELD
-    template class Vector<Field>;
-#endif
   }
 }

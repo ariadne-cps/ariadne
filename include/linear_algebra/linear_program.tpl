@@ -1170,9 +1170,9 @@ namespace Ariadne {
 */
     template<typename R>
     std::ostream& 
-    operator<<(std::ostream& os, const LinearProgram<R>& lp) 
+    LinearProgram<R>::write(std::ostream& os) const
     {
-      return os << "LinearProgram( tableau=" << lp.tableau() << ")";
+      return os << "LinearProgram( tableau=" << this->tableau() << ")";
     }
   }
 }

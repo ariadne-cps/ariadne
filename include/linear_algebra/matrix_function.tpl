@@ -29,24 +29,6 @@
 namespace Ariadne {
   namespace LinearAlgebra {
 
-    template <typename R>
-    Matrix<R>
-    exp_approx(const Matrix<R>& A, 
-               const R& e) 
-    {
-      Matrix<R> result=Matrix<R>::identity(A.size1());
-      
-      R norm_A=norm(A);
-      Matrix<R> term=result;
-      uint n=0;
-      while(norm(term)*n >= e*(n-norm_A)) {
-        ++n;
-        term=(term*A)/n;
-        result=result+term;
-      }
-      return result;
-    }
-
     template<typename R>
     IntervalMatrix<R>
     exp(const IntervalMatrix<R>& A) 

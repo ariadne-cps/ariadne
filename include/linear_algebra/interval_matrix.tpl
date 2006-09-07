@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include <sstream>
 #include <string>
 
@@ -55,102 +55,34 @@ namespace Ariadne {
       return result;
     }
     
-  
-    
-      
-
-    template <typename R>
-    IntervalVector<R> 
-    prod(const Matrix<R>& A, const IntervalVector<R>& v) {
-      IntervalVector<R> result(A.size1());
-      for (size_type i=0; i!=result.size(); ++i) {
-        result(i)=R(0);
-        for (size_type j=0; j!=v.size(); ++j) {
-          result(i)+=A(i,j)*v(j);
-        }
-      }
-      return result;
-    }
-      
-    template <typename R>
-    IntervalVector<R> 
-    prod(const IntervalMatrix<R>& A, const Vector<R>& v) {
-      IntervalVector<R> result(A.size1());
-      for (size_type i=0; i!=result.size(); ++i) {
-        result(i)=R(0);
-        for (size_type j=0; j!=v.size(); ++j) {
-          result(i)+=A(i,j)*v(j);
-        }
-      }
-      return result;
-    }
-      
-    template <typename R>
-    IntervalVector<R> 
-    prod(const IntervalMatrix<R>& A, const IntervalVector<R>& v) {
-      IntervalVector<R> result(A.size1());
-      for (size_type i=0; i!=result.size(); ++i) {
-        result(i)=R(0);
-        for (size_type j=0; j!=v.size(); ++j) {
-          result(i)+=A(i,j)*v(j);
-        }
-      }
-      return result;
-    }
-      
-    template <typename R>
-    IntervalMatrix<R> 
-    prod(const IntervalMatrix<R>& A, const Matrix<R>& B) {
-      IntervalMatrix<R> result(A.size1(),B.size2());
-      for (size_type i=0; i!=A.size1(); ++i) {
-        for (size_type j=0; j!=B.size2(); ++j) {
-          result(i,j)=R(0);
-          for (size_type k=0; k!=A.size2(); ++k) {
-            result(i,j)+=A(i,k)*B(k,j);
-          }
-        }
-      }
-      return result;
-    }
-      
-    template <typename R>
-    IntervalMatrix<R> 
-    prod(const Matrix<R>& A, const IntervalMatrix<R>& B) {
-      IntervalMatrix<R> result(A.size1(),B.size2());
-      for (size_type i=0; i!=A.size1(); ++i) {
-        for (size_type j=0; j!=B.size2(); ++j) {
-          result(i,j)=R(0);
-          for (size_type k=0; k!=A.size2(); ++k) {
-            result(i,j)+=A(i,k)*B(k,j);
-          }
-        }
-      }
-      return result;
-    }
-    
-    template <typename R>
-    IntervalMatrix<R> 
-    prod(const IntervalMatrix<R>& A, const IntervalMatrix<R>& B) {
-      IntervalMatrix<R> result(A.size1(),B.size2());
-      for (size_type i=0; i!=A.size1(); ++i) {
-        for (size_type j=0; j!=B.size2(); ++j) {
-          result(i,j)=R(0);
-          for (size_type k=0; k!=A.size2(); ++k) {
-            result(i,j)+=A(i,k)*B(k,j);
-          }
-        }
-      }
-      return result;
-    }
-
     template<typename R>
-    IntervalMatrix<R>
-    fprod(const Matrix<typename numerical_traits<R>::field_extension_type>& A, 
-         const IntervalMatrix<R>& B) 
-    {
-      /* FIXME: Write this code! */
-      return IntervalMatrix<R>(A.size1(),B.size2());
+    IntervalVector<R> 
+    IntervalMatrix<R>::prod(const IntervalMatrix<R>& A, const IntervalVector<R>& v) {
+      IntervalVector<R> result(A.size1());
+      for (size_type i=0; i!=result.size(); ++i) {
+        result(i)=R(0);
+        for (size_type j=0; j!=v.size(); ++j) {
+          result(i)+=A(i,j)*v(j);
+        }
+      }
+      return result;
     }
+    
+    template<typename R>
+    IntervalMatrix<R> 
+    IntervalMatrix<R>::prod(const IntervalMatrix<R>& A, const IntervalMatrix<R>& B) {
+      IntervalMatrix<R> result(A.size1(),B.size2());
+      for (size_type i=0; i!=A.size1(); ++i) {
+        for (size_type j=0; j!=B.size2(); ++j) {
+          result(i,j)=R(0);
+          for (size_type k=0; k!=A.size2(); ++k) {
+            result(i,j)+=A(i,k)*B(k,j);
+          }
+        }
+      }
+      return result;
+    }
+
 
     template<typename R>
     bool
@@ -246,11 +178,9 @@ namespace Ariadne {
     
     template<typename R>
     Matrix<R>
-    over_approximation(const IntervalMatrix<R>& A)
+    IntervalMatrix<R>::over_approximation() const
     {
-      
-      typedef typename numerical_traits<R>::field_extension_type F;
-
+      const IntervalMatrix<R>& A=*this;
       assert(A.size1()==A.size2());
       dimension_type n=A.size1();
       
@@ -260,17 +190,18 @@ namespace Ariadne {
           Amid(i,j)=(A(i,j).upper()+A(i,j).lower())/2;
         }
       }
-      IntervalMatrix<R> I=inverse(IntervalMatrix<R>(Amid))*A;
+      IntervalMatrix<R> I=LinearAlgebra::inverse(IntervalMatrix<R>(Amid))*A;
       
-      R excess=norm(I).upper();
+      R excess=LinearAlgebra::norm(I).upper();
       
       // FIXME: Outer bound on multiplication
       return excess*Amid;
     }
     
+/*
     template<typename R>
     IntervalMatrix<R>
-    approximate(const Matrix<typename numerical_traits<R>::field_extension_type>& A, const R& e)
+    IntervalMatrix<R>::approximate(const Matrix<typename numerical_traits<R>::field_extension_type>& A, const R& e)
     {
       R abserr=e/(2*A.number_of_columns());
       Interval<R> err(-abserr,abserr);
@@ -283,8 +214,8 @@ namespace Ariadne {
       }
       return result;
     }
-      
-     
+*/
+
 /*
     template<typename R>
     IntervalMatrix<R>

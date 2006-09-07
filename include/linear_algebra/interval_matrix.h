@@ -69,6 +69,9 @@ namespace Ariadne {
       /*! \brief Convert from a matrix. */
       IntervalMatrix(const Matrix<R>& A) : _Base(A) { }
       
+      /*! \brief Convert from a matrix of intervals. */
+      IntervalMatrix(const Matrix< Interval<R> >& A) : _Base(A) { }
+      
       /* Convert from a matrix expression. */
       template<typename E> IntervalMatrix(const boost::numeric::ublas::matrix_expression<E>& A) : _Base(A()) { }
 
@@ -94,55 +97,71 @@ namespace Ariadne {
       R upper_norm() const;
       /*! \brief The maximum possible logarithmic norm. */
       R upper_log_norm() const;
+      
+      /*! \brief A matrix whose image contains the image of the unit ball (in the supremum norm) 
+       *  of all possible images of the unit ball under the interval matrix. */
+      Matrix<R> over_approximation() const;
+
+      static IntervalVector<R> prod(const IntervalMatrix<R>& A, const IntervalVector<R>& v);
+      static IntervalMatrix<R> prod(const IntervalMatrix<R>& A, const IntervalMatrix<R>& v);
+      
     };
 
 
 
     /*! \brief A matrix \f$A\f$ such that for all zonotopes \f$Z\f$, \f$AZ\subset \overline{\underline{A}}\f$. */
     template<typename R>
+    inline
     Matrix<R>
-    over_approximation(const IntervalMatrix<R>& A); 
+    over_approximation(const IntervalMatrix<R>& A) {
+      return A.over_approximation();
+    }      
         
-    /*! \brief An interval matrix exponential. */
-    template<typename R>
-    IntervalMatrix<R>
-    exp(const IntervalMatrix<R>& A); 
-        
-    /*! \brief The interval matrix inverse. */
-    template<typename R>
-    IntervalMatrix<R>
-    approximate(const Matrix<typename numerical_traits<R>::field_extension_type>& A,const R& e); 
         
     
     template <typename R>
+    inline
     IntervalVector<R> 
-    prod(const Matrix<R>& A, const IntervalVector<R>& v);
-        
-    template <typename R>
-    IntervalVector<R> 
-    prod(const IntervalMatrix<R>& A, const Vector<R>& v);
-        
-    template <typename R>
-    IntervalVector<R> 
-    prod(const IntervalMatrix<R>& A, const IntervalVector<R>& v);
-        
-    template <typename R>
-    IntervalMatrix<R> 
-    prod(const IntervalMatrix<R>& A, const Matrix<R>& B);
-      
-    template <typename R>
-    IntervalMatrix<R> 
-    prod(const Matrix<R>& A, const IntervalMatrix<R>& B);
-      
-    template <typename R>
-    IntervalMatrix<R> 
-    prod(const IntervalMatrix<R>& A, const IntervalMatrix<R>& B);
-      
-    template<typename R>
-    IntervalMatrix<R>
-    fprod(const Matrix<typename numerical_traits<R>::field_extension_type>& A, 
-         const IntervalMatrix<R>& B);
+    prod(const Matrix<R>& A, const IntervalVector<R>& v) {
+      return IntervalMatrix<R>::prod(IntervalMatrix<R>(A),v);
+    }
     
+    template <typename R>
+    inline
+    IntervalVector<R> 
+    prod(const IntervalMatrix<R>& A, const Vector<R>& v) {
+      return IntervalMatrix<R>::prod(A,IntervalVector<R>(v));
+    }
+        
+    template <typename R>
+    inline
+    IntervalVector<R> 
+    prod(const IntervalMatrix<R>& A, const IntervalVector<R>& v) {
+      return IntervalMatrix<R>::prod(A,v);
+    }
+    
+        
+    template <typename R>
+    inline
+    IntervalMatrix<R> 
+    prod(const IntervalMatrix<R>& A, const Matrix<R>& B){
+      return IntervalMatrix<R>::prod(A,IntervalMatrix<R>(B));
+    }
+      
+    template <typename R>
+    inline
+    IntervalMatrix<R> 
+    prod(const Matrix<R>& A, const IntervalMatrix<R>& B){
+      return IntervalMatrix<R>::prod(IntervalMatrix<R>(A),B);
+    }
+      
+    template <typename R>
+    inline
+    IntervalMatrix<R> 
+    prod(const IntervalMatrix<R>& A, const IntervalMatrix<R>& B){
+      return IntervalMatrix<R>::prod(A,B);
+    }
+      
 
     template<typename R>
     inline
@@ -187,14 +206,6 @@ namespace Ariadne {
       return prod(A,B);
     }
     
-    template<typename R>
-    inline
-    IntervalMatrix<R>
-    operator*(const Matrix<typename numerical_traits<R>::field_extension_type>& A, 
-              const IntervalMatrix<R>& B) {
-      return fprod(A,B);
-    }
-
         
     /*! \brief The range of supremum norms of matrices in the interval Matrix. */
     template<typename R>

@@ -21,23 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "real_typedef.h"
-
 #include "linear_algebra/matrix_function.h"
 #include "linear_algebra/matrix_function.tpl"
+
+#include "numeric/float64.h"
+#include "numeric/mpfloat.h"
+#include "numeric/rational.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {
     
-    template Matrix<Real> exp_approx(const Matrix<Real> &A, 
-                                     const Real& e); 
+    template IntervalMatrix<Float64> exp(const IntervalMatrix<Float64>& A); 
+    template IntervalMatrix<MPFloat> exp(const IntervalMatrix<MPFloat>& A); 
+    template IntervalMatrix<Rational> exp(const IntervalMatrix<Rational>& A); 
 
-    template IntervalMatrix<Real> exp(const IntervalMatrix<Real>& A); 
-
-
-#ifndef REAL_IS_A_FIELD
-    template Matrix<Field> exp_approx(const Matrix<Field> &A, 
-                                      const Field& e); 
-#endif
   }
 }

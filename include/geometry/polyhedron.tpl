@@ -85,6 +85,17 @@ namespace Ariadne {
     {
     }
    
+    template <typename R>
+    Polyhedron<R>&
+    Polyhedron<R>::operator=(const Polyhedron<R>& p)
+      
+    {
+      if(this!=&p) { 
+        this->_vertices=p._vertices;
+      }
+      return *this;
+    }
+   
     
     template <typename R>
     Polyhedron<R>::operator Parma_Polyhedra_Library::C_Polyhedron() const
@@ -208,6 +219,32 @@ namespace Ariadne {
     {
     }
     
+    template <typename R>
+    Polytope<R>::Polytope(const LinearAlgebra::Matrix<R>& A,
+                          const LinearAlgebra::Vector<R>& b) 
+      : _A(A), _b(b)
+    {
+      assert(A.number_of_columns()==b.size());
+    }
+    
+    template <typename R>
+    Polytope<R>::Polytope(const Polytope<R>& p)
+      : _A(p._A), _b(p._b)
+    {
+    }
+   
+    template <typename R>
+    Polytope<R>&
+    Polytope<R>::operator=(const Polytope<R>& p)
+      
+    {
+      if(this!=&p) { 
+        this->_A=p._A;
+        this->_b=p._b;
+      }
+      return *this;
+    }
+ 
     template <typename R>
     Polytope<R>::operator Parma_Polyhedra_Library::C_Polyhedron() const
     {

@@ -86,7 +86,7 @@ namespace Ariadne {
       
       LinearAlgebra::Matrix<R> img_generators = df_at_centre*g;
       
-      LinearAlgebra::Matrix<F> img_generators_inverse = LinearAlgebra::inverse(img_generators);
+      LinearAlgebra::IntervalMatrix<R> img_generators_inverse = LinearAlgebra::inverse(LinearAlgebra::IntervalMatrix<R>(img_generators));
       
       LinearAlgebra::IntervalMatrix<R> img_generators_on_set = df_on_set * g;
       LinearAlgebra::IntervalMatrix<R> cuboid_transform = img_generators_inverse * img_generators_on_set;

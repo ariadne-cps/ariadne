@@ -14,11 +14,18 @@ TESTS = \
   test_chainreach \
   test_integration_step 
 
+OBJS=$(addsuffix .o,$(TESTS))
+
 CXXFLAGS += -Wall -I../include/ 
-#LDXXFLAGS += .-L../src/ -lariadne -lmpfr -lgmp -lgmpxx -lppl #-lblas
-LDXXFLAGS += ../src/libariadne.so -lmpfr -lgmp -lgmpxx -lppl #-lblas
+LDLIBS = ../src/libariadne.so -lmpfr -lgmp -lgmpxx -lppl #-lblas
 
 all: ${TESTS}
+
+check: $(TESTS)
+	@(for test in $(TESTS); do ./$$test; done);
+
+$(TESTS): %: %.o ../src/libariadne.so
+	$(CXX) $@.o $(LDXXFLAGS) $(LDLIBS) -o $@
 
 .cc.o:
 	${CXX} ${INCLUDE} ${CXXFLAGS} -c $<
@@ -32,14 +39,8 @@ dep:
 	@echo "### Do Not edit this line" >> Makefile
 	@echo "### Everything below is auto-generated" >> Makefile
 	@echo "" >> Makefile 
-	@echo "all: $$""{TESTS}" >> Makefile
-	@for ff in ${TESTS}; do echo "	-./$$ff"; done >> Makefile
-	@echo "" >> Makefile 
 	@for ff in ${TESTS}; do g++ -MM ${CXXFLAGS} $$ff.cc; \
 	echo "	-$$""{CXX} $$""{CXXFLAGS} -c $$ff.cc "; \
-	echo " "; \
-	echo "$$ff: $$ff.o"; \
-	echo "	-$$""{CXX} $$ff.o $$""{LDXXFLAGS} -o $$ff "; \
 	echo ""; done >> Makefile
 
 depclean:

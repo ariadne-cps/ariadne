@@ -1,7 +1,6 @@
 include ../../config.mk
 
 CXXFLAGS += -I/usr/include/python2.4/
-LDXXFLAGS += -L../src
 LDLIBS = -lariadne  -lmpfr -lboost_python -lppl ${LIBGMPXX} 
 
 BASE_OBJ=base_module.o \

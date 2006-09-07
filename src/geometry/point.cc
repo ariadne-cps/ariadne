@@ -24,14 +24,20 @@
 #include "geometry/point.h"
 #include "geometry/point.tpl"
 
-#include "real_typedef.h"
+#include "numeric/float64.h"
+#include "numeric/mpfloat.h"
+#include "numeric/rational.h"
 
 namespace Ariadne {
   namespace Geometry {
 
-    template class Point<Real>;
-    template std::ostream& operator<<(std::ostream&, const Point<Real>&);
-    template std::istream& operator>>(std::istream&, Point<Real>&);
+    template class Point<Float64>;
+    template std::ostream& operator<<(std::ostream&, const Point<Float64>&);
+    template std::istream& operator>>(std::istream&, Point<Float64>&);
+
+    template class Point<MPFloat>;
+    template std::ostream& operator<<(std::ostream&, const Point<MPFloat>&);
+    template std::istream& operator>>(std::istream&, Point<MPFloat>&);
 
     template class Point<Rational>;
     template std::ostream& operator<<(std::ostream&, const Point<Rational>&);

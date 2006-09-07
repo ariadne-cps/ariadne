@@ -100,6 +100,13 @@ namespace Ariadne {
       const R& operator() (const array<size_type> ind) {
         return this->_elements[this->position(ind)]; }
     
+      static Matrix<R> product(const Tensor<R>& T, const Vector<R>& v1);
+      static Vector<R> product(const Tensor<R>& T, const Vector<R>& v1, const Vector<R>& v2);
+      static Tensor<R> product(const Tensor<R>& T, const Matrix<R>& A1);
+      static Tensor<R> product(const Tensor<R>& T, const Matrix<R>& A1, const Matrix<R>& A2);
+        
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream&) const;
      protected:
       size_type position(const array<size_type>& ind) const {
         size_type result=ind[0];
@@ -118,20 +125,35 @@ namespace Ariadne {
     };
   
     template<typename R>
-    Vector<R>
-    product(const Tensor<R>& T, const Vector<R>& v1, const Vector<R>& v2);
+    Matrix<R>
+    product(const Tensor<R>& T, const Vector<R>& v1) {
+      return Tensor<R>::product(T,v1);
+    }
     
     template<typename R>
-    Matrix<R>
-    product(const Tensor<R>& T, const Vector<R>& v1);
+    Vector<R>
+    product(const Tensor<R>& T, const Vector<R>& v1, const Vector<R>& v2) {
+      return Tensor<R>::product(T,v1,v2); 
+    }
     
     template<typename R>
     Tensor<R>
-    product(const Tensor<R>& T, const Matrix<R>& A1);
+    product(const Tensor<R>& T, const Matrix<R>& A1) {
+      return Tensor<R>::product(T,A1);
+    }
 
     template<typename R>
+    Tensor<R>
+    product(const Tensor<R>& T, const Matrix<R>& A1, const Matrix<R>& A2) {
+      return Tensor<R>::product(T,A1,A2);
+    }
+
+    template<typename R>
+    inline
     std::ostream&
-    operator<< (std::ostream& os, const Tensor<R>& T); 
+    operator<< (std::ostream& os, const Tensor<R>& T) {
+      return T.write(os);
+    } 
 
     template<typename R>
     inline 

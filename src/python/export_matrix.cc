@@ -113,7 +113,6 @@ void export_Matrix() {
   ;
     
   def("inverse",&rmatrix_inverse);
-  def("exp_approx",&LinearAlgebra::exp_approx<Real>);
 
 #ifndef REAL_IS_A_FIELD 
   class_<FMatrix>("RationalMatrix",init<int,int>())
@@ -135,4 +134,5 @@ void export_IntervalMatrix() {
     .def("__setitem__",&iMatrix_setitem)
     .def(self_ns::str(self))    // __self_ns::str__
   ;
+  def("exp",&LinearAlgebra::exp<Real>);
 }

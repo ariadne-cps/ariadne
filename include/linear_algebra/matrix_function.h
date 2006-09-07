@@ -36,10 +36,6 @@ namespace Ariadne {
   namespace LinearAlgebra {
 
     template<typename R>
-    Matrix<R>
-    exp_approx(const Matrix<R>& A, const R& e);
-
-    template<typename R>
     IntervalMatrix<R>
     exp(const IntervalMatrix<R>& A); 
 

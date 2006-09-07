@@ -1,6 +1,8 @@
 include ./config.mk
 
-all:  python 
+.PHONY: doc lib python clean install install-lib 
+
+all: lib python 
 
 doc:
 	doxygen;
@@ -8,28 +10,32 @@ doc:
 lib: 
 	(cd ${SRCDIR}; ${MAKE} lib);
 
-python: lib
+python: 
 	(cd ${SRCDIR}/${PYTHONDIR}; ${MAKE} all);
 
 clean:                                                                          
-	rm -f *.bak *.o *~ *% core 
-	rm -f *.eps
+	rm -f *~ *% core 
+	rm -f *.eps test_*.log
 	rm -rf latex html
 	(cd ${SRCDIR}; ${MAKE} clean; cd ..; )
 	(cd ${TESTDIR}; ${MAKE} clean; cd ..; )
 
-install: lib
+install: lib python
 	(cd ${SRCDIR}; ${MAKE} install);
 	(cd ${PYTHONDIR}; ${MAKE} install);
 
 install-lib: lib
 	(cd ${SRCDIR}; ${MAKE} install-lib);
 
-install-python: lib python
-	(cd ${SRCDIR}; ${MAKE} install-lib ${MAKE} install-python);
+check: install
+	(cd ${TESTDIR}; ${MAKE} check);
+	(cd ${PYTHONDIR}; ${MAKE} check);
 
-check: install-lib
-	(cd ${TESTDIR}; ${MAKE});
+check-lib: lib
+	(cd ${TESTDIR}; ${MAKE} check);
+
+check-python: install
+	(cd ${PYTHONDIR}; ${MAKE} check);
 
 dep: 
 	(cd ${SRCDIR}; ${MAKE} dep);
@@ -39,5 +45,3 @@ depclean:
 	(cd ${SRCDIR}; ${MAKE} depclean);
 	(cd ${TESTDIR}; ${MAKE} depclean);
 
-pycheck: python install
-	for file in python/test/*.py; do echo $$file; $$file; done

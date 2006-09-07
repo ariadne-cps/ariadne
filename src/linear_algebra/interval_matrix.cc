@@ -21,52 +21,24 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "real_typedef.h"
-
 #include "linear_algebra/interval_matrix.h"
 #include "linear_algebra/interval_matrix.tpl"
 #include "linear_algebra/matrix.tpl"
 
+#include "numeric/float64.h"
+#include "numeric/mpfloat.h"
+#include "numeric/rational.h"
+
 namespace Ariadne {
   namespace LinearAlgebra {
-    template class Matrix< Interval<Real> >;
-    template class IntervalMatrix<Real>;
+    template class Matrix< Interval<Float64> >;
+    template class IntervalMatrix<Float64>;
       
-    template IntervalVector<Real> prod(const Matrix<Real>&, const IntervalVector<Real>&);
-    
-    template IntervalVector<Real> prod(const IntervalMatrix<Real>&, const Vector<Real>&);
-    
-    template IntervalVector<Real> prod(const IntervalMatrix<Real>&, const IntervalVector<Real>&);
-    
-    template IntervalMatrix<Real> prod(const Matrix<Real>&, const IntervalMatrix<Real>&);
-    
-    template IntervalMatrix<Real> prod(const IntervalMatrix<Real>&, const Matrix<Real>&);
-    
-    template IntervalMatrix<Real> prod(const IntervalMatrix<Real>&, const IntervalMatrix<Real>&);
-    
-    template IntervalMatrix<Real> fprod(const Matrix<Field>&, const IntervalMatrix<Real>&);
-     
-    template Matrix<Real> over_approximation(const IntervalMatrix<Real>&);
+    template class Matrix< Interval<Numeric::MPFloat> >;
+    template class IntervalMatrix<MPFloat>;
+      
+    template class Matrix< Interval<Rational> >;
+    template class IntervalMatrix<Rational>;
 
-    template IntervalMatrix<Real> approximate(const Matrix<Field>& A,const Real& e); 
-
-#ifndef REAL_IS_A_FIELD
-    template class Matrix< Interval<Field> >;
-    template class IntervalMatrix<Field>;
-   
-    template IntervalVector<Field> prod(const Matrix<Field>&, const IntervalVector<Field>&);
-    
-    template IntervalVector<Field> prod(const IntervalMatrix<Field>&, const Vector<Field>&);
-    
-    template IntervalVector<Field> prod(const IntervalMatrix<Field>&, const IntervalVector<Field>&);
-    
-    template IntervalMatrix<Field> prod(const Matrix<Field>&, const IntervalMatrix<Field>&);
-    
-    template IntervalMatrix<Field> prod(const IntervalMatrix<Field>&, const Matrix<Field>&);
-    
-    template IntervalMatrix<Field> prod(const IntervalMatrix<Field>&, const IntervalMatrix<Field>&);
-    
-    template Matrix<Field> over_approximation(const IntervalMatrix<Field>&);
-#endif
   }
 }

@@ -77,12 +77,18 @@ int main() {
     b(1)=-Rational(53,9);
     b(2)=Rational(118,13);
    
-    test_assert(1==13*A(2,1),"mutiplication");
+    clog << "A=" << A << endl;
+    clog << "b=" << b << endl;
+    
+    //test_assert(1==13*A(2,1),"mutiplication");
    
     x=A.solve(b);
   
+    clog << "A.solve(b)= " << x << endl;
+    clog << "Ax=" << A*b << endl;
+    
     test_assert(x(0)==1 && x(1)==1 && x(2)==1,"lu_solve");
-  
+    
   }
   
   Rational Aqptr[9]={-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0};

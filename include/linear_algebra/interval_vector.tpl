@@ -30,6 +30,6 @@
 
 namespace Ariadne {
   namespace LinearAlgebra {
-    
+
   }
 }

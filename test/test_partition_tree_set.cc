@@ -52,8 +52,8 @@ using namespace Ariadne::Postscript;
 
 int main() {
 
-  cout << "test_partition_tree_set: " << flush;
-  ofstream clog("test_partition_tree_set.log");
+
+  
 
   std::vector<Ariadne::dimension_type> seqa;
 
@@ -75,7 +75,7 @@ int main() {
   bnw=BinaryWord("[1,0,1,1,0,1]");
   bla=BooleanArray(bnw.begin(),bnw.begin()+bnw.size());
 
-  clog << "bb=" << bb << "  seq=" << seq << "  bna=" << bna << "  bla=" << bla << endl;
+  cout << "bb=" << bb << "  seq=" << seq << "  bna=" << bna << "  bla=" << bla << endl;
 
   PartitionScheme<Real> pg(bb,seq);
   PartitionTree<Real> pt(pg,bnt);
@@ -95,39 +95,39 @@ int main() {
   Matrix<Real> A("[2,1;0.5,1]");
   bb=Rectangle<Real>("[-4,4]x[-4,4]");
   Parallelotope<Real> pltp(c,A);
-  clog << "pltp=" << pltp << endl << "bb=" << bb << endl;
+  cout << "pltp=" << pltp << endl << "bb=" << bb << endl;
 
 
   seq=SubdivisionSequence(2);
-  clog << "seq=" << seq << " " << seq.body_size() << " " << seq.tail_size() << " " << seq.dimension() << endl;
+  cout << "seq=" << seq << " " << seq.body_size() << " " << seq.tail_size() << " " << seq.dimension() << endl;
 
   
-  clog << "pt=" << pt << endl;
-  clog << "pts=" << pts << endl;
-  clog << "rls=" << rls << endl;
-  clog << "pltp=" << pltp << endl;
+  cout << "pt=" << pt << endl;
+  cout << "pts=" << pts << endl;
+  cout << "rls=" << rls << endl;
+  cout << "pltp=" << pltp << endl;
   pg=PartitionScheme<Real>(bb,seq);
   uint dpth=8;
   PartitionTreeSet<Real> ptsua=under_approximation< Real, Parallelotope<Real>  >(pltp,pg,dpth);
-  clog << "ptsua=" << ptsua << endl;
+  cout << "ptsua=" << ptsua << endl;
   PartitionTreeSet<Real> ptsoa=over_approximation< Real, Parallelotope<Real>  >(pltp,pg,dpth);
-  clog << "ptsoa=" << ptsoa << endl;
+  cout << "ptsoa=" << ptsoa << endl;
   PartitionTreeSet<Real> ptsina=inner_approximation< Real, Parallelotope<Real>  >(pltp,pg,dpth);
-  clog << "ptsina=" << ptsina << endl;
+  cout << "ptsina=" << ptsina << endl;
   PartitionTreeSet<Real> ptsouta=outer_approximation< Real, Parallelotope<Real>  >(pltp,pg,dpth);
-  clog << "ptsouta=" << ptsouta << endl;
+  cout << "ptsouta=" << ptsouta << endl;
 
   RegularGrid<Real> rg(2,Real(0.125));
   Grid<Real>& g=rg;
   FiniteGrid<Real> fg(g,bb);
   ListSet<Real,Rectangle> lsua=ptsua;
-  clog << "lsua=" << lsua << endl;
+  cout << "lsua=" << lsua << endl;
   GridMaskSet<Real> gmsina=under_approximation(ptsina,fg);
-  clog << "gmsina=" << gmsina << endl;
+  cout << "gmsina=" << gmsina << endl;
   GridMaskSet<Real> gmsouta=over_approximation(ptsouta,fg);
-  clog << "gmsouta=" << gmsouta << endl;
+  cout << "gmsouta=" << gmsouta << endl;
 
-  clog.close();
+  
 
   epsfstream eps;
   eps.open("test_partition_tree-1.eps",bb);
@@ -157,7 +157,5 @@ int main() {
   eps << pltp;
   eps.close();
   
-  cout << "PASS\n";
-
   return 0;
 }

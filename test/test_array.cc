@@ -43,9 +43,6 @@ template class array<Rational>;
 template class array<Rational,4>;
 
 int main() {
-  cout << "test_array: " << flush;
-  ofstream clog("test_array.log");
-
   array<double> a0,a1,a2,a3,a4;
   array<double> aa0,aa1,aa2,aa3,aa4;
   array<bool> b1;
@@ -58,10 +55,10 @@ int main() {
   a1.resize(4);
   a2.assign(input+4,input+8);
   
-  clog << "a0=" << a0 << " a1=" << a1 << " a2=" << a2 << endl;
-  test_assert(a0[2]==2.5,"array assignment");
+  cout << "a0=" << a0 << " a1=" << a1 << " a2=" << a2 << endl;
+  assert(a0[2]==2.5);
   a0[2]=2.3;
-  test_assert(a0[2]==2.3,"array element assignment");
+  assert(a0[2]==2.3);
   
   array_vector<double> fsav(4);
 
@@ -69,25 +66,25 @@ int main() {
   fsav.push_back(a1);
   fsav.push_back(a2);
   fsav.pop_back();
-  clog << fsav << endl;
+  cout << fsav << endl;
 
-  test_assert(fsav.size()==2,"array_vector.size");
-  test_assert(fsav.length()==8,"array_vector.length");
+  assert(fsav.size()==2);
+  assert(fsav.length()==8);
 
   array_reference<array_vector<double>::element_iterator> aref=fsav[1];
-  test_assert(aref==a1,"array reference equality");
+  assert(aref==a1);
   array_reference<array_vector<double>::element_const_iterator> acref=fsav[1];
-  test_assert(acref==a1,"array const reference equality");
+  assert(acref==a1);
   array<double> atmp=fsav[1];
-  test_assert(fsav[1]==a1,"array_vector.operator[]");
+  assert(fsav[1]==a1);
 
   array_vector<double>::const_iterator fsavi=fsav.begin();
-  test_assert(*fsavi==a0,"array_vector::iterator");
-  test_assert(fsavi!=fsav.end(),"array_vector::iterator::operator==");
+  assert(*fsavi==a0);
+  assert(fsavi!=fsav.end());
   ++fsavi;
-  test_assert(*fsavi==a1,"array_vector::iterator");
+  assert(*fsavi==a1);
   fsavi+=1;
-  test_assert(fsavi==fsav.end(),"array_vector::iterator::end()");
+  assert(fsavi==fsav.end());
 
   a1.resize(3);
   a1.fill(1.1);
@@ -98,22 +95,19 @@ int main() {
   va.pop_back();
   va.push_back(a2);
 
-  test_assert(va.size()==3,"vector<array>.size");
-  test_assert(va[1]==a1,"vector<array>.operator[]");
+  assert(va.size()==3);
+  assert(va[1]==a1);
 
   std::vector< array<double> >::const_iterator vai=va.begin();
-  test_assert(*vai==a0,"vector<array>::iterator::operator*");
-  test_assert(vai!=va.end(),"vector<array>::iterator::operator==");
+  assert(*vai==a0);
+  assert(vai!=va.end());
   ++vai;
-  test_assert(*vai==a1,"vector<array>::iterator::operator++");
+  assert(*vai==a1);
   ++vai;
   ++vai;
-  test_assert(vai==va.end(),"vector<array>::iterator::end()");
+  assert(vai==va.end());
 
-  clog << fsav;
+  cout << fsav;
   
-  clog.close();
-  cout << "PASS\n";
-
   return 0;
 }

@@ -5,7 +5,7 @@ install:
 	cp -f src/*.py ${PYTHONPREFIX}/ariadne/
 
 check:
-	(cd test/; for file in *.py; do echo $$file; $$file; done);
+	(cd test; make check);
 
 
 clean:

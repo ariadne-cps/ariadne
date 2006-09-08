@@ -218,6 +218,7 @@ namespace Ariadne {
         }
       }
       else {
+        std::cerr << "c=" << c << std::endl;
         assert(false);
       }
       return is;

@@ -15,32 +15,32 @@ using namespace std;
 using namespace Ariadne;
 
 int main() {
-  cout << "test_interval_newton: " << flush;
-  ofstream clog("test_interval_newton.log");
+
+  
 
   System::HenonMap<Real> h(1.5,0.375);
   Geometry::Rectangle<Real> r("[-2.125,-2]x[-2.125,-2]");
   Real e=1e-10;
   
-  clog << h << r << e << endl;
+  cout << h << r << e << endl;
   
   Geometry::Rectangle<Real> fr;
   try {
     fr=Evaluation::interval_newton(System::DifferenceMap<Real>(h),r,e);
   }
   catch(Evaluation::EvaluationException e) {
-    clog << "No solution found" << endl;
+    cout << "No solution found" << endl;
     throw e;
   }
-  test_assert(fr.radius()<e,"interval_newton radius");
-  clog << fr << endl;
+  assert(fr.radius()<e);
+  cout << fr << endl;
 
   Geometry::Point<Real> fp("(-2.09201281589026466534,-2.09201281589026466534)");
-  test_assert(fr.contains(fp),"interval_newton result");
+  assert(fr.contains(fp));
 
   fp=h(fp);
   
-  cout << "PASS\n";
+
 
   return 0;
 }

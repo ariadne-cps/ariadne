@@ -22,6 +22,8 @@ TESTDIR = test
 EXAMPLEDIR = examples
 PYTHONDIR=python
 
+LIBMPFR = -lmpfr
+LIBBOOSTPYTHON = -lboost_python
 LIBPPL = -lppl
 LIBGMPXX = -lgmpxx -lgmp
 

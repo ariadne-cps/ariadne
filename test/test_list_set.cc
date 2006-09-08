@@ -42,15 +42,13 @@ using namespace Ariadne::Geometry;
 using namespace std;
 
 int main() {
-  cout << "test_list_set: " << flush;
-  ofstream clog("test_list_set.log");
   
   Point<Real> s0("(0,0)");
   Point<Real> s1("(1,1)");
   Point<Real> s2("(1.375,1.375)");
   Point<Real> s3("(1.5,1.5)");
   
-  clog << s0 << " " << s1 << " " << s2 << " " << s3 << endl;
+  cout << s0 << " " << s1 << " " << s2 << " " << s3 << endl;
   
   typedef ListSet<Real, Rectangle> ListSet;
   typedef Rectangle<Real> Rectangle;
@@ -60,14 +58,14 @@ int main() {
   Rectangle r1(s1,s2);
   Rectangle r2(s2,s3);
   
-  clog << r0 << " " << r1 << " " << r2 << endl;
+  cout << r0 << " " << r1 << " " << r2 << endl;
   
   ListSet ds1;
   ds1.inplace_union(r0);
   ds1.inplace_union(r1);
   ds1.inplace_union(r2);
 
-  clog << ds1 << endl;
+  cout << ds1 << endl;
   
   string input("[ [0,1]x[0,1], [1,1.375]x[1,1.375], [1.375,1.5]x[1.375,1.5] ]");
   stringstream is(input);
@@ -75,7 +73,7 @@ int main() {
   ListSet ds2;
   is >> ds2;
 
-  test_assert(ds1[0]==ds2[0] && ds1[1]==ds2[1] && ds1[2]==ds2[2], "stream input");
+  assert(ds1[0]==ds2[0] && ds1[1]==ds2[1] && ds1[2]==ds2[2]);
 
   /* Test input format */
   try {
@@ -86,22 +84,17 @@ int main() {
     stringstream is(input);
   }
   catch(invalid_input& e) {
-    cout << "FAILED\n";
     cout << "  invalid_input: " << e.what() << "\n";
     return 1;
   }
   catch(std::invalid_argument& e) {
-    cout << "FAILED\n";
     cout << "  std::invalid_argument: " << e.what() << "\n";
     return 1;
   }
   catch(...) {
-    cout << "FAILED\n";
     cout << "  Unknown error\n";
     return 1;
   }
-
-  cout << "PASS\n";
 
   return 0;
 }

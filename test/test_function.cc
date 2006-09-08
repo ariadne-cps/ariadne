@@ -35,11 +35,11 @@ using namespace Ariadne;
 
 template<typename R>
 void
-test_function(ostream& clog) 
+test_function()
 {
-  clog << "test_function<" << name<R>() << ">" << endl;
+  cout << "test_function<" << name<R>() << ">" << endl;
   
-  clog << setprecision(20);
+  cout << setprecision(20);
   mpf_set_default_prec (8);
 
   { 
@@ -48,40 +48,40 @@ test_function(ostream& clog)
     R t(2);
     R fl,fu,zl,zu,ol,ou,tl,tu;
     
-    clog << "sqrt" << endl;
+    cout << "sqrt" << endl;
     fl=sqrt_down(t);
     fu=sqrt_up(t);
-    clog << fl << " <= " << fu << endl;
+    cout << fl << " <= " << fu << endl;
     assert(fl <= fu);
     tl=mul_down(fl,fl);
     tu=mul_up(fu,fu);
-    clog << tl << " <= " << t << " <= " << tu << endl;
+    cout << tl << " <= " << t << " <= " << tu << endl;
     assert(tl <= tu);
     assert(tl <= t);
     assert(t <= tu);
 
-    clog << "exp" << endl;
+    cout << "exp" << endl;
     fl=exp_down(o);
     fu=exp_up(o);
-    clog << fl << " <= " << fu << endl;
+    cout << fl << " <= " << fu << endl;
     assert(fl <= fu);
     ol=log_down(fl);
     ou=log_up(fu);
-    clog << ol << " <= " << o << " <= " << ou << endl;
+    cout << ol << " <= " << o << " <= " << ou << endl;
     assert(ol <= o && o <= ou);
     zl=log_down(ol);
     zu=log_up(ou);
-    clog << zl << " <= " << z << " <= " << zu << endl;
+    cout << zl << " <= " << z << " <= " << zu << endl;
     assert(zl <= z && z <= zu);
     
-    clog << "sin" << endl;
+    cout << "sin" << endl;
     fl=sin_down(o);
     fu=sin_up(o);
-    clog << fl << " <= " << fu << endl;
+    cout << fl << " <= " << fu << endl;
     assert(fl <= fu);
     ol=asin_down(fl);
     ou=asin_up(fl);
-    clog << ol << " <= " << ou << endl;
+    cout << ol << " <= " << ou << endl;
     assert(ol <= ou);
     assert(ol <= o);
     assert(o <= ou);
@@ -91,14 +91,11 @@ test_function(ostream& clog)
 }
 
 int main() {
-  cout << "test_function: " << flush;
-  ofstream clog("test_function.log");
 
-  test_function<Float64>(clog);
-  test_function<MPFloat>(clog);
+  test_function<Float64>();
+  test_function<MPFloat>();
   
-  clog.close();
-  cout << "INCOMPLETE\n";
+  cerr << "INCOMPLETE ";
 
   return 0;
 }

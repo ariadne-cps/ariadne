@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <fstream>
+#include <iostream>
 
 #include "real_typedef.h"
 #include "geometry/point.h"
@@ -42,42 +42,38 @@ using namespace Ariadne::System;
 using namespace Ariadne::Evaluation;
 using namespace std;
 
-template class Rectangle< Real >;
-template class Point< Real >;
+template<typename R> 
+int test_chainreach()
+{
+  Point<R> params=Point<R>("(1.5,0.875)");
+  R a=params[0];
+  R b=params[1];
 
-int main() {
-  cout << "test_chainreach: " << flush;
-  ofstream clog("test_chainreach.log");
-
-  Point<Real> params=Point<Real>("(1.5,0.875)");
-  Real a=params[0];
-  Real b=params[1];
-
-  HenonMap<Real> h=HenonMap<Real>(a,b);
-  Rectangle<Real> gbb=Rectangle<Real>("[-11,5]x[-8,8]") ;
-  FiniteGrid<Real> g=FiniteGrid<Real>(gbb,128); // grid
-  Rectangle<Real> ir=Rectangle<Real>("[1.499,1.501]x[0.499,0.501]"); // initial state
-  Rectangle<Real> cb=Rectangle<Real>("[-4,4]x[-4,4]"); // cutoff box
-  Rectangle<Real> epsbb=Rectangle<Real>("[-4.1,4.1]x[-4.1,4.1]"); // eps bounding box
+  HenonMap<R> h=HenonMap<R>(a,b);
+  Rectangle<R> gbb=Rectangle<R>("[-11,5]x[-8,8]") ;
+  FiniteGrid<R> g=FiniteGrid<R>(gbb,128); // grid
+  Rectangle<R> ir=Rectangle<R>("[1.499,1.501]x[0.499,0.501]"); // initial state
+  Rectangle<R> cb=Rectangle<R>("[-4,4]x[-4,4]"); // cutoff box
+  Rectangle<R> epsbb=Rectangle<R>("[-4.1,4.1]x[-4.1,4.1]"); // eps bounding box
   
-  cb=Rectangle<Real>(gbb); // cutoff box
-  epsbb=Rectangle<Real>(gbb); // eps bounding box
+  cb=Rectangle<R>(gbb); // cutoff box
+  epsbb=Rectangle<R>(gbb); // eps bounding box
   
-  GridMaskSet<Real> in=GridMaskSet<Real>(g);
-  GridMaskSet<Real> bd=GridMaskSet<Real>(g);
+  GridMaskSet<R> in=GridMaskSet<R>(g);
+  GridMaskSet<R> bd=GridMaskSet<R>(g);
   in.adjoin(over_approximation(ir,g));
   bd.adjoin(over_approximation(gbb,g));
 
 
-  GridMaskSet<Real> cr=chainreach(h,in,bd);
-  PartitionTreeSet<Real> ptcr=PartitionTreeSet<Real>(cr);
+  GridMaskSet<R> cr=chainreach(h,in,bd);
+  PartitionTreeSet<R> ptcr=PartitionTreeSet<R>(cr);
 
-  clog << cr <<endl;
-  clog << ptcr <<endl;
+  cout << cr <<endl;
+  cout << ptcr <<endl;
   
-  clog << "cr.size()=" << cr.size() << endl;
-  clog << "ptcr.size()=" << ptcr.size() << "  " << flush;
-  clog << "ptcr.capacity()=" << ptcr.capacity() << endl;
+  cout << "cr.size()=" << cr.size() << endl;
+  cout << "ptcr.size()=" << ptcr.size() << "  " << flush;
+  cout << "ptcr.capacity()=" << ptcr.capacity() << endl;
 
   epsfstream eps=epsfstream("test_chainreach-1.eps",epsbb);
   eps.set_pen_colour("black");
@@ -94,7 +90,7 @@ int main() {
   eps << ir;
   eps.close();
 
-  GridMaskSet<Real> gmcr=GridMaskSet<Real>(cr);
+  GridMaskSet<R> gmcr=GridMaskSet<R>(cr);
   eps.open("test_chainreach-2.eps",epsbb);
   eps.set_line_style(false);
   eps.set_fill_colour("red");
@@ -104,10 +100,10 @@ int main() {
   eps.set_fill_colour("green");
   eps << gmcr;
   eps.close();
-  
-  clog.close();
-  cout << "PASS\n";
 
   return 0;
-
+}
+ 
+int main() {
+  return test_chainreach<Real>();
 }

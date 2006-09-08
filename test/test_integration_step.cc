@@ -39,28 +39,28 @@ using namespace Ariadne;
 using namespace std;
 
 int main() {
-  cout << "test_integration_step: " << flush;
-  ofstream clog("test_integration_step.log");
+
+  
   
   Evaluation::C1LohnerIntegrator<Real> lohner=Evaluation::C1LohnerIntegrator<Real>(0.125,0.5,0.0625);
   Geometry::Rectangle<Real> r=Geometry::Rectangle<Real>("[0.96,1.04]x[0.46,0.54]");
-  clog << "r=" << r << endl;
+  cout << "r=" << r << endl;
   Geometry::Parallelotope<Real> p=Geometry::Parallelotope<Real>(r);
-  clog << "p=" << p << endl;
+  cout << "p=" << p << endl;
   LinearAlgebra::Matrix<Real> A=LinearAlgebra::Matrix<Real>("[-0.25,-1;+1,-0.25]");
-  clog << "A=" << A << endl;
+  cout << "A=" << A << endl;
   LinearAlgebra::Vector<Real> b=LinearAlgebra::Vector<Real>("[0,0]");
-  clog << "b=" << b << endl;
+  cout << "b=" << b << endl;
   System::AffineVectorField<Real> avf=System::AffineVectorField<Real>(A,b);
-  clog << "avf=" << avf << endl;
+  cout << "avf=" << avf << endl;
 
   Real h=Real(0.125);
-  clog << "h=" << h << endl;
+  cout << "h=" << h << endl;
   Geometry::Parallelotope<Real> next_paral=lohner.integration_step(avf,p,h);
-  clog << next_paral << "\n";
+  cout << next_paral << "\n";
   
-  clog.close();
-  cout << "PASS" << endl;
+  
+
   
   return 0;
 }

@@ -69,10 +69,7 @@
  * \section Installation
  *
  * From the ariadne/trunk/ directory of the main tree, type
- * \code 
- * make dep
- * make install
- *\endcode
+ * \code make install \endcode
  * to make and install the library. 
  *
  * The default installation directory for the library is $HOME/lib/, and for the Python interface is $HOME/python/.

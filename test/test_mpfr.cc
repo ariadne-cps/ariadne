@@ -6,7 +6,7 @@
 using namespace std;
 
 int main() {
-  cout << "test_mpfr: " << flush;
+
   double one;
   double one_approx;
   mpfr_t mpfr_one;
@@ -48,6 +48,6 @@ int main() {
   }
   assert(mpf_cmp(mpf_exp_one_lower,mpf_exp_one_upper)<0);
   
-    cout << "PASS" << endl;
+
   return 0;
 }

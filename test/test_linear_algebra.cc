@@ -51,17 +51,6 @@ bool contains(const Matrix< Interval<Real> >& A, Matrix<Real>& B) {
 
 int main() {
 
-/*
-  boost::numeric::interval<Real> i(-1,1);
-  Real r(0125);
-  boost::numeric::hull(i,i);
-  boost::numeric::in(r,i);
-  //boost::numeric::in(i,r);
-*/
-  
-  cout << "test_linear_algebra: " << flush;
-  ofstream clog("test_linear_algebra.log");
-
   {
     
     Matrix< Rational > A(3,3), LU(3,3);
@@ -77,62 +66,62 @@ int main() {
     b(1)=-Rational(53,9);
     b(2)=Rational(118,13);
    
-    clog << "A=" << A << endl;
-    clog << "b=" << b << endl;
+    cout << "A=" << A << endl;
+    cout << "b=" << b << endl;
     
-    //test_assert(1==13*A(2,1),"mutiplication");
+    //assert(1==13*A(2,1));
    
     x=A.solve(b);
   
-    clog << "A.solve(b)= " << x << endl;
-    clog << "Ax=" << A*b << endl;
+    cout << "A.solve(b)= " << x << endl;
+    cout << "Ax=" << A*b << endl;
     
-    test_assert(x(0)==1 && x(1)==1 && x(2)==1,"lu_solve");
+    assert(x(0)==1 && x(1)==1 && x(2)==1);
     
   }
   
   Rational Aqptr[9]={-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0};
   Real Arptr[9]={-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0};
   Matrix<Rational> Aq(3,3,Aqptr,3,1);
-  Matrix<Real> Ar(3,3,Arptr,3,1);
+  Matrix<Real> Ar(3,3,Arptr,3);
 
-  clog << "Testing LU\n";
+  cout << "Testing LU\n";
   {
     Matrix<Rational> A(Aq);
     LUMatrix<Rational> LU(A);
     Matrix<Rational> P=LU.P();
     Matrix<Rational> L=LU.L();
     Matrix<Rational> U=LU.U();
-    clog << "A=" << A << "\n";
-    clog << "P=" << P << "\n";
-    clog << "L=" << L << "\n";
-    clog << "U=" << U << "\n";
-    clog << "P*L*U=" << P*L*U << "\n";
-    clog << "LU=" << Matrix<Rational>(LU) << "\n";
-    clog << flush;
+    cout << "A=" << A << "\n";
+    cout << "P=" << P << "\n";
+    cout << "L=" << L << "\n";
+    cout << "U=" << U << "\n";
+    cout << "P*L*U=" << P*L*U << "\n";
+    cout << "LU=" << Matrix<Rational>(LU) << "\n";
+    cout << flush;
     assert(Matrix<Rational>(LU)==A);
   }
 
-  clog << "Testing Real QR\n";
+  cout << "Testing Real QR\n";
   {
     Matrix<Real> A(Ar);
     QRMatrix<Real> QR(A);
     Matrix<Real> Q=QR.Q();
     Matrix<Real> R=QR.R();
-    clog << "A=" << A << "\n";
-    clog << "Q=" << Q << "\n";
-    clog << "Q^T=" << Q.transpose() << "\n";
-    clog << "R=" << R << "\n";
-    clog << "Q*Q^T=" << Q*Q.transpose() << "\n";
-    clog << setprecision(20);
-    clog << "Q*R=" << Q*R << "\n";
-    clog << "QR =" << Matrix<Real>(QR) << "\n";
-    clog << "A  =" << A << "\n";
-    clog << flush;
-    //test_assert(Matrix<Real>(QR)==A);
+    cout << "A=" << A << "\n";
+    cout << "Q=" << Q << "\n";
+    cout << "Q^T=" << Q.transpose() << "\n";
+    cout << "R=" << R << "\n";
+    cout << "Q*Q^T=" << Q*Q.transpose() << "\n";
+    cout << setprecision(20);
+    cout << "Q*R=" << Q*R << "\n";
+    cout << "QR =" << Matrix<Real>(QR) << "\n";
+    cout << "A  =" << A << "\n";
+    cout << flush;
+    //assert(Matrix<Real>(QR)==A);
   }
 
-  clog << "Testing Interval<Real> QR\n";
+  cout << "Testing Interval<Real> QR\n";
   {
     Matrix<Real> I=Matrix<Real>::identity(3);
     Matrix<Real> A(Ar);
@@ -140,59 +129,58 @@ int main() {
     Matrix< Interval<Real> > Q=QR.Q();
     Matrix< Interval<Real> > R=QR.R();
     Matrix< Interval<Real> > B=QR;
-    clog << "A=" << A << "\n";
-    clog << "Q=" << Q << "\n";
-    clog << "Q^T=" << Q.transpose() << "\n";
-    clog << "R=" << R << "\n";
-    clog << "Q*Q^T=" << Q*Q.transpose() << "\n";
-    clog << setprecision(20);
-    clog << "Q*R=" << Q*R << "\n";
-    clog << "QR =" << B << "\n";
-    clog << "A  =" << A << "\n";
-    clog << flush;
-    test_assert(contains(Q*Q.transpose(),I),"(Q*Q^T).contains(I)");
-    test_assert(contains(B,A),"QR.contains(A)");
+    cout << "A=" << A << "\n";
+    cout << "Q=" << Q << "\n";
+    cout << "Q^T=" << Q.transpose() << "\n";
+    cout << "R=" << R << "\n";
+    cout << "Q*Q^T=" << Q*Q.transpose() << "\n";
+    cout << setprecision(20);
+    cout << "Q*R=" << Q*R << "\n";
+    cout << "QR =" << B << "\n";
+    cout << "A  =" << A << "\n";
+    cout << flush;
+    assert(contains(Q*Q.transpose(),I));
+    assert(contains(B,A));
   }
 
   /*
-  clog << "Testing QR\n";
+  cout << "Testing QR\n";
   {
     QRMatrix<Rational> QR(A);
     Matrix<Rational> Q=QR.Q();
     Matrix<Rational> R=QR.R();
-    clog << "A=" << A << "\n";
-    clog << "Q=" << Q << "\n";
-    clog << "R=" << R << "\n";
-    clog << "Q*Q^T=" << Q*Q.transpose() << "\n";
-    clog << "Q*R=" << Q*R << "\n";
-    clog << "QR=" << Matrix<Rational>(QR) << "\n";
-    clog << flush;
+    cout << "A=" << A << "\n";
+    cout << "Q=" << Q << "\n";
+    cout << "R=" << R << "\n";
+    cout << "Q*Q^T=" << Q*Q.transpose() << "\n";
+    cout << "Q*R=" << Q*R << "\n";
+    cout << "QR=" << Matrix<Rational>(QR) << "\n";
+    cout << flush;
     assert(Matrix<Rational>(QR)==A);
   }
 
-  clog << "Testing SVD\n";
+  cout << "Testing SVD\n";
   {
     SVDMatrix<Rational> SVD(A);
     Vector<Rational> S=SVD.S();
     Matrix<Rational> U=SVD.U();
     Matrix<Rational> V=SVD.V();
     Matrix<Rational> D=SVD.D();
-    clog << "A=" << A << "\n";
-    clog << "S=" << S << "\n";
-    clog << "D=" << D << "\n";
-    clog << "U=" << U << "\n";
-    clog << "V=" << V << "\n";
-    clog << "U*U^T=" << U*U.transpose() << "\n";
-    clog << "V*V^T=" << V*V.transpose() << "\n";
-    clog << "U*D*V^T" << U*D*V.transpose() << "\n";
-    clog << "SVD=" << Matrix<Rational>(SVD) << "\n";
-    clog << flush;
+    cout << "A=" << A << "\n";
+    cout << "S=" << S << "\n";
+    cout << "D=" << D << "\n";
+    cout << "U=" << U << "\n";
+    cout << "V=" << V << "\n";
+    cout << "U*U^T=" << U*U.transpose() << "\n";
+    cout << "V*V^T=" << V*V.transpose() << "\n";
+    cout << "U*D*V^T" << U*D*V.transpose() << "\n";
+    cout << "SVD=" << Matrix<Rational>(SVD) << "\n";
+    cout << flush;
     assert(Matrix<Rational>(SVD)==A);
   }
   */
 
-  clog.close();
-  cout << "INCOMPLETE\n";
+  cerr << "INCOMPLETE ";
 
-    return 0;
+  return 0;
 }

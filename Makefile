@@ -10,7 +10,7 @@ doc:
 lib: 
 	(cd ${SRCDIR}; ${MAKE} lib);
 
-python: 
+python: lib
 	(cd ${SRCDIR}/${PYTHONDIR}; ${MAKE} all);
 
 clean:                                                                          
@@ -19,6 +19,7 @@ clean:
 	rm -rf latex html
 	(cd ${SRCDIR}; ${MAKE} clean; cd ..; )
 	(cd ${TESTDIR}; ${MAKE} clean; cd ..; )
+	(cd ${PYTHONDIR}; ${MAKE} clean; cd ..; )
 
 install: lib python
 	(cd ${SRCDIR}; ${MAKE} install);

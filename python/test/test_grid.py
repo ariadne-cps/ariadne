@@ -30,7 +30,7 @@ import sys
 bb=Rectangle("[-3,3]x[-3,3]")
 print bb,"\n"
 
-g=RegularGrid(2,0.0625);
+g=RegularGrid(2,0.125);
 fg=FiniteGrid(g,bb);
 print g,fg,fg.grid()
 if g==fg.grid():

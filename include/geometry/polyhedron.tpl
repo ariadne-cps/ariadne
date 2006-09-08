@@ -224,7 +224,7 @@ namespace Ariadne {
                           const LinearAlgebra::Vector<R>& b) 
       : _A(A), _b(b)
     {
-      assert(A.number_of_columns()==b.size());
+      assert(A.number_of_rows()==b.size());
     }
     
     template <typename R>

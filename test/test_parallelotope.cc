@@ -41,8 +41,8 @@ using namespace Ariadne::Geometry;
 using namespace std;
 
 int main() {
-  cout << "test_parallelotope: " << flush;
-  ofstream clog("test_parallelotope.log");
+
+  
   
   Rectangle<Real> r1=Rectangle<Real>("[9,11]x[5,11]x[-1,1]");
   Rectangle<Real> r2=Rectangle<Real>("[5,6]x[3,4]x[-0.5,0.5]");
@@ -50,7 +50,7 @@ int main() {
   Parallelotope<Real> p1=Parallelotope<Real>(r1);
   Parallelotope<Real> p2=Parallelotope<Real>(r2);
 
-  clog << p1 << p2 << endl;
+  cout << p1 << p2 << endl;
 
   Point<Real> pt1,pt2,pt3,pt4,pt5,pt6;
   pt1=Point<Real>("(17.0,15.0,-0.5) ");
@@ -61,7 +61,7 @@ int main() {
   pt6=Point<Real>("(15.5,11.5,0) ");
 
 
-  clog << pt1 << pt2 << pt3 << pt4 << pt5 << pt6 << endl;
+  cout << pt1 << pt2 << pt3 << pt4 << pt5 << pt6 << endl;
   
   assert(!p1.contains(pt1));
   assert(!p1.contains(pt2));
@@ -77,8 +77,8 @@ int main() {
   assert(!p1.interior_contains(pt5));
   assert(!p1.interior_contains(pt6));
 
-  clog.close();
-  cout << "INCOMPLETE\n";
+  
+  cerr << "INCOMPLETE ";
 
   return 0;
 }

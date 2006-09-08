@@ -44,8 +44,8 @@ using namespace Ariadne::Postscript;
 using namespace std;
 
 int main() {
-  cout << "test_epsfstream: " << flush;
-  ofstream clog("test_epsfstream.log");
+
+  
   
   Rectangle<Real> bbox(2), r1, r2;
   Rectangle<Real> r3;
@@ -60,8 +60,8 @@ int main() {
 
   iss >> bbox >> r1 >> r2 >> r3 >> r4;
   
-  clog << bbox << "\n";
-  clog << r1 << " " << r2 << " "<< r3 << " " << r4 << std::endl;
+  cout << bbox << "\n";
+  cout << r1 << " " << r2 << " "<< r3 << " " << r4 << std::endl;
   
   epsfstream eps("test_epsfstream.eps",bbox);
   eps << r1;
@@ -79,23 +79,17 @@ int main() {
     stringstream is(input);
   }
   catch(invalid_input& e) {
-    cout << "FAILED\n";
     cout << "  invalid_input: " << e.what() << "\n";
     return 1;
   }
   catch(std::invalid_argument& e) {
-    cout << "FAILED\n";
     cout << "  std::invalid_argument: " << e.what() << "\n";
     return 1;
   }
-  catch(...) {
-    cout << "FAILED\n";
+  catch(std::exception& e) {
     cout << "  Unknown error\n";
-    return 1;
+    throw e;
   }
-
-  clog.close();
-  cout << "PASS\n";
 
   return 0;
 }

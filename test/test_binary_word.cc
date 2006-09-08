@@ -44,11 +44,7 @@ using namespace Ariadne;
 using namespace Ariadne::Geometry;
 using namespace std;
 
-template class Rectangle< Rational >;
-
 int main() {
-  cout << "test_binary_word: " << flush;
-
   string istr = "[0,1,1,0,1,0] ";
   stringstream iss(istr);
 
@@ -62,7 +58,7 @@ int main() {
   iss >> v;
   bw=BinaryWord(v);
   
-  cout << "INCOMPLETE\n";
+  cerr << "INCOMPLETE ";
 
-    return 0;
+  return 0;
 }

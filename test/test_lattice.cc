@@ -36,8 +36,8 @@ using namespace System;
 using namespace std;
 
 int main() {
-  cout << "test_lattice: " << flush;
-  ofstream clog("test_lattice.log");
+
+  
   
   IndexArray argary=IndexArray(3);
   argary[0]=-1;
@@ -61,34 +61,34 @@ int main() {
   lm.adjoin_to_image(arglc,imglcls);
   imgary[1]=3;
   lm.adjoin_to_image(arglc,LatticeCell(imgary));
-  clog << lm << endl << endl;
+  cout << lm << endl << endl;
   
   argary[0]=0;
   argary[1]=0;
   argary[2]=0;
   LatticeCell arglc2=LatticeCell(argary);
   
-  clog << arglc2 << " " << lm(arglc2) << endl;
-  clog << arglc2 << " " << lm.apply(arglc2) << endl;
-  clog << arglc << " " << lm(arglc) << endl;
-  clog << arglc << " " << lm.apply(arglc) << endl;
-  clog << endl;
+  cout << arglc2 << " " << lm(arglc2) << endl;
+  cout << arglc2 << " " << lm.apply(arglc2) << endl;
+  cout << arglc << " " << lm(arglc) << endl;
+  cout << arglc << " " << lm.apply(arglc) << endl;
+  cout << endl;
   
-  clog << LatticeRectangle(arglc) << " " << lm(LatticeRectangle(arglc)) << endl;
+  cout << LatticeRectangle(arglc) << " " << lm(LatticeRectangle(arglc)) << endl;
   LatticeCellListSet lcls(0);
-  clog << lm(arglc2) << endl;
+  cout << lm(arglc2) << endl;
   lcls=lm.apply(arglc2);
-  clog << arglc2 << " " << lcls << endl;
+  cout << arglc2 << " " << lcls << endl;
   lcls=lm(arglc);
-  clog << lcls << endl;
+  cout << lcls << endl;
   lcls.adjoin(LatticeCell(imgary));
-  clog << lcls << endl;
+  cout << lcls << endl;
   lcls=lm(LatticeCellListSet(arglc));
-  clog << lm << endl;
+  cout << lm << endl;
 
   
-  clog.close();
-  cout << "PASS" << endl;
+  
+
   
   return 0;
 }

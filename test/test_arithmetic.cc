@@ -42,58 +42,55 @@ using Ariadne::Rational;
 using Ariadne::MPFloat;
 using Ariadne::Float64;
 
-template<typename R> void test_arithmetic(ofstream&);
+template<typename R> void test_arithmetic();
 
 int main() {
 
-  cout << "test_arithmetic: " << flush;
-  ofstream clog("test_arithmetic.log");
-  clog << setprecision(20);
+  cout << setprecision(20);
   mpf_set_default_prec (8);
 
-  test_arithmetic<Float64>(clog);
-  test_arithmetic<MPFloat>(clog);
-  test_arithmetic<Rational>(clog);
+  test_arithmetic<Float64>();
+  test_arithmetic<MPFloat>();
+  test_arithmetic<Rational>();
   
-  clog.close();
-  cout << "INCOMPLETE\n";
+  cerr << "INCOMPLETE ";
 
   return 0;
 }
 
-template<typename Real>
+template<typename R>
 void
-test_arithmetic(ofstream& clog)
+test_arithmetic()
 {
-  clog << "test_arithmetic<" << name<Real>() << ">" << endl;
+  cout << "test_arithmetic<" << name<R>() << ">" << endl;
   
-  Real f1(1.25);
-  Real f2(2.25);
-  Real f3;
-  Real f4;
-  //clog << "prec(f1)=" << f1.get_prec() << endl;
+  R f1(1.25);
+  R f2(2.25);
+  R f3;
+  R f4;
+  //cout << "prec(f1)=" << f1.get_prec() << endl;
   
   f3=add_down(f1,f2);
   f4=add_up(f1,f2);
-  clog << f3 << " <= " << f1 << " + " << f2 << " <= " << f4 << endl;
+  cout << f3 << " <= " << f1 << " + " << f2 << " <= " << f4 << endl;
   f3=sub_down(f1,f2);
   f4=sub_up(f1,f2);
-  clog << f3 << " <= " << f1 << " - " << f2 << " <= " << f4 << endl;
+  cout << f3 << " <= " << f1 << " - " << f2 << " <= " << f4 << endl;
   f3=mul_down(f1,f2);
   f4=mul_up(f1,f2);
-  clog << f3 << " <= " << f1 << " * " << f2 << " <= " << f4 << endl;
+  cout << f3 << " <= " << f1 << " * " << f2 << " <= " << f4 << endl;
   f3=div_down(f1,f2);
   f4=div_up(f1,f2);
-  clog << f3 << " <= " << f1 << " / " << f2 << " <= " << f4 << endl;
+  cout << f3 << " <= " << f1 << " / " << f2 << " <= " << f4 << endl;
   f3=mul_down(f3,f2);
   f4=mul_up(f4,f2);
-  clog << f3 << " <= " << f1 << " <= " << f4 << endl;
+  cout << f3 << " <= " << f1 << " <= " << f4 << endl;
   
-  Real h=0.5;
-  Real e=0.5;
-  Real o=1.0;
-  Real l=add_down(o,e);
-  Real u=add_up(o,e);
+  R h=0.5;
+  R e=0.5;
+  R o=1.0;
+  R l=add_down(o,e);
+  R u=add_up(o,e);
   int n=0;
   while(l==u && n!=256) {
     e=e*h;
@@ -101,19 +98,19 @@ test_arithmetic(ofstream& clog)
     l=add_down(o,e);
     u=add_up(o,e);
   }
-  clog << l << " <= " << o << " + " << e << " <= " << u << endl;
+  cout << l << " <= " << o << " + " << e << " <= " << u << endl;
   
-  Real z=0.0;
-  Real t=3.0;
-  Real tl=div_down(o,t);
-  Real tu=div_up(o,t);
-  clog << tl << " <= " << tu << endl;
-  Real ol=mul_down(tl,t);
-  Real ou=mul_up(tu,t);
-  clog << ol << " <= " << o << " <= " << ou << endl;
-  Real zl=sub_down(ol,o);
-  Real zu=sub_up(ou,o);
-  clog << "zl=" << zl << "  zu=" << zu << endl;
+  R z=0.0;
+  R t=3.0;
+  R tl=div_down(o,t);
+  R tu=div_up(o,t);
+  cout << tl << " <= " << tu << endl;
+  R ol=mul_down(tl,t);
+  R ou=mul_up(tu,t);
+  cout << ol << " <= " << o << " <= " << ou << endl;
+  R zl=sub_down(ol,o);
+  R zu=sub_up(ou,o);
+  cout << "zl=" << zl << "  zu=" << zu << endl;
   assert(tl<=tu);
   assert(ol<=o);
   assert(o<=ou);
@@ -121,24 +118,14 @@ test_arithmetic(ofstream& clog)
   assert(z<=zu);
   //assert(zl<=z && z <=zu);
   
-  Interval<Real> io(1);
-  Interval<Real> it(3);
-  Interval<Real> iao=(io/it)*it;
-  clog << iao << endl;
+  Interval<R> io(1);
+  Interval<R> it(3);
+  Interval<R> iao=(io/it)*it;
+  cout << iao << endl;
   assert(in(o,iao));
-  Interval<Real> iaz=iao-io;
-  clog << iaz << endl;
+  Interval<R> iaz=iao-io;
+  cout << iaz << endl;
   assert(in(z,iaz)); 
-  clog << endl;
-  
-/*
-  boost::numeric::interval<Real> io(1);
-  boost::numeric::interval<Real> it(3);
-  boost::numeric::interval<Real> iao=(io/it)*it;
-  clog << iao << endl;
-  assert(in(o,iao));
-  boost::numeric::interval<Real> iaz=iao-io;
-  clog << iaz << endl;
-  assert(in(z,iaz));
-*/
+  cout << endl;
+
 }

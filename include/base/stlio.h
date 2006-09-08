@@ -92,7 +92,7 @@ namespace Ariadne {
       try {
         is >> c;
         if(c != opening) {
-          throw std::invalid_argument("input must begin with "+opening);
+          throw std::ios_base::failure("Ariadne::Utility::read_vector: Input must begin with "+opening);
         }
         
         /* Handle case of empty list */
@@ -104,14 +104,14 @@ namespace Ariadne {
         
         while(c != closing) {
           if(is.eof()) {
-            throw std::invalid_argument("End-of-file reached");
+            throw std::ios_base::failure("Ariadne::Utility::read_vector: End-of-file reached");
           }
           if(c!=separator) {
-            throw std::invalid_argument("Items in list must be separated by "+separator);
+            throw std::ios_base::failure("Ariadne::Utility::read_vector: Items in list must be separated by "+separator);
           }
           is >> x;
           if(is.fail()) {
-            throw std::invalid_argument("Error inputting value in list");
+            throw std::ios_base::failure("Ariadne::Utility::read_vector: Error inputting value in list");
           }
           v.push_back(x);
           is >> c;
@@ -124,6 +124,55 @@ namespace Ariadne {
       
       return is;
     }
+
+    template<typename T>
+    inline
+    std::istream&
+    read_array(std::istream& is, Base::array<T>& a, char opening='[', char closing=']', char separator=',') 
+    {
+      T x;
+      char c;
+      
+      a.reallocate(0);
+      std::streampos pos = is.tellg();
+      
+      try {
+        is >> c;
+        if(c != opening) {
+          throw std::ios_base::failure("Ariadne::Utility::read_array: Input must begin with "+opening);
+        }
+        
+        /* Handle case of empty list */
+        is >> c;
+        if(c != closing) {
+          is.putback(c);
+          c=separator;
+        }
+        
+        while(c != closing) {
+          if(is.eof()) {
+            throw std::ios_base::failure("Ariadne::Utility::read_array: End-of-file reached");
+          }
+          if(c!=separator) {
+            throw std::ios_base::failure("Ariadne::Utility::read_array: Items in list must be separated by "+separator);
+          }
+          is >> x;
+          if(is.fail()) {
+            throw std::ios_base::failure("Ariadne::Utility::read_array: Error inputting value in list");
+          }
+	  a.resize(a.size()+1);
+          a[a.size()-1]=x;
+          is >> c;
+        }
+      }
+      catch(...) {
+        // is.seekg(pos);
+        throw; 
+      }
+      
+      return is;
+    }
+    
   }
 }
 
@@ -136,13 +185,11 @@ namespace Ariadne {
       Utility::write_sequence(os,a.begin(),a.end());
       return os;
     }
-
     
     template<typename T> inline
     std::ostream&
     operator<<(std::ostream& os, const array<T>& a) {
-      Utility::write_sequence(os,a.begin(),a.end());
-      return os;
+      return Utility::write_sequence(os,a.begin(),a.end());
     }
     
     template<typename T> inline
@@ -160,6 +207,12 @@ namespace Ariadne {
       return os;
     }
 
+    template<typename T> inline
+    std::istream&
+    operator>>(std::istream& is, array<T>& a) {
+      return Utility::read_array(is,a);
+    }
+    
   } // namespace Base
 } // namespace Ariadne
 

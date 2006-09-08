@@ -1093,10 +1093,10 @@ namespace Ariadne {
     std::ostream& operator<<(std::ostream& os,
                              const GridMaskSet<R>& set)
     {
-      os << "GridMaskSet<" << name<R>() << ">(\n";
-      os << "  grid=" << set.grid() << "\n";
-      os << "  bounds=" << set.bounds() << "\n";
-      os << "  mask=" << set.mask() << "\n";
+      os << "GridMaskSet<" << name<R>() << ">("<< std::endl;
+      os << "  grid=" << set.grid();
+      os << "  bounds=" << set.bounds() << std::endl;
+      os << "  mask=" << set.mask() << std::endl;
       os << ")\n";
       return os;
     }

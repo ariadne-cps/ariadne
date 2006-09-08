@@ -46,6 +46,7 @@ namespace Ariadne {
     template<typename R> class GridRectangle;
 
     template<typename R> std::ostream& operator<<(std::ostream&, const Grid<R>&);
+    template<typename R> std::istream& operator>>(std::istream&, Grid<R>&);
     template<typename R> std::ostream& operator<<(std::ostream&, const FiniteGrid<R>&);
    
     /*! \brief Base type for defining a grid.
@@ -111,6 +112,7 @@ namespace Ariadne {
       IndexArray upper_index(const Rectangle<R>& r) const;
 
       virtual std::ostream& write(std::ostream& os) const = 0;
+      virtual std::istream& read(std::istream& is) = 0;
    };
 
 
@@ -218,6 +220,7 @@ namespace Ariadne {
       static array< std::vector<index_type> > index_translation(const IrregularGrid<R>& from, const IrregularGrid<R>& to);
 
       virtual std::ostream& write(std::ostream& os) const;
+      virtual std::istream& read(std::istream& is);
      private:
       void create();
      private:
@@ -272,6 +275,7 @@ namespace Ariadne {
       bool operator!=(const Grid<R>& g) const; 
 
       virtual std::ostream& write(std::ostream& os) const;
+      virtual std::istream& read(std::istream& is);
      private:
       array<R> _subdivision_lengths;
     };

@@ -318,7 +318,76 @@ namespace Ariadne {
     std::ostream&
     RegularGrid<R>::write(std::ostream& os) const
     {
-        return os << "RegularGrid( subdivision_lengths=" << this->_subdivision_lengths << " )\n";
+        return os << "RegularGrid( subdivision_lengths=" 
+                  << this->_subdivision_lengths << " )\n";
+    }
+
+    template<typename R>
+    std::istream&
+    operator>>(std::istream& is, Grid<R>& g)
+    {
+      return g.read(is);
+    }
+
+    template<typename R>
+    std::istream&
+    IrregularGrid<R>::read(std::istream& is)
+    {
+      char c;
+      char grid_string[]="IrregularGrid(";
+
+      try {
+        int i=0; 
+        do {
+          is >> c;
+          if(c != grid_string[i]) {
+             throw std::ios_base::failure("Ariadne::Geometry::IrregularGrid<R>::read: The input object is not an IrregularGrid" );
+          }
+          i++;
+        } while (grid_string[i]!='\0');
+        
+        is >> this->_subdivision_coordinates >> c;
+
+        if (c != ')') {
+             throw std::ios_base::failure("Ariadne::Geometry::IrregularGrid<R>::read: The input IrregularGrid has not a proper format" );
+        }
+
+      } catch(...) {
+        throw; 
+      }
+
+      return is; 
+    }
+
+    template<typename R>
+    std::istream&
+    RegularGrid<R>::read(std::istream& is)
+    {
+      char c;
+      char grid_string[]="RegularGrid( subdivision_lengths=";
+
+      try {
+        int i=0; 
+        do {
+          is >> c;
+          if(c != grid_string[i]) {
+             throw std::ios_base::failure("Ariadne::Geometry::RegularGrid<R>::read: The input object is not an RegularGrid" );
+          }
+          i++;
+        } while (grid_string[i]!='\0');
+        
+        is >> this->_subdivision_lengths >> c;
+
+        if (c != ')') {
+             throw std::ios_base::failure("Ariadne::Geometry::RegularGrid<R>::read: The input RegularGrid has not a proper format" );
+        }
+
+      }
+      catch(...) {
+        throw; 
+      }
+
+      return is; 
     }
 
     template<typename R>

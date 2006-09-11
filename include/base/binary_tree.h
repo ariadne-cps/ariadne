@@ -49,9 +49,13 @@ namespace Ariadne {
      */
     class BinaryTree {
      public:
+      /*!\brief The constant indicating that a node is a leaf of the tree. */
       static const bool leaf=1;
+      /*!\brief The constant indicating that a node is a branch of the tree. */
       static const bool branch=0;
+      /*!\brief The constant indicating that a word follows the left-hand path. */
       static const bool left=0;
+      /*!\brief The constant indicating that a word follows the right-hand path. */
       static const bool right=1;
      public:    
       /*! \brief The type of the BinaryWord object stored in the tree. */

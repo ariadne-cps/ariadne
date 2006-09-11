@@ -286,8 +286,13 @@ namespace Ariadne {
       /*! \brief Scale the zonotope by a real constant. */
       static Zonotope<R> scale(const Zonotope<R>& z, const R& sf);
            
-      friend std::ostream& operator<< <> (std::ostream& os, const Zonotope<R>& r);
-      friend std::istream& operator>> <> (std::istream& is, Zonotope<R>& r);
+      //@{ 
+      //! \name Input/output operations
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream& os) const;
+      /*! \brief Read from an input stream. */
+      std::istream& read(std::istream& is);
+      //@}
      public:
       static bool equal(const Zonotope<R>&, const Zonotope<R>&);
       static bool disjoint(const Zonotope<R>&, const Zonotope<R>&);
@@ -503,6 +508,23 @@ namespace Ariadne {
       return Zonotope<R>::minkowski_sum(z,Zonotope<R>(A));
     }
 
+    template<typename R> 
+    inline
+    Zonotope<R> 
+    scale(const Zonotope<R>& z, const R& sf) {
+      return Zonotope<R>::scale(z,sf);
+    }
+
+    
+    template<typename R> inline 
+    std::ostream& operator<<(std::ostream& os, const Zonotope<R>& z) {
+      return z.write(os);
+    }
+    
+    template<typename R> inline
+    std::istream& operator>>(std::istream& is, Zonotope<R>& z) {
+      return z.read(is);
+    }
 
 
 

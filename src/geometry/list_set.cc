@@ -55,11 +55,5 @@ namespace Ariadne {
     template ListSet<Real,Rectangle> regular_intersection(const ListSet<Real,Rectangle>&, const ListSet<Real,Rectangle>&);
    
     
-    template std::ostream& operator<<(std::ostream&, const ListSet<Real,Rectangle>&);
-    template std::ostream& operator<<(std::ostream&, const ListSet<Real,Parallelotope>&);
-    template std::ostream& operator<<(std::ostream&, const ListSet<Real,Zonotope>&);
- 
-    template std::istream& operator>>(std::istream&, ListSet<Real,Rectangle>&);
-
   }
 }

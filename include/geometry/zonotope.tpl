@@ -82,10 +82,10 @@ namespace Ariadne {
     }
       
     template<typename R>
-    Geometry::Zonotope<R> 
-    scale(const Geometry::Zonotope<R>& z, const R& scale_factor) 
+    Zonotope<R> 
+    Zonotope<R>::scale(const Zonotope<R>& z, const R& scale_factor) 
     {
-      Geometry::Rectangle<R> new_central_block=scale(z.central_block(),scale_factor);
+      Geometry::Rectangle<R> new_central_block=Geometry::scale(z.central_block(),scale_factor);
       LinearAlgebra::IntervalMatrix<R> new_interval_generators=z.generators()*Interval<R>(scale_factor);
       new_central_block=new_central_block+new_interval_generators.radius_row_sum();
       LinearAlgebra::Matrix<R> new_generators=new_interval_generators.centre();
@@ -754,15 +754,16 @@ namespace Ariadne {
 
     template <typename R>
     std::ostream&
-    operator<<(std::ostream& os, const Zonotope<R>& z) 
+    Zonotope<R>::write(std::ostream& os) const 
     {
+      const Zonotope<R>& z=*this;
       if(z.dimension() > 0) {
         if (!(z.empty())) {
           os << "Zonotope( centre=" << z.centre();
           os << " directions=" << z.generators();
           os << ") ";
         } else {
-          os << "Zonotope( Empty )" << std::endl;
+          os << "Zonotope( )" << std::endl;
         }
       }
 
@@ -771,7 +772,7 @@ namespace Ariadne {
     
     template <typename R>
     std::istream& 
-    operator>>(std::istream& is, Zonotope<R>& z)
+    Zonotope<R>::read(std::istream& is)
     {
       throw std::domain_error("Not implemented");
     }

@@ -1,6 +1,6 @@
 include ../../config.mk
 
-OBJ = arithmetic.o function.o
+OBJ = approximation.o arithmetic.o function.o
 
 all: ${OBJ}
 

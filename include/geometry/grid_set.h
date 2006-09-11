@@ -196,7 +196,9 @@ namespace Ariadne {
       friend class GridMaskSet<R>;
       friend class GridCellListSet<R>;
      public:
+      /*! \brief The type of denotable real number defining the vertices and cells of the grid. */
       typedef R real_type;
+      /*! \brief The type of denotable point contained by the set. */
       typedef Point<R> state_type;
       
       /*!\brief Construct from a grid and an unit grid cell. */
@@ -216,6 +218,9 @@ namespace Ariadne {
 
       /*!\brief Convert to an ordinary rectangle. */
       operator Rectangle<R>() const;
+
+      /*!\brief A rectangle containing the grid rectangle. */
+      Rectangle<R> bounding_box() const { return *this; }
      private:
       const Grid<R>& _grid;
       LatticeCell _lattice_set;
@@ -232,7 +237,9 @@ namespace Ariadne {
       friend class GridMaskSet<R>;
       friend class GridRectangleListSet<R>;
      public:
+      /*! \brief The type of denotable real number defining the vertices and cells of the grid. */
       typedef R real_type;
+      /*! \brief The type of denotable point contained by the set. */
       typedef Point<R> state_type;
 
       /*!\brief Construct an empty rectangle on a grid. */
@@ -262,6 +269,9 @@ namespace Ariadne {
 
       /*!\brief Convert to an ordinary rectangle. */
       operator Rectangle<R>() const;
+
+      /*!\brief A rectangle containing the grid rectangle. */
+      Rectangle<R> bounding_box() const { return *this; }
 
       friend bool interiors_intersect<> (const GridRectangle<R>&, const GridRectangle<R>&);
       friend bool interiors_intersect<> (const GridRectangle<R>&, const GridMaskSet<R>&);
@@ -324,12 +334,16 @@ namespace Ariadne {
       friend class GridRectangleListSet<R>;
       friend class GridMaskSet<R>;
      public:
-      typedef R real_type;
-      typedef Point<R> state_type;
-      typedef GridCell<R> value_type;
       typedef GridSetIterator< LatticeCellListSet::const_iterator, GridCell<R> > iterator;
       typedef GridSetIterator< LatticeCellListSet::const_iterator, GridCell<R> > const_iterator;
 
+      /*! \brief The type of denotable real number defining the vertices and cells of the grid. */
+      typedef R real_type;
+      /*! \brief The type of denotable point contained by the set. */
+      typedef Point<R> state_type;
+      /*! \brief The type of basic set contained by the denotable set. */
+      typedef GridCell<R> value_type;
+      
       /*!\brief Construct an empty set based on a Grid. */
       GridCellListSet(const Grid<R>& g);
 
@@ -420,12 +434,15 @@ namespace Ariadne {
       friend class GridMaskSet<R>;
       friend class GridCellListSet<R>;
      public:
-      typedef R real_type;
-      typedef Point<R> state_type;
-      typedef GridRectangle<R> value_type;
       typedef GridSetIterator< LatticeRectangleListSet::const_iterator, GridRectangle<R> > iterator;
       typedef GridSetIterator< LatticeRectangleListSet::const_iterator, GridRectangle<R> > const_iterator;
 
+      /*! \brief The type of denotable real number defining the vertices and cells of the grid. */
+      typedef R real_type;
+      /*! \brief The type of denotable point contained by the set. */
+      typedef Point<R> state_type;
+      /*! \brief The type of basic set contained by the denotable set. */
+      typedef GridRectangle<R> value_type;
       /*!\brief Destructor. */
       ~GridRectangleListSet() { 
         //delete _grid_ptr; }
@@ -524,19 +541,30 @@ namespace Ariadne {
       friend class GridCellListSet<R>;
       friend class PartitionTreeSet<R>;
      public:
-      typedef R real_type;
-      typedef Point<R> state_type;
-      typedef GridCell<R> value_type;
       typedef GridSetIterator< LatticeMaskSet::const_iterator, GridCell<R> > iterator;
       typedef GridSetIterator< LatticeMaskSet::const_iterator, GridCell<R> > const_iterator;
 
-      /*!\brief Construct an empty set from a finite grid. */
+      /*! \brief The type of denotable real number defining the vertices and cells of the grid. */
+      typedef R real_type;
+      /*! \brief The type of denotable point contained by the set. */
+      typedef Point<R> state_type;
+      /*! \brief The type of basic set contained by the denotable set. */
+      typedef GridCell<R> value_type;
+      /*! \brief The type of object returned by indexing. */
+
+      /*!\brief Construct an empty set from a finite grid. (Deprecated)
+       *
+       * \deprecated Use GridMaskSet(const Grid<R>& g, const LatticeRectangle& b) instead.
+       */
       GridMaskSet(const FiniteGrid<R>& g);
      
-      /*!\brief Construct a set from a finite grid and a mask */
+      /*!\brief Construct a set from a finite grid and a mask. (Deprecated)
+       *
+       * \deprecated Use GridMaskSet(const Grid<R>& g, const LatticeRectangle& b, const BooleanArray& m) instead.
+       */
       GridMaskSet(const FiniteGrid<R>& g, const BooleanArray& m);
 
-      /*!\brief Construct a set from a grid, and a lattice rectangle. */
+      /*!\brief Construct an empty set based on grid \a g and with cells in the block \a b. */
       GridMaskSet(const Grid<R>& g, const LatticeRectangle& b);
      
       /*!\brief Construct a set from a grid, a lattice rectangle and a mask. */
@@ -548,32 +576,39 @@ namespace Ariadne {
       /*!\brief Copy constructor. */
       GridMaskSet(const GridMaskSet<R>& gms);
 
-      /*!\brief Construct from a ListSet of Rectangle. */
+      /*!\brief Construct from a %ListSet of %Rectangle. */
       GridMaskSet(const ListSet<R,Rectangle>& ls);
 
-      /*!\brief Construct from a GridCellListSet. */
+      /*!\brief Construct from a %GridCellListSet. */
       GridMaskSet(const GridCellListSet<R>& gcls);
 
-      /*!\brief Construct from a GridRectangleListSet. */
+      /*!\brief Construct from a %GridRectangleListSet. */
       GridMaskSet(const GridRectangleListSet<R>& grls);
 
 
-      /*!\brief Convert to a ListSet of Rectangles. */
-      operator ListSet<R,Rectangle>() const;
-
-      /*! \brief Equality operator. */
+      /*!\brief Convert to a %ListSet of BS. */
+      template <template<typename> class BS> operator ListSet<R,BS> () const;
+      operator ListSet<R,Rectangle> () const;
+      
+      /*!\brief Equality operator. (Deprecated)
+       *
+       * \deprecated Equality operator for sets is deprecated.
+       */
       bool operator==(const GridMaskSet<R>& gms) {
-        if(this->grid()==gms.grid() && this->bounds()==gms.bounds()) {
-          return this->mask()==gms.mask();
-        }
-        throw(std::domain_error("Can only compare GridMaskSets on the same grid"));
+        throw(std::domain_error("Equality operator for sets is deprecated"));
       }
 
-      /*! \brief Inequality operator. */
+      /*! \brief Inequality operator. (Deprecated)
+       *
+       * \deprecated Equality operator for sets is deprecated.
+       */
       bool operator!=(const GridMaskSet<R>& gms) { return !(*this==gms); }
 
       /*! \brief The underlying grid. */
       const Grid<R>& grid() const { return *_grid_ptr; }
+
+      /*! \brief The bounds on elements in the set. */
+      GridRectangle<R> bounds() const { return GridRectangle<R>(*_grid_ptr,_lattice_set.block()); }
 
       /*! \brief The underlying lattice set. */
       const LatticeMaskSet& lattice_set() const { return _lattice_set; }
@@ -584,20 +619,29 @@ namespace Ariadne {
        /*! \brief The number of elements in the mask. */
       size_type capacity() const { return _lattice_set.capacity(); }
       
-      /*! \brief The lowest position in the grid. */
-      const IndexArray& lower() const { return _lattice_set.lower(); }
+      /*! \brief The block of cells available in the lattice. */
+      const LatticeRectangle& block() const { return _lattice_set.block(); }
 
-      /*! \brief The highest position in the grid. */
-      const IndexArray& upper() const { return _lattice_set.upper(); }
+      /*! \brief The lowest position in the grid. (Deprecated)
+       *
+       * \deprecated Use block().lower() instead.
+       */
+      //const IndexArray& lower() const { return _lattice_set.block().lower(); }
 
-      /*! \brief The bounding rectangle in the grid. */
-      const LatticeRectangle& bounds() const { return _lattice_set.bounds(); }
+      /*! \brief The highest position in the grid. (Deprecated)
+       *
+       * \deprecated Use block().lower() instead.
+       */
+      //const IndexArray& upper() const { return _lattice_set.block().upper(); }
 
-      /*! \brief The bounding rectangle in the grid. */
+      /*! \brief The number of cells in each dimension. */
       const SizeArray& sizes() const { return _lattice_set.sizes(); }
 
-      /*! \brief The bounding rectangle in the grid. */
-      const SizeArray& strides() const { return _lattice_set.strides(); }
+      /*! \brief The number of c. 
+       *
+       * \deprecated Use block().sizes() instead.
+       */
+      //const SizeArray& strides() const { return _lattice_set.block().strides(); }
 
       /*! \brief The mask giving the cells in the set. */
       const BooleanArray& mask() const { return _lattice_set.mask(); }
@@ -617,18 +661,8 @@ namespace Ariadne {
       const_iterator end() const { return const_iterator(*this->_grid_ptr,this->_lattice_set.end()); }
 
       /*! \brief The rectangle bounding the region of the mask. */
-      GridRectangle<R> bounding_box() const { return GridRectangle<R>(grid(),bounds()); }
+      Rectangle<R> bounding_box() const { return GridRectangle<R>(grid(),bounds()); }
      
-      template <template<typename> class BS>
-      operator ListSet<R,BS> () const {
-         ListSet<R,BS> result(this->dimension());
-
-         for (size_type i=0; i<this->size(); i++) 
-           result.push_back((BS<R>)((Rectangle<R>)((*this)[i])));
-      
-         return result;
-      }
-      
       /*! \brief Removes all cells. */
       void clear() {
         _lattice_set.clear();
@@ -676,10 +710,12 @@ namespace Ariadne {
         this->_lattice_set.adjoin(rls._lattice_set);
       }
 
+      /*!\brief The one-box neighbourhood, consisting of all cells whose closure intersects the set. */
       GridMaskSet neighbourhood() const {
         return GridMaskSet(this->grid(),this->_lattice_set.neighbourhood());
       }
 
+      /*!\brief The set of all cells which share a facet a cell in the set. */
       GridMaskSet adjoining() const {
         return GridMaskSet(this->grid(),this->_lattice_set.adjoining());
       }
@@ -696,6 +732,22 @@ namespace Ariadne {
       const Grid<R>* _grid_ptr;
       LatticeMaskSet _lattice_set;
     };
+
+    template<typename R>
+    template <template<typename> class BS>
+    inline
+    GridMaskSet<R>::operator ListSet<R,BS> () const 
+    {
+      ListSet<R,BS> result(this->dimension());
+      Rectangle<R> r(this->dimension());
+      BS<R> bs(this->dimension());
+      for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+        r=iter;
+        bs=BS<R>(r);
+        result.push_back(bs);
+      }
+      return result;
+    }
 
   }
 }

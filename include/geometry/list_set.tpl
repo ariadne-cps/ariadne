@@ -179,9 +179,10 @@ namespace Ariadne {
     
     
     template <typename R, template<typename> class BS>
-    std::ostream& operator<<(std::ostream& os,
-                             const ListSet<R,BS>& A)
+    std::ostream& 
+    ListSet<R,BS>::write(std::ostream& os) const
     {
+      const ListSet<R,BS>& A=*this;
       os << "ListSet<" << name<R>() << ",BS>{\n  ";
       os << "[";
       if (A.size() >0 ) {
@@ -195,9 +196,10 @@ namespace Ariadne {
     }
 
     template <typename R, template<typename> class BS>
-    std::istream& operator>>(std::istream& is,
-                             ListSet<R,BS>& A)
+    std::istream& 
+    ListSet<R,BS>::read(std::istream& is)
     {
+      ListSet<R,BS>& A=*this;
       std::vector< BS<R> >& vec(A._vector);
       is >> vec;
 
@@ -209,7 +211,7 @@ namespace Ariadne {
       }
       return is;
     }
-
+  
 
   }
 }

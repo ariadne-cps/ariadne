@@ -20,8 +20,8 @@ namespace Ariadne {
   namespace Numeric {
 
 #ifdef DOXYGEN
-    /*! \brief A dyadic rational (i.e. of form \f$m/2^n\f$).
-     *   \ingroup Numeric
+    /*!\ingroup Numeric
+     * \brief A dyadic rational (i.e. of form \f$m/2^n\f$).
      * 
      * A element of the ring of dyadic rationals.
      * Must allow denotation of any dyadic rational.

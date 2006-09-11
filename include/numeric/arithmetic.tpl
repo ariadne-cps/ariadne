@@ -31,7 +31,7 @@
 namespace Ariadne {
   namespace Numeric {
     
-    template<> int quotient(const Float64& x, const Float64& y)
+    template<> int quot(const Float64& x, const Float64& y)
     {
       assert(y>=0.0);
       int q = int(x/y+0.5);
@@ -40,7 +40,7 @@ namespace Ariadne {
       return q;
     }
   
-    template<> int quotient(const Rational& x, const Rational& y) 
+    template<> int quot(const Rational& x, const Rational& y) 
     {
       assert(y>=0);
 
@@ -54,14 +54,14 @@ namespace Ariadne {
       return q;
     }
   
-    template<> int quotient(const MPFloat& x, const MPFloat& y)
+    template<> int quot(const MPFloat& x, const MPFloat& y)
     {
-      return quotient(Rational(x),Rational(y));
+      return quot<int>(Rational(x),Rational(y));
     }
   
-    template<> int quotient(const Dyadic& x, const Dyadic& y) 
+    template<> int quot(const Dyadic& x, const Dyadic& y) 
     {
-      return quotient(Rational(x),Rational(y));
+      return quot<int>(Rational(x),Rational(y));
     }
   
   }

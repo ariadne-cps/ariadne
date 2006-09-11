@@ -43,39 +43,40 @@ using namespace Ariadne;
 using namespace Ariadne::Geometry;
 using namespace std;
 
-int main() {
-
   
-  
-  Point<Real> c("(0.125,-0.25,0.5)");
-  LinearAlgebra::Vector<Real> v("[0.0,1.0,-1.5]");
-  LinearAlgebra::Matrix<Real> a("[2.0,1.0,-1.5; 1.0,1.0,0.5; 0.0,0.0,0.375]");
+template<typename R>
+int 
+test_zonotope()
+{
+  Point<R> c("(0.125,-0.25,0.5)");
+  LinearAlgebra::Vector<R> v("[0.0,1.0,-1.5]");
+  LinearAlgebra::Matrix<R> a("[2.0,1.0,-1.5; 1.0,1.0,0.5; 0.0,0.0,0.375]");
   
   cout << "c=" << c << "\nv=" << v << "\na=" << a << endl;
   
-  Rectangle<Real> r1=Rectangle<Real>("[9,11]x[5,11]x[0,0]");
-  Rectangle<Real> r2=Rectangle<Real>("[5,6]x[3,4]x[-0.5,0.5]");
+  Rectangle<R> r1=Rectangle<R>("[9,11]x[5,11]x[0,0]");
+  Rectangle<R> r2=Rectangle<R>("[5,6]x[3,4]x[-0.5,0.5]");
   cout << "r1=" << r1 << "\nr2=" << r2 << endl;
 
-  Parallelotope<Real> p2=Parallelotope<Real>(r2);
+  Parallelotope<R> p2=Parallelotope<R>(r2);
   cout << "p2=" << p2 << endl;
 
-  Zonotope<Real> z1=Zonotope<Real>(r1);
+  Zonotope<R> z1=Zonotope<R>(r1);
   cout << "z1=" << z1 << endl;
-  Zonotope<Real> z2=Zonotope<Real>(p2);
+  Zonotope<R> z2=Zonotope<R>(p2);
   cout << "z2=" << z2 << endl;
 
-  Zonotope<Real> z3=minkowski_sum(z1,z2);
+  Zonotope<R> z3=minkowski_sum(z1,z2);
   cout << "z3=" << z3 << endl;
 
-  Point<Real> pt1,pt2,pt3,pt4,pt5,pt6;
+  Point<R> pt1,pt2,pt3,pt4,pt5,pt6;
 
-  pt1=Point<Real>("(17.0,15.0,-0.5)");
-  pt2=Point<Real>("(17.0,8.0,-0.5)");
-  pt3=Point<Real>("(14.0,15.0,-0.5)");
-  pt4=Point<Real>("(14.0,8.0,-0.5)");
-  pt5=Point<Real>("(14.0,5.0,-0.5)");
-  pt6=Point<Real>("(15.5,11.5,0)");
+  pt1=Point<R>("(17.0,15.0,-0.5)");
+  pt2=Point<R>("(17.0,8.0,-0.5)");
+  pt3=Point<R>("(14.0,15.0,-0.5)");
+  pt4=Point<R>("(14.0,8.0,-0.5)");
+  pt5=Point<R>("(14.0,5.0,-0.5)");
+  pt6=Point<R>("(15.5,11.5,0)");
 
   Postscript::epsfstream eps("test_zonotope.eps",z3.bounding_box(),0,1);
   eps << z3 << pt1 << pt2 << pt3 << pt4 << pt5 << pt6 << endl;
@@ -103,6 +104,13 @@ int main() {
   assert(!z3.empty());
   assert(!z3.empty_interior());
   
+  return 0;
+}
+
+  
+
+int main() {
+  test_zonotope<Real>();
   
   cerr << "INCOMPLETE ";
 

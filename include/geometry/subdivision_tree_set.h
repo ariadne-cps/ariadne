@@ -54,30 +54,93 @@ namespace Ariadne {
     class LatticeMaskSet;
     class LatticeRectangle;
       
-    /*! \brief A sequence of coordinate giving axes of subdivision for a subdivision tree. */
+    
+    /*!\ingroup SubdivisionTree
+     * \brief A binary tree with a boolean labelling on the leaves. */
+    class MaskedBinaryTree {
+     public:
+      typedef mask_iterator<BinaryTree::const_iterator, 
+                            BooleanArray::const_iterator> const_iterator;
+      typedef const_iterator iterator;
+
+      /*!\brief Construct a tree with a single leaf marked false. */
+      MaskedBinaryTree()
+        : _tree(), _mask(1,false) { }
+      /*!\brief Construct a from a binary tree, labelling all leaves as false. */
+      MaskedBinaryTree(const BinaryTree& t) 
+        : _tree(t), _mask(t.size(),false) { }
+      /*!\brief Construct a from the binary tree \a t, labelling leaves as given by the values in \a m. */
+      MaskedBinaryTree(const BinaryTree& t, const BooleanArray& m) 
+        : _tree(t), _mask(m) { }
+
+      /*!\brief A constant reference to the binary tree. */
+      const BinaryTree& tree() const { return _tree; }
+      /*!\brief A constant reference to the mask on the leaves. */
+      const BooleanArray& mask() const { return _mask; }
+      
+      /*!\brief The number of leaves of the tree. */
+      size_type capacity() const { return mask().size(); }
+      /*!\brief The number of leaves of the tree marked as true.  */
+      size_type size() const { return std::count(_mask.begin(),_mask.end(),true); }
+
+      /*!\brief Reduce the representation of the tree by combining elements
+       * the same marking. 
+       */
+      void reduce();
+
+      /*!\brief A constant iterator to the beginning of the marked leaves of the tree. */
+      const_iterator begin() const { 
+        return const_iterator(_tree.begin(),_mask.begin(),_mask.end()); }
+      /*!\brief A constant iterator to the end of the marked leaves of the tree. */
+      const_iterator end() const { 
+        return const_iterator(_tree.end(),_mask.end(),_mask.end()); }
+     private:
+      BinaryTree _tree;
+      BooleanArray _mask;
+    };
+
+    /*!\ingroup SubdivisionTree
+     * \brief A sequence of coordinate giving axes of subdivision for a subdivision tree. 
+     */
     class SubdivisionSequence
     {
      public:
+      /*!\brief Construct the default sequence in dimension \a n, which consists of 
+       * the sequence \f$0,1,2,\ldots,n-1\f$ repeated.
+       */
       SubdivisionSequence(const dimension_type& n)
         : _sequence(_default(n)), _dimension(n) { }
       
+      /*!\brief Construct from a sequence starting at \a b, where \a tb and \a te
+       * describe the periodic tail of the sequence.
+       */
       template<typename FwdIter> 
       SubdivisionSequence(FwdIter b, FwdIter tb, FwdIter te)
         : _sequence(b,tb,te), _dimension(_compute_dimension())
       { }
 
+      /*!\brief Construct from a string literal of the for,
+       * "\f$[a_1,a_2,\ldots,a_{k-1};b_1,\ldots,b_{l-1}]\f$", where
+       * the values before the ';' denote the body of the sequence and the values
+       * after denote the periodic tail.
+       */
       SubdivisionSequence(const std::string& str);
        
+      /*!\brief Equality operator. */
       bool operator==(const SubdivisionSequence& ss) const {
         return this->_sequence==ss._sequence && this->_dimension==ss._dimension; }
 
+      /*!\brief Inequality operator. */
       bool operator!=(const SubdivisionSequence& ss) const {
         return !(*this==ss); }
 
-      dimension_type dimension() const { 
-        return _dimension; }
+      /*!\brief The dimension of the space the sequence describes subdivisions of. */
+      dimension_type dimension() const { return _dimension; }
+      /*!\brief The number of elements in the aperiodic body. */
       size_type body_size() const { return _sequence.body_size(); }
+      /*!\brief The number of elements in the periodic tail. */
       size_type tail_size() const { return _sequence.tail_size(); }
+      /*!\brief The \a i th element. */
       dimension_type operator[](const size_type& i) const { 
         return _sequence[i]; }
      private:
@@ -91,55 +154,41 @@ namespace Ariadne {
       dimension_type _dimension;
     };
 
-    /*! \brief A binary tree with a boolean labelling on the leaves. */
-    class MaskedBinaryTree {
-     public:
-      typedef mask_iterator<BinaryTree::const_iterator, 
-                            BooleanArray::const_iterator> const_iterator;
-      typedef const_iterator iterator;
-
-      MaskedBinaryTree() 
-        : _tree(), _mask(1,false) { }
-      MaskedBinaryTree(const BooleanArray& t, const BooleanArray& m) 
-        : _tree(t), _mask(m) { }
-      MaskedBinaryTree(const BinaryTree& t, const BooleanArray& m) 
-        : _tree(t), _mask(m) { }
-
-      const BinaryTree& tree() const { return _tree; }
-      const BooleanArray& mask() const { return _mask; }
-      
-      size_type capacity() const { return mask().size(); }
-      size_type size() const { return std::count(_mask.begin(),_mask.end(),true); }
-
-      void reduce();
-
-      const_iterator begin() const { 
-        return const_iterator(_tree.begin(),_mask.begin(),_mask.end()); }
-      const_iterator end() const { 
-        return const_iterator(_tree.end(),_mask.end(),_mask.end()); }
-     private:
-      BinaryTree _tree;
-      BooleanArray _mask;
-    };
-
-    /*! \brief A cell in a subdivision tree. */
+    /*!\ingroup SubdivisionTree
+     * \brief A cell in a subdivision tree. */
     class SubdivisionTreeCell {
      public:
+      /*!\brief The type used to represent the dyadic numbers giving the upper
+       * and lower bounds of the cell. */
       typedef double dyadic_type;
 
+      /*!\brief Construct from a sequence giving the subdivision dimensions, 
+       * and a binary word giving the cell to be chosen at each subdivision. */
       SubdivisionTreeCell(const SubdivisionSequence& ss, 
-                            const BinaryWord& bw);
+                          const BinaryWord& bw);
 
+      /*!\brief Equality operator. */
       bool operator==(const SubdivisionTreeCell& other) const {
         return this->_bounds==other._bounds; }
 
+      /*!\brief Inequality operator. */
+      bool operator!=(const SubdivisionTreeCell& other) const {
+        return !(*this==other); }
+        
+      /*!\brief The dimension of the cell. */
       dimension_type dimension() const { 
         return _bounds.dimension(); }
+      /*!\brief A rectangle giving the cell. (Deprecated)
+       *
+       * \deprecated This class should be independent of the Geometry library.
+       */
+      const Rectangle<dyadic_type>& bounds() const { return _bounds; };
+      /*!\brief The lower bound in the \a i th dimension. */
       const dyadic_type& lower_bound(dimension_type i) const {
         return _bounds.lower_bound(i); }
+      /*!\brief The upper bound in the \a i th dimension. */
       const dyadic_type& upper_bound(dimension_type i) const {
         return _bounds.upper_bound(i); }
-      const Rectangle<dyadic_type>& bounds() const { return _bounds; };
      private:
       void _compute_bounds(const SubdivisionSequence& ss, const BinaryWord& bw);
      private:
@@ -148,7 +197,8 @@ namespace Ariadne {
     
 
 
-    /*! \brief A subdivision structure on the unit hypercube determined by a sequence of subdivision coordinates and a binary tree. */
+    /*!\ingroup SubdivisionTree
+     * \brief A subdivision structure on the unit hypercube determined by a sequence of subdivision coordinates and a binary tree. */
     class SubdivisionTree {
      public:
       typedef binary_constructor_iterator<BinaryTree::const_iterator, 
@@ -156,8 +206,9 @@ namespace Ariadne {
                                           SubdivisionSequence> const_iterator;
       typedef const_iterator iterator;
      
+      /*! Construct from a subdivision sequence and a binary tree. */
       SubdivisionTree(const SubdivisionSequence& ss, 
-                        const BinaryTree& bt);
+                      const BinaryTree& bt);
 
       /*! \brief The space dimension of the tree. */
       dimension_type dimension() const { return _subdivisions.dimension(); }
@@ -181,6 +232,7 @@ namespace Ariadne {
       /*! \brief Constant iterator to the end of the cells in the tree. */
       const_iterator end() const { return const_iterator(_subdivisions,_tree.end()); }
      private:
+      /* Reduce the tree by combining cells where possible. */
       void reduce();
      private:
       SubdivisionSequence _subdivisions;
@@ -214,7 +266,8 @@ namespace Ariadne {
       SubdivisionSequence _subdivisions;
     };
   
-    /*! \brief A subset of the unit hypercube described by a subdivision structure. */
+    /*!\ingroup SubdivisionTree
+     * \brief A subset of the unit hypercube described by a subdivision structure. */
     class SubdivisionTreeSet {
      public:
       typedef binary_constructor_iterator<MaskedBinaryTree::const_iterator,
@@ -222,13 +275,22 @@ namespace Ariadne {
                                           SubdivisionSequence> const_iterator;
       typedef const_iterator iterator;
      
+      /*!\brief Construct an empty set with a single cell. */
       SubdivisionTreeSet(const SubdivisionSequence& ss);
+      /*!\brief Construct an empty set with a single cell. */
       SubdivisionTreeSet(const SubdivisionSequence& ss, 
-                           const BinaryTree& bt,
-                           const BooleanArray& ba); 
+                         const BinaryTree& bt,
+                         const BooleanArray& ba); 
+
+      /*!\brief Copy constructor. */
+      SubdivisionTreeSet(const SubdivisionTreeSet& sts);
+
+      /*!\brief Convert from a lattice mask set \a ms. 
+       *
+       * The supporting block of \a ms must have sides which are a power of 2. */
       SubdivisionTreeSet(const LatticeMaskSet& ms); 
 
-     /*! \brief The space dimension of the tree. */
+      /*! \brief The space dimension of the tree. */
       dimension_type dimension() const { return _subdivisions.dimension(); }
 
       /*! \brief The sequence describing the order of subdivisions. */

@@ -31,10 +31,5 @@ namespace Ariadne {
 
     template class Zonotope<Real>;
 
-    template Zonotope<Real> scale(const Zonotope<Real>& s, const Real& factor);
-
-    template std::ostream& operator<<(std::ostream&, const Zonotope<Real>&);
-    template std::istream& operator>>(std::istream&, Zonotope<Real>&);
-
   }
 }

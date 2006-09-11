@@ -30,6 +30,7 @@
 #define _ARIADNE_LIST_SET_H
 
 #include <iosfwd>
+#include <iostream>
 #include <exception>
 #include <stdexcept>
 
@@ -42,13 +43,7 @@ namespace Ariadne {
   namespace Geometry {
 
     template<typename R> class Rectangle;
-    template<typename R, template<typename> class BS> class ListSet;
-  
-    template<typename R, template<typename> class BS>
-    std::ostream& operator<<(std::ostream&, const ListSet<R,BS>&);
-    template<typename R, template<typename> class BS>
-    std::istream& operator>>(std::istream&, ListSet<R,BS>&);
-    
+      
     /*! \brief A finite union of basic sets, represented as a sequence.
      *  \ingroup DenotableSet
      *  \ingroup List
@@ -63,14 +58,19 @@ namespace Ariadne {
       std::vector< BS<R> > _vector;
 
      public:
+      /*!\brief The type of denotable real number used to represent the sets in the list. */
       typedef R real_type;
+      /*!\brief The type of point contained by the set. */
       typedef typename BS<R>::state_type state_type;
+      /*!\brief The type of basic set making up the denotable set. */
       typedef BS<R> basic_set_type;
-      
+      /*!\brief The type of basic set in the list of sets. */
       typedef BS<R> value_type;
+
       typedef typename std::vector<basic_set_type>::const_iterator const_iterator;
       typedef typename std::vector<basic_set_type>::iterator iterator;
 
+     public:
       /*! \brief An empty list set which can hold sets of an unspecified dimension. */
       ListSet() : _dimension(0), _vector() { }
 
@@ -198,17 +198,19 @@ namespace Ariadne {
         return *this;
       }
 
+      /*!\brief Convert to a list set BS2<R>. */
       template <template<typename> class BS2>
       operator ListSet<R,BS2> () const {
-         ListSet<R,BS2> result(this->dimension());
-
-         for (size_type i=0; i<this->size(); i++) 
-           result.push_back((BS2<R>)((*this)[i]));
-      
-         return result;
+        ListSet<R,BS2> result(this->dimension());
+        BS2<R> bs(this->dimension());
+        for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+          bs=BS2<R>(*iter);
+          result.push_back(bs);
+        }
+        return result;
       }
       
-      /*! \brief Checks if a denotable set includes a point.
+      /*!\brief Checks if a denotable set includes a point.
       *
       * This method checks whenever the current denotable set
       * includes the point \a p.
@@ -369,6 +371,14 @@ namespace Ariadne {
       void inplace_union(const BS<R>& A) {
         this->adjoin(A);
       }
+      
+      //@{
+      //! \name Input/output operators
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream& os) const;
+      /*! \brief Read from an input stream. */
+      std::istream& read(std::istream& is);
+      //@}
 
 #ifdef DOXYGEN
       //@{ 
@@ -388,7 +398,7 @@ namespace Ariadne {
       friend bool inner_subset(const ListSet<R,BS>& A,
                                const ListSet<R,BS>& B);
 
-      /*! \brief Tests inclusion of \A in \B.
+      /*! \brief Tests inclusion of \a A in \a B.
        */
       friend bool subset(const ListSet<R,BS>& A,
                          const ListSet<R,BS>& B);
@@ -412,25 +422,33 @@ namespace Ariadne {
       friend ListSet<R,BS> regular_intersection(const ListSet<R,BS>& A,
                                                 const ListSet<R,BS>& B);
       //@}
-
-
-      //@{
-      //! \name Input/output operators
-      /*! \brief Stream insertion operator. */
-      friend std::ostream& operator<<(std::ostream& is, const ListSet<R,BS>& S);
-
-      /*! \brief Stream extraction operator. */
-      friend std::istream& operator>>(std::istream& is, ListSet<R,BS>& S);
-      //@}
 #endif      
-      
-      friend std::ostream& operator<< <> (std::ostream& is, const ListSet<R,BS>& S);
 
-      friend std::istream& operator>> <> (std::istream& is, ListSet<R,BS>& S);
-      //@}
-      
     };
 
+  
+    template <typename R, template <typename> class BS>
+    inline
+    std::ostream&
+    operator<<(std::ostream& os, const ListSet<R,BS>& A) 
+    {
+      return A.write(os);
+    }
+
+    template <typename R, template <typename> class BS>
+    inline
+    std::istream&
+    operator>>(std::istream& is, ListSet<R,BS>& A) 
+    {
+      return A.read(is);
+    }
+
+
+    template<typename R, template<class> class BS>
+    ListSet<R,BS>
+    regular_intersection(const ListSet<R,BS>& A,
+                         const ListSet<R,BS>& B);
+  
 
 
     template <typename R, template<class> class BS>

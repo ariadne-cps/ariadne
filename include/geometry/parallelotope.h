@@ -51,10 +51,6 @@ namespace Ariadne {
     template<>
     inline bool is_a<Parallelotope,Polyhedron>() { return true; }
 
-    /* Forward declaration of friends. */
-    template<typename R> std::ostream& operator<<(std::ostream&, const Parallelotope<R>&);
-    template<typename R> std::istream& operator>>(std::istream&, Parallelotope<R>&);
-
     /*! \ingroup BasicSet
      *  \brief A parallelotope of arbitrary dimension.
      */
@@ -75,7 +71,7 @@ namespace Ariadne {
       //@{ 
       //! \name Constructors
       /*! \brief Default constructor constructs an empty parallelotope of dimension \a n. */
-      explicit Parallelotope(dimension_type n) : Zonotope<R>(n,n) { }
+      explicit Parallelotope(dimension_type n=0) : Zonotope<R>(n,n) { }
       
       /*! \brief Construct from centre and directions. */
       explicit Parallelotope(const vector_type& c, const matrix_type& m) 
@@ -133,13 +129,17 @@ namespace Ariadne {
       /*! \brief Scale the parallelotope by at least \a sf. */
       static Parallelotope<R> scale(const Parallelotope<R>& p, const R& sf);
 
-      friend std::istream& operator>> <> (std::istream& is, Parallelotope<R>& r);
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream& os) const;
+      /*! \brief Read from an input stream. */
+      std::istream& read(std::istream& is);
      private:
       static LinearAlgebra::Matrix<R> compute_generators(const Rectangle<R>& r);
       static void compute_linear_inequalities(matrix_type&, vector_type&, vector_type&);
       LinearAlgebra::Vector<F> coordinates(const state_type& s) const;
     };
  
+    
     template<typename R>
     inline
     Parallelotope<R> 
@@ -147,9 +147,24 @@ namespace Ariadne {
     {
       return Parallelotope<R>::scale(p,scale_factor);
     }
+
+    template<typename R>
+    inline
+    std::ostream&
+    operator<<(std::ostream& os, const Parallelotope<R>& p) 
+    {
+      return p.write(os);
+    }
     
-
-
+    template<typename R>
+    inline
+    std::istream&
+    operator>>(std::ostream& is, Parallelotope<R>& p) 
+    {
+      return p.read(is);
+    }
+    
+   
     template <typename R>
     inline
     bool 
@@ -158,7 +173,6 @@ namespace Ariadne {
     {
       throw std::domain_error("subset_of_open_cover(Parallelotope, ListSet<Parallelotope>) not implemented");
     }
-
     
     template <typename R>
     inline
@@ -168,6 +182,8 @@ namespace Ariadne {
     {
       throw std::domain_error("inner_subset(Parallelotope, ListSet<Parallelotope>) not implemented");
     }
+    
+    
 
   }
 }

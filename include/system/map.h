@@ -43,11 +43,10 @@ namespace Ariadne {
     template<typename R>
     class Map {
      public:
+      /*! \brief The real number type. */
       typedef R real_type;
+      /*! \brief The type of denotable state the system acts on. */
       typedef Geometry::Point<R> state_type;
-      typedef LinearAlgebra::Vector<R> vector_type;
-      typedef LinearAlgebra::Matrix<R> matrix_type;
-      typedef LinearAlgebra::IntervalMatrix<R> interval_matrix_type;
       
       /*! \brief Virtual destructor. */
       virtual ~Map();

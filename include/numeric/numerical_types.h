@@ -22,7 +22,7 @@
  */
  
 /*! \file numerical_types.h
- *  \brief Type definitions and conversion operators for fundamental Ariadne types.
+ *  \brief Type definitions and conversion operators for fundamental %Ariadne types.
  */
 
 #ifndef _ARIADNE_NUMERICAL_TYPES_H

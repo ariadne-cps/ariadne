@@ -40,7 +40,7 @@ typedef size_t DiscreteLocationID;
 
 /*! \brief The discrete location type. */
 template <typename R>
-class DiscreteLocation{
+class DiscreteLocation {
 
   public:
     typedef R Real;

@@ -32,16 +32,10 @@ namespace Ariadne {
   namespace Geometry {
 
     template class Point<Float64>;
-    template std::ostream& operator<<(std::ostream&, const Point<Float64>&);
-    template std::istream& operator>>(std::istream&, Point<Float64>&);
 
     template class Point<MPFloat>;
-    template std::ostream& operator<<(std::ostream&, const Point<MPFloat>&);
-    template std::istream& operator>>(std::istream&, Point<MPFloat>&);
 
     template class Point<Rational>;
-    template std::ostream& operator<<(std::ostream&, const Point<Rational>&);
-    template std::istream& operator>>(std::istream&, Point<Rational>&);
 
   }
 }

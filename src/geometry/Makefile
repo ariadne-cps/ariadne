@@ -1,12 +1,14 @@
 include ../../config.mk
 
-OBJ = point.o \
+OBJ = \
+  lattice_set.o subdivision_tree_set.o \
 	ppl_polyhedron.o \
+  point.o point_list.o \
 	rectangle.o polyhedron.o simplex.o zonotope.o parallelotope.o \
 	sphere.o ellipsoid.o \
 	list_set.o \
-	lattice_set.o grid.o grid_set.o \
-	subdivision_tree_set.o partition_tree_set.o
+	grid.o grid_set.o \
+	partition_tree_set.o
 
 all: ${OBJ}
 

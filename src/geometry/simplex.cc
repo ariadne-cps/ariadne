@@ -31,8 +31,5 @@ namespace Ariadne {
 
     template class Simplex<Real>;
 
-    template std::ostream& operator<<(std::ostream&, const Simplex<Real>&);
-    template std::istream& operator>>(std::istream&, Simplex<Real>&);
-
   }
 }

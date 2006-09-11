@@ -51,7 +51,7 @@ void export_partition_tree_set() {
   class_<RPartitionScheme>("PartitionScheme",init<RRectangle,SubdivisionSequence>())
     .def(init<RRectangle>())
     .def("dimension", &RPartitionScheme::dimension)
-    .def("bounding_box", &RPartitionScheme::bounding_box, return_value_policy<copy_const_reference>())
+    .def("unit_box", &RPartitionScheme::unit_box, return_value_policy<copy_const_reference>())
     .def("subdivisions", &RPartitionScheme::subdivisions, return_value_policy<copy_const_reference>())
     .def(self_ns::str(self))    // __self_ns::str__
   ;
@@ -59,7 +59,7 @@ void export_partition_tree_set() {
   class_<RPartitionTree>("PartitionTree",init<RRectangle,SubdivisionSequence,BinaryTree>())
     .def(init<RPartitionScheme,BinaryTree>())
     .def("dimension", &RPartitionTree::dimension)
-    .def("bounding_box", &RPartitionTree::bounding_box, return_value_policy<copy_const_reference>())
+    .def("unit_box", &RPartitionTree::unit_box, return_value_policy<copy_const_reference>())
     .def("subdivisions", &RPartitionTree::subdivisions, return_value_policy<copy_const_reference>())
     .def("binary_tree", &RPartitionTree::binary_tree, return_value_policy<copy_const_reference>())
     .def("size", &RPartitionTree::size)
@@ -74,6 +74,7 @@ void export_partition_tree_set() {
     .def(init<RGridMaskSet>())
     .def("dimension", &RPartitionTreeSet::dimension)
     .def("bounding_box", &RPartitionTreeSet::bounding_box, return_value_policy<copy_const_reference>())
+    .def("unit_box", &RPartitionTreeSet::unit_box, return_value_policy<copy_const_reference>())
     .def("subdivisions", &RPartitionTreeSet::subdivisions, return_value_policy<copy_const_reference>())
     .def("binary_tree", &RPartitionTreeSet::binary_tree, return_value_policy<copy_const_reference>())
     .def("mask", &RPartitionTreeSet::mask, return_value_policy<copy_const_reference>()) 

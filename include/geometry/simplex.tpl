@@ -51,9 +51,10 @@ namespace Ariadne {
         throw std::runtime_error("A simplex of dimension d must have d+1 vertices");
       }
     }
-     template<typename R>
+    
+    template<typename R>
     Simplex<R>::Simplex(const PointList<R>& v)
-      : _vertices(v)
+      : _vertices(v.generators())
     {
       if(v.dimension()+1u != v.size()) {
         throw std::runtime_error("A simplex of dimension d must have d+1 vertices");
@@ -96,12 +97,9 @@ namespace Ariadne {
       
     template <typename R>
     std::ostream&
-    operator<<(std::ostream& os, const Simplex<R>& s) 
+    Simplex<R>::write(std::ostream& os) const
     {
-//      if(s.empty()) {
-//        os << "Empty";
-//     }
-//      else 
+      const Simplex<R>& s=*this;
       PointList<R> v=s.vertices();
       if(s.dimension() > 0) {
         os << "Simplex( vertices=";
@@ -113,7 +111,7 @@ namespace Ariadne {
     
     template <typename R>
     std::istream& 
-    operator>>(std::istream& is, Simplex<R>& s)
+    Simplex<R>::read(std::istream& is)
     {
       throw std::domain_error("Not implemented");
     }

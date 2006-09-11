@@ -40,24 +40,33 @@
 namespace Ariadne {
   namespace System {
 
-    /*! \brief An affine map on Euclidean space. 
+    /*! \brief An affine map \f$f(x)=Ax+b\f$ on Euclidean space. 
      *  \ingroup DiscreteTime
      */
     template <typename R>
     class AffineMap : public Map<R> 
     {
      public:
+      /*! \brief The type of denotable real number used to describe the system. */
       typedef R real_type;
+      /*! \brief The type of denotable state the system acts on. */
       typedef Geometry::Point<R> state_type;
-      typedef LinearAlgebra::Vector<R> vector_type;
-      typedef LinearAlgebra::Matrix<R> matrix_type;
       
+      /*! \brief Default constructor constructs a map on a zero-dimensional space. */
       explicit AffineMap() {}
-      explicit AffineMap(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b) : _A(A), _b(b) { }
-      explicit AffineMap(const LinearAlgebra::Matrix<R>& A) : _A(A), _b(A.size2()) { }
-      explicit AffineMap(const LinearAlgebra::Vector<R>& b) : _A(b.size(),b.size()), _b(b) { }
+      /*! \brief Construct from the matrix \f$A\f$ and the vector \f$b\f$. */
+      explicit AffineMap(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b)
+        : _A(A), _b(b) { }
+      /*! \brief Construct a linear map from the matrix \f$A\f$. */
+      explicit AffineMap(const LinearAlgebra::Matrix<R>& A)
+        : _A(A), _b(A.size1()) { }
+      /*! \brief Construct a translation from the vector \f$b\f$. */
+      explicit AffineMap(const LinearAlgebra::Vector<R>& b)
+        : _A(LinearAlgebra::Matrix<R>::identity(b.size())), _b(b) { }
       
+      /*! \brief Copy constructor. */
       AffineMap(const AffineMap<real_type>& T) : _A(T._A), _b(T._b) { }
+      /*! \brief Assignment operator. */
       AffineMap<real_type>& operator=(const AffineMap<real_type>& T) {
         this->_A=T._A; this->_b=T._b; return *this; }
       
@@ -91,8 +100,11 @@ namespace Ariadne {
         return _b.size();
       }
       
+      /*! \brief True if the map is invertible, which is equivalent to invertiblity of
+       *  the matrix A. */
       bool invertible() const { assert(false); return false; }
   
+      /*! \brief  The name of the system. */
       std::string name() const { return "AffineMap"; }
      protected:
       LinearAlgebra::Matrix<R> _A;

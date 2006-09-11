@@ -59,9 +59,10 @@ namespace boost {
 
 namespace Ariadne {
   namespace Numeric {
-    /*!
+    //using namespace boost::numeric::interval_lib;
+
+    /*!\ingroup Numeric
      * \brief A templated class representing an interval of real numbers.
-     * \ingroup Numeric
      * 
      * An interval of real numbers with endpoints of type \a R.
      * All operations on an interval must be guarenteed to return an interval contining the exact result.
@@ -72,9 +73,6 @@ namespace Ariadne {
      *
      * Currently implemented as a wrapper around the boost::numeric::interval class template from the Boost C++ library.
      */
-    //using namespace boost::numeric::interval_lib;
-
-//typedef boost::numeric::interval< double, policies< rounded_math<double>,checking_base<double> > > dInterval;
     template<typename R>
     class Interval : public
         boost::numeric::interval<R, 

@@ -1,8 +1,8 @@
 /***************************************************************************
- *            integrator.cc
+ *            point_list.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,16 +21,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "geometry/point_list.h"
+#include "geometry/point_list.tpl"
 
-#include "evaluation/integrator.h"
-#include "evaluation/integrator.tpl"
-
-#include "real_typedef.h"
+#include "numeric/float64.h"
+#include "numeric/mpfloat.h"
+#include "numeric/rational.h"
 
 namespace Ariadne {
-  namespace Evaluation {
-    template class Integrator<Real>;
-    template class C0Integrator<Real>;
-    template class C1Integrator<Real>;
+  namespace Geometry {
+
+    template class PointList<Float64>;
+
+    template class PointList<MPFloat>;
+
+    template class PointList<Rational>;
+
   }
 }

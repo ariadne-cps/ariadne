@@ -49,9 +49,12 @@ namespace Ariadne {
     template<typename R>
     class LinearProgram {
      public:
+      /*! \brief The type of denotable real number. */
       typedef R real_type;
-      typedef Matrix<R> Matrix_type;
-      typedef Vector<R> Vector_type;
+      /*! \brief The type of matrix used for the tableau. */
+      typedef Matrix<R> matrix_type;
+      /*! \brief The type of vector used to represent the constraint values and costs. */
+      typedef Vector<R> vector_type;
      
       /*! \brief Destructor. */
       ~LinearProgram();
@@ -59,8 +62,8 @@ namespace Ariadne {
       /*! \brief Default constructor: builds a trivial LP problem. 
        *
        * The trivial LP problem requires to maximize the objective function
-       * \f$0\f$ on the zero-dimensional Vector space under no constraints
-       * at all: the origin of the Vector space is the optimal solution.
+       * \f$0\f$ on the zero-dimensional vector space under no constraints
+       * at all: the origin of the vector space is the optimal solution.
        */
       LinearProgram();
 
@@ -69,28 +72,28 @@ namespace Ariadne {
        * \f$\max c^T x\f$.
        *
        * \param A
-       * The Matrix constraint system defining the feasible region for the LP problem.
+       * The matrix on the left-hand side of the system of linear inequalities.
        *
        * \param b
-       * The Vector describing the right-hand side of the system of linear inequalities.
+       * The vector describing the right-hand side of the system of linear inequalities.
        * \param c
        * The objective function for the LP problem (optional argument with
        * default value \f$0\f$).
        *
        * \exception std::invalid_argument
        */
-      explicit LinearProgram(const Matrix_type& A, const Vector_type& b, const Vector_type& c);
+      explicit LinearProgram(const Matrix<R>& A, const Vector<R>& b, const Vector<R>& c);
 
       /*! \brief Builds an LP problem from the _tableau T. 
        *
-       * The tableau T is a bordered Matrix of the form \f$\begin{array}{c|c} A&b\\\hline -c^T&v \end{array}\f$
+       * The tableau T is a bordered matrix of the form \f$\begin{array}{c|c} A&b\\\hline -c^T&v \end{array}\f$
        * with \f$ b\geq0 \f$. 
        * The optimization problem is 
        * \f[ \max c^T x +v \quad \textrm{s.t.} \quad Ax+s=b,\ x,s\geq 0 \f]
        * The variables \f$s\f$ are the <em>slack variables</em>, and a feasible 
        * solution is given \f[ \max c^T x +v \quad \textrm{s.t.} \quad Ax+s=b,\ x,s\geq 0 \f]
        */
-      explicit LinearProgram(const Matrix_type& T);
+      explicit LinearProgram(const Matrix<R>& T);
     
       /*! \brief Ordinary copy-constructor. */
       LinearProgram(const LinearProgram& y);
@@ -108,10 +111,10 @@ namespace Ariadne {
       size_type number_of_variables() const;
     
       /*! \brief The current working tableau. */
-      const Matrix_type& tableau() const;
+      const Matrix<R>& tableau() const;
 
       /*! \brief The current working tableau. */
-      Matrix_type& tableau();
+      Matrix<R>& tableau();
    
       /*! \brief Checks satisfiability.
        *
@@ -121,22 +124,18 @@ namespace Ariadne {
       bool is_satisfiable() const;
     
       /*! \brief Optimizes the current LP problem using the primal simplex algorithm.
-       *
-       * \return
-       * An LinearProgram_Status flag indicating the outcome of the optimization
-       * attempt (unfeasible, unbounded or optimized problem).
        */
       void solve() const;
     
       /*! \brief Evaluates the objective function at \p p. */
-      real_type objective_function(const Vector_type& p) const;
+      real_type objective_function(const Vector<R>& p) const;
     
       /*! \brief Returns a feasible point, if it exists.
        *
        * \exception std::domain_error
        * Thrown if the LP problem is not satisfiable.
        */
-      Vector_type feasible_point() const;
+      Vector<R> feasible_point() const;
     
       /*! \brief Returns an optimal point, if it exists.
        *
@@ -144,7 +143,7 @@ namespace Ariadne {
        * Thrown if \p *this doesn't not have an optimizing point, i.e.,
        * if the LP problem is unbounded or not satisfiable.
        */
-      Vector_type optimizing_point() const;
+      Vector<R> optimizing_point() const;
     
       /*! \brief Computes and returns the optimal value, if it exists.
        *
@@ -179,8 +178,8 @@ namespace Ariadne {
       };
 
      private:
-      //  The Matrix encoding the current feasible region in _tableau form.
-      mutable Matrix_type _tableau;
+      //  The matrix encoding the current feasible region in _tableau form.
+      mutable Matrix<R> _tableau;
       // The current basic variables.
       mutable std::vector<size_type> _variable_indices;
        
@@ -264,7 +263,7 @@ namespace Ariadne {
     
     template<typename R>
     inline 
-    const typename LinearProgram<R>::Matrix_type&
+    const Matrix<R>&
     LinearProgram<R>::tableau() const 
     {
       return _tableau;
@@ -272,7 +271,7 @@ namespace Ariadne {
     
     template<typename R>
     inline 
-    typename LinearProgram<R>::Matrix_type&
+    Matrix<R>&
     LinearProgram<R>::tableau() 
     {
       return _tableau;
@@ -325,7 +324,7 @@ namespace Ariadne {
 /*
     template<typename R>
     inline 
-    typename LinearProgram<R>::Vector_type
+    Vector<R>
     LinearProgram<R>::feasible_point() const 
     {
       if (is_satisfiable()) {

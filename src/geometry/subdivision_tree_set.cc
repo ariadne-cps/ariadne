@@ -171,22 +171,27 @@ namespace Ariadne {
       this->reduce();
     }
     
+    SubdivisionTreeSet::SubdivisionTreeSet(const SubdivisionTreeSet& sts)
+      : _subdivisions(sts._subdivisions), _words(sts._words)
+    {
+    }
+    
     SubdivisionTreeSet::SubdivisionTreeSet(const LatticeMaskSet& ms) 
       : _subdivisions(ms.dimension()), _words()
     {      
       
       dimension_type n=ms.dimension();
 
-      LatticeRectangle bounds=ms.bounds();
-      SizeArray grid_sizes=bounds.sizes();
+      LatticeRectangle block=ms.block();
+      SizeArray grid_sizes=block.sizes();
       SizeArray new_sizes(this->dimension());
       SizeArray depths(this->dimension());
       size_type depth=0;
 
       /* Compute grid sizes as powers of two */
       for(dimension_type i=0; i!=n; ++i) {
-        depths[i]=log_ceil(2,grid_sizes[i]);
-        new_sizes[i]=pow(2,depths[i]);
+        depths[i]=log_two_ceil(grid_sizes[i]);
+        new_sizes[i]=pow_two(depths[i]);
         depth+=depths[i];
       }
      
@@ -224,7 +229,7 @@ namespace Ariadne {
       do {
         //TODO: Construct full tree, then reduce
         SubdivisionTreeCell c(subdivisions,word);
-        LatticeRectangle r=compute_block(c,bounds);
+        LatticeRectangle r=compute_block(c,block);
         if(subset(r,ms)) {
           tree.push_back(leaf);
           mask.push_back(true);
@@ -251,7 +256,7 @@ namespace Ariadne {
       while(!word.empty());
       
       this->_subdivisions=subdivisions;
-      this->_words=MaskedBinaryTree(tree,mask);
+      this->_words=MaskedBinaryTree(BinaryTree(tree),mask);
     
       this->reduce();
     }

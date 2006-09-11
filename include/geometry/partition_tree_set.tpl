@@ -36,31 +36,61 @@
 namespace Ariadne {
   namespace Geometry {
 
+    void advance(BinaryWord& word) {
+      while(!word.empty() && word.back()==BinaryTree::right) {
+        word.pop_back();
+      }
+      if(!word.empty()) {
+        word.set_back(BinaryTree::right);
+      }
+    }
+
+    
+    
     template<typename R>
     PartitionScheme<R>::PartitionScheme(const Rectangle<R>& bb) 
-      : _bounding_box(bb), 
+      : _unit_box(bb), 
         _subdivisions(bb.dimension()) 
       { }
 
+      
+      
     template<typename R>
     PartitionTreeCell<R>::operator Rectangle<R>() const {
       Rectangle<R> result(this->dimension());
       for(dimension_type i=0; i!=this->dimension(); ++i) {
         result[i]=Interval<R>(
-            _bounding_box.lower_bound(i)+_unit_cell.lower_bound(i)
-                *(_bounding_box.upper_bound(i)-_bounding_box.lower_bound(i)),
-            _bounding_box.lower_bound(i)+_unit_cell.upper_bound(i)
-                *(_bounding_box.upper_bound(i)-_bounding_box.lower_bound(i)) 
+            _unit_box.lower_bound(i)+_subdivision_cell.lower_bound(i)
+                *(_unit_box.upper_bound(i)-_unit_box.lower_bound(i)),
+            _unit_box.lower_bound(i)+_subdivision_cell.upper_bound(i)
+                *(_unit_box.upper_bound(i)-_unit_box.lower_bound(i)) 
           ); 
       }
       return result;
     }
 
+    
+    
     template<typename R>
     PartitionTreeSet<R>::PartitionTreeSet(const GridMaskSet<R>& gms) 
-      : _bounding_box(gms.bounding_box()),
-        _unit_set(gms._lattice_set)
+      : _unit_box(gms.bounding_box()),
+        _subdivision_set(gms._lattice_set)
     { }
+
+
+    template<typename R>
+    PartitionTreeSet<R>::operator GridRectangleListSet<R>() const 
+    {
+      throw std::domain_error("PartitionTreeSet<R>::operator GridRectangleListSet<R>() const not implemented");
+      //FiniteGrid<R>* grid_ptr=new FiniteGrid<R>(this->bounding_box(),this->subdivisions());
+      //GridRectangleListSet<R> res(*grid_ptr);
+      //for(const_iterator iter=begin(); iter!=end(); ++iter) {
+      //  res.push_back(GridRectangle<R>(res.grid(),Rectangle<R>(*iter)));
+      //}
+      //return res;
+    }
+
+
 
     template<typename R>
     PartitionTreeSet<R>::operator ListSet<R,Rectangle>() const 
@@ -71,21 +101,12 @@ namespace Ariadne {
       }
       return res;
     }
-
-    void advance(BinaryWord& word) {
-      while(!word.empty() && word.back()==BinaryTree::right) {
-        word.pop_back();
-      }
-      if(!word.empty()) {
-        word.set_back(BinaryTree::right);
-      }
-    }
     
     template<typename R, class S>
     PartitionTreeSet<R>
     outer_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth)
     {
-      const Rectangle<R>& bounding_box=ps.bounding_box();
+      const Rectangle<R>& bounding_box=ps.unit_box();
       const SubdivisionSequence& subdivisions=ps.subdivisions();
       std::vector<bool> tree;
       std::vector<bool> mask;
@@ -117,7 +138,7 @@ namespace Ariadne {
     PartitionTreeSet<R>
     inner_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth)
     {
-      const Rectangle<R>& bounding_box=ps.bounding_box();
+      const Rectangle<R>& unit_box=ps.unit_box();
       const SubdivisionSequence& subdivisions=ps.subdivisions();
       std::vector<bool> tree;
       std::vector<bool> mask;
@@ -125,7 +146,7 @@ namespace Ariadne {
       BinaryWord word;
       
       do {
-        Rectangle<R> cell=Rectangle<R>(PartitionTreeCell<R>(bounding_box,subdivisions,word));
+        Rectangle<R> cell=Rectangle<R>(PartitionTreeCell<R>(unit_box,subdivisions,word));
         if(word.size()==depth+1 || !interiors_intersect(cell,s)) {
           tree.push_back(BinaryTree::leaf);
           mask.push_back(false);
@@ -142,7 +163,7 @@ namespace Ariadne {
          }
       } while(!word.empty());
       
-      return PartitionTreeSet<R>(bounding_box,subdivisions,BinaryTree(tree),BooleanArray(mask));
+      return PartitionTreeSet<R>(unit_box,subdivisions,BinaryTree(tree),BooleanArray(mask));
     }
     
 
@@ -150,7 +171,7 @@ namespace Ariadne {
     PartitionTreeSet<R>
     over_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth)
     {
-      const Rectangle<R>& bounding_box=ps.bounding_box();
+      const Rectangle<R>& unit_box=ps.unit_box();
       const SubdivisionSequence& subdivisions=ps.subdivisions();
       std::vector<bool> tree;
       std::vector<bool> mask;
@@ -158,7 +179,7 @@ namespace Ariadne {
       BinaryWord word;
       
       do {
-        Rectangle<R> cell=Rectangle<R>(PartitionTreeCell<R>(bounding_box,subdivisions,word));
+        Rectangle<R> cell=Rectangle<R>(PartitionTreeCell<R>(unit_box,subdivisions,word));
         if(word.size()==depth+1 || subset(cell,s)) {
           tree.push_back(BinaryTree::leaf);
           mask.push_back(true);
@@ -175,7 +196,7 @@ namespace Ariadne {
         }
       } while(!word.empty());
       
-      return PartitionTreeSet<R>(bounding_box,subdivisions,BinaryTree(tree),BooleanArray(mask));
+      return PartitionTreeSet<R>(unit_box,subdivisions,BinaryTree(tree),BooleanArray(mask));
     }
     
 
@@ -183,7 +204,7 @@ namespace Ariadne {
     PartitionTreeSet<R>
     under_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth)
     {
-      const Rectangle<R>& bounding_box=ps.bounding_box();
+      const Rectangle<R>& unit_box=ps.unit_box();
       const SubdivisionSequence& subdivisions=ps.subdivisions();
       std::vector<bool> tree;
       std::vector<bool> mask;
@@ -191,7 +212,7 @@ namespace Ariadne {
       BinaryWord word;
       
       do {
-        Rectangle<R> cell=Rectangle<R>(PartitionTreeCell<R>(bounding_box,subdivisions,word));
+        Rectangle<R> cell=Rectangle<R>(PartitionTreeCell<R>(unit_box,subdivisions,word));
         if(word.size()==depth+1 || !interiors_intersect(cell,s)) {
           tree.push_back(BinaryTree::leaf);
           mask.push_back(false);
@@ -208,31 +229,17 @@ namespace Ariadne {
          }
       } while(!word.empty());
       
-      return PartitionTreeSet<R>(bounding_box,subdivisions,BinaryTree(tree),BooleanArray(mask));
+      return PartitionTreeSet<R>(unit_box,subdivisions,BinaryTree(tree),BooleanArray(mask));
     }
     
 
     
-/*
-    template<typename R>
-    PartitionTreeSet<R>::operator GridRectangleListSet<R>() const 
-    {
-      std::cerr << "PartitionTreeSet<R>::operator GridRectangleListSet<R>() const" << std::endl;
-      FiniteGrid<R>* grid_ptr=new FiniteGrid<R>(this->bounding_box(),this->subdivisions());
-      GridRectangleListSet<R> res(*grid_ptr);
-      for(const_iterator iter=begin(); iter!=end(); ++iter) {
-        res.push_back(GridRectangle<R>(res.grid(),Rectangle<R>(*iter)));
-      }
-      return res;
-    }
-*/
-
     template<typename R>
     std::ostream&
     operator<<(std::ostream& os, const PartitionScheme<R>& g)
     {
       os << "PartitionScheme<" << name<R>() << ">(\n";
-      os << "  bounding_box=" << g.bounding_box() << ",\n";
+      os << "  unit_box=" << g.unit_box() << ",\n";
       os << "  subdivision_coordinates=" << g.subdivisions() << "\n";
       os << ")\n";
       return os;
@@ -243,7 +250,7 @@ namespace Ariadne {
     operator<<(std::ostream& os, const PartitionTreeCell<R>& c)
     {
       os << "PartitionTreeCell<" << name<R>() << ">(\n";
-      os << "  bounds=" << c.unit_cell() << ",\n";
+      os << "  bounds=" << c.subdivision_cell() << ",\n";
       os << "  rectangle=" << Rectangle<R>(c) << "\n";
       os << ")\n";
       return os;
@@ -254,10 +261,10 @@ namespace Ariadne {
     operator<<(std::ostream& os, const PartitionTree<R>& pt)
     {
       os << "PartitionTree<" << name<R>() << ">(\n";
-      os << "  bounding_box=" << pt.bounding_box() << ",\n";
+      os << "  unit_box=" << pt.unit_box() << ",\n";
       os << "  subdivisions=" << pt.subdivisions() << "\n";
       os << "  words="; Utility::write_sequence(os, pt.binary_tree().begin(), pt.binary_tree().end()); os << ",\n";
-      os << "  blocks=["; Utility::write_sequence(os,  pt.unit_tree().begin(), pt.unit_tree().end()); os << ",\n";
+      os << "  blocks=["; Utility::write_sequence(os,  pt.subdivision_tree().begin(), pt.subdivision_tree().end()); os << ",\n";
       os << "  cells=["; Utility::write_sequence(os,  pt.begin(), pt.end()); os << ",\n";
       os << ")\n";
       return os;
@@ -268,12 +275,12 @@ namespace Ariadne {
     operator<<(std::ostream& os, const PartitionTreeSet<R>& pts)
     {
       os << "PartitionTreeSet<" << name<R>() << ">(\n";
-      os << "  bounding_box=" << pts.bounding_box() << ",\n";
+      os << "  unit_box=" << pts.unit_box() << ",\n";
       os << "  subdivisions=" << pts.subdivisions() << ",\n";
       os << "  tree=" << pts.binary_tree() << ",\n";
       os << "  mask=" << pts.mask() << ",\n";
-      os << "  words="; Utility::write_sequence(os, pts.unit_set().words().begin(), pts.unit_set().words().end()); os << ",\n";
-      os << "  blocks=["; Utility::write_sequence(os,  pts.unit_set().begin(), pts.unit_set().end()); os << ",\n";
+      os << "  words="; Utility::write_sequence(os, pts.subdivision_set().words().begin(), pts.subdivision_set().words().end()); os << ",\n";
+      os << "  blocks=["; Utility::write_sequence(os,  pts.subdivision_set().begin(), pts.subdivision_set().end()); os << ",\n";
       os << "  cells=["; Utility::write_sequence(os,  pts.begin(), pts.end()); os << ",\n";
       os << ")\n";
       return os;

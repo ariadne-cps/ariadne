@@ -516,10 +516,10 @@ namespace Ariadne {
       R step_size=this->maximum_step_size();
       
       const Geometry::Grid<R>& g(initial_set.grid());
-      Geometry::LatticeRectangle lb=bounding_set.bounds();
+      Geometry::LatticeRectangle lb=bounding_set.block();
       Geometry::Rectangle<R> bb=bounding_set.bounding_box();
       
-      Geometry::GridMaskSet<R> result(bounding_set.grid(),bounding_set.bounds());
+      Geometry::GridMaskSet<R> result(bounding_set.grid(),bounding_set.block());
       
       R t=time;
       R h=step_size;

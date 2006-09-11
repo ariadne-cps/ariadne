@@ -36,8 +36,16 @@ using namespace Ariadne;
 #include <boost/python.hpp>
 using namespace boost::python;
 
+inline void rpoint_setitem(RPoint& p, uint i, Real x) {
+  p[i]=x;
+}
+
+inline Real rpoint_getitem(const RPoint& p, uint i) {
+  return p[i];
+}
+
 inline void rpoint_setitem_from_double(RPoint& p, uint i, double x) {
-  p.set(i,Ariadne::convert_to<Real>(x));
+  p[i]=Ariadne::convert_to<Real>(x);
 }
 
 inline RPoint rpoint_add_rVector(const RPoint& p, const RVector& v) {
@@ -62,8 +70,8 @@ void export_point() {
     .def(init<std::string>())
     .def("dimension", &RPoint::dimension)
     .def("__len__", &RPoint::dimension)
-    .def("__getitem__", &RPoint::get)
-    .def("__setitem__", &RPoint::set)
+    .def("__getitem__", &rpoint_getitem)
+    .def("__setitem__", &rpoint_setitem)
     .def("__setitem__", &rpoint_setitem_from_double)
     .def("__eq__", &RPoint::operator==)
     .def("__ne__", &RPoint::operator!=)

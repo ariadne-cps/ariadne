@@ -72,6 +72,7 @@ int main() {
   
   ListSet ds2;
   is >> ds2;
+  cout << ds2 << endl;
 
   assert(ds1[0]==ds2[0] && ds1[1]==ds2[1] && ds1[2]==ds2[2]);
 

@@ -67,12 +67,11 @@ namespace Ariadne {
     template <typename R>
     class Point {
      public:
+      /*!\brief The type of denotable real number giving the point's values. */
       typedef R real_type;
-      typedef LinearAlgebra::Vector<R> Vector_type;
-     
-      typedef real_type value_type;
-      typedef Vector_type difference_type;
-     public:
+      /*!\brief The type of denotable vector in the space the point lies in. */
+      typedef LinearAlgebra::Vector<R> vector_type;
+
       /*! \brief Default constructor. */
       Point() : _vector(0) { }
 
@@ -94,11 +93,15 @@ namespace Ariadne {
       }
 
       /*! \brief Construct a point from a position Vector. */
-      explicit Point(const Vector_type& position) : _vector(position) { }
+      explicit Point(const vector_type& position) : _vector(position) { }
 
       /*! \brief Construct a point from a string literal. */
       explicit Point(const std::string& s);
 
+      /*! \brief Construct from a point which possibly lies in a different space. */
+      template<typename R2>
+      explicit Point(const Point<R2>& original) : _vector(original.position_vector()) { }
+      
       /*! \brief Copy constructor. */
       Point(const Point<R>& original) : _vector(original._vector) { }
 
@@ -151,11 +154,11 @@ namespace Ariadne {
       }
 
       /*! \brief The position Vector of the point. */
-      const Vector_type& position_vector() const {
+      const vector_type& position_vector() const {
         return this->_vector; 
       }
       
-      real_type get(size_type index) const {
+/*      real_type get(size_type index) const {
         if(this->_vector.size() <= index) { 
           throw std::out_of_range("Out of the Vector's range.");
         }
@@ -168,11 +171,17 @@ namespace Ariadne {
         }
         this->_vector[index]=r;
       }
+*/
+      
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream& os) const;
+      /*! \brief Read from an input stream. */
+      std::istream& read(std::istream& is);
 
       friend std::ostream& operator<< <>(std::ostream& os, const Point<real_type>& state);
       friend std::istream& operator>> <> (std::istream& is, Point<real_type>& state);
      private:
-      Vector_type _vector;
+      vector_type _vector;
     };
 
 
@@ -264,6 +273,17 @@ namespace Ariadne {
 
       return new_point;
     }
+    
+    template<typename R> inline 
+    std::ostream& operator<<(std::ostream& os, const Point<R>& pt) {
+      return pt.write(os);
+    }
+    
+    template<typename R> inline
+    std::istream& operator>>(std::istream& is, Point<R>& pt) {
+      return pt.read(is);
+    }
+
 
   }
 }

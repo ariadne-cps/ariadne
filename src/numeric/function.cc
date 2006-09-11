@@ -26,12 +26,6 @@
 #include "numeric/function.h"
 #include "numeric/function.tpl"
 
-#include "numeric/numerical_types.h"
-#include "numeric/float64.h"
-#include "numeric/mpfloat.h"
-
-#include "real_typedef.h"
-
 namespace Ariadne {
   namespace Numeric {
 

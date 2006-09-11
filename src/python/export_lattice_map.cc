@@ -31,34 +31,34 @@ using namespace Ariadne;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-typedef LatticeCellListSet (LatticeMap::* LatMapApplCellFunc) (const LatticeCell&) const;
-typedef LatticeCellListSet (LatticeMap::* LatMapApplRectFunc) (const LatticeRectangle&) const;
-typedef LatticeCellListSet (LatticeMap::* LatMapApplCellListFunc) (const LatticeCellListSet&) const;
-typedef LatticeCellListSet (LatticeMap::* LatMapApplRectListFunc) (const LatticeRectangleListSet&) const;
-typedef LatticeCellListSet (LatticeMap::* LatMapApplMaskSetFunc) (const LatticeMaskSet&) const;
+typedef LatticeCellListSet (LatticeMultiMap::* LatMapApplCellFunc) (const LatticeCell&) const;
+typedef LatticeCellListSet (LatticeMultiMap::* LatMapApplRectFunc) (const LatticeRectangle&) const;
+typedef LatticeCellListSet (LatticeMultiMap::* LatMapApplCellListFunc) (const LatticeCellListSet&) const;
+typedef LatticeCellListSet (LatticeMultiMap::* LatMapApplRectListFunc) (const LatticeRectangleListSet&) const;
+typedef LatticeCellListSet (LatticeMultiMap::* LatMapApplMaskSetFunc) (const LatticeMaskSet&) const;
 
-typedef void (LatticeMap::* LatMapAdjCell) (const LatticeCell&, const LatticeCell&);
-typedef void (LatticeMap::* LatMapAdjCellList) (const LatticeCell&, const LatticeCellListSet&);
+typedef void (LatticeMultiMap::* LatMapAdjCell) (const LatticeCell&, const LatticeCell&);
+typedef void (LatticeMultiMap::* LatMapAdjCellList) (const LatticeCell&, const LatticeCellListSet&);
 
 /* WARNING: for some reason, we need this helper routing to avoid segmentation faults. */
-inline LatticeCellListSet apply_cell(const LatticeMap& lm, const LatticeCell& lc) { 
+inline LatticeCellListSet apply_cell(const LatticeMultiMap& lm, const LatticeCell& lc) { 
   const LatticeCellListSet& ref=lm.apply(lc); 
   LatticeCellListSet res=ref;
   return res;
 }
 
 void export_lattice_map() {
-  class_<LatticeMap>("LatticeMap",init<dimension_type,dimension_type>())
-    .def("adjoin_to_image", LatMapAdjCell(&LatticeMap::adjoin_to_image))
-    .def("adjoin_to_image", LatMapAdjCellList(&LatticeMap::adjoin_to_image))
+  class_<LatticeMultiMap>("LatticeMultiMap",init<dimension_type,dimension_type>())
+    .def("adjoin_to_image", LatMapAdjCell(&LatticeMultiMap::adjoin_to_image))
+    .def("adjoin_to_image", LatMapAdjCellList(&LatticeMultiMap::adjoin_to_image))
     .def("__call__", &apply_cell)
-//    .def("__call__", LatMapApplCellFunc(&LatticeMap::operator()))
-    .def("__call__", LatMapApplRectFunc(&LatticeMap::operator()))
-    .def("__call__", LatMapApplCellListFunc(&LatticeMap::operator()))
-    .def("__call__", LatMapApplRectListFunc(&LatticeMap::operator()))
-    .def("__call__", LatMapApplMaskSetFunc(&LatticeMap::operator()))
-    .def("argument_dimension", &LatticeMap::argument_dimension)
-    .def("result_dimension", &LatticeMap::result_dimension)
+//    .def("__call__", LatMapApplCellFunc(&LatticeMultiMap::operator()))
+    .def("__call__", LatMapApplRectFunc(&LatticeMultiMap::operator()))
+    .def("__call__", LatMapApplCellListFunc(&LatticeMultiMap::operator()))
+    .def("__call__", LatMapApplRectListFunc(&LatticeMultiMap::operator()))
+    .def("__call__", LatMapApplMaskSetFunc(&LatticeMultiMap::operator()))
+    .def("argument_dimension", &LatticeMultiMap::argument_dimension)
+    .def("result_dimension", &LatticeMultiMap::result_dimension)
     .def(self_ns::str(self))
   ;
 }

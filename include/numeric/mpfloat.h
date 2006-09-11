@@ -41,10 +41,11 @@
 
 namespace Ariadne {
   namespace Numeric {
-    #ifdef DOXYGEN
-    /*! \brief A multiple-precision floating-point type.
-     *  \ingroup Numeric
-     * 
+
+#ifdef DOXYGEN
+    /*!\ingroup Numeric
+     * \brief A multiple-precision floating-point type.
+     *  
      * Currently implemented using mpf_class from the GNU Multiple Precision library.
      */
     class MPFloat { };
@@ -148,170 +149,148 @@ namespace Ariadne {
       MPFloat y; invoke_mpfr(y,x1,x2,f,r); return y; 
     }
     
-    /*! \brief Conversion to a double. */
+  
     template<> inline double conv_approx(const MPFloat& x) { return x.get_d(); }
  
-    /*! \brief Conversion from a double. */
+    template<> inline MPFloat conv_exact(const int& n) { return MPFloat(n); }
+    template<> inline MPFloat conv_down(const int& n) { return conv_exact<MPFloat>(n); }
+    template<> inline MPFloat conv_up(const int& n) { return conv_exact<MPFloat>(n); }
+    template<> inline MPFloat conv_approx(const int& n) { return conv_exact<MPFloat>(n); }
+
     template<> inline MPFloat conv_exact(const double& x) { return MPFloat(x); }
     template<> inline MPFloat conv_down(const double& x) { return conv_exact<MPFloat>(x); }
     template<> inline MPFloat conv_up(const double& x) { return conv_exact<MPFloat>(x); }
     template<> inline MPFloat conv_approx(const double& x) { return conv_exact<MPFloat>(x); }
   
-    /*! \brief Conversion to a rational. */
     template<> inline mpq_class conv_exact(const MPFloat& x) { return x; }
     template<> inline mpq_class conv_down(const MPFloat& x) { return conv_exact<mpq_class>(x); }
     template<> inline mpq_class conv_up(const MPFloat& x) { return conv_exact<mpq_class>(x); }
  
-    /*! \brief Conversion from a rational. */
     template<> inline MPFloat conv_down(const mpq_class& x) { return MPFloat(x); }
     template<> inline MPFloat conv_up(const mpq_class& x) { return MPFloat(x); }
     template<> inline MPFloat conv_approx(const mpq_class& x) { return MPFloat(x); }
   
-    /*! \brief Unary negation. */
     template<> inline MPFloat neg_exact(const MPFloat& x) { return invoke_mpfr(x,mpfr_neg,GMP_RNDN); }
-    inline MPFloat neg_down(const MPFloat& x) { return neg_exact(x); }
+    template<> inline MPFloat neg_down(const MPFloat& x) { return neg_exact(x); }
     template<> inline MPFloat neg_up(const MPFloat& x) { return neg_exact(x); }
-   
-    /*! \brief Absolute value. */
+
     template<> inline MPFloat abs_exact(const MPFloat& x) { return invoke_mpfr(x,mpfr_abs,GMP_RNDN); }
     template<> inline MPFloat abs_down(const MPFloat& x) { return abs_exact(x);  }
     template<> inline MPFloat abs_up(const MPFloat& x) { return abs_exact(x);  }
-   
-    /*! \brief Addition. */
+
+    template<> inline MPFloat add_approx(const MPFloat& x1,const MPFloat& x2) {
+      return invoke_mpfr(x1,x2,mpfr_add,GMP_RNDN); }
     template<> inline MPFloat add_down(const MPFloat& x1,const MPFloat& x2) {
       return invoke_mpfr(x1,x2,mpfr_add,GMP_RNDD); }
     template<> inline MPFloat add_up(const MPFloat& x1,const MPFloat& x2) {
       return invoke_mpfr(x1,x2,mpfr_add,GMP_RNDU); }
-    template<> inline MPFloat add_approx(const MPFloat& x1,const MPFloat& x2) {
-      return invoke_mpfr(x1,x2,mpfr_add,GMP_RNDN); }
     
-    /*! \brief Subtraction. */
+    template<> inline MPFloat sub_approx(const MPFloat& x1,const MPFloat& x2) {
+      return invoke_mpfr(x1,x2,mpfr_sub,GMP_RNDN); }
     template<> inline MPFloat sub_down(const MPFloat& x1,const MPFloat& x2) {
       return invoke_mpfr(x1,x2,mpfr_sub,GMP_RNDD); }
     template<> inline MPFloat sub_up(const MPFloat& x1,const MPFloat& x2) {
       return invoke_mpfr(x1,x2,mpfr_sub,GMP_RNDU); }
-    template<> inline MPFloat sub_approx(const MPFloat& x1,const MPFloat& x2) {
-      return invoke_mpfr(x1,x2,mpfr_sub,GMP_RNDN); }
     
-     /*! \brief Multiplication. */
+    template<> inline MPFloat mul_approx(const MPFloat& x1,const MPFloat& x2) {
+      return invoke_mpfr(x1,x2,mpfr_mul,GMP_RNDN); }
     template<> inline MPFloat mul_down(const MPFloat& x1,const MPFloat& x2) {
       return invoke_mpfr(x1,x2,mpfr_mul,GMP_RNDD); }
     template<> inline MPFloat mul_up(const MPFloat& x1,const MPFloat& x2) {
       return invoke_mpfr(x1,x2,mpfr_mul,GMP_RNDU); }
-    template<> inline MPFloat mul_approx(const MPFloat& x1,const MPFloat& x2) {
-      return invoke_mpfr(x1,x2,mpfr_mul,GMP_RNDN); }
     
-    /*! \brief Division. */
+    template<> inline MPFloat div_approx(const MPFloat& x1,const MPFloat& x2) {
+      return invoke_mpfr(x1,x2,mpfr_div,GMP_RNDN); }
     template<> inline MPFloat div_down(const MPFloat& x1,const MPFloat& x2) {
       return invoke_mpfr(x1,x2,mpfr_div,GMP_RNDD); }
     template<> inline MPFloat div_up(const MPFloat& x1,const MPFloat& x2) {
       return invoke_mpfr(x1,x2,mpfr_div,GMP_RNDU); }
-    template<> inline MPFloat div_approx(const MPFloat& x1,const MPFloat& x2) {
-      return invoke_mpfr(x1,x2,mpfr_div,GMP_RNDN); }
     
-    /*! \brief Median. */
     template<> inline MPFloat med_approx(const MPFloat& x1, const MPFloat& x2) {
       return div_approx(add_approx(x1,x2),MPFloat(2)); }
     
-    /*! \brief Square root. */
+    template<> inline MPFloat sqrt_approx(const MPFloat& x) { 
+      return invoke_mpfr(x,mpfr_sqrt,GMP_RNDN); }
     template<> inline MPFloat sqrt_down(const MPFloat& x) { 
       return invoke_mpfr(x,mpfr_sqrt,GMP_RNDD); }
     template<> inline MPFloat sqrt_up(const MPFloat& x) { 
       return invoke_mpfr(x,mpfr_sqrt,GMP_RNDU); }
-    template<> inline MPFloat sqrt_approx(const MPFloat& x) { 
-      return invoke_mpfr(x,mpfr_sqrt,GMP_RNDN); }
 
-    /*! \brief Hypoteneuse. */
+    template<> inline MPFloat hypot_approx(const MPFloat& x1,const MPFloat& x2) { 
+      return invoke_mpfr(x1,x2,mpfr_hypot,GMP_RNDN); }
     template<> inline MPFloat hypot_down(const MPFloat& x1,const MPFloat& x2) {
       return invoke_mpfr(x1,x2,mpfr_hypot,GMP_RNDD); }
     template<> inline MPFloat hypot_up(const MPFloat& x1,const MPFloat& x2) {
       return invoke_mpfr(x1,x2,mpfr_hypot,GMP_RNDU); }
-    template<> inline MPFloat hypot_approx(const MPFloat& x1,const MPFloat& x2) { 
-      return invoke_mpfr(x1,x2,mpfr_hypot,GMP_RNDN); }
     
-    /*! \brief Integer bounds. */
     template<> inline Integer int_down(const MPFloat& x);
     template<> inline Integer int_up(const MPFloat& x);
 
-    /*! \brief Exponential. */
     template<> inline MPFloat exp_down(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_exp,GMP_RNDD); }
     template<> inline MPFloat exp_up(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_exp,GMP_RNDU); };
 
-    /*! \brief Natural logarithm. */
     template<> inline MPFloat log_down(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_log,GMP_RNDD); }
     template<> inline MPFloat log_up(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_log,GMP_RNDU); };
 
-    /*! \brief Sine function. */
     template<> inline MPFloat sin_down(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_sin,GMP_RNDD); }
     template<> inline MPFloat sin_up(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_sin,GMP_RNDU); };
 
-    /*! \brief Cosine function. */
     template<> inline MPFloat cos_down(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_cos,GMP_RNDD); }
     template<> inline MPFloat cos_up(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_cos,GMP_RNDU); };
 
-    /*! \brief Tangent function. */
     template<> inline MPFloat tan_down(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_tan,GMP_RNDD); }
     template<> inline MPFloat tan_up(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_tan,GMP_RNDU); };
 
-    /*! \brief Hyperbolic sine function. */
     template<> inline MPFloat sinh_down(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_sinh,GMP_RNDD); }
     template<> inline MPFloat sinh_up(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_sinh,GMP_RNDU); };
 
-    /*! \brief Hyperbolic cosine function. */
     template<> inline MPFloat cosh_down(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_cosh,GMP_RNDD); }
     template<> inline MPFloat cosh_up(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_cosh,GMP_RNDU); };
 
-    /*! \brief Hyperbolic tangent function. */
     template<> inline MPFloat tanh_down(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_tanh,GMP_RNDD); }
     template<> inline MPFloat tanh_up(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_tanh,GMP_RNDU); };
 
-    /*! \brief Inverse sine function. */
     template<> inline MPFloat asin_down(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_asin,GMP_RNDD); }
     template<> inline MPFloat asin_up(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_asin,GMP_RNDU); };
 
-    /*! \brief Inverse cosine function. */
     template<> inline MPFloat acos_down(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_acos,GMP_RNDD); }
     template<> inline MPFloat acos_up(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_acos,GMP_RNDU); };
 
-    /*! \brief Inverse tangent function. */
     template<> inline MPFloat atan_down(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_atan,GMP_RNDD); }
     template<> inline MPFloat atan_up(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_atan,GMP_RNDU); };
 
-    /*! \brief Inverse hyperbolic sine function. */
     template<> inline MPFloat asinh_down(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_asinh,GMP_RNDD); }
     template<> inline MPFloat asinh_up(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_asinh,GMP_RNDU); };
 
-    /*! \brief Inverse hyperbolic cosine function. */
     template<> inline MPFloat acosh_down(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_acosh,GMP_RNDD); }
     template<> inline MPFloat acosh_up(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_acosh,GMP_RNDU); };
 
-    /*! \brief Inverse hyperbolic tangent function. */
     template<> inline MPFloat atanh_down(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_atanh,GMP_RNDD); }
     template<> inline MPFloat atanh_up(const MPFloat& x) {

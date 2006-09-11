@@ -162,9 +162,9 @@ namespace Ariadne {
 
     template<typename R>
     GridRectangle<R>
-    IrregularGrid<R>::bounding_box() const
+    IrregularGrid<R>::bounds() const
     { 
-      return GridRectangle<R>(*this,bounds());
+      return GridRectangle<R>(*this,block());
     }
     
     template<typename R>
@@ -290,7 +290,7 @@ namespace Ariadne {
 	     const IrregularGrid<R> *this_grid=
 	                               ((IrregularGrid<R> *)(this->_grid_ptr));
 	   
-	     return (Rectangle<R>)(this_grid->bounding_box());
+	     return (Rectangle<R>)(this_grid->bounds());
 	   }
 	default:
            throw std::runtime_error("FiniteGrid<R>::bounding_box(): not implemented for this grid type.");

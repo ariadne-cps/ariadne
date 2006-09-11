@@ -36,7 +36,7 @@ namespace Ariadne {
   namespace System {
     
     void
-    LatticeMap::adjoin_to_image(const Geometry::LatticeCell& lc, const Geometry::LatticeCell& img)
+    LatticeMultiMap::adjoin_to_image(const Geometry::LatticeCell& lc, const Geometry::LatticeCell& img)
     {
       typedef std::map<Geometry::LatticeCell,Geometry::LatticeCellListSet>::iterator map_iterator;
       map_iterator iter=this->_map.find(lc);
@@ -48,7 +48,7 @@ namespace Ariadne {
     }
     
     void
-    LatticeMap::adjoin_to_image(const Geometry::LatticeCell& lc, const Geometry::LatticeCellListSet& img)
+    LatticeMultiMap::adjoin_to_image(const Geometry::LatticeCell& lc, const Geometry::LatticeCellListSet& img)
     {
       typedef std::map<Geometry::LatticeCell,Geometry::LatticeCellListSet>::iterator map_iterator;
       map_iterator iter=this->_map.find(lc);
@@ -61,7 +61,7 @@ namespace Ariadne {
     
 
     Geometry::LatticeCellListSet
-    LatticeMap::apply(const Geometry::LatticeCell& lc) const
+    LatticeMultiMap::apply(const Geometry::LatticeCell& lc) const
     {
       cdbg << "LatticeMap::apply(const Geometry::LatticeCell& lc) const\n";
       typedef std::map<Geometry::LatticeCell,Geometry::LatticeCellListSet>::iterator map_iterator;
@@ -76,14 +76,14 @@ namespace Ariadne {
     }
     
     Geometry::LatticeCellListSet
-    LatticeMap::operator() (const Geometry::LatticeCell& lc) const
+    LatticeMultiMap::operator() (const Geometry::LatticeCell& lc) const
     {
       cdbg << "LatticeMap::operator() (const Geometry::LatticeCell& lc) const\n";
       return this->apply(lc);
     }
     
     Geometry::LatticeCellListSet 
-    LatticeMap::operator() (const Geometry::LatticeRectangle& lr) const 
+    LatticeMultiMap::operator() (const Geometry::LatticeRectangle& lr) const 
     {
       cdbg << "LatticeMap::operator() (const Geometry::LatticeRectangle& lr) const\n";
       Geometry::LatticeCellListSet result(this->_result_dimension);
@@ -94,7 +94,7 @@ namespace Ariadne {
     }
     
     Geometry::LatticeCellListSet 
-    LatticeMap::operator() (const Geometry::LatticeCellListSet& lcls) const 
+    LatticeMultiMap::operator() (const Geometry::LatticeCellListSet& lcls) const 
     {
       cdbg << "LatticeMap::operator() (const Geometry::LatticeCellListSet& lcls) const\n";
       Geometry::LatticeCellListSet result(this->_result_dimension);
@@ -106,7 +106,7 @@ namespace Ariadne {
     }
     
     Geometry::LatticeCellListSet 
-    LatticeMap::operator() (const Geometry::LatticeRectangleListSet& lrls) const 
+    LatticeMultiMap::operator() (const Geometry::LatticeRectangleListSet& lrls) const 
     {
       cdbg << "LatticeMap::operator() (const Geometry::LatticeRectangleListSet& lrls) const\n";
       Geometry::LatticeCellListSet result(this->_result_dimension);
@@ -117,7 +117,7 @@ namespace Ariadne {
     }
     
     Geometry::LatticeCellListSet 
-    LatticeMap::operator() (const Geometry::LatticeMaskSet& lms) const 
+    LatticeMultiMap::operator() (const Geometry::LatticeMaskSet& lms) const 
     {
       Geometry::LatticeCellListSet result(this->_result_dimension);
       for(Geometry::LatticeMaskSet::const_iterator cell_iter=lms.begin(); cell_iter!=lms.end(); ++cell_iter) {
@@ -127,7 +127,7 @@ namespace Ariadne {
     }
     
     std::ostream&
-    operator<<(std::ostream& os, const LatticeMap& m) 
+    operator<<(std::ostream& os, const LatticeMultiMap& m) 
     {
       return os << "LatticeMap(" << m._map << ")";
     }

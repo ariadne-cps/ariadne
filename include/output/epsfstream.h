@@ -31,6 +31,7 @@
 #include <string.h>
 
 #include "../numeric/approximation.h"
+#include "../numeric/float64.h"
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
 #include "../geometry/list_set.h"

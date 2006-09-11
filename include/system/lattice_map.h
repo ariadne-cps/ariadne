@@ -37,10 +37,12 @@ namespace Ariadne {
   namespace System {
 
     /*! \brief A combinatorial map on a lattice. */
-    class LatticeMap {
+    class LatticeMultiMap {
      public:
      
-      explicit LatticeMap(const dimension_type arg_dim, const dimension_type res_dim) 
+      /*! \brief Construct a map with argumbent dimension \a arg_dim and result dimension \a res_dim,
+       *  which maps all cells to the empty set. */
+      explicit LatticeMultiMap(const dimension_type arg_dim, const dimension_type res_dim) 
         : _argument_dimension(arg_dim), _result_dimension(res_dim) { }
         
       /*! \brief Adjoin set \a img to the image of set \a lc. */
@@ -76,18 +78,20 @@ namespace Ariadne {
         return _result_dimension;
       }
       
-      LatticeMap inverse() const;
+      /*! brief  The inverse of the map. */
+      LatticeMultiMap inverse() const;
       
-      std::string name() const { return "LatticeMap"; }
+      /*! \brief The name of the system. */
+      std::string name() const { return "LatticeMultiMap"; }
      private:
-      friend std::ostream& operator<<(std::ostream&, const LatticeMap&);
+      friend std::ostream& operator<<(std::ostream&, const LatticeMultiMap&);
      private:
       dimension_type _argument_dimension;
       dimension_type _result_dimension;
       mutable std::map<Geometry::LatticeCell,Geometry::LatticeCellListSet> _map;
     };
       
-    std::ostream& operator<<(std::ostream&, const LatticeMap&);
+    std::ostream& operator<<(std::ostream&, const LatticeMultiMap&);
     
   }
 }

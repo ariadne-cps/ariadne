@@ -56,9 +56,9 @@ namespace Ariadne {
      };
 
 
-    /*! \brief An integrator based on the \f$C^1\f$-Lohner algorithm. 
-     *  \ingroup Integrate
-     *
+    /*!\ingroup Integrate
+     * \brief An integrator based on the \f$C^1\f$-Lohner algorithm. 
+     *  
      * The \f$C^1\f$-Lohner algorithm is a Taylor method.
      */
     template<typename R>

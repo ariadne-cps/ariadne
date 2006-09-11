@@ -252,6 +252,7 @@ namespace Ariadne {
       pointer _ptr;
     };
     
+    /*! \brief The convolution of two sequences, \f$(a\star b)_i=\sum_{j\in\mathbb{Z}}a_jb_{i-j}\f$. */
     template<typename T>
     compact_sequence<T>
     convolution(const compact_sequence<T>& u, const compact_sequence<T>& v) {

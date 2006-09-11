@@ -51,6 +51,7 @@ struct RGridWrap : RGrid, wrapper<RGrid>
   index_type subdivision_interval(dimension_type d, const real_type& x) const { return this->get_override("subdivision_interval")(); }
   bool bounds_enclose(const RRectangle& r) const { return this->get_override("bounds_enclose")(); }
   std::ostream& write(std::ostream& os) const { return this->get_override("write")(); }
+  std::istream& read(std::istream& is) { return this->get_override("read")(); }
 };
 
 typedef RGridRectangle (*ApprxRectGridFunc) (const RRectangle&, const RGrid&);
@@ -187,7 +188,7 @@ void export_grid_set() {
     .def("empty", &RGridMaskSet::empty)
     .def("dimension", &RGridMaskSet::dimension)
     .def("clear", &RGridMaskSet::clear)
-    .def("bounds", &RGridMaskSet::bounds,return_value_policy<copy_const_reference>())
+    .def("block", &RGridMaskSet::block,return_value_policy<copy_const_reference>())
     .def("lattice_set", &RGridMaskSet::lattice_set,return_value_policy<copy_const_reference>())
     .def("adjoin", GMSAdjCellFunc(&RGridMaskSet::adjoin))
     .def("adjoin", GMSAdjRectFunc(&RGridMaskSet::adjoin))
@@ -202,13 +203,13 @@ void export_grid_set() {
     .def("__iter__", iterator<RGridMaskSet>())
     .def(self_ns::str(self))    // __str__
     ;
-    
+
   def("join",GMSBinFunc(&Geometry::join));
   def("difference",GMSBinFunc(&Geometry::difference));
   def("regular_intersection",GMSBinFunc(&Geometry::regular_intersection));
   def("interiors_intersect",GMSBinPred(&Geometry::interiors_intersect));
   def("interiors_intersect",GMSRectPred(&Geometry::interiors_intersect));
-    
+
   def("over_approximation",ApprxRectGridFunc(&Geometry::over_approximation));
   def("over_approximation",ApprxZltpGridFunc(&Geometry::over_approximation));
   def("over_approximation",ApprxRectFGridFunc(&Geometry::over_approximation));
@@ -238,6 +239,7 @@ void export_grid_set() {
   def("join_under_approximation",GMSPlhdFunc(&Geometry::join_under_approximation));
   def("join_under_approximation",GMSLSRectFunc(&Geometry::join_under_approximation));
   def("join_under_approximation",GMSLSPltpFunc(&Geometry::join_under_approximation));
+
   def("join_under_approximation",GMSLSZntpFunc(&Geometry::join_under_approximation));
   def("join_under_approximation",GMSLSPlhdFunc(&Geometry::join_under_approximation));
 }

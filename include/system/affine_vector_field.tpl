@@ -58,14 +58,14 @@ namespace Ariadne {
   
     template<typename R>
     LinearAlgebra::Matrix<R>
-    AffineVectorField<R>::derivative(const state_type& x) const 
+    AffineVectorField<R>::derivative(const Geometry::Point<R>& x) const 
     { 
       return this->_A; 
     }
     
     template<typename R>
     LinearAlgebra::IntervalMatrix<R> 
-    AffineVectorField<R>::derivative(const Rectangle& r) const 
+    AffineVectorField<R>::derivative(const Geometry::Rectangle<R>& r) const 
     { 
       return LinearAlgebra::IntervalMatrix<R>(this->_A);
     }

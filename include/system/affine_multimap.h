@@ -42,15 +42,28 @@ namespace Ariadne {
     class AffineMultiMap
     {
      public:
+      /*! \brief The real number type. */
       typedef R real_type;
+      /*! \brief The type of denotable state the system acts on. */
       typedef Geometry::Point<R> state_type;
-      typedef LinearAlgebra::Matrix<R> matrix_type;
-      typedef LinearAlgebra::Vector<R> vector_type;
+      /*! \brief The type of set describing the image of a point. */
       typedef BS<R> set_type;
+      
+      /*! \brief The type of vector used to represent the affine transformation. */
+      typedef LinearAlgebra::Vector<R> vector_type;
+      /*! \brief The type of matrix used to represent the affine transformation. */
+      typedef LinearAlgebra::Matrix<R> matrix_type;
 
-      explicit AffineMultiMap(const matrix_type& A, const set_type& S)
+      /*! \brief Construct from a matrix describing a linear transformation
+       *  and a set decribing the offset. */
+      explicit AffineMultiMap(const LinearAlgebra::Matrix<R>& A, 
+                              const BS<R>& S)
         : _A(A), _S(S) { }
         
+      /*! \brief Copy constructor. */
+      AffineMultiMap(const AffineMultiMap<R,BS>& T) : _A(T._A), _S(T._S) { }
+      
+      /*! \brief Assignment operator. */
       AffineMultiMap<R,BS>& operator=(const AffineMultiMap<R,BS>& T) {
         this->_A=T._A; this->_S=T._S; return *this; 
       }
@@ -78,6 +91,7 @@ namespace Ariadne {
       }
       
 
+      /*! \brief  The name of the system. */
       std::string name() const { return "AffineMultiMap"; }
      private:
       matrix_type _A;

@@ -42,8 +42,9 @@ namespace Ariadne {
   namespace Numeric {
 
 #ifdef DOXYGEN
-    /*! \brief A rational number.
-    *   \ingroup Numeric
+
+   /*!\ingroup Numeric
+    * \brief A rational number.
     * 
     * An element of the field of rationals.
     * Must allow denotation of any rational.
@@ -73,15 +74,16 @@ namespace Ariadne {
     template<> inline std::string name<Numeric::Rational>() { return "Rational"; }
     template<> inline std::string name<Numeric::Interval<Numeric::Rational> >() { return "Interval<Rational>"; }
     
-    /*! \brief Conversion to a double. */
     template<> inline double conv_approx(const Rational& x) { return x.get_d(); }
  
-    /*! \brief Conversion from a double. */
-    template<> inline Rational conv_exact(const double& x) { return x; }
+    template<> inline Rational conv_exact(const int& n) { return Rational(n); }
+    template<> inline Rational conv_down(const int& n) { return conv_exact<Rational>(n); }
+    template<> inline Rational conv_up(const int& n) { return conv_exact<Rational>(n); }
+ 
+    template<> inline Rational conv_exact(const double& x) { return Rational(x); }
     template<> inline Rational conv_down(const double& x) { return conv_exact<Rational>(x); }
     template<> inline Rational conv_up(const double& x) { return conv_exact<Rational>(x); }
  
-    /*! \brief Conversion from a Rational. */
     template<> inline Rational conv_exact(const mpq_class& x) { return x; }
     template<> inline Rational conv_down(const mpq_class& x) { return conv_exact<Rational>(x); }
     template<> inline Rational conv_up(const mpq_class& x) { return conv_exact<Rational>(x); }

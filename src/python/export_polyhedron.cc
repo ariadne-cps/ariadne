@@ -46,13 +46,20 @@ void export_polyhedron() {
   def("subset", PolyhPolyhBinPred(&subset));
   def("convex_hull", PolyhPolyhBinFunc(&convex_hull));
 
-  class_<RPolyhedron>("Polyhedron",init<int>())
+  class_<RPolyhedron>("Polyhedron",init<size_type>())
     .def(init<RPointList>())
     .def(init<RPolyhedron>())
     .def(init<RRectangle>())
     .def("dimension", &RPolyhedron::dimension)
     .def("vertices", &RPolyhedron::vertices)
     .def("bounding_box", &RPolyhedron::bounding_box)
+    .def(self_ns::str(self))
+  ;
+  
+  class_<RPolytope>("Polytope",init<size_type>())
+    .def(init<RPolytope>())
+    .def(init<RRectangle>())
+    .def("dimension", &RPolytope::dimension)
     .def(self_ns::str(self))
   ;
   

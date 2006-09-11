@@ -92,7 +92,6 @@ namespace Ariadne {
       friend class BinaryWordList;
       friend class BinaryWordFixedSizeList;
      public:
-      /*! \brief An unsigned integral type. */
       typedef std::vector<bool>::const_iterator const_iterator;
      private:
       /* The number of bits per byte */
@@ -121,7 +120,7 @@ namespace Ariadne {
       /*! \brief Create a string. */
       BinaryWord(const std::string& str);
       
-     /*! Equality operator. */
+      /*! Equality operator. */
       bool operator==(const BinaryWord& w) const { return this->_rep==w._rep; }
       
       /*! Inequality operator. */
@@ -136,7 +135,7 @@ namespace Ariadne {
       /*! \brief The largest possible size of the BinaryWord. */
       size_type max_size() const { return _rep.max_size(); }
       
-      /* \brief The number of machine bytes the word takes up. */
+      /*! \brief The number of machine bytes the word takes up. */
       size_type bytes() const { return (size()+_bits_per_byte-1)/_bits_per_byte; }
       
       /*! \brief Returns the nth bit. */
@@ -160,10 +159,10 @@ namespace Ariadne {
       /*! \brief Removes the bit at the end of the word. */
       void pop_back() { _rep.pop_back(); }
       
-      /* \brief An iterator to the beginning of the bits of the BinaryWord. */
+      /*! \brief An iterator to the beginning of the bits of the BinaryWord. */
       const_iterator begin() const { return _rep.begin(); }
       
-      /* \brief An iterator to the beginning of the bits of the BinaryWord. */
+      /*! \brief An iterator to the beginning of the bits of the BinaryWord. */
       const_iterator end() const { return _rep.end(); }
       
       /*! \brief true if the word is a prefix of the other word. */
@@ -244,10 +243,10 @@ namespace Ariadne {
       size_type _word_size;
       std::vector<bool> _elements;
      public:
+      /*!\brief Construct an empty list which can hold words of size \a ws. */
       BinaryWordFixedSizeList(size_type ws) : _word_size(ws), _elements() { }
       
-      /*!\brief The size of the list, in binary words.
-       */
+      /*!\brief The size of the list, in binary words. */
       size_type size() const { return _elements.size()/word_size(); }
       
       /*!\brief The size of each binary word in the list, in bits. */

@@ -37,44 +37,51 @@
 namespace Ariadne {
   namespace System {
 
-    /*! \brief An affine vector field in Euclidean space.
-     *  \ingroup ContinuousTime
+    /*!\ingroup ContinuousTime
+     * \brief An affine vector field in Euclidean space, given by \f$f(x)=Ax+b\f$.
      */
     template <typename R>
     class AffineVectorField : public VectorField<R> 
     {
-      typedef typename Geometry::Polyhedron<R> Polyhedron;
-      typedef typename Geometry::Rectangle<R> Rectangle;
-    
      public:
-      typedef typename Geometry::Point<R> state_type;
+      /*! \brief The real number type. */
+      typedef R real_type;
+      /*! \brief The type of denotable state the system acts on. */
+      typedef Geometry::Point<R> state_type;
       
+      /*! \brief The type of vector used to represent the affine transformation. */
       typedef LinearAlgebra::Matrix<R> matrix_type;
+      /*! \brief The type of matrix used to represent the affine transformation. */
       typedef LinearAlgebra::Vector<R> mector_type;
     
-      typedef LinearAlgebra::IntervalVector<R> IntervalVector_type;
-      typedef LinearAlgebra::IntervalMatrix<R> IntervalMatrix_type;
-    
+      /*! \brief Virtual destructor. */
       virtual ~AffineVectorField();
       
+      /*! \brief Copy constructor. */
       AffineVectorField(const AffineVectorField<R>& F) : _A(F.A()), _b(F.b()) { }
+      /*! \brief Construct from the matrix \a A and the vector \a b.. */
       AffineVectorField(const LinearAlgebra::Matrix<R> &A, const LinearAlgebra::Vector<R> &b) : _A(A), _b(b) { }
     
+      /*! \brief An approximation to the vector field at a point. */
       LinearAlgebra::Vector<R> operator() (const Geometry::Point<R>& s) const;
+      /*! \brief An over-approximation to the vector field over a rectangle. */
       LinearAlgebra::IntervalVector<R> operator() (const Geometry::Rectangle<R>& r) const;
     
+      /*! \brief An approximation to the Jacobian derivative at a point. */
       LinearAlgebra::Matrix<R> derivative(const Geometry::Point<R>& x) const;
+      /*! \brief An over-approximation to the Jacobian derivative over a rectangle. */
       LinearAlgebra::IntervalMatrix<R> derivative(const Geometry::Rectangle<R>& r) const;
       
+      /*! \brief The matrix \f$A\f$. */
       const LinearAlgebra::Matrix<R>& A() const { return this->_A; }
+      /*! \brief The vector \f$b\f$. */
       const LinearAlgebra::Vector<R>& b() const { return this->_b; }
       
-      dimension_type dimension() const {
-        return this->_b.size();
-      }
+      /*! \brief The dimension of the vector field is given by the size of \f$b\f$. */
+      dimension_type dimension() const { return this->_b.size(); }
       
+      /*! \brief  The name of the system. */
       std::string name() const { return "AffineVectorField"; }
-      
      private:
       LinearAlgebra::Matrix<R> _A;
       LinearAlgebra::Vector<R> _b;
@@ -87,6 +94,7 @@ namespace Ariadne {
 
 namespace Ariadne {
   namespace LinearAlgebra {
+    /*! \brief Compute \f$e^{Ah}\f$. */
     template <typename R>
     Matrix<R> 
     exp_Ah_approx(const Matrix<R>& A, 

@@ -59,13 +59,15 @@ namespace Ariadne {
     
     
     template <typename R>
-    std::ostream& operator<<(std::ostream& os, const Point<R>& state)
+    std::ostream& 
+    Point<R>::write(std::ostream& os) const
     {
+      const Point<R>& pt=*this;
       os << "(";
-      if(state.dimension() > 0) {
-        os << state[0] ;
-        for (size_type i=1; i<state.dimension(); i++) {
-          os << ", " << state[i];
+      if(pt.dimension() > 0) {
+        os << pt[0] ;
+        for (size_type i=1; i<pt.dimension(); i++) {
+          os << ", " << pt[i];
         }
       }
       os << ")" ;
@@ -74,8 +76,10 @@ namespace Ariadne {
     }
 
     template <typename R>
-    std::istream& operator>>(std::istream& is, Point<R>& state)
+    std::istream& 
+    Point<R>::read(std::istream& is)
     {
+      Point<R>& pt=*this;
       static size_type last_size;
 
       std::vector<R> v;
@@ -83,9 +87,9 @@ namespace Ariadne {
       Utility::read_vector(is, v, '(', ')');
       last_size = v.size();
 
-      state._vector=LinearAlgebra::Vector<R>(v.size());
+      pt._vector=LinearAlgebra::Vector<R>(v.size());
       for(size_t i=0; i!=v.size(); ++i) {
-        state._vector[i]=v[i];
+        pt._vector[i]=v[i];
       }
       return is;
     }

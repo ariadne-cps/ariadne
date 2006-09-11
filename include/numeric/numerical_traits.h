@@ -30,6 +30,8 @@
 
 #include <string>
 
+#include "approximation.h"
+
 namespace Ariadne {
   namespace Numeric {
     
@@ -40,7 +42,7 @@ namespace Ariadne {
     class field_tag { };
       
     /*! \brief Typedef's describing a numerical type. */
-    template<typename T> class numerical_traits;
+    template<typename T> class numerical_traits { };
 
     template<> class numerical_traits<double> {
      public:
@@ -48,19 +50,21 @@ namespace Ariadne {
       typedef double field_extension_type;
     };
   
+    //! \name Numerical type description.
+    //@{
     /*! \brief The name of class T. */
     template<typename T> inline std::string name();
 
-    /*! \brief Approximate \a x by an element of \p Res. */
+    //! \name Standard conversion operations. (Deprecated) 
+    /*! \brief Approximate \a x by an element of Res. */
     template<typename Res, typename Arg> inline Res convert_to(const Arg& x) { return Res(x); }
-
-    /*! \brief Conversion. */
-    template<typename R,typename X> inline R conv_exact(const X& x) { return R(x); }
-    template<typename R,typename X> inline R conv_down(const X& x) { return R(x); }
-    template<typename R,typename X> inline R conv_up(const X& x) { return R(x); }
-    template<typename R,typename X> inline R conv_approx(const X& x) { return R(x); }
     
-     
+    /*! \brief Approximate \a x by an element of Res. */
+    template<typename Res, typename Arg> inline Res approximate_by(const Arg& x) { return conv_approx<Res>(x); }
+        
+     /*! \brief Approximate \a x by an element of Res with accuracy \a e. */
+     template<typename Res, typename Arg, typename Err> Res approximate(const Arg& x, const Err& e);
+     //@}
   }   
 }
   

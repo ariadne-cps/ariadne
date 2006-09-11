@@ -69,6 +69,8 @@ namespace Ariadne {
       size_type _j;
     };
     
+    /*!\brief A list of points in Euclidean space.
+     */
     template<typename R>
     class PointList
     {
@@ -77,82 +79,86 @@ namespace Ariadne {
      public:
       typedef PointListIterator<R> const_iterator;
       
-      PointList() : _size(0), _pts(0,0) { }
-      PointList(dimension_type d) : _size(0), _pts(d,1) { }
-      PointList(dimension_type d, size_type n) : _size(n), _pts(d,n) { }
-      PointList(const LinearAlgebra::Matrix<R>& g) : _size(g.size2()), _pts(g) { }
+      /*!\brief Construct an empty point list, able to hold points of dimension \a d. */
+      explicit PointList(dimension_type d=0) : _size(0), _pts(d,1) { }
+      /*!\brief Construct a list consisting of \a n copies of the origin in dimension \a d. */
+      explicit PointList(dimension_type d, size_type n) : _size(n), _pts(d,n) { }
+      /*!\brief Construct from a matrix \a G whose columns contain the position vectors of the points. */
+      explicit PointList(const LinearAlgebra::Matrix<R>& G) : _size(G.size2()), _pts(G) { }
+      
+      /*!\brief Copy constructor. */
       PointList(const PointList& ptl) : _size(ptl._size), _pts(ptl.generators()) { }
+      /*!\brief Assignment operator. */
       PointList& operator=(const PointList& ptl) {
         if(this!=&ptl) { this->_size=ptl.size(); this->_pts=ptl.generators(); } 
         return *this; }
+      
+      /*!\brief The dimension of the points in the list. */
       dimension_type dimension() const { return _pts.size1(); }
+      /*!\brief The number of points in the list. */
       size_type size() const { return _size; }
+      /*!\brief The number of points which the list can hold without a reallocation of memory. */
       size_type capacity() const { return _pts.size2(); }
-      LinearAlgebra::Matrix<R> generators() const { 
-        LinearAlgebra::Matrix<R> result(this->dimension(),this->size());
-        for(size_type j=0; j!=this->size(); ++j) {
-          for(size_type i=0; i!=this->dimension(); ++i) {
-            result(i,j)=this->_pts(i,j);
-          }
-        }
-        return result;
-      }
+      /*!\brief Reserve space for at least \a n points. */
+      void reserve(size_type n);
+      
+      /*!\brief A matrix expression whose columns are the position vectors of the points. */
+      LinearAlgebra::Matrix<R> generators() const;
+      /*!\brief A matrix expression whose columns are the position vectors of the points. */
       LinearAlgebra::Matrix<R> matrix() const { return this->generators(); }
-      operator LinearAlgebra::Matrix<R> () const { return this->generators(); }
+      //operator LinearAlgebra::Matrix<R> () const { return this->generators(); }
+
+#ifdef DOXYGEN
+      /*!\brief The \a j th point in the list. */
+      Point<R> operator[] (const size_type j) const;
+      /*!\brief A reference to the \a j th point in the list. */
+      Point<R>& operator[] (const size_type j);
+#else
       Point<R> operator[] (const size_type j) const { 
         return Point<R>(column(_pts,j)); }
+
       PointListReference<R> operator[] (const size_type j) { 
         return PointListReference<R>(*this,j);}
-      void set(size_type j, dimension_type i,const R& x) { _pts(i,j)=x; }
-      Point<R> get(size_type j) const { return Point<R>(column(_pts,j)); }
-      R get(size_type j, dimension_type i) const { return _pts(i,j); }
-      void push_back(const Point<R>& pt) {
-        if(_pts.size2()==0) {
-          _pts=LinearAlgebra::Matrix<R>(pt.dimension(),1);
-        } else {
-          if(pt.dimension()!=_pts.size1()) {
-            throw std::runtime_error("Cannot insert point into list of different dimension");
-          }
-        }
-        if(this->size()==this->capacity()) {
-          reserve(this->size()*2);
-        }
-        for(size_type i=0; i!=pt.dimension(); ++i) {
-            _pts(i,this->size())=pt[i];
-        }
-        ++this->_size;
-      }
+#endif
+
+      /*!\brief Adjoin \a pt to the end of the list. */
+      void push_back(const Point<R>& pt);
+      /*!\brief Remove the last point from the list. */
       void pop_back() { --this->_size; }
-      void reserve(size_type n) {
-        if(this->capacity()>=n) { return; }
-        LinearAlgebra::Matrix<R> old(this->_pts);
-        _pts=LinearAlgebra::Matrix<R>(this->dimension(),n);
-        for(size_type j=0; j!=this->size(); ++j) {
-          for(size_type i=0; i!=this->dimension(); ++i) {
-            _pts(i,j)=old(i,j);
-          }
-        }
-      }
+      
+      /*!\brief Adjoin \a pt to the list. */
+      void adjoin(const Point<R>& pt) { this->push_back(pt); }
+      /*!\brief Remove the last point from the list. */
+      void clear() { this->_size=0; }
+
+      
+      /*!\brief A constant iterator to the beginning of the list. */
       const_iterator begin() const { return const_iterator(this->_pts,0); }
+      /*!\brief A constant iterator to the end of the list. */
       const_iterator end() const { return const_iterator(this->_pts,this->_size); }
+      
+      /*!\brief Write to an output stream. */
+      std::ostream& write(std::ostream& os) const;
+     private:
+      void _set(size_type j, dimension_type i,const R& x) { _pts(i,j)=x; }
+      Point<R> _get(size_type j) const { return Point<R>(column(_pts,j)); }
+      R _get(size_type j, dimension_type i) const { return _pts(i,j); }
+
      private:
       size_type _size;
       LinearAlgebra::Matrix<R> _pts;
     };
     
-    template<typename R> std::ostream& operator<<(std::ostream& os, const PointList<R>& pts);
-    
     template<typename R> 
     inline
     std::ostream& 
-    operator<<(std::ostream& os, const PointList<R>& pts) 
-    {
-      if(pts.size()==0) { os << "[ "; }
-      for(size_type j=0; j!=pts.size(); ++j) {
-        os << ((j==0) ? '[' : ',') << pts[j]; 
-      }
-      return os << ']';
+    operator<<(std::ostream& os, const PointList<R>& pts) {
+      return pts.write(os);
     }
+    
+    
+    
+   
       
   }
 }

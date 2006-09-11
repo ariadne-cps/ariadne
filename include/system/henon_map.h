@@ -43,45 +43,50 @@
 namespace Ariadne {
   namespace System {
 
-    /*! \brief The Henon map. */
+    /*! \brief The Henon map \f$(x,y)\mapsto(a-x^2-by,x)\f$. */
     template <typename R>
     class HenonMap : public Map<R> 
     {
      public:
+      /*! \brief The real number type. */
       typedef R real_type;
-      typedef Geometry::Point<real_type> state_type;
+      /*! \brief The type of denotable state the system acts on. */
+      typedef Geometry::Point<R> state_type;
       
-      inline explicit HenonMap(real_type a=real_type(1.5),real_type b=real_type(0.3)) : _a(a), _b(b) { }
+      /*! \brief Construct the Henon map with parameters \a a and \a b. */
+      explicit HenonMap(R a=R(1.5), R b=R(0.3)) : _a(a), _b(b) { }
       
       /*! \brief  The map applied to a state. */
-      virtual state_type operator() (const state_type& x) const;
+      virtual Geometry::Point<R> operator() (const Geometry::Point<R>& x) const;
       /*! \brief  The map applied to a rectangle basic set. */
       virtual Geometry::Rectangle<R> operator() (const Geometry::Rectangle<R>& r) const;
       /*! \brief  The map applied to a parallelotope basic set. */
       virtual Geometry::Parallelotope<R> operator() (const Geometry::Parallelotope<R>& r) const;
       
       /*! \brief  The derivative of the map at a point. */
-      virtual LinearAlgebra::Matrix<R> derivative(const state_type& x) const;
+      virtual LinearAlgebra::Matrix<R> derivative(const Geometry::Point<R>& x) const;
       /*! \brief  The derivative of the map over a rectangular basic set. */
       virtual LinearAlgebra::IntervalMatrix<R> derivative(const Geometry::Rectangle<R>& r) const;
             
       /*! \brief  The parameter a. */
-      const real_type& a() const { return _a; }
+      const R& a() const { return _a; }
       /*! \brief  The parameter b. */
-      const real_type& b() const { return _b; }
+      const R& b() const { return _b; }
       
       /*! \brief  The dimension of the argument. */
       dimension_type argument_dimension() const { return 2; }
       /*! \brief The dimension of the result. */
       dimension_type result_dimension() const { return 2; }
       
+      /*! \brief The Henon map is invertible unless \fb$=0\f$. */
       bool invertible() const {
         return _b!=0; }
         
-      std::string name() const { return "HenonMap"; }
+      /*! \brief  The name of the system. */
+      virtual std::string name() const { return "HenonMap"; }
      private:
-      real_type _a;
-      real_type _b;
+      R _a;
+      R _b;
     };
       
     template <typename R>

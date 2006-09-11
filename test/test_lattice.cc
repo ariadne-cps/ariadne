@@ -54,7 +54,7 @@ int main() {
   imgary[0]=5;
   imglcls.adjoin(LatticeCell(imgary));
   
-  LatticeMap lm=LatticeMap(3,2);
+  LatticeMultiMap lm=LatticeMultiMap(3,2);
   lm.adjoin_to_image(arglc,imglcls);
   argary[0]=0;
   arglc=LatticeCell(argary);

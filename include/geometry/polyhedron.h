@@ -64,7 +64,10 @@ namespace Ariadne {
       /*! \brief The type of a list of points. */
       typedef PointList<R>  state_list_type;
      public:
-      /*! \brief Construct from a matrix whose columns give the vertices. */
+       /*! \brief Construct an empty polyhedron in dimension \a n. */
+      Polyhedron(dimension_type n=0);
+     
+     /*! \brief Construct from a matrix whose columns give the vertices. */
       explicit Polyhedron(const LinearAlgebra::Matrix<R>& A);
      
       /*! \brief Convert from a list of vertices. */
@@ -298,13 +301,9 @@ namespace Ariadne {
      public:
       //@{ 
       //! \name Constructors
-      /*! \brief Default constructor creates empty set. 
+      /*! \brief Construct full Euclidean space of dimension \a n.
        */
-      explicit Polytope<R>();
-      
-      /*! \brief Construct an empty polytope with dimension \a n.
-       */
-      explicit Polytope<R>(dimension_type n);
+      explicit Polytope<R>(dimension_type n=0);
      
       /*! \brief Construct the polytope defined by the matrix equations \f$Ax\leq b\f$.
        */

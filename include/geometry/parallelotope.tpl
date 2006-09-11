@@ -225,8 +225,9 @@ namespace Ariadne {
 
     template <typename R>
     std::ostream&
-    operator<<(std::ostream& os, const Parallelotope<R>& p) 
+    Parallelotope<R>::write(std::ostream& os) const
     {
+      const Parallelotope<R>& p=*this;
       if(p.dimension() > 0) {
         os << "Parallelotope(\n  centre=" << p.centre();
         os << "\n  directions=" << p.generators();
@@ -238,7 +239,7 @@ namespace Ariadne {
     
     template <typename R>
     std::istream& 
-    operator>>(std::istream& is, Parallelotope<R>& p)
+    Parallelotope<R>::read(std::istream& is)
     {
       throw std::domain_error("Not implemented");
     }

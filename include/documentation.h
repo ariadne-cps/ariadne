@@ -201,7 +201,7 @@
  * Should we only support explicit approximation functions, like \c exp_approx for finite-precision types?
  * While it is in some ways appealing to make the approximation explicit,
  * I think it's probably better to allow <tt> double exp(double)</tt> in Ariadne, for two reasons.
- * The first reason is that this is common useage, and people might well include \c <cmath> anyway.
+ * The first reason is that this is common useage, and people might well include <tt>\<cmath\></tt> anyway.
  * The second is operator overloading; we should insist that \c operator+ and add give the same answers,
  * and by disallowing add, we also need to disallow all operator overloading on double-precision types.
  *
@@ -714,7 +714,55 @@
  * 
  */
  
-/*! \page references References
+/*! \page GeometricOps Geometric operations
+ * 
+ * The core geometric operations are ::subset and ::intersect .
+ * The core geometric types are Zonotope, Polyhedron (described by generators)
+ * and Polytope (described by constraints). Rectangle can be easily converted
+ * to both Zonotope and Polytope.
+ *
+ *   - Zonotope representation: \f$x=c+De,\ -1\leq e\leq1\f$.
+ *   - Polyhedron representation: \f$x=Gs,\ 1\cdot s=1,\ s\geq0\f$.
+ *   - Polytope representation: \f$Ax\leq b\f$.
+ *
+ * We can re-write a zonotope as \f$x=c'+D'e,\ 0\leq e\leq1\f$, 
+ * a polyhedron as \f$x'=G's,\ s\geq0\f$, and a polytope as \f$A'x'\geq0\f$,
+ * where \f$x'=(x,1)\f$.
+ *
+ * \section Intersection Testing intersection
+ * 
+ * To test intersection of zonotopes and polyhedra, equate the expression for
+ * \f$x\f$ in both sets. 
+ *
+ * To test intersection of a zonotope/polyhedron with a polytope, substitute
+ * \f$x\f$ in the equation of the polytope, e.g. \f$A(c+De)\leq b,\ 0\leq e\leq 1\f$.
+ *
+ * To test intersection of two polytopes, solve both sets of equations simultaneously.
+ *
+ * The resulting equations can be solved by linear programming.
+ * 
+ * \section Subset Testing subset
+ *
+ * To test if a polyhedron is a subset of a polytope, test \f$AG\geq0\f$.
+ *
+ * To test other types of subset relation, we need to transform to 
+ * ::subset(Polyhedron,Polytope).
+ *
+ * \section PolyhedralConversion Converting between a polyhedron and a polytope.
+ * 
+ * \subsection PolyhedralCone Polyhedral cone
+ * 
+ *   - Constraint: \f$a\cdot x\geq0\f$;  
+ *   - Generator:  \f$x=\lambda g\f$
+ *   - Ray \f$g\f$ \e violates constraint \f$a\f$ if \f$a\cdot r<0\f$, 
+ *   - Ray \f$g\f$ \e saturates constraint \f$a\f$ if \f$a\cdot r=0\f$.
+ *   - Saturation matrix \f$S=\mathrm{sgn}(AG)\f$.
+ *
+ * Rays are \em adjacent if the corresponding columns of the saturation matrix
+ * differ only in one row.
+ */
+
+ /*! \page references References
  *
  * \section computable_analysis_references Computable Analysis
  *

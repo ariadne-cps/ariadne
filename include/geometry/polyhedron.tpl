@@ -62,6 +62,12 @@ namespace Ariadne {
 
 
     template <typename R>
+    Polyhedron<R>::Polyhedron(dimension_type n)
+      : _vertices(n,0)
+    {
+    }
+   
+    template <typename R>
     Polyhedron<R>::Polyhedron(const LinearAlgebra::Matrix<R>& A)
       : _vertices(A)
     {
@@ -69,13 +75,13 @@ namespace Ariadne {
    
     template <typename R>
     Polyhedron<R>::Polyhedron(const PointList<R>& pts)
-      : _vertices(pts)
+      : _vertices(pts.generators())
     {
     }
    
     template <typename R>
     Polyhedron<R>::Polyhedron(const Rectangle<R>& r)
-      : _vertices(r.vertices())
+      : _vertices(r.vertices().generators())
     {
     }
    
@@ -150,7 +156,7 @@ namespace Ariadne {
     Polyhedron<R>::bounding_box() const 
     {
       Rectangle<R> result(this->dimension());
-      PointList<R> v=this->_vertices;
+      PointList<R> v(this->_vertices);
       for(typename PointList<R>::const_iterator pt_iter=v.begin(); pt_iter!=v.end(); ++pt_iter) {
         result=rectangular_hull(result,Rectangle<R>(*pt_iter));
       }
@@ -215,7 +221,7 @@ namespace Ariadne {
     
     
     template <typename R>
-    Polytope<R>::Polytope() : _A(0,0), _b(0)
+    Polytope<R>::Polytope(dimension_type n) : _A(0,n), _b(0)
     {
     }
     
@@ -227,6 +233,19 @@ namespace Ariadne {
       assert(A.number_of_rows()==b.size());
     }
     
+    template <typename R>
+    Polytope<R>::Polytope(const Rectangle<R>& r)
+      : _A(2*r.dimension(),r.dimension()), _b(r.dimension())
+    {
+      dimension_type n=r.dimension();
+      for(size_type i=0; i!=n; ++i) {
+        this->_A(i,i)=R(1); 
+        this->_A(i+n,i)=R(-1); 
+        this->_b(i)=r.upper_bound(i);
+        this->_b(i+n)=r.lower_bound(i);
+      }
+    }
+   
     template <typename R>
     Polytope<R>::Polytope(const Polytope<R>& p)
       : _A(p._A), _b(p._b)
@@ -251,6 +270,13 @@ namespace Ariadne {
       return ppl_polyhedron(this->_A,this->_b);
     }
     
+    template <typename R>
+    dimension_type
+    Polytope<R>::dimension() const
+    {
+      return this->_A.size2(); 
+    }
+
     template <typename R>
     PointList<Rational>
     Polytope<R>::vertices() const

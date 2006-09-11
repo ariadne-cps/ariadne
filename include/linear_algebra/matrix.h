@@ -118,7 +118,7 @@ namespace Ariadne {
         return result;
       }
       
-      /* Concatenate the columns of two matrices. */
+      /*! \brief Concatenate the columns of two matrices. */
       static Matrix<R> concatenate_columns(const Matrix<R>& A1, const Matrix<R>& A2);
       
       /*! \brief The operator norm with respect to the supremum norm on vectors. 

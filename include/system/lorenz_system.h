@@ -47,41 +47,42 @@ namespace Ariadne {
     class LorenzSystem : public VectorField<R> 
     {
      public:
-      typedef R real_type;
-      typedef Geometry::Point<R> state_type;
-
-      explicit LorenzSystem(real_type beta=real_type(8.0/3.0), 
-                            real_type rho=real_type(28.0), 
-                            real_type sigma=real_type(10.0))
+      /*! \brief Construct the Lorenz system with parameter values \a beta,
+       * \a rho and \a sigma.
+       */
+      explicit LorenzSystem(R beta=R(8.0/3.0), 
+                            R rho=R(28.0), 
+                            R sigma=R(10.0))
        : _b(beta), _p(rho), _s(sigma) { }
       
       /*! \brief  The vector field applied to a state. */
-      virtual LinearAlgebra::Vector<R> operator() (const state_type& x) const;
+      virtual LinearAlgebra::Vector<R> operator() (const Geometry::Point<R>& x) const;
       /*! \brief  The map applied to a rectangle basic set. */
       virtual LinearAlgebra::IntervalVector<R> operator() (const Geometry::Rectangle<R>& r) const;
      
       /*! \brief  The derivative of the map at a point. */
-      virtual LinearAlgebra::Matrix<R> derivative(const state_type& x) const;
+      virtual LinearAlgebra::Matrix<R> derivative(const Geometry::Point<R>& x) const;
       /*! \brief  The derivative of the map over a rectangular basic set. */
       virtual LinearAlgebra::IntervalMatrix<R> derivative(const Geometry::Rectangle<R>& r) const;
             
       /*! \brief  The parameter \f$\beta\f$. */
-      const real_type& beta() const { return _b; }
+      const R& beta() const { return _b; }
       /*! \brief  The parameter \f$\rho\f$. */
-      const real_type& rho() const { return _p; }
+      const R& rho() const { return _p; }
       /*! \brief  The parameter \f$\sigma\f$. */
-      const real_type& sigma() const { return _s; }
+      const R& sigma() const { return _s; }
       
       
       /*! \brief  The dimension of the space. */
       dimension_type dimension() const { return 3; }
       
+      /*! \brief  The name of the system. */
       std::string name() const { return "LorenzSystem"; }
 
      private:
-      real_type _b;
-      real_type _p;
-      real_type _s;
+      R _b;
+      R _p;
+      R _s;
     };
       
     template <typename R>

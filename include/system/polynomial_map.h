@@ -214,15 +214,23 @@ namespace Ariadne {
     template <typename R>
     class PolynomialMatrix {
      public:
+      /*! \brief Default constructor creates a 0 by 0 matrix. */
       PolynomialMatrix() : _matrix() { }
+      /*! \brief Construct an \a m by \a n matrix, all of whose entries are zero. */
       PolynomialMatrix(const size_type& r, const size_type& c) : _matrix(r,c) { }
      
+      /*! \brief The number of rows of the matrix. */
       size_type number_of_rows() const { return _matrix.size1(); }
+      /*! \brief The number of columns of the matrix. */
       size_type number_of_columns() const { return _matrix.size2(); }
-      
+
+      /*! \brief A reference to the (\a i,\a j)th entry. */
+      Polynomial<R>& operator() (const size_type& i, const size_type& j) { return this->_matrix(i,j); }
+      /*! \brief A constant reference to the (\a i,\a j)th entry. */
+      const Polynomial<R>& operator() (const size_type& i, const size_type& j) const { return this->_matrix(i,j); }
+     private:     
       void set(const size_type& i, const size_type& j, const Polynomial<R>& p) { this->_matrix(i,j)=p; }
       const Polynomial<R>& get(const size_type& i, const size_type& j) const { return _matrix(i,j); }
-      const Polynomial<R>& operator() (const size_type& i, const size_type& j) const { return this->get(i,j); }
      private:
       friend class PolynomialMap<R>;
      private:

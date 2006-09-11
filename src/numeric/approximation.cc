@@ -1,8 +1,8 @@
 /***************************************************************************
- *            integrator.cc
+ *            approximation.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,16 +21,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-
-#include "evaluation/integrator.h"
-#include "evaluation/integrator.tpl"
-
-#include "real_typedef.h"
+#include "numeric/approximation.h"
+#include "numeric/approximation.tpl"
 
 namespace Ariadne {
-  namespace Evaluation {
-    template class Integrator<Real>;
-    template class C0Integrator<Real>;
-    template class C1Integrator<Real>;
-  }
+  namespace Numeric {
+
+  } 
 }

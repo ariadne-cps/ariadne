@@ -63,6 +63,7 @@ template<typename R> class Parallelotope;
 template<typename R> class Zonotope;
 template<typename R> class Simplex;
 template<typename R> class Polyhedron;
+template<typename R> class Polytope;
 template<typename R> class Sphere;
 template<typename R> class Ellipsoid;
 
@@ -94,16 +95,11 @@ template<typename R> class PartitionScheme;
 template<typename R> class PartitionTree;
 template<typename R> class PartitionTreeCell;
 template<typename R> class PartitionTreeSet;
-
-template<typename R> bool disjoint(const Polyhedron<R>&, const Polyhedron<R>&);
-template<typename R> bool interiors_intersect(const Polyhedron<R>&, const Polyhedron<R>&);
-template<typename R> bool inner_subset(const Polyhedron<R>&, const Polyhedron<R>&);
-template<typename R> bool subset(const Polyhedron<R>&, const Polyhedron<R>&);
 }}
 
 
 namespace Ariadne { namespace System {
-class LatticeMap;
+class LatticeMultiMap;
 
 template <typename R> class Map;
 template <typename R> class AffineMap;

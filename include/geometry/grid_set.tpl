@@ -327,8 +327,8 @@ namespace Ariadne {
     GridMaskSet<R>
     join(const GridMaskSet<R>& A, const GridMaskSet<R>& B)
     {
-      assert(A.grid()==B.grid() && A.bounds()==B.bounds());
-      return GridMaskSet<R>(A.grid(), A.bounds(), A.mask() | B.mask());
+      assert(A.grid()==B.grid() && A.block()==B.block());
+      return GridMaskSet<R>(A.grid(), A.block(), A.mask() | B.mask());
     }
 
     /*! \brief The closure of the intersection of the interior of \a A with the interior of \a B. */
@@ -336,8 +336,8 @@ namespace Ariadne {
     GridMaskSet<R>
     regular_intersection(const GridMaskSet<R>& A, const GridMaskSet<R>& B)
     {
-      assert(A.grid()==B.grid() && A.bounds()==B.bounds());
-      return GridMaskSet<R>(A.grid(), A.bounds(), A.mask() & B.mask());
+      assert(A.grid()==B.grid() && A.block()==B.block());
+      return GridMaskSet<R>(A.grid(), A.block(), A.mask() & B.mask());
     }
 
     /*! \brief The closure of the intersection of the interior of \a A with the interior of \a B. */
@@ -345,8 +345,8 @@ namespace Ariadne {
     GridMaskSet<R>
     difference(const GridMaskSet<R>& A, const GridMaskSet<R>& B)
     {
-      assert(A.grid()==B.grid() && A.bounds()==B.bounds());
-      return GridMaskSet<R>(A.grid(), A.bounds(), A.mask() - B.mask());
+      assert(A.grid()==B.grid() && A.block()==B.block());
+      return GridMaskSet<R>(A.grid(), A.block(), A.mask() - B.mask());
     }
 
     template<typename R>
@@ -474,7 +474,7 @@ namespace Ariadne {
       }
     }
 
-        template<typename R>
+    template<typename R>
     GridMaskSet<R>::GridMaskSet(const FiniteGrid<R>& g)
       : _grid_ptr(&g.grid()), _lattice_set(g.bounds()) 
     { 
@@ -498,7 +498,7 @@ namespace Ariadne {
     {
       const IrregularGrid<R>* irregular_grid_ptr=dynamic_cast<const IrregularGrid<R>*>(_grid_ptr);
       if(irregular_grid_ptr) {
-        assert(subset(b,irregular_grid_ptr->bounds()));
+        assert(subset(b,irregular_grid_ptr->block()));
       }
     }
 
@@ -508,7 +508,7 @@ namespace Ariadne {
     {
       const IrregularGrid<R>* irregular_grid_ptr=dynamic_cast<const IrregularGrid<R>*>(_grid_ptr);
       if(irregular_grid_ptr) {
-        assert(subset(ms.bounds(),irregular_grid_ptr->bounds()));
+        assert(subset(ms.block(),irregular_grid_ptr->block()));
       }
     }
 
@@ -521,24 +521,21 @@ namespace Ariadne {
     template<typename R>
     GridMaskSet<R>::GridMaskSet(const GridCellListSet<R>& gcls)
       : _grid_ptr(&gcls.grid()),
-        _lattice_set(gcls.dimension())
+        _lattice_set(gcls.lattice_set())
     {
-      _lattice_set=LatticeMaskSet(gcls.lattice_set().bounds());
-      _lattice_set.adjoin(gcls.lattice_set());
     }
     
     template<typename R>
     GridMaskSet<R>::GridMaskSet(const GridRectangleListSet<R>& grls)
       : _grid_ptr(&grls.grid()),
-        _lattice_set(grls.lattice_set().bounds())
+        _lattice_set(grls.lattice_set())
     {
-      _lattice_set.adjoin(grls.lattice_set());
     }
 
     template<typename R>
     GridMaskSet<R>::GridMaskSet(const ListSet<R,Rectangle>& rls) 
       : _grid_ptr(new IrregularGrid<R>(rls)), 
-        _lattice_set(dynamic_cast<const IrregularGrid<R>*>(_grid_ptr)->bounds())
+        _lattice_set(dynamic_cast<const IrregularGrid<R>*>(_grid_ptr)->block())
     {
       //FIXME: Memory leak!    
 
@@ -829,7 +826,7 @@ namespace Ariadne {
       
       GridMaskSet<R> result(g);
       GridMaskSet<R> bb(g);
-      bb.adjoin(result.bounding_box());
+      bb.adjoin(bb.bounds());
       Rectangle<R> r;
       
       for(typename GridMaskSet<R>::const_iterator iter=bb.begin(); iter!=bb.end(); ++iter) {
@@ -845,7 +842,7 @@ namespace Ariadne {
     GridMaskSet<R>
     under_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& g) 
     {
-      return under_approximation(GridMaskSet<R>(pts),g);
+      return under_approximation(GridMaskSet<R>(GridRectangleListSet<R>(pts)),g);
     }
     
 

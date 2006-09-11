@@ -161,19 +161,27 @@ namespace Ariadne {
     //! \name Geometric binary predicates
     /*! \brief Tests disjointness */
     friend bool disjoint(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
+    /*! \brief Tests disjointness */
     friend bool disjoint(const Rectangle<R>& A, const Ellipsoid<R>& B);
+    /*! \brief Tests disjointness */
     friend bool disjoint(const Ellipsoid<R>& A, const Rectangle<R>& B);
     /*! \brief Tests intersection of interiors */
     friend bool interiors_intersect(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
+    /*! \brief Tests intersection of interiors */
     friend bool interiors_intersect(const Rectangle<R>& A, const Ellipsoid<R>& B);
+    /*! \brief Tests intersection of interiors */
     friend bool interiors_intersect(const Ellipsoid<R>& A, const Rectangle<R>& B);
     /*! \brief Tests inclusion of \a A in the interior of \a B. */
     friend bool inner_subset(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
+    /*! \brief Tests inclusion of \a A in the interior of \a B. */
     friend bool inner_subset(const Rectangle<R>& A, const Ellipsoid<R>& B);
+    /*! \brief Tests inclusion of \a A in the interior of \a B. */
     friend bool inner_subset(const Ellipsoid<R>& A, const Rectangle<R>& B);
     /*! \brief Tests inclusion of \a A in \a B. */
     friend bool subset(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
+    /*! \brief Tests inclusion of \a A in \a B. */
     friend bool subset(const Rectangle<R>& A, const Ellipsoid<R>& B);
+    /*! \brief Tests inclusion of \a A in \a B. */
     friend bool subset(const Ellipsoid<R>& A, const Rectangle<R>& B);
     //@}
     

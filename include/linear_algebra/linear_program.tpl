@@ -47,9 +47,9 @@ namespace Ariadne {
     }
     
     template<typename R>
-    LinearProgram<R>::LinearProgram(const Matrix_type& A,
-                                       const Vector_type& b,
-                                       const Vector_type& c)
+    LinearProgram<R>::LinearProgram(const Matrix<R>& A,
+                                    const Vector<R>& b,
+                                    const Vector<R>& c)
       : _tableau(), 
         _variable_indices(b.size()+c.size())
     {
@@ -68,7 +68,7 @@ namespace Ariadne {
       
       size_type n=nv+ne+na;
       size_type nfv=nv;
-      _tableau=Matrix_type(nc+1,nfv+1);
+      _tableau=Matrix<R>(nc+1,nfv+1);
       
       assert(ne==0);
       
@@ -104,7 +104,7 @@ namespace Ariadne {
     }
     
     template<typename R>
-    LinearProgram<R>::LinearProgram(const Matrix_type& T)
+    LinearProgram<R>::LinearProgram(const Matrix<R>& T)
       : _tableau(T),
         _variable_indices()
     {
@@ -237,10 +237,10 @@ namespace Ariadne {
     }
     
     template<typename R>
-    typename LinearProgram<R>::Vector_type
+    Vector<R>
     LinearProgram<R>::optimizing_point() const 
     {
-      Vector_type result(this->number_of_free_variables());
+      Vector<R> result(this->number_of_free_variables());
  
       size_type m=this->number_of_constraints();
       size_type n=this->number_of_free_variables();
@@ -266,7 +266,7 @@ namespace Ariadne {
     
     template<typename R>
     R 
-    LinearProgram<R>::objective_function(const Vector_type& v) const
+    LinearProgram<R>::objective_function(const Vector<R>& v) const
     {
       assert(false);
     }
@@ -914,7 +914,7 @@ namespace Ariadne {
         for (size_type i = new_cost.size(); i-- > 0; )
           neg_assign(new_cost[i]);
     
-      // Substitute properly the cost funcion in the `costs' Matrix_type.
+      // Substitute properly the cost funcion in the `costs'.
       const size_type cost_zero_size = working_cost.size();
       Row tmp_cost = Row(new_cost, cost_zero_size, cost_zero_size);
       tmp_cost.swap(working_cost);

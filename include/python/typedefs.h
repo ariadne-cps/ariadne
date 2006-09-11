@@ -64,6 +64,7 @@ typedef Geometry::Parallelotope<Real> RParallelotope;
 typedef Geometry::Zonotope<Real> RZonotope;
 typedef Geometry::Simplex<Real> RSimplex;
 typedef Geometry::Polyhedron<Real> RPolyhedron;
+typedef Geometry::Polytope<Real> RPolytope;
 
 typedef Geometry::ListSet<Real,Geometry::Rectangle> RRectangleListSet;
 typedef Geometry::ListSet<Real,Geometry::Parallelotope> RParallelotopeListSet;
@@ -92,7 +93,7 @@ typedef Geometry::PartitionTree<Real> RPartitionTree;
 typedef Geometry::PartitionTreeCell<Real> RPartitionTreeCell;
 typedef Geometry::PartitionTreeSet<Real> RPartitionTreeSet;
 
-typedef System::LatticeMap LatticeMap;
+typedef System::LatticeMultiMap LatticeMultiMap;
 
 typedef System::Map<Real> RMapBase;
 typedef System::AffineMap<Real> RAffineMap;

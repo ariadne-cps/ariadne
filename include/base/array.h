@@ -62,6 +62,11 @@ namespace Ariadne {
     // Need to give default size in first declaration.
     //template<typename T, size_t N=0> class array;
     
+    /*! \brief STL style interface to dynamically-sizable arrays. 
+     *
+     * An array<T> is a variable-size array which can be resized and is allocated 
+     * on the heap. Arrays provide checked access using at and unchecked access using operator[].
+     */
     template<typename T> class array<T> {
      public:
       typedef T value_type;
@@ -201,6 +206,17 @@ namespace Ariadne {
     
     
     
+    /*! \brief STL style interface to sized arrays. 
+     *
+     * An array<T> is a variable-size array which can be resized and is allocated 
+     * on the heap. Arrays provide checked access using at and unchecked access using operator[].
+     *
+     * An array<T,N> is a fixed-size array of size \a N which is allocated 
+     * on the stack. Arrays provide checked access using at and unchecked access using operator[].
+     *
+     * FIXME: Constructors for small arrays.
+     * FIXME: Exception safety in constructors!
+     */
     template<typename T, size_t N> class array {
      public:
       typedef T value_type;
@@ -214,22 +230,26 @@ namespace Ariadne {
       typedef ptrdiff_t difference_type;
       
       ~array() { }
-      array() { }
-      explicit array(const value_type& val) { fill(val); }
-      template<class In> array(In first, In last) { assert(distance(first,last==N)); fill(first); }
-      array(const array& a) { fill(a.begin()); }
-      array& operator=(const array& a) { fill(a.begin()); return *this; }
+      array() : _size(0) { }
+      explicit array(const size_type n) : _size(n) { assert(n<=N); }
+      array(const size_type n, const value_type& val) : _size(n) { assert(n<N); fill(val); }
+      template<class In> array(In first, In last) : _size(distance(first,last)) { assert(_size<=N); fill(first); }
+      array(const array& a) : _size(a.size()) { fill(a.begin()); }
+      array& operator=(const array& a) { _size=a.size(); fill(a.begin()); return *this; }
       
-      array(const value_type& x, const value_type& y) { 
-        assert(N==2); _ptr[0]=x; _ptr[1]=y; }
-      array(const value_type& x, const value_type& y, const value_type& z) { 
-        assert(N==3); _ptr[0]=x; _ptr[1]=y; _ptr[2]=z; }
-      array(const value_type& w, const value_type& x, const value_type& y, const value_type& z) { 
-        assert(N==4); _ptr[0]=w; _ptr[1]=x; _ptr[2]=y; _ptr[3]=z; }
+      explicit array(const value_type& x) : _size(1) { 
+        assert(N>=1); _ptr[0]=x;}
+      array(const value_type& x, const value_type& y) : _size(2) { 
+        assert(N>=2); _ptr[0]=x; _ptr[1]=y; }
+      array(const value_type& x, const value_type& y, const value_type& z) : _size(3) { 
+        assert(N>=3); _ptr[0]=x; _ptr[1]=y; _ptr[2]=z; }
+      array(const value_type& w, const value_type& x, const value_type& y, const value_type& z) : _size(4) { 
+        assert(N>=4); _ptr[0]=w; _ptr[1]=x; _ptr[2]=y; _ptr[3]=z; }
       
-      size_type empty() const { return N==0u; }
-      size_type size() const { return N; }
+      size_type empty() const { return _size==0u; }
+      size_type size() const { return _size; }
       size_type max_size() const { return N; }
+      void resize(size_type n) { assert(n<=N); _size=n; }
       
       reference operator[](size_type i) { return _ptr[i]; }
       const_reference operator[](size_type i) const { return _ptr[i]; }
@@ -237,38 +257,39 @@ namespace Ariadne {
       const_reference at(size_type i) const { assert(i<N); return _ptr[i]; }
       
       iterator begin() { return _ptr; }
-      iterator end() { return _ptr+N; }
+      iterator end() { return _ptr+_size; }
       const_iterator begin() const { return _ptr; }
-      const_iterator end() const { return _ptr+N; }
+      const_iterator end() const { return _ptr+_size; }
       
       bool operator==(const array& other) const {
         const_iterator first=begin(); const_iterator last=end(); const_iterator curr=other.begin(); 
         while(first!=last) { if((*first)!=(*curr)) { return false; } ++first; ++curr; } return true; }
       bool operator!=(const array& other) const { return !((*this)==other); }
       void fill(value_type val) { 
-        for(size_type i=0; i!=N; ++i) { _ptr[i]=val; } }
+        for(size_type i=0; i!=_size; ++i) { _ptr[i]=val; } }
       template<class In> void fill(In iter) { 
         _assign_iter(iter); }
       template<class In> void assign(In first, In last) { 
-        assert(distance(first,last)==size()); _assign_iter(first); }
+        assert(distance(first,last)==_size); _assign_iter(first); }
      private:
       template<class InputIterator> inline void _assign_iter(InputIterator);
      private:
+      size_type _size;
       value_type _ptr[N];
     };
     
     template<typename T, size_t N> template<class InputIterator> inline
     void array<T,N>::_assign_iter(InputIterator iter)
     { 
-      if(N==1) { 
+      if(_size==1) { 
         *_ptr=*iter; }
-      else if(N==2) { 
+      else if(_size==2) { 
         value_type* curr=_ptr; *curr=*iter; ++curr; ++iter;  *curr=*iter; }
-      else if(N==3) { 
+      else if(_size==3) { 
         value_type* curr=_ptr; *curr=*iter; 
         ++curr; ++iter;  *curr=*iter; 
         ++curr; ++iter;  *curr=*iter; }
-      else if(N==4) { 
+      else if(_size==4) { 
         value_type* curr=_ptr; *curr=*iter; 
         ++curr; ++iter; *curr=*iter; 
         ++curr; ++iter;  *curr=*iter;  
@@ -279,22 +300,23 @@ namespace Ariadne {
     }
     
     
-    template<typename T> template<size_t N> 
+    template<typename T> template<size_type N> 
     inline
-    array<T,0>::array(const array<T,N>& a)
+    array<T>::array(const array<T,N>& a)
       : _size(a.size()), _ptr(new value_type[_size])
     { 
       fill(a.begin()); 
     }
     
-    template<typename T> template<size_t N> 
+    template<typename T> template<size_type N> 
     inline
-    array<T,0>& array<T,0>::operator=(const array<T,N>& a) 
+    array<T>& array<T>::operator=(const array<T,N>& a) 
     { 
       resize(a.size()); fill(a.begin()); return *this; 
     }
     
     
+   
     
     
     

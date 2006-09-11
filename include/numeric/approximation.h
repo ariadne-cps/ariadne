@@ -28,18 +28,22 @@
 #ifndef _ARIADNE_APPROXIMATION_H
 #define _ARIADNE_APPROXIMATION_H
 
-#include "../declarations.h"
-#include "../numeric/numerical_traits.h"
-
 namespace Ariadne {
   namespace Numeric {
     
-    /*! \brief Approximate \a x by an element of \p Res. */
-    template<typename Res, typename Arg> inline Res approximate_by(const Arg& x) { return conv_approx<Res>(x); }
-        
-     /*! \brief Approximate \a x by an element of \p Res with accuracy \a e. */
-    template<typename Res, typename Arg, typename Err> Res approximate(const Arg& x, const Err& e);
-    
+    //! \name Conversion operations. 
+    //@{ 
+    //! \ingroup Numeric
+    /*! \brief Convert \a x to an element of R. */
+    template<typename R,typename A> R conv_exact(const A& x);
+    /*! \brief Approximate \a x by an element of R. */
+    template<typename R,typename A> R conv_approx(const A& x);
+    /*! \brief Approximate \a x by an element of R, rounding down. */
+    template<typename R,typename A> R conv_down(const A& x);
+    /*! \brief Approximate \a x by an element of R, rounding up. */
+    template<typename R,typename A> R conv_up(const A& x);
+    //@}
+
   }    
 }
 

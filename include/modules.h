@@ -25,8 +25,14 @@
 #define _ARIADNE_MODULES_H
 
 /*! \file modules.h
- * \brief Documentation for Ariadne modules.
+ * \brief Documentation for %Ariadne modules.
  */
+
+\namespace Ariadne {
+  /*!\brief Combinatorial sets and functions. */
+  namespace Combinatoric {
+  }
+}
 
 /*! \addtogroup Base Base
  *
@@ -41,24 +47,42 @@
  *  \brief Numerical types and intervals.
  */
 
+/*! \defgroup Combinatoric Combinatoric
+ *  \brief Combinatoric sets and maps.
+ *
+ *  \defgroup Lattice Lattice Sets and Functions
+ *  \ingroup Combinatoric
+ *  \brief Classes for integer lattices.
+ *
+ *  \defgroup SubdivisionTree Subdivision Tree Sets and Functions
+ *  \ingroup Combinatoric
+ *  \brief Classes for binary subdivision trees.
+ *
+ */
+ 
 /*! \defgroup Geometry Geometry
  *  \brief Geometric calculus module.
+ *
  *
  *  \defgroup BasicSet Basic Sets
  *  \ingroup Geometry
  *  \brief Basic set classes.
  *
+ *
  *  \defgroup DenotableSet Denotable Sets
  *  \ingroup Geometry
  *  \brief Denotable set classes.
+ *
  *
  *  \defgroup List List Sets 
  *  \ingroup DenotableSet
  *  \brief Denotable sets based on arbitrary lists of elements.
  *
+ *
  *  \defgroup Grid Grid Sets 
  *  \ingroup DenotableSet
  *  \brief Sets based on grids.
+ *
  *
  *  \defgroup PartitionTree Partition Tree Sets
  *  \ingroup DenotableSet

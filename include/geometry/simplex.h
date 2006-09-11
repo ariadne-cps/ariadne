@@ -147,20 +147,27 @@ namespace Ariadne {
       bool interior_contains(const state_type& point) const;
       //@}
 
-      friend std::ostream& operator<< <> (std::ostream& os, const Simplex<R>& r);
-      friend std::istream& operator>> <> (std::istream& is, Simplex<R>& r);
+      //@{ 
+      //! \name Input/output operations
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream& os) const;
+      /*! \brief Read from an input stream. */
+      std::istream& read(std::istream& is);
+      //@}
     };
 
-    template <typename R>
-    std::ostream&
-    operator<<(std::ostream& os, const Simplex<R>& s); 
 
+    template<typename R> inline 
+    std::ostream& operator<<(std::ostream& os, const Simplex<R>& s) {
+      return s.write(os);
+    }
     
-    template <typename R>
-    std::istream& 
-    operator>>(std::istream& is, Simplex<R>& s);
+    template<typename R> inline
+    std::istream& operator>>(std::istream& is, Simplex<R>& s) {
+      return s.read(is);
+    }
 
-      
+     
   }
 }
 

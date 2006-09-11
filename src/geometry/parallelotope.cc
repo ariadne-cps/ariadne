@@ -30,9 +30,6 @@ namespace Ariadne {
   namespace Geometry {
 
     template class Parallelotope<Real>;
-    
-    template std::ostream& operator<<(std::ostream&, const Parallelotope<Real>&);
-    template std::istream& operator>>(std::istream&, Parallelotope<Real>&);
 
   }
 }

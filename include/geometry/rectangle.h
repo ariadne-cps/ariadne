@@ -379,8 +379,13 @@ namespace Ariadne {
       //@}
 #endif
       
+      //@{ 
+      //! \name Input/output operations
+      /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;
+      /*! \brief Read from an input stream. */
       std::istream& read(std::istream& is);
+      //@}
      private:
       LinearAlgebra::IntervalVector<R> _bounds;
     };

@@ -26,6 +26,8 @@
 #include <fstream>
 #include <string>
 
+#include <algorithm>
+
 #include "base/stlio.h"
 
 #include "base/array_operations.h"
@@ -101,7 +103,7 @@ namespace Ariadne {
     {
       SizeArray result(this->dimension());
       for(dimension_type i=0; i!=this->dimension(); ++i) {
-        result[i]=size_type(this->_upper[i]-this->_lower[i]);
+        result[i]=std::max(0,this->_upper[i]-this->_lower[i]);
       }
       return result;
     }
@@ -112,7 +114,7 @@ namespace Ariadne {
       SizeArray result(this->dimension()+1);
       result[0]=1;
       for(dimension_type i=0; i!=this->dimension(); ++i) {
-        result[i+1]=size_type(this->_upper[i]-this->_lower[i])*result[i];
+        result[i+1]=std::max(0,this->_upper[i]-this->_lower[i])*result[i];
       }
       return result;
     }
@@ -120,7 +122,11 @@ namespace Ariadne {
     size_type
     LatticeRectangle::size() const
     {
-      return this->strides()[this->dimension()];
+      size_type result=1;
+      for(dimension_type i=0; i!=this->dimension(); ++i) {
+        result*=std::max(0,this->_upper[i]-this->_lower[i]);
+      }
+      return result;
     }
 
     bool 
@@ -257,9 +263,11 @@ namespace Ariadne {
     }
     
     LatticeRectangle
-    LatticeCellListSet::bounds() const
+    LatticeCellListSet::bounding_block() const
     { 
-      assert(!this->empty());
+      if(this->empty()) {
+        return LatticeRectangle(this->dimension());
+      }
 
       LatticeCell c=(*this)[0];
       IndexArray lower(c.lower());
@@ -331,10 +339,12 @@ namespace Ariadne {
 
 
     LatticeRectangle
-    LatticeRectangleListSet::bounds() const
+    LatticeRectangleListSet::bounding_block() const
     { 
-      assert(!this->empty());
-
+      if(this->empty()) {
+        return LatticeRectangle(this->dimension());
+      }
+      
       LatticeRectangle r=(*this)[0];
       IndexArray lower(r.lower());
       IndexArray upper(r.upper());
@@ -357,21 +367,35 @@ namespace Ariadne {
 
 
     LatticeMaskSet::LatticeMaskSet(const LatticeRectangle& bd, const LatticeCellListSet& cls)
-      : _bounds(bd)
+      : _block(bd)
     {
       this->_compute_cached_attributes();
       this->adjoin(cls);
     }
     
     LatticeMaskSet::LatticeMaskSet(const LatticeRectangle& bd, const LatticeRectangleListSet& rls)
-      : _bounds(bd)
+      : _block(bd)
+    {
+      this->_compute_cached_attributes();
+      this->adjoin(rls);
+    }
+    
+    LatticeMaskSet::LatticeMaskSet(const LatticeCellListSet& cls)
+      : _block(cls.bounding_block())
+    {
+      this->_compute_cached_attributes();
+      this->adjoin(cls);
+    }
+    
+    LatticeMaskSet::LatticeMaskSet(const LatticeRectangleListSet& rls)
+      : _block(rls.bounding_block())
     {
       this->_compute_cached_attributes();
       this->adjoin(rls);
     }
     
     LatticeMaskSet::LatticeMaskSet(const LatticeMaskSet& ms)
-      : _bounds(ms._bounds), _mask(ms._mask)
+      : _block(ms._block), _mask(ms._mask)
     {
       this->_compute_cached_attributes();
     }
@@ -396,18 +420,25 @@ namespace Ariadne {
 
 
 
-    /* Compute the index of a position in a grid. */
+    /* Compute the index of a lattice cell in a grid. */
     size_type
-    LatticeMaskSet::index(const IndexArray& pos) const
+    LatticeMaskSet::index(const LatticeCell& c) const
+    {
+      return this->_index(c.position());
+    }
+    
+     /* Compute the index of a lattice cell in a grid. */
+    size_type
+    LatticeMaskSet::_index(const IndexArray& pos) const
     {
       size_type result=0;
-      dimension_type n=pos.size();
-      for(dimension_type i=0; i!=n; ++i) {
+      for(dimension_type i=0; i!=pos.size(); ++i) {
         result += size_type(pos[i]-this->_lower[i])*this->_strides[i];
       }
       return result;
     }
 
+ 
 /*
     size_type
     LatticeMaskSet::index(const IndexArray& pos) const
@@ -421,31 +452,31 @@ namespace Ariadne {
     }
 */
 
-    IndexArray
-    LatticeMaskSet::position(size_type index) const
+    LatticeCell
+    LatticeMaskSet::cell(size_type index) const
     {
-      IndexArray result(this->dimension());
+      LatticeCell result(this->dimension());
+      IndexArray& array=result._lower;
       dimension_type n=this->dimension();
       for(dimension_type i=n-1; i!=0; --i) {
-        result[i] = index/this->_strides[i]+this->_lower[i];
+        array[i] = index/this->_strides[i]+this->_lower[i];
         index = index%this->_strides[i];
       }
-      result[0]=index;
+      array[0]=index;
       return result;
     }
 
 
     void 
-    LatticeMaskSet::adjoin(const LatticeRectangle& r) {
-      assert(subset(r,this->bounds()));
-
-      if (r.empty()) return;
-
+    LatticeMaskSet::adjoin(const LatticeRectangle& r) 
+    {
+      assert(subset(r,this->block()));
+      
       dimension_type n=this->dimension();
       const IndexArray& rlower(r.lower());
       const IndexArray& rupper(r.upper());
-      const IndexArray& glower(this->lower());
-      const SizeArray& gstrides(this->strides());
+      const IndexArray& glower(this->block().lower());
+      const SizeArray gstrides(this->block().strides());
 
       if(n==1) {
         for(size_type i=rlower[0]-glower[0]; 
@@ -457,7 +488,7 @@ namespace Ariadne {
 
       if(n==2) {
         SizeArray rsizes=r.sizes();
-        size_type index=this->index(rlower);
+        size_type index=this->_index(rlower);
         for(size_type loop_end=index+rsizes[1]*gstrides[1]; index!=loop_end; index+=gstrides[1]-rsizes[0]) {
           for(size_type inner_loop_end=index+rsizes[0]; index!=inner_loop_end; index+=1) {
             _mask[index]=true;
@@ -475,7 +506,7 @@ namespace Ariadne {
 
       /* dim>2 */
       SizeArray rsizes=r.sizes();
-      size_type index=this->index(rlower);
+      size_type index=this->_index(rlower);
       IndexArray rposition=rlower;
 
       while(rposition[n-1]!=rupper[n-1]) {
@@ -509,12 +540,13 @@ namespace Ariadne {
     }
 
     void 
-    LatticeMaskSet::adjoin(const LatticeMaskSet& lm) {
-      if(this->bounds()==lm.bounds()) {
+    LatticeMaskSet::adjoin(const LatticeMaskSet& lm) 
+    {
+      if(this->_block==lm._block) {
         this->_mask |= lm._mask;
       }
       else {
-        assert(subset(lm.bounds(),this->bounds()));
+        assert(subset(lm.block(),this->block()));
         for(LatticeMaskSet::const_iterator iter=lm.begin(); iter!=lm.end(); ++iter) {
           this->adjoin(*iter);
         }
@@ -522,11 +554,17 @@ namespace Ariadne {
     }
 
     void
-    LatticeMaskSet::_compute_cached_attributes() {
-      _lower=_bounds.lower();
-      _upper=_bounds.upper();
-      _sizes=_bounds.sizes();
-      _strides=_bounds.strides();
+    LatticeMaskSet::_compute_cached_attributes() 
+    {
+      if(_block.empty()) {
+        IndexArray origin(_block.dimension(),0);
+        _block=LatticeRectangle(origin,origin);
+      }
+      _lower=_block.lower();
+      _upper=_block.upper();
+      _sizes=_block.sizes();
+      _strides=_block.strides();
+      _mask.resize(_strides[_block.dimension()]);
     }
     
 
@@ -545,22 +583,22 @@ namespace Ariadne {
     LatticeMaskSet
     regular_intersection(const LatticeMaskSet& A, const LatticeMaskSet& B) 
     {
-      assert(A.bounds()==B.bounds());
-      return LatticeMaskSet(A.bounds(),A.mask() & B.mask());
+      assert(A.block()==B.block());
+      return LatticeMaskSet(A.block(),A.mask() & B.mask());
     }
 
     LatticeMaskSet
     join(const LatticeMaskSet& A, const LatticeMaskSet& B) 
     {
-      assert(A.bounds()==B.bounds());
-      return LatticeMaskSet(A.bounds(),A.mask() | B.mask());
+      assert(A.block()==B.block());
+      return LatticeMaskSet(A.block(),A.mask() | B.mask());
     }
 
     LatticeMaskSet
     difference(const LatticeMaskSet& A, const LatticeMaskSet& B) 
     {
-      assert(A.bounds()==B.bounds());
-      return LatticeMaskSet(A.bounds(),A.mask() - B.mask());
+      assert(A.block()==B.block());
+      return LatticeMaskSet(A.block(),A.mask() - B.mask());
     }
 
     bool 
@@ -604,7 +642,7 @@ namespace Ariadne {
     bool 
     interiors_intersect(const LatticeRectangle& r, const LatticeMaskSet& ms) 
     {
-      LatticeRectangle rstr=regular_intersection(r,ms.bounds());
+      LatticeRectangle rstr=regular_intersection(r,ms.block());
       if(rstr.empty()) {
         return false;
       }
@@ -619,18 +657,26 @@ namespace Ariadne {
     bool 
     interiors_intersect(const LatticeMaskSet& a, const LatticeMaskSet& b) 
     {
-      assert(a.bounds()==b.bounds());
-      BooleanArray::const_iterator aiter=a.mask().begin();
-      BooleanArray::const_iterator biter=a.mask().begin();
-      BooleanArray::const_iterator aend=a.mask().end();
-      while(aiter!=aend) {
-        if(*aiter & *biter) {
-          return true;
+      if(a.block()==b.block()) {
+        BooleanArray::const_iterator aiter=a.mask().begin();
+        BooleanArray::const_iterator biter=a.mask().begin();
+        BooleanArray::const_iterator aend=a.mask().end();
+        while(aiter!=aend) {
+          if(*aiter & *biter) {
+            return true;
+          }
+          ++aiter;
+          ++biter;
         }
-        ++aiter;
-        ++biter;
+        return false;
+      } else {
+        for(LatticeMaskSet::const_iterator aiter=a.begin(); aiter!=a.end(); ++aiter) {
+          if(interiors_intersect(*aiter,b)) {
+            return true;
+          }
+        }
+        return false;
       }
-      return false;
     }
     
 
@@ -644,7 +690,7 @@ namespace Ariadne {
     bool 
     subset(const LatticeCell& c, const LatticeMaskSet& ms) 
     {
-      return ms.mask()[ms.index(c.lower())];
+      return ms.mask()[ms.index(c)];
     }
     
     bool 
@@ -669,7 +715,7 @@ namespace Ariadne {
       if(r.empty()) {
         return true;
       }
-      if(!subset(r,ms.bounds())) {
+      if(!subset(r,ms.block())) {
         return false;
       }
       for(LatticeRectangle::const_iterator i=r.begin(); i!=r.end(); ++i) {
@@ -682,15 +728,23 @@ namespace Ariadne {
     
     bool 
     subset(const LatticeMaskSet& a, const LatticeMaskSet& b) {
-      assert(a.bounds() == b.bounds());
-      return a.mask() <= b.mask();
+      if(a.block() == b.block()) {
+        return a.mask() <= b.mask();
+      } else {
+        for(LatticeMaskSet::const_iterator aiter=a.begin(); aiter!=a.end(); ++aiter) {
+          if(!subset(*aiter,b)) {
+            return false;
+          }
+        }
+        return true;
+      }
     }
       
 
     LatticeMaskSet LatticeMaskSet::neighbourhood() const {
       LatticeMaskSet result=*this;
-      IndexArray lower_bound=result.lower();
-      IndexArray upper_bound=result.upper();
+      const IndexArray& lower_bound=result.block().lower();
+      const IndexArray& upper_bound=result.block().upper();
       for(LatticeMaskSet::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
         LatticeCell cell=*iter;
         IndexArray lower(this->dimension());
@@ -707,8 +761,8 @@ namespace Ariadne {
 
     LatticeMaskSet LatticeMaskSet::adjoining() const {
       LatticeMaskSet result=*this;
-      IndexArray lower_bound=result.lower();
-      IndexArray upper_bound=result.upper();
+      const IndexArray& lower_bound=result.block().lower();
+      const IndexArray& upper_bound=result.block().upper();
       for(LatticeMaskSet::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
         LatticeCell cell=*iter;
         IndexArray lower=(cell.lower());
@@ -757,7 +811,7 @@ namespace Ariadne {
     std::ostream& 
     operator<<(std::ostream& os, const LatticeMaskSet& ms) 
     {
-      return os << "LatticeMaskSet(\n  bounds=" << ms.bounds() << "\n  mask=" << ms.mask() << "\n)\n";
+      return os << "LatticeMaskSet(\n  block=" << ms.block() << "\n  mask=" << ms.mask() << "\n)\n";
     }
         
     std::ostream& 

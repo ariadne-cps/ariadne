@@ -43,11 +43,10 @@ namespace Ariadne {
     class DiscreteTimeSystem
     {
      public:
+      /*! \brief The real number type. */
       typedef R real_type;
+      /*! \brief The type of denotable state the system acts on. */
       typedef Geometry::Point<R> state_type;
-      
-      typedef Ariadne::LinearAlgebra::Matrix<R> Matrix_type;
-      typedef Ariadne::LinearAlgebra::Vector<R> Vector_type;
       
       /*! \brief  An the image of a point. Only available if the image can be 
        *  computed exactly. */
@@ -77,6 +76,7 @@ namespace Ariadne {
       /*! \brief  The dimension of the noise space. */
       virtual dimension_type noise_space_dimension() const;
       
+      /*! \brief  The name of the system. */
       virtual std::string name() const { return "DiscreteTimeSystem"; }
     };
 

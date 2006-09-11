@@ -43,6 +43,7 @@
 namespace Ariadne {
   namespace Evaluation {
    
+    /*! \brief %Base class for exceptions in the Evaluation module. */
     class EvaluationException
       : public std::exception 
     {
@@ -71,19 +72,27 @@ namespace Ariadne {
 namespace Ariadne {
   namespace System {
 
+    /*! \brief A class representing the difference of a Map and the identity.
+     *
+     * Useful for computing fixed points.
+     */
     template<typename R> class DifferenceMap
       : public VectorField<R>
     {
      public:
+      /*!\brief Construct from a map \a f, which must have the same argument dimension as result dimension. */
       DifferenceMap(const Map<R>& f) : _base(f) { assert(f.argument_dimension()==f.result_dimension()); }
-      DifferenceMap(const HenonMap<R>& f) : _base(f) { }
+      /*!\brief The dimension of the space the map acts on. */
       virtual dimension_type dimension() const { return _base.argument_dimension(); }
+      /*!\brief Evaluate the function \f$f(x)-x\f$, where \f$f\f$ is the map used to construct the difference map. */
       virtual LinearAlgebra::IntervalVector<R> operator() (const Geometry::Rectangle<R>& r) const {
         return _base(r)-r; }
+      /*!\brief Evaluate the derivative of function \f$f(x)-x\f$, which is \f$Df(x)-I\f$. */
       virtual LinearAlgebra::IntervalMatrix<R> derivative(const Geometry::Rectangle<R>& r) const {
         LinearAlgebra::IntervalMatrix<R> d=_base.derivative(r);
         LinearAlgebra::IntervalMatrix<R> i=LinearAlgebra::IntervalMatrix<R>::identity(this->dimension());
         return d-i; }
+      /*!\brief The name of the class. */
       virtual std::string name() const { return "DifferenceMap"; }
      private:
       const Map<R>& _base;

@@ -49,8 +49,9 @@ namespace Ariadne {
     template<typename R> std::istream& operator>>(std::istream&, Grid<R>&);
     template<typename R> std::ostream& operator<<(std::ostream&, const FiniteGrid<R>&);
    
-    /*! \brief Base type for defining a grid.
-     *  \ingroup Grid
+    /*! \ingroup Grid
+     *  \brief %Base type for defining a grid.
+     *
      *  We use inheritence and abstract functions here partly for ease of 
      *  development and partly since the grid coordinates only play a role when
      *  converting to rectangles and should occur with linear complexity in the 
@@ -59,6 +60,7 @@ namespace Ariadne {
     template<typename R>
     class Grid {
     public:
+      /*! \brief The type of real number defining the vertices and cells of the grid. */
       typedef R real_type;
      
       /*! \brief Destructor. */
@@ -104,14 +106,21 @@ namespace Ariadne {
         return subdivision_coordinate(d,n) == x ? n : n+1;
       }
 
+      /*! \brief Tests equality of two grids. */
       virtual bool operator==(const Grid<R>& g) const; 
+      /*! \brief Tests inequality of two grids. */
       virtual bool operator!=(const Grid<R>& g) const;
 
+      /*! The index of the cell countaining the point \a s. */
       IndexArray index(const Point<R>& s) const;
+      /*! The index of vertex to the lower-left of \a r. */
       IndexArray lower_index(const Rectangle<R>& r) const;
+      /*! The index of vertex to the upper-right of \a r. */
       IndexArray upper_index(const Rectangle<R>& r) const;
 
+      /*!\brief Write to an output stream. */
       virtual std::ostream& write(std::ostream& os) const = 0;
+      /*!\brief Read from an input stream. */
       virtual std::istream& read(std::istream& is) = 0;
    };
 
@@ -121,8 +130,10 @@ namespace Ariadne {
      */
     template<typename R>
     class IrregularGrid : public Grid<R> {
-      typedef R real_type;
      public:
+      /*! \brief The type of real number defining the vertices and cells of the grid. */
+      typedef R real_type;
+
       /*! \brief Cloning operator. */
       virtual IrregularGrid<R>* clone() const;
     
@@ -167,7 +178,7 @@ namespace Ariadne {
       /*! \brief Tests whether the grid contains the given lattice rectangle 
        * within its bounds. */
       virtual bool bounds_enclose(const Rectangle<R>& r) const {
-        return subset(r,Rectangle<R>(this->bounding_box())); }
+        return subset(r,Rectangle<R>(this->bounds())); }
 
       /*! \brief Construct from a bounding box and an equal number of 
        * subdivisions in each coordinate. */
@@ -187,10 +198,10 @@ namespace Ariadne {
       /*! \brief Join two irregular grids. */
       IrregularGrid(const IrregularGrid& g1,IrregularGrid& g2);
 
-      /*! \brief Tests equivalence of two irregular grids. */
+      /*! \brief Tests equality of two irregular grids. */
       bool operator==(const Grid<R>& g) const; 
       
-      /*! \brief Tests unequivalence of two irregular grids. */
+      /*! \brief Tests equality of two irregular grids. */
       bool operator!=(const Grid<R>& g) const;
             
       /*! \brief The lowest valid vertex index. */
@@ -204,22 +215,24 @@ namespace Ariadne {
         return result;
       }
       /*! \brief The block of valid lattice cells. */
-      LatticeRectangle bounds() const { return LatticeRectangle(lower(),upper()); }
+      LatticeRectangle block() const { return LatticeRectangle(lower(),upper()); }
       /*! \brief The number of subdivision intervals in each dimension. */
-      SizeArray sizes() const { return bounds().sizes(); }
+      SizeArray sizes() const { return block().sizes(); }
       /*! \brief The total number of cells. */
-      size_type capacity() const { return bounds().size(); }
+      size_type capacity() const { return block().size(); }
       /*! \brief The number of subdivision intervals in dimension \a d. */
       size_type size(dimension_type i) const { return _subdivision_coordinates[i].size()-1; }
 
       /*! \brief The rectangle bounding the grid. */
-      GridRectangle<R> bounding_box() const;
+      GridRectangle<R> bounds() const;
       
       /*! \brief Find the rule to translate elements from a grid to a 
        * refinement. */
       static array< std::vector<index_type> > index_translation(const IrregularGrid<R>& from, const IrregularGrid<R>& to);
 
+      /*!\brief Write to an output stream. */
       virtual std::ostream& write(std::ostream& os) const;
+      /*!\brief Read from an input stream. */
       virtual std::istream& read(std::istream& is);
      private:
       void create();
@@ -233,8 +246,10 @@ namespace Ariadne {
      *  \ingroup Grid
      */
     template<typename R> class RegularGrid : public Grid<R> {
-      typedef R real_type;
      public:
+      /*! \brief The type of real number defining the vertices and cells of the grid. */
+      typedef R real_type;
+
       /*! \brief Cloning operator. */
       RegularGrid<R>* clone() const;
       
@@ -268,24 +283,35 @@ namespace Ariadne {
         return result;
       }
 
+      /*! \brief True if \a r is contained within the region of definition of the grid. */
       virtual bool bounds_enclose(const Rectangle<R>& r) const { return true; }
      
+      /*! \brief True if \a r is contained within the region of definition of the grid. */
+      virtual bool bounds_superset(const Rectangle<R>& r) const { return true; }
+     
+      /*! \brief Tests equality of two regular grids. */
       bool operator==(const Grid<R>& g) const; 
       
+      /*! \brief Tests inequality of two regular grids. */
       bool operator!=(const Grid<R>& g) const; 
 
+      /*!\brief Write to an output stream. */
       virtual std::ostream& write(std::ostream& os) const;
+      /*!\brief Read from an input stream. */
       virtual std::istream& read(std::istream& is);
      private:
       array<R> _subdivision_lengths;
     };
 
-    /*! \brief A finite grid, suitable for defining a GridMaskSet. 
-     *  \ingroup Grid
+    /*!\ingroup Grid
+     * \brief A finite grid, suitable for defining a GridMaskSet. (Deprecated)
+     * \deprecated Use a Grid and LatticeRectangle in GridMaskSet constructor instead. 
      */
     template<typename R> class FiniteGrid {
-      typedef R real_type;
      public:
+      /*! \brief The type of real number defining the vertices and cells of the grid. */
+      typedef R real_type;
+
       /*! \brief A finite grid generated by subdividing a rectangle. */
       FiniteGrid(const Rectangle<R>& g, const size_type& s);
         

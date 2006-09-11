@@ -33,7 +33,7 @@
 namespace Ariadne {
   namespace Evaluation {
    
-    /*! \brief Base class for integration schemes. 
+    /*! \brief %Base class for integration schemes. 
      *  \ingroup Integrate
      */
     template<typename R>
@@ -91,10 +91,16 @@ namespace Ariadne {
                                                         const Geometry::Rectangle<R>& estimated_bound,
                                                         const R& integration_time) const;
 
+      /*! \brief A suggested minimum step size for integration. */
       virtual R minimum_step_size() const;
+      /*! \brief The maximum allowable step size for integration. */
       virtual R maximum_step_size() const;
+      /*! \brief A suggested minimum radius of a basic set after a subdivision (not a strict bound). */
       virtual R minimum_basic_set_radius() const;
+      /*! T\brief he maximum allowable radius of a basic set during integration. */
       virtual R maximum_basic_set_radius() const;
+      /*! \brief The time after which an integrator may approximate computed sets on a grid,
+       *  in order to use previously caches integration results for the grid. */
       virtual R lock_to_grid_time() const;
 
      protected:
@@ -138,7 +144,7 @@ namespace Ariadne {
 
     };
 
-    /*! \brief Base class for integration schemes which do not use the derivative of the vector field. 
+    /*! \brief %Base class for integration schemes which do not use the derivative of the vector field. 
      *  \ingroup Integrate
      */
     template<typename R>
@@ -186,7 +192,7 @@ namespace Ariadne {
     };
 
  
-    /*! \brief Base class for integration schemes which require at least a \f$C^1\f$ vector field.
+    /*! \brief %Base class for integration schemes which require at least a \f$C^1\f$ vector field.
      *  \ingroup Integrate
      */
     template<typename R>
@@ -218,7 +224,7 @@ namespace Ariadne {
        * The algorithm first finds \f$B_{n+1}\f$ such that \f$R_{n+1}\subset B_{n+1}\f$. 
        * It then computes an interval matrix \f$ \mathcal{A}_{n} \f$ such that \f$ Df(B_{n+1}) \in \mathcal{A}_{n} \f$.
        * It then computes a rectangle \f$ \mathcal{c}_{n+1} \f$ such that \f$ \Phi(t,c_{n})\in \mathcal{c}_{n+1} \f$.
-       * We then compute \f$ \mathcal{P}_{n} \f$ such that \$f D\Phi(h,R_{n}) \subset \mathcal{P}_{n} \f$.
+       * We then compute \f$ \mathcal{P}_{n} \f$ such that \f$ D\Phi(h,R_{n}) \subset \mathcal{P}_{n} \f$.
        * We then compute \f$ A_{n+1} \f$ such that \f$ A_{n+1} \mathcal{e} \supset \mathcal{P}_{n} \mathcal{e} \f$.
        */
       virtual Geometry::ListSet<R,Geometry::Parallelotope> integrate(const System::VectorField<R>&,
@@ -230,7 +236,7 @@ namespace Ariadne {
        * The algorithm first finds \f$B_{n+1}\f$ such that \f$R_{n+1}\subset B_{n+1}\f$. 
        * It then computes an interval matrix \f$ \mathcal{A}_{n} \f$ such that \f$ Df(B_{n+1}) \in \mathcal{A}_{n} \f$.
        * It then computes a rectangle \f$ \mathcal{c}_{n+1} \f$ such that \f$ \Phi(t,c_{n})\in \mathcal{c}_{n+1} \f$.
-       * We then compute \f$ \mathcal{P}_{n} \f$ such that \$f D\Phi(h,R_{n}) \subset \mathcal{P}_{n} \f$.
+       * We then compute \f$ \mathcal{P}_{n} \f$ such that \f$ D\Phi(h,R_{n}) \subset \mathcal{P}_{n} \f$.
        * We then compute \f$ A_{n+1} \f$ such that \f$ A_{n+1} \mathcal{e} \supset \mathcal{P}_{n} \mathcal{e} \f$.
        */
       virtual Geometry::ListSet<R,Geometry::Zonotope> integrate(const System::VectorField<R>&,
@@ -255,6 +261,7 @@ namespace Ariadne {
                                                             const Geometry::ListSet<R,Geometry::Zonotope>&,
                                                             const R&) const;
 
+      /*! \brief A C1 algorithm for computing the reachable set of in initial set of Parallelotopes up to a certain time. */
       inline Geometry::ListSet<R,Geometry::Parallelotope> reach(
                       const System::VectorField<R>& vector_field, 
                       const Geometry::Parallelotope<R>& initial_set, 
@@ -263,6 +270,7 @@ namespace Ariadne {
         return this->reach(vector_field, initial_set.subdivide(), time);
       }
 
+      /*! \brief A C1 algorithm for computing the reachable set of in initial set of Zonotopes up to a certain time. */
       inline Geometry::ListSet<R,Geometry::Zonotope> reach(
                       const System::VectorField<R>& vector_field,
                       const Geometry::Zonotope<R>& initial_set, 

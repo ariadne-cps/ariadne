@@ -41,19 +41,28 @@ namespace Ariadne {
     template <typename R>
     class VectorField {
      public:
+      /*! \brief The real number type. */
       typedef R real_type;
+      /*! \brief The type of denotable state the system acts on. */
       typedef Geometry::Point<R> state_type;
       
+      /*! \brief Virtual destructor. */
       virtual ~VectorField();
      
+      /*! \brief An approximation to the vector field at a point. */
       virtual LinearAlgebra::Vector<R> operator() (const Geometry::Point<R>& x) const;
+      /*! \brief A bound for the vector field over a rectangle. */
       virtual LinearAlgebra::IntervalVector<R> operator() (const Geometry::Rectangle<R>& A) const;
 
+      /*! \brief An approximation to the Jacobian derivative at a point. */
       virtual LinearAlgebra::Matrix<R> derivative(const Geometry::Point<R>& x) const;
+      /*! \brief A bound for the Jacobian derivative over a rectangle. */
       virtual LinearAlgebra::IntervalMatrix<R> derivative(const Geometry::Rectangle<R>& A) const;
     
+      /*! \brief The dimension of the space the vector field lives in. */
       virtual dimension_type dimension() const = 0;
 
+      /*! \brief The name of the system. */
       virtual std::string name() const = 0;
     };
    

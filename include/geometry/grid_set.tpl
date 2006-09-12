@@ -50,7 +50,7 @@ namespace Ariadne {
     }
 
     template<typename R>
-    GridRectangle<R>::GridRectangle(const Grid<R>& g, const LatticeRectangle& b)
+    GridRectangle<R>::GridRectangle(const Grid<R>& g, const Combinatoric::LatticeRectangle& b)
       : _grid(g), _lattice_set(b)
     {
       assert(g.dimension()==b.dimension());
@@ -83,7 +83,7 @@ namespace Ariadne {
 
 
     template<typename R>
-    GridCell<R>::GridCell(const Grid<R>& g, const LatticeCell& pos)
+    GridCell<R>::GridCell(const Grid<R>& g, const Combinatoric::LatticeCell& pos)
       : _grid(g), _lattice_set(pos)
     {
       assert(_lattice_set.dimension()==_grid.dimension());
@@ -470,7 +470,7 @@ namespace Ariadne {
       typedef typename ListSet<R,Rectangle>::const_iterator ListSet_const_iterator;
 
       for(ListSet_const_iterator riter=ls.begin(); riter!=ls.end(); ++riter) {
-        _lattice_set.adjoin(LatticeRectangle(grid().lower_index(*riter),grid().upper_index(*riter)));
+        _lattice_set.adjoin(Combinatoric::LatticeRectangle(grid().lower_index(*riter),grid().upper_index(*riter)));
       }
     }
 
@@ -487,13 +487,13 @@ namespace Ariadne {
     }
 
     template<typename R>
-    GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const LatticeRectangle& b)
+    GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeRectangle& b)
       : _grid_ptr(&g), _lattice_set(b) 
     { 
     }
 
     template<typename R>
-    GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const LatticeRectangle& b, const BooleanArray& m)
+    GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeRectangle& b, const BooleanArray& m)
       : _grid_ptr(&g), _lattice_set(b,m)
     {
       const IrregularGrid<R>* irregular_grid_ptr=dynamic_cast<const IrregularGrid<R>*>(_grid_ptr);
@@ -503,7 +503,7 @@ namespace Ariadne {
     }
 
     template<typename R>
-    GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const LatticeMaskSet& ms)
+    GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeMaskSet& ms)
       : _grid_ptr(&g), _lattice_set(ms)
     {
       const IrregularGrid<R>* irregular_grid_ptr=dynamic_cast<const IrregularGrid<R>*>(_grid_ptr);
@@ -629,9 +629,9 @@ namespace Ariadne {
       Rectangle<R> bb=p.bounding_box();
 
       GridRectangle<R> gbb=over_approximation(bb,g);
-      LatticeRectangle block=gbb.lattice_set();
+      Combinatoric::LatticeRectangle block=gbb.lattice_set();
 
-      for(LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
+      for(Combinatoric::LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
         GridCell<R> cell(g,*iter);
         if(!disjoint(Rectangle<R>(cell),p)) {
           result.adjoin(cell);
@@ -654,9 +654,9 @@ namespace Ariadne {
       
       Rectangle<R> bb=z.bounding_box();
       GridRectangle<R> gbb=over_approximation(bb,g);
-      LatticeRectangle block=gbb.lattice_set();
+      Combinatoric::LatticeRectangle block=gbb.lattice_set();
 
-      for(LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
+      for(Combinatoric::LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
         GridCell<R> cell(g,*iter);
         if(subset(Rectangle<R>(cell),z)) {
           result.adjoin(cell);
@@ -722,9 +722,9 @@ namespace Ariadne {
       }
       
       GridRectangle<R> gbb=over_approximation(bb,g);
-      LatticeRectangle block=gbb.lattice_set();
+      Combinatoric::LatticeRectangle block=gbb.lattice_set();
 
-      for(LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
+      for(Combinatoric::LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
 
         GridCell<R> cell(g.grid(),*iter);
         if(!disjoint(Rectangle<R>(cell),p)) {
@@ -751,9 +751,9 @@ namespace Ariadne {
       }
       
       GridRectangle<R> gbb=over_approximation(bb,g);
-      LatticeRectangle block=gbb.lattice_set();
+      Combinatoric::LatticeRectangle block=gbb.lattice_set();
 
-      for(LatticeRectangle::const_iterator iter=block.begin(); 
+      for(Combinatoric::LatticeRectangle::const_iterator iter=block.begin(); 
             iter!=block.end(); ++iter) {
 
         GridCell<R> cell(g.grid(),*iter);
@@ -1005,8 +1005,8 @@ namespace Ariadne {
       GridRectangle<R> gbb=over_approximation_of_intersection(z.bounding_box(),r,g);
 
       if(!gbb.empty()) {
-        LatticeRectangle block=gbb.lattice_set();
-        for(LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
+        Combinatoric::LatticeRectangle block=gbb.lattice_set();
+        for(Combinatoric::LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
           GridCell<R> cell(g,*iter);
           if(!disjoint(Rectangle<R>(cell),z)) {
             result.adjoin(cell);

@@ -36,10 +36,11 @@
 
 #include "../declarations.h"
 #include "../base/array.h"
-#include "../base/binary_word.h"
+
+#include "../combinatoric/binary_word.h"
 
 namespace Ariadne {
-  namespace Base {
+  namespace Combinatoric {
     class BinaryTree;
     class BinaryTreeIterator;
     

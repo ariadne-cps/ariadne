@@ -37,9 +37,10 @@
 
 #include "../base/array.h"
 
+#include "../combinatoric/lattice_set.h"
+
 #include "../geometry/rectangle.h"
 #include "../geometry/grid.h"
-#include "../geometry/lattice_set.h"
 
 /*TODO: Unify bounds in FiniteGrid, and make GridMaskSet use only finite grid bounds*/
 
@@ -202,7 +203,7 @@ namespace Ariadne {
       typedef Point<R> state_type;
       
       /*!\brief Construct from a grid and an unit grid cell. */
-      GridCell(const Grid<R>& g, const LatticeCell& pos);
+      GridCell(const Grid<R>& g, const Combinatoric::LatticeCell& pos);
 
       /*!\brief Construct from a grid and an unit grid cell. */
       GridCell(const Grid<R>& g, const IndexArray& pos);
@@ -214,7 +215,7 @@ namespace Ariadne {
       dimension_type dimension() const { return _lattice_set.dimension(); }
 
       /*!\brief The position of the cell in the grid. */
-      const LatticeCell& lattice_set() const { return _lattice_set; }
+      const Combinatoric::LatticeCell& lattice_set() const { return _lattice_set; }
 
       /*!\brief Convert to an ordinary rectangle. */
       operator Rectangle<R>() const;
@@ -223,7 +224,7 @@ namespace Ariadne {
       Rectangle<R> bounding_box() const { return *this; }
      private:
       const Grid<R>& _grid;
-      LatticeCell _lattice_set;
+      Combinatoric::LatticeCell _lattice_set;
     };
 
 
@@ -245,7 +246,7 @@ namespace Ariadne {
       /*!\brief Construct an empty rectangle on a grid. */
       GridRectangle(const Grid<R>& g);
       /*!\brief Construct from a grid and a bounding block. */
-      GridRectangle(const Grid<R>& g, const LatticeRectangle& b);
+      GridRectangle(const Grid<R>& g, const Combinatoric::LatticeRectangle& b);
       /*!\brief Construct from a grid and two integer arrays giving the corners. */
       GridRectangle(const Grid<R>& g, const IndexArray& l, const IndexArray& u);
       /*!\brief Construct from a grid and an ordinary rectangle. */
@@ -260,7 +261,7 @@ namespace Ariadne {
       dimension_type dimension() const { return _lattice_set.dimension(); }
 
       /*!\brief The position of the rectangle in the grid. */
-      const LatticeRectangle& lattice_set() const { return _lattice_set; }
+      const Combinatoric::LatticeRectangle& lattice_set() const { return _lattice_set; }
 
       /*!\brief Tests if the rectangle is empty. */
       bool empty() const { return _lattice_set.empty(); }
@@ -279,7 +280,7 @@ namespace Ariadne {
       friend bool subset<> (const GridRectangle<R>&, const GridMaskSet<R>&);
      private:
       const Grid<R>& _grid;
-      LatticeRectangle _lattice_set;
+      Combinatoric::LatticeRectangle _lattice_set;
     };
 
     template<class Base, class Value>
@@ -309,7 +310,7 @@ namespace Ariadne {
       typedef const GridCell<R>* pointer;
       typedef int difference_type;
      public:
-      GridCellListSetIterator(const Grid<R>& g, LatticeCellListSetIterator iter);
+      GridCellListSetIterator(const Grid<R>& g, Combinatoric::LatticeCellListSetIterator iter);
       GridCell<R> operator*() const { return this->dereference(); }
       Self& operator++() { this->increment(); return *this; }
       Self operator++(int) { Self tmp=*this; this->increment(); return tmp; }
@@ -321,7 +322,7 @@ namespace Ariadne {
       GridCell<R> dereference() const { return GridCell<R>(*_grid_ptr,*_iter); }
      private:
       const Grid<R>* _grid_ptr;
-      LatticeCellListSet::const_iterator _iter;
+      Combinatoric::LatticeCellListSet::const_iterator _iter;
     };
 
 
@@ -334,8 +335,8 @@ namespace Ariadne {
       friend class GridRectangleListSet<R>;
       friend class GridMaskSet<R>;
      public:
-      typedef GridSetIterator< LatticeCellListSet::const_iterator, GridCell<R> > iterator;
-      typedef GridSetIterator< LatticeCellListSet::const_iterator, GridCell<R> > const_iterator;
+      typedef GridSetIterator< Combinatoric::LatticeCellListSet::const_iterator, GridCell<R> > iterator;
+      typedef GridSetIterator< Combinatoric::LatticeCellListSet::const_iterator, GridCell<R> > const_iterator;
 
       /*! \brief The type of denotable real number defining the vertices and cells of the grid. */
       typedef R real_type;
@@ -375,7 +376,7 @@ namespace Ariadne {
       size_type size() const { return _lattice_set.size(); }
 
       /*! \brief The lattice set. */
-      const LatticeCellListSet& lattice_set() const { return _lattice_set; }
+      const Combinatoric::LatticeCellListSet& lattice_set() const { return _lattice_set; }
 
       /*!\brief The @a i th cell in the list. */
       GridCell<R> operator[] (const size_type i) const { return GridCell<R>(grid(),_lattice_set[i]); }
@@ -392,7 +393,7 @@ namespace Ariadne {
       friend std::ostream& operator<< <> (std::ostream&, const GridCellListSet<R>&);
      private:
       const Grid<R>* _grid_ptr;
-      LatticeCellListSet _lattice_set;
+      Combinatoric::LatticeCellListSet _lattice_set;
     };
 
 
@@ -409,7 +410,7 @@ namespace Ariadne {
       typedef const GridRectangle<R>* pointer;
       typedef int difference_type;
      public:
-      GridRectangleListSetIterator(const Grid<R>& g, LatticeRectangleListSetIterator iter);
+      GridRectangleListSetIterator(const Grid<R>& g, Combinatoric::LatticeRectangleListSetIterator iter);
       GridRectangle<R> operator*() const { return this->dereference(); }
       Self& operator++() { this->increment(); return *this; }
       Self operator++(int) { Self tmp=*this; this->increment(); return tmp; }
@@ -421,7 +422,7 @@ namespace Ariadne {
       GridRectangle<R> dereference() const { return GridRectangle<R>(*_grid_ptr,*_iter); }
      private:
       const Grid<R>* _grid_ptr;
-      LatticeRectangleListSet::const_iterator _iter;
+      Combinatoric::LatticeRectangleListSet::const_iterator _iter;
     };
 
 
@@ -434,8 +435,8 @@ namespace Ariadne {
       friend class GridMaskSet<R>;
       friend class GridCellListSet<R>;
      public:
-      typedef GridSetIterator< LatticeRectangleListSet::const_iterator, GridRectangle<R> > iterator;
-      typedef GridSetIterator< LatticeRectangleListSet::const_iterator, GridRectangle<R> > const_iterator;
+      typedef GridSetIterator< Combinatoric::LatticeRectangleListSet::const_iterator, GridRectangle<R> > iterator;
+      typedef GridSetIterator< Combinatoric::LatticeRectangleListSet::const_iterator, GridRectangle<R> > const_iterator;
 
       /*! \brief The type of denotable real number defining the vertices and cells of the grid. */
       typedef R real_type;
@@ -480,7 +481,7 @@ namespace Ariadne {
       size_type size() const { return _lattice_set.size(); }
 
       /*! \brief The rectangles on the underlying lattice. */
-      const LatticeRectangleListSet& lattice_set() const { return _lattice_set; }
+      const Combinatoric::LatticeRectangleListSet& lattice_set() const { return _lattice_set; }
       
       /*!\brief Return the @a i th rectangle in the list. */
       GridRectangle<R> operator[] (const size_t i) const {
@@ -501,7 +502,7 @@ namespace Ariadne {
       friend std::ostream& operator<< <> (std::ostream&, const GridRectangleListSet<R>&);
      private:
       const Grid<R>* _grid_ptr;
-      LatticeRectangleListSet _lattice_set;
+      Combinatoric::LatticeRectangleListSet _lattice_set;
     };
 
 
@@ -515,7 +516,7 @@ namespace Ariadne {
       typedef const GridCell<R>* pointer;
       typedef int difference_type;
      public:
-      GridMaskSetIterator(const Grid<R>& g, LatticeMaskSetIterator iter);
+      GridMaskSetIterator(const Grid<R>& g, Combinatoric::LatticeMaskSetIterator iter);
       GridCell<R> operator*() const { return this->dereference(); }
       Self& operator++() { this->increment(); return *this; }
       Self operator++(int) { Self tmp=*this; this->increment(); return tmp; }
@@ -527,7 +528,7 @@ namespace Ariadne {
       GridCell<R> dereference() const { return GridCell<R>(*_grid_ptr,*_iter); }
      private:
       const Grid<R>* _grid_ptr;
-      LatticeMaskSet::const_iterator _iter;
+      Combinatoric::LatticeMaskSet::const_iterator _iter;
     };
 
     
@@ -541,8 +542,8 @@ namespace Ariadne {
       friend class GridCellListSet<R>;
       friend class PartitionTreeSet<R>;
      public:
-      typedef GridSetIterator< LatticeMaskSet::const_iterator, GridCell<R> > iterator;
-      typedef GridSetIterator< LatticeMaskSet::const_iterator, GridCell<R> > const_iterator;
+      typedef GridSetIterator< Combinatoric::LatticeMaskSet::const_iterator, GridCell<R> > iterator;
+      typedef GridSetIterator< Combinatoric::LatticeMaskSet::const_iterator, GridCell<R> > const_iterator;
 
       /*! \brief The type of denotable real number defining the vertices and cells of the grid. */
       typedef R real_type;
@@ -554,24 +555,24 @@ namespace Ariadne {
 
       /*!\brief Construct an empty set from a finite grid. (Deprecated)
        *
-       * \deprecated Use GridMaskSet(const Grid<R>& g, const LatticeRectangle& b) instead.
+       * \deprecated Use GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeRectangle& b) instead.
        */
       GridMaskSet(const FiniteGrid<R>& g);
      
       /*!\brief Construct a set from a finite grid and a mask. (Deprecated)
        *
-       * \deprecated Use GridMaskSet(const Grid<R>& g, const LatticeRectangle& b, const BooleanArray& m) instead.
+       * \deprecated Use GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeRectangle& b, const BooleanArray& m) instead.
        */
       GridMaskSet(const FiniteGrid<R>& g, const BooleanArray& m);
 
       /*!\brief Construct an empty set based on grid \a g and with cells in the block \a b. */
-      GridMaskSet(const Grid<R>& g, const LatticeRectangle& b);
+      GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeRectangle& b);
      
       /*!\brief Construct a set from a grid, a lattice rectangle and a mask. */
-      GridMaskSet(const Grid<R>& g, const LatticeRectangle& b, const BooleanArray& m);
+      GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeRectangle& b, const BooleanArray& m);
      
       /*!\brief Construct a set from a grid, and a lattice mask set. */
-      GridMaskSet(const Grid<R>& g, const LatticeMaskSet& ms);
+      GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeMaskSet& ms);
      
       /*!\brief Copy constructor. */
       GridMaskSet(const GridMaskSet<R>& gms);
@@ -611,7 +612,7 @@ namespace Ariadne {
       GridRectangle<R> bounds() const { return GridRectangle<R>(*_grid_ptr,_lattice_set.block()); }
 
       /*! \brief The underlying lattice set. */
-      const LatticeMaskSet& lattice_set() const { return _lattice_set; }
+      const Combinatoric::LatticeMaskSet& lattice_set() const { return _lattice_set; }
 
       /*! \brief The space dimension of the set. */
       dimension_type dimension() const { return _lattice_set.dimension(); }
@@ -620,7 +621,7 @@ namespace Ariadne {
       size_type capacity() const { return _lattice_set.capacity(); }
       
       /*! \brief The block of cells available in the lattice. */
-      const LatticeRectangle& block() const { return _lattice_set.block(); }
+      const Combinatoric::LatticeRectangle& block() const { return _lattice_set.block(); }
 
       /*! \brief The lowest position in the grid. (Deprecated)
        *
@@ -730,7 +731,7 @@ namespace Ariadne {
       friend GridMaskSet<R> difference<> (const GridMaskSet<R>&, const GridMaskSet<R>&);
      private:
       const Grid<R>* _grid_ptr;
-      LatticeMaskSet _lattice_set;
+      Combinatoric::LatticeMaskSet _lattice_set;
     };
 
     template<typename R>

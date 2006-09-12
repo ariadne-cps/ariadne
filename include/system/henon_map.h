@@ -78,7 +78,7 @@ namespace Ariadne {
       /*! \brief The dimension of the result. */
       dimension_type result_dimension() const { return 2; }
       
-      /*! \brief The Henon map is invertible unless \fb$=0\f$. */
+      /*! \brief The Henon map is invertible unless \f$b=0\f$. */
       bool invertible() const {
         return _b!=0; }
         

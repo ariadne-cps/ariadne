@@ -78,7 +78,7 @@
 #include "../declarations.h"
 
 namespace Ariadne {
-  namespace Base {    
+  namespace Combinatoric {    
     class BinaryWordList;
     class BinaryWordFixedSizeList;
     

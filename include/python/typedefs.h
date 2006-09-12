@@ -57,6 +57,13 @@ typedef LinearAlgebra::Vector<Field> FVector;
 typedef LinearAlgebra::Matrix<Field> FMatrix;
 typedef LinearAlgebra::LinearProgram<Field> FLinearProgram;
 
+typedef Combinatoric::LatticeCell LatticeCell;
+typedef Combinatoric::LatticeRectangle LatticeRectangle;
+typedef Combinatoric::LatticeMaskSet LatticeMaskSet;
+typedef Combinatoric::LatticeCellListSet LatticeCellListSet;
+typedef Combinatoric::LatticeRectangleListSet LatticeRectangleListSet;
+typedef Combinatoric::LatticeMultiMap LatticeMultiMap;
+
 typedef Geometry::Point<Real> RPoint;
 typedef Geometry::PointList<Real> RPointList;
 typedef Geometry::Rectangle<Real> RRectangle;
@@ -70,12 +77,6 @@ typedef Geometry::ListSet<Real,Geometry::Rectangle> RRectangleListSet;
 typedef Geometry::ListSet<Real,Geometry::Parallelotope> RParallelotopeListSet;
 typedef Geometry::ListSet<Real,Geometry::Zonotope> RZonotopeListSet;
 typedef Geometry::ListSet<Real,Geometry::Polyhedron> RPolyhedronListSet;
-
-typedef Geometry::LatticeCell LatticeCell;
-typedef Geometry::LatticeRectangle LatticeRectangle;
-typedef Geometry::LatticeMaskSet LatticeMaskSet;
-typedef Geometry::LatticeCellListSet LatticeCellListSet;
-typedef Geometry::LatticeRectangleListSet LatticeRectangleListSet;
 
 typedef Geometry::grid_type grid_type;
 typedef Geometry::Grid<Real> RGrid;
@@ -92,8 +93,6 @@ typedef Geometry::PartitionScheme<Real> RPartitionScheme;
 typedef Geometry::PartitionTree<Real> RPartitionTree;
 typedef Geometry::PartitionTreeCell<Real> RPartitionTreeCell;
 typedef Geometry::PartitionTreeSet<Real> RPartitionTreeSet;
-
-typedef System::LatticeMultiMap LatticeMultiMap;
 
 typedef System::Map<Real> RMapBase;
 typedef System::AffineMap<Real> RAffineMap;

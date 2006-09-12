@@ -23,7 +23,7 @@
 
 
 
-#include "geometry/lattice_set.h"
+#include "combinatoric/lattice_set.h"
 
 #include "python/typedefs.h"
 using namespace Ariadne;

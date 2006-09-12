@@ -268,7 +268,7 @@ namespace Ariadne {
     FiniteGrid<R>::bounding_box() const
     {
       const size_t &dim=this->dimension();
-      const LatticeRectangle &bounds=this->_bounds;
+      const Combinatoric::LatticeRectangle &bounds=this->_bounds;
 	   
       switch(this->_grid_type) {
         case REGULAR:

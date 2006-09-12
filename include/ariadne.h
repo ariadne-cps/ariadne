@@ -57,6 +57,10 @@ namespace Numeric {}
  */
 namespace LinearAlgebra {}
 
+/*! \brief Combinatorial objects, such as sets and maps on lattices and subdivision trees.
+ */
+namespace Combinatoric {}
+  
 /*! \brief Geometric calculus library.
  */
 namespace Geometry {}

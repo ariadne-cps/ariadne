@@ -29,8 +29,8 @@
 
 #include "base/stlio.h"
 #include "base/exception.h"
-#include "base/binary_word.h"
-#include "base/binary_tree.h"
+#include "combinatoric/binary_word.h"
+#include "combinatoric/binary_tree.h"
 #include "numeric/numerical_types.h"
 
 #include "base/utility.h"
@@ -41,7 +41,7 @@
 #include "test.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Geometry;
+using namespace Ariadne::Combinatoric;
 using namespace std;
 
 int main() {

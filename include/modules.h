@@ -28,12 +28,6 @@
  * \brief Documentation for %Ariadne modules.
  */
 
-\namespace Ariadne {
-  /*!\brief Combinatorial sets and functions. */
-  namespace Combinatoric {
-  }
-}
-
 /*! \addtogroup Base Base
  *
  *  \defgroup LinearAlgebra Linear Algebra

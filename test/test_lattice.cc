@@ -27,11 +27,11 @@
 #include "declarations.h"
 #include "real_typedef.h"
 
-#include "geometry/lattice_set.h"
-#include "system/lattice_map.h"
+#include "combinatoric/lattice_set.h"
+#include "combinatoric/lattice_map.h"
 
 using namespace Ariadne;
-using namespace Geometry;
+using namespace Combinatoric;
 using namespace System;
 using namespace std;
 

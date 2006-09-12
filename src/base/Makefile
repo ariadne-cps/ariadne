@@ -1,6 +1,6 @@
 include ../../config.mk
 
-OBJ = binary_tree.o array_operations.o
+OBJ = array_operations.o
 
 all: ${OBJ}
 

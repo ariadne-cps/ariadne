@@ -32,11 +32,13 @@
 
 #include "../declarations.h"
 
-#include "../base/binary_word.h"
-#include "../base/binary_tree.h"
 #include "../base/iterator.h"
 
-#include "../geometry/subdivision_tree_set.h"
+#include "../combinatoric/binary_word.h"
+#include "../combinatoric/binary_tree.h"
+#include "../combinatoric/subdivision_tree_set.h"
+
+
 
 namespace Ariadne {
   namespace Geometry {
@@ -67,7 +69,9 @@ namespace Ariadne {
     {
       friend class PartitionTree<R>;
      public:
-      PartitionTreeIterator(const Rectangle<R>& bb, const SubdivisionSequence& ss, BinaryTree::const_iterator i)
+      PartitionTreeIterator(const Rectangle<R>& bb, 
+                            const Combinatoric::SubdivisionSequence& ss, 
+                            Combinatoric::BinaryTree::const_iterator i)
         : _bounding_box(bb), _subdivisions(ss), _base(i) { }
      private:
       bool equal(const PartitionTreeIterator<R>& other) const {
@@ -77,8 +81,8 @@ namespace Ariadne {
         return PartitionTreeCell<R>(_bounding_box,_subdivisions,*_base); }
      private:
       const Rectangle<R> _bounding_box;
-      const SubdivisionSequence _subdivisions;
-      BinaryTree::const_iterator _base;
+      const Combinatoric::SubdivisionSequence _subdivisions;
+      Combinatoric::BinaryTree::const_iterator _base;
     };
 
     template<typename R>
@@ -98,8 +102,8 @@ namespace Ariadne {
         return PartitionTreeCell<R>(_bounding_box,_subdivisions,*_base); }
      private:
       const Rectangle<R> _bounding_box;
-      const SubdivisionSequence _subdivisions;
-      MaskedBinaryTree::const_iterator _base;
+      const Combinatoric::SubdivisionSequence _subdivisions;
+      Combinatoric::MaskedBinaryTree::const_iterator _base;
     };
 
     /*!\ingroup PartitionTree
@@ -117,7 +121,7 @@ namespace Ariadne {
       PartitionScheme(const Rectangle<R>& bb);
 
       /*! \brief Construct from a bounding box \a bb and a sequence of subdivision coordinates \a sc. */
-      PartitionScheme(const Rectangle<R>& bb, const SubdivisionSequence& sc)
+      PartitionScheme(const Rectangle<R>& bb, const Combinatoric::SubdivisionSequence& sc)
         : _unit_box(bb), _subdivisions(sc) { }
 
       /*! \brief Equality. */
@@ -134,13 +138,13 @@ namespace Ariadne {
       const Rectangle<R>& unit_box() const { return _unit_box; }
 
       /*! \brief The sequence of subdivision coordinates. */
-      const SubdivisionSequence& subdivisions() const { return _subdivisions; }
+      const Combinatoric::SubdivisionSequence& subdivisions() const { return _subdivisions; }
 
       /*! \brief The underlying dimension of the partition scheme. */
       dimension_type dimension() const { return _subdivisions.dimension(); }
      private:
       Rectangle<R> _unit_box;
-      SubdivisionSequence _subdivisions;
+      Combinatoric::SubdivisionSequence _subdivisions;
     };
 
 
@@ -158,14 +162,14 @@ namespace Ariadne {
       typedef Point<R> state_type;
 
       /*!\brief Construct from a rectangle, and a unit partition tree cell. */
-      PartitionTreeCell(const Rectangle<R>& r, const SubdivisionTreeCell& c)
+      PartitionTreeCell(const Rectangle<R>& r, const Combinatoric::SubdivisionTreeCell& c)
         : _unit_box(r), _subdivision_cell(c)
       { assert(r.dimension()==c.dimension()); }
 
       /*!\brief Construct from a rectangle, the subdivision_coordinates and a binary word. */
       PartitionTreeCell(const Rectangle<R>& r, 
-                        const SubdivisionSequence& s, 
-                        const BinaryWord& w) 
+                        const Combinatoric::SubdivisionSequence& s, 
+                        const Combinatoric::BinaryWord& w) 
         : _unit_box(r), _subdivision_cell(s,w) 
       { }
 
@@ -180,7 +184,7 @@ namespace Ariadne {
         return this->_unit_box; }
 
       /*!\brief The cell in a unit box. */
-      const SubdivisionTreeCell& subdivision_cell() const { 
+      const Combinatoric::SubdivisionTreeCell& subdivision_cell() const { 
         return this->_subdivision_cell; }
 
       /*!\brief The dimension of the cell. */
@@ -191,7 +195,7 @@ namespace Ariadne {
       operator Rectangle<R>() const;
      private:
       const Rectangle<R> _unit_box;
-      SubdivisionTreeCell _subdivision_cell;
+      Combinatoric::SubdivisionTreeCell _subdivision_cell;
     };
 
 
@@ -203,7 +207,7 @@ namespace Ariadne {
     class PartitionTree {
       friend class PartitionTreeSet<R>;
      public:
-      typedef binary_constructor_iterator< SubdivisionTree::const_iterator,
+      typedef binary_constructor_iterator< Combinatoric::SubdivisionTree::const_iterator,
                                            PartitionTreeCell<R>,
                                            Rectangle<R> > const_iterator;
       typedef const_iterator iterator;
@@ -214,27 +218,29 @@ namespace Ariadne {
       typedef Point<R> state_type;
 
       /*! \brief Construct a tree from a rectangle, a subdivision sequence and a binary tree. */
-      explicit PartitionTree(const Rectangle<R>& r, const SubdivisionSequence& s, const BinaryTree& t)
+      explicit PartitionTree(const Rectangle<R>& r, 
+                             const Combinatoric::SubdivisionSequence& s, 
+                             const Combinatoric::BinaryTree& t)
         : _unit_box(r), _subdivision_tree(s,t) { }
 
       /*! \brief Construct a tree based on a partition scheme and a binary tree. */
-      explicit PartitionTree(const PartitionScheme<R>& ps, const BinaryTree& t)
+      explicit PartitionTree(const PartitionScheme<R>& ps, const Combinatoric::BinaryTree& t)
         : _unit_box(ps.unit_box()), _subdivision_tree(ps.subdivisions(),t) { }
 
       /*! \brief The unit box of the partition scheme. */
       const Rectangle<R>& unit_box() const { return _unit_box; }
 
       /*! \brief The underlying subdivision tree. */
-      const SubdivisionTree& subdivision_tree() const { return _subdivision_tree; }
+      const Combinatoric::SubdivisionTree& subdivision_tree() const { return _subdivision_tree; }
 
       /*! \brief The space dimension of the tree. */
       dimension_type dimension() const { return _subdivision_tree.dimension(); }
 
       /*! \brief The underlying bounding box. */
-      const SubdivisionSequence& subdivisions() const { return _subdivision_tree.subdivisions(); }
+      const Combinatoric::SubdivisionSequence& subdivisions() const { return _subdivision_tree.subdivisions(); }
 
       /*! \brief The array describing the tree. */
-      const BinaryTree& binary_tree() const { return _subdivision_tree.binary_tree(); }
+      const Combinatoric::BinaryTree& binary_tree() const { return _subdivision_tree.binary_tree(); }
 
       /*! \brief The number of cells in the PartitionTree. */
       size_type size() const { return _subdivision_tree.size(); }
@@ -248,7 +254,7 @@ namespace Ariadne {
       const_iterator end() const { return const_iterator(_unit_box,_subdivision_tree.end()); }
      private:
       Rectangle<R> _unit_box;
-      SubdivisionTree _subdivision_tree;
+      Combinatoric::SubdivisionTree _subdivision_tree;
     };
 
 
@@ -261,7 +267,7 @@ namespace Ariadne {
      public:
       //      typedef PartitionTreeSetIterator<R> iterator;
       //      typedef PartitionTreeSetIterator<R> const_iterator;
-      typedef binary_constructor_iterator< SubdivisionTreeSet::const_iterator,
+      typedef binary_constructor_iterator< Combinatoric::SubdivisionTreeSet::const_iterator,
                                            PartitionTreeCell<R>,
                                            Rectangle<R> > const_iterator;         
       typedef const_iterator iterator;
@@ -272,7 +278,7 @@ namespace Ariadne {
       { }
 
       /*! \brief Construct an set based on a partition scheme, a binary tree and a mask. */
-      PartitionTreeSet(const PartitionScheme<R>& g, const BinaryTree& t, const BooleanArray& m)
+      PartitionTreeSet(const PartitionScheme<R>& g, const Combinatoric::BinaryTree& t, const BooleanArray& m)
         : _unit_box(g.unit_box()), _subdivision_set(g.subdivisions(),t,m) 
       { }
 
@@ -282,7 +288,7 @@ namespace Ariadne {
       { }
 
       /*! \brief Construct a set based on a bounding box, a subdivision sequence, a binary tree and a mask. */
-      PartitionTreeSet(const Rectangle<R>& r, const SubdivisionSequence& s, const BinaryTree& t, const BooleanArray& m)
+      PartitionTreeSet(const Rectangle<R>& r, const Combinatoric::SubdivisionSequence& s, const Combinatoric::BinaryTree& t, const BooleanArray& m)
         : _unit_box(r), _subdivision_set(s,t,m)
       { }
 
@@ -306,16 +312,16 @@ namespace Ariadne {
       const Rectangle<R>& unit_box() const { return _unit_box; }
 
       /*! \brief The underlying subdivision set. */
-      const SubdivisionTreeSet& subdivision_set() const { return _subdivision_set; }
+      const Combinatoric::SubdivisionTreeSet& subdivision_set() const { return _subdivision_set; }
 
       /*! \brief The space dimension of the set. */
       size_type dimension() const { return _subdivision_set.dimension(); }
 
       /*! \brief The subdivision coordinates. */
-      const SubdivisionSequence& subdivisions() const { return _subdivision_set.subdivisions(); }
+      const Combinatoric::SubdivisionSequence& subdivisions() const { return _subdivision_set.subdivisions(); }
 
       /*! \brief The binary tree. */
-      const BinaryTree& binary_tree() const { return _subdivision_set.binary_tree(); }
+      const Combinatoric::BinaryTree& binary_tree() const { return _subdivision_set.binary_tree(); }
       
       /*! \brief The mask. */
       const BooleanArray& mask() const { return _subdivision_set.mask(); }
@@ -367,7 +373,7 @@ namespace Ariadne {
 #endif
      private:
       Rectangle<R> _unit_box;
-      SubdivisionTreeSet _subdivision_set;
+      Combinatoric::SubdivisionTreeSet _subdivision_set;
     };
 
     

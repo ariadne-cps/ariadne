@@ -36,9 +36,6 @@
 namespace Ariadne { namespace Base {
 template<typename T, size_t N=0> class array;
 template<typename T> class sequence;
-  
-class BinaryWord;
-class BinaryTree;  
 }}
 
 namespace Ariadne { namespace Numeric {
@@ -52,6 +49,20 @@ template<typename R> class Matrix;
 template<typename R> class IntervalVector;
 template<typename R> class IntervalMatrix;
 template<typename R> class LinearProgram;
+}}
+
+namespace Ariadne { namespace Combinatoric {
+class BinaryWord;
+class BinaryTree;  
+
+class LatticeCell;
+class LatticeRectangle;
+class LatticeMaskSet;
+class LatticeCellListSet;
+class LatticeRectangleListSet;
+class LatticeTransformation;
+class LatticeMultiMap;
+class LatticeSystem;
 }}
 
 namespace Ariadne { namespace Geometry {
@@ -68,13 +79,6 @@ template<typename R> class Sphere;
 template<typename R> class Ellipsoid;
 
 template<typename R, template<typename> class BS> class ListSet;
-
-class LatticeCell;
-class LatticeRectangle;
-class LatticeMaskSet;
-class LatticeCellListSet;
-class LatticeRectangleListSet;
-class LatticeTransformation;
 
 typedef enum {
  REGULAR,
@@ -99,8 +103,6 @@ template<typename R> class PartitionTreeSet;
 
 
 namespace Ariadne { namespace System {
-class LatticeMultiMap;
-
 template <typename R> class Map;
 template <typename R> class AffineMap;
 template <typename R, template<typename> class BS > class AffineMultiMap;

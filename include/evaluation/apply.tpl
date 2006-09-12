@@ -41,11 +41,13 @@
 #include "../linear_algebra/interval_vector.h"
 #include "../linear_algebra/interval_matrix.h"
 
+#include "../combinatoric/lattice_set.h"
+
 #include "../geometry/rectangle.h"
 #include "../geometry/parallelotope.h"
 #include "../geometry/list_set.h"
 #include "../geometry/grid_set.h"
-#include "../geometry/lattice_set.h"
+
 
 #include "../system/map.h"
 
@@ -129,7 +131,7 @@ namespace Ariadne {
       typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
       
       const Geometry::Grid<R>& g=is.grid();
-      Geometry::LatticeRectangle bd=is.block();
+      Combinatoric::LatticeRectangle bd=is.block();
       Geometry::GridMaskSet<R> image(g,bd);
       Geometry::Rectangle<R> bb=is.bounding_box();
       
@@ -152,7 +154,7 @@ namespace Ariadne {
       typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
       
       const Geometry::Grid<R>& g=is.grid();
-      Geometry::LatticeRectangle bd=is.block();
+      Combinatoric::LatticeRectangle bd=is.block();
       Geometry::Rectangle<R> bb=is.bounding_box();
       Geometry::GridMaskSet<R> result(g,bd);
       Geometry::GridMaskSet<R> found(g,bd);

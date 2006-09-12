@@ -26,13 +26,13 @@
 #include <string>
 #include <sstream>
 
-#include "base/binary_tree.h"
+#include "combinatoric/binary_tree.h"
 
 #include "base/array.h"
 #include "base/stlio.h"
 
 namespace Ariadne {
-  namespace Base {
+  namespace Combinatoric {
 
   inline size_type pow2(size_type n) { return 1<<n; }
   

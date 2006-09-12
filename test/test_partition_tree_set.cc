@@ -31,7 +31,7 @@
 #include "base/exception.h"
 #include "base/stlio.h"
 #include "base/utility.h"
-#include "base/binary_word.h"
+#include "combinatoric/binary_word.h"
 #include "numeric/numerical_types.h"
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/vector.h"
@@ -47,6 +47,7 @@
 using namespace std;
 using namespace Ariadne;
 using namespace Ariadne::LinearAlgebra;
+using namespace Ariadne::Combinatoric;
 using namespace Ariadne::Geometry;
 using namespace Ariadne::Postscript;
 

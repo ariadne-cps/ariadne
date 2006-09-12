@@ -313,7 +313,7 @@ namespace Ariadne {
        *  of the rectangle in the ith coordinate is used, and 1 if the upper
        *  half is used.
        */
-      Rectangle<R> quadrant(const BinaryWord& q) const;
+      Rectangle<R> quadrant(const Combinatoric::BinaryWord& q) const;
       /*! \brief Subdivide into smaller pieces. */
       ListSet<R,Geometry::Rectangle> subdivide() const;
       

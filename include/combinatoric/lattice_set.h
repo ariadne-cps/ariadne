@@ -41,7 +41,7 @@
 #include "../numeric/interval.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  namespace Combinatoric {
     class LatticeCell;
 
     class LatticePoint;

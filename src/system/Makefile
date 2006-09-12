@@ -3,7 +3,6 @@ include ../../config.mk
 OBJ = map.o multimap.o vector_field.o \
 	affine_map.o affine_multimap.o affine_vector_field.o \
 	polynomial_map.o \
-	lattice_map.o
 
 all: ${OBJ}
 

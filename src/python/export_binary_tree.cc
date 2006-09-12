@@ -21,13 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "base/binary_word.h"
-#include "base/binary_tree.h"
+#include "combinatoric/binary_word.h"
+#include "combinatoric/binary_tree.h"
 
 
 #include "python/typedefs.h"
 #include "python/python_utilities.h"
 using namespace Ariadne;
+using namespace Ariadne::Combinatoric;
 
 #include <boost/python.hpp>
 using namespace boost::python;

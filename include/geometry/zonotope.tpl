@@ -38,7 +38,7 @@
 #include "../linear_algebra/interval_vector.h"
 #include "../linear_algebra/interval_matrix.h"
 
-#include "../geometry/lattice_set.h"
+#include "../combinatoric/lattice_set.h"
 
 #include "../geometry/point.h"
 #include "../geometry/point_list.h"

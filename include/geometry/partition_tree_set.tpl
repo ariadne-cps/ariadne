@@ -36,15 +36,6 @@
 namespace Ariadne {
   namespace Geometry {
 
-    void advance(BinaryWord& word) {
-      while(!word.empty() && word.back()==BinaryTree::right) {
-        word.pop_back();
-      }
-      if(!word.empty()) {
-        word.set_back(BinaryTree::right);
-      }
-    }
-
     
     
     template<typename R>
@@ -107,31 +98,31 @@ namespace Ariadne {
     outer_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth)
     {
       const Rectangle<R>& bounding_box=ps.unit_box();
-      const SubdivisionSequence& subdivisions=ps.subdivisions();
+      const Combinatoric::SubdivisionSequence& subdivisions=ps.subdivisions();
       std::vector<bool> tree;
       std::vector<bool> mask;
       
-      BinaryWord word;
+      Combinatoric::BinaryWord word;
       
       do {
         Rectangle<R> cell=Rectangle<R>(PartitionTreeCell<R>(bounding_box,subdivisions,word));
         if(word.size()==depth+1 || subset(cell,s)) {
-          tree.push_back(BinaryTree::leaf);
+          tree.push_back(Combinatoric::BinaryTree::leaf);
           mask.push_back(true);
-          advance(word);
+          Combinatoric::advance(word);
         }  
         else if(disjoint(cell,s)) {
-          tree.push_back(BinaryTree::leaf);
+          tree.push_back(Combinatoric::BinaryTree::leaf);
           mask.push_back(false);
-          advance(word);
+          Combinatoric::advance(word);
         }
         else {
-          tree.push_back(BinaryTree::branch);
-          word.push_back(BinaryTree::left);
+          tree.push_back(Combinatoric::BinaryTree::branch);
+          word.push_back(Combinatoric::BinaryTree::left);
         }
       } while(!word.empty());
       
-      return PartitionTreeSet<R>(bounding_box,subdivisions,BinaryTree(tree),BooleanArray(mask));
+      return PartitionTreeSet<R>(bounding_box,subdivisions,Combinatoric::BinaryTree(tree),BooleanArray(mask));
     }
     
     template<typename R, class S>
@@ -139,31 +130,31 @@ namespace Ariadne {
     inner_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth)
     {
       const Rectangle<R>& unit_box=ps.unit_box();
-      const SubdivisionSequence& subdivisions=ps.subdivisions();
+      const Combinatoric::SubdivisionSequence& subdivisions=ps.subdivisions();
       std::vector<bool> tree;
       std::vector<bool> mask;
       
-      BinaryWord word;
+      Combinatoric::BinaryWord word;
       
       do {
         Rectangle<R> cell=Rectangle<R>(PartitionTreeCell<R>(unit_box,subdivisions,word));
         if(word.size()==depth+1 || !interiors_intersect(cell,s)) {
-          tree.push_back(BinaryTree::leaf);
+          tree.push_back(Combinatoric::BinaryTree::leaf);
           mask.push_back(false);
-          advance(word);
+          Combinatoric::advance(word);
         }  
         else if(inner_subset(cell,s)) {
-          tree.push_back(BinaryTree::leaf);
+          tree.push_back(Combinatoric::BinaryTree::leaf);
           mask.push_back(true);
-          advance(word);
+          Combinatoric::advance(word);
         }
         else {
-          tree.push_back(BinaryTree::branch);
-          word.push_back(BinaryTree::left);
+          tree.push_back(Combinatoric::BinaryTree::branch);
+          word.push_back(Combinatoric::BinaryTree::left);
          }
       } while(!word.empty());
       
-      return PartitionTreeSet<R>(unit_box,subdivisions,BinaryTree(tree),BooleanArray(mask));
+      return PartitionTreeSet<R>(unit_box,subdivisions,Combinatoric::BinaryTree(tree),BooleanArray(mask));
     }
     
 
@@ -172,31 +163,31 @@ namespace Ariadne {
     over_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth)
     {
       const Rectangle<R>& unit_box=ps.unit_box();
-      const SubdivisionSequence& subdivisions=ps.subdivisions();
+      const Combinatoric::SubdivisionSequence& subdivisions=ps.subdivisions();
       std::vector<bool> tree;
       std::vector<bool> mask;
       
-      BinaryWord word;
+      Combinatoric::BinaryWord word;
       
       do {
         Rectangle<R> cell=Rectangle<R>(PartitionTreeCell<R>(unit_box,subdivisions,word));
         if(word.size()==depth+1 || subset(cell,s)) {
-          tree.push_back(BinaryTree::leaf);
+          tree.push_back(Combinatoric::BinaryTree::leaf);
           mask.push_back(true);
-          advance(word);
+          Combinatoric::advance(word);
         }  
         else if(!interiors_intersect(cell,s)) {
-          tree.push_back(BinaryTree::leaf);
+          tree.push_back(Combinatoric::BinaryTree::leaf);
           mask.push_back(false);
-          advance(word);
+          Combinatoric::advance(word);
         }
         else {
-          tree.push_back(BinaryTree::branch);
-          word.push_back(BinaryTree::left);
+          tree.push_back(Combinatoric::BinaryTree::branch);
+          word.push_back(Combinatoric::BinaryTree::left);
         }
       } while(!word.empty());
       
-      return PartitionTreeSet<R>(unit_box,subdivisions,BinaryTree(tree),BooleanArray(mask));
+      return PartitionTreeSet<R>(unit_box,subdivisions,Combinatoric::BinaryTree(tree),BooleanArray(mask));
     }
     
 
@@ -205,31 +196,31 @@ namespace Ariadne {
     under_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth)
     {
       const Rectangle<R>& unit_box=ps.unit_box();
-      const SubdivisionSequence& subdivisions=ps.subdivisions();
+      const Combinatoric::SubdivisionSequence& subdivisions=ps.subdivisions();
       std::vector<bool> tree;
       std::vector<bool> mask;
       
-      BinaryWord word;
+      Combinatoric::BinaryWord word;
       
       do {
         Rectangle<R> cell=Rectangle<R>(PartitionTreeCell<R>(unit_box,subdivisions,word));
         if(word.size()==depth+1 || !interiors_intersect(cell,s)) {
-          tree.push_back(BinaryTree::leaf);
+          tree.push_back(Combinatoric::BinaryTree::leaf);
           mask.push_back(false);
-          advance(word);
+          Combinatoric::advance(word);
         }  
         else if(subset(cell,s)) {
-          tree.push_back(BinaryTree::leaf);
+          tree.push_back(Combinatoric::BinaryTree::leaf);
           mask.push_back(true);
-          advance(word);
+          Combinatoric::advance(word);
         }
         else {
-          tree.push_back(BinaryTree::branch);
-          word.push_back(BinaryTree::left);
+          tree.push_back(Combinatoric::BinaryTree::branch);
+          word.push_back(Combinatoric::BinaryTree::left);
          }
       } while(!word.empty());
       
-      return PartitionTreeSet<R>(unit_box,subdivisions,BinaryTree(tree),BooleanArray(mask));
+      return PartitionTreeSet<R>(unit_box,subdivisions,Combinatoric::BinaryTree(tree),BooleanArray(mask));
     }
     
 

@@ -23,7 +23,7 @@
 
 
 
-#include "system/lattice_map.h"
+#include "combinatoric/lattice_map.h"
 
 #include "python/typedefs.h"
 using namespace Ariadne;

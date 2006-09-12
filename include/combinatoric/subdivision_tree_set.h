@@ -34,14 +34,15 @@
 
 #include "../base/array.h"
 #include "../base/sequence.h"
-#include "../base/binary_word.h"
-#include "../base/binary_tree.h"
 #include "../base/iterator.h"
+
+#include "../combinatoric/binary_word.h"
+#include "../combinatoric/binary_tree.h"
 
 #include "../geometry/rectangle.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  namespace Combinatoric {
     class SubdivisionSequence;
     class SubdivisionTreeCell;
     class SubdivisionTree;
@@ -54,6 +55,10 @@ namespace Ariadne {
     class LatticeMaskSet;
     class LatticeRectangle;
       
+    /*!\brief Advance a binary word used to describe a position in a tree by
+     * removing all trailing right's and replacing the last left by a right.    
+     */
+    void advance(BinaryWord& word);
     
     /*!\ingroup SubdivisionTree
      * \brief A binary tree with a boolean labelling on the leaves. */
@@ -178,12 +183,14 @@ namespace Ariadne {
       /*!\brief The dimension of the cell. */
       dimension_type dimension() const { 
         return _bounds.dimension(); }
+
       /*!\brief A rectangle giving the cell. (Deprecated)
        *
        * \deprecated This class should be independent of the Geometry library.
        */
-      const Rectangle<dyadic_type>& bounds() const { return _bounds; };
+      const Geometry::Rectangle<dyadic_type>& bounds() const { return _bounds; };
       /*!\brief The lower bound in the \a i th dimension. */
+
       const dyadic_type& lower_bound(dimension_type i) const {
         return _bounds.lower_bound(i); }
       /*!\brief The upper bound in the \a i th dimension. */
@@ -192,7 +199,7 @@ namespace Ariadne {
      private:
       void _compute_bounds(const SubdivisionSequence& ss, const BinaryWord& bw);
      private:
-      Rectangle<dyadic_type> _bounds;
+      Geometry::Rectangle<dyadic_type> _bounds;
     };
     
 

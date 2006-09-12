@@ -30,11 +30,11 @@
 
 #include <map>
 
-#include "../geometry/lattice_set.h"
+#include "../combinatoric/lattice_set.h"
 
 
 namespace Ariadne {
-  namespace System {
+  namespace Combinatoric {
 
     /*! \brief A combinatorial map on a lattice. */
     class LatticeMultiMap {
@@ -46,27 +46,27 @@ namespace Ariadne {
         : _argument_dimension(arg_dim), _result_dimension(res_dim) { }
         
       /*! \brief Adjoin set \a img to the image of set \a lc. */
-      void adjoin_to_image(const Geometry::LatticeCell& lc, const Geometry::LatticeCell& img);
+      void adjoin_to_image(const LatticeCell& lc, const LatticeCell& img);
       /*! \brief Adjoin set \a img to the image of set \a lc. */
-      void adjoin_to_image(const Geometry::LatticeCell& lc, const Geometry::LatticeCellListSet& img);
+      void adjoin_to_image(const LatticeCell& lc, const LatticeCellListSet& img);
         
       /*! \brief  The map applied to a cell. */
-      Geometry::LatticeCellListSet apply(const Geometry::LatticeCell& lc) const;
+      LatticeCellListSet apply(const LatticeCell& lc) const;
 
       /*! \brief  The map applied to a cell. */
-      Geometry::LatticeCellListSet operator() (const Geometry::LatticeCell& lc) const;
+      LatticeCellListSet operator() (const LatticeCell& lc) const;
         
       /*! \brief  The map applied to a lattice rectangle. */
-      Geometry::LatticeCellListSet operator() (const Geometry::LatticeRectangle& lr) const;
+      LatticeCellListSet operator() (const LatticeRectangle& lr) const;
         
       /*! \brief  The map applied to a cell list set. */
-      Geometry::LatticeCellListSet operator() (const Geometry::LatticeCellListSet& lcsl) const;
+      LatticeCellListSet operator() (const LatticeCellListSet& lcsl) const;
         
       /*! \brief  The map applied to a cell list set. */
-      Geometry::LatticeCellListSet operator() (const Geometry::LatticeRectangleListSet& lrls) const;
+      LatticeCellListSet operator() (const LatticeRectangleListSet& lrls) const;
         
       /*! \brief  The map applied to a cell list set. */
-      Geometry::LatticeCellListSet operator() (const Geometry::LatticeMaskSet& lms) const;
+      LatticeCellListSet operator() (const LatticeMaskSet& lms) const;
 
       /*! \brief  The dimension of the argument. */
       dimension_type argument_dimension() const {
@@ -88,7 +88,7 @@ namespace Ariadne {
      private:
       dimension_type _argument_dimension;
       dimension_type _result_dimension;
-      mutable std::map<Geometry::LatticeCell,Geometry::LatticeCellListSet> _map;
+      mutable std::map<LatticeCell,LatticeCellListSet> _map;
     };
       
     std::ostream& operator<<(std::ostream&, const LatticeMultiMap&);

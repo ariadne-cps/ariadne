@@ -1,13 +1,6 @@
 include ../../config.mk
 
-OBJ = \
-	ppl_polyhedron.o \
-	point.o point_list.o \
-	rectangle.o polyhedron.o simplex.o zonotope.o parallelotope.o \
-	sphere.o ellipsoid.o \
-	list_set.o \
-	grid.o grid_set.o \
-	partition_tree_set.o
+OBJ = binary_tree.o lattice_set.o lattice_map.o subdivision_tree_set.o
 
 all: ${OBJ}
 

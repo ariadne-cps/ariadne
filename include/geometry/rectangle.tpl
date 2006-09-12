@@ -31,7 +31,7 @@
 
 #include "rectangle.h"
 
-#include "../base/binary_word.h" 
+#include "../combinatoric/binary_word.h" 
 #include "../base/array.h" 
 #include "../linear_algebra/interval_vector.h" 
 #include "../geometry/point.h" 
@@ -70,7 +70,7 @@ namespace Ariadne {
     
     template <typename R>
     Rectangle<R>
-    Rectangle<R>::quadrant(const BinaryWord& w) const 
+    Rectangle<R>::quadrant(const Combinatoric::BinaryWord& w) const 
     {
       assert(w.size() == this->dimension());
       Rectangle<R> quadrant(this->dimension());

@@ -23,8 +23,8 @@
  */
 
 
-#include "base/binary_word.h"
-#include "base/binary_tree.h"
+#include "combinatoric/binary_word.h"
+#include "combinatoric/binary_tree.h"
 
 #include "geometry/rectangle.h"
 #include "geometry/grid_set.h"
@@ -33,6 +33,7 @@
 
 #include "python/typedefs.h"
 using namespace Ariadne;
+using namespace Ariadne::Combinatoric;
 using namespace Ariadne::Geometry;
 
 #include <boost/python.hpp>

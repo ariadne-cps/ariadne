@@ -31,10 +31,11 @@
 #include "base/stlio.h"
 
 #include "base/array_operations.h"
-#include "geometry/lattice_set.h"
+
+#include "combinatoric/lattice_set.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  namespace Combinatoric {
     
     template<typename Ptr>
     class array_less {

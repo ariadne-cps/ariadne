@@ -28,18 +28,28 @@
 
 #include "numeric/arithmetic.h"
 
-#include "geometry/rectangle.h"
-#include "geometry/lattice_set.h"
+#include "combinatoric/lattice_set.h"
+#include "combinatoric/subdivision_tree_set.h"
 
-#include "geometry/subdivision_tree_set.h"
+#include "geometry/rectangle.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  namespace Combinatoric {
     const bool branch=BinaryTree::branch;
     const bool leaf=BinaryTree::leaf;
     const bool left=BinaryTree::left;
     const bool right=BinaryTree::right;
     
+    void advance(BinaryWord& word)
+    {
+      while(!word.empty() && word.back()==BinaryTree::right) {
+        word.pop_back();
+      }
+      if(!word.empty()) {
+        word.set_back(BinaryTree::right);
+      }
+    }
+
     SubdivisionSequence::SubdivisionSequence(const std::string& str)
     {
       std::stringstream ss(str);
@@ -311,7 +321,7 @@ namespace Ariadne {
       IndexArray lower(r.dimension());
       IndexArray upper(r.dimension());
       SizeArray sizes=r.sizes();
-      Rectangle<SubdivisionTreeCell::dyadic_type> cr=c.bounds();
+      Geometry::Rectangle<SubdivisionTreeCell::dyadic_type> cr=c.bounds();
       for(dimension_type i=0; i!=r.dimension(); ++i) {
         lower[i]=r.lower_bound(i)+index_type(cr.lower_bound(i)*sizes[i]);
         upper[i]=r.lower_bound(i)+index_type(cr.upper_bound(i)*sizes[i]);

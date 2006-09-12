@@ -30,7 +30,7 @@
 #include "real_typedef.h"
 #include "base/exception.h"
 #include "base/utility.h"
-#include "base/binary_word.h"
+#include "combinatoric/binary_word.h"
 #include "numeric/numerical_types.h"
 #include "geometry/point.h"
 #include "geometry/rectangle.h"

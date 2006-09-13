@@ -83,6 +83,23 @@ namespace Ariadne {
 
 
     template<typename R>
+    R
+    GridRectangle<R>::lower_bound(dimension_type i) const 
+    {
+      return _grid.subdivision_coordinate(i,_lattice_set.lower_bound(i));
+    }
+
+    
+    template<typename R>
+    R
+    GridRectangle<R>::upper_bound(dimension_type i) const 
+    {
+      return _grid.subdivision_coordinate(i,_lattice_set.upper_bound(i));
+    }
+
+
+    
+    template<typename R>
     GridCell<R>::GridCell(const Grid<R>& g, const Combinatoric::LatticeCell& pos)
       : _grid(g), _lattice_set(pos)
     {
@@ -97,37 +114,20 @@ namespace Ariadne {
       dimension()==_grid.dimension());
     }
 
-
-
     template<typename R>
-    GridCell<R>::operator Rectangle<R>() const {
-      Rectangle<R> result(dimension());
-
-      for(dimension_type i=0; i!=dimension(); ++i) {
-        result[i]=Interval<R>(
-            _grid.subdivision_coordinate(i,_lattice_set.lower_bound(i)),
-            _grid.subdivision_coordinate(i,_lattice_set.upper_bound(i)));
-      }
-
-      return result;
+    R
+    GridCell<R>::lower_bound(dimension_type i) const 
+    {
+      return _grid.subdivision_coordinate(i,_lattice_set.lower_bound(i));
     }
-
-
+    
     template<typename R>
-    GridRectangle<R>::operator Rectangle<R>() const {
-      if(this->empty()) {
-        return Rectangle<R>(this->dimension());
-      }
-     
-      Rectangle<R> result(dimension());
-      for(size_type i=0; i!=dimension(); ++i) {
-        result[i]=Interval<R>(
-            _grid.subdivision_coordinate(i,_lattice_set.lower_bound(i)),
-            _grid.subdivision_coordinate(i,_lattice_set.upper_bound(i)));
-      }
-
-      return result;
+    R
+    GridCell<R>::upper_bound(dimension_type i) const 
+    {
+      return _grid.subdivision_coordinate(i,_lattice_set.upper_bound(i));
     }
+    
 
 
     template<typename R>
@@ -707,15 +707,15 @@ namespace Ariadne {
    
     template<typename R>
     GridCellListSet<R>
-    over_approximation(const Zonotope<R>& p, const FiniteGrid<R>& g) 
+    over_approximation(const Zonotope<R>& z, const FiniteGrid<R>& g) 
     {
       GridCellListSet<R> result(g);
-      assert(g.dimension()==p.dimension());
-      if(p.empty()) {
+      assert(g.dimension()==z.dimension());
+      if(z.empty()) {
         return result; 
       }
       
-      Rectangle<R> bb=regular_intersection(p.bounding_box(),g.bounding_box());
+      Rectangle<R> bb=regular_intersection(z.bounding_box(),g.bounding_box());
       
       if (bb.empty()) {
         return result;
@@ -727,7 +727,7 @@ namespace Ariadne {
       for(Combinatoric::LatticeRectangle::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
 
         GridCell<R> cell(g.grid(),*iter);
-        if(!disjoint(Rectangle<R>(cell),p)) {
+        if(!disjoint(Rectangle<R>(cell),z)) {
           result.adjoin(cell);
         }
       }
@@ -832,7 +832,8 @@ namespace Ariadne {
       for(typename GridMaskSet<R>::const_iterator iter=bb.begin(); iter!=bb.end(); ++iter) {
         r=*iter;
         if(subset(r,gms)) {
-          result.adjoin(*iter);
+          const GridCell<R>& cell=*iter;
+          result.adjoin(cell);
         }
       }
       return result;

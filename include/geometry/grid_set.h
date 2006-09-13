@@ -192,7 +192,9 @@ namespace Ariadne {
      *  \ingroup Grid
      */
     template<typename R>
-    class GridCell {
+    class GridCell 
+      : public RectangleExpression< GridCell<R> >
+    {
       friend class GridRectangle<R>;
       friend class GridMaskSet<R>;
       friend class GridCellListSet<R>;
@@ -214,11 +216,14 @@ namespace Ariadne {
       /*!\brief The dimension of the cell. */
       dimension_type dimension() const { return _lattice_set.dimension(); }
 
+      /*!\brief The lower bound of the \a i th coordinate. */
+      R lower_bound(dimension_type i) const;
+
+      /*!\brief The upper bound of the \a i th coordinate. */
+      R upper_bound(dimension_type i) const;
+
       /*!\brief The position of the cell in the grid. */
       const Combinatoric::LatticeCell& lattice_set() const { return _lattice_set; }
-
-      /*!\brief Convert to an ordinary rectangle. */
-      operator Rectangle<R>() const;
 
       /*!\brief A rectangle containing the grid rectangle. */
       Rectangle<R> bounding_box() const { return *this; }
@@ -233,7 +238,9 @@ namespace Ariadne {
      *  \ingroup Grid
      */
     template<typename R>
-    class GridRectangle {
+    class GridRectangle 
+      : public RectangleExpression< GridRectangle<R> >
+    {
       friend class GridCell<R>;
       friend class GridMaskSet<R>;
       friend class GridRectangleListSet<R>;
@@ -260,6 +267,12 @@ namespace Ariadne {
       /*!\brief The dimension of the rectangle. */
       dimension_type dimension() const { return _lattice_set.dimension(); }
 
+      /*!\brief The lower bound of the \a i th coordinate. */
+      R lower_bound(dimension_type i) const;
+      
+      /*!\brief The upper bound of the \a i th coordinate. */
+      R upper_bound(dimension_type i) const;
+      
       /*!\brief The position of the rectangle in the grid. */
       const Combinatoric::LatticeRectangle& lattice_set() const { return _lattice_set; }
 
@@ -267,9 +280,6 @@ namespace Ariadne {
       bool empty() const { return _lattice_set.empty(); }
       /*!\brief Tests if the rectangle has empty interior. */
       bool empty_interior() const { return _lattice_set.empty_interior(); }
-
-      /*!\brief Convert to an ordinary rectangle. */
-      operator Rectangle<R>() const;
 
       /*!\brief A rectangle containing the grid rectangle. */
       Rectangle<R> bounding_box() const { return *this; }

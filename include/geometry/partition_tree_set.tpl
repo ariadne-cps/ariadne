@@ -45,21 +45,28 @@ namespace Ariadne {
       { }
 
       
-      
+    // FIXME: Should use add_approx etc here.
+    // We use approximate values since the cell boundaries are defined
+    // by the lower bound an upper bound formulae (which must be the same given 
+    // the cell bound.
     template<typename R>
-    PartitionTreeCell<R>::operator Rectangle<R>() const {
-      Rectangle<R> result(this->dimension());
-      for(dimension_type i=0; i!=this->dimension(); ++i) {
-        result[i]=Interval<R>(
-            _unit_box.lower_bound(i)+_subdivision_cell.lower_bound(i)
-                *(_unit_box.upper_bound(i)-_unit_box.lower_bound(i)),
-            _unit_box.lower_bound(i)+_subdivision_cell.upper_bound(i)
-                *(_unit_box.upper_bound(i)-_unit_box.lower_bound(i)) 
-          ); 
-      }
-      return result;
+    R
+    PartitionTreeCell<R>::lower_bound(dimension_type i) const 
+    {
+      return (_unit_box.lower_bound(i)+
+               (_subdivision_cell.lower_bound(i)*
+                 (_unit_box.upper_bound(i)-_unit_box.lower_bound(i))));
     }
-
+    
+    template<typename R>
+    R
+    PartitionTreeCell<R>::upper_bound(dimension_type i) const 
+    {
+      return (_unit_box.lower_bound(i)+
+               (_subdivision_cell.upper_bound(i)*
+                 (_unit_box.upper_bound(i)-_unit_box.lower_bound(i))));
+    }
+    
     
     
     template<typename R>

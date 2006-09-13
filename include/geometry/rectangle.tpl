@@ -109,7 +109,8 @@ namespace Ariadne {
             new_lwr_crnr[i]+=offst(i);
           }
         }
-        result.adjoin(Rectangle(new_lwr_crnr,new_lwr_crnr+offst));
+        Rectangle<R> new_rect(new_lwr_crnr,new_lwr_crnr+offst);
+        result.adjoin(new_rect);
       }
       return result;
     }

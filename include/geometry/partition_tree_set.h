@@ -154,7 +154,9 @@ namespace Ariadne {
      * \brief A rectangle defined on a partition tree.
      */
     template<typename R>
-    class PartitionTreeCell {
+    class PartitionTreeCell
+      : public RectangleExpression< PartitionTreeCell<R> >
+    {
      public:
       /*! \brief The type of denotable real number used for the cell blounds. */
       typedef R real_type;
@@ -191,8 +193,11 @@ namespace Ariadne {
       dimension_type dimension() const { 
         return this->_subdivision_cell.dimension(); }
 
-      /*!\brief Convert to an ordinary rectangle. */
-      operator Rectangle<R>() const;
+      /*!\brief The lower bound of the \a i th coordinate. */
+      R lower_bound(dimension_type i) const;
+      
+      /*!\brief The upper bound of the \a i th coordinate. */
+      R upper_bound(dimension_type i) const;
      private:
       const Rectangle<R> _unit_box;
       Combinatoric::SubdivisionTreeCell _subdivision_cell;

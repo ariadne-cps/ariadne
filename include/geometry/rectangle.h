@@ -40,6 +40,7 @@
 
 #include "../geometry/ppl_polyhedron.h"
 #include "../geometry/point.h"
+#include "../geometry/rectangle_expression.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -57,7 +58,9 @@ namespace Ariadne {
      *  \brief A cuboid of arbitrary dimension.
      */
     template <typename R>
-    class Rectangle {
+    class Rectangle 
+      : public RectangleExpression< Rectangle<R> >
+    {
      public:
       /*! \brief The type of denotable real number used for the corners. */
       typedef R real_type;
@@ -133,6 +136,18 @@ namespace Ariadne {
       {
       }
 
+      /*! \brief Convert from a rectangle expression. */
+      template<class E>
+      Rectangle(const RectangleExpression<E>& original)
+        : _bounds(original().dimension())
+      {         
+        const E& expression=original();
+        for (size_type i=0; i!=this->dimension(); ++i) {
+          this->_bounds[i]=Interval<R>(expression.lower_bound(i),expression.upper_bound(i));
+        }
+      }
+    
+    
       /*! \brief Copy constructor. */
       Rectangle(const Rectangle<R>& original)
         : _bounds(original._bounds)
@@ -145,6 +160,19 @@ namespace Ariadne {
         }
         return *this;
       }
+
+      /*! \brief Assign from a rectangle expression. */
+      template<class E>
+      Rectangle<R>& operator=(const RectangleExpression<E>& original)
+      {         
+        const E& expression=original();
+        this->_bounds.resize(expression.dimension());
+        for (size_type i=0; i!=this->dimension(); ++i) {
+          this->_bounds[i]=Interval<R>(expression.lower_bound(i),expression.upper_bound(i));
+        }
+        return *this;
+      }
+    
       //@}
       
       

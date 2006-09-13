@@ -40,6 +40,7 @@
 
 #include "../combinatoric/lattice_set.h"
 
+#include "../geometry/ppl_polyhedron.h"
 #include "../geometry/point.h"
 #include "../geometry/point_list.h"
 #include "../geometry/rectangle.h"

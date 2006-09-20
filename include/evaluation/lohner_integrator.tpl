@@ -41,11 +41,9 @@
 #include "../numeric/interval.h"
 
 #include "../linear_algebra/vector.h"
-#include "../linear_algebra/interval_vector.h"
 
 #include "../linear_algebra/matrix.h"
 #include "../linear_algebra/matrix_function.h"
-#include "../linear_algebra/interval_matrix.h"
 
 #include "../geometry/rectangle.h"
 #include "../geometry/parallelotope.h"
@@ -92,7 +90,7 @@ namespace Ariadne {
       
       Geometry::Rectangle<R> q=estimate_flow_bounds(vf,r,h);
       
-      LinearAlgebra::IntervalVector<R> fq=vf(q);
+      LinearAlgebra::Vector< Interval<R> > fq=vf(q);
       r=r+(h*fq);
 #ifdef DEBUG
       std::cerr << "suggested stepsize=" << step_size << std::endl;
@@ -124,9 +122,9 @@ namespace Ariadne {
 
       Geometry::Rectangle<R> q=estimate_flow_bounds(vf,r,h);
       
-      LinearAlgebra::IntervalVector<R> fq=vf(q);
+      LinearAlgebra::Vector< Interval<R> > fq=vf(q);
       
-      r=r+LinearAlgebra::IntervalVector<R>(Interval<R>(R(0),h)*fq);
+      r=r+LinearAlgebra::Vector< Interval<R> >(Interval<R>(R(0),h)*fq);
 
 #ifdef DEBUG
       std::cerr << "suggested stepsize=" << step_size << std::endl;
@@ -181,10 +179,10 @@ namespace Ariadne {
       std::cerr << "bound=" << b << std::endl;
 #endif
       
-      LinearAlgebra::IntervalVector<R> f=vf(b);
-      LinearAlgebra::IntervalMatrix<R> df=vf.derivative(b);
+      LinearAlgebra::Vector< Interval<R> > f=vf(b);
+      LinearAlgebra::Matrix< Interval<R> > df=vf.derivative(b);
       
-      R l=upper_log_norm(df);
+      R l=df.log_norm().upper();
 
 #ifdef DEBUG
       std::cerr << "flow=" << f << std::endl;
@@ -197,13 +195,13 @@ namespace Ariadne {
       
       //integration_step(): the varaible l is useless!
       
-      LinearAlgebra::IntervalMatrix<R> hdf=h*df;
-      LinearAlgebra::IntervalMatrix<R> dphi=exp(hdf);
+      LinearAlgebra::Matrix< Interval<R> > hdf=h*df;
+      LinearAlgebra::Matrix< Interval<R> > dphi=exp(hdf);
       
       Geometry::Point<R> c=p.centre();
       Geometry::Rectangle<R> rc=Geometry::Rectangle<R>(c,c);
       Geometry::Rectangle<R> phic=refine_flow_bounds(vf,rc,b,h);
-      LinearAlgebra::IntervalMatrix<R> zv(dphi*p.generators());
+      LinearAlgebra::Matrix< Interval<R> > zv(dphi*p.generators());
 
       p=Geometry::Parallelotope<R>::over_approximation(phic,zv);
       
@@ -251,16 +249,17 @@ namespace Ariadne {
       LinearAlgebra::Matrix<R> P=LinearAlgebra::exp_Ah_sub_id_div_A_approx(vf.A(),h,max_error);
       if(debug_level>0) { std::cerr << "twist=" << P << std::endl; }
       
-      LinearAlgebra::IntervalMatrix<R> iD(LinearAlgebra::IntervalMatrix<R>(D,max_error));
+      LinearAlgebra::Vector< Interval<R> > ib=vf.b();
+       LinearAlgebra::Matrix< Interval<R> > iD=D;
       if(debug_level>0) { std::cerr << "approximating derivative=" << iD << std::endl; }
-      LinearAlgebra::IntervalMatrix<R> iP(LinearAlgebra::IntervalMatrix<R>(P,max_error));
+      LinearAlgebra::Matrix< Interval<R> > iP=P;
       if(debug_level>0) { std::cerr << "approximating twist=" << iP << std::endl; }
-      //LinearAlgebra::IntervalVector<R> iC=iD*p.centre().position_vector()+iP*vf.b();
-      LinearAlgebra::IntervalVector<R> iv1=iD*p.centre().position_vector();
+      //LinearAlgebra::Vector< Interval<R> > iC=iD*p.centre().position_vector()+iP*vf.b();
+      LinearAlgebra::Vector< Interval<R> > iv1=iD*p.centre().position_vector();
       if(debug_level>0) { std::cerr << "iv1=" << iv1 << std::endl; }
-      LinearAlgebra::IntervalVector<R> iv2=iP*vf.b();
+       LinearAlgebra::Vector< Interval<R> > iv2=iP*ib;
       if(debug_level>0) { std::cerr << "iv2=" << iv2 << std::endl; }
-      LinearAlgebra::IntervalVector<R> iC=iv1+iv2;
+      LinearAlgebra::Vector< Interval<R> > iC=iv1+iv2;
       
       if(debug_level>0) { std::cerr << "interval centre=" << iC << std::endl; }
       
@@ -316,10 +315,10 @@ template<typename R>
       std::cerr << "bound=" << b << std::endl;
 #endif
       
-      IntervalVector<R> f=vf(b);
-      IntervalMatrix<R> df=vf.derivative(b);
+      Vector< Interval<R> > f=vf(b);
+      Matrix< Interval<R> > df=vf.derivative(b);
       
-      R l=upper_log_norm(df);
+      R l=df.log_norm().upper();
 
 #ifdef DEBUG
       std::cerr << "flow=" << f << std::endl;
@@ -332,14 +331,14 @@ template<typename R>
       
       //integration_step(): the varaible l is useless!
       
-      IntervalMatrix<R> hdf=h*df;
-      IntervalMatrix<R> dphi=exp(hdf);
+      Matrix< Interval<R> > hdf=h*df;
+      Matrix< Interval<R> > dphi=exp(hdf);
       
       Point<R> c=p.centre();
       Rectangle<R> rc=Geometry::Rectangle<R>(c,c);
       Rectangle<R> phic=refine_flow_bounds(vf,rc,b,h);
       
-      IntervalMatrix<R> zv(dphi*p.generators());
+      Matrix< Interval<R> > zv(dphi*p.generators());
 
       p=Geometry::Zonotope<R>::over_approximation(phic,zv);
       
@@ -384,9 +383,10 @@ template<typename R>
       /* Write phi(x)=D x0 + P b */
       LinearAlgebra::Matrix<R> P=LinearAlgebra::exp_Ah_sub_id_div_A_approx(vf.A(),h,max_error);
       
-      LinearAlgebra::IntervalMatrix<R> iD(LinearAlgebra::IntervalMatrix<R>(D,max_error));
-      LinearAlgebra::IntervalMatrix<R> iP(LinearAlgebra::IntervalMatrix<R>(P,max_error));
-      LinearAlgebra::IntervalVector<R> iC=iD*p.centre().position_vector()+iP*vf.b();
+      LinearAlgebra::Matrix< Interval<R> > iD=D;
+      LinearAlgebra::Matrix< Interval<R> > iP=P;
+      LinearAlgebra::Vector< Interval<R> > ib=vf.b();
+      LinearAlgebra::Vector< Interval<R> > iC=iD*p.centre().position_vector()+iP*ib;
       p=Geometry::Zonotope<R>::over_approximation(Geometry::Rectangle<R>(iC),iD*p.generators());
       
 #ifdef DEBUG
@@ -431,16 +431,16 @@ template<typename R>
       /* Throws exception if we can't find flow bounds for given stepsize. */
       Rectangle<R> b=estimate_flow_bounds(vf,z.bounding_box(),h,256);
       
-      IntervalVector<R> f=vf(b);
-      IntervalMatrix<R> df=vf.derivative(b);
+      Vector< Interval<R> > f=vf(b);
+      Matrix< Interval<R> > df=vf.derivative(b);
       
-      IntervalMatrix<R> dphi=id+Interval<R>(0,h)*df;
+      Matrix< Interval<R> > dphi=id+Interval<R>(0,h)*df;
       
       Point<R> c=z.centre();
       Rectangle<R> rc=Geometry::Rectangle<R>(c,c);
       Rectangle<R> phic=refine_flow_bounds(vf,rc,b,R(h/2));
       
-      IntervalVector<R> fh=(R(h/2)*f);
+      Vector< Interval<R> > fh=(R(h/2)*f);
       
       Matrix<R> zfh=symmetrize(fh);
       Matrix<R> mdf=over_approximation(dphi)*z.generators();

@@ -46,8 +46,6 @@ template<typename T> class numerical_traits;
 namespace Ariadne { namespace LinearAlgebra {
 template<typename R> class Vector;
 template<typename R> class Matrix;
-template<typename R> class IntervalVector;
-template<typename R> class IntervalMatrix;
 template<typename R> class LinearProgram;
 }}
 

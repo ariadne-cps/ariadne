@@ -36,8 +36,8 @@ namespace Ariadne {
   namespace LinearAlgebra {
 
     template<typename R>
-    IntervalMatrix<R>
-    exp(const IntervalMatrix<R>& A); 
+    Matrix< Interval<R> >
+    exp(const Matrix< Interval<R> >& A); 
 
   }
 }

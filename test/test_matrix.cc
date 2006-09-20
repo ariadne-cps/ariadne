@@ -33,8 +33,6 @@
 #include "linear_algebra/vector.tpl"
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/matrix.tpl"
-#include "linear_algebra/interval_matrix.h"
-#include "linear_algebra/interval_matrix.tpl"
 
 using namespace std;
 using namespace Ariadne;
@@ -87,24 +85,24 @@ int main() {
   cout << endl;
 
   
-  IntervalMatrix<Real> iA0;
+  Matrix< Interval<Real> > iA0;
   cout << "iA1= " << iA0 << endl;
-  IntervalMatrix<Real> iA1(3,2);
+  Matrix< Interval<Real> > iA1(3,2);
   cout << "iA2= " << iA1 << endl;
-  IntervalMatrix<Real> iA2(2,2,iAptr,3,1);
+  Matrix< Interval<Real> > iA2(2,2,iAptr,3,1);
   cout << "iA3= " << iA2 << endl;
-  IntervalMatrix<Real> iA3(A1);
+  Matrix< Interval<Real> > iA3(A1);
   cout << "iA4= " << iA3 << endl;
-  IntervalMatrix<Real> iA4("[[1.875,2.125],[0.75,1.25];[-1.25,-0.875],[0.5,1.75]]");
+  Matrix< Interval<Real> > iA4("[[1.875,2.125],[0.75,1.25];[-1.25,-0.875],[0.5,1.75]]");
   cout << "iA5= " << iA4 << endl;
   
-  iA0=IntervalMatrix<Real>::zero(2,3);
+  iA0=Matrix< Interval<Real> >::zero(2,3);
   cout << "iA0= " << iA0 << endl;
-  iA1=IntervalMatrix<Real>::identity(4);
+  iA1=Matrix< Interval<Real> >::identity(4);
   cout << "iA1= " << iA1 << endl;
 
   cout << "iA4.norm()=" << iA4.norm() << endl;
-  cout << "iA4.upper_norm()=" << iA4.upper_norm() << endl;
+  cout << "iA4.norm().upper()=" << iA4.norm().upper() << endl;
   
   
 

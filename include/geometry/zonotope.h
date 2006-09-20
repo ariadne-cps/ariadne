@@ -282,7 +282,7 @@ namespace Ariadne {
 #endif
 
       /*! \brief Computes an over approximation from an "interval zonotope". */
-      static Zonotope<R> over_approximation(const Rectangle<R>& c, const LinearAlgebra::IntervalMatrix<R>& A);
+      static Zonotope<R> over_approximation(const Rectangle<R>& c, const LinearAlgebra::Matrix< Interval<R> >& A);
       /*! \brief Scale the zonotope by a real constant. */
       static Zonotope<R> scale(const Zonotope<R>& z, const R& sf);
            

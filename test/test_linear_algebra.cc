@@ -31,7 +31,6 @@
 #include "numeric/numerical_types.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "linear_algebra/interval_matrix.h"
 #include "linear_algebra/lu_matrix.h"
 #include "linear_algebra/qr_matrix.h"
 #include "linear_algebra/svd_matrix.h"
@@ -44,10 +43,6 @@
 using namespace Ariadne;
 using namespace Ariadne::LinearAlgebra;
 using namespace std;
-
-bool contains(const Matrix< Interval<Real> >& A, Matrix<Real>& B) {
-  return IntervalMatrix<Real>(A).contains(B);
-}
 
 int main() {
 
@@ -139,8 +134,8 @@ int main() {
     cout << "QR =" << B << "\n";
     cout << "A  =" << A << "\n";
     cout << flush;
-    assert(contains(Q*Q.transpose(),I));
-    assert(contains(B,A));
+    assert(LinearAlgebra::in(I,Q*Q.transpose()));
+    assert(LinearAlgebra::in(A,B));
   }
 
   /*

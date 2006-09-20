@@ -35,8 +35,6 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
-#include "../linear_algebra/interval_vector.h"
-#include "../linear_algebra/interval_matrix.h"
 
 #include "../combinatoric/lattice_set.h"
 
@@ -87,9 +85,9 @@ namespace Ariadne {
     Zonotope<R>::scale(const Zonotope<R>& z, const R& scale_factor) 
     {
       Geometry::Rectangle<R> new_central_block=Geometry::scale(z.central_block(),scale_factor);
-      LinearAlgebra::IntervalMatrix<R> new_interval_generators=z.generators()*Interval<R>(scale_factor);
-      new_central_block=new_central_block+new_interval_generators.radius_row_sum();
-      LinearAlgebra::Matrix<R> new_generators=new_interval_generators.centre();
+      LinearAlgebra::Matrix< Interval<R> > new_interval_generators=z.generators()*Interval<R>(scale_factor);
+      new_central_block=new_central_block+LinearAlgebra::radius_row_sum(new_interval_generators);
+      LinearAlgebra::Matrix<R> new_generators=LinearAlgebra::centre(new_interval_generators);
       return Geometry::Zonotope<R>(new_central_block, new_generators);
     }
 
@@ -135,7 +133,7 @@ namespace Ariadne {
     Rectangle<R>
     Zonotope<R>::bounding_box() const
     {
-      LinearAlgebra::IntervalVector<R> e(this->number_of_generators());
+      LinearAlgebra::Vector< Interval<R> > e(this->number_of_generators());
       for(size_type j=0; j!=this->number_of_generators(); ++j) {
         e[j]=Interval<R>(-1,1);
       }
@@ -745,10 +743,10 @@ namespace Ariadne {
     
     template<typename R>
     Zonotope<R>
-    Zonotope<R>::over_approximation(const Rectangle<R> &c, const LinearAlgebra::IntervalMatrix<R>& A)
+    Zonotope<R>::over_approximation(const Rectangle<R> &c, const LinearAlgebra::Matrix< Interval<R> >& A)
     {
-      LinearAlgebra::Matrix<R> Amid=A.centre();
-      return Zonotope<R>(c+A.radius_row_sum(),A.centre());
+      LinearAlgebra::Matrix<R> Amid=LinearAlgebra::centre(A);
+      return Zonotope<R>(c+LinearAlgebra::radius_row_sum(A),LinearAlgebra::centre(A));
     }
     
 

@@ -23,8 +23,6 @@
  
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
-#include "../linear_algebra/interval_vector.h"
-#include "../linear_algebra/interval_matrix.h"
 
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
@@ -93,7 +91,7 @@ namespace Ariadne {
     }
 
     template<typename R>
-    LinearAlgebra::IntervalMatrix<R> 
+    LinearAlgebra::Matrix< Interval<R> > 
     Map<R>::derivative(const Geometry::Rectangle<R>& r) const 
     {
       throw std::invalid_argument(this->name()+"::derivative(Rectangle) not implemented."); 

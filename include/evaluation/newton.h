@@ -34,8 +34,8 @@
 
 #include "../declarations.h"
 
-#include "linear_algebra/interval_vector.h"
-#include "linear_algebra/interval_matrix.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 #include "geometry/rectangle.h"
 #include "system/map.h"
 #include "system/vector_field.h"
@@ -58,11 +58,11 @@ namespace Ariadne {
     /*! \brief Interval Newton solver.
      *  \ingroup Solve
      */
-    template<typename Real>
-    Geometry::Rectangle<Real>
-    interval_newton(const System::VectorField<Real>& f, 
-                    const Geometry::Rectangle<Real>& r, 
-                    const Real& e,
+    template<typename R>
+    Geometry::Rectangle<R>
+    interval_newton(const System::VectorField<R>& f, 
+                    const Geometry::Rectangle<R>& r, 
+                    const R& e,
                     uint max_steps=64);
 
   }
@@ -85,12 +85,12 @@ namespace Ariadne {
       /*!\brief The dimension of the space the map acts on. */
       virtual dimension_type dimension() const { return _base.argument_dimension(); }
       /*!\brief Evaluate the function \f$f(x)-x\f$, where \f$f\f$ is the map used to construct the difference map. */
-      virtual LinearAlgebra::IntervalVector<R> operator() (const Geometry::Rectangle<R>& r) const {
+      virtual LinearAlgebra::Vector< Interval<R> > operator() (const Geometry::Rectangle<R>& r) const {
         return _base(r)-r; }
       /*!\brief Evaluate the derivative of function \f$f(x)-x\f$, which is \f$Df(x)-I\f$. */
-      virtual LinearAlgebra::IntervalMatrix<R> derivative(const Geometry::Rectangle<R>& r) const {
-        LinearAlgebra::IntervalMatrix<R> d=_base.derivative(r);
-        LinearAlgebra::IntervalMatrix<R> i=LinearAlgebra::IntervalMatrix<R>::identity(this->dimension());
+      virtual LinearAlgebra::Matrix< Interval<R> > derivative(const Geometry::Rectangle<R>& r) const {
+        LinearAlgebra::Matrix< Interval<R> > d=_base.derivative(r);
+        LinearAlgebra::Matrix< Interval<R> > i=LinearAlgebra::Matrix< Interval<R> >::identity(this->dimension());
         return d-i; }
       /*!\brief The name of the class. */
       virtual std::string name() const { return "DifferenceMap"; }

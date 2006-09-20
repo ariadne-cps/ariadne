@@ -26,8 +26,6 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
-#include "../linear_algebra/interval_vector.h"
-#include "../linear_algebra/interval_matrix.h"
 
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
@@ -73,7 +71,7 @@ namespace Ariadne {
       }
       return Geometry::Parallelotope<R>::over_approximation(
           this->operator()(Geometry::Rectangle<R>(p.centre())),
-          this->A()*LinearAlgebra::IntervalMatrix<R>(p.generators()));
+          this->A()*LinearAlgebra::Matrix< Interval<R> >(p.generators()));
     }
 
     template <typename R>
@@ -85,7 +83,7 @@ namespace Ariadne {
       }
       return Geometry::Zonotope<R>::over_approximation(
         this->operator()(z.central_block()),
-        this->A()*LinearAlgebra::IntervalMatrix<R>(z.generators()));
+        this->A()*LinearAlgebra::Matrix< Interval<R> >(z.generators()));
     }    
     
     template<typename R>

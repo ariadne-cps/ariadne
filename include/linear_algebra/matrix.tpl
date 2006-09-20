@@ -72,9 +72,9 @@ namespace Ariadne {
     Matrix<R>::norm() const
     {
       const Matrix<R>& A=*this;
-      F result=0;
+      R result=0;
       for(size_type i=0; i!=A.number_of_rows(); ++i) {
-        F row_sum=0;
+        R row_sum=0;
         for(size_type j=0; j!=A.number_of_columns(); ++j) {
           row_sum+=abs(A(i,j));
         }
@@ -88,9 +88,9 @@ namespace Ariadne {
     Matrix<R>::log_norm() const
     {
       const Matrix<R>& A=*this;
-      F result=0;
+      R result=0;
       for(size_type i=0; i!=A.number_of_rows(); ++i) {
-        F row_sum=A(i,i);
+        R row_sum=A(i,i);
         for(size_type j=0; j!=A.number_of_columns(); ++j) {
           if(i!=j) {
             row_sum+=abs(A(i,j));

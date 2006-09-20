@@ -175,7 +175,7 @@ namespace Ariadne {
    
     
     Parma_Polyhedra_Library::C_Polyhedron  
-    ppl_polyhedron(const LinearAlgebra::IntervalVector<Rational>& r)
+    ppl_polyhedron(const LinearAlgebra::Vector< Interval<Rational> >& r)
     {
       Parma_Polyhedra_Library::Constraint_System ppl_cs;
       LinearAlgebra::Vector<Rational> e(r.size());

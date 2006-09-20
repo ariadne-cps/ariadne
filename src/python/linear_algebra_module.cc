@@ -24,20 +24,20 @@
 
 #include <boost/python.hpp>
 
-void export_Vector();
-void export_Matrix();
-void export_Linear_Program();
+void export_vector();
+void export_matrix();
+void export_linear_program();
 
-void export_IntervalVector();
-void export_IntervalMatrix();
+void export_interval_vector();
+void export_interval_matrix();
 
 
 BOOST_PYTHON_MODULE(linear_algebra)
 {
-  export_Vector();
-  export_Matrix();
-  export_Linear_Program();
+  export_vector();
+  export_matrix();
+  export_linear_program();
   
-  export_IntervalVector();
-  export_IntervalMatrix();
+  export_interval_vector();
+  export_interval_matrix();
 }

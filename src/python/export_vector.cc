@@ -27,7 +27,6 @@
 #include "numeric/interval.h"
 
 #include "linear_algebra/vector.h"
-#include "linear_algebra/interval_vector.h"
 
 #include "python/typedefs.h"
 using namespace Ariadne;
@@ -104,7 +103,7 @@ inline void fvector_setitem_from_double(FVector& v, uint i, double x) {
 }
 
 
-void export_Vector() {
+void export_vector() {
   class_<RVector>("Vector",init<int>())
     .def(init<std::string>())
     .def(init<RVector>())
@@ -132,7 +131,7 @@ void export_Vector() {
 
 }
 
-void export_IntervalVector() {
+void export_interval_vector() {
   class_< RIntervalVector >("IntervalVector",init<int>())
     .def(init<std::string>())
     .def(init<RIntervalVector>())

@@ -37,7 +37,7 @@
 #include "../declarations.h"
 #include "../numeric/integer.h"
 #include "../numeric/arithmetic.h"
-
+#include "../numeric/interval.h"
 
 
 namespace Ariadne {
@@ -137,6 +137,32 @@ namespace Ariadne {
       std::istream& read(std::istream& is);
     };
     
+    template <typename R>
+    inline 
+    Vector<R>
+    centre(const Vector< Interval<R> >& iv) 
+    {
+      Vector<R> result(iv.size());
+      for(size_type i=0; i!=iv.size(); ++i) {
+        result(i) = iv(i).centre();
+      }
+      return result;
+    }
+
+    template <typename R>
+    inline 
+    bool
+    in(const Vector<R>& v, const Vector< Interval<R> >& iv) 
+    {
+      assert(v.size()==iv.size());
+      for(size_type i=0; i!=v.size(); ++i) {
+        if(!Numeric::in(v(i),iv(i))) {
+          return false;
+        }
+      }
+      return true;
+    }
+
     template <typename R>
     inline
     std::ostream&

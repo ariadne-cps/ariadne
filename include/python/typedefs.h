@@ -50,8 +50,8 @@ typedef Interval<Field> FInterval;
 
 typedef LinearAlgebra::Vector<Real> RVector;
 typedef LinearAlgebra::Matrix<Real> RMatrix;
-typedef LinearAlgebra::IntervalVector<Real> RIntervalVector;
-typedef LinearAlgebra::IntervalMatrix<Real> RIntervalMatrix;
+typedef LinearAlgebra::Vector< Interval<Real> > RIntervalVector;
+typedef LinearAlgebra::Matrix< Interval<Real> > RIntervalMatrix;
 
 typedef LinearAlgebra::Vector<Field> FVector;
 typedef LinearAlgebra::Matrix<Field> FMatrix;

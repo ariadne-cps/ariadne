@@ -23,7 +23,7 @@
 
 
 #include "numeric/interval.h"
-#include "linear_algebra/interval_matrix.h"
+#include "linear_algebra/matrix.h"
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"

@@ -43,10 +43,7 @@
 #include "../numeric/interval.h"
 
 #include "../linear_algebra/vector.h"
-#include "../linear_algebra/interval_vector.h"
-
 #include "../linear_algebra/matrix.h"
-#include "../linear_algebra/interval_matrix.h"
 
 #include "../geometry/rectangle.h"
 #include "../geometry/parallelotope.h"
@@ -103,7 +100,7 @@ namespace Ariadne {
 
     template<typename R>
     LinearAlgebra::Matrix<R>
-    Integrator<R>::symmetrize(const LinearAlgebra::IntervalVector<R>& iv)
+    Integrator<R>::symmetrize(const LinearAlgebra::Vector< Interval<R> >& iv)
     {
       LinearAlgebra::Matrix<R> A(iv.size(),iv.size()+1);
       for(size_type i=0; i!=A.number_of_rows(); ++i) {
@@ -199,7 +196,7 @@ namespace Ariadne {
       
       while(t>0) {
         bounds=reach+Interval<R>(0,multiplier*h)*vf(reach);
-        LinearAlgebra::IntervalVector<R> df=vf(bounds);
+        LinearAlgebra::Vector< Interval<R> > df=vf(bounds);
         
         F dt=t;
         for(dimension_type i=0; i!=vf.dimension(); ++i) {
@@ -273,11 +270,11 @@ namespace Ariadne {
 #ifdef DEBUG
       std::cerr << "new bounds " << xxb << "," << xb << " vs old bounds " << b << "  " << subset(xb,b) << std::endl;
 #endif
-      IntervalVector<R> ddphi=vf.derivative(xb)*vf(xb);
-      IntervalVector<R> dfx=vf(rx);
-      IntervalVector<R> hdfx=(h*dfx);
-      IntervalVector<R> hhddphi=(R(h*h/2)*ddphi);
-      IntervalVector<R> dx=hdfx+hhddphi;
+      Vector< Interval<R> > ddphi=vf.derivative(xb)*vf(xb);
+      Vector< Interval<R> > dfx=vf(rx);
+      Vector< Interval<R> > hdfx=(h*dfx);
+      Vector< Interval<R> > hhddphi=(R(h*h/2)*ddphi);
+      Vector< Interval<R> > dx=hdfx+hhddphi;
       return rx+dx;
     }
     

@@ -23,8 +23,8 @@
  
 #include "affine_vector_field.h"
 
-#include "../linear_algebra/interval_vector.h"
-#include "../linear_algebra/interval_matrix.h"
+#include "../linear_algebra/vector.h"
+#include "../linear_algebra/matrix.h"
 
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
@@ -49,11 +49,11 @@ namespace Ariadne {
     }
     
     template<typename R>
-    LinearAlgebra::IntervalVector<R> 
+    LinearAlgebra::Vector< Interval<R> > 
     AffineVectorField<R>::operator() (const Geometry::Rectangle<R>& r) const 
     {
-      LinearAlgebra::IntervalVector<R> iv=r.position_vectors();
-      return LinearAlgebra::IntervalVector<R>(this->_A*iv)+(this->_b);
+      LinearAlgebra::Vector< Interval<R> > iv=r.position_vectors();
+      return LinearAlgebra::Vector< Interval<R> >(this->_A*iv)+(this->_b);
     }
   
     template<typename R>
@@ -64,10 +64,10 @@ namespace Ariadne {
     }
     
     template<typename R>
-    LinearAlgebra::IntervalMatrix<R> 
+    LinearAlgebra::Matrix< Interval<R> > 
     AffineVectorField<R>::derivative(const Geometry::Rectangle<R>& r) const 
     { 
-      return LinearAlgebra::IntervalMatrix<R>(this->_A);
+      return LinearAlgebra::Matrix< Interval<R> >(this->_A);
     }
     
     template<typename R> 

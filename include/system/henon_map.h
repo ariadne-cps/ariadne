@@ -30,7 +30,6 @@
 #define _ARIADNE_HENON_MAP_H
 
 #include "../linear_algebra/matrix.h"
-#include "../linear_algebra/interval_matrix.h"
 
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
@@ -66,7 +65,7 @@ namespace Ariadne {
       /*! \brief  The derivative of the map at a point. */
       virtual LinearAlgebra::Matrix<R> derivative(const Geometry::Point<R>& x) const;
       /*! \brief  The derivative of the map over a rectangular basic set. */
-      virtual LinearAlgebra::IntervalMatrix<R> derivative(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::Matrix< Interval<R> > derivative(const Geometry::Rectangle<R>& r) const;
             
       /*! \brief  The parameter a. */
       const R& a() const { return _a; }
@@ -131,10 +130,10 @@ namespace Ariadne {
     }
      
     template <typename R>
-    LinearAlgebra::IntervalMatrix<R>
+    LinearAlgebra::Matrix< Interval<R> >
     HenonMap<R>::derivative(const Geometry::Rectangle<R>& r) const
     {
-      LinearAlgebra::IntervalMatrix<R> result(2,2); 
+      LinearAlgebra::Matrix< Interval<R> > result(2,2); 
       result(0,0) = R(-2)*r[0];
       result(0,1) = Interval<R>(R(-_b));
       result(1,0) = Interval<R>(R(1));

@@ -67,7 +67,7 @@ namespace Ariadne {
       /*! \brief The derivative at a point, if this can be computed exactly. */
       virtual LinearAlgebra::Matrix<R> derivative(const Geometry::Point<R>& r) const;
       /*! \brief The derivatives over a rectangle. */
-      virtual LinearAlgebra::IntervalMatrix<R> derivative(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::Matrix< Interval<R> > derivative(const Geometry::Rectangle<R>& r) const;
         
       /*! \brief The dimension of the domain space. */
       virtual dimension_type argument_dimension() const = 0;

@@ -33,7 +33,6 @@
 
 #include "../combinatoric/binary_word.h" 
 #include "../base/array.h" 
-#include "../linear_algebra/interval_vector.h" 
 #include "../geometry/point.h" 
 #include "../geometry/point_list.h" 
 #include "../geometry/list_set.h" 
@@ -53,7 +52,7 @@ namespace Ariadne {
     template <typename R>
     Rectangle<R>::operator Parma_Polyhedra_Library::C_Polyhedron() const
     {
-      return ppl_polyhedron(LinearAlgebra::IntervalVector<Rational>(this->position_vectors()));
+      return ppl_polyhedron(LinearAlgebra::Vector< Interval<Rational> >(this->position_vectors()));
     }
 
     template <typename R>

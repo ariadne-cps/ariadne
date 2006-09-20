@@ -23,10 +23,6 @@
  
 #include "newton.h"
 
-#include "../linear_algebra/matrix.h"
-#include "../linear_algebra/interval_vector.h"
-#include "../linear_algebra/interval_matrix.h"
-
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
 
@@ -41,36 +37,36 @@ namespace Ariadne {
 namespace Ariadne {
   namespace Evaluation {
 
-    template<typename Real>
-    Geometry::Rectangle<Real>
-    interval_newton(const System::VectorField<Real>& f, 
-                    const Geometry::Rectangle<Real>& x, 
-                    const Real& e,
+    template<typename R>
+    Geometry::Rectangle<R>
+    interval_newton(const System::VectorField<R>& f, 
+                    const Geometry::Rectangle<R>& x, 
+                    const R& e,
                     uint max_steps)
     {
       uint n=max_steps;
       if(debug_level>0) { std::cerr << "debug_level=" << debug_level << "\n"; }
-      Geometry::Rectangle<Real> r=x;
+      Geometry::Rectangle<R> r=x;
       while(true) {
         if(debug_level>0) { std::cerr << "Testing for root in " << r << "\n"; }
         if(debug_level>0) { std::cerr << "  e=" << r.radius() << "  r=" << r << std::endl; }
-        Geometry::Point<Real> m=r.centre();
+        Geometry::Point<R> m=r.centre();
         if(debug_level>0) { std::cerr << "  m=" << m << std::endl; }
-        Geometry::Rectangle<Real> mr(m);
+        Geometry::Rectangle<R> mr(m);
         if(debug_level>0) { std::cerr << "  mr=" << mr << std::endl; }
-        LinearAlgebra::IntervalVector<Real> w=f(mr);
+        LinearAlgebra::Vector< Interval<R> > w=f(mr);
         if(debug_level>0) { std::cerr << "  f(mr)=" << w << std::endl; }
-        LinearAlgebra::IntervalMatrix<Real> A=f.derivative(r);
+        LinearAlgebra::Matrix< Interval<R> > A=f.derivative(r);
         if(debug_level>0) { std::cerr << "  Df(r)=" << A << std::endl; }
-        LinearAlgebra::IntervalMatrix<Real> Ainv=A.inverse();
+        LinearAlgebra::Matrix< Interval<R> > Ainv=A.inverse();
         if(debug_level>0) { std::cerr << "  inverse(Df(r))=" << Ainv << std::endl; }
-        LinearAlgebra::IntervalVector<Real> dr=Ainv * w;
+        LinearAlgebra::Vector< Interval<R> > dr=Ainv * w;
         if(debug_level>0) { std::cerr << "  dr=" << dr << std::endl; }
-        Geometry::Rectangle<Real> nr= mr - dr;
+        Geometry::Rectangle<R> nr= mr - dr;
         if(debug_level>0) { std::cerr << "  nr=" << nr << std::endl; } 
         if(debug_level>0) {
           std::cerr << "  f(x)=" << f(r) << std::flush;
-          std::cerr << "  f(m)=" << f(mr).centre() << std::flush;
+          std::cerr << "  f(m)=" << centre(f(mr)) << std::flush;
           std::cerr << "  Df(x) =" << A << "  inv=" << inverse(A) << "  I=" << A*inverse(A) << std::flush;
           std::cerr << "  nx =" << nr << "\n\n" << std::flush;
           std::cerr << nr << " subset " << r << " ? " << Geometry::subset(nr,r) << "\n";

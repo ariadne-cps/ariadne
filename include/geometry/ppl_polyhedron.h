@@ -39,7 +39,6 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
-#include "../linear_algebra/interval_vector.h"
 
 namespace Parma_Polyhedra_Library {
   class Polyhedron;
@@ -64,7 +63,7 @@ namespace Ariadne {
                    const LinearAlgebra::Vector<Rational>& b);
     
     Parma_Polyhedra_Library::C_Polyhedron 
-    ppl_polyhedron(const LinearAlgebra::IntervalVector<Rational>& c, 
+    ppl_polyhedron(const LinearAlgebra::Vector< Interval<Rational> >& c, 
                    const LinearAlgebra::Matrix<Rational>& A);
     
     Parma_Polyhedra_Library::C_Polyhedron 
@@ -75,7 +74,7 @@ namespace Ariadne {
     ppl_polyhedron(const LinearAlgebra::Matrix<Rational>& G);
     
     Parma_Polyhedra_Library::C_Polyhedron 
-    ppl_polyhedron(const LinearAlgebra::IntervalVector<Rational>& r);
+    ppl_polyhedron(const LinearAlgebra::Vector< Interval<Rational> >& r);
     
     Parma_Polyhedra_Library::C_Polyhedron 
     ppl_polyhedron(const LinearAlgebra::Vector<Rational>& p);

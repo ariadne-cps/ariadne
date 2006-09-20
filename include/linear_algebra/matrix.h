@@ -36,6 +36,7 @@
 
 #include "../declarations.h"
 #include "../numeric/integer.h"
+#include "../numeric/interval.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {
@@ -53,7 +54,6 @@ namespace Ariadne {
     {
       typedef boost::numeric::ublas::matrix<R> _Base;
       typedef boost::numeric::ublas::matrix<R> _boost_matrix;
-      typedef typename numerical_traits<R>::field_extension_type F;
      public:
       /*! \brief Construct a 0 by 0 matrix. */
       Matrix() : _Base() { }
@@ -183,6 +183,57 @@ namespace Ariadne {
 
     };
   
+
+    template <typename R>
+    inline 
+    bool
+    in(const Matrix<R>& A, const Matrix< Interval<R> >& iA) 
+    {
+      assert(A.number_of_rows()==iA.number_of_rows() 
+        && A.number_of_columns()==iA.number_of_columns());
+      for(size_type i=0; i!=A.number_of_rows(); ++i) {
+        for(size_type j=0; j!=A.number_of_columns(); ++j) {
+          if(!Numeric::in(A(i,j),iA(i,j))) {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+
+    template <typename R>
+    inline 
+    Matrix<R>
+    centre(const Matrix< Interval<R> >& im) 
+    {
+      Matrix<R> result(im.number_of_rows(),im.number_of_columns());
+      for(size_type i=0; i!=im.number_of_rows(); ++i) {
+        for(size_type j=0; j!=im.number_of_columns(); ++j) {
+          result(i,j)=im(i,j).centre();
+        }
+      }
+      return result;
+    }
+
+    template<typename R>
+    inline
+    Vector< Interval<R> >
+    radius_row_sum(const Matrix< Interval<R> >& im) 
+    { 
+      Vector< Interval<R> > result(im.number_of_rows());
+      for(dimension_type i=0; i!=im.number_of_rows(); ++i) {
+        R radius=0;
+        for(dimension_type j=0; j!=im.number_of_columns(); ++j) {
+          radius+=im(i,j).length();
+        }
+        radius /= 2;
+        result[i]=Interval<R>(-radius,radius);
+      }
+      return result;
+    }
+
+
     template<typename R>
     inline
     bool
@@ -201,9 +252,38 @@ namespace Ariadne {
            
     template<typename R>
     inline
+    Vector< Interval<R> >
+    operator*(const Matrix<R>& A, const Vector< Interval<R> >& B) {
+      return boost::numeric::ublas::prod(Matrix< Interval<R> >(A),B);
+    }
+           
+    template<typename R>
+    inline
+    Vector< Interval<R> >
+    operator*(const Matrix< Interval<R> >& A, const Vector<R>& B) {
+      return boost::numeric::ublas::prod(A,Vector< Interval<R> >(B));
+    }
+           
+    
+    template<typename R>
+    inline
     Matrix<R>
     operator*(const Matrix<R>& A, const Matrix<R>& B) {
       return boost::numeric::ublas::prod(A,B);
+    }
+    
+    template<typename R>
+    inline
+    Matrix< Interval<R> >
+    operator*(const Matrix<R>& A, const Matrix< Interval<R> >& B) {
+      return boost::numeric::ublas::prod(Matrix< Interval<R> >(A),B);
+    }
+    
+    template<typename R>
+    inline
+    Matrix< Interval<R> >
+    operator*(const Matrix< Interval<R> >& A, const Matrix<R>& B) {
+      return boost::numeric::ublas::prod(A,Matrix< Interval<R> >(B));
     }
     
  
@@ -246,6 +326,30 @@ namespace Ariadne {
       return Matrix<R>::concatenate_columns(A1,A2);
     }
     
+    
+    /*! \brief A matrix \f$A\f$ such that for all zonotopes \f$Z\f$, \f$AZ\subset \overline{\underline{A}}\f$. */
+    template<typename R>
+    Matrix<R>
+    over_approximation(const Matrix< Interval<R> >& A)
+    {
+      assert(A.number_of_rows()==A.number_of_columns());
+      dimension_type n=A.number_of_rows();
+      
+      Matrix<R> Amid(n,n);
+      for(size_type i=0; i!=n; ++i) {
+        for(size_type j=0; j!=n; ++j) {
+          Amid(i,j)=(A(i,j).upper()+A(i,j).lower())/2;
+        }
+      }
+      Matrix< Interval<R> > I=LinearAlgebra::inverse(Matrix< Interval<R> >(Amid))*A;
+      
+      R excess=LinearAlgebra::norm(I).upper();
+      
+      // FIXME: Outer bound on multiplication
+      return excess*Amid;
+    }
+
+
     template <typename R>
     std::ostream&
     operator<<(std::ostream& os, const Matrix<R>& A) {

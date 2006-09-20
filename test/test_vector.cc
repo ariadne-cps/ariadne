@@ -28,8 +28,8 @@
 
 #include "real_typedef.h"
 #include "numeric/numerical_types.h"
+#include "numeric/interval.h"
 #include "linear_algebra/vector.h"
-#include "linear_algebra/interval_vector.h"
 #include "linear_algebra/vector.tpl"
 
 #undef DEBUG
@@ -81,20 +81,20 @@ int main() {
   v1=v2/x;
   cout << v1 << " = " << v2 << " / " << x << endl;
   
-  IntervalVector<Real> iv1("[[0.99,1.01],[2.25,2.375],[4.0,4.375],[-0.02,0.01]]");
+  Vector< Interval<Real> > iv1("[[0.99,1.01],[2.25,2.375],[4.0,4.375],[-0.02,0.01]]");
   cout << "iv1=" << iv1 << endl;
   cout << "iv1.norm()=" << iv1.norm() << endl;
   cout << "iv1.upper_norm()=" << iv1.upper_norm() << endl;
 
-  IntervalVector<Real> iv2("[[-1,1],[-1,1]]");
+  Vector< Interval<Real> > iv2("[[-1,1],[-1,1]]");
   cout << "iv2=" << iv2 << endl;
-  IntervalVector<Real> iv3(3);
+  Vector< Interval<Real> > iv3(3);
   cout << "iv3=" << iv3 << endl;
-  iv3=IntervalVector<Real>("[[4.25,4.25],[2.375,2.375]]");
+  iv3=Vector< Interval<Real> >("[[4.25,4.25],[2.375,2.375]]");
   cout << "iv3=" << iv3 << endl;
   Interval<Real> ix=Interval<Real>(-2,1);
  
-  IntervalVector<Real> iv0;
+  Vector< Interval<Real> > iv0;
   cout << "iv0=" << iv0 << endl;
   iv1=iv0;
   //cout << "iv1=" << iv1 << endl;
@@ -102,7 +102,7 @@ int main() {
   cout << "iv1=" << iv1 << endl;
   cout << endl;
   
-  //IntervalVector<Real> ivv=Interval<Real>(x)*iv1;
+  //Vector< Interval<Real> > ivv=Interval<Real>(x)*iv1;
   //Vector<Real> vv=x*v1;
   
   boost::numeric::ublas::vector<Real> bv1(3);
@@ -115,12 +115,12 @@ int main() {
   Vector<Real> tv1(3);
   Vector<Real> tv2=(x*x)*tv1;
   cout << "Tested Vector" << endl;
-  IntervalVector<Real> tiv1(3);
+  Vector< Interval<Real> > tiv1(3);
   tiv1=ix*tiv1;
   cout << "Tested IntervalVector" << endl;
-  IntervalVector<Real> tiv2=ix*tiv1;
+  Vector< Interval<Real> > tiv2=ix*tiv1;
   cout << "Tested IntervalVector" << endl;
-  IntervalVector<Real> tiv3=Interval<Real>(x)*tiv1;
+  Vector< Interval<Real> > tiv3=Interval<Real>(x)*tiv1;
   cout << "Tested IntervalVector" << endl;
  
   

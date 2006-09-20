@@ -190,7 +190,7 @@ namespace Ariadne {
       /*! \brief Compute the derivate of the map at a point. */
       LinearAlgebra::Matrix<R> derivative(const Geometry::Point<R>& s) const;
       /*! \brief Compute an over-approximation to the the derivate of the map over a rectangle. */
-      LinearAlgebra::IntervalMatrix<R> derivative(const Geometry::Rectangle<R>& s) const;
+      LinearAlgebra::Matrix< Interval<R> > derivative(const Geometry::Rectangle<R>& s) const;
       
       /*! \brief Compute a closed form for the derivative of the map. */
       const PolynomialMatrix<R>& derivative() const;

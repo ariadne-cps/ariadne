@@ -134,7 +134,7 @@ namespace Ariadne {
                                                           R&) const = 0;
      protected:
       /*! \brief Constructs a zonotopic generator for the convex hull of \a iv and \a -iv. */ 
-      static LinearAlgebra::Matrix<R> symmetrize(const LinearAlgebra::IntervalVector<R>& r);
+      static LinearAlgebra::Matrix<R> symmetrize(const LinearAlgebra::Vector< Interval<R> >& r);
      private:
       R _minimum_step_size;
       R _maximum_step_size;

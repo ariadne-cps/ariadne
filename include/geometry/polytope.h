@@ -35,7 +35,6 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
-#include "../linear_algebra/interval_vector.h"
 
 #include "../geometry/ppl_polyhedron.h"
 #include "../geometry/point.h"

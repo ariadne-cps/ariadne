@@ -35,8 +35,6 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
-#include "../linear_algebra/interval_vector.h"
-#include "../linear_algebra/interval_matrix.h"
 #include "../linear_algebra/linear_program.h"
 
 #include "../combinatoric/lattice_set.h" 
@@ -185,7 +183,7 @@ namespace Ariadne {
     
     template<typename R>
     Parallelotope<R>
-    Parallelotope<R>::over_approximation(const Rectangle<R> &c, const LinearAlgebra::IntervalMatrix<R>& A)
+    Parallelotope<R>::over_approximation(const Rectangle<R> &c, const LinearAlgebra::Matrix< Interval<R> >& A)
     {
 #ifdef DEBUG
       std::cerr << "IntervalParallelotope<R>::over_approximating_parallelotope() const" << std::endl;
@@ -193,15 +191,15 @@ namespace Ariadne {
       size_type n=c.dimension();
       
       Point<R> cmid=c.centre();
-      LinearAlgebra::Matrix<R> Amid=A.centre();
+      LinearAlgebra::Matrix<R> Amid=LinearAlgebra::centre(A);
       
       LinearAlgebra::Matrix<R> D(n,n);
       for(size_type i=0; i!=n; ++i) {
         D(i,i)=c[i].radius();
       }
       
-      LinearAlgebra::IntervalMatrix<R> Ainv=LinearAlgebra::inverse(LinearAlgebra::IntervalMatrix<R>(Amid));
-      R err = upper_norm(Ainv*D)+upper_norm(Ainv*A);
+      LinearAlgebra::Matrix< Interval<R> > Ainv=LinearAlgebra::inverse(LinearAlgebra::Matrix< Interval<R> >(Amid));
+      R err = ((Ainv*D).norm()+(Ainv*A).norm()).upper();
 
       return Geometry::Parallelotope<R>(cmid,err*Amid);
     }

@@ -125,7 +125,7 @@ namespace Ariadne {
       //@}
       
       /*! \brief Computes an over approximation from an "interval parallelotope". */
-      static Parallelotope<R> over_approximation(const Rectangle<R>& c, const LinearAlgebra::IntervalMatrix<R>& A);
+      static Parallelotope<R> over_approximation(const Rectangle<R>& c, const LinearAlgebra::Matrix< Interval<R> >& A);
       /*! \brief Scale the parallelotope by at least \a sf. */
       static Parallelotope<R> scale(const Parallelotope<R>& p, const R& sf);
 

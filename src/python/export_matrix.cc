@@ -29,7 +29,6 @@
 #include "numeric/integer.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "linear_algebra/interval_matrix.h"
 #include "linear_algebra/matrix_function.h"
 
 #include "python/typedefs.h"
@@ -101,7 +100,7 @@ inline FMatrix rmatrix_inverse(const RMatrix& A) {
   return LinearAlgebra::inverse(A);
 }
 
-void export_Matrix() {
+void export_matrix() {
   class_<RMatrix>("Matrix",init<int,int>())
     .def(init<std::string>())
     .def(init<RMatrix>())
@@ -126,7 +125,7 @@ void export_Matrix() {
 #endif
 }
 
-void export_IntervalMatrix() {
+void export_interval_matrix() {
   class_<RIntervalMatrix>("IntervalMatrix",init<int,int>())
     .def(init<RIntervalMatrix>())
     .def(init<std::string>())

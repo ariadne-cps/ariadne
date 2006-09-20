@@ -308,6 +308,16 @@ namespace Ariadne {
       }
     }
 
+    
+    template<typename R>
+    inline
+    bool
+    in(const R& x, const Interval<R>& ivl)
+    {
+      return(ivl.lower()<=x && x<=ivl.upper());
+    }
+    
+    
     template<typename R>
     inline
     Interval<R>

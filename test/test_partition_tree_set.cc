@@ -89,7 +89,7 @@ int main() {
   PartitionTreeSet<Real>::const_iterator ptreeset_iter=pts.begin();
   PartitionTreeSet<Real>::const_iterator ptreeset_end=pts.end();
 
-  IntervalVector<Real> iv(2);
+  Vector< Interval<Real> > iv(2);
   iv[0]=Interval<Real>(-0.5,0.5);
   iv[1]=Interval<Real>(-0.5,0.5);
   Vector<Real> c("[0.125,0.25]");

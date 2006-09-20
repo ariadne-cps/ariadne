@@ -37,8 +37,6 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
-#include "../linear_algebra/interval_matrix.h"
-#include "../linear_algebra/interval_vector.h"
 
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
@@ -270,11 +268,11 @@ namespace Ariadne {
     
     
     template<typename R>
-    LinearAlgebra::IntervalMatrix<R>
+    LinearAlgebra::Matrix< Interval<R> >
     PolynomialMap<R>::derivative(const Geometry::Rectangle<R>& r) const 
     {
       this->_compute_derivative();
-      LinearAlgebra::IntervalMatrix<R> result(this->result_dimension(), this->argument_dimension());
+      LinearAlgebra::Matrix< Interval<R> > result(this->result_dimension(), this->argument_dimension());
       for(size_type i=0; i!=this->result_dimension(); ++i) {
         for(size_type j=0; j!=this->argument_dimension(); ++j) {
           result(i,j)=this->_derivative(i,j).apply(r);

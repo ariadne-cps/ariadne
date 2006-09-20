@@ -23,28 +23,28 @@
  
 #include "matrix_function.h"
 
+#include "../numeric/interval.h"
 #include "../linear_algebra/matrix.h"
-#include "../linear_algebra/interval_matrix.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {
 
     template<typename R>
-    IntervalMatrix<R>
-    exp(const IntervalMatrix<R>& A) 
+    Matrix< Interval<R> >
+    exp(const Matrix< Interval<R> >& A) 
     {
       assert(A.number_of_rows()==A.number_of_columns());
-      R err=A.radius_norm()/65536;
+      R err=A.norm().upper()/65536;
       if(err==0) {
-        err=A.upper_norm()/65536;
+        err=A.norm().upper()/65536;
         err/=65536;
         err/=65536;
       }
             
-      IntervalMatrix<R> result=IntervalMatrix<R>::identity(A.number_of_rows())+A;
-      IntervalMatrix<R> term=A;
+      Matrix< Interval<R> > result=Matrix< Interval<R> >::identity(A.number_of_rows())+A;
+      Matrix< Interval<R> > term=A;
       unsigned int n=1;
-      while(term.upper_norm()>err) {
+      while(term.norm().upper()>err) {
         n=n+1;
         term=(term*A)/Interval<R>(R(n));
         result+=term;

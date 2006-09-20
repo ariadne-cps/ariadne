@@ -29,9 +29,7 @@
 #define _ARIADNE_LORENZ_SYSTEM_H
 
 #include "../linear_algebra/vector.h"
-#include "../linear_algebra/interval_vector.h"
 #include "../linear_algebra/matrix.h"
-#include "../linear_algebra/interval_matrix.h"
 
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
@@ -58,12 +56,12 @@ namespace Ariadne {
       /*! \brief  The vector field applied to a state. */
       virtual LinearAlgebra::Vector<R> operator() (const Geometry::Point<R>& x) const;
       /*! \brief  The map applied to a rectangle basic set. */
-      virtual LinearAlgebra::IntervalVector<R> operator() (const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::Vector< Interval<R> > operator() (const Geometry::Rectangle<R>& r) const;
      
       /*! \brief  The derivative of the map at a point. */
       virtual LinearAlgebra::Matrix<R> derivative(const Geometry::Point<R>& x) const;
       /*! \brief  The derivative of the map over a rectangular basic set. */
-      virtual LinearAlgebra::IntervalMatrix<R> derivative(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::Matrix< Interval<R> > derivative(const Geometry::Rectangle<R>& r) const;
             
       /*! \brief  The parameter \f$\beta\f$. */
       const R& beta() const { return _b; }
@@ -97,10 +95,10 @@ namespace Ariadne {
     }
      
     template <typename R>
-    LinearAlgebra::IntervalVector<R>
+    LinearAlgebra::Vector< Interval<R> >
     LorenzSystem<R>::operator() (const Geometry::Rectangle<R>& X) const
     {
-      LinearAlgebra::IntervalVector<R> result(3); 
+      LinearAlgebra::Vector< Interval<R> > result(3); 
       result(0)=_s*(X[1]-X[0]);
       result(0)=_p*X[0]-X[1]-X[0]*X[2];
       result(0)=X[0]*X[1]-_b*X[2];
@@ -125,10 +123,10 @@ namespace Ariadne {
     }
      
     template <typename R>
-    LinearAlgebra::IntervalMatrix<R>
+    LinearAlgebra::Matrix< Interval<R> >
     LorenzSystem<R>::derivative(const Geometry::Rectangle<R>& X) const
     {
-      LinearAlgebra::IntervalMatrix<R> result(3,3); 
+      LinearAlgebra::Matrix< Interval<R> > result(3,3); 
       result(0,0) = R(-_s);
       result(0,1) = _s;
       result(0,2) = R(0);

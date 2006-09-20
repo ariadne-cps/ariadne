@@ -65,12 +65,12 @@ namespace Ariadne {
       /*! \brief An approximation to the vector field at a point. */
       LinearAlgebra::Vector<R> operator() (const Geometry::Point<R>& s) const;
       /*! \brief An over-approximation to the vector field over a rectangle. */
-      LinearAlgebra::IntervalVector<R> operator() (const Geometry::Rectangle<R>& r) const;
+      LinearAlgebra::Vector< Interval<R> > operator() (const Geometry::Rectangle<R>& r) const;
     
       /*! \brief An approximation to the Jacobian derivative at a point. */
       LinearAlgebra::Matrix<R> derivative(const Geometry::Point<R>& x) const;
       /*! \brief An over-approximation to the Jacobian derivative over a rectangle. */
-      LinearAlgebra::IntervalMatrix<R> derivative(const Geometry::Rectangle<R>& r) const;
+      LinearAlgebra::Matrix< Interval<R> > derivative(const Geometry::Rectangle<R>& r) const;
       
       /*! \brief The matrix \f$A\f$. */
       const LinearAlgebra::Matrix<R>& A() const { return this->_A; }

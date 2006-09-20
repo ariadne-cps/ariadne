@@ -34,9 +34,10 @@
 #include "../declarations.h"
 
 #include "../numeric/arithmetic.h"
+#include "../numeric/function.h"
 #include "../numeric/interval.h"
 
-#include "../linear_algebra/interval_vector.h"
+#include "../linear_algebra/vector.h"
 
 #include "../geometry/ppl_polyhedron.h"
 #include "../geometry/point.h"
@@ -131,7 +132,7 @@ namespace Ariadne {
       explicit Rectangle(const std::string& s);
       
       /*! \brief Construct from an interval vector. */
-      explicit Rectangle(const LinearAlgebra::IntervalVector<R>& iv)
+      explicit Rectangle(const LinearAlgebra::Vector< Interval<R> >& iv)
         : _bounds(iv)
       {
       }
@@ -254,7 +255,7 @@ namespace Ariadne {
       }
       
       /*! \brief The set of position vectors of the rectangle. */
-      const LinearAlgebra::IntervalVector<R>& position_vectors() const {
+      const LinearAlgebra::Vector< Interval<R> >& position_vectors() const {
         return this->_bounds;
       }
       //@}
@@ -324,16 +325,20 @@ namespace Ariadne {
       
       /*! \brief The centre. */
       Point<R> centre() const {
-        return Point<R>(this->_bounds.centre());
+        Point<R> result(this->dimension());
+        for(dimension_type i=0; i!=this->dimension(); ++i) {
+          result[i]=Numeric::div_approx(Numeric::add_approx(this->lower_bound(i),this->upper_bound(i)),R(2));
+        }
+        return result;
       }
       
       /*! \brief The radius in the sup norm. */
       R radius() const {
         R diameter=0;
         for(dimension_type i=0; i!=this->dimension(); ++i) {
-          diameter=max(diameter,this->_bounds[i].length());
+          diameter=Numeric::max(diameter,sub_up(this->upper_bound(i),this->lower_bound(i)));
         }
-        return diameter/2;
+        return div_down(diameter,R(2));
       }
       
       /*! \brief Compute a quadrant of the Rectangle determined by \a q.
@@ -390,20 +395,20 @@ namespace Ariadne {
       friend Rectangle<R> minkowski_difference(const Rectangle<R>& A, const Rectangle<R>& B); 
       
       /*! \brief The difference between two rectangles. */
-      friend LinearAlgebra::IntervalVector<R> operator-(const Rectangle<R>& A, 
+      friend LinearAlgebra::Vector< Interval<R> > operator-(const Rectangle<R>& A, 
                                                         const Rectangle& B);
       /*! \brief Adds a vector to a rectangle. */
       friend Rectangle<R> operator+(const Rectangle<R>& r, 
                                     const LinearAlgebra::Vector<R>& v);
       /*! \brief Adds an interval vector to a rectangle. */
       friend Rectangle<R> operator+(const Rectangle<R>& r, 
-                                    const LinearAlgebra::IntervalVector<R>& v);
+                                    const LinearAlgebra::Vector< Interval<R> >& v);
       /*! \brief Subtracts a vector from a rectangle. */
       friend Rectangle<R> operator-(const Rectangle<R>& r, 
                                     const LinearAlgebra::Vector<R>& v);
       /*! \brief Subtracts an interval vector from a rectangle. */
       friend Rectangle<R> operator-(const Rectangle<R>& r, 
-                                    const LinearAlgebra::IntervalVector<R>& v);
+                                    const LinearAlgebra::Vector< Interval<R> >& v);
       //@}
 #endif
       
@@ -415,7 +420,7 @@ namespace Ariadne {
       std::istream& read(std::istream& is);
       //@}
      private:
-      LinearAlgebra::IntervalVector<R> _bounds;
+      LinearAlgebra::Vector< Interval<R> > _bounds;
     };
   
 
@@ -634,7 +639,7 @@ namespace Ariadne {
     
     template<typename R>
     inline
-    LinearAlgebra::IntervalVector<R> 
+    LinearAlgebra::Vector< Interval<R> > 
     operator-(const Geometry::Rectangle<R>& r1, 
               const Geometry::Rectangle<R>& r2)
     {
@@ -650,7 +655,7 @@ namespace Ariadne {
               const boost::numeric::ublas::vector_expression<E>& v)
     {
       const E& ev=v();
-      LinearAlgebra::IntervalVector<R> iv=ev;
+      LinearAlgebra::Vector< Interval<R> > iv=ev;
       return r+iv; 
     }
       
@@ -673,7 +678,7 @@ namespace Ariadne {
     inline
     Geometry::Rectangle<R> 
     operator+(const Geometry::Rectangle<R>& r, 
-              const LinearAlgebra::IntervalVector<R>& v)
+              const LinearAlgebra::Vector< Interval<R> >& v)
     {
       Geometry::Rectangle<R> result(r.dimension());
       assert(r.dimension()==v.size());
@@ -703,7 +708,7 @@ namespace Ariadne {
     inline
     Geometry::Rectangle<R> 
     operator-(const Geometry::Rectangle<R>& r, 
-              const LinearAlgebra::IntervalVector<R>& v)
+              const LinearAlgebra::Vector< Interval<R> >& v)
     {
       Geometry::Rectangle<R> result(r.dimension());
       assert(r.dimension()==v.size());

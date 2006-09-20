@@ -24,6 +24,8 @@
 #include <cstdlib>
 #include <cstdio>
 
+#include "numeric/interval.h"
+
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/matrix.tpl"
 
@@ -40,5 +42,8 @@ namespace Ariadne {
     template class Matrix<MPFloat>;
     template class Matrix<Rational>;
   
+    template class Matrix< Interval<Float64> >;
+    template class Matrix< Interval<MPFloat> >;
+    template class Matrix< Interval<Rational> >;
   }
 }

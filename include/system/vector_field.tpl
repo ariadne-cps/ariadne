@@ -24,8 +24,7 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
-#include "../linear_algebra/interval_vector.h"
-#include "../linear_algebra/interval_matrix.h"
+
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
 
@@ -47,7 +46,7 @@ namespace Ariadne {
     }
     
     template<typename R>
-    LinearAlgebra::IntervalVector<R>
+    LinearAlgebra::Vector< Interval<R> >
     VectorField<R>::operator() (const Geometry::Rectangle<R>& x) const
     {
       throw std::invalid_argument(this->name()+"::operator() (Rectangle) not implemented."); 
@@ -61,7 +60,7 @@ namespace Ariadne {
     }
     
     template<typename R>
-    LinearAlgebra::IntervalMatrix<R> 
+    LinearAlgebra::Matrix< Interval<R> > 
     VectorField<R>::derivative(const Geometry::Rectangle<R>& A) const 
     {
       throw std::invalid_argument(this->name()+"::derivative(Rectangle) not implemented."); 

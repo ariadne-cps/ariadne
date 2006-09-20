@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "numeric/interval.h"
+
 #include "linear_algebra/vector.h"
 #include "linear_algebra/vector.tpl"
 
@@ -35,5 +37,8 @@ namespace Ariadne {
     template class Vector<MPFloat>;
     template class Vector<Rational>;
 
+    template class Vector< Interval<Float64> >;
+    template class Vector< Interval<MPFloat> >;
+    template class Vector< Interval<Rational> >;
   }
 }

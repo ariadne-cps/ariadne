@@ -25,8 +25,6 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
-#include "../linear_algebra/interval_vector.h"
-#include "../linear_algebra/interval_matrix.h"
 
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
@@ -50,7 +48,7 @@ namespace Ariadne {
       if (this->argument_dimension()!=pt.dimension()) {
         throw std::domain_error("AffineMultiMap<R,BS>::operator() (const Point&): the map does not have the same dimension of the point.");
       }
-      IntervalVector<R> iv=this->A()*IntervalVector<R>(pt.position_vector());
+      Vector< Interval<R> > iv=this->A()*Vector< Interval<R> >(pt.position_vector());
       return minkowski_sum(this->S(),BS<R>(Geometry::Rectangle<R>(iv)));
     }
     

@@ -84,7 +84,7 @@ namespace Ariadne {
       /*!\brief Construct a list consisting of \a n copies of the origin in dimension \a d. */
       explicit PointList(dimension_type d, size_type n) : _size(n), _pts(d,n) { }
       /*!\brief Construct from a matrix \a G whose columns contain the position vectors of the points. */
-      explicit PointList(const LinearAlgebra::Matrix<R>& G) : _size(G.size2()), _pts(G) { }
+      explicit PointList(const LinearAlgebra::Matrix<R>& G) : _size(G.number_of_columns()), _pts(G) { }
       
       /*!\brief Copy constructor. */
       PointList(const PointList& ptl) : _size(ptl._size), _pts(ptl.generators()) { }
@@ -94,11 +94,11 @@ namespace Ariadne {
         return *this; }
       
       /*!\brief The dimension of the points in the list. */
-      dimension_type dimension() const { return _pts.size1(); }
+      dimension_type dimension() const { return _pts.number_of_rows(); }
       /*!\brief The number of points in the list. */
       size_type size() const { return _size; }
       /*!\brief The number of points which the list can hold without a reallocation of memory. */
-      size_type capacity() const { return _pts.size2(); }
+      size_type capacity() const { return _pts.number_of_columns(); }
       /*!\brief Reserve space for at least \a n points. */
       void reserve(size_type n);
       

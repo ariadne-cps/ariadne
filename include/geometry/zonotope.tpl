@@ -149,7 +149,7 @@ namespace Ariadne {
     {
       // FIXME: What to do about central block?
       //size_type n=this->dimension();
-      size_type m=(this->generators()).size2();
+      size_type m=(this->generators()).number_of_columns();
       ListSet<R,Geometry::Zonotope> result(this->dimension());
       matrix_type new_generators=this->generators()/2;
       
@@ -182,7 +182,7 @@ namespace Ariadne {
     Zonotope<R>::divide() const 
     {
       size_type n=this->dimension();
-      size_type m=(this->generators()).size2();
+      size_type m=(this->generators()).number_of_columns();
       ListSet<R,Geometry::Zonotope> result(this->dimension());
       
       matrix_type new_generators=this->generators();
@@ -323,7 +323,7 @@ namespace Ariadne {
       size_type i,j,i2,j2;
       matrix_type &gen=this->_generators;
       gen=remove_null_columns_but_one(gen);
-      size_type rows=gen.size1();
+      size_type rows=gen.number_of_rows();
       
       // if the first row is null the zonotope is a point and it is already
       // minimized
@@ -458,9 +458,9 @@ namespace Ariadne {
         remove_null_columns(A,row,col);
         Space=compute_space(A,row,col);
 
-        A=matrix_type(2*ngen+2*Space.size1(),
+        A=matrix_type(2*ngen+2*Space.number_of_rows(),
                         this->dimension());
-        b=vector_type(2*ngen+2*Space.size1());
+        b=vector_type(2*ngen+2*Space.number_of_rows());
       }
       // TO IMPROVE: we new compute both (col_i)^T(cols_j) and 
       // (col_j)^T(cols_i)
@@ -489,7 +489,7 @@ namespace Ariadne {
         }
       }
 
-      for (size_type i=0; i< Space.size1(); i++) {
+      for (size_type i=0; i< Space.number_of_rows(); i++) {
         for (size_type j=0; j< this->dimension(); j++) {
           A(2*(i+ngen),j)=Space(i,j);
           A(2*(i+ngen)+1,j)=-Space(i,j);
@@ -680,8 +680,8 @@ namespace Ariadne {
       const Matrix<R> &A_gen=A.generators();
       const Matrix<R> &B_gen=B.generators();
       
-      dimension_type col_A=(A_gen).size2(); 
-      dimension_type col_B=(B_gen).size2(); 
+      dimension_type col_A=(A_gen).number_of_columns(); 
+      dimension_type col_B=(B_gen).number_of_columns(); 
       
       Matrix<R> gen(A.dimension(), col_A+col_B);
 
@@ -716,8 +716,8 @@ namespace Ariadne {
       const Matrix<R> &A_gen=A.generators();
       const Matrix<R> &B_gen=B.generators();
       
-      dimension_type col_A=(A_gen).size2(); 
-      dimension_type col_B=(B_gen).size2(); 
+      dimension_type col_A=(A_gen).number_of_columns(); 
+      dimension_type col_B=(B_gen).number_of_columns(); 
       
       Matrix<R> gen(A.dimension(), col_A+col_B);
 

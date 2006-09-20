@@ -82,12 +82,12 @@ namespace Ariadne {
       
       /*! \brief  The dimension of the argument. */
       dimension_type argument_dimension() const {
-        return _A.size2();
+        return _A.number_of_columns();
       }
       
       /*! \brief The dimension of the result. */
       dimension_type result_dimension() const {
-        return _A.size1();
+        return _A.number_of_rows();
       }
       
 

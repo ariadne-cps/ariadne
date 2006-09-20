@@ -46,7 +46,7 @@ namespace Ariadne {
     Simplex<R>::Simplex(const LinearAlgebra::Matrix<R>& A)
       : _vertices(A)
     {
-      if(A.size1()+1u != A.size2()) {
+      if(A.number_of_rows()+1u != A.number_of_columns()) {
         throw std::runtime_error("A simplex of dimension d must have d+1 vertices");
       }
     }

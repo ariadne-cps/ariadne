@@ -58,7 +58,7 @@ namespace Ariadne {
     template<typename R>
     IntervalVector<R> 
     IntervalMatrix<R>::prod(const IntervalMatrix<R>& A, const IntervalVector<R>& v) {
-      IntervalVector<R> result(A.size1());
+      IntervalVector<R> result(A.number_of_rows());
       for (size_type i=0; i!=result.size(); ++i) {
         result(i)=R(0);
         for (size_type j=0; j!=v.size(); ++j) {
@@ -71,11 +71,11 @@ namespace Ariadne {
     template<typename R>
     IntervalMatrix<R> 
     IntervalMatrix<R>::prod(const IntervalMatrix<R>& A, const IntervalMatrix<R>& B) {
-      IntervalMatrix<R> result(A.size1(),B.size2());
-      for (size_type i=0; i!=A.size1(); ++i) {
-        for (size_type j=0; j!=B.size2(); ++j) {
+      IntervalMatrix<R> result(A.number_of_rows(),B.number_of_columns());
+      for (size_type i=0; i!=A.number_of_rows(); ++i) {
+        for (size_type j=0; j!=B.number_of_columns(); ++j) {
           result(i,j)=R(0);
-          for (size_type k=0; k!=A.size2(); ++k) {
+          for (size_type k=0; k!=A.number_of_columns(); ++k) {
             result(i,j)+=A(i,k)*B(k,j);
           }
         }
@@ -89,8 +89,8 @@ namespace Ariadne {
     IntervalMatrix<R>::contains(const Matrix<R>& B) const
     {
       const IntervalMatrix<R>& A=*this;      
-      for(size_type i=0; i!=A.size1(); ++i) {
-        for(size_type j=0; j!=A.size2(); ++j) {
+      for(size_type i=0; i!=A.number_of_rows(); ++i) {
+        for(size_type j=0; j!=A.number_of_columns(); ++j) {
           if(!A(i,j).contains(B(i,j))) {
             return false;
           }
@@ -104,9 +104,9 @@ namespace Ariadne {
     IntervalMatrix<R>::centre() const
     {
       const IntervalMatrix<R>& A=*this;      
-      Matrix<R> result(A.size1(),A.size2());
-      for(size_type i=0; i!=A.size1(); ++i) {
-        for(size_type j=0; j!=A.size2(); ++j) {
+      Matrix<R> result(A.number_of_rows(),A.number_of_columns());
+      for(size_type i=0; i!=A.number_of_rows(); ++i) {
+        for(size_type j=0; j!=A.number_of_columns(); ++j) {
           result(i,j)=A(i,j).centre();
         }
       }
@@ -120,9 +120,9 @@ namespace Ariadne {
     {
       const IntervalMatrix<R>& A=*this;
       R diameter=0;
-      for(size_type i=0; i!=A.size1(); ++i) {
+      for(size_type i=0; i!=A.number_of_rows(); ++i) {
         R row_sum=0;
-        for(size_type j=0; j!=A.size2(); ++j) {
+        for(size_type j=0; j!=A.number_of_columns(); ++j) {
           row_sum+=A(i,j).length();
         }
         diameter=max(diameter,row_sum);
@@ -134,11 +134,11 @@ namespace Ariadne {
     IntervalVector<R>
     IntervalMatrix<R>::radius_row_sum() const
     { 
-      IntervalVector<R> result(this->size1());
+      IntervalVector<R> result(this->number_of_rows());
       const IntervalMatrix<R>& self=*this;
-      for(dimension_type i=0; i!=self.size1(); ++i) {
+      for(dimension_type i=0; i!=self.number_of_rows(); ++i) {
         R radius=0;
-        for(dimension_type j=0; j!=self.size2(); ++j) {
+        for(dimension_type j=0; j!=self.number_of_columns(); ++j) {
           radius+=self(i,j).length();
         }
         radius /= 2;
@@ -181,8 +181,8 @@ namespace Ariadne {
     IntervalMatrix<R>::over_approximation() const
     {
       const IntervalMatrix<R>& A=*this;
-      assert(A.size1()==A.size2());
-      dimension_type n=A.size1();
+      assert(A.number_of_rows()==A.number_of_columns());
+      dimension_type n=A.number_of_rows();
       
       Matrix<R> Amid(n,n);
       for(size_type i=0; i!=n; ++i) {
@@ -205,9 +205,9 @@ namespace Ariadne {
     {
       R abserr=e/(2*A.number_of_columns());
       Interval<R> err(-abserr,abserr);
-      IntervalMatrix<R> result(A.size1(),A.size2());
-      for(size_type i=0; i!=result.size1(); ++i) {
-        for(size_type j=0; j!=result.size2(); ++j) {
+      IntervalMatrix<R> result(A.number_of_rows(),A.number_of_columns());
+      for(size_type i=0; i!=result.number_of_rows(); ++i) {
+        for(size_type j=0; j!=result.number_of_columns(); ++j) {
           const R& Aij=A(i,j);
           result(i,j)=err+Aij;
         }

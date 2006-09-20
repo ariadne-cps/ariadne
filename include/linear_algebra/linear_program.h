@@ -282,7 +282,7 @@ namespace Ariadne {
     size_type
     LinearProgram<R>::number_of_constraints() const 
     {
-      return _tableau.size1()-1;
+      return _tableau.number_of_rows()-1;
     }
     
     template<typename R>
@@ -290,7 +290,7 @@ namespace Ariadne {
     size_type
     LinearProgram<R>::number_of_free_variables() const 
     {
-      return _tableau.size2()-1;
+      return _tableau.number_of_columns()-1;
     }
     
     template<typename R>
@@ -298,7 +298,7 @@ namespace Ariadne {
     size_type
     LinearProgram<R>::number_of_variables() const 
     {
-      return _tableau.size1()+_tableau.size2()-2;
+      return _tableau.number_of_rows()+_tableau.number_of_columns()-2;
     }
     
 

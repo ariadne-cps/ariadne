@@ -92,8 +92,8 @@ namespace Ariadne {
      
       /*! \brief The number of elements in the \a d th dimension. */
       size_type size(const size_type& d) const {
-        if(d==0) { return _Base::size1(); } 
-        else if(d==1) { return _Base::size2(); }
+        if(d==0) { return number_of_rows(); } 
+        else if(d==1) { return number_of_columns(); }
         else { assert(false); } 
       }
       /*! \brief The number of rows of the matrix. */

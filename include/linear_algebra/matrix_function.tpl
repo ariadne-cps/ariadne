@@ -33,7 +33,7 @@ namespace Ariadne {
     IntervalMatrix<R>
     exp(const IntervalMatrix<R>& A) 
     {
-      assert(A.size1()==A.size2());
+      assert(A.number_of_rows()==A.number_of_columns());
       R err=A.radius_norm()/65536;
       if(err==0) {
         err=A.upper_norm()/65536;
@@ -41,7 +41,7 @@ namespace Ariadne {
         err/=65536;
       }
             
-      IntervalMatrix<R> result=IntervalMatrix<R>::identity(A.size1())+A;
+      IntervalMatrix<R> result=IntervalMatrix<R>::identity(A.number_of_rows())+A;
       IntervalMatrix<R> term=A;
       unsigned int n=1;
       while(term.upper_norm()>err) {

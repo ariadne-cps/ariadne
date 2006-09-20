@@ -117,7 +117,7 @@ namespace Ariadne {
       //! \name Geometric operations
       /*! \brief The dimension of the Euclidean space the rectangle lies in. */
       size_type dimension() const {
-        return this->_vertices.size1();
+        return this->_vertices.number_of_rows();
       }
       
       /*! \brief True if the simplex is empty. */

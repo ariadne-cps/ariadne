@@ -261,7 +261,7 @@ namespace Ariadne {
     {
       // std::cerr << "LinearProgram<" << name<R>() << ">::optimal_value() const\n";
       solve_tableau();
-      return this->_tableau(_tableau.size1()-1,_tableau.size2()-1);
+      return this->_tableau(_tableau.number_of_rows()-1,_tableau.number_of_columns()-1);
     }
     
     template<typename R>

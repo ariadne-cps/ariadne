@@ -114,7 +114,7 @@ namespace Ariadne {
     dimension_type
     Polyhedron<R>::dimension() const
     {
-      return this->_A.size2(); 
+      return this->_A.number_of_columns(); 
     }
 
     template <typename R>

@@ -73,9 +73,9 @@ namespace Ariadne {
     {
       const Matrix<R>& A=*this;
       F result=0;
-      for(size_type i=0; i!=A.size1(); ++i) {
+      for(size_type i=0; i!=A.number_of_rows(); ++i) {
         F row_sum=0;
-        for(size_type j=0; j!=A.size2(); ++j) {
+        for(size_type j=0; j!=A.number_of_columns(); ++j) {
           row_sum+=abs(A(i,j));
         }
         result=max(result,row_sum);
@@ -89,9 +89,9 @@ namespace Ariadne {
     {
       const Matrix<R>& A=*this;
       F result=0;
-      for(size_type i=0; i!=A.size1(); ++i) {
+      for(size_type i=0; i!=A.number_of_rows(); ++i) {
         F row_sum=A(i,i);
-        for(size_type j=0; j!=A.size2(); ++j) {
+        for(size_type j=0; j!=A.number_of_columns(); ++j) {
           if(i!=j) {
             row_sum+=abs(A(i,j));
           }
@@ -135,14 +135,14 @@ namespace Ariadne {
     template<typename R>
     Matrix<R>
     Matrix<R>::concatenate_columns(const Matrix<R>& A1, const Matrix<R>& A2) {
-      assert(A1.size1()==A2.size1());
-      LinearAlgebra::Matrix<R> result(A1.size1(),A1.size2()+A2.size2());
-      for(size_type i=0; i!=result.size1(); ++i) {
-        for(size_type j=0; j!=A1.size2(); ++j) {
+      assert(A1.number_of_rows()==A2.number_of_rows());
+      LinearAlgebra::Matrix<R> result(A1.number_of_rows(),A1.number_of_columns()+A2.number_of_columns());
+      for(size_type i=0; i!=result.number_of_rows(); ++i) {
+        for(size_type j=0; j!=A1.number_of_columns(); ++j) {
           result(i,j)=A1(i,j);
         }
-        for(size_type j=0; j!=A2.size2(); ++j) {
-          result(i,j+A1.size2())=A2(i,j);
+        for(size_type j=0; j!=A2.number_of_columns(); ++j) {
+          result(i,j+A1.number_of_columns())=A2(i,j);
         }
       }
       return result;
@@ -172,8 +172,8 @@ namespace Ariadne {
     {
       const Matrix<R>& A=*this;
       os << "[";
-      for(uint i=0; i!=A.size1(); ++i) {
-        for(uint j=0; j!=A.size2(); ++j) {
+      for(uint i=0; i!=A.number_of_rows(); ++i) {
+        for(uint j=0; j!=A.number_of_columns(); ++j) {
           os << (j==0 ? (i==0 ? " " : "; ") : ",");
           //os << Ariadne::convert_to<double>(A(i,j));
           os << A(i,j);
@@ -209,9 +209,9 @@ namespace Ariadne {
         if(is) {
           Matrix<R>& A=*this;
           A=Matrix<R>(v.size(),v.front().size());
-          for(size_type i=0; i!=A.size1(); ++i) {
-            assert(v[i].size()==A.size2());
-            for(size_type j=0; j!=A.size2(); ++j) {
+          for(size_type i=0; i!=A.number_of_rows(); ++i) {
+            assert(v[i].size()==A.number_of_columns());
+            for(size_type j=0; j!=A.number_of_columns(); ++j) {
               A(i,j)=v[i][j];
             }
           }
@@ -239,7 +239,7 @@ namespace Ariadne {
     bool
     independent_rows(Matrix<R> A)
     {
-     const size_type rows = A.size1(),cols = A.size2();
+     const size_type rows = A.number_of_rows(),cols = A.number_of_columns();
      size_type i,j,i2,j2;
 
       if (rows > cols) return false;
@@ -266,10 +266,10 @@ namespace Ariadne {
     equivalent_columns(const Matrix<R> &A, const size_type &A_col,
                        const Matrix<R> &B, const size_type &B_col)
     {
-      if (A.size1()!=B.size1()) {
+      if (A.number_of_rows()!=B.number_of_rows()) {
         throw std::domain_error("The two Matrix have a diffentent number of rows");
       }
-      for (size_type i=0; i<A.size1(); i++) {
+      for (size_type i=0; i<A.number_of_rows(); i++) {
         if (A(i,A_col)!=B(i,B_col)) {
           return false;
         }
@@ -285,7 +285,7 @@ namespace Ariadne {
     {
       size_type i=0;
 
-      while ( (i<A.size1()) && (A(i,col)==0) ) {
+      while ( (i<A.number_of_rows()) && (A(i,col)==0) ) {
         ++i;
       }
       return i;
@@ -298,8 +298,8 @@ namespace Ariadne {
     remove_null_columns_but_one(const Matrix<R> &A)
     {
       size_type directions=0;
-      size_type rows=A.size1();
-      size_type cols=A.size2();
+      size_type rows=A.number_of_rows();
+      size_type cols=A.number_of_columns();
       array<bool> not_null(cols);
 
       if (cols<2) {
@@ -373,7 +373,7 @@ namespace Ariadne {
 
       assert(cols>=rows);
 
-      size_type SA_cols=SA.size2(), A_rows=SA_cols-rows;
+      size_type SA_cols=SA.number_of_columns(), A_rows=SA_cols-rows;
       size_type i,j,k,j2;
 
       Matrix<R> A(A_rows,SA_cols);

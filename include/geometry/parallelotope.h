@@ -77,7 +77,7 @@ namespace Ariadne {
       explicit Parallelotope(const vector_type& c, const matrix_type& m) 
         : Zonotope<R>(state_type(c),m)
       {
-        if (m.size1()!=m.size2()) {
+        if (m.number_of_rows()!=m.number_of_columns()) {
           throw std::domain_error(
               "The the Matrix of principal directions is not a square Matrix");
         }
@@ -87,7 +87,7 @@ namespace Ariadne {
       explicit Parallelotope(const state_type& c, const matrix_type& m)
         : Zonotope<R>(c,m)
       {
-        if (m.size1()!=m.size2()) {
+        if (m.number_of_rows()!=m.number_of_columns()) {
           throw std::domain_error(
               "The the Matrix of principal directions is not a square Matrix");
         }

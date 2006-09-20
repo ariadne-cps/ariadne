@@ -93,7 +93,7 @@ namespace Ariadne {
      
       /*! \brief Construct a zonotope centred at zero from generators \a g. */
       explicit Zonotope(const matrix_type& g)
-        : _central_block(g.size1()), _generators(g)
+        : _central_block(g.number_of_rows()), _generators(g)
       {
         this->minimize_generators();
       }
@@ -102,7 +102,7 @@ namespace Ariadne {
       explicit Zonotope(const vector_type& c, const matrix_type& g)
         : _central_block(c), _generators(g)
       {
-        if (c.size()!=g.size1()) {
+        if (c.size()!=g.number_of_rows()) {
           throw std::domain_error(
               "The the Matrix of principal directions does not have the same number of rows as the point dimension.");
         }
@@ -113,7 +113,7 @@ namespace Ariadne {
       explicit Zonotope(const state_type& c, const matrix_type& g)
         : _central_block(c), _generators(g)
       {
-        if (c.dimension()!=g.size1()) {
+        if (c.dimension()!=g.number_of_rows()) {
           throw std::domain_error(
               "The the Matrix of principal directions does not have the same number of rows as the point dimension.");
         }
@@ -124,7 +124,7 @@ namespace Ariadne {
       explicit Zonotope(const Rectangle<R>& c, const LinearAlgebra::Matrix<R>& m)
         : _central_block(c), _generators(m)
       {
-        if (c.dimension()!=m.size1()) {
+        if (c.dimension()!=m.number_of_rows()) {
           throw std::domain_error(
               "The the Matrix of principal directions does not have the same number of rows as the point dimension.");
         }
@@ -167,7 +167,7 @@ namespace Ariadne {
      
       /*! \brief The number of generators of the zonotope. */
       size_type number_of_generators() const {
-        return this->_generators.size2();
+        return this->_generators.number_of_columns();
       }
 
       /*! \brief The \a n th of principle direction. */

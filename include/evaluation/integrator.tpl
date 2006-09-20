@@ -106,7 +106,7 @@ namespace Ariadne {
     Integrator<R>::symmetrize(const LinearAlgebra::IntervalVector<R>& iv)
     {
       LinearAlgebra::Matrix<R> A(iv.size(),iv.size()+1);
-      for(size_type i=0; i!=A.size1(); ++i) {
+      for(size_type i=0; i!=A.number_of_rows(); ++i) {
         A(i,i)=iv(i).radius();
         A(i,iv.size())=iv(i).centre();
       }

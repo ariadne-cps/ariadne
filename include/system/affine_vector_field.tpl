@@ -93,7 +93,7 @@ namespace Ariadne {
                   const R& h, 
                   const R& e) 
     {
-      Matrix<R> result=identity_matrix<R>(A.size1());
+      Matrix<R> result=identity_matrix<R>(A.number_of_rows());
       
       R norm_Ah=h*norm(A);
       Matrix<R> AhpowNdivfN=result;
@@ -112,7 +112,7 @@ namespace Ariadne {
                                const R& h, 
                                const R& e)
     {
-      Matrix<R> result=h*identity_matrix<R>(A.size1());
+      Matrix<R> result=h*identity_matrix<R>(A.number_of_rows());
       
       R norm_Ah=h*norm(A);
       Matrix<R> AhpowNdivfN=result;

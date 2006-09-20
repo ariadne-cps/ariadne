@@ -74,9 +74,9 @@ namespace Ariadne {
     Tensor<R>
     Tensor<R>::product(const Tensor<R>& T, const Matrix<R>& A1) 
     {
-      assert(T.size(1)==A1.size1());
+      assert(T.size(1)==A1.number_of_rows());
       
-      Tensor<R> result(T.size(0),A1.size2(),T.size(2));
+      Tensor<R> result(T.size(0),A1.number_of_columns(),T.size(2));
       for(size_type i=0; i!=result.size(0); ++i) {
         for(size_type j=0; j!=result.size(1); ++j) {
           for(size_type k=0; k!=result.size(2); ++k) {
@@ -93,13 +93,13 @@ namespace Ariadne {
     Tensor<R>
     Tensor<R>::product(const Tensor<R>& T, const Matrix<R>& A1, const Matrix<R>& A2) 
     {
-      assert(T.size(1)==A1.size1());
-      assert(T.size(2)==A2.size1());
+      assert(T.size(1)==A1.number_of_rows());
+      assert(T.size(2)==A2.number_of_rows());
       
-      Tensor<R> result(T.size(0),A1.size2(),A2.size2());
+      Tensor<R> result(T.size(0),A1.number_of_columns(),A2.number_of_columns());
       for(size_type i=0; i!=T.size(0); ++i) {
-        for(size_type j=0; j!=A1.size2(); ++j) {
-          for(size_type k=0; k!=A2.size2(); ++k) {
+        for(size_type j=0; j!=A1.number_of_columns(); ++j) {
+          for(size_type k=0; k!=A2.number_of_columns(); ++k) {
             for(size_type l=0; l!=T.size(1); ++l) {
               for(size_type m=0; k!=T.size(2); ++m) {
                 result(i,j,k)+=T(i,l,m)*A1(l,j)*A2(m,k);

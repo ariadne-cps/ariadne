@@ -59,7 +59,7 @@ namespace Ariadne {
         : _A(A), _b(b) { }
       /*! \brief Construct a linear map from the matrix \f$A\f$. */
       explicit AffineMap(const LinearAlgebra::Matrix<R>& A)
-        : _A(A), _b(A.size1()) { }
+        : _A(A), _b(A.number_of_rows()) { }
       /*! \brief Construct a translation from the vector \f$b\f$. */
       explicit AffineMap(const LinearAlgebra::Vector<R>& b)
         : _A(LinearAlgebra::Matrix<R>::identity(b.size())), _b(b) { }
@@ -92,7 +92,7 @@ namespace Ariadne {
       
       /*! \brief  The dimension of the argument. */
       dimension_type argument_dimension() const {
-        return _A.size2();
+        return _A.number_of_columns();
       }
       
       /*! \brief The dimension of the result. */

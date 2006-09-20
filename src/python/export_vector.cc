@@ -24,124 +24,104 @@
 
 
 #include "numeric/numerical_types.h"
+#include "numeric/float64.h"
+#include "numeric/mpfloat.h"
+#include "numeric/rational.h"
 #include "numeric/interval.h"
 
 #include "linear_algebra/vector.h"
 
-#include "python/typedefs.h"
+#include "python/python_utilities.h"
 using namespace Ariadne;
+using namespace Ariadne::Numeric;
+using namespace Ariadne::LinearAlgebra;
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
-inline Real rvector_getitem(const RVector& v, uint i) {
-  return v(i);
+template<class R> 
+inline
+R
+vector_get_item(const Vector<R>& v, int n) {
+  if(n<0) {
+    n+=v.size();
+  }
+  assert(0<=n);
+  size_t m=size_t(n);
+  assert(m<v.size());
+  return v(m);
 }
 
-inline void rvector_setitem(RVector& v, uint i, Real x) {
-  v(i)=x;
-}
-
-inline void rvector_setitem_from_double(RVector& v, uint i, double x) {
-  v(i)=x;
-}
-
-inline RVector rvector_add_rvector(const RVector& u, RVector& v) {
-  return RVector(u+v);
-}
-
-inline RVector rvector_sub_rvector(const RVector& u, RVector& v) {
-  return RVector(u-v);
-}
-
-inline RIntervalVector 
-ivector_add_rvector(const RIntervalVector& u, RVector& v) {
-  return RIntervalVector(u+v);
-}
-
-inline RIntervalVector 
-rvector_add_ivector(const RVector& u, RIntervalVector& v) {
-  return RIntervalVector(u+v);
-}
-
-inline RIntervalVector 
-ivector_add_ivector(const RIntervalVector& u, 
-				RIntervalVector& v) {
-  return RIntervalVector(u+v);
-}
-
-inline RInterval ivector_getitem(const RIntervalVector& v, uint i) {
-  return v(i);
-}
-
-inline void ivector_setitem(RIntervalVector& v, uint i, RInterval x) {
-  v(i)=x;
-}
-
-inline void ivector_setitem_from_real(RIntervalVector& v, uint i, Real x) {
-  v(i)=RInterval(x);
-}
-
-inline void ivector_setitem_from_double(RIntervalVector& v, uint i, double x) {
-  v(i)=RInterval(x);
-}
-
-inline Field fvector_getitem(const FVector& v, uint i) {
-  return v(i);
-}
-
-inline void fvector_setitem(FVector& v, uint i, Field x) {
-  v(i)=x;
-}
-
-inline void fvector_setitem_from_real(FVector& v, uint i, Real x) {
-  v(i)=Ariadne::convert_to<Field>(x);
-}
-
-inline void fvector_setitem_from_double(FVector& v, uint i, double x) {
-  v(i)=Ariadne::convert_to<Field>(x);
+template<class R, class A> 
+inline
+void
+vector_set_item(Vector<R>& v, int n, const A& x) {
+  if(n<0) {
+    n+=v.size();
+  }
+  assert(0<=n);
+  size_t m=size_t(n);
+  assert(m<v.size());
+  R& r=v(m);
+  r=R(x);
 }
 
 
-void export_vector() {
-  class_<RVector>("Vector",init<int>())
+template<class R>
+void export_vector()
+{
+  typedef Vector<R> Vec;
+  
+  class_<Vec>(python_name<R>("Vector").c_str(),init<uint>())
     .def(init<std::string>())
-    .def(init<RVector>())
-    .def("__len__", &RVector::size)
-    .def("__getitem__",&rvector_getitem)
-    .def("__setitem__",&rvector_setitem)
-    .def("__setitem__",&rvector_setitem_from_double)
-    .def("__add__",&rvector_add_rvector)
-    .def("__sub__",&rvector_sub_rvector)
-    .def(self_ns::str(self))    // __self_ns::str__
+    .def(init<Vec>())
+    .def("__len__", &Vec::size)
+    .def("__getitem__",&vector_get_item<R>)
+    .def("__setitem__",&vector_set_item<R,R>)
+    .def("__setitem__",&vector_set_item<R,double>)
+    .def("__add__",&add<Vec,Vec,Vec>)
+    .def("__sub__",&sub<Vec,Vec,Vec>)
+    .def("__rmul__",&mul<Vec,R,Vec>)
+    .def("__mul__",&mul<Vec,Vec,R>)
+    .def("__div__",&div<Vec,Vec,R>)
+    .def(self_ns::str(self))
   ;
-
-#ifndef REAL_IS_A_FIELD
-  class_<FVector>("RationalVector",init<int>())
-    .def(init<std::string>())
-    .def(init<FVector>())
-    .def("__len__", &FVector::size)
-    .def("__getitem__",&fvector_getitem)
-    .def("__setitem__",&fvector_setitem)
-    .def("__setitem__",&fvector_setitem_from_real)
-    .def("__setitem__",&fvector_setitem_from_double)
-    .def(self_ns::str(self))    // __self_ns::str__
-  ;
-#endif
-
 }
 
+
+template<class R>
 void export_interval_vector() {
-  class_< RIntervalVector >("IntervalVector",init<int>())
+  typedef Interval<R> Ivl;
+  typedef Vector<R> Vec;
+  typedef Vector< Interval<R> > IVec;
+  
+  class_<IVec>(python_name<R>("IntervalVector").c_str(),init<uint>())
     .def(init<std::string>())
-    .def(init<RIntervalVector>())
-    .def("__len__", &RIntervalVector::size)
-    .def("__getitem__",&ivector_getitem)
-    .def("__setitem__",&ivector_setitem)
-    .def("__setitem__",&ivector_setitem_from_double)
-    .def("__add__",&ivector_add_rvector)
-    .def("__add__",&rvector_add_ivector)
-    .def("__add__",&ivector_add_ivector)
-    .def(self_ns::str(self))    // __self_ns::str__
+    .def(init<IVec>())
+    .def("__len__", &IVec::size)
+    .def("__getitem__",&vector_get_item<Ivl>) 
+    .def("__setitem__",&vector_set_item<Ivl,Ivl>)
+    .def("__setitem__",&vector_set_item<Ivl,R>)
+    .def("__setitem__",&vector_set_item<Ivl,double>)
+    .def("__add__",&add<IVec,IVec,IVec>)
+    .def("__add__",&add<IVec,IVec,Vec>)
+    .def("__radd__",&add<IVec,Vec,IVec>)
+    .def("__sub__",&sub<IVec,IVec,IVec>)
+    .def("__sub__",&sub<IVec,IVec,Vec>)
+    .def("__rsub__",&sub<IVec,Vec,IVec>)
+    .def("__mul__",&mul<IVec,IVec,Ivl>)
+    .def("__mul__",&mul<IVec,IVec,R>)
+    .def("__rmul__",&mul<IVec,Ivl,IVec>)
+    .def("__rmul__",&mul<IVec,R,IVec>)
+    .def("__div__",&mul<IVec,IVec,Ivl>)
+    .def("__div__",&mul<IVec,IVec,R>)
+   .def(self_ns::str(self))
   ;
 }
+
+template void export_vector<Float64>();
+template void export_vector<MPFloat>();
+template void export_vector<Rational>();
+
+template void export_interval_vector<Float64>();
+template void export_interval_vector<MPFloat>();

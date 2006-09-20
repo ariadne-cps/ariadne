@@ -26,8 +26,3 @@ depclean:
 	@echo "### Do Not edit this line" >> Makefile
 
 ### Do Not edit this line
-### Everything below is auto-generated
-array_operations.o: array_operations.cc \
-  ../../include/base/array_operations.h \
-  ../../include/base/../declarations.h ../../include/base/array.h
-

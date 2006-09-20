@@ -1,5 +1,5 @@
 /***************************************************************************
- *            python/export_Matrix.cc
+ *            python/export_matrix.cc
  *
  *  17 November 2005
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
@@ -25,113 +25,104 @@
 #include <utility>  //for std::pair
 
 
+#include "numeric/float64.h"
+#include "numeric/mpfloat.h"
+#include "numeric/rational.h"
 #include "numeric/interval.h"
-#include "numeric/integer.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/matrix_function.h"
 
-#include "python/typedefs.h"
 #include "python/python_utilities.h"
 using namespace Ariadne;
+using namespace Ariadne::LinearAlgebra;
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
-inline Field fmatrix_getitem(const FMatrix& A, tuple index) {
+template<typename R> 
+inline R matrix_get_item(const Matrix<R>& M, tuple index) {
   uint i=extract<uint>(index[0]);
   uint j=extract<uint>(index[1]);
-  return A(i,j);
+  return M(i,j);
 }
 
-inline void fmatrix_setitem(FMatrix& A, tuple index, Field x) {
+template<typename R, typename A> 
+inline void matrix_set_item(Matrix<R>& M, tuple index, const A& x) {
   uint i=extract<uint>(index[0]);
   uint j=extract<uint>(index[1]);
-  A(i,j)=x;
+  M(i,j)=x;
 }
 
-inline void fmatrix_setitem_from_real(FMatrix& A, tuple index, Real x) {
-  uint i=extract<uint>(index[0]);
-  uint j=extract<uint>(index[1]);
-  A(i,j)=Ariadne::convert_to<Field>(x);
-}
 
-inline void fmatrix_setitem_from_double(FMatrix& A, tuple index, double x) {
-  uint i=extract<uint>(index[0]);
-  uint j=extract<uint>(index[1]);
-  A(i,j)=Ariadne::convert_to<Field>(x);
-}
-
-inline Real rmatrix_getitem(const RMatrix& A, tuple index) {
-  uint i=extract<uint>(index[0]);
-  uint j=extract<uint>(index[1]);
-  return A(i,j);
-}
-
-inline void rmatrix_setitem(RMatrix& A, tuple index, Real x) {
-  uint i=extract<uint>(index[0]);
-  uint j=extract<uint>(index[1]);
-  A(i,j)=x;
-}
-
-inline void rmatrix_setitem_from_double(RMatrix& A, tuple index, double x) {
-  uint i=extract<uint>(index[0]);
-  uint j=extract<uint>(index[1]);
-  A(i,j)=Ariadne::convert_to<Real>(x);
-}
-
-inline RVector rmatrix_vprod(const RMatrix& A, const RVector v) {
-  return prod(A,v);
-}
-
-inline RInterval iMatrix_getitem(const RIntervalMatrix& A, tuple index) {
-  uint i=extract<uint>(index[0]);
-  uint j=extract<uint>(index[1]);
-  return A(i,j);
-}
-
-inline void iMatrix_setitem(RIntervalMatrix& A, tuple index, RInterval x) {
-  uint i=extract<uint>(index[0]);
-  uint j=extract<uint>(index[1]);
-  A(i,j)=x;
-}
-
-inline FMatrix rmatrix_inverse(const RMatrix& A) {
+template<typename R>
+inline Matrix<R> matrix_inverse(const Matrix<R>& A) {
   return LinearAlgebra::inverse(A);
 }
 
+template<typename R>
 void export_matrix() {
-  class_<RMatrix>("Matrix",init<int,int>())
+  typedef Vector<R> Vec;
+  typedef Matrix<R> Mx;
+  
+  class_<Mx>(python_name<R>("Matrix").c_str(),init<int,int>())
     .def(init<std::string>())
-    .def(init<RMatrix>())
-    .def("__mul__",&rmatrix_vprod)
-    .def("__getitem__",&rmatrix_getitem)
-    .def("__setitem__",&rmatrix_setitem)
-    .def("__setitem__",&rmatrix_setitem_from_double)
-    .def(self_ns::str(self))    // __self_ns::str__
+    .def(init<Mx>())
+    .def("__getitem__",&matrix_get_item<R>)
+    .def("__setitem__",&matrix_set_item<R,R>)
+    .def("__setitem__",&matrix_set_item<R,double>)
+    .def(self_ns::str(self)) 
   ;
-    
-  def("inverse",&rmatrix_inverse);
-
-#ifndef REAL_IS_A_FIELD 
-  class_<FMatrix>("RationalMatrix",init<int,int>())
-    .def(init<FMatrix>())
-    .def("__getitem__",&fmatrix_getitem)
-    .def("__setitem__",&fmatrix_setitem)
-    .def("__setitem__",&fmatrix_setitem_from_real)
-    .def("__setitem__",&fmatrix_setitem_from_double)
-    .def(self_ns::str(self))    // __self_ns::str__
-  ;
-#endif
 }
 
+template<>
+void export_matrix<Rational>() {
+  typedef Rational R;
+  typedef Vector<R> Vec;
+  typedef Matrix<R> Mx;
+  
+  class_<Mx>(python_name<R>("Matrix").c_str(),init<int,int>())
+    .def(init<std::string>())
+    .def(init<Mx>())
+    .def("__getitem__",&matrix_get_item<R>)
+    .def("__setitem__",&matrix_set_item<R,R>)
+    .def("__setitem__",&matrix_set_item<R,double>)
+    .def("__add__",&add<Mx,Mx,Mx>)
+    .def("__sub__",&sub<Mx,Mx,Mx>)
+    .def("__rmul__",&mul<Mx,R,Mx>)
+    .def("__mul__",&mul<Mx,Mx,R>)
+    .def("__mul__",&mul<Vec,Mx,Vec>)
+    .def("__mul__",&mul<Mx,Mx,Mx>)
+    .def("__div__",&mul<Mx,Mx,R>)
+    .def(self_ns::str(self)) 
+  ;
+}
+
+template<typename R>
 void export_interval_matrix() {
-  class_<RIntervalMatrix>("IntervalMatrix",init<int,int>())
-    .def(init<RIntervalMatrix>())
+  typedef Interval<R> Ivl;
+  typedef Vector<R> Vec;
+  typedef Matrix<R> Mx;
+  typedef Vector< Interval<R> > IVec;
+  typedef Matrix< Interval<R> > IMx;
+  
+  class_<IMx>(python_name<R>("IntervalMatrix").c_str(),init<int,int>())
+    .def(init<IMx>())
     .def(init<std::string>())
-    .def("__getitem__",&iMatrix_getitem)
-    .def("__setitem__",&iMatrix_setitem)
-    .def(self_ns::str(self))    // __self_ns::str__
+    .def("__getitem__",&matrix_get_item<Ivl>)
+    .def("__setitem__",&matrix_set_item<Ivl>)
+    .def("__setitem__",&matrix_set_item<Ivl,R>)
+    .def("__setitem__",&matrix_set_item<Ivl,double>)
+    .def(self_ns::str(self))
   ;
-  def("exp",&LinearAlgebra::exp<Real>);
+  
+  def("inverse",&matrix_inverse<Ivl>);
+  def("exp",&LinearAlgebra::exp<R>);
 }
+
+template void export_matrix<Float64>();
+template void export_matrix<MPFloat>();
+template void export_matrix<Rational>();
+
+template void export_interval_matrix<Float64>();
+template void export_interval_matrix<MPFloat>();

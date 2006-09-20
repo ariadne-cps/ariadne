@@ -22,66 +22,75 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "numeric/float64.h"
+#include "numeric/mpfloat.h"
+#include "numeric/rational.h"
 
+#include "linear_algebra/vector.h"
 
 #include "geometry/rectangle.h"
-
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 
-#include "python/typedefs.h"
 using namespace Ariadne;
+using namespace Ariadne::Numeric;
+using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
 
 #include <boost/python.hpp>
+#include "python/python_utilities.h"
 using namespace boost::python;
 
-void export_rectangle() {
-  typedef bool (*RectBinPred) (const RRectangle&, const RRectangle&);
-  typedef RRectangle (*RectBinFunc) (const RRectangle&, const RRectangle&);
-  typedef RZonotope (*RectZntpBinFunc) (const RRectangle&, const RZonotope&);
-  typedef RRectangle (*RectRealBinFunc) (const RRectangle&, const Real&);
+template<typename R>
+void export_rectangle() 
+{
+  typedef bool (*RectRectBinPred) (const Rectangle<R>&, const Rectangle<R>&);
+  typedef Rectangle<R> (*RectRectBinFunc) (const Rectangle<R>&, const Rectangle<R>&);
+  typedef Zonotope<R> (*RectZntpBinFunc) (const Rectangle<R>&, const Zonotope<R>&);
+  typedef Rectangle<R> (*RectRealBinFunc) (const Rectangle<R>&, const R&);
 
-  typedef bool (RRectangle::*RectPred)(const RRectangle &) const;
-  typedef bool (RRectangle::*PointPred) (const RPoint&) const;
+  typedef bool (Rectangle<R>::*RectPred)(const Rectangle<R> &) const;
+  typedef bool (Rectangle<R>::*PointPred) (const Point<R>&) const;
 
-  def("convex_hull", RectBinFunc(&rectangular_hull));
-  def("regular_intersection", RectBinFunc(&regular_intersection));
-  def("touching_intersection", RectBinFunc(&regular_intersection));
-  def("interiors_intersect", RectBinPred(&interiors_intersect));
-  def("disjoint", RectBinPred(&disjoint));
-  def("inner_subset", RectBinPred(&inner_subset));
+  def("convex_hull", RectRectBinFunc(&rectangular_hull));
+  def("regular_intersection", RectRectBinFunc(&regular_intersection));
+  def("touching_intersection", RectRectBinFunc(&regular_intersection));
+  def("interiors_intersect", RectRectBinPred(&interiors_intersect));
+  def("disjoint", RectRectBinPred(&disjoint));
+  def("inner_subset", RectRectBinPred(&inner_subset));
 
-  def("intersection", RectBinFunc(&intersection));
-  def("subset", RectBinPred(&subset));
+  def("intersection", RectRectBinFunc(&intersection));
+  def("subset", RectRectBinPred(&subset));
   
-  class_<RRectangle>("Rectangle",init<int>())
-    .def(init<RPoint,RPoint>())
-    .def(init<RRectangle>())
-    .def(init< RIntervalVector >())
+  class_< Rectangle<R> >(python_name<R>("Rectangle").c_str(),init<int>())
+    .def(init< Point<R>,Point<R> >())
+    .def(init< Rectangle<R> >())
+    .def(init< Vector<Interval<R> > >())
     .def(init<std::string>())
-    .def("empty", &RRectangle::empty)
-    .def("empty_interior", &RRectangle::empty_interior)
-    .def("dimension", &RRectangle::dimension)
-    .def("contains", RectPred(&RRectangle::contains) )
-    .def("contains", PointPred(&RRectangle::contains))
-    .def("interior_contains", &RRectangle::interior_contains)
-    .def("centre", &RRectangle::centre)
-    .def("radius", &RRectangle::radius)
-    .def("__getitem__", &RRectangle::interval, return_value_policy<copy_const_reference>())
-    .def("__setitem__", &RRectangle::set_interval)
-    .def("set_lower_bound", &RRectangle::set_lower_bound)
-    .def("set_upper_bound", &RRectangle::set_upper_bound)
-    .def("bounding_box", &RRectangle::bounding_box)
-    .def("lower_corner", &RRectangle::lower_corner)
-    .def("upper_corner", &RRectangle::upper_corner)
-    .def("lower_bound", &RRectangle::lower_bound, return_value_policy<copy_const_reference>())
-    .def("upper_bound", &RRectangle::upper_bound, return_value_policy<copy_const_reference>())
-    .def("__add__", (RectBinFunc)(&minkowski_sum))
+    .def("empty", & Rectangle<R>::empty)
+    .def("empty_interior", &Rectangle<R>::empty_interior)
+    .def("dimension", &Rectangle<R>::dimension)
+    .def("contains", RectPred(&Rectangle<R>::contains) )
+    .def("contains", PointPred(&Rectangle<R>::contains))
+    .def("interior_contains", &Rectangle<R>::interior_contains)
+    .def("centre", &Rectangle<R>::centre)
+    .def("radius", &Rectangle<R>::radius)
+    .def("__getitem__", &Rectangle<R>::interval, return_value_policy<copy_const_reference>())
+    .def("__setitem__", &Rectangle<R>::set_interval)
+    .def("set_lower_bound", &Rectangle<R>::set_lower_bound)
+    .def("set_upper_bound", &Rectangle<R>::set_upper_bound)
+    .def("bounding_box", &Rectangle<R>::bounding_box)
+    .def("lower_corner", &Rectangle<R>::lower_corner)
+    .def("upper_corner", &Rectangle<R>::upper_corner)
+    .def("lower_bound", &Rectangle<R>::lower_bound, return_value_policy<copy_const_reference>())
+    .def("upper_bound", &Rectangle<R>::upper_bound, return_value_policy<copy_const_reference>())
+    .def("__add__", (RectRectBinFunc)(&minkowski_sum))
     .def("__add__", (RectZntpBinFunc)(&minkowski_sum))
-    .def("__sub__", (RectBinFunc)(&minkowski_difference))
+    .def("__sub__", (RectRectBinFunc)(&minkowski_difference))
     .def("__sub__", (RectZntpBinFunc)(&minkowski_difference))
     .def("__mul__", (RectRealBinFunc)(&scale))
     .def(self_ns::str(self))
   ;
 }
+
+template void export_rectangle<MPFloat>();

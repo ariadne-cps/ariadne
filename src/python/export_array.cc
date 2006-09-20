@@ -25,8 +25,6 @@
 #include "base/array_operations.h"
 #include "base/stlio.h"
 
-
-#include "python/typedefs.h"
 #include "python/python_utilities.h"
 using namespace Ariadne;
 using namespace Ariadne::Base;

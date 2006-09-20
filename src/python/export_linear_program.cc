@@ -22,25 +22,30 @@
  */
 
 
+#include "numeric/rational.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/linear_program.h"
 
-#include "python/typedefs.h"
-using namespace Ariadne;
+#include "python/python_utilities.h"
+using namespace Ariadne::Numeric;
+using namespace Ariadne::LinearAlgebra;
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
-void export_linear_program() {
-  typedef const FMatrix& (FLinearProgram::*MatrixConst) () const;
-
-  class_<FLinearProgram>("RationalLinearProgram",init<FMatrix,FVector,FVector>())
-    .def(init<FMatrix>())
-    .def("solve",&FLinearProgram::solve)
-    .def("is_satisfiable",&FLinearProgram::is_satisfiable)
-    .def("optimizing_point",&FLinearProgram::optimizing_point)
-    .def("optimal_value",&FLinearProgram::optimal_value)
-    .def("tableau",MatrixConst(&FLinearProgram::tableau),return_value_policy<copy_const_reference>())
-    .def(self_ns::str(self))    // __self_ns::str__
+template<typename R>
+void export_linear_program() 
+{
+  class_< LinearProgram<R> >(python_name<R>("LinearProgram").c_str(),
+                             init< Matrix<R>, Vector<R>, Vector<R> >())
+    .def(init< Matrix<R> >())
+    .def("solve",&LinearProgram<R>::solve)
+    .def("is_satisfiable",&LinearProgram<R>::is_satisfiable)
+    .def("optimizing_point",&LinearProgram<R>::optimizing_point)
+    .def("optimal_value",&LinearProgram<R>::optimal_value)
+//    .def("tableau",&LinearProgram<R>::tableau,return_value_policy<copy_const_reference>())
+    .def(self_ns::str(self))
   ;
 }
+
+template void export_linear_program<Rational>();

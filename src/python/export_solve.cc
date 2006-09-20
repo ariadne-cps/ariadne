@@ -1,8 +1,7 @@
 /***************************************************************************
- *            python/linear_algebra_module.cc
+ *            python/export_solve.cc
  *
- *  17 November 2005
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
+ *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -22,36 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "evaluation/newton.h"
+#include "python/python_utilities.h"
+
+using namespace Ariadne;
+using namespace Ariadne::Evaluation;
+
 #include <boost/python.hpp>
+using namespace boost::python;
 
-#include "numeric/float64.h"
-#include "numeric/mpfloat.h"
-#include "numeric/rational.h"
+void export_solve() {
 
-using namespace Ariadne::Numeric;
-
-template<typename R> void export_vector();
-template<typename R> void export_matrix();
-template<typename R> void export_linear_program();
-
-template<typename R> void export_interval_vector();
-template<typename R> void export_interval_matrix();
-
-
-BOOST_PYTHON_MODULE(linear_algebra)
-{
-  export_vector<Float64>();
-  export_vector<MPFloat>();
-  export_vector<Rational>();
-
-  export_matrix<Float64>();
-  export_matrix<MPFloat>();
-  export_matrix<Rational>();
-  
-  export_linear_program<Rational>();
-  
-  export_interval_vector<Float64>();
-  export_interval_vector<MPFloat>();
-  export_interval_matrix<Float64>();
-  export_interval_matrix<MPFloat>();
 }

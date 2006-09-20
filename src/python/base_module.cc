@@ -25,10 +25,8 @@
 #include <boost/python.hpp>
 
 void export_array();
-void export_binary_tree();
 
 BOOST_PYTHON_MODULE(base)
 {
   export_array();
-  export_binary_tree();
 }

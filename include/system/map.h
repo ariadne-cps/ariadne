@@ -61,8 +61,8 @@ namespace Ariadne {
       virtual Geometry::Zonotope<R> operator() (const Geometry::Zonotope<R>& A) const;
       /*! \brief An over-approximation to the image of a simplex. */
       virtual Geometry::Simplex<R> operator() (const Geometry::Simplex<R>& A) const;
-      /*! \brief An over-approximation to the image of a polyhedron. */
-      virtual Geometry::Polyhedron<R> operator() (const Geometry::Polyhedron<R>& A) const;
+      /*! \brief An over-approximation to the image of a polytope. */
+      virtual Geometry::Polytope<R> operator() (const Geometry::Polytope<R>& A) const;
     
       /*! \brief The derivative at a point, if this can be computed exactly. */
       virtual LinearAlgebra::Matrix<R> derivative(const Geometry::Point<R>& r) const;

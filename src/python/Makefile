@@ -20,7 +20,7 @@ LINEAR_ALGEBRA_OBJ = linear_algebra_module.o \
 
 GEOMETRY_OBJ = geometry_module.o \
 	export_point.o export_rectangle.o export_parallelotope.o \
-	export_zonotope.o export_simplex.o export_polyhedron.o \
+	export_zonotope.o export_polytope.o export_simplex.o export_polyhedron.o \
 	export_lattice_set.o export_list_set.o export_grid_set.o \
 	export_partition_tree_set.o 
 

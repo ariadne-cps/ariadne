@@ -142,7 +142,7 @@ namespace Ariadne {
     template
     GridMaskSet<Real>
     join_over_approximation(const GridMaskSet<Real>& gms,
-                            const Polyhedron<Real>& z);
+                            const Polytope<Real>& z);
 
 
     template
@@ -164,7 +164,7 @@ namespace Ariadne {
     template
     GridMaskSet<Real>
     join_over_approximation(const GridMaskSet<Real>& gms,
-                            const ListSet<Real,Polyhedron>& lp);
+                            const ListSet<Real,Polytope>& lp);
 
 
     template
@@ -181,7 +181,7 @@ namespace Ariadne {
     template
     GridMaskSet<Real>
     join_under_approximation(const GridMaskSet<Real>& gms,
-                             const Polyhedron<Real>& z);
+                             const Polytope<Real>& z);
 
 
     template
@@ -203,7 +203,7 @@ namespace Ariadne {
     template
     GridMaskSet<Real>
     join_under_approximation(const GridMaskSet<Real>& gms,
-                            const ListSet<Real,Polyhedron>& z); 
+                            const ListSet<Real,Polytope>& z); 
 
 
     template

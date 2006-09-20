@@ -3,7 +3,7 @@ include ../../config.mk
 OBJ = \
 	ppl_polyhedron.o \
 	point.o point_list.o \
-	rectangle.o polyhedron.o simplex.o zonotope.o parallelotope.o \
+	rectangle.o polyhedron.o polytope.o simplex.o zonotope.o parallelotope.o \
 	sphere.o ellipsoid.o \
 	list_set.o \
 	grid.o grid_set.o \

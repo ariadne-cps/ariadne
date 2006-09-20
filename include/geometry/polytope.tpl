@@ -1,5 +1,5 @@
 /***************************************************************************
- *            polyhedron.tpl
+ *            polytope.tpl
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -32,7 +32,7 @@
 
 #include <ppl.hh>
 
-#include "polyhedron.h"
+#include "polytope.h"
 
 #include "../base/stlio.h"
 
@@ -59,146 +59,167 @@ namespace Ariadne {
       return ppl_polyhedron(LinearAlgebra::Vector<Rational>(pt.position_vector()));
     }
     
-  
+
+
     template <typename R>
-    Polyhedron<R>::Polyhedron(dimension_type n) : _A(0,n), _b(0)
-    {
-    }
-    
-    template <typename R>
-    Polyhedron<R>::Polyhedron(const LinearAlgebra::Matrix<R>& A,
-                          const LinearAlgebra::Vector<R>& b) 
-      : _A(A), _b(b)
-    {
-      assert(A.number_of_rows()==b.size());
-    }
-    
-    template <typename R>
-    Polyhedron<R>::Polyhedron(const Rectangle<R>& r)
-      : _A(2*r.dimension(),r.dimension()), _b(r.dimension())
-    {
-      dimension_type n=r.dimension();
-      for(size_type i=0; i!=n; ++i) {
-        this->_A(i,i)=R(1); 
-        this->_A(i+n,i)=R(-1); 
-        this->_b(i)=r.upper_bound(i);
-        this->_b(i+n)=r.lower_bound(i);
-      }
-    }
-   
-    template <typename R>
-    Polyhedron<R>::Polyhedron(const Polyhedron<R>& p)
-      : _A(p._A), _b(p._b)
+    Polytope<R>::Polytope(dimension_type n)
+      : _vertices(n,0)
     {
     }
    
     template <typename R>
-    Polyhedron<R>&
-    Polyhedron<R>::operator=(const Polyhedron<R>& p)
+    Polytope<R>::Polytope(const LinearAlgebra::Matrix<R>& A)
+      : _vertices(A)
+    {
+    }
+   
+    template <typename R>
+    Polytope<R>::Polytope(const PointList<R>& pts)
+      : _vertices(pts.generators())
+    {
+    }
+   
+    template <typename R>
+    Polytope<R>::Polytope(const Rectangle<R>& r)
+      : _vertices(r.vertices().generators())
+    {
+    }
+   
+    template <typename R>
+    Polytope<R>::Polytope(const Polytope<R>& p)
+      : _vertices(p._vertices)
+    {
+    }
+   
+    template <typename R>
+    Polytope<R>&
+    Polytope<R>::operator=(const Polytope<R>& p)
       
     {
       if(this!=&p) { 
-        this->_A=p._A;
-        this->_b=p._b;
+        this->_vertices=p._vertices;
       }
       return *this;
     }
- 
+   
+    
     template <typename R>
-    Polyhedron<R>::operator Parma_Polyhedra_Library::C_Polyhedron() const
+    Polytope<R>::operator Parma_Polyhedra_Library::C_Polyhedron() const
     {
-      return ppl_polyhedron(this->_A,this->_b);
+      return ppl_polyhedron(this->_vertices);
+    }
+   
+    template <typename R>
+    dimension_type 
+    Polytope<R>::dimension() const
+    {
+      return this->_vertices.size(1);
     }
     
     template <typename R>
-    dimension_type
-    Polyhedron<R>::dimension() const
+    bool 
+    Polytope<R>::empty() const
     {
-      return this->_A.size2(); 
+      return Geometry::empty(ppl_polyhedron(this->_vertices));
+    }
+    
+    template <typename R>
+    bool 
+    Polytope<R>::empty_interior() const
+    {
+      return Geometry::empty_interior(ppl_polyhedron(this->_vertices));
+    }
+    
+    template <typename R>
+    bool 
+    Polytope<R>::contains(const Point<R>& pt) const
+    {
+      return Geometry::subset(ppl_polyhedron(pt),ppl_polyhedron(this->_vertices));
+    }
+    
+    template <typename R>
+    bool 
+    Polytope<R>::interior_contains(const Point<R>& pt) const
+    {
+      return Geometry::inner_subset(ppl_polyhedron(pt),ppl_polyhedron(this->_vertices));
     }
 
     template <typename R>
-    bool 
-    Polyhedron<R>::empty() const
+    PointList<R> 
+    Polytope<R>::vertices() const 
     {
-      return Geometry::empty(ppl_polyhedron(this->_A,this->_b));
+      return PointList<R>(this->_vertices);
     }
 
     template <typename R>
     Rectangle<R> 
-    Polyhedron<R>::bounding_box() const 
+    Polytope<R>::bounding_box() const 
     {
-      throw std::runtime_error("Polyhedron<R>::bounding_box() const not implemented");
+      Rectangle<R> result(this->dimension());
+      PointList<R> v(this->_vertices);
+      for(typename PointList<R>::const_iterator pt_iter=v.begin(); pt_iter!=v.end(); ++pt_iter) {
+        result=rectangular_hull(result,Rectangle<R>(*pt_iter));
+      }
+      return result;
     }
       
-    template <typename R>
-    PointList<Rational>
-    Polyhedron<R>::vertices() const
-    {
-      return PointList<Rational>(Geometry::generators(ppl_polyhedron(this->_A,this->_b)));
-    }
 
     template <typename R>
     bool 
-    Polyhedron<R>::contains(const Point<R>& pt) const
-    {
-      return Geometry::subset(ppl_polyhedron(pt),
-                              ppl_polyhedron(this->_A,this->_b));
-    }
-    
-    template <typename R>
-    bool 
-    Polyhedron<R>::interior_contains(const Point<R>& pt) const
-    {
-      return Geometry::inner_subset(ppl_polyhedron(pt),
-                                    ppl_polyhedron(this->_A,this->_b));
-    }
-    
-    template <typename R>
-    bool 
-    Polyhedron<R>::equal(const Polyhedron<R>& A, const Polyhedron<R>& B)
+    Polytope<R>::equal(const Polytope<R>& A, const Polytope<R>& B)
     {
       return Geometry::equal(C_Polyhedron(A),C_Polyhedron(B));
     }
     
     template <typename R>
     bool 
-    Polyhedron<R>::disjoint(const Polyhedron<R>& A, const Polyhedron<R>& B)
+    Polytope<R>::disjoint(const Polytope<R>& A, const Polytope<R>& B)
     {
       return Geometry::disjoint(C_Polyhedron(A),C_Polyhedron(B));
     }
     
     template <typename R>
     bool 
-    Polyhedron<R>::interiors_intersect(const Polyhedron<R>& A, const Polyhedron<R>& B)
+    Polytope<R>::interiors_intersect(const Polytope<R>& A, const Polytope<R>& B)
     {
       return Geometry::interiors_intersect(C_Polyhedron(A),C_Polyhedron(B));
     }
     
     template <typename R>
     bool 
-    Polyhedron<R>::subset(const Polyhedron<R>& A, const Polyhedron<R>& B)
+    Polytope<R>::subset(const Polytope<R>& A, const Polytope<R>& B)
     {
       return Geometry::subset(C_Polyhedron(A),C_Polyhedron(B));
     }
     
     template <typename R>
     bool 
-    Polyhedron<R>::inner_subset(const Polyhedron<R>& A, const Polyhedron<R>& B)
+    Polytope<R>::inner_subset(const Polytope<R>& A, const Polytope<R>& B)
     {
       return Geometry::inner_subset(C_Polyhedron(A),C_Polyhedron(B));
     }
           
-    template<typename R> inline 
-    std::ostream& operator<<(std::ostream& os, const Polyhedron<R>& p) {
-      return os << "Polyhedron( A=" << p.A() << ", b=" << p.b() << " )";
+    template <typename R>
+    Polytope<R>
+    Polytope<R>::convex_hull(const Polytope<R>& A, const Polytope<R>& B)
+    {
+      throw std::runtime_error("Polytope<R>::convex_hull(const Polytope& A, const Polytope& B) not implemented");
     }
     
-    template<typename R> inline 
-    std::istream& operator>>(std::istream& is, Polyhedron<R>& p) {
-      throw std::runtime_error("std::istream& operator>>(std::istream&, Polyhedron<R>&) not implemented");
+    template<typename R>  
+    std::ostream& operator<<(std::ostream& os, const Polytope<R>& p) {
+      return os << "Polytope( vertices=" << p.vertices() << " )";
+    }
+    
+    template<typename R>  
+    std::istream& operator>>(std::istream& is, Polytope<R>& p) {
+      throw std::runtime_error("std::istream& operator>>(std::istream&, Polytope<R>&) not implemented");
     }
 
+    
+    
+    
+    
 
   }
 }

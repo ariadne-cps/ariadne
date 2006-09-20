@@ -170,19 +170,19 @@ namespace Ariadne {
     }a
 
     
-    Geometry::Polyhedron<Rational>
-    AffineMap<Rational>::operator() (const Geometry::Polyhedron<Rational>& p) const
+    Geometry::Polytope<Rational>
+    AffineMap<Rational>::operator() (const Geometry::Polytope<Rational>& p) const
     {
       if (this->argument_dimension()!=p.dimension()) {
-        throw std::domain_error("AffineMap<Rational>::operator() (const Polyhedron<Rational>&): "
-          "the map does not have the same dimension of the polyhedron.");
+        throw std::domain_error("AffineMap<Rational>::operator() (const Polytope<Rational>&): "
+          "the map does not have the same dimension of the polytope.");
       }
 
       std::vector< Geometry::Point<Rational> > new_vertices=p.vertices();
       for (size_type i=0; i< new_vertices.size(); ++i) {
         new_vertices[i]=this->operator() (new_vertices[i]);
       }
-      return Geometry::Polyhedron<Rational>(new_vertices);
+      return Geometry::Polytope<Rational>(new_vertices);
     }    
 */
 

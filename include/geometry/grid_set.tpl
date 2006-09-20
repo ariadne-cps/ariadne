@@ -33,7 +33,7 @@
 #include "../geometry/rectangle.h"
 #include "../geometry/zonotope.h"
 #include "../geometry/parallelotope.h"
-#include "../geometry/polyhedron.h"
+#include "../geometry/polytope.h"
 #include "../geometry/list_set.h"
 #include "../geometry/partition_tree_set.h"
 

@@ -1,8 +1,7 @@
 /***************************************************************************
- *            python/export_polyhedron.cc
+ *            python/export_polytope.cc
  *
- *  21 October 2005
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
+ *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -25,7 +24,7 @@
 #include <vector>
 
 #include "geometry/rectangle.h"
-#include "geometry/polyhedron.h"
+#include "geometry/polytope.h"
 
 #include "python/typedefs.h"
 using namespace Ariadne;
@@ -36,21 +35,25 @@ using namespace boost::python;
 
 
 
-void export_polyhedron() {
-  typedef bool (*PolyhPolyhBinPred) (const RPolyhedron&, const RPolyhedron&);
-  typedef RPolyhedron (*PolyhPolyhBinFunc) (const RPolyhedron&, const RPolyhedron&);
+void export_polytope() {
+  typedef bool (*PolytPolytBinPred) (const RPolytope&, const RPolytope&);
+  typedef RPolytope (*PolytPolytBinFunc) (const RPolytope&, const RPolytope&);
 
-  def("disjoint", PolyhPolyhBinPred(&disjoint));
-  def("interiors_intersect", PolyhPolyhBinPred(&interiors_intersect));
-  def("inner_subset", PolyhPolyhBinPred(&inner_subset));
-  def("subset", PolyhPolyhBinPred(&subset));
-  def("convex_hull", PolyhPolyhBinFunc(&convex_hull));
+  def("disjoint", PolytPolytBinPred(&disjoint));
+  def("interiors_intersect", PolytPolytBinPred(&interiors_intersect));
+  def("inner_subset", PolytPolytBinPred(&inner_subset));
+  def("subset", PolytPolytBinPred(&subset));
+  def("convex_hull", PolytPolytBinFunc(&convex_hull));
 
-  class_<RPolyhedron>("Polyhedron",init<size_type>())
-    .def(init<RPolyhedron>())
+  class_<RPolytope>("Polytope",init<size_type>())
+    .def(init<RPointList>())
+    .def(init<RPolytope>())
     .def(init<RRectangle>())
-    .def("dimension", &RPolyhedron::dimension)
+    .def("dimension", &RPolytope::dimension)
+    .def("vertices", &RPolytope::vertices)
+    .def("bounding_box", &RPolytope::bounding_box)
     .def(self_ns::str(self))
   ;
+
   
 }

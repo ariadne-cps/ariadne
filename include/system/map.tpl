@@ -28,7 +28,7 @@
 
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
-#include "../geometry/polyhedron.h"
+#include "../geometry/polytope.h"
 #include "../geometry/simplex.h"
 #include "../geometry/zonotope.h"
 #include "../geometry/parallelotope.h"
@@ -79,10 +79,10 @@ namespace Ariadne {
     }
     
     template<typename R>
-    Geometry::Polyhedron<R>
-    Map<R>::operator() (const Geometry::Polyhedron<R>& p) const 
+    Geometry::Polytope<R>
+    Map<R>::operator() (const Geometry::Polytope<R>& p) const 
     {
-      throw std::invalid_argument(this->name()+"::operator() (Polyhedron) not implemented."); 
+      throw std::invalid_argument(this->name()+"::operator() (Polytope) not implemented."); 
     }
     
     template<typename R>

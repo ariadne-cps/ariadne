@@ -29,7 +29,7 @@
 #include "../geometry/parallelotope.h"
 #include "../geometry/zonotope.h"
 #include "../geometry/simplex.h"
-#include "../geometry/polyhedron.h"
+#include "../geometry/polytope.h"
 #include "../geometry/list_set.h"
 
 #include "../system/multimap.h"
@@ -71,10 +71,10 @@ namespace Ariadne {
     }
     
     template<typename R>
-    Geometry::ListSet<R,Geometry::Polyhedron>
-    MultiMap<R>::operator() (const Geometry::Polyhedron<R>& p) const 
+    Geometry::ListSet<R,Geometry::Polytope>
+    MultiMap<R>::operator() (const Geometry::Polytope<R>& p) const 
     {
-      throw std::invalid_argument(this->name()+"::operator() (Polyhedron) not implemented."); 
+      throw std::invalid_argument(this->name()+"::operator() (Polytope) not implemented."); 
     }
     
     

@@ -26,7 +26,7 @@
 
 #include "linear_algebra/linear_algebra.h"
 
-#include "geometry/polyhedron.h"
+#include "geometry/polytope.h"
 #include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
 #include "geometry/rectangle.h"
@@ -79,7 +79,7 @@ typedef RGridMaskSet (*GMSBinFunc) (const RGridMaskSet&, const RGridMaskSet&);
 typedef RGridMaskSet (*GMSRectFunc)(const RGridMaskSet&, const RRectangle&);
 typedef RGridMaskSet (*GMSPltpFunc)(const RGridMaskSet&, const RParallelotope&);
 typedef RGridMaskSet (*GMSZntpFunc)(const RGridMaskSet&, const RZonotope&);
-typedef RGridMaskSet (*GMSPlhdFunc)(const RGridMaskSet&, const RPolyhedron&);
+typedef RGridMaskSet (*GMSPlhdFunc)(const RGridMaskSet&, const RPolytope&);
 typedef RGridMaskSet (*GMSLSRectFunc)(const RGridMaskSet&, 
 		                      const RRectangleListSet&);
 typedef RGridMaskSet (*GMSLSPltpFunc)(const RGridMaskSet&, 
@@ -87,7 +87,7 @@ typedef RGridMaskSet (*GMSLSPltpFunc)(const RGridMaskSet&,
 typedef RGridMaskSet (*GMSLSZntpFunc)(const RGridMaskSet&, 
 		                      const RZonotopeListSet&);
 typedef RGridMaskSet (*GMSLSPlhdFunc)(const RGridMaskSet&, 
-		                      const RPolyhedronListSet&);
+		                      const RPolytopeListSet&);
 
 void export_grid_set() {
 

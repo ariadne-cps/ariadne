@@ -76,6 +76,7 @@ typedef Geometry::Polytope<Real> RPolytope;
 typedef Geometry::ListSet<Real,Geometry::Rectangle> RRectangleListSet;
 typedef Geometry::ListSet<Real,Geometry::Parallelotope> RParallelotopeListSet;
 typedef Geometry::ListSet<Real,Geometry::Zonotope> RZonotopeListSet;
+typedef Geometry::ListSet<Real,Geometry::Polytope> RPolytopeListSet;
 typedef Geometry::ListSet<Real,Geometry::Polyhedron> RPolyhedronListSet;
 
 typedef Geometry::grid_type grid_type;

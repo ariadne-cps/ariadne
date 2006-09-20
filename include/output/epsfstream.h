@@ -38,7 +38,7 @@
 #include "../geometry/grid_set.h"
 #include "../geometry/parallelotope.h"
 #include "../geometry/zonotope.h"
-#include "../geometry/polyhedron.h"
+#include "../geometry/polytope.h"
 #include "../geometry/partition_tree_set.h"
 #include "../linear_algebra/matrix.h"
 #include "../system/affine_map.h"
@@ -109,7 +109,7 @@ namespace Ariadne {
       template<typename R> Geometry::PointList<double> operator() (const Geometry::Zonotope<R>& z) const {
         return this->operator()(z.vertices());
       }
-      template<typename R> Geometry::PointList<double> operator() (const Geometry::Polyhedron<R>& p) const {
+      template<typename R> Geometry::PointList<double> operator() (const Geometry::Polytope<R>& p) const {
         return this->operator()(p.vertices());
       }
      private:
@@ -635,7 +635,7 @@ namespace Ariadne {
        
     template<typename R>
     epsfstream&
-    operator<<(epsfstream& eps, const Ariadne::Geometry::Polyhedron<R>& p)
+    operator<<(epsfstream& eps, const Ariadne::Geometry::Polytope<R>& p)
     {
       return draw(eps,eps.projection_map()(p.vertices()));      
     }

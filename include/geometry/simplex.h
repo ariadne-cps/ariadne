@@ -36,7 +36,7 @@
 #include "../base/array.h"
 #include "../geometry/point.h"
 #include "../geometry/point_list.h"
-#include "../geometry/polyhedron.h"
+#include "../geometry/polytope.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -44,7 +44,7 @@ namespace Ariadne {
     template<> 
     inline bool is_a<Simplex,Simplex>() { return true; }
     template<> 
-    inline bool is_a<Simplex,Polyhedron>() { return true; }
+    inline bool is_a<Simplex,Polytope>() { return true; }
 
     /* Forward declaration of friends. */
     template<typename R> std::ostream& operator<<(std::ostream&, const Simplex<R>&);
@@ -108,8 +108,8 @@ namespace Ariadne {
       /*! \brief Convert to a Parma Polyhedra Library polyhedron. */
       operator Parma_Polyhedra_Library::C_Polyhedron() const;
 
-      /*! \brief Convert to a polyhedron. */
-      operator Polyhedron<R>() const;
+      /*! \brief Convert to a polytope. */
+      operator Polytope<R>() const;
       //@}
       
       

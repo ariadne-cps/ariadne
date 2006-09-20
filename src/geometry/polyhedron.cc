@@ -33,9 +33,6 @@ namespace Ariadne {
     template std::ostream& operator<<(std::ostream&, const Polyhedron<Real>&);
     template std::istream& operator>>(std::istream&, Polyhedron<Real>&);
 
-    template class Polytope<Real>;
-    template std::ostream& operator<<(std::ostream&, const Polytope<Real>&);
-    template std::istream& operator>>(std::istream&, Polytope<Real>&);
 /*
     
     template bool disjoint(const Polyhedron<Real>&, const Polyhedron<Real>&);

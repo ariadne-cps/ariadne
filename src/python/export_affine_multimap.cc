@@ -28,7 +28,7 @@
 #include "geometry/parallelotope.h"
 #include "geometry/simplex.h"
 #include "geometry/zonotope.h"
-#include "geometry/polyhedron.h"
+#include "geometry/polytope.h"
 #include "system/affine_multimap.h"
 
 
@@ -44,7 +44,7 @@ typedef RRectangle (RAffineMultiMapRect::*AffMultiMapRectCallRectangle) (const R
 //typedef RParallelotope (RAffineMultiMapRect::*AffMultiMapRectCallParallelotope) (const RParallelotope&) const;
 //typedef RZonotope (RAffineMultiMapRect::*AffMultiMapRectCallZonotope) (const RZonotope&) const;
 //typedef RSimplex (RAffineMultiMapRect::*AffMultiMapRectCallSimplex) (const RSimplex&) const;
-//typedef RPolyhedron (RAffineMultiMapRect::*AffMultiMapRectCallPolyhedron) (const RPolyhedron&) const;
+//typedef RPolytope (RAffineMultiMapRect::*AffMultiMapRectCallPolytope) (const RPolytope&) const;
 //typedef RParallelotopeListSet (RAffineMultiMapRect::*AffMultiMapRectCallParallelotopeListSet) (const RParallelotopeListSet&) const;
 //typedef RZonotopeListSet (RAffineMultiMapRect::*AffMultiMapRectCallZonotopeListSet) (const RZonotopeListSet&) const;
 //typedef RZonotopeListSet (RAffineMultiMapRect::*AffMultiMapRectCallGridMaskSet) (const RGridMaskSet&) const;
@@ -54,7 +54,7 @@ AffMultiMapRectCallRectangle affine_multimap_rect_call_rectangle=&RAffineMultiMa
 //AffMultiMapRectCallParallelotope affine_multimap_rect_call_parallelotope=&RAffineMultiMapRect::operator();
 //AffMultiMapRectCallSimplex affine_multimap_rect_call_simplex=&RAffineMultiMapRect::operator();
 //AffMultiMapRectCallZonotope affine_multimap_rect_call_zonotope=&RAffineMultiMapRect::operator();
-//AffMultiMapRectCallPolyhedron affine_multimap_rect_call_polyhedron=&RAffineMultiMapRect::operator();
+//AffMultiMapRectCallPolytope affine_multimap_rect_call_polytope=&RAffineMultiMapRect::operator();
 //AffMultiMapRectCallParallelotopeListSet affine_multimap_rect_call_parallelotope_list_set=&RAffineMultiMapRect::operator();
 //AffMultiMapRectCallZonotopeListSet affine_multimap_rect_call_zonotope_list_set=&RAffineMultiMapRect::operator();
 //AffMultiMapRectCallGridMaskSet affine_multimap_rect_call_grid_mask_set=&RAffineMultiMapRect::operator();
@@ -62,7 +62,7 @@ AffMultiMapRectCallRectangle affine_multimap_rect_call_rectangle=&RAffineMultiMa
 //typedef RParallelotope (RAffineMultiMapPltp::*AffMultiMapPltpCallPoint) (const RPoint&) const;
 //typedef RParallelotope (RAffineMultiMapPltp::*AffMultiMapPltpCallParallelotope) (const RParallelotope&) const;
 //typedef RZonotope (RAffineMultiMapPltp::*AffMultiMapPltpCallZonotope) (const RZonotope&) const;
-//typedef RPolyhedron (RAffineMultiMapPltp::*AffMultiMapPltpCallPolyhedron) (const RPolyhedron&) const;
+//typedef RPolytope (RAffineMultiMapPltp::*AffMultiMapPltpCallPolytope) (const RPolytope&) const;
 //typedef RParallelotopeListSet (RAffineMultiMapPltp::*AffMultiMapPltpCallParallelotopeListSet) (const RParallelotopeListSet&) const;
 //typedef RZonotopeListSet (RAffineMultiMapPltp::*AffMultiMapPltpCallZonotopeListSet) (const RZonotopeListSet&) const;
 //typedef RZonotopeListSet (RAffineMultiMapPltp::*AffMultiMapPltpCallGridMaskSet) (const RGridMaskSet&) const;
@@ -70,21 +70,21 @@ AffMultiMapRectCallRectangle affine_multimap_rect_call_rectangle=&RAffineMultiMa
 //AffMultiMapPltpCallPoint affine_multimap_pltp_call_point=&RAffineMultiMapPltp::operator();
 //AffMultiMapPltpCallParallelotope affine_multimap_pltp_call_parallelotope=&RAffineMultiMapPltp::operator();
 //AffMultiMapPltpCallZonotope affine_multimap_pltp_call_zonotope=&RAffineMultiMapPltp::operator();
-//AffMultiMapPltpCallPolyhedron affine_multimap_pltp_call_polyhedron=&RAffineMultiMapPltp::operator();
+//AffMultiMapPltpCallPolytope affine_multimap_pltp_call_polytope=&RAffineMultiMapPltp::operator();
 //AffMultiMapPltpCallParallelotopeListSet affine_multimap_pltp_call_parallelotope_list_set=&RAffineMultiMapPltp::operator();
 //AffMultiMapPltpCallZonotopeListSet affine_multimap_pltp_call_zonotope_list_set=&RAffineMultiMapPltp::operator();
 //AffMultiMapPltpCallGridMaskSet affine_multimap_pltp_call_grid_mask_set=&RAffineMultiMapPltp::operator();
 
 typedef RZonotope (RAffineMultiMapZntp::*AffMultiMapZntpCallPoint) (const RPoint&) const;
 typedef RZonotope (RAffineMultiMapZntp::*AffMultiMapZntpCallZonotope) (const RZonotope&) const;
-//typedef RPolyhedron (RAffineMultiMapZntp::*AffMultiMapZntpCallPolyhedron) (const RPolyhedron&) const;
+//typedef RPolytope (RAffineMultiMapZntp::*AffMultiMapZntpCallPolytope) (const RPolytope&) const;
 //typedef RParallelotopeListSet (RAffineMultiMapZntp::*AffMultiMapZntpCallParallelotopeListSet) (const RParallelotopeListSet&) const;
 //typedef RZonotopeListSet (RAffineMultiMapZntp::*AffMultiMapZntpCallZonotopeListSet) (const RZonotopeListSet&) const;
 //typedef RZonotopeListSet (RAffineMultiMapZntp::*AffMultiMapZntpCallGridMaskSet) (const RGridMaskSet&) const;
 
 AffMultiMapZntpCallPoint affine_multimap_zntp_call_point=&RAffineMultiMapZntp::operator();
 AffMultiMapZntpCallZonotope affine_multimap_zntp_call_zonotope=&RAffineMultiMapZntp::operator();
-//AffMultiMapZntpCallPolyhedron affine_multimap_zntp_call_polyhedron=&RAffineMultiMapZntp::operator();
+//AffMultiMapZntpCallPolytope affine_multimap_zntp_call_polytope=&RAffineMultiMapZntp::operator();
 //AffMultiMapZntpCallZonotopeListSet affine_multimap_zntp_call_zonotope_list_set=&RAffineMultiMapZntp::operator();
 //AffMultiMapZntpCallGridMaskSet affine_multimap_zntp_call_grid_mask_set=&RAffineMultiMapZntp::operator();
 
@@ -96,7 +96,7 @@ void export_affine_map_with_set() {
     .def("result_dimension", &RAffineMultiMapRect::result_dimension)
     .def("__call__", affine_multimap_rect_call_point)
     .def("__call__", affine_multimap_rect_call_rectangle)
-//    .def("__call__", affine_multimap_rect_call_polyhedron)
+//    .def("__call__", affine_multimap_rect_call_polytope)
 //    .def("__call__", affine_multimap_rect_call_zonotope)
 //    .def("__call__", affine_multimap_rect_call_zonotope_list_set)
 //    .def("__call__", affine_multimap_rect_call_grid_mask_set)
@@ -110,7 +110,7 @@ void export_affine_map_with_set() {
     .def("result_dimension", &RAffineMultiMapPltp::result_dimension)
     .def("__call__", affine_multimap_pltp_call_point)
     .def("__call__", affine_multimap_pltp_call_parallelotope)
-    .def("__call__", affine_multimap_pltp_call_polyhedron)
+    .def("__call__", affine_multimap_pltp_call_polytope)
     .def("__call__", affine_multimap_pltp_call_zonotope)
     .def("__call__", affine_multimap_pltp_call_parallelotope_list_set)
     .def("__call__", affine_multimap_pltp_call_zonotope_list_set)
@@ -124,7 +124,7 @@ void export_affine_map_with_set() {
     .def("argument_dimension", &RAffineMultiMapZntp::argument_dimension)
     .def("result_dimension", &RAffineMultiMapZntp::result_dimension)
     .def("__call__", affine_multimap_zntp_call_point)
-//    .def("__call__", affine_multimap_zntp_call_polyhedron)
+//    .def("__call__", affine_multimap_zntp_call_polytope)
     .def("__call__", affine_multimap_zntp_call_zonotope)
 //    .def("__call__", affine_multimap_zntp_call_zonotope_list_set)
 //    .def("__call__", affine_multimap_zntp_call_grid_mask_set)

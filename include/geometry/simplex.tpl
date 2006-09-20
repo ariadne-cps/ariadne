@@ -29,7 +29,6 @@
 #include <ppl.hh>
 
 #include "../base/stlio.h"
-#include "../geometry/polyhedron.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -70,9 +69,9 @@ namespace Ariadne {
     }
     
     template<typename R>
-    Simplex<R>::operator Polyhedron<R>() const 
+    Simplex<R>::operator Polytope<R>() const 
     {
-      return Polyhedron<R>(this->_vertices);
+      return Polytope<R>(this->_vertices);
     }
     
     template<typename R>
@@ -85,14 +84,14 @@ namespace Ariadne {
     bool 
     Simplex<R>::contains(const Point<R>& pt) const
     {
-      return Polyhedron<R>(*this).contains(pt);
+      return Polytope<R>(*this).contains(pt);
     }      
       
     template<typename R>
     bool 
     Simplex<R>::interior_contains(const Point<R>& pt) const
     {
-      return Polyhedron<R>(*this).interior_contains(pt);
+      return Polytope<R>(*this).interior_contains(pt);
     }      
       
     template <typename R>

@@ -25,7 +25,7 @@
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
-#include "geometry/polyhedron.h"
+#include "geometry/polytope.h"
 #include "geometry/list_set.h"
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
@@ -45,11 +45,11 @@ inline void write_grid_rectangle(epsfstream& eps, const RGridRectangle& r) { eps
 inline void write_grid_cell(epsfstream& eps, const RGridCell& r) { eps << RRectangle(r); }
 inline void write_parallelotope(epsfstream& eps, const RParallelotope& p) { eps << p; }
 inline void write_zonotope(epsfstream& eps, const RZonotope& z) { eps << z; }
-inline void write_polyhedron(epsfstream& eps, const RPolyhedron& p) { eps << p; }
+inline void write_polytope(epsfstream& eps, const RPolytope& p) { eps << p; }
 inline void write_rectangle_list_set(epsfstream& eps, const RRectangleListSet& r) { eps << r; }
 inline void write_parallelotope_list_set(epsfstream& eps, const RParallelotopeListSet& s) { eps << s; }
 inline void write_zonotope_list_set(epsfstream& eps, const RZonotopeListSet& s) { eps << s; }
-inline void write_polyhedron_list_set(epsfstream& eps, const RPolyhedronListSet& s) { eps << s; }
+inline void write_polytope_list_set(epsfstream& eps, const RPolytopeListSet& s) { eps << s; }
 inline void write_grid_mask_set(epsfstream& eps, const RGridMaskSet& s) { eps << s; }
 inline void write_grid_cell_list_set(epsfstream& eps, const RGridCellListSet& s) { eps << s; }
 inline void write_grid_rectangle_list_set(epsfstream& eps, const RGridRectangleListSet& s) { eps << s; }
@@ -75,11 +75,11 @@ void export_postscript_output()
     .def("write",&write_parallelotope)
     .def("write",&write_zonotope)
     .def("write",&write_parallelotope)
-    .def("write",&write_polyhedron)
+    .def("write",&write_polytope)
     .def("write",&write_rectangle_list_set)
     .def("write",&write_parallelotope_list_set)
     .def("write",&write_zonotope_list_set)
-    .def("write",&write_polyhedron_list_set)
+    .def("write",&write_polytope_list_set)
     .def("write",&write_grid_mask_set)
     .def("write",&write_grid_cell_list_set)
     .def("write",&write_grid_rectangle_list_set)

@@ -57,8 +57,8 @@ namespace Ariadne {
       virtual Geometry::ListSet<R,Geometry::Zonotope> operator() (const Geometry::Zonotope<R>& A) const;
       /*! \brief A minimal cover of the image of a simplex. */
       virtual Geometry::ListSet<R,Geometry::Simplex> operator() (const Geometry::Simplex<R>& A) const;
-      /*! \brief A minimal cover of the image of a polyhedron. */
-      virtual Geometry::ListSet<R,Geometry::Polyhedron> operator() (const Geometry::Polyhedron<R>& A) const;
+      /*! \brief A minimal cover of the image of a polytope. */
+      virtual Geometry::ListSet<R,Geometry::Polytope> operator() (const Geometry::Polytope<R>& A) const;
     
       /*! \brief The dimension of the domain space. */
       virtual dimension_type argument_dimension() const = 0;

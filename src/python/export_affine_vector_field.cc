@@ -29,7 +29,7 @@
 #include "geometry/parallelotope.h"
 #include "geometry/simplex.h"
 #include "geometry/zonotope.h"
-#include "geometry/polyhedron.h"
+#include "geometry/polytope.h"
 #include "system/affine_vector_field.h"
 
 
@@ -46,7 +46,7 @@ typedef RIntervalVector (RAffineVectorField::*AffVectorFieldCallRectangle) (cons
 //typedef RParallelotope (RAffineVectorField::*AffVectorFieldApplyParallelotope) (const RParallelotope&) const;
 //typedef RZonotope (RAffineVectorField::*AffVectorFieldApplyZonotope) (const RZonotope&) const;
 //typedef RSimplex (RAffineVectorField::*AffVectorFieldApplySimplex) (const RSimplex&) const;
-//typedef RPolyhedron (RAffineVectorField::*AffVectorFieldApplyPolyhedron) (const RPolyhedron&) const;
+//typedef RPolytope (RAffineVectorField::*AffVectorFieldApplyPolytope) (const RPolytope&) const;
 
 typedef RMatrix (RAffineVectorField::*AffVectorFieldDerivativePoint) (const RPoint&) const;
 typedef RIntervalMatrix (RAffineVectorField::*AffVectorFieldDerivativeRectangle) (const RRectangle&) const;
@@ -56,7 +56,7 @@ AffVectorFieldCallRectangle affine_vf_call_rectangle=&RAffineVectorField::operat
 //AffVectorFieldApplyParallelotope affine_vf_apply_parallelotope=&RAffineVectorField::operator();
 //AffVectorFieldApplyZonotope affine_vf_apply_zonotope=&RAffineVectorField::operator();
 //AffVectorFieldApplySimplex affine_vf_apply_simplex=&RAffineVectorField::operator();
-//AffVectorFieldApplyPolyhedron affine_vf_apply_polyhedron=&RAffineVectorField::operator();
+//AffVectorFieldApplyPolytope affine_vf_apply_polytope=&RAffineVectorField::operator();
 AffVectorFieldDerivativePoint affine_vf_derivative_point=&RAffineVectorField::derivative;
 AffVectorFieldDerivativeRectangle affine_vf_derivative_rectangle=&RAffineVectorField::derivative;
 
@@ -68,7 +68,7 @@ void export_affine_vector_field() {
     .def("__call__", affine_vf_call_rectangle)
 //    .def("__call__", affine_vf_apply_parallelotope)
 //    .def("__call__", affine_vf_apply_zonotope)
-//    .def("__call__", affine_vf_apply_polyhedron)
+//    .def("__call__", affine_vf_apply_polytope)
 //    .def("__call__", affine_vf_apply_simplex)
     .def("derivative", affine_vf_derivative_point)
     .def("derivative", affine_vf_derivative_rectangle)

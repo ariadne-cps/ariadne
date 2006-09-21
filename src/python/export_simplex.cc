@@ -40,10 +40,9 @@ void export_simplex() {
   typedef bool (*SmplxSmplxBinPred) (const RSimplex&, const RSimplex&);
   typedef bool (*SmplxRectBinPred) (const RSimplex&, const RRectangle&);
 
-   class_<RSimplex>("Simplex",init<int>())
+   class_<RSimplex>("Simplex",init< >())
     .def(init< PointList<Real> >())
     .def(init<RSimplex>())
-    .def(init<std::string>())
     .def("empty", &RSimplex::empty)
     .def("empty_interior", &RSimplex::empty_interior)
     .def("dimension", &RSimplex::dimension)

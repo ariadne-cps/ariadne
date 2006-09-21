@@ -34,66 +34,30 @@ namespace Ariadne {
   namespace Geometry {
 
     template<typename R>
-    Simplex<R>::Simplex(size_type n)
-      : _vertices(n,n+1) 
+    Simplex<R>::Simplex()
+      : Polytope<R>(LinearAlgebra::Matrix<R>(0,1))
     {
-      for(size_type i=0; i!=n; ++i) {
-        _vertices(i,i)=1;
-      }
     }
   
     template<typename R>
     Simplex<R>::Simplex(const LinearAlgebra::Matrix<R>& A)
-      : _vertices(A)
+      : Polytope<R>(A)
     {
-      if(A.number_of_rows()+1u != A.number_of_columns()) {
+      if(this->dimension()+1u!=this->number_of_vertices()) {
         throw std::runtime_error("A simplex of dimension d must have d+1 vertices");
       }
     }
     
     template<typename R>
     Simplex<R>::Simplex(const PointList<R>& v)
-      : _vertices(v.generators())
+      : Polytope<R>(v)
     {
-      if(v.dimension()+1u != v.size()) {
+      if(this->dimension()+1u!=this->number_of_vertices()) {
         throw std::runtime_error("A simplex of dimension d must have d+1 vertices");
       }
     }
     
-    template<typename R>
-    Simplex<R>::Simplex(const std::string& s)
-      : _vertices()
-    {
-      std::stringstream ss(s);
-      ss >> *this;
-    }
-    
-    template<typename R>
-    Simplex<R>::operator Polytope<R>() const 
-    {
-      return Polytope<R>(this->_vertices);
-    }
-    
-    template<typename R>
-    Simplex<R>::operator Parma_Polyhedra_Library::C_Polyhedron() const 
-    {
-      return ppl_polyhedron(this->_vertices);
-    }
-    
-    template<typename R>
-    bool 
-    Simplex<R>::contains(const Point<R>& pt) const
-    {
-      return Polytope<R>(*this).contains(pt);
-    }      
-      
-    template<typename R>
-    bool 
-    Simplex<R>::interior_contains(const Point<R>& pt) const
-    {
-      return Polytope<R>(*this).interior_contains(pt);
-    }      
-      
+
     template <typename R>
     std::ostream&
     Simplex<R>::write(std::ostream& os) const
@@ -112,7 +76,7 @@ namespace Ariadne {
     std::istream& 
     Simplex<R>::read(std::istream& is)
     {
-      throw std::domain_error("Not implemented");
+      throw std::domain_error("Simplex<R>::read(std::istream& is)");
     }
       
   }

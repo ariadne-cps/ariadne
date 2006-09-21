@@ -54,22 +54,19 @@ namespace Ariadne {
      *  \brief A simplex of arbitrary dimension.
      */
     template <typename R>
-    class Simplex {
+    class Simplex : public Polytope<R>
+    {
      public:
       /*! \brief The type of denotable real number used for the corners. */
       typedef R real_type;
       /*! \brief The type of denotable point contained by the simplex. */
       typedef Point<R> state_type;
      
-     private:
-      /* Simplex's vertices. */
-      LinearAlgebra::Matrix<R> _vertices;
-   
      public:
       //@{
       //! \name Constructors
-      /*! \brief Default constructor constructs standard simplex of dimension \a n. */
-      Simplex(size_type n = 0);
+      /*! \brief Default constructor constructs simplex of dimension \a 0. */
+      Simplex();
     
       /*! \brief Construct from matrix giving the vertices in column form. */
       explicit Simplex(const LinearAlgebra::Matrix<R>& A);
@@ -77,76 +74,18 @@ namespace Ariadne {
       /*! \brief Construct from list of vertices. */
       explicit Simplex(const PointList<R>& v);
       
-      /*! \brief Construct from a string literal. */
-      explicit Simplex(const std::string& s);
-      
       /*! \brief Copy constructor. */
-      Simplex(const Simplex<R>& original)
-        : _vertices(original._vertices)
-      { }
+      Simplex(const Simplex<R>& s) : Polytope<R>(s) { }
 
-      /*! \brief Construct from a rectangle. 
-       *
-       * It returns an error since, it can not be doen without errors.
-       */
-      Simplex(const Rectangle<R>& r){ 
-        throw std::runtime_error("Simplex(const Rectangle<R>& r): errorless conversion can not be accomplished.");
-      }
-      
       /*! \brief Copy assignment operator. */
-      Simplex<R>& operator=(const Simplex<R>& original) {
-        if(this != &original) {
-          this->_vertices = original._vertices;
+      Simplex<R>& operator=(const Simplex<R>& s) {
+        if(this != &s) {
+          this->Polytope<R>::operator=(s); 
         }
         return *this;
       }
       //@}
-      
     
-      //@{
-      //! \name Conversion operators
-      /*! \brief Convert to a Parma Polyhedra Library polyhedron. */
-      operator Parma_Polyhedra_Library::C_Polyhedron() const;
-
-      /*! \brief Convert to a polytope. */
-      operator Polytope<R>() const;
-      //@}
-      
-      
-      //@{
-      //! \name Geometric operations
-      /*! \brief The dimension of the Euclidean space the rectangle lies in. */
-      size_type dimension() const {
-        return this->_vertices.number_of_rows();
-      }
-      
-      /*! \brief True if the simplex is empty. */
-      bool empty() const {
-        throw std::domain_error("Simplex::empty() not implemented.");
-      }
-      
-      /*! \brief True if the simplex has empty interior. */
-      bool empty_interior() const {
-        throw std::domain_error("Simplex::empty_interior() not implemented.");
-      }
-      
-      /*! \brief The array of vertices. */
-      PointList<R> vertices() const {
-        return PointList<R>(this->_vertices);
-      }
-      
-      /*! \brief The \a n th vertex. */
-      state_type vertex(size_type n) const {
-        return Point<R>(LinearAlgebra::Vector<R>(column(this->_vertices,n)));
-      }
-      
-      /*! \brief Tests if \a point is included into a simplex. */
-      bool contains(const state_type& point) const;
-      
-      /*! \brief Tests if \a point is included into the interior a simplex. */
-      bool interior_contains(const state_type& point) const;
-      //@}
-
       //@{ 
       //! \name Input/output operations
       /*! \brief Write to an output stream. */
@@ -156,7 +95,7 @@ namespace Ariadne {
       //@}
     };
 
-
+  
     template<typename R> inline 
     std::ostream& operator<<(std::ostream& os, const Simplex<R>& s) {
       return s.write(os);

@@ -63,7 +63,7 @@ namespace Ariadne {
       typedef PointList<R>  state_list_type;
      public:
        /*! \brief Construct an empty polytope in dimension \a n. */
-      Polytope(dimension_type n=0);
+      Polytope(dimension_type d=0);
      
      /*! \brief Construct from a matrix whose columns give the vertices. */
       explicit Polytope(const LinearAlgebra::Matrix<R>& A);
@@ -185,7 +185,7 @@ namespace Ariadne {
       
       static Polytope<R> convex_hull(const Polytope<R>& A, const Polytope<R>& B);
 #endif
-     private:
+     private:    
       LinearAlgebra::Matrix<R> _vertices;
     };
    

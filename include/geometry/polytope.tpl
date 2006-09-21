@@ -62,10 +62,11 @@ namespace Ariadne {
 
 
     template <typename R>
-    Polytope<R>::Polytope(dimension_type n)
-      : _vertices(n,0)
+    Polytope<R>::Polytope(dimension_type d)
+      : _vertices(d,0)
     {
     }
+   
    
     template <typename R>
     Polytope<R>::Polytope(const LinearAlgebra::Matrix<R>& A)
@@ -113,7 +114,14 @@ namespace Ariadne {
     dimension_type 
     Polytope<R>::dimension() const
     {
-      return this->_vertices.size(1);
+      return this->_vertices.number_of_rows();
+    }
+    
+    template <typename R>
+    size_type 
+    Polytope<R>::number_of_vertices() const
+    {
+      return this->_vertices.number_of_columns();
     }
     
     template <typename R>

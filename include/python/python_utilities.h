@@ -41,17 +41,10 @@
 template<typename R> inline std::string python_name(const std::string& bn);
 template<> inline std::string python_name<Ariadne::Numeric::Float64>(const std::string& bn) { return "F"+bn; }
 //template<> inline const char* python_name<Ariadne::Numeric::MPFloat>(const std::string& bn) { return "R"+bn; }
-template<> inline std::string python_name<Ariadne::Numeric::MPFloat>(const std::string& bn) { return "R"+bn; }
+template<> inline std::string python_name<Ariadne::Numeric::MPFloat>(const std::string& bn) { return ""+bn; }
 template<> inline std::string python_name<Ariadne::Numeric::Dyadic>(const std::string& bn) { return "D"+bn; }
 template<> inline std::string python_name<Ariadne::Numeric::Rational>(const std::string& bn) { return "Q"+bn; }
 
-
-template<typename R> inline const char* prefix(); 
-template<> inline const char* prefix<Ariadne::Numeric::Float64>() { return "F"; }
-//template<> inline std::string prefix<Ariadne::Numeric::MPFloat>() { return "R"; }
-template<> inline const char* prefix<Ariadne::Numeric::MPFloat>() { return ""; }
-template<> inline const char*  prefix<Ariadne::Numeric::Dyadic>() { return "D"; }
-template<> inline const char*  prefix<Ariadne::Numeric::Rational>() { return "Q"; }
 
 
 template<class C> 
@@ -67,6 +60,7 @@ get_item(const C& c, int n) {
   return c[m];
 }
 
+
 template<class C, class T> 
 inline
 void
@@ -79,6 +73,7 @@ set_item_from(C& c, int n, const T& x) {
   assert(m<c.size());
   c[n]=x;
 }
+
 
 template<class C> 
 inline
@@ -93,14 +88,16 @@ set_item(C& c, int n, const typename C::value_type& x) {
   c[n]=x;
 }
 
+
+
 template<typename Res, typename Arg1, typename Arg2, typename Op>
 inline
 Res
 evaluate(const Arg1& a1, const Arg2& a2)
 {
-  Op op;
-  return Res(op(a1,a2));
+  return Res(Op()(a1,a2));
 }
+
 
 template<typename Res, typename Arg1, typename Arg2>
 inline
@@ -110,6 +107,7 @@ add(const Arg1& a1, const Arg2& a2)
   return Res(a1+a2);
 }
 
+
 template<typename Res, typename Arg1, typename Arg2>
 inline
 Res
@@ -117,6 +115,7 @@ sub(const Arg1& a1, const Arg2& a2)
 {
   return Res(a1-a2); 
 }
+
 
 template<typename Res, typename Arg1, typename Arg2>
 inline

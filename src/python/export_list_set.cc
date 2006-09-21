@@ -128,7 +128,7 @@ def("regular_intersection", RectLSBinFun(&regular_intersection));
   class_<RRectangleListSet>("RectangleListSet",init<int>())
     .def(init<RRectangle>())
     .def(init<RRectangleListSet>())
-    .def(init<RGridRectangleListSet>())
+    .def(init<RGridBlockListSet>())
     .def(init<RGridCellListSet>())
     .def(init<RGridMaskSet>())
     .def(init<RPartitionTreeSet>())

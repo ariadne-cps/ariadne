@@ -74,7 +74,7 @@ int main() {
   cout << arglc << " " << lm.apply(arglc) << endl;
   cout << endl;
   
-  cout << LatticeRectangle(arglc) << " " << lm(LatticeRectangle(arglc)) << endl;
+  cout << LatticeBlock(arglc) << " " << lm(LatticeBlock(arglc)) << endl;
   LatticeCellListSet lcls(0);
   cout << lm(arglc2) << endl;
   lcls=lm.apply(arglc2);

@@ -27,11 +27,10 @@
 #include <exception>
 
 #include "numeric/arithmetic.h"
+#include "numeric/integer.h"
 
 #include "combinatoric/lattice_set.h"
 #include "combinatoric/subdivision_tree_set.h"
-
-#include "geometry/rectangle.h"
 
 namespace Ariadne {
   namespace Combinatoric {
@@ -135,28 +134,28 @@ namespace Ariadne {
 
     
     SubdivisionTreeCell::SubdivisionTreeCell(const SubdivisionSequence& ss,
-                                                 const BinaryWord& w)
-      : _bounds(ss.dimension())
+                                             const BinaryWord& w)
+      : _bounds(2*ss.dimension())
     {
       _compute_bounds(ss,w);
     }
     
     void
     SubdivisionTreeCell::_compute_bounds(const SubdivisionSequence& ss,
-                                           const BinaryWord& w)
+                                         const BinaryWord& w)
     {
       for(dimension_type i=0; i!=this->dimension(); ++i) {
-        _bounds.set_lower_bound(i,0.0);
-        _bounds.set_upper_bound(i,1.0);
+        _bounds[2*i]=0.0;
+        _bounds[2*i+1]=1.0;
       }
       for(size_type j=0; j!=w.size(); ++j) {
         dimension_type i=ss[j];
-        dyadic_type c=(_bounds.lower_bound(i)+_bounds.upper_bound(i))/2;
+        dyadic_type c=(_bounds[2*i]+_bounds[2*i+1])/2;
         if(w[j]==left) {
-          _bounds.set_upper_bound(i,c);
+          _bounds[2*i+1]=c;
         }
         else {
-          _bounds.set_lower_bound(i,c); 
+          _bounds[2*i]=c;
         }
       }
     }
@@ -192,7 +191,7 @@ namespace Ariadne {
       
       dimension_type n=ms.dimension();
 
-      LatticeRectangle block=ms.block();
+      LatticeBlock block=ms.block();
       SizeArray grid_sizes=block.sizes();
       SizeArray new_sizes(this->dimension());
       SizeArray depths(this->dimension());
@@ -239,7 +238,7 @@ namespace Ariadne {
       do {
         //TODO: Construct full tree, then reduce
         SubdivisionTreeCell c(subdivisions,word);
-        LatticeRectangle r=compute_block(c,block);
+        LatticeBlock r=compute_block(c,block);
         if(subset(r,ms)) {
           tree.push_back(leaf);
           mask.push_back(true);
@@ -286,13 +285,18 @@ namespace Ariadne {
     operator<<(std::ostream& os, const SubdivisionTreeCell& uptc) 
     {
       os << "SubdivisionTreeCell(" 
-         << "block=" << uptc.bounds() << ")";
+         << "block=";
+      for(dimension_type i=0; i!=uptc.dimension(); ++i) {
+        if(i!=0) { os << "x"; }
+        os << '[' << uptc.lower_bound(i) << ',' << uptc.upper_bound(i) << ']';
+      }
+      os << ")";
       return os;
     }
     
     
     IndexArray 
-    compute_position(const SubdivisionSequence& ss, const BinaryWord& bw, const LatticeRectangle& r)
+    compute_position(const SubdivisionSequence& ss, const BinaryWord& bw, const LatticeBlock& r)
     {
       IndexArray lower=r.lower();
       IndexArray upper=r.upper();
@@ -314,19 +318,18 @@ namespace Ariadne {
     }
     
       
-    LatticeRectangle 
+    LatticeBlock 
     compute_block(const SubdivisionTreeCell& c, 
-                  const LatticeRectangle& r)
+                  const LatticeBlock& r)
     {
       IndexArray lower(r.dimension());
       IndexArray upper(r.dimension());
       SizeArray sizes=r.sizes();
-      Geometry::Rectangle<SubdivisionTreeCell::dyadic_type> cr=c.bounds();
       for(dimension_type i=0; i!=r.dimension(); ++i) {
-        lower[i]=r.lower_bound(i)+index_type(cr.lower_bound(i)*sizes[i]);
-        upper[i]=r.lower_bound(i)+index_type(cr.upper_bound(i)*sizes[i]);
+        lower[i]=r.lower_bound(i)+index_type(c.lower_bound(i)*sizes[i]);
+        upper[i]=r.lower_bound(i)+index_type(c.upper_bound(i)*sizes[i]);
       }
-      return LatticeRectangle(lower,upper);
+      return LatticeBlock(lower,upper);
     }
 
 

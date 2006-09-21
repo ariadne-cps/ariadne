@@ -32,18 +32,18 @@ using namespace Ariadne;
 using namespace boost::python;
 
 typedef void (LatticeCellListSet::* LatCellListAdjCellFunc) (const LatticeCell&);
-typedef void (LatticeCellListSet::* LatCellListAdjRectFunc) (const LatticeRectangle&);
+typedef void (LatticeCellListSet::* LatCellListAdjBlkFunc) (const LatticeBlock&);
 typedef void (LatticeCellListSet::* LatCellListAdjCellListFunc) (const LatticeCellListSet&);
-typedef void (LatticeCellListSet::* LatCellListAdjRectListFunc) (const LatticeRectangleListSet&);
+typedef void (LatticeCellListSet::* LatCellListAdjBlkListFunc) (const LatticeBlockListSet&);
 typedef void (LatticeCellListSet::* LatCellListAdjMaskSetFunc) (const LatticeMaskSet&);
 
-typedef void (LatticeRectangleListSet::* LatRectListAdjRectFunc) (const LatticeRectangle&);
-typedef void (LatticeRectangleListSet::* LatRectListAdjRectListFunc) (const LatticeRectangleListSet&);
+typedef void (LatticeBlockListSet::* LatBlkListAdjBlkFunc) (const LatticeBlock&);
+typedef void (LatticeBlockListSet::* LatBlkListAdjBlkListFunc) (const LatticeBlockListSet&);
 
 typedef void (LatticeMaskSet::* MaskSetadjLatCellFunc) (const LatticeCell&);
-typedef void (LatticeMaskSet::* MaskSetadjLatRectFunc) (const LatticeRectangle&);
+typedef void (LatticeMaskSet::* MaskSetadjLatBlkFunc) (const LatticeBlock&);
 typedef void (LatticeMaskSet::* MaskSetadjLatCellListFunc) (const LatticeCellListSet&);
-typedef void (LatticeMaskSet::* MaskSetadjLatRectListFunc) (const LatticeRectangleListSet&);
+typedef void (LatticeMaskSet::* MaskSetadjLatBlkListFunc) (const LatticeBlockListSet&);
 typedef void (LatticeMaskSet::* MaskSetadjLatMaskSetFunc) (const LatticeMaskSet&);
 
 
@@ -56,46 +56,46 @@ void export_lattice_set() {
     .def(self_ns::str(self))
     ;
 
-  class_<LatticeRectangle>("LatticeRectangle",init<IndexArray,IndexArray>())
+  class_<LatticeBlock>("LatticeBlock",init<IndexArray,IndexArray>())
     .def(init<std::string>())
     .def(init<const LatticeCell&>())
-    .def(init<const LatticeRectangle&>())
-    .def("dimension", &LatticeRectangle::dimension)
+    .def(init<const LatticeBlock&>())
+    .def("dimension", &LatticeBlock::dimension)
     .def(self_ns::str(self))
     ;
 
   class_<LatticeCellListSet>("LatticeCellListSet",init<uint>())
     .def(init<const LatticeCell&>())
-    .def(init<const LatticeRectangle&>())
+    .def(init<const LatticeBlock&>())
     .def(init<const LatticeCellListSet&>())
     .def(init<const LatticeMaskSet&>())
     .def("dimension", &LatticeCellListSet::dimension)
     .def("__getitem__", &LatticeCellListSet::operator[])
     .def("adjoin", LatCellListAdjCellFunc(&LatticeCellListSet::adjoin))
-    .def("adjoin", LatCellListAdjRectFunc(&LatticeCellListSet::adjoin))
+    .def("adjoin", LatCellListAdjBlkFunc(&LatticeCellListSet::adjoin))
     .def("adjoin", LatCellListAdjCellListFunc(&LatticeCellListSet::adjoin))
-    .def("adjoin", LatCellListAdjRectListFunc(&LatticeCellListSet::adjoin))
+    .def("adjoin", LatCellListAdjBlkListFunc(&LatticeCellListSet::adjoin))
     .def("adjoin", LatCellListAdjMaskSetFunc(&LatticeCellListSet::adjoin))
     .def("unique_sort",&LatticeCellListSet::unique_sort)
     .def(self_ns::str(self))
     ;
     
-  class_<LatticeRectangleListSet>("LatticeRectangleListSet",init<uint>())
-    .def(init<LatticeRectangleListSet>())
-    .def("dimension", &LatticeRectangleListSet::dimension)
-    .def("adjoin", LatRectListAdjRectFunc(&LatticeRectangleListSet::adjoin))
-    .def("adjoin", LatRectListAdjRectListFunc(&LatticeRectangleListSet::adjoin))
+  class_<LatticeBlockListSet>("LatticeBlockListSet",init<uint>())
+    .def(init<LatticeBlockListSet>())
+    .def("dimension", &LatticeBlockListSet::dimension)
+    .def("adjoin", LatBlkListAdjBlkFunc(&LatticeBlockListSet::adjoin))
+    .def("adjoin", LatBlkListAdjBlkListFunc(&LatticeBlockListSet::adjoin))
     .def(self_ns::str(self))
     ;
 
-  class_<LatticeMaskSet>("LatticeMaskSet",init<LatticeRectangle>())
-    .def(init<LatticeRectangle,LatticeCellListSet>())
+  class_<LatticeMaskSet>("LatticeMaskSet",init<LatticeBlock>())
+    .def(init<LatticeBlock,LatticeCellListSet>())
     .def(init<LatticeMaskSet>())
     .def("dimension", &LatticeMaskSet::dimension)
     .def("adjoin", MaskSetadjLatCellFunc(&LatticeMaskSet::adjoin))
-    .def("adjoin", MaskSetadjLatRectFunc(&LatticeMaskSet::adjoin))
+    .def("adjoin", MaskSetadjLatBlkFunc(&LatticeMaskSet::adjoin))
     .def("adjoin", MaskSetadjLatCellListFunc(&LatticeMaskSet::adjoin))
-    .def("adjoin", MaskSetadjLatRectListFunc(&LatticeMaskSet::adjoin))
+    .def("adjoin", MaskSetadjLatBlkListFunc(&LatticeMaskSet::adjoin))
     .def("adjoin", MaskSetadjLatMaskSetFunc(&LatticeMaskSet::adjoin))
     .def(self_ns::str(self))
     ;

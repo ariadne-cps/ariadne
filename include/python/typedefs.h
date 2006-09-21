@@ -58,10 +58,10 @@ typedef LinearAlgebra::Matrix<Field> FMatrix;
 typedef LinearAlgebra::LinearProgram<Field> FLinearProgram;
 
 typedef Combinatoric::LatticeCell LatticeCell;
-typedef Combinatoric::LatticeRectangle LatticeRectangle;
+typedef Combinatoric::LatticeBlock LatticeBlock;
 typedef Combinatoric::LatticeMaskSet LatticeMaskSet;
 typedef Combinatoric::LatticeCellListSet LatticeCellListSet;
-typedef Combinatoric::LatticeRectangleListSet LatticeRectangleListSet;
+typedef Combinatoric::LatticeBlockListSet LatticeBlockListSet;
 typedef Combinatoric::LatticeMultiMap LatticeMultiMap;
 
 typedef Geometry::Point<Real> RPoint;
@@ -85,9 +85,9 @@ typedef Geometry::RegularGrid<Real> RRegularGrid;
 typedef Geometry::IrregularGrid<Real> RIrregularGrid;
 typedef Geometry::FiniteGrid<Real> RFiniteGrid;
 typedef Geometry::GridCell<Real> RGridCell;
-typedef Geometry::GridRectangle<Real> RGridRectangle;
+typedef Geometry::GridBlock<Real> RGridBlock;
 typedef Geometry::GridCellListSet<Real> RGridCellListSet;
-typedef Geometry::GridRectangleListSet<Real> RGridRectangleListSet;
+typedef Geometry::GridBlockListSet<Real> RGridBlockListSet;
 typedef Geometry::GridMaskSet<Real> RGridMaskSet;
 
 typedef Geometry::PartitionScheme<Real> RPartitionScheme;

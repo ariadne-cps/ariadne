@@ -513,7 +513,7 @@ namespace Ariadne {
       R step_size=this->maximum_step_size();
       
       const Geometry::Grid<R>& g(initial_set.grid());
-      Combinatoric::LatticeRectangle lb=bounding_set.block();
+      Combinatoric::LatticeBlock lb=bounding_set.block();
       Geometry::Rectangle<R> bb=bounding_set.bounding_box();
       
       Geometry::GridMaskSet<R> result(bounding_set.grid(),bounding_set.block());
@@ -735,7 +735,7 @@ namespace Ariadne {
       const Geometry::Grid<R>& g=initial_set.grid();
       const Geometry::GridMaskSet<R>& is=initial_set;
       const Geometry::Rectangle<R>& bb=bounding_set.bounding_box();
-      const Combinatoric::LatticeRectangle lb=over_approximation(bb,g).lattice_set();
+      const Combinatoric::LatticeBlock lb=over_approximation(bb,g).lattice_set();
       
       Geometry::GridMaskSet<R> stored(g,lb);
       Geometry::GridMaskSet<R> found(g,lb);
@@ -790,7 +790,7 @@ namespace Ariadne {
       const Geometry::Grid<R>& g=initial_set.grid();
       const Geometry::GridMaskSet<R>& is=initial_set;
       const Geometry::Rectangle<R>& bb=bounding_set.bounding_box();
-      const Combinatoric::LatticeRectangle lb=over_approximation(bb,g).lattice_set();
+      const Combinatoric::LatticeBlock lb=over_approximation(bb,g).lattice_set();
       
       Geometry::GridMaskSet<R> result(g,lb);
       Geometry::GridMaskSet<R> found(g,lb);

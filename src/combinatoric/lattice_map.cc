@@ -84,11 +84,11 @@ namespace Ariadne {
     }
     
     LatticeCellListSet 
-    LatticeMultiMap::operator() (const LatticeRectangle& lr) const 
+    LatticeMultiMap::operator() (const LatticeBlock& lr) const 
     {
-      cdbg << "LatticeMap::operator() (const LatticeRectangle& lr) const\n";
+      cdbg << "LatticeMap::operator() (const LatticeBlock& lr) const\n";
       LatticeCellListSet result(this->_result_dimension);
-      for(LatticeRectangle::const_iterator cell_iter=lr.begin(); cell_iter!=lr.end(); ++cell_iter) {
+      for(LatticeBlock::const_iterator cell_iter=lr.begin(); cell_iter!=lr.end(); ++cell_iter) {
         result.adjoin(this->apply(*cell_iter));
       }
       return result;
@@ -107,11 +107,11 @@ namespace Ariadne {
     }
     
     LatticeCellListSet 
-    LatticeMultiMap::operator() (const LatticeRectangleListSet& lrls) const 
+    LatticeMultiMap::operator() (const LatticeBlockListSet& lrls) const 
     {
-      cdbg << "LatticeMap::operator() (const LatticeRectangleListSet& lrls) const\n";
+      cdbg << "LatticeMap::operator() (const LatticeBlockListSet& lrls) const\n";
       LatticeCellListSet result(this->_result_dimension);
-      for(LatticeRectangleListSet::const_iterator rect_iter=lrls.begin(); rect_iter!=lrls.end(); ++rect_iter) {
+      for(LatticeBlockListSet::const_iterator rect_iter=lrls.begin(); rect_iter!=lrls.end(); ++rect_iter) {
         result.adjoin(this->operator()(*rect_iter));
       }
       return result;

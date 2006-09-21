@@ -38,6 +38,7 @@
 #include "../combinatoric/binary_tree.h"
 #include "../combinatoric/subdivision_tree_set.h"
 
+#include "../geometry/rectangle_expression.h"
 
 
 namespace Ariadne {
@@ -305,7 +306,7 @@ namespace Ariadne {
       PartitionTreeSet(const GridMaskSet<R>& gms);
 
       /*! \brief Convert to a list of rectangles on a grid. */
-      operator GridRectangleListSet<R> () const;
+      operator GridBlockListSet<R> () const;
 
       /*! \brief Convert to a ListSet of Rectangle. */
       operator ListSet<R,Rectangle> () const;

@@ -61,7 +61,7 @@ test_grid_set()
   cout << "ls=" << ls << endl;
 
   RegularGrid<R> gr(2,0.125);
-  GridRectangleListSet<R> grls(gr,ls);
+  GridBlockListSet<R> grls(gr,ls);
   cout << "grls=" << grls << endl;
   cout << "ListSet(grls)=" << ListSet<R,Rectangle>(grls) << endl;
 
@@ -95,18 +95,18 @@ test_grid_set()
   cout << igr1 << "\n" << igr2 << "\n" << igrj << "\n";
 
   IrregularGrid<R> gr1(ls1);
-  GridRectangleListSet<R> grls1(gr1,ls1);
-  GridRectangleListSet<R> grlsj1(igrj,grls1);
+  GridBlockListSet<R> grls1(gr1,ls1);
+  GridBlockListSet<R> grlsj1(igrj,grls1);
   cout << "grlsj1=" << grlsj1 << "\n";
 
   IrregularGrid<R> gr2(ls2);
-  GridRectangleListSet<R> grls2(gr2,ls2);
-  GridRectangleListSet<R> grlsj2(igrj,grls2);
+  GridBlockListSet<R> grls2(gr2,ls2);
+  GridBlockListSet<R> grlsj2(igrj,grls2);
   cout << "grlsj2=" << grlsj2 << "\n";
 
   GridCellListSet<R> gcls1(grls1);
   cout << gcls1 << "\n";
-  GridRectangleListSet<R> grlsc1(igrj,gcls1);
+  GridBlockListSet<R> grlsc1(igrj,gcls1);
   cout << grlsc1 << "\n";
 
   FiniteGrid<R> fgr=FiniteGrid<R>(igrj,igrj.block());

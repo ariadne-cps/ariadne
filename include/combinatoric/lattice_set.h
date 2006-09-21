@@ -46,50 +46,50 @@ namespace Ariadne {
 
     class LatticePoint;
       
-    class LatticeRectangle;
-    class LatticeRectangleIterator;
+    class LatticeBlock;
+    class LatticeBlockIterator;
 
     class LatticeCellListSet;
     class LatticeCellListSetIterator;
 
-    class LatticeRectangleListSet;
-    class LatticeRectangleListSetIterator;
+    class LatticeBlockListSet;
+    class LatticeBlockListSetIterator;
 
     class LatticeMaskSet;
     class LatticeMaskSetIterator;
 
-    bool disjoint(const LatticeRectangle&, const LatticeRectangle&);
-    bool disjoint(const LatticeRectangle&, const LatticeMaskSet&);
+    bool disjoint(const LatticeBlock&, const LatticeBlock&);
+    bool disjoint(const LatticeBlock&, const LatticeMaskSet&);
     bool disjoint(const LatticeMaskSet&, const LatticeMaskSet&);
-    bool interiors_intersect(const LatticeRectangle&, const LatticeRectangle&);
-    bool interiors_intersect(const LatticeRectangle&, const LatticeMaskSet&);
+    bool interiors_intersect(const LatticeBlock&, const LatticeBlock&);
+    bool interiors_intersect(const LatticeBlock&, const LatticeMaskSet&);
     bool interiors_intersect(const LatticeMaskSet&, const LatticeMaskSet&);
-    bool subset(const LatticeCell&, const LatticeRectangle&);
-    bool subset(const LatticeRectangle&, const LatticeRectangle&);
-    bool subset(const LatticeRectangle&, const LatticeMaskSet&);
+    bool subset(const LatticeCell&, const LatticeBlock&);
+    bool subset(const LatticeBlock&, const LatticeBlock&);
+    bool subset(const LatticeBlock&, const LatticeMaskSet&);
     bool subset(const LatticeMaskSet&, const LatticeMaskSet&);
     
-    LatticeRectangle regular_intersection(const LatticeRectangle&, const LatticeRectangle&);
+    LatticeBlock regular_intersection(const LatticeBlock&, const LatticeBlock&);
     LatticeMaskSet regular_intersection(const LatticeMaskSet&, const LatticeMaskSet&);
     LatticeMaskSet join(const LatticeMaskSet&, const LatticeMaskSet&);
     LatticeMaskSet difference(const LatticeMaskSet&, const LatticeMaskSet&);
 
     bool operator<(const LatticeCell& lc1, const LatticeCell& lc2);
     
-    std::istream& operator>>(std::istream& os, LatticeRectangle&);
+    std::istream& operator>>(std::istream& os, LatticeBlock&);
     
     std::ostream& operator<<(std::ostream& os, const LatticeCell&);
-    std::ostream& operator<<(std::ostream& os, const LatticeRectangle&);
+    std::ostream& operator<<(std::ostream& os, const LatticeBlock&);
     std::ostream& operator<<(std::ostream& os, const LatticeMaskSet&);
     std::ostream& operator<<(std::ostream& os, const LatticeCellListSet&);
-    std::ostream& operator<<(std::ostream& os, const LatticeRectangleListSet&);
+    std::ostream& operator<<(std::ostream& os, const LatticeBlockListSet&);
 
 
     /*!\ingroup Lattice
      * \brief A cell in an integer lattice. 
      */
     class LatticeCell {
-      friend class LatticeRectangleIterator;
+      friend class LatticeBlockIterator;
       friend class LatticeMaskSet;
      public:
       /*!\brief Construct a cell of dimension \a n with lower corner at the origin. */
@@ -138,32 +138,32 @@ namespace Ariadne {
 
     /*!\ingroup Lattice
      * \brief A block of indices in a grid. */
-    class LatticeRectangle {
-      friend class LatticeRectangleIterator;
+    class LatticeBlock {
+      friend class LatticeBlockIterator;
       friend class LatticeMaskSet;
      public:
-      typedef LatticeRectangleIterator const_iterator;
+      typedef LatticeBlockIterator const_iterator;
       
       /*!\brief Construct an empty lattice rectangle of dimension \a n. */
-      explicit LatticeRectangle(dimension_type n=0) : _lower(n), _upper(n) { }
+      explicit LatticeBlock(dimension_type n=0) : _lower(n), _upper(n) { }
       /*!\brief Construct a lattice rectangle specified by lower and upper corners. */
-      explicit LatticeRectangle(const IndexArray& l, const IndexArray& u)
+      explicit LatticeBlock(const IndexArray& l, const IndexArray& u)
         : _lower(l), _upper(u) { assert(l.size()==u.size()); }
       /*!\brief Construct a lattice rectangle defined by a string literal. */
-      explicit LatticeRectangle(const std::string& s);
+      explicit LatticeBlock(const std::string& s);
 
       /*!\brief Convert from a lattice cell. */
-      LatticeRectangle(const LatticeCell& c)
+      LatticeBlock(const LatticeCell& c)
         : _lower(c.lower()), _upper(c.upper()) { }
       /*!\brief Copy constructor. */
-      LatticeRectangle(const LatticeRectangle& r)
+      LatticeBlock(const LatticeBlock& r)
         : _lower(r._lower), _upper(r._upper) { }
       
       /*!\brief Equality operator. */
-      bool operator==(const LatticeRectangle& other) const { 
+      bool operator==(const LatticeBlock& other) const { 
         return this->_lower==other._lower && this->_upper==other._upper; }
       /*!\brief Inequality operator. */
-      bool operator!=(const LatticeRectangle& other) const { 
+      bool operator!=(const LatticeBlock& other) const { 
         return !(*this==other); }
         
       /*!\brief The dimension of the lattice rectangle. */
@@ -205,7 +205,7 @@ namespace Ariadne {
       const_iterator end() const;
       
       /*!\brief The one-box neighbourhood of the rectangle. */
-      LatticeRectangle neighbourhood() const;
+      LatticeBlock neighbourhood() const;
 
       /*! \brief Write to an output stream */
       std::ostream& write(std::ostream& os) const;
@@ -215,19 +215,19 @@ namespace Ariadne {
     };
     
     
-    class LatticeRectangleIterator 
-      : public boost::iterator_facade<LatticeRectangleIterator,
+    class LatticeBlockIterator 
+      : public boost::iterator_facade<LatticeBlockIterator,
                                       LatticeCell,
                                       boost::forward_traversal_tag,
                                       LatticeCell>
     {
      public:
-      LatticeRectangleIterator(const IndexArray& l, const IndexArray& u)
+      LatticeBlockIterator(const IndexArray& l, const IndexArray& u)
         : _lower(l), _upper(u), _position(l) { }
-      LatticeRectangleIterator(const IndexArray& l, const IndexArray& u, const IndexArray& p)
+      LatticeBlockIterator(const IndexArray& l, const IndexArray& u, const IndexArray& p)
         : _lower(l), _upper(u), _position(p) { }
      private:
-      bool equal(const LatticeRectangleIterator& other) const {
+      bool equal(const LatticeBlockIterator& other) const {
         return (this->_position==other._position) 
           && (this->_lower==other._lower) && (this->_upper==other._upper);
       }
@@ -250,15 +250,15 @@ namespace Ariadne {
     };
 
     inline
-    LatticeRectangle::const_iterator 
-    LatticeRectangle::begin() const 
+    LatticeBlock::const_iterator 
+    LatticeBlock::begin() const 
     { 
       return const_iterator(this->_lower, this->_upper, this->_lower);
     }
     
     inline
-    LatticeRectangle::const_iterator 
-    LatticeRectangle::end() const 
+    LatticeBlock::const_iterator 
+    LatticeBlock::end() const 
     { 
       IndexArray end_position=this->_lower;
       end_position[this->dimension()-1]=_upper[this->dimension()-1];
@@ -281,9 +281,9 @@ namespace Ariadne {
       /*!\brief Convert a single cell \a c into a one-element list of cells. */
       LatticeCellListSet(const LatticeCell& c);
       /*!\brief Convert a lattice rectangle \a r into a list of cells. */
-      LatticeCellListSet(const LatticeRectangle& r);
+      LatticeCellListSet(const LatticeBlock& r);
       /*!\brief Convert from a list of rectangles. */
-      LatticeCellListSet(const LatticeRectangleListSet& rls);
+      LatticeCellListSet(const LatticeBlockListSet& rls);
       /*!\brief Convert from a lattice set defined by a mask on a block of cells. */
       LatticeCellListSet(const LatticeMaskSet& ms);
       
@@ -304,19 +304,19 @@ namespace Ariadne {
       LatticeCell operator[] (size_type i) const { return LatticeCell(_list[i]); }
       
       /*!\brief A rectangular block containing all cells in the list. */
-      LatticeRectangle bounding_block() const;
+      LatticeBlock bounding_block() const;
 
       /*! \brief Adjoins a LatticeCell to the set. */
       void adjoin(const LatticeCell& c) { 
         assert(this->dimension() == c.dimension());
         this->_list.push_back(c.position()); 
       }
-      /*! \brief Adjoins all cells in a LatticeRectangle to the set. */
-      void adjoin(const LatticeRectangle& r);
+      /*! \brief Adjoins all cells in a LatticeBlock to the set. */
+      void adjoin(const LatticeBlock& r);
       /*! \brief Adjoins a LatticeCellListSet to the set. */
       void adjoin(const LatticeCellListSet& cl);
-      /*! \brief Adjoins a LatticeRectangleListSet to the set. */
-      void adjoin(const LatticeRectangleListSet& rl);
+      /*! \brief Adjoins a LatticeBlockListSet to the set. */
+      void adjoin(const LatticeBlockListSet& rl);
       /*! \brief Adjoins a LatticeMaskSet to the set. */
       void adjoin(const LatticeMaskSet& ms);
       
@@ -341,22 +341,22 @@ namespace Ariadne {
 
     /*!\ingroup Lattice
      * \brief A list of rectangles in a lattice. */
-    class LatticeRectangleListSet {
+    class LatticeBlockListSet {
      public:
-      //      typedef LatticeRectangleListSetIterator iterator;
-      //typedef LatticeRectangleListSetIterator const_iterator;
-      typedef pair_constructor_iterator<array_vector<index_type>::const_iterator, LatticeRectangle> iterator;
-      typedef pair_constructor_iterator<array_vector<index_type>::const_iterator, LatticeRectangle> const_iterator;
+      //      typedef LatticeBlockListSetIterator iterator;
+      //typedef LatticeBlockListSetIterator const_iterator;
+      typedef pair_constructor_iterator<array_vector<index_type>::const_iterator, LatticeBlock> iterator;
+      typedef pair_constructor_iterator<array_vector<index_type>::const_iterator, LatticeBlock> const_iterator;
      public:
       /*!\brief Construct an empty list, to hold rectangular blocks of dimension \a n. */
-      LatticeRectangleListSet(dimension_type n) 
+      LatticeBlockListSet(dimension_type n) 
         : _list(n) { }
 
       /*!\brief Copy constructor. */
-      LatticeRectangleListSet(const LatticeRectangleListSet& rls) 
+      LatticeBlockListSet(const LatticeBlockListSet& rls) 
         : _list(rls._list) { }
       /*!\brief Assignment operator. */
-      LatticeRectangleListSet& operator=(const LatticeRectangleListSet& rls) {
+      LatticeBlockListSet& operator=(const LatticeBlockListSet& rls) {
         if(this!=&rls) { this->_list=rls._list; } return *this; }
         
       /*!\brief The dimension of the cells in the list. */
@@ -366,12 +366,12 @@ namespace Ariadne {
       /*!\brief The number of rectangles in the list. */
       size_type size() const { return _list.size()/2; }
       /*!\brief The \a i th rectangle in the list. */
-      LatticeRectangle operator[] (size_type i) const { 
-        return LatticeRectangle(_list[2*i],_list[2*i+1]); 
+      LatticeBlock operator[] (size_type i) const { 
+        return LatticeBlock(_list[2*i],_list[2*i+1]); 
       }
 
       /*!\brief A rectangular block containing all cells in the list. */
-      LatticeRectangle bounding_block() const;
+      LatticeBlock bounding_block() const;
 
       /*! \brief Adjoins a LatticeCell to the set. */
       void adjoin(const LatticeCell& c) { 
@@ -379,16 +379,16 @@ namespace Ariadne {
         this->_list.push_back(c.lower()); 
         this->_list.push_back(c.upper()); 
       }
-      /*! \brief Adjoins all cells in a LatticeRectangle to the set. */
-      void adjoin(const LatticeRectangle& r) { 
+      /*! \brief Adjoins all cells in a LatticeBlock to the set. */
+      void adjoin(const LatticeBlock& r) { 
         assert(this->dimension() == r.dimension());
         this->_list.push_back(r.lower()); 
         this->_list.push_back(r.upper()); 
       }
       /*! \brief Adjoins a LatticeCellListSet to the set. */
       void adjoin(const LatticeCellListSet& cl);
-      /*! \brief Adjoins a LatticeRectangleListSet to the set. */
-      void adjoin(const LatticeRectangleListSet& rl);
+      /*! \brief Adjoins a LatticeBlockListSet to the set. */
+      void adjoin(const LatticeBlockListSet& rl);
       /*! \brief Adjoins a LatticeMaskSet to the set. */
       void adjoin(const LatticeMaskSet& ms);
       
@@ -413,32 +413,32 @@ namespace Ariadne {
      * \brief A list of arrays of integers of the same size, representing rectangles in a grid. */
     class LatticeMaskSet {
      public:
-      typedef mask_iterator<LatticeRectangle::const_iterator,BooleanArray::const_iterator> iterator;
+      typedef mask_iterator<LatticeBlock::const_iterator,BooleanArray::const_iterator> iterator;
       typedef iterator const_iterator;
      public:
       /*! \brief Construct an lattice mask set on an empty block set of dimension \a n. */
       LatticeMaskSet(const size_type& n) 
         : _block(n), _mask() { this->_compute_cached_attributes(); }
       /*! \brief Construct an empty lattice mask set on the block \a bb. */
-      LatticeMaskSet(const LatticeRectangle& bb) 
+      LatticeMaskSet(const LatticeBlock& bb) 
         : _block(bb), _mask(bb.size(),false) { this->_compute_cached_attributes(); }
       /*! \brief Construct a lattice mask set n the block \a bb with cells given by the mast \a ma. */
-      LatticeMaskSet(const LatticeRectangle& bb, const BooleanArray& ma) 
+      LatticeMaskSet(const LatticeBlock& bb, const BooleanArray& ma) 
         : _block(bb), _mask(ma) { this->_compute_cached_attributes(); }
       /*! \brief Construct a lattice mask oset n the block \a bb with cells given by the mast \a ma. */
-      LatticeMaskSet(const LatticeRectangle& bb, const LatticeCellListSet& cls);
+      LatticeMaskSet(const LatticeBlock& bb, const LatticeCellListSet& cls);
       /*! \brief Construct a lattice mask oset n the block \a bb with cells given by the mast \a ma. */
-      LatticeMaskSet(const LatticeRectangle& bb, const LatticeRectangleListSet& rls);
+      LatticeMaskSet(const LatticeBlock& bb, const LatticeBlockListSet& rls);
 
       /*! \brief Convert from a %LatticeCellListSet. */
       LatticeMaskSet(const LatticeCellListSet& cls);
-      /*! \brief Convert from a %LatticeRectangleListSet. */
-      LatticeMaskSet(const LatticeRectangleListSet& rls);
+      /*! \brief Convert from a %LatticeBlockListSet. */
+      LatticeMaskSet(const LatticeBlockListSet& rls);
       /*! \brief Copy constructor. */
       LatticeMaskSet(const LatticeMaskSet& ms);
       
       /*!\brief The rectangular block of cells covered by the mask. */
-      const LatticeRectangle& block() const { return _block; }
+      const LatticeBlock& block() const { return _block; }
       /*!\brief The number of cells in each dimension. */
       const SizeArray& sizes() const { return _sizes; }
       /*!\brief An array of boolean values determining whether the ith cell in the block is in the set. */
@@ -472,13 +472,13 @@ namespace Ariadne {
         }
       }
     
-      /*! \brief Adjoins a LatticeRectangle to the set. */
-      void adjoin(const LatticeRectangle& r);
+      /*! \brief Adjoins a LatticeBlock to the set. */
+      void adjoin(const LatticeBlock& r);
 
-      /*! \brief Adjoins a GridCellListSet to the set. */
+      /*! \brief Adjoins a LatticeCellListSet to the set. */
       void adjoin(const LatticeCellListSet& cl);
-      /*! \brief Adjoins a GridRectangleListSet to the set. */
-      void adjoin(const LatticeRectangleListSet& rl);
+      /*! \brief Adjoins a LatticeBlockListSet to the set. */
+      void adjoin(const LatticeBlockListSet& rl);
       /*! \brief Adjoins a LatticeMaskSet to the set. */
       void adjoin(const LatticeMaskSet& ms);
         
@@ -498,7 +498,7 @@ namespace Ariadne {
       void _compute_cached_attributes();
       size_type _index(const IndexArray& cl) const;
      private:
-      LatticeRectangle _block;
+      LatticeBlock _block;
       IndexArray _lower;
       IndexArray _upper;
       SizeArray _sizes;
@@ -525,9 +525,9 @@ namespace Ariadne {
       /*!\brief The transformation applied to a point. */
       IndexArray operator() (const IndexArray& c) const;
       /*!\brief The transformation applied to a cell. */
-      LatticeRectangle operator() (const LatticeCell& c) const;
+      LatticeBlock operator() (const LatticeCell& c) const;
       /*!\brief The dimension of lattice the transformation rule works on. */
-      LatticeRectangle operator() (const LatticeRectangle& r) const;
+      LatticeBlock operator() (const LatticeBlock& r) const;
      private:
       array< std::vector<index_type> > _transformation;
     };

@@ -41,7 +41,7 @@ using namespace boost::python;
 typedef Postscript::epsfstream epsfstream;
 
 inline void write_rectangle(epsfstream& eps, const RRectangle& r) { eps << r; }
-inline void write_grid_rectangle(epsfstream& eps, const RGridRectangle& r) { eps << RRectangle(r); }
+inline void write_grid_rectangle(epsfstream& eps, const RGridBlock& r) { eps << RRectangle(r); }
 inline void write_grid_cell(epsfstream& eps, const RGridCell& r) { eps << RRectangle(r); }
 inline void write_parallelotope(epsfstream& eps, const RParallelotope& p) { eps << p; }
 inline void write_zonotope(epsfstream& eps, const RZonotope& z) { eps << z; }
@@ -52,7 +52,7 @@ inline void write_zonotope_list_set(epsfstream& eps, const RZonotopeListSet& s) 
 inline void write_polytope_list_set(epsfstream& eps, const RPolytopeListSet& s) { eps << s; }
 inline void write_grid_mask_set(epsfstream& eps, const RGridMaskSet& s) { eps << s; }
 inline void write_grid_cell_list_set(epsfstream& eps, const RGridCellListSet& s) { eps << s; }
-inline void write_grid_rectangle_list_set(epsfstream& eps, const RGridRectangleListSet& s) { eps << s; }
+inline void write_grid_rectangle_list_set(epsfstream& eps, const RGridBlockListSet& s) { eps << s; }
 inline void write_partition_tree(epsfstream& eps, const RPartitionTree& s) { eps << s; }
 inline void write_partition_tree_set(epsfstream& eps, const RPartitionTreeSet& s) { eps << s; }
 inline void epsfstream_open(epsfstream& eps, const Ariadne::Geometry::Rectangle<Real>& bbox) { eps.open("Ariadne",bbox); }

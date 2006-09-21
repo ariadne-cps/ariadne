@@ -77,13 +77,13 @@ namespace Ariadne {
 
 
     template<typename R>
-    PartitionTreeSet<R>::operator GridRectangleListSet<R>() const 
+    PartitionTreeSet<R>::operator GridBlockListSet<R>() const 
     {
-      throw std::domain_error("PartitionTreeSet<R>::operator GridRectangleListSet<R>() const not implemented");
+      throw std::domain_error("PartitionTreeSet<R>::operator GridBlockListSet<R>() const not implemented");
       //FiniteGrid<R>* grid_ptr=new FiniteGrid<R>(this->bounding_box(),this->subdivisions());
-      //GridRectangleListSet<R> res(*grid_ptr);
+      //GridBlockListSet<R> res(*grid_ptr);
       //for(const_iterator iter=begin(); iter!=end(); ++iter) {
-      //  res.push_back(GridRectangle<R>(res.grid(),Rectangle<R>(*iter)));
+      //  res.push_back(GridBlock<R>(res.grid(),Rectangle<R>(*iter)));
       //}
       //return res;
     }

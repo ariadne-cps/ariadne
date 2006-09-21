@@ -57,13 +57,13 @@ namespace Ariadne {
       LatticeCellListSet operator() (const LatticeCell& lc) const;
         
       /*! \brief  The map applied to a lattice rectangle. */
-      LatticeCellListSet operator() (const LatticeRectangle& lr) const;
+      LatticeCellListSet operator() (const LatticeBlock& lr) const;
         
       /*! \brief  The map applied to a cell list set. */
       LatticeCellListSet operator() (const LatticeCellListSet& lcsl) const;
         
       /*! \brief  The map applied to a cell list set. */
-      LatticeCellListSet operator() (const LatticeRectangleListSet& lrls) const;
+      LatticeCellListSet operator() (const LatticeBlockListSet& lrls) const;
         
       /*! \brief  The map applied to a cell list set. */
       LatticeCellListSet operator() (const LatticeMaskSet& lms) const;

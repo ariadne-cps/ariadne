@@ -32,9 +32,9 @@ using namespace Ariadne;
 using namespace boost::python;
 
 typedef LatticeCellListSet (LatticeMultiMap::* LatMapApplCellFunc) (const LatticeCell&) const;
-typedef LatticeCellListSet (LatticeMultiMap::* LatMapApplRectFunc) (const LatticeRectangle&) const;
+typedef LatticeCellListSet (LatticeMultiMap::* LatMapApplRectFunc) (const LatticeBlock&) const;
 typedef LatticeCellListSet (LatticeMultiMap::* LatMapApplCellListFunc) (const LatticeCellListSet&) const;
-typedef LatticeCellListSet (LatticeMultiMap::* LatMapApplRectListFunc) (const LatticeRectangleListSet&) const;
+typedef LatticeCellListSet (LatticeMultiMap::* LatMapApplRectListFunc) (const LatticeBlockListSet&) const;
 typedef LatticeCellListSet (LatticeMultiMap::* LatMapApplMaskSetFunc) (const LatticeMaskSet&) const;
 
 typedef void (LatticeMultiMap::* LatMapAdjCell) (const LatticeCell&, const LatticeCell&);

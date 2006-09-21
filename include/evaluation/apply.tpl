@@ -128,7 +128,7 @@ namespace Ariadne {
       typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
       
       const Geometry::Grid<R>& g=is.grid();
-      Combinatoric::LatticeRectangle bd=is.block();
+      Combinatoric::LatticeBlock bd=is.block();
       Geometry::GridMaskSet<R> image(g,bd);
       Geometry::Rectangle<R> bb=is.bounding_box();
       
@@ -151,7 +151,7 @@ namespace Ariadne {
       typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
       
       const Geometry::Grid<R>& g=is.grid();
-      Combinatoric::LatticeRectangle bd=is.block();
+      Combinatoric::LatticeBlock bd=is.block();
       Geometry::Rectangle<R> bb=is.bounding_box();
       Geometry::GridMaskSet<R> result(g,bd);
       Geometry::GridMaskSet<R> found(g,bd);

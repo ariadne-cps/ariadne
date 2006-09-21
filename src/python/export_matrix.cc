@@ -51,7 +51,7 @@ template<typename R, typename A>
 inline void matrix_set_item(Matrix<R>& M, tuple index, const A& x) {
   uint i=extract<uint>(index[0]);
   uint j=extract<uint>(index[1]);
-  M(i,j)=x;
+  M(i,j)=R(x);
 }
 
 
@@ -61,7 +61,8 @@ inline Matrix<R> matrix_inverse(const Matrix<R>& A) {
 }
 
 template<typename R>
-void export_matrix() {
+void export_matrix()
+{
   typedef Vector<R> Vec;
   typedef Matrix<R> Mx;
   
@@ -76,7 +77,8 @@ void export_matrix() {
 }
 
 template<>
-void export_matrix<Rational>() {
+void export_matrix<Rational>() 
+{
   typedef Rational R;
   typedef Vector<R> Vec;
   typedef Matrix<R> Mx;
@@ -99,7 +101,8 @@ void export_matrix<Rational>() {
 }
 
 template<typename R>
-void export_interval_matrix() {
+void export_interval_matrix() 
+{
   typedef Interval<R> Ivl;
   typedef Vector<R> Vec;
   typedef Matrix<R> Mx;
@@ -107,10 +110,10 @@ void export_interval_matrix() {
   typedef Matrix< Interval<R> > IMx;
   
   class_<IMx>(python_name<R>("IntervalMatrix").c_str(),init<int,int>())
-    .def(init<IMx>())
     .def(init<std::string>())
+    .def(init<IMx>())
     .def("__getitem__",&matrix_get_item<Ivl>)
-    .def("__setitem__",&matrix_set_item<Ivl>)
+    .def("__setitem__",&matrix_set_item<Ivl,Ivl>)
     .def("__setitem__",&matrix_set_item<Ivl,R>)
     .def("__setitem__",&matrix_set_item<Ivl,double>)
     .def(self_ns::str(self))

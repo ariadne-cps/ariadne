@@ -84,7 +84,7 @@ int main() {
   Vector< Interval<Real> > iv1("[[0.99,1.01],[2.25,2.375],[4.0,4.375],[-0.02,0.01]]");
   cout << "iv1=" << iv1 << endl;
   cout << "iv1.norm()=" << iv1.norm() << endl;
-  cout << "iv1.upper_norm()=" << iv1.upper_norm() << endl;
+  cout << "iv1.norm().upper()=" << iv1.norm().upper() << endl;
 
   Vector< Interval<Real> > iv2("[[-1,1],[-1,1]]");
   cout << "iv2=" << iv2 << endl;

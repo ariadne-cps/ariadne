@@ -161,10 +161,10 @@ namespace Ariadne {
     }
 
     template<typename R>
-    GridRectangle<R>
+    GridBlock<R>
     IrregularGrid<R>::bounds() const
     { 
-      return GridRectangle<R>(*this,block());
+      return GridBlock<R>(*this,block());
     }
     
     template<typename R>
@@ -259,7 +259,7 @@ namespace Ariadne {
         subdivision_lengths[i]=bb[i].length()/s;
       }
       this->_grid_ptr=new RegularGrid<R>(subdivision_lengths);
-      GridRectangle<R> bounding_box=over_approximation(bb,*_grid_ptr);
+      GridBlock<R> bounding_box=over_approximation(bb,*_grid_ptr);
       this->_bounds=bounding_box.lattice_set();
     }
 
@@ -268,7 +268,7 @@ namespace Ariadne {
     FiniteGrid<R>::bounding_box() const
     {
       const size_t &dim=this->dimension();
-      const Combinatoric::LatticeRectangle &bounds=this->_bounds;
+      const Combinatoric::LatticeBlock &bounds=this->_bounds;
 	   
       switch(this->_grid_type) {
         case REGULAR:

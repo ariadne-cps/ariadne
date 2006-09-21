@@ -39,8 +39,6 @@
 #include "../combinatoric/binary_word.h"
 #include "../combinatoric/binary_tree.h"
 
-#include "../geometry/rectangle.h"
-
 namespace Ariadne {
   namespace Combinatoric {
     class SubdivisionSequence;
@@ -53,7 +51,7 @@ namespace Ariadne {
     std::istream& operator>>(std::istream&, SubdivisionSequence&);
     
     class LatticeMaskSet;
-    class LatticeRectangle;
+    class LatticeBlock;
       
     /*!\brief Advance a binary word used to describe a position in a tree by
      * removing all trailing right's and replacing the last left by a right.    
@@ -182,24 +180,18 @@ namespace Ariadne {
         
       /*!\brief The dimension of the cell. */
       dimension_type dimension() const { 
-        return _bounds.dimension(); }
+        return _bounds.size()/2; }
 
-      /*!\brief A rectangle giving the cell. (Deprecated)
-       *
-       * \deprecated This class should be independent of the Geometry library.
-       */
-      const Geometry::Rectangle<dyadic_type>& bounds() const { return _bounds; };
       /*!\brief The lower bound in the \a i th dimension. */
-
       const dyadic_type& lower_bound(dimension_type i) const {
-        return _bounds.lower_bound(i); }
+        return _bounds[2*i]; }
       /*!\brief The upper bound in the \a i th dimension. */
       const dyadic_type& upper_bound(dimension_type i) const {
-        return _bounds.upper_bound(i); }
+        return _bounds[2*i+1]; }
      private:
       void _compute_bounds(const SubdivisionSequence& ss, const BinaryWord& bw);
      private:
-      Geometry::Rectangle<dyadic_type> _bounds;
+      Base::array<dyadic_type> _bounds;
     };
     
 
@@ -338,11 +330,11 @@ namespace Ariadne {
     IndexArray 
     compute_position(const SubdivisionSequence& ss, 
                      const BinaryWord& bw,
-                     const LatticeRectangle& r);
+                     const LatticeBlock& r);
       
-    LatticeRectangle 
+    LatticeBlock 
     compute_block(const SubdivisionTreeCell& c, 
-                  const LatticeRectangle& r);
+                  const LatticeBlock& r);
 
   }
   

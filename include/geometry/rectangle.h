@@ -33,6 +33,8 @@
 
 #include "../declarations.h"
 
+#include "../base/array.h"
+
 #include "../numeric/arithmetic.h"
 #include "../numeric/function.h"
 #include "../numeric/interval.h"
@@ -71,60 +73,65 @@ namespace Ariadne {
      public:
       //@{
       //! \name Constructors
-      /*! \brief Construct an empty rectangle with dimension \a n. */
-      explicit Rectangle(size_type n=0)
-        : _bounds(n)
+      /*! \brief Construct an empty rectangle with dimension \a d. */
+      explicit Rectangle(size_type d=0)
+        : _bounds(2*d)
       { 
-        if(n!=0) { this->_bounds[0]=Interval<R>(1,0); }
+        if(d!=0) { this->_bounds[0]=1; this->_bounds[1]=0; }
       }
       
       /*! \brief Construct a rectangle from a range of interval values. */
       template<class ForwardIterator>
       Rectangle(ForwardIterator b, ForwardIterator e)
-        : _bounds(std::distance(b,e))
+        : _bounds(2*std::distance(b,e))
       {
         for(dimension_type i=0; i!=this->dimension(); ++i) {
-          this->_bounds[i]=*b;
+          this->set_lower_bound(i,b->lower());
+          this->set_upper_bound(i,b->upper());
           ++b;
         }
       }
       
       /*! \brief Construct from an array of intervals. */
       explicit Rectangle(const array< Interval<R> >& a)
-        : _bounds(a.size())
+        : _bounds(2*a.size())
       {
         for(dimension_type i=0; i!=a.size(); ++i) {
-          this->_bounds[i]=a[i];
+          this->set_lower_bound(i,a[i].lower());
+          this->set_upper_bound(i,a[i].upper());
         }
       }
       
       /*! \brief Construct from a std::vector of intervals. */
       explicit Rectangle(const std::vector< Interval<R> >& v)
-        : _bounds(v.size())
+        : _bounds(2*v.size())
       {
         for(dimension_type i=0; i!=v.size(); ++i) {
-          this->_bounds[i]=v[i];
+          this->set_lower_bound(i,v[i].lower());
+          this->set_upper_bound(i,v[i].upper());
         }
       }
 
       /*! \brief Construct a degenerate rectangle from a single point. */
-      explicit Rectangle(const Point<R>& p) 
-        : _bounds(p.dimension())
+      explicit Rectangle(const Point<R>& pt)
+        : _bounds(2*pt.dimension())
       {
-        for(dimension_type i=0; i!=p.dimension(); ++i) {
-          this->_bounds[i]=p[i];
+        for(dimension_type i=0; i!=pt.dimension(); ++i) {
+          this->set_lower_bound(i,pt[i]);
+          this->set_upper_bound(i,pt[i]);
         }
       }
       
       /*! \brief Construct from two corners. */
-      explicit Rectangle(const Point<R>& p1, const Point<R>& p2) 
-        : _bounds(p1.dimension())
+      explicit Rectangle(const Point<R>& pt1, const Point<R>& pt2) 
+        : _bounds(2*pt1.dimension())
       {
-        if (p1.dimension()!=p2.dimension()) {
+        if (pt1.dimension()!=pt2.dimension()) {
           throw std::domain_error("The parameters have different space dimensions");
         }
         for (size_type i=0; i!=this->dimension(); ++i) {
-          this->_bounds[i]=Interval<R>(std::min(p1[i],p2[i]),std::max(p1[i],p2[i]));
+          this->set_lower_bound(i,Numeric::min(pt1[i],pt2[i]));
+          this->set_upper_bound(i,Numeric::max(pt1[i],pt2[i]));
         }
       }
       
@@ -133,18 +140,23 @@ namespace Ariadne {
       
       /*! \brief Construct from an interval vector. */
       explicit Rectangle(const LinearAlgebra::Vector< Interval<R> >& iv)
-        : _bounds(iv)
+        : _bounds(2*iv.size())
       {
+        for (size_type i=0; i!=this->dimension(); ++i) {
+          this->set_lower_bound(i,iv[i].lower());
+          this->set_upper_bound(i,iv[i].upper());
+        }
       }
 
       /*! \brief Convert from a rectangle expression. */
       template<class E>
       Rectangle(const RectangleExpression<E>& original)
-        : _bounds(original().dimension())
+        : _bounds(2*original().dimension())
       {         
         const E& expression=original();
         for (size_type i=0; i!=this->dimension(); ++i) {
-          this->_bounds[i]=Interval<R>(expression.lower_bound(i),expression.upper_bound(i));
+          this->_bounds[2*i]=expression.lower_bound(i);
+          this->_bounds[2*i+1]=expression.upper_bound(i);
         }
       }
     
@@ -167,9 +179,10 @@ namespace Ariadne {
       Rectangle<R>& operator=(const RectangleExpression<E>& original)
       {         
         const E& expression=original();
-        this->_bounds.resize(expression.dimension());
+        this->_bounds.resize(2*expression.dimension());
         for (size_type i=0; i!=this->dimension(); ++i) {
-          this->_bounds[i]=Interval<R>(expression.lower_bound(i),expression.upper_bound(i));
+          this->set_lower_bound(i,expression.lower_bound(i));
+          this->set_upper_bound(i,expression.upper_bound(i));
         }
         return *this;
       }
@@ -210,7 +223,7 @@ namespace Ariadne {
       //! \name Data access
       /*! \brief Returns the projection onto the \a i th coordinate. */
       Interval<R>& operator[] (dimension_type i) {
-        return this->_bounds[i];
+        return reinterpret_cast<Interval<R>&>(this->_bounds[2*i]);
       }
       //IntervalReference<R> operator[] (dimension_type i) {
       //  return IntervalReference<R>(this->_bounds[i]);
@@ -218,22 +231,22 @@ namespace Ariadne {
       
       /*! \brief Returns the projection onto the \a i th coordinate. */
       const Interval<R>& operator[] (dimension_type i) const {
-        return this->_bounds[i];
+        return reinterpret_cast<const Interval<R>&>(this->_bounds[2*i]);
       }
       
       /*! \brief Returns the lower bound of the \a i th coordinate */
       const Interval<R>& interval(dimension_type i) const {
-        return this->_bounds[i];
+        return reinterpret_cast<const Interval<R>&>(this->_bounds[2*i]);
       }
       
       /*! \brief Returns the lower bound of the \a i th coordinate */
       const R& lower_bound(dimension_type i) const {
-        return this->_bounds[i].lower();
+        return this->_bounds[2*i];
       }
       
       /*! \brief Returns the upper bound of the \a i th coordinate */
       const R& upper_bound(dimension_type i) const {
-        return this->_bounds[i].upper();
+        return this->_bounds[2*i+1];
       }
       
       /*! \brief The lower corner. */
@@ -255,8 +268,12 @@ namespace Ariadne {
       }
       
       /*! \brief The set of position vectors of the rectangle. */
-      const LinearAlgebra::Vector< Interval<R> >& position_vectors() const {
-        return this->_bounds;
+      LinearAlgebra::Vector< Interval<R> > position_vectors() const {
+        LinearAlgebra::Vector< Interval<R> > result(this->dimension());
+        for(dimension_type i=0; i!=this->dimension(); ++i) {
+          result[i]=this->interval(i);
+        }
+        return result;
       }
       //@}
       
@@ -266,23 +283,25 @@ namespace Ariadne {
       /*! \brief Makes the rectangle empty. */
       void clear() {
         if(this->_bounds.size()!=0) {
-          this->_bounds[0]=Interval<R>();
+          this->_bounds[0]=1;
+          this->_bounds[1]=0;
         }
       }
       
       /*! \brief Sets the \a i th interval. */
       void set_interval(dimension_type i, Interval<R> x) {
-        this->_bounds[i]=x;
+        this->set_lower_bound(i,x.lower());
+        this->set_upper_bound(i,x.upper());
       }
       
       /*! \brief Sets the lower bound of the \a i th coordinate to \a r. */
       void set_lower_bound(dimension_type i, const R& l) {
-        this->_bounds[i]=Interval<R>(l,this->_bounds[i].upper());
+        this->_bounds[2*i]=l;
       }
       
       /*! \brief Sets the upper bound of the \a i th coordinate to \a u. */
       void set_upper_bound(dimension_type i, const R& u) {
-        this->_bounds[i]=Interval<R>(this->_bounds[i].lower(),u);
+        this->_bounds[2*i+1]=u;
       }
 
       /*! \brief Expand the Rectangle by \a delta in each direction. */
@@ -294,16 +313,16 @@ namespace Ariadne {
       //! \name Rectangle geometric operations
       /*! \brief The dimension of the Euclidean space the rectangle lies in. */
       size_type dimension() const {
-        return this->_bounds.size();
+        return this->_bounds.size()/2;
       }
       
-      /*! \brief True if the rectangle is empty. */
+      /*! \brief True if the rectangle is empty. A zero-dimensional rectangle is considered empty. */
       bool empty() const {
         if(this->dimension()==0) {
           return true;
         }
         for(dimension_type i=0; i!=this->dimension(); ++i) {
-          if(this->_bounds[i].empty()) {
+          if(this->lower_bound(i) > this->upper_bound(i)) {
             return true;
           }
         }
@@ -316,7 +335,7 @@ namespace Ariadne {
           return true;
         }
         for(size_type i=0; i!=this->dimension(); ++i) {
-          if(this->_bounds[i].lower()>=this->_bounds[i].upper()) {
+          if(this->lower_bound(i) >= this->upper_bound(i)) {
             return true;
           }
         }
@@ -420,7 +439,7 @@ namespace Ariadne {
       std::istream& read(std::istream& is);
       //@}
      private:
-      LinearAlgebra::Vector< Interval<R> > _bounds;
+      array<R> _bounds;
     };
   
 
@@ -452,7 +471,7 @@ namespace Ariadne {
         throw std::domain_error("The point has a different dimension to the rectangle.");
       }
       for (size_type i=0; i!=self.dimension(); ++i) {
-        if(!self[i].interior_contains(p[i])) {
+        if(self.lower_bound(i) >= p[i] || self.upper_bound(i) <= p[i]) {
           return false;
         }
       }
@@ -468,7 +487,7 @@ namespace Ariadne {
         return false;
       }
       for(size_type i=0; i!=A.dimension(); ++i) {
-        if(!equal(A[i],B[i])) {
+        if(!Numeric::equal(A[i],B[i])) {
           return false;
         }
       }

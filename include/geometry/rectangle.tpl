@@ -61,7 +61,7 @@ namespace Ariadne {
     {
       Interval<R> expand(-delta,delta);
       for (size_type j=0; j< this->dimension(); ++j) {
-        this->_bounds[j]+=expand;
+        this->operator[](j)+=expand;
       }
       return *this;
     }

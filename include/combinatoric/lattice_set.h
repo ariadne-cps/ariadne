@@ -418,13 +418,16 @@ namespace Ariadne {
      public:
       /*! \brief Construct an lattice mask set on an empty block set of dimension \a n. */
       LatticeMaskSet(const size_type& n) 
-        : _block(n), _mask() { this->_compute_cached_attributes(); }
+        : _block(n), _mask(), _unbounded(false) { this->_compute_cached_attributes(); }
       /*! \brief Construct an empty lattice mask set on the block \a bb. */
       LatticeMaskSet(const LatticeBlock& bb) 
-        : _block(bb), _mask(bb.size(),false) { this->_compute_cached_attributes(); }
+        : _block(bb), _mask(bb.size(),false), _unbounded(false) { this->_compute_cached_attributes(); }
       /*! \brief Construct a lattice mask set n the block \a bb with cells given by the mast \a ma. */
       LatticeMaskSet(const LatticeBlock& bb, const BooleanArray& ma) 
-        : _block(bb), _mask(ma) { this->_compute_cached_attributes(); }
+        : _block(bb), _mask(ma), _unbounded(false) { this->_compute_cached_attributes(); }
+      /*! \brief Construct a lattice mask set n the block \a bb with cells given by the mast \a ma. */
+      LatticeMaskSet(const LatticeBlock& bb, const BooleanArray& ma, const bool& ub) 
+        : _block(bb), _mask(ma), _unbounded(ub) { this->_compute_cached_attributes(); }
       /*! \brief Construct a lattice mask oset n the block \a bb with cells given by the mast \a ma. */
       LatticeMaskSet(const LatticeBlock& bb, const LatticeCellListSet& cls);
       /*! \brief Construct a lattice mask oset n the block \a bb with cells given by the mast \a ma. */
@@ -450,6 +453,8 @@ namespace Ariadne {
       size_type capacity() const { return _mask.size(); }
       /*!\brief True if the set is empty. */
       size_type empty() const { return this->size()==0; }
+      /*!\brief True if the set is bounded. */
+      size_type bounded() const { return !this->_unbounded; }
       /*!\brief The number of cells in the set. */
       size_type size() const { return std::count(_mask.begin(),_mask.end(),true); }
       /*!\brief The \a i th cell in the set.<br>This method is expensive, since
@@ -504,6 +509,7 @@ namespace Ariadne {
       SizeArray _sizes;
       SizeArray _strides;
       BooleanArray _mask;
+      bool _unbounded;
     };
 
     

@@ -368,35 +368,35 @@ namespace Ariadne {
 
 
     LatticeMaskSet::LatticeMaskSet(const LatticeBlock& bd, const LatticeCellListSet& cls)
-      : _block(bd)
+      : _block(bd), _unbounded(false)
     {
       this->_compute_cached_attributes();
       this->adjoin(cls);
     }
     
     LatticeMaskSet::LatticeMaskSet(const LatticeBlock& bd, const LatticeBlockListSet& rls)
-      : _block(bd)
+      : _block(bd), _unbounded(false)
     {
       this->_compute_cached_attributes();
       this->adjoin(rls);
     }
     
     LatticeMaskSet::LatticeMaskSet(const LatticeCellListSet& cls)
-      : _block(cls.bounding_block())
+      : _block(cls.bounding_block()), _unbounded(false)
     {
       this->_compute_cached_attributes();
       this->adjoin(cls);
     }
     
     LatticeMaskSet::LatticeMaskSet(const LatticeBlockListSet& rls)
-      : _block(rls.bounding_block())
+      : _block(rls.bounding_block()), _unbounded(false)
     {
       this->_compute_cached_attributes();
       this->adjoin(rls);
     }
     
     LatticeMaskSet::LatticeMaskSet(const LatticeMaskSet& ms)
-      : _block(ms._block), _mask(ms._mask)
+      : _block(ms._block), _mask(ms._mask), _unbounded(false)
     {
       this->_compute_cached_attributes();
     }
@@ -469,9 +469,12 @@ namespace Ariadne {
 
 
     void 
-    LatticeMaskSet::adjoin(const LatticeBlock& r) 
+    LatticeMaskSet::adjoin(const LatticeBlock& b) 
     {
-      assert(subset(r,this->block()));
+      LatticeBlock r=regular_intersection(this->block(),b);
+      if(!subset(b,this->block())) {
+        this->_unbounded=true;
+      }
       
       dimension_type n=this->dimension();
       const IndexArray& rlower(r.lower());
@@ -529,7 +532,11 @@ namespace Ariadne {
     void 
     LatticeMaskSet::adjoin(const LatticeCellListSet& cl) {
       for(LatticeCellListSet::const_iterator i=cl.begin(); i!=cl.end(); ++i) {
-        this->adjoin(*i);
+        if(subset(*i,this->block())) {
+          this->adjoin(*i);
+        } else {
+          this->_unbounded=true;
+        }
       }
     }
 
@@ -547,7 +554,6 @@ namespace Ariadne {
         this->_mask |= lm._mask;
       }
       else {
-        assert(subset(lm.block(),this->block()));
         for(LatticeMaskSet::const_iterator iter=lm.begin(); iter!=lm.end(); ++iter) {
           this->adjoin(*iter);
         }
@@ -585,21 +591,21 @@ namespace Ariadne {
     regular_intersection(const LatticeMaskSet& A, const LatticeMaskSet& B) 
     {
       assert(A.block()==B.block());
-      return LatticeMaskSet(A.block(),A.mask() & B.mask());
+      return LatticeMaskSet(A.block(),A.mask() & B.mask(), !A.bounded() & !B.bounded());
     }
 
     LatticeMaskSet
     join(const LatticeMaskSet& A, const LatticeMaskSet& B) 
     {
       assert(A.block()==B.block());
-      return LatticeMaskSet(A.block(),A.mask() | B.mask());
+      return LatticeMaskSet(A.block(),A.mask() | B.mask(), !A.bounded() | !B.bounded());
     }
 
     LatticeMaskSet
     difference(const LatticeMaskSet& A, const LatticeMaskSet& B) 
     {
       assert(A.block()==B.block());
-      return LatticeMaskSet(A.block(),A.mask() - B.mask());
+      return LatticeMaskSet(A.block(),A.mask() - B.mask(), !A.bounded() - !B.bounded());
     }
 
     bool 

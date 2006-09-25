@@ -95,12 +95,8 @@ namespace Ariadne {
     over_approximation(const Zonotope<R>& p, const Grid<R>& g);
 
     template<typename R>
-    GridBlock<R>
-    over_approximation(const Rectangle<R>& p, const FiniteGrid<R>& g);
-
-    template<typename R>
     GridCellListSet<R>
-    over_approximation(const Zonotope<R>& p, const FiniteGrid<R>& g);
+    over_approximation(const Polytope<R>& p, const Grid<R>& g);
     
     
     template<typename R, template<typename> class BS>
@@ -126,13 +122,9 @@ namespace Ariadne {
     under_approximation(const Zonotope<R>& p, const Grid<R>& g);
    
     template<typename R>
-    GridBlock<R>
-    under_approximation(const Rectangle<R>& p, const FiniteGrid<R>& g);
-
-    template<typename R>
     GridCellListSet<R>
-    under_approximation(const Zonotope<R>& p, const FiniteGrid<R>& g);
-    
+    under_approximation(const Polytope<R>& p, const Grid<R>& g);
+       
     
     template<typename R>
     GridMaskSet<R>
@@ -147,40 +139,7 @@ namespace Ariadne {
     under_approximation(const PartitionTreeSet<R>& gm, const FiniteGrid<R>& g);
     
     
-    template<typename R, template <typename R> class BS>
-    GridMaskSet<R>
-    join_over_approximation(const GridMaskSet<R>& gms, const BS<R>& bs);
 
-    template<typename R, template <typename R> class BS>
-    GridMaskSet<R>
-    join_under_approximation(const GridMaskSet<R>& gms, const BS<R>& bs);
-    
-    template<typename R, template <typename R> class BS>
-    GridMaskSet<R>
-    join_over_approximation(const GridMaskSet<R>& gms,const ListSet<R,BS>& ls);
-
-    template<typename R, template <typename R> class BS>
-    GridMaskSet<R>
-    join_under_approximation(const GridMaskSet<R>& gms,const ListSet<R,BS>& ls);
-
-    template<typename R>
-    GridBlock<R>
-    over_approximation_of_intersection(const Rectangle<R>& r1, 
-                                       const Rectangle<R>& r2,
-                                       const Grid<R>& g);
-    
-    template<typename R>
-    GridCellListSet<R>
-    over_approximation_of_intersection(const Zonotope<R>& p, 
-                                       const Rectangle<R>& r,
-                                       const Grid<R>& g);
-
-    template<typename R, template<typename> class BS>
-    GridMaskSet<R>
-    over_approximation_of_intersection(const ListSet<R,BS>& ls, 
-                                       const Rectangle<R>& r, 
-                                       const FiniteGrid<R>& g);
-    
     template<typename R> std::ostream& operator<<(std::ostream&, const GridCell<R>&);
     template<typename R> std::ostream& operator<<(std::ostream&, const GridBlock<R>&);
     template<typename R> std::ostream& operator<<(std::ostream&, const GridBlockListSet<R>&);
@@ -659,6 +618,9 @@ namespace Ariadne {
 
       /*! \brief Returns true if the set is empty. */
       bool empty() const { return _lattice_set.empty(); }
+      
+      /*! \brief Returns true if the set is empty. */
+      bool bounded() const { return _lattice_set.bounded(); }
       
       /*! \brief The number of cells in the grid. */
       size_type size() const { return _lattice_set.size(); }

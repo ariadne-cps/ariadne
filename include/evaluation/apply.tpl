@@ -122,42 +122,44 @@ namespace Ariadne {
     template<typename R, template<typename> class BS>
     Geometry::GridMaskSet<R> 
     Applicator<R,BS>::apply(const System::Map<R>& f, 
-                            const Geometry::GridMaskSet<R>& is, 
-                            const Geometry::GridMaskSet<R>& bs) const 
+                            const Geometry::GridMaskSet<R>& initial_set, 
+                            const Geometry::GridMaskSet<R>& bounding_set) const 
     {
       typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
+      assert(initial_set.bounded() && bounding_set.bounded());
       
-      const Geometry::Grid<R>& g=is.grid();
-      Combinatoric::LatticeBlock bd=is.block();
+      const Geometry::Grid<R>& g=initial_set.grid();
+      Combinatoric::LatticeBlock bd=initial_set.block();
       Geometry::GridMaskSet<R> image(g,bd);
-      Geometry::Rectangle<R> bb=is.bounding_box();
+      Geometry::Rectangle<R> bb=initial_set.bounding_box();
       
-      for(gms_const_iterator iter=is.begin(); iter!=is.end(); ++iter) {
+      for(gms_const_iterator iter=initial_set.begin(); iter!=initial_set.end(); ++iter) {
         Geometry::Rectangle<R> r=*iter;
         BS<R> p=convert_to< BS<R> >(r);
         BS<R> fp=this->apply(f,p);
-        image.adjoin(over_approximation_of_intersection(fp,bb,g));
+        image.adjoin(over_approximation(fp,g));
       }
-      return regular_intersection(image,bs);
+      return regular_intersection(image,bounding_set);
     }
     
     
     template<typename R, template<typename> class BS>
     Geometry::GridMaskSet<R> 
     Applicator<R,BS>::chainreach(const System::Map<R>& f, 
-                                 const Geometry::GridMaskSet<R>& is, 
-                                 const Geometry::GridMaskSet<R>& bs) const
+                                 const Geometry::GridMaskSet<R>& initial_set, 
+                                 const Geometry::GridMaskSet<R>& bounding_set) const
     {
       typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
+      assert(initial_set.bounded() && bounding_set.bounded());
       
-      const Geometry::Grid<R>& g=is.grid();
-      Combinatoric::LatticeBlock bd=is.block();
-      Geometry::Rectangle<R> bb=is.bounding_box();
+      const Geometry::Grid<R>& g=initial_set.grid();
+      Combinatoric::LatticeBlock bd=initial_set.block();
+      Geometry::Rectangle<R> bb=initial_set.bounding_box();
       Geometry::GridMaskSet<R> result(g,bd);
       Geometry::GridMaskSet<R> found(g,bd);
       Geometry::GridMaskSet<R> image(g,bd);
       
-      found=is;
+      found=initial_set;
       while(!subset(found,result)) {
         found=difference(found,result);
         result.adjoin(found);
@@ -168,9 +170,9 @@ namespace Ariadne {
           Geometry::Rectangle<R> r=*iter;
           BS<R> p=convert_to< BS<R> >(r);
           BS<R> fp=this->apply(f,p);
-          image.adjoin(over_approximation_of_intersection(fp,bb,g));
+          image.adjoin(over_approximation(fp,g));
         }
-        found=regular_intersection(image,bs);
+        found=regular_intersection(image,bounding_set);
       }
       return result;
     }

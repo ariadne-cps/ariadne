@@ -40,6 +40,41 @@
 namespace Ariadne {
   namespace Geometry {
 
+   // GridCell ----------------------------------------------------------------
+    
+    template<typename R>
+    GridCell<R>::GridCell(const Grid<R>& g, const Combinatoric::LatticeCell& pos)
+      : _grid(g), _lattice_set(pos)
+    {
+      assert(_lattice_set.dimension()==_grid.dimension());
+    }
+
+    template<typename R>
+    GridCell<R>::GridCell(const Grid<R>& g, const IndexArray& pos)
+      : _grid(g), _lattice_set(pos)
+    {
+      assert(_lattice_set.
+      dimension()==_grid.dimension());
+    }
+
+    template<typename R>
+    R
+    GridCell<R>::lower_bound(dimension_type i) const 
+    {
+      return _grid.subdivision_coordinate(i,_lattice_set.lower_bound(i));
+    }
+    
+    template<typename R>
+    R
+    GridCell<R>::upper_bound(dimension_type i) const 
+    {
+      return _grid.subdivision_coordinate(i,_lattice_set.upper_bound(i));
+    }
+    
+
+    
+    // GridBlock --------------------------------------------------------------
+    
     template<typename R>
     GridBlock<R>::GridBlock(const Grid<R>& g)
       : _grid(g), _lattice_set(g.dimension())
@@ -99,52 +134,10 @@ namespace Ariadne {
 
 
     
-    template<typename R>
-    GridCell<R>::GridCell(const Grid<R>& g, const Combinatoric::LatticeCell& pos)
-      : _grid(g), _lattice_set(pos)
-    {
-      assert(_lattice_set.dimension()==_grid.dimension());
-    }
-
-    template<typename R>
-    GridCell<R>::GridCell(const Grid<R>& g, const IndexArray& pos)
-      : _grid(g), _lattice_set(pos)
-    {
-      assert(_lattice_set.
-      dimension()==_grid.dimension());
-    }
-
-    template<typename R>
-    R
-    GridCell<R>::lower_bound(dimension_type i) const 
-    {
-      return _grid.subdivision_coordinate(i,_lattice_set.lower_bound(i));
-    }
-    
-    template<typename R>
-    R
-    GridCell<R>::upper_bound(dimension_type i) const 
-    {
-      return _grid.subdivision_coordinate(i,_lattice_set.upper_bound(i));
-    }
-    
 
 
-    template<typename R>
-    std::ostream&
-    operator<<(std::ostream& os, const GridBlock<R>& r) {
-      return os << Rectangle<R>(r);
-    }
+    // Geometric predicates ---------------------------------------------------
 
-    template<typename R>
-    std::ostream&
-    operator<<(std::ostream& os, const GridCell<R>& c) {
-      return os << Rectangle<R>(c);
-    }
-
-
-
-    /*! \brief Tests disjointness */
     template<typename R>
     bool
     disjoint(const GridBlock<R>& A, const GridBlock<R>& B) {
@@ -152,7 +145,7 @@ namespace Ariadne {
       return disjoint(A.lattice_set(),B.lattice_set());
     }
 
-    /*! \brief Tests disjointness */
+
     template<typename R>
     bool
     disjoint(const GridBlock<R>& A, const GridMaskSet<R>& B) {
@@ -160,7 +153,7 @@ namespace Ariadne {
       return disjoint(A.lattice_set(),B.lattice_set());
     }
 
-    /*! \brief Tests disjointness */
+
     template<typename R>
     bool
     disjoint(const GridMaskSet<R>& A, const GridBlock<R>& B) {
@@ -168,7 +161,7 @@ namespace Ariadne {
       return disjoint(A.lattice_set(),B.lattice_set());
     }
 
-    /*! \brief Tests disjointness */
+
     template<typename R>
     bool
     disjoint(const GridMaskSet<R>& A, const GridMaskSet<R>& B)
@@ -177,7 +170,7 @@ namespace Ariadne {
       return disjoint(A.lattice_set(),B.lattice_set());
     }
 
-    /*! \brief Tests disjointness */
+
     template<typename R>
     bool
     disjoint(const Rectangle<R>& A, const GridMaskSet<R>& B) {
@@ -187,7 +180,7 @@ namespace Ariadne {
       return !interiors_intersect(gr,B);
     }
     
-    /*! \brief Tests disjointness */
+
     template<typename R>
     bool
     disjoint(const GridMaskSet<R>& A, const Rectangle<R>& B) {
@@ -195,7 +188,7 @@ namespace Ariadne {
     }
     
     
-    /*! \brief Tests intersection of interiors */
+
     template<typename R>
     bool
     interiors_intersect(const GridBlock<R>& A, const GridBlock<R>& B) {
@@ -203,7 +196,7 @@ namespace Ariadne {
       return interiors_intersect(A.lattice_set(),B.lattice_set());
     }
 
-    /*! \brief Tests intersection of interiors */
+
     template<typename R>
     bool
     interiors_intersect(const GridBlock<R>& A, const GridMaskSet<R>& B) {
@@ -211,7 +204,7 @@ namespace Ariadne {
       return interiors_intersect(A._lattice_set,B._lattice_set);
     }
 
-    /*! \brief Tests intersection of interiors */
+
     template<typename R>
     bool
     interiors_intersect(const GridMaskSet<R>& A, const GridBlock<R>& B) {
@@ -219,7 +212,7 @@ namespace Ariadne {
       return interiors_intersect(A._lattice_set,B._lattice_set);
     }
 
-    /*! \brief Tests intersection of interiors */
+
     template<typename R>
     bool
     interiors_intersect(const GridMaskSet<R>& A, const GridMaskSet<R>& B)
@@ -228,7 +221,7 @@ namespace Ariadne {
       return interiors_intersect(A._lattice_set,B._lattice_set);
     }
 
-    /*! \brief Tests intersection of interiors */
+
     template<typename R>
     bool
     interiors_intersect(const Rectangle<R>& A, const GridMaskSet<R>& B) {
@@ -237,7 +230,7 @@ namespace Ariadne {
       return interiors_intersect(gr,B);
     }
     
-     /*! \brief Tests intersection of interiors */
+
     template<typename R>
     bool
     interiors_intersect(const GridMaskSet<R>& A, const Rectangle<R>& B) {
@@ -246,7 +239,7 @@ namespace Ariadne {
     
 
 
-    /*! \brief Tests if A is a subset of B. */
+
     template<typename R>
     bool
     subset(const GridBlock<R>& A, const GridBlock<R>& B)
@@ -258,7 +251,7 @@ namespace Ariadne {
       return subset(Rectangle<R>(A),Rectangle<R>(B));
     }
 
-    /*! \brief Tests if A is a subset of B. */
+
     template<typename R>
     bool
     subset(const GridBlock<R>& A, const GridMaskSet<R>& B)
@@ -267,7 +260,7 @@ namespace Ariadne {
       return subset(A.lattice_set(),B.lattice_set()); 
     }
 
-    /*! \brief Tests if A is a subset of B. */
+
     template<typename R>
     bool
     subset(const GridMaskSet<R>& A, const GridMaskSet<R>& B)
@@ -276,7 +269,7 @@ namespace Ariadne {
       return subset(A.lattice_set(),B.lattice_set());
     }
 
-    /*! \brief Tests if A is a subset of B. */
+
     template<typename R>
     bool
     subset(const Rectangle<R>& A, const GridBlock<R>& B)
@@ -286,7 +279,7 @@ namespace Ariadne {
     }
     
     
-    /*! \brief Tests if A is a subset of B. */
+
     template<typename R>
     bool
     subset(const Rectangle<R>& A, const GridMaskSet<R>& B)
@@ -300,7 +293,7 @@ namespace Ariadne {
 
 
 
-     /*! \brief Tests if A is a subset of the interior of B. */
+
     template<typename R>
     bool
     inner_subset(const Rectangle<R>& A, const GridBlock<R>& B)
@@ -308,7 +301,7 @@ namespace Ariadne {
       return inner_subset(A,Rectangle<R>(B));
     }
 
-     /*! \brief Tests if A is a subset of the interior of B. */
+
     template<typename R>
     bool
     inner_subset(const Rectangle<R>& A, const GridMaskSet<R>& B)
@@ -322,36 +315,37 @@ namespace Ariadne {
 
 
 
-    /*! \brief The union of \a A and \a B. */
+
     template<typename R>
     GridMaskSet<R>
     join(const GridMaskSet<R>& A, const GridMaskSet<R>& B)
     {
       assert(A.grid()==B.grid() && A.block()==B.block());
-      return GridMaskSet<R>(A.grid(), A.block(), A.mask() | B.mask());
+      return GridMaskSet<R>(A.grid(), join(A.lattice_set(),B.lattice_set()));
     }
 
-    /*! \brief The closure of the intersection of the interior of \a A with the interior of \a B. */
+
     template<typename R>
     GridMaskSet<R>
     regular_intersection(const GridMaskSet<R>& A, const GridMaskSet<R>& B)
     {
       assert(A.grid()==B.grid() && A.block()==B.block());
-      return GridMaskSet<R>(A.grid(), A.block(), A.mask() & B.mask());
+      return GridMaskSet<R>(A.grid(), regular_intersection(A.lattice_set(),B.lattice_set()));
     }
 
-    /*! \brief The closure of the intersection of the interior of \a A with the interior of \a B. */
+
     template<typename R>
     GridMaskSet<R>
     difference(const GridMaskSet<R>& A, const GridMaskSet<R>& B)
     {
       assert(A.grid()==B.grid() && A.block()==B.block());
-      return GridMaskSet<R>(A.grid(), A.block(), A.mask() - B.mask());
+      return GridMaskSet<R>(A.grid(), difference(A.lattice_set(),B.lattice_set()));
     }
 
     template<typename R>
     GridMaskSet<R>::operator ListSet<R,Rectangle>() const
     {
+      assert(this->bounded());
       ListSet<R,Rectangle> result(this->dimension());
       for(typename GridMaskSet::const_iterator riter=begin(); riter!=end(); ++riter) {
         Rectangle<R> r(*riter);
@@ -361,29 +355,11 @@ namespace Ariadne {
     }
 
 
-    template<typename R>
-    GridCellListSet<R>::operator ListSet<R,Rectangle>() const
-    {
-      ListSet<R,Rectangle> result(dimension());
-      for(size_type i=0; i!=size(); ++i) {
-        result.push_back((*this)[i]);
-      }
-      return result;
-    }
-
-    template<typename R>
-    GridBlockListSet<R>::operator ListSet<R,Rectangle>() const
-    {
-      ListSet<R,Rectangle> result(dimension());
-      for(size_type i=0; i!=size(); ++i) {
-        result.push_back((*this)[i]);
-      }
-      return result;
-    }
 
 
 
   
+    // GridCellListSet ------------------------------------------------------------
 
 
 
@@ -420,8 +396,18 @@ namespace Ariadne {
       (*this)=GridCellListSet<R>(GridBlockListSet<R>(rls));      
     }
 
+    template<typename R>
+    GridCellListSet<R>::operator ListSet<R,Rectangle>() const
+    {
+      ListSet<R,Rectangle> result(dimension());
+      for(size_type i=0; i!=size(); ++i) {
+        result.push_back((*this)[i]);
+      }
+      return result;
+    }
 
 
+    // GridBlockListSet ------------------------------------------------------------
 
     template<typename R>
     GridBlockListSet<R>::GridBlockListSet(const Grid<R>& g)
@@ -474,6 +460,20 @@ namespace Ariadne {
       }
     }
 
+    template<typename R>
+    GridBlockListSet<R>::operator ListSet<R,Rectangle>() const
+    {
+      ListSet<R,Rectangle> result(dimension());
+      for(size_type i=0; i!=size(); ++i) {
+        result.push_back((*this)[i]);
+      }
+      return result;
+    }
+
+
+    
+    // GridMaskSet ------------------------------------------------------------
+    
     template<typename R>
     GridMaskSet<R>::GridMaskSet(const FiniteGrid<R>& g)
       : _grid_ptr(&g.grid()), _lattice_set(g.bounds()) 
@@ -549,6 +549,7 @@ namespace Ariadne {
     
   
 
+    // Over and under approximations ------------------------------------------
     
     template<typename R>
     GridBlock<R>
@@ -619,7 +620,31 @@ namespace Ariadne {
     
     template<typename R>
     GridCellListSet<R>
-    over_approximation(const Zonotope<R>& p, const Grid<R>& g) 
+    over_approximation(const Zonotope<R>& z, const Grid<R>& g) 
+    {
+      GridCellListSet<R> result(g);
+      assert(g.dimension()==z.dimension());
+      if(z.empty()) {
+        return result; 
+      }
+      Rectangle<R> bb=z.bounding_box();
+
+      GridBlock<R> gbb=over_approximation(bb,g);
+      Combinatoric::LatticeBlock block=gbb.lattice_set();
+
+      for(Combinatoric::LatticeBlock::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
+        GridCell<R> cell(g,*iter);
+        if(!disjoint(Rectangle<R>(cell),z)) {
+          result.adjoin(cell);
+        }
+      }
+
+      return result;
+    }
+
+    template<typename R>
+    GridCellListSet<R>
+    over_approximation(const Polytope<R>& p, const Grid<R>& g) 
     {
       GridCellListSet<R> result(g);
       assert(g.dimension()==p.dimension());
@@ -666,106 +691,28 @@ namespace Ariadne {
     }
 
     template<typename R>
-    GridBlock<R>
-    over_approximation(const Rectangle<R>& r, const FiniteGrid<R>& g) 
-    {
-      Rectangle<R> rect=regular_intersection(r,g.bounding_box());
-     
-      if(rect.empty()) {
-        return GridBlock<R>(g.grid());
-      }
-      IndexArray lower(rect.dimension());
-      IndexArray upper(rect.dimension());
-      
-      for(size_type i=0; i!=rect.dimension(); ++i) {
-        lower[i]=g.subdivision_lower_index(i,rect.lower_bound(i));
-        upper[i]=g.subdivision_upper_index(i,rect.upper_bound(i));
-      }
-
-      return GridBlock<R>(g.grid(),lower,upper);
-    }
-    
-    template<typename R>
-    GridBlock<R>
-    under_approximation(const Rectangle<R>& r, const FiniteGrid<R>& g) 
-    {
-      Rectangle<R> rect=regular_intersection(r,g.bounding_box());
-     
-      if(rect.empty()) {
-        return GridBlock<R>(g.grid());
-      }
-      IndexArray lower(rect.dimension());
-      IndexArray upper(rect.dimension());
-      
-      for(size_type i=0; i!=rect.dimension(); ++i) {
-        lower[i]=g.subdivision_lower_index(i,rect.lower_bound(i))+1;
-        upper[i]=g.subdivision_upper_index(i,rect.upper_bound(i))-1;
-      }
-       
-      return GridBlock<R>(g.grid(),lower,upper);
-    }
-   
-    template<typename R>
     GridCellListSet<R>
-    over_approximation(const Zonotope<R>& z, const FiniteGrid<R>& g) 
-    {
-      GridCellListSet<R> result(g);
-      assert(g.dimension()==z.dimension());
-      if(z.empty()) {
-        return result; 
-      }
-      
-      Rectangle<R> bb=regular_intersection(z.bounding_box(),g.bounding_box());
-      
-      if (bb.empty()) {
-        return result;
-      }
-      
-      GridBlock<R> gbb=over_approximation(bb,g);
-      Combinatoric::LatticeBlock block=gbb.lattice_set();
-
-      for(Combinatoric::LatticeBlock::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
-
-        GridCell<R> cell(g.grid(),*iter);
-        if(!disjoint(Rectangle<R>(cell),z)) {
-          result.adjoin(cell);
-        }
-      }
-
-      return result;
-    }
-
-    template<typename R>
-    GridCellListSet<R>
-    under_approximation(const Zonotope<R>& p, const FiniteGrid<R>& g) 
+    under_approximation(const Polytope<R>& p, const Grid<R>& g) 
     {
       GridCellListSet<R> result(g);
       assert(g.dimension()==p.dimension());
       if(p.empty()) {
         return result; 
       }
-      Rectangle<R> bb=regular_intersection(p.bounding_box(),g.bounding_box());
-
-      if (bb.empty()) {
-        return result;
-      }
       
+      Rectangle<R> bb=p.bounding_box();
       GridBlock<R> gbb=over_approximation(bb,g);
       Combinatoric::LatticeBlock block=gbb.lattice_set();
 
-      for(Combinatoric::LatticeBlock::const_iterator iter=block.begin(); 
-            iter!=block.end(); ++iter) {
-
-        GridCell<R> cell(g.grid(),*iter);
+      for(Combinatoric::LatticeBlock::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
+        GridCell<R> cell(g,*iter);
         if(subset(Rectangle<R>(cell),p)) {
           result.adjoin(cell);
         }
       }
-
       return result;
     }
 
-    
     
     
     template<typename R, template<typename> class BS>
@@ -777,7 +724,7 @@ namespace Ariadne {
       assert(g.dimension()==ls.dimension());
 
       for(typename ListSet<R,BS>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
-       result.adjoin(over_approximation(*iter,g));
+       result.adjoin(over_approximation(*iter,g.grid()));
       }
         
       return result;
@@ -791,7 +738,7 @@ namespace Ariadne {
       assert(g.dimension()==gms.dimension());
 
       for(typename GridMaskSet<R>::const_iterator iter=gms.begin(); iter!=gms.end(); ++iter) {
-        result.adjoin(over_approximation(Rectangle<R>(*iter),g));
+        result.adjoin(over_approximation(Rectangle<R>(*iter),g.grid()));
       }
       return result;
     }
@@ -804,7 +751,7 @@ namespace Ariadne {
       assert(g.dimension()==pts.dimension());
 
       for(typename PartitionTreeSet<R>::const_iterator iter=pts.begin(); iter!=pts.end(); ++iter) {
-        result.adjoin(over_approximation(Rectangle<R>(*iter),g));
+        result.adjoin(over_approximation(Rectangle<R>(*iter),g.grid()));
       }
       return result;
     }
@@ -864,202 +811,25 @@ namespace Ariadne {
       return under_approximation(r,gms.grid());
     }
     
-    template<typename R, template < typename R > class BS >
-    GridCellListSet<R>
-    over_approximation_not_intersecting(const BS<R>& bs, 
-                                        const GridMaskSet<R>& gms) 
-    {
-      GridCellListSet<R> result(gms.grid());
-      assert(gms.dimension()==bs.dimension());
-      if(bs.empty()) {
-        return result; 
-      }
 
-      GridMaskSet<R> new_gms(gms);
-      Rectangle<R> bb_gms=Rectangle<R>(new_gms.bounding_box());
-      bb_gms=regular_intersection(bs.bounding_box(),bb_gms);
-      
-      new_gms.adjoin(over_approximation(bb_gms,gms.grid()));
-      
-      new_gms=difference(new_gms,gms);
 
-      size_type new_gms_elem=new_gms.size();      
 
-      for (size_type i=0; i< new_gms_elem; i++) {
-        GridCell<R> cell(new_gms[i]);
-        if(!disjoint(Rectangle<R>(cell),bs)) {
-          result.adjoin(cell);
-        }
-      }
+    // Input/output------------------------------------------------------------
 
-      return result;
+    template<typename R>
+    std::ostream&
+    operator<<(std::ostream& os, const GridCell<R>& c) {
+      return os << Rectangle<R>(c);
     }
 
-    template<typename R, template < typename R > class BS >
-    GridCellListSet<R>
-    under_approximation_not_intersecting(const BS<R>& bs, 
-                                         const GridMaskSet<R>& gms) 
-    {
-      GridCellListSet<R> result(gms.grid());
-      assert(gms.dimension()==bs.dimension());
-      if(bs.empty()) {
-        return result; 
-      }
-      
-      GridMaskSet<R> new_gms(gms);
-      Rectangle<R> bb_gms=Rectangle<R>(new_gms.bounding_box());
-      bb_gms=regular_intersection(bs.bounding_box(),bb_gms);
-      
-      new_gms.adjoin(over_approximation(bb_gms,gms.grid()));
-
-      new_gms=difference(new_gms,gms);
-
-      size_type new_gms_elem=new_gms.size();      
-
-      for (size_type i=0; i< new_gms_elem; i++) {
-        GridCell<R> cell(new_gms[i]);
-        if(subset(Rectangle<R>(cell),bs)) {
-          result.adjoin(cell);
-        }
-      }
-      
-      return result;
-    }
-
-    template<typename R, template<typename> class BS>
-    GridMaskSet<R>
-    join_over_approximation(const GridMaskSet<R>& gms, const BS<R>& bs) 
-    {
-      GridMaskSet<R> result(gms);
-      
-      assert(gms.dimension()==bs.dimension());
-
-      result.adjoin(over_approximation_not_intersecting(bs,gms));
-        
-      return result;
-    }
-
-    template<typename R, template<typename> class BS>
-    GridMaskSet<R>
-    join_under_approximation(const GridMaskSet<R>& gms, const BS<R>& bs) 
-    {
-      GridMaskSet<R> result(gms);
-      
-      assert(gms.dimension()==bs.dimension());
-
-      result.adjoin(under_approximation_not_intersecting(bs,gms));
-        
-      return result;
-    }
-
-    template<typename R, template<typename> class BS>
-    GridMaskSet<R>
-    join_over_approximation(const GridMaskSet<R>& gms, const ListSet<R,BS>& ls) 
-    {
-      GridMaskSet<R> result(gms);
-      
-      assert(gms.dimension()==ls.dimension());
-
-      for(typename ListSet<R,BS>::const_iterator iter=ls.begin(); 
-                                              iter!=ls.end(); ++iter) {
-
-       result.adjoin(over_approximation_not_intersecting(*iter,gms));
-      }
-        
-      return result;
-    }
-     
-    template<typename R, template<typename> class BS>
-    GridMaskSet<R>
-    join_under_approximation(const GridMaskSet<R>& gms, 
-                             const ListSet<R,BS>& ls) 
-    {
-      GridMaskSet<R> result(gms);
-      
-      assert(gms.dimension()==ls.dimension());
-      for(typename ListSet<R,BS>::const_iterator iter=ls.begin(); 
-                                               iter!=ls.end(); ++iter) {
-       result.adjoin(under_approximation_not_intersecting(*iter,gms));
-      }
-        
-      return result;
-    }
- 
     
     template<typename R>
-    GridBlock<R>
-    over_approximation_of_intersection(const Rectangle<R>& r1, 
-                                       const Rectangle<R>& r2,
-                                       const Grid<R>& g) 
-    {
-      return over_approximation(intersection(r1,Rectangle<R>(r2)),g);
+    std::ostream&
+    operator<<(std::ostream& os, const GridBlock<R>& r) {
+      return os << Rectangle<R>(r);
     }
 
-
-    template<typename R>
-    GridCellListSet<R>
-    over_approximation_of_intersection(const Zonotope<R>& z, 
-                                       const Rectangle<R>& r,
-                                       const Grid<R>& g) 
-    {
-      GridCellListSet<R> result(g);
-      GridBlock<R> gbb=over_approximation_of_intersection(z.bounding_box(),r,g);
-
-      if(!gbb.empty()) {
-        Combinatoric::LatticeBlock block=gbb.lattice_set();
-        for(Combinatoric::LatticeBlock::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
-          GridCell<R> cell(g,*iter);
-          if(!disjoint(Rectangle<R>(cell),z)) {
-            result.adjoin(cell);
-          }
-        }
-      }
-      return result;
-    }
-
-    template<typename R, template<typename> class BS>
-    GridMaskSet<R>
-    over_approximation_of_intersection(const ListSet<R,BS>& ls, const Rectangle<R>& r, const FiniteGrid<R>& g) 
-    {
-      GridMaskSet<R> result(g);
-      
-      assert(g.dimension()==ls.dimension());
-
-      for(typename ListSet<R,BS>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
-       result.adjoin(over_approximation_of_intersection(*iter,r,g.grid()));
-      }
-        
-      return result;
-    }
-
-  
-
-    template <typename R>
-    std::ostream& operator<<(std::ostream& os,
-                             const GridBlockListSet<R>& set)
-    {
-      os << "GridBlockListSet<" << name<R>() << ">(\n  rectangle_lattice_set=[\n    ";
-      for (size_type i=0; i!=set.size(); i++) {
-        if(i!=0) {
-          os << ",\n    ";
-        }
-        os << Rectangle<R>(set[i]);
-      }
-      os << "\n  ]\n";
-      os << "  grid=" << set.grid() << "\n";
-      os << "  integer_rectangle_lattice_set=[ ";
-      os.flush();
-      for(size_type i=0; i!=set.size(); ++i) {
-        if(i!=0) { os << ", "; }
-        os << set[i].lattice_set();
-      }
-      os << " ]\n";
-      os << ")" << std::endl;
-      return os;
-    }
-
-
-
+    
     template <typename R>
     std::ostream& operator<<(std::ostream& os,
                              const GridCellListSet<R>& set)
@@ -1086,6 +856,31 @@ namespace Ariadne {
       os << ")" << std::endl;
       return os;
     }
+
+        template <typename R>
+    std::ostream& operator<<(std::ostream& os,
+                             const GridBlockListSet<R>& set)
+    {
+      os << "GridBlockListSet<" << name<R>() << ">(\n  rectangle_lattice_set=[\n    ";
+      for (size_type i=0; i!=set.size(); i++) {
+        if(i!=0) {
+          os << ",\n    ";
+        }
+        os << Rectangle<R>(set[i]);
+      }
+      os << "\n  ]\n";
+      os << "  grid=" << set.grid() << "\n";
+      os << "  integer_rectangle_lattice_set=[ ";
+      os.flush();
+      for(size_type i=0; i!=set.size(); ++i) {
+        if(i!=0) { os << ", "; }
+        os << set[i].lattice_set();
+      }
+      os << " ]\n";
+      os << ")" << std::endl;
+      return os;
+    }
+
 
     template <typename R>
     std::ostream& operator<<(std::ostream& os,

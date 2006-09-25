@@ -26,10 +26,11 @@
 
 #include "linear_algebra/linear_algebra.h"
 
-#include "geometry/polytope.h"
+#include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
-#include "geometry/rectangle.h"
+#include "geometry/polytope.h"
+#include "geometry/polyhedron.h"
 #include "geometry/list_set.h"
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
@@ -54,14 +55,13 @@ struct RGridWrap : RGrid, wrapper<RGrid>
   std::istream& read(std::istream& is) { return this->get_override("read")(); }
 };
 
-typedef RGridBlock (*ApprxBlkGridFunc) (const RRectangle&, const RGrid&);
-typedef RGridCellListSet (*ApprxPltpGridFunc) (const RParallelotope&, const RGrid&);
+typedef RGridBlock (*ApprxRctGridFunc) (const RRectangle&, const RGrid&);
 typedef RGridCellListSet (*ApprxZltpGridFunc) (const RZonotope&, const RGrid&);
+typedef RGridCellListSet (*ApprxPltpGridFunc) (const RPolytope&, const RGrid&);
+//typedef RGridCellListSet (*ApprxPlhdGridFunc) (const RPolyhedron&, const RGrid&);
 typedef RGridBlock (*ApprxBlkFGridFunc) (const RRectangle&, const RFiniteGrid&);
-typedef RGridCellListSet (*ApprxPltpFGridFunc) (const RParallelotope&, const RFiniteGrid&);
-typedef RGridCellListSet (*ApprxZltpFGridFunc) (const RZonotope&, const RFiniteGrid&);
-typedef RGridMaskSet (*ApprxLSBlkFGridFunc) (const RRectangleListSet&, const RFiniteGrid&);
-typedef RGridMaskSet (*ApprxLSPltpFGridFunc) (const RParallelotopeListSet&, const RFiniteGrid&);
+typedef RGridMaskSet (*ApprxLSRctFGridFunc) (const RRectangleListSet&, const RFiniteGrid&);
+typedef RGridMaskSet (*ApprxLSPrltpFGridFunc) (const RParallelotopeListSet&, const RFiniteGrid&);
 typedef RGridMaskSet (*ApprxLSZltpFGridFunc) (const RZonotopeListSet&, const RFiniteGrid&);
 typedef RGridMaskSet (*ApprxGridltpFGridFunc) (const RGridMaskSet&, const RFiniteGrid&);
 
@@ -72,15 +72,16 @@ typedef void (RGridMaskSet::*GMSAdjBlkLSFunc) (const RGridBlockListSet&);
 typedef void (RGridMaskSet::*GMSAdjGMSFunc) (const RGridMaskSet&);
 
 typedef bool (*GMSBinPred) (const RGridMaskSet&, const RGridMaskSet&);
-typedef bool (*GMSBlkPred) (const RGridMaskSet&, const RRectangle&);
+typedef bool (*GMSRctPred) (const RGridMaskSet&, const RRectangle&);
 
 typedef RGridMaskSet (*GMSBinFunc) (const RGridMaskSet&, const RGridMaskSet&);
 
-typedef RGridMaskSet (*GMSBlkFunc)(const RGridMaskSet&, const RRectangle&);
-typedef RGridMaskSet (*GMSPltpFunc)(const RGridMaskSet&, const RParallelotope&);
+typedef RGridMaskSet (*GMSRctFunc)(const RGridMaskSet&, const RRectangle&);
+typedef RGridMaskSet (*GMSPrltpFunc)(const RGridMaskSet&, const RParallelotope&);
 typedef RGridMaskSet (*GMSZntpFunc)(const RGridMaskSet&, const RZonotope&);
-typedef RGridMaskSet (*GMSPlhdFunc)(const RGridMaskSet&, const RPolytope&);
-typedef RGridMaskSet (*GMSLSBlkFunc)(const RGridMaskSet&, 
+typedef RGridMaskSet (*GMSPltpFunc)(const RGridMaskSet&, const RPolytope&);
+//typedef RGridMaskSet (*GMSPlhdFunc)(const RGridMaskSet&, const RPolyhedron&);
+typedef RGridMaskSet (*GMSLSRctFunc)(const RGridMaskSet&, 
 		                      const RRectangleListSet&);
 typedef RGridMaskSet (*GMSLSPltpFunc)(const RGridMaskSet&, 
 		                      const RParallelotopeListSet&);
@@ -208,38 +209,25 @@ void export_grid_set() {
   def("difference",GMSBinFunc(&Geometry::difference));
   def("regular_intersection",GMSBinFunc(&Geometry::regular_intersection));
   def("interiors_intersect",GMSBinPred(&Geometry::interiors_intersect));
-  def("interiors_intersect",GMSBlkPred(&Geometry::interiors_intersect));
+  def("interiors_intersect",GMSRctPred(&Geometry::interiors_intersect));
 
-  def("over_approximation",ApprxBlkGridFunc(&Geometry::over_approximation));
+  def("over_approximation",ApprxRctGridFunc(&Geometry::over_approximation));
   def("over_approximation",ApprxZltpGridFunc(&Geometry::over_approximation));
-  def("over_approximation",ApprxBlkFGridFunc(&Geometry::over_approximation));
-  def("over_approximation",ApprxZltpFGridFunc(&Geometry::over_approximation));
-  def("over_approximation",ApprxLSBlkFGridFunc(&Geometry::over_approximation));
-  def("over_approximation",ApprxLSPltpFGridFunc(&Geometry::over_approximation));
+  def("over_approximation",ApprxPltpGridFunc(&Geometry::over_approximation));
+  //def("over_approximation",ApprxPlhdGridFunc(&Geometry::over_approximation));
+  def("over_approximation",ApprxLSRctFGridFunc(&Geometry::over_approximation));
+  def("over_approximation",ApprxLSPrltpFGridFunc(&Geometry::over_approximation));
   def("over_approximation",ApprxLSZltpFGridFunc(&Geometry::over_approximation));
   def("over_approximation",ApprxGridltpFGridFunc(&Geometry::over_approximation));
 
-  def("under_approximation",ApprxBlkGridFunc(&Geometry::under_approximation));
+  def("under_approximation",ApprxRctGridFunc(&Geometry::under_approximation));
   def("under_approximation",ApprxZltpGridFunc(&Geometry::under_approximation));
-  def("under_approximation",ApprxBlkFGridFunc(&Geometry::under_approximation));
-  def("under_approximation",ApprxZltpFGridFunc(&Geometry::under_approximation));
-  def("under_approximation",ApprxLSBlkFGridFunc(&Geometry::under_approximation));
+  def("under_approximation",ApprxPltpGridFunc(&Geometry::under_approximation));
+  //def("under_approximation",ApprxPlhdGridFunc(&Geometry::under_approximation));
+  def("under_approximation",ApprxLSRctFGridFunc(&Geometry::under_approximation));
+  //def("under_approximation",ApprxLSPrltpFGridFunc(&Geometry::under_approximation));
+  //def("under_approximation",ApprxLSZltpFGridFunc(&Geometry::under_approximation));
   def("under_approximation",ApprxGridltpFGridFunc(&Geometry::under_approximation));
 
 
-  def("join_over_approximation",GMSBlkFunc(&Geometry::join_over_approximation));
-  def("join_over_approximation",GMSZntpFunc(&Geometry::join_over_approximation));
-  def("join_over_approximation",GMSPlhdFunc(&Geometry::join_over_approximation));
-  def("join_over_approximation",GMSLSBlkFunc(&Geometry::join_over_approximation));
-  def("join_over_approximation",GMSLSPltpFunc(&Geometry::join_over_approximation));
-  def("join_over_approximation",GMSLSZntpFunc(&Geometry::join_over_approximation));
-  def("join_over_approximation",GMSLSPlhdFunc(&Geometry::join_over_approximation));
-  def("join_under_approximation",GMSBlkFunc(&Geometry::join_under_approximation));
-  def("join_under_approximation",GMSZntpFunc(&Geometry::join_under_approximation));
-  def("join_under_approximation",GMSPlhdFunc(&Geometry::join_under_approximation));
-  def("join_under_approximation",GMSLSBlkFunc(&Geometry::join_under_approximation));
-  def("join_under_approximation",GMSLSPltpFunc(&Geometry::join_under_approximation));
-
-  def("join_under_approximation",GMSLSZntpFunc(&Geometry::join_under_approximation));
-  def("join_under_approximation",GMSLSPlhdFunc(&Geometry::join_under_approximation));
 }

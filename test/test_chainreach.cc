@@ -51,7 +51,8 @@ int test_chainreach()
 
   HenonMap<R> h=HenonMap<R>(a,b);
   Rectangle<R> gbb=Rectangle<R>("[-11,5]x[-8,8]") ;
-  FiniteGrid<R> g=FiniteGrid<R>(gbb,128); // grid
+  FiniteGrid<R> fg=FiniteGrid<R>(gbb,128); // grid
+  const Grid<R>& g=fg.grid(); // grid
   Rectangle<R> ir=Rectangle<R>("[1.499,1.501]x[0.499,0.501]"); // initial state
   Rectangle<R> cb=Rectangle<R>("[-4,4]x[-4,4]"); // cutoff box
   Rectangle<R> epsbb=Rectangle<R>("[-4.1,4.1]x[-4.1,4.1]"); // eps bounding box
@@ -59,8 +60,8 @@ int test_chainreach()
   cb=Rectangle<R>(gbb); // cutoff box
   epsbb=Rectangle<R>(gbb); // eps bounding box
   
-  GridMaskSet<R> in=GridMaskSet<R>(g);
-  GridMaskSet<R> bd=GridMaskSet<R>(g);
+  GridMaskSet<R> in=GridMaskSet<R>(fg);
+  GridMaskSet<R> bd=GridMaskSet<R>(fg);
   in.adjoin(over_approximation(ir,g));
   bd.adjoin(over_approximation(gbb,g));
 

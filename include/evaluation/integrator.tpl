@@ -565,7 +565,7 @@ namespace Ariadne {
       }
     
       for(typename ListSet<R,Parallelotope>::const_iterator iter=start_set.begin(); iter!=start_set.end(); ++iter) {
-        GridCellListSet<R> oai=over_approximation_of_intersection(*iter,bb,g);
+        GridCellListSet<R> oai=over_approximation(*iter,g);
         result.adjoin(oai);
       }
       return result;
@@ -727,6 +727,7 @@ namespace Ariadne {
     {
       typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
       typedef typename Geometry::ListSet<R,Geometry::Zonotope>::const_iterator zls_const_iterator;
+      assert(initial_set.bounded() && bounding_set.bounded());
       
       if(!subset(initial_set,bounding_set)) {
         throw std::runtime_error("chainreach: Initial set must be subset of bounding set");
@@ -766,7 +767,7 @@ namespace Ariadne {
       output_list=this->reach(vector_field,input_list,time_step);
       for(zls_const_iterator iter=output_list.begin(); iter!=output_list.end(); ++iter) {
         Geometry::Zonotope<R> fz=*iter;
-        Geometry::GridCellListSet<R> oai=over_approximation_of_intersection(fz,bb,g);
+        Geometry::GridCellListSet<R> oai=over_approximation(fz,g);
         result.adjoin(oai);
       }
       return result;
@@ -782,7 +783,8 @@ namespace Ariadne {
     {
       typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
       typedef typename Geometry::ListSet<R,Geometry::Parallelotope>::const_iterator pls_const_iterator;
-      
+      assert(initial_set.bounded() && bounding_set.bounded());
+     
       if(!subset(initial_set,bounding_set)) {
         throw std::runtime_error("chainreach: Initial set must be subset of bounding set");
       }
@@ -815,7 +817,7 @@ namespace Ariadne {
         parallotope_list=this->integrate_list_set(vf,parallotope_list,time_step);
         for(pls_const_iterator iter=parallotope_list.begin(); iter!=parallotope_list.end(); ++iter) {
           Geometry::Parallelotope<R> fp=*iter;
-          Geometry::GridCellListSet<R> oai=over_approximation_of_intersection(fp,bb,g);
+          Geometry::GridCellListSet<R> oai=over_approximation(fp,g);
           image.adjoin(oai);
         }
         found=image;

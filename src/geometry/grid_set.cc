@@ -66,13 +66,11 @@ namespace Ariadne {
     GridCellListSet<Real>
     over_approximation(const Zonotope<Real>& p, const Grid<Real>& g);
 
-    template GridBlock<Real>
-    over_approximation(const Rectangle<Real>& p, const FiniteGrid<Real>& g);
-
     template
     GridCellListSet<Real>
-    over_approximation(const Zonotope<Real>& p, const FiniteGrid<Real>& g); 
-    
+    over_approximation(const Polytope<Real>& p, const Grid<Real>& g);
+
+
     template
     GridMaskSet<Real>
     over_approximation(const ListSet<Real,Rectangle>& ls, 
@@ -105,12 +103,10 @@ namespace Ariadne {
     GridCellListSet<Real>
     under_approximation(const Zonotope<Real>& p, const Grid<Real>& g);
 
-    template GridBlock<Real>
-    under_approximation(const Rectangle<Real>& p, const FiniteGrid<Real>& g);
-
     template
     GridCellListSet<Real>
-    under_approximation(const Zonotope<Real>& p, const FiniteGrid<Real>& g); 
+    under_approximation(const Polytope<Real>& p, const Grid<Real>& g);
+
     
     
     template
@@ -127,108 +123,6 @@ namespace Ariadne {
     under_approximation(const PartitionTreeSet<Real>& gm, const FiniteGrid<Real>& g); 
     
     
-    
-    template
-    GridMaskSet<Real>
-    join_over_approximation(const GridMaskSet<Real>& gms,
-                            const Rectangle<Real>& p); 
-
-    template
-    GridMaskSet<Real>
-    join_over_approximation(const GridMaskSet<Real>& gms,
-                            const Zonotope<Real>& z); 
-
-
-    template
-    GridMaskSet<Real>
-    join_over_approximation(const GridMaskSet<Real>& gms,
-                            const Polytope<Real>& z);
-
-
-    template
-    GridMaskSet<Real>
-    join_over_approximation(const GridMaskSet<Real>& gms,
-                            const ListSet<Real,Rectangle>& lr); 
-
-    template
-    GridMaskSet<Real>
-    join_over_approximation(const GridMaskSet<Real>& gms,
-                            const ListSet<Real,Parallelotope>& lp); 
-
-    template
-    GridMaskSet<Real>
-    join_over_approximation(const GridMaskSet<Real>& gms,
-                            const ListSet<Real,Zonotope>& lz);
-
-
-    template
-    GridMaskSet<Real>
-    join_over_approximation(const GridMaskSet<Real>& gms,
-                            const ListSet<Real,Polytope>& lp);
-
-
-    template
-    GridMaskSet<Real>
-    join_under_approximation(const GridMaskSet<Real>& gms,
-                             const Rectangle<Real>& p); 
-
-    template
-    GridMaskSet<Real>
-    join_under_approximation(const GridMaskSet<Real>& gms,
-                             const Zonotope<Real>& z); 
-
-
-    template
-    GridMaskSet<Real>
-    join_under_approximation(const GridMaskSet<Real>& gms,
-                             const Polytope<Real>& z);
-
-
-    template
-    GridMaskSet<Real>
-    join_under_approximation(const GridMaskSet<Real>& gms,
-                             const ListSet<Real,Rectangle>& p); 
-
-    template
-    GridMaskSet<Real>
-    join_under_approximation(const GridMaskSet<Real>& gms,
-                             const ListSet<Real,Parallelotope>& p); 
-
-    template
-    GridMaskSet<Real>
-    join_under_approximation(const GridMaskSet<Real>& gms,
-                            const ListSet<Real,Zonotope>& z); 
-
-
-    template
-    GridMaskSet<Real>
-    join_under_approximation(const GridMaskSet<Real>& gms,
-                            const ListSet<Real,Polytope>& z); 
-
-
-    template
-    GridBlock<Real>
-    over_approximation_of_intersection(const Rectangle<Real>& r1, 
-                                       const Rectangle<Real>& r2,
-                                       const Grid<Real>& g);
-
-    template
-    GridCellListSet<Real>
-    over_approximation_of_intersection(const Zonotope<Real>& z, 
-                                       const Rectangle<Real>& r,
-                                       const Grid<Real>& g);
-
-    template
-    GridMaskSet<Real>
-    over_approximation_of_intersection(const ListSet<Real,Rectangle>& ls, 
-                                       const Rectangle<Real>& r, 
-                                       const FiniteGrid<Real>& g);
-    
-    template
-    GridMaskSet<Real>
-    over_approximation_of_intersection(const ListSet<Real,Parallelotope>& ls, 
-                                       const Rectangle<Real>& r, 
-                                       const FiniteGrid<Real>& g);
     
     template std::ostream& operator<<(std::ostream&, const GridCell<Real>&);
     template std::ostream& operator<<(std::ostream&, 

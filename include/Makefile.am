@@ -1,0 +1,1 @@
+ariadne_includedir = $(pkgincludedir)

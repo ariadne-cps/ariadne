@@ -22,7 +22,7 @@
  */
 
 #include "base/array.h"
-#include "base/array_operations.h"
+#include "combinatoric/array_operations.h"
 #include "base/stlio.h"
 
 #include "python/python_utilities.h"

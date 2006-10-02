@@ -29,7 +29,7 @@
 
 #include "base/stlio.h"
 #include "base/array.h"
-#include "numeric/numerical_types.h"
+#include "numeric/rational.h"
 
 #include "test.h"
 

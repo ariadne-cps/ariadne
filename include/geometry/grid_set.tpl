@@ -28,7 +28,7 @@
 
 #include "../base/stlio.h"
 
-#include "../base/array_operations.h"
+#include "../combinatoric/array_operations.h"
 
 #include "../geometry/rectangle.h"
 #include "../geometry/zonotope.h"

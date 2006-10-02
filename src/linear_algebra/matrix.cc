@@ -33,7 +33,6 @@
 #include "numeric/mpfloat.h"
 #include "numeric/rational.h"
 
-#include "real_typedef.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {

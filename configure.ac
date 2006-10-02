@@ -10,12 +10,19 @@ AC_PROG_CXX
 dnl Checks for libraries.
 AC_LANG(C++)
 
+# Disable static libraries
+AC_DISABLE_STATIC
+
+# Checks for Libtool
+AC_PROG_LIBTOOL
+
 dnl Checks for header files.
 AC_STDC_HEADERS
 AC_CHECK_HEADER([gmpxx.h],,AC_MSG_ERROR([GMP library is missing. You must install it.]))
+AC_CHECK_HEADER([mpfr.h],,AC_MSG_ERROR([MPFR library is missing. You must install it.]))
 
 CPPFLAGS="$CPPFLAGS -I/usr/include/python2.4"
-AC_CHECK_HEADER([boost/version.hpp],,AC_MSG_ERROR([BOOST library is missing. You must install it.]))
+AC_CHECK_HEADER([boost/version.hpp],,AC_MSG_ERROR([Boost library is missing. You must install it.]))
 AC_CHECK_HEADER([boost/python.hpp],,AC_MSG_ERROR([Boost.Python library development files are missing. You must install them.]))
 
 #AC_MSG_CHECKING(for Doxygen)
@@ -27,6 +34,9 @@ else
     AC_MSG_WARN([Doxygen is not installed. You can not generate Ariadne's documentation.])
 fi
 
+# Find Python paths
+AM_PATH_PYTHON(2.4,, :)
 
-AC_CONFIG_FILES([Makefile src/Makefile src/base/Makefile src/evaluation/Makefile src/geometry/Makefile src/linear_algebra/Makefile src/numeric/Makefile src/python/Makefile])
+#AC_CONFIG_FILES([Makefile include/Makefile src/Makefile src/base/Makefile src/numeric/Makefile src/linear_algebra/Makefile src/combinatoric/Makefile src/geometry/Makefile src/python/Makefile src/system/Makefile src/evaluation/Makefile test/Makefile])
+AC_CONFIG_FILES([Makefile include/Makefile src/Makefile src/python/Makefile python/Makefile test/Makefile])
 AC_OUTPUT

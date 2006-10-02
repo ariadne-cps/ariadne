@@ -30,8 +30,7 @@
 
 #include "base/stlio.h"
 
-#include "base/array_operations.h"
-
+#include "combinatoric/array_operations.h"
 #include "combinatoric/lattice_set.h"
 
 namespace Ariadne {

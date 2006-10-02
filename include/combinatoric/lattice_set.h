@@ -37,8 +37,8 @@
 #include "../base/array.h"
 #include "../base/iterator.h"
 
-#include "../base/array_operations.h"
 #include "../numeric/interval.h"
+#include "../combinatoric/array_operations.h"
 
 namespace Ariadne {
   namespace Combinatoric {

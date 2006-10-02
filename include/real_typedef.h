@@ -29,31 +29,29 @@
 #ifndef _ARIADNE_REAL_TYPEDEF_H
 #define _ARIADNE_REAL_TYPEDEF_H
 
-#include "numeric/numerical_types.h"
 
-namespace Ariadne {
+#ifndef DOUBLE_REAL 
+#define MPFLOAT_REAL
+#endif
 
 #ifdef DOUBLE_REAL
 #define REAL_IS_A_FIELD
-typedef double Real;
+#include "numeric/float64.h"
+namespace Ariadne {
+  typedef Numeric::Float64 Real;
+}
 #endif
 
 #ifdef MPFLOAT_REAL
 #undef REAL_IS_A_FIELD
-typedef Ariadne::MPFloat Real;
+#include "numeric/mpfloat.h"
+namespace Ariadne {
+  typedef Numeric::MPFloat Real;
+}
 #endif
 
-#ifdef DYADIC_REAL
-#undef REAL_IS_A_FIELD
-typedef Ariadne::Dyadic Real;
-#endif 
-
-#ifdef RATIONAL_REAL
-#define REAL_IS_A_FIELD
-typedef Ariadne::Rational Real;
-#endif
-
-typedef Ariadne::numerical_traits<Real>::field_extension_type Field;
+namespace Ariadne {
+  typedef Ariadne::numerical_traits<Real>::field_extension_type Field;
 }
 
 #endif /* _ARIADNE_REAL_TYPEDEF_H */

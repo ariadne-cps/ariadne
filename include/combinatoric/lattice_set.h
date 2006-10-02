@@ -76,6 +76,7 @@ namespace Ariadne {
 
     bool operator<(const LatticeCell& lc1, const LatticeCell& lc2);
     
+    std::istream& operator>>(std::istream& os, LatticeCell&);
     std::istream& operator>>(std::istream& os, LatticeBlock&);
     
     std::ostream& operator<<(std::ostream& os, const LatticeCell&);
@@ -96,7 +97,9 @@ namespace Ariadne {
       explicit LatticeCell(dimension_type n=0) : _lower(n) { }
       /*!\brief Construct a cell with lower corner at \a l. */
       explicit LatticeCell(const IndexArray& l) : _lower(l) { }
-      
+      /*!\brief Construct a cell with lower corner at \a l. */
+      explicit LatticeCell(const std::string& str);
+  
       /*!\brief Copy constructor. */
       LatticeCell(const LatticeCell& c) : _lower(c._lower) { }
       /*!\brief Assignment operator. */

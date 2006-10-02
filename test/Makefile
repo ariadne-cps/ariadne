@@ -10,11 +10,11 @@ TESTS = \
   test_simplex test_polytope test_polyhedron \
   test_list_set test_grid_set test_partition_tree_set \
   test_ddconv \
-  test_epsfstream \
   test_interval_newton \
   test_chainreach \
-  test_integration_step 
-
+  test_integration_step \
+  test_epsfstream test_chompfstream \
+  
 OBJS=$(addsuffix .o,$(TESTS))
 
 CXXFLAGS += -Wall -I../include/ 
@@ -47,7 +47,7 @@ $(TESTS): %: %.o ../src/libariadne.so
 	${CXX} ${INCLUDE} ${CXXFLAGS} -c $<
 
 clean:
-	-rm -rf core *.log *.eps *.o ${TESTS} 
+	-rm -rf core *.log *.eps *.txt *.o ${TESTS} 
 
 dep:  
 	@sed -e '/^### Do Not edit this line$$/,$$d' Makefile \

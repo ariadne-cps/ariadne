@@ -127,6 +127,20 @@ namespace Ariadne {
       return result;
     }
     
+    LatticeMultiMap::const_iterator
+    LatticeMultiMap::begin() const 
+    {
+      return _map.begin();
+    }
+    
+    LatticeMultiMap::const_iterator
+    LatticeMultiMap::end() const 
+    {
+      return _map.end();
+    }
+
+    
+    
     std::ostream&
     operator<<(std::ostream& os, const LatticeMultiMap& m) 
     {

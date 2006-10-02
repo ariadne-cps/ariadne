@@ -78,6 +78,13 @@ namespace Ariadne {
       size_type _array_size;
     };
       
+    LatticeCell::LatticeCell(const std::string& s)
+      : _lower()
+    {
+      std::stringstream ss(s);
+      ss >> *this;
+    }
+     
     bool
     operator<(const LatticeCell& lc1, const LatticeCell& lc2) {
       assert(lc1.dimension()==lc2.dimension());
@@ -92,6 +99,45 @@ namespace Ariadne {
       return false;
     }
 
+    std::istream& 
+    operator>>(std::istream& is, LatticeCell& lc)
+    {
+      char c;
+      is >> c;
+      if(c=='(') {
+        /* Representation as a literal (l1,l2,...,ln) */
+        std::vector< int > v;
+        int i;
+        c=',';
+        while(c==',') {
+          is >> i;
+          v.push_back(i);
+          c=' ';
+          while( is && c==' ') {
+            is >> c;
+          }
+        }
+        if(is) {
+          assert(c=')');
+        }
+        
+        IndexArray l(v.size());
+        for(size_type i=0; i!=v.size(); ++i) {
+          l[i]=v[i];
+        }
+        lc=LatticeCell(l);
+      }
+      else {
+        is.putback(c);
+        /* representation as lower and upper corners */
+        /* FIXME */
+        // throw invalid_input("Not implemented");
+      }
+      return is;
+    }
+    
+    
+    
     LatticeBlock::LatticeBlock(const std::string& s)
       : _lower(), _upper()
     {

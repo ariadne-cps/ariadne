@@ -39,6 +39,8 @@ namespace Ariadne {
     /*! \brief A combinatorial map on a lattice. */
     class LatticeMultiMap {
      public:
+      typedef std::map<LatticeCell,LatticeCellListSet>::const_iterator const_iterator;
+     public:
      
       /*! \brief Construct a map with argumbent dimension \a arg_dim and result dimension \a res_dim,
        *  which maps all cells to the empty set. */
@@ -80,6 +82,12 @@ namespace Ariadne {
       
       /*! brief  The inverse of the map. */
       LatticeMultiMap inverse() const;
+      
+      /*! brief  A constant iterator to the first non-default image. */
+      LatticeMultiMap::const_iterator begin() const;
+      
+      /*! brief  A constant iterator to the last non-default image. */
+      LatticeMultiMap::const_iterator end() const;
       
       /*! \brief The name of the system. */
       std::string name() const { return "LatticeMultiMap"; }

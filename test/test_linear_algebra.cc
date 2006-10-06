@@ -134,8 +134,8 @@ int main() {
     cout << "QR =" << B << "\n";
     cout << "A  =" << A << "\n";
     cout << flush;
-    assert(LinearAlgebra::in(I,Q*Q.transpose()));
-    assert(LinearAlgebra::in(A,B));
+    assert(LinearAlgebra::contains(Q*Q.transpose(),I));
+    assert(LinearAlgebra::contains(B,A));
   }
 
   /*

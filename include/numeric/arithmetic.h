@@ -150,20 +150,20 @@ namespace Ariadne {
     }
 
     /*! \brief The power of a real number type by an integer. */
-    template<typename R, typename N> R pow(const R& x, const N& n) {
+    template<typename R, typename N> inline R pow(const R& x, const N& n) {
       R r=1; R p=x; N e=1;
       while(e<n) { if(e&n) { r*=p; } p*=p; e*=2; }
       return r; 
     }
     
     /*! \brief The integer part of \a x, rounding towards 0. */
-    template<typename N, typename R> N floor(const R& x);
+    template<typename N, typename R> inline N floor(const R& x);
 
     /*! \brief The integer ceiling of \a x, rounding away from 0. */
-    template<typename N, typename R> N ceil(const R& x);
+    template<typename N, typename R> inline N ceil(const R& x);
     
     /*! \brief An integer \a n such that \f$n\leq x/y < n+1\f$. */
-    template<typename N, typename R> N quot(const R& x, const R& y);
+    template<typename N, typename R> inline N quot(const R& x, const R& y);
 
     /*! \brief An integer \a n such that \f$n\leq x/y < n+1\f$. (Deprecated) 
      *  \deprecated This function has been replaced by quot . 

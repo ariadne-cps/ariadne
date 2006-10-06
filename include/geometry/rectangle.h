@@ -355,9 +355,9 @@ namespace Ariadne {
       R radius() const {
         R diameter=0;
         for(dimension_type i=0; i!=this->dimension(); ++i) {
-          diameter=Numeric::max(diameter,sub_up(this->upper_bound(i),this->lower_bound(i)));
+          diameter=Numeric::max_up(diameter,Numeric::sub_up(this->upper_bound(i),this->lower_bound(i)));
         }
-        return div_down(diameter,R(2));
+        return div_up(diameter,R(2));
       }
       
       /*! \brief Compute a quadrant of the Rectangle determined by \a q.
@@ -519,7 +519,7 @@ namespace Ariadne {
         throw std::domain_error("interiors_intersect(Rectangle,Rectangle): The two rectangles have different dimensions");
       }
       for(size_type i=0; i!=A.dimension(); ++i) {
-        if(!Numeric::interiors_intersect(A[i],B[i])) {
+        if(!(A[i].upper()>B[i].lower() && A[i].lower()<B[i].upper())) {
           return false;
         }
       }
@@ -535,7 +535,7 @@ namespace Ariadne {
         throw std::domain_error("inner_subset(Rectangle,Rectangle): The two rectangles have different dimensions");
       }
       for (size_type i=0; i!=A.dimension(); ++i) {
-        if(!Numeric::inner_subset(A[i],B[i])) {
+        if(!(A[i].lower()>B[i].lower() && A[i].upper()<B[i].upper())) {
           return false;
         }
       }
@@ -584,7 +584,10 @@ namespace Ariadne {
         throw std::domain_error("Cannot intersect with a rectangle of a different dimension.");
       }
       for(size_type i=0; i != C.dimension(); ++i) {
-        C[i]=Numeric::regular_intersection(A[i],B[i]);
+        C[i]=Numeric::intersection(A[i],B[i]);
+        if(C[i].lower()>=C[i].upper()) {
+          C[i]=Interval<R>();
+        }
       }
       return C;
     }

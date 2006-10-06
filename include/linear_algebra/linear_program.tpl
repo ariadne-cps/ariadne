@@ -25,6 +25,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "lpslv.h"
 #include "linear_program.h"
 
 #include "../linear_algebra/vector.h"
@@ -211,8 +212,17 @@ namespace Ariadne {
     void
     LinearProgram<R>::solve_tableau() const 
     {
-      //std::cerr << "LinearProgram<" << name<R>() << ">::second_phase() const" << std::endl;
+      size_type m=this->number_of_constraints();
       size_type n=this->number_of_free_variables();
+      R* A=const_cast<R*>(this->tableau().begin());
+      R* b=A+n;
+      R* c=A+m*(n+1);
+      R& d=A[(m+1)*(n+1)-1];
+      size_type* piv=this->_variable_indices.begin().operator->();
+      lpslv(m,n,A,1,n+1,b,n+1,c,1,d,(int*)piv);
+      return;
+      
+      //std::cerr << "LinearProgram<" << name<R>() << ">::second_phase() const" << std::endl;
       
       size_type recursions=10;
       

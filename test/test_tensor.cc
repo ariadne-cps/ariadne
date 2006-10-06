@@ -1,8 +1,7 @@
 /***************************************************************************
- *            test_binary_word.cc
+ *            test_tensor.cc
  *
- *  9 May 2005
- *  Copyright  2005  Pieter Collins
+ *  Copyright  2006  Pieter Collins, Alberto Casagrande
  *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
  ****************************************************************************/
 
@@ -22,40 +21,34 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#define NO_CBLAS
+
 #include <iostream>
-#include <sstream>
-#include <string>
+#include <fstream>
 
-#include "ariadne.h"
+#include "declarations.h"
+#include "real_typedef.h"
+#include "numeric/numerical_types.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
+#include "linear_algebra/tensor.h"
 
-#include "base/stlio.h"
-#include "base/exception.h"
-#include "combinatoric/binary_word.h"
-#include "combinatoric/binary_tree.h"
-
-#include "base/utility.h"
-
-#include "test.h"
-
-using namespace Ariadne;
-using namespace Ariadne::Combinatoric;
 using namespace std;
+using namespace Ariadne;
+using namespace Ariadne::LinearAlgebra;
+
+template<class R>
+int test_tensor();
 
 int main() {
-  string istr = "[0,1,1,0,1,0] ";
-  stringstream iss(istr);
+  test_tensor<Rational>();
+  cout << "Incomplete";
+  return 0;
+}
 
-  BinaryWord bw;
-  BinaryWordList bwl;
-  BinaryWordFixedSizeList bwfsl(12);
-  BinaryTree bwt;
-  
-  vector<bool> v;
-
-  iss >> v;
-  bw=BinaryWord(v);
-  
-  cerr << "INCOMPLETE ";
-
+template<class R>
+int
+test_tensor()
+{
   return 0;
 }

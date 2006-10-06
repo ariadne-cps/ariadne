@@ -152,11 +152,11 @@ namespace Ariadne {
     template <typename R>
     inline 
     bool
-    in(const Vector<R>& v, const Vector< Interval<R> >& iv) 
+    contains(const Vector< Interval<R> >& iv,const Vector<R>& v) 
     {
       assert(v.size()==iv.size());
       for(size_type i=0; i!=v.size(); ++i) {
-        if(!Numeric::in(v(i),iv(i))) {
+        if(!Numeric::contains(iv(i),v(i))) {
           return false;
         }
       }

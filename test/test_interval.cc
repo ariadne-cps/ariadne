@@ -107,13 +107,6 @@ test_interval()
   cout << "centre(" << ivlf1 << ")=" << ivlf1.centre() << endl;
   assert(ivlf1.centre()==R(2.3125));
   
-  ivlf1=Interval<R>(R(1),R(1));
-  cout << "one=" << ivlf1 << endl;
-  ivlf2=exp(ivlf1);
-  cout << "exp(" << ivlf1 << ")=" << ivlf2 << endl;
-  ivlf3=log(ivlf1);
-  cout << "log(" << ivlf2 << ")=" << ivlf3 << endl;
- 
   try {
     string input("[1.125,2.25] ");
     stringstream iss(input);
@@ -125,10 +118,7 @@ test_interval()
     
     assert(equal(ivld1,ivld2));
     
-    try {
-      assert(ivld1==ivld2);
-    }
-    catch(...) { }
+    assert(indeterminate(ivld1==ivld2));
     
     Interval<R>& ivlf1ref=ivlf1;
     ivlf1ref=Interval<R>(5.25,7.375);
@@ -185,12 +175,41 @@ test_interval()
     cout << endl;
     //ivlr1 = sin(ivlr2);
 
+    ivlf1=Interval<R>(-13,-7);
+    ivlf2=Interval<R>(-3,2);
+    ivlf3=Interval<R>(5,11);
+    
+    cout << ivlf1 << " * " << ivlf1 << " = " << ivlf1*ivlf1 << endl;
+    cout << ivlf1 << " * " << ivlf2 << " = " << ivlf1*ivlf2 << endl;
+    cout << ivlf1 << " * " << ivlf3 << " = " << ivlf1*ivlf3 << endl;
+    cout << ivlf2 << " * " << ivlf1 << " = " << ivlf2*ivlf1 << endl;
+    cout << ivlf2 << " * " << ivlf2 << " = " << ivlf2*ivlf2 << endl;
+    cout << ivlf2 << " * " << ivlf3 << " = " << ivlf2*ivlf3 << endl;
+    cout << ivlf3 << " * " << ivlf1 << " = " << ivlf3*ivlf1 << endl;
+    cout << ivlf3 << " * " << ivlf2 << " = " << ivlf3*ivlf2 << endl;
+    cout << ivlf3 << " * " << ivlf3 << " = " << ivlf3*ivlf3 << endl;
+
+    cout << ivlf1 << " / " << ivlf1 << " = " << ivlf1/ivlf1 << endl;
+    cout << ivlf1 << " / " << ivlf3 << " = " << ivlf1/ivlf3 << endl;
+    cout << ivlf2 << " / " << ivlf1 << " = " << ivlf2/ivlf1 << endl;
+    cout << ivlf2 << " / " << ivlf3 << " = " << ivlf2/ivlf3 << endl;
+    cout << ivlf3 << " / " << ivlf1 << " = " << ivlf3/ivlf1 << endl;
+    cout << ivlf3 << " / " << ivlf3 << " = " << ivlf3/ivlf3 << endl;
+
+
   }
   catch(exception& e) {
     cout << "EXCEPTION " << e.what() << "\n";
     throw e;
   }
   
+  ivlf1=Interval<R>(R(1),R(1));
+  cout << "one=" << ivlf1 << endl;
+  ivlf2=exp(ivlf1);
+  cout << "exp(" << ivlf1 << ")=" << ivlf2 << endl;
+  ivlf3=log(ivlf1);
+  cout << "log(" << ivlf2 << ")=" << ivlf3 << endl;
+ 
   return 0;
 }
 
@@ -250,15 +269,8 @@ test_interval<Rational>()
     cout << "ivld1=" << ivld1 << "  ivld2=" << ivld2 << endl;
     assert(equal(ivld1,ivld2));
     
-    try {
-      assert(equal(ivld1,ivld2));
-    }
-    catch(...) { }
-    
-    try {
-      assert(ivld1==ivld2);
-    }
-    catch(...) { }
+    assert(equal(ivld1,ivld2));
+    assert(indeterminate(ivld1==ivld2));
     
     Interval<R>& ivlf1ref=ivlf1;
     ivlf1ref=Interval<R>(5.25,7.375);

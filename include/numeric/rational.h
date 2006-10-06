@@ -88,11 +88,32 @@ namespace Ariadne {
     template<> inline Rational conv_down(const mpq_class& x) { return conv_exact<Rational>(x); }
     template<> inline Rational conv_up(const mpq_class& x) { return conv_exact<Rational>(x); }
  
+    template<> inline Rational min_exact(const Rational& x1, const Rational& x2) {
+      return (x1<=x2) ? x1 : x2; }
+    template<> inline Rational min_approx(const Rational& x1, const Rational& x2) { 
+      return min_exact(x1,x2); }
+    template<> inline Rational min_down(const Rational& x1, const Rational& x2) { 
+      return min_exact(x1,x2); }
+    template<> inline Rational min_up(const Rational& x1, const Rational& x2) { 
+      return min_exact(x1,x2); }
+  
+    template<> inline Rational max_exact(const Rational& x1, const Rational& x2) {
+      return (x1<=x2) ? x1 : x2; }
+    template<> inline Rational max_approx(const Rational& x1, const Rational& x2) { 
+      return max_exact(x1,x2); }
+    template<> inline Rational max_down(const Rational& x1, const Rational& x2) { 
+      return max_exact(x1,x2); }
+    template<> inline Rational max_up(const Rational& x1, const Rational& x2) { 
+      return max_exact(x1,x2); }
+  
+    
     template<> inline Rational neg_exact(const Rational& x) { return -x; }
+    template<> inline Rational neg_approx(const Rational& x) { return neg_exact(x); }
     template<> inline Rational neg_down(const Rational& x) { return neg_exact(x); }
     template<> inline Rational neg_up(const Rational& x) { return neg_exact(x); }
     
     template<> inline Rational abs_exact(const Rational& x) { return (x>=0) ? x : Rational(-x); }
+    template<> inline Rational abs_approx(const Rational& x) { return abs_exact(x); }
     template<> inline Rational abs_down(const Rational& x) { return abs_exact(x); }
     template<> inline Rational abs_up(const Rational& x) { return abs_exact(x); }
     

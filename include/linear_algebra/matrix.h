@@ -187,13 +187,13 @@ namespace Ariadne {
     template <typename R>
     inline 
     bool
-    in(const Matrix<R>& A, const Matrix< Interval<R> >& iA) 
+    contains(const Matrix< Interval<R> >& iA, const Matrix<R>& A) 
     {
       assert(A.number_of_rows()==iA.number_of_rows() 
         && A.number_of_columns()==iA.number_of_columns());
       for(size_type i=0; i!=A.number_of_rows(); ++i) {
         for(size_type j=0; j!=A.number_of_columns(); ++j) {
-          if(!Numeric::in(A(i,j),iA(i,j))) {
+          if(!Numeric::contains(iA(i,j),A(i,j))) {
             return false;
           }
         }

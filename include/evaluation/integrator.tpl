@@ -744,10 +744,10 @@ namespace Ariadne {
       Geometry::GridMaskSet<R> result(g,lb);
       found.adjoin(is);
       
-      int steps=quotient(time,this->lock_to_grid_time());
-      if (steps==0) steps=1;
+      int steps=Numeric::conv_up<int>(div_up(time,this->lock_to_grid_time()));
+      if (steps==0) { steps=1; }
 
-      R time_step=time/steps;
+      R time_step=div_up(time,R(steps));
      
       for(int step=0; step!=steps; ++step) {
         found=difference(found,stored);

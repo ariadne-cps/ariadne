@@ -150,6 +150,12 @@ namespace Ariadne {
     }
     
   
+    template<> inline MPFloat conv_exact(const MPFloat& x) { return x; }
+    template<> inline MPFloat conv_approx(const MPFloat& x) { return conv_exact<MPFloat>(x); }
+    template<> inline MPFloat conv_down(const MPFloat& x) { return conv_exact<MPFloat>(x); }
+    template<> inline MPFloat conv_up(const MPFloat& x) { return conv_exact<MPFloat>(x); }
+ 
+
     template<> inline double conv_approx(const MPFloat& x) { return x.get_d(); }
  
     template<> inline MPFloat conv_exact(const int& n) { return MPFloat(n); }
@@ -162,6 +168,9 @@ namespace Ariadne {
     template<> inline MPFloat conv_up(const double& x) { return conv_exact<MPFloat>(x); }
     template<> inline MPFloat conv_approx(const double& x) { return conv_exact<MPFloat>(x); }
   
+    template<> inline int conv_down(const MPFloat& x) { return x.get_si(); }
+    template<> inline int conv_up(const MPFloat& x) { return x.get_si()+1; }
+ 
     template<> inline mpq_class conv_exact(const MPFloat& x) { return x; }
     template<> inline mpq_class conv_down(const MPFloat& x) { return conv_exact<mpq_class>(x); }
     template<> inline mpq_class conv_up(const MPFloat& x) { return conv_exact<mpq_class>(x); }
@@ -170,11 +179,36 @@ namespace Ariadne {
     template<> inline MPFloat conv_up(const mpq_class& x) { return MPFloat(x); }
     template<> inline MPFloat conv_approx(const mpq_class& x) { return MPFloat(x); }
   
+
+
+    template<> inline MPFloat min_exact(const MPFloat& x1, const MPFloat& x2) {
+      return (x1<=x2) ? x1 : x2; }
+    template<> inline MPFloat min_approx(const MPFloat& x1, const MPFloat& x2) {
+      return min_exact(x1,x2); }
+    template<> inline MPFloat min_down(const MPFloat& x1, const MPFloat& x2) {
+      return min_exact(x1,x2); }
+    template<> inline MPFloat min_up(const MPFloat& x1, const MPFloat& x2) {
+      return min_exact(x1,x2); }
+  
+    template<> inline MPFloat max_exact(const MPFloat& x1, const MPFloat& x2) {
+      return (x1>=x2) ? x1 : x2; }
+    template<> inline MPFloat max_approx(const MPFloat& x1, const MPFloat& x2) {
+      return max_exact(x1,x2); }
+    template<> inline MPFloat max_down(const MPFloat& x1, const MPFloat& x2) {
+      return max_exact(x1,x2); }
+    template<> inline MPFloat max_up(const MPFloat& x1, const MPFloat& x2) {
+      return max_exact(x1,x2); }
+  
+  
+  
     template<> inline MPFloat neg_exact(const MPFloat& x) { return invoke_mpfr(x,mpfr_neg,GMP_RNDN); }
+    template<> inline MPFloat neg_approx(const MPFloat& x) { return neg_exact(x); }
     template<> inline MPFloat neg_down(const MPFloat& x) { return neg_exact(x); }
     template<> inline MPFloat neg_up(const MPFloat& x) { return neg_exact(x); }
 
+
     template<> inline MPFloat abs_exact(const MPFloat& x) { return invoke_mpfr(x,mpfr_abs,GMP_RNDN); }
+    template<> inline MPFloat abs_approx(const MPFloat& x) { return abs_exact(x);  }
     template<> inline MPFloat abs_down(const MPFloat& x) { return abs_exact(x);  }
     template<> inline MPFloat abs_up(const MPFloat& x) { return abs_exact(x);  }
 

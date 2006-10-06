@@ -22,7 +22,7 @@ pkgpython_DATA = __init__.py
 #	$(INSTALL) __init__.py $(pkgpyexecdir)/
 
 
-INCLUDES = -I$(top_srcdir)/include -I$(python_includedir)
+INCLUDES = -I$(top_srcdir)/include 
 CXX_FLAGS = -fpic
 
 EXTRA_DIST = __init__.py

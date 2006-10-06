@@ -1,8 +1,7 @@
 /***************************************************************************
  *            interval.h
  *
- *  Wed 4 May 2005
- *  Copyright 2005  Alberto Casagrande, Pieter Collins
+ *  Copyright 2005-6  Alberto Casagrande, Pieter Collins
  *  Email casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -31,8 +30,7 @@
 
 #include <iostream>
 
-#include <boost/numeric/interval.hpp>
-#include <boost/numeric/interval/io.hpp>
+#include <boost/logic/tribool.hpp>
 
 #include "../declarations.h"
 
@@ -40,26 +38,14 @@
 #include "../numeric/arithmetic.h"
 #include "../numeric/rounding.h"
  
-/* No input routine for intervals defined by boost */
-namespace boost {
-  namespace numeric {
-    template<typename R>
-    std::istream&
-    operator>>(std::istream& is, interval<R>& ivl)
-    {
-      R l,u;
-      char c1,c2,c3;
-      is >> c1 >> l >> c2 >> u >> c3;
-      ivl=interval<R>(l,u);
-      return is;
-    }
-  }
-}
-
+using boost::logic::tribool;
+using boost::logic::indeterminate;
 
 namespace Ariadne {
   namespace Numeric {
     //using namespace boost::numeric::interval_lib;
+
+  class DivideByZeroException : public std::exception { };
 
     /*!\ingroup Numeric
      * \brief A templated class representing an interval of real numbers.
@@ -74,76 +60,51 @@ namespace Ariadne {
      * Currently implemented as a wrapper around the boost::numeric::interval class template from the Boost C++ library.
      */
     template<typename R>
-    class Interval : public
-        boost::numeric::interval<R, 
-            boost::numeric::interval_lib::policies< 
-                //boost::numeric::interval_lib::rounded_math<R>,
-                rounded_math<R>,
-                boost::numeric::interval_lib::checking_base<R> 
-            > 
-        >
+    class Interval
     {
-      typedef boost::numeric::interval<R, 
-            boost::numeric::interval_lib::policies< 
-                //boost::numeric::interval_lib::rounded_math<R>,
-                rounded_math<R>,
-                boost::numeric::interval_lib::checking_base<R> 
-            > 
-        > _boost_interval;
-
+     private:
+      R _lower; R _upper;
      public:
       /*! \brief Default constructer constructs empty interval. */
-      Interval()
-        : _boost_interval(1,0) { }
+      Interval() : _lower(0), _upper(0) { }
       /*! \brief Construct from lower and upper bounds. */
       template<typename RL,typename RU> Interval(const RL& l, const RU& u)
-        : _boost_interval(R(l),R(u)) { }
+        : _lower(conv_down<R>(l)), _upper(conv_up<R>(u)) { }
        /*! \brief Construct an interval with possibly different real type. */
       template<typename RX> Interval(const Interval<RX>& ivl)
-        : _boost_interval(R(ivl.lower()),R(ivl.upper())) { }
+        : _lower(conv_down<R>(ivl.lower())), _upper(conv_up<R>(ivl.upper())) { }
      /*! \brief Construct a one-point interval. */
       template<typename RX> Interval(const RX& x)
-        : _boost_interval(R(x),R(x)) { }
-      /*! \brief Construct from a boost interval. */
-      Interval(const _boost_interval& ivl)
-        : _boost_interval(ivl) { }
+        : _lower(conv_down<R>(x)), _upper(conv_up<R>(x)) { }
       /*! \brief Construct from lower and upper bounds. */
-      Interval(const R& l, const R& u)
-        : _boost_interval(l,u) { }
+      Interval(const R& l, const R& u) : _lower(l), _upper(u) { }
+
       /*! \brief Assignment operator. */
       Interval<R>& operator=(const R& x) {
-        *this=Interval<R>(x,x);
-        return *this;
+        this->_lower=x; this->_upper=x; return *this;
+      }
+      /*! \brief Copy assignment operator. */
+      Interval<R>& operator=(const Interval<R>& ivl) {
+        this->_lower=ivl._lower; this->_upper=ivl._upper; return *this;
       }
       
-      /*! \brief Equality operator. */
-      bool operator==(const Interval<R>& ivl) const { 
-        return this->_boost_interval::operator==(ivl); }
-      /*! \brief Inequality operator. */
-      bool operator!=(const Interval<R>& ivl) const{ 
-        return this->_boost_interval::operator!=(ivl); }
-
-      /*! \brief Comparison operator. */
-      bool operator==(const R& x) const { 
-        return this->_boost_interval::operator==(x); }
-      /*! \brief Inequality operator. */
-      bool operator!=(const R& x) const { 
-        return this->_boost_interval::operator!=(x); }
-
+      /*! \brief The lower bound. */
+      const R& lower() const { return this->_lower; }
+      /*! \brief The upper bound. */
+      const R& upper() const { return this->_upper; }
+      
       /*! \brief Tests if the interval is empty . */
       bool empty() const { return this->lower()>this->upper(); }
       /*! \brief Tests if the interval contains \a r. */
       bool contains(const R& r) const { return this->lower()<=r && r<=this->upper(); }
-      /*! \brief Tests if the interior of the interval contains \a r. */
-      bool interior_contains(const R& r) const { return this->lower()<r && r<this->upper(); }
       
       /*! \brief The midpoint of the interval, given by \f$(a+b)/2\f$. */
       R centre() const { 
         return div_approx(add_approx(this->lower(),this->upper()),R(2)); }
       /*! \brief The radius of the interval, given by \f$(b-a)/2\f$. */
-      R radius() const { return (this->upper()-this->lower())/2; }
+      R radius() const { return div_up(sub_up(this->upper(),this->lower()),R(2)); }
       /*! \brief The length of the interval, given by \f$b-a\f$. */
-      R length() const { return this->upper()-this->lower(); }
+      R length() const { return sub_up(this->upper(),this->lower()); }
       
 #ifdef DOXYGEN
       /*! \brief The interval of possible minima of \a x1 in \a ivl1 and \a x2 in \a ivl2. */
@@ -213,124 +174,428 @@ namespace Ariadne {
      public:
       typedef field_tag algebraic_category;
       typedef Interval<R> field_extension_type;
+      typedef Interval<R> arithmetic_type;
     };
     
+
+
+
+
+    /*! \brief Equality operator. */
+    template<class R> inline
+    tribool operator==(const Interval<R>& x1, const Interval<R>& x2) { 
+      if(x1.lower()==x2.upper() && x1.upper()==x2.lower()) { return true; }
+      if(x1.lower()> x2.upper() || x1.upper()< x2.lower()) { return false; }
+      return indeterminate;
+    }
+  
+    /*! \brief Inequality operator. */
+    template<class R> inline
+    tribool operator!=(const Interval<R>& x1, const Interval<R>& x2) { 
+      if(x1.lower()> x2.upper() || x1.upper()< x2.lower()) { return true; }
+      if(x1.lower()==x2.upper() && x1.upper()==x2.lower()) { return false; }
+      return indeterminate;
+    }
+  
+    /*! \brief Less than operator. */
+    template<class R> inline
+    tribool operator< (const Interval<R>& x1, const Interval<R>& x2) { 
+      if(x1.upper()< x2.lower()) { return true; }
+      if(x1.lower()>=x2.upper()) { return false; }
+      return indeterminate;
+    }
+  
+    /*! \brief Greater than operator. */
+    template<class R> inline
+    tribool operator> (const Interval<R>& x1, const Interval<R>& x2) { 
+      if(x1.lower()> x2.upper()) { return true; }
+      if(x1.upper()<=x2.lower()) { return false; }
+      return indeterminate;
+    }
+  
+    /*! \brief Less than or equal to operator. */
+    template<class R> inline
+    tribool operator<=(const Interval<R>& x1, const Interval<R>& x2) { 
+      if(x1.upper()<=x2.lower()) { return true; }
+      if(x1.lower()> x2.upper()) { return false; }
+      return indeterminate;
+    }
+  
+    /*! \brief Greater than or equal to operator. */
+    template<class R> inline
+    tribool operator>=(const Interval<R>& x1, const Interval<R>& x2) { 
+      if(x1.lower()>=x2.upper()) { return true; }
+      if(x1.upper()< x2.lower()) { return false; }
+      return indeterminate;
+    }
+  
+
+
+    /*! \brief Equality operator. */
+    template<class R> inline
+    tribool operator==(const Interval<R>& x1, const R& x2) { 
+      if(x1.lower()==x2 && x1.upper()==x2) { return true; }
+      if(x1.lower()> x2 || x1.upper()< x2) { return false; }
+      return indeterminate; 
+    }
+
+    /*! \brief Inequality operator. */
+    template<class R> inline
+    tribool operator!=(const Interval<R>& x1, const R& x2) { 
+      if(x1.lower()> x2 || x1.upper()< x2) { return true; }
+      if(x1.lower()==x2 && x1.upper()==x2) { return false; }
+      return indeterminate; 
+    }
+
+    /*! \brief Less than operator. */
+    template<class R> inline
+    tribool operator< (const Interval<R>& x1, const R& x2) { 
+      if(x1.upper()< x2) { return true; }
+      if(x1.lower()>=x2) { return false; }
+      return indeterminate; 
+    }
+
+    /*! \brief Greater than operator. */
+    template<class R> inline
+    tribool operator> (const Interval<R>& x1, const R& x2) { 
+      if(x1.lower()> x2) { return true; }
+      if(x1.upper()<=x2) { return false; }
+      return indeterminate; 
+    }
+
+    /*! \brief Less than or equal to operator. */
+    template<class R> inline
+    tribool operator<=(const Interval<R>& x1, const R& x2) { 
+      if(x1.upper()<=x2) { return true; }
+      if(x1.lower()> x2) { return false; }
+      return indeterminate; 
+    }
+
+    /*! \brief Greater than or equal to operator. */
+    template<class R> inline
+    tribool operator>=(const Interval<R>& x1, const R& x2) { 
+      if(x1.lower()>=x2) { return true; }
+      if(x1.upper()< x2) { return false; }
+      return indeterminate; 
+    }
+
+
+    /*! \brief Equality operator. */
+    template<class R> inline
+    tribool operator==(const R& x1, const Interval<R>& x2) { 
+      return x2==x1;
+    }
+
+    /*! \brief Inequality operator. */
+    template<class R> inline
+    tribool operator!=(const R& x1, const Interval<R>& x2) { 
+      return x2!=x1;
+    }
+
+    /*! \brief Less than operator. */
+    template<class R> inline
+    tribool operator< (const R& x1, const Interval<R>& x2) { 
+      return x2< x1;
+    }
+
+    /*! \brief Greater than operator. */
+    template<class R> inline
+    tribool operator> (const R& x1, const Interval<R>& x2) { 
+      return x2> x1;
+    }
+
+    /*! \brief Less than or equal to operator. */
+    template<class R> inline
+    tribool operator<=(const R& x1, const Interval<R>& x2) { 
+      return x2<=x1;
+    }
+
+    /*! \brief Greater than or equal to operator. */
+    template<class R> inline
+    tribool operator>=(const R& x1, const Interval<R>& x2) { 
+      return x2>=x1;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    template<typename R> inline
+    Interval<R> operator+(const Interval<R>& x) {
+      return x;
+    }
+
+    template<typename R> inline
+    Interval<R> operator-(const Interval<R>& x) {
+      return Interval<R>(neg_down(x.upper()),neg_up(x.lower()));
+    }
+
+
+    template<typename R> inline
+    Interval<R> operator+(const Interval<R>& x1, const Interval<R>& x2) {
+      return Interval<R>(add_down(x1.lower(),x2.lower()),
+                         add_up(x1.upper(),x2.upper()));
+    }
+
+    template<typename R> inline
+    Interval<R> operator+(const Interval<R>& x1, const R& x2) {
+      return Interval<R>(add_down(x1.lower(),x2),add_up(x1.upper(),x2));
+    }
+
+    template<typename R> inline
+    Interval<R> operator+(const R& x1, const Interval<R>& x2) {
+      return Interval<R>(add_down(x1,x2.lower()),add_up(x1,x2.upper()));
+    }
+
+
+    template<typename R> inline
+    Interval<R> operator+=(Interval<R>& x1, const Interval<R>& x2) {
+      return x1=x1+x2;
+    }
+
+    template<typename R> inline
+    Interval<R> operator+=(Interval<R>& x1, const R& x2) {
+      return x1=x1+x2;
+    }
+
+
+
+    template<typename R> inline
+    Interval<R> operator-(const Interval<R>& x1, const Interval<R>& x2) {
+      return Interval<R>(sub_down(x1.lower(),x2.upper()),
+                         sub_up(x1.upper(),x2.lower()));
+    }
+
+    template<typename R> inline
+    Interval<R> operator-(const Interval<R>& x1, const R& x2) {
+      return Interval<R>(sub_down(x1.lower(),x2),sub_up(x1.upper(),x2));
+    }
+
+    template<typename R> inline
+    Interval<R> operator-(const R& x1, const Interval<R>& x2) {
+      return Interval<R>(sub_down(x1,x2.upper()),sub_up(x1,x2.lower()));
+    }
+
+    template<typename R> inline
+    Interval<R> operator-=(Interval<R>& x1, const Interval<R>& x2) {
+      return x1=x1-x2;
+    }
+
+    template<typename R> inline
+    Interval<R> operator-=(Interval<R>& x1, const R& x2) {
+      return x1=x1-x2;
+    }
+
+
+
+    template<typename R> inline
+    Interval<R> operator*(const Interval<R>& x1, const Interval<R>& x2) {
+      typedef Interval<R> I;
+      const R& xl = x1.lower();
+      const R& xu = x1.upper();
+      const R& yl = x2.lower();
+      const R& yu = x2.upper();
+      R z=0;
+        
+      if (xl>=z) {
+        if (yl>=z) {
+          return I(mul_down(xl,yl),mul_up(xu,yu));
+        } else if(yu<=z) {
+          return I(mul_down(xu,yl),mul_up(xl,yu));
+        } else {
+          return I(mul_down(xu,yl),mul_up(xu,yu));
+        }
+      } else if (xu<=z) {
+        if (yl>=z) {
+          return I(mul_down(xl,yu),mul_up(xu,yl));
+        } else if(yu<=z) {
+          return I(mul_down(xu,yu),mul_up(xl,yl));
+        } else {
+          return I(mul_down(xl,yu),mul_up(xl,yl));
+        }
+      } else {
+        if (yl>=z) {
+          return I(mul_down(xl,yu),mul_up(xu,yu));
+        } else if(yu<=z) {
+          return I(mul_down(xu,yl),mul_up(xl,yl));
+        } else {
+          return I(min_down(mul_down(xl,yu),mul_down(xu,yl)),
+                   max_up(mul_up(xl,yl),mul_up(xu,xu)));
+        }
+      }
+    }    
+
+    template<typename R> inline
+    Interval<R> operator*(const Interval<R>& x1, const R& x2) {
+      return x1*Interval<R>(x2); 
+    }
+
+    template<typename R> inline
+    Interval<R> operator*(const R& x1, const Interval<R>& x2) {
+      return Interval<R>(x1)*x2;
+    }
+
+    template<typename R> inline
+    Interval<R> operator*=(Interval<R>& x1, const Interval<R>& x2) {
+      return x1=x1*x2;
+    }
+
+    template<typename R> inline
+    Interval<R> operator*=(Interval<R>& x1, const R& x2) {
+      return x1=x1*x2;
+    }
+
+
+
+
+    template<typename R> inline
+    Interval<R> operator/(const Interval<R>& x1, const Interval<R>& x2) {
+      typedef Interval<R> I;
+      const R& xl = x1.lower();
+      const R& xu = x1.upper();
+      const R& yl = x2.lower();
+      const R& yu = x2.upper();
+      R z=0;
+
+      if (yl>z) {
+        if (xl>=z) {
+          return I(div_down(xl,yu),div_up(xu,yl));
+        } else if(xu<=z) {
+          return I(div_down(xl,yl),div_up(xu,yu));
+        } else {
+          return I(div_down(xl,yl),div_up(xu,yl));
+        }
+      } else if (yu<z) {
+        if (xl>=z) {
+          return I(div_down(xu,yu),div_up(xl,yl));
+        } else if(xu<=z) {
+          return I(div_down(xu,yl),div_up(xl,yu));
+        } else {
+          return I(div_down(xu,yu),div_up(xl,yu));
+        }
+      } else {
+        throw DivideByZeroException();
+      }
+    }
+
+    template<typename R> inline
+    Interval<R> operator/(const Interval<R>& x1, const R& x2) {
+      return x1/Interval<R>(x2); 
+    }
+
+    template<typename R> inline
+    Interval<R> operator/(const R& x1, const Interval<R>& x2) {
+      return Interval<R>(x1)/x2;
+    }
+
+    template<typename R> inline
+    Interval<R> operator/=(Interval<R>& x1, const Interval<R>& x2) {
+      return x1=x1/x2;
+    }
+
+    template<typename R> inline
+    Interval<R> operator/=(Interval<R>& x1, const R& x2) {
+      return x1=x1/x2;
+    }
+
+
+
+
     template<typename R>
     inline
     Interval<R> 
-    min(const Interval<R>& ivl1, const Interval<R>& ivl2) {
+    min(const Interval<R>& x1, const Interval<R>& x2) {
       //std::cerr << "Interval::min<Interval<" << name<R>() << ">>" << std::endl;
-      //return Interval<R>(min(ivl1.lower(),ivl2.lower()),min(ivl1.upper(),ivl2.upper()));
-      return boost::numeric::min(ivl1,ivl2);
+      return Interval<R>(min_down(x1.lower(),x2.lower()),min_up(x1.upper(),x2.upper()));
     }
   
     template<typename R>
     inline
     Interval<R> 
-    max(const Interval<R>& ivl1, const Interval<R>& ivl2) {
-      //std::cerr << "Interval::max<Interval<" << name<R>() << ">>" << std::endl;
-      //return Interval<R>(max(ivl1.lower(),ivl2.lower()),max(ivl1.upper(),ivl2.upper()));
-      return boost::numeric::max(ivl1,ivl2);
+    max(const Interval<R>& x1, const Interval<R>& x2) {
+      //std::cerr << "Interval::min<Interval<" << name<R>() << ">>" << std::endl;
+      return Interval<R>(max_down(x1.lower(),x2.lower()),max_up(x1.upper(),x2.upper()));
     }
     
     template<typename R>
     inline
     Interval<R> 
-    abs(const Interval<R>& ivl) {
+    abs(const Interval<R>& x) {
       using namespace ::Ariadne::Numeric;
-      //std::cerr << "Interval::abs<Interval<" << name<R>() << ">>" << std::endl;
-      //Can't use boost::numeric::abs because no comparison of GMP expressions.
-      //return boost::numeric::abs(ivl);
-      if(ivl.lower()>=0) { return ivl; } else if(ivl.upper() < 0) { return -ivl; } 
-      else { return Interval<R>(0,max(R(-ivl.lower()),ivl.upper())); }
-      //else { return Interval<R>(0,max<R>(-ivl.lower(),ivl.upper())); }
+      if(x.lower()>=0) { return x; } 
+      if(x.upper() < 0) { return -x; } 
+      return Interval<R>(R(0),max_up(neg_up(x.lower()),x.upper()));
     }
   
     template<typename R>
     inline
     bool
-    equal(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    equal(const Interval<R>& x1, const Interval<R>& x2)
     {
-      return (ivl1.lower()==ivl2.lower() || ivl1.upper()==ivl2.upper());
+      return (x1.lower()==x2.lower() || x1.upper()==x2.upper());
     }
 
     template<typename R>
     inline
     bool
-    disjoint(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    disjoint(const Interval<R>& x1, const Interval<R>& x2)
     {
-      return (ivl1.upper()<ivl2.lower() || ivl1.lower()>ivl2.upper());
+      return (x1.upper()<x2.lower() || x1.lower()>x2.upper());
     }
 
     template<typename R>
     inline
     bool
-    interiors_intersect(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    subset(const Interval<R>& x1, const Interval<R>& x2)
     {
-      return (ivl1.upper()>ivl2.lower() && ivl1.lower()<ivl2.upper());
-    }
-
-    template<typename R>
-    inline
-    bool
-    inner_subset(const Interval<R>& ivl1, const Interval<R>& ivl2)
-    {
-      return (ivl1.lower()>ivl2.lower() && ivl1.upper()<ivl2.upper());
-    }
-
-    template<typename R>
-    inline
-    bool
-    subset(const Interval<R>& ivl1, const Interval<R>& ivl2)
-    {
-      return (ivl1.lower()>=ivl2.lower() && ivl1.upper()<=ivl2.upper());
+      return (x1.lower()>=x2.lower() && x1.upper()<=x2.upper());
     }
 
     template<typename R>
     inline
     Interval<R>
-    intersection(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    intersection(const Interval<R>& x1, const Interval<R>& x2)
     {
-      return Interval<R>(std::max(ivl1.lower(),ivl2.lower()),
-                         std::min(ivl1.upper(),ivl2.upper()));
+      return Interval<R>(std::max(x1.lower(),x2.lower()),
+                         std::min(x1.upper(),x2.upper()));
     }
 
     template<typename R>
     inline
-    Interval<R>
-    regular_intersection(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    bool
+    contains(const Interval<R>& x1, const R& x2)
     {
-      if(ivl1.upper()==ivl2.lower() || ivl1.lower()==ivl2.upper()) {
-        return Interval<R>(1,0);
-      }
-      else {
-        return intersection(ivl1,ivl2);
-      }
+      return(x1.lower()<=x2 && x2<=x1.upper());
     }
-
     
+    
+
     template<typename R>
     inline
-    bool
-    in(const R& x, const Interval<R>& ivl)
+    R
+    centre(const Interval<R>& x)
     {
-      return(ivl.lower()<=x && x<=ivl.upper());
+      return med_approx(x.lower(),x.upper());
     }
     
     
     template<typename R>
     inline
     Interval<R>
-    hull(const Interval<R>& ivl1, const Interval<R>& ivl2)
+    hull(const Interval<R>& x1, const Interval<R>& x2)
     {
-      if(ivl1.empty()) {
-        return ivl2;
-      }
-      if(ivl2.empty()) {
-        return ivl1;
-      }
-      return Interval<R>(std::min(ivl1.lower(),ivl2.lower()),
-                         std::max(ivl1.upper(),ivl2.upper()));
+      if(x1.empty()) { return x2; }
+      if(x2.empty()) { return x1; }
+      return Interval<R>(x1.lower()<=x2.lower()?x1.lower():x2.lower(),
+                         x1.upper()>=x2.upper()?x1.upper():x2.upper());
     }
     
     
@@ -346,6 +611,38 @@ namespace Ariadne {
       return result;
     }
   
+
+
+    template<typename R>
+    inline
+    Interval<R>
+    sqrt(const Interval<R>& x) {
+      return Interval<R>(sqrt_down(x.lower()),sqrt_up(x.upper()));
+    }
+
+    template<typename R>
+    inline
+    Interval<R>
+    hypot(const Interval<R>& x1, const Interval<R>& x2) {
+      return Interval<R>(hypot_down(x1.lower(),x2.lower()),
+                         hypot_up(x1.upper(),x2.upper()));
+    }
+
+    template<typename R>
+    inline
+    Interval<R>
+    exp(const Interval<R>& x) {
+      return Interval<R>(exp_down(x.lower()),exp_up(x.upper()));
+    }
+
+    template<typename R>
+    inline
+    Interval<R>
+    log(const Interval<R>& x) {
+      return Interval<R>(log_down(x.lower()),log_up(x.upper()));
+    }
+
+
     template<typename R>
     inline
     std::ostream&
@@ -357,8 +654,6 @@ namespace Ariadne {
       else {
         return os << "[" << this->lower() << "," << this->upper() << "]";
       }
-      //const _boost_interval& boost_ivl(*this);
-      //return os << boost_ivl;
     }
     
     template<typename R>
@@ -371,28 +666,66 @@ namespace Ariadne {
       R u;
       is >> c >> l >> c >> u >> c;
       (*this)=Interval<R>(l,u);
-      //_boost_interval& boost_ivl(*this);
-      //is >> boost_ivl;
       return is;
     }
         
     template<typename R>
     inline
     std::ostream&
-    operator<<(std::ostream& os, const Interval<R>& ivl)
+    operator<<(std::ostream& os, const Interval<R>& x)
     {
-      return ivl.write(os);
+      return x.write(os);
     }
     
     template<typename R>
     inline
     std::istream&
-    operator>>(std::istream& is, Interval<R>& ivl)
+    operator>>(std::istream& is, Interval<R>& x)
     {
-      return ivl.read(is);
+      return x.read(is);
     }
     
   } // namespace Numeric
 } // namespace Ariadne
   
+
+namespace TBLAS {
+  template<typename real>
+  int
+  iamax (const int N, const real *X, const int incX);
+
+  template<typename real>
+  int
+  iamax (const int N, const Ariadne::Numeric::Interval<real> *X, const int incX)
+  {
+#ifdef DEBUG
+    std::cerr << "TBLAS::iamax(const int N, const interval<real> *X, const int incX)\n";
+#endif
+
+    real mx = 0;
+    int ix = 0;
+    int i;
+    int result = 0;
+    
+    if (incX <= 0) {
+      return 0;
+    }
+
+    for (i = 0; i < N; i++) {
+      real av=min(abs(X[ix].lower()),abs(X[ix].upper()));
+      if (av > mx) {
+        mx = av;
+        result = i;
+      }
+      ix += incX;
+    }
+    
+    return result;
+  }
+  
+}
+
+
+
+
 #endif /* _ARIADNE_INTERVAL_H */

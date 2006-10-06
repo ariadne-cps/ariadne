@@ -104,7 +104,27 @@ namespace Ariadne {
     template<> inline double conv_up(const double& x) { return conv_exact<double>(x); }
     template<> inline double conv_approx(const double& x) { return conv_exact<double>(x); }
 
+    template<> inline Float64 min_exact(const Float64& x1,const Float64& x2) { 
+      return (x1<=x2) ? x1 : x2; }
+    template<> inline Float64 min_approx(const Float64& x1,const Float64& x2) { 
+      return min_exact(x1,x2); }
+    template<> inline Float64 min_down(const Float64& x1,const Float64& x2) { 
+      return min_exact(x1,x2); }
+    template<> inline Float64 min_up(const Float64& x1,const Float64& x2) { 
+      return min_exact(x1,x2); }
+   
+    template<> inline Float64 max_exact(const Float64& x1,const Float64& x2) { 
+      return (x1>=x2) ? x1 : x2; }
+    template<> inline Float64 max_approx(const Float64& x1,const Float64& x2) { 
+      return max_exact(x1,x2); }
+    template<> inline Float64 max_down(const Float64& x1,const Float64& x2) { 
+      return max_exact(x1,x2); }
+    template<> inline Float64 max_up(const Float64& x1,const Float64& x2) { 
+      return max_exact(x1,x2); }
+   
+
     template<> inline Float64 neg_exact(const Float64& x) { return -x; }
+    template<> inline Float64 neg_approx(const Float64& x) { return neg_exact(x); }
     template<> inline Float64 neg_down(const Float64& x) { return neg_exact(x); }
     template<> inline Float64 neg_up(const Float64& x) { return neg_exact(x); }
    

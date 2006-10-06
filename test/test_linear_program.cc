@@ -1,8 +1,7 @@
 /***************************************************************************
- *            test_binary_word.cc
+ *            test_linear_program.cc
  *
- *  9 May 2005
- *  Copyright  2005  Pieter Collins
+ *  Copyright  2006  Pieter Collins, Alberto Casagrande
  *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
  ****************************************************************************/
 
@@ -23,39 +22,44 @@
  */
 
 #include <iostream>
-#include <sstream>
+#include <iomanip>
+#include <fstream>
 #include <string>
 
-#include "ariadne.h"
-
-#include "base/stlio.h"
-#include "base/exception.h"
-#include "combinatoric/binary_word.h"
-#include "combinatoric/binary_tree.h"
-
-#include "base/utility.h"
-
-#include "test.h"
+#include "real_typedef.h"
+#include "numeric/rational.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
+#include "linear_algebra/linear_program.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Combinatoric;
+using namespace Ariadne::Numeric;
+using namespace Ariadne::LinearAlgebra;
 using namespace std;
 
+template<typename R>
+void test_linear_program();
+
+
 int main() {
-  string istr = "[0,1,1,0,1,0] ";
-  stringstream iss(istr);
-
-  BinaryWord bw;
-  BinaryWordList bwl;
-  BinaryWordFixedSizeList bwfsl(12);
-  BinaryTree bwt;
-  
-  vector<bool> v;
-
-  iss >> v;
-  bw=BinaryWord(v);
-  
-  cerr << "INCOMPLETE ";
-
+  test_linear_program<Rational>();
+  cout << "Incomplete";
   return 0;
+}
+
+template<typename R>
+void 
+test_linear_program()
+{
+  Matrix<R> A("[1,1,1,1; 1,1,1,1; 1,1,1,1]");
+  Vector<R> b("[1,1,1]");
+  Vector<R> c("[1,1,1,1]");
+  
+  LinearProgram<R> LP(A,b,c);
+  cout << LP << endl;
+
+  LP.solve();
+  cout << LP << endl;
+
+  
 }

@@ -101,8 +101,10 @@ namespace Ariadne {
       template<typename R> Geometry::Rectangle<double> operator() (const Geometry::Rectangle<R>& r) const {
         Geometry::Rectangle<double> result(2); 
         assert(r.dimension()==_d);
-        result[0]=Interval<double>(conv_approx<double>(r[_i].lower()),conv_approx<double>(r[_i].upper())); 
-        result[1]=Interval<double>(conv_approx<double>(r[_j].lower()),conv_approx<double>(r[_j].upper())); 
+        result.set_lower_bound(0,conv_approx<double>(r.lower_bound(0)));
+        result.set_upper_bound(0,conv_approx<double>(r.upper_bound(0)));
+        result.set_lower_bound(1,conv_approx<double>(r.lower_bound(1)));
+        result.set_upper_bound(1,conv_approx<double>(r.upper_bound(1)));
         return result;
       }
       template<typename R> Geometry::PointList<double> operator() (const Geometry::Zonotope<R>& z) const {
@@ -157,7 +159,7 @@ namespace Ariadne {
             pointers[i].radiant=-acos(0.0);
         } else {
           tangent_R=vert_pos[i](0)/vert_pos[i](1);
-          tangent=conv_approx<double>(tangent_R);
+          tangent=tangent_R;
           pointers[i].radiant=atan(tangent);
         
           if (vert_pos[i](1) <0)

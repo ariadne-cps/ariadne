@@ -33,6 +33,7 @@
 #include "numeric/numerical_types.h"
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
+#include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 #include "output/epsfstream.h"
 
@@ -59,16 +60,23 @@ int main() {
   stringstream iss(input);
 
   iss >> bbox >> r1 >> r2 >> r3 >> r4;
+  Zonotope<Real> z3(r3);
+  Polytope<Real> p4(r4);
   
   cout << bbox << "\n";
-  cout << r1 << " " << r2 << " "<< r3 << " " << r4 << std::endl;
+  cout << r1 << " " << r2 << endl;
+  cout << r3 << " " << r4 << endl;
+  cout << z3 << " " << p4 << endl;
+  cout << p4.vertices() << endl;
+  cout << z3.vertices() << endl;
+  
   
   epsfstream eps("test_epsfstream.eps",bbox);
   eps << r1;
   eps.set_fill_colour("blue");
   eps << r2;
   eps.set_fill_colour("red");
-  eps << r3 << r4;
+  eps << z3<< p4;
   eps.close();
 
   try {

@@ -130,8 +130,8 @@ namespace Ariadne {
           throw std::domain_error("The parameters have different space dimensions");
         }
         for (size_type i=0; i!=this->dimension(); ++i) {
-          this->set_lower_bound(i,Numeric::min(pt1[i],pt2[i]));
-          this->set_upper_bound(i,Numeric::max(pt1[i],pt2[i]));
+          this->set_lower_bound(i,Numeric::min_exact(pt1[i],pt2[i]));
+          this->set_upper_bound(i,Numeric::max_exact(pt1[i],pt2[i]));
         }
       }
       

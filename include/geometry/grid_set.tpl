@@ -432,7 +432,7 @@ namespace Ariadne {
     {
       SizeArray sizes=pts.depths();
       for(dimension_type i=0; i!=pts.dimension(); ++i) {
-        sizes[i]=pow(2,sizes[i]);
+        sizes[i]=exp2(sizes[i]);
       }
       _grid_ptr=new IrregularGrid<R>(pts.bounding_box(),sizes);
       for(typename PartitionTreeSet<R>::const_iterator iter=pts.begin(); iter!=pts.end(); ++iter) {

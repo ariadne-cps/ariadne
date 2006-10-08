@@ -87,6 +87,12 @@ namespace Ariadne {
     template<class R> inline R div_down(const R& x1,const R& x2);
     template<class R> inline R div_up(const R& x1,const R& x2);
     
+    /*! \brief Power. */
+    template<class R, class N> inline R pow_approx(const R& x1,const N& x2);
+    template<class R, class N> inline R pow_exact(const R& x1,const N& x2);
+    template<class R, class N> inline R pow_down(const R& x1,const N& x2);
+    template<class R, class N> inline R pow_up(const R& x1,const N& x2);
+    
     /*! \brief %Integer lower bound. */
     template<typename N, typename R> inline N int_down(const R& x);
     /*! \brief %Integer upper bound. */

@@ -29,6 +29,7 @@
 #define _ARIADNE_INTEGER_H
 
 #include <gmpxx.h>
+#include <iostream>
 
 #include "../declarations.h"
 #include "../numeric/numerical_traits.h"
@@ -66,41 +67,89 @@ namespace Ariadne {
     template<> inline int conv_up<int>(const int& n) { return n; }
     
 
-    //! \name %Integer arithmetical functions
+    //! \name %Integer arithmetic
     //@{
     //! \ingroup Numeric
+    template<> inline Integer min(const Integer& n1, const Integer& n2) {
+      //std::cerr << "min<" << name<R>() << ">" << std::endl;
+      return n1<=n2 ? n1 : n2;
+    }
+  
+    template<> inline Integer max(const Integer& n1, const Integer& n2) {
+      //std::cerr << "min<" << name<R>() << ">" << std::endl;
+      return n1>=n2 ? n1 : n2;
+    }
+     
+    /*! \brief Absolute value. */
+    template<> inline 
+    Integer abs(const Integer& n) {
+      return n>=0 ? n : static_cast<Integer>(-n);
+    }
+  
+    /*! \brief Unary negation. */
+    template<> inline
+    Integer neg(const Integer& n) {
+      return -n;
+    }
+    
+    /*! \brief Addition. */
+    template<> inline
+    Integer add(const Integer& n1,const Integer& n2) {
+      return n1+n2;
+    }
+
+    
+    /*! \brief Subtraction. */
+    template<> inline
+    Integer sub(const Integer& n1,const Integer& n2) {
+      return n1-n2;
+    }
+
+    
+    /*! \brief Multiplication. */
+    template<> inline
+    Integer mul(const Integer& n1,const Integer& n2) {
+      return n1*n2;
+    }
+    
+    /*! \brief The power of a real number type by an integer. */
+    template<> inline 
+    Integer pow(const Integer& n, const uint& i) {
+      Integer r=1; Integer p=n; uint e=1;
+      while(e<i) { if(e&i) { r*=p; } p*=p; e*=2; }
+      return r; 
+    }
+    //@}
+    
+    //! \name %Integer functions
+    //@{
     /*! \brief Factorial. */
-    template<typename N>
-    inline
-    N 
-    factorial(const N& n) {
-      uint result=1;
-      for(N i=1; i!=n; ++i) {
-        result*=i;
-      }
+    template<typename N1, class N2> inline
+    N1 factorial(const N2& n) {
+      N1 result=1;
+      for(N2 i=1; i!=n; ++i) { result*=i; }
       return result;
     }
 
+    /*! \brief Factorial. */
+    template<typename N> inline
+    N factorial(const N& n) {
+      N result=1;
+      for(N i=1; i!=n; ++i) { result*=i; }
+      return result;
+    }
 
     /*! \brief Greatest common divisor. */
-    template <typename N>
-    inline 
-    N 
-    gcd(const N &a, const N &b)
-    {
-      N c=a%b;
-      if (c==0) { 
-        return b;
-      }
-      return (gcd(b, c));
+    template <typename N> inline 
+    N gcd(const N &a, const N &b) {
+      N aa=a; N bb=b; N cc=aa%bb;
+      while(cc!=0) { aa=bb; bb=cc; cc=aa%bb; }
+      return bb;
     }
-  
-  
+
     /*! \brief Least common multiple. */
-    template <typename N>
-    inline 
-    N 
-    lcm(const N &a, const N &b) {
+    template <typename N> inline 
+    N lcm(const N &a, const N &b) {
       return ((a*b)/gcd(a,b));
     }
     //@}
@@ -108,18 +157,14 @@ namespace Ariadne {
     //! \name %Integer bit-shift functions
     //@{
     /*! \brief The integer power \f$2^n\f$. */
-    template<typename N>
-    inline
-    N 
-    pow_two(const N& n) {
+    template<typename N> inline
+    N exp2(const N& n) {
       return 1<<n;
     }
 
     /*! \brief The floor of the logarithm of \a n in base 2. */
-    template<typename N>
-    inline
-    N 
-    log_two_floor(const N& n) {
+    template<typename N> inline
+    N log2_floor(const N& n) {
       assert(n>=1);
       N r=0;
       N y=n;
@@ -132,10 +177,8 @@ namespace Ariadne {
 
 
     /*! \brief The ceiling of the logarithm of \a n in base 2. */
-    template<typename N>
-    inline
-    N 
-    log_two_ceil(const N& n) {
+    template<typename N> inline
+    N log2_ceil(const N& n) {
       assert(n>=1);
       N r=0;
       N y=n;

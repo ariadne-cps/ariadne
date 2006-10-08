@@ -135,7 +135,7 @@ namespace Ariadne {
     {
       LinearAlgebra::Vector< Interval<R> > e(this->number_of_generators());
       for(size_type j=0; j!=this->number_of_generators(); ++j) {
-        e[j]=Interval<R>(-1,1);
+        e[j]=Interval<R>(R(-1),1);
       }
       return this->central_block()+(this->generators()*e);
     }
@@ -280,7 +280,6 @@ namespace Ariadne {
       LinearAlgebra::Vector<Rational> c(this->centre().position_vector());
       LinearAlgebra::Matrix<Rational> g(this->_extended_generators());
       return ppl_polyhedron(c,g);
-      //return Polyhedron<Rational>(this->_possible_vertices());
     }
     
     

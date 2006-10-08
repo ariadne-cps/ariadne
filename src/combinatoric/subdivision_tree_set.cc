@@ -199,8 +199,8 @@ namespace Ariadne {
 
       /* Compute grid sizes as powers of two */
       for(dimension_type i=0; i!=n; ++i) {
-        depths[i]=log_two_ceil(grid_sizes[i]);
-        new_sizes[i]=pow_two(depths[i]);
+        depths[i]=log2_ceil(grid_sizes[i]);
+        new_sizes[i]=exp2(depths[i]);
         depth+=depths[i];
       }
      

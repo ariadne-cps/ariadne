@@ -80,6 +80,7 @@ namespace Ariadne {
     Parma_Polyhedra_Library::Generator 
     ppl_generator(const LinearAlgebra::Vector<Rational>& p) 
     {
+      //std::cerr << "ppl_generator(Vector<Rational>&)" << std::endl;
       Integer den=1;
       for (size_type j=0; j!=p.size(); ++j) {
         den=lcm(den,denominator(p[j]));
@@ -145,13 +146,14 @@ namespace Ariadne {
     ppl_polyhedron(const LinearAlgebra::Vector<Rational>& c, 
                    const LinearAlgebra::Matrix<Rational>& G)
     {
+      //std::cerr << "ppl_polyhedron(Vector<Rational>,Matrix<Rational>)" << std::endl;
       Parma_Polyhedra_Library::Generator_System ppl_gs;
       LinearAlgebra::Vector<Rational> e(G.size2());
       LinearAlgebra::Vector<Rational> v(c);
       size_type m=G.size2();
       for(size_type i=0; i!=(1u<<m); ++i) {
         for(size_type j=0; j!=m; ++j) {
-          e[j] = (i&(1u<<j)) ? +1 : -1;
+          e[j] = (i&(1u<<j)) ? Rational(+1) : Rational(-1);
         }
         v=c+G*e;
         ppl_gs.insert(ppl_generator(v));

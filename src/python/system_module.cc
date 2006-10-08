@@ -24,8 +24,6 @@
 
 #include <boost/python.hpp>
 
-void export_lattice_map();
-
 void export_map();
 void export_affine_map();
 void export_affine_map_with_set();
@@ -38,8 +36,6 @@ void export_lorenz_system();
 
 BOOST_PYTHON_MODULE(system)
 {
-  export_lattice_map();
-
   export_map();
   export_affine_map();
   export_affine_map_with_set();

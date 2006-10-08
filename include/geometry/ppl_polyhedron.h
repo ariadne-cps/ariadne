@@ -63,10 +63,6 @@ namespace Ariadne {
                    const LinearAlgebra::Vector<Rational>& b);
     
     Parma_Polyhedra_Library::C_Polyhedron 
-    ppl_polyhedron(const LinearAlgebra::Vector< Interval<Rational> >& c, 
-                   const LinearAlgebra::Matrix<Rational>& A);
-    
-    Parma_Polyhedra_Library::C_Polyhedron 
     ppl_polyhedron(const LinearAlgebra::Vector<Rational>& c, 
                    const LinearAlgebra::Matrix<Rational>& A);
     

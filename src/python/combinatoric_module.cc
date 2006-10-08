@@ -25,9 +25,11 @@
 
 void export_binary_tree();
 void export_lattice_set();
+void export_lattice_map();
 
 BOOST_PYTHON_MODULE(combinatoric)
 {
   export_binary_tree();
   export_lattice_set();
+  export_lattice_map();
 }

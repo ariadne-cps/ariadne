@@ -59,7 +59,7 @@ namespace Ariadne {
     Rectangle<R>& 
     Rectangle<R>::expand_by(const real_type& delta) 
     {
-      Interval<R> expand(-delta,delta);
+      Interval<R> expand(R(-delta),delta);
       for (size_type j=0; j< this->dimension(); ++j) {
         this->operator[](j)+=expand;
       }

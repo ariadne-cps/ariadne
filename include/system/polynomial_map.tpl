@@ -123,7 +123,7 @@ namespace Ariadne {
     {
       dimension_type result=0;
       for(size_type i=0; i!=this->_terms.size(); ++i) {
-        result=max(this->_terms[i].argument_dimension(),result);
+        result=std::max(this->_terms[i].argument_dimension(),result);
       }
       return result;
     }
@@ -145,7 +145,7 @@ namespace Ariadne {
     {
       dimension_type result=0;
       for(size_type i=0; i!=this->_components.size(); ++i) {
-        result=max(this->_components[i].argument_dimension(),result);
+        result=std::max(this->_components[i].argument_dimension(),result);
       }
       return result;
     }
@@ -157,7 +157,7 @@ namespace Ariadne {
     operator<(const Monomial<R>& m1, const Monomial<R>& m2)
     {
       if(m1.degree() == m2.degree()) { 
-        dimension_type max_arg_dim=max(m1.argument_dimension(),m2.argument_dimension());
+        dimension_type max_arg_dim=std::max(m1.argument_dimension(),m2.argument_dimension());
         for(dimension_type i=0; i!=max_arg_dim; ++i) {
           size_type m1index=(i<m1.argument_dimension()) ? m1.index(i) : 0u;
           size_type m2index=(i<m2.argument_dimension()) ? m2.index(i) : 0u;
@@ -183,7 +183,7 @@ namespace Ariadne {
       assert(s.dimension() == this->argument_dimension());
       real_type result=_coefficient;
       for(size_type k=0; k!=this->argument_dimension(); ++k) {
-        result *= pow(s[k],_multi_index[k]);
+        result *= pow_approx(s[k],_multi_index[k]);
       }
       return result;
     }

@@ -35,9 +35,10 @@
 #include "../declarations.h"
 
 #include "../numeric/numerical_traits.h"
+#include "../numeric/conversion.h"
 #include "../numeric/arithmetic.h"
-#include "../numeric/rounding.h"
- 
+#include "../numeric/function.h"
+
 using boost::logic::tribool;
 using boost::logic::indeterminate;
 
@@ -540,7 +541,7 @@ namespace Ariadne {
     bool
     equal(const Interval<R>& x1, const Interval<R>& x2)
     {
-      return (x1.lower()==x2.lower() || x1.upper()==x2.upper());
+      return (x1.lower()==x2.lower() && x1.upper()==x2.upper());
     }
 
     template<typename R>
@@ -564,8 +565,8 @@ namespace Ariadne {
     Interval<R>
     intersection(const Interval<R>& x1, const Interval<R>& x2)
     {
-      return Interval<R>(std::max(x1.lower(),x2.lower()),
-                         std::min(x1.upper(),x2.upper()));
+      return Interval<R>(max_down(x1.lower(),x2.lower()),
+                         min_up(x1.upper(),x2.upper()));
     }
 
     template<typename R>
@@ -594,8 +595,8 @@ namespace Ariadne {
     {
       if(x1.empty()) { return x2; }
       if(x2.empty()) { return x1; }
-      return Interval<R>(x1.lower()<=x2.lower()?x1.lower():x2.lower(),
-                         x1.upper()>=x2.upper()?x1.upper():x2.upper());
+      return Interval<R>(min_down(x1.lower(),x2.lower()),
+                         max_up(x1.upper(),x2.upper()));
     }
     
     
@@ -712,7 +713,9 @@ namespace TBLAS {
     }
 
     for (i = 0; i < N; i++) {
-      real av=min(abs(X[ix].lower()),abs(X[ix].upper()));
+      real av=Ariadne::Numeric::min_down(
+                Ariadne::Numeric::abs_down(X[ix].lower()),
+                Ariadne::Numeric::abs_down(X[ix].upper()));
       if (av > mx) {
         mx = av;
         result = i;

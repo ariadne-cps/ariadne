@@ -12,7 +12,8 @@ LDADD = -lmpfr -lppl -lgmpxx
 SUBDIRS = . python
 
 NUMERIC_SRC = \
-	numeric/approximation.cc numeric/arithmetic.cc numeric/function.cc 
+  numeric/integer.cc numeric/rational.cc \
+  numeric/float64.cc numeric/mpfloat.cc numeric/dyadic.cc
 
 LINEAR_ALGEBRA_SRC = \
 	linear_algebra/vector.cc linear_algebra/matrix.cc \
@@ -67,4 +68,4 @@ liboutput_la_SOURCES = $(OUTPUT_SRC)
 
 EXTRA_DIST =  
 bin_PROGRAMS = 
-include_HEADERS = 
+include_HEADERS =

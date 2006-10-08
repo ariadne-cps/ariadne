@@ -23,15 +23,11 @@
  */
 
 
-#include "numeric/arithmetic.h"
-#include "numeric/approximation.h"
 #include "numeric/integer.h"
+#include "numeric/rational.h"
+#include "numeric/dyadic.h"
 #include "numeric/float64.h"
 #include "numeric/mpfloat.h"
-#include "numeric/dyadic.h"
-#include "numeric/rational.h"
-
-#include "real_typedef.h"
 
 using namespace Ariadne;
 

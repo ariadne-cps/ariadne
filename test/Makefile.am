@@ -1,5 +1,5 @@
 #TESTS_ENVIRONMENT = (function run_tst { $1 > $1.log; }; run_tst )
-TESTS_ENVIRONMENT = run_test.sh
+TESTS_ENVIRONMENT = ./run_test.sh
 
 
 INCLUDES = -I$(top_srcdir)/include
@@ -13,9 +13,9 @@ check_PROGRAMS = \
 	test_linear_algebra test_linear_program \
 	test_binary_word test_lattice \
 	test_point \
-	test_list_set test_grid_set test_partition_tree_set \
 	test_rectangle test_zonotope test_parallelotope test_simplex \
 	test_polytope test_polyhedron \
+	test_list_set test_grid_set test_partition_tree_set \
 	test_interval_newton test_integration_step test_chainreach \
 	test_epsfstream test_chompfstream 
 

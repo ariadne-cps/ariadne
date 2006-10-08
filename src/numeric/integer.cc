@@ -1,5 +1,5 @@
 /***************************************************************************
- *            arithmetic.cc
+ *            integer.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
@@ -21,16 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/arithmetic.h"
-#include "numeric/arithmetic.tpl"
-
+#include "numeric/integer.h"
 
 namespace Ariadne {
   namespace Numeric {
-    template int quotient(const Float64& x, const Float64& y);
-    template int quotient(const MPFloat& x, const MPFloat& y);
-    template int quotient(const Dyadic& x, const Dyadic& y);
-    template int quotient(const Rational& x, const Rational& y);
-
   } 
 }

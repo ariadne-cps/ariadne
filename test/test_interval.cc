@@ -265,10 +265,9 @@ test_interval<Rational>()
     string input("[5/4,9/4] ");
     stringstream iss(input);
     
+    ivld1=Interval<R>(1.25,2.25);
     iss >> ivld2;
     cout << "ivld1=" << ivld1 << "  ivld2=" << ivld2 << endl;
-    assert(equal(ivld1,ivld2));
-    
     assert(equal(ivld1,ivld2));
     assert(indeterminate(ivld1==ivld2));
     

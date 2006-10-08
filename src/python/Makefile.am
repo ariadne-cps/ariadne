@@ -51,7 +51,8 @@ BASE_MODULE_SRC=base_module.cc \
 	export_array.cc
 
 COMBINATORIC_MODULE_SRC=combinatoric_module.cc \
-	export_binary_tree.cc export_lattice_set.cc 
+	export_binary_tree.cc export_lattice_set.cc	export_lattice_map.cc
+
 
 NUMERIC_MODULE_SRC=numeric_module.cc \
 	export_numeric.cc export_interval.cc export_function.cc 
@@ -70,7 +71,6 @@ GEOMETRY_MODULE_SRC = geometry_module.cc \
 	export_partition_tree_set.cc 
 
 SYSTEM_MODULE_SRC = system_module.cc \
-	export_lattice_map.cc \
 	export_map.cc export_affine_map.cc export_polynomial_map.cc \
 	export_affine_multimap.cc \
 	export_vector_field.cc export_affine_vector_field.cc \
@@ -83,4 +83,3 @@ EVALUATION_MODULE_SRC = evaluation_module.cc \
 
 OUTPUT_MODULE_SRC = output_module.cc \
 	export_postscript_output.cc
-

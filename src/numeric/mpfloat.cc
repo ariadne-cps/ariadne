@@ -1,5 +1,5 @@
 /***************************************************************************
- *            approximation.cc
+ *            mpfloat.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
@@ -21,11 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/approximation.h"
-#include "numeric/approximation.tpl"
+#include "numeric/mpfloat.h"
 
 namespace Ariadne {
   namespace Numeric {
-
   } 
 }

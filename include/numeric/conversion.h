@@ -1,8 +1,8 @@
 /***************************************************************************
- *            function.cc
+ *            conversion.h
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -20,29 +20,31 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+ 
+/*! \file conversion.h
+ *  \brief Approximation of numerical types.
+ */
 
-#include <mpfr.h>
-
-#include "numeric/function.h"
-#include "numeric/function.tpl"
+#ifndef _ARIADNE_APPROXIMATION_H
+#define _ARIADNE_APPROXIMATION_H
 
 namespace Ariadne {
   namespace Numeric {
+    
+    //! \name Conversion operations. 
+    //@{ 
+    //! \ingroup Numeric
+    /*! \brief Convert \a x to an element of R. */
+    template<typename R,typename A> inline R conv_exact(const A& x) { return x; }
+    /*! \brief Approximate \a x by an element of R. */
+    template<typename R,typename A> inline R conv_approx(const A& x) { return x; }
+    /*! \brief Approximate \a x by an element of R, rounding down. */
+    template<typename R,typename A> inline R conv_down(const A& x) { return x; }
+    /*! \brief Approximate \a x by an element of R, rounding up. */
+    template<typename R,typename A> inline R conv_up(const A& x) { return x; }
+    //@}
 
-    int 
-    mpfr_hypot(mpfr_t y, 
-               const __mpfr_struct* x1, 
-               const __mpfr_struct* x2, 
-               mpfr_rnd_t r)
-    {
-      mpfr_t z;
-      mpfr_init_set(z,y,GMP_RNDN);
-      mpfr_mul(y,x1,x1,r);
-      mpfr_mul(z,x2,x2,r);
-      mpfr_add(y,y,z,r);
-      mpfr_clear(z);
-      return mpfr_sqrt(y,y,r);
-    } 
-
-  } 
+  }    
 }
+
+#endif /* _ARIADNE_APPROXIMATION_H */

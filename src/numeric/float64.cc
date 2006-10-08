@@ -1,8 +1,8 @@
 /***************************************************************************
- *            function.tpl
+ *            float64.cc
  *
- *  Copyright 2005-6  Alberto Casagrande, Pieter Collins
- *  Email casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2006  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -20,19 +20,10 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-  
 
-#include "function.h"
-
-#include "../numeric/integer.h"
-#include "../numeric/numerical_types.h"
-#include "../numeric/arithmetic.h"
-#include "../numeric/approximation.h"
+#include "numeric/float64.h"
 
 namespace Ariadne {
   namespace Numeric {
-    
-
-    
-  }
+  } 
 }

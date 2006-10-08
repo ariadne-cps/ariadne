@@ -30,8 +30,7 @@
 #include <algorithm>
 #include <string.h>
 
-#include "../numeric/approximation.h"
-#include "../numeric/float64.h"
+#include "../numeric/conversion.h"
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
 #include "../geometry/list_set.h"
@@ -65,7 +64,7 @@ namespace Ariadne {
     {
       Geometry::Point<R1> result(pt.dimension());
       for(size_type i=0; i!= result.dimension(); ++i) {
-        result[i]=approximate_by<R1>(pt[i]);
+        result[i]=conv_approx<R1>(pt[i]);
       }
       return result;
     }
@@ -90,8 +89,8 @@ namespace Ariadne {
       template<typename R> Geometry::Point<double> operator() (const Geometry::Point<R>& pt) const {
         Geometry::Point<double> result(2); 
         assert(pt.dimension()==_d);
-        result[0]=approximate_by<double>(pt[_i]); 
-        result[1]=approximate_by<double>(pt[_j]); 
+        result[0]=conv_approx<double>(pt[_i]); 
+        result[1]=conv_approx<double>(pt[_j]); 
         return result;
       }
       template<typename R> Geometry::PointList<double> operator() (const Geometry::PointList<R>& ptl) const {
@@ -102,8 +101,8 @@ namespace Ariadne {
       template<typename R> Geometry::Rectangle<double> operator() (const Geometry::Rectangle<R>& r) const {
         Geometry::Rectangle<double> result(2); 
         assert(r.dimension()==_d);
-        result[0]=Interval<double>(approximate_by<double>(r[_i].lower()),approximate_by<double>(r[_i].upper())); 
-        result[1]=Interval<double>(approximate_by<double>(r[_j].lower()),approximate_by<double>(r[_j].upper())); 
+        result[0]=Interval<double>(conv_approx<double>(r[_i].lower()),conv_approx<double>(r[_i].upper())); 
+        result[1]=Interval<double>(conv_approx<double>(r[_j].lower()),conv_approx<double>(r[_j].upper())); 
         return result;
       }
       template<typename R> Geometry::PointList<double> operator() (const Geometry::Zonotope<R>& z) const {
@@ -158,7 +157,7 @@ namespace Ariadne {
             pointers[i].radiant=-acos(0.0);
         } else {
           tangent_R=vert_pos[i](0)/vert_pos[i](1);
-          tangent=approximate_by<double>(tangent_R);
+          tangent=conv_approx<double>(tangent_R);
           pointers[i].radiant=atan(tangent);
         
           if (vert_pos[i](1) <0)
@@ -185,8 +184,8 @@ namespace Ariadne {
     {
       Geometry::Rectangle<double> result(r.dimension());
       for(dimension_type i=0; i!=result.dimension(); ++i) {
-        result.set_lower_bound(i,approximate_by<double>(r.lower_bound(i)));
-        result.set_upper_bound(i,approximate_by<double>(r.upper_bound(i)));
+        result.set_lower_bound(i,conv_approx<double>(r.lower_bound(i)));
+        result.set_upper_bound(i,conv_approx<double>(r.upper_bound(i)));
       }
       return result;
     }

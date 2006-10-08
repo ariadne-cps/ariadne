@@ -1,8 +1,8 @@
 /***************************************************************************
- *            approximation.h
+ *            dyadic.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -20,31 +20,10 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-/*! \file approximation.h
- *  \brief Approximation of numerical types.
- */
 
-#ifndef _ARIADNE_APPROXIMATION_H
-#define _ARIADNE_APPROXIMATION_H
+#include "numeric/dyadic.h"
 
 namespace Ariadne {
   namespace Numeric {
-    
-    //! \name Conversion operations. 
-    //@{ 
-    //! \ingroup Numeric
-    /*! \brief Convert \a x to an element of R. */
-    template<typename R,typename A> inline R conv_exact(const A& x) { return x; }
-    /*! \brief Approximate \a x by an element of R. */
-    template<typename R,typename A> inline R conv_approx(const A& x) { return x; }
-    /*! \brief Approximate \a x by an element of R, rounding down. */
-    template<typename R,typename A> inline R conv_down(const A& x) { return x; }
-    /*! \brief Approximate \a x by an element of R, rounding up. */
-    template<typename R,typename A> inline R conv_up(const A& x) { return x; }
-    //@}
-
-  }    
+  } 
 }
-
-#endif /* _ARIADNE_APPROXIMATION_H */

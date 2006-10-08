@@ -30,8 +30,6 @@
 
 #include <string>
 
-#include "approximation.h"
-
 namespace Ariadne {
   namespace Numeric {
     
@@ -59,12 +57,9 @@ namespace Ariadne {
     /*! \brief Approximate \a x by an element of Res. */
     template<typename Res, typename Arg> inline Res convert_to(const Arg& x) { return Res(x); }
     
-    /*! \brief Approximate \a x by an element of Res. */
-    template<typename Res, typename Arg> inline Res approximate_by(const Arg& x) { return conv_approx<Res>(x); }
-        
-     /*! \brief Approximate \a x by an element of Res with accuracy \a e. */
-     template<typename Res, typename Arg, typename Err> Res approximate(const Arg& x, const Err& e);
-     //@}
+    /*! \brief Approximate \a x by an element of Res with accuracy \a e. */
+    template<typename Res, typename Arg, typename Err> Res approximate(const Arg& x, const Err& e);
+    //@}
   }   
 }
   

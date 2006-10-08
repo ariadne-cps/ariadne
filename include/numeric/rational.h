@@ -33,9 +33,12 @@
 #include <gmpxx.h>
 
 #include "../declarations.h"
+
 #include "../numeric/numerical_traits.h"
+#include "../numeric/conversion.h"
 #include "../numeric/arithmetic.h"
 #include "../numeric/function.h"
+
 #include "../numeric/integer.h"
 
 namespace Ariadne {

@@ -31,7 +31,7 @@
 #include "zonotope.h"
 
 #include "../base/array.h"
-#include "../numeric/approximation.h"
+#include "../numeric/conversion.h"
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"

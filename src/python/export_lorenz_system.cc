@@ -29,9 +29,9 @@ using namespace Ariadne;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-typedef RVector (RLorenzSystem::* PointMap) (const RPoint&) const;
+typedef FVector (RLorenzSystem::* PointMap) (const RPoint&) const;
 typedef RIntervalVector (RLorenzSystem::* RectangleMap) (const RRectangle&) const;
-typedef RMatrix (RLorenzSystem::* PointDerivative) (const RPoint&) const;
+typedef FMatrix (RLorenzSystem::* PointDerivative) (const RPoint&) const;
 typedef RIntervalMatrix (RLorenzSystem::* RectangleDerivative) (const RRectangle&) const;
 
 void export_lorenz_system() {
@@ -39,8 +39,8 @@ void export_lorenz_system() {
     .def("dimension", &RLorenzSystem::dimension)
     .def("__call__", PointMap(&RLorenzSystem::operator()))
     .def("__call__", RectangleMap(&RLorenzSystem::operator()))
-    .def("derivative", PointDerivative(&RLorenzSystem::derivative))
-    .def("derivative", RectangleDerivative(&RLorenzSystem::derivative))
+    .def("jacobian", PointDerivative(&RLorenzSystem::jacobian))
+    .def("jacobian", RectangleDerivative(&RLorenzSystem::jacobian))
     .def(self_ns::str(self))
   ;
 }

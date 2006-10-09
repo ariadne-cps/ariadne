@@ -29,10 +29,14 @@
 #define _ARIADNE_INTEGRATOR_H
 
 #include "../declarations.h"
+#include "../numeric/rational.h"
 
 namespace Ariadne {
   namespace Evaluation {
    
+    /*!\brief The type used to denote time. */
+    typedef Numeric::Rational time_type;
+    
     /*! \brief %Base class for integration schemes. 
      *  \ingroup Integrate
      */
@@ -43,19 +47,19 @@ namespace Ariadne {
       virtual ~Integrator();
 
       /*! \brief Constructor. */
-      Integrator(const R& maximum_step_size, const R& lock_to_grid_time, const R& maximum_set_radius);
+      Integrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_set_radius);
 
       /*! \brief Integrate \a intial_set for time \a time under \a vector_field, while remaining in \a bounding_set. */
       virtual Geometry::GridMaskSet<R> integrate(const System::VectorField<R>& vector_field,
                                                  const Geometry::GridMaskSet<R>& initial_set,
                                                  const Geometry::GridMaskSet<R>& bounding_set,
-                                                 const R& time) const = 0;
+                                                 const time_type& time) const = 0;
 
       /*! \brief Integrate \a intial_set for times up to \a time under \a vector_field, while remaining in \a bounding_set. */
       virtual Geometry::GridMaskSet<R> reach(const System::VectorField<R>& vector_field,
                                              const Geometry::GridMaskSet<R>& initial_set,
                                              const Geometry::GridMaskSet<R>& bounding_set,
-                                             const R& time) const = 0;
+                                             const time_type& time) const = 0;
 
       /*! \brief Integrate \a intial_set for all times under \a vector_field, while remaining in \a bounding_set. 
        *
@@ -72,36 +76,36 @@ namespace Ariadne {
       virtual bool check_flow_bounds(const System::VectorField<R>& vector_field,
                                      const Geometry::Rectangle<R>& initial_set,
                                      const Geometry::Rectangle<R>& bound,
-                                     const R& integration_time) const;
+                                     const time_type& integration_time) const;
       
       /*! \brief Computes a bounding box for the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time. */
       virtual Geometry::Rectangle<R> estimate_flow_bounds(const System::VectorField<R>& vector_field,
                                                           const Geometry::Rectangle<R>& initial_set,
-                                                          R& integration_time) const;
+                                                          time_type& integration_time) const;
 
       /*! \brief Computes a bounding box for the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time. */
       virtual Geometry::Rectangle<R> estimate_flow_bounds(const System::VectorField<R>& vector_field,
                                                           const Geometry::Rectangle<R>& initial_set,
-                                                          const R& integration_time,
+                                                          const time_type& integration_time,
                                                           const unsigned int& maximum_iterations) const;
 
       /*! \brief Compute a set \a bound such that the flow of \a vector_field starting in \a initial_point remains in \a bound for times up to \a integration_time, given a bound \a estimated_bound. */
       virtual Geometry::Rectangle<R> refine_flow_bounds(const System::VectorField<R>& vector_field,
                                                         const Geometry::Rectangle<R>& initial_set,
                                                         const Geometry::Rectangle<R>& estimated_bound,
-                                                        const R& integration_time) const;
+                                                        const time_type& integration_time) const;
 
       /*! \brief A suggested minimum step size for integration. */
-      virtual R minimum_step_size() const;
+      virtual time_type minimum_step_size() const;
       /*! \brief The maximum allowable step size for integration. */
-      virtual R maximum_step_size() const;
+      virtual time_type maximum_step_size() const;
       /*! \brief A suggested minimum radius of a basic set after a subdivision (not a strict bound). */
       virtual R minimum_basic_set_radius() const;
       /*! T\brief he maximum allowable radius of a basic set during integration. */
       virtual R maximum_basic_set_radius() const;
       /*! \brief The time after which an integrator may approximate computed sets on a grid,
        *  in order to use previously caches integration results for the grid. */
-      virtual R lock_to_grid_time() const;
+      virtual time_type lock_to_grid_time() const;
 
      protected:
       /*! \brief Template for integrating a list set. */
@@ -109,36 +113,36 @@ namespace Ariadne {
       Geometry::ListSet<R,BS> 
       integrate_list_set(const System::VectorField<R>& vector_field, 
                          const Geometry::ListSet<R,BS>& initial_set, 
-                         const R& time) const;
+                         const time_type& time) const;
 
       /*! \brief Template for integrating a basic set. */
       template<template<typename> class BS>
       BS<R>
       integrate_basic_set(const System::VectorField<R>& vector_field, 
                           const BS<R>& initial_set, 
-                          const R& time) const;
+                          const time_type& time) const;
 
       /*! \brief An algorithm for integrating forward a rectangle. */
       virtual Geometry::Rectangle<R> integration_step(const System::VectorField<R>&,
                                                       const Geometry::Rectangle<R>&,
-                                                      R&) const = 0;
+                                                      time_type&) const = 0;
 
       /*! \brief An algorithm for integrating forward a parallelotope. */
       virtual Geometry::Parallelotope<R> integration_step(const System::VectorField<R>&,
                                                           const Geometry::Parallelotope<R>&,
-                                                          R&) const = 0;
+                                                          time_type&) const = 0;
 
        /*! \brief An algorithm for integrating forward a zonotope. */
       virtual Geometry::Zonotope<R> integration_step(const System::VectorField<R>&,
-                                                          const Geometry::Zonotope<R>&,
-                                                          R&) const = 0;
+                                                     const Geometry::Zonotope<R>&,
+                                                     time_type&) const = 0;
      protected:
       /*! \brief Constructs a zonotopic generator for the convex hull of \a iv and \a -iv. */ 
       static LinearAlgebra::Matrix<R> symmetrize(const LinearAlgebra::Vector< Interval<R> >& r);
      private:
-      R _minimum_step_size;
-      R _maximum_step_size;
-      R _lock_to_grid_time;
+      time_type _minimum_step_size;
+      time_type _maximum_step_size;
+      time_type _lock_to_grid_time;
       R _minimum_basic_set_radius;
       R _maximum_basic_set_radius;
 
@@ -151,13 +155,13 @@ namespace Ariadne {
     class C0Integrator : public Integrator<R> {
      public:
       /*! \brief Constructor. */
-      C0Integrator(const R& maximum_step_size, const R& lock_to_grid_time, const R& maximum_set_radius);
+      C0Integrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_set_radius);
 
       /*! \brief A C0 algorithm for integrating forward a rectangle. 
        */
       virtual Geometry::Rectangle<R> integrate(const System::VectorField<R>& vector_field,
                                                const Geometry::Rectangle<R>& initial_set,
-                                               const R& time) const;
+                                               const time_type& time) const;
 
       /*! \brief A C0 algorithm for integrating forward a set of rectangles. 
        *
@@ -168,27 +172,27 @@ namespace Ariadne {
        */
       virtual Geometry::ListSet<R,Geometry::Rectangle> integrate(const System::VectorField<R>& vector_field,
                                                                  const Geometry::ListSet<R,Geometry::Rectangle>& initial_set,
-                                                                 const R& time) const;
+                                                                 const time_type& time) const;
 
       /*! \brief A C0 algorithm for integrating forward a set of rectangles up to a certain time. */
       virtual Geometry::ListSet<R,Geometry::Rectangle> reach(const System::VectorField<R>& vector_field,
                                                              const Geometry::ListSet<R,Geometry::Rectangle>& initial_set,
-                                                             const R& time) const;
+                                                             const time_type& time) const;
      public:
       /*! \brief A C0 algorithm for integrating forward a rectangle. */
       virtual Geometry::Rectangle<R> integration_step(const System::VectorField<R>& vector_field, 
                                                       const Geometry::Rectangle<R>& initial_set, 
-                                                      R& step_size) const = 0;
+                                                      time_type& step_size) const = 0;
 
       /*! \brief A C0 algorithm for integrating forward a parallelotope. */
       virtual Geometry::Parallelotope<R> integration_step(const System::VectorField<R>& vector_field, 
                                                           const Geometry::Parallelotope<R>& initial_set, 
-                                                          R& step_size) const;
+                                                          time_type& step_size) const;
 
       /*! \brief A C0 algorithm for integrating forward a rectangle up to a certain time. */
       virtual Geometry::Rectangle<R> reachability_step(const System::VectorField<R>& vector_field, 
                                                        const Geometry::Rectangle<R>& initial_set,
-                                                       R& step_size) const = 0;
+                                                       time_type& step_size) const = 0;
     };
 
  
@@ -199,25 +203,25 @@ namespace Ariadne {
     class C1Integrator : public Integrator<R> {
      public:
       /*! \brief Constructor. */
-      C1Integrator(const R& maximum_step_size, const R& lock_to_grid_time, const R& maximum_set_radius);
+      C1Integrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_set_radius);
 
       /*! \brief A C1 algorithm for integrating forward a rectangle.
        */
       virtual Geometry::Rectangle<R> integrate(const System::VectorField<R>&,
                                                    const Geometry::Rectangle<R>&,
-                                                   const R&) const;
+                                                   const time_type&) const;
 
       /*! \brief A C1 algorithm for integrating forward a parallelotope.
        */
       virtual Geometry::Parallelotope<R> integrate(const System::VectorField<R>&,
                                                    const Geometry::Parallelotope<R>&,
-                                                   const R&) const;
+                                                   const time_type&) const;
       
       /*! \brief A C1 algorithm for integrating forward a zonotope.
        */
       virtual Geometry::Zonotope<R> integrate(const System::VectorField<R>&,
                                                    const Geometry::Zonotope<R>&,
-                                                   const R&) const;
+                                                   const time_type&) const;
       
       /*! \brief A C1 algorithm for integrating forward a parallelotope.
        *
@@ -229,7 +233,7 @@ namespace Ariadne {
        */
       virtual Geometry::ListSet<R,Geometry::Parallelotope> integrate(const System::VectorField<R>&,
                                                                      const Geometry::ListSet<R,Geometry::Parallelotope>&,
-                                                                     const R&) const;
+                                                                     const time_type&) const;
 
       /*! \brief A C1 algorithm for integrating forward a zonotope.
        *
@@ -241,31 +245,31 @@ namespace Ariadne {
        */
       virtual Geometry::ListSet<R,Geometry::Zonotope> integrate(const System::VectorField<R>&,
                                                                      const Geometry::ListSet<R,Geometry::Zonotope>&,
-                                                                     const R&) const;
+                                                                     const time_type&) const;
 
       
       /*! \brief Integrate \a intial_set for time \a time under \a vector_field, while remaining in \a bounding_set. */
       virtual Geometry::GridMaskSet<R> integrate(const System::VectorField<R>& vector_field,
                                                  const Geometry::GridMaskSet<R>& initial_set,
                                                  const Geometry::GridMaskSet<R>& bounding_set,
-                                                 const R& time) const;
+                                                 const time_type& time) const;
 
 
       /*! \brief A C1 algorithm for integrating forward a set of parallelotopes up to a certain time. */
       virtual Geometry::ListSet<R,Geometry::Parallelotope> reach(const System::VectorField<R>&,
                                                             const Geometry::ListSet<R,Geometry::Parallelotope>&,
-                                                            const R&) const;
+                                                            const time_type&) const;
 
       /*! \brief A C1 algorithm for integrating forward a set of zonotopes up to a certain time. */
       virtual Geometry::ListSet<R,Geometry::Zonotope> reach(const System::VectorField<R>&,
                                                             const Geometry::ListSet<R,Geometry::Zonotope>&,
-                                                            const R&) const;
+                                                            const time_type&) const;
 
       /*! \brief A C1 algorithm for computing the reachable set of in initial set of Parallelotopes up to a certain time. */
       inline Geometry::ListSet<R,Geometry::Parallelotope> reach(
                       const System::VectorField<R>& vector_field, 
                       const Geometry::Parallelotope<R>& initial_set, 
-                      const R& time) const
+                      const time_type& time) const
       {
         return this->reach(vector_field, initial_set.subdivide(), time);
       }
@@ -274,7 +278,7 @@ namespace Ariadne {
       inline Geometry::ListSet<R,Geometry::Zonotope> reach(
                       const System::VectorField<R>& vector_field,
                       const Geometry::Zonotope<R>& initial_set, 
-                      const R& time) const
+                      const time_type& time) const
       {
         return this->reach(vector_field, initial_set.subdivide(), time);
       }
@@ -283,29 +287,29 @@ namespace Ariadne {
       virtual Geometry::GridMaskSet<R> reach(const System::VectorField<R>& vector_field,
                                              const Geometry::GridMaskSet<R>& initial_set,
                                              const Geometry::GridMaskSet<R>& bounding_set,
-                                             const R& time) const;
+                                             const time_type& time) const;
 
      public:
       /*! \brief A C1 algorithm for integrating forward a rectangle. */
       virtual Geometry::Rectangle<R> integration_step(const System::VectorField<R>&,
                                                       const Geometry::Rectangle<R>&,
-                                                      R&) const;
+                                                      time_type&) const;
 
       /*! \brief A C1 algorithm for integrating forward a parallelotope. */
       virtual Geometry::Parallelotope<R> integration_step(const System::VectorField<R>&,
                                                           const Geometry::Parallelotope<R>&,
-                                                          R&) const = 0;
+                                                          time_type&) const = 0;
 
       /*! \brief A C1 algorithm for integrating forward a zonotope. */
       virtual Geometry::Zonotope<R> integration_step(const System::VectorField<R>&,
                                                           const Geometry::Zonotope<R>&,
-                                                          R&) const = 0;
+                                                          time_type&) const = 0;
 
       /*! \brief A C1 algorithm for integrating forward a rectangle up to a certain time. 
        */
       virtual Geometry::Rectangle<R> reachability_step(const System::VectorField<R>&,
                                                        const Geometry::Rectangle<R>&,
-                                                       R&) const;
+                                                       time_type&) const;
 
       /*! \brief A C1 algorithm for integrating forward a parallelotope up to a certain time. 
        *
@@ -313,17 +317,17 @@ namespace Ariadne {
        * and hence is not invertible. 
        *
        * This method forwards its argument to 
-       * reachability_step(const System::VectorField<R>&, const Geometry::Zonotope<R>&, const R&)
+       * reachability_step(const System::VectorField<R>&, const Geometry::Zonotope<R>&, const time_type&)
        */
       virtual Geometry::Zonotope<R> reachability_step(const System::VectorField<R>&,
                                                       const Geometry::Parallelotope<R>&,
-                                                      R&) const;
+                                                      time_type&) const;
 
       /*! \brief A C1 algorithm for integrating forward a zonotope up to a certain time. 
         */ 
       virtual Geometry::Zonotope<R> reachability_step(const System::VectorField<R>&,
                                                       const Geometry::Zonotope<R>&,
-                                                      R&) const = 0;
+                                                      time_type&) const = 0;
     };
 
 

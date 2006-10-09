@@ -24,14 +24,14 @@
 #include <cstdlib>
 #include <cstdio>
 
+#include "numeric/float64.h"
+#include "numeric/mpfloat.h"
+#include "numeric/rational.h"
+
 #include "numeric/interval.h"
 
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/matrix.tpl"
-
-#include "numeric/float64.h"
-#include "numeric/mpfloat.h"
-#include "numeric/rational.h"
 
 
 namespace Ariadne {

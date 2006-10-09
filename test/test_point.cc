@@ -35,6 +35,13 @@ using namespace Ariadne;
 using namespace Ariadne::Geometry;
 using namespace std;
 
+template<typename R> int test_point();
+
+int main() {
+  test_point<Real>();
+  return 0;
+}
+
 template<typename R>
 int
 test_point()
@@ -42,8 +49,8 @@ test_point()
   Point<R> s1(3);
   Point<R> s2(4);
   Point<R> s3(2);
-  s3[0]=R(2,3);
-  s3[1]=R(2,3);
+  s3[0]=R(0.675);
+  s3[1]=R(0.675);
   Point<R> s4(s1);
   Point<R> s5;
   
@@ -85,12 +92,5 @@ test_point()
     cerr << "Unknown error\n";
     return 1;
   }
-  return 0;
-}
-
-
-
-int main() {
-  test_point<Real>();
   return 0;
 }

@@ -26,9 +26,11 @@
 #include <iostream>
 #include <fstream>
 
+#include "numeric/float64.h"
+#include "numeric/mpfloat.h"
+#include "numeric/rational.h"
+
 #include "declarations.h"
-#include "real_typedef.h"
-#include "numeric/numerical_types.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/vector.tpl"
 #include "linear_algebra/matrix.h"
@@ -38,74 +40,82 @@ using namespace std;
 using namespace Ariadne;
 using namespace Ariadne::LinearAlgebra;
 
-int main() {
+template<typename R> int test_matrix();
 
+int main() {
+  test_matrix<Float64>();
+  test_matrix<MPFloat>();
+  return 0;
+}
+
+template<typename R> 
+int 
+test_matrix()
+{
+  typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
+
+  R x=2.25;
+  Interval<R> ix(1.5,2.25);
+  R Aptr[9]={-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0};
+  Interval<R> iAptr[4]={-1.0,3.0, -1.0,1.0};
   
-  
-  Real x=2.25;
-  Interval<Real> ix(1.5,2.25);
-  Real Aptr[9]={-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0};
-  Interval<Real> iAptr[4]={-1.0,3.0, -1.0,1.0};
-  
-  Matrix<Real> A0;
+  Matrix<R> A0;
   cout << "A0=" << A0 << endl;
-  Matrix<Real> A1(3,2);
+  Matrix<R> A1(3,2);
   cout << "A1=" << A1 << endl;
-  Matrix<Real> A2(3,3,Aptr,3,1);
+  Matrix<R> A2(3,3,Aptr,3,1);
   cout << "A2=" << A2 << endl;
-  Matrix<Real> A3("[-1.0,3.0,1.0; -1.0,1.0,2.0; 2.0,1.0,1.0]");
+  Matrix<R> A3("[-1.0,3.0,1.0; -1.0,1.0,2.0; 2.0,1.0,1.0]");
   cout << "A3=" << A3 << endl;
 
   cout << "A1(0,0)= " << A1(0,0) << endl;
   cout << "A2(0,0)= " << A2(0,0) << endl;
   assert(A2==A3);
   
-  A0=Matrix<Real>::zero(2,3);
+  A0=Matrix<R>::zero(2,3);
   cout << "A0= " << A0 << endl;
-  A1=Matrix<Real>::identity(4);
+  A1=Matrix<R>::identity(4);
   cout << "A1= " << A1 << endl;
   cout << endl;
   
-  A1=Matrix<Real>("[2,1,1;1,1,-1;1,-1,3]");
-  
-  A0=-A1;
+  A1=Matrix<R>("[2,1,1;1,1,-1;1,-1,3]");
+  Matrix<F> fA0;
+
+  fA0=-A1;
   cout << A0 << " = -" << A1 << endl;
-  A0=A1+A2;
+  fA0=Matrix<F>(A1)+A2;
   cout << A0 << " = " << A1 << " + " << A2 << endl;
-  A0=A1-A2;
+  fA0=Matrix<F>(A1)-A2;
   cout << A0 << " = " << A1 << " - " << A2 << endl;
-  A0=x*A2;
+  fA0=x*Matrix<F>(A2);
   cout << A0 << " = " << x << " * " << A2 << endl;
-  A0=A1*x;
+  fA0=Matrix<F>(A1)*x;
   cout << A0 << " = " << A1 << " * " << x << endl;
-  A0=A1/x;
+  fA0=Matrix<F>(A1)/x;
   cout << A0 << " = " << A1 << " / " << x << endl;
-  A0=A1*A2;
+  fA0=Matrix<F>(A1)*A2;
   cout << A0 << " = " << A1 << " * " << A2 << endl;
   cout << endl;
 
   
-  Matrix< Interval<Real> > iA0;
+  Matrix< Interval<R> > iA0;
   cout << "iA1= " << iA0 << endl;
-  Matrix< Interval<Real> > iA1(3,2);
+  Matrix< Interval<R> > iA1(3,2);
   cout << "iA2= " << iA1 << endl;
-  Matrix< Interval<Real> > iA2(2,2,iAptr,3,1);
+  Matrix< Interval<R> > iA2(2,2,iAptr,3,1);
   cout << "iA3= " << iA2 << endl;
-  Matrix< Interval<Real> > iA3(A1);
+  Matrix< Interval<R> > iA3(A1);
   cout << "iA4= " << iA3 << endl;
-  Matrix< Interval<Real> > iA4("[[1.875,2.125],[0.75,1.25];[-1.25,-0.875],[0.5,1.75]]");
+  Matrix< Interval<R> > iA4("[[1.875,2.125],[0.75,1.25];[-1.25,-0.875],[0.5,1.75]]");
   cout << "iA5= " << iA4 << endl;
   
-  iA0=Matrix< Interval<Real> >::zero(2,3);
+  iA0=Matrix< Interval<R> >::zero(2,3);
   cout << "iA0= " << iA0 << endl;
-  iA1=Matrix< Interval<Real> >::identity(4);
+  iA1=Matrix< Interval<R> >::identity(4);
   cout << "iA1= " << iA1 << endl;
 
   cout << "iA4.norm()=" << iA4.norm() << endl;
   cout << "iA4.norm().upper()=" << iA4.norm().upper() << endl;
   
-  
-
-
   return 0;
 }

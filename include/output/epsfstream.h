@@ -44,6 +44,21 @@
 
 #define SCALE_DIMENSION 3.5 
 
+// FIXME: This should not be necessary
+namespace Ariadne {
+  namespace Numeric {
+
+    template<> inline double min_exact(const double& x1, const double& x2) {
+      return std::min(x1,x2);
+    }
+    
+    template<> inline double max_exact(const double& x1, const double& x2) {
+      return std::max(x1,x2);
+    }
+    
+  }
+}
+
 namespace Ariadne {
   namespace Postscript {
     

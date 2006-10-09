@@ -77,7 +77,7 @@ namespace Ariadne {
     bool 
     Zonotope<R>::empty_interior() const 
     {
-      return !LinearAlgebra::independent_rows(this->_generators);
+      return !LinearAlgebra::independent_rows(LinearAlgebra::Matrix<Rational>(this->_generators));
     }
       
     template<typename R>
@@ -147,13 +147,22 @@ namespace Ariadne {
     {
       // FIXME: What to do about central block?
       //size_type n=this->dimension();
-      size_type m=(this->generators()).number_of_columns();
       ListSet<R,Geometry::Zonotope> result(this->dimension());
-      matrix_type new_generators=this->generators()/2;
       
+      R two=2;
+      size_type d=(this->generators()).number_of_rows();
+      size_type m=(this->generators()).number_of_columns();
+      
+      matrix_type new_generators(d,m);
+      for(size_type i=0; i!=d; ++i) {
+        for(size_type j=0; i!=m; ++j) {
+          new_generators(i,j)=div_up(this->generators()(i,j),two);
+        }
+      }
+
       state_type first_centre=this->centre();
       for(size_type i=0; i<m; i++) {
-        first_centre=first_centre-LinearAlgebra::Vector<R>((this->generator(i))/2);
+        first_centre=sub_approx(first_centre,LinearAlgebra::Vector<R>(column(new_generators,i)));
       }
       
       array<index_type> lower(m,0);
@@ -167,7 +176,7 @@ namespace Ariadne {
         state_type new_centre=first_centre;
         for(size_type i=0; i<m; i++) {
           if(ary[i]==1) {
-            new_centre=new_centre+this->generator(i);
+            new_centre=add_approx(new_centre,this->generator(i));
           }
         }
         result.adjoin(Zonotope(new_centre,new_generators));
@@ -181,6 +190,7 @@ namespace Ariadne {
     {
       size_type n=this->dimension();
       size_type m=(this->generators()).number_of_columns();
+      R two=2;
       ListSet<R,Geometry::Zonotope> result(this->dimension());
       
       matrix_type new_generators=this->generators();
@@ -197,12 +207,12 @@ namespace Ariadne {
       
       size_type j=max_column;
       for(size_type i=0; i!=n; ++i) {
-        new_generators(i,j)/=2;
+        div_up(new_generators(i,j),two);
       }
       
-      state_type new_centre=this->centre()-LinearAlgebra::Vector<R>(column(new_generators,j)/2);
+      state_type new_centre=sub_approx(this->centre(),LinearAlgebra::Vector<R>(column(new_generators,j)));
       result.adjoin(Zonotope<R>(new_centre,new_generators));
-      new_centre=new_centre+LinearAlgebra::Vector<R>(column(new_generators,j));
+      new_centre=add_approx(new_centre,LinearAlgebra::Vector<R>(column(new_generators,j)));
       result.adjoin(Zonotope(new_centre,new_generators));
 
       return result;
@@ -298,12 +308,15 @@ namespace Ariadne {
           A(i,j)=z.generators()(i,j);
         }
       }
-      LinearAlgebra::Matrix<F> B=LinearAlgebra::inverse(A);
+      LinearAlgebra::Matrix<F> Aq=A;
+      LinearAlgebra::Matrix<F> B=LinearAlgebra::inverse(Aq);
       const Point<R>& c=z.centre();
+      
+      throw std::runtime_error("Zonotope<R>::over_approximating_parallelotope() const not implemented");
       
       Parallelotope<R> p(c,A);
       while(!Geometry::subset(z,p)) {
-        A*=2;
+        Aq*=2;
         p=Parallelotope<R>(c,A);
       }
       return p;
@@ -315,91 +328,9 @@ namespace Ariadne {
     void 
     Zonotope<R>::minimize_generators(void) 
     {
-      using namespace LinearAlgebra;
-           
-      size_type i,j,i2,j2;
-      matrix_type &gen=this->_generators;
-      gen=remove_null_columns_but_one(gen);
-      size_type rows=gen.number_of_rows();
-      
-      // if the first row is null the zonotope is a point and it is already
-      // minimized
-      if (find_first_not_null_in_col(gen,0)==rows) {
-        return;
-      }
-      
-      size_type cols=this->number_of_generators();
-      size_type min_cols=cols;
-      R coef,coef2;
-     
-      array<size_type> dependences(cols,cols);
-      array<bool> same_sign(cols,true);
-      
-      for (j=0; j<cols; j++) {
-        i=find_first_not_null_in_col(gen,j);
-             
-        // if the first row is null the zonotope is a point and it is already
-        // minimized
-        assert(i!=rows);
-
-        coef=gen(i,j);
-        
-        for (j2=j+1; j2<cols; j2++) {
-          i2=find_first_not_null_in_col(gen,j2);
-
-          if (i==i2) {
-            coef2=gen(i2,j2);
-
-            //check whever the j-th and the j2-th columns are linear depended
-            //or not.
-            while ((i2<rows)&&(gen(i2,j2)*coef==gen(i2,j)*coef2))
-              i2++;
-
-            // if they are
-            if (i2==rows) {
-              if (dependences[j]==cols) {
-                dependences[j2]=j;
-                if (coef*coef2<0) same_sign[j2]=false;
-                min_cols--;
-              } else {
-                dependences[j2]=dependences[j];
-                if ((coef*coef2>0)^same_sign[j]) same_sign[j2]=false;
-              }
-            }
-          }
-        }
-      }
-      
-      if (min_cols!= cols) {
-        matrix_type new_gen(rows,min_cols);
-
-        j2=0;
-        for (j=0; j< cols; j++) {
-          if (dependences[j]==cols) {
-            dependences[j]=j2;
-            
-            for (i=0; i<rows; i++)
-              new_gen(i,j2)=gen(i,j);
-            
-            j2++;
-          } else {
-             
-             if (same_sign[j]) {
-               for (i=0; i<rows; i++)
-                 new_gen(i,dependences[j])+=gen(i,j);
-             } else {
-               for (i=0; i<rows; i++)
-                 new_gen(i, dependences[j])-=gen(i,j);
-             }
-          }
-        }
-
-        gen=new_gen;
-      }
-      sort_generators();
+      return;
     }
     
-
 
     template<typename R>
     inline
@@ -429,6 +360,7 @@ namespace Ariadne {
     
     
     
+/*
     template<typename R>
     void 
     Zonotope<R>::compute_linear_inequalities(matrix_type& A, vector_type& b) const
@@ -493,9 +425,9 @@ namespace Ariadne {
         }
       }
     }
-    
+*/    
 
-      /*
+/*
     template<typename R>
     bool
     Zonotope<R>::disjoint(const Rectangle<R>& r) const
@@ -576,7 +508,7 @@ namespace Ariadne {
       }
       return Geometry::disjoint(Polyhedron<Rational>(*this), Polyhedron<Rational>(r));
     }
-    */
+*/
    
     template <typename R>
     bool 
@@ -694,7 +626,7 @@ namespace Ariadne {
         }
       }
       
-      return Zonotope<R>(A.centre()+(B.centre()).position_vector(),gen);
+      return Zonotope<R>(add_approx(A.centre(),B.centre().position_vector()),gen);
     }
    
  
@@ -731,7 +663,7 @@ namespace Ariadne {
          }
       }
       
-      return Zonotope<R>(A.centre()-(B.centre()).position_vector(), 
+      return Zonotope<R>(sub_approx(A.centre(),B.centre().position_vector()), 
                          remove_null_columns_but_one(gen));
     }
 

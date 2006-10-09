@@ -79,11 +79,11 @@ namespace Ariadne {
       const Geometry::Point<R>& c=p.centre();
       const LinearAlgebra::Matrix<R>& g=p.generators();
       
-      Geometry::Point<R> img_centre=f(c);
-      LinearAlgebra::Matrix< Interval<R> > df_on_set = f.derivative(p.bounding_box());
-      LinearAlgebra::Matrix<R> df_at_centre = f.derivative(c);
+      Geometry::Point< Interval<R> > img_centre=f(c);
+      LinearAlgebra::Matrix< Interval<R> > df_on_set = f.jacobian(p.bounding_box());
+      LinearAlgebra::Matrix< Interval<R> > df_at_centre = f.jacobian(c);
       
-      LinearAlgebra::Matrix<R> img_generators = df_at_centre*g;
+      LinearAlgebra::Matrix< Interval<R> > img_generators = df_at_centre*g;
       
       LinearAlgebra::Matrix< Interval<R> > img_generators_inverse = LinearAlgebra::inverse(LinearAlgebra::Matrix< Interval<R> >(img_generators));
       
@@ -98,7 +98,11 @@ namespace Ariadne {
         new_cuboid_sup=std::max( new_cuboid_sup, R(abs(new_cuboid(j).upper())) );
       }
       
-      Geometry::Parallelotope<R> result(img_centre,img_generators);
+      // FIXME: This is incorrect; need over-approximations
+      Geometry::Point<R> nc=Geometry::Point<R>(centre(img_centre.position_vector()));
+      LinearAlgebra::Matrix<R> ng=centre(img_generators);
+      
+      Geometry::Parallelotope<R> result(nc,ng);
       return result;
     }
 

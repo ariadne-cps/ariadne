@@ -57,23 +57,24 @@ inline RZonotope integrate_zonotope(
 }
 
 void export_integrate() {
-  typedef RRectangle (RC1LohnerIntegrator::*IntStepRectFunc) (const RVectorFieldBase&, const RRectangle&, Real&) const;
-  typedef RParallelotope (RC1LohnerIntegrator::*IntStepPltpFunc) (const RVectorFieldBase&, const RParallelotope&, Real&) const;
-  typedef RRectangle (RC1Integrator::*RchStepRectFunc) (const RVectorFieldBase&, const RRectangle&, Real&) const;
-  typedef RZonotope (RC1Integrator::*RchStepPltpFunc) (const RVectorFieldBase&, const RParallelotope&, Real&) const;
-  typedef RZonotope (RC1Integrator::*RchStepZntpFunc) (const RVectorFieldBase&, const RZonotope&, Real&) const;
-  typedef RRectangle (RC1LohnerIntegrator::*IntRectFunc) (const RVectorFieldBase&, const RRectangle&, const Real&) const;
-  typedef RParallelotope (RC1LohnerIntegrator::*IntPltpFunc) (const RVectorFieldBase&, const RParallelotope&, const Real&) const;
-  typedef RZonotope (RC1LohnerIntegrator::*IntZntpFunc) (const RVectorFieldBase&, const RZonotope&, const Real&) const;
-  typedef RRectangleListSet (RC1LohnerIntegrator::*IntLSRectFunc) (const RVectorFieldBase&, const RRectangleListSet&, const Real&) const;
-  typedef RZonotopeListSet (RC1LohnerIntegrator::*IntLSZNtpFunc) (const RVectorFieldBase&, const RZonotopeListSet&, const Real&) const;
-  typedef RParallelotopeListSet (RC1LohnerIntegrator::*ReachLSPltpFunc) (const RVectorFieldBase&, const RParallelotopeListSet&, const Real&) const;
-  typedef RZonotopeListSet (RC1LohnerIntegrator::*ReachLSPltzFunc) (const RVectorFieldBase&, const RZonotopeListSet&, const Real&) const;
-  typedef RParallelotopeListSet (RC1LohnerIntegrator::*ReachLSPpFunc) (const RVectorFieldBase&, const RParallelotope&, const Real&) const;
-  typedef RZonotopeListSet (RC1LohnerIntegrator::*ReachLSZzFunc) (const RVectorFieldBase&, const RZonotope&, const Real&) const;
-  typedef RParallelotopeListSet (RC1LohnerIntegrator::*IntLSPltpFunc) (const RVectorFieldBase&, const RParallelotopeListSet&, const Real&) const;
-  typedef RZonotopeListSet (RC1LohnerIntegrator::*IntLSZntpFunc) (const RVectorFieldBase&, const RZonotopeListSet&, const Real&) const;
-  typedef RGridMaskSet (RC1Integrator::*IntGMSFunc) (const RVectorFieldBase&, const RGridMaskSet&, const RGridMaskSet&, const Real&) const;
+  typedef Evaluation::time_type Time;
+  typedef RRectangle (RC1LohnerIntegrator::*IntStepRectFunc) (const RVectorFieldBase&, const RRectangle&, Time&) const;
+  typedef RParallelotope (RC1LohnerIntegrator::*IntStepPltpFunc) (const RVectorFieldBase&, const RParallelotope&, Time&) const;
+  typedef RRectangle (RC1Integrator::*RchStepRectFunc) (const RVectorFieldBase&, const RRectangle&, Time&) const;
+  typedef RZonotope (RC1Integrator::*RchStepPltpFunc) (const RVectorFieldBase&, const RParallelotope&, Time&) const;
+  typedef RZonotope (RC1Integrator::*RchStepZntpFunc) (const RVectorFieldBase&, const RZonotope&, Time&) const;
+  typedef RRectangle (RC1LohnerIntegrator::*IntRectFunc) (const RVectorFieldBase&, const RRectangle&, const Time&) const;
+  typedef RParallelotope (RC1LohnerIntegrator::*IntPltpFunc) (const RVectorFieldBase&, const RParallelotope&, const Time&) const;
+  typedef RZonotope (RC1LohnerIntegrator::*IntZntpFunc) (const RVectorFieldBase&, const RZonotope&, const Time&) const;
+  typedef RRectangleListSet (RC1LohnerIntegrator::*IntLSRectFunc) (const RVectorFieldBase&, const RRectangleListSet&, const Time&) const;
+  typedef RZonotopeListSet (RC1LohnerIntegrator::*IntLSZNtpFunc) (const RVectorFieldBase&, const RZonotopeListSet&, const Time&) const;
+  typedef RParallelotopeListSet (RC1LohnerIntegrator::*ReachLSPltpFunc) (const RVectorFieldBase&, const RParallelotopeListSet&, const Time&) const;
+  typedef RZonotopeListSet (RC1LohnerIntegrator::*ReachLSPltzFunc) (const RVectorFieldBase&, const RZonotopeListSet&, const Time&) const;
+  typedef RParallelotopeListSet (RC1LohnerIntegrator::*ReachLSPpFunc) (const RVectorFieldBase&, const RParallelotope&, const Time&) const;
+  typedef RZonotopeListSet (RC1LohnerIntegrator::*ReachLSZzFunc) (const RVectorFieldBase&, const RZonotope&, const Time&) const;
+  typedef RParallelotopeListSet (RC1LohnerIntegrator::*IntLSPltpFunc) (const RVectorFieldBase&, const RParallelotopeListSet&, const Time&) const;
+  typedef RZonotopeListSet (RC1LohnerIntegrator::*IntLSZntpFunc) (const RVectorFieldBase&, const RZonotopeListSet&, const Time&) const;
+  typedef RGridMaskSet (RC1Integrator::*IntGMSFunc) (const RVectorFieldBase&, const RGridMaskSet&, const RGridMaskSet&, const Time&) const;
   typedef RGridMaskSet (RC1LohnerIntegrator::*CRGMSFunc) (const RVectorFieldBase&, const RGridMaskSet&, const RGridMaskSet&) const;
  
   class_<RC1LohnerIntegrator>("C1LohnerIntegrator",init<Real,Real,Real>())

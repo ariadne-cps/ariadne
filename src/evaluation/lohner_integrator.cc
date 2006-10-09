@@ -22,12 +22,12 @@
  */
 
 
+#include "real_typedef.h"
+
 #include "evaluation/integrator.h"
 #include "evaluation/lohner_integrator.h"
 
 #include "evaluation/lohner_integrator.tpl"
-
-#include "real_typedef.h"
 
 namespace Ariadne {
   namespace Evaluation {

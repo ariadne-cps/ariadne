@@ -21,27 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "real_typedef.h"
+
 #include "geometry/rectangle.h"
 #include "geometry/rectangle.tpl"
-
-#include "numeric/float64.h"
-#include "numeric/rational.h"
-#include "real_typedef.h"
 
 
 namespace Ariadne {
   namespace Geometry {
     template class Rectangle<Real>; 
+      
     template bool subset(const Rectangle<Real>&, 
                          const ListSet<Real,Geometry::Rectangle>&);
-
-    #ifndef RATIONAL_REAL
-    template class Rectangle<Rational>; 
-    #endif
-      
-    #ifndef DOUBLE_REAL  
-    template class Rectangle<Float64>; 
-    #endif
     
   }
 }

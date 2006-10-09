@@ -40,7 +40,7 @@ using namespace Ariadne;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-typedef RVector (RAffineVectorField::*AffVectorFieldCallPoint) (const RPoint&) const;
+typedef FVector (RAffineVectorField::*AffVectorFieldCallPoint) (const RPoint&) const;
 typedef RIntervalVector (RAffineVectorField::*AffVectorFieldCallRectangle) (const RRectangle&) const;
 
 //typedef RParallelotope (RAffineVectorField::*AffVectorFieldApplyParallelotope) (const RParallelotope&) const;
@@ -48,7 +48,7 @@ typedef RIntervalVector (RAffineVectorField::*AffVectorFieldCallRectangle) (cons
 //typedef RSimplex (RAffineVectorField::*AffVectorFieldApplySimplex) (const RSimplex&) const;
 //typedef RPolytope (RAffineVectorField::*AffVectorFieldApplyPolytope) (const RPolytope&) const;
 
-typedef RMatrix (RAffineVectorField::*AffVectorFieldDerivativePoint) (const RPoint&) const;
+typedef FMatrix (RAffineVectorField::*AffVectorFieldDerivativePoint) (const RPoint&) const;
 typedef RIntervalMatrix (RAffineVectorField::*AffVectorFieldDerivativeRectangle) (const RRectangle&) const;
 
 AffVectorFieldCallPoint affine_vf_call_point=&RAffineVectorField::operator();

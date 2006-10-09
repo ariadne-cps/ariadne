@@ -59,6 +59,8 @@ namespace Ariadne {
     /*! \brief A monomial in several variables. */
     template<typename R>
     class Monomial {
+      typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
+      typedef typename Numeric::numerical_traits<R>::arithmetic_type result_type;
      public:
       /*! \brief The type of denotable real number used for the coefficients. */
       typedef R real_type;
@@ -94,7 +96,7 @@ namespace Ariadne {
       size_type degree() const;
       
       /*! \brief Compute the image of a point under the monomial. */
-      R apply(const Geometry::Point<R>& s) const;
+      result_type apply(const Geometry::Point<R>& s) const;
       /*! \brief Compute the image of a rectangle under the monomial. */
       Interval<R> apply(const Geometry::Rectangle<R>& s) const;
      private:
@@ -118,6 +120,8 @@ namespace Ariadne {
     /*! \brief A polynomial in several variables. */
     template<typename R>
     class Polynomial {
+      typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
+      typedef typename Numeric::numerical_traits<R>::arithmetic_type result_type;
      public:
       /*! \brief The type of denotable real number used for the corners. */
       typedef R real_type;
@@ -139,7 +143,7 @@ namespace Ariadne {
       size_type number_of_terms() const { return _terms.size(); }
       
       /*! \brief Compute the image of a point under the polynomial. */
-      R apply(const Geometry::Point<R>& s) const;
+      result_type apply(const Geometry::Point<R>& s) const;
       /*! \brief Compute an over-approximation to a rectangle using interval arithmetic. */
       Interval<R> apply(const Geometry::Rectangle<R>& s) const;
      private:
@@ -160,6 +164,8 @@ namespace Ariadne {
      */
     template <typename R>
     class PolynomialMap : public Map<R> {
+      typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
+      typedef Geometry::Point<F> result_type;
      public:
       /*! \brief The type of denotable real number used for the corners. */
       typedef R real_type;
@@ -183,21 +189,21 @@ namespace Ariadne {
       dimension_type result_dimension() const { return _components.size(); }
       
       /*! \brief Compute the image of a point under the polynomial map. */
-      Geometry::Point<R> apply(const Geometry::Point<R>& s) const;
+      Geometry::Point<F> apply(const Geometry::Point<R>& s) const;
       /*! \brief Compute an over-approximation to the image of a rectangle under the polynomial map. */
       Geometry::Rectangle<R> apply(const Geometry::Rectangle<R>& s) const;
       
       /*! \brief Compute the derivate of the map at a point. */
-      LinearAlgebra::Matrix<R> derivative(const Geometry::Point<R>& s) const;
+      LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<R>& s) const;
       /*! \brief Compute an over-approximation to the the derivate of the map over a rectangle. */
-      LinearAlgebra::Matrix< Interval<R> > derivative(const Geometry::Rectangle<R>& s) const;
+      LinearAlgebra::Matrix< Interval<R> > jacobian(const Geometry::Rectangle<R>& s) const;
       
       /*! \brief Compute a closed form for the derivative of the map. */
-      const PolynomialMatrix<R>& derivative() const;
+      const PolynomialMatrix<R>& jacobian() const;
       
       std::string name() const { return "PolynomialMap"; }
      private:
-      void _compute_derivative() const;
+      void _compute_jacobian() const;
       void _set_argument_dimension(const dimension_type& n);
       dimension_type _compute_maximum_component_dimension() const;
      private:
@@ -207,12 +213,13 @@ namespace Ariadne {
       /* Components of the map. */
       dimension_type _argument_dimension;
       array< Polynomial<R> > _components;
-      mutable PolynomialMatrix<R> _derivative;
+      mutable PolynomialMatrix<R> _jacobian;
     };
     
     /*! \brief A matrix with polynomial entries. */
     template <typename R>
     class PolynomialMatrix {
+      typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
      public:
       /*! \brief Default constructor creates a 0 by 0 matrix. */
       PolynomialMatrix() : _matrix() { }

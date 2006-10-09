@@ -21,14 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "numeric/float64.h"
+#include "numeric/mpfloat.h"
+#include "numeric/rational.h"
+
 #include "numeric/interval.h"
 
 #include "linear_algebra/vector.h"
 #include "linear_algebra/vector.tpl"
-
-#include "numeric/float64.h"
-#include "numeric/mpfloat.h"
-#include "numeric/rational.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {

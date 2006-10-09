@@ -44,6 +44,7 @@ namespace Ariadne {
     template <typename R>
     class LorenzSystem : public VectorField<R> 
     {
+      typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
      public:
       /*! \brief Construct the Lorenz system with parameter values \a beta,
        * \a rho and \a sigma.
@@ -54,14 +55,14 @@ namespace Ariadne {
        : _b(beta), _p(rho), _s(sigma) { }
       
       /*! \brief  The vector field applied to a state. */
-      virtual LinearAlgebra::Vector<R> operator() (const Geometry::Point<R>& x) const;
+      virtual LinearAlgebra::Vector<F> operator() (const Geometry::Point<R>& x) const;
       /*! \brief  The map applied to a rectangle basic set. */
       virtual LinearAlgebra::Vector< Interval<R> > operator() (const Geometry::Rectangle<R>& r) const;
      
       /*! \brief  The derivative of the map at a point. */
-      virtual LinearAlgebra::Matrix<R> derivative(const Geometry::Point<R>& x) const;
+      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<R>& x) const;
       /*! \brief  The derivative of the map over a rectangular basic set. */
-      virtual LinearAlgebra::Matrix< Interval<R> > derivative(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::Matrix< Interval<R> > jacobian(const Geometry::Rectangle<R>& r) const;
             
       /*! \brief  The parameter \f$\beta\f$. */
       const R& beta() const { return _b; }
@@ -84,10 +85,10 @@ namespace Ariadne {
     };
       
     template <typename R>
-    LinearAlgebra::Vector<R>
+    LinearAlgebra::Vector<typename LorenzSystem<R>::F>
     LorenzSystem<R>::operator() (const Geometry::Point<R>& x) const
     {
-      LinearAlgebra::Vector<R> result(3); 
+      LinearAlgebra::Vector<F> result(3); 
       result(0)=_s*(x[1]-x[0]);
       result(0)=_p*x[0]-x[1]-x[0]*x[2];
       result(0)=-_b*x[2]+x[0]*x[1];
@@ -106,10 +107,10 @@ namespace Ariadne {
     }
      
     template <typename R>
-    LinearAlgebra::Matrix<R>
-    LorenzSystem<R>::derivative(const Geometry::Point<R>& x) const
+    LinearAlgebra::Matrix<typename LorenzSystem<R>::F>
+    LorenzSystem<R>::jacobian(const Geometry::Point<R>& x) const
     {
-      LinearAlgebra::Matrix<R> result(3,3); 
+      LinearAlgebra::Matrix<F> result(3,3); 
       result(0,0) = -_s;
       result(0,1) = _s;
       result(0,2) = 0;
@@ -124,7 +125,7 @@ namespace Ariadne {
      
     template <typename R>
     LinearAlgebra::Matrix< Interval<R> >
-    LorenzSystem<R>::derivative(const Geometry::Rectangle<R>& X) const
+    LorenzSystem<R>::jacobian(const Geometry::Rectangle<R>& X) const
     {
       LinearAlgebra::Matrix< Interval<R> > result(3,3); 
       result(0,0) = R(-_s);

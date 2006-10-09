@@ -93,7 +93,7 @@ test_arithmetic()
   R u=add_up(o,e);
   int n=0;
   while(l==u && n!=256) {
-    e=e*h;
+    e=mul_approx(e,h);
     ++n;
     l=add_down(o,e);
     u=add_up(o,e);

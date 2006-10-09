@@ -40,22 +40,20 @@ using namespace Ariadne;
 using namespace boost::python;
 
 typedef System::Map<Real> RMap;
+typedef Geometry::Point< Numeric::Interval<Real> > IPoint;
 
-typedef RPoint (RAffineMap::*AffMapCallPoint) (const RPoint&) const;
+typedef IPoint (RAffineMap::*AffMapCallPoint) (const RPoint&) const;
 typedef RParallelotope (RAffineMap::*AffMapCallParallelotope) (const RParallelotope&) const;
 typedef RRectangle (RAffineMap::*AffMapCallRectangle) (const RRectangle&) const;
 typedef RZonotope (RAffineMap::*AffMapCallZonotope) (const RZonotope&) const;
 typedef RSimplex (RAffineMap::*AffMapCallSimplex) (const RSimplex&) const;
 typedef RPolytope (RAffineMap::*AffMapCallPolytope) (const RPolytope&) const;
-typedef RPolytope (RMap::*MapCallPolytope) (const RPolytope&) const;
-typedef RSimplex (RMap::*MapCallSimplex) (const RSimplex&) const;
 
 AffMapCallPoint affine_map_call_point=&RAffineMap::operator();
 AffMapCallRectangle affine_map_call_rectangle=&RAffineMap::operator();
 AffMapCallParallelotope affine_map_call_parallelotope=&RAffineMap::operator();
 AffMapCallZonotope affine_map_call_zonotope=&RAffineMap::operator();
-MapCallSimplex affine_map_call_simplex=&RMap::operator();
-MapCallPolytope affine_map_call_polytope=&RMap::operator();
+AffMapCallPolytope affine_map_call_polytope=&RAffineMap::operator();
 
 
 void export_affine_map() {
@@ -67,7 +65,6 @@ void export_affine_map() {
     .def("__call__", affine_map_call_rectangle)
     .def("__call__", affine_map_call_parallelotope)
     .def("__call__", affine_map_call_zonotope)
-    .def("__call__", affine_map_call_simplex)
     .def("__call__", affine_map_call_polytope)
     .def(self_ns::str(self))
   ;

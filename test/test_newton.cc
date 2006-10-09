@@ -38,19 +38,28 @@
 using namespace std;
 using namespace Ariadne;
 
-int main() {
+template<typename R> int test_newton();
 
+int main() {
+  test_newton<Real>();
+  return 0;
+}
+
+template<typename R>
+int 
+test_newton()
+{
   
 
-  System::HenonMap<Real> h(1.5,0.375);
-  Geometry::Rectangle<Real> r("[-2.125,-2]x[-2.125,-2]");
-  Real e=1e-10;
+  System::HenonMap<R> h(1.5,0.375);
+  Geometry::Rectangle<R> r("[-2.125,-2]x[-2.125,-2]");
+  R e=1e-10;
   
   cout << h << r << e << endl;
   
-  Geometry::Rectangle<Real> fr;
+  Geometry::Rectangle<R> fr;
   try {
-    fr=Evaluation::interval_newton(System::DifferenceMap<Real>(h),r,e);
+    fr=Evaluation::interval_newton(System::DifferenceMap<R>(h),r,e);
   }
   catch(Evaluation::EvaluationException e) {
     cout << "No solution found" << endl;
@@ -60,10 +69,10 @@ int main() {
   cout << std::setprecision(20);
   cout << fr << "  " << fr.radius() << endl;
 
-  Geometry::Point<Real> fp("(-2.0920128158902654,-2.0920128158902654)");
+  Geometry::Point<R> fp("(-2.0920128158902654,-2.0920128158902654)");
   assert(fr.contains(fp));
 
-  fp=h(fp);
+  Geometry::Point< Interval<R> > ifp=h(fp);
   
 
 

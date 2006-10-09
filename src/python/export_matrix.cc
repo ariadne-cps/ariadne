@@ -103,7 +103,7 @@ void export_matrix<Rational>()
 template<typename R>
 void export_interval_matrix() 
 {
-  typedef Interval<R> Ivl;
+  typedef Interval<R> I;
   typedef Vector<R> Vec;
   typedef Matrix<R> Mx;
   typedef Vector< Interval<R> > IVec;
@@ -111,15 +111,16 @@ void export_interval_matrix()
   
   class_<IMx>(python_name<R>("IntervalMatrix").c_str(),init<int,int>())
     .def(init<std::string>())
+    .def(init<Mx>())
     .def(init<IMx>())
-    .def("__getitem__",&matrix_get_item<Ivl>)
-    .def("__setitem__",&matrix_set_item<Ivl,Ivl>)
-    .def("__setitem__",&matrix_set_item<Ivl,R>)
-    .def("__setitem__",&matrix_set_item<Ivl,double>)
+    .def("__getitem__",&matrix_get_item<I>)
+    .def("__setitem__",&matrix_set_item<I,I>)
+    .def("__setitem__",&matrix_set_item<I,R>)
+    .def("__setitem__",&matrix_set_item<I,double>)
     .def(self_ns::str(self))
   ;
   
-  def("inverse",&matrix_inverse<Ivl>);
+  def("inverse",&matrix_inverse<I>);
   def("exp",&LinearAlgebra::exp<R>);
 }
 

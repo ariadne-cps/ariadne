@@ -25,11 +25,11 @@
 #include <fstream>
 #include <string>
 
-#include "ariadne.h"
 #include "real_typedef.h"
+
+#include "ariadne.h"
 #include "base/exception.h"
 #include "base/utility.h"
-#include "numeric/numerical_types.h"
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
@@ -43,7 +43,16 @@ using namespace Ariadne;
 using namespace Ariadne::Geometry;
 using namespace std;
 
+template<typename R> int test_zonotope();
+ 
+int main() {
+  test_zonotope<Real>();
   
+  cerr << "INCOMPLETE ";
+  return 0;
+}
+
+
 template<typename R>
 int 
 test_zonotope()
@@ -68,7 +77,6 @@ test_zonotope()
 
   Zonotope<R> z3=minkowski_sum(z1,z2);
   cout << "z3=" << z3 << endl;
-  cout << "z3.vertices()=" << flush; cout << z3.vertices() << endl;
 
   Point<R> pt1,pt2,pt3,pt4,pt5,pt6;
 
@@ -79,6 +87,10 @@ test_zonotope()
   pt5=Point<R>("(14.0,5.0,-0.5)");
   pt6=Point<R>("(15.5,11.5,0)");
 
+  Postscript::epsfstream eps("test_zonotope.eps",z3.bounding_box(),0,1);
+  eps << z3 << pt1 << pt2 << pt3 << pt4 << pt5 << pt6 << endl;
+  eps.close();
+  
   assert(z3.contains(pt1));
   assert(z3.contains(pt2));
   assert(z3.contains(pt3));
@@ -101,20 +113,5 @@ test_zonotope()
   assert(!z3.empty());
   assert(!z3.empty_interior());
   
-  
-  Postscript::epsfstream eps("test_zonotope.eps",z3.bounding_box(),0,1);
-  eps << z3 << pt1 << pt2 << pt3 << pt4 << pt5 << pt6 << endl;
-  eps.close();
-  
-  return 0;
-}
-
-  
-
-int main() {
-  test_zonotope<Real>();
-  
-  cerr << "INCOMPLETE ";
-
   return 0;
 }

@@ -26,10 +26,6 @@
 
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
-#include "../geometry/polytope.h"
-#include "../geometry/simplex.h"
-#include "../geometry/zonotope.h"
-#include "../geometry/parallelotope.h"
 
 #include "../system/map.h"
 
@@ -42,10 +38,17 @@ namespace Ariadne {
     }
   
     template<typename R>
-    Geometry::Point<R> 
-    Map<R>::operator() (const Geometry::Point<R>& x) const 
+    size_type
+    Map<R>::smoothness() const
     {
-      throw std::invalid_argument(this->name()+"::operator() (Point) not implemented."); 
+      return (size_type)(-1);
+    }
+  
+    template<typename R>
+    typename Map<R>::result_type
+    Map<R>::operator() (const Geometry::Point<R>& r) const 
+    {
+      throw std::invalid_argument(this->name()+"::operator() (Rectangle) not implemented."); 
     }
     
     template<typename R>
@@ -56,45 +59,17 @@ namespace Ariadne {
     }
     
     template<typename R>
-    Geometry::Parallelotope<R>
-    Map<R>::operator() (const Geometry::Parallelotope<R>& p) const 
+    LinearAlgebra::Matrix<typename Map<R>::F>
+    Map<R>::jacobian(const Geometry::Point<R>& r) const 
     {
-      throw std::invalid_argument(this->name()+"::operator() (Parallelotope) not implemented."); 
+      throw std::invalid_argument(this->name()+"::jacobian(Point) not implemented."); 
     }
     
-    template<typename R>
-    Geometry::Zonotope<R>
-    Map<R>::operator() (const Geometry::Zonotope<R>& p) const 
-    {
-      throw std::invalid_argument(this->name()+"::operator() (Zonotope) not implemented."); 
-    }
-    
-    template<typename R>
-    Geometry::Simplex<R>
-    Map<R>::operator() (const Geometry::Simplex<R>& p) const 
-    {
-      throw std::invalid_argument(this->name()+"::operator() (Simplex) not implemented."); 
-    }
-    
-    template<typename R>
-    Geometry::Polytope<R>
-    Map<R>::operator() (const Geometry::Polytope<R>& p) const 
-    {
-      throw std::invalid_argument(this->name()+"::operator() (Polytope) not implemented."); 
-    }
-    
-    template<typename R>
-    LinearAlgebra::Matrix<R> 
-    Map<R>::derivative(const Geometry::Point<R>& x) const 
-    {
-      throw std::invalid_argument(this->name()+"::derivative(Point) not implemented."); 
-    }
-
     template<typename R>
     LinearAlgebra::Matrix< Interval<R> > 
-    Map<R>::derivative(const Geometry::Rectangle<R>& r) const 
+    Map<R>::jacobian(const Geometry::Rectangle<R>& r) const 
     {
-      throw std::invalid_argument(this->name()+"::derivative(Rectangle) not implemented."); 
+      throw std::invalid_argument(this->name()+"::jacobian(Rectangle) not implemented."); 
     }
     
     

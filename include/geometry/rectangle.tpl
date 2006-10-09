@@ -59,10 +59,11 @@ namespace Ariadne {
     Rectangle<R>& 
     Rectangle<R>::expand_by(const real_type& delta) 
     {
-      Interval<R> expand(R(-delta),delta);
+      Interval<R> expand(-delta,delta);
       for (size_type j=0; j< this->dimension(); ++j) {
-        this->operator[](j)+=expand;
+        (*this)[j]+=expand;
       }
+        
       return *this;
     }
       
@@ -92,23 +93,23 @@ namespace Ariadne {
       size_type n=this->dimension();
       ListSet<R,Geometry::Rectangle> result(this->dimension());
       
-      array<index_type> lower(n,0);
-      array<index_type> upper(n,2);
-      array<index_type> finish(n,0);
-      finish[n-1]=2;
-      lattice_iterator end(finish,lower,upper);
-
       Point<R> lwr_crnr=this->lower_corner();
-      LinearAlgebra::Vector<R> offst=(this->upper_corner()-this->lower_corner())/2;
-      for(lattice_iterator iter(lower,lower,upper); iter!=end; ++iter) {
-        array<index_type> ary=*iter;
-        state_type new_lwr_crnr=lwr_crnr;
-        for(size_type i=0; i!=n; ++i) {
-          if(ary[i]==1) {
-            new_lwr_crnr[i]+=offst(i);
+      Point<R> cntr=this->centre();
+      Point<R> upr_crnr=this->upper_corner();
+      Point<R> new_lwr_crnr;
+      Point<R> new_upr_crnr;
+      for(size_type i=0; i!=1<<n; ++i) {
+        for(size_type j=0; j!=n; ++j) {
+          if(i&(1<<j)) {
+            new_lwr_crnr[j]=lwr_crnr[j];
+            new_upr_crnr[j]=cntr[j];
+          }
+          else {
+            new_lwr_crnr[j]=cntr[j];
+            new_upr_crnr[j]=upr_crnr[j];
           }
         }
-        Rectangle<R> new_rect(new_lwr_crnr,new_lwr_crnr+offst);
+        Rectangle<R> new_rect(new_lwr_crnr,new_upr_crnr);
         result.adjoin(new_rect);
       }
       return result;

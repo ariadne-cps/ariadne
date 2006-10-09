@@ -27,11 +27,10 @@
 
 #include <vector>
 
-#include "parallelotope.h"
+#include "../numeric/rational.h"
+#include "../numeric/interval.h"
 
 #include "../base/stlio.h"
-
-#include "../numeric/interval.h"
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
@@ -46,17 +45,19 @@
 #include "../geometry/zonotope.h"
 #include "../geometry/polyhedron.h"
 
+#include "parallelotope.h"
+
 namespace Ariadne {
   namespace Geometry {
 
     /*! \brief Tests if the parallelotope contains \a point. */
     template <typename R>
-    bool Parallelotope<R>::contains(const state_type& point) const {
-      matrix_type inv_gen(LinearAlgebra::inverse(this->generators()));
-      state_type centre=this->centre();
-      vector_type v(point.position_vector()-centre.position_vector());
+    bool Parallelotope<R>::contains(const Point<R>& point) const {
+      LinearAlgebra::Vector<Rational> p=point.position_vector();
+      LinearAlgebra::Vector<Rational> c=this->centre().position_vector();
+      LinearAlgebra::Matrix<Rational> G=this->generators();
 
-      vector_type e=prod(inv_gen,v);
+      LinearAlgebra::Vector<Rational> e=G.solve(c-p);
 
       for (size_t i=0; i<e.size(); i++) 
         if (abs(e(i))>1) return false;
@@ -66,12 +67,13 @@ namespace Ariadne {
     
     /*! \brief Tests if the interior of the parallelotope contains \a point. */
     template<typename R>
-    bool Parallelotope<R>::interior_contains(const state_type& point) const {
-      matrix_type inv_gen=LinearAlgebra::inverse(this->generators());
-      state_type centre=this->centre();
-      vector_type v(point.position_vector()-centre.position_vector());
+    bool Parallelotope<R>::interior_contains(const Point<R>& point) const 
+    {
+      LinearAlgebra::Vector<Rational> p=point.position_vector();
+      LinearAlgebra::Vector<Rational> c=this->centre().position_vector();
+      LinearAlgebra::Matrix<Rational> G=this->generators();
 
-      vector_type e=inv_gen*v;
+      LinearAlgebra::Vector<Rational> e=G.solve(c-p);
 
       for (size_t i=0; i<e.size(); i++) 
         if (abs(e(i))>=1) return false;
@@ -88,6 +90,7 @@ namespace Ariadne {
       
       matrix_type new_generators=this->generators();
       
+      R two=2;
       R max_norm=0;
       size_type max_column=0;
       for(size_type j=0; j!=n; ++j) {
@@ -100,12 +103,12 @@ namespace Ariadne {
       
       size_type j=max_column;
       for(size_type i=0; i!=n; ++i) {
-        new_generators(i,j)/=2;
+        new_generators(i,j)=div_up(new_generators(i,j),two);
       }
       
-      state_type new_centre=this->centre()-LinearAlgebra::Vector<R>(column(new_generators,j)/2);
+      state_type new_centre=sub_approx(this->centre(),div_approx(LinearAlgebra::Vector<R>(column(new_generators,j)),two));
       result.adjoin(Parallelotope<R>(new_centre,new_generators));
-      new_centre=new_centre+LinearAlgebra::Vector<R>(column(new_generators,j));
+      new_centre=add_approx(new_centre,LinearAlgebra::Vector<R>(column(new_generators,j)));
       result.adjoin(Parallelotope(new_centre,new_generators));
 
       return result;
@@ -115,27 +118,29 @@ namespace Ariadne {
     ListSet<R,Parallelotope>
     Parallelotope<R>::subdivide() const 
     {
-      size_type n=this->dimension();
       ListSet<R,Geometry::Parallelotope> result(this->dimension());
-      matrix_type new_generators=this->generators()/2;
+      
+      R two=2;
+      size_type n=this->dimension();
+      
+      matrix_type new_generators(n,n);
+      for(size_type i=0; i!=n; ++i) {
+        for(size_type j=0; j!=n; ++j) {
+          new_generators(i,j)=div_up(this->generators()(i,j),two);
+        }
+      }
       
       state_type first_centre=this->centre();
       for(size_type i=0; i!=n; ++i) {
-        first_centre=first_centre-LinearAlgebra::Vector<R>((this->generator(i))/2);
+        first_centre=sub_approx(first_centre,div_approx(LinearAlgebra::Vector<R>(this->generator(i)),two));
       }
       
-      array<index_type> lower(n,0);
-      array<index_type> upper(n,2);
-      array<index_type> finish(n,0);
-      finish[n-1]=2;
-      lattice_iterator end(finish,lower,upper);
-
-      for(lattice_iterator iter(lower,lower,upper); iter!=end; ++iter) {
-        array<index_type> ary=*iter;
-        state_type new_centre=first_centre;
+      Point<R> new_centre;
+      for(size_type k=0; k!=1<<n; ++k) {
+        new_centre=first_centre;
         for(size_type i=0; i!=n; ++i) {
-          if(ary[i]==1) {
-            new_centre=new_centre+this->generator(i);
+          if(k&(1<<i)) {
+            new_centre=add_approx(new_centre,this->generator(i));
           }
         }
         result.adjoin(Parallelotope(new_centre,new_generators));
@@ -148,9 +153,11 @@ namespace Ariadne {
     LinearAlgebra::Vector<typename numerical_traits<R>::field_extension_type>
     Parallelotope<R>::coordinates(const state_type& s) const {
       typedef typename numerical_traits<R>::field_extension_type F;
-      LinearAlgebra::Vector<F> diff=s-this->centre();
-      LinearAlgebra::Matrix<F> inv = LinearAlgebra::inverse(this->generators());
-      return prod(inv,diff);
+      LinearAlgebra::Vector<F> p=s.position_vector();
+      LinearAlgebra::Vector<F> c=this->centre().position_vector();
+      LinearAlgebra::Vector<F> d=p-c;
+      LinearAlgebra::Matrix<F> G=this->generators();
+      return G.solve(d);
     }
 
 
@@ -201,10 +208,16 @@ namespace Ariadne {
       LinearAlgebra::Matrix< Interval<R> > Ainv=LinearAlgebra::inverse(LinearAlgebra::Matrix< Interval<R> >(Amid));
       R err = ((Ainv*D).norm()+(Ainv*A).norm()).upper();
 
-      return Geometry::Parallelotope<R>(cmid,err*Amid);
+      for(size_type i=0; i!=n; ++i) {
+        for(size_type j=0; j!=n; ++j) {
+          Amid(i,j)=mul_up(Amid(i,j),err);
+        }
+      }
+      
+      return Geometry::Parallelotope<R>(cmid,Amid);
     }
     
-
+/*
     template<typename R>
     Parallelotope<R> 
     Parallelotope<R>::scale(const Parallelotope<R>& p, const R& scale_factor) {
@@ -215,12 +228,13 @@ namespace Ariadne {
       Point<R> new_centre(p.dimension());
 
       for(size_type i=0; i!=p.dimension(); ++i) {
-        new_centre[i]=scale_factor*centre[i];
+        new_centre[i]=mul_approx(scale_factor,centre[i]);
       }
 
       return Parallelotope<R>(new_centre, scale_factor*generators);
     }
-
+*/
+    
     template <typename R>
     std::ostream&
     Parallelotope<R>::write(std::ostream& os) const

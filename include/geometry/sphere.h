@@ -42,7 +42,8 @@ namespace Ariadne {
     template<typename R> std::ostream& operator<<(std::ostream&, const Sphere<R>&);
     template<typename R> std::istream& operator>>(std::istream&, Sphere<R>&);
 
-    template<typename R> R euclidean_norm_square(const LinearAlgebra::Vector<R>&);
+    template<typename R> R euclidean_distance_square_down(const Point<R>&,const Point<R>&);
+    template<typename R> R euclidean_distance_square_up(const Point<R>&,const Point<R>&);
     
     /*! \ingroup BasicSet
      *  \brief A ball \f$||x-c||\leq r\f$ of arbitrary dimension.
@@ -140,12 +141,12 @@ namespace Ariadne {
       
       /*! \brief Tests if \a point is included into a simplex. */
       bool contains(const state_type& point) const {
-        return euclidean_norm_square(point-this->_centre) <= this->_radius * this->_radius;
+        return euclidean_distance_square_down(point,this->_centre) <= mul_approx(this->_radius , this->_radius);
       }
       
       /*! \brief Tests if \a point is included into the interior a simplex. */
       bool interior_contains(const state_type& point) const {
-        return euclidean_norm_square(point-this->_centre) < this->_radius * this->_radius;
+        return euclidean_distance_square_up(point,this->_centre) < mul_approx(this->_radius , this->_radius);
       }
       //@}
       
@@ -189,20 +190,31 @@ namespace Ariadne {
       friend std::ostream& operator<< <> (std::ostream& os, const Sphere<R>& r);
       friend std::istream& operator>> <> (std::istream& is, Sphere<R>& r);
     };
-    
+          
     template<typename R>
-    inline R square(const R& x) {
-      return x*x;
+    inline
+    R
+    euclidean_distance_square_down(const Point<R>& pt1, const Point<R>& pt2) 
+    {
+      R result=R(0);
+      R tmp;
+      for(dimension_type i=0; i!=pt1.dimension(); ++i) {
+        tmp = (pt1[i]>=pt2[i]) ? sub_down(pt1[i],pt2[i]) : sub_down(pt2[i],pt1[i]);
+        result=add_down(result,mul_down(tmp,tmp));
+      }
+      return result;
     }
       
     template<typename R>
     inline
     R
-    euclidean_norm_square(const LinearAlgebra::Vector<R>& v) 
+    euclidean_distance_square_up(const Point<R>& pt1, const Point<R>& pt2) 
     {
       R result=R(0);
-      for(dimension_type i=0; i!=v.size(); ++i) {
-        result+=v[i]*v[i];
+      R tmp;
+      for(dimension_type i=0; i!=pt1.dimension(); ++i) {
+        tmp = (pt1[i]>=pt2[i]) ? sub_up(pt1[i],pt2[i]) : sub_up(pt2[i],pt1[i]);
+        result=add_up(result,mul_up(tmp,tmp));
       }
       return result;
     }
@@ -210,8 +222,8 @@ namespace Ariadne {
     template <typename R>
     inline bool disjoint(const Sphere<R>& A, const Sphere<R>& B) 
     {
-      return euclidean_norm_square(A.centre()-B.centre()) > 
-        square(A.radius()+B.radius());
+      return euclidean_distance_down(A.centre(),B.centre()) > 
+        pow_up(add_up(A.radius(),B.radius()),2);
     }
     
     template <typename R>
@@ -231,8 +243,8 @@ namespace Ariadne {
     inline bool interiors_intersect(const Sphere<R>& A,
                                     const Sphere<R>& B) 
     {
-      return euclidean_norm_square(A.centre()-B.centre()) < 
-        square(A.radius()+B.radius());
+      return euclidean_distance_up(A.centre(),B.centre()) < 
+        pow_down(add_down(A.radius(),B.radius()),2);
     }
     
     template <typename R>
@@ -254,18 +266,20 @@ namespace Ariadne {
     inline bool inner_subset(const Sphere<R>& A,
                              const Sphere<R>& B) 
     {
-      return A.radius()<B.radius && euclidean_norm_square(A.centre()-B.centre()) < square(B.centre()-A.centre());
+      throw std::runtime_error("bool inner_subset(const Sphere<R>&, const Sphere<R>&) not implemented");
+      //return A.radius()<B.radius && euclidean_distance_square(A.centre()-B.centre()) < square(B.centre()-A.centre());
     }
 
     template <typename R>
     inline bool inner_subset(const Sphere<R>& A,
                              const Rectangle<R>& B) 
     {
-      for(dimension_type i=0; i!=A.dimension(); ++i) {
-        if(! inner_subset(A.centre()[i]-A.radius(),A.centre()[i]+A.radius(),B[i]) ) {
-          return false;
-        }
-      }
+      throw std::runtime_error("bool inner_subset(const Sphere<R>&, const Rectangle<R>&) not implemented");
+      //for(dimension_type i=0; i!=A.dimension(); ++i) {
+      //  if(! inner_subset(A.centre()[i]-A.radius(),A.centre()[i]+A.radius(),B[i]) ) {
+      //    return false;
+      //  }
+      //}
       return true;
     }
 
@@ -273,12 +287,13 @@ namespace Ariadne {
     inline bool inner_subset(const Rectangle<R>& A,
                              const Sphere<R>& B) 
     {
-      array< Point<R> > vertices=A.vertices();
-      for(typename Rectangle<R>::vertex_iterator vertex_iter=vertices.begin(); vertex_iter!=vertices.end(); ++vertex_iter) {
-        if(! B.interior_contains(*vertex_iter) ) {
-          return false;
-        }
-      }
+      throw std::runtime_error("bool inner_subset(const Rectangle<R>&, const Sphere<R>&) not implemented");
+      //array< Point<R> > vertices=A.vertices();
+      //for(typename Rectangle<R>::vertex_iterator vertex_iter=vertices.begin(); vertex_iter!=vertices.end(); ++vertex_iter) {
+      //  if(! B.interior_contains(*vertex_iter) ) {
+      //    return false;
+      //  }
+      //}
       return true;
     }
 
@@ -287,26 +302,29 @@ namespace Ariadne {
     inline bool subset(const Sphere<R>& A, 
                        const Sphere<R>& B) 
     {
-      return A.radius()<=B.radius && euclidean_norm_square(A.centre()-B.centre()) <= square(B.centre()-A.centre());
+      throw std::runtime_error("bool subset(const Sphere<R>&, const Sphere<R>&) not implemented");
+      //return A.radius()<=B.radius && euclidean_distance_square(A.centre()-B.centre()) <= square(B.centre()-A.centre());
     }
     
     template <typename R>
     inline bool subset(const Sphere<R>& A, 
                        const Rectangle<R>& B) 
     {
-      return subset(A.bounding_box(),B);
+      throw std::runtime_error("bool subset(const Sphere<R>&, const Rectangle<R>&) not implemented");
+      //return subset(A.bounding_box(),B);
     }
     
     template <typename R>
     inline bool subset(const Rectangle<R>& A, 
                        const Sphere<R>& B) 
     {
-      array< Point<R> > vertices=A.vertices();
-      for(typename Rectangle<R>::vertex_iterator vertex_iter=vertices.begin(); vertex_iter!=vertices.end(); ++vertex_iter) {
-        if(! B.contains(*vertex_iter) ) {
-          return false;
-        }
-      }
+      throw std::runtime_error("bool subset(const Rectangle<R>&, const Sphere<R>&) not implemented");
+      //array< Point<R> > vertices=A.vertices();
+      //for(typename Rectangle<R>::vertex_iterator vertex_iter=vertices.begin(); vertex_iter!=vertices.end(); ++vertex_iter) {
+      //  if(! B.contains(*vertex_iter) ) {
+      //    return false;
+      //  }
+      //}
       return true;
     }
 

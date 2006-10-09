@@ -67,7 +67,7 @@ namespace Ariadne {
       R _lower; R _upper;
      public:
       /*! \brief Default constructer constructs empty interval. */
-      Interval() : _lower(0), _upper(0) { }
+      Interval() : _lower(conv_down<R>(0)), _upper(conv_up<R>(0)) { }
       /*! \brief Construct from lower and upper bounds. */
       template<typename RL,typename RU> Interval(const RL& l, const RU& u)
         : _lower(conv_down<R>(l)), _upper(conv_up<R>(u)) { }
@@ -81,8 +81,18 @@ namespace Ariadne {
       Interval(const R& l, const R& u) : _lower(l), _upper(u) { }
 
       /*! \brief Assignment operator. */
+      template<typename RX> 
+      Interval<R>& operator=(const RX& x) {
+        this->_lower=conv_down<R>(x); this->_upper=conv_up<R>(x); return *this;
+      }
+      /*! \brief Assignment operator. */
       Interval<R>& operator=(const R& x) {
         this->_lower=x; this->_upper=x; return *this;
+      }
+      /*! \brief Assignment operator. */
+      template<typename RX> 
+      Interval<R>& operator=(const Interval<RX>& ivl) {
+        this->_lower=conv_down<R>(ivl.lower()); this->_upper=conv_up<R>(ivl.upper()); return *this;
       }
       /*! \brief Copy assignment operator. */
       Interval<R>& operator=(const Interval<R>& ivl) {
@@ -342,28 +352,33 @@ namespace Ariadne {
 
     template<typename R> inline
     Interval<R> operator+(const Interval<R>& x1, const Interval<R>& x2) {
+      //std::cerr << "operator+(" << name< Interval<R> >() << "," << name< Interval<R> >() << ")\n";
       return Interval<R>(add_down(x1.lower(),x2.lower()),
                          add_up(x1.upper(),x2.upper()));
     }
 
     template<typename R> inline
     Interval<R> operator+(const Interval<R>& x1, const R& x2) {
+      //std::cerr << "operator+(" << name< Interval<R> >() << "," << name<R>() << ")\n";
       return Interval<R>(add_down(x1.lower(),x2),add_up(x1.upper(),x2));
     }
 
     template<typename R> inline
     Interval<R> operator+(const R& x1, const Interval<R>& x2) {
+      //std::cerr << "operator+(" << name<R>() << "," << name< Interval<R> >() << ")\n";
       return Interval<R>(add_down(x1,x2.lower()),add_up(x1,x2.upper()));
     }
 
 
     template<typename R> inline
     Interval<R> operator+=(Interval<R>& x1, const Interval<R>& x2) {
+      //std::cerr << "operator+=(" << name< Interval<R> >() << "," << name< Interval<R> >() << ")\n";
       return x1=x1+x2;
     }
 
     template<typename R> inline
     Interval<R> operator+=(Interval<R>& x1, const R& x2) {
+      //std::cerr << "operator+=(" << name< Interval<R> >() << "," << name<R>() << ")\n";
       return x1=x1+x2;
     }
 
@@ -522,7 +537,7 @@ namespace Ariadne {
     inline
     Interval<R> 
     max(const Interval<R>& x1, const Interval<R>& x2) {
-      //std::cerr << "Interval::min<Interval<" << name<R>() << ">>" << std::endl;
+      std::cerr << "Interval::max<Interval<" << name<R>() << ">>" << std::endl;
       return Interval<R>(max_down(x1.lower(),x2.lower()),max_up(x1.upper(),x2.upper()));
     }
     

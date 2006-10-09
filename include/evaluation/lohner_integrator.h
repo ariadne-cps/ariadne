@@ -40,19 +40,19 @@ namespace Ariadne {
     class C0LohnerIntegrator : public C0Integrator<R> {
      public:
       /*! \brief Constructor. */
-      C0LohnerIntegrator(const R& maximum_step_size, const R& lock_to_grid_time, const R& maximum_set_radius);
+      C0LohnerIntegrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_set_radius);
 
 
       /*! \brief A C0 algorithm for integrating forward a rectangle.
        */
       virtual Geometry::Rectangle<R> integration_step(const System::VectorField<R>&,
                                                       const Geometry::Rectangle<R>&,
-                                                      R&) const;
+                                                      time_type&) const;
 
       /*! \brief A C0 algorithm for integrating forward a zonotope up to a certain time. */
       virtual Geometry::Rectangle<R> reachability_step(const System::VectorField<R>&,
                                                        const Geometry::Rectangle<R>&,
-                                                       R&) const;
+                                                       time_type&) const;
      };
 
 
@@ -65,7 +65,7 @@ namespace Ariadne {
     class C1LohnerIntegrator : public C1Integrator<R> {
      public:
       /*! \brief Constructor. */
-      C1LohnerIntegrator(const R& maximum_step_size, const R& lock_to_grid_time, const R& maximum_set_radius);
+      C1LohnerIntegrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_set_radius);
 
      public:
       /*! \brief A C1 algorithm for integrating forward a parallelotope.
@@ -78,12 +78,12 @@ namespace Ariadne {
        */
       virtual Geometry::Parallelotope<R> integration_step(const System::VectorField<R>&,
                                                           const Geometry::Parallelotope<R>&,
-                                                          R&) const;
+                                                          time_type&) const;
 
       /*! \brief A specialized algorithm for integrating forward a parallelotope under an affine vector field. */
       virtual Geometry::Parallelotope<R> integration_step(const System::AffineVectorField<R>&,
                                                           const Geometry::Parallelotope<R>&,
-                                                          R&) const;
+                                                          time_type&) const;
 
       /*! \brief A C1 algorithm for integrating forward a parallelotope.
        *
@@ -95,18 +95,18 @@ namespace Ariadne {
        */
       virtual Geometry::Zonotope<R> integration_step(const System::VectorField<R>&,
                                                           const Geometry::Zonotope<R>&,
-                                                          R&) const;
+                                                          time_type&) const;
 
       /*! \brief A specialized algorithm for integrating forward a parallelotope under an affine vector field. */
       virtual Geometry::Zonotope<R> integration_step(const System::AffineVectorField<R>&,
                                                           const Geometry::Zonotope<R>&,
-                                                          R&) const;
+                                                          time_type&) const;
 
       
       /*! \brief A C1 algorithm for integrating forward a zonotope for a time up to time \a step_size. */
       virtual Geometry::Zonotope<R> reachability_step(const System::VectorField<R>&,
                                                       const Geometry::Zonotope<R>&,
-                                                      R& step_size) const;
+                                                      time_type& step_size) const;
      private:
       R _maximum_step_size;
       R _lock_to_grid_time;

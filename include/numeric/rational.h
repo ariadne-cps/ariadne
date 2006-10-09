@@ -72,6 +72,7 @@ namespace Ariadne {
      public:
       typedef field_tag algebraic_category;
       typedef Rational field_extension_type;
+      typedef Rational arithmetic_type;
     };
   
     template<> inline Rational min(const Rational& x1, const Rational& x2) {

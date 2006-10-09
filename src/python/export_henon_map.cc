@@ -30,10 +30,10 @@ using namespace Ariadne;
 #include <boost/python.hpp>
 using namespace boost::python;
   
-typedef RPoint (RHenonMap::* PointMap) (const RPoint&) const;
+typedef FPoint (RHenonMap::* PointMap) (const RPoint&) const;
 typedef RRectangle (RHenonMap::* RectangleMap) (const RRectangle&) const;
 typedef RParallelotope (RHenonMap::* ParallelotopeMap) (const RParallelotope&) const;
-typedef RMatrix (RHenonMap::* PointDerivative) (const RPoint&) const;
+typedef FMatrix (RHenonMap::* PointDerivative) (const RPoint&) const;
 typedef RIntervalMatrix (RHenonMap::* RectangleDerivative) (const RRectangle&) const;
 
 void export_henon_map() {
@@ -43,8 +43,8 @@ void export_henon_map() {
     .def("__call__", PointMap(&RHenonMap::operator()))
     .def("__call__", RectangleMap(&RHenonMap::operator()))
     .def("__call__", ParallelotopeMap(&RHenonMap::operator()))
-    .def("derivative", PointDerivative(&RHenonMap::derivative))
-    .def("derivative", RectangleDerivative(&RHenonMap::derivative))
+    .def("jacobian", PointDerivative(&RHenonMap::jacobian))
+    .def("jacobian", RectangleDerivative(&RHenonMap::jacobian))
     .def(self_ns::str(self))
   ;
 }

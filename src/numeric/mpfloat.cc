@@ -22,8 +22,34 @@
  */
 
 #include "numeric/mpfloat.h"
+#include "numeric/interval.h"
 
 namespace Ariadne {
   namespace Numeric {
+
+    Interval<MPFloat> 
+    operator+(const MPFloat& x1, const MPFloat& x2) 
+    {
+      return Interval<MPFloat>(add_down(x1,x2),add_up(x1,x2));
+    }
+    
+    Interval<MPFloat> 
+    operator-(const MPFloat& x1, const MPFloat& x2) 
+    {
+      return Interval<MPFloat>(sub_down(x1,x2),sub_up(x1,x2));
+    }
+
+    Interval<MPFloat> 
+    operator*(const MPFloat& x1, const MPFloat& x2) 
+    {
+      return Interval<MPFloat>(mul_down(x1,x2),mul_up(x1,x2));
+    }
+
+    Interval<MPFloat> 
+    operator/(const MPFloat& x1, const MPFloat& x2) 
+    {
+      return Interval<MPFloat>(div_down(x1,x2),div_up(x1,x2));
+    }
+
   } 
 }

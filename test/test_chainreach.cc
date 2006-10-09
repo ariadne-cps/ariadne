@@ -24,6 +24,7 @@
 #include <iostream>
 
 #include "real_typedef.h"
+
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
 #include "geometry/grid.h"
@@ -42,8 +43,15 @@ using namespace Ariadne::System;
 using namespace Ariadne::Evaluation;
 using namespace std;
 
+template<typename R> int test_chainreach();
+
+int main() {
+  return test_chainreach<Real>();
+}
+
 template<typename R> 
-int test_chainreach()
+int 
+test_chainreach()
 {
   Point<R> params=Point<R>("(1.5,0.875)");
   R a=params[0];
@@ -103,8 +111,4 @@ int test_chainreach()
   eps.close();
 
   return 0;
-}
- 
-int main() {
-  return test_chainreach<Real>();
 }

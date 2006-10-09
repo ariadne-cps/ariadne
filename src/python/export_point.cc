@@ -22,70 +22,83 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "numeric/mpfloat.h"
+
+#include "linear_algebra/vector.h"
 
 #include "geometry/point.h"
 #include "geometry/point_list.h"
 #include "geometry/rectangle.h"
-#include "linear_algebra/vector.h"
-
 #include <boost/python.hpp>
 
-#include "python/typedefs.h"
+#include "python/python_utilities.h"
 using namespace Ariadne;
+using namespace Ariadne::Numeric;
+using namespace Ariadne::Geometry;
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
-inline void rpoint_setitem(RPoint& p, uint i, Real x) {
+template<typename R1, typename R2> inline 
+void point_setitem(Point<R1>& p, uint i, R2 x) {
   p[i]=x;
 }
 
-inline Real rpoint_getitem(const RPoint& p, uint i) {
+template<typename R> inline 
+R point_getitem(const Point<R>& p, uint i) {
   return p[i];
 }
 
-inline void rpoint_setitem_from_double(RPoint& p, uint i, double x) {
-  p[i]=Ariadne::convert_to<Real>(x);
+//inline RPoint rpoint_add_rVector(const RPoint& p, const RVector& v) {
+//  return p+v;
+//}
+
+//inline RVector rpoint_sub_rpoint(const RPoint& p, const RPoint& q) {
+//  return p-q;
+//}
+
+template<typename R> inline 
+Rectangle<R> rectangle_expanded(const Point<R>& p, const R& r) {
+  return Rectangle<R>(p).expand_by(r);
 }
 
-inline RPoint rpoint_add_rVector(const RPoint& p, const RVector& v) {
-  return p+v;
-}
-
-inline RVector rpoint_sub_rpoint(const RPoint& p, const RPoint& q) {
-  return p-q;
-}
-
-inline RRectangle rectangle_expanded(const RPoint& p, const Real& r) {
-  return (((RRectangle)p).expand_by(r));
-}
-
-inline RPoint point_list_get(const RPointList& pl, const size_type& n) {
+template<typename R> inline 
+Point<R> point_list_get(const PointList<R>& pl, const size_type& n) {
   return pl[n];
 }
 
-void export_point() {
-  class_<RPoint>("Point",init<int>())
-    .def(init<RPoint>())
-    .def(init<std::string>())
-    .def("dimension", &RPoint::dimension)
-    .def("__len__", &RPoint::dimension)
-    .def("__getitem__", &rpoint_getitem)
-    .def("__setitem__", &rpoint_setitem)
-    .def("__setitem__", &rpoint_setitem_from_double)
-    .def("__eq__", &RPoint::operator==)
-    .def("__ne__", &RPoint::operator!=)
-    .def("__add__", &rpoint_add_rVector)
-    .def("__sub__", &rpoint_sub_rpoint)
-    .def("rectangle_expanded_by", &rectangle_expanded)
-    .def(self_ns::str(self))
+template<typename R>
+void export_point_list() 
+{
+  class_< PointList<R> >(python_name<R>("PointList").c_str(),init<>())
+    .def("size", &PointList<R>::size)
+    .def("append", &PointList<R>::push_back)
+    .def("__getitem__", &point_list_get<R>)
   ;
 }
 
-void export_point_list() {
-  class_<RPointList>("PointList",init<>())
-    .def("size", &RPointList::size)
-    .def("append", &RPointList::push_back)
-    .def("__getitem__", &point_list_get)
+template<typename R>
+void export_point() 
+{
+  class_< Point<R> >("FPoint",init<>())
+    .def(init< int >())
+    .def(init< Point<R> >())
+    .def(init<std::string>())
+    .def("dimension", &Point<R>::dimension)
+    .def("__len__", &Point<R>::dimension)
+    .def("__getitem__", &point_getitem<R>)
+    .def("__setitem__", &point_setitem<R,R>)
+    .def("__setitem__", &point_setitem<R,double>)
+    .def("__eq__", &Point<R>::operator==)
+    .def("__ne__", &Point<R>::operator!=)
+//    .def("__add__", &rpoint_add_rVector)
+//    .def("__sub__", &rpoint_sub_rpoint)
+//    .def("rectangle_expanded_by", &rectangle_expanded)
+    .def(self_ns::str(self))
+
   ;
 }
+
+
+template void export_point<Numeric::MPFloat>();
+template void export_point_list<Numeric::MPFloat>();

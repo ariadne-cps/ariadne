@@ -56,7 +56,7 @@ namespace Ariadne {
         if(verbosity>0) { std::cerr << "  mr=" << mr << std::endl; }
         LinearAlgebra::Vector< Interval<R> > w=f(mr);
         if(verbosity>0) { std::cerr << "  f(mr)=" << w << std::endl; }
-        LinearAlgebra::Matrix< Interval<R> > A=f.derivative(r);
+        LinearAlgebra::Matrix< Interval<R> > A=f.jacobian(r);
         if(verbosity>0) { std::cerr << "  Df(r)=" << A << std::endl; }
         LinearAlgebra::Matrix< Interval<R> > Ainv=A.inverse();
         if(verbosity>0) { std::cerr << "  inverse(Df(r))=" << Ainv << std::endl; }

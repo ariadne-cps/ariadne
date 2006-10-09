@@ -50,19 +50,20 @@ namespace Ariadne {
      */
     class MPFloat { };
 #else
-    typedef mpf_class MPFloat;
+    //typedef mpf_class MPFloat;
 #endif
 
-/*
+
     class MPFloat {
      private:
       mpfr_t _value;
       typedef __mpfr_struct* pointer;
       typedef const __mpfr_struct* const_pointer;
      public:
-      MPFloat() { mpfr_init(_value); }
+      MPFloat() { mpfr_init_set_si(_value,0,GMP_RNDN); }
       MPFloat(int x) { mpfr_init_set_si(_value,x,GMP_RNDN); }
       MPFloat(long int x) { mpfr_init_set_si(_value,x,GMP_RNDN); }
+      MPFloat(unsigned int x) { mpfr_init_set_ui(_value,x,GMP_RNDN); }
       MPFloat(long unsigned int x) { mpfr_init_set_ui(_value,x,GMP_RNDN); }
       MPFloat(double x) { mpfr_init_set_d(_value,x,GMP_RNDN); }
       MPFloat(const MPFloat& x) { mpfr_init_set(_value,x._value,GMP_RNDN); }
@@ -72,42 +73,34 @@ namespace Ariadne {
       mpfr_srcptr get_mpfr_t() const { return _value; }
       mpfr_ptr get_mpfr_t() { return _value; }
       mpf_class get_mpf_class() const { mpf_class result; mpfr_get_f(result.get_mpf_t(),_value,GMP_RNDD); return result; }
-      double get_d() const { return mpfr_get_d(_value,GMP_RNDN); }
       operator mpf_class () const { mpf_class result; mpfr_get_f(result.get_mpf_t(),_value,GMP_RNDD); return result; }
       operator const_pointer () const { return _value; }
       operator pointer () { return _value; }
+      operator Rational () const { 
+        mpf_class f; 
+        mpfr_get_f(f.get_mpf_t(),this->get_mpfr_t(),GMP_RNDN); 
+        return mpq_class(f);
+      }
+      
+      int precision() const { return mpfr_get_prec(this->get_mpfr_t()); }
     };
     
     inline std::ostream& operator<<(std::ostream& os, const MPFloat& x) {
-      return os<<x.get_d(); }
+      return os<<x.get_mpf_class().get_d(); }
     inline std::istream& operator>>(std::istream& is, MPFloat& x) {
       //FIXME: Improve this!
       double dx; is >> dx; x=MPFloat(dx); return is; }
-*/
+
     
     inline int precision(const MPFloat& num) {
-      return mpf_get_prec(num.get_mpf_t());
-    }
-  
-    inline int exponent(const MPFloat& num) {
-      long int res; 
-      mpf_get_d_2exp(&res,num.get_mpf_t()); 
-      return res-1; 
-    }
-  
-    inline MPFloat mantissa(const MPFloat& num) {
-      long int exp; 
-      MPFloat res; 
-      mpf_get_d_2exp(&exp,num.get_mpf_t()); 
-      exp=exp-1;
-      mpf_div_2exp(res.get_mpf_t(),num.get_mpf_t(),exp); 
-      return res; 
+      return mpfr_get_prec(num.get_mpfr_t());
     }
   
     template<> class numerical_traits<MPFloat> {
      public:
       typedef ring_tag algebraic_category;
       typedef Rational field_extension_type;
+      typedef Interval<MPFloat> arithmetic_type;
     };
       
     template<> inline std::string name<Numeric::MPFloat>() { return "MPFloat"; }
@@ -123,43 +116,26 @@ namespace Ariadne {
 
 
     inline void invoke_mpfr(MPFloat& y, const MPFloat& x, mpfr_func f, mp_rnd_t r) {
-      mpfr_t xx;
-      mpfr_init_set_f(xx, x.get_mpf_t(), r);
-      f(xx, xx, r);
-      mpfr_get_f(y.get_mpf_t(), xx, r);
-      mpfr_clear(xx);
+      f(y.get_mpfr_t(), x.get_mpfr_t(), r);
     }     
     
     inline 
     void invoke_mpfr(MPFloat& y, const MPFloat& x1, const MPFloat& x2, mpfr_bin_func f, mp_rnd_t r) {
-      mpfr_t xx1;
-      mpfr_t xx2;
-      mpfr_init_set_f(xx1, x1.get_mpf_t(), r);
-      mpfr_init_set_f(xx2, x2.get_mpf_t(), r);
-      f(xx1, xx1, xx2, r);
-      mpfr_get_f(y.get_mpf_t(), xx1, r);
-      mpfr_clear(xx1);
-      mpfr_clear(xx2);
+      //std::cerr << "invoke_mpfr(MPFloat& y, const MPFloat& x1, const MPFloat& x2, mpfr_bin_func f, mp_rnd_t r)\n";
+      f(y.get_mpfr_t(), x1.get_mpfr_t(), x2.get_mpfr_t(), r);
     }
 
     inline 
     void invoke_mpfr(MPFloat& y, const MPFloat& x1, const long int& x2, mpfr_bin_int_func f, mp_rnd_t r) {
-      mpfr_t xx1;
-      mpfr_init_set_f(xx1, x1.get_mpf_t(), r);
-      f(xx1, xx1, x2, r);
-      mpfr_get_f(y.get_mpf_t(), xx1, r);
-      mpfr_clear(xx1);
+      f(y.get_mpfr_t(), x1.get_mpfr_t(), x2, r);
     }
 
     inline 
     void invoke_mpfr(MPFloat& y, const MPFloat& x1, const unsigned long int& x2, mpfr_bin_uint_func f, mp_rnd_t r) {
-      mpfr_t xx1;
-      mpfr_init_set_f(xx1, x1.get_mpf_t(), r);
-      f(xx1, xx1, x2, r);
-      mpfr_get_f(y.get_mpf_t(), xx1, r);
-      mpfr_clear(xx1);
+      f(y.get_mpfr_t(), x1.get_mpfr_t(), x2, r);
     }
 
+    
     inline 
     MPFloat invoke_mpfr(const MPFloat& x, mpfr_func f, mp_rnd_t r) {
       MPFloat y; invoke_mpfr(y,x,f,r); return y; 
@@ -168,6 +144,7 @@ namespace Ariadne {
     inline 
     MPFloat invoke_mpfr(const MPFloat& x1, const MPFloat& x2, mpfr_bin_func f, mpfr_rnd_t r) 
     {
+      //std::cerr << "MPFloat invoke_mpfr(const MPFloat& x1, const MPFloat& x2, mpfr_bin_func f, mpfr_rnd_t r)\n";
       MPFloat y; invoke_mpfr(y,x1,x2,f,r); return y; 
     }
     
@@ -184,13 +161,66 @@ namespace Ariadne {
     }
     
   
+    inline bool operator==(const MPFloat& x1, const MPFloat& x2) {
+      return mpfr_equal_p(x1.get_mpfr_t(),x2.get_mpfr_t()); }
+    inline bool operator!=(const MPFloat& x1, const MPFloat& x2) {
+      return mpfr_lessgreater_p(x1.get_mpfr_t(),x2.get_mpfr_t()); }
+    inline bool operator<=(const MPFloat& x1, const MPFloat& x2) {
+      return mpfr_lessequal_p(x1.get_mpfr_t(),x2.get_mpfr_t()); }
+    inline bool operator>=(const MPFloat& x1, const MPFloat& x2) {
+      return mpfr_greaterequal_p(x1.get_mpfr_t(),x2.get_mpfr_t()); }
+    inline bool operator< (const MPFloat& x1, const MPFloat& x2) {
+      return mpfr_less_p(x1.get_mpfr_t(),x2.get_mpfr_t()); }
+    inline bool operator> (const MPFloat& x1, const MPFloat& x2) {
+      return mpfr_greater_p(x1.get_mpfr_t(),x2.get_mpfr_t()); }
+     
+    inline bool operator==(const MPFloat& x1, const int& x2) {
+      return mpfr_cmp_si(x1.get_mpfr_t(),x2)==0; }
+    inline bool operator!=(const MPFloat& x1, const int& x2) {
+      return mpfr_cmp_si(x1.get_mpfr_t(),x2)!=0; }
+    inline bool operator<=(const MPFloat& x1, const int& x2) {
+      return mpfr_cmp_si(x1.get_mpfr_t(),x2)<=0; }
+    inline bool operator>=(const MPFloat& x1, const int& x2) {
+      return mpfr_cmp_si(x1.get_mpfr_t(),x2)>=0; }
+     inline bool operator< (const MPFloat& x1, const int& x2) {
+      return mpfr_cmp_si(x1.get_mpfr_t(),x2)< 0; }
+    inline bool operator> (const MPFloat& x1, const int& x2) {
+      return mpfr_cmp_si(x1.get_mpfr_t(),x2)> 0; }
+  
+    inline bool operator==(const MPFloat& x1, const double& x2) {
+      return mpfr_cmp_d(x1.get_mpfr_t(),x2)==0; }
+    inline bool operator!=(const MPFloat& x1, const double& x2) {
+      return mpfr_cmp_d(x1.get_mpfr_t(),x2)!=0; }
+    inline bool operator<=(const MPFloat& x1, const double& x2) {
+      return mpfr_cmp_d(x1.get_mpfr_t(),x2)<=0; }
+    inline bool operator>=(const MPFloat& x1, const double& x2) {
+      return mpfr_cmp_d(x1.get_mpfr_t(),x2)>=0; }
+     inline bool operator< (const MPFloat& x1, const double& x2) {
+      return mpfr_cmp_d(x1.get_mpfr_t(),x2)< 0; }
+    inline bool operator> (const MPFloat& x1, const double& x2) {
+      return mpfr_cmp_d(x1.get_mpfr_t(),x2)> 0; }
+  
+      
+      
+    template<> inline MPFloat min(const MPFloat& x1, const MPFloat& x2) {
+      return invoke_mpfr(x1,x2,mpfr_min,GMP_RNDN); }
+    template<> inline MPFloat max(const MPFloat& x1, const MPFloat& x2) {
+      return invoke_mpfr(x1,x2,mpfr_max,GMP_RNDN); }
+    template<> inline MPFloat neg(const MPFloat& x) {
+      return invoke_mpfr(x,mpfr_neg,GMP_RNDN); }
+    template<> inline MPFloat abs(const MPFloat& x) {
+      return invoke_mpfr(x,mpfr_abs,GMP_RNDN); }
+
+
+
+
     template<> inline MPFloat conv_exact(const MPFloat& x) { return x; }
     template<> inline MPFloat conv_approx(const MPFloat& x) { return conv_exact<MPFloat>(x); }
     template<> inline MPFloat conv_down(const MPFloat& x) { return conv_exact<MPFloat>(x); }
     template<> inline MPFloat conv_up(const MPFloat& x) { return conv_exact<MPFloat>(x); }
  
 
-    template<> inline double conv_approx(const MPFloat& x) { return x.get_d(); }
+    template<> inline double conv_approx(const MPFloat& x) { return mpfr_get_d(x.get_mpfr_t(),GMP_RNDN); }
  
     template<> inline MPFloat conv_exact(const int& n) { return MPFloat(n); }
     template<> inline MPFloat conv_down(const int& n) { return conv_exact<MPFloat>(n); }
@@ -202,20 +232,14 @@ namespace Ariadne {
     template<> inline MPFloat conv_up(const double& x) { return conv_exact<MPFloat>(x); }
     template<> inline MPFloat conv_approx(const double& x) { return conv_exact<MPFloat>(x); }
   
-    template<> inline int conv_down(const MPFloat& x) { return x.get_si(); }
-    template<> inline int conv_up(const MPFloat& x) { return x.get_si()+1; }
+    template<> inline int conv_down(const MPFloat& x) { return mpfr_get_si(x.get_mpfr_t(),GMP_RNDD); }
+    template<> inline int conv_up(const MPFloat& x) { return mpfr_get_si(x.get_mpfr_t(),GMP_RNDU); }
  
     template<> inline Rational conv_exact(const MPFloat& x) { return Rational(x); }
+    template<> inline Rational conv_approx(const MPFloat& x) { return conv_exact<Rational>(x); }
     template<> inline Rational conv_down(const MPFloat& x) { return conv_exact<Rational>(x); }
     template<> inline Rational conv_up(const MPFloat& x) { return conv_exact<Rational>(x); }
  
-    template<> inline MPFloat min(const MPFloat& x1, const MPFloat& x2) {
-      return (x1<=x2) ? x1 : x2; }
-    template<> inline MPFloat max(const MPFloat& x1, const MPFloat& x2) {
-      return (x1>=x2) ? x1 : x2; }
-    template<> inline MPFloat abs(const MPFloat& x) {
-      return (x<=0) ? x : static_cast<MPFloat>(-x); }
-
 
     template<> inline MPFloat min_exact(const MPFloat& x1, const MPFloat& x2) {
       return (x1<=x2) ? x1 : x2; }
@@ -251,8 +275,10 @@ namespace Ariadne {
     template<> inline MPFloat add_approx(const MPFloat& x1,const MPFloat& x2) {
       return invoke_mpfr(x1,x2,mpfr_add,GMP_RNDN); }
     template<> inline MPFloat add_down(const MPFloat& x1,const MPFloat& x2) {
+      //std::cerr << "add_down(MPFloat,MPFloat)" << std::endl;
       return invoke_mpfr(x1,x2,mpfr_add,GMP_RNDD); }
     template<> inline MPFloat add_up(const MPFloat& x1,const MPFloat& x2) {
+      //std::cerr << "add_up(MPFloat,MPFloat)" << std::endl;
       return invoke_mpfr(x1,x2,mpfr_add,GMP_RNDU); }
     
     template<> inline MPFloat sub_approx(const MPFloat& x1,const MPFloat& x2) {
@@ -293,6 +319,26 @@ namespace Ariadne {
     template<> inline MPFloat med_approx(const MPFloat& x1, const MPFloat& x2) {
       return div_approx(add_approx(x1,x2),MPFloat(2)); }
     
+    inline MPFloat mul_approx(const int& n, const MPFloat& x) {
+      return invoke_mpfr(x,n,mpfr_mul_si,GMP_RNDN); }
+    inline MPFloat mul_approx(const MPFloat& x, const int& n) {
+      return invoke_mpfr(x,n,mpfr_mul_si,GMP_RNDN); }
+    inline MPFloat div_approx(const MPFloat& x, const int& n) {
+      return invoke_mpfr(x,n,mpfr_div_si,GMP_RNDN); }
+      
+    inline MPFloat mul_approx(const uint& n, const MPFloat& x) {
+      return invoke_mpfr(x,n,mpfr_mul_ui,GMP_RNDN); }
+    inline MPFloat mul_approx(const MPFloat& x, const uint& n) {
+      return invoke_mpfr(x,n,mpfr_mul_ui,GMP_RNDN); }
+    inline MPFloat div_approx(const MPFloat& x, const uint& n) {
+      return invoke_mpfr(x,n,mpfr_div_ui,GMP_RNDN); }
+     
+    inline MPFloat mul_approx(const double& d, const MPFloat& x) {
+      return mul_approx(x,MPFloat(d)); }
+    inline MPFloat mul_approx(const MPFloat& x, const double& d) {
+      return mul_approx(x,MPFloat(d)); }
+      
+      
     template<> inline MPFloat sqrt_approx(const MPFloat& x) { 
       return invoke_mpfr(x,mpfr_sqrt,GMP_RNDN); }
     template<> inline MPFloat sqrt_down(const MPFloat& x) { 
@@ -310,11 +356,15 @@ namespace Ariadne {
     template<> inline Integer int_down(const MPFloat& x);
     template<> inline Integer int_up(const MPFloat& x);
 
+    template<> inline MPFloat exp_approx(const MPFloat& x) {
+      return invoke_mpfr(x,mpfr_exp,GMP_RNDN); }
     template<> inline MPFloat exp_down(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_exp,GMP_RNDD); }
     template<> inline MPFloat exp_up(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_exp,GMP_RNDU); };
 
+    template<> inline MPFloat log_approx(const MPFloat& x) {
+      return invoke_mpfr(x,mpfr_log,GMP_RNDN); }
     template<> inline MPFloat log_down(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_log,GMP_RNDD); }
     template<> inline MPFloat log_up(const MPFloat& x) {
@@ -380,7 +430,14 @@ namespace Ariadne {
     template<> inline MPFloat atanh_up(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_atanh,GMP_RNDU); };
     
+    inline MPFloat operator-(const MPFloat& x) {
+      return neg(x); }
 
+    Interval<MPFloat> operator+(const MPFloat&, const MPFloat&);
+    Interval<MPFloat> operator-(const MPFloat&, const MPFloat&);
+    Interval<MPFloat> operator*(const MPFloat&, const MPFloat&);
+    Interval<MPFloat> operator/(const MPFloat&, const MPFloat&);
+      
   }
 }
 

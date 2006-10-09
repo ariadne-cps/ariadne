@@ -8,6 +8,7 @@ LDADD   = ../src/libariadne.la -lppl -lmpfr -lgmpxx
 check_PROGRAMS = \
 	test_array \
 	test_ddconv test_mpfr \
+	test_integer \
 	test_arithmetic test_function test_interval \
 	test_vector test_matrix test_tensor \
 	test_linear_algebra test_linear_program \
@@ -16,7 +17,7 @@ check_PROGRAMS = \
 	test_rectangle test_zonotope test_parallelotope test_simplex \
 	test_polytope test_polyhedron \
 	test_list_set test_grid_set test_partition_tree_set \
-	test_interval_newton test_integration_step test_chainreach \
+	test_newton test_integration_step test_chainreach \
 	test_epsfstream test_chompfstream 
 
 XFAIL_TESTS = 
@@ -26,6 +27,7 @@ XFAIL_TESTS =
 test_array_SOURCES=test_array.cc
 test_ddconv_SOURCES=test_ddconv.cc
 test_mpfr_SOURCES=test_mpfr.cc
+test_integer_SOURCES=test_integer.cc
 test_arithmetic_SOURCES=test_arithmetic.cc
 test_function_SOURCES=test_function.cc
 test_interval_SOURCES=test_interval.cc
@@ -46,7 +48,7 @@ test_parallelotope_SOURCES=test_parallelotope.cc
 test_simplex_SOURCES=test_simplex.cc
 test_polytope_SOURCES=test_polytope.cc
 test_polyhedron_SOURCES=test_polyhedron.cc
-test_interval_newton_SOURCES=test_interval_newton.cc
+test_newton_SOURCES=test_newton.cc
 test_integration_step_SOURCES=test_integration_step.cc
 test_chainreach_SOURCES=test_chainreach.cc
 test_epsfstream_SOURCES=test_epsfstream.cc

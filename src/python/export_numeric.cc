@@ -29,11 +29,43 @@
 #include "numeric/float64.h"
 #include "numeric/mpfloat.h"
 
+#include "numeric/interval.h"
+
 using namespace Ariadne;
+using namespace Ariadne::Numeric;
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
+// Give some mixed arithmetic operators for MPFloat
+template<typename R> inline Interval<MPFloat> operator+(const MPFloat& x1, const R& x2) {
+  return x1+MPFloat(x2); }
+template<typename R> inline Interval<MPFloat> operator-(const MPFloat& x1, const R& x2) {
+  return x1-MPFloat(x2); }
+template<typename R> inline Interval<MPFloat> operator*(const MPFloat& x1, const R& x2) {
+  return x1*MPFloat(x2); }
+template<typename R> inline Interval<MPFloat> operator/(const MPFloat& x1, const R& x2) {
+  return x1/MPFloat(x2); }
+  
+template<typename R> inline Interval<MPFloat> operator-(const R& x1, const MPFloat& x2) {
+  return MPFloat(x1)-x2; }
+template<typename R> inline Interval<MPFloat> operator/(const R& x1, const MPFloat& x2) {
+  return MPFloat(x1)/x2; }
+
+template<typename R> inline bool operator==(const MPFloat& x1, const R& x2) {
+  return x1==MPFloat(x2); }
+template<typename R> inline bool operator!=(const MPFloat& x1, const R& x2) {
+  return x1!=MPFloat(x2); }
+template<typename R> inline bool operator<=(const MPFloat& x1, const R& x2) {
+  return x1<=MPFloat(x2); }
+template<typename R> inline bool operator>=(const MPFloat& x1, const R& x2) {
+  return x1>=MPFloat(x2); }
+template<typename R> inline bool operator< (const MPFloat& x1, const R& x2) {
+  return x1< MPFloat(x2); }
+template<typename R> inline bool operator> (const MPFloat& x1, const R& x2) {
+  return x1> MPFloat(x2); }
+
+  
 // Since gmpxx operators return intermediate types which need conversion, need to explicitly provide arithmetic functions
 inline Integer neg_z(const Integer& z1) { return -z1; }
 inline Integer add_zz(const Integer& z1, const Integer& z2) { return z1+z2; }
@@ -62,15 +94,15 @@ inline bool ge_zi(const Integer& z1, const int& z2) { return z1>=z2; }
 inline bool ge_zx(const Integer& z1, const double& z2) { return z1>=z2; }
 
 inline MPFloat neg_f(const MPFloat& f1) { return -f1; }
-inline MPFloat add_ff(const MPFloat& f1, const MPFloat& f2) { return f1+f2; }
-inline MPFloat add_fx(const MPFloat& f1, const double& f2) { return f1+f2; }
-inline MPFloat sub_ff(const MPFloat& f1, const MPFloat& f2) { return f1-f2; }
-inline MPFloat sub_fx(const MPFloat& f1, const double& f2) { return f1-f2; }
-inline MPFloat rsub_fx(const MPFloat& f1, const double& f2) { return f2-f1; }
-inline MPFloat mul_ff(const MPFloat& f1, const MPFloat& f2) { return f1*f2; }
-inline MPFloat mul_fx(const MPFloat& f1, const double& f2) { return f1*f2; }
-inline MPFloat div_ff(const MPFloat& f1, const MPFloat& f2) { return f1/f2; }
-inline MPFloat div_fn(const MPFloat& f1, const uint& f2) { return f1/f2; }
+inline Interval<MPFloat> add_ff(const MPFloat& f1, const MPFloat& f2) { return f1+f2; }
+inline Interval<MPFloat> add_fx(const MPFloat& f1, const double& f2) { return f1+f2; }
+inline Interval<MPFloat> sub_ff(const MPFloat& f1, const MPFloat& f2) { return f1-f2; }
+inline Interval<MPFloat> sub_fx(const MPFloat& f1, const double& f2) { return f1-f2; }
+inline Interval<MPFloat> rsub_fx(const MPFloat& f1, const double& f2) { return f2-f1; }
+inline Interval<MPFloat> mul_ff(const MPFloat& f1, const MPFloat& f2) { return f1*f2; }
+inline Interval<MPFloat> mul_fx(const MPFloat& f1, const double& f2) { return f1*f2; }
+inline Interval<MPFloat> div_ff(const MPFloat& f1, const MPFloat& f2) { return f1/f2; }
+inline Interval<MPFloat> div_fn(const MPFloat& f1, const uint& f2) { return f1/f2; }
 inline bool eq_ff(const MPFloat& f1, const MPFloat& f2) { return f1==f2; }
 inline bool eq_fx(const MPFloat& f1, const double& f2) { return f1==f2; }
 inline bool eq_fz(const MPFloat& f1, const Integer& f2) { return f1==f2; }
@@ -89,8 +121,8 @@ inline bool le_fz(const MPFloat& f1, const Integer& f2) { return f1<=f2; }
 inline bool ge_ff(const MPFloat& f1, const MPFloat& f2) { return f1>=f2; }
 inline bool ge_fx(const MPFloat& f1, const double& f2) { return f1>=f2; }
 inline bool ge_fz(const MPFloat& f1, const Integer& f2) { return f1>=f2; }
-inline MPFloat mantissa_f(const MPFloat f) { return mantissa(f); }
-inline Integer exponent_f(const MPFloat f) { return exponent(f); }
+//inline MPFloat mantissa_f(const MPFloat f) { return mantissa(f); }
+//inline Integer exponent_f(const MPFloat f) { return exponent(f); }
 inline Integer precision_f(const MPFloat f) { return precision(f); }
 
 inline Dyadic neg_d(const Dyadic& d1) { return -d1; }
@@ -190,11 +222,9 @@ void export_numeric() {
   ;
 
   class_<MPFloat>("MPFloat")
-    .def(init<int,int>())
     .def(init<int>())
     .def(init<Integer>())
     .def(init<double>())
-    .def(init<float>())
     .def(init<MPFloat>())
     .def("__neg__", &neg_f)
     .def("__add__", &add_ff)
@@ -226,8 +256,8 @@ void export_numeric() {
     .def("__ge__", &ge_fx)
     .def("__ge__", &ge_fz)
     .def("precision", &precision_f)
-    .def("exponent", &exponent_f)
-    .def("mantissa", &mantissa_f)
+//    .def("exponent", &exponent_f)
+//    .def("mantissa", &mantissa_f)
     .def(self_ns::str(self))
   ;
 
@@ -236,7 +266,7 @@ void export_numeric() {
     .def(init<int>())
     .def(init<Integer>())
     .def(init<double>())
-    .def(init<MPFloat>())
+//    .def(init<MPFloat>())
     .def(init<Dyadic>())
     .def("__neg__", &neg_d)
     .def("__add__", &add_dd)

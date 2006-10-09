@@ -42,9 +42,7 @@ namespace Ariadne {
     /* Forward declaration of friends. */
     template<typename R> std::ostream& operator<<(std::ostream&, const Ellipsoid<R>&);
     template<typename R> std::istream& operator>>(std::istream&, Ellipsoid<R>&);
-
-    template<typename R> R euclidean_norm_square(const LinearAlgebra::Vector<R>&);
-    
+   
     /*! \ingroup BasicSet
      *  \brief An ellipsoid \f$(x-c)^T A (x-c)\leq 1\f$ of arbitrary dimension.
      */
@@ -144,16 +142,10 @@ namespace Ariadne {
       Rectangle<R> bounding_box() const;
       
       /*! \brief Tests if \a point is contained in the ellipsoid. */
-      bool contains(const state_type& point) const {
-        vector_type vec=point - this->_centre;
-        return inner_product(vec,vector_type(this->_bilinear_form*vec))<=1;
-      }
+      bool contains(const state_type& point) const;
       
       /*! \brief Tests if \a point is contained in the interior of the ellipsoid. */
-      bool interior_contains(const state_type& point) const {
-        vector_type vec=point-this->_centre;
-        return inner_product(vec,this->_bilinear_form*vec)<1;
-      }
+      bool interior_contains(const state_type& point) const;
       //@}
       
 #ifdef DOXYGEN
@@ -300,21 +292,8 @@ namespace Ariadne {
     }
 
     template<typename R>
-    inline
     Geometry::Ellipsoid<R> 
-    scale(const Geometry::Ellipsoid<R>& s, const R& scale_factor) {
-
-      const Geometry::Point<R>& centre=s.centre();
-      const LinearAlgebra::Matrix<R>& bilinear_form=s.bilinear_form();
-      
-      Geometry::Point<R> new_centre(s.dimension());
-
-      for(size_type i=0; i!=s.dimension(); ++i) {
-        new_centre[i]=scale_factor*centre[i];
-      }
-
-      return Geometry::Ellipsoid<R>(new_centre, scale_factor*bilinear_form);
-    }
+    scale(const Geometry::Ellipsoid<R>& s, const R& scale_factor);
 
     template <typename R>
     std::ostream&

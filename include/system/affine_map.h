@@ -46,6 +46,7 @@ namespace Ariadne {
     template <typename R>
     class AffineMap : public Map<R> 
     {
+      typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
      public:
       /*! \brief The type of denotable real number used to describe the system. */
       typedef R real_type;
@@ -71,7 +72,7 @@ namespace Ariadne {
         this->_A=T._A; this->_b=T._b; return *this; }
       
       /*! \brief  An approximation to the image of a point. DEPRECATED. */
-      Geometry::Point<R> operator() (const Geometry::Point<R>& A) const;
+      Geometry::Point<F> operator() (const Geometry::Point<R>& A) const;
       
       /*! \brief  The map applied to a rectangle. */
       Geometry::Rectangle<R> operator() (const Geometry::Rectangle<R>& A) const;
@@ -81,6 +82,9 @@ namespace Ariadne {
       
       /*! \brief  The map applied to a zonotope basic set. */
       Geometry::Zonotope<R> operator() (const Geometry::Zonotope<R>& A) const;
+              
+      /*! \brief  The map applied to a polytopic basic set. */
+      Geometry::Polytope<R> operator() (const Geometry::Polytope<R>& A) const;
               
       /*! \brief  The map applied to a grid mask set. */
       Geometry::ListSet<R,Geometry::Parallelotope> operator() (const Geometry::GridMaskSet<R>& ) const;

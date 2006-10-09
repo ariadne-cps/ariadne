@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "linear_algebra/tensor.h"
-#include "linear_algebra/tensor.tpl"
-
 #include "numeric/float64.h"
 #include "numeric/mpfloat.h"
 #include "numeric/rational.h"
 
+#include "linear_algebra/tensor.h"
+#include "linear_algebra/tensor.tpl"
+
 namespace Ariadne {
   namespace LinearAlgebra {
     
-    template class Tensor<Float64>;
-    template class Tensor<MPFloat>;
+    //template class Tensor<Float64>;
+    //template class Tensor<MPFloat>;
     template class Tensor<Rational>;
 
   }

@@ -71,6 +71,24 @@ template<class R>
 void export_vector()
 {
   typedef Vector<R> Vec;
+  typedef Vector< Interval<R> > IVec;
+  
+  class_<Vec>(python_name<R>("Vector").c_str(),init<uint>())
+    .def(init<std::string>())
+    .def(init<Vec>())
+    .def("__len__", &Vec::size)
+    .def("__getitem__",&vector_get_item<R>)
+    .def("__setitem__",&vector_set_item<R,R>)
+    .def("__setitem__",&vector_set_item<R,double>)
+    .def(self_ns::str(self))
+  ;
+}
+
+template<>
+void export_vector<Rational>()
+{
+  typedef Rational R;
+  typedef Vector<R> Vec;
   
   class_<Vec>(python_name<R>("Vector").c_str(),init<uint>())
     .def(init<std::string>())
@@ -91,29 +109,30 @@ void export_vector()
 
 template<class R>
 void export_interval_vector() {
-  typedef Interval<R> Ivl;
+  typedef Interval<R> I;
   typedef Vector<R> Vec;
   typedef Vector< Interval<R> > IVec;
   
   class_<IVec>(python_name<R>("IntervalVector").c_str(),init<uint>())
     .def(init<std::string>())
+    .def(init<Vec>())
     .def(init<IVec>())
     .def("__len__", &IVec::size)
-    .def("__getitem__",&vector_get_item<Ivl>) 
-    .def("__setitem__",&vector_set_item<Ivl,Ivl>)
-    .def("__setitem__",&vector_set_item<Ivl,R>)
-    .def("__setitem__",&vector_set_item<Ivl,double>)
+    .def("__getitem__",&vector_get_item<I>) 
+    .def("__setitem__",&vector_set_item<I,I>)
+    .def("__setitem__",&vector_set_item<I,R>)
+    .def("__setitem__",&vector_set_item<I,double>)
     .def("__add__",&add<IVec,IVec,IVec>)
     .def("__add__",&add<IVec,IVec,Vec>)
     .def("__radd__",&add<IVec,Vec,IVec>)
     .def("__sub__",&sub<IVec,IVec,IVec>)
     .def("__sub__",&sub<IVec,IVec,Vec>)
     .def("__rsub__",&sub<IVec,Vec,IVec>)
-    .def("__mul__",&mul<IVec,IVec,Ivl>)
+    .def("__mul__",&mul<IVec,IVec,I>)
     .def("__mul__",&mul<IVec,IVec,R>)
-    .def("__rmul__",&mul<IVec,Ivl,IVec>)
+    .def("__rmul__",&mul<IVec,I,IVec>)
     .def("__rmul__",&mul<IVec,R,IVec>)
-    .def("__div__",&mul<IVec,IVec,Ivl>)
+    .def("__div__",&mul<IVec,IVec,I>)
     .def("__div__",&mul<IVec,IVec,R>)
    .def(self_ns::str(self))
   ;

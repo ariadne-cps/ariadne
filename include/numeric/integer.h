@@ -128,7 +128,7 @@ namespace Ariadne {
     N1 factorial(const N2& n) {
       N1 result=1;
       for(N2 i=1; i!=n; ++i) { result*=i; }
-      return result;
+      return result*n;
     }
 
     /*! \brief Factorial. */
@@ -136,7 +136,7 @@ namespace Ariadne {
     N factorial(const N& n) {
       N result=1;
       for(N i=1; i!=n; ++i) { result*=i; }
-      return result;
+      return result*n;
     }
 
     /*! \brief Greatest common divisor. */

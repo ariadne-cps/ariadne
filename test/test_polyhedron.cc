@@ -49,6 +49,16 @@ using namespace std;
 
 using namespace Parma_Polyhedra_Library::IO_Operators;
 
+int test_ppl_polyhedron();
+template<typename R> int test_polyhedron();
+
+int main() {
+  test_ppl_polyhedron();
+  test_polyhedron<Float64>();
+  
+  cerr << "INCOMPLETE ";
+}
+
 
 int
 test_ppl_polyhedron()
@@ -69,18 +79,4 @@ test_polyhedron()
   ptp=Polyhedron<R>(A,b);
   
   return 0;
-}
-
-
-
-int main() {
-
-  
-
-  test_ppl_polyhedron();
-  
-  test_polyhedron<Float64>();
-
-  
-  cerr << "INCOMPLETE ";
 }

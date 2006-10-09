@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "geometry/point.h"
-#include "geometry/point.tpl"
-
 #include "numeric/float64.h"
 #include "numeric/mpfloat.h"
 #include "numeric/rational.h"
+
+#include "geometry/point.h"
+#include "geometry/point.tpl"
 
 namespace Ariadne {
   namespace Geometry {

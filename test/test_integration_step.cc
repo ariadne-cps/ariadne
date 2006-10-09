@@ -23,8 +23,9 @@
 
 #include <fstream>
 
-#include "ariadne.h"
 #include "real_typedef.h"
+
+#include "ariadne.h"
 #include "numeric/numerical_types.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
@@ -38,25 +39,58 @@
 using namespace Ariadne;
 using namespace std;
 
-int main() {
+template<typename R> int test_integration_step();
 
+int main() {
+  test_integration_step<Real>();
+  return 0;
+}
+
+template<typename R> 
+int 
+test_integration_step()
+{
   
-  
-  Evaluation::C1LohnerIntegrator<Real> lohner=Evaluation::C1LohnerIntegrator<Real>(0.125,0.5,0.0625);
-  Geometry::Rectangle<Real> r=Geometry::Rectangle<Real>("[0.96,1.04]x[0.46,0.54]");
+  Evaluation::C1LohnerIntegrator<R> lohner=Evaluation::C1LohnerIntegrator<R>(0.125,0.5,0.0625);
+  Geometry::Rectangle<R> r=Geometry::Rectangle<R>("[0.96,1.04]x[0.46,0.54]");
   cout << "r=" << r << endl;
-  Geometry::Parallelotope<Real> p=Geometry::Parallelotope<Real>(r);
+  Geometry::Parallelotope<R> p=Geometry::Parallelotope<R>(r);
   cout << "p=" << p << endl;
-  LinearAlgebra::Matrix<Real> A=LinearAlgebra::Matrix<Real>("[-0.25,-1;+1,-0.25]");
+  LinearAlgebra::Matrix<R> A=LinearAlgebra::Matrix<R>("[-0.25,-1;+1,-0.25]");
   cout << "A=" << A << endl;
-  LinearAlgebra::Vector<Real> b=LinearAlgebra::Vector<Real>("[0,0]");
+  LinearAlgebra::Vector<R> b=LinearAlgebra::Vector<R>("[0,0]");
   cout << "b=" << b << endl;
-  System::AffineVectorField<Real> avf=System::AffineVectorField<Real>(A,b);
+  System::AffineVectorField<R> avf=System::AffineVectorField<R>(A,b);
   cout << "avf=" << avf << endl;
 
-  Real h=Real(0.125);
+  Real x0=0;
+  Real x1=0.4;
+  Interval<Real> ivl1(0.4);
+  Interval<Real> ivl0;
+  
+  LinearAlgebra::Matrix<Real> fA(2,2);
+  fA(0,0)=0.4;
+  fA(1,1)=0.4;
+  R z=0;
+  Interval<Real> ivlm(z,z);
+  Interval<Real> ivls(z,z);
+  ivls+=abs(fA(0,0));
+  cout << fA(0,0) << "  " << ivls << "  " << ivlm << "\n";
+  ivls+=abs(fA(0,1));
+  ivlm=Numeric::max(ivlm,ivls);
+  cout << fA(0,1) << "  " << ivls << "  " << ivlm << "\n";
+  ivls=Interval<Real>(0);
+  ivls+=abs(fA(1,0));
+  cout << fA(1,0) << "  " << ivls << "  " << ivlm << "\n";
+  ivls+=abs(fA(1,1));
+  ivlm=Numeric::max(ivlm,ivls);
+  cout << fA(1,1) << "  " << ivls << "  " << ivlm << "\n";
+  
+  Evaluation::time_type h(0.125);
   cout << "h=" << h << endl;
-  Geometry::Parallelotope<Real> next_paral=lohner.integration_step(avf,p,h);
+  cout << "p.generators().norm()=" << LinearAlgebra::norm(p.generators()) << endl;
+
+  Geometry::Parallelotope<R> next_paral=lohner.integration_step(avf,p,h);
   cout << next_paral << "\n";
   
   

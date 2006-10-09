@@ -46,16 +46,17 @@ typedef Numeric::Dyadic Dyadic;
 typedef Numeric::Rational Rational;
 
 typedef Interval<Real> RInterval;
-typedef Interval<Field> FInterval;
+typedef Interval<Field> QInterval;
 
 typedef LinearAlgebra::Vector<Real> RVector;
 typedef LinearAlgebra::Matrix<Real> RMatrix;
 typedef LinearAlgebra::Vector< Interval<Real> > RIntervalVector;
 typedef LinearAlgebra::Matrix< Interval<Real> > RIntervalMatrix;
 
-typedef LinearAlgebra::Vector<Field> FVector;
-typedef LinearAlgebra::Matrix<Field> FMatrix;
-typedef LinearAlgebra::LinearProgram<Field> FLinearProgram;
+typedef LinearAlgebra::Vector<Numeric::numerical_traits<Real>::arithmetic_type> FVector;
+typedef LinearAlgebra::Matrix<Numeric::numerical_traits<Real>::arithmetic_type> FMatrix;
+typedef LinearAlgebra::LinearProgram<Numeric::numerical_traits<Real>::arithmetic_type> FLinearProgram;
+typedef LinearAlgebra::LinearProgram<Field> QLinearProgram;
 
 typedef Combinatoric::LatticeCell LatticeCell;
 typedef Combinatoric::LatticeBlock LatticeBlock;
@@ -64,6 +65,7 @@ typedef Combinatoric::LatticeCellListSet LatticeCellListSet;
 typedef Combinatoric::LatticeBlockListSet LatticeBlockListSet;
 typedef Combinatoric::LatticeMultiMap LatticeMultiMap;
 
+typedef Geometry::Point<Numeric::numerical_traits<Real>::arithmetic_type> FPoint;
 typedef Geometry::Point<Real> RPoint;
 typedef Geometry::PointList<Real> RPointList;
 typedef Geometry::Rectangle<Real> RRectangle;

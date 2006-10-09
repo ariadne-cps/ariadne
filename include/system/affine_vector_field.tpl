@@ -23,6 +23,7 @@
  
 #include "affine_vector_field.h"
 
+#include "../numeric/numerical_traits.h"
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 
@@ -42,10 +43,10 @@ namespace Ariadne {
     }
     
     template<typename R>
-    LinearAlgebra::Vector<R>
+    LinearAlgebra::Vector<typename AffineVectorField<R>::F>
     AffineVectorField<R>::operator() (const Geometry::Point<R>& s) const 
     { 
-      return this->_A*s.position_vector()+this->_b; 
+      return LinearAlgebra::Vector<F>(this->_A*LinearAlgebra::Vector<F>(s.position_vector())+this->_b); 
     }
     
     template<typename R>
@@ -57,7 +58,7 @@ namespace Ariadne {
     }
   
     template<typename R>
-    LinearAlgebra::Matrix<R>
+    LinearAlgebra::Matrix<typename AffineVectorField<R>::F>
     AffineVectorField<R>::derivative(const Geometry::Point<R>& x) const 
     { 
       return this->_A; 
@@ -88,38 +89,40 @@ namespace Ariadne {
   namespace LinearAlgebra {
 
     template <typename R>
-    Matrix<R>
+    Matrix<typename Numeric::numerical_traits<R>::arithmetic_type>
     exp_Ah_approx(const Matrix<R>& A, 
                   const R& h, 
                   const R& e) 
     {
-      Matrix<R> result=identity_matrix<R>(A.number_of_rows());
+      typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
+      Matrix<F> result=identity_matrix<R>(A.number_of_rows());
       
-      R norm_Ah=h*norm(A);
-      Matrix<R> AhpowNdivfN=result;
+      F norm_Ah=F(h)*norm(A);
+      Matrix<F> AhpowNdivfN=result;
       uint n=0;
-      while(norm(AhpowNdivfN)*n >= e*(n-norm_Ah)) {
+      while( (norm(AhpowNdivfN)*static_cast<F>(n)) >= (e*(static_cast<R>(n)-norm_Ah)) ) {
         ++n;
-        AhpowNdivfN=(h/n)*(AhpowNdivfN*A);
+        AhpowNdivfN=(F(h)/R(n))*(AhpowNdivfN*A);
         result=result+AhpowNdivfN;
       }
       return result;
     }
     
     template <typename R> 
-    Matrix<R> 
+    Matrix<typename Numeric::numerical_traits<R>::arithmetic_type> 
     exp_Ah_sub_id_div_A_approx(const Matrix<R>& A, 
                                const R& h, 
                                const R& e)
     {
-      Matrix<R> result=h*identity_matrix<R>(A.number_of_rows());
+      typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
+      Matrix<F> result=static_cast<F>(h)*identity_matrix<R>(A.number_of_rows());
       
-      R norm_Ah=h*norm(A);
-      Matrix<R> AhpowNdivfN=result;
+      F norm_Ah=F(h)*norm(A);
+      Matrix<F> AhpowNdivfN=result;
       uint n=0;
-      while(norm(AhpowNdivfN)*n >= e*(n-norm_Ah)) {
+      while(norm(AhpowNdivfN)*static_cast<R>(n) >= e*(static_cast<R>(n)-norm_Ah)) {
         ++n;
-        AhpowNdivfN=(h/(n+1))*(AhpowNdivfN*A);
+        AhpowNdivfN=(F(h)/R(n+1))*(AhpowNdivfN*A);
         result=result+AhpowNdivfN;
       }
       return result;

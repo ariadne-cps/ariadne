@@ -27,8 +27,10 @@
 #include <fstream>
 #include <string>
 
-#include "real_typedef.h"
-#include "numeric/numerical_types.h"
+#include "numeric/float64.h"
+#include "numeric/mpfloat.h"
+#include "numeric/rational.h"
+
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/lu_matrix.h"
@@ -44,99 +46,89 @@ using namespace Ariadne;
 using namespace Ariadne::LinearAlgebra;
 using namespace std;
 
-int main() {
+template<typename R> int test_linear_algebra();
+template<> int test_linear_algebra<Rational>();
 
-  {
-    
-    Matrix< Rational > A(3,3), LU(3,3);
-    Matrix< Rational > Aq(3,3), QT, R;
-    Vector< Rational > b(3), x(3);
-    Vector< dimension_type > pivot(3);
-    
-    A(0,0)=Rational(7,3);A(0,1)=4;A(0,2)=-1;
-    A(1,0)=-13;A(1,1)=Rational(10,9);A(1,2)=6;
-    A(2,0)=0;A(2,1)=Rational(1,13);A(2,2)=9;
-   
-    b(0)=Rational(16,3);
-    b(1)=-Rational(53,9);
-    b(2)=Rational(118,13);
-   
-    cout << "A=" << A << endl;
-    cout << "b=" << b << endl;
-    
-    //assert(1==13*A(2,1));
-   
-    x=A.solve(b);
+int main() {
+  test_linear_algebra<Rational>();
+  test_linear_algebra<Float64>();
+  test_linear_algebra<MPFloat>();
+}
+
+template<> 
+int 
+test_linear_algebra<Rational>()
+{
+  Matrix< Rational > A(3,3);
+  Matrix< Rational > Aq(3,3), QT, R;
+  Vector< Rational > b(3), x(3);
+  Vector< dimension_type > pivot(3);
   
-    cout << "A.solve(b)= " << x << endl;
-    cout << "Ax=" << A*b << endl;
-    
-    assert(x(0)==1 && x(1)==1 && x(2)==1);
-    
-  }
+  A(0,0)=Rational(7,3);A(0,1)=4;A(0,2)=-1;
+  A(1,0)=-13;A(1,1)=Rational(10,9);A(1,2)=6;
+  A(2,0)=0;A(2,1)=Rational(1,13);A(2,2)=9;
+  
+  b(0)=Rational(16,3);
+  b(1)=-Rational(53,9);
+  b(2)=Rational(118,13);
+  
+  cout << "A=" << A << endl;
+  cout << "b=" << b << endl;
+  
+  //assert(1==13*A(2,1));
+  
+  x=A.solve(b);
+  
+  cout << "A.solve(b)= " << x << endl;
+  cout << "Ax=" << A*b << endl;
+  
+  assert(x(0)==1 && x(1)==1 && x(2)==1);
   
   Rational Aqptr[9]={-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0};
-  Real Arptr[9]={-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0};
-  Matrix<Rational> Aq(3,3,Aqptr,3,1);
-  Matrix<Real> Ar(3,3,Arptr,3);
+  Aq=Matrix<Rational>(3,3,Aqptr,3,1);
 
   cout << "Testing LU\n";
-  {
-    Matrix<Rational> A(Aq);
-    LUMatrix<Rational> LU(A);
-    Matrix<Rational> P=LU.P();
-    Matrix<Rational> L=LU.L();
-    Matrix<Rational> U=LU.U();
-    cout << "A=" << A << "\n";
-    cout << "P=" << P << "\n";
-    cout << "L=" << L << "\n";
-    cout << "U=" << U << "\n";
-    cout << "P*L*U=" << P*L*U << "\n";
-    cout << "LU=" << Matrix<Rational>(LU) << "\n";
-    cout << flush;
-    assert(Matrix<Rational>(LU)==A);
-  }
+  A=Matrix<Rational>(Aq);
+  LUMatrix<Rational> LU(A);
+  Matrix<Rational> P=LU.P();
+  Matrix<Rational> L=LU.L();
+  Matrix<Rational> U=LU.U();
+  cout << "A=" << A << "\n";
+  cout << "P=" << P << "\n";
+  cout << "L=" << L << "\n";
+  cout << "U=" << U << "\n";
+  cout << "P*L*U=" << P*L*U << "\n";
+  cout << "LU=" << Matrix<Rational>(LU) << "\n";
+  cout << flush;
+  assert(Matrix<Rational>(LU)==A);
 
-  cout << "Testing Real QR\n";
-  {
-    Matrix<Real> A(Ar);
-    QRMatrix<Real> QR(A);
-    Matrix<Real> Q=QR.Q();
-    Matrix<Real> R=QR.R();
-    cout << "A=" << A << "\n";
-    cout << "Q=" << Q << "\n";
-    cout << "Q^T=" << Q.transpose() << "\n";
-    cout << "R=" << R << "\n";
-    cout << "Q*Q^T=" << Q*Q.transpose() << "\n";
-    cout << setprecision(20);
-    cout << "Q*R=" << Q*R << "\n";
-    cout << "QR =" << Matrix<Real>(QR) << "\n";
-    cout << "A  =" << A << "\n";
-    cout << flush;
-    //assert(Matrix<Real>(QR)==A);
-  }
+  return 0;
+}
 
-  cout << "Testing Interval<Real> QR\n";
-  {
-    Matrix<Real> I=Matrix<Real>::identity(3);
-    Matrix<Real> A(Ar);
-    QRMatrix< Interval<Real> > QR(A);
-    Matrix< Interval<Real> > Q=QR.Q();
-    Matrix< Interval<Real> > R=QR.R();
-    Matrix< Interval<Real> > B=QR;
-    cout << "A=" << A << "\n";
-    cout << "Q=" << Q << "\n";
-    cout << "Q^T=" << Q.transpose() << "\n";
-    cout << "R=" << R << "\n";
-    cout << "Q*Q^T=" << Q*Q.transpose() << "\n";
-    cout << setprecision(20);
-    cout << "Q*R=" << Q*R << "\n";
-    cout << "QR =" << B << "\n";
-    cout << "A  =" << A << "\n";
-    cout << flush;
-    assert(LinearAlgebra::contains(Q*Q.transpose(),I));
-    assert(LinearAlgebra::contains(B,A));
-  }
+template<typename Rl>
+int
+test_linear_algebra()
+{
+  typedef typename Numeric::numerical_traits<Rl>::arithmetic_type F;
+  Rl Arptr[9]={-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0};
+  Matrix<Rl> Ar(3,3,Arptr,3);
+
+  cout << "Testing real QR\n";
+  Matrix<Rl> A(Ar);
+  QRMatrix<F> QR(A);
+  Matrix<F> Q=QR.Q();
+  Matrix<F> R=QR.R();
+  cout << "A=" << A << "\n";
+  cout << "Q=" << Q << "\n";
+  cout << "Q^T=" << Q.transpose() << "\n";
+  cout << "R=" << R << "\n";
+  cout << "Q*Q^T=" << Q*Q.transpose() << "\n";
+  cout << setprecision(20);
+  cout << "Q*R=" << Q*R << "\n";
+  cout << "QR =" << Matrix<F>(QR) << "\n";
+  cout << "A  =" << A << "\n";
+  cout << flush;
+  //assert(Matrix<Rl>(QR)==A);
 
   /*
   cout << "Testing QR\n";

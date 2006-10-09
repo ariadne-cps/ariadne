@@ -21,10 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "real_typedef.h"
+
 #include "evaluation/apply.h"
 #include "evaluation/apply.tpl"
-
-#include "real_typedef.h"
 
 namespace Ariadne {
   namespace Evaluation {

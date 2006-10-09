@@ -46,6 +46,7 @@ namespace Ariadne {
     template <typename R>
     class HenonMap : public Map<R> 
     {
+      typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
      public:
       /*! \brief The real number type. */
       typedef R real_type;
@@ -56,16 +57,16 @@ namespace Ariadne {
       explicit HenonMap(R a=R(1.5), R b=R(0.3)) : _a(a), _b(b) { }
       
       /*! \brief  The map applied to a state. */
-      virtual Geometry::Point<R> operator() (const Geometry::Point<R>& x) const;
+      virtual Geometry::Point<F> operator() (const Geometry::Point<R>& x) const;
       /*! \brief  The map applied to a rectangle basic set. */
       virtual Geometry::Rectangle<R> operator() (const Geometry::Rectangle<R>& r) const;
       /*! \brief  The map applied to a parallelotope basic set. */
       virtual Geometry::Parallelotope<R> operator() (const Geometry::Parallelotope<R>& r) const;
       
       /*! \brief  The derivative of the map at a point. */
-      virtual LinearAlgebra::Matrix<R> derivative(const Geometry::Point<R>& x) const;
+      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<R>& x) const;
       /*! \brief  The derivative of the map over a rectangular basic set. */
-      virtual LinearAlgebra::Matrix< Interval<R> > derivative(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::Matrix< Interval<R> > jacobian(const Geometry::Rectangle<R>& r) const;
             
       /*! \brief  The parameter a. */
       const R& a() const { return _a; }
@@ -89,12 +90,12 @@ namespace Ariadne {
     };
       
     template <typename R>
-    Geometry::Point<R>
+    Geometry::Point<typename HenonMap<R>::F>
     HenonMap<R>::operator() (const Geometry::Point<R>& p) const
     {
-      Geometry::Point<R> result(2); 
-      const R& x=p[0];
-      const R& y=p[0];
+      Geometry::Point<F> result(2); 
+      const F& x=p[0];
+      const F& y=p[0];
       result[0]=_a-x*x-_b*y; 
       result[1]=x; 
       return result;
@@ -118,20 +119,20 @@ namespace Ariadne {
     }
      
     template <typename R>
-    LinearAlgebra::Matrix<R>
-    HenonMap<R>::derivative(const Geometry::Point<R>& x) const
+    LinearAlgebra::Matrix<typename HenonMap<R>::F>
+    HenonMap<R>::jacobian(const Geometry::Point<R>& x) const
     {
-      LinearAlgebra::Matrix<R> result(2,2); 
-      result(0,0) = -2*x[0];
-      result(0,1) = -_b;
-      result(1,0) = 1;
-      result(1,1) = 0;
+      LinearAlgebra::Matrix<F> result(2,2); 
+      result(0,0) = F(-2)*x[0];
+      result(0,1) = R(-_b);
+      result(1,0) = R(1);
+      result(1,1) = R(0);
       return result;
     }
      
     template <typename R>
     LinearAlgebra::Matrix< Interval<R> >
-    HenonMap<R>::derivative(const Geometry::Rectangle<R>& r) const
+    HenonMap<R>::jacobian(const Geometry::Rectangle<R>& r) const
     {
       LinearAlgebra::Matrix< Interval<R> > result(2,2); 
       result(0,0) = R(-2)*r[0];

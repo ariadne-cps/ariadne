@@ -49,6 +49,16 @@ using namespace std;
 
 using namespace Parma_Polyhedra_Library::IO_Operators;
 
+template<typename R> int test_polytope();
+template<> int test_polytope<Rational>();
+
+int main() {
+  test_polytope<Float64>();
+  test_polytope<MPFloat>();
+  test_polytope<Rational>();
+  
+  cerr << "INCOMPLETE ";
+}
 
 
 template<typename R>
@@ -125,19 +135,4 @@ test_polytope<Rational>()
   
   cout << endl;
   return 0;
-}
-
-
-
-
-int main() {
-
-  
-
-  test_polytope<Float64>();
-  test_polytope<MPFloat>();
-  test_polytope<Rational>();
-
-  
-  cerr << "INCOMPLETE ";
 }

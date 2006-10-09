@@ -25,8 +25,9 @@
 #include <fstream>
 #include <string>
 
-#include "ariadne.h"
 #include "real_typedef.h"
+
+#include "ariadne.h"
 #include "base/exception.h"
 #include "base/utility.h"
 #include "geometry/rectangle.h"
@@ -38,23 +39,27 @@ using namespace Ariadne;
 using namespace Ariadne::Geometry;
 using namespace std;
 
-template class Rectangle< Real >;
-template class Point< Real >;
+template<class R> int test_rectangle();
 
 int main() {
-  
-    
-  
-    Point<Real> s1("(1,1)");
-    Point<Real> s2("(1.5,1.5)");
-    Point<Real> s3("(1.375,1.375)");
-    Point<Real> s4("(2,2)");
-    Point<Real> s5("(0.75,0.125)");
-    Rectangle<Real> r0(2);
-    Rectangle<Real> r1(s1,s2);
-    Rectangle<Real> r2(s3,s4);
-    Rectangle<Real> r3(s3,s2);
-    Rectangle<Real> r4,r5,r6;
+  test_rectangle<Real>();
+}
+
+template<class R>
+int
+test_rectangle()
+{
+ 
+    Point<R> s1("(1,1)");
+    Point<R> s2("(1.5,1.5)");
+    Point<R> s3("(1.375,1.375)");
+    Point<R> s4("(2,2)");
+    Point<R> s5("(0.75,0.125)");
+    Rectangle<R> r0(2);
+    Rectangle<R> r1(s1,s2);
+    Rectangle<R> r2(s3,s4);
+    Rectangle<R> r3(s3,s2);
+    Rectangle<R> r4,r5,r6;
     
     string istr = "[0,1]x[0,1] "
         "[-0.5,1.5]x[-0.375,0.5] "
@@ -64,16 +69,16 @@ int main() {
         "[0,1]x[0,0.5] ";
     stringstream iss(istr);
     iss >> r1 >> r2 >> r3 >> r4 >> r5 >> r6;
-    Rectangle<Real> r7=r1;
+    Rectangle<R> r7=r1;
     
     cout << "r1=" << r1 << ", r2=" << r2 << ", r3=" << r3 << ", r4=" << r4 << "\n"
          << "r5=" << r5 << ", r6=" << r6 << ", r7=" << r7 << endl;
     
     assert(equal(r1,r7));
     cout << "centre(r2)=" << r2.centre() << endl;
-    assert(r2.centre()==Point<Real>("(0.5,0.0625)"));
+    assert(r2.centre()==Point<R>("(0.5,0.0625)"));
     
-    ListSet<Real,Rectangle> cover1,cover2;
+    ListSet<R,Rectangle> cover1,cover2;
     cover1.push_back(r2);
     cover1.push_back(r3);
     cover1.push_back(r4);
@@ -108,7 +113,7 @@ int main() {
     assert(r4==r6);
 
     cout << "r1=" << r1;
-    r1[1]=Interval<Real>(0.0,0.5);
+    r1[1]=Interval<R>(0.0,0.5);
     cout << " r1=" << r1;
     assert(r1==r6);
     //r1[1].lower()=-2.25;

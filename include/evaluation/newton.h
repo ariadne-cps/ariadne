@@ -88,8 +88,8 @@ namespace Ariadne {
       virtual LinearAlgebra::Vector< Interval<R> > operator() (const Geometry::Rectangle<R>& r) const {
         return _base(r)-r; }
       /*!\brief Evaluate the derivative of function \f$f(x)-x\f$, which is \f$Df(x)-I\f$. */
-      virtual LinearAlgebra::Matrix< Interval<R> > derivative(const Geometry::Rectangle<R>& r) const {
-        LinearAlgebra::Matrix< Interval<R> > d=_base.derivative(r);
+      virtual LinearAlgebra::Matrix< Interval<R> > jacobian(const Geometry::Rectangle<R>& r) const {
+        LinearAlgebra::Matrix< Interval<R> > d=_base.jacobian(r);
         LinearAlgebra::Matrix< Interval<R> > i=LinearAlgebra::Matrix< Interval<R> >::identity(this->dimension());
         return d-i; }
       /*!\brief The name of the class. */

@@ -271,7 +271,7 @@ namespace Ariadne {
       /*! \brief The coordinate of the \a n th subdivision point in 
        * dimension \a d. */
       virtual real_type subdivision_coordinate(dimension_type d, index_type n) const { 
-        return _subdivision_lengths[d] * n; }
+        return mul_approx(_subdivision_lengths[d] , n); }
 
       /*! \brief The length of the subdivision in the \a d th coordinate. */
       real_type subdivision_length(dimension_type d) const { 
@@ -279,7 +279,7 @@ namespace Ariadne {
 
       /*! \brief The index of interval in dimension \a d index containing \a x. */
       virtual index_type subdivision_interval(dimension_type d, const real_type& x) const {
-        index_type result = div_down(x,_subdivision_lengths[d]).get_si();
+        index_type result = conv_down<index_type>(div_down(x,_subdivision_lengths[d]));
         return result;
       }
 

@@ -34,11 +34,11 @@ namespace Ariadne {
     exp(const Matrix< Interval<R> >& A) 
     {
       assert(A.number_of_rows()==A.number_of_columns());
-      R err=A.norm().upper()/65536;
+      R err=div_up(A.norm().upper(),R(65536));
       if(err==0) {
-        err=A.norm().upper()/65536;
-        err/=65536;
-        err/=65536;
+        err=div_up(A.norm().upper(),R(65536));
+        err=div_up(err,R(65536));
+        err=div_up(err,R(65536));
       }
             
       Matrix< Interval<R> > result=Matrix< Interval<R> >::identity(A.number_of_rows())+A;

@@ -23,7 +23,7 @@
  */
   
 /*! \file function.h
- *  \brief Standard functions on double precision and dyadic number types.
+ *  \brief Standard functions on real number types.
  */
 
 #ifndef _ARIADNE_FUNCTION_H
@@ -51,7 +51,7 @@ namespace Ariadne {
     template<class R> inline R med_approx(const R& x1, const R& x2);
     template<class R> inline R med_exact(const R& x1, const R& x2);
    
-   /*! \brief Unary negation. */
+    /*! \brief Unary negation. */
     template<class R> inline R neg_exact(const R& x);
     template<class R> inline R neg_approx(const R& x);
     template<class R> inline R neg_down(const R& x);

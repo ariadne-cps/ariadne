@@ -31,6 +31,8 @@
 #include "../geometry/rectangle.h"
 #include "../geometry/parallelotope.h"
 #include "../geometry/zonotope.h"
+#include "../geometry/polytope.h"
+
 
 
 
@@ -38,7 +40,7 @@ namespace Ariadne {
   namespace System {
 
     template <typename R>
-    Geometry::Point<R>
+    Geometry::Point< typename AffineMap<R>::F >
     AffineMap<R>::operator() (const Geometry::Point<R>& pt) const
     {
       //std::cerr << "AffineMap<R>::apply(const Geometry::Rectangle<R>& r) const\n";
@@ -46,7 +48,8 @@ namespace Ariadne {
       if (this->argument_dimension()!=pt.dimension()) {
         throw std::domain_error("AffineMap<R>::operator() (const Geometry::Point<R>& r): the map does not have the same dimension of the point.");
       }
-      return Geometry::Point<R>(this->A()*pt.position_vector()+this->b());
+      LinearAlgebra::Vector<F> image(this->A()*LinearAlgebra::Vector<F>(pt.position_vector())+this->b());
+      return Geometry::Point<F>(image);
     }
     
 
@@ -85,6 +88,13 @@ namespace Ariadne {
         this->operator()(z.central_block()),
         this->A()*LinearAlgebra::Matrix< Interval<R> >(z.generators()));
     }    
+    
+    template <typename R>
+    Geometry::Polytope<R>
+    AffineMap<R>::operator() (const Geometry::Polytope<R>& p) const
+    {
+      throw std::runtime_error("AffineMap<R>::operator() (const Geometry::Polytope<R>&) const not implemented");
+    }   
     
     template<typename R>
     std::ostream& 

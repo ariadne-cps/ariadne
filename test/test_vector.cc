@@ -26,8 +26,9 @@
 #include <iostream>
 #include <fstream>
 
-#include "real_typedef.h"
-#include "numeric/numerical_types.h"
+#include "numeric/float64.h"
+#include "numeric/mpfloat.h"
+#include "numeric/rational.h"
 #include "numeric/interval.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/vector.tpl"
@@ -38,92 +39,81 @@ using namespace std;
 using namespace Ariadne;
 using namespace Ariadne::LinearAlgebra;
 
-int main() {
+template<typename R> int test_vector();
 
-  
+int main() {
+  test_vector<Float64>();
+  test_vector<MPFloat>();
+  //test_vector<Rational>();
+  //test_vector< Interval<MPFloat> >();
+  //test_vector< Interval<Rational> >();
+
+  return 0;
+}  
+
+template<typename R>
+int 
+test_vector()
+{
+  typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
   
   int n=3;
-  Real vptr[3]={-4.0,3.0,1.0};
-  
-  Real x=1.5;
-  Vector<Real> v1(n,vptr);
-  Vector<Real> v2("[2.375,4.25,-1.25]");
-  cout << "v1=" << v1 << "  v2=" << v2 << endl;
+  R vptr[3]={-4.0,3.0,1.0};
+  R x=1.5;
+
+  Vector<R> v0;
+  cout << "v0=" << v0 << endl;
+  Vector<R> v1(n,vptr);
+  cout << "v1=" << v1 << endl;
+  Vector<R> v2("[2.375,4.25,-1.25]");
+  cout << "v2=" << v2 << endl;
   cout << "v1.norm()=" << v1.norm() << "  v2.norm()=" << v2.norm() << endl;
-  assert(v1.norm()==4.0);
+  assert(v1.norm()==4);
   assert(v2.norm()==4.25);
 
-  Vector<Real> v3(v1+v2);
+  Vector<R> v3(1);
   cout << "v3=" << v3 << endl;
-  
-  Vector<Real> v4(v3);
+  Vector<R> v4=v2;
   cout << "v4=" << v4 << endl;
-  Vector<Real> v0;
-  cout << "v0=" << v0 << endl;
-  Vector<Real> v5(1);
-  cout << "v5=" << v5 << endl;
-  v5=v3;
-  cout << "v5=" << v5 << endl;
   cout << endl;
+
+  Vector<F> vf0;
+  v1=Vector<R>("[0.25,-1.5]");
+  v2=Vector<R>("[-0.5,2.25]");
+  vf0=-v1;
+  cout << vf0 << " = -" << v1 << endl;
+  vf0=Vector<F>(v1)+v2;
+  cout << vf0 << " = " << v1 << " + " << v2 << endl;
+  vf0=Vector<F>(v1)-v2;
+  cout << vf0 << " = " << v1 << " - " << v2 << endl;
+  vf0=x*Vector<F>(v2);
+  cout << vf0 << " = " << x << " * " << v2 << endl;
+  vf0=Vector<F>(v1)*x;
+  cout << vf0 << " = " << v1 << " * " << x << endl;
+  vf0=Vector<F>(v1)/x;
+  cout << vf0 << " = " << v1 << " / " << x << endl;
   
-  v2=Vector<Real>("[0.25,-1.5]");
-  v3=Vector<Real>("[-0.5,2.25]");
-  v1=-v2;
-  cout << v1 << " = -" << v2 << endl;
-  v1=v2+v3;
-  cout << v1 << " = " << v2 << " + " << v3 << endl;
-  v1=v2-v3;
-  cout << v1 << " = " << v2 << " - " << v3 << endl;
-  v1=x*v3;
-  cout << v1 << " = " << x << " * " << v3 << endl;
-  v1=v2*x;
-  cout << v1 << " = " << v2 << " * " << x << endl;
-  v1=v2/x;
-  cout << v1 << " = " << v2 << " / " << x << endl;
-  
-  Vector< Interval<Real> > iv1("[[0.99,1.01],[2.25,2.375],[4.0,4.375],[-0.02,0.01]]");
+  Vector< Interval<R> > iv1("[[0.99,1.01],[2.25,2.375],[4.0,4.375],[-0.02,0.01]]");
   cout << "iv1=" << iv1 << endl;
   cout << "iv1.norm()=" << iv1.norm() << endl;
   cout << "iv1.norm().upper()=" << iv1.norm().upper() << endl;
 
-  Vector< Interval<Real> > iv2("[[-1,1],[-1,1]]");
+  Vector< Interval<R> > iv2("[[-1,1],[-1,1]]");
   cout << "iv2=" << iv2 << endl;
-  Vector< Interval<Real> > iv3(3);
+  Vector< Interval<R> > iv3(3);
   cout << "iv3=" << iv3 << endl;
-  iv3=Vector< Interval<Real> >("[[4.25,4.25],[2.375,2.375]]");
+  iv3=Vector< Interval<R> >("[[4.25,4.25],[2.375,2.375]]");
   cout << "iv3=" << iv3 << endl;
-  Interval<Real> ix=Interval<Real>(-2,1);
+  Interval<R> ix=Interval<R>(-2,1);
  
-  Vector< Interval<Real> > iv0;
+  Vector< Interval<R> > iv0;
   cout << "iv0=" << iv0 << endl;
   iv1=iv0;
   //cout << "iv1=" << iv1 << endl;
   iv1=iv2;
   cout << "iv1=" << iv1 << endl;
   cout << endl;
-  
-  //Vector< Interval<Real> > ivv=Interval<Real>(x)*iv1;
-  //Vector<Real> vv=x*v1;
-  
-  boost::numeric::ublas::vector<Real> bv1(3);
-  boost::numeric::ublas::vector<Real> bv2=x*bv1;
-  
-  boost::numeric::ublas::vector< Interval<Real> > biv1(3);
-  boost::numeric::ublas::vector< Interval<Real> > biv2=Interval<Real>(x)*biv1;
-  
-  cout << "Tested ublas" << endl;
-  Vector<Real> tv1(3);
-  Vector<Real> tv2=(x*x)*tv1;
-  cout << "Tested Vector" << endl;
-  Vector< Interval<Real> > tiv1(3);
-  tiv1=ix*tiv1;
-  cout << "Tested IntervalVector" << endl;
-  Vector< Interval<Real> > tiv2=ix*tiv1;
-  cout << "Tested IntervalVector" << endl;
-  Vector< Interval<Real> > tiv3=Interval<Real>(x)*tiv1;
-  cout << "Tested IntervalVector" << endl;
- 
-  
+   
   iv1=iv2+iv3;
   cout << iv1 << " = " << iv2 << " + " << iv3 << endl;
   iv1=iv2-iv3;
@@ -132,12 +122,12 @@ int main() {
   cout << iv1 << " = " << ix << " * " << iv3 << endl;
   iv1=iv2*ix;
   cout << iv1 << " = " << iv2 << " * " << ix << endl;
-  ix=Interval<Real>(1,2);
+  ix=Interval<R>(1,2);
   iv1=iv2/ix;
   cout << iv1 << " = " << iv2 << " / " << ix << endl;
   cout << endl;
    
-  v1=Vector<Real>("[-1.25,0.75]");
+  v1=Vector<R>("[-1.25,0.75]");
   iv0=iv1+v1;
   cout << iv0 << " = " << iv1 << " + " << v1 << endl;
   iv0=v1+iv1;
@@ -158,8 +148,6 @@ int main() {
   cout << iv0 << " = " << iv1 << " / " << x << endl;
   iv0=v1/ix;
   cout << iv0 << " = " << v1 << " / " << ix << endl;
-  
-
 
   return 0;
 }

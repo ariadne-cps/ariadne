@@ -179,6 +179,57 @@ namespace Ariadne {
        return v.read(is);
     }
     
+    
+    
+    template<typename R> inline
+    Vector<R> add_approx(const Vector<R>& u, const Vector<R>& v) {
+      assert(u.size()==v.size());
+      Vector<R> result(u.size());
+      for(size_type i=0; i!=u.size(); ++i) {
+        result(i)=add_approx(u(i),v(i));
+      }
+      return result;
+    }
+      
+    template<typename R> inline
+    Vector<R> sub_approx(const Vector<R>& u, const Vector<R>& v) {
+      assert(u.size()==v.size());
+      Vector<R> result(u.size());
+      for(size_type i=0; i!=u.size(); ++i) {
+        result(i)=sub_approx(u(i),v(i));
+      }
+      return result;
+    }
+      
+    template<typename R> inline
+    Vector<R> mul_approx(const R& s, const Vector<R>& v) {
+      Vector<R> result(v.size());
+      for(size_type i=0; i!=v.size(); ++i) {
+        result(i)=mul_approx(v(i),s);
+      }
+      return result;
+    }
+      
+    template<typename R> inline
+    Vector<R> mul_approx(const Vector<R>& v, const R& s) {
+      Vector<R> result(v.size());
+      for(size_type i=0; i!=v.size(); ++i) {
+        result(i)=mul_approx(v(i),s);
+      }
+      return result;
+    }
+      
+    template<typename R> inline
+    Vector<R> div_approx(const Vector<R>& v, const R& s) {
+      Vector<R> result(v.size());
+      for(size_type i=0; i!=v.size(); ++i) {
+        result(i)=div_approx(v(i),s);
+      }
+      return result;
+    }
+      
+    
+    
     template <typename R>
     inline R inner_product(const Vector<R>& u, const Vector<R>& v) 
     {

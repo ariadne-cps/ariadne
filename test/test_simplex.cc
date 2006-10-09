@@ -25,11 +25,11 @@
 #include <fstream>
 #include <string>
 
-#include "ariadne.h"
 #include "real_typedef.h"
+
+#include "ariadne.h"
 #include "base/exception.h"
 #include "base/utility.h"
-#include "numeric/numerical_types.h"
 #include "geometry/point.h"
 #include "geometry/simplex.h"
 #include "geometry/polyhedron.h"
@@ -40,17 +40,23 @@ using namespace Ariadne;
 using namespace Ariadne::Geometry;
 using namespace std;
 
-int main() {
+template<class R> int test_simplex();
 
+int main() {
+  test_simplex<Real>();
+}
   
-  
-  Point<Real> v0("(-0.25,-0.125)");
-  Point<Real> v1("(1.0,-0.5)");
-  Point<Real> v2("(-0.375,0.75)");
+template<class R> 
+int 
+test_simplex() 
+{
+  Point<R> v0("(-0.25,-0.125)");
+  Point<R> v1("(1.0,-0.5)");
+  Point<R> v2("(-0.375,0.75)");
 
   cout << v0 << " " << v1 << " " << v2 << endl;
   
-  PointList<Real> pl;
+  PointList<R> pl;
   pl.push_back(v0);
   pl.push_back(v1);
   pl.push_back(v2);
@@ -60,14 +66,14 @@ int main() {
   cout << "pl.capacity()=" << pl.capacity() << endl;
   cout << "pl=" << pl << std::endl;
   
-  Simplex<Real> s(pl);
+  Simplex<R> s(pl);
   cout << "s=" << flush << s << endl;
 
-  Point<Real> pt1,pt2,pt3;
+  Point<R> pt1,pt2,pt3;
 
-  pt1=Point<Real>("(17.0,15.0)");
-  pt2=Point<Real>("(-0.25,-0.125)");
-  pt3=Point<Real>("(0.0,0.0)");
+  pt1=Point<R>("(17.0,15.0)");
+  pt2=Point<R>("(-0.25,-0.125)");
+  pt3=Point<R>("(0.0,0.0)");
 
   assert(!s.contains(pt1));
   assert(s.contains(pt2));

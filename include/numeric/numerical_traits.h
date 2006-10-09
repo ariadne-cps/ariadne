@@ -42,10 +42,14 @@ namespace Ariadne {
     /*! \brief Typedef's describing a numerical type. */
     template<typename T> class numerical_traits { };
 
+    template<> class numerical_traits<int> {
+     public:
+      typedef int arithmetic_type;
+    };
+  
     template<> class numerical_traits<double> {
      public:
-      typedef field_tag algebraic_category;
-      typedef double field_extension_type;
+      typedef double arithmetic_type;
     };
   
     //! \name Numerical type description.

@@ -22,18 +22,25 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "numeric/float64.h"
+#include "numeric/mpfloat.h"
+
 #include "numeric/function.h"
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
-#include "python/typedefs.h"
-using namespace Ariadne;
+using namespace Ariadne::Numeric;
 
+template<typename R>
 void export_function() {
-  def("div_approx", div_approx<Real>, "approximate division function (maximum error e)" );
-  def("sqrt_approx", sqrt_approx<Real>, "approximate square root function (maximum error e)" );
-//  def("exp_approx", exp_approx<Real>, "approximate exponential function (maximum error e)" );
-//  def("cos_approx", cos_approx<Real>, "approximate sine function (maximum error e)" );
-//  def("sin_approx", sin_approx<Real>, "approximate cosine function (maximum error e)" );
+  def("div_approx", div_approx<R>, "approximate division function" );
+  def("sqrt_approx", sqrt_approx<R>, "approximate square root function" );
+  def("exp_approx", exp_approx<R>, "approximate exponential function" );
+  def("log_approx", log_approx<R>, "approximate logarithm function" );
+//  def("cos_approx", cos_approx<R>, "approximate sine function" );
+//  def("sin_approx", sin_approx<R>, "approximate cosine function" );
 }
+
+template void export_function<Float64>();
+template void export_function<MPFloat>();

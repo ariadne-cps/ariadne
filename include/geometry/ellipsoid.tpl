@@ -23,6 +23,7 @@
  
 #include <stdexcept>
 
+#include "../numeric/rational.h"
 #include "ellipsoid.h"
 
 #include "../geometry/sphere.h"
@@ -65,11 +66,55 @@ namespace Ariadne {
       : _centre(s.centre()), _bilinear_form(s.dimension(),s.dimension())
     { 
       for(size_type i=0; i!=this->dimension(); ++i) {
-        this->_bilinear_form(i,i) = R(1)/square(s.radius());
+        this->_bilinear_form(i,i) = div_up(R(1),mul_down(s.radius(),s.radius()));
       }
     }
       
       
+    template <typename R>
+    bool Ellipsoid<R>::contains(const state_type& point) const 
+    {
+      LinearAlgebra::Vector<Rational> p=point.position_vector();
+      LinearAlgebra::Vector<Rational> c=this->centre().position_vector();
+      LinearAlgebra::Vector<Rational> d=p-c;
+      LinearAlgebra::Matrix<Rational> A=this->bilinear_form();
+      return inner_product(d,LinearAlgebra::Vector<Rational>(A*d))<=1;
+    }
+    
+    template <typename R>
+    bool Ellipsoid<R>::interior_contains(const state_type& point) const 
+    {
+      LinearAlgebra::Vector<Rational> p=point.position_vector();
+      LinearAlgebra::Vector<Rational> c=this->centre().position_vector();
+      LinearAlgebra::Vector<Rational> d=p-c;
+      LinearAlgebra::Matrix<Rational> A=this->bilinear_form();
+      return inner_product(d,LinearAlgebra::Vector<Rational>(A*d))<1;
+    }
+    
+    template<typename R>
+    inline
+    Geometry::Ellipsoid<R> 
+    scale(const Geometry::Ellipsoid<R>& s, const R& scale_factor) 
+    {
+      const Geometry::Point<R>& centre=s.centre();
+      const LinearAlgebra::Matrix<R>& bilinear_form=s.bilinear_form();
+      
+      Geometry::Point<R> new_centre(s.dimension());
+      LinearAlgebra::Matrix<R> new_bilinear_form(s.dimension(),s.dimension());
+
+      for(size_type i=0; i!=s.dimension(); ++i) {
+        new_centre[i]=mul_approx(scale_factor,centre[i]);
+      }
+
+      for(size_type i=0; i!=s.dimension(); ++i) {
+        for(size_type j=0; j!=s.dimension(); ++j) {
+          new_bilinear_form(i,j)=mul_up(scale_factor,bilinear_form(i,j));
+        }
+      }
+      
+      return Geometry::Ellipsoid<R>(new_centre, new_bilinear_form);
+    }
+
     template <typename R>
     std::ostream&
     operator<<(std::ostream& os, const Ellipsoid<R>& e) 

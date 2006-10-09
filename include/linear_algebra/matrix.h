@@ -54,6 +54,7 @@ namespace Ariadne {
     {
       typedef boost::numeric::ublas::matrix<R> _Base;
       typedef boost::numeric::ublas::matrix<R> _boost_matrix;
+      typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
      public:
       /*! \brief Construct a 0 by 0 matrix. */
       Matrix() : _Base() { }
@@ -124,23 +125,23 @@ namespace Ariadne {
       /*! \brief The operator norm with respect to the supremum norm on vectors. 
        * Equal to the supremum over all rows of the sum of absolute values.
        */
-      R norm() const;
+      F norm() const;
 
       /*! \brief The logarithmic norm. */
-      R log_norm() const;
+      F log_norm() const;
       
       /*! \brief True if the matrix is singular. */
       bool singular() const;
       /*! \brief The determinant of the matrix. */
-      R determinant() const;
+      F determinant() const;
       
       /*! \brief The transposed matrix. */
       Matrix<R> transpose() const;
 
       /*! \brief The inverse of the matrix. */
-      Matrix<R> inverse() const;
+      Matrix<F> inverse() const;
       /*! \brief The solution of the linear equation \f$ Ax=b\f$. */
-      Vector<R> solve(const Vector<R>& b) const;
+      Vector<F> solve(const Vector<R>& b) const;
 
       /*! \brief A pointer to the first element of the array of values. */
       R* begin() { return &(*this)(0,0); }
@@ -225,9 +226,9 @@ namespace Ariadne {
       for(dimension_type i=0; i!=im.number_of_rows(); ++i) {
         R radius=0;
         for(dimension_type j=0; j!=im.number_of_columns(); ++j) {
-          radius+=im(i,j).length();
+          radius=add_up(radius,im(i,j).length());
         }
-        radius /= 2;
+        radius = div_up(radius,static_cast<R>(2));
         result[i]=Interval<R>(-radius,radius);
       }
       return result;
@@ -289,7 +290,7 @@ namespace Ariadne {
  
     template<typename R>
     inline
-    R
+    typename Numeric::numerical_traits<R>::arithmetic_type
     norm(const Matrix<R>& A) 
     {
       return A.norm();
@@ -297,7 +298,7 @@ namespace Ariadne {
     
     template<typename R>
     inline
-    R
+    typename Numeric::numerical_traits<R>::arithmetic_type
     log_norm(const Matrix<R>& A)
     {
       return A.log_norm();
@@ -305,7 +306,7 @@ namespace Ariadne {
 
     template <typename R>
     inline
-    Matrix<R> 
+    Matrix<typename Numeric::numerical_traits<R>::arithmetic_type> 
     inverse(const Matrix<R>& A)
     {
       return A.inverse();
@@ -313,7 +314,7 @@ namespace Ariadne {
     
     template <typename R>
     inline
-    Vector<R> 
+    Vector<typename Numeric::numerical_traits<R>::arithmetic_type> 
     solve(const Matrix<R>& A, const Vector<R>& v)
     {
       return A.solve(v);
@@ -362,7 +363,15 @@ namespace Ariadne {
       return A.read(is); 
     }
 
-        
+    template<>
+    class Matrix<int> : public boost::numeric::ublas::matrix<int> 
+    {
+     public:
+      Matrix()
+        : boost::numeric::ublas::matrix<int>() { }
+      Matrix(const size_type& nr, const size_type& nc)
+        : boost::numeric::ublas::matrix<int>(nr,nc) { }
+    };
              
     
 /*        

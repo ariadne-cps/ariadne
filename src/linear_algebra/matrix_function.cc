@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "linear_algebra/matrix_function.h"
-#include "linear_algebra/matrix_function.tpl"
-
 #include "numeric/float64.h"
 #include "numeric/mpfloat.h"
 #include "numeric/rational.h"
+
+#include "linear_algebra/matrix_function.h"
+#include "linear_algebra/matrix_function.tpl"
 
 namespace Ariadne {
   namespace LinearAlgebra {

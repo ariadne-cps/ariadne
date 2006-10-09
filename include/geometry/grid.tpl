@@ -87,10 +87,10 @@ namespace Ariadne {
       for(dimension_type i=0; i!=r.dimension(); ++i) {
         R lower(r.lower_bound(i));
         R upper(r.upper_bound(i));
-        R step=(upper-lower)/n;
+        R step=div_approx(sub_approx(upper,lower),n);
         _subdivision_coordinates[i].push_back(lower);
         for(size_type j=1; j!=n; ++j) {
-          _subdivision_coordinates[i].push_back(lower+j*step);
+          _subdivision_coordinates[i].push_back(add_approx(lower,mul_approx(j,step)));
         }
         _subdivision_coordinates[i].push_back(upper);
       }
@@ -104,10 +104,10 @@ namespace Ariadne {
       for(dimension_type i=0; i!=r.dimension(); ++i) {
         R lower(r.lower_bound(i));
         R upper(r.upper_bound(i));
-        R step=(upper-lower)/sz[i];
+        R step=div_approx(sub_approx(upper,lower),sz[i]);
         _subdivision_coordinates[i].push_back(lower);
         for(size_type j=1; j!=sz[i]; ++j) {
-          _subdivision_coordinates[i].push_back(lower+j*step);
+          _subdivision_coordinates[i].push_back(add_approx(lower,mul_approx(j,step)));
         }
         _subdivision_coordinates[i].push_back(upper);
       }
@@ -256,7 +256,7 @@ namespace Ariadne {
     {
       array<R> subdivision_lengths(bb.dimension());
       for(dimension_type i=0; i!=bb.dimension(); ++i) {
-        subdivision_lengths[i]=bb[i].length()/s;
+        subdivision_lengths[i]=div_approx(bb[i].length(),s);
       }
       this->_grid_ptr=new RegularGrid<R>(subdivision_lengths);
       GridBlock<R> bounding_box=over_approximation(bb,*_grid_ptr);
@@ -272,28 +272,27 @@ namespace Ariadne {
 	   
       switch(this->_grid_type) {
         case REGULAR:
-	   {
-	     const RegularGrid<R> *this_grid=
-	                               ((RegularGrid<R> *)(this->_grid_ptr));
+	      {
+          const RegularGrid<R> *this_grid=
+                                       ((RegularGrid<R> *)(this->_grid_ptr));
 	     
-             Point<R> l(dim),u(dim);
+          Point<R> l(dim),u(dim);
 	     
-	     for (dimension_type i=0; i< dim; i++) {
-	       l[i]=this_grid->subdivision_length(i)*bounds.lower_bound(i);
-	       u[i]=this_grid->subdivision_length(i)*bounds.upper_bound(i);
-             }
+          for (dimension_type i=0; i< dim; i++) {
+            l[i]=mul_approx(this_grid->subdivision_length(i),bounds.lower_bound(i));
+            u[i]=mul_approx(this_grid->subdivision_length(i),bounds.upper_bound(i));
+          }
              
-	     return Rectangle<R>(l,u);
-	   }
-	case IRREGULAR:
-	  {
-	     const IrregularGrid<R> *this_grid=
+          return Rectangle<R>(l,u);
+        }
+        case IRREGULAR:
+        {
+          const IrregularGrid<R> *this_grid=
 	                               ((IrregularGrid<R> *)(this->_grid_ptr));
-	   
-	     return (Rectangle<R>)(this_grid->bounds());
-	   }
-	default:
-           throw std::runtime_error("FiniteGrid<R>::bounding_box(): not implemented for this grid type.");
+          return (Rectangle<R>)(this_grid->bounds());
+        }
+        default:
+          throw std::runtime_error("FiniteGrid<R>::bounding_box(): not implemented for this grid type.");
       }
            
       return Rectangle<R>(0);

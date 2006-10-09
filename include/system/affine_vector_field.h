@@ -43,6 +43,7 @@ namespace Ariadne {
     template <typename R>
     class AffineVectorField : public VectorField<R> 
     {
+      typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
      public:
       /*! \brief The real number type. */
       typedef R real_type;
@@ -63,12 +64,12 @@ namespace Ariadne {
       AffineVectorField(const LinearAlgebra::Matrix<R> &A, const LinearAlgebra::Vector<R> &b) : _A(A), _b(b) { }
     
       /*! \brief An approximation to the vector field at a point. */
-      LinearAlgebra::Vector<R> operator() (const Geometry::Point<R>& s) const;
+      LinearAlgebra::Vector<F> operator() (const Geometry::Point<R>& s) const;
       /*! \brief An over-approximation to the vector field over a rectangle. */
       LinearAlgebra::Vector< Interval<R> > operator() (const Geometry::Rectangle<R>& r) const;
     
       /*! \brief An approximation to the Jacobian derivative at a point. */
-      LinearAlgebra::Matrix<R> derivative(const Geometry::Point<R>& x) const;
+      LinearAlgebra::Matrix<F> derivative(const Geometry::Point<R>& x) const;
       /*! \brief An over-approximation to the Jacobian derivative over a rectangle. */
       LinearAlgebra::Matrix< Interval<R> > derivative(const Geometry::Rectangle<R>& r) const;
       
@@ -96,14 +97,14 @@ namespace Ariadne {
   namespace LinearAlgebra {
     /*! \brief Compute \f$e^{Ah}\f$. */
     template <typename R>
-    Matrix<R> 
+    Matrix<typename Numeric::numerical_traits<R>::arithmetic_type> 
     exp_Ah_approx(const Matrix<R>& A, 
                   const R& h, 
                   const R& e); 
 
     /*! \brief Compute \f$A^{-1}(e^{Ah}-I) = h\sum_{n=0}^{\infty} \frac{{(Ah)}^{n}}{(n+1)!}\f$. */
-    template <typename R> 
-    Matrix<R> 
+    template <typename R>
+    Matrix<typename Numeric::numerical_traits<R>::arithmetic_type> 
     exp_Ah_sub_id_div_A_approx(const Matrix<R>& A, 
                                const R& h, 
                                const R& e); 

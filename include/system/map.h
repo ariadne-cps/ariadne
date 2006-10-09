@@ -42,33 +42,29 @@ namespace Ariadne {
      */
     template<typename R>
     class Map {
+      typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
      public:
       /*! \brief The real number type. */
       typedef R real_type;
       /*! \brief The type of denotable state the system acts on. */
       typedef Geometry::Point<R> state_type;
+      /*! \brief The type obtained by applying the map to a state. */
+      typedef Geometry::Point<F> result_type;
       
       /*! \brief Virtual destructor. */
       virtual ~Map();
       
-      /*! \brief The image of a point, if this can be computed exactly. */
-      virtual Geometry::Point<R> operator() (const Geometry::Point<R>& x) const;
+      /*! \brief An over-approximation to the image of a point. */
+      virtual Geometry::Point<F> operator() (const Geometry::Point<R>& pt) const;
       /*! \brief An over-approximation to the image of a rectangle. */
       virtual Geometry::Rectangle<R> operator() (const Geometry::Rectangle<R>& A) const;
-      /*! \brief An over-approximation to the image of a parallelotope. */
-      virtual Geometry::Parallelotope<R> operator() (const Geometry::Parallelotope<R>& A) const;
-      /*! \brief An over-approximation to the image of a zonotope. */
-      virtual Geometry::Zonotope<R> operator() (const Geometry::Zonotope<R>& A) const;
-      /*! \brief An over-approximation to the image of a simplex. */
-      virtual Geometry::Simplex<R> operator() (const Geometry::Simplex<R>& A) const;
-      /*! \brief An over-approximation to the image of a polytope. */
-      virtual Geometry::Polytope<R> operator() (const Geometry::Polytope<R>& A) const;
-    
-      /*! \brief The derivative at a point, if this can be computed exactly. */
-      virtual LinearAlgebra::Matrix<R> derivative(const Geometry::Point<R>& r) const;
-      /*! \brief The derivatives over a rectangle. */
-      virtual LinearAlgebra::Matrix< Interval<R> > derivative(const Geometry::Rectangle<R>& r) const;
+      /*! \brief The Jacobian derivative matrix over a rectangle. */
+      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<R>& r) const;
+      /*! \brief The Jacobian derivative matrix over a rectangle. */
+      virtual LinearAlgebra::Matrix< Interval<R> > jacobian(const Geometry::Rectangle<R>& r) const;
         
+      /*! \brief The dimension of the domain space. */
+      virtual size_type smoothness() const;
       /*! \brief The dimension of the domain space. */
       virtual dimension_type argument_dimension() const = 0;
       /*! \brief The dimension of the range space. */

@@ -26,61 +26,56 @@
 #include "numeric/interval.h"
 
 #include <boost/python.hpp>
-
-#include "python/typedefs.h"
+#include "python/python_utilities.h"
 
 using namespace boost::python;
 using namespace Ariadne;
+using Numeric::Interval;
 
-typedef RInterval (*IntervalFunc) (const RInterval&);
-typedef RInterval (*IntervalBinFunc) (const RInterval&, const RInterval&);
+template<typename R> inline Interval<R> neginvl(const Interval<R>& i) { return -i; }
+template<typename R> inline Interval<R> addinvl(const Interval<R>& i, const Interval<R>& j) { return i+j; }
+template<typename R> inline Interval<R> subinvl(const Interval<R>& i, const Interval<R>& j) { return i-j; }
+template<typename R> inline Interval<R> mulinvl(const Interval<R>& i, const Interval<R>& j) { return i*j; }
+template<typename R> inline Interval<R> divinvl(const Interval<R>& i, const Interval<R>& j) { return i/j; }
 
-/* FIXME: Do these divisions */
-inline RInterval div_ii(const RInterval& r, const RInterval& i) { assert(false); }
-inline RInterval div_ri(const Real& r, const RInterval& i) { assert(false); }
+template <typename R1, typename R2>
+inline Interval<R1> addreal(const Interval<R1>& i, const R2& r) { return i+(R1)r; }
+template <typename R1, typename R2>
+inline Interval<R1> subreal(const Interval<R1>& i, const R2& r) { return i-(R1)r; }
+template <typename R1, typename R2>
+inline Interval<R1> mulreal(const Interval<R1>& i, const R2& r) { return i*(R1)r; }
+template <typename R1, typename R2>
+inline Interval<R1> divreal(const Interval<R1>& i, const R2& r) { return i/(R1)r; }
 
-inline RInterval neginvl(const RInterval& i) { return -i; }
-inline RInterval addinvl(const RInterval& i, const RInterval& j) { return i+j; }
-inline RInterval subinvl(const RInterval& i, const RInterval& j) { return i-j; }
-inline RInterval mulinvl(const RInterval& i, const RInterval& j) { return i*j; }
-
-template <typename R>
-inline RInterval addreal(const RInterval& i, const R& r) { return i+(Real)r; }
-template <typename R>
-inline RInterval subreal(const RInterval& i, const R& r) { return i-(Real)r; }
-template <typename R>
-inline RInterval mulreal(const RInterval& i, const R& r) { return i*(Real)r; }
-template <typename R>
-inline RInterval div_ir(const RInterval& i, const R& r) { return i/(Real)r; }
-
+template<typename R>
 void export_interval()
 {
-  class_< RInterval >("Interval")
+  class_< Interval<R> >(python_name<R>("Interval").c_str())
     .def(init<int,int>())
     .def(init<double,double>())
-    .def(init<Real,Real>())
-//    .def(init<double>())
-    .def(init<Real>())
-    .def("__neg__", &neginvl)
-    .def("__add__", &addinvl) 
-    .def("__sub__", &subinvl) 
-    .def("__mul__", &mulinvl) 
-    .def("__div__",&div_ii)  // __div__
-    .def("__add__", &addreal<int>) 
-    .def("__sub__", &subreal<int>) 
-    .def("__mul__", &mulreal<int>) 
-    .def("__div__",&div_ir<int>)
-    .def("__add__", &addreal<float>) 
-    .def("__sub__", &subreal<float>) 
-    .def("__mul__", &mulreal<float>) 
-    .def("__div__",&div_ir<float>)
-    .def("__add__", &addreal<Real>) 
-    .def("__sub__", &subreal<Real>) 
-    .def("__mul__", &mulreal<Real>) 
-    .def("__div__",&div_ir<Real>)
-    .def("__div__",&div_ri)  // __div__
-    .def("lower", &RInterval::lower, return_value_policy<copy_const_reference>())
-    .def("upper", &RInterval::upper, return_value_policy<copy_const_reference>())
+    .def(init<R,R>())
+    .def(init<int>())
+    .def(init<double>())
+    .def(init<R>())
+    .def("__neg__", &neginvl<R>)
+    .def("__add__", &addinvl<R>) 
+    .def("__sub__", &subinvl<R>) 
+    .def("__mul__", &mulinvl<R>) 
+    .def("__div__", &divinvl<R>)  // __div__
+    .def("__add__", &addreal<R,int>) 
+    .def("__sub__", &subreal<R,int>) 
+    .def("__mul__", &mulreal<R,int>) 
+    .def("__div__", &divreal<R,int>)
+    .def("__add__", &addreal<R,float>) 
+    .def("__sub__", &subreal<R,float>) 
+    .def("__mul__", &mulreal<R,float>) 
+    .def("__div__", &divreal<R,float>)
+    .def("__add__", &addreal<R,R>) 
+    .def("__sub__", &subreal<R,R>) 
+    .def("__mul__", &mulreal<R,R>) 
+    .def("__div__", &divreal<R,R>)
+    .def("lower", &Interval<R>::lower, return_value_policy<copy_const_reference>())
+    .def("upper", &Interval<R>::upper, return_value_policy<copy_const_reference>())
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 

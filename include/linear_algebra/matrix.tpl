@@ -68,29 +68,30 @@ namespace Ariadne {
     }
 
     template<typename R>
-    R
+    typename Matrix<R>::F
     Matrix<R>::norm() const
     {
+      //std::cerr << "Matrix<" << name<R>() << ">::norm() const\n";
       const Matrix<R>& A=*this;
-      R result=0;
+      F result=0;
       for(size_type i=0; i!=A.number_of_rows(); ++i) {
-        R row_sum=0;
+        F row_sum=0;
         for(size_type j=0; j!=A.number_of_columns(); ++j) {
           row_sum+=abs(A(i,j));
         }
-        result=max(result,row_sum);
+        result=Numeric::max(result,row_sum);
       }
       return result;
     }
 
     template<typename R>
-    R
+    typename Matrix<R>::F
     Matrix<R>::log_norm() const
     {
       const Matrix<R>& A=*this;
-      R result=0;
+      F result=0;
       for(size_type i=0; i!=A.number_of_rows(); ++i) {
-        R row_sum=A(i,i);
+        F row_sum=A(i,i);
         for(size_type j=0; j!=A.number_of_columns(); ++j) {
           if(i!=j) {
             row_sum+=abs(A(i,j));
@@ -122,14 +123,14 @@ namespace Ariadne {
     template <typename R>
     bool
     Matrix<R>::singular() const {
-      return LUMatrix<R>(*this).singular();
+      return LUMatrix<F>(*this).singular();
     }
 
     template <typename R>
-    R
+    typename Matrix<R>::F
     Matrix<R>::determinant() const
     {
-      return LUMatrix<R>(*this).determinant();
+      return LUMatrix<F>(*this).determinant();
     }
 
     template<typename R>
@@ -151,15 +152,15 @@ namespace Ariadne {
 
 
     template <typename R>
-    Matrix<R>
+    Matrix<typename Matrix<R>::F>
     Matrix<R>::inverse() const
     {
-      return LUMatrix<R>(*this).inverse();
+      return LUMatrix<F>(*this).inverse();
     }
 
 
     template <typename R>
-    Vector<R>
+    Vector<typename Matrix<R>::F>
     Matrix<R>::solve(const Vector<R>& v) const
     {
       return this->inverse()*v;

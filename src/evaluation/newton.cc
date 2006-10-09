@@ -24,10 +24,10 @@
 
 #define DEBUG
 
+#include "real_typedef.h"
+
 #include "evaluation/newton.h"
 #include "evaluation/newton.tpl"
-
-#include "real_typedef.h"
 
 namespace Ariadne {
   namespace Evaluation {

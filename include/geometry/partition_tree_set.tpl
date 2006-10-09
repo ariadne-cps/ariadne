@@ -53,18 +53,18 @@ namespace Ariadne {
     R
     PartitionTreeCell<R>::lower_bound(dimension_type i) const 
     {
-      return (_unit_box.lower_bound(i)+
-               (_subdivision_cell.lower_bound(i)*
-                 (_unit_box.upper_bound(i)-_unit_box.lower_bound(i))));
+      return add_approx(_unit_box.lower_bound(i),
+               mul_approx(_subdivision_cell.lower_bound(i),
+                 sub_approx(_unit_box.upper_bound(i),_unit_box.lower_bound(i))));
     }
     
     template<typename R>
     R
     PartitionTreeCell<R>::upper_bound(dimension_type i) const 
     {
-      return (_unit_box.lower_bound(i)+
-               (_subdivision_cell.upper_bound(i)*
-                 (_unit_box.upper_bound(i)-_unit_box.lower_bound(i))));
+      return add_approx(_unit_box.lower_bound(i),
+               mul_approx(_subdivision_cell.upper_bound(i),
+                 sub_approx(_unit_box.upper_bound(i),_unit_box.lower_bound(i))));
     }
     
     

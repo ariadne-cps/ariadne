@@ -22,8 +22,34 @@
  */
 
 #include "numeric/float64.h"
+#include "numeric/interval.h"
 
 namespace Ariadne {
   namespace Numeric {
+    
+    Interval<Float64> 
+    operator+(const Float64& x1, const Float64& x2) 
+    {
+      return Interval<Float64>(add_down(x1,x2),add_up(x1,x2));
+    }
+    
+    Interval<Float64> 
+    operator-(const Float64& x1, const Float64& x2) 
+    {
+      return Interval<Float64>(sub_down(x1,x2),sub_up(x1,x2));
+    }
+
+    Interval<Float64> 
+    operator*(const Float64& x1, const Float64& x2) 
+    {
+      return Interval<Float64>(mul_down(x1,x2),mul_up(x1,x2));
+    }
+
+    Interval<Float64> 
+    operator/(const Float64& x1, const Float64& x2) 
+    {
+      return Interval<Float64>(div_down(x1,x2),div_up(x1,x2));
+    }
+
   } 
 }

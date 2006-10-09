@@ -185,7 +185,7 @@ namespace Ariadne {
     };
 
 
-    template <typename R>
+    template <typename R> 
     inline
     LinearAlgebra::Vector<R>
     operator-(const Point<R>& s1, const Point<R>& s2)
@@ -207,6 +207,30 @@ namespace Ariadne {
     operator-(const Point<R>& s, const LinearAlgebra::Vector<R>& v)
     {
       return Point<R>(s.position_vector() - v);
+    }
+
+    template <typename R>
+    inline
+    LinearAlgebra::Vector<R>
+    sub_approx(const Point<R>& s1, const Point<R>& s2)
+    {
+      return sub_approx(s1.position_vector(),s2.position_vector());
+    }
+
+    template <typename R>
+    inline
+    Point<R> 
+    add_approx(const Point<R>& s, const LinearAlgebra::Vector<R>& v)
+    {
+      return Point<R>(add_approx(s.position_vector(),v));
+    }
+
+    template <typename R>
+    inline
+    Point<R> 
+    sub_approx(const Point<R>& s, const LinearAlgebra::Vector<R>& v)
+    {
+      return Point<R>(sub_approx(s.position_vector(),v));
     }
 
     template <typename R>

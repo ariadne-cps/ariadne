@@ -23,13 +23,20 @@
 
 #include <boost/python.hpp>
 
+#include "numeric/float64.h"
+#include "numeric/mpfloat.h"
+#include "numeric/rational.h"
+
+using namespace Ariadne::Numeric;
+
 void export_numeric();
-void export_function();
-void export_interval();
+template<typename R> void export_function();
+template<typename R> void export_interval();
 
 BOOST_PYTHON_MODULE(numeric)
 {
   export_numeric();
-  export_function();
-  export_interval();
+  export_function<MPFloat>();
+  export_interval<Float64>();
+  export_interval<MPFloat>();
 }

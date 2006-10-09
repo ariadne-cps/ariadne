@@ -23,8 +23,6 @@
  
 //#define DEBUG
 
-#include "integrator.h"
-
 #include <iosfwd>
 #include <string>
 #include <sstream>
@@ -39,7 +37,8 @@
 #include "../declarations.h"
 
 #include "../base/array.h"
-#include "../numeric/arithmetic.h"
+
+#include "../numeric/rational.h"
 #include "../numeric/interval.h"
 
 #include "../linear_algebra/vector.h"
@@ -55,11 +54,12 @@
 #include "../system/vector_field.h"
 #include "../system/affine_vector_field.h"
 
+#include "integrator.h"
+
 
 namespace Ariadne {
   namespace Evaluation {
 
-      
     template<typename R, typename BST>
     struct pair_first_less {
       bool operator()(const std::pair<R,BST>& ts1, const std::pair<R,BST>& ts2) {
@@ -73,7 +73,7 @@ namespace Ariadne {
     class IntegrationStepBound {
      public:
       /*!\ brief Constructor. */
-      IntegrationStepBound(const Geometry::Rectangle<R>& bound, const R& integration_time) 
+      IntegrationStepBound(const Geometry::Rectangle<R>& bound, const time_type& integration_time) 
         : _bound(bound), _integration_time(integration_time) { }
       /*! The spacial bound for the integrations step. */
       const Geometry::Rectangle<R>& bound() const { return _bound; }
@@ -91,7 +91,7 @@ namespace Ariadne {
 
 
     template<typename R>
-    Integrator<R>::Integrator(const R& maximum_step_size, const R& lock_to_grid_time, const R& maximum_basic_set_radius)
+    Integrator<R>::Integrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_basic_set_radius)
       : _maximum_step_size(maximum_step_size),
         _lock_to_grid_time(lock_to_grid_time),
         _maximum_basic_set_radius(maximum_basic_set_radius)
@@ -111,7 +111,7 @@ namespace Ariadne {
     }
 
     template<typename R>
-    C1Integrator<R>::C1Integrator(const R& maximum_step_size, const R& lock_to_grid_time, const R& maximum_basic_set_radius)
+    C1Integrator<R>::C1Integrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_basic_set_radius)
       : Integrator<R>(maximum_step_size,lock_to_grid_time,maximum_basic_set_radius)
     {
     }
@@ -128,13 +128,13 @@ namespace Ariadne {
 
 
     template<typename R>
-    R Integrator<R>::minimum_step_size() const
+    time_type Integrator<R>::minimum_step_size() const
     {
       return this->_minimum_step_size;
     }
 
     template<typename R>
-    R Integrator<R>::maximum_step_size() const
+    time_type Integrator<R>::maximum_step_size() const
     {
       return this->_maximum_step_size;
     }
@@ -152,7 +152,7 @@ namespace Ariadne {
     }
 
     template<typename R>
-    R Integrator<R>::lock_to_grid_time() const
+    time_type Integrator<R>::lock_to_grid_time() const
     {
       return this->_lock_to_grid_time;
     }
@@ -166,7 +166,7 @@ namespace Ariadne {
     Integrator<R>::check_flow_bounds(const System::VectorField<R>& vf,
                                      const Geometry::Rectangle<R>& r,
                                      const Geometry::Rectangle<R>& b,
-                                     const R& h) const
+                                     const time_type& h) const
     {
       using namespace Geometry;
       return subset(r+Interval<R>(0,h)*vf(b),b);
@@ -177,7 +177,7 @@ namespace Ariadne {
     Geometry::Rectangle<R>
     Integrator<R>::estimate_flow_bounds(const System::VectorField<R>& vf,
                                         const Geometry::Rectangle<R>& r,
-                                        const R& h,
+                                        const time_type& h,
                                         const unsigned int& maximum_iterations) const
     {
 #ifdef DEBUG
@@ -189,22 +189,22 @@ namespace Ariadne {
       typedef typename numerical_traits<R>::field_extension_type F;
       uint iteration=0;
       R multiplier=1.125;
-      F t=h;
+      time_type t=h;
       Rectangle<R> reach(vf.dimension());
       Rectangle<R> bounds(vf.dimension());
       reach=r;
       
       while(t>0) {
-        bounds=reach+Interval<R>(0,multiplier*h)*vf(reach);
+        bounds=reach+multiplier*Interval<R>(R(0),h)*vf(reach);
         LinearAlgebra::Vector< Interval<R> > df=vf(bounds);
         
-        F dt=t;
+        time_type dt=t;
         for(dimension_type i=0; i!=vf.dimension(); ++i) {
           if(df(i).upper()>0) {
-            dt=min(dt,F((bounds[i].upper()-reach[i].upper())/df(i).upper()));
+            dt=min(dt,time_type(div_up(sub_up(bounds[i].upper(),reach[i].upper()),df(i).upper())));
           }
           if(df(i).lower()<0) {
-            dt=min(dt,F((bounds[i].lower()-reach[i].lower())/df(i).lower()));
+            dt=min(dt,time_type(div_up(sub_up(bounds[i].lower(),reach[i].lower()),df(i).lower())));
           }
         }
         reach=bounds;
@@ -225,7 +225,7 @@ namespace Ariadne {
     Geometry::Rectangle<R>
     Integrator<R>::estimate_flow_bounds(const System::VectorField<R>& vf,
                                         const Geometry::Rectangle<R>& r,
-                                        R& h) const
+                                        time_type& h) const
     {
 #ifdef DEBUG
       std::cerr << "estimate_flow_bounds" << std::endl;
@@ -256,7 +256,7 @@ namespace Ariadne {
     Integrator<R>::refine_flow_bounds(const System::VectorField<R>& vector_field,
                                       const Geometry::Rectangle<R>& initial_set,
                                       const Geometry::Rectangle<R>& estimated_bounds,
-                                      const R& h) const
+                                      const time_type& step_size) const
     {
       using namespace System;
       using namespace Geometry;
@@ -264,16 +264,17 @@ namespace Ariadne {
       const VectorField<R>& vf=vector_field;
       Rectangle<R> rx=initial_set;
       Rectangle<R> b=estimated_bounds;
+      Interval<R> h=step_size;
       
-      Rectangle<R> xb=rx+Interval<R>(0,h)*vf(b);
-      Rectangle<R> xxb=rx+Interval<R>(0,h)*vf(xb);
+      Rectangle<R> xb=rx+Interval<R>(0,step_size)*vf(b);
+      Rectangle<R> xxb=rx+Interval<R>(0,step_size)*vf(xb);
 #ifdef DEBUG
       std::cerr << "new bounds " << xxb << "," << xb << " vs old bounds " << b << "  " << subset(xb,b) << std::endl;
 #endif
-      Vector< Interval<R> > ddphi=vf.derivative(xb)*vf(xb);
+      Vector< Interval<R> > ddphi=vf.jacobian(xb)*vf(xb);
       Vector< Interval<R> > dfx=vf(rx);
-      Vector< Interval<R> > hdfx=(h*dfx);
-      Vector< Interval<R> > hhddphi=(R(h*h/2)*ddphi);
+      Vector< Interval<R> > hdfx=h*dfx;
+      Vector< Interval<R> > hhddphi=(h*h/R(2))*ddphi;
       Vector< Interval<R> > dx=hdfx+hhddphi;
       return rx+dx;
     }
@@ -289,7 +290,7 @@ namespace Ariadne {
     BS<R> 
     Integrator<R>::integrate_basic_set(const System::VectorField<R>& vector_field, 
                                        const BS<R>& initial_set, 
-                                       const R& time) const
+                                       const time_type& time) const
     {
       if(time==0) { 
         return initial_set;
@@ -297,13 +298,13 @@ namespace Ariadne {
       
       const System::VectorField<R>& vf=vector_field;
       BS<R> r(initial_set);
-      R t=time;
-      R h=this->maximum_step_size();
+      time_type t=time;
+      time_type h=this->maximum_step_size();
       while(t>0) {
         h=min(t,h);
         r=this->integration_step(vf,r,h);
         t=t-h;
-        h=min(R(2*h),this->maximum_step_size());
+        h=min(time_type(2*h),this->maximum_step_size());
       }
       return r;
     }
@@ -313,28 +314,28 @@ namespace Ariadne {
     Geometry::ListSet<R,BS> 
     Integrator<R>::integrate_list_set(const System::VectorField<R>& vector_field, 
                                       const Geometry::ListSet<R,BS>& initial_set, 
-                                      const R& time) const
+                                      const time_type& time) const
     {
       if(time==0) { 
         return initial_set;
       }
 
       const System::VectorField<R>& vf=vector_field;
-      R step_size=this->maximum_step_size();
+      time_type step_size=this->maximum_step_size();
       R maximum_set_radius=this->maximum_basic_set_radius();
 #ifdef DEBUG
         std::cerr << "step_size=" << step_size << "  maximum_set_radius=" << maximum_set_radius << std::endl;
 #endif
       
-      R t=time;
-      R h=step_size;
+      time_type t=time;
+      time_type h=step_size;
       BS<R> bs(initial_set.dimension());
       
       std::multiset< std::pair<R,BS<R> >, pair_first_less<R,BS<R> > > working_sets;
       Geometry::ListSet<R,BS> final_set(initial_set.dimension());
       
       typedef typename Geometry::ListSet<R,BS>::const_iterator list_set_const_iterator;
-      typedef std::pair< R,BS<R> > timed_set;
+      typedef std::pair< time_type,BS<R> > timed_set;
       for(list_set_const_iterator bs_iter=initial_set.begin(); bs_iter!=initial_set.end(); ++bs_iter) {
         working_sets.insert(timed_set(time,*bs_iter));
       }
@@ -367,7 +368,7 @@ namespace Ariadne {
             h=min(t,h);
             bs=this->integration_step(vf,bs,h);
             t=t-h;
-            h=min(R(2*h),step_size);
+            h=min(time_type(2*h),step_size);
           } while(t!=0 && bs.radius()<=maximum_set_radius);
           if(t==0) {
             final_set.adjoin(bs);
@@ -384,7 +385,7 @@ namespace Ariadne {
     Geometry::Rectangle<R>
     C0Integrator<R>::integrate(const System::VectorField<R>& vector_field,
                                const Geometry::Rectangle<R>& initial_set,
-                               const R& time) const
+                               const time_type& time) const
     {
      return this->integrate_basic_set(vector_field,initial_set,time);
     }
@@ -393,7 +394,7 @@ namespace Ariadne {
     Geometry::ListSet<R,Geometry::Rectangle>
     C0Integrator<R>::integrate(const System::VectorField<R>& vector_field,
                                const Geometry::ListSet<R,Geometry::Rectangle>& initial_set,
-                               const R& time) const
+                               const time_type& time) const
     {
      return this->integrate_list_set(vector_field,initial_set,time);
     }
@@ -402,7 +403,7 @@ namespace Ariadne {
     Geometry::ListSet<R,Geometry::Rectangle>
     C0Integrator<R>::reach(const System::VectorField<R>& vector_field,
                            const Geometry::ListSet<R,Geometry::Rectangle>& initial_set,
-                           const R& time) const
+                           const time_type& time) const
     {
       assert(false);
     }
@@ -411,7 +412,7 @@ namespace Ariadne {
     Geometry::Parallelotope<R>
     C0Integrator<R>::integration_step(const System::VectorField<R>& vector_field, 
                                       const Geometry::Parallelotope<R>& initial_set, 
-                                      R& time) const
+                                      time_type& time) const
     {
       return Geometry::Parallelotope<R>(this->integration_step(vector_field,initial_set.bounding_box(),time));
     }
@@ -424,7 +425,7 @@ namespace Ariadne {
     Geometry::Rectangle<R> 
     C1Integrator<R>::integration_step(const System::VectorField<R>& vf,
                                       const Geometry::Rectangle<R>& is,
-                                      R& h) const 
+                                      time_type& h) const 
     {
       return this->integration_step(vf,Geometry::Parallelotope<R>(is),h).bounding_box();
     }
@@ -433,7 +434,7 @@ namespace Ariadne {
     Geometry::Rectangle<R> 
     C1Integrator<R>::reachability_step(const System::VectorField<R>& vf,
                                        const Geometry::Rectangle<R>& is,
-                                       R& h) const 
+                                       time_type& h) const 
     {
       return this->reachability_step(vf,Geometry::Parallelotope<R>(is),h).bounding_box();
     }
@@ -442,7 +443,7 @@ namespace Ariadne {
     Geometry::Zonotope<R> 
     C1Integrator<R>::reachability_step(const System::VectorField<R>& vf,
                                        const Geometry::Parallelotope<R>& is,
-                                       R& h) const 
+                                       time_type& h) const 
     {
       return this->reachability_step(vf,Geometry::Zonotope<R>(is),h);
     }
@@ -453,7 +454,7 @@ namespace Ariadne {
     Geometry::Rectangle<R>
     C1Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
                                const Geometry::Rectangle<R>& initial_set, 
-                               const R& time) const
+                               const time_type& time) const
     {
       return this->integrate_basic_set(vector_field,initial_set,time);
     }
@@ -462,7 +463,7 @@ namespace Ariadne {
     Geometry::Parallelotope<R>
     C1Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
                                const Geometry::Parallelotope<R>& initial_set, 
-                               const R& time) const
+                               const time_type& time) const
     {
       return this->integrate_basic_set(vector_field,initial_set,time);
     }
@@ -471,7 +472,7 @@ namespace Ariadne {
     Geometry::ListSet<R,Geometry::Parallelotope> 
     C1Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
                                const Geometry::ListSet<R,Geometry::Parallelotope>& initial_set, 
-                               const R& time) const
+                               const time_type& time) const
     {
       return this->integrate_list_set(vector_field,initial_set,time);
     }
@@ -480,7 +481,7 @@ namespace Ariadne {
     Geometry::Zonotope<R>
     C1Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
                                const Geometry::Zonotope<R>& initial_set, 
-                               const R& time) const
+                               const time_type& time) const
     {
       return this->integrate_basic_set(vector_field,initial_set,time);
     }
@@ -489,7 +490,7 @@ namespace Ariadne {
     Geometry::ListSet<R,Geometry::Zonotope> 
     C1Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
                                const Geometry::ListSet<R,Geometry::Zonotope>& initial_set, 
-                               const R& time) const
+                               const time_type& time) const
     {
       return this->integrate_list_set(vector_field,initial_set,time);
     }
@@ -499,7 +500,7 @@ namespace Ariadne {
     C1Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
                                const Geometry::GridMaskSet<R>& initial_set,
                                const Geometry::GridMaskSet<R>& bounding_set,
-                               const R& time) const
+                               const time_type& time) const
     {
       assert(initial_set.grid()==bounding_set.grid());
       using namespace System;
@@ -510,7 +511,7 @@ namespace Ariadne {
         return initial_set;
       }
       
-      R step_size=this->maximum_step_size();
+      time_type step_size=this->maximum_step_size();
       
       const Geometry::Grid<R>& g(initial_set.grid());
       Combinatoric::LatticeBlock lb=bounding_set.block();
@@ -518,12 +519,12 @@ namespace Ariadne {
       
       Geometry::GridMaskSet<R> result(bounding_set.grid(),bounding_set.block());
       
-      R t=time;
-      R h=step_size;
+      time_type t=time;
+      time_type h=step_size;
       
       //bb=regular_intersection(bb,bounding_box());
       
-      R spacial_tolerance=2.0;
+      R spacial_tolerance=2;
       
       ListSet<R,Parallelotope> start_set;
       ListSet<R,Parallelotope> finish_set;
@@ -576,17 +577,17 @@ namespace Ariadne {
     Geometry::ListSet<R,Geometry::Parallelotope> 
     C1Integrator<R>::reach(const System::VectorField<R>& vector_field, 
                            const Geometry::ListSet<R,Geometry::Parallelotope>& initial_set, 
-                           const R& time) const
+                           const time_type& time) const
     {
       const System::VectorField<R>& vf=vector_field;
-      R step_size=this->maximum_step_size();
+      time_type step_size=this->maximum_step_size();
       R maximum_set_radius=this->maximum_basic_set_radius();
 #ifdef DEBUG
         std::cerr << "step_size=" << step_size << "  maximum_set_radius()=" << maximum_set_radius << std::endl;
 #endif
       
-      R t=time;
-      R h=step_size;
+      time_type t=time;
+      time_type h=step_size;
       Geometry::Parallelotope<R> bs(initial_set.dimension());
       Geometry::Parallelotope<R> rs(initial_set.dimension());
       
@@ -594,14 +595,14 @@ namespace Ariadne {
       Geometry::ListSet< R,Geometry::Parallelotope > reach_set(initial_set.dimension());
       
       typedef typename Geometry::ListSet<R,Geometry::Parallelotope>::const_iterator list_set_const_iterator;
-      typedef std::pair< R,Geometry::Parallelotope<R> > timed_set;
+      typedef std::pair< time_type,Geometry::Parallelotope<R> > timed_set;
       for(list_set_const_iterator bs_iter=initial_set.begin(); bs_iter!=initial_set.end(); ++bs_iter) {
         working_sets.insert(timed_set(time,*bs_iter));
       }
       
       while(!working_sets.empty()) {
         
-	timed_set ts=*working_sets.begin();
+        timed_set ts=*working_sets.begin();
         working_sets.erase(working_sets.begin());
         t=ts.first;
         bs=ts.second;
@@ -630,7 +631,7 @@ namespace Ariadne {
             
             bs=integration_step(vf,bs,h);
             t=t-h;
-            h=min(R(2*h),step_size);
+            h=min(time_type(2*h),step_size);
           } while(t!=0 && bs.radius()<=maximum_set_radius);
           if(t!=0) {
             working_sets.insert(timed_set(t,bs));
@@ -646,18 +647,18 @@ namespace Ariadne {
     Geometry::ListSet<R,Geometry::Zonotope> 
     C1Integrator<R>::reach(const System::VectorField<R>& vector_field, 
                            const Geometry::ListSet<R,Geometry::Zonotope>& initial_set, 
-                           const R& time) const
+                           const time_type& time) const
     {
       const System::VectorField<R>& vf=vector_field;
-      R step_size=this->maximum_step_size();
+      time_type step_size=this->maximum_step_size();
       R maximum_set_radius=this->maximum_basic_set_radius();
 #ifdef DEBUG
-        std::cerr << "C1Integrator<R>::reach(const VectorField<R>& vector_field,const Geometry::ListSet<R,Geometry::Zonotope>& initial_set, const R& time)" << std::endl;
+        std::cerr << "C1Integrator<R>::reach(const VectorField<R>& vector_field,const Geometry::ListSet<R,Geometry::Zonotope>& initial_set, const time_type& time)" << std::endl;
         std::cerr << "step_size=" << step_size << "  maximum_set_radius()=" << maximum_set_radius << std::endl<<std::flush;
 #endif
       
-      R t=time;
-      R h=step_size;
+      time_type t=time;
+      time_type h=step_size;
       Geometry::Zonotope<R> bs(initial_set.dimension(),initial_set.dimension());
       Geometry::Zonotope<R> rs(initial_set.dimension(),initial_set.dimension()+1);
       
@@ -665,7 +666,7 @@ namespace Ariadne {
       Geometry::ListSet<R,Geometry::Zonotope> reach_set(initial_set.dimension());
       
       typedef typename Geometry::ListSet<R,Geometry::Zonotope>::const_iterator list_set_const_iterator;
-      typedef std::pair< R,Geometry::Zonotope<R> > timed_set;
+      typedef std::pair< time_type,Geometry::Zonotope<R> > timed_set;
       for(list_set_const_iterator bs_iter=initial_set.begin(); bs_iter!=initial_set.end(); ++bs_iter) {
         working_sets.insert(timed_set(time,*bs_iter));
       }
@@ -704,7 +705,7 @@ namespace Ariadne {
             
             bs=integration_step(vf,bs,h);
             t=t-h;
-            h=min(R(2*h),step_size);
+            h=min(time_type(2*h),step_size);
           } while(t!=0 && bs.radius()<=maximum_set_radius);
           if(t!=0) {
             working_sets.insert(timed_set(t,bs));
@@ -723,7 +724,7 @@ namespace Ariadne {
     C1Integrator<R>::reach(const System::VectorField<R>& vector_field, 
                            const Geometry::GridMaskSet<R>& initial_set,
                            const Geometry::GridMaskSet<R>& bounding_set,
-                           const R& time) const
+                           const time_type& time) const
     {
       typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
       typedef typename Geometry::ListSet<R,Geometry::Zonotope>::const_iterator zls_const_iterator;
@@ -744,10 +745,10 @@ namespace Ariadne {
       Geometry::GridMaskSet<R> result(g,lb);
       found.adjoin(is);
       
-      int steps=Numeric::conv_up<int>(div_up(time,this->lock_to_grid_time()));
+      int steps=ceil<int>(time_type(time/this->lock_to_grid_time()));
       if (steps==0) { steps=1; }
 
-      R time_step=div_up(time,R(steps));
+      time_type time_step=time/steps;
      
       for(int step=0; step!=steps; ++step) {
         found=difference(found,stored);
@@ -799,8 +800,8 @@ namespace Ariadne {
       Geometry::GridMaskSet<R> image(g,lb);
       found.adjoin(is);
       
-      R step_size=this->maximum_step_size();
-      R time_step=this->lock_to_grid_time();
+      time_type step_size=this->maximum_step_size();
+      time_type time_step=this->lock_to_grid_time();
       
       while(!subset(found,result)) {
         found=difference(found,result);

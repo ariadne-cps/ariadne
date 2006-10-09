@@ -40,6 +40,7 @@ namespace Ariadne {
      */
     template <typename R>
     class VectorField {
+      typedef typename Numeric::numerical_traits<R>::arithmetic_type F; 
      public:
       /*! \brief The real number type. */
       typedef R real_type;
@@ -50,14 +51,14 @@ namespace Ariadne {
       virtual ~VectorField();
      
       /*! \brief An approximation to the vector field at a point. */
-      virtual LinearAlgebra::Vector<R> operator() (const Geometry::Point<R>& x) const;
+      virtual LinearAlgebra::Vector<F> operator() (const Geometry::Point<R>& x) const;
       /*! \brief A bound for the vector field over a rectangle. */
       virtual LinearAlgebra::Vector< Interval<R> > operator() (const Geometry::Rectangle<R>& A) const;
 
       /*! \brief An approximation to the Jacobian derivative at a point. */
-      virtual LinearAlgebra::Matrix<R> derivative(const Geometry::Point<R>& x) const;
+      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<R>& x) const;
       /*! \brief A bound for the Jacobian derivative over a rectangle. */
-      virtual LinearAlgebra::Matrix< Interval<R> > derivative(const Geometry::Rectangle<R>& A) const;
+      virtual LinearAlgebra::Matrix< Interval<R> > jacobian(const Geometry::Rectangle<R>& A) const;
     
       /*! \brief The dimension of the space the vector field lives in. */
       virtual dimension_type dimension() const = 0;

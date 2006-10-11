@@ -76,6 +76,7 @@ void export_integrate() {
   typedef RZonotopeListSet (RC1LohnerIntegrator::*IntLSZntpFunc) (const RVectorFieldBase&, const RZonotopeListSet&, const Time&) const;
   typedef RGridMaskSet (RC1Integrator::*IntGMSFunc) (const RVectorFieldBase&, const RGridMaskSet&, const RGridMaskSet&, const Time&) const;
   typedef RGridMaskSet (RC1LohnerIntegrator::*CRGMSFunc) (const RVectorFieldBase&, const RGridMaskSet&, const RGridMaskSet&) const;
+  typedef bool (RC1LohnerIntegrator::*CRGMSPred) (const RVectorFieldBase&, const RGridMaskSet&, const RGridMaskSet&) const;
  
   class_<RC1LohnerIntegrator>("C1LohnerIntegrator",init<Real,Real,Real>())
     .def(init<double,double,double>()) 
@@ -98,6 +99,7 @@ void export_integrate() {
     .def("reach", ReachLSZzFunc(&RC1LohnerIntegrator::reach))
     .def("reach", IntGMSFunc(&RC1Integrator::reach))
     .def("chainreach", CRGMSFunc(&RC1LohnerIntegrator::chainreach), "chain reach of a set" )
+    .def("verify", CRGMSFunc(&RC1LohnerIntegrator::verify), "verify a safety property" )
     ;
 
 }

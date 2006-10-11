@@ -75,55 +75,24 @@ template ListSet<Real,Zonotope> touching_intersection(const ListSet<Real,Zonotop
 
 
 void export_list_set() {
-  typedef bool (*RectLSBinPred) (const RRectangleListSet&, const RRectangleListSet&);
-  typedef bool (*ParLSBinPred) (const RParallelotopeListSet&, const RParallelotopeListSet&);
-  typedef bool (*ZonLSBinPred) (const RZonotopeListSet&, const RZonotopeListSet&);
-  typedef bool (*ParLSParBinPred) (const RParallelotope&, const RParallelotopeListSet&);
-  typedef bool (*LSParParBinPred) (const RParallelotopeListSet&, const RParallelotope&);
-  typedef bool (*ZonLSZonBinPred) (const RZonotope&, const RZonotopeListSet&);
-  typedef bool (*LSZonZonBinPred) (const RZonotopeListSet&, const RZonotope&);
-  typedef bool (*LSZonParBinPred) (const RZonotopeListSet&, const RParallelotope&);
-  
-   typedef RRectangleListSet (*LTRlsrBinFun) (const RRectangleListSet&, const RRectangle&);
-   typedef RRectangleListSet (*LTRlspBinFun) (const RRectangleListSet&, const RParallelotope&);
-   typedef RRectangleListSet (*LTRlszBinFun) (const RRectangleListSet&, const RZonotope&);
-   typedef RParallelotopeListSet (*LTPlsrBinFun) (const RParallelotopeListSet&, const RRectangle&);
-   typedef RParallelotopeListSet (*LTPlspBinFun) (const RParallelotopeListSet&, const RParallelotope&);
-   typedef RParallelotopeListSet (*LTPlszBinFun) (const RParallelotopeListSet&, const RZonotope&);
-   typedef RZonotopeListSet (*LTZlsrBinFun) (const RZonotopeListSet&, const RRectangle&);
-   typedef RZonotopeListSet (*LTZlspBinFun) (const RZonotopeListSet&, const RParallelotope&);
-   typedef RZonotopeListSet (*LTZlszBinFun) (const RZonotopeListSet&, const RZonotope&);
-  
-  typedef RRectangleListSet (*RectLSBinFun) (const RRectangleListSet&, const RRectangleListSet&);
-  typedef void (RRectangleListSet::* RectLSadjRectLS) (const RRectangleListSet&);
-  typedef void (RParallelotopeListSet::* PltpLSadjRect) (const RRectangle&);
-  typedef void (RParallelotopeListSet::* PltpLSadjRectLS) (const RRectangleListSet&);
-  typedef void (RParallelotopeListSet::* PltpLSadjPltp) (const RParallelotope&);
-  typedef void (RParallelotopeListSet::* PltpLSadjPltpLS) (const RParallelotopeListSet&);
-  typedef void (RZonotopeListSet::* ZltzLSadjZltz) (const RZonotope&);
-  typedef void (RZonotopeListSet::* ZltzLSadjZltzLZ) (const RZonotopeListSet&);
+  def("regular_intersection",(RRectangleListSet(*)(const RRectangleListSet&,const RRectangleListSet&))(&regular_intersection));
+  def("interiors_intersect",(bool(*)(const RRectangleListSet&,const RRectangleListSet&))(&interiors_intersect));
+  def("interiors_intersect",(bool(*)(const RParallelotopeListSet&,const RParallelotopeListSet&))(&interiors_intersect));
+  def("interiors_intersect",(bool(*)(const RZonotopeListSet&,const RZonotopeListSet&))(&interiors_intersect));
 
+  def("touching_intersection",(RRectangleListSet(*)(const RRectangleListSet&,const RRectangle&))(&touching_intersection));
+  def("touching_intersection",(RRectangleListSet(*)(const RRectangleListSet&,const RParallelotope&))(&touching_intersection));
+  def("touching_intersection",(RRectangleListSet(*)(const RRectangleListSet&,const RZonotope&))(&touching_intersection));
+  def("touching_intersection",(RParallelotopeListSet(*)(const RParallelotopeListSet&,const RRectangle&))(&touching_intersection));
+  def("touching_intersection",(RParallelotopeListSet(*)(const RParallelotopeListSet&,const RParallelotope&))(&touching_intersection));
+  def("touching_intersection",(RParallelotopeListSet(*)(const RParallelotopeListSet&,const RZonotope&))(&touching_intersection));
+  def("touching_intersection",(RZonotopeListSet(*)(const RZonotopeListSet&,const RRectangle&))(&touching_intersection));
+  def("touching_intersection",(RZonotopeListSet(*)(const RZonotopeListSet&,const RParallelotope&))(&touching_intersection));
+  def("touching_intersection",(RZonotopeListSet(*)(const RZonotopeListSet&,const RZonotope&))(&touching_intersection));
 
-def("regular_intersection", RectLSBinFun(&regular_intersection));
-  def("interiors_intersect", RectLSBinPred(&interiors_intersect));
-  def("interiors_intersect", ParLSBinPred(&interiors_intersect));
-  def("interiors_intersect", ZonLSBinPred(&interiors_intersect));
-  //def("interiors_intersect", ParLSParBinPred(&interiors_intersect));
-  //def("interiors_intersect", LSParParBinPred(&interiors_intersect));
-  //def("interiors_intersect", LSZonZonBinPred(&interiors_intersect));
-  //def("interiors_intersect", LSZonParBinPred(&interiors_intersect));
-  def("touching_intersection", LTRlsrBinFun(&touching_intersection));
-  def("touching_intersection", LTRlspBinFun(&touching_intersection));
-  def("touching_intersection", LTRlszBinFun(&touching_intersection));
-  def("touching_intersection", LTPlsrBinFun(&touching_intersection));
-  def("touching_intersection", LTPlspBinFun(&touching_intersection));
-  def("touching_intersection", LTPlszBinFun(&touching_intersection));
-  def("touching_intersection", LTZlsrBinFun(&touching_intersection));
-  def("touching_intersection", LTZlspBinFun(&touching_intersection));
-  def("touching_intersection", LTZlszBinFun(&touching_intersection));
-  def("disjoint", RectLSBinPred(&disjoint));
-  def("inner_subset", RectLSBinPred(&inner_subset));
-  def("subset", RectLSBinPred(&subset));
+  def("disjoint", (bool(*)(const RRectangleListSet&,const RRectangleListSet&))(&disjoint));
+  def("inner_subset", (bool(*)(const RRectangleListSet&,const RRectangleListSet&))(&inner_subset));
+  def("subset", (bool(*)(const RRectangleListSet&,const RRectangleListSet&))(&subset));
 
   class_<RRectangleListSet>("RectangleListSet",init<int>())
     .def(init<RRectangle>())
@@ -149,8 +118,8 @@ def("regular_intersection", RectLSBinFun(&regular_intersection));
     .def(init<RParallelotopeListSet>())
     .def("dimension", &RParallelotopeListSet::dimension)
     .def("push_back", &RParallelotopeListSet::push_back)
-    .def("adjoin", PltpLSadjPltp(&RParallelotopeListSet::adjoin))
-    .def("adjoin", PltpLSadjPltpLS(&RParallelotopeListSet::adjoin))
+    .def("adjoin", (void(RParallelotopeListSet::*)(const RParallelotope&))(&RParallelotopeListSet::adjoin))
+    .def("adjoin", (void(RParallelotopeListSet::*)(const RParallelotopeListSet&))(&RParallelotopeListSet::adjoin))
     .def("size", &RParallelotopeListSet::size)
     .def("empty", &RParallelotopeListSet::empty)
     .def("__len__", &RParallelotopeListSet::size)
@@ -169,8 +138,8 @@ def("regular_intersection", RectLSBinFun(&regular_intersection));
     .def(init<RZonotopeListSet>())
     .def("dimension", &RZonotopeListSet::dimension)
     .def("push_back", &RZonotopeListSet::push_back)
-    .def("adjoin", ZltzLSadjZltz(&RZonotopeListSet::adjoin))
-    .def("adjoin", ZltzLSadjZltzLZ(&RZonotopeListSet::adjoin))
+    .def("adjoin", (void(RZonotopeListSet::*)(const RZonotope&))(&RZonotopeListSet::adjoin))
+    .def("adjoin", (void(RZonotopeListSet::*)(const RZonotopeListSet&))(&RZonotopeListSet::adjoin))
     .def("size", &RZonotopeListSet::size)
     .def("empty", &RZonotopeListSet::empty)
     .def("__len__", &RZonotopeListSet::size)

@@ -153,32 +153,75 @@ namespace Ariadne {
                                  const Geometry::GridMaskSet<R>& initial_set, 
                                  const Geometry::GridMaskSet<R>& bounding_set) const
     {
-      typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
+      typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
       assert(initial_set.bounded() && bounding_set.bounded());
       
       const Geometry::Grid<R>& g=initial_set.grid();
       Combinatoric::LatticeBlock bd=initial_set.block();
       Geometry::Rectangle<R> bb=initial_set.bounding_box();
       Geometry::GridMaskSet<R> result(g,bd);
-      Geometry::GridMaskSet<R> found(g,bd);
-      Geometry::GridMaskSet<R> image(g,bd);
+      Geometry::GridCellListSet<R> found(g);
+      Geometry::GridCellListSet<R> image(g);
       
       found=initial_set;
       while(!subset(found,result)) {
         found=difference(found,result);
         result.adjoin(found);
-        image=Geometry::GridMaskSet<R>(g,bd);
+        image.clear(); 
         uint size=0;
-        for(gms_const_iterator iter=found.begin(); iter!=found.end(); ++iter) {
+        for(gcls_const_iterator iter=found.begin(); iter!=found.end(); ++iter) {
           ++size;
           Geometry::Rectangle<R> r=*iter;
           BS<R> p=convert_to< BS<R> >(r);
           BS<R> fp=this->apply(f,p);
-          image.adjoin(over_approximation(fp,g));
+          if(!disjoint(fp.bounding_box(),bounding_set)) {
+            image.adjoin(over_approximation(fp,g));
+          }
+          //std::cerr << size << "\n";
         }
         found=regular_intersection(image,bounding_set);
       }
       return result;
+    }
+  
+    template<typename R, template<typename> class BS>
+    bool
+    Applicator<R,BS>::verify(const System::Map<R>& f, 
+                             const Geometry::GridMaskSet<R>& initial_set, 
+                             const Geometry::GridMaskSet<R>& safe_set) const
+    {
+      typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
+      assert(initial_set.bounded() && safe_set.bounded());
+      
+      const Geometry::Grid<R>& g=initial_set.grid();
+      Combinatoric::LatticeBlock bd=initial_set.block();
+      Geometry::Rectangle<R> bb=initial_set.bounding_box();
+      Geometry::GridMaskSet<R> reach(g,bd);
+      Geometry::GridCellListSet<R> found(g);
+      Geometry::GridCellListSet<R> cell_image(g);
+      Geometry::GridCellListSet<R> image(g);
+      
+      found=initial_set;
+      while(!subset(found,reach)) {
+        found=difference(found,reach);
+        reach.adjoin(found);
+        image.clear();
+        uint size=0;
+        for(gcls_const_iterator iter=found.begin(); iter!=found.end(); ++iter) {
+          ++size;
+          Geometry::Rectangle<R> r=*iter;
+          BS<R> p=convert_to< BS<R> >(r);
+          BS<R> fp=this->apply(f,p);
+          cell_image.adjoin(over_approximation(fp,g));
+          if(!subset(cell_image,safe_set)) {
+            return false;
+          }
+          image.adjoin(cell_image);
+          cell_image.clear();
+        }
+        found=image;
+      }
+      return true;
     }
 
   }

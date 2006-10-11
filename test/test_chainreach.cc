@@ -75,6 +75,11 @@ test_chainreach()
 
 
   GridMaskSet<R> cr=chainreach(h,in,bd);
+  if(!cr.bounded()) {
+    cout << "Chain reachable set leaves domain bounds\n";
+    cr=regular_intersection(cr,cr.bounds());
+  }
+  cout << cr <<endl;
   PartitionTreeSet<R> ptcr=PartitionTreeSet<R>(cr);
 
   cout << cr <<endl;

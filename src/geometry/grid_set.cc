@@ -52,12 +52,27 @@ namespace Ariadne {
     template bool interiors_intersect(const GridMaskSet<Real>&, const GridMaskSet<Real>&);
     template bool inner_subset(const Rectangle<Real>&, const GridMaskSet<Real>&);
     template bool subset(const Rectangle<Real>&, const GridMaskSet<Real>&);
+    template bool subset(const GridCell<Real>&, const GridMaskSet<Real>&);
+    template bool subset(const GridBlock<Real>&, const GridMaskSet<Real>&);
+    template bool subset(const GridCellListSet<Real>&, const GridMaskSet<Real>&);
     template bool subset(const GridMaskSet<Real>&, const GridMaskSet<Real>&);
-    template GridMaskSet<Real> regular_intersection(const GridMaskSet<Real>&, 
-                                                      const GridMaskSet<Real>&);
+
+    template GridCellListSet<Real> regular_intersection(const GridCellListSet<Real>&, 
+                                                        const GridMaskSet<Real>&);
+    template GridCellListSet<Real> regular_intersection(const GridMaskSet<Real>&,
+                                                        const GridCellListSet<Real>&);
+    template GridCellListSet<Real> difference(const GridCellListSet<Real>&, 
+                                              const GridMaskSet<Real>&);
+
     template GridMaskSet<Real> join(const GridMaskSet<Real>&, const GridMaskSet<Real>&);
     template GridMaskSet<Real> difference(const GridMaskSet<Real>&, 
-                                            const GridMaskSet<Real>&);
+                                          const GridMaskSet<Real>&);
+    template GridMaskSet<Real> regular_intersection(const GridBlock<Real>&, 
+                                                    const GridMaskSet<Real>&);
+    template GridMaskSet<Real> regular_intersection(const GridMaskSet<Real>&, 
+                                                    const GridBlock<Real>&);
+    template GridMaskSet<Real> regular_intersection(const GridMaskSet<Real>&, 
+                                                    const GridMaskSet<Real>&);
 
     template GridBlock<Real>
     over_approximation(const Rectangle<Real>& p, const Grid<Real>& g);

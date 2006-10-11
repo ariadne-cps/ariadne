@@ -66,12 +66,19 @@ namespace Ariadne {
     bool interiors_intersect(const LatticeMaskSet&, const LatticeMaskSet&);
     bool subset(const LatticeCell&, const LatticeBlock&);
     bool subset(const LatticeBlock&, const LatticeBlock&);
+    bool subset(const LatticeCell&, const LatticeMaskSet&);
     bool subset(const LatticeBlock&, const LatticeMaskSet&);
+    bool subset(const LatticeCellListSet&, const LatticeMaskSet&);
     bool subset(const LatticeMaskSet&, const LatticeMaskSet&);
     
     LatticeBlock regular_intersection(const LatticeBlock&, const LatticeBlock&);
+    LatticeCellListSet regular_intersection(const LatticeCellListSet&, const LatticeMaskSet&);
+    LatticeCellListSet regular_intersection(const LatticeMaskSet&, const LatticeCellListSet&);
+    LatticeMaskSet regular_intersection(const LatticeBlock&, const LatticeMaskSet&);
+    LatticeMaskSet regular_intersection(const LatticeMaskSet&, const LatticeBlock&);
     LatticeMaskSet regular_intersection(const LatticeMaskSet&, const LatticeMaskSet&);
     LatticeMaskSet join(const LatticeMaskSet&, const LatticeMaskSet&);
+    LatticeCellListSet difference(const LatticeCellListSet&, const LatticeMaskSet&);
     LatticeMaskSet difference(const LatticeMaskSet&, const LatticeMaskSet&);
 
     bool operator<(const LatticeCell& lc1, const LatticeCell& lc2);

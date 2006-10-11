@@ -69,6 +69,14 @@ namespace Ariadne {
                                                   const Geometry::GridMaskSet<R>& initial_set,
                                                   const Geometry::GridMaskSet<R>& bounding_set) const;
 
+      /*! \brief  Verifies that the flow of \a vector_field starting in \a initial_set remains in \a safe_set all times.
+       *
+       * Implemented by repeated calls to integrate(...) followed by a single call to reach(...).
+       */
+      virtual bool verify(const System::VectorField<R>& vector_field,
+                          const Geometry::GridMaskSet<R>& initial_set,
+                          const Geometry::GridMaskSet<R>& safe_set) const;
+
       /*! \brief Verifies that the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time. 
        *
        *  This method may return \a false even if the flow remains in \a bound. 

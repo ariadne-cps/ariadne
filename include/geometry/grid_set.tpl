@@ -242,6 +242,17 @@ namespace Ariadne {
 
     template<typename R>
     bool
+    subset(const GridCell<R>& A, const GridBlock<R>& B)
+    {
+      assert(A.dimension() == B.dimension());
+      if(A.grid()==B.grid()) {
+        return subset(A.lattice_set(),B.lattice_set());
+      }
+      return subset(Rectangle<R>(A),Rectangle<R>(B));
+    }
+
+    template<typename R>
+    bool
     subset(const GridBlock<R>& A, const GridBlock<R>& B)
     {
       assert(A.dimension() == B.dimension());
@@ -251,6 +262,13 @@ namespace Ariadne {
       return subset(Rectangle<R>(A),Rectangle<R>(B));
     }
 
+    template<typename R>
+    bool
+    subset(const GridCell<R>& A, const GridMaskSet<R>& B)
+    {
+      assert(A.grid()==B.grid());
+      return subset(A.lattice_set(),B.lattice_set()); 
+    }
 
     template<typename R>
     bool
@@ -260,6 +278,21 @@ namespace Ariadne {
       return subset(A.lattice_set(),B.lattice_set()); 
     }
 
+    template<typename R>
+    bool
+    subset(const GridCellListSet<R>& A, const GridMaskSet<R>& B)
+    {
+      assert(A.grid()==B.grid());
+      return subset(A.lattice_set(),B.lattice_set()); 
+    }
+
+    template<typename R>
+    bool
+    subset(const GridBlockListSet<R>& A, const GridMaskSet<R>& B)
+    {
+      assert(A.grid()==B.grid());
+      return subset(A.lattice_set(),B.lattice_set());
+    }
 
     template<typename R>
     bool
@@ -327,9 +360,41 @@ namespace Ariadne {
 
     template<typename R>
     GridMaskSet<R>
+    regular_intersection(const GridMaskSet<R>& A, const GridBlock<R>& B)
+    {
+      assert(A.grid()==B.grid());
+      return GridMaskSet<R>(A.grid(), regular_intersection(A.lattice_set(),B.lattice_set()));
+    }
+
+    template<typename R>
+    GridMaskSet<R>
+    regular_intersection(const GridBlock<R>& A, const GridMaskSet<R>& B)
+    {
+      assert(A.grid()==B.grid());
+      return GridMaskSet<R>(A.grid(), regular_intersection(A.lattice_set(),B.lattice_set()));
+    }
+
+    template<typename R>
+    GridMaskSet<R>
     regular_intersection(const GridMaskSet<R>& A, const GridMaskSet<R>& B)
     {
       assert(A.grid()==B.grid() && A.block()==B.block());
+      return GridMaskSet<R>(A.grid(), regular_intersection(A.lattice_set(),B.lattice_set()));
+    }
+
+    template<typename R>
+    GridCellListSet<R>
+    regular_intersection(const GridCellListSet<R>& A, const GridMaskSet<R>& B)
+    {
+      assert(A.grid()==B.grid());
+      return GridMaskSet<R>(A.grid(), regular_intersection(A.lattice_set(),B.lattice_set()));
+    }
+
+    template<typename R>
+    GridCellListSet<R>
+    regular_intersection(const GridMaskSet<R>& A, const GridCellListSet<R>& B)
+    {
+      assert(A.grid()==B.grid());
       return GridMaskSet<R>(A.grid(), regular_intersection(A.lattice_set(),B.lattice_set()));
     }
 
@@ -340,6 +405,14 @@ namespace Ariadne {
     {
       assert(A.grid()==B.grid() && A.block()==B.block());
       return GridMaskSet<R>(A.grid(), difference(A.lattice_set(),B.lattice_set()));
+    }
+
+    template<typename R>
+    GridCellListSet<R>
+    difference(const GridCellListSet<R>& A, const GridMaskSet<R>& B)
+    {
+      assert(A.grid()==B.grid());
+      return GridCellListSet<R>(A.grid(),Combinatoric::difference(A.lattice_set(),B.lattice_set()));
     }
 
     template<typename R>
@@ -367,6 +440,14 @@ namespace Ariadne {
     GridCellListSet<R>::GridCellListSet(const Grid<R>& g)
       : _grid_ptr(&g), _lattice_set(g.dimension())
     {
+    }
+
+    template<typename R>
+    GridCellListSet<R>::GridCellListSet(const Grid<R>& g, 
+                                        const Combinatoric::LatticeCellListSet& lcls)
+      : _grid_ptr(&g), _lattice_set(lcls)
+    {
+      assert(g.dimension()==lcls.dimension());
     }
 
     template<typename R>
@@ -406,6 +487,12 @@ namespace Ariadne {
       return result;
     }
 
+    template<typename R>
+    void
+    GridCellListSet<R>::clear()
+    {
+      this->_lattice_set.clear();
+    }
 
     // GridBlockListSet ------------------------------------------------------------
 
@@ -413,6 +500,14 @@ namespace Ariadne {
     GridBlockListSet<R>::GridBlockListSet(const Grid<R>& g)
       : _grid_ptr(&g), _lattice_set(g.dimension())
     {
+    }
+
+    template<typename R>
+    GridBlockListSet<R>::GridBlockListSet(const Grid<R>& g, 
+                                        const Combinatoric::LatticeBlockListSet& lbls)
+      : _grid_ptr(&g), _lattice_set(lbls)
+    {
+      assert(g.dimension()==lbls.dimension());
     }
 
     template<typename R>
@@ -470,6 +565,12 @@ namespace Ariadne {
       return result;
     }
 
+    template<typename R>
+    void
+    GridBlockListSet<R>::clear()
+    {
+      this->_lattice_set.clear();
+    }
 
     
     // GridMaskSet ------------------------------------------------------------
@@ -547,6 +648,13 @@ namespace Ariadne {
       }
     }    
     
+    template<typename R>
+    void
+    GridMaskSet<R>::clear()
+    {
+      this->_lattice_set.clear();
+    }
+
   
 
     // Over and under approximations ------------------------------------------

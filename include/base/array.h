@@ -509,6 +509,9 @@ namespace Ariadne {
       /*!\brief The size of each array word in the list. */
       void resize(size_type n) { _elements.resize(_array_size*n); }
       
+      /*!\brief The size of each array word in the list. */
+      void clear() { _elements.clear(); }
+      
       /*!\brief Insert an element at the back of the vector. */
       void push_back(const array<T>& a) { 
         assert(a.size()==array_size()); 

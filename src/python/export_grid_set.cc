@@ -55,40 +55,6 @@ struct RGridWrap : RGrid, wrapper<RGrid>
   std::istream& read(std::istream& is) { return this->get_override("read")(); }
 };
 
-typedef RGridBlock (*ApprxRctGridFunc) (const RRectangle&, const RGrid&);
-typedef RGridCellListSet (*ApprxZltpGridFunc) (const RZonotope&, const RGrid&);
-typedef RGridCellListSet (*ApprxPltpGridFunc) (const RPolytope&, const RGrid&);
-//typedef RGridCellListSet (*ApprxPlhdGridFunc) (const RPolyhedron&, const RGrid&);
-typedef RGridBlock (*ApprxBlkFGridFunc) (const RRectangle&, const RFiniteGrid&);
-typedef RGridMaskSet (*ApprxLSRctFGridFunc) (const RRectangleListSet&, const RFiniteGrid&);
-typedef RGridMaskSet (*ApprxLSPrltpFGridFunc) (const RParallelotopeListSet&, const RFiniteGrid&);
-typedef RGridMaskSet (*ApprxLSZltpFGridFunc) (const RZonotopeListSet&, const RFiniteGrid&);
-typedef RGridMaskSet (*ApprxGridltpFGridFunc) (const RGridMaskSet&, const RFiniteGrid&);
-
-typedef void (RGridMaskSet::*GMSAdjCellFunc) (const RGridCell&);
-typedef void (RGridMaskSet::*GMSAdjBlkFunc) (const RGridBlock&);
-typedef void (RGridMaskSet::*GMSAdjCellLSFunc) (const RGridCellListSet&);
-typedef void (RGridMaskSet::*GMSAdjBlkLSFunc) (const RGridBlockListSet&);
-typedef void (RGridMaskSet::*GMSAdjGMSFunc) (const RGridMaskSet&);
-
-typedef bool (*GMSBinPred) (const RGridMaskSet&, const RGridMaskSet&);
-typedef bool (*GMSRctPred) (const RGridMaskSet&, const RRectangle&);
-
-typedef RGridMaskSet (*GMSBinFunc) (const RGridMaskSet&, const RGridMaskSet&);
-
-typedef RGridMaskSet (*GMSRctFunc)(const RGridMaskSet&, const RRectangle&);
-typedef RGridMaskSet (*GMSPrltpFunc)(const RGridMaskSet&, const RParallelotope&);
-typedef RGridMaskSet (*GMSZntpFunc)(const RGridMaskSet&, const RZonotope&);
-typedef RGridMaskSet (*GMSPltpFunc)(const RGridMaskSet&, const RPolytope&);
-//typedef RGridMaskSet (*GMSPlhdFunc)(const RGridMaskSet&, const RPolyhedron&);
-typedef RGridMaskSet (*GMSLSRctFunc)(const RGridMaskSet&, 
-		                      const RRectangleListSet&);
-typedef RGridMaskSet (*GMSLSPltpFunc)(const RGridMaskSet&, 
-		                      const RParallelotopeListSet&);
-typedef RGridMaskSet (*GMSLSZntpFunc)(const RGridMaskSet&, 
-		                      const RZonotopeListSet&);
-typedef RGridMaskSet (*GMSLSPlhdFunc)(const RGridMaskSet&, 
-		                      const RPolytopeListSet&);
 
 void export_grid_set() {
 
@@ -151,6 +117,7 @@ void export_grid_set() {
     .def(self_ns::str(self))    // __str__
     ;
   
+  //void f(void (*)(int))  
   class_<RGridCellListSet>("GridCellListSet",init<const RGrid&>())
     .def(init<RGridMaskSet>())
     .def(init<RGridCellListSet>())
@@ -158,7 +125,8 @@ void export_grid_set() {
     .def(init<RRectangleListSet>())
     .def("lattice_set", &RGridCellListSet::lattice_set,return_value_policy<copy_const_reference>())
     .def("dimension", &RGridCellListSet::dimension)
-    .def("adjoin", &RGridCellListSet::adjoin)
+    .def("adjoin", (void(RGridCellListSet::*)(const RGridCell&))(&RGridCellListSet::adjoin))
+    .def("adjoin", (void(RGridCellListSet::*)(const RGridCellListSet&))(&RGridCellListSet::adjoin))
     .def("size", &RGridCellListSet::size)
     .def("__len__", &RGridCellListSet::size)
     .def("__getitem__", &get_item<RGridCellListSet>)
@@ -172,7 +140,7 @@ void export_grid_set() {
     .def(init<RPartitionTreeSet>())
     .def("lattice_set", &RGridBlockListSet::lattice_set,return_value_policy<copy_const_reference>())
     .def("dimension", &RGridBlockListSet::dimension)
-    .def("adjoin", &RGridBlockListSet::adjoin)
+    .def("adjoin", (void(RGridMaskSet::*)(const RGridBlock&))(&RGridBlockListSet::adjoin))
     .def("size", &RGridBlockListSet::size)
     .def("__len__", &RGridBlockListSet::size)
     .def("__getitem__", &get_item<RGridBlockListSet>)
@@ -191,11 +159,11 @@ void export_grid_set() {
     .def("clear", &RGridMaskSet::clear)
     .def("block", &RGridMaskSet::block,return_value_policy<copy_const_reference>())
     .def("lattice_set", &RGridMaskSet::lattice_set,return_value_policy<copy_const_reference>())
-    .def("adjoin", GMSAdjCellFunc(&RGridMaskSet::adjoin))
-    .def("adjoin", GMSAdjBlkFunc(&RGridMaskSet::adjoin))
-    .def("adjoin", GMSAdjCellLSFunc(&RGridMaskSet::adjoin))
-    .def("adjoin", GMSAdjBlkLSFunc(&RGridMaskSet::adjoin))
-    .def("adjoin", GMSAdjGMSFunc(&RGridMaskSet::adjoin))
+    .def("adjoin", (void(RGridMaskSet::*)(const RGridCell&))(&RGridMaskSet::adjoin))
+    .def("adjoin", (void(RGridMaskSet::*)(const RGridBlock&))(&RGridMaskSet::adjoin))
+    .def("adjoin", (void(RGridMaskSet::*)(const RGridCellListSet&))(&RGridMaskSet::adjoin))
+    .def("adjoin", (void(RGridMaskSet::*)(const RGridBlockListSet&))(&RGridMaskSet::adjoin))
+    .def("adjoin", (void(RGridMaskSet::*)(const RGridMaskSet&))(&RGridMaskSet::adjoin))
     .def("neighbourhood", &RGridMaskSet::neighbourhood)
     .def("adjoining", &RGridMaskSet::adjoining)
     .def("size", &RGridMaskSet::size)
@@ -205,29 +173,29 @@ void export_grid_set() {
     .def(self_ns::str(self))    // __str__
     ;
 
-  def("join",GMSBinFunc(&Geometry::join));
-  def("difference",GMSBinFunc(&Geometry::difference));
-  def("regular_intersection",GMSBinFunc(&Geometry::regular_intersection));
-  def("interiors_intersect",GMSBinPred(&Geometry::interiors_intersect));
-  def("interiors_intersect",GMSRctPred(&Geometry::interiors_intersect));
+  def("join",(RGridMaskSet(*)(const RGridMaskSet&,const RGridMaskSet&))(&Geometry::join));
+  def("difference",(RGridMaskSet(*)(const RGridMaskSet&,const RGridMaskSet&))(&Geometry::difference));
+  def("regular_intersection",(RGridMaskSet(*)(const RGridMaskSet&,const RGridMaskSet&))(&Geometry::regular_intersection));
+  def("interiors_intersect",(bool(*)(const RGridMaskSet&,const RGridMaskSet&))(&Geometry::interiors_intersect));
+  def("interiors_intersect",(bool(*)(const RGridMaskSet&,const RGridMaskSet&))(&Geometry::interiors_intersect));
 
-  def("over_approximation",ApprxRctGridFunc(&Geometry::over_approximation));
-  def("over_approximation",ApprxZltpGridFunc(&Geometry::over_approximation));
-  def("over_approximation",ApprxPltpGridFunc(&Geometry::over_approximation));
-  //def("over_approximation",ApprxPlhdGridFunc(&Geometry::over_approximation));
-  def("over_approximation",ApprxLSRctFGridFunc(&Geometry::over_approximation));
-  def("over_approximation",ApprxLSPrltpFGridFunc(&Geometry::over_approximation));
-  def("over_approximation",ApprxLSZltpFGridFunc(&Geometry::over_approximation));
-  def("over_approximation",ApprxGridltpFGridFunc(&Geometry::over_approximation));
+  def("over_approximation",(RGridBlock(*)(const RRectangle&,const RGrid&))(&Geometry::over_approximation));
+  def("over_approximation",(RGridCellListSet(*)(const RZonotope&,const RGrid&))(&Geometry::over_approximation));
+  def("over_approximation",(RGridCellListSet(*)(const RPolytope&,const RGrid&))(&Geometry::over_approximation));
+  //def("over_approximation",(RGridCellListSet(*)(const RPolyhedron&,const RGrid&))(&Geometry::over_approximation));
+  def("over_approximation",(RGridMaskSet(*)(const RRectangleListSet&,const RFiniteGrid&))(&Geometry::over_approximation));
+  def("over_approximation",(RGridMaskSet(*)(const RParallelotopeListSet&,const RFiniteGrid&))(&Geometry::over_approximation));
+  def("over_approximation",(RGridMaskSet(*)(const RZonotopeListSet&,const RFiniteGrid&))(&Geometry::over_approximation));
+  def("over_approximation",(RGridMaskSet(*)(const RGridMaskSet&,const RFiniteGrid&))(&Geometry::over_approximation));
 
-  def("under_approximation",ApprxRctGridFunc(&Geometry::under_approximation));
-  def("under_approximation",ApprxZltpGridFunc(&Geometry::under_approximation));
-  def("under_approximation",ApprxPltpGridFunc(&Geometry::under_approximation));
-  //def("under_approximation",ApprxPlhdGridFunc(&Geometry::under_approximation));
-  def("under_approximation",ApprxLSRctFGridFunc(&Geometry::under_approximation));
-  //def("under_approximation",ApprxLSPrltpFGridFunc(&Geometry::under_approximation));
-  //def("under_approximation",ApprxLSZltpFGridFunc(&Geometry::under_approximation));
-  def("under_approximation",ApprxGridltpFGridFunc(&Geometry::under_approximation));
+  def("under_approximation",(RGridBlock(*)(const RRectangle&,const RGrid&))(&Geometry::under_approximation));
+  def("under_approximation",(RGridCellListSet(*)(const RZonotope&,const RGrid&))(&Geometry::under_approximation));
+  def("under_approximation",(RGridCellListSet(*)(const RPolytope&,const RGrid&))(&Geometry::under_approximation));
+  //def("under_approximation",(RGridCellListSet(*)(const RPolyhedron&,const RGrid&))(&Geometry::under_approximation));
+  def("under_approximation",(RGridMaskSet(*)(const RRectangleListSet&,const RFiniteGrid&))(&Geometry::under_approximation));
+  //def("under_approximation",(RGridMaskSet(*)(const RParallelotopeListSet&,const RFiniteGrid&))(&Geometry::under_approximation));
+  //def("under_approximation",(RGridMaskSet(*)(const RZonotopeListSet&,const RFiniteGrid&))(&Geometry::under_approximation));
+  def("under_approximation",(RGridMaskSet(*)(const RGridMaskSet&,const RFiniteGrid&))(&Geometry::under_approximation));
 
 
 }

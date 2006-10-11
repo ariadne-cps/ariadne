@@ -31,22 +31,6 @@ using namespace Ariadne;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-typedef void (LatticeCellListSet::* LatCellListAdjCellFunc) (const LatticeCell&);
-typedef void (LatticeCellListSet::* LatCellListAdjBlkFunc) (const LatticeBlock&);
-typedef void (LatticeCellListSet::* LatCellListAdjCellListFunc) (const LatticeCellListSet&);
-typedef void (LatticeCellListSet::* LatCellListAdjBlkListFunc) (const LatticeBlockListSet&);
-typedef void (LatticeCellListSet::* LatCellListAdjMaskSetFunc) (const LatticeMaskSet&);
-
-typedef void (LatticeBlockListSet::* LatBlkListAdjBlkFunc) (const LatticeBlock&);
-typedef void (LatticeBlockListSet::* LatBlkListAdjBlkListFunc) (const LatticeBlockListSet&);
-
-typedef void (LatticeMaskSet::* MaskSetadjLatCellFunc) (const LatticeCell&);
-typedef void (LatticeMaskSet::* MaskSetadjLatBlkFunc) (const LatticeBlock&);
-typedef void (LatticeMaskSet::* MaskSetadjLatCellListFunc) (const LatticeCellListSet&);
-typedef void (LatticeMaskSet::* MaskSetadjLatBlkListFunc) (const LatticeBlockListSet&);
-typedef void (LatticeMaskSet::* MaskSetadjLatMaskSetFunc) (const LatticeMaskSet&);
-
-
 void export_lattice_set() {
   class_<LatticeCell>("LatticeCell",init<const IndexArray&>())
     .def(init<const LatticeCell&>())
@@ -71,11 +55,11 @@ void export_lattice_set() {
     .def(init<const LatticeMaskSet&>())
     .def("dimension", &LatticeCellListSet::dimension)
     .def("__getitem__", &LatticeCellListSet::operator[])
-    .def("adjoin", LatCellListAdjCellFunc(&LatticeCellListSet::adjoin))
-    .def("adjoin", LatCellListAdjBlkFunc(&LatticeCellListSet::adjoin))
-    .def("adjoin", LatCellListAdjCellListFunc(&LatticeCellListSet::adjoin))
-    .def("adjoin", LatCellListAdjBlkListFunc(&LatticeCellListSet::adjoin))
-    .def("adjoin", LatCellListAdjMaskSetFunc(&LatticeCellListSet::adjoin))
+    .def("adjoin", (void(LatticeCellListSet::*)(const LatticeCell&))(&LatticeCellListSet::adjoin))
+    .def("adjoin", (void(LatticeCellListSet::*)(const LatticeBlock&))(&LatticeCellListSet::adjoin))
+    .def("adjoin", (void(LatticeCellListSet::*)(const LatticeCellListSet&))(&LatticeCellListSet::adjoin))
+    .def("adjoin", (void(LatticeCellListSet::*)(const LatticeBlockListSet&))(&LatticeCellListSet::adjoin))
+    .def("adjoin", (void(LatticeCellListSet::*)(const LatticeMaskSet&))(&LatticeCellListSet::adjoin))
     .def("unique_sort",&LatticeCellListSet::unique_sort)
     .def(self_ns::str(self))
     ;
@@ -83,8 +67,8 @@ void export_lattice_set() {
   class_<LatticeBlockListSet>("LatticeBlockListSet",init<uint>())
     .def(init<LatticeBlockListSet>())
     .def("dimension", &LatticeBlockListSet::dimension)
-    .def("adjoin", LatBlkListAdjBlkFunc(&LatticeBlockListSet::adjoin))
-    .def("adjoin", LatBlkListAdjBlkListFunc(&LatticeBlockListSet::adjoin))
+    .def("adjoin", (void(LatticeBlockListSet::*)(const LatticeBlock&))(&LatticeBlockListSet::adjoin))
+    .def("adjoin", (void(LatticeBlockListSet::*)(const LatticeBlockListSet&))(&LatticeBlockListSet::adjoin))
     .def(self_ns::str(self))
     ;
 
@@ -92,11 +76,11 @@ void export_lattice_set() {
     .def(init<LatticeBlock,LatticeCellListSet>())
     .def(init<LatticeMaskSet>())
     .def("dimension", &LatticeMaskSet::dimension)
-    .def("adjoin", MaskSetadjLatCellFunc(&LatticeMaskSet::adjoin))
-    .def("adjoin", MaskSetadjLatBlkFunc(&LatticeMaskSet::adjoin))
-    .def("adjoin", MaskSetadjLatCellListFunc(&LatticeMaskSet::adjoin))
-    .def("adjoin", MaskSetadjLatBlkListFunc(&LatticeMaskSet::adjoin))
-    .def("adjoin", MaskSetadjLatMaskSetFunc(&LatticeMaskSet::adjoin))
+    .def("adjoin", (void(LatticeMaskSet::*)(const LatticeCell&))(&LatticeMaskSet::adjoin))
+    .def("adjoin", (void(LatticeMaskSet::*)(const LatticeBlock&))(&LatticeMaskSet::adjoin))
+    .def("adjoin", (void(LatticeMaskSet::*)(const LatticeCellListSet&))(&LatticeMaskSet::adjoin))
+    .def("adjoin", (void(LatticeMaskSet::*)(const LatticeBlockListSet&))(&LatticeMaskSet::adjoin))
+    .def("adjoin", (void(LatticeMaskSet::*)(const LatticeMaskSet&))(&LatticeMaskSet::adjoin))
     .def(self_ns::str(self))
     ;
 

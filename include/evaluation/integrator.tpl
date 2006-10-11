@@ -782,7 +782,7 @@ namespace Ariadne {
                               const Geometry::GridMaskSet<R>& initial_set, 
                               const Geometry::GridMaskSet<R>& bounding_set) const
     {
-      typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
+      typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
       typedef typename Geometry::ListSet<R,Geometry::Parallelotope>::const_iterator pls_const_iterator;
       assert(initial_set.bounded() && bounding_set.bounded());
      
@@ -796,8 +796,8 @@ namespace Ariadne {
       const Combinatoric::LatticeBlock lb=over_approximation(bb,g).lattice_set();
       
       Geometry::GridMaskSet<R> result(g,lb);
-      Geometry::GridMaskSet<R> found(g,lb);
-      Geometry::GridMaskSet<R> image(g,lb);
+      Geometry::GridCellListSet<R> found(g);
+      Geometry::GridCellListSet<R> image(g);
       found.adjoin(is);
       
       time_type step_size=this->maximum_step_size();
@@ -809,7 +809,7 @@ namespace Ariadne {
         image.clear();
         uint size=0;
         Geometry::ListSet<R,Geometry::Parallelotope> parallotope_list;
-        for(gms_const_iterator iter=found.begin(); iter!=found.end(); ++iter) {
+        for(gcls_const_iterator iter=found.begin(); iter!=found.end(); ++iter) {
           ++size;
           Geometry::Rectangle<R> r=*iter;
           Geometry::Parallelotope<R> pp(r);
@@ -818,12 +818,67 @@ namespace Ariadne {
         parallotope_list=this->integrate_list_set(vf,parallotope_list,time_step);
         for(pls_const_iterator iter=parallotope_list.begin(); iter!=parallotope_list.end(); ++iter) {
           Geometry::Parallelotope<R> fp=*iter;
-          Geometry::GridCellListSet<R> oai=over_approximation(fp,g);
-          image.adjoin(oai);
+          if(!disjoint(fp.bounding_box(),bounding_set)) {
+            image.adjoin(over_approximation(fp,g));
+          }
+        }
+        found=regular_intersection(image,bounding_set);
+      }
+      return result;
+    }
+
+    template<typename R>
+    bool
+    Integrator<R>::verify(const System::VectorField<R>& vf, 
+                          const Geometry::GridMaskSet<R>& initial_set, 
+                          const Geometry::GridMaskSet<R>& safe_set) const
+    {
+      typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
+      typedef typename Geometry::ListSet<R,Geometry::Parallelotope>::const_iterator pls_const_iterator;
+      assert(initial_set.bounded() && safe_set.bounded());
+     
+      if(!subset(initial_set,safe_set)) {
+        throw std::runtime_error("chainreach: Initial set must be subset of bounding set");
+      }
+        
+      const Geometry::Grid<R>& g=initial_set.grid();
+      const Geometry::GridMaskSet<R>& is=initial_set;
+      const Geometry::Rectangle<R>& bb=safe_set.bounding_box();
+      const Combinatoric::LatticeBlock lb=over_approximation(bb,g).lattice_set();
+      
+      Geometry::GridMaskSet<R> chainreach(g,lb);
+      Geometry::GridCellListSet<R> found(g);
+      Geometry::GridCellListSet<R> image(g);
+      Geometry::GridCellListSet<R> cellimage(g);
+      found.adjoin(is);
+      
+      time_type step_size=this->maximum_step_size();
+      time_type time_step=this->lock_to_grid_time();
+      
+      while(!subset(found,chainreach)) {
+        found=difference(found,chainreach);
+        chainreach.adjoin(found);
+        image.clear();
+        uint size=0;
+        Geometry::ListSet<R,Geometry::Parallelotope> parallotope_list;
+        for(gcls_const_iterator iter=found.begin(); iter!=found.end(); ++iter) {
+          ++size;
+          Geometry::Rectangle<R> r=*iter;
+          Geometry::Parallelotope<R> pp(r);
+          parallotope_list.adjoin(pp);
+        }
+        parallotope_list=this->integrate_list_set(vf,parallotope_list,time_step);
+        for(pls_const_iterator iter=parallotope_list.begin(); iter!=parallotope_list.end(); ++iter) {
+          Geometry::Parallelotope<R> fp=*iter;
+          cellimage=over_approximation(fp,g);
+          if(!subset(cellimage,safe_set)) {
+            return false;
+          }
+          image.adjoin(cellimage);
         }
         found=image;
       }
-      return result;
+      return true;
     }
 
   }

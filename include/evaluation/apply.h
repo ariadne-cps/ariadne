@@ -64,6 +64,13 @@ namespace Ariadne {
       chainreach(const System::Map<R>& map, 
                  const Geometry::GridMaskSet<R>& initial_set, 
                  const Geometry::GridMaskSet<R>& bounding_set) const;
+    
+      /*! \brief Attempt to verify that the reachable set of \a map starting in \a initial_set remains in \a safe_set. */
+      virtual
+      bool
+      verify(const System::Map<R>& map, 
+             const Geometry::GridMaskSet<R>& initial_set, 
+             const Geometry::GridMaskSet<R>& safe_set) const;
     };
     
     /*! \brief A class for computing the image of a continuous map on a rectangle. */

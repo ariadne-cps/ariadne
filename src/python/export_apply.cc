@@ -45,6 +45,7 @@ typedef RRectangle (RC0Applicator::*ApplMapRectBinFunc) (const RMapBase&, const 
 typedef RParallelotope (RC1Applicator::*ApplMapPltpBinFunc) (const RMapBase&, const RParallelotope&) const;
 typedef RParallelotopeListSet (RC1Applicator::*ApplMapPltpLSBinFunc) (const RMapBase&, const RParallelotopeListSet&) const;
 typedef RGridMaskSet (RC1Applicator::*ApplMapGMSFunc) (const RMapBase&, const RGridMaskSet&, const RGridMaskSet&) const;
+typedef bool (RC1Applicator::*ApplMapGMSPred) (const RMapBase&, const RGridMaskSet&, const RGridMaskSet&) const;
 
 typedef RRectangle (*MapRectBinFunc) (const RMapBase&, const RRectangle&);
 typedef RParallelotope (*MapPltpBinFunc) (const RMapBase&, const RParallelotope&);
@@ -60,6 +61,7 @@ void export_apply() {
     .def("apply", ApplMapPltpLSBinFunc(&RC1Applicator::apply), "apply the image of a map to a set" )
     .def("apply", ApplMapGMSFunc(&RC1Applicator::apply), "apply the image of a map to a set" )
     .def("chainreach", ApplMapGMSFunc(&RC1Applicator::chainreach), "Compute the chain reachable set")
+    .def("verify", ApplMapGMSPred(&RC1Applicator::verify), "Verify that the reachable set lies within a safe set")
   ;
  
   def("apply", MapRectBinFunc(&apply), "apply the image of a map to a set" );

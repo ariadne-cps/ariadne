@@ -62,7 +62,10 @@ namespace Ariadne {
     template<typename R> bool disjoint(const GridMaskSet<R>& gm, const Rectangle<R>& r);
 
     template<typename R> bool subset(const GridBlock<R>&, const GridBlock<R>&);
+    template<typename R> bool subset(const GridCell<R>&, const GridMaskSet<R>&);
     template<typename R> bool subset(const GridBlock<R>&, const GridMaskSet<R>&);
+    template<typename R> bool subset(const GridCellListSet<R>&, const GridMaskSet<R>&);
+    template<typename R> bool subset(const GridBlockListSet<R>&, const GridMaskSet<R>&);
     template<typename R> bool subset(const GridMaskSet<R>&, const GridMaskSet<R>&);
     template<typename R> bool subset(const Rectangle<R>&, const GridBlock<R>&);
     template<typename R> bool subset(const Rectangle<R>&, const GridMaskSet<R>&);
@@ -72,6 +75,12 @@ namespace Ariadne {
     template<typename R> bool inner_subset(const GridMaskSet<R>&, const GridMaskSet<R>&);
     template<typename R> bool inner_subset(const Rectangle<R>&, const GridBlock<R>&);
     template<typename R> bool inner_subset(const Rectangle<R>&, const GridMaskSet<R>&);
+
+    template<typename R> GridMaskSet<R> regular_intersection(const GridBlock<R>&, const GridMaskSet<R>&);
+    template<typename R> GridMaskSet<R> regular_intersection(const GridMaskSet<R>&, const GridBlock<R>&);
+    template<typename R> GridCellListSet<R> regular_intersection(const GridCellListSet<R>&, const GridMaskSet<R>&);
+    template<typename R> GridCellListSet<R> regular_intersection(const GridMaskSet<R>&, const GridCellListSet<R>&);
+    template<typename R> GridCellListSet<R> difference(const GridCellListSet<R>&, const GridMaskSet<R>&);
 
     template<typename R> GridMaskSet<R> regular_intersection(const GridMaskSet<R>&, const GridMaskSet<R>&);
     template<typename R> GridMaskSet<R> join(const GridMaskSet<R>&, const GridMaskSet<R>&);
@@ -317,6 +326,9 @@ namespace Ariadne {
       /*!\brief Construct an empty set based on a Grid. */
       GridCellListSet(const Grid<R>& g);
 
+      /*!\brief Construct from a grid and a lattice cell list set. */
+      GridCellListSet(const Grid<R>& g, const Combinatoric::LatticeCellListSet& lcls);
+
       /*!\brief Construct from a GridMaskSet. */
       GridCellListSet(const GridMaskSet<R>& gms);
 
@@ -358,6 +370,13 @@ namespace Ariadne {
 
       /*!\brief Append a GridCell to the list. */
       void adjoin(const GridCell<R>& c) { _lattice_set.adjoin(c.lattice_set()); }
+      /*!\brief Append a GridBlock to the list. */
+      void adjoin(const GridBlock<R>& bl) { _lattice_set.adjoin(bl.lattice_set()); }
+      /*!\brief Append a GridCellListSet to the list. */
+      void adjoin(const GridCellListSet<R>& cls) { _lattice_set.adjoin(cls.lattice_set()); }
+
+      /*! \brief Empties the set. */
+      void clear();
 
       friend std::ostream& operator<< <> (std::ostream&, const GridCellListSet<R>&);
      private:
@@ -421,6 +440,9 @@ namespace Ariadne {
       /*!\brief Construct from a Grid. */
       GridBlockListSet(const Grid<R>& g);
 
+      /*!\brief Construct from a Grid and a lattice block list set. */
+      GridBlockListSet(const Grid<R>& g, const Combinatoric::LatticeBlockListSet& lbls);
+
       /*!\brief Construct from a ListSet of Rectangles. */
       explicit GridBlockListSet(const ListSet<R,Rectangle>& s);
 
@@ -467,6 +489,9 @@ namespace Ariadne {
       void adjoin(const GridBlock<R>& r) {
         _lattice_set.adjoin(r._lattice_set);
       }
+      
+      /*! \brief Empties the set. */
+      void clear();
 
       friend std::ostream& operator<< <> (std::ostream&, const GridBlockListSet<R>&);
      private:
@@ -637,9 +662,7 @@ namespace Ariadne {
       Rectangle<R> bounding_box() const { return GridBlock<R>(grid(),bounds()); }
      
       /*! \brief Removes all cells. */
-      void clear() {
-        _lattice_set.clear();
-      }
+      void clear();
 
       /*! \brief Adjoins a cell to the set. */
       void adjoin(const GridCell<R>& c) {

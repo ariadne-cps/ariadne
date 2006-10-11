@@ -41,6 +41,7 @@
 
 using namespace Ariadne;
 using namespace Ariadne::Geometry;
+using namespace Ariadne::LinearAlgebra;
 using namespace std;
 
 template<typename R> int test_zonotope();
@@ -87,7 +88,11 @@ test_zonotope()
   pt5=Point<R>("(14.0,5.0,-0.5)");
   pt6=Point<R>("(15.5,11.5,0)");
 
-  Postscript::epsfstream eps("test_zonotope.eps",z3.bounding_box(),0,1);
+  Interval<R> unit=Interval<R>(-1,1);
+  Rectangle<R> bbox=z3.bounding_box();
+  bbox=bbox+Vector< Interval<R> >(3,&unit,0);
+  
+  Postscript::epsfstream eps("test_zonotope.eps",bbox,0,1);
   eps << z3 << pt1 << pt2 << pt3 << pt4 << pt5 << pt6 << endl;
   eps.close();
   

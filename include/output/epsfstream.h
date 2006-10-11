@@ -526,7 +526,7 @@ namespace Ariadne {
     epsfstream&
     trace(epsfstream& eps, const Ariadne::Geometry::Point<double>& pt)
     {        
-      eps << pt[0] << " " << pt[1] << "0.001 0 360 closepath\n";
+      eps << pt[0] << " " << pt[1] << " 0.001 0 360 arc closepath\n";
       return eps;
     }
     
@@ -565,7 +565,7 @@ namespace Ariadne {
         trace_polygon(eps,vertices) << eps.fill_colour << " fill\n";
       }
       if(eps.line_style) {
-        trace_polygon(eps,vertices) << eps.line_colour << " stroke\n";
+        trace_polygon(eps,vertices) << eps.line_colour << " stroke\n\n";
       }
       return eps;
     }
@@ -593,12 +593,12 @@ namespace Ariadne {
          const Geometry::Point<double>& pt)
     {
       if(eps.fill_style) {
-        eps << pt[0] << " " << pt[1] << "0.001 0 360 closepath\n";
+        eps << pt[0] << " " << pt[1] << " 0.001 0 360 arc closepath\n";
         eps << eps.fill_colour << " fill\n";
       }
       if(eps.line_style) {
-        eps << pt[0] << " " << pt[1] << "0.001 0 360 closepath\n";
-        eps << eps.line_colour << " stroke\n";
+        eps << pt[0] << " " << pt[1] << " 0.001 0 360 arc closepath\n";
+        eps << eps.line_colour << " stroke\n\n";
       }
       return eps;
     }
@@ -610,7 +610,7 @@ namespace Ariadne {
         trace(eps,r) << eps.fill_colour << " fill\n";
       }
       if(eps.line_style) {
-        trace(eps,r) << eps.line_colour << " stroke\n";
+        trace(eps,r) << eps.line_colour << " stroke\n\n";
       }
       return eps;
     }

@@ -537,7 +537,7 @@ namespace Ariadne {
     inline
     Interval<R> 
     max(const Interval<R>& x1, const Interval<R>& x2) {
-      std::cerr << "Interval::max<Interval<" << name<R>() << ">>" << std::endl;
+      //std::cerr << "Interval::max<Interval<" << name<R>() << ">>" << std::endl;
       return Interval<R>(max_down(x1.lower(),x2.lower()),max_up(x1.upper(),x2.upper()));
     }
     

@@ -46,13 +46,13 @@ using namespace std;
 
 int main() {
 
-  
-  
-  Rectangle<Real> bbox(2), r1, r2;
-  Rectangle<Real> r3;
-  Rectangle<Real> r4;
+  Rectangle<Real> bbox(2);
+
+  Point<Real> pt("(0.0,0.0)");
+
+  Rectangle<Real> r1,r2,r3,r4;
   string input("[-0.125,1.125]x[-0.25, 3.25] "
-               "[ 0.0,1.0]x[0.0,2.0] "
+               "[ 0.0125,1.0]x[0.0,2.0] "
                "[ 0.5,1.0]x[1.0,3.0] "
                "[ 0,0.3333333]x[2.3333,3] "
                "[ 0.06125,0.125]x[0.5,2.75] "
@@ -78,26 +78,7 @@ int main() {
   eps.set_fill_colour("red");
   eps << z3<< p4;
   eps.close();
-
-  try {
-    string input("[ ] "
-                "[ [0,2] ] "
-                "[ [0,1], [3/4,4/3], [1,3/2] ] "
-                "{ lower_corner=[0,1], upper_corner=[1,4/3] } " );
-    stringstream is(input);
-  }
-  catch(invalid_input& e) {
-    cout << "  invalid_input: " << e.what() << "\n";
-    return 1;
-  }
-  catch(std::invalid_argument& e) {
-    cout << "  std::invalid_argument: " << e.what() << "\n";
-    return 1;
-  }
-  catch(std::exception& e) {
-    cout << "  Unknown error\n";
-    throw e;
-  }
+  eps << pt;
 
   return 0;
 }

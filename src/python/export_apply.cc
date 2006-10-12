@@ -22,6 +22,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "real_typedef.h"
+
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
 #include "geometry/list_set.h"
@@ -31,43 +33,39 @@
 
 #include "evaluation/apply.h"
 
-#include "python/typedefs.h"
 using namespace Ariadne;
+using namespace Ariadne::Geometry;
+using namespace Ariadne::System;
 using namespace Ariadne::Evaluation;
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
-typedef C0Applicator<Real> RC0Applicator;
-typedef C1Applicator<Real> RC1Applicator;
-
-typedef RRectangle (RC0Applicator::*ApplMapRectBinFunc) (const RMapBase&, const RRectangle&) const;
-typedef RParallelotope (RC1Applicator::*ApplMapPltpBinFunc) (const RMapBase&, const RParallelotope&) const;
-typedef RParallelotopeListSet (RC1Applicator::*ApplMapPltpLSBinFunc) (const RMapBase&, const RParallelotopeListSet&) const;
-typedef RGridMaskSet (RC1Applicator::*ApplMapGMSFunc) (const RMapBase&, const RGridMaskSet&, const RGridMaskSet&) const;
-typedef bool (RC1Applicator::*ApplMapGMSPred) (const RMapBase&, const RGridMaskSet&, const RGridMaskSet&) const;
-
-typedef RRectangle (*MapRectBinFunc) (const RMapBase&, const RRectangle&);
-typedef RParallelotope (*MapPltpBinFunc) (const RMapBase&, const RParallelotope&);
-typedef RZonotope (*MapZltzBinFunc) (const RMapBase&, const RParallelotope&);
-typedef RParallelotopeListSet (*MapPltpLSBinFunc) (const RMapBase&, const RParallelotopeListSet&);
-typedef RGridMaskSet (*MapGMSFunc) (const RMapBase&, const RGridMaskSet&, const RGridMaskSet&);
-
-void export_apply() {
-
-  class_<RC1Applicator>("C1Applicator",init<>())
-    .def("apply", ApplMapRectBinFunc(&RC0Applicator::apply), "apply the image of a map to a set" )
-    .def("apply", ApplMapPltpBinFunc(&RC1Applicator::apply), "apply the image of a map to a set" )
-    .def("apply", ApplMapPltpLSBinFunc(&RC1Applicator::apply), "apply the image of a map to a set" )
-    .def("apply", ApplMapGMSFunc(&RC1Applicator::apply), "apply the image of a map to a set" )
-    .def("chainreach", ApplMapGMSFunc(&RC1Applicator::chainreach), "Compute the chain reachable set")
-    .def("verify", ApplMapGMSPred(&RC1Applicator::verify), "Verify that the reachable set lies within a safe set")
+template<typename R>
+void export_apply() 
+{
+  class_< C1Applicator<R> >("Applicator",init<>())
+    .def("apply",(Rectangle<R>(C0Applicator<R>::*)(const Map<R>&,const Rectangle<R>&)const)
+                   (&C0Applicator<R>::apply),"apply the image of a map to a set")
+    .def("apply",(Parallelotope<R>(C1Applicator<R>::*)(const Map<R>&,const Parallelotope<R>&)const)
+                   (&C1Applicator<R>::apply),"apply the image of a map to a set" )
+    .def("apply",(ListSet<R,Parallelotope>(C1Applicator<R>::*)(const Map<R>&,const ListSet<R,Parallelotope>&)const)
+                   (&C1Applicator<R>::apply),"apply the image of a map to a set" )
+    .def("apply",(GridMaskSet<R>(C1Applicator<R>::*)(const Map<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
+                   (&C1Applicator<R>::apply),"apply the image of a map to a set" )
+    .def("chainreach",(GridMaskSet<R>(C1Applicator<R>::*)(const Map<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
+                        (&C1Applicator<R>::chainreach), "Compute the chain reachable set")
+    .def("verify",(bool(C1Applicator<R>::*)(const Map<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
+                    (&C1Applicator<R>::verify), "Verify that the reachable set lies within a safe set")
   ;
  
-  def("apply", MapRectBinFunc(&apply), "apply the image of a map to a set" );
-  def("apply", MapPltpBinFunc(&apply), "apply the image of a map to a set" );
-  def("apply", MapPltpLSBinFunc(&apply), "apply the image of a map to a set" );
-  def("apply", MapGMSFunc(&apply), "apply the image of a map to a set" );
-  def("chainreach", MapGMSFunc(&chainreach), "Compute the chain reachable set");
+  def("apply", (Rectangle<R>(*)(const Map<R>&,const Rectangle<R>&))(&apply), "apply the image of a map to a set" );
+  def("apply", (Parallelotope<R>(*)(const Map<R>&,const Parallelotope<R>&))(&apply), "apply the image of a map to a set" );
+  def("apply", (ListSet<R,Parallelotope>(*)(const Map<R>&,const ListSet<R,Parallelotope>&))(&apply), "apply the image of a map to a set" );
+  def("apply", (GridMaskSet<R>(*)(const Map<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&))(&apply), "apply the image of a map to a set" );
+  def("chainreach", (GridMaskSet<R>(*)(const Map<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&))(&chainreach), "Compute the chain reachable set" );
+  def("verify", (bool(*)(const Map<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&))(&verify), "Compute the chain reachable set" );
   
 }
+
+template void export_apply<Real>();

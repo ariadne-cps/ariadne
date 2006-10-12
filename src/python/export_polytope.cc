@@ -23,10 +23,11 @@
 
 #include <vector>
 
+#include "numeric/mpfloat.h"
+
 #include "geometry/rectangle.h"
 #include "geometry/polytope.h"
 
-#include "python/typedefs.h"
 using namespace Ariadne;
 using namespace Ariadne::Geometry;
 
@@ -34,26 +35,27 @@ using namespace Ariadne::Geometry;
 using namespace boost::python;
 
 
+template<typename R>
+void export_polytope() 
+{
+  typedef Polytope<R> RPolytope;
 
-void export_polytope() {
-  typedef bool (*PolytPolytBinPred) (const RPolytope&, const RPolytope&);
-  typedef RPolytope (*PolytPolytBinFunc) (const RPolytope&, const RPolytope&);
+  def("disjoint", (bool(*)(const RPolytope&, const RPolytope&))(&disjoint));
+  def("interiors_intersect", (bool(*)(const RPolytope&, const RPolytope&))(&interiors_intersect));
+  def("inner_subset", (bool(*)(const RPolytope&, const RPolytope&))(&inner_subset));
+  def("subset", (bool(*)(const RPolytope&, const RPolytope&))(&subset));
+  def("convex_hull", (RPolytope(*)(const RPolytope&, const RPolytope&))(&convex_hull));
 
-  def("disjoint", PolytPolytBinPred(&disjoint));
-  def("interiors_intersect", PolytPolytBinPred(&interiors_intersect));
-  def("inner_subset", PolytPolytBinPred(&inner_subset));
-  def("subset", PolytPolytBinPred(&subset));
-  def("convex_hull", PolytPolytBinFunc(&convex_hull));
-
-  class_<RPolytope>("Polytope",init<size_type>())
-    .def(init<RPointList>())
-    .def(init<RPolytope>())
-    .def(init<RRectangle>())
-    .def("dimension", &RPolytope::dimension)
-    .def("vertices", &RPolytope::vertices)
-    .def("bounding_box", &RPolytope::bounding_box)
+  class_< Polytope<R> >("Polytope",init<size_type>())
+    .def(init< PointList<R> >())
+    .def(init< Polytope<R> >())
+    .def(init< Rectangle<R> >())
+    .def("dimension", &Polytope<R>::dimension)
+    .def("vertices", &Polytope<R>::vertices)
+    .def("bounding_box", &Polytope<R>::bounding_box)
     .def(self_ns::str(self))
   ;
 
-  
 }
+
+template void export_polytope<MPFloat>();

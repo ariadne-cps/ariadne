@@ -22,25 +22,25 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-
+#include "real_typedef.h"
 
 #include "geometry/simplex.h"
 
 #include "geometry/rectangle.h"
 #include "geometry/polyhedron.h"
 
-#include "python/typedefs.h"
 using namespace Ariadne;
 using namespace Ariadne::Geometry;
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
-void export_simplex() {
-  typedef bool (*SmplxSmplxBinPred) (const RSimplex&, const RSimplex&);
-  typedef bool (*SmplxRectBinPred) (const RSimplex&, const RRectangle&);
-
-   class_<RSimplex>("Simplex",init< >())
+template<typename R>
+void export_simplex() 
+{
+  typedef Simplex<R> RSimplex;
+  
+  class_<RSimplex>("Simplex",init< >())
     .def(init< PointList<Real> >())
     .def(init<RSimplex>())
     .def("empty", &RSimplex::empty)
@@ -51,3 +51,5 @@ void export_simplex() {
     .def(self_ns::str(self))
   ;
 }
+
+template void export_simplex<Real>();

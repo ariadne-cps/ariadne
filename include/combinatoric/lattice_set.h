@@ -66,6 +66,8 @@ namespace Ariadne {
     bool interiors_intersect(const LatticeMaskSet&, const LatticeMaskSet&);
     bool subset(const LatticeCell&, const LatticeBlock&);
     bool subset(const LatticeBlock&, const LatticeBlock&);
+    bool subset(const LatticeCellListSet&, const LatticeBlock&);
+    bool subset(const LatticeMaskSet&, const LatticeBlock&);
     bool subset(const LatticeCell&, const LatticeMaskSet&);
     bool subset(const LatticeBlock&, const LatticeMaskSet&);
     bool subset(const LatticeCellListSet&, const LatticeMaskSet&);

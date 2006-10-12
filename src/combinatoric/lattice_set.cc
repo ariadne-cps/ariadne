@@ -789,22 +789,45 @@ namespace Ariadne {
     
 
     bool
-    subset(const LatticeCell& lc, const LatticeBlock& lr)
+    subset(const LatticeCell& lc, const LatticeBlock& lb)
     {
-      return subset(LatticeBlock(lc),lr);
+      return subset(LatticeBlock(lc),lb);
     }
      
 
     bool 
-    subset(const LatticeBlock& r1, const LatticeBlock& r2) 
+    subset(const LatticeBlock& lb1, const LatticeBlock& lb2) 
     {
-      if(r1.empty()) { 
+      if(lb1.empty()) { 
         return true; 
       }
-      for(dimension_type i=0; i!=r1.dimension(); ++i) {
-        if(r1.lower_bound(i)<r2.lower_bound(i)
-            || r1.upper_bound(i)>r2.upper_bound(i))
+      for(dimension_type i=0; i!=lb1.dimension(); ++i) {
+        if(lb1.lower_bound(i)<lb2.lower_bound(i)
+            || lb1.upper_bound(i)>lb2.upper_bound(i))
         {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    bool 
+    subset(const LatticeCellListSet& lcls, const LatticeBlock& lb) 
+    {
+      for(LatticeCellListSet::const_iterator citer=lcls.begin(); citer!=lcls.end(); ++citer) {
+        if(!subset(*citer,lb)) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    bool 
+    subset(const LatticeMaskSet& lms, const LatticeBlock& lb) 
+    {
+      if(!lms.bounded()) { return false; }
+      for(LatticeMaskSet::const_iterator citer=lms.begin(); citer!=lms.end(); ++citer) {
+        if(!subset(*citer,lb)) {
           return false;
         }
       }
@@ -814,6 +837,9 @@ namespace Ariadne {
     bool 
     subset(const LatticeCell& c, const LatticeMaskSet& ms) 
     {
+      if(!subset(c,ms.block())) {
+        return !ms.bounded();
+      }
       return ms.mask()[ms.index(c)];
     }
     
@@ -824,7 +850,7 @@ namespace Ariadne {
         return true;
       }
       if(!subset(r,ms.block())) {
-        return false;
+        return !ms.bounded();
       }
       for(LatticeBlock::const_iterator i=r.begin(); i!=r.end(); ++i) {
         if(!subset(*i,ms)) {
@@ -847,6 +873,10 @@ namespace Ariadne {
     
     bool 
     subset(const LatticeMaskSet& a, const LatticeMaskSet& b) {
+      //FIXME: possible bug if a and b unbounded
+      if(!a.bounded() && b.bounded()) { 
+        return false;
+      }
       if(a.block() == b.block()) {
         return a.mask() <= b.mask();
       } else {

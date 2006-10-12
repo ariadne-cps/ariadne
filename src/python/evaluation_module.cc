@@ -24,11 +24,13 @@
 
 #include <boost/python.hpp>
 
-void export_apply();
-void export_integrate();
+#include "real_typedef.h"
+
+template<typename R> void export_apply();
+template<typename R> void export_integrate();
 
 BOOST_PYTHON_MODULE(evaluation)
 {
-  export_apply();
-  export_integrate();
+  export_apply<Ariadne::Real>();
+  export_integrate<Ariadne::Real>();
 }

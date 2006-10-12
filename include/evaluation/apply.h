@@ -151,6 +151,19 @@ namespace Ariadne {
       return C1Applicator<R>().chainreach(map,initial_set,bounding_set);
     }
 
+    /*! \brief Attempt to verify that the reachable set of \a map starting in \a initial_set remains in \a safe_set. 
+     *  \ingroup Apply
+     */
+    template<typename R>
+    inline
+    bool
+    verify(const System::Map<R>& map, 
+               const Geometry::GridMaskSet<R>& initial_set, 
+               const Geometry::GridMaskSet<R>& safe_set) 
+    {
+      return C1Applicator<R>().verify(map,initial_set,safe_set);
+    }
+
   }
 }
 

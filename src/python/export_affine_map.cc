@@ -22,6 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "real_typedef.h"
 
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
@@ -32,40 +33,31 @@
 #include "system/affine_map.h"
 
 
-#include "python/typedefs.h"
 #include "python/python_utilities.h"
 using namespace Ariadne;
+using namespace Ariadne::LinearAlgebra;
+using namespace Ariadne::Geometry;
+using namespace Ariadne::System;
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
-typedef System::Map<Real> RMap;
-typedef Geometry::Point< Numeric::Interval<Real> > IPoint;
-
-typedef IPoint (RAffineMap::*AffMapCallPoint) (const RPoint&) const;
-typedef RParallelotope (RAffineMap::*AffMapCallParallelotope) (const RParallelotope&) const;
-typedef RRectangle (RAffineMap::*AffMapCallRectangle) (const RRectangle&) const;
-typedef RZonotope (RAffineMap::*AffMapCallZonotope) (const RZonotope&) const;
-typedef RSimplex (RAffineMap::*AffMapCallSimplex) (const RSimplex&) const;
-typedef RPolytope (RAffineMap::*AffMapCallPolytope) (const RPolytope&) const;
-
-AffMapCallPoint affine_map_call_point=&RAffineMap::operator();
-AffMapCallRectangle affine_map_call_rectangle=&RAffineMap::operator();
-AffMapCallParallelotope affine_map_call_parallelotope=&RAffineMap::operator();
-AffMapCallZonotope affine_map_call_zonotope=&RAffineMap::operator();
-AffMapCallPolytope affine_map_call_polytope=&RAffineMap::operator();
-
-
-void export_affine_map() {
-
-  class_< RAffineMap, bases<RMapBase> >("AffineMap",init<RMatrix,RVector>())
-    .def("argument_dimension", &RAffineMap::argument_dimension)
-    .def("result_dimension", &RAffineMap::result_dimension)
-    .def("__call__", affine_map_call_point)
-    .def("__call__", affine_map_call_rectangle)
-    .def("__call__", affine_map_call_parallelotope)
-    .def("__call__", affine_map_call_zonotope)
-    .def("__call__", affine_map_call_polytope)
+template<typename R>
+void export_affine_map() 
+{
+  typedef typename numerical_traits<R>::arithmetic_type F;
+  typedef Interval<R> I;
+  
+  class_< AffineMap<R>, bases< Map<R> > >("AffineMap",init< Matrix<R>, Vector<R> >())
+    .def("argument_dimension",&AffineMap<R>::argument_dimension)
+    .def("result_dimension",&AffineMap<R>::result_dimension)
+    .def("__call__",(Point<F>(AffineMap<R>::*)(const Point<R>&)const)(&AffineMap<R>::operator()))
+    .def("__call__",(Rectangle<R>(AffineMap<R>::*)(const Rectangle<R>&)const)(&AffineMap<R>::operator()))
+    .def("__call__",(Parallelotope<R>(AffineMap<R>::*)(const Parallelotope<R>&)const)(&AffineMap<R>::operator()))
+    .def("__call__",(Zonotope<R>(AffineMap<R>::*)(const Zonotope<R>&)const)(&AffineMap<R>::operator()))
+    .def("__call__",(Polytope<R>(AffineMap<R>::*)(const Polytope<R>&)const)(&AffineMap<R>::operator()))
     .def(self_ns::str(self))
   ;
 }
+
+template void export_affine_map<Real>();

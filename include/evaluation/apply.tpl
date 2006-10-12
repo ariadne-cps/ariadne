@@ -156,17 +156,21 @@ namespace Ariadne {
       typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
       assert(initial_set.bounded() && bounding_set.bounded());
       
-      const Geometry::Grid<R>& g=initial_set.grid();
-      Combinatoric::LatticeBlock bd=initial_set.block();
-      Geometry::Rectangle<R> bb=initial_set.bounding_box();
+      const Geometry::Grid<R>& g=bounding_set.grid();
+      Combinatoric::LatticeBlock bd=bounding_set.block();
+      Geometry::GridBlock<R> bb(g,bd);
       Geometry::GridMaskSet<R> result(g,bd);
       Geometry::GridCellListSet<R> found(g);
       Geometry::GridCellListSet<R> image(g);
       
+      //std::cerr << "result.size() = " << result.size() << "\n";
       found=initial_set;
+      //std::cerr << "found.size() = " << found.size() << "\n";
       while(!subset(found,result)) {
         found=difference(found,result);
+        //std::cerr << "new.size() = " << found.size() << "\n";
         result.adjoin(found);
+        //std::cerr << "result.size() = " << result.size() << "\n";
         image.clear(); 
         uint size=0;
         for(gcls_const_iterator iter=found.begin(); iter!=found.end(); ++iter) {
@@ -179,8 +183,12 @@ namespace Ariadne {
           }
           //std::cerr << size << "\n";
         }
+        //std::cerr << "image.size() = " << image.size() << "\n";
         found=regular_intersection(image,bounding_set);
+        //std::cerr << "found.size() = " << found.size() << "\n";
       }
+      //std::cerr << "result.size() = " << result.size() << "\n";
+      //std::cerr << "result.bounded() = " << result.bounded() << "\n";
       return result;
     }
   
@@ -194,8 +202,8 @@ namespace Ariadne {
       assert(initial_set.bounded() && safe_set.bounded());
       
       const Geometry::Grid<R>& g=initial_set.grid();
-      Combinatoric::LatticeBlock bd=initial_set.block();
-      Geometry::Rectangle<R> bb=initial_set.bounding_box();
+      Combinatoric::LatticeBlock bd=safe_set.block();
+      Geometry::Rectangle<R> bb=safe_set.bounding_box();
       Geometry::GridMaskSet<R> reach(g,bd);
       Geometry::GridCellListSet<R> found(g);
       Geometry::GridCellListSet<R> cell_image(g);

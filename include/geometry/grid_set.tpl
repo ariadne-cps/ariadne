@@ -264,6 +264,22 @@ namespace Ariadne {
 
     template<typename R>
     bool
+    subset(const GridCellListSet<R>& A, const GridBlock<R>& B)
+    {
+      assert(A.grid()==B.grid());
+      return subset(A.lattice_set(),B.lattice_set());
+    }
+
+    template<typename R>
+    bool
+    subset(const GridMaskSet<R>& A, const GridBlock<R>& B)
+    {
+      assert(A.grid()==B.grid());
+      return subset(A.lattice_set(),B.lattice_set());
+    }
+
+    template<typename R>
+    bool
     subset(const GridCell<R>& A, const GridMaskSet<R>& B)
     {
       assert(A.grid()==B.grid());

@@ -22,7 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-
+#include "real_typedef.h"
 
 #include "geometry/parallelotope.h"
 
@@ -32,7 +32,6 @@
 #include "geometry/list_set.h"
 
 
-#include "python/typedefs.h"
 #include "python/python_utilities.h"
 using namespace Ariadne;
 using namespace Ariadne::Geometry;
@@ -52,27 +51,18 @@ touching_intersection(const BS1<Real> &a,
   return a;
 }
 
-template Parallelotope<Real> touching_intersection(
-                const Parallelotope<Real> &,  
-                const Rectangle<Real> &);
-
-template Parallelotope<Real> touching_intersection(
-                const Parallelotope<Real> &,  
-                const Parallelotope<Real> &);
-
-void export_parallelotope() {
-  typedef RParallelotope (*PltpRectBinFun) (const RParallelotope&, 
-                                            const RRectangle&);
-  typedef RParallelotope (*PltpPltpBinFun) (const RParallelotope&, 
-                                            const RParallelotope&);
-  typedef bool (*PltpPltpBinPred) (const RParallelotope&, 
-                                   const RParallelotope&);
-  typedef bool (*ZntpZntpBinPred) (const RZonotope&, 
-                                   const RZonotope&);
-
-  def("touching_intersection", PltpRectBinFun(&touching_intersection));
-  def("touching_intersection", PltpPltpBinFun(&touching_intersection));
-
+template<typename R>
+void export_parallelotope() 
+{
+  typedef Parallelotope<R> RParallelotope;
+  typedef Zonotope<R> RZonotope;
+  typedef Rectangle<R> RRectangle;
+  typedef Point<R> RPoint;
+  
+  typedef LinearAlgebra::Matrix<R> RMatrix;
+  
+  def("touching_intersection",(RParallelotope(*)(const RParallelotope&,const RRectangle&))(&touching_intersection));
+  def("touching_intersection", (RParallelotope(*)(const RParallelotope&,const RParallelotope&))(&touching_intersection));
 
   class_< RParallelotope, bases<RZonotope> >("Parallelotope",init<int>())
     .def(init<RPoint,RMatrix>())
@@ -108,3 +98,5 @@ void export_parallelotope() {
   ;
 */
 }
+
+template void export_parallelotope<Real>();

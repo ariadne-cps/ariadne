@@ -21,26 +21,32 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "real_typedef.h"
+#include "system/vector_field.h"
 #include "system/lorenz_system.h"
 
-#include "python/typedefs.h"
 using namespace Ariadne;
+using namespace Ariadne::Numeric;
+using namespace Ariadne::LinearAlgebra;
+using namespace Ariadne::Geometry;
+using namespace Ariadne::System;
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
-typedef FVector (RLorenzSystem::* PointMap) (const RPoint&) const;
-typedef RIntervalVector (RLorenzSystem::* RectangleMap) (const RRectangle&) const;
-typedef FMatrix (RLorenzSystem::* PointDerivative) (const RPoint&) const;
-typedef RIntervalMatrix (RLorenzSystem::* RectangleDerivative) (const RRectangle&) const;
-
-void export_lorenz_system() {
-  class_<RLorenzSystem, bases<RVectorFieldBase> >("LorenzSystem",init<Real,Real,Real>())
-    .def("dimension", &RLorenzSystem::dimension)
-    .def("__call__", PointMap(&RLorenzSystem::operator()))
-    .def("__call__", RectangleMap(&RLorenzSystem::operator()))
-    .def("jacobian", PointDerivative(&RLorenzSystem::jacobian))
-    .def("jacobian", RectangleDerivative(&RLorenzSystem::jacobian))
+template<typename R>
+void export_lorenz_system() 
+{
+  typedef typename numerical_traits<R>::arithmetic_type F;
+  typedef Interval<R> I;
+  typedef LorenzSystem<R> RLorenzSystem;
+  
+  class_< LorenzSystem<R>, bases< VectorField<R> > >("LorenzSystem",init<R,R,R>())
+    .def("dimension", &LorenzSystem<R>::dimension)
+    .def("__call__", (Vector<F>(LorenzSystem<R>::*)(const Point<R>&)const)(&LorenzSystem<R>::operator()))
+    .def("__call__", (Rectangle<R>(LorenzSystem<R>::*)(const Rectangle<R>&)const)(&RLorenzSystem::operator()))
+    .def("jacobian", (Matrix<F>(LorenzSystem<R>::*)(const Point<R>&)const)(&RLorenzSystem::jacobian))
+    .def("jacobian", (Matrix<I>(LorenzSystem<R>::*)(const Rectangle<R>&)const)(&RLorenzSystem::jacobian))
     .def(self_ns::str(self))
   ;
 }

@@ -22,29 +22,33 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "real_typedef.h"
+
 #include "system/henon_map.h"
 
-#include "python/typedefs.h"
 using namespace Ariadne;
+using namespace Ariadne::Numeric;
+using namespace Ariadne::LinearAlgebra;
+using namespace Ariadne::Geometry;
+using namespace Ariadne::System;
 
 #include <boost/python.hpp>
 using namespace boost::python;
   
-typedef FPoint (RHenonMap::* PointMap) (const RPoint&) const;
-typedef RRectangle (RHenonMap::* RectangleMap) (const RRectangle&) const;
-typedef RParallelotope (RHenonMap::* ParallelotopeMap) (const RParallelotope&) const;
-typedef FMatrix (RHenonMap::* PointDerivative) (const RPoint&) const;
-typedef RIntervalMatrix (RHenonMap::* RectangleDerivative) (const RRectangle&) const;
-
+template<typename R>
 void export_henon_map() {
-  class_<RHenonMap, bases<RMapBase> >("HenonMap",init<Real,Real>())
-    .def("argument_dimension", &RHenonMap::argument_dimension)
-    .def("result_dimension", &RHenonMap::result_dimension)
-    .def("__call__", PointMap(&RHenonMap::operator()))
-    .def("__call__", RectangleMap(&RHenonMap::operator()))
-    .def("__call__", ParallelotopeMap(&RHenonMap::operator()))
-    .def("jacobian", PointDerivative(&RHenonMap::jacobian))
-    .def("jacobian", RectangleDerivative(&RHenonMap::jacobian))
+  typedef typename numerical_traits<R>::arithmetic_type F;
+  
+  class_< HenonMap<R>, bases< Map<R> > >("HenonMap",init<R,R>())
+    .def("argument_dimension", &HenonMap<R>::argument_dimension)
+    .def("result_dimension", &HenonMap<R>::result_dimension)
+    .def("__call__", (Point<F>(HenonMap<R>::*)(const Point<R>&)const)(&HenonMap<R>::operator()))
+    .def("__call__", (Rectangle<R>(HenonMap<R>::*)(const Rectangle<R>&)const)(&HenonMap<R>::operator()))
+    .def("__call__", (Parallelotope<R>(HenonMap<R>::*)(const Parallelotope<R>&)const)(&HenonMap<R>::operator()))
+    .def("jacobian", (Matrix<F>(HenonMap<R>::*)(const Point<R>&)const)(&HenonMap<R>::jacobian))
+    .def("jacobian", (Matrix< Interval<R> >(HenonMap<R>::*)(const Rectangle<R>&)const)(&HenonMap<R>::jacobian))
     .def(self_ns::str(self))
   ;
 }
+
+template void export_henon_map<Real>();

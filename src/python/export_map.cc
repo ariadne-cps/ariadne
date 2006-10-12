@@ -22,24 +22,32 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "real_typedef.h"
+
 #include "system/map.h"
 
-#include "python/typedefs.h"
 using namespace Ariadne;
+using namespace Ariadne::System;
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
-struct RMap : RMapBase, wrapper<RMapBase>
+template<typename R>
+class MapWrapper : public Map<R>, public wrapper< Map<R> >
 {
+ public:
   dimension_type argument_dimension() const { return this->get_override("argument_dimension")(); }
   dimension_type result_dimension() const { return this->get_override("result_dimension")(); }
   std::string name() const { return this->get_override("name")(); }
 };
 
-void export_map() {
-  class_<RMap, boost::noncopyable>("Map")
-    .def("argument_dimension", pure_virtual(&RMapBase::argument_dimension))
-    .def("result_dimension", pure_virtual(&RMapBase::result_dimension))
+template<typename R>
+void export_map() 
+{
+  class_<MapWrapper<R>, boost::noncopyable>("Map")
+    .def("argument_dimension", pure_virtual(&MapWrapper<R>::argument_dimension))
+    .def("result_dimension", pure_virtual(&MapWrapper<R>::result_dimension))
   ;
 }
+
+template void export_map<Real>();

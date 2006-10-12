@@ -22,12 +22,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <vector>
+#include "real_typedef.h"
 
 #include "geometry/rectangle.h"
 #include "geometry/polyhedron.h"
 
-#include "python/typedefs.h"
 using namespace Ariadne;
 using namespace Ariadne::Geometry;
 
@@ -35,16 +34,18 @@ using namespace Ariadne::Geometry;
 using namespace boost::python;
 
 
+template<typename R>
+void export_polyhedron() 
+{
+  typedef Polyhedron<R> RPolyhedron;
+  typedef Rectangle<R> RRectangle;
+  typedef Polytope<R> RPolytope;
 
-void export_polyhedron() {
-  typedef bool (*PolyhPolyhBinPred) (const RPolyhedron&, const RPolyhedron&);
-  typedef RPolyhedron (*PolyhPolyhBinFunc) (const RPolyhedron&, const RPolyhedron&);
-
-  def("disjoint", PolyhPolyhBinPred(&disjoint));
-  def("interiors_intersect", PolyhPolyhBinPred(&interiors_intersect));
-  def("inner_subset", PolyhPolyhBinPred(&inner_subset));
-  def("subset", PolyhPolyhBinPred(&subset));
-  def("convex_hull", PolyhPolyhBinFunc(&convex_hull));
+  def("disjoint", (bool(*)(const RPolyhedron&, const RPolyhedron&))(&disjoint));
+  def("interiors_intersect", (bool(*)(const RPolyhedron&, const RPolyhedron&))(&interiors_intersect));
+  def("inner_subset", (bool(*)(const RPolyhedron&, const RPolyhedron&))(&inner_subset));
+  def("subset", (bool(*)(const RPolyhedron&, const RPolyhedron&))(&subset));
+  def("convex_hull", (RPolyhedron(*)(const RPolyhedron&, const RPolyhedron&))(&convex_hull));
 
   class_<RPolyhedron>("Polyhedron",init<size_type>())
     .def(init<RPolyhedron>())
@@ -54,3 +55,5 @@ void export_polyhedron() {
   ;
   
 }
+
+template void export_polyhedron<MPFloat>();

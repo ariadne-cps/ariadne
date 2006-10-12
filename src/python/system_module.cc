@@ -24,25 +24,27 @@
 
 #include <boost/python.hpp>
 
-void export_map();
-void export_affine_map();
-void export_affine_map_with_set();
-void export_polynomial_map();
-void export_henon_map();
+#include "real_typedef.h"
+
+template<typename R> void export_map();
+template<typename R> void export_affine_map();
+template<typename R> void export_affine_map_with_set();
+template<typename R> void export_polynomial_map();
+template<typename R> void export_henon_map();
  
-void export_vector_field();
-void export_affine_vector_field();
-void export_lorenz_system();
+template<typename R> void export_vector_field();
+template<typename R> void export_affine_vector_field();
+template<typename R> void export_lorenz_system();
 
 BOOST_PYTHON_MODULE(system)
 {
-  export_map();
-  export_affine_map();
-  export_affine_map_with_set();
-  export_polynomial_map();
-  export_henon_map();
+  export_map<Ariadne::Real>();
+  export_affine_map<Ariadne::Real>();
+  export_affine_map_with_set<Ariadne::Real>();
+  export_polynomial_map<Ariadne::Real>();
+  export_henon_map<Ariadne::Real>();
   
-  export_vector_field();
-  export_affine_vector_field();
-  export_lorenz_system();
+  export_vector_field<Ariadne::Real>();
+  export_affine_vector_field<Ariadne::Real>();
+  export_lorenz_system<Ariadne::Real>();
 }

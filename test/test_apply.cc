@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_chainreach.cc
+ *            test_apply.cc
  *
  *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -27,9 +27,9 @@
 
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
-#include "geometry/grid.h"
-#include "geometry/grid_set.h"
-#include "geometry/partition_tree_set.h"
+#include "geometry/parallelotope.h"
+#include "geometry/zonotope.h"
+#include "geometry/polytope.h"
 #include "system/henon_map.h"
 #include "evaluation/apply.h"
 #include "output/epsfstream.h"
@@ -43,15 +43,15 @@ using namespace Ariadne::System;
 using namespace Ariadne::Evaluation;
 using namespace std;
 
-template<typename R> int test_chainreach();
+template<typename R> int test_apply();
 
 int main() {
-  return test_chainreach<Real>();
+  return test_apply<Real>();
 }
 
 template<typename R> 
 int 
-test_chainreach()
+test_apply()
 {
   Point<R> params=Point<R>("(1.5,0.875)");
   R a=params[0];
@@ -61,54 +61,22 @@ test_chainreach()
   Rectangle<R> gbb=Rectangle<R>("[-11,5]x[-8,8]") ;
   FiniteGrid<R> fg=FiniteGrid<R>(gbb,128); // grid
   const Grid<R>& g=fg.grid(); // grid
-  Rectangle<R> ir=Rectangle<R>("[1.499,1.501]x[0.499,0.501]"); // initial state
   Rectangle<R> cb=Rectangle<R>("[-4,4]x[-4,4]"); // cutoff box
   Rectangle<R> epsbb=Rectangle<R>("[-4.1,4.1]x[-4.1,4.1]"); // eps bounding box
+  
+  Rectangle<R> ir=Rectangle<R>("[1.499,1.501]x[0.499,0.501]"); // initial state
+  Parallelotope<R> ip=Parallelotope<R>(Rectangle<R>("[1.499,1.501]x[0.499,0.501]")); // initial state
+  Zonotope<R> iz=Zonotope<R>(Rectangle<R>("[1.499,1.501]x[0.499,0.501]")); // initial state
+  Polytope<R> ipl=Polytope<R>(Rectangle<R>("[1.499,1.501]x[0.499,0.501]")); // initial state
   
   cb=Rectangle<R>(gbb); // cutoff box
   epsbb=Rectangle<R>(gbb); // eps bounding box
   
-  GridMaskSet<R> in=GridMaskSet<R>(fg);
-  GridMaskSet<R> bd=GridMaskSet<R>(fg);
-  in.adjoin(over_approximation(ir,g));
-  bd.adjoin(over_approximation(gbb,g));
-
-
-  GridMaskSet<R> cr=chainreach(h,in,bd);
-  PartitionTreeSet<R> ptcr=PartitionTreeSet<R>(cr);
-
-  cout << cr <<endl;
-  cout << ptcr <<endl;
   
-  cout << "cr.size()=" << cr.size() << endl;
-  cout << "ptcr.size()=" << ptcr.size() << "  " << flush;
-  cout << "ptcr.capacity()=" << ptcr.capacity() << endl;
-
-  epsfstream eps=epsfstream("test_chainreach-1.eps",epsbb);
-  eps.set_pen_colour("black");
-  eps.set_fill_colour("white");
-  eps << cb;
-  eps.set_line_style(false);
-  eps.set_fill_colour("green");
-  eps << cr;
-  eps.set_line_style(true);
-  eps.set_fill_style(false);
-  eps << ptcr.partition_tree();
-  eps.set_line_style(true);
-  eps.set_fill_colour("blue");
-  eps << ir;
-  eps.close();
-
-  GridMaskSet<R> gmcr=GridMaskSet<R>(cr);
-  eps.open("test_chainreach-2.eps",epsbb);
-  eps.set_line_style(false);
-  eps.set_fill_colour("red");
-  eps << difference(gmcr.neighbourhood(),gmcr);
-  eps.set_fill_colour("blue");
-  eps << gmcr.adjoining();
-  eps.set_fill_colour("green");
-  eps << gmcr;
-  eps.close();
-
+  Rectangle<R> fr=apply(h,ir);
+  Parallelotope<R> fp=apply(h,ip);
+  //Zonotope<R> fz=apply(h,iz);
+  //Polytope<R> fpl=apply(h,ipl);
+  
   return 0;
 }

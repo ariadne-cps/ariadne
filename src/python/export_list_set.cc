@@ -22,6 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "real_typedef.h"
 
 
 #include "geometry/rectangle.h"
@@ -32,7 +33,6 @@
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
 
-#include "python/typedefs.h"
 #include "python/python_utilities.h"
 using namespace Ariadne;
 using namespace Ariadne::Geometry;
@@ -40,16 +40,15 @@ using namespace Ariadne::Geometry;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-inline RParallelotope plsg(const RParallelotopeListSet& s, int n) { return ::get_item(s,n); }
-inline RZonotope zlsg(const RZonotopeListSet& s, int n) { return ::get_item(s,n); }
-
+template<typename R>
 inline 
-bool interiors_intersect(const RZonotopeListSet& A, const RParallelotope& B) 
+bool interiors_intersect(const ListSet<R,Zonotope>& A, const Parallelotope<R>& B) 
 {
-  return interiors_intersect(A,RZonotopeListSet(RZonotope(B)));
+  return interiors_intersect(A,ListSet<R,Zonotope>(Zonotope<R>(B)));
 }
 
 template <typename R, template<typename> class BS, template<typename> class BS2>
+inline
 ListSet<R,BS> 
 touching_intersection(const ListSet<R,BS>& ls, const BS2<R>& bs) 
 {
@@ -63,18 +62,26 @@ touching_intersection(const ListSet<R,BS>& ls, const BS2<R>& bs)
   return output;
 }
 
-template ListSet<Real,Rectangle> touching_intersection(const ListSet<Real,Rectangle>&, const Rectangle<Real> &);
-template ListSet<Real,Parallelotope> touching_intersection(const ListSet<Real,Parallelotope>&, const Rectangle<Real> &);
-template ListSet<Real,Zonotope> touching_intersection(const ListSet<Real,Zonotope>&, const Rectangle<Real> &);
-template ListSet<Real,Rectangle> touching_intersection(const ListSet<Real,Rectangle>&, const Parallelotope<Real> &);
-template ListSet<Real,Parallelotope> touching_intersection(const ListSet<Real,Parallelotope>&, const Parallelotope<Real> &);
-template ListSet<Real,Zonotope> touching_intersection(const ListSet<Real,Zonotope>&, const Parallelotope<Real> &);
-template ListSet<Real,Rectangle> touching_intersection(const ListSet<Real,Rectangle>&, const Zonotope<Real> &);
-template ListSet<Real,Parallelotope> touching_intersection(const ListSet<Real,Parallelotope>&, const Zonotope<Real> &);
-template ListSet<Real,Zonotope> touching_intersection(const ListSet<Real,Zonotope>&, const Zonotope<Real> &);
 
 
-void export_list_set() {
+template<typename R>
+void export_list_set() 
+{
+  typedef Rectangle<R> RRectangle;
+  typedef Parallelotope<R> RParallelotope;
+  typedef Zonotope<R> RZonotope;
+  typedef Polytope<R> RPolytope;
+  
+  typedef ListSet<R,Rectangle> RRectangleListSet;
+  typedef ListSet<R,Parallelotope> RParallelotopeListSet;
+  typedef ListSet<R,Zonotope> RZonotopeListSet;
+  typedef ListSet<R,Polytope> RPolytopeListSet;
+  
+  typedef GridCellListSet<R> RGridCellListSet;
+  typedef GridBlockListSet<R> RGridBlockListSet;
+  typedef GridMaskSet<R> RGridMaskSet;
+  typedef PartitionTreeSet<R> RPartitionTreeSet;
+  
   def("regular_intersection",(RRectangleListSet(*)(const RRectangleListSet&,const RRectangleListSet&))(&regular_intersection));
   def("interiors_intersect",(bool(*)(const RRectangleListSet&,const RRectangleListSet&))(&interiors_intersect));
   def("interiors_intersect",(bool(*)(const RParallelotopeListSet&,const RParallelotopeListSet&))(&interiors_intersect));
@@ -106,8 +113,8 @@ void export_list_set() {
     .def("size", &RRectangleListSet::size)
     .def("empty", &RRectangleListSet::empty)
     .def("__len__", &RRectangleListSet::size)
-    .def("__getitem__", &RRectangleListSet::get, return_value_policy<copy_const_reference>())
-    .def("__setitem__", &RRectangleListSet::set)
+    .def("__getitem__", &get_item<RRectangleListSet>)
+//    .def("__setitem__", &set_item<RRectangleListSet>)
     .def("__iter__", iterator<RRectangleListSet>())
     .def(self_ns::str(self))    // __self_ns::str__
   ;
@@ -124,9 +131,8 @@ void export_list_set() {
     .def("empty", &RParallelotopeListSet::empty)
     .def("__len__", &RParallelotopeListSet::size)
 //    .def("__getitem__", &RParallelotopeListSet::get, return_value_policy<copy_const_reference>())
-//    .def("__getitem__", &get_item<RParallelotopeListSet>)
-    .def("__getitem__", &plsg)
-    .def("__setitem__", &RParallelotopeListSet::set)
+    .def("__getitem__", &get_item<RParallelotopeListSet>)
+//    .def("__setitem__", &set_item<RParallelotopeListSet>)
     .def("__iter__", iterator<RParallelotopeListSet>())
     .def(self_ns::str(self))    // __self_ns::str__
   ;
@@ -144,11 +150,12 @@ void export_list_set() {
     .def("empty", &RZonotopeListSet::empty)
     .def("__len__", &RZonotopeListSet::size)
 //    .def("__getitem__", &RParallelotopeListSet::get, return_value_policy<copy_const_reference>())
-//    .def("__getitem__", &get_item<RParallelotopeListSet>)
-    .def("__getitem__", &zlsg)
-    .def("__setitem__", &RZonotopeListSet::set)
+    .def("__getitem__", &get_item<RZonotopeListSet>)
+//    .def("__setitem__", &set_item<RZonotopeListSet>)
     .def("__iter__", iterator<RZonotopeListSet>())
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 
 }
+
+template void export_list_set<Real>();

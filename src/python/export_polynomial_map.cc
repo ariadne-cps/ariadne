@@ -22,18 +22,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "real_typedef.h"
 
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
 #include "system/polynomial_map.h"
 
-#include "python/typedefs.h"
 using namespace Ariadne;
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
-void export_polynomial_map() {
+template<typename R>
+void export_polynomial_map() 
+{
 /*
   typedef Real (RPolynomial::* PolyApplyPointFunc) (const RPoint&) const;
   typedef RInterval (RPolynomial::* PolyApplyRectFunc) (const RRectangle&) const;
@@ -73,3 +75,5 @@ void export_polynomial_map() {
   ;
 */
 }
+
+template void export_polynomial_map<Real>();

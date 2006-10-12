@@ -22,7 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-
+#include "real_typedef.h"
 
 #include "linear_algebra/linear_algebra.h"
 
@@ -36,28 +36,51 @@
 #include "geometry/partition_tree_set.h"
 
 
-#include "python/typedefs.h"
 #include "python/python_utilities.h"
 using namespace Ariadne;
+using namespace Ariadne::Combinatoric;
+using namespace Ariadne::Geometry;
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
-struct RGridWrap : RGrid, wrapper<RGrid>
+template<typename R>
+struct GridWrap : Grid<R>, wrapper< Grid<R> >
 {
-  RGrid* clone() const { return this->get_override("clone")(); }
+  Grid<R>* clone() const { return this->get_override("clone")(); }
   dimension_type dimension() const { return this->get_override("dimension")(); }
   grid_type type() const { return this->get_override("type")(); }
-  real_type subdivision_coordinate(dimension_type d, index_type n) const { return this->get_override("subdivision_coordinate")(); }
-  index_type subdivision_interval(dimension_type d, const real_type& x) const { return this->get_override("subdivision_interval")(); }
-  bool bounds_enclose(const RRectangle& r) const { return this->get_override("bounds_enclose")(); }
+  R subdivision_coordinate(dimension_type d, index_type n) const { return this->get_override("subdivision_coordinate")(); }
+  index_type subdivision_interval(dimension_type d, const R& x) const { return this->get_override("subdivision_interval")(); }
+  bool bounds_enclose(const Rectangle<R>& r) const { return this->get_override("bounds_enclose")(); }
   std::ostream& write(std::ostream& os) const { return this->get_override("write")(); }
   std::istream& read(std::istream& is) { return this->get_override("read")(); }
 };
 
-
-void export_grid_set() {
-
+template<typename R>
+void export_grid_set() 
+{
+  typedef Grid<R> RGrid;
+  typedef GridWrap<R> RGridWrap;
+  typedef IrregularGrid<R> RIrregularGrid;
+  typedef RegularGrid<R> RRegularGrid;
+  typedef FiniteGrid<R> RFiniteGrid;
+  
+  typedef GridCell<R> RGridCell;
+  typedef GridBlock<R> RGridBlock;
+  typedef GridCellListSet<R> RGridCellListSet;
+  typedef GridBlockListSet<R> RGridBlockListSet;
+  typedef GridMaskSet<R> RGridMaskSet;
+  
+  typedef Rectangle<R> RRectangle;
+  typedef Parallelotope<R> RParallelotope;
+  typedef Zonotope<R> RZonotope;
+  typedef Polytope<R> RPolytope;
+  typedef ListSet<R,Rectangle> RRectangleListSet;
+  typedef ListSet<R,Parallelotope> RParallelotopeListSet;
+  typedef ListSet<R,Zonotope> RZonotopeListSet;
+  typedef PartitionTreeSet<R> RPartitionTreeSet;
+  
   class_<RGridWrap, boost::noncopyable>("Grid")
     .def("dimension", pure_virtual(&RGrid::dimension))
     .def("subdivision_coordinate", pure_virtual(&RGrid::subdivision_coordinate))

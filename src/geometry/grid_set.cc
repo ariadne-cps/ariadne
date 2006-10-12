@@ -52,6 +52,9 @@ namespace Ariadne {
     template bool interiors_intersect(const GridMaskSet<Real>&, const GridMaskSet<Real>&);
     template bool inner_subset(const Rectangle<Real>&, const GridMaskSet<Real>&);
     template bool subset(const Rectangle<Real>&, const GridMaskSet<Real>&);
+    template bool subset(const GridCell<Real>&, const GridBlock<Real>&);
+    template bool subset(const GridBlock<Real>&, const GridBlock<Real>&);
+    template bool subset(const GridCellListSet<Real>&, const GridBlock<Real>&);
     template bool subset(const GridCell<Real>&, const GridMaskSet<Real>&);
     template bool subset(const GridBlock<Real>&, const GridMaskSet<Real>&);
     template bool subset(const GridCellListSet<Real>&, const GridMaskSet<Real>&);

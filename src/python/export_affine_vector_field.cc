@@ -21,6 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "real_typedef.h"
 
 #include "numeric/interval.h"
 #include "linear_algebra/matrix.h"
@@ -33,45 +34,28 @@
 #include "system/affine_vector_field.h"
 
 
-#include "python/typedefs.h"
 #include "python/python_utilities.h"
 using namespace Ariadne;
+using namespace Ariadne::Numeric;
+using namespace Ariadne::LinearAlgebra;
+using namespace Ariadne::Geometry;
+using namespace Ariadne::System;
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
-typedef FVector (RAffineVectorField::*AffVectorFieldCallPoint) (const RPoint&) const;
-typedef RIntervalVector (RAffineVectorField::*AffVectorFieldCallRectangle) (const RRectangle&) const;
-
-//typedef RParallelotope (RAffineVectorField::*AffVectorFieldApplyParallelotope) (const RParallelotope&) const;
-//typedef RZonotope (RAffineVectorField::*AffVectorFieldApplyZonotope) (const RZonotope&) const;
-//typedef RSimplex (RAffineVectorField::*AffVectorFieldApplySimplex) (const RSimplex&) const;
-//typedef RPolytope (RAffineVectorField::*AffVectorFieldApplyPolytope) (const RPolytope&) const;
-
-typedef FMatrix (RAffineVectorField::*AffVectorFieldDerivativePoint) (const RPoint&) const;
-typedef RIntervalMatrix (RAffineVectorField::*AffVectorFieldDerivativeRectangle) (const RRectangle&) const;
-
-AffVectorFieldCallPoint affine_vf_call_point=&RAffineVectorField::operator();
-AffVectorFieldCallRectangle affine_vf_call_rectangle=&RAffineVectorField::operator();
-//AffVectorFieldApplyParallelotope affine_vf_apply_parallelotope=&RAffineVectorField::operator();
-//AffVectorFieldApplyZonotope affine_vf_apply_zonotope=&RAffineVectorField::operator();
-//AffVectorFieldApplySimplex affine_vf_apply_simplex=&RAffineVectorField::operator();
-//AffVectorFieldApplyPolytope affine_vf_apply_polytope=&RAffineVectorField::operator();
-AffVectorFieldDerivativePoint affine_vf_derivative_point=&RAffineVectorField::derivative;
-AffVectorFieldDerivativeRectangle affine_vf_derivative_rectangle=&RAffineVectorField::derivative;
-
-void export_affine_vector_field() {
-
-  class_< RAffineVectorField, bases<RVectorFieldBase> >("AffineVectorField",init<RMatrix,RVector>())
-    .def("dimension", &RAffineVectorField::dimension)
-    .def("__call__", affine_vf_call_point)
-    .def("__call__", affine_vf_call_rectangle)
-//    .def("__call__", affine_vf_apply_parallelotope)
-//    .def("__call__", affine_vf_apply_zonotope)
-//    .def("__call__", affine_vf_apply_polytope)
-//    .def("__call__", affine_vf_apply_simplex)
-    .def("derivative", affine_vf_derivative_point)
-    .def("derivative", affine_vf_derivative_rectangle)
+template<typename R>
+void export_affine_vector_field() 
+{
+  typedef typename numerical_traits<R>::arithmetic_type F;
+  typedef Interval<R> I;
+  
+  class_< AffineVectorField<R>, bases< VectorField<R> > >("AffineVectorField",init< Matrix<R>, Vector<R> >())
+    .def("dimension", &AffineVectorField<R>::dimension)
+    .def("__call__", (Vector<F>(AffineVectorField<R>::*)(const Point<R>&)const)(&AffineVectorField<R>::operator()))
+    .def("__call__", (Vector<I>(AffineVectorField<R>::*)(const Rectangle<R>&)const)(&AffineVectorField<R>::operator()))
+    .def("jacobian", (Matrix<F>(AffineVectorField<R>::*)(const Point<R>&)const)(&AffineVectorField<R>::jacobian))
+    .def("jacobian", (Matrix<I>(AffineVectorField<R>::*)(const Point<R>&)const)(&AffineVectorField<R>::jacobian))
     .def(self_ns::str(self))
   ;
 }

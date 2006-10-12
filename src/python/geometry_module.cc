@@ -22,35 +22,33 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <boost/python.hpp>
-#include "numeric/float64.h"
-#include "numeric/mpfloat.h"
-#include "numeric/rational.h"
+#include "real_typedef.h"
 
+#include <boost/python.hpp>
 
 template<typename R> void export_point();
 template<typename R> void export_point_list();
 template<typename R> void export_rectangle();
-void export_parallelotope();
-void export_simplex();
-void export_zonotope();
-void export_polytope();
-void export_polyhedron();
-void export_list_set();
-void export_grid_set();
-void export_partition_tree_set();
+template<typename R> void export_parallelotope();
+template<typename R> void export_simplex();
+template<typename R> void export_zonotope();
+template<typename R> void export_polytope();
+template<typename R> void export_polyhedron();
+template<typename R> void export_list_set();
+template<typename R> void export_grid_set();
+template<typename R> void export_partition_tree_set();
 
 BOOST_PYTHON_MODULE(geometry)
 {
-  export_point<Ariadne::Numeric::MPFloat>();
-  export_point_list<Ariadne::Numeric::MPFloat>();
-  export_rectangle<Ariadne::Numeric::MPFloat>();
-  export_zonotope();
-  export_parallelotope();
-  export_simplex();
-  export_polytope();
-  export_polyhedron();
-  export_list_set();
-  export_grid_set();
-  export_partition_tree_set();
+  export_point<Ariadne::Real>();
+  export_point_list<Ariadne::Real>();
+  export_rectangle<Ariadne::Real>();
+  export_zonotope<Ariadne::Real>();
+  export_parallelotope<Ariadne::Real>();
+  export_simplex<Ariadne::Real>();
+  export_polytope<Ariadne::Real>();
+  export_polyhedron<Ariadne::Real>();
+  export_list_set<Ariadne::Real>();
+  export_grid_set<Ariadne::Real>();
+  export_partition_tree_set<Ariadne::Real>();
 }

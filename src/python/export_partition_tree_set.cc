@@ -22,6 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "real_typedef.h"
 
 #include "combinatoric/binary_word.h"
 #include "combinatoric/binary_tree.h"
@@ -30,8 +31,6 @@
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
 
-
-#include "python/typedefs.h"
 using namespace Ariadne;
 using namespace Ariadne::Combinatoric;
 using namespace Ariadne::Geometry;
@@ -39,10 +38,22 @@ using namespace Ariadne::Geometry;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-RRectangle convert_to_rectangle(const RPartitionTreeCell& ptc) {
-  return RRectangle(ptc); }
+template<typename R> inline
+Rectangle<R> convert_to_rectangle(const PartitionTreeCell<R>& ptc) {
+  return Rectangle<R>(ptc);
+}
 
-void export_partition_tree_set() {
+template<typename R>
+void export_partition_tree_set() 
+{
+  typedef PartitionScheme<R> RPartitionScheme;
+  typedef PartitionTree<R> RPartitionTree;
+  typedef PartitionTreeCell<R> RPartitionTreeCell;
+  typedef PartitionTreeSet<R> RPartitionTreeSet;
+ 
+  typedef Rectangle<R> RRectangle;
+  typedef GridMaskSet<R> RGridMaskSet;
+  
   class_<SubdivisionSequence>("SubdivisionSequence",init<unsigned int>())
     .def("dimension", &SubdivisionSequence::dimension)
     .def("__getitem__", &SubdivisionSequence::operator[])
@@ -94,3 +105,5 @@ void export_partition_tree_set() {
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 }
+
+template void export_partition_tree_set<Real>();

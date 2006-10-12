@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "real_typedef.h"
+
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
@@ -33,73 +35,76 @@
 #include "evaluation/lohner_integrator.h"
 
 
-#include "python/typedefs.h"
 using namespace Ariadne;
+using namespace Ariadne::Geometry;
+using namespace Ariadne::System;
 using namespace Ariadne::Evaluation;
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
-typedef Integrator<Real> RIntegrator;
-typedef C0Integrator<Real> RC0Integrator;
-typedef C1Integrator<Real> RC1Integrator;
-typedef C1LohnerIntegrator<Real> RC1LohnerIntegrator;
-
-inline RParallelotope integrate_parallelotope(
-  const RC1LohnerIntegrator li, const RVectorFieldBase& vf, const RParallelotope& p, const Real& t)
+template<typename R> inline 
+Parallelotope<R> integrate_parallelotope(
+  const C1LohnerIntegrator<R> li, const VectorField<R>& vf, const Parallelotope<R>& p, const time_type& t)
 {
   return li.integrate(vf,p,t);
 }
-inline RZonotope integrate_zonotope(
-  const RC1LohnerIntegrator li, const RVectorFieldBase& vf, const RZonotope& z, const Real& t)
+
+template<typename R> inline 
+Zonotope<R> integrate_zonotope(
+  const C1LohnerIntegrator<R> li, const VectorField<R>& vf, const Zonotope<R>& z, const time_type& t)
 {
   return li.integrate(vf,z,t);
 }
 
-void export_integrate() {
-  typedef Evaluation::time_type Time;
-  typedef RRectangle (RC1LohnerIntegrator::*IntStepRectFunc) (const RVectorFieldBase&, const RRectangle&, Time&) const;
-  typedef RParallelotope (RC1LohnerIntegrator::*IntStepPltpFunc) (const RVectorFieldBase&, const RParallelotope&, Time&) const;
-  typedef RRectangle (RC1Integrator::*RchStepRectFunc) (const RVectorFieldBase&, const RRectangle&, Time&) const;
-  typedef RZonotope (RC1Integrator::*RchStepPltpFunc) (const RVectorFieldBase&, const RParallelotope&, Time&) const;
-  typedef RZonotope (RC1Integrator::*RchStepZntpFunc) (const RVectorFieldBase&, const RZonotope&, Time&) const;
-  typedef RRectangle (RC1LohnerIntegrator::*IntRectFunc) (const RVectorFieldBase&, const RRectangle&, const Time&) const;
-  typedef RParallelotope (RC1LohnerIntegrator::*IntPltpFunc) (const RVectorFieldBase&, const RParallelotope&, const Time&) const;
-  typedef RZonotope (RC1LohnerIntegrator::*IntZntpFunc) (const RVectorFieldBase&, const RZonotope&, const Time&) const;
-  typedef RRectangleListSet (RC1LohnerIntegrator::*IntLSRectFunc) (const RVectorFieldBase&, const RRectangleListSet&, const Time&) const;
-  typedef RZonotopeListSet (RC1LohnerIntegrator::*IntLSZNtpFunc) (const RVectorFieldBase&, const RZonotopeListSet&, const Time&) const;
-  typedef RParallelotopeListSet (RC1LohnerIntegrator::*ReachLSPltpFunc) (const RVectorFieldBase&, const RParallelotopeListSet&, const Time&) const;
-  typedef RZonotopeListSet (RC1LohnerIntegrator::*ReachLSPltzFunc) (const RVectorFieldBase&, const RZonotopeListSet&, const Time&) const;
-  typedef RParallelotopeListSet (RC1LohnerIntegrator::*ReachLSPpFunc) (const RVectorFieldBase&, const RParallelotope&, const Time&) const;
-  typedef RZonotopeListSet (RC1LohnerIntegrator::*ReachLSZzFunc) (const RVectorFieldBase&, const RZonotope&, const Time&) const;
-  typedef RParallelotopeListSet (RC1LohnerIntegrator::*IntLSPltpFunc) (const RVectorFieldBase&, const RParallelotopeListSet&, const Time&) const;
-  typedef RZonotopeListSet (RC1LohnerIntegrator::*IntLSZntpFunc) (const RVectorFieldBase&, const RZonotopeListSet&, const Time&) const;
-  typedef RGridMaskSet (RC1Integrator::*IntGMSFunc) (const RVectorFieldBase&, const RGridMaskSet&, const RGridMaskSet&, const Time&) const;
-  typedef RGridMaskSet (RC1LohnerIntegrator::*CRGMSFunc) (const RVectorFieldBase&, const RGridMaskSet&, const RGridMaskSet&) const;
-  typedef bool (RC1LohnerIntegrator::*CRGMSPred) (const RVectorFieldBase&, const RGridMaskSet&, const RGridMaskSet&) const;
- 
-  class_<RC1LohnerIntegrator>("C1LohnerIntegrator",init<Real,Real,Real>())
+template<typename R>
+void export_integrate() 
+{
+  class_< C1LohnerIntegrator<R> >("C1LohnerIntegrator",init<R,R,R>())
     .def(init<double,double,double>()) 
-    .def_readwrite("maximum_step_size", &RC1LohnerIntegrator::maximum_step_size)
-    .def_readwrite("maximum_basic_set_radius", &RC1LohnerIntegrator::maximum_basic_set_radius)
-    .def("integration_step", IntStepRectFunc(&RC1Integrator::integration_step))
-    .def("integration_step", IntStepPltpFunc(&RC1LohnerIntegrator::integration_step))
-    .def("reach_step", RchStepPltpFunc(&RC1LohnerIntegrator::reachability_step))
-    .def("reach_step", RchStepZntpFunc(&RC1LohnerIntegrator::reachability_step))
-    .def("integrate", IntRectFunc(&RC1LohnerIntegrator::integrate))
-    .def("integrate_parallelotope", IntPltpFunc(&RC1LohnerIntegrator::integrate))
-    .def("integrate", IntPltpFunc(&RC1LohnerIntegrator::integrate))
-    .def("integrate", IntZntpFunc(&RC1LohnerIntegrator::integrate))
-    .def("integrate", IntLSPltpFunc(&RC1LohnerIntegrator::integrate))
-    .def("integrate", IntLSZntpFunc(&RC1LohnerIntegrator::integrate))
-    .def("integrate", IntGMSFunc(&RC1Integrator::integrate))
-    .def("reach", ReachLSPltpFunc(&RC1LohnerIntegrator::reach))
-    .def("reach", ReachLSPltzFunc(&RC1LohnerIntegrator::reach))
-    .def("reach", ReachLSPpFunc(&RC1LohnerIntegrator::reach))
-    .def("reach", ReachLSZzFunc(&RC1LohnerIntegrator::reach))
-    .def("reach", IntGMSFunc(&RC1Integrator::reach))
-    .def("chainreach", CRGMSFunc(&RC1LohnerIntegrator::chainreach), "chain reach of a set" )
-    .def("verify", CRGMSFunc(&RC1LohnerIntegrator::verify), "verify a safety property" )
-    ;
+    .def_readwrite("maximum_step_size", &C1LohnerIntegrator<R>::maximum_step_size)
+    .def_readwrite("maximum_basic_set_radius", &C1LohnerIntegrator<R>::maximum_basic_set_radius)
+    .def("integration_step",(Rectangle<R>(C0LohnerIntegrator<R>::*)(const VectorField<R>&,const Rectangle<R>&,time_type&)const)
+                              (&C0LohnerIntegrator<R>::integration_step))
+    .def("integration_step",(Parallelotope<R>(C1LohnerIntegrator<R>::*)(const VectorField<R>&,const Parallelotope<R>&,time_type&)const)
+                              (&C1LohnerIntegrator<R>::integration_step))
+    .def("reach_step",(Rectangle<R>(C0LohnerIntegrator<R>::*)(const VectorField<R>&,const Rectangle<R>&,time_type&)const)
+                              (&C0LohnerIntegrator<R>::reachability_step))
+    .def("reach_step",(Zonotope<R>(C1LohnerIntegrator<R>::*)(const VectorField<R>&,const Zonotope<R>&,time_type&)const)
+                              (&C1LohnerIntegrator<R>::reachability_step))
 
+    .def("integrate",(Rectangle<R>(C0LohnerIntegrator<R>::*)(const VectorField<R>&,const Rectangle<R>&,const time_type&)const)
+                              (&C0LohnerIntegrator<R>::integrate))
+    .def("integrate",(Parallelotope<R>(C1LohnerIntegrator<R>::*)(const VectorField<R>&,const Parallelotope<R>&,const time_type&)const)
+                              (&C1LohnerIntegrator<R>::integrate))
+    .def("integrate",(Zonotope<R>(C1LohnerIntegrator<R>::*)(const VectorField<R>&,const Zonotope<R>&,const time_type&)const)
+                              (&C1LohnerIntegrator<R>::integrate))
+    .def("integrate",(ListSet<R,Parallelotope>(C1LohnerIntegrator<R>::*)(const VectorField<R>&,const ListSet<R,Parallelotope>&,const time_type&)const)
+                              (&C1LohnerIntegrator<R>::integrate))
+    .def("integrate",(ListSet<R,Zonotope>(C1LohnerIntegrator<R>::*)(const VectorField<R>&,const ListSet<R,Zonotope>&,const time_type&)const)
+                              (&C1LohnerIntegrator<R>::integrate))
+    .def("integrate",(GridMaskSet<R>(C1LohnerIntegrator<R>::*)(const VectorField<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&,const time_type&)const)
+                              (&C1LohnerIntegrator<R>::integrate))
+
+    .def("reach",(ListSet<R,Parallelotope>(C1LohnerIntegrator<R>::*)(const VectorField<R>&,const Parallelotope<R>&,const time_type&)const)
+                              (&C1LohnerIntegrator<R>::reach))
+
+    .def("reach",(ListSet<R,Zonotope>(C1LohnerIntegrator<R>::*)(const VectorField<R>&,const Zonotope<R>&,const time_type&)const)
+                              (&C1LohnerIntegrator<R>::reach))
+
+    .def("reach",(ListSet<R,Parallelotope>(C1Integrator<R>::*)(const VectorField<R>&,const ListSet<R,Parallelotope>&,const time_type&)const)
+                              (&C1Integrator<R>::reach))
+    .def("reach",(ListSet<R,Zonotope>(C1Integrator<R>::*)(const VectorField<R>&,const ListSet<R,Zonotope>&,const time_type&)const)
+                              (&C1Integrator<R>::reach))
+    .def("reach",(GridMaskSet<R>(C1LohnerIntegrator<R>::*)(const VectorField<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&,const time_type&)const)
+                              (&C1LohnerIntegrator<R>::reach))
+
+    .def("chainreach",(GridMaskSet<R>(Integrator<R>::*)(const VectorField<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
+                              (&Integrator<R>::reach),"chain reach of a set")
+    .def("verify",(bool(Integrator<R>::*)(const VectorField<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
+                              (&Integrator<R>::reach),"verify a safety property")
+
+;
 }
+
+template void export_integrate<Real>();

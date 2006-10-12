@@ -21,23 +21,32 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "real_typedef.h"
+
 #include "system/vector_field.h"
 
-#include "python/typedefs.h"
 using namespace Ariadne;
+using namespace Ariadne::System;
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
-struct RVectorField : RVectorFieldBase, wrapper<RVectorFieldBase>
+template<typename R>
+class VectorFieldWrapper
+  : public VectorField<R>, public wrapper< VectorField<R> >
 {
+ public: 
   dimension_type dimension() const { return this->get_override("dimension")(); }
   std::string name() const { return this->get_override("name")(); }
 };
 
-void export_vector_field() {
-  class_<RVectorField, boost::noncopyable>("VectorField")
-    .def("dimension", pure_virtual(&RVectorFieldBase::dimension))
-    .def("name", pure_virtual(&RVectorFieldBase::name))
+template<typename R>
+void export_vector_field() 
+{
+  class_<VectorFieldWrapper<R>, boost::noncopyable>("VectorField")
+    .def("dimension", pure_virtual(&VectorField<R>::dimension))
+    .def("name", pure_virtual(&VectorField<R>::name))
   ;
 }
+
+template void export_vector_field<Real>();

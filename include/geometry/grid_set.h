@@ -61,7 +61,10 @@ namespace Ariadne {
     template<typename R> bool disjoint(const Rectangle<R>&, const GridMaskSet<R>&);
     template<typename R> bool disjoint(const GridMaskSet<R>& gm, const Rectangle<R>& r);
 
+    template<typename R> bool subset(const GridCell<R>&, const GridBlock<R>&);
     template<typename R> bool subset(const GridBlock<R>&, const GridBlock<R>&);
+    template<typename R> bool subset(const GridCellListSet<R>&, const GridBlock<R>&);
+    template<typename R> bool subset(const GridMaskSet<R>&, const GridBlock<R>&);
     template<typename R> bool subset(const GridCell<R>&, const GridMaskSet<R>&);
     template<typename R> bool subset(const GridBlock<R>&, const GridMaskSet<R>&);
     template<typename R> bool subset(const GridCellListSet<R>&, const GridMaskSet<R>&);

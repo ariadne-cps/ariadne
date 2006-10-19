@@ -54,40 +54,46 @@ int main() {
   imgary[0]=5;
   imglcls.adjoin(LatticeCell(imgary));
   
-  LatticeMultiMap lm=LatticeMultiMap(3,2);
-  lm.adjoin_to_image(arglc,imglcls);
+  LatticeMultiMap lmap=LatticeMultiMap(3,2);
+  lmap.adjoin_to_image(arglc,imglcls);
   argary[0]=0;
   arglc=LatticeCell(argary);
-  lm.adjoin_to_image(arglc,imglcls);
+  lmap.adjoin_to_image(arglc,imglcls);
   imgary[1]=3;
-  lm.adjoin_to_image(arglc,LatticeCell(imgary));
-  cout << lm << endl << endl;
+  lmap.adjoin_to_image(arglc,LatticeCell(imgary));
+  cout << lmap << endl << endl;
   
   argary[0]=0;
   argary[1]=0;
   argary[2]=0;
   LatticeCell arglc2=LatticeCell(argary);
   
-  cout << arglc2 << " " << lm(arglc2) << endl;
-  cout << arglc2 << " " << lm.apply(arglc2) << endl;
-  cout << arglc << " " << lm(arglc) << endl;
-  cout << arglc << " " << lm.apply(arglc) << endl;
+  cout << arglc2 << " " << lmap(arglc2) << endl;
+  cout << arglc2 << " " << lmap.image(arglc2) << endl;
+  cout << arglc << " " << lmap(arglc) << endl;
+  cout << arglc << " " << lmap.image(arglc) << endl;
   cout << endl;
   
-  cout << LatticeBlock(arglc) << " " << lm(LatticeBlock(arglc)) << endl;
+  cout << LatticeBlock(arglc) << " " << lmap(LatticeBlock(arglc)) << endl;
   LatticeCellListSet lcls(0);
-  cout << lm(arglc2) << endl;
-  lcls=lm.apply(arglc2);
+  cout << lmap(arglc2) << endl;
+  lcls=lmap.image(arglc2);
   cout << arglc2 << " " << lcls << endl;
-  lcls=lm(arglc);
+  lcls=lmap(arglc);
   cout << lcls << endl;
   lcls.adjoin(LatticeCell(imgary));
   cout << lcls << endl;
-  lcls=lm(LatticeCellListSet(arglc));
-  cout << lm << endl;
+  lcls=lmap(LatticeCellListSet(arglc));
+  cout << lmap << endl;
 
-  
-  
+  //assert(lmap.inverse().inverse() == lmap);
+
+  LatticeMaskSet lms(lcls);
+  cout << lmap.weak_preimage(lms);
+  cout << lmap.inverse().image(lms);
+  //assert(lmap.weak_preimage(lms) == lmap.inverse().image(lms));
+  cout << lmap.inverse().image(lms);
+  cout << lmap.strong_preimage(lms);
 
   
   return 0;

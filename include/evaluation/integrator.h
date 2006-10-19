@@ -32,6 +32,9 @@
 #include "../numeric/rational.h"
 
 namespace Ariadne {
+  
+  extern int verbosity;
+
   namespace Evaluation {
    
     /*!\brief The type used to denote time. */

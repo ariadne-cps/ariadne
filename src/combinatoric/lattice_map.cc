@@ -62,9 +62,9 @@ namespace Ariadne {
     
 
     LatticeCellListSet
-    LatticeMultiMap::apply(const LatticeCell& lc) const
+    LatticeMultiMap::image(const LatticeCell& lc) const
     {
-      cdbg << "LatticeMap::apply(const LatticeCell& lc) const\n";
+      cdbg << "LatticeMap::image(const LatticeCell& lc) const\n";
       typedef std::map<LatticeCell,LatticeCellListSet>::iterator map_iterator;
       map_iterator iter=this->_map.find(lc);
       if(iter==this->_map.end()) {
@@ -74,6 +74,52 @@ namespace Ariadne {
         assert(iter!=this->_map.end());
       }
       return iter->second;
+    }
+    
+    LatticeCellListSet 
+    LatticeMultiMap::image(const LatticeMaskSet& lms) const 
+    {
+      LatticeCellListSet result(this->_result_dimension);
+      for(LatticeMaskSet::const_iterator cell_iter=lms.begin(); cell_iter!=lms.end(); ++cell_iter) {
+        result.adjoin(this->apply(*cell_iter));
+      }
+      return result;
+    }
+
+    LatticeCellListSet
+    LatticeMultiMap::apply(const LatticeCell& lc) const
+    {
+      return this->image(lc);
+    }
+
+    LatticeCellListSet
+    LatticeMultiMap::weak_preimage(const LatticeMaskSet& lms) const
+    {
+      cdbg << "LatticeMap::weak_preimage(const LatticeCell& lc) const\n";
+      typedef std::map<LatticeCell,LatticeCellListSet>::iterator map_iterator;
+      LatticeCellListSet result(this->argument_dimension());
+      for(map_iterator iter=this->_map.begin(); iter!=this->_map.end(); ++iter) {
+        LatticeCellListSet& image=iter->second;
+        if(interiors_intersect(image,lms)) { 
+          result.adjoin(iter->first);
+        }
+      }
+      return result;
+    }
+    
+    LatticeCellListSet
+    LatticeMultiMap::strong_preimage(const LatticeMaskSet& lms) const
+    {
+      cdbg << "LatticeMap::strong_preimage(const LatticeCell& lc) const\n";
+      typedef std::map<LatticeCell,LatticeCellListSet>::iterator map_iterator;
+      LatticeCellListSet result(this->argument_dimension());
+      for(map_iterator iter=this->_map.begin(); iter!=this->_map.end(); ++iter) {
+        LatticeCellListSet& image=iter->second;
+        if(subset(image,lms)) { 
+          result.adjoin(iter->first);
+        }
+      }
+      return result;
     }
     
     LatticeCellListSet
@@ -123,6 +169,19 @@ namespace Ariadne {
       LatticeCellListSet result(this->_result_dimension);
       for(LatticeMaskSet::const_iterator cell_iter=lms.begin(); cell_iter!=lms.end(); ++cell_iter) {
         result.adjoin(this->apply(*cell_iter));
+      }
+      return result;
+    }
+    
+    LatticeMultiMap
+    LatticeMultiMap::inverse() const 
+    {
+      LatticeMultiMap result(this->_result_dimension, this->_argument_dimension);
+      for(LatticeMultiMap::const_iterator arg_iter=this->begin(); arg_iter!=this->end(); ++arg_iter) {
+        const LatticeCellListSet& image=arg_iter->second;
+        for(LatticeCellListSet::const_iterator im_iter=image.begin(); im_iter!=image.end(); ++im_iter) {
+          result.adjoin_to_image(*im_iter,arg_iter->first);
+        }
       }
       return result;
     }

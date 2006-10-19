@@ -52,8 +52,14 @@ namespace Ariadne {
       /*! \brief Adjoin set \a img to the image of set \a lc. */
       void adjoin_to_image(const LatticeCell& lc, const LatticeCellListSet& img);
         
-      /*! \brief  The map applied to a cell. */
+      /*! \brief  The map applied to a cell. \deprecated */
       LatticeCellListSet apply(const LatticeCell& lc) const;
+
+      /*! \brief  The map applied to a cell. */
+      LatticeCellListSet image(const LatticeCell& lc) const;
+
+      /*! \brief  The map applied to a lattice mask set. */
+      LatticeCellListSet image(const LatticeMaskSet& lc) const;
 
       /*! \brief  The map applied to a cell. */
       LatticeCellListSet operator() (const LatticeCell& lc) const;
@@ -69,6 +75,12 @@ namespace Ariadne {
         
       /*! \brief  The map applied to a cell list set. */
       LatticeCellListSet operator() (const LatticeMaskSet& lms) const;
+
+      /*! \brief  The set of cells which map into \a lms. */
+      LatticeCellListSet strong_preimage (const LatticeMaskSet& lms) const;
+
+      /*! \brief  The set of cells which map over a cell in \a lms. */
+      LatticeCellListSet weak_preimage (const LatticeMaskSet& lms) const;
 
       /*! \brief  The dimension of the argument. */
       dimension_type argument_dimension() const {

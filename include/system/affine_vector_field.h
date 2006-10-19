@@ -64,9 +64,9 @@ namespace Ariadne {
       AffineVectorField(const LinearAlgebra::Matrix<R> &A, const LinearAlgebra::Vector<R> &b) : _A(A), _b(b) { }
     
       /*! \brief An approximation to the vector field at a point. */
-      LinearAlgebra::Vector<F> operator() (const Geometry::Point<R>& s) const;
+      LinearAlgebra::Vector<F> image(const Geometry::Point<R>& s) const;
       /*! \brief An over-approximation to the vector field over a rectangle. */
-      LinearAlgebra::Vector< Interval<R> > operator() (const Geometry::Rectangle<R>& r) const;
+      LinearAlgebra::Vector< Interval<R> > image(const Geometry::Rectangle<R>& r) const;
     
       /*! \brief An approximation to the Jacobian derivative at a point. */
       LinearAlgebra::Matrix<F> derivative(const Geometry::Point<R>& x) const;
@@ -78,6 +78,9 @@ namespace Ariadne {
       /*! \brief The vector \f$b\f$. */
       const LinearAlgebra::Vector<R>& b() const { return this->_b; }
       
+      /*! \brief The dimension of the result. */
+      size_type smoothness() const { return (size_type) -1; }
+ 
       /*! \brief The dimension of the vector field is given by the size of \f$b\f$. */
       dimension_type dimension() const { return this->_b.size(); }
       

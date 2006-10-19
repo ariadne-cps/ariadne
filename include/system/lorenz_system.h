@@ -75,7 +75,10 @@ namespace Ariadne {
       /*! \brief  The dimension of the space. */
       dimension_type dimension() const { return 3; }
       
-      /*! \brief  The name of the system. */
+      /*! \brief  The smoothness of the vector field. */
+      size_type smoothness() const { return std::numeric_limits<size_type>::max(); }
+      
+       /*! \brief  The name of the system. */
       std::string name() const { return "LorenzSystem"; }
 
      private:

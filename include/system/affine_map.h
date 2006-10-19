@@ -72,19 +72,31 @@ namespace Ariadne {
         this->_A=T._A; this->_b=T._b; return *this; }
       
       /*! \brief  An approximation to the image of a point. DEPRECATED. */
-      Geometry::Point<F> operator() (const Geometry::Point<R>& A) const;
+      Geometry::Point<F> image(const Geometry::Point<R>& A) const;
       
       /*! \brief  The map applied to a rectangle. */
-      Geometry::Rectangle<R> operator() (const Geometry::Rectangle<R>& A) const;
+      Geometry::Rectangle<R> image(const Geometry::Rectangle<R>& A) const;
+
+      /*! \brief  The map applied to a parallelotope. */
+      Geometry::Parallelotope<R> image(const Geometry::Parallelotope<R>& A) const;
+
+      /*! \brief  The map applied to a zonotope. */
+      Geometry::Zonotope<R> image(const Geometry::Zonotope<R>& A) const;
+
+      /*! \brief  The map applied to a polytope. */
+      Geometry::Polytope<R> image(const Geometry::Polytope<R>& A) const;
 
       /*! \brief  The map applied to a parallelotope basic set. */
-      Geometry::Parallelotope<R> operator() (const Geometry::Parallelotope<R>& A) const;
+      Geometry::Parallelotope<R> operator() (const Geometry::Parallelotope<R>& A) const {
+        return this->image(A); };
       
       /*! \brief  The map applied to a zonotope basic set. */
-      Geometry::Zonotope<R> operator() (const Geometry::Zonotope<R>& A) const;
+      Geometry::Zonotope<R> operator() (const Geometry::Zonotope<R>& A) const {
+        return this->image(A); }
               
       /*! \brief  The map applied to a polytopic basic set. */
-      Geometry::Polytope<R> operator() (const Geometry::Polytope<R>& A) const;
+      Geometry::Polytope<R> operator() (const Geometry::Polytope<R>& A) const{
+        return this->image(A); };
               
       /*! \brief  The map applied to a grid mask set. */
       Geometry::ListSet<R,Geometry::Parallelotope> operator() (const Geometry::GridMaskSet<R>& ) const;
@@ -98,6 +110,9 @@ namespace Ariadne {
       dimension_type argument_dimension() const {
         return _A.number_of_columns();
       }
+      
+      /*! \brief The dimension of the result. */
+      size_type smoothness() const { return (size_type) -1; }
       
       /*! \brief The dimension of the result. */
       dimension_type result_dimension() const {

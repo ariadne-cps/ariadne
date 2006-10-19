@@ -57,7 +57,7 @@ namespace Ariadne {
     Geometry::Rectangle<R> 
     C0Applicator<R>::apply(const System::Map<R>& f, const Geometry::Rectangle<R>& r) const
     {
-      return f(r);
+      return f.image(r);
     }
     
     

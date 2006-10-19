@@ -40,18 +40,33 @@ namespace Ariadne {
      
     template<typename R>
     LinearAlgebra::Vector<typename VectorField<R>::F> 
-    VectorField<R>::operator() (const Geometry::Point<R>& x) const
+    VectorField<R>::image(const Geometry::Point<R>& x) const
     {
       throw std::invalid_argument(this->name()+"::operator() (Point) not implemented."); 
     }
     
     template<typename R>
     LinearAlgebra::Vector< Interval<R> >
-    VectorField<R>::operator() (const Geometry::Rectangle<R>& x) const
+    VectorField<R>::image(const Geometry::Rectangle<R>& x) const
     {
       throw std::invalid_argument(this->name()+"::operator() (Rectangle) not implemented."); 
     }
     
+    template<typename R>
+    typename VectorField<R>::F 
+    VectorField<R>::derivative(const Geometry::Point<R>& x, const size_type& i, const multi_index_type& j) const
+    {
+      throw std::invalid_argument(this->name()+"::derivative(Point,size_type,multi_index_type) not implemented."); 
+    }
+   
+    template<typename R>
+    typename VectorField<R>::I 
+    VectorField<R>::derivative(const Geometry::Rectangle<R>& x, const size_type& i, const multi_index_type& j) const
+    {
+      throw std::invalid_argument(this->name()+"::derivative(Rectangle,size_type,multi_index_type) not implemented."); 
+    }
+    
+
     template<typename R>
     LinearAlgebra::Matrix<typename VectorField<R>::F> 
     VectorField<R>::jacobian(const Geometry::Point<R>& x) const 

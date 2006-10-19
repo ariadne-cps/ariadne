@@ -29,6 +29,8 @@
 #ifndef _ARIADNE_HENON_MAP_H
 #define _ARIADNE_HENON_MAP_H
 
+#include <limits>
+
 #include "../linear_algebra/matrix.h"
 
 #include "../geometry/point.h"
@@ -57,11 +59,9 @@ namespace Ariadne {
       explicit HenonMap(R a=R(1.5), R b=R(0.3)) : _a(a), _b(b) { }
       
       /*! \brief  The map applied to a state. */
-      virtual Geometry::Point<F> operator() (const Geometry::Point<R>& x) const;
+      virtual Geometry::Point<F> image(const Geometry::Point<R>& x) const;
       /*! \brief  The map applied to a rectangle basic set. */
-      virtual Geometry::Rectangle<R> operator() (const Geometry::Rectangle<R>& r) const;
-      /*! \brief  The map applied to a parallelotope basic set. */
-      virtual Geometry::Parallelotope<R> operator() (const Geometry::Parallelotope<R>& r) const;
+      virtual Geometry::Rectangle<R> image(const Geometry::Rectangle<R>& r) const;
       
       /*! \brief  The derivative of the map at a point. */
       virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<R>& x) const;
@@ -73,6 +73,8 @@ namespace Ariadne {
       /*! \brief  The parameter b. */
       const R& b() const { return _b; }
       
+      /*! \brief  The dimension of the argument. */
+      size_type smoothness() const { return std::numeric_limits<size_type>::max(); }
       /*! \brief  The dimension of the argument. */
       dimension_type argument_dimension() const { return 2; }
       /*! \brief The dimension of the result. */
@@ -91,7 +93,7 @@ namespace Ariadne {
       
     template <typename R>
     Geometry::Point<typename HenonMap<R>::F>
-    HenonMap<R>::operator() (const Geometry::Point<R>& p) const
+    HenonMap<R>::image(const Geometry::Point<R>& p) const
     {
       Geometry::Point<F> result(2); 
       const F& x=p[0];
@@ -103,19 +105,12 @@ namespace Ariadne {
      
     template <typename R>
     Geometry::Rectangle<R>
-    HenonMap<R>::operator() (const Geometry::Rectangle<R>& A) const
+    HenonMap<R>::image(const Geometry::Rectangle<R>& A) const
     {
       Geometry::Rectangle<R> result(2); 
       result[0]=_a-A[0]*A[0]-_b*A[1]; 
       result[1]=A[0]; 
       return result;
-    }
-     
-    template <typename R>
-    Geometry::Parallelotope<R>
-    HenonMap<R>::operator() (const Geometry::Parallelotope<R>& A) const
-    {
-      return Evaluation::C1Applicator<R>().apply(*this,A);
     }
      
     template <typename R>

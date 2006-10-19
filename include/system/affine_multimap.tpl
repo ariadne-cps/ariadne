@@ -62,7 +62,7 @@ namespace Ariadne {
       if (this->argument_dimension()!=bs.dimension()) {
         throw std::domain_error("AffineMultiMap<R,BS>::operator() (const Point&): the map does not have the same dimension of the point.");
       }
-      return minkowski_sum(AffineMap<R>(this->A())(bs),this->S());
+      return minkowski_sum(AffineMap<R>(this->A()).image(bs),this->S());
     }
     
   }

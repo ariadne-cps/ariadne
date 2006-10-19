@@ -43,6 +43,7 @@ namespace Ariadne {
     template<typename R>
     class Map {
       typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
+      typedef typename Numeric::Interval<R> I;
      public:
       /*! \brief The real number type. */
       typedef R real_type;
@@ -55,16 +56,27 @@ namespace Ariadne {
       virtual ~Map();
       
       /*! \brief An over-approximation to the image of a point. */
-      virtual Geometry::Point<F> operator() (const Geometry::Point<R>& pt) const;
+      Geometry::Point<F> operator() (const Geometry::Point<R>& pt) const {
+        return this->image(pt); }
       /*! \brief An over-approximation to the image of a rectangle. */
-      virtual Geometry::Rectangle<R> operator() (const Geometry::Rectangle<R>& A) const;
+      Geometry::Rectangle<F> operator() (const Geometry::Rectangle<R>& pt) const {
+        return this->image(pt); }
+        
+      /*! \brief An over-approximation to the image of a point. */
+      virtual Geometry::Point<F> image(const Geometry::Point<R>& pt) const;
+      /*! \brief An over-approximation to the image of a rectangle. */
+      virtual Geometry::Rectangle<R> image(const Geometry::Rectangle<R>& A) const;
+      /*! \brief The derivative of the \a i th component with respect to the multi-index j. */
+      virtual F derivative(const Geometry::Point<R>& r, const size_type& i, const multi_index_type& j) const;
+      /*! \brief The derivative of the \a i th component with respect to the multi-index j, evaluated over a rectangle. */
+      virtual I derivative(const Geometry::Rectangle<R>& r, const size_type& i, const multi_index_type& j) const;
       /*! \brief The Jacobian derivative matrix over a rectangle. */
       virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<R>& r) const;
       /*! \brief The Jacobian derivative matrix over a rectangle. */
-      virtual LinearAlgebra::Matrix< Interval<R> > jacobian(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::Matrix< I > jacobian(const Geometry::Rectangle<R>& r) const;
         
-      /*! \brief The dimension of the domain space. */
-      virtual size_type smoothness() const;
+      /*! \brief The degree of differentiability of the map. */
+      virtual size_type smoothness() const = 0;
       /*! \brief The dimension of the domain space. */
       virtual dimension_type argument_dimension() const = 0;
       /*! \brief The dimension of the range space. */

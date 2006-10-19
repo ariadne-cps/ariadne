@@ -135,6 +135,7 @@ namespace Ariadne {
     template<typename N> inline
     N factorial(const N& n) {
       N result=1;
+      if(n<=0) { return 1; }
       for(N i=1; i!=n; ++i) { result*=i; }
       return result*n;
     }

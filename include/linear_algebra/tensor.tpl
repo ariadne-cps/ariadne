@@ -29,6 +29,7 @@
 
 #include <iostream>
 
+#include "../linear_algebra/multi_index.h"
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 
@@ -36,80 +37,81 @@ namespace Ariadne {
   namespace LinearAlgebra {
 
     template<typename R>
-    Vector<R>
-    Tensor<R>::product(const Tensor<R>& T, const Vector<R>& v1, const Vector<R>& v2) 
+    DerivativeTensor<R>::DerivativeTensor(const Vector<R>& v) 
+      : _res_size(v.size()), _arg_size(1), _degree(0), _elements(v.size())
     {
-      assert(T.size(1)==v1.size());
-      assert(T.size(2)==v2.size());
-      
-      Vector<R> result(T.size(0));
-      for(size_type i=0; i!=T.size(0); ++i) {
-        for(size_type j=0; j!=T.size(1); ++j) {
-          for(size_type k=0; k!=T.size(2); ++k) {
-            result(i)+=T(i,j,k)*v1(j)*v2(k);
-          }
+      for(size_type i=0; i!=this->_res_size; ++i) {
+        this->_elements[i]=v(i);
+      }
+    }
+    
+    template<typename R>
+    DerivativeTensor<R>::DerivativeTensor(const Matrix<R>& A) 
+      : _res_size(A.size(0)), _arg_size(A.size(1)), _degree(1), _elements(A.size(0)*A.size(1))
+    {
+      for(size_type i=0; i!=this->_res_size; ++i) {
+        for(size_type j=0; i!=this->_arg_size; ++j) {
+          this->_elements[i*this->_res_size+j]=A(i,j);
         }
       }
-      return result;
+    }
+    
+    template<typename R>
+    DerivativeTensor<R>
+    DerivativeTensor<R>::product(const DerivativeTensor<R>& T, const Vector<R>& v) 
+    {
+      return DerivativeTensor<R>::product(T,DerivativeTensor<R>(v));
     }
       
     template<typename R>
-    Matrix<R>
-    Tensor<R>::product(const Tensor<R>& T, const Vector<R>& v1) 
+    DerivativeTensor<R>
+    DerivativeTensor<R>::product(const DerivativeTensor<R>& T, const Matrix<R>& A) 
     {
-      assert(T.size(1)==v1.size());
-      
-      Matrix<R> result(T.size(0),T.size(1));
-      for(size_type i=0; i!=T.size(0); ++i) {
-        for(size_type j=0; j!=T.size(1); ++j) {
-          for(size_type k=0; k!=T.size(2); ++k) {
-            result(i,k)+=T(i,j,k)*v1(j);
-          }
-        }
-      }
-      return result;
+      return DerivativeTensor<R>::product(T,DerivativeTensor<R>(A));
     }
+      
+    template<typename R>
+    DerivativeTensor<R>
+    DerivativeTensor<R>::product(const DerivativeTensor<R>& T1, const DerivativeTensor<R>& T2) 
+    {
+      //std::cerr << "DerivativeTensor<R>::product(const DerivativeTensor<R>& T1, const DerivativeTensor<R>& T2)" << std::endl;
+      assert(T1.argument_size()==T2.result_size());      
+      assert(T1.degree()!=0);
+      
+      DerivativeTensor<R> T0(T1.result_size(),T2.argument_size(),T1.degree()+T2.degree()-1);
 
-    template<typename R>
-    Tensor<R>
-    Tensor<R>::product(const Tensor<R>& T, const Matrix<R>& A1) 
-    {
-      assert(T.size(1)==A1.number_of_rows());
-      
-      Tensor<R> result(T.size(0),A1.number_of_columns(),T.size(2));
-      for(size_type i=0; i!=result.size(0); ++i) {
-        for(size_type j=0; j!=result.size(1); ++j) {
-          for(size_type k=0; k!=result.size(2); ++k) {
-            for(size_type l=0; l!=T.size(1); ++l) {
-              result(i,j,k)+=T(i,l,k)*A1(l,j);
+      MultiIndex m0(T0.argument_size());
+      MultiIndex m1(T1.argument_size());
+      MultiIndex m2(T2.argument_size());
+
+      m1.set_index(0,T1.degree()-1);
+      MultiIndexIterator mi_begin1(m1);
+      m1.increment_index(0);
+      MultiIndexIterator mi_end1(m1);
+
+      m2.set_index(0,T2.degree());
+      MultiIndexIterator mi_begin2(m2);
+      m2.increment_index(0);
+      MultiIndexIterator mi_end2(m2);
+
+      for(size_type i1=0; i1!=T1.result_size(); ++i1) {
+        for(size_type i2=0; i2!=T2.result_size(); ++i2) {
+          for(MultiIndexIterator mi_iter2=mi_begin2; mi_iter2!=mi_end2; ++mi_iter2) {
+            for(MultiIndexIterator mi_iter1=mi_begin1; mi_iter1!=mi_end1;++mi_iter1) {
+              m1=*mi_iter1;
+              m2=*mi_iter2;
+              m0=m1+m2;
+              size_type n=m1.number()*m2.number();
+              m1.increment_index(i2);
+              T0(i1,m0)+=n*T1(i1,m1)*T2(i2,m2);
             }
           }
         }
       }
-      return result;
+      return T0;
     }
 
-    template<typename R>
-    Tensor<R>
-    Tensor<R>::product(const Tensor<R>& T, const Matrix<R>& A1, const Matrix<R>& A2) 
-    {
-      assert(T.size(1)==A1.number_of_rows());
-      assert(T.size(2)==A2.number_of_rows());
-      
-      Tensor<R> result(T.size(0),A1.number_of_columns(),A2.number_of_columns());
-      for(size_type i=0; i!=T.size(0); ++i) {
-        for(size_type j=0; j!=A1.number_of_columns(); ++j) {
-          for(size_type k=0; k!=A2.number_of_columns(); ++k) {
-            for(size_type l=0; l!=T.size(1); ++l) {
-              for(size_type m=0; k!=T.size(2); ++m) {
-                result(i,j,k)+=T(i,l,m)*A1(l,j)*A2(m,k);
-              }
-            }
-          }
-        }
-      }
-      return result;
-    }
+
     
     template<typename R>
     std::ostream&
@@ -118,5 +120,40 @@ namespace Ariadne {
       return os << "Tensor(...)";
     }
     
+    template<typename R>
+    std::ostream&
+    SymmetricTensor<R>::write(std::ostream& os) const
+    {
+      //std::cerr << "SymmetricTensor<R>::write(std::ostream& os) const" << std::endl;
+      size_type n=this->argument_size();
+      size_type d=this->degree();
+      
+      os << "SymmetricTensor( argument_size=" << n << ", degree=" << d << "\n  elements=[\n";
+      for(MultiIndexIterator j(n,d); j!=MultiIndexIterator(n,d+1); ++j) {
+        os << "    " << *j << ":" << this->position(*j) << ": " << (*this)(*j) << "; \n"; 
+      }
+      os << "  ]\n)\n";
+      return os;
+    }
+
+    template<typename R>
+    std::ostream&
+    DerivativeTensor<R>::write(std::ostream& os) const
+    {
+      //std::cerr << "DerivativeTensor<R>::write(std::ostream& os) const" << std::endl;
+      size_type m=this->result_size();
+      size_type n=this->argument_size();
+      size_type d=this->degree();
+      
+      os << "DerivativeTensor( result_size=" << m << ", argument_size=" << n << ", degree=" << d << "\n  elements=[\n";
+      for(size_type i=0; i!=m; ++i) {
+        for(MultiIndexIterator j(n,d); j!=MultiIndexIterator(n,d+1); ++j) {
+          os << "    " << i << "," << *j << ":" << this->position(i,*j) << ": " << (*this)(i,*j) << "; \n"; 
+        }
+      }
+      os << "  ]\n)\n";
+      return os;
+    }
+
   }
 }

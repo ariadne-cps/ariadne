@@ -28,7 +28,7 @@
 
 template<typename R> void export_map();
 template<typename R> void export_affine_map();
-template<typename R> void export_affine_map_with_set();
+template<typename R> void export_affine_multimap();
 template<typename R> void export_polynomial_map();
 template<typename R> void export_henon_map();
  
@@ -40,7 +40,7 @@ BOOST_PYTHON_MODULE(system)
 {
   export_map<Ariadne::Real>();
   export_affine_map<Ariadne::Real>();
-  export_affine_map_with_set<Ariadne::Real>();
+  export_affine_multimap<Ariadne::Real>();
   export_polynomial_map<Ariadne::Real>();
   export_henon_map<Ariadne::Real>();
   

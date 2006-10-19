@@ -29,7 +29,10 @@
 #ifndef _ARIADNE_VECTOR_FIELD_H
 #define _ARIADNE_VECTOR_FIELD_H
 
+#include <limits>
+
 #include "../declarations.h"
+
 
 namespace Ariadne {
   namespace System {
@@ -41,6 +44,7 @@ namespace Ariadne {
     template <typename R>
     class VectorField {
       typedef typename Numeric::numerical_traits<R>::arithmetic_type F; 
+      typedef typename Numeric::Interval<R> I; 
      public:
       /*! \brief The real number type. */
       typedef R real_type;
@@ -51,15 +55,27 @@ namespace Ariadne {
       virtual ~VectorField();
      
       /*! \brief An approximation to the vector field at a point. */
-      virtual LinearAlgebra::Vector<F> operator() (const Geometry::Point<R>& x) const;
+      LinearAlgebra::Vector<F> operator() (const Geometry::Point<R>& x) const { return this->image(x); }
       /*! \brief A bound for the vector field over a rectangle. */
-      virtual LinearAlgebra::Vector< Interval<R> > operator() (const Geometry::Rectangle<R>& A) const;
+      LinearAlgebra::Vector<I> operator() (const Geometry::Rectangle<R>& A) const { return this->image(A); };
+
+      /*! \brief An approximation to the vector field at a point. */
+      virtual LinearAlgebra::Vector<F> image(const Geometry::Point<R>& x) const;
+      /*! \brief A bound for the vector field over a rectangle. */
+      virtual LinearAlgebra::Vector<I> image(const Geometry::Rectangle<R>& A) const;
+
+      /*! \brief An approximation to the vector field at a point. */
+      virtual F derivative(const Geometry::Point<R>& x, const size_type& i, const multi_index_type& j) const;
+      /*! \brief A bound for the vector field over a rectangle. */
+      virtual Interval<R> derivative(const Geometry::Rectangle<R>& A, const size_type& i, const multi_index_type& j) const;
 
       /*! \brief An approximation to the Jacobian derivative at a point. */
       virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<R>& x) const;
       /*! \brief A bound for the Jacobian derivative over a rectangle. */
       virtual LinearAlgebra::Matrix< Interval<R> > jacobian(const Geometry::Rectangle<R>& A) const;
     
+      /*! \brief The degree of differentiability of the map. */
+      virtual size_type smoothness() const = 0;
       /*! \brief The dimension of the space the vector field lives in. */
       virtual dimension_type dimension() const = 0;
 

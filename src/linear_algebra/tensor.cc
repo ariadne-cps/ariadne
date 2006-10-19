@@ -34,6 +34,8 @@ namespace Ariadne {
     //template class Tensor<Float64>;
     //template class Tensor<MPFloat>;
     template class Tensor<Rational>;
+    template class SymmetricTensor<Rational>;
+    template class DerivativeTensor<Rational>;
 
   }
 }

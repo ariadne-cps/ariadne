@@ -52,10 +52,13 @@ void export_affine_vector_field()
   
   class_< AffineVectorField<R>, bases< VectorField<R> > >("AffineVectorField",init< Matrix<R>, Vector<R> >())
     .def("dimension", &AffineVectorField<R>::dimension)
-    .def("__call__", (Vector<F>(AffineVectorField<R>::*)(const Point<R>&)const)(&AffineVectorField<R>::operator()))
-    .def("__call__", (Vector<I>(AffineVectorField<R>::*)(const Rectangle<R>&)const)(&AffineVectorField<R>::operator()))
+    .def("smoothness", &AffineVectorField<R>::smoothness)
+    .def("__call__", (Vector<F>(AffineVectorField<R>::*)(const Point<R>&)const)(&AffineVectorField<R>::image))
+    .def("__call__", (Vector<I>(AffineVectorField<R>::*)(const Rectangle<R>&)const)(&AffineVectorField<R>::image))
     .def("jacobian", (Matrix<F>(AffineVectorField<R>::*)(const Point<R>&)const)(&AffineVectorField<R>::jacobian))
     .def("jacobian", (Matrix<I>(AffineVectorField<R>::*)(const Point<R>&)const)(&AffineVectorField<R>::jacobian))
     .def(self_ns::str(self))
   ;
 }
+
+template void export_affine_vector_field<Real>();

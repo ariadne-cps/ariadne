@@ -38,6 +38,7 @@ class MapWrapper : public Map<R>, public wrapper< Map<R> >
  public:
   dimension_type argument_dimension() const { return this->get_override("argument_dimension")(); }
   dimension_type result_dimension() const { return this->get_override("result_dimension")(); }
+  size_type smoothness() const { return this->get_override("smoothness")(); }
   std::string name() const { return this->get_override("name")(); }
 };
 
@@ -47,6 +48,7 @@ void export_map()
   class_<MapWrapper<R>, boost::noncopyable>("Map")
     .def("argument_dimension", pure_virtual(&MapWrapper<R>::argument_dimension))
     .def("result_dimension", pure_virtual(&MapWrapper<R>::result_dimension))
+    .def("smoothness", pure_virtual(&MapWrapper<R>::smoothness))
   ;
 }
 

@@ -68,11 +68,11 @@ namespace Ariadne {
      /*! \brief Construct from a matrix whose columns give the vertices. */
       explicit Polytope(const LinearAlgebra::Matrix<R>& A);
      
-      /*! \brief Convert from a list of vertices. */
-      Polytope(const PointList<R>& v);
+      /*! \brief Construct from a list of vertices. */
+      explicit Polytope(const PointList<R>& v);
      
-      /*! \brief Convert from a rectangle. */
-      Polytope<R>(const Rectangle<R>& rect);
+      /*! \brief Construct from a rectangle. */
+      explicit Polytope<R>(const Rectangle<R>& rect);
             
       /*! \brief Copy constructor. 
        */

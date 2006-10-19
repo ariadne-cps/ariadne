@@ -22,6 +22,7 @@
  */
 
 #include "real_typedef.h"
+
 #include "system/vector_field.h"
 #include "system/lorenz_system.h"
 
@@ -43,10 +44,13 @@ void export_lorenz_system()
   
   class_< LorenzSystem<R>, bases< VectorField<R> > >("LorenzSystem",init<R,R,R>())
     .def("dimension", &LorenzSystem<R>::dimension)
-    .def("__call__", (Vector<F>(LorenzSystem<R>::*)(const Point<R>&)const)(&LorenzSystem<R>::operator()))
-    .def("__call__", (Rectangle<R>(LorenzSystem<R>::*)(const Rectangle<R>&)const)(&RLorenzSystem::operator()))
-    .def("jacobian", (Matrix<F>(LorenzSystem<R>::*)(const Point<R>&)const)(&RLorenzSystem::jacobian))
+    .def("smoothness", &LorenzSystem<R>::smoothness)
+    //.def("__call__", (Vector<F>(LorenzSystem<R>::*)(const Point<R>&)const)(&LorenzSystem<R>::image))
+    .def("__call__", (Vector<I>(LorenzSystem<R>::*)(const Rectangle<R>&)const)(&RLorenzSystem::image))
+    //.def("jacobian", (Matrix<F>(LorenzSystem<R>::*)(const Point<R>&)const)(&RLorenzSystem::jacobian))
     .def("jacobian", (Matrix<I>(LorenzSystem<R>::*)(const Rectangle<R>&)const)(&RLorenzSystem::jacobian))
     .def(self_ns::str(self))
   ;
 }
+
+template void export_lorenz_system<Real>();

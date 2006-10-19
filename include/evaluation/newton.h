@@ -83,10 +83,12 @@ namespace Ariadne {
       /*!\brief Construct from a map \a f, which must have the same argument dimension as result dimension. */
       DifferenceMap(const Map<R>& f) : _base(f) { assert(f.argument_dimension()==f.result_dimension()); }
       /*!\brief The dimension of the space the map acts on. */
+      virtual size_type smoothness() const { return _base.smoothness(); }
+      /*!\brief The dimension of the space the map acts on. */
       virtual dimension_type dimension() const { return _base.argument_dimension(); }
       /*!\brief Evaluate the function \f$f(x)-x\f$, where \f$f\f$ is the map used to construct the difference map. */
-      virtual LinearAlgebra::Vector< Interval<R> > operator() (const Geometry::Rectangle<R>& r) const {
-        return _base(r)-r; }
+      LinearAlgebra::Vector< Interval<R> > image(const Geometry::Rectangle<R>& r) const {
+        return _base.image(r)-r; }
       /*!\brief Evaluate the derivative of function \f$f(x)-x\f$, which is \f$Df(x)-I\f$. */
       virtual LinearAlgebra::Matrix< Interval<R> > jacobian(const Geometry::Rectangle<R>& r) const {
         LinearAlgebra::Matrix< Interval<R> > d=_base.jacobian(r);

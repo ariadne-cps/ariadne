@@ -41,12 +41,12 @@ namespace Ariadne {
 
     template <typename R>
     Geometry::Point< typename AffineMap<R>::F >
-    AffineMap<R>::operator() (const Geometry::Point<R>& pt) const
+    AffineMap<R>::image(const Geometry::Point<R>& pt) const
     {
-      //std::cerr << "AffineMap<R>::apply(const Geometry::Rectangle<R>& r) const\n";
+      //std::cerr << "AffineMap<R>::image(const Geometry::Rectangle<R>& r) const\n";
 
       if (this->argument_dimension()!=pt.dimension()) {
-        throw std::domain_error("AffineMap<R>::operator() (const Geometry::Point<R>& r): the map does not have the same dimension of the point.");
+        throw std::domain_error("AffineMap<R>::image(const Geometry::Point<R>& r): the map does not have the same dimension of the point.");
       }
       LinearAlgebra::Vector<F> image(this->A()*LinearAlgebra::Vector<F>(pt.position_vector())+this->b());
       return Geometry::Point<F>(image);
@@ -55,45 +55,45 @@ namespace Ariadne {
 
     template <typename R>
     Geometry::Rectangle<R>
-    AffineMap<R>::operator() (const Geometry::Rectangle<R>& r) const
+    AffineMap<R>::image(const Geometry::Rectangle<R>& r) const
     {
-      //std::cerr << "AffineMap<R>::apply(const Geometry::Rectangle<R>& r) const\n";
+      //std::cerr << "AffineMap<R>::image(const Geometry::Rectangle<R>& r) const\n";
 
       if (this->argument_dimension()!=r.dimension()) {
-        throw std::domain_error("AffineMap<R>::apply(const Geometry::Rectangle<R>& r): the map does not have the same dimension of the rectangle.");
+        throw std::domain_error("AffineMap<R>::image(const Geometry::Rectangle<R>& r): the map does not have the same dimension of the rectangle.");
       }
       return Geometry::Rectangle<R>(this->A()*r.position_vectors()+this->b());
     }
     
     template <typename R>
     Geometry::Parallelotope<R>
-    AffineMap<R>::operator() (const Geometry::Parallelotope<R>& p) const
+    AffineMap<R>::image(const Geometry::Parallelotope<R>& p) const
     {
       if (this->argument_dimension()!=p.dimension()) {
-        throw std::domain_error("AffineMap<R>::operator() (const Geometry::Parallelotope<R>& p): the map does not have the same dimension of the parallelotope.");
+        throw std::domain_error("AffineMap<R>::image(const Geometry::Parallelotope<R>& p): the map does not have the same dimension of the parallelotope.");
       }
       return Geometry::Parallelotope<R>::over_approximation(
-          this->operator()(Geometry::Rectangle<R>(p.centre())),
+          this->image(Geometry::Rectangle<R>(p.centre())),
           this->A()*LinearAlgebra::Matrix< Interval<R> >(p.generators()));
     }
 
     template <typename R>
     Geometry::Zonotope<R>
-    AffineMap<R>::operator() (const Geometry::Zonotope<R>& z) const
+    AffineMap<R>::image(const Geometry::Zonotope<R>& z) const
     {
       if (this->argument_dimension()!=z.dimension()) {
-        throw std::domain_error("AffineMap<R>::operator() (const Geometry::Zonotope<R>& z): the map does not have the same dimension of the zonotope."); 
+        throw std::domain_error("AffineMap<R>::image(const Geometry::Zonotope<R>& z): the map does not have the same dimension of the zonotope."); 
       }
       return Geometry::Zonotope<R>::over_approximation(
-        this->operator()(z.central_block()),
+        this->image(z.central_block()),
         this->A()*LinearAlgebra::Matrix< Interval<R> >(z.generators()));
     }    
     
     template <typename R>
     Geometry::Polytope<R>
-    AffineMap<R>::operator() (const Geometry::Polytope<R>& p) const
+    AffineMap<R>::image(const Geometry::Polytope<R>& p) const
     {
-      throw std::runtime_error("AffineMap<R>::operator() (const Geometry::Polytope<R>&) const not implemented");
+      throw std::runtime_error("AffineMap<R>::image(const Geometry::Polytope<R>&) const not implemented");
     }   
     
     template<typename R>

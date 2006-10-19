@@ -44,8 +44,10 @@ template<typename T> class numerical_traits;
 }}
 
 namespace Ariadne { namespace LinearAlgebra {
+class MultiIndex;
 template<typename R> class Vector;
 template<typename R> class Matrix;
+template<typename R> class Tensor;
 template<typename R> class LinearProgram;
 }}
 
@@ -135,6 +137,8 @@ typedef array<bool> BooleanArray;
 typedef array<size_type> SizeArray;
 /*! \brief An array of integer values. */
 typedef array<index_type> IndexArray;
+/*! \brief An array of integer values. */
+typedef LinearAlgebra::MultiIndex multi_index_type;
 }}
 
 namespace Ariadne {

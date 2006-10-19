@@ -78,7 +78,7 @@ void export_interval()
     .def("upper", &Interval<R>::upper, return_value_policy<copy_const_reference>())
     .def(self_ns::str(self))    // __self_ns::str__
   ;
-
+  
 /*
   IFUN iabs(&boost::numeric::abs);
   IFUN iexp(&boost::numeric::exp);
@@ -112,4 +112,8 @@ void export_interval()
   def("acosh", iacosh);
   def("atanh", iatanh);
 */
+
 }
+
+template void export_interval<Float64>();
+template void export_interval<MPFloat>();

@@ -37,6 +37,7 @@ class VectorFieldWrapper
 {
  public: 
   dimension_type dimension() const { return this->get_override("dimension")(); }
+  size_type smoothness() const { return this->get_override("smoothness")(); }
   std::string name() const { return this->get_override("name")(); }
 };
 
@@ -45,6 +46,7 @@ void export_vector_field()
 {
   class_<VectorFieldWrapper<R>, boost::noncopyable>("VectorField")
     .def("dimension", pure_virtual(&VectorField<R>::dimension))
+    .def("smoothness", pure_virtual(&VectorField<R>::smoothness))
     .def("name", pure_virtual(&VectorField<R>::name))
   ;
 }

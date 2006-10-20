@@ -122,10 +122,10 @@ test_arithmetic()
   Interval<R> it(3);
   Interval<R> iao=(io/it)*it;
   cout << iao << endl;
-  assert(contains(iao,o));
+  assert(contains_value(iao,o));
   Interval<R> iaz=iao-io;
   cout << iaz << endl;
-  assert(contains(iaz,z)); 
+  assert(contains_value(iaz,z)); 
   cout << endl;
 
 }

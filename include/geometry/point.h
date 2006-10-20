@@ -233,6 +233,19 @@ namespace Ariadne {
       return Point<R>(sub_approx(s.position_vector(),v));
     }
 
+    
+    template<typename R>
+    inline
+    Point<R>
+    approximate_value(const Point< Interval<R> >& pt) 
+    {
+      Point<R> result(pt.dimension());
+      for(dimension_type i=0; i!=result.dimension(); ++i) {
+        result[i]=approximate_value(pt[i]);
+      }
+      return result;
+    }
+    
     template <typename R>
     inline 
     Point<R> 

@@ -87,7 +87,7 @@ namespace Ariadne {
       Geometry::Rectangle<R> new_central_block=Geometry::scale(z.central_block(),scale_factor);
       LinearAlgebra::Matrix< Interval<R> > new_interval_generators=z.generators()*Interval<R>(scale_factor);
       new_central_block=new_central_block+LinearAlgebra::radius_row_sum(new_interval_generators);
-      LinearAlgebra::Matrix<R> new_generators=LinearAlgebra::centre(new_interval_generators);
+      LinearAlgebra::Matrix<R> new_generators=LinearAlgebra::approximate_value(new_interval_generators);
       return Geometry::Zonotope<R>(new_central_block, new_generators);
     }
 
@@ -676,8 +676,7 @@ namespace Ariadne {
     Zonotope<R>
     Zonotope<R>::over_approximation(const Rectangle<R> &c, const LinearAlgebra::Matrix< Interval<R> >& A)
     {
-      LinearAlgebra::Matrix<R> Amid=LinearAlgebra::centre(A);
-      return Zonotope<R>(c+LinearAlgebra::radius_row_sum(A),LinearAlgebra::centre(A));
+      return Zonotope<R>(c+LinearAlgebra::radius_row_sum(A),LinearAlgebra::approximate_value(A));
     }
     
 

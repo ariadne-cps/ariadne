@@ -99,8 +99,8 @@ namespace Ariadne {
       }
       
       // FIXME: This is incorrect; need over-approximations
-      Geometry::Point<R> nc=Geometry::Point<R>(centre(img_centre.position_vector()));
-      LinearAlgebra::Matrix<R> ng=centre(img_generators);
+      Geometry::Point<R> nc=Geometry::approximate_value(img_centre);
+      LinearAlgebra::Matrix<R> ng=approximate_value(img_generators);
       
       Geometry::Parallelotope<R> result(nc,ng);
       return result;

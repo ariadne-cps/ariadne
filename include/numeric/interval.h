@@ -187,8 +187,28 @@ namespace Ariadne {
       typedef Interval<R> field_extension_type;
       typedef Interval<R> arithmetic_type;
     };
+        
+    template<typename R> inline
+    R approximate_value(const Interval<R>& ivl) 
+    {
+      return ivl.centre();
+      //return Numeric::med_appox(ivl.lower(),ivl.upper());
+      //return div_approx(add_appox(ivl.lower(),ivl.upper()),2);
+    }
     
-
+    template<typename R> inline
+    bool contains_value(const Interval<R>& ivl, const R& x) 
+    {
+      return ivl.contains(x);
+    }
+    
+    template<typename R> inline
+    R error_bound(const Interval<R>& ivl) 
+    {
+      R av=approximate_value(ivl);
+      return max_up(sub_up(av,ivl.lower()),sub_up(ivl.upper(),av));
+    }
+    
 
 
 
@@ -584,15 +604,7 @@ namespace Ariadne {
                          min_up(x1.upper(),x2.upper()));
     }
 
-    template<typename R>
-    inline
-    bool
-    contains(const Interval<R>& x1, const R& x2)
-    {
-      return(x1.lower()<=x2 && x2<=x1.upper());
-    }
-    
-    
+   
 
     template<typename R>
     inline

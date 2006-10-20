@@ -140,11 +140,11 @@ namespace Ariadne {
     template <typename R>
     inline 
     Vector<R>
-    centre(const Vector< Interval<R> >& iv) 
+    approximate_value(const Vector< Interval<R> >& iv) 
     {
       Vector<R> result(iv.size());
       for(size_type i=0; i!=iv.size(); ++i) {
-        result(i) = iv(i).centre();
+        result(i) = approximate_value(iv(i));
       }
       return result;
     }
@@ -152,11 +152,11 @@ namespace Ariadne {
     template <typename R>
     inline 
     bool
-    contains(const Vector< Interval<R> >& iv,const Vector<R>& v) 
+    contains_value(const Vector< Interval<R> >& iv,const Vector<R>& v) 
     {
       assert(v.size()==iv.size());
       for(size_type i=0; i!=v.size(); ++i) {
-        if(!Numeric::contains(iv(i),v(i))) {
+        if(!Numeric::contains_value(iv(i),v(i))) {
           return false;
         }
       }

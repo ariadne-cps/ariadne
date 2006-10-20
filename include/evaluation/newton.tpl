@@ -66,7 +66,7 @@ namespace Ariadne {
         if(verbosity>0) { std::cerr << "  nr=" << nr << std::endl; } 
         if(verbosity>0) {
           std::cerr << "  f(x)=" << f(r) << std::flush;
-          std::cerr << "  f(m)=" << centre(f(mr)) << std::flush;
+          std::cerr << "  f(m)=" << approximate_value(f(mr)) << std::flush;
           std::cerr << "  Df(x) =" << A << "  inv=" << inverse(A) << "  I=" << A*inverse(A) << std::flush;
           std::cerr << "  nx =" << nr << "\n\n" << std::flush;
           std::cerr << nr << " subset " << r << " ? " << Geometry::subset(nr,r) << "\n";

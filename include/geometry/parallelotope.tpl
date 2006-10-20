@@ -198,7 +198,7 @@ namespace Ariadne {
       size_type n=c.dimension();
       
       Point<R> cmid=c.centre();
-      LinearAlgebra::Matrix<R> Amid=LinearAlgebra::centre(A);
+      LinearAlgebra::Matrix<R> Amid=LinearAlgebra::approximate_value(A);
       
       LinearAlgebra::Matrix<R> D(n,n);
       for(size_type i=0; i!=n; ++i) {

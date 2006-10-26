@@ -38,14 +38,14 @@
 using namespace std;
 using namespace Ariadne;
 
-template<typename R> int test_newton();
+template<class R> int test_newton();
 
 int main() {
   test_newton<Real>();
   return 0;
 }
 
-template<typename R>
+template<class R>
 int 
 test_newton()
 {

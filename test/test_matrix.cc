@@ -40,7 +40,7 @@ using namespace std;
 using namespace Ariadne;
 using namespace Ariadne::LinearAlgebra;
 
-template<typename R> int test_matrix();
+template<class R> int test_matrix();
 
 int main() {
   test_matrix<Float64>();
@@ -48,7 +48,7 @@ int main() {
   return 0;
 }
 
-template<typename R> 
+template<class R> 
 int 
 test_matrix()
 {

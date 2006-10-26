@@ -50,7 +50,7 @@ using namespace std;
 
 using namespace Parma_Polyhedra_Library::IO_Operators;
 
-template<typename R> int test_polytope();
+template<class R> int test_polytope();
 template<> int test_polytope<Rational>();
 
 int main() {
@@ -62,7 +62,7 @@ int main() {
 }
 
 
-template<typename R>
+template<class R>
 int 
 test_polytope() 
 {

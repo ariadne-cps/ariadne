@@ -249,7 +249,7 @@ namespace Ariadne {
     
 
 
-    template <class R>
+    template<class R>
     inline 
     bool
     contains_value(const Matrix< Interval<R> >& iA, const Matrix<R>& A) 
@@ -267,7 +267,7 @@ namespace Ariadne {
     }
 
 
-    template <class R>
+    template<class R>
     inline 
     Matrix<R>
     approximate_value(const Matrix< Interval<R> >& im) 
@@ -368,7 +368,7 @@ namespace Ariadne {
       return A.log_norm();
     }
 
-    template <class R>
+    template<class R>
     inline
     Matrix<typename Numeric::traits<R>::arithmetic_type> 
     inverse(const Matrix<R>& A)
@@ -376,7 +376,7 @@ namespace Ariadne {
       return A.inverse();
     }
     
-    template <class R>
+    template<class R>
     inline
     Vector<typename Numeric::traits<R>::arithmetic_type> 
     solve(const Matrix<R>& A, const Vector<R>& v)
@@ -415,13 +415,13 @@ namespace Ariadne {
     }
 
 
-    template <class R>
+    template<class R>
     std::ostream&
     operator<<(std::ostream& os, const Matrix<R>& A) {
       return A.write(os);
     }
 
-    template <class R>
+    template<class R>
     std::istream&
     operator>>(std::istream& is, Matrix<R>& A) {
       return A.read(is); 
@@ -442,11 +442,11 @@ namespace Ariadne {
         
     
     
-    template <class R>
+    template<class R>
     bool independent_rows(Matrix<R> A);
 
     
-    template <class R>
+    template<class R>
     bool 
     equivalent_columns(const Matrix<R> &A, 
                        const size_type &A_col, 
@@ -459,17 +459,17 @@ namespace Ariadne {
     find_first_not_null_in_col(const Matrix<R> &A, 
                                const size_type &col);
     
-    template <class R>
+    template<class R>
     Matrix<R> 
     remove_null_columns_but_one(const Matrix<R> &A);
     
-    template <class R>
+    template<class R>
     void 
     remove_null_columns(const Matrix<R>& A, 
                         array<size_type>& row, 
                         array<size_type>& col);
 
-    template <class R>
+    template<class R>
     Matrix<R> 
     compute_space(const Matrix<R>& SA, 
                   array<size_type>& row,

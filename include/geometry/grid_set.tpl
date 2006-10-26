@@ -918,7 +918,7 @@ namespace Ariadne {
     }
 
     
-    template <class R>
+    template<class R>
     std::ostream& operator<<(std::ostream& os,
                              const GridCellListSet<R>& set)
     {
@@ -945,7 +945,7 @@ namespace Ariadne {
       return os;
     }
 
-    template <class R>
+    template<class R>
     std::ostream& operator<<(std::ostream& os,
                              const GridBlockListSet<R>& set)
     {
@@ -970,7 +970,7 @@ namespace Ariadne {
     }
 
 
-    template <class R>
+    template<class R>
     std::ostream& operator<<(std::ostream& os,
                              const GridMaskSet<R>& set)
     {

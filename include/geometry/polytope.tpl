@@ -66,20 +66,20 @@ namespace Ariadne {
     }
 
 
-    template <class R>
+    template<class R>
     Polytope<R>::Polytope(dimension_type d)
       : _generators(d+1,0)
     {
     }
    
    
-    template <class R>
+    template<class R>
     Polytope<R>::Polytope(const LinearAlgebra::Matrix<R>& G)
       : _generators(G)
     {
     }
    
-    template <class R>
+    template<class R>
     Polytope<R>::Polytope(const PointList<R>& pts)
       : _generators(pts.dimension()+1,pts.size())
     {
@@ -91,7 +91,7 @@ namespace Ariadne {
       }
     }
    
-    template <class R>
+    template<class R>
     Polytope<R>::Polytope(const Rectangle<R>& r)
       : _generators(r.dimension()+1,1<<r.dimension())
     {
@@ -107,7 +107,7 @@ namespace Ariadne {
       }
     }
    
-    template <class R>
+    template<class R>
     Polytope<R>::Polytope(const Polyhedron<R>& pltp)
       : _generators()
     {   
@@ -115,7 +115,7 @@ namespace Ariadne {
       throw std::runtime_error("Polytope<R>::Polytope(const Polyhedron<R>& pltp) not implemented");
     }
     
-    template <>
+    template<>
     Polytope<Rational>::Polytope(const Polyhedron<Rational>& plhd)
       : _generators()
     {
@@ -163,7 +163,7 @@ namespace Ariadne {
       //std::cerr << "G=" << G << std::endl;
     }
     
-    template <class R>
+    template<class R>
     Polytope<R>&
     Polytope<R>::operator=(const Polytope<R>& p)
       
@@ -175,14 +175,14 @@ namespace Ariadne {
     }
    
     
-    template <class R>
+    template<class R>
     dimension_type 
     Polytope<R>::dimension() const
     {
       return this->_generators.number_of_rows()-1;
     }
     
-    template <class R>
+    template<class R>
     const LinearAlgebra::Matrix<R>&
     Polytope<R>::generators() const
     {
@@ -190,21 +190,21 @@ namespace Ariadne {
     }
     
     
-    template <class R>
+    template<class R>
     size_type 
     Polytope<R>::number_of_vertices() const
     {
       return this->_generators.number_of_columns();
     }
     
-    template <class R>
+    template<class R>
     PointList<R> 
     Polytope<R>::vertices() const 
     {
       return PointList<R>(this->generators());
     }
 
-    template <class R>
+    template<class R>
     Point<R>
     Polytope<R>::vertex(const size_type& j) const 
     {
@@ -215,21 +215,21 @@ namespace Ariadne {
       return result;
     }
 
-    template <class R>
+    template<class R>
     typename Polytope<R>::vertices_const_iterator
     Polytope<R>::vertices_begin() const 
     {
       return PolytopeVerticesIterator<R>(*this,0);
     }
 
-    template <class R>
+    template<class R>
     typename Polytope<R>::vertices_const_iterator
     Polytope<R>::vertices_end() const 
     {
       return PolytopeVerticesIterator<R>(*this,this->number_of_vertices());
     }
 
-    template <class R>
+    template<class R>
     Rectangle<R> 
     Polytope<R>::bounding_box() const 
     {
@@ -242,7 +242,7 @@ namespace Ariadne {
     }
       
 
-    template <class R>
+    template<class R>
     tribool 
     Polytope<R>::empty() const
     {
@@ -255,7 +255,7 @@ namespace Ariadne {
      * Try to simultaneously solve A*x=p where A is the extended vertex matrix
      * d+1 auxiliary variables, d+1 equations
      */
-    template <class R>
+    template<class R>
     tribool 
     contains(const Polytope<R>& ply, const Point<R>& pt)
     {
@@ -303,7 +303,7 @@ namespace Ariadne {
     }
     
 
-    template <class R>
+    template<class R>
     tribool 
     Polytope<R>::contains(const Point<R>& pt) const
     {
@@ -314,7 +314,7 @@ namespace Ariadne {
      * Try to simultaneously solve A*s1-(u2-l2) x e2=l2 with 1*s1=1 and e2<=1
      * d+1 equality constraints, d+m inequality constraints, d+m variables, d+m slack variables, d+1 artificial variables.
      */
-    template <class R>
+    template<class R>
     tribool 
     disjoint(const Polytope<R>& A, const Rectangle<R>& B)
     {
@@ -379,14 +379,14 @@ namespace Ariadne {
       return lp.is_feasible();
     }
 
-    template <class R>
+    template<class R>
     tribool 
     disjoint(const Rectangle<R>& A, const Polytope<R>& B)
     { 
       return disjoint(B,A);
     }
 
-    template <class R>
+    template<class R>
     tribool 
     disjoint(const Polytope<R>& A, const Polytope<R>& B)
     {
@@ -423,7 +423,7 @@ namespace Ariadne {
       return lp.is_feasible();
     }
       
-    template <class R>
+    template<class R>
     tribool 
     subset(const Polytope<R>& A, const Polytope<R>& B)
     {
@@ -434,7 +434,7 @@ namespace Ariadne {
       
     
     
-    template <class R>
+    template<class R>
     tribool 
     subset(const Polytope<R>& A, const Rectangle<R>& B)
     {
@@ -447,14 +447,14 @@ namespace Ariadne {
     }
     
     
-    template <class R>
+    template<class R>
     tribool 
     subset(const Rectangle<R>& A, const Polytope<R>& B)
     {
       return Geometry::subset(Rectangle<Rational>(A),Polyhedron<Rational>(B));
     }
     
-    template <class R>
+    template<class R>
     Polytope<R>
     convex_hull(const Polytope<R>& A, const Polytope<R>& B)
     {

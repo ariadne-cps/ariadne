@@ -31,7 +31,7 @@ using namespace Ariadne::System;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template<typename R>
+template<class R>
 class VectorFieldWrapper
   : public VectorField<R>, public wrapper< VectorField<R> >
 {
@@ -41,7 +41,7 @@ class VectorFieldWrapper
   std::string name() const { return this->get_override("name")(); }
 };
 
-template<typename R>
+template<class R>
 void export_vector_field() 
 {
   class_<VectorFieldWrapper<R>, boost::noncopyable>("VectorField")

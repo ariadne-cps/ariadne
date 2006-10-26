@@ -45,7 +45,7 @@ template class Interval<Float64>;
 template class Interval<MPFloat>;
 template class Interval<Rational>;
 
-template<typename R> int test_interval();
+template<class R> int test_interval();
 template<> int test_interval<Rational>();
 
 int main() {
@@ -58,7 +58,7 @@ int main() {
 }
 
 
-template<typename R>
+template<class R>
 int
 test_interval()
 {

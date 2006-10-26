@@ -39,7 +39,7 @@ namespace Ariadne {
      *  \ingroup System
      *  \ingroup DiscreteTime
      */
-    template <typename R>
+    template<class R>
     class DiscreteTimeSystem
     {
      public:

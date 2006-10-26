@@ -42,18 +42,18 @@ using namespace Ariadne::Geometry;
 using namespace boost::python;
 
 
-template<typename R> inline
+template<class R> inline
 Rectangle<R> over_approximation_of_minkowski_sum(const Rectangle<R>& r1, const Rectangle<R>& r2) {
   return over_approximation(minkowski_sum(r1,r2));
 }
 
-template<typename R> inline
+template<class R> inline
 Rectangle<R> over_approximation_of_minkowski_difference(const Rectangle<R>& r1, const Rectangle<R>& r2) {
   return over_approximation(minkowski_difference(r1,r2));
 }
 
 
-template<typename R>
+template<class R>
 void export_rectangle() 
 {
   typedef Point<R> RPoint;

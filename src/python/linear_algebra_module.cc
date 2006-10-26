@@ -30,12 +30,12 @@
 
 using namespace Ariadne::Numeric;
 
-template<typename R> void export_vector();
-template<typename R> void export_matrix();
-template<typename R> void export_linear_program();
+template<class R> void export_vector();
+template<class R> void export_matrix();
+template<class R> void export_linear_program();
 
-template<typename R> void export_interval_vector();
-template<typename R> void export_interval_matrix();
+template<class R> void export_interval_vector();
+template<class R> void export_interval_matrix();
 
 
 BOOST_PYTHON_MODULE(linear_algebra)

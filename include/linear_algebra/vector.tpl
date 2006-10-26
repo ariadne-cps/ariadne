@@ -33,7 +33,7 @@
 namespace Ariadne {
   namespace LinearAlgebra {
 
-    template <class R>
+    template<class R>
     Vector<R>::Vector(const std::string& str)
       : _Base(1)
     {  
@@ -41,7 +41,7 @@ namespace Ariadne {
       ss >> *this; 
     }      
 
-    template <class R>
+    template<class R>
     std::ostream&
     Vector<R>::write(std::ostream& os) const
     {  
@@ -56,7 +56,7 @@ namespace Ariadne {
       return os;
     }      
 
-    template <class R>
+    template<class R>
     std::istream&
     Vector<R>::read(std::istream& is)
     {  

@@ -84,7 +84,7 @@ namespace Ariadne {
       array<int> _pivots;
     };
     
-    template <class Real>
+    template<class Real>
     inline 
     LUMatrix<Real>::LUMatrix(const Matrix<Real>& A) 
       : _elements(A), _pivots(A.number_of_rows()) 
@@ -95,7 +95,7 @@ namespace Ariadne {
                     this->_pivots.begin());      
     }
 
-    template <class Real>
+    template<class Real>
     inline
     Matrix<Real>
     LUMatrix<Real>::P() const
@@ -109,7 +109,7 @@ namespace Ariadne {
       return result;
     }
 
-    template <class Real>
+    template<class Real>
     inline
     Matrix<Real>
     LUMatrix<Real>::L() const
@@ -124,7 +124,7 @@ namespace Ariadne {
       return result;
     }
 
-    template <class Real>
+    template<class Real>
     inline
     Matrix<Real>
     LUMatrix<Real>::U() const
@@ -140,7 +140,7 @@ namespace Ariadne {
       return result;
     }
 
-    template <class Real>
+    template<class Real>
     inline
     LUMatrix<Real>::operator Matrix<Real> () const
     {
@@ -163,7 +163,7 @@ namespace Ariadne {
       return result;
     }
 
-    template <class Real>
+    template<class Real>
     inline
     bool
     LUMatrix<Real>::singular() const
@@ -171,7 +171,7 @@ namespace Ariadne {
       return this->determinant()==Real(0); 
     }
 
-    template <class Real>
+    template<class Real>
     inline
     Real
     LUMatrix<Real>::determinant() const
@@ -185,7 +185,7 @@ namespace Ariadne {
       return result;
     }
 
-    template <class Real>
+    template<class Real>
     inline
     Matrix<Real>
     LUMatrix<Real>::inverse() const

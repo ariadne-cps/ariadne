@@ -60,7 +60,7 @@ namespace Ariadne {
       return b;
     }
     
-    template <class R>
+    template<class R>
     tribool 
     _parallelotope_contains_coordinates(const LinearAlgebra::Vector<R>& e) 
     {  
@@ -74,7 +74,7 @@ namespace Ariadne {
       return true;
     }
 
-    template <class R>
+    template<class R>
     void 
     Parallelotope<R>::_compute_generators_inverse() const 
     {  
@@ -82,14 +82,14 @@ namespace Ariadne {
     }
     
       
-    template <class R>
+    template<class R>
     void 
     Parallelotope< Interval<R> >::_compute_generators_inverse() const 
     {  
       this->_generators_inverse=this->generators().inverse();
     }
     
-    template <class R>
+    template<class R>
     tribool 
     Parallelotope<R>::contains(const Point<R>& pt) const {
       if(this->_generators_inverse.number_of_rows()==0) {
@@ -98,7 +98,7 @@ namespace Ariadne {
       return _parallelotope_contains_coordinates(this->_generators_inverse*(pt-this->centre()));
     }
       
-    template <class R>
+    template<class R>
     tribool 
     Parallelotope< Interval<R> >::contains(const Point<I>& pt) const {
       if(this->_generators_inverse.number_of_rows()==0) {
@@ -107,7 +107,7 @@ namespace Ariadne {
       return _parallelotope_contains_coordinates(this->_generators_inverse*(pt-this->centre()));
     }
 
-    template <class R>
+    template<class R>
     ListSet<R,Parallelotope>
     Parallelotope<R>::divide() const 
     {
@@ -140,7 +140,7 @@ namespace Ariadne {
       return result;
     }
     
-    template <class R>
+    template<class R>
     ListSet<R,Parallelotope>
     Parallelotope<R>::subdivide() const 
     {
@@ -296,7 +296,7 @@ namespace Ariadne {
 */
     
     /*! \brief Tests if the parallelotope contains \a pt. */
-    template <class R>
+    template<class R>
     tribool 
     subset(const Rectangle<R>& r, const Parallelotope<R>& p)
     {
@@ -316,7 +316,7 @@ namespace Ariadne {
 
 
 
-    template <class R>
+    template<class R>
     std::ostream&
     Parallelotope<R>::write(std::ostream& os) const
     {
@@ -330,7 +330,7 @@ namespace Ariadne {
       return os;
     }
     
-    template <class R>
+    template<class R>
     std::istream& 
     Parallelotope<R>::read(std::istream& is)
     {

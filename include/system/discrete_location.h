@@ -31,7 +31,7 @@ namespace Ariadne {
 
 namespace HybridSystem {
 
-template < typename LDT > class HybridAutomaton;
+template< class LDT > class HybridAutomaton;
   
 /*! \typedef DiscreteLocationID
  *  \brief It's the type of the discrete location's univocal identifier. 
@@ -39,14 +39,14 @@ template < typename LDT > class HybridAutomaton;
 typedef size_t DiscreteLocationID;  
 
 /*! \brief The discrete location type. */
-template <typename R>
+template<class R>
 class DiscreteLocation {
 
   public:
     typedef R Real;
     typedef Evaluation::VectorField<Real> VectorField;
   
-    template < typename LDT >
+    template< class LDT >
     friend class HybridAutomaton;
       
   private:

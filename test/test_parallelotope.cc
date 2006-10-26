@@ -44,7 +44,7 @@ using namespace Ariadne::Geometry;
 using namespace Ariadne::Output;
 using namespace std;
 
-template<typename R> int test_parallelotope();
+template<class R> int test_parallelotope();
 
 int main() {
   cout << boolalpha;
@@ -53,7 +53,7 @@ int main() {
   return 0;
 }
 
-template<typename R>
+template<class R>
 int
 test_parallelotope()
 { 
@@ -74,7 +74,7 @@ test_parallelotope()
   cout << "p1.empty()=" << p1.empty() << endl;
 //  cout << "disjoint(p1,p2)=" << disjoint(p1,p2) << endl;
 //  cout << "subset(p1,p2)=" << subset(p1,p2) << endl;
-  for(typename Rectangle<R>::vertices_iterator v_iter=r2.vertices_begin();
+  for(class Rectangle<R>::vertices_iterator v_iter=r2.vertices_begin();
       v_iter!=r2.vertices_end(); ++v_iter)
   {
     cout << "p2.contains(" << *v_iter << ")=" << p2.contains(*v_iter) << endl;

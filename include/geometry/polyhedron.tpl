@@ -74,7 +74,7 @@ namespace Ariadne {
       open_intersection(p,p);
     }
     
-    template <class R1, class R2, template<class> class BS>
+    template<class R1, class R2, template<class> class BS>
     tribool 
     _subset(const BS<R1>& A, const Polyhedron<R2>& B)
     {
@@ -94,12 +94,12 @@ namespace Ariadne {
     
     
   
-    template <class R>
+    template<class R>
     Polyhedron<R>::Polyhedron(dimension_type n) : _A(0,n), _b(0)
     {
     }
     
-    template <class R>
+    template<class R>
     Polyhedron<R>::Polyhedron(const LinearAlgebra::Matrix<R>& A,
                               const LinearAlgebra::Vector<R>& b) 
       : _A(A), _b(b)
@@ -107,14 +107,14 @@ namespace Ariadne {
       assert(A.number_of_rows()==b.size());
     }
     
-    template <class R>
+    template<class R>
     Polyhedron<R>::Polyhedron(const PointList<R>& ptl)
       : _A(), _b()
     {
       (*this)=Polyhedron<R>(Polytope<R>(ptl));
     }
     
-    template <class R>
+    template<class R>
     Polyhedron<R>::Polyhedron(const Rectangle<R>& r)
       : _A(2*r.dimension(),r.dimension()), _b(r.dimension())
     {
@@ -127,14 +127,14 @@ namespace Ariadne {
       }
     }
    
-    template <class R>
+    template<class R>
     Polyhedron<R>::Polyhedron(const Polytope<R>& pltp)
       : _A(), _b()
     {   
       throw std::runtime_error("Polyhedron<R>::Polyhedron(const Polytope<R>& pltp) not implemented");
     }
     
-    template <>
+    template<>
     Polyhedron<Rational>::Polyhedron(const Polytope<Rational>& pltp)
       : _A(), _b()
     {
@@ -172,13 +172,13 @@ namespace Ariadne {
       }
     }
     
-    template <class R>
+    template<class R>
     Polyhedron<R>::Polyhedron(const Polyhedron<R>& p)
       : _A(p._A), _b(p._b)
     {
     }
    
-    template <class R>
+    template<class R>
     Polyhedron<R>&
     Polyhedron<R>::operator=(const Polyhedron<R>& p)
       
@@ -204,35 +204,35 @@ namespace Ariadne {
       return constraints_const_iterator(*this,this->number_of_constraints());
     }
  
-    template <class R>
+    template<class R>
     dimension_type
     Polyhedron<R>::dimension() const
     {
       return this->_A.number_of_columns(); 
     }
 
-    template <class R>
+    template<class R>
     Rectangle<R> 
     Polyhedron<R>::bounding_box() const 
     {
       throw std::runtime_error("Polyhedron<R>::bounding_box() const not implemented");
     }
       
-    template <class R>
+    template<class R>
     PointList<Rational>
     Polyhedron<R>::vertices() const
     {
       return Polytope<Rational>(*this).vertices();
     }
 
-    template <class R>
+    template<class R>
     tribool 
     Polyhedron<R>::empty() const
     {
       throw std::runtime_error("Polyhedron<R>::empty() const");
     }
 
-    template <class R>
+    template<class R>
     tribool 
     Polyhedron<R>::contains(const Point<R>& pt) const
     {
@@ -245,7 +245,7 @@ namespace Ariadne {
       return result;
     }
     
-    template <class R>
+    template<class R>
     tribool 
     equal(const Polyhedron<R>& A, const Polyhedron<R>& B)
     {
@@ -254,7 +254,7 @@ namespace Ariadne {
     
     
     
-    template <class R>
+    template<class R>
     tribool 
     disjoint(const Polyhedron<R>& p, const Rectangle<R>& r)
     {
@@ -262,7 +262,7 @@ namespace Ariadne {
     }
     
     
-    template <class R>
+    template<class R>
     tribool 
     disjoint(const Rectangle<R>& r, const Polyhedron<R>& p)
     {
@@ -271,7 +271,7 @@ namespace Ariadne {
     
     
     /*!Set up linear programming problem to solve A1*s1 <= b1; A2*s2 <= b2; A1*s1 - A2*s2 ==0 */
-    template <class R>
+    template<class R>
     tribool 
     disjoint(const Polyhedron<R>& plyhd1, const Polyhedron<R>& plyhd2)
     {
@@ -293,14 +293,14 @@ namespace Ariadne {
     
     
     
-    template <class R>
+    template<class R>
     tribool 
     subset(const Polyhedron<R>& A, const Polyhedron<R>& B)
     {
       return Geometry::subset(Polytope<Rational>(Polyhedron<Rational>(A)),Polyhedron<Rational>(B));
     }
     
-    template <class R>
+    template<class R>
     tribool 
     subset(const Polyhedron<R>& A, const Rectangle<R>& B)
     {
@@ -309,21 +309,21 @@ namespace Ariadne {
     
     
     
-    template <class R1,class R2>
+    template<class R1,class R2>
     tribool 
     subset(const Rectangle<R1>& A, const Polyhedron<R2>& B)
     {
       return Geometry::_subset(A,B);
     }
     
-    template <class R1,class R2>
+    template<class R1,class R2>
     tribool 
     subset(const Zonotope<R1>& A, const Polyhedron<R2>& B)
     {
       return Geometry::_subset(A,B);
     }
     
-    template <class R1,class R2>
+    template<class R1,class R2>
     tribool 
     subset(const Polytope<R1>& A, const Polyhedron<R2>& B)
     {
@@ -332,7 +332,7 @@ namespace Ariadne {
     
     
     
-    template <class R>
+    template<class R>
     Polyhedron<R> 
     open_intersection(const Polyhedron<R>& A, const Polyhedron<R>& B)
     {
@@ -343,7 +343,7 @@ namespace Ariadne {
     }
     
     
-    template <class R>
+    template<class R>
     Polyhedron<R> 
     closed_intersection(const Polyhedron<R>& p1, const Polyhedron<R>& p2)
     {

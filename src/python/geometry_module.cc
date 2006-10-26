@@ -26,17 +26,17 @@
 
 #include <boost/python.hpp>
 
-template<typename R> void export_point();
-template<typename R> void export_point_list();
-template<typename R> void export_rectangle();
-template<typename R> void export_parallelotope();
-template<typename R> void export_simplex();
-template<typename R> void export_zonotope();
-template<typename R> void export_polytope();
-template<typename R> void export_polyhedron();
-template<typename R> void export_list_set();
-template<typename R> void export_grid_set();
-template<typename R> void export_partition_tree_set();
+template<class R> void export_point();
+template<class R> void export_point_list();
+template<class R> void export_rectangle();
+template<class R> void export_parallelotope();
+template<class R> void export_simplex();
+template<class R> void export_zonotope();
+template<class R> void export_polytope();
+template<class R> void export_polyhedron();
+template<class R> void export_list_set();
+template<class R> void export_grid_set();
+template<class R> void export_partition_tree_set();
 
 BOOST_PYTHON_MODULE(geometry)
 {

@@ -37,7 +37,7 @@ using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
 using namespace std;
 
-template<typename R>
+template<class R>
 void test_linear_program();
 
 
@@ -47,7 +47,7 @@ int main() {
   return 0;
 }
 
-template<typename R>
+template<class R>
 void 
 test_linear_program()
 {

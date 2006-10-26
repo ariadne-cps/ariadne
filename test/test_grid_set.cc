@@ -43,7 +43,7 @@ using namespace Ariadne;
 using namespace Ariadne::Geometry;
 using namespace std;
 
-template<typename R>
+template<class R>
 int
 test_grid_set()
 {

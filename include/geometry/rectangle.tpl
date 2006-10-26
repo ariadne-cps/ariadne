@@ -39,7 +39,7 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template <class R>
+    template<class R>
     Rectangle<R>::Rectangle(const std::string& s)
       : _bounds()
     {
@@ -47,7 +47,7 @@ namespace Ariadne {
       ss >> *this;
     }
 
-    template <class R>
+    template<class R>
     Rectangle<R>& 
     Rectangle<R>::expand_by(const real_type& delta) 
     {
@@ -60,7 +60,7 @@ namespace Ariadne {
     }
       
     
-    template <class R>
+    template<class R>
     Rectangle<R>
     Rectangle<R>::quadrant(const Combinatoric::BinaryWord& w) const 
     {
@@ -78,7 +78,7 @@ namespace Ariadne {
       return quadrant;
     }
       
-    template <class R>
+    template<class R>
     ListSet<R,Rectangle>
     Rectangle<R>::subdivide() const 
     {
@@ -130,7 +130,7 @@ namespace Ariadne {
       return result;   
     }
     
-    template <class R>
+    template<class R>
     Point<R> 
     Rectangle<R>::vertex(size_type i) const 
     {
@@ -169,7 +169,7 @@ namespace Ariadne {
     }
     
     
-    template <class R>
+    template<class R>
     tribool 
     subset(const Rectangle<R>& A, 
            const ListSet<R,Geometry::Rectangle>& B)
@@ -178,7 +178,7 @@ namespace Ariadne {
     }
     
     
-    template <class R>
+    template<class R>
     std::ostream&
     Rectangle<R>::write(std::ostream& os) const 
     {
@@ -195,7 +195,7 @@ namespace Ariadne {
       return os;
     }
     
-    template <class R>
+    template<class R>
     std::istream& 
     Rectangle<R>::read(std::istream& is)
     {

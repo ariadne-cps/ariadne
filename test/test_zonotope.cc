@@ -45,7 +45,7 @@ using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Output;
 using namespace std;
 
-template<typename R> int test_zonotope();
+template<class R> int test_zonotope();
  
 int main() {
   test_zonotope<Real>();
@@ -55,7 +55,7 @@ int main() {
 }
 
 
-template<typename R>
+template<class R>
 int 
 test_zonotope()
 {

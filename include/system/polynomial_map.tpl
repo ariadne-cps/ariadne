@@ -45,14 +45,14 @@
 namespace Ariadne {
   namespace System {
 
-    template<typename R>
+    template<class R>
     Monomial<R>::Monomial(const std::string& s) 
     {
       std::stringstream ss(s);
       ss >> *this;
     }
     
-    template<typename R>
+    template<class R>
     Polynomial<R>::Polynomial(const std::string& s) 
     {
       //std::cerr << "Polynomial(\"" << s << "\")" << std::endl;
@@ -61,7 +61,7 @@ namespace Ariadne {
     }
     
     
-    template<typename R>
+    template<class R>
     PolynomialMap<R>::PolynomialMap(const std::string& s) 
     {
       //std::cerr << "PolynomialMap(\"" << s << "\")" << std::endl;
@@ -70,7 +70,7 @@ namespace Ariadne {
     }
     
     
-    template<typename R>
+    template<class R>
     size_type
     Monomial<R>::degree() const 
     {
@@ -81,14 +81,14 @@ namespace Ariadne {
       return result;
     }
     
-    template<typename R>
+    template<class R>
     void
     Monomial<R>::_resize(const dimension_type& n) 
     {
       this->_multi_index.resize(n);
     }
     
-    template<typename R>
+    template<class R>
     void
     Polynomial<R>::_sort() 
     {
@@ -102,7 +102,7 @@ namespace Ariadne {
       this->_terms.swap(new_terms);
     }
     
-    template<typename R>
+    template<class R>
     void
     Polynomial<R>::_set_argument_dimension(const dimension_type& n) 
     {
@@ -112,7 +112,7 @@ namespace Ariadne {
       }
     }
     
-    template<typename R>
+    template<class R>
     dimension_type
     Polynomial<R>::_compute_maximum_term_dimension() const
     {
@@ -124,7 +124,7 @@ namespace Ariadne {
     }
     
     
-    template<typename R>
+    template<class R>
     void
     PolynomialMap<R>::_set_argument_dimension(const dimension_type& n) 
     {
@@ -134,7 +134,7 @@ namespace Ariadne {
       }
     }
     
-    template<typename R>
+    template<class R>
     dimension_type
     PolynomialMap<R>::_compute_maximum_component_dimension() const
     {
@@ -147,7 +147,7 @@ namespace Ariadne {
     
     
     
-    template<typename R> 
+    template<class R> 
     bool 
     operator<(const Monomial<R>& m1, const Monomial<R>& m2)
     {
@@ -171,7 +171,7 @@ namespace Ariadne {
     }
     
     
-    template<typename R>
+    template<class R>
     typename Monomial<R>::result_type 
     Monomial<R>::apply(const Geometry::Point<R>& s) const 
     {
@@ -183,7 +183,7 @@ namespace Ariadne {
       return result;
     }
     
-    template<typename R>
+    template<class R>
     Interval<R>
     Monomial<R>::apply(const Geometry::Rectangle<R>& r) const 
     {
@@ -196,7 +196,7 @@ namespace Ariadne {
     }
     
     
-    template<typename R>
+    template<class R>
     typename Polynomial<R>::result_type
     Polynomial<R>::apply(const Geometry::Point<R>& s) const 
     {
@@ -209,7 +209,7 @@ namespace Ariadne {
       return result;
     }
     
-    template<typename R>
+    template<class R>
     Interval<R>
     Polynomial<R>::apply(const Geometry::Rectangle<R>& r) const 
     {
@@ -222,7 +222,7 @@ namespace Ariadne {
     }
     
     
-    template<typename R>
+    template<class R>
     typename PolynomialMap<R>::result_type
     PolynomialMap<R>::apply(const Geometry::Point<R>& s) const 
     {
@@ -234,7 +234,7 @@ namespace Ariadne {
       return result;
     }
     
-    template<typename R>
+    template<class R>
     Geometry::Rectangle<R>
     PolynomialMap<R>::apply(const Geometry::Rectangle<R>& r) const 
     {
@@ -246,7 +246,7 @@ namespace Ariadne {
       return result;
     }
     
-    template<typename R>
+    template<class R>
     LinearAlgebra::Matrix< typename PolynomialMap<R>::F >
     PolynomialMap<R>::jacobian(const Geometry::Point<R>& s) const 
     {
@@ -262,7 +262,7 @@ namespace Ariadne {
     }
     
     
-    template<typename R>
+    template<class R>
     LinearAlgebra::Matrix< Interval<R> >
     PolynomialMap<R>::jacobian(const Geometry::Rectangle<R>& r) const 
     {
@@ -276,7 +276,7 @@ namespace Ariadne {
       return result;
     }
     
-    template<typename R>
+    template<class R>
     const PolynomialMatrix<R>&
     PolynomialMap<R>::jacobian() const 
     {
@@ -284,7 +284,7 @@ namespace Ariadne {
     }
    
   
-    template<typename R>
+    template<class R>
     void
     PolynomialMap<R>::_compute_jacobian() const 
     {
@@ -311,7 +311,7 @@ namespace Ariadne {
     
 
     
-    template <typename R>
+    template<class R>
     std::ostream&
     operator<<(std::ostream& os, const Monomial<R>& m) 
     {
@@ -350,7 +350,7 @@ namespace Ariadne {
       return os;
     }
 
-    template <typename R>
+    template<class R>
     std::ostream&
     operator<<(std::ostream& os, const Polynomial<R>& p) 
     {
@@ -374,14 +374,14 @@ namespace Ariadne {
       return os;
     }
 
-    template <typename R>
+    template<class R>
     std::ostream&
     operator<<(std::ostream& os, const PolynomialMap<R>& p) 
     {
       return os << p._components;
     }
     
-    template <typename R>
+    template<class R>
     std::ostream&
     operator<<(std::ostream& os, const PolynomialMatrix<R>& p) 
     {
@@ -404,7 +404,7 @@ namespace Ariadne {
     
     
     
-    template <typename R>
+    template<class R>
     std::istream&
     operator>>(std::istream& is, Monomial<R>& m) 
     {
@@ -475,7 +475,7 @@ namespace Ariadne {
       return is;
     }
 
-    template <typename R>
+    template<class R>
     std::istream&
     operator>>(std::istream& is, Polynomial<R>& p) 
     {
@@ -500,7 +500,7 @@ namespace Ariadne {
       return is;
     }
     
-    template <typename R>
+    template<class R>
     std::istream&
     operator>>(std::istream& is, PolynomialMap<R>& pm) 
     {

@@ -61,7 +61,7 @@ namespace Ariadne {
     }
     
       
-    template <class R>
+    template<class R>
     Ellipsoid<R>::Ellipsoid(const Sphere<R>& s)
       : _centre(s.centre()), _bilinear_form(s.dimension(),s.dimension())
     { 
@@ -71,7 +71,7 @@ namespace Ariadne {
     }
       
       
-    template <class R>
+    template<class R>
     bool Ellipsoid<R>::contains(const state_type& point) const 
     {
       LinearAlgebra::Vector<Rational> p=point.position_vector();
@@ -81,7 +81,7 @@ namespace Ariadne {
       return inner_product(d,LinearAlgebra::Vector<Rational>(A*d))<=1;
     }
     
-    template <class R>
+    template<class R>
     bool Ellipsoid<R>::interior_contains(const state_type& point) const 
     {
       LinearAlgebra::Vector<Rational> p=point.position_vector();
@@ -115,7 +115,7 @@ namespace Ariadne {
       return Geometry::Ellipsoid<R>(new_centre, new_bilinear_form);
     }
 
-    template <class R>
+    template<class R>
     std::ostream&
     operator<<(std::ostream& os, const Ellipsoid<R>& e) 
     {
@@ -128,7 +128,7 @@ namespace Ariadne {
       return os;
     }
     
-    template <class R>
+    template<class R>
     std::istream& 
     operator>>(std::istream& is, Ellipsoid<R>& e)
     {

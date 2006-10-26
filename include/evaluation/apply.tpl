@@ -53,7 +53,7 @@ namespace Ariadne {
   namespace Evaluation {
 
    
-    template<typename R>
+    template<class R>
     Geometry::Rectangle<R> 
     C0Applicator<R>::apply(const System::Map<R>& f, const Geometry::Rectangle<R>& r) const
     {
@@ -61,7 +61,7 @@ namespace Ariadne {
     }
     
     
-    template<typename R>
+    template<class R>
     Geometry::Parallelotope<R> 
     C1Applicator<R>::apply(const System::Map<R>& f, const Geometry::Parallelotope<R>& p) const 
     {
@@ -106,12 +106,12 @@ namespace Ariadne {
       return result;
     }
 
-    template<typename R, template<typename> class BS>
+    template<class R, template<class> class BS>
     Applicator<R,BS>::~Applicator() 
     {
     }
     
-    template<typename R, template<typename> class BS>
+    template<class R, template<class> class BS>
     Geometry::ListSet<R,BS> 
     Applicator<R,BS>::apply(const System::Map<R>& f, const Geometry::ListSet<R,BS>& ds) const 
     {
@@ -123,7 +123,7 @@ namespace Ariadne {
     }
      
     
-    template<typename R, template<typename> class BS>
+    template<class R, template<class> class BS>
     Geometry::GridMaskSet<R> 
     Applicator<R,BS>::apply(const System::Map<R>& f, 
                             const Geometry::GridMaskSet<R>& initial_set, 
@@ -147,7 +147,7 @@ namespace Ariadne {
     }
     
     
-    template<typename R, template<typename> class BS>
+    template<class R, template<class> class BS>
     Geometry::GridMaskSet<R> 
     Applicator<R,BS>::chainreach(const System::Map<R>& f, 
                                  const Geometry::GridMaskSet<R>& initial_set, 
@@ -192,7 +192,7 @@ namespace Ariadne {
       return result;
     }
   
-    template<typename R, template<typename> class BS>
+    template<class R, template<class> class BS>
     bool
     Applicator<R,BS>::verify(const System::Map<R>& f, 
                              const Geometry::GridMaskSet<R>& initial_set, 

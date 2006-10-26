@@ -36,7 +36,7 @@
 namespace Ariadne {
   namespace Combinatoric {
     
-    template<typename Ptr>
+    template<class Ptr>
     class array_less {
      public:
       array_less(size_type n) : _array_size(n) { }
@@ -58,7 +58,7 @@ namespace Ariadne {
       size_type _array_size;
     };
       
-    template<typename Ptr>
+    template<class Ptr>
     class array_eq {
      public:
       array_eq(size_type n) : _array_size(n) { }

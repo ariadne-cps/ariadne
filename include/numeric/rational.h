@@ -61,8 +61,8 @@ namespace Ariadne {
     {
      public:
       Rational() : mpq_class() { }
-      template<typename R> Rational(const R& x) : mpq_class(x) { }
-      template<typename R1,typename R2> Rational(const R1& x1,const R2& x2) : mpq_class(x1,x2) { }
+      template<class R> Rational(const R& x) : mpq_class(x) { }
+      template<class R1,class R2> Rational(const R1& x1,const R2& x2) : mpq_class(x1,x2) { }
     };
     
 #endif

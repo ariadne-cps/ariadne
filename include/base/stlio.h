@@ -44,7 +44,7 @@
 
 namespace Ariadne {
   namespace Utility { 
-    template<typename InputIterator>
+    template<class InputIterator>
     inline
     std::ostream&
     write_sequence(std::ostream& os, InputIterator first, InputIterator last, char opening='[', char closing=']', char separator=',') 
@@ -61,7 +61,7 @@ namespace Ariadne {
       return os;
     }
     
-    template<typename InputIterator>
+    template<class InputIterator>
     inline
     std::ostream&
     write_map_sequence(std::ostream& os, InputIterator first, InputIterator last, char opening='{', char closing='}', char separator=',') 
@@ -78,7 +78,7 @@ namespace Ariadne {
       return os;
     }
     
-    template<typename T>
+    template<class T>
     inline
     std::istream&
     read_vector(std::istream& is, std::vector<T>& v, char opening='[', char closing=']', char separator=',') 
@@ -125,7 +125,7 @@ namespace Ariadne {
       return is;
     }
 
-    template<typename T>
+    template<class T>
     inline
     std::istream&
     read_array(std::istream& is, Base::array<T>& a, char opening='[', char closing=']', char separator=',') 
@@ -179,20 +179,20 @@ namespace Ariadne {
 namespace Ariadne {
   namespace Base { 
 
-    template<typename Iter> inline
+    template<class Iter> inline
     std::ostream&
     operator<<(std::ostream& os, const range<Iter>& a) {
       Utility::write_sequence(os,a.begin(),a.end());
       return os;
     }
     
-    template<typename T> inline
+    template<class T> inline
     std::ostream&
     operator<<(std::ostream& os, const array<T>& a) {
       return Utility::write_sequence(os,a.begin(),a.end());
     }
     
-    template<typename T> inline
+    template<class T> inline
     std::ostream&
     operator<<(std::ostream& os, const array_vector<T>& a) {
       os << "[ ";
@@ -207,7 +207,7 @@ namespace Ariadne {
       return os;
     }
 
-    template<typename T> inline
+    template<class T> inline
     std::istream&
     operator>>(std::istream& is, array<T>& a) {
       return Utility::read_array(is,a);
@@ -223,7 +223,7 @@ namespace Ariadne {
    any namespace using operator<<.
 */
 namespace std {
-  template <typename S,typename T> 
+  template<class S, class T> 
   inline 
   std::ostream& 
   operator<<(std::ostream &os, const std::pair<S,T>& s) 
@@ -231,7 +231,7 @@ namespace std {
     return os << '(' << s.first << ',' << s.second << ')';
   }
   
-  template <typename T> 
+  template<class T> 
   inline
   std::ostream& 
   operator<< (std::ostream &os, const std::vector<T>& v) 
@@ -239,7 +239,7 @@ namespace std {
     return Ariadne::Utility::write_sequence(os,v.begin(),v.end());
   }
   
-  template <typename T> 
+  template<class T> 
   inline
   std::ostream& 
   operator<< (std::ostream &os, const std::list<T>& l) 
@@ -247,7 +247,7 @@ namespace std {
     return Ariadne::Utility::write_sequence(os,l.begin(),l.end());
   }
   
-  template <typename T> 
+  template<class T> 
   inline
   std::ostream& 
   operator<< (std::ostream &os, const std::deque<T>& d) 
@@ -255,14 +255,14 @@ namespace std {
     return Ariadne::Utility::write_sequence(os,d.begin(),d.end());
   }
   
-  template <typename T> 
+  template<class T> 
   inline
   ostream& 
   operator<< (std::ostream &os, const std::valarray<T>& v) {
     return Ariadne::Utility::write_sequence(os,&(v[0]),&(v[v.size()-1]));
   }
   
-  template <typename T, typename C> 
+  template<class T, class C> 
   inline 
   std::ostream& 
   operator<<(std::ostream &os, const std::set<T,C>& s) 
@@ -270,7 +270,7 @@ namespace std {
     return Ariadne::Utility::write_sequence(os,s.begin(), s.end(), '{', '}');
   }
   
-  template <typename K, typename T, typename C> 
+  template<class K, class T, class C> 
   inline 
   std::ostream& 
   operator<<(std::ostream &os, const std::map<K,T,C>& m) 
@@ -278,7 +278,7 @@ namespace std {
     return Ariadne::Utility::write_map_sequence(os,m.begin(), m.end(), '{', '}');
   }
   
-  template <typename T> 
+  template<class T> 
   inline
   istream& 
   operator>> (std::istream &is, std::vector<T>& v) {

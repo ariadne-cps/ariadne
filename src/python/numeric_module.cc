@@ -30,8 +30,8 @@
 using namespace Ariadne::Numeric;
 
 void export_numeric();
-template<typename R> void export_function();
-template<typename R> void export_interval();
+template<class R> void export_function();
+template<class R> void export_interval();
 
 BOOST_PYTHON_MODULE(numeric)
 {

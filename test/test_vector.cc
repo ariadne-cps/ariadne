@@ -39,7 +39,7 @@ using namespace std;
 using namespace Ariadne;
 using namespace Ariadne::LinearAlgebra;
 
-template<typename R> int test_vector();
+template<class R> int test_vector();
 
 int main() {
   test_vector<MPFloat>();
@@ -51,7 +51,7 @@ int main() {
   return 0;
 }  
 
-template<typename R>
+template<class R>
 int 
 test_vector()
 {

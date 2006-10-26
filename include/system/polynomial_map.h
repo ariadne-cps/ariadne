@@ -39,25 +39,25 @@
 
 namespace Ariadne {
   namespace System {
-    template<typename R> class Monomial;
-    template<typename R> class Polynomial;
-    template<typename R> class PolynomialMap;
-    template<typename R> class PolynomialMatrix;
+    template<class R> class Monomial;
+    template<class R> class Polynomial;
+    template<class R> class PolynomialMap;
+    template<class R> class PolynomialMatrix;
 
-    template<typename R> std::ostream& operator<<(std::ostream&, const Monomial<R>&);
-    template<typename R> std::ostream& operator<<(std::ostream&, const Polynomial<R>&);
-    template<typename R> std::ostream& operator<<(std::ostream&, const PolynomialMap<R>&);
-    template<typename R> std::ostream& operator<<(std::ostream&, const PolynomialMatrix<R>&);
+    template<class R> std::ostream& operator<<(std::ostream&, const Monomial<R>&);
+    template<class R> std::ostream& operator<<(std::ostream&, const Polynomial<R>&);
+    template<class R> std::ostream& operator<<(std::ostream&, const PolynomialMap<R>&);
+    template<class R> std::ostream& operator<<(std::ostream&, const PolynomialMatrix<R>&);
    
-    template<typename R> std::istream& operator>>(std::istream&, Monomial<R>&);
-    template<typename R> std::istream& operator>>(std::istream&, Polynomial<R>&);
-    template<typename R> std::istream& operator>>(std::istream&, PolynomialMap<R>&);
+    template<class R> std::istream& operator>>(std::istream&, Monomial<R>&);
+    template<class R> std::istream& operator>>(std::istream&, Polynomial<R>&);
+    template<class R> std::istream& operator>>(std::istream&, PolynomialMap<R>&);
    
     /*! \brief Graded lexicographical ordering. */
-    template<typename R> bool operator<(const Monomial<R>&, const Monomial<R>&);
+    template<class R> bool operator<(const Monomial<R>&, const Monomial<R>&);
     
     /*! \brief A monomial in several variables. */
-    template<typename R>
+    template<class R>
     class Monomial {
       typedef typename Numeric::traits<R>::arithmetic_type F;
       typedef typename Numeric::traits<R>::arithmetic_type result_type;
@@ -110,7 +110,7 @@ namespace Ariadne {
     };
     
     /*! \brief Unary minus. */
-    template<typename R>
+    template<class R>
     inline Monomial<R> operator-(const Monomial<R>& m) 
     {
       return Monomial<R>(-m.coefficient(), m.multi_index());
@@ -118,7 +118,7 @@ namespace Ariadne {
     
     
     /*! \brief A polynomial in several variables. */
-    template<typename R>
+    template<class R>
     class Polynomial {
       typedef typename Numeric::traits<R>::arithmetic_type F;
       typedef typename Numeric::traits<R>::arithmetic_type result_type;
@@ -162,7 +162,7 @@ namespace Ariadne {
     /*! \brief A polynomial map with multivalued output.
      *  \ingroup DiscreteTime
      */
-    template <typename R>
+    template<class R>
     class PolynomialMap : public Map<R> {
       typedef typename Numeric::traits<R>::arithmetic_type F;
       typedef Geometry::Point<F> result_type;
@@ -217,7 +217,7 @@ namespace Ariadne {
     };
     
     /*! \brief A matrix with polynomial entries. */
-    template <typename R>
+    template<class R>
     class PolynomialMatrix {
       typedef typename Numeric::traits<R>::arithmetic_type F;
      public:

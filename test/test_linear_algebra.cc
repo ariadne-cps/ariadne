@@ -46,7 +46,7 @@ using namespace Ariadne;
 using namespace Ariadne::LinearAlgebra;
 using namespace std;
 
-template<typename R> int test_linear_algebra();
+template<class R> int test_linear_algebra();
 template<> int test_linear_algebra<Rational>();
 
 int main() {
@@ -105,7 +105,7 @@ test_linear_algebra<Rational>()
   return 0;
 }
 
-template<typename Rl>
+template<class Rl>
 int
 test_linear_algebra()
 {

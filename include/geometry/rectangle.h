@@ -68,7 +68,7 @@ namespace Ariadne {
      * The lower bound in the \a i th coordinate is the \a p2i element, and the 
      * upper bound is the \a 2i+1 st element.
      */
-    template <class R>
+    template<class R>
     class Rectangle 
       : public RectangleExpression< Rectangle<R> >
     {
@@ -470,7 +470,7 @@ namespace Ariadne {
       return result;
     }
     
-    template <class R>
+    template<class R>
     inline
     tribool 
     Rectangle<R>::contains(const Point<R>& p) const 
@@ -492,7 +492,7 @@ namespace Ariadne {
     }
 
       
-    template <class R>
+    template<class R>
     inline
     tribool 
     equal(const Rectangle<R>& A, const Rectangle<R>& B)
@@ -508,7 +508,7 @@ namespace Ariadne {
       return indeterminate;
     }
       
-    template <class R>
+    template<class R>
     inline
     tribool 
     disjoint(const Rectangle<R>& A, const Rectangle<R>& B)
@@ -529,7 +529,7 @@ namespace Ariadne {
     }
        
 
-    template <class R>
+    template<class R>
     inline
     tribool 
     subset(const Rectangle<R>& A, const Rectangle<R>& B)
@@ -550,7 +550,7 @@ namespace Ariadne {
     }
     
     
-    template <class R>
+    template<class R>
     inline
     Rectangle<R> 
     closed_intersection(const Rectangle<R>& A, const Rectangle<R>& B)
@@ -565,7 +565,7 @@ namespace Ariadne {
       return C;
     }
 
-    template <class R>
+    template<class R>
     inline
     Rectangle<R> 
     open_intersection(const Rectangle<R>& A, const Rectangle<R>& B)
@@ -583,7 +583,7 @@ namespace Ariadne {
       return C;
     }
 
-    template <class R>
+    template<class R>
     inline
     Rectangle<R>
     rectangular_hull(const Rectangle<R>& A, const Rectangle<R>& B)
@@ -631,7 +631,7 @@ namespace Ariadne {
     }
     
     
-    template <class R> 
+    template<class R> 
     inline
     tribool 
     subset(const Rectangle<R>& A, ListSet<R,Geometry::Rectangle>& B);

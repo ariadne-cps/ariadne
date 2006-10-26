@@ -39,7 +39,7 @@ using namespace Ariadne::Geometry;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template <template <typename> class BS1, template<typename> class BS2>
+template<template<class> class BS1, template<class> class BS2>
 inline
 BS1<Real> 
 touching_intersection(const BS1<Real> &a, 
@@ -51,7 +51,7 @@ touching_intersection(const BS1<Real> &a,
   return a;
 }
 
-template<typename R>
+template<class R>
 void export_parallelotope() 
 {
   typedef Parallelotope<R> RParallelotope;

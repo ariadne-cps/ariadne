@@ -39,10 +39,10 @@
 namespace Ariadne {  
 namespace HybridSystem {
   
-template < typename LDT >
+template< class LDT >
 class HybridAutomaton;
   
-template < typename LDT>
+template< class LDT>
 inline void dot_print(const HybridAutomaton< LDT >& A){          
   std::ofstream fos;
   
@@ -79,7 +79,7 @@ inline void dot_print(const HybridAutomaton< LDT >& A){
  * It represents automata and its methods evaluate both reachability
  * properties and region.
  */
-template < typename LDT >
+template< class LDT >
 class HybridAutomaton
 {
  private: 
@@ -239,11 +239,11 @@ class HybridAutomaton
     return this->_dimension; 
   }
   
-  template <typename AUTO , typename HDS ,typename TRACE, 
-            typename MAINTAIN, typename INT>
+  template<class AUTO , class HDS , class TRACE, 
+            class MAINTAIN, class INT>
   friend class Ariadne::Evaluation::Solver;
   
-  template <typename LeavingDT>
+  template<class LeavingDT>
   friend void dot_print(const HybridAutomaton< LeavingDT >& A);
 };
   

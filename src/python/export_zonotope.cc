@@ -38,7 +38,7 @@ using namespace Ariadne::Geometry;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template <typename R, template <typename> class BS1, template<typename> class BS2>
+template<class R, template<class> class BS1, template<class> class BS2>
 inline
 BS1<R> 
 touching_intersection(const BS1<R> &a, 
@@ -50,17 +50,17 @@ touching_intersection(const BS1<R> &a,
   return a;
 }
 
-template<typename R> inline
+template<class R> inline
 Zonotope<R> over_approximation_of_minkowski_sum(const Zonotope<R>& z1, const Zonotope<R>& z2) {
   return minkowski_sum(z1,z2).over_approximation();
 }
 
-template<typename R> inline
+template<class R> inline
 Zonotope<R> over_approximation_of_minkowski_difference(const Zonotope<R>& z1, const Zonotope<R>& z2) {
   return minkowski_difference(z1,z2).over_approximation();
 }
 
-template<typename R>
+template<class R>
 void export_zonotope() 
 {
   typedef typename Numeric::traits<R>::arithmetic_type F;

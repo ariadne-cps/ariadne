@@ -41,7 +41,7 @@ using namespace Ariadne::Evaluation;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template<typename R>
+template<class R>
 void export_apply() 
 {
   class_< C1Applicator<R> >("Applicator",init<>())

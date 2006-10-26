@@ -186,7 +186,7 @@ namespace Ariadne {
     
     
     
-    template <class R>
+    template<class R>
     inline 
     Vector<R>
     approximate_value(const Vector< Interval<R> >& iv) 
@@ -198,7 +198,7 @@ namespace Ariadne {
       return result;
     }
 
-    template <class R>
+    template<class R>
     inline 
     bool
     contains_value(const Vector< Interval<R> >& iv,const Vector<R>& v) 
@@ -212,7 +212,7 @@ namespace Ariadne {
       return true;
     }
 
-    template <class R>
+    template<class R>
     inline
     std::ostream&
     operator<<(std::ostream& os, const Vector<R>& v)
@@ -220,7 +220,7 @@ namespace Ariadne {
        return v.write(os);
     }
     
-    template <class R>
+    template<class R>
     inline
     std::istream&
     operator>>(std::istream& is, Vector<R>& v)
@@ -327,7 +327,7 @@ namespace Ariadne {
       
     
     
-    template <class R> inline 
+    template<class R> inline 
     R inner_product(const Vector<R>& u, const Vector<R>& v) 
     {
       assert(u.size()==v.size());
@@ -338,7 +338,7 @@ namespace Ariadne {
       return result;
     }
 
-    template <class R> inline 
+    template<class R> inline 
     Vector<R> direct_sum(const Vector<R>& v1, const Vector<R>& v2) 
     {
       Vector<R> result(v1.size()+v2.size());
@@ -351,7 +351,7 @@ namespace Ariadne {
       return result;
     }
 
-    template <class R> inline 
+    template<class R> inline 
     bool linear_multiple(const Vector<R>& u, const Vector<R>& v) 
     {
       assert(u.size()==v.size());

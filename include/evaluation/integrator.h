@@ -43,7 +43,7 @@ namespace Ariadne {
     /*! \brief %Base class for integration schemes. 
      *  \ingroup Integrate
      */
-    template<typename R>
+    template<class R>
     class Integrator {
      public:
       /*! \brief Virtual destructor. */
@@ -120,14 +120,14 @@ namespace Ariadne {
 
      protected:
       /*! \brief Template for integrating a list set. */
-      template<template<typename> class BS>
+      template<template<class> class BS>
       Geometry::ListSet<R,BS> 
       integrate_list_set(const System::VectorField<R>& vector_field, 
                          const Geometry::ListSet<R,BS>& initial_set, 
                          const time_type& time) const;
 
       /*! \brief Template for integrating a basic set. */
-      template<template<typename> class BS>
+      template<template<class> class BS>
       BS<R>
       integrate_basic_set(const System::VectorField<R>& vector_field, 
                           const BS<R>& initial_set, 
@@ -162,7 +162,7 @@ namespace Ariadne {
     /*! \brief %Base class for integration schemes which do not use the derivative of the vector field. 
      *  \ingroup Integrate
      */
-    template<typename R>
+    template<class R>
     class C0Integrator : public Integrator<R> {
      public:
       /*! \brief Constructor. */
@@ -210,7 +210,7 @@ namespace Ariadne {
     /*! \brief %Base class for integration schemes which require at least a \f$C^1\f$ vector field.
      *  \ingroup Integrate
      */
-    template<typename R>
+    template<class R>
     class C1Integrator : public Integrator<R> {
      public:
       /*! \brief Constructor. */

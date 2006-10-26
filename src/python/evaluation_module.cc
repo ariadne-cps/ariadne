@@ -26,8 +26,8 @@
 
 #include "real_typedef.h"
 
-template<typename R> void export_apply();
-template<typename R> void export_integrate();
+template<class R> void export_apply();
+template<class R> void export_integrate();
 
 BOOST_PYTHON_MODULE(evaluation)
 {

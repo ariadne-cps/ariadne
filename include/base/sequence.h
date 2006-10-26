@@ -38,18 +38,18 @@
 
 namespace Ariadne {
   namespace Base {
-    template<typename T> class sequence;
-    template<typename T> class compact_sequence;
-    template<typename T> class _sequence_const_iterator;
-    template<typename T> class _compact_sequence_const_iterator;
+    template<class T> class sequence;
+    template<class T> class compact_sequence;
+    template<class T> class _sequence_const_iterator;
+    template<class T> class _compact_sequence_const_iterator;
     
-    template<typename T> compact_sequence<T> convolution(const compact_sequence<T>& u, const compact_sequence<T>& v);
+    template<class T> compact_sequence<T> convolution(const compact_sequence<T>& u, const compact_sequence<T>& v);
     
     /*! \brief An eventually-periodic sequence with an STL style interface.
      *
      * A sequence<T> is an eventually-periodic sequence of values with STL style forward iterators.
      */
-    template<typename T> class sequence {
+    template<class T> class sequence {
       friend class _sequence_const_iterator<T>;
      public:
       typedef _sequence_const_iterator<T> iterator;
@@ -66,7 +66,7 @@ namespace Ariadne {
       ~sequence() { delete[] _ptr; }
       sequence() : _body_size(0), _tail_size(1), _ptr(new value_type[1]) { _ptr[0]=value_type(); }
       
-      template<typename ForwardIterator> sequence(ForwardIterator b, ForwardIterator tb, ForwardIterator te)
+      template<class ForwardIterator> sequence(ForwardIterator b, ForwardIterator tb, ForwardIterator te)
         : _body_size(std::distance(b,tb)), _tail_size(std::distance(tb,te)), _ptr(new value_type[std::distance(b,te)])
       { fill(b); }
       
@@ -109,9 +109,9 @@ namespace Ariadne {
         bool operator!=(const array& other) const { return !((*this)==other); }
       */
       
-      template<typename InputIterator> void fill(InputIterator iter) { 
+      template<class InputIterator> void fill(InputIterator iter) { 
         pointer curr=_ptr; pointer end=curr+size(); while(curr!=end) { *curr=*iter; ++curr; ++iter; } }
-      template<typename ForwardIterator> void assign(ForwardIterator first, ForwardIterator tail, ForwardIterator last) {
+      template<class ForwardIterator> void assign(ForwardIterator first, ForwardIterator tail, ForwardIterator last) {
         resize(std::distance(first,tail),std::distance(tail,last)); fill(first); }
      private:
       size_type size() const { return _body_size + _tail_size; }
@@ -157,7 +157,7 @@ namespace Ariadne {
       const_pointer _tail_end;
     };
     
-    template<typename T>
+    template<class T>
     inline
     typename sequence<T>::const_iterator
     sequence<T>::begin() const
@@ -167,7 +167,7 @@ namespace Ariadne {
     
     /*! \brief An eventually-zero biinfinite sequence.
      */
-    template<typename T> class compact_sequence {
+    template<class T> class compact_sequence {
       friend class _compact_sequence_const_iterator<T>;
       //    friend template<> compact_sequence<T> convolution(const compact_sequence<T>& u, const compact_sequence<T>& v);
      public:
@@ -187,7 +187,7 @@ namespace Ariadne {
       compact_sequence(size_type start, size_type finish, value_type x) : _start(start), _finish(finish), _ptr(new value_type[finish-start]) { 
         for(size_type i=_start; i!=_finish; ++i) { _ptr[i]=x; }
       }
-      template<typename ForwardIterator> compact_sequence(const ForwardIterator& b, ForwardIterator c, ForwardIterator e)
+      template<class ForwardIterator> compact_sequence(const ForwardIterator& b, ForwardIterator c, ForwardIterator e)
         : _start(std::distance(c,b)), _finish(std::distance(c,e)), _ptr(new value_type[std::distance(b,c)]-_start)
       { fill(c); }
       
@@ -239,9 +239,9 @@ namespace Ariadne {
       
       const_iterator begin() const;
       
-      template<typename InputIterator> void fill(InputIterator iter) { 
+      template<class InputIterator> void fill(InputIterator iter) { 
         pointer curr=_ptr+_start; iter=iter+_start; pointer end=curr+_finish; while(curr!=end) { *curr=*iter; ++curr; ++iter; } }
-      template<typename ForwardIterator> void assign(ForwardIterator first, ForwardIterator centre, ForwardIterator last) {
+      template<class ForwardIterator> void assign(ForwardIterator first, ForwardIterator centre, ForwardIterator last) {
         resize(std::distance(centre,first),std::distance(centre,last)); fill(centre); }
      private:
       size_type size() const { return _finish-_start; }
@@ -253,7 +253,7 @@ namespace Ariadne {
     };
     
     /*! \brief The convolution of two sequences, \f$(a\star b)_i=\sum_{j\in\mathbb{Z}}a_jb_{i-j}\f$. */
-    template<typename T>
+    template<class T>
     compact_sequence<T>
     convolution(const compact_sequence<T>& u, const compact_sequence<T>& v) {
       typedef typename compact_sequence<T>::size_type size_type;
@@ -266,7 +266,7 @@ namespace Ariadne {
       return r;
     }
     
-    template<typename T>
+    template<class T>
     std::ostream&
     operator<<(std::ostream& os, const sequence<T>& s)
     {

@@ -35,14 +35,14 @@ using namespace Ariadne;
 using namespace Ariadne::Geometry;
 using namespace std;
 
-template<typename R> int test_point();
+template<class R> int test_point();
 
 int main() {
   test_point<Real>();
   return 0;
 }
 
-template<typename R>
+template<class R>
 int
 test_point()
 {

@@ -104,7 +104,7 @@ namespace Ariadne {
     }
     
     
-    template <class R>
+    template<class R>
     PointList<Rational>
     Zonotope<R>::vertices() const
     {
@@ -173,7 +173,7 @@ namespace Ariadne {
       return subset(A,B) && subset(B,A);
     }
     
-    template <class R>
+    template<class R>
     Rectangle<R>
     Zonotope<R>::bounding_box() const
     {
@@ -186,7 +186,7 @@ namespace Ariadne {
     }
 
 
-    template <class R>
+    template<class R>
     ListSet<R,Zonotope>
     Zonotope<R>::subdivide() const 
     {
@@ -221,7 +221,7 @@ namespace Ariadne {
       return result;
     }
     
-    template <class R>
+    template<class R>
     ListSet<R,Zonotope>
     Zonotope<R>::divide() const 
     {
@@ -629,7 +629,7 @@ namespace Ariadne {
     
 
 
-    template <class R>
+    template<class R>
     tribool 
     subset(const Rectangle<R>& A, const Zonotope<R>& B) 
     {
@@ -638,14 +638,14 @@ namespace Ariadne {
       return Geometry::subset(Rectangle<F>(A),B.operator Polyhedron<F>());
     }
 
-    template <class R>
+    template<class R>
     tribool 
     subset(const Zonotope<R>& A, const Rectangle<R>& B) 
     {
       return Geometry::subset(A.bounding_box(),B);
     }
 
-    template <class R>
+    template<class R>
     tribool 
     subset(const Zonotope<R>& A, const Zonotope<R>& B) 
     {
@@ -717,7 +717,7 @@ namespace Ariadne {
     }
   */
 
-    template <class R>
+    template<class R>
     std::ostream&
     Zonotope<R>::write(std::ostream& os) const 
     {
@@ -734,7 +734,7 @@ namespace Ariadne {
       return os;
     }
     
-    template <class R>
+    template<class R>
     std::ostream&
     Zonotope< Interval<R> >::write(std::ostream& os) const 
     {
@@ -747,7 +747,7 @@ namespace Ariadne {
       return os;
     }
     
-    template <class R>
+    template<class R>
     std::istream& 
     Zonotope<R>::read(std::istream& is)
     {

@@ -45,7 +45,7 @@ namespace Ariadne {
   namespace System {
 
     /*! \brief The Henon map \f$(x,y)\mapsto(a-x^2-by,x)\f$. */
-    template <typename R>
+    template<class R>
     class HenonMap : public Map<R> 
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
@@ -91,7 +91,7 @@ namespace Ariadne {
       R _b;
     };
       
-    template <typename R>
+    template<class R>
     Geometry::Point<typename HenonMap<R>::F>
     HenonMap<R>::image(const Geometry::Point<R>& p) const
     {
@@ -103,7 +103,7 @@ namespace Ariadne {
       return result;
     }
      
-    template <typename R>
+    template<class R>
     Geometry::Rectangle<R>
     HenonMap<R>::image(const Geometry::Rectangle<R>& A) const
     {
@@ -113,7 +113,7 @@ namespace Ariadne {
       return result;
     }
      
-    template <typename R>
+    template<class R>
     LinearAlgebra::Matrix<typename HenonMap<R>::F>
     HenonMap<R>::jacobian(const Geometry::Point<R>& x) const
     {
@@ -125,7 +125,7 @@ namespace Ariadne {
       return result;
     }
      
-    template <typename R>
+    template<class R>
     LinearAlgebra::Matrix< Interval<R> >
     HenonMap<R>::jacobian(const Geometry::Rectangle<R>& r) const
     {
@@ -138,7 +138,7 @@ namespace Ariadne {
     }
      
      
-    template <typename R>
+    template<class R>
     std::ostream& operator<<(std::ostream& os, const HenonMap<R>& hm) {
       os << "HenonMap( a=" << hm.a() << ", b=" << hm.b() << " )";
       return os;

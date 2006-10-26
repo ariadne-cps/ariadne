@@ -40,7 +40,7 @@ namespace Ariadne {
     /*!\ingroup ContinuousTime
      * \brief An affine vector field in Euclidean space, given by \f$f(x)=Ax+b\f$.
      */
-    template <typename R>
+    template<class R>
     class AffineVectorField : public VectorField<R> 
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
@@ -91,7 +91,7 @@ namespace Ariadne {
       LinearAlgebra::Vector<R> _b;
     };
  
-    template<typename R> std::ostream& operator<<(std::ostream& os, const AffineVectorField<R>& vf);
+    template<class R> std::ostream& operator<<(std::ostream& os, const AffineVectorField<R>& vf);
     
   }
 }
@@ -99,14 +99,14 @@ namespace Ariadne {
 namespace Ariadne {
   namespace LinearAlgebra {
     /*! \brief Compute \f$e^{Ah}\f$. */
-    template <typename R>
+    template<class R>
     Matrix<typename Numeric::traits<R>::arithmetic_type> 
     exp_Ah_approx(const Matrix<R>& A, 
                   const R& h, 
                   const R& e); 
 
     /*! \brief Compute \f$A^{-1}(e^{Ah}-I) = h\sum_{n=0}^{\infty} \frac{{(Ah)}^{n}}{(n+1)!}\f$. */
-    template <typename R>
+    template<class R>
     Matrix<typename Numeric::traits<R>::arithmetic_type> 
     exp_Ah_sub_id_div_A_approx(const Matrix<R>& A, 
                                const R& h, 

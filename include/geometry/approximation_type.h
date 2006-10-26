@@ -40,7 +40,7 @@ enum ApproxKind {
 };
 
 /*! \brief Defines the approximation type */ 
-template < class R>
+template< class R>
 class ApproximationType {
   public:
     typedef R real_type;

@@ -64,7 +64,7 @@ namespace Ariadne {
      * ith element, and the ith component of the kth generator is given by the
      * (kd+i)th element.
      */
-    template <class R>
+    template<class R>
     class Zonotope {
       typedef typename Numeric::traits<R>::arithmetic_type F; 
       typedef typename Numeric::traits<R>::interval_type I; 
@@ -316,7 +316,7 @@ namespace Ariadne {
 
 
 
-    //template <class R>
+    //template<class R>
     //inline
     //tribool 
     //equal(const Zonotope<R>& A, const Zonotope<R>& B) 
@@ -324,24 +324,24 @@ namespace Ariadne {
     //  return Zonotope<R>::equal(A,B);
     //}
     
-    template <class R> tribool disjoint(const Rectangle<R>& A, const Zonotope<R>& B);
+    template<class R> tribool disjoint(const Rectangle<R>& A, const Zonotope<R>& B);
     
-    template <class R> tribool disjoint(const Zonotope<R>& A, const Rectangle<R>& B);
+    template<class R> tribool disjoint(const Zonotope<R>& A, const Rectangle<R>& B);
     
-    template <class R> tribool disjoint(const Zonotope<R>& A, const Zonotope<R>& B);
+    template<class R> tribool disjoint(const Zonotope<R>& A, const Zonotope<R>& B);
     
-    template <class R> tribool subset(const Rectangle<R>& A, const Zonotope<R>& B);
+    template<class R> tribool subset(const Rectangle<R>& A, const Zonotope<R>& B);
     
-    template <class R> tribool subset(const Zonotope<R>& A, const Rectangle<R>& B);
+    template<class R> tribool subset(const Zonotope<R>& A, const Rectangle<R>& B);
     
-    template <class R> tribool subset(const Zonotope<R>& A, const Zonotope<R>& B);
+    template<class R> tribool subset(const Zonotope<R>& A, const Zonotope<R>& B);
     
     
-    template <class R> 
+    template<class R> 
     Zonotope<typename Numeric::traits<R>::arithmetic_type>
     minkowski_sum(const Zonotope<R>& A, const Zonotope<R>& B);
     
-    template <class R> 
+    template<class R> 
     Zonotope<typename Numeric::traits<R>::arithmetic_type>
     minkowski_difference(const Zonotope<R>& A, const Zonotope<R>& B);
     

@@ -37,19 +37,19 @@
 namespace Ariadne {
   namespace System {
 
-    template<typename R>
+    template<class R>
     AffineVectorField<R>::~AffineVectorField() 
     {
     }
     
-    template<typename R>
+    template<class R>
     LinearAlgebra::Vector<typename AffineVectorField<R>::F>
     AffineVectorField<R>::image(const Geometry::Point<R>& s) const 
     { 
       return LinearAlgebra::Vector<F>(this->_A*LinearAlgebra::Vector<F>(s.position_vector())+this->_b); 
     }
     
-    template<typename R>
+    template<class R>
     LinearAlgebra::Vector< Interval<R> > 
     AffineVectorField<R>::image(const Geometry::Rectangle<R>& r) const 
     {
@@ -57,21 +57,21 @@ namespace Ariadne {
       return LinearAlgebra::Vector< Interval<R> >(this->_A*iv)+(this->_b);
     }
   
-    template<typename R>
+    template<class R>
     LinearAlgebra::Matrix<typename AffineVectorField<R>::F>
     AffineVectorField<R>::derivative(const Geometry::Point<R>& x) const 
     { 
       return this->_A; 
     }
     
-    template<typename R>
+    template<class R>
     LinearAlgebra::Matrix< Interval<R> > 
     AffineVectorField<R>::derivative(const Geometry::Rectangle<R>& r) const 
     { 
       return LinearAlgebra::Matrix< Interval<R> >(this->_A);
     }
     
-    template<typename R> 
+    template<class R> 
     std::ostream& 
     operator<<(std::ostream& os, const AffineVectorField<R>& vf)
     {
@@ -88,7 +88,7 @@ namespace Ariadne {
 namespace Ariadne {
   namespace LinearAlgebra {
 
-    template <typename R>
+    template<class R>
     Matrix<typename Numeric::traits<R>::arithmetic_type>
     exp_Ah_approx(const Matrix<R>& A, 
                   const R& h, 
@@ -108,7 +108,7 @@ namespace Ariadne {
       return result;
     }
     
-    template <typename R> 
+    template<class R> 
     Matrix<typename Numeric::traits<R>::arithmetic_type> 
     exp_Ah_sub_id_div_A_approx(const Matrix<R>& A, 
                                const R& h, 

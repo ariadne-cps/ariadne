@@ -43,13 +43,13 @@ using namespace Ariadne::System;
 using namespace Ariadne::Evaluation;
 using namespace std;
 
-template<typename R> int test_apply();
+template<class R> int test_apply();
 
 int main() {
   return test_apply<Real>();
 }
 
-template<typename R> 
+template<class R> 
 int 
 test_apply()
 {

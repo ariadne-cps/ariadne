@@ -26,15 +26,15 @@
 
 #include "real_typedef.h"
 
-template<typename R> void export_map();
-template<typename R> void export_affine_map();
-template<typename R> void export_affine_multimap();
-template<typename R> void export_polynomial_map();
-template<typename R> void export_henon_map();
+template<class R> void export_map();
+template<class R> void export_affine_map();
+template<class R> void export_affine_multimap();
+template<class R> void export_polynomial_map();
+template<class R> void export_henon_map();
  
-template<typename R> void export_vector_field();
-template<typename R> void export_affine_vector_field();
-template<typename R> void export_lorenz_system();
+template<class R> void export_vector_field();
+template<class R> void export_affine_vector_field();
+template<class R> void export_lorenz_system();
 
 BOOST_PYTHON_MODULE(system)
 {

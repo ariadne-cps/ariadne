@@ -40,14 +40,14 @@ using namespace Ariadne::Geometry;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template<typename R>
+template<class R>
 inline 
 bool interiors_intersect(const ListSet<R,Zonotope>& A, const Parallelotope<R>& B) 
 {
   return interiors_intersect(A,ListSet<R,Zonotope>(Zonotope<R>(B)));
 }
 
-template <typename R, template<typename> class BS, template<typename> class BS2>
+template<class R, template<class> class BS, template<class> class BS2>
 inline
 ListSet<R,BS> 
 touching_intersection(const ListSet<R,BS>& ls, const BS2<R>& bs) 
@@ -64,7 +64,7 @@ touching_intersection(const ListSet<R,BS>& ls, const BS2<R>& bs)
 
 
 
-template<typename R>
+template<class R>
 void export_list_set() 
 {
   typedef Rectangle<R> RRectangle;

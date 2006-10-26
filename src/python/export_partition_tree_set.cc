@@ -38,12 +38,12 @@ using namespace Ariadne::Geometry;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template<typename R> inline
+template<class R> inline
 Rectangle<R> convert_to_rectangle(const PartitionTreeCell<R>& ptc) {
   return Rectangle<R>(ptc);
 }
 
-template<typename R>
+template<class R>
 void export_partition_tree_set() 
 {
   typedef PartitionScheme<R> RPartitionScheme;

@@ -26,7 +26,7 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template <class R>
+    template<class R>
     std::ostream&
     operator<<(std::ostream& os, const Sphere<R>& s) 
     {
@@ -39,7 +39,7 @@ namespace Ariadne {
       return os;
     }
     
-    template <class R>
+    template<class R>
     std::istream& 
     operator>>(std::istream& is, Sphere<R>& s)
     {

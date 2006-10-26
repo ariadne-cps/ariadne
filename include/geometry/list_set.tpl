@@ -31,7 +31,7 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template <class R, template<class> class BS>
+    template<class R, template<class> class BS>
     tribool
     disjoint (const ListSet<R,BS>& A,
               const ListSet<R,BS>& B)
@@ -49,7 +49,7 @@ namespace Ariadne {
       return result;
     }
 
-    template <class R, template <class> class BS>
+    template<class R, template<class> class BS>
     tribool
     subset(const ListSet<R,BS>& A,
            const ListSet<R,BS>& B)
@@ -61,7 +61,7 @@ namespace Ariadne {
       throw std::runtime_error("Not implemented");
     }
     
-    template <class R, template <class> class BS>
+    template<class R, template<class> class BS>
     ListSet<R,BS>
     join(const ListSet<R,BS>& A,
          const ListSet<R,BS>& B)
@@ -85,7 +85,7 @@ namespace Ariadne {
       return ds_union;
     }
 
-    template <class R, template <class> class BS>
+    template<class R, template<class> class BS>
     ListSet<R,BS>
     open_intersection(const ListSet<R,BS>& A,
                       const ListSet<R,BS>& B)
@@ -117,7 +117,7 @@ namespace Ariadne {
     
     
     
-    template <class R, template<class> class BS>
+    template<class R, template<class> class BS>
     std::ostream& 
     ListSet<R,BS>::write(std::ostream& os) const
     {
@@ -134,7 +134,7 @@ namespace Ariadne {
       return os;
     }
 
-    template <class R, template<class> class BS>
+    template<class R, template<class> class BS>
     std::istream& 
     ListSet<R,BS>::read(std::istream& is)
     {

@@ -117,7 +117,7 @@ namespace Ariadne {
       /*!\brief Construct from a sequence starting at \a b, where \a tb and \a te
        * describe the periodic tail of the sequence.
        */
-      template<typename FwdIter> 
+      template<class FwdIter> 
       SubdivisionSequence(FwdIter b, FwdIter tb, FwdIter te)
         : _sequence(b,tb,te), _dimension(_compute_dimension())
       { }

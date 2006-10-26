@@ -43,21 +43,21 @@ using namespace Ariadne::Evaluation;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template<typename R> inline 
+template<class R> inline 
 Parallelotope<R> integrate_parallelotope(
   const C1LohnerIntegrator<R> li, const VectorField<R>& vf, const Parallelotope<R>& p, const time_type& t)
 {
   return li.integrate(vf,p,t);
 }
 
-template<typename R> inline 
+template<class R> inline 
 Zonotope<R> integrate_zonotope(
   const C1LohnerIntegrator<R> li, const VectorField<R>& vf, const Zonotope<R>& z, const time_type& t)
 {
   return li.integrate(vf,z,t);
 }
 
-template<typename R>
+template<class R>
 void export_integrate() 
 {
   class_< C1LohnerIntegrator<R> >("C1LohnerIntegrator",init<R,R,R>())

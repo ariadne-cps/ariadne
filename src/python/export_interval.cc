@@ -32,22 +32,22 @@ using namespace boost::python;
 using namespace Ariadne;
 using Numeric::Interval;
 
-template<typename R> inline Interval<R> neginvl(const Interval<R>& i) { return -i; }
-template<typename R> inline Interval<R> addinvl(const Interval<R>& i, const Interval<R>& j) { return i+j; }
-template<typename R> inline Interval<R> subinvl(const Interval<R>& i, const Interval<R>& j) { return i-j; }
-template<typename R> inline Interval<R> mulinvl(const Interval<R>& i, const Interval<R>& j) { return i*j; }
-template<typename R> inline Interval<R> divinvl(const Interval<R>& i, const Interval<R>& j) { return i/j; }
+template<class R> inline Interval<R> neginvl(const Interval<R>& i) { return -i; }
+template<class R> inline Interval<R> addinvl(const Interval<R>& i, const Interval<R>& j) { return i+j; }
+template<class R> inline Interval<R> subinvl(const Interval<R>& i, const Interval<R>& j) { return i-j; }
+template<class R> inline Interval<R> mulinvl(const Interval<R>& i, const Interval<R>& j) { return i*j; }
+template<class R> inline Interval<R> divinvl(const Interval<R>& i, const Interval<R>& j) { return i/j; }
 
-template <typename R1, typename R2>
+template<class R1, class R2>
 inline Interval<R1> addreal(const Interval<R1>& i, const R2& r) { return i+(R1)r; }
-template <typename R1, typename R2>
+template<class R1, class R2>
 inline Interval<R1> subreal(const Interval<R1>& i, const R2& r) { return i-(R1)r; }
-template <typename R1, typename R2>
+template<class R1, class R2>
 inline Interval<R1> mulreal(const Interval<R1>& i, const R2& r) { return i*(R1)r; }
-template <typename R1, typename R2>
+template<class R1, class R2>
 inline Interval<R1> divreal(const Interval<R1>& i, const R2& r) { return i/(R1)r; }
 
-template<typename R>
+template<class R>
 void export_interval()
 {
   class_< Interval<R> >(python_name<R>("Interval").c_str())

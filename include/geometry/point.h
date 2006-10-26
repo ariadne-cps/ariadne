@@ -40,13 +40,13 @@
 namespace Ariadne {
   namespace Geometry {
    
-    template<typename> class Rectangle;
-    template<typename> class Parallelotope;
-    template<typename> class Zonotope;
-    template<typename> class Sphere;
-    template<typename> class Ellipsoid;
+    template<class> class Rectangle;
+    template<class> class Parallelotope;
+    template<class> class Zonotope;
+    template<class> class Sphere;
+    template<class> class Ellipsoid;
 
-    template<template <typename> class BS1, template <typename> class BS2> 
+    template<template<class> class BS1, template<class> class BS2> 
     inline bool is_a(){ return false; }
 
     template<> inline bool is_a<Point, Point>(){ return true; }
@@ -56,7 +56,7 @@ namespace Ariadne {
     template<class R> std::istream& operator>>(std::istream&, Point<R>&);
 
     /*! \brief A point in Euclidean space. */
-    template <class R>
+    template<class R>
     class Point {
       typedef typename Numeric::traits<R>::arithmetic_type F;
      public:
@@ -204,7 +204,7 @@ namespace Ariadne {
       return pt1.position_vector()-pt2.position_vector();
     }
     
-    template <class R1,class R2>
+    template<class R1,class R2>
     inline
     Point<typename Numeric::traits<R1,R2>::arithmetic_type> 
     operator+(const Point<R1>& pt, const LinearAlgebra::Vector<R2>& v)
@@ -213,7 +213,7 @@ namespace Ariadne {
     }
 
 
-    template <class R1,class R2>
+    template<class R1,class R2>
     inline
     Point<typename Numeric::traits<R1,R2>::arithmetic_type> 
     operator-(const Point<R1>& pt, const LinearAlgebra::Vector<R2>& v)
@@ -221,7 +221,7 @@ namespace Ariadne {
       return Point<typename Numeric::traits<R1,R2>::arithmetic_type>(pt.position_vector() - v);
     }
 
-    template <class R>
+    template<class R>
     inline
     Point<R> 
     add_approx(const Point<R>& pt, const LinearAlgebra::Vector<R>& v)
@@ -229,7 +229,7 @@ namespace Ariadne {
       return Point<R>(add_approx(pt.position_vector(),v));
     }
 
-    template <class R>
+    template<class R>
     inline
     Point<R> 
     sub_approx(const Point<R>& pt, const LinearAlgebra::Vector<R>& v)
@@ -250,7 +250,7 @@ namespace Ariadne {
       return result;
     }
     
-    template <class R>
+    template<class R>
     inline 
     Point<R> 
     project_on_dimensions(const Point<R> &A, const Base::array<bool>& dims) 
@@ -278,7 +278,7 @@ namespace Ariadne {
       return new_point;
     }
 
-    template <class R>
+    template<class R>
     inline 
     Point<R> 
     project_on_dimensions(const Point<R> &A, 
@@ -298,7 +298,7 @@ namespace Ariadne {
       return new_point;
     }
 
-    template <class R>
+    template<class R>
     inline 
     Point<R> 
     project_on_dimensions(const Point<R> &A, 

@@ -54,7 +54,7 @@ namespace Ariadne {
     /*! \ingroup BasicSet
      *  \brief A parallelotope of arbitrary dimension.
      */
-    template <class R>
+    template<class R>
     class Parallelotope : public Zonotope<R> {
      private:
       typedef typename traits<R>::arithmetic_type F;

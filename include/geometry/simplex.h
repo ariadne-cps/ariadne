@@ -53,7 +53,7 @@ namespace Ariadne {
     /*! \ingroup BasicSet
      *  \brief A simplex of arbitrary dimension.
      */
-    template <class R>
+    template<class R>
     class Simplex : public Polytope<R>
     {
      public:

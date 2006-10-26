@@ -48,7 +48,7 @@ namespace Ariadne {
     /*! \ingroup BasicSet
      *  \brief A ball \f$||x-c||\leq r\f$ of arbitrary dimension.
      */
-    template <class R>
+    template<class R>
     class Sphere {
      public:
       /*! \brief The type of denotable real number used for the corners. */
@@ -219,27 +219,27 @@ namespace Ariadne {
       return result;
     }
       
-    template <class R>
+    template<class R>
     inline bool disjoint(const Sphere<R>& A, const Sphere<R>& B) 
     {
       return euclidean_distance_down(A.centre(),B.centre()) > 
         pow_up(add_up(A.radius(),B.radius()),2);
     }
     
-    template <class R>
+    template<class R>
     inline bool disjoint(const Sphere<R>& A, const Rectangle<R>& B) 
     {
       throw std::runtime_error("bool disjoint(const Sphere<R>&, const Rectangle<R>&) not implemented");
     }
     
-    template <class R>
+    template<class R>
     inline bool disjoint(const Rectangle<R>& A, const Sphere<R>& B) 
     {
       return disjoint(B,A);
     }
     
     
-    template <class R>
+    template<class R>
     inline bool interiors_intersect(const Sphere<R>& A,
                                     const Sphere<R>& B) 
     {
@@ -247,14 +247,14 @@ namespace Ariadne {
         pow_down(add_down(A.radius(),B.radius()),2);
     }
     
-    template <class R>
+    template<class R>
     inline bool interiors_intersect(const Sphere<R>& A,
                                     const Rectangle<R>& B) 
     {
       throw std::runtime_error("bool disjoint(const Sphere<R>&, const Rectangle<R>&) not implemented");
     }
     
-    template <class R>
+    template<class R>
     inline bool interiors_intersect(const Rectangle<R>& A,
                                     const Sphere<R>& B) 
     {
@@ -262,7 +262,7 @@ namespace Ariadne {
     }
     
     
-    template <class R>
+    template<class R>
     inline bool inner_subset(const Sphere<R>& A,
                              const Sphere<R>& B) 
     {
@@ -270,7 +270,7 @@ namespace Ariadne {
       //return A.radius()<B.radius && euclidean_distance_square(A.centre()-B.centre()) < square(B.centre()-A.centre());
     }
 
-    template <class R>
+    template<class R>
     inline bool inner_subset(const Sphere<R>& A,
                              const Rectangle<R>& B) 
     {
@@ -283,7 +283,7 @@ namespace Ariadne {
       return true;
     }
 
-    template <class R>
+    template<class R>
     inline bool inner_subset(const Rectangle<R>& A,
                              const Sphere<R>& B) 
     {
@@ -298,7 +298,7 @@ namespace Ariadne {
     }
 
     
-    template <class R>
+    template<class R>
     inline bool subset(const Sphere<R>& A, 
                        const Sphere<R>& B) 
     {
@@ -306,7 +306,7 @@ namespace Ariadne {
       //return A.radius()<=B.radius && euclidean_distance_square(A.centre()-B.centre()) <= square(B.centre()-A.centre());
     }
     
-    template <class R>
+    template<class R>
     inline bool subset(const Sphere<R>& A, 
                        const Rectangle<R>& B) 
     {
@@ -314,7 +314,7 @@ namespace Ariadne {
       //return subset(A.bounding_box(),B);
     }
     
-    template <class R>
+    template<class R>
     inline bool subset(const Rectangle<R>& A, 
                        const Sphere<R>& B) 
     {
@@ -343,12 +343,12 @@ namespace Ariadne {
       return Geometry::Sphere<R>(new_centre, scale_factor*s.radius());
     }
 
-    template <class R>
+    template<class R>
     std::ostream&
     operator<<(std::ostream& os, const Sphere<R>& s); 
 
     
-    template <class R>
+    template<class R>
     std::istream& 
     operator>>(std::istream& is, Sphere<R>& s);
 

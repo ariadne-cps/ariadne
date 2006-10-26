@@ -37,7 +37,7 @@ namespace Ariadne {
 namespace Ariadne {
   namespace Evaluation {
 
-    template<typename R>
+    template<class R>
     Geometry::Rectangle<R>
     interval_newton(const System::VectorField<R>& f, 
                     const Geometry::Rectangle<R>& x, 

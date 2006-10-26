@@ -32,7 +32,7 @@ using namespace Ariadne::Evaluation;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template<typename R>
+template<class R>
 void export_solve() 
 {
 

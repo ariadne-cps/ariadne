@@ -71,7 +71,7 @@ namespace Ariadne {
       Matrix<Real> _R;
     };
     
-    template <class Real>
+    template<class Real>
     inline 
     QRMatrix<Real>::QRMatrix(const Matrix<Real>& A) 
       : _Q(A.number_of_rows(),A.number_of_rows()), _R(A)
@@ -87,7 +87,7 @@ namespace Ariadne {
       TBLAS::trset(TBLAS::RowMajor,TBLAS::Lower,TBLAS::Unit,m,n,Real(0),_R.begin(),n);
     }
 
-    template <class Real>
+    template<class Real>
     inline
     QRMatrix<Real>::operator Matrix<Real> () const
     {

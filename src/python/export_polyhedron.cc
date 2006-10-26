@@ -34,7 +34,7 @@ using namespace Ariadne::Geometry;
 using namespace boost::python;
 
 
-template<typename R>
+template<class R>
 void export_polyhedron() 
 {
   typedef Polyhedron<R> RPolyhedron;

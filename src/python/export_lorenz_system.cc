@@ -35,7 +35,7 @@ using namespace Ariadne::System;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template<typename R>
+template<class R>
 void export_lorenz_system() 
 {
   typedef typename Numeric::traits<R>::arithmetic_type F;

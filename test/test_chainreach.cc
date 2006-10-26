@@ -43,13 +43,13 @@ using namespace Ariadne::System;
 using namespace Ariadne::Evaluation;
 using namespace std;
 
-template<typename R> int test_chainreach();
+template<class R> int test_chainreach();
 
 int main() {
   return test_chainreach<Real>();
 }
 
-template<typename R> 
+template<class R> 
 int 
 test_chainreach()
 {

@@ -41,7 +41,7 @@ namespace Ariadne {
      *  \ingroup System
      *  \ingroup ContinuousTime
      */
-    template <typename R>
+    template<class R>
     class VectorField {
       typedef typename Numeric::traits<R>::arithmetic_type F; 
       typedef typename Numeric::traits<R>::interval_type I; 

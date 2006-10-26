@@ -39,7 +39,7 @@ using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
 using namespace std;
 
-template<typename R> class nt {
+template<class R> class nt {
   public: typedef R at;
 };
   
@@ -49,7 +49,7 @@ template<> class nt<Float64> {
   
 
 
-template<typename R>
+template<class R>
 int 
 test_ddconv() 
 {

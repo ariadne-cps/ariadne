@@ -39,12 +39,12 @@ using namespace Ariadne::Geometry;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template<typename R1, typename R2> inline 
+template<class R1, class R2> inline 
 void point_setitem(Point<R1>& p, uint i, R2 x) {
   p[i]=x;
 }
 
-template<typename R> inline 
+template<class R> inline 
 R point_getitem(const Point<R>& p, uint i) {
   return p[i];
 }
@@ -57,17 +57,17 @@ R point_getitem(const Point<R>& p, uint i) {
 //  return p-q;
 //}
 
-template<typename R> inline 
+template<class R> inline 
 Rectangle<R> rectangle_expanded(const Point<R>& p, const R& r) {
   return Rectangle<R>(p).expand_by(r);
 }
 
-template<typename R> inline 
+template<class R> inline 
 Point<R> point_list_get(const PointList<R>& pl, const size_type& n) {
   return pl[n];
 }
 
-template<typename R>
+template<class R>
 void export_point_list() 
 {
   class_< PointList<R> >(python_name<R>("PointList").c_str(),init<>())
@@ -77,7 +77,7 @@ void export_point_list()
   ;
 }
 
-template<typename R>
+template<class R>
 void export_point() 
 {
   class_< Point<R> >("FPoint",init<>())

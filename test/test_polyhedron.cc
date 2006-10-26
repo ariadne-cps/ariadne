@@ -50,7 +50,7 @@ using namespace std;
 using namespace Parma_Polyhedra_Library::IO_Operators;
 
 int test_ppl_polyhedron();
-template<typename R> int test_polyhedron();
+template<class R> int test_polyhedron();
 template<> int test_polyhedron<Rational>();
 
 int main() {
@@ -72,7 +72,7 @@ test_ppl_polyhedron()
 }  
 
 
-template<typename R>
+template<class R>
 int 
 test_polyhedron() 
 {
@@ -108,7 +108,7 @@ test_polyhedron()
   
   Rectangle<R> r1("[-0.06125,0.25]x[0.125,0.375]");
   cout << "r1=" << r1 << endl;
-  for(typename Rectangle<R>::vertices_iterator v_iter=r1.vertices_begin();
+  for(class Rectangle<R>::vertices_iterator v_iter=r1.vertices_begin();
       v_iter!=r1.vertices_end(); ++v_iter)
   {
     for(typename Polyhedron<R>::constraints_const_iterator c_iter=phd.constraints_begin();

@@ -29,7 +29,7 @@
 #include "../system/discrete_location.h"
 #include "../geometry/denotable_set.h"
 
-template <typename DS>
+template<class DS>
 inline void _print_ds_(std::ostream &os,
                        const DS &p) {
   
@@ -41,13 +41,13 @@ inline void _print_ds_(std::ostream &os,
 namespace Ariadne {  
 namespace HybridSystem {
   
-template <typename LOC>
+template<class LOC>
 class LocationDenotableSet;
 
-template <typename LDS>
+template<class LDS>
 class HybridDenotableSet;
 
-template <typename LOC>
+template<class LOC>
 std::ostream& operator<<(std::ostream &os, 
                          const LocationDenotableSet<LOC> &A)
 {
@@ -62,7 +62,7 @@ std::ostream& operator<<(std::ostream &os,
   return os;  
 }
 
-template <typename LDS>
+template<class LDS>
 std::ostream& operator<<(std::ostream &os, 
                          const HybridDenotableSet<LDS> &A)
 {
@@ -77,7 +77,7 @@ std::ostream& operator<<(std::ostream &os,
   return os;  
 }
 
-template < typename LOC >
+template< class LOC >
 class LocationDenotableSet {
  public:
   typedef LOC DiscreteLocation;
@@ -130,13 +130,13 @@ class LocationDenotableSet {
     return (this->location).id();
   }
   
-  template <typename L>
+  template<class L>
   friend std::ostream& operator<<(std::ostream &os, 
                                   const LocationDenotableSet<L> &A);
   
 };
 
-template < typename LDS >
+template< class LDS >
 class HybridDenotableSet {
  public:
   typedef LDS LocationDenotableSet;
@@ -341,7 +341,7 @@ class HybridDenotableSet {
     return this->_ordered;
   }
   
-  template <typename L>
+  template<class L>
   friend std::ostream& operator<<(std::ostream &os, 
                                   const HybridDenotableSet<L> &A);
 };

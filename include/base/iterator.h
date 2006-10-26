@@ -37,7 +37,7 @@
 namespace Ariadne {
   namespace Iterator {
     /*! \brief An iterator traversing a subset of values defined by a mask */
-    template<typename Base, typename Mask>
+    template<class Base, class Mask>
     class mask_iterator
       : public boost::iterator_facade<mask_iterator<Base,Mask>,
                                       typename Base::value_type,
@@ -75,7 +75,7 @@ namespace Ariadne {
     
     
     /*! \brief An iterator adaptor which uses a conversion operator to convert its argument into another type. */
-    template<typename Base, typename Value>
+    template<class Base, class Value>
     class conversion_iterator
       : public boost::iterator_adaptor<conversion_iterator<Base,Value>,
                                        Base,
@@ -96,7 +96,7 @@ namespace Ariadne {
     
     
     /*! \brief An iterator which constructs its results from a piece of data and an iterator. */
-    template<typename Base, typename Value, typename Data>
+    template<class Base, class Value, class Data>
     class binary_constructor_iterator 
       : public boost::iterator_adaptor<binary_constructor_iterator<Base,Value,Data>,
                                        Base,
@@ -117,7 +117,7 @@ namespace Ariadne {
     
     
     /*! \brief An iterator which constructs its results from a piece of data and an iterator. */
-    template<typename Base, typename Value, typename Data1, typename Data2>
+    template<class Base, class Value, class Data1, class Data2>
     class ternary_constructor_iterator 
       : public boost::iterator_adaptor<ternary_constructor_iterator<Base, Value,
                                                                     Data1,Data2>,
@@ -140,7 +140,7 @@ namespace Ariadne {
     
     
     /*! \brief An iterator which constructs its results from a pair or adjacent values of another iterator. */
-    template<typename Base, typename Value>
+    template<class Base, class Value>
     class pair_constructor_iterator
       : public boost::iterator_adaptor<pair_constructor_iterator<Base,Value>,
                                        Base,

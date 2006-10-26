@@ -162,7 +162,7 @@ namespace Ariadne {
     };
     
     /* A reference to an interval. */
-    template <class R>
+    template<class R>
     class IntervalReference {
      public:
       IntervalReference(R& l, R& u) : _lower(&l), _upper(&u) { }

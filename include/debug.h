@@ -30,7 +30,7 @@
 namespace Ariadne {
 
 class dbgstream;
-template<typename T> dbgstream& operator<<(dbgstream& dbgs, const T& t);
+template<class T> dbgstream& operator<<(dbgstream& dbgs, const T& t);
 
 class dbgstream : public std::ostream
 {
@@ -38,13 +38,13 @@ class dbgstream : public std::ostream
   dbgstream(std::ostream& os, int debug_level) : _stream(os), _debug_level(debug_level) { }
   dbgstream(int debug_level) : _stream(std::cerr), _debug_level(debug_level) { }
  private:
-  template<typename T> friend dbgstream& operator<<(dbgstream& dbgs, const T& t);
+  template<class T> friend dbgstream& operator<<(dbgstream& dbgs, const T& t);
  private:
   std::ostream& _stream;
   int _debug_level;
 };
 
-template<typename T>
+template<class T>
 inline
 dbgstream& 
 operator<<(dbgstream& dbgs, const T& t) 

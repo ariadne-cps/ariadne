@@ -38,7 +38,7 @@ namespace Ariadne {
     /*! \brief An affine multimap on Euclidean space, with the form \f$x\mapsto Ax+S \f$ for some basic set \f$S\f$. 
      *  \ingroup DiscreteTime
     */
-    template <typename R,template <typename> class BS>
+    template<class R,template<class> class BS>
     class AffineMultiMap
     {
      public:

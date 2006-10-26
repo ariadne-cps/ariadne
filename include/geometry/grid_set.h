@@ -573,7 +573,7 @@ namespace Ariadne {
 
 
       /*!\brief Convert to a %ListSet of BS. */
-      template <template<class> class BS> operator ListSet<R,BS> () const;
+      template<template<class> class BS> operator ListSet<R,BS> () const;
       operator ListSet<R,Rectangle> () const;
       
       /*!\brief Equality operator. (Deprecated)
@@ -722,7 +722,7 @@ namespace Ariadne {
     };
 
     template<class R>
-    template <template<class> class BS>
+    template<template<class> class BS>
     inline
     GridMaskSet<R>::operator ListSet<R,BS> () const 
     {

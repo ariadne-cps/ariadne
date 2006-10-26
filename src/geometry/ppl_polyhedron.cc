@@ -39,7 +39,7 @@ namespace Ariadne {
   namespace Geometry {
     
     
-    template <typename R> inline 
+    template<class R> inline 
     Parma_Polyhedra_Library::C_Polyhedron 
     ppl_polyhedron(const Point<R>& pt) 
     {

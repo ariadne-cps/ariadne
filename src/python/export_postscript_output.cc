@@ -43,22 +43,22 @@ using namespace Ariadne::Output;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template<typename R> inline void write_rectangle(epsfstream& eps, const Rectangle<R>& r) { eps << r; }
-template<typename R> inline void write_grid_rectangle(epsfstream& eps, const GridBlock<R>& r) { eps << Rectangle<R>(r); }
-template<typename R> inline void write_grid_cell(epsfstream& eps, const GridCell<R>& r) { eps << Rectangle<R>(r); }
-template<typename R> inline void write_parallelotope(epsfstream& eps, const Parallelotope<R>& p) { eps << p; }
-template<typename R> inline void write_zonotope(epsfstream& eps, const Zonotope<R>& z) { eps << z; }
-template<typename R> inline void write_polytope(epsfstream& eps, const Polytope<R>& p) { eps << p; }
-template<typename R> inline void write_rectangle_list_set(epsfstream& eps, const ListSet<R,Rectangle>& r) { eps << r; }
-template<typename R> inline void write_parallelotope_list_set(epsfstream& eps, const ListSet<R,Parallelotope>& s) { eps << s; }
-template<typename R> inline void write_zonotope_list_set(epsfstream& eps, const ListSet<R,Zonotope>& s) { eps << s; }
-template<typename R> inline void write_polytope_list_set(epsfstream& eps, const ListSet<R,Polytope>& s) { eps << s; }
-template<typename R> inline void write_grid_mask_set(epsfstream& eps, const GridMaskSet<R>& s) { eps << s; }
-template<typename R> inline void write_grid_cell_list_set(epsfstream& eps, const GridCellListSet<R>& s) { eps << s; }
-template<typename R> inline void write_grid_rectangle_list_set(epsfstream& eps, const GridBlockListSet<R>& s) { eps << s; }
-template<typename R> inline void write_partition_tree(epsfstream& eps, const PartitionTree<R>& s) { eps << s; }
-template<typename R> inline void write_partition_tree_set(epsfstream& eps, const PartitionTreeSet<R>& s) { eps << s; }
-template<typename R> inline void epsfstream_open(epsfstream& eps, const Ariadne::Geometry::Rectangle<R>& bbox) { eps.open("Ariadne",bbox); }
+template<class R> inline void write_rectangle(epsfstream& eps, const Rectangle<R>& r) { eps << r; }
+template<class R> inline void write_grid_rectangle(epsfstream& eps, const GridBlock<R>& r) { eps << Rectangle<R>(r); }
+template<class R> inline void write_grid_cell(epsfstream& eps, const GridCell<R>& r) { eps << Rectangle<R>(r); }
+template<class R> inline void write_parallelotope(epsfstream& eps, const Parallelotope<R>& p) { eps << p; }
+template<class R> inline void write_zonotope(epsfstream& eps, const Zonotope<R>& z) { eps << z; }
+template<class R> inline void write_polytope(epsfstream& eps, const Polytope<R>& p) { eps << p; }
+template<class R> inline void write_rectangle_list_set(epsfstream& eps, const ListSet<R,Rectangle>& r) { eps << r; }
+template<class R> inline void write_parallelotope_list_set(epsfstream& eps, const ListSet<R,Parallelotope>& s) { eps << s; }
+template<class R> inline void write_zonotope_list_set(epsfstream& eps, const ListSet<R,Zonotope>& s) { eps << s; }
+template<class R> inline void write_polytope_list_set(epsfstream& eps, const ListSet<R,Polytope>& s) { eps << s; }
+template<class R> inline void write_grid_mask_set(epsfstream& eps, const GridMaskSet<R>& s) { eps << s; }
+template<class R> inline void write_grid_cell_list_set(epsfstream& eps, const GridCellListSet<R>& s) { eps << s; }
+template<class R> inline void write_grid_rectangle_list_set(epsfstream& eps, const GridBlockListSet<R>& s) { eps << s; }
+template<class R> inline void write_partition_tree(epsfstream& eps, const PartitionTree<R>& s) { eps << s; }
+template<class R> inline void write_partition_tree_set(epsfstream& eps, const PartitionTreeSet<R>& s) { eps << s; }
+template<class R> inline void epsfstream_open(epsfstream& eps, const Ariadne::Geometry::Rectangle<R>& bbox) { eps.open("Ariadne",bbox); }
 inline void epsfstream_close(epsfstream& eps) { eps.close(); }
 
 void export_postscript_output()

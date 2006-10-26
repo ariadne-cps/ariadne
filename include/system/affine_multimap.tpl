@@ -39,7 +39,7 @@
 namespace Ariadne {
   namespace System {
 
-    template <typename R, template<typename> class BS>
+    template<class R, template<class> class BS>
     BS<R>
     AffineMultiMap<R,BS>::operator() (const Geometry::Point<R>& pt) const
     {
@@ -55,7 +55,7 @@ namespace Ariadne {
 //      return over_approximation(minkowski_sum(this->S(),BS<R>(Geometry::Rectangle<R>(iv))));
     }
     
-    template <typename R, template<typename> class BS>
+    template<class R, template<class> class BS>
     BS<R>
     AffineMultiMap<R,BS>::operator() (const BS<R>& bs) const
     {

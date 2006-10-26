@@ -91,7 +91,7 @@ namespace Ariadne {
             
       /*! \brief Copy constructor. 
        */
-      template<typename OR> inline Polytope(const Polytope<OR>& original);
+      template<class OR> inline Polytope(const Polytope<OR>& original);
           
       /*! \brief Copy assignment operator. 
        *

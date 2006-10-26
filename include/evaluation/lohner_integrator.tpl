@@ -66,13 +66,13 @@ namespace Ariadne {
     static const int debug_level=0;
 #endif
     
-    template<typename R>
+    template<class R>
     C1LohnerIntegrator<R>::C1LohnerIntegrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_basic_set_radius)
       : C1Integrator<R>(maximum_step_size,lock_to_grid_time,maximum_basic_set_radius)
     {
     }
 
-    template<typename R>
+    template<class R>
     Geometry::Rectangle<R> 
     C0LohnerIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
                                             const Geometry::Rectangle<R>& initial_set, 
@@ -104,7 +104,7 @@ namespace Ariadne {
       return r;
     }
 
-    template<typename R>
+    template<class R>
     Geometry::Rectangle<R> 
     C0LohnerIntegrator<R>::reachability_step(const System::VectorField<R>& vector_field, 
                                              const Geometry::Rectangle<R>& initial_set, 
@@ -138,7 +138,7 @@ namespace Ariadne {
       return r;
     }
     
-    template<typename R>
+    template<class R>
     Geometry::Parallelotope<R> 
     C1LohnerIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
                                             const Geometry::Parallelotope<R>& initial_set, 
@@ -222,7 +222,7 @@ namespace Ariadne {
       return p;
     }
 
-    template<typename R>
+    template<class R>
     Geometry::Parallelotope<R> 
     C1LohnerIntegrator<R>::integration_step(const System::AffineVectorField<R>& vector_field, 
                                             const Geometry::Parallelotope<R>& initial_set, 
@@ -275,7 +275,7 @@ namespace Ariadne {
     }
     
 
-template<typename R>
+template<class R>
     Geometry::Zonotope<R> 
     C1LohnerIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
                                             const Geometry::Zonotope<R>& initial_set, 
@@ -361,7 +361,7 @@ template<typename R>
       return z;
     }
 
-    template<typename R>
+    template<class R>
     Geometry::Zonotope<R> 
     C1LohnerIntegrator<R>::integration_step(const System::AffineVectorField<R>& vector_field, 
                                             const Geometry::Zonotope<R>& initial_set, 
@@ -408,7 +408,7 @@ template<typename R>
     }
 
     
-    template<typename R>
+    template<class R>
     Geometry::Zonotope<R> 
     C1LohnerIntegrator<R>::reachability_step(const System::VectorField<R>& vector_field, 
                                              const Geometry::Zonotope<R>& initial_set, 

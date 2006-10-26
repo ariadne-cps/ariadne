@@ -33,7 +33,7 @@ using namespace Ariadne::LinearAlgebra;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template<typename R>
+template<class R>
 void export_linear_program() 
 {
   class_< LinearProgram<R> >(python_name<R>("LinearProgram").c_str(),

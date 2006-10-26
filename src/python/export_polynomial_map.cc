@@ -33,7 +33,7 @@ using namespace Ariadne;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template<typename R>
+template<class R>
 void export_polynomial_map() 
 {
 /*

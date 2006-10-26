@@ -84,7 +84,7 @@ namespace Ariadne {
       return Ginv*v;
     }
     
-    template <class R>
+    template<class R>
     std::ostream&
     Simplex<R>::write(std::ostream& os) const
     {
@@ -95,7 +95,7 @@ namespace Ariadne {
       return os;
     }
     
-    template <class R>
+    template<class R>
     std::istream& 
     Simplex<R>::read(std::istream& is)
     {

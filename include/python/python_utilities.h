@@ -38,7 +38,7 @@
 #include "numeric/dyadic.h"
 #include "numeric/rational.h"
 
-template<typename R> inline std::string python_name(const std::string& bn);
+template<class R> inline std::string python_name(const std::string& bn);
 template<> inline std::string python_name<Ariadne::Numeric::Float64>(const std::string& bn) { return "F"+bn; }
 //template<> inline const char* python_name<Ariadne::Numeric::MPFloat>(const std::string& bn) { return "R"+bn; }
 template<> inline std::string python_name<Ariadne::Numeric::MPFloat>(const std::string& bn) { return ""+bn; }
@@ -90,7 +90,7 @@ set_item(C& c, int n, const typename C::value_type& x) {
 
 
 
-template<typename Res, typename Arg1, typename Arg2, typename Op>
+template<class Res, class Arg1, class Arg2, class Op>
 inline
 Res
 evaluate(const Arg1& a1, const Arg2& a2)
@@ -99,7 +99,7 @@ evaluate(const Arg1& a1, const Arg2& a2)
 }
 
 
-template<typename Res, typename Arg1, typename Arg2>
+template<class Res, class Arg1, class Arg2>
 inline
 Res
 add(const Arg1& a1, const Arg2& a2)
@@ -108,7 +108,7 @@ add(const Arg1& a1, const Arg2& a2)
 }
 
 
-template<typename Res, typename Arg1, typename Arg2>
+template<class Res, class Arg1, class Arg2>
 inline
 Res
 sub(const Arg1& a1, const Arg2& a2)
@@ -117,7 +117,7 @@ sub(const Arg1& a1, const Arg2& a2)
 }
 
 
-template<typename Res, typename Arg1, typename Arg2>
+template<class Res, class Arg1, class Arg2>
 inline
 Res
 mul(const Arg1& a1, const Arg2& a2)
@@ -126,7 +126,7 @@ mul(const Arg1& a1, const Arg2& a2)
 }
 
 
-template<typename Res, typename Arg1, typename Arg2>
+template<class Res, class Arg1, class Arg2>
 inline
 Res
 div(const Arg1& a1, const Arg2& a2)

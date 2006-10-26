@@ -57,17 +57,17 @@ namespace Ariadne {
      * FIXME: Constructors for small arrays.
      * FIXME: Exception safety in constructors!
      */
-    template<typename T, size_t N> class array;
+    template<class T, size_t N> class array;
     
     // Need to give default size in first declaration.
-    //template<typename T, size_t N=0> class array;
+    //template<class T, size_t N=0> class array;
     
     /*! \brief STL style interface to dynamically-sizable arrays. 
      *
      * An array<T> is a variable-size array which can be resized and is allocated 
      * on the heap. Arrays provide checked access using at and unchecked access using operator[].
      */
-    template<typename T> class array<T> {
+    template<class T> class array<T> {
      public:
       typedef T value_type;
       typedef value_type& reference;
@@ -217,7 +217,7 @@ namespace Ariadne {
      * FIXME: Constructors for small arrays.
      * FIXME: Exception safety in constructors!
      */
-    template<typename T, size_t N> class array {
+    template<class T, size_t N> class array {
      public:
       typedef T value_type;
       typedef value_type& reference;
@@ -278,7 +278,7 @@ namespace Ariadne {
       value_type _ptr[N];
     };
     
-    template<typename T, size_t N> template<class InputIterator> inline
+    template<class T, size_t N> template<class InputIterator> inline
     void array<T,N>::_assign_iter(InputIterator iter)
     { 
       if(_size==1) { 
@@ -300,7 +300,7 @@ namespace Ariadne {
     }
     
     
-    template<typename T> template<size_type N> 
+    template<class T> template<size_type N> 
     inline
     array<T>::array(const array<T,N>& a)
       : _size(a.size()), _ptr(new value_type[_size])
@@ -308,7 +308,7 @@ namespace Ariadne {
       fill(a.begin()); 
     }
     
-    template<typename T> template<size_type N> 
+    template<class T> template<size_type N> 
     inline
     array<T>& array<T>::operator=(const array<T,N>& a) 
     { 
@@ -336,7 +336,7 @@ namespace Ariadne {
       ~range() { }
       range(const array<value_type>& a) : _first(a.begin()), _last(a.end()) { }
       
-      template<typename ForwardIterator>
+      template<class ForwardIterator>
       range(ForwardIterator first, ForwardIterator last)
         : _first(first), _last(last) { }
       
@@ -356,7 +356,7 @@ namespace Ariadne {
       bool operator!=(const range<iterator>& other) const { return !((*this)==other); }
       bool operator!=(const array<value_type>& other) const { return !((*this)==other); }
      private:
-      template<typename ForwardIterator>
+      template<class ForwardIterator>
       bool equals(ForwardIterator first, ForwardIterator last) const {
         if( size() != size_type(std::distance(first,last)) ) { return false; }
         iterator curr=_first;
@@ -369,7 +369,7 @@ namespace Ariadne {
     
     
     /*! \brief A reference to an array of values. */
-    template<typename Iter>
+    template<class Iter>
     class array_reference {
       typedef array_reference<Iter> Self;
      public:
@@ -382,20 +382,20 @@ namespace Ariadne {
       ~array_reference() { }
       array_reference(array<value_type>& a) : _size(a.size()), _begin(a.begin()) { }
       array_reference(const size_type& s, iterator b) : _size(s), _begin(b) { }
-      template<typename I> array_reference(const array_reference<I>& a) : _size(a.size()), _begin(a.begin()) { }
+      template<class I> array_reference(const array_reference<I>& a) : _size(a.size()), _begin(a.begin()) { }
       
       Self& operator=(const array<value_type>& a) { 
         assert(this->size()==a.size()); _assign(a.begin(),a.end()); return *this; }
-      template<typename Iter2> Self& operator=(const array_reference<Iter2>& a) { 
+      template<class Iter2> Self& operator=(const array_reference<Iter2>& a) { 
         assert(this->size()==a.size()); _assign(a.begin(),a.end()); return *this; }
-      template<typename RanIter> Self& operator=(const range<RanIter>& r) { 
+      template<class RanIter> Self& operator=(const range<RanIter>& r) { 
         assert(this->size()==r.size()); _assign(r.begin(),r.end()); return *this; }
       
       bool operator==(const array<value_type>& a) { return this->_equals(a.begin(),a.end()); }  
       bool operator!=(const array<value_type>& a) { return !((*this)==a); }
       
-      template<typename I> bool operator==(const array_reference<I>& a) { return this->_equals(a.begin(),a.end()); }  
-      template<typename I> bool operator!=(const array_reference<I>& a) { return !((*this)==a); }
+      template<class I> bool operator==(const array_reference<I>& a) { return this->_equals(a.begin(),a.end()); }  
+      template<class I> bool operator!=(const array_reference<I>& a) { return !((*this)==a); }
       
       operator array<value_type>() const { return array<value_type>(begin(),end()); }
       
@@ -408,9 +408,9 @@ namespace Ariadne {
       iterator begin() const { return _begin; }
       iterator end() const { return _begin+_size; }
      private:
-      template<typename FwdIter> void _assign(FwdIter b, FwdIter e) { 
+      template<class FwdIter> void _assign(FwdIter b, FwdIter e) { 
         iterator curr=_begin; while(b!=e) { *curr=*b; ++curr; ++b; } }
-      template<typename FwdIter> bool _equals(FwdIter b, FwdIter e) { 
+      template<class FwdIter> bool _equals(FwdIter b, FwdIter e) { 
         if(std::distance(b,e)!=int(this->size())) { return false; }
         iterator curr=_begin; while(b!=e) { if(*curr!=*b) { return false; } ++curr; ++b; }
         return true;
@@ -425,7 +425,7 @@ namespace Ariadne {
     
     
     
-    template<typename BaseIter>
+    template<class BaseIter>
     class _array_vector_iterator
       : public std::iterator<std::random_access_iterator_tag,
                              array_reference<BaseIter>,
@@ -446,11 +446,11 @@ namespace Ariadne {
      public:
       _array_vector_iterator(size_type n, element_iterator ptr)
         : _array_size(n), _curr(ptr) { }
-      template<typename B> _array_vector_iterator(const _array_vector_iterator<B>& iter) 
+      template<class B> _array_vector_iterator(const _array_vector_iterator<B>& iter) 
         : _array_size((*iter).size()), _curr((*iter).begin()) { }
-      template<typename B> bool operator==(const _array_vector_iterator<B>& other) const { 
+      template<class B> bool operator==(const _array_vector_iterator<B>& other) const { 
         return _curr==(*other).begin(); }
-      template<typename B> bool operator!=(const _array_vector_iterator<B>& other) const { 
+      template<class B> bool operator!=(const _array_vector_iterator<B>& other) const { 
         return !(*this==other); }
       reference operator*() const { return reference(_array_size,_curr); }
       Self& operator++() { _curr+=_array_size; return *this; }
@@ -462,7 +462,7 @@ namespace Ariadne {
     };
     
     template<class T> class array_vector;
-    template<typename T> std::ostream& operator<<(std::ostream&, const array_vector<T>&);
+    template<class T> std::ostream& operator<<(std::ostream&, const array_vector<T>&);
     
     
     /*! \brief A vector of arrays of a fixed size. */

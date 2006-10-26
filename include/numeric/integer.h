@@ -118,7 +118,7 @@ namespace Ariadne {
     //! \name %Integer functions
     //@{
     /*! \brief Factorial. */
-    template<typename N1, class N2> inline
+    template<class N1, class N2> inline
     N1 factorial(const N2& n) {
       N1 result=1;
       for(N2 i=1; i!=n; ++i) { result*=i; }
@@ -126,7 +126,7 @@ namespace Ariadne {
     }
 
     /*! \brief Factorial. */
-    template<typename N> inline
+    template<class N> inline
     N factorial(const N& n) {
       N result=1;
       if(n<=0) { return 1; }
@@ -135,7 +135,7 @@ namespace Ariadne {
     }
 
     /*! \brief Greatest common divisor. */
-    template <typename N> inline 
+    template<class N> inline 
     N gcd(const N &a, const N &b) {
       N aa=a; N bb=b; N cc=aa%bb;
       while(cc!=0) { aa=bb; bb=cc; cc=aa%bb; }
@@ -143,7 +143,7 @@ namespace Ariadne {
     }
 
     /*! \brief Least common multiple. */
-    template <typename N> inline 
+    template<class N> inline 
     N lcm(const N &a, const N &b) {
       return ((a*b)/gcd(a,b));
     }
@@ -152,13 +152,13 @@ namespace Ariadne {
     //! \name %Integer bit-shift functions
     //@{
     /*! \brief The integer power \f$2^n\f$. */
-    template<typename N> inline
+    template<class N> inline
     N exp2(const N& n) {
       return 1<<n;
     }
 
     /*! \brief The floor of the logarithm of \a n in base 2. */
-    template<typename N> inline
+    template<class N> inline
     N log2_floor(const N& n) {
       assert(n>=1);
       N r=0;
@@ -172,7 +172,7 @@ namespace Ariadne {
 
 
     /*! \brief The ceiling of the logarithm of \a n in base 2. */
-    template<typename N> inline
+    template<class N> inline
     N log2_ceil(const N& n) {
       assert(n>=1);
       N r=0;

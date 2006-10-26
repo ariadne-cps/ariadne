@@ -39,7 +39,7 @@
 namespace Ariadne {
   namespace System {
 
-    template <typename R>
+    template<class R>
     Geometry::Point< typename AffineMap<R>::F >
     AffineMap<R>::image(const Geometry::Point<R>& pt) const
     {
@@ -53,7 +53,7 @@ namespace Ariadne {
     }
     
 
-    template <typename R>
+    template<class R>
     Geometry::Rectangle<R>
     AffineMap<R>::image(const Geometry::Rectangle<R>& r) const
     {
@@ -65,7 +65,7 @@ namespace Ariadne {
       return Geometry::Rectangle<R>(this->A()*r.position_vectors()+this->b());
     }
     
-    template <typename R>
+    template<class R>
     Geometry::Parallelotope<R>
     AffineMap<R>::image(const Geometry::Parallelotope<R>& p) const
     {
@@ -79,7 +79,7 @@ namespace Ariadne {
       return Geometry::Parallelotope< Interval<R> >(nc,ng).over_approximation();
     }
 
-    template <typename R>
+    template<class R>
     Geometry::Zonotope<R>
     AffineMap<R>::image(const Geometry::Zonotope<R>& z) const
     {
@@ -92,14 +92,14 @@ namespace Ariadne {
       ).over_approximation();
     }   
     
-    template <typename R>
+    template<class R>
     Geometry::Polytope<R>
     AffineMap<R>::image(const Geometry::Polytope<R>& p) const
     {
       throw std::runtime_error("AffineMap<R>::image(const Geometry::Polytope<R>&) const not implemented");
     }   
     
-    template<typename R>
+    template<class R>
     std::ostream& 
     operator<<(std::ostream& os, const AffineMap<R>& f)
     {
@@ -108,7 +108,7 @@ namespace Ariadne {
     }
     
 /*
-    template <typename R>
+    template<class R>
     Geometry::ListSet<R,Geometry::Parallelotope>
     AffineMap<R>::operator() (const Geometry::GridMaskSet<R>& gms) const
     {

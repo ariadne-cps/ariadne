@@ -45,7 +45,7 @@ namespace Ariadne {
     }
 
     
-    template <class R>
+    template<class R>
     std::ostream& 
     Point<R>::write(std::ostream& os) const
     {
@@ -62,7 +62,7 @@ namespace Ariadne {
       return os;
     }
 
-    template <class R>
+    template<class R>
     std::istream& 
     Point<R>::read(std::istream& is)
     {

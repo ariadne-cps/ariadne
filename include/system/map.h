@@ -40,7 +40,7 @@ namespace Ariadne {
      *  \ingroup System
      *  \ingroup DiscreteTime
      */
-    template<typename R>
+    template<class R>
     class Map {
       typedef typename Numeric::traits<R>::arithmetic_type F; 
       typedef typename Numeric::traits<R>::interval_type I; 

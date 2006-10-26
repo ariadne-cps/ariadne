@@ -32,7 +32,7 @@ using namespace Ariadne::System;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template<typename R>
+template<class R>
 class MapWrapper : public Map<R>, public wrapper< Map<R> >
 {
  public:
@@ -42,7 +42,7 @@ class MapWrapper : public Map<R>, public wrapper< Map<R> >
   std::string name() const { return this->get_override("name")(); }
 };
 
-template<typename R>
+template<class R>
 void export_map() 
 {
   class_<MapWrapper<R>, boost::noncopyable>("Map")

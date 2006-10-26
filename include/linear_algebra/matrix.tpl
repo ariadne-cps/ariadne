@@ -36,7 +36,7 @@
 namespace Ariadne {
   namespace LinearAlgebra {
 
-    template <class R>
+    template<class R>
     Matrix<R>::Matrix(const std::string& s)
     {
         std::stringstream ss(s);
@@ -102,7 +102,7 @@ namespace Ariadne {
       return result;
     }
 
-    template <class R>
+    template<class R>
     Matrix<R>
     Matrix<R>::transpose() const
     {
@@ -111,13 +111,13 @@ namespace Ariadne {
     }
 
 
-    template <class R>
+    template<class R>
     bool
     Matrix<R>::singular() const {
       return LUMatrix<F>(*this).singular();
     }
 
-    template <class R>
+    template<class R>
     typename Matrix<R>::F
     Matrix<R>::determinant() const
     {
@@ -142,7 +142,7 @@ namespace Ariadne {
 
 
 
-    template <class R>
+    template<class R>
     Matrix<typename Matrix<R>::F>
     Matrix<R>::inverse() const
     {
@@ -150,7 +150,7 @@ namespace Ariadne {
     }
 
 
-    template <class R>
+    template<class R>
     Vector<typename Matrix<R>::F>
     Matrix<R>::solve(const Vector<R>& v) const
     {
@@ -158,7 +158,7 @@ namespace Ariadne {
     }
 
 
-    template <class R>
+    template<class R>
     std::ostream&
     Matrix<R>::write(std::ostream& os) const
     {
@@ -176,7 +176,7 @@ namespace Ariadne {
     }
 
 
-    template <class R>
+    template<class R>
     std::istream&
     Matrix<R>::read(std::istream& is)
     {
@@ -227,7 +227,7 @@ namespace Ariadne {
     // Also note that many algorithms can probably be better implemented
     // by using LU or QR factorizations.
 
-    template <class R>
+    template<class R>
     bool
     independent_rows(Matrix<R> A)
     {
@@ -253,7 +253,7 @@ namespace Ariadne {
     }
 
 
-    template <class R>
+    template<class R>
     bool
     equivalent_columns(const Matrix<R> &A, const size_type &A_col,
                        const Matrix<R> &B, const size_type &B_col)
@@ -285,7 +285,7 @@ namespace Ariadne {
     }
 
 
-    template <class R>
+    template<class R>
     Matrix<R>
     remove_null_columns_but_one(const Matrix<R> &A)
     {
@@ -321,7 +321,7 @@ namespace Ariadne {
     }
 
 
-    template <class R>
+    template<class R>
     void
     remove_null_columns(const Matrix<R> &A,
                         array<size_type> &row, array<size_type> &col)
@@ -356,7 +356,7 @@ namespace Ariadne {
     }
 
 
-    template <class R>
+    template<class R>
     Matrix<R>
     compute_space(const Matrix<R> &SA,
                   array<size_type> &row,const array<size_type> &col)

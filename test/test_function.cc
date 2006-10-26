@@ -33,7 +33,7 @@
 using namespace std;
 using namespace Ariadne;
 
-template<typename R>
+template<class R>
 void
 test_function()
 {

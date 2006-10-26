@@ -200,7 +200,7 @@ namespace Ariadne {
       }
 
       /*!\brief Convert to a list set BS2<R>. */
-      template <template<class> class BS2>
+      template<template<class> class BS2>
       operator ListSet<R,BS2> () const {
         ListSet<R,BS2> result(this->dimension());
         BS2<R> bs(this->dimension());
@@ -397,7 +397,7 @@ namespace Ariadne {
     };
 
   
-    template <class R, template <class> class BS>
+    template<class R, template<class> class BS>
     inline
     std::ostream&
     operator<<(std::ostream& os, const ListSet<R,BS>& A) 
@@ -405,7 +405,7 @@ namespace Ariadne {
       return A.write(os);
     }
 
-    template <class R, template <class> class BS>
+    template<class R, template<class> class BS>
     inline
     std::istream&
     operator>>(std::istream& is, ListSet<R,BS>& A) 
@@ -421,7 +421,7 @@ namespace Ariadne {
   
 
 
-    template <class R, template<class> class BS>
+    template<class R, template<class> class BS>
     tribool
     disjoint (const ListSet<R,BS>& A,
               const ListSet<R,BS>& B);
@@ -429,19 +429,19 @@ namespace Ariadne {
 
 
 
-    template <class R, template <class> class BS>
+    template<class R, template<class> class BS>
     tribool
     subset(const ListSet<R,BS>& A,
            const ListSet<R,BS>& B);
     
     
-    template <class R, template <class> class BS>
+    template<class R, template<class> class BS>
     ListSet<R,BS>
     join(const ListSet<R,BS>& A,
          const ListSet<R,BS>& B);
     
 
-    template <class R, template <class> class BS>
+    template<class R, template<class> class BS>
     ListSet<R,BS>
     open_intersection(const ListSet<R,BS>& A,
                          const ListSet<R,BS>& B);

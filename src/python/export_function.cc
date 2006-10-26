@@ -32,7 +32,7 @@ using namespace boost::python;
 
 using namespace Ariadne::Numeric;
 
-template<typename R>
+template<class R>
 void export_function() {
   def("div_approx", div_approx<R>, "approximate division function" );
   def("sqrt_approx", sqrt_approx<R>, "approximate square root function" );

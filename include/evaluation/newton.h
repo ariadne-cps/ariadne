@@ -58,7 +58,7 @@ namespace Ariadne {
     /*! \brief Interval Newton solver.
      *  \ingroup Solve
      */
-    template<typename R>
+    template<class R>
     Geometry::Rectangle<R>
     interval_newton(const System::VectorField<R>& f, 
                     const Geometry::Rectangle<R>& r, 
@@ -76,7 +76,7 @@ namespace Ariadne {
      *
      * Useful for computing fixed points.
      */
-    template<typename R> class DifferenceMap
+    template<class R> class DifferenceMap
       : public VectorField<R>
     {
      public:

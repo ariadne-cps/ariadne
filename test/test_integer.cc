@@ -31,7 +31,7 @@
 using namespace std;
 using namespace Ariadne::Numeric;
 
-template<typename R> void test_integer();
+template<class R> void test_integer();
 
 int test_integer();
 

@@ -44,7 +44,7 @@ using namespace Ariadne::Geometry;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template<typename R>
+template<class R>
 struct GridWrap : Grid<R>, wrapper< Grid<R> >
 {
   Grid<R>* clone() const { return this->get_override("clone")(); }
@@ -57,7 +57,7 @@ struct GridWrap : Grid<R>, wrapper< Grid<R> >
   std::istream& read(std::istream& is) { return this->get_override("read")(); }
 };
 
-template<typename R>
+template<class R>
 void export_grid_set() 
 {
   typedef Grid<R> RGrid;

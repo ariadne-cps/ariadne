@@ -41,7 +41,7 @@ namespace Ariadne {
   namespace System {
 
     /*! \brief The Lorenz system. */
-    template <typename R>
+    template<class R>
     class LorenzSystem : public VectorField<R> 
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
@@ -87,7 +87,7 @@ namespace Ariadne {
       R _s;
     };
       
-    template <typename R>
+    template<class R>
     LinearAlgebra::Vector<typename LorenzSystem<R>::F>
     LorenzSystem<R>::operator() (const Geometry::Point<R>& x) const
     {
@@ -98,7 +98,7 @@ namespace Ariadne {
       return result;
     }
      
-    template <typename R>
+    template<class R>
     LinearAlgebra::Vector< Interval<R> >
     LorenzSystem<R>::operator() (const Geometry::Rectangle<R>& X) const
     {
@@ -109,7 +109,7 @@ namespace Ariadne {
       return result;
     }
      
-    template <typename R>
+    template<class R>
     LinearAlgebra::Matrix<typename LorenzSystem<R>::F>
     LorenzSystem<R>::jacobian(const Geometry::Point<R>& x) const
     {
@@ -126,7 +126,7 @@ namespace Ariadne {
       return result;
     }
      
-    template <typename R>
+    template<class R>
     LinearAlgebra::Matrix< Interval<R> >
     LorenzSystem<R>::jacobian(const Geometry::Rectangle<R>& X) const
     {
@@ -144,7 +144,7 @@ namespace Ariadne {
     }
      
      
-    template <typename R>
+    template<class R>
     std::ostream& operator<<(std::ostream& os, const LorenzSystem<R>& ls) {
       os << "LorenzSystem( beta=" << ls.beta() << ", rho=" << ls.rho() << ", sigma=" << ls.sigma() << " )";
       return os;

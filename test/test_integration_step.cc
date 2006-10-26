@@ -39,14 +39,14 @@
 using namespace Ariadne;
 using namespace std;
 
-template<typename R> int test_integration_step();
+template<class R> int test_integration_step();
 
 int main() {
   test_integration_step<Real>();
   return 0;
 }
 
-template<typename R> 
+template<class R> 
 int 
 test_integration_step()
 {

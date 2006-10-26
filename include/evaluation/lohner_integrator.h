@@ -36,7 +36,7 @@ namespace Ariadne {
    
     /*! \brief An integrator based on the \f$C^0\f$-Lohner algorithm. 
      */
-    template<typename R>
+    template<class R>
     class C0LohnerIntegrator : public C0Integrator<R> {
      public:
       /*! \brief Constructor. */
@@ -61,7 +61,7 @@ namespace Ariadne {
      *  
      * The \f$C^1\f$-Lohner algorithm is a Taylor method.
      */
-    template<typename R>
+    template<class R>
     class C1LohnerIntegrator : public C1Integrator<R> {
      public:
       /*! \brief Constructor. */

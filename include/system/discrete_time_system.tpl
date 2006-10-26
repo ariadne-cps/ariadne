@@ -37,12 +37,12 @@
 namespace Ariadne {
   namespace System {
 
-    template<typename R>
+    template<class R>
     DiscreteTimeSystem<R>::~DiscreteTimeSystem() 
     {
     }
   
-    template<typename R>
+    template<class R>
     Geometry::Point<R> 
     DiscreteTimeSystem<R>::operator() (const Geometry::Point<R>& x,
                                        const Geometry::Point<R>& u,
@@ -51,7 +51,7 @@ namespace Ariadne {
       throw std::invalid_argument(this->name()+"::operator() (Point,Point,Point) not implemented."); 
     }
     
-    template<typename R>
+    template<class R>
     Geometry::Rectangle<R> 
     DiscreteTimeSystem<R>::operator() (const Geometry::Rectangle<R>& x,
                                        const Geometry::Rectangle<R>& u,
@@ -60,7 +60,7 @@ namespace Ariadne {
       throw std::invalid_argument(this->name()+"::operator() (Rectangle,Rectangle,Rectangle) not implemented."); 
     }
     
-    template<typename R>
+    template<class R>
     Geometry::Zonotope<R> 
     DiscreteTimeSystem<R>::operator() (const Geometry::Zonotope<R>& x,
                                        const Geometry::Zonotope<R>& u,
@@ -70,7 +70,7 @@ namespace Ariadne {
     }
     
     
-    template<typename R>
+    template<class R>
     LinearAlgebra::Matrix<R> 
     DiscreteTimeSystem<R>::derivative(const Geometry::Point<R>& x,
                                       const Geometry::Point<R>& u,
@@ -79,7 +79,7 @@ namespace Ariadne {
       throw std::invalid_argument(this->name()+"::derivative(Point,Point,Point) not implemented."); 
     }
 
-    template<typename R>
+    template<class R>
     LinearAlgebra::Matrix<R> 
     DiscreteTimeSystem<R>::derivative(const Geometry::Rectangle<R>& x,
                                       const Geometry::Rectangle<R>& u,

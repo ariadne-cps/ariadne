@@ -32,7 +32,7 @@ namespace HybridSystem {
     
 /*! \brief Represents discrete transitions.
  */
-template < typename LOC, typename RESET >
+template< class LOC, class RESET >
 class DiscreteTransition
 {
   public:

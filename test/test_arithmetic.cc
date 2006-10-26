@@ -42,7 +42,7 @@ using Ariadne::Rational;
 using Ariadne::MPFloat;
 using Ariadne::Float64;
 
-template<typename R> void test_arithmetic();
+template<class R> void test_arithmetic();
 
 int main() {
 
@@ -58,7 +58,7 @@ int main() {
   return 0;
 }
 
-template<typename R>
+template<class R>
 void
 test_arithmetic()
 {

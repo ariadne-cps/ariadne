@@ -34,23 +34,23 @@
 
 
 namespace Ariadne { namespace Base {
-template<typename T, size_t N=0> class array;
-template<typename T> class sequence;
+template<class T, size_t N=0> class array;
+template<class T> class sequence;
 }}
 
 namespace Ariadne { namespace Numeric {
-template<typename R> class Interval;
-template<typename T1, typename T2=T1> class traits;
+template<class R> class Interval;
+template<class T1, class T2=T1> class traits;
 }}
 
 namespace Ariadne { namespace LinearAlgebra {
 class MultiIndex;
-template<typename R> class Vector;
-template<typename R> class VectorSlice;
-template<typename R> class Matrix;
-template<typename R> class MatrixSlice;
-template<typename R> class Tensor;
-template<typename R> class LinearProgram;
+template<class R> class Vector;
+template<class R> class VectorSlice;
+template<class R> class Matrix;
+template<class R> class MatrixSlice;
+template<class R> class Tensor;
+template<class R> class LinearProgram;
 }}
 
 namespace Ariadne { namespace Combinatoric {
@@ -68,55 +68,55 @@ class LatticeSystem;
 }}
 
 namespace Ariadne { namespace Geometry {
-template<typename R> class Point;
-template<typename R> class PointList;
+template<class R> class Point;
+template<class R> class PointList;
 
-template<typename R> class Rectangle;
-template<typename R> class Parallelotope;
-template<typename R> class Zonotope;
-template<typename R> class Simplex;
-template<typename R> class Polyhedron;
-template<typename R> class Polytope;
-template<typename R> class Sphere;
-template<typename R> class Ellipsoid;
+template<class R> class Rectangle;
+template<class R> class Parallelotope;
+template<class R> class Zonotope;
+template<class R> class Simplex;
+template<class R> class Polyhedron;
+template<class R> class Polytope;
+template<class R> class Sphere;
+template<class R> class Ellipsoid;
 
-template<typename R, template<typename> class BS> class ListSet;
+template<class R, template<class> class BS> class ListSet;
 
 typedef enum {
  REGULAR,
  IRREGULAR
 } grid_type;
 
-template<typename R> class Grid;
-template<typename R> class RegularGrid;
-template<typename R> class IrregularGrid;
-template<typename R> class FiniteGrid;
-template<typename R> class GridCell;
-template<typename R> class GridBlock;
-template<typename R> class GridMaskSet;
-template<typename R> class GridCellListSet;
-template<typename R> class GridBlockListSet;
+template<class R> class Grid;
+template<class R> class RegularGrid;
+template<class R> class IrregularGrid;
+template<class R> class FiniteGrid;
+template<class R> class GridCell;
+template<class R> class GridBlock;
+template<class R> class GridMaskSet;
+template<class R> class GridCellListSet;
+template<class R> class GridBlockListSet;
 
-template<typename R> class PartitionScheme;
-template<typename R> class PartitionTree;
-template<typename R> class PartitionTreeCell;
-template<typename R> class PartitionTreeSet;
+template<class R> class PartitionScheme;
+template<class R> class PartitionTree;
+template<class R> class PartitionTreeCell;
+template<class R> class PartitionTreeSet;
 }}
 
 
 namespace Ariadne { namespace System {
-template <typename R> class Map;
-template <typename R> class AffineMap;
-template <typename R, template<typename> class BS > class AffineMultiMap;
-template <typename R> class Monomial;
-template <typename R> class Polynomial;
-template <typename R> class PolynomialMap;
-template <typename R> class PolynomialMatrix;
-template <typename R> class VectorField;
-template <typename R> class AffineVectorField;
+template<class R> class Map;
+template<class R> class AffineMap;
+template<class R, template<class> class BS > class AffineMultiMap;
+template<class R> class Monomial;
+template<class R> class Polynomial;
+template<class R> class PolynomialMap;
+template<class R> class PolynomialMatrix;
+template<class R> class VectorField;
+template<class R> class AffineVectorField;
 
-template <typename R> class HenonMap;
-template <typename R> class LorenzSystem;
+template<class R> class HenonMap;
+template<class R> class LorenzSystem;
 }}
 
 

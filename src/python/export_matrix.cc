@@ -40,14 +40,14 @@ using namespace Ariadne::LinearAlgebra;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template<typename R> 
+template<class R> 
 inline R matrix_get_item(const Matrix<R>& M, tuple index) {
   uint i=extract<uint>(index[0]);
   uint j=extract<uint>(index[1]);
   return M(i,j);
 }
 
-template<typename R, typename A> 
+template<class R, class A> 
 inline void matrix_set_item(Matrix<R>& M, tuple index, const A& x) {
   uint i=extract<uint>(index[0]);
   uint j=extract<uint>(index[1]);
@@ -55,12 +55,12 @@ inline void matrix_set_item(Matrix<R>& M, tuple index, const A& x) {
 }
 
 
-template<typename R>
+template<class R>
 inline Matrix<R> matrix_inverse(const Matrix<R>& A) {
   return LinearAlgebra::inverse(A);
 }
 
-template<typename R>
+template<class R>
 void export_matrix()
 {
   typedef Vector<R> Vec;
@@ -100,7 +100,7 @@ void export_matrix<Rational>()
   ;
 }
 
-template<typename R>
+template<class R>
 void export_interval_matrix() 
 {
   typedef Interval<R> I;

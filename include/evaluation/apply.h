@@ -37,7 +37,7 @@ namespace Ariadne {
     /*! \brief A class for computing the image of a set under a map. 
      *  \ingroup Applicators
      */
-    template<typename R, template<typename> class BS>
+    template<class R, template<class> class BS>
     class Applicator {
      public:
       /*! \brief Compute the image of a basic set under a continuous function. */
@@ -74,7 +74,7 @@ namespace Ariadne {
     };
     
     /*! \brief A class for computing the image of a continuous map on a rectangle. */
-    template<typename R>
+    template<class R>
     class C0Applicator
       : public Applicator<R,Geometry::Rectangle> 
     {
@@ -84,7 +84,7 @@ namespace Ariadne {
     };
 
     /*! \brief A class for computing the image of a differentiable map on a parallelotope. */
-    template<typename R>
+    template<class R>
     class C1Applicator
       : public Applicator<R,Geometry::Parallelotope> 
     {
@@ -99,7 +99,7 @@ namespace Ariadne {
     /*! \brief Compute the image of a rectangle under a continuous function. 
      *  \ingroup Apply
      */
-    template<typename R>
+    template<class R>
     Geometry::Rectangle<R> 
     apply(const System::Map<R>& f, const Geometry::Rectangle<R>& s) {
       return C0Applicator<R>().apply(f,s);
@@ -108,7 +108,7 @@ namespace Ariadne {
     /*! \brief Compute the image of a parallelotope under a differentiable function. 
      *  \ingroup Apply
      */
-    template<typename R>
+    template<class R>
     inline
     Geometry::Parallelotope<R> 
     apply(const System::Map<R>& f, const Geometry::Parallelotope<R>& s) {
@@ -118,7 +118,7 @@ namespace Ariadne {
     /*! \brief Compute the image of a parallelotope under a differentiable function.  
      *  \ingroup Apply
      */
-    template<typename R>
+    template<class R>
     inline
     Geometry::ListSet<R,Geometry::Parallelotope>
     apply(const System::Map<R>& f, const Geometry::ListSet<R,Geometry::Parallelotope>& s) {
@@ -128,7 +128,7 @@ namespace Ariadne {
     /*! \brief Compute the chain-reachable set of \a map starting in \a initial_set on the grid \a grid while staying within \a bounds.  
      *  \ingroup Apply
      */
-    template<typename R>
+    template<class R>
     inline
     Geometry::GridMaskSet<R> 
     apply(const System::Map<R>& map, 
@@ -141,7 +141,7 @@ namespace Ariadne {
     /*! \brief Compute the chain-reachable set of \a map starting in \a initial_set on the grid \a grid while staying within \a bounds.  
      *  \ingroup Apply
      */
-    template<typename R>
+    template<class R>
     inline
     Geometry::GridMaskSet<R> 
     chainreach(const System::Map<R>& map, 
@@ -154,7 +154,7 @@ namespace Ariadne {
     /*! \brief Attempt to verify that the reachable set of \a map starting in \a initial_set remains in \a safe_set. 
      *  \ingroup Apply
      */
-    template<typename R>
+    template<class R>
     inline
     bool
     verify(const System::Map<R>& map, 

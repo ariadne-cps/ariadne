@@ -43,7 +43,7 @@ namespace Ariadne {
     /*! \brief An affine map \f$f(x)=Ax+b\f$ on Euclidean space. 
      *  \ingroup DiscreteTime
      */
-    template <typename R>
+    template<class R>
     class AffineMap : public Map<R> 
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
@@ -130,7 +130,7 @@ namespace Ariadne {
       LinearAlgebra::Vector<R> _b;
     };
       
-    template<typename R>
+    template<class R>
     std::ostream& operator<<(std::ostream&, const AffineMap<R>&);
 
   }

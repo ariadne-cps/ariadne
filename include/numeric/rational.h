@@ -44,8 +44,6 @@
 namespace Ariadne {
   namespace Numeric {
 
-#ifdef DOXYGEN
-
    /*!\ingroup Numeric
     * \brief A rational number.
     * 
@@ -55,18 +53,17 @@ namespace Ariadne {
     *
     * Currently implemented using mpq_class from the GNU Multiple Precision library.
     */
-    class Rational { };
-#else
     class Rational : public mpq_class 
     {
      public:
       Rational() : mpq_class() { }
       template<class R> Rational(const R& x) : mpq_class(x) { }
       template<class R1,class R2> Rational(const R1& x1,const R2& x2) : mpq_class(x1,x2) { }
+      Integer numerator() const { return this->get_num(); }
+      Integer denominator() const { return this->get_den();}
     };
+
     
-#endif
-  
     inline Integer numerator(const Rational& num){ 
       return num.get_num(); }
   
@@ -99,8 +96,10 @@ namespace Ariadne {
       return r; 
     }      
     
-    template<> inline int floor(const Rational& x) { return (Integer((x.get_num()+x.get_den()-1)/x.get_den())).get_si(); }
-    template<> inline int ceil(const Rational& x) { return (Integer(x.get_num()/x.get_den())).get_si(); }
+    template<> inline int floor(const Rational& x) { 
+      return (Integer((x.get_num()+x.get_den()-1)/x.get_den())).get_si(); }
+    template<> inline int ceil(const Rational& x) { 
+      return (Integer(x.get_num()/x.get_den())).get_si(); }
     
     template<> inline int quot(const Rational& x1, const Rational& x2) {
       return floor<int>(div(x1,x2)); }

@@ -42,18 +42,11 @@
 namespace Ariadne {
   namespace Numeric {
 
-#ifdef DOXYGEN
     /*!\ingroup Numeric
      * \brief A multiple-precision floating-point type.
      *  
      * Currently implemented using mpf_class from the GNU Multiple Precision library.
      */
-    class MPFloat { };
-#else
-    //typedef mpf_class MPFloat;
-#endif
-
-
     class MPFloat {
      private:
       mpfr_t _value;
@@ -115,7 +108,6 @@ namespace Ariadne {
     
     inline 
     void invoke_mpfr(MPFloat& y, const MPFloat& x1, const MPFloat& x2, mpfr_bin_func f, mp_rnd_t r) {
-      //std::cerr << "invoke_mpfr(MPFloat& y, const MPFloat& x1, const MPFloat& x2, mpfr_bin_func f, mp_rnd_t r)\n";
       f(y.get_mpfr_t(), x1.get_mpfr_t(), x2.get_mpfr_t(), r);
     }
 
@@ -138,7 +130,6 @@ namespace Ariadne {
     inline 
     MPFloat invoke_mpfr(const MPFloat& x1, const MPFloat& x2, mpfr_bin_func f, mpfr_rnd_t r) 
     {
-      //std::cerr << "MPFloat invoke_mpfr(const MPFloat& x1, const MPFloat& x2, mpfr_bin_func f, mpfr_rnd_t r)\n";
       MPFloat y; invoke_mpfr(y,x1,x2,f,r); return y; 
     }
     
@@ -269,10 +260,8 @@ namespace Ariadne {
     template<> inline MPFloat add_approx(const MPFloat& x1,const MPFloat& x2) {
       return invoke_mpfr(x1,x2,mpfr_add,GMP_RNDN); }
     template<> inline MPFloat add_down(const MPFloat& x1,const MPFloat& x2) {
-      //std::cerr << "add_down(MPFloat,MPFloat)" << std::endl;
       return invoke_mpfr(x1,x2,mpfr_add,GMP_RNDD); }
     template<> inline MPFloat add_up(const MPFloat& x1,const MPFloat& x2) {
-      //std::cerr << "add_up(MPFloat,MPFloat)" << std::endl;
       return invoke_mpfr(x1,x2,mpfr_add,GMP_RNDU); }
     
     template<> inline MPFloat sub_approx(const MPFloat& x1,const MPFloat& x2) {
@@ -424,13 +413,86 @@ namespace Ariadne {
     template<> inline MPFloat atanh_up(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_atanh,GMP_RNDU); };
     
-    inline MPFloat operator-(const MPFloat& x) {
-      return neg(x); }
+    inline MPFloat operator+(const MPFloat& x) { return x; }
+    inline MPFloat operator-(const MPFloat& x) { return neg(x); }
 
     Interval<MPFloat> operator+(const MPFloat&, const MPFloat&);
     Interval<MPFloat> operator-(const MPFloat&, const MPFloat&);
     Interval<MPFloat> operator*(const MPFloat&, const MPFloat&);
     Interval<MPFloat> operator/(const MPFloat&, const MPFloat&);
+      
+      
+      
+/*  Expression-templated functions for possible future use.
+      
+    template<class Rnd> inline mpfr_rnd_t mpfr_rounding_mode();
+    template<> inline mpfr_rnd_t mpfr_rounding_mode<approx>() { return GMP_RNDN; }
+    template<> inline mpfr_rnd_t mpfr_rounding_mode<down>() { return GMP_RNDD; }
+    template<> inline mpfr_rnd_t mpfr_rounding_mode<up>() { return GMP_RNDU; }
+
+    class MpfrConstantFunction
+      : public ConstantFunction<MPFloat>
+    {
+     public:
+      MpfrConstantFunction(mpfr_const_func ff, const mpfr_rnd_t rr) : f(ff), r(rr) { }
+      void operator() (MPFloat& r) const;
+      MPFloat operator() () const;
+      mpfr_const_func* f; mpfr_rnd_t r;
+    };
+
+    class MpfrUnaryFunction
+      : public UnaryFunction<MPFloat,MPFloat>
+    {
+     public:
+      MpfrUnaryFunction(mpfr_func ff, const mpfr_rnd_t rr) : f(ff), r(rr) { }
+      void operator() (MPFloat& r, const MPFloat& a) const;
+      MPFloat operator()(const MPFloat& a) const;
+      mpfr_func* f; mpfr_rnd_t r;
+    };
+
+    class MpfrBinaryFunction
+      : public BinaryFunction<MPFloat,MPFloat,MPFloat>
+    {
+     public:
+      MpfrBinaryFunction(mpfr_bin_func ff, const mpfr_rnd_t rr) : f(ff), r(rr) { }
+      void operator() (MPFloat& r, const MPFloat& a1, const MPFloat& a2) const;
+      MPFloat operator()(const MPFloat& a1, const MPFloat& a2) const;
+      mpfr_bin_func* f; mpfr_rnd_t r;
+    };
+
+    template<typename A>
+    inline
+    UnaryExpression<A,MpfrUnaryFunction> 
+    mpfr_unary_expression(const A& a, mpfr_func f, mpfr_rnd_t r)
+    {
+      return UnaryExpression<A,MpfrUnaryFunction>(a,MpfrUnaryFunction(f,r));
+    }
+
+    template<typename A1, typename A2>
+    inline
+    BinaryExpression<A1,A2,MpfrBinaryFunction> 
+    mpfr_binary_expression(const A1& a1, const A2& a2, mpfr_bin_func f, mpfr_rnd_t r)
+    {
+      return BinaryExpression<A1,A2,MpfrBinaryFunction>(a1,a2,MpfrBinaryFunction(f,r));
+    }
+
+    template<typename A1, typename A2, typename Rnd>
+    inline
+    BinaryExpression<A1,A2,MpfrBinaryFunction> 
+    mpfr_binary_expression(const A1& a1, const A2& a2, mpfr_bin_func f, Rnd)
+    {
+      return BinaryExpression<A1,A2,MpfrBinaryFunction>(a1,a2,MpfrBinaryFunction(f,mpfr_rounding_mode<Rnd>()));
+    }
+
+    template<class E1, class E2> 
+    inline 
+    BinaryExpression<E1,E2,MpfrBinaryFunction> 
+    add_approx(const Expression<MPFloat,E1>& x1, const Expression<MPFloat,E2>&x2) {
+      return mpfr_binary_expression(x1.promote(),x2.promote(),mpfr_add,GMP_RNDN);
+    }
+
+*/
+      
       
   }
 }

@@ -63,6 +63,7 @@ namespace Ariadne {
       Geometry::subset(r,p);
       Geometry::subset(p,r);
       Geometry::subset(p,p);
+      Geometry::convex_hull(p,p);
     }
 
 

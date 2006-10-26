@@ -122,6 +122,11 @@ namespace Ariadne {
     template<class R> inline R log_down(const R& x);
     template<class R> inline R log_up(const R& x);
 
+    /*! \brief The constant \f$\pi\f$. */
+    template<typename R> R pi_approx();
+    template<typename R> R pi_down();
+    template<typename R> R pi_up();
+
     /*! \brief Sine function. */
     template<class R> inline R sin_approx(const R& x);
     template<class R> inline R sin_down(const R& x);

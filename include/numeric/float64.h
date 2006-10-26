@@ -316,8 +316,8 @@ namespace Ariadne {
       return invoke_mpfr(x,mpfr_atanh,GMP_RNDU); };
       
     
-    inline Float64 operator-(const Float64& x) {
-      return neg(x); }
+    inline Float64 operator+(const Float64& x) { return x; }
+    inline Float64 operator-(const Float64& x) { return neg(x); }
       
     Interval<Float64> operator+(const Float64&, const Float64&);
     Interval<Float64> operator-(const Float64&, const Float64&);

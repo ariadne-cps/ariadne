@@ -45,9 +45,18 @@ namespace Ariadne {
 
     template<class R> class Rectangle;
       
-    /*! \brief A finite union of basic sets, represented as a sequence.
-     *  \ingroup DenotableSet
-     *  \ingroup List
+    /*!\ingroup DenotableSet
+     * \ingroup List
+     * \brief A finite union of basic sets, represented as a sequence.
+     *
+     * A list set is the simplest type of denotable set class. It can hold
+     * arbitrary lists of basic sets of the same type. Hence, the %ListSet class
+     * also takes a template parameter which is the type of basic set contained
+     * in the list.
+     *
+     * A list set is ordered by the order of insertion. Hence, as well as the
+     * standard adjoin() method for denotable sets, a %ListSet also provides
+     * the STL methods push_back() and pop_back().
      */
     template<class R, template<class> class BS>
     class ListSet {

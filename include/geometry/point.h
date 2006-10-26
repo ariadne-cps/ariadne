@@ -55,7 +55,26 @@ namespace Ariadne {
     template<class R> std::ostream& operator<<(std::ostream&, const Point<R>&);
     template<class R> std::istream& operator>>(std::istream&, Point<R>&);
 
-    /*! \brief A point in Euclidean space. */
+    /*!\brief A point in Euclidean space. 
+     *
+     * A point is defined by its coordinates or type #real_type, which are accessed by 
+     * operator[](dimension_type). 
+     *
+     * We consider Euclidean space as an affine space, so it is allowed to
+     * add a vector (of type #vector_type or LinearAlgebra::Vector < R >) to a point, or subtract two points to obtain a vector,
+     * but not add two points.
+     *
+     * Points can be constructed from string literals of the form
+     * "(p0,p1,...)". Note the use of round brackets in the
+     * literal expression.
+     *
+     * Points are ordered by the lexicographic order.
+     *
+     * Operations on points which cannot be computed exactly in the arithmetic
+     * used, give results of type FuzzyPoint< R >, which is a Point< Numeric::Interval < R > >.
+     * Currently, %Ariadne does not support other space types, such as annuli
+     * or general differential manifolds.
+     */
     template<class R>
     class Point {
       typedef typename Numeric::traits<R>::arithmetic_type F;
@@ -85,8 +104,8 @@ namespace Ariadne {
         }
       }
 
-      /*! \brief Construct a point from a position Vector. */
-      explicit Point(const vector_type& position) : _vector(position) { }
+      /*! \brief Construct a point from a position vector. */
+      explicit Point(const LinearAlgebra::Vector<R>& position) : _vector(position) { }
 
       /*! \brief Construct a point from a string literal. */
       explicit Point(const std::string& s);
@@ -121,12 +140,12 @@ namespace Ariadne {
       }
 
       /*! \brief The dimension of the Euclidean space the state lies in. */
-      size_type dimension() const {
+      dimension_type dimension() const {
         return this->_vector.size();
       }
 
       /*! \brief Subcripting operator. */
-      real_type& operator[] (size_type index) {
+      real_type& operator[] (dimension_type index) {
         if(this->_vector.size() <= index) { 
           throw std::out_of_range("Out of the Vector's range.");
         }
@@ -134,14 +153,14 @@ namespace Ariadne {
       }
 
       /*! \brief Subcripting operator. */
-      const real_type& operator[](size_type index) const {
+      const real_type& operator[](dimension_type index) const {
         if(this->_vector.size() <= index) { 
             throw std::out_of_range("Out of the Vector's range.");
         }
         return  (this->_vector[index]);
       }
 
-      /*! \brief The position Vector of the point. */
+      /*! \brief The position vector of the point. */
       const vector_type& position_vector() const {
         return this->_vector; 
       }

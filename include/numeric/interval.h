@@ -161,7 +161,9 @@ namespace Ariadne {
       std::istream& read(std::istream& is);
     };
     
-    /* A reference to an interval. */
+    /*!\ingroup Numeric
+     * \brief A reference to an interval. 
+     */
     template<class R>
     class IntervalReference {
      public:

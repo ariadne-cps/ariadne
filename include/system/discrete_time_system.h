@@ -35,9 +35,23 @@
 namespace Ariadne {
   namespace System {
 
-    /*! \brief Abstract base class for noisy control systems operating in discrete time.
-     *  \ingroup System
-     *  \ingroup DiscreteTime
+    /*!\ingroup System
+     * \ingroup DiscreteTime
+     * \brief Abstract base class for noisy control systems operating in discrete time.
+     * 
+     * A discrete-time control system is defined by a continuous function
+     * \f$f:X\times U\times V\rightarrow X\f$ where \f$X\f$ is the state space,
+     * \f$U\f$ is the control input space and \f$V\f$ is the noise.
+     * The set of admissible controls \f$U(x)\f$ may depend on \f$x\f$.
+     * 
+     * To compute with a discrete-time control system, the multivalued mapping
+     * \f$X\Rightarrow X\times U,\ x\mapsto\{x\}\times U(x)\f$ must be 
+     * lower-semicomputable, and \f$X\times U\Rightarrow X\f$, \f$(x,u)\mapsto f(x,u,v)\f$
+     * must be upper-semicomputable.
+     *
+     * Currently, a discrete-time control system is defined by operator()(const Geometry::Rectangle<R>&, const Geometry::Rectangle<R>&, const Geometry::Rectangle<R>&) const 
+     * acting on rectangles in \f$X\times U\times V\f$, and by derivatives (see the Map class for details).
+     * In a future version, restrictions on \f$U(x)\f$ will also be allowed.
      */
     template<class R>
     class DiscreteTimeSystem

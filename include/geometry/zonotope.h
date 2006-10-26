@@ -52,11 +52,19 @@ namespace Ariadne {
 
     template<class R> class ZonotopeVerticesIterator;
       
-    /*! \ingroup BasicSet
-     *  \brief A zonotope of arbitrary dimension.
+    /*!\ingroup BasicSet
+     * \brief A zonotope of arbitrary dimension.
      * 
-     * A zonotope is a set of the form \f$c+Ae\f$, where \f$||e||_{infty}\leq1\f$.
-     * The intersection and membership tests are performed using algorithms from: <br>
+     * A zonotope is a set of the form \f$c+Ae\f$, where \f$||e||_{\infty}\leq1\f$.
+     * The columns of the matrix \f$A\f$ are the <em>generators</em> of the 
+     * zonotope. 
+     *
+     * Zonotopes are always bounded.
+     * A zonotope always contains its centre point, so can never be empty.
+     * However, it may not be regular.
+     *
+     *
+     * The intersection and membership tests may be performed using algorithms from: <br>
      * Guibas, Leonidas J.; Nguyen, An; Zhang, Li, "Zonotopes as bounding volumes."  <i>Proceedings of the Fourteenth Annual ACM-SIAM Symposium on Discrete Algorithms</i> (Baltimore, MD, 2003),  803--812, ACM, New York, 2003.
      *
      * \b Storage: A %Zonotope in dimension d with n generators is described by

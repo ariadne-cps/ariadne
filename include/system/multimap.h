@@ -35,9 +35,18 @@
 namespace Ariadne {
   namespace System {
 
-    /*! \brief Abstract base class for multivalued functions.
-     *  \ingroup System
-     *  \ingroup DiscreteTime
+    /*!\ingroup System
+     * \ingroup DiscreteTime
+     * \brief Abstract base class for multivalued functions.
+     * 
+     * A multivalued function is specified by operator()(const Geometry::Rectangle<R>& A) const.
+     * This must return a list set \f$\hat{f}(A)\f$ such that either
+     *   - <em>lower-semicontinuity:</em> all sets of \f$\hat{f}(A)\f$ intersect \f$f(A)\f$, or
+     *   - <em>upper-semicontinuity:</em> the true image \f$\hat{f}(A)\f$ is a subset of \f$\overline{f}(A)\f$.
+     *
+     * Further, the image must converge monotonically as the set \a A converges to a point.
+     *
+     * Derivatives of multivalued maps are not supported.
      */
      template<class R>
     class MultiMap {
@@ -47,6 +56,7 @@ namespace Ariadne {
       /*! \brief The type of denotable state the system acts on. */
       typedef Geometry::Point<R> state_type;
 
+      /*! \brief Virtual destructor. */
       virtual ~MultiMap();
       
       /*! \brief A minimal cover of the image of a rectangle. */

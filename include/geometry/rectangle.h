@@ -62,6 +62,26 @@ namespace Ariadne {
     
     /*! \ingroup BasicSet
      *  \brief A cuboid of arbitrary dimension.
+     * 
+     * The most important geomtric object in %Ariadne, the %Rectangle class 
+     * describes a rectangle, cuboid or hypercuboid in Euclidean space.
+     * Rectangles are closed under most major geometric operations, and geometric
+     * predicates and operations are simple to compute.
+     * Rectangular sets require little data to describe, and are used as cells in grid-based and lattice based sets,
+     * making them ubiquitous in storage-representations.
+     * Further, rectangles are easily and exactly convertible to the other major polyhedral
+     * set representations, namely, Zonotope,  Polytope and Polyhedron.
+     * 
+     * Rectangles are decribed by the lower and upper bounds in each of their
+     * dimensions, as accessed by the lower_bound(dimension_type) const and upper_bound(dimension_type) const methods. 
+     * 
+     * Rectangles are by default ordered by the lexicographic order on lower-left corner.
+     * If these are equal, then points are ordered by the lexicographic order 
+     * on the upper-right corner.
+     *
+     * A rectangle is described by the literal "[a0,b0]x[a1,b1]x...".
+     * 
+     * Rectangles are always bounded, but may be empty. A zero-dimensional rectangle is considered to be non-empty.
      *
      * \b Storage: A %Rectangle of dimension \a d is specified by \a 2d real 
      * number giving the lower and upper bounds in each coordinate.

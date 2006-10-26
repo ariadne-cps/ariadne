@@ -69,7 +69,19 @@ namespace Ariadne {
       size_type _j;
     };
     
-    /*!\brief A list of points in Euclidean space.
+    /*!\brief A list of points in Euclidean space. 
+     *
+     * All points must have the same dimension.
+     * Space is allocated for the entire list, which is more efficient than
+     * allocating space for each point independently.
+     *
+     * A %PointList is the preferred class to hold lists of points of the same
+     * dimension, such as the vertices of a polyhedron.
+     * Duplicates are allowed, and in general the points are not ordered.
+     *
+     * A lexicographic sort() function will be made available.
+     *
+     * A FuzzyPointList class also exists.
      *
      * The data is stored as a (d+1)*m matrix, where d is the dimension of the
      * space and m is the number of points.

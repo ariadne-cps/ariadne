@@ -50,8 +50,15 @@ namespace Ariadne {
     template<class R> std::ostream& operator<<(std::ostream&, const Simplex<R>&);
     template<class R> std::istream& operator>>(std::istream&, Simplex<R>&);
 
-    /*! \ingroup BasicSet
-     *  \brief A simplex of arbitrary dimension.
+    /*!\ingroup BasicSet
+     * \brief A simplex of arbitrary dimension.
+     *
+     * A simplex is represented by its corner vertices. (We could instead define a
+     * simplex by the inequalities describing its faces, but this is less 
+     * convenient for simplicial complexes.) Since the representation is the
+     * same as that of a polyhedron, the %Simplex class is a subclass of Polyhedron.
+     *
+     * 
      */
     template<class R>
     class Simplex : public Polytope<R>

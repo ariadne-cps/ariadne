@@ -33,11 +33,11 @@
  *
  * \section Introduction
  * 
- * Ariadne is a C++ package for set-based analysis of dynamical and control systems, including reachability analysis and verification.
+ * %Ariadne is a C++ package for set-based analysis of dynamical and control systems, including reachability analysis and verification.
  *
  * \section Download
  *
- * The homepage of Ariadne is <a href="http://fsv.dimi.uniud.it/ariadne/">http://fsv.dimi.uniud.it/ariadne/</a>.
+ * The homepage of %Ariadne is <a href="http://fsv.dimi.uniud.it/ariadne/">http://fsv.dimi.uniud.it/ariadne/</a>.
  *
  * You can check out the latest version on the Subversion repository by typing:
  *
@@ -49,7 +49,7 @@
  *
  * \section Requirements
  * 
- * To compile Ariadne, you will need a C++ compiler (we recommend g++ version 4.0.2 or higher, which can be downloaded from <a href="http://gcc.gnu.org/">http://gcc.gnu.org</a>).
+ * To compile %Ariadne, you will need a C++ compiler (we recommend g++ version 4.0.2 or higher, which can be downloaded from <a href="http://gcc.gnu.org/">http://gcc.gnu.org</a>).
  *
  * You will also need the following libraries:
  *   - The GNU Multiple-Precision Library (version 4.1.2 or higher)  <a href="http://www.swox.com/gmp/">http://www.swox.com/gmp/</a>.

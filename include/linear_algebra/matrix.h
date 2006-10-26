@@ -46,8 +46,12 @@ namespace Ariadne {
     using boost::numeric::ublas::matrix_row;
     using boost::numeric::ublas::matrix_column;
   
-    /*! \ingroup LinearAlgebra
-     *  \brief A matrix over \a R. 
+    /*!\ingroup LinearAlgebra
+     * \brief A matrix over \a R. 
+     *
+     * \internal
+     * Agreed on number_of_rows() and number_of_columns() for size functions as 
+     * this is clearest and best English.
      */
     template<class R>
     class Matrix : public boost::numeric::ublas::matrix<R> 

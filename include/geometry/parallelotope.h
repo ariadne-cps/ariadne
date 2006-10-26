@@ -51,8 +51,21 @@ namespace Ariadne {
     template<>
     inline bool is_a<Parallelotope,Polyhedron>() { return true; }
 
-    /*! \ingroup BasicSet
-     *  \brief A parallelotope of arbitrary dimension.
+    /*!\ingroup BasicSet
+     * \brief A parallelotope of arbitrary dimension.
+     *
+     * A %Parallelotope is a type of Zonotope, and has the same data storage 
+     * structure, so is implemented as a subclass. However, it is easier to convert a parallelotope to a
+     * Polytope defined by its inequalities, since this can be performed by matrix inversion.
+     * Hence it is easier to check if a parallelotope contains a point.
+     *
+     * A parallelotope is always bounded and nonempty. A nondegenerate 
+     * parallelotope is regular.
+     *
+     * Since a parallelotope of dimension \a d has exactly \a d generators,
+     * the space required for a parallelotope depends only on the dimension,
+     * and is given by \f$d(d+1)\f$.
+     *
      */
     template<class R>
     class Parallelotope : public Zonotope<R> {

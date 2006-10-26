@@ -22,8 +22,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file rectangle.h
- *  \brief Rectangles and cuboids.
+/*! \file rectangle_expression.h
+ *  \brief Base class for rectangle expression templates.
  */
 
 #ifndef _ARIADNE_RECTANGLE_EXPRESSION_H

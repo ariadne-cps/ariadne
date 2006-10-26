@@ -37,7 +37,7 @@
 #include "test.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Postscript;
+using namespace Ariadne::Output;
 using namespace Ariadne::Geometry;
 using namespace Ariadne::System;
 using namespace Ariadne::Evaluation;

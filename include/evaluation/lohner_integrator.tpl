@@ -159,7 +159,7 @@ namespace Ariadne {
       std::cerr << "integration_step(VectorField<R>, Parallelotope<R>, R)\n";
 #endif
 
-      typedef typename numerical_traits<R>::field_extension_type F;
+      typedef typename traits<R>::arithmetic_type F;
        
       assert(vector_field.dimension()==initial_set.dimension());
 
@@ -201,7 +201,9 @@ namespace Ariadne {
       
       Geometry::Point<R> c=p.centre();
       Geometry::Rectangle<R> rc=Geometry::Rectangle<R>(c,c);
-      Geometry::Rectangle<R> phic=refine_flow_bounds(vf,rc,b,step_size);
+      // FIXME: The new centre is incorrect
+      //Geometry::Point< Interval<R> > phic=refine_flow_bounds(vf,rc,b,step_size);
+      Geometry::Point< Interval<R> > phic=c;
       LinearAlgebra::Matrix< Interval<R> > zv(dphi*p.generators());
 
       p=Geometry::Parallelotope<R>::over_approximation(phic,zv);
@@ -260,11 +262,12 @@ namespace Ariadne {
       if(debug_level>0) { std::cerr << "iv1=" << iv1 << std::endl; }
        LinearAlgebra::Vector< Interval<R> > iv2=iP*ib;
       if(debug_level>0) { std::cerr << "iv2=" << iv2 << std::endl; }
-      LinearAlgebra::Vector< Interval<R> > iC=iv1+iv2;
+      LinearAlgebra::Vector< Interval<R> > iCv=iv1+iv2;
+      Geometry::Point< Interval<R> > iC(iCv);
       
       if(debug_level>0) { std::cerr << "interval centre=" << iC << std::endl; }
       
-      p=Geometry::Parallelotope<R>::over_approximation(Geometry::Rectangle<R>(iC),iD*p.generators());
+      p=Geometry::Parallelotope<R>::over_approximation(iC,iD*p.generators());
       if(debug_level>0) { std::cerr << "parallelotope=" << p << std::endl; }
       //IntervalParallelotope<R> img(iD*p.centre().position_vector()+iP*vf.b(),iD*p.generators());
       
@@ -293,7 +296,7 @@ template<typename R>
       std::cerr << "integration_step(VectorField<R>, Zonotope<R>, R)" << std::endl<<std::flush;
 #endif
 
-      typedef typename numerical_traits<R>::field_extension_type F;
+      typedef typename traits<R>::arithmetic_type F;
        
       using namespace LinearAlgebra;
       using namespace Geometry;
@@ -302,13 +305,13 @@ template<typename R>
       assert(vector_field.dimension()==initial_set.dimension());
 
       const VectorField<R>& vf(vector_field);
-      Zonotope<R> p=initial_set;
-      const size_type n=p.dimension();
+      Zonotope<R> z=initial_set;
+      const size_type n=z.dimension();
       const Matrix<R> id=identity_matrix<R>(n);
       
-      R err=(norm(p.generators())/Interval<R>(65536)).upper();
+      R err=(norm(z.generators())/Interval<R>(65536)).upper();
       
-      Rectangle<R> b=this->estimate_flow_bounds(vf,p.bounding_box(),step_size);
+      Rectangle<R> b=this->estimate_flow_bounds(vf,z.bounding_box(),step_size);
       Interval<R> h=step_size;
 #ifdef DEBUG
       std::cerr << "suggested stepsize=" << step_size << std::endl;
@@ -335,13 +338,15 @@ template<typename R>
       Matrix< Interval<R> > hdf=h*df;
       Matrix< Interval<R> > dphi=exp(hdf);
       
-      Point<R> c=p.centre();
+      Point<R> c=z.centre();
       Rectangle<R> rc=Geometry::Rectangle<R>(c,c);
-      Rectangle<R> phic=refine_flow_bounds(vf,rc,b,step_size);
+      //Rectangle<R> phic=refine_flow_bounds(vf,rc,b,step_size);
+      // FIXME: This code is incorrect!
+      Point< Interval<R> > phic=Point< Interval<R> >(c);
       h=step_size;
-      Matrix< Interval<R> > zv(dphi*p.generators());
+      Matrix< Interval<R> > zv(dphi*z.generators());
 
-      p=Geometry::Zonotope<R>::over_approximation(phic,zv);
+      z=Zonotope< Interval<R> >(phic,zv).over_approximation();
       
 #ifdef DEBUG
       std::cerr << "stepsize*jacobian=" << hdf << std::endl;
@@ -350,10 +355,10 @@ template<typename R>
       std::cerr << "centre=" << c << std::endl;
       std::cerr << "bounds on centre=" << phic << std::endl;
       std::cerr << "zonotopic <vector> to add to image of centre=" << zv << std::endl;
-      std::cerr << "new approximation=" << p << std::endl;
+      std::cerr << "new approximation=" << z << std::endl;
 #endif  
 
-      return p;
+      return z;
     }
 
     template<typename R>
@@ -366,14 +371,14 @@ template<typename R>
       std::cerr << "integration_step(AffineVectorField<R>, Parallelotope<R>, R)\n";
 #endif
       const System::AffineVectorField<R>& vf=vector_field;
-      Geometry::Zonotope<R> p=initial_set;
+      Geometry::Zonotope<R> z=initial_set;
       Interval<R> h=step_size;
       
-      R max_error=(norm(p.generators())/Interval<R>(65536)).upper();
+      R max_error=(LinearAlgebra::norm(z.generators())/Interval<R>(65536)).upper();
       assert(max_error>0);
       
 #ifdef DEBUG
-      std::cerr << "parallelotope generators=" << p.generators() << std::endl;
+      std::cerr << "zonotope generators=" << z.generators() << std::endl;
       std::cerr << "maximum allowed error=" << max_error << std::endl;
       
       std::cerr << "jacobian=" << vf.A() << std::endl;
@@ -385,8 +390,9 @@ template<typename R>
       LinearAlgebra::Matrix< Interval<R> > iP=LinearAlgebra::exp_Ah_sub_id_div_A_approx(vf.A(),h.upper(),max_error);
       
       LinearAlgebra::Vector< Interval<R> > ib=vf.b();
-      LinearAlgebra::Vector< Interval<R> > iC=iD*p.centre().position_vector()+iP*ib;
-      p=Geometry::Zonotope<R>::over_approximation(Geometry::Rectangle<R>(iC),iD*p.generators());
+      Geometry::Point< Interval<R> > ic(iD*z.centre().position_vector()+iP*ib);
+      Geometry::Zonotope< Interval<R> > iz(ic,iD*z.generators());
+      z=Geometry::Zonotope<R>::over_approximation(iz);
       
 #ifdef DEBUG
       std::cerr << "twist=" << P << std::endl;
@@ -396,9 +402,9 @@ template<typename R>
       std::cerr << "approximating twist=" << iP << std::endl;
       std::cerr << "bounds on centre=" << iC << std::endl;
       
-      std::cerr << "parallelotope=" << p << std::endl;
+      std::cerr << "zonotope=" << z << std::endl;
 #endif
-      return p;      
+      return z;      
     }
 
     
@@ -413,7 +419,7 @@ template<typename R>
       std::cerr << "reachability_step(VectorField<R>, Zonotope<R>, R)\n";
 #endif
 
-      typedef typename numerical_traits<R>::field_extension_type F;
+      typedef typename traits<R>::arithmetic_type F;
 
       using namespace LinearAlgebra;
       using namespace Geometry;
@@ -437,7 +443,9 @@ template<typename R>
       
       Point<R> c=z.centre();
       Rectangle<R> rc=Geometry::Rectangle<R>(c,c);
-      Rectangle<R> phic=refine_flow_bounds(vf,rc,b,step_size/2);
+      //Rectangle<R> phic=refine_flow_bounds(vf,rc,b,step_size/2);
+      // FIXME: Compute centre
+      Point< Interval<R> > phic=c;
       
       Vector< Interval<R> > fh=(h/R(2)*f);
       
@@ -450,7 +458,7 @@ template<typename R>
         }
       }
       
-      z=Zonotope<R>(phic,concatenate_columns(zfh,mdf));
+      z=Zonotope<R>::over_approximation(Zonotope< Interval<R> >(phic,concatenate_columns(zfh,mdf)));
 #ifdef DEBUG
       std::cerr << "suggested stepsize=" << step_size << std::endl;
         

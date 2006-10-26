@@ -43,8 +43,8 @@ namespace Ariadne {
      */
     template <typename R>
     class VectorField {
-      typedef typename Numeric::numerical_traits<R>::arithmetic_type F; 
-      typedef typename Numeric::Interval<R> I; 
+      typedef typename Numeric::traits<R>::arithmetic_type F; 
+      typedef typename Numeric::traits<R>::interval_type I; 
      public:
       /*! \brief The real number type. */
       typedef R real_type;
@@ -67,12 +67,12 @@ namespace Ariadne {
       /*! \brief An approximation to the vector field at a point. */
       virtual F derivative(const Geometry::Point<R>& x, const size_type& i, const multi_index_type& j) const;
       /*! \brief A bound for the vector field over a rectangle. */
-      virtual Interval<R> derivative(const Geometry::Rectangle<R>& A, const size_type& i, const multi_index_type& j) const;
+      virtual I derivative(const Geometry::Rectangle<R>& A, const size_type& i, const multi_index_type& j) const;
 
       /*! \brief An approximation to the Jacobian derivative at a point. */
       virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<R>& x) const;
       /*! \brief A bound for the Jacobian derivative over a rectangle. */
-      virtual LinearAlgebra::Matrix< Interval<R> > jacobian(const Geometry::Rectangle<R>& A) const;
+      virtual LinearAlgebra::Matrix<I> jacobian(const Geometry::Rectangle<R>& A) const;
     
       /*! \brief The degree of differentiability of the map. */
       virtual size_type smoothness() const = 0;

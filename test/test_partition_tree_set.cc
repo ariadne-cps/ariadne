@@ -49,7 +49,7 @@ using namespace Ariadne;
 using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Combinatoric;
 using namespace Ariadne::Geometry;
-using namespace Ariadne::Postscript;
+using namespace Ariadne::Output;
 
 int main() {
 
@@ -95,6 +95,7 @@ int main() {
   Vector<Real> c("[0.125,0.25]");
   Matrix<Real> A("[2,1;0.5,1]");
   bb=Rectangle<Real>("[-4,4]x[-4,4]");
+  Rectangle<Real> rect("[-1.5,2.5]x[0.875,2.25]");
   Parallelotope<Real> pltp(c,A);
   cout << "pltp=" << pltp << endl << "bb=" << bb << endl;
 
@@ -102,13 +103,22 @@ int main() {
   seq=SubdivisionSequence(2);
   cout << "seq=" << seq << " " << seq.body_size() << " " << seq.tail_size() << " " << seq.dimension() << endl;
 
+  assert(subset(pltp,bb));
+  assert(!subset(bb,pltp));
+  assert(!disjoint(pltp,bb));
   
   cout << "pt=" << pt << endl;
   cout << "pts=" << pts << endl;
-  cout << "rls=" << rls << endl;
+  cout << "rect=" << rect << endl;
   cout << "pltp=" << pltp << endl;
+  cout << "rls=" << rls << endl;
   pg=PartitionScheme<Real>(bb,seq);
   uint dpth=8;
+  PartitionTreeSet<Real> ptsrua=under_approximation< Real, Rectangle<Real>  >(rect,pg,dpth);
+  cout << "under_approximation(rect,pg,dpth)=" << ptsrua << endl;
+  PartitionTreeSet<Real> ptsroa=over_approximation< Real, Rectangle<Real>  >(rect,pg,dpth);
+  cout << "over_approximation(rect,pg,dpth)=" << ptsrua << endl;
+
   PartitionTreeSet<Real> ptsua=under_approximation< Real, Parallelotope<Real>  >(pltp,pg,dpth);
   cout << "ptsua=" << ptsua << endl;
   PartitionTreeSet<Real> ptsoa=over_approximation< Real, Parallelotope<Real>  >(pltp,pg,dpth);
@@ -123,6 +133,7 @@ int main() {
   FiniteGrid<Real> fg(g,bb);
   ListSet<Real,Rectangle> lsua=ptsua;
   cout << "lsua=" << lsua << endl;
+  cout << "ptsua.size()=" << ptsua.size() << ", lsua.size()=" << lsua.size() << endl;
   GridMaskSet<Real> gmsina=under_approximation(ptsina,fg);
   cout << "gmsina=" << gmsina << endl;
   GridMaskSet<Real> gmsouta=over_approximation(ptsouta,fg);

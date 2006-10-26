@@ -30,9 +30,11 @@
 namespace Ariadne {
   namespace Geometry {
     template class Rectangle<Real>; 
+    template class Rectangle<Rational>; 
+//    template class Rectangle< Interval<Real> >; 
       
-    template bool subset(const Rectangle<Real>&, 
-                         const ListSet<Real,Geometry::Rectangle>&);
+    template tribool subset(const Rectangle<Real>&, 
+                            const ListSet<Real,Geometry::Rectangle>&);
     
   }
 }

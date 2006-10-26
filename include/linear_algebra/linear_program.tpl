@@ -35,24 +35,26 @@
 namespace Ariadne {
   namespace LinearAlgebra {
 
-    template<typename R>
+    template<class R>
     LinearProgram<R>::~LinearProgram()
     {
     }
     
-    template<typename R>
+    template<class R>
     LinearProgram<R>::LinearProgram()
       : _tableau(),
-        _variable_indices()
+        _variable_indices(),
+        _status(UNSOLVED)
     {
     }
     
-    template<typename R>
+    template<class R>
     LinearProgram<R>::LinearProgram(const Matrix<R>& A,
                                     const Vector<R>& b,
                                     const Vector<R>& c)
       : _tableau(), 
-        _variable_indices(b.size()+c.size())
+        _variable_indices(b.size()+c.size()),
+        _status(UNSOLVED)
     {
       size_type nc=b.size(); // number of constraints
       size_type nv=c.size(); // number of variables
@@ -104,10 +106,11 @@ namespace Ariadne {
       }
     }
     
-    template<typename R>
+    template<class R>
     LinearProgram<R>::LinearProgram(const Matrix<R>& T)
       : _tableau(T),
-        _variable_indices()
+        _variable_indices(),
+        _status(UNSOLVED)
     {
       size_type nv=this->number_of_variables();
       _variable_indices=std::vector<size_type>(nv);
@@ -116,171 +119,146 @@ namespace Ariadne {
       }
     }
     
-    template<typename R>
+    template<class R>
     LinearProgram<R>::LinearProgram(const LinearProgram& LP)
       : _tableau(LP._tableau),
-        _variable_indices(LP._variable_indices)
+        _variable_indices(LP._variable_indices),
+        _status(LP._status)
     {
     }
     
-    template<typename R>
+    template<class R>
     LinearProgram<R>&
     LinearProgram<R>::operator=(const LinearProgram& LP) 
     {
       if( this != &LP) {
         this->_tableau=LP._tableau;
         this->_variable_indices=LP._variable_indices;
+        this->_status=LP._status;
       } 
       return *this;
     }
 
-    template<typename R>
-    size_type
-    LinearProgram<R>::compute_entering_variable_index() const 
+    
+    template<class R>
+    void 
+    LinearProgram<R>::compute_feasible_point() const
     {
-      size_type m=this->number_of_constraints();
+      size_type m=this->number_of_constraints()+1;
       size_type n=this->number_of_free_variables();
-
-      for (size_type j=0; j!=n; ++j)
-        if(_tableau(m,j) < 0) {
-          return j;
-        }
-      // No variable has to enter the base:
-      // the cost function was optimized.
-      return n;
+      R* ptrA = const_cast<R*>(this->tableau().begin());
+      size_type rincA=this->tableau().row_increment();
+      size_type cincA=this->tableau().column_increment();
+      size_type* piv=const_cast<size_type*>(&*this->_variable_indices.begin());
+      
+      size_type nrA=this->tableau().number_of_rows();
+      size_type ncA=this->tableau().number_of_columns();
+      //std::cerr << this->tableau() << "\n" << Matrix<R>(nrA,ncA,ptrA,rincA,cincA) << std::endl;
+      //std::cerr << nrA << " " << ncA << " " << ptrA << " " << rincA << " " << cincA << std::endl;
+      
+      lpslv(m,n, ptrA,rincA,cincA, ptrA+cincA*n,rincA, ptrA+rincA*(m),cincA, *(ptrA+rincA*(m)+cincA*n), (int*)piv);
+      if(this->_tableau(m,n)==0) {
+        this->_status=SATISFIABLE;
+      } else {
+        this->_status=UNSATISFIABLE;
+      }
     }
- 
-    template<typename R>
-    size_type
-    LinearProgram<R>::compute_exiting_base_index(size_type j) const 
+    
+    template<class R>
+    void 
+    LinearProgram<R>::compute_optimizing_point() const
     {
-      typedef typename numerical_traits<R>::field_extension_type F;
-      // select variable to exit basis
       size_type m=this->number_of_constraints();
       size_type n=this->number_of_free_variables();
+      R* ptrA = const_cast<R*>(this->tableau().begin());
+      size_type rincA=this->tableau().row_increment();
+      size_type cincA=this->tableau().column_increment();
+      size_type* piv=const_cast<size_type*>(&*this->_variable_indices.begin());
+      lpslv<R>(m+1,n, ptrA,rincA,cincA, ptrA+cincA*n, rincA, ptrA+rincA*m,cincA, *(ptrA+rincA*m+cincA*n), (int*)piv);
+    }
+    
 
-      size_type i=m;
-      F min_change=0;
-      for(size_type k=0; k!=m; ++k) {
-        if(this->_tableau(k,j)>0) {
-          F change=this->_tableau(k,n)/this->_tableau(k,j);
-          if(change<min_change || min_change==0) {
-            min_change=change;
-            i=k;
+    template<class R>
+    void
+    LinearProgram<R>::solve() const 
+    {
+      if(this->_status==UNSOLVED) {
+        this->compute_feasible_point();
+      }
+      if(this->_status==SATISFIABLE) {
+        this->compute_optimizing_point();
+      }
+    }
+    
+    template<class R>
+    tribool
+    LinearProgram<R>::is_feasible() const 
+    {
+      if(this->_status==UNSOLVED) {
+        this->compute_feasible_point();
+      }
+      return(this->_status!=UNSATISFIABLE);
+    }
+    
+    template<class R>
+    Vector<R>
+    LinearProgram<R>::feasible_point() const 
+    {
+      if(this->_status==UNSOLVED) {
+        this->compute_feasible_point();
+      }
+      if(this->_status!=UNSATISFIABLE) {
+        size_type m=this->number_of_constraints();
+        size_type n=this->number_of_free_variables();
+        Vector<R> result(n);
+        for(size_type i=0; i!=m; ++i) {
+          size_type j=this->_variable_indices[n+i];
+          if(j<result.size()) {
+            result(j)=_tableau(i,n);
           }
         }
+        return result;
+      } else {
+        throw std::runtime_error("Infeasible linear program");
       }
-      return i;
     }
-    
-    template<typename R>
-    void
-    LinearProgram<R>::swap_base(const size_type entering_variable_index,
-                                   const size_type exiting_base_index) const
-    {
-      // select variable to exit basis
-      size_type m=this->number_of_constraints();
-      size_type n=this->number_of_free_variables();
 
-      size_type i=exiting_base_index;
-      size_type j=entering_variable_index;
-      
-      std::swap(_variable_indices[j],_variable_indices[n+i]);
-      
-      // Modify the tableau
-      real_type pivot=_tableau(i,j);
-      for(size_type p=0; p!=m+1; ++p) {
-        if(p!=i) {
-          real_type annihilated=_tableau(p,j);
-          for(size_type q=0; q!=n+1; ++q) {
-            if(q!=j) {
-              _tableau(p,q)=_tableau(p,q)-(_tableau(i,q)*annihilated)/pivot;
-            }
-          }
-          _tableau(p,j)=-_tableau(p,j)/pivot;
-        }
-      }
-      for(size_type q=0; q!=n+1; ++q) {
-        if(q!=j) {
-          _tableau(i,q)=_tableau(i,q)/pivot;
-        }
-        _tableau(i,j)=1/pivot;
-      }
-    }
-    
-    template<typename R>
-    void
-    LinearProgram<R>::solve_tableau() const 
-    {
-      size_type m=this->number_of_constraints();
-      size_type n=this->number_of_free_variables();
-      R* A=const_cast<R*>(this->tableau().begin());
-      R* b=A+n;
-      R* c=A+m*(n+1);
-      R& d=A[(m+1)*(n+1)-1];
-      size_type* piv=this->_variable_indices.begin().operator->();
-      lpslv(m,n,A,1,n+1,b,n+1,c,1,d,(int*)piv);
-      return;
-      
-      //std::cerr << "LinearProgram<" << name<R>() << ">::second_phase() const" << std::endl;
-      
-      size_type recursions=10;
-      
-      //std::cerr << this->_tableau << "\n" << this->_variable_indices << "\n" << std::endl;
-      
-      //Select variable to enter basis
-      size_type j=this->compute_entering_variable_index();
-      //if(j==n) { std::cerr << "Tableau already optimal" << std::endl; }
-      
-      while(j!=n) {
-        assert(--recursions);
-        size_type i=this->compute_exiting_base_index(j);
-        // std::cerr << "Pivoting on (" << i << "," << j << ")" << std::endl;
-        
-        swap_base(j,i);
-        // std::cerr << this->_tableau << "\n" << this->_variable_indices << "\n" << std::endl;
-        
-        j=this->compute_entering_variable_index();
-      }
-      
-      return;
-    }
-    
-    template<typename R>
+    template<class R>
     Vector<R>
     LinearProgram<R>::optimizing_point() const 
     {
-      Vector<R> result(this->number_of_free_variables());
- 
-      size_type m=this->number_of_constraints();
-      size_type n=this->number_of_free_variables();
-      solve();
-      
-      for(size_type i=0; i!=m; ++i) {
-        size_type j=this->_variable_indices[n+i];
-        if(j<result.size()) {
-          result(j)=_tableau(i,n);
+      this->solve();
+      if(this->_status==OPTIMIZED) {
+        Vector<R> result(this->number_of_free_variables());
+        size_type m=this->number_of_constraints();
+        size_type n=this->number_of_free_variables();
+        for(size_type i=0; i!=m; ++i) {
+          size_type j=this->_variable_indices[n+i];
+          if(j<result.size()) {
+            result(j)=_tableau(i,n);
+          }
         }
+        return result;
+      } else {
+        throw std::runtime_error("Unsolvable linear program");
       }
-      return result;
     }
         
-    template<typename R>
+    template<class R>
     R
     LinearProgram<R>::optimal_value() const 
     {
       // std::cerr << "LinearProgram<" << name<R>() << ">::optimal_value() const\n";
-      solve_tableau();
-      return this->_tableau(_tableau.number_of_rows()-1,_tableau.number_of_columns()-1);
+      this->solve();
+      if(this->_status==OPTIMIZED) {
+        size_type m=this->number_of_constraints();
+        size_type n=this->number_of_free_variables();
+        return this->_tableau(m,n);
+      } else {
+        throw std::runtime_error("Unsolvable linear program");
+      }
     }
     
-    template<typename R>
-    R 
-    LinearProgram<R>::objective_function(const Vector<R>& v) const
-    {
-      assert(false);
-    }
-
     
 /*    
     size_type
@@ -989,7 +967,7 @@ namespace Ariadne {
       normalize2(ext_n, evaluating_point.divisor(), ext_n, ext_d);
     }
 
-    template<typename R>
+    template<class R>
     bool
     LinearProgram<R>::is_satisfiable() const {
     #if PPL_NOISY_SIMPLEX
@@ -1178,7 +1156,7 @@ namespace Ariadne {
     
 
 */
-    template<typename R>
+    template<class R>
     std::ostream& 
     LinearProgram<R>::write(std::ostream& os) const
     {

@@ -65,7 +65,7 @@ namespace Ariadne {
     Geometry::Parallelotope<R> 
     C1Applicator<R>::apply(const System::Map<R>& f, const Geometry::Parallelotope<R>& p) const 
     {
-      typedef typename numerical_traits<R>::field_extension_type F;
+      typedef typename Numeric::traits<R>::arithmetic_type F;
 
       const size_type m=p.dimension();
       const size_type n=p.dimension();

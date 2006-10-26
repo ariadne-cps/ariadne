@@ -37,28 +37,15 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template<typename R>
+    template<class R>
     Point<R>::Point(const std::string& s) : _vector(1)
     {
       std::stringstream ss(s);
       ss >> *this;
     }
 
-    #ifndef RATIONAL_REAL
-    template<typename R>
-    Point<R>::operator Point<Rational> ()  const
-    {
-      const Point<R>& self=*this;
-      Point<Rational> result(self.dimension());
-      for(size_type i=0; i!=self.dimension(); ++i) {
-        result[i]=self[i];
-      }
-      return result;
-    }
-    #endif 
     
-    
-    template <typename R>
+    template <class R>
     std::ostream& 
     Point<R>::write(std::ostream& os) const
     {
@@ -75,7 +62,7 @@ namespace Ariadne {
       return os;
     }
 
-    template <typename R>
+    template <class R>
     std::istream& 
     Point<R>::read(std::istream& is)
     {
@@ -84,7 +71,16 @@ namespace Ariadne {
 
       std::vector<R> v;
       v.reserve(last_size);
-      Utility::read_vector(is, v, '(', ')');
+      char c;
+      is >> c;
+      is.putback(c);
+      if(c=='(') {
+        Utility::read_vector(is, v, '(', ')');
+      } else if(c=='[') {
+        Utility::read_vector(is, v, '[', ']');
+      } else {
+        throw std::runtime_error("Invalid point input");
+      }
       last_size = v.size();
 
       pt._vector=LinearAlgebra::Vector<R>(v.size());

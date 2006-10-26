@@ -27,8 +27,6 @@
 #include <sstream>
 #include <exception>
 
-#include <ppl.hh>
-
 #include "rectangle.h"
 
 #include "../combinatoric/binary_word.h" 
@@ -41,7 +39,7 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template <typename R>
+    template <class R>
     Rectangle<R>::Rectangle(const std::string& s)
       : _bounds()
     {
@@ -49,13 +47,7 @@ namespace Ariadne {
       ss >> *this;
     }
 
-    template <typename R>
-    Rectangle<R>::operator Parma_Polyhedra_Library::C_Polyhedron() const
-    {
-      return ppl_polyhedron(LinearAlgebra::Vector< Interval<Rational> >(this->position_vectors()));
-    }
-
-    template <typename R>
+    template <class R>
     Rectangle<R>& 
     Rectangle<R>::expand_by(const real_type& delta) 
     {
@@ -68,7 +60,7 @@ namespace Ariadne {
     }
       
     
-    template <typename R>
+    template <class R>
     Rectangle<R>
     Rectangle<R>::quadrant(const Combinatoric::BinaryWord& w) const 
     {
@@ -86,7 +78,7 @@ namespace Ariadne {
       return quadrant;
     }
       
-    template <typename R>
+    template <class R>
     ListSet<R,Rectangle>
     Rectangle<R>::subdivide() const 
     {
@@ -98,7 +90,7 @@ namespace Ariadne {
       Point<R> upr_crnr=this->upper_corner();
       Point<R> new_lwr_crnr;
       Point<R> new_upr_crnr;
-      for(size_type i=0; i!=1<<n; ++i) {
+      for(size_type i=0; i!=1u<<n; ++i) {
         for(size_type j=0; j!=n; ++j) {
           if(i&(1<<j)) {
             new_lwr_crnr[j]=lwr_crnr[j];
@@ -116,7 +108,7 @@ namespace Ariadne {
     }
 
 
-    template<typename R>
+    template<class R>
     PointList<R>
     Rectangle<R>::vertices() const
     {
@@ -138,7 +130,7 @@ namespace Ariadne {
       return result;   
     }
     
-    template <typename R>
+    template <class R>
     Point<R> 
     Rectangle<R>::vertex(size_type i) const 
     {
@@ -162,25 +154,23 @@ namespace Ariadne {
       return result;
     }
     
-
-    template <typename R>
-    bool 
-    subset_of_open_cover(const Rectangle<R>& A, 
-                         const ListSet<R,Geometry::Rectangle>& U)
+    template<class R>
+    typename Rectangle<R>::vertices_const_iterator
+    Rectangle<R>::vertices_begin() const
     {
-      throw std::domain_error("subset_of_open_cover(Rectangle, ListSet<Rectangle>) not implemented");
+      return RectangleVerticesIterator<R>(*this,false);
     }
     
-    template <typename R>
-    bool 
-    inner_subset(const Rectangle<R>& A, 
-                 const ListSet<R,Geometry::Rectangle>& B)
+    template<class R>
+    typename Rectangle<R>::vertices_const_iterator
+    Rectangle<R>::vertices_end() const
     {
-      return Geometry::inner_subset(A, GridMaskSet<R>(B));
+      return RectangleVerticesIterator<R>(*this,true);
     }
     
-    template <typename R>
-    bool 
+    
+    template <class R>
+    tribool 
     subset(const Rectangle<R>& A, 
            const ListSet<R,Geometry::Rectangle>& B)
     {
@@ -188,7 +178,7 @@ namespace Ariadne {
     }
     
     
-    template <typename R>
+    template <class R>
     std::ostream&
     Rectangle<R>::write(std::ostream& os) const 
     {
@@ -205,7 +195,7 @@ namespace Ariadne {
       return os;
     }
     
-    template <typename R>
+    template <class R>
     std::istream& 
     Rectangle<R>::read(std::istream& is)
     {

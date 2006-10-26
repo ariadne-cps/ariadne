@@ -33,6 +33,7 @@
 #include "../declarations.h"
 
 #include "../base/iterator.h"
+#include "../base/tribool.h"
 
 #include "../combinatoric/binary_word.h"
 #include "../combinatoric/binary_tree.h"
@@ -44,24 +45,24 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template<typename R> class PartitionScheme;
-    template<typename R> class PartitionTree;
-    template<typename R> class PartitionTreeCell;
-    template<typename R> class PartitionTreeSet;
+    template<class R> class PartitionScheme;
+    template<class R> class PartitionTree;
+    template<class R> class PartitionTreeCell;
+    template<class R> class PartitionTreeSet;
 
-    template<typename R> class PartitionTreeSetIterator;
+    template<class R> class PartitionTreeSetIterator;
 
-    template<typename R> std::ostream& operator<<(std::ostream&, const PartitionScheme<R>&);
-    template<typename R> std::ostream& operator<<(std::ostream&, const PartitionTree<R>&);
-    template<typename R> std::ostream& operator<<(std::ostream&, const PartitionTreeCell<R>&);
-    template<typename R> std::ostream& operator<<(std::ostream&, const PartitionTreeSet<R>&);
+    template<class R> std::ostream& operator<<(std::ostream&, const PartitionScheme<R>&);
+    template<class R> std::ostream& operator<<(std::ostream&, const PartitionTree<R>&);
+    template<class R> std::ostream& operator<<(std::ostream&, const PartitionTreeCell<R>&);
+    template<class R> std::ostream& operator<<(std::ostream&, const PartitionTreeSet<R>&);
 
     /* External class declarations. */
-    template<typename R> class Rectangle;
-    template<typename R, template<typename> class BS> class ListSet;
+    template<class R> class Rectangle;
+    template<class R, template<class> class BS> class ListSet;
 
           
-    template<typename R>
+    template<class R>
     class PartitionTreeIterator 
       : public boost::iterator_facade<PartitionTreeIterator<R>,
                                       PartitionTreeCell<R>,
@@ -86,7 +87,7 @@ namespace Ariadne {
       Combinatoric::BinaryTree::const_iterator _base;
     };
 
-    template<typename R>
+    template<class R>
     class PartitionTreeSetIterator 
       : public boost::iterator_facade<PartitionTreeSetIterator<R>,
                                       PartitionTreeCell<R>,
@@ -110,7 +111,7 @@ namespace Ariadne {
     /*!\ingroup PartitionTree
      * \brief A scheme for creating sets based on binary partition trees.
      */
-    template<typename R> 
+    template<class R> 
     class PartitionScheme {
     public:
       /*! \brief The type of denotable real number used for the cell vertices. */
@@ -154,7 +155,7 @@ namespace Ariadne {
      * \ingroup PartitionTree
      * \brief A rectangle defined on a partition tree.
      */
-    template<typename R>
+    template<class R>
     class PartitionTreeCell
       : public RectangleExpression< PartitionTreeCell<R> >
     {
@@ -209,7 +210,7 @@ namespace Ariadne {
     /*!\ingroup PartitionTree
      * \brief A tree structure following a PartitionScheme.
      */
-    template<typename R>
+    template<class R>
     class PartitionTree {
       friend class PartitionTreeSet<R>;
      public:
@@ -268,7 +269,7 @@ namespace Ariadne {
      * \ingroup PartitionTree
      * \brief A denotable set on a partition grid, defined using a partition tree of cells.
      */
-    template<typename R>
+    template<class R>
     class PartitionTreeSet {
      public:
       //      typedef PartitionTreeSetIterator<R> iterator;
@@ -383,16 +384,16 @@ namespace Ariadne {
     };
 
     
-    template<typename R, class S>
+    template<class R, class S>
     PartitionTreeSet<R> outer_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth);
     
-    template<typename R, class S>
+    template<class R, class S>
     PartitionTreeSet<R> inner_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth);
     
-    template<typename R, class S>
+    template<class R, class S>
     PartitionTreeSet<R> over_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth);
     
-    template<typename R, class S>
+    template<class R, class S>
     PartitionTreeSet<R> under_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth);
     
   }

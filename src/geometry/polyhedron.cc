@@ -22,6 +22,7 @@
  */
 
 #include "real_typedef.h"
+#include "numeric/rational.h"
 
 #include "geometry/polyhedron.h"
 #include "geometry/polyhedron.tpl"
@@ -29,25 +30,12 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template class Polyhedron<Real>;
-    template std::ostream& operator<<(std::ostream&, const Polyhedron<Real>&);
-    template std::istream& operator>>(std::istream&, Polyhedron<Real>&);
+    template class Polyhedron<Rational>;
 
-/*
-    
-    template bool disjoint(const Polyhedron<Real>&, const Polyhedron<Real>&);
-    template bool interiors_intersect(const Polyhedron<Real>&, const Polyhedron<Real>&);
-    template bool inner_subset(const Polyhedron<Real>&, const Polyhedron<Real>&);
-    template bool subset(const Polyhedron<Real>&, const Polyhedron<Real>&);
-    
-    template Polyhedron<Real> regular_intersection(const Polyhedron<Real>&, const Polyhedron<Real>&);
-    template Polyhedron<Real> intersection(const Polyhedron<Real>&, const Polyhedron<Real>&);
-    template Polyhedron<Real> convex_hull(const Polyhedron<Real>&, const Polyhedron<Real>&);
-    template Polyhedron<Real> minkowski_sum(const Polyhedron<Real>&, const Polyhedron<Real>&);
-    
-    template std::ostream& operator<<(std::ostream&, const Polyhedron<Real>&);
-    template std::istream& operator>>(std::istream&, Polyhedron<Real>&);
-*/
+    template class Polyhedron<Real>;
+    template class Polyhedron< Interval<Real> >;
+
+
     
   }
 }

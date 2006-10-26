@@ -32,10 +32,10 @@ namespace Ariadne {
   namespace Geometry {
 
     template class Point<Float64>;
-
     template class Point<MPFloat>;
-
     template class Point<Rational>;
 
+    template class Point< Interval<Float64> >;
+    template class Point< Interval<MPFloat> >;
   }
 }

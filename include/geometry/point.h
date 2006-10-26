@@ -37,14 +37,6 @@
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 
-#include <gmpxx.h>
-
-namespace Ariadne { 
-  namespace Numeric {
-    typedef mpq_class Rational;
-  } 
-}
-
 namespace Ariadne {
   namespace Geometry {
    
@@ -60,12 +52,13 @@ namespace Ariadne {
     template<> inline bool is_a<Point, Point>(){ return true; }
 
     /* Forward declaration of friends. */
-    template<typename R> std::ostream& operator<<(std::ostream&, const Point<R>&);
-    template<typename R> std::istream& operator>>(std::istream&, Point<R>&);
+    template<class R> std::ostream& operator<<(std::ostream&, const Point<R>&);
+    template<class R> std::istream& operator>>(std::istream&, Point<R>&);
 
     /*! \brief A point in Euclidean space. */
-    template <typename R>
+    template <class R>
     class Point {
+      typedef typename Numeric::traits<R>::arithmetic_type F;
      public:
       /*!\brief The type of denotable real number giving the point's values. */
       typedef R real_type;
@@ -76,7 +69,7 @@ namespace Ariadne {
       Point() : _vector(0) { }
 
       /*! \brief The origin in dimension \a dim. */
-      explicit Point(size_type dim) : _vector(dim) {
+      explicit Point(dimension_type d) : _vector(d) {
         for(size_type i=0; i!=dimension(); ++i) {
           _vector[i]=real_type(0);
         }
@@ -98,9 +91,9 @@ namespace Ariadne {
       /*! \brief Construct a point from a string literal. */
       explicit Point(const std::string& s);
 
-      /*! \brief Construct from a point which possibly lies in a different space. */
-      template<typename R2>
-      explicit Point(const Point<R2>& original) : _vector(original.position_vector()) { }
+      /*! \brief Convert from a point which possibly lies in a different space. */
+      template<class R2>
+      Point(const Point<R2>& original) : _vector(original.position_vector()) { }
       
       /*! \brief Copy constructor. */
       Point(const Point<R>& original) : _vector(original._vector) { }
@@ -111,12 +104,7 @@ namespace Ariadne {
         return *this; 
       }
       
-      #ifndef RATIONAL_REAL
-      /*! \brief Convert to a rational point. */
-      operator Point<Rational> () const;
-      #endif 
-
-
+ 
       /*! \brief Checks equivalence between two states. */
       bool operator==(const Point<R>& A) const {
         /* Return false if states have different dimensions */
@@ -184,57 +172,73 @@ namespace Ariadne {
       vector_type _vector;
     };
 
-
-    template <typename R> 
-    inline
-    LinearAlgebra::Vector<R>
-    operator-(const Point<R>& s1, const Point<R>& s2)
+    template<class R> inline
+    Point<R> approximation(const Point< Interval<R> >& ipt) 
     {
-      return s1.position_vector() - s2.position_vector();
+      Point<R> result(ipt.dimension());
+      for(dimension_type i=0; i!=ipt.dimension(); ++i) {
+        result[i]=ipt[i].centre();
+      }
+      return result;
+    }
+    
+    template<class R>
+    inline
+    Point<typename Numeric::traits<R>::arithmetic_type>
+    minkowski_sum(const Point<R>& pt1, const Point<R>& pt2) {
+      return Point<typename Numeric::traits<R>::arithmetic_type>(pt1.position_vector()+pt2.position_vector());
+    }
+    
+    template<class R>
+    inline
+    Point<typename Numeric::traits<R>::arithmetic_type>
+    minkowski_difference(const Point<R>& pt1, const Point<R>& pt2) {
+      return Point<typename Numeric::traits<R>::arithmetic_type>(pt1.position_vector()-pt2.position_vector());
+    }
+    
+    template<class R1,class R2>
+    inline
+    LinearAlgebra::Vector<typename Numeric::traits<R1,R2>::arithmetic_type>
+    operator-(const Point<R1> pt1, const Point<R2>& pt2) 
+    {
+      return pt1.position_vector()-pt2.position_vector();
+    }
+    
+    template <class R1,class R2>
+    inline
+    Point<typename Numeric::traits<R1,R2>::arithmetic_type> 
+    operator+(const Point<R1>& pt, const LinearAlgebra::Vector<R2>& v)
+    {
+      return Point<typename Numeric::traits<R1,R2>::arithmetic_type>(pt.position_vector() + v);
     }
 
-    template <typename R>
+
+    template <class R1,class R2>
+    inline
+    Point<typename Numeric::traits<R1,R2>::arithmetic_type> 
+    operator-(const Point<R1>& pt, const LinearAlgebra::Vector<R2>& v)
+    {
+      return Point<typename Numeric::traits<R1,R2>::arithmetic_type>(pt.position_vector() - v);
+    }
+
+    template <class R>
     inline
     Point<R> 
-    operator+(const Point<R>& s, const LinearAlgebra::Vector<R>& v)
+    add_approx(const Point<R>& pt, const LinearAlgebra::Vector<R>& v)
     {
-      return Point<R>(s.position_vector() + v);
+      return Point<R>(add_approx(pt.position_vector(),v));
     }
 
-    template <typename R>
+    template <class R>
     inline
     Point<R> 
-    operator-(const Point<R>& s, const LinearAlgebra::Vector<R>& v)
+    sub_approx(const Point<R>& pt, const LinearAlgebra::Vector<R>& v)
     {
-      return Point<R>(s.position_vector() - v);
-    }
-
-    template <typename R>
-    inline
-    LinearAlgebra::Vector<R>
-    sub_approx(const Point<R>& s1, const Point<R>& s2)
-    {
-      return sub_approx(s1.position_vector(),s2.position_vector());
-    }
-
-    template <typename R>
-    inline
-    Point<R> 
-    add_approx(const Point<R>& s, const LinearAlgebra::Vector<R>& v)
-    {
-      return Point<R>(add_approx(s.position_vector(),v));
-    }
-
-    template <typename R>
-    inline
-    Point<R> 
-    sub_approx(const Point<R>& s, const LinearAlgebra::Vector<R>& v)
-    {
-      return Point<R>(sub_approx(s.position_vector(),v));
+      return Point<R>(sub_approx(pt.position_vector(),v));
     }
 
     
-    template<typename R>
+    template<class R>
     inline
     Point<R>
     approximate_value(const Point< Interval<R> >& pt) 
@@ -246,7 +250,7 @@ namespace Ariadne {
       return result;
     }
     
-    template <typename R>
+    template <class R>
     inline 
     Point<R> 
     project_on_dimensions(const Point<R> &A, const Base::array<bool>& dims) 
@@ -274,7 +278,7 @@ namespace Ariadne {
       return new_point;
     }
 
-    template <typename R>
+    template <class R>
     inline 
     Point<R> 
     project_on_dimensions(const Point<R> &A, 
@@ -294,7 +298,7 @@ namespace Ariadne {
       return new_point;
     }
 
-    template <typename R>
+    template <class R>
     inline 
     Point<R> 
     project_on_dimensions(const Point<R> &A, 
@@ -311,12 +315,12 @@ namespace Ariadne {
       return new_point;
     }
     
-    template<typename R> inline 
+    template<class R> inline 
     std::ostream& operator<<(std::ostream& os, const Point<R>& pt) {
       return pt.write(os);
     }
     
-    template<typename R> inline
+    template<class R> inline
     std::istream& operator>>(std::istream& is, Point<R>& pt) {
       return pt.read(is);
     }

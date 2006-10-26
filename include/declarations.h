@@ -40,13 +40,15 @@ template<typename T> class sequence;
 
 namespace Ariadne { namespace Numeric {
 template<typename R> class Interval;
-template<typename T> class numerical_traits;
+template<typename T1, typename T2=T1> class traits;
 }}
 
 namespace Ariadne { namespace LinearAlgebra {
 class MultiIndex;
 template<typename R> class Vector;
+template<typename R> class VectorSlice;
 template<typename R> class Matrix;
+template<typename R> class MatrixSlice;
 template<typename R> class Tensor;
 template<typename R> class LinearProgram;
 }}

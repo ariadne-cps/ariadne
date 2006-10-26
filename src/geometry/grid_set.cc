@@ -40,42 +40,41 @@ namespace Ariadne {
     template class GridCellListSetIterator<Real>;
     template class GridBlockListSetIterator<Real>;
 
-    template bool disjoint(const Rectangle<Real>&, const GridMaskSet<Real>&);
-    template bool disjoint(const GridMaskSet<Real>&, const Rectangle<Real>&);
-    template bool disjoint(const GridBlock<Real>&, const GridMaskSet<Real>&);
-    template bool disjoint(const GridMaskSet<Real>&, const GridBlock<Real>&);
-    template bool disjoint(const GridMaskSet<Real>&, const GridMaskSet<Real>&);
-    template bool interiors_intersect(const Rectangle<Real>&, const GridMaskSet<Real>&);
-    template bool interiors_intersect(const GridMaskSet<Real>&, const Rectangle<Real>&);
-    template bool interiors_intersect(const GridBlock<Real>&, const GridMaskSet<Real>&);
-    template bool interiors_intersect(const GridMaskSet<Real>&, const GridBlock<Real>&);
-    template bool interiors_intersect(const GridMaskSet<Real>&, const GridMaskSet<Real>&);
-    template bool inner_subset(const Rectangle<Real>&, const GridMaskSet<Real>&);
-    template bool subset(const Rectangle<Real>&, const GridMaskSet<Real>&);
-    template bool subset(const GridCell<Real>&, const GridBlock<Real>&);
-    template bool subset(const GridBlock<Real>&, const GridBlock<Real>&);
-    template bool subset(const GridCellListSet<Real>&, const GridBlock<Real>&);
-    template bool subset(const GridCell<Real>&, const GridMaskSet<Real>&);
-    template bool subset(const GridBlock<Real>&, const GridMaskSet<Real>&);
-    template bool subset(const GridCellListSet<Real>&, const GridMaskSet<Real>&);
-    template bool subset(const GridMaskSet<Real>&, const GridMaskSet<Real>&);
+    template tribool disjoint(const GridMaskSet<Real>&, const Rectangle<Real>&);
+    template tribool disjoint(const Rectangle<Real>&, const GridMaskSet<Real>&);
+
+    template tribool subset(const Rectangle<Real>&, const GridBlock<Real>&);
+    template tribool subset(const Rectangle<Real>&, const GridMaskSet<Real>&);
+
+    template tribool overlap(const GridBlock<Real>&, const GridBlock<Real>&);
+    template tribool overlap(const GridBlock<Real>&, const GridMaskSet<Real>&);
+    template tribool overlap(const GridMaskSet<Real>&, const GridBlock<Real>&);
+    template tribool overlap(const GridMaskSet<Real>&, const GridMaskSet<Real>&);
+    
+    template tribool subset(const GridCell<Real>&, const GridBlock<Real>&);
+    template tribool subset(const GridCell<Real>&, const GridMaskSet<Real>&);
+    template tribool subset(const GridBlock<Real>&, const GridBlock<Real>&);
+    template tribool subset(const GridBlock<Real>&, const GridMaskSet<Real>&);
+    template tribool subset(const GridCellListSet<Real>&, const GridBlock<Real>&);
+    template tribool subset(const GridCellListSet<Real>&, const GridMaskSet<Real>&);
+    template tribool subset(const GridMaskSet<Real>&, const GridMaskSet<Real>&);
 
     template GridCellListSet<Real> regular_intersection(const GridCellListSet<Real>&, 
-                                                        const GridMaskSet<Real>&);
+                                                     const GridMaskSet<Real>&);
     template GridCellListSet<Real> regular_intersection(const GridMaskSet<Real>&,
-                                                        const GridCellListSet<Real>&);
+                                                     const GridCellListSet<Real>&);
+    template GridMaskSet<Real> regular_intersection(const GridBlock<Real>&, 
+                                                 const GridMaskSet<Real>&);
+    template GridMaskSet<Real> regular_intersection(const GridMaskSet<Real>&, 
+                                                 const GridBlock<Real>&);
+    template GridMaskSet<Real> regular_intersection(const GridMaskSet<Real>&, 
+                                                 const GridMaskSet<Real>&);
+    
     template GridCellListSet<Real> difference(const GridCellListSet<Real>&, 
                                               const GridMaskSet<Real>&);
-
-    template GridMaskSet<Real> join(const GridMaskSet<Real>&, const GridMaskSet<Real>&);
     template GridMaskSet<Real> difference(const GridMaskSet<Real>&, 
                                           const GridMaskSet<Real>&);
-    template GridMaskSet<Real> regular_intersection(const GridBlock<Real>&, 
-                                                    const GridMaskSet<Real>&);
-    template GridMaskSet<Real> regular_intersection(const GridMaskSet<Real>&, 
-                                                    const GridBlock<Real>&);
-    template GridMaskSet<Real> regular_intersection(const GridMaskSet<Real>&, 
-                                                    const GridMaskSet<Real>&);
+    template GridMaskSet<Real> join(const GridMaskSet<Real>&, const GridMaskSet<Real>&);
 
     template GridBlock<Real>
     over_approximation(const Rectangle<Real>& p, const Grid<Real>& g);

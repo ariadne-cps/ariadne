@@ -96,13 +96,7 @@ namespace Ariadne {
       return mpfr_get_prec(num.get_mpfr_t());
     }
   
-    template<> class numerical_traits<MPFloat> {
-     public:
-      typedef ring_tag algebraic_category;
-      typedef Rational field_extension_type;
-      typedef Interval<MPFloat> arithmetic_type;
-    };
-      
+    
     template<> inline std::string name<Numeric::MPFloat>() { return "MPFloat"; }
     template<> inline std::string name<Numeric::Interval<Numeric::MPFloat> >() { return "Interval<MPFloat>"; }
     

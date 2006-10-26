@@ -46,7 +46,7 @@ namespace Ariadne {
     template <typename R>
     class AffineMap : public Map<R> 
     {
-      typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
+      typedef typename Numeric::traits<R>::arithmetic_type F;
      public:
       /*! \brief The type of denotable real number used to describe the system. */
       typedef R real_type;

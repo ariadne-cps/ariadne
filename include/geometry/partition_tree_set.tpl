@@ -38,7 +38,7 @@ namespace Ariadne {
 
     
     
-    template<typename R>
+    template<class R>
     PartitionScheme<R>::PartitionScheme(const Rectangle<R>& bb) 
       : _unit_box(bb), 
         _subdivisions(bb.dimension()) 
@@ -49,7 +49,7 @@ namespace Ariadne {
     // We use approximate values since the cell boundaries are defined
     // by the lower bound an upper bound formulae (which must be the same given 
     // the cell bound.
-    template<typename R>
+    template<class R>
     R
     PartitionTreeCell<R>::lower_bound(dimension_type i) const 
     {
@@ -58,7 +58,7 @@ namespace Ariadne {
                  sub_approx(_unit_box.upper_bound(i),_unit_box.lower_bound(i))));
     }
     
-    template<typename R>
+    template<class R>
     R
     PartitionTreeCell<R>::upper_bound(dimension_type i) const 
     {
@@ -69,14 +69,14 @@ namespace Ariadne {
     
     
     
-    template<typename R>
+    template<class R>
     PartitionTreeSet<R>::PartitionTreeSet(const GridMaskSet<R>& gms) 
       : _unit_box(gms.bounding_box()),
         _subdivision_set(gms._lattice_set)
     { }
 
 
-    template<typename R>
+    template<class R>
     PartitionTreeSet<R>::operator GridBlockListSet<R>() const 
     {
       throw std::domain_error("PartitionTreeSet<R>::operator GridBlockListSet<R>() const not implemented");
@@ -90,7 +90,7 @@ namespace Ariadne {
 
 
 
-    template<typename R>
+    template<class R>
     PartitionTreeSet<R>::operator ListSet<R,Rectangle>() const 
     {
       ListSet<R,Rectangle> res(this->dimension());
@@ -100,7 +100,7 @@ namespace Ariadne {
       return res;
     }
     
-    template<typename R, class S>
+    template<class R, class S>
     PartitionTreeSet<R>
     outer_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth)
     {
@@ -132,7 +132,7 @@ namespace Ariadne {
       return PartitionTreeSet<R>(bounding_box,subdivisions,Combinatoric::BinaryTree(tree),BooleanArray(mask));
     }
     
-    template<typename R, class S>
+    template<class R, class S>
     PartitionTreeSet<R>
     inner_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth)
     {
@@ -145,12 +145,12 @@ namespace Ariadne {
       
       do {
         Rectangle<R> cell=Rectangle<R>(PartitionTreeCell<R>(unit_box,subdivisions,word));
-        if(word.size()==depth+1 || !interiors_intersect(cell,s)) {
+        if(word.size()==depth+1 || disjoint(cell,s)) {
           tree.push_back(Combinatoric::BinaryTree::leaf);
           mask.push_back(false);
           Combinatoric::advance(word);
         }  
-        else if(inner_subset(cell,s)) {
+        else if(subset(cell,s)) {
           tree.push_back(Combinatoric::BinaryTree::leaf);
           mask.push_back(true);
           Combinatoric::advance(word);
@@ -165,7 +165,7 @@ namespace Ariadne {
     }
     
 
-    template<typename R, class S>
+    template<class R, class S>
     PartitionTreeSet<R>
     over_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth)
     {
@@ -183,7 +183,7 @@ namespace Ariadne {
           mask.push_back(true);
           Combinatoric::advance(word);
         }  
-        else if(!interiors_intersect(cell,s)) {
+        else if(disjoint(cell,s)) {
           tree.push_back(Combinatoric::BinaryTree::leaf);
           mask.push_back(false);
           Combinatoric::advance(word);
@@ -198,7 +198,7 @@ namespace Ariadne {
     }
     
 
-    template<typename R, class S>
+    template<class R, class S>
     PartitionTreeSet<R>
     under_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth)
     {
@@ -211,7 +211,7 @@ namespace Ariadne {
       
       do {
         Rectangle<R> cell=Rectangle<R>(PartitionTreeCell<R>(unit_box,subdivisions,word));
-        if(word.size()==depth+1 || !interiors_intersect(cell,s)) {
+        if(word.size()==depth+1 || disjoint(cell,s)) {
           tree.push_back(Combinatoric::BinaryTree::leaf);
           mask.push_back(false);
           Combinatoric::advance(word);
@@ -232,7 +232,7 @@ namespace Ariadne {
     
 
     
-    template<typename R>
+    template<class R>
     std::ostream&
     operator<<(std::ostream& os, const PartitionScheme<R>& g)
     {
@@ -243,7 +243,7 @@ namespace Ariadne {
       return os;
     }
 
-    template<typename R>
+    template<class R>
     std::ostream&
     operator<<(std::ostream& os, const PartitionTreeCell<R>& c)
     {
@@ -254,7 +254,7 @@ namespace Ariadne {
       return os;
     }
 
-    template<typename R>
+    template<class R>
     std::ostream&
     operator<<(std::ostream& os, const PartitionTree<R>& pt)
     {
@@ -268,7 +268,7 @@ namespace Ariadne {
       return os;
     }
 
-    template<typename R>
+    template<class R>
     std::ostream&
     operator<<(std::ostream& os, const PartitionTreeSet<R>& pts)
     {

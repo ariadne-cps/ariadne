@@ -725,17 +725,17 @@ namespace Ariadne {
     bool 
     disjoint(const LatticeBlock& r, const LatticeMaskSet& ms) 
     {
-      return !interiors_intersect(r.neighbourhood(),ms);
+      return !overlap(r.neighbourhood(),ms);
     }
     
     bool 
     disjoint(const LatticeMaskSet& ms1, const LatticeMaskSet& ms2) 
     {
-      return !interiors_intersect(ms1.neighbourhood(),ms2);
+      return !overlap(ms1.neighbourhood(),ms2);
     }
     
     bool 
-    interiors_intersect(const LatticeBlock& r1, const LatticeBlock& r2) 
+    overlap(const LatticeBlock& r1, const LatticeBlock& r2) 
     {
       for(dimension_type i=0; i!=r1.dimension(); ++i) {
         if(r1.upper_bound(i)<=r2.lower_bound(i)
@@ -748,7 +748,7 @@ namespace Ariadne {
     }
     
     bool 
-    interiors_intersect(const LatticeBlock& r, const LatticeMaskSet& ms) 
+    overlap(const LatticeBlock& r, const LatticeMaskSet& ms) 
     {
       LatticeBlock rstr=regular_intersection(r,ms.block());
       if(rstr.empty()) {
@@ -763,7 +763,7 @@ namespace Ariadne {
     }
     
     bool 
-    interiors_intersect(const LatticeMaskSet& a, const LatticeMaskSet& b) 
+    overlap(const LatticeMaskSet& a, const LatticeMaskSet& b) 
     {
       if(a.block()==b.block()) {
         BooleanArray::const_iterator aiter=a.mask().begin();
@@ -779,7 +779,7 @@ namespace Ariadne {
         return false;
       } else {
         for(LatticeMaskSet::const_iterator aiter=a.begin(); aiter!=a.end(); ++aiter) {
-          if(interiors_intersect(*aiter,b)) {
+          if(overlap(*aiter,b)) {
             return true;
           }
         }

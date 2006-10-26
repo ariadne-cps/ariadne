@@ -40,22 +40,42 @@
 
 namespace Ariadne { namespace LinearAlgebra {
 
+int verbosity=0;
+  
 /*! \ingroup LinearAlgebra
  *  \brief Solver for linear programming problems.
  *
  *  \param m Number of free constraints
  *  \param n Number of free variables
+ *  \param (A,rincA,cincA) An m-by-n matrix
+ *  \param (B,incB) An m-element vector
+ *  \param (C,incC) An n-element vector
+ *  \param d A scalar
+ *  \param piv A consecutive (m+n)-element vector of integers.
+ *
+ * Solve the linear programming problem 
+ * \f$ text{minimize}\ c^Tx \text{ subject to } Ax+y=b,\ x,y\geq0\f$ where the
+ * current point is given by \f$x=0,\ y=b\f$ and the current value is \f$-d\f$. 
  */
-template<typename R>
-void lpslv(int m, int n, R* A, int rincA, int cincA, R* b, int incB, R* c, int incC, R& d, int* piv)
+template<class R>
+void lpslv(int m, int n, R* A, int rincA, int cincA, R* B, int incB, R* C, int incC, R& d, int* piv)
 {
+  if(verbosity>1) {
+    std::cerr << "lpslv(" << m << "," << n << ", " << A-A << "," << rincA << "," << cincA << ", " 
+              << B-A << "," << incB << ", " << C-A << "," << incC << ", "
+              << &d-A << ", " << piv << ")" << std::endl;
+    std::cerr << "T=" << Matrix<R>(m+1,n+1,A,rincA,cincA) << std::endl;
+    std::cerr << "A=" << Matrix<R>(m,n,A,rincA,cincA) << "; b=" << Vector<R>(m,B,incB)
+              << "; c=" << Vector<R>(n,C,incC) << "; d=" << d << std::endl;
+  }
+  
   R one=static_cast<R>(1);
-  size_type recursions=100;
+  size_type recursions=16;
   int i,j;
       
   //Select variable to enter basis
   for(j=0; j!=n; ++j) {
-    if(c[j*incC] < 0) {
+    if(C[j*incC] < 0) {
       break;
     }
   }
@@ -66,9 +86,9 @@ void lpslv(int m, int n, R* A, int rincA, int cincA, R* b, int incB, R* c, int i
     // compute variable to exit basis
     i=m;
     R min_change=0;
-    for(size_type k=0; k!=m; ++k) {
+    for(int k=0; k!=m; ++k) {
       if(A[k*rincA+j*cincA]>0) {
-        R change=b[k*incB]/A[k*rincA+j*cincA];
+        R change=B[k*incB]/A[k*rincA+j*cincA];
         if(change<min_change || min_change==0) {
           min_change=change;
           i=k;
@@ -76,45 +96,56 @@ void lpslv(int m, int n, R* A, int rincA, int cincA, R* b, int incB, R* c, int i
       }
     }
 
-    // std::cerr << "Pivoting on (" << i << "," << j << ")" << std::endl;
-        
+    if(verbosity>1) {
+      std::cerr << "Pivoting on (exit=" << i << ", enter=" << j << ")" << std::endl;
+    }
+    
     std::swap(piv[j],piv[n+i]);
       
     // Modify the tableau
     R pivot=A[i*rincA+j*cincA];
     
-    // Subtract A(p,j)/A(i,j) times row i from row p,
+    // Subtract A(p,j)/A(i,j) times row i from row p, p!=i,
     // except in the jth column, which is divided by A(i,j)
     for(int p=0; p!=m; ++p) {
       if(p!=i) {
         R scale=A[p*rincA+j*cincA]/pivot;
         for(int q=0; q!=n; ++q) {
-          A[p*rincA+q*cincA] -= A[i*rincA+q*cincA]*scale;
+          if(q!=j) {
+            A[p*rincA+q*cincA] -= A[i*rincA+q*cincA]*scale;
+          }
         }
-        b[p*incB] -= b[i*incB]*scale;
-        A[p*rincA+j*cincA] = scale;
+        B[p*incB] -= B[i*incB]*scale;
+        A[p*rincA+j*cincA] = -scale;
       }
     }
     // Subtract c(j)/A(i,j) times row i from c,
     // except in the jth column, which is divided by A(i,j)
-    R scale = c[j*incC]/pivot;
-    for(size_type q=0; q!=n; ++q) {
-      c[q*incC] -= c[j*incC]*scale;
+    R scale = C[j*incC]/pivot;
+    for(int q=0; q!=n; ++q) {
+      if(q!=j) {
+        C[q*incC] -= A[i*rincA+q*incC]*scale;
+      }
     }
-    d -= c[j*incC]*scale;
-    c[j*incC] = scale;
+    d -= B[i*incB]*scale;
+    C[j*incC] = -scale;
 
-    // Set the ith row
+    // Scale the ith row by 1/pivot, except the jth column, which is set to 1/pivot
     scale=one/pivot;
-    for(size_type q=0; q!=n; ++q) {
+    for(int q=0; q!=n; ++q) {
       A[i*rincA+q*cincA] *= scale;
     }
-    b[i*incB] *= scale;
+    B[i*incB] *= scale;
     A[i*rincA+j*cincA] = scale;
+    
+    if(verbosity>1) {
+      std::cerr << "A=" << Matrix<R>(m,n,A,rincA,cincA) << "; b=" << Vector<R>(m,B,incB) 
+                << "; c=" << Vector<R>(n,C,incC) << "; d=" << d << std::endl;
+    }
     
     // Select variable to enter basis
     for(j=0; j!=n; ++j) {
-      if(c[j*incC] < 0) {
+      if(C[j*incC] < 0) {
         break;
       }
     }

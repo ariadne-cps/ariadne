@@ -31,7 +31,7 @@
 namespace Ariadne {
   namespace Geometry {
   
-    template<typename R>
+    template<class R>
     void
     ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
            const std::vector< LinearAlgebra::Vector<R> >&  argument);

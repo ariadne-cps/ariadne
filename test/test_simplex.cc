@@ -44,6 +44,15 @@ template<class R> int test_simplex();
 
 int main() {
   test_simplex<Real>();
+
+  tribool x=indeterminate;
+  cout << x << endl;
+  cout << boolalpha;
+  cout << x << endl;
+  cout << x << endl;
+  cout << indeterminate(x) << endl;
+  cout << endl;
+  cout << "INCOMPLETE ";
 }
   
 template<class R> 
@@ -69,19 +78,23 @@ test_simplex()
   Simplex<R> s(pl);
   cout << "s=" << flush << s << endl;
 
+  cout << "s.generators()=" << s.generators() << endl;
+  cout << "s.vertices()=" << s.vertices() << endl;
+  
   Point<R> pt1,pt2,pt3;
 
   pt1=Point<R>("(17.0,15.0)");
   pt2=Point<R>("(-0.25,-0.125)");
   pt3=Point<R>("(0.0,0.0)");
 
-  assert(!s.contains(pt1));
-  assert(s.contains(pt2));
-  assert(!s.interior_contains(pt2));
-  assert(s.interior_contains(pt3));
-
+  cout << "s.coordinates(pt1)=" << flush;
+  cout << s.coordinates(pt1) << endl;
+  cout << "s.coordinates(pt2)=" << s.coordinates(pt2) << endl;
+  cout << "s.coordinates(pt3)=" << s.coordinates(pt3) << endl;
   
-  cerr << "INCOMPLETE ";
-
+  assert(!s.contains(pt1));
+  assert(s.contains(pt3));
+  assert(indeterminate(s.contains(pt2)));
+  
   return 0;
 }

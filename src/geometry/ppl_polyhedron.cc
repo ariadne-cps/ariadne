@@ -21,16 +21,61 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/numerical_types.h"
+#include "numeric/rational.h"
 #include "numeric/interval.h"
-#include "geometry/ppl_polyhedron.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
+#include "geometry/rectangle.h"
+#include "geometry/zonotope.h"
+#include "geometry/polytope.h"
+#include "geometry/polyhedron.h"
+
+#include "geometry/ppl_polyhedron.h"
 #include <ppl.hh>
 
 
 namespace Ariadne {
   namespace Geometry {
+    
+    
+    template <typename R> inline 
+    Parma_Polyhedra_Library::C_Polyhedron 
+    ppl_polyhedron(const Point<R>& pt) 
+    {
+      return ppl_polyhedron(LinearAlgebra::Vector<Rational>(pt.position_vector()));
+    }
+    
+    Parma_Polyhedra_Library::C_Polyhedron
+    ppl_polyhedron(const Rectangle<Rational>& r)
+    {
+      LinearAlgebra::Vector< Interval<Rational> > pv(r.dimension());
+      for(dimension_type i=0; i!=r.dimension(); ++i) {
+        pv[i]=Interval<Rational>(r.lower_bound(i),r.upper_bound(i));
+      }
+      return ppl_polyhedron(pv);
+    }
 
+    Parma_Polyhedra_Library::C_Polyhedron
+    ppl_polyhedron(const Zonotope<Rational>& z)
+    {
+      return ppl_polyhedron(z.centre().position_vector(),z.generators());
+    }
+
+    Parma_Polyhedra_Library::C_Polyhedron
+    ppl_polyhedron(const Polytope<Rational>& plytp)
+    {
+      return ppl_polyhedron(plytp.generators());
+    }
+   
+    Parma_Polyhedra_Library::C_Polyhedron
+    ppl_polyhedron(const Polyhedron<Rational>& plhd)
+    {
+      return ppl_polyhedron(plhd.A(),plhd.b());
+    }
+
+
+    
     Parma_Polyhedra_Library::Constraint
     ppl_constraint(const LinearAlgebra::Vector<Rational>&  a, 
                    const Rational& b) 

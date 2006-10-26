@@ -38,7 +38,7 @@ namespace Ariadne {
 namespace Ariadne {
   namespace LinearAlgebra {
     
-    typedef Numeric::numerical_traits<Real>::arithmetic_type IReal;
+    typedef Numeric::traits<Real>::arithmetic_type IReal;
     
     template Matrix<IReal> exp_Ah_approx(const Matrix<Real>& A, 
                                          const Real& h, 

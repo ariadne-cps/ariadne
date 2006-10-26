@@ -59,8 +59,8 @@ namespace Ariadne {
     /*! \brief A monomial in several variables. */
     template<typename R>
     class Monomial {
-      typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
-      typedef typename Numeric::numerical_traits<R>::arithmetic_type result_type;
+      typedef typename Numeric::traits<R>::arithmetic_type F;
+      typedef typename Numeric::traits<R>::arithmetic_type result_type;
      public:
       /*! \brief The type of denotable real number used for the coefficients. */
       typedef R real_type;
@@ -120,8 +120,8 @@ namespace Ariadne {
     /*! \brief A polynomial in several variables. */
     template<typename R>
     class Polynomial {
-      typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
-      typedef typename Numeric::numerical_traits<R>::arithmetic_type result_type;
+      typedef typename Numeric::traits<R>::arithmetic_type F;
+      typedef typename Numeric::traits<R>::arithmetic_type result_type;
      public:
       /*! \brief The type of denotable real number used for the corners. */
       typedef R real_type;
@@ -164,7 +164,7 @@ namespace Ariadne {
      */
     template <typename R>
     class PolynomialMap : public Map<R> {
-      typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
+      typedef typename Numeric::traits<R>::arithmetic_type F;
       typedef Geometry::Point<F> result_type;
      public:
       /*! \brief The type of denotable real number used for the corners. */
@@ -219,7 +219,7 @@ namespace Ariadne {
     /*! \brief A matrix with polynomial entries. */
     template <typename R>
     class PolynomialMatrix {
-      typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
+      typedef typename Numeric::traits<R>::arithmetic_type F;
      public:
       /*! \brief Default constructor creates a 0 by 0 matrix. */
       PolynomialMatrix() : _matrix() { }

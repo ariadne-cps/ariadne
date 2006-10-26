@@ -29,8 +29,13 @@
 namespace Ariadne {
 namespace Geometry {
 
+int verbosity=0;
   
-template<typename R>
+  
+/*! \param argument is a list of constraints (or generators).
+ *  \param result is an output parameter storing a list of generators (or constraints).
+ */  
+template<class R>
 void
 ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
        const std::vector< LinearAlgebra::Vector<R> >&  argument)
@@ -44,6 +49,7 @@ ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
 
   // 'constraints' is a list of vectors $a$ representing the constraint $a^Tx\geq 0$
   const std::vector< LinearAlgebra::Vector<R> >& constraints=argument;
+
   // 'generators' is a list of vectors $r$ representing the ray $x=\lambda r, \lambda\geq0$
   std::vector< LinearAlgebra::Vector<R> >& generators=result;
   
@@ -71,8 +77,8 @@ ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
   
   // Add constraints sequentially and compute new generators
   for(size_type k=0; k!=constraints.size(); ++k) {
-    std::cout << "G=" << generators << "\n";
-    std::cout << "c=" << constraints[k] << "\n";
+    if(verbosity > 1) { std::cerr << "G=" << generators << "\n"; }
+    if(verbosity > 1) { std::cerr << "c=" << constraints[k] << "\n"; }
     
     // If any line does not saturate the new constraint, add a ray containing 
     // the first such line to the generators. If more lines do not saturate the

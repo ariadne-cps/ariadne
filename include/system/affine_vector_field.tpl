@@ -89,12 +89,12 @@ namespace Ariadne {
   namespace LinearAlgebra {
 
     template <typename R>
-    Matrix<typename Numeric::numerical_traits<R>::arithmetic_type>
+    Matrix<typename Numeric::traits<R>::arithmetic_type>
     exp_Ah_approx(const Matrix<R>& A, 
                   const R& h, 
                   const R& e) 
     {
-      typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
+      typedef typename Numeric::traits<R>::arithmetic_type F;
       Matrix<F> result=identity_matrix<R>(A.number_of_rows());
       
       F norm_Ah=F(h)*norm(A);
@@ -109,12 +109,12 @@ namespace Ariadne {
     }
     
     template <typename R> 
-    Matrix<typename Numeric::numerical_traits<R>::arithmetic_type> 
+    Matrix<typename Numeric::traits<R>::arithmetic_type> 
     exp_Ah_sub_id_div_A_approx(const Matrix<R>& A, 
                                const R& h, 
                                const R& e)
     {
-      typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
+      typedef typename Numeric::traits<R>::arithmetic_type F;
       Matrix<F> result=static_cast<F>(h)*identity_matrix<R>(A.number_of_rows());
       
       F norm_Ah=F(h)*norm(A);

@@ -38,7 +38,7 @@ using namespace boost::python;
 template<typename R>
 void export_lorenz_system() 
 {
-  typedef typename numerical_traits<R>::arithmetic_type F;
+  typedef typename Numeric::traits<R>::arithmetic_type F;
   typedef Interval<R> I;
   typedef LorenzSystem<R> RLorenzSystem;
   

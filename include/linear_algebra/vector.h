@@ -46,7 +46,7 @@ namespace Ariadne {
     /*! \ingroup LinearAlgebra
      *  \brief A vector over \a R. 
      */
-    template<typename R>
+    template<class R>
     class Vector
       : public boost::numeric::ublas::vector<R> 
     {
@@ -56,12 +56,15 @@ namespace Ariadne {
       explicit Vector() : _Base() { }
       /*! \brief Construct the zero vector of size \a n. */
       explicit Vector(const size_type& n) : _Base(n) { }
+      /*! \brief Construct the zero vector of size \a n with all elements initialized to \a x. */
+      explicit Vector(const size_type& n, const R& x) : _Base(n) { 
+        for(size_type i=0; i!=n; ++i) { (*this)(i)=x; } }
       /*! \brief Construct a vector of size \a n from the array beginning at \a ptr. */
       explicit Vector(const size_type& n, const R* ptr, const size_type& inc=1) : _Base(n) { 
         for(size_type i=0; i!=n; ++i) { (*this)(i)=ptr[i*inc]; } }
 
       /* Convert from a vector expression. */
-      template<typename E> Vector(const boost::numeric::ublas::vector_expression<E>& v) : _Base(v) { }
+      template<class E> Vector(const boost::numeric::ublas::vector_expression<E>& v) : _Base(v) { }
         
       /*! \brief Construct from a string literal of the form 
        *  "[v1,v2,...,vn]", where the vi are numerical literals for the vector elements. 
@@ -98,12 +101,21 @@ namespace Ariadne {
 #ifdef DOXYGEN
       /*! \brief The number of elements of the vector. */
       size_type size() const;
+#endif
+      /*! \brief A pointer to the first element. */
+      R* begin() { return this->data().begin(); }
+      /*! \brief A constant pointer to the first element. */
+      const R* begin() const { return this->data().begin(); };
+      /*! \brief The increment between elements in the storage array. */
+      size_type increment() const { return 1; }
+      
+#ifdef DOXYGEN
       /*! \brief A reference to the \a i th element. */
       R& operator() (const size_type& i);
       /*! \brief A constant reference to the \a i th element. */
       const R& operator() (const size_type& i) const;
 #endif
-        
+      
       /*! \brief The supremum norm. */
       R norm() const {
         R result=0; for (size_type i=0; i<this->size(); ++i) {
@@ -129,6 +141,8 @@ namespace Ariadne {
       friend R inner_product<>(const Vector<R>& v1, const Vector<R>& v2);
       /*! \brief The supremum norm of \a v. */
       friend R LinearAlgebra::norm<>(const Vector<R>& v);
+      /*! \brief The direct sum (concatentation) of v1 and v2. */
+      friend Vector<R> direct_sum<R>(const Vector<R>& v1, const Vector<R>& v2);
 #endif 
 
       /*! \brief Write to an output stream . */
@@ -137,7 +151,42 @@ namespace Ariadne {
       std::istream& read(std::istream& is);
     };
     
-    template <typename R>
+    
+    
+    /*! \ingroup LinearAlgebra
+     *  \brief A slice through an array or vector, with equally spaces increments. 
+     */
+    template<class R>
+    class VectorSlice : public boost::numeric::ublas::vector_expression< VectorSlice<R> >
+    {
+    
+      VectorSlice(const size_type& size, R* begin, const size_type& increment=1u)
+        : _size(size), _begin(begin), _increment(increment) { }
+      VectorSlice(const Vector<R>& v)
+        : _size(v.size()), _begin(v.begin()), _increment(v.increment()) { }
+      
+      size_type size() const { return this->_size; }
+      const R* begin() const { return this->_begin; }
+      const R* end() const { return this->_begin+this->_size*this->_increment; }
+      size_type increment() const { return this->_increment; }
+      
+      const R& operator() (const size_type& i) const { return this->_begin[i*this->_increment]; }
+      R& operator() (const size_type& i) { return this->_begin[i*this->_increment]; }
+     
+      template<class E> VectorSlice<R>& operator=(const boost::numeric::ublas::vector_expression< E > v) {
+        const E& e=v(); assert(this->size()==e.size());
+        for(size_type i=0; i!=e.size(); ++i) { this->begin[i*this->_increment]=e(i); }
+        return *this;
+      }
+     private:
+      size_type _size;
+      R* _begin;
+      size_type _increment;
+    };
+    
+    
+    
+    template <class R>
     inline 
     Vector<R>
     approximate_value(const Vector< Interval<R> >& iv) 
@@ -149,7 +198,7 @@ namespace Ariadne {
       return result;
     }
 
-    template <typename R>
+    template <class R>
     inline 
     bool
     contains_value(const Vector< Interval<R> >& iv,const Vector<R>& v) 
@@ -163,7 +212,7 @@ namespace Ariadne {
       return true;
     }
 
-    template <typename R>
+    template <class R>
     inline
     std::ostream&
     operator<<(std::ostream& os, const Vector<R>& v)
@@ -171,7 +220,7 @@ namespace Ariadne {
        return v.write(os);
     }
     
-    template <typename R>
+    template <class R>
     inline
     std::istream&
     operator>>(std::istream& is, Vector<R>& v)
@@ -179,9 +228,57 @@ namespace Ariadne {
        return v.read(is);
     }
     
+    template<class R1, class R2> inline
+    Vector<typename Numeric::traits<R1,R2>::arithmetic_type> 
+    operator+(const Vector<R1>& v1, const Vector<R2>& v2) {
+      if(v1.size()!=v2.size()) { throw std::runtime_error("Incompatible vector sizes"); }
+      Vector<typename Numeric::traits<R1,R2>::arithmetic_type> result(v1.size());
+      for(size_type i=0; i!=result.size(); ++i) {
+        result(i)=v1(i)+v2(i);
+      }
+      return result;
+    }
     
+    template<class R1, class R2> inline
+    Vector<class Numeric::traits<R1,R2>::arithmetic_type> 
+    operator-(const Vector<R1>& v1, const Vector<R2>& v2) {
+      if(v1.size()!=v2.size()) { throw std::runtime_error("Incompatible vector sizes"); }
+      Vector<typename Numeric::traits<R1,R2>::arithmetic_type> result(v1.size());
+      for(size_type i=0; i!=result.size(); ++i) {
+        result(i)=v1(i)-v2(i);
+      }
+      return result;
+    }
     
-    template<typename R> inline
+    template<class R1, class R2> inline
+    Vector<typename Numeric::traits<R1,R2>::arithmetic_type> 
+    operator*(const R1& s, const Vector<R2>& v) {
+      return v*s;
+    }
+    
+    template<class R1, class R2> inline
+    Vector<typename Numeric::traits<R1,R2>::arithmetic_type> 
+    operator*(const Vector<R1>& v, const R2& s) {
+      Vector<typename Numeric::traits<R1,R2>::arithmetic_type> result(v.size());
+      for(size_type i=0; i!=result.size(); ++i) {
+        result(i)=v(i)*s;
+      }
+      return result;
+    }
+    
+    template<class R1, class R2> inline
+    Vector<typename Numeric::traits<R1,R2>::arithmetic_type> 
+    operator/(const Vector<R1>& v, const R2& s) {
+      Vector<typename Numeric::traits<R1,R2>::arithmetic_type> result(v.size());
+      for(size_type i=0; i!=result.size(); ++i) {
+        result(i)=v(i)/s;
+      }
+      return result;
+    }
+    
+   
+    
+    template<class R> inline
     Vector<R> add_approx(const Vector<R>& u, const Vector<R>& v) {
       assert(u.size()==v.size());
       Vector<R> result(u.size());
@@ -191,7 +288,7 @@ namespace Ariadne {
       return result;
     }
       
-    template<typename R> inline
+    template<class R> inline
     Vector<R> sub_approx(const Vector<R>& u, const Vector<R>& v) {
       assert(u.size()==v.size());
       Vector<R> result(u.size());
@@ -201,7 +298,7 @@ namespace Ariadne {
       return result;
     }
       
-    template<typename R> inline
+    template<class R> inline
     Vector<R> mul_approx(const R& s, const Vector<R>& v) {
       Vector<R> result(v.size());
       for(size_type i=0; i!=v.size(); ++i) {
@@ -210,7 +307,7 @@ namespace Ariadne {
       return result;
     }
       
-    template<typename R> inline
+    template<class R> inline
     Vector<R> mul_approx(const Vector<R>& v, const R& s) {
       Vector<R> result(v.size());
       for(size_type i=0; i!=v.size(); ++i) {
@@ -219,7 +316,7 @@ namespace Ariadne {
       return result;
     }
       
-    template<typename R> inline
+    template<class R> inline
     Vector<R> div_approx(const Vector<R>& v, const R& s) {
       Vector<R> result(v.size());
       for(size_type i=0; i!=v.size(); ++i) {
@@ -230,8 +327,8 @@ namespace Ariadne {
       
     
     
-    template <typename R>
-    inline R inner_product(const Vector<R>& u, const Vector<R>& v) 
+    template <class R> inline 
+    R inner_product(const Vector<R>& u, const Vector<R>& v) 
     {
       assert(u.size()==v.size());
       R result=0;
@@ -241,8 +338,21 @@ namespace Ariadne {
       return result;
     }
 
-    template <typename R>
-    inline bool linear_multiple(const Vector<R>& u, const Vector<R>& v) 
+    template <class R> inline 
+    Vector<R> direct_sum(const Vector<R>& v1, const Vector<R>& v2) 
+    {
+      Vector<R> result(v1.size()+v2.size());
+      for(size_type i=0; i!=v1.size(); ++i) {
+        result(i)=v1(i);
+      }
+      for(size_type i=0; i!=v2.size(); ++i) {
+        result(i+v1.size())=v2(i);
+      }
+      return result;
+    }
+
+    template <class R> inline 
+    bool linear_multiple(const Vector<R>& u, const Vector<R>& v) 
     {
       assert(u.size()==v.size());
       R multiple=0;
@@ -262,12 +372,16 @@ namespace Ariadne {
       return true;
     }
     
-    template<typename R>
+    template<class R>
     inline R norm(const Vector<R>& v) 
     {
       return v.norm(); 
     }
     
+    
+
+      
+        
   }
 }
 

@@ -28,11 +28,11 @@ COMBINATORIC_SRC = \
 	combinatoric/subdivision_tree_set.cc 
 
 GEOMETRY_SRC = \
-	geometry/ppl_polyhedron.cc \
 	geometry/point.cc geometry/point_list.cc \
 	geometry/rectangle.cc \
 	geometry/polytope.cc geometry/polyhedron.cc \
 	geometry/zonotope.cc geometry/parallelotope.cc geometry/simplex.cc \
+	geometry/ppl_polyhedron.cc \
 	geometry/ellipsoid.cc geometry/sphere.cc \
 	geometry/list_set.cc \
 	geometry/grid.cc geometry/grid_set.cc \
@@ -51,10 +51,14 @@ OUTPUT_SRC =
 
 noinst_LTLIBRARIES = libnumeric.la liblinearalgebra.la libcombinatoric.la libgeometry.la libsystem.la libevaluation.la liboutput.la
 
-lib_LTLIBRARIES = libariadne.la
+lib_LTLIBRARIES = libariadne.la libgeometric.la
 libariadne_la_LIBADD = $(noinst_LTLIBRARIES) -lmpfr -lppl -lgmpxx
 libariadne_la_SOURCES = 
 nodist_EXTRA_libariadne_la_SOURCES = dummy.cc
+
+libgeometric_la_LIBADD = libnumeric.la liblinearalgebra.la libcombinatoric.la libgeometry.la -lmpfr -lppl -lgmpxx
+libgeometric_la_SOURCES = 
+nodist_EXTRA_libgeometric_la_SOURCES = dummy.cc
 
 
 libnumeric_la_SOURCES = $(NUMERIC_SRC)

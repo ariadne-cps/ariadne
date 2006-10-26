@@ -36,52 +36,78 @@
 #include "../linear_algebra/matrix.h"
 #include "../linear_algebra/linear_program.h"
 
-#include "../combinatoric/lattice_set.h" 
-
 #include "../geometry/point.h"
 #include "../geometry/point_list.h"
 #include "../geometry/rectangle.h"
 #include "../geometry/list_set.h"
 #include "../geometry/zonotope.h"
 #include "../geometry/polyhedron.h"
+#include "../geometry/polytope.h"
 
 #include "parallelotope.h"
 
 namespace Ariadne {
   namespace Geometry {
 
-    /*! \brief Tests if the parallelotope contains \a point. */
-    template <typename R>
-    bool Parallelotope<R>::contains(const Point<R>& point) const {
-      LinearAlgebra::Vector<Rational> p=point.position_vector();
-      LinearAlgebra::Vector<Rational> c=this->centre().position_vector();
-      LinearAlgebra::Matrix<Rational> G=this->generators();
-
-      LinearAlgebra::Vector<Rational> e=G.solve(c-p);
-
-      for (size_t i=0; i<e.size(); i++) 
-        if (abs(e(i))>1) return false;
-      
-      return true;
+    template<class R>
+    tribool
+    Parallelotope<R>::_instantiate_geometry_operators() 
+    {
+      Rectangle<R> r;
+      Parallelotope<R> p;
+      tribool b=Geometry::subset(r,p);
+      b = b&&b;
+      return b;
     }
     
-    /*! \brief Tests if the interior of the parallelotope contains \a point. */
-    template<typename R>
-    bool Parallelotope<R>::interior_contains(const Point<R>& point) const 
-    {
-      LinearAlgebra::Vector<Rational> p=point.position_vector();
-      LinearAlgebra::Vector<Rational> c=this->centre().position_vector();
-      LinearAlgebra::Matrix<Rational> G=this->generators();
+    template <class R>
+    tribool 
+    _parallelotope_contains_coordinates(const LinearAlgebra::Vector<R>& e) 
+    {  
+      R one=1;
+      tribool result=true;
+      for (size_t i=0; i<e.size(); i++) {
+        R av=abs(e(i));
+        if (av>one) { return false; }
+        if (!(av<one)) { result=indeterminate; }
+      }
+      return true;
+    }
 
-      LinearAlgebra::Vector<Rational> e=G.solve(c-p);
-
-      for (size_t i=0; i<e.size(); i++) 
-        if (abs(e(i))>=1) return false;
+    template <class R>
+    void 
+    Parallelotope<R>::_compute_generators_inverse() const 
+    {  
+      this->_generators_inverse=this->generators().inverse();
+    }
+    
       
-      return true;  
+    template <class R>
+    void 
+    Parallelotope< Interval<R> >::_compute_generators_inverse() const 
+    {  
+      this->_generators_inverse=this->generators().inverse();
+    }
+    
+    template <class R>
+    tribool 
+    Parallelotope<R>::contains(const Point<R>& pt) const {
+      if(this->_generators_inverse.number_of_rows()==0) {
+        this->_compute_generators_inverse();
+      }
+      return _parallelotope_contains_coordinates(this->_generators_inverse*(pt-this->centre()));
     }
       
-    template <typename R>
+    template <class R>
+    tribool 
+    Parallelotope< Interval<R> >::contains(const Point<I>& pt) const {
+      if(this->_generators_inverse.number_of_rows()==0) {
+        this->_compute_generators_inverse();
+      }
+      return _parallelotope_contains_coordinates(this->_generators_inverse*(pt-this->centre()));
+    }
+
+    template <class R>
     ListSet<R,Parallelotope>
     Parallelotope<R>::divide() const 
     {
@@ -114,7 +140,7 @@ namespace Ariadne {
       return result;
     }
     
-    template <typename R>
+    template <class R>
     ListSet<R,Parallelotope>
     Parallelotope<R>::subdivide() const 
     {
@@ -136,7 +162,7 @@ namespace Ariadne {
       }
       
       Point<R> new_centre;
-      for(size_type k=0; k!=1<<n; ++k) {
+      for(unsigned long k=0; k!=1u<<n; ++k) {
         new_centre=first_centre;
         for(size_type i=0; i!=n; ++i) {
           if(k&(1<<i)) {
@@ -149,10 +175,9 @@ namespace Ariadne {
     }
     
     
-    template<typename R>
-    LinearAlgebra::Vector<typename numerical_traits<R>::field_extension_type>
-    Parallelotope<R>::coordinates(const state_type& s) const {
-      typedef typename numerical_traits<R>::field_extension_type F;
+    template<class R>
+    LinearAlgebra::Vector<typename traits<R>::arithmetic_type>
+    Parallelotope<R>::coordinates(const Point<R>& s) const {
       LinearAlgebra::Vector<F> p=s.position_vector();
       LinearAlgebra::Vector<F> c=this->centre().position_vector();
       LinearAlgebra::Vector<F> d=p-c;
@@ -161,17 +186,17 @@ namespace Ariadne {
     }
 
 
-    template<typename R>
-    PointList<Rational>
+    template<class R>
+    PointList<typename Parallelotope<R>::F>
     Parallelotope<R>::vertices() const
     {
-      PointList<Rational> result;
+      PointList<F> result;
 
       dimension_type d=this->dimension();
       assert(d<32);      
-      Point<Rational> c(this->centre());
-      LinearAlgebra::Matrix<Rational> g(this->generators());
-      LinearAlgebra::Vector<Rational> e(d);
+      Point<F> c(this->centre());
+      LinearAlgebra::Matrix<F> g(this->generators());
+      LinearAlgebra::Vector<F> e(d);
 
       size_type nv=(1<<d);
       result.reserve(nv);
@@ -180,7 +205,7 @@ namespace Ariadne {
         for(size_type j=0; j!=d; ++j) {
           e[j]=(i&(1<<d) ? 1 : -1);
         }
-        result.push_back(c+g*e);
+        result.push_back(c+LinearAlgebra::Vector<F>(g*e));
       }
       return result;
     }
@@ -188,16 +213,16 @@ namespace Ariadne {
     
 
     
-    template<typename R>
+    template<class R>
     Parallelotope<R>
-    Parallelotope<R>::over_approximation(const Rectangle<R> &c, const LinearAlgebra::Matrix< Interval<R> >& A)
+    Parallelotope<R>::over_approximation(const Point<I> &c, const LinearAlgebra::Matrix<I>& A)
     {
 #ifdef DEBUG
       std::cerr << "IntervalParallelotope<R>::over_approximating_parallelotope() const" << std::endl;
 #endif
       size_type n=c.dimension();
       
-      Point<R> cmid=c.centre();
+      Point<R> cmid=approximation(c);
       LinearAlgebra::Matrix<R> Amid=LinearAlgebra::approximate_value(A);
       
       LinearAlgebra::Matrix<R> D(n,n);
@@ -205,7 +230,7 @@ namespace Ariadne {
         D(i,i)=c[i].radius();
       }
       
-      LinearAlgebra::Matrix< Interval<R> > Ainv=LinearAlgebra::inverse(LinearAlgebra::Matrix< Interval<R> >(Amid));
+      LinearAlgebra::Matrix<I> Ainv=LinearAlgebra::inverse(LinearAlgebra::Matrix<I>(Amid));
       R err = ((Ainv*D).norm()+(Ainv*A).norm()).upper();
 
       for(size_type i=0; i!=n; ++i) {
@@ -217,8 +242,43 @@ namespace Ariadne {
       return Geometry::Parallelotope<R>(cmid,Amid);
     }
     
+    template<class R>
+    Parallelotope<R>
+    Parallelotope<R>::over_approximation(const Zonotope<R>& z)
+    {
+      dimension_type n=z.dimension();
+      LinearAlgebra::Matrix<R> A(n,n);
+      for(dimension_type i=0; i!=n; ++i) {
+        for(dimension_type j=0; j!=n; ++j) {
+          A(i,j)=z.generators()(i,j);
+        }
+      }
+      LinearAlgebra::Matrix<F> Aq=A;
+      LinearAlgebra::Matrix<F> B=LinearAlgebra::inverse(Aq);
+      const Point<R>& c=z.centre();
+      
+      throw std::runtime_error("Zonotope<R>::over_approximating_parallelotope() const not implemented");
+      
+      /*
+      typedef Rational FF;
+      Parallelotope<R> p(c,A);
+      while(!Geometry::subset(Polytope<FF>(z),Polyhedron<FF>(p))) {
+        Aq*=F(2);
+        p=Parallelotope<R>(c,A);
+      }
+      return p;
+      */
+    }        
+    
+    template<class R>
+    Parallelotope<R>
+    Parallelotope< Interval<R> >::over_approximation() const
+    { 
+      throw std::runtime_error("Parallelotope<Interval<R>>::over_approximation() const not implemented");
+    }
+    
 /*
-    template<typename R>
+    template<class R>
     Parallelotope<R> 
     Parallelotope<R>::scale(const Parallelotope<R>& p, const R& scale_factor) {
 
@@ -235,7 +295,28 @@ namespace Ariadne {
     }
 */
     
-    template <typename R>
+    /*! \brief Tests if the parallelotope contains \a pt. */
+    template <class R>
+    tribool 
+    subset(const Rectangle<R>& r, const Parallelotope<R>& p)
+    {
+      //std::cerr << "subset(const Rectangle<R>& r, const Parallelotope<R>& p)" << std::endl;
+      tribool result=true;
+      for(typename Rectangle<R>::vertices_const_iterator v_iter=r.vertices_begin();
+          v_iter!=r.vertices_end(); ++v_iter) 
+      {
+        result=result && p.contains(*v_iter);
+        if(result==false) { 
+          //std::cerr << "p.contains(" << *v_iter << ")==false" << std::endl;
+          return result; 
+        }
+      }
+      return result;
+    }
+
+
+
+    template <class R>
     std::ostream&
     Parallelotope<R>::write(std::ostream& os) const
     {
@@ -249,7 +330,7 @@ namespace Ariadne {
       return os;
     }
     
-    template <typename R>
+    template <class R>
     std::istream& 
     Parallelotope<R>::read(std::istream& is)
     {

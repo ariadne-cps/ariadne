@@ -29,41 +29,36 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template<typename R> 
+    
+    template<class R> 
     void
     PointList<R>::reserve(size_type n)
     {
       if(this->capacity()>=n) { return; }
       LinearAlgebra::Matrix<R> old(this->_pts);
-      _pts=LinearAlgebra::Matrix<R>(this->dimension(),n);
+      _pts=LinearAlgebra::Matrix<R>(this->dimension()+1,n);
       for(size_type j=0; j!=this->size(); ++j) {
-        for(size_type i=0; i!=this->dimension(); ++i) {
+        for(size_type i=0; i!=this->dimension()+1u; ++i) {
           _pts(i,j)=old(i,j);
         }
       }
     }    
     
     
-    template<typename R>
-    LinearAlgebra::Matrix<R> 
+    template<class R>
+    const LinearAlgebra::Matrix<R>&
     PointList<R>::generators() const 
     { 
-      LinearAlgebra::Matrix<R> result(this->dimension(),this->size());
-      for(size_type j=0; j!=this->size(); ++j) {
-        for(size_type i=0; i!=this->dimension(); ++i) {
-          result(i,j)=this->_pts(i,j);
-        }
-      }
-      return result;
+      return this->_pts;
     }
     
     
-    template<typename R>
+    template<class R>
     void
     PointList<R>::push_back(const Point<R>& pt) 
     {
       if(this->_size==0) {
-        _pts.resize(pt.dimension(),1);
+        _pts.resize(pt.dimension()+1,1);
       }
       if(pt.dimension()!=this->dimension()) {
         throw std::runtime_error("Cannot insert point into list of different dimension");
@@ -73,18 +68,19 @@ namespace Ariadne {
       }
       for(size_type i=0; i!=pt.dimension(); ++i) {
           _pts(i,this->size())=pt[i];
-      }  
+      }
+      _pts(pt.dimension(),this->size())=R(1);
       ++this->_size;
     }
     
-     template<typename R> 
+    template<class R> 
     std::ostream& 
     PointList<R>::write(std::ostream& os) const
     {
-      const PointList<R>& pts=*this;
-      if(pts.size()==0) { os << "[ "; }
-      for(size_type j=0; j!=pts.size(); ++j) {
-        os << ((j==0) ? '[' : ',') << pts[j]; 
+      const PointList<R>& ptl=*this;
+      if(ptl.size()==0) { os << "[ "; }
+      for(size_type j=0; j!=ptl.size(); ++j) {
+        os << ((j==0) ? '[' : ',') << ptl[j]; 
       }
       return os << ']';
     }

@@ -48,7 +48,7 @@ namespace Ariadne {
     template <typename R>
     class HenonMap : public Map<R> 
     {
-      typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
+      typedef typename Numeric::traits<R>::arithmetic_type F;
      public:
       /*! \brief The real number type. */
       typedef R real_type;

@@ -37,17 +37,17 @@
 
 namespace Ariadne {
   namespace Geometry {
-    template<typename R> class Grid;
-    template<typename R> class FiniteGrid;
-    template<typename R> class RegularGrid;
-    template<typename R> class IrregularGrid;
+    template<class R> class Grid;
+    template<class R> class FiniteGrid;
+    template<class R> class RegularGrid;
+    template<class R> class IrregularGrid;
     
-    template<typename R> class GridCell;
-    template<typename R> class GridBlock;
+    template<class R> class GridCell;
+    template<class R> class GridBlock;
 
-    template<typename R> std::ostream& operator<<(std::ostream&, const Grid<R>&);
-    template<typename R> std::istream& operator>>(std::istream&, Grid<R>&);
-    template<typename R> std::ostream& operator<<(std::ostream&, const FiniteGrid<R>&);
+    template<class R> std::ostream& operator<<(std::ostream&, const Grid<R>&);
+    template<class R> std::istream& operator>>(std::istream&, Grid<R>&);
+    template<class R> std::ostream& operator<<(std::ostream&, const FiniteGrid<R>&);
    
     /*! \ingroup Grid
      *  \brief %Base type for defining a grid.
@@ -57,7 +57,7 @@ namespace Ariadne {
      *  converting to rectangles and should occur with linear complexity in the 
      *  space dimension.
      */
-    template<typename R>
+    template<class R>
     class Grid {
     public:
       /*! \brief The type of real number defining the vertices and cells of the grid. */
@@ -128,7 +128,7 @@ namespace Ariadne {
     /*! \brief A finite, nonuniform grid of rectangles in Euclidean space. 
      *  \ingroup Grid
      */
-    template<typename R>
+    template<class R>
     class IrregularGrid : public Grid<R> {
      public:
       /*! \brief The type of real number defining the vertices and cells of the grid. */
@@ -245,7 +245,7 @@ namespace Ariadne {
     /*! \brief An infinite, uniform grid of rectangles in Euclidean space.
      *  \ingroup Grid
      */
-    template<typename R> class RegularGrid : public Grid<R> {
+    template<class R> class RegularGrid : public Grid<R> {
      public:
       /*! \brief The type of real number defining the vertices and cells of the grid. */
       typedef R real_type;
@@ -307,7 +307,7 @@ namespace Ariadne {
      * \brief A finite grid, suitable for defining a GridMaskSet. (Deprecated)
      * \deprecated Use a Grid and LatticeBlock in GridMaskSet constructor instead. 
      */
-    template<typename R> class FiniteGrid {
+    template<class R> class FiniteGrid {
      public:
       /*! \brief The type of real number defining the vertices and cells of the grid. */
       typedef R real_type;

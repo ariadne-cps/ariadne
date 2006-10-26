@@ -89,7 +89,7 @@ test_tensor_index()
   mi.set_index(0,4);
   MultiIndex mie=mi; mie.increment_index(0);
   MultiIndexIterator miie(mie);
-  int zi=0;
+  uint zi=0;
   cout << endl << endl;
   for(MultiIndexIterator mii(mi); mii!=miie; ++mii) {
     assert(mii->position()==zi++);

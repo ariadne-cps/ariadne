@@ -38,17 +38,18 @@
 
 #include "../declarations.h"
 #include "../base/utility.h"
+#include "../base/tribool.h"
 
 namespace Ariadne {
   namespace Geometry {
 
-    template<typename R> class Rectangle;
+    template<class R> class Rectangle;
       
     /*! \brief A finite union of basic sets, represented as a sequence.
      *  \ingroup DenotableSet
      *  \ingroup List
      */
-    template<typename R, template<typename> class BS>
+    template<class R, template<class> class BS>
     class ListSet {
      private:
       /* List of basic sets. Note that std::vector provides a
@@ -199,7 +200,7 @@ namespace Ariadne {
       }
 
       /*!\brief Convert to a list set BS2<R>. */
-      template <template<typename> class BS2>
+      template <template<class> class BS2>
       operator ListSet<R,BS2> () const {
         ListSet<R,BS2> result(this->dimension());
         BS2<R> bs(this->dimension());
@@ -219,34 +220,13 @@ namespace Ariadne {
       * \return  \a true, if \a s is contained into the
       * current set, \a false otherwise.
       */
-      bool contains(const Point<R>& p) const {
-
-        for (size_type i=0; i<this->size(); i++) {
-          if ((this->_vector[i]).contains(p))
-            return true;
+      tribool contains(const Point<R>& p) const {
+        tribool result=false;
+        for (typename ListSet<R,BS>::const_iterator i=this->begin(); i!=this->end(); ++i) {
+          result=result || i->contains(p);
+          if(result) { return result; }
         }
-
-        return false;
-      }
-
-      /*! \brief Checks if the interior of the denotable set includes a point.
-       * FIXME! Incorrect since interior of union may be larger than union of interiors.
-       *
-       * This method checks whenever the interior of the current denotable set
-       * includes the point \a s.
-       * \param p is the point of which inclusion
-       * into the current denotable set should be tested.
-       * \return  \a true, if \a s is contained into the
-       * current set, \a false otherwise.
-       */
-      bool interior_contains(const Point<R>& p) const {
-        throw(std::domain_error("Not implemented"));
-        for (size_type i=0; i<this->size(); i++) {
-          if ((this->_vector[i]).interior_contains(p))
-            return true;
-        }
-
-        return false;
+        return result;
       }
 
       /*! \brief Checks for emptyness.
@@ -254,13 +234,13 @@ namespace Ariadne {
        * \return \a true if the denotable set is empty,
        * \a false otherwise.
        */
-      bool empty() const {
-        for (size_type i=0; i<this->size(); ++i) {
-          if (!(this->_vector[i]).empty())
-            return false;
+      tribool empty() const {
+        tribool result=true;
+        for (typename ListSet<R,BS>::const_iterator i=this->begin(); i!=this->end(); ++i) {
+          result = result && i->empty();
+          if(!result) { return result; }
         }
-
-        return true;
+        return result;
       }
 
       /*! \brief Return a rectangle containing the set. */
@@ -385,22 +365,12 @@ namespace Ariadne {
       //! \name Geometric binary predicates
       /*! \brief Tests disjointness.
        */
-      friend bool disjoint(const ListSet<R,BS>& A,
+      friend tribool disjoint(const ListSet<R,BS>& A,
                            const ListSet<R,BS>& B);
-
-      /*! \brief Tests if the interior of \a A intersects the interior of \a B.
-       */
-      friend bool interiors_intersect(const ListSet<R,BS>& A,
-                                      const ListSet<R,BS>& B);
-
-      /*! \brief Tests inclusion of \a A in the interior of \a B.
-       */
-      friend bool inner_subset(const ListSet<R,BS>& A,
-                               const ListSet<R,BS>& B);
 
       /*! \brief Tests inclusion of \a A in \a B.
        */
-      friend bool subset(const ListSet<R,BS>& A,
+      friend tribool subset(const ListSet<R,BS>& A,
                          const ListSet<R,BS>& B);
       //@}
       
@@ -427,7 +397,7 @@ namespace Ariadne {
     };
 
   
-    template <typename R, template <typename> class BS>
+    template <class R, template <class> class BS>
     inline
     std::ostream&
     operator<<(std::ostream& os, const ListSet<R,BS>& A) 
@@ -435,7 +405,7 @@ namespace Ariadne {
       return A.write(os);
     }
 
-    template <typename R, template <typename> class BS>
+    template <class R, template <class> class BS>
     inline
     std::istream&
     operator>>(std::istream& is, ListSet<R,BS>& A) 
@@ -444,47 +414,36 @@ namespace Ariadne {
     }
 
 
-    template<typename R, template<class> class BS>
+    template<class R, template<class> class BS>
     ListSet<R,BS>
-    regular_intersection(const ListSet<R,BS>& A,
+    open_intersection(const ListSet<R,BS>& A,
                          const ListSet<R,BS>& B);
   
 
 
-    template <typename R, template<class> class BS>
-    bool
+    template <class R, template<class> class BS>
+    tribool
     disjoint (const ListSet<R,BS>& A,
               const ListSet<R,BS>& B);
 
-    template <typename R, template <typename> class BS>
-    bool
-    interiors_intersect(const ListSet<R,BS>& A,
-                        const ListSet<R,BS>& B);
-
-
-    template <typename R, template <typename> class BS>
-    bool
-    inner_subset(const ListSet<R,BS>& A,
-                 const ListSet<R,BS>& B);
 
 
 
-
-    template <typename R, template <typename> class BS>
-    bool
+    template <class R, template <class> class BS>
+    tribool
     subset(const ListSet<R,BS>& A,
            const ListSet<R,BS>& B);
     
     
-    template <typename R, template <typename> class BS>
+    template <class R, template <class> class BS>
     ListSet<R,BS>
     join(const ListSet<R,BS>& A,
          const ListSet<R,BS>& B);
     
 
-    template <typename R, template <typename> class BS>
+    template <class R, template <class> class BS>
     ListSet<R,BS>
-    regular_intersection(const ListSet<R,BS>& A,
+    open_intersection(const ListSet<R,BS>& A,
                          const ListSet<R,BS>& B);
   
   }

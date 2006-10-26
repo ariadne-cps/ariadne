@@ -38,19 +38,19 @@ using namespace Ariadne::Numeric;
 using namespace boost::python;
 
 // Give some mixed arithmetic operators for MPFloat
-template<typename R> inline Interval<MPFloat> operator+(const MPFloat& x1, const R& x2) {
-  return x1+MPFloat(x2); }
-template<typename R> inline Interval<MPFloat> operator-(const MPFloat& x1, const R& x2) {
-  return x1-MPFloat(x2); }
-template<typename R> inline Interval<MPFloat> operator*(const MPFloat& x1, const R& x2) {
-  return x1*MPFloat(x2); }
-template<typename R> inline Interval<MPFloat> operator/(const MPFloat& x1, const R& x2) {
-  return x1/MPFloat(x2); }
+//template<typename R> inline Interval<MPFloat> operator+(const MPFloat& x1, const R& x2) {
+//  return x1+MPFloat(x2); }
+//template<typename R> inline Interval<MPFloat> operator-(const MPFloat& x1, const R& x2) {
+//  return x1-MPFloat(x2); }
+//template<typename R> inline Interval<MPFloat> operator*(const MPFloat& x1, const R& x2) {
+//  return x1*MPFloat(x2); }
+//template<typename R> inline Interval<MPFloat> operator/(const MPFloat& x1, const R& x2) {
+//  return x1/MPFloat(x2); }
   
-template<typename R> inline Interval<MPFloat> operator-(const R& x1, const MPFloat& x2) {
-  return MPFloat(x1)-x2; }
-template<typename R> inline Interval<MPFloat> operator/(const R& x1, const MPFloat& x2) {
-  return MPFloat(x1)/x2; }
+//template<typename R> inline Interval<MPFloat> operator-(const R& x1, const MPFloat& x2) {
+//  return MPFloat(x1)-x2; }
+//template<typename R> inline Interval<MPFloat> operator/(const R& x1, const MPFloat& x2) {
+//  return MPFloat(x1)/x2; }
 
 template<typename R> inline bool operator==(const MPFloat& x1, const R& x2) {
   return x1==MPFloat(x2); }

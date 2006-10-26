@@ -44,10 +44,8 @@ void export_simplex()
     .def(init< PointList<Real> >())
     .def(init<RSimplex>())
     .def("empty", &RSimplex::empty)
-    .def("empty_interior", &RSimplex::empty_interior)
     .def("dimension", &RSimplex::dimension)
     .def("contains", &RSimplex::contains)
-    .def("interior_contains", &RSimplex::interior_contains)
     .def(self_ns::str(self))
   ;
 }

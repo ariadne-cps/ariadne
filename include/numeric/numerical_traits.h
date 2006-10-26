@@ -30,9 +30,15 @@
 
 #include <string>
 
+#include "../declarations.h"
+
 namespace Ariadne {
   namespace Numeric {
-    
+    class Float64;
+    class MPFloat;
+    class Rational;
+    template<class R> class Interval;
+      
     /* numerical traits */
     /*! \brief Tags a class representing a ring. */
     class ring_tag { };
@@ -40,29 +46,86 @@ namespace Ariadne {
     class field_tag { };
       
     /*! \brief Typedef's describing a numerical type. */
-    template<typename T> class numerical_traits { };
-
-    template<> class numerical_traits<int> {
-     public:
+    template<class T1, class T2> class traits { };
+  //    template<class T1, class T2=T1> class traits { };
+    
+    template<> struct traits<int> {
       typedef int arithmetic_type;
     };
   
-    template<> class numerical_traits<double> {
-     public:
+    template<> struct traits<double> {
       typedef double arithmetic_type;
+      typedef Interval<double> interval_type;
     };
   
+    template<> struct traits< Float64 > { 
+      typedef Interval<Float64> arithmetic_type; 
+      typedef Interval<Float64> interval_type;
+    };
+    
+    template<> struct traits< MPFloat > { 
+      typedef Interval<MPFloat> arithmetic_type; 
+      typedef Interval<MPFloat> interval_type; 
+    };
+    
+    template<> struct traits< Rational > { 
+      typedef Rational arithmetic_type; 
+      typedef Interval<Rational> interval_type; 
+    };
+
+    template<class R> struct traits< Interval<R> > { 
+      typedef Interval<R> arithmetic_type; 
+      typedef Interval<R> interval_type; 
+    };
+
+    
+    template<> struct traits< Float64, double > { 
+      typedef Interval<Float64> arithmetic_type; 
+    };
+    
+    template<> struct traits< double, Float64 > { 
+      typedef Interval<Float64> arithmetic_type; 
+    };
+    
+    template<> struct traits< Float64, Rational > { 
+      typedef Rational arithmetic_type; 
+    };
+    
+    template<> struct traits< Rational, Float64 > { 
+      typedef Rational arithmetic_type; 
+    };
+    
+    template<> struct traits< MPFloat, Rational > { 
+      typedef Rational arithmetic_type; 
+    };
+    
+    template<> struct traits< Rational, MPFloat > { 
+      typedef Rational arithmetic_type; 
+    };
+    
+
+    template<class R> struct traits< R,Interval<R> > { 
+      typedef Interval<R> arithmetic_type; 
+    };
+    
+    template<class R> struct traits< Interval<R>, R > { 
+      typedef Interval<R> arithmetic_type; 
+    };    
+    
+
+
+
     //! \name Numerical type description.
     //@{
     /*! \brief The name of class T. */
-    template<typename T> inline std::string name();
+    template<class T> inline std::string name();
 
     //! \name Standard conversion operations. (Deprecated) 
     /*! \brief Approximate \a x by an element of Res. */
-    template<typename Res, typename Arg> inline Res convert_to(const Arg& x) { return Res(x); }
+    template<class Res, class Arg> inline Res convert_to(const Arg& x) { return Res(x); }
     
     /*! \brief Approximate \a x by an element of Res with accuracy \a e. */
-    template<typename Res, typename Arg, typename Err> Res approximate(const Arg& x, const Err& e);
+    template<class Res, class Arg, class Err> Res approximate(const Arg& x, const Err& e);
     //@}
   }   
 }

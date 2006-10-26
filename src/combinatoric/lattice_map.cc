@@ -100,7 +100,7 @@ namespace Ariadne {
       LatticeCellListSet result(this->argument_dimension());
       for(map_iterator iter=this->_map.begin(); iter!=this->_map.end(); ++iter) {
         LatticeCellListSet& image=iter->second;
-        if(interiors_intersect(image,lms)) { 
+        if(overlap(image,lms)) { 
           result.adjoin(iter->first);
         }
       }

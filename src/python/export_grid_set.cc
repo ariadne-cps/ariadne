@@ -199,8 +199,8 @@ void export_grid_set()
   def("join",(RGridMaskSet(*)(const RGridMaskSet&,const RGridMaskSet&))(&Geometry::join));
   def("difference",(RGridMaskSet(*)(const RGridMaskSet&,const RGridMaskSet&))(&Geometry::difference));
   def("regular_intersection",(RGridMaskSet(*)(const RGridMaskSet&,const RGridMaskSet&))(&Geometry::regular_intersection));
-  def("interiors_intersect",(bool(*)(const RGridMaskSet&,const RGridMaskSet&))(&Geometry::interiors_intersect));
-  def("interiors_intersect",(bool(*)(const RGridMaskSet&,const RGridMaskSet&))(&Geometry::interiors_intersect));
+  def("overlap",(tribool(*)(const RGridMaskSet&,const RGridMaskSet&))(&Geometry::overlap));
+  def("overlap",(tribool(*)(const RGridMaskSet&,const RGridMaskSet&))(&Geometry::overlap));
 
   def("over_approximation",(RGridBlock(*)(const RRectangle&,const RGrid&))(&Geometry::over_approximation));
   def("over_approximation",(RGridCellListSet(*)(const RZonotope&,const RGrid&))(&Geometry::over_approximation));

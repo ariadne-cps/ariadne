@@ -36,14 +36,14 @@
 namespace Ariadne {
   namespace LinearAlgebra {
 
-    template <typename R>
+    template <class R>
     Matrix<R>::Matrix(const std::string& s)
     {
         std::stringstream ss(s);
         ss >> *this;
     }
 
-    template<typename R>
+    template<class R>
     bool
     Matrix<R>::operator==(const Matrix<R>& A) const
     {
@@ -60,14 +60,14 @@ namespace Ariadne {
       return true;
     }
 
-    template<typename R>
+    template<class R>
     bool
     Matrix<R>::operator!=(const Matrix<R>& A) const
     {
       return !(*this==A);
     }
 
-    template<typename R>
+    template<class R>
     typename Matrix<R>::F
     Matrix<R>::norm() const
     {
@@ -84,7 +84,7 @@ namespace Ariadne {
       return result;
     }
 
-    template<typename R>
+    template<class R>
     typename Matrix<R>::F
     Matrix<R>::log_norm() const
     {
@@ -102,38 +102,29 @@ namespace Ariadne {
       return result;
     }
 
-    template <typename R>
+    template <class R>
     Matrix<R>
     Matrix<R>::transpose() const
     {
-      size_type m=this->number_of_rows();
-      size_type n=this->number_of_columns();
-      const Matrix<R>& self=*this;
-
-      Matrix<R> result(n,m);
-      for(size_type i=0; i!=n; ++i) {
-        for(size_type j=0; j!=m; ++j) {
-          result(i,j)=self(j,i);
-        }
-      }
-      return result;
+      return Matrix<R>(this->number_of_columns(),this->number_of_rows(),const_cast<R*>(this->begin()),
+                       this->column_increment(),this->row_increment());
     }
 
 
-    template <typename R>
+    template <class R>
     bool
     Matrix<R>::singular() const {
       return LUMatrix<F>(*this).singular();
     }
 
-    template <typename R>
+    template <class R>
     typename Matrix<R>::F
     Matrix<R>::determinant() const
     {
       return LUMatrix<F>(*this).determinant();
     }
 
-    template<typename R>
+    template<class R>
     Matrix<R>
     Matrix<R>::concatenate_columns(const Matrix<R>& A1, const Matrix<R>& A2) {
       assert(A1.number_of_rows()==A2.number_of_rows());
@@ -151,7 +142,7 @@ namespace Ariadne {
 
 
 
-    template <typename R>
+    template <class R>
     Matrix<typename Matrix<R>::F>
     Matrix<R>::inverse() const
     {
@@ -159,7 +150,7 @@ namespace Ariadne {
     }
 
 
-    template <typename R>
+    template <class R>
     Vector<typename Matrix<R>::F>
     Matrix<R>::solve(const Vector<R>& v) const
     {
@@ -167,7 +158,7 @@ namespace Ariadne {
     }
 
 
-    template <typename R>
+    template <class R>
     std::ostream&
     Matrix<R>::write(std::ostream& os) const
     {
@@ -185,7 +176,7 @@ namespace Ariadne {
     }
 
 
-    template <typename R>
+    template <class R>
     std::istream&
     Matrix<R>::read(std::istream& is)
     {
@@ -262,7 +253,7 @@ namespace Ariadne {
     }
 
 
-    template <typename R>
+    template <class R>
     bool
     equivalent_columns(const Matrix<R> &A, const size_type &A_col,
                        const Matrix<R> &B, const size_type &B_col)
@@ -279,7 +270,7 @@ namespace Ariadne {
     }
 
 
-    template<typename R>
+    template<class R>
     size_type
     find_first_not_null_in_col(const Matrix<R> &A,
                                const size_type &col)
@@ -330,7 +321,7 @@ namespace Ariadne {
     }
 
 
-    template <typename R>
+    template <class R>
     void
     remove_null_columns(const Matrix<R> &A,
                         array<size_type> &row, array<size_type> &col)
@@ -365,7 +356,7 @@ namespace Ariadne {
     }
 
 
-    template <typename R>
+    template <class R>
     Matrix<R>
     compute_space(const Matrix<R> &SA,
                   array<size_type> &row,const array<size_type> &col)

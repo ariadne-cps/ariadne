@@ -41,7 +41,7 @@
 
 using namespace Ariadne;
 using namespace Ariadne::Geometry;
-using namespace Ariadne::Postscript;
+using namespace Ariadne::Output;
 using namespace std;
 
 int main() {

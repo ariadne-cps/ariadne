@@ -94,9 +94,9 @@ namespace Ariadne {
     template<class R, class N> inline R pow_up(const R& x1,const N& x2);
     
     /*! \brief %Integer lower bound. */
-    template<typename N, typename R> inline N int_down(const R& x);
+    template<class N, class R> inline N int_down(const R& x);
     /*! \brief %Integer upper bound. */
-    template<typename N, typename R> inline N int_up(const R& x);
+    template<class N, class R> inline N int_up(const R& x);
     //@}
 
     //! \name Algebraic and transcendental functions.

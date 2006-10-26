@@ -44,12 +44,7 @@ namespace Ariadne {
     typedef Synaps::dyadic Dyadic;
 #endif
 
-    template<> class numerical_traits<Dyadic> {
-     public:
-      typedef ring_tag algebraic_category;
-      typedef Rational field_extension_type;
-    };
-
+  
     template<> inline std::string name<Numeric::Dyadic>() { return "Dyadic"; }
     template<> inline std::string name<Numeric::Interval<Numeric::Dyadic> >() { return "Interval<Dyadic>"; }
  

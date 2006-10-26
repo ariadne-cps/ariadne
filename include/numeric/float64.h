@@ -70,12 +70,6 @@ namespace Ariadne {
       double _value;
     };
     
-    template<> class numerical_traits<Float64> {
-     public:
-      typedef ring_tag algebraic_category;
-      typedef Rational field_extension_type;
-      typedef Interval<Float64> arithmetic_type;
-    };
 
     inline std::ostream& operator<<(std::ostream& os, const Float64& x) { return os << x.get_d(); }
     inline std::istream& operator>>(std::istream& is, Float64& x) { double d; is >> d; x=d; return is; }

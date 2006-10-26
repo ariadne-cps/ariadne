@@ -47,13 +47,13 @@ namespace Ariadne {
     inline bool is_a<Simplex,Polytope>() { return true; }
 
     /* Forward declaration of friends. */
-    template<typename R> std::ostream& operator<<(std::ostream&, const Simplex<R>&);
-    template<typename R> std::istream& operator>>(std::istream&, Simplex<R>&);
+    template<class R> std::ostream& operator<<(std::ostream&, const Simplex<R>&);
+    template<class R> std::istream& operator>>(std::istream&, Simplex<R>&);
 
     /*! \ingroup BasicSet
      *  \brief A simplex of arbitrary dimension.
      */
-    template <typename R>
+    template <class R>
     class Simplex : public Polytope<R>
     {
      public:
@@ -86,6 +86,11 @@ namespace Ariadne {
       }
       //@}
     
+      //! \name Geometric predicates
+      //! \brief Specialized containment predicate
+      tribool contains(const Point<R>& pt) const;
+      //@}
+      
       //@{ 
       //! \name Input/output operations
       /*! \brief Write to an output stream. */
@@ -93,15 +98,18 @@ namespace Ariadne {
       /*! \brief Read from an input stream. */
       std::istream& read(std::istream& is);
       //@}
+     public:
+      LinearAlgebra::Vector<typename Numeric::traits<R>::arithmetic_type> coordinates(const Point<R>& s) const;
+
     };
 
   
-    template<typename R> inline 
+    template<class R> inline 
     std::ostream& operator<<(std::ostream& os, const Simplex<R>& s) {
       return s.write(os);
     }
     
-    template<typename R> inline
+    template<class R> inline
     std::istream& operator>>(std::istream& is, Simplex<R>& s) {
       return s.read(is);
     }

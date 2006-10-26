@@ -29,7 +29,7 @@
 namespace Ariadne {
   namespace LinearAlgebra {
 
-    template<typename R>
+    template<class R>
     Matrix< Interval<R> >
     exp(const Matrix< Interval<R> >& A) 
     {

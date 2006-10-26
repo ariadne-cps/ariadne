@@ -51,7 +51,7 @@ namespace Ariadne {
     uint choose(int n, uint k) 
     {
       //std::cerr << "choose(" << n << "," << k << ")=" << std::flush;
-      if(n<k) { 
+      if(n<int(k)) { 
         return 0;
       }
       if(n-k<k) {

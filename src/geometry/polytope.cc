@@ -22,6 +22,7 @@
  */
 
 #include "real_typedef.h"
+#include "numeric/rational.h"
 
 #include "geometry/polytope.h"
 #include "geometry/polytope.tpl"
@@ -29,9 +30,10 @@
 namespace Ariadne {
   namespace Geometry {
 
+    template class Polytope<Rational>;
+
     template class Polytope<Real>;
-    template std::ostream& operator<<(std::ostream&, const Polytope<Real>&);
-    template std::istream& operator>>(std::istream&, Polytope<Real>&);
+    template class Polytope< Interval<Real> >;
     
   }
 }

@@ -74,9 +74,20 @@ test_rectangle()
     cout << "r1=" << r1 << ", r2=" << r2 << ", r3=" << r3 << ", r4=" << r4 << "\n"
          << "r5=" << r5 << ", r6=" << r6 << ", r7=" << r7 << endl;
     
-    assert(equal(r1,r7));
+    assert(r1==r7);
+    assert(indeterminate(equal(r1,r7)));
     cout << "centre(r2)=" << r2.centre() << endl;
     assert(r2.centre()==Point<R>("(0.5,0.0625)"));
+    
+    cout << "r4=" << r4 << endl;
+    cout << "r4.vertices()=" << flush;
+    RectangleVerticesIterator<R> r4e(r4,true);
+    for(typename Rectangle<R>::vertices_iterator v=r4.vertices_begin();
+        v!=r4.vertices_end(); ++v)
+    {
+      cout << *v << " " << flush;
+    }
+    cout << endl;
     
     ListSet<R,Rectangle> cover1,cover2;
     cover1.push_back(r2);
@@ -88,27 +99,23 @@ test_rectangle()
     cover2.push_back(r5);
 
     cout << "r0=" << r0 << ", r0.dimension()=" << r0.dimension()
-         << ", r0.empty()=" << r0.empty() << ", r0.empty_interior()=" << r0.empty_interior() << endl;
+         << ", r0.empty()=" << r0.empty() << endl;
     cout << "r1=" << r1 << ", r1.dimension()=" << r1.dimension()
-         << ", r1.empty()=" << r1.empty() << ", r0.empty_interior()=" << r0.empty_interior()  << endl;
+         << ", r1.empty()=" << r1.empty() << endl;
     assert(!r1.empty());
-    assert(r0.empty_interior());
+    assert(r0.empty());
 
     assert(!disjoint(r1,r1));
-    assert(interiors_intersect (r1,r1));
-    assert(subset(r1,r1));
+    assert(indeterminate(subset(r1,r1)));
     cout << "r1=" << r1 << ", s1=" << s1 << ", s3=" << s3 << ", s5=" << s5 << endl;
-    assert(r1.contains(s1));
+    assert(indeterminate(r1.contains(s1)));
     assert(!r1.contains(s3));
     assert(r1.contains(s5));
-    assert(!r1.interior_contains(s1));
-    assert(!r1.interior_contains(s3));
-    assert(r1.interior_contains(s5));
     //assert(!subset_of_interior(r1,r1));
     //assert(subset_of_open_cover(r1,cover1));
     //assert(!subset_of_open_cover(r1,cover2));
        
-    r4=regular_intersection(r1,r2);
+    r4=open_intersection(r1,r2);
     cout << "r1=" << r1 << ",r2=" << r2 << ",r4=" << r4 << ",r6=" << r6 << endl;
     assert(r4==r6);
 

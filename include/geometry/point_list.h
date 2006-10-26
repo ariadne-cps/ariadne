@@ -39,7 +39,7 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template<typename R>
+    template<class R>
     class PointListIterator
     {
      public:
@@ -55,7 +55,7 @@ namespace Ariadne {
       size_type _j;
     };
     
-    template<typename R>
+    template<class R>
     class PointListReference
     {
      public:
@@ -70,21 +70,32 @@ namespace Ariadne {
     };
     
     /*!\brief A list of points in Euclidean space.
+     *
+     * The data is stored as a (d+1)*m matrix, where d is the dimension of the
+     * space and m is the number of points.
+     * This is to facilitate linear programming and double description
+     * method transformations. 
+     * Hence the \a i th element of the \a j th point
+     * is stored in the \a (i,j) th element of the matrix.
      */
-    template<typename R>
+    template<class R>
     class PointList
     {
       friend class PointListReference<R>;
       friend class PointListIterator<R>;
      public:
       typedef PointListIterator<R> const_iterator;
+      typedef PointListIterator<R> iterator;
       
       /*!\brief Construct an empty point list, able to hold points of dimension \a d. */
-      explicit PointList(dimension_type d=0) : _size(0), _pts(d,1) { }
+      explicit PointList(dimension_type d=0) : _size(0), _pts(d+1,1) { }
       /*!\brief Construct a list consisting of \a n copies of the origin in dimension \a d. */
-      explicit PointList(dimension_type d, size_type n) : _size(n), _pts(d,n) { }
-      /*!\brief Construct from a matrix \a G whose columns contain the position vectors of the points. */
+      explicit PointList(dimension_type d, size_type n) : _size(n), _pts(d+1,n) { }
+      /*!\brief Construct from a matrix \a G whose columns contain the position vectors of the points padded by a one. */
       explicit PointList(const LinearAlgebra::Matrix<R>& G) : _size(G.number_of_columns()), _pts(G) { }
+      
+      /*!\brief Convert from a point list with another data type. */
+      template<class Rl> PointList(const PointList<Rl>& ptl) : _size(ptl.size()), _pts(ptl.generators()) { }
       
       /*!\brief Copy constructor. */
       PointList(const PointList& ptl) : _size(ptl._size), _pts(ptl.generators()) { }
@@ -94,7 +105,7 @@ namespace Ariadne {
         return *this; }
       
       /*!\brief The dimension of the points in the list. */
-      dimension_type dimension() const { return _pts.number_of_rows(); }
+      dimension_type dimension() const { return _pts.number_of_rows()-1; }
       /*!\brief The number of points in the list. */
       size_type size() const { return _size; }
       /*!\brief The number of points which the list can hold without a reallocation of memory. */
@@ -103,10 +114,7 @@ namespace Ariadne {
       void reserve(size_type n);
       
       /*!\brief A matrix expression whose columns are the position vectors of the points. */
-      LinearAlgebra::Matrix<R> generators() const;
-      /*!\brief A matrix expression whose columns are the position vectors of the points. */
-      LinearAlgebra::Matrix<R> matrix() const { return this->generators(); }
-      //operator LinearAlgebra::Matrix<R> () const { return this->generators(); }
+      const LinearAlgebra::Matrix<R>& generators() const;
 
 #ifdef DOXYGEN
       /*!\brief The \a j th point in the list. */
@@ -114,8 +122,7 @@ namespace Ariadne {
       /*!\brief A reference to the \a j th point in the list. */
       Point<R>& operator[] (const size_type j);
 #else
-      Point<R> operator[] (const size_type j) const { 
-        return Point<R>(column(_pts,j)); }
+      Point<R> operator[] (const size_type j) const;
 
       PointListReference<R> operator[] (const size_type j) { 
         return PointListReference<R>(*this,j);}
@@ -149,7 +156,18 @@ namespace Ariadne {
       LinearAlgebra::Matrix<R> _pts;
     };
     
-    template<typename R> 
+    template<class R> inline
+    Point<R> 
+    PointList<R>::operator[] (const size_type j) const
+    {
+      Point<R> result(this->dimension());
+      for(size_type i=0; i!=this->dimension(); ++i) {
+        result[i]=this->_pts(i,j);
+      }
+      return result;
+    }
+    
+    template<class R> 
     inline
     std::ostream& 
     operator<<(std::ostream& os, const PointList<R>& pts) {

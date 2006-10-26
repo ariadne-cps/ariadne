@@ -40,10 +40,8 @@ void export_polytope()
 {
   typedef Polytope<R> RPolytope;
 
-  def("disjoint", (bool(*)(const RPolytope&, const RPolytope&))(&disjoint));
-  def("interiors_intersect", (bool(*)(const RPolytope&, const RPolytope&))(&interiors_intersect));
-  def("inner_subset", (bool(*)(const RPolytope&, const RPolytope&))(&inner_subset));
-  def("subset", (bool(*)(const RPolytope&, const RPolytope&))(&subset));
+  def("disjoint", (tribool(*)(const RPolytope&, const RPolytope&))(&disjoint));
+  def("subset", (tribool(*)(const RPolytope&, const RPolytope&))(&subset));
   def("convex_hull", (RPolytope(*)(const RPolytope&, const RPolytope&))(&convex_hull));
 
   class_< Polytope<R> >("Polytope",init<size_type>())

@@ -47,7 +47,7 @@ using namespace boost::python;
 template<typename R>
 void export_affine_vector_field() 
 {
-  typedef typename numerical_traits<R>::arithmetic_type F;
+  typedef typename Numeric::traits<R>::arithmetic_type F;
   typedef Interval<R> I;
   
   class_< AffineVectorField<R>, bases< VectorField<R> > >("AffineVectorField",init< Matrix<R>, Vector<R> >())

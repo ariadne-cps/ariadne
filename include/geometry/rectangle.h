@@ -34,6 +34,8 @@
 #include "../declarations.h"
 
 #include "../base/array.h"
+#include "../base/iterator.h"
+#include "../base/tribool.h"
 
 #include "../numeric/arithmetic.h"
 #include "../numeric/function.h"
@@ -41,7 +43,6 @@
 
 #include "../linear_algebra/vector.h"
 
-#include "../geometry/ppl_polyhedron.h"
 #include "../geometry/point.h"
 #include "../geometry/rectangle_expression.h"
 
@@ -57,19 +58,30 @@ namespace Ariadne {
     template<> 
     inline bool is_a<Rectangle,Polyhedron>() { return true; }
 
+    template<class R> class RectangleVerticesIterator;
+    
     /*! \ingroup BasicSet
      *  \brief A cuboid of arbitrary dimension.
+     *
+     * \b Storage: A %Rectangle of dimension \a d is specified by \a 2d real 
+     * number giving the lower and upper bounds in each coordinate.
+     * The lower bound in the \a i th coordinate is the \a p2i element, and the 
+     * upper bound is the \a 2i+1 st element.
      */
-    template <typename R>
+    template <class R>
     class Rectangle 
       : public RectangleExpression< Rectangle<R> >
     {
+      typedef typename Numeric::traits<R>::arithmetic_type F;
+      typedef typename Numeric::traits<R>::interval_type I;
      public:
       /*! \brief The type of denotable real number used for the corners. */
       typedef R real_type;
       /*! \brief The type of denotable point contained by the rectangle. */
       typedef Point<R> state_type;
-    
+      /*! \brief An iterator to the vertices of the rectangle. */
+      typedef RectangleVerticesIterator<R> vertices_iterator;
+      typedef RectangleVerticesIterator<R> vertices_const_iterator;
      public:
       //@{
       //! \name Constructors
@@ -192,8 +204,6 @@ namespace Ariadne {
       
       //@{
       //! \name Conversion operators
-      /*! \brief Convert to a Parma Polyhedra Library closed polyhedron. */
-      operator Parma_Polyhedra_Library::C_Polyhedron () const;
       //@}
       
       
@@ -317,7 +327,8 @@ namespace Ariadne {
       }
       
       /*! \brief True if the rectangle is empty. A zero-dimensional rectangle is considered empty. */
-      bool empty() const {
+      tribool empty() const {
+        tribool result=false;
         if(this->dimension()==0) {
           return true;
         }
@@ -325,21 +336,11 @@ namespace Ariadne {
           if(this->lower_bound(i) > this->upper_bound(i)) {
             return true;
           }
-        }
-        return false;
-      }
-      
-      /*! \brief True if the rectangle has empty interior. */
-      bool empty_interior() const {
-        if(this->dimension()==0) {
-          return true;
-        }
-        for(size_type i=0; i!=this->dimension(); ++i) {
-          if(this->lower_bound(i) >= this->upper_bound(i)) {
-            return true;
+          if(this->lower_bound(i)== this->upper_bound(i)) {
+            result=indeterminate;
           }
         }
-        return false;
+        return result;
       }
       
       /*! \brief The centre. */
@@ -372,34 +373,36 @@ namespace Ariadne {
       /*! \brief The vertices of the rectangle. */
       PointList<R> vertices() const;
 
+      /*! \brief An iterator to the first vertex of the rectangle. */
+      vertices_const_iterator vertices_begin() const;
+      /*! \brief An iterator to the end vertex of the rectangle. */
+      vertices_const_iterator vertices_end() const;
+
       /*! \brief The \a i th vertex. */
       Point<R> vertex(size_type i) const;
         
       /*! \brief Tests if \a point is included into a rectangle. */
-      bool contains(const Point<R>& pt) const;
-      /*! \brief Tests if \a point is included into the interior a rectangle. */
-      bool interior_contains(const Point<R>& pt) const;
+      tribool contains(const Point<R>& pt) const;
       
       /*! \brief A rectangle containing the given rectangle; returns a copy. */
       Rectangle bounding_box() const {
         return *this;
       }
+      
+      /*! \brief Construct an over-approximation of an interval rectangle. */
+      static Rectangle<R> over_approximation(const Rectangle<I>& ir);
       //@}
       
 #ifdef DOXYGEN
       //@{ 
       //! \name Binary geometric predicates
       /*! \brief Set equality operator. */
-      friend bool equal(const Rectangle<R>& A, const Rectangle<R>& B) const;
+      friend tribool equal(const Rectangle<R>& A, const Rectangle<R>& B) const;
      
       /*! \brief Tests disjointness with \a r. */
-      friend bool disjoint(const Rectangle<R>& A, const Rectangle<R>& B) const;
-      /*! \brief Tests intersection of interiors of \a A and \a B. */
-      friend bool interiors_intersect(const Rectangle<R>& A, const Rectangle<R>& B) const;
-      /*! \brief Tests inclusion in the interior of \a r. */
-      friend bool inner_subset(const Rectangle<R>& A, const Rectangle<R>& B) const;
+      friend tribool disjoint(const Rectangle<R>& A, const Rectangle<R>& B) const;
       /*! \brief Tests if the rectangle is a subset of another rectangle \a r. */
-      friend bool subset(const Rectangle<R>& A, const Rectangle<R>& B) const;
+      friend tribool subset(const Rectangle<R>& A, const Rectangle<R>& B) const;
       //@{ 
       //! \name Binary geometric operations
       /*! \brief The intersection of \a A and \a B. */
@@ -442,127 +445,115 @@ namespace Ariadne {
       array<R> _bounds;
     };
   
-
+/*
+    template<class R>
+    class Rectangle< Interval<R> >
+    {
+      typedef Interval<R> I;
+     public:
+      Rectangle(dimension_type d) : _bounds(2*d) { }
+      dimension_type dimension() const { return _bounds.size()/2; }
+      const I& lower_bound(const dimension_type& i) { return _bounds[2*i]; }
+      const I& upper_bound(const dimension_type& i) { return _bounds[2*i+1]; }
+     private:
+      array<I> _bounds;
+    };
+*/    
     
-    template <typename R>
+    template<class R> inline
+    Rectangle<R> over_approximation(const Rectangle< Numeric::Interval<R> >& ir) {
+      Rectangle<R> result(ir.dimension());
+      for(dimension_type i=0; i!=result.dimension(); ++i) {
+        result.set_lower_bound(i,ir.lower_bound(i).lower());
+        result.set_upper_bound(i,ir.upper_bound(i).upper());
+      }
+      return result;
+    }
+    
+    template <class R>
     inline
-    bool 
+    tribool 
     Rectangle<R>::contains(const Point<R>& p) const 
     {
+      tribool result=true;
       const Rectangle<R>& self=*this;
       if (p.dimension()!=self.dimension()) {
         throw std::domain_error("The point has a different dimension to the rectangle.");
       }
       for (size_type i=0; i!=self.dimension(); ++i) {
-        if(!self[i].contains(p[i])) {
+        if(self.lower_bound(i)>p[i] || p[i]>self.upper_bound(i)) {
           return false;
         }
+        if(self.lower_bound(i)==p[i] || p[i]==self.upper_bound(i)) { 
+          result=indeterminate;
+        }
       }
-      return true;
+      return result;
     }
 
-    template <typename R>
-    inline
-    bool 
-    Rectangle<R>::interior_contains(const Point<R>& p) const 
-    {
-      const Rectangle<R>& self=*this;
-      if (p.dimension()!=self.dimension()) {
-        throw std::domain_error("The point has a different dimension to the rectangle.");
-      }
-      for (size_type i=0; i!=self.dimension(); ++i) {
-        if(self.lower_bound(i) >= p[i] || self.upper_bound(i) <= p[i]) {
-          return false;
-        }
-      }
-      return true;
-    }
       
-    template <typename R>
+    template <class R>
     inline
-    bool 
+    tribool 
     equal(const Rectangle<R>& A, const Rectangle<R>& B)
     {
       if(A.dimension()!=B.dimension()) {
         return false;
       }
       for(size_type i=0; i!=A.dimension(); ++i) {
-        if(!Numeric::equal(A[i],B[i])) {
+        if(A.lower_bound(i)!=B.lower_bound(i) || A.upper_bound(i)!=B.upper_bound(i)) {
           return false;
         }
       }
-      return true;
+      return indeterminate;
     }
       
-    template <typename R>
+    template <class R>
     inline
-    bool 
+    tribool 
     disjoint(const Rectangle<R>& A, const Rectangle<R>& B)
     {
+      tribool result=false;
       if(A.dimension()!=B.dimension()) {
         throw std::domain_error("disjoint(Rectangle,Rectangle): The two rectangles have different dimensions");
       }
       for(size_type i=0; i!=A.dimension(); ++i) {
-        if(Numeric::disjoint(A[i],B[i])) {
+        if(A.lower_bound(i)>B.upper_bound(i) || A.upper_bound(i)<B.lower_bound(i)) {
           return true;
         }
-      }
-      return false;
-    }
-   
-    template <typename R>
-    inline
-    bool 
-    interiors_intersect(const Rectangle<R>& A, const Rectangle<R>& B)
-    {
-      if (A.dimension()!=B.dimension()) {
-        throw std::domain_error("interiors_intersect(Rectangle,Rectangle): The two rectangles have different dimensions");
-      }
-      for(size_type i=0; i!=A.dimension(); ++i) {
-        if(!(A[i].upper()>B[i].lower() && A[i].lower()<B[i].upper())) {
-          return false;
+        if(A.lower_bound(i)==B.upper_bound(i) || A.upper_bound(i)==B.lower_bound(i)) {
+          result=indeterminate;
         }
       }
-      return true;
+      return result;
     }
-    
-    template <typename R>
+       
+
+    template <class R>
     inline
-    bool 
-    inner_subset(const Rectangle<R>& A, const Rectangle<R>& B)
-    {
-      if (A.dimension()!=B.dimension()) {
-        throw std::domain_error("inner_subset(Rectangle,Rectangle): The two rectangles have different dimensions");
-      }
-      for (size_type i=0; i!=A.dimension(); ++i) {
-        if(!(A[i].lower()>B[i].lower() && A[i].upper()<B[i].upper())) {
-          return false;
-        }
-      }
-      return true;
-    }
-    
-    template <typename R>
-    inline
-    bool 
+    tribool 
     subset(const Rectangle<R>& A, const Rectangle<R>& B)
     {
+      tribool result=true;
       if (A.dimension()!=B.dimension()) {
         throw std::domain_error("subset(Rectangle,Rectangle): The two rectangles have different dimensions");
       }
-      for (size_type i=0; i< A.dimension(); ++i) {
-        if(!Numeric::subset(A[i],B[i])) {
+      for (size_type i=0; i!=A.dimension(); ++i) {
+        if(A.lower_bound(i)<B.lower_bound(i) || A.upper_bound(i)>B.upper_bound(i)) {
           return false;
         }
+        if(A.lower_bound(i)==B.lower_bound(i) || A.upper_bound(i)==B.upper_bound(i)) {
+          result=indeterminate;
+        }
       }
-      return true;
+      return result;
     }
     
     
-    template <typename R>
+    template <class R>
     inline
     Rectangle<R> 
-    intersection(const Rectangle<R>& A, const Rectangle<R>& B)
+    closed_intersection(const Rectangle<R>& A, const Rectangle<R>& B)
     {
       Rectangle<R> C(A.dimension());
       if (A.dimension()!=B.dimension()) {
@@ -574,10 +565,10 @@ namespace Ariadne {
       return C;
     }
 
-    template <typename R>
+    template <class R>
     inline
     Rectangle<R> 
-    regular_intersection(const Rectangle<R>& A, const Rectangle<R>& B)
+    open_intersection(const Rectangle<R>& A, const Rectangle<R>& B)
     {
       Rectangle<R> C(A.dimension());
       if (A.dimension()!=B.dimension()) {
@@ -592,7 +583,7 @@ namespace Ariadne {
       return C;
     }
 
-    template <typename R>
+    template <class R>
     inline
     Rectangle<R>
     rectangular_hull(const Rectangle<R>& A, const Rectangle<R>& B)
@@ -607,59 +598,49 @@ namespace Ariadne {
       return C;
     }
 
-    template<typename R> 
-    Rectangle<R> 
-    minkowski_sum(const Rectangle<R>& A, const Rectangle<R>& B)
+    template<class R1, class R2> 
+    Rectangle<typename Numeric::traits<R1,R2>::arithmetic_type> 
+    minkowski_sum(const Rectangle<R1>& A, const Rectangle<R2>& B)
     {
-      Rectangle<R> C(A.dimension());
+      Rectangle<typename Numeric::traits<R1,R2>::arithmetic_type> C(A.dimension());
       if (A.dimension()!=B.dimension()) {
         throw std::domain_error(
               "minkowski_sum: the two rectangles have different dimension.");
       }
       for(dimension_type i=0; i!=C.dimension(); ++i) {
-        C[i]=A[i]+B[i];
+        C.set_lower_bound(i,A.lower_bound(i)+B.lower_bound(i));
+        C.set_lower_bound(i,A.upper_bound(i)+B.upper_bound(i));
       }
       return C;
     }
 
-    template<typename R> 
-    Rectangle<R> 
-    minkowski_difference(const Rectangle<R>& A, const Rectangle<R>& B)
+    template<class R1, class R2> 
+    Rectangle<typename Numeric::traits<R1,R2>::arithmetic_type> 
+    minkowski_difference(const Rectangle<R1>& A, const Rectangle<R2>& B)
     {
-      Rectangle<R> C(A.dimension());
+      Rectangle<typename Numeric::traits<R1,R2>::arithmetic_type> C(A.dimension());
       if (A.dimension()!=B.dimension()) {
         throw std::domain_error(
               "minkowski_difference: the two rectangles have different dimension.");
       }
       for(dimension_type i=0; i!=C.dimension(); ++i) {
-          C[i]=A[i]-B[i];
+        C.set_lower_bound(i,A.lower_bound(i)-B.lower_bound(i));
+        C.set_lower_bound(i,A.upper_bound(i)-B.upper_bound(i));
       }
       return C;
     }
     
     
-    template <typename R> 
+    template <class R> 
     inline
-    bool 
+    tribool 
     subset(const Rectangle<R>& A, ListSet<R,Geometry::Rectangle>& B);
-    
+        
 
-    template <typename R> 
-    inline
-    bool 
-    inner_subset(const Rectangle<R>& A, 
-                 const ListSet<R,Geometry::Rectangle>& B);
-    
-
-    template <typename R> 
-    inline
-    bool 
-    subset_of_open_cover(const Rectangle<R>& A, 
-                         const ListSet<R,Geometry::Rectangle>& U);
     
     
     
-    template<typename R>
+    template<class R>
     inline
     LinearAlgebra::Vector< Interval<R> > 
     operator-(const Geometry::Rectangle<R>& r1, 
@@ -670,7 +651,7 @@ namespace Ariadne {
       return r1.position_vectors()-r2.position_vectors();
     }
 
-    template<typename R, typename E>
+    template<class R, class E>
     inline
     Geometry::Rectangle<R> 
     operator+(const Geometry::Rectangle<R>& r, 
@@ -681,7 +662,7 @@ namespace Ariadne {
       return r+iv; 
     }
       
-    template<typename R>
+    template<class R>
     inline
     Geometry::Rectangle<R> 
     operator+(const Geometry::Rectangle<R>& r, 
@@ -696,7 +677,7 @@ namespace Ariadne {
       return result;
     }
 
-    template<typename R>
+    template<class R>
     inline
     Geometry::Rectangle<R> 
     operator+(const Geometry::Rectangle<R>& r, 
@@ -711,7 +692,7 @@ namespace Ariadne {
       return result;
     }
 
-    template<typename R>
+    template<class R>
     inline
     Geometry::Rectangle<R> 
     operator-(const Geometry::Rectangle<R>& r, 
@@ -726,7 +707,7 @@ namespace Ariadne {
       return result;
     }
 
-    template<typename R>
+    template<class R>
     inline
     Geometry::Rectangle<R> 
     operator-(const Geometry::Rectangle<R>& r, 
@@ -741,7 +722,7 @@ namespace Ariadne {
       return result;
     }
 
-    template<typename R>
+    template<class R>
     inline
     Geometry::Rectangle<R> 
     scale(const Geometry::Rectangle<R>& r, const R& scale_factor) {
@@ -755,12 +736,51 @@ namespace Ariadne {
       return result;
     }
     
-    template<typename R> inline 
+    template<class R>
+    class RectangleVerticesIterator 
+      : public boost::iterator_facade<RectangleVerticesIterator<R>,
+                                      Point<R>,
+                                      boost::forward_traversal_tag,
+                                      Point<R> const&,
+                                      Point<R> const*
+                                     >
+    {
+     public:
+      RectangleVerticesIterator(const Rectangle<R>& r, const bool end);
+      bool equal(const RectangleVerticesIterator<R>& other) const;
+      const Point<R>& dereference() const;
+      void increment();
+     private:
+      const Rectangle<R>* _r; long unsigned int _i; bool _parity; Point<R> _pt;
+    };
+    
+    template<class R> inline
+    RectangleVerticesIterator<R>::RectangleVerticesIterator(const Rectangle<R>& r, const bool end)
+      : _r(&r), _i(end==true ? (1<<(r.dimension()-1))*3 : 0), _parity(0), _pt(r.lower_corner()) { }
+      
+    template<class R> inline
+    bool RectangleVerticesIterator<R>::equal(const RectangleVerticesIterator<R>& other) const {
+      return this->_i==other._i && this->_r==other._r; }
+      
+    template<class R> inline
+    const Point<R>& RectangleVerticesIterator<R>::dereference() const { 
+      return this->_pt; }
+      
+    template<class R> inline
+    void RectangleVerticesIterator<R>::increment() { 
+      uint j=0; uint m=1; if(this->_parity) { while(!(m&(this->_i))) { ++j; m*=2u; } ++j; m*=2u; }
+      this->_parity=!this->_parity;
+      if(j==this->_r->dimension()) { this->_i+=m; return; }
+      if(m&(this->_i)) { this->_pt[j]=this->_r->lower_bound(j); this->_i-=m; }
+      else { this->_pt[j]=this->_r->upper_bound(j); this->_i+=m; }
+    }
+    
+    template<class R> inline 
     std::ostream& operator<<(std::ostream& os, const Rectangle<R>& r) {
       return r.write(os);
     }
     
-    template<typename R> inline
+    template<class R> inline
     std::istream& operator>>(std::istream& is, Rectangle<R>& r) {
       return r.read(is);
     }

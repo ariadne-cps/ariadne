@@ -21,14 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "geometry/rectangle.tpl"
-#include "geometry/parallelotope.tpl"
-#include "geometry/zonotope.tpl"
+#include "real_typedef.h"
+
+#include "geometry/rectangle.h"
+#include "geometry/parallelotope.h"
+#include "geometry/zonotope.h"
 
 #include "geometry/list_set.h"
 #include "geometry/list_set.tpl"
-
-#include "real_typedef.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -42,17 +42,19 @@ namespace Ariadne {
     template  ListSet<Real,Parallelotope>::operator  ListSet<Real,Zonotope>() const;
     
 
-    template bool disjoint(const ListSet<Real,Rectangle>&, const ListSet<Real,Rectangle>&);
-    template bool interiors_intersect(const ListSet<Real,Rectangle>&, const ListSet<Real,Rectangle>&);
-    template bool interiors_intersect(const ListSet<Real,Parallelotope>&, const ListSet<Real,Parallelotope>&);
-    template bool interiors_intersect(const ListSet<Real,Zonotope>&, const ListSet<Real,Zonotope>&);
-    template bool interiors_intersect(const Parallelotope<Real>&, const ListSet<Real,Parallelotope>&);
-    template bool interiors_intersect(const ListSet<Real,Parallelotope>&, const Parallelotope<Real> &);
-    template bool interiors_intersect(const Zonotope<Real>&, const ListSet<Real,Zonotope>&);
-    template bool interiors_intersect(const ListSet<Real,Zonotope>&, const Zonotope<Real> &);
-    template bool inner_subset(const ListSet<Real,Rectangle>&, const ListSet<Real,Rectangle>&);
-    template bool subset(const ListSet<Real,Rectangle>&, const ListSet<Real,Rectangle>&);
-    template ListSet<Real,Rectangle> regular_intersection(const ListSet<Real,Rectangle>&, const ListSet<Real,Rectangle>&);
+    template tribool disjoint(const ListSet<Real,Rectangle>&, const ListSet<Real,Rectangle>&);
+    template tribool disjoint(const ListSet<Real,Zonotope>&, const ListSet<Real,Zonotope>&);
+    template tribool disjoint(const ListSet<Real,Parallelotope>&, const ListSet<Real,Parallelotope>&);
+/*    
+    template tribool disjoint(const ListSet<Real,Rectangle>&, const Rectangle<Real> &);
+    template tribool disjoint(const ListSet<Real,Zonotope>&, const Zonotope<Real> &);
+    template tribool disjoint(const ListSet<Real,Parallelotope>&, const Parallelotope<Real> &);
+    template tribool disjoint(const Rectangle<Real>&, const ListSet<Real,Rectangle> &);
+    template tribool disjoint(const Zonotope<Real>&, const ListSet<Real,Zonotope> &);
+    template tribool disjoint(const Parallelotope<Real>&, const ListSet<Real,Parallelotope> &);
+*/
+    template tribool subset(const ListSet<Real,Rectangle>&, const ListSet<Real,Rectangle>&);
+    template ListSet<Real,Rectangle> open_intersection(const ListSet<Real,Rectangle>&, const ListSet<Real,Rectangle>&);
    
     
   }

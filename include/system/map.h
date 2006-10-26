@@ -42,8 +42,8 @@ namespace Ariadne {
      */
     template<typename R>
     class Map {
-      typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
-      typedef typename Numeric::Interval<R> I;
+      typedef typename Numeric::traits<R>::arithmetic_type F; 
+      typedef typename Numeric::traits<R>::interval_type I; 
      public:
       /*! \brief The real number type. */
       typedef R real_type;
@@ -73,7 +73,7 @@ namespace Ariadne {
       /*! \brief The Jacobian derivative matrix over a rectangle. */
       virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<R>& r) const;
       /*! \brief The Jacobian derivative matrix over a rectangle. */
-      virtual LinearAlgebra::Matrix< I > jacobian(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::Matrix<I> jacobian(const Geometry::Rectangle<R>& r) const;
         
       /*! \brief The degree of differentiability of the map. */
       virtual size_type smoothness() const = 0;

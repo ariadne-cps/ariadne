@@ -29,7 +29,10 @@
 namespace Ariadne {
   namespace Geometry {
 
+    template class Zonotope<Rational>;
+      
     template class Zonotope<Real>;
+    template class Zonotope< Interval<Real> >;
 
   }
 }

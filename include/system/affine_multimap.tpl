@@ -43,26 +43,30 @@ namespace Ariadne {
     BS<R>
     AffineMultiMap<R,BS>::operator() (const Geometry::Point<R>& pt) const
     {
+      assert(false);
       using namespace Ariadne::LinearAlgebra;
-
+      typedef typename Numeric::traits<R>::arithmetic_type F;
+      typedef typename Numeric::traits<R>::interval_type I;
+     
       if (this->argument_dimension()!=pt.dimension()) {
         throw std::domain_error("AffineMultiMap<R,BS>::operator() (const Point&): the map does not have the same dimension of the point.");
       }
-      Vector< Interval<R> > iv=this->A()*Vector< Interval<R> >(pt.position_vector());
-      return minkowski_sum(this->S(),BS<R>(Geometry::Rectangle<R>(iv)));
+      Vector<I> iv=this->A()*Vector<F>(pt.position_vector());
+//      return over_approximation(minkowski_sum(this->S(),BS<R>(Geometry::Rectangle<R>(iv))));
     }
     
     template <typename R, template<typename> class BS>
     BS<R>
     AffineMultiMap<R,BS>::operator() (const BS<R>& bs) const
     {
+      assert(false);
       using namespace Ariadne::LinearAlgebra;
       using namespace Ariadne::Geometry;
 
       if (this->argument_dimension()!=bs.dimension()) {
         throw std::domain_error("AffineMultiMap<R,BS>::operator() (const Point&): the map does not have the same dimension of the point.");
       }
-      return minkowski_sum(AffineMap<R>(this->A()).image(bs),this->S());
+//      return over_approximation(minkowski_sum(AffineMap<R>(this->A()).image(bs),this->S()));
     }
     
   }

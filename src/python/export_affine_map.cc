@@ -45,7 +45,7 @@ using namespace boost::python;
 template<typename R>
 void export_affine_map() 
 {
-  typedef typename numerical_traits<R>::arithmetic_type F;
+  typedef typename Numeric::traits<R>::arithmetic_type F;
   typedef Interval<R> I;
   
   class_< AffineMap<R>, bases< Map<R> > >("AffineMap",init< Matrix<R>, Vector<R> >())

@@ -42,8 +42,8 @@ using namespace Ariadne::LinearAlgebra;
 template<typename R> int test_vector();
 
 int main() {
-  test_vector<Float64>();
   test_vector<MPFloat>();
+  test_vector<Float64>();
   //test_vector<Rational>();
   //test_vector< Interval<MPFloat> >();
   //test_vector< Interval<Rational> >();
@@ -55,7 +55,9 @@ template<typename R>
 int 
 test_vector()
 {
-  typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
+  std::cout << "\ntest_vector<" << name<R>() << ">()\n";
+  
+  typedef typename Numeric::traits<R>::arithmetic_type F;
   
   int n=3;
   R vptr[3]={-4.0,3.0,1.0};
@@ -92,6 +94,7 @@ test_vector()
   cout << vf0 << " = " << v1 << " * " << x << endl;
   vf0=Vector<F>(v1)/x;
   cout << vf0 << " = " << v1 << " / " << x << endl;
+  cout << endl;
   
   Vector< Interval<R> > iv1("[[0.99,1.01],[2.25,2.375],[4.0,4.375],[-0.02,0.01]]");
   cout << "iv1=" << iv1 << endl;
@@ -109,11 +112,17 @@ test_vector()
   Vector< Interval<R> > iv0;
   cout << "iv0=" << iv0 << endl;
   iv1=iv0;
-  //cout << "iv1=" << iv1 << endl;
+  cout << "iv1=" << iv1 << endl;
   iv1=iv2;
   cout << "iv1=" << iv1 << endl;
   cout << endl;
-   
+
+  Interval<R> ix2=iv2[0];
+  Interval<R> ix3=iv3[0];
+  Interval<R> ix1=ix2+ix3;
+  ix1=ix2+ix3;
+  
+  cout << "iv2=" << iv2 << ", iv3=" << iv3 << endl;
   iv1=iv2+iv3;
   cout << iv1 << " = " << iv2 << " + " << iv3 << endl;
   iv1=iv2-iv3;

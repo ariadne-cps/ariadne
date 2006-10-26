@@ -37,7 +37,7 @@ using namespace boost::python;
   
 template<typename R>
 void export_henon_map() {
-  typedef typename numerical_traits<R>::arithmetic_type F;
+  typedef typename Numeric::traits<R>::arithmetic_type F;
   
   class_< HenonMap<R>, bases< Map<R> > >("HenonMap",init<R,R>())
     .def("argument_dimension", &HenonMap<R>::argument_dimension)

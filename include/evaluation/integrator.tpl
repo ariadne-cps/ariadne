@@ -186,7 +186,7 @@ namespace Ariadne {
 #endif
 
       using namespace Geometry;
-      typedef typename numerical_traits<R>::field_extension_type F;
+      typedef typename Numeric::traits<R>::arithmetic_type F;
       uint iteration=0;
       R multiplier=1.125;
       time_type t=h;
@@ -234,7 +234,7 @@ namespace Ariadne {
       unsigned int max_iterations=16;
       
       Geometry::Rectangle<R> bounds(vf.dimension());
-      while(bounds.empty_interior()) {
+      while(bounds.empty()) {
         try {
           bounds=estimate_flow_bounds(vf,r,h,max_iterations);
         }
@@ -623,7 +623,7 @@ namespace Ariadne {
 		 << bs.centre()  << std::endl;
 #endif
             h=min(t,h);
-            rs=(this->reachability_step(vf,bs,h)).over_approximating_parallelotope();
+            rs=Geometry::Parallelotope<R>::over_approximation(this->reachability_step(vf,bs,h));
             reach_set.adjoin(rs);
 #ifdef DEBUG
         std::cerr << "rs.centre=" << rs.centre() << std::endl;

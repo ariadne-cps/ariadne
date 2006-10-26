@@ -73,7 +73,7 @@ namespace Ariadne {
     }
     
     template<typename R>
-    LinearAlgebra::Matrix< Interval<R> > 
+    LinearAlgebra::Matrix<typename Map<R>::I> 
     Map<R>::jacobian(const Geometry::Rectangle<R>& r) const 
     {
       throw std::invalid_argument(this->name()+"::jacobian(Rectangle) not implemented."); 

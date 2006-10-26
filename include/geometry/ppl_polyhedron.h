@@ -34,12 +34,6 @@
 
 #include "../declarations.h"
 
-// For forward declaration only
-#include "../numeric/rational.h"
-
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
-
 namespace Parma_Polyhedra_Library {
   class Polyhedron;
   class C_Polyhedron;
@@ -74,8 +68,23 @@ namespace Ariadne {
     
     Parma_Polyhedra_Library::C_Polyhedron 
     ppl_polyhedron(const LinearAlgebra::Vector<Rational>& p);
-  
-    
+ 
+ 
+    Parma_Polyhedra_Library::C_Polyhedron 
+    ppl_polyhedron(const Rectangle<Rational>& p);
+ 
+    Parma_Polyhedra_Library::C_Polyhedron 
+    ppl_polyhedron(const Zonotope<Rational>& p);
+ 
+    Parma_Polyhedra_Library::C_Polyhedron 
+    ppl_polyhedron(const Polytope<Rational>& p);
+ 
+    Parma_Polyhedra_Library::C_Polyhedron 
+    ppl_polyhedron(const Polyhedron<Rational>& p);
+ 
+
+ 
+
     LinearAlgebra::Matrix<Rational> 
     generators(const Parma_Polyhedra_Library::C_Polyhedron& A);
     

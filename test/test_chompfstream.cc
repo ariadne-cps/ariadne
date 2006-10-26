@@ -35,7 +35,7 @@
 
 using namespace Ariadne;
 using namespace Ariadne::Combinatoric;
-using namespace Ariadne::CHomP;
+using namespace Ariadne::Output;
 using namespace std;
 
 int main() {

@@ -44,7 +44,7 @@ namespace Ariadne {
     template <typename R>
     class LorenzSystem : public VectorField<R> 
     {
-      typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
+      typedef typename Numeric::traits<R>::arithmetic_type F;
      public:
       /*! \brief Construct the Lorenz system with parameter values \a beta,
        * \a rho and \a sigma.

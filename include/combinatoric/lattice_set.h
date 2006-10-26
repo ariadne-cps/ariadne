@@ -61,9 +61,9 @@ namespace Ariadne {
     bool disjoint(const LatticeBlock&, const LatticeBlock&);
     bool disjoint(const LatticeBlock&, const LatticeMaskSet&);
     bool disjoint(const LatticeMaskSet&, const LatticeMaskSet&);
-    bool interiors_intersect(const LatticeBlock&, const LatticeBlock&);
-    bool interiors_intersect(const LatticeBlock&, const LatticeMaskSet&);
-    bool interiors_intersect(const LatticeMaskSet&, const LatticeMaskSet&);
+    bool overlap(const LatticeBlock&, const LatticeBlock&);
+    bool overlap(const LatticeBlock&, const LatticeMaskSet&);
+    bool overlap(const LatticeMaskSet&, const LatticeMaskSet&);
     bool subset(const LatticeCell&, const LatticeBlock&);
     bool subset(const LatticeBlock&, const LatticeBlock&);
     bool subset(const LatticeCellListSet&, const LatticeBlock&);

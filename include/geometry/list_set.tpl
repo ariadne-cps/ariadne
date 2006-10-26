@@ -25,93 +25,32 @@
 #include <iostream>
 
 #include "list_set.h"
+#include "../base/stlio.h"
 #include "../geometry/rectangle.h"
 
 namespace Ariadne {
   namespace Geometry {
 
-    template <typename R, template<class> class BS>
-    bool
+    template <class R, template<class> class BS>
+    tribool
     disjoint (const ListSet<R,BS>& A,
               const ListSet<R,BS>& B)
     {
       if (A.dimension()!=B.dimension()) {
         throw std::invalid_argument("The two denotable sets have different space dimensions.");
       }
-
-      size_type i,j;
-      for (i=0; i<A.size() ; i++) {
-        for (j=0; j<B.size() ; j++) {
-          if (!disjoint(A[i],B[j])) { return false; }
+      tribool result=true;
+      for (typename ListSet<R,BS>::const_iterator i=A.begin(); i!=A.end(); ++i) {
+        for (typename ListSet<R,BS>::const_iterator j=B.begin(); j!=B.end(); ++j) {
+          result = result && disjoint(*i,*j);
+          if(!result) { return result; }
         }
       }
-
-      return true;
+      return result;
     }
 
-    template <typename R, template <typename> class BS>
-    bool
-    interiors_intersect(const ListSet<R,BS>& A,
-                        const ListSet<R,BS>& B)
-    {
-      if (A.dimension()!=B.dimension()) {
-        throw std::invalid_argument("The two denotable sets have different space dimensions.");
-      }
-
-      size_type i,j;
-
-      for (i=0; i<A.size() ; i++) {
-        for (j=0; j<B.size() ; j++) {
-          if (interiors_intersect(A[i],B[j])) { return true; }
-        }
-      }
-
-      return false;
-    }
-
-    template <typename R, template <typename> class BS>
-    bool
-    interiors_intersect(const ListSet<R,BS>& A, const BS<R>& B)
-    {
-      if (A.dimension()!=B.dimension()) {
-        throw std::invalid_argument("The two denotable sets have different space dimensions.");
-      }
-
-      size_type i;
-
-      for (i=0; i<A.size() ; i++) {
-         if (interiors_intersect(A[i],B)) { return true; }
-      }
-
-      return false;
-    }
-
-    template <typename R, template <typename> class BS>
-    bool
-    interiors_intersect(const BS<R>& A, const ListSet<R,BS>& B)
-    {
-      return interiors_intersect(B,A);
-    }
-
-
-    template <typename R, template <typename> class BS>
-    bool
-    inner_subset(const ListSet<R,BS>& A,
-                 const ListSet<R,BS>& B)
-    {
-      if (A.dimension()!=B.dimension()) {
-        throw std::invalid_argument("The two denotable sets have different space dimensions.");
-      }
-
-      for (size_type i=0; i<A.size() ; i++) {
-        if (!inner_subset(A[i], B)) { return false; }
-      }
-
-      return true;
-    }
-
-    template <typename R, template <typename> class BS>
-    bool
+    template <class R, template <class> class BS>
+    tribool
     subset(const ListSet<R,BS>& A,
            const ListSet<R,BS>& B)
     {
@@ -122,7 +61,7 @@ namespace Ariadne {
       throw std::runtime_error("Not implemented");
     }
     
-    template <typename R, template <typename> class BS>
+    template <class R, template <class> class BS>
     ListSet<R,BS>
     join(const ListSet<R,BS>& A,
          const ListSet<R,BS>& B)
@@ -146,10 +85,10 @@ namespace Ariadne {
       return ds_union;
     }
 
-    template <typename R, template <typename> class BS>
+    template <class R, template <class> class BS>
     ListSet<R,BS>
-    regular_intersection(const ListSet<R,BS>& A,
-                         const ListSet<R,BS>& B)
+    open_intersection(const ListSet<R,BS>& A,
+                      const ListSet<R,BS>& B)
     {
       ListSet<R,BS> ds_inter(A.dimension());
 
@@ -163,8 +102,8 @@ namespace Ariadne {
 
       for (size_type i=0; i<A.size(); i++) {
         for (size_type j=0; j<B.size(); j++) {
-          if (interiors_intersect(A[i],B[j])) {
-              ds_inter.push_back(regular_intersection(A[i],B[j]));
+          if (!disjoint(A[i],B[j])) {
+              ds_inter.push_back(open_intersection(A[i],B[j]));
           }
         }
       }
@@ -178,7 +117,7 @@ namespace Ariadne {
     
     
     
-    template <typename R, template<typename> class BS>
+    template <class R, template<class> class BS>
     std::ostream& 
     ListSet<R,BS>::write(std::ostream& os) const
     {
@@ -195,7 +134,7 @@ namespace Ariadne {
       return os;
     }
 
-    template <typename R, template<typename> class BS>
+    template <class R, template<class> class BS>
     std::istream& 
     ListSet<R,BS>::read(std::istream& is)
     {

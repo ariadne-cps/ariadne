@@ -51,7 +51,7 @@ namespace Ariadne {
 #endif
 
 namespace Ariadne {
-  typedef Ariadne::numerical_traits<Real>::field_extension_type Field;
+  typedef Ariadne::Numeric::traits<Real>::arithmetic_type Field;
 }
 
 #endif /* _ARIADNE_REAL_TYPEDEF_H */

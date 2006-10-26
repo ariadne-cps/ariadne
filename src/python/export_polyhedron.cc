@@ -41,11 +41,8 @@ void export_polyhedron()
   typedef Rectangle<R> RRectangle;
   typedef Polytope<R> RPolytope;
 
-  def("disjoint", (bool(*)(const RPolyhedron&, const RPolyhedron&))(&disjoint));
-  def("interiors_intersect", (bool(*)(const RPolyhedron&, const RPolyhedron&))(&interiors_intersect));
-  def("inner_subset", (bool(*)(const RPolyhedron&, const RPolyhedron&))(&inner_subset));
-  def("subset", (bool(*)(const RPolyhedron&, const RPolyhedron&))(&subset));
-  def("convex_hull", (RPolyhedron(*)(const RPolyhedron&, const RPolyhedron&))(&convex_hull));
+  def("disjoint", (tribool(*)(const RPolyhedron&, const RPolyhedron&))(&disjoint));
+  def("subset", (tribool(*)(const RPolyhedron&, const RPolyhedron&))(&subset));
 
   class_<RPolyhedron>("Polyhedron",init<size_type>())
     .def(init<RPolyhedron>())

@@ -54,12 +54,6 @@ namespace Ariadne {
     typedef mpz_class Integer;
 #endif
   
-    template<> class numerical_traits<Integer> {
-     public:
-      typedef ring_tag algebraic_category;
-      typedef mpq_class field_extension_type;
-    };
-
     template<> inline int convert_to<int>(const Numeric::Integer& n) { return n.get_si(); }
     template<> inline long convert_to<long>(const Numeric::Integer& n) { return n.get_si(); }
     

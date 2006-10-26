@@ -243,7 +243,7 @@ namespace Ariadne {
           tree.push_back(leaf);
           mask.push_back(true);
         }
-        else if(!interiors_intersect(r,ms)) {
+        else if(!overlap(r,ms)) {
           tree.push_back(leaf);
           mask.push_back(false);
         }

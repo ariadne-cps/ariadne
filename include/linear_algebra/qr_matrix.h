@@ -45,7 +45,7 @@ namespace Ariadne {
 
     /*! \ingroup LinearAlgebra
      *  \brief A matrix stored in QR product form. */
-    template<typename Real>
+    template<class Real>
     class QRMatrix {
      public:
       /*! \brief Construct from an ordinary matrix. */
@@ -71,7 +71,7 @@ namespace Ariadne {
       Matrix<Real> _R;
     };
     
-    template <typename Real>
+    template <class Real>
     inline 
     QRMatrix<Real>::QRMatrix(const Matrix<Real>& A) 
       : _Q(A.number_of_rows(),A.number_of_rows()), _R(A)
@@ -87,7 +87,7 @@ namespace Ariadne {
       TBLAS::trset(TBLAS::RowMajor,TBLAS::Lower,TBLAS::Unit,m,n,Real(0),_R.begin(),n);
     }
 
-    template <typename Real>
+    template <class Real>
     inline
     QRMatrix<Real>::operator Matrix<Real> () const
     {

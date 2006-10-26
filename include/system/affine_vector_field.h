@@ -43,7 +43,7 @@ namespace Ariadne {
     template <typename R>
     class AffineVectorField : public VectorField<R> 
     {
-      typedef typename Numeric::numerical_traits<R>::arithmetic_type F;
+      typedef typename Numeric::traits<R>::arithmetic_type F;
      public:
       /*! \brief The real number type. */
       typedef R real_type;
@@ -100,14 +100,14 @@ namespace Ariadne {
   namespace LinearAlgebra {
     /*! \brief Compute \f$e^{Ah}\f$. */
     template <typename R>
-    Matrix<typename Numeric::numerical_traits<R>::arithmetic_type> 
+    Matrix<typename Numeric::traits<R>::arithmetic_type> 
     exp_Ah_approx(const Matrix<R>& A, 
                   const R& h, 
                   const R& e); 
 
     /*! \brief Compute \f$A^{-1}(e^{Ah}-I) = h\sum_{n=0}^{\infty} \frac{{(Ah)}^{n}}{(n+1)!}\f$. */
     template <typename R>
-    Matrix<typename Numeric::numerical_traits<R>::arithmetic_type> 
+    Matrix<typename Numeric::traits<R>::arithmetic_type> 
     exp_Ah_sub_id_div_A_approx(const Matrix<R>& A, 
                                const R& h, 
                                const R& e); 

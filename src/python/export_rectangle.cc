@@ -41,38 +41,40 @@ using namespace Ariadne::Geometry;
 #include "python/python_utilities.h"
 using namespace boost::python;
 
+
+template<typename R> inline
+Rectangle<R> over_approximation_of_minkowski_sum(const Rectangle<R>& r1, const Rectangle<R>& r2) {
+  return over_approximation(minkowski_sum(r1,r2));
+}
+
+template<typename R> inline
+Rectangle<R> over_approximation_of_minkowski_difference(const Rectangle<R>& r1, const Rectangle<R>& r2) {
+  return over_approximation(minkowski_difference(r1,r2));
+}
+
+
 template<typename R>
 void export_rectangle() 
 {
-  typedef bool (*RectRectBinPred) (const Rectangle<R>&, const Rectangle<R>&);
-  typedef Rectangle<R> (*RectRectBinFunc) (const Rectangle<R>&, const Rectangle<R>&);
-  typedef Zonotope<R> (*RectZntpBinFunc) (const Rectangle<R>&, const Zonotope<R>&);
-  typedef Rectangle<R> (*RectRealBinFunc) (const Rectangle<R>&, const R&);
+  typedef Point<R> RPoint;
+  typedef Rectangle<R> RRectangle;
+  typedef Zonotope<R> RZonotope;
+    
+  def("rectangular_hull", (RRectangle(*)(const RRectangle&, const RRectangle&))(&rectangular_hull));
+  def("open_intersection", (RRectangle(*)(const RRectangle&, const RRectangle&))(&open_intersection));
+  def("closed_intersection", (RRectangle(*)(const RRectangle&, const RRectangle&))(&closed_intersection));
+  def("disjoint", (tribool(*)(const RRectangle&, const RRectangle&))(&disjoint));
+  def("subset", (tribool(*)(const RRectangle&, const RRectangle&))(&subset));
 
-  typedef bool (Rectangle<R>::*RectPred)(const Rectangle<R> &) const;
-  typedef bool (Rectangle<R>::*PointPred) (const Point<R>&) const;
-
-  def("convex_hull", RectRectBinFunc(&rectangular_hull));
-  def("regular_intersection", RectRectBinFunc(&regular_intersection));
-  def("touching_intersection", RectRectBinFunc(&regular_intersection));
-  def("interiors_intersect", RectRectBinPred(&interiors_intersect));
-  def("disjoint", RectRectBinPred(&disjoint));
-  def("inner_subset", RectRectBinPred(&inner_subset));
-
-  def("intersection", RectRectBinFunc(&intersection));
-  def("subset", RectRectBinPred(&subset));
   
-  class_< Rectangle<R> >(python_name<R>("Rectangle").c_str(),init<int>())
+  class_<RRectangle>(python_name<R>("Rectangle").c_str(),init<int>())
     .def(init< Point<R>,Point<R> >())
-    .def(init< Rectangle<R> >())
+    .def(init<RRectangle>())
     .def(init< Vector<Interval<R> > >())
     .def(init<std::string>())
-    .def("empty", & Rectangle<R>::empty)
-    .def("empty_interior", &Rectangle<R>::empty_interior)
+    .def("empty", &RRectangle::empty)
     .def("dimension", &Rectangle<R>::dimension)
-    .def("contains", RectPred(&Rectangle<R>::contains) )
-    .def("contains", PointPred(&Rectangle<R>::contains))
-    .def("interior_contains", &Rectangle<R>::interior_contains)
+    .def("contains", &Rectangle<R>::contains)
     .def("centre", &Rectangle<R>::centre)
     .def("radius", &Rectangle<R>::radius)
     .def("__getitem__", &Rectangle<R>::interval, return_value_policy<copy_const_reference>())
@@ -84,11 +86,13 @@ void export_rectangle()
     .def("upper_corner", &Rectangle<R>::upper_corner)
     .def("lower_bound", &Rectangle<R>::lower_bound, return_value_policy<copy_const_reference>())
     .def("upper_bound", &Rectangle<R>::upper_bound, return_value_policy<copy_const_reference>())
-    .def("__add__", (RectRectBinFunc)(&minkowski_sum))
-    .def("__add__", (RectZntpBinFunc)(&minkowski_sum))
-    .def("__sub__", (RectRectBinFunc)(&minkowski_difference))
-    .def("__sub__", (RectZntpBinFunc)(&minkowski_difference))
-    .def("__mul__", (RectRealBinFunc)(&scale))
+    .def("__add__", &over_approximation_of_minkowski_sum<R>)
+    .def("__sub__", &over_approximation_of_minkowski_difference<R>)
+//    .def("__add__", (RRectangle(*)(const RRectangle&,const RRectangle&))(&minkowski_sum))
+//    .def("__add__", (RRectangle(*)(const RRectangle&,const RZonotope&))(&minkowski_sum))
+//    .def("__sub__", (RRectangle(*)(const RRectangle&,const RRectangle&))(&minkowski_difference))
+//    .def("__sub__", (RRectangle(*)(const RRectangle&,const RZonotope&))(&minkowski_difference))
+//    .def("__mul__", (RRectangle(*)(const RRectangle&,const R&))(&scale))
     .def(self_ns::str(self))
   ;
 }

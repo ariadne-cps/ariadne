@@ -30,6 +30,7 @@ namespace Ariadne {
   namespace Geometry {
 
     template class Parallelotope<Real>;
+    template class Parallelotope< Interval<Real> >;
 
   }
 }

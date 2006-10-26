@@ -41,12 +41,137 @@
 namespace Ariadne {
   namespace LinearAlgebra {
 
-    /*! \ingroup LinearAlgebra
-     *  \brief Linear programming problems
+    enum Comparison { equal, greater, less, greater_or_equal, less_or_equal };
+    
+    class Variable;
+    template<class R> class LinearTerm;
+    template<class R> class LinearCombination;
+    template<class R1, class R2> class LinearConstraint;
+    template<class R> class LinearProgram;
+   
+    class Variable {
+     public:
+      Variable(size_type begin, size_type size, int increment=1) 
+        : _size(size), _begin(begin), _increment(increment) { }
+      size_type operator[] (size_type i) { 
+        return this->_begin+this->_increment*i; }
+      size_type size() const { return this->_size; }
+     private:
+      size_type _size;
+      size_type _begin;
+      int _increment;
+    };
+   
+    
+    template<class R>
+    class LinearTerm {
+      friend class LinearCombination<R>;
+     public:
+      LinearTerm(const Matrix<R>& m, const Variable& s)
+        : _coefficient(1), _matrix(&m), _variable(&s) { }
+      LinearTerm(const R& c, const Matrix<R>& m, const Variable& s)
+        : _coefficient(c), _matrix(&m), _variable(&s) { }
+     private:
+      const R _coefficient;
+      const Matrix<R>* _matrix;
+      const Variable* _variable;
+    };
+    
+    template<class R>
+    class LinearCombination {
+      template<class R1, class R2> friend class LinearConstraint;
+     public:
+      LinearCombination(const LinearTerm<R>& lt) 
+        : _coefficients(1,lt._coefficient), _matrices(1,lt._matrix), _variables(1,lt._variable) { }
+      LinearCombination(const LinearCombination<R>& lc) 
+        : _coefficients(lc._coefficients), _matrices(lc._matrices), _variables(lc._variables) { }
+      void add(const LinearTerm<R>& lt) {
+        this->_coefficients.push_back(lt._coefficient); 
+        this->_matrices.push_back(lt._matrix); 
+        this->_variables.push_back(lt._variables); }
+      void subtract(const LinearTerm<R>& lt) {
+        this->_coefficients.push_back(-lt._coefficient); 
+        this->_matrices.push_back(lt._matrix); 
+        this->_variables.push_back(lt._variables); }
+     private:
+      std::vector<R> _coefficients;
+      std::vector<const Matrix<R>*> _matrices;
+      std::vector<const Variable*> _variables;
+    };
+    
+    template<class R1, class R2>
+    class LinearConstraint {
+      friend class LinearProgram<typename Numeric::traits<R1,R2>::arithmetic_type>;
+     public:
+      LinearConstraint(const LinearCombination<R1>& lc, const Comparison& cmp, const Vector<R2>& v) 
+        : _coefficients(lc._coefficients), _matrices(lc._matrices), _variables(lc._variables),
+          _comparison(cmp), _vector(&v) { }
+     private:
+      std::vector<R1> _coefficients;
+      std::vector<const Matrix<R1>*> _matrices;
+      std::vector<const Variable*> _variables;
+      Comparison _comparison;
+      const Vector<R2>* _vector;
+    };
+     
+    
+    template<class R> inline
+    LinearTerm<R> operator*(const Matrix<R>& m, const Variable& s) {
+      return LinearTerm<R>(m,s);
+    }
+    
+    template<class R> inline
+    LinearTerm<R> operator*(const R& c, const LinearTerm<R>& lt) {
+      return LinearTerm<R>(c*lt._coefficient, lt._matrix, lt._variable);
+    }
+    
+    template<class R> inline
+    LinearCombination<R> operator+(const LinearTerm<R>& lt1, const LinearTerm<R>& lt2) {
+      return LinearCombination<R>(lt1).add(lt2); }
+        
+    template<class R> inline
+    LinearCombination<R> operator+(const LinearCombination<R>& lc1, const LinearTerm<R>& lt2) {
+      return LinearCombination<R>(lc1).add(lt2); }
+    
+    template<class R> inline
+    LinearCombination<R> operator-(const LinearCombination<R>& lc1, const LinearTerm<R>& lt2) {
+      return LinearCombination<R>(lc1).subtract(lt2); }
+    
+    template<class R1, class R2> inline
+    LinearConstraint<R1,R2> operator==(const LinearCombination<R1>& lc, const Vector<R2>& v) {
+      return LinearConstraint<R1,R2>(lc,equal,v); }
+      
+    template<class R1, class R2> inline
+    LinearConstraint<R1,R2> operator==(const LinearTerm<R1>& lt, const Vector<R2>& v) {
+      return LinearConstraint<R1,R2>(LinearCombination<R1>(lt),equal,v); }
+      
+    template<class R1, class R2> inline
+    LinearConstraint<R1,R2> operator<=(const LinearCombination<R1>& lc, const Vector<R2>& v) {
+      return LinearConstraint<R1,R2>(lc,less_or_equal,v); }
+      
+    template<class R1, class R2> inline
+    LinearConstraint<R1,R2> operator>=(const LinearCombination<R1>& lc, const Vector<R2>& v) {
+      return LinearConstraint<R1,R2>(lc,greater_or_equal,v); }
+      
+    
+      
+    /*!\ingroup LinearAlgebra
+     * \brief Linear programming problems
      *
-     *  FIXME: The dyadic version doesn't work properly due to divisions. 
+     * Solve a linear program in the standard form \f$\text{minimize } cx \text{ subject to } Ax=b;\ x\geq0\f$.
+     *
+     * The problem is stored as a tableau 
+     * \f\[\left(\begin{array}{c|c} A&b\\c^t&d\end{array}\right)\f\]
+     * where the constraints are \f$Ax+y = b\f$ and the cost of putting variable
+     * \f$x_i\f$ into the basis is given by \f$c_i\f$, and the current value is \f$d\f$.
+     *
+     * For a two-stage problem, \f$c^T\f$ stores both the actual value function
+     * and the value function associated with the constraints.
+     *
+     * The standard MATLAB constructor is x = linprog(c ;A; b; Aeq; beq; l; u) 
+     * for the linear program \f$\text{minimize } c^Tx \text{ subject to } Ax\leq b;\ A_{\mathrm{eq}}x=b_{\mathrm{eq}};\ l\leq b\leq u\f$.
      */
-    template<typename R>
+    template<class R>
     class LinearProgram {
      public:
       /*! \brief The type of denotable real number. */
@@ -84,7 +209,7 @@ namespace Ariadne {
        */
       explicit LinearProgram(const Matrix<R>& A, const Vector<R>& b, const Vector<R>& c);
 
-      /*! \brief Builds an LP problem from the _tableau T. 
+      /*! \brief Builds an LP problem from the tableau \a T. 
        *
        * The tableau T is a bordered matrix of the form \f$\begin{array}{c|c} A&b\\\hline -c^T&v \end{array}\f$
        * with \f$ b\geq0 \f$. 
@@ -116,12 +241,15 @@ namespace Ariadne {
       /*! \brief The current working tableau. */
       Matrix<R>& tableau();
    
+      /*! \brief The variable indices. */
+      array<int>& variable_indices();
+
       /*! \brief Checks satisfiability.
        *
        * \return
        * <CODE>true</CODE> if and only if the LP problem is satisfiable.
        */
-      bool is_satisfiable() const;
+      tribool is_feasible() const;
     
       /*! \brief Optimizes the current LP problem using the primal simplex algorithm.
        */
@@ -169,12 +297,6 @@ namespace Ariadne {
         UNBOUNDED,
         //! The LP problem is optimized; an optimal solution has been computed.
         OPTIMIZED,
-        /*! \brief
-          The feasible region of the LP problem has been changed by adding
-          new constraints; a feasible solution for the old constraints has
-          been computed.
-        */
-        PARTIALLY_SATISFIABLE
       };
 
      private:
@@ -191,7 +313,13 @@ namespace Ariadne {
         Optimizes the current LP problem using the second phase of the
         primal simplex algorithm.
       */
-      void solve_tableau() const;
+      void compute_feasible_point() const;
+       
+      /*! \brief
+        Optimizes the current LP problem using the second phase of the
+        primal simplex algorithm.
+      */
+      void compute_optimizing_point() const;
        
       /* 
        * Checks for optimality and, if it does not hold, computes the column
@@ -251,7 +379,7 @@ namespace Ariadne {
 
     };
 
-    template<typename R>
+    template<class R>
     inline
     std::ostream& 
     operator<<(std::ostream& os, const LinearProgram<R>& lp) {
@@ -261,7 +389,7 @@ namespace Ariadne {
     
     
     
-    template<typename R>
+    template<class R>
     inline 
     const Matrix<R>&
     LinearProgram<R>::tableau() const 
@@ -269,7 +397,7 @@ namespace Ariadne {
       return _tableau;
     }
     
-    template<typename R>
+    template<class R>
     inline 
     Matrix<R>&
     LinearProgram<R>::tableau() 
@@ -277,15 +405,15 @@ namespace Ariadne {
       return _tableau;
     }
     
-    template<typename R>
+    template<class R>
     inline 
     size_type
     LinearProgram<R>::number_of_constraints() const 
     {
-      return _tableau.number_of_rows()-1;
+      return _tableau.number_of_rows()-2;
     }
     
-    template<typename R>
+    template<class R>
     inline 
     size_type
     LinearProgram<R>::number_of_free_variables() const 
@@ -293,7 +421,7 @@ namespace Ariadne {
       return _tableau.number_of_columns()-1;
     }
     
-    template<typename R>
+    template<class R>
     inline 
     size_type
     LinearProgram<R>::number_of_variables() const 
@@ -303,26 +431,9 @@ namespace Ariadne {
     
 
     
-    template<typename R>
-    inline 
-    void
-    LinearProgram<R>::solve() const 
-    {
-      this->solve_tableau();
-    }
-    
-    
-    template<typename R>
-    inline
-    bool 
-    LinearProgram<R>::is_satisfiable() const 
-    {
-      assert(false);
-      return true;
-    }
     
 /*
-    template<typename R>
+    template<class R>
     inline 
     Vector<R>
     LinearProgram<R>::feasible_point() const 

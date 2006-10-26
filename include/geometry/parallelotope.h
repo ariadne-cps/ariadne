@@ -54,10 +54,11 @@ namespace Ariadne {
     /*! \ingroup BasicSet
      *  \brief A parallelotope of arbitrary dimension.
      */
-    template <typename R>
+    template <class R>
     class Parallelotope : public Zonotope<R> {
      private:
-      typedef typename numerical_traits<R>::field_extension_type F;
+      typedef typename traits<R>::arithmetic_type F;
+      typedef typename traits<R>::interval_type I;
      public:
       /*! \brief The real number type. */
       typedef R real_type;
@@ -109,13 +110,15 @@ namespace Ariadne {
       //@{
       //! \name Geometric operations
       /*! \brief Tests if the parallelotope contains \a point. */
-      bool contains(const state_type& point) const;
-      
-      /*! \brief Tests if the interior of the parallelotope contains \a point. */
-      bool interior_contains(const state_type& point) const;
+      tribool contains(const state_type& point) const;
 
+#ifdef DOXYGEN
+      /*! \brief Tests inclusion of \a A in \a B. */
+      friend tribool subset(const Rectangle<R>& A, const Parallelotope<R>& B);
+#endif
+      
       /*! \brief The vertices of the parallelotope. */
-      PointList<Rational> vertices() const;
+      PointList<F> vertices() const;
       
       /*! \brief Subdivide into two smaller pieces. */
       ListSet<R,Geometry::Parallelotope> divide() const;
@@ -125,7 +128,12 @@ namespace Ariadne {
       //@}
       
       /*! \brief Computes an over approximation from an "interval parallelotope". */
-      static Parallelotope<R> over_approximation(const Rectangle<R>& c, const LinearAlgebra::Matrix< Interval<R> >& A);
+      static Parallelotope<R> over_approximation(const Point<I>& c, const LinearAlgebra::Matrix<I>& A);
+      /*! \brief Computes an over approximation from an "interval parallelotope". */
+      static Parallelotope<R> over_approximation(const Parallelotope<I>& p);
+      /*! \brief Computes an over approximation from a zonotope". */
+      static Parallelotope<R> over_approximation(const Zonotope<R>& p);
+      
       /*! \brief Scale the parallelotope by at least \a sf. */
       static Parallelotope<R> scale(const Parallelotope<R>& p, const R& sf);
 
@@ -134,54 +142,77 @@ namespace Ariadne {
       /*! \brief Read from an input stream. */
       std::istream& read(std::istream& is);
      private:
+      static tribool _instantiate_geometry_operators();
+     private:
+      static tribool subset(const Rectangle<R>& r, const Parallelotope<R>& p);
       static LinearAlgebra::Matrix<R> compute_generators(const Rectangle<R>& r);
       static void compute_linear_inequalities(matrix_type&, vector_type&, vector_type&);
       LinearAlgebra::Vector<F> coordinates(const state_type& s) const;
+      void _compute_generators_inverse() const;
+     private:
+      mutable LinearAlgebra::Matrix<F> _generators_inverse;
+     
     };
  
+    template<class R>
+    class Parallelotope< Interval<R> > 
+      : public Zonotope< Interval<R> >
+    {
+      typedef typename traits<R>::arithmetic_type F;
+      typedef typename traits<R>::interval_type I;
+     public:
+      /*! \brief The real number type. */
+      typedef I real_type;
+      /*! \brief The type of denotable point contained by the parallelotope. */
+      typedef Point<I> state_type;
+     
+      template<class Rl1, class Rl2> 
+      Parallelotope(const Point<Rl1>& c, const LinearAlgebra::Matrix<Rl2>& g)
+        : Zonotope<I>(c,g) { }
+      
+      /*! \brief Over-approximate by an ordinary parallelotope. */
+      Parallelotope<R> over_approximation() const;
+
+      /*! \brief Tests if the parallelotope contains \a point. */
+      tribool contains(const Point<I>& point) const;
+
+      /*! \brief The vertices of the parallelotope. */
+      PointList<F> vertices() const;
+     private:
+      void _compute_generators_inverse() const;
+     private:
+      mutable LinearAlgebra::Matrix<I> _generators_inverse;
+    };
+       
+        
+    template<class R>
+    tribool
+    subset(const Rectangle<R>& r, const Parallelotope<R>& p);
     
-    template<typename R>
-    inline
-    Parallelotope<R> 
-    scale(const Parallelotope<R>& p, const R& scale_factor) 
+
+    /*! \brief Computes an over approximation from an interval parallelotope. */
+    template<class R> 
+    Parallelotope<R> over_approximation(const Parallelotope< Interval<R> >& p);
+    
+    
+    template<class R> inline
+    Parallelotope<R> scale(const Parallelotope<R>& p, const R& scale_factor) 
     {
       return Parallelotope<R>::scale(p,scale_factor);
     }
 
-    template<typename R>
-    inline
-    std::ostream&
-    operator<<(std::ostream& os, const Parallelotope<R>& p) 
+    template<class R> inline
+    std::ostream& operator<<(std::ostream& os, const Parallelotope<R>& p) 
     {
       return p.write(os);
     }
     
-    template<typename R>
-    inline
-    std::istream&
-    operator>>(std::ostream& is, Parallelotope<R>& p) 
+    template<class R> inline
+    std::istream& operator>>(std::ostream& is, Parallelotope<R>& p) 
     {
       return p.read(is);
     }
     
-   
-    template <typename R>
-    inline
-    bool 
-    subset_of_open_cover(const Parallelotope<R>& A,
-                         const ListSet<R, Parallelotope >& cover) 
-    {
-      throw std::domain_error("subset_of_open_cover(Parallelotope, ListSet<Parallelotope>) not implemented");
-    }
-    
-    template <typename R>
-    inline
-    bool 
-    inner_subset(const Parallelotope<R>& A,
-                 const ListSet<R,Parallelotope>& B) 
-    {
-      throw std::domain_error("inner_subset(Parallelotope, ListSet<Parallelotope>) not implemented");
-    }
     
     
 

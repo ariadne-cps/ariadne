@@ -82,10 +82,11 @@ void export_list_set()
   typedef GridMaskSet<R> RGridMaskSet;
   typedef PartitionTreeSet<R> RPartitionTreeSet;
   
-  def("regular_intersection",(RRectangleListSet(*)(const RRectangleListSet&,const RRectangleListSet&))(&regular_intersection));
-  def("interiors_intersect",(bool(*)(const RRectangleListSet&,const RRectangleListSet&))(&interiors_intersect));
-  def("interiors_intersect",(bool(*)(const RParallelotopeListSet&,const RParallelotopeListSet&))(&interiors_intersect));
-  def("interiors_intersect",(bool(*)(const RZonotopeListSet&,const RZonotopeListSet&))(&interiors_intersect));
+  def("open_intersection",(RRectangleListSet(*)(const RRectangleListSet&,const RRectangleListSet&))(&open_intersection));
+  def("disjoint",(tribool(*)(const RRectangleListSet&,const RRectangleListSet&))(&disjoint));
+  def("disjoint",(tribool(*)(const RParallelotopeListSet&,const RParallelotopeListSet&))(&disjoint));
+  def("disjoint",(tribool(*)(const RZonotopeListSet&,const RZonotopeListSet&))(&disjoint));
+  def("subset", (tribool(*)(const RRectangleListSet&,const RRectangleListSet&))(&subset));
 
   def("touching_intersection",(RRectangleListSet(*)(const RRectangleListSet&,const RRectangle&))(&touching_intersection));
   def("touching_intersection",(RRectangleListSet(*)(const RRectangleListSet&,const RParallelotope&))(&touching_intersection));
@@ -97,9 +98,6 @@ void export_list_set()
   def("touching_intersection",(RZonotopeListSet(*)(const RZonotopeListSet&,const RParallelotope&))(&touching_intersection));
   def("touching_intersection",(RZonotopeListSet(*)(const RZonotopeListSet&,const RZonotope&))(&touching_intersection));
 
-  def("disjoint", (bool(*)(const RRectangleListSet&,const RRectangleListSet&))(&disjoint));
-  def("inner_subset", (bool(*)(const RRectangleListSet&,const RRectangleListSet&))(&inner_subset));
-  def("subset", (bool(*)(const RRectangleListSet&,const RRectangleListSet&))(&subset));
 
   class_<RRectangleListSet>("RectangleListSet",init<int>())
     .def(init<RRectangle>())

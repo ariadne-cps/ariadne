@@ -75,17 +75,22 @@ test_point()
   
   /* Test input format */
   try {
-    string input("(0,0.75,0) (1,1,1,1) (0.666,0.666) \n");
+    string input("(0,0.75,0) (1,1,1,1) [0.666,0.666] \n");
     stringstream is(input);
     
-    is >> s1 >> s2 >> s3;
+    is >> s1;
+    cout << "s1=" << s1 << endl;
+    is >> s2;
+    cout << "s2=" << s2 << endl;
+    is >> s3;
+    cout << "s3=" << s3 << endl;
   } 
   catch(std::invalid_argument& e) {
-    cerr << "std::invalid_argument " << e.what() << "\n";
+    cerr << "std::invalid_argument: " << e.what() << "\n";
     return 1;
   }
   catch(std::runtime_error& e) {
-    cerr << "std::runtime_error " << e.what() << "\n";
+    cerr << "std::runtime_error: " << e.what() << "\n";
     return 1;
   }
   catch(...) {

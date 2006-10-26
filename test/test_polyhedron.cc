@@ -51,11 +51,16 @@ using namespace Parma_Polyhedra_Library::IO_Operators;
 
 int test_ppl_polyhedron();
 template<typename R> int test_polyhedron();
+template<> int test_polyhedron<Rational>();
 
 int main() {
-  test_ppl_polyhedron();
-  test_polyhedron<Float64>();
   
+  cout << boolalpha;
+  
+  test_ppl_polyhedron();
+  test_polyhedron<MPFloat>();
+  test_polyhedron<Rational>();
+   
   cerr << "INCOMPLETE ";
 }
 
@@ -74,9 +79,82 @@ test_polyhedron()
   cout << "test_polyhedron<" << name<R>() << ">" << endl;
   LinearAlgebra::Matrix<R> A("[1.0,0.875;-1,1.125;0.125,-2.25]");
   LinearAlgebra::Vector<R> b("[1.375,0.5,0.25]");
-  Polyhedron<R> ptp;
+  Polyhedron<R> phd;
   
-  ptp=Polyhedron<R>(A,b);
+  phd=Polyhedron<R>(A,b);
+  cout << "phd=" << phd << endl;
+  cout << "phd.dimension()=" << phd.dimension() << ", " 
+       << "phd.number_of_constraints()=" << phd.number_of_constraints() << endl;
+  //assert(!phd.empty());
+
+  Point<R> pt1("(0.25,0.375)");
+  cout << "pt1=" << pt1 << endl;
+
+  Constraint<R> c=Constraint<R> (phd.dimension(),phd.A().begin(),phd.b().begin()[0]);
+  cout << c << flush;
+  cout << "  " << c.satisfied_by(pt1) << endl;
   
+  typename Polyhedron<R>::constraints_const_iterator iter=phd.constraints_begin();
+  for(typename Polyhedron<R>::constraints_const_iterator c_iter=phd.constraints_begin();
+      c_iter!=phd.constraints_end(); ++c_iter)
+  {
+    const Constraint<R>& c=*c_iter;
+    cout << c << flush;
+    cout << "  " << c.satisfied_by(pt1) << endl;
+  }
+  
+  cout << "phd.contains(pt1)=" << phd.contains(pt1) << endl;
+  assert(phd.contains(pt1));
+  
+  Rectangle<R> r1("[-0.06125,0.25]x[0.125,0.375]");
+  cout << "r1=" << r1 << endl;
+  for(typename Rectangle<R>::vertices_iterator v_iter=r1.vertices_begin();
+      v_iter!=r1.vertices_end(); ++v_iter)
+  {
+    for(typename Polyhedron<R>::constraints_const_iterator c_iter=phd.constraints_begin();
+        c_iter!=phd.constraints_end(); ++c_iter)
+    {
+      cout << *c_iter << ".satisfied_by" << *v_iter << "=" << c_iter->satisfied_by(*v_iter) << endl;
+    }
+  }
+  cout << "subset(r1,phd)=" << subset(r1,phd) << endl;
+  assert(subset(r1,phd));
+  
+  Rectangle<R> r2("[-0.125,0.25]x[0.125,0.75]");
+  cout << "r2=" << r1 << endl;
+  cout << "subset(r2,phd)=" << subset(r2,phd) << endl;
+  assert(!subset(r2,phd));
+  
+  Zonotope<R> z1(r1);
+  cout << "z1=" << z1 << endl;
+  cout << "subset(z1,phd)=" << subset(z1,phd) << endl;
+  assert(subset(z1,phd));
+  
+  Polytope<R> p2(r1);
+  cout << "p2=" << flush; cout << p2 << endl;
+  cout << "subset(p2,phd)=" << subset(p2,phd) << endl;
+  assert(subset(p2,phd));
+ 
+  return 0;
+}
+
+
+template<>
+int 
+test_polyhedron<Rational>() 
+{
+  typedef Rational R;
+  cout << "test_polyhedron<" << name<R>() << ">" << endl;
+  LinearAlgebra::Matrix<R> A("[1,7/8;-1,9/8;1/8,-9/4]");
+  LinearAlgebra::Vector<R> b("[11/8,1/2,1/4]");
+  Polyhedron<R> phd(A,b);
+  cout << "phd=" << phd << endl;
+    
+  Polytope<R> pltp(phd);
+  cout << "Polytope(phd)=" << pltp << endl;
+    
+  Polyhedron<R> phd2(pltp);
+  cout << "Polyhedron(Polytope(phd))=" << phd2 << endl;
+    
   return 0;
 }

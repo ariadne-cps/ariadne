@@ -36,14 +36,18 @@
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
+#include "output/epsfstream.h"
 
 using namespace Ariadne;
+using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
+using namespace Ariadne::Output;
 using namespace std;
 
 template<typename R> int test_parallelotope();
 
 int main() {
+  cout << boolalpha;
   test_parallelotope<Real>();
   cerr << "INCOMPLETE ";
   return 0;
@@ -54,37 +58,69 @@ int
 test_parallelotope()
 { 
   Rectangle<R> r1=Rectangle<R>("[9,11]x[5,11]x[-1,1]");
-  Rectangle<R> r2=Rectangle<R>("[5,6]x[3,4]x[-0.5,0.5]");
+  Rectangle<R> r2=Rectangle<R>("[4.875,5.125]x[2.875,3.125]x[1.75,2.25]");
+  Rectangle<R> r3=Rectangle<R>("[-1,9]x[-1,6]x[0,4]");
+  Rectangle<R> r4=Rectangle<R>("[-1,9]x[-1,6]x[1,4]");
+
+  Point<R> c2("(5,3,2)");
+  Matrix<R> G2("[2,1,0;1,1,0;0,0,1]");
 
   Parallelotope<R> p1=Parallelotope<R>(r1);
-  Parallelotope<R> p2=Parallelotope<R>(r2);
+  Parallelotope<R> p2=Parallelotope<R>(c2,G2);
 
-  cout << p1 << p2 << endl;
+  cout << "r1=" << r1 << "\nr2=" << r2<< "\nr3=" << r3 << endl;
+  cout << "p1=" << p1 << "\np2=" << p2 << endl;
 
-  Point<R> pt1,pt2,pt3,pt4,pt5,pt6;
-  pt1=Point<R>("(17.0,15.0,-0.5) ");
-  pt2=Point<R>("(17.0,8.0,-0.5) ");
-  pt3=Point<R>("(14.0,15.0,-0.5) ");
-  pt4=Point<R>("(14.0,15.0,-0.5) ");
-  pt5=Point<R>("(14.0,15.0,-0.5) ");
-  pt6=Point<R>("(15.5,11.5,0) ");
-
-
-  cout << pt1 << pt2 << pt3 << pt4 << pt5 << pt6 << endl;
+  cout << "p1.empty()=" << p1.empty() << endl;
+//  cout << "disjoint(p1,p2)=" << disjoint(p1,p2) << endl;
+//  cout << "subset(p1,p2)=" << subset(p1,p2) << endl;
+  for(typename Rectangle<R>::vertices_iterator v_iter=r2.vertices_begin();
+      v_iter!=r2.vertices_end(); ++v_iter)
+  {
+    cout << "p2.contains(" << *v_iter << ")=" << p2.contains(*v_iter) << endl;
+  }
   
-  assert(!p1.contains(pt1));
-  assert(!p1.contains(pt2));
-  assert(!p1.contains(pt3));
-  assert(!p1.contains(pt4));
-  assert(!p1.contains(pt5));
-  assert(!p1.contains(pt6));
+  Zonotope<R>& z2=p2;
+  cout << "disjoint(r1,z2)=" << flush; cout << disjoint(r1,z2) << endl;
+  //cout << "subset(r1,z2)=" << flush; cout << subset(r1,z2) << endl;
+  //cout << "subset(r2,z2)=" << flush; cout << subset(r2,z2) << endl;
+  cout << "subset(z2,r3)=" << flush; cout << subset(z2,r3) << endl;
+  cout << "subset(z2,r4)=" << flush; cout << subset(z2,r4) << endl;
+  cout << "disjoint(r1,p2)=" << disjoint(r1,p2) << endl;
+  cout << "subset(r1,p2)=" << subset(r1,p2) << endl; 
+  cout << "subset(r2,p2)=" << subset(r2,p2) << endl; 
+  cout << "subset(p2,r3)=" << subset(p2,r3) << endl; 
+  cout << "subset(p2,r4)=" << subset(p2,r4) << endl; 
 
-  assert(!p1.interior_contains(pt1));
-  assert(!p1.interior_contains(pt2));
-  assert(!p1.interior_contains(pt3));
-  assert(!p1.interior_contains(pt4));
-  assert(!p1.interior_contains(pt5));
-  assert(!p1.interior_contains(pt6));
+  Point<R> pts[6];
+  pts[0]=Point<R>("(17.0,15.0,-0.5) ");
+  pts[1]=Point<R>("(17.0,8.0,-0.5) ");
+  pts[2]=Point<R>("(14.0,15.0,-0.5) ");
+  pts[3]=Point<R>("(14.0,15.0,-0.5) ");
+  pts[4]=Point<R>("(14.0,15.0,-0.5) ");
+  pts[5]=Point<R>("(15.5,11.5,0) ");
 
+  
+  cout << pts[0] << pts[1] << pts[2] << pts[3]<< pts[4] << pts[5]<< endl;
+  
+  assert(!p1.contains(pts[0]));
+  assert(!p1.contains(pts[1]));
+  assert(!p1.contains(pts[2]));
+  assert(!p1.contains(pts[3]));
+  assert(!p1.contains(pts[4]));
+  assert(!p1.contains(pts[5]));
+
+  Rectangle<R> bbox=p1.bounding_box();
+  epsfstream eps("test_parallelotope.eps",bbox,0,1);
+  eps << p1;
+  for(uint i=0; i!=6; ++i) {
+    if(p1.contains(pts[i])) {
+      eps << "\black\n" << pts[i];
+    } else {
+      eps << "\red\n" << pts[i];
+    }
+  }
+  eps.close();
+  
   return 0;
 }

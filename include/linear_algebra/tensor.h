@@ -42,7 +42,7 @@ namespace Ariadne {
     /*! \ingroup LinearAlgebra
      *  \brief Base class for tensor expressions. 
      */
-    template<typename E> 
+    template<class E> 
     class TensorExpression {
      public:
       typedef IndexArray index_array_type;
@@ -55,7 +55,7 @@ namespace Ariadne {
     /*! \ingroup LinearAlgebra
      *  \brief Base class for symmetric tensor expressions. 
      */
-    template<typename E> 
+    template<class E> 
     class SymmetricTensorExpression 
       : public TensorExpression<E>
     {
@@ -72,7 +72,7 @@ namespace Ariadne {
     /*! \ingroup LinearAlgebra
      *  \brief Base class for derivative tensor expressions. 
      */
-    template<typename E> 
+    template<class E> 
     class DerivativeTensorExpression 
       : public TensorExpression<E>
     {
@@ -90,7 +90,7 @@ namespace Ariadne {
     /*! \ingroup LinearAlgebra
      *  \brief A tensor. 
      */
-    template<typename R> 
+    template<class R> 
     class Tensor {
      public:
       typedef array<size_type> index_array_type;
@@ -206,7 +206,7 @@ namespace Ariadne {
      * \brief A tensor representing a derivative, with a single covariant (upper)
      * index, and symmetric contravariant (lower) indices. 
      */
-    template<typename R> 
+    template<class R> 
     class SymmetricTensor 
       : public SymmetricTensorExpression< SymmetricTensor<R> >
     {
@@ -307,7 +307,7 @@ namespace Ariadne {
       array<R> _elements;
     };
   
-    template<typename R>
+    template<class R>
     size_type 
     SymmetricTensor<R>::position(const multi_index_type& j) const
     {
@@ -316,7 +316,7 @@ namespace Ariadne {
       return j.position();
     }
     
-    template<typename R>
+    template<class R>
     size_type 
     SymmetricTensor<R>::position(const index_array_type& i) const
     {
@@ -331,7 +331,7 @@ namespace Ariadne {
      * \brief A tensor representing a derivative, with a single covariant (upper)
      * index, and symmetric contravariant (lower) indices. 
      */
-    template<typename R> 
+    template<class R> 
     class DerivativeTensor 
       : public DerivativeTensorExpression< DerivativeTensor<R> >
     {
@@ -444,7 +444,7 @@ namespace Ariadne {
       array<R> _elements;
     };
   
-    template<typename R>
+    template<class R>
     size_type 
     DerivativeTensor<R>::position(const size_type& i, const multi_index_type& j) const
     {
@@ -454,19 +454,19 @@ namespace Ariadne {
       return i*choose(this->_arg_size+this->_degree-1,this->_degree)+j.position();
     }
     
-    template<typename R>
+    template<class R>
     DerivativeTensor<R>
     operator*(const DerivativeTensor<R>& T, const Vector<R>& v) {
       return DerivativeTensor<R>::product(T,v);
     }
     
-    template<typename R>
+    template<class R>
     DerivativeTensor<R>
     operator*(const DerivativeTensor<R>& T, const Matrix<R>& A) {
       return DerivativeTensor<R>::product(T,A);
     }
 
-    template<typename R>
+    template<class R>
     DerivativeTensor<R>
     operator*(const DerivativeTensor<R>& T1, const DerivativeTensor<R>& T2) {
       return DerivativeTensor<R>::product(T1,T2);
@@ -474,21 +474,21 @@ namespace Ariadne {
 
     
     
-    template<typename R>
+    template<class R>
     inline
     std::ostream&
     operator<< (std::ostream& os, const Tensor<R>& T) {
       return T.write(os);
     } 
 
-    template<typename R>
+    template<class R>
     inline
     std::ostream&
     operator<< (std::ostream& os, const SymmetricTensor<R>& T) {
       return T.write(os);
     } 
     
-    template<typename R>
+    template<class R>
     inline
     std::ostream&
     operator<< (std::ostream& os, const DerivativeTensor<R>& T) {

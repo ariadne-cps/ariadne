@@ -1,7 +1,6 @@
 /***************************************************************************
- *            python/export_parallelotope.cc
+ *            python/export_zonotope.cc
  *
- *  22 March 2006
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
@@ -24,6 +23,7 @@
 
 
 #include "numeric/mpfloat.h"
+#include "numeric/numerical_traits.h"
 
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
@@ -50,38 +50,41 @@ touching_intersection(const BS1<R> &a,
   return a;
 }
 
+template<typename R> inline
+Zonotope<R> over_approximation_of_minkowski_sum(const Zonotope<R>& z1, const Zonotope<R>& z2) {
+  return minkowski_sum(z1,z2).over_approximation();
+}
+
+template<typename R> inline
+Zonotope<R> over_approximation_of_minkowski_difference(const Zonotope<R>& z1, const Zonotope<R>& z2) {
+  return minkowski_difference(z1,z2).over_approximation();
+}
+
 template<typename R>
 void export_zonotope() 
 {
+  typedef typename Numeric::traits<R>::arithmetic_type F;
+  
   typedef LinearAlgebra::Matrix<R> RMatrix;
   typedef Point<R> RPoint;
   typedef Zonotope<R> RZonotope;
   typedef Parallelotope<R> RParallelotope;
   typedef Rectangle<R> RRectangle;
   
-  typedef RZonotope (*ZntpRectBinFun) (const RZonotope&, const RRectangle&);
-  typedef RZonotope (*RectZntpBinFun) (const RRectangle&, const RZonotope&);
-   
-  def("interiors_intersect", (bool(*)(const RZonotope&,const RZonotope&))(&interiors_intersect));
-  def("interiors_intersect", (bool(*)(const RZonotope&,const RRectangle&))(&interiors_intersect));
-  def("interiors_intersect", (bool(*)(const RRectangle&,const RZonotope&))(&interiors_intersect));
-  def("disjoint", (bool(*)(const RZonotope&,const RZonotope&))(&disjoint));
-  def("disjoint", (bool(*)(const RZonotope&,const RRectangle&))(&disjoint));
-  def("disjoint", (bool(*)(const RRectangle&,const RZonotope&))(&disjoint));
-  def("inner_subset", (bool(*)(const RZonotope&,const RZonotope&))(&inner_subset));
-  def("inner_subset", (bool(*)(const RZonotope&,const RRectangle&))(&inner_subset));
-  def("inner_subset", (bool(*)(const RRectangle&,const RZonotope&))(&inner_subset));
-  def("subset", (bool(*)(const RZonotope&,const RZonotope&))(&subset));
-  def("subset", (bool(*)(const RZonotope&,const RRectangle&))(&subset));
-  def("subset", (bool(*)(const RRectangle&,const RZonotope&))(&subset));
+  typedef Zonotope<F> FZonotope;
+  
+  def("disjoint", (tribool(*)(const RZonotope&,const RZonotope&))(&disjoint));
+  def("disjoint", (tribool(*)(const RZonotope&,const RRectangle&))(&disjoint));
+  def("disjoint", (tribool(*)(const RRectangle&,const RZonotope&))(&disjoint));
+  def("subset", (tribool(*)(const RZonotope&,const RZonotope&))(&subset));
+  def("subset", (tribool(*)(const RZonotope&,const RRectangle&))(&subset));
+  def("subset", (tribool(*)(const RRectangle&,const RZonotope&))(&subset));
+
   def("touching_intersection", (RZonotope(*)(const RZonotope&,const RZonotope&))(&touching_intersection));
   def("touching_intersection", (RZonotope(*)(const RZonotope&,const RRectangle&))(&touching_intersection));
-  def("minkowski_sum", (RZonotope(*)(const RZonotope&,const RZonotope&))(&minkowski_sum));
-  def("minkowski_sum", (RZonotope(*)(const RZonotope&,const RRectangle&))(&minkowski_sum));
-  def("minkowski_sum", (RZonotope(*)(const RRectangle&,const RZonotope&))(&minkowski_sum));
-  def("minkowski_difference", (RZonotope(*)(const RZonotope&,const RZonotope&))(&minkowski_difference));
-  def("minkowski_difference", (RZonotope(*)(const RZonotope&,const RRectangle&))(&minkowski_difference));
-  def("minkowski_difference", (RZonotope(*)(const RRectangle&,const RZonotope&))(&minkowski_difference));
+
+  def("minkowski_sum", &over_approximation_of_minkowski_sum<R>);
+  def("minkowski_difference", &over_approximation_of_minkowski_difference<R>);
 
   class_<RZonotope>("Zonotope",init<int>())
     .def(init<RPoint,RMatrix>())
@@ -93,23 +96,13 @@ void export_zonotope()
     .def("generators",&RZonotope::generators, return_value_policy<copy_const_reference>())
     .def("dimension", &RZonotope::dimension)
     .def("empty", &RZonotope::empty)
-    .def("empty_interior", &RZonotope::empty_interior)
     .def("contains", &RZonotope::contains)
-    .def("interior_contains", &RZonotope::interior_contains)
     .def("bounding_box", &RZonotope::bounding_box)
     .def("subdivide", &RZonotope::subdivide)
-    .def("__add__", (RZonotope(*)(const RZonotope&,const RZonotope&))(&minkowski_sum))
-    .def("__add__", (RZonotope(*)(const RZonotope&,const RRectangle&))(&minkowski_sum))
-    .def("__add__", (RZonotope(*)(const RRectangle&,const RZonotope&))(&minkowski_sum))
-    .def("__sub__", (RZonotope(*)(const RZonotope&,const RZonotope&))(&minkowski_difference))
-    .def("__sub__", (RZonotope(*)(const RZonotope&,const RRectangle&))(&minkowski_difference))
-    .def("__sub__", (RZonotope(*)(const RRectangle&,const RZonotope&))(&minkowski_difference))
+    .def("__add__", &over_approximation_of_minkowski_sum<R>)
+    .def("__sub__", &over_approximation_of_minkowski_difference<R>)
     .def(self_ns::str(self))
   ;
 }
 
 template void export_zonotope<MPFloat>();
-template Zonotope<MPFloat> touching_intersection(const Zonotope<MPFloat> &,  
-                                                 const Zonotope<MPFloat> &);
-template Zonotope<MPFloat> touching_intersection(const Zonotope<MPFloat> &,  
-                                                 const Rectangle<MPFloat> &);

@@ -40,13 +40,13 @@ namespace Ariadne {
   namespace Geometry {
 
     /* Forward declaration of friends. */
-    template<typename R> std::ostream& operator<<(std::ostream&, const Ellipsoid<R>&);
-    template<typename R> std::istream& operator>>(std::istream&, Ellipsoid<R>&);
+    template<class R> std::ostream& operator<<(std::ostream&, const Ellipsoid<R>&);
+    template<class R> std::istream& operator>>(std::istream&, Ellipsoid<R>&);
    
     /*! \ingroup BasicSet
      *  \brief An ellipsoid \f$(x-c)^T A (x-c)\leq 1\f$ of arbitrary dimension.
      */
-    template <typename R>
+    template <class R>
     class Ellipsoid {
      public:
       /*! \brief The type of denotable real number used for the corners. */
@@ -190,40 +190,40 @@ namespace Ariadne {
     };
     
      
-    template <typename R>
+    template <class R>
     inline bool disjoint(const Ellipsoid<R>& A, const Ellipsoid<R>& B) 
     {
       throw std::runtime_error("bool disjoint(const Ellipsoid<R>&, const Ellipsoid<R>&) not implemented");
     }
     
-    template <typename R>
+    template <class R>
     inline bool disjoint(const Ellipsoid<R>& A, const Rectangle<R>& B) 
     {
       throw std::runtime_error("bool disjoint(const Ellipsoid<R>&, const Rectangle<R>&) not implemented");
     }
     
-    template <typename R>
+    template <class R>
     inline bool disjoint(const Rectangle<R>& A, const Ellipsoid<R>& B) 
     {
       return disjoint(B,A);
     }
     
     
-    template <typename R>
+    template <class R>
     inline bool interiors_intersect(const Ellipsoid<R>& A,
                                     const Ellipsoid<R>& B) 
     {
       throw std::runtime_error("bool interiors_intersect(const Ellipsoid<R>&, const Ellipsoid<R>&) not implemented");
     }
     
-    template <typename R>
+    template <class R>
     inline bool interiors_intersect(const Ellipsoid<R>& A,
                                     const Rectangle<R>& B) 
     {
       throw std::runtime_error("bool disjoint(const Ellipsoid<R>&, const Rectangle<R>&) not implemented");
     }
     
-    template <typename R>
+    template <class R>
     inline bool interiors_intersect(const Rectangle<R>& A,
                                     const Ellipsoid<R>& B) 
     {
@@ -231,14 +231,14 @@ namespace Ariadne {
     }
     
     
-    template <typename R>
+    template <class R>
     inline bool inner_subset(const Ellipsoid<R>& A,
                              const Ellipsoid<R>& B) 
     {
       throw std::runtime_error("bool inner_subset(const Ellipsoid<R>&, const Ellipsoid<R>&) not implemented");
     }
 
-    template <typename R>
+    template <class R>
     inline bool inner_subset(const Ellipsoid<R>& A,
                              const Rectangle<R>& B) 
     {
@@ -250,7 +250,7 @@ namespace Ariadne {
       return true;
     }
 
-    template <typename R>
+    template <class R>
     inline bool inner_subset(const Rectangle<R>& A,
                              const Ellipsoid<R>& B) 
     {
@@ -264,21 +264,21 @@ namespace Ariadne {
     }
 
     
-    template <typename R>
+    template <class R>
     inline bool subset(const Ellipsoid<R>& A, 
                        const Ellipsoid<R>& B) 
     {
       throw std::runtime_error("bool subset(const Ellipsoid<R>&, const Ellipsoid<R>&) not implemented");
     }
     
-    template <typename R>
+    template <class R>
     inline bool subset(const Ellipsoid<R>& A, 
                        const Rectangle<R>& B) 
     {
       return subset(A.bounding_box(),B);
     }
     
-    template <typename R>
+    template <class R>
     inline bool subset(const Rectangle<R>& A, 
                        const Ellipsoid<R>& B) 
     {
@@ -291,16 +291,16 @@ namespace Ariadne {
       return true;
     }
 
-    template<typename R>
+    template<class R>
     Geometry::Ellipsoid<R> 
     scale(const Geometry::Ellipsoid<R>& s, const R& scale_factor);
 
-    template <typename R>
+    template <class R>
     std::ostream&
     operator<<(std::ostream& os, const Ellipsoid<R>& s); 
 
     
-    template <typename R>
+    template <class R>
     std::istream& 
     operator>>(std::istream& is, Ellipsoid<R>& s);
 

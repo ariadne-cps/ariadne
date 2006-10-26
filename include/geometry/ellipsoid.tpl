@@ -39,13 +39,13 @@ namespace Ariadne {
       DimensionException(const std::string& s) : std::runtime_error(s) { }
     };
       
-    template<typename R>
+    template<class R>
     Ellipsoid<R>::Ellipsoid(size_type n)
       : _centre(n), _bilinear_form(LinearAlgebra::identity_matrix<R>(n))
     {
     }
     
-    template<typename R>
+    template<class R>
     Ellipsoid<R>::Ellipsoid(const state_type& c, const matrix_type& A)
       : _centre(c), _bilinear_form(A)
     {
@@ -54,14 +54,14 @@ namespace Ariadne {
       }
     }
      
-    template<typename R>
+    template<class R>
     Ellipsoid<R>::Ellipsoid(const std::string& s)
     {
       throw std::runtime_error("Ellipsoid(const std::string& s) not implemented");
     }
     
       
-    template <typename R>
+    template <class R>
     Ellipsoid<R>::Ellipsoid(const Sphere<R>& s)
       : _centre(s.centre()), _bilinear_form(s.dimension(),s.dimension())
     { 
@@ -71,7 +71,7 @@ namespace Ariadne {
     }
       
       
-    template <typename R>
+    template <class R>
     bool Ellipsoid<R>::contains(const state_type& point) const 
     {
       LinearAlgebra::Vector<Rational> p=point.position_vector();
@@ -81,7 +81,7 @@ namespace Ariadne {
       return inner_product(d,LinearAlgebra::Vector<Rational>(A*d))<=1;
     }
     
-    template <typename R>
+    template <class R>
     bool Ellipsoid<R>::interior_contains(const state_type& point) const 
     {
       LinearAlgebra::Vector<Rational> p=point.position_vector();
@@ -91,7 +91,7 @@ namespace Ariadne {
       return inner_product(d,LinearAlgebra::Vector<Rational>(A*d))<1;
     }
     
-    template<typename R>
+    template<class R>
     inline
     Geometry::Ellipsoid<R> 
     scale(const Geometry::Ellipsoid<R>& s, const R& scale_factor) 
@@ -115,7 +115,7 @@ namespace Ariadne {
       return Geometry::Ellipsoid<R>(new_centre, new_bilinear_form);
     }
 
-    template <typename R>
+    template <class R>
     std::ostream&
     operator<<(std::ostream& os, const Ellipsoid<R>& e) 
     {
@@ -128,7 +128,7 @@ namespace Ariadne {
       return os;
     }
     
-    template <typename R>
+    template <class R>
     std::istream& 
     operator>>(std::istream& is, Ellipsoid<R>& e)
     {

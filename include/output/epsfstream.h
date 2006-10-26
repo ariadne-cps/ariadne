@@ -60,7 +60,7 @@ namespace Ariadne {
 }
 
 namespace Ariadne {
-  namespace Postscript {
+  namespace Output {
     
     typedef struct{
       size_t pos;
@@ -110,7 +110,9 @@ namespace Ariadne {
       }
       template<typename R> Geometry::PointList<double> operator() (const Geometry::PointList<R>& ptl) const {
         Geometry::PointList<double> result(2,ptl.size());
-        for(size_type i=0; i!=ptl.size(); ++i) { result[i]=this->operator()(ptl[i]); }
+        for(size_type i=0; i!=ptl.size(); ++i) { 
+          result[i]=this->operator()(ptl[i]);
+        }
         return result;
       }
       template<typename R> Geometry::Rectangle<double> operator() (const Geometry::Rectangle<R>& r) const {
@@ -637,7 +639,7 @@ namespace Ariadne {
     operator<<(epsfstream& eps, const Geometry::Zonotope<R>& z)
     {
       Geometry::Point<double> centre=eps.projection_map()(z.centre());
-      Geometry::PointList<double> vertices=eps.projection_map()(z.vertices());      
+      Geometry::PointList<double> vertices=eps.projection_map()(Geometry::Zonotope<Rational>(z).vertices());      
       return draw(eps,vertices,centre);
     }
        

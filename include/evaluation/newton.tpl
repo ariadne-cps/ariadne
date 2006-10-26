@@ -78,7 +78,7 @@ namespace Ariadne {
         if(Geometry::disjoint(nr,r)) {
           throw EvaluationException("No result found -- disjoint");
         }
-        r=Geometry::intersection(nr,r);
+        r=Geometry::closed_intersection(nr,r);
         n=n-1;
       }
       throw EvaluationException("No result found -- disjoint");

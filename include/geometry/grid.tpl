@@ -36,7 +36,7 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template<typename R>
+    template<class R>
     IndexArray 
     Grid<R>::index(const Point<R>& s) const
     {
@@ -47,7 +47,7 @@ namespace Ariadne {
       return res;
     }
 
-    template<typename R>
+    template<class R>
     IndexArray  
     Grid<R>::lower_index(const Rectangle<R>& r) const {
       IndexArray res(r.dimension());
@@ -57,7 +57,7 @@ namespace Ariadne {
       return res;
     }
 
-    template<typename R>
+    template<class R>
     IndexArray  
     Grid<R>::upper_index(const Rectangle<R>& r) const {
       IndexArray res(r.dimension());
@@ -67,7 +67,7 @@ namespace Ariadne {
       return res;
     }
 
-    template<typename R>
+    template<class R>
     IrregularGrid<R>*
     IrregularGrid<R>::clone() const
     {
@@ -75,12 +75,12 @@ namespace Ariadne {
       return new IrregularGrid<R>(*this);
     }
 
-    template<typename R>
+    template<class R>
     IrregularGrid<R>::~IrregularGrid()
     {
     }
 
-    template<typename R>
+    template<class R>
     IrregularGrid<R>::IrregularGrid(const Rectangle<R>& r, size_type n)
       : _subdivision_coordinates(r.dimension())
     {
@@ -97,7 +97,7 @@ namespace Ariadne {
       create();
     }
 
-    template<typename R>
+    template<class R>
     IrregularGrid<R>::IrregularGrid(const Rectangle<R>& r, SizeArray sz)
       : _subdivision_coordinates(r.dimension())
     {
@@ -114,14 +114,14 @@ namespace Ariadne {
       create();
     }
 
-    template<typename R>
+    template<class R>
     IrregularGrid<R>::IrregularGrid(const array< std::vector<R> >& sp)
       : _subdivision_coordinates(sp)
     {
       create();
     }
 
-    template<typename R>
+    template<class R>
     IrregularGrid<R>::IrregularGrid(const ListSet<R,Rectangle>& ls)
       : _subdivision_coordinates(ls.dimension())
     {
@@ -134,7 +134,7 @@ namespace Ariadne {
       create();
     }
 
-    template<typename R>
+    template<class R>
     IrregularGrid<R>::IrregularGrid(const IrregularGrid<R>& g1, IrregularGrid<R>& g2)
       : _subdivision_coordinates(g1.dimension())
     {
@@ -148,7 +148,7 @@ namespace Ariadne {
       create();
     }
 
-    template<typename R>
+    template<class R>
     void
     IrregularGrid<R>::create()
     {
@@ -160,14 +160,14 @@ namespace Ariadne {
       }
     }
 
-    template<typename R>
+    template<class R>
     GridBlock<R>
     IrregularGrid<R>::bounds() const
     { 
       return GridBlock<R>(*this,block());
     }
     
-    template<typename R>
+    template<class R>
     array< std::vector<index_type> >
     IrregularGrid<R>::index_translation(const IrregularGrid<R>& from, const IrregularGrid<R>& to)
     {
@@ -183,7 +183,7 @@ namespace Ariadne {
     }
 
 
-    template<typename R>
+    template<class R>
     RegularGrid<R>*
     RegularGrid<R>::clone() const
     {
@@ -191,21 +191,21 @@ namespace Ariadne {
       return new RegularGrid<R>(*this);
     }
 
-    template<typename R>
+    template<class R>
     inline bool 
     Grid<R>::operator==(const Grid<R>& g) const 
     { 
        return this==&g;
     }
             
-    template<typename R>
+    template<class R>
     inline bool 
     Grid<R>::operator!=(const Grid<R>& g) const 
     { 
        return !(*this==g);
     }
 
-    template<typename R>
+    template<class R>
     inline bool 
     IrregularGrid<R>::operator==(const Grid<R>& g) const 
     {
@@ -216,7 +216,7 @@ namespace Ariadne {
       		((const IrregularGrid<R>&)(g))._subdivision_coordinates; 
     }
       
-    template<typename R>
+    template<class R>
     inline bool 
     IrregularGrid<R>::operator!=(const Grid<R>& g) const 
     { 
@@ -228,7 +228,7 @@ namespace Ariadne {
 
     }
 
-    template<typename R>
+    template<class R>
     inline bool 
     RegularGrid<R>::operator==(const Grid<R>& g) const 
     { 
@@ -239,7 +239,7 @@ namespace Ariadne {
       		((const RegularGrid<R>&)g)._subdivision_lengths; 
     }
             
-    template<typename R>
+    template<class R>
     inline bool 
     RegularGrid<R>::operator!=(const Grid<R>& g) const 
     { 
@@ -250,7 +250,7 @@ namespace Ariadne {
       		((const RegularGrid<R>&)g)._subdivision_lengths;
     }
 
-    template<typename R>
+    template<class R>
     FiniteGrid<R>::FiniteGrid(const Rectangle<R>& bb, const size_type& s)
       : _grid_ptr(0), _grid_type(REGULAR), _bounds(bb.dimension())
     {
@@ -263,7 +263,7 @@ namespace Ariadne {
       this->_bounds=bounding_box.lattice_set();
     }
 
-    template<typename R>
+    template<class R>
     Rectangle<R>
     FiniteGrid<R>::bounding_box() const
     {
@@ -299,21 +299,21 @@ namespace Ariadne {
     }
 
 
-    template<typename R>
+    template<class R>
     std::ostream&
     operator<<(std::ostream& os, const Grid<R>& g)
     {
       return g.write(os);
     }
 
-    template<typename R>
+    template<class R>
     std::ostream&
     IrregularGrid<R>::write(std::ostream& os) const
     {
       return os << "IrregularGrid(" << this->_subdivision_coordinates << ")";
     }
 
-    template<typename R>
+    template<class R>
     std::ostream&
     RegularGrid<R>::write(std::ostream& os) const
     {
@@ -321,14 +321,14 @@ namespace Ariadne {
                   << this->_subdivision_lengths << " )\n";
     }
 
-    template<typename R>
+    template<class R>
     std::istream&
     operator>>(std::istream& is, Grid<R>& g)
     {
       return g.read(is);
     }
 
-    template<typename R>
+    template<class R>
     std::istream&
     IrregularGrid<R>::read(std::istream& is)
     {
@@ -358,7 +358,7 @@ namespace Ariadne {
       return is; 
     }
 
-    template<typename R>
+    template<class R>
     std::istream&
     RegularGrid<R>::read(std::istream& is)
     {
@@ -389,14 +389,14 @@ namespace Ariadne {
       return is; 
     }
 
-    template<typename R>
+    template<class R>
     std::ostream&
     operator<<(std::ostream& os, const FiniteGrid<R>& fg)
     {
       return os << "FiniteGrid(grid=" << fg.grid() << ", bounds=" << fg.bounds() << ")";
     }
 
-    template<typename R>
+    template<class R>
     dimension_type 
     FiniteGrid<R>::dimension() const 
     {

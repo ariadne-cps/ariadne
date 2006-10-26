@@ -33,10 +33,11 @@
 
 #include "../declarations.h"
 
+#include "../base/tribool.h"
+
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 
-#include "../geometry/ppl_polyhedron.h"
 #include "../geometry/point.h"
 #include "../geometry/point_list.h"
 #include "../geometry/rectangle.h"
@@ -44,12 +45,20 @@
 namespace Ariadne {  
   namespace Geometry {
 
-
+    template<class R> class PolytopeVerticesIterator;
+      
     /*! \ingroup BasicSet
      *  \brief A polytope (bounded polyhedral set) described by its vertices.
+     * 
+     * \b Storage: A polytope in d dimensions with n vertices is stored as an 
+     * array with \f$d\times n\f$ elements.
      */ 
-    template<typename R>
+//     * The ith element of the jth vertex is in position \f$(d+1)j+i\f$.
+//     * the \f$j(d+1)+d\f$th element is always set to 1, this is for 
+//     * possible compatibility with unbounded polytopes.
+    template<class R>
     class Polytope {
+      typedef typename Numeric::traits<R>::arithmetic_type F;
       public:
        /*! \brief The type of denotable real numbers used to describe the convex hull. */
       typedef R real_type;
@@ -61,22 +70,28 @@ namespace Ariadne {
       typedef Ariadne::LinearAlgebra::Matrix<R> matrix_type;
       /*! \brief The type of a list of points. */
       typedef PointList<R>  state_list_type;
+      /*! \brief The type of a list of points. */
+      typedef PolytopeVerticesIterator<R> vertices_iterator;
+      typedef PolytopeVerticesIterator<R> vertices_const_iterator;
      public:
-       /*! \brief Construct an empty polytope in dimension \a n. */
+      /*! \brief Construct an empty polytope in dimension \a n. */
       Polytope(dimension_type d=0);
      
-     /*! \brief Construct from a matrix whose columns give the vertices. */
+      /*! \brief Construct from a matrix whose columns give the vertices. */
       explicit Polytope(const LinearAlgebra::Matrix<R>& A);
      
       /*! \brief Construct from a list of vertices. */
       explicit Polytope(const PointList<R>& v);
      
       /*! \brief Construct from a rectangle. */
-      explicit Polytope<R>(const Rectangle<R>& rect);
+      explicit Polytope(const Rectangle<R>& rect);
+            
+      /*! \brief Construct from a polyhedron. */
+      explicit Polytope(const Polyhedron<R>& p);
             
       /*! \brief Copy constructor. 
        */
-      Polytope<R>(const Polytope<R>& original);
+      template<typename OR> inline Polytope(const Polytope<OR>& original);
           
       /*! \brief Copy assignment operator. 
        *
@@ -86,16 +101,21 @@ namespace Ariadne {
       Polytope<R>& operator=(const Polytope<R>& original);
       //@}
  
+      /*! \brief The matrix of generators. */
+      const LinearAlgebra::Matrix<R>& generators() const;
       /*! \brief The number of vertices of the convex set. */
       size_type number_of_vertices() const;
-
       /*! \brief The vertices of the convex set. */
       PointList<R> vertices() const;
+      /*! \brief The \a i th vertex. */
+      Point<R> vertex(const size_type& i) const;
+      /*! \brief An iterator to the beginning of the vertices. */
+      vertices_const_iterator vertices_begin() const;
+      /*! \brief An iterator to the end of the vertices. */
+      vertices_const_iterator vertices_end() const;
       
       //@{
       //! \name Conversion operations
-      /*! \brief Convert to a Parma Polyhedral Library closed polyhedron. */
-      operator Parma_Polyhedra_Library::C_Polyhedron () const;
       //@}
 
 
@@ -107,24 +127,20 @@ namespace Ariadne {
       
       /*! \brief Checks for emptyness.
        */
-      bool empty() const;
-      
-      /*! \brief Checks for emptyness of the interior.
-       */
-      bool empty_interior() const;
-   
+      tribool empty() const;
+         
 #ifdef DOXYGEN
       /*! \brief The vertices of the polytope. */
       state_list_type vertices() const; 
+      /*! \brief An iterator to the vertices of the polytope. */
+      vertices_const_iterator vertices_begin() const; 
+      /*! \brief An iterator to the vertices of the polytope. */
+      vertices_const_iterator vertices_end() const; 
 #endif
 
       /*! \brief Tests if a point is an element of the polytope.
        */
-      bool contains(const state_type& point) const;
-
-      /*! \brief Tests if a point is an element of the interior of the polytope.
-       */
-      bool interior_contains(const state_type& point) const;
+      tribool contains(const state_type& point) const;
            
       /*! \brief A rectangle containing the polytope. */
       Rectangle<R> bounding_box() const;
@@ -133,36 +149,31 @@ namespace Ariadne {
       //@{
       //! \name Geometric binary predicates
       /*! \brief Tests equality. */
-      friend bool Geometry::equal<>(const Polytope<R>& A, 
-                                    const Polytope<R>& B);
-      /*! \brief Tests disjointness. */
-      friend bool Geometry::disjoint<>(const Polytope<R>& A, 
+      friend tribool Geometry::equal<>(const Polytope<R>& A, 
                                        const Polytope<R>& B);
-    
-      /*! \brief Tests intersection of interiors. */
-      friend bool Geometry::interiors_intersect<>(const Polytope<R>& A, 
-                                                  const Polytope<R>& B);
-      
-      /*! \brief Tests inclusion of \a A in interior of \a B. */
-      friend bool Geometry::inner_subset<>(const Polytope<R>& A, 
-                                           const Polytope<R>& B);
+      /*! \brief Tests disjointness. */
+      friend tribool Geometry::disjoint<>(const Polytope<R>& A, 
+                                          const Polytope<R>& B);
+        
+      /*! \brief Tests inclusion of \a A in \a B. */
+      friend tribool Geometry::subset<>(const Polytope<R>& A, 
+                                        const Rectangle<R>& B);
     
       /*! \brief Tests inclusion of \a A in \a B. */
-      friend bool Geometry::subset<>(const Polytope<R>& A, 
-                                     const Polytope<R>& B);
-    
+      friend tribool Geometry::subset<>(const Polytope<R>& A, 
+                                        const Polyhedron<R>& B);
       //@}
       
 
       //@{
       //! \name Geometric binary operations
       /*! \brief The intersection of two polyhedra. */
-      friend Polytope<R> intersection<>(const Polytope<R>& A, 
-                                          const Polytope<R>& B);
+      friend Polytope<R> closed_intersection<>(const Polytope<R>& A, 
+                                               const Polytope<R>& B);
     
       /*! \brief The closure of the intersection of the interiors of two polyhedra. */
-      friend Polytope<R> regular_intersection<>(const Polytope<R>& A, 
-                                                  const Polytope<R>& B);
+      friend Polytope<R> open_intersection<>(const Polytope<R>& A, 
+                                             const Polytope<R>& B);
     
       /*! \brief The convex hull of two polyhedra. */
       friend Polytope<R> convex_hull<>(const Polytope<R>& A, 
@@ -170,118 +181,107 @@ namespace Ariadne {
       
       /*! \brief The Minkowski (pointwise) sum of two polyhedra. */
       friend Polytope<R> minkowski_sum<>(const Polytope<R>& A, 
-                                           const Polytope<R>& B);
+                                         const Polytope<R>& B);
    
       /*! \brief The Minkowski (pointwise) difference of two polyhedra. */
       friend Polytope<R> minkowski_difference<>(const Polytope<R>& A, 
                                                   const Polytope<R>& B);
       //@}
  #else
-      static bool equal(const Polytope<R>& A, const Polytope<R>& B);
-      static bool disjoint(const Polytope<R>& A, const Polytope<R>& B);
-      static bool interiors_intersect(const Polytope<R>& A, const Polytope<R>& B);
-      static bool subset(const Polytope<R>& A, const Polytope<R>& B);
-      static bool inner_subset(const Polytope<R>& A, const Polytope<R>& B);
-      
-      static Polytope<R> convex_hull(const Polytope<R>& A, const Polytope<R>& B);
-#endif
+     private:
+      static void _instantiate_geometry_operators();
+     public:
+  #endif
+
+      //@{ 
+      //! \name Input/output operations
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream& os) const;
+      /*! \brief Read from an input stream. */
+      std::istream& read(std::istream& is);
+      //@}
      private:    
-      LinearAlgebra::Matrix<R> _vertices;
+      LinearAlgebra::Matrix<R> _generators;
     };
    
-    template<typename R> std::ostream& operator<<(std::ostream& os, const Polytope<R>& p);
-    template<typename R> std::istream& operator>>(std::istream& os, Polytope<R>& p);
-   
-    
-    template<typename R> inline 
-    bool equal(const Polytope<R>& A, const Polytope<R>& B) {
-      return Polytope<R>::equal(A,B);
-    }
-   
-    template<typename R> inline 
-    bool disjoint(const Polytope<R>& A, const Polytope<R>& B) {
-      return Polytope<R>::disjoint(A,B);
-    }
-    
-    template<typename R> inline 
-    bool 
-    disjoint(const Polytope<R>& A, const Rectangle<R>& B) {
-      return Polytope<R>::disjoint(A,Polytope<R>(B));
-    }
-    
-    template<typename R> inline 
-    bool 
-    disjoint(const Rectangle<R>& A, const Polytope<R>& B) {
-      return Polytope<R>::disjoint(Polytope<R>(A),B);
-    }
-    
-    
-    template<typename R> inline 
-    bool
-    interiors_intersect(const Polytope<R>& A, const Polytope<R>& B) {
-      return Polytope<R>::interiors_intersect(A,B);
-    }
-    
-    template<typename R> inline 
-    bool
-    interiors_intersect(const Polytope<R>& A, const Rectangle<R>& B) {
-      return Polytope<R>::interiors_intersect(A,Polytope<R>(B));
-    }
-    
-    template<typename R> inline 
-    bool
-    interiors_intersect(const Rectangle<R>& A, const Polytope<R>& B) {
-      return Polytope<R>::interiors_intersect(Polytope<R>(A),B);
-    }
-    
-   
-    template<typename R> inline 
-    bool 
-    inner_subset(const Polytope<R>& A, const Polytope<R>& B) {
-      return Polytope<R>::inner_subset(A,B);
-    }
-    
-    template<typename R> inline 
-    bool 
-    inner_subset(const Polytope<R>& A, const Rectangle<R>& B) {
-      return Polytope<R>::inner_subset(A,Polytope<R>(B));
-    }
+    template<class R>
+    class Polytope< Interval<R> >
+    {
+      typedef Interval<R> I;
+     public:
+      template<class Rl> Polytope(const PointList<Rl>& v);
+      template<class Rl> explicit Polytope(const Rectangle<Rl>& r);
+      dimension_type dimension() const { return _vertices.dimension(); }
+      dimension_type number_of_vertices() const { return _vertices.size(); }
+      const PointList< Interval<R> >& vertices() const;
+     private:
+      PointList<I> _vertices;
+    };
 
-    template<typename R> inline 
-    bool 
-    inner_subset(const Rectangle<R>& A, const Polytope<R>& B) {
-      return Polytope<R>::inner_subset(Polytope<R>(A),B);
-    }
+    template<class R> inline
+    std::ostream& operator<<(std::ostream& os, const Polytope<R>& p) {
+      return p.write(os); }
+    template<class R> inline
+    std::istream& operator>>(std::istream& os, Polytope<R>& p) {
+      return p.read(os); }
+   
+
+    template<class R>
+    class PolytopeVerticesIterator
+      : public boost::iterator_facade<PolytopeVerticesIterator<R>,
+                                      Point<R>,
+                                      boost::forward_traversal_tag,
+                                      Point<R> const&,
+                                      Point<R> const*
+                                     >
+    {
+     public:
+      PolytopeVerticesIterator(const Polytope<R>& plytp, const size_type& j) 
+        : _p(&plytp), _j(j) { }
+      bool equal(const PolytopeVerticesIterator<R>& other) const {
+        return this->_j==other._j && this->_p ==other._p; }
+      void increment() {
+        ++this->_j; }
+      const Point<R>& dereference() const {
+        this->_v=this->_p->vertex(this->_j); return this->_v; }
+     private:
+      const Polytope<R>* _p; size_type _j; mutable Point<R> _v;
+    };
+    
+    template<class R> 
+    tribool equal(const Polytope<R>& A, const Polytope<R>& B);
+   
+    template<class R>  
+    tribool disjoint(const Polytope<R>& A, const Polytope<R>& B);
+    
+    template<class R>
+    tribool disjoint(const Polytope<R>& A, const Rectangle<R>& B);
+    
+    template<class R> 
+    tribool disjoint(const Rectangle<R>& A, const Polytope<R>& B);
+    
       
       
-    template<typename R> inline 
-    bool 
-    subset(const Polytope<R>& A, const Polytope<R>& B) {
-      return Polytope<R>::subset(A,B);
-    }
+    template<class R> 
+    tribool subset(const Polytope<R>& A, const Polytope<R>& B);
 
-    template<typename R> inline 
-    bool 
-    subset(const Polytope<R>& A, const Rectangle<R>& B) {
-      return Polytope<R>::subset(A,Polytope<R>(B));
-    }
+    template<class R> 
+    tribool subset(const Polytope<R>& A, const Rectangle<R>& B);
 
-    template<typename R> inline 
-    bool 
-    subset(const Rectangle<R>& A, const Polytope<R>& B) {
-      return Polytope<R>::subset(Polytope<R>(A),B);
-    }
+    template<class R> 
+    tribool subset(const Rectangle<R>& A, const Polytope<R>& B);
 
 
-    template<typename R> inline 
+    template<class R> 
     Polytope<R> 
-    convex_hull(const Polytope<R>& A, const Polytope<R>& B) {
-      return Polytope<R>::convex_hull(A,B);
-    }
+    convex_hull(const Polytope<R>& A, const Polytope<R>& B);
   
     
     
-    
+    template<class R> template<class Rl> inline 
+    Polytope<R>::Polytope(const Polytope<Rl>& original)
+      : _generators(original.generators()) { }
+
 
   }
 }

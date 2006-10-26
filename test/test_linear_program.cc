@@ -51,15 +51,22 @@ template<typename R>
 void 
 test_linear_program()
 {
-  Matrix<R> A("[1,1,1,1; 1,1,1,1; 1,1,1,1]");
+  Matrix<R> T1("[1,0,-1,0,1; 0,1,0,-1,1; 1,1,0,0,3; -1,-1,1,1,-2]");
+  Matrix<R> T2("[1,0,-1,0,1; 0,1,0,-1,1; 1,1,0,0,3/2; -1,-1,1,1,-2]");
   Vector<R> b("[1,1,1]");
   Vector<R> c("[1,1,1,1]");
+  LinearProgram<R> LP;
   
-  LinearProgram<R> LP(A,b,c);
+  LP=LinearProgram<R>(T1);
   cout << LP << endl;
-
-  LP.solve();
+  cout << LP.is_feasible() << endl;
   cout << LP << endl;
-
+  cout << LP.feasible_point() << endl;
+  
+  LP=LinearProgram<R>(T2);
+  cout << LP << endl;
+  cout << LP.is_feasible() << endl;
+  cout << LP << endl;
+  
   
 }

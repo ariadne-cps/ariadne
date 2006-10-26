@@ -43,7 +43,7 @@ namespace Ariadne {
     /*! \ingroup LinearAlgebra
      *  \brief A matrix stored in SVD product form. 
      */
-    template<typename Real>
+    template<class Real>
     class SVDMatrix {
      public:
       /*! \brief Construct from an ordinary matrix. */
@@ -75,7 +75,7 @@ namespace Ariadne {
       Matrix<Real> _Vt;
     };
     
-    template <typename Real>
+    template <class Real>
     inline 
     SVDMatrix<Real>::SVDMatrix(const Matrix<Real>& A) 
       : _S(TBLAS::min(A.number_of_rows(),A.number_of_columns())),
@@ -88,7 +88,7 @@ namespace Ariadne {
       TLAPACK::gesvd(TBLAS::RowMajor,m,n,work.begin(),n,_S.data().begin(),_U.data().begin(),m,_Vt.data().begin(),n);
     }
 
-    template <typename Real>
+    template <class Real>
     inline
     Matrix<Real>
     SVDMatrix<Real>::D() const
@@ -102,7 +102,7 @@ namespace Ariadne {
       return result;
     }
 
-    template <typename Real>
+    template <class Real>
     inline
     Real
     SVDMatrix<Real>::operator() (const size_type& i, const size_type& j) const
@@ -118,7 +118,7 @@ namespace Ariadne {
     }
 
 
-    template <typename Real>
+    template <class Real>
     inline
     SVDMatrix<Real>::operator Matrix<Real> () const
     {

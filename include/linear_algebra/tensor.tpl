@@ -36,7 +36,7 @@
 namespace Ariadne {
   namespace LinearAlgebra {
 
-    template<typename R>
+    template<class R>
     DerivativeTensor<R>::DerivativeTensor(const Vector<R>& v) 
       : _res_size(v.size()), _arg_size(1), _degree(0), _elements(v.size())
     {
@@ -45,7 +45,7 @@ namespace Ariadne {
       }
     }
     
-    template<typename R>
+    template<class R>
     DerivativeTensor<R>::DerivativeTensor(const Matrix<R>& A) 
       : _res_size(A.size(0)), _arg_size(A.size(1)), _degree(1), _elements(A.size(0)*A.size(1))
     {
@@ -56,21 +56,21 @@ namespace Ariadne {
       }
     }
     
-    template<typename R>
+    template<class R>
     DerivativeTensor<R>
     DerivativeTensor<R>::product(const DerivativeTensor<R>& T, const Vector<R>& v) 
     {
       return DerivativeTensor<R>::product(T,DerivativeTensor<R>(v));
     }
       
-    template<typename R>
+    template<class R>
     DerivativeTensor<R>
     DerivativeTensor<R>::product(const DerivativeTensor<R>& T, const Matrix<R>& A) 
     {
       return DerivativeTensor<R>::product(T,DerivativeTensor<R>(A));
     }
       
-    template<typename R>
+    template<class R>
     DerivativeTensor<R>
     DerivativeTensor<R>::product(const DerivativeTensor<R>& T1, const DerivativeTensor<R>& T2) 
     {
@@ -113,14 +113,14 @@ namespace Ariadne {
 
 
     
-    template<typename R>
+    template<class R>
     std::ostream&
     Tensor<R>::write(std::ostream& os) const
     {
       return os << "Tensor(...)";
     }
     
-    template<typename R>
+    template<class R>
     std::ostream&
     SymmetricTensor<R>::write(std::ostream& os) const
     {
@@ -136,7 +136,7 @@ namespace Ariadne {
       return os;
     }
 
-    template<typename R>
+    template<class R>
     std::ostream&
     DerivativeTensor<R>::write(std::ostream& os) const
     {

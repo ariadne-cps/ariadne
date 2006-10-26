@@ -109,7 +109,7 @@ template<typename Rl>
 int
 test_linear_algebra()
 {
-  typedef typename Numeric::numerical_traits<Rl>::arithmetic_type F;
+  typedef typename Numeric::traits<Rl>::arithmetic_type F;
   Rl Arptr[9]={-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0};
   Matrix<Rl> Ar(3,3,Arptr,3);
 
@@ -120,9 +120,9 @@ test_linear_algebra()
   Matrix<F> R=QR.R();
   cout << "A=" << A << "\n";
   cout << "Q=" << Q << "\n";
-  cout << "Q^T=" << Q.transpose() << "\n";
+  //cout << "Q^T=" << Q.transpose() << "\n";
   cout << "R=" << R << "\n";
-  cout << "Q*Q^T=" << Q*Q.transpose() << "\n";
+  //cout << "Q*Q^T=" << Q*Q.transpose() << "\n";
   cout << setprecision(20);
   cout << "Q*R=" << Q*R << "\n";
   cout << "QR =" << Matrix<F>(QR) << "\n";

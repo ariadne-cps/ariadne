@@ -57,7 +57,14 @@ namespace Ariadne {
     */
     class Rational { };
 #else
-    typedef mpq_class Rational;
+    class Rational : public mpq_class 
+    {
+     public:
+      Rational() : mpq_class() { }
+      template<typename R> Rational(const R& x) : mpq_class(x) { }
+      template<typename R1,typename R2> Rational(const R1& x1,const R2& x2) : mpq_class(x1,x2) { }
+    };
+    
 #endif
   
     inline Integer numerator(const Rational& num){ 
@@ -66,14 +73,6 @@ namespace Ariadne {
     inline Integer denominator(const Rational& num){ 
       return num.get_den();}
   
-  
-     
-    template<> class numerical_traits<Rational> {
-     public:
-      typedef field_tag algebraic_category;
-      typedef Rational field_extension_type;
-      typedef Rational arithmetic_type;
-    };
   
     template<> inline Rational min(const Rational& x1, const Rational& x2) {
       return (x1<=x2) ? x1 : x2; }
@@ -94,8 +93,9 @@ namespace Ariadne {
       return x1/x2; }
 
     template<> inline Rational pow(const Rational& q, const int& n) {
-      Rational r=1; Rational p=n; uint e=1;
-      while(e<n) { if(e&n) { r*=p; } p*=p; e*=2; }
+      if(n<0) { return pow(q,-n); }
+      Rational r=1; Rational p=n; uint e=1; uint un=n;
+      while(e<un) { if(e&un) { r*=p; } p*=p; e*=2; }
       return r; 
     }      
     

@@ -38,7 +38,7 @@
 
 using namespace Ariadne;
 using namespace Ariadne::Geometry;
-using namespace Ariadne::Postscript;
+using namespace Ariadne::Output;
 
 #include <boost/python.hpp>
 using namespace boost::python;

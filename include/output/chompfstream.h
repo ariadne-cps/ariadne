@@ -34,7 +34,7 @@
 #include "../combinatoric/lattice_map.h"
 
 namespace Ariadne {
-  namespace CHomP {
+  namespace Output {
     /*
     class chompfstream;
     

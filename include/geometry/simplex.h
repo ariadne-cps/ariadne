@@ -56,9 +56,11 @@ namespace Ariadne {
      * A simplex is represented by its corner vertices. (We could instead define a
      * simplex by the inequalities describing its faces, but this is less 
      * convenient for simplicial complexes.) Since the representation is the
-     * same as that of a polyhedron, the %Simplex class is a subclass of Polyhedron.
+     * same as that of a polyhedron, the %Simplex class is a subclass of Polytope.
      *
-     * 
+     * The contains(const Point<R>&) operation is much more efficient for simplices
+     * than general polytopes, since it can be performed by a simple matrix inversion
+     * without the need to solve a linear programming problem.
      */
     template<class R>
     class Simplex : public Polytope<R>

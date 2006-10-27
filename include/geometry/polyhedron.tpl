@@ -99,6 +99,14 @@ namespace Ariadne {
     {
     }
     
+    
+    template<class R>
+    Polyhedron<R>::Polyhedron(dimension_type d, size_type nc, const R* data)
+      : _A(nc,d,data,d+1,1), _b(nc,data+d,d+1)
+    { 
+    }
+   
+   
     template<class R>
     Polyhedron<R>::Polyhedron(const LinearAlgebra::Matrix<R>& A,
                               const LinearAlgebra::Vector<R>& b) 

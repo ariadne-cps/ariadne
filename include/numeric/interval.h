@@ -127,6 +127,14 @@ namespace Ariadne {
       bool contains(const R& r) const { return this->lower()<=r && r<=this->upper(); }
       //@}
       
+      //@{
+      //! \name Input/output operations
+      /*! \brief Write to an output stream . */
+      std::ostream& write(std::ostream& os) const;
+      /*! \brief Read from an input stream . */
+      std::istream& read(std::istream& is);
+      //@}
+
 #ifdef DOXYGEN
       //@{
       //! \name Arithmetic operations
@@ -180,15 +188,61 @@ namespace Ariadne {
       /*! \brief The smallest interval containing \a ivl1 and \a ivl2. */
       friend Interval<R> hull<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
       //@}
-#endif
       
       //@{
-      //! \name Input/output operations
-      /*! \brief Write to an output stream . */
-      std::ostream& write(std::ostream& os) const;
-      /*! \brief Read from an input stream . */
-      std::istream& read(std::istream& is);
+      //! \name \name Approximation operations.
+      /*! \brief Test if the interval \a ivl contains the value \a x. */
+      friend bool contains_value<>(const Interval<R>& ivl, const R& x);
+      /*! \brief The approximate value represented by the interval \a ivl. */
+      friend R approximate_value<>(const Interval<R>& ivl);
+      /*! \brief An upper bound for the error of the approximate value represented by the interval \a ivl. */
+      friend R error_bound(const Interval<R>& ivl);
       //@}
+      
+      //@{
+      //! \name \name Comparison operators.
+      /*! \brief Equality operator. */
+      friend template<class R1, class R2> tribool operator==(const Interval<R1>& ivl1, const Interval<R2>& ivl2); 
+      /*! \brief Inequality operator. */
+      friend template<class R1, class R2> tribool operator!=(const Interval<R1>& ivl1, const Interval<R2>& ivl2); 
+      /*! \brief Less than operator. */
+      friend template<class R1, class R2> tribool operator<(const Interval<R1>& ivl1, const Interval<R2>& ivl2);  
+      /*! \brief Greater than operator. */
+      friend template<class R1, class R2> tribool operator>(const Interval<R1>& ivl1, const Interval<R2>& ivl2);
+      /*! \brief Less than or equal to operator. */
+      friend template<class R1, class R2> tribool operator<=(const Interval<R1>& ivl1, const Interval<R2>& ivl2);
+      /*! \brief Greater than or equal to operator. */
+      friend template<class R1, class R2> tribool operator>=(const Interval<R1>& ivl1, const Interval<R2>& ivl2);
+
+      /*! \brief Equality operator. */
+      friend template<class R1, class R2> tribool operator==(const Interval<R1>& ivl1, const R2& ivl2); 
+      /*! \brief Inequality operator. */
+      friend template<class R1, class R2> tribool operator!=(const Interval<R1>& ivl1, const R2& ivl2); 
+      /*! \brief Less than operator. */
+      friend template<class R1, class R2> tribool operator<(const Interval<R1>& ivl1, const R2& ivl2);  
+      /*! \brief Greater than operator. */
+      friend template<class R1, class R2> tribool operator>(const Interval<R1>& ivl1, const R2& ivl2);
+      /*! \brief Less than or equal to operator. */
+      friend template<class R1, class R2> tribool operator<=(const Interval<R1>& ivl1, const R2& ivl2);
+      /*! \brief Greater than or equal to operator. */
+      friend template<class R1, class R2> tribool operator>=(const Interval<R1>& ivl1, const R2& ivl2);
+
+      /*! \brief Equality operator. */
+      friend template<class R1, class R2> tribool operator==(const R1& ivl1, const Interval<R2>& ivl2); 
+      /*! \brief Inequality operator. */
+      friend template<class R1, class R2> tribool operator!=(const R1& ivl1, const Interval<R2>& ivl2); 
+      /*! \brief Less than operator. */
+      friend template<class R1, class R2> tribool operator<(const R1& ivl1, const Interval<R2>& ivl2);  
+      /*! \brief Greater than operator. */
+      friend template<class R1, class R2> tribool operator>(const R1& ivl1, const Interval<R2>& ivl2);
+      /*! \brief Less than or equal to operator. */
+      friend template<class R1, class R2> tribool operator<=(const R1& ivl1, const Interval<R2>& ivl2);
+      /*! \brief Greater than or equal to operator. */
+      friend template<class R1, class R2> tribool operator>=(const R1& ivl1, const Interval<R2>& ivl2);
+
+      //@}
+#endif
+      
     };
     
     /*!\ingroup Numeric
@@ -209,12 +263,22 @@ namespace Ariadne {
       R* _lower; R* _upper;
     };
     
+    
+    template<class R> inline 
+    R conv_approx(const Interval<R>& ivl) {
+      return approximate_value(ivl);
+    }
+    
     template<class R> inline
-    R approximate_value(const Interval<R>& ivl) 
-    {
+    R approximate_value(const Interval<R>& ivl) {
       return ivl.centre();
       //return Numeric::med_appox(ivl.lower(),ivl.upper());
       //return div_approx(add_appox(ivl.lower(),ivl.upper()),2);
+    }
+    
+    template<class R> inline
+    R approximate_value(const R& x) {
+      return x;
     }
     
     template<class R> inline
@@ -233,7 +297,6 @@ namespace Ariadne {
 
 
 
-    /*! \brief Equality operator. */
     template<class R1, class R2> inline
     tribool operator==(const Interval<R1>& ivl1, const Interval<R2>& ivl2) { 
       if(ivl1.lower()==ivl2.upper() && ivl1.upper()==ivl2.lower()) { return true; }
@@ -241,7 +304,7 @@ namespace Ariadne {
       return indeterminate;
     }
       
-    /*! \brief Inequality operator. */
+    
     template<class R1, class R2> inline
     tribool operator!=(const Interval<R1>& ivl1, const Interval<R2>& ivl2) { 
       if(ivl1.lower()>ivl2.upper() || ivl1.upper()<ivl2.lower()) { return true; }
@@ -249,7 +312,7 @@ namespace Ariadne {
       return indeterminate;
     }
         
-    /*! \brief Less than operator. */
+    
     template<class R1, class R2> inline
     tribool operator<(const Interval<R1>& ivl1, const Interval<R2>& ivl2) { 
       if(ivl1.upper()<ivl2.lower()) { return true; } 
@@ -257,7 +320,7 @@ namespace Ariadne {
       return indeterminate;
     }
         
-    /*! \brief Greater than operator. */
+    
     template<class R1, class R2> inline
     tribool operator>(const Interval<R1>& ivl1, const Interval<R2>& ivl2) { 
       if(ivl1.lower()>ivl2.upper()) { return true; }
@@ -265,7 +328,7 @@ namespace Ariadne {
       return indeterminate;
     }
       
-    /*! \brief Less than or equal to operator. */
+    
     template<class R1, class R2> inline
     tribool operator<=(const Interval<R1>& ivl1, const Interval<R2>& ivl2) { 
       if(ivl1.upper()<=ivl2.lower()) { return true; } 
@@ -273,7 +336,7 @@ namespace Ariadne {
       return indeterminate;
     }
         
-    /*! \brief Greater than or equal to operator. */
+    
     template<class R1, class R2> inline
     tribool operator>=(const Interval<R1>& ivl1, const Interval<R2>& ivl2) { 
       if(ivl1.lower()>=ivl2.upper()) { return true; }
@@ -283,7 +346,7 @@ namespace Ariadne {
       
 
 
-    /*! \brief Equality operator. */
+    
     template<class R1, class R2> inline
     tribool operator==(const Interval<R1>& ivl, const R2& x) { 
       if(ivl.lower()==x() && ivl.upper()==x) { return true; }
@@ -291,7 +354,7 @@ namespace Ariadne {
       return indeterminate;
     }
       
-    /*! \brief inquality operator. */
+    
     template<class R1, class R2> inline
     tribool operator!=(const Interval<R1>& ivl, const R2& x) { 
       if(ivl.lower()>x || ivl.upper()<x) { return true; }
@@ -299,7 +362,7 @@ namespace Ariadne {
       return indeterminate;
     }
       
-    /*! \brief Less than operator. */
+    
     template<class R1, class R2> inline
     tribool operator<(const Interval<R1>& ivl, const R2& x) { 
       if(ivl.upper()<x) { return true; }
@@ -307,7 +370,7 @@ namespace Ariadne {
       return indeterminate;
     }
       
-    /*! \brief Greater than operator. */
+    
     template<class R1, class R2> inline
     tribool operator>(const Interval<R1>& ivl, const R2& x) { 
       if(ivl.lower()>x) { return true; }
@@ -315,7 +378,7 @@ namespace Ariadne {
       return indeterminate;
     }
       
-    /*! \brief Less than or equal to operator. */
+    
     template<class R1, class R2> inline
     tribool operator<=(const Interval<R1>& ivl, const R2& x) { 
       if(ivl.lower()<=x) { return true; }
@@ -323,7 +386,7 @@ namespace Ariadne {
       return indeterminate;
     }
 
-    /*! \brief Greater than or equal to operator. */
+    
     template<class R1, class R2> inline
     tribool operator>=(const Interval<R1>& ivl, const R2& x) { 
       if(ivl.lower()>=x) { return true; }
@@ -333,43 +396,43 @@ namespace Ariadne {
 
 
       
-    /*! \brief Equality operator. */
+    
     template<class R1, class R2> inline
     tribool operator==(const R1& x, const Interval<R2>& ivl) { 
       return ivl==x; 
     }
 
       
-    /*! \brief inquality operator. */
+    
     template<class R1, class R2> inline
     tribool operator!=(const R1& x, const Interval<R2>& ivl) {
       return ivl!=x;
     }
       
-    /*! \brief Less than operator. */
+    
     template<class R1, class R2> inline
     tribool operator<(const R1& x, const Interval<R2>& ivl) {
       return ivl>x;
     }
       
-    /*! \brief Greater than operator. */
+    
     template<class R1, class R2> inline
     tribool operator>(const R1& x, const Interval<R2>& ivl) {
       return ivl<x;
     }
 
-    /*! \brief Less than or equal to operator. */
+    
     template<class R1, class R2> inline
     tribool operator<=(const R1& x, const Interval<R2>& ivl) {
       return ivl>=x;
     }
       
-    /*! \brief Greater than or equal to operator. */
+    
     template<class R1, class R2> inline
     tribool operator>=(const R1& x, const Interval<R2>& ivl) {
       return ivl<=x;
     }
-
+    //@}
 
 
 

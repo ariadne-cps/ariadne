@@ -100,6 +100,17 @@ namespace Ariadne {
     }
     
     
+    void BinaryTree::advance(BinaryWord& word)
+    {
+      while(!word.empty() && word.back()==BinaryTree::right) {
+        word.pop_back();
+      }
+      if(!word.empty()) {
+        word.set_back(BinaryTree::right);
+      }
+    }
+    
+    
     
     BinaryTreeIterator::BinaryTreeIterator(BooleanArray::const_iterator i, BooleanArray::const_iterator e)
       : _position(i), _word()

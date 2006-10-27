@@ -114,12 +114,18 @@ namespace Ariadne {
       /*! \brief Adjoins a basic set to the back of the list. */
       void push_back(const BS<R>& A) {
         if (this->dimension()==0) { this->_dimension=A.dimension(); }
-
         if (A.dimension()!=this->dimension()) {
           throw std::invalid_argument("The denotable set has a different space dimension to the list.");
         }
+        this->_vector.push_back(A);
+      }
 
-        _vector.push_back(A);
+      /*! \brief Removes the basic set at the back of the list. */
+      void pop_back() {
+        if (this->_vector.empty()) { 
+          throw std::runtime_error("Attempting to pop from an empty ListSet");
+        }
+        this->_vector.pop_back();
       }
 
       /*! \brief Return the denotable set's space dimension. 

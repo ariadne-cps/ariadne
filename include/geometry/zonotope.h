@@ -55,8 +55,8 @@ namespace Ariadne {
     /*!\ingroup BasicSet
      * \brief A zonotope of arbitrary dimension.
      * 
-     * A zonotope is a set of the form \f$c+Ae\f$, where \f$||e||_{\infty}\leq1\f$.
-     * The columns of the matrix \f$A\f$ are the <em>generators</em> of the 
+     * A zonotope is a set of the form \f$c+Ge\f$, where \f$||e||_{\infty}\leq1\f$.
+     * The columns of the matrix \f$G\f$ are the <em>generators</em> of the 
      * zonotope. 
      *
      * Zonotopes are always bounded.
@@ -233,6 +233,7 @@ namespace Ariadne {
       
       /*! \brief A rectangle containing the given zonotope. */
       Rectangle<R> bounding_box() const;
+      
       //@}
       
 #ifdef DOXYGEN

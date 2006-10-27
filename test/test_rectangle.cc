@@ -74,6 +74,9 @@ test_rectangle()
     cout << "r1=" << r1 << ", r2=" << r2 << ", r3=" << r3 << ", r4=" << r4 << "\n"
          << "r5=" << r5 << ", r6=" << r6 << ", r7=" << r7 << endl;
     
+    cout << "r2.volume()=" << r2.volume() << endl;
+    assert(contains_value(Interval<R>(1.74,1.76),r2.volume()));
+    
     assert(r1==r7);
     assert(indeterminate(equal(r1,r7)));
     cout << "centre(r2)=" << r2.centre() << endl;

@@ -75,6 +75,15 @@ namespace Ariadne {
     }
 
     template<class R>
+    R
+    Parallelotope<R>::volume() const
+    {
+      return approximate_value(this->generators().determinant());
+    }
+   
+    
+    
+    template<class R>
     void 
     Parallelotope<R>::_compute_generators_inverse() const 
     {  

@@ -153,7 +153,11 @@ namespace Ariadne {
 
     /*!\ingroup BasicSet
      * \ingroup PartitionTree
-     * \brief A rectangle defined on a partition tree.
+     * \brief A rectangular cell in a partition tree.
+     *
+     * Defined as a SubdivisionTreeCell within a base cell given as a Rectangle<R>.
+     *
+     * Satisfies the requirements of a RectangleExpression.
      */
     template<class R>
     class PartitionTreeCell
@@ -200,6 +204,9 @@ namespace Ariadne {
       
       /*!\brief The upper bound of the \a i th coordinate. */
       R upper_bound(dimension_type i) const;
+
+      /*! \brief An approximation to the volume of the set. */
+      R volume() const;
      private:
       const Rectangle<R> _unit_box;
       Combinatoric::SubdivisionTreeCell _subdivision_cell;
@@ -209,6 +216,8 @@ namespace Ariadne {
 
     /*!\ingroup PartitionTree
      * \brief A tree structure following a PartitionScheme.
+     *
+     * Defined as a SubdivisionTree within a base cell given as a Rectangle<R>.
      */
     template<class R>
     class PartitionTree {
@@ -268,6 +277,16 @@ namespace Ariadne {
     /*!\ingroup DenotableSet
      * \ingroup PartitionTree
      * \brief A denotable set on a partition grid, defined using a partition tree of cells.
+     *
+     * Intersection (as an open set), union and set difference can be 
+     * computed in time which is linear in the number elements of the partitions
+     * underlying the two sets.
+     *
+     * Testing inclusion of a cell in a %PartitionTreeSet, or adjoining a single
+     * cell also takes unit time, which means that a LatticeMaskSet may be
+     * preferable if these operations are common.
+     *
+     * Defined as a SubdivisionTree within a base cell given as a Rectangle<R>.
      */
     template<class R>
     class PartitionTreeSet {
@@ -357,6 +376,9 @@ namespace Ariadne {
       const_iterator begin() const { return const_iterator(_unit_box,_subdivision_set.begin()); }
       /*! \brief Constant iterator to the end of the cells in the set. */
       const_iterator end() const { return const_iterator(_unit_box,_subdivision_set.end()); }
+      
+      /*! \brief An approximation to the volume of the set. */
+      R volume() const;
       
 #ifdef DOXYGEN
       /*! \brief Compute an outer approximation to set \a s based on the partition scheme \a ps to depth a d. */

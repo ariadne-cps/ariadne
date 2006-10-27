@@ -51,12 +51,18 @@ namespace Ariadne {
     void
     LatticeMultiMap::adjoin_to_image(const LatticeCell& lc, const LatticeCellListSet& img)
     {
+      //std::cerr << "LatticeMultiMap::adjoin_to_image(const LatticeCell& lc, const LatticeCellListSet& img)" << std::endl;
+      //std::cerr << "result_dimension=" << this->_result_dimension << " lc=" << lc << " img=" << img << std::endl;
       typedef std::map<LatticeCell,LatticeCellListSet>::iterator map_iterator;
       map_iterator iter=this->_map.find(lc);
       if(iter==this->_map.end()) {
         this->_map.insert(std::make_pair(lc,LatticeCellListSet(this->_result_dimension)));
+        //std::cerr << *this << std::endl;
         iter=this->_map.find(lc);
+        //std::cerr << *iter << std::endl;
+        assert(iter!=this->_map.end());
       }
+      //std::cerr << iter->first << " " << iter->second.dimension() << " " << iter->second << std::endl;
       iter->second.adjoin(img);
     }
     

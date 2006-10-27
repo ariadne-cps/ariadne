@@ -45,10 +45,28 @@ namespace Ariadne {
     /*! \brief Tags a class representing a field. */
     class field_tag { };
       
-    /*! \brief Typedef's describing a numerical type. */
-    template<class T1, class T2> class traits { };
-  //    template<class T1, class T2=T1> class traits { };
+#ifndef DOXYGEN
+    template<class T1, class T2> struct traits { };
+    //template<class T1, class T2=T1> class traits { };
+
+#else
+    /*! \brief Typedef's describing the results of binary operations involving \a T1 and \a T2. */
+    template<class T1, class T2> struct traits<T1,T2> { 
+      /*!\brief The default type used to represent the result of a binary arithmetical operation. */
+      typedef AT arithmetic_type;
+    };
     
+    /*! \brief Typedef's describing a numerical type. */
+    template<class T> struct traits<T,T> { 
+      /*!\brief The default type used to store the result of a binary arithmetical operation. */
+      typedef AT arithmetic_type;
+      /*!\brief The type used for interval arithmetic over \a T. Defaults to Interval<T> if \a T is
+       * a number type, and T if \a T is an interval type.
+       */
+      typedef IT interval_type;
+    };
+#endif      
+
     template<> struct traits<int> {
       typedef int arithmetic_type;
     };

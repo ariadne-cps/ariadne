@@ -84,59 +84,7 @@ namespace Ariadne {
       ss >> *this;
     }
      
-    bool
-    operator<(const LatticeCell& lc1, const LatticeCell& lc2) {
-      assert(lc1.dimension()==lc2.dimension());
-      for(dimension_type i=0; i!=lc1.dimension(); ++i) {
-        if(lc1.lower_bound(i)<lc2.lower_bound(i)) { 
-          return true;
-        }
-        else if(lc1.lower_bound(i)>lc2.lower_bound(i)) {
-          return false;
-        }
-      }
-      return false;
-    }
-
-    std::istream& 
-    operator>>(std::istream& is, LatticeCell& lc)
-    {
-      char c;
-      is >> c;
-      if(c=='(') {
-        /* Representation as a literal (l1,l2,...,ln) */
-        std::vector< int > v;
-        int i;
-        c=',';
-        while(c==',') {
-          is >> i;
-          v.push_back(i);
-          c=' ';
-          while( is && c==' ') {
-            is >> c;
-          }
-        }
-        if(is) {
-          assert(c=')');
-        }
-        
-        IndexArray l(v.size());
-        for(size_type i=0; i!=v.size(); ++i) {
-          l[i]=v[i];
-        }
-        lc=LatticeCell(l);
-      }
-      else {
-        is.putback(c);
-        /* representation as lower and upper corners */
-        /* FIXME */
-        // throw invalid_input("Not implemented");
-      }
-      return is;
-    }
-    
-    
-    
+   
     LatticeBlock::LatticeBlock(const std::string& s)
       : _lower(), _upper()
     {
@@ -216,44 +164,6 @@ namespace Ariadne {
       return LatticeBlock(lower,upper);
     }
 
-    std::istream& 
-    operator>>(std::istream& is, LatticeBlock& r)
-    {
-      char c;
-      is >> c;
-      is.putback(c);
-      if(c=='[') {
-        /* Representation as a literal [a1,b1]x[a2,b2]x...x[an,bn] */
-        std::vector< Interval<int> > v;
-        Interval<int> i;
-        c='x';
-        while(c=='x') {
-          is >> i;
-          v.push_back(i);
-          c=' ';
-          while( is && c==' ') {
-            is >> c;
-          }
-        }
-        if(is) {
-          is.putback(c);
-        }
-        
-        IndexArray l(v.size());
-        IndexArray u(v.size());
-        for(size_type i=0; i!=v.size(); ++i) {
-          l[i]=v[i].lower();
-          u[i]=v[i].upper();
-        }
-        r=LatticeBlock(l,u);
-      }
-      else {
-        /* representation as lower and upper corners */
-        /* FIXME */
-        // throw invalid_input("Not implemented");
-      }
-      return is;
-    }
 
     
     LatticeBlock
@@ -316,13 +226,13 @@ namespace Ariadne {
       }
 
       LatticeCell c=(*this)[0];
-      IndexArray lower(c.lower());
-      IndexArray upper(c.upper());
+      IndexArray lower(c.lower_corner());
+      IndexArray upper(c.upper_corner());
 
       for(size_type i=1; i!=this->size(); ++i) {
         c=(*this)[i];
-        assign_min(lower,c.lower());
-        assign_max(upper,c.upper());
+        assign_min(lower,c.lower_corner());
+        assign_max(upper,c.upper_corner());
       }
       return LatticeBlock(lower,upper);
     }
@@ -398,13 +308,13 @@ namespace Ariadne {
       }
       
       LatticeBlock r=(*this)[0];
-      IndexArray lower(r.lower());
-      IndexArray upper(r.upper());
+      IndexArray lower(r.lower_corner());
+      IndexArray upper(r.upper_corner());
 
       for(size_type i=1; i!=this->size(); ++i) {
         r=(*this)[i];
-        assign_min(lower,r.lower());
-        assign_max(upper,r.upper());
+        assign_min(lower,r.lower_corner());
+        assign_max(upper,r.upper_corner());
       }
       return LatticeBlock(lower,upper);
     }
@@ -534,9 +444,9 @@ namespace Ariadne {
       }
       
       dimension_type n=this->dimension();
-      const IndexArray& rlower(r.lower());
-      const IndexArray& rupper(r.upper());
-      const IndexArray& glower(this->block().lower());
+      const IndexArray& rlower(r.lower_corner());
+      const IndexArray& rupper(r.upper_corner());
+      const IndexArray& glower(this->block().lower_corner());
       const SizeArray gstrides(this->block().strides());
 
       if(n==1) {
@@ -624,8 +534,8 @@ namespace Ariadne {
         IndexArray origin(_block.dimension(),0);
         _block=LatticeBlock(origin,origin);
       }
-      _lower=_block.lower();
-      _upper=_block.upper();
+      _lower=_block.lower_corner();
+      _upper=_block.upper_corner();
       _sizes=_block.sizes();
       _strides=_block.strides();
       _mask.resize(_strides[_block.dimension()]);
@@ -892,15 +802,15 @@ namespace Ariadne {
 
     LatticeMaskSet LatticeMaskSet::neighbourhood() const {
       LatticeMaskSet result=*this;
-      const IndexArray& lower_bound=result.block().lower();
-      const IndexArray& upper_bound=result.block().upper();
+      const IndexArray& lower_bound=result.block().lower_corner();
+      const IndexArray& upper_bound=result.block().upper_corner();
       for(LatticeMaskSet::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
         LatticeCell cell=*iter;
         IndexArray lower(this->dimension());
         IndexArray upper(this->dimension());
         for(dimension_type i=0; i!=this->dimension(); ++i) {
-          lower[i]=std::max(cell.lower()[i]-1,lower_bound[i]);
-          upper[i]=std::min(cell.upper()[i]+1,upper_bound[i]);
+          lower[i]=std::max(cell.lower_bound(i)-1,lower_bound[i]);
+          upper[i]=std::min(cell.upper_bound(i)+1,upper_bound[i]);
         }
         LatticeBlock block(lower,upper);
         result.adjoin(block);
@@ -910,11 +820,11 @@ namespace Ariadne {
 
     LatticeMaskSet LatticeMaskSet::adjoining() const {
       LatticeMaskSet result=*this;
-      const IndexArray& lower_bound=result.block().lower();
-      const IndexArray& upper_bound=result.block().upper();
+      const IndexArray& lower_bound=result.block().lower_corner();
+      const IndexArray& upper_bound=result.block().upper_corner();
       for(LatticeMaskSet::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
         LatticeCell cell=*iter;
-        IndexArray lower=(cell.lower());
+        IndexArray lower=(cell.lower_corner());
         for(dimension_type i=0; i!=this->dimension(); ++i) {
           if(lower[i]>lower_bound[i]) {
             lower[i]-=1;
@@ -931,48 +841,124 @@ namespace Ariadne {
       return result;
     }
 
-    std::ostream& 
-    operator<<(std::ostream& os, const LatticeCell& c) 
+    std::istream& 
+    operator>>(std::istream& is, LatticePoint& lpt)
     {
-      if(c.dimension()==0) {
+      std::vector<int> v;
+      Utility::read_vector(is, v, '(', ')');
+      lpt=LatticePoint(v.size());
+      for(dimension_type i=0; i!=lpt.dimension(); ++i) {
+        lpt[i]=v[i];
+      }
+      return is;
+    }
+    
+    std::istream& 
+    operator>>(std::istream& is, LatticeCell& lc)
+    {
+      /* Representation as a literal (l1,l2,...,ln) */
+      std::vector<int> v;
+      Utility::read_vector(is, v, '(', ')');
+      IndexArray l(v.size());
+      for(size_type i=0; i!=v.size(); ++i) {
+        l[i]=v[i];
+      }
+      lc=LatticeCell(l);
+      return is;
+    }
+    
+    
+    std::istream& 
+    operator>>(std::istream& is, LatticeBlock& r)
+    {
+      char c;
+      is >> c;
+      is.putback(c);
+      if(c=='[') {
+        /* Representation as a literal [a1,b1]x[a2,b2]x...x[an,bn] */
+        std::vector< Interval<int> > v;
+        Interval<int> i;
+        c='x';
+        while(c=='x') {
+          is >> i;
+          v.push_back(i);
+          c=' ';
+          while( is && c==' ') {
+            is >> c;
+          }
+        }
+        if(is) {
+          is.putback(c);
+        }
+        
+        IndexArray l(v.size());
+        IndexArray u(v.size());
+        for(size_type i=0; i!=v.size(); ++i) {
+          l[i]=v[i].lower();
+          u[i]=v[i].upper();
+        }
+        r=LatticeBlock(l,u);
+      }
+      else {
+        /* representation as lower and upper corners */
+        /* FIXME */
+        // throw invalid_input("Not implemented");
+      }
+      return is;
+    }
+    
+    std::ostream& 
+    operator<<(std::ostream& os, const LatticePoint& lpt) 
+    {
+      os << "(" << lpt[0];
+      for(dimension_type i=1; i!=lpt.dimension(); ++i) {
+        os << "," << lpt[i];
+      }
+      return os << ")";
+    }
+        
+    std::ostream& 
+    operator<<(std::ostream& os, const LatticeCell& lc) 
+    {
+      if(lc.dimension()==0) {
         return os<<"Empty";
       }
-      os << c[0];
-      for(dimension_type i=1; i!=c.dimension(); ++i) {
-        os << "x" << c[i];
+      os << lc[0];
+      for(dimension_type i=1; i!=lc.dimension(); ++i) {
+        os << "x" << lc[i];
       }
       return os;
     }
         
     std::ostream& 
-    operator<<(std::ostream& os, const LatticeBlock& r) 
+    operator<<(std::ostream& os, const LatticeBlock& lb) 
     {
-      if(r.empty() || r.dimension()==0) {
+      if(lb.empty() || lb.dimension()==0) {
         return os<<"Empty";
       }
-      os << r[0];
-      for(dimension_type i=1; i!=r.dimension(); ++i) {
-        os << "x" << r[i];
+      os << lb[0];
+      for(dimension_type i=1; i!=lb.dimension(); ++i) {
+        os << "x" << lb[i];
       }
       return os;
     }
     
     std::ostream& 
-    operator<<(std::ostream& os, const LatticeMaskSet& ms) 
+    operator<<(std::ostream& os, const LatticeMaskSet& lms) 
     {
-      return os << "LatticeMaskSet(\n  block=" << ms.block() << "\n  mask=" << ms.mask() << "\n)\n";
+      return os << "LatticeMaskSet(\n  block=" << lms.block() << "\n  mask=" << lms.mask() << "\n)\n";
     }
         
     std::ostream& 
-    operator<<(std::ostream& os, const LatticeCellListSet& cls) 
+    operator<<(std::ostream& os, const LatticeCellListSet& lcls) 
     {
-      return Utility::write_sequence(os,cls.begin(),cls.end(),'[',']',',');
+      return Utility::write_sequence(os,lcls.begin(),lcls.end(),'[',']',',');
     }
     
     std::ostream& 
-    operator<<(std::ostream& os, const LatticeBlockListSet& rls) 
+    operator<<(std::ostream& os, const LatticeBlockListSet& lbls) 
     {
-      return Utility::write_sequence(os,rls.begin(),rls.end(),'[',']',',');
+      return Utility::write_sequence(os,lbls.begin(),lbls.end(),'[',']',',');
     }
     
     
@@ -980,14 +966,14 @@ namespace Ariadne {
     class chompfstream : public std::ofstream { };
     
     chompfstream& 
-    operator<<(chompfstream& cfs, const LatticeMaskSet& ms) 
+    operator<<(chompfstream& cfs, const LatticeMaskSet& lms) 
     {
       std::ostream& os=cfs;
-      dimension_type d=ms.dimension();
-      for(LatticeMaskSet::const_iterator iter=ms.begin(); iter!=ms.end(); ++iter) {
-        LatticeCell c=*iter;
+      dimension_type d=lms.dimension();
+      for(LatticeMaskSet::const_iterator iter=lms.begin(); iter!=lms.end(); ++iter) {
+        LatticeCell lc=*iter;
         for(size_type i=0; i!=d; ++i) {
-          uint k=c.lower_bound(i);
+          uint k=lc.lower_bound(i);
           os << k << " ";
         }
         os << "\n";

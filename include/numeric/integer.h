@@ -64,11 +64,13 @@ namespace Ariadne {
     //! \name %Integer arithmetic
     //@{
     //! \ingroup Numeric
+    /*! \brief Minimum. */
     template<> inline Integer min(const Integer& n1, const Integer& n2) {
       //std::cerr << "min<" << name<R>() << ">" << std::endl;
       return n1<=n2 ? n1 : n2;
     }
   
+    /*! \brief Maximum. */
     template<> inline Integer max(const Integer& n1, const Integer& n2) {
       //std::cerr << "min<" << name<R>() << ">" << std::endl;
       return n1>=n2 ? n1 : n2;
@@ -117,7 +119,7 @@ namespace Ariadne {
     
     //! \name %Integer functions
     //@{
-    /*! \brief Factorial. */
+    /*! \brief Factorial with mixed argument and result types. */
     template<class N1, class N2> inline
     N1 factorial(const N2& n) {
       N1 result=1;
@@ -134,6 +136,20 @@ namespace Ariadne {
       return result*n;
     }
 
+    /*!\brief The number of ways of choosing \a k objects from \a n. */
+    template<class N> inline 
+    N choose(const N& n, const N& k) 
+    {
+      //std::cerr << "choose(" << n << "," << k << ")=" << std::flush;
+      if(k==0 || k==n) { return 1; }
+      if(n<0 || k<0 || k>n) { return 0; }
+      N m=(n-k < k) ? k : static_cast<N>(n-k);
+      N result=1;
+      for(N i=n; i!=n-m; --i) { result*=i; }
+      for(N i=m; i!=1; --i) { result/=i; }
+      return result;
+    }
+    
     /*! \brief Greatest common divisor. */
     template<class N> inline 
     N gcd(const N &a, const N &b) {

@@ -53,10 +53,7 @@ namespace Ariadne {
     class LatticeMaskSet;
     class LatticeBlock;
       
-    /*!\brief Advance a binary word used to describe a position in a tree by
-     * removing all trailing right's and replacing the last left by a right.    
-     */
-    void advance(BinaryWord& word);
+
     
     /*!\ingroup SubdivisionTree
      * \brief A binary tree with a boolean labelling on the leaves. */
@@ -103,7 +100,7 @@ namespace Ariadne {
     };
 
     /*!\ingroup SubdivisionTree
-     * \brief A sequence of coordinate giving axes of subdivision for a subdivision tree. 
+     * \brief A sequence of coordinates giving axes of subdivision for a subdivision tree. 
      */
     class SubdivisionSequence
     {
@@ -158,7 +155,19 @@ namespace Ariadne {
     };
 
     /*!\ingroup SubdivisionTree
-     * \brief A cell in a subdivision tree. */
+     * \brief A cell in a subdivision tree. 
+     *
+     * A %SubdivisionTreeCell is defined by a BinaryWord \a w and a SubdivisionSequence \a ss.
+     * Start with a unit cell \f$[0,1]^d\f$ in \f$\mathbb{R}^d\f$ and successively partition.
+     * At the \a i th step, we subdivide in coordinate \a k=ss[i]. 
+     * If \f$bw[i]=0\f$, then the \a k th coordinate \f$[a_k,b_k]\f$ becomes \f$[a_k,c_k]\f$, 
+     * where \f$c_k=(a_k+b_k)/2\f$.
+     * If \f$bw[i]=1\f$, then the \a k th coordinate becomes \f$[c_k,b_k]\f$.
+     *
+     * Since the coordinates are described by dyadic numbers in the unit interval,
+     * they can be exactly computed and represented by double-precision floating point
+     * numbers up to about 50 subdivisions.         
+     */
     class SubdivisionTreeCell {
      public:
       /*!\brief The type used to represent the dyadic numbers giving the upper
@@ -188,6 +197,15 @@ namespace Ariadne {
       /*!\brief The upper bound in the \a i th dimension. */
       const dyadic_type& upper_bound(dimension_type i) const {
         return _bounds[2*i+1]; }
+        
+      /*! The volume of the cell as a fraction of the unit cell. */
+      dyadic_type volume() const {
+        dyadic_type result=1;
+        for(dimension_type i=0; i!=this->dimension(); ++i) {
+          result*=(this->upper_bound(i)-this->lower_bound(i));
+        }
+        return result;
+      }
      private:
       void _compute_bounds(const SubdivisionSequence& ss, const BinaryWord& bw);
      private:
@@ -197,7 +215,14 @@ namespace Ariadne {
 
 
     /*!\ingroup SubdivisionTree
-     * \brief A subdivision structure on the unit hypercube determined by a sequence of subdivision coordinates and a binary tree. */
+     * \brief A subdivision structure on the unit hypercube determined by a sequence of subdivision coordinates and a binary tree. 
+     *
+     * A %SubdivisionTree represents a partition of the unit hypercube into hypercubes described by successive subdivisions 
+     * parallel to the coordinate axes.
+     *
+     * A subdivision into \a n cells uses 2n+1 bits of data, independently of the dimension of the set. This means that
+     * a %SubdivisionTree provides a highly memory-efficient adaptive partitioning scheme.
+     */
     class SubdivisionTree {
      public:
       typedef binary_constructor_iterator<BinaryTree::const_iterator, 
@@ -266,7 +291,21 @@ namespace Ariadne {
     };
   
     /*!\ingroup SubdivisionTree
-     * \brief A subset of the unit hypercube described by a subdivision structure. */
+     * \brief A subset of the unit hypercube described by a subdivision structure. 
+     *
+     * The \em depth of the set is the maximum number of subdivisions needed to specify the smallest cell.
+     *
+     * The operations of intersection, union and set difference can all be performed in
+     * linear time on the two operands. However, adjoining a new cell also requires
+     * linear time, which means that it is often preferable to store cells to be
+     * added in a LatticeCellListSet and adjoin them all at once.
+     *
+     * A %SubdivisionTreeSet defined on an n-cell partition uses 3n+1 bits of data.
+     * This means that a %SubdivisionTreeSet provides a highly efficient representation of structured data sets.
+     * In the worst case where every cell of a depth-\a d subdivision needs to be
+     * explicitly specified, a %SubdivisionTreeSet uses three times as much memory as a LatticeMaskSet, but in 
+     * typical cases a %SubdivisionTreeSet performs much better.
+     */
     class SubdivisionTreeSet {
      public:
       typedef binary_constructor_iterator<MaskedBinaryTree::const_iterator,
@@ -274,6 +313,7 @@ namespace Ariadne {
                                           SubdivisionSequence> const_iterator;
       typedef const_iterator iterator;
      
+      typedef double dyadic_type;
       /*!\brief Construct an empty set with a single cell. */
       SubdivisionTreeSet(const SubdivisionSequence& ss);
       /*!\brief Construct an empty set with a single cell. */
@@ -318,7 +358,16 @@ namespace Ariadne {
       /*! \brief Constant iterator to the beginning of the cells in the tree. */
       const_iterator begin() const { return const_iterator(_subdivisions,_words.begin()); }
       /*! \brief Constant iterator to the end of the cells in the tree. */
-      const_iterator end() const { return const_iterator(_subdivisions,_words.end()); };
+      const_iterator end() const { return const_iterator(_subdivisions,_words.end()); }
+      
+      /*! \brief The volume of the set. */
+      dyadic_type volume() const {
+        dyadic_type result=0;
+        for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+          result+=iter->volume();
+        }
+        return result;
+      }
      private:
       void reduce() { this->_words.reduce(); }
      private:

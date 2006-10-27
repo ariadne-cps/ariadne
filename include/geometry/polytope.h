@@ -49,13 +49,18 @@ namespace Ariadne {
       
     /*! \ingroup BasicSet
      *  \brief A polytope (bounded polyhedral set) described by its vertices.
-     * 
-     * \b Storage: A polytope in d dimensions with n vertices is stored as an 
-     * array with \f$d\times n\f$ elements.
+     *
+     *  The vertices are stored in a matrix of \em generators. The columns of
+     *  this matrix are the position vectors of the vertices, padded by 1's.
+     *  Hence the generator matrix has size \f$(d+1)\times nv\f$, where nv is
+     *  the number of vertices.
+     *
+     *  The polytope is described as 
+     *     \f$ \{ x \in \mathbb{R}^d \mid \exists s\in\mathbb{R}^n,\ x=Vs, s\geq 0,\ 1^Ts=1 \} . \f$
+     *
+     *  \internal It would be preferable to store the generator matrix in 
+     *  column major format.
      */ 
-//     * The ith element of the jth vertex is in position \f$(d+1)j+i\f$.
-//     * the \f$j(d+1)+d\f$th element is always set to 1, this is for 
-//     * possible compatibility with unbounded polytopes.
     template<class R>
     class Polytope {
       typedef typename Numeric::traits<R>::arithmetic_type F;
@@ -77,7 +82,13 @@ namespace Ariadne {
       /*! \brief Construct an empty polytope in dimension \a n. */
       Polytope(dimension_type d=0);
      
-      /*! \brief Construct from a matrix whose columns give the vertices. */
+      /*! \brief Construct a polytope of dimension \a d with \a nv constraints from the data in the
+       *  array beginning at \a data. The ith element of the jth vertex is stored in position j*(d+1)+i. 
+       *  The j(d+1)+dth data element is padded with a 1.
+       */
+      explicit Polytope<R>(dimension_type d, size_type nv, const R* data);
+
+     /*! \brief Construct from a matrix whose columns give the vertices. */
       explicit Polytope(const LinearAlgebra::Matrix<R>& A);
      
       /*! \brief Construct from a list of vertices. */

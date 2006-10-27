@@ -51,6 +51,10 @@ namespace Ariadne {
     
     /*! \ingroup BasicSet
      *  \brief A polyhedron (not necessarily bounded polyhedral set) described by a system of linear inequalities.
+     *
+     *  The set is described as
+     *  \f$ x\in\mathbb{R}^d \mid Ax\leq b , \f$
+     *  where \f$A\f$ is a \f$n\times d\f$ matrix and \f$b\f$ is a vector of size \f$n\f$.
      */ 
     template<class R>
     class Polyhedron {
@@ -74,6 +78,12 @@ namespace Ariadne {
        */
       explicit Polyhedron<R>(dimension_type n=0);
      
+      /*! \brief Construct a polyhedron of dimension \a d with \a nc constraints from the data in the
+       *  array beginning at \a data. The jth element of the ith constraint is stored in position i*(d+1)+j, 
+       *  and the ith inhomogeneous term is stored in position i*(d+1)+d.
+       */
+      explicit Polyhedron<R>(dimension_type d, size_type nc, const R* data);
+            
       /*! \brief Construct the polyhedron defined by the matrix equations \f$Ax\leq b\f$.
        */
       explicit Polyhedron<R>(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b);

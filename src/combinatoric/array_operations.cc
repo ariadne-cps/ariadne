@@ -156,11 +156,26 @@ namespace Ariadne {
           return false;
         }
       }
+      return false;
+    }
+
+    bool
+    lexicographic_less_equal(const IndexArray& s1, const IndexArray& s2)
+    {
+      assert(s1.size() == s2.size());
+      for(dimension_type i=0; i!=s1.size(); ++i) {
+        if(s1[i]<s2[i]) {
+          return true;
+        }
+        if(s1[i]>s2[i]) {
+          return false;
+        }
+      }
       return true;
     }
 
     bool
-    coordinate_less(const IndexArray& s1, const IndexArray& s2)
+    coordinate_less_equal(const IndexArray& s1, const IndexArray& s2)
     {
       assert(s1.size() == s2.size());
       for(dimension_type i=0; i!=s1.size(); ++i) {

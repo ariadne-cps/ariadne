@@ -73,6 +73,12 @@ namespace Ariadne {
     {
     }
    
+    template<class R>
+    Polytope<R>::Polytope(dimension_type d, size_type nv, const R* data)
+      : _generators(d+1,nv,data,1,d+1)
+    {
+    }
+   
    
     template<class R>
     Polytope<R>::Polytope(const LinearAlgebra::Matrix<R>& G)

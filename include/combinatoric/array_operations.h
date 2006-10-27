@@ -41,8 +41,10 @@ namespace Ariadne {
 
     /*! \brief Compare two arrays using the lexicographic total ordering. */
     bool lexicographic_less(const IndexArray&, const IndexArray&);
+    /*! \brief Compare two arrays using the lexicographic total ordering. */
+    bool lexicographic_less_equal(const IndexArray&, const IndexArray&);
     /*! \brief Compare two arrays using the componentwise partial ordering. */
-    bool coordinate_less(const IndexArray&, const IndexArray&);
+    bool coordinate_less_equal(const IndexArray&, const IndexArray&);
   
     /*! \brief Assigns the max of a and b to a. */
     void assign_max(IndexArray& a, const IndexArray& l);

@@ -39,16 +39,6 @@ namespace Ariadne {
     const bool left=BinaryTree::left;
     const bool right=BinaryTree::right;
     
-    void advance(BinaryWord& word)
-    {
-      while(!word.empty() && word.back()==BinaryTree::right) {
-        word.pop_back();
-      }
-      if(!word.empty()) {
-        word.set_back(BinaryTree::right);
-      }
-    }
-
     SubdivisionSequence::SubdivisionSequence(const std::string& str)
     {
       std::stringstream ss(str);
@@ -298,8 +288,8 @@ namespace Ariadne {
     IndexArray 
     compute_position(const SubdivisionSequence& ss, const BinaryWord& bw, const LatticeBlock& r)
     {
-      IndexArray lower=r.lower();
-      IndexArray upper=r.upper();
+      IndexArray lower=r.lower_corner();
+      IndexArray upper=r.upper_corner();
       for(size_type j=0; j!=bw.size(); ++j) {
         dimension_type i=ss[j];
         assert((lower[i]+upper[i])%2==0);

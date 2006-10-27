@@ -56,13 +56,13 @@ namespace Ariadne {
      *
      * A %Parallelotope is a type of Zonotope, and has the same data storage 
      * structure, so is implemented as a subclass. However, it is easier to convert a parallelotope to a
-     * Polytope defined by its inequalities, since this can be performed by matrix inversion.
+     * Polyhedron defined by its inequalities, since this can be performed by matrix inversion.
      * Hence it is easier to check if a parallelotope contains a point.
      *
      * A parallelotope is always bounded and nonempty. A nondegenerate 
-     * parallelotope is regular.
+     * parallelotope is regular, meaning that it is the closure of its interior.
      *
-     * Since a parallelotope of dimension \a d has exactly \a d generators,
+     * \b storage Since a parallelotope of dimension \a d has exactly \a d generators,
      * the space required for a parallelotope depends only on the dimension,
      * and is given by \f$d(d+1)\f$.
      *
@@ -138,6 +138,9 @@ namespace Ariadne {
       
       /*! \brief Subdivide into smaller pieces in each dimension. */
       ListSet<R,Geometry::Parallelotope> subdivide() const;      
+
+      /*! \brief An approximation to the volume. */
+      R volume() const;
       //@}
       
       /*! \brief Computes an over approximation from an "interval parallelotope". */

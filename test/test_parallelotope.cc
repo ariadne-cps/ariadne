@@ -80,6 +80,9 @@ test_parallelotope()
     cout << "p2.contains(" << *v_iter << ")=" << p2.contains(*v_iter) << endl;
   }
   
+  cout << "p2.volume()=" << p2.volume() << endl;
+  assert(contains_value(Interval<R>(0.99,1.01),p2.volume()));
+  
   Zonotope<R>& z2=p2;
   cout << "disjoint(r1,z2)=" << flush; cout << disjoint(r1,z2) << endl;
   //cout << "subset(r1,z2)=" << flush; cout << subset(r1,z2) << endl;

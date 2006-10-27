@@ -152,7 +152,20 @@ namespace Ariadne {
     };
     
     
-    
+#ifdef DOXYGEN
+    /*! \ingroup LinearAlgebra
+     *  \brief Base class for vector expressions. 
+     */
+    template<class E>
+    class VectorExpression {
+     public:
+      /*! Promote to the actual expression type \a E. */
+      E& operator();
+      /*! Promote to a constant reference to the actual expression type \a E. */
+      const E& operator() const;
+   };
+#endif
+     
     /*! \ingroup LinearAlgebra
      *  \brief A slice through an array or vector, with equally spaces increments. 
      */

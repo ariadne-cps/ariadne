@@ -106,8 +106,9 @@ test_grid_set()
 
   GridCellListSet<R> gcls1(grls1);
   cout << gcls1 << "\n";
-  GridBlockListSet<R> grlsc1(igrj,gcls1);
-  cout << grlsc1 << "\n";
+  GridBlockListSet<R> gblsc1(igrj,gcls1);
+  cout << "gblsc1=" << flush;
+  cout << gblsc1 << "\n";
 
   FiniteGrid<R> fgr=FiniteGrid<R>(igrj,igrj.block());
   //GridMaskSet<R> gms1(fgr,grlsj1);

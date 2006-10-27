@@ -85,7 +85,7 @@ namespace Ariadne {
      *
      * \b Storage: A %Rectangle of dimension \a d is specified by \a 2d real 
      * number giving the lower and upper bounds in each coordinate.
-     * The lower bound in the \a i th coordinate is the \a p2i element, and the 
+     * The lower bound in the \a i th coordinate is the \a 2i th element, and the 
      * upper bound is the \a 2i+1 st element.
      */
     template<class R>
@@ -259,24 +259,34 @@ namespace Ariadne {
       //  return IntervalReference<R>(this->_bounds[i]);
       //}
       
-      /*! \brief Returns the projection onto the \a i th coordinate. */
-      const Interval<R>& operator[] (dimension_type i) const {
-        return reinterpret_cast<const Interval<R>&>(this->_bounds[2*i]);
-      }
-      
-      /*! \brief Returns the lower bound of the \a i th coordinate */
-      const Interval<R>& interval(dimension_type i) const {
-        return reinterpret_cast<const Interval<R>&>(this->_bounds[2*i]);
-      }
-      
-      /*! \brief Returns the lower bound of the \a i th coordinate */
+      /*! \brief The lower bound of the \a i th coordinate */
       const R& lower_bound(dimension_type i) const {
         return this->_bounds[2*i];
       }
       
-      /*! \brief Returns the upper bound of the \a i th coordinate */
+      /*! \brief A reference to the lower bound of the \a i th coordinate */
+      R& lower_bound(dimension_type i) {
+        return this->_bounds[2*i];
+      }
+      
+      /*! \brief The upper bound of the \a i th coordinate */
       const R& upper_bound(dimension_type i) const {
         return this->_bounds[2*i+1];
+      }
+      
+      /*! \brief A reference to the upper bound of the \a i th coordinate */
+      R& upper_bound(dimension_type i) {
+        return this->_bounds[2*i+1];
+      }
+      
+      /*! \brief The projection onto the \a i th coordinate. */
+      const Interval<R>& operator[] (dimension_type i) const {
+        return reinterpret_cast<const Interval<R>&>(this->_bounds[2*i]);
+      }
+      
+      /*! \brief The interval of values in the \a i th coordinate. */
+      const Interval<R>& interval(dimension_type i) const {
+        return reinterpret_cast<const Interval<R>&>(this->_bounds[2*i]);
       }
       
       /*! \brief The lower corner. */
@@ -379,6 +389,15 @@ namespace Ariadne {
           diameter=Numeric::max_up(diameter,Numeric::sub_up(this->upper_bound(i),this->lower_bound(i)));
         }
         return div_up(diameter,R(2));
+      }
+      
+      /*! An approximation to the volume. */
+      R volume() const {
+        R result=1;
+        for(dimension_type i=0; i!=this->dimension(); ++i) {
+          result=mul_approx(result,sub_approx(this->upper_bound(i),this->lower_bound(i)));
+        }
+        return result;
       }
       
       /*! \brief Compute a quadrant of the Rectangle determined by \a q.

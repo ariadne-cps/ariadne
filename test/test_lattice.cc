@@ -44,24 +44,31 @@ int main() {
   argary[1]=2;
   argary[2]=3;
   LatticeCell arglc(argary);
+  cout << "arglc=" << arglc << endl;
   
  
   LatticeCellListSet imglcls=LatticeCellListSet(2);
+  cout << "imglcls.dimension()=" << imglcls.dimension() << endl;
+  cout << "imglcls=" << imglcls << endl;
   IndexArray imgary=IndexArray(2);
   imgary[0]=4;
   imgary[1]=2;
   imglcls.adjoin(LatticeCell(imgary));
   imgary[0]=5;
   imglcls.adjoin(LatticeCell(imgary));
+  cout << "imglcls=" << imglcls << endl;
   
   LatticeMultiMap lmap=LatticeMultiMap(3,2);
+  cout << "lmap=" << lmap << endl;
   lmap.adjoin_to_image(arglc,imglcls);
+  cout << "lmap=" << lmap << endl;
   argary[0]=0;
   arglc=LatticeCell(argary);
   lmap.adjoin_to_image(arglc,imglcls);
+  cout << "lmap=" << lmap << endl;
   imgary[1]=3;
   lmap.adjoin_to_image(arglc,LatticeCell(imgary));
-  cout << lmap << endl << endl;
+  cout << "lmap=" << lmap << endl << endl;
   
   argary[0]=0;
   argary[1]=0;
@@ -75,7 +82,7 @@ int main() {
   cout << endl;
   
   cout << LatticeBlock(arglc) << " " << lmap(LatticeBlock(arglc)) << endl;
-  LatticeCellListSet lcls(0);
+  LatticeCellListSet lcls(2);
   cout << lmap(arglc2) << endl;
   lcls=lmap.image(arglc2);
   cout << arglc2 << " " << lcls << endl;

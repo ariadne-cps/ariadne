@@ -91,8 +91,8 @@ namespace Ariadne {
     }
     
     inline chompfstream& operator<<(chompfstream& cfs, const Combinatoric::LatticeMultiMap& lmm) {
-      Combinatoric::LatticeCell lc;
-      Combinatoric::LatticeCellListSet lcls;
+      Combinatoric::LatticeCell lc(lmm.argument_dimension());
+      Combinatoric::LatticeCellListSet lcls(lmm.result_dimension());
       for(Combinatoric::LatticeMultiMap::const_iterator iter=lmm.begin(); iter!=lmm.end(); ++iter) {
         lc=iter->first;
         lcls=iter->second;

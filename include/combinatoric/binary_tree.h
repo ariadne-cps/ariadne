@@ -89,6 +89,11 @@ namespace Ariadne {
       /*! \brief The array of bits denoting branches and leaves. */
       const std::vector<bool>& array() const;
       
+      /*!\brief Advance a binary word used to describe a position in a tree by
+       * removing all trailing right's and replacing the last left by a right.    
+       */
+      static void advance(BinaryWord& word);
+      
       friend std::ostream& operator<<(std::ostream&, const BinaryTree&);
      private:
       void check() const;
@@ -120,6 +125,7 @@ namespace Ariadne {
       BinaryWord _word;
     };
     
+
     inline
     size_type 
     BinaryTree::size() const

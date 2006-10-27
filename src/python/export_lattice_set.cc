@@ -32,6 +32,13 @@ using namespace Ariadne::Combinatoric;
 using namespace boost::python;
 
 void export_lattice_set() {
+  class_<LatticePoint>("LatticePoint",init<const IndexArray&>())
+    .def(init<const LatticePoint&>())
+    .def("__eq__",&LatticePoint::operator==)
+    .def("dimension", &LatticePoint::dimension)
+    .def(self_ns::str(self))
+    ;
+
   class_<LatticeCell>("LatticeCell",init<const IndexArray&>())
     .def(init<const LatticeCell&>())
     .def("__eq__",&LatticeCell::operator==)

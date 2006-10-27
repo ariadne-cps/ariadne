@@ -149,7 +149,14 @@ namespace Ariadne {
     template<class R> std::ostream& operator<<(std::ostream&, const GridCellListSet<R>&);
     template<class R> std::ostream& operator<<(std::ostream&, const GridMaskSet<R>&);
     
-    /*! \brief A cell in a grid.
+    /*! \brief A unit cell in a grid.
+     *
+     *  A %GridCell is defined by mapping a LatticeCell \a lc into \f$\mathbb{R}^d\f$
+     *  via a grid \a g. The bounds of the ith coordinate of the cell are given by
+     *  g.subdivision_coordinate(i,lc.lower_bound(i)) and
+     *  g.subdivision_coordinate(i,lc.upper_bound(i)).
+     *
+     *  A %GridCell satisfies the requirements of a RectangleExpression.
      *  \ingroup BasicSet
      *  \ingroup Grid
      */
@@ -195,7 +202,14 @@ namespace Ariadne {
     };
 
 
-    /*! \brief A rectangle in a grid.
+    /*! \brief A rectangular block in a grid.
+     *
+     *  A %GridBlock is defined by mapping a LatticeBlock \a lb into \f$\mathbb{R}^d\f$
+     *  via a Grid \a g. The bounds of the ith coordinate of the cell are given by
+     *  g.subdivision_coordinate(i,lb.lower_bound(i)) and
+     *  g.subdivision_coordinate(i,lb.upper_bound(i)).
+     *
+     *  A %GridBlock satisfies all the requirements of a RectangleExpression.
      *  \ingroup BasicSet
      *  \ingroup Grid
      */
@@ -295,7 +309,13 @@ namespace Ariadne {
     };
 
 
-    /*! \brief A denotable set on a grid, defined using a list of cells.
+    /*! \brief A denotable set on a grid, defined as a list of cells.
+     *
+     *  The data for a %GridCellListSet provided by a Grid and a LatticeCellList.
+     *
+     *  A cell list set is useful for storing small sparse sets, such as an 
+     *  over-approximation to a basic set.
+     *
      *  \ingroup DenotableSet
      *  \ingroup Grid
      */
@@ -405,7 +425,7 @@ namespace Ariadne {
     };
 
 
-    /*! \brief A denotable set on a grid, defined using a list of rectangles.
+    /*! \brief A denotable set on a grid, defined using a list of grid blocks.
      *  \ingroup DenotableSet
      *  \ingroup Grid
      */
@@ -518,7 +538,17 @@ namespace Ariadne {
 
     
     
-    /*! \brief A denotable set on a finite grid, defined using a mask. 
+    /*! \brief A denotable set on a finite grid, defined using a mask over a block of cells.
+     *
+     *  A %GridMaskSet is defined using a Grid and a LatticeMaskSet.
+     * 
+     *  A %GridMaskSet is especially useful for storing large sets with a lot of
+     *  fine structure. Elementary set operations such as intersection, union and
+     *  set difference can be implemented highly efficiently for GridMaskSets 
+     *  defined over the same block of cells.
+     * 
+     *  For structured sets, a PartitionTreeSet is usually more efficient.
+     *
      *  \ingroup DenotableSet
      *  \ingroup Grid
      */

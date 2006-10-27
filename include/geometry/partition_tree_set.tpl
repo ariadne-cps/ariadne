@@ -116,12 +116,12 @@ namespace Ariadne {
         if(word.size()==depth+1 || subset(cell,s)) {
           tree.push_back(Combinatoric::BinaryTree::leaf);
           mask.push_back(true);
-          Combinatoric::advance(word);
+          Combinatoric::BinaryTree::advance(word);
         }  
         else if(disjoint(cell,s)) {
           tree.push_back(Combinatoric::BinaryTree::leaf);
           mask.push_back(false);
-          Combinatoric::advance(word);
+          Combinatoric::BinaryTree::advance(word);
         }
         else {
           tree.push_back(Combinatoric::BinaryTree::branch);
@@ -148,12 +148,12 @@ namespace Ariadne {
         if(word.size()==depth+1 || disjoint(cell,s)) {
           tree.push_back(Combinatoric::BinaryTree::leaf);
           mask.push_back(false);
-          Combinatoric::advance(word);
+          Combinatoric::BinaryTree::advance(word);
         }  
         else if(subset(cell,s)) {
           tree.push_back(Combinatoric::BinaryTree::leaf);
           mask.push_back(true);
-          Combinatoric::advance(word);
+          Combinatoric::BinaryTree::advance(word);
         }
         else {
           tree.push_back(Combinatoric::BinaryTree::branch);
@@ -181,12 +181,12 @@ namespace Ariadne {
         if(word.size()==depth+1 || subset(cell,s)) {
           tree.push_back(Combinatoric::BinaryTree::leaf);
           mask.push_back(true);
-          Combinatoric::advance(word);
+          Combinatoric::BinaryTree::advance(word);
         }  
         else if(disjoint(cell,s)) {
           tree.push_back(Combinatoric::BinaryTree::leaf);
           mask.push_back(false);
-          Combinatoric::advance(word);
+          Combinatoric::BinaryTree::advance(word);
         }
         else {
           tree.push_back(Combinatoric::BinaryTree::branch);
@@ -214,12 +214,12 @@ namespace Ariadne {
         if(word.size()==depth+1 || disjoint(cell,s)) {
           tree.push_back(Combinatoric::BinaryTree::leaf);
           mask.push_back(false);
-          Combinatoric::advance(word);
+          Combinatoric::BinaryTree::advance(word);
         }  
         else if(subset(cell,s)) {
           tree.push_back(Combinatoric::BinaryTree::leaf);
           mask.push_back(true);
-          Combinatoric::advance(word);
+          Combinatoric::BinaryTree::advance(word);
         }
         else {
           tree.push_back(Combinatoric::BinaryTree::branch);

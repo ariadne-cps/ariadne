@@ -178,9 +178,9 @@ namespace Ariadne {
     {
       assert(this->number_of_rows()==this->number_of_columns());
       size_type n=this->number_of_rows();
-      Real result=0;
+      Real result=1;
       for(size_type i=0; i!=n; ++i) { 
-        result+=this->_elements(i,i);
+        result*=this->_elements(i,i);
       }
       return result;
     }

@@ -206,6 +206,20 @@ namespace Ariadne {
 
     };
   
+#ifdef DOXYGEN
+    /*! \ingroup LinearAlgebra
+     *  \brief Base class for matrix expressions. */
+    template<class E>
+    class MatrixExpression {
+     public:
+      /*! Promote to the actual expression type \a E. */
+      E& operator();
+      /*! Promote to a constant reference to the actual expression type \a E. */
+      const E& operator() const;
+   };
+#endif
+
+
     /*!\ingroup LinearAlgebra
      * \brief A slice through a matrix with equally spaced row and column increments. 
      */

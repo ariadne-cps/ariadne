@@ -46,30 +46,6 @@ namespace Ariadne {
       C& _c; const typename C::size_type& _i;
     };
     
-    /*!\brief The number of ways of choosing \a k objects from \a n. */
-    inline 
-    uint choose(int n, uint k) 
-    {
-      //std::cerr << "choose(" << n << "," << k << ")=" << std::flush;
-      if(n<int(k)) { 
-        return 0;
-      }
-      if(n-k<k) {
-        k=n-k;
-      }
-      if(k==0) { 
-        return 1;
-      }
-      uint result=1;
-      for(uint i=n; i!=n-k; --i) {
-        result*=i;
-      }
-      for(uint i=k; i!=1; --i) {
-        result/=i;
-      }
-      return result;
-    }
-    
    /*! \ingroup LinearAlgebra
      *  \brief An index of a tensor object. 
      */

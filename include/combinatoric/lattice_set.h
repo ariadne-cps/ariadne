@@ -83,16 +83,57 @@ namespace Ariadne {
     LatticeCellListSet difference(const LatticeCellListSet&, const LatticeMaskSet&);
     LatticeMaskSet difference(const LatticeMaskSet&, const LatticeMaskSet&);
 
-    bool operator<(const LatticeCell& lc1, const LatticeCell& lc2);
     
+    std::istream& operator>>(std::istream& os, LatticePoint&);
     std::istream& operator>>(std::istream& os, LatticeCell&);
     std::istream& operator>>(std::istream& os, LatticeBlock&);
     
+    std::ostream& operator<<(std::ostream& os, const LatticePoint&);
     std::ostream& operator<<(std::ostream& os, const LatticeCell&);
     std::ostream& operator<<(std::ostream& os, const LatticeBlock&);
     std::ostream& operator<<(std::ostream& os, const LatticeMaskSet&);
     std::ostream& operator<<(std::ostream& os, const LatticeCellListSet&);
     std::ostream& operator<<(std::ostream& os, const LatticeBlockListSet&);
+
+
+    /*!\ingroup Lattice
+     * \brief A point in an integer lattice.
+     */     
+    class LatticePoint {
+     public:
+      /*!\brief Construct a cell of dimension \a n with lower corner at the origin. */
+      explicit LatticePoint(dimension_type n=0) : _elements(n) { }
+      /*!\brief Construct a cell with lower corner at \a l. */
+      explicit LatticePoint(const IndexArray& l) : _elements(l) { }
+      /*!\brief Construct a cell with lower corner at \a l. */
+      explicit LatticePoint(const std::string& str);
+  
+      /*!\brief Copy constructor. */
+      LatticePoint(const LatticePoint& p) : _elements(p._elements) { }
+      /*!\brief Assignment operator. */
+      LatticePoint& operator=(const LatticePoint& p) {
+        if(this!=&p) { _elements=p._elements; } return *this; }
+
+      /*!\brief Equality operator. */
+      bool operator==(const LatticePoint& p) const { 
+        return this->_elements==p._elements; }
+      /*!\brief Inequality operator. */
+      bool operator!=(const LatticePoint& p) const { 
+        return !(*this==p); }
+         
+      /*!\brief The dimension of the point. */
+      dimension_type dimension() const { return this->_elements.size(); }
+      /*!\brief The dimension of the point. */
+      const IndexArray& position() const { return this->_elements; }
+      /*!\brief The \a i th integer coordinate. */
+      const index_type& operator[](dimension_type i) const { return this->_elements[i]; }
+      /*!\brief A reference to the \a i th integer coordinate. */
+      index_type& operator[](dimension_type i) { return this->_elements[i]; }
+      
+     private:
+      IndexArray _elements;
+    };
+
 
 
     /*!\ingroup Lattice
@@ -121,7 +162,11 @@ namespace Ariadne {
       /*!\brief Inequality operator. */
       bool operator!=(const LatticeCell& c) const { 
         return !(*this==c); }
-         
+        
+      /*!\brief Lexicographical comparison operator. */
+      bool operator<(const LatticeCell& lc) const {
+        return lexicographic_less(this->_lower, lc._lower); }
+   
       /*!\brief The dimension of the cell. */
       dimension_type dimension() const { return this->_lower.size(); }
       /*!\brief The \a i th interval. */
@@ -135,9 +180,9 @@ namespace Ariadne {
       /*!\brief The position of the lower corner in the latiice. */
       const IndexArray& position() const { return this->_lower; }
       /*!\brief The position of the lower corner in the latiice. */
-      IndexArray lower() const { return this->_lower; }
+      IndexArray lower_corner() const { return this->_lower; }
       /*!\brief The position of the upper corner in the latiice. */
-      IndexArray upper() const { 
+      IndexArray upper_corner() const { 
         IndexArray result(this->dimension());
         for(dimension_type i=0; i!=this->dimension(); ++i) {
           result[i]=this->upper_bound(i); }
@@ -147,7 +192,6 @@ namespace Ariadne {
       IndexArray _lower;
     };
     
-
     /*!\ingroup Lattice
      * \brief A block of indices in a grid. */
     class LatticeBlock {
@@ -166,7 +210,7 @@ namespace Ariadne {
 
       /*!\brief Convert from a lattice cell. */
       LatticeBlock(const LatticeCell& c)
-        : _lower(c.lower()), _upper(c.upper()) { }
+        : _lower(c.lower_corner()), _upper(c.upper_corner()) { }
       /*!\brief Copy constructor. */
       LatticeBlock(const LatticeBlock& r)
         : _lower(r._lower), _upper(r._upper) { }
@@ -200,9 +244,9 @@ namespace Ariadne {
       void set_upper_bound(dimension_type i, index_type n) { this->_upper[i]=n; }
 
       /*!\brief The position of the lower corner in the lattice. */
-      const IndexArray& lower() const { return this->_lower; }
+      const IndexArray& lower_corner() const { return this->_lower; }
       /*!\brief The position of the upper corner in the lattice. */
-      const IndexArray& upper() const { return this->_upper; }
+      const IndexArray& upper_corner() const { return this->_upper; }
 
       /*!\brief The number of cells in each dimension. */
       SizeArray sizes() const;
@@ -256,8 +300,8 @@ namespace Ariadne {
      private:
       friend class boost::iterator_core_access;
       dimension_type dimension() const { return _position.size(); }
-      const IndexArray& _lower;
-      const IndexArray& _upper;
+      IndexArray _lower;
+      IndexArray _upper;
       IndexArray _position;
     };
 
@@ -280,14 +324,17 @@ namespace Ariadne {
 
 
     /*!\ingroup Lattice
-     * \brief A list of cells in a lattice. */
+     * \brief A list of cells in a lattice.
+     *
+     * Useful for storing sparse sets, such as the image of a cell under a lattice map.
+     */
     class LatticeCellListSet {
      public:
       typedef conversion_iterator<array_vector<index_type>::const_iterator, LatticeCell> iterator;
       typedef conversion_iterator<array_vector<index_type>::const_iterator, LatticeCell> const_iterator;
      public:
       /*!\brief Construct an empty list, to hold cells of dimension \a n. */
-     LatticeCellListSet(dimension_type n=0) 
+     LatticeCellListSet(dimension_type n) 
         : _list(n) { }
 
       /*!\brief Convert a single cell \a c into a one-element list of cells. */
@@ -388,14 +435,14 @@ namespace Ariadne {
       /*! \brief Adjoins a LatticeCell to the set. */
       void adjoin(const LatticeCell& c) { 
         assert(this->dimension() == c.dimension());
-        this->_list.push_back(c.lower()); 
-        this->_list.push_back(c.upper()); 
+        this->_list.push_back(c.lower_corner()); 
+        this->_list.push_back(c.upper_corner()); 
       }
       /*! \brief Adjoins all cells in a LatticeBlock to the set. */
       void adjoin(const LatticeBlock& r) { 
         assert(this->dimension() == r.dimension());
-        this->_list.push_back(r.lower()); 
-        this->_list.push_back(r.upper()); 
+        this->_list.push_back(r.lower_corner()); 
+        this->_list.push_back(r.upper_corner()); 
       }
       /*! \brief Adjoins a LatticeCellListSet to the set. */
       void adjoin(const LatticeCellListSet& cl);
@@ -422,7 +469,13 @@ namespace Ariadne {
 
 
     /*!\ingroup Lattice
-     * \brief A list of arrays of integers of the same size, representing rectangles in a grid. */
+     * \brief A list of arrays of integers of the same size, representing rectangles in a grid.
+     *
+     * A storage class in which highly unstructured sets over an integer lattice can be efficiently represented.
+     * Intersection, union and difference can also be efficiently implemented.
+     *
+     * For highly sparse and/or structured sets, it is usually more efficient to use a SubdivisionTreeSet.    
+     */
     class LatticeMaskSet {
      public:
       typedef mask_iterator<LatticeBlock::const_iterator,BooleanArray::const_iterator> iterator;

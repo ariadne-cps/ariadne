@@ -237,7 +237,14 @@ namespace Ariadne {
     tribool 
     Polyhedron<R>::empty() const
     {
-      throw std::runtime_error("Polyhedron<R>::empty() const");
+      throw std::runtime_error("Polyhedron<R>::empty() const not implemented");
+    }
+
+    template<class R>
+    tribool 
+    Polyhedron<R>::bounded() const
+    {
+      throw std::runtime_error("Polyhedron<R>::bounded() const not implemented");
     }
 
     template<class R>

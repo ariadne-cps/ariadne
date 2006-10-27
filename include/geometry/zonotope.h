@@ -208,6 +208,9 @@ namespace Ariadne {
       /*! \brief True if the zonotope is empty. */
       tribool empty() const;
       
+      /*! \brief Checks for boundedness. */
+      tribool bounded() const { return true; }
+      
       /*! \brief The radius of the zonotope. */
       real_type radius() const {
         return this->bounding_box().radius();

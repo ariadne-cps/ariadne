@@ -420,6 +420,9 @@ namespace Ariadne {
       /*! \brief The \a i th vertex. */
       Point<R> vertex(size_type i) const;
         
+      /*! \brief Checks for boundedness. */
+      tribool bounded() const { return true; }
+      
       /*! \brief Tests if \a point is included into a rectangle. */
       tribool contains(const Point<R>& pt) const;
       

@@ -145,6 +145,10 @@ namespace Ariadne {
        */
       tribool empty() const;
       
+      /*! \brief Checks for boundedness.
+       */
+      tribool bounded() const;
+      
       /*! \brief Tests if a point is an element of the polyhedron.
        */
       tribool contains(const Point<R>& point) const;

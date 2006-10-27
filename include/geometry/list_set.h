@@ -258,6 +258,17 @@ namespace Ariadne {
         return result;
       }
 
+      /*! \brief Checks for boundedness.
+       */
+      tribool bounded() const {
+        tribool result=true;
+        for (typename ListSet<R,BS>::const_iterator i=this->begin(); i!=this->end(); ++i) {
+          result = result && i->bounded();
+          if(!result) { return result; }
+        }
+        return result;
+      }
+
       /*! \brief Return a rectangle containing the set. */
       Rectangle<R> bounding_box() const {
         assert(!this->empty());

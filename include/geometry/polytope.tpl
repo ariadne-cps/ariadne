@@ -258,6 +258,13 @@ namespace Ariadne {
       return indeterminate;
     }
     
+    template<class R>
+    tribool 
+    Polytope<R>::bounded() const
+    {
+      return true;
+    }
+    
     /*!Set up linear programming problem
      * Try to simultaneously solve A*x=p where A is the extended vertex matrix
      * d+1 auxiliary variables, d+1 equations

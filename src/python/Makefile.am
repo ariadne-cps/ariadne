@@ -58,7 +58,7 @@ NUMERIC_MODULE_SRC=numeric_module.cc \
 	export_numeric.cc export_interval.cc export_function.cc 
 
 LINEAR_ALGEBRA_MODULE_SRC = linear_algebra_module.cc \
-	export_vector.cc export_matrix.cc export_linear_program.cc
+	export_vector.cc export_matrix.cc export_tensor.cc export_linear_program.cc
 
 GEOMETRY_MODULE_SRC = geometry_module.cc \
 	export_point.cc \

@@ -31,9 +31,12 @@
 namespace Ariadne {
   namespace LinearAlgebra {
     
-    //template class Tensor<Float64>;
-    //template class Tensor<MPFloat>;
+    template class Tensor<Float64>;
+    template class Tensor<MPFloat>;
     template class Tensor<Rational>;
+    template class Tensor< Interval<Float64> >;
+    template class Tensor< Interval<MPFloat> >;
+    
     template class SymmetricTensor<Rational>;
     template class DerivativeTensor<Rational>;
 

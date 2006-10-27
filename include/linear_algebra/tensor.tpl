@@ -28,6 +28,8 @@
 #include "tensor.h"
 
 #include <iostream>
+#include <sstream>
+#include <string>
 
 #include "../linear_algebra/multi_index.h"
 #include "../linear_algebra/vector.h"
@@ -37,6 +39,93 @@ namespace Ariadne {
   namespace LinearAlgebra {
 
     template<class R>
+    void
+    Tensor<R>::_instantiate()
+    {
+      typedef typename Numeric::traits<R>::arithmetic_type F;
+      R* s; Tensor<R>* T; Tensor<F>* qT; R ss; 
+      Tensor<R> TT=*T;
+      Tensor<F> qTT=*qT;
+      qTT=TT*ss;
+      *T + *T; *T * *s;
+    }
+    
+    
+    template<class R>
+    Tensor<typename Numeric::traits<R>::arithmetic_type>
+    operator+(const Tensor<R>& T1, const Tensor<R>& T2)
+    {
+      typedef typename Numeric::traits<R>::arithmetic_type F;
+      assert(T1.sizes()==T2.sizes());
+      Tensor<F> result(T1.sizes());
+      for(size_type i=0; i!=result.number_of_elements(); ++i) {
+        result.begin()[i]=T1.begin()[i]+T2.begin()[i];
+      }
+      return result;
+    }
+      
+    
+    template<class R>
+    Tensor<typename Numeric::traits<R>::arithmetic_type>
+    operator*(const Tensor<R>& T, const R& s)
+    {
+      typedef typename Numeric::traits<R>::arithmetic_type F;
+      Tensor<F> result(T.sizes());
+      for(size_type i=0; i!=result.number_of_elements(); ++i) {
+        result.begin()[i]=T.begin()[i]*s;
+      }
+      return result;
+    }
+    
+    
+    
+    template<class R>
+    void
+    SymmetricTensor<R>::_instantiate()
+    {
+      R* s; SymmetricTensor<R>* T;
+      *T + *T; *T * *s;
+    }
+    
+    
+    template<class R>
+    SymmetricTensor<typename Numeric::traits<R>::arithmetic_type>
+    operator+(const SymmetricTensor<R>& T1, const SymmetricTensor<R>& T2)
+    {
+      typedef typename Numeric::traits<R>::arithmetic_type F;
+      assert(T1.argument_size()==T2.argument_size() && T1.degree()==T2.degree());
+      SymmetricTensor<F> result(T1.argument_size(),T1.degree());
+      for(size_type i=0; i!=result.number_of_independent_elements(); ++i) {
+        result.begin()[i]=T1.begin()[i]+T2.begin()[i];
+      }
+      return result;
+    }
+      
+    
+    template<class R>
+    SymmetricTensor<typename Numeric::traits<R>::arithmetic_type>
+    operator*(const SymmetricTensor<R>& T, const R& s)
+    {
+      typedef typename Numeric::traits<R>::arithmetic_type F;
+      SymmetricTensor<F> result(T.argument_size(),T.degree());
+      for(size_type i=0; i!=result.number_of_elements(); ++i) {
+        result.begin()[i]=T.begin()[i]*s;
+      }
+      return result;
+    }
+    
+    
+    
+    template<class R>
+    void
+    DerivativeTensor<R>::_instantiate()
+    {
+      R* s; Vector<R>* v; Matrix<R>* A; DerivativeTensor<R>* T;
+      *T + *T; *T - *T; *T * *s; *T * *v; *T * *A; *T * *T;
+    }
+    
+    
+    template<class R>
     DerivativeTensor<R>::DerivativeTensor(const Vector<R>& v) 
       : _res_size(v.size()), _arg_size(1), _degree(0), _elements(v.size())
     {
@@ -44,6 +133,7 @@ namespace Ariadne {
         this->_elements[i]=v(i);
       }
     }
+    
     
     template<class R>
     DerivativeTensor<R>::DerivativeTensor(const Matrix<R>& A) 
@@ -56,29 +146,72 @@ namespace Ariadne {
       }
     }
     
+    
     template<class R>
-    DerivativeTensor<R>
-    DerivativeTensor<R>::product(const DerivativeTensor<R>& T, const Vector<R>& v) 
+    DerivativeTensor<typename Numeric::traits<R>::arithmetic_type>
+    operator+(const DerivativeTensor<R>& T1, const DerivativeTensor<R>& T2) 
     {
-      return DerivativeTensor<R>::product(T,DerivativeTensor<R>(v));
+      assert(T1.result_size()==T2.result_size() && T1.argument_size()==T2.argument_size() &&
+             T1.degree()==T2.degree());
+      DerivativeTensor<typename Numeric::traits<R>::arithmetic_type> result(T1.result_size(),T1.argument_size(),T1.degree());
+      for(size_type i=0; i!=result.number_of_independent_elements(); ++i) {
+        result.begin()[i]=T1.begin()[i]+T2.begin()[i];
+      }
+      return result;
     }
       
+    
     template<class R>
-    DerivativeTensor<R>
-    DerivativeTensor<R>::product(const DerivativeTensor<R>& T, const Matrix<R>& A) 
+    DerivativeTensor<typename Numeric::traits<R>::arithmetic_type>
+    operator-(const DerivativeTensor<R>& T1, const DerivativeTensor<R>& T2) 
     {
-      return DerivativeTensor<R>::product(T,DerivativeTensor<R>(A));
+      assert(T1.result_size()==T2.result_size() && T1.argument_size()==T2.argument_size() &&
+             T1.degree()==T2.degree());
+      DerivativeTensor<typename Numeric::traits<R>::arithmetic_type> result(T1.result_size(),T1.argument_size(),T1.degree());
+      for(size_type i=0; i!=result.number_of_independent_elements(); ++i) {
+        result.begin()[i]=T1.begin()[i]-T2.begin()[i];
+      }
+      return result;
     }
       
+    
     template<class R>
-    DerivativeTensor<R>
-    DerivativeTensor<R>::product(const DerivativeTensor<R>& T1, const DerivativeTensor<R>& T2) 
+    DerivativeTensor<typename Numeric::traits<R>::arithmetic_type>
+    operator*(const DerivativeTensor<R>& T, const R& s) 
+    {
+      DerivativeTensor<typename Numeric::traits<R>::arithmetic_type> result(T.result_size(),T.argument_size(),T.degree());
+      for(size_type i=0; i!=result.number_of_independent_elements(); ++i) {
+        result.begin()[i]=T.begin()[i]*s;
+      }
+      return result;
+    }
+      
+      
+    template<class R>
+    DerivativeTensor<typename Numeric::traits<R>::arithmetic_type>
+    operator*(const DerivativeTensor<R>& T, const Vector<R>& v) 
+    {
+      return operator*(T,DerivativeTensor<R>(v));
+    }
+      
+    
+    template<class R>
+    DerivativeTensor<typename Numeric::traits<R>::arithmetic_type>
+    operator*(const DerivativeTensor<R>& T, const Matrix<R>& A) 
+    {
+      return operator*(T,DerivativeTensor<R>(A));
+    }
+      
+    
+    template<class R>
+    DerivativeTensor<typename Numeric::traits<R>::arithmetic_type>
+    operator*(const DerivativeTensor<R>& T1, const DerivativeTensor<R>& T2) 
     {
       //std::cerr << "DerivativeTensor<R>::product(const DerivativeTensor<R>& T1, const DerivativeTensor<R>& T2)" << std::endl;
       assert(T1.argument_size()==T2.result_size());      
       assert(T1.degree()!=0);
       
-      DerivativeTensor<R> T0(T1.result_size(),T2.argument_size(),T1.degree()+T2.degree()-1);
+      DerivativeTensor<typename Numeric::traits<R>::arithmetic_type> T0(T1.result_size(),T2.argument_size(),T1.degree()+T2.degree()-1);
 
       MultiIndex m0(T0.argument_size());
       MultiIndex m1(T1.argument_size());
@@ -111,6 +244,7 @@ namespace Ariadne {
       return T0;
     }
 
+    
 
     
     template<class R>
@@ -119,6 +253,7 @@ namespace Ariadne {
     {
       return os << "Tensor(...)";
     }
+    
     
     template<class R>
     std::ostream&
@@ -136,6 +271,7 @@ namespace Ariadne {
       return os;
     }
 
+    
     template<class R>
     std::ostream&
     DerivativeTensor<R>::write(std::ostream& os) const

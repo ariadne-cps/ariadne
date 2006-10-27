@@ -194,6 +194,9 @@ namespace Ariadne {
       /*!\brief The position of the cell in the grid. */
       const Combinatoric::LatticeCell& lattice_set() const { return _lattice_set; }
 
+      /*! \brief True if the set is bounded. */
+      tribool bounded() const { return true; }
+
       /*!\brief A rectangle containing the grid rectangle. */
       Rectangle<R> bounding_box() const { return *this; }
      private:
@@ -254,8 +257,9 @@ namespace Ariadne {
 
       /*!\brief Tests if the rectangle is empty. */
       tribool empty() const { return _lattice_set.empty(); }
-      /*!\brief Tests if the rectangle has empty interior. */
-      tribool empty_interior() const { return _lattice_set.empty_interior(); }
+
+      /*! \brief True if the set is bounded. */
+      tribool bounded() const { return true; }
 
       /*!\brief A rectangle containing the grid rectangle. */
       Rectangle<R> bounding_box() const { return *this; }
@@ -363,6 +367,9 @@ namespace Ariadne {
 
       /*! \brief True if the set is empty. */
       tribool empty() const { return _lattice_set.empty(); }
+
+      /*! \brief True if the set is bounded. */
+      tribool bounded() const { return true; }
 
       /*! \brief The numeber of cells in the list. */
       size_type size() const { return _lattice_set.size(); }
@@ -478,6 +485,9 @@ namespace Ariadne {
 
       /*! \brief True if the set is empty. */
       tribool empty() const { return _lattice_set.empty(); }
+
+      /*! \brief True if the set is empty. */
+      tribool bounded() const { return true; }
 
       /*! \brief The number of rectangles in the list. */
       size_type size() const { return _lattice_set.size(); }

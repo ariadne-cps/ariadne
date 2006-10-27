@@ -22,3 +22,5 @@ lib:
 check-lib: lib
 	(cd test; make check)
 
+check-python:
+	(cd python; make check)

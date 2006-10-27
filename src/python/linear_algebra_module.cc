@@ -32,10 +32,12 @@ using namespace Ariadne::Numeric;
 
 template<class R> void export_vector();
 template<class R> void export_matrix();
+template<class R> void export_tensor();
 template<class R> void export_linear_program();
 
 template<class R> void export_interval_vector();
 template<class R> void export_interval_matrix();
+template<class R> void export_interval_tensor();
 
 
 BOOST_PYTHON_MODULE(linear_algebra)
@@ -48,10 +50,18 @@ BOOST_PYTHON_MODULE(linear_algebra)
   export_matrix<MPFloat>();
   export_matrix<Rational>();
   
+  export_tensor<Float64>();
+  export_tensor<MPFloat>();
+  export_tensor<Rational>();
+  
   export_linear_program<Rational>();
   
   export_interval_vector<Float64>();
   export_interval_vector<MPFloat>();
+  
   export_interval_matrix<Float64>();
   export_interval_matrix<MPFloat>();
+  
+  export_interval_tensor<Float64>();
+  export_interval_tensor<MPFloat>();
 }

@@ -136,10 +136,12 @@ namespace Ariadne {
        */
       dimension_type dimension() const;
       
-      /*! \brief Checks for emptyness.
-       */
+      /*! \brief Checks for emptyness. */
       tribool empty() const;
          
+      /*! \brief Checks for boundedness. */
+      tribool bounded() const;
+      
 #ifdef DOXYGEN
       /*! \brief The vertices of the polytope. */
       state_list_type vertices() const; 

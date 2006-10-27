@@ -199,6 +199,12 @@ namespace Ariadne {
       dimension_type dimension() const { 
         return this->_subdivision_cell.dimension(); }
 
+      /*!\brief Tests if the set is empty. */
+      tribool empty() const { return false; }
+
+      /*! \brief True if the set is bounded. */
+      tribool bounded() const { return true; }
+
       /*!\brief The lower bound of the \a i th coordinate. */
       R lower_bound(dimension_type i) const;
       
@@ -377,6 +383,12 @@ namespace Ariadne {
       /*! \brief Constant iterator to the end of the cells in the set. */
       const_iterator end() const { return const_iterator(_unit_box,_subdivision_set.end()); }
       
+      /*!\brief Tests if the set is empty. */
+      tribool empty() const { return this->size()==0; }
+
+      /*! \brief True if the set is bounded. */
+      tribool bounded() const { return true; }
+
       /*! \brief An approximation to the volume of the set. */
       R volume() const;
       

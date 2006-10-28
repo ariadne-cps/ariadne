@@ -22,6 +22,7 @@
  */
 
 #include <fstream>
+#include <string>
 #include <iomanip>
 
 #include "numeric/function.h"
@@ -33,6 +34,33 @@
 using namespace std;
 using namespace Ariadne;
 
+typedef Float64(*unary_func)(const Float64&);
+
+
+template<class R>
+int
+test_inverse_pair(
+  std::string name, 
+  R(*fnl)(const R&),
+  R(*fnu)(const R&),
+  R(*ifnl)(const R&),
+  R(*ifnu)(const R&) )
+{
+  cout << name << endl;
+  R o=1;
+  R iml=fnl(o);
+  R imu=fnu(o);
+  R ol=ifnl(iml);
+  R ou=ifnu(imu);
+  cout << iml << " <= " << name << "(1) <= " << imu << endl;
+  cout << ol << " <=    1   <= " << ou << endl;
+  assert(iml<imu);
+  assert(ol<=o);
+  assert(o<=ou);
+  return 0;
+}
+  
+  
 template<class R>
 void
 test_function()
@@ -40,53 +68,15 @@ test_function()
   cout << "test_function<" << name<R>() << ">" << endl;
   
   cout << setprecision(20);
-  mpf_set_default_prec (8);
-
-  { 
-    R z(0);
-    R o(1);
-    R t(2);
-    R fl,fu,zl,zu,ol,ou,tl,tu;
-    
-    cout << "sqrt" << endl;
-    fl=sqrt_down(t);
-    fu=sqrt_up(t);
-    cout << fl << " <= " << fu << endl;
-    assert(fl <= fu);
-    tl=mul_down(fl,fl);
-    tu=mul_up(fu,fu);
-    cout << tl << " <= " << t << " <= " << tu << endl;
-    assert(tl <= tu);
-    assert(tl <= t);
-    assert(t <= tu);
-
-    cout << "exp" << endl;
-    fl=exp_down(o);
-    fu=exp_up(o);
-    cout << fl << " <= " << fu << endl;
-    assert(fl <= fu);
-    ol=log_down(fl);
-    ou=log_up(fu);
-    cout << ol << " <= " << o << " <= " << ou << endl;
-    assert(ol <= o && o <= ou);
-    zl=log_down(ol);
-    zu=log_up(ou);
-    cout << zl << " <= " << z << " <= " << zu << endl;
-    assert(zl <= z && z <= zu);
-    
-    cout << "sin" << endl;
-    fl=sin_down(o);
-    fu=sin_up(o);
-    cout << fl << " <= " << fu << endl;
-    assert(fl <= fu);
-    ol=asin_down(fl);
-    ou=asin_up(fl);
-    cout << ol << " <= " << ou << endl;
-    assert(ol <= ou);
-    assert(ol <= o);
-    assert(o <= ou);
-  }
+  mpf_set_default_prec (128);
   
+  test_inverse_pair("exp",&exp_down<R>,&exp_up<R>,&log_down<R>,&log_up<R>);
+  test_inverse_pair("sin",&sin_down<R>,&sin_up<R>,&asin_down<R>,&asin_up<R>);
+  test_inverse_pair("cos",&cos_down<R>,&cos_up<R>,&acos_down<R>,&acos_up<R>);
+  test_inverse_pair("tan",&tan_down<R>,&tan_up<R>,&atan_down<R>,&atan_up<R>);
+  test_inverse_pair("sinh",&sinh_down<R>,&sinh_up<R>,&asinh_down<R>,&asinh_up<R>);
+  test_inverse_pair("cosh",&cosh_down<R>,&cosh_up<R>,&acosh_down<R>,&acosh_up<R>);
+  test_inverse_pair("tanh",&tanh_down<R>,&tanh_up<R>,&atanh_down<R>,&atanh_up<R>);
   return;
 }
 

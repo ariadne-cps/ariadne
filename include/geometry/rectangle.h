@@ -154,6 +154,16 @@ namespace Ariadne {
         }
       }
       
+      /*! \brief Construct a rectangle from an interval point. */
+      explicit Rectangle(const Point<I>& pt)
+        : _bounds(2*pt.dimension())
+      {
+        for(dimension_type i=0; i!=pt.dimension(); ++i) {
+          this->set_lower_bound(i,pt[i].lower());
+          this->set_upper_bound(i,pt[i].upper());
+        }
+      }
+      
       /*! \brief Construct from two corners. */
       explicit Rectangle(const Point<R>& pt1, const Point<R>& pt2) 
         : _bounds(2*pt1.dimension())
@@ -224,6 +234,10 @@ namespace Ariadne {
       
       //@{
       //! \name Conversion operators
+      /*! \brief Convert to an interval point. */
+      operator Point< Interval<R> >() const {
+        return Point< Interval<R> >(this->dimension(),reinterpret_cast<const Interval<R>*>(this->_bounds.begin()));
+      }
       //@}
       
       
@@ -430,9 +444,6 @@ namespace Ariadne {
       Rectangle bounding_box() const {
         return *this;
       }
-      
-      /*! \brief Construct an over-approximation of an interval rectangle. */
-      static Rectangle<R> over_approximation(const Rectangle<I>& ir);
       //@}
       
 #ifdef DOXYGEN
@@ -487,20 +498,33 @@ namespace Ariadne {
       array<R> _bounds;
     };
   
-/*
+
     template<class R>
-    class Rectangle< Interval<R> >
+    class Rectangle< Interval<R> > 
+      : public RectangleExpression< Rectangle< Interval<R> > >
     {
       typedef Interval<R> I;
      public:
       Rectangle(dimension_type d) : _bounds(2*d) { }
+      template<class E> Rectangle(const RectangleExpression<E>& e)
+        : _bounds(2*e().dimension()) { this->assign(e()); }
+      template<class E> Rectangle< Interval<I> > operator=(const RectangleExpression<E>& e) {
+         this->_bounds.resize(e().dimension()); this->assign(e); }
       dimension_type dimension() const { return _bounds.size()/2; }
-      const I& lower_bound(const dimension_type& i) { return _bounds[2*i]; }
-      const I& upper_bound(const dimension_type& i) { return _bounds[2*i+1]; }
+      const I& lower_bound(const dimension_type& i) const { return _bounds[2*i]; }
+      const I& upper_bound(const dimension_type& i) const { return _bounds[2*i+1]; }
+      void set_lower_bound(const dimension_type& i, const I& x) { _bounds[2*i]=x; }
+      void set_upper_bound(const dimension_type& i, const I& x) { _bounds[2*i+1]=x; }
+     private:
+      template<class RE> void assign(const RE& re) { 
+        for(dimension_type i=0; i!=this->dimension(); ++i) {
+          this->_bounds[2*i]=re.lower_bound(i); this->_bounds[2*i+1]=re.upper_bound(i);
+        }
+      }
      private:
       array<I> _bounds;
     };
-*/    
+    
     
     template<class R> inline
     Rectangle<R> over_approximation(const Rectangle< Numeric::Interval<R> >& ir) {
@@ -508,6 +532,16 @@ namespace Ariadne {
       for(dimension_type i=0; i!=result.dimension(); ++i) {
         result.set_lower_bound(i,ir.lower_bound(i).lower());
         result.set_upper_bound(i,ir.upper_bound(i).upper());
+      }
+      return result;
+    }
+    
+    template<class R> inline
+    Rectangle<R> under_approximation(const Rectangle< Numeric::Interval<R> >& ir) {
+      Rectangle<R> result(ir.dimension());
+      for(dimension_type i=0; i!=result.dimension(); ++i) {
+        result.set_lower_bound(i,ir.lower_bound(i).upper());
+        result.set_upper_bound(i,ir.upper_bound(i).lower());
       }
       return result;
     }

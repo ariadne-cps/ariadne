@@ -220,6 +220,15 @@ namespace Ariadne {
     template<> inline int conv_down(const MPFloat& x) { return mpfr_get_si(x.get_mpfr_t(),GMP_RNDD); }
     template<> inline int conv_up(const MPFloat& x) { return mpfr_get_si(x.get_mpfr_t(),GMP_RNDU); }
  
+    template<> inline mpf_class conv_exact(const MPFloat& x) { 
+      mpf_class r; mpfr_get_f(r.get_mpf_t(),x.get_mpfr_t(),GMP_RNDN); return r; }
+    template<> inline mpf_class conv_approx(const MPFloat& x) { 
+      mpf_class r; mpfr_get_f(r.get_mpf_t(),x.get_mpfr_t(),GMP_RNDN); return r; }
+    template<> inline mpf_class conv_down(const MPFloat& x) { 
+      mpf_class r; mpfr_get_f(r.get_mpf_t(),x.get_mpfr_t(),GMP_RNDD); return r; }
+    template<> inline mpf_class conv_up(const MPFloat& x) { 
+      mpf_class r; mpfr_get_f(r.get_mpf_t(),x.get_mpfr_t(),GMP_RNDU); return r; }
+  
     template<> inline Rational conv_exact(const MPFloat& x) { return Rational(x); }
     template<> inline Rational conv_approx(const MPFloat& x) { return conv_exact<Rational>(x); }
     template<> inline Rational conv_down(const MPFloat& x) { return conv_exact<Rational>(x); }
@@ -421,7 +430,8 @@ namespace Ariadne {
     Interval<MPFloat> operator*(const MPFloat&, const MPFloat&);
     Interval<MPFloat> operator/(const MPFloat&, const MPFloat&);
       
-      
+    
+    
       
 /*  Expression-templated functions for possible future use.
       

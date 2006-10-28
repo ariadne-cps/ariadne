@@ -52,12 +52,12 @@ touching_intersection(const BS1<R> &a,
 
 template<class R> inline
 Zonotope<R> over_approximation_of_minkowski_sum(const Zonotope<R>& z1, const Zonotope<R>& z2) {
-  return minkowski_sum(z1,z2).over_approximation();
+  return over_approximation(minkowski_sum(z1,z2));
 }
 
 template<class R> inline
 Zonotope<R> over_approximation_of_minkowski_difference(const Zonotope<R>& z1, const Zonotope<R>& z2) {
-  return minkowski_difference(z1,z2).over_approximation();
+  return over_approximation(minkowski_difference(z1,z2));
 }
 
 template<class R>

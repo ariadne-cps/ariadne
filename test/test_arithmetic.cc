@@ -26,6 +26,7 @@
 
 #include <gmpxx.h>
 #include <mpfr.h>
+#include <boost/numeric/interval.hpp>
 
 #include "numeric/arithmetic.h"
 #include "numeric/interval.h"
@@ -42,13 +43,17 @@ using Ariadne::Rational;
 using Ariadne::MPFloat;
 using Ariadne::Float64;
 
+void test_boost_rounding(); 
 template<class R> void test_arithmetic();
+template<> void test_arithmetic<Rational>();
 
 int main() {
 
   cout << setprecision(20);
   mpf_set_default_prec (8);
 
+  test_boost_rounding();
+  
   test_arithmetic<Float64>();
   test_arithmetic<MPFloat>();
   test_arithmetic<Rational>();
@@ -58,6 +63,22 @@ int main() {
   return 0;
 }
 
+void
+test_boost_rounding() 
+{
+  double x=1;
+  double y=3;
+  double zl,zu;
+  
+  { 
+    boost::numeric::interval_lib::rounded_arith_std<double> rnd;
+    zl=rnd.div_down(x,y);
+    zu=rnd.div_up(x,y);
+  }
+  cout << zl << " <= " << x << "/" << y << " <= " << zu << endl;
+}
+
+  
 template<class R>
 void
 test_arithmetic()
@@ -82,6 +103,13 @@ test_arithmetic()
   f3=div_down(f1,f2);
   f4=div_up(f1,f2);
   cout << f3 << " <= " << f1 << " / " << f2 << " <= " << f4 << endl;
+  assert(f3<f4);
+  assert(Rational(f3)<=Rational(5,9));
+  assert(Rational(f4)>=Rational(5,9));
+  cout << mul_down(f3,f2) << " <= (" << f1 << "/" << f2 << ")*" << f2 << " <= " << mul_up(f4,f2) << endl;
+  assert(mul_down(f3,f2)<f1);
+  assert(mul_up(f4,f2)>f1);
+  
   f3=mul_down(f3,f2);
   f4=mul_up(f4,f2);
   cout << f3 << " <= " << f1 << " <= " << f4 << endl;
@@ -111,11 +139,11 @@ test_arithmetic()
   R zl=sub_down(ol,o);
   R zu=sub_up(ou,o);
   cout << "zl=" << zl << "  zu=" << zu << endl;
-  assert(tl<=tu);
-  assert(ol<=o);
-  assert(o<=ou);
-  assert(zl<=z);
-  assert(z<=zu);
+  assert(tl<tu);
+  assert(ol<o);
+  assert(o<ou);
+  assert(zl<z);
+  assert(z<zu);
   //assert(zl<=z && z <=zu);
   
   Interval<R> io(1);
@@ -127,5 +155,32 @@ test_arithmetic()
   cout << iaz << endl;
   assert(contains_value(iaz,z)); 
   cout << endl;
+
+  return;
+}
+
+
+template<>
+void
+test_arithmetic<Rational>()
+{
+  typedef Rational R;
+  
+  R f1(1.25);
+  R f2(2.25);
+  R f3;
+
+  f3=add(f1,f2);
+  cout << f1 << " + " << f2 << " = " << f3 << endl;
+  assert(f3==R(7,2));
+  f3=sub(f1,f2);
+  cout << f1 << " - " << f2 << " = " << f3 << endl;
+  assert(f3==R(-1,1));
+  f3=mul(f1,f2);
+  cout << f1 << " * " << f2 << " = " << f3 << endl;
+  assert(f3==R(45,16));
+  f3=div(f1,f2);
+  cout << f1 << " / " << f2 << " = " << f3 << endl;
+  assert(f3==R(5,9));
 
 }

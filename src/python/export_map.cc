@@ -24,6 +24,8 @@
 
 #include "real_typedef.h"
 
+#include "geometry/point.h"
+#include "geometry/rectangle.h"
 #include "system/map.h"
 
 using namespace Ariadne;

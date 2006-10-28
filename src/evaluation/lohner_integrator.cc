@@ -1,5 +1,5 @@
 /***************************************************************************
- *            integrator.cc
+ *            lohner_integrator.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -32,7 +32,7 @@
 namespace Ariadne {
   namespace Evaluation {
 
-    template class C0LohnerIntegrator<Real>;
-    template class C1LohnerIntegrator<Real>;
+    template class LohnerIntegrator<Real>;
+
   }
 }

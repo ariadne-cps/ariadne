@@ -10,7 +10,7 @@ s/Combinatoric:://g
 s/Geometry:://g
 s/System:://g
 s/Evaluation:://g
-s/boost::numeric::ublas:://g
+s/boost::numeric:://g
 s/boost::logic:://g
 s/\,\ basic_row_major<unsigned int\, int>//g
 s/\,\ unbounded_array<Dyadic\,\ std::allocator<Dyadic\ >\ >//g

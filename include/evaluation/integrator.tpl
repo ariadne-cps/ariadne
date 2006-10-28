@@ -37,6 +37,7 @@
 #include "../declarations.h"
 
 #include "../base/array.h"
+#include "../base/exception.h"
 
 #include "../numeric/rational.h"
 #include "../numeric/interval.h"
@@ -83,13 +84,18 @@ namespace Ariadne {
       Geometry::Rectangle<R> _bound;
       R _integration_time;
     };
-       
-      
     
     
     
-
-
+    
+    
+    template<class R>
+    Integrator<R>::~Integrator()
+    {
+    }
+    
+    
+    
     template<class R>
     Integrator<R>::Integrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_basic_set_radius)
       : _maximum_step_size(maximum_step_size),
@@ -97,36 +103,9 @@ namespace Ariadne {
         _maximum_basic_set_radius(maximum_basic_set_radius)
     {
     }
-
-    template<class R>
-    LinearAlgebra::Matrix<R>
-    Integrator<R>::symmetrize(const LinearAlgebra::Vector< Interval<R> >& iv)
-    {
-      LinearAlgebra::Matrix<R> A(iv.size(),iv.size()+1);
-      for(size_type i=0; i!=A.number_of_rows(); ++i) {
-        A(i,i)=iv(i).radius();
-        A(i,iv.size())=iv(i).centre();
-      }
-      return A;
-    }
-
-    template<class R>
-    C1Integrator<R>::C1Integrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_basic_set_radius)
-      : Integrator<R>(maximum_step_size,lock_to_grid_time,maximum_basic_set_radius)
-    {
-    }
-
-
-
-    template<class R>
-    Integrator<R>::~Integrator()
-    {
-    }
-
- 
-
-
-
+    
+    
+    
     template<class R>
     time_type Integrator<R>::minimum_step_size() const
     {
@@ -156,10 +135,23 @@ namespace Ariadne {
     {
       return this->_lock_to_grid_time;
     }
-
-
-
-
+    
+    
+    
+    
+    template<class R>
+    LinearAlgebra::Matrix<R>
+    Integrator<R>::symmetrize(const LinearAlgebra::Vector< Interval<R> >& iv)
+    {
+      LinearAlgebra::Matrix<R> A(iv.size(),iv.size()+1);
+      for(size_type i=0; i!=A.number_of_rows(); ++i) {
+        A(i,i)=iv(i).radius();
+        A(i,iv.size())=iv(i).centre();
+      }
+      return A;
+    }
+    
+    
     
     template<class R>
     bool
@@ -171,6 +163,7 @@ namespace Ariadne {
       using namespace Geometry;
       return subset(r+Interval<R>(0,h)*vf(b),b);
     }
+    
     
     
     template<class R>
@@ -221,6 +214,8 @@ namespace Ariadne {
       return reach;
     }
     
+    
+    
     template<class R>
     Geometry::Rectangle<R>
     Integrator<R>::estimate_flow_bounds(const System::VectorField<R>& vf,
@@ -249,8 +244,8 @@ namespace Ariadne {
       return bounds;
     }
     
-   
-
+    
+    
     template<class R>
     Geometry::Rectangle<R>
     Integrator<R>::refine_flow_bounds(const System::VectorField<R>& vector_field,
@@ -280,11 +275,7 @@ namespace Ariadne {
     }
     
     
-
     
-
-
-
     template<class R>
     template<template<class> class BS>
     BS<R> 
@@ -308,7 +299,9 @@ namespace Ariadne {
       }
       return r;
     }
-  
+    
+    
+    
     template<class R>
     template<template<class> class BS>
     Geometry::ListSet<R,BS> 
@@ -379,128 +372,171 @@ namespace Ariadne {
       }
       return final_set;
     }
-
-
+    
+    
+    
+    
+    
+    
+    
+    template<class R>
+    Geometry::ListSet<R,Geometry::Rectangle>
+    Integrator<R>::reach(const System::VectorField<R>& vector_field,
+                         const Geometry::ListSet<R,Geometry::Rectangle>& initial_set,
+                         const time_type& time) const
+    {
+      throw std::domain_error("Integrator<R>::reach(const System::VectorField<R>& vector_field,"
+                              "const Geometry::ListSet<R,Geometry::Rectangle>& initial_set,"
+                              "const time_type& time) const not implemented");
+    }
+    
+    
+    
     template<class R>
     Geometry::Rectangle<R>
-    C0Integrator<R>::integrate(const System::VectorField<R>& vector_field,
-                               const Geometry::Rectangle<R>& initial_set,
-                               const time_type& time) const
+    Integrator<R>::integration_step(const System::VectorField<R>& vector_field, 
+                                      const Geometry::Rectangle<R>& initial_set, 
+                                      time_type& time) const
     {
-     return this->integrate_basic_set(vector_field,initial_set,time);
+      throw NotImplemented("Integrator<R>::integration_step(VectorField<R>,Rectangle<R>,T)");
     }
-
-    template<class R>
-    Geometry::ListSet<R,Geometry::Rectangle>
-    C0Integrator<R>::integrate(const System::VectorField<R>& vector_field,
-                               const Geometry::ListSet<R,Geometry::Rectangle>& initial_set,
-                               const time_type& time) const
-    {
-     return this->integrate_list_set(vector_field,initial_set,time);
-    }
-
-    template<class R>
-    Geometry::ListSet<R,Geometry::Rectangle>
-    C0Integrator<R>::reach(const System::VectorField<R>& vector_field,
-                           const Geometry::ListSet<R,Geometry::Rectangle>& initial_set,
-                           const time_type& time) const
-    {
-      assert(false);
-    }
-
+    
     template<class R>
     Geometry::Parallelotope<R>
-    C0Integrator<R>::integration_step(const System::VectorField<R>& vector_field, 
+    Integrator<R>::integration_step(const System::VectorField<R>& vector_field, 
                                       const Geometry::Parallelotope<R>& initial_set, 
                                       time_type& time) const
     {
       return Geometry::Parallelotope<R>(this->integration_step(vector_field,initial_set.bounding_box(),time));
     }
-
-
-
-  
-
+    
     template<class R>
-    Geometry::Rectangle<R> 
-    C1Integrator<R>::integration_step(const System::VectorField<R>& vf,
-                                      const Geometry::Rectangle<R>& is,
-                                      time_type& h) const 
+    Geometry::Zonotope<R>
+    Integrator<R>::integration_step(const System::VectorField<R>& vector_field, 
+                                      const Geometry::Zonotope<R>& initial_set, 
+                                      time_type& time) const
     {
-      return this->integration_step(vf,Geometry::Parallelotope<R>(is),h).bounding_box();
+      return Geometry::Zonotope<R>(this->integration_step(vector_field,initial_set.bounding_box(),time));
     }
-
+    
+    template<class R>
+    Geometry::Parallelotope< Interval<R> >
+    Integrator<R>::integration_step(const System::VectorField<R>& vector_field, 
+                                      const Geometry::Parallelotope< Interval<R> >& initial_set, 
+                                      time_type& time) const
+    {
+      return Geometry::Parallelotope< Interval<R> >(this->integration_step(vector_field,initial_set.bounding_box(),time));
+    }
+    
+    template<class R>
+    Geometry::Zonotope< Interval<R> >
+    Integrator<R>::integration_step(const System::VectorField<R>& vector_field, 
+                                      const Geometry::Zonotope< Interval<R> >& initial_set, 
+                                      time_type& time) const
+    {
+      return Geometry::Zonotope< Interval<R> >(this->integration_step(vector_field,initial_set.bounding_box(),time));
+    }
+    
+    
+    
     template<class R>
     Geometry::Rectangle<R> 
-    C1Integrator<R>::reachability_step(const System::VectorField<R>& vf,
+    Integrator<R>::reachability_step(const System::VectorField<R>& vf,
                                        const Geometry::Rectangle<R>& is,
                                        time_type& h) const 
     {
-      return this->reachability_step(vf,Geometry::Parallelotope<R>(is),h).bounding_box();
+      throw NotImplemented("Integrator<R>::reachability_step(VectorField<R>,Rectangle<R>,time_type)");
+    }
+    
+    
+    template<class R>
+    Geometry::Zonotope<R> 
+    Integrator<R>::reachability_step(const System::VectorField<R>& vf,
+                                       const Geometry::Zonotope<R>& is,
+                                       time_type& h) const 
+    {
+      return this->reachability_step(vf,is.bounding_box(),h);
     }
 
     template<class R>
-    Geometry::Zonotope<R> 
-    C1Integrator<R>::reachability_step(const System::VectorField<R>& vf,
-                                       const Geometry::Parallelotope<R>& is,
+    Geometry::Zonotope< Interval<R> > 
+    Integrator<R>::reachability_step(const System::VectorField<R>& vf,
+                                       const Geometry::Zonotope< Interval<R> >& is,
                                        time_type& h) const 
     {
-      return this->reachability_step(vf,Geometry::Zonotope<R>(is),h);
+      return Geometry::Zonotope< Interval<R> >(this->reachability_step(vf,is.bounding_box(),h));
     }
+
 
 
 
     template<class R>
     Geometry::Rectangle<R>
-    C1Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
+    Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
                                const Geometry::Rectangle<R>& initial_set, 
                                const time_type& time) const
     {
       return this->integrate_basic_set(vector_field,initial_set,time);
     }
     
+    
     template<class R>
     Geometry::Parallelotope<R>
-    C1Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
+    Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
                                const Geometry::Parallelotope<R>& initial_set, 
                                const time_type& time) const
     {
       return this->integrate_basic_set(vector_field,initial_set,time);
     }
     
-    template<class R>
-    Geometry::ListSet<R,Geometry::Parallelotope> 
-    C1Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
-                               const Geometry::ListSet<R,Geometry::Parallelotope>& initial_set, 
-                               const time_type& time) const
-    {
-      return this->integrate_list_set(vector_field,initial_set,time);
-    }
     
     template<class R>
     Geometry::Zonotope<R>
-    C1Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
+    Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
                                const Geometry::Zonotope<R>& initial_set, 
                                const time_type& time) const
     {
       return this->integrate_basic_set(vector_field,initial_set,time);
     }
     
+    
+    
+    template<class R>
+    Geometry::ListSet<R,Geometry::Rectangle>
+    Integrator<R>::integrate(const System::VectorField<R>& vector_field,
+                               const Geometry::ListSet<R,Geometry::Rectangle>& initial_set,
+                               const time_type& time) const
+    {
+     return this->integrate_list_set(vector_field,initial_set,time);
+    }
+    
+    
+    template<class R>
+    Geometry::ListSet<R,Geometry::Parallelotope> 
+    Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
+                               const Geometry::ListSet<R,Geometry::Parallelotope>& initial_set, 
+                               const time_type& time) const
+    {
+      return this->integrate_list_set(vector_field,initial_set,time);
+    }
+    
+    
     template<class R>
     Geometry::ListSet<R,Geometry::Zonotope> 
-    C1Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
+    Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
                                const Geometry::ListSet<R,Geometry::Zonotope>& initial_set, 
                                const time_type& time) const
     {
       return this->integrate_list_set(vector_field,initial_set,time);
     }
    
+    
     template<class R>
     Geometry::GridMaskSet<R> 
-    C1Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
-                               const Geometry::GridMaskSet<R>& initial_set,
-                               const Geometry::GridMaskSet<R>& bounding_set,
-                               const time_type& time) const
+    Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
+                             const Geometry::GridMaskSet<R>& initial_set,
+                             const Geometry::GridMaskSet<R>& bounding_set,
+                             const time_type& time) const
     {
       assert(initial_set.grid()==bounding_set.grid());
       using namespace System;
@@ -574,10 +610,10 @@ namespace Ariadne {
    
         
     template<class R>
-    Geometry::ListSet<R,Geometry::Parallelotope> 
-    C1Integrator<R>::reach(const System::VectorField<R>& vector_field, 
-                           const Geometry::ListSet<R,Geometry::Parallelotope>& initial_set, 
-                           const time_type& time) const
+    Geometry::ListSet<R,Geometry::Zonotope> 
+    Integrator<R>::reach(const System::VectorField<R>& vector_field, 
+                         const Geometry::ListSet<R,Geometry::Parallelotope>& initial_set, 
+                         const time_type& time) const
     {
       const System::VectorField<R>& vf=vector_field;
       time_type step_size=this->maximum_step_size();
@@ -589,10 +625,10 @@ namespace Ariadne {
       time_type t=time;
       time_type h=step_size;
       Geometry::Parallelotope<R> bs(initial_set.dimension());
-      Geometry::Parallelotope<R> rs(initial_set.dimension());
+      Geometry::Zonotope<R> rs(initial_set.dimension());
       
       std::multiset< std::pair< R,Geometry::Parallelotope<R> >, pair_first_less< R,Geometry::Parallelotope<R> > > working_sets;
-      Geometry::ListSet< R,Geometry::Parallelotope > reach_set(initial_set.dimension());
+      Geometry::ListSet< R,Geometry::Zonotope > reach_set(initial_set.dimension());
       
       typedef typename Geometry::ListSet<R,Geometry::Parallelotope>::const_iterator list_set_const_iterator;
       typedef std::pair< time_type,Geometry::Parallelotope<R> > timed_set;
@@ -620,10 +656,10 @@ namespace Ariadne {
           do {
 #ifdef DEBUG
         std::cerr << "time left=" << t << "  stepsize=" << h << "  centre=" 
-		 << bs.centre()  << std::endl;
+                  << bs.centre()  << std::endl;
 #endif
             h=min(t,h);
-            rs=Geometry::Parallelotope<R>::over_approximation(this->reachability_step(vf,bs,h));
+            rs=Geometry::over_approximation(Geometry::Zonotope< Interval<R> >(this->reachability_step(vf,bs,h)));
             reach_set.adjoin(rs);
 #ifdef DEBUG
         std::cerr << "rs.centre=" << rs.centre() << std::endl;
@@ -645,7 +681,7 @@ namespace Ariadne {
 
     template<class R>
     Geometry::ListSet<R,Geometry::Zonotope> 
-    C1Integrator<R>::reach(const System::VectorField<R>& vector_field, 
+    Integrator<R>::reach(const System::VectorField<R>& vector_field, 
                            const Geometry::ListSet<R,Geometry::Zonotope>& initial_set, 
                            const time_type& time) const
     {
@@ -653,7 +689,7 @@ namespace Ariadne {
       time_type step_size=this->maximum_step_size();
       R maximum_set_radius=this->maximum_basic_set_radius();
 #ifdef DEBUG
-        std::cerr << "C1Integrator<R>::reach(const VectorField<R>& vector_field,const Geometry::ListSet<R,Geometry::Zonotope>& initial_set, const time_type& time)" << std::endl;
+        std::cerr << "Integrator<R>::reach(const VectorField<R>& vector_field,const Geometry::ListSet<R,Geometry::Zonotope>& initial_set, const time_type& time)" << std::endl;
         std::cerr << "step_size=" << step_size << "  maximum_set_radius()=" << maximum_set_radius << std::endl<<std::flush;
 #endif
       
@@ -717,11 +753,11 @@ namespace Ariadne {
         std::cerr << "Exiting reach"<< std::endl;
 #endif
       return reach_set;
-    }
+    } 
 
     template<class R>
     Geometry::GridMaskSet<R> 
-    C1Integrator<R>::reach(const System::VectorField<R>& vector_field, 
+    Integrator<R>::reach(const System::VectorField<R>& vector_field, 
                            const Geometry::GridMaskSet<R>& initial_set,
                            const Geometry::GridMaskSet<R>& bounding_set,
                            const time_type& time) const

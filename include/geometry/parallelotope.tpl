@@ -34,6 +34,7 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
+#include "../linear_algebra/qr_matrix.h"
 #include "../linear_algebra/linear_program.h"
 
 #include "../geometry/point.h"
@@ -53,11 +54,23 @@ namespace Ariadne {
     tribool
     Parallelotope<R>::_instantiate_geometry_operators() 
     {
+      //Parallelotope<R>(*goa)(const Parallelotope< Interval<R> >&) = &Geometry::over_approximation<R>;
       Rectangle<R> r;
       Parallelotope<R> p;
-      tribool b=Geometry::subset(r,p);
-      b = b&&b;
-      return b;
+      Geometry::subset(r,p);
+      return false;
+    }
+    
+    template<class R>
+    tribool
+    Parallelotope< Interval<R> >::_instantiate_geometry_operators() 
+    {
+      Parallelotope<R> p;
+      Parallelotope< Interval<R> > ip;
+      Zonotope< Interval<R> > iz;
+      p=Geometry::over_approximation(ip);
+      p=Geometry::orthogonal_over_approximation(iz);
+      return p.empty();
     }
     
     template<class R>
@@ -220,72 +233,95 @@ namespace Ariadne {
     }
     
     
-
+    template<class R>
+    Parallelotope<R>
+    over_approximation(const Parallelotope<R>& p)
+    {
+      return p;
+    }
     
     template<class R>
     Parallelotope<R>
-    Parallelotope<R>::over_approximation(const Point<I> &c, const LinearAlgebra::Matrix<I>& A)
+    over_approximation(const Parallelotope< Interval<R> >& p)
     {
-#ifdef DEBUG
-      std::cerr << "IntervalParallelotope<R>::over_approximating_parallelotope() const" << std::endl;
-#endif
+      //std::cerr << "IntervalParallelotope<R>::over_approximating_parallelotope() const" << std::endl;
+      typedef Interval<R> I;
+      const Point<I>& c=p.centre();
+      const LinearAlgebra::Matrix<I> G=p.generators();
+      
       size_type n=c.dimension();
       
-      Point<R> cmid=approximation(c);
-      LinearAlgebra::Matrix<R> Amid=LinearAlgebra::approximate_value(A);
+      Point<R> cmid=approximate_value(c);
+      LinearAlgebra::Matrix<R> Gmid=LinearAlgebra::approximate_value(G);
       
       LinearAlgebra::Matrix<R> D(n,n);
       for(size_type i=0; i!=n; ++i) {
         D(i,i)=c[i].radius();
       }
       
-      LinearAlgebra::Matrix<I> Ainv=LinearAlgebra::inverse(LinearAlgebra::Matrix<I>(Amid));
-      R err = ((Ainv*D).norm()+(Ainv*A).norm()).upper();
+      LinearAlgebra::Matrix<I> Ginv=LinearAlgebra::inverse(LinearAlgebra::Matrix<I>(Gmid));
+      R err = ((Ginv*D).norm()+(Ginv*G).norm()).upper();
 
       for(size_type i=0; i!=n; ++i) {
         for(size_type j=0; j!=n; ++j) {
-          Amid(i,j)=mul_up(Amid(i,j),err);
+          Gmid(i,j)=mul_up(Gmid(i,j),err);
         }
       }
       
-      return Geometry::Parallelotope<R>(cmid,Amid);
+      // Check to make such result is valid.
+      assert(LinearAlgebra::norm(LinearAlgebra::row_norms(Gmid.inverse()*G)+(cmid-c))<=R(1));
+      return Geometry::Parallelotope<R>(cmid,Gmid);
     }
     
+ 
     template<class R>
     Parallelotope<R>
-    Parallelotope<R>::over_approximation(const Zonotope<R>& z)
+    orthogonal_over_approximation(const Zonotope<R>& z)
     {
-      dimension_type n=z.dimension();
-      LinearAlgebra::Matrix<R> A(n,n);
-      for(dimension_type i=0; i!=n; ++i) {
-        for(dimension_type j=0; j!=n; ++j) {
-          A(i,j)=z.generators()(i,j);
-        }
-      }
-      LinearAlgebra::Matrix<F> Aq=A;
-      LinearAlgebra::Matrix<F> B=LinearAlgebra::inverse(Aq);
-      const Point<R>& c=z.centre();
-      
-      throw std::runtime_error("Zonotope<R>::over_approximating_parallelotope() const not implemented");
-      
-      /*
-      typedef Rational FF;
-      Parallelotope<R> p(c,A);
-      while(!Geometry::subset(Polytope<FF>(z),Polyhedron<FF>(p))) {
-        Aq*=F(2);
-        p=Parallelotope<R>(c,A);
-      }
-      return p;
-      */
-    }        
+      return orthogonal_over_approximation(Zonotope< Interval<R> >(z));
+    }
     
     template<class R>
     Parallelotope<R>
-    Parallelotope< Interval<R> >::over_approximation() const
-    { 
-      throw std::runtime_error("Parallelotope<Interval<R>>::over_approximation() const not implemented");
+    orthogonal_over_approximation(const Zonotope< Interval<R> >& z)
+    {
+      //std::cerr << "Parallelotope<R>::orthogonal_over_approximation(const Zonotope<I>&) const" << std::endl;
+      typedef Interval<R> I;
+      typedef typename Numeric::traits<R>::approximate_arithmetic_type A;
+      const Point<I>& c=z.centre();
+      const LinearAlgebra::Matrix<I>& G=z.generators();
+      
+      size_type d=z.dimension();
+      size_type ng=z.number_of_generators();
+      
+      Point<R> cmid=approximate_value(c);
+      LinearAlgebra::Vector<I> cerr=c-cmid;
+      
+      LinearAlgebra::Matrix<A> Gapprx(d,ng);
+      for(size_type i=0; i!=d; ++i) {
+        for(size_type j=0; j!=ng; ++j) {
+          Gapprx(i,j)=conv_approx<A>(approximate_value(G(i,j)));
+        }
+      }
+      
+      LinearAlgebra::QRMatrix<I> QR(G);
+      LinearAlgebra::Matrix<I> Q=QR.Q();
+      LinearAlgebra::Matrix<R> Qmid=approximate_value(Q);
+      LinearAlgebra::Vector<I> Rrwnrm=LinearAlgebra::row_norms(Qmid.transpose()*G);
+      for(size_type i=0; i!=d; ++i) {
+        R scale=(Rrwnrm(i)+cerr(i)).upper();
+        for(size_type j=0; j!=d; ++j) {
+          Qmid(i,j)=mul_up(Qmid(i,j),scale);
+        }
+      }
+      
+      
+      // Check to make such result is valid.
+      //assert(LinearAlgebra::norm(LinearAlgebra::row_norms(Qmid.inverse()*A)+(cmid-c))<=R(1));
+      return Geometry::Parallelotope<R>(cmid,Qmid);
     }
     
+
 /*
     template<class R>
     Parallelotope<R> 

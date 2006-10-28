@@ -1,8 +1,7 @@
 /***************************************************************************
  *            python/export_apply.cc
  *
- *  6 February 2006
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
+ *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -44,25 +43,25 @@ using namespace boost::python;
 template<class R>
 void export_apply() 
 {
-  class_< C1Applicator<R> >("Applicator",init<>())
-    .def("apply",(Rectangle<R>(C0Applicator<R>::*)(const Map<R>&,const Rectangle<R>&)const)
-                   (&C0Applicator<R>::apply),"apply the image of a map to a set")
-    .def("apply",(Parallelotope<R>(C1Applicator<R>::*)(const Map<R>&,const Parallelotope<R>&)const)
-                   (&C1Applicator<R>::apply),"apply the image of a map to a set" )
-    .def("apply",(ListSet<R,Parallelotope>(C1Applicator<R>::*)(const Map<R>&,const ListSet<R,Parallelotope>&)const)
-                   (&C1Applicator<R>::apply),"apply the image of a map to a set" )
-    .def("apply",(GridMaskSet<R>(C1Applicator<R>::*)(const Map<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
-                   (&C1Applicator<R>::apply),"apply the image of a map to a set" )
-    .def("chainreach",(GridMaskSet<R>(C1Applicator<R>::*)(const Map<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
-                        (&C1Applicator<R>::chainreach), "Compute the chain reachable set")
-    .def("verify",(bool(C1Applicator<R>::*)(const Map<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
-                    (&C1Applicator<R>::verify), "Verify that the reachable set lies within a safe set")
+  class_< Applicator<R> >("Applicator",init<>())
+    .def("image",(Rectangle<R>(Applicator<R>::*)(const Map<R>&,const Rectangle<R>&)const)
+                   (&Applicator<R>::image),"Compute the image of a set under a map")
+    .def("image",(Parallelotope<R>(Applicator<R>::*)(const Map<R>&,const Parallelotope<R>&)const)
+                   (&Applicator<R>::image),"Compute the image of a set under a map" )
+    .def("image",(ListSet<R,Parallelotope>(Applicator<R>::*)(const Map<R>&,const ListSet<R,Parallelotope>&)const)
+                   (&Applicator<R>::image),"Compute the image of a set under a map" )
+    .def("image",(GridMaskSet<R>(Applicator<R>::*)(const Map<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
+                   (&Applicator<R>::image),"Compute the image of a set under a map" )
+    .def("chainreach",(GridMaskSet<R>(Applicator<R>::*)(const Map<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
+                        (&Applicator<R>::chainreach), "Compute the chain reachable set")
+    .def("verify",(bool(Applicator<R>::*)(const Map<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
+                    (&Applicator<R>::verify), "Verify that the reachable set lies within a safe set")
   ;
  
-  def("apply", (Rectangle<R>(*)(const Map<R>&,const Rectangle<R>&))(&apply), "apply the image of a map to a set" );
-  def("apply", (Parallelotope<R>(*)(const Map<R>&,const Parallelotope<R>&))(&apply), "apply the image of a map to a set" );
-  def("apply", (ListSet<R,Parallelotope>(*)(const Map<R>&,const ListSet<R,Parallelotope>&))(&apply), "apply the image of a map to a set" );
-  def("apply", (GridMaskSet<R>(*)(const Map<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&))(&apply), "apply the image of a map to a set" );
+  def("image", (Rectangle<R>(*)(const Map<R>&,const Rectangle<R>&))(&image), "apply the image of a map to a set" );
+  def("image", (Parallelotope<R>(*)(const Map<R>&,const Parallelotope<R>&))(&image), "apply the image of a map to a set" );
+  def("image", (ListSet<R,Parallelotope>(*)(const Map<R>&,const ListSet<R,Parallelotope>&))(&image), "apply the image of a map to a set" );
+  def("image", (GridMaskSet<R>(*)(const Map<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&))(&image), "apply the image of a map to a set" );
   def("chainreach", (GridMaskSet<R>(*)(const Map<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&))(&chainreach), "Compute the chain reachable set" );
   def("verify", (bool(*)(const Map<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&))(&verify), "Compute the chain reachable set" );
   

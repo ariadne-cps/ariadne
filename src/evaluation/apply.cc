@@ -29,8 +29,7 @@
 namespace Ariadne {
   namespace Evaluation {
 
-    template class C0Applicator<Real>;
-    template class C1Applicator<Real>;
+    template class Applicator<Real>;
 
 /*  template 
     Geometry::Rectangle<Real> 

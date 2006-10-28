@@ -72,9 +72,10 @@ test_apply()
   cb=Rectangle<R>(gbb); // cutoff box
   epsbb=Rectangle<R>(gbb); // eps bounding box
   
+  Applicator<R> apply;
   
-  Rectangle<R> fr=apply(h,ir);
-  Parallelotope<R> fp=apply(h,ip);
+  Rectangle<R> fr=apply.image(h,ir);
+  Parallelotope<R> fp=apply.image(h,ip);
   //Zonotope<R> fz=apply(h,iz);
   //Polytope<R> fpl=apply(h,ipl);
   

@@ -29,6 +29,10 @@
 #define _ARIADNE_FLOAT64_H
 
 #include <mpfr.h>
+#include <cmath>
+#include <boost/numeric/interval/rounded_arith.hpp>
+#include <boost/numeric/interval/rounded_transc.hpp>
+#include <boost/numeric/interval/hw_rounding.hpp>
 
 #include "../declarations.h"
 #include "../numeric/numerical_traits.h"
@@ -54,6 +58,9 @@ namespace Ariadne {
  
     class Float64 {
      public:
+      typedef boost::numeric::interval_lib::rounded_arith_std<double> rounded_arith;
+      typedef boost::numeric::interval_lib::rounded_transc_std<double> rounding;
+     public:
       Float64() : _value() { }
       Float64(const int& n) : _value(n) { }
       Float64(const uint& n) : _value(n) { }
@@ -69,8 +76,7 @@ namespace Ariadne {
      private:
       double _value;
     };
-    
-
+       
     inline std::ostream& operator<<(std::ostream& os, const Float64& x) { return os << x.get_d(); }
     inline std::istream& operator>>(std::istream& is, Float64& x) { double d; is >> d; x=d; return is; }
     
@@ -177,32 +183,32 @@ namespace Ariadne {
     template<> inline Float64 abs_up(const Float64& x) { return abs_exact(x);  }
 
     template<> inline Float64 add_down(const Float64& x1,const Float64& x2) {
-      return invoke_mpfr(x1,x2,mpfr_add,GMP_RNDD); }
+      return Float64::rounding().add_down(x1.get_d(),x2.get_d()); }
     template<> inline Float64 add_up(const Float64& x1,const Float64& x2) {
-      return invoke_mpfr(x1,x2,mpfr_add,GMP_RNDU); }
+      return Float64::rounding().add_up(x1.get_d(),x2.get_d()); }
     template<> inline Float64 add_approx(const Float64& x1,const Float64& x2) {
-      return invoke_mpfr(x1,x2,mpfr_add,GMP_RNDN); }
+      return x1.get_d()+x2.get_d(); }
     
     template<> inline Float64 sub_down(const Float64& x1,const Float64& x2) {
-      return invoke_mpfr(x1,x2,mpfr_sub,GMP_RNDD); }
+      return Float64::rounding().sub_down(x1.get_d(),x2.get_d()); }
     template<> inline Float64 sub_up(const Float64& x1,const Float64& x2) {
-      return invoke_mpfr(x1,x2,mpfr_sub,GMP_RNDU); }
+      return Float64::rounding().sub_down(x1.get_d(),x2.get_d()); }
     template<> inline Float64 sub_approx(const Float64& x1,const Float64& x2) {
-      return invoke_mpfr(x1,x2,mpfr_sub,GMP_RNDN); }
+      return x1.get_d()-x2.get_d(); }
     
     template<> inline Float64 mul_down(const Float64& x1,const Float64& x2) {
-      return invoke_mpfr(x1,x2,mpfr_mul,GMP_RNDD); }
+      return Float64::rounding().mul_down(x1.get_d(),x2.get_d()); }
     template<> inline Float64 mul_up(const Float64& x1,const Float64& x2) {
-      return invoke_mpfr(x1,x2,mpfr_mul,GMP_RNDU); }
+      return Float64::rounding().mul_up(x1.get_d(),x2.get_d()); }
     template<> inline Float64 mul_approx(const Float64& x1,const Float64& x2) {
-      return invoke_mpfr(x1,x2,mpfr_mul,GMP_RNDN); }
+      return x1.get_d()*x2.get_d(); }
     
     template<> inline Float64 div_down(const Float64& x1,const Float64& x2) {
-      return invoke_mpfr(x1,x2,mpfr_div,GMP_RNDD); }
+      return Float64::rounding().div_down(x1.get_d(),x2.get_d()); }
     template<> inline Float64 div_up(const Float64& x1,const Float64& x2) {
-      return invoke_mpfr(x1,x2,mpfr_div,GMP_RNDU); }
+      return Float64::rounding().div_up(x1.get_d(),x2.get_d()); }
     template<> inline Float64 div_approx(const Float64& x1,const Float64& x2) {
-      return invoke_mpfr(x1,x2,mpfr_div,GMP_RNDN); }
+      return x1.get_d()/x2.get_d(); }
     
     inline Float64 mul_approx(const int& n, const Float64& x) {
       return x.get_d()*n; }
@@ -225,95 +231,100 @@ namespace Ariadne {
       
       
     template<> inline Float64 sqrt_down(const Float64& x) { 
-      return invoke_mpfr(x,mpfr_sqrt,GMP_RNDD); }
+      return Float64::rounding().sqrt_down(x.get_d()); }
     template<> inline Float64 sqrt_up(const Float64& x) { 
-      return invoke_mpfr(x,mpfr_sqrt,GMP_RNDU); }
+      return Float64::rounding().sqrt_up(x.get_d()); }
     template<> inline Float64 sqrt_approx(const Float64& x) { 
-      return invoke_mpfr(x,mpfr_sqrt,GMP_RNDN); }
+      return std::sqrt(x.get_d()); }
 
     template<> inline Float64 hypot_down(const Float64& x1,const Float64& x2) {
-      return invoke_mpfr(x1,x2,mpfr_hypot,GMP_RNDD); }
+      if(abs_approx(x1)>abs_approx(x2)) { return hypot_down(x2,x1); } Float64::rounding rnd; 
+      double z=rnd.div_down(x1.get_d(),x2.get_d()); z=rnd.sqrt_down(rnd.add_down(1.0,rnd.mul_down(z,z)));
+      return rnd.mul_down(z,x2.get_d()); }
     template<> inline Float64 hypot_up(const Float64& x1,const Float64& x2) {
-      return invoke_mpfr(x1,x2,mpfr_hypot,GMP_RNDU); }
+      if(abs_approx(x1)>abs_approx(x2)) { return hypot_up(x2,x1); } Float64::rounding rnd; 
+      double z=rnd.div_up(x1.get_d(),x2.get_d()); z=rnd.sqrt_up(rnd.add_up(1.0,rnd.mul_up(z,z)));
+      return rnd.mul_up(z,x2.get_d()); }
     template<> inline Float64 hypot_approx(const Float64& x1,const Float64& x2) {
-      return invoke_mpfr(x1,x2,mpfr_hypot,GMP_RNDN); }
+      if(abs_approx(x1)>abs_approx(x2)) { return hypot_approx(x2,x1); }
+      double z=x1.get_d()/x2.get_d(); return std::sqrt(z*z+1.0)*x2.get_d(); }
     
     template<> inline Integer int_down(const Float64& x);
     template<> inline Integer int_up(const Float64& x);
 
     template<> inline Float64 exp_approx(const Float64& x) {
-      return invoke_mpfr(x,mpfr_exp,GMP_RNDN); }
+      return std::exp(x.get_d()); }
     template<> inline Float64 exp_down(const Float64& x) {
-      return invoke_mpfr(x,mpfr_exp,GMP_RNDD); }
+      return Float64::rounding().exp_down(x.get_d()); }
     template<> inline Float64 exp_up(const Float64& x) {
-      return invoke_mpfr(x,mpfr_exp,GMP_RNDU); };
+      return Float64::rounding().exp_up(x.get_d()); }
     
     template<> inline Float64 log_approx(const Float64& x) {
-      return invoke_mpfr(x,mpfr_log,GMP_RNDN); }
+      return std::log(x.get_d()); }
     template<> inline Float64 log_down(const Float64& x) {
-      return invoke_mpfr(x,mpfr_log,GMP_RNDD); }
+      return Float64::rounding().log_down(x.get_d()); }
     template<> inline Float64 log_up(const Float64& x) {
-      return invoke_mpfr(x,mpfr_log,GMP_RNDU); };
+      return Float64::rounding().log_up(x.get_d()); }
 
     template<> inline Float64 sin_down(const Float64& x) {
-      return invoke_mpfr(x,mpfr_sin,GMP_RNDD); }
+      return Float64::rounding().sin_down(x.get_d()); }
     template<> inline Float64 sin_up(const Float64& x) {
-      return invoke_mpfr(x,mpfr_sin,GMP_RNDU); };
+      return Float64::rounding().sin_up(x.get_d()); }
 
     template<> inline Float64 cos_down(const Float64& x) {
-      return invoke_mpfr(x,mpfr_cos,GMP_RNDD); }
+      return Float64::rounding().cos_down(x.get_d()); }
     template<> inline Float64 cos_up(const Float64& x) {
-      return invoke_mpfr(x,mpfr_cos,GMP_RNDU); };
+      return Float64::rounding().cos_up(x.get_d()); }
 
     template<> inline Float64 tan_down(const Float64& x) {
-      return invoke_mpfr(x,mpfr_tan,GMP_RNDD); }
+      return Float64::rounding().tan_down(x.get_d()); }
     template<> inline Float64 tan_up(const Float64& x) {
-      return invoke_mpfr(x,mpfr_tan,GMP_RNDU); };
+      return Float64::rounding().tan_up(x.get_d()); }
 
     template<> inline Float64 sinh_down(const Float64& x) {
-      return invoke_mpfr(x,mpfr_sinh,GMP_RNDD); }
+      return Float64::rounding().sinh_down(x.get_d()); }
     template<> inline Float64 sinh_up(const Float64& x) {
-      return invoke_mpfr(x,mpfr_sinh,GMP_RNDU); };
+      return Float64::rounding().sinh_up(x.get_d()); }
 
     template<> inline Float64 cosh_down(const Float64& x) {
-      return invoke_mpfr(x,mpfr_cosh,GMP_RNDD); }
+      return Float64::rounding().cosh_down(x.get_d()); }
     template<> inline Float64 cosh_up(const Float64& x) {
-      return invoke_mpfr(x,mpfr_cosh,GMP_RNDU); };
+      return Float64::rounding().cosh_up(x.get_d()); }
 
     template<> inline Float64 tanh_down(const Float64& x) {
-      return invoke_mpfr(x,mpfr_tanh,GMP_RNDD); }
+      return Float64::rounding().tanh_down(x.get_d()); }
     template<> inline Float64 tanh_up(const Float64& x) {
-      return invoke_mpfr(x,mpfr_tanh,GMP_RNDU); };
+      return Float64::rounding().tanh_up(x.get_d()); }
 
     template<> inline Float64 asin_down(const Float64& x) {
-      return invoke_mpfr(x,mpfr_asin,GMP_RNDD); }
+      return Float64::rounding().asin_down(x.get_d()); }
     template<> inline Float64 asin_up(const Float64& x) {
-      return invoke_mpfr(x,mpfr_asin,GMP_RNDU); };
+      return Float64::rounding().asin_up(x.get_d()); }
 
     template<> inline Float64 acos_down(const Float64& x) {
-      return invoke_mpfr(x,mpfr_acos,GMP_RNDD); }
+      return Float64::rounding().acos_down(x.get_d()); }
     template<> inline Float64 acos_up(const Float64& x) {
-      return invoke_mpfr(x,mpfr_acos,GMP_RNDU); };
+      return Float64::rounding().acos_up(x.get_d()); }
 
     template<> inline Float64 atan_down(const Float64& x) {
-      return invoke_mpfr(x,mpfr_atan,GMP_RNDD); }
+      return Float64::rounding().atan_down(x.get_d()); }
     template<> inline Float64 atan_up(const Float64& x) {
-      return invoke_mpfr(x,mpfr_atan,GMP_RNDU); };
+      return Float64::rounding().atan_up(x.get_d()); }
 
     template<> inline Float64 asinh_down(const Float64& x) {
-      return invoke_mpfr(x,mpfr_asinh,GMP_RNDD); }
+      return Float64::rounding().asinh_down(x.get_d()); }
     template<> inline Float64 asinh_up(const Float64& x) {
-      return invoke_mpfr(x,mpfr_asinh,GMP_RNDU); };
+      return Float64::rounding().asinh_up(x.get_d()); }
 
     template<> inline Float64 acosh_down(const Float64& x) {
-      return invoke_mpfr(x,mpfr_acosh,GMP_RNDD); }
+      return Float64::rounding().acosh_down(x.get_d()); }
     template<> inline Float64 acosh_up(const Float64& x) {
-      return invoke_mpfr(x,mpfr_acosh,GMP_RNDU); };
+      return Float64::rounding().acosh_up(x.get_d()); }
 
     template<> inline Float64 atanh_down(const Float64& x) {
-      return invoke_mpfr(x,mpfr_atanh,GMP_RNDD); }
+      return Float64::rounding().atanh_down(x.get_d()); }
     template<> inline Float64 atanh_up(const Float64& x) {
-      return invoke_mpfr(x,mpfr_atanh,GMP_RNDU); };
+      return Float64::rounding().atanh_up(x.get_d()); }
       
     
     inline Float64 operator+(const Float64& x) { return x; }

@@ -31,6 +31,7 @@
 #include "zonotope.h"
 
 #include "../base/array.h"
+#include "../base/exception.h"
 #include "../numeric/conversion.h"
 
 #include "../linear_algebra/vector.h"
@@ -43,6 +44,7 @@
 #include "../geometry/rectangle.h"
 #include "../geometry/polytope.h"
 #include "../geometry/polyhedron.h"
+#include "../geometry/parallelotope.h"
 #include "../geometry/list_set.h"
 
 // include for column operations
@@ -66,9 +68,27 @@ namespace Ariadne {
       Geometry::minkowski_sum(z,z);
       Geometry::minkowski_difference(z,z);
     }
+    
+    template<class R>
+    void
+    Zonotope< Interval<R> >::_instantiate_geometry_operators() 
+    {
+      Zonotope< Interval<R> > iz;
+      Geometry::over_approximation(iz);
+    }
       
     template<class R>
     Zonotope<R>::Zonotope(const Rectangle<R>& r)
+      : _centre(r.dimension()), _generators(r.dimension(),r.dimension())
+    {
+      for(size_type i=0; i!=dimension(); ++i) {
+        this->_centre[i] = r[i].centre();
+        this->_generators(i,i) = r[i].radius();
+      }
+    }
+
+    template<class R>
+    Zonotope< Interval<R> >::Zonotope(const Rectangle<R>& r)
       : _centre(r.dimension()), _generators(r.dimension(),r.dimension())
     {
       for(size_type i=0; i!=dimension(); ++i) {
@@ -691,19 +711,46 @@ namespace Ariadne {
     }
 
 
+    
     template<class R> 
-    Zonotope<R> 
-    Zonotope<R>::over_approximation(const Zonotope<I>& z)
+    Rectangle<R> 
+    Zonotope< Interval<R> >::bounding_box() const
     {
-      return z.over_approximation();
-    }
+      LinearAlgebra::Vector< Interval<R> > e(this->number_of_generators(),Interval<R>(-1,1));
       
+      Point< Interval<R> > b=this->centre()+this->generators()*e;
+      Rectangle<R> result(this->dimension());
+      for(size_type i=0; i!=this->dimension(); ++i) {
+        result.set_lower_bound(i,b[i].lower());
+        result.set_lower_bound(i,b[i].upper());
+      }
+      return result;
+    }
     
     template<class R> 
     Zonotope<R> 
-    Zonotope< Interval<R> >::over_approximation() const
+    over_approximation(const Zonotope< Interval<R> >& iz)
     {
-      throw std::runtime_error("Zonotope<Interval<R>>::over_approximation() const not implemented");
+      return orthogonal_over_approximation(iz);
+    }
+    
+    template<class R> 
+    Zonotope< Interval<R> > 
+    box_over_approximation(const Zonotope< Interval<R> >& iz)
+    {
+      LinearAlgebra::Vector< Interval<R> > c=iz.centre();
+      LinearAlgebra::Matrix< Interval<R> > G=iz.generators();
+      
+      R x,r;
+      for(dimension_type i=0; i!=G.number_of_rows(); ++i) {
+        for(size_type j=0; j!=G.number_of_columns(); ++j) {
+          x=approximate_value(G(i,j));
+          r=error_bound(G(i,j));
+          c(i)=c(i)+Interval<R>(-r,r);
+          G(i,j)=x;
+        }
+      }
+      return Zonotope< Interval<R> >(c,G);
     }
     
     

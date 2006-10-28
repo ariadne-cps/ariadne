@@ -45,7 +45,10 @@ SYSTEM_SRC = \
 
 EVALUATION_SRC = \
 	evaluation/newton.cc \
-	evaluation/apply.cc 	evaluation/integrator.cc evaluation/lohner_integrator.cc 
+	evaluation/apply.cc \
+	evaluation/integrator.cc \
+	evaluation/euler_integrator.cc \
+	evaluation/lohner_integrator.cc 
 
 OUTPUT_SRC = 
 

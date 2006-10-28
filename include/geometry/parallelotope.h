@@ -117,6 +117,11 @@ namespace Ariadne {
       
       /*! \brief Copy constructor. */
       Parallelotope(const Parallelotope<R>& original) : Zonotope<R>(original) { }
+
+      /*! \brief Assign from a rectangle. */
+      Parallelotope<R>& operator=(const Rectangle<R>& r) {
+        Zonotope<R>& z=*this; z=r; return *this;
+      }
       //@}
       
       
@@ -142,13 +147,6 @@ namespace Ariadne {
       /*! \brief An approximation to the volume. */
       R volume() const;
       //@}
-      
-      /*! \brief Computes an over approximation from an "interval parallelotope". */
-      static Parallelotope<R> over_approximation(const Point<I>& c, const LinearAlgebra::Matrix<I>& A);
-      /*! \brief Computes an over approximation from an "interval parallelotope". */
-      static Parallelotope<R> over_approximation(const Parallelotope<I>& p);
-      /*! \brief Computes an over approximation from a zonotope". */
-      static Parallelotope<R> over_approximation(const Zonotope<R>& p);
       
       /*! \brief Scale the parallelotope by at least \a sf. */
       static Parallelotope<R> scale(const Parallelotope<R>& p, const R& sf);
@@ -182,20 +180,28 @@ namespace Ariadne {
       /*! \brief The type of denotable point contained by the parallelotope. */
       typedef Point<I> state_type;
      
+      Parallelotope(dimension_type d=0)
+        : Zonotope<I>(d) { }
+      
       template<class Rl1, class Rl2> 
       Parallelotope(const Point<Rl1>& c, const LinearAlgebra::Matrix<Rl2>& g)
         : Zonotope<I>(c,g) { }
       
-      /*! \brief Over-approximate by an ordinary parallelotope. */
-      Parallelotope<R> over_approximation() const;
-
+      Parallelotope(const Rectangle<R>& r) 
+        : Zonotope<I>(r) { }
+      
+      Parallelotope(const Zonotope<R>& z) 
+        : Zonotope<I>(z) { assert(z.dimension()==z.number_of_generators()); }
+      
       /*! \brief Tests if the parallelotope contains \a point. */
       tribool contains(const Point<I>& point) const;
 
       /*! \brief The vertices of the parallelotope. */
       PointList<F> vertices() const;
+      
      private:
       void _compute_generators_inverse() const;
+      static tribool _instantiate_geometry_operators();
      private:
       mutable LinearAlgebra::Matrix<I> _generators_inverse;
     };
@@ -206,9 +212,22 @@ namespace Ariadne {
     subset(const Rectangle<R>& r, const Parallelotope<R>& p);
     
 
+    /*! \brief Computes an over approximation from a parallelotope (returns the argument). */
+    template<class R> 
+    Parallelotope<R> over_approximation(const Parallelotope<R>& p);
+    
     /*! \brief Computes an over approximation from an interval parallelotope. */
     template<class R> 
     Parallelotope<R> over_approximation(const Parallelotope< Interval<R> >& p);
+    
+    /*! \brief Computes an over approximation from a zonotope using a qr factorization. */
+    template<class R> 
+    Parallelotope<R> orthogonal_over_approximation(const Zonotope<R>& z);
+    
+    /*! \brief Computes an over approximation from an interval zonotope using a qr factorization. */
+    template<class R> 
+    Parallelotope<R> orthogonal_over_approximation(const Zonotope< Interval<R> >& z);
+    
     
     
     template<class R> inline

@@ -1,9 +1,8 @@
 /***************************************************************************
- *            exception.h
+ *            test_boost_interval.cc
  *
- *  2 May 2005
- *  Copyright  2005  Pieter Collins, Alberto Casagrande
- *  Email  Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
+ *  Copyright  2006  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,29 +20,41 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-/*! \file exception.h
- *  \brief Exceptions, error handling and assertions.
- */
 
-#ifndef _ARIADNE_EXCEPTION_H
-#define _ARIADNE_EXCEPTION_H
+// Compile with -IProfil -lProfil -lBias -llr
 
-#include <stdexcept>
-#include <iosfwd>
+#include <iostream>
+#include <iomanip>
+#include <cassert>
 
-namespace Ariadne {
-  class NotImplemented : public std::logic_error {
-   public:
-    NotImplemented(const std::string& str) : std::logic_error(str) { }
-  };
-     
-    
-  class invalid_input : public std::runtime_error {
-   public:
-    invalid_input(const std::string& str) : std::runtime_error(str) { }
-  };
-    
+#include <Interval.h>
+
+using namespace std;
+
+int test_profil_interval();
+
+int main() {
+  cout << setprecision(20);
+  test_profil_interval();
+  
+  return 0;
 }
 
-#endif /* _ARIADNE_EXCEPTION_H */
+
+int
+test_profil_interval()
+{
+  cout << "test_boost_interval<double>" << endl;
+  
+  INTERVAL o(1.0);
+  INTERVAL t(3.0);
+  INTERVAL odt = o/t;
+  INTERVAL oa = odt*t;
+  cout << o << " / " << t << " = " << odt << endl;
+  cout << o << " in " << oa << endl;
+  assert(Inf(odt)<Sup(odt));
+  assert(Inf(oa)<Inf(o));
+  assert(Sup(oa)>Sup(o));
+
+  return 0;
+}

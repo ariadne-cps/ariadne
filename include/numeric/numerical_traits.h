@@ -31,6 +31,7 @@
 #include <string>
 
 #include "../declarations.h"
+#include <gmpxx.h>
 
 namespace Ariadne {
   namespace Numeric {
@@ -76,17 +77,26 @@ namespace Ariadne {
       typedef Interval<double> interval_type;
     };
   
+    template<> struct traits< mpf_class > { 
+      typedef mpf_class approximate_arithmetic_type; 
+      typedef mpf_class arithmetic_type; 
+      typedef Interval<MPFloat> interval_type; 
+    };
+    
     template<> struct traits< Float64 > { 
+      typedef double approximate_arithmetic_type; 
       typedef Interval<Float64> arithmetic_type; 
       typedef Interval<Float64> interval_type;
     };
     
     template<> struct traits< MPFloat > { 
+      typedef mpf_class approximate_arithmetic_type; 
       typedef Interval<MPFloat> arithmetic_type; 
       typedef Interval<MPFloat> interval_type; 
     };
     
     template<> struct traits< Rational > { 
+      typedef Rational approximate_arithmetic_type; 
       typedef Rational arithmetic_type; 
       typedef Interval<Rational> interval_type; 
     };

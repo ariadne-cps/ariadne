@@ -76,7 +76,7 @@ namespace Ariadne {
       }
       Geometry::Point<F> nc=this->image(p.centre());
       LinearAlgebra::Matrix<F> ng=this->A()*LinearAlgebra::Matrix<F>(p.generators());
-      return Geometry::Parallelotope< Interval<R> >(nc,ng).over_approximation();
+      return Geometry::over_approximation(Geometry::Parallelotope<F>(nc,ng));
     }
 
     template<class R>
@@ -86,10 +86,10 @@ namespace Ariadne {
       if (this->argument_dimension()!=z.dimension()) {
         throw std::domain_error("AffineMap<R>::image(const Geometry::Zonotope<R>& z): the map does not have the same dimension of the zonotope."); 
       }
-      return Geometry::Zonotope< Interval<R> >(
+      return Geometry::over_approximation(Geometry::Zonotope< Interval<R> >(
         this->image(z.centre()),
         this->A()*LinearAlgebra::Matrix< Interval<R> >(z.generators())
-      ).over_approximation();
+      ));
     }   
     
     template<class R>

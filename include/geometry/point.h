@@ -94,6 +94,11 @@ namespace Ariadne {
         }
       }
 
+      /*! \brief Construct a point a strided array of data. */
+      template<class Rl>
+      Point(dimension_type d, const Rl* data, size_type inc=1)
+        : _vector(d,data,inc) { }
+      
       /*! \brief Construct a point from a range of values. */
       template<class ForwardIterator>
       Point(ForwardIterator b, ForwardIterator e) : _vector(std::distance(b,e))
@@ -161,7 +166,7 @@ namespace Ariadne {
       }
 
       /*! \brief The position vector of the point. */
-      const vector_type& position_vector() const {
+      const LinearAlgebra::Vector<R>& position_vector() const {
         return this->_vector; 
       }
       
@@ -188,7 +193,7 @@ namespace Ariadne {
       friend std::ostream& operator<< <>(std::ostream& os, const Point<real_type>& state);
       friend std::istream& operator>> <> (std::istream& is, Point<real_type>& state);
      private:
-      vector_type _vector;
+      LinearAlgebra::Vector<R> _vector;
     };
 
     template<class R> inline

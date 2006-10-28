@@ -22,6 +22,7 @@
  */
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -38,7 +39,7 @@ using namespace Ariadne;
 using std::exception;
 using std::ostream; using std::ofstream; using std::stringstream;
 using std::cout; using std::cerr;
-using std::endl; using std::flush;
+using std::endl; using std::flush; using std::setprecision;
 using std::string;
 
 template class Interval<Float64>;
@@ -49,6 +50,9 @@ template<class R> int test_interval();
 template<> int test_interval<Rational>();
 
 int main() {
+  cout << setprecision(20);
+  mpf_set_default_prec (8);
+
   test_interval<Float64>();
   test_interval<MPFloat>();
   test_interval<Rational>();
@@ -56,6 +60,7 @@ int main() {
   cerr << "INCOMPLETE ";
   return 0;
 }
+
 
 
 template<class R>
@@ -174,6 +179,18 @@ test_interval()
     cout << ivlq2 << " / " << ivlq3 << " =" << ivlq1 << endl;
     cout << endl;
     //ivlr1 = sin(ivlr2);
+
+    // ensure proper rounding using assertions
+    Interval<R> ivlo(1.0);
+    Interval<R> ivlt(3.0);
+    Interval<R> ivlodt=ivlo/ivlt;
+    Interval<R> ivloa=ivlodt*ivlt;
+    cout << ivlo << " / " << ivlt << " = " << ivlodt << endl;
+    cout << ivlo << " in " << ivlodt * ivlt << endl;
+    assert(ivlodt.lower()< ivlodt.upper());
+    assert(ivloa.lower() < ivlo.lower() && ivloa.upper() > ivlo.upper());
+    
+    
 
     ivlf1=Interval<R>(-13,-7);
     ivlf2=Interval<R>(-3,2);

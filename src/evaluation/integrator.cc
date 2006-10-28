@@ -29,7 +29,5 @@
 namespace Ariadne {
   namespace Evaluation {
     template class Integrator<Real>;
-    template class C0Integrator<Real>;
-    template class C1Integrator<Real>;
   }
 }

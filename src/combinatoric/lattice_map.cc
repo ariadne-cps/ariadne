@@ -205,6 +205,77 @@ namespace Ariadne {
     }
 
     
+    void
+    LatticeSystem::set_control_values(const LatticeCell& lc, const LatticeCellListSet& lcls) 
+    {
+      assert(lc.dimension()==this->space_dimension());
+      assert(lcls.dimension()==this->input_dimension());
+      this->_control_map.insert(std::make_pair(lc,lcls));
+    }
+    
+    void
+    LatticeSystem::set_noise_values(const LatticeCell& splc, const LatticeCell& inlc,const LatticeCellListSet& lcls) 
+    {
+      assert(splc.dimension()==this->space_dimension());
+      assert(inlc.dimension()==this->input_dimension());
+      assert(lcls.dimension()==this->space_dimension());
+      LatticeCell lc(this->space_dimension()+this->input_dimension());
+      for(dimension_type i=0; i!=this->space_dimension(); ++i) {
+        lc[i]=splc[i];
+      }
+      for(dimension_type i=0; i!=this->input_dimension(); ++i) {
+        lc[i+this->space_dimension()]=inlc[i];
+      }
+      this->set_noise_values(lc,lcls);
+    }
+    
+    void
+    LatticeSystem::set_noise_values(const LatticeCell& lc, const LatticeCellListSet& lcls) 
+    {
+      assert(lc.dimension()==this->space_dimension()+this->input_dimension());
+      assert(lcls.dimension()==this->input_dimension());
+      this->_noise_map.insert(std::make_pair(lc,lcls));
+    }
+    
+    LatticeCellListSet
+    LatticeSystem::preimage(const LatticeMaskSet& lms) const
+    {
+      LatticeCellListSet result(this->space_dimension());
+      
+      assert(lms.dimension()==this->space_dimension());
+      typedef std::map<LatticeCell,LatticeCellListSet>::iterator map_iterator;
+      
+      LatticeCell space(IndexArray(this->space_dimension()));
+      LatticeCell control(IndexArray(this->input_dimension()));
+      
+      for(LatticeMultiMap::const_iterator nz_iter=this->_noise_map.begin();
+          nz_iter!=this->_noise_map.end(); ++nz_iter)
+      {
+        if(subset(nz_iter->second,lms)) {
+          const LatticeCell& cell=nz_iter->first;
+          for(dimension_type i=0; i!=this->space_dimension(); ++i) {
+            space[i]=cell[i];
+          }
+          
+          // If we've already found this cell, we can skip the next steps
+          if(!subset(space,result)) {
+            for(dimension_type i=0; i!=this->input_dimension(); ++i) {
+              control[i]=cell[space_dimension()+i];
+            }
+            map_iterator cntrl_iter=this->_control_map.find(space);
+            if(cntrl_iter!=this->_control_map.end()) {
+              const LatticeCellListSet& possible_controls(cntrl_iter->second);
+              if(subset(control,possible_controls)) {
+              result.adjoin(space);
+              }
+            }
+          } 
+        }
+      }
+      return result;
+    }
+          
+    
     
     std::ostream&
     operator<<(std::ostream& os, const LatticeMultiMap& m) 

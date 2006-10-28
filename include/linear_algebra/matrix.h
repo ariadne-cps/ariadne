@@ -299,6 +299,20 @@ namespace Ariadne {
       return result;
     }
 
+    template<class R1,class R2>
+    inline 
+    Matrix<R1>
+    approximate(const Matrix<R2>& im) 
+    {
+      Matrix<R1> result(im.number_of_rows(),im.number_of_columns());
+      for(size_type i=0; i!=im.number_of_rows(); ++i) {
+        for(size_type j=0; j!=im.number_of_columns(); ++j) {
+          result(i,j)=conv_approx<R1>(im(i,j));
+        }
+      }
+      return result;
+    }
+
     template<class R>
     inline
     Vector< Interval<R> >
@@ -370,6 +384,20 @@ namespace Ariadne {
     }
     
  
+    template<class R>
+    inline
+    Vector<typename Numeric::traits<R>::arithmetic_type>
+    row_norms(const Matrix<R>& A) 
+    {
+      Vector<typename Numeric::traits<R>::arithmetic_type> result(A.number_of_rows());
+      for(size_type i=0; i!=A.number_of_rows(); ++i) {
+        for(size_type j=0; j!=A.number_of_columns(); ++j) {
+          result(i)+=abs(A(i,j));
+        }
+      }
+      return result;
+    }
+    
     template<class R>
     inline
     typename Numeric::traits<R>::arithmetic_type

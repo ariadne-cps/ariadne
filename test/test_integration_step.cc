@@ -51,7 +51,7 @@ int
 test_integration_step()
 {
   
-  Evaluation::C1LohnerIntegrator<R> lohner=Evaluation::C1LohnerIntegrator<R>(0.125,0.5,0.0625);
+  Evaluation::LohnerIntegrator<R> lohner=Evaluation::LohnerIntegrator<R>(0.125,0.5,0.0625);
   Geometry::Rectangle<R> r=Geometry::Rectangle<R>("[0.96,1.04]x[0.46,0.54]");
   cout << "r=" << r << endl;
   Geometry::Parallelotope<R> p=Geometry::Parallelotope<R>(r);

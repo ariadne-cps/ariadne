@@ -74,12 +74,18 @@ namespace Ariadne {
       /*! \brief An over-approximation to the image of a point. */
       Geometry::Point<F> operator() (const Geometry::Point<R>& pt) const {
         return this->image(pt); }
+      /*! \brief An over-approximation to the image of a point. */
+      Geometry::Point< Interval<R> > operator() (const Geometry::Point< Interval<R> >& pt) const {
+        return this->image(pt); }
       /*! \brief An over-approximation to the image of a rectangle. */
       Geometry::Rectangle<F> operator() (const Geometry::Rectangle<R>& pt) const {
         return this->image(pt); }
         
       /*! \brief An over-approximation to the image of a point. */
       virtual Geometry::Point<F> image(const Geometry::Point<R>& pt) const;
+      /*! \brief An over-approximation to the image of an interval point. */
+      virtual Geometry::Point< Interval<R> > image(const Geometry::Point< Interval<R> >& pt) const {
+        return Geometry::Point<I>(this->image(static_cast< Geometry::Rectangle<R> >(pt))); }
       /*! \brief An over-approximation to the image of a rectangle. */
       virtual Geometry::Rectangle<R> image(const Geometry::Rectangle<R>& A) const;
       /*! \brief The derivative of the \a i th component with respect to the multi-index j. */

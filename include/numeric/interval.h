@@ -125,6 +125,9 @@ namespace Ariadne {
       bool singleton() const { return this->lower()==this->upper(); }
       /*! \brief Tests if the interval contains \a r. */
       bool contains(const R& r) const { return this->lower()<=r && r<=this->upper(); }
+      
+      /*! \brief Expand the interval by \a r. */
+      void expand_by(const R& r) { this->_lower=sub_down(this->lower(),r); this->_upper=add_up(this->upper(),r); }
       //@}
       
       //@{

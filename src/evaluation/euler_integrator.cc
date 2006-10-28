@@ -1,9 +1,8 @@
 /***************************************************************************
- *            exception.h
+ *            euler_integrator.cc
  *
- *  2 May 2005
- *  Copyright  2005  Pieter Collins, Alberto Casagrande
- *  Email  Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
+ *  Copyright  2006  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,29 +20,17 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-/*! \file exception.h
- *  \brief Exceptions, error handling and assertions.
- */
 
-#ifndef _ARIADNE_EXCEPTION_H
-#define _ARIADNE_EXCEPTION_H
 
-#include <stdexcept>
-#include <iosfwd>
+#include "real_typedef.h"
+
+#include "evaluation/euler_integrator.h"
+#include "evaluation/euler_integrator.tpl"
 
 namespace Ariadne {
-  class NotImplemented : public std::logic_error {
-   public:
-    NotImplemented(const std::string& str) : std::logic_error(str) { }
-  };
-     
-    
-  class invalid_input : public std::runtime_error {
-   public:
-    invalid_input(const std::string& str) : std::runtime_error(str) { }
-  };
-    
-}
+  namespace Evaluation {
 
-#endif /* _ARIADNE_EXCEPTION_H */
+    template class EulerIntegrator<Real>;
+
+  }
+}

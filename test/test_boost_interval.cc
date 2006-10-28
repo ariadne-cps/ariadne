@@ -1,9 +1,8 @@
 /***************************************************************************
- *            exception.h
+ *            test_boost_interval.cc
  *
- *  2 May 2005
- *  Copyright  2005  Pieter Collins, Alberto Casagrande
- *  Email  Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
+ *  Copyright  2006  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,29 +20,43 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-/*! \file exception.h
- *  \brief Exceptions, error handling and assertions.
- */
 
-#ifndef _ARIADNE_EXCEPTION_H
-#define _ARIADNE_EXCEPTION_H
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <sstream>
+#include <string>
 
-#include <stdexcept>
-#include <iosfwd>
+#include <boost/numeric/interval.hpp>
+#include <boost/numeric/interval/io.hpp>
 
-namespace Ariadne {
-  class NotImplemented : public std::logic_error {
-   public:
-    NotImplemented(const std::string& str) : std::logic_error(str) { }
-  };
-     
-    
-  class invalid_input : public std::runtime_error {
-   public:
-    invalid_input(const std::string& str) : std::runtime_error(str) { }
-  };
-    
+using namespace std;
+
+int test_boost_interval();
+
+int main() {
+  cout << setprecision(20);
+  test_boost_interval();
+  
+  return 0;
 }
 
-#endif /* _ARIADNE_EXCEPTION_H */
+
+int
+test_boost_interval()
+{
+  cout << "test_boost_interval<double>" << endl;
+  using namespace boost::numeric;
+  
+  interval<double> o(1.0);
+  interval<double> t(3.0);
+  interval<double> odt=o/t;
+  interval<double> oa=odt*t;
+  cout << o << " / " << t << " = " << odt << endl;
+  cout << o << " in " << oa << endl;
+  assert(odt.lower()<odt.upper());
+  assert(oa.lower()<o.lower());
+  assert(oa.upper()>o.upper());
+  
+  return 0;
+}

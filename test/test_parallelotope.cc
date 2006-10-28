@@ -113,6 +113,11 @@ test_parallelotope()
   assert(!p1.contains(pts[4]));
   assert(!p1.contains(pts[5]));
 
+  // Test over-approximation routines
+  Parallelotope< Interval<R> > ip(p1);
+  Parallelotope<R> oap=over_approximation(ip);
+  Parallelotope<R> qoap=orthogonal_over_approximation(ip);
+
   Rectangle<R> bbox=p1.bounding_box();
   epsfstream eps("test_parallelotope.eps",bbox,0,1);
   eps << p1;

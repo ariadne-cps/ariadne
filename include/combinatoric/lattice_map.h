@@ -42,7 +42,7 @@ namespace Ariadne {
       typedef std::map<LatticeCell,LatticeCellListSet>::const_iterator const_iterator;
      public:
      
-      /*! \brief Construct a map with argumbent dimension \a arg_dim and result dimension \a res_dim,
+      /*! \brief Construct a map with argument dimension \a arg_dim and result dimension \a res_dim,
        *  which maps all cells to the empty set. */
       explicit LatticeMultiMap(const dimension_type arg_dim, const dimension_type res_dim) 
         : _argument_dimension(arg_dim), _result_dimension(res_dim) { }
@@ -112,6 +112,59 @@ namespace Ariadne {
     };
       
     std::ostream& operator<<(std::ostream&, const LatticeMultiMap&);
+    
+    /*! \brief A discrete control system on a lattice. */
+    class LatticeSystem {
+     public:
+      typedef std::map<LatticeCell,LatticeCellListSet>::const_iterator const_iterator;
+     public:
+     
+      /*! \brief Construct a system with space dimension \a sd and input dimension \a id,
+       *  which maps all cells to the empty set. */
+      explicit LatticeSystem(const dimension_type sd, const dimension_type id) 
+        : _space_dimension(sd), _input_dimension(id) { }
+        
+      /*! \brief . */
+      void set_control_values(const LatticeCell& lc, const LatticeCellListSet& img);
+      /*! \brief . */
+      void set_noise_values(const LatticeCell& lc, const LatticeCellListSet& img);
+      /*! \brief . */
+      void set_noise_values(const LatticeCell& lc, const LatticeCell& lc, const LatticeCellListSet& img);
+        
+      /*! \brief  The set of cells which can be controlled into lms regardless of the noise. */
+      LatticeCellListSet preimage (const LatticeMaskSet& lms) const;
+
+      /*! \brief  The dimension of the argument. */
+      dimension_type space_dimension() const {
+        return _space_dimension;
+      }
+      
+      /*! \brief The dimension of the result. */
+      dimension_type input_dimension() const {
+        return _input_dimension;
+      }
+      
+      /*! brief  The inverse of the map. */
+      LatticeMultiMap inverse() const;
+      
+      /*! brief  A constant iterator to the first non-default image. */
+      LatticeMultiMap::const_iterator begin() const;
+      
+      /*! brief  A constant iterator to the last non-default image. */
+      LatticeMultiMap::const_iterator end() const;
+      
+      /*! \brief The name of the system. */
+      std::string name() const { return "LatticeMultiMap"; }
+     private:
+      friend std::ostream& operator<<(std::ostream&, const LatticeMultiMap&);
+     private:
+      dimension_type _space_dimension;
+      dimension_type _input_dimension;
+      mutable std::map<LatticeCell,LatticeCellListSet> _control_map;
+      mutable std::map<LatticeCell,LatticeCellListSet> _noise_map;
+    };
+      
+    std::ostream& operator<<(std::ostream&, const LatticeSystem&);
     
   }
 }

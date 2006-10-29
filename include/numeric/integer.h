@@ -39,7 +39,6 @@
 namespace Ariadne {
   namespace Numeric {
 
-#ifdef DOXYGEN
     /*!\ingroup Numeric
      * \brief An integer of arbitrary size.
      *  
@@ -49,10 +48,12 @@ namespace Ariadne {
      *
      * Currently implemented using mpz_class from the GNU Multiple Precision Library.
      */
-    class Integer { };
-#else
-    typedef mpz_class Integer;
-#endif
+    class Integer : public mpz_class 
+    { 
+     public:
+      Integer() : mpz_class() { }
+      template<class N> Integer(const N& n) : mpz_class(n) { }
+    };
   
     template<> inline int convert_to<int>(const Numeric::Integer& n) { return n.get_si(); }
     template<> inline long convert_to<long>(const Numeric::Integer& n) { return n.get_si(); }

@@ -30,7 +30,7 @@
 
 #include "system/map.h"
 
-#include "evaluation/apply.h"
+#include "evaluation/applicator.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Geometry;

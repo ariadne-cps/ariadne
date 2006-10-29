@@ -86,7 +86,7 @@ test_integration_step()
   ivlm=Numeric::max(ivlm,ivls);
   cout << fA(1,1) << "  " << ivls << "  " << ivlm << "\n";
   
-  Evaluation::time_type h(0.125);
+  time_type h(0.125);
   cout << "h=" << h << endl;
   cout << "p.generators().norm()=" << LinearAlgebra::norm(p.generators()) << endl;
 

@@ -44,11 +44,13 @@ SYSTEM_SRC = \
 	system/multimap.cc system/affine_multimap.cc 
 
 EVALUATION_SRC = \
-	evaluation/newton.cc \
-	evaluation/apply.cc \
+	evaluation/solver.cc \
+	evaluation/newton_solver.cc \
+	evaluation/applicator.cc \
 	evaluation/integrator.cc \
 	evaluation/euler_integrator.cc \
-	evaluation/lohner_integrator.cc 
+	evaluation/lohner_integrator.cc \
+	evaluation/hybrid_evolver.cc
 
 OUTPUT_SRC = 
 

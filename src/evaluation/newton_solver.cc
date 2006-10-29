@@ -1,5 +1,5 @@
 /***************************************************************************
- *            newton.cc
+ *            newton_solver.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -32,6 +32,8 @@
 namespace Ariadne {
   namespace Evaluation {
 
+    template class IntervalNewtonSolver<Real>;
+      
     template 
     Geometry::Rectangle<Real> 
     interval_newton(const System::VectorField<Real>& f, 

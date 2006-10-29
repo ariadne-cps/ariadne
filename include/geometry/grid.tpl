@@ -205,49 +205,42 @@ namespace Ariadne {
        return !(*this==g);
     }
 
+    // FIXME: Use dynamic_cast<> 
     template<class R>
-    inline bool 
+    bool 
     IrregularGrid<R>::operator==(const Grid<R>& g) const 
     {
-      if (g.type()!=IRREGULAR) 
+      if (g.type()!=IRREGULAR) {
          return false;
-	 
+      }
       return this->_subdivision_coordinates==
-      		((const IrregularGrid<R>&)(g))._subdivision_coordinates; 
+            ((const IrregularGrid<R>&)(g))._subdivision_coordinates; 
     }
       
     template<class R>
     inline bool 
     IrregularGrid<R>::operator!=(const Grid<R>& g) const 
     { 
-      if (g.type()!=IRREGULAR) 
-         return true;
-	 
-      return this->_subdivision_coordinates!=
-      		((const IrregularGrid<R>&)(g))._subdivision_coordinates; 
-
+      return !(*this==g);
     }
 
+    // FIXME: Use dynamic_cast<> 
     template<class R>
-    inline bool 
+    bool 
     RegularGrid<R>::operator==(const Grid<R>& g) const 
     { 
-      if (g.type()!=REGULAR) 
-         return false;
-	 
+      if (g.type()!=REGULAR) {
+        return false;
+      }
       return this->_subdivision_lengths==
-      		((const RegularGrid<R>&)g)._subdivision_lengths; 
+          ((const RegularGrid<R>&)g)._subdivision_lengths; 
     }
             
     template<class R>
-    inline bool 
+    bool 
     RegularGrid<R>::operator!=(const Grid<R>& g) const 
     { 
-      if (g.type()!=REGULAR) 
-         return true;
-	 
-      return this->_subdivision_lengths!=
-      		((const RegularGrid<R>&)g)._subdivision_lengths;
+      return !(*this==g);
     }
 
     template<class R>
@@ -267,28 +260,26 @@ namespace Ariadne {
     Rectangle<R>
     FiniteGrid<R>::bounding_box() const
     {
-      const size_t &dim=this->dimension();
+      dimension_type dim=this->dimension();
       const Combinatoric::LatticeBlock &bounds=this->_bounds;
-	   
+       
       switch(this->_grid_type) {
         case REGULAR:
-	      {
-          const RegularGrid<R> *this_grid=
-                                       ((RegularGrid<R> *)(this->_grid_ptr));
-	     
+        {
+          const RegularGrid<R> *this_grid=((RegularGrid<R> *)(this->_grid_ptr));
+          
           Point<R> l(dim),u(dim);
-	     
+          
           for (dimension_type i=0; i< dim; i++) {
             l[i]=mul_approx(this_grid->subdivision_length(i),bounds.lower_bound(i));
             u[i]=mul_approx(this_grid->subdivision_length(i),bounds.upper_bound(i));
           }
-             
+          
           return Rectangle<R>(l,u);
         }
         case IRREGULAR:
         {
-          const IrregularGrid<R> *this_grid=
-	                               ((IrregularGrid<R> *)(this->_grid_ptr));
+          const IrregularGrid<R> *this_grid=((IrregularGrid<R> *)(this->_grid_ptr));
           return (Rectangle<R>)(this_grid->bounds());
         }
         default:
@@ -400,17 +391,9 @@ namespace Ariadne {
     dimension_type 
     FiniteGrid<R>::dimension() const 
     {
-	switch (this->type()) {
-          case REGULAR:
-        	return ((RegularGrid<R> *)_grid_ptr)->dimension();
-	  case IRREGULAR:
-        	return ((IrregularGrid<R> *)_grid_ptr)->dimension();
-          default:
-                throw std::runtime_error("FiniteGrid<R>::dimension(): the grid type is unknown.");
-	}
-	
-	return 0;
-      }
+      return this->_grid_ptr->dimension();
+    }
+    
 
   }
 }

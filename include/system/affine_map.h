@@ -66,10 +66,13 @@ namespace Ariadne {
         : _A(LinearAlgebra::Matrix<R>::identity(b.size())), _b(b) { }
       
       /*! \brief Copy constructor. */
-      AffineMap(const AffineMap<real_type>& T) : _A(T._A), _b(T._b) { }
+      AffineMap(const AffineMap<R>& T) : _A(T._A), _b(T._b) { }
       /*! \brief Assignment operator. */
-      AffineMap<real_type>& operator=(const AffineMap<real_type>& T) {
+      AffineMap<R>& operator=(const AffineMap<R>& T) {
         this->_A=T._A; this->_b=T._b; return *this; }
+      /*! \brief Returns a pointer to a dynamically-allocated copy of the map. */
+      AffineMap<R>* clone() const { return new AffineMap<R>(*this); }
+
       
       /*! \brief  An approximation to the image of a point. DEPRECATED. */
       Geometry::Point<F> image(const Geometry::Point<R>& A) const;

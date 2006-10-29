@@ -39,6 +39,10 @@ template<class T> class sequence;
 }}
 
 namespace Ariadne { namespace Numeric {
+class Integer;
+class Float64;
+class MPFloat;
+class Rational;
 template<class R> class Interval;
 template<class T1, class T2=T1> class traits;
 }}
@@ -101,6 +105,10 @@ template<class R> class PartitionScheme;
 template<class R> class PartitionTree;
 template<class R> class PartitionTreeCell;
 template<class R> class PartitionTreeSet;
+
+template<class R> class Set;
+
+template<class R> class HybridGridMaskSet;
 }}
 
 
@@ -115,12 +123,20 @@ template<class R> class PolynomialMatrix;
 template<class R> class VectorField;
 template<class R> class AffineVectorField;
 
+template<class R> class DiscreteLocation;
+template<class R> class DiscreteTransition;
+template<class R> class HybridAutomaton;
+  
 template<class R> class HenonMap;
 template<class R> class LorenzSystem;
 }}
 
 
 namespace Ariadne { namespace Evaluation {
+template<class R> class Solver;
+template<class R> class Applicator;
+template<class R> class Integrator;
+template<class R> class HybridEvolver;
 }}
 
 namespace Ariadne { namespace Base {
@@ -132,7 +148,11 @@ typedef size_t size_type;
 typedef int index_type;
 /*! \brief The type of a machine byte. */
 typedef unsigned char byte_type; 
- 
+/*! \brief The type used for a unique identifyer or key. */
+typedef size_type id_type;
+/*! \brief The type used for a unique identifyer or key. */
+typedef Numeric::Rational time_type;
+
 /*! \brief An array of boolean values. */
 typedef array<bool> BooleanArray;
 /*! \brief An array of unsigned integer values. */

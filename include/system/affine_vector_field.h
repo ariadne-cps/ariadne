@@ -62,7 +62,9 @@ namespace Ariadne {
       AffineVectorField(const AffineVectorField<R>& F) : _A(F.A()), _b(F.b()) { }
       /*! \brief Construct from the matrix \a A and the vector \a b.. */
       AffineVectorField(const LinearAlgebra::Matrix<R> &A, const LinearAlgebra::Vector<R> &b) : _A(A), _b(b) { }
-    
+      /*! \brief Make a copy (clone) of the vector field. */
+      AffineVectorField<R>* clone() const { return new AffineVectorField<R>(this->A(),this->b()); }
+      
       /*! \brief An approximation to the vector field at a point. */
       LinearAlgebra::Vector<F> image(const Geometry::Point<R>& s) const;
       /*! \brief An over-approximation to the vector field over a rectangle. */

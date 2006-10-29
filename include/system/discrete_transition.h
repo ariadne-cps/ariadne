@@ -1,9 +1,8 @@
 /****************************************************************************
- *            discrete_trans.h
+ *            discrete_transition.h
  *
- *  Fri Apr  2 20:12:20 2004
- *  Copyright  2004  Alberto Casagrande
- *  casagrande@dimi.uniud.it
+ *  Copyright  2004-6  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it  Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -22,43 +21,47 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _DISCRETE_TRANSITION_H
-#define _DISCRETE_TRANSITION_H
+#ifndef _ARIADNE_DISCRETE_TRANSITION_H
+#define _ARIADNE_DISCRETE_TRANSITION_H
 
-#include "../system/discrete_location.h"
+#include <cassert>
+#include <stdexcept>
+
+#include <boost/smart_ptr.hpp>
+#include <memory>
+
+#include "../geometry/set.h"
+#include "../system/map.h"
+#include "../system/vector_field.h"
+#include "../system/discrete_mode.h"
 
 namespace Ariadne {
-namespace HybridSystem {
+namespace System {
     
-/*! \brief Represents discrete transitions.
+/*! \ingroup HybridTime
+ *  \brief A discrete transition of a HybridAutomaton.
  */
-template< class LOC, class RESET >
+template< class R >
 class DiscreteTransition
 {
-  public:
-    typedef RESET ResetMap;
-    typedef LOC DiscreteLocation;
-    typedef typename DiscreteLocation::Vector_typeField Vector_typeField;
-    typedef typename ResetMap::DenotableSet DenotableSet;
-    typedef typename DenotableSet::BasicSet BasicSet;
-    typedef typename BasicSet::state_type state_type;
-    typedef typename state_type::real_type real_type;
   
   private:
-    /*! \brief This is the source of the current discrete 
-     * transition. */ 
-    DiscreteLocation _source;   
+    static id_type _next_transition_id;
+    
+    // \brief The discrete transition's identificator.
+    id_type _id;
   
-    /*! \brief The destination of the leaving discrete 
-     * transition. */
-    DiscreteLocation _destination;   
+    // \brief The source of the discrete transition.
+    const DiscreteMode<R>* _source;   
   
-    /*! \brief The activation region of the leaving discrete 
-     * transition. */ 
-    DenotableSet _activation; 
+    // \brief The destination of the discrete transition.
+    const DiscreteMode<R>* _destination;   
+  
+    // \brief The activation region of the discrete transition.
+    boost::shared_ptr< const Geometry::Set<R> > _activation; 
 
-    /*! \brief The reset of the leaving discrete transition. */ 
-    ResetMap _reset;  
+    // \brief The reset of the discrete transition.
+    boost::shared_ptr< const Map<R> > _reset;  
     
   public:
     /*! \brief This is a discrete transition class constructor.
@@ -75,32 +78,52 @@ class DiscreteTransition
      * \param reset is the reset of the current discrete 
      * transition.
      */
-    DiscreteTransition(const DiscreteLocation &source, 
-        const DiscreteLocation &dest, 
-        const DenotableSet &act, ResetMap reset):
-              _source(source), _destination(dest), 
-              _activation(act), _reset(reset) {}
+    DiscreteTransition(const DiscreteMode<R> &source, 
+                       const DiscreteMode<R> &dest, 
+                       const Geometry::Set<R> &act, 
+                       const Map<R> &reset)
+      : _source(&source), _destination(&dest), 
+        _activation(act.clone()), _reset(reset.clone()) 
+    { 
+      assert(source.dimension()==act.dimension());
+      assert(source.dimension()==reset.argument_dimension());
+      assert(dest.dimension()==reset.result_dimension());
+      this->_set_id(); 
+    }
 
   
-    /*! \brief This is a \a LeavingDiscreteTransition class 
-     * constructor.
+    /*! \brief Copy constructor.
      *
      * This constructor initializes the object of the  
      * leaving discrete transition class.
      * \param orig is the original copy of the leaving arc.
      */
-    DiscreteTransition(const
-        DiscreteTransition< LOC, RESET > &orig):
-        _source(orig._source), _destination(orig._destination), 
-        _activation(orig._activation), _reset(orig._reset) {}
+    DiscreteTransition(const DiscreteTransition<R> &orig)
+      : _id(orig._id), _source(orig._source), _destination(orig._destination), 
+        _activation(orig._activation), _reset(orig._reset) { 
+    }
                 
+    /*! \brief Copy assignment operator for discrete transition.
+     *
+     * This method copies a leaving arc.
+     * \param orig is the original copy of the leaving arc.
+     */
+    inline DiscreteTransition<R>& operator=(const DiscreteTransition<R> &orig) {
+      this->_id=orig._id;
+      this->_activation=orig._activation;
+      this->_destination=orig._destination;
+      this->_reset=orig._reset;
+      this->_source=orig._source;
+      return *this;
+    }
+    
     /*! \brief Return the source of the discrete transition.
      *
      * This method return the source of the discrete transition.
      * \return The source of the discrete transition.
      */
-    inline const DiscreteLocation &source() const {
-      this->_source;
+    inline const DiscreteMode<R> &source() const {
+      return *this->_source;
     }      
 
       /*! \brief Return the destination of the discrete transition.
@@ -109,8 +132,8 @@ class DiscreteTransition
      * transition.
      * \return The destination of the discrete transition.
      */
-    inline const DiscreteLocation &destination() const { 
-      return this->_destination;
+    inline const DiscreteMode<R> &destination() const { 
+      return *this->_destination;
     }
   
     /*! \brief Return the activation region of the discrete 
@@ -120,8 +143,8 @@ class DiscreteTransition
      * discrete transition.
      * \return The activation region of the discrete transition.
      */
-        inline const DenotableSet &activation() const{ 
-      return this->_activation;
+    inline const Geometry::Set<R> &activation() const { 
+      return *this->_activation;
     }
 
     /*! \brief Return the reset.
@@ -131,29 +154,18 @@ class DiscreteTransition
      * \return The reset function of the leaving discrete 
      * transition.
      */
-    inline const ResetMap &reset() const{ 
-      return this->_reset;
+    inline const Map<R> &reset() const { 
+      return *this->_reset;
     }
     
-    /*! \brief Copies a leaving arc.
-     *
-     * This method copies a leaving arc.
-     * \param orig is the original copy of the leaving arc.
-     */
-    inline const DiscreteTransition< LOC , RESET >& 
-        operator=(const DiscreteTransition< LOC , RESET > &orig) {
-      
-      this->_activation=orig._activation;
-      this->_destination=orig._destination;
-          
-      this->_reset=orig._reset;
-      this->_source=orig._source;
-            
-      return *this;
-    }
+  private:
+    void _set_id() { this->_id=_next_transition_id; ++_next_transition_id; }
 };
+
+
+template<class R> id_type DiscreteTransition<R>::_next_transition_id=0;
 
 }
 }
  
-#endif /* _DISCRETE_TRANSITION_H */
+#endif /* _ARIADNE_DISCRETE_TRANSITION_H */

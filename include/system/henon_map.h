@@ -39,8 +39,6 @@
 
 #include "../system/map.h"
 
-#include "../evaluation/apply.h"
-
 namespace Ariadne {
   namespace System {
 
@@ -58,6 +56,9 @@ namespace Ariadne {
       /*! \brief Construct the Henon map with parameters \a a and \a b. */
       explicit HenonMap(R a=R(1.5), R b=R(0.3)) : _a(a), _b(b) { }
       
+      /*! \brief Returns a pointer to a dynamically-allocated copy of the map. */
+      HenonMap<R>* clone() const { return new HenonMap<R>(this->_a,this->_b); }
+
       /*! \brief  The map applied to a state. */
       virtual Geometry::Point<F> image(const Geometry::Point<R>& x) const;
       /*! \brief  The map applied to a rectangle basic set. */

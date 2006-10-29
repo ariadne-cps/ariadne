@@ -36,6 +36,7 @@ class VectorFieldWrapper
   : public VectorField<R>, public wrapper< VectorField<R> >
 {
  public: 
+  VectorField<R>* clone() const { return this->get_override("clone")(); }
   dimension_type dimension() const { return this->get_override("dimension")(); }
   size_type smoothness() const { return this->get_override("smoothness")(); }
   std::string name() const { return this->get_override("name")(); }

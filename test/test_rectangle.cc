@@ -28,7 +28,7 @@
 #include "real_typedef.h"
 
 #include "ariadne.h"
-#include "base/exception.h"
+#include "base/exceptions.h"
 #include "base/utility.h"
 #include "geometry/rectangle.h"
 #include "geometry/list_set.h"

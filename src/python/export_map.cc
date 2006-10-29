@@ -38,6 +38,7 @@ template<class R>
 class MapWrapper : public Map<R>, public wrapper< Map<R> >
 {
  public:
+  Map<R>* clone() const { return this->get_override("clone")(); }
   dimension_type argument_dimension() const { return this->get_override("argument_dimension")(); }
   dimension_type result_dimension() const { return this->get_override("result_dimension")(); }
   size_type smoothness() const { return this->get_override("smoothness")(); }

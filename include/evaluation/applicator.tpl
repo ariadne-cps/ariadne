@@ -1,5 +1,5 @@
 /***************************************************************************
- *            apply.tpl
+ *            applicator.tpl
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "apply.h"
+#include "applicator.h"
 
 #include <iosfwd>
 #include <string>
@@ -32,6 +32,8 @@
 #include <set>
 #include <vector>
 #include <valarray>
+
+#include "../base/exceptions.h"
 
 #include "../numeric/interval.h"
 

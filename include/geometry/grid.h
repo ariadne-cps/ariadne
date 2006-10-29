@@ -304,7 +304,7 @@ namespace Ariadne {
     };
 
     /*!\ingroup Grid
-     * \brief A finite grid, suitable for defining a GridMaskSet. (Deprecated)
+     * \brief A finite grid, suitable for defining a GridMaskSet.
      * \deprecated Use a Grid and LatticeBlock in GridMaskSet constructor instead. 
      */
     template<class R> class FiniteGrid {
@@ -327,9 +327,6 @@ namespace Ariadne {
         : _grid_ptr(&g), _grid_type(g.type()), 
           _bounds(over_approximation(bb,g).lattice_set())
       { }
-      
-      /*! \brief Return the grid type. */
-      const grid_type &type() const {return _grid_type;}
       
       /*! \brief The underlying grid. */
       const Grid<R>& grid() const { return *_grid_ptr; }

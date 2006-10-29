@@ -490,6 +490,7 @@ namespace Ariadne {
       assert(g.dimension()==lbls.dimension());
     }
 
+    // FIXME: Memory leak
     template<class R>
     GridBlockListSet<R>::GridBlockListSet(const ListSet<R,Rectangle>& s)
       : _grid_ptr(new IrregularGrid<R>(s)), _lattice_set(s.dimension())
@@ -501,6 +502,7 @@ namespace Ariadne {
     }
 
     /* FIXME: This constructor is only included since Boost Python doesn't find the conversion operator */
+    // FIXME: Memory leak due to construction of new grid
     template<class R>
     GridBlockListSet<R>::GridBlockListSet(const PartitionTreeSet<R>& pts)
       : _grid_ptr(0),_lattice_set(pts.dimension()) 
@@ -613,6 +615,7 @@ namespace Ariadne {
     {
     }
 
+    // FIXME: Memory leak
     template<class R>
     GridMaskSet<R>::GridMaskSet(const ListSet<R,Rectangle>& rls) 
       : _grid_ptr(new IrregularGrid<R>(rls)), 

@@ -31,7 +31,7 @@
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
 #include "system/henon_map.h"
-#include "evaluation/apply.h"
+#include "evaluation/applicator.h"
 #include "output/epsfstream.h"
 
 #include "test.h"

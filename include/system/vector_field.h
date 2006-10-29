@@ -70,6 +70,9 @@ namespace Ariadne {
       /*! \brief Virtual destructor. */
       virtual ~VectorField();
      
+      /*! \brief Make a copy (clone) of the vector field. */
+      virtual VectorField<R>* clone() const = 0;
+     
       /*! \brief An approximation to the vector field at a point. */
       LinearAlgebra::Vector<F> operator() (const Geometry::Point<R>& x) const { return this->image(x); }
       /*! \brief A bound for the vector field over a rectangle. */

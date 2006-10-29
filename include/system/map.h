@@ -71,6 +71,9 @@ namespace Ariadne {
       /*! \brief Virtual destructor. */
       virtual ~Map();
       
+      /*! \brief Make a copy (clone) of the map. */
+      virtual Map<R>* clone() const = 0;
+
       /*! \brief An over-approximation to the image of a point. */
       Geometry::Point<F> operator() (const Geometry::Point<R>& pt) const {
         return this->image(pt); }

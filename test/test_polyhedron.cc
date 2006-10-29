@@ -30,7 +30,7 @@
 #include <ppl.hh>
 
 #include "ariadne.h"
-#include "base/exception.h"
+#include "base/exceptions.h"
 #include "base/utility.h"
 #include "numeric/float64.h"
 #include "numeric/mpfloat.h"

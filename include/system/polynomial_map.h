@@ -180,6 +180,12 @@ namespace Ariadne {
       /*! \brief Construct from an array of polynomials. */
       PolynomialMap(const array< Polynomial<R> >& c) : _components(c) { 
         this->_set_argument_dimension(this->_compute_maximum_component_dimension()); }
+      /*! \brief Copy constructor. */
+      PolynomialMap(const PolynomialMap<R>& pm)
+        : _argument_dimension(pm._argument_dimension), _components(pm._components) { }
+        
+      /*! \brief Returns a pointer to a dynamically-allocated copy of the map. */
+      PolynomialMap<R>* clone() const { return new PolynomialMap<R>(*this); }
       
       /*! \brief The \a i th component polynomial. */
       const Polynomial<R>& component(size_type i) const { return _components[i]; }
@@ -187,6 +193,8 @@ namespace Ariadne {
       dimension_type argument_dimension() const { return _argument_dimension; }
       /*! \brief The dimension of the result. */
       dimension_type result_dimension() const { return _components.size(); }
+      /*! \brief The dimension of the result. */
+      size_type smoothness() const { return (size_type) -1;; }
       
       /*! \brief Compute the image of a point under the polynomial map. */
       Geometry::Point<F> apply(const Geometry::Point<R>& s) const;

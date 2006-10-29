@@ -34,57 +34,58 @@ namespace Ariadne {
 }
 
 
-namespace Ariadne {
-  namespace Evaluation {
 
-    template<class R>
-    Geometry::Rectangle<R>
-    interval_newton(const System::VectorField<R>& f, 
-                    const Geometry::Rectangle<R>& x, 
-                    const R& e,
-                    uint max_steps)
-    {
-      uint n=max_steps;
-      if(verbosity>0) { std::cerr << "verbosity=" << verbosity << "\n"; }
-      Geometry::Rectangle<R> r=x;
-      while(true) {
-        if(verbosity>0) { std::cerr << "Testing for root in " << r << "\n"; }
-        if(verbosity>0) { std::cerr << "  e=" << r.radius() << "  r=" << r << std::endl; }
-        Geometry::Point<R> m=r.centre();
-        if(verbosity>0) { std::cerr << "  m=" << m << std::endl; }
-        Geometry::Rectangle<R> mr(m);
-        if(verbosity>0) { std::cerr << "  mr=" << mr << std::endl; }
-        LinearAlgebra::Vector< Interval<R> > w=f(mr);
-        if(verbosity>0) { std::cerr << "  f(mr)=" << w << std::endl; }
-        LinearAlgebra::Matrix< Interval<R> > A=f.jacobian(r);
-        if(verbosity>0) { std::cerr << "  Df(r)=" << A << std::endl; }
-        LinearAlgebra::Matrix< Interval<R> > Ainv=A.inverse();
-        if(verbosity>0) { std::cerr << "  inverse(Df(r))=" << Ainv << std::endl; }
-        LinearAlgebra::Vector< Interval<R> > dr=Ainv * w;
-        if(verbosity>0) { std::cerr << "  dr=" << dr << std::endl; }
-        Geometry::Rectangle<R> nr= mr - dr;
-        if(verbosity>0) { std::cerr << "  nr=" << nr << std::endl; } 
-        if(verbosity>0) {
-          std::cerr << "  f(x)=" << f(r) << std::flush;
-          std::cerr << "  f(m)=" << approximate_value(f(mr)) << std::flush;
-          std::cerr << "  Df(x) =" << A << "  inv=" << inverse(A) << "  I=" << A*inverse(A) << std::flush;
-          std::cerr << "  nx =" << nr << "\n\n" << std::flush;
-          std::cerr << nr << " subset " << r << " ? " << Geometry::subset(nr,r) << "\n";
-          std::cerr << nr.radius() << " < " << e << " ? " << (nr.radius() < e) << "\n";
-        }
-        if(Geometry::subset(nr,r) and (nr.radius() < e)) {   \
-          return nr;
-        }
-        if(Geometry::disjoint(nr,r)) {
-          throw EvaluationException("No result found -- disjoint");
-        }
-        r=Geometry::closed_intersection(nr,r);
-        n=n-1;
-      }
+template<class R>
+Ariadne::Geometry::Rectangle<R>
+Ariadne::Evaluation::interval_newton(const System::VectorField<R>& f, 
+                                     const Geometry::Rectangle<R>& x, 
+                                     const R& e,
+                                     uint max_steps)
+{
+  uint n=max_steps;
+  if(verbosity>0) { std::cerr << "verbosity=" << verbosity << "\n"; }
+  Geometry::Rectangle<R> r=x;
+  while(true) {
+    if(verbosity>0) { std::cerr << "Testing for root in " << r << "\n"; }
+    if(verbosity>0) { std::cerr << "  e=" << r.radius() << "  r=" << r << std::endl; }
+    Geometry::Point<R> m=r.centre();
+    if(verbosity>0) { std::cerr << "  m=" << m << std::endl; }
+    Geometry::Rectangle<R> mr(m);
+    if(verbosity>0) { std::cerr << "  mr=" << mr << std::endl; }
+    LinearAlgebra::Vector< Interval<R> > w=f(mr);
+    if(verbosity>0) { std::cerr << "  f(mr)=" << w << std::endl; }
+    LinearAlgebra::Matrix< Interval<R> > A=f.jacobian(r);
+    if(verbosity>0) { std::cerr << "  Df(r)=" << A << std::endl; }
+    LinearAlgebra::Matrix< Interval<R> > Ainv=A.inverse();
+    if(verbosity>0) { std::cerr << "  inverse(Df(r))=" << Ainv << std::endl; }
+    LinearAlgebra::Vector< Interval<R> > dr=Ainv * w;
+    if(verbosity>0) { std::cerr << "  dr=" << dr << std::endl; }
+    Geometry::Rectangle<R> nr= mr - dr;
+    if(verbosity>0) { std::cerr << "  nr=" << nr << std::endl; } 
+    if(verbosity>0) {
+      std::cerr << "  f(x)=" << f(r) << std::flush;
+      std::cerr << "  f(m)=" << approximate_value(f(mr)) << std::flush;
+      std::cerr << "  Df(x) =" << A << "  inv=" << inverse(A) << "  I=" << A*inverse(A) << std::flush;
+      std::cerr << "  nx =" << nr << "\n\n" << std::flush;
+      std::cerr << nr << " subset " << r << " ? " << Geometry::subset(nr,r) << "\n";
+      std::cerr << nr.radius() << " < " << e << " ? " << (nr.radius() < e) << "\n";
+    }
+    if(Geometry::subset(nr,r) and (nr.radius() < e)) {   \
+      return nr;
+    }
+    if(Geometry::disjoint(nr,r)) {
       throw EvaluationException("No result found -- disjoint");
     }
-    
-      
-
+    r=Geometry::closed_intersection(nr,r);
+    n=n-1;
   }
+  throw EvaluationException("No result found -- disjoint");
+}
+
+template<class R>
+Ariadne::Geometry::Rectangle<R>
+Ariadne::Evaluation::IntervalNewtonSolver<R>::solve(const System::VectorField<R>& f, 
+                                                    const Geometry::Rectangle<R>& x)
+{
+  return interval_newton(f,x,this->maximum_error(),this->maximum_number_of_steps());
 }

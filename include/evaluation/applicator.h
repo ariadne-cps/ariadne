@@ -1,5 +1,5 @@
 /***************************************************************************
- *            apply.h
+ *            applicator.h
  *
  *  17 January 2006
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
@@ -22,15 +22,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file apply.h
+/*! \file applicator.h
  *  \brief Methods for computing the images of sets under maps.
  */
 
-#ifndef _ARIADNE_APPLY_H
-#define _ARIADNE_APPLY_H
+#ifndef _ARIADNE_APPLICATOR_H
+#define _ARIADNE_APPLICATOR_H
 
 #include "../declarations.h"
-#include "base/exception.h"
 
 namespace Ariadne {
   namespace Evaluation {

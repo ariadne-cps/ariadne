@@ -54,6 +54,10 @@ namespace Ariadne {
                             R sigma=R(10.0))
        : _b(beta), _p(rho), _s(sigma) { }
       
+      
+      LorenzSystem<R>* clone() const { return new LorenzSystem<R>(this->_b, this->_p, this->_s); }
+       
+       
       /*! \brief  The vector field applied to a state. */
       virtual LinearAlgebra::Vector<F> operator() (const Geometry::Point<R>& x) const;
       /*! \brief  The map applied to a rectangle basic set. */

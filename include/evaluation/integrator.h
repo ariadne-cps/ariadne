@@ -37,9 +37,6 @@ namespace Ariadne {
 
   namespace Evaluation {
    
-    /*!\brief The type used to denote time. */
-    typedef Numeric::Rational time_type;
-    
     /*! \brief %Base class for integration schemes. 
      *  \ingroup Integrate
      */

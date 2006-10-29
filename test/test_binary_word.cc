@@ -29,7 +29,7 @@
 #include "ariadne.h"
 
 #include "base/stlio.h"
-#include "base/exception.h"
+#include "base/exceptions.h"
 #include "combinatoric/binary_word.h"
 #include "combinatoric/binary_tree.h"
 

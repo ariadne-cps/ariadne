@@ -37,6 +37,7 @@
 #include "lohner_integrator.h"
 
 #include "../base/array.h"
+#include "../base/exceptions.h"
 #include "../numeric/arithmetic.h"
 #include "../numeric/interval.h"
 

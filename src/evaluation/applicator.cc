@@ -1,5 +1,5 @@
 /***************************************************************************
- *            apply.cc
+ *            applicator.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -23,8 +23,8 @@
 
 #include "real_typedef.h"
 
-#include "evaluation/apply.h"
-#include "evaluation/apply.tpl"
+#include "evaluation/applicator.h"
+#include "evaluation/applicator.tpl"
 
 namespace Ariadne {
   namespace Evaluation {

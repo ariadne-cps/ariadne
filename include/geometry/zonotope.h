@@ -32,7 +32,6 @@
 #include <iosfwd>
 
 #include "../base/iterator.h"
-#include "../base/exception.h"
 #include "../base/tribool.h"
 
 #include "../numeric/interval.h"

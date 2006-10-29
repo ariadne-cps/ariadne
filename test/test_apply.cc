@@ -31,7 +31,7 @@
 #include "geometry/zonotope.h"
 #include "geometry/polytope.h"
 #include "system/henon_map.h"
-#include "evaluation/apply.h"
+#include "evaluation/applicator.h"
 #include "output/epsfstream.h"
 
 #include "test.h"

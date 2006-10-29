@@ -33,6 +33,7 @@
 #include "../declarations.h"
 
 #include "../base/array.h"
+#include "../base/exceptions.h"
 #include "../geometry/point.h"
 
 namespace Ariadne {
@@ -229,7 +230,7 @@ namespace Ariadne {
     template<class R>
     inline bool disjoint(const Sphere<R>& A, const Rectangle<R>& B) 
     {
-      throw std::runtime_error("bool disjoint(const Sphere<R>&, const Rectangle<R>&) not implemented");
+      throw NotImplemented("bool disjoint(const Sphere<R>&, const Rectangle<R>&)");
     }
     
     template<class R>
@@ -251,7 +252,7 @@ namespace Ariadne {
     inline bool interiors_intersect(const Sphere<R>& A,
                                     const Rectangle<R>& B) 
     {
-      throw std::runtime_error("bool disjoint(const Sphere<R>&, const Rectangle<R>&) not implemented");
+      throw NotImplemented("interiors_intersect(const Sphere<R>&, const Rectangle<R>&)");
     }
     
     template<class R>
@@ -266,7 +267,7 @@ namespace Ariadne {
     inline bool inner_subset(const Sphere<R>& A,
                              const Sphere<R>& B) 
     {
-      throw std::runtime_error("bool inner_subset(const Sphere<R>&, const Sphere<R>&) not implemented");
+      throw NotImplemented("inner_subset(const Sphere<R>&, const Sphere<R>&)");
       //return A.radius()<B.radius && euclidean_distance_square(A.centre()-B.centre()) < square(B.centre()-A.centre());
     }
 
@@ -274,7 +275,7 @@ namespace Ariadne {
     inline bool inner_subset(const Sphere<R>& A,
                              const Rectangle<R>& B) 
     {
-      throw std::runtime_error("bool inner_subset(const Sphere<R>&, const Rectangle<R>&) not implemented");
+      throw NotImplemented("inner_subset(const Sphere<R>&, const Rectangle<R>&)");
       //for(dimension_type i=0; i!=A.dimension(); ++i) {
       //  if(! inner_subset(A.centre()[i]-A.radius(),A.centre()[i]+A.radius(),B[i]) ) {
       //    return false;
@@ -287,7 +288,7 @@ namespace Ariadne {
     inline bool inner_subset(const Rectangle<R>& A,
                              const Sphere<R>& B) 
     {
-      throw std::runtime_error("bool inner_subset(const Rectangle<R>&, const Sphere<R>&) not implemented");
+      throw NotImplemented("inner_subset(const Rectangle<R>&, const Sphere<R>&)");
       //array< Point<R> > vertices=A.vertices();
       //for(class Rectangle<R>::vertex_iterator vertex_iter=vertices.begin(); vertex_iter!=vertices.end(); ++vertex_iter) {
       //  if(! B.interior_contains(*vertex_iter) ) {
@@ -302,7 +303,7 @@ namespace Ariadne {
     inline bool subset(const Sphere<R>& A, 
                        const Sphere<R>& B) 
     {
-      throw std::runtime_error("bool subset(const Sphere<R>&, const Sphere<R>&) not implemented");
+      throw NotImplemented("bool subset(const Sphere<R>&, const Sphere<R>&)");
       //return A.radius()<=B.radius && euclidean_distance_square(A.centre()-B.centre()) <= square(B.centre()-A.centre());
     }
     
@@ -310,7 +311,7 @@ namespace Ariadne {
     inline bool subset(const Sphere<R>& A, 
                        const Rectangle<R>& B) 
     {
-      throw std::runtime_error("bool subset(const Sphere<R>&, const Rectangle<R>&) not implemented");
+      throw NotImplemented("bool subset(const Sphere<R>&, const Rectangle<R>&)");
       //return subset(A.bounding_box(),B);
     }
     
@@ -318,7 +319,7 @@ namespace Ariadne {
     inline bool subset(const Rectangle<R>& A, 
                        const Sphere<R>& B) 
     {
-      throw std::runtime_error("bool subset(const Rectangle<R>&, const Sphere<R>&) not implemented");
+      throw NotImplemented("bool subset(const Rectangle<R>&, const Sphere<R>&)");
       //array< Point<R> > vertices=A.vertices();
       //for(class Rectangle<R>::vertex_iterator vertex_iter=vertices.begin(); vertex_iter!=vertices.end(); ++vertex_iter) {
       //  if(! B.contains(*vertex_iter) ) {

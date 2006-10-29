@@ -193,13 +193,13 @@ namespace Ariadne {
     template<class R>
     inline bool disjoint(const Ellipsoid<R>& A, const Ellipsoid<R>& B) 
     {
-      throw std::runtime_error("bool disjoint(const Ellipsoid<R>&, const Ellipsoid<R>&) not implemented");
+      throw NotImplemented("bool disjoint(const Ellipsoid<R>&, const Ellipsoid<R>&)");
     }
     
     template<class R>
     inline bool disjoint(const Ellipsoid<R>& A, const Rectangle<R>& B) 
     {
-      throw std::runtime_error("bool disjoint(const Ellipsoid<R>&, const Rectangle<R>&) not implemented");
+      throw NotImplemented("bool disjoint(const Ellipsoid<R>&, const Rectangle<R>&)");
     }
     
     template<class R>
@@ -213,14 +213,14 @@ namespace Ariadne {
     inline bool interiors_intersect(const Ellipsoid<R>& A,
                                     const Ellipsoid<R>& B) 
     {
-      throw std::runtime_error("bool interiors_intersect(const Ellipsoid<R>&, const Ellipsoid<R>&) not implemented");
+      throw NotImplemented("bool interiors_intersect(const Ellipsoid<R>&, const Ellipsoid<R>&)");
     }
     
     template<class R>
     inline bool interiors_intersect(const Ellipsoid<R>& A,
                                     const Rectangle<R>& B) 
     {
-      throw std::runtime_error("bool disjoint(const Ellipsoid<R>&, const Rectangle<R>&) not implemented");
+      throw NotImplemented("bool disjoint(const Ellipsoid<R>&, const Rectangle<R>&)");
     }
     
     template<class R>
@@ -235,7 +235,7 @@ namespace Ariadne {
     inline bool inner_subset(const Ellipsoid<R>& A,
                              const Ellipsoid<R>& B) 
     {
-      throw std::runtime_error("bool inner_subset(const Ellipsoid<R>&, const Ellipsoid<R>&) not implemented");
+      throw NotImplemented("bool inner_subset(const Ellipsoid<R>&, const Ellipsoid<R>&)");
     }
 
     template<class R>
@@ -268,7 +268,7 @@ namespace Ariadne {
     inline bool subset(const Ellipsoid<R>& A, 
                        const Ellipsoid<R>& B) 
     {
-      throw std::runtime_error("bool subset(const Ellipsoid<R>&, const Ellipsoid<R>&) not implemented");
+      throw NotImplemented("bool subset(const Ellipsoid<R>&, const Ellipsoid<R>&)");
     }
     
     template<class R>

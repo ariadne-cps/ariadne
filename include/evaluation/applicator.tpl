@@ -258,7 +258,8 @@ namespace Ariadne {
                          const Geometry::GridMaskSet<R>& bounding_set) const 
     {
       typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
-      assert(initial_set.bounded() && bounding_set.bounded());
+      check_bounded(initial_set,"Applicator<R>::image(...)");
+      check_bounded(bounding_set,"Applicator<R>::image(...)");
       
       const Geometry::Grid<R>& g=initial_set.grid();
       Combinatoric::LatticeBlock bd=initial_set.block();
@@ -301,7 +302,8 @@ namespace Ariadne {
                               const Geometry::GridMaskSet<R>& bounding_set) const
     {
       typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
-      assert(initial_set.bounded() && bounding_set.bounded());
+      check_bounded(initial_set,"Applicator<R>::chainreach(...)");
+      check_bounded(bounding_set,"Applicator<R>::chainreach(...)");
       
       const Geometry::Grid<R>& g=bounding_set.grid();
       Combinatoric::LatticeBlock bd=bounding_set.block();
@@ -360,7 +362,8 @@ namespace Ariadne {
                              const Geometry::GridMaskSet<R>& safe_set) const
     {
       typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
-      assert(initial_set.bounded() && safe_set.bounded());
+      check_bounded(initial_set,"Applicator<R>::verify(...)");
+      check_bounded(safe_set,"Applicator<R>::verify(...)");
       
       const Geometry::Grid<R>& g=initial_set.grid();
       Combinatoric::LatticeBlock bd=safe_set.block();

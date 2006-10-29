@@ -171,7 +171,7 @@ namespace Ariadne {
     array< std::vector<index_type> >
     IrregularGrid<R>::index_translation(const IrregularGrid<R>& from, const IrregularGrid<R>& to)
     {
-      assert(from.dimension()==to.dimension());
+      check_dimension(from,to,"IrregularGrid<R>::index_translation(IrregularGrid<R>,IrregularGrid<R>)");
       array< std::vector<index_type> > result(from.dimension());
       for(dimension_type d=0; d!=from.dimension(); ++d) {
         for(size_type n=0; n!=from.size(d); ++n) {

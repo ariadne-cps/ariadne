@@ -172,14 +172,16 @@ namespace Ariadne {
       /*!\brief Construct from a rectangle, and a unit partition tree cell. */
       PartitionTreeCell(const Rectangle<R>& r, const Combinatoric::SubdivisionTreeCell& c)
         : _unit_box(r), _subdivision_cell(c)
-      { assert(r.dimension()==c.dimension()); }
+      { check_dimension(r,c,"PartitionTreeCell<R>::PartitionTreeCell(Rectangle<R>,SubdivisionTreeCell)"); }
 
       /*!\brief Construct from a rectangle, the subdivision_coordinates and a binary word. */
       PartitionTreeCell(const Rectangle<R>& r, 
                         const Combinatoric::SubdivisionSequence& s, 
                         const Combinatoric::BinaryWord& w) 
         : _unit_box(r), _subdivision_cell(s,w) 
-      { }
+      { 
+        //check_dimension_size(r,w,"PartitionTreeCell<R>::PartitionTreeCell(Rectangle<R>,SubdivisionSequence,BinaryWord"); 
+      }
 
 /*
       bool operator==(const PartitionTreeCell<R>& other) const {

@@ -92,8 +92,8 @@ namespace Ariadne {
         : Zonotope<R>(state_type(c),m)
       {
         if (m.number_of_rows()!=m.number_of_columns()) {
-          throw std::domain_error(
-              "The the Matrix of principal directions is not a square Matrix");
+          throw InvalidGenerators("Parallelotope<R>::Parallelotope(Vector<R>,Matrix<R>): "
+                                  "The matrix of principal directions is not a square matrix");
         }
       }
       
@@ -102,8 +102,8 @@ namespace Ariadne {
         : Zonotope<R>(c,m)
       {
         if (m.number_of_rows()!=m.number_of_columns()) {
-          throw std::domain_error(
-              "The the Matrix of principal directions is not a square Matrix");
+          throw InvalidGenerators("Parallelotope<R>::Parallelotope(Vector<R>,Matrix<R>): "
+                                  "The matrix of principal directions is not a square matrix");
         }
       }
        
@@ -187,12 +187,14 @@ namespace Ariadne {
       Parallelotope(const Point<Rl1>& c, const LinearAlgebra::Matrix<Rl2>& g)
         : Zonotope<I>(c,g) { }
       
-      Parallelotope(const Rectangle<R>& r) 
-        : Zonotope<I>(r) { }
+      Parallelotope(const Rectangle<R>& r) : Zonotope<I>(r) { }
       
-      Parallelotope(const Zonotope<R>& z) 
-        : Zonotope<I>(z) { assert(z.dimension()==z.number_of_generators()); }
-      
+      Parallelotope(const Zonotope<R>& z) : Zonotope<I>(z) { 
+        if(z.dimension()!=z.number_of_generators()) { 
+          throw InvalidGenerators("Parallelotope(const Zonotope<R>& z)"); 
+        }
+      }
+
       /*! \brief Tests if the parallelotope contains \a point. */
       tribool contains(const Point<I>& point) const;
 
@@ -206,7 +208,7 @@ namespace Ariadne {
       mutable LinearAlgebra::Matrix<I> _generators_inverse;
     };
        
-        
+    
     template<class R>
     tribool
     subset(const Rectangle<R>& r, const Parallelotope<R>& p);

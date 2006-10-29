@@ -538,7 +538,7 @@ namespace Ariadne {
                              const Geometry::GridMaskSet<R>& bounding_set,
                              const time_type& time) const
     {
-      assert(initial_set.grid()==bounding_set.grid());
+      check_grid(initial_set,bounding_set);
       using namespace System;
       using namespace Geometry;
       using namespace LinearAlgebra;
@@ -764,7 +764,8 @@ namespace Ariadne {
     {
       typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
       typedef typename Geometry::ListSet<R,Geometry::Zonotope>::const_iterator zls_const_iterator;
-      assert(initial_set.bounded() && bounding_set.bounded());
+      check_bounded(initial_set,"Integrator<R>::reach(...)");
+      check_bounded(bounding_set,"Integrator<R>::reach(...)");
       
       if(!subset(initial_set,bounding_set)) {
         throw std::runtime_error("chainreach: Initial set must be subset of bounding set");
@@ -820,7 +821,8 @@ namespace Ariadne {
     {
       typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
       typedef typename Geometry::ListSet<R,Geometry::Parallelotope>::const_iterator pls_const_iterator;
-      assert(initial_set.bounded() && bounding_set.bounded());
+      check_bounded(initial_set,"Integrator<R>::chainreach(...)");
+      check_bounded(bounding_set,"Integrator<R>::chainreach(...)");
      
       if(!subset(initial_set,bounding_set)) {
         throw std::runtime_error("chainreach: Initial set must be subset of bounding set");
@@ -871,7 +873,8 @@ namespace Ariadne {
     {
       typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
       typedef typename Geometry::ListSet<R,Geometry::Parallelotope>::const_iterator pls_const_iterator;
-      assert(initial_set.bounded() && safe_set.bounded());
+      check_bounded(initial_set,"Integrator<R>::verify(...)");
+      check_bounded(safe_set,"Integrator<R>::verify(...)");
      
       if(!subset(initial_set,safe_set)) {
         throw std::runtime_error("chainreach: Initial set must be subset of bounding set");

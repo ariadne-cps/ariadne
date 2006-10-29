@@ -33,6 +33,7 @@
 #include <stdexcept>
 
 #include "../declarations.h"
+#include "../base/exceptions.h"
 #include "../base/array.h"
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
@@ -151,17 +152,13 @@ namespace Ariadne {
 
       /*! \brief Subcripting operator. */
       real_type& operator[] (dimension_type index) {
-        if(this->_vector.size() <= index) { 
-          throw std::out_of_range("Out of the Vector's range.");
-        }
+        check_index(*this,index,"Point<R>::operator[]");
         return  (this->_vector[index]);
       }
 
       /*! \brief Subcripting operator. */
       const real_type& operator[](dimension_type index) const {
-        if(this->_vector.size() <= index) { 
-            throw std::out_of_range("Out of the Vector's range.");
-        }
+        check_index(*this,index,"Point<R>::operator[]");
         return  (this->_vector[index]);
       }
 
@@ -170,21 +167,7 @@ namespace Ariadne {
         return this->_vector; 
       }
       
-/*      real_type get(size_type index) const {
-        if(this->_vector.size() <= index) { 
-          throw std::out_of_range("Out of the Vector's range.");
-        }
-        return  (this->_vector[index]);
-      }
-
-      void set(size_type index, const real_type& r) {
-        if(this->_vector.size() <= index) {
-          throw std::out_of_range("Out of the Vector's range.");
-        }
-        this->_vector[index]=r;
-      }
-*/
-      
+     
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;
       /*! \brief Read from an input stream. */
@@ -210,6 +193,7 @@ namespace Ariadne {
     inline
     Point<typename Numeric::traits<R>::arithmetic_type>
     minkowski_sum(const Point<R>& pt1, const Point<R>& pt2) {
+      check_dimension(pt1,pt2,"minkowski_sum(Point<R>,Point<R>)");
       return Point<typename Numeric::traits<R>::arithmetic_type>(pt1.position_vector()+pt2.position_vector());
     }
     
@@ -217,6 +201,7 @@ namespace Ariadne {
     inline
     Point<typename Numeric::traits<R>::arithmetic_type>
     minkowski_difference(const Point<R>& pt1, const Point<R>& pt2) {
+      check_dimension(pt1,pt2,"minkowski_difference(Point<R>,Point<R>)");
       return Point<typename Numeric::traits<R>::arithmetic_type>(pt1.position_vector()-pt2.position_vector());
     }
     
@@ -225,6 +210,7 @@ namespace Ariadne {
     LinearAlgebra::Vector<typename Numeric::traits<R1,R2>::arithmetic_type>
     operator-(const Point<R1> pt1, const Point<R2>& pt2) 
     {
+      check_dimension(pt1,pt2,"operator-(Point<R>,Point<R>)");
       return pt1.position_vector()-pt2.position_vector();
     }
     
@@ -233,6 +219,7 @@ namespace Ariadne {
     Point<typename Numeric::traits<R1,R2>::arithmetic_type> 
     operator+(const Point<R1>& pt, const LinearAlgebra::Vector<R2>& v)
     {
+      check_dimension(pt,v,"operator+(Point<R>,Vector<R>)");
       return Point<typename Numeric::traits<R1,R2>::arithmetic_type>(pt.position_vector() + v);
     }
 
@@ -242,6 +229,7 @@ namespace Ariadne {
     Point<typename Numeric::traits<R1,R2>::arithmetic_type> 
     operator-(const Point<R1>& pt, const LinearAlgebra::Vector<R2>& v)
     {
+      check_dimension_size(pt,v,"operator-(Point<R>,Vector<R>)");
       return Point<typename Numeric::traits<R1,R2>::arithmetic_type>(pt.position_vector() - v);
     }
 
@@ -250,6 +238,7 @@ namespace Ariadne {
     Point<R> 
     add_approx(const Point<R>& pt, const LinearAlgebra::Vector<R>& v)
     {
+      check_dimension_size(pt,v,"add_approx(Point<R>,Vector<R>)");
       return Point<R>(add_approx(pt.position_vector(),v));
     }
 
@@ -258,6 +247,7 @@ namespace Ariadne {
     Point<R> 
     sub_approx(const Point<R>& pt, const LinearAlgebra::Vector<R>& v)
     {
+      check_dimension_size(pt,v,"sub_approx(Point<R>,Vector<R>)");
       return Point<R>(sub_approx(pt.position_vector(),v));
     }
 
@@ -280,7 +270,7 @@ namespace Ariadne {
     project_on_dimensions(const Point<R> &A, const Base::array<bool>& dims) 
     {
       if (A.dimension()!=dims.size()) {
-         throw "project_on_dimensions(const Point & ,...): the two parameters have different dimension";
+        throw std::runtime_error("project_on_dimensions(const Point & ,...): the two parameters have different dimension");
       }
       size_type new_dim=0;
 
@@ -310,7 +300,7 @@ namespace Ariadne {
     {
 
       if ((A.dimension()<=x)||(A.dimension()<=y)||(A.dimension()<=z)) {
-         throw "project_on_dimensions(const Point& ,...): one of the projection dimensions is greater than the Point dimension";
+        throw std::runtime_error("project_on_dimensions(const Point & ,...): the two parameters have different dimension");
       }
       
       Point<R> new_point(3);

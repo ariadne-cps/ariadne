@@ -139,7 +139,7 @@ namespace Ariadne {
       return qv;
     }
     
-    
+  
     
     //template<class R>
     //Zonotope<R>::operator Polytope<typename Numeric::traits<R>::arithmetic_type> () const
@@ -166,7 +166,7 @@ namespace Ariadne {
       return Polyhedron<Rational>(Zonotope<Rational>(*this).vertices());
     }
     
-    
+  
     
     template<class R>
     tribool 
@@ -205,7 +205,7 @@ namespace Ariadne {
       return Rectangle<R>(this->centre().position_vector()+v);
     }
 
-
+  
     template<class R>
     ListSet<R,Zonotope>
     Zonotope<R>::subdivide() const 
@@ -276,7 +276,7 @@ namespace Ariadne {
     }
     
 
-
+  
 
    
    
@@ -316,7 +316,7 @@ namespace Ariadne {
         }
       }
     }
-    
+  
     
     
 /*
@@ -398,7 +398,7 @@ namespace Ariadne {
       //typedef typename Numeric::traits<R,R>::arithmetic_type F;
       typedef Rational F;
       const Zonotope<R>& z=*this;
-      assert(z.dimension()==pt.dimension());
+      check_dimension(z,pt,"Zonotope<R>::contains(Point<R>)");
       dimension_type d=z.dimension();
       dimension_type m=z.number_of_generators();
       
@@ -456,7 +456,7 @@ namespace Ariadne {
       return result;
     }
 
-    
+  
     
     /*!Set up linear program to solve 
      *   \f\[x=c+Ge;\ l\leq x\leq u;\ -1\leq e\leq1\f\].
@@ -474,7 +474,7 @@ namespace Ariadne {
     {
       //std::cerr << "Zonotope<R>::disjoint(const Zonotope<R>&, const Rectangle<R>&)" << std::endl;
       //std::cerr << r << "\n" << z << std::endl;
-      assert(z.dimension()==r.dimension());
+      check_dimension(z,r,"disjoint(Zonotope<R>,Rectangle<R>)");
       dimension_type d=z.dimension();
       size_type m=z.number_of_generators();
     
@@ -567,7 +567,7 @@ namespace Ariadne {
       return disjoint(z,r);
     }
     
-    
+  
 
     template<class R>
     tribool
@@ -674,7 +674,7 @@ namespace Ariadne {
       return Geometry::subset(A.operator Polyhedron<F>(),B.operator Polyhedron<F>());
     }
 
-   
+  
     
 
     template<class R> 
@@ -692,7 +692,7 @@ namespace Ariadne {
       LinearAlgebra::Matrix<R> new_generators=LinearAlgebra::concatenate_columns(A.generators(),B.generators());
       return Zonotope<F>(new_centre,new_generators);
     }
-   
+  
  
     
     template<class R> 
@@ -753,7 +753,7 @@ namespace Ariadne {
       return Zonotope< Interval<R> >(c,G);
     }
     
-    
+  
 
 /*    
     template<class R>
@@ -801,7 +801,7 @@ namespace Ariadne {
       throw std::domain_error("Not implemented");
     }
       
-    
+  
 
   }
 }

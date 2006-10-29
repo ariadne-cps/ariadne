@@ -150,7 +150,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorF
   typedef typename traits<R>::arithmetic_type F;
   typedef Interval<R> I;
   
-  assert(vector_field.dimension()==initial_set.dimension());
+  check_dimension(vector_field,initial_set);
 
   Geometry::Rectangle<R> b=this->estimate_flow_bounds(vector_field,initial_set.bounding_box(),step_size);
 
@@ -240,7 +240,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorF
   using namespace Geometry;
   using namespace System;
 
-  assert(vector_field.dimension()==initial_set.dimension());
+  check_dimension(vector_field,initial_set);
 
   const VectorField<R>& vf(vector_field);
   Zonotope<R> z=initial_set;
@@ -316,7 +316,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::reachability_step(const System::Vector
   using namespace Geometry;
   using namespace System;
 
-  assert(vector_field.dimension()==initial_set.dimension());
+  check_dimension(vector_field,initial_set);
 
   const VectorField<R>& vf(vector_field);
   Zonotope<R> z=initial_set;
@@ -392,7 +392,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::reachability_step(const System::Vector
   using namespace Geometry;
   using namespace System;
 
-  assert(vector_field.dimension()==initial_set.dimension());
+  check_dimension(vector_field,initial_set);
 
   const VectorField<R>& vf(vector_field);
   Zonotope<I> z=initial_set;

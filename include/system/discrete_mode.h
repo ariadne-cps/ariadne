@@ -76,17 +76,15 @@ class DiscreteMode {
      * This constructor initializes the object of the 
      * discrete mode class.
      * \param name is the name of the discrete mode.
-     * \param vfield is the mode's vector field.
+     * \param dynamic is the mode's vector field.
      * \param invariant is the mode's invariant.
      */
     DiscreteMode(const std::string &name, 
-                     const VectorField<R> &vfield, 
+                     const VectorField<R> &dynamic, 
                      const Geometry::Set<R> &invariant)
-      : _name(name), _dynamic(vfield.clone()), _invariant(invariant.clone()) 
+      : _name(name), _dynamic(dynamic.clone()), _invariant(invariant.clone()) 
     {
-      if (vfield.dimension()!=invariant.dimension()) {
-        throw std::invalid_argument("The invariant and the vector field have different space dimensions.");
-      } 
+      check_dimension(vfield,invariant);
       this->_set_id();
     }
       

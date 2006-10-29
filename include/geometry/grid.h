@@ -151,7 +151,7 @@ namespace Ariadne {
       /*! \brief The coordinate of the \a n th subdivision point in 
        * dimension \a d. */
       virtual real_type subdivision_coordinate(dimension_type d, index_type n) const {
-        assert(d<this->dimension());
+        check_index(*this,d);
         if(!(0<=n && uint(n)<_subdivision_coordinates[d].size())) {
           std::cerr << "d=" << d << ", n=" << n << ", size=" << _subdivision_coordinates[d].size() << std::endl;
           throw std::runtime_error("index does not lie in range of finite grid");
@@ -163,7 +163,7 @@ namespace Ariadne {
        * containing \a x. */
       virtual index_type subdivision_interval(dimension_type d, const real_type& x) const {
         typename std::vector<R>::const_iterator pos;
-        assert(d<this->dimension());
+        check_index(*this,d);
         if(x<_subdivision_coordinates[d].front() || x>_subdivision_coordinates[d].back()) {
           std::cerr << "d.front()=" << _subdivision_coordinates[d].front()
                     <<  " d.back()=" << _subdivision_coordinates[d].back()

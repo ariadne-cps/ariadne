@@ -31,6 +31,7 @@
 
 #include "../declarations.h"
 
+#include "../base/exceptions.h"
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 
@@ -124,7 +125,7 @@ namespace Ariadne {
       
       /*! \brief True if the map is invertible, which is equivalent to invertiblity of
        *  the matrix A. */
-      bool invertible() const { assert(false); return false; }
+      bool invertible() const { throw NotImplemented("bool AffineMap<R>::invertible() const"); }
   
       /*! \brief  The name of the system. */
       std::string name() const { return "AffineMap"; }

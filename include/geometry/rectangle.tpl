@@ -11,7 +11,7 @@
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
- *
+ *a
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -64,7 +64,7 @@ namespace Ariadne {
     Rectangle<R>
     Rectangle<R>::quadrant(const Combinatoric::BinaryWord& w) const 
     {
-      assert(w.size() == this->dimension());
+      check_dimension_size(*this,w);
       Rectangle<R> quadrant(this->dimension());
       
       for (size_type i=0; i!=this->dimension(); ++i) {
@@ -138,7 +138,7 @@ namespace Ariadne {
       state_type result(d); 
             
       if (i >= (size_type)(1<<d)) {
-         throw std::domain_error("Rectangle::vertex(i): Wrong vertex index.");
+        throw InvalidIndex("Rectangle::vertex(i): Invalid index");
       }
       
       for (size_type j=0; j<d; ++j) {
@@ -174,6 +174,7 @@ namespace Ariadne {
     subset(const Rectangle<R>& A, 
            const ListSet<R,Geometry::Rectangle>& B)
     {
+      check_dimension(A,B);
       return Geometry::subset(A, GridMaskSet<R>(B));
     }
     

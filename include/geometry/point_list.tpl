@@ -60,9 +60,7 @@ namespace Ariadne {
       if(this->_size==0) {
         _pts.resize(pt.dimension()+1,1);
       }
-      if(pt.dimension()!=this->dimension()) {
-        throw std::runtime_error("Cannot insert point into list of different dimension");
-      }
+      check_dimension(*this,pt,"PointList<R>::push_back(Point<R>)");
       if(this->size()==this->capacity()) {
         reserve(this->size()*2);
       }

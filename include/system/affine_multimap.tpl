@@ -43,7 +43,8 @@ namespace Ariadne {
     BS<R>
     AffineMultiMap<R,BS>::operator() (const Geometry::Point<R>& pt) const
     {
-      assert(false);
+      throw NotImplemented("BS<R> AffineMultiMap<R,BS>::operator() (const Geometry::Point<R>&) const");
+
       using namespace Ariadne::LinearAlgebra;
       typedef typename Numeric::traits<R>::arithmetic_type F;
       typedef typename Numeric::traits<R>::interval_type I;
@@ -59,7 +60,8 @@ namespace Ariadne {
     BS<R>
     AffineMultiMap<R,BS>::operator() (const BS<R>& bs) const
     {
-      assert(false);
+      throw NotImplemented("BS<R> AffineMultiMap<R,BS>::operator() (const BS<R>&) const");
+
       using namespace Ariadne::LinearAlgebra;
       using namespace Ariadne::Geometry;
 

@@ -279,7 +279,7 @@ namespace Ariadne {
       typedef Rational F;
       const Polytope<R>& A=ply;
       const PointList<R>& vertices=A.vertices();
-      assert(A.dimension()==pt.dimension());
+      check_dimension(ply,pt,"contains(Polytope<R>,Point<R>)");
       size_type d=A.dimension();
       size_type m=A.number_of_vertices();
 
@@ -330,17 +330,17 @@ namespace Ariadne {
      */
     template<class R>
     tribool 
-    disjoint(const Polytope<R>& A, const Rectangle<R>& B)
+    disjoint(const Polytope<R>& ply, const Rectangle<R>& rect)
     {
       std::cerr << "disjoint(const Polytope<R>&, const Rectangle<R>&)" << std::endl;
       //typedef typename Numeric::traits<R>::arithmetic_type F;
       typedef Rational F;
-      assert(A.dimension()==B.dimension());
-      size_type d=A.dimension();
-      size_type m=A.number_of_vertices();
+      check_dimension(ply,rect,"disjoint(Polytope<R>,Rectangle<R>)");
+      size_type d=ply.dimension();
+      size_type m=ply.number_of_vertices();
       
-      LinearAlgebra::Vector<F> ql=B.lower_corner().position_vector();
-      LinearAlgebra::Vector<F> qu=B.lower_corner().position_vector();
+      LinearAlgebra::Vector<F> ql=rect.lower_corner().position_vector();
+      LinearAlgebra::Vector<F> qu=rect.lower_corner().position_vector();
       
       LinearAlgebra::Matrix<F> T(2*d+m+2,2*d+2*m+1);
       
@@ -361,13 +361,13 @@ namespace Ariadne {
         if(ql(i)>=0) {
           T(i+d+m,i) = -1;
           for(size_type j=0; j!=m; ++j) {
-            T(i+d+m,j+d) = A.vertex(j)[i];
+            T(i+d+m,j+d) = ply.vertex(j)[i];
           }
           T(i+d+m,d+m)=ql(i);
         } else {
           T(i+d+m,i) = 1;
           for(size_type j=0; j!=m; ++j) {
-            T(i+d+m,j+d) = -A.vertex(j)[i];
+            T(i+d+m,j+d) = -ply.vertex(j)[i];
           }
           T(i+d+m,d+m)=-ql(i);
         }
@@ -414,7 +414,7 @@ namespace Ariadne {
       // Set up linear programming problem
       // Try to simultaneously solve A*s1-B*s2=0 with 1*s1=1 and 1*s2=1
       // variable, d+2 equations; 2 auxiliary variables
-      assert(A.dimension()==B.dimension());
+      check_dimension(A,B,"disjoint(Polytope<R>,Polytope<R>)");
       size_type d=A.dimension();
       size_type nv1=A.number_of_vertices();
       size_type nv2=B.number_of_vertices();

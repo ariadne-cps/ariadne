@@ -271,7 +271,7 @@ namespace Ariadne {
 
       /*! \brief Return a rectangle containing the set. */
       Rectangle<R> bounding_box() const {
-        assert(!this->empty());
+        if(this->empty()) { return Rectangle<R>(this->dimension()); }
         Rectangle<R> result=(*this)[0].bounding_box();
         for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
           Rectangle<R> bb=iter->bounding_box();

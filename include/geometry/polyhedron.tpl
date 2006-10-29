@@ -112,7 +112,9 @@ namespace Ariadne {
                               const LinearAlgebra::Vector<R>& b) 
       : _A(A), _b(b)
     {
-      assert(A.number_of_rows()==b.size());
+      if(A.number_of_rows()!=b.size()) { 
+        throw IncompatibleSizes("Polyhedron<R>::Polyhedron(Matrix<R>,Vector<R>)");
+      }
     }
     
     template<class R>

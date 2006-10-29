@@ -29,6 +29,7 @@
 
 namespace Ariadne {
 
+  
 class dbgstream;
 template<class T> dbgstream& operator<<(dbgstream& dbgs, const T& t);
 

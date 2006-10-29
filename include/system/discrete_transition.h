@@ -24,12 +24,12 @@
 #ifndef _ARIADNE_DISCRETE_TRANSITION_H
 #define _ARIADNE_DISCRETE_TRANSITION_H
 
-#include <cassert>
 #include <stdexcept>
 
 #include <boost/smart_ptr.hpp>
 #include <memory>
 
+#include "../base/exceptions.h"
 #include "../geometry/set.h"
 #include "../system/map.h"
 #include "../system/vector_field.h"
@@ -85,9 +85,9 @@ class DiscreteTransition
       : _source(&source), _destination(&dest), 
         _activation(act.clone()), _reset(reset.clone()) 
     { 
-      assert(source.dimension()==act.dimension());
-      assert(source.dimension()==reset.argument_dimension());
-      assert(dest.dimension()==reset.result_dimension());
+      check_dimension(act,source);
+      check_argument_dimension(reset,source);
+      check_result_dimension(reset,dest);
       this->_set_id(); 
     }
 

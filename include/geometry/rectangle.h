@@ -36,6 +36,7 @@
 #include "../base/array.h"
 #include "../base/iterator.h"
 #include "../base/tribool.h"
+#include "../base/exceptions.h"
 
 #include "../numeric/arithmetic.h"
 #include "../numeric/function.h"
@@ -168,9 +169,7 @@ namespace Ariadne {
       explicit Rectangle(const Point<R>& pt1, const Point<R>& pt2) 
         : _bounds(2*pt1.dimension())
       {
-        if (pt1.dimension()!=pt2.dimension()) {
-          throw std::domain_error("The parameters have different space dimensions");
-        }
+        check_dimension(pt1,pt2,"Rectangle<R>::Rectangle(Point<R>,Point<R>");
         for (size_type i=0; i!=this->dimension(); ++i) {
           this->set_lower_bound(i,Numeric::min_exact(pt1[i],pt2[i]));
           this->set_upper_bound(i,Numeric::max_exact(pt1[i],pt2[i]));
@@ -267,6 +266,7 @@ namespace Ariadne {
       //! \name Data access
       /*! \brief Returns the projection onto the \a i th coordinate. */
       Interval<R>& operator[] (dimension_type i) {
+        check_index(*this,i,"Rectangle<R>::operator[]");
         return reinterpret_cast<Interval<R>&>(this->_bounds[2*i]);
       }
       //IntervalReference<R> operator[] (dimension_type i) {
@@ -275,31 +275,37 @@ namespace Ariadne {
       
       /*! \brief The lower bound of the \a i th coordinate */
       const R& lower_bound(dimension_type i) const {
+        check_index(*this,i,"Rectangle<R>::upper_bound");
         return this->_bounds[2*i];
       }
       
       /*! \brief A reference to the lower bound of the \a i th coordinate */
       R& lower_bound(dimension_type i) {
+        check_index(*this,i,"Rectangle<R>::upper_bound");
         return this->_bounds[2*i];
       }
       
       /*! \brief The upper bound of the \a i th coordinate */
       const R& upper_bound(dimension_type i) const {
+        check_index(*this,i,"Rectangle<R>::upper_bound");
         return this->_bounds[2*i+1];
       }
       
       /*! \brief A reference to the upper bound of the \a i th coordinate */
       R& upper_bound(dimension_type i) {
+        check_index(*this,i,"Rectangle<R>::upper_bound");
         return this->_bounds[2*i+1];
       }
       
       /*! \brief The projection onto the \a i th coordinate. */
       const Interval<R>& operator[] (dimension_type i) const {
+        check_index(*this,i,"Rectangle<R>::operator[]");
         return reinterpret_cast<const Interval<R>&>(this->_bounds[2*i]);
       }
       
       /*! \brief The interval of values in the \a i th coordinate. */
       const Interval<R>& interval(dimension_type i) const {
+        check_index(*this,i,"Rectangle<R>::interval");
         return reinterpret_cast<const Interval<R>&>(this->_bounds[2*i]);
       }
       
@@ -344,17 +350,20 @@ namespace Ariadne {
       
       /*! \brief Sets the \a i th interval. */
       void set_interval(dimension_type i, Interval<R> x) {
+        check_index(*this,i,"Rectangle<R>::set_interval");
         this->set_lower_bound(i,x.lower());
         this->set_upper_bound(i,x.upper());
       }
       
       /*! \brief Sets the lower bound of the \a i th coordinate to \a r. */
       void set_lower_bound(dimension_type i, const R& l) {
+        check_index(*this,i,"Rectangle<R>::set_lower_bound");
         this->_bounds[2*i]=l;
       }
       
       /*! \brief Sets the upper bound of the \a i th coordinate to \a u. */
       void set_upper_bound(dimension_type i, const R& u) {
+        check_index(*this,i,"Rectangle<R>::set_upper_bound");
         this->_bounds[2*i+1]=u;
       }
 
@@ -553,9 +562,7 @@ namespace Ariadne {
     {
       tribool result=true;
       const Rectangle<R>& self=*this;
-      if (p.dimension()!=self.dimension()) {
-        throw std::domain_error("The point has a different dimension to the rectangle.");
-      }
+      check_dimension(*this,p,"Rectangle<R>::contains(Point<R>)");
       for (size_type i=0; i!=self.dimension(); ++i) {
         if(self.lower_bound(i)>p[i] || p[i]>self.upper_bound(i)) {
           return false;
@@ -573,9 +580,7 @@ namespace Ariadne {
     tribool 
     equal(const Rectangle<R>& A, const Rectangle<R>& B)
     {
-      if(A.dimension()!=B.dimension()) {
-        return false;
-      }
+      check_dimension(A,B,"equal(Rectangle<R>,Rectangle<R>)");
       for(size_type i=0; i!=A.dimension(); ++i) {
         if(A.lower_bound(i)!=B.lower_bound(i) || A.upper_bound(i)!=B.upper_bound(i)) {
           return false;
@@ -590,9 +595,7 @@ namespace Ariadne {
     disjoint(const Rectangle<R>& A, const Rectangle<R>& B)
     {
       tribool result=false;
-      if(A.dimension()!=B.dimension()) {
-        throw std::domain_error("disjoint(Rectangle,Rectangle): The two rectangles have different dimensions");
-      }
+      check_dimension(A,B,"disjoint(Rectangle<R>,Rectangle<R>)");
       for(size_type i=0; i!=A.dimension(); ++i) {
         if(A.lower_bound(i)>B.upper_bound(i) || A.upper_bound(i)<B.lower_bound(i)) {
           return true;
@@ -611,9 +614,7 @@ namespace Ariadne {
     subset(const Rectangle<R>& A, const Rectangle<R>& B)
     {
       tribool result=true;
-      if (A.dimension()!=B.dimension()) {
-        throw std::domain_error("subset(Rectangle,Rectangle): The two rectangles have different dimensions");
-      }
+      check_dimension(A,B,"subset(Rectangle<R>,Rectangle<R>)");
       for (size_type i=0; i!=A.dimension(); ++i) {
         if(A.lower_bound(i)<B.lower_bound(i) || A.upper_bound(i)>B.upper_bound(i)) {
           return false;
@@ -632,9 +633,7 @@ namespace Ariadne {
     closed_intersection(const Rectangle<R>& A, const Rectangle<R>& B)
     {
       Rectangle<R> C(A.dimension());
-      if (A.dimension()!=B.dimension()) {
-        throw std::domain_error("Cannot intersect with a rectangle of a different dimension.");
-      }
+      check_dimension(A,B,"closed_intersection(Rectangle<R>,Rectangle<R>)");
       for(size_type i=0; i != C.dimension(); ++i) {
         C[i]=Numeric::intersection(A[i],B[i]);
       }
@@ -647,9 +646,7 @@ namespace Ariadne {
     open_intersection(const Rectangle<R>& A, const Rectangle<R>& B)
     {
       Rectangle<R> C(A.dimension());
-      if (A.dimension()!=B.dimension()) {
-        throw std::domain_error("Cannot intersect with a rectangle of a different dimension.");
-      }
+      check_dimension(A,B,"open_intersection(Rectangle<R>,Rectangle<R>)");
       for(size_type i=0; i != C.dimension(); ++i) {
         C[i]=Numeric::intersection(A[i],B[i]);
         if(C[i].lower()>=C[i].upper()) {
@@ -665,9 +662,7 @@ namespace Ariadne {
     rectangular_hull(const Rectangle<R>& A, const Rectangle<R>& B)
     {
       Rectangle<R> C(A.dimension());
-      if (A.dimension()!=B.dimension()) {
-        throw std::domain_error("The two parameters have different space dimensions");
-      }      
+      check_dimension(A,B,"rectangular_hull(Rectangle<R>,Rectangle<R>)");
       for(size_type i=0; i != C.dimension(); ++i) {
         C[i]=Numeric::hull(A[i],B[i]);
       }
@@ -679,10 +674,7 @@ namespace Ariadne {
     minkowski_sum(const Rectangle<R1>& A, const Rectangle<R2>& B)
     {
       Rectangle<typename Numeric::traits<R1,R2>::arithmetic_type> C(A.dimension());
-      if (A.dimension()!=B.dimension()) {
-        throw std::domain_error(
-              "minkowski_sum: the two rectangles have different dimension.");
-      }
+      check_dimension(A,B,"minkowski_sum(Rectangle<R1>,Rectangle<R2>)");
       for(dimension_type i=0; i!=C.dimension(); ++i) {
         C.set_lower_bound(i,A.lower_bound(i)+B.lower_bound(i));
         C.set_lower_bound(i,A.upper_bound(i)+B.upper_bound(i));
@@ -695,10 +687,7 @@ namespace Ariadne {
     minkowski_difference(const Rectangle<R1>& A, const Rectangle<R2>& B)
     {
       Rectangle<typename Numeric::traits<R1,R2>::arithmetic_type> C(A.dimension());
-      if (A.dimension()!=B.dimension()) {
-        throw std::domain_error(
-              "minkowski_difference: the two rectangles have different dimension.");
-      }
+      check_dimension(A,B,"minkowski_difference(Rectangle<R1>,Rectangle<R2>)");
       for(dimension_type i=0; i!=C.dimension(); ++i) {
         C.set_lower_bound(i,A.lower_bound(i)-B.lower_bound(i));
         C.set_lower_bound(i,A.upper_bound(i)-B.upper_bound(i));
@@ -722,8 +711,8 @@ namespace Ariadne {
     operator-(const Geometry::Rectangle<R>& r1, 
               const Geometry::Rectangle<R>& r2)
     {
-      assert(r1.dimension()==r2.dimension());
-      
+      check_dimension(r1,r2,"operator-(Rectangle<R1>,Rectangle<R2>)");
+       
       return r1.position_vectors()-r2.position_vectors();
     }
 
@@ -733,7 +722,8 @@ namespace Ariadne {
     operator+(const Geometry::Rectangle<R>& r, 
               const boost::numeric::ublas::vector_expression<E>& v)
     {
-      const E& ev=v();
+      check_dimension_size(r,v,"operator+(Rectangle<R1>,Vector<R2>)");
+       const E& ev=v();
       LinearAlgebra::Vector< Interval<R> > iv=ev;
       return r+iv; 
     }
@@ -745,8 +735,8 @@ namespace Ariadne {
               const LinearAlgebra::Vector<R>& v)
     {
       Geometry::Rectangle<R> result(r.dimension());
-      assert(r.dimension()==v.size());
-      
+      check_dimension_size(r,v,"operator+(Rectangle<R1>,Vector<R2>)");
+       
       for(size_type i=0; i!=result.dimension(); ++i) {
         result.set_interval(i,r[i]+v(i));
       }
@@ -760,7 +750,7 @@ namespace Ariadne {
               const LinearAlgebra::Vector< Interval<R> >& v)
     {
       Geometry::Rectangle<R> result(r.dimension());
-      assert(r.dimension()==v.size());
+      check_dimension_size(r,v,"operator+(Rectangle<R>,Vector<I>)");
       
       for(size_type i=0; i!=result.dimension(); ++i) {
         result.set_interval(i,r[i]+v(i));
@@ -775,7 +765,7 @@ namespace Ariadne {
               const LinearAlgebra::Vector<R>& v)
     {
       Geometry::Rectangle<R> result(r.dimension());
-      assert(r.dimension()==v.size());
+      check_dimension_size(r,v,"operator-(Rectangle<R>,Vector<R>)");
       
       for(size_type i=0; i!=result.dimension(); ++i) {
         result.set_interval(i,r[i]-v(i));
@@ -790,7 +780,7 @@ namespace Ariadne {
               const LinearAlgebra::Vector< Interval<R> >& v)
     {
       Geometry::Rectangle<R> result(r.dimension());
-      assert(r.dimension()==v.size());
+      check_dimension_size(r,v,"operator-(Rectangle<R>,Vector<I>)");
       
       for(size_type i=0; i!=result.dimension(); ++i) {
         result.set_interval(i,r[i]-v(i));
@@ -801,14 +791,12 @@ namespace Ariadne {
     template<class R>
     inline
     Geometry::Rectangle<R> 
-    scale(const Geometry::Rectangle<R>& r, const R& scale_factor) {
-
+    scale(const Geometry::Rectangle<R>& r, const R& scale_factor) 
+    {
       Geometry::Rectangle<R> result(r.dimension());
-      
       for(size_type i=0; i!=result.dimension(); ++i) {
         result.set_interval(i,scale_factor*r[i]);
       }
-
       return result;
     }
     

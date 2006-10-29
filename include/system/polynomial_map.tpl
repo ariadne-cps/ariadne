@@ -175,7 +175,7 @@ namespace Ariadne {
     typename Monomial<R>::result_type 
     Monomial<R>::apply(const Geometry::Point<R>& s) const 
     {
-      assert(s.dimension() == this->argument_dimension());
+      check_argument_dimension(*this,s,"Monomial<R>::apply(Point<R>)");
       result_type result=_coefficient;
       for(size_type k=0; k!=this->argument_dimension(); ++k) {
         result *= pow_approx(s[k],_multi_index[k]);
@@ -187,7 +187,7 @@ namespace Ariadne {
     Interval<R>
     Monomial<R>::apply(const Geometry::Rectangle<R>& r) const 
     {
-      assert(r.dimension() == this->argument_dimension());
+      check_argument_dimension(*this,r,"Monomial<R>::apply(Rectangle<R>)");
       Interval<R> result(this->_coefficient);
       for(size_type k=0; k!=this->argument_dimension(); ++k) {
         result *= pow(r[k],_multi_index[k]);
@@ -201,7 +201,7 @@ namespace Ariadne {
     Polynomial<R>::apply(const Geometry::Point<R>& s) const 
     {
       //std::cerr << "Polynomial<R>::apply(const Geometry::Point<R>& s) const " << std::endl;
-      assert(s.dimension() == this->argument_dimension());
+      check_argument_dimension(*this,s,"Polynomial<R>::apply(Point<R>)");
       F result=0;
       for(size_type j=0; j!=_terms.size(); ++j) {
         result += _terms[j].apply(s);
@@ -213,7 +213,7 @@ namespace Ariadne {
     Interval<R>
     Polynomial<R>::apply(const Geometry::Rectangle<R>& r) const 
     {
-      assert(r.dimension() == this->argument_dimension());
+      check_argument_dimension(*this,r,"PolynomialMap<R>::apply(Rectangle<R>)");
       Interval<R> result(R(0));
       for(size_type j=0; j!=_terms.size(); ++j) {
         result += _terms[j].apply(r);
@@ -226,7 +226,7 @@ namespace Ariadne {
     typename PolynomialMap<R>::result_type
     PolynomialMap<R>::apply(const Geometry::Point<R>& s) const 
     {
-      assert(s.dimension() == this->argument_dimension());
+      check_argument_dimension(*this,s,"PolynomialMap<R>::apply(Point<R>)");
       Geometry::Point<F> result(this->result_dimension());
       for(size_type i=0; i!=this->result_dimension(); ++i) {
         result[i] = _components[i].apply(s);
@@ -238,7 +238,7 @@ namespace Ariadne {
     Geometry::Rectangle<R>
     PolynomialMap<R>::apply(const Geometry::Rectangle<R>& r) const 
     {
-      assert(r.dimension() == this->argument_dimension());
+      check_argument_dimension(*this,r,"PolynomialMap<R>::apply(Rectangle<R>)");
       Geometry::Rectangle<R> result(this->result_dimension());
       for(size_type i=0; i!=this->result_dimension(); ++i) {
         result[i] = _components[i].apply(r);

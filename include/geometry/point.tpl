@@ -79,7 +79,7 @@ namespace Ariadne {
       } else if(c=='[') {
         Utility::read_vector(is, v, '[', ']');
       } else {
-        throw std::runtime_error("Invalid point input");
+        throw invalid_input("Invalid point input");
       }
       last_size = v.size();
 

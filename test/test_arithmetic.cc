@@ -54,10 +54,10 @@ int main() {
 
   test_boost_rounding();
   
-  test_arithmetic<Float64>();
-  test_arithmetic<MPFloat>();
   test_arithmetic<Rational>();
-  
+  test_arithmetic<MPFloat>();
+  test_arithmetic<Float64>();
+ 
   cerr << "INCOMPLETE ";
 
   return 0;

@@ -44,15 +44,15 @@ namespace Ariadne {
       typedef R real_type;
       typedef Point<R> state_type;
      
+      virtual ~Set() { };
       virtual Set<R>* clone() const = 0;
      
-      virtual ~Set() = 0;
       virtual dimension_type dimension() const = 0;
-      virtual tribool contains(const Point<R>&) = 0;
+      virtual tribool contains(const Point<R>&) const = 0;
      
-      virtual Rectangle<R> bounding_box() = 0;
-      virtual tribool disjoint(const Rectangle<R>&) = 0;
-      virtual tribool superset(const Rectangle<R>&) = 0;     
+      virtual Rectangle<R> bounding_box() const = 0;
+      virtual tribool disjoint(const Rectangle<R>&) const = 0;
+      virtual tribool superset(const Rectangle<R>&) const = 0;     
     };
      
     template<class R> inline tribool disjoint(const Set<R>& A, const Rectangle<R>& B) {
@@ -66,6 +66,33 @@ namespace Ariadne {
     template<class R> inline tribool subset(const Rectangle<R>& A, const Set<R>& B) {
       return B.superset(A);
     }
+    
+  }
+}
+
+
+
+#include "geometry/polyhedron.h"
+
+namespace Ariadne {
+  namespace Geometry {
+    
+    template<class R>
+    class PolyhedralSet : public Set<R>, public Polyhedron<R>
+    {
+     public:
+      PolyhedralSet<R>(const Polyhedron<R>& plhd) : Set<R>(), Polyhedron<R>(plhd) { }
+      
+      virtual ~PolyhedralSet<R>() { }
+      virtual PolyhedralSet<R>* clone() const { return new PolyhedralSet<R>(*this); }
+      virtual dimension_type dimension() const { return Polyhedron<R>::dimension(); }
+      virtual tribool contains(const Point<R>& pt) const { return Polyhedron<R>::contains(pt); }
+      virtual Rectangle<R> bounding_box() const { return Polyhedron<R>::bounding_box(); }      
+      virtual tribool disjoint(const Rectangle<R>& r) const { 
+        return Geometry::disjoint(r,static_cast<const Polyhedron<R>&>(*this)); }
+      virtual tribool superset(const Rectangle<R>& r) const { 
+        return Geometry::subset(r,static_cast<const Polyhedron<R>&>(*this)); }
+    };
     
   }
 }

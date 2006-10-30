@@ -69,19 +69,19 @@ class DiscreteTransition
      * This constructor initializes the object of the discrete 
      * transitioni class.
      * @see LeavingDiscreteTransition()
+     * \param reset is the reset of the current discrete 
+     * transition.
+     * \param act is the activation region of the current 
+     * discrete transition.
      * \param source is the source of the current discrete 
      * transition.
      * \param dest is the destination of the current discrete 
      * transition.
-     * \param act is the activation region of the current 
-     * discrete transition.
-     * \param reset is the reset of the current discrete 
-     * transition.
-     */
-    DiscreteTransition(const DiscreteMode<R> &source, 
-                       const DiscreteMode<R> &dest, 
+      */
+    DiscreteTransition(const Map<R> &reset,
                        const Geometry::Set<R> &act, 
-                       const Map<R> &reset)
+                       const DiscreteMode<R> &source, 
+                       const DiscreteMode<R> &dest)
       : _source(&source), _destination(&dest), 
         _activation(act.clone()), _reset(reset.clone()) 
     { 
@@ -91,6 +91,7 @@ class DiscreteTransition
       this->_set_id(); 
     }
 
+  
   
     /*! \brief Copy constructor.
      *
@@ -159,6 +160,20 @@ class DiscreteTransition
     }
     
   private:
+    // Construct from shared pointers (for internal use)
+    DiscreteTransition(const boost::shared_ptr< Map<R> > reset,
+                       const boost::shared_ptr< Geometry::Set<R> > act, 
+                       const DiscreteMode<R> &source, 
+                       const DiscreteMode<R> &dest)
+      : _source(&source), _destination(&dest), 
+        _activation(act), _reset(reset) 
+    { 
+      check_dimension(act,source);
+      check_argument_dimension(reset,source);
+      check_result_dimension(reset,dest);
+      this->_set_id(); 
+    }
+
     void _set_id() { this->_id=_next_transition_id; ++_next_transition_id; }
 };
 

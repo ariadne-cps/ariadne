@@ -26,11 +26,15 @@
 
 #include "real_typedef.h"
 
+template<class R> void export_solve();
 template<class R> void export_apply();
 template<class R> void export_integrate();
+template<class R> void export_hybrid_evolver();
 
 BOOST_PYTHON_MODULE(evaluation)
 {
+  export_solve<Ariadne::Real>();
   export_apply<Ariadne::Real>();
   export_integrate<Ariadne::Real>();
+  export_hybrid_evolver<Ariadne::Real>();
 }

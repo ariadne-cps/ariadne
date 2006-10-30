@@ -70,7 +70,7 @@ class DiscreteMode {
     boost::shared_ptr< const Geometry::Set<R> > _invariant;
   
   public:  
-  
+      
     /*! \brief Construct a discrete mode.
      *  
      * This constructor initializes the object of the 
@@ -80,14 +80,31 @@ class DiscreteMode {
      * \param invariant is the mode's invariant.
      */
     DiscreteMode(const std::string &name, 
-                     const VectorField<R> &dynamic, 
-                     const Geometry::Set<R> &invariant)
+                 const VectorField<R> &dynamic, 
+                 const Geometry::Set<R> &invariant)
       : _name(name), _dynamic(dynamic.clone()), _invariant(invariant.clone()) 
     {
       check_dimension(dynamic,invariant);
       this->_set_id();
     }
       
+    /*! \brief Construct an anonymous discrete mode.
+     *  
+     * This constructor initializes the object of the 
+     * discrete mode class.
+     * \param dynamic is the mode's vector field.
+     * \param invariant is the mode's invariant.
+     */
+    DiscreteMode(const VectorField<R> &dynamic, 
+                 const Geometry::Set<R> &invariant)
+      : _name(), _dynamic(dynamic.clone()), _invariant(invariant.clone()) 
+    {
+      check_dimension(dynamic,invariant);
+      this->_set_id();
+    }
+    
+    
+    
     /*! \brief Copy constructor. */
     DiscreteMode(const DiscreteMode<R>& orig)
       : _id(orig._id), _name(orig._name), _dynamic(orig._dynamic),
@@ -105,7 +122,7 @@ class DiscreteMode {
     }
 
     /*! \brief The discrete mode's identifier. */
-    inline const id_type& id() const {
+    inline id_type id() const {
       return this->_id;
     }
     
@@ -130,6 +147,15 @@ class DiscreteMode {
 
     
    private:
+    // Construct from objects managed by shared pointers (for internal use)
+    DiscreteMode(const boost::shared_ptr< VectorField<R> > dynamic, 
+                 const boost::shared_ptr< Geometry::Set<R> > invariant)
+      : _name(), _dynamic(dynamic), _invariant(invariant) 
+    {
+      check_dimension(dynamic,invariant);
+      this->_set_id();
+    }
+    
     // Set the identifier of the mode.
     void _set_id() { this->_id=_next_mode_id; ++_next_mode_id; }
 };

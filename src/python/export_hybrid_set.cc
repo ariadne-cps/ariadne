@@ -1,8 +1,7 @@
 /***************************************************************************
- *            python/system_module.cc
+ *            python/export_hybrid_set.cc
  *
- *  21 October 2005
- *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
+ *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -12,7 +11,7 @@
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  This program is diself_ns::stributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
@@ -22,29 +21,27 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <boost/python.hpp>
-
 #include "real_typedef.h"
 
-template<class R> void export_map();
-template<class R> void export_affine_map();
-template<class R> void export_affine_multimap();
-template<class R> void export_polynomial_map();
- 
-template<class R> void export_vector_field();
-template<class R> void export_affine_vector_field();
+#include "geometry/hybrid_set.h"
 
-template<class R> void export_hybrid_automaton();
+using namespace Ariadne;
+using namespace Ariadne::Geometry;
 
-BOOST_PYTHON_MODULE(system)
+#include <boost/python.hpp>
+using namespace boost::python;
+return_value_policy<reference_existing_object> return_reference_existing_object;
+
+template<class R>
+void export_hybrid_set() 
 {
-  export_map<Ariadne::Real>();
-  export_affine_map<Ariadne::Real>();
-  export_affine_multimap<Ariadne::Real>();
-  export_polynomial_map<Ariadne::Real>();
+ 
+  class_< HybridGridMaskSet<R> >("HybridGridMaskSet",init<size_type,const FiniteGrid<R>&>())
+    .def("__len__",&HybridGridMaskSet<R>::number_of_discrete_components)
+    .def("__getitem__",(const GridMaskSet<R>&(HybridGridMaskSet<R>::*)(const size_type& i)const)
+                        &HybridGridMaskSet<R>::operator[],return_reference_existing_object)
+  ;
   
-  export_vector_field<Ariadne::Real>();
-  export_affine_vector_field<Ariadne::Real>();
-
-  export_hybrid_automaton<Ariadne::Real>();
 }
+
+template void export_hybrid_set<Real>();

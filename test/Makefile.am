@@ -17,6 +17,7 @@ check_PROGRAMS = \
 	test_rectangle test_zonotope test_parallelotope test_simplex \
 	test_polytope test_polyhedron \
 	test_list_set test_grid_set test_partition_tree_set \
+	test_hybrid_automaton \
 	test_newton test_apply test_integration_step test_chainreach \
 	test_epsfstream test_chompfstream 
 
@@ -48,6 +49,7 @@ test_parallelotope_SOURCES=test_parallelotope.cc
 test_simplex_SOURCES=test_simplex.cc
 test_polytope_SOURCES=test_polytope.cc
 test_polyhedron_SOURCES=test_polyhedron.cc
+test_hybrid_automaton_SOURCES=test_hybrid_automaton.cc
 test_newton_SOURCES=test_newton.cc
 test_apply_SOURCES=test_apply.cc
 test_integration_step_SOURCES=test_integration_step.cc

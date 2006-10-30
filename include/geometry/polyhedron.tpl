@@ -126,7 +126,7 @@ namespace Ariadne {
     
     template<class R>
     Polyhedron<R>::Polyhedron(const Rectangle<R>& r)
-      : _A(2*r.dimension(),r.dimension()), _b(r.dimension())
+      : _A(2*r.dimension(),r.dimension()), _b(2*r.dimension())
     {
       dimension_type n=r.dimension();
       for(size_type i=0; i!=n; ++i) {

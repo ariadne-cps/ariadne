@@ -1,9 +1,8 @@
 /***************************************************************************
- *            automaton.h
+ *            hybrid_automaton.h
  *
- *  Tue Mar 23 14:12:31 2004
- *  Copyright  2004  Alberto Casagrande
- *  casagrande@dimi.uniud.it
+ *  Copyright  2004-6  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it  Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -119,24 +118,33 @@ class HybridAutomaton
    * \param act is the arc's activation region.
    * \param reset is the discrete arc's reset.
    */
-  inline void add_transition(DiscreteMode<R> &source, 
-                             DiscreteMode<R> &dest, 
+  inline void add_transition(const Map<R> &reset,
                              const Geometry::Set<R> &act,
-                             const Map<R> &reset) 
+                             DiscreteMode<R> &source, 
+                             DiscreteMode<R> &dest) 
   {
     this->add_mode(source);
     this->add_mode(dest);
     
-    DiscreteTransition<R> arc(source,dest,act,reset);
+    DiscreteTransition<R> arc(reset,act,source,dest);
     
     this->_transitions.push_back(arc);
   }
   
+  /*! \brief The list of discrete modes. */
+  inline const std::vector< DiscreteMode<R> >& modes() const 
+  {
+    return this->_modes;
+  }
   
-  /*! \brief Returns the hybrid automaton's name.
-   *
-   * \return The name of the hybrid automaton.
-   */
+  /*! \brief The list of discrete transitions. */
+  inline const std::vector< DiscreteTransition<R> >& transitions() const 
+  {
+    return this->_transitions;
+  }
+  
+  
+  /*! \brief Returns the hybrid automaton's name. */
   inline const std::string &name() const{ 
     return this->_name; 
   }

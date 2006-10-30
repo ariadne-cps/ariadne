@@ -30,6 +30,7 @@
 #include <iostream>
 
 #include "../declarations.h"
+#include "../geometry/grid_set.h"
 #include "../system/hybrid_automaton.h"
 
 namespace Ariadne {  
@@ -43,10 +44,8 @@ class HybridGridMaskSet
 {
  public:
   /*! \brief Construct a set for \a n discrete modes, each based on the same cells in the same grid. */
-  HybridGridMaskSet(size_type n, const FiniteGrid<R>& fg) {
-    GridMaskSet<R> gms(fg);
-    this->_component_sets(n,gms);
-  }
+  HybridGridMaskSet(size_type n, const FiniteGrid<R>& fg) 
+    : _component_sets(n,GridMaskSet<R>(fg)) { }
     
  
   /*! \brief Construct a set for \a n discrete modes, based on a list of finite grids. */
@@ -58,6 +57,7 @@ class HybridGridMaskSet
     }
   }
  
+  size_type number_of_discrete_components() const { return _component_sets.size(); }
   GridMaskSet<R>& operator[] (const size_type& i) { return _component_sets[i]; }
   const GridMaskSet<R>& operator[] (const size_type& i) const { return _component_sets[i]; }
  private:

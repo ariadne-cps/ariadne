@@ -79,17 +79,20 @@ GEOMETRY_MODULE_SRC = geometry_module.cc \
 	export_polyhedron.cc \
 	export_list_set.cc \
 	export_grid_set.cc \
-	export_partition_tree_set.cc 
+	export_partition_tree_set.cc \
+	export_hybrid_set.cc 
 
 SYSTEM_MODULE_SRC = system_module.cc \
 	export_map.cc export_affine_map.cc export_polynomial_map.cc \
 	export_affine_multimap.cc \
-	export_vector_field.cc export_affine_vector_field.cc 
+	export_vector_field.cc export_affine_vector_field.cc \
+	export_hybrid_automaton.cc 
 
 EVALUATION_MODULE_SRC = evaluation_module.cc \
 	export_solve.cc \
 	export_apply.cc \
-	export_integrate.cc
+	export_integrate.cc \
+	export_hybrid_evolver.cc
 
 OUTPUT_MODULE_SRC = output_module.cc \
 	export_postscript_output.cc

@@ -42,6 +42,7 @@ namespace Evaluation {
 template< class R >
 class HybridEvolver
 {
+ public:
   HybridEvolver(Applicator<R>& applicator, Integrator<R>& integrator);
   
   Geometry::HybridGridMaskSet<R> lower_reach(const System::HybridAutomaton<R>&, 

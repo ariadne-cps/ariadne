@@ -32,7 +32,7 @@
 
 #include "../declarations.h"
 #include "../base/array.h"
-#include "../base/exceptions.h"
+#include "../exceptions.h"
 #include "../numeric/numerical_traits.h"
 #include "../linear_algebra/multi_index.h"
 

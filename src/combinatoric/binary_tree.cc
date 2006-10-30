@@ -205,7 +205,7 @@ namespace Ariadne {
     std::ostream& 
     operator<<(std::ostream& os, const BinaryTree& t) {
       os << "BinaryTree( words=";
-      Utility::write_sequence(os, t.begin(), t.end());
+      Base::write_sequence(os, t.begin(), t.end());
       return os << ", sequence=" << t._array << " )"; 
     }
     

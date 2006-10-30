@@ -35,7 +35,7 @@
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 
 #include "../declarations.h"
-#include "../base/exceptions.h"
+#include "../exceptions.h"
 #include "../numeric/integer.h"
 #include "../numeric/interval.h"
 

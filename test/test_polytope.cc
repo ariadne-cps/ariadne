@@ -30,9 +30,6 @@
 
 #include <ppl.hh>
 
-#include "declarations.h"
-#include "base/exceptions.h"
-#include "base/utility.h"
 #include "numeric/float64.h"
 #include "numeric/mpfloat.h"
 #include "numeric/rational.h"

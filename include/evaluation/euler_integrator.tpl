@@ -37,6 +37,7 @@
 #include "euler_integrator.h"
 
 #include "../base/array.h"
+#include "../debug.h"
 #include "../numeric/arithmetic.h"
 #include "../numeric/interval.h"
 

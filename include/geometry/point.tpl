@@ -75,9 +75,9 @@ namespace Ariadne {
       is >> c;
       is.putback(c);
       if(c=='(') {
-        Utility::read_vector(is, v, '(', ')');
+        Base::read_vector(is, v, '(', ')');
       } else if(c=='[') {
-        Utility::read_vector(is, v, '[', ']');
+        Base::read_vector(is, v, '[', ']');
       } else {
         throw invalid_input("Invalid point input");
       }

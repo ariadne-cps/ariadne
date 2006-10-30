@@ -45,10 +45,6 @@ namespace Ariadne {
  */
 namespace Base {}
   
-/*! \brief General-purpose iterators.
- */
-namespace Iterator {}
-  
 /*! \brief Numerical types, arithmetic, real functions and interval functions.
  */
 namespace Numeric {}

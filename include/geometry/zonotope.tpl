@@ -31,7 +31,7 @@
 #include "zonotope.h"
 
 #include "../base/array.h"
-#include "../base/exceptions.h"
+#include "../exceptions.h"
 #include "../numeric/conversion.h"
 
 #include "../linear_algebra/vector.h"

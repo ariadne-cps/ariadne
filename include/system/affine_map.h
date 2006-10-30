@@ -31,7 +31,7 @@
 
 #include "../declarations.h"
 
-#include "../base/exceptions.h"
+#include "../exceptions.h"
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 

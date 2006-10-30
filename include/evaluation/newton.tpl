@@ -23,15 +23,11 @@
  
 #include "newton.h"
 
+#include "../debug.h"
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
 
 #include "../system/vector_field.h"
-
-
-namespace Ariadne {
-  static int verbosity=0;
-}
 
 
 
@@ -43,26 +39,26 @@ Ariadne::Evaluation::interval_newton(const System::VectorField<R>& f,
                                      uint max_steps)
 {
   uint n=max_steps;
-  if(verbosity>0) { std::cerr << "verbosity=" << verbosity << "\n"; }
+  if(verbosity>1) { std::cerr << "verbosity=" << verbosity << "\n"; }
   Geometry::Rectangle<R> r=x;
   while(true) {
-    if(verbosity>0) { std::cerr << "Testing for root in " << r << "\n"; }
-    if(verbosity>0) { std::cerr << "  e=" << r.radius() << "  r=" << r << std::endl; }
+    if(verbosity>1) { std::cerr << "Testing for root in " << r << "\n"; }
+    if(verbosity>1) { std::cerr << "  e=" << r.radius() << "  r=" << r << std::endl; }
     Geometry::Point<R> m=r.centre();
-    if(verbosity>0) { std::cerr << "  m=" << m << std::endl; }
+    if(verbosity>1) { std::cerr << "  m=" << m << std::endl; }
     Geometry::Rectangle<R> mr(m);
-    if(verbosity>0) { std::cerr << "  mr=" << mr << std::endl; }
+    if(verbosity>1) { std::cerr << "  mr=" << mr << std::endl; }
     LinearAlgebra::Vector< Interval<R> > w=f(mr);
-    if(verbosity>0) { std::cerr << "  f(mr)=" << w << std::endl; }
+    if(verbosity>1) { std::cerr << "  f(mr)=" << w << std::endl; }
     LinearAlgebra::Matrix< Interval<R> > A=f.jacobian(r);
-    if(verbosity>0) { std::cerr << "  Df(r)=" << A << std::endl; }
+    if(verbosity>1) { std::cerr << "  Df(r)=" << A << std::endl; }
     LinearAlgebra::Matrix< Interval<R> > Ainv=A.inverse();
-    if(verbosity>0) { std::cerr << "  inverse(Df(r))=" << Ainv << std::endl; }
+    if(verbosity>1) { std::cerr << "  inverse(Df(r))=" << Ainv << std::endl; }
     LinearAlgebra::Vector< Interval<R> > dr=Ainv * w;
-    if(verbosity>0) { std::cerr << "  dr=" << dr << std::endl; }
+    if(verbosity>1) { std::cerr << "  dr=" << dr << std::endl; }
     Geometry::Rectangle<R> nr= mr - dr;
-    if(verbosity>0) { std::cerr << "  nr=" << nr << std::endl; } 
-    if(verbosity>0) {
+    if(verbosity>1) { std::cerr << "  nr=" << nr << std::endl; } 
+    if(verbosity>1) {
       std::cerr << "  f(x)=" << f(r) << std::flush;
       std::cerr << "  f(m)=" << approximate_value(f(mr)) << std::flush;
       std::cerr << "  Df(x) =" << A << "  inv=" << inverse(A) << "  I=" << A*inverse(A) << std::flush;

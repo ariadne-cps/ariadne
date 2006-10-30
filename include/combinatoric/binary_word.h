@@ -75,7 +75,7 @@
 #include <stdexcept>
 
 #include "../declarations.h"
-#include "../base/exceptions.h"
+#include "../exceptions.h"
 
 namespace Ariadne {
   namespace Combinatoric {    

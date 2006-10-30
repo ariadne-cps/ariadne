@@ -33,7 +33,7 @@
 
 #include "../base/stlio.h"
 #include "../base/array.h"
-#include "../base/exceptions.h"
+#include "../exceptions.h"
 #include "../numeric/interval.h"
 
 #include "../linear_algebra/vector.h"

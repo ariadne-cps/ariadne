@@ -28,8 +28,6 @@
 
 #include "ariadne.h"
 #include "real_typedef.h"
-#include "base/exceptions.h"
-#include "base/utility.h"
 #include "combinatoric/binary_word.h"
 #include "numeric/numerical_types.h"
 #include "geometry/point.h"

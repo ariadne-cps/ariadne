@@ -378,7 +378,7 @@ namespace Ariadne {
     Constraint<R>::write(std::ostream& os) const
     {
       os << "Constraint(a=";
-      Utility::write_sequence(os,this->_a,this->_a+this->_d);
+      Base::write_sequence(os,this->_a,this->_a+this->_d);
       os << ",b=" << *this->_b << ")";
       return os;
     }

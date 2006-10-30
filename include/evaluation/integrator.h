@@ -33,8 +33,6 @@
 
 namespace Ariadne {
   
-  extern int verbosity;
-
   namespace Evaluation {
    
     /*! \brief %Base class for integration schemes. 

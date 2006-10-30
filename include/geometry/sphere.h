@@ -33,7 +33,7 @@
 #include "../declarations.h"
 
 #include "../base/array.h"
-#include "../base/exceptions.h"
+#include "../exceptions.h"
 #include "../geometry/point.h"
 
 namespace Ariadne {

@@ -36,7 +36,7 @@
 
 #include "../base/array.h"
 #include "../base/iterator.h"
-#include "../base/exceptions.h"
+#include "../exceptions.h"
 
 #include "../numeric/interval.h"
 #include "../combinatoric/array_operations.h"

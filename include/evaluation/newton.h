@@ -33,8 +33,6 @@
 #include <string>
 
 #include "../declarations.h"
-
-#include "../base/exceptions.h"
 #include "solver.h"
 
 namespace Ariadne {

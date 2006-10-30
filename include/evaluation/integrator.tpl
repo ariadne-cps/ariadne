@@ -38,7 +38,8 @@
 #include "../declarations.h"
 
 #include "../base/array.h"
-#include "../base/exceptions.h"
+#include "../exceptions.h"
+#include "../debug.h"
 
 #include "../numeric/rational.h"
 #include "../numeric/interval.h"

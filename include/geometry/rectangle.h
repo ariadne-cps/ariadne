@@ -36,7 +36,7 @@
 #include "../base/array.h"
 #include "../base/iterator.h"
 #include "../base/tribool.h"
-#include "../base/exceptions.h"
+#include "../exceptions.h"
 
 #include "../numeric/arithmetic.h"
 #include "../numeric/function.h"

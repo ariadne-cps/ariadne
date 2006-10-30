@@ -881,7 +881,7 @@ namespace Ariadne {
     operator>>(std::istream& is, LatticePoint& lpt)
     {
       std::vector<int> v;
-      Utility::read_vector(is, v, '(', ')');
+      Base::read_vector(is, v, '(', ')');
       lpt=LatticePoint(v.size());
       for(dimension_type i=0; i!=lpt.dimension(); ++i) {
         lpt[i]=v[i];
@@ -894,7 +894,7 @@ namespace Ariadne {
     {
       /* Representation as a literal (l1,l2,...,ln) */
       std::vector<int> v;
-      Utility::read_vector(is, v, '(', ')');
+      Base::read_vector(is, v, '(', ')');
       IndexArray l(v.size());
       for(size_type i=0; i!=v.size(); ++i) {
         l[i]=v[i];
@@ -988,13 +988,13 @@ namespace Ariadne {
     std::ostream& 
     operator<<(std::ostream& os, const LatticeCellListSet& lcls) 
     {
-      return Utility::write_sequence(os,lcls.begin(),lcls.end(),'[',']',',');
+      return Base::write_sequence(os,lcls.begin(),lcls.end(),'[',']',',');
     }
     
     std::ostream& 
     operator<<(std::ostream& os, const LatticeBlockListSet& lbls) 
     {
-      return Utility::write_sequence(os,lbls.begin(),lbls.end(),'[',']',',');
+      return Base::write_sequence(os,lbls.begin(),lbls.end(),'[',']',',');
     }
     
     

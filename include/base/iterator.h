@@ -35,7 +35,11 @@
 #include "../base/array.h"
 
 namespace Ariadne {
-  namespace Iterator {
+  namespace Base {
+
+    //! \name Iterators
+    //@{
+   
     /*! \brief An iterator traversing a subset of values defined by a mask */
     template<class Base, class Mask>
     class mask_iterator
@@ -203,10 +207,10 @@ namespace Ariadne {
       }
     }
     
+    //@}
     
-  } // namespace Iterator
+  } // namespace Base
     
-  using namespace Iterator;
 } // namespace Ariadne
   
   

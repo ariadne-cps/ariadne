@@ -28,8 +28,6 @@
 #include "real_typedef.h"
 
 #include "ariadne.h"
-#include "base/exceptions.h"
-#include "base/utility.h"
 #include "geometry/point.h"
 #include "geometry/simplex.h"
 #include "geometry/polyhedron.h"

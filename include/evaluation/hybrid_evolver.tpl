@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "../base/exceptions.h"
+#include "../exceptions.h"
 #include "../geometry/hybrid_set.h"
 #include "../system/hybrid_automaton.h"
 #include "hybrid_evolver.h"

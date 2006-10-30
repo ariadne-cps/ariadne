@@ -33,9 +33,9 @@
 #include <stdexcept>
 
 #include "../declarations.h"
+#include "../exceptions.h"
 
 #include "../base/tribool.h"
-#include "../base/exceptions.h"
 
 #include "../numeric/numerical_traits.h"
 #include "../numeric/conversion.h"

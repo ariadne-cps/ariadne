@@ -33,7 +33,7 @@
 #include <vector>
 #include <valarray>
 
-#include "../base/exceptions.h"
+#include "../exceptions.h"
 
 #include "../numeric/interval.h"
 

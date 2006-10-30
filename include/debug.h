@@ -1,8 +1,7 @@
 /***************************************************************************
  *            debug.h
  *
- *  Wed Sep 15 15:56 2004
- *  Copyright  2004  Alberto Casagrande, Pieter Collins
+ *  Copyright  2004-6  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -29,6 +28,13 @@
 
 namespace Ariadne {
 
+#ifdef DEBUG
+  static const int verbosity=1;
+#else
+  static const int verbosity=0;
+#endif
+  
+  
   
 class dbgstream;
 template<class T> dbgstream& operator<<(dbgstream& dbgs, const T& t);
@@ -36,14 +42,15 @@ template<class T> dbgstream& operator<<(dbgstream& dbgs, const T& t);
 class dbgstream : public std::ostream
 {
  public:
-  dbgstream(std::ostream& os, int debug_level) : _stream(os), _debug_level(debug_level) { }
-  dbgstream(int debug_level) : _stream(std::cerr), _debug_level(debug_level) { }
+  dbgstream(std::ostream& os, int debug_level=verbosity) : _stream(os), _debug_level(debug_level) { }
+  dbgstream(int debug_level=verbosity) : _stream(std::cerr), _debug_level(debug_level) { }
  private:
   template<class T> friend dbgstream& operator<<(dbgstream& dbgs, const T& t);
  private:
   std::ostream& _stream;
   int _debug_level;
 };
+
 
 template<class T>
 inline
@@ -53,6 +60,8 @@ operator<<(dbgstream& dbgs, const T& t)
   if(dbgs._debug_level>0) { dbgs._stream << t; }
   return dbgs;
 }
+
+
 
 } // namespace Ariadne
 

@@ -41,7 +41,7 @@
 #include "../base/array.h"
 
 namespace Ariadne {
-  namespace Utility { 
+  namespace Base { 
     template<class InputIterator>
     inline
     std::ostream&
@@ -90,7 +90,7 @@ namespace Ariadne {
       try {
         is >> c;
         if(c != opening) {
-          throw std::ios_base::failure("Ariadne::Utility::read_vector: Input must begin with "+opening);
+          throw std::ios_base::failure("Ariadne::Base::read_vector: Input must begin with "+opening);
         }
         
         /* Handle case of empty list */
@@ -102,14 +102,14 @@ namespace Ariadne {
         
         while(c != closing) {
           if(is.eof()) {
-            throw std::ios_base::failure("Ariadne::Utility::read_vector: End-of-file reached");
+            throw std::ios_base::failure("Ariadne::Base::read_vector: End-of-file reached");
           }
           if(c!=separator) {
-            throw std::ios_base::failure("Ariadne::Utility::read_vector: Items in list must be separated by "+separator);
+            throw std::ios_base::failure("Ariadne::Base::read_vector: Items in list must be separated by "+separator);
           }
           is >> x;
           if(is.fail()) {
-            throw std::ios_base::failure("Ariadne::Utility::read_vector: Error inputting value in list");
+            throw std::ios_base::failure("Ariadne::Base::read_vector: Error inputting value in list");
           }
           v.push_back(x);
           is >> c;
@@ -137,7 +137,7 @@ namespace Ariadne {
       try {
         is >> c;
         if(c != opening) {
-          throw std::ios_base::failure("Ariadne::Utility::read_array: Input must begin with "+opening);
+          throw std::ios_base::failure("Ariadne::Base::read_array: Input must begin with "+opening);
         }
         
         /* Handle case of empty list */
@@ -149,16 +149,16 @@ namespace Ariadne {
         
         while(c != closing) {
           if(is.eof()) {
-            throw std::ios_base::failure("Ariadne::Utility::read_array: End-of-file reached");
+            throw std::ios_base::failure("Ariadne::Base::read_array: End-of-file reached");
           }
           if(c!=separator) {
-            throw std::ios_base::failure("Ariadne::Utility::read_array: Items in list must be separated by "+separator);
+            throw std::ios_base::failure("Ariadne::Base::read_array: Items in list must be separated by "+separator);
           }
           is >> x;
           if(is.fail()) {
-            throw std::ios_base::failure("Ariadne::Utility::read_array: Error inputting value in list");
+            throw std::ios_base::failure("Ariadne::Base::read_array: Error inputting value in list");
           }
-	  a.resize(a.size()+1);
+          a.resize(a.size()+1);
           a[a.size()-1]=x;
           is >> c;
         }
@@ -180,14 +180,14 @@ namespace Ariadne {
     template<class Iter> inline
     std::ostream&
     operator<<(std::ostream& os, const range<Iter>& a) {
-      Utility::write_sequence(os,a.begin(),a.end());
+      Base::write_sequence(os,a.begin(),a.end());
       return os;
     }
     
     template<class T> inline
     std::ostream&
     operator<<(std::ostream& os, const array<T>& a) {
-      return Utility::write_sequence(os,a.begin(),a.end());
+      return Base::write_sequence(os,a.begin(),a.end());
     }
     
     template<class T> inline
@@ -198,7 +198,7 @@ namespace Ariadne {
         if(i!=0) {
           os << ", ";
         }
-        Utility::write_sequence(os,a[i].begin(),a[i].end());
+        Base::write_sequence(os,a[i].begin(),a[i].end());
         os.flush();
       }
       os << " ]";
@@ -208,7 +208,7 @@ namespace Ariadne {
     template<class T> inline
     std::istream&
     operator>>(std::istream& is, array<T>& a) {
-      return Utility::read_array(is,a);
+      return Base::read_array(is,a);
     }
     
   } // namespace Base
@@ -234,7 +234,7 @@ namespace std {
   std::ostream& 
   operator<< (std::ostream &os, const std::vector<T>& v) 
   {
-    return Ariadne::Utility::write_sequence(os,v.begin(),v.end());
+    return Ariadne::Base::write_sequence(os,v.begin(),v.end());
   }
   
   template<class T> 
@@ -242,7 +242,7 @@ namespace std {
   std::ostream& 
   operator<< (std::ostream &os, const std::list<T>& l) 
   {
-    return Ariadne::Utility::write_sequence(os,l.begin(),l.end());
+    return Ariadne::Base::write_sequence(os,l.begin(),l.end());
   }
   
   template<class T> 
@@ -250,14 +250,14 @@ namespace std {
   std::ostream& 
   operator<< (std::ostream &os, const std::deque<T>& d) 
   {
-    return Ariadne::Utility::write_sequence(os,d.begin(),d.end());
+    return Ariadne::Base::write_sequence(os,d.begin(),d.end());
   }
   
   template<class T> 
   inline
   ostream& 
   operator<< (std::ostream &os, const std::valarray<T>& v) {
-    return Ariadne::Utility::write_sequence(os,&(v[0]),&(v[v.size()-1]));
+    return Ariadne::Base::write_sequence(os,&(v[0]),&(v[v.size()-1]));
   }
   
   template<class T, class C> 
@@ -265,7 +265,7 @@ namespace std {
   std::ostream& 
   operator<<(std::ostream &os, const std::set<T,C>& s) 
   {
-    return Ariadne::Utility::write_sequence(os,s.begin(), s.end(), '{', '}');
+    return Ariadne::Base::write_sequence(os,s.begin(), s.end(), '{', '}');
   }
   
   template<class K, class T, class C> 
@@ -273,14 +273,14 @@ namespace std {
   std::ostream& 
   operator<<(std::ostream &os, const std::map<K,T,C>& m) 
   {
-    return Ariadne::Utility::write_map_sequence(os,m.begin(), m.end(), '{', '}');
+    return Ariadne::Base::write_map_sequence(os,m.begin(), m.end(), '{', '}');
   }
   
   template<class T> 
   inline
   istream& 
   operator>> (std::istream &is, std::vector<T>& v) {
-    return Ariadne::Utility::read_vector(is,v);
+    return Ariadne::Base::read_vector(is,v);
   }
 } // namespace std
 

@@ -24,15 +24,11 @@
 #include <iostream>
 #include <cassert>
 
-#include "debug.h"
-
 #include "base/stlio.h"
 
 #include "combinatoric/lattice_set.h"
 #include "combinatoric/lattice_map.h"
 
-
-Ariadne::dbgstream cdbg(std::cerr,0);
 
 namespace Ariadne {
   namespace Combinatoric {
@@ -52,7 +48,7 @@ namespace Ariadne {
     void
     LatticeMultiMap::adjoin_to_image(const LatticeCell& lc, const LatticeCellListSet& img)
     {
-      //std::cerr << "LatticeMultiMap::adjoin_to_image(const LatticeCell& lc, const LatticeCellListSet& img)" << std::endl;
+      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
       //std::cerr << "result_dimension=" << this->_result_dimension << " lc=" << lc << " img=" << img << std::endl;
       typedef std::map<LatticeCell,LatticeCellListSet>::iterator map_iterator;
       map_iterator iter=this->_map.find(lc);
@@ -71,7 +67,7 @@ namespace Ariadne {
     LatticeCellListSet
     LatticeMultiMap::image(const LatticeCell& lc) const
     {
-      cdbg << "LatticeMap::image(const LatticeCell& lc) const\n";
+      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
       typedef std::map<LatticeCell,LatticeCellListSet>::iterator map_iterator;
       map_iterator iter=this->_map.find(lc);
       if(iter==this->_map.end()) {
@@ -102,7 +98,7 @@ namespace Ariadne {
     LatticeCellListSet
     LatticeMultiMap::weak_preimage(const LatticeMaskSet& lms) const
     {
-      cdbg << "LatticeMap::weak_preimage(const LatticeCell& lc) const\n";
+      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
       typedef std::map<LatticeCell,LatticeCellListSet>::iterator map_iterator;
       LatticeCellListSet result(this->argument_dimension());
       for(map_iterator iter=this->_map.begin(); iter!=this->_map.end(); ++iter) {
@@ -117,7 +113,7 @@ namespace Ariadne {
     LatticeCellListSet
     LatticeMultiMap::strong_preimage(const LatticeMaskSet& lms) const
     {
-      cdbg << "LatticeMap::strong_preimage(const LatticeCell& lc) const\n";
+      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
       typedef std::map<LatticeCell,LatticeCellListSet>::iterator map_iterator;
       LatticeCellListSet result(this->argument_dimension());
       for(map_iterator iter=this->_map.begin(); iter!=this->_map.end(); ++iter) {
@@ -132,14 +128,14 @@ namespace Ariadne {
     LatticeCellListSet
     LatticeMultiMap::operator() (const LatticeCell& lc) const
     {
-      cdbg << "LatticeMap::operator() (const LatticeCell& lc) const\n";
+      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
       return this->apply(lc);
     }
     
     LatticeCellListSet 
     LatticeMultiMap::operator() (const LatticeBlock& lr) const 
     {
-      cdbg << "LatticeMap::operator() (const LatticeBlock& lr) const\n";
+      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
       LatticeCellListSet result(this->_result_dimension);
       for(LatticeBlock::const_iterator cell_iter=lr.begin(); cell_iter!=lr.end(); ++cell_iter) {
         result.adjoin(this->apply(*cell_iter));
@@ -150,19 +146,18 @@ namespace Ariadne {
     LatticeCellListSet 
     LatticeMultiMap::operator() (const LatticeCellListSet& lcls) const 
     {
-      cdbg << "LatticeMap::operator() (const LatticeCellListSet& lcls) const\n";
+      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
       LatticeCellListSet result(this->_result_dimension);
       for(LatticeCellListSet::const_iterator cell_iter=lcls.begin(); cell_iter!=lcls.end(); ++cell_iter) {
         result.adjoin(this->apply(*cell_iter));
       }
-      cdbg << "Returning" << result << "\n";
       return result;
     }
     
     LatticeCellListSet 
     LatticeMultiMap::operator() (const LatticeBlockListSet& lrls) const 
     {
-      cdbg << "LatticeMap::operator() (const LatticeBlockListSet& lrls) const\n";
+      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
       LatticeCellListSet result(this->_result_dimension);
       for(LatticeBlockListSet::const_iterator rect_iter=lrls.begin(); rect_iter!=lrls.end(); ++rect_iter) {
         result.adjoin(this->operator()(*rect_iter));

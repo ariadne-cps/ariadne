@@ -29,7 +29,7 @@
 #include <boost/smart_ptr.hpp>
 #include <memory>
 
-#include "../base/exceptions.h"
+#include "../exceptions.h"
 #include "../geometry/set.h"
 #include "../system/map.h"
 #include "../system/vector_field.h"

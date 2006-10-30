@@ -37,7 +37,8 @@
 #include "lohner_integrator.h"
 
 #include "../base/array.h"
-#include "../base/exceptions.h"
+#include "../debug.h"
+#include "../exceptions.h"
 #include "../numeric/arithmetic.h"
 #include "../numeric/interval.h"
 
@@ -58,14 +59,6 @@
 
 #include "../evaluation/integrator.h"
 
-    
-namespace Ariadne { namespace Evaluation {
-  #ifdef DEBUG
-    static const int verbosity=1;
-#else
-    static const int verbosity=0;
-#endif
-}}  
 
 
 template<class R>

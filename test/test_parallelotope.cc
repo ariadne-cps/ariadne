@@ -31,7 +31,6 @@
 #include "real_typedef.h"
 
 #include "ariadne.h"
-#include "base/exceptions.h"
 #include "base/utility.h"
 #include "numeric/numerical_types.h"
 #include "geometry/point.h"

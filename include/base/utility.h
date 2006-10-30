@@ -29,17 +29,11 @@
 #define _ARIADNE_UTILITY_H
 
 #include <iosfwd>
-#include "../declarations.h"
 
 namespace Ariadne {
   namespace Base {
     
-    /*! \brief Convert an element \a x of type \a Arg to type \a Res. */
-    //template<class Res, class Arg> inline Res convert_to(const Arg& x) { return Res(x); }
 
-    /*! \brief The name of class T. */
-    //template<class T> inline std::string name();
-    
   }    
 }
 

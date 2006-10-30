@@ -12,8 +12,6 @@
 #ifndef _ARIADNE_DYADIC_H
 #define _ARIADNE_DYADIC_H
 
-#include <cassert>
-
 #include "../declarations.h"
 #include "../base/dyadic.h"
 

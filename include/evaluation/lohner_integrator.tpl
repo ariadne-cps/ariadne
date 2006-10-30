@@ -512,7 +512,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::reachability_step(const System::Affine
                                        const Geometry::Zonotope<R>& initial_set, 
                                        time_type& step_size) const
 {
-  if(verbosity>0) { std::cerr << "reachability_step(AffineVectorField<R>, Zonotope<R>, R)\n"; }
+  if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+  throw NotImplemented(__PRETTY_FUNCTION__);
 
-  throw NotImplemented("LohnerIntegrator<R>::reachability_step(AffineVectorField<R>,Zonotope<R>,Q");
 }

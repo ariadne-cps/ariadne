@@ -621,7 +621,7 @@ namespace Ariadne {
        * \deprecated Equality operator for sets is deprecated.
        */
       bool operator==(const GridMaskSet<R>& gms) {
-        throw(std::domain_error("Equality operator for sets is deprecated"));
+        throw Deprecated(__PRETTY_FUNCTION__);
       }
 
       /*! \brief Inequality operator. (Deprecated)

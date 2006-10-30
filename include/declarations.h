@@ -127,8 +127,6 @@ template<class R> class DiscreteLocation;
 template<class R> class DiscreteTransition;
 template<class R> class HybridAutomaton;
   
-template<class R> class HenonMap;
-template<class R> class LorenzSystem;
 }}
 
 

@@ -187,7 +187,7 @@ namespace Ariadne {
       R& operator() (const size_type& i) { return this->_begin[i*this->_increment]; }
      
       template<class E> VectorSlice<R>& operator=(const boost::numeric::ublas::vector_expression< E > v) {
-        const E& e=v(); assert(this->size()==e.size());
+        const E& e=v(); check_size(*this,e,__PRETTY_FUNCTION__);
         for(size_type i=0; i!=e.size(); ++i) { this->begin[i*this->_increment]=e(i); }
         return *this;
       }
@@ -216,7 +216,7 @@ namespace Ariadne {
     bool
     contains_value(const Vector< Interval<R> >& iv,const Vector<R>& v) 
     {
-      assert(v.size()==iv.size());
+      check_size(iv,v,__PRETTY_FUNCTION__);
       for(size_type i=0; i!=v.size(); ++i) {
         if(!Numeric::contains_value(iv(i),v(i))) {
           return false;
@@ -293,7 +293,7 @@ namespace Ariadne {
     
     template<class R> inline
     Vector<R> add_approx(const Vector<R>& u, const Vector<R>& v) {
-      assert(u.size()==v.size());
+      check_size(u,v,__PRETTY_FUNCTION__);
       Vector<R> result(u.size());
       for(size_type i=0; i!=u.size(); ++i) {
         result(i)=add_approx(u(i),v(i));
@@ -303,7 +303,7 @@ namespace Ariadne {
       
     template<class R> inline
     Vector<R> sub_approx(const Vector<R>& u, const Vector<R>& v) {
-      assert(u.size()==v.size());
+      check_size(u,v,__PRETTY_FUNCTION__);
       Vector<R> result(u.size());
       for(size_type i=0; i!=u.size(); ++i) {
         result(i)=sub_approx(u(i),v(i));
@@ -343,7 +343,7 @@ namespace Ariadne {
     template<class R> inline 
     R inner_product(const Vector<R>& u, const Vector<R>& v) 
     {
-      assert(u.size()==v.size());
+      check_size(u,v,__PRETTY_FUNCTION__);
       R result=0;
       for(size_type i=0; i!=u.size(); ++i) {
         result+=u(i)*v(i);
@@ -367,7 +367,7 @@ namespace Ariadne {
     template<class R> inline 
     bool linear_multiple(const Vector<R>& u, const Vector<R>& v) 
     {
-      assert(u.size()==v.size());
+      check_size(u,v,__PRETTY_FUNCTION__);
       R multiple=0;
       for (dimension_type i=0; i<u.dimension(); ++i) {
         if(u(i)==0 && multiple!=0 && v(i)!=0) {

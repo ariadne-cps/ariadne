@@ -25,6 +25,8 @@
 #include <string>
 #include <sstream>
 #include <exception>
+#include <cassert>
+
 
 #include "numeric/arithmetic.h"
 #include "numeric/integer.h"
@@ -166,7 +168,7 @@ namespace Ariadne {
                                                const BooleanArray& ba)
       : _subdivisions(ss), _words(bt,ba)
     {
-      assert(bt.size()==ba.size());
+      check_size(bt,ba,__PRETTY_FUNCTION__);
       this->reduce();
     }
     

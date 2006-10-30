@@ -36,7 +36,6 @@
 #include <vector>
 #include <iterator>
 
-#include <cassert>
 #include <iostream>
 
 #include "../declarations.h"
@@ -118,8 +117,8 @@ namespace Ariadne {
       reference operator[](size_type i) { return _ptr[i]; } 
       const_reference operator[](size_type i) const { return _ptr[i]; }
       /*! \brief Checked access to the \a n'th element. */
-      reference at(size_type i) { if(i<_size) { return _ptr[i]; } else { throw std::out_of_range("array index out-of-range"); } } 
-      const_reference at(size_type i) const { if(i<_size) { return _ptr[i]; } else { throw std::out_of_range("array index out-of-range"); } }
+      reference at(size_type i) { if(i<_size) { return _ptr[i]; } else { throw std::out_of_range("array: index out-of-range"); } } 
+      const_reference at(size_type i) const { if(i<_size) { return _ptr[i]; } else { throw std::out_of_range("array: index out-of-range"); } }
       
       /*! \brief An iterator pointing to the beginning of the array. */
       iterator begin() { return _ptr; }
@@ -180,8 +179,8 @@ namespace Ariadne {
       
       reference operator[](size_type i) { return _vector[i]; }
       const_reference operator[](size_type i) const { return _vector[i]; }
-      reference at(size_type i) { if(i<size()) { return _vector[i]; } else { throw std::out_of_range("array index out-of-range"); } } 
-      const_reference at(size_type i) const { if(i<size()) { return _vector[i]; } else { throw std::out_of_range("array index out-of-range"); } }
+      reference at(size_type i) { if(i<size()) { return _vector[i]; } else { throw std::out_of_range("array::index out-of-range"); } } 
+      const_reference at(size_type i) const { if(i<size()) { return _vector[i]; } else { throw std::out_of_range("array::index out-of-range"); } }
       
       iterator begin() { return _vector.begin(); }
       const_iterator begin() const { return _vector.begin(); }
@@ -231,30 +230,43 @@ namespace Ariadne {
       
       ~array() { }
       array() : _size(0) { }
-      explicit array(const size_type n) : _size(n) { assert(n<=N); }
-      array(const size_type n, const value_type& val) : _size(n) { assert(n<N); fill(val); }
-      template<class In> array(In first, In last) : _size(distance(first,last)) { assert(_size<=N); fill(first); }
+      explicit array(const size_type n) : _size(n) { 
+        if(n>N) { throw std::length_error("array<T,N>::array(size_type)"); } }
+      array(const size_type n, const value_type& val) : _size(n) { 
+        if(n>N) { throw std::length_error("array<T,N>::array(size_type)"); } fill(val); }
+      template<class In> array(In first, In last) : _size(distance(first,last)) { 
+        if(_size>N) { _size=N; throw std::length_error("array<T,N>::array(size_type)"); } fill(first); }
       array(const array& a) : _size(a.size()) { fill(a.begin()); }
       array& operator=(const array& a) { _size=a.size(); fill(a.begin()); return *this; }
       
       explicit array(const value_type& x) : _size(1) { 
-        assert(N>=1); _ptr[0]=x;}
+        if(N<1) { throw std::length_error("array<T,N>::array(value_type)"); }
+        _ptr[0]=x;}
       array(const value_type& x, const value_type& y) : _size(2) { 
-        assert(N>=2); _ptr[0]=x; _ptr[1]=y; }
+        if(N<2) { throw std::length_error("array<T,N>::array(value_type,value_type)"); }
+        _ptr[0]=x; _ptr[1]=y; }
       array(const value_type& x, const value_type& y, const value_type& z) : _size(3) { 
-        assert(N>=3); _ptr[0]=x; _ptr[1]=y; _ptr[2]=z; }
+        if(N<3) { throw std::length_error("array<T,N>::array(value_type,value_type,value_type)"); }
+        _ptr[0]=x; _ptr[1]=y; _ptr[2]=z; }
       array(const value_type& w, const value_type& x, const value_type& y, const value_type& z) : _size(4) { 
-        assert(N>=4); _ptr[0]=w; _ptr[1]=x; _ptr[2]=y; _ptr[3]=z; }
+        if(N<4) { throw std::length_error("array<T,N>::array(value_type,value_type,value_type,value_type)"); }
+        _ptr[0]=w; _ptr[1]=x; _ptr[2]=y; _ptr[3]=z; }
       
       size_type empty() const { return _size==0u; }
       size_type size() const { return _size; }
       size_type max_size() const { return N; }
-      void resize(size_type n) { assert(n<=N); _size=n; }
+      void resize(size_type n) { 
+        if(n>N) { throw std::length_error("array<T,N>::resize(size_type)"); }
+        _size=n; }
       
       reference operator[](size_type i) { return _ptr[i]; }
       const_reference operator[](size_type i) const { return _ptr[i]; }
-      reference at(size_type i) { assert(i<N); return _ptr[i]; }
-      const_reference at(size_type i) const { assert(i<N); return _ptr[i]; }
+      reference at(size_type i) { 
+        if(i>=N) { throw std::out_of_range("array<T,N>::at(size_type)"); }
+        return _ptr[i]; }
+      const_reference at(size_type i) const { 
+        if(i>=N) { throw std::out_of_range("array<T,N>::at(size_type)"); }
+        return _ptr[i]; }
       
       iterator begin() { return _ptr; }
       iterator end() { return _ptr+_size; }
@@ -270,7 +282,8 @@ namespace Ariadne {
       template<class In> void fill(In iter) { 
         _assign_iter(iter); }
       template<class In> void assign(In first, In last) { 
-        assert(distance(first,last)==_size); _assign_iter(first); }
+        if(distance(first,last)!=_size) { throw std::length_error("array<T,N>::assign(In,In)"); }
+        _assign_iter(first); }
      private:
       template<class InputIterator> inline void _assign_iter(InputIterator);
      private:
@@ -385,11 +398,14 @@ namespace Ariadne {
       template<class I> array_reference(const array_reference<I>& a) : _size(a.size()), _begin(a.begin()) { }
       
       Self& operator=(const array<value_type>& a) { 
-        assert(this->size()==a.size()); _assign(a.begin(),a.end()); return *this; }
+        if(this->size()!=a.size()) { throw std::length_error("array_reference<T>::operator=(array<T> const&)"); }
+        _assign(a.begin(),a.end()); return *this; }
       template<class Iter2> Self& operator=(const array_reference<Iter2>& a) { 
-        assert(this->size()==a.size()); _assign(a.begin(),a.end()); return *this; }
+        if(this->size()!=a.size()) { throw std::length_error("array_reference<T>::operator=(array<X> const&)"); }
+        _assign(a.begin(),a.end()); return *this; }
       template<class RanIter> Self& operator=(const range<RanIter>& r) { 
-        assert(this->size()==r.size()); _assign(r.begin(),r.end()); return *this; }
+        if(this->size()!=r.size()) { throw std::length_error("array_reference<T>::operator=(range<X> const&)"); }
+        _assign(r.begin(),r.end()); return *this; }
       
       bool operator==(const array<value_type>& a) { return this->_equals(a.begin(),a.end()); }  
       bool operator!=(const array<value_type>& a) { return !((*this)==a); }
@@ -514,7 +530,7 @@ namespace Ariadne {
       
       /*!\brief Insert an element at the back of the vector. */
       void push_back(const array<T>& a) { 
-        assert(a.size()==array_size()); 
+        if(a.size()!=array_size()) { throw std::length_error("array_vector<T>::push_back(array<T> const&)"); }
         for(size_type i=0; i!=array_size(); ++i) { _elements.push_back(a[i]); }
       }
       

@@ -21,6 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <cassert>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -29,7 +30,7 @@
 
 #include <ppl.hh>
 
-#include "ariadne.h"
+#include "declarations.h"
 #include "base/exceptions.h"
 #include "base/utility.h"
 #include "numeric/float64.h"

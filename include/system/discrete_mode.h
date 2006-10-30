@@ -84,7 +84,7 @@ class DiscreteMode {
                      const Geometry::Set<R> &invariant)
       : _name(name), _dynamic(dynamic.clone()), _invariant(invariant.clone()) 
     {
-      check_dimension(vfield,invariant);
+      check_dimension(dynamic,invariant);
       this->_set_id();
     }
       

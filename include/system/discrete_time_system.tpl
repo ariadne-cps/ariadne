@@ -48,7 +48,7 @@ namespace Ariadne {
                                        const Geometry::Point<R>& u,
                                        const Geometry::Point<R>& v) const
     {
-      throw std::invalid_argument(this->name()+"::operator() (Point,Point,Point) not implemented."); 
+      throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
     
     template<class R>
@@ -57,7 +57,7 @@ namespace Ariadne {
                                        const Geometry::Rectangle<R>& u,
                                        const Geometry::Rectangle<R>& v) const
     {
-      throw std::invalid_argument(this->name()+"::operator() (Rectangle,Rectangle,Rectangle) not implemented."); 
+      throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
     
     template<class R>
@@ -66,7 +66,7 @@ namespace Ariadne {
                                        const Geometry::Zonotope<R>& u,
                                        const Geometry::Zonotope<R>& v) const
     {
-      throw std::invalid_argument(this->name()+"::operator() (Zonotope,Zonotope,Zonotope) not implemented."); 
+      throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
     
     
@@ -76,7 +76,7 @@ namespace Ariadne {
                                       const Geometry::Point<R>& u,
                                       const Geometry::Point<R>& v) const
     {
-      throw std::invalid_argument(this->name()+"::derivative(Point,Point,Point) not implemented."); 
+      throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
 
     template<class R>
@@ -85,5 +85,5 @@ namespace Ariadne {
                                       const Geometry::Rectangle<R>& u,
                                       const Geometry::Rectangle<R>& v) const
     {
-      throw std::invalid_argument(this->name()+"::derivative(Rectangle,Rectangle,Rectangle) not implemented."); 
+      throw DeferredImplementation(__PRETTY_FUNCTION__);
     }

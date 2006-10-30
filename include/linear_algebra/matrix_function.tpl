@@ -33,7 +33,7 @@ namespace Ariadne {
     Matrix< Interval<R> >
     exp(const Matrix< Interval<R> >& A) 
     {
-      assert(A.number_of_rows()==A.number_of_columns());
+      check_size(A.number_of_rows(),A.number_of_columns(),__PRETTY_FUNCTION__);
       R err=div_up(A.norm().upper(),R(65536));
       if(err==0) {
         err=div_up(A.norm().upper(),R(65536));

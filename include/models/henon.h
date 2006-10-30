@@ -1,9 +1,8 @@
 /***************************************************************************
- *            henon_map.h
+ *            henon.h
  *
- *  Wed Feb  2 18:52:36 2005
- *  Copyright  2005  Alberto Casagrande
- *  casagrande@dimi.uniud.it
+ *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it  Pieter Collins
  ****************************************************************************/
 
 /*
@@ -22,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file henon_map.h
+/*! \file henon.h
  *  \brief The Henon map \f$(x,y) \rightarrow (a-x^2-by,x)\f$.
  */
 
@@ -44,7 +43,7 @@ namespace Ariadne {
 
     /*! \brief The Henon map \f$(x,y)\mapsto(a-x^2-by,x)\f$. */
     template<class R>
-    class HenonMap : public Map<R> 
+    class HenonMap : public System::Map<R> 
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
      public:

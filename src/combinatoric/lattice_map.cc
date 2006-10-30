@@ -22,6 +22,7 @@
  */
  
 #include <iostream>
+#include <cassert>
 
 #include "debug.h"
 
@@ -208,17 +209,17 @@ namespace Ariadne {
     void
     LatticeSystem::set_control_values(const LatticeCell& lc, const LatticeCellListSet& lcls) 
     {
-      assert(lc.dimension()==this->space_dimension());
-      assert(lcls.dimension()==this->input_dimension());
+      check_dimension(lc,this->space_dimension(),__PRETTY_FUNCTION__);
+      check_dimension(lcls,this->input_dimension(),__PRETTY_FUNCTION__);
       this->_control_map.insert(std::make_pair(lc,lcls));
     }
     
     void
     LatticeSystem::set_noise_values(const LatticeCell& splc, const LatticeCell& inlc,const LatticeCellListSet& lcls) 
     {
-      assert(splc.dimension()==this->space_dimension());
-      assert(inlc.dimension()==this->input_dimension());
-      assert(lcls.dimension()==this->space_dimension());
+      check_dimension(splc,this->space_dimension(),__PRETTY_FUNCTION__);
+      check_dimension(inlc,this->input_dimension(),__PRETTY_FUNCTION__);
+      check_dimension(lcls,this->space_dimension(),__PRETTY_FUNCTION__);
       LatticeCell lc(this->space_dimension()+this->input_dimension());
       for(dimension_type i=0; i!=this->space_dimension(); ++i) {
         lc[i]=splc[i];
@@ -232,8 +233,8 @@ namespace Ariadne {
     void
     LatticeSystem::set_noise_values(const LatticeCell& lc, const LatticeCellListSet& lcls) 
     {
-      assert(lc.dimension()==this->space_dimension()+this->input_dimension());
-      assert(lcls.dimension()==this->input_dimension());
+      check_dimension(lc,this->space_dimension(),__PRETTY_FUNCTION__);
+      check_dimension(lcls,this->input_dimension(),__PRETTY_FUNCTION__);
       this->_noise_map.insert(std::make_pair(lc,lcls));
     }
     
@@ -242,7 +243,7 @@ namespace Ariadne {
     {
       LatticeCellListSet result(this->space_dimension());
       
-      assert(lms.dimension()==this->space_dimension());
+      check_dimension(lms,this->space_dimension(),__PRETTY_FUNCTION__);
       typedef std::map<LatticeCell,LatticeCellListSet>::iterator map_iterator;
       
       LatticeCell space(IndexArray(this->space_dimension()));

@@ -33,6 +33,7 @@
 
 #include "../base/stlio.h"
 #include "../base/array.h"
+#include "../base/exceptions.h"
 #include "../numeric/interval.h"
 
 #include "../linear_algebra/vector.h"
@@ -445,11 +446,11 @@ namespace Ariadne {
         }
         is >> c;
         if(!c=='x') {
-          throw std::runtime_error("Invalid format for monomial");
+          throw invalid_input(__PRETTY_FUNCTION__);
         }
         is >> c;
         if(!c=='_') {
-          throw std::runtime_error("Invalid format for monomial");
+          throw invalid_input(__PRETTY_FUNCTION__);
         }
         is >> i;
         is >> c;

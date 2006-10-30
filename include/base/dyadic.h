@@ -39,6 +39,7 @@
 
 #include <gmpxx.h>
 #include <iostream>
+#include <stdexcept>
 
 namespace Ariadne { 
 namespace Synaps {
@@ -165,7 +166,7 @@ inline
 void
 dyadic::normalize_()
 {
-  if( num_==0) {
+  if(num_==0) {
     exp_=0;
   }
   else {
@@ -296,13 +297,14 @@ inline
 dyadic&
 dyadic::operator/= (const numerator_type& n)
 {
-  assert( n != 0 );
   numerator_type d=n;
   while( (d%2)==0 ) {
     --exp_;
     d/=2;
   }
-  assert(d==1);
+  if(d!=1) {
+    throw std::invalid_argument("dyadic::operator/=(...): Division only possible by a positive power of 2");
+  }
   return *this;
 }
 

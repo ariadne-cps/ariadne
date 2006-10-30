@@ -54,9 +54,9 @@ get_item(const C& c, int n) {
   if(n<0) {
     n+=c.size();
   }
-  assert(0<=n);
+  if(n<0) { throw std::out_of_range("Index out-of-range"); }
   size_t m=size_t(n);
-  assert(m<c.size());
+  if(c.size()<=m) { throw std::out_of_range("Index out-of-range"); }
   return c[m];
 }
 
@@ -68,9 +68,9 @@ set_item_from(C& c, int n, const T& x) {
   if(n<0) {
     n+=c.size();
   }
-  assert(0<=n);
+  if(n<0) { throw std::out_of_range("Index out-of-range"); }
   size_t m=size_t(n);
-  assert(m<c.size());
+  if(c.size()<=m) { throw std::out_of_range("Index out-of-range"); }
   c[n]=x;
 }
 
@@ -82,9 +82,9 @@ set_item(C& c, int n, const typename C::value_type& x) {
   if(n<0) {
     n+=c.size();
   }
-  assert(0<=n);
+  if(n<0) { throw std::out_of_range("Index out-of-range"); }
   size_t m=size_t(n);
-  assert(m<c.size());
+  if(c.size()<=m) { throw std::out_of_range("Index out-of-range"); }
   c[n]=x;
 }
 

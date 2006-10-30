@@ -46,35 +46,35 @@ namespace Ariadne {
     Geometry::ListSet<R,Geometry::Rectangle>
     MultiMap<R>::operator() (const Geometry::Rectangle<R>& r) const 
     {
-      throw std::invalid_argument(this->name()+"::operator() (Rectangle) not implemented."); 
+      throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
     
     template<class R>
     Geometry::ListSet<R,Geometry::Parallelotope>
     MultiMap<R>::operator() (const Geometry::Parallelotope<R>& p) const 
     {
-      throw std::invalid_argument(this->name()+"::operator() (Parallelotope) not implemented."); 
+      throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
     
     template<class R>
     Geometry::ListSet<R,Geometry::Zonotope>
     MultiMap<R>::operator() (const Geometry::Zonotope<R>& p) const 
     {
-      throw std::invalid_argument(this->name()+"::operator() (Zonotope) not implemented."); 
+      throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
     
     template<class R>
     Geometry::ListSet<R,Geometry::Simplex>
     MultiMap<R>::operator() (const Geometry::Simplex<R>& p) const 
     {
-      throw std::invalid_argument(this->name()+"::operator() (Simplex) not implemented."); 
+      throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
     
     template<class R>
     Geometry::ListSet<R,Geometry::Polytope>
     MultiMap<R>::operator() (const Geometry::Polytope<R>& p) const 
     {
-      throw std::invalid_argument(this->name()+"::operator() (Polytope) not implemented."); 
+      throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
     
     

@@ -265,7 +265,7 @@ namespace Ariadne {
     void 
     LatticeCellListSet::adjoin(const LatticeBlock& r) 
     { 
-      assert(this->dimension() == r.dimension());
+      check_dimension(*this,r,__PRETTY_FUNCTION__);
       for(LatticeBlock::const_iterator i=r.begin(); i!=r.end(); ++i) {
         this->adjoin(*i);
       }
@@ -287,7 +287,7 @@ namespace Ariadne {
 
     void 
     LatticeCellListSet::adjoin(const LatticeMaskSet& ms) {
-      assert(this->dimension() == ms.dimension());
+      check_dimension(*this,ms,__PRETTY_FUNCTION__);
       for(LatticeMaskSet::const_iterator i=ms.begin(); i!=ms.end(); ++i) {
         this->adjoin(*i);
       }
@@ -589,21 +589,21 @@ namespace Ariadne {
     LatticeMaskSet
     regular_intersection(const LatticeMaskSet& A, const LatticeMaskSet& B) 
     {
-      assert(A.block()==B.block());
+      if(A.block()!=B.block()) { throw IncompatibleGrids(__PRETTY_FUNCTION__); }
       return LatticeMaskSet(A.block(),A.mask() & B.mask(), !A.bounded() && !B.bounded());
     }
 
     LatticeMaskSet
     join(const LatticeMaskSet& A, const LatticeMaskSet& B) 
     {
-      assert(A.block()==B.block());
+      if(A.block()!=B.block()) { throw IncompatibleGrids(__PRETTY_FUNCTION__); }
       return LatticeMaskSet(A.block(),A.mask() | B.mask(), !A.bounded() | !B.bounded());
     }
 
     LatticeMaskSet
     difference(const LatticeMaskSet& A, const LatticeMaskSet& B) 
     {
-      assert(A.block()==B.block());
+      if(A.block()!=B.block()) { throw IncompatibleGrids(__PRETTY_FUNCTION__); }
       return LatticeMaskSet(A.block(),A.mask() - B.mask(), !A.bounded() - !B.bounded());
     }
 
@@ -902,7 +902,7 @@ namespace Ariadne {
       else {
         /* representation as lower and upper corners */
         /* FIXME */
-        // throw invalid_input("Not implemented");
+        throw invalid_input(__PRETTY_FUNCTION__);
       }
       return is;
     }

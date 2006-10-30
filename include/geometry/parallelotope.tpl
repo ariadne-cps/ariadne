@@ -379,7 +379,7 @@ namespace Ariadne {
     std::istream& 
     Parallelotope<R>::read(std::istream& is)
     {
-      throw std::domain_error("Not implemented");
+      throw NotImplemented(__PRETTY_FUNCTION__);
     }
       
   }

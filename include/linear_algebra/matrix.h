@@ -35,6 +35,7 @@
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 
 #include "../declarations.h"
+#include "../base/exceptions.h"
 #include "../numeric/integer.h"
 #include "../numeric/interval.h"
 
@@ -99,7 +100,7 @@ namespace Ariadne {
       size_type size(const size_type& d) const {
         if(d==0) { return number_of_rows(); } 
         else if(d==1) { return number_of_columns(); }
-        else { assert(false); } 
+        throw InvalidIndex(__PRETTY_FUNCTION__);
       }
       /*! \brief The number of rows of the matrix. */
       size_type number_of_rows() const { return _Base::size1(); }
@@ -251,7 +252,9 @@ namespace Ariadne {
         return this->_begin[i*this->_row_increment+j*this->_column_increment]; }
      
       template<class E> MatrixSlice<R>& operator=(const boost::numeric::ublas::matrix_expression< E > m) {
-        const E& e=m(); assert(this->number_of_rows()==e.size1() && this->number_of_columns()==e.size2());
+        const E& e=m(); 
+        if(!(this->number_of_rows()==e.size1() && this->number_of_columns()==e.size2())) {
+          throw IncompatibleSizes(__PRETTY_FUNCTION__); }
         for(size_type i=0; i!=this->number_of_rows(); ++i) { 
           for(size_type j=0; j!=this->number_of_columns(); ++j) { 
             (*this)(i,j)=e(i,j); } }
@@ -272,8 +275,11 @@ namespace Ariadne {
     bool
     contains_value(const Matrix< Interval<R> >& iA, const Matrix<R>& A) 
     {
-      assert(A.number_of_rows()==iA.number_of_rows() 
-        && A.number_of_columns()==iA.number_of_columns());
+      if(!(A.number_of_rows()==iA.number_of_rows() 
+           && A.number_of_columns()==iA.number_of_columns())) 
+      {
+        throw IncompatibleSizes(__PRETTY_FUNCTION__);
+      }
       for(size_type i=0; i!=A.number_of_rows(); ++i) {
         for(size_type j=0; j!=A.number_of_columns(); ++j) {
           if(!Numeric::contains_value(iA(i,j),A(i,j))) {
@@ -443,7 +449,10 @@ namespace Ariadne {
     Matrix<R>
     over_approximation(const Matrix< Interval<R> >& A)
     {
-      assert(A.number_of_rows()==A.number_of_columns());
+      if(A.number_of_rows()!=A.number_of_columns()) {
+        //throw NotImplemented(__PRETTY_FUNCTION__ ": Only implemented for square matrices"); 
+        throw NotImplemented(__PRETTY_FUNCTION__); 
+      }
       dimension_type n=A.number_of_rows();
       
       Matrix<R> Amid(n,n);

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            lorenz_system.h
+ *            duffing.h
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.itm, Pieter.Collins@cwi.nl
@@ -20,13 +20,13 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-/*! \file lorenz_system.h
- *  \brief The Lorenz system \f$(\dot{x},\dot{y},\dot{z}) = (\sigma(y-x),\rho x-y-xz,-\beta z+xy)\f$.
+
+/*! \file duffing.h
+ *  \brief The Duffing equation \f$(\ddot{x}+\delta\dot{x}+(\beta x^3\pm\omega_0^2)=\gamma\cos(\omega t+\phi)\f$.
  */
 
-#ifndef _ARIADNE_LORENZ_SYSTEM_H
-#define _ARIADNE_LORENZ_SYSTEM_H
+#ifndef _ARIADNE_DUFFING_EQUATION_H
+#define _ARIADNE_DUFFING_EQUATION_H
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
@@ -40,22 +40,23 @@
 namespace Ariadne {
   namespace System {
 
-    /*! \brief The Lorenz system. */
+    /*! \brief The Duffing equation. */
     template<class R>
-    class LorenzSystem : public VectorField<R> 
+    class DuffingEquation : public System::VectorField<R> 
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
      public:
-      /*! \brief Construct the Lorenz system with parameter values \a beta,
-       * \a rho and \a sigma.
+      /*! \brief Construct the unforced Duffing system with parameter values \a delta,
+       * \a beta and \a alpha.
        */
-      explicit LorenzSystem(R beta=R(8.0/3.0), 
-                            R rho=R(28.0), 
-                            R sigma=R(10.0))
-       : _b(beta), _p(rho), _s(sigma) { }
+      explicit DuffingEquation(R delta=0.0, 
+                               R beta=1.0, 
+                               R alpha=1.0)
+        : _delta(delta), _beta(beta), _alpha(alpha),
+          _gamma(0.0), _omega(1.0), _phi(0.0) { }
       
       
-      LorenzSystem<R>* clone() const { return new LorenzSystem<R>(this->_b, this->_p, this->_s); }
+      DuffingEquation<R>* clone() const { return new DuffingEquation<R>(this->_delta, this->_beta, this->_alpha); }
        
        
       /*! \brief  The vector field applied to a state. */
@@ -68,89 +69,75 @@ namespace Ariadne {
       /*! \brief  The derivative of the map over a rectangular basic set. */
       virtual LinearAlgebra::Matrix< Interval<R> > jacobian(const Geometry::Rectangle<R>& r) const;
             
+      /*! \brief  The parameter \f$\delta\f$. */
+      const R& delta() const { return _delta; }
       /*! \brief  The parameter \f$\beta\f$. */
-      const R& beta() const { return _b; }
-      /*! \brief  The parameter \f$\rho\f$. */
-      const R& rho() const { return _p; }
-      /*! \brief  The parameter \f$\sigma\f$. */
-      const R& sigma() const { return _s; }
+      const R& beta() const { return _beta; }
+      /*! \brief  The parameter \f$\alpha\f$. */
+      const R& alpha() const { return _alpha; }
       
       
       /*! \brief  The dimension of the space. */
-      dimension_type dimension() const { return 3; }
+      dimension_type dimension() const { return 2; }
       
       /*! \brief  The smoothness of the vector field. */
       size_type smoothness() const { return std::numeric_limits<size_type>::max(); }
       
        /*! \brief  The name of the system. */
-      std::string name() const { return "LorenzSystem"; }
+      std::string name() const { return "DuffingEquations"; }
 
      private:
-      R _b;
-      R _p;
-      R _s;
+      R _delta, _beta, _alpha, _gamma, _omega,_phi;
     };
       
     template<class R>
-    LinearAlgebra::Vector<typename LorenzSystem<R>::F>
-    LorenzSystem<R>::operator() (const Geometry::Point<R>& x) const
+    LinearAlgebra::Vector<typename DuffingEquation<R>::F>
+    DuffingEquation<R>::operator() (const Geometry::Point<R>& x) const
     {
-      LinearAlgebra::Vector<F> result(3); 
-      result(0)=_s*(x[1]-x[0]);
-      result(0)=_p*x[0]-x[1]-x[0]*x[2];
-      result(0)=-_b*x[2]+x[0]*x[1];
+      LinearAlgebra::Vector<F> result(2); 
+      result(0)=x[1];
+      result(1)=-_delta*x[1]-x[0]*(_alpha+_beta*x[0]*x[0]);
       return result;
     }
      
     template<class R>
     LinearAlgebra::Vector< Interval<R> >
-    LorenzSystem<R>::operator() (const Geometry::Rectangle<R>& X) const
+    DuffingEquation<R>::operator() (const Geometry::Rectangle<R>& x) const
     {
-      LinearAlgebra::Vector< Interval<R> > result(3); 
-      result(0)=_s*(X[1]-X[0]);
-      result(0)=_p*X[0]-X[1]-X[0]*X[2];
-      result(0)=X[0]*X[1]-_b*X[2];
+      LinearAlgebra::Vector< Interval<R> > result(2); 
+      result(0)=x[1];
+      result(1)=-_delta*x[1]-x[0]*(_alpha+_beta*x[0]*x[0]);
       return result;
     }
      
     template<class R>
-    LinearAlgebra::Matrix<typename LorenzSystem<R>::F>
-    LorenzSystem<R>::jacobian(const Geometry::Point<R>& x) const
+    LinearAlgebra::Matrix<typename DuffingEquation<R>::F>
+    DuffingEquation<R>::jacobian(const Geometry::Point<R>& x) const
     {
-      LinearAlgebra::Matrix<F> result(3,3); 
-      result(0,0) = -_s;
-      result(0,1) = _s;
-      result(0,2) = 0;
-      result(1,0) = _p-x[2];
-      result(1,1) = -1;
-      result(1,2) = -x[0];
-      result(2,0) = x[1];
-      result(2,1) = x[0];
-      result(2,2) = -_b;
+      LinearAlgebra::Matrix<F> result(2,2); 
+      result(0,0) = 0;
+      result(0,1) = 1;
+      result(1,0) = -(_alpha+3.0*_beta*x[0]*x[0]);
+      result(1,1) = -_delta;
       return result;
     }
      
     template<class R>
     LinearAlgebra::Matrix< Interval<R> >
-    LorenzSystem<R>::jacobian(const Geometry::Rectangle<R>& X) const
+    DuffingEquation<R>::jacobian(const Geometry::Rectangle<R>& x) const
     {
-      LinearAlgebra::Matrix< Interval<R> > result(3,3); 
-      result(0,0) = R(-_s);
-      result(0,1) = _s;
-      result(0,2) = R(0);
-      result(1,0) = _p-X[2];
-      result(1,1) = R(-1);
-      result(1,2) = -X[0];
-      result(2,0) = X[1];
-      result(2,1) = X[0];
-      result(2,2) = R(-_b);
+      LinearAlgebra::Matrix< Interval<R> > result(2,2); 
+      result(0,0) = 0;
+      result(0,1) = 1;
+      result(1,0) = -(_alpha+3.0*_beta*x[0]*x[0]);
+      result(1,1) = -_delta;
       return result;
     }
      
      
     template<class R>
-    std::ostream& operator<<(std::ostream& os, const LorenzSystem<R>& ls) {
-      os << "LorenzSystem( beta=" << ls.beta() << ", rho=" << ls.rho() << ", sigma=" << ls.sigma() << " )";
+    std::ostream& operator<<(std::ostream& os, const DuffingEquation<R>& de) {
+      os << "DuffingEquation( delta=" << de.delta() << ", beta=" << de.beta() << ", alpha=" << de.alpha() << " )";
       return os;
     }
     
@@ -160,4 +147,4 @@ namespace Ariadne {
 }
 
 
-#endif /* _ARIADNE_LORENZ_SYSTEM_H */
+#endif /* _ARIADNE_DUFFING_EQUATION_H */

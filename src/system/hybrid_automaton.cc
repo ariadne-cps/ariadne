@@ -1,9 +1,8 @@
 /***************************************************************************
- *            python/system_module.cc
+ *            hybrid_automaton.cc
  *
- *  21 October 2005
- *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2006  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -22,25 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <boost/python.hpp>
-
 #include "real_typedef.h"
 
-template<class R> void export_map();
-template<class R> void export_affine_map();
-template<class R> void export_affine_multimap();
-template<class R> void export_polynomial_map();
- 
-template<class R> void export_vector_field();
-template<class R> void export_affine_vector_field();
+#include "system/discrete_mode.h"
+#include "system/discrete_transition.h"
+#include "system/hybrid_automaton.h"
 
-BOOST_PYTHON_MODULE(system)
-{
-  export_map<Ariadne::Real>();
-  export_affine_map<Ariadne::Real>();
-  export_affine_multimap<Ariadne::Real>();
-  export_polynomial_map<Ariadne::Real>();
-  
-  export_vector_field<Ariadne::Real>();
-  export_affine_vector_field<Ariadne::Real>();
+
+namespace Ariadne {
+  namespace System {
+
+    template class DiscreteMode<Real>;
+    template class DiscreteTransition<Real>;
+    template class HybridAutomaton<Real>;
+      
+  }
 }

@@ -67,7 +67,9 @@ namespace Ariadne {
      
       size_type position() const;
       
-      void push_back(const size_type& i) { assert(i<this->_number_of_variables); this->_entries.push_back(i); }
+      void push_back(const size_type& i) { 
+        if(!(i<this->_number_of_variables)) { throw InvalidIndex(__PRETTY_FUNCTION__); }
+        this->_entries.push_back(i); }
       void pop_back() { this->_entries.pop_back(); }
       
       friend std::ostream& operator<<(std::ostream&, const Index&);
@@ -144,7 +146,11 @@ namespace Ariadne {
       /*! Increment the the \a i th index, thereby increasing the degree. */
       void increment_index(const size_type& i) { ++this->_occurrences[i]; ++this->_degree; }
       /*! Decrement the the \a i th index, thereby decreasing the degree. */
-      void decrement_index(const size_type& i) { assert(this->_occurrences[i]>0); --this->_occurrences[i]; --this->_degree; }
+      void decrement_index(const size_type& i) { 
+        if(!(this->_occurrences[i]>0)) { 
+          //throw std::runtime_error(__PRETTY_FUNCTION__ ": the number of occurence of the index must be positive"); }
+          throw std::runtime_error(__PRETTY_FUNCTION__ ); }
+        --this->_occurrences[i]; --this->_degree; }
       
       /*! Set the value of the \a i th index to \a j. */
       void set(const size_type& i, const size_type j) { this->set_index(i,j); }
@@ -153,7 +159,7 @@ namespace Ariadne {
       size_type _degree;
       array<size_type> _occurrences;
     };
-    
+      
     inline
     size_type MultiIndex::number() const
     {
@@ -197,7 +203,6 @@ namespace Ariadne {
     inline
     bool MultiIndex::operator<(const MultiIndex& a2) const {
       const MultiIndex& a1=*this;
-      assert(a1.number_of_variables()==a2.number_of_variables());
       if(a1.degree()!=a2.degree()) {
         return a1.degree()<a2.degree();
       } else {
@@ -214,7 +219,6 @@ namespace Ariadne {
     MultiIndex MultiIndex::operator+(const MultiIndex& a2) const {
       MultiIndex result(a2.number_of_variables());
       const MultiIndex& a1=*this;
-      assert(a1.number_of_variables()==a2.number_of_variables());
       for(size_type i=0; i!=a1.number_of_variables(); ++i) {
         result.set_index(i,a1[i]+a2[i]);
       }

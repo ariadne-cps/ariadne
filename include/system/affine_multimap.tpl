@@ -43,15 +43,13 @@ namespace Ariadne {
     BS<R>
     AffineMultiMap<R,BS>::operator() (const Geometry::Point<R>& pt) const
     {
-      throw NotImplemented("BS<R> AffineMultiMap<R,BS>::operator() (const Geometry::Point<R>&) const");
+      throw NotImplemented(__PRETTY_FUNCTION__);
 
       using namespace Ariadne::LinearAlgebra;
       typedef typename Numeric::traits<R>::arithmetic_type F;
       typedef typename Numeric::traits<R>::interval_type I;
      
-      if (this->argument_dimension()!=pt.dimension()) {
-        throw std::domain_error("AffineMultiMap<R,BS>::operator() (const Point&): the map does not have the same dimension of the point.");
-      }
+      check_argument_dimension(*this,pt,__PRETTY_FUNCTION__);
       Vector<I> iv=this->A()*Vector<F>(pt.position_vector());
 //      return over_approximation(minkowski_sum(this->S(),BS<R>(Geometry::Rectangle<R>(iv))));
     }
@@ -60,14 +58,12 @@ namespace Ariadne {
     BS<R>
     AffineMultiMap<R,BS>::operator() (const BS<R>& bs) const
     {
-      throw NotImplemented("BS<R> AffineMultiMap<R,BS>::operator() (const BS<R>&) const");
+      throw NotImplemented(__PRETTY_FUNCTION__);
 
       using namespace Ariadne::LinearAlgebra;
       using namespace Ariadne::Geometry;
 
-      if (this->argument_dimension()!=bs.dimension()) {
-        throw std::domain_error("AffineMultiMap<R,BS>::operator() (const Point&): the map does not have the same dimension of the point.");
-      }
+      check_argument_dimension(*this,bs,__PRETTY_FUNCTION__);
 //      return over_approximation(minkowski_sum(AffineMap<R>(this->A()).image(bs),this->S()));
     }
     

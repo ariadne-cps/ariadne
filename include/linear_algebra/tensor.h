@@ -32,6 +32,7 @@
 
 #include "../declarations.h"
 #include "../base/array.h"
+#include "../base/exceptions.h"
 #include "../numeric/numerical_traits.h"
 #include "../linear_algebra/multi_index.h"
 
@@ -168,37 +169,37 @@ namespace Ariadne {
       //! \name Element acces for low-rank tensors
       /*! \brief A constant reference to the \a i-th element of a rank-1 tensor. */
       const R& operator() (const size_type& i) const {
-        assert(this->rank()==1);
+        if(this->rank()!=1) { throw InvalidIndex(__PRETTY_FUNCTION__); }
         return this->_elements[i];
       }
       
       /*! \brief A reference to the \a i-th element of a rank-1 tensor. */
       R& operator() (const size_type& i) {
-        assert(this->rank()==1);
+        if(this->rank()!=1) { throw InvalidIndex(__PRETTY_FUNCTION__); }
         return this->_elements[i];
       }
       
       /*! \brief A constant reference to the (\a i,\a j)-th element of a rank-2 tensor. */
       const R& operator() (const size_type& i, const size_type& j) const {
-        assert(this->rank()==2);
+        if(this->rank()!=2) { throw InvalidIndex(__PRETTY_FUNCTION__); }
         return this->_elements[i*this->_sizes[1]+j];
       }
       
       /*! \brief A reference to the (\a i,\a j)-th element of a rank-2 tensor. */
       R& operator() (const size_type& i, const size_type& j) {
-        assert(this->rank()==2);
+        if(this->rank()!=2) { throw InvalidIndex(__PRETTY_FUNCTION__); }
         return this->_elements[i*this->_sizes[1]+j];
       }
       
       /*! \brief A constant reference to the (\a i,\a j,\a k)-th element of a rank-3 tensor. */
       const R& operator() (const size_type& i, const size_type& j, const size_type& k) const {
-        assert(this->rank()==3);
+        if(this->rank()!=3) { throw InvalidIndex(__PRETTY_FUNCTION__); }
         return this->_elements[(i*_sizes[1]+j)*_sizes[2]+k];
       }
       
       /*! \brief A reference to the (\a i,\a j,\a k)-th element element of a rank-3 tensor. */
       R& operator() (const size_type& i, const size_type& j, const size_type& k) {
-        assert(this->rank()==3);
+        if(this->rank()!=3) { throw InvalidIndex(__PRETTY_FUNCTION__); }
         return this->_elements[(i*_sizes[1]+j)*_sizes[2]+k];
       }
       //@}
@@ -355,8 +356,8 @@ namespace Ariadne {
     size_type 
     SymmetricTensor<R>::position(const multi_index_type& j) const
     {
-      assert(j.number_of_variables()==this->_arg_size);
-      assert(j.degree()==this->_degree);
+      if(j.number_of_variables()!=this->_arg_size) { throw InvalidIndex(__PRETTY_FUNCTION__); }
+      if(j.degree()!=this->_degree) { throw InvalidIndex(__PRETTY_FUNCTION__); }
       return j.position();
     }
     
@@ -364,7 +365,7 @@ namespace Ariadne {
     size_type 
     SymmetricTensor<R>::position(const index_array_type& i) const
     {
-      assert(i.size()==this->_degree);
+      if(i.size()!=this->_degree) { throw InvalidIndex(__PRETTY_FUNCTION__); }
       return multi_index_type(this->_arg_size,i).position();
     }
     
@@ -460,13 +461,14 @@ namespace Ariadne {
       
       /*! \brief A constant reference to the element indexed by \a (i,j). */
       const R& operator() (const size_type& i, const multi_index_type j) const {
-        assert(j.degree()==this->degree());
+        if(j.degree()!=this->_degree) { throw InvalidIndex(__PRETTY_FUNCTION__); }
+        if(i>=this->_res_size) { throw InvalidIndex(__PRETTY_FUNCTION__); }
         return this->_elements[this->position(i,j)]; }
       
       /*! \brief A reference to the element indexed by \a (i,j). */
       R& operator() (const size_type& i, const multi_index_type j) {
         //std::cerr << "DerivativeTensor<R>::operator() (const size_type& i, const multi_index_type j)" << std::endl;
-        assert(j.degree()==this->degree());
+        if(j.degree()!=this->degree()) { throw InvalidIndex(__PRETTY_FUNCTION__); }
         return this->_elements[this->position(i,j)]; }
     
       /*! \brief A constant reference to the element indexed by \a i. */
@@ -504,9 +506,9 @@ namespace Ariadne {
     size_type 
     DerivativeTensor<R>::position(const size_type& i, const multi_index_type& j) const
     {
-      assert(i<this->_res_size);
-      assert(j.number_of_variables()==this->_arg_size);
-      assert(j.degree()==this->_degree);
+      if(i>=this->_res_size) { throw InvalidIndex(__PRETTY_FUNCTION__); }
+      if(j.number_of_variables()!=this->_arg_size) { throw InvalidIndex(__PRETTY_FUNCTION__); }
+      if(j.degree()!=this->degree()) { throw InvalidIndex(__PRETTY_FUNCTION__); }
       return i*choose(this->_arg_size+this->_degree-1,this->_degree)+j.position();
     }
     

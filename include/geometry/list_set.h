@@ -114,9 +114,7 @@ namespace Ariadne {
       /*! \brief Adjoins a basic set to the back of the list. */
       void push_back(const BS<R>& A) {
         if (this->dimension()==0) { this->_dimension=A.dimension(); }
-        if (A.dimension()!=this->dimension()) {
-          throw std::invalid_argument("The denotable set has a different space dimension to the list.");
-        }
+        check_dimension(*this,A,__PRETTY_FUNCTION__);
         this->_vector.push_back(A);
       }
 
@@ -142,9 +140,7 @@ namespace Ariadne {
       * \return The i-th basic set maitained by the ListSet.
       */
       const BS<R>& get(size_type index) const {
-        if (this->size()<=index)
-          throw std::invalid_argument("Invalid index in ListSet::get(size_type).");
-
+        check_index(*this,index,__PRETTY_FUNCTION__);
         return this->_vector[index];
       }
 
@@ -154,9 +150,7 @@ namespace Ariadne {
       * \param set is the new set.
       */
       void set(size_type index, const BS<R>& set) {
-        if (this->size()<=index) 
-          throw std::invalid_argument("Invalid index in ListSet::set(size_type, const BasicSet& ).");
-        
+        check_index(*this,index,__PRETTY_FUNCTION__);
         this->_vector[index]=set;
       }
 
@@ -166,9 +160,7 @@ namespace Ariadne {
       * \return The i-th basic set maitained by the ListSet.
       */
       const BS<R>& operator[](size_type index) const {
-        if (this->size()<=index)
-          throw std::invalid_argument("Invalid index in ListSet::operator[](size_type).");
-
+        check_index(*this,index,__PRETTY_FUNCTION__);
         return this->_vector[index];
       }
 
@@ -334,11 +326,7 @@ namespace Ariadne {
         if(this->dimension()==0) { 
           this->_dimension=A.dimension(); 
         }
-
-        if(A.dimension()!=this->dimension()) {
-          throw std::invalid_argument("The two denotable sets have different space dimensions.");
-        }
-
+        check_dimension(*this,A,__PRETTY_FUNCTION__);
         this->_vector.reserve(A.size());
         for(typename ListSet<R,BS>::const_iterator iter=A.begin(); iter!=A.end(); ++iter) {
           this->_vector.push_back(*iter);
@@ -365,9 +353,7 @@ namespace Ariadne {
         if(this->dimension()==0) { 
           this->_dimension=A.dimension(); 
         }
-        if (A.dimension()!=this->dimension()) {
-          throw std::invalid_argument("The denotable set and the basic set have different space dimensions.");
-        }
+        check_dimension(*this,A,__PRETTY_FUNCTION__);
         if(!A.empty()) {
           this->_vector.push_back(A);
         }

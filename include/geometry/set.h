@@ -1,5 +1,5 @@
 /***************************************************************************
- *            sphere.tpl
+ *            set.h
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -21,29 +21,53 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "sphere.h"
+/*! \file set.h
+ *  \brief General sets.
+ */
+
+#ifndef _ARIADNE_SET_H
+#define _ARIADNE_SET_H
+
+#include <iosfwd>
+
+#include "../declarations.h"
+
+#include "../base/tribool.h"
 
 namespace Ariadne {
   namespace Geometry {
 
+    /*! An abstract base class for general sets. */
     template<class R>
-    std::ostream&
-    operator<<(std::ostream& os, const Sphere<R>& s) 
-    {
-      if(s.empty()) {
-        os << "Empty";
-      }
-      else if(s.dimension() > 0) {
-        os << "Sphere( centre=" << s.centre() << ", radius=" << s.radius() << " )";
-      }
-      return os;
+    class Set {
+     public:
+      typedef R real_type;
+      typedef Point<R> state_type;
+     
+      virtual Set<R>* clone() const = 0;
+     
+      virtual ~Set() = 0;
+      virtual dimension_type dimension() const = 0;
+      virtual tribool contains(const Point<R>&) = 0;
+     
+      virtual Rectangle<R> bounding_box() = 0;
+      virtual tribool disjoint(const Rectangle<R>&) = 0;
+      virtual tribool superset(const Rectangle<R>&) = 0;     
+    };
+     
+    template<class R> inline tribool disjoint(const Set<R>& A, const Rectangle<R>& B) {
+      return A.disjoint(B);
     }
     
-    template<class R>
-    std::istream& 
-    operator>>(std::istream& is, Sphere<R>& s)
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
+    template<class R> inline tribool disjoint(const Rectangle<R>& A, const Set<R>& B) {
+      return B.disjoint(A);
     }
+    
+    template<class R> inline tribool subset(const Rectangle<R>& A, const Set<R>& B) {
+      return B.superset(A);
+    }
+    
   }
 }
+
+#endif /* _ARIADNE_SET_H */

@@ -100,10 +100,10 @@ namespace Ariadne {
      public:
       PlanarProjectionMap() : _d(2), _i(0), _j(1) { }
       PlanarProjectionMap(dimension_type d, dimension_type i, dimension_type j)
-        : _d(d), _i(i), _j(j) { assert(i<d && j<d); }
+        : _d(d), _i(i), _j(j) { if(i>=d || j>=d) { throw InvalidIndex(__PRETTY_FUNCTION__); } }
       template<class R> Geometry::Point<double> operator() (const Geometry::Point<R>& pt) const {
         Geometry::Point<double> result(2); 
-        assert(pt.dimension()==_d);
+        check_dimension(pt,_d,__PRETTY_FUNCTION__);
         result[0]=conv_approx<double>(pt[_i]); 
         result[1]=conv_approx<double>(pt[_j]); 
         return result;
@@ -117,7 +117,7 @@ namespace Ariadne {
       }
       template<class R> Geometry::Rectangle<double> operator() (const Geometry::Rectangle<R>& r) const {
         Geometry::Rectangle<double> result(2); 
-        assert(r.dimension()==_d);
+        check_dimension(r,this->_d);
         result.set_lower_bound(0,conv_approx<double>(r.lower_bound(0)));
         result.set_upper_bound(0,conv_approx<double>(r.upper_bound(0)));
         result.set_lower_bound(1,conv_approx<double>(r.lower_bound(1)));
@@ -134,7 +134,7 @@ namespace Ariadne {
       dimension_type _d;
       dimension_type _i;
       dimension_type _j;
-    };
+      };
     
     Geometry::Point<double> baricentre_of_points(const Geometry::PointList<double>& vertices)
     {
@@ -675,7 +675,7 @@ namespace Ariadne {
       }
       return eps;
     }
-
+    
     template<class R>
     epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::GridMaskSet<R>& ds)

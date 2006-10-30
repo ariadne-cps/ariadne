@@ -292,7 +292,7 @@ namespace Ariadne {
     Applicator<R>::reach(const System::Map<R>& f, 
                          const Geometry::GridMaskSet<R>& initial_set) const 
     {
-      throw NotImplemented("Applicator<R>::reach(Map<R>& f,GridMaskSet<R>)");
+      throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
     template<class R>

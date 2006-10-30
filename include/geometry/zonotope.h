@@ -115,8 +115,9 @@ namespace Ariadne {
         : _centre(c), _generators(g)
       {
         if(c.dimension()!=g.number_of_rows()) { 
-          throw InvalidGenerators("Zonotope<R>::Zonotope(Point<R1>,Matrix<R2>): "
-                                  "The matrix of principal directions does not have the same number of rows as the point dimension.");
+//          throw InvalidGenerators("Zonotope<R>::Zonotope(Point<R1>,Matrix<R2>): "
+//                                  "The matrix of principal directions does not have the same number of rows as the point dimension.");
+          throw InvalidGenerators(__PRETTY_FUNCTION__);
         }
         this->minimize_generators();
       }
@@ -127,8 +128,9 @@ namespace Ariadne {
         : _centre(c), _generators(c.dimension(),g1.number_of_columns()+1) 
       { 
         if(c.dimension()!=g1.number_of_rows() || c.dimension()!=g2.size()) { 
-          throw InvalidGenerators("Zonotope<R>::Zonotope(Point<R1>,Matrix<R2>,Vector<R3>): "
-                                  "The principal directions do not all have the same size as the point dimension.");
+//          throw InvalidGenerators("Zonotope<R>::Zonotope(Point<R1>,Matrix<R2>,Vector<R3>): "
+//                                  "The principal directions do not all have the same size as the point dimension.");
+          throw InvalidGenerators(__PRETTY_FUNCTION__);
         }
         for(size_type i=0; i!=this->dimension();++i) {
           for(size_type j1=0; j1!=g1.number_of_columns(); ++j1) {
@@ -144,8 +146,9 @@ namespace Ariadne {
         : _centre(c), _generators(c.dimension(),g1.number_of_columns()+g2.number_of_columns()) 
       { 
         if(c.dimension()!=g1.number_of_rows() || c.dimension()!=g2.number_of_rows()) { 
-          throw InvalidGenerators("Zonotope<R>::Zonotope(Point<R1>,Matrix<R2>,Matrix<R3>): "
-                                  "The principal directions do not all have the same size as the point dimension.");
+//          throw InvalidGenerators("Zonotope<R>::Zonotope(Point<R1>,Matrix<R2>,Matrix<R3>): "
+//                                  "The principal directions do not all have the same size as the point dimension.");
+          throw InvalidGenerators(__PRETTY_FUNCTION__);
         }
         for(size_type i=0; i!=this->dimension();++i) {
           for(size_type j1=0; j1!=g1.number_of_columns(); ++j1) {

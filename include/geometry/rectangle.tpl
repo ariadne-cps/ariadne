@@ -64,7 +64,7 @@ namespace Ariadne {
     Rectangle<R>
     Rectangle<R>::quadrant(const Combinatoric::BinaryWord& w) const 
     {
-      check_dimension_size(*this,w);
+      check_dimension_size(*this,w,__PRETTY_FUNCTION__);
       Rectangle<R> quadrant(this->dimension());
       
       for (size_type i=0; i!=this->dimension(); ++i) {
@@ -138,7 +138,7 @@ namespace Ariadne {
       state_type result(d); 
             
       if (i >= (size_type)(1<<d)) {
-        throw InvalidIndex("Rectangle::vertex(i): Invalid index");
+        throw InvalidIndex(__PRETTY_FUNCTION__);
       }
       
       for (size_type j=0; j<d; ++j) {
@@ -174,7 +174,7 @@ namespace Ariadne {
     subset(const Rectangle<R>& A, 
            const ListSet<R,Geometry::Rectangle>& B)
     {
-      check_dimension(A,B);
+      check_dimension(A,B,__PRETTY_FUNCTION__);
       return Geometry::subset(A, GridMaskSet<R>(B));
     }
     
@@ -225,7 +225,7 @@ namespace Ariadne {
       else {
         /* representation as lower and upper corners */
         /* FIXME */
-        // throw invalid_input("Not implemented");
+        throw invalid_input(__PRETTY_FUNCTION__);
       }
       return is;
     }

@@ -36,6 +36,7 @@
 
 #include "../base/array.h"
 #include "../base/iterator.h"
+#include "../base/exceptions.h"
 
 #include "../numeric/interval.h"
 #include "../combinatoric/array_operations.h"
@@ -204,7 +205,7 @@ namespace Ariadne {
       explicit LatticeBlock(dimension_type n=0) : _lower(n), _upper(n) { }
       /*!\brief Construct a lattice rectangle specified by lower and upper corners. */
       explicit LatticeBlock(const IndexArray& l, const IndexArray& u)
-        : _lower(l), _upper(u) { assert(l.size()==u.size()); }
+        : _lower(l), _upper(u) { check_size(l,u,__PRETTY_FUNCTION__); }
       /*!\brief Construct a lattice rectangle defined by a string literal. */
       explicit LatticeBlock(const std::string& s);
 
@@ -367,7 +368,7 @@ namespace Ariadne {
 
       /*! \brief Adjoins a LatticeCell to the set. */
       void adjoin(const LatticeCell& c) { 
-        assert(this->dimension() == c.dimension());
+        check_dimension(*this,c,__PRETTY_FUNCTION__);
         this->_list.push_back(c.position()); 
       }
       /*! \brief Adjoins all cells in a LatticeBlock to the set. */
@@ -434,13 +435,13 @@ namespace Ariadne {
 
       /*! \brief Adjoins a LatticeCell to the set. */
       void adjoin(const LatticeCell& c) { 
-        assert(this->dimension() == c.dimension());
+        check_dimension(*this,c,__PRETTY_FUNCTION__); 
         this->_list.push_back(c.lower_corner()); 
         this->_list.push_back(c.upper_corner()); 
       }
       /*! \brief Adjoins all cells in a LatticeBlock to the set. */
       void adjoin(const LatticeBlock& r) { 
-        assert(this->dimension() == r.dimension());
+        check_dimension(*this,r,__PRETTY_FUNCTION__);
         this->_list.push_back(r.lower_corner()); 
         this->_list.push_back(r.upper_corner()); 
       }

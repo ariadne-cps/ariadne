@@ -113,7 +113,7 @@ namespace Ariadne {
       : _A(A), _b(b)
     {
       if(A.number_of_rows()!=b.size()) { 
-        throw IncompatibleSizes("Polyhedron<R>::Polyhedron(Matrix<R>,Vector<R>)");
+        throw IncompatibleSizes(__PRETTY_FUNCTION__);
       }
     }
     
@@ -141,7 +141,7 @@ namespace Ariadne {
     Polyhedron<R>::Polyhedron(const Polytope<R>& pltp)
       : _A(), _b()
     {   
-      throw std::runtime_error("Polyhedron<R>::Polyhedron(const Polytope<R>& pltp) not implemented");
+      throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
     template<>
@@ -225,7 +225,7 @@ namespace Ariadne {
     Rectangle<R> 
     Polyhedron<R>::bounding_box() const 
     {
-      throw std::runtime_error("Polyhedron<R>::bounding_box() const not implemented");
+      throw NotImplemented(__PRETTY_FUNCTION__);
     }
       
     template<class R>
@@ -239,14 +239,14 @@ namespace Ariadne {
     tribool 
     Polyhedron<R>::empty() const
     {
-      throw std::runtime_error("Polyhedron<R>::empty() const not implemented");
+      throw NotImplemented(__PRETTY_FUNCTION__);
     }
 
     template<class R>
     tribool 
     Polyhedron<R>::bounded() const
     {
-      throw std::runtime_error("Polyhedron<R>::bounded() const not implemented");
+      throw NotImplemented(__PRETTY_FUNCTION__);
     }
 
     template<class R>
@@ -275,7 +275,7 @@ namespace Ariadne {
     tribool 
     disjoint(const Polyhedron<R>& p, const Rectangle<R>& r)
     {
-      throw("disjoint(const Polyhedron<R>&, const Rectangle<R>&) not implemented");
+      throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
     
@@ -292,7 +292,7 @@ namespace Ariadne {
     tribool 
     disjoint(const Polyhedron<R>& plyhd1, const Polyhedron<R>& plyhd2)
     {
-      throw("disjoint(const Polyhedron<R>&, const Polyhedron<R>&) not implemented");
+      throw NotImplemented(__PRETTY_FUNCTION__);
       
       typedef Rational F;
       LinearAlgebra::Matrix<F> qA(plyhd1.number_of_constraints() + plyhd2.number_of_constraints(), plyhd1.dimension());
@@ -353,10 +353,8 @@ namespace Ariadne {
     Polyhedron<R> 
     open_intersection(const Polyhedron<R>& A, const Polyhedron<R>& B)
     {
-      if(A.dimension()!=B.dimension()) {
-        throw std::runtime_error("Incompatible dimensions in open_intersection(const Polyhedron<R>&, const Polyhedron<R>&)");
-      }
-      throw std::runtime_error("open_intersection(const Polyhedron<R>&, const Polyhedron<R>&) not implemented");
+      check_dimension(A,B,__PRETTY_FUNCTION__);
+      throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
     
@@ -364,9 +362,7 @@ namespace Ariadne {
     Polyhedron<R> 
     closed_intersection(const Polyhedron<R>& p1, const Polyhedron<R>& p2)
     {
-      if(p1.dimension()!=p1.dimension()) {
-        throw std::runtime_error("Incompatible dimensions in closed_intersection(const Polyhedron<R>&, const Polyhedron<R>&)");
-      }
+      check_dimension(p1,p2,__PRETTY_FUNCTION__);
       dimension_type d=p1.dimension();
       size_type nc1=p1.number_of_constraints();
       size_type nc2=p2.number_of_constraints();
@@ -399,7 +395,7 @@ namespace Ariadne {
     std::istream& 
     Polyhedron<R>::read(std::istream& is) 
     {
-      throw std::runtime_error("std::istream& operator>>(std::istream&, Polyhedron<R>&) not implemented");
+      throw NotImplemented(__PRETTY_FUNCTION__);
     }
 
 

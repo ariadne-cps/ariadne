@@ -79,7 +79,7 @@ namespace Ariadne {
     template<class R>
     PartitionTreeSet<R>::operator GridBlockListSet<R>() const 
     {
-      throw std::domain_error("PartitionTreeSet<R>::operator GridBlockListSet<R>() const not implemented");
+      throw NotImplemented(__PRETTY_FUNCTION__);
       //FiniteGrid<R>* grid_ptr=new FiniteGrid<R>(this->bounding_box(),this->subdivisions());
       //GridBlockListSet<R> res(*grid_ptr);
       //for(const_iterator iter=begin(); iter!=end(); ++iter) {

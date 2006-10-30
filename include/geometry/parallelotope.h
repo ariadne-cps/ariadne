@@ -92,8 +92,9 @@ namespace Ariadne {
         : Zonotope<R>(state_type(c),m)
       {
         if (m.number_of_rows()!=m.number_of_columns()) {
-          throw InvalidGenerators("Parallelotope<R>::Parallelotope(Vector<R>,Matrix<R>): "
-                                  "The matrix of principal directions is not a square matrix");
+//          throw InvalidGenerators("Parallelotope<R>::Parallelotope(Vector<R>,Matrix<R>): "
+//                                  "The matrix of principal directions is not a square matrix");
+          throw InvalidGenerators(__PRETTY_FUNCTION__);
         }
       }
       
@@ -102,8 +103,9 @@ namespace Ariadne {
         : Zonotope<R>(c,m)
       {
         if (m.number_of_rows()!=m.number_of_columns()) {
-          throw InvalidGenerators("Parallelotope<R>::Parallelotope(Vector<R>,Matrix<R>): "
-                                  "The matrix of principal directions is not a square matrix");
+//          throw InvalidGenerators("Parallelotope<R>::Parallelotope(Vector<R>,Matrix<R>): "
+//                                  "The matrix of principal directions is not a square matrix");
+          throw InvalidGenerators(__PRETTY_FUNCTION__);
         }
       }
        
@@ -191,7 +193,7 @@ namespace Ariadne {
       
       Parallelotope(const Zonotope<R>& z) : Zonotope<I>(z) { 
         if(z.dimension()!=z.number_of_generators()) { 
-          throw InvalidGenerators("Parallelotope(const Zonotope<R>& z)"); 
+          throw InvalidGenerators(__PRETTY_FUNCTION__);
         }
       }
 

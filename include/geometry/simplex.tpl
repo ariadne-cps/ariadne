@@ -42,7 +42,7 @@ namespace Ariadne {
       : Polytope<R>(A)
     {
       if(this->dimension()+1u!=this->number_of_vertices()) {
-        throw std::runtime_error("A simplex of dimension d must have d+1 vertices");
+        throw IncompatibleSizes(__PRETTY_FUNCTION__);
       }
     }
     
@@ -51,7 +51,7 @@ namespace Ariadne {
       : Polytope<R>(v)
     {
       if(this->dimension()+1u!=this->number_of_vertices()) {
-        throw std::runtime_error("A simplex of dimension d must have d+1 vertices");
+        throw IncompatibleSizes(__PRETTY_FUNCTION__);
       }
     }
     
@@ -99,7 +99,7 @@ namespace Ariadne {
     std::istream& 
     Simplex<R>::read(std::istream& is)
     {
-      throw std::domain_error("Simplex<R>::read(std::istream& is)");
+      throw NotImplemented(__PRETTY_FUNCTION__);
     }
       
   }

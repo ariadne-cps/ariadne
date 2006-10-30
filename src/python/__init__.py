@@ -1,4 +1,4 @@
-__all__=["base","numeric", "linear_algebra","geometry","system","evaluation"]
+__all__=["base","numeric","linear_algebra","combinatoric","geometry","system","evaluation","output","models"]
 
 from base import *
 from numeric import *

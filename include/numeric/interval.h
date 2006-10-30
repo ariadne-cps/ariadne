@@ -35,6 +35,7 @@
 #include "../declarations.h"
 
 #include "../base/tribool.h"
+#include "../base/exceptions.h"
 
 #include "../numeric/numerical_traits.h"
 #include "../numeric/conversion.h"
@@ -44,8 +45,6 @@
 namespace Ariadne {
   namespace Numeric {
     //using namespace boost::numeric::interval_lib;
-
-  class DivideByZeroException : public std::exception { };
 
     /*!\ingroup Numeric
      * \brief A templated class representing an interval of real numbers.

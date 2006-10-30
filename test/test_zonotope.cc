@@ -21,6 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <cassert>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -132,7 +133,7 @@ test_zonotope()
     cout << "subset(z1,z2)=" << subset(z1,z2) << endl;
     assert(disjoint(r1,z2));
   }
-  catch(std::runtime_error e) {
+  catch(NotImplemented e) {
     cerr << "WARNING: " << e.what();
   }
   

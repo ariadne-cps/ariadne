@@ -1,5 +1,5 @@
 /***************************************************************************
- *            python/system_module.cc
+ *            python/models.cc
  *
  *  21 October 2005
  *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
@@ -26,21 +26,11 @@
 
 #include "real_typedef.h"
 
-template<class R> void export_map();
-template<class R> void export_affine_map();
-template<class R> void export_affine_multimap();
-template<class R> void export_polynomial_map();
- 
-template<class R> void export_vector_field();
-template<class R> void export_affine_vector_field();
+template<class R> void export_henon_map();
+template<class R> void export_lorenz_system();
 
-BOOST_PYTHON_MODULE(system)
+BOOST_PYTHON_MODULE(models)
 {
-  export_map<Ariadne::Real>();
-  export_affine_map<Ariadne::Real>();
-  export_affine_multimap<Ariadne::Real>();
-  export_polynomial_map<Ariadne::Real>();
-  
-  export_vector_field<Ariadne::Real>();
-  export_affine_vector_field<Ariadne::Real>();
+  export_henon_map<Ariadne::Real>();
+  export_lorenz_system<Ariadne::Real>();
 }

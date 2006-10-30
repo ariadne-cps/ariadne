@@ -74,7 +74,7 @@ namespace Ariadne {
         std::cerr << "integrate(const VectorField<R>& vf, const Geometry::Rectangle<R>& r, const time_type& t)" << std::endl;
       }
 
-      assert(vector_field.dimension()==initial_set.dimension());
+      check_dimension(vector_field,initial_set,__PRETTY_FUNCTION__);
       
       const System::VectorField<R>& vf(vector_field);
       Geometry::Rectangle<R> r=initial_set;
@@ -108,7 +108,7 @@ namespace Ariadne {
 #ifdef DEBUG
       std::cerr << "integrate(const VectorField<R>& vf, const Geometry::Rectangle<R>& r, const time_type& t)" << std::endl;
 #endif
-      assert(vector_field.dimension()==initial_set.dimension());
+      check_dimension(vector_field,initial_set(),__PRETTY_FUNCTION__);
       
       const System::VectorField<R>& vf(vector_field);
       Geometry::Rectangle<R> r=initial_set;

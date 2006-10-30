@@ -30,9 +30,10 @@
 #include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
 #include "geometry/polytope.h"
-#include "system/henon_map.h"
 #include "evaluation/applicator.h"
 #include "output/epsfstream.h"
+
+#include "models/henon.h"
 
 #include "test.h"
 

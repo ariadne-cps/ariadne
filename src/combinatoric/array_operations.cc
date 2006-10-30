@@ -24,6 +24,7 @@
 #include "combinatoric/array_operations.h"
 
 #include "base/array.h"
+#include "base/exceptions.h"
 
 namespace Ariadne {
   namespace Base {
@@ -51,7 +52,7 @@ namespace Ariadne {
     BooleanArray&
     operator&=(BooleanArray& v1, const BooleanArray& v2)
     {
-      assert(v1.size()==v2.size());
+      check_size(v1,v2,__PRETTY_FUNCTION__);
       typedef BooleanArray::const_iterator const_iterator;
       typedef BooleanArray::iterator iterator;
 
@@ -70,7 +71,7 @@ namespace Ariadne {
     BooleanArray&
     operator|=(BooleanArray& v1, const BooleanArray& v2)
     {
-      assert(v1.size()==v2.size());
+      check_size(v1,v2,__PRETTY_FUNCTION__);
       typedef BooleanArray::const_iterator const_iterator;
       typedef BooleanArray::iterator iterator;
 
@@ -89,7 +90,7 @@ namespace Ariadne {
     BooleanArray&
     operator-=(BooleanArray& v1, const BooleanArray& v2)
     {
-      assert(v1.size()==v2.size());
+      check_size(v1,v2,__PRETTY_FUNCTION__);
       typedef BooleanArray::const_iterator const_iterator;
       typedef BooleanArray::iterator iterator;
 
@@ -129,7 +130,7 @@ namespace Ariadne {
     bool
     operator<=(const BooleanArray& v1, const BooleanArray& v2)
     {
-      assert(v1.size()==v2.size());
+      check_size(v1,v2,__PRETTY_FUNCTION__);
       typedef BooleanArray::const_iterator const_iterator;
       const_iterator v1_iter=v1.begin();
       const_iterator v2_iter=v2.begin();
@@ -147,7 +148,7 @@ namespace Ariadne {
     bool
     lexicographic_less(const IndexArray& s1, const IndexArray& s2)
     {
-      assert(s1.size() == s2.size());
+      check_size(s1,s2,__PRETTY_FUNCTION__);
       for(dimension_type i=0; i!=s1.size(); ++i) {
         if(s1[i]<s2[i]) {
           return true;
@@ -162,7 +163,7 @@ namespace Ariadne {
     bool
     lexicographic_less_equal(const IndexArray& s1, const IndexArray& s2)
     {
-      assert(s1.size() == s2.size());
+      check_size(s1,s2,__PRETTY_FUNCTION__);
       for(dimension_type i=0; i!=s1.size(); ++i) {
         if(s1[i]<s2[i]) {
           return true;
@@ -177,7 +178,7 @@ namespace Ariadne {
     bool
     coordinate_less_equal(const IndexArray& s1, const IndexArray& s2)
     {
-      assert(s1.size() == s2.size());
+      check_size(s1,s2,__PRETTY_FUNCTION__);
       for(dimension_type i=0; i!=s1.size(); ++i) {
         if(s1[i]>s2[i]) {
           return false;

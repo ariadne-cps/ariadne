@@ -56,7 +56,7 @@ namespace Ariadne {
     operator+(const Tensor<R>& T1, const Tensor<R>& T2)
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
-      assert(T1.sizes()==T2.sizes());
+      if(T1.sizes()!=T2.sizes()) { throw IncompatibleSizes(__PRETTY_FUNCTION__); }
       Tensor<F> result(T1.sizes());
       for(size_type i=0; i!=result.number_of_elements(); ++i) {
         result.begin()[i]=T1.begin()[i]+T2.begin()[i];
@@ -93,7 +93,9 @@ namespace Ariadne {
     operator+(const SymmetricTensor<R>& T1, const SymmetricTensor<R>& T2)
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
-      assert(T1.argument_size()==T2.argument_size() && T1.degree()==T2.degree());
+      if(!(T1.argument_size()==T2.argument_size() && T1.degree()==T2.degree())) {
+        throw IncompatibleSizes(__PRETTY_FUNCTION__); 
+      }
       SymmetricTensor<F> result(T1.argument_size(),T1.degree());
       for(size_type i=0; i!=result.number_of_independent_elements(); ++i) {
         result.begin()[i]=T1.begin()[i]+T2.begin()[i];
@@ -151,8 +153,11 @@ namespace Ariadne {
     DerivativeTensor<typename Numeric::traits<R>::arithmetic_type>
     operator+(const DerivativeTensor<R>& T1, const DerivativeTensor<R>& T2) 
     {
-      assert(T1.result_size()==T2.result_size() && T1.argument_size()==T2.argument_size() &&
-             T1.degree()==T2.degree());
+      if(!(T1.result_size()==T2.result_size() && T1.argument_size()!=T2.argument_size() &&
+           T1.degree()==T2.degree())) 
+      {
+        throw IncompatibleSizes(__PRETTY_FUNCTION__);
+      }
       DerivativeTensor<typename Numeric::traits<R>::arithmetic_type> result(T1.result_size(),T1.argument_size(),T1.degree());
       for(size_type i=0; i!=result.number_of_independent_elements(); ++i) {
         result.begin()[i]=T1.begin()[i]+T2.begin()[i];
@@ -165,8 +170,11 @@ namespace Ariadne {
     DerivativeTensor<typename Numeric::traits<R>::arithmetic_type>
     operator-(const DerivativeTensor<R>& T1, const DerivativeTensor<R>& T2) 
     {
-      assert(T1.result_size()==T2.result_size() && T1.argument_size()==T2.argument_size() &&
-             T1.degree()==T2.degree());
+      if(!(T1.result_size()==T2.result_size() && T1.argument_size()==T2.argument_size() &&
+           T1.degree()==T2.degree()))
+      {
+        throw IncompatibleSizes(__PRETTY_FUNCTION__);
+      }
       DerivativeTensor<typename Numeric::traits<R>::arithmetic_type> result(T1.result_size(),T1.argument_size(),T1.degree());
       for(size_type i=0; i!=result.number_of_independent_elements(); ++i) {
         result.begin()[i]=T1.begin()[i]-T2.begin()[i];
@@ -208,8 +216,9 @@ namespace Ariadne {
     operator*(const DerivativeTensor<R>& T1, const DerivativeTensor<R>& T2) 
     {
       //std::cerr << "DerivativeTensor<R>::product(const DerivativeTensor<R>& T1, const DerivativeTensor<R>& T2)" << std::endl;
-      assert(T1.argument_size()==T2.result_size());      
-      assert(T1.degree()!=0);
+      check_size(T1.argument_size(),T2.result_size(),__PRETTY_FUNCTION__);      
+      //      if(T1.degree()==0) { throw IncompatibleSizes(__PRETTY_FUNCTION__ ": T2 must have nonzero degree"); }
+      if(T1.degree()==0) { throw IncompatibleSizes(__PRETTY_FUNCTION__); }
       
       DerivativeTensor<typename Numeric::traits<R>::arithmetic_type> T0(T1.result_size(),T2.argument_size(),T1.degree()+T2.degree()-1);
 

@@ -41,42 +41,42 @@ namespace Ariadne {
     typename Map<R>::result_type
     Map<R>::image(const Geometry::Point<R>& r) const 
     {
-      throw std::invalid_argument(this->name()+"::image(Point) not implemented."); 
+      throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
     
     template<class R>
     Geometry::Rectangle<R>
     Map<R>::image(const Geometry::Rectangle<R>& r) const 
     {
-      throw std::invalid_argument(this->name()+"::operator() (Rectangle) not implemented."); 
+      throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
     
     template<class R>
     typename Map<R>::F
     Map<R>::derivative(const Geometry::Point<R>& r, const size_type& i, const multi_index_type& j) const 
     {
-      throw std::invalid_argument(this->name()+"::derivative(Point,size_type,multi_index_type) not implemented."); 
+      throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
     
     template<class R>
     typename Map<R>::I
     Map<R>::derivative(const Geometry::Rectangle<R>& r, const size_type& i, const multi_index_type& j) const 
     {
-      throw std::invalid_argument(this->name()+"::derivative(Rectangle,size_type,multi_index_type) not implemented."); 
+      throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
     
     template<class R>
     LinearAlgebra::Matrix<typename Map<R>::F>
     Map<R>::jacobian(const Geometry::Point<R>& r) const 
     {
-      throw std::invalid_argument(this->name()+"::jacobian(Point) not implemented."); 
+      throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
     
     template<class R>
     LinearAlgebra::Matrix<typename Map<R>::I> 
     Map<R>::jacobian(const Geometry::Rectangle<R>& r) const 
     {
-      throw std::invalid_argument(this->name()+"::jacobian(Rectangle) not implemented."); 
+      throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
     
     

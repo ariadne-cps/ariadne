@@ -45,9 +45,7 @@ namespace Ariadne {
     {
       //std::cerr << "AffineMap<R>::image(const Geometry::Rectangle<R>& r) const\n";
 
-      if (this->argument_dimension()!=pt.dimension()) {
-        throw std::domain_error("AffineMap<R>::image(const Geometry::Point<R>& r): the map does not have the same dimension of the point.");
-      }
+      check_argument_dimension(*this,pt,__PRETTY_FUNCTION__);
       LinearAlgebra::Vector<F> image(this->A()*LinearAlgebra::Vector<F>(pt.position_vector())+this->b());
       return Geometry::Point<F>(image);
     }
@@ -59,9 +57,7 @@ namespace Ariadne {
     {
       //std::cerr << "AffineMap<R>::image(const Geometry::Rectangle<R>& r) const\n";
 
-      if (this->argument_dimension()!=r.dimension()) {
-        throw std::domain_error("AffineMap<R>::image(const Geometry::Rectangle<R>& r): the map does not have the same dimension of the rectangle.");
-      }
+      check_argument_dimension(*this,r,__PRETTY_FUNCTION__);
       return Geometry::Rectangle<R>(this->A()*r.position_vectors()+this->b());
     }
     
@@ -71,9 +67,7 @@ namespace Ariadne {
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
       
-      if (this->argument_dimension()!=p.dimension()) {
-        throw std::domain_error("AffineMap<R>::image(const Geometry::Parallelotope<R>& p): the map does not have the same dimension of the parallelotope.");
-      }
+      check_argument_dimension(*this,p,__PRETTY_FUNCTION__);
       Geometry::Point<F> nc=this->image(p.centre());
       LinearAlgebra::Matrix<F> ng=this->A()*LinearAlgebra::Matrix<F>(p.generators());
       return Geometry::over_approximation(Geometry::Parallelotope<F>(nc,ng));
@@ -83,9 +77,7 @@ namespace Ariadne {
     Geometry::Zonotope<R>
     AffineMap<R>::image(const Geometry::Zonotope<R>& z) const
     {
-      if (this->argument_dimension()!=z.dimension()) {
-        throw std::domain_error("AffineMap<R>::image(const Geometry::Zonotope<R>& z): the map does not have the same dimension of the zonotope."); 
-      }
+      check_argument_dimension(*this,z,__PRETTY_FUNCTION__);
       return Geometry::over_approximation(Geometry::Zonotope< Interval<R> >(
         this->image(z.centre()),
         this->A()*LinearAlgebra::Matrix< Interval<R> >(z.generators())
@@ -96,7 +88,7 @@ namespace Ariadne {
     Geometry::Polytope<R>
     AffineMap<R>::image(const Geometry::Polytope<R>& p) const
     {
-      throw std::runtime_error("AffineMap<R>::image(const Geometry::Polytope<R>&) const not implemented");
+      throw NotImplemented(__PRETTY_FUNCTION__);
     }   
     
     template<class R>

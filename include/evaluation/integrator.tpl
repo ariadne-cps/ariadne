@@ -28,6 +28,7 @@
 #include <sstream>
 #include <algorithm>
 #include <typeinfo>
+#include <cstring>
 
 #include <list>
 #include <set>
@@ -208,6 +209,7 @@ namespace Ariadne {
 #endif
         ++iteration;
         if(iteration==maximum_iterations) {
+          //throw std::runtime_error(strcat(__PRETTY_FUNCTION__,": Cannot find bounding box for flow");
           throw std::runtime_error("Cannot find bounding box for flow");
         }
       }
@@ -385,9 +387,7 @@ namespace Ariadne {
                          const Geometry::ListSet<R,Geometry::Rectangle>& initial_set,
                          const time_type& time) const
     {
-      throw std::domain_error("Integrator<R>::reach(const System::VectorField<R>& vector_field,"
-                              "const Geometry::ListSet<R,Geometry::Rectangle>& initial_set,"
-                              "const time_type& time) const not implemented");
+      throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
     
@@ -398,7 +398,7 @@ namespace Ariadne {
                                       const Geometry::Rectangle<R>& initial_set, 
                                       time_type& time) const
     {
-      throw NotImplemented("Integrator<R>::integration_step(VectorField<R>,Rectangle<R>,T)");
+      throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
     template<class R>
@@ -445,7 +445,7 @@ namespace Ariadne {
                                        const Geometry::Rectangle<R>& is,
                                        time_type& h) const 
     {
-      throw NotImplemented("Integrator<R>::reachability_step(VectorField<R>,Rectangle<R>,time_type)");
+      throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
     
     
@@ -538,7 +538,7 @@ namespace Ariadne {
                              const Geometry::GridMaskSet<R>& bounding_set,
                              const time_type& time) const
     {
-      check_grid(initial_set,bounding_set);
+      check_grid(initial_set,bounding_set,__PRETTY_FUNCTION__);
       using namespace System;
       using namespace Geometry;
       using namespace LinearAlgebra;
@@ -764,11 +764,12 @@ namespace Ariadne {
     {
       typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
       typedef typename Geometry::ListSet<R,Geometry::Zonotope>::const_iterator zls_const_iterator;
-      check_bounded(initial_set,"Integrator<R>::reach(...)");
-      check_bounded(bounding_set,"Integrator<R>::reach(...)");
+      check_bounded(initial_set,__PRETTY_FUNCTION__);
+      check_bounded(bounding_set,__PRETTY_FUNCTION__);
       
       if(!subset(initial_set,bounding_set)) {
-        throw std::runtime_error("chainreach: Initial set must be subset of bounding set");
+        //throw std::runtime_error(strcat(__PRETTY_FUNCTION__,": Initial set must be subset of bounding set"));
+        throw std::runtime_error("Initial set must be subset of bounding set");
       }
         
       const Geometry::Grid<R>& g=initial_set.grid();
@@ -821,11 +822,12 @@ namespace Ariadne {
     {
       typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
       typedef typename Geometry::ListSet<R,Geometry::Parallelotope>::const_iterator pls_const_iterator;
-      check_bounded(initial_set,"Integrator<R>::chainreach(...)");
-      check_bounded(bounding_set,"Integrator<R>::chainreach(...)");
+      check_bounded(initial_set,__PRETTY_FUNCTION__);
+      check_bounded(bounding_set,__PRETTY_FUNCTION__);
      
       if(!subset(initial_set,bounding_set)) {
-        throw std::runtime_error("chainreach: Initial set must be subset of bounding set");
+        //throw std::runtime_error(strcat(__PRETTY_FUNCTION__,": Initial set must be subset of bounding set"));
+        throw std::runtime_error("Initial set must be subset of bounding set");
       }
         
       const Geometry::Grid<R>& g=initial_set.grid();
@@ -873,11 +875,12 @@ namespace Ariadne {
     {
       typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
       typedef typename Geometry::ListSet<R,Geometry::Parallelotope>::const_iterator pls_const_iterator;
-      check_bounded(initial_set,"Integrator<R>::verify(...)");
-      check_bounded(safe_set,"Integrator<R>::verify(...)");
+      check_bounded(initial_set,__PRETTY_FUNCTION__);
+      check_bounded(safe_set,__PRETTY_FUNCTION__);
      
       if(!subset(initial_set,safe_set)) {
-        throw std::runtime_error("chainreach: Initial set must be subset of bounding set");
+        //throw std::runtime_error(strcat(__PRETTY_FUNCTION__,": Initial set must be subset of bounding set"));
+        throw std::runtime_error("Initial set must be subset of bounding set");
       }
         
       const Geometry::Grid<R>& g=initial_set.grid();

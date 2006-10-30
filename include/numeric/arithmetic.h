@@ -30,7 +30,6 @@
 #define _ARIADNE_ARITHMETIC_H
 
 #include <algorithm>
-#include <cassert>
 
 namespace Ariadne {
   namespace Numeric {

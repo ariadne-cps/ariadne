@@ -28,8 +28,6 @@
 #ifndef _ARIADNE_RATIONAL_H
 #define _ARIADNE_RATIONAL_H
 
-#include <cassert>
-
 #include <gmpxx.h>
 
 #include "../declarations.h"

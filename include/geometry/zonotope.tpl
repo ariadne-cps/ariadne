@@ -324,7 +324,7 @@ namespace Ariadne {
     void 
     Zonotope<R>::compute_linear_inequalities(matrix_type& A, vector_type& b) const
     {
-      throw std::runtime_error("Zonotope<R>::compute_linear_inequalities(matrix_type&, vector_type&) const not implemented");
+      throw NotImplemented(__PRETTY_FUNCTION__);
       using namespace Ariadne::LinearAlgebra;
      
       const matrix_type &gen=this->_generators;
@@ -398,7 +398,7 @@ namespace Ariadne {
       //typedef typename Numeric::traits<R,R>::arithmetic_type F;
       typedef Rational F;
       const Zonotope<R>& z=*this;
-      check_dimension(z,pt,"Zonotope<R>::contains(Point<R>)");
+      check_dimension(z,pt,__PRETTY_FUNCTION__);
       dimension_type d=z.dimension();
       dimension_type m=z.number_of_generators();
       
@@ -474,7 +474,7 @@ namespace Ariadne {
     {
       //std::cerr << "Zonotope<R>::disjoint(const Zonotope<R>&, const Rectangle<R>&)" << std::endl;
       //std::cerr << r << "\n" << z << std::endl;
-      check_dimension(z,r,"disjoint(Zonotope<R>,Rectangle<R>)");
+      check_dimension(z,r,__PRETTY_FUNCTION__);
       dimension_type d=z.dimension();
       size_type m=z.number_of_generators();
     
@@ -574,9 +574,7 @@ namespace Ariadne {
     disjoint(const Zonotope<R>& z1, const Zonotope<R>& z2)
     {
       typedef Rational F;
-      if(z1.dimension()!=z2.dimension()) {
-        throw std::runtime_error("Invalid dimension in disjoint(const Zonotope<R>&, const Zonotope<R>&)");
-      }
+      check_dimension(z1,z2,__PRETTY_FUNCTION__);
       
       dimension_type d=z1.dimension();
       size_type m1=z1.number_of_generators();
@@ -653,7 +651,7 @@ namespace Ariadne {
     tribool 
     subset(const Rectangle<R>& A, const Zonotope<R>& B) 
     {
-      throw std::runtime_error("subset(const Rectangle<R>& A, const Zonotope<R>& B) not implemented");
+      throw NotImplemented(__PRETTY_FUNCTION__);
       typedef Rational F;
       return Geometry::subset(Rectangle<F>(A),B.operator Polyhedron<F>());
     }
@@ -669,7 +667,7 @@ namespace Ariadne {
     tribool 
     subset(const Zonotope<R>& A, const Zonotope<R>& B) 
     {
-      throw std::runtime_error("subset(const Zonotope<R>& A, const Zonotope<R>& B) not implemented");
+      throw NotImplemented(__PRETTY_FUNCTION__);
       typedef Rational F;
       return Geometry::subset(A.operator Polyhedron<F>(),B.operator Polyhedron<F>());
     }
@@ -683,10 +681,7 @@ namespace Ariadne {
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
       
-      if (A.dimension()!=B.dimension()) {
-          throw std::domain_error(
-              "minkowski_sum: the two zonotopes have different dimension.");
-      }
+      check_dimension(A,B,__PRETTY_FUNCTION__);
       
       Geometry::Point<F> new_centre=Geometry::minkowski_sum(A.centre(),B.centre());
       LinearAlgebra::Matrix<R> new_generators=LinearAlgebra::concatenate_columns(A.generators(),B.generators());
@@ -701,10 +696,7 @@ namespace Ariadne {
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
      
-      if (A.dimension()!=B.dimension()) {
-          throw std::domain_error(
-              "minkowski_difference: the two zonotopes have different dimension.");
-      }
+      check_dimension(A,B,__PRETTY_FUNCTION__);
       
       return Zonotope<F>(Geometry::minkowski_difference(A.centre(),B.centre()),
                          LinearAlgebra::concatenate_columns(A.generators(),B.generators()));
@@ -798,7 +790,7 @@ namespace Ariadne {
     std::istream& 
     Zonotope<R>::read(std::istream& is)
     {
-      throw std::domain_error("Not implemented");
+      throw NotImplemented(__PRETTY_FUNCTION__);
     }
       
   

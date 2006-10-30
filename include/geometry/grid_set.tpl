@@ -333,7 +333,7 @@ namespace Ariadne {
     join(const GridMaskSet<R>& A, const GridMaskSet<R>& B)
     {
       check_grid(A,B,"join(GridMaskSet<R>,GridMaskSet<R>)");
-      assert(A.block()==B.block());
+      if(A.block()!=B.block()) { throw IncompatibleGrids(__PRETTY_FUNCTION__); }
       return GridMaskSet<R>(A.grid(), join(A.lattice_set(),B.lattice_set()));
     }
 
@@ -359,7 +359,7 @@ namespace Ariadne {
     regular_intersection(const GridMaskSet<R>& A, const GridMaskSet<R>& B)
     {
       check_grid(A,B,"regular_intersection(GridMaskSet<R>,GridMaskSet<R>)");
-      assert(A.block()==B.block());
+      if(A.block()!=B.block()) { throw IncompatibleGrids(__PRETTY_FUNCTION__); }
       return GridMaskSet<R>(A.grid(), regular_intersection(A.lattice_set(),B.lattice_set()));
     }
 
@@ -385,7 +385,7 @@ namespace Ariadne {
     difference(const GridMaskSet<R>& A, const GridMaskSet<R>& B)
     {
       check_grid(A,B,"difference(GridMaskSet<R>,GridMaskSet<R>)");
-      assert(A.block()==B.block());
+      if(A.block()!=B.block()) { throw IncompatibleGrids(__PRETTY_FUNCTION__); }
       return GridMaskSet<R>(A.grid(), difference(A.lattice_set(),B.lattice_set()));
     }
 

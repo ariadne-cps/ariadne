@@ -33,6 +33,7 @@
 
 namespace Ariadne {
 
+//@{ \name Exceptions
 
 /*! \brief The method or function has not been implemented yet. */
 class NotImplemented : public std::logic_error {
@@ -56,89 +57,141 @@ class Deprecated : public std::logic_error {
 };
 
 
+/*! \brief A stream or string input was invalid. */
 class invalid_input : public std::runtime_error {
  public:
   invalid_input(const std::string& str) : std::runtime_error(str) { }
 };
 
+
+/*! \brief A division by zero has occurred. */
+class DivideByZeroException : public std::exception { };
+
+/*! \brief The sizes of the operands are incompatible. */
 struct IncompatibleSizes : public std::runtime_error {
   IncompatibleSizes(const std::string& str) : std::runtime_error(str) { }
 };
 
-struct IncompatibleDimensions : public std::runtime_error {
-  IncompatibleDimensions(const std::string& str) : std::runtime_error(str) { }
-};
-
+/*! \brief The index to an arrayed object was invalid. */
 struct InvalidIndex : public std::runtime_error {
   InvalidIndex(const std::string& str) : std::runtime_error(str) { }
 };
 
+/*! \brief The dimensions of two geometric objects are incompatible. */
+struct IncompatibleDimensions : public std::runtime_error {
+  IncompatibleDimensions(const std::string& str) : std::runtime_error(str) { }
+};
+
+/*! \brief The coordinate in  a geometric object was invalid. */
+struct InvalidCoordinate : public std::runtime_error {
+  InvalidCoordinate(const std::string& str) : std::runtime_error(str) { }
+};
+
+
+/*! \brief The generaors of a zonotope or polytope were of the wrong size. */
 struct InvalidGenerators : public std::runtime_error {
   InvalidGenerators(const std::string& str) : std::runtime_error(str) { }
 };
 
-struct InvalidNumberOfGenerators : public std::runtime_error {
-  InvalidNumberOfGenerators(const std::string& str) : std::runtime_error(str) { }
-};
-
-struct IncompatibleGrid : public std::runtime_error {
-  IncompatibleGrid(const std::string& str) : std::runtime_error(str) { }
+/*! \brief Attempting to perform a binary operation on two objects on incompatible grids. */
+struct IncompatibleGrids : public std::runtime_error {
+  IncompatibleGrids(const std::string& str) : std::runtime_error(str) { }
 };
   
+/*! \brief Attempting to perform an operation on an unbounded set. */
 struct UnboundedSet : public std::runtime_error {
   UnboundedSet(const std::string& str) : std::runtime_error(str) { }
 };
-  
-template<class S1, class S2>
+ 
+//@}
+
+template<class V1, class V2> inline
+void check_size(const V1& v1, const V2& v2, const char* where="") {
+  if(v1.size()!=v2.size()) {
+    throw IncompatibleSizes(where);
+  }
+}
+
+template<class V1> inline
+void check_size(const V1& v1, const size_type& n2, const char* where="") {
+  if(v1.size()!=n2) {
+    throw IncompatibleSizes(where);
+  }
+}
+
+inline
+void check_size(const size_type& n1, const size_type& n2, const char* where="") {
+  if(n1!=n2) {
+    throw IncompatibleSizes(where);
+  }
+}
+
+template<class S1> inline
+void check_index(const S1& s1, const size_type& i2, const char* where="") {
+  if(i2>=s1.size()) {
+    throw InvalidIndex(where);
+  }
+}
+
+
+
+template<class S1, class S2> inline
 void check_grid(const S1& s1, const S2& s2, const char* where="") {
   if(s1.grid()!=s2.grid()) {
-    throw IncompatibleGrid(where);
+    throw IncompatibleGrids(where);
   }
 }
     
-template<class S1, class S2>
+template<class S1, class S2> inline
 void check_dimension(const S1& s1, const S2& s2, const char* where="") {
   if(s1.dimension()!=s2.dimension()) {
     throw IncompatibleDimensions(where);
   }
 }
     
-template<class S1, class V2>
+template<class S1> inline
+void check_dimension(const S1& s1, const dimension_type& d2, const char* where="") {
+  if(s1.dimension()!=d2) {
+    throw IncompatibleDimensions(where);
+  }
+}
+    
+template<class S1, class V2> inline
 void check_dimension_size(const S1& s1, const V2& v2, const char* where="") {
   if(s1.dimension()!=v2.size()) {
     throw IncompatibleDimensions(where);
   }
 }
     
-template<class R1, class R2>
-void check_dimension(const Geometry::Point<R1>& pt1, const LinearAlgebra::Vector<R2>& v2, const char* where="") {
-  if(pt1.dimension()!=v2.size()) {
+inline
+void check_dimension_size(const dimension_type& n1, const size_type& n2, const char* where="") {
+  if(n1!=n2) {
     throw IncompatibleDimensions(where);
   }
 }
     
-template<class S1>
-void check_index(const S1& s1, const dimension_type& i2, const char* where="") {
+template<class S1> inline
+void check_coordinate(const S1& s1, const dimension_type& i2, const char* where="") {
   if(i2>=s1.dimension()) {
     throw InvalidIndex(where);
   }
 }
 
-template<class S>
+template<class S> inline
 void check_bounded(const S& s, const char* where="") {
   if(!s.bounded()) {
     throw UnboundedSet(where);
   }
 }
 
-template<class M, class S>
+template<class M, class S> inline
 void check_argument_dimension(const M& m1, const S& s2, const char* where="") {
   if(m1.argument_dimension()!=s2.dimension()) {
     throw IncompatibleDimensions(where);
   }
 }
 
-template<class M, class S>
+template<class M, class S> inline
 void check_result_dimension(const M& m1, const S& s2, const char* where="") {
   if(m1.result_dimension()!=s2.dimension()) {
     throw IncompatibleDimensions(where);

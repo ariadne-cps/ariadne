@@ -41,6 +41,7 @@
 
 #include "../declarations.h"
 #include "../base/array.h"
+#include "../base/exceptions.h"
 #include "../linear_algebra/matrix.h"
 
 namespace Ariadne {
@@ -176,7 +177,10 @@ namespace Ariadne {
     Real
     LUMatrix<Real>::determinant() const
     {
-      assert(this->number_of_rows()==this->number_of_columns());
+      if(this->number_of_rows()!=this->number_of_columns()) {
+        throw IncompatibleSizes(__PRETTY_FUNCTION__);
+        //throw IncompatibleSizes(__PRETTY_FUNCTION__ ": not a square matrix");
+      }
       size_type n=this->number_of_rows();
       Real result=1;
       for(size_type i=0; i!=n; ++i) { 

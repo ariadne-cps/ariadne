@@ -5,8 +5,17 @@ pythondir=${prefix}/python
 pyexecdir=${prefix}/python
 libdir=${pyexecdir}
 
-python_LIBS = base.la numeric.la linear_algebra.la combinatoric.la geometry.la system.la evaluation.la output.la
-python_MODULES = .libs/base.so .libs/numeric.so .libs/linear_algebra.so .libs/combinatoric.so .libs/geometry.so .libs/system.so .libs/evaluation.so .libs/output.so
+python_LIBS = base.la numeric.la linear_algebra.la \
+	combinatoric.la \
+	geometry.la system.la evaluation.la \
+	output.la \
+	models.la
+
+python_MODULES = .libs/base.so .libs/numeric.so .libs/linear_algebra.so \
+	.libs/combinatoric.so \
+	.libs/geometry.so .libs/system.so .libs/evaluation.so \
+	.libs/output.so \
+	.libs/models.so
 
 pkglib_LTLIBRARIES = $(python_LIBS)
 pkgpython_DATA = __init__.py
@@ -36,6 +45,7 @@ geometry_la_SOURCES=$(GEOMETRY_MODULE_SRC)
 system_la_SOURCES=$(SYSTEM_MODULE_SRC)
 evaluation_la_SOURCES=$(EVALUATION_MODULE_SRC)
 output_la_SOURCES=$(OUTPUT_MODULE_SRC)
+models_la_SOURCES=$(MODELS_SRC)
 
 # name
 base_la_LIBADD = ../libariadne.la
@@ -46,6 +56,7 @@ geometry_la_LIBADD = ../libariadne.la
 system_la_LIBADD = ../libariadne.la
 evaluation_la_LIBADD = ../libariadne.la
 output_la_LIBADD = ../libariadne.la
+models_la_LIBADD = ../libariadne.la
 
 BASE_MODULE_SRC=base_module.cc \
 	export_array.cc
@@ -73,8 +84,7 @@ GEOMETRY_MODULE_SRC = geometry_module.cc \
 SYSTEM_MODULE_SRC = system_module.cc \
 	export_map.cc export_affine_map.cc export_polynomial_map.cc \
 	export_affine_multimap.cc \
-	export_vector_field.cc export_affine_vector_field.cc \
-	export_henon_map.cc export_lorenz_system.cc 
+	export_vector_field.cc export_affine_vector_field.cc 
 
 EVALUATION_MODULE_SRC = evaluation_module.cc \
 	export_solve.cc \
@@ -83,3 +93,6 @@ EVALUATION_MODULE_SRC = evaluation_module.cc \
 
 OUTPUT_MODULE_SRC = output_module.cc \
 	export_postscript_output.cc
+
+MODELS_SRC = models.cc \
+	export_models.cc

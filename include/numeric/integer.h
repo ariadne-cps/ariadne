@@ -30,6 +30,7 @@
 
 #include <gmpxx.h>
 #include <iostream>
+#include <stdexcept>
 
 #include "../declarations.h"
 #include "../numeric/numerical_traits.h"
@@ -177,7 +178,7 @@ namespace Ariadne {
     /*! \brief The floor of the logarithm of \a n in base 2. */
     template<class N> inline
     N log2_floor(const N& n) {
-      assert(n>=1);
+      if(n<1) { throw std::invalid_argument(__PRETTY_FUNCTION__); }
       N r=0;
       N y=n;
       while(y>=n) {
@@ -191,7 +192,7 @@ namespace Ariadne {
     /*! \brief The ceiling of the logarithm of \a n in base 2. */
     template<class N> inline
     N log2_ceil(const N& n) {
-      assert(n>=1);
+      if(n<1) { throw std::invalid_argument(__PRETTY_FUNCTION__); }
       N r=0;
       N y=n;
       while(y>1) {

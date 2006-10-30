@@ -50,14 +50,14 @@ namespace Ariadne {
       : _centre(c), _bilinear_form(A)
     {
       if(c.dimension()!=A.number_of_rows() && A.number_of_rows()!=A.number_of_columns()) {
-        throw DimensionException("Ellipsoid");
+        throw DimensionException(__PRETTY_FUNCTION__);
       }
     }
      
     template<class R>
     Ellipsoid<R>::Ellipsoid(const std::string& s)
     {
-      throw std::runtime_error("Ellipsoid(const std::string& s) not implemented");
+      throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
       
@@ -132,7 +132,8 @@ namespace Ariadne {
     std::istream& 
     operator>>(std::istream& is, Ellipsoid<R>& e)
     {
-      throw std::domain_error("operator>>(std::istream&, Ellipsoid<R>&) not implemented");
+      throw NotImplemented(__PRETTY_FUNCTION__);
+        
     }
   }
 }

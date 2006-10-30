@@ -73,9 +73,9 @@
 #include <vector>
 #include <iosfwd>
 #include <stdexcept>
-#include <cassert>
 
 #include "../declarations.h"
+#include "../base/exceptions.h"
 
 namespace Ariadne {
   namespace Combinatoric {    
@@ -254,7 +254,7 @@ namespace Ariadne {
       
       /*!\brief Insert an element at the back of the list. */
       void push_back(const BinaryWord& b) { 
-        assert(b.size()==word_size()); 
+        if(this->word_size()!=b.size()) { throw IncompatibleSizes(__PRETTY_FUNCTION__); }
         for(size_type i=0; i!=word_size(); ++i) { _elements.push_back(b[i]); }
       }
       

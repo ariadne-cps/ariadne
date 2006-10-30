@@ -127,7 +127,7 @@ namespace Ariadne {
     template<class R>
     Matrix<R>
     Matrix<R>::concatenate_columns(const Matrix<R>& A1, const Matrix<R>& A2) {
-      assert(A1.number_of_rows()==A2.number_of_rows());
+      if(!(A1.number_of_rows()==A2.number_of_rows())) { throw IncompatibleSizes(__PRETTY_FUNCTION__); }
       LinearAlgebra::Matrix<R> result(A1.number_of_rows(),A1.number_of_columns()+A2.number_of_columns());
       for(size_type i=0; i!=result.number_of_rows(); ++i) {
         for(size_type j=0; j!=A1.number_of_columns(); ++j) {
@@ -202,7 +202,7 @@ namespace Ariadne {
           Matrix<R>& A=*this;
           A=Matrix<R>(v.size(),v.front().size());
           for(size_type i=0; i!=A.number_of_rows(); ++i) {
-            assert(v[i].size()==A.number_of_columns());
+            check_size(v[i].size(),A.number_of_columns(),__PRETTY_FUNCTION__);
             for(size_type j=0; j!=A.number_of_columns(); ++j) {
               A(i,j)=v[i][j];
             }
@@ -211,7 +211,7 @@ namespace Ariadne {
       }
       else {
         std::cerr << "c=" << c << std::endl;
-        assert(false);
+        throw invalid_input("Matrix<R>");
       }
       return is;
     }
@@ -363,7 +363,7 @@ namespace Ariadne {
     {
       size_type cols=col.size(), rows=row.size();
 
-      assert(cols>=rows);
+      if(cols<rows) { throw IncompatibleSizes(__PRETTY_FUNCTION__); }
 
       size_type SA_cols=SA.number_of_columns(), A_rows=SA_cols-rows;
       size_type i,j,k,j2;

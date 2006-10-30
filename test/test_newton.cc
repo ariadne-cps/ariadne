@@ -29,14 +29,17 @@
 
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
-#include "system/henon_map.h"
 #include "evaluation/newton.h"
 
+#include "models/henon.h"
 #include "test.h"
 #include "real_typedef.h"
 
 using namespace std;
 using namespace Ariadne;
+using namespace Ariadne::Geometry;
+using namespace Ariadne::System;
+using namespace Ariadne::Evaluation;
 
 template<class R> int test_newton();
 
@@ -51,17 +54,17 @@ test_newton()
 {
   
 
-  System::HenonMap<R> h(1.5,0.375);
-  Geometry::Rectangle<R> r("[-2.125,-2]x[-2.125,-2]");
+  HenonMap<R> h(1.5,0.375);
+  Rectangle<R> r("[-2.125,-2]x[-2.125,-2]");
   R e=1e-10;
   
   cout << h << r << e << endl;
   
-  Geometry::Rectangle<R> fr;
+  Rectangle<R> fr;
   try {
-    fr=Evaluation::interval_newton(System::DifferenceMap<R>(h),r,e);
+    fr=interval_newton(DifferenceMap<R>(h),r,e);
   }
-  catch(Evaluation::EvaluationException e) {
+  catch(EvaluationException e) {
     cout << "No solution found" << endl;
     throw e;
   }
@@ -69,10 +72,10 @@ test_newton()
   cout << std::setprecision(20);
   cout << fr << "  " << fr.radius() << endl;
 
-  Geometry::Point<R> fp("(-2.0920128158902654,-2.0920128158902654)");
+  Point<R> fp("(-2.0920128158902654,-2.0920128158902654)");
   assert(fr.contains(fp));
 
-  Geometry::Point< Interval<R> > ifp=h(fp);
+  Point< Interval<R> > ifp=h(fp);
   
 
 

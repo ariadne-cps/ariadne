@@ -33,6 +33,7 @@
 #define _ARIADNE_LPSLV_H
 
 #include <iosfwd>
+#include <cassert>
 #include <map>
 
 

@@ -70,11 +70,9 @@ namespace Ariadne {
                                             const Geometry::Rectangle<R>& initial_set, 
                                             time_type& step_size) const
     {
-      if(verbosity>0) { 
-        std::cerr << "integrate(const VectorField<R>& vf, const Geometry::Rectangle<R>& r, const time_type& t)" << std::endl;
-      }
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
 
-      check_dimension(vector_field,initial_set,__PRETTY_FUNCTION__);
+      check_equal_dimensions(vector_field,initial_set,__PRETTY_FUNCTION__);
       
       const System::VectorField<R>& vf(vector_field);
       Geometry::Rectangle<R> r=initial_set;
@@ -105,10 +103,9 @@ namespace Ariadne {
                                            const Geometry::Rectangle<R>& initial_set, 
                                            time_type& step_size) const
     {
-#ifdef DEBUG
-      std::cerr << "integrate(const VectorField<R>& vf, const Geometry::Rectangle<R>& r, const time_type& t)" << std::endl;
-#endif
-      check_dimension(vector_field,initial_set(),__PRETTY_FUNCTION__);
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+
+      check_equal_dimensions(vector_field,initial_set(),__PRETTY_FUNCTION__);
       
       const System::VectorField<R>& vf(vector_field);
       Geometry::Rectangle<R> r=initial_set;
@@ -120,15 +117,15 @@ namespace Ariadne {
       
       r=r+LinearAlgebra::Vector< Interval<R> >(Interval<R>(R(0),h)*fq);
 
-#ifdef DEBUG
-      std::cerr << "suggested stepsize=" << step_size << std::endl;
-                
-      std::cerr << "stepsize=" << h << std::endl;
-      std::cerr << "bound=" << q << std::endl;
-
-      std::cerr << "derivative=" << fq << std::endl;
-      std::cerr << "position=" << r << std::endl;
-#endif
+      if(verbosity>1) { 
+        std::cerr << "suggested stepsize=" << step_size << std::endl;
+                  
+        std::cerr << "stepsize=" << h << std::endl;
+        std::cerr << "bound=" << q << std::endl;
+  
+        std::cerr << "derivative=" << fq << std::endl;
+        std::cerr << "position=" << r << std::endl;
+      }
 
       return r;
     }

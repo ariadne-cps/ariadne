@@ -36,7 +36,7 @@ namespace Ariadne {
     disjoint (const ListSet<R,BS>& A,
               const ListSet<R,BS>& B)
     {
-      check_dimension(A,B,__PRETTY_FUNCTION__);
+      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
       tribool result=true;
       for (typename ListSet<R,BS>::const_iterator i=A.begin(); i!=A.end(); ++i) {
         for (typename ListSet<R,BS>::const_iterator j=B.begin(); j!=B.end(); ++j) {
@@ -52,7 +52,7 @@ namespace Ariadne {
     subset(const ListSet<R,BS>& A,
            const ListSet<R,BS>& B)
     {
-      check_dimension(A,B,__PRETTY_FUNCTION__);
+      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
@@ -62,7 +62,7 @@ namespace Ariadne {
          const ListSet<R,BS>& B)
     {
       ListSet<R,BS> ds_union(A);
-      check_dimension(A,B,__PRETTY_FUNCTION__);
+      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
       ds_union.inplace_union(B);
       return ds_union;
     }
@@ -73,7 +73,7 @@ namespace Ariadne {
                       const ListSet<R,BS>& B)
     {
       ListSet<R,BS> ds_inter(A.dimension());
-      check_dimension(A,B,__PRETTY_FUNCTION__);
+      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
       for (size_type i=0; i<A.size(); i++) {
         for (size_type j=0; j<B.size(); j++) {
           if (!disjoint(A[i],B[j])) {

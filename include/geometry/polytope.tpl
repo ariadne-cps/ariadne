@@ -276,7 +276,7 @@ namespace Ariadne {
       typedef Rational F;
       const Polytope<R>& A=ply;
       const PointList<R>& vertices=A.vertices();
-      check_dimension(ply,pt,__PRETTY_FUNCTION__);
+      check_equal_dimensions(ply,pt,__PRETTY_FUNCTION__);
       size_type d=A.dimension();
       size_type m=A.number_of_vertices();
 
@@ -332,7 +332,7 @@ namespace Ariadne {
       std::cerr << "disjoint(const Polytope<R>&, const Rectangle<R>&)" << std::endl;
       //typedef typename Numeric::traits<R>::arithmetic_type F;
       typedef Rational F;
-      check_dimension(ply,rect,__PRETTY_FUNCTION__);
+      check_equal_dimensions(ply,rect,__PRETTY_FUNCTION__);
       size_type d=ply.dimension();
       size_type m=ply.number_of_vertices();
       
@@ -411,7 +411,7 @@ namespace Ariadne {
       // Set up linear programming problem
       // Try to simultaneously solve A*s1-B*s2=0 with 1*s1=1 and 1*s2=1
       // variable, d+2 equations; 2 auxiliary variables
-      check_dimension(A,B,__PRETTY_FUNCTION__);
+      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
       size_type d=A.dimension();
       size_type nv1=A.number_of_vertices();
       size_type nv2=B.number_of_vertices();

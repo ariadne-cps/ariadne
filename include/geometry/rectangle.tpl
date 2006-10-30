@@ -64,7 +64,7 @@ namespace Ariadne {
     Rectangle<R>
     Rectangle<R>::quadrant(const Combinatoric::BinaryWord& w) const 
     {
-      check_dimension_size(*this,w,__PRETTY_FUNCTION__);
+      check_dimension(*this,w.size(),__PRETTY_FUNCTION__);
       Rectangle<R> quadrant(this->dimension());
       
       for (size_type i=0; i!=this->dimension(); ++i) {
@@ -130,6 +130,15 @@ namespace Ariadne {
       return result;   
     }
     
+    
+    template<class R>
+    size_type 
+    Rectangle<R>::number_of_vertices() const 
+    {
+      return 1<<this->dimension();
+    }
+    
+    
     template<class R>
     Point<R> 
     Rectangle<R>::vertex(size_type i) const 
@@ -137,9 +146,7 @@ namespace Ariadne {
       size_type d=this->dimension();
       state_type result(d); 
             
-      if (i >= (size_type)(1<<d)) {
-        throw InvalidIndex(__PRETTY_FUNCTION__);
-      }
+      check_vertex_index(*this,i,__PRETTY_FUNCTION__);
       
       for (size_type j=0; j<d; ++j) {
         if (i%2) {
@@ -174,7 +181,7 @@ namespace Ariadne {
     subset(const Rectangle<R>& A, 
            const ListSet<R,Geometry::Rectangle>& B)
     {
-      check_dimension(A,B,__PRETTY_FUNCTION__);
+      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
       return Geometry::subset(A, GridMaskSet<R>(B));
     }
     

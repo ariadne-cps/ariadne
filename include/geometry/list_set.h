@@ -114,7 +114,7 @@ namespace Ariadne {
       /*! \brief Adjoins a basic set to the back of the list. */
       void push_back(const BS<R>& A) {
         if (this->dimension()==0) { this->_dimension=A.dimension(); }
-        check_dimension(*this,A,__PRETTY_FUNCTION__);
+        check_equal_dimensions(*this,A,__PRETTY_FUNCTION__);
         this->_vector.push_back(A);
       }
 
@@ -140,7 +140,7 @@ namespace Ariadne {
       * \return The i-th basic set maitained by the ListSet.
       */
       const BS<R>& get(size_type index) const {
-        check_index(*this,index,__PRETTY_FUNCTION__);
+        check_array_index(*this,index,__PRETTY_FUNCTION__);
         return this->_vector[index];
       }
 
@@ -150,7 +150,7 @@ namespace Ariadne {
       * \param set is the new set.
       */
       void set(size_type index, const BS<R>& set) {
-        check_index(*this,index,__PRETTY_FUNCTION__);
+        check_array_index(*this,index,__PRETTY_FUNCTION__);
         this->_vector[index]=set;
       }
 
@@ -160,49 +160,18 @@ namespace Ariadne {
       * \return The i-th basic set maitained by the ListSet.
       */
       const BS<R>& operator[](size_type index) const {
-        check_index(*this,index,__PRETTY_FUNCTION__);
+        check_array_index(*this,index,__PRETTY_FUNCTION__);
         return this->_vector[index];
-      }
-
-      /*! \brief What does this do? */
-      ListSet<R,BS> operator+(const ListSet<R,BS>& A) const{
-
-        #ifdef DEBUG
-          std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-        #endif
-
-        ListSet<R,BS> sum(A.dimension());
-
-        for (size_type i=0; i< this->size(); i++) {
-          for (size_type j=0; j< A.size(); j++) {
-              // sum.inplace_union((this->_vector[i])+A[j]);
-          }
-        }
-
-        #ifdef DEBUG
-          std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-        #endif
-
-        return sum;
       }
 
 
       /*! \brief Copy assignment. */
       const ListSet<R,BS>& 
       operator=(const ListSet<R,BS>& A) {
-        #ifdef DEBUG
-          std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-        #endif
-
         if(this !=& A) {
-            this->_dimension = A._dimension;
-            this->_vector = A._vector;
+          this->_dimension = A._dimension;
+          this->_vector = A._vector;
         }
-
-        #ifdef DEBUG
-          std::cout << __FILE__ << ":" << __LINE__ << std::endl;
-        #endif
-
         return *this;
       }
 
@@ -326,7 +295,7 @@ namespace Ariadne {
         if(this->dimension()==0) { 
           this->_dimension=A.dimension(); 
         }
-        check_dimension(*this,A,__PRETTY_FUNCTION__);
+        check_equal_dimensions(*this,A,__PRETTY_FUNCTION__);
         this->_vector.reserve(A.size());
         for(typename ListSet<R,BS>::const_iterator iter=A.begin(); iter!=A.end(); ++iter) {
           this->_vector.push_back(*iter);
@@ -353,7 +322,7 @@ namespace Ariadne {
         if(this->dimension()==0) { 
           this->_dimension=A.dimension(); 
         }
-        check_dimension(*this,A,__PRETTY_FUNCTION__);
+        check_equal_dimensions(*this,A,__PRETTY_FUNCTION__);
         if(!A.empty()) {
           this->_vector.push_back(A);
         }

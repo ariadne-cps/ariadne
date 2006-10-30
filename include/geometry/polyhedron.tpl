@@ -112,9 +112,7 @@ namespace Ariadne {
                               const LinearAlgebra::Vector<R>& b) 
       : _A(A), _b(b)
     {
-      if(A.number_of_rows()!=b.size()) { 
-        throw IncompatibleSizes(__PRETTY_FUNCTION__);
-      }
+      LinearAlgebra::check_size(b,A.number_of_rows(),__PRETTY_FUNCTION__);
     }
     
     template<class R>
@@ -253,6 +251,7 @@ namespace Ariadne {
     tribool 
     Polyhedron<R>::contains(const Point<R>& pt) const
     {
+      check_equal_dimensions(*this,pt,__PRETTY_FUNCTION__);
       tribool result=true;
       for(constraints_const_iterator i=this->constraints_begin(); 
           i!=this->constraints_end(); ++i) {
@@ -353,7 +352,7 @@ namespace Ariadne {
     Polyhedron<R> 
     open_intersection(const Polyhedron<R>& A, const Polyhedron<R>& B)
     {
-      check_dimension(A,B,__PRETTY_FUNCTION__);
+      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
@@ -362,7 +361,7 @@ namespace Ariadne {
     Polyhedron<R> 
     closed_intersection(const Polyhedron<R>& p1, const Polyhedron<R>& p2)
     {
-      check_dimension(p1,p2,__PRETTY_FUNCTION__);
+      check_equal_dimensions(p1,p2,__PRETTY_FUNCTION__);
       dimension_type d=p1.dimension();
       size_type nc1=p1.number_of_constraints();
       size_type nc2=p2.number_of_constraints();

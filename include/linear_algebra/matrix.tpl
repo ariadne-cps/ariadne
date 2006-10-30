@@ -202,7 +202,7 @@ namespace Ariadne {
           Matrix<R>& A=*this;
           A=Matrix<R>(v.size(),v.front().size());
           for(size_type i=0; i!=A.number_of_rows(); ++i) {
-            check_size(v[i].size(),A.number_of_columns(),__PRETTY_FUNCTION__);
+            check_size(v[i],A.number_of_columns(),__PRETTY_FUNCTION__);
             for(size_type j=0; j!=A.number_of_columns(); ++j) {
               A(i,j)=v[i][j];
             }

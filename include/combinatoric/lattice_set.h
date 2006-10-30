@@ -74,6 +74,7 @@ namespace Ariadne {
     bool subset(const LatticeCellListSet&, const LatticeMaskSet&);
     bool subset(const LatticeMaskSet&, const LatticeMaskSet&);
     
+    LatticeBlock rectangular_hull(const LatticeBlock&, const LatticeBlock&);
     LatticeBlock regular_intersection(const LatticeBlock&, const LatticeBlock&);
     LatticeCellListSet regular_intersection(const LatticeCellListSet&, const LatticeMaskSet&);
     LatticeCellListSet regular_intersection(const LatticeMaskSet&, const LatticeCellListSet&);
@@ -205,7 +206,7 @@ namespace Ariadne {
       explicit LatticeBlock(dimension_type n=0) : _lower(n), _upper(n) { }
       /*!\brief Construct a lattice rectangle specified by lower and upper corners. */
       explicit LatticeBlock(const IndexArray& l, const IndexArray& u)
-        : _lower(l), _upper(u) { check_size(l,u,__PRETTY_FUNCTION__); }
+        : _lower(l), _upper(u) { check_equal_array_sizes(l,u,__PRETTY_FUNCTION__); }
       /*!\brief Construct a lattice rectangle defined by a string literal. */
       explicit LatticeBlock(const std::string& s);
 
@@ -368,7 +369,7 @@ namespace Ariadne {
 
       /*! \brief Adjoins a LatticeCell to the set. */
       void adjoin(const LatticeCell& c) { 
-        check_dimension(*this,c,__PRETTY_FUNCTION__);
+        Geometry::check_equal_dimensions(*this,c,__PRETTY_FUNCTION__);
         this->_list.push_back(c.position()); 
       }
       /*! \brief Adjoins all cells in a LatticeBlock to the set. */
@@ -435,13 +436,13 @@ namespace Ariadne {
 
       /*! \brief Adjoins a LatticeCell to the set. */
       void adjoin(const LatticeCell& c) { 
-        check_dimension(*this,c,__PRETTY_FUNCTION__); 
+        check_equal_dimensions(*this,c,__PRETTY_FUNCTION__); 
         this->_list.push_back(c.lower_corner()); 
         this->_list.push_back(c.upper_corner()); 
       }
       /*! \brief Adjoins all cells in a LatticeBlock to the set. */
       void adjoin(const LatticeBlock& r) { 
-        check_dimension(*this,r,__PRETTY_FUNCTION__);
+        check_equal_dimensions(*this,r,__PRETTY_FUNCTION__);
         this->_list.push_back(r.lower_corner()); 
         this->_list.push_back(r.upper_corner()); 
       }

@@ -177,10 +177,8 @@ namespace Ariadne {
     Real
     LUMatrix<Real>::determinant() const
     {
-      if(this->number_of_rows()!=this->number_of_columns()) {
-        throw IncompatibleSizes(__PRETTY_FUNCTION__);
-        //throw IncompatibleSizes(__PRETTY_FUNCTION__ ": not a square matrix");
-      }
+      check_square(*this,__PRETTY_FUNCTION__);
+      
       size_type n=this->number_of_rows();
       Real result=1;
       for(size_type i=0; i!=n; ++i) { 

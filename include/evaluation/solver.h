@@ -85,8 +85,7 @@ namespace Ariadne {
       /*!\brief Construct from a map \a f, which must have the same argument dimension as result dimension. */
       DifferenceMap(const Map<R>& f) : _base(f) { 
         if(f.argument_dimension()!=f.result_dimension()) { 
-          throw IncompatibleDimensions("DifferenceMap<R>::DifferenceMap(Map<R>): "
-                                       "The argument and result dimensions must be equal"); } }
+          throw Geometry::IncompatibleDimensions(__PRETTY_FUNCTION__); } }
       /*! \brief Make a copy (clone) of the vector field. */
       DifferenceMap<R>* clone() const { return new DifferenceMap<R>(this->_base); }
       /*!\brief The dimension of the space the map acts on. */

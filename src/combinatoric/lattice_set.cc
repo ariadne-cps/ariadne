@@ -265,7 +265,7 @@ namespace Ariadne {
     void 
     LatticeCellListSet::adjoin(const LatticeBlock& r) 
     { 
-      check_dimension(*this,r,__PRETTY_FUNCTION__);
+      check_equal_dimensions(*this,r,__PRETTY_FUNCTION__);
       for(LatticeBlock::const_iterator i=r.begin(); i!=r.end(); ++i) {
         this->adjoin(*i);
       }
@@ -287,7 +287,7 @@ namespace Ariadne {
 
     void 
     LatticeCellListSet::adjoin(const LatticeMaskSet& ms) {
-      check_dimension(*this,ms,__PRETTY_FUNCTION__);
+      check_equal_dimensions(*this,ms,__PRETTY_FUNCTION__);
       for(LatticeMaskSet::const_iterator i=ms.begin(); i!=ms.end(); ++i) {
         this->adjoin(*i);
       }
@@ -544,12 +544,25 @@ namespace Ariadne {
 
 
     LatticeBlock 
-    regular_intersection(const LatticeBlock& r1, const LatticeBlock& r2) 
+    rectangular_hull(const LatticeBlock& A, const LatticeBlock& B) 
     {
-      LatticeBlock result(r1.dimension());
-      for(dimension_type i=0; i!=r1.dimension(); ++i) {
-        result.set_lower_bound(i,std::max(r1.lower_bound(i),r2.lower_bound(i)));
-        result.set_upper_bound(i,std::min(r1.upper_bound(i),r2.upper_bound(i)));
+      check_equal_dimensions(A,B);
+      LatticeBlock result(A.dimension());
+      for(dimension_type i=0; i!=A.dimension(); ++i) {
+        result.set_lower_bound(i,std::min(A.lower_bound(i),B.lower_bound(i)));
+        result.set_upper_bound(i,std::max(A.upper_bound(i),B.upper_bound(i)));
+      }
+      return result;
+    }
+
+    LatticeBlock 
+    regular_intersection(const LatticeBlock& A, const LatticeBlock& B) 
+    {
+      check_equal_dimensions(A,B);
+      LatticeBlock result(A.dimension());
+      for(dimension_type i=0; i!=A.dimension(); ++i) {
+        result.set_lower_bound(i,std::max(A.lower_bound(i),B.lower_bound(i)));
+        result.set_upper_bound(i,std::min(A.upper_bound(i),B.upper_bound(i)));
       }
       return result;
     }
@@ -557,6 +570,7 @@ namespace Ariadne {
     LatticeCellListSet
     regular_intersection(const LatticeCellListSet& A, const LatticeMaskSet& B) 
     {
+      check_equal_dimensions(A,B);
       LatticeCellListSet result(A.dimension());
       for(LatticeCellListSet::const_iterator c=A.begin(); c!=A.end(); ++c) {
         if(subset(*c,B)) {
@@ -589,22 +603,44 @@ namespace Ariadne {
     LatticeMaskSet
     regular_intersection(const LatticeMaskSet& A, const LatticeMaskSet& B) 
     {
-      if(A.block()!=B.block()) { throw IncompatibleGrids(__PRETTY_FUNCTION__); }
-      return LatticeMaskSet(A.block(),A.mask() & B.mask(), !A.bounded() && !B.bounded());
+      if(A.block()==B.block()) { 
+        return LatticeMaskSet(A.block(),A.mask() & B.mask(), !A.bounded() && !B.bounded());
+      } else {
+        check_bounded(A);
+        check_bounded(B);
+        LatticeMaskSet C(regular_intersection(A.block(),B.block()));
+        C.adjoin(regular_intersection(LatticeCellListSet(A),B));
+        return C;
+      }
     }
 
     LatticeMaskSet
     join(const LatticeMaskSet& A, const LatticeMaskSet& B) 
     {
-      if(A.block()!=B.block()) { throw IncompatibleGrids(__PRETTY_FUNCTION__); }
-      return LatticeMaskSet(A.block(),A.mask() | B.mask(), !A.bounded() | !B.bounded());
+      if(A.block()==B.block()) { 
+        return LatticeMaskSet(A.block(),A.mask() | B.mask(), !A.bounded() | !B.bounded());
+      } else {
+        check_bounded(A);
+        check_bounded(B);
+        LatticeMaskSet C(rectangular_hull(A.block(),B.block()));
+        C.adjoin(LatticeCellListSet(A));
+        C.adjoin(LatticeCellListSet(B));
+        return C;
+      }
     }
 
     LatticeMaskSet
     difference(const LatticeMaskSet& A, const LatticeMaskSet& B) 
     {
-      if(A.block()!=B.block()) { throw IncompatibleGrids(__PRETTY_FUNCTION__); }
-      return LatticeMaskSet(A.block(),A.mask() - B.mask(), !A.bounded() - !B.bounded());
+      if(A.block()==B.block()) { 
+        return LatticeMaskSet(A.block(),A.mask() - B.mask(), !A.bounded() - !B.bounded());
+      } else {
+        check_bounded(A);
+        check_bounded(B);
+        LatticeMaskSet C(A.block());
+        C.adjoin(difference(LatticeCellListSet(A),B));
+        return C;
+      }
     }
 
     LatticeCellListSet

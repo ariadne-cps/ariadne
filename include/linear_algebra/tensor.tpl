@@ -215,9 +215,8 @@ namespace Ariadne {
     DerivativeTensor<typename Numeric::traits<R>::arithmetic_type>
     operator*(const DerivativeTensor<R>& T1, const DerivativeTensor<R>& T2) 
     {
-      //std::cerr << "DerivativeTensor<R>::product(const DerivativeTensor<R>& T1, const DerivativeTensor<R>& T2)" << std::endl;
-      check_size(T1.argument_size(),T2.result_size(),__PRETTY_FUNCTION__);      
-      //      if(T1.degree()==0) { throw IncompatibleSizes(__PRETTY_FUNCTION__ ": T2 must have nonzero degree"); }
+      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
+      if(T1.argument_size()!=T2.result_size()) { throw IncompatibleSizes(__PRETTY_FUNCTION__); }
       if(T1.degree()==0) { throw IncompatibleSizes(__PRETTY_FUNCTION__); }
       
       DerivativeTensor<typename Numeric::traits<R>::arithmetic_type> T0(T1.result_size(),T2.argument_size(),T1.degree()+T2.degree()-1);
@@ -268,7 +267,7 @@ namespace Ariadne {
     std::ostream&
     SymmetricTensor<R>::write(std::ostream& os) const
     {
-      //std::cerr << "SymmetricTensor<R>::write(std::ostream& os) const" << std::endl;
+      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
       size_type n=this->argument_size();
       size_type d=this->degree();
       
@@ -285,7 +284,7 @@ namespace Ariadne {
     std::ostream&
     DerivativeTensor<R>::write(std::ostream& os) const
     {
-      //std::cerr << "DerivativeTensor<R>::write(std::ostream& os) const" << std::endl;
+      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
       size_type m=this->result_size();
       size_type n=this->argument_size();
       size_type d=this->degree();

@@ -169,7 +169,7 @@ namespace Ariadne {
       explicit Rectangle(const Point<R>& pt1, const Point<R>& pt2) 
         : _bounds(2*pt1.dimension())
       {
-        check_dimension(pt1,pt2,__PRETTY_FUNCTION__);
+        check_equal_dimensions(pt1,pt2,__PRETTY_FUNCTION__);
         for (size_type i=0; i!=this->dimension(); ++i) {
           this->set_lower_bound(i,Numeric::min_exact(pt1[i],pt2[i]));
           this->set_upper_bound(i,Numeric::max_exact(pt1[i],pt2[i]));
@@ -440,6 +440,9 @@ namespace Ariadne {
       /*! \brief An iterator to the end vertex of the rectangle. */
       vertices_const_iterator vertices_end() const;
 
+      /*! \brief The number of vertices. */
+      size_type number_of_vertices() const;
+        
       /*! \brief The \a i th vertex. */
       Point<R> vertex(size_type i) const;
         
@@ -562,7 +565,7 @@ namespace Ariadne {
     Rectangle<R>::contains(const Point<R>& p) const 
     {
       tribool result=true;
-      check_dimension(*this,p,__PRETTY_FUNCTION__);
+      check_equal_dimensions(*this,p,__PRETTY_FUNCTION__);
       const Rectangle<R>& self=*this;
       for (size_type i=0; i!=self.dimension(); ++i) {
         if(self.lower_bound(i)>p[i] || p[i]>self.upper_bound(i)) {
@@ -581,7 +584,7 @@ namespace Ariadne {
     tribool 
     equal(const Rectangle<R>& A, const Rectangle<R>& B)
     {
-      check_dimension(A,B,__PRETTY_FUNCTION__);
+      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
       for(size_type i=0; i!=A.dimension(); ++i) {
         if(A.lower_bound(i)!=B.lower_bound(i) || A.upper_bound(i)!=B.upper_bound(i)) {
           return false;
@@ -596,7 +599,7 @@ namespace Ariadne {
     disjoint(const Rectangle<R>& A, const Rectangle<R>& B)
     {
       tribool result=false;
-      check_dimension(A,B,__PRETTY_FUNCTION__);
+      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
       for(size_type i=0; i!=A.dimension(); ++i) {
         if(A.lower_bound(i)>B.upper_bound(i) || A.upper_bound(i)<B.lower_bound(i)) {
           return true;
@@ -615,7 +618,7 @@ namespace Ariadne {
     subset(const Rectangle<R>& A, const Rectangle<R>& B)
     {
       tribool result=true;
-      check_dimension(A,B,__PRETTY_FUNCTION__);
+      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
       for (size_type i=0; i!=A.dimension(); ++i) {
         if(A.lower_bound(i)<B.lower_bound(i) || A.upper_bound(i)>B.upper_bound(i)) {
           return false;
@@ -634,7 +637,7 @@ namespace Ariadne {
     closed_intersection(const Rectangle<R>& A, const Rectangle<R>& B)
     {
       Rectangle<R> C(A.dimension());
-      check_dimension(A,B,__PRETTY_FUNCTION__);
+      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
       for(size_type i=0; i != C.dimension(); ++i) {
         C[i]=Numeric::intersection(A[i],B[i]);
       }
@@ -647,7 +650,7 @@ namespace Ariadne {
     open_intersection(const Rectangle<R>& A, const Rectangle<R>& B)
     {
       Rectangle<R> C(A.dimension());
-      check_dimension(A,B,__PRETTY_FUNCTION__);
+      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
       for(size_type i=0; i != C.dimension(); ++i) {
         C[i]=Numeric::intersection(A[i],B[i]);
         if(C[i].lower()>=C[i].upper()) {
@@ -663,7 +666,7 @@ namespace Ariadne {
     rectangular_hull(const Rectangle<R>& A, const Rectangle<R>& B)
     {
       Rectangle<R> C(A.dimension());
-      check_dimension(A,B,__PRETTY_FUNCTION__);
+      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
       for(size_type i=0; i != C.dimension(); ++i) {
         C[i]=Numeric::hull(A[i],B[i]);
       }
@@ -675,7 +678,7 @@ namespace Ariadne {
     minkowski_sum(const Rectangle<R1>& A, const Rectangle<R2>& B)
     {
       Rectangle<typename Numeric::traits<R1,R2>::arithmetic_type> C(A.dimension());
-      check_dimension(A,B,__PRETTY_FUNCTION__);
+      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
       for(dimension_type i=0; i!=C.dimension(); ++i) {
         C.set_lower_bound(i,A.lower_bound(i)+B.lower_bound(i));
         C.set_lower_bound(i,A.upper_bound(i)+B.upper_bound(i));
@@ -688,7 +691,7 @@ namespace Ariadne {
     minkowski_difference(const Rectangle<R1>& A, const Rectangle<R2>& B)
     {
       Rectangle<typename Numeric::traits<R1,R2>::arithmetic_type> C(A.dimension());
-      check_dimension(A,B,__PRETTY_FUNCTION__);
+      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
       for(dimension_type i=0; i!=C.dimension(); ++i) {
         C.set_lower_bound(i,A.lower_bound(i)-B.lower_bound(i));
         C.set_lower_bound(i,A.upper_bound(i)-B.upper_bound(i));
@@ -712,7 +715,7 @@ namespace Ariadne {
     operator-(const Geometry::Rectangle<R>& r1, 
               const Geometry::Rectangle<R>& r2)
     {
-      check_dimension(r1,r2,__PRETTY_FUNCTION__);
+      check_equal_dimensions(r1,r2,__PRETTY_FUNCTION__);
        
       return r1.position_vectors()-r2.position_vectors();
     }
@@ -723,8 +726,8 @@ namespace Ariadne {
     operator+(const Geometry::Rectangle<R>& r, 
               const boost::numeric::ublas::vector_expression<E>& v)
     {
-      check_dimension_size(r,v,__PRETTY_FUNCTION__);
-       const E& ev=v();
+      const E& ev=v();
+      check_dimension(r,ev.size(),__PRETTY_FUNCTION__);
       LinearAlgebra::Vector< Interval<R> > iv=ev;
       return r+iv; 
     }
@@ -736,7 +739,7 @@ namespace Ariadne {
               const LinearAlgebra::Vector<R>& v)
     {
       Geometry::Rectangle<R> result(r.dimension());
-      check_dimension_size(r,v,__PRETTY_FUNCTION__);
+      check_dimension(r,v.size(),__PRETTY_FUNCTION__);
        
       for(size_type i=0; i!=result.dimension(); ++i) {
         result.set_interval(i,r[i]+v(i));
@@ -751,7 +754,7 @@ namespace Ariadne {
               const LinearAlgebra::Vector< Interval<R> >& v)
     {
       Geometry::Rectangle<R> result(r.dimension());
-      check_dimension_size(r,v,__PRETTY_FUNCTION__);
+      check_dimension(r,v.size(),__PRETTY_FUNCTION__);
       
       for(size_type i=0; i!=result.dimension(); ++i) {
         result.set_interval(i,r[i]+v(i));
@@ -766,7 +769,7 @@ namespace Ariadne {
               const LinearAlgebra::Vector<R>& v)
     {
       Geometry::Rectangle<R> result(r.dimension());
-      check_dimension_size(r,v,__PRETTY_FUNCTION__);
+      check_dimension(r,v.size(),__PRETTY_FUNCTION__);
       
       for(size_type i=0; i!=result.dimension(); ++i) {
         result.set_interval(i,r[i]-v(i));
@@ -781,7 +784,7 @@ namespace Ariadne {
               const LinearAlgebra::Vector< Interval<R> >& v)
     {
       Geometry::Rectangle<R> result(r.dimension());
-      check_dimension_size(r,v,__PRETTY_FUNCTION__);
+      check_dimension(r,v.size(),__PRETTY_FUNCTION__);
       
       for(size_type i=0; i!=result.dimension(); ++i) {
         result.set_interval(i,r[i]-v(i));

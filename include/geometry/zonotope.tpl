@@ -398,7 +398,7 @@ namespace Ariadne {
       //typedef typename Numeric::traits<R,R>::arithmetic_type F;
       typedef Rational F;
       const Zonotope<R>& z=*this;
-      check_dimension(z,pt,__PRETTY_FUNCTION__);
+      check_equal_dimensions(z,pt,__PRETTY_FUNCTION__);
       dimension_type d=z.dimension();
       dimension_type m=z.number_of_generators();
       
@@ -474,7 +474,7 @@ namespace Ariadne {
     {
       //std::cerr << "Zonotope<R>::disjoint(const Zonotope<R>&, const Rectangle<R>&)" << std::endl;
       //std::cerr << r << "\n" << z << std::endl;
-      check_dimension(z,r,__PRETTY_FUNCTION__);
+      check_equal_dimensions(z,r,__PRETTY_FUNCTION__);
       dimension_type d=z.dimension();
       size_type m=z.number_of_generators();
     
@@ -574,7 +574,7 @@ namespace Ariadne {
     disjoint(const Zonotope<R>& z1, const Zonotope<R>& z2)
     {
       typedef Rational F;
-      check_dimension(z1,z2,__PRETTY_FUNCTION__);
+      check_equal_dimensions(z1,z2,__PRETTY_FUNCTION__);
       
       dimension_type d=z1.dimension();
       size_type m1=z1.number_of_generators();
@@ -681,7 +681,7 @@ namespace Ariadne {
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
       
-      check_dimension(A,B,__PRETTY_FUNCTION__);
+      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
       
       Geometry::Point<F> new_centre=Geometry::minkowski_sum(A.centre(),B.centre());
       LinearAlgebra::Matrix<R> new_generators=LinearAlgebra::concatenate_columns(A.generators(),B.generators());
@@ -696,7 +696,7 @@ namespace Ariadne {
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
      
-      check_dimension(A,B,__PRETTY_FUNCTION__);
+      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
       
       return Zonotope<F>(Geometry::minkowski_difference(A.centre(),B.centre()),
                          LinearAlgebra::concatenate_columns(A.generators(),B.generators()));

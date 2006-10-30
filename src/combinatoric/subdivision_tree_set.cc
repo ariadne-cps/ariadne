@@ -168,7 +168,7 @@ namespace Ariadne {
                                                const BooleanArray& ba)
       : _subdivisions(ss), _words(bt,ba)
     {
-      check_size(bt,ba,__PRETTY_FUNCTION__);
+      check_equal_array_sizes(bt,ba,__PRETTY_FUNCTION__);
       this->reduce();
     }
     

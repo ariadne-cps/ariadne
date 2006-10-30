@@ -216,7 +216,7 @@ namespace Ariadne {
     bool
     contains_value(const Vector< Interval<R> >& iv,const Vector<R>& v) 
     {
-      check_size(iv,v,__PRETTY_FUNCTION__);
+      check_equal_sizes(iv,v,__PRETTY_FUNCTION__);
       for(size_type i=0; i!=v.size(); ++i) {
         if(!Numeric::contains_value(iv(i),v(i))) {
           return false;
@@ -244,7 +244,7 @@ namespace Ariadne {
     template<class R1, class R2> inline
     Vector<typename Numeric::traits<R1,R2>::arithmetic_type> 
     operator+(const Vector<R1>& v1, const Vector<R2>& v2) {
-      if(v1.size()!=v2.size()) { throw std::runtime_error("Incompatible vector sizes"); }
+      check_equal_sizes(v1,v2,__PRETTY_FUNCTION__);
       Vector<typename Numeric::traits<R1,R2>::arithmetic_type> result(v1.size());
       for(size_type i=0; i!=result.size(); ++i) {
         result(i)=v1(i)+v2(i);
@@ -255,7 +255,7 @@ namespace Ariadne {
     template<class R1, class R2> inline
     Vector<class Numeric::traits<R1,R2>::arithmetic_type> 
     operator-(const Vector<R1>& v1, const Vector<R2>& v2) {
-      if(v1.size()!=v2.size()) { throw std::runtime_error("Incompatible vector sizes"); }
+      check_equal_sizes(v1,v2,__PRETTY_FUNCTION__);
       Vector<typename Numeric::traits<R1,R2>::arithmetic_type> result(v1.size());
       for(size_type i=0; i!=result.size(); ++i) {
         result(i)=v1(i)-v2(i);
@@ -293,7 +293,7 @@ namespace Ariadne {
     
     template<class R> inline
     Vector<R> add_approx(const Vector<R>& u, const Vector<R>& v) {
-      check_size(u,v,__PRETTY_FUNCTION__);
+      check_equal_sizes(u,v,__PRETTY_FUNCTION__);
       Vector<R> result(u.size());
       for(size_type i=0; i!=u.size(); ++i) {
         result(i)=add_approx(u(i),v(i));
@@ -303,7 +303,7 @@ namespace Ariadne {
       
     template<class R> inline
     Vector<R> sub_approx(const Vector<R>& u, const Vector<R>& v) {
-      check_size(u,v,__PRETTY_FUNCTION__);
+      check_equal_sizes(u,v,__PRETTY_FUNCTION__);
       Vector<R> result(u.size());
       for(size_type i=0; i!=u.size(); ++i) {
         result(i)=sub_approx(u(i),v(i));
@@ -343,7 +343,7 @@ namespace Ariadne {
     template<class R> inline 
     R inner_product(const Vector<R>& u, const Vector<R>& v) 
     {
-      check_size(u,v,__PRETTY_FUNCTION__);
+      check_equal_sizes(u,v,__PRETTY_FUNCTION__);
       R result=0;
       for(size_type i=0; i!=u.size(); ++i) {
         result+=u(i)*v(i);
@@ -367,7 +367,7 @@ namespace Ariadne {
     template<class R> inline 
     bool linear_multiple(const Vector<R>& u, const Vector<R>& v) 
     {
-      check_size(u,v,__PRETTY_FUNCTION__);
+      check_equal_sizes(u,v,__PRETTY_FUNCTION__);
       R multiple=0;
       for (dimension_type i=0; i<u.dimension(); ++i) {
         if(u(i)==0 && multiple!=0 && v(i)!=0) {

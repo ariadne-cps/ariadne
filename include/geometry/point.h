@@ -193,7 +193,7 @@ namespace Ariadne {
     inline
     Point<typename Numeric::traits<R>::arithmetic_type>
     minkowski_sum(const Point<R>& pt1, const Point<R>& pt2) {
-      check_dimension(pt1,pt2,__PRETTY_FUNCTION__);
+      check_equal_dimensions(pt1,pt2,__PRETTY_FUNCTION__);
       return Point<typename Numeric::traits<R>::arithmetic_type>(pt1.position_vector()+pt2.position_vector());
     }
     
@@ -201,7 +201,7 @@ namespace Ariadne {
     inline
     Point<typename Numeric::traits<R>::arithmetic_type>
     minkowski_difference(const Point<R>& pt1, const Point<R>& pt2) {
-      check_dimension(pt1,pt2,__PRETTY_FUNCTION__);
+      check_equal_dimensions(pt1,pt2,__PRETTY_FUNCTION__);
       return Point<typename Numeric::traits<R>::arithmetic_type>(pt1.position_vector()-pt2.position_vector());
     }
     
@@ -210,7 +210,7 @@ namespace Ariadne {
     LinearAlgebra::Vector<typename Numeric::traits<R1,R2>::arithmetic_type>
     operator-(const Point<R1> pt1, const Point<R2>& pt2) 
     {
-      check_dimension(pt1,pt2,__PRETTY_FUNCTION__);
+      check_equal_dimensions(pt1,pt2,__PRETTY_FUNCTION__);
       return pt1.position_vector()-pt2.position_vector();
     }
     
@@ -219,7 +219,7 @@ namespace Ariadne {
     Point<typename Numeric::traits<R1,R2>::arithmetic_type> 
     operator+(const Point<R1>& pt, const LinearAlgebra::Vector<R2>& v)
     {
-      check_dimension_size(pt,v,__PRETTY_FUNCTION__);
+      check_dimension(pt,v.size(),__PRETTY_FUNCTION__);
       return Point<typename Numeric::traits<R1,R2>::arithmetic_type>(pt.position_vector() + v);
     }
 
@@ -229,7 +229,7 @@ namespace Ariadne {
     Point<typename Numeric::traits<R1,R2>::arithmetic_type> 
     operator-(const Point<R1>& pt, const LinearAlgebra::Vector<R2>& v)
     {
-      check_dimension_size(pt,v,__PRETTY_FUNCTION__);
+      check_dimension(pt,v.size(),__PRETTY_FUNCTION__);
       return Point<typename Numeric::traits<R1,R2>::arithmetic_type>(pt.position_vector() - v);
     }
 
@@ -238,7 +238,7 @@ namespace Ariadne {
     Point<R> 
     add_approx(const Point<R>& pt, const LinearAlgebra::Vector<R>& v)
     {
-      check_dimension_size(pt,v,__PRETTY_FUNCTION__);
+      check_dimension(pt,v.size(),__PRETTY_FUNCTION__);
       return Point<R>(add_approx(pt.position_vector(),v));
     }
 
@@ -247,7 +247,7 @@ namespace Ariadne {
     Point<R> 
     sub_approx(const Point<R>& pt, const LinearAlgebra::Vector<R>& v)
     {
-      check_dimension_size(pt,v,__PRETTY_FUNCTION__);
+      check_dimension(pt,v.size(),__PRETTY_FUNCTION__);
       return Point<R>(sub_approx(pt.position_vector(),v));
     }
 

@@ -172,7 +172,7 @@ namespace Ariadne {
       /*!\brief Construct from a rectangle, and a unit partition tree cell. */
       PartitionTreeCell(const Rectangle<R>& r, const Combinatoric::SubdivisionTreeCell& c)
         : _unit_box(r), _subdivision_cell(c)
-      { check_dimension(r,c,"PartitionTreeCell<R>::PartitionTreeCell(Rectangle<R>,SubdivisionTreeCell)"); }
+      { check_equal_dimensions(r,c,__PRETTY_FUNCTION__); }
 
       /*!\brief Construct from a rectangle, the subdivision_coordinates and a binary word. */
       PartitionTreeCell(const Rectangle<R>& r, 

@@ -697,13 +697,13 @@ namespace Ariadne {
 
       /*! \brief Adjoins a cell to the set. */
       void adjoin(const GridCell<R>& c) {
-        check_grid(*this,c);
+        check_same_grid(*this,c);
         this->_lattice_set.adjoin(c._lattice_set);
       }
 
       /*! \brief Adjoins a rectangle to the set. */
       void adjoin(const GridBlock<R>& r) {
-        check_grid(*this,r);
+        check_same_grid(*this,r);
         
         if (r.empty()) return;
         this->_lattice_set.adjoin(r._lattice_set);
@@ -711,7 +711,7 @@ namespace Ariadne {
 
       /*! \brief Adjoins a GridMaskSet to the set. */
       void adjoin(const GridMaskSet<R>& gms) {
-        check_grid(*this,gms);
+        check_same_grid(*this,gms);
 
         if (gms.empty()) 
           return;
@@ -721,7 +721,7 @@ namespace Ariadne {
 
       /*! \brief Adjoins a GridCellListSet to the set. */
       void adjoin(const GridCellListSet<R>& cls) {
-        check_grid(*this,cls);
+        check_same_grid(*this,cls);
         
         if (cls.empty()) 
           return;
@@ -731,7 +731,7 @@ namespace Ariadne {
 
       /*! \brief Adjoins a GridBlockListSet to the set. */
       void adjoin(const GridBlockListSet<R>& rls) {
-        check_grid(*this,rls);
+        check_same_grid(*this,rls);
         
         if (rls.empty()) return;
         this->_lattice_set.adjoin(rls._lattice_set);

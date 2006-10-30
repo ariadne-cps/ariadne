@@ -41,18 +41,14 @@ namespace Ariadne {
     Simplex<R>::Simplex(const LinearAlgebra::Matrix<R>& A)
       : Polytope<R>(A)
     {
-      if(this->dimension()+1u!=this->number_of_vertices()) {
-        throw IncompatibleSizes(__PRETTY_FUNCTION__);
-      }
+      check_dimension(*this,A.number_of_columns()-1,__PRETTY_FUNCTION__);
     }
     
     template<class R>
     Simplex<R>::Simplex(const PointList<R>& v)
       : Polytope<R>(v)
     {
-      if(this->dimension()+1u!=this->number_of_vertices()) {
-        throw IncompatibleSizes(__PRETTY_FUNCTION__);
-      }
+      check_dimension(*this,v.size()-1,__PRETTY_FUNCTION__);
     }
     
     template<class R>

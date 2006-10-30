@@ -538,7 +538,7 @@ namespace Ariadne {
                              const Geometry::GridMaskSet<R>& bounding_set,
                              const time_type& time) const
     {
-      check_grid(initial_set,bounding_set,__PRETTY_FUNCTION__);
+      check_same_grid(initial_set,bounding_set,__PRETTY_FUNCTION__);
       using namespace System;
       using namespace Geometry;
       using namespace LinearAlgebra;

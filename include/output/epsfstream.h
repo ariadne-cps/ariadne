@@ -100,7 +100,7 @@ namespace Ariadne {
      public:
       PlanarProjectionMap() : _d(2), _i(0), _j(1) { }
       PlanarProjectionMap(dimension_type d, dimension_type i, dimension_type j)
-        : _d(d), _i(i), _j(j) { if(i>=d || j>=d) { throw InvalidIndex(__PRETTY_FUNCTION__); } }
+        : _d(d), _i(i), _j(j) { if(i>=d || j>=d) { throw Geometry::InvalidCoordinate(__PRETTY_FUNCTION__); } }
       template<class R> Geometry::Point<double> operator() (const Geometry::Point<R>& pt) const {
         Geometry::Point<double> result(2); 
         check_dimension(pt,_d,__PRETTY_FUNCTION__);

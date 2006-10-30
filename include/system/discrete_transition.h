@@ -85,7 +85,7 @@ class DiscreteTransition
       : _source(&source), _destination(&dest), 
         _activation(act.clone()), _reset(reset.clone()) 
     { 
-      check_dimension(act,source);
+      check_equal_dimensions(act,source);
       check_argument_dimension(reset,source);
       check_result_dimension(reset,dest);
       this->_set_id(); 

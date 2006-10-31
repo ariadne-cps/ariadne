@@ -89,9 +89,9 @@ test_interval()
   assert(ivld5.lower()<Rational(1,3));
   assert(ivld5.upper()>Rational(1,3));
   // Exact constructor from a single value
-  Interval<R> ivld5(R(1.25));
-  assert(ivld5.lower()==R(1.25));
-  assert(ivld5.upper()==R(1.25));
+  Interval<R> ivld6(R(1.25));
+  assert(ivld6.lower()==R(1.25));
+  assert(ivld6.upper()==R(1.25));
   
   Interval<R> ivlq1(1.1,2.2);
   Interval<R> ivlq2(1.125,1.125);

@@ -80,8 +80,6 @@ namespace Ariadne {
     /*! \brief The integer ceiling of \a x, rounding away from 0. */
     template<class R> inline R ceil(const R& x);
     
-    /*! \brief An integer \a n such that \f$n\leq x/y < n+1\f$. */
-    template<class N, class R> inline N quot(const R& x, const R& y);
     //@}
 
   }

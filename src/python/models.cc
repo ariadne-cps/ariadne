@@ -27,10 +27,14 @@
 #include "real_typedef.h"
 
 template<class R> void export_henon_map();
+template<class R> void export_duffing_equation();
+template<class R> void export_van_der_pol_equation();
 template<class R> void export_lorenz_system();
 
 BOOST_PYTHON_MODULE(models)
 {
   export_henon_map<Ariadne::Real>();
+  export_duffing_equation<Ariadne::Real>();
+  export_van_der_pol_equation<Ariadne::Real>();
   export_lorenz_system<Ariadne::Real>();
 }

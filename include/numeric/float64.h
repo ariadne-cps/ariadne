@@ -321,6 +321,13 @@ namespace Ariadne {
     template<> inline Float64 log_up(const Float64& x) {
       return Float64::rounding().log_up(x.get_d()); }
 
+    template<> inline Float64 pi_approx() {
+      return std::acos(2)*2; }
+    template<> inline Float64 pi_down() {
+      mpfr_t y; mpfr_init(y); mpfr_const_pi(y,GMP_RNDD); return mpfr_get_d(y,GMP_RNDD); }
+    template<> inline Float64 pi_up() {
+      mpfr_t y; mpfr_init(y); mpfr_const_pi(y,GMP_RNDU); return mpfr_get_d(y,GMP_RNDU); }
+
     template<> inline Float64 sin_down(const Float64& x) {
       return Float64::rounding().sin_down(x.get_d()); }
     template<> inline Float64 sin_up(const Float64& x) {

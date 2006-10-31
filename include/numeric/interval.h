@@ -735,13 +735,27 @@ namespace Ariadne {
     Interval<R> sin(const Interval<R>& ivl) {
       R pl=pi_down<R>();
       R pu=pi_up<R>();
-      int n=quot(ivl.lower(),pu);
+      R n=floor(div_down(ivl.lower(),pu));
       R l=sub_down(ivl.lower(),mul_up(pu,n));
       R u=sub_up(ivl.upper(),mul_down(pl,n));
-      if(sub_down(u,l)>=mul_up(2,pu)) {
+      if(sub_down(u,l)>=mul_up(R(2),pu)) {
         return Interval<R>(static_cast<R>(-1),static_cast<R>(1));
       } else {
-        throw std::runtime_error("sin(const Interval<R>& ivl) not implemented completely");
+        throw NotImplemented(__PRETTY_FUNCTION__);
+      }
+    }
+    
+    template<typename R> inline 
+    Interval<R> cos(const Interval<R>& ivl) {
+      R pl=pi_down<R>();
+      R pu=pi_up<R>();
+      R n=floor(div_down(ivl.lower(),pu));
+      R l=sub_down(ivl.lower(),mul_up(pu,n));
+      R u=sub_up(ivl.upper(),mul_down(pl,n));
+      if(sub_down(u,l)>=mul_up(R(2),pu)) {
+        return Interval<R>(static_cast<R>(-1),static_cast<R>(1));
+      } else {
+        throw NotImplemented(__PRETTY_FUNCTION__);
       }
     }
     

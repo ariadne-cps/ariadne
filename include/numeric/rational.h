@@ -109,9 +109,6 @@ namespace Ariadne {
     template<> inline int int_up(const Rational& x) { 
       return (Integer(x.get_num()/x.get_den())).get_si(); }
     
-    template<> inline int quot(const Rational& x1, const Rational& x2) {
-      return int_down<int>(div(x1,x2)); }
-      
       
     template<> inline std::string name<Numeric::Rational>() { return "Rational"; }
     template<> inline std::string name<Numeric::Interval<Numeric::Rational> >() { return "Interval<Rational>"; }

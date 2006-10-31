@@ -286,6 +286,7 @@ namespace Ariadne {
                                        const BS<R>& initial_set, 
                                        const time_type& time) const
     {
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       if(time==0) { 
         return initial_set;
       }
@@ -487,6 +488,7 @@ namespace Ariadne {
                                const Geometry::Parallelotope<R>& initial_set, 
                                const time_type& time) const
     {
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       return this->integrate_basic_set(vector_field,initial_set,time);
     }
     

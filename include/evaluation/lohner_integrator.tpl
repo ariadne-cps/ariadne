@@ -59,7 +59,7 @@
 
 #include "../evaluation/integrator.h"
 
-
+// namespace Ariadne { namespace Evaluation { int verbosity=1; } }
 
 template<class R>
 Ariadne::Evaluation::LohnerIntegrator<R>::LohnerIntegrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_basic_set_radius)
@@ -74,6 +74,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorF
                                       const Geometry::Parallelotope< Interval<R> >& initial_set, 
                                       time_type& step_size) const
 {
+  if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
   const LohnerIntegrator<R>& lohner=*this;
   const System::VectorField<R>& vf=vector_field;
   const Geometry::Zonotope<I>& z=initial_set;
@@ -89,7 +90,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorF
                                       const Geometry::Zonotope< Interval<R> >& initial_set, 
                                       time_type& step_size) const
 {
-  if(verbosity>0) { std::cerr << "integration_step(VectorField<R>, Point<I>&, Matrix<I>&, R)\n"; }
+  if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
   
   const Geometry::Zonotope<I>& z=initial_set;
   const Geometry::Point<I>& c=z.centre();
@@ -125,6 +126,8 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorF
                                       const Geometry::Parallelotope<R>& initial_set, 
                                       time_type& step_size) const
 {
+  if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+
   const System::VectorField<R>* cvf_ptr=&vector_field;
   const System::AffineVectorField<R>* cavf_ptr=dynamic_cast< const System::AffineVectorField<R>* >(cvf_ptr);
 
@@ -135,10 +138,6 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorF
   if(cavf_ptr != NULL) {
     return integration_step(*cavf_ptr,initial_set,step_size);
   }
-
-#ifdef DEBUG
-  std::cerr << "integration_step(VectorField<R>, Parallelotope<R>, R)\n";
-#endif
 
   typedef typename traits<R>::arithmetic_type F;
   typedef Interval<R> I;
@@ -212,6 +211,8 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorF
                                       const Geometry::Zonotope<R>& initial_set, 
                                       time_type& step_size) const
 {
+  if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+
   const System::VectorField<R>* cvf_ptr=&vector_field;
   const System::AffineVectorField<R>* cavf_ptr=dynamic_cast< const System::AffineVectorField<R>* >(cvf_ptr);
 
@@ -298,10 +299,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::reachability_step(const System::Vector
                                        const Geometry::Zonotope<R>& initial_set, 
                                        time_type& step_size) const
 {
-
-#ifdef DEBUG
-  std::cerr << "reachability_step(VectorField<R>, Zonotope<R>, R)\n";
-#endif
+  if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
 
   typedef typename traits<R>::arithmetic_type F;
 
@@ -374,10 +372,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::reachability_step(const System::Vector
                                        const Geometry::Zonotope< Interval<R> >& initial_set, 
                                        time_type& step_size) const
 {
-
-#ifdef DEBUG
-  std::cerr << "reachability_step(VectorField<R>, Zonotope<R>, R)\n";
-#endif
+  if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
 
   typedef Interval<R> I;
 
@@ -439,7 +434,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::AffineV
                                       const Geometry::Parallelotope<R>& initial_set, 
                                       time_type& step_size) const
 {
-  if(verbosity>0) { std::cerr << "integration_step(AffineVectorField<R>, Parallelotope<R>, R)\n"; }
+  if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
 
   Geometry::Zonotope<R> phiz=
     this->integration_step(vector_field,static_cast<const Geometry::Zonotope<R>&>(initial_set),step_size);
@@ -454,7 +449,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::AffineV
                                       const Geometry::Zonotope<R>& initial_set, 
                                       time_type& step_size) const
 {
-  if(verbosity>0) { std::cerr << "integration_step(AffineVectorField<R>, Zonotope<R>, R)\n"; }
+  if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
 
   const System::AffineVectorField<R>& vf=vector_field;
   Geometry::Zonotope<R> z=initial_set;

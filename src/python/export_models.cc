@@ -1,8 +1,7 @@
 /***************************************************************************
- *            python/export_henon_map.cc
+ *            python/export_models.cc
  *
- *  8 February 2006
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
+ *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -61,7 +60,7 @@ void export_duffing_equation() {
   typedef typename Numeric::traits<R>::arithmetic_type F;
   typedef Interval<R> I;
   
-  class_< DuffingEquation<R>, bases< Map<R> > >("DuffingEquation",init<R,R>())
+  class_< DuffingEquation<R>, bases< VectorField<R> > >("DuffingEquation",init<R,R>())
     .def("dimension", &DuffingEquation<R>::dimension)
     .def("__call__", (Vector<F>(DuffingEquation<R>::*)(const Point<R>&)const)(&DuffingEquation<R>::image))
     .def("__call__", (Vector<I>(DuffingEquation<R>::*)(const Rectangle<R>&)const)(&DuffingEquation<R>::image))
@@ -76,7 +75,7 @@ void export_van_der_pol_equation() {
   typedef typename Numeric::traits<R>::arithmetic_type F;
   typedef Interval<R> I;
   
-  class_< VanDerPolEquation<R>, bases< Map<R> > >("VanDerPolEquation",init<R>())
+  class_< VanDerPolEquation<R>, bases< VectorField<R> > >("VanDerPolEquation",init<R>())
     .def("dimension", &VanDerPolEquation<R>::dimension)
     .def("__call__", (Vector<F>(VanDerPolEquation<R>::*)(const Point<R>&)const)(&VanDerPolEquation<R>::image))
     .def("__call__", (Vector<I>(VanDerPolEquation<R>::*)(const Rectangle<R>&)const)(&VanDerPolEquation<R>::image))

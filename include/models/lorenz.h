@@ -59,9 +59,9 @@ namespace Ariadne {
        
        
       /*! \brief  The vector field applied to a state. */
-      virtual LinearAlgebra::Vector<F> operator() (const Geometry::Point<R>& x) const;
+      virtual LinearAlgebra::Vector<F> image(const Geometry::Point<R>& x) const;
       /*! \brief  The map applied to a rectangle basic set. */
-      virtual LinearAlgebra::Vector< Interval<R> > operator() (const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::Vector< Interval<R> > image(const Geometry::Rectangle<R>& r) const;
      
       /*! \brief  The derivative of the map at a point. */
       virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<R>& x) const;
@@ -93,7 +93,7 @@ namespace Ariadne {
       
     template<class R>
     LinearAlgebra::Vector<typename LorenzSystem<R>::F>
-    LorenzSystem<R>::operator() (const Geometry::Point<R>& x) const
+    LorenzSystem<R>::image(const Geometry::Point<R>& x) const
     {
       LinearAlgebra::Vector<F> result(3); 
       result(0)=_s*(x[1]-x[0]);
@@ -104,7 +104,7 @@ namespace Ariadne {
      
     template<class R>
     LinearAlgebra::Vector< Interval<R> >
-    LorenzSystem<R>::operator() (const Geometry::Rectangle<R>& X) const
+    LorenzSystem<R>::image(const Geometry::Rectangle<R>& X) const
     {
       LinearAlgebra::Vector< Interval<R> > result(3); 
       result(0)=_s*(X[1]-X[0]);

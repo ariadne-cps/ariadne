@@ -32,58 +32,42 @@ from ariadne.output import *
 from ariadne.models import *
 import sys
 
+import ariadne.models
+print "Available models:",dir(ariadne.models)
+
 mu=Real(0.25)
 
 vdp=VanDerPolEquation(mu)
 interval_newton=IntervalNewtonSolver(Real(0.00001),64)
+lohner=LohnerIntegrator(0.1,0.1,0.1)
 
 subdivisions=128
 grid_extent=Rectangle("[--4,4]x[-2,2]") # grid bounding box
 finite_grid=FiniteGrid(grid_extent,128)
 grid=finite_grid.grid()
-initial_set=Rectangle("[1.00,1.000002]x[0,0.000001]") # initial state
-initial_set=Parallelotope(initial_state)
-initial_cell=over_approximation(initial_state,g)
+initial_set=Rectangle("[1.00,1.000002]x[0,0.000001]")
+initial_set=Parallelotope(initial_set)
 
-cb=Rectangle(gbb) # cutoff box
-initial_set=GridMaskSet(fg)
-initial_set.adjoin(over_approximation(fixed_point,g))
-bounding_set=GridMaskSet(fg)
-bounding_set.adjoin(over_approximation(gbb,g))
+print "Initial set: ", initial_set
+print "Integrate initial parallelotope for time 1"
+intermediate_set=lohner.integrate(vdp,initial_set,Rational(0.25))
+print intermediate_set
+
+print initial_set
+
+#bounding_set.adjoin(over_approximation(grid_extent,grid))
 time=Rational(5)
 print "Computing chain-reachable set..."
-reach=reach(vdp,initial_set,time)
-print reach
-#print "Found",cr.size(),"cells in grid with",cr.capacity(),"cells."
-
-ptscr=PartitionTreeSet(gmscr)
-print "Reduced to",ptscr.size(),"cells in partition tree with",ptscr.capacity(),"cells."
+reach_set=lohner.reach(vdp,initial_set,time)
+print reach_set
 
 print "Exporting to postscript output...",
 epsbb=Rectangle("[-4.1,4.1]x[-2.1,2.1]") # eps bounding box
 eps=EpsPlot("van_der_pol_oscillator-1.eps",epsbb)
-eps.set_line_style(False)
-eps.set_fill_colour("red")
-eps.write(difference(gmscr.neighbourhood(),gmscr))
-eps.set_fill_colour("blue")
-eps.write(gmscr.adjoining())
+eps.set_line_style(True)
 eps.set_fill_colour("green")
-eps.write(gmscr)
+eps.write(reach_set)
 eps.set_fill_colour("blue")
-eps.write(fixed_point_cell)
-
-eps=EpsPlot("henon_attractor-2.eps",epsbb)
-eps.set_pen_colour("black")
-eps.set_fill_colour("white")
-eps.write(cb)
-eps.set_line_style(0)
-eps.set_fill_colour("green")
-eps.write(gmscr)
-eps.set_line_style(1)
-eps.set_fill_style(0)
-eps.write(ptscr.partition_tree())
-eps.set_fill_style(1)
-eps.set_fill_colour("blue")
-eps.write(fixed_point_cell)
+eps.write(initial_set)
 eps.close()
 print " done."

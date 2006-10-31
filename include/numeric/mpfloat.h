@@ -1,5 +1,5 @@
 /***************************************************************************
- *            mofloat.h
+ *            mpfloat.h
  *
  *  Copyright  2004-6  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -96,6 +96,7 @@ namespace Ariadne {
 
     int mpfr_hypot(mpfr_t y, const __mpfr_struct* x1, const __mpfr_struct* x2, mpfr_rnd_t r);
 
+    typedef int mpfr_const(mpfr_t, mp_rnd_t);
     typedef int mpfr_func(mpfr_t, const __mpfr_struct*, mp_rnd_t);
     typedef int mpfr_func_rnd(mpfr_t, const __mpfr_struct*);
     typedef int mpfr_bin_func(mpfr_t, const __mpfr_struct*, const __mpfr_struct*, mp_rnd_t);
@@ -103,6 +104,10 @@ namespace Ariadne {
     typedef int mpfr_bin_uint_func(mpfr_t, const __mpfr_struct*, unsigned long int, mp_rnd_t);
 
 
+    inline void invoke_mpfr(MPFloat& y, mpfr_const f, mp_rnd_t r) {
+      f(y.get_mpfr_t(), r);
+    }     
+    
     inline void invoke_mpfr(MPFloat& y, const MPFloat& x, mpfr_func f, mp_rnd_t r) {
       f(y.get_mpfr_t(), x.get_mpfr_t(), r);
     }     
@@ -127,6 +132,11 @@ namespace Ariadne {
       f(y.get_mpfr_t(), x1.get_mpfr_t());
     }
 
+    
+    inline 
+    MPFloat invoke_mpfr(mpfr_const f, mp_rnd_t r) {
+      MPFloat y; invoke_mpfr(y,f,r); return y; 
+    }
     
     inline 
     MPFloat invoke_mpfr(const MPFloat& x, mpfr_func f, mp_rnd_t r) {
@@ -401,6 +411,13 @@ namespace Ariadne {
       return invoke_mpfr(x,mpfr_log,GMP_RNDD); }
     template<> inline MPFloat log_up(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_log,GMP_RNDU); };
+
+    template<> inline MPFloat pi_approx() {
+      return invoke_mpfr(mpfr_const_pi,GMP_RNDN); }
+    template<> inline MPFloat pi_down() {
+      return invoke_mpfr(mpfr_const_pi,GMP_RNDD); }
+    template<> inline MPFloat pi_up() {
+      return invoke_mpfr(mpfr_const_pi,GMP_RNDU); };
 
     template<> inline MPFloat sin_down(const MPFloat& x) {
       return invoke_mpfr(x,mpfr_sin,GMP_RNDD); }

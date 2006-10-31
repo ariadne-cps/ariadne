@@ -54,9 +54,9 @@ namespace Ariadne {
       VanDerPolEquation<R>* clone() const { return new VanDerPolEquation<R>(this->_mu); }
        
       /*! \brief  The vector field applied to a state. */
-      virtual LinearAlgebra::Vector<F> operator() (const Geometry::Point<R>& x) const;
+      virtual LinearAlgebra::Vector<F> image(const Geometry::Point<R>& x) const;
       /*! \brief  The map applied to a rectangle basic set. */
-      virtual LinearAlgebra::Vector<I> operator() (const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::Vector<I> image(const Geometry::Rectangle<R>& r) const;
      
       /*! \brief  The derivative of the map at a point. */
       virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<R>& x) const;
@@ -82,21 +82,21 @@ namespace Ariadne {
       
     template<class R>
     LinearAlgebra::Vector<typename VanDerPolEquation<R>::F>
-    VanDerPolEquation<R>::operator() (const Geometry::Point<R>& x) const
+    VanDerPolEquation<R>::image(const Geometry::Point<R>& x) const
     {
       LinearAlgebra::Vector<F> result(2); 
       result(0)=x[1];
-      result(1)=_mu*(1-x[0]*x[0])*x[1]-x[0];
+      result(1)=_mu*(R(1.0)-x[0]*x[0])*x[1]-x[0];
       return result;
     }
      
     template<class R>
     LinearAlgebra::Vector< Interval<R> >
-    VanDerPolEquation<R>::operator() (const Geometry::Rectangle<R>& x) const
+    VanDerPolEquation<R>::image(const Geometry::Rectangle<R>& x) const
     {
       LinearAlgebra::Vector< Interval<R> > result(2); 
       result(0)=x[1];
-      result(1)=_mu*(1.0-x[0]*x[0])*x[1]-x[0];
+      result(1)=_mu*(R(1.0)-x[0]*x[0])*x[1]-x[0];
       return result;
     }
      
@@ -107,8 +107,8 @@ namespace Ariadne {
       LinearAlgebra::Matrix<F> result(2,2); 
       result(0,0) = 0.0;
       result(0,1) = 1.0;
-      result(1,0) = -2.0*_mu*x[0]*x[1]-1.0;
-      result(1,1) = _mu*(1.0-x[0]*x[0]);
+      result(1,0) = -R(2.0)*_mu*x[0]*x[1]-R(1.0);
+      result(1,1) = _mu*(R(1.0)-x[0]*x[0]);
       return result;
     }
      
@@ -119,8 +119,8 @@ namespace Ariadne {
       LinearAlgebra::Matrix< Interval<R> > result(2,2); 
       result(0,0) = 0.0;
       result(0,1) = 1.0;
-      result(1,0) = -2.0*_mu*x[0]*x[1]-1.0;
-      result(1,1) = _mu*(1.0-x[0]*x[0]);
+      result(1,0) = -R(2.0)*_mu*x[0]*x[1]-R(1.0);
+      result(1,1) = _mu*(R(1.0)-x[0]*x[0]);
       return result;
     }
      

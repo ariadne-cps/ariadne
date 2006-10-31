@@ -32,6 +32,8 @@
 #include "numeric/numerical_types.h"
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
+#include "geometry/parallelotope.h"
+#include "geometry/zonotope.h"
 #include "geometry/grid_set.h"
 #include "geometry/list_set.h"
 
@@ -113,6 +115,14 @@ test_grid_set()
   //GridMaskSet<R> gms2(fgr,grlsj2);
   //cout << regular_intersection(gms1,gms2);
   //cout << join(gms1,gms2);
+
+  // Test over-approximations
+  r=Rectangle<R>("[-0.125,0.5]x[0.1,0.3]");
+  Parallelotope<R> p(r);
+  Zonotope<R> z(r);
+  GridBlock<R> roa=over_approximation(r,gr);
+  GridCellListSet<R> poa=over_approximation(p,gr);
+  GridCellListSet<R> zoa=over_approximation(z,gr);
 
   return 0;
 }

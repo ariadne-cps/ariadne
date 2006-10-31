@@ -279,7 +279,7 @@ namespace Ariadne {
 
       /*! \brief The index of interval in dimension \a d index containing \a x. */
       virtual index_type subdivision_interval(dimension_type d, const real_type& x) const {
-        index_type result = conv_down<index_type>(div_down(x,_subdivision_lengths[d]));
+        index_type result = int_down<index_type>(div_down(x,_subdivision_lengths[d]));
         return result;
       }
 

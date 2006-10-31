@@ -912,12 +912,16 @@ namespace Ariadne {
       is.putback(c);
       if(c=='[') {
         /* Representation as a literal [a1,b1]x[a2,b2]x...x[an,bn] */
-        std::vector< Interval<int> > v;
-        Interval<int> i;
+        std::vector< int > v;
         c='x';
         while(c=='x') {
-          is >> i;
-          v.push_back(i);
+          char cl,cm,cr;
+          int l,u;
+          is >> cl >> l >> cm >> r >> cr;
+          if(cl!='[' || (cm!=',' && cm!=';') || cr!=']') {
+            throw invalid_input(__PRETTY_FUNCTION__);
+          }
+          v.push_back(l); v.push_back(u);
           c=' ';
           while( is && c==' ') {
             is >> c;
@@ -927,11 +931,11 @@ namespace Ariadne {
           is.putback(c);
         }
         
-        IndexArray l(v.size());
-        IndexArray u(v.size());
-        for(size_type i=0; i!=v.size(); ++i) {
-          l[i]=v[i].lower();
-          u[i]=v[i].upper();
+        IndexArray l(v.size()/2);
+        IndexArray u(v.size()/2);
+        for(size_type i=0; i!=v.size()/2; ++i) {
+          l[i]=v[2*i];
+          u[i]=v[2*i+1];
         }
         r=LatticeBlock(l,u);
       }

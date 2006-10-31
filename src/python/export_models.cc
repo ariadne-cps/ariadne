@@ -107,4 +107,5 @@ void export_lorenz_system()
 
 template void export_henon_map<Real>();
 template void export_duffing_equation<Real>();
+template void export_van_der_pol_equation<Real>();
 template void export_lorenz_system<Real>();

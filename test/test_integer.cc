@@ -43,6 +43,8 @@ int main() {
 
 int test_integer()
 {
+  cout << __PRETTY_FUNCTION__ << endl;
+
   cout << setprecision(20);
   mpf_set_default_prec (8);
 

@@ -51,9 +51,13 @@ namespace Ariadne {
        */
       explicit DuffingEquation(R delta=0.0, 
                                R beta=1.0, 
-                               R alpha=1.0)
+                               R alpha=1.0,
+                               R gamma=0.0,
+                               R omega=1.0,
+                               R phi=0.0
+                              )
         : _delta(delta), _beta(beta), _alpha(alpha),
-          _gamma(0.0), _omega(1.0), _phi(0.0) { }
+          _gamma(gamma), _omega(omega), _phi(phi) { }
       
       
       DuffingEquation<R>* clone() const { return new DuffingEquation<R>(this->_delta, this->_beta, this->_alpha); }
@@ -69,12 +73,18 @@ namespace Ariadne {
       /*! \brief  The derivative of the map over a rectangular basic set. */
       virtual LinearAlgebra::Matrix< Interval<R> > jacobian(const Geometry::Rectangle<R>& r) const;
             
-      /*! \brief  The parameter \f$\delta\f$. */
+      /*! \brief The parameter \f$\delta\f$. */
       const R& delta() const { return _delta; }
-      /*! \brief  The parameter \f$\beta\f$. */
+      /*! \brief The parameter \f$\beta\f$. */
       const R& beta() const { return _beta; }
-      /*! \brief  The parameter \f$\alpha\f$. */
+      /*! \brief The parameter \f$\alpha\f$. */
       const R& alpha() const { return _alpha; }
+      /*! \brief The parameter \f$\gamma\f$. */
+      const R& gamma() const { return _gamma; }
+      /*! \brief The parameter \f$\omega\f$. */
+      const R& omega() const { return _omega; }
+      /*! \brief The parameter \f$\phi\f$. */
+      const R& phi() const { return _phi; }
       
       
       /*! \brief  The dimension of the space. */
@@ -94,9 +104,10 @@ namespace Ariadne {
     LinearAlgebra::Vector<typename DuffingEquation<R>::F>
     DuffingEquation<R>::operator() (const Geometry::Point<R>& x) const
     {
-      LinearAlgebra::Vector<F> result(2); 
+      LinearAlgebra::Vector<F> result(3); 
       result(0)=x[1];
-      result(1)=-_delta*x[1]-x[0]*(_alpha+_beta*x[0]*x[0]);
+      result(1)=-_delta*x[1]-x[0]*(_alpha+_beta*x[0]*x[0])+_gamma*cos(_omega*x[2]+_phi);
+      result(2)=1.0;
       return result;
     }
      
@@ -106,7 +117,8 @@ namespace Ariadne {
     {
       LinearAlgebra::Vector< Interval<R> > result(2); 
       result(0)=x[1];
-      result(1)=-_delta*x[1]-x[0]*(_alpha+_beta*x[0]*x[0]);
+      result(1)=-_delta*x[1]-x[0]*(_alpha+_beta*x[0]*x[0])+_gamma*cos(_omega*x[2]+_phi);
+      result(2)=1.0;
       return result;
     }
      
@@ -117,9 +129,14 @@ namespace Ariadne {
       LinearAlgebra::Matrix<F> result(2,2); 
       result(0,0) = 0;
       result(0,1) = 1;
+      result(0,2) = 0;
       result(1,0) = -(_alpha+3.0*_beta*x[0]*x[0]);
       result(1,1) = -_delta;
-      return result;
+      result(1,2) = -gamma*_omega*sin(_omega*x[2]+_phi);
+      result(2,0) = 0;
+      result(2,1) = 0;
+      result(2,2) = 0;
+     return result;
     }
      
     template<class R>
@@ -129,15 +146,21 @@ namespace Ariadne {
       LinearAlgebra::Matrix< Interval<R> > result(2,2); 
       result(0,0) = 0;
       result(0,1) = 1;
+      result(0,2) = 0;
       result(1,0) = -(_alpha+3.0*_beta*x[0]*x[0]);
       result(1,1) = -_delta;
+      result(1,2) = -gamma*_omega*sin(_omega*x[2]+_phi);
+      result(2,0) = 0;
+      result(2,1) = 0;
+      result(2,2) = 0;
       return result;
     }
      
      
     template<class R>
     std::ostream& operator<<(std::ostream& os, const DuffingEquation<R>& de) {
-      os << "DuffingEquation( delta=" << de.delta() << ", beta=" << de.beta() << ", alpha=" << de.alpha() << " )";
+      os << "DuffingEquation( delta=" << de.delta() << ", beta=" << de.beta() << ", alpha=" << de.alpha() 
+         << ", gamma=" << de.gamma() << ", omega=" << de.omega() << ", phi=" << de.phi() << " )";
       return os;
     }
     

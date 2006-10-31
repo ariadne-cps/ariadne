@@ -37,11 +37,16 @@ namespace Ariadne {
     /*! \brief Convert \a x to an element of R. */
     template<class R,class A> inline R conv_exact(const A& x) { return static_cast<R>(x); }
     /*! \brief Approximate \a x by an element of R. */
-    template<class R,class A> inline R conv_approx(const A& x) { return conv_exact<R>(x); }
+    template<class R,class A> inline R conv_approx(const A& x) { return conv_exact<R>(x); };
     /*! \brief Approximate \a x by an element of R, rounding down. */
     template<class R,class A> inline R conv_down(const A& x) { return conv_exact<R>(x); };
     /*! \brief Approximate \a x by an element of R, rounding up. */
     template<class R,class A> inline R conv_up(const A& x) { return conv_exact<R>(x); };
+
+    /*! \brief Approximate \a x by an integer of type N, rounding down. */
+    template<class N,class A> inline N int_down(const A& x);
+    /*! \brief Approximate \a x by an integer of type N, rounding up. */
+    template<class N,class A> inline N int_up(const A& x);
     //@}
 
   }    

@@ -43,7 +43,7 @@ void test_linear_program();
 
 int main() {
   test_linear_program<Rational>();
-  cout << "Incomplete";
+  cerr << "INCOMPLETE ";
   return 0;
 }
 

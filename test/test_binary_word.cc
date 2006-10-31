@@ -40,11 +40,23 @@ using namespace Ariadne;
 using namespace Ariadne::Combinatoric;
 using namespace std;
 
+
+int test_binary_word();
+
+
 int main() {
-  string istr = "[0,1,1,0,1,0] ";
+  test_binary_word();
+  return 0;
+}
+
+  
+int test_binary_word() {
+  cout << __PRETTY_FUNCTION__ << endl;
+  
+  string istr = "[0,1,1,0,1,0] [0,1,1,0,1,0] [0,1,1] [1,1,0,1] [1] ";
   stringstream iss(istr);
 
-  BinaryWord bw;
+  BinaryWord bw1,bw2,bw3,bw4,bw5;
   BinaryWordList bwl;
   BinaryWordFixedSizeList bwfsl(12);
   BinaryTree bwt;
@@ -52,7 +64,26 @@ int main() {
   vector<bool> v;
 
   iss >> v;
-  bw=BinaryWord(v);
+  bw1=BinaryWord(v);
+  
+  iss >> bw2 >> bw3 >> bw4 >> bw5;
+  
+  assert(bw1.size()==6);
+  
+  assert(bw1==bw2);
+  assert(bw1.is_prefix(bw1));
+  assert(bw1.is_subword(bw1));
+  assert(bw3!=bw1);
+  assert(bw3.is_prefix(bw1));
+  assert(bw3.is_subword(bw1));
+  assert(bw4!=bw1);
+  assert(!bw4.is_prefix(bw1));
+  assert(bw3.is_subword(bw1));
+  
+  bw5=bw4;
+  assert(bw5==bw4);
+  bw5=BinaryWord("[1,0,1,1,0,1,0]");
+  assert(bw5==bw1);
   
   cerr << "INCOMPLETE ";
 

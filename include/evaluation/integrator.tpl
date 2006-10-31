@@ -784,7 +784,7 @@ namespace Ariadne {
       Geometry::GridMaskSet<R> result(g,lb);
       found.adjoin(is);
       
-      int steps=ceil<int>(time_type(time/this->lock_to_grid_time()));
+      int steps=int_up<int>(time_type(time/this->lock_to_grid_time()));
       if (steps==0) { steps=1; }
 
       time_type time_step=time/steps;

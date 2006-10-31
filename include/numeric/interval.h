@@ -69,6 +69,8 @@ namespace Ariadne {
       /*! \brief Default constructer constructs empty interval. */
       Interval() : _lower(conv_down<R>(0)), _upper(conv_up<R>(0)) { }
       /*! \brief Construct from lower and upper bounds. */
+      Interval(const R& l, const R& u) : _lower(l), _upper(u) { }
+      /*! \brief Construct from lower and upper bounds. */
       template<class RL,class RU> Interval(const RL& l, const RU& u)
         : _lower(conv_down<R>(l)), _upper(conv_up<R>(u)) { }
        /*! \brief Construct an interval with possibly different real type. */
@@ -77,8 +79,6 @@ namespace Ariadne {
       /*! \brief Construct a one-point interval. */
       template<class RX> Interval(const RX& x)
         : _lower(conv_down<R>(x)), _upper(conv_up<R>(x)) { }
-      /*! \brief Construct from lower and upper bounds. */
-      Interval(const R& l, const R& u) : _lower(l), _upper(u) { }
       
       /*! \brief Assignment operator. */
       template<class RX> 

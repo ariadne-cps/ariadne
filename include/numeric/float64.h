@@ -89,14 +89,31 @@ namespace Ariadne {
     inline bool operator>=(const Float64& x1, const Float64& x2) { return x1.get_d()>=x2.get_d(); }
     inline bool operator< (const Float64& x1, const Float64& x2) { return x1.get_d()< x2.get_d(); }
     inline bool operator> (const Float64& x1, const Float64& x2) { return x1.get_d()> x2.get_d(); }
-/*    
-    bool operator==(const Float64& x1, const int& x2) { return x1.get_d()==x2; }
-    bool operator!=(const Float64& x1, const int& x2) { return x1.get_d()!=x2; }
-    bool operator<=(const Float64& x1, const int& x2) { return x1.get_d()<=x2; }
-    bool operator>=(const Float64& x1, const int& x2) { return x1.get_d()>=x2; }
-    bool operator< (const Float64& x1, const int& x2) { return x1.get_d()< x2; }
-    bool operator> (const Float64& x1, const int& x2) { return x1.get_d()> x2; }
-*/    
+    
+    inline bool operator==(const Float64& x1, const int& x2) { return x1.get_d()==x2; }
+    inline bool operator!=(const Float64& x1, const int& x2) { return x1.get_d()!=x2; }
+    inline bool operator<=(const Float64& x1, const int& x2) { return x1.get_d()<=x2; }
+    inline bool operator>=(const Float64& x1, const int& x2) { return x1.get_d()>=x2; }
+    inline bool operator< (const Float64& x1, const int& x2) { return x1.get_d()< x2; }
+    inline bool operator> (const Float64& x1, const int& x2) { return x1.get_d()> x2; }    
+
+    inline bool operator==(const Float64& x1, const double& x2) { return x1.get_d()==x2; }
+    inline bool operator!=(const Float64& x1, const double& x2) { return x1.get_d()!=x2; }
+    inline bool operator<=(const Float64& x1, const double& x2) { return x1.get_d()<=x2; }
+    inline bool operator>=(const Float64& x1, const double& x2) { return x1.get_d()>=x2; }
+    inline bool operator< (const Float64& x1, const double& x2) { return x1.get_d()< x2; }
+    inline bool operator> (const Float64& x1, const double& x2) { return x1.get_d()> x2; }    
+
+    inline bool operator==(const Float64& x1, const mpq_class& x2) { return x1.get_d()==x2; }
+    inline bool operator!=(const Float64& x1, const mpq_class& x2) { return x1.get_d()!=x2; }
+    inline bool operator<=(const Float64& x1, const mpq_class& x2) { return x1.get_d()<=x2; }
+    inline bool operator>=(const Float64& x1, const mpq_class& x2) { return x1.get_d()>=x2; }
+    inline bool operator< (const Float64& x1, const mpq_class& x2) { return x1.get_d()< x2; }
+    inline bool operator> (const Float64& x1, const mpq_class& x2) { return x1.get_d()> x2; }    
+      
+      
+    
+      
     int mpfr_hypot(mpfr_t y, const __mpfr_struct* x1, const __mpfr_struct* x2, mpfr_rnd_t r);
 
     typedef int mpfr_func(mpfr_t, const __mpfr_struct*, mp_rnd_t);
@@ -144,6 +161,11 @@ namespace Ariadne {
     
     template<> inline double conv_approx(const Float64& x) { return x.get_d(); }
 
+    template<> inline Float64 conv_exact(const Float64& x) { return x; }
+    template<> inline Float64 conv_approx(const Float64& x) { return conv_exact<Float64>(x); }
+    template<> inline Float64 conv_down(const Float64& x) { return conv_exact<Float64>(x); }
+    template<> inline Float64 conv_up(const Float64& x) { return conv_exact<Float64>(x); }
+
     template<> inline Float64 conv_exact(const int& n) { return n; }
     template<> inline Float64 conv_approx(const int& n) { return conv_exact<Float64>(n); }
     template<> inline Float64 conv_down(const int& n) { return conv_exact<Float64>(n); }
@@ -153,6 +175,18 @@ namespace Ariadne {
     template<> inline Float64 conv_approx(const double& x) { return conv_exact<Float64>(x); }
     template<> inline Float64 conv_down(const double& x) { return conv_exact<Float64>(x); }
     template<> inline Float64 conv_up(const double& x) { return conv_exact<Float64>(x); }
+
+    template<> inline Float64 conv_approx(const Rational& x) { 
+      return x.get_d(); }
+    template<> inline Float64 conv_down(const Rational& x) { 
+      mpfr_t y; mpfr_init_set_q(y,x.get_mpq_t(),GMP_RNDD); return mpfr_get_d(y,GMP_RNDD); }
+    template<> inline Float64 conv_up(const Rational& x) { 
+      mpfr_t y; mpfr_init_set_q(y,x.get_mpq_t(),GMP_RNDU); return mpfr_get_d(y,GMP_RNDU); }
+    
+    template<> inline int int_down(const Float64& x) { 
+      int n=static_cast<int>(x.get_d()); if(n>=x) { n-=1; } return n; }
+    template<> inline int int_up(const Float64& x) { 
+      int n=static_cast<int>(x.get_d()); if(n<=x) { n+=1; } return n; }
 
     template<> inline Float64 min_exact(const Float64& x1,const Float64& x2) { 
       return min(x1,x2); }
@@ -210,7 +244,30 @@ namespace Ariadne {
     template<> inline Float64 div_approx(const Float64& x1,const Float64& x2) {
       return x1.get_d()/x2.get_d(); }
     
-    inline Float64 mul_approx(const int& n, const Float64& x) {
+     template<> inline Float64 med_approx(const Float64& x1,const Float64& x2) {
+      return (x1.get_d()+x2.get_d())/2; }
+    
+    template<> inline Float64 pow_approx(const Float64& x1, const int& n2) {
+      return std::pow(x1.get_d(),n2); }
+    template<> inline Float64 pow_down(const Float64& x1,const int& n2) {
+      if(n2<0) { return pow_down(div_down(Float64(1.0),x1),-n2); }
+      if(n2==0) { return 1.0; }
+      Float64 r=1.0; Float64 p=x1; int n=n2;
+      while(n) { if(n%2) { r=mul_down(r,p); } p=mul_down(p,p); n=n/2; }
+      return r; }
+    template<> inline Float64 pow_up(const Float64& x1,const int& n2) {
+      if(n2<0) { return pow_up(div_up(Float64(1.0),x1),-n2); }
+      if(n2==0) { return 1.0; }
+      Float64 r=1.0; Float64 p=x1; int n=n2;
+      while(n) { if(n%2) { r=mul_up(r,p); } p=mul_up(p,p); n=n/2; }
+      return r; }
+      
+    template<> inline Float64 floor(const Float64& x) {
+      return std::floor(x.get_d()); }
+    template<> inline Float64 ceil(const Float64& x) {
+      return std::ceil(x.get_d()); }
+      
+   inline Float64 mul_approx(const int& n, const Float64& x) {
       return x.get_d()*n; }
     inline Float64 mul_approx(const Float64& x, const int& n) {
       return x.get_d()*n; }
@@ -249,8 +306,6 @@ namespace Ariadne {
       if(abs_approx(x1)>abs_approx(x2)) { return hypot_approx(x2,x1); }
       double z=x1.get_d()/x2.get_d(); return std::sqrt(z*z+1.0)*x2.get_d(); }
     
-    template<> inline Integer int_down(const Float64& x);
-    template<> inline Integer int_up(const Float64& x);
 
     template<> inline Float64 exp_approx(const Float64& x) {
       return std::exp(x.get_d()); }

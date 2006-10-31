@@ -29,6 +29,7 @@
 #define _ARIADNE_RATIONAL_H
 
 #include <gmpxx.h>
+#include <iostream>
 
 #include "../declarations.h"
 
@@ -55,13 +56,17 @@ namespace Ariadne {
     {
      public:
       Rational() : mpq_class() { }
-      template<class R> Rational(const R& x) : mpq_class(x) { }
-      template<class R1,class R2> Rational(const R1& x1,const R2& x2) : mpq_class(x1,x2) { }
+      template<class R> Rational(const R& x)
+        : mpq_class(x) { this->mpq_class::canonicalize(); }
+      template<class R1,class R2> Rational(const R1& x1,const R2& x2)
+        : mpq_class(x1,x2) { this->mpq_class::canonicalize(); }
       Integer numerator() const { return this->get_num(); }
       Integer denominator() const { return this->get_den();}
     };
 
-    
+    inline std::istream& operator>>(std::istream& is, Rational& q) { 
+      mpq_class& mpq=static_cast<mpq_class&>(q); is >> mpq; mpq.canonicalize(); return is; }
+      
     inline Integer numerator(const Rational& num){ 
       return num.get_num(); }
   
@@ -94,13 +99,18 @@ namespace Ariadne {
       return r; 
     }      
     
-    template<> inline int floor(const Rational& x) { 
+    template<> inline Rational floor(const Rational& x) { 
+      return Rational((x.get_num()+x.get_den()-1)/x.get_den()); }
+    template<> inline Rational ceil(const Rational& x) { 
+      return Rational(x.get_num()/x.get_den()); }
+
+    template<> inline int int_down(const Rational& x) { 
       return (Integer((x.get_num()+x.get_den()-1)/x.get_den())).get_si(); }
-    template<> inline int ceil(const Rational& x) { 
+    template<> inline int int_up(const Rational& x) { 
       return (Integer(x.get_num()/x.get_den())).get_si(); }
     
     template<> inline int quot(const Rational& x1, const Rational& x2) {
-      return floor<int>(div(x1,x2)); }
+      return int_down<int>(div(x1,x2)); }
       
       
     template<> inline std::string name<Numeric::Rational>() { return "Rational"; }

@@ -694,7 +694,7 @@ namespace Ariadne {
       check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
       for(dimension_type i=0; i!=C.dimension(); ++i) {
         C.set_lower_bound(i,A.lower_bound(i)-B.lower_bound(i));
-        C.set_lower_bound(i,A.upper_bound(i)-B.upper_bound(i));
+        C.set_upper_bound(i,A.upper_bound(i)-B.upper_bound(i));
       }
       return C;
     }

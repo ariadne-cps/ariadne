@@ -66,7 +66,7 @@ template<class R>
 void
 test_function()
 {
-  cout << "test_function<" << name<R>() << ">" << endl;
+  cout << __PRETTY_FUNCTION__ << endl;
   
   cout << setprecision(20);
   mpf_set_default_prec (128);
@@ -85,8 +85,6 @@ int main() {
 
   test_function<Float64>();
   test_function<MPFloat>();
-  
-  cerr << "INCOMPLETE ";
 
   return 0;
 }

@@ -68,11 +68,30 @@ template<class R>
 int
 test_interval()
 {
-  cout << "Test interval<" << name<R>() << ">" << endl;
+  cout << __PRETTY_FUNCTION__ << endl;
   
+  // Construct from pair
   Interval<R> ivld1(R(1.125),R(2.25));
+  assert(ivld1.lower()==1.125); assert(ivld1.upper()==2.25);
+  // Default constructor
   Interval<R> ivld2;
-  Interval<R> ivld3(2.1,3.2);
+  assert(ivld1.empty());
+  // Constructor with approximations
+  Interval<R> ivld3(Rational(21,10),Rational(16,5));
+  assert(ivld3.lower()<Rational(21,10));
+  assert(ivld3.upper()>Rational(16,5));
+  // Constructor from approximate values
+  Interval<R> ivld4(2.1,3.2);
+  assert(ivld4.lower()<=2.1);
+  assert(ivld4.upper()>=3.2);
+  // Approximate constructor from a single value
+  Interval<R> ivld5(Rational(1,3));
+  assert(ivld5.lower()<Rational(1,3));
+  assert(ivld5.upper()>Rational(1,3));
+  // Exact constructor from a single value
+  Interval<R> ivld5(R(1.25));
+  assert(ivld5.lower()==R(1.25));
+  assert(ivld5.upper()==R(1.25));
   
   Interval<R> ivlq1(1.1,2.2);
   Interval<R> ivlq2(1.125,1.125);

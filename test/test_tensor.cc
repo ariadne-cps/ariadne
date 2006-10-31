@@ -43,7 +43,7 @@ template<class R> int test_tensor();
 int main() {
   test_tensor_index();
   test_tensor<Rational>();
-  cout << "Incomplete";
+  cerr << "INCOMPLETE ";
   return 0;
 }
 

@@ -2,7 +2,7 @@ SUBDIRS = include src test python
 
 EXTRA_DIST = Doxyfile
 
-CXXFLAGS += -Wall
+CXXFLAGS += -Wall 
 
 .PHONY: shiny lib check-lib
 shiny: maintainer-clean

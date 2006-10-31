@@ -32,6 +32,16 @@
  * \brief Fundamental classes and operations, mostly implemented as wrappers 
  * around other libraries.
  *
+ * \defgroup Storage Storage
+ * \ingroup Base
+ * \brief Array classes for data storage
+ * \addtogroup Storage
+ * \class array<bool>
+ * 
+ *
+ * \defgroup Traversal Traversal
+ * \ingroup Base
+ * \brief Iterator classes for data traversal
  * 
  * \defgroup Numeric Numeric
  * \ingroup Base
@@ -64,6 +74,7 @@
  * (approximate) multiplication operator. Use 
  * mul(Float64,Float64,RoundApproximate) instead.
  * 
+ * See the page \ref real for more information.
  *
  * \defgroup LinearAlgebra Linear Algebra
  * \ingroup Base
@@ -137,19 +148,20 @@
  * simple sets which form a base for the topology, and <em>denotable sets</em>
  * which are unions of basic sets.
  * 
- * The fundamental geometric operations are contains(Set,State), 
- * intersects(Set,Set) and subset(Set,Set). All these return tribool values,
+ * The fundamental geometric operations are \c contains(Set,State), 
+ * \a disjoint(Set,Set) and subset(Set,Set). All these return \a tribool values,
  * where the indeterminate value is used to indicate a result which is either
  * not robust (e.g. the boundaries of two sets intersect but their interiors do
  * not) or which cannot be computed to the given precision.
  *
- * Ariadne uses <em>fuzzy basic sets</em>, which are sets of sets defined using
+ * %Ariadne uses <em>fuzzy basic sets</em>, which are sets of sets defined using
  * interval data, to store intermediate results if these cannot be computed 
  * exactly. These sets can be converted to ordinary basic sets by over- or
  * under-approximation. Alternatively, the fundamental binary predicates can
  * be computed directed for the fuzzy set types.
- *
  * Denotable sets are never fuzzy.
+ *
+ * See \ref geometric for more information.
  * 
  * \defgroup BasicSet Basic Sets
  * \ingroup Geometry
@@ -190,16 +202,21 @@
  * \ingroup DenotableSet
  * \brief Sets based on partition trees.
  *
- *
- * \defgroup GeometricOperations Geometric Operations
+ * \defgroup ExactSet Exact sets
  * \ingroup Geometry
- * \brief Operations on basic sets and denotable sets.
+ * \brief Sets which can be defined exactly.
  *
- * The fundamental geometric predicates must be defined for all basic set 
- * classes, and should be defined for denotable set classes. Other operations
- * should only be defined when the corresponding mathematical class of sets
- * is closed under the operation e.g. intersection of parallelotopes should not
- * be defined.
+ * Any set can be uniquely specified by the results geometric predicates involving
+ * rectangles. Exact sets are defined by an interface in which these predicates are
+ * defined.
+ *
+ * \defgroup HybridSet Hybrid sets
+ * \ingroup Geometry
+ * \brief Sets in spaces with many components.
+ *
+ * The state space of a hybrid system consists of many disconnected components,
+ * one for each discrete mode. Hybrid sets consist of a union of many different
+ * sets, one for each component of the state space.
  */
 
 /*!\defgroup System System
@@ -219,6 +236,8 @@
  * compute the image of denotable sets; this is the purpose of the Evaluation 
  * module.
  * 
+ * See the page on \ref function for more information.
+ *
  * \defgroup DiscreteTime Discrete-Time Systems
  * \ingroup System
  * \brief Discrete-time systems.
@@ -236,17 +255,22 @@
  *  \brief Functions and methods for computing the evolution of a system and solving equations.
  *
  * 
+ *  \defgroup Solve Solve
+ *  \ingroup Evaluation
+ *  \brief Functions for solving systems of equations.
+ *
  *  \defgroup Apply Apply
  *  \ingroup Evaluation
  *  \brief Functions for iterating forward discrete-time systems.
  *
  *  \defgroup Integrate Integrate
  *  \ingroup Evaluation
- *  \brief Classes for integrating discrete-time systems.
+ *  \brief Classes for integrating continuous-time systems.
  *
- *  \defgroup Solve Solve
+ *  \defgroup Evolve Evolve
  *  \ingroup Evaluation
- *  \brief Functions for solving systems of equations.
+ *  \brief Classes for computing the evolution of hybrid-time systems.
+ *
  */
 
 /*! \defgroup Output Output
@@ -254,6 +278,10 @@
  *  \defgroup Postscript Postscript Output
  *  \ingroup Output 
  *  \brief Encapsulated Postscript output.
+ *
+ *  \defgroup CHomP Homology Output
+ *  \ingroup Output 
+ *  \brief Homology Output.
  */
 
 

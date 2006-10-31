@@ -33,12 +33,11 @@
 
 template<class R>
 Ariadne::Geometry::Rectangle<R>
-Ariadne::Evaluation::interval_newton(const System::VectorField<R>& f, 
-                                     const Geometry::Rectangle<R>& x, 
-                                     const R& e,
-                                     uint max_steps)
+Ariadne::Evaluation::IntervalNewtonSolver<R>::solve(const System::VectorField<R>& f, 
+                                                    const Geometry::Rectangle<R>& x)
 {
-  uint n=max_steps;
+  const R& e=this->maximum_error();
+  uint n=this->maximum_number_of_steps();
   if(verbosity>1) { std::cerr << "verbosity=" << verbosity << "\n"; }
   Geometry::Rectangle<R> r=x;
   while(true) {
@@ -80,8 +79,10 @@ Ariadne::Evaluation::interval_newton(const System::VectorField<R>& f,
 
 template<class R>
 Ariadne::Geometry::Rectangle<R>
-Ariadne::Evaluation::IntervalNewtonSolver<R>::solve(const System::VectorField<R>& f, 
-                                                    const Geometry::Rectangle<R>& x)
+Ariadne::Evaluation::interval_newton(const System::VectorField<R>& f, 
+                                     const Geometry::Rectangle<R>& x,
+                                     const R& e, 
+                                     uint s)
 {
-  return interval_newton(f,x,this->maximum_error(),this->maximum_number_of_steps());
+  return IntervalNewtonSolver<R>(e,s).solve(f,x);
 }

@@ -36,7 +36,7 @@ namespace Ariadne {
 namespace Evaluation {
   
 
-  /*! 
+/*! \ingroup Evolve
  *  \brief A class for computing the evolution of a hybrid system.
  */
 template< class R >

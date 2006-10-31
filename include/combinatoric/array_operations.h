@@ -34,6 +34,9 @@
 
 namespace Ariadne {
   namespace Base {
+    //! \name Array operations
+    //@{
+    //! \ingroup Base
     /*! \brief Inner product. */
     size_type inner_product(const SizeArray& a1, const SizeArray& a2);
     /*! \brief Inner product. */
@@ -76,7 +79,8 @@ namespace Ariadne {
     /*! \brief True if v1-v2 is all zeros. */
     bool operator<=(const BooleanArray& v1, const BooleanArray& v2);
     
-
+    //@}
+    
   }
 
 }

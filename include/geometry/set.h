@@ -37,6 +37,7 @@
 namespace Ariadne {
   namespace Geometry {
 
+    //! \ingroup ExactSet
     /*! An abstract base class for general sets. */
     template<class R>
     class Set {
@@ -77,6 +78,8 @@ namespace Ariadne {
 namespace Ariadne {
   namespace Geometry {
     
+    //! \ingroup ExactSet
+    /*! \brief An adaptor for the Polyhedron class conforming to the Set interface. */
     template<class R>
     class PolyhedralSet : public Set<R>, public Polyhedron<R>
     {

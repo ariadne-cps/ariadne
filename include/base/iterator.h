@@ -37,9 +37,7 @@
 namespace Ariadne {
   namespace Base {
 
-    //! \name Iterators
-    //@{
-   
+    //! \ingroup Traversal
     /*! \brief An iterator traversing a subset of values defined by a mask */
     template<class Base, class Mask>
     class mask_iterator
@@ -78,6 +76,7 @@ namespace Ariadne {
     
     
     
+    //! \ingroup Traversal
     /*! \brief An iterator adaptor which uses a conversion operator to convert its argument into another type. */
     template<class Base, class Value>
     class conversion_iterator
@@ -99,6 +98,7 @@ namespace Ariadne {
     
     
     
+    //! \ingroup Traversal
     /*! \brief An iterator which constructs its results from a piece of data and an iterator. */
     template<class Base, class Value, class Data>
     class binary_constructor_iterator 
@@ -120,6 +120,7 @@ namespace Ariadne {
     
     
     
+    //! \ingroup Traversal
     /*! \brief An iterator which constructs its results from a piece of data and an iterator. */
     template<class Base, class Value, class Data1, class Data2>
     class ternary_constructor_iterator 
@@ -143,6 +144,7 @@ namespace Ariadne {
     
     
     
+    //! \ingroup Traversal
     /*! \brief An iterator which constructs its results from a pair or adjacent values of another iterator. */
     template<class Base, class Value>
     class pair_constructor_iterator
@@ -167,6 +169,7 @@ namespace Ariadne {
     
     
     
+    //! \ingroup Traversal
     /*! \brief An iterator for positions in rectangular piece of a grid. */
     class lattice_iterator 
       : public boost::iterator_facade<lattice_iterator,
@@ -207,7 +210,6 @@ namespace Ariadne {
       }
     }
     
-    //@}
     
   } // namespace Base
     

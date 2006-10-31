@@ -36,7 +36,7 @@
 namespace Ariadne {  
 namespace Geometry {
   
-/*! 
+/*! \ingroup HybridSet
  *  \brief A class for representing the reachable set of a hybrid system.
  */
 template< class R >

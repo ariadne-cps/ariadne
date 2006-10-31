@@ -113,6 +113,8 @@ template<class R> class HybridGridMaskSet;
 
 
 namespace Ariadne { namespace System {
+template<class R> class Function;
+  
 template<class R> class Map;
 template<class R> class AffineMap;
 template<class R, template<class> class BS > class AffineMultiMap;
@@ -138,19 +140,26 @@ template<class R> class HybridEvolver;
 }}
 
 namespace Ariadne { namespace Base {
-/*! \brief An unsigned integral type used to represent a coordinate in state space. */
-typedef unsigned short dimension_type;
+//! \name Basic types
+//@{
+//! \ingroup Base
+/*! \brief The type used for a unique identifier or key. */
+typedef size_t id_type;
+/*! \brief The type of a machine byte. */
+typedef unsigned char byte_type; 
 /*! \brief An unsigned integral type used to represent the size of a list. */
 typedef size_t size_type;
 /*! \brief An signed integral type used to represent the position in a list with positive and negative indices. */
 typedef int index_type;
-/*! \brief The type of a machine byte. */
-typedef unsigned char byte_type; 
-/*! \brief The type used for a unique identifyer or key. */
-typedef size_type id_type;
-/*! \brief The type used for a unique identifyer or key. */
+/*! \brief An unsigned integral type used to represent a coordinate in state space. */
+typedef unsigned short dimension_type;
+/*! \brief The type used to describe evolution time. */
 typedef Numeric::Rational time_type;
-
+//@}
+  
+//! \name Array types
+//@{
+//! \ingroup Array
 /*! \brief An array of boolean values. */
 typedef array<bool> BooleanArray;
 /*! \brief An array of unsigned integer values. */
@@ -159,6 +168,7 @@ typedef array<size_type> SizeArray;
 typedef array<index_type> IndexArray;
 /*! \brief An array of integer values. */
 typedef LinearAlgebra::MultiIndex multi_index_type;
+//@}
 }}
 
 namespace Ariadne {

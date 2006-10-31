@@ -69,13 +69,17 @@
  * \section Installation
  *
  * From the ariadne/trunk/ directory of the main tree, type
- * \code make install \endcode
- * to make and install the library. 
- *
- * The default installation directory for the library is $HOME/lib/, and for the Python interface is $HOME/python/.
- * These defaults can be changed by editing the PREFIX variable in the file config.mk, or, for more control, the 
- * variables LIBPREFIX and PYTHONPREFIX.
- */
+ * \code 
+ *   ./configure
+ *   make
+ *   make install
+ * \endcode
+ * The default installation directory for the library is $/usr/local/lib/, and for the Python interface is /usr/local/python/.
+ * These defaults can be changed by using the --prefix flag to ./configure, as in
+ * \code 
+ *   ./configure --prefix=$HOME
+ * \endcode
+*/
 
 
 
@@ -85,111 +89,66 @@
  *
  * \section Introduction
  *
- * Ariadne supports three different real number types, \a double, \a dyadic and \a rational.
- * The \a double type is a \em finite-precision type, and the \a dyadic and \a rational types are \em arbitrary-precision types.
+ * Ariadne currently supports three different real number types, \a \ref Float64, \a MPFloat and \a Rational.
+ * The \a Float64 type is a \em finite-precision type, the \a MPFloat type is a \em multiple-precision type
+ * and \a Rational is an \em exact number type. Future realeases will also support an \em arbitrary-precision
+ * real number type \a Real.
  *
- * \section Finite-Precision Real Numbers
+ * \section floatingpoint Floating-Point Numbers
  *
  * Real numbers are traditionally described by floating-point types \a float and \a double.
- * The set of denotable elements is <em>finite</em>.
+ * The set of elements which can be represented by these typesis <em>finite</em>.
  * Arithmetic operations can only be performed approximately to maximal precision determined by the data type.
  * However, these types have the advantage of requiring a known amount of memory, which means they can be statically
  * allocated, and having hardware-supported arithmetical approximations. This makes them especially suitable in
- * situations where execution speed and memory usage are more important than computational accuracy.
+ * situations where execution speed and memory usage are more important than a knowledge of the computational accuracy.
  *
- * A finite-precision real number type \c FPReal must satisfy the following requirements
+ * \section finiteprecision Finite-Precision Real Numbers
  *
+ * For a package such as %Ariadne, in which we are concerned with keeping track of numerical errors,
+ * we cannot use these types directly. Instead, we provide four different arithmetic operations for
+ * the same type. We can specify that the result can be rounded up or down, or that the result
+ * should be rounded to the nearest representable value. However, the default option is to
+ * <em>return an interval</em> containing the exact value of the operation. To summarize, we have the following 
+ * operations.
  * \code
- * concept FPReal {
- *  public:
- *   FPReal(int);
- *   FPReal(const FPReal &);
- *   FPReal& operator=(const FPReal&);
- * };
- *
- * // Arithmetical operators.
- * FPReal operator-(FPReal);
- * FPReal operator+(FPReal,FPReal);
- * FPReal operator-(FPReal,FPReal);
- * FPReal operator*(FPReal,FPReal);
- * FPReal operator/(FPReal,FPReal);
- * \endcode
- *
- * We also define the following functions.
- *
- * \code
- * // Arithmetical functions.
+ * // Exact arithmetic where possible
+ * FPReal neg_exact(FPReal);
  * FPReal neg(FPReal);
- * FPReal add(FPReal,FPReal);
- * FPReal sub(FPReal,FPReal);
- * FPReal mul(FPReal,FPReal);
- * FPReal recip(FPReal);
- * FPReal div(FPReal,FPReal);
+ * FPReal operator-(FPReal);
  *
- * // Conversions.
- * FPReal floor(FPReal);
- * FPReal ceil(FPReal);
+ * // Approximate and rounded arithmetic
+ * FPReal add_approx(FPReal);
+ * FPReal add_down(FPReal);
+ * FPReal add_up(FPReal);
  *
- * // Comparisons.
- * FPReal min(FPReal, FPReal)
- * FPReal max(FPReal, FPReal)
+ * // Interval arithmetic
+ * Interval<FPReal> operator+(Interval<FPReal>,Interval<FPReal>);
  *
- * // Absolute value.
- * FPReal abs(FPReal)
- *
- * // Algebraic functions.
- * FPReal pow(FPReal,int)
- * FPReal square(FPReal)
- * FPReal sqrt(FPReal)
- *
- * // Transcendental functions.
- * FPReal exp(FPReal);
- * FPReal log(FPReal);
- *
- * FPReal sin(FPReal);
- * FPReal cos(FPReal);
- * FPReal tan(FPReal);
- *
- * FPReal asin(FPReal);
- * FPReal acos(FPReal);
- * FPReal atan(FPReal);
- *
- * FPReal sinh(FPReal);
- * FPReal cosh(FPReal);
- * FPReal tanh(FPReal);
- *
- * FPReal asinh(FPReal);
- * FPReal acosh(FPReal);
- * FPReal atanh(FPReal);
+ * // Automatic conversion to interval arithmetic
+ * Interval<FPReal> operator+(FPReal,FPReal);
  * \endcode
+ * For types based on floating point numbers, the arithmetical operators should follow IEEE standards.
  *
- * The arithmetical operators should follow IEEE standards.
- * The arithmetical functions are synonyms for the arithmetical operators.
+ * \code
+ * // Approximate and rounded algebraic transcendental functions
+ * FPReal exp_approx(FPReal);
+ * FPReal exp_down(FPReal);
+ * FPReal exp_up(FPReal);
+ *
+ * // Interval algebraic and transcendental functions
+ * Interval<FPReal> exp(Interval<FPReal>);
+ * \endcode
  * The precision of the algebraic and transcendental functions is not guarenteed,
  * except that the functions must give values in the correct range.
  *
- * In order to support interval arithmetic, we also define the following functions.
- *
- * \code
- * FPReal f_approx(FPReal); // Synonym for FPReal f(FPReal)
- * FPReal f_down(FPReal);
- * FPReal f_up(FPReal)
- * \endcode
- * An alternative syntax is
- * \code
- * enum ApproximationKind { EXACT, APPROX, LOWER, UPPER };
- *
- * FPReal f(FPReal,ApproximationKind);
- * \endcode
- * where \p ApproximationKind describes whether the function return value is exact, and approximation, a lower bound or an upper bound.
- *
- * Further, we define arithmetical operations on Interval<FPReal>.
- *
- * The upper and lower bounds satisfy the mathematical postcondition \f$ f(x) \in [\textrm{f\_down}(x),\textrm{f\_up}(x)] \f$
- * and the implementation postcondition <tt>f_down(x) <= f_approx(x) <= f_up(x)</tt>.
+ * The upper and lower rounded versions satisfy the mathematical postcondition 
+ * \f$ \underline{f}(x) \leq f(x) \leq \overline{f}(x) \f$
+ * and the implementation postcondition 
+ * \code f_down(x) <= f_approx(x) <= f_up(x) \endcode
  *
  * \note
- * No other conditions are required of \c f, \c f_down, and \c f_up.
+ * No other conditions are required of the implementation.
  * Hence a valid (but useless) implementation of \f$ \sin(x) \f$ is
  * \code
  * FPReal sin_approx(FPReal x) { return 0.0; }
@@ -197,98 +156,74 @@
  * FPReal sin_up(FPReal x) { return 1.0; }
  * \endcode
  *
- * \internal
- * Should we only support explicit approximation functions, like \c exp_approx for finite-precision types?
- * While it is in some ways appealing to make the approximation explicit,
- * I think it's probably better to allow <tt> double exp(double)</tt> in Ariadne, for two reasons.
- * The first reason is that this is common useage, and people might well include <tt>\<cmath\></tt> anyway.
- * The second is operator overloading; we should insist that \c operator+ and add give the same answers,
- * and by disallowing add, we also need to disallow all operator overloading on double-precision types.
  *
- * Should we use the \c f_down, \c f_up syntax, or the \c f(Real,ApproximationKind) syntax?
- * Boost uses \c f_down and \c f_up.
- * I currently have a slight preference for \c f_down and \c f_up,
- * but this might change when we fix the names for approximations of sets and functions.
+ * \section multipleprecision Multiple-precision types.
  *
+ * If we have a problem for which a fixed-precision type is not sufficient to obtain an accurate answer,
+ * we can switch to a \em multiple-precision type. The semantics of arithmetic on multiple-precision types 
+ * is mostly the same as that of a fixed-precision type; arithmetic is approximate, and the default is to
+ * return an interval. However, a multiple-precision type has a 
+ * \code MPReal::set_precision(unsigned int) \endcode
+ * method, which sets the precision to which the type can store its result.
+ * Using a higher precision yields a more accurate answer. Further, the result of an
+ * arithmetic operation is guarenteed to converge as the precision is increased.
+ *
+ * For efficiency, all elements of an array of a multiple precision type 
  *
  * \section arbitraryprecision Arbitrary-precision types.
+ * 
+ * An arbitrary-precision type stores a number in a form so that it can be
+ * recovered to any desired precision. This is typically acheived by expressing
+ * the number as a formula in terms of other arbitrary-precision or exact number
+ * types. However, the high computational overhead of such numbers makes them
+ * impractical for describing higher-order types, such as matrices or sets.
  *
- * Alternatively, real numbers may be described by rational types such as \c rational and \c dyadic, or even by more
- * complicated types, such as \c algebraic. We have a <em>countable</em> set of denotable elements which are dense
- * in the set of all real numbers. Real-valued functions can be approximated to arbitrary precision, which may be
- * by the user. Arithmetic operations can usually be performed exactly. However, these types require arbitrarily
- * large amounts of memory which is typically dynamically allocated, and hardware support for arithmetic does not
- * exist, so are typically less efficient than the floating-point types.
+ * Arbitrary-precision numbers may be used to store constants occurring in a 
+ * system definition.
  *
  * \code
- * concept APReal {
- *  public:
- *   APReal(int);
- *   APReal(double);
- *   APReal(const APReal &);
- *   APReal& operator=(const APReal&);
- * };
- *
- * // Arithmetical operators.
+ * // Exact arithmetical operators.
  * APReal operator-(APReal);
  * APReal operator+(APReal,APReal);
- * APReal operator-(APReal,APReal);
- * APReal operator*(APReal,APReal);
- * rational operator/(rational,rational);
- * dyadic operator/(dyadic,int i); // Behaviour undefined unless i is a power of 2.
  *
- * // Arithmetical functions.
- * APReal neg(APReal);
- * APReal add(APReal,APReal);
- * APReal sub(APReal,APReal);
- * APReal mul(APReal,APReal);
+ * // Exact algebraic and transcendental functions
+ * APReal sqrt(APReal);
+ * APReal exp(APReal);
+ * APReal sin(APReal);
+ * \endcode
+ * \section exactarithmetic Exact arithmetic types.
  *
- * rational recip(rational);
- * rational div(rational,rational);
- * dyadic div(dyadic,int i); // Behaviour undefined unless i is a power of 2.
+ * Elements of a countable set of numbers, such as integer, dyadic, rational or algebraic numbers,
+ * may be stored using a finite amount of data, though the size of the data depends on the 
+ * element used. Hence in an array of an exact arithmetic type, each element needs to be
+ * dynamically allocated, which is expensive in terms of spacial overhead. 
+ * Since these sets are typically closed under arithmetical operations, 
+ * arithmetic can be performed exactly for these types. Hence these types are
+ * appropriate where time and space overhead are not at a premium.
  *
- * // Conversions.
- * APReal floor(APReal);
- * APReal ceil(APReal);
+ * Since these types require arbitrarily
+ * large amounts of memory which is typically dynamically allocated, and hardware support for arithmetic does not
+ * exist, they are typically less efficient than the fixed-precision and multiple-precision types.
  *
- * // Comparisons.
- * APReal min(APReal, APReal)
- * APReal max(APReal, APReal)
+ * In %Ariadne, we support arithmetic on the Rational number type, but no algebraic or transcendental functions.
+ * This type is primarily useful for testing.
  *
- * // Absolute value.
- * APReal abs(APReal)
+ * \code
+ * // Exact arithmetical operators.
+ * ExReal operator-(ExReal);
+ * ExReal operator+(ExReal,ExReal);
  *
- * // Algebraic functions.
- * APReal pow(APReal,int)
- * APReal square(APReal)
- *
- * // Approximate algebraic functions.
- * APReal div_approx(APReal x, APReal y, APReal e); 
- * APReal recip_approx(APReal x, APReal e);
- * APReal sqrt_approx(APReal x, APReal e);
- *
- * // Approximate transcendental functions.
- * APReal exp_approx(APReal x, APReal e);
- * APReal log_approx(APReal x, APReal e);
- *
- * APReal sin_approx(APReal x, APReal e);
- *  ...
+ * // No algebraic or transcendental functions
  * \endcode
  *
  * Unlike a finite-precision type, arbitrary-precision types are intended for use when precise error specifications are required.
- * Hence, whenever a function returns an approximation, the suffix \c _approx is \em always added to the function name.
+ * Hence, whenever a function returns an approximation, the suffix _approx is \em always added to the function name.
  * This ensures that the user is always aware of the use of approximations.
  *
- * The \c dyadic type does not in general support exact division.
+ * The Dyadic type does not in general support exact division.
  * The exception is that division by a power of 2 yields an exact answer.
- * Generic code intended for use with all arbitrary precision types should \em not use division, except by a power of two.
+ * Generic code intended for use with all exact arithmetic types should \em not use division, except by a power of two.
  *
- * \b Warning: The compiler may not catch errors resulting from inexact division involving \c dyadic numbers!!
- *
- * The parameter \a e is an input parameter giving the desired error in the output.
- *
- * \internal Alternatively, since we always need an error bound, we don't need to add the suffix \c _approx 
- * to function names for exact arithmetic.
  *
  *
  * \section interval Interval Arithmetic
@@ -302,25 +237,15 @@
  * Finite precision functions are of the form
  * \code
  * Interval<FPReal> f(Interval<FPReal>);
- * Interval<FPReal> f_approx(Interval<FPReal>);
  * \endcode
- * and satisfy the mathematical postcondition \f$ \forall x\in I,\ f(x)\in\textrm{f\_approx}(I) \f$,
- * and the implementation postcondition <tt>I.contains(x)</tt> implies <tt>f_approx(I).contains(f_approx(x))</tt>.
+ * and satisfy the mathematical postcondition \f$ \forall x\in I,\ f(x)\in\f$\c f(I),
+ * and the implementation postcondition <tt>I.contains(x)</tt> implies <tt>f(I).contains(f_approx(x))</tt>.
  *
- * \subsection arbitrary_precision_interval Arbitrary-precision interval arithmetic
+ * \subsection multiple_precision_interval Multiple-precision interval arithmetic
  *
- * Exact arbitrary-precision interval functions are given by
- * \code
- * Interval<APReal> f(Interval<APReal>);
- * \endcode
- * and approximate arbitrary-precision interval functions by
- * \code
- * Interval<APReal> f_approx(Interval<APReal>);
- * Interval<APReal> f(Interval<APReal>); // (Possible) syntactic sugar for f_approx.
- * \endcode
- * where \c f(I) is the exact image of the interval \c I, and \c f_approx satisfies the mathematical postcondition
- * \f$ \textrm{f\_approx}(I) \supset f(I)\f$, and the convergence criterion that the length of \c f_approx(I) approaches 0
- * as the length of \c I approaches 0.
+ * Multiple-precision interval functions follow the same conditions as fixed-precision
+ * interval functions, together with the convergence criterion
+ * that the length of \c f(I) approaches 0 as the length of \c I approaches 0.
  *
  */
 
@@ -368,60 +293,56 @@
  * Mathematically, a \c BasicSet type represents elements of a countable base of a topological space.
  * More precisely, a \c BasicSet represents the \em closure of a basic set for the topology.
  *
+ * In many cases,it is not possible to evaluate geometric predicates concerning two sets 
+ * using a given real number type. For this reason, the results of a geometric predicate
+ * returns an object of type \a tribool, which may be \a true, \a false or \a indeterminate (unknown).
+ *  
+ *
+ *
  * \code
  * // The basic set concept.
  * concept BasicSet
  * {
- *   typename real_type; // The type of denotable real number used for the representation.
- *   typename state_type; // The type of denotable point the set contains.
+ *   type real_type; // The type of denotable real number used for the representation.
+ *   type state_type; // The type of denotable point the set contains.
  *
- *   BasicSet(const std::string &); // Construct from a string literal.
+ *   BasicSet(const std::string &); // Construct from a string literal (optional).
  *   BasicSet(const BasicSet &); // Copy constructor.
  *   BasicSet & operator=(const BasicSet &); // Assignment operator.
  *
  *   dimension_type dimension() const; // The dimension of the set.
- *   bool empty() const; // Returns true if the set is empty.
- *   bool empty_interior() const; // Returns true if the interior of the set is empty.
- *   bool contains(const State &) const; // Returns true if the set contains a given state.
- *   bool interior_contains(const State &) const; // Returns true if the interior of the set contains a given state.
- *
  *   state_type centre() const; // A point in the set (typically, the "centre" point, if this makes sense).
- *   State radius() const; // The maximum distance from the centre to another point in the set in an appropriate metric. 
- *   Real volume() const; // The volume of the set. (Optional).
+ *   real_type radius() const; // The maximum distance from the centre to another point in the set in an appropriate metric. 
+ *   real_type volume() const; // An approximation to the volume of the set. (Optional).
+ *
+ *   tribool empty() const; // Tests if the set is empty.
+ *   tribool bounded() const; // Tests if the set is bounded.
+ *
+ *   tribool contains(const State &) const; // Tests if the set contains a point.
  *
  *   Rectangle<real_type> bounding_box() const; // A rectangle containing the set.
- *   Sphere<real_type> bounding_sphere() const; // A sphere containing the set. (Optional)
+ *   tribool disjoint(const Rectangle &); // Tests if the set is disjoint from a Rectangle
+ *   tribool superset(const Rectangle &); // Tests if the set contains a Rectangle.
+ *
  * };
  *
- *  bool equal(const BasicSet &, const BasicSet &); // Returns true if the two sets are equal.
- *  bool disjoint(const BasicSet &, const BasicSet &); // Returns true if the two sets are disjoint.
- *  bool interiors_intersect(const BasicSet &, const BasicSet &); // Returns true if the interiors of the two sets intersect.
- *  bool inner_subset(const BasicSet &, const BasicSet &); // Returns true if the first argument is a subset of the interior of the second.
- *  bool subset(const BasicSet &, const BasicSet &); // Returns true if the first argument is a subset of the second.
+ *  tribool equal(const BasicSet1 &, const BasicSet2 &); // Returns indeterminate if the two sets are equal; if false, then they are not equal.
+ *  tribool disjoint(const BasicSet1 &, const BasicSet2 &); // If true, then the sets are disjoint; if false, then they robustly intersect.
+ *  tribool subset(const BasicSet1 &, const BasicSet2 &); // If true, then the first set is a subset of the second interior of the second; 
+ *                                                      // if false, then the first set is not a subset of the second.
  *
  *  // Optional, depending on whether the operation yields a basic set of the same type.
- *  BasicSet regular_intersection(const BasicSet &, const BasicSet &); // The closure of the intersection of the interiors of the two sets.
- *  BasicSet intersection(const BasicSet &, const BasicSet &); // The intersection of the two (closed) sets.
+ *  BasicSet open_intersection(const BasicSet &, const BasicSet &); // The closure of the intersection of the interiors of the two sets.
+ *  BasicSet closed_intersection(const BasicSet &, const BasicSet &); // The intersection of the two (closed) sets.
  *  BasicSet convex_hull(const BasicSet &, const BasicSet &); // The convex hull of the two sets.
  *  BasicSet minkowski_sum(const BasicSet &, const BasicSet &); // The Minkowski (pointwise) sum of the two sets.
  *  BasicSet minkowski_difference(const BasicSet &, const BasicSet &); // The Minkowski (pointwise) difference of the two sets.
  *
  * \endcode
  *
- * Classes fulfilling the \c BasicSet concept are \c Rectangle (or \c Cuboid), \c Simplex, \c Parallelotope, \c Zonotope, \c Polytope and \c Ellipsoid.
- * Actually, these are templates, parameterised by the real number type \c real_type.
+ * Classes fulfilling the BasicSet concept are \ref Rectangle (or Cuboid), Simplex, Parallelotope, Zonotope, Polytope, Polyhedron, Sphere and Ellipsoid.
+ * Actually, these are templates, parameterised by the real number type real_type.
  *
- * Additionally, we have mixed comparison operators.
- * \code
- * bool disjoint(const BasicSet1 &, const BasicSet2 &);
- * bool interiors_intersect(const BasicSet1 &, const BasicSet2 &);
- * bool inner_subset(const BasicSet1 &, const BasicSet2 &);
- * bool subset(const BasicSet1 &, const BasicSet2 &);
- * \endcode
- *
- * The operations \c disjoint, \c interiors_intersect and \c inner_subset are \em robust,
- * which means that if true, they remain true under a sufficiently small perturbation of
- * the arguments.
  *
  * \section denotable_set Denotable Sets
  *
@@ -429,11 +350,11 @@
  * \code
  * concept DenotableSet
  * {
- *   typename real_type;
- *   typename state_type;
- *   typename basic_set_type;
+ *   type real_type;
+ *   type state_type;
+ *   type basic_set_type;
  *
- *   typename const_iterator; // Must satisfy the requirements of a ForwardIterator.
+ *   type const_iterator; // Must satisfy the requirements of a ForwardIterator.
  *
  *   // No default constructor required.
  *
@@ -444,8 +365,8 @@
  *
  *   // Set-theoretic operations
  *   dimension_type dimension() const;
- *   bool empty() const;
- *   bool contains(const state_type &) const;
+ *   tribool empty() const;
+ *   tribool contains(const state_type &) const;
  *
  *   Rectangle<real_type> bounding_box() const; // Optional.
  *
@@ -466,28 +387,25 @@
  *   void remove(const basic_set_type &); // Only used if the DenotableSet is an unordered or sorted list. (Optional)
  * };
  *
+ * tribool subset(const BasicSet &, const DenotableSet &); // Optional, but highly recommended.
+ *
+ * tribool disjoint(const DenotableSet &, const DenotableSet &);
+ * tribool subset(const DenotableSet &, const DenotableSet &);
+ *
  * DenotableSet join(const DenotableSet &, const DenotableSet &);
+ * DenotableSet open_intersection(const BasicSet &, const DenotableSet &); // Optional.
+ * DenotableSet difference(const DenotableSet&, const DenotableSet&); // Optional
  *
- * bool inner_subset(const BasicSet &, const DenotableSet &); // Optional, but highly recommended.
- * bool subset(const BasicSet &, const DenotableSet &); // Optional, but highly recommended.
- *
- * bool disjoint(const DenotableSet &, const DenotableSet &);
- * bool interiors_intersect(const DenotableSet &, const DenotableSet &);
- * bool inner_subset(const DenotableSet &, const DenotableSet &);
- * bool subset(const DenotableSet &, const DenotableSet &);
- *
- * DenotableSet regular_intersection(const BasicSet &, const DenotableSet &); // Optional.
  * \endcode
  *
  * \section set_approximation Approximating Sets
  *
- * Ariadne provides operators for approximating sets. All the operators have one
+ * %Ariadne provides operators for approximating sets. All the operators have one
  * of the following forms.
  *
  * \code
- * Result outer_approximation(Argument,Error); // inner_subset(Argument,Result)
+ * Result outer_approximation(Argument,Error); // postcondition: inner_subset(Argument,Result)
  * Result over_approximation(Argument,Error);  // postcondition: subset(Argument,Result)
- * Result approximation(Argument,Error);       // postcondition: error specified by Error
  * Result lower_approximation(Argument,Error); // postcondition: 
  * Result under_approximation(Argument,Error); // postcondition: subset(Result,Argument)
  * Result inner_approximation(Argument,Error); // postcondition: inner_subset(Result,Argument)
@@ -501,14 +419,94 @@
  *
  */
 
-/*! \page evaluation Function Evaluation
+/*! \page GeometricOps Geometric operations.
  * 
- * Ariadne is primarily a module for set-based computationan.
+ * The core geometric types used by %Ariadne to represent are Rectangle, Zonotope, Polytope (described by generators)
+ * and Polyhedron (described by constraints). 
+ * A %Rectangle can be easily converted to a %Zonotope, %Polytope or %Polyhedron.
+ *
+ *   - Rectangle representation: \f$l\leq x\leq u\f$.
+ *   - Zonotope representation: \f$x=c+De,\ -1\leq e\leq1\f$.
+ *   - Polytope representation: \f$x=Gs,\ 1\cdot s=1,\ s\geq0\f$.
+ *   - Polyhedron representation: \f$Ax\leq b\f$.
+ *
+ * The core geometric operations are subset(A,B) and disjoint(A,B) .
+ *
+ * We can re-write a zonotope as \f$x=c'+D'e,\ 0\leq e\leq1\f$, 
+ * a polytope as \f$x'=G's,\ s\geq0\f$, and a polyhedron as \f$A'x'\geq0\f$,
+ * where \f$x'=(x,1)\f$.
+ *
+ *  \section Intersection Testing intersection/disjointness
+ * 
+ *   - To test intersection of zonotopes and polytope, equate the expression for
+ *     \f$x\f$ in both sets. 
+ *   - To test intersection of a zonotope/polytope with a polyhedron, substitute
+ *     \f$x\f$ in the equation of the polytope, e.g. \f$A(c+De)\leq b,\ 0\leq e\leq 1\f$.
+ *   - To test intersection of two polyhedra, solve both sets of equations simultaneously.
+ *     The resulting equations can be solved by linear programming.
+ * 
+ * \section Subset Testing subset
+ *
+ *   - To test if a zonotope is a subset of a polyhedron, test \f$AGe\leq b-Ac\f$ for \f$-1\leq e\leq 1\f$. 
+ *     This can be performed by checking at all the extremal values of \f$e\f$.
+ *   - To test if a polytope is a subset of a polyhedron, test \f$A'G'\geq0\f$.
+ *   - To test other types of subset relation, we need to transform to 
+ *     subset(Polytope,Polyhedron).
+ *
+ * \section PolyhedralConversion Converting between a polyhedron and a polytope.
+ *  
+ * Augment the state by \f$x'=(x,1)\f$.
+ *
+ *   - Define a Polytope by generators \f$x=\lambda g\f$, given as columns of the augmented generator matrix \f$G'\f$.
+ *   - Define a Polyhedron by constraints \f$a\cdot x\geq 0\f$, given as rows of the augmented constraints matric \f$A'\f$.
+ *
+ * Construct the <em>saturation matrix</em> by 
+ *   - Generator \f$g\f$ \e violates constraint \f$a\f$ if \f$a\cdot g<0\f$, 
+ *   - Generator \f$g\f$ \e saturates constraint \f$a\f$ if \f$a\cdot g=0\f$.
+ *   - Generator \f$g\f$ \e satisfies constraint \f$a\f$ if \f$a\cdot g=0\f$.
+ * Saturation matrix \f$S=\mathrm{sgn}(AG)\f$.
+ *
+ * Generators are \em adjacent if the corresponding columns of the saturation matrix
+ * differ only in one row.
+ *
+ * \section zonotope Zonotopic reduction methods
+ *
+ * Throughout this sections, we use the supremum norm on \f$R^n\f$, and the correspoinding operator norm on \f$\mathbb{R}^{m\times n}\f$.
+ * 
+ * Given a zonotope \f$ Z=\{ c+Ae \mid ||e||\leq 1 \}\subset \mathbb{R}^n\f$, where \f$A\in \mathbb{R}^{n\times p}\f$, 
+ * we wish to compute a zonotope \f$Z' = \{ c + A' e' \mid ||e'||\leq 1\}\f$ with fewer generators 
+ * i.e. \f$A'\in \mathbb{R}^{n\times p'}\f$ with \f$p'<p\f$.
+ * The general reduction method is to choose \f$ A'\f$ such that \f$ A = A' B\f$ with \f$||B||\leq 1\f$.
+ * The key to zonotopic reduction is to choose a method with good properties.
+ *
+ * A simple criterion to note is that if \f$\sum_{j=1}^{p} |b_{ij}|<1\f$ for some \f$i\f$, then we can improve the approximation by taking
+ * \f$D=\mathrm{diag}(d_{i})\f$ with \f$d_{i}=\sum_{j=1}^{p} |b_{ij}|\f$, 
+ * and \f$B'= D^{-1}B\f$ which has \f$b'_{ij}=b_{ij}/\sum_{k=1}^{p} |b_{ik}|\f$.
+ * 
+ * It is clear that if the rows of \f$B\f$ are close to a set of mutually orthogonal coordinate vectors, then the approximation is good, 
+ * since the image of \f$B\f$ is close to the unit ball. 
+ * 
+ *
+ * \subsection interval_zonotope Interval zonotopic reduction
+ *
+ * An <em>interval zonotope</em> is a set of the form \f$ \{ y = c + A e \mid c\in R,\ A\in\mathcal{A} \text{ and } ||e||\leq1 \} 
+ * = R + \mathcal{A} B\f$.
+ * To reduce an interval zonotope, we first write \f$ R = \{ c + Be\mid ||e||\leq 1 \}\f$ and combine this in \f$\mathcal{A}\f$.
+ * To reduce \f$ \mathcal{A} \f$, write \f$ \mathcal{A} = A \mathcal{B} \mathcal{A} \f$ where \f$ A\in\mathcal{A}\f$ and \f$A\mathcal{B}\ni I\f$.
+ * Then take \f$ \mathcal{C} = \mathcal{B} \mathcal{A} \f$ and \f$ || \mathcal{C} || 
+ *   = \sup_{i]1}^{n} \sum_{j=1}^{p} \max |\mathcal{C}_{ij}| \f$, 
+ * where \f$ \max |\mathcal{C}_{ij}| = \max\{ |x| \mid x\in \mathcal{C}_{ij}\f$.
+ * 
+ */
+ 
+/*! \page function Function Evaluation
+ * 
+ * %Ariadne is primarily a module for set-based computation.
  * For this reason, functions are best defined by their actions on sets.
  * However, we sometimes also want to compute function values on points, and to evaluate real-valued functions.
  * For this reason, we also allow definition of functions on points.
  * 
- * We distinguish between computations on \em fixed-precision and \em arbitrary-precision types, 
+ * We distinguish between computations on \em fixed-precision and \em multiple-precision types, 
  * between computations on \em points and \em sets, and between \em exact and \em approximate computations.
  *
  * The basic computation on sets is to compute \em over-approximations to the image of <em>basic sets</em>
@@ -532,19 +530,14 @@
  *
  * \section point_functions Computations on points.
  *
- * A arbitrary-precision computation on points may be \em exact or \em approximate.
- * Examples of exact operations are polynomial functions on a ring (e.g. dyadic numbers)
- * and rational functions on a field (e.g. rational numbers). If \f$f\f$ is a mathematical function, 
- * then \c f(x) computes \f$f(x)\f$ exactly if possible, and is undefined (compile-time or run-time error) otherwise.
- * \c f(x,e) computes \f$f(x)\f$ with an error of at most \c e.
+ * If a denotable state type is invariant under a class of functions (e.g. polynomial functions on a ring),
+ * then the image of a point is given exactly. Otherwise, a \a fuzzy \a point is given,
+ * which is a point defined using interval coefficients. A Point< Interval<R> > can be automatically 
+ * converted to a Rectangle<R>.
  * 
  * Note that even if \c f is exact, it is impossible to compute 
  * the action of \f$f\f$ on a set just from the action of \c f on points,
  * unless a modulus of continuity for \f$f\f$ is known.
- *
- * All fixed-precision computations on points are approximate. Further, the accuracy of the approximation is often unknown,
- * or hard to compute. Since the aim of the fixed-precision computation is rapid computation, no guarentees are given about 
- * the error. We use the syntax \c f(x) to compute an approximation to \f$f(x)\f$ with no controls on the accuracy.
  *
  *
  * \section real_functions Computations on real numbers.
@@ -554,9 +547,9 @@
  * For this reason, Ariadne provides extended operations for computation on real-valued functions.
  * 
  * Arbitrary-precision computations may be exact or approximate. 
- * The function \c f(x) computes \f$f(x)\f$ exactly, if possible, 
- * and gives an error (at compile-time or run-time) if the result cannot be computed exactly.
- * The function \c f_approx(x,e) computes \f$f(x)\f$ with an error of at most \f$e\f$.
+ * The function \c f(x) computes \f$f(x)\f$ exactly, if possible. 
+ * If exact computation is not possible, then \c f(x) either returns an interval,
+ * or gives an error at compile time.
  *
  * Although it is not, in general, possible to perform evaluation of functions on sets from their definitions on points,
  * in many cases such a computation can be extracted. 
@@ -573,84 +566,28 @@
  * The function \c f_approx(x) computes \f$f(x)\f$ approximately, with no control on the error bound.
  * The function \c f_down(x) computes a lower-approximation to \f$f(x)\f$, 
  * and \c f_up(x) computes an upper-approximation.
- * For consistency with existing practise, we also allow \c fnc(x) as a valid alternative to \c fnc_approx(x).
+ *
+ * Without an error specification, \c f(x) either gives an eFor consistency with existing practise, we also allow \c fnc(x) as a valid alternative to \c fnc_approx(x).
  *
  * Note that in many cases, including arithmetic and simple functions, it is possible to compute an interval \f$J\f$ containing \f$f(I)\f$ 
  * using \c f_down and \c f_upp. This allows an implementation of the standard set-based function \c f(I).
  * 
  * \section function_syntax Syntax for continuous functions and function objects.
  *
- * Computable functions are represented as function objects, i.e. objects in a
- * class with an overloaded operator().
  * Elementary and arithmetical functions are represented as ordinary functions
  * with the same syntax.
  *
  * \code
- * // Syntax for built-in real-valued functions.
- * FPReal f(FPReal x); // A synonym for f_approx(x)
- * FPReal f_approx(FPReal x); // Compute an approximation to f(x).
- * FPReal f_down(FPReal x); // Compute a lower-approximation to f(x). 
- * FPReal f_up(FPReal x); // Compute an upper-approximation to f(x). 
+ * // Action of functions on points
+ * Point<ExReal> f(Point<ExReal> x); // Compute f(x) exactly.
  *
- * APReal f(APReal x); // Compute f(x) exactly, if possible.
- * APReal f(APReal x, APReal e); // A synonym for f_approx(x,e).
- * APReal f_approx(APReal x, APReal e); // Compute f(x) with an error of at most e.
+ * Point< Interval<FPReal> > f(Point<ExReal> x); // Compute a fuzzy point approximation to f(x)
+ * BasicSet<FPReal> f(Point<ExReal> x); // Compute a set containing f(x)
  *
- * // Syntax for user-defined single-valued continuous functions with fixed-precision arithmetic.
- * Point<FPReal> f(Point<FPReal> A); // A synonym for f.approx(x)
- * Point<FPReal> f.approx(Point<FPReal A); // Compute an approximation to f(x).
- * Point<FPReal> f.approximate(Point<FPReal> A); // Compute an approximation to f(x).
- *
+ * // Action of functions on sets
  * BasicSet<FPReal> f(BasicSet<FPReal> A); // Compute an over-approximation to f(A).
- *
- * // Syntax for user-defined single-valued continuous functions with arbitrary-precision arithmetic.
- * Point<APReal> f(Point<APReal> x); // Compute f(x) exactly, if possible.
- * Point<APReal> f(Point<APReal> x, APReal e); // Compute f(x) with an error of at most e.
- * Point<APReal> f.approx(Point<APReal> x, APReal e); // A more descriptive syntax for f(x,e)
- * Point<APReal> f.approximate(Point<APReal> x, APReal e); // A more descriptive syntax for f(x,e)
- *
- * BasicSet<APReal> f(BasicSet<APReal> A); // Compute a convergent over-approximation to f(A).
- * BasicSet<APReal> f(BasicSet<APReal> A, OverApproximation); // Compute a convergent over-approximation to f(A).
- * BasicSet<APReal> f.approx(BasicSet<APReal> A); // A more descriptive syntax for f(A).
- * BasicSet<APReal> f.approximate(BasicSet<APReal> A); // A more descriptive syntax for f(A).
- * BasicSet<APReal> f.approximation(BasicSet<APReal> A); // A more descriptive syntax for f(A).
- * BasicSet<APReal> f.over(BasicSet<APReal> A); // A more descriptive syntax for f(A).
- * BasicSet<APReal> f.over_approximate(BasicSet<APReal> A); // A more descriptive syntax for f(A).
- *
- * // Definition for fixed-precision continuous functions.
- * template<class FPReal>
- * class ContinuousFunction {
- *   // Compute an approximation to f(p) with no guarentees on error.
- *   Point<FPReal> operator() (Point<FPReal> p); 
- *   Point<FPReal> approximate() (Point<FPReal> p); 
- *   Point<FPReal> approx() (Point<FPReal> p); 
- *
- *   // Compute an over-approximation to f(A) with no guarentees on error.
- *   BasicSet<FPReal> operator() (BasicSet<FPReal> A); 
- * };
- *
- *
- * // Definition for arbitrary-precision continuous functions.
- * template<class APReal>
- * class ContinuousFunction {
- *   // Compute f(p) exactly, but only if possible.
- *   Point<APReal> operator() (Point<APReal> p); 
- *
- *   // Compute an approximation to f(p) with error at most e.
- *   Point<APReal> operator() (Point<APReal> p, APReal e); 
- *   Point<APReal> approximate() (Point<APReal> p, APReal e); 
- *
- *   // Compute an over-approximation to f(A). The result is guarenteed to 
- *   // converge to a one-point set as the argument converges to a one-point set.
- *   BasicSet<APReal> operator() (BasicSet<APReal> A); 
- * };
- *
+ * BasicSet<MPReal> f(BasicSet<APReal> A); // Compute a convergent over-approximation to f(A).
  * \endcode
- *
- * \internal 
- *    Use \c f.approx(p) or f.approximate(p) for function objects?
- *    Use \c f_approx(p) or f_approximate(p) for functions?     
- * 
  */
  
 /*! \page integration Integration methods
@@ -684,83 +621,6 @@
  *      + \frac{h^3}{4} D^2f(\xi)f(\xi)f(\xi) \f]
  */
 
-/*! \page zonotope Zonotopic reduction methods
- *
- * Throughout this sections, we use the supremum norm on \f$R^n\f$, and the correspoinding operator norm on \f$\mathbb{R}^{m\times n}\f$.
- * 
- * Given a zonotope \f$ Z=\{ c+Ae \mid ||e||\leq 1 \}\subset \mathbb{R}^n\f$, where \f$A\in \mathbb{R}^{n\times p}\f$, 
- * we wish to compute a zonotope \f$Z' = \{ c + A' e' \mid ||e'||\leq 1\}\f$ with fewer generators 
- * i.e. \f$A'\in \mathbb{R}^{n\times p'}\f$ with \f$p'<p\f$.
- * The general reduction method is to choose \f$ A'\f$ such that \f$ A = A' B\f$ with \f$||B||\leq 1\f$.
- * The key to zonotopic reduction is to choose a method with good properties.
- *
- * A simple criterion to note is that if \f$\sum_{j=1}^{p} |b_{ij}|<1\f$ for some \f$i\f$, then we can improve the approximation by taking
- * \f$D=\mathrm{diag}(d_{i})\f$ with \f$d_{i}=\sum_{j=1}^{p} |b_{ij}|\f$, 
- * and \f$B'= D^{-1}B\f$ which has \f$b'_{ij}=b_{ij}/\sum_{k=1}^{p} |b_{ik}|\f$.
- * 
- * It is clear that if the rows of \f$B\f$ are close to a set of mutually orthogonal coordinate vectors, then the approximation is good, 
- * since the image of \f$B\f$ is close to the unit ball. This suggests the following algorithm:
- * 
- *
- * \section interval_zonotope Interval zonotopic reduction
- *
- * An <em>interval zonotope</em> is a set of the form \f$ \{ y = c + A e \mid c\in R,\ A\in\mathcal{A} \text{ and } ||e||\leq1 \} 
- * = R + \mathcal{A} B\f$.
- * To reduce an interval zonotope, we first write \f$ R = \{ c + Be\mid ||e||\leq 1 \}\f$ and combine this in \f$\mathcal{A}\f$.
- * To reduce \f$ \mathcal{A} \f$, write \f$ \mathcal{A} = A \mathcal{B} \mathcal{A} \f$ where \f$ A\in\mathcal{A}\f$ and \f$A\mathcal{B}\ni I\f$.
- * Then take \f$ \mathcal{C} = \mathcal{B} \mathcal{A} \f$ and \f$ || \mathcal{C} || 
- *   = \sup_{i]1}^{n} \sum_{j=1}^{p} \max |\mathcal{C}_{ij}| \f$, 
- * where \f$ \max |\mathcal{C}_{ij}| = \max\{ |x| \mid x\in \mathcal{C}_{ij}\f$.
- * 
- */
- 
-/*! \page GeometricOps Geometric operations
- * 
- * The core geometric operations are ::subset and ::intersect .
- * The core geometric types are Zonotope, Polyhedron (described by generators)
- * and Polytope (described by constraints). Rectangle can be easily converted
- * to both Zonotope and Polytope.
- *
- *   - Zonotope representation: \f$x=c+De,\ -1\leq e\leq1\f$.
- *   - Polyhedron representation: \f$x=Gs,\ 1\cdot s=1,\ s\geq0\f$.
- *   - Polytope representation: \f$Ax\leq b\f$.
- *
- * We can re-write a zonotope as \f$x=c'+D'e,\ 0\leq e\leq1\f$, 
- * a polyhedron as \f$x'=G's,\ s\geq0\f$, and a polytope as \f$A'x'\geq0\f$,
- * where \f$x'=(x,1)\f$.
- *
- * \section Intersection Testing intersection
- * 
- * To test intersection of zonotopes and polyhedra, equate the expression for
- * \f$x\f$ in both sets. 
- *
- * To test intersection of a zonotope/polyhedron with a polytope, substitute
- * \f$x\f$ in the equation of the polytope, e.g. \f$A(c+De)\leq b,\ 0\leq e\leq 1\f$.
- *
- * To test intersection of two polytopes, solve both sets of equations simultaneously.
- *
- * The resulting equations can be solved by linear programming.
- * 
- * \section Subset Testing subset
- *
- * To test if a polyhedron is a subset of a polytope, test \f$AG\geq0\f$.
- *
- * To test other types of subset relation, we need to transform to 
- * ::subset(Polyhedron,Polytope).
- *
- * \section PolyhedralConversion Converting between a polyhedron and a polytope.
- * 
- * \subsection PolyhedralCone Polyhedral cone
- * 
- *   - Constraint: \f$a\cdot x\geq0\f$;  
- *   - Generator:  \f$x=\lambda g\f$
- *   - Ray \f$g\f$ \e violates constraint \f$a\f$ if \f$a\cdot r<0\f$, 
- *   - Ray \f$g\f$ \e saturates constraint \f$a\f$ if \f$a\cdot r=0\f$.
- *   - Saturation matrix \f$S=\mathrm{sgn}(AG)\f$.
- *
- * Rays are \em adjacent if the corresponding columns of the saturation matrix
- * differ only in one row.
- */
 
  /*! \page references References
  *

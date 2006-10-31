@@ -38,8 +38,24 @@
 namespace Ariadne {
   namespace Evaluation {
       
-    /*! \brief Interval Newton solver.
-     *  \ingroup Solve
+    /*! \ingroup Solve
+     *  \brief Interval Newton solver.
+     */
+    template<class R>
+    class IntervalNewtonSolver : public Solver<R>
+    {
+     public:
+      /*! \brief Constructor. */
+      IntervalNewtonSolver(R max_error, uint max_steps) : Solver<R>(max_error,max_steps) { }
+      
+      /*! \brief Solve \f$f(x)=0\f$, using the interval Newton method. */
+      Geometry::Rectangle<R>
+      solve(const System::VectorField<R>& f, 
+            const Geometry::Rectangle<R>& r); 
+    };            
+      
+    /*! \ingroup Solve
+     *  \brief Interval Newton solver.
      */
     template<class R>
     Geometry::Rectangle<R>
@@ -48,17 +64,6 @@ namespace Ariadne {
                     const R& e,
                     uint max_steps=64);
 
-    template<class R>
-    class IntervalNewtonSolver : public Solver<R>
-    {
-     public:
-      IntervalNewtonSolver(R max_error, uint max_steps) : Solver<R>(max_error,max_steps) { }
-      
-      Geometry::Rectangle<R>
-      solve(const System::VectorField<R>& f, 
-            const Geometry::Rectangle<R>& r); 
-    };            
-      
     
   }
 }

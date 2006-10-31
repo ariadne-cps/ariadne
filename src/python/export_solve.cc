@@ -35,7 +35,18 @@ using namespace boost::python;
 template<class R>
 void export_solve() 
 {
-
+  return_value_policy<copy_const_reference> copy_const_reference;
+  
+  class_< IntervalNewtonSolver<R> >("IntervalNewtonSolver",init<R,uint>())
+    .def(init<double,uint>())
+    .def("maximum_error",&Solver<R>::maximum_error,copy_const_reference)
+    .def("maximum_number_of_steps",&Solver<R>::maximum_number_of_steps,copy_const_reference)
+    .def("solve",&IntervalNewtonSolver<R>::solve)
+    .def("fixed_point",&Solver<R>::fixed_point)
+  ;
+  
+  def("interval_newton",&interval_newton<R>);
+  
 }
 
 template void export_solve<Real>();

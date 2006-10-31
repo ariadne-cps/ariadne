@@ -34,47 +34,17 @@
 
 #include "../declarations.h"
 
-#include "linear_algebra/vector.h"
-#include "linear_algebra/matrix.h"
-#include "geometry/rectangle.h"
-#include "system/map.h"
-#include "system/vector_field.h"
-
-namespace Ariadne {
-  namespace Evaluation {
-   
-    
-    template<class R>
-    class Solver
-    {
-     public:
-      Solver(R max_error, uint max_steps)
-        : _max_error(max_error), _max_steps(max_steps) { }
-      
-      virtual ~Solver();
-        
-      const R& maximum_error() const { return this->_max_error; }
-      const uint& maximum_number_of_steps() const { return this->_max_steps; }
-      
-      void set_maximum_error(R max_error) { this->_max_error=max_error; }
-      void maximum_number_of_steps(uint max_steps) { this->_max_steps=max_steps; }
-      
-      virtual Geometry::Rectangle<R>solve(const System::VectorField<R>& f, 
-                                          const Geometry::Rectangle<R>& r) = 0;
-     private:
-      R _max_error;
-      uint _max_steps;
-    };
-    
-    template<class R> Solver<R>::~Solver() { }
-  }
-}
-
+#include "../linear_algebra/vector.h"
+#include "../linear_algebra/matrix.h"
+#include "../geometry/rectangle.h"
+#include "../system/vector_field.h"
+#include "../system/map.h"
 
 namespace Ariadne {
   namespace System {
 
-    /*! \brief A class representing the difference of a Map and the identity.
+    /*!
+     * \brief A class representing the difference of a Map and the identity.
      *
      * Useful for computing fixed points.
      */
@@ -107,6 +77,52 @@ namespace Ariadne {
     };
   }
 }
+
+
+
+namespace Ariadne {
+  namespace Evaluation {
+   
+    /*!\ingroup Solve
+     * \brief %Base class for solving (nonlinear) equations. 
+     */
+    template<class R>
+    class Solver
+    {
+     public:
+      /*! \brief Constructor. */
+      Solver(R max_error, uint max_steps)
+        : _max_error(max_error), _max_steps(max_steps) { }
+      
+      /*! \brief Virtual destructor. */
+      virtual ~Solver();
+        
+      /*! \brief The maximum permissible error of the solution. */
+      const R& maximum_error() const { return this->_max_error; }
+      /*! \brief The maximum number of steps allowed before the method must quit. */
+      const uint& maximum_number_of_steps() const { return this->_max_steps; }
+      
+      /*! \brief Set the maximum error. */
+      void set_maximum_error(R max_error) { this->_max_error=max_error; }
+      /*! \brief Set the maximum number of steps. */
+      void set_maximum_number_of_steps(uint max_steps) { this->_max_steps=max_steps; }
+      
+      /*! \brief Solve \f$f(x)=0\f$, starting in the \a r. */
+      virtual Geometry::Rectangle<R> 
+      solve(const System::VectorField<R>& f,const Geometry::Rectangle<R>& r) = 0;
+      /*! \brief Solve \f$f(x)=0\f$, starting in the \a r. */
+      virtual Geometry::Rectangle<R> 
+      fixed_point(const System::Map<R>& f,const Geometry::Rectangle<R>& r) {
+        return solve(System::DifferenceMap<R>(f),r); }
+     private:
+      R _max_error;
+      uint _max_steps;
+    };
+    
+    template<class R> Solver<R>::~Solver() { }
+  }
+}
+
 
 
 #endif /* _ARIADNE_SOLVER_H */

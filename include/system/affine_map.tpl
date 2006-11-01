@@ -43,7 +43,7 @@ namespace Ariadne {
     Geometry::Point< typename AffineMap<R>::F >
     AffineMap<R>::image(const Geometry::Point<R>& pt) const
     {
-      //std::cerr << "AffineMap<R>::image(const Geometry::Rectangle<R>& r) const\n";
+      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
 
       check_argument_dimension(*this,pt,__PRETTY_FUNCTION__);
       LinearAlgebra::Vector<F> image(this->A()*LinearAlgebra::Vector<F>(pt.position_vector())+this->b());
@@ -55,7 +55,7 @@ namespace Ariadne {
     Geometry::Rectangle<R>
     AffineMap<R>::image(const Geometry::Rectangle<R>& r) const
     {
-      //std::cerr << "AffineMap<R>::image(const Geometry::Rectangle<R>& r) const\n";
+      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
 
       check_argument_dimension(*this,r,__PRETTY_FUNCTION__);
       return Geometry::Rectangle<R>(this->A()*r.position_vectors()+this->b());
@@ -65,8 +65,8 @@ namespace Ariadne {
     Geometry::Parallelotope<R>
     AffineMap<R>::image(const Geometry::Parallelotope<R>& p) const
     {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-      
+      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
+
       check_argument_dimension(*this,p,__PRETTY_FUNCTION__);
       Geometry::Point<F> nc=this->image(p.centre());
       LinearAlgebra::Matrix<F> ng=this->A()*LinearAlgebra::Matrix<F>(p.generators());
@@ -77,6 +77,8 @@ namespace Ariadne {
     Geometry::Zonotope<R>
     AffineMap<R>::image(const Geometry::Zonotope<R>& z) const
     {
+      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
+
       check_argument_dimension(*this,z,__PRETTY_FUNCTION__);
       return Geometry::over_approximation(Geometry::Zonotope< Interval<R> >(
         this->image(z.centre()),
@@ -93,10 +95,10 @@ namespace Ariadne {
     
     template<class R>
     std::ostream& 
-    operator<<(std::ostream& os, const AffineMap<R>& f)
+    AffineMap<R>::write(std::ostream& os) const
     {
-      return os << "AffineMap(\n  matrix=" << f.A() << ",\n"
-                << "  vector=" << f.b() << "\n)\n";
+      return os << "AffineMap(\n  matrix=" << this->A() << ",\n"
+                << "  vector=" << this->b() << "\n)\n";
     }
     
 /*

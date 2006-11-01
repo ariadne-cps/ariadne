@@ -36,6 +36,8 @@ namespace Ariadne {
     template class ListSet<Real,Rectangle>;
     template class ListSet<Real,Parallelotope>;
     template class ListSet<Real,Zonotope>;
+    template class ListSet<Interval<Real>,Parallelotope>;
+    template class ListSet<Interval<Real>,Zonotope>;
 
     template  ListSet<Real,Rectangle>::operator  ListSet<Real,Parallelotope>() const;
     template  ListSet<Real,Rectangle>::operator  ListSet<Real,Zonotope>() const;

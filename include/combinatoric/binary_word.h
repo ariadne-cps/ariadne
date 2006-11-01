@@ -167,19 +167,25 @@ namespace Ariadne {
       
       /*! \brief true if the word is a prefix of the other word. */
       bool is_prefix(const BinaryWord& b) const {
-        if(size()>b.size()) { return false; }
-        for(size_type i=0; i!=size(); ++i) { if((*this)[i] != b[i]) { return false; } }
+        if(this->size()>b.size()) { return false; }
+        for(size_type i=0; i!=this->size(); ++i) { if((*this)[i] != b[i]) { return false; } }
         return true;
       }
       
       /*! \brief true if the word is a subword of the other word. */
       bool is_subword(const BinaryWord& b) const {
+        //std::cerr << __PRETTY_FUNCTION__ << std::endl;
+        //std::cerr << "self=" << *this << ",  b=" << b << std::endl;
         if(this->size() > b.size()) { return false; }
-        for(size_type i=0; i!=b.size()-size(); ++i) { 
+        for(size_type i=0; i!=b.size()-this->size()+1; ++i) { 
           size_type j=0;
           while(j!=this->size() && (*this)[j]==b[i+j]) {
+            //std::cerr << "i=" << i << ", j=" << j << ",  self[j]=" << (*this)[j] << ",  b[i+j]=" << b[i+j] << std::endl;
             ++j;
           }
+          //std::cerr << "i=" << i << ", j=" << j; 
+          //if(j!=this->size()) { std::cerr << ",  self[j]=" << (*this)[j] << ",  b[i+j]=" << b[i+j]; } 
+          //std::cerr << std::endl;
           if(j==this->size()) {
             return true;
           }

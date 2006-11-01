@@ -50,7 +50,7 @@ namespace Ariadne {
     }
     
     template<class R>
-    LinearAlgebra::Vector< Interval<R> > 
+    LinearAlgebra::Vector<typename AffineVectorField<R>::I> 
     AffineVectorField<R>::image(const Geometry::Rectangle<R>& r) const 
     {
       LinearAlgebra::Vector< Interval<R> > iv=r.position_vectors();
@@ -59,24 +59,24 @@ namespace Ariadne {
   
     template<class R>
     LinearAlgebra::Matrix<typename AffineVectorField<R>::F>
-    AffineVectorField<R>::derivative(const Geometry::Point<R>& x) const 
+    AffineVectorField<R>::jacobian(const Geometry::Point<R>& x) const 
     { 
       return this->_A; 
     }
     
     template<class R>
-    LinearAlgebra::Matrix< Interval<R> > 
-    AffineVectorField<R>::derivative(const Geometry::Rectangle<R>& r) const 
+    LinearAlgebra::Matrix<typename AffineVectorField<R>::I> 
+    AffineVectorField<R>::jacobian(const Geometry::Rectangle<R>& r) const 
     { 
       return LinearAlgebra::Matrix< Interval<R> >(this->_A);
     }
     
     template<class R> 
     std::ostream& 
-    operator<<(std::ostream& os, const AffineVectorField<R>& vf)
+    AffineVectorField<R>::write(std::ostream& os) const
     {
-      return os << "AffineVectorField(\n  matrix=" << vf.A() << ",\n"
-                << "  vector=" << vf.b() << "\n)\n";
+      return os << "AffineVectorField(\n  matrix=" << this->A() << ",\n"
+                << "  vector=" << this->b() << "\n)\n";
     }
 
     

@@ -376,6 +376,20 @@ namespace Ariadne {
     }
     
     template<class R>
+    std::ostream&
+    Parallelotope< Interval<R> >::write(std::ostream& os) const
+    {
+      const Parallelotope< Interval<R> >& p=*this;
+      if(p.dimension() > 0) {
+        os << "Parallelotope(\n  centre=" << p.centre();
+        os << "\n  directions=" << p.generators();
+        os << "\n) ";
+      }
+
+      return os;
+    }
+    
+    template<class R>
     std::istream& 
     Parallelotope<R>::read(std::istream& is)
     {

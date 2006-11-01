@@ -53,10 +53,10 @@ int main() {
 int test_binary_word() {
   cout << __PRETTY_FUNCTION__ << endl;
   
-  string istr = "[0,1,1,0,1,0] [0,1,1,0,1,0] [0,1,1] [1,1,0,1] [1] ";
+  string istr = "[0,1,1,0,1,0] [0,1,1,0,1,0] [0,1,1] [1,1,0,1] [1,1,1] [1,0,1,0] ";
   stringstream iss(istr);
 
-  BinaryWord bw1,bw2,bw3,bw4,bw5;
+  BinaryWord bw1,bw2,bw3,bw4,bw5,bw6;
   BinaryWordList bwl;
   BinaryWordFixedSizeList bwfsl(12);
   BinaryTree bwt;
@@ -66,7 +66,7 @@ int test_binary_word() {
   iss >> v;
   bw1=BinaryWord(v);
   
-  iss >> bw2 >> bw3 >> bw4 >> bw5;
+  iss >> bw2 >> bw3 >> bw4 >> bw5 >> bw6;
   
   assert(bw1.size()==6);
   
@@ -78,14 +78,15 @@ int test_binary_word() {
   assert(bw3.is_subword(bw1));
   assert(bw4!=bw1);
   assert(!bw4.is_prefix(bw1));
-  assert(bw3.is_subword(bw1));
+  assert(bw4.is_subword(bw1));
+  assert(!bw5.is_subword(bw1));
+  assert(!bw1.is_subword(bw5));
+  assert(bw6.is_subword(bw1));
   
   bw5=bw4;
   assert(bw5==bw4);
-  bw5=BinaryWord("[1,0,1,1,0,1,0]");
+  bw5=BinaryWord("[0,1,1,0,1,0]");
   assert(bw5==bw1);
-  
-  cerr << "INCOMPLETE ";
 
   return 0;
 }

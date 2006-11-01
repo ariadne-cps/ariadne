@@ -59,7 +59,7 @@
 
 #include "../evaluation/integrator.h"
 
-// namespace Ariadne { namespace Evaluation { int verbosity=1; } }
+namespace Ariadne { namespace Evaluation { int verbosity=8; } }
 
 template<class R>
 Ariadne::Evaluation::LohnerIntegrator<R>::LohnerIntegrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_basic_set_radius)
@@ -69,36 +69,21 @@ Ariadne::Evaluation::LohnerIntegrator<R>::LohnerIntegrator(const time_type& maxi
 
 
 template<class R>
-Ariadne::Geometry::Parallelotope< Ariadne::Interval<R> > 
-Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
-                                      const Geometry::Parallelotope< Interval<R> >& initial_set, 
-                                      time_type& step_size) const
-{
-  if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-  const LohnerIntegrator<R>& lohner=*this;
-  const System::VectorField<R>& vf=vector_field;
-  const Geometry::Zonotope<I>& z=initial_set;
-  time_type& h=step_size;
-  
-  Geometry::Zonotope<I> phiz=lohner.integration_step(vf,z,h);
-  return Geometry::Parallelotope<I>(phiz.centre(),phiz.generators());
-}
-
-template<class R>
 Ariadne::Geometry::Zonotope< Ariadne::Interval<R> >
 Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
                                       const Geometry::Zonotope< Interval<R> >& initial_set, 
                                       time_type& step_size) const
 {
-  if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-  
+  if(verbosity>6) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+  if(verbosity>6) { std::cerr << "  step_size=" << conv_approx<double>(step_size) << "  initial_set=" << initial_set << std::endl; }
   const Geometry::Zonotope<I>& z=initial_set;
   const Geometry::Point<I>& c=z.centre();
   const LinearAlgebra::Matrix<I>& G=z.generators();
+  time_type suggested_step_size=step_size;
   
   Geometry::Rectangle<R> bbox=z.bounding_box();
   bbox=this->estimate_flow_bounds(vector_field,bbox,step_size);
-
+  if(verbosity>4) { if(suggested_step_size!=step_size) { std::cerr << "  using step_size=" << conv_approx<double>(step_size) << std::endl; } }
   const System::VectorField<R>& vf=vector_field;
   const size_type n=vf.dimension();
   Interval<R> h=step_size;
@@ -109,13 +94,40 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorF
   LinearAlgebra::Matrix<I> hdf=h*df;
   LinearAlgebra::Matrix<I> dphi=exp(hdf);
   
-  Geometry::Rectangle<R> rc(c);
-  rc=refine_flow_bounds(vf,rc,bbox,step_size);
-  Geometry::Point<I> phic(n);
-  for(size_type i=0; i!=n; ++i) { phic[i]=rc[i]; }
+  Geometry::Rectangle<R> cbbox(c);
+  cbbox=refine_flow_bounds(vf,cbbox,bbox,step_size);
+  LinearAlgebra::Vector<I> fc=vf.image(cbbox);
+  LinearAlgebra::Matrix<I> dfc=vf.jacobian(cbbox);
+  Geometry::Point<I> phic=c+h*fc;
   LinearAlgebra::Matrix<I> phiG=dphi*G;
-  
+
+  if(verbosity>7) {
+    std::cerr << "  flow_bounds=" << bbox << std::endl; 
+    std::cerr << "  centre_flow_bounds=" << cbbox << std::endl; 
+    std::cerr << "  f_for_centre=" << fc << std::endl; 
+    std::cerr << "  f_for_set=" << f << std::endl; 
+    std::cerr << "  df_for_set=" << df << std::endl; 
+    std::cerr << "  exp_hdf_for_set=" << dphi << std::endl; 
+
+    std::cerr << "  new_centre=" << phic << std::endl;
+    std::cerr << "  new _generators=" << phiG << std::endl;
+  }
   return Geometry::Zonotope<I>(phic,phiG);
+}
+
+
+
+template<class R>
+Ariadne::Geometry::Parallelotope< Ariadne::Interval<R> > 
+Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
+                                      const Geometry::Parallelotope< Interval<R> >& initial_set, 
+                                      time_type& step_size) const
+{
+  if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+  
+  const Geometry::Zonotope< Interval<R> >& zonotopic_initial_set=initial_set;
+  Geometry::Zonotope< Interval<R> > zonotopic_final_set=this->integration_step(vector_field,zonotopic_initial_set,step_size);
+  return Geometry::Parallelotope< Interval<R> >(zonotopic_final_set);
 }
 
 
@@ -127,171 +139,34 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorF
                                       time_type& step_size) const
 {
   if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-
-  const System::VectorField<R>* cvf_ptr=&vector_field;
-  const System::AffineVectorField<R>* cavf_ptr=dynamic_cast< const System::AffineVectorField<R>* >(cvf_ptr);
-
-#ifdef DEBUG
-  if(cavf_ptr) { std::cerr << typeid(*cavf_ptr).name(); } else { std::cerr << "void"; } std::cerr << std::endl;
-  std::cerr << cvf_ptr << "  " << cavf_ptr << "\n" << std::endl;
-#endif
-  if(cavf_ptr != NULL) {
-    return integration_step(*cavf_ptr,initial_set,step_size);
-  }
-
-  typedef typename traits<R>::arithmetic_type F;
-  typedef Interval<R> I;
-  
   check_equal_dimensions(vector_field,initial_set);
 
-  Geometry::Rectangle<R> b=this->estimate_flow_bounds(vector_field,initial_set.bounding_box(),step_size);
-
-  const System::VectorField<R>& vf(vector_field);
-  Geometry::Parallelotope<R> p=initial_set;
-  const size_type n=p.dimension();
-  Interval<R> h=step_size;
-  const LinearAlgebra::Matrix<R> id=LinearAlgebra::identity_matrix<R>(n);
-  
-  R err=(norm(p.generators())/Interval<R>(65536)).upper();
-  
-#ifdef DEBUG
-  std::cerr << "suggested stepsize=" << step_size << std::endl;
-  std::cerr << "stepsize=" << h << std::endl;
-  std::cerr << "bound=" << b << std::endl;
-#endif
-  
-  LinearAlgebra::Vector< Interval<R> > f=vf(b);
-  LinearAlgebra::Matrix< Interval<R> > df=vf.jacobian(b);
-  
-  R l=df.log_norm().upper();
-
-#ifdef DEBUG
-  std::cerr << "flow=" << f << std::endl;
-  std::cerr << "jacobian=" << df << std::endl;
-  std::cerr << "jacobian centre=" << df.centre() << std::endl;
-  std::cerr << "logarithmic_norm=" << l << std::endl;
-#endif
-
-  l=max(l,R(1));
-  
-  //integration_step(): the varaible l is useless!
-  
-  h=step_size;
-  LinearAlgebra::Matrix< Interval<R> > hdf=h*df;
-  LinearAlgebra::Matrix< Interval<R> > dphi=exp(hdf);
-  
-  Geometry::Point<R> c=p.centre();
-  Geometry::Rectangle<R> rc=Geometry::Rectangle<R>(c,c);
-  // FIXME: The new centre is incorrect
-  //Geometry::Point< Interval<R> > phic=refine_flow_bounds(vf,rc,b,step_size);
-  Geometry::Point< Interval<R> > phic=c;
-  LinearAlgebra::Matrix< Interval<R> > zv(dphi*p.generators());
-  
-  p=Geometry::over_approximation(Geometry::Parallelotope<I>(phic,zv));
-  
-#ifdef DEBUG
-  std::cerr << "stepsize*jacobian=" << hdf << std::endl;
-  std::cerr << "flow derivative=" << dphi << std::endl;
-
-  std::cerr << "centre=" << c << std::endl;
-  std::cerr << "rectangular centre=" << rc << std::endl;
-  std::cerr << "flow bounds=" << phic << std::endl;
-  std::cerr << "zonotopic <vector> to add to image of centre=" << zv << std::endl;
-  std::cerr << "new approximation=" << p << std::endl;
-  std::cerr << "Done integration step\n\n\n" << std::endl;
-#endif  
-  return p;
+  Geometry::Zonotope< Interval<R> > fuzzy_zonotopic_initial_set(initial_set);
+  Geometry::Zonotope< Interval<R> > fuzzy_zonotopic_final_set=this->integration_step(vector_field,fuzzy_zonotopic_initial_set,step_size);
+  Geometry::Parallelotope< Interval<R> > fuzzy_parallelotopic_final_set=fuzzy_zonotopic_final_set;
+  Geometry::Parallelotope<R> final_set(Geometry::over_approximation(fuzzy_parallelotopic_final_set));
+  return final_set;
 }
 
-  
-  
+
+
 template<class R>
 Ariadne::Geometry::Zonotope<R> 
 Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
                                       const Geometry::Zonotope<R>& initial_set, 
                                       time_type& step_size) const
 {
-  if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-
-  const System::VectorField<R>* cvf_ptr=&vector_field;
-  const System::AffineVectorField<R>* cavf_ptr=dynamic_cast< const System::AffineVectorField<R>* >(cvf_ptr);
-
-#ifdef DEBUG
-  if(cavf_ptr) { std::cerr << typeid(*cavf_ptr).name(); } else { std::cerr << "void"; } std::cerr << std::endl;
-  std::cerr << cvf_ptr << "  " << cavf_ptr << "\n" << std::endl;
-#endif
-  if(cavf_ptr != NULL) {
-    return integration_step(*cavf_ptr,initial_set,step_size);
-  }
-
-#ifdef DEBUG
-  std::cerr << "integration_step(VectorField<R>, Zonotope<R>, R)" << std::endl<<std::flush;
-#endif
-
-  typedef typename traits<R>::arithmetic_type F;
-   
-  using namespace LinearAlgebra;
-  using namespace Geometry;
-  using namespace System;
-
+  if(verbosity>6) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
   check_equal_dimensions(vector_field,initial_set);
 
-  const VectorField<R>& vf(vector_field);
-  Zonotope<R> z=initial_set;
-  const size_type n=z.dimension();
-  const Matrix<R> id=identity_matrix<R>(n);
+  Geometry::Zonotope< Interval<R> > fuzzy_zonotopic_initial_set(initial_set);
+  Geometry::Zonotope< Interval<R> > fuzzy_zonotopic_final_set=this->integration_step(vector_field,fuzzy_zonotopic_initial_set,step_size);
   
-  R err=(norm(z.generators())/Interval<R>(65536)).upper();
-  
-  Rectangle<R> b=this->estimate_flow_bounds(vf,z.bounding_box(),step_size);
-  Interval<R> h=step_size;
-#ifdef DEBUG
-  std::cerr << "suggested stepsize=" << step_size << std::endl;
-  std::cerr << "stepsize=" << h << std::endl;
-  std::cerr << "bound=" << b << std::endl;
-#endif
-  
-  Vector< Interval<R> > f=vf(b);
-  Matrix< Interval<R> > df=vf.jacobian(b);
-  
-  R l=df.log_norm().upper();
-
-#ifdef DEBUG
-  std::cerr << "flow=" << f << std::endl;
-  std::cerr << "jacobian=" << df << std::endl;
-  std::cerr << "jacobian centre=" << df.centre() << std::endl;
-  std::cerr << "logarithmic_norm=" << l << std::endl;
-#endif
-
-  l=max(l,R(1));
-  
-  //integration_step(): the varaible l is useless!
-  
-  Matrix< Interval<R> > hdf=h*df;
-  Matrix< Interval<R> > dphi=exp(hdf);
-  
-  Point<R> c=z.centre();
-  Rectangle<R> rc=Geometry::Rectangle<R>(c,c);
-  //Rectangle<R> phic=refine_flow_bounds(vf,rc,b,step_size);
-  // FIXME: This code is incorrect!
-  Point< Interval<R> > phic=Point< Interval<R> >(c);
-  h=step_size;
-  Matrix< Interval<R> > zv(dphi*z.generators());
-
-  z=over_approximation(Zonotope< Interval<R> >(phic,zv));
-  
-#ifdef DEBUG
-  std::cerr << "stepsize*jacobian=" << hdf << std::endl;
-  std::cerr << "flow derivative=" << dphi << std::endl;
-
-  std::cerr << "centre=" << c << std::endl;
-  std::cerr << "bounds on centre=" << phic << std::endl;
-  std::cerr << "zonotopic <vector> to add to image of centre=" << zv << std::endl;
-  std::cerr << "new approximation=" << z << std::endl;
-#endif  
-
-  return z;
+  Geometry::Zonotope<R> final_set=Geometry::over_approximation(fuzzy_zonotopic_final_set);
+  return final_set;
 }
+
+
 
 template<class R>
 Ariadne::Geometry::Zonotope<R> 
@@ -299,7 +174,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::reachability_step(const System::Vector
                                        const Geometry::Zonotope<R>& initial_set, 
                                        time_type& step_size) const
 {
-  if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+  if(verbosity>6) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
 
   typedef typename traits<R>::arithmetic_type F;
 
@@ -341,25 +216,25 @@ Ariadne::Evaluation::LohnerIntegrator<R>::reachability_step(const System::Vector
   }
   
   z=Geometry::over_approximation(Geometry::Zonotope< Interval<R> >(phic,zfh,mdf));
-#ifdef DEBUG
-  std::cerr << "suggested stepsize=" << step_size << std::endl;
+  if(verbosity>7) {
+    std::cerr << "suggested stepsize=" << step_size << std::endl;
     
-  std::cerr << "stepsize=" << h << std::endl;
-  std::cerr << "bound=" << b << std::endl;
-  
-  std::cerr << "flow=" << f << "=" << std::endl;
-  std::cerr << "jacobian=" << df << std::endl;
-  std::cerr << "flow derivative=" << dphi << std::endl;
+    std::cerr << "stepsize=" << h << std::endl;
+    std::cerr << "bound=" << b << std::endl;
     
-  std::cerr << "centre=" << c << std::endl;
-  std::cerr << "bounds on centre=" << phic << std::endl;
-  
-  std::cerr << "flow times stepsize=" << fh << std::endl;
-  std::cerr << "symmetrised flow=" << zfh << std::endl;
-  std::cerr << "over approximating Matrix=" << mdf << std::endl;
-  
-  std::cerr << "approximating zonotope " << z;
-#endif
+    std::cerr << "flow=" << f << "=" << std::endl;
+    std::cerr << "jacobian=" << df << std::endl;
+    std::cerr << "flow derivative=" << dphi << std::endl;
+      
+    std::cerr << "centre=" << c << std::endl;
+    std::cerr << "bounds on centre=" << phic << std::endl;
+    
+    std::cerr << "flow times stepsize=" << fh << std::endl;
+    std::cerr << "symmetrised flow=" << zfh << std::endl;
+    std::cerr << "over approximating Matrix=" << mdf << std::endl;
+    
+    std::cerr << "approximating zonotope " << z;
+  }
 
   return z;
 }
@@ -372,7 +247,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::reachability_step(const System::Vector
                                        const Geometry::Zonotope< Interval<R> >& initial_set, 
                                        time_type& step_size) const
 {
-  if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+  if(verbosity>6) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
 
   typedef Interval<R> I;
 
@@ -405,25 +280,26 @@ Ariadne::Evaluation::LohnerIntegrator<R>::reachability_step(const System::Vector
   Matrix<I> mdf=dphi*z.generators();
   
   z=Zonotope<I>(phic,mdf,zfh);
-#ifdef DEBUG
-  std::cerr << "suggested stepsize=" << step_size << std::endl;
+
+  if(verbosity>7) {
+    std::cerr << "suggested stepsize=" << step_size << std::endl;
+      
+    std::cerr << "stepsize=" << conv_approx<double>(step_size) << std::endl;
+    std::cerr << "bound=" << bbox << std::endl;
     
-  std::cerr << "stepsize=" << h << std::endl;
-  std::cerr << "bound=" << b << std::endl;
-  
-  std::cerr << "flow=" << f << "=" << std::endl;
-  std::cerr << "jacobian=" << df << std::endl;
-  std::cerr << "flow derivative=" << dphi << std::endl;
+    std::cerr << "flow=" << f << "=" << std::endl;
+    std::cerr << "jacobian=" << df << std::endl;
+    std::cerr << "flow derivative=" << dphi << std::endl;
+      
+    std::cerr << "centre=" << c << std::endl;
+    std::cerr << "bounds on centre=" << phic << std::endl;
     
-  std::cerr << "centre=" << c << std::endl;
-  std::cerr << "bounds on centre=" << phic << std::endl;
-  
-  std::cerr << "flow times stepsize=" << fh << std::endl;
-  std::cerr << "symmetrised flow=" << zfh << std::endl;
-  std::cerr << "over approximating Matrix=" << mdf << std::endl;
-  
-  std::cerr << "approximating zonotope " << z;
-#endif
+    std::cerr << "flow times stepsize=" << fh << std::endl;
+    std::cerr << "symmetrised flow=" << zfh << std::endl;
+    std::cerr << "over approximating Matrix=" << mdf << std::endl;
+    
+    std::cerr << "approximating zonotope " << z;
+  }
 
   return z;
 }
@@ -434,7 +310,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::AffineV
                                       const Geometry::Parallelotope<R>& initial_set, 
                                       time_type& step_size) const
 {
-  if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+  if(verbosity>6) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
 
   Geometry::Zonotope<R> phiz=
     this->integration_step(vector_field,static_cast<const Geometry::Zonotope<R>&>(initial_set),step_size);
@@ -449,7 +325,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::AffineV
                                       const Geometry::Zonotope<R>& initial_set, 
                                       time_type& step_size) const
 {
-  if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+  if(verbosity>6) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
 
   const System::AffineVectorField<R>& vf=vector_field;
   Geometry::Zonotope<R> z=initial_set;
@@ -458,7 +334,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::AffineV
   R max_error=(norm(z.generators())/Interval<R>(65536)).upper();
   assert(max_error>0);
   
-  if(verbosity>0) { 
+  if(verbosity>7) { 
     std::cerr << "zonotope generators=" << z.generators() << std::endl;
     std::cerr << "maximum allowed error=" << max_error << std::endl;
   
@@ -468,27 +344,27 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::AffineV
   
 
   LinearAlgebra::Matrix< Interval<R> > D=LinearAlgebra::exp_Ah_approx(vf.A(),h.upper(),max_error);
-  if(verbosity>0) { std::cerr << "approximate derivative=" << D << std::endl; }
+  if(verbosity>7) { std::cerr << "approximate derivative=" << D << std::endl; }
   LinearAlgebra::Matrix< Interval<R> > P=LinearAlgebra::exp_Ah_sub_id_div_A_approx(vf.A(),h.upper(),max_error);
-  if(verbosity>0) { std::cerr << "twist=" << P << std::endl; }
+  if(verbosity>7) { std::cerr << "twist=" << P << std::endl; }
   
   LinearAlgebra::Vector< Interval<R> > ib=vf.b();
   LinearAlgebra::Matrix< Interval<R> > iD=D;
-  if(verbosity>0) { std::cerr << "approximating derivative=" << iD << std::endl; }
+  if(verbosity>7) { std::cerr << "approximating derivative=" << iD << std::endl; }
   LinearAlgebra::Matrix< Interval<R> > iP=P;
-  if(verbosity>0) { std::cerr << "approximating twist=" << iP << std::endl; }
+  if(verbosity>7) { std::cerr << "approximating twist=" << iP << std::endl; }
   //LinearAlgebra::Vector< Interval<R> > iC=iD*z.centre().position_vector()+iP*vf.b();
   LinearAlgebra::Vector< Interval<R> > iv1=iD*z.centre().position_vector();
-  if(verbosity>0) { std::cerr << "iv1=" << iv1 << std::endl; }
+  if(verbosity>7) { std::cerr << "iv1=" << iv1 << std::endl; }
    LinearAlgebra::Vector< Interval<R> > iv2=iP*ib;
-  if(verbosity>0) { std::cerr << "iv2=" << iv2 << std::endl; }
+  if(verbosity>7) { std::cerr << "iv2=" << iv2 << std::endl; }
   LinearAlgebra::Vector< Interval<R> > iCv=iv1+iv2;
   Geometry::Point< Interval<R> > iC(iCv);
   
-  if(verbosity>0) { std::cerr << "interval centre=" << iC << std::endl; }
+  if(verbosity>7) { std::cerr << "interval centre=" << iC << std::endl; }
   
   z=Geometry::over_approximation(Geometry::Zonotope< Interval<R> >(iC,iD*z.generators()));
-  if(verbosity>0) { std::cerr << "zonotope=" << z << std::endl; }
+  if(verbosity>7) { std::cerr << "zonotope=" << z << std::endl; }
   //IntervalZonotope<R> img(iD*z.centre().position_vector()+iP*vf.b(),iD*z.generators());
   
   return z;      
@@ -500,7 +376,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::reachability_step(const System::Affine
                                        const Geometry::Zonotope<R>& initial_set, 
                                        time_type& step_size) const
 {
-  if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+  if(verbosity>6) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
   throw NotImplemented(__PRETTY_FUNCTION__);
 
 }

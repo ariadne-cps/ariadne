@@ -1,8 +1,8 @@
 /***************************************************************************
- *            affine_map.cc
+ *            binary_word.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,15 +21,46 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "system/affine_map.h"
-#include "system/affine_map.tpl"
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <cassert>
 
-#include "real_typedef.h"
+#include "combinatoric/binary_word.h"
+
+#include "base/stlio.h"
 
 namespace Ariadne {
-  namespace System {
+  namespace Combinatoric {
 
-    template class AffineMap<Real>;
+    BinaryWord::BinaryWord(const std::string& str)
+    {
+      std::stringstream ss(str);
+      ss >> *this;
+    }
+
+    std::istream& operator>>(std::istream& is, BinaryWord& b)
+    {
+      std::vector<bool> v;
+      is >> v;
+      b=BinaryWord(v);
+      
+      return is;
+    }
     
+    std::ostream& operator<<(std::ostream& os, const BinaryWord& b) 
+    {    
+      if(b.empty()) {
+        os << "e";
+      }
+      for(size_type i=0; i!=b.size(); ++i) {
+        if(i%8==0 && i!=0) {
+          //os << " ";
+        }
+        os << b[i];
+      }
+      return os;
+    }
+ 
   }
 }

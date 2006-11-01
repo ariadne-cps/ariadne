@@ -129,13 +129,13 @@ namespace Ariadne {
   
       /*! \brief  The name of the system. */
       std::string name() const { return "AffineMap"; }
+      
+      /*! \brief Write to an output stream. */
+      virtual std::ostream& write(std::ostream& os) const;
      protected:
       LinearAlgebra::Matrix<R> _A;
       LinearAlgebra::Vector<R> _b;
     };
-      
-    template<class R>
-    std::ostream& operator<<(std::ostream&, const AffineMap<R>&);
 
   }
 }

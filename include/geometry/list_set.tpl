@@ -92,7 +92,7 @@ namespace Ariadne {
     {
       const ListSet<R,BS>& A=*this;
       os << "ListSet<" << name<R>() << ",BS>{\n  ";
-      os << "[";
+      os << "[ ";
       if (A.size() >0 ) {
         os << A[0];
       }

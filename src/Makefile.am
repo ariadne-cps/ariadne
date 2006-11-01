@@ -23,7 +23,7 @@ LINEAR_ALGEBRA_SRC = \
 
 COMBINATORIC_SRC = \
 	combinatoric/array_operations.cc \
-	combinatoric/binary_tree.cc \
+	combinatoric/binary_word.cc combinatoric/binary_tree.cc \
 	combinatoric/lattice_set.cc combinatoric/lattice_map.cc \
 	combinatoric/subdivision_tree_set.cc 
 

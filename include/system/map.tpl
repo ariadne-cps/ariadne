@@ -79,6 +79,12 @@ namespace Ariadne {
       throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
     
+    template<class R>
+    std::ostream&
+    Map<R>::write(std::ostream& os) const 
+    {
+      return os << "Map()";
+    }
     
    
   }

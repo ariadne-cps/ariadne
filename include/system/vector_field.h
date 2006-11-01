@@ -59,6 +59,7 @@ namespace Ariadne {
      */
     template<class R>
     class VectorField {
+     protected:
       typedef typename Numeric::traits<R>::arithmetic_type F; 
       typedef typename Numeric::traits<R>::interval_type I; 
      public:
@@ -100,8 +101,16 @@ namespace Ariadne {
 
       /*! \brief The name of the system. */
       virtual std::string name() const = 0;
+
+      /*! \brief Write to an output stream. */
+      virtual std::ostream& write(std::ostream& os) const;
     };
    
+    template<class R> inline 
+    std::ostream& operator<<(std::ostream& os, const VectorField<R>& vf) {
+      return vf.write(os);
+    }
+    
   }
 }
 

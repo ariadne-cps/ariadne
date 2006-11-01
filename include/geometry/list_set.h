@@ -320,7 +320,7 @@ namespace Ariadne {
        */
       void adjoin(const BS<R>& A) {
         if(this->dimension()==0) { 
-          this->_dimension=A.dimension(); 
+           this->_dimension=A.dimension(); 
         }
         check_equal_dimensions(*this,A,__PRETTY_FUNCTION__);
         if(!A.empty()) {

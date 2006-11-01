@@ -134,7 +134,7 @@ test_zonotope()
     assert(disjoint(r1,z2));
   }
   catch(NotImplemented e) {
-    cerr << "WARNING: " << e.what();
+    cerr << "Warning: " << e.what() << " not implemented\n";
   }
   
   /*

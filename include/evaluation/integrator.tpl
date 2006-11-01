@@ -59,6 +59,7 @@
 
 #include "integrator.h"
 
+namespace Ariadne { namespace Evaluation { extern int verbosity; } }
 
 namespace Ariadne {
   namespace Evaluation {
@@ -162,6 +163,7 @@ namespace Ariadne {
                                      const Geometry::Rectangle<R>& b,
                                      const time_type& h) const
     {
+      if(verbosity>6) { std::cerr << __FUNCTION__ << std::endl; }
       using namespace Geometry;
       return subset(r+Interval<R>(0,h)*vf(b),b);
     }
@@ -175,10 +177,8 @@ namespace Ariadne {
                                         const time_type& h,
                                         const unsigned int& maximum_iterations) const
     {
-#ifdef DEBUG
-      std::cerr << "estimate_flow_bounds(VectorField<R>, Rectangle<R>, R, uint)\n";
-      std::cerr << "r=" << r << "  h=" << h << "  max_iter=" << maximum_iterations << std::endl;
-#endif
+      if(verbosity>6) { std::cerr << __FUNCTION__ << " (maximum_iterations=" << maximum_iterations << ")" << std::endl; }
+      if(verbosity>7) { std::cerr << "  h=" << conv_approx<double>(h) << "  r=" << r << "  vf(r)=" << vf(r) << std::endl; }
 
       using namespace Geometry;
       typedef typename Numeric::traits<R>::arithmetic_type F;
@@ -205,13 +205,11 @@ namespace Ariadne {
         reach=bounds;
         t-=dt;
         
-#ifdef DEBUG
-        std::cerr << "t=" << convert_to<double>(t) << "  reach="  << reach << std::endl;
-#endif
+        if(verbosity>8) { std::cerr << "t=" << conv_approx<double>(t) << "  reach="  << reach << std::endl; }
+
         ++iteration;
         if(iteration==maximum_iterations) {
-          //throw std::runtime_error(strcat(__PRETTY_FUNCTION__,": Cannot find bounding box for flow");
-          throw std::runtime_error("Cannot find bounding box for flow");
+          throw std::runtime_error(std::string(__FUNCTION__)+": Cannot find bounding box for flow");
         }
       }
       return reach;
@@ -225,11 +223,12 @@ namespace Ariadne {
                                         const Geometry::Rectangle<R>& r,
                                         time_type& h) const
     {
-#ifdef DEBUG
-      std::cerr << "estimate_flow_bounds" << std::endl;
-#endif
+      if(verbosity>6) { std::cerr << __FUNCTION__ << std::endl; }
 
-      unsigned int max_iterations=16;
+      static const unsigned int max_tries=8;
+
+      unsigned int max_iterations=4;
+      unsigned int remaining_tries=max_tries;
       
       Geometry::Rectangle<R> bounds(vf.dimension());
       while(bounds.empty()) {
@@ -238,12 +237,16 @@ namespace Ariadne {
         }
         catch(std::runtime_error) { 
           h/=2;
-          max_iterations*=2;
+          max_iterations+=1;
+          --remaining_tries;
+          if(remaining_tries==0) {
+            throw std::runtime_error(std::string(__FUNCTION__)+": cannnot find bounding box for flow");
+          }
         }
       }
-#ifdef DEBUG
-      std::cerr << "bounds=" << bounds << std::endl;
-#endif
+      
+      if(verbosity>7) { std::cerr << "  h=" << conv_approx<double>(h) << "  b=" << bounds << std::endl; }
+      
       return bounds;
     }
     
@@ -256,6 +259,8 @@ namespace Ariadne {
                                       const Geometry::Rectangle<R>& estimated_bounds,
                                       const time_type& step_size) const
     {
+      if(verbosity>6) { std::cerr << __FUNCTION__ << std::endl; }
+
       using namespace System;
       using namespace Geometry;
       using namespace LinearAlgebra;
@@ -266,9 +271,9 @@ namespace Ariadne {
       
       Rectangle<R> xb=rx+Interval<R>(0,step_size)*vf(b);
       Rectangle<R> xxb=rx+Interval<R>(0,step_size)*vf(xb);
-#ifdef DEBUG
-      std::cerr << "new bounds " << xxb << "," << xb << " vs old bounds " << b << "  " << subset(xb,b) << std::endl;
-#endif
+
+      if(verbosity>7) { std::cerr << "new bounds " << xxb << "," << xb << " vs old bounds " << b << "  " << subset(xb,b) << std::endl; }
+
       Vector< Interval<R> > ddphi=vf.jacobian(xb)*vf(xb);
       Vector< Interval<R> > dfx=vf(rx);
       Vector< Interval<R> > hdfx=h*dfx;
@@ -286,26 +291,27 @@ namespace Ariadne {
                                        const BS<R>& initial_set, 
                                        const time_type& time) const
     {
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+      if(verbosity>4) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       if(time==0) { 
         return initial_set;
       }
       
       const System::VectorField<R>& vf=vector_field;
-      BS<R> r(initial_set);
-      time_type t=time;
+      BS<R> bs=initial_set;
+      time_type t=0;
       time_type h=this->maximum_step_size();
       while(t>0) {
-        h=min(t,h);
-        r=this->integration_step(vf,r,h);
-        t=t-h;
+        h=min(time_type(time-t),h);
+        bs=this->integration_step(vf,bs,h);
+        t=t+h;
         h=min(time_type(2*h),this->maximum_step_size());
       }
-      return r;
+      return bs;
     }
     
     
     
+    // Template pattern for integrating a list set using basic set type UBS
     template<class R>
     template<template<class> class BS>
     Geometry::ListSet<R,BS> 
@@ -313,6 +319,8 @@ namespace Ariadne {
                                       const Geometry::ListSet<R,BS>& initial_set, 
                                       const time_type& time) const
     {
+      if(verbosity>4) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+
       if(time==0) { 
         return initial_set;
       }
@@ -320,57 +328,67 @@ namespace Ariadne {
       const System::VectorField<R>& vf=vector_field;
       time_type step_size=this->maximum_step_size();
       R maximum_set_radius=this->maximum_basic_set_radius();
-#ifdef DEBUG
-        std::cerr << "step_size=" << step_size << "  maximum_set_radius=" << maximum_set_radius << std::endl;
-#endif
+
+      if(verbosity>7) { std::cerr << "step_size=" << step_size << "  maximum_set_radius=" << maximum_set_radius << std::endl; }
       
-      time_type t=time;
+      time_type t=0; // t is the time elapsed!
       time_type h=step_size;
       BS<R> bs(initial_set.dimension());
       
-      std::multiset< std::pair<R,BS<R> >, pair_first_less<R,BS<R> > > working_sets;
+      typedef std::pair< time_type,BS<R> > timed_set_type;
+      
+      // Working sets contains (time,set) pairs, storing the sets reached with different remaining
+      std::multiset< timed_set_type, pair_first_less<time_type, BS<R> > > working_sets;
+      
       Geometry::ListSet<R,BS> final_set(initial_set.dimension());
       
       typedef typename Geometry::ListSet<R,BS>::const_iterator list_set_const_iterator;
-      typedef std::pair< time_type,BS<R> > timed_set;
       for(list_set_const_iterator bs_iter=initial_set.begin(); bs_iter!=initial_set.end(); ++bs_iter) {
-        working_sets.insert(timed_set(time,*bs_iter));
+        working_sets.insert(timed_set_type(0,*bs_iter));
       }
       
       while(!working_sets.empty()) {
-#ifdef DEBUG
-        //std::cerr << working_sets << "\n\n\n";
-#endif
-        timed_set ts=*working_sets.begin();
-        working_sets.erase(working_sets.begin());
+        if(verbosity>7) { std::cerr << "working_sets.size()=" << working_sets.size() << "\n"; }
+
+        const timed_set_type& ts=*working_sets.begin();
         t=ts.first;
         bs=ts.second;
         h=step_size;
-        
+        working_sets.erase(working_sets.begin());
 
+        if(verbosity>5) { std::cerr << "  t=" << t << "  bs=" << bs << std::endl; }
         if(bs.radius()>maximum_set_radius) {
+          if(verbosity>5) { std::cerr << "    subdividing..." << std::flush; }
           Geometry::ListSet<R,BS> subdivisions=bs.subdivide();
           for(list_set_const_iterator subdiv_iter=subdivisions.begin(); 
               subdiv_iter!=subdivisions.end(); ++subdiv_iter)
           {
-            working_sets.insert(timed_set(t,*subdiv_iter));
+            working_sets.insert(timed_set_type(t,*subdiv_iter));
           }
+          if(verbosity>5) { std::cerr << " done" << std::endl; }
         }
         else {
+          if(verbosity>5) { std::cerr << "    integrating..." << std::endl; }
           do {
-#ifdef DEBUG
-        std::cerr << "time left=" << t << "  stepsize=" << h << "  centre=" << bs.centre() 
-                  << "  radius=" << bs.radius() << std::endl;
-#endif
-            h=min(t,h);
+            if(verbosity>5) { 
+              std::cerr << "      t=" << conv_approx<double>(t) << "  h=" << conv_approx<double>(h) << "  c=" << bs.centre() 
+                        << "  r=" << bs.radius() << std::endl;
+            }
+            h=min(time_type(time-t),h);
             bs=this->integration_step(vf,bs,h);
-            t=t-h;
+            t=t+h;  // t is the time remaining!
             h=min(time_type(2*h),step_size);
-          } while(t!=0 && bs.radius()<=maximum_set_radius);
-          if(t==0) {
+          } while(t!=time && bs.radius()<=maximum_set_radius);
+          
+          if(verbosity>5) { 
+            std::cerr << "      t=" << conv_approx<double>(t) << "  c=" << bs.centre() 
+                      << "  r=" << bs.radius() << std::endl;
+          }
+          
+          if(t==time) {
             final_set.adjoin(bs);
           } else {
-            working_sets.insert(timed_set(t,bs));
+            working_sets.insert(timed_set_type(t,bs));
           }
         }
       }
@@ -389,6 +407,7 @@ namespace Ariadne {
                          const Geometry::ListSet<R,Geometry::Rectangle>& initial_set,
                          const time_type& time) const
     {
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
@@ -400,6 +419,7 @@ namespace Ariadne {
                                       const Geometry::Rectangle<R>& initial_set, 
                                       time_type& time) const
     {
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
@@ -409,6 +429,7 @@ namespace Ariadne {
                                       const Geometry::Parallelotope<R>& initial_set, 
                                       time_type& time) const
     {
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       return Geometry::Parallelotope<R>(this->integration_step(vector_field,initial_set.bounding_box(),time));
     }
     
@@ -418,6 +439,7 @@ namespace Ariadne {
                                       const Geometry::Zonotope<R>& initial_set, 
                                       time_type& time) const
     {
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       return Geometry::Zonotope<R>(this->integration_step(vector_field,initial_set.bounding_box(),time));
     }
     
@@ -427,6 +449,7 @@ namespace Ariadne {
                                       const Geometry::Parallelotope< Interval<R> >& initial_set, 
                                       time_type& time) const
     {
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       return Geometry::Parallelotope< Interval<R> >(this->integration_step(vector_field,initial_set.bounding_box(),time));
     }
     
@@ -436,6 +459,7 @@ namespace Ariadne {
                                       const Geometry::Zonotope< Interval<R> >& initial_set, 
                                       time_type& time) const
     {
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       return Geometry::Zonotope< Interval<R> >(this->integration_step(vector_field,initial_set.bounding_box(),time));
     }
     
@@ -447,6 +471,7 @@ namespace Ariadne {
                                        const Geometry::Rectangle<R>& is,
                                        time_type& h) const 
     {
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
     
@@ -457,6 +482,7 @@ namespace Ariadne {
                                        const Geometry::Zonotope<R>& is,
                                        time_type& h) const 
     {
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       return this->reachability_step(vf,is.bounding_box(),h);
     }
 
@@ -466,6 +492,7 @@ namespace Ariadne {
                                        const Geometry::Zonotope< Interval<R> >& is,
                                        time_type& h) const 
     {
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       return Geometry::Zonotope< Interval<R> >(this->reachability_step(vf,is.bounding_box(),h));
     }
 
@@ -478,6 +505,7 @@ namespace Ariadne {
                                const Geometry::Rectangle<R>& initial_set, 
                                const time_type& time) const
     {
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       return this->integrate_basic_set(vector_field,initial_set,time);
     }
     
@@ -499,6 +527,7 @@ namespace Ariadne {
                                const Geometry::Zonotope<R>& initial_set, 
                                const time_type& time) const
     {
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       return this->integrate_basic_set(vector_field,initial_set,time);
     }
     
@@ -510,6 +539,7 @@ namespace Ariadne {
                                const Geometry::ListSet<R,Geometry::Rectangle>& initial_set,
                                const time_type& time) const
     {
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
      return this->integrate_list_set(vector_field,initial_set,time);
     }
     
@@ -520,6 +550,7 @@ namespace Ariadne {
                                const Geometry::ListSet<R,Geometry::Parallelotope>& initial_set, 
                                const time_type& time) const
     {
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       return this->integrate_list_set(vector_field,initial_set,time);
     }
     
@@ -530,6 +561,7 @@ namespace Ariadne {
                                const Geometry::ListSet<R,Geometry::Zonotope>& initial_set, 
                                const time_type& time) const
     {
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       return this->integrate_list_set(vector_field,initial_set,time);
     }
    
@@ -541,6 +573,7 @@ namespace Ariadne {
                              const Geometry::GridMaskSet<R>& bounding_set,
                              const time_type& time) const
     {
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       check_same_grid(initial_set,bounding_set,__PRETTY_FUNCTION__);
       using namespace System;
       using namespace Geometry;
@@ -618,6 +651,7 @@ namespace Ariadne {
                          const Geometry::ListSet<R,Geometry::Parallelotope>& initial_set, 
                          const time_type& time) const
     {
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       const System::VectorField<R>& vf=vector_field;
       time_type step_size=this->maximum_step_size();
       R maximum_set_radius=this->maximum_basic_set_radius();
@@ -688,6 +722,7 @@ namespace Ariadne {
                            const Geometry::ListSet<R,Geometry::Zonotope>& initial_set, 
                            const time_type& time) const
     {
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       const System::VectorField<R>& vf=vector_field;
       time_type step_size=this->maximum_step_size();
       R maximum_set_radius=this->maximum_basic_set_radius();
@@ -733,7 +768,7 @@ namespace Ariadne {
           do {
 #ifdef DEBUG
         std::cerr << "time left=" << t << "  stepsize=" << h << "  centre=" 
-	          << bs.centre() << std::endl;
+                  << bs.centre() << std::endl;
 #endif
             h=min(t,h);
             rs=this->reachability_step(vf,bs,h);
@@ -765,6 +800,7 @@ namespace Ariadne {
                            const Geometry::GridMaskSet<R>& bounding_set,
                            const time_type& time) const
     {
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
       typedef typename Geometry::ListSet<R,Geometry::Zonotope>::const_iterator zls_const_iterator;
       check_bounded(initial_set,__PRETTY_FUNCTION__);
@@ -823,6 +859,7 @@ namespace Ariadne {
                               const Geometry::GridMaskSet<R>& initial_set, 
                               const Geometry::GridMaskSet<R>& bounding_set) const
     {
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
       typedef typename Geometry::ListSet<R,Geometry::Parallelotope>::const_iterator pls_const_iterator;
       check_bounded(initial_set,__PRETTY_FUNCTION__);
@@ -876,6 +913,7 @@ namespace Ariadne {
                           const Geometry::GridMaskSet<R>& initial_set, 
                           const Geometry::GridMaskSet<R>& safe_set) const
     {
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
       typedef typename Geometry::ListSet<R,Geometry::Parallelotope>::const_iterator pls_const_iterator;
       check_bounded(initial_set,__PRETTY_FUNCTION__);

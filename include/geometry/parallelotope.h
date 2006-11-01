@@ -32,6 +32,7 @@
 #include <iosfwd>
 
 #include "../declarations.h"
+#include "../exceptions.h"
 
 #include "../numeric/interval.h"
 
@@ -88,8 +89,8 @@ namespace Ariadne {
       explicit Parallelotope(dimension_type n=0) : Zonotope<R>(n,n) { }
       
       /*! \brief Construct from centre and directions. */
-      explicit Parallelotope(const vector_type& c, const matrix_type& m) 
-        : Zonotope<R>(state_type(c),m)
+      explicit Parallelotope(const LinearAlgebra::Vector<R>& c, const LinearAlgebra::Matrix<R>& m) 
+        : Zonotope<R>(Point<R>(c),m)
       {
         if (m.number_of_rows()!=m.number_of_columns()) {
 //          throw InvalidGenerators("Parallelotope<R>::Parallelotope(Vector<R>,Matrix<R>): "
@@ -99,7 +100,7 @@ namespace Ariadne {
       }
       
       /*! \brief Construct from centre and directions. */
-      explicit Parallelotope(const state_type& c, const matrix_type& m)
+      explicit Parallelotope(const Point<R>& c, const LinearAlgebra::Matrix<R>& m)
         : Zonotope<R>(c,m)
       {
         if (m.number_of_rows()!=m.number_of_columns()) {
@@ -110,13 +111,17 @@ namespace Ariadne {
       }
        
       /*! \brief Construct from a rectangle. */
-      explicit Parallelotope(const Rectangle<real_type>& r)
+      explicit Parallelotope(const Rectangle<R>& r)
         : Zonotope<R>(r) { }
       
       /*! \brief Construct from a string literal. */
       explicit Parallelotope(const std::string& s) : Zonotope<R>(s) { }
         
       
+      /*! \brief Construct from a zonotope. */
+      Parallelotope(const Zonotope<R>& z)
+        : Zonotope<R>(z) { check_dimension(*this,z.number_of_generators(),__PRETTY_FUNCTION__); }
+
       /*! \brief Copy constructor. */
       Parallelotope(const Parallelotope<R>& original) : Zonotope<R>(original) { }
 
@@ -197,11 +202,20 @@ namespace Ariadne {
         }
       }
 
+      Parallelotope(const Zonotope<I>& z) : Zonotope<I>(z) { 
+        if(z.dimension()!=z.number_of_generators()) { 
+          throw InvalidGenerators(__PRETTY_FUNCTION__);
+        }
+      }
+
       /*! \brief Tests if the parallelotope contains \a point. */
       tribool contains(const Point<I>& point) const;
 
       /*! \brief The vertices of the parallelotope. */
       PointList<F> vertices() const;
+      
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream& os) const;
       
      private:
       void _compute_generators_inverse() const;
@@ -240,6 +254,12 @@ namespace Ariadne {
       return Parallelotope<R>::scale(p,scale_factor);
     }
 
+    template<class R> inline
+    std::ostream& operator<<(std::ostream& os, const Parallelotope< Interval<R> >& p) 
+    {
+      return p.write(os);
+    }
+    
     template<class R> inline
     std::ostream& operator<<(std::ostream& os, const Parallelotope<R>& p) 
     {

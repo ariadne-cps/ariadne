@@ -44,6 +44,7 @@ namespace Ariadne {
     class AffineVectorField : public VectorField<R> 
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
+      typedef typename Numeric::traits<R>::interval_type I;
      public:
       /*! \brief The real number type. */
       typedef R real_type;
@@ -66,14 +67,14 @@ namespace Ariadne {
       AffineVectorField<R>* clone() const { return new AffineVectorField<R>(this->A(),this->b()); }
       
       /*! \brief An approximation to the vector field at a point. */
-      LinearAlgebra::Vector<F> image(const Geometry::Point<R>& s) const;
+      virtual LinearAlgebra::Vector<F> image(const Geometry::Point<R>& x) const;
       /*! \brief An over-approximation to the vector field over a rectangle. */
-      LinearAlgebra::Vector< Interval<R> > image(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::Vector<I> image(const Geometry::Rectangle<R>& A) const;
     
       /*! \brief An approximation to the Jacobian derivative at a point. */
-      LinearAlgebra::Matrix<F> derivative(const Geometry::Point<R>& x) const;
+      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<R>& x) const;
       /*! \brief An over-approximation to the Jacobian derivative over a rectangle. */
-      LinearAlgebra::Matrix< Interval<R> > derivative(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::Matrix<I> jacobian(const Geometry::Rectangle<R>& r) const;
       
       /*! \brief The matrix \f$A\f$. */
       const LinearAlgebra::Matrix<R>& A() const { return this->_A; }
@@ -88,12 +89,14 @@ namespace Ariadne {
       
       /*! \brief  The name of the system. */
       std::string name() const { return "AffineVectorField"; }
+      
+      /*! \brief  The name of the system. */
+      virtual std::ostream& write(std::ostream& os) const;
      private:
       LinearAlgebra::Matrix<R> _A;
       LinearAlgebra::Vector<R> _b;
     };
  
-    template<class R> std::ostream& operator<<(std::ostream& os, const AffineVectorField<R>& vf);
     
   }
 }

@@ -32,6 +32,7 @@
 #include "numeric/numerical_types.h"
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
+#include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 
 #include "test.h"
@@ -39,62 +40,59 @@
 using namespace Ariadne;
 using namespace Ariadne::Geometry;
 using namespace std;
-
+  
+template<class R> int test_list_set();
+  
 int main() {
+  test_list_set<Real>();
+  cout << "INCOMPLETE ";
+}
+
+template<class R>
+int test_list_set() 
+{
   
-  Point<Real> s0("(0,0)");
-  Point<Real> s1("(1,1)");
-  Point<Real> s2("(1.375,1.375)");
-  Point<Real> s3("(1.5,1.5)");
-  
+  Point<R> s0("(0,0)");
+  Point<R> s1("(1,1)");
+  Point<R> s2("(1.375,1.375)");
+  Point<R> s3("(1.5,1.5)");
   cout << s0 << " " << s1 << " " << s2 << " " << s3 << endl;
   
-  typedef ListSet<Real, Rectangle> ListSet;
-  typedef Rectangle<Real> Rectangle;
-  typedef Point<Real> Point;
-
-  Rectangle r0(s0,s1);
-  Rectangle r1(s1,s2);
-  Rectangle r2(s2,s3);
-  
+  Rectangle<R> r0(s0,s1);
+  Rectangle<R> r1(s1,s2);
+  Rectangle<R> r2(s2,s3);
   cout << r0 << " " << r1 << " " << r2 << endl;
   
-  ListSet ds1;
-  ds1.inplace_union(r0);
-  ds1.inplace_union(r1);
-  ds1.inplace_union(r2);
-
+  Zonotope<R> z0(r0);
+  Zonotope<R> z1(r1);
+  
+  ListSet<R,Rectangle> ds1;
+  ds1.adjoin(r0);
+  ds1.adjoin(r1);
+  ds1.adjoin(r2);
+  cout << ds1 << endl;
+  assert(ds1.size()==3);
+  assert(ds1[0]==r0);
+  assert(ds1[1]==r1);
+  assert(ds1[2]==r2);
+  
   cout << ds1 << endl;
   
   string input("[ [0,1]x[0,1], [1,1.375]x[1,1.375], [1.375,1.5]x[1.375,1.5] ]");
   stringstream is(input);
   
-  ListSet ds2;
+  ListSet<R,Rectangle> ds2;
   is >> ds2;
   cout << ds2 << endl;
-
+  assert(ds2.size()==3);
   assert(ds1[0]==ds2[0] && ds1[1]==ds2[1] && ds1[2]==ds2[2]);
 
-  /* Test input format */
-  try {
-    string input("[ ] "
-                 "[ [0,2] ] "
-                 "[ [0,1], [3/4,4/3], [1,3/2] ] "
-                 "{ lower_corner=[0,1], upper_corner=[1,4/3] } " );
-    stringstream is(input);
-  }
-  catch(invalid_input& e) {
-    cout << "  invalid_input: " << e.what() << "\n";
-    return 1;
-  }
-  catch(std::invalid_argument& e) {
-    cout << "  std::invalid_argument: " << e.what() << "\n";
-    return 1;
-  }
-  catch(...) {
-    cout << "  Unknown error\n";
-    return 1;
-  }
+  ListSet<R,Zonotope> zds;
+  cout << "z0.empty()=" << z0.empty() << endl;
+  zds.push_back(z0);
+  assert(zds.size()==1);
+  zds.adjoin(z1);
+  assert(zds.size()==2);
 
   return 0;
 }

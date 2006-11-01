@@ -81,5 +81,13 @@ namespace Ariadne {
       throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
     
+    template<class R>
+    std::ostream&
+    VectorField<R>::write(std::ostream& os) const 
+    {
+      return os << "VectorField()";
+    }
+    
+    
   }
 }

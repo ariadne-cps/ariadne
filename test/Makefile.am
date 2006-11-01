@@ -18,7 +18,7 @@ check_PROGRAMS = \
 	test_polytope test_polyhedron \
 	test_list_set test_grid_set test_partition_tree_set \
 	test_hybrid_automaton \
-	test_newton test_apply test_integration_step test_chainreach \
+	test_newton test_apply test_integration_step test_integrate test_chainreach \
 	test_epsfstream test_chompfstream 
 
 XFAIL_TESTS = 
@@ -53,6 +53,7 @@ test_hybrid_automaton_SOURCES=test_hybrid_automaton.cc
 test_newton_SOURCES=test_newton.cc
 test_apply_SOURCES=test_apply.cc
 test_integration_step_SOURCES=test_integration_step.cc
+test_integrate_SOURCES=test_integrate.cc
 test_chainreach_SOURCES=test_chainreach.cc
 test_epsfstream_SOURCES=test_epsfstream.cc
 test_chompfstream_SOURCES=test_chompfstream.cc

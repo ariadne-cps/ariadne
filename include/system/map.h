@@ -110,8 +110,14 @@ namespace Ariadne {
       /*! \brief The name of the map. */
       virtual std::string name() const = 0;
 
+      /*! \brief Write to an output stream. */
+      virtual std::ostream& write(std::ostream& os) const;
     };
-  
+   
+    template<class R> inline 
+    std::ostream& operator<<(std::ostream& os, const Map<R>& f) {
+      return f.write(os);
+    }  
     
   }
 }

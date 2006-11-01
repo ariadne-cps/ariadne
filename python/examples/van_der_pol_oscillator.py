@@ -39,18 +39,23 @@ mu=Real(0.25)
 
 vdp=VanDerPolEquation(mu)
 interval_newton=IntervalNewtonSolver(Real(0.00001),64)
-lohner=LohnerIntegrator(0.1,0.1,0.1)
+lohner=LohnerIntegrator(0.125,0.5,0.1) #(maximum_step_size,lock_to_grid_time,maximum_set_size)
 
 subdivisions=128
 grid_extent=Rectangle("[--4,4]x[-2,2]") # grid bounding box
 finite_grid=FiniteGrid(grid_extent,128)
 grid=finite_grid.grid()
-initial_set=Rectangle("[1.00,1.000002]x[0,0.000001]")
+initial_set=Rectangle("[1.00,1.002]x[05,0.501]")
 initial_set=Parallelotope(initial_set)
+initial_set=Zonotope(initial_set)
 
+h=Rational(0.125)
+t=Rational(0.25)
 print "Initial set: ", initial_set
+print "Integrate initial parallelotope for one time step"
+intermediate_set=lohner.integration_step(vdp,initial_set,h)
 print "Integrate initial parallelotope for time 1"
-intermediate_set=lohner.integrate(vdp,initial_set,Rational(0.25))
+intermediate_set=lohner.integrate(vdp,initial_set,t)
 print intermediate_set
 
 print initial_set

@@ -243,7 +243,7 @@ namespace Ariadne {
       }
       
       /*! \brief True if the zonotope is empty. */
-      tribool empty() const;
+      tribool empty() const { return false; }
       
       /*! \brief Checks for boundedness. */
       tribool bounded() const { return true; }
@@ -389,8 +389,12 @@ namespace Ariadne {
       const Point<I>& centre() const { return _centre; }
       const LinearAlgebra::Matrix<I>& generators() const { return _generators; }
       
+      tribool empty() const;
+      tribool bounded() const;
+      tribool contains(const Point< Interval<R> >& pt) const;
       Rectangle<R> bounding_box() const;
       
+      std::istream& read(std::istream& is) ;
       std::ostream& write(std::ostream& os) const;
      private:
       static void _instantiate_geometry_operators();

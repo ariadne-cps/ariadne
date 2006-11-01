@@ -70,12 +70,18 @@ test_interval()
 {
   cout << __PRETTY_FUNCTION__ << endl;
   
+  R zero=0;
+  
   // Construct from pair
   Interval<R> ivld1(R(1.125),R(2.25));
   assert(ivld1.lower()==1.125); assert(ivld1.upper()==2.25);
   // Default constructor
   Interval<R> ivld2;
-  assert(ivld1.empty());
+  if(ivld2.empty()) { 
+    cerr << "Warning: Interval<R> default constructor returns an empty set\n"; 
+  } else {
+    assert(ivld2==Interval<R>(zero,zero));
+  }
   // Constructor with approximations
   Interval<R> ivld3(Rational(21,10),Rational(16,5));
   assert(ivld3.lower()<Rational(21,10));

@@ -624,6 +624,91 @@ namespace Ariadne {
       return x1=x1/x2;
     }
 
+    
+    
+    template<class R> inline
+    Interval<R> operator+(const Interval<R>& x1, const int& x2) {
+      return x1+Interval<R>(x2); 
+    }
+
+    template<class R> inline
+    Interval<R> operator-(const Interval<R>& x1, const int& x2) {
+      return x1-Interval<R>(x2); 
+    }
+
+    template<class R> inline
+    Interval<R> operator*(const Interval<R>& x1, const int& x2) {
+      return x1*Interval<R>(x2); 
+    }
+
+    template<class R> inline
+    Interval<R> operator/(const Interval<R>& x1, const int& x2) {
+      return x1/Interval<R>(x2); 
+    }
+
+
+    template<class R> inline
+    Interval<R> operator+(const int& x1, const Interval<R>& x2) {
+      return x1+Interval<R>(x2); 
+    }
+
+    template<class R> inline
+    Interval<R> operator-(const int& x1, const Interval<R>& x2) {
+      return x1-Interval<R>(x2); 
+    }
+
+    template<class R> inline
+    Interval<R> operator*(const int& x1, const Interval<R>& x2) {
+      return x1*Interval<R>(x2); 
+    }
+
+    template<class R> inline
+    Interval<R> operator/(const int& x1, const Interval<R>& x2) {
+      return x1/Interval<R>(x2); 
+    }
+
+    
+    
+    template<class R> inline
+    Interval<R> operator+(const Interval<R>& x1, const double& x2) {
+      return x1+Interval<R>(x2); 
+    }
+
+    template<class R> inline
+    Interval<R> operator-(const Interval<R>& x1, const double& x2) {
+      return x1-Interval<R>(x2); 
+    }
+
+    template<class R> inline
+    Interval<R> operator*(const Interval<R>& x1, const double& x2) {
+      return x1*Interval<R>(x2); 
+    }
+
+    template<class R> inline
+    Interval<R> operator/(const Interval<R>& x1, const double& x2) {
+      return x1/Interval<R>(x2); 
+    }
+
+    template<class R> inline
+    Interval<R> operator+(const double& x1, const Interval<R>& x2) {
+      return x1+Interval<R>(x2); 
+    }
+
+    template<class R> inline
+    Interval<R> operator-(const double& x1, const Interval<R>& x2) {
+      return x1-Interval<R>(x2); 
+    }
+
+    template<class R> inline
+    Interval<R> operator*(const double& x1, const Interval<R>& x2) {
+      return x1*Interval<R>(x2); 
+    }
+
+    template<class R> inline
+    Interval<R> operator/(const double& x1, const Interval<R>& x2) {
+      return x1/Interval<R>(x2); 
+    }
+
 
 
 

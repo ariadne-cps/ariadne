@@ -38,40 +38,64 @@ print "Available models:",dir(ariadne.models)
 mu=Real(0.25)
 
 vdp=VanDerPolEquation(mu)
-interval_newton=IntervalNewtonSolver(Real(0.00001),64)
-lohner=LohnerIntegrator(0.125,0.5,0.1) #(maximum_step_size,lock_to_grid_time,maximum_set_size)
+
+maximum_step_size=0.125
+lock_to_grid_time=1.0
+maximum_set_size=0.0625
+lohner=LohnerIntegrator(maximum_step_size,lock_to_grid_time,maximum_set_size)
+
+print "Available integration methods:",dir(lohner),"\n"
 
 subdivisions=128
 grid_extent=Rectangle("[--4,4]x[-2,2]") # grid bounding box
 finite_grid=FiniteGrid(grid_extent,128)
 grid=finite_grid.grid()
-initial_set=Rectangle("[1.00,1.002]x[05,0.501]")
+initial_set=Rectangle("[0.99,1.01]x[0.49,0.51]")
 initial_set=Parallelotope(initial_set)
 initial_set=Zonotope(initial_set)
 
-h=Rational(0.125)
-t=Rational(0.25)
-print "Initial set: ", initial_set
-print "Integrate initial parallelotope for one time step"
-intermediate_set=lohner.integration_step(vdp,initial_set,h)
-print "Integrate initial parallelotope for time 1"
-intermediate_set=lohner.integrate(vdp,initial_set,t)
-print intermediate_set
+print "initial_set =", initial_set,"\n"
 
-print initial_set
+step_size=Rational(0.125)
+flow_steps=2
+reach_steps=3
 
-#bounding_set.adjoin(over_approximation(grid_extent,grid))
-time=Rational(5)
-print "Computing chain-reachable set..."
-reach_set=lohner.reach(vdp,initial_set,time)
-print reach_set
+flow_time=flow_steps*step_size
+reach_time=reach_steps*step_size
+
+# FIXME: The line below is necessary to prevent segmentation faults
+initial_set=Identity().image(initial_set)
+
+print "Integrate initial set for time",flow_time
+flowed_set=lohner.integrate(vdp,initial_set,flow_time)
+print "  ",flowed_set,"\n"
+
+print "Computing reachable set from time",flow_time,"to time",flow_time,"+",reach_time
+reach_set=lohner.reach(vdp,ZonotopeListSet(flowed_set),reach_time)
+print reach_set,"\n\n"
+
+
+intermediate_sets=ZonotopeListSet(initial_set)
+current_set=initial_set
+for i in range(0,flow_steps+reach_steps):
+  current_set=lohner.integrate(vdp,current_set,step_size)
+  intermediate_sets.adjoin(current_set)
+
+
+print "initial set:",initial_set
+print "flowed set:",flowed_set
+print
+print "reach set:",reach_set
 
 print "Exporting to postscript output...",
 epsbb=Rectangle("[-4.1,4.1]x[-2.1,2.1]") # eps bounding box
+epsbb=Rectangle("[0.4,1.4]x[-0.4,0.6]") # eps bounding box
 eps=EpsPlot("van_der_pol_oscillator-1.eps",epsbb)
 eps.set_line_style(True)
 eps.set_fill_colour("green")
 eps.write(reach_set)
+eps.set_fill_colour("white")
+eps.write(intermediate_sets)
 eps.set_fill_colour("blue")
 eps.write(initial_set)
 eps.close()

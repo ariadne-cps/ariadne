@@ -96,22 +96,6 @@ namespace Ariadne {
                                                       const Geometry::Zonotope< Interval<R> >&,
                                                       time_type& step_size) const;
 
-
-      /*! \brief A specialized algorithm for integrating forward a parallelotope under an affine vector field. */
-      virtual Geometry::Parallelotope<R> integration_step(const System::AffineVectorField<R>&,
-                                                          const Geometry::Parallelotope<R>&,
-                                                          time_type&) const;
-
-      /*! \brief A specialized algorithm for integrating forward a zonotope under an affine vector field. */
-      virtual Geometry::Zonotope<R> integration_step(const System::AffineVectorField<R>&,
-                                                     const Geometry::Zonotope<R>&,
-                                                     time_type&) const;
-
-      /*! \brief A specialized algorithm for computing the reachable set of a zonotope under an affine vector field. */
-      virtual Geometry::Zonotope<R> reachability_step(const System::AffineVectorField<R>&,
-                                                      const Geometry::Zonotope<R>&,
-                                                      time_type&) const;
-                                                          
     };
     
     

@@ -88,10 +88,28 @@ test_zonotope()
     ++vi;
   }
   cout << "z2.vertices()=" << z2.vertices() << endl;
+  cout << endl;
   
+  // Minkowski sum
+  cout << "z1=" << z1 << "\nz2=" << z2 << endl;
   Zonotope<F> z3=minkowski_sum(z1,z2);
-  cout << "z3=" << z3 << endl;
-
+  cout << "minkowski_sum(z1,z2)=" << z3 << endl;
+  z3=minkowski_difference(z1,z2);
+  cout << "minkowski_difference(z1,z2)=" << z3 << endl;
+  cout << endl;
+  
+  ListSet<R,Zonotope> zls;
+  cout << "z2=" << z2 << std::endl;
+  
+  zls.clear();
+  zls=z2.subdivide();
+  cout << "z2.subdivide()=" << zls << std::endl;
+  
+  zls.clear();
+  zls=z2.divide();
+  cout << "z2.divide()=" << zls << std::endl;
+  
+  
   Point<R> pts[6];
   
   pts[0]=Point<R>("(17.0,15.0,-0.5)");

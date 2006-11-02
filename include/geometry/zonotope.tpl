@@ -192,16 +192,17 @@ namespace Ariadne {
     ListSet<R,Zonotope>
     Zonotope<R>::subdivide() const 
     {
-      //size_type n=this->dimension();
+      std::cerr << __PRETTY_FUNCTION__ << std::endl;
+
       ListSet<R,Geometry::Zonotope> result(this->dimension());
       
       R two=2;
-      size_type d=(this->generators()).number_of_rows();
-      size_type m=(this->generators()).number_of_columns();
+      dimension_type d=this->dimension();
+      size_type m=this->number_of_generators();
       
       matrix_type new_generators(d,m);
       for(size_type i=0; i!=d; ++i) {
-        for(size_type j=0; i!=m; ++j) {
+        for(size_type j=0; j!=m; ++j) {
           new_generators(i,j)=div_up(this->generators()(i,j),two);
         }
       }
@@ -228,10 +229,10 @@ namespace Ariadne {
     ListSet<R,Zonotope>
     Zonotope<R>::divide() const 
     {
-      size_type n=this->dimension();
-      size_type m=(this->generators()).number_of_columns();
+      size_type d=this->dimension();
+      size_type m=this->number_of_generators();
       R two=2;
-      ListSet<R,Geometry::Zonotope> result(this->dimension());
+      ListSet<R,Geometry::Zonotope> result(d);
       
       matrix_type new_generators=this->generators();
       
@@ -246,8 +247,8 @@ namespace Ariadne {
       }
       
       size_type j=max_column;
-      for(size_type i=0; i!=n; ++i) {
-        div_up(new_generators(i,j),two);
+      for(size_type i=0; i!=d; ++i) {
+        new_generators(i,j)=div_up(new_generators(i,j),two);
       }
       
       state_type new_centre=sub_approx(this->centre(),LinearAlgebra::Vector<R>(column(new_generators,j)));

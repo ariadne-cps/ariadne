@@ -1,5 +1,6 @@
 LIBS = -lboost_python -lmpfr -lppl -lgmpxx
 AM_LDFLAGS = -module
+CXX_FLAGS = -Wall -O0 -fpic
 
 pythondir=${prefix}/python
 pyexecdir=${prefix}/python
@@ -32,8 +33,6 @@ pkgpython_DATA = __init__.py
 
 
 INCLUDES = -I$(top_srcdir)/include 
-CXX_FLAGS = -fpic
-
 EXTRA_DIST = __init__.py
 
 

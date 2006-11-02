@@ -59,7 +59,8 @@
 
 #include "integrator.h"
 
-namespace Ariadne { namespace Evaluation { extern int verbosity; } }
+namespace Ariadne { namespace Evaluation { int verbosity=0; } }
+//namespace Ariadne { namespace Evaluation { int verbosity=7; } }
 
 namespace Ariadne {
   namespace Evaluation {
@@ -70,6 +71,21 @@ namespace Ariadne {
         return ts1.first < ts2.first; 
       }
     };
+    
+    template<class R>
+    Geometry::Zonotope<R> 
+    Integrator<R>::identity(const Geometry::Zonotope<R>& z) const
+    {
+      return z;
+    }
+    
+    template<class R>
+    LinearAlgebra::Vector< Interval<R> >
+    Integrator<R>::field(const System::VectorField<R>& vf, const Geometry::Zonotope<R>& z) const
+    {
+      Geometry::Rectangle<R> r=z.bounding_box();
+      return vf(r);
+    }
     
 
     /*!\ brief A class representing pre-computed bounds for an integration step. */
@@ -272,7 +288,7 @@ namespace Ariadne {
       Rectangle<R> xb=rx+Interval<R>(0,step_size)*vf(b);
       Rectangle<R> xxb=rx+Interval<R>(0,step_size)*vf(xb);
 
-      if(verbosity>7) { std::cerr << "new bounds " << xxb << "," << xb << " vs old bounds " << b << "  " << subset(xb,b) << std::endl; }
+      if(verbosity>7) { std::cerr << "new_bounds " << xxb << "," << xb << " vs old_bounds " << b << "  " << subset(xb,b) << std::endl; }
 
       Vector< Interval<R> > ddphi=vf.jacobian(xb)*vf(xb);
       Vector< Interval<R> > dfx=vf(rx);
@@ -300,18 +316,20 @@ namespace Ariadne {
       BS<R> bs=initial_set;
       time_type t=0;
       time_type h=this->maximum_step_size();
-      while(t>0) {
+      while(t<time) {
         h=min(time_type(time-t),h);
         bs=this->integration_step(vf,bs,h);
         t=t+h;
         h=min(time_type(2*h),this->maximum_step_size());
+        h=max(h,this->minimum_step_size());
       }
+      if(verbosity>4) { std::cerr << "  t=" << t << "  final_set=" << bs << std::endl; }
       return bs;
     }
     
     
     
-    // Template pattern for integrating a list set using basic set type UBS
+    // Template pattern for integrating a list set
     template<class R>
     template<template<class> class BS>
     Geometry::ListSet<R,BS> 
@@ -338,23 +356,23 @@ namespace Ariadne {
       typedef std::pair< time_type,BS<R> > timed_set_type;
       
       // Working sets contains (time,set) pairs, storing the sets reached with different remaining
-      std::multiset< timed_set_type, pair_first_less<time_type, BS<R> > > working_sets;
+      std::vector< timed_set_type > working_sets;
       
       Geometry::ListSet<R,BS> final_set(initial_set.dimension());
       
       typedef typename Geometry::ListSet<R,BS>::const_iterator list_set_const_iterator;
       for(list_set_const_iterator bs_iter=initial_set.begin(); bs_iter!=initial_set.end(); ++bs_iter) {
-        working_sets.insert(timed_set_type(0,*bs_iter));
+        working_sets.push_back(timed_set_type(0,*bs_iter));
       }
       
       while(!working_sets.empty()) {
         if(verbosity>7) { std::cerr << "working_sets.size()=" << working_sets.size() << "\n"; }
 
-        const timed_set_type& ts=*working_sets.begin();
+        const timed_set_type& ts=working_sets.back();
         t=ts.first;
         bs=ts.second;
         h=step_size;
-        working_sets.erase(working_sets.begin());
+        working_sets.pop_back();
 
         if(verbosity>5) { std::cerr << "  t=" << t << "  bs=" << bs << std::endl; }
         if(bs.radius()>maximum_set_radius) {
@@ -363,7 +381,7 @@ namespace Ariadne {
           for(list_set_const_iterator subdiv_iter=subdivisions.begin(); 
               subdiv_iter!=subdivisions.end(); ++subdiv_iter)
           {
-            working_sets.insert(timed_set_type(t,*subdiv_iter));
+            working_sets.push_back(timed_set_type(t,*subdiv_iter));
           }
           if(verbosity>5) { std::cerr << " done" << std::endl; }
         }
@@ -388,13 +406,105 @@ namespace Ariadne {
           if(t==time) {
             final_set.adjoin(bs);
           } else {
-            working_sets.insert(timed_set_type(t,bs));
+            working_sets.push_back(timed_set_type(t,bs));
           }
         }
       }
+      if(verbosity>6) { std::cerr << "  final_set=" << final_set << std::endl; }
       return final_set;
     }
     
+    
+    
+    template<class R>
+    template<template<class> class BS>
+    Geometry::ListSet<R,BS> 
+    Integrator<R>::reach_list_set(const System::VectorField<R>& vector_field, 
+                                  const Geometry::ListSet<R,BS>& initial_set, 
+                                  const time_type& time) const
+    {
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+      const System::VectorField<R>& vf=vector_field;
+      time_type step_size=this->maximum_step_size();
+      R maximum_set_radius=this->maximum_basic_set_radius();
+    
+      if(verbosity>4) {
+        std::cerr << "step_size=" << conv_approx<double>(step_size) << "  maximum_set_radius()=" << maximum_set_radius << std::endl<<std::flush;
+      }
+      
+      time_type t=0;
+      time_type h=step_size;
+      BS<R> bs(initial_set.dimension());
+      BS<R> rs(initial_set.dimension());
+      
+      typedef typename Geometry::ListSet<R,BS>::const_iterator list_set_const_iterator;
+      typedef std::pair< time_type, BS<R> > timed_set_type;
+
+      std::vector< timed_set_type > working_sets;
+      Geometry::ListSet<R,BS> reach_set(initial_set.dimension());
+      
+      for(list_set_const_iterator bs_iter=initial_set.begin(); bs_iter!=initial_set.end(); ++bs_iter) {
+        working_sets.push_back(timed_set_type(0,*bs_iter));
+      }
+      
+      if(verbosity>6) { std::cerr << "initial_set.size()=" << initial_set.size() << std::endl; }
+      assert(working_sets.size()==initial_set.size());
+      assert(reach_set.size()==0);
+      
+      while(!working_sets.empty()) {
+        if(verbosity>6) { 
+          std::cerr << "  working_sets.size()=" << working_sets.size() << "  reach_set.size()=" << reach_set.size() << std::endl; 
+        }
+        
+        const timed_set_type& ts=working_sets.back();
+        t=ts.first;
+        bs=ts.second;
+        h=step_size;
+        working_sets.pop_back();
+        
+        if(verbosity>6) { std::cerr << "  t=" << conv_approx<double>(t) << "  bs.centre()=" << bs.centre() << "  bs.radius() = " << bs.radius() << std::endl; }
+
+        if(bs.radius()>maximum_set_radius) {
+        if(verbosity>6) { std::cerr << "  subdividing..." << std::endl; }
+          Geometry::ListSet<R,Geometry::Zonotope> subdivisions=bs.subdivide();
+          if(verbosity>6) { std::cerr << "    subdivisions.size() =" << subdivisions.size() << std::endl; }
+          for(list_set_const_iterator subdiv_iter=subdivisions.begin(); 
+              subdiv_iter!=subdivisions.end(); ++subdiv_iter)
+          {
+            working_sets.push_back(timed_set_type(t,*subdiv_iter));
+          }
+        }
+        else {
+          if(verbosity>6) { std::cerr << "  integrating..." << std::endl; }
+          
+          do {
+            if(verbosity>6) {
+              std::cerr << "    t=" << conv_approx<double>(t) << "  h=" << conv_approx<double>(h)
+                        << "  bs=" << bs << std::endl;
+            }
+            
+            h=min(time_type(time-t),h);
+            rs=this->reachability_step(vf,bs,h);
+            reach_set.adjoin(rs);
+            
+            if(t<time) {
+              bs=integration_step(vf,bs,h);
+              t=t+h;
+            }
+          } while(t!=time && bs.radius()<=maximum_set_radius);
+          
+          if(t<time) {
+            working_sets.push_back(timed_set_type(t,bs));
+          }
+        }
+      }
+      
+      if(verbosity>4) {
+        std::cerr << "  reach_set.size()=" << reach_set.size() <<  std::endl;
+      }
+      return reach_set;
+    } 
+
     
     
     
@@ -528,7 +638,9 @@ namespace Ariadne {
                                const time_type& time) const
     {
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      return this->integrate_basic_set(vector_field,initial_set,time);
+      Geometry::Zonotope<R> result=this->integrate_basic_set(vector_field,initial_set,time);
+      if(verbosity>2) { std::cerr << result << std::endl; }
+      return result;
     }
     
     
@@ -652,70 +764,13 @@ namespace Ariadne {
                          const time_type& time) const
     {
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      const System::VectorField<R>& vf=vector_field;
-      time_type step_size=this->maximum_step_size();
-      R maximum_set_radius=this->maximum_basic_set_radius();
-#ifdef DEBUG
-        std::cerr << "step_size=" << step_size << "  maximum_set_radius()=" << maximum_set_radius << std::endl;
-#endif
       
-      time_type t=time;
-      time_type h=step_size;
-      Geometry::Parallelotope<R> bs(initial_set.dimension());
-      Geometry::Zonotope<R> rs(initial_set.dimension());
-      
-      std::multiset< std::pair< R,Geometry::Parallelotope<R> >, pair_first_less< R,Geometry::Parallelotope<R> > > working_sets;
-      Geometry::ListSet< R,Geometry::Zonotope > reach_set(initial_set.dimension());
-      
-      typedef typename Geometry::ListSet<R,Geometry::Parallelotope>::const_iterator list_set_const_iterator;
-      typedef std::pair< time_type,Geometry::Parallelotope<R> > timed_set;
-      for(list_set_const_iterator bs_iter=initial_set.begin(); bs_iter!=initial_set.end(); ++bs_iter) {
-        working_sets.insert(timed_set(time,*bs_iter));
-      }
-      
-      while(!working_sets.empty()) {
-        
-        timed_set ts=*working_sets.begin();
-        working_sets.erase(working_sets.begin());
-        t=ts.first;
-        bs=ts.second;
-        h=step_size;
-
-        if(bs.radius()>maximum_set_radius) {
-          Geometry::ListSet<R,Geometry::Parallelotope> subdivisions=bs.subdivide();
-          for(list_set_const_iterator subdiv_iter=subdivisions.begin(); 
-              subdiv_iter!=subdivisions.end(); ++subdiv_iter)
-          {
-            working_sets.insert(timed_set(t,*subdiv_iter));
-          }
-        }
-        else {
-          do {
-#ifdef DEBUG
-        std::cerr << "time left=" << t << "  stepsize=" << h << "  centre=" 
-                  << bs.centre()  << std::endl;
-#endif
-            h=min(t,h);
-            rs=Geometry::over_approximation(Geometry::Zonotope< Interval<R> >(this->reachability_step(vf,bs,h)));
-            reach_set.adjoin(rs);
-#ifdef DEBUG
-        std::cerr << "rs.centre=" << rs.centre() << std::endl;
-#endif
-            
-            bs=integration_step(vf,bs,h);
-            t=t-h;
-            h=min(time_type(2*h),step_size);
-          } while(t!=0 && bs.radius()<=maximum_set_radius);
-          if(t!=0) {
-            working_sets.insert(timed_set(t,bs));
-          }
-        }
-      }
-      
-      return reach_set;
+      Geometry::ListSet<R,Geometry::Zonotope> zonotopic_initial_set(initial_set);
+      return reach(vector_field,zonotopic_initial_set,time);
     }
-
-
+    
+    
+    
     template<class R>
     Geometry::ListSet<R,Geometry::Zonotope> 
     Integrator<R>::reach(const System::VectorField<R>& vector_field, 
@@ -723,76 +778,11 @@ namespace Ariadne {
                            const time_type& time) const
     {
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      const System::VectorField<R>& vf=vector_field;
-      time_type step_size=this->maximum_step_size();
-      R maximum_set_radius=this->maximum_basic_set_radius();
-#ifdef DEBUG
-        std::cerr << "Integrator<R>::reach(const VectorField<R>& vector_field,const Geometry::ListSet<R,Geometry::Zonotope>& initial_set, const time_type& time)" << std::endl;
-        std::cerr << "step_size=" << step_size << "  maximum_set_radius()=" << maximum_set_radius << std::endl<<std::flush;
-#endif
-      
-      time_type t=time;
-      time_type h=step_size;
-      Geometry::Zonotope<R> bs(initial_set.dimension(),initial_set.dimension());
-      Geometry::Zonotope<R> rs(initial_set.dimension(),initial_set.dimension()+1);
-      
-      std::multiset< std::pair< R,Geometry::Zonotope<R> >, pair_first_less< R,Geometry::Zonotope<R> > > working_sets;
-      Geometry::ListSet<R,Geometry::Zonotope> reach_set(initial_set.dimension());
-      
-      typedef typename Geometry::ListSet<R,Geometry::Zonotope>::const_iterator list_set_const_iterator;
-      typedef std::pair< time_type,Geometry::Zonotope<R> > timed_set;
-      for(list_set_const_iterator bs_iter=initial_set.begin(); bs_iter!=initial_set.end(); ++bs_iter) {
-        working_sets.insert(timed_set(time,*bs_iter));
-      }
-      
-      while(!working_sets.empty()) {
-#ifdef DEBUG
-        //std::cerr << working_sets << "\n\n\n";
-#endif
-        timed_set ts=*working_sets.begin();
-        working_sets.erase(working_sets.begin());
-        t=ts.first;
-        bs=ts.second;
-        h=step_size;
-        
-
-        if(bs.radius()>maximum_set_radius) {
-          Geometry::ListSet<R,Geometry::Zonotope> subdivisions=bs.subdivide();
-          for(list_set_const_iterator subdiv_iter=subdivisions.begin(); 
-              subdiv_iter!=subdivisions.end(); ++subdiv_iter)
-          {
-            working_sets.insert(timed_set(t,*subdiv_iter));
-          }
-        }
-        else {
-          do {
-#ifdef DEBUG
-        std::cerr << "time left=" << t << "  stepsize=" << h << "  centre=" 
-                  << bs.centre() << std::endl;
-#endif
-            h=min(t,h);
-            rs=this->reachability_step(vf,bs,h);
-            reach_set.adjoin(rs);
-#ifdef DEBUG
-        std::cerr << "rs.centre=" << rs.centre() << std::endl;
-#endif
-            
-            bs=integration_step(vf,bs,h);
-            t=t-h;
-            h=min(time_type(2*h),step_size);
-          } while(t!=0 && bs.radius()<=maximum_set_radius);
-          if(t!=0) {
-            working_sets.insert(timed_set(t,bs));
-          }
-        }
-      }
-      
-#ifdef DEBUG
-        std::cerr << "Exiting reach"<< std::endl;
-#endif
-      return reach_set;
-    } 
-
+      return reach_list_set(vector_field,initial_set,time);
+    }
+    
+    
+    
     template<class R>
     Geometry::GridMaskSet<R> 
     Integrator<R>::reach(const System::VectorField<R>& vector_field, 

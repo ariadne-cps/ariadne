@@ -12,7 +12,7 @@ check_PROGRAMS = \
 	test_arithmetic test_function test_interval \
 	test_vector test_matrix test_tensor \
 	test_linear_algebra test_linear_program \
-	test_binary_word test_lattice \
+	test_binary_word test_lattice test_subdivision_tree \
 	test_point \
 	test_rectangle test_zonotope test_parallelotope test_simplex \
 	test_polytope test_polyhedron \
@@ -39,6 +39,7 @@ test_linear_algebra_SOURCES=test_linear_algebra.cc
 test_linear_program_SOURCES=test_linear_program.cc
 test_binary_word_SOURCES=test_binary_word.cc
 test_lattice_SOURCES=test_lattice.cc
+test_subdivision_tree_SOURCES=test_subdivision_tree.cc
 test_point_SOURCES=test_point.cc
 test_list_set_SOURCES=test_list_set.cc
 test_grid_set_SOURCES=test_grid_set.cc

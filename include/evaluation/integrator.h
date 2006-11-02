@@ -50,6 +50,8 @@ namespace Ariadne {
       typedef R real_type;
       typedef Interval<R> interval_type;
      
+      virtual Geometry::Zonotope<R> identity(const Geometry::Zonotope<R>& z) const;
+      virtual LinearAlgebra::Vector< Interval<R> > field(const System::VectorField<R>&, const Geometry::Zonotope<R>& z) const;
      
       /*! \brief Virtual destructor. */
       virtual ~Integrator();
@@ -101,6 +103,14 @@ namespace Ariadne {
 
 
      protected:
+      /*! \brief Template for integrating a basic set. */
+      template<template<class> class BS>
+      BS<R>
+      integrate_basic_set(const System::VectorField<R>& vector_field, 
+                          const BS<R>& initial_set, 
+                          const time_type& time) const;
+
+      
       /*! \brief Template for integrating a list set. */
       template<template<class> class BS>
       Geometry::ListSet<R,BS> 
@@ -109,12 +119,12 @@ namespace Ariadne {
                          const time_type& time) const;
 
       
-      /*! \brief Template for integrating a basic set. */
+      /*! \brief Template for computing the reachable set from a list set. */
       template<template<class> class BS>
-      BS<R>
-      integrate_basic_set(const System::VectorField<R>& vector_field, 
-                          const BS<R>& initial_set, 
-                          const time_type& time) const;
+      Geometry::ListSet<R,BS> 
+      reach_list_set(const System::VectorField<R>& vector_field, 
+                     const Geometry::ListSet<R,BS>& initial_set, 
+                     const time_type& time) const;
 
       
      public:

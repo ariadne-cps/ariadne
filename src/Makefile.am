@@ -49,6 +49,7 @@ EVALUATION_SRC = \
 	evaluation/applicator.cc \
 	evaluation/integrator.cc \
 	evaluation/euler_integrator.cc \
+	evaluation/affine_integrator.cc \
 	evaluation/lohner_integrator.cc \
 	evaluation/hybrid_evolver.cc
 

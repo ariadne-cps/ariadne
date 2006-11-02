@@ -58,6 +58,14 @@ int
 test_integration_step()
 {
   
+  // Test constructor/destructor
+  Integrator<R>* integrator_ptr;
+  LohnerIntegrator<R>* lohner_ptr;
+  lohner_ptr=new LohnerIntegrator<R>(0.125,0.5,0.125);
+  delete lohner_ptr;
+  integrator_ptr=new LohnerIntegrator<R>(0.125,0.5,0.125);
+  delete integrator_ptr;
+  
   LohnerIntegrator<R> lohner=LohnerIntegrator<R>(0.125,0.5,0.125);
   
   AffineVectorField<R> avf=AffineVectorField<R>(Matrix<R>("[-0.25,-1.0;+1.0,-0.25]"),Vector<R>("[0.25,0.0]"));
@@ -136,7 +144,10 @@ test_integration_step()
   //npls=lohner.integrate(vdp,pls,t);
   //cout << npls << endl << endl;;
   nzls=lohner.integrate(vdp,zls,t);
-  cout << nzls << endl << endl;;
+  cout << nzls << endl << endl;
+  
+  nzls=lohner.reach(vdp,zls,t);
+  cout << nzls << endl << endl;
   
   // Affine vector field
   VectorField<R>& avfr=avf;

@@ -87,10 +87,10 @@ namespace Ariadne {
       for(dimension_type i=0; i!=r.dimension(); ++i) {
         R lower(r.lower_bound(i));
         R upper(r.upper_bound(i));
-        R step=div_approx(sub_approx(upper,lower),n);
+        R step=div_approx(sub_approx(upper,lower),(long uint)n);
         _subdivision_coordinates[i].push_back(lower);
         for(size_type j=1; j!=n; ++j) {
-          _subdivision_coordinates[i].push_back(add_approx(lower,mul_approx(j,step)));
+          _subdivision_coordinates[i].push_back(add_approx(lower,mul_approx((long uint)j,step)));
         }
         _subdivision_coordinates[i].push_back(upper);
       }
@@ -104,10 +104,10 @@ namespace Ariadne {
       for(dimension_type i=0; i!=r.dimension(); ++i) {
         R lower(r.lower_bound(i));
         R upper(r.upper_bound(i));
-        R step=div_approx(sub_approx(upper,lower),sz[i]);
+        R step=div_approx(sub_approx(upper,lower),(long uint)sz[i]);
         _subdivision_coordinates[i].push_back(lower);
         for(size_type j=1; j!=sz[i]; ++j) {
-          _subdivision_coordinates[i].push_back(add_approx(lower,mul_approx(j,step)));
+          _subdivision_coordinates[i].push_back(add_approx(lower,mul_approx((long uint)j,step)));
         }
         _subdivision_coordinates[i].push_back(upper);
       }

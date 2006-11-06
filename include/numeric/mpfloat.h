@@ -365,14 +365,28 @@ namespace Ariadne {
       return invoke_mpfr(x,n,mpfr_mul_si,GMP_RNDN); }
     inline MPFloat div_approx(const MPFloat& x, const int& n) {
       return invoke_mpfr(x,n,mpfr_div_si,GMP_RNDN); }
-      
+
+    inline MPFloat mul_approx(const long int& n, const MPFloat& x) {
+      return invoke_mpfr(x,n,mpfr_mul_si,GMP_RNDN); }
+    inline MPFloat mul_approx(const MPFloat& x, const long int& n) {
+      return invoke_mpfr(x,n,mpfr_mul_si,GMP_RNDN); }
+    inline MPFloat div_approx(const MPFloat& x, const long int& n) {
+      return invoke_mpfr(x,n,mpfr_div_si,GMP_RNDN); }
+
     inline MPFloat mul_approx(const uint& n, const MPFloat& x) {
       return invoke_mpfr(x,n,mpfr_mul_ui,GMP_RNDN); }
-    inline MPFloat mul_approx(const MPFloat& x, const uint& n) {
+    inline MPFloat mul_approx(const MPFloat& x, const unsigned int& n) {
       return invoke_mpfr(x,n,mpfr_mul_ui,GMP_RNDN); }
-    inline MPFloat div_approx(const MPFloat& x, const uint& n) {
+    inline MPFloat div_approx(const MPFloat& x, const unsigned int& n) {
       return invoke_mpfr(x,n,mpfr_div_ui,GMP_RNDN); }
-     
+    
+    inline MPFloat mul_approx(const long unsigned int& n, const MPFloat& x) {
+      return invoke_mpfr(x,n,mpfr_mul_ui,GMP_RNDN); }
+    inline MPFloat mul_approx(const MPFloat& x, const long unsigned int& n) {
+      return invoke_mpfr(x,n,mpfr_mul_ui,GMP_RNDN); }
+    inline MPFloat div_approx(const MPFloat& x, const long unsigned int& n) {
+      return invoke_mpfr(x,n,mpfr_div_ui,GMP_RNDN); }
+    
     inline MPFloat mul_approx(const double& d, const MPFloat& x) {
       return mul_approx(x,MPFloat(d)); }
     inline MPFloat mul_approx(const MPFloat& x, const double& d) {

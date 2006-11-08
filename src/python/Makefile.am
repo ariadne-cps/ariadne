@@ -2,8 +2,8 @@ LIBS = -lboost_python -lmpfr -lppl -lgmpxx
 AM_LDFLAGS = -module
 CXX_FLAGS = -Wall -O0 -fpic
 
-pythondir=${prefix}/python
-pyexecdir=${prefix}/python
+pythondir=${prefix}/lib/python2.4
+pyexecdir=${prefix}/lib/python2.4
 libdir=${pyexecdir}
 
 python_LIBS = base.la numeric.la linear_algebra.la \

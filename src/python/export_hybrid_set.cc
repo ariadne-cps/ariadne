@@ -37,7 +37,7 @@ void export_hybrid_set()
 {
  
   class_< HybridGridMaskSet<R> >("HybridGridMaskSet",init<size_type,const FiniteGrid<R>&>())
-    .def("__len__",&HybridGridMaskSet<R>::number_of_discrete_components)
+    .def("__len__",&HybridGridMaskSet<R>::number_of_discrete_locations)
     .def("__getitem__",(const GridMaskSet<R>&(HybridGridMaskSet<R>::*)(const size_type& i)const)
                         &HybridGridMaskSet<R>::operator[],return_reference_existing_object)
   ;

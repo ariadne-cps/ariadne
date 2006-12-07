@@ -50,7 +50,7 @@ int main() {
   cout << x << endl;
   cout << indeterminate(x) << endl;
   cout << endl;
-  cout << "INCOMPLETE ";
+  cerr << "INCOMPLETE ";
 }
   
 template<class R> 

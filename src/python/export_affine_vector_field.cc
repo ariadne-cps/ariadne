@@ -43,7 +43,7 @@ using namespace Ariadne::System;
 
 #include <boost/python.hpp>
 using namespace boost::python;
-
+    
 template<class R>
 void export_affine_vector_field() 
 {
@@ -57,7 +57,7 @@ void export_affine_vector_field()
     .def("__call__", (Vector<I>(AffineVectorField<R>::*)(const Rectangle<R>&)const)(&AffineVectorField<R>::image))
     .def("jacobian", (Matrix<F>(AffineVectorField<R>::*)(const Point<R>&)const)(&AffineVectorField<R>::jacobian))
     .def("jacobian", (Matrix<I>(AffineVectorField<R>::*)(const Point<R>&)const)(&AffineVectorField<R>::jacobian))
-    .def(self_ns::str(self))
+//    .def(self_ns::str(self))
   ;
 }
 

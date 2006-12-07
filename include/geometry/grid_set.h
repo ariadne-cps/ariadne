@@ -114,6 +114,14 @@ namespace Ariadne {
     GridMaskSet<R>
     over_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& g);
     
+    template<class R>
+    GridMaskSet<R>
+    over_approximation(const Set<R>& set, const FiniteGrid<R>& g);
+    
+    template<class R>
+    GridMaskSet<R>
+    over_approximation(const Set<R>& set, const Grid<R>& g);
+    
     
     
     template<class R>

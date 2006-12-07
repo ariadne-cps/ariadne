@@ -71,38 +71,6 @@ class DiscreteMode {
   
   public:  
       
-    /*! \brief Construct a discrete mode.
-     *  
-     * This constructor initializes the object of the 
-     * discrete mode class.
-     * \param name is the name of the discrete mode.
-     * \param dynamic is the mode's vector field.
-     * \param invariant is the mode's invariant.
-     */
-    DiscreteMode(const std::string &name, 
-                 const VectorField<R> &dynamic, 
-                 const Geometry::Set<R> &invariant)
-      : _name(name), _dynamic(dynamic.clone()), _invariant(invariant.clone()) 
-    {
-      check_dimension(dynamic,invariant);
-      this->_set_id();
-    }
-      
-    /*! \brief Construct an anonymous discrete mode.
-     *  
-     * This constructor initializes the object of the 
-     * discrete mode class.
-     * \param dynamic is the mode's vector field.
-     * \param invariant is the mode's invariant.
-     */
-    DiscreteMode(const VectorField<R> &dynamic, 
-                 const Geometry::Set<R> &invariant)
-      : _name(), _dynamic(dynamic.clone()), _invariant(invariant.clone()) 
-    {
-      check_equal_dimensions(dynamic,invariant);
-      this->_set_id();
-    }
-    
     
     
     /*! \brief Copy constructor. */
@@ -144,24 +112,60 @@ class DiscreteMode {
     /*! \brief The dimension of the discrete mode. */
     dimension_type dimension() const { return this->_invariant->dimension(); }
     
-
-    
+    /*! \brief The dimension of the discrete mode. */
+    std::ostream& write(std::ostream& os) const { return os << "DiscreteMode( id=" << this->id() << ")"; }
+       
    private:
-    // Construct from objects managed by shared pointers (for internal use)
-    DiscreteMode(const boost::shared_ptr< VectorField<R> > dynamic, 
-                 const boost::shared_ptr< Geometry::Set<R> > invariant)
-      : _name(), _dynamic(dynamic), _invariant(invariant) 
+    /*! \brief Construct a discrete mode.
+     *  
+     * This constructor initializes the object of the 
+     * discrete mode class.
+     * \param name is the name of the discrete mode.
+     * \param id is the identifier of the mode.
+     * \param dynamic is the mode's vector field.
+     * \param invariant is the mode's invariant.
+     */
+    DiscreteMode(const std::string &name, 
+                 const id_type& id,
+                 const VectorField<R> &dynamic, 
+                 const Geometry::Set<R> &invariant)
+      : _name(name), _id(id), _dynamic(dynamic.clone()), _invariant(invariant.clone()) 
     {
       check_dimension(dynamic,invariant);
-      this->_set_id();
+    }
+      
+    /*! \brief Construct an anonymous discrete mode.
+     *  
+     * This constructor initializes the object of the 
+     * discrete mode class.
+     * \param id is the identifier of the mode.
+     * \param dynamic is the mode's vector field.
+     * \param invariant is the mode's invariant.
+     */
+    DiscreteMode(id_type id,
+                 const VectorField<R> &dynamic, 
+                 const Geometry::Set<R> &invariant)
+      :  _id(id), _name(), _dynamic(dynamic.clone()), _invariant(invariant.clone()) 
+    {
+      check_equal_dimensions(dynamic,invariant);
     }
     
-    // Set the identifier of the mode.
-    void _set_id() { this->_id=_next_mode_id; ++_next_mode_id; }
+    // Construct from objects managed by shared pointers (for internal use)
+    DiscreteMode(id_type id,
+                 const boost::shared_ptr< VectorField<R> > dynamic, 
+                 const boost::shared_ptr< Geometry::Set<R> > invariant)
+      :  _id(id), _name(),_dynamic(dynamic), _invariant(invariant) 
+    {
+      check_dimension(dynamic,invariant);
+    }
+    
 };
-
-template<class R> id_type DiscreteMode<R>::_next_mode_id=0;
   
+template<class R> inline
+std::ostream& operator<<(std::ostream& os, DiscreteMode<R>& dm) {
+  return dm.write(os);
+}
+    
 }
 }
 

@@ -68,11 +68,10 @@ int test_hybrid_automaton()
   cout << "activation=" << activation << endl;
   
   
-  DiscreteMode<R> mode(dynamic,invariant);
-  DiscreteTransition<R> transition(reset,activation,mode,mode);
-  
   HybridAutomaton<R> automaton("Affine test automaton");
-  automaton.add_transition(reset,activation,mode,mode);
-
+  DiscreteMode<R>& mode=automaton.new_mode(dynamic,invariant);
+  DiscreteTransition<R>& transition=automaton.new_transition(reset,activation,mode,mode);
+  
+  cout << mode << transition << endl;
   return 0;
 }

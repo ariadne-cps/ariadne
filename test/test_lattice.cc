@@ -37,6 +37,10 @@ using namespace std;
 
 int main() {
 
+  LatticeCell lc("(0,2,-1)");
+  cout << "lc=" << lc << endl;
+  LatticeBlock lb("[0,5]x[-2,3]x[-1,1]");
+  cout << "lb=" << lb << endl;
   
   
   IndexArray argary=IndexArray(3);

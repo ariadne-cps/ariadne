@@ -19,6 +19,7 @@ check_PROGRAMS = \
 	test_list_set test_grid_set test_partition_tree_set \
 	test_hybrid_automaton \
 	test_newton test_apply test_integration_step test_integrate test_chainreach \
+	test_hybrid_evolution \
 	test_epsfstream test_chompfstream 
 
 XFAIL_TESTS = 
@@ -56,6 +57,7 @@ test_apply_SOURCES=test_apply.cc
 test_integration_step_SOURCES=test_integration_step.cc
 test_integrate_SOURCES=test_integrate.cc
 test_chainreach_SOURCES=test_chainreach.cc
+test_hybrid_evolution_SOURCES=test_hybrid_evolution.cc
 test_epsfstream_SOURCES=test_epsfstream.cc
 test_chompfstream_SOURCES=test_chompfstream.cc
 

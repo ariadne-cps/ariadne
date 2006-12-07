@@ -30,6 +30,7 @@
 #include <iostream>
 
 #include "../declarations.h"
+#include "../geometry/hybrid_set.h"
 #include "../system/hybrid_automaton.h"
 
 namespace Ariadne {  
@@ -45,13 +46,35 @@ class HybridEvolver
  public:
   HybridEvolver(Applicator<R>& applicator, Integrator<R>& integrator);
   
+  Geometry::HybridGridMaskSet<R> evolve(const System::HybridAutomaton<R>& automaton, 
+                                        const Geometry::HybridGridMaskSet<R>& initial_set, 
+                                        time_type evolution_time,
+                                        size_type maximum_number_of_events);
+  
+  Geometry::HybridGridMaskSet<R> reach(const System::HybridAutomaton<R>& automaton, 
+                                       const Geometry::HybridGridMaskSet<R>& initial_set, 
+                                       time_type maximum_time,
+                                       size_type maximum_number_of_events);
+  
   Geometry::HybridGridMaskSet<R> lower_reach(const System::HybridAutomaton<R>&, 
                                              const Geometry::HybridGridMaskSet<R>&, 
                                              time_type, time_type, size_type);
   
-  Geometry::HybridGridMaskSet<R> upper_reach(const System::HybridAutomaton<R>&, 
-                                             const Geometry::HybridGridMaskSet<R>&, 
-                                             time_type, time_type, size_type);
+  Geometry::HybridGridMaskSet<R> upper_reach(const System::HybridAutomaton<R>& automaton, 
+                                             const Geometry::HybridGridMaskSet<R>& initial_set, 
+                                             time_type initial_evolution_time, 
+                                             time_type final_time, 
+                                             size_type maximum_number_of_events);
+ 
+  Geometry::HybridGridMaskSet<R> chainreach(const System::HybridAutomaton<R>& automaton, 
+                                            const Geometry::HybridGridMaskSet<R>& initial_set, 
+                                            const Geometry::HybridGridMaskSet<R>& bounding_set);
+ private:
+  Geometry::HybridGridCellListSet<R> discrete_step(const System::HybridAutomaton<R>& automaton, 
+                                                   const Geometry::HybridGridCellListSet<R>& initial_set);
+  Geometry::HybridGridMaskSet<R> continuous_chainreach(const System::HybridAutomaton<R>& automaton, 
+                                                       const Geometry::HybridGridMaskSet<R>& initial_set,
+                                                       const Geometry::HybridGridMaskSet<R>& invariants);
  private:
   Applicator<R>* _applicator;
   Integrator<R>* _integrator;

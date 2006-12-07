@@ -25,6 +25,7 @@ dnl Checks for header files.
 AC_STDC_HEADERS
 AC_CHECK_HEADER([mpfr.h],,AC_MSG_ERROR([MPFR library is missing. You must install it.]))
 AC_CHECK_HEADER([gmpxx.h],,AC_MSG_ERROR([GMP library is missing. You must install it.]))
+AC_CHECK_HEADER([cblas.h],,AC_MSG_ERROR([CBLAS library is missing. You must install it.]))
 AC_CHECK_HEADER([tblas/tblas.hpp],,AC_MSG_ERROR([TBLAS library is missing. You must install it.]))
 AC_CHECK_HEADER([tlapack/tlapack.hpp],,AC_MSG_ERROR([TLAPACK library is missing. You must install it.]))
 AC_CHECK_HEADER([ppl.hh],,AC_MSG_ERROR([PPL library is missing. You must install it.]))

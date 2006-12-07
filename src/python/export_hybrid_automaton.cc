@@ -40,12 +40,9 @@ return_value_policy<reference_existing_object> return_reference_existing_object;
 template<class R>
 void export_hybrid_automaton() 
 {
-  init<const std::string&,const VectorField<R>&,const Set<R>&> named_discrete_mode_init;
-  init<const VectorField<R>&,const Set<R>&> discrete_mode_init;
-  init<const Map<R>&,const Set<R>&,const DiscreteMode<R>&,const DiscreteMode<R>&> discrete_transition_init;
   init<const std::string&> hybrid_automaton_init;
   
-  class_< DiscreteMode<R> >("DiscreteMode",discrete_mode_init)
+  class_< DiscreteMode<R> >("DiscreteMode",no_init)
     .def("id",&DiscreteMode<R>::id)
     .def("name",&DiscreteMode<R>::name,return_copy_const_reference)
     .def("dimension",&DiscreteMode<R>::dimension)
@@ -54,7 +51,7 @@ void export_hybrid_automaton()
   ;
   
 
-  class_< DiscreteTransition<R> >("DiscreteTransition",discrete_transition_init)
+  class_< DiscreteTransition<R> >("DiscreteTransition",no_init)
     .def("source",&DiscreteTransition<R>::source,return_reference_existing_object)
     .def("destination",&DiscreteTransition<R>::destination,return_reference_existing_object)
     .def("activation",&DiscreteTransition<R>::activation,return_reference_existing_object)
@@ -63,7 +60,8 @@ void export_hybrid_automaton()
 
 
   class_< HybridAutomaton<R> >("HybridAutomaton",hybrid_automaton_init)
-    .def("add_mode",&HybridAutomaton<R>::add_mode)
+    .def("new_mode",&HybridAutomaton<R>::new_mode,return_reference_existing_object)
+    .def("new_transition",&HybridAutomaton<R>::new_transition,return_reference_existing_object)
     .def("name",&HybridAutomaton<R>::name,return_copy_const_reference)
     .def("modes",&HybridAutomaton<R>::modes,return_reference_existing_object)
     .def("transitions",&HybridAutomaton<R>::transitions,return_reference_existing_object)

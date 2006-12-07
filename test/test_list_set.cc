@@ -45,7 +45,7 @@ template<class R> int test_list_set();
   
 int main() {
   test_list_set<Real>();
-  cout << "INCOMPLETE ";
+  cerr << "INCOMPLETE ";
 }
 
 template<class R>

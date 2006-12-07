@@ -77,11 +77,11 @@ namespace Ariadne {
     template GridMaskSet<Real> join(const GridMaskSet<Real>&, const GridMaskSet<Real>&);
 
     template GridBlock<Real>
-    over_approximation(const Rectangle<Real>& p, const Grid<Real>& g);
+    over_approximation(const Rectangle<Real>& r, const Grid<Real>& g);
 
     template
     GridCellListSet<Real>
-    over_approximation(const Zonotope<Real>& p, const Grid<Real>& g);
+    over_approximation(const Zonotope<Real>& z, const Grid<Real>& g);
 
     template
     GridCellListSet<Real>
@@ -101,24 +101,32 @@ namespace Ariadne {
     template
     GridMaskSet<Real>
     over_approximation(const ListSet<Real,Zonotope>& ls, 
-                       const FiniteGrid<Real>& g); 
+                       const FiniteGrid<Real>& fg); 
 
     template
     GridMaskSet<Real>
-    over_approximation(const GridMaskSet<Real>& gm, const FiniteGrid<Real>& g); 
+    over_approximation(const GridMaskSet<Real>& gms, const FiniteGrid<Real>& fg); 
     
     template
     GridMaskSet<Real>
-    over_approximation(const PartitionTreeSet<Real>& gm, const FiniteGrid<Real>& g); 
+    over_approximation(const PartitionTreeSet<Real>& pts, const FiniteGrid<Real>& fg); 
+    
+    template
+    GridMaskSet<Real>
+    over_approximation(const Set<Real>& set, const FiniteGrid<Real>& fg); 
+    
+    template
+    GridMaskSet<Real>
+    over_approximation(const Set<Real>& set, const Grid<Real>& g); 
     
 
 
     template GridBlock<Real>
-    under_approximation(const Rectangle<Real>& p, const Grid<Real>& g);
+    under_approximation(const Rectangle<Real>& r, const Grid<Real>& g);
 
     template
     GridCellListSet<Real>
-    under_approximation(const Zonotope<Real>& p, const Grid<Real>& g);
+    under_approximation(const Zonotope<Real>& z, const Grid<Real>& g);
 
     template
     GridCellListSet<Real>
@@ -133,11 +141,11 @@ namespace Ariadne {
 
     template
     GridMaskSet<Real>
-    under_approximation(const GridMaskSet<Real>& gm, const FiniteGrid<Real>& g);
+    under_approximation(const GridMaskSet<Real>& gms, const FiniteGrid<Real>& g);
     
     template
     GridMaskSet<Real>
-    under_approximation(const PartitionTreeSet<Real>& gm, const FiniteGrid<Real>& g); 
+    under_approximation(const PartitionTreeSet<Real>& pts, const FiniteGrid<Real>& g); 
     
     
     

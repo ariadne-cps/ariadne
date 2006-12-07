@@ -37,6 +37,7 @@
 #include "../geometry/polytope.h"
 #include "../geometry/list_set.h"
 #include "../geometry/partition_tree_set.h"
+#include "../geometry/set.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -849,8 +850,35 @@ namespace Ariadne {
       return result;
     }
     
-
-
+    template<class R>
+    GridMaskSet<R>
+    over_approximation(const Set<R>& set, const FiniteGrid<R>& fg) 
+    {
+      GridMaskSet<R> result(fg);
+      check_equal_dimensions(set,fg,"over_approximation(PartitionTreeSet<R>,FiniteGrid<R>)");
+      
+      const Grid<R>& g=fg.grid();
+      const Combinatoric::LatticeBlock& lb=fg.bounds();
+      
+      for(typename Combinatoric::LatticeBlock::const_iterator iter=lb.begin(); iter!=lb.end(); ++iter) {
+        GridCell<R> gc(g,*iter);
+        if(!bool(set.disjoint(Rectangle<R>(gc)))) {
+          result.adjoin(gc);
+        }
+      }
+      return result;
+    }
+    
+    // FIXME: Add GridBlock iterator
+    
+    template<class R>
+    GridMaskSet<R>
+    over_approximation(const Set<R>& set, const Grid<R>& g) 
+    {
+      FiniteGrid<R> fg(g,set.bounding_box());
+      return over_approximation(set,fg);
+    }
+      
     template<class R>
     GridMaskSet<R>
     under_approximation(const ListSet<R,Rectangle>& ls, const FiniteGrid<R>& g) 

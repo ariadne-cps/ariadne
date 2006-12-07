@@ -25,9 +25,9 @@
 #define _ARIADNE_DISCRETE_TRANSITION_H
 
 #include <stdexcept>
+#include <memory>
 
 #include <boost/smart_ptr.hpp>
-#include <memory>
 
 #include "../exceptions.h"
 #include "../geometry/set.h"
@@ -38,13 +38,16 @@
 namespace Ariadne {
 namespace System {
     
+template< class R > class HybridAutomaton;
+
+
 /*! \ingroup HybridTime
  *  \brief A discrete transition of a HybridAutomaton.
  */
 template< class R >
 class DiscreteTransition
 {
-  
+  friend class HybridAutomaton<R>;
   private:
     static id_type _next_transition_id;
     
@@ -64,35 +67,6 @@ class DiscreteTransition
     boost::shared_ptr< const Map<R> > _reset;  
     
   public:
-    /*! \brief This is a discrete transition class constructor.
-     *
-     * This constructor initializes the object of the discrete 
-     * transitioni class.
-     * @see LeavingDiscreteTransition()
-     * \param reset is the reset of the current discrete 
-     * transition.
-     * \param act is the activation region of the current 
-     * discrete transition.
-     * \param source is the source of the current discrete 
-     * transition.
-     * \param dest is the destination of the current discrete 
-     * transition.
-      */
-    DiscreteTransition(const Map<R> &reset,
-                       const Geometry::Set<R> &act, 
-                       const DiscreteMode<R> &source, 
-                       const DiscreteMode<R> &dest)
-      : _source(&source), _destination(&dest), 
-        _activation(act.clone()), _reset(reset.clone()) 
-    { 
-      check_equal_dimensions(act,source);
-      check_argument_dimension(reset,source);
-      check_result_dimension(reset,dest);
-      this->_set_id(); 
-    }
-
-  
-  
     /*! \brief Copy constructor.
      *
      * This constructor initializes the object of the  
@@ -118,6 +92,11 @@ class DiscreteTransition
       return *this;
     }
     
+    /*! \brief Return the unique identifyer of the discrete transition. */
+    inline const id_type &id() const {
+      return this->_id;
+    }      
+
     /*! \brief Return the source of the discrete transition.
      *
      * This method return the source of the discrete transition.
@@ -159,26 +138,55 @@ class DiscreteTransition
       return *this->_reset;
     }
     
+    std::ostream& write(std::ostream& os) const { return os << "DiscreteTransition( id=" << this->id() << ")"; }
   private:
+    /*! \brief This is a discrete transition class constructor.
+     *
+     * This constructor initializes the object of the discrete 
+     * transition class.
+     * @see LeavingDiscreteTransition()
+     * \param reset is the reset relation of the discrete 
+     * transition.
+     * \param act is the activation region of the 
+     * discrete transition.
+     * \param source is the source mode of the discrete 
+     * transition.
+     * \param dest is the destination mode of the discrete 
+     * transition.
+      */
+    DiscreteTransition(id_type id,
+                       const Map<R> &reset,
+                       const Geometry::Set<R> &act, 
+                       const DiscreteMode<R> &source, 
+                       const DiscreteMode<R> &dest)
+      : _id(id), _source(&source), _destination(&dest), 
+        _activation(act.clone()), _reset(reset.clone()) 
+    { 
+      check_equal_dimensions(act,source);
+      check_argument_dimension(reset,source);
+      check_result_dimension(reset,dest);
+    }
+
     // Construct from shared pointers (for internal use)
-    DiscreteTransition(const boost::shared_ptr< Map<R> > reset,
+    DiscreteTransition(id_type id,
+                       const boost::shared_ptr< Map<R> > reset,
                        const boost::shared_ptr< Geometry::Set<R> > act, 
                        const DiscreteMode<R> &source, 
                        const DiscreteMode<R> &dest)
-      : _source(&source), _destination(&dest), 
+      : _id(id), _source(&source), _destination(&dest), 
         _activation(act), _reset(reset) 
     { 
       check_dimension(act,source);
       check_argument_dimension(reset,source);
       check_result_dimension(reset,dest);
-      this->_set_id(); 
     }
 
-    void _set_id() { this->_id=_next_transition_id; ++_next_transition_id; }
 };
 
-
-template<class R> id_type DiscreteTransition<R>::_next_transition_id=0;
+template<class R> inline
+std::ostream& operator<<(std::ostream& os, DiscreteTransition<R>& dt) {
+  return dt.write(os);
+}
 
 }
 }

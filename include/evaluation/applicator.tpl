@@ -250,6 +250,69 @@ namespace Ariadne {
     }
      
     
+    template<class R>
+    Geometry::GridCellListSet<R> 
+    Applicator<R>::image(const System::Map<R>& f, 
+                         const Geometry::GridCellListSet<R>& initial_set, 
+                         const Geometry::Grid<R>& image_grid) const 
+    {
+      typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
+      
+      Geometry::GridCellListSet<R> image(image_grid);
+
+      Geometry::Rectangle<R> r(f.argument_dimension());
+      Geometry::Rectangle<R> fr(f.result_dimension());
+      Geometry::Parallelotope<R> p(f.argument_dimension());
+      Geometry::Parallelotope<R> fp(f.result_dimension());
+      
+      for(gcls_const_iterator iter=initial_set.begin(); iter!=initial_set.end(); ++iter) {
+        Geometry::Rectangle<R> r=*iter;
+        if(f.smoothness()>=1) {
+          p=r;
+          fp=this->image(f,p);
+          image.adjoin(over_approximation(fp,image_grid));
+        } else {
+          fr=this->image(f,r);
+          image.adjoin(over_approximation(fr,image_grid));
+        }
+      }
+      return image;
+    }
+    
+    
+    
+    template<class R>
+    Geometry::GridMaskSet<R> 
+    Applicator<R>::image(const System::Map<R>& f, 
+                         const Geometry::GridMaskSet<R>& initial_set, 
+                         const Geometry::FiniteGrid<R>& image_grid) const 
+    {
+      typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
+      check_bounded(initial_set,"Applicator<R>::image(...)");
+      
+      Geometry::GridMaskSet<R> image(image_grid);
+      const Geometry::Grid<R>& g=image_grid.grid();
+      
+      Geometry::Rectangle<R> r(f.argument_dimension());
+      Geometry::Rectangle<R> fr(f.result_dimension());
+      Geometry::Parallelotope<R> p(f.argument_dimension());
+      Geometry::Parallelotope<R> fp(f.result_dimension());
+      
+      for(gms_const_iterator iter=initial_set.begin(); iter!=initial_set.end(); ++iter) {
+        Geometry::Rectangle<R> r=*iter;
+        if(f.smoothness()>=1) {
+          p=r;
+          fp=this->image(f,p);
+          image.adjoin(over_approximation(fp,g));
+        } else {
+          fr=this->image(f,r);
+          image.adjoin(over_approximation(fr,g));
+        }
+      }
+      return image;
+    }
+    
+    
     
     template<class R>
     Geometry::GridMaskSet<R> 

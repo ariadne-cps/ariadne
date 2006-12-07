@@ -53,6 +53,9 @@ class HybridAutomaton
 {
  public:
   typedef R real_type;
+ 
+  typedef typename std::vector< DiscreteTransition<R> >::const_iterator discrete_transition_iterator;
+  typedef typename std::vector< DiscreteMode<R> >::const_iterator discrete_mode_iterator;
  private: 
   static std::list<std::string> system_names;
   
@@ -95,40 +98,39 @@ class HybridAutomaton
   /*! \brief Adds a discrete mode.
    *
    * This method adds a discrete mode to automaton definition.
-   * \param A is the new discrete mode.
+   * \param dynamic is the discrete mode's vector field.
+   * \param invariant is the discrete mode's invariant.
    */
-  inline void add_mode(DiscreteMode<R> &A) {
-    // If this discrete mode is already present into the 
-    //mode <vector> there is nothing to do. 
-    for (size_t i=0; i<(this->_modes).size(); i++) {
-      if (A.id()== this->_modes[i].id()) {
-        return;
-      }
-    }
-    
-    this->_modes.push_back(A);
+  inline DiscreteMode<R>& new_mode(const VectorField<R>& dynamic,
+                                   const Geometry::Set<R>& invariant) 
+  {
+    this->_modes.push_back(DiscreteMode<R>(this->_modes.size(),dynamic,invariant));
+    return this->_modes.back();
   }
     
   /*! \brief Adds a discrete transition.
    *
    * This method adds an arc and the relavite reset between 
    * two discrete modes.
-   * \param source is the discrete arc's source.
-   * \param dest is the discrete arc's destination.
-   * \param act is the arc's activation region.
-   * \param reset is the discrete arc's reset.
+   * \param source is the discrete transition's source.
+   * \param dest is the discrete transition's destination.
+   * \param act is the discrete transition's activation region.
+   * \param reset is the discrete transition's reset.
    */
-  inline void add_transition(const Map<R> &reset,
-                             const Geometry::Set<R> &act,
-                             DiscreteMode<R> &source, 
-                             DiscreteMode<R> &dest) 
+  inline DiscreteTransition<R>& new_transition(const Map<R> &reset,
+                                               const Geometry::Set<R> &activation,
+                                               DiscreteMode<R> &source, 
+                                               DiscreteMode<R> &destination) 
   {
-    this->add_mode(source);
-    this->add_mode(dest);
+    if(&this->_modes[source.id()] != &source) {
+      throw std::runtime_error("The source mode of the transition must be in the automaton");
+    }
+    if(&this->_modes[source.id()] != &destination) {
+      throw std::runtime_error("The desitination mode of the transition must be in the automaton");
+    }
     
-    DiscreteTransition<R> arc(reset,act,source,dest);
-    
-    this->_transitions.push_back(arc);
+    this->_transitions.push_back(DiscreteTransition<R>(this->_transitions.size(),reset,activation,source,destination));
+    return this->_transitions.back();
   }
   
   /*! \brief The list of discrete modes. */

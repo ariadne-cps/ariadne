@@ -907,6 +907,7 @@ namespace Ariadne {
     std::istream& 
     operator>>(std::istream& is, LatticeBlock& r)
     {
+      // std::cerr << __PRETTY_FUNCTION__ << std::endl;
       char c;
       is >> c;
       is.putback(c);
@@ -917,7 +918,7 @@ namespace Ariadne {
         while(c=='x') {
           char cl,cm,cr;
           int l,u;
-          is >> cl >> l >> cm >> r >> cr;
+          is >> cl >> l >> cm >> u >> cr;
           if(cl!='[' || (cm!=',' && cm!=';') || cr!=']') {
             throw invalid_input(__PRETTY_FUNCTION__);
           }

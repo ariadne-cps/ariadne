@@ -41,8 +41,10 @@ using namespace std;
 int main() {
 
   LatticeBlock lbb("[-1,3]x[-1,3]x[-1,3]");
+  cout << lbb << endl;
   LatticeMaskSet lms(lbb);
-
+  cout << lms << endl;
+  
   LatticeBlock lb("[-1,2]x[1,3]x[0,1]");
   lms.adjoin(lb);
   LatticeCell lc=*lb.begin();
@@ -52,7 +54,7 @@ int main() {
   lmm.adjoin_to_image(LatticeCell("(-1,1,0)"),LatticeCell("(0,1)"));
   lmm.adjoin_to_image(LatticeCell("(-1,2,0)"),LatticeCell("(0,1)"));
   
-  chompfstream cfs("test_chompfstream.txt");
+  chompfstream cfs("test_chompfstream.hom");
   cfs << lc << "\n\n";
   cfs << lms << "\n\n";
   cfs << lmm << "\n\n";

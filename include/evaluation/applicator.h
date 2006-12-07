@@ -96,6 +96,20 @@ namespace Ariadne {
       image(const System::Map<R>& f, const Geometry::ListSet<Interval<R>,Geometry::Zonotope>& ds) const;
       
       
+      /*! \brief Compute the image of \a map starting in \a initial_set computing the result on \a grid. */
+      virtual
+      Geometry::GridCellListSet<R> 
+      image(const System::Map<R>& map, 
+            const Geometry::GridCellListSet<R>& initial_set,
+            const Geometry::Grid<R>& grid) const;
+
+      /*! \brief Compute the image of \a map starting in \a initial_set computing the result on \a grid. */
+      virtual
+      Geometry::GridMaskSet<R> 
+      image(const System::Map<R>& map, 
+            const Geometry::GridMaskSet<R>& initial_set,
+            const Geometry::FiniteGrid<R>& grid) const;
+
       /*! \brief Compute the image of \a map starting in \a initial_set while remaining in \a bounding_set. */
       virtual
       Geometry::GridMaskSet<R> 

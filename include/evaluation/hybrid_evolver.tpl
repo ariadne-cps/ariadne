@@ -161,8 +161,8 @@ Ariadne::Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<
   {
     const System::DiscreteMode<R>& dm=*dm_iter;
     Geometry::GridMaskSet<R>& invariant=invariants[dm.id()];
-    invariant=Geometry::GridMaskSet<R>(Geometry::FiniteGrid<R>(invariant.grid(),dm.invariant().bounding_box()));
-    invariant.adjoin(over_approximation(dm.invariant(),invariant.grid()));
+    invariant=bounding_set[dm.id()];
+    invariant.restrict(over_approximation(dm.invariant(),invariant.grid()));
   }
   
   Geometry::HybridGridMaskSet<R> intermediate_set=this->continuous_chainreach(hybrid_automaton,initial_set,invariants);

@@ -44,28 +44,37 @@ template< class R >
 class HybridEvolver
 {
  public:
-  HybridEvolver(Applicator<R>& applicator, Integrator<R>& integrator);
+  /*! \brief Construct from an applicator and an integrator. */
+ HybridEvolver(Applicator<R>& applicator, Integrator<R>& integrator);
   
   Geometry::HybridGridMaskSet<R> evolve(const System::HybridAutomaton<R>& automaton, 
                                         const Geometry::HybridGridMaskSet<R>& initial_set, 
                                         time_type evolution_time,
                                         size_type maximum_number_of_events);
   
-  Geometry::HybridGridMaskSet<R> reach(const System::HybridAutomaton<R>& automaton, 
-                                       const Geometry::HybridGridMaskSet<R>& initial_set, 
-                                       time_type maximum_time,
-                                       size_type maximum_number_of_events);
+  /*! \brief Compute the system evolution at \a time with up to \a maximum_number_of_events. */
+  Geometry::HybridGridMaskSet<R> upper_evolve(const System::HybridAutomaton<R>& automaton, 
+                                        const Geometry::HybridGridMaskSet<R>& initial_set, 
+                                        time_type evolution_time,
+                                        size_type maximum_number_of_events);
   
+  /*! \brief Compute a lower approximation to the reachable set between \a initial_evolution_time and \a final_time
+   *  with up to \a maximum_number_of_events using lower semantics. */
   Geometry::HybridGridMaskSet<R> lower_reach(const System::HybridAutomaton<R>&, 
                                              const Geometry::HybridGridMaskSet<R>&, 
-                                             time_type, time_type, size_type);
+                                             time_type initial_evolution_time, 
+                                             time_type final_time, 
+                                             size_type maximum_number_of_events);
   
+  /*! \brief Compute an over approximation to the reachable set between \a initial_evolution_time and \a final_time
+   *  with up to \a maximum_number_of_events using upper semantics. */
   Geometry::HybridGridMaskSet<R> upper_reach(const System::HybridAutomaton<R>& automaton, 
                                              const Geometry::HybridGridMaskSet<R>& initial_set, 
                                              time_type initial_evolution_time, 
                                              time_type final_time, 
                                              size_type maximum_number_of_events);
  
+  /*! \brief Compute an over approximation to the chain-reachable set using upper semantics. */
   Geometry::HybridGridMaskSet<R> chainreach(const System::HybridAutomaton<R>& automaton, 
                                             const Geometry::HybridGridMaskSet<R>& initial_set, 
                                             const Geometry::HybridGridMaskSet<R>& bounding_set);

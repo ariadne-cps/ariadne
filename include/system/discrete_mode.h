@@ -112,9 +112,9 @@ class DiscreteMode {
     /*! \brief The dimension of the discrete mode. */
     dimension_type dimension() const { return this->_invariant->dimension(); }
     
-    /*! \brief The dimension of the discrete mode. */
-    std::ostream& write(std::ostream& os) const { return os << "DiscreteMode( id=" << this->id() << ")"; }
-       
+    /*! \brief Write to an output stream. */
+    std::ostream& write(std::ostream& os) const;
+    
    private:
     /*! \brief Construct a discrete mode.
      *  
@@ -161,6 +161,16 @@ class DiscreteMode {
     
 };
   
+template<class R> inline
+std::ostream& 
+DiscreteMode<R>::write(std::ostream& os) const 
+{ 
+  return os << "DiscreteMode( "
+            << "id=" << this->id() << ", " 
+            << "invariant=" << this->invariant() << ", "
+            << "dynamic=" << this->dynamic() << " )"; 
+}
+
 template<class R> inline
 std::ostream& operator<<(std::ostream& os, DiscreteMode<R>& dm) {
   return dm.write(os);

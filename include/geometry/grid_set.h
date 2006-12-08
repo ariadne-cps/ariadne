@@ -703,46 +703,52 @@ namespace Ariadne {
       /*! \brief Removes all cells. */
       void clear();
 
+      /*! \brief Removes a cell from the set. */
+      void remove(const GridCell<R>& gc) {
+        check_same_grid(*this,gc);
+        this->_lattice_set.remove(gc._lattice_set);
+      }
+
       /*! \brief Adjoins a cell to the set. */
-      void adjoin(const GridCell<R>& c) {
-        check_same_grid(*this,c);
-        this->_lattice_set.adjoin(c._lattice_set);
+      void adjoin(const GridCell<R>& gc) {
+        check_same_grid(*this,gc);
+        this->_lattice_set.adjoin(gc._lattice_set);
       }
 
       /*! \brief Adjoins a rectangle to the set. */
-      void adjoin(const GridBlock<R>& r) {
-        check_same_grid(*this,r);
-        
-        if (r.empty()) return;
-        this->_lattice_set.adjoin(r._lattice_set);
+      void adjoin(const GridBlock<R>& gb) {
+        check_same_grid(*this,gb);
+        this->_lattice_set.adjoin(gb._lattice_set);
+      }
+
+      /*! \brief Adjoins a GridCellListSet to the set. */
+      void adjoin(const GridCellListSet<R>& gcls) {
+        check_same_grid(*this,gcls);
+        this->_lattice_set.adjoin(gcls._lattice_set);
+      }
+
+      /*! \brief Adjoins a GridBlockListSet to the set. */
+      void adjoin(const GridBlockListSet<R>& gbls) {
+        check_same_grid(*this,gbls);
+        this->_lattice_set.adjoin(gbls._lattice_set);
       }
 
       /*! \brief Adjoins a GridMaskSet to the set. */
       void adjoin(const GridMaskSet<R>& gms) {
         check_same_grid(*this,gms);
-
-        if (gms.empty()) 
-          return;
-        
         this->_lattice_set.adjoin(gms._lattice_set);
       }
 
-      /*! \brief Adjoins a GridCellListSet to the set. */
-      void adjoin(const GridCellListSet<R>& cls) {
-        check_same_grid(*this,cls);
-        
-        if (cls.empty()) 
-          return;
-        
-        this->_lattice_set.adjoin(cls._lattice_set);
+      /*! \brief Intersects the set with a GridCellListSet. */
+      void restrict(const GridCellListSet<R>& gcls) {
+        check_same_grid(*this,gcls);
+        this->_lattice_set.restrict(gcls._lattice_set);
       }
 
-      /*! \brief Adjoins a GridBlockListSet to the set. */
-      void adjoin(const GridBlockListSet<R>& rls) {
-        check_same_grid(*this,rls);
-        
-        if (rls.empty()) return;
-        this->_lattice_set.adjoin(rls._lattice_set);
+      /*! \brief Intersects the set with a GridMaskSet. */
+      void restrict(const GridMaskSet<R>& gms) {
+        check_same_grid(*this,gms);
+        this->_lattice_set.restrict(gms._lattice_set);
       }
 
       /*!\brief The one-box neighbourhood, consisting of all cells whose closure intersects the set. */

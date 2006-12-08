@@ -53,7 +53,9 @@ namespace Ariadne {
      
       virtual Rectangle<R> bounding_box() const = 0;
       virtual tribool disjoint(const Rectangle<R>&) const = 0;
-      virtual tribool superset(const Rectangle<R>&) const = 0;     
+      virtual tribool superset(const Rectangle<R>&) const = 0;
+      
+      virtual std::ostream& write(std::ostream& os) const = 0;
     };
      
     template<class R> inline tribool disjoint(const Set<R>& A, const Rectangle<R>& B) {
@@ -66,6 +68,11 @@ namespace Ariadne {
     
     template<class R> inline tribool subset(const Rectangle<R>& A, const Set<R>& B) {
       return B.superset(A);
+    }
+    
+    template<class R> inline
+    std::ostream& operator<<(std::ostream& os, const Set<R>& set) {
+      return set.write(os);
     }
     
   }
@@ -95,7 +102,15 @@ namespace Ariadne {
         return Geometry::disjoint(r,static_cast<const Polyhedron<R>&>(*this)); }
       virtual tribool superset(const Rectangle<R>& r) const { 
         return Geometry::subset(r,static_cast<const Polyhedron<R>&>(*this)); }
+      virtual std::ostream& write(std::ostream& os) const {
+        return Polyhedron<R>::write(os);
+      }
     };
+    
+    template<class R> inline
+    std::ostream& operator<<(std::ostream& os, const PolyhedralSet<R>& pset) {
+      return pset.write(os);
+    }
     
   }
 }

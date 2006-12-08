@@ -75,8 +75,8 @@ namespace Ariadne {
     std::ostream& 
     AffineVectorField<R>::write(std::ostream& os) const
     {
-      return os << "AffineVectorField(\n  matrix=" << this->A() << ",\n"
-                << "  vector=" << this->b() << "\n)\n";
+      return os << "AffineVectorField( A=" << this->A()
+                << ", b=" << this->b() << " )";
     }
 
     

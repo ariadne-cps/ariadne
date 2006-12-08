@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_hybrid_automaton.cc
+ *            test_hybrid_evolution.cc
  *
  *  Copyright  2006  Alberto Casagrande,  Pieter Collins
  *  Email  casagrande@dimi.uniud.it  Pieter.Collins@cwi.nl
@@ -27,11 +27,16 @@
 
 #include "ariadne.h"
 #include "real_typedef.h"
-#include "geometry/polyhedron.h"
+#include "geometry/rectangle.h"
+#include "geometry/hybrid_set.h"
 #include "geometry/set.h"
 #include "system/affine_map.h"
 #include "system/affine_vector_field.h"
 #include "system/hybrid_automaton.h"
+#include "evaluation/applicator.h"
+#include "evaluation/lohner_integrator.h"
+#include "evaluation/hybrid_evolver.h"
+#include "output/epsfstream.h"
 
 #include "test.h"
 
@@ -40,38 +45,58 @@ using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
 using namespace Ariadne::System;
+using namespace Ariadne::Evaluation;
+using namespace Ariadne::Output;
 using namespace std;
 
-template<class R> int test_hybrid_automaton();
+template<class R> int test_hybrid_evolution();
   
 int main() {
-  return test_hybrid_automaton<Real>();
+  test_hybrid_evolution<Real>();
+  cerr << "INCOMPLETE ";
+  return 0;
 }
 
 template<class R>
-int test_hybrid_automaton() 
+int test_hybrid_evolution() 
 {
   
   Rectangle<R> r("[-7,7]x[-7,7]");
-  cout << "r=" << r << endl;
   Polyhedron<R> p(r);
-  cout << "p=" << p << endl;
 
   AffineVectorField<R> dynamic(Matrix<R>("[-2,-1;1,-2]"),Vector<R>("[-1,0]"));
-  cout << "dynamic=" << dynamic << endl;
   AffineMap<R> reset(Matrix<R>("[5,0;0,5]"),Vector<R>("[0,0]"));
-  cout << "reset=" << reset << endl;
   
   PolyhedralSet<R> invariant(p);
-  cout << "invariant=" << invariant << endl;
   PolyhedralSet<R> activation(Polyhedron<R>(Rectangle<R>("[-2,2]x[-2,2]")));
-  cout << "activation=" << activation << endl;
-  cout << endl;
   
-  HybridAutomaton<R> automaton("Affine test automaton");
+  HybridAutomaton<R> automaton("Affine automaton");
   DiscreteMode<R>& mode=automaton.new_mode(dynamic,invariant);
   DiscreteTransition<R>& transition=automaton.new_transition(reset,activation,mode,mode);
   
-  cout << mode << "\n" << transition << endl;
+  cout << mode << endl << transition << endl;
+  
+  Applicator<R> apply;
+  LohnerIntegrator<R> lohner(0.1,0.1,0.1);
+  HybridEvolver<R> hybrid_evolver(apply,lohner);
+  
+  Rectangle<R> bounding_box("[-8,8]x[-8,8]");
+  FiniteGrid<R> finite_grid(bounding_box,256);
+  const Grid<R>& grid=finite_grid.grid();
+  
+  Rectangle<R> initial_rectangle("[-7,-7]x[-7,-7]");
+  HybridGridMaskSet<R> initial_set(1,finite_grid);
+  initial_set[0].adjoin(over_approximation(initial_rectangle,grid));
+  
+  HybridGridMaskSet<R> bounding_set(1,finite_grid);
+  bounding_set[0].adjoin(over_approximation(bounding_box,grid));
+  
+  HybridGridMaskSet<R> chainreach=hybrid_evolver.chainreach(automaton,initial_set,bounding_set);
+  
+  epsfstream eps("test_hybrid_evolution.eps",bounding_box);
+  eps << chainreach[0];
+  eps.close();
+  
+  
   return 0;
 }

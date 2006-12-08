@@ -138,7 +138,8 @@ class DiscreteTransition
       return *this->_reset;
     }
     
-    std::ostream& write(std::ostream& os) const { return os << "DiscreteTransition( id=" << this->id() << ")"; }
+    /*! \brief Write to an output stream. */
+    std::ostream& write(std::ostream& os) const;
   private:
     /*! \brief This is a discrete transition class constructor.
      *
@@ -182,6 +183,20 @@ class DiscreteTransition
     }
 
 };
+
+
+template<class R> inline
+std::ostream& 
+DiscreteTransition<R>::write(std::ostream& os) const 
+{ 
+  return os << "DiscreteTransition( "
+            << "id=" << this->id() << ", " 
+            << "source=" << this->source().id() << ", "
+            << "destination=" << this->destination().id() << ", "
+            << "activation=" << this->activation() << ", "
+            << "reset=" << this->reset() << " )"; 
+}
+
 
 template<class R> inline
 std::ostream& operator<<(std::ostream& os, DiscreteTransition<R>& dt) {

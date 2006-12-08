@@ -97,8 +97,8 @@ namespace Ariadne {
     std::ostream& 
     AffineMap<R>::write(std::ostream& os) const
     {
-      return os << "AffineMap(\n  matrix=" << this->A() << ",\n"
-                << "  vector=" << this->b() << "\n)\n";
+      return os << "AffineMap( A=" << this->A()
+                << ", b=" << this->b() << " )";
     }
     
 /*
@@ -172,7 +172,7 @@ namespace Ariadne {
         new_vertices[i]=this->operator() (new_vertices[i]);
       }
       return Geometry::Simplex<Rational>(new_vertices);
-    }a
+    }
 
     
     Geometry::Polytope<Rational>

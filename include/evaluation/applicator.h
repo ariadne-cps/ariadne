@@ -40,6 +40,9 @@ namespace Ariadne {
     template<class R>
     class Applicator {
      public:
+      /*! \brief Default constructor. */
+      Applicator();
+      
       /*! \brief Compute the image of a basic set under a continuous function. */
       virtual ~Applicator();
       

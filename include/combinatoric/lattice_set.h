@@ -537,6 +537,13 @@ namespace Ariadne {
       /*! \brief Empties the set. */
       void clear();
     
+      /*! \brief Removes a LatticeCell from the set. */
+      void remove(const LatticeCell& c) { 
+        if (subset(c,this->block())) {
+           this->_mask[this->index(c)]=false;
+        }
+      }
+    
       /*! \brief Adjoins a LatticeCell to the set. */
       void adjoin(const LatticeCell& c) { 
         if (subset(c,this->block())) {
@@ -545,16 +552,21 @@ namespace Ariadne {
       }
     
       /*! \brief Adjoins a LatticeBlock to the set. */
-      void adjoin(const LatticeBlock& r);
+      void adjoin(const LatticeBlock& lb);
 
       /*! \brief Adjoins a LatticeCellListSet to the set. */
-      void adjoin(const LatticeCellListSet& cl);
+      void adjoin(const LatticeCellListSet& lcls);
       /*! \brief Adjoins a LatticeBlockListSet to the set. */
-      void adjoin(const LatticeBlockListSet& rl);
+      void adjoin(const LatticeBlockListSet& lbls);
       /*! \brief Adjoins a LatticeMaskSet to the set. */
-      void adjoin(const LatticeMaskSet& ms);
+      void adjoin(const LatticeMaskSet& lms);
         
-      /*! \brief The one-box neighbourhood on the same grid. */
+      /*! \brief Adjoins a LatticeCellListSet to the set. */
+      void restrict(const LatticeCellListSet& lcls);
+      /*! \brief Adjoins a LatticeMaskSet to the set. */
+      void restrict(const LatticeMaskSet& lms);
+        
+       /*! \brief The one-box neighbourhood on the same grid. */
       LatticeMaskSet neighbourhood() const;
       /*! \brief The adjoining elements on the same grid. */
       LatticeMaskSet adjoining() const;

@@ -56,6 +56,13 @@ namespace Ariadne {
 
    
     template<class R>
+    Applicator<R>::Applicator() 
+    {
+    }
+    
+
+
+    template<class R>
     Applicator<R>::~Applicator() 
     {
     }

@@ -286,9 +286,9 @@ namespace Ariadne {
     }
 
     void 
-    LatticeCellListSet::adjoin(const LatticeMaskSet& ms) {
-      check_equal_dimensions(*this,ms,__PRETTY_FUNCTION__);
-      for(LatticeMaskSet::const_iterator i=ms.begin(); i!=ms.end(); ++i) {
+    LatticeCellListSet::adjoin(const LatticeMaskSet& lms) {
+      check_equal_dimensions(*this,lms,__PRETTY_FUNCTION__);
+      for(LatticeMaskSet::const_iterator i=lms.begin(); i!=lms.end(); ++i) {
         this->adjoin(*i);
       }
     }
@@ -436,10 +436,10 @@ namespace Ariadne {
 
 
     void 
-    LatticeMaskSet::adjoin(const LatticeBlock& b) 
+    LatticeMaskSet::adjoin(const LatticeBlock& lb) 
     {
-      LatticeBlock r=regular_intersection(this->block(),b);
-      if(!subset(b,this->block())) {
+      LatticeBlock r=regular_intersection(this->block(),lb);
+      if(!subset(lb,this->block())) {
         this->_unbounded=true;
       }
       
@@ -497,8 +497,8 @@ namespace Ariadne {
     }
 
     void 
-    LatticeMaskSet::adjoin(const LatticeCellListSet& cl) {
-      for(LatticeCellListSet::const_iterator i=cl.begin(); i!=cl.end(); ++i) {
+    LatticeMaskSet::adjoin(const LatticeCellListSet& lcls) {
+      for(LatticeCellListSet::const_iterator i=lcls.begin(); i!=lcls.end(); ++i) {
         if(subset(*i,this->block())) {
           this->adjoin(*i);
         } else {
@@ -515,18 +515,41 @@ namespace Ariadne {
     }
 
     void 
-    LatticeMaskSet::adjoin(const LatticeMaskSet& lm) 
+    LatticeMaskSet::adjoin(const LatticeMaskSet& lms) 
     {
-      if(this->_block==lm._block) {
-        this->_mask |= lm._mask;
+      if(this->_block==lms._block) {
+        this->_mask |= lms._mask;
       }
       else {
-        for(LatticeMaskSet::const_iterator iter=lm.begin(); iter!=lm.end(); ++iter) {
+        for(LatticeMaskSet::const_iterator iter=lms.begin(); iter!=lms.end(); ++iter) {
           this->adjoin(*iter);
         }
       }
     }
 
+    
+    void 
+    LatticeMaskSet::restrict(const LatticeCellListSet& lcls) {
+      for(LatticeCellListSet::const_iterator i=lcls.begin(); i!=lcls.end(); ++i) {
+        if(subset(*i,this->block())) {
+          this->remove(*i);
+        }
+      }
+    }
+
+    void 
+    LatticeMaskSet::restrict(const LatticeMaskSet& lms) {
+      if(this->_block==lms._block) {
+        this->_mask &= lms._mask;
+      }
+      else {
+        for(LatticeMaskSet::const_iterator iter=lms.begin(); iter!=lms.end(); ++iter) {
+          this->remove(*iter);
+        }
+      }
+    }
+
+    
     void
     LatticeMaskSet::_compute_cached_attributes() 
     {

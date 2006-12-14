@@ -78,7 +78,6 @@ void export_list_set()
   typedef ListSet<R,Polytope> RPolytopeListSet;
   
   typedef GridCellListSet<R> RGridCellListSet;
-  typedef GridBlockListSet<R> RGridBlockListSet;
   typedef GridMaskSet<R> RGridMaskSet;
   typedef PartitionTreeSet<R> RPartitionTreeSet;
   
@@ -102,7 +101,6 @@ void export_list_set()
   class_<RRectangleListSet>("RectangleListSet",init<int>())
     .def(init<RRectangle>())
     .def(init<RRectangleListSet>())
-    .def(init<RGridBlockListSet>())
     .def(init<RGridCellListSet>())
     .def(init<RGridMaskSet>())
     .def(init<RPartitionTreeSet>())

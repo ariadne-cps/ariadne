@@ -154,16 +154,6 @@ namespace Ariadne {
       return result;
     }
     
-    LatticeCellListSet 
-    LatticeMultiMap::operator() (const LatticeBlockListSet& lrls) const 
-    {
-      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
-      LatticeCellListSet result(this->_result_dimension);
-      for(LatticeBlockListSet::const_iterator rect_iter=lrls.begin(); rect_iter!=lrls.end(); ++rect_iter) {
-        result.adjoin(this->operator()(*rect_iter));
-      }
-      return result;
-    }
     
     LatticeCellListSet 
     LatticeMultiMap::operator() (const LatticeMaskSet& lms) const 

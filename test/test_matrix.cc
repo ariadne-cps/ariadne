@@ -32,9 +32,12 @@
 
 #include "declarations.h"
 #include "linear_algebra/vector.h"
-#include "linear_algebra/vector.tpl"
 #include "linear_algebra/matrix.h"
-#include "linear_algebra/matrix.tpl"
+
+// The following includes are not necessary,
+// but allow testing without rebuilding the entire library.
+#include "linear_algebra/vector.code.h"
+#include "linear_algebra/matrix.code.h"
 
 using namespace std;
 using namespace Ariadne;

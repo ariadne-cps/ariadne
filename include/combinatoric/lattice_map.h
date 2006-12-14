@@ -69,11 +69,8 @@ namespace Ariadne {
         
       /*! \brief  The map applied to a cell list set. */
       LatticeCellListSet operator() (const LatticeCellListSet& lcsl) const;
-        
-      /*! \brief  The map applied to a cell list set. */
-      LatticeCellListSet operator() (const LatticeBlockListSet& lrls) const;
-        
-      /*! \brief  The map applied to a cell list set. */
+                
+      /*! \brief  The map applied to a mask set. */
       LatticeCellListSet operator() (const LatticeMaskSet& lms) const;
 
       /*! \brief  The set of cells which map into \a lms. */

@@ -31,7 +31,10 @@
 #include "numeric/rational.h"
 #include "numeric/interval.h"
 #include "linear_algebra/vector.h"
-#include "linear_algebra/vector.tpl"
+
+// The following include is not necessary,
+// but allows testing without rebuilding the entire library.
+#include "linear_algebra/vector.code.h"
 
 #undef DEBUG
 

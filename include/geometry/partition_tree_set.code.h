@@ -76,17 +76,6 @@ namespace Ariadne {
     { }
 
 
-    template<class R>
-    PartitionTreeSet<R>::operator GridBlockListSet<R>() const 
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-      //FiniteGrid<R>* grid_ptr=new FiniteGrid<R>(this->bounding_box(),this->subdivisions());
-      //GridBlockListSet<R> res(*grid_ptr);
-      //for(const_iterator iter=begin(); iter!=end(); ++iter) {
-      //  res.push_back(GridBlock<R>(res.grid(),Rectangle<R>(*iter)));
-      //}
-      //return res;
-    }
 
 
 

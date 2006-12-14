@@ -31,9 +31,12 @@ namespace Ariadne {
   namespace Geometry {
 
     template class Polyhedron<Rational>;
+    template class Constraint<Rational>;
 
     template class Polyhedron<Real>;
+    template class Constraint<Real>;
     template class Polyhedron< Interval<Real> >;
+    template class Constraint< Interval<Real> >;
 
 
     

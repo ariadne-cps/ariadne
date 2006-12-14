@@ -69,7 +69,6 @@ void export_grid_set()
   typedef GridCell<R> RGridCell;
   typedef GridBlock<R> RGridBlock;
   typedef GridCellListSet<R> RGridCellListSet;
-  typedef GridBlockListSet<R> RGridBlockListSet;
   typedef GridMaskSet<R> RGridMaskSet;
   
   typedef Rectangle<R> RRectangle;
@@ -144,7 +143,6 @@ void export_grid_set()
   class_<RGridCellListSet>("GridCellListSet",init<const RGrid&>())
     .def(init<RGridMaskSet>())
     .def(init<RGridCellListSet>())
-    .def(init<RGridBlockListSet>())
     .def(init<RRectangleListSet>())
     .def("lattice_set", &RGridCellListSet::lattice_set,return_value_policy<copy_const_reference>())
     .def("dimension", &RGridCellListSet::dimension)
@@ -157,22 +155,7 @@ void export_grid_set()
     .def(self_ns::str(self))    // __str__
     ;
   
-  class_<RGridBlockListSet>("GridBlockListSet",init<const RGrid&>())
-    .def(init<RGridBlockListSet>())
-    .def(init<RRectangleListSet>())
-    .def(init<RPartitionTreeSet>())
-    .def("lattice_set", &RGridBlockListSet::lattice_set,return_value_policy<copy_const_reference>())
-    .def("dimension", &RGridBlockListSet::dimension)
-    .def("adjoin", (void(RGridMaskSet::*)(const RGridBlock&))(&RGridBlockListSet::adjoin))
-    .def("size", &RGridBlockListSet::size)
-    .def("__len__", &RGridBlockListSet::size)
-    .def("__getitem__", &get_item<RGridBlockListSet>)
-    .def("__iter__", iterator<RGridBlockListSet>())
-    .def(self_ns::str(self))    // __str__
-    ;
-    
   class_<RGridMaskSet>("GridMaskSet",init<const RFiniteGrid&>())
-    .def(init<RGridBlockListSet>())
     .def(init<RGridCellListSet>())
     .def(init<RGridMaskSet>())
     .def(init<RRectangleListSet>())
@@ -185,7 +168,6 @@ void export_grid_set()
     .def("adjoin", (void(RGridMaskSet::*)(const RGridCell&))(&RGridMaskSet::adjoin))
     .def("adjoin", (void(RGridMaskSet::*)(const RGridBlock&))(&RGridMaskSet::adjoin))
     .def("adjoin", (void(RGridMaskSet::*)(const RGridCellListSet&))(&RGridMaskSet::adjoin))
-    .def("adjoin", (void(RGridMaskSet::*)(const RGridBlockListSet&))(&RGridMaskSet::adjoin))
     .def("adjoin", (void(RGridMaskSet::*)(const RGridMaskSet&))(&RGridMaskSet::adjoin))
     .def("neighbourhood", &RGridMaskSet::neighbourhood)
     .def("adjoining", &RGridMaskSet::adjoining)

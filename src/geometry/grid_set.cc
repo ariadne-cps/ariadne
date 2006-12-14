@@ -32,13 +32,11 @@ namespace Ariadne {
 
     template class GridCell<Real>;
     template class GridBlock<Real>;
-    template class GridMaskSet<Real>;
     template class GridCellListSet<Real>;
-    template class GridBlockListSet<Real>;
-      
-    template class GridMaskSetIterator<Real>;
+    template class GridMaskSet<Real>;
+
     template class GridCellListSetIterator<Real>;
-    template class GridBlockListSetIterator<Real>;
+    template class GridMaskSetIterator<Real>;
 
     template tribool disjoint(const GridMaskSet<Real>&, const Rectangle<Real>&);
     template tribool disjoint(const Rectangle<Real>&, const GridMaskSet<Real>&);
@@ -156,8 +154,6 @@ namespace Ariadne {
     template std::ostream& operator<<(std::ostream&, const GridCell<Real>&);
     template std::ostream& operator<<(std::ostream&, 
                                 const GridBlock<Real>&);
-    template std::ostream& operator<<(std::ostream&, 
-                                const GridBlockListSet<Real>&);
     template std::ostream& operator<<(std::ostream&,
                                 const GridCellListSet<Real>&);
     template std::ostream& operator<<(std::ostream&, 

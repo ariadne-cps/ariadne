@@ -53,9 +53,6 @@ namespace Ariadne {
     class LatticeCellListSet;
     class LatticeCellListSetIterator;
 
-    class LatticeBlockListSet;
-    class LatticeBlockListSetIterator;
-
     class LatticeMaskSet;
     class LatticeMaskSetIterator;
 
@@ -93,9 +90,8 @@ namespace Ariadne {
     std::ostream& operator<<(std::ostream& os, const LatticePoint&);
     std::ostream& operator<<(std::ostream& os, const LatticeCell&);
     std::ostream& operator<<(std::ostream& os, const LatticeBlock&);
-    std::ostream& operator<<(std::ostream& os, const LatticeMaskSet&);
     std::ostream& operator<<(std::ostream& os, const LatticeCellListSet&);
-    std::ostream& operator<<(std::ostream& os, const LatticeBlockListSet&);
+    std::ostream& operator<<(std::ostream& os, const LatticeMaskSet&);
 
 
     /*!\ingroup Lattice
@@ -343,8 +339,6 @@ namespace Ariadne {
       LatticeCellListSet(const LatticeCell& c);
       /*!\brief Convert a lattice rectangle \a r into a list of cells. */
       LatticeCellListSet(const LatticeBlock& r);
-      /*!\brief Convert from a list of rectangles. */
-      LatticeCellListSet(const LatticeBlockListSet& rls);
       /*!\brief Convert from a lattice set defined by a mask on a block of cells. */
       LatticeCellListSet(const LatticeMaskSet& ms);
       
@@ -376,8 +370,6 @@ namespace Ariadne {
       void adjoin(const LatticeBlock& r);
       /*! \brief Adjoins a LatticeCellListSet to the set. */
       void adjoin(const LatticeCellListSet& cl);
-      /*! \brief Adjoins a LatticeBlockListSet to the set. */
-      void adjoin(const LatticeBlockListSet& rl);
       /*! \brief Adjoins a LatticeMaskSet to the set. */
       void adjoin(const LatticeMaskSet& ms);
       
@@ -397,77 +389,7 @@ namespace Ariadne {
      private:
       array_vector<index_type> _list;
     };
-      
 
-
-    /*!\ingroup Lattice
-     * \brief A list of rectangles in a lattice. */
-    class LatticeBlockListSet {
-     public:
-      //      typedef LatticeBlockListSetIterator iterator;
-      //typedef LatticeBlockListSetIterator const_iterator;
-      typedef pair_constructor_iterator<array_vector<index_type>::const_iterator, LatticeBlock> iterator;
-      typedef pair_constructor_iterator<array_vector<index_type>::const_iterator, LatticeBlock> const_iterator;
-     public:
-      /*!\brief Construct an empty list, to hold rectangular blocks of dimension \a n. */
-      LatticeBlockListSet(dimension_type n) 
-        : _list(n) { }
-
-      /*!\brief Copy constructor. */
-      LatticeBlockListSet(const LatticeBlockListSet& rls) 
-        : _list(rls._list) { }
-      /*!\brief Assignment operator. */
-      LatticeBlockListSet& operator=(const LatticeBlockListSet& rls) {
-        if(this!=&rls) { this->_list=rls._list; } return *this; }
-        
-      /*!\brief The dimension of the cells in the list. */
-      dimension_type dimension() const { return _list.array_size(); }
-      /*!\brief True if the list is empty. */
-      size_type empty() const { return _list.empty(); }
-      /*!\brief The number of rectangles in the list. */
-      size_type size() const { return _list.size()/2; }
-      /*!\brief The \a i th rectangle in the list. */
-      LatticeBlock operator[] (size_type i) const { 
-        return LatticeBlock(_list[2*i],_list[2*i+1]); 
-      }
-
-      /*!\brief A rectangular block containing all cells in the list. */
-      LatticeBlock bounding_block() const;
-
-      /*! \brief Adjoins a LatticeCell to the set. */
-      void adjoin(const LatticeCell& c) { 
-        check_equal_dimensions(*this,c,__PRETTY_FUNCTION__); 
-        this->_list.push_back(c.lower_corner()); 
-        this->_list.push_back(c.upper_corner()); 
-      }
-      /*! \brief Adjoins all cells in a LatticeBlock to the set. */
-      void adjoin(const LatticeBlock& r) { 
-        check_equal_dimensions(*this,r,__PRETTY_FUNCTION__);
-        this->_list.push_back(r.lower_corner()); 
-        this->_list.push_back(r.upper_corner()); 
-      }
-      /*! \brief Adjoins a LatticeCellListSet to the set. */
-      void adjoin(const LatticeCellListSet& cl);
-      /*! \brief Adjoins a LatticeBlockListSet to the set. */
-      void adjoin(const LatticeBlockListSet& rl);
-      /*! \brief Adjoins a LatticeMaskSet to the set. */
-      void adjoin(const LatticeMaskSet& ms);
-      
-      /*! \brief Empties the set. */
-      void clear();
-
-      /*! \brief Constant iterator to the beginning of the cells in the set. */
-      const_iterator begin() const  { return const_iterator(_list.begin()); }
-      /*! \brief Constant iterator to the end of the cells in the set. */
-      const_iterator end() const { return const_iterator(_list.end()); }
-
-      /*! \brief Write to an output stream */
-      std::ostream& write(std::ostream& os) const;
-     private:
-      array_vector<index_type> _list;
-    };
-       
-  
 
 
     /*!\ingroup Lattice
@@ -497,13 +419,9 @@ namespace Ariadne {
         : _block(bb), _mask(ma), _unbounded(ub) { this->_compute_cached_attributes(); }
       /*! \brief Construct a lattice mask oset n the block \a bb with cells given by the mast \a ma. */
       LatticeMaskSet(const LatticeBlock& bb, const LatticeCellListSet& cls);
-      /*! \brief Construct a lattice mask oset n the block \a bb with cells given by the mast \a ma. */
-      LatticeMaskSet(const LatticeBlock& bb, const LatticeBlockListSet& rls);
 
       /*! \brief Convert from a %LatticeCellListSet. */
       LatticeMaskSet(const LatticeCellListSet& cls);
-      /*! \brief Convert from a %LatticeBlockListSet. */
-      LatticeMaskSet(const LatticeBlockListSet& rls);
       /*! \brief Copy constructor. */
       LatticeMaskSet(const LatticeMaskSet& ms);
       
@@ -556,8 +474,6 @@ namespace Ariadne {
 
       /*! \brief Adjoins a LatticeCellListSet to the set. */
       void adjoin(const LatticeCellListSet& lcls);
-      /*! \brief Adjoins a LatticeBlockListSet to the set. */
-      void adjoin(const LatticeBlockListSet& lbls);
       /*! \brief Adjoins a LatticeMaskSet to the set. */
       void adjoin(const LatticeMaskSet& lms);
         

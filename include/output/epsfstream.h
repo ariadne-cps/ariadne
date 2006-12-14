@@ -692,13 +692,6 @@ namespace Ariadne {
     
     template<class R>
     epsfstream&
-    operator<<(epsfstream& eps, const Ariadne::Geometry::GridBlockListSet<R>& ds)
-    {
-      return eps << Ariadne::Geometry::ListSet<R,Ariadne::Geometry::Rectangle>(ds);
-    }
-    
-    template<class R>
-    epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::GridCellListSet<R>& ds)
     {
       return eps << Ariadne::Geometry::ListSet<R,Ariadne::Geometry::Rectangle>(ds);

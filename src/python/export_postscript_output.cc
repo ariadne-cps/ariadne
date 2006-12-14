@@ -55,7 +55,6 @@ template<class R> inline void write_zonotope_list_set(epsfstream& eps, const Lis
 template<class R> inline void write_polytope_list_set(epsfstream& eps, const ListSet<R,Polytope>& s) { eps << s; }
 template<class R> inline void write_grid_mask_set(epsfstream& eps, const GridMaskSet<R>& s) { eps << s; }
 template<class R> inline void write_grid_cell_list_set(epsfstream& eps, const GridCellListSet<R>& s) { eps << s; }
-template<class R> inline void write_grid_rectangle_list_set(epsfstream& eps, const GridBlockListSet<R>& s) { eps << s; }
 template<class R> inline void write_partition_tree(epsfstream& eps, const PartitionTree<R>& s) { eps << s; }
 template<class R> inline void write_partition_tree_set(epsfstream& eps, const PartitionTreeSet<R>& s) { eps << s; }
 template<class R> inline void epsfstream_open(epsfstream& eps, const Ariadne::Geometry::Rectangle<R>& bbox) { eps.open("Ariadne",bbox); }
@@ -85,7 +84,6 @@ void export_postscript_output()
     .def("write",&write_polytope_list_set<Real>)
     .def("write",&write_grid_mask_set<Real>)
     .def("write",&write_grid_cell_list_set<Real>)
-    .def("write",&write_grid_rectangle_list_set<Real>)
     .def("write",&write_partition_tree<Real>)
     .def("write",&write_partition_tree_set<Real>)
   ;

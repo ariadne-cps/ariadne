@@ -63,9 +63,8 @@ class BinaryTree;
 
 class LatticeCell;
 class LatticeBlock;
-class LatticeMaskSet;
 class LatticeCellListSet;
-class LatticeBlockListSet;
+class LatticeMaskSet;
 class LatticeTransformation;
 class LatticeMultiMap;
 class LatticeSystem;
@@ -97,9 +96,8 @@ template<class R> class IrregularGrid;
 template<class R> class FiniteGrid;
 template<class R> class GridCell;
 template<class R> class GridBlock;
-template<class R> class GridMaskSet;
 template<class R> class GridCellListSet;
-template<class R> class GridBlockListSet;
+template<class R> class GridMaskSet;
 
 template<class R> class PartitionScheme;
 template<class R> class PartitionTree;

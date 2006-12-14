@@ -333,9 +333,6 @@ namespace Ariadne {
        */
       PartitionTreeSet(const GridMaskSet<R>& gms);
 
-      /*! \brief Convert to a list of rectangles on a grid. */
-      operator GridBlockListSet<R> () const;
-
       /*! \brief Convert to a ListSet of Rectangle. */
       operator ListSet<R,Rectangle> () const;
 

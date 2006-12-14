@@ -291,14 +291,6 @@ namespace Ariadne {
 
     template<class R>
     tribool
-    subset(const GridBlockListSet<R>& A, const GridMaskSet<R>& B)
-    {
-      check_same_grid(A,B,"subset(GridBlockListSet<R>,GridMaskSet<R>)");
-      return subset(A.lattice_set(),B.lattice_set());
-    }
-
-    template<class R>
-    tribool
     subset(const GridMaskSet<R>& A, const GridMaskSet<R>& B)
     {
       check_same_grid(A,B,"subset(GridMaskSet<R>,GridMaskSet<R>)");
@@ -448,18 +440,16 @@ namespace Ariadne {
     {
     }
 
-    template<class R>
-    GridCellListSet<R>::GridCellListSet(const GridBlockListSet<R>& grls)
-      : _grid_ptr(&grls.grid()), _lattice_set(grls.dimension())
-    {
-      this->_lattice_set.adjoin(grls._lattice_set); 
-    }
 
+    // FIXME: Memory leak
     template<class R>
     GridCellListSet<R>::GridCellListSet(const ListSet<R,Rectangle>& rls)
-      : _grid_ptr(0), _lattice_set(rls.dimension())
+      : _grid_ptr(new IrregularGrid<R>(rls)), _lattice_set(rls.dimension())
     {
-      (*this)=GridCellListSet<R>(GridBlockListSet<R>(rls));      
+      typedef typename ListSet<R,Rectangle>::const_iterator list_set_const_iterator;
+      for(list_set_const_iterator iter=rls.begin(); iter!=rls.end(); ++iter) {
+        this->adjoin(GridBlock<R>(grid(),*iter));
+      }
     }
 
     template<class R>
@@ -479,85 +469,8 @@ namespace Ariadne {
       this->_lattice_set.clear();
     }
 
-    // GridBlockListSet ------------------------------------------------------------
 
-    template<class R>
-    GridBlockListSet<R>::GridBlockListSet(const Grid<R>& g)
-      : _grid_ptr(&g), _lattice_set(g.dimension())
-    {
-    }
 
-    template<class R>
-    GridBlockListSet<R>::GridBlockListSet(const Grid<R>& g, 
-                                        const Combinatoric::LatticeBlockListSet& lbls)
-      : _grid_ptr(&g), _lattice_set(lbls)
-    {
-      check_equal_dimensions(g,lbls,"GridBlockListSet<R>::GridBlockListSet(Grid<R>,LatticeBlockListSet)");
-    }
-
-    // FIXME: Memory leak
-    template<class R>
-    GridBlockListSet<R>::GridBlockListSet(const ListSet<R,Rectangle>& s)
-      : _grid_ptr(new IrregularGrid<R>(s)), _lattice_set(s.dimension())
-    {
-      typedef typename ListSet<R,Rectangle>::const_iterator list_set_const_iterator;
-      for(list_set_const_iterator iter=s.begin(); iter!=s.end(); ++iter) {
-        this->adjoin(GridBlock<R>(grid(),*iter));
-      }
-    }
-
-    /* FIXME: This constructor is only included since Boost Python doesn't find the conversion operator */
-    // FIXME: Memory leak due to construction of new grid
-    template<class R>
-    GridBlockListSet<R>::GridBlockListSet(const PartitionTreeSet<R>& pts)
-      : _grid_ptr(0),_lattice_set(pts.dimension()) 
-    {
-      SizeArray sizes=pts.depths();
-      for(dimension_type i=0; i!=pts.dimension(); ++i) {
-        sizes[i]=exp2(sizes[i]);
-      }
-      _grid_ptr=new IrregularGrid<R>(pts.bounding_box(),sizes);
-      for(typename PartitionTreeSet<R>::const_iterator iter=pts.begin(); iter!=pts.end(); ++iter) {
-        Rectangle<R> rect(*iter);
-        GridBlock<R> grect(this->grid(),rect);
-        this->adjoin(grect);
-      }
-    }
-
-    template<class R>
-    GridBlockListSet<R>::GridBlockListSet(const GridBlockListSet<R>& s)
-      : _grid_ptr(&s.grid()), _lattice_set(s._lattice_set)
-    {
-    }
-
-    
-    template<class R>
-    GridBlockListSet<R>::GridBlockListSet(const Grid<R>& g, const ListSet<R,Rectangle>& ls)
-      : _grid_ptr(&g), _lattice_set(ls.dimension())
-    {
-      typedef typename ListSet<R,Rectangle>::const_iterator ListSet_const_iterator;
-
-      for(ListSet_const_iterator riter=ls.begin(); riter!=ls.end(); ++riter) {
-        _lattice_set.adjoin(Combinatoric::LatticeBlock(grid().lower_index(*riter),grid().upper_index(*riter)));
-      }
-    }
-
-    template<class R>
-    GridBlockListSet<R>::operator ListSet<R,Rectangle>() const
-    {
-      ListSet<R,Rectangle> result(dimension());
-      for(size_type i=0; i!=size(); ++i) {
-        result.push_back((*this)[i]);
-      }
-      return result;
-    }
-
-    template<class R>
-    void
-    GridBlockListSet<R>::clear()
-    {
-      this->_lattice_set.clear();
-    }
 
     
     // GridMaskSet ------------------------------------------------------------
@@ -613,13 +526,6 @@ namespace Ariadne {
     {
     }
     
-    template<class R>
-    GridMaskSet<R>::GridMaskSet(const GridBlockListSet<R>& grls)
-      : _grid_ptr(&grls.grid()),
-        _lattice_set(grls.lattice_set())
-    {
-    }
-
     // FIXME: Memory leak
     template<class R>
     GridMaskSet<R>::GridMaskSet(const ListSet<R,Rectangle>& rls) 
@@ -939,7 +845,7 @@ namespace Ariadne {
     GridMaskSet<R>
     under_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& g) 
     {
-      return under_approximation(GridMaskSet<R>(GridBlockListSet<R>(pts)),g);
+      return under_approximation(ListSet<R,Rectangle>(pts),g);
     }
     
 
@@ -1006,29 +912,6 @@ namespace Ariadne {
       return os;
     }
 
-    template<class R>
-    std::ostream& operator<<(std::ostream& os,
-                             const GridBlockListSet<R>& set)
-    {
-      os << "GridBlockListSet<" << name<R>() << ">(\n  rectangle_lattice_set=[\n    ";
-      for (size_type i=0; i!=set.size(); i++) {
-        if(i!=0) {
-          os << ",\n    ";
-        }
-        os << Rectangle<R>(set[i]);
-      }
-      os << "\n  ]\n";
-      os << "  grid=" << set.grid() << "\n";
-      os << "  integer_rectangle_lattice_set=[ ";
-      os.flush();
-      for(size_type i=0; i!=set.size(); ++i) {
-        if(i!=0) { os << ", "; }
-        os << set[i].lattice_set();
-      }
-      os << " ]\n";
-      os << ")" << std::endl;
-      return os;
-    }
 
 
     template<class R>

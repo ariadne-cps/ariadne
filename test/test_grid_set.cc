@@ -61,18 +61,15 @@ test_grid_set()
   cout << "ls=" << ls << endl;
 
   RegularGrid<R> gr(2,0.125);
-  GridBlockListSet<R> grls(gr,ls);
-  cout << "grls=" << grls << endl;
-  cout << "ListSet(grls)=" << ListSet<R,Rectangle>(grls) << endl;
 
-  GridCellListSet<R> gcls(grls);
+  GridCellListSet<R> gcls(ls);
   cout << "gcls=" << gcls << endl;
   cout << "ListSet(gcls)=" << ListSet<R,Rectangle>(gcls) << endl;
   cout << "gcls.lattice_set().bounding_block()=" << gcls.lattice_set().bounding_block() << endl;
 
 
   
-  GridMaskSet<R> gms(grls);
+  GridMaskSet<R> gms(ls);
   cout << "gms=" << flush << gms << endl;
 
   GridMaskSet<R> gcms(gcls);
@@ -95,20 +92,11 @@ test_grid_set()
   cout << igr1 << "\n" << igr2 << "\n" << igrj << "\n";
 
   IrregularGrid<R> gr1(ls1);
-  GridBlockListSet<R> grls1(gr1,ls1);
-  GridBlockListSet<R> grlsj1(igrj,grls1);
-  cout << "grlsj1=" << grlsj1 << "\n";
 
   IrregularGrid<R> gr2(ls2);
-  GridBlockListSet<R> grls2(gr2,ls2);
-  GridBlockListSet<R> grlsj2(igrj,grls2);
-  cout << "grlsj2=" << grlsj2 << "\n";
 
-  GridCellListSet<R> gcls1(grls1);
+  GridCellListSet<R> gcls1(ls1);
   cout << gcls1 << "\n";
-  GridBlockListSet<R> gblsc1(igrj,gcls1);
-  cout << "gblsc1=" << flush;
-  cout << gblsc1 << "\n";
 
   FiniteGrid<R> fgr=FiniteGrid<R>(igrj,igrj.block());
   //GridMaskSet<R> gms1(fgr,grlsj1);

@@ -66,7 +66,6 @@ namespace Ariadne {
     template<class R> tribool subset(const GridCell<R>&, const GridMaskSet<R>&);
     template<class R> tribool subset(const GridBlock<R>&, const GridMaskSet<R>&);
     template<class R> tribool subset(const GridCellListSet<R>&, const GridMaskSet<R>&);
-    template<class R> tribool subset(const GridBlockListSet<R>&, const GridMaskSet<R>&);
     template<class R> tribool subset(const GridMaskSet<R>&, const GridMaskSet<R>&);
     
     template<class R> GridCellListSet<R> regular_intersection(const GridCellListSet<R>&, const GridMaskSet<R>&);
@@ -157,7 +156,6 @@ namespace Ariadne {
 
     template<class R> std::ostream& operator<<(std::ostream&, const GridCell<R>&);
     template<class R> std::ostream& operator<<(std::ostream&, const GridBlock<R>&);
-    template<class R> std::ostream& operator<<(std::ostream&, const GridBlockListSet<R>&);
     template<class R> std::ostream& operator<<(std::ostream&, const GridCellListSet<R>&);
     template<class R> std::ostream& operator<<(std::ostream&, const GridMaskSet<R>&);
     
@@ -234,7 +232,6 @@ namespace Ariadne {
     {
       friend class GridCell<R>;
       friend class GridMaskSet<R>;
-      friend class GridBlockListSet<R>;
      public:
       /*! \brief The type of denotable real number defining the vertices and cells of the grid. */
       typedef R real_type;
@@ -337,7 +334,6 @@ namespace Ariadne {
      */
     template<class R>
     class GridCellListSet {
-      friend class GridBlockListSet<R>;
       friend class GridMaskSet<R>;
      public:
       typedef GridSetIterator< Combinatoric::LatticeCellListSet::const_iterator, GridCell<R> > iterator;
@@ -362,10 +358,7 @@ namespace Ariadne {
       /*!\brief Copy constructor. */
       GridCellListSet(const GridCellListSet<R>& gcls);
 
-      /*!\brief Construct from a GridBlockListSet. */
-      GridCellListSet(const GridBlockListSet<R>& grls);
-
-      /*!\brief Construct from a GridBlockListSet. */
+      /*!\brief Construct from a ListSet of Rectangles. */
       GridCellListSet(const ListSet<R,Rectangle>& rls);
 
       /*!\brief Convert to a ListSet of Rectangles. */
@@ -414,123 +407,6 @@ namespace Ariadne {
       Combinatoric::LatticeCellListSet _lattice_set;
     };
 
-
-
-
-
-    template<class R>
-    class GridBlockListSetIterator {
-      typedef GridBlockListSetIterator Self;
-     public:
-      typedef std::forward_iterator_tag iterator_category;
-      typedef GridBlock<R> value_type;
-      typedef GridBlock<R> reference;
-      typedef const GridBlock<R>* pointer;
-      typedef int difference_type;
-     public:
-      GridBlockListSetIterator(const Grid<R>& g, Combinatoric::LatticeBlockListSetIterator iter);
-      GridBlock<R> operator*() const { return this->dereference(); }
-      Self& operator++() { this->increment(); return *this; }
-      Self operator++(int) { Self tmp=*this; this->increment(); return tmp; }
-      bool operator==(const Self& other) const { return this->equal(other); }
-      bool operator!=(const Self& other) const { return !this->equal(other); }
-     private:
-      bool equal(const GridBlockListSetIterator& other) const { return this->_iter==other._iter; }
-      void increment() { ++_iter; }
-      GridBlock<R> dereference() const { return GridBlock<R>(*_grid_ptr,*_iter); }
-     private:
-      const Grid<R>* _grid_ptr;
-      Combinatoric::LatticeBlockListSet::const_iterator _iter;
-    };
-
-
-    /*! \brief A denotable set on a grid, defined using a list of grid blocks.
-     *  \ingroup DenotableSet
-     *  \ingroup Grid
-     */
-    template<class R>
-    class GridBlockListSet {
-      friend class GridMaskSet<R>;
-      friend class GridCellListSet<R>;
-     public:
-      typedef GridSetIterator< Combinatoric::LatticeBlockListSet::const_iterator, GridBlock<R> > iterator;
-      typedef GridSetIterator< Combinatoric::LatticeBlockListSet::const_iterator, GridBlock<R> > const_iterator;
-
-      /*! \brief The type of denotable real number defining the vertices and cells of the grid. */
-      typedef R real_type;
-      /*! \brief The type of denotable point contained by the set. */
-      typedef Point<R> state_type;
-      /*! \brief The type of basic set contained by the denotable set. */
-      typedef GridBlock<R> value_type;
-      /*!\brief Destructor. */
-      ~GridBlockListSet() { 
-        //delete _grid_ptr; }
-      }
-      
-      /*!\brief Construct from a Grid. */
-      GridBlockListSet(const Grid<R>& g);
-
-      /*!\brief Construct from a Grid and a lattice block list set. */
-      GridBlockListSet(const Grid<R>& g, const Combinatoric::LatticeBlockListSet& lbls);
-
-      /*!\brief Construct from a ListSet of Rectangles. */
-      explicit GridBlockListSet(const ListSet<R,Rectangle>& s);
-
-      /*!\brief Construct from a PartitionTreeSet. */
-      /* FIXME: This constructor is only included since Boost Python doesn't find the conversion operator */
-      explicit GridBlockListSet(const PartitionTreeSet<R>& s);
-
-      /*!\brief Copy constructor. */
-      GridBlockListSet(const GridBlockListSet<R>& s);
-
-      /*!\brief Construct a set on a finer grid. */
-      GridBlockListSet(const Grid<R>& g, const ListSet<R,Rectangle>& s);
-
-      /*!\brief Convert to a ListSet of Rectangles. */
-      operator ListSet<R,Rectangle>() const;
-
-      /*! \brief The underlying grid. */
-      const Grid<R>& grid() const { return *_grid_ptr; }
-
-      /*! \brief The space dimension of the set. */
-      dimension_type dimension() const { return _lattice_set.dimension(); }
-
-      /*! \brief True if the set is empty. */
-      tribool empty() const { return _lattice_set.empty(); }
-
-      /*! \brief True if the set is empty. */
-      tribool bounded() const { return true; }
-
-      /*! \brief The number of rectangles in the list. */
-      size_type size() const { return _lattice_set.size(); }
-
-      /*! \brief The rectangles on the underlying lattice. */
-      const Combinatoric::LatticeBlockListSet& lattice_set() const { return _lattice_set; }
-      
-      /*!\brief Return the @a i th rectangle in the list. */
-      GridBlock<R> operator[] (const size_t i) const {
-        return GridBlock<R>(grid(),_lattice_set[i]);
-      }
-
-      /*! \brief A constant iterator to the beginning of the list. */
-      const_iterator begin() const { return const_iterator(*_grid_ptr,_lattice_set.begin()); }
-
-      /*! \brief A constant iterator to the end of the list. */
-      const_iterator end() const { return const_iterator(*_grid_ptr,_lattice_set.end()); }
-
-      /*!\brief Append a GridBlock to the list. */
-      void adjoin(const GridBlock<R>& r) {
-        _lattice_set.adjoin(r._lattice_set);
-      }
-      
-      /*! \brief Empties the set. */
-      void clear();
-
-      friend std::ostream& operator<< <> (std::ostream&, const GridBlockListSet<R>&);
-     private:
-      const Grid<R>* _grid_ptr;
-      Combinatoric::LatticeBlockListSet _lattice_set;
-    };
 
 
     template<class R>
@@ -619,9 +495,6 @@ namespace Ariadne {
 
       /*!\brief Construct from a %GridCellListSet. */
       GridMaskSet(const GridCellListSet<R>& gcls);
-
-      /*!\brief Construct from a %GridBlockListSet. */
-      GridMaskSet(const GridBlockListSet<R>& grls);
 
 
       /*!\brief Convert to a %ListSet of BS. */
@@ -729,12 +602,6 @@ namespace Ariadne {
       void adjoin(const GridCellListSet<R>& gcls) {
         check_same_grid(*this,gcls);
         this->_lattice_set.adjoin(gcls._lattice_set);
-      }
-
-      /*! \brief Adjoins a GridBlockListSet to the set. */
-      void adjoin(const GridBlockListSet<R>& gbls) {
-        check_same_grid(*this,gbls);
-        this->_lattice_set.adjoin(gbls._lattice_set);
       }
 
       /*! \brief Adjoins a GridMaskSet to the set. */

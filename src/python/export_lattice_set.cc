@@ -65,20 +65,11 @@ void export_lattice_set() {
     .def("adjoin", (void(LatticeCellListSet::*)(const LatticeCell&))(&LatticeCellListSet::adjoin))
     .def("adjoin", (void(LatticeCellListSet::*)(const LatticeBlock&))(&LatticeCellListSet::adjoin))
     .def("adjoin", (void(LatticeCellListSet::*)(const LatticeCellListSet&))(&LatticeCellListSet::adjoin))
-    .def("adjoin", (void(LatticeCellListSet::*)(const LatticeBlockListSet&))(&LatticeCellListSet::adjoin))
     .def("adjoin", (void(LatticeCellListSet::*)(const LatticeMaskSet&))(&LatticeCellListSet::adjoin))
     .def("unique_sort",&LatticeCellListSet::unique_sort)
     .def(self_ns::str(self))
     ;
     
-  class_<LatticeBlockListSet>("LatticeBlockListSet",init<uint>())
-    .def(init<LatticeBlockListSet>())
-    .def("dimension", &LatticeBlockListSet::dimension)
-    .def("adjoin", (void(LatticeBlockListSet::*)(const LatticeBlock&))(&LatticeBlockListSet::adjoin))
-    .def("adjoin", (void(LatticeBlockListSet::*)(const LatticeBlockListSet&))(&LatticeBlockListSet::adjoin))
-    .def(self_ns::str(self))
-    ;
-
   class_<LatticeMaskSet>("LatticeMaskSet",init<LatticeBlock>())
     .def(init<LatticeBlock,LatticeCellListSet>())
     .def(init<LatticeMaskSet>())
@@ -86,7 +77,6 @@ void export_lattice_set() {
     .def("adjoin", (void(LatticeMaskSet::*)(const LatticeCell&))(&LatticeMaskSet::adjoin))
     .def("adjoin", (void(LatticeMaskSet::*)(const LatticeBlock&))(&LatticeMaskSet::adjoin))
     .def("adjoin", (void(LatticeMaskSet::*)(const LatticeCellListSet&))(&LatticeMaskSet::adjoin))
-    .def("adjoin", (void(LatticeMaskSet::*)(const LatticeBlockListSet&))(&LatticeMaskSet::adjoin))
     .def("adjoin", (void(LatticeMaskSet::*)(const LatticeMaskSet&))(&LatticeMaskSet::adjoin))
     .def(self_ns::str(self))
     ;

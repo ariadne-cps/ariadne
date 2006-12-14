@@ -29,7 +29,7 @@
 #include "numeric/rational.h"
 #include "numeric/float64.h"
 #include "geometry/ddconv.h"
-#include "geometry/ddconv.tpl"
+#include "geometry/ddconv.code.h"
 
 #include "test.h"
 

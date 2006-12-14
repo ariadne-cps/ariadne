@@ -212,12 +212,6 @@ namespace Ariadne {
       this->adjoin(ms); 
     }
     
-    LatticeCellListSet::LatticeCellListSet(const LatticeBlockListSet& rls) 
-      : _list(rls.dimension()) 
-    {
-      this->adjoin(rls); 
-    }
-    
     LatticeBlock
     LatticeCellListSet::bounding_block() const
     { 
@@ -279,13 +273,6 @@ namespace Ariadne {
     }
 
     void 
-    LatticeCellListSet::adjoin(const LatticeBlockListSet& rl) {
-      for(LatticeBlockListSet::const_iterator i=rl.begin(); i!=rl.end(); ++i) {
-        this->adjoin(*i);
-      }
-    }
-
-    void 
     LatticeCellListSet::adjoin(const LatticeMaskSet& lms) {
       check_equal_dimensions(*this,lms,__PRETTY_FUNCTION__);
       for(LatticeMaskSet::const_iterator i=lms.begin(); i!=lms.end(); ++i) {
@@ -300,38 +287,6 @@ namespace Ariadne {
     }
 
 
-    LatticeBlock
-    LatticeBlockListSet::bounding_block() const
-    { 
-      if(this->empty()) {
-        return LatticeBlock(this->dimension());
-      }
-      
-      LatticeBlock r=(*this)[0];
-      IndexArray lower(r.lower_corner());
-      IndexArray upper(r.upper_corner());
-
-      for(size_type i=1; i!=this->size(); ++i) {
-        r=(*this)[i];
-        assign_min(lower,r.lower_corner());
-        assign_max(upper,r.upper_corner());
-      }
-      return LatticeBlock(lower,upper);
-    }
-
-    void
-    LatticeBlockListSet::adjoin(const LatticeBlockListSet& rls)
-    {
-      for(LatticeBlockListSet::const_iterator rect_iter=rls.begin(); rect_iter!=rls.end(); ++rect_iter) {
-        this->adjoin(*rect_iter);
-      }
-    }
-
-    void
-    LatticeBlockListSet::clear()
-    {
-      _list.clear();
-    }
 
 
     LatticeMaskSet::LatticeMaskSet(const LatticeBlock& bd, const LatticeCellListSet& cls)
@@ -341,25 +296,11 @@ namespace Ariadne {
       this->adjoin(cls);
     }
     
-    LatticeMaskSet::LatticeMaskSet(const LatticeBlock& bd, const LatticeBlockListSet& rls)
-      : _block(bd), _unbounded(false)
-    {
-      this->_compute_cached_attributes();
-      this->adjoin(rls);
-    }
-    
     LatticeMaskSet::LatticeMaskSet(const LatticeCellListSet& cls)
       : _block(cls.bounding_block()), _unbounded(false)
     {
       this->_compute_cached_attributes();
       this->adjoin(cls);
-    }
-    
-    LatticeMaskSet::LatticeMaskSet(const LatticeBlockListSet& rls)
-      : _block(rls.bounding_block()), _unbounded(false)
-    {
-      this->_compute_cached_attributes();
-      this->adjoin(rls);
     }
     
     LatticeMaskSet::LatticeMaskSet(const LatticeMaskSet& ms)
@@ -504,13 +445,6 @@ namespace Ariadne {
         } else {
           this->_unbounded=true;
         }
-      }
-    }
-
-    void 
-    LatticeMaskSet::adjoin(const LatticeBlockListSet& rl) {
-      for(LatticeBlockListSet::const_iterator i=rl.begin(); i!=rl.end(); ++i) {
-        this->adjoin(*i);
       }
     }
 
@@ -1021,12 +955,6 @@ namespace Ariadne {
     operator<<(std::ostream& os, const LatticeCellListSet& lcls) 
     {
       return Base::write_sequence(os,lcls.begin(),lcls.end(),'[',']',',');
-    }
-    
-    std::ostream& 
-    operator<<(std::ostream& os, const LatticeBlockListSet& lbls) 
-    {
-      return Base::write_sequence(os,lbls.begin(),lbls.end(),'[',']',',');
     }
     
     

@@ -59,6 +59,15 @@ namespace Ariadne {
       return *this;
     }
       
+    template<class R>
+    Rectangle<R> 
+    Rectangle<R>::expand(const real_type& delta) const
+    {
+      Rectangle<R> result(*this);
+      result.expand_by(delta);
+      return result;
+    }
+      
     
     template<class R>
     Rectangle<R>

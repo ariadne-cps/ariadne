@@ -42,7 +42,9 @@
 namespace Ariadne {
   namespace Geometry {
 
-   // GridCell ----------------------------------------------------------------
+    extern int verbosity;
+    
+    // GridCell ----------------------------------------------------------------
     
     template<class R>
     GridCell<R>::GridCell(const Grid<R>& g, const Combinatoric::LatticeCell& pos)
@@ -53,7 +55,7 @@ namespace Ariadne {
 
     template<class R>
     GridCell<R>::GridCell(const Grid<R>& g, const IndexArray& pos)
-      : _grid(g), _lattice_set(pos) \
+      : _grid(g), _lattice_set(pos)
     {
       check_dimension(g,pos.size(),__PRETTY_FUNCTION__);
     }
@@ -369,7 +371,7 @@ namespace Ariadne {
     regular_intersection(const GridCellListSet<R>& A, const GridMaskSet<R>& B)
     {
       check_same_grid(A,B,"regular_intersection(GridCellListSet<R>,GridMaskSet<R>)");
-      return GridMaskSet<R>(A.grid(), regular_intersection(A.lattice_set(),B.lattice_set()));
+      return GridCellListSet<R>(A.grid(), regular_intersection(A.lattice_set(),B.lattice_set()));
     }
 
     template<class R>
@@ -377,7 +379,7 @@ namespace Ariadne {
     regular_intersection(const GridMaskSet<R>& A, const GridCellListSet<R>& B)
     {
       check_same_grid(A,B,"regular_intersection(GridMaskSet<R>,GridCellListSet<R>)");
-      return GridMaskSet<R>(A.grid(), regular_intersection(A.lattice_set(),B.lattice_set()));
+      return GridCellListSet<R>(A.grid(), regular_intersection(A.lattice_set(),B.lattice_set()));
     }
 
 
@@ -716,6 +718,7 @@ namespace Ariadne {
     GridCellListSet<R>
     over_approximation(const Zonotope<R>& z, const Grid<R>& g) 
     {
+      if(verbosity>7) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       GridCellListSet<R> result(g);
       check_equal_dimensions(z,g,"over_approximation(Zonotope<R>,Grid<R>)");
       if(z.empty()) {
@@ -735,6 +738,7 @@ namespace Ariadne {
 
       return result;
     }
+
 
     template<class R>
     GridCellListSet<R>
@@ -761,6 +765,30 @@ namespace Ariadne {
     }
 
    
+    template<class R>
+    GridCellListSet<R>
+    under_approximation(const Parallelotope<R>& p, const Grid<R>& g)
+    {
+      GridCellListSet<R> result(g);
+      check_equal_dimensions(p,g,"over_approximation(Zonotope<R>,Grid<R>)");
+      if(p.empty()) {
+        return result; 
+      }
+      Rectangle<R> bb=p.bounding_box();
+
+      GridBlock<R> gbb=over_approximation(bb,g);
+      Combinatoric::LatticeBlock block=gbb.lattice_set();
+
+      for(Combinatoric::LatticeBlock::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
+        GridCell<R> cell(g,*iter);
+        if(subset(Rectangle<R>(cell),p)) {
+          result.adjoin(cell);
+        }
+      }
+
+      return result;
+    }
+
     template<class R>
     GridCellListSet<R>
     under_approximation(const Zonotope<R>& z, const Grid<R>& g) 

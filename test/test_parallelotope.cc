@@ -31,6 +31,7 @@
 #include "real_typedef.h"
 
 #include "ariadne.h"
+#include "debug.h"
 #include "base/utility.h"
 #include "numeric/numerical_types.h"
 #include "geometry/point.h"
@@ -57,6 +58,8 @@ template<class R>
 int
 test_parallelotope()
 { 
+  LinearAlgebra::verbosity=9;
+  
   Rectangle<R> r1=Rectangle<R>("[9,11]x[5,11]x[-1,1]");
   Rectangle<R> r2=Rectangle<R>("[4.875,5.125]x[2.875,3.125]x[1.75,2.25]");
   Rectangle<R> r3=Rectangle<R>("[-1,9]x[-1,6]x[0,4]");
@@ -65,17 +68,21 @@ test_parallelotope()
   Point<R> c2("(5,3,2)");
   Matrix<R> G2("[2,1,0;1,1,0;0,0,1]");
 
+  Point<R> c3("(0.125,-0.25)");
+  Matrix<R> G3("[2,1;1,1]");
+
   Parallelotope<R> p1=Parallelotope<R>(r1);
   Parallelotope<R> p2=Parallelotope<R>(c2,G2);
+  Parallelotope<R> p3=Parallelotope<R>(c3,G3);
 
   cout << "r1=" << r1 << "\nr2=" << r2<< "\nr3=" << r3 << endl;
-  cout << "p1=" << p1 << "\np2=" << p2 << endl;
+  cout << "p1=" << p1 << "\np2=" << p2 << "\np3=" << p3 << endl;
 
   cout << "p1.empty()=" << p1.empty() << endl;
 //  cout << "disjoint(p1,p2)=" << disjoint(p1,p2) << endl;
 //  cout << "subset(p1,p2)=" << subset(p1,p2) << endl;
-  for(class Rectangle<R>::vertices_iterator v_iter=r2.vertices_begin();
-      v_iter!=r2.vertices_end(); ++v_iter)
+  for(class Rectangle<R>::vertices_iterator v_iter=r3.vertices_begin();
+      v_iter!=r3.vertices_end(); ++v_iter)
   {
     cout << "p2.contains(" << *v_iter << ")=" << p2.contains(*v_iter) << endl;
   }
@@ -113,21 +120,32 @@ test_parallelotope()
   assert(!p1.contains(pts[4]));
   assert(!p1.contains(pts[5]));
 
-  // Test over-approximation routines
+  // Test grid approximation routines
   Parallelotope< Interval<R> > ip(p1);
   Parallelotope<R> oap=over_approximation(ip);
   Parallelotope<R> qoap=orthogonal_over_approximation(ip);
 
-  Rectangle<R> bbox=p1.bounding_box();
-  epsfstream eps("test_parallelotope.eps",bbox,0,1);
-  eps << p1;
-  for(uint i=0; i!=6; ++i) {
-    if(p1.contains(pts[i])) {
-      eps << "\black\n" << pts[i];
-    } else {
-      eps << "\red\n" << pts[i];
-    }
-  }
+  Rectangle<R> r5("[1.125,1.25]x[1.625,1.75]");
+  Rectangle<R> r6("[0.875,1.00]x[0.125,0.25]");
+  assert(!disjoint(p3,r6));
+  assert(disjoint(p3,r5));
+ 
+  Rectangle<R> bbox3=p3.bounding_box().expand_by(0.25);
+  RegularGrid<R> gr3(2,0.125);
+  
+  GridCellListSet<R> oap3=over_approximation(p3,gr3);
+  GridCellListSet<R> uap3=under_approximation(p3,gr3);
+  epsfstream eps("test_parallelotope.eps",bbox3,0,1);
+  eps.set_fill_colour("white");
+  eps << bbox3;
+  eps.set_fill_colour("red");
+  eps << oap3;
+  eps.set_fill_colour("green");
+  eps << p3;
+  eps.set_fill_colour("blue");
+  eps << uap3;
+  eps.set_fill_colour("yellow");
+  eps << r5 << r6;
   eps.close();
   
   return 0;

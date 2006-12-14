@@ -38,10 +38,9 @@
 
 
 #include "../linear_algebra/matrix.h"
+#include "../debug.h"
 
 namespace Ariadne { namespace LinearAlgebra {
-
-int verbosity=0;
   
 /*! \ingroup LinearAlgebra
  *  \brief Solver for linear programming problems.
@@ -61,6 +60,7 @@ int verbosity=0;
 template<class R>
 void lpslv(int m, int n, R* A, int rincA, int cincA, R* B, int incB, R* C, int incC, R& d, int* piv)
 {
+  
   if(verbosity>1) {
     std::cerr << "lpslv(" << m << "," << n << ", " << A-A << "," << rincA << "," << cincA << ", " 
               << B-A << "," << incB << ", " << C-A << "," << incC << ", "
@@ -86,11 +86,11 @@ void lpslv(int m, int n, R* A, int rincA, int cincA, R* B, int incB, R* C, int i
     
     // compute variable to exit basis
     i=m;
-    R min_change=0;
+    R min_change=-1;
     for(int k=0; k!=m; ++k) {
       if(A[k*rincA+j*cincA]>0) {
         R change=B[k*incB]/A[k*rincA+j*cincA];
-        if(change<min_change || min_change==0) {
+        if(change<min_change || min_change==-1) {
           min_change=change;
           i=k;
         }

@@ -658,6 +658,13 @@ namespace Ariadne {
       return draw(eps,eps.projection_map()(p.vertices()));      
     }
     
+    template<class R>
+    epsfstream&
+    operator<<(epsfstream& eps, const Ariadne::Geometry::Polyhedron<R>& p)
+    {
+      return draw(eps,eps.projection_map()(p.vertices()));      
+    }
+    
     template<class R, template<class> class BS>
     epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::ListSet<R,BS>& ds)

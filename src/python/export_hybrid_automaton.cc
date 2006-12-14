@@ -60,8 +60,18 @@ void export_hybrid_automaton()
 
 
   class_< HybridAutomaton<R> >("HybridAutomaton",hybrid_automaton_init)
-    .def("new_mode",&HybridAutomaton<R>::new_mode,return_reference_existing_object)
-    .def("new_transition",&HybridAutomaton<R>::new_transition,return_reference_existing_object)
+    .def("new_mode",(DiscreteMode<R>&(HybridAutomaton<R>::*)(const VectorField<R>&,const Geometry::Set<R>&))
+           (&HybridAutomaton<R>::new_mode),
+         return_reference_existing_object)
+    .def("new_transition",
+         (DiscreteTransition<R>&(HybridAutomaton<R>::*)
+             (const Map<R>&,const Geometry::Set<R>&,const DiscreteMode<R>&,const DiscreteMode<R>&))
+           (&HybridAutomaton<R>::new_transition),
+         return_reference_existing_object)
+    .def("new_transition",
+         (DiscreteTransition<R>&(HybridAutomaton<R>::*)(const Map<R>&,const Geometry::Set<R>&,const id_type&,const id_type&))
+           (&HybridAutomaton<R>::new_transition),
+         return_reference_existing_object)
     .def("name",&HybridAutomaton<R>::name,return_copy_const_reference)
     .def("modes",&HybridAutomaton<R>::modes,return_reference_existing_object)
     .def("transitions",&HybridAutomaton<R>::transitions,return_reference_existing_object)

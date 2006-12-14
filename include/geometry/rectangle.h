@@ -367,8 +367,11 @@ namespace Ariadne {
         this->_bounds[2*i+1]=u;
       }
 
-      /*! \brief Expand the Rectangle by \a delta in each direction. */
+      /*! \brief Expand the %Rectangle by \a delta in each direction. */
       Rectangle<R>& expand_by(const R& delta);
+
+      /*! \brief Return a copy of the %Rectangle expanded by \a delta in each direction. */
+      Rectangle<R> expand(const R& delta) const;
       //@}
       
       
@@ -673,7 +676,8 @@ namespace Ariadne {
       return C;
     }
 
-    template<class R1, class R2> 
+    template<class R1, class R2>
+    inline
     Rectangle<typename Numeric::traits<R1,R2>::arithmetic_type> 
     minkowski_sum(const Rectangle<R1>& A, const Rectangle<R2>& B)
     {
@@ -687,6 +691,7 @@ namespace Ariadne {
     }
 
     template<class R1, class R2> 
+    inline
     Rectangle<typename Numeric::traits<R1,R2>::arithmetic_type> 
     minkowski_difference(const Rectangle<R1>& A, const Rectangle<R2>& B)
     {

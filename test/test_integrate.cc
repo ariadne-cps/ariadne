@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_integration_step.cc
+ *            test_integrate.cc
  *
  *  Copyright  2006  Pieter Collins
  *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
@@ -35,7 +35,9 @@
 #include "geometry/list_set.h"
 #include "system/affine_vector_field.h"
 #include "evaluation/lohner_integrator.h"
+#include "evaluation/affine_integrator.h"
 #include "models/vanderpol.h"
+#include "output/epsfstream.h"
 
 #include "test.h"
 
@@ -44,12 +46,15 @@ using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
 using namespace Ariadne::System;
 using namespace Ariadne::Evaluation;
+using namespace Ariadne::Output;
 using namespace std;
 
 template<class R> int test_integration_step();
+template<class R> int test_integrate();
 
 int main() {
   test_integration_step<Real>();
+  test_integrate<Real>();
   return 0;
 }
 
@@ -57,6 +62,7 @@ template<class R>
 int 
 test_integration_step()
 {
+  cout << __PRETTY_FUNCTION__ << endl;
   
   // Test constructor/destructor
   Integrator<R>* integrator_ptr;
@@ -160,7 +166,51 @@ test_integration_step()
   cout << nz << endl;
   niz=lohner.integration_step(avfr,iz,h);
   cout << niz << endl;
-
+  cout << endl;
   
+  return 0;
+}
+
+
+template<class R> 
+int 
+test_integrate()
+{
+  cout << __PRETTY_FUNCTION__ << endl;
+  
+  AffineIntegrator<R> affine(0.0625,1.0,0.25);
+  
+  AffineVectorField<R> affine_vector_field(Matrix<R>("[-2,-1;1,-2]"),Vector<R>("[1,1]"));
+  
+  Rectangle<R> bb("[-4,4]x[-4,4]");
+  Rectangle<R> r("[-3.125,-2.875]x[-0.125,0.125]");
+  FiniteGrid<R> fg(bb,128);
+  const Grid<R>& g=fg.grid();
+  
+  GridMaskSet<R> initial_set(fg);
+  initial_set.adjoin(over_approximation(r,g));
+  GridMaskSet<R> bounding_set(fg);
+  bounding_set.adjoin(over_approximation(bb,g));
+  
+  //GridMaskSet<R> chainreach=affine.chainreach(affine_vector_field,initial_set,bounding_set);
+  time_type integration_time=3;
+  uint n=12;
+  GridMaskSet<R> integrate_set=initial_set;
+  GridMaskSet<R> found_set=initial_set;
+  for(uint i=0; i!=n; ++i) {
+    found_set=affine.integrate(affine_vector_field,found_set,bounding_set,time_type(integration_time/n));
+    integrate_set.adjoin(found_set);
+  }
+  GridMaskSet<R> reach_set=affine.reach(affine_vector_field,initial_set,bounding_set,integration_time);
+  
+  epsfstream eps("test_integrate.eps",bb);
+  eps << reach_set;
+  eps.set_fill_colour("blue");
+  eps << integrate_set;
+  eps.set_fill_colour("yellow");
+  eps << initial_set;
+  eps.close();
+  cout << endl;
+
   return 0;
 }

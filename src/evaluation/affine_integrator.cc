@@ -32,6 +32,10 @@
 namespace Ariadne {
   namespace Evaluation {
 
+    template LinearAlgebra::Vector< Numeric::Interval<Real> > 
+    gexp(const LinearAlgebra::Matrix<Real>& A, const LinearAlgebra::Vector<Real>& b, 
+         const time_type& t, const uint& k, const Real& err);
+    
     template class AffineIntegrator<Real>;
 
   }

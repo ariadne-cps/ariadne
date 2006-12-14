@@ -53,6 +53,9 @@
 namespace Ariadne {
   namespace Geometry {
     
+    extern int verbosity;
+    
+    
     template<class R>
     void
     Zonotope<R>::_instantiate_geometry_operators() 
@@ -382,8 +385,9 @@ namespace Ariadne {
     tribool
     disjoint(const Zonotope<R>& z, const Rectangle<R>& r)
     {
-      //std::cerr << "Zonotope<R>::disjoint(const Zonotope<R>&, const Rectangle<R>&)" << std::endl;
-      //std::cerr << r << "\n" << z << std::endl;
+      if(verbosity>7) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+      if(verbosity>8) { std::cerr << z << " " << r << std::endl; }
+      
       check_equal_dimensions(z,r,__PRETTY_FUNCTION__);
       dimension_type d=z.dimension();
       size_type m=z.number_of_generators();
@@ -417,9 +421,12 @@ namespace Ariadne {
       const LinearAlgebra::Vector<F> qo(m,F(1));
       const LinearAlgebra::Vector<F> ql=l.position_vector();
       const LinearAlgebra::Vector<F> qu=u.position_vector();
+      const LinearAlgebra::Vector<F> qd=qu-ql;
       const LinearAlgebra::Vector<F> qc=c.position_vector();
       const LinearAlgebra::Matrix<F> qG=G;
       const LinearAlgebra::Vector<F> qrhs=qc-ql-qG*qo;
+      
+      if(verbosity>8) { std::cerr << "ql=" << ql << ", qd=" << qd <<", qc=" << qc << ", qrhs=" << qrhs << std::endl; }
       
       // Set up constraints x+sx=u-l
       for(size_type i=0; i!=d; ++i) {
@@ -460,11 +467,9 @@ namespace Ariadne {
         T(2*d+m,d+m) -= T(i+d+m,d+m);
       }
       
-      //std::cerr << "T=" << T << std::endl;
       LinearAlgebra::LinearProgram<F> lp(T);
       tribool result=!lp.is_feasible();
-      //std::cerr << "T=" << lp.tableau() << std::endl;
-      //std::cerr << "disjoint(" << z << "," << r << ")=" << result << std::endl;
+
       return result;
     }
 
@@ -473,7 +478,7 @@ namespace Ariadne {
     tribool
     disjoint(const Rectangle<R>& r, const Zonotope<R>& z)
     {
-      //std::cerr << "disjoint(const Rectangle<R>&, const Zonotope<R>&)" << std::endl;
+      if(verbosity>7) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       return disjoint(z,r);
     }
     

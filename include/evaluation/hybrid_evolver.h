@@ -79,8 +79,11 @@ class HybridEvolver
                                             const Geometry::HybridGridMaskSet<R>& initial_set, 
                                             const Geometry::HybridGridMaskSet<R>& bounding_set);
  private:
+ public:
+  /*! \brief Make a discrete step of the hybrid automaton, starting from initial set. */
   Geometry::HybridGridCellListSet<R> discrete_step(const System::HybridAutomaton<R>& automaton, 
                                                    const Geometry::HybridGridCellListSet<R>& initial_set);
+  /*! \brief Evolve the hybrid automaton withing \a invariants starting from the \a initial_set without using discrete transitions. */
   Geometry::HybridGridMaskSet<R> continuous_chainreach(const System::HybridAutomaton<R>& automaton, 
                                                        const Geometry::HybridGridMaskSet<R>& initial_set,
                                                        const Geometry::HybridGridMaskSet<R>& invariants);

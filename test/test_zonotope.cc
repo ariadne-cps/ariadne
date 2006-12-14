@@ -79,6 +79,8 @@ test_zonotope()
   cout << "z1=" << z1 << endl;
   Zonotope<R> z2=Zonotope<R>(p2);
   cout << "z2=" << z2 << endl;
+  Zonotope<R> z3=Zonotope<R>(Point<R>("(0,0)"),Matrix<R>("[1,0,1;0,1,1]"));
+  cout << "z3=" << z3 << endl;
   
   typename Zonotope<R>::vertices_const_iterator vend=z2.vertices_end();
   typename Zonotope<R>::vertices_const_iterator vi=z2.vertices_begin();
@@ -92,10 +94,10 @@ test_zonotope()
   
   // Minkowski sum
   cout << "z1=" << z1 << "\nz2=" << z2 << endl;
-  Zonotope<F> z3=minkowski_sum(z1,z2);
-  cout << "minkowski_sum(z1,z2)=" << z3 << endl;
-  z3=minkowski_difference(z1,z2);
-  cout << "minkowski_difference(z1,z2)=" << z3 << endl;
+  Zonotope<F> z4=minkowski_sum(z1,z2);
+  cout << "minkowski_sum(z1,z2)=" << z4 << endl;
+  z4=minkowski_difference(z1,z2);
+  cout << "minkowski_difference(z1,z2)=" << z4 << endl;
   cout << endl;
   
   ListSet<R,Zonotope> zls;
@@ -124,7 +126,7 @@ test_zonotope()
   cout << "Writing to eps stream" << endl;
   
   Rectangle<R> bbox=z2.bounding_box().expand_by(R(0.5));
-  epsfstream eps("test_zonotope.eps",bbox,0,1);
+  epsfstream eps("test_zonotope-1.eps",bbox,0,1);
   eps << z2;
   for(uint i=0; i!=6; ++i) {
     if(z2.contains(pts[i])) {
@@ -133,6 +135,11 @@ test_zonotope()
       eps.set_fill_colour("red");
     }
   }
+  eps.close();
+  
+  bbox=z3.bounding_box().expand_by(R(0.5));
+  eps.open("test_zonotope-2.eps",bbox);
+  eps << z3;
   eps.close();
   
   

@@ -34,7 +34,16 @@
 namespace Ariadne {
   namespace Evaluation {
    
-
+    /*! \brief Compute an over-approximation to \f$\sum_{n=0}^{\infty} \frac{x^n}{(k+n)!}\f$. */
+    template<class R> R gexp_up(const R& x, uint k);
+      
+    
+    /*! \brief Compute \f$\sum_{n=0}^{\infty} \frac{(tA)^n}{(k+n)!}b\f$ with an error of at most \a epsilon. */
+    template<class R> 
+    LinearAlgebra::Vector< Numeric::Interval<R> > 
+    gexp(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b, const time_type& t, const uint& k, const R& err);
+      
+    
     /*!\ingroup Integrate
      * \brief An integrator based on using the exponential formula to integrate an affine vector field. 
      *  
@@ -63,7 +72,28 @@ namespace Ariadne {
       virtual Geometry::Zonotope<R> reachability_step(const System::VectorField<R>&,
                                                       const Geometry::Zonotope<R>&,
                                                       time_type& step_size) const;
-    };
+     public:
+      /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope. */
+      virtual Geometry::Zonotope< Interval<R> > integration_step(const System::AffineVectorField<R>&,
+                                                                 const Geometry::Zonotope< Interval<R> >&,
+                                                                 time_type&) const;
+
+      /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope. */
+      virtual Geometry::Zonotope<R> integration_step(const System::AffineVectorField<R>&,
+                                                          const Geometry::Zonotope<R>&,
+                                                          time_type&) const;
+
+      
+      /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. 
+       *
+       * We use the formula that the reached set is 
+       * \f\[ c + Ge + t(Ac+b) + 
+       */
+      virtual Geometry::Zonotope<R> reachability_step(const System::AffineVectorField<R>&,
+                                                      const Geometry::Zonotope<R>&,
+                                                      time_type& step_size) const;
+
+     };
 
      
   }

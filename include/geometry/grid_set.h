@@ -130,6 +130,10 @@ namespace Ariadne {
 
     template<class R>
     GridCellListSet<R>
+    under_approximation(const Parallelotope<R>& p, const Grid<R>& g);
+   
+    template<class R>
+    GridCellListSet<R>
     under_approximation(const Zonotope<R>& p, const Grid<R>& g);
    
     template<class R>

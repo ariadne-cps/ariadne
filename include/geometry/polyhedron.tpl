@@ -131,7 +131,7 @@ namespace Ariadne {
         this->_A(i,i)=R(1); 
         this->_A(i+n,i)=R(-1); 
         this->_b(i)=r.upper_bound(i);
-        this->_b(i+n)=r.lower_bound(i);
+        this->_b(i+n)=-r.lower_bound(i);
       }
     }
    
@@ -223,7 +223,13 @@ namespace Ariadne {
     Rectangle<R> 
     Polyhedron<R>::bounding_box() const 
     {
-      throw NotImplemented(__PRETTY_FUNCTION__);
+      Rectangle<Rational> qbb=Polytope<Rational>(Polyhedron<Rational>(*this)).bounding_box();
+      Rectangle<R> bb(qbb.dimension());
+      for(dimension_type i=0; i!=bb.dimension(); ++i) {
+        bb.set_lower_bound(i,conv_down<R>(qbb.lower_bound(i)));
+        bb.set_upper_bound(i,conv_up<R>(qbb.upper_bound(i)));
+      }
+      return bb;
     }
       
     template<class R>

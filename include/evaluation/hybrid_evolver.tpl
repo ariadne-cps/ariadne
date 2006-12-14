@@ -29,6 +29,7 @@
 #include "../evaluation/integrator.h"
 #include "hybrid_evolver.h"
 
+#include "output/epsfstream.h"
 namespace Ariadne {
   
 template<class Set> 
@@ -114,8 +115,8 @@ Ariadne::Evaluation::HybridEvolver<R>::continuous_chainreach(const System::Hybri
                                                              const Geometry::HybridGridMaskSet<R>& initial_set,
                                                              const Geometry::HybridGridMaskSet<R>& invariants)
 {
+  //if(verbosity>5) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
   Geometry::HybridGridMaskSet<R> result_set(initial_set);
-  result_set.clear();
   
   typedef typename System::HybridAutomaton<R>::discrete_mode_iterator discrete_mode_iterator;
   
@@ -125,9 +126,9 @@ Ariadne::Evaluation::HybridEvolver<R>::continuous_chainreach(const System::Hybri
     const System::DiscreteMode<R>& dm = *dm_iter;
     Geometry::GridMaskSet<R>& continuous_set=result_set[dm.id()];
     const Geometry::GridMaskSet<R>& invariant=invariants[dm.id()];
+    //if(verbosity>5) { std::cerr << continuous_set.size() << " " << invariant.size() << std::endl; }
     continuous_set.adjoin(this->_integrator->chainreach(dm.dynamic(),continuous_set,invariant));
   }
-  
   return result_set;
 }
 
@@ -151,6 +152,7 @@ Ariadne::Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<
     const System::DiscreteTransition<R>& dt=*dt_iter;
     Geometry::GridCellListSet<R>& activation=activations[dt.id()];
     activation.adjoin(over_approximation(dt.activation(),activation.grid()));
+    const Geometry::Set<R>& activation_set=dt.activation();
   }
   
   // Compute invariant regions as GridMaskSets
@@ -171,11 +173,11 @@ Ariadne::Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<
   Geometry::HybridGridCellListSet<R> new_activated=regular_intersection(intermediate_set,activations);
   while(!new_activated.empty()) {
     intermediate_set.clear();
-    intermediate_set.adjoin(this->discrete_step(hybrid_automaton,new_activated));
+    Geometry::HybridGridCellListSet<R> new_activated_image=this->discrete_step(hybrid_automaton,new_activated);
+    intermediate_set.adjoin(new_activated_image);
     intermediate_set=this->continuous_chainreach(hybrid_automaton,intermediate_set,invariants);
     result_set.adjoin(intermediate_set);
     new_activated=regular_intersection(intermediate_set,activations);
   }
-  
   return result_set;
 }

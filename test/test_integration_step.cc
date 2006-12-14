@@ -33,34 +33,96 @@
 #include "geometry/parallelotope.h"
 #include "system/affine_vector_field.h"
 #include "evaluation/lohner_integrator.h"
+#include "evaluation/affine_integrator.h"
+#include "output/epsfstream.h"
 
 #include "test.h"
 
 using namespace Ariadne;
+using namespace Ariadne::LinearAlgebra;
+using namespace Ariadne::Geometry;
+using namespace Ariadne::System;
+using namespace Ariadne::Evaluation;
+using namespace Ariadne::Output;
 using namespace std;
 
-template<class R> int test_integration_step();
+template<class R> int test_affine_integrator();
+template<class R> int test_lohner_integrator();
 
 int main() {
-  test_integration_step<Real>();
+  test_lohner_integrator<Real>();
+  test_affine_integrator<Real>();
   return 0;
 }
 
+
 template<class R> 
 int 
-test_integration_step()
+test_affine_integrator()
 {
+  cout << __PRETTY_FUNCTION__ << endl;
   
-  Evaluation::LohnerIntegrator<R> lohner=Evaluation::LohnerIntegrator<R>(0.125,0.5,0.0625);
-  Geometry::Rectangle<R> r=Geometry::Rectangle<R>("[0.96,1.04]x[0.46,0.54]");
+  {
+    Matrix<R> T("[2]");
+    Matrix<R> I("[1]");
+    Vector<R> u("[1]");
+    Matrix<R> A("[-2,-1;1,-2]");
+    Vector<R> b("[0.125,0.25]");
+    time_type h=0.125;
+    uint k=1;
+    R err(0.03125);
+    std::cout << gexp(T,u,time_type(0.5),0u,err) << endl;
+    std::cout << gexp(I,u,1,1u,err) << endl;
+    std::cout << gexp(I,u,1,2u,err) << endl;
+    std::cout << gexp(A,b,h,k,err) << endl;
+  }
+  
+  Matrix<R> A("[-2,-1;1,-2]");
+  Vector<R> b("[0.125,0.25]");
+  time_type h=0.125;
+  AffineIntegrator<R> affine(0.125,0.5,0.25);
+  AffineVectorField<R> avf(A,b);
+  Rectangle<R> bb("[-4,4]x[-4,4]");
+  Rectangle<R> r("[-3.125,-2.875]x[-0.125,0.125]");
+  Zonotope<R> z=r;
+  
+  Zonotope<R> iz1=affine.integration_step(avf,z,h);
+  Zonotope<R> iz2=affine.integration_step(avf,iz1,h);
+  Zonotope<R> rz1=affine.reachability_step(avf,z,h);
+  Zonotope<R> rz2=affine.reachability_step(avf,iz1,h);
+  
+  if(h!=0.125) { cout << "h changed from 0.125 to " << h << endl; }
+  
+  epsfstream eps("test_reachability_step.eps",bb);
+  eps << rz1 << rz2;
+  eps.set_fill_colour("blue");
+  eps << iz1 << iz2;
+  eps.set_fill_colour("yellow");
+  eps << z;
+  eps.close();
+  
+  cout << endl;
+  
+  return 0;
+}
+
+
+template<class R> 
+int 
+test_lohner_integrator()
+{
+  cout << __PRETTY_FUNCTION__ << endl;
+  
+  LohnerIntegrator<R> lohner=LohnerIntegrator<R>(0.125,0.5,0.0625);
+  Rectangle<R> r=Rectangle<R>("[0.96,1.04]x[0.46,0.54]");
   cout << "r=" << r << endl;
-  Geometry::Parallelotope<R> p=Geometry::Parallelotope<R>(r);
+  Parallelotope<R> p=Parallelotope<R>(r);
   cout << "p=" << p << endl;
-  LinearAlgebra::Matrix<R> A=LinearAlgebra::Matrix<R>("[-0.25,-1;+1,-0.25]");
+  Matrix<R> A=Matrix<R>("[-0.25,-1;+1,-0.25]");
   cout << "A=" << A << endl;
-  LinearAlgebra::Vector<R> b=LinearAlgebra::Vector<R>("[0,0]");
+  Vector<R> b=Vector<R>("[0,0]");
   cout << "b=" << b << endl;
-  System::AffineVectorField<R> avf=System::AffineVectorField<R>(A,b);
+  AffineVectorField<R> avf=AffineVectorField<R>(A,b);
   cout << "avf=" << avf << endl;
 
   Real x0=0;
@@ -68,7 +130,7 @@ test_integration_step()
   Interval<Real> ivl1(0.4);
   Interval<Real> ivl0;
   
-  LinearAlgebra::Matrix<Real> fA(2,2);
+  Matrix<Real> fA(2,2);
   fA(0,0)=0.4;
   fA(1,1)=0.4;
   R z=0;
@@ -88,13 +150,10 @@ test_integration_step()
   
   time_type h(0.125);
   cout << "h=" << h << endl;
-  cout << "p.generators().norm()=" << LinearAlgebra::norm(p.generators()) << endl;
+  cout << "p.generators().norm()=" << norm(p.generators()) << endl;
 
-  Geometry::Parallelotope<R> next_paral=lohner.integration_step(avf,p,h);
-  cout << next_paral << "\n";
-  
-  
-
+  Parallelotope<R> next_paral=lohner.integration_step(avf,p,h);
+  cout << next_paral << "\n\n";
   
   return 0;
 }

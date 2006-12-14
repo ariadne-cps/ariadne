@@ -48,6 +48,7 @@ namespace Ariadne {
     class AffineMap : public Map<R> 
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
+      typedef typename Map<R>::I I;
      public:
       /*! \brief The type of denotable real number used to describe the system. */
       typedef R real_type;
@@ -123,6 +124,12 @@ namespace Ariadne {
         return _b.size();
       }
       
+      /*! \brief The Jacobian derivative matrix at a point. */
+      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<R>& pt) const;
+
+      /*! \brief The Jacobian derivative matrix over a rectangle. */
+      virtual LinearAlgebra::Matrix<I> jacobian(const Geometry::Rectangle<R>& r) const;
+
       /*! \brief True if the map is invertible, which is equivalent to invertiblity of
        *  the matrix A. */
       bool invertible() const { throw NotImplemented("bool AffineMap<R>::invertible() const"); }

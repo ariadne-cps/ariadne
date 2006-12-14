@@ -54,6 +54,7 @@ namespace Ariadne {
       virtual Rectangle<R> bounding_box() const = 0;
       virtual tribool disjoint(const Rectangle<R>&) const = 0;
       virtual tribool superset(const Rectangle<R>&) const = 0;
+      virtual tribool subset(const Rectangle<R>&) const = 0;
       
       virtual std::ostream& write(std::ostream& os) const = 0;
     };
@@ -86,6 +87,37 @@ namespace Ariadne {
   namespace Geometry {
     
     //! \ingroup ExactSet
+    /*! \brief An adaptor for the Rectangle class conforming to the Set interface. */
+    template<class R>
+    class RectangularSet : public Set<R>, public Rectangle<R>
+    {
+     public:
+      RectangularSet<R>(const Rectangle<R>& r) : Set<R>(), Rectangle<R>(r) { }
+      
+      virtual ~RectangularSet<R>() { }
+      virtual RectangularSet<R>* clone() const { return new RectangularSet<R>(*this); }
+      virtual dimension_type dimension() const { return this->Rectangle<R>::dimension(); }
+      virtual tribool contains(const Point<R>& pt) const { return this->Rectangle<R>::contains(pt); }
+      virtual Rectangle<R> bounding_box() const { return this->Rectangle<R>::bounding_box(); }      
+      virtual tribool disjoint(const Rectangle<R>& r) const { 
+        return Geometry::disjoint(r,static_cast<const Rectangle<R>&>(*this)); }
+      virtual tribool superset(const Rectangle<R>& r) const { 
+        return Geometry::subset(r,static_cast<const Rectangle<R>&>(*this)); }
+      virtual tribool subset(const Rectangle<R>& r) const { 
+        return Geometry::subset(static_cast<const Polyhedron<R>&>(*this),r); }
+      virtual std::ostream& write(std::ostream& os) const {
+        return Rectangle<R>::write(os);
+      }
+    };
+    
+    template<class R> inline
+    std::ostream& operator<<(std::ostream& os, const RectangularSet<R>& rset) {
+      return rset.write(os);
+    }
+    
+    
+    
+    //! \ingroup ExactSet
     /*! \brief An adaptor for the Polyhedron class conforming to the Set interface. */
     template<class R>
     class PolyhedralSet : public Set<R>, public Polyhedron<R>
@@ -102,6 +134,8 @@ namespace Ariadne {
         return Geometry::disjoint(r,static_cast<const Polyhedron<R>&>(*this)); }
       virtual tribool superset(const Rectangle<R>& r) const { 
         return Geometry::subset(r,static_cast<const Polyhedron<R>&>(*this)); }
+      virtual tribool subset(const Rectangle<R>& r) const { 
+        return Geometry::subset(static_cast<const Polyhedron<R>&>(*this),r); }
       virtual std::ostream& write(std::ostream& os) const {
         return Polyhedron<R>::write(os);
       }

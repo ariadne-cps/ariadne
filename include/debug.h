@@ -29,11 +29,17 @@
 namespace Ariadne {
 
 #ifdef DEBUG
-  static const int verbosity=1;
+  static const int default_verbosity=1; 
 #else
-  static const int verbosity=0;
+  static const int default_verbosity=0; 
 #endif
-  
+
+namespace Numeric { static int verbosity=default_verbosity; }
+namespace LinearAlgebra { static int verbosity=default_verbosity; }
+namespace Combinatoric { static int verbosity=default_verbosity; }
+namespace Geometry { static int verbosity=default_verbosity; }
+namespace System { static int verbosity=default_verbosity; }
+namespace Evaluation { static int verbosity=default_verbosity; }
   
   
 class dbgstream;
@@ -42,8 +48,8 @@ template<class T> dbgstream& operator<<(dbgstream& dbgs, const T& t);
 class dbgstream : public std::ostream
 {
  public:
-  dbgstream(std::ostream& os, int debug_level=verbosity) : _stream(os), _debug_level(debug_level) { }
-  dbgstream(int debug_level=verbosity) : _stream(std::cerr), _debug_level(debug_level) { }
+  dbgstream(std::ostream& os, int debug_level=default_verbosity) : _stream(os), _debug_level(debug_level) { }
+  dbgstream(int debug_level=default_verbosity) : _stream(std::cerr), _debug_level(debug_level) { }
  private:
   template<class T> friend dbgstream& operator<<(dbgstream& dbgs, const T& t);
  private:

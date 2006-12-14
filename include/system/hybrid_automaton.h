@@ -112,15 +112,15 @@ class HybridAutomaton
    *
    * This method adds an arc and the relavite reset between 
    * two discrete modes.
-   * \param source is the discrete transition's source.
-   * \param dest is the discrete transition's destination.
-   * \param act is the discrete transition's activation region.
    * \param reset is the discrete transition's reset.
+   * \param activation is the discrete transition's activation region.
+   * \param source is the discrete transition's source.
+   * \param destination is the discrete transition's destination.
    */
   inline DiscreteTransition<R>& new_transition(const Map<R> &reset,
                                                const Geometry::Set<R> &activation,
-                                               DiscreteMode<R> &source, 
-                                               DiscreteMode<R> &destination) 
+                                               const DiscreteMode<R> &source, 
+                                               const DiscreteMode<R> &destination) 
   {
     if(&this->_modes[source.id()] != &source) {
       throw std::runtime_error("The source mode of the transition must be in the automaton");
@@ -129,6 +129,33 @@ class HybridAutomaton
       throw std::runtime_error("The desitination mode of the transition must be in the automaton");
     }
     
+    this->_transitions.push_back(DiscreteTransition<R>(this->_transitions.size(),reset,activation,source,destination));
+    return this->_transitions.back();
+  }
+  
+  /*! \brief Adds a discrete transition.
+   *
+   * This method adds an arc and the relavite reset between 
+   * two discrete modes.
+   * \param reset is the discrete transition's reset.
+   * \param activation is the discrete transition's activation region.
+   * \param source_id is the identifyer of the discrete transition's source mode.
+   * \param destination_id is the identifyer of the discrete transition's destination mode.
+   */
+  inline DiscreteTransition<R>& new_transition(const Map<R> &reset,
+                                               const Geometry::Set<R> &activation,
+                                               const id_type &source_id, 
+                                               const id_type &destination_id) 
+  {
+    if(source_id >= this->modes().size()) {
+      throw std::runtime_error("The automaton does not contain a mode with ths given id");
+    }
+    if(destination_id >= this->modes().size()) {
+      throw std::runtime_error("The automaton does not contain a mode with ths given id");
+    }
+    
+    DiscreteMode<R>& source=this->_modes[source_id];
+    DiscreteMode<R>& destination=this->_modes[destination_id];
     this->_transitions.push_back(DiscreteTransition<R>(this->_transitions.size(),reset,activation,source,destination));
     return this->_transitions.back();
   }

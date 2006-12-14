@@ -37,7 +37,13 @@ namespace Ariadne {
 namespace Geometry {
 
 typedef size_type location_type;
+extern int verbosity;
   
+class HybridSystemError : public std::runtime_error {
+ public:
+  HybridSystemError(const std::string& what) : std::runtime_error(what) { }
+};
+
 /*! \ingroup HybridSet
  *  \brief A base class for representing subsets of hybrid state spaces.
  */
@@ -83,15 +89,17 @@ class HybridSet
       if(!result) { return result; } }
     return result;
   }
+  
   /*! \brief Adjoin another hybrid set. */
   template<class S> void adjoin(const HybridSet<S>& hs) {
     if(this->number_of_discrete_locations()!=hs.number_of_discrete_locations()) {
       throw std::runtime_error("Invalid number of discrete components");
-      for(location_type q=0; q!=this->number_of_discrete_locations(); ++q) {
-        (*this)[q].adjoin(hs[q]);
-      }
+    }
+    for(location_type q=0; q!=this->number_of_discrete_locations(); ++q) {
+      (*this)[q].adjoin(hs[q]);
     }
   }
+  
  private:
   std::vector< Set > _component_sets;
 };
@@ -123,6 +131,10 @@ class HybridGridCellListSet
   : public HybridSet< GridCellListSet<R> >
 {
  public:
+  /*! \brief Construct a set for \a n discrete modes, based on a fixed grid. */
+  HybridGridCellListSet(location_type nq, const Grid<R>& g) 
+    : HybridSet< GridCellListSet<R> >(nq,GridCellListSet<R>(g)) { }
+    
   /*! \brief Construct a set for \a n discrete modes, based on a list of finite grids. */
   HybridGridCellListSet(const HybridSet< GridMaskSet<R> >& hgms)
     : HybridSet< GridCellListSet<R> >(hgms) { }
@@ -133,6 +145,12 @@ template<class R>
 inline
 HybridGridCellListSet<R>
 regular_intersection(const HybridGridCellListSet<R>& hgcl, const HybridGridMaskSet<R>& hgms) {
+  if(verbosity>5) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+  
+  if(hgcl.number_of_discrete_locations()!=hgms.number_of_discrete_locations()) {
+    throw HybridSystemError("Intersection of sets with different numbers of discrete locations");
+  }
+  
   HybridGridCellListSet<R> result=hgcl;
   result.clear();
   for(location_type q=0; q!=hgcl.number_of_discrete_locations(); ++q) {

@@ -59,12 +59,9 @@
 
 #include "integrator.h"
 
-namespace Ariadne { namespace Evaluation { int verbosity=0; } }
-//namespace Ariadne { namespace Evaluation { int verbosity=7; } }
-
 namespace Ariadne {
   namespace Evaluation {
-
+    
     template<class R, class BST>
     struct pair_first_less {
       bool operator()(const std::pair<R,BST>& ts1, const std::pair<R,BST>& ts2) {
@@ -851,7 +848,9 @@ namespace Ariadne {
     {
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
+      typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
       typedef typename Geometry::ListSet<R,Geometry::Parallelotope>::const_iterator pls_const_iterator;
+      typedef typename Geometry::ListSet<R,Geometry::Zonotope>::const_iterator zls_const_iterator;
       check_bounded(initial_set,__PRETTY_FUNCTION__);
       check_bounded(bounding_set,__PRETTY_FUNCTION__);
      
@@ -894,6 +893,21 @@ namespace Ariadne {
         }
         found=regular_intersection(image,bounding_set);
       }
+      
+      Geometry::ListSet<R,Geometry::Zonotope> zonotope_list;
+      for(gms_const_iterator iter=result.begin(); iter!=result.end(); ++iter) {
+        Geometry::Rectangle<R> r=*iter;
+        Geometry::Zonotope<R> pp(r);
+        zonotope_list.adjoin(pp);
+      }
+      zonotope_list=this->reach(vf,zonotope_list,time_step);
+      for(zls_const_iterator iter=zonotope_list.begin(); iter!=zonotope_list.end(); ++iter) {
+        Geometry::Zonotope<R> fz=*iter;
+        if(!disjoint(fz.bounding_box(),bounding_set)) {
+          result.adjoin(over_approximation(fz,g));
+        }
+      }
+      
       return result;
     }
 

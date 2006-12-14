@@ -94,6 +94,20 @@ namespace Ariadne {
     }   
     
     template<class R>
+    LinearAlgebra::Matrix<typename AffineMap<R>::F>
+    AffineMap<R>::jacobian(const Geometry::Point<R>& pt) const
+    {
+      return this->_A;
+    }
+    
+    template<class R>
+    LinearAlgebra::Matrix<typename AffineMap<R>::I>
+    AffineMap<R>::jacobian(const Geometry::Rectangle<R>& r) const
+    {
+      return this->_A;
+    }
+    
+    template<class R>
     std::ostream& 
     AffineMap<R>::write(std::ostream& os) const
     {

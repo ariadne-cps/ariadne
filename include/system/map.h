@@ -58,6 +58,7 @@ namespace Ariadne {
      */
     template<class R>
     class Map {
+     protected:
       typedef typename Numeric::traits<R>::arithmetic_type F; 
       typedef typename Numeric::traits<R>::interval_type I; 
      public:

@@ -530,9 +530,11 @@ namespace Ariadne {
     
     void 
     LatticeMaskSet::restrict(const LatticeCellListSet& lcls) {
+      LatticeMaskSet copy=*this;
+      this->clear();
       for(LatticeCellListSet::const_iterator i=lcls.begin(); i!=lcls.end(); ++i) {
-        if(subset(*i,this->block())) {
-          this->remove(*i);
+        if(subset(*i,copy)) {
+          this->adjoin(*i);
         }
       }
     }
@@ -543,8 +545,10 @@ namespace Ariadne {
         this->_mask &= lms._mask;
       }
       else {
-        for(LatticeMaskSet::const_iterator iter=lms.begin(); iter!=lms.end(); ++iter) {
-          this->remove(*iter);
+        for(LatticeMaskSet::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+          if(!subset(*iter,lms)) {
+            this->remove(*iter);
+          }
         }
       }
     }

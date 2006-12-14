@@ -367,9 +367,9 @@ namespace Ariadne {
     {
       const Parallelotope<R>& p=*this;
       if(p.dimension() > 0) {
-        os << "Parallelotope(\n  centre=" << p.centre();
-        os << "\n  directions=" << p.generators();
-        os << "\n) ";
+        os << "Parallelotope( centre=" << p.centre()
+           << ", directions=" << p.generators()
+           << " ) ";
       }
 
       return os;
@@ -381,9 +381,9 @@ namespace Ariadne {
     {
       const Parallelotope< Interval<R> >& p=*this;
       if(p.dimension() > 0) {
-        os << "Parallelotope(\n  centre=" << p.centre();
-        os << "\n  directions=" << p.generators();
-        os << "\n) ";
+        os << "Parallelotope( centre=" << p.centre()
+           << ", directions=" << p.generators()
+           << " ) ";
       }
 
       return os;

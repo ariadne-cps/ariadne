@@ -22,7 +22,7 @@
  */
 
 #include "geometry/simplex.h"
-#include "geometry/simplex.tpl"
+#include "geometry/simplex.code.h"
 
 #include "real_typedef.h"
 

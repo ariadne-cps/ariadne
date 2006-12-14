@@ -31,7 +31,7 @@
 #include "numeric/interval.h"
 
 #include "linear_algebra/matrix.h"
-#include "linear_algebra/matrix.tpl"
+#include "linear_algebra/matrix.code.h"
 
 
 namespace Ariadne {

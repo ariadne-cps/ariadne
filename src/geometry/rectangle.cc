@@ -24,7 +24,7 @@
 #include "real_typedef.h"
 
 #include "geometry/rectangle.h"
-#include "geometry/rectangle.tpl"
+#include "geometry/rectangle.code.h"
 
 
 namespace Ariadne {

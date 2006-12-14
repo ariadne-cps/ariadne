@@ -22,7 +22,7 @@
  */
 
 #include "system/affine_vector_field.h"
-#include "system/affine_vector_field.tpl"
+#include "system/affine_vector_field.code.h"
 
 #include "real_typedef.h"
 

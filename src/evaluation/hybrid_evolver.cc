@@ -24,7 +24,7 @@
 #include "real_typedef.h"
 
 #include "evaluation/hybrid_evolver.h"
-#include "evaluation/hybrid_evolver.tpl"
+#include "evaluation/hybrid_evolver.code.h"
 
 namespace Ariadne {
   namespace Evaluation {

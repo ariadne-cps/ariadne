@@ -22,7 +22,7 @@
  */
 
 #include "geometry/grid.h"
-#include "geometry/grid.tpl"
+#include "geometry/grid.code.h"
 
 #include "real_typedef.h"
 

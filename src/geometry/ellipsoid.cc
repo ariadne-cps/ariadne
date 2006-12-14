@@ -22,7 +22,7 @@
  */
 
 #include "geometry/ellipsoid.h"
-#include "geometry/ellipsoid.tpl"
+#include "geometry/ellipsoid.code.h"
 
 #include "real_typedef.h"
 

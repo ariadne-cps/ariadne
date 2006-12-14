@@ -22,7 +22,7 @@
  */
 
 #include "system/multimap.h"
-#include "system/multimap.tpl"
+#include "system/multimap.code.h"
 
 #include "real_typedef.h"
 

@@ -22,7 +22,7 @@
  */
 
 #include "system/vector_field.h"
-#include "system/vector_field.tpl"
+#include "system/vector_field.code.h"
 
 #include "real_typedef.h"
 

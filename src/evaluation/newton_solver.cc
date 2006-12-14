@@ -27,7 +27,7 @@
 #include "real_typedef.h"
 
 #include "evaluation/newton.h"
-#include "evaluation/newton.tpl"
+#include "evaluation/newton.code.h"
 
 namespace Ariadne {
   namespace Evaluation {

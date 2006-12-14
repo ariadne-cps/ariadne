@@ -24,7 +24,7 @@
 #include "real_typedef.h"
 
 #include "geometry/parallelotope.h"
-#include "geometry/parallelotope.tpl"
+#include "geometry/parallelotope.code.h"
 
 namespace Ariadne {
   namespace Geometry {

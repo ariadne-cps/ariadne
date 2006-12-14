@@ -26,7 +26,7 @@
 #include "numeric/rational.h"
 
 #include "linear_algebra/tensor.h"
-#include "linear_algebra/tensor.tpl"
+#include "linear_algebra/tensor.code.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {

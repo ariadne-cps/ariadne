@@ -24,7 +24,7 @@
 #include "real_typedef.h"
 
 #include "system/polynomial_map.h"
-#include "system/polynomial_map.tpl"
+#include "system/polynomial_map.code.h"
 
 namespace Ariadne {
   namespace System {

@@ -22,7 +22,7 @@
  */
 
 #include "system/map.h"
-#include "system/map.tpl"
+#include "system/map.code.h"
 
 #include "real_typedef.h"
 

@@ -28,7 +28,7 @@
 #include "geometry/zonotope.h"
 
 #include "geometry/list_set.h"
-#include "geometry/list_set.tpl"
+#include "geometry/list_set.code.h"
 
 namespace Ariadne {
   namespace Geometry {

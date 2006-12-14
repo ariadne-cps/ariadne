@@ -22,7 +22,7 @@
  */
 
 #include "system/affine_multimap.h"
-#include "system/affine_multimap.tpl"
+#include "system/affine_multimap.code.h"
 
 #include "real_typedef.h"
 

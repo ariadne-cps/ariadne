@@ -26,7 +26,7 @@
 #include "numeric/rational.h"
 
 #include "linear_algebra/matrix_function.h"
-#include "linear_algebra/matrix_function.tpl"
+#include "linear_algebra/matrix_function.code.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {

@@ -26,7 +26,7 @@
 #include "numeric/rational.h"
 
 #include "geometry/point_list.h"
-#include "geometry/point_list.tpl"
+#include "geometry/point_list.code.h"
 
 namespace Ariadne {
   namespace Geometry {

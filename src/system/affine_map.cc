@@ -22,7 +22,7 @@
  */
 
 #include "system/affine_map.h"
-#include "system/affine_map.tpl"
+#include "system/affine_map.code.h"
 
 #include "real_typedef.h"
 

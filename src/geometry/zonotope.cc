@@ -24,7 +24,7 @@
 #include "real_typedef.h"
 
 #include "geometry/zonotope.h"
-#include "geometry/zonotope.tpl"
+#include "geometry/zonotope.code.h"
 
 namespace Ariadne {
   namespace Geometry {

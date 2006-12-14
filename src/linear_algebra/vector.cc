@@ -28,7 +28,7 @@
 #include "numeric/interval.h"
 
 #include "linear_algebra/vector.h"
-#include "linear_algebra/vector.tpl"
+#include "linear_algebra/vector.code.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {

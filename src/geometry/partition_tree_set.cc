@@ -24,7 +24,7 @@
 
 #include "geometry/parallelotope.h"
 #include "geometry/partition_tree_set.h"
-#include "geometry/partition_tree_set.tpl"
+#include "geometry/partition_tree_set.code.h"
 
 #include "real_typedef.h"
 

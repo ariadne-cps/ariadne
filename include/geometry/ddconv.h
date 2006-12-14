@@ -1,5 +1,5 @@
 /***************************************************************************
- *            ddconv.tpl
+ *            ddconv.h
  *
  *  Copyright 2006  Alberto Casagrande, Pieter Collins
  *  Email casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl

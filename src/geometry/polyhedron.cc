@@ -25,7 +25,7 @@
 #include "numeric/rational.h"
 
 #include "geometry/polyhedron.h"
-#include "geometry/polyhedron.tpl"
+#include "geometry/polyhedron.code.h"
 
 namespace Ariadne {
   namespace Geometry {

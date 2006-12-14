@@ -24,7 +24,7 @@
 #include "real_typedef.h"
 
 #include "evaluation/integrator.h"
-#include "evaluation/integrator.tpl"
+#include "evaluation/integrator.code.h"
 
 namespace Ariadne {
   namespace Evaluation {

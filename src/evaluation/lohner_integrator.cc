@@ -27,7 +27,7 @@
 #include "evaluation/integrator.h"
 #include "evaluation/lohner_integrator.h"
 
-#include "evaluation/lohner_integrator.tpl"
+#include "evaluation/lohner_integrator.code.h"
 
 namespace Ariadne {
   namespace Evaluation {

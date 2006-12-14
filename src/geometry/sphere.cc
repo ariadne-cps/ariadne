@@ -22,7 +22,7 @@
  */
 
 #include "geometry/sphere.h"
-#include "geometry/sphere.tpl"
+#include "geometry/sphere.code.h"
 
 #include "real_typedef.h"
 

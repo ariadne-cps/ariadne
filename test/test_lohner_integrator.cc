@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_integration_step.cc
+ *            test_lohner_integrator.cc
  *
  *  Copyright  2006  Pieter Collins
  *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
@@ -46,63 +46,10 @@ using namespace Ariadne::Evaluation;
 using namespace Ariadne::Output;
 using namespace std;
 
-template<class R> int test_affine_integrator();
 template<class R> int test_lohner_integrator();
 
 int main() {
   test_lohner_integrator<Real>();
-  test_affine_integrator<Real>();
-  return 0;
-}
-
-
-template<class R> 
-int 
-test_affine_integrator()
-{
-  cout << __PRETTY_FUNCTION__ << endl;
-  
-  {
-    Matrix<R> T("[2]");
-    Matrix<R> I("[1]");
-    Vector<R> u("[1]");
-    Matrix<R> A("[-2,-1;1,-2]");
-    Vector<R> b("[0.125,0.25]");
-    time_type h=0.125;
-    uint k=1;
-    R err(0.03125);
-    std::cout << gexp(T,u,time_type(0.5),0u,err) << endl;
-    std::cout << gexp(I,u,1,1u,err) << endl;
-    std::cout << gexp(I,u,1,2u,err) << endl;
-    std::cout << gexp(A,b,h,k,err) << endl;
-  }
-  
-  Matrix<R> A("[-2,-1;1,-2]");
-  Vector<R> b("[0.125,0.25]");
-  time_type h=0.125;
-  AffineIntegrator<R> affine(0.125,0.5,0.25);
-  AffineVectorField<R> avf(A,b);
-  Rectangle<R> bb("[-4,4]x[-4,4]");
-  Rectangle<R> r("[-3.125,-2.875]x[-0.125,0.125]");
-  Zonotope<R> z=r;
-  
-  Zonotope<R> iz1=affine.integration_step(avf,z,h);
-  Zonotope<R> iz2=affine.integration_step(avf,iz1,h);
-  Zonotope<R> rz1=affine.reachability_step(avf,z,h);
-  Zonotope<R> rz2=affine.reachability_step(avf,iz1,h);
-  
-  if(h!=0.125) { cout << "h changed from 0.125 to " << h << endl; }
-  
-  epsfstream eps("test_reachability_step.eps",bb);
-  eps << rz1 << rz2;
-  eps.set_fill_colour("blue");
-  eps << iz1 << iz2;
-  eps.set_fill_colour("yellow");
-  eps << z;
-  eps.close();
-  
-  cout << endl;
-  
   return 0;
 }
 
@@ -114,6 +61,7 @@ test_lohner_integrator()
   cout << __PRETTY_FUNCTION__ << endl;
   
   LohnerIntegrator<R> lohner=LohnerIntegrator<R>(0.125,0.5,0.0625);
+  Rectangle<R> bb=Rectangle<R>("[0.50,1.25]x[0.25,1.00]");
   Rectangle<R> r=Rectangle<R>("[0.96,1.04]x[0.46,0.54]");
   cout << "r=" << r << endl;
   Parallelotope<R> p=Parallelotope<R>(r);
@@ -152,8 +100,21 @@ test_lohner_integrator()
   cout << "h=" << h << endl;
   cout << "p.generators().norm()=" << norm(p.generators()) << endl;
 
-  Parallelotope<R> next_paral=lohner.integration_step(avf,p,h);
-  cout << next_paral << "\n\n";
+  Parallelotope<R> p0=p;
+  Parallelotope<R> p1=lohner.integration_step(avf,p0,h);
+  Parallelotope<R> p2=lohner.integration_step(avf,p1,h);
+  cout << "p0=" << p0 << "\np1=" << p1 << "\np2=" << p2 << endl;
+  Zonotope<R> z1=lohner.reachability_step(avf,p0,h);
+  Zonotope<R> z2=lohner.reachability_step(avf,p1,h);
+  cout << "z1=" << z1 << "\nz2=" << z2 << endl;
+  
+  epsfstream eps("test_lohner_integrator.eps",bb);
+  eps << z1 << z2;
+  eps.set_fill_colour("blue");
+  eps << p1 << p2;
+  eps.set_fill_colour("yellow");
+  eps << p0;
+  eps.close();
   
   return 0;
 }

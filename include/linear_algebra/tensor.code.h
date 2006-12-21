@@ -139,7 +139,8 @@ namespace Ariadne {
     
     template<class R>
     DerivativeTensor<R>::DerivativeTensor(const Matrix<R>& A) 
-      : _res_size(A.size(0)), _arg_size(A.size(1)), _degree(1), _elements(A.size(0)*A.size(1))
+      : _res_size(A.number_of_rows()), _arg_size(A.number_of_columns()), 
+        _degree(1), _elements(A.number_of_rows()*A.number_of_columns())
     {
       for(size_type i=0; i!=this->_res_size; ++i) {
         for(size_type j=0; i!=this->_arg_size; ++j) {

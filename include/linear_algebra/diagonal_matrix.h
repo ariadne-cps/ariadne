@@ -30,9 +30,6 @@
 
 #include <iosfwd>
 
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/matrix_proxy.hpp>
-
 #include "../declarations.h"
 #include "../numeric/integer.h"
 #include "../numeric/interval.h"
@@ -41,11 +38,6 @@
 namespace Ariadne {
   namespace LinearAlgebra {
 
-    using boost::numeric::ublas::identity_matrix;
-    using boost::numeric::ublas::herm;
-    using boost::numeric::ublas::matrix_row;
-    using boost::numeric::ublas::matrix_column;
-  
     /*!\ingroup LinearAlgebra
      * \brief A matrix over \a R. 
      *

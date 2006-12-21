@@ -85,7 +85,7 @@ namespace Ariadne {
 
       pt._vector=LinearAlgebra::Vector<R>(v.size());
       for(size_t i=0; i!=v.size(); ++i) {
-        pt._vector[i]=v[i];
+        pt._vector(i)=v[i];
       }
       return is;
     }

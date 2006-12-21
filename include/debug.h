@@ -41,7 +41,19 @@ namespace Geometry { static int verbosity=default_verbosity; }
 namespace System { static int verbosity=default_verbosity; }
 namespace Evaluation { static int verbosity=default_verbosity; }
   
+static int maximum_verbosity() {
+  return std::max(
+          std::max(Numeric::verbosity,LinearAlgebra::verbosity),
+          std::max(
+            std::max(Combinatoric::verbosity,Geometry::verbosity),
+            std::max(System::verbosity,Evaluation::verbosity)
+          )
+        );
   
+
+}
+
+
 class dbgstream;
 template<class T> dbgstream& operator<<(dbgstream& dbgs, const T& t);
 

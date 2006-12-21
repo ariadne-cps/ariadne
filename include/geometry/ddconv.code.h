@@ -71,7 +71,7 @@ ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
   number_of_lines=dimension;
   for(dimension_type i=0; i!=dimension; ++i) {
     v=LinearAlgebra::Vector<R>::zero(dimension);
-    v[i]=one;
+    v(i)=one;
     generators.push_back(v);
   }
   
@@ -178,8 +178,8 @@ ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
   
   // Normalize generators
   for(size_type i=0; i!=generators.size(); ++i) {
-    if(generators[i][dimension-1]!=zero) {
-      generators[i]/=abs(generators[i][dimension-1]);
+    if(generators[i](dimension-1)!=zero) {
+      generators[i]/=abs(generators[i](dimension-1));
     }
   }
   

@@ -55,6 +55,15 @@ namespace Ariadne {
    
     /*! \brief Graded lexicographical ordering. */
     template<class R> bool operator<(const Monomial<R>&, const Monomial<R>&);
+  }
+
+  namespace Numeric {
+    template<class R> struct traits< System::Polynomial<R> > {
+      typedef System::Polynomial<typename traits<R>::arithmetic_type> arithmetic_type;
+    };
+  }
+  
+  namespace System {
     
     /*! \brief A monomial in several variables. */
     template<class R>
@@ -115,7 +124,6 @@ namespace Ariadne {
     {
       return Monomial<R>(-m.coefficient(), m.multi_index());
     }
-    
     
     /*! \brief A polynomial in several variables. */
     template<class R>
@@ -235,9 +243,9 @@ namespace Ariadne {
       PolynomialMatrix(const size_type& r, const size_type& c) : _matrix(r,c) { }
      
       /*! \brief The number of rows of the matrix. */
-      size_type number_of_rows() const { return _matrix.size1(); }
+      size_type number_of_rows() const { return _matrix.number_of_rows(); }
       /*! \brief The number of columns of the matrix. */
-      size_type number_of_columns() const { return _matrix.size2(); }
+      size_type number_of_columns() const { return _matrix.number_of_columns(); }
 
       /*! \brief A reference to the (\a i,\a j)th entry. */
       Polynomial<R>& operator() (const size_type& i, const size_type& j) { return this->_matrix(i,j); }
@@ -249,7 +257,7 @@ namespace Ariadne {
      private:
       friend class PolynomialMap<R>;
      private:
-      boost::numeric::ublas::matrix< Polynomial<R> > _matrix;
+      LinearAlgebra::Matrix< Polynomial<R> > _matrix;
     };
     
 

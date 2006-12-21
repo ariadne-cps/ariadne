@@ -35,7 +35,7 @@ namespace Ariadne {
 
     template<class R>
     Vector<R>::Vector(const std::string& str)
-      : _Base(1)
+      : _array(1)
     {  
       std::istringstream ss(str); 
       ss >> *this; 

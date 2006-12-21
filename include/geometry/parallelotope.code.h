@@ -142,7 +142,7 @@ namespace Ariadne {
       R max_norm=0;
       size_type max_column=0;
       for(size_type j=0; j!=n; ++j) {
-        R norm = LinearAlgebra::norm(LinearAlgebra::Vector<R>(column(new_generators,j)));
+        R norm = LinearAlgebra::norm(LinearAlgebra::Vector<R>(new_generators.column(j)));
         if(norm>max_norm) {
           max_norm=norm;
           max_column=j;
@@ -154,9 +154,9 @@ namespace Ariadne {
         new_generators(i,j)=div_up(new_generators(i,j),two);
       }
       
-      state_type new_centre=sub_approx(this->centre(),div_approx(LinearAlgebra::Vector<R>(column(new_generators,j)),two));
+      state_type new_centre=sub_approx(this->centre(),div_approx(LinearAlgebra::Vector<R>(new_generators.column(j)),two));
       result.adjoin(Parallelotope<R>(new_centre,new_generators));
-      new_centre=add_approx(new_centre,LinearAlgebra::Vector<R>(column(new_generators,j)));
+      new_centre=add_approx(new_centre,LinearAlgebra::Vector<R>(new_generators.column(j)));
       result.adjoin(Parallelotope(new_centre,new_generators));
 
       return result;
@@ -225,7 +225,7 @@ namespace Ariadne {
 
       for (size_type i=0; i<nv; ++i) {
         for(size_type j=0; j!=d; ++j) {
-          e[j]=(i&(1<<d) ? 1 : -1);
+          e(j)=(i&(1<<d) ? 1 : -1);
         }
         result.push_back(c+LinearAlgebra::Vector<F>(g*e));
       }

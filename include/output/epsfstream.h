@@ -25,6 +25,7 @@
  *  \brief Encapsulated postscript output.
  */
  
+#include <cmath>
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -171,16 +172,16 @@ namespace Ariadne {
         pointers[i].pos=i;
         if (vert_pos[i](1)==0) {
           if (vert_pos[i](0) >0)
-            pointers[i].radiant=acos(0.0);
+            pointers[i].radiant=std::acos(0.0);
           else
-            pointers[i].radiant=-acos(0.0);
+            pointers[i].radiant=-std::acos(0.0);
         } else {
           tangent_R=vert_pos[i](0)/vert_pos[i](1);
           tangent=tangent_R;
-          pointers[i].radiant=atan(tangent);
+          pointers[i].radiant=std::atan(tangent);
         
           if (vert_pos[i](1) <0)
-            pointers[i].radiant+=acos(-1.0);
+            pointers[i].radiant+=std::acos(-1.0);
         }
       }
       

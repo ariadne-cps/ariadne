@@ -1,3 +1,4 @@
+SED_COMMAND="
 s/Synaps::dyadic/Dyadic/g
 s/__gmp_expr<__gmpf_value, __gmpf_value>/MPFloat/g
 s/__gmp_expr<__gmpq_value, __gmpq_value>/Rational/g
@@ -10,6 +11,8 @@ s/Combinatoric:://g
 s/Geometry:://g
 s/System:://g
 s/Evaluation:://g
+s/Output:://g
+
 s/boost::numeric:://g
 s/boost::logic:://g
 s/boost::python:://g
@@ -20,3 +23,19 @@ s/\,\ unbounded_array<Interval<Dyadic\ >\,\ std::allocator<Interval<Dyadic\ >\ >
 s/\,\ unbounded_array<Interval<Rational\ >\,\ std::allocator<Interval<Rational\ >\ >\ >//g
 s/ >/>/g
 s/basic_ostream<char, std::char_traits<char>>/ostream/g
+
+s/std::basic_string<char, std::char_traits<char>, std::allocator<char>>/string/g
+s/std::basic_string<_CharT, _Traits, _Alloc>/string/g
+s/\[with _CharT = char, _Traits = std::char_traits<char>, _Alloc = std::allocator<char>\]//g
+s/_CharT/char/g
+
+s/\/usr\/lib\/gcc\/.*\/include\/c++\/.\..\..\///g
+s/\.\.\/include\///g
+" 
+
+#s/\/usr\/lib\/gcc\/i386\-redhat\-linux\/4\.\1\.\1\/\.\.\/\.\.\/\.\.\/\.\.\/include\/c\+\+\/4\.1\.1\//c\+\+\//g
+# | cat > ariadne_filter.sed.tmp
+#echo $SED_COMMAND
+
+#sed -f ariadne_filter.sed.tmp $1 
+sed -e "$SED_COMMAND" $1

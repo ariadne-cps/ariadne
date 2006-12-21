@@ -211,7 +211,7 @@ namespace Ariadne {
 
       /*! \brief The \a n th of principle direction. */
       LinearAlgebra::Vector<R> generator(size_type n) const {
-        return column(this->_generators,n);
+        return this->_generators.column(n);
       }
       
       //@}

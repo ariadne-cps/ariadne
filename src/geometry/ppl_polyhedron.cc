@@ -148,8 +148,8 @@ namespace Ariadne {
       Rational cnst;
       Parma_Polyhedra_Library::Constraint_System cs;
       
-      for(size_type i=0; i!=A.size1(); ++i) {
-        rw=row(A,i);
+      for(size_type i=0; i!=A.number_of_rows(); ++i) {
+        rw=A.row(i);
         cnst=b[i];
         cs.insert(ppl_open_constraint(rw,cnst));
       }
@@ -163,8 +163,8 @@ namespace Ariadne {
       Parma_Polyhedra_Library::Linear_Expression ppl_lin_expr;
       
       LinearAlgebra::Vector<Rational> s;
-      for(size_type j=0; j!=G.size2(); ++j) {
-        s=column(G,j);
+      for(size_type j=0; j!=G.number_of_columns(); ++j) {
+        s=G.column(j);
         ppl_gs.insert(ppl_generator(s));
       }
       return Parma_Polyhedra_Library::NNC_Polyhedron(ppl_gs);
@@ -178,8 +178,8 @@ namespace Ariadne {
       Rational cnst;
       Parma_Polyhedra_Library::Constraint_System cs;
       
-      for(size_type i=0; i!=A.size1(); ++i) {
-        rw=row(A,i);
+      for(size_type i=0; i!=A.number_of_rows(); ++i) {
+        rw=A.row(i);
         cnst=b[i];
         cs.insert(ppl_constraint(rw,cnst));
       }
@@ -193,9 +193,9 @@ namespace Ariadne {
     {
       //std::cerr << "ppl_polyhedron(Vector<Rational>,Matrix<Rational>)" << std::endl;
       Parma_Polyhedra_Library::Generator_System ppl_gs;
-      LinearAlgebra::Vector<Rational> e(G.size2());
+      LinearAlgebra::Vector<Rational> e(G.number_of_columns());
       LinearAlgebra::Vector<Rational> v(c);
-      size_type m=G.size2();
+      size_type m=G.number_of_columns();
       for(size_type i=0; i!=(1u<<m); ++i) {
         for(size_type j=0; j!=m; ++j) {
           e[j] = (i&(1u<<j)) ? Rational(+1) : Rational(-1);
@@ -213,8 +213,8 @@ namespace Ariadne {
       Parma_Polyhedra_Library::Linear_Expression ppl_lin_expr;
       
       LinearAlgebra::Vector<Rational> s;
-      for(size_type j=0; j!=G.size2(); ++j) {
-        s=column(G,j);
+      for(size_type j=0; j!=G.number_of_columns(); ++j) {
+        s=G.column(j);
         ppl_gs.insert(ppl_generator(s));
       }
       return Parma_Polyhedra_Library::C_Polyhedron(ppl_gs);
@@ -411,11 +411,11 @@ namespace Ariadne {
       assert(A.space_dimension()==B.space_dimension());
       LinearAlgebra::Matrix<Rational> Av=generators(A);
       LinearAlgebra::Matrix<Rational> Bv=generators(B);
-      LinearAlgebra::Matrix<Rational> Rv(Av.size1(),Av.size2()*Bv.size2());
-      for(size_type i=0; i!=Rv.size1(); ++i) {
-        for(size_type j=0; j!=Av.size2(); ++j) {
-          for(size_type k=0; k!=Bv.size2(); ++k) {
-            Rv(i,j*Bv.size2()+k)=Av(i,j)+Bv(i,k);
+      LinearAlgebra::Matrix<Rational> Rv(Av.number_of_rows(),Av.number_of_columns()*Bv.number_of_columns());
+      for(size_type i=0; i!=Rv.number_of_rows(); ++i) {
+        for(size_type j=0; j!=Av.number_of_columns(); ++j) {
+          for(size_type k=0; k!=Bv.number_of_columns(); ++k) {
+            Rv(i,j*Bv.number_of_columns()+k)=Av(i,j)+Bv(i,k);
           }
         }
       }
@@ -429,11 +429,11 @@ namespace Ariadne {
       assert(A.space_dimension()==B.space_dimension());
       LinearAlgebra::Matrix<Rational> Av=generators(A);
       LinearAlgebra::Matrix<Rational> Bv=generators(B);
-      LinearAlgebra::Matrix<Rational> Rv(Av.size1(),Av.size2()*Bv.size2());
-      for(size_type i=0; i!=Rv.size1(); ++i) {
-        for(size_type j=0; j!=Av.size2(); ++j) {
-          for(size_type k=0; k!=Bv.size2(); ++k) {
-            Rv(i,j*Bv.size2()+k)=Av(i,j)-Bv(i,k);
+      LinearAlgebra::Matrix<Rational> Rv(Av.number_of_rows(),Av.number_of_columns()*Bv.number_of_columns());
+      for(size_type i=0; i!=Rv.number_of_rows(); ++i) {
+        for(size_type j=0; j!=Av.number_of_columns(); ++j) {
+          for(size_type k=0; k!=Bv.number_of_columns(); ++k) {
+            Rv(i,j*Bv.number_of_columns()+k)=Av(i,j)-Bv(i,k);
           }
         }
       }

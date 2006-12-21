@@ -31,22 +31,36 @@
 
 #include <iosfwd>
 
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/matrix_proxy.hpp>
-
 #include "../declarations.h"
 #include "../exceptions.h"
+#include "../base/array.h"
 #include "../numeric/integer.h"
 #include "../numeric/interval.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {
 
-    using boost::numeric::ublas::identity_matrix;
-    using boost::numeric::ublas::herm;
-    using boost::numeric::ublas::matrix_row;
-    using boost::numeric::ublas::matrix_column;
-  
+    /*!\brief Base class for all matrix expressions. */
+    template<class E>
+    class MatrixExpression 
+    {
+     public:
+      /*!\brief Convert \a *this to a reference to E. */
+      E& operator() () { return static_cast<E&>(*this); }
+      /*!\brief Convert \a *this to a constant reference to E. */
+      const E& operator() () const { return static_cast<const E&>(*this); }
+    };
+    
+
+    /* Proxy for a matrix row in operator[] */
+    template<class Mx>
+    struct MatrixRow
+    {
+      MatrixRow(Mx& A, const size_type& i) : _A(A), _i(i) { }
+      typename Mx::value_type& operator[](const size_type& j) { return _A(_i,j); }
+      Mx& _A; const size_type _i;
+    };
+    
     /*!\ingroup LinearAlgebra
      * \brief A matrix over \a R. 
      *
@@ -55,72 +69,105 @@ namespace Ariadne {
      * this is clearest and best English.
      */
     template<class R>
-    class Matrix : public boost::numeric::ublas::matrix<R> 
+    class Matrix : public MatrixExpression< Matrix<R> > 
     {
-      typedef boost::numeric::ublas::matrix<R> _Base;
-      typedef boost::numeric::ublas::matrix<R> _boost_matrix;
+     private:
+      size_type _nr;
+      size_type _nc;
+      array<R> _array;
+     private:
       typedef typename Numeric::traits<R>::arithmetic_type F;
      public:
+      /*! \brief The type of real number stored by the matrix. */
+      typedef R value_type;
+       
       /*! \brief Construct a 0 by 0 matrix. */
-      Matrix() : _Base() { }
+      explicit Matrix() : _nr(0), _nc(0), _array() { }
       /*! \brief Construct an \a r by \a c matrix, all of whose entries are zero. */
-      Matrix(const size_type& r, const size_type& c) : _Base(r,c) { }
+      explicit Matrix(const size_type& r, const size_type& c) : _nr(r), _nc(c), _array(r*c,static_cast<R>(0)) { }
       /*! \brief Construct an \a r by \a c matrix from the array beginning at \a ptr, 
        *  incrementing the input row elements by \a ri and input columns by \a ci. */
-      Matrix(const size_type& nr, const size_type& nc, 
-             const R* ptr, const size_type& ri, const size_type& ci=1) : _Base(nr,nc) 
+      explicit Matrix(const size_type& nr, const size_type& nc, 
+             const R* ptr, const size_type& ri, const size_type& ci=1)
+        : _nr(nr), _nc(nc), _array(nr*nc) 
       { 
         for(size_type i=0; i!=nr; ++i) { 
           for(size_type j=0; j!=nc; ++j) { 
-            _Base::operator()(i,j)=ptr[i*ri+j*ci];
+            (*this)(i,j)=ptr[i*ri+j*ci];
           } 
         } 
       }
 
-      template<class E> Matrix(const boost::numeric::ublas::matrix_expression<E>& A) : _Base(A) { }
-            
+      /*! \brief Convert from a matrix expression. */
+      template<class E> Matrix(const MatrixExpression<E>& A)
+        : _nr(A().number_of_rows()), _nc(A().number_of_columns()), _array(_nc*_nr)
+      { 
+        for(size_type i=0; i!=_nr; ++i) { 
+          for(size_type j=0; j!=_nc; ++j) { 
+            (*this)(i,j)=A()(i,j);
+          } 
+        } 
+      }
+        
       /*! \brief Construct from a string literal of the form "[a11,a12,...,a1n; a21,a22,...,a2n;...;am1,am2,...amn]". */
       explicit Matrix(const std::string& s);
 
-#ifdef DOXYGEN
       /*! \brief Copy constructor. */
-      Matrix(const Matrix<R>& A);
+      Matrix(const Matrix<R>& A) : _nr(A._nr), _nc(A._nc), _array(A._array) { }
       /*! \brief Copy assignment operator. */
-      Matrix<R>& operator=(const Matrix<R>& A);
-#endif
+      Matrix<R>& operator=(const Matrix<R>& A) {
+        if(this!=&A) { this->_nr=A._nr; this->_nc=A._nc; this->_array=A._array; } return *this; }
+      /*! \brief Assignment operator. */
+      template<class E> Matrix<R>& operator=(const MatrixExpression<E>& A) {
+        resize(A().number_of_rows(),A().number_of_columns());
+        for(size_type i=0; i!=this->number_of_rows(); ++i) {
+          for(size_type j=0; j!=this->number_of_columns(); ++j) {
+            (*this)(i,j)=A()(i,j); } } 
+        return *this;
+      }
       
       /*! \brief The equality operator. */
-      bool operator==(const Matrix<R>& A) const;
+      bool operator==(const Matrix<R>& A) const { 
+        return this->_nr==A._nr && this->_array==A._array; }
       /*! \brief The inequality operator. */
-      bool operator!=(const Matrix<R>& A) const;
+      bool operator!=(const Matrix<R>& A) const {
+        return !(*this==A); }
 
-    
-     
-      /*! \brief The number of elements in the \a d th dimension. */
-      size_type size(const size_type& d) const {
-        if(d==0) { return number_of_rows(); } 
-        else if(d==1) { return number_of_columns(); }
-        throw InvalidIndex(__PRETTY_FUNCTION__);
+      /*! A reference to the array holding the element data. */
+      array<R>& data() { return this->_array; }
+      /*! A constant reference to the array holding the element data. */
+      const array<R>& data() const { return this->_array; }
+      
+      /*! \brief Resize the matrix. */
+      void resize(const size_type& nr, const size_type nc) {
+        if(nr*nc!=this->_array.size()) { _array.resize(nr*nc); }
+        this->_nr=nr; this->_nc=nc;
       }
+      
       /*! \brief The number of rows of the matrix. */
-      size_type number_of_rows() const { return _Base::size1(); }
+      size_type number_of_rows() const { return this->_nr; }
       /*! \brief The number of columns of the matrix. */
-      size_type number_of_columns() const { return _Base::size2(); }
+      size_type number_of_columns() const { return this->_nc; }
       
       /*! \brief A constant reference to \a i,\a j th element. */
       const R& operator() (const size_type& i, const size_type& j) const { 
-        return this->_Base::operator()(i,j); }
+        return this->_array[i*this->_nc+j]; }
       /*! \brief A reference to \a i,\a j th element. */
       R& operator() (const size_type& i, const size_type& j) { 
-        return this->_Base::operator()(i,j); }
+        return this->_array[i*this->_nc+j]; }
       
-      // /*! \brief A slice through the \a i th row. */
-      //VectorSlice<R> operator[] (const size_type& i) {
-      //  return VectorSlice<R>(this->number_of_columns(),this->begin()+i*this->column_increment(),this->row_increment()); }
+      /*! \brief Subscripting operator; A[i][j] returns a reference to the (i,j)th element. */
+      MatrixRow< Matrix<R> > operator[](const size_type& i) {
+        return MatrixRow< Matrix<R> >(*this,i); }
+        
+      /*! \brief Constant subscripting operator; A[i][j] returns the (i,j)th element. */
+      //MatrixRow< const Matrix<R> > operator[](const size_type& i) const {
+      //  return MatrixRow< const Matrix<R> >(*this,i); }
         
       /*! \brief An \a r by \a c matrix, all of whose entries are zero. */
       static Matrix<R> zero(const size_type r, const size_type c) {
         return Matrix<R>(r,c); }
+        
       /*! \brief The \a n by \a n identity matrix. */
       static Matrix<R> identity(const size_type n) {
         Matrix<R> result(n,n); 
@@ -129,11 +176,12 @@ namespace Ariadne {
       }
       
       /*! \brief The \a i th row. */
-      matrix_row< Matrix<R> > row(const size_type& i) {
-        return boost::numeric::ublas::row(*this,i); }
+      VectorSlice<const R> row(const size_type& i) const {
+        return VectorSlice<const R>(this->_nc,this->begin()+i*_nc,1u); }
         
-      matrix_column< Matrix<R> > column(const size_type& j) {
-        return boost::numeric::ublas::column(*this,j); }
+      /*! \brief The \a j th column. */
+      VectorSlice<const R> column(const size_type& j) const {
+        return VectorSlice<const R>(this->_nr,this->begin()+j,this->_nc); }
         
       /*! \brief Concatenate the columns of two matrices. */
       static Matrix<R> concatenate_columns(const Matrix<R>& A1, const Matrix<R>& A2);
@@ -141,23 +189,23 @@ namespace Ariadne {
       /*! \brief The operator norm with respect to the supremum norm on vectors. 
        * Equal to the supremum over all rows of the sum of absolute values.
        */
-      F norm() const;
+      typename Numeric::traits<R>::arithmetic_type norm() const;
 
       /*! \brief The logarithmic norm. */
-      F log_norm() const;
+      typename Numeric::traits<R>::arithmetic_type log_norm() const;
       
       /*! \brief True if the matrix is singular. */
       bool singular() const;
       /*! \brief The determinant of the matrix. */
-      F determinant() const;
+      typename Numeric::traits<R>::arithmetic_type determinant() const;
       
       /*! \brief The transposed matrix. */
       Matrix<R> transpose() const;
 
       /*! \brief The inverse of the matrix. */
-      Matrix<F> inverse() const;
+      Matrix<typename Numeric::traits<R>::arithmetic_type> inverse() const;
       /*! \brief The solution of the linear equation \f$ Ax=b\f$. */
-      Vector<F> solve(const Vector<R>& b) const;
+      Vector<typename Numeric::traits<R>::arithmetic_type> solve(const Vector<R>& b) const;
 
       /*! \brief A pointer to the first element of the array of values. */
       //R* begin() { return &(*this)(0,0); }
@@ -177,57 +225,48 @@ namespace Ariadne {
       std::istream& read(std::istream& is);
 
 #ifdef DOXYGEN
+      typedef Numeric::traits<R>::arithmetic_type AT;
       /*! \brief The additive inverse of the matrix \a A. */
-      friend Matrix<R> operator-<>(const Matrix<R>& A);
+      friend Matrix<AT> operator-<>(const Matrix<R>& A);
       /*! \brief The sum of \a A1 and \a A2. */
-      friend Matrix<R> operator+<>(const Matrix<R>& A1, const Matrix<R>& A2);
+      friend Matrix<AT> operator+<>(const Matrix<R>& A1, const Matrix<R>& A2);
       /*! \brief The difference of \a A1 and \a A2. */
-      friend Matrix<R> operator-<>(const Matrix<R>& A1, const Matrix<R>& A2);
+      friend Matrix<AT> operator-<>(const Matrix<R>& A1, const Matrix<R>& A2);
       /*! \brief The scalar product of \a A by \a s. */
-      friend Matrix<R> operator*<>(const R& s, const Matrix<R>& A);
+      friend Matrix<AT> operator*<>(const R& s, const Matrix<R>& A);
       /*! \brief The scalar product of \a A by \a s. */
-      friend Matrix<R> operator*<>(const Matrix<R>& A, const R& s);
+      friend Matrix<AT> operator*<>(const Matrix<R>& A, const R& s);
       /*! \brief The scalar product of \a A by the reciprocal of \a s. */
-      friend Matrix<R> operator/<>(const Matrix<R>& A, const R& s);
+      friend Matrix<RAT> operator/<>(const Matrix<R>& A, const R& s);
       /*! \brief The product of matrix \a A1 with matrix \a A2. */
-      friend Matrix<R> operator*<>(const Matrix<R>& A1, const Matrix<R>& A2);
+      friend Matrix<AT> operator*<>(const Matrix<R>& A1, const Matrix<R>& A2);
       /*! \brief The product of matrix \a A with vector \a v. */
-      friend Vector<R> operator*<>(const Matrix<R>& A, const Vector<R>& v);
+      friend Vector<AT> operator*<>(const Matrix<R>& A, const Vector<R>& v);
 
       /*! \brief The inverse of \a A. */
-      friend Matrix<R> inverse<>(const Matrix<R>& A);
+      friend Matrix<AT> inverse<>(const Matrix<R>& A);
       /*! \brief Solve the linear system \f$Ax=b\f$. */
-      friend Matrix<R> solve<>(const Matrix<R>& A, const Vector<R>& b);
+      friend Matrix<AT> solve<>(const Matrix<R>& A, const Vector<R>& b);
 
       /*! \brief Catenate the columns of \a A1 with those of \a A2. */
-      friend Matrix<R> concatenate_columns<>(const Matrix<R>& A1, const Matrix<R>& A2);
+      friend Matrix<AT> concatenate_columns<>(const Matrix<R>& A1, const Matrix<R>& A2);
       /*! \brief Checks if the matrices have the same dimensions. */
       friend bool have_same_dimensions<>(const Matrix<R>& A1, const Matrix<R>& A2);
 #endif 
 
     };
   
-#ifdef DOXYGEN
-    /*! \ingroup LinearAlgebra
-     *  \brief Base class for matrix expressions. */
-    template<class E>
-    class MatrixExpression {
-     public:
-      /*! Promote to the actual expression type \a E. */
-      E& operator();
-      /*! Promote to a constant reference to the actual expression type \a E. */
-      const E& operator() const;
-   };
-#endif
 
 
     /*!\ingroup LinearAlgebra
      * \brief A slice through a matrix with equally spaced row and column increments. 
      */
     template<class R>
-    class MatrixSlice : public boost::numeric::ublas::matrix_expression< MatrixSlice<R> >
+    class MatrixSlice : public MatrixExpression< MatrixSlice<R> >
     {
      public:
+      typedef R value_type;
+
       MatrixSlice(const size_type& nr, const size_type& nc, R* ptr, const size_type& rinc, const size_type& cinc=1u)
         : _number_of_rows(nr), _number_of_columns(nc), _begin(ptr), _row_increment(rinc), _column_increment(cinc) { }
       MatrixSlice(const size_type& nr, const size_type& nc, R* ptr)
@@ -236,9 +275,6 @@ namespace Ariadne {
         : _number_of_rows(m.number_of_rows()), _number_of_columns(m.number_of_constraints()), _begin(m.begin()),
           _row_increment(m.row_increment()), _column_increment(m.column_increment()) { }
 
-      size_type size1() const { return this->_number_of_rows; }
-      size_type size2() const { return this->_number_of_columns; }
-      
       size_type number_of_rows() const { return this->_number_of_rows; }
       size_type number_of_columns() const { return this->_number_of_columns; }
       const R* begin() const { return this->_begin; }
@@ -251,9 +287,10 @@ namespace Ariadne {
       R& operator() (const size_type& i, const size_type& j) { 
         return this->_begin[i*this->_row_increment+j*this->_column_increment]; }
      
-      template<class E> MatrixSlice<R>& operator=(const boost::numeric::ublas::matrix_expression< E > m) {
+        
+      template<class E> MatrixSlice<R>& operator=(const MatrixExpression< E > m) {
         const E& e=m(); 
-        if(!(this->number_of_rows()==e.size1() && this->number_of_columns()==e.size2())) {
+        if(!(this->number_of_rows()==e.number_of_rows() && this->number_of_columns()==e.number_of_columns())) {
           throw IncompatibleSizes(__PRETTY_FUNCTION__); }
         for(size_type i=0; i!=this->number_of_rows(); ++i) { 
           for(size_type j=0; j!=this->number_of_columns(); ++j) { 
@@ -336,7 +373,7 @@ namespace Ariadne {
       return result;
     }
 
-
+    
     template<class R>
     inline
     bool
@@ -346,48 +383,118 @@ namespace Ariadne {
           && A1.number_of_columns()==A2.number_of_columns();
     }
     
-    template<class R>
-    inline
-    Vector<R>
-    operator*(const Matrix<R>& A, const Vector<R>& B) {
-      return boost::numeric::ublas::prod(A,B);
-    }
-           
-    template<class R>
-    inline
-    Vector< Interval<R> >
-    operator*(const Matrix<R>& A, const Vector< Interval<R> >& B) {
-      return boost::numeric::ublas::prod(Matrix< Interval<R> >(A),B);
-    }
-           
-    template<class R>
-    inline
-    Vector< Interval<R> >
-    operator*(const Matrix< Interval<R> >& A, const Vector<R>& B) {
-      return boost::numeric::ublas::prod(A,Vector< Interval<R> >(B));
-    }
-           
     
-    template<class R>
-    inline
+    template<class R> inline
     Matrix<R>
-    operator*(const Matrix<R>& A, const Matrix<R>& B) {
-      return boost::numeric::ublas::prod(A,B);
+    operator-(const Matrix<R>& A) 
+    {
+      Matrix<R> result(A.number_of_rows(),A.number_of_columns());
+      for(size_type i=0; i!=A.number_of_rows(); ++i) {
+        for(size_type j=0; j!=A.number_of_columns(); ++j) {
+          result(i,j)=-A(i,j);
+        }
+      }
+      return result;
+    }
+ 
+    template<class R1, class R2> inline
+    Matrix<R1>&
+    operator+=(Matrix<R1>& A1, const Matrix<R2>& A2) 
+    {
+      for(size_type i=0; i!=A1.number_of_rows(); ++i) {
+        for(size_type j=0; j!=A1.number_of_columns(); ++j) {
+          A1(i,j)+=A2(i,j);
+        }
+      }
+      return A1;
     }
     
-    template<class R>
-    inline
-    Matrix< Interval<R> >
-    operator*(const Matrix<R>& A, const Matrix< Interval<R> >& B) {
-      return boost::numeric::ublas::prod(Matrix< Interval<R> >(A),B);
+    template<class R1, class R2> inline
+    Matrix<typename Numeric::traits<R1,R2>::arithmetic_type>
+    operator+(const Matrix<R1>& A1, const Matrix<R2>& A2) 
+    {
+      typedef typename Numeric::traits<R1,R2>::arithmetic_type R3;
+      Matrix<R3> result(A1.number_of_rows(),A1.number_of_columns());
+      for(size_type i=0; i!=A1.number_of_rows(); ++i) {
+        for(size_type j=0; j!=A1.number_of_columns(); ++j) {
+          result(i,j)=A1(i,j)+A2(i,j);
+        }
+      }
+      return result;
     }
     
-    template<class R>
-    inline
-    Matrix< Interval<R> >
-    operator*(const Matrix< Interval<R> >& A, const Matrix<R>& B) {
-      return boost::numeric::ublas::prod(A,Matrix< Interval<R> >(B));
+    template<class R1, class R2> inline
+    Matrix<typename Numeric::traits<R1,R2>::arithmetic_type>
+    operator-(const Matrix<R1>& A1, const Matrix<R2>& A2) 
+    {
+      typedef typename Numeric::traits<R1,R2>::arithmetic_type R3;
+      Matrix<R3> result(A1.number_of_rows(),A1.number_of_columns());
+      for(size_type i=0; i!=A1.number_of_rows(); ++i) {
+        for(size_type j=0; j!=A1.number_of_columns(); ++j) {
+          result(i,j)=A1(i,j)-A2(i,j);
+        }
+      }
+      return result;
     }
+    
+    template<class R1, class R2> inline
+    Matrix<typename Numeric::traits<R1,R2>::arithmetic_type>
+    operator*(const R1& s, const Matrix<R2>& A) 
+    {
+      typedef typename Numeric::traits<R1,R2>::arithmetic_type R3;
+      Matrix<R3> result(A.number_of_rows(),A.number_of_columns());
+      for(size_type i=0; i!=A.number_of_rows(); ++i) {
+        for(size_type j=0; j!=A.number_of_columns(); ++j) {
+          result(i,j)=s*A(i,j);
+        }
+      }
+      return result;
+    }
+    
+    template<class R1, class R2> inline
+    Matrix<typename Numeric::traits<R1,R2>::arithmetic_type>
+    operator*(const Matrix<R1>& A, const R2& s) 
+    {
+      return s*A;
+    }
+    
+    template<class R1, class R2> inline
+    Matrix<typename Numeric::traits<R1,R2>::arithmetic_type>
+    operator/(const Matrix<R1>& A, const R2& s) 
+    {
+      return (static_cast<R2>(1)/s)*A;
+    }
+    
+    template<class R1, class R2> inline
+    Vector<typename Numeric::traits<R1,R2>::arithmetic_type>
+    operator*(const Matrix<R1>& A, const Vector<R2>& v) 
+    {
+      typedef typename Numeric::traits<R1,R2>::arithmetic_type R3;
+      Vector<R3> result(A.number_of_rows());
+      for(size_type i=0; i!=A.number_of_rows(); ++i) {
+        for(size_type j=0; j!=A.number_of_columns(); ++j) {
+          result(i)+=A(i,j)*v(j);
+        }
+      }
+      return result;
+    }
+    
+    template<class R1, class R2> inline
+    Matrix<typename Numeric::traits<R1,R2>::arithmetic_type>
+    operator*(const Matrix<R1>& A1, const Matrix<R2>& A2) 
+    {
+      typedef typename Numeric::traits<R1,R2>::arithmetic_type R3;
+      Matrix<R3> result(A1.number_of_rows(),A2.number_of_columns());
+      for(size_type i=0; i!=A1.number_of_rows(); ++i) {
+        for(size_type j=0; j!=A2.number_of_columns(); ++j) {
+          for(size_type k=0; k!=A1.number_of_columns(); ++k) {
+            result(i,j)+=A1(i,k)*A2(k,j);
+          }
+        }
+      }
+      return result;
+    }
+    
     
  
     template<class R>
@@ -482,16 +589,6 @@ namespace Ariadne {
       return A.read(is); 
     }
 
-    template<>
-    class Matrix<int> : public boost::numeric::ublas::matrix<int> 
-    {
-     public:
-      Matrix()
-        : boost::numeric::ublas::matrix<int>() { }
-      Matrix(const size_type& nr, const size_type& nc)
-        : boost::numeric::ublas::matrix<int>(nr,nc) { }
-    };
-             
     
 /*        
         

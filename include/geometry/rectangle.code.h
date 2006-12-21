@@ -47,27 +47,7 @@ namespace Ariadne {
       ss >> *this;
     }
 
-    template<class R>
-    Rectangle<R>& 
-    Rectangle<R>::expand_by(const real_type& delta) 
-    {
-      Interval<R> expand(-delta,delta);
-      for (size_type j=0; j< this->dimension(); ++j) {
-        (*this)[j]+=expand;
-      }
-        
-      return *this;
-    }
-      
-    template<class R>
-    Rectangle<R> 
-    Rectangle<R>::expand(const real_type& delta) const
-    {
-      Rectangle<R> result(*this);
-      result.expand_by(delta);
-      return result;
-    }
-      
+    
     
     template<class R>
     Rectangle<R>
@@ -184,15 +164,6 @@ namespace Ariadne {
       return RectangleVerticesIterator<R>(*this,true);
     }
     
-    
-    template<class R>
-    tribool 
-    subset(const Rectangle<R>& A, 
-           const ListSet<R,Geometry::Rectangle>& B)
-    {
-      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
-      return Geometry::subset(A, GridMaskSet<R>(B));
-    }
     
     
     template<class R>

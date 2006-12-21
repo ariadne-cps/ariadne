@@ -499,7 +499,9 @@ namespace Ariadne {
     {
       const IrregularGrid<R>* irregular_grid_ptr=dynamic_cast<const IrregularGrid<R>*>(_grid_ptr);
       if(irregular_grid_ptr) {
-        assert(subset(b,irregular_grid_ptr->block()));
+        if(!subset(b,irregular_grid_ptr->block())) {
+          throw std::runtime_error("Lattice block does not lie in grid bounds");
+        }
       }
     }
 
@@ -509,7 +511,9 @@ namespace Ariadne {
     {
       const IrregularGrid<R>* irregular_grid_ptr=dynamic_cast<const IrregularGrid<R>*>(_grid_ptr);
       if(irregular_grid_ptr) {
-        assert(subset(ms.block(),irregular_grid_ptr->block()));
+        if(!subset(ms.block(),irregular_grid_ptr->block())) {
+          throw std::runtime_error("Lattice block does not lie in grid bounds");
+        }
       }
     }
 

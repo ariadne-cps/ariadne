@@ -95,7 +95,7 @@ namespace Ariadne {
                   const R& e) 
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
-      Matrix<F> result=identity_matrix<R>(A.number_of_rows());
+      Matrix<F> result=Matrix<R>::identity(A.number_of_rows());
       
       F norm_Ah=F(h)*norm(A);
       Matrix<F> AhpowNdivfN=result;
@@ -115,7 +115,7 @@ namespace Ariadne {
                                const R& e)
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
-      Matrix<F> result=static_cast<F>(h)*identity_matrix<R>(A.number_of_rows());
+      Matrix<F> result=static_cast<F>(h)*Matrix<R>::identity(A.number_of_rows());
       
       F norm_Ah=F(h)*norm(A);
       Matrix<F> AhpowNdivfN=result;

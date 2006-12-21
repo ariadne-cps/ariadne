@@ -41,7 +41,7 @@ namespace Ariadne {
       
     template<class R>
     Ellipsoid<R>::Ellipsoid(size_type n)
-      : _centre(n), _bilinear_form(LinearAlgebra::identity_matrix<R>(n))
+      : _centre(n), _bilinear_form(LinearAlgebra::Matrix<R>::identity(n))
     {
     }
     

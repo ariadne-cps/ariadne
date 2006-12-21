@@ -42,33 +42,10 @@ namespace Ariadne {
         std::stringstream ss(s);
         ss >> *this;
     }
+    
 
     template<class R>
-    bool
-    Matrix<R>::operator==(const Matrix<R>& A) const
-    {
-      if(this->number_of_rows()!=A.number_of_rows() ||
-            this->number_of_columns()!=A.number_of_columns())
-      {
-        return false;
-      }
-      for(size_type i=0; i!=this->number_of_rows(); ++i) {
-        for(size_type j=0; j!=this->number_of_columns(); ++j) {
-          if((*this)(i,j)!=A(i,j)) { return false; }
-        }
-      }
-      return true;
-    }
-
-    template<class R>
-    bool
-    Matrix<R>::operator!=(const Matrix<R>& A) const
-    {
-      return !(*this==A);
-    }
-
-    template<class R>
-    typename Matrix<R>::F
+    typename Numeric::traits<R>::arithmetic_type
     Matrix<R>::norm() const
     {
       //std::cerr << "Matrix<" << name<R>() << ">::norm() const\n";
@@ -85,7 +62,7 @@ namespace Ariadne {
     }
 
     template<class R>
-    typename Matrix<R>::F
+    typename Numeric::traits<R>::arithmetic_type
     Matrix<R>::log_norm() const
     {
       const Matrix<R>& A=*this;

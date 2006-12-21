@@ -160,7 +160,7 @@ namespace Ariadne {
       std::ostream& write(std::ostream& os) const;
      private:
       void _set(size_type j, dimension_type i,const R& x) { _pts(i,j)=x; }
-      Point<R> _get(size_type j) const { return Point<R>(column(_pts,j)); }
+      Point<R> _get(size_type j) const { return Point<R>(_pts.column(j)); }
       R _get(size_type j, dimension_type i) const { return _pts(i,j); }
 
      private:

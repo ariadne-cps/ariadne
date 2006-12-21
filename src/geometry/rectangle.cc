@@ -33,8 +33,5 @@ namespace Ariadne {
     template class Rectangle<Rational>; 
 //    template class Rectangle< Interval<Real> >; 
       
-    template tribool subset(const Rectangle<Real>&, 
-                            const ListSet<Real,Geometry::Rectangle>&);
-    
   }
 }

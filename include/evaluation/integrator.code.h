@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <typeinfo>
 #include <cstring>
+#include <cassert>
 
 #include <list>
 #include <set>

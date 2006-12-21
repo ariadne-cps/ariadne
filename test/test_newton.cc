@@ -25,6 +25,7 @@
 #include <iomanip>
 #include <fstream>
 #include <cstdio>
+#include <cassert>
 
 
 #include "geometry/point.h"

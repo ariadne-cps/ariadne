@@ -47,7 +47,8 @@ namespace Ariadne {
     class field_tag { };
       
 #ifndef DOXYGEN
-    template<class T1, class T2> struct traits { };
+    template<class T1, class T2> struct traits { 
+    };
     //template<class T1, class T2=T1> class traits { };
 
 #else
@@ -59,6 +60,8 @@ namespace Ariadne {
     
     /*! \brief Typedef's describing a numerical type. */
     template<class T> struct traits<T,T> { 
+      /*!\brief The type which can be assigned an element of \a T. */
+      typedef T closure_type;
       /*!\brief The default type used to store the result of a binary arithmetical operation. */
       typedef AT arithmetic_type;
       /*!\brief The type used for interval arithmetic over \a T. Defaults to Interval<T> if \a T is
@@ -69,52 +72,55 @@ namespace Ariadne {
 #endif      
 
     template<> struct traits<int> {
+      typedef int closure_type;
       typedef int arithmetic_type;
     };
   
     template<> struct traits<double> {
+      typedef double closure_type;
       typedef double arithmetic_type;
       typedef Interval<double> interval_type;
     };
   
     template<> struct traits< mpf_class > { 
       typedef mpf_class approximate_arithmetic_type; 
+      typedef mpf_class closure_type; 
       typedef mpf_class arithmetic_type; 
       typedef Interval<MPFloat> interval_type; 
     };
     
     template<> struct traits< Float64 > { 
       typedef double approximate_arithmetic_type; 
+      typedef Float64 closure_type; 
       typedef Interval<Float64> arithmetic_type; 
       typedef Interval<Float64> interval_type;
     };
     
     template<> struct traits< MPFloat > { 
       typedef mpf_class approximate_arithmetic_type; 
+      typedef MPFloat closure_type; 
       typedef Interval<MPFloat> arithmetic_type; 
       typedef Interval<MPFloat> interval_type; 
     };
     
     template<> struct traits< Rational > { 
       typedef Rational approximate_arithmetic_type; 
+      typedef Rational closure_type; 
       typedef Rational arithmetic_type; 
       typedef Interval<Rational> interval_type; 
     };
 
+    template<class E> struct traits< __gmp_expr<__gmpq_value,E> > { 
+      typedef Rational closure_type; 
+    };
+
+
     template<class R> struct traits< Interval<R> > { 
-      typedef Interval<R> arithmetic_type; 
+      typedef Interval<typename traits<R>::closure_type> closure_type; 
+      typedef Interval<typename traits<R>::closure_type> arithmetic_type; 
       typedef Interval<R> interval_type; 
     };
 
-    
-    template<> struct traits< Float64, double > { 
-      typedef Interval<Float64> arithmetic_type; 
-    };
-    
-    template<> struct traits< double, Float64 > { 
-      typedef Interval<Float64> arithmetic_type; 
-    };
-    
     template<> struct traits< Float64, Rational > { 
       typedef Rational arithmetic_type; 
     };

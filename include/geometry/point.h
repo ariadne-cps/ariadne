@@ -91,7 +91,7 @@ namespace Ariadne {
       /*! \brief The origin in dimension \a dim. */
       explicit Point(dimension_type d) : _vector(d) {
         for(size_type i=0; i!=dimension(); ++i) {
-          _vector[i]=real_type(0);
+          _vector(i)=real_type(0);
         }
       }
 
@@ -132,12 +132,7 @@ namespace Ariadne {
  
       /*! \brief Checks equivalence between two states. */
       bool operator==(const Point<R>& A) const {
-        /* Return false if states have different dimensions */
-        if (this->dimension()!=A.dimension()) { return false; }
-        for (size_type i=0; i<this->dimension(); i++) {
-          if (this->_vector[i]!=A._vector[i]) { return false; }
-        }
-        return true;
+        return this->_vector==A._vector;
       }
       
       /*! \brief Inequality operator. */
@@ -153,13 +148,13 @@ namespace Ariadne {
       /*! \brief Subcripting operator. */
       real_type& operator[] (dimension_type index) {
         check_coordinate(*this,index,__PRETTY_FUNCTION__);
-        return  (this->_vector[index]);
+        return  (this->_vector(index));
       }
 
       /*! \brief Subcripting operator. */
       const real_type& operator[](dimension_type index) const {
         check_coordinate(*this,index,__PRETTY_FUNCTION__);
-        return  (this->_vector[index]);
+        return  (this->_vector(index));
       }
 
       /*! \brief The position vector of the point. */

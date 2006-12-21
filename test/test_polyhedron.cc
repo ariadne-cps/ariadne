@@ -39,8 +39,8 @@
 #include "geometry/point.h"
 #include "geometry/point_list.h"
 #include "geometry/rectangle.h"
-#include "geometry/polytope.h"
 #include "geometry/zonotope.h"
+#include "geometry/polytope.h"
 #include "geometry/polyhedron.h"
 
 #include "test.h"
@@ -105,7 +105,7 @@ test_polyhedron()
     cout << "  " << c.satisfied_by(pt1) << endl;
   }
   
-  cout << "phd.contains(pt1)=" << phd.contains(pt1) << endl;
+  cout << "phd.contains(pt1)=" << flush; cout << phd.contains(pt1) << endl;
   assert(phd.contains(pt1));
   
   Rectangle<R> r1("[-0.06125,0.25]x[0.125,0.375]");

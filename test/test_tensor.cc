@@ -25,6 +25,8 @@
 
 #include <iostream>
 #include <fstream>
+#include <fstream>
+#include <cassert>
 
 #include "declarations.h"
 #include "real_typedef.h"

@@ -97,7 +97,7 @@ int main() {
 
   assert(va.size()==3);
   assert(va[1]==a1);
-
+  
   std::vector< array<double> >::const_iterator vai=va.begin();
   assert(*vai==a0);
   assert(vai!=va.end());

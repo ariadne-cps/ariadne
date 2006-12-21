@@ -28,6 +28,7 @@
 #include <sstream>
 #include <algorithm>
 #include <typeinfo>
+#include <cassert>
 
 #include <list>
 #include <set>
@@ -308,7 +309,7 @@ Ariadne::Evaluation::AffineIntegrator<R>::reachability_step(
   const VectorField<R>& vf(vector_field);
   Zonotope<I> iz=initial_set;
   const size_type n=vector_field.dimension();
-  const Matrix<R> id=identity_matrix<R>(n);
+  const Matrix<R> id=Matrix<R>::identity(n);
   time_type hc=step_size/2;
   Interval<R> hh(step_size/2);
   

@@ -25,6 +25,8 @@
 
 #include <iostream>
 #include <fstream>
+#include <cassert>
+
 
 #include "numeric/float64.h"
 #include "numeric/mpfloat.h"
@@ -58,7 +60,7 @@ template<class R>
 int 
 test_vector()
 {
-  std::cout << "\ntest_vector<" << name<R>() << ">()\n";
+  std::cout << "\ntest_vector<" << name<R>() << ">()" << endl;
   
   typedef typename Numeric::traits<R>::arithmetic_type F;
   
@@ -67,21 +69,22 @@ test_vector()
   R x=1.5;
 
   Vector<R> v0;
-  cout << "v0=" << v0 << endl;
+  cout << "v0.size()=" << v0.size() << endl;
+  cout << "v0=" << flush; cout << v0 << endl;
   Vector<R> v1(n,vptr);
   cout << "v1=" << v1 << endl;
   Vector<R> v2("[2.375,4.25,-1.25]");
   cout << "v2=" << v2 << endl;
-  cout << "v1.norm()=" << v1.norm() << "  v2.norm()=" << v2.norm() << endl;
-  assert(v1.norm()==4);
-  assert(v2.norm()==4.25);
+  cout << "norm(v1)=" << norm(v1) << "  norm(v2)=" << norm(v2) << endl;
+  assert(norm(v1)==4);
+  assert(norm(v2)==4.25);
 
   Vector<R> v3(1);
   cout << "v3=" << v3 << endl;
   Vector<R> v4=v2;
   cout << "v4=" << v4 << endl;
   cout << endl;
-
+    
   Vector<F> vf0;
   v1=Vector<R>("[0.25,-1.5]");
   v2=Vector<R>("[-0.5,2.25]");
@@ -101,8 +104,8 @@ test_vector()
   
   Vector< Interval<R> > iv1("[[0.99,1.01],[2.25,2.375],[4.0,4.375],[-0.02,0.01]]");
   cout << "iv1=" << iv1 << endl;
-  cout << "iv1.norm()=" << iv1.norm() << endl;
-  cout << "iv1.norm().upper()=" << iv1.norm().upper() << endl;
+  cout << "norm(iv1)=" << norm(iv1) << endl;
+  cout << "norm(iv1).upper()=" << norm(iv1).upper() << endl;
 
   Vector< Interval<R> > iv2("[[-1,1],[-1,1]]");
   cout << "iv2=" << iv2 << endl;
@@ -120,8 +123,8 @@ test_vector()
   cout << "iv1=" << iv1 << endl;
   cout << endl;
 
-  Interval<R> ix2=iv2[0];
-  Interval<R> ix3=iv3[0];
+  Interval<R> ix2=iv2(0);
+  Interval<R> ix3=iv3(0);
   Interval<R> ix1=ix2+ix3;
   ix1=ix2+ix3;
   
@@ -161,5 +164,24 @@ test_vector()
   iv0=v1/ix;
   cout << iv0 << " = " << v1 << " / " << ix << endl;
 
+  cout << "test_vector_slice" << endl;
+  v1=Vector<R>("[-1.25,0.75,-0.5,-4.25,2.3725]");
+  cout << v1 << endl;
+  VectorSlice<R> vs1(2,v1.begin()+2,2);
+  cout << vs1 << endl;
+  VectorSlice<R> vs2(2,v1.begin(),3);
+  cout << vs2 << endl;
+  
+  iv1=vs1+vs2;
+  cout << iv1 << endl;
+  iv1=vs1-vs2;
+  cout << iv1 << endl;
+  iv1=x*vs1;
+  cout << iv1 << endl;
+  iv1=vs1*x;
+  cout << iv1 << endl;
+  iv1=vs1/x;
+  cout << iv1 << endl;
+  
   return 0;
 }

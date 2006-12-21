@@ -87,7 +87,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorF
   const System::VectorField<R>& vf=vector_field;
   const size_type n=vf.dimension();
   Interval<R> h=step_size;
-  const LinearAlgebra::Matrix<I> id=LinearAlgebra::identity_matrix<I>(n);
+  const LinearAlgebra::Matrix<I> id=LinearAlgebra::Matrix<I>::identity(n);
   
   LinearAlgebra::Vector<I> f=vf(bbox);
   LinearAlgebra::Matrix<I> df=vf.jacobian(bbox);
@@ -189,7 +189,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::reachability_step(const System::Vector
   const VectorField<R>& vf(vector_field);
   Zonotope<R> z=initial_set;
   const size_type n=z.dimension();
-  const Matrix<R> id=identity_matrix<R>(n);
+  const Matrix<R> id=Matrix<R>::identity(n);
   
   /* Throws exception if we can't find flow bounds for given stepsize. */
   time_type input_step_size=step_size;
@@ -265,7 +265,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::reachability_step(const System::Vector
   const VectorField<R>& vf(vector_field);
   Zonotope<I> z=initial_set;
   const size_type n=z.dimension();
-  const Matrix<R> id=identity_matrix<R>(n);
+  const Matrix<R> id=Matrix<R>::identity(n);
   
   /* Throws exception if we can't find flow bounds for given stepsize. */
   Rectangle<R> bbox=estimate_flow_bounds(vf,z.bounding_box(),step_size,256);

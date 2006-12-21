@@ -212,7 +212,7 @@ namespace Ariadne {
 
       state_type first_centre=this->centre();
       for(size_type i=0; i<m; i++) {
-        first_centre=sub_approx(first_centre,LinearAlgebra::Vector<R>(column(new_generators,i)));
+        first_centre=sub_approx(first_centre,LinearAlgebra::Vector<R>(new_generators.column(i)));
       }
       
       for(unsigned long k=0; k!=1u<<m; ++k) {
@@ -242,7 +242,7 @@ namespace Ariadne {
       R max_norm=0;
       size_type max_column=0;
       for(size_type j=0; j<m; j++) {
-        R norm = LinearAlgebra::norm(LinearAlgebra::Vector<R>(column(new_generators,j)));
+        R norm = LinearAlgebra::norm(LinearAlgebra::Vector<R>(new_generators.column(j)));
         if(norm>max_norm) {
           max_norm=norm;
           max_column=j;
@@ -254,9 +254,9 @@ namespace Ariadne {
         new_generators(i,j)=div_up(new_generators(i,j),two);
       }
       
-      state_type new_centre=sub_approx(this->centre(),LinearAlgebra::Vector<R>(column(new_generators,j)));
+      state_type new_centre=sub_approx(this->centre(),LinearAlgebra::Vector<R>(new_generators.column(j)));
       result.adjoin(Zonotope<R>(new_centre,new_generators));
-      new_centre=sub_approx(new_centre,LinearAlgebra::Vector<R>(column(new_generators,j)));
+      new_centre=sub_approx(new_centre,LinearAlgebra::Vector<R>(new_generators.column(j)));
       result.adjoin(Zonotope(new_centre,new_generators));
 
       return result;
@@ -289,7 +289,7 @@ namespace Ariadne {
     {
       std::vector< LinearAlgebra::Vector<R> > generator_vectors;
       for(size_type j=0; j!=this->number_of_generators(); ++j) {
-        generator_vectors.push_back(column(this->_generators,j));
+        generator_vectors.push_back(this->_generators.column(j));
       }
       
       std::stable_sort(generator_vectors.begin(),generator_vectors.end(),&norm_grtr<R>);

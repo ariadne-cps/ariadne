@@ -75,6 +75,11 @@ test_matrix()
   cout << "A2(0,0)= " << A2(0,0) << endl;
   assert(A2==A3);
   
+  A1[0][0]=1.0;
+  cout << "A1[0][0]= " << A1[0][0] << endl;
+  cout << "A2[0][0]= " << A2[0][0] << endl;
+  assert(A2==A3);
+  
   A0=Matrix<R>::zero(2,3);
   cout << "A0= " << A0 << endl;
   A1=Matrix<R>::identity(4);
@@ -86,13 +91,13 @@ test_matrix()
 
   fA0=-A1;
   cout << A0 << " = -" << A1 << endl;
-  fA0=Matrix<F>(A1)+A2;
+  fA0=A1+A2;
   cout << A0 << " = " << A1 << " + " << A2 << endl;
-  fA0=Matrix<F>(A1)-A2;
+  fA0=A1-A2;
   cout << A0 << " = " << A1 << " - " << A2 << endl;
-  fA0=x*Matrix<F>(A2);
+  fA0=x*A2;
   cout << A0 << " = " << x << " * " << A2 << endl;
-  fA0=Matrix<F>(A1)*x;
+  fA0=A1*x;
   cout << A0 << " = " << A1 << " * " << x << endl;
   fA0=Matrix<F>(A1)/x;
   cout << A0 << " = " << A1 << " / " << x << endl;

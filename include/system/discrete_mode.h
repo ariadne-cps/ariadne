@@ -69,9 +69,7 @@ class DiscreteMode {
     // The discrete mode's invariant.
     boost::shared_ptr< const Geometry::Set<R> > _invariant;
   
-  public:  
-      
-    
+  public:
     
     /*! \brief Copy constructor. */
     DiscreteMode(const DiscreteMode<R>& orig)

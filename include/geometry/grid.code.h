@@ -29,9 +29,10 @@
 
 #include "../numeric/arithmetic.h"
 
-#include "../geometry/grid_set.h"
 #include "../geometry/rectangle.h"
 #include "../geometry/list_set.h"
+
+#include "../geometry/grid_set.h" // for GridBlock<R>
 
 namespace Ariadne {
   namespace Geometry {
@@ -289,14 +290,15 @@ namespace Ariadne {
       return Rectangle<R>(0);
     }
 
-
     template<class R>
-    std::ostream&
-    operator<<(std::ostream& os, const Grid<R>& g)
+    dimension_type 
+    FiniteGrid<R>::dimension() const 
     {
-      return g.write(os);
+      return this->_grid_ptr->dimension();
     }
+    
 
+    
     template<class R>
     std::ostream&
     IrregularGrid<R>::write(std::ostream& os) const
@@ -304,6 +306,7 @@ namespace Ariadne {
       return os << "IrregularGrid(" << this->_subdivision_coordinates << ")";
     }
 
+    
     template<class R>
     std::ostream&
     RegularGrid<R>::write(std::ostream& os) const
@@ -312,13 +315,7 @@ namespace Ariadne {
                   << this->_subdivision_lengths << " )\n";
     }
 
-    template<class R>
-    std::istream&
-    operator>>(std::istream& is, Grid<R>& g)
-    {
-      return g.read(is);
-    }
-
+    
     template<class R>
     std::istream&
     IrregularGrid<R>::read(std::istream& is)
@@ -349,6 +346,7 @@ namespace Ariadne {
       return is; 
     }
 
+    
     template<class R>
     std::istream&
     RegularGrid<R>::read(std::istream& is)
@@ -380,20 +378,15 @@ namespace Ariadne {
       return is; 
     }
 
+    
+    
     template<class R>
     std::ostream&
-    operator<<(std::ostream& os, const FiniteGrid<R>& fg)
+    FiniteGrid<R>::write(std::ostream& os) const
     {
-      return os << "FiniteGrid(grid=" << fg.grid() << ", bounds=" << fg.bounds() << ")";
+      return os << "FiniteGrid(grid=" << this->grid() << ", bounds=" << this->bounds() << ")";
     }
 
-    template<class R>
-    dimension_type 
-    FiniteGrid<R>::dimension() const 
-    {
-      return this->_grid_ptr->dimension();
-    }
-    
 
   }
 }

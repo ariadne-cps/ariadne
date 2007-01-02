@@ -587,6 +587,28 @@ namespace Ariadne {
       return C;
     }
   
+    template<class R> inline
+    Rectangle<R>
+    rectangular_hull(const Rectangle<R>& A, const Point<R>& B)
+    {
+      return rectangular_hull(A,Rectangle<R>(B));
+    }
+  
+    template<class R> inline
+    Rectangle<R>
+    rectangular_hull(const Point<R>& A, const Rectangle<R>& B)
+    {
+      return rectangular_hull(B,A);
+    }
+
+    template<class R> inline
+    Rectangle<R>
+    rectangular_hull(const Point<R>& A, const Point<R>& B)
+    {
+      return Rectangle<R>(A,B);
+    }
+
+ 
     template<class R1, class R2> inline
     Rectangle<typename Numeric::traits<R1,R2>::arithmetic_type> 
     minkowski_sum(const Rectangle<R1>& A, const Rectangle<R2>& B)

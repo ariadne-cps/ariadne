@@ -36,24 +36,5 @@ namespace Ariadne {
     template class PartitionTreeCell<Real>;
     template class PartitionTreeSet<Real>;
 
-    template PartitionTreeSet<Real> outer_approximation(const Rectangle<Real>&, const PartitionScheme<Real>&, const uint);
-    template PartitionTreeSet<Real> inner_approximation(const Rectangle<Real>&, const PartitionScheme<Real>&, const uint);
-    template PartitionTreeSet<Real> over_approximation(const Rectangle<Real>&, const PartitionScheme<Real>&, const uint);
-    template PartitionTreeSet<Real> under_approximation(const Rectangle<Real>&, const PartitionScheme<Real>&, const uint);
-    
-    template PartitionTreeSet<Real> outer_approximation(const Parallelotope<Real>&, const PartitionScheme<Real>&, const uint);
-    template PartitionTreeSet<Real> inner_approximation(const Parallelotope<Real>&, const PartitionScheme<Real>&, const uint);
-    template PartitionTreeSet<Real> over_approximation(const Parallelotope<Real>&, const PartitionScheme<Real>&, const uint);
-    template PartitionTreeSet<Real> under_approximation(const Parallelotope<Real>&, const PartitionScheme<Real>&, const uint);
-    
-    template PartitionTreeSet<Real> outer_approximation(const GridMaskSet<Real>&, const PartitionScheme<Real>&, const uint);
-    template PartitionTreeSet<Real> inner_approximation(const GridMaskSet<Real>&, const PartitionScheme<Real>&, const uint);
-    template PartitionTreeSet<Real> over_approximation(const GridMaskSet<Real>&, const PartitionScheme<Real>&, const uint);
-    template PartitionTreeSet<Real> under_approximation(const GridMaskSet<Real>&, const PartitionScheme<Real>&, const uint);
-    
-    template std::ostream& operator<<(std::ostream&, const PartitionScheme<Real>&);
-    template std::ostream& operator<<(std::ostream&, const PartitionTree<Real>&);
-    template std::ostream& operator<<(std::ostream&, const PartitionTreeCell<Real>&);
-    template std::ostream& operator<<(std::ostream&, const PartitionTreeSet<Real>&);
   }
 }

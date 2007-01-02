@@ -48,117 +48,6 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template<class R> tribool disjoint(const Rectangle<R>&, const GridMaskSet<R>&);
-    template<class R> tribool disjoint(const GridMaskSet<R>& gm, const Rectangle<R>& r);
-    template<class R> tribool subset(const Rectangle<R>&, const GridBlock<R>&);
-    template<class R> tribool subset(const Rectangle<R>&, const GridMaskSet<R>&);
-
-    template<class R> tribool overlap(const GridBlock<R>&, const GridBlock<R>&);
-    template<class R> tribool overlap(const GridBlock<R>&, const GridMaskSet<R>&);
-    template<class R> tribool overlap(const GridMaskSet<R>&, const GridBlock<R>&);
-    template<class R> tribool overlap(const GridMaskSet<R>&, const GridMaskSet<R>&);
-    
-    template<class R> tribool subset(const GridCell<R>&, const GridBlock<R>&);
-    template<class R> tribool subset(const GridCell<R>&, const GridMaskSet<R>&);
-    template<class R> tribool subset(const GridBlock<R>&, const GridBlock<R>&);
-    template<class R> tribool subset(const GridCellListSet<R>&, const GridBlock<R>&);
-    template<class R> tribool subset(const GridMaskSet<R>&, const GridBlock<R>&);
-    template<class R> tribool subset(const GridCell<R>&, const GridMaskSet<R>&);
-    template<class R> tribool subset(const GridBlock<R>&, const GridMaskSet<R>&);
-    template<class R> tribool subset(const GridCellListSet<R>&, const GridMaskSet<R>&);
-    template<class R> tribool subset(const GridMaskSet<R>&, const GridMaskSet<R>&);
-    
-    template<class R> GridCellListSet<R> regular_intersection(const GridCellListSet<R>&, const GridMaskSet<R>&);
-    template<class R> GridCellListSet<R> regular_intersection(const GridMaskSet<R>&, const GridCellListSet<R>&);
-    template<class R> GridMaskSet<R> regular_intersection(const GridBlock<R>&, const GridMaskSet<R>&);
-    template<class R> GridMaskSet<R> regular_intersection(const GridMaskSet<R>&, const GridBlock<R>&);
-    template<class R> GridMaskSet<R> regular_intersection(const GridMaskSet<R>&, const GridMaskSet<R>&);
-    
-    template<class R> GridMaskSet<R> difference(const GridMaskSet<R>&, const GridMaskSet<R>&);
-    template<class R> GridCellListSet<R> difference(const GridCellListSet<R>&, const GridMaskSet<R>&);
-
-    template<class R> GridMaskSet<R> join(const GridMaskSet<R>&, const GridMaskSet<R>&);
-
-    template<class R>
-    GridBlock<R>
-    outer_approximation(const Rectangle<R>& p, const Grid<R>& g);
-
-    template<class R>
-    GridBlock<R>
-    inner_approximation(const Rectangle<R>& p, const Grid<R>& g);
-
-
-    template<class R>
-    GridBlock<R>
-    over_approximation(const Rectangle<R>& p, const Grid<R>& g);
-
-    template<class R>
-    GridCellListSet<R>
-    over_approximation(const Zonotope<R>& p, const Grid<R>& g);
-
-    template<class R>
-    GridCellListSet<R>
-    over_approximation(const Polytope<R>& p, const Grid<R>& g);
-    
-    
-    template<class R, template<class> class BS>
-    GridMaskSet<R>
-    over_approximation(const ListSet<R,BS>& ls, const FiniteGrid<R>& g); 
-
-    template<class R>
-    GridMaskSet<R>
-    over_approximation(const GridMaskSet<R>& gm, const FiniteGrid<R>& g);
-    
-    template<class R>
-    GridMaskSet<R>
-    over_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& g);
-    
-    template<class R>
-    GridMaskSet<R>
-    over_approximation(const Set<R>& set, const FiniteGrid<R>& g);
-    
-    template<class R>
-    GridMaskSet<R>
-    over_approximation(const Set<R>& set, const Grid<R>& g);
-    
-    
-    
-    template<class R>
-    GridBlock<R>
-    under_approximation(const Rectangle<R>& p, const Grid<R>& g);
-
-    template<class R>
-    GridCellListSet<R>
-    under_approximation(const Parallelotope<R>& p, const Grid<R>& g);
-   
-    template<class R>
-    GridCellListSet<R>
-    under_approximation(const Zonotope<R>& p, const Grid<R>& g);
-   
-    template<class R>
-    GridCellListSet<R>
-    under_approximation(const Polytope<R>& p, const Grid<R>& g);
-       
-    
-    template<class R>
-    GridMaskSet<R>
-    under_approximation(const ListSet<R,Rectangle>& ls, const FiniteGrid<R>& g); 
-
-    template<class R>
-    GridMaskSet<R>
-    under_approximation(const GridMaskSet<R>& gm, const FiniteGrid<R>& g);
-    
-    template<class R>
-    GridMaskSet<R>
-    under_approximation(const PartitionTreeSet<R>& gm, const FiniteGrid<R>& g);
-    
-    
-
-    template<class R> std::ostream& operator<<(std::ostream&, const GridCell<R>&);
-    template<class R> std::ostream& operator<<(std::ostream&, const GridBlock<R>&);
-    template<class R> std::ostream& operator<<(std::ostream&, const GridCellListSet<R>&);
-    template<class R> std::ostream& operator<<(std::ostream&, const GridMaskSet<R>&);
-    
     /*! \brief A unit cell in a grid.
      *
      *  A %GridCell is defined by mapping a LatticeCell \a lc into \f$\mathbb{R}^d\f$
@@ -207,8 +96,13 @@ namespace Ariadne {
       /*! \brief True if the set is bounded. */
       tribool bounded() const { return true; }
 
-      /*!\brief A rectangle containing the grid rectangle. */
+      /*!\brief A rectangle containing the grid cell. */
       Rectangle<R> bounding_box() const { return *this; }
+
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream&) const;
+     private: 
+      static void _instantiate_geometry_operators();
      private:
       const Grid<R>& _grid;
       Combinatoric::LatticeCell _lattice_set;
@@ -247,13 +141,18 @@ namespace Ariadne {
       /*!\brief Construct from a grid and an ordinary rectangle. */
       GridBlock(const Grid<R>& g, const Rectangle<R>& r);
       /*!\brief Construct from a GridCell. */
-      GridBlock(const GridCell<R>& c);
+      GridBlock(const GridCell<R>& gc);
+      
+      /*!\brief Copy constructor. */
+      GridBlock(const GridBlock<R>& gb);
+      /*!\brief Copy assignment. */
+      GridBlock<R>& operator=(const GridBlock<R>& gb);
 
       /*!\brief The grid containing the rectangle. */
-      const Grid<R>& grid() const { return _grid; }
+      const Grid<R>& grid() const { return *this->_grid_ptr; }
 
       /*!\brief The dimension of the rectangle. */
-      dimension_type dimension() const { return _lattice_set.dimension(); }
+      dimension_type dimension() const { return this->_lattice_set.dimension(); }
 
       /*!\brief The lower bound of the \a i th coordinate. */
       R lower_bound(dimension_type i) const;
@@ -262,10 +161,10 @@ namespace Ariadne {
       R upper_bound(dimension_type i) const;
       
       /*!\brief The position of the rectangle in the grid. */
-      const Combinatoric::LatticeBlock& lattice_set() const { return _lattice_set; }
+      const Combinatoric::LatticeBlock& lattice_set() const { return this->_lattice_set; }
 
       /*!\brief Tests if the rectangle is empty. */
-      tribool empty() const { return _lattice_set.empty(); }
+      tribool empty() const { return this->_lattice_set.empty(); }
 
       /*! \brief True if the set is bounded. */
       tribool bounded() const { return true; }
@@ -273,9 +172,12 @@ namespace Ariadne {
       /*!\brief A rectangle containing the grid rectangle. */
       Rectangle<R> bounding_box() const { return *this; }
 
-      friend tribool subset<> (const GridBlock<R>&, const GridMaskSet<R>&);
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream&) const;
+     private: 
+      static void _instantiate_geometry_operators();
      private:
-      const Grid<R>& _grid;
+      const Grid<R>* _grid_ptr;
       Combinatoric::LatticeBlock _lattice_set;
     };
 
@@ -401,7 +303,10 @@ namespace Ariadne {
       /*! \brief Empties the set. */
       void clear();
 
-      friend std::ostream& operator<< <> (std::ostream&, const GridCellListSet<R>&);
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream&) const;
+     private: 
+      static void _instantiate_geometry_operators();
      private:
       const Grid<R>* _grid_ptr;
       Combinatoric::LatticeCellListSet _lattice_set;
@@ -632,6 +537,10 @@ namespace Ariadne {
         return GridMaskSet(this->grid(),this->_lattice_set.adjoining());
       }
 
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream&) const;
+
+#ifdef DOXYGEN
       friend tribool overlap<> (const GridBlock<R>&, const GridMaskSet<R>&);
       friend tribool overlap<> (const GridMaskSet<R>&, const GridBlock<R>&);
       friend tribool overlap<> (const GridMaskSet<R>&, const GridMaskSet<R>&);
@@ -641,14 +550,16 @@ namespace Ariadne {
       friend GridMaskSet<R> join<> (const GridMaskSet<R>&, const GridMaskSet<R>&);
       friend GridMaskSet<R> regular_intersection<> (const GridMaskSet<R>&, const GridMaskSet<R>&);
       friend GridMaskSet<R> difference<> (const GridMaskSet<R>&, const GridMaskSet<R>&);
+#endif
+     private: 
+      static void _instantiate_geometry_operators();
      private:
       const Grid<R>* _grid_ptr;
       Combinatoric::LatticeMaskSet _lattice_set;
     };
-
-    template<class R>
-    template<template<class> class BS>
-    inline
+    
+    
+    template<class R> template<template<class> class BS> inline
     GridMaskSet<R>::operator ListSet<R,BS> () const 
     {
       ListSet<R,BS> result(this->dimension());
@@ -661,7 +572,120 @@ namespace Ariadne {
       }
       return result;
     }
+    
+    
+    
+    
+    
+    template<class R> tribool disjoint(const Rectangle<R>&, const GridMaskSet<R>&);
+    template<class R> tribool disjoint(const GridMaskSet<R>& gm, const Rectangle<R>& r);
+    template<class R> tribool subset(const Rectangle<R>&, const GridBlock<R>&);
+    template<class R> tribool subset(const Rectangle<R>&, const GridMaskSet<R>&);
+    
+    template<class R> tribool overlap(const GridBlock<R>&, const GridBlock<R>&);
+    template<class R> tribool overlap(const GridBlock<R>&, const GridMaskSet<R>&);
+    template<class R> tribool overlap(const GridMaskSet<R>&, const GridBlock<R>&);
+    template<class R> tribool overlap(const GridMaskSet<R>&, const GridMaskSet<R>&);
+    
+    template<class R> tribool subset(const GridCell<R>&, const GridBlock<R>&);
+    template<class R> tribool subset(const GridCell<R>&, const GridMaskSet<R>&);
+    template<class R> tribool subset(const GridBlock<R>&, const GridBlock<R>&);
+    template<class R> tribool subset(const GridCellListSet<R>&, const GridBlock<R>&);
+    template<class R> tribool subset(const GridMaskSet<R>&, const GridBlock<R>&);
+    template<class R> tribool subset(const GridCell<R>&, const GridMaskSet<R>&);
+    template<class R> tribool subset(const GridBlock<R>&, const GridMaskSet<R>&);
+    template<class R> tribool subset(const GridCellListSet<R>&, const GridMaskSet<R>&);
+    template<class R> tribool subset(const GridMaskSet<R>&, const GridMaskSet<R>&);
+    
+    template<class R> GridCellListSet<R> regular_intersection(const GridCellListSet<R>&, const GridMaskSet<R>&);
+    template<class R> GridCellListSet<R> regular_intersection(const GridMaskSet<R>&, const GridCellListSet<R>&);
+    template<class R> GridMaskSet<R> regular_intersection(const GridBlock<R>&, const GridMaskSet<R>&);
+    template<class R> GridMaskSet<R> regular_intersection(const GridMaskSet<R>&, const GridBlock<R>&);
+    template<class R> GridMaskSet<R> regular_intersection(const GridMaskSet<R>&, const GridMaskSet<R>&);
+    
+    template<class R> GridMaskSet<R> difference(const GridMaskSet<R>&, const GridMaskSet<R>&);
+    template<class R> GridCellListSet<R> difference(const GridCellListSet<R>&, const GridMaskSet<R>&);
 
+    template<class R> GridMaskSet<R> join(const GridMaskSet<R>&, const GridMaskSet<R>&);
+
+    
+    
+    template<class R> GridBlock<R> outer_approximation(const Rectangle<R>& p, const Grid<R>& g);
+    
+    
+    template<class R> GridBlock<R> inner_approximation(const Rectangle<R>& p, const Grid<R>& g);
+    
+    
+    template<class R> GridBlock<R> over_approximation(const Rectangle<R>& p, const Grid<R>& g);
+    
+    template<class R> GridCellListSet<R> over_approximation(const Zonotope<R>& p, const Grid<R>& g);
+    template<class R> GridCellListSet<R> over_approximation(const Polytope<R>& p, const Grid<R>& g);
+    
+    template<class R, template<class> class BS> GridMaskSet<R> over_approximation(const ListSet<R,BS>& ls, const FiniteGrid<R>& fg); 
+    template<class R> GridMaskSet<R> over_approximation(const GridMaskSet<R>& gms, const FiniteGrid<R>& fg);
+    template<class R> GridMaskSet<R> over_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& fg);
+    template<class R> GridMaskSet<R> over_approximation(const Set<R>& set, const FiniteGrid<R>& fg);
+    
+    template<class R> GridMaskSet<R> over_approximation(const Set<R>& set, const Grid<R>& g);
+    
+    
+    template<class R> GridBlock<R> under_approximation(const Rectangle<R>& p, const Grid<R>& g);
+    
+    template<class R> GridCellListSet<R> under_approximation(const Zonotope<R>& p, const Grid<R>& g);
+    template<class R> GridCellListSet<R> under_approximation(const Parallelotope<R>& p, const Grid<R>& g);
+    template<class R> GridCellListSet<R> under_approximation(const Polytope<R>& p, const Grid<R>& g);
+    template<class R> GridCellListSet<R> under_approximation(const Polyhedron<R>& p, const Grid<R>& g);
+    
+    template<class R> GridMaskSet<R> under_approximation(const ListSet<R,Rectangle>& ls, const FiniteGrid<R>& fg); 
+    template<class R> GridMaskSet<R> under_approximation(const GridMaskSet<R>& gms, const FiniteGrid<R>& fg);
+    template<class R> GridMaskSet<R> under_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& fg);
+    
+    
+    
+    
+    
+    template<class R, template<class> class BS> inline
+    GridMaskSet<R> over_approximation(const ListSet<R,BS>& ls, const FiniteGrid<R>& g) 
+    {
+      GridMaskSet<R> result(g);
+      
+      check_equal_dimensions(ls,g,"over_approximation(ListSet<R,BS>,FiniteGrid<R>)");
+
+      for(typename ListSet<R,BS>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
+       result.adjoin(over_approximation(*iter,g.grid()));
+      }
+        
+      return result;
+    }
+    
+    
+    
+    
+    
+    
+    template<class R> inline
+    std::ostream& operator<<(std::ostream& os, const GridCell<R>& gc) {
+      return gc.write(os);
+    }
+    
+    template<class R> inline
+    std::ostream& operator<<(std::ostream& os, const GridBlock<R>& gb) {
+      return gb.write(os);
+    }
+    
+    template<class R> inline
+    std::ostream& operator<<(std::ostream& os, const GridCellListSet<R>& gcls) {
+      return gcls.write(os);
+    }
+    
+    template<class R> inline
+    std::ostream& operator<<(std::ostream& os, const GridMaskSet<R>& gms) {
+      return gms.write(os);
+    }
+    
+    
+    
+    
   }
 }
 

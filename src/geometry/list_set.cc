@@ -39,22 +39,16 @@ namespace Ariadne {
     template class ListSet<Interval<Real>,Parallelotope>;
     template class ListSet<Interval<Real>,Zonotope>;
 
+    // The following are not defined for all types,
+    // so we can't instantiate them in ListSet<R,BS>::_instantiate_geometry_operators()
     template  ListSet<Real,Rectangle>::operator  ListSet<Real,Parallelotope>() const;
     template  ListSet<Real,Rectangle>::operator  ListSet<Real,Zonotope>() const;
     template  ListSet<Real,Parallelotope>::operator  ListSet<Real,Zonotope>() const;
     
-
     template tribool disjoint(const ListSet<Real,Rectangle>&, const ListSet<Real,Rectangle>&);
-    template tribool disjoint(const ListSet<Real,Zonotope>&, const ListSet<Real,Zonotope>&);
     template tribool disjoint(const ListSet<Real,Parallelotope>&, const ListSet<Real,Parallelotope>&);
-/*    
-    template tribool disjoint(const ListSet<Real,Rectangle>&, const Rectangle<Real> &);
-    template tribool disjoint(const ListSet<Real,Zonotope>&, const Zonotope<Real> &);
-    template tribool disjoint(const ListSet<Real,Parallelotope>&, const Parallelotope<Real> &);
-    template tribool disjoint(const Rectangle<Real>&, const ListSet<Real,Rectangle> &);
-    template tribool disjoint(const Zonotope<Real>&, const ListSet<Real,Zonotope> &);
-    template tribool disjoint(const Parallelotope<Real>&, const ListSet<Real,Parallelotope> &);
-*/
+    template tribool disjoint(const ListSet<Real,Zonotope>&, const ListSet<Real,Zonotope>&);
+
     template tribool subset(const ListSet<Real,Rectangle>&, const ListSet<Real,Rectangle>&);
     template ListSet<Real,Rectangle> open_intersection(const ListSet<Real,Rectangle>&, const ListSet<Real,Rectangle>&);
    

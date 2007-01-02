@@ -89,6 +89,36 @@ namespace Ariadne {
       return res;
     }
     
+    
+    
+    template<class R>
+    void
+    PartitionTreeSet<R>::_instantiate_geometry_operators()
+    {
+      uint d=0;
+      Rectangle<R>* r=0;
+      Parallelotope<R>* pl=0;
+      GridMaskSet<R>* gms=0;
+      PartitionScheme<R>* ps=0;
+      PartitionTreeSet<R>* pts=0;
+      
+      *pts=outer_approximation(*r,*ps,d);
+      *pts=inner_approximation(*r,*ps,d);
+      *pts=over_approximation(*r,*ps,d);
+      *pts=under_approximation(*r,*ps,d);
+    
+      *pts=outer_approximation(*pl,*ps,d);
+      *pts=inner_approximation(*pl,*ps,d);
+      *pts=over_approximation(*pl,*ps,d);
+      *pts=under_approximation(*pl,*ps,d);
+    
+      *pts=outer_approximation(*gms,*ps,d);
+      *pts=inner_approximation(*gms,*ps,d);
+      *pts=over_approximation(*gms,*ps,d);
+      *pts=under_approximation(*gms,*ps,d);
+    }
+
+    
     template<class R, class S>
     PartitionTreeSet<R>
     outer_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth)
@@ -223,52 +253,52 @@ namespace Ariadne {
     
     template<class R>
     std::ostream&
-    operator<<(std::ostream& os, const PartitionScheme<R>& g)
+    PartitionScheme<R>::write(std::ostream& os) const
     {
       os << "PartitionScheme<" << name<R>() << ">(\n";
-      os << "  unit_box=" << g.unit_box() << ",\n";
-      os << "  subdivision_coordinates=" << g.subdivisions() << "\n";
+      os << "  unit_box=" << this->unit_box() << ",\n";
+      os << "  subdivision_coordinates=" << this->subdivisions() << "\n";
       os << ")\n";
       return os;
     }
 
     template<class R>
     std::ostream&
-    operator<<(std::ostream& os, const PartitionTreeCell<R>& c)
+    PartitionTreeCell<R>::write(std::ostream& os) const
     {
       os << "PartitionTreeCell<" << name<R>() << ">(\n";
-      os << "  bounds=" << c.subdivision_cell() << ",\n";
-      os << "  rectangle=" << Rectangle<R>(c) << "\n";
+      os << "  bounds=" << this->subdivision_cell() << ",\n";
+      os << "  rectangle=" << Rectangle<R>(*this) << "\n";
       os << ")\n";
       return os;
     }
 
     template<class R>
     std::ostream&
-    operator<<(std::ostream& os, const PartitionTree<R>& pt)
+    PartitionTree<R>::write(std::ostream& os) const
     {
       os << "PartitionTree<" << name<R>() << ">(\n";
-      os << "  unit_box=" << pt.unit_box() << ",\n";
-      os << "  subdivisions=" << pt.subdivisions() << "\n";
-      os << "  words="; Base::write_sequence(os, pt.binary_tree().begin(), pt.binary_tree().end()); os << ",\n";
-      os << "  blocks=["; Base::write_sequence(os,  pt.subdivision_tree().begin(), pt.subdivision_tree().end()); os << ",\n";
-      os << "  cells=["; Base::write_sequence(os,  pt.begin(), pt.end()); os << ",\n";
+      os << "  unit_box=" << this->unit_box() << ",\n";
+      os << "  subdivisions=" << this->subdivisions() << "\n";
+      os << "  words="; Base::write_sequence(os, this->binary_tree().begin(), this->binary_tree().end()); os << ",\n";
+      os << "  blocks=["; Base::write_sequence(os,  this->subdivision_tree().begin(), this->subdivision_tree().end()); os << ",\n";
+      os << "  cells=["; Base::write_sequence(os,  this->begin(), this->end()); os << ",\n";
       os << ")\n";
       return os;
     }
 
     template<class R>
     std::ostream&
-    operator<<(std::ostream& os, const PartitionTreeSet<R>& pts)
+    PartitionTreeSet<R>::write(std::ostream& os) const
     {
       os << "PartitionTreeSet<" << name<R>() << ">(\n";
-      os << "  unit_box=" << pts.unit_box() << ",\n";
-      os << "  subdivisions=" << pts.subdivisions() << ",\n";
-      os << "  tree=" << pts.binary_tree() << ",\n";
-      os << "  mask=" << pts.mask() << ",\n";
-      os << "  words="; Base::write_sequence(os, pts.subdivision_set().words().begin(), pts.subdivision_set().words().end()); os << ",\n";
-      os << "  blocks=["; Base::write_sequence(os,  pts.subdivision_set().begin(), pts.subdivision_set().end()); os << ",\n";
-      os << "  cells=["; Base::write_sequence(os,  pts.begin(), pts.end()); os << ",\n";
+      os << "  unit_box=" << this->unit_box() << ",\n";
+      os << "  subdivisions=" << this->subdivisions() << ",\n";
+      os << "  tree=" << this->binary_tree() << ",\n";
+      os << "  mask=" << this->mask() << ",\n";
+      os << "  words="; Base::write_sequence(os, this->subdivision_set().words().begin(), this->subdivision_set().words().end()); os << ",\n";
+      os << "  blocks=["; Base::write_sequence(os,  this->subdivision_set().begin(), this->subdivision_set().end()); os << ",\n";
+      os << "  cells=["; Base::write_sequence(os,  this->begin(), this->end()); os << ",\n";
       os << ")\n";
       return os;
     }

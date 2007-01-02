@@ -82,9 +82,16 @@ namespace Ariadne {
    
     template<class R>
     Polytope<R>::Polytope(const LinearAlgebra::Matrix<R>& G)
-      : _generators(G)
+      : _generators(G.number_of_rows()+1,G.number_of_columns())
     {
+      for(size_type j=0; j!=G.number_of_columns(); ++j) {
+        for(size_type i=0; i!=G.number_of_rows(); ++i) {
+          this->_generators(i,j)=G(i,j);
+        }
+        this->_generators(this->dimension(),j)=static_cast<R>(1);
+      }
     }
+
    
     template<class R>
     Polytope<R>::Polytope(const PointList<R>& pts)
@@ -143,7 +150,7 @@ namespace Ariadne {
       
       for(size_type i=0; i!=nc; ++i) {
         for(size_type j=0; j!=d; ++j) {
-          tmp(j)=A(i,j);
+          tmp(j)=-A(i,j);
         }
         tmp(d)=b(i);
         argument.push_back(tmp);
@@ -151,15 +158,15 @@ namespace Ariadne {
       ddconv(result,argument);     
       
       //std::cerr << "argument=" << argument << std::endl;
-      //std::cerr << "result=" << argument << std::endl;
+      //std::cerr << "result=" << result << std::endl;
       
       size_type nv=result.size();
       G.resize(d+1,nv);
       for(size_type j=0; j!=nv; ++j) {
-        F s=argument[j](d);
+        F s=result[j](d);
         if(s!=F(0)) {
           for(size_type i=0; i!=d; ++i) {
-            G(i,j)=argument[j](i)/s;
+            G(i,j)=result[j](i)/s;
           }
           G(d,j)=1;
         } else {
@@ -240,8 +247,10 @@ namespace Ariadne {
     Polytope<R>::bounding_box() const 
     {
       //std::cerr << "Polytope<R>::bounding_box()" << std::endl;
-      Rectangle<R> result(this->dimension());
-      for(vertices_iterator pt_iter=this->vertices_begin(); pt_iter!=this->vertices_end(); ++pt_iter) {
+      vertices_iterator pt_iter=this->vertices_begin();
+      Rectangle<R> result(*pt_iter);
+      ++pt_iter;
+      for( ; pt_iter!=this->vertices_end(); ++pt_iter) {
         result=rectangular_hull(result,Rectangle<R>(*pt_iter));
       }
       return result;
@@ -329,7 +338,7 @@ namespace Ariadne {
     tribool 
     disjoint(const Polytope<R>& ply, const Rectangle<R>& rect)
     {
-      std::cerr << "disjoint(const Polytope<R>&, const Rectangle<R>&)" << std::endl;
+      //std::cerr << "disjoint(const Polytope<R>&, const Rectangle<R>&)" << std::endl;
       //typedef typename Numeric::traits<R>::arithmetic_type F;
       typedef Rational F;
       check_equal_dimensions(ply,rect,__PRETTY_FUNCTION__);

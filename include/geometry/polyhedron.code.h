@@ -224,7 +224,7 @@ namespace Ariadne {
     Polyhedron<R>::bounding_box() const 
     {
       Rectangle<Rational> qbb=Polytope<Rational>(Polyhedron<Rational>(*this)).bounding_box();
-      Rectangle<R> bb(qbb.dimension());
+      Rectangle<R> bb(this->dimension());
       for(dimension_type i=0; i!=bb.dimension(); ++i) {
         bb.set_lower_bound(i,conv_down<R>(qbb.lower_bound(i)));
         bb.set_upper_bound(i,conv_up<R>(qbb.upper_bound(i)));

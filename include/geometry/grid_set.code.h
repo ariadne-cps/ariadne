@@ -60,12 +60,14 @@ namespace Ariadne {
       check_dimension(g,pos.size(),__PRETTY_FUNCTION__);
     }
 
+    
     template<class R>
     R
     GridCell<R>::lower_bound(dimension_type i) const 
     {
       return _grid.subdivision_coordinate(i,_lattice_set.lower_bound(i));
     }
+    
     
     template<class R>
     R
@@ -75,35 +77,46 @@ namespace Ariadne {
     }
     
 
+    template<class R>
+    void
+    GridCell<R>::_instantiate_geometry_operators() 
+    {    
+    }
+    
+    
+    
     
     // GridBlock --------------------------------------------------------------
     
     template<class R>
     GridBlock<R>::GridBlock(const Grid<R>& g)
-      : _grid(g), _lattice_set(g.dimension())
+      : _grid_ptr(&g), _lattice_set(g.dimension())
     { 
       _lattice_set.set_lower_bound(0,1);
       //_lattice_set.set_lower_bound(0,0);
       _lattice_set.set_upper_bound(0,0);
     }
-
+    
+    
     template<class R>
     GridBlock<R>::GridBlock(const Grid<R>& g, const Combinatoric::LatticeBlock& b)
-      : _grid(g), _lattice_set(b)
+      : _grid_ptr(&g), _lattice_set(b)
     {
       check_equal_dimensions(g,b,"GridBlock<R>::GridBlock(Grid<R>,LatticeBlock)");
     }
-
+    
+    
     template<class R>
     GridBlock<R>::GridBlock(const Grid<R>& g, const IndexArray& l, const IndexArray& u)
-      : _grid(g), _lattice_set(l,u)
+      : _grid_ptr(&g), _lattice_set(l,u)
     {
       check_dimension(g,l.size(),__PRETTY_FUNCTION__);
     }
-
+    
+    
     template<class R>
     GridBlock<R>::GridBlock(const Grid<R>& g, const Rectangle<R>& r)
-      : _grid(g), _lattice_set(g.dimension())
+      : _grid_ptr(&g), _lattice_set(g.dimension())
     {
       check_equal_dimensions(g,r,"GridBlock<R>::GridBlock(Grid<R>,Rectangle<R>)");
       for(dimension_type i=0; i!=dimension(); ++i) {
@@ -112,33 +125,308 @@ namespace Ariadne {
         _lattice_set.set_upper_bound(i,g.subdivision_index(i,r.upper_bound(i)));
       }
     }
-
+    
+    
     template<class R>
-    GridBlock<R>::GridBlock(const GridCell<R>& c)
-      : _grid(c._grid), _lattice_set(c.lattice_set())
+    GridBlock<R>::GridBlock(const GridCell<R>& gc)
+      : _grid_ptr(&gc.grid()), _lattice_set(gc.lattice_set())
     {
     }
-
-
+    
+    
+    template<class R>
+    GridBlock<R>::GridBlock(const GridBlock<R>& gb)
+      : _grid_ptr(gb._grid_ptr), _lattice_set(gb.lattice_set())
+    {
+    }
+    
+    
+    template<class R>
+    GridBlock<R>&
+    GridBlock<R>::operator=(const GridBlock<R>& gb)
+    {
+      if(this!=&gb) {
+        this->_grid_ptr=gb._grid_ptr;
+        this->_lattice_set=gb._lattice_set;
+      }
+      return *this;
+    }
+    
+    
     template<class R>
     R
     GridBlock<R>::lower_bound(dimension_type i) const 
     {
-      return _grid.subdivision_coordinate(i,_lattice_set.lower_bound(i));
+      return _grid_ptr->subdivision_coordinate(i,_lattice_set.lower_bound(i));
     }
-
+    
     
     template<class R>
     R
     GridBlock<R>::upper_bound(dimension_type i) const 
     {
-      return _grid.subdivision_coordinate(i,_lattice_set.upper_bound(i));
+      return _grid_ptr->subdivision_coordinate(i,_lattice_set.upper_bound(i));
+    }
+    
+    
+    template<class R>
+    void
+    GridBlock<R>::_instantiate_geometry_operators() 
+    {
+      tribool tb;
+      Rectangle<R>* r=0;
+      Grid<R>* g=0;
+      GridCell<R>* gc=0;
+      GridBlock<R>* gb=0;
+      
+      tb=subset(*r,*gb);
+      
+      tb=overlap(*gb,*gb);
+      tb=subset(*gc,*gb);
+      tb=subset(*gb,*gb);
+
+      *gb=under_approximation(*r,*g);
+    }
+    
+    
+    
+    
+    // GridCellListSet ------------------------------------------------------------
+
+    template<class R>
+    GridCellListSet<R>::GridCellListSet(const Grid<R>& g)
+      : _grid_ptr(&g), _lattice_set(g.dimension())
+    {
+    }
+
+    
+    template<class R>
+    GridCellListSet<R>::GridCellListSet(const Grid<R>& g, 
+                                        const Combinatoric::LatticeCellListSet& lcls)
+      : _grid_ptr(&g), _lattice_set(lcls)
+    {
+      check_equal_dimensions(g,lcls,"GridCellListSet<R>::GridCellListSet(Grid<R>,LatticeCellListSet)");
+    }
+
+    
+    template<class R>
+    GridCellListSet<R>::GridCellListSet(const GridMaskSet<R>& gms)
+      : _grid_ptr(&gms.grid()), _lattice_set(gms.dimension())
+    {
+      this->_lattice_set.adjoin(gms._lattice_set);
+    }
+
+    
+    template<class R>
+    GridCellListSet<R>::GridCellListSet(const GridCellListSet<R>& gcls)
+      : _grid_ptr(&gcls.grid()), _lattice_set(gcls._lattice_set)
+    {
+    }
+
+    
+    // FIXME: Memory leak
+    template<class R>
+    GridCellListSet<R>::GridCellListSet(const ListSet<R,Rectangle>& rls)
+      : _grid_ptr(new IrregularGrid<R>(rls)), _lattice_set(rls.dimension())
+    {
+      typedef typename ListSet<R,Rectangle>::const_iterator list_set_const_iterator;
+      for(list_set_const_iterator iter=rls.begin(); iter!=rls.end(); ++iter) {
+        this->adjoin(GridBlock<R>(grid(),*iter));
+      }
+    }
+
+    
+    template<class R>
+    GridCellListSet<R>::operator ListSet<R,Rectangle>() const
+    {
+      ListSet<R,Rectangle> result(dimension());
+      for(size_type i=0; i!=size(); ++i) {
+        result.push_back((*this)[i]);
+      }
+      return result;
+    }
+
+    
+    template<class R>
+    void
+    GridCellListSet<R>::clear()
+    {
+      this->_lattice_set.clear();
+    }
+    
+    
+    template<class R>
+    void
+    GridCellListSet<R>::_instantiate_geometry_operators()
+    {
+      tribool tb;
+      Zonotope<R>* z=0;
+      Parallelotope<R>* pl=0;
+      Polytope<R>* p=0;
+      Polyhedron<R>* ph=0;
+      Grid<R>* g=0;
+      GridBlock<R>* gb=0;
+      GridCellListSet<R>* gcls=0;
+
+      tb=subset(*gcls,*gb);
+      
+      *gcls=over_approximation(*z,*g);
+      *gcls=over_approximation(*pl,*g);
+      *gcls=over_approximation(*p,*g);
+
+      *gcls=under_approximation(*z,*g);
+      *gcls=under_approximation(*pl,*g);
+      *gcls=under_approximation(*p,*g);
+      *gcls=under_approximation(*ph,*g);
     }
 
 
+    // GridMaskSet ------------------------------------------------------------
     
+    template<class R>
+    GridMaskSet<R>::GridMaskSet(const FiniteGrid<R>& g)
+      : _grid_ptr(&g.grid()), _lattice_set(g.bounds()) 
+    { 
+    }
 
+    
+    template<class R>
+    GridMaskSet<R>::GridMaskSet(const FiniteGrid<R>& fg, const BooleanArray& m)
+      : _grid_ptr(&fg.grid()), _lattice_set(fg.bounds(),m)
+    {
+    }
 
+    
+    template<class R>
+    GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeBlock& b)
+      : _grid_ptr(&g), _lattice_set(b) 
+    { 
+    }
+
+    
+    template<class R>
+    GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeBlock& b, const BooleanArray& m)
+      : _grid_ptr(&g), _lattice_set(b,m)
+    {
+      const IrregularGrid<R>* irregular_grid_ptr=dynamic_cast<const IrregularGrid<R>*>(_grid_ptr);
+      if(irregular_grid_ptr) {
+        if(!subset(b,irregular_grid_ptr->block())) {
+          throw std::runtime_error("Lattice block does not lie in grid bounds");
+        }
+      }
+    }
+
+    
+    template<class R>
+    GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeMaskSet& ms)
+      : _grid_ptr(&g), _lattice_set(ms)
+    {
+      const IrregularGrid<R>* irregular_grid_ptr=dynamic_cast<const IrregularGrid<R>*>(_grid_ptr);
+      if(irregular_grid_ptr) {
+        if(!subset(ms.block(),irregular_grid_ptr->block())) {
+          throw std::runtime_error("Lattice block does not lie in grid bounds");
+        }
+      }
+    }
+
+    
+    template<class R>
+    GridMaskSet<R>::GridMaskSet(const GridMaskSet<R>& gms) 
+      : _grid_ptr(&gms.grid()), _lattice_set(gms._lattice_set)
+    {
+    }
+    
+    
+    template<class R>
+    GridMaskSet<R>::GridMaskSet(const GridCellListSet<R>& gcls)
+      : _grid_ptr(&gcls.grid()),
+        _lattice_set(gcls.lattice_set())
+    {
+    }
+    
+    
+    // FIXME: Memory leak
+    template<class R>
+    GridMaskSet<R>::GridMaskSet(const ListSet<R,Rectangle>& rls) 
+      : _grid_ptr(new IrregularGrid<R>(rls)), 
+        _lattice_set(dynamic_cast<const IrregularGrid<R>*>(_grid_ptr)->block())
+    {
+      //FIXME: Memory leak!    
+
+      for(typename ListSet<R,Rectangle>::const_iterator riter=rls.begin(); 
+          riter!=rls.end(); ++riter) 
+      {
+        GridBlock<R> r(grid(),*riter);
+        adjoin(r);
+      }
+    }    
+    
+    
+    template<class R>
+    void
+    GridMaskSet<R>::clear()
+    {
+      this->_lattice_set.clear();
+    }
+    
+    
+    template<class R>
+    void
+    GridMaskSet<R>::_instantiate_geometry_operators()
+    {
+      tribool tb;
+      Rectangle<R>* r=0;
+      ListSet<R,Rectangle>* rls=0;
+      ListSet<R,Zonotope>* zls=0;
+      ListSet<R,Parallelotope>* plls=0;
+      Grid<R>* g=0;
+      FiniteGrid<R>* fg=0;
+      GridCell<R>* gc=0;
+      GridBlock<R>* gb=0;
+      GridCellListSet<R>* gcls=0;
+      GridMaskSet<R>* gms=0;
+      PartitionTreeSet<R>* pts=0;
+      Set<R>* set=0;
+      
+      tb=subset(*r,*gms);
+      tb=disjoint(*r,*gms);
+      tb=disjoint(*gms,*r);
+       
+      tb=overlap(*gb,*gms);
+      tb=overlap(*gms,*gb);
+      tb=overlap(*gms,*gms);
+    
+      tb=subset(*gc,*gms);
+      tb=subset(*gb,*gms);
+      tb=subset(*gcls,*gms);
+      tb=subset(*gms,*gms);
+
+      *gms=regular_intersection(*gb,*gms);
+      *gms=regular_intersection(*gms,*gb);
+      *gcls=regular_intersection(*gcls,*gms);
+      *gcls=regular_intersection(*gms,*gcls);
+      *gms=regular_intersection(*gms,*gms);
+      *gcls=difference(*gcls,*gms);
+      *gms=difference(*gms,*gms);
+      *gms=join(*gms,*gms);
+
+      *gms=over_approximation(*rls,*fg);
+      *gms=over_approximation(*zls,*fg);
+      *gms=over_approximation(*plls,*fg);
+      *gms=over_approximation(*gms,*fg);
+      *gms=over_approximation(*pts,*fg);
+      *gms=over_approximation(*set,*fg);
+      
+      *gms=over_approximation(*set,*g);
+
+      *gms=under_approximation(*rls,*fg);
+      *gms=under_approximation(*gms,*fg);
+      *gms=under_approximation(*pts,*fg);
+    }
+    
+    
+    
+    
     // Geometric predicates ---------------------------------------------------
 
     template<class R>
@@ -409,150 +697,6 @@ namespace Ariadne {
 
 
   
-    // GridCellListSet ------------------------------------------------------------
-
-
-
-    template<class R>
-    GridCellListSet<R>::GridCellListSet(const Grid<R>& g)
-      : _grid_ptr(&g), _lattice_set(g.dimension())
-    {
-    }
-
-    template<class R>
-    GridCellListSet<R>::GridCellListSet(const Grid<R>& g, 
-                                        const Combinatoric::LatticeCellListSet& lcls)
-      : _grid_ptr(&g), _lattice_set(lcls)
-    {
-      check_equal_dimensions(g,lcls,"GridCellListSet<R>::GridCellListSet(Grid<R>,LatticeCellListSet)");
-    }
-
-    template<class R>
-    GridCellListSet<R>::GridCellListSet(const GridMaskSet<R>& gms)
-      : _grid_ptr(&gms.grid()), _lattice_set(gms.dimension())
-    {
-      this->_lattice_set.adjoin(gms._lattice_set);
-    }
-
-    template<class R>
-    GridCellListSet<R>::GridCellListSet(const GridCellListSet<R>& gcls)
-      : _grid_ptr(&gcls.grid()), _lattice_set(gcls._lattice_set)
-    {
-    }
-
-
-    // FIXME: Memory leak
-    template<class R>
-    GridCellListSet<R>::GridCellListSet(const ListSet<R,Rectangle>& rls)
-      : _grid_ptr(new IrregularGrid<R>(rls)), _lattice_set(rls.dimension())
-    {
-      typedef typename ListSet<R,Rectangle>::const_iterator list_set_const_iterator;
-      for(list_set_const_iterator iter=rls.begin(); iter!=rls.end(); ++iter) {
-        this->adjoin(GridBlock<R>(grid(),*iter));
-      }
-    }
-
-    template<class R>
-    GridCellListSet<R>::operator ListSet<R,Rectangle>() const
-    {
-      ListSet<R,Rectangle> result(dimension());
-      for(size_type i=0; i!=size(); ++i) {
-        result.push_back((*this)[i]);
-      }
-      return result;
-    }
-
-    template<class R>
-    void
-    GridCellListSet<R>::clear()
-    {
-      this->_lattice_set.clear();
-    }
-
-
-
-
-    
-    // GridMaskSet ------------------------------------------------------------
-    
-    template<class R>
-    GridMaskSet<R>::GridMaskSet(const FiniteGrid<R>& g)
-      : _grid_ptr(&g.grid()), _lattice_set(g.bounds()) 
-    { 
-    }
-
-    template<class R>
-    GridMaskSet<R>::GridMaskSet(const FiniteGrid<R>& fg, const BooleanArray& m)
-      : _grid_ptr(&fg.grid()), _lattice_set(fg.bounds(),m)
-    {
-    }
-
-    template<class R>
-    GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeBlock& b)
-      : _grid_ptr(&g), _lattice_set(b) 
-    { 
-    }
-
-    template<class R>
-    GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeBlock& b, const BooleanArray& m)
-      : _grid_ptr(&g), _lattice_set(b,m)
-    {
-      const IrregularGrid<R>* irregular_grid_ptr=dynamic_cast<const IrregularGrid<R>*>(_grid_ptr);
-      if(irregular_grid_ptr) {
-        if(!subset(b,irregular_grid_ptr->block())) {
-          throw std::runtime_error("Lattice block does not lie in grid bounds");
-        }
-      }
-    }
-
-    template<class R>
-    GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeMaskSet& ms)
-      : _grid_ptr(&g), _lattice_set(ms)
-    {
-      const IrregularGrid<R>* irregular_grid_ptr=dynamic_cast<const IrregularGrid<R>*>(_grid_ptr);
-      if(irregular_grid_ptr) {
-        if(!subset(ms.block(),irregular_grid_ptr->block())) {
-          throw std::runtime_error("Lattice block does not lie in grid bounds");
-        }
-      }
-    }
-
-    template<class R>
-    GridMaskSet<R>::GridMaskSet(const GridMaskSet<R>& gms) 
-      : _grid_ptr(&gms.grid()), _lattice_set(gms._lattice_set)
-    {
-    }
-    
-    template<class R>
-    GridMaskSet<R>::GridMaskSet(const GridCellListSet<R>& gcls)
-      : _grid_ptr(&gcls.grid()),
-        _lattice_set(gcls.lattice_set())
-    {
-    }
-    
-    // FIXME: Memory leak
-    template<class R>
-    GridMaskSet<R>::GridMaskSet(const ListSet<R,Rectangle>& rls) 
-      : _grid_ptr(new IrregularGrid<R>(rls)), 
-        _lattice_set(dynamic_cast<const IrregularGrid<R>*>(_grid_ptr)->block())
-    {
-      //FIXME: Memory leak!    
-
-      for(typename ListSet<R,Rectangle>::const_iterator riter=rls.begin(); 
-          riter!=rls.end(); ++riter) 
-      {
-        GridBlock<R> r(grid(),*riter);
-        adjoin(r);
-      }
-    }    
-    
-    template<class R>
-    void
-    GridMaskSet<R>::clear()
-    {
-      this->_lattice_set.clear();
-    }
-
   
 
     // Over and under approximations ------------------------------------------
@@ -680,7 +824,7 @@ namespace Ariadne {
     under_approximation(const Parallelotope<R>& p, const Grid<R>& g)
     {
       GridCellListSet<R> result(g);
-      check_equal_dimensions(p,g,"over_approximation(Zonotope<R>,Grid<R>)");
+      check_equal_dimensions(p,g,"under_approximation(Parallelotope<R>,Grid<R>)");
       if(p.empty()) {
         return result; 
       }
@@ -745,22 +889,27 @@ namespace Ariadne {
       return result;
     }
 
-    
-    
-    template<class R, template<class> class BS>
-    GridMaskSet<R>
-    over_approximation(const ListSet<R,BS>& ls, const FiniteGrid<R>& g) 
+    template<class R>
+    GridCellListSet<R>
+    under_approximation(const Polyhedron<R>& p, const Grid<R>& g) 
     {
-      GridMaskSet<R> result(g);
+      GridCellListSet<R> result(g);
+      check_equal_dimensions(p,g,"under_approximation(Polyhedron<R>,Grid<R>)");
       
-      check_equal_dimensions(ls,g,"over_approximation(ListSet<R,BS>,FiniteGrid<R>)");
+      Rectangle<R> bb=p.bounding_box();
+      GridBlock<R> gbb=over_approximation(bb,g);
+      Combinatoric::LatticeBlock block=gbb.lattice_set();
 
-      for(typename ListSet<R,BS>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
-       result.adjoin(over_approximation(*iter,g.grid()));
+      for(Combinatoric::LatticeBlock::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
+        GridCell<R> cell(g,*iter);
+        if(subset(Rectangle<R>(cell),p)) {
+          result.adjoin(cell);
+        }
       }
-        
       return result;
     }
+
+    
     
     template<class R>
     GridMaskSet<R>
@@ -877,41 +1026,27 @@ namespace Ariadne {
 
     template<class R>
     std::ostream&
-    operator<<(std::ostream& os, const GridCell<R>& c) {
-      return os << Rectangle<R>(c);
+    GridCell<R>::write(std::ostream& os) const 
+    {
+      return os << Rectangle<R>(*this);
     }
 
     
     template<class R>
     std::ostream&
-    operator<<(std::ostream& os, const GridBlock<R>& r) {
-      return os << Rectangle<R>(r);
+    GridBlock<R>::write(std::ostream& os) const 
+    {
+      return os << Rectangle<R>(*this);
     }
 
     
     template<class R>
-    std::ostream& operator<<(std::ostream& os,
-                             const GridCellListSet<R>& set)
+    std::ostream&     
+    GridCellListSet<R>::write(std::ostream& os) const 
     {
       os << "GridCellListSet<" << name<R>() << ">(\n";
-      /*
-      os << "  rectangle_lattice_set: [\n    ";
-      if (!set.empty() ) {
-        os << set[0];
-      }
-      for (size_t i=1; i<set.size(); ++i) {
-        os << ",\n    " << Rectangle<R>(set[i]);
-      }
-      os << "\n  ]\n";
-      */
-      os << "  grid=" << set.grid() << "\n";
-      os << "  integer_cell_lattice_set=[ ";
-      os.flush();
-      for(size_type i=0; i!=set.size(); ++i) {
-        if(i!=0) { os << ", "; }
-        os <<  set[i].lattice_set();
-      }
-      os << " ]\n";
+      os << "  grid=" << this->grid() << "\n";
+      os << "  lattice_set=" << this->lattice_set();
       os << ")" << std::endl;
       return os;
     }
@@ -919,13 +1054,13 @@ namespace Ariadne {
 
 
     template<class R>
-    std::ostream& operator<<(std::ostream& os,
-                             const GridMaskSet<R>& set)
+    std::ostream& 
+    GridMaskSet<R>::write(std::ostream& os) const 
     {
       os << "GridMaskSet<" << name<R>() << ">("<< std::endl;
-      os << "  grid=" << set.grid();
-      os << "  bounds=" << set.bounds() << std::endl;
-      os << "  mask=" << set.mask() << std::endl;
+      os << "  grid=" << this->grid();
+      os << "  bounds=" << this->bounds() << std::endl;
+      os << "  mask=" << this->mask() << std::endl;
       os << ")\n";
       return os;
     }

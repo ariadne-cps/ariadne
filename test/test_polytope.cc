@@ -42,6 +42,7 @@
 #include "test.h"
 
 using namespace Ariadne;
+using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
 using namespace Ariadne::Output;
 using namespace std;
@@ -105,7 +106,7 @@ test_polytope()
   Rectangle<R> bbox=p.bounding_box();
   cout << "p.bounding_box()=" << bbox << endl;
   
-  epsfstream eps("test_polytope.eps",bbox,0,1);
+  epsfstream eps("test_polytope-1.eps",bbox,0,1);
   eps << p << pt1 << pt2 << pt3 << pt4 << pt5 << endl;
   eps.close();
   
@@ -116,6 +117,30 @@ test_polytope()
   p=Polytope<R>(r);
   cout << "Polytope(r)=" << p << endl;
   
+  cout << endl;
+
+
+  Polytope<R> pltp2=Polytope<R>(Matrix<R>("[3.125,1.125,-2.875,-0.875;1.75,-0.25,-2.25,-0.25]"));
+  cout << "pltp2=" << pltp2 << endl << "pltp2.bounding_box()=" << pltp2.bounding_box() << endl;
+  RegularGrid<R> gr2(2,0.125);
+  GridCellListSet<R> oap2=over_approximation(pltp2,gr2);
+  GridCellListSet<R> uap2=under_approximation(pltp2,gr2);
+  cout << "oap2.size()=" << oap2.size() << endl;
+  cout << "uap2.size()=" << uap2.size() << endl;
+  Rectangle<R> bbox2=pltp2.bounding_box().expand_by(0.25);
+  eps.open("test_polytope-2.eps",bbox2);
+  eps.set_fill_colour("white");
+  eps << pltp2.bounding_box();
+  eps.set_fill_colour("red");
+  eps << oap2;
+  eps.set_fill_colour("green");
+  eps << pltp2;
+  eps.set_fill_colour("blue");
+  eps << uap2;
+  eps.close();
+
+  cout << endl;
+
   return 0;
 }
 

@@ -144,6 +144,9 @@ namespace Ariadne {
 
       /*! \brief The underlying dimension of the partition scheme. */
       dimension_type dimension() const { return _subdivisions.dimension(); }
+
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream&) const;
      private:
       Rectangle<R> _unit_box;
       Combinatoric::SubdivisionSequence _subdivisions;
@@ -215,6 +218,9 @@ namespace Ariadne {
 
       /*! \brief An approximation to the volume of the set. */
       R volume() const;
+
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream&) const;
      private:
       const Rectangle<R> _unit_box;
       Combinatoric::SubdivisionTreeCell _subdivision_cell;
@@ -276,6 +282,9 @@ namespace Ariadne {
       const_iterator begin() const { return const_iterator(_unit_box,_subdivision_tree.begin()); }
       /*! \brief Constant iterator to the end of the cells in the tree. */
       const_iterator end() const { return const_iterator(_unit_box,_subdivision_tree.end()); }
+
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream&) const;
      private:
       Rectangle<R> _unit_box;
       Combinatoric::SubdivisionTree _subdivision_tree;
@@ -411,6 +420,11 @@ namespace Ariadne {
       friend template<class Set>
       PartitionTreeSet<R> under_approximation(const Set& s, const PartitionScheme<R>& ps, const uint depth);
 #endif
+
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream&) const;
+     private:
+      static void _instantiate_geometry_operators();
      private:
       Rectangle<R> _unit_box;
       Combinatoric::SubdivisionTreeSet _subdivision_set;
@@ -428,6 +442,29 @@ namespace Ariadne {
     
     template<class R, class S>
     PartitionTreeSet<R> under_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth);
+    
+    
+    
+    template<class R> inline
+    std::ostream& operator<<(std::ostream& os, const PartitionScheme<R>& ps) { 
+      return ps.write(os);
+    }
+    
+    template<class R> inline
+    std::ostream& operator<<(std::ostream& os, const PartitionTreeCell<R>& ptc) { 
+      return ptc.write(os);
+    }
+    
+    template<class R> inline
+    std::ostream& operator<<(std::ostream& os, const PartitionTree<R>& pt) { 
+      return pt.write(os);
+    }
+    
+    template<class R> inline
+    std::ostream& operator<<(std::ostream& os, const PartitionTreeSet<R>& pts) { 
+      return pts.write(os);
+    }
+    
     
   }
 }

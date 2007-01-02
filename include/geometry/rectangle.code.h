@@ -34,7 +34,6 @@
 #include "../geometry/point.h" 
 #include "../geometry/point_list.h" 
 #include "../geometry/list_set.h" 
-#include "../geometry/grid_set.h" 
 
 namespace Ariadne {
   namespace Geometry {

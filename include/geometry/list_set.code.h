@@ -86,6 +86,17 @@ namespace Ariadne {
     
     
     
+    
+    template<class R, template<class> class BS>
+    void
+    ListSet<R,BS>::_instantiate_geometry_operators()
+    {
+      //tribool tb;
+      //ListSet<R,BS>* ls=0;
+      //tb=disjoint(*ls,*ls);
+    }
+    
+    
     template<class R, template<class> class BS>
     std::ostream& 
     ListSet<R,BS>::write(std::ostream& os) const

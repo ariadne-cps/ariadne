@@ -30,11 +30,7 @@ namespace Ariadne {
   namespace Geometry {
 
     template class Ellipsoid<Real>;
- 
-    template Ellipsoid<Real> scale(const Ellipsoid<Real>& s, const Real& factor);
 
-    template std::ostream& operator<<(std::ostream&, const Ellipsoid<Real>&);
-    template std::istream& operator>>(std::istream&, Ellipsoid<Real>&);
 
   }
 }

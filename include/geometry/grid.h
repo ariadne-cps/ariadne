@@ -38,17 +38,15 @@
 namespace Ariadne {
   namespace Geometry {
     template<class R> class Grid;
-    template<class R> class FiniteGrid;
     template<class R> class RegularGrid;
     template<class R> class IrregularGrid;
     
+    template<class R> class FiniteGrid;
+
     template<class R> class GridCell;
     template<class R> class GridBlock;
-
-    template<class R> std::ostream& operator<<(std::ostream&, const Grid<R>&);
-    template<class R> std::istream& operator>>(std::istream&, Grid<R>&);
-    template<class R> std::ostream& operator<<(std::ostream&, const FiniteGrid<R>&);
-   
+    
+    
     /*! \ingroup Grid
      *  \brief %Base type for defining a grid.
      *
@@ -125,6 +123,7 @@ namespace Ariadne {
    };
 
 
+   
     /*! \brief A finite, nonuniform grid of rectangles in Euclidean space. 
      *  \ingroup Grid
      */
@@ -303,6 +302,8 @@ namespace Ariadne {
       array<R> _subdivision_lengths;
     };
 
+    
+    
     /*!\ingroup Grid
      * \brief A finite grid, suitable for defining a GridMaskSet.
      * \deprecated Use a Grid and LatticeBlock in GridMaskSet constructor instead. 
@@ -362,12 +363,34 @@ namespace Ariadne {
         return _grid_ptr->subdivision_upper_index(d,x);
       }
       
+      /*!\brief Write to an output stream. */
+      std::ostream& write(std::ostream& os) const;
      private:
       const Grid<R>* _grid_ptr;
       const grid_type _grid_type; 
       Combinatoric::LatticeBlock _bounds;
     };
    
+    
+    
+    template<class R> inline
+    std::istream& operator>>(std::istream& is, Grid<R>& g)
+    {
+      return g.read(is);
+    }
+
+    template<class R> inline
+    std::ostream& operator<<(std::ostream& os, const Grid<R>& g)
+    {
+      return g.write(os);
+    }
+
+    template<class R> inline
+    std::ostream& operator<<(std::ostream& os, const FiniteGrid<R>& fg)
+    {
+      return fg.write(os);
+    }
+
   }
 }
 

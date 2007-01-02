@@ -149,44 +149,53 @@ namespace Ariadne {
       //@}
       
 #ifdef DOXYGEN
-    //@{
-    //! \name Geometric binary predicates
-    /*! \brief Tests disjointness */
-    friend bool disjoint(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
-    /*! \brief Tests disjointness */
-    friend bool disjoint(const Rectangle<R>& A, const Ellipsoid<R>& B);
-    /*! \brief Tests disjointness */
-    friend bool disjoint(const Ellipsoid<R>& A, const Rectangle<R>& B);
-    /*! \brief Tests intersection of interiors */
-    friend bool interiors_intersect(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
-    /*! \brief Tests intersection of interiors */
-    friend bool interiors_intersect(const Rectangle<R>& A, const Ellipsoid<R>& B);
-    /*! \brief Tests intersection of interiors */
-    friend bool interiors_intersect(const Ellipsoid<R>& A, const Rectangle<R>& B);
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
-    friend bool inner_subset(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
-    friend bool inner_subset(const Rectangle<R>& A, const Ellipsoid<R>& B);
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
-    friend bool inner_subset(const Ellipsoid<R>& A, const Rectangle<R>& B);
-    /*! \brief Tests inclusion of \a A in \a B. */
-    friend bool subset(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
-    /*! \brief Tests inclusion of \a A in \a B. */
-    friend bool subset(const Rectangle<R>& A, const Ellipsoid<R>& B);
-    /*! \brief Tests inclusion of \a A in \a B. */
-    friend bool subset(const Ellipsoid<R>& A, const Rectangle<R>& B);
-    //@}
-    
-    //@{
-    //! \name Geometric binary operations
-    /*! \brief The Minkoswi sum of two ellipsoids */
-    friend Ellipsoid<R> minkowski_sum(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
-    /*! \brief The Minkoswi difference of two ellipsoids */
-    friend Ellipsoid<R> minkowski_difference(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
-    //@}
+      //@{
+      //! \name Geometric binary predicates
+      /*! \brief Tests disjointness */
+      friend bool disjoint(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
+      /*! \brief Tests disjointness */
+      friend bool disjoint(const Rectangle<R>& A, const Ellipsoid<R>& B);
+      /*! \brief Tests disjointness */
+      friend bool disjoint(const Ellipsoid<R>& A, const Rectangle<R>& B);
+      /*! \brief Tests intersection of interiors */
+      friend bool interiors_intersect(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
+      /*! \brief Tests intersection of interiors */
+      friend bool interiors_intersect(const Rectangle<R>& A, const Ellipsoid<R>& B);
+      /*! \brief Tests intersection of interiors */
+      friend bool interiors_intersect(const Ellipsoid<R>& A, const Rectangle<R>& B);
+      /*! \brief Tests inclusion of \a A in the interior of \a B. */
+      friend bool inner_subset(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
+      /*! \brief Tests inclusion of \a A in the interior of \a B. */
+      friend bool inner_subset(const Rectangle<R>& A, const Ellipsoid<R>& B);
+      /*! \brief Tests inclusion of \a A in the interior of \a B. */
+      friend bool inner_subset(const Ellipsoid<R>& A, const Rectangle<R>& B);
+      /*! \brief Tests inclusion of \a A in \a B. */
+      friend bool subset(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
+      /*! \brief Tests inclusion of \a A in \a B. */
+      friend bool subset(const Rectangle<R>& A, const Ellipsoid<R>& B);
+      /*! \brief Tests inclusion of \a A in \a B. */
+      friend bool subset(const Ellipsoid<R>& A, const Rectangle<R>& B);
+      //@}
+      
+      //@{
+      //! \name Geometric binary operations
+      /*! \brief The Minkoswi sum of two ellipsoids */
+      friend Ellipsoid<R> minkowski_sum(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
+      /*! \brief The Minkoswi difference of two ellipsoids */
+      friend Ellipsoid<R> minkowski_difference(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
+      //@}
 #endif
-      friend std::ostream& operator<< <> (std::ostream& os, const Ellipsoid<R>& r);
-      friend std::istream& operator>> <> (std::istream& is, Ellipsoid<R>& r);
+           
+      //@{ 
+      //! \name Input/output operations
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream& os) const;
+      /*! \brief Read from an input stream. */
+      std::istream& read(std::istream& is);
+      //@}
+      
+     private:
+      static void _instantiate_geometry_operators();
     };
     
      
@@ -291,18 +300,22 @@ namespace Ariadne {
       return true;
     }
 
-    template<class R>
-    Geometry::Ellipsoid<R> 
-    scale(const Geometry::Ellipsoid<R>& s, const R& scale_factor);
-
-    template<class R>
-    std::ostream&
-    operator<<(std::ostream& os, const Ellipsoid<R>& s); 
-
     
     template<class R>
-    std::istream& 
-    operator>>(std::istream& is, Ellipsoid<R>& s);
+    Ellipsoid<R> 
+    scale(const Ellipsoid<R>& e, const R& scale_factor);
+
+    
+    template<class R> inline
+    std::ostream& operator<<(std::ostream& os, const Ellipsoid<R>& e) {
+      return e.write(os);
+    }
+
+    
+    template<class R> inline
+    std::istream& operator>>(std::istream& is, Ellipsoid<R>& e) {
+      return e.read(is);
+    }
 
       
   }

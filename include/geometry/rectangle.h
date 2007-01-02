@@ -289,8 +289,16 @@ namespace Ariadne {
       friend Rectangle<R> intersection(const Rectangle<R>& A, const Rectangle<R>& B); 
       /*! \brief The closure of the intersection of the interiors of \a A and \a B. */
       friend Rectangle<R> regular_intersection(const Rectangle<R>& A, const Rectangle<R>& B); 
+
       /*! \brief The smallest rectangle containing \a A and \a B. */
       friend Rectangle<R> rectangular_hull(const Rectangle<R>& A, const Rectangle<R>& B); 
+      /*! \brief The smallest rectangle containing \a A and \a B. */
+      friend Rectangle<R> rectangular_hull(const Rectangle<R>& A, const Point<R>& B); 
+      /*! \brief The smallest rectangle containing \a A and \a B. */
+      friend Rectangle<R> rectangular_hull(const Point<R>& A, const Rectangle<R>& B); 
+      /*! \brief The smallest rectangle containing \a A and \a B. */
+      friend Rectangle<R> rectangular_hull(const Point<R>& A, const Point<R>& B); 
+
       /*! \brief The componentwise sum of rectangles \a A and \a B. */
       friend Rectangle<R> minkowski_sum(const Rectangle<R>& A, const Rectangle<R>& B); 
       /*! \brief The componentwise difference of rectangles \a A and \a B. */

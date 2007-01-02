@@ -152,44 +152,50 @@ namespace Ariadne {
       //@}
       
 #ifdef DOXYGEN
-    //@{
-    //! \name Geometric binary predicates
-    /*! \brief Tests disjointness */
-    friend bool disjoint(const Sphere<R>& A, const Sphere<R>& B);
-    /*! \brief Tests disjointness */
-    friend bool disjoint(const Rectangle<R>& A, const Sphere<R>& B);
-    /*! \brief Tests disjointness */
-    friend bool disjoint(const Sphere<R>& A, const Rectangle<R>& B);
-    /*! \brief Tests intersection of interiors */
-    friend bool interiors_intersect(const Sphere<R>& A, const Sphere<R>& B);
-    /*! \brief Tests intersection of interiors */
-    friend bool interiors_intersect(const Rectangle<R>& A, const Sphere<R>& B);
-    /*! \brief Tests intersection of interiors */
-    friend bool interiors_intersect(const Sphere<R>& A, const Rectangle<R>& B);
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
-    friend bool inner_subset(const Sphere<R>& A, const Sphere<R>& B);
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
-    friend bool inner_subset(const Rectangle<R>& A, const Sphere<R>& B);
-    /*! \brief Tests inclusion of \a A in the interior of \a B. */
-    friend bool inner_subset(const Sphere<R>& A, const Rectangle<R>& B);
-    /*! \brief Tests inclusion of \a A in \a B. */
-    friend bool subset(const Sphere<R>& A, const Sphere<R>& B);
-    /*! \brief Tests inclusion of \a A in \a B. */
-    friend bool subset(const Rectangle<R>& A, const Sphere<R>& B);
-    /*! \brief Tests inclusion of \a A in \a B. */
-    friend bool subset(const Sphere<R>& A, const Rectangle<R>& B);
-    //@}
-    
-    //@{
-    //! \name Geometric binary operations
-    /*! \brief The Minkoswi sum of two spheres */
-    friend Sphere<R> minkowski_sum(const Sphere<R>& A, const Sphere<R>& B);
-   /*! \brief The Minkoswi difference of two spheres */
-    friend Sphere<R> minkowski_difference(const Sphere<R>& A, const Sphere<R>& B);
-    //@}
+      //@{
+      //! \name Geometric binary predicates
+      /*! \brief Tests disjointness */
+      friend bool disjoint(const Sphere<R>& A, const Sphere<R>& B);
+      /*! \brief Tests disjointness */
+      friend bool disjoint(const Rectangle<R>& A, const Sphere<R>& B);
+      /*! \brief Tests disjointness */
+      friend bool disjoint(const Sphere<R>& A, const Rectangle<R>& B);
+      /*! \brief Tests intersection of interiors */
+      friend bool interiors_intersect(const Sphere<R>& A, const Sphere<R>& B);
+      /*! \brief Tests intersection of interiors */
+      friend bool interiors_intersect(const Rectangle<R>& A, const Sphere<R>& B);
+      /*! \brief Tests intersection of interiors */
+      friend bool interiors_intersect(const Sphere<R>& A, const Rectangle<R>& B);
+      /*! \brief Tests inclusion of \a A in the interior of \a B. */
+      friend bool inner_subset(const Sphere<R>& A, const Sphere<R>& B);
+      /*! \brief Tests inclusion of \a A in the interior of \a B. */
+      friend bool inner_subset(const Rectangle<R>& A, const Sphere<R>& B);
+      /*! \brief Tests inclusion of \a A in the interior of \a B. */
+      friend bool inner_subset(const Sphere<R>& A, const Rectangle<R>& B);
+      /*! \brief Tests inclusion of \a A in \a B. */
+      friend bool subset(const Sphere<R>& A, const Sphere<R>& B);
+      /*! \brief Tests inclusion of \a A in \a B. */
+      friend bool subset(const Rectangle<R>& A, const Sphere<R>& B);
+      /*! \brief Tests inclusion of \a A in \a B. */
+      friend bool subset(const Sphere<R>& A, const Rectangle<R>& B);
+      //@}
+      
+      //@{
+      //! \name Geometric binary operations
+      /*! \brief The Minkoswi sum of two spheres */
+      friend Sphere<R> minkowski_sum(const Sphere<R>& A, const Sphere<R>& B);
+      /*! \brief The Minkoswi difference of two spheres */
+      friend Sphere<R> minkowski_difference(const Sphere<R>& A, const Sphere<R>& B);
+      //@}
 #endif      
-      friend std::ostream& operator<< <> (std::ostream& os, const Sphere<R>& r);
-      friend std::istream& operator>> <> (std::istream& is, Sphere<R>& r);
+      //@{ 
+      //! \name Input/output operations
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream& os) const;
+      /*! \brief Read from an input stream. */
+      std::istream& read(std::istream& is);
+      //@}
+      
     };
           
     template<class R>
@@ -344,14 +350,16 @@ namespace Ariadne {
       return Geometry::Sphere<R>(new_centre, scale_factor*s.radius());
     }
 
-    template<class R>
-    std::ostream&
-    operator<<(std::ostream& os, const Sphere<R>& s); 
+    template<class R> inline
+    std::ostream& operator<<(std::ostream& os, const Sphere<R>& s) {
+      return s.write(os);
+    }
 
     
-    template<class R>
-    std::istream& 
-    operator>>(std::istream& is, Sphere<R>& s);
+    template<class R> inline
+    std::istream& operator>>(std::istream& is, Sphere<R>& s) {
+      return s.read(is);
+    }
 
       
   }

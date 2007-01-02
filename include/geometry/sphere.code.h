@@ -28,20 +28,20 @@ namespace Ariadne {
 
     template<class R>
     std::ostream&
-    operator<<(std::ostream& os, const Sphere<R>& s) 
+    Sphere<R>::write(std::ostream& os) const
     {
-      if(s.empty()) {
+      if(this->empty()) {
         os << "Empty";
       }
-      else if(s.dimension() > 0) {
-        os << "Sphere( centre=" << s.centre() << ", radius=" << s.radius() << " )";
+      else if(this->dimension() > 0) {
+        os << "Sphere( centre=" << this->centre() << ", radius=" << this->radius() << " )";
       }
       return os;
     }
     
     template<class R>
     std::istream& 
-    operator>>(std::istream& is, Sphere<R>& s)
+    Sphere<R>::read(std::istream& is)
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }

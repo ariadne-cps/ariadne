@@ -91,15 +91,26 @@ namespace Ariadne {
       return inner_product(d,LinearAlgebra::Vector<Rational>(A*d))<1;
     }
     
+    
     template<class R>
-    inline
-    Geometry::Ellipsoid<R> 
-    scale(const Geometry::Ellipsoid<R>& s, const R& scale_factor) 
+    void
+    Ellipsoid<R>::_instantiate_geometry_operators()
     {
-      const Geometry::Point<R>& centre=s.centre();
+      R sf=1.0;
+      Ellipsoid<R>* e=0;
+      *e=scale(*e,sf);
+    }
+    
+    
+    
+    template<class R>
+    Ellipsoid<R> 
+    scale(const Ellipsoid<R>& s, const R& scale_factor) 
+    {
+      const Point<R>& centre=s.centre();
       const LinearAlgebra::Matrix<R>& bilinear_form=s.bilinear_form();
       
-      Geometry::Point<R> new_centre(s.dimension());
+      Point<R> new_centre(s.dimension());
       LinearAlgebra::Matrix<R> new_bilinear_form(s.dimension(),s.dimension());
 
       for(size_type i=0; i!=s.dimension(); ++i) {
@@ -112,25 +123,29 @@ namespace Ariadne {
         }
       }
       
-      return Geometry::Ellipsoid<R>(new_centre, new_bilinear_form);
+      return Ellipsoid<R>(new_centre, new_bilinear_form);
     }
-
+    
+    
+    
+    
+    
     template<class R>
     std::ostream&
-    operator<<(std::ostream& os, const Ellipsoid<R>& e) 
+    Ellipsoid<R>::write(std::ostream& os) const
     {
-      if(e.empty()) {
+      if(this->empty()) {
         os << "Empty";
       }
-      else if(e.dimension() > 0) {
-        os << "Ellipsoid( centre=" << e.centre() << ", axes=" << e.bilinear_form() << " )";
+      else if(this->dimension() > 0) {
+        os << "Ellipsoid( centre=" << this->centre() << ", axes=" << this->bilinear_form() << " )";
       }
       return os;
     }
     
     template<class R>
     std::istream& 
-    operator>>(std::istream& is, Ellipsoid<R>& e)
+    Ellipsoid<R>::read(std::istream& is)
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
         

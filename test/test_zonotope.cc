@@ -35,6 +35,7 @@
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
+#include "geometry/polyhedron.h"
 
 #include "output/epsfstream.h"
 
@@ -79,8 +80,10 @@ test_zonotope()
   cout << "z1=" << z1 << endl;
   Zonotope<R> z2=Zonotope<R>(p2);
   cout << "z2=" << z2 << endl;
-  Zonotope<R> z3=Zonotope<R>(Point<R>("(0,0)"),Matrix<R>("[1,0,1;0,1,1]"));
+  Zonotope<R> z3=Zonotope<R>(Point<R>("(0.125,-0.25)"),Matrix<R>("[2,1;1,1]"));
   cout << "z3=" << z3 << endl;
+  Zonotope<R> z4=Zonotope<R>(Point<R>("(0,0)"),Matrix<R>("[1,0,1;0,1,1]"));
+  cout << "z4=" << z4 << endl;
   
   typename Zonotope<R>::vertices_const_iterator vend=z2.vertices_end();
   typename Zonotope<R>::vertices_const_iterator vi=z2.vertices_begin();
@@ -94,10 +97,10 @@ test_zonotope()
   
   // Minkowski sum
   cout << "z1=" << z1 << "\nz2=" << z2 << endl;
-  Zonotope<F> z4=minkowski_sum(z1,z2);
-  cout << "minkowski_sum(z1,z2)=" << z4 << endl;
-  z4=minkowski_difference(z1,z2);
-  cout << "minkowski_difference(z1,z2)=" << z4 << endl;
+  Zonotope<F> z5=minkowski_sum(z1,z2);
+  cout << "minkowski_sum(z1,z2)=" << z5 << endl;
+  z5=minkowski_difference(z1,z2);
+  cout << "minkowski_difference(z1,z2)=" << z5 << endl;
   cout << endl;
   
   ListSet<R,Zonotope> zls;
@@ -137,12 +140,30 @@ test_zonotope()
   }
   eps.close();
   
+  Rectangle<R> bbox3=z3.bounding_box().expand_by(0.25);
+  RegularGrid<R> gr3(2,0.125);
+  GridCellListSet<R> oaz3=over_approximation(z3,gr3);
+  GridCellListSet<R> uaz3=under_approximation(z3,gr3);
   bbox=z3.bounding_box().expand_by(R(0.5));
   eps.open("test_zonotope-2.eps",bbox);
+  eps.set_fill_colour("white");
+  eps << bbox3;
+  eps.set_fill_colour("red");
+  eps << oaz3;
+  eps.set_fill_colour("green");
   eps << z3;
+  eps.set_fill_colour("yellow");
+  eps << z3.operator Polyhedron<Rational>();
+  eps.set_fill_colour("blue");
+  eps << uaz3;
   eps.close();
   
+  bbox=z4.bounding_box().expand_by(R(0.5));
+  eps.open("test_zonotope-3.eps",bbox);
+  eps << z4;
+  eps.close();
   
+
   
   try {
     //Rectangle<R> r("[1,17/16]x[19/16,5/4]");

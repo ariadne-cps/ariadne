@@ -140,7 +140,7 @@ namespace Ariadne {
       return min_exact(x1,x2); }
   
     template<> inline Rational max_exact(const Rational& x1, const Rational& x2) {
-      return (x1<=x2) ? x1 : x2; }
+      return (x1>=x2) ? x1 : x2; }
     template<> inline Rational max_approx(const Rational& x1, const Rational& x2) { 
       return max_exact(x1,x2); }
     template<> inline Rational max_down(const Rational& x1, const Rational& x2) { 

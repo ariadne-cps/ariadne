@@ -563,7 +563,7 @@ namespace Ariadne {
     tribool 
     subset(const Rectangle<R>& A, const Zonotope<R>& B) 
     {
-      throw NotImplemented(__PRETTY_FUNCTION__);
+      //      throw NotImplemented(__PRETTY_FUNCTION__);
       typedef Rational F;
       return Geometry::subset(Rectangle<F>(A),B.operator Polyhedron<F>());
     }
@@ -581,9 +581,9 @@ namespace Ariadne {
     tribool 
     subset(const Zonotope<R>& A, const Zonotope<R>& B) 
     {
-      throw NotImplemented(__PRETTY_FUNCTION__);
+      //throw NotImplemented(__PRETTY_FUNCTION__);
       typedef Rational F;
-      return Geometry::subset(A.operator Polyhedron<F>(),B.operator Polyhedron<F>());
+      return Geometry::subset(A.operator Polytope<F>(),B.operator Polyhedron<F>());
     } 
     
     

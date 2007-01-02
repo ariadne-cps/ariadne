@@ -374,6 +374,8 @@ namespace Ariadne {
                                                 const ListSet<R,BS>& B);
       //@}
 #endif      
+     private:
+      static void _instantiate_geometry_operators();
 
     };
 

@@ -35,129 +35,15 @@ namespace Ariadne {
     template class GridCellListSet<Real>;
     template class GridMaskSet<Real>;
 
+    //template class GridBlockIterator<Real>;
     template class GridCellListSetIterator<Real>;
     template class GridMaskSetIterator<Real>;
 
-    template tribool disjoint(const GridMaskSet<Real>&, const Rectangle<Real>&);
-    template tribool disjoint(const Rectangle<Real>&, const GridMaskSet<Real>&);
 
-    template tribool subset(const Rectangle<Real>&, const GridBlock<Real>&);
-    template tribool subset(const Rectangle<Real>&, const GridMaskSet<Real>&);
-
-    template tribool overlap(const GridBlock<Real>&, const GridBlock<Real>&);
-    template tribool overlap(const GridBlock<Real>&, const GridMaskSet<Real>&);
-    template tribool overlap(const GridMaskSet<Real>&, const GridBlock<Real>&);
-    template tribool overlap(const GridMaskSet<Real>&, const GridMaskSet<Real>&);
-    
-    template tribool subset(const GridCell<Real>&, const GridBlock<Real>&);
-    template tribool subset(const GridCell<Real>&, const GridMaskSet<Real>&);
-    template tribool subset(const GridBlock<Real>&, const GridBlock<Real>&);
-    template tribool subset(const GridBlock<Real>&, const GridMaskSet<Real>&);
-    template tribool subset(const GridCellListSet<Real>&, const GridBlock<Real>&);
-    template tribool subset(const GridCellListSet<Real>&, const GridMaskSet<Real>&);
-    template tribool subset(const GridMaskSet<Real>&, const GridMaskSet<Real>&);
-
-    template GridCellListSet<Real> regular_intersection(const GridCellListSet<Real>&, 
-                                                     const GridMaskSet<Real>&);
-    template GridCellListSet<Real> regular_intersection(const GridMaskSet<Real>&,
-                                                     const GridCellListSet<Real>&);
-    template GridMaskSet<Real> regular_intersection(const GridBlock<Real>&, 
-                                                 const GridMaskSet<Real>&);
-    template GridMaskSet<Real> regular_intersection(const GridMaskSet<Real>&, 
-                                                 const GridBlock<Real>&);
-    template GridMaskSet<Real> regular_intersection(const GridMaskSet<Real>&, 
-                                                 const GridMaskSet<Real>&);
-    
-    template GridCellListSet<Real> difference(const GridCellListSet<Real>&, 
-                                              const GridMaskSet<Real>&);
-    template GridMaskSet<Real> difference(const GridMaskSet<Real>&, 
-                                          const GridMaskSet<Real>&);
-    template GridMaskSet<Real> join(const GridMaskSet<Real>&, const GridMaskSet<Real>&);
-
-    template GridBlock<Real>
-    over_approximation(const Rectangle<Real>& r, const Grid<Real>& g);
-
-    template
-    GridCellListSet<Real>
-    over_approximation(const Zonotope<Real>& z, const Grid<Real>& g);
-
-    template
-    GridCellListSet<Real>
-    over_approximation(const Polytope<Real>& p, const Grid<Real>& g);
-
-
-    template
-    GridMaskSet<Real>
-    over_approximation(const ListSet<Real,Rectangle>& ls, 
-                       const FiniteGrid<Real>& g);
-
-    template
-    GridMaskSet<Real>
-    over_approximation(const ListSet<Real,Parallelotope>& ls, 
-                       const FiniteGrid<Real>& g); 
-
-    template
-    GridMaskSet<Real>
-    over_approximation(const ListSet<Real,Zonotope>& ls, 
-                       const FiniteGrid<Real>& fg); 
-
-    template
-    GridMaskSet<Real>
-    over_approximation(const GridMaskSet<Real>& gms, const FiniteGrid<Real>& fg); 
-    
-    template
-    GridMaskSet<Real>
-    over_approximation(const PartitionTreeSet<Real>& pts, const FiniteGrid<Real>& fg); 
-    
-    template
-    GridMaskSet<Real>
-    over_approximation(const Set<Real>& set, const FiniteGrid<Real>& fg); 
-    
-    template
-    GridMaskSet<Real>
-    over_approximation(const Set<Real>& set, const Grid<Real>& g); 
     
 
-
-    template GridBlock<Real>
-    under_approximation(const Rectangle<Real>& r, const Grid<Real>& g);
-
-    template
-    GridCellListSet<Real>
-    under_approximation(const Parallelotope<Real>& p, const Grid<Real>& g);
-
-    template
-    GridCellListSet<Real>
-    under_approximation(const Zonotope<Real>& z, const Grid<Real>& g);
-
-    template
-    GridCellListSet<Real>
-    under_approximation(const Polytope<Real>& p, const Grid<Real>& g);
 
     
     
-    template
-    GridMaskSet<Real>
-    under_approximation(const ListSet<Real,Rectangle>& ls, 
-                        const FiniteGrid<Real>& g); 
-
-    template
-    GridMaskSet<Real>
-    under_approximation(const GridMaskSet<Real>& gms, const FiniteGrid<Real>& g);
-    
-    template
-    GridMaskSet<Real>
-    under_approximation(const PartitionTreeSet<Real>& pts, const FiniteGrid<Real>& g); 
-    
-    
-    
-    template std::ostream& operator<<(std::ostream&, const GridCell<Real>&);
-    template std::ostream& operator<<(std::ostream&, 
-                                const GridBlock<Real>&);
-    template std::ostream& operator<<(std::ostream&,
-                                const GridCellListSet<Real>&);
-    template std::ostream& operator<<(std::ostream&, 
-                                const GridMaskSet<Real>&);
- 
   }
 }

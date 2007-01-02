@@ -34,9 +34,6 @@ namespace Ariadne {
     template class RegularGrid<Real>;
 
     template class FiniteGrid<Real>;
-
-    template std::ostream& operator<<(std::ostream&, const Grid<Real>&);
-    template std::ostream& operator<<(std::ostream&, const FiniteGrid<Real>&);
  
   }
 }

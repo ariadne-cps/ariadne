@@ -35,14 +35,11 @@
 
 #include "numeric/float64.h"
 #include "numeric/mpfloat.h"
-#include "numeric/dyadic.h"
 #include "numeric/rational.h"
 
 template<class R> inline std::string python_name(const std::string& bn);
 template<> inline std::string python_name<Ariadne::Numeric::Float64>(const std::string& bn) { return "F"+bn; }
-//template<> inline const char* python_name<Ariadne::Numeric::MPFloat>(const std::string& bn) { return "R"+bn; }
 template<> inline std::string python_name<Ariadne::Numeric::MPFloat>(const std::string& bn) { return ""+bn; }
-template<> inline std::string python_name<Ariadne::Numeric::Dyadic>(const std::string& bn) { return "D"+bn; }
 template<> inline std::string python_name<Ariadne::Numeric::Rational>(const std::string& bn) { return "Q"+bn; }
 
 

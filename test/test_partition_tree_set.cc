@@ -31,7 +31,6 @@
 #include "real_typedef.h"
 #include "base/stlio.h"
 #include "combinatoric/binary_word.h"
-#include "numeric/numerical_types.h"
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/vector.h"
 #include "geometry/point.h"

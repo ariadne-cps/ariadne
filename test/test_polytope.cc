@@ -28,8 +28,6 @@
 
 #include <vector>
 
-#include <ppl.hh>
-
 #include "numeric/float64.h"
 #include "numeric/mpfloat.h"
 #include "numeric/rational.h"
@@ -39,6 +37,11 @@
 #include "geometry/ppl_polyhedron.h"
 #include "output/epsfstream.h"
 
+#ifdef HAVE_PPL_HH
+#include <ppl.hh>
+using namespace Parma_Polyhedra_Library::IO_Operators;
+#endif
+
 #include "test.h"
 
 using namespace Ariadne;
@@ -46,8 +49,6 @@ using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
 using namespace Ariadne::Output;
 using namespace std;
-
-using namespace Parma_Polyhedra_Library::IO_Operators;
 
 template<class R> int test_polytope();
 template<> int test_polytope<Rational>();
@@ -167,6 +168,7 @@ test_polytope<Rational>()
   cout << "p=" << p << endl;
   
   
+#ifdef HAVE_PPL_HH
   Parma_Polyhedra_Library::C_Polyhedron ppl_p=ppl_polyhedron(p);
   cout << ppl_p.generators() << endl;
   
@@ -178,6 +180,7 @@ test_polytope<Rational>()
   
   Parma_Polyhedra_Library::C_Polyhedron ppl_s=ppl_polyhedron(s4.position_vector());
   cout << ppl_s.generators() << endl;
+#endif
 
   //assert(p.contains(s4));
   //assert(!p.contains(s5));

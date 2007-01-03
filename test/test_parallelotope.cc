@@ -33,7 +33,6 @@
 #include "ariadne.h"
 #include "debug.h"
 #include "base/utility.h"
-#include "numeric/numerical_types.h"
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"

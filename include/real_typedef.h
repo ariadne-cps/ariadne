@@ -30,12 +30,11 @@
 #define _ARIADNE_REAL_TYPEDEF_H
 
 
-#ifndef DOUBLE_REAL 
+#ifndef FLOAT64_REAL 
 #define MPFLOAT_REAL
 #endif
 
-#ifdef DOUBLE_REAL
-#define REAL_IS_A_FIELD
+#ifdef FLOAT64_REAL
 #include "numeric/float64.h"
 namespace Ariadne {
   typedef Numeric::Float64 Real;
@@ -43,7 +42,6 @@ namespace Ariadne {
 #endif
 
 #ifdef MPFLOAT_REAL
-#undef REAL_IS_A_FIELD
 #include "numeric/mpfloat.h"
 namespace Ariadne {
   typedef Numeric::MPFloat Real;

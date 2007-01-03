@@ -28,8 +28,6 @@
 
 #include <vector>
 
-#include <ppl.hh>
-
 #include "real_typedef.h"
 
 #include "ariadne.h"
@@ -46,6 +44,8 @@
 #include "geometry/grid_set.h"
 #include "output/epsfstream.h"
 
+#include "geometry/ppl_polyhedron.h"
+
 #include "test.h"
 
 using namespace Ariadne;
@@ -54,9 +54,6 @@ using namespace Ariadne::Geometry;
 using namespace Ariadne::Output;
 using namespace std;
 
-using namespace Parma_Polyhedra_Library::IO_Operators;
-
-int test_ppl_polyhedron();
 template<class R> int test_polyhedron();
 template<> int test_polyhedron<Rational>();
 
@@ -64,19 +61,12 @@ int main() {
   
   cout << boolalpha;
   
-  test_ppl_polyhedron();
   test_polyhedron<MPFloat>();
   test_polyhedron<Rational>();
    
   cerr << "INCOMPLETE ";
 }
 
-
-int
-test_ppl_polyhedron()
-{
-  return 0;
-}  
 
 
 template<class R>

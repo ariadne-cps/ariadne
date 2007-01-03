@@ -352,10 +352,10 @@ namespace Ariadne {
     Zonotope<typename Zonotope<R>::F> 
     scale(const Zonotope<R>& z, const R& sf);
     
-    template<class R> inline 
+    template<class R>  
     std::ostream& operator<<(std::ostream& os, const Zonotope<R>& z);
     
-    template<class R> inline
+    template<class R> 
     std::istream& operator>>(std::istream& is, Zonotope<R>& z);
 
     
@@ -363,7 +363,7 @@ namespace Ariadne {
     
     template<class R> class ZonotopeVerticesIterator;
       
-    template<class R> inline 
+    template<class R> 
     std::ostream& operator<<(std::ostream& os, const ZonotopeVerticesIterator<R>& iter);
 
 

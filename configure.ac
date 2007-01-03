@@ -25,10 +25,10 @@ dnl Checks for header files.
 AC_STDC_HEADERS
 AC_CHECK_HEADER([mpfr.h],,AC_MSG_ERROR([MPFR library is missing. You must install it.]))
 AC_CHECK_HEADER([gmpxx.h],,AC_MSG_ERROR([GMP library is missing. You must install it.]))
-AC_CHECK_HEADER([cblas.h],,AC_MSG_ERROR([CBLAS library is missing. You must install it.]))
+AC_CHECK_HEADER([cblas.h],[AC_DEFINE([HAVE_CBLAS_H],[1],[Define to 1 if you have the <cblas.h> header file.])],AC_MSG_WARN([CBLAS library is missing. You cannot use Fortran BLAS routines.]))
 AC_CHECK_HEADER([tblas/tblas.hpp],,AC_MSG_ERROR([TBLAS library is missing. You must install it.]))
 AC_CHECK_HEADER([tlapack/tlapack.hpp],,AC_MSG_ERROR([TLAPACK library is missing. You must install it.]))
-AC_CHECK_HEADER([ppl.hh],,AC_MSG_ERROR([PPL library is missing. You must install it.]))
+AC_CHECK_HEADER([ppl.hh],[AC_DEFINE([HAVE_PPL_HH],[1],[Define to 1 if you have the <ppl.hh> header file.])],AC_MSG_WARN([PPL library is missing. Ariadne polyhedral routines cannot be checked against PPL routines.]))
 
 CPPFLAGS="$CPPFLAGS -I/usr/include/python2.4"
 AC_CHECK_HEADER([boost/version.hpp],,AC_MSG_ERROR([Boost library is missing. You must install it.]))

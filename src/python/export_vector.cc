@@ -23,7 +23,6 @@
  */
 
 
-#include "numeric/numerical_types.h"
 #include "numeric/float64.h"
 #include "numeric/mpfloat.h"
 #include "numeric/rational.h"

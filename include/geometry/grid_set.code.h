@@ -30,7 +30,6 @@
 
 #include "../combinatoric/array_operations.h"
 
-#include "../geometry/ppl_polyhedron.h"
 #include "../geometry/rectangle.h"
 #include "../geometry/zonotope.h"
 #include "../geometry/parallelotope.h"

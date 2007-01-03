@@ -1,5 +1,5 @@
 /***************************************************************************
- *            polyhedron.cc
+ *            ppl_polyhedron.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
@@ -21,6 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "geometry/ppl_polyhedron.h"
+
+#ifdef HAVE_PPL_HH
+
 #include "numeric/rational.h"
 #include "numeric/interval.h"
 #include "linear_algebra/vector.h"
@@ -31,7 +35,7 @@
 #include "geometry/polytope.h"
 #include "geometry/polyhedron.h"
 
-#include "geometry/ppl_polyhedron.h"
+
 #include <ppl.hh>
 
 
@@ -442,3 +446,5 @@ namespace Ariadne {
                    
   }
 }
+
+#endif /* HAVE_PPL_HH */

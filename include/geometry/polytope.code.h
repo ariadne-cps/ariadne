@@ -261,8 +261,6 @@ namespace Ariadne {
     tribool 
     Polytope<R>::empty() const
     {
-      //if(Geometry::empty_interior(ppl_polyhedron(this->_vertices))) { return true; }
-      //if(!Geometry::empty(ppl_polyhedron(this->_vertices))) { return false; }
       return indeterminate;
     }
     

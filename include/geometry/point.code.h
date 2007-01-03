@@ -25,7 +25,6 @@
 
 
 #include "point.h"
-#include "../numeric/numerical_types.h"
 
 #include <iostream>
 #include <string>

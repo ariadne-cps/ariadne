@@ -26,6 +26,10 @@
  *  \brief Wrapper for Parmal Polyhedral Library Polyhedron.
  */
  
+#include "config.h"
+
+#ifdef HAVE_PPL_HH
+
 #ifndef _ARIADNE_PPL_POLYHEDRON_H
 #define _ARIADNE_PPL_POLYHEDRON_H
 
@@ -41,6 +45,7 @@ namespace Parma_Polyhedra_Library {
   class Constraint_System;
   class Generator_System;
 }
+
 
 namespace Ariadne {  
   namespace Geometry {
@@ -152,3 +157,5 @@ namespace Ariadne {
 }
                    
 #endif /* _ARIADNE_PPL_POLYHEDRON_H */
+
+#endif /* HAVE_PPL_HH */

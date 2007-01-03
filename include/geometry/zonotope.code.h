@@ -26,8 +26,6 @@
 #include <vector>
 #include <algorithm>
 
-#include <ppl.hh>
-
 #include "zonotope.h"
 
 #include "../base/array.h"

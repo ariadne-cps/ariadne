@@ -30,7 +30,6 @@
 
 #include "declarations.h"
 #include "real_typedef.h"
-#include "numeric/numerical_types.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/tensor.h"

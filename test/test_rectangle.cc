@@ -84,8 +84,8 @@ test_rectangle()
     
     cout << "r4=" << r4 << endl;
     cout << "r4.vertices()=" << flush;
-    RectangleVerticesIterator<R> r4e(r4,true);
-    for(class Rectangle<R>::vertices_iterator v=r4.vertices_begin();
+
+    for(typename Rectangle<R>::vertices_const_iterator v=r4.vertices_begin();
         v!=r4.vertices_end(); ++v)
     {
       cout << *v << " " << flush;

@@ -81,7 +81,7 @@ test_parallelotope()
   cout << "p1.empty()=" << p1.empty() << endl;
 //  cout << "disjoint(p1,p2)=" << disjoint(p1,p2) << endl;
 //  cout << "subset(p1,p2)=" << subset(p1,p2) << endl;
-  for(class Rectangle<R>::vertices_iterator v_iter=r3.vertices_begin();
+  for(typename Rectangle<R>::vertices_const_iterator v_iter=r3.vertices_begin();
       v_iter!=r3.vertices_end(); ++v_iter)
   {
     cout << "p2.contains(" << *v_iter << ")=" << p2.contains(*v_iter) << endl;

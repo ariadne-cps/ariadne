@@ -70,8 +70,8 @@ namespace Ariadne {
     ListSet<R,Rectangle>
     Rectangle<R>::subdivide() const 
     {
-      size_type n=this->dimension();
       ListSet<R,Geometry::Rectangle> result(this->dimension());
+      size_type n=this->dimension();
       
       Point<R> lwr_crnr=this->lower_corner();
       Point<R> cntr=this->centre();

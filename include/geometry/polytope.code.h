@@ -111,7 +111,7 @@ namespace Ariadne {
     {
       dimension_type d=r.dimension();
       size_type j=0;
-      for(typename Rectangle<R>::vertices_iterator v=r.vertices_begin();
+      for(typename Rectangle<R>::vertices_const_iterator v=r.vertices_begin();
           v!=r.vertices_end(); ++v)
       {
         for(size_type i=0; i!=this->dimension(); ++i) {
@@ -247,7 +247,7 @@ namespace Ariadne {
     Polytope<R>::bounding_box() const 
     {
       //std::cerr << "Polytope<R>::bounding_box()" << std::endl;
-      vertices_iterator pt_iter=this->vertices_begin();
+      vertices_const_iterator pt_iter=this->vertices_begin();
       Rectangle<R> result(*pt_iter);
       ++pt_iter;
       for( ; pt_iter!=this->vertices_end(); ++pt_iter) {
@@ -494,7 +494,26 @@ namespace Ariadne {
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
-
+    
+    
+    
+    
+    
+    template<class R>
+    dimension_type 
+    Polytope< Interval<R> >::dimension() const 
+    { 
+      return _vertices.dimension(); 
+    }
+    
+    
+    template<class R>
+    size_type 
+    Polytope< Interval<R> >::number_of_vertices() const 
+    { 
+      return _vertices.size(); 
+    }
+    
     
     template<class R>
     const PointList< Interval<R> >&

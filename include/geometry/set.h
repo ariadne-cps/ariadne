@@ -45,7 +45,7 @@ namespace Ariadne {
       typedef R real_type;
       typedef Point<R> state_type;
      
-      virtual ~Set() { };
+      virtual ~Set();
       virtual Set<R>* clone() const = 0;
      
       virtual dimension_type dimension() const = 0;
@@ -59,6 +59,12 @@ namespace Ariadne {
       virtual std::ostream& write(std::ostream& os) const = 0;
     };
      
+    template<class R> 
+    Set<R>::~Set() 
+    {
+    }
+
+
     template<class R> inline tribool disjoint(const Set<R>& A, const Rectangle<R>& B) {
       return A.disjoint(B);
     }
@@ -81,6 +87,7 @@ namespace Ariadne {
 
 
 
+#include "geometry/rectangle.h"
 #include "geometry/polyhedron.h"
 
 namespace Ariadne {

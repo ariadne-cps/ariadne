@@ -1,7 +1,6 @@
 /***************************************************************************
  *            simplex.h
  *
- *  6 January 2006
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
@@ -41,14 +40,6 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template<> 
-    inline bool is_a<Simplex,Simplex>() { return true; }
-    template<> 
-    inline bool is_a<Simplex,Polytope>() { return true; }
-
-    /* Forward declaration of friends. */
-    template<class R> std::ostream& operator<<(std::ostream&, const Simplex<R>&);
-    template<class R> std::istream& operator>>(std::istream&, Simplex<R>&);
 
     /*!\ingroup BasicSet
      * \brief A simplex of arbitrary dimension.
@@ -84,15 +75,10 @@ namespace Ariadne {
       explicit Simplex(const PointList<R>& v);
       
       /*! \brief Copy constructor. */
-      Simplex(const Simplex<R>& s) : Polytope<R>(s) { }
+      Simplex(const Simplex<R>& s);
 
       /*! \brief Copy assignment operator. */
-      Simplex<R>& operator=(const Simplex<R>& s) {
-        if(this != &s) {
-          this->Polytope<R>::operator=(s); 
-        }
-        return *this;
-      }
+      Simplex<R>& operator=(const Simplex<R>& s);
       //@}
     
       //! \name Geometric predicates
@@ -109,22 +95,14 @@ namespace Ariadne {
       //@}
      public:
       LinearAlgebra::Vector<typename Numeric::traits<R>::arithmetic_type> coordinates(const Point<R>& s) const;
-
     };
-
   
-    template<class R> inline 
-    std::ostream& operator<<(std::ostream& os, const Simplex<R>& s) {
-      return s.write(os);
-    }
+    template<class R> std::ostream& operator<<(std::ostream& os, const Simplex<R>& s);
+    template<class R> std::istream& operator>>(std::istream& is, Simplex<R>& s);
     
-    template<class R> inline
-    std::istream& operator>>(std::istream& is, Simplex<R>& s) {
-      return s.read(is);
-    }
-
-     
   }
 }
+
+#include "simplex.inline.h"
 
 #endif /* _ARIADNE_SIMPLEX_H */

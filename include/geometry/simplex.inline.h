@@ -1,8 +1,8 @@
 /***************************************************************************
- *            rectangle.cc
+ *            simplex.inline.h
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,18 +21,42 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "real_typedef.h"
-
-#include "geometry/rectangle.h"
-#include "geometry/rectangle.code.h"
-
-
 namespace Ariadne {
   namespace Geometry {
-    template class Rectangle<Rational>; 
 
-    template class Rectangle<Real>; 
-    template class Rectangle< Interval<Real> >; 
-      
+    template<class R> inline
+    Simplex<R>::Simplex(const Simplex<R>& s)
+      : Polytope<R>(s) 
+    { 
+    }
+
+    template<class R> inline
+    Simplex<R>& 
+    Simplex<R>::operator=(const Simplex<R>& s) 
+    {
+      if(this != &s) {
+        this->Polytope<R>::operator=(s); 
+      }
+      return *this;
+    }
+    
+    
+    
+    template<class R> inline 
+    std::ostream& 
+    operator<<(std::ostream& os, const Simplex<R>& s) 
+    {
+      return s.write(os);
+    }
+    
+    
+    template<class R> inline
+    std::istream& 
+    operator>>(std::istream& is, Simplex<R>& s) 
+    {
+      return s.read(is);
+    }
+
+     
   }
 }

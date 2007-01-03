@@ -82,256 +82,87 @@ namespace Ariadne {
 
      public:
       /*! \brief An empty list set which can hold sets of an unspecified dimension. */
-      ListSet() : _dimension(0), _vector() { }
+      ListSet();
 
       /*! \brief An empty ListSet which can only hold sets of dimension \a n. */
-      ListSet(size_type n) : _dimension(n), _vector() { }
+      ListSet(size_type n);
 
       /*! \brief A denotable set constructor. */
-      ListSet(const BS<R>& A) : _dimension(A.dimension()), _vector() {
-        if (A.empty()) {
-            return;
-        }
-        _vector.push_back(A);
-      }
+      ListSet(const BS<R>& A);
 
       /*! \brief The copy constructor. */
-      ListSet(const ListSet<R,BS>& A) : _dimension(A.dimension()), _vector(A._vector) { }
+      ListSet(const ListSet<R,BS>& A);
 
       /*! \brief The destructor. */
-      ~ListSet() {
-        this->_vector.clear();
-      }
+      ~ListSet();
 
-      /*! \brief Return the number of basic sets forming this object.
-      *
-      * \return The number of basic sets forming this object.
-      */
-      const size_type size() const {
-          return this->_vector.size();
-      }
+      /*! \brief Returns the number of basic sets forming this object. */
+      size_type size() const;
 
       /*! \brief Adjoins a basic set to the back of the list. */
-      void push_back(const BS<R>& A) {
-        if (this->dimension()==0) { this->_dimension=A.dimension(); }
-        check_equal_dimensions(*this,A,__PRETTY_FUNCTION__);
-        this->_vector.push_back(A);
-      }
+      void push_back(const BS<R>& A);
 
       /*! \brief Removes the basic set at the back of the list. */
-      void pop_back() {
-        if (this->_vector.empty()) { 
-          throw std::runtime_error("Attempting to pop from an empty ListSet");
-        }
-        this->_vector.pop_back();
-      }
+      void pop_back();
 
-      /*! \brief Return the denotable set's space dimension. 
-      *
-      * \return The space dimension of the ListSet.
-      */
-      const size_type dimension() const {
-          return this->_dimension;
-      }
+      /*! \brief Returns the denotable set's space dimension. */
+      dimension_type dimension() const;
 
-      /*! \brief Accesses the i-th BasicSet.
-      *
-      * \param index is the index of the returned basic set.
-      * \return The i-th basic set maitained by the ListSet.
-      */
-      const BS<R>& get(size_type index) const {
-        check_array_index(*this,index,__PRETTY_FUNCTION__);
-        return this->_vector[index];
-      }
+      /*! \brief Accesses the i-th basic set in the list. */
+      const BS<R>& get(size_type index) const;
 
-      /*! \brief Assigns to the i-th BasicSet.
-      *
-      * \param index is the index of the returned basic set.
-      * \param set is the new set.
-      */
-      void set(size_type index, const BS<R>& set) {
-        check_array_index(*this,index,__PRETTY_FUNCTION__);
-        this->_vector[index]=set;
-      }
+      /*! \brief Assigns to the i-th BasicSet. */
+      void set(size_type index, const BS<R>& set);
 
-      /*! \brief Accesses the i-th BasicSet.
-      *
-      * \param index is the index of the returned basic set.
-      * \return The i-th basic set maitained by the ListSet.
-      */
-      const BS<R>& operator[](size_type index) const {
-        check_array_index(*this,index,__PRETTY_FUNCTION__);
-        return this->_vector[index];
-      }
+      /*! \brief Accesses the i-th BasicSet. */
+      const BS<R>& operator[](size_type index) const;
 
 
       /*! \brief Copy assignment. */
-      const ListSet<R,BS>& 
-      operator=(const ListSet<R,BS>& A) {
-        if(this !=& A) {
-          this->_dimension = A._dimension;
-          this->_vector = A._vector;
-        }
-        return *this;
-      }
+      const ListSet<R,BS>& operator=(const ListSet<R,BS>& A);
 
       /*!\brief Convert to a list set BS2<R>. */
-      template<template<class> class BS2>
-      operator ListSet<R,BS2> () const {
-        ListSet<R,BS2> result(this->dimension());
-        BS2<R> bs(this->dimension());
-        for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-          bs=BS2<R>(*iter);
-          result.push_back(bs);
-        }
-        return result;
-      }
+      template<template<class> class BS2> 
+      operator ListSet<R,BS2> () const;
       
-      /*!\brief Checks if a denotable set includes a point.
-      *
-      * This method checks whenever the current denotable set
-      * includes the point \a p.
-      * \param p is the point of which inclusion
-      * into the current denotable set should be tested.
-      * \return  \a true, if \a s is contained into the
-      * current set, \a false otherwise.
-      */
-      tribool contains(const Point<R>& p) const {
-        tribool result=false;
-        for (typename ListSet<R,BS>::const_iterator i=this->begin(); i!=this->end(); ++i) {
-          result=result || i->contains(p);
-          if(result) { return result; }
-        }
-        return result;
-      }
+      /*!\brief Checks if a denotable set includes a point. */
+      tribool contains(const Point<R>& p) const;
 
-      /*! \brief Checks for emptyness.
-       *
-       * \return \a true if the denotable set is empty,
-       * \a false otherwise.
-       */
-      tribool empty() const {
-        tribool result=true;
-        for (typename ListSet<R,BS>::const_iterator i=this->begin(); i!=this->end(); ++i) {
-          result = result && i->empty();
-          if(!result) { return result; }
-        }
-        return result;
-      }
+      /*! \brief Checks for emptyness. Returns \a true if the denotable set is empty, \a false otherwise. */
+      tribool empty() const;
 
-      /*! \brief Checks for boundedness.
-       */
-      tribool bounded() const {
-        tribool result=true;
-        for (typename ListSet<R,BS>::const_iterator i=this->begin(); i!=this->end(); ++i) {
-          result = result && i->bounded();
-          if(!result) { return result; }
-        }
-        return result;
-      }
+      /*! \brief Checks for boundedness. */
+      tribool bounded() const;
 
       /*! \brief Return a rectangle containing the set. */
-      Rectangle<R> bounding_box() const {
-        if(this->empty()) { return Rectangle<R>(this->dimension()); }
-        Rectangle<R> result=(*this)[0].bounding_box();
-        for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-          Rectangle<R> bb=iter->bounding_box();
-          for(size_type i=0; i!=result.dimension(); ++i) {
-            if(bb.lower_bound(i) < result.lower_bound(i)) {
-              result.set_lower_bound(i,bb.lower_bound(i));
-            }
-            if(bb.upper_bound(i) > result.upper_bound(i)) {
-              result.set_upper_bound(i,bb.upper_bound(i));
-            }
-          }
-        }
-        return result;
-      }
+      Rectangle<R> bounding_box() const;
         
       /*! \brief Make the set empty. */
-      void clear() { 
-        this->_vector.clear();
-      }
+      void clear();
       
-      /*! \brief An iterator to the beginning of the list of basic sets.
-       *
-       * \return The begin of the maintained basic set vector.
-       */
-      iterator begin() {
-          return _vector.begin();
-      }
+      /*! \brief An iterator to the beginning of the list of basic sets. */
+      iterator begin();
 
-      /*! \brief An iterator to the end of the list of basic sets.
-       *
-       * \return The end of the maintained basic set vector.
-       */
-      iterator end() {
-        return _vector.end();
-      }
+      /*! \brief An iterator to the end of the list of basic sets. */
+      iterator end();
 
-      /*! \brief A constant iterator to the beginning of the list of basic sets.
-       *
-       * \return The begin of the maintained basic set vector.
-       */
-      const_iterator begin() const {
-          return _vector.begin();
-      }
+      /*! \brief A constant iterator to the beginning of the list of basic sets. */
+      const_iterator begin() const;
 
-      /*! \brief A constant iterator to the end of the list of basic sets.
-       *
-       * \return The end of the maintained basic set vector.
-       */
-      const_iterator end() const {
-        return _vector.end();
-      }
+      /*! \brief A constant iterator to the end of the list of basic sets. */
+      const_iterator end() const;
 
-      /*! \brief Adjoins (makes union with) another denotable set.
-       *
-       * Makes the union of the current denotable set with another of the same type.
-       * The result is stored into the current object.
-       * \param A is a ListSet.
-       */
-      void adjoin(const ListSet<R,BS>& A) {
-        if(this->dimension()==0) { 
-          this->_dimension=A.dimension(); 
-        }
-        check_equal_dimensions(*this,A,__PRETTY_FUNCTION__);
-        this->_vector.reserve(A.size());
-        for(typename ListSet<R,BS>::const_iterator iter=A.begin(); iter!=A.end(); ++iter) {
-          this->_vector.push_back(*iter);
-        }
-      }
+      /*! \brief Adjoins (makes union with) another denotable set. */
+      void adjoin(const ListSet<R,BS>& A);
       
-      /*! \brief Adjoins (makes union with) another denotable set.
-       *
-       * Makes the union of the current denotable set with another of the same type.
-       * The result is stored into the current object.
-       * \param A is a ListSet.
-       */
-      void inplace_union(const ListSet<R,BS>& A) {
-        this->adjoin(A);
-      }
-
-      /*! \brief Adjoins (makes union with) a basic set.
-       *
-       * Makes the union of the current denotable set with a basic set.
-       * The result is stored into the current object.
-       * \param A is a basic set.
-       */
-      void adjoin(const BS<R>& A) {
-        if(this->dimension()==0) { 
-           this->_dimension=A.dimension(); 
-        }
-        check_equal_dimensions(*this,A,__PRETTY_FUNCTION__);
-        if(!A.empty()) {
-          this->_vector.push_back(A);
-        }
-      }
+      /*! \brief Adjoins (makes union with) another denotable set. */
+      void inplace_union(const ListSet<R,BS>& A);
 
       /*! \brief Adjoins (makes union with) a basic set. */
-      void inplace_union(const BS<R>& A) {
-        this->adjoin(A);
-      }
+      void adjoin(const BS<R>& A);
+
+      /*! \brief Adjoins (makes union with) a basic set. */
+      void inplace_union(const BS<R>& A);
       
       //@{
       //! \name Input/output operators
@@ -381,20 +212,14 @@ namespace Ariadne {
 
   
     template<class R, template<class> class BS>
-    inline
-    std::ostream&
-    operator<<(std::ostream& os, const ListSet<R,BS>& A) 
-    {
-      return A.write(os);
-    }
+    std::ostream& operator<<(std::ostream& os, const ListSet<R,BS>& A);
+
 
     template<class R, template<class> class BS>
-    inline
     std::istream&
-    operator>>(std::istream& is, ListSet<R,BS>& A) 
-    {
-      return A.read(is);
-    }
+    operator>>(std::istream& is, ListSet<R,BS>& A);
+
+
 
 
     template<class R, template<class> class BS>
@@ -431,5 +256,7 @@ namespace Ariadne {
   
   }
 }
+
+#include "list_set.inline.h"
 
 #endif /* _LIST_SET_H */

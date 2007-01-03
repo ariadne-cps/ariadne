@@ -115,7 +115,7 @@ test_polyhedron()
   
   Rectangle<R> r1("[-0.06125,0.25]x[0.125,0.375]");
   cout << "r1=" << r1 << endl;
-  for(class Rectangle<R>::vertices_iterator v_iter=r1.vertices_begin();
+  for(class Rectangle<R>::vertices_const_iterator v_iter=r1.vertices_begin();
       v_iter!=r1.vertices_end(); ++v_iter)
   {
     for(typename Polyhedron<R>::constraints_const_iterator c_iter=phd1.constraints_begin();

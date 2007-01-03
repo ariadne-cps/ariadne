@@ -69,14 +69,7 @@ namespace Ariadne {
       typedef R real_type;
       /*! \brief The type of denotable point contained by the convex hull. */
       typedef Point<R> state_type;
-      /*! \brief The type of vector. */
-      typedef Ariadne::LinearAlgebra::Vector<R> vector_type;
-      /*! \brief The type of matrix. */
-      typedef Ariadne::LinearAlgebra::Matrix<R> matrix_type;
-      /*! \brief The type of a list of points. */
-      typedef PointList<R>  state_list_type;
-      /*! \brief The type of a list of points. */
-      typedef PolytopeVerticesIterator<R> vertices_iterator;
+      /*! \brief An iterator through the vertices of the polytope. */
       typedef PolytopeVerticesIterator<R> vertices_const_iterator;
      public:
       /*! \brief Construct an empty polytope in dimension \a n. */
@@ -144,7 +137,7 @@ namespace Ariadne {
       
 #ifdef DOXYGEN
       /*! \brief The vertices of the polytope. */
-      state_list_type vertices() const; 
+      PointList<R> vertices() const; 
       /*! \brief An iterator to the vertices of the polytope. */
       vertices_const_iterator vertices_begin() const; 
       /*! \brief An iterator to the vertices of the polytope. */
@@ -153,7 +146,7 @@ namespace Ariadne {
 
       /*! \brief Tests if a point is an element of the polytope.
        */
-      tribool contains(const state_type& point) const;
+      tribool contains(const Point<R>& point) const;
            
       /*! \brief A rectangle containing the polytope. */
       Rectangle<R> bounding_box() const;
@@ -204,7 +197,7 @@ namespace Ariadne {
      private:
       static void _instantiate_geometry_operators();
      public:
-  #endif
+#endif
 
       //@{ 
       //! \name Input/output operations
@@ -218,48 +211,28 @@ namespace Ariadne {
     };
    
     template<class R>
+    std::ostream& operator<<(std::ostream& os, const Polytope<R>& p);
+    
+    template<class R>
+    std::istream& operator>>(std::istream& os, Polytope<R>& p);
+    
+    
+    
+    template<class R>
     class Polytope< Interval<R> >
     {
       typedef Interval<R> I;
      public:
       template<class Rl> Polytope(const PointList<Rl>& v);
       template<class Rl> explicit Polytope(const Rectangle<Rl>& r);
-      dimension_type dimension() const { return _vertices.dimension(); }
-      dimension_type number_of_vertices() const { return _vertices.size(); }
+      dimension_type dimension() const;
+      size_type number_of_vertices() const;
       const PointList< Interval<R> >& vertices() const;
      private:
       PointList<I> _vertices;
     };
 
-    template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const Polytope<R>& p) {
-      return p.write(os); }
-    template<class R> inline
-    std::istream& operator>>(std::istream& os, Polytope<R>& p) {
-      return p.read(os); }
-   
 
-    template<class R>
-    class PolytopeVerticesIterator
-      : public boost::iterator_facade<PolytopeVerticesIterator<R>,
-                                      Point<R>,
-                                      boost::forward_traversal_tag,
-                                      Point<R> const&,
-                                      Point<R> const*
-                                     >
-    {
-     public:
-      PolytopeVerticesIterator(const Polytope<R>& plytp, const size_type& j) 
-        : _p(&plytp), _j(j) { }
-      bool equal(const PolytopeVerticesIterator<R>& other) const {
-        return this->_j==other._j && this->_p ==other._p; }
-      void increment() {
-        ++this->_j; }
-      const Point<R>& dereference() const {
-        this->_v=this->_p->vertex(this->_j); return this->_v; }
-     private:
-      const Polytope<R>* _p; size_type _j; mutable Point<R> _v;
-    };
     
     template<class R> 
     tribool equal(const Polytope<R>& A, const Polytope<R>& B);
@@ -286,17 +259,12 @@ namespace Ariadne {
 
 
     template<class R> 
-    Polytope<R> 
-    convex_hull(const Polytope<R>& A, const Polytope<R>& B);
+    Polytope<R> convex_hull(const Polytope<R>& A, const Polytope<R>& B);
   
-    
-    
-    template<class R> template<class Rl> inline 
-    Polytope<R>::Polytope(const Polytope<Rl>& original)
-      : _generators(original.generators()) { }
-
 
   }
 }
+
+#include "polytope.inline.h"
 
 #endif /* _ARIADNE_POLYTOPE_H */

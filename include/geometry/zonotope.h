@@ -1,7 +1,6 @@
 /***************************************************************************
  *            zonotope.h
  *
- *  6 February 2006
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
@@ -44,11 +43,6 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template<> 
-    inline bool is_a<Zonotope,Zonotope>() { return true; }
-    template<> 
-    inline bool is_a<Zonotope,Polyhedron>() { return true; }
-
     template<class R> class ZonotopeVerticesIterator;
       
     /*!\ingroup BasicSet
@@ -80,116 +74,48 @@ namespace Ariadne {
       typedef R real_type;
       /*! \brief The type of denotable point contained by the zonotope. */
       typedef Point<R> state_type;
-      /*! \brief The type of vectors. */
-      typedef Ariadne::LinearAlgebra::Vector<R> vector_type;
-      /*! \brief The type of matrix giving principal directions. */
-      typedef Ariadne::LinearAlgebra::Matrix<R> matrix_type;
       /*! \brief An iterator through the (possible) vertices of the zonotope. */
-      typedef ZonotopeVerticesIterator<R> vertices_iterator;
       typedef ZonotopeVerticesIterator<R> vertices_const_iterator;
 
      private:
-      /* Zonotope's centre. */
       Point<R> _centre;
-      
-      /* Zonotope's principal directions. */
-      matrix_type _generators;
+      LinearAlgebra::Matrix<R> _generators;
      public:
       //@{
       //! \name Constructors
       /*! \brief Default constructor constructs an empty zonotope. */
-      explicit Zonotope()
-        : _centre(0),  _generators(0,0) { }
+      explicit Zonotope();
      
       /*! \brief Construct a zonotope of dimension \a n with centre at the origin and no generators. */
-      explicit Zonotope(dimension_type n)
-        : _centre(n),  _generators(n,0) { }
+      explicit Zonotope(dimension_type d);
      
       /*! \brief Construct a zonotope of dimension \a n with centre at the origin and \a m generators. */
-       explicit Zonotope(dimension_type n, size_type m)
-        : _centre(n),  _generators(n,m) { }
+      explicit Zonotope(dimension_type d, size_type m);
      
       /*! \brief Construct from centre and directions. */
       template<class R1, class R2> 
-      explicit Zonotope(const Point<R1>& c, const LinearAlgebra::Matrix<R2>& g)
-        : _centre(c), _generators(g)
-      {
-        if(c.dimension()!=g.number_of_rows()) { 
-//          throw InvalidGenerators("Zonotope<R>::Zonotope(Point<R1>,Matrix<R2>): "
-//                                  "The matrix of principal directions does not have the same number of rows as the point dimension.");
-          throw InvalidGenerators(__PRETTY_FUNCTION__);
-        }
-        this->minimize_generators();
-      }
+      explicit Zonotope(const Point<R1>& c, const LinearAlgebra::Matrix<R2>& g);
 
       /*! \brief Construct from centre directions given by two matrices. */
       template<class R1, class R2, class R3> 
-      Zonotope(const Point<R1>& c, const LinearAlgebra::Matrix<R2>& g1, const LinearAlgebra::Vector<R3>& g2)
-        : _centre(c), _generators(c.dimension(),g1.number_of_columns()+1) 
-      { 
-        if(c.dimension()!=g1.number_of_rows() || c.dimension()!=g2.size()) { 
-//          throw InvalidGenerators("Zonotope<R>::Zonotope(Point<R1>,Matrix<R2>,Vector<R3>): "
-//                                  "The principal directions do not all have the same size as the point dimension.");
-          throw InvalidGenerators(__PRETTY_FUNCTION__);
-        }
-        for(size_type i=0; i!=this->dimension();++i) {
-          for(size_type j1=0; j1!=g1.number_of_columns(); ++j1) {
-            this->_generators(i,j1)=g1(i,j1);
-          }
-          this->_generators(i,g1.number_of_columns())=g2(i);
-        }
-      }
+      Zonotope(const Point<R1>& c, const LinearAlgebra::Matrix<R2>& g1, const LinearAlgebra::Vector<R3>& g2);
       
       /*! \brief Construct from centre directions given by a matrix and a vector. */
       template<class R1, class R2, class R3> 
-      Zonotope(const Point<R1>& c, const LinearAlgebra::Matrix<R2>& g1, const LinearAlgebra::Matrix<R3>& g2)
-        : _centre(c), _generators(c.dimension(),g1.number_of_columns()+g2.number_of_columns()) 
-      { 
-        if(c.dimension()!=g1.number_of_rows() || c.dimension()!=g2.number_of_rows()) { 
-//          throw InvalidGenerators("Zonotope<R>::Zonotope(Point<R1>,Matrix<R2>,Matrix<R3>): "
-//                                  "The principal directions do not all have the same size as the point dimension.");
-          throw InvalidGenerators(__PRETTY_FUNCTION__);
-        }
-        for(size_type i=0; i!=this->dimension();++i) {
-          for(size_type j1=0; j1!=g1.number_of_columns(); ++j1) {
-            this->_generators(i,j1)=g1(i,j1);
-          }
-          for(size_type j2=0; j2!=g2.number_of_columns(); ++j2) {
-            this->_generators(i,g1.number_of_columns()+j2)=g2(i,j2);
-          }
-        }
-      }
+      Zonotope(const Point<R1>& c, const LinearAlgebra::Matrix<R2>& g1, const LinearAlgebra::Matrix<R3>& g2);
 
       /*! \brief Construct from a string literal. */
       explicit Zonotope(const std::string& s);
       
       /*! \brief Copy constructor. */
-      template<class Rl>
-      Zonotope(const Zonotope<Rl>& original)
-        : _centre(original.centre()),
-          _generators(original.generators())
-      { }
+      template<class R1> 
+      Zonotope(const Zonotope<R1>& original);
       
       /*! \brief Assign from a Rectangle. */
-      Zonotope<R>& operator=(const Rectangle<R>& r) {
-        this->_centre=r.centre(); this->_generators.resize(r.dimension(),r.dimension());
-        for(size_type i=0; i!=r.dimension(); ++i) {
-          for(size_type j=0; j!=r.dimension(); ++j) {
-            this->_generators(i,j)=0;
-          }
-          this->_generators(i,i)=div_up(sub_up(r.upper_bound(i),r.lower_bound(i)),R(2));
-        }
-        return *this;
-      }
+      Zonotope<R>& operator=(const Rectangle<R>& r);
       
       /*! \brief Copy assignment operator. */
-      Zonotope<R>& operator=(const Zonotope<R>& original) {
-        if(this != &original) {
-          this->_centre = original._centre;
-          this->_generators = original._generators;
-        }
-        return *this;
-      }
+      Zonotope<R>& operator=(const Zonotope<R>& original);
       //@}
       
       
@@ -197,22 +123,16 @@ namespace Ariadne {
       //@{ 
       //! \name Data access
       /*! \brief The centre. */
-      Point<R> centre() const { return this->_centre; }
+      Point<R> centre() const;
 
       /*! \brief The matrix of principle directions. */
-      const LinearAlgebra::Matrix<R>& generators() const {
-        return this->_generators;
-      }
+      const LinearAlgebra::Matrix<R>& generators() const;
      
       /*! \brief The number of generators of the zonotope. */
-      size_type number_of_generators() const {
-        return this->_generators.number_of_columns();
-      }
+      size_type number_of_generators() const;
 
       /*! \brief The \a n th of principle direction. */
-      LinearAlgebra::Vector<R> generator(size_type n) const {
-        return this->_generators.column(n);
-      }
+      LinearAlgebra::Vector<R> generator(size_type n) const;
       
       //@}
       
@@ -238,20 +158,16 @@ namespace Ariadne {
       //@{
       //! \name Geometric operations.
       /*! \brief The dimension of the Euclidean space the zonotope lies in. */
-      dimension_type dimension() const {
-        return this->_centre.dimension();
-      }
+      dimension_type dimension() const;
       
       /*! \brief True if the zonotope is empty. */
-      tribool empty() const { return false; }
+      tribool empty() const;
       
       /*! \brief Checks for boundedness. */
-      tribool bounded() const { return true; }
+      tribool bounded() const;
       
       /*! \brief The radius of the zonotope. */
-      real_type radius() const {
-        return this->bounding_box().radius();
-      }
+      R radius() const;
       
       /*! \brief Tests if the zonotope contains point. */
       tribool contains(const Point<R>& point) const;
@@ -352,49 +268,30 @@ namespace Ariadne {
       typedef Interval<R> real_type;
       typedef Point< Interval<R> > state_type;
      
-      Zonotope(dimension_type d=0)
-        : _centre(d), _generators(d,d) { }
-      template<class R1, class R2> Zonotope(const Point<R1>& c, const LinearAlgebra::Matrix<R2>& g)
-        : _centre(c), _generators(g) { }
+      Zonotope(dimension_type d=0);
+
+      template<class R1, class R2> Zonotope(const Point<R1>& c, const LinearAlgebra::Matrix<R2>& g);
+        
       template<class R1, class R2, class R3> 
-      Zonotope(const Point<R1>& c, const LinearAlgebra::Matrix<R2>& g1, const LinearAlgebra::Vector<R3>& g2)
-        : _centre(c), _generators(c.dimension(),g1.number_of_columns()+1) 
-      { 
-        for(size_type i=0; i!=this->dimension();++i) {
-          for(size_type j1=0; j1!=g1.number_of_columns(); ++j1) {
-            this->_generators(i,j1)=g1(i,j1);
-          }
-          this->_generators(i,g1.number_of_columns())=g2(i);
-        }
-      }
+      Zonotope(const Point<R1>& c, const LinearAlgebra::Matrix<R2>& g1, const LinearAlgebra::Vector<R3>& g2);
+      
       template<class R1, class R2, class R3> 
-      Zonotope(const Point<R1>& c, const LinearAlgebra::Matrix<R2>& g1, const LinearAlgebra::Matrix<R3>& g2)
-        : _centre(c), _generators(c.dimension(),g1.number_of_columns()+g2.number_of_columns()) 
-      { 
-        for(size_type i=0; i!=this->dimension();++i) {
-          for(size_type j1=0; j1!=g1.number_of_columns(); ++j1) {
-            this->_generators(i,j1)=g1(i,j1);
-          }
-          for(size_type j2=0; j2!=g2.number_of_columns(); ++j2) {
-            this->_generators(i,g1.number_of_columns()+j2)=g2(i,j2);
-          }
-        }
-      }
+      Zonotope(const Point<R1>& c, const LinearAlgebra::Matrix<R2>& g1, const LinearAlgebra::Matrix<R3>& g2);
       
       Zonotope(const Rectangle<R>& r);
-      Zonotope(const Zonotope<R>& z) : _centre(z.centre()), _generators(z.generators()) { }
+      Zonotope(const Zonotope<R>& z);
       
-      dimension_type dimension() const { return this->_centre.dimension(); }
-      size_type number_of_generators() const { return this->_generators.number_of_columns(); }
-      const Point<I>& centre() const { return _centre; }
-      const LinearAlgebra::Matrix<I>& generators() const { return _generators; }
+      dimension_type dimension() const;
+      size_type number_of_generators() const;
+      const Point<I>& centre() const;
+      const LinearAlgebra::Matrix<I>& generators() const;
       
       tribool empty() const;
       tribool bounded() const;
       tribool contains(const Point< Interval<R> >& pt) const;
       Rectangle<R> bounding_box() const;
       
-      std::istream& read(std::istream& is) ;
+      std::istream& read(std::istream& is);
       std::ostream& write(std::ostream& os) const;
      private:
       static void _instantiate_geometry_operators();
@@ -405,14 +302,6 @@ namespace Ariadne {
 
 
 
-    //template<class R>
-    //inline
-    //tribool 
-    //equal(const Zonotope<R>& A, const Zonotope<R>& B) 
-    //{
-    //  return Zonotope<R>::equal(A,B);
-    //}
-    
     template<class R> tribool disjoint(const Rectangle<R>& A, const Zonotope<R>& B);
     
     template<class R> tribool disjoint(const Zonotope<R>& A, const Rectangle<R>& B);
@@ -425,8 +314,9 @@ namespace Ariadne {
     
     template<class R> tribool subset(const Zonotope<R>& A, const Zonotope<R>& B);
     
+    template<class R> Zonotope<R> over_approximation(const Zonotope<R>&);
+ 
     template<class R> Zonotope<R> over_approximation(const Zonotope< Interval<R> >&);
-      
     
     template<class R> 
     Zonotope<typename Numeric::traits<R>::arithmetic_type>
@@ -438,105 +328,43 @@ namespace Ariadne {
     
     
     
-    template<class R> inline
+    template<class R>
     Zonotope<typename Numeric::traits<R>::arithmetic_type> 
-    minkowski_sum(const Rectangle<R>& A, const Zonotope<R>& B) 
-    {
-      return Geometry::minkowski_sum(Zonotope<R>(A),B);
-    }
-
-    template<class R> inline
-    Zonotope<typename Numeric::traits<R>::arithmetic_type> 
-    minkowski_sum(const Zonotope<R>& A, const Rectangle<R>& B) 
-    {
-      return Geometry::minkowski_sum(A,Zonotope<R>(B));
-    }
-
-    template<class R> inline
-    Zonotope<typename Numeric::traits<R>::arithmetic_type> 
-    minkowski_difference(const Rectangle<R>& A, const Zonotope<R>& B) 
-    {
-      return Geometry::minkowski_difference(Zonotope<R>(A),B);
-    }
-
-    template<class R> inline
-    Zonotope<typename Numeric::traits<R>::arithmetic_type> 
-    minkowski_difference(const Zonotope<R>& A, const Rectangle<R>& B) 
-    {
-      return Geometry::minkowski_difference(A,Zonotope<R>(B));
-    }
-
-    
-    template<class R> 
-    inline
-    Zonotope<R> 
-    operator+(const Zonotope<R>& z, const LinearAlgebra::Matrix<R>& A) 
-    {
-      return Zonotope<R>(z.centre(),concatenate_columns(z.generators(),A));
-    }
-
-    template<class R> 
-    inline
-    Zonotope<typename Zonotope<R>::F> 
-    scale(const Zonotope<R>& z, const R& sf) {
-      return Zonotope<R>::scale(z,sf);
-    }
-
+    minkowski_sum(const Rectangle<R>& A, const Zonotope<R>& B);
     
     template<class R>
-    class ZonotopeVerticesIterator 
-      : public boost::iterator_facade<ZonotopeVerticesIterator<R>,
-                                      Point<typename Numeric::traits<R>::arithmetic_type>,
-                                      boost::forward_traversal_tag,
-                                      Point<typename Numeric::traits<R>::arithmetic_type> const&,
-                                      Point<typename Numeric::traits<R>::arithmetic_type> const*
-                                     >
-    {
-      friend class Zonotope<R>;
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-      const Zonotope<R>* _z; long unsigned int _i; bool _parity; Point<F> _pt;
-     public:
-      ZonotopeVerticesIterator(const Zonotope<R>& z, bool end) 
-        : _z(&z), _i(end ? (1u<<(z.number_of_generators()-1))*3 : 0), _parity(0), _pt(z.centre())
-      {
-        if(end) { return; }
-        for(dimension_type i=0; i!=z.dimension(); ++i) {
-          for(dimension_type j=0; j!=z.number_of_generators(); ++j) {
-            this->_pt[i]-=z.generators()(i,j); } }
-      }
-      bool equal(const ZonotopeVerticesIterator<R>& other) const {
-        //std::cerr << "ZonotopeVerticesIterator<R>::equal" << std::endl;
-        return this->_i==other._i && this->_z==other._z; }
-      const Point<F>& dereference() const { 
-        //std::cerr << "ZonotopeVerticesIterator<R>::dereference" << std::endl;
-        return this->_pt; }
-      void increment() { 
-        //std::cerr << "ZonotopeVerticesIterator<R>::increment" << std::endl;
-        uint j=0; uint m=1; if(this->_parity) { while(!(m&(this->_i))) { ++j; m*=2u; } ++j; m*=2u; }
-        this->_parity=!this->_parity;
-        if(j==this->_z->number_of_generators()) { this->_i+=m; return; }
-        if(m&(this->_i)) { this->_pt=this->_pt-R(2)*this->_z->generator(j); this->_i-=m; }
-        else { this->_pt=this->_pt+R(2)*this->_z->generator(j); this->_i+=m; }
-      }
+    Zonotope<typename Numeric::traits<R>::arithmetic_type> 
+    minkowski_sum(const Zonotope<R>& A, const Rectangle<R>& B);
+    
+    template<class R>
+    Zonotope<typename Numeric::traits<R>::arithmetic_type> 
+    minkowski_difference(const Rectangle<R>& A, const Zonotope<R>& B);
 
-      std::ostream& write(std::ostream& os) const {
-        return os << _z << " " << _i << " " << _parity << std::endl; }
-    }; 
-
+    template<class R>
+    Zonotope<typename Numeric::traits<R>::arithmetic_type> 
+    minkowski_difference(const Zonotope<R>& A, const Rectangle<R>& B);
+    
+    template<class R> 
+    Zonotope<R> 
+    operator+(const Zonotope<R>& z, const LinearAlgebra::Matrix<R>& A);
+    
+    template<class R> 
+    Zonotope<typename Zonotope<R>::F> 
+    scale(const Zonotope<R>& z, const R& sf);
+    
     template<class R> inline 
-    std::ostream& operator<<(std::ostream& os, const ZonotopeVerticesIterator<R>& iter) {
-      return iter.write(os);
-    }
-
-    template<class R> inline 
-    std::ostream& operator<<(std::ostream& os, const Zonotope<R>& z) {
-      return z.write(os);
-    }
+    std::ostream& operator<<(std::ostream& os, const Zonotope<R>& z);
     
     template<class R> inline
-    std::istream& operator>>(std::istream& is, Zonotope<R>& z) {
-      return z.read(is);
-    }
+    std::istream& operator>>(std::istream& is, Zonotope<R>& z);
+
+    
+    
+    
+    template<class R> class ZonotopeVerticesIterator;
+      
+    template<class R> inline 
+    std::ostream& operator<<(std::ostream& os, const ZonotopeVerticesIterator<R>& iter);
 
 
 
@@ -545,5 +373,7 @@ namespace Ariadne {
 
   }
 }
+
+#include "zonotope.inline.h"
 
 #endif /* _ARIADNE_ZONOTOPE_H */

@@ -45,13 +45,6 @@
 namespace Ariadne {
   namespace Geometry {
  
-    template<> 
-    inline bool is_a<Parallelotope,Parallelotope>() { return true; }
-    template<> 
-    inline bool is_a<Parallelotope,Zonotope>() { return true; }
-    template<>
-    inline bool is_a<Parallelotope,Polyhedron>() { return true; }
-
     /*!\ingroup BasicSet
      * \brief A parallelotope of arbitrary dimension.
      *
@@ -78,64 +71,40 @@ namespace Ariadne {
       typedef R real_type;
       /*! \brief The type of denotable point contained by the parallelotope. */
       typedef Point<R> state_type;
-      /*! \brief The type of vector in the underlying space. */
-      typedef LinearAlgebra::Vector<R> vector_type;
-      /*! \brief The type of matrix giving principal directions. */
-      typedef LinearAlgebra::Matrix<R> matrix_type;
      public:
       //@{ 
       //! \name Constructors
       /*! \brief Default constructor constructs an empty parallelotope of dimension \a n. */
-      explicit Parallelotope(dimension_type n=0) : Zonotope<R>(n,n) { }
+      explicit Parallelotope(dimension_type n=0);
       
       /*! \brief Construct from centre and directions. */
-      explicit Parallelotope(const LinearAlgebra::Vector<R>& c, const LinearAlgebra::Matrix<R>& m) 
-        : Zonotope<R>(Point<R>(c),m)
-      {
-        if (m.number_of_rows()!=m.number_of_columns()) {
-//          throw InvalidGenerators("Parallelotope<R>::Parallelotope(Vector<R>,Matrix<R>): "
-//                                  "The matrix of principal directions is not a square matrix");
-          throw InvalidGenerators(__PRETTY_FUNCTION__);
-        }
-      }
+      explicit Parallelotope(const LinearAlgebra::Vector<R>& c, const LinearAlgebra::Matrix<R>& m);
       
       /*! \brief Construct from centre and directions. */
-      explicit Parallelotope(const Point<R>& c, const LinearAlgebra::Matrix<R>& m)
-        : Zonotope<R>(c,m)
-      {
-        if (m.number_of_rows()!=m.number_of_columns()) {
-//          throw InvalidGenerators("Parallelotope<R>::Parallelotope(Vector<R>,Matrix<R>): "
-//                                  "The matrix of principal directions is not a square matrix");
-          throw InvalidGenerators(__PRETTY_FUNCTION__);
-        }
-      }
+      explicit Parallelotope(const Point<R>& c, const LinearAlgebra::Matrix<R>& m);
        
       /*! \brief Construct from a rectangle. */
-      explicit Parallelotope(const Rectangle<R>& r)
-        : Zonotope<R>(r) { }
+      explicit Parallelotope(const Rectangle<R>& r);
       
       /*! \brief Construct from a string literal. */
-      explicit Parallelotope(const std::string& s) : Zonotope<R>(s) { }
+      explicit Parallelotope(const std::string& s);
         
       
       /*! \brief Construct from a zonotope. */
-      Parallelotope(const Zonotope<R>& z)
-        : Zonotope<R>(z) { check_dimension(*this,z.number_of_generators(),__PRETTY_FUNCTION__); }
+      Parallelotope(const Zonotope<R>& z);
 
       /*! \brief Copy constructor. */
-      Parallelotope(const Parallelotope<R>& original) : Zonotope<R>(original) { }
+      Parallelotope(const Parallelotope<R>& original);
 
       /*! \brief Assign from a rectangle. */
-      Parallelotope<R>& operator=(const Rectangle<R>& r) {
-        Zonotope<R>& z=*this; z=r; return *this;
-      }
+      Parallelotope<R>& operator=(const Rectangle<R>& r);
       //@}
       
       
       //@{
       //! \name Geometric operations
       /*! \brief Tests if the parallelotope contains \a point. */
-      tribool contains(const state_type& point) const;
+      tribool contains(const Point<R>& point) const;
 
 #ifdef DOXYGEN
       /*! \brief Tests inclusion of \a A in \a B. */
@@ -167,14 +136,16 @@ namespace Ariadne {
      private:
       static tribool subset(const Rectangle<R>& r, const Parallelotope<R>& p);
       static LinearAlgebra::Matrix<R> compute_generators(const Rectangle<R>& r);
-      static void compute_linear_inequalities(matrix_type&, vector_type&, vector_type&);
-      LinearAlgebra::Vector<F> coordinates(const state_type& s) const;
+      static void compute_linear_inequalities(LinearAlgebra::Matrix<R>&, LinearAlgebra::Vector<R>&, LinearAlgebra::Vector<R>&);
+      LinearAlgebra::Vector<F> coordinates(const Point<R>& s) const;
       void _compute_generators_inverse() const;
      private:
       mutable LinearAlgebra::Matrix<F> _generators_inverse;
-     
     };
- 
+    
+    
+    
+     
     template<class R>
     class Parallelotope< Interval<R> > 
       : public Zonotope< Interval<R> >
@@ -182,39 +153,29 @@ namespace Ariadne {
       typedef typename traits<R>::arithmetic_type F;
       typedef typename traits<R>::interval_type I;
      public:
-      /*! \brief The real number type. */
+      /* The real number type. */
       typedef I real_type;
-      /*! \brief The type of denotable point contained by the parallelotope. */
+      /* The type of denotable point contained by the parallelotope. */
       typedef Point<I> state_type;
      
-      Parallelotope(dimension_type d=0)
-        : Zonotope<I>(d) { }
+      Parallelotope(dimension_type d=0);
       
       template<class Rl1, class Rl2> 
-      Parallelotope(const Point<Rl1>& c, const LinearAlgebra::Matrix<Rl2>& g)
-        : Zonotope<I>(c,g) { }
+      Parallelotope(const Point<Rl1>& c, const LinearAlgebra::Matrix<Rl2>& g);
       
-      Parallelotope(const Rectangle<R>& r) : Zonotope<I>(r) { }
+      Parallelotope(const Rectangle<R>& r);
       
-      Parallelotope(const Zonotope<R>& z) : Zonotope<I>(z) { 
-        if(z.dimension()!=z.number_of_generators()) { 
-          throw InvalidGenerators(__PRETTY_FUNCTION__);
-        }
-      }
+      Parallelotope(const Zonotope<R>& z);
 
-      Parallelotope(const Zonotope<I>& z) : Zonotope<I>(z) { 
-        if(z.dimension()!=z.number_of_generators()) { 
-          throw InvalidGenerators(__PRETTY_FUNCTION__);
-        }
-      }
-
-      /*! \brief Tests if the parallelotope contains \a point. */
+      Parallelotope(const Zonotope<I>& z);
+      
+      /* Tests if the parallelotope contains \a point. */
       tribool contains(const Point<I>& point) const;
 
-      /*! \brief The vertices of the parallelotope. */
+      /* The vertices of the parallelotope. */
       PointList<F> vertices() const;
       
-      /*! \brief Write to an output stream. */
+      /* Write to an output stream. */
       std::ostream& write(std::ostream& os) const;
       
      private:
@@ -223,7 +184,7 @@ namespace Ariadne {
      private:
       mutable LinearAlgebra::Matrix<I> _generators_inverse;
     };
-       
+    
     
     template<class R>
     tribool
@@ -248,34 +209,18 @@ namespace Ariadne {
     
     
     
-    template<class R> inline
-    Parallelotope<R> scale(const Parallelotope<R>& p, const R& scale_factor) 
-    {
-      return Parallelotope<R>::scale(p,scale_factor);
-    }
-
-    template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const Parallelotope< Interval<R> >& p) 
-    {
-      return p.write(os);
-    }
+    template<class R>
+    std::istream& operator>>(std::ostream& is, Parallelotope<R>& p);
     
-    template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const Parallelotope<R>& p) 
-    {
-      return p.write(os);
-    }
+    template<class R>
+    std::ostream& operator<<(std::ostream& os, const Parallelotope<R>& p);
     
-    template<class R> inline
-    std::istream& operator>>(std::ostream& is, Parallelotope<R>& p) 
-    {
-      return p.read(is);
-    }
+    template<class R>
+    std::ostream& operator<<(std::ostream& os, const Parallelotope< Interval<R> >& p) ;
     
-    
-    
-
   }
 }
+
+#include "parallelotope.inline.h"
 
 #endif /* _ARIADNE_PARALLELOTOPE_H */

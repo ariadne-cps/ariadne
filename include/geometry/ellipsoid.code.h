@@ -46,7 +46,7 @@ namespace Ariadne {
     }
     
     template<class R>
-    Ellipsoid<R>::Ellipsoid(const state_type& c, const matrix_type& A)
+    Ellipsoid<R>::Ellipsoid(const Point<R>& c, const LinearAlgebra::Matrix<R>& A)
       : _centre(c), _bilinear_form(A)
     {
       if(c.dimension()!=A.number_of_rows() && A.number_of_rows()!=A.number_of_columns()) {
@@ -72,23 +72,16 @@ namespace Ariadne {
       
       
     template<class R>
-    bool Ellipsoid<R>::contains(const state_type& point) const 
+    tribool Ellipsoid<R>::contains(const Point<R>& point) const 
     {
       LinearAlgebra::Vector<Rational> p=point.position_vector();
       LinearAlgebra::Vector<Rational> c=this->centre().position_vector();
       LinearAlgebra::Vector<Rational> d=p-c;
       LinearAlgebra::Matrix<Rational> A=this->bilinear_form();
-      return inner_product(d,LinearAlgebra::Vector<Rational>(A*d))<=1;
-    }
-    
-    template<class R>
-    bool Ellipsoid<R>::interior_contains(const state_type& point) const 
-    {
-      LinearAlgebra::Vector<Rational> p=point.position_vector();
-      LinearAlgebra::Vector<Rational> c=this->centre().position_vector();
-      LinearAlgebra::Vector<Rational> d=p-c;
-      LinearAlgebra::Matrix<Rational> A=this->bilinear_form();
-      return inner_product(d,LinearAlgebra::Vector<Rational>(A*d))<1;
+      Rational r=inner_product(d,LinearAlgebra::Vector<Rational>(A*d));
+      if(r<1) { return true; }
+      if(r>1) { return false; }
+      return indeterminate;
     }
     
     

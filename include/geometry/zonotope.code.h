@@ -195,28 +195,26 @@ namespace Ariadne {
     ListSet<R,Zonotope>
     Zonotope<R>::subdivide() const 
     {
-      std::cerr << __PRETTY_FUNCTION__ << std::endl;
-
       ListSet<R,Geometry::Zonotope> result(this->dimension());
       
       R two=2;
       dimension_type d=this->dimension();
       size_type m=this->number_of_generators();
       
-      matrix_type new_generators(d,m);
+      LinearAlgebra::Matrix<R> new_generators(d,m);
       for(size_type i=0; i!=d; ++i) {
         for(size_type j=0; j!=m; ++j) {
           new_generators(i,j)=div_up(this->generators()(i,j),two);
         }
       }
 
-      state_type first_centre=this->centre();
+      Point<R> first_centre=this->centre();
       for(size_type i=0; i<m; i++) {
         first_centre=sub_approx(first_centre,LinearAlgebra::Vector<R>(new_generators.column(i)));
       }
       
       for(unsigned long k=0; k!=1u<<m; ++k) {
-        state_type new_centre=first_centre;
+        Point<R> new_centre=first_centre;
         for(size_type i=0; i<m; i++) {
           if(k & 1u<<i) {
             new_centre=add_approx(new_centre,this->generator(i));
@@ -237,7 +235,7 @@ namespace Ariadne {
       R two=2;
       ListSet<R,Geometry::Zonotope> result(d);
       
-      matrix_type new_generators=this->generators();
+      LinearAlgebra::Matrix<R> new_generators=this->generators();
       
       R max_norm=0;
       size_type max_column=0;
@@ -254,7 +252,7 @@ namespace Ariadne {
         new_generators(i,j)=div_up(new_generators(i,j),two);
       }
       
-      state_type new_centre=sub_approx(this->centre(),LinearAlgebra::Vector<R>(new_generators.column(j)));
+      Point<R> new_centre=sub_approx(this->centre(),LinearAlgebra::Vector<R>(new_generators.column(j)));
       result.adjoin(Zonotope<R>(new_centre,new_generators));
       new_centre=sub_approx(new_centre,LinearAlgebra::Vector<R>(new_generators.column(j)));
       result.adjoin(Zonotope(new_centre,new_generators));

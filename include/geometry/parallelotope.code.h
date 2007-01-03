@@ -136,7 +136,7 @@ namespace Ariadne {
       size_type n=this->dimension();
       ListSet<R,Geometry::Parallelotope> result(this->dimension());
       
-      matrix_type new_generators=this->generators();
+      LinearAlgebra::Matrix<R> new_generators=this->generators();
       
       R two=2;
       R max_norm=0;
@@ -154,7 +154,7 @@ namespace Ariadne {
         new_generators(i,j)=div_up(new_generators(i,j),two);
       }
       
-      state_type new_centre=sub_approx(this->centre(),div_approx(LinearAlgebra::Vector<R>(new_generators.column(j)),two));
+      Point<R> new_centre=sub_approx(this->centre(),div_approx(LinearAlgebra::Vector<R>(new_generators.column(j)),two));
       result.adjoin(Parallelotope<R>(new_centre,new_generators));
       new_centre=add_approx(new_centre,LinearAlgebra::Vector<R>(new_generators.column(j)));
       result.adjoin(Parallelotope(new_centre,new_generators));
@@ -171,14 +171,14 @@ namespace Ariadne {
       R two=2;
       size_type n=this->dimension();
       
-      matrix_type new_generators(n,n);
+      LinearAlgebra::Matrix<R> new_generators(n,n);
       for(size_type i=0; i!=n; ++i) {
         for(size_type j=0; j!=n; ++j) {
           new_generators(i,j)=div_up(this->generators()(i,j),two);
         }
       }
       
-      state_type first_centre=this->centre();
+      Point<R> first_centre=this->centre();
       for(size_type i=0; i!=n; ++i) {
         first_centre=sub_approx(first_centre,div_approx(LinearAlgebra::Vector<R>(this->generator(i)),two));
       }

@@ -1,0 +1,167 @@
+/***************************************************************************
+ *            parallelotope.inline.h
+ *
+ *  Copyright  2006  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ ****************************************************************************/
+
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to bouthe Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+ 
+namespace Ariadne {
+  namespace Geometry {
+    
+    
+    template<class R> inline 
+    Parallelotope<R>::Parallelotope(dimension_type n)
+      : Zonotope<R>(n,n) 
+    { 
+    }
+    
+    
+    template<class R> inline 
+    Parallelotope<R>::Parallelotope(const LinearAlgebra::Vector<R>& c, const LinearAlgebra::Matrix<R>& m) 
+      : Zonotope<R>(Point<R>(c),m)
+    {
+      if (m.number_of_rows()!=m.number_of_columns()) {
+//          throw InvalidGenerators("Parallelotope<R>::Parallelotope(Vector<R>,Matrix<R>): "
+//                                  "The matrix of principal directions is not a square matrix");
+        throw InvalidGenerators(__PRETTY_FUNCTION__);
+      }
+    }
+    
+    
+    template<class R> inline 
+    Parallelotope<R>::Parallelotope(const Point<R>& c, const LinearAlgebra::Matrix<R>& m)
+      : Zonotope<R>(c,m)
+    {
+      if (m.number_of_rows()!=m.number_of_columns()) {
+//          throw InvalidGenerators("Parallelotope<R>::Parallelotope(Vector<R>,Matrix<R>): "
+//                                  "The matrix of principal directions is not a square matrix");
+        throw InvalidGenerators(__PRETTY_FUNCTION__);
+      }
+    }
+    
+    
+    template<class R> inline 
+    Parallelotope<R>::Parallelotope(const Rectangle<R>& r)
+      : Zonotope<R>(r) 
+    { 
+    }
+    
+    
+    template<class R> inline 
+    Parallelotope<R>::Parallelotope(const std::string& s)
+      : Zonotope<R>(s) 
+    { 
+    }
+    
+    
+    template<class R> inline 
+    Parallelotope<R>::Parallelotope(const Zonotope<R>& z)
+      : Zonotope<R>(z) 
+    { 
+      check_dimension(*this,z.number_of_generators(),__PRETTY_FUNCTION__); 
+    }
+    
+    template<class R> inline 
+    Parallelotope<R>::Parallelotope(const Parallelotope<R>& original)
+      : Zonotope<R>(original) 
+    { 
+    }
+    
+    
+    template<class R> inline 
+    Parallelotope<R>& 
+    Parallelotope<R>::operator=(const Rectangle<R>& r)
+    {
+      Zonotope<R>& z=*this; z=r; return *this;
+    }
+    
+    
+    template<class R> inline
+    Parallelotope<R> scale(const Parallelotope<R>& p, const R& scale_factor) 
+    {
+      return Parallelotope<R>::scale(p,scale_factor);
+    }
+    
+    
+    template<class R> inline
+    std::ostream& operator<<(std::ostream& os, const Parallelotope<R>& p) 
+    {
+      return p.write(os);
+    }
+    
+    
+    template<class R> inline
+    std::istream& operator>>(std::ostream& is, Parallelotope<R>& p) 
+    {
+      return p.read(is);
+    }
+
+
+
+
+
+    template<class R> inline
+    Parallelotope< Interval<R> >::Parallelotope(dimension_type d)
+      : Zonotope< Interval<R> >(d) 
+    { 
+    }
+    
+    
+    template<class R> template<class Rl1, class Rl2> inline
+    Parallelotope< Interval<R> >::Parallelotope(const Point<Rl1>& c, const LinearAlgebra::Matrix<Rl2>& g)
+      : Zonotope< Interval<R> >(c,g) 
+    { 
+    }
+    
+    
+    template<class R> inline
+    Parallelotope< Interval<R> >::Parallelotope(const Rectangle<R>& r)
+      : Zonotope< Interval<R> >(r) 
+    { 
+    }
+    
+    
+    template<class R> inline
+    Parallelotope< Interval<R> >::Parallelotope(const Zonotope<R>& z)
+      : Zonotope< Interval<R> >(z) 
+    { 
+      if(z.dimension()!=z.number_of_generators()) { 
+        throw InvalidGenerators(__PRETTY_FUNCTION__);
+      }
+    }
+    
+    
+    template<class R> inline
+    Parallelotope< Interval<R> >::Parallelotope(const Zonotope<I>& z)
+      : Zonotope< Interval<R> >(z) 
+    { 
+      if(z.dimension()!=z.number_of_generators()) { 
+        throw InvalidGenerators(__PRETTY_FUNCTION__);
+      }
+    }
+    
+    
+    template<class R> inline
+    std::ostream& operator<<(std::ostream& os, const Parallelotope< Interval<R> >& p) 
+    {
+      return p.write(os);
+    }
+    
+  }
+}

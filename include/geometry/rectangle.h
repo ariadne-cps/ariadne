@@ -50,14 +50,6 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template<> 
-    inline bool is_a<Rectangle,Rectangle>() { return true; }
-    template<> 
-    inline bool is_a<Rectangle,Parallelotope>() { return true; }
-    template<> 
-    inline bool is_a<Rectangle,Zonotope>() { return true; }
-    template<> 
-    inline bool is_a<Rectangle,Polyhedron>() { return true; }
 
     template<class R> class RectangleVerticesIterator;
     
@@ -101,7 +93,6 @@ namespace Ariadne {
       /*! \brief The type of denotable point contained by the rectangle. */
       typedef Point<R> state_type;
       /*! \brief An iterator to the vertices of the rectangle. */
-      typedef RectangleVerticesIterator<R> vertices_iterator;
       typedef RectangleVerticesIterator<R> vertices_const_iterator;
      public:
       //@{
@@ -337,6 +328,9 @@ namespace Ariadne {
     {
       typedef Interval<R> I;
      public:
+      typedef Interval<R> real_type;
+      typedef Point< Interval<R> > state_type;
+
       explicit Rectangle(dimension_type d=0);
       template<class E> Rectangle(const RectangleExpression<E>& e);
       template<class E> Rectangle< Interval<R> >& operator=(const RectangleExpression<E>& e);
@@ -401,9 +395,11 @@ namespace Ariadne {
     
     
     
-    template<class R> Rectangle<R> over_approximation(const Rectangle< Numeric::Interval<R> >& ir);
-      
-    template<class R> Rectangle<R> under_approximation(const Rectangle< Numeric::Interval<R> >& ir);
+    template<class R> Rectangle<R> over_approximation(const Rectangle<R>& r);
+    template<class R> Rectangle<R> under_approximation(const Rectangle<R>& r);
+
+    template<class R> Rectangle<R> over_approximation(const Rectangle< Interval<R> >& ir);
+    template<class R> Rectangle<R> under_approximation(const Rectangle< Interval<R> >& ir);
     
     
     

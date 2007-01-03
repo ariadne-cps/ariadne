@@ -479,7 +479,22 @@ namespace Ariadne {
     
   
     template<class R> inline
-    Rectangle<R> over_approximation(const Rectangle< Numeric::Interval<R> >& ir) {
+    Rectangle<R> over_approximation(const Rectangle<R>& r) 
+    {
+      return r;
+    }
+
+
+    template<class R> inline
+    Rectangle<R> under_approximation(const Rectangle<R>& r) 
+    {
+      return r;
+    }
+
+
+    template<class R> inline
+    Rectangle<R> over_approximation(const Rectangle< Interval<R> >& ir) 
+    {
       Rectangle<R> result(ir.dimension());
       for(dimension_type i=0; i!=result.dimension(); ++i) {
         result.set_lower_bound(i,ir.lower_bound(i).lower());
@@ -489,7 +504,8 @@ namespace Ariadne {
     }
     
     template<class R> inline
-    Rectangle<R> under_approximation(const Rectangle< Numeric::Interval<R> >& ir) {
+    Rectangle<R> under_approximation(const Rectangle< Interval<R> >& ir) 
+    {
       Rectangle<R> result(ir.dimension());
       for(dimension_type i=0; i!=result.dimension(); ++i) {
         result.set_lower_bound(i,ir.lower_bound(i).upper());

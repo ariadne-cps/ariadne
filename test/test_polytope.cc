@@ -89,7 +89,7 @@ test_polytope()
   }
   
   cout << "p.vertices_begin() to p.vertices_end() = \n  " << flush;
-  for(typename Polytope<R>::vertices_iterator v=p.vertices_begin();
+  for(typename Polytope<R>::vertices_const_iterator v=p.vertices_begin();
       v!=p.vertices_end(); ++v) 
   {
     cout << *v << ", " << flush;

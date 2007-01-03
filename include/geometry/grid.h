@@ -62,7 +62,7 @@ namespace Ariadne {
       typedef R real_type;
      
       /*! \brief Destructor. */
-      virtual ~Grid() { }
+      virtual ~Grid();
 
       /*! \brief Cloning operator. */
       virtual Grid<R>* clone() const = 0;
@@ -87,22 +87,13 @@ namespace Ariadne {
 
       /*! \brief The index in dimension \a d of the subdivision 
        * point \a x. Throws an exception if \a x is not a subdivision point. */
-      index_type subdivision_index(dimension_type d, const real_type& x) const {
-        index_type n=subdivision_interval(d,x);
-        if(subdivision_coordinate(d,n) == x) { return n; }
-        throw std::runtime_error("Value is not a grid coordinate");
-      }
-
+      index_type subdivision_index(dimension_type d, const real_type& x) const;
+      
       /*! \brief The index of the subdivision point below \a x. */
-      index_type subdivision_lower_index(dimension_type d, const real_type& x) const {
-        return subdivision_interval(d,x);
-      }
+      index_type subdivision_lower_index(dimension_type d, const real_type& x) const;
 
       /*! \brief The index of the subdivision point above \a x. */
-      index_type subdivision_upper_index(dimension_type d, const real_type& x) const {
-        index_type n=subdivision_interval(d,x);
-        return subdivision_coordinate(d,n) == x ? n : n+1;
-      }
+      index_type subdivision_upper_index(dimension_type d, const real_type& x) const;
 
       /*! \brief Tests equality of two grids. */
       virtual bool operator==(const Grid<R>& g) const; 
@@ -140,44 +131,22 @@ namespace Ariadne {
       virtual ~IrregularGrid();
 
       /*! \brief Return the grid type. */
-      grid_type type() const {return IRREGULAR;}
+      grid_type type() const;
       
       /*! \brief The underlying dimension of the grid. */
-      virtual dimension_type dimension() const { 
-        return this->_subdivision_coordinates.size();
-      }
+      virtual dimension_type dimension() const;
     
       /*! \brief The coordinate of the \a n th subdivision point in 
        * dimension \a d. */
-      virtual real_type subdivision_coordinate(dimension_type d, index_type n) const {
-        check_coordinate(*this,d,__PRETTY_FUNCTION__);
-        if(!(0<=n && uint(n)<_subdivision_coordinates[d].size())) {
-          std::cerr << "d=" << d << ", n=" << n << ", size=" << _subdivision_coordinates[d].size() << std::endl;
-          throw std::runtime_error("index does not lie in range of finite grid");
-        }
-        return _subdivision_coordinates[d][n];
-      }
+      virtual real_type subdivision_coordinate(dimension_type d, index_type n) const;
   
       /*! \brief The index of interval in dimension \a d index 
        * containing \a x. */
-      virtual index_type subdivision_interval(dimension_type d, const real_type& x) const {
-        typename std::vector<R>::const_iterator pos;
-        check_coordinate(*this,d,__PRETTY_FUNCTION__);
-        if(x<_subdivision_coordinates[d].front() || x>_subdivision_coordinates[d].back()) {
-          std::cerr << "d.front()=" << _subdivision_coordinates[d].front()
-                    <<  " d.back()=" << _subdivision_coordinates[d].back()
-                    <<  " x="<< x <<std::endl<<std::flush;
-          throw std::runtime_error("point does not lie in extent of finite grid");
-        }
-        pos = std::upper_bound(_subdivision_coordinates[d].begin(),
-                               _subdivision_coordinates[d].end(), x);
-        return (pos - _subdivision_coordinates[d].begin()) - 1;
-      }
+      virtual index_type subdivision_interval(dimension_type d, const real_type& x) const;
 
       /*! \brief Tests whether the grid contains the given lattice rectangle 
        * within its bounds. */
-      virtual bool bounds_enclose(const Rectangle<R>& r) const {
-        return subset(r,Rectangle<R>(this->bounds())); }
+      virtual bool bounds_enclose(const Rectangle<R>& r) const;
 
       /*! \brief Construct from a bounding box and an equal number of 
        * subdivisions in each coordinate. */
@@ -204,23 +173,17 @@ namespace Ariadne {
       bool operator!=(const Grid<R>& g) const;
             
       /*! \brief The lowest valid vertex index. */
-      IndexArray lower() const { return IndexArray(dimension(),0); }
+      IndexArray lower() const;
       /*! \brief The highest valid vertex index. */
-      IndexArray upper() const { 
-        IndexArray result(this->dimension());
-        for(dimension_type i=0; i!=this->dimension(); ++i) {
-          result[i]=_subdivision_coordinates[i].size()-1;
-        }
-        return result;
-      }
+      IndexArray upper() const;
       /*! \brief The block of valid lattice cells. */
-      Combinatoric::LatticeBlock block() const { return Combinatoric::LatticeBlock(lower(),upper()); }
+      Combinatoric::LatticeBlock block() const;
       /*! \brief The number of subdivision intervals in each dimension. */
-      SizeArray sizes() const { return block().sizes(); }
+      SizeArray sizes() const;
       /*! \brief The total number of cells. */
-      size_type capacity() const { return block().size(); }
+      size_type capacity() const;
       /*! \brief The number of subdivision intervals in dimension \a d. */
-      size_type size(dimension_type i) const { return _subdivision_coordinates[i].size()-1; }
+      size_type size(dimension_type i) const;
 
       /*! \brief The rectangle bounding the grid. */
       GridBlock<R> bounds() const;
@@ -253,41 +216,32 @@ namespace Ariadne {
       RegularGrid<R>* clone() const;
       
       /*! \brief Return the grid type. */
-      grid_type type() const {return REGULAR;}
+      grid_type type() const;
       
       /*! \brief Construct from an array of subdivision lengths \a sl. */
-      explicit RegularGrid(const array<R>& sl)
-        : _subdivision_lengths(sl) { }
+      explicit RegularGrid(const array<R>& sl);
 
       /*! \brief Construct from an array of subdivision lengths \a sl. */
-      RegularGrid(const dimension_type& n, const R& l)
-        : _subdivision_lengths(n,l) { }
+      RegularGrid(const dimension_type& n, const R& l);
 
       /*! \brief The underlying dimension of the grid. */
-      virtual dimension_type dimension() const { 
-        return _subdivision_lengths.size(); }
+      virtual dimension_type dimension() const;
 
       /*! \brief The coordinate of the \a n th subdivision point in 
        * dimension \a d. */
-      virtual real_type subdivision_coordinate(dimension_type d, index_type n) const { 
-        return mul_approx(_subdivision_lengths[d] , n); }
+      virtual real_type subdivision_coordinate(dimension_type d, index_type n) const;
 
       /*! \brief The length of the subdivision in the \a d th coordinate. */
-      real_type subdivision_length(dimension_type d) const { 
-        return _subdivision_lengths[d]; }
+      real_type subdivision_length(dimension_type d) const;
 
       /*! \brief The index of interval in dimension \a d index containing \a x. */
-      virtual index_type subdivision_interval(dimension_type d, const real_type& x) const {
-        index_type result = int_down<index_type>(div_down(x,_subdivision_lengths[d]));
-        return result;
-      }
+      virtual index_type subdivision_interval(dimension_type d, const real_type& x) const;
 
       /*! \brief True if \a r is contained within the region of definition of the grid. */
-      virtual bool bounds_enclose(const Rectangle<R>& r) const { return true; }
-     
+      virtual bool bounds_enclose(const Rectangle<R>& r) const;      
       /*! \brief True if \a r is contained within the region of definition of the grid. */
-      virtual bool bounds_superset(const Rectangle<R>& r) const { return true; }
-     
+      virtual bool bounds_superset(const Rectangle<R>& r) const;     \
+      
       /*! \brief Tests equality of two regular grids. */
       bool operator==(const Grid<R>& g) const; 
       
@@ -318,22 +272,17 @@ namespace Ariadne {
         
       /*! \brief A finite grid generated by restricting a grid by specifying 
        * lattice bounds. */
-      FiniteGrid(const Grid<R>& g, const Combinatoric::LatticeBlock& b) 
-        : _grid_ptr(&g), _grid_type(g.type()), _bounds(b)
-      { }
+      FiniteGrid(const Grid<R>& g, const Combinatoric::LatticeBlock& b);
       
       /*! \brief A finite grid generated by restricting a using a spacial 
        * bounding box. */
-      FiniteGrid(const Grid<R>& g, const Rectangle<R>& bb) 
-        : _grid_ptr(&g), _grid_type(g.type()), 
-          _bounds(over_approximation(bb,g).lattice_set())
-      { }
+      FiniteGrid(const Grid<R>& g, const Rectangle<R>& bb);
+
       
       /*! \brief The underlying grid. */
-      const Grid<R>& grid() const { return *_grid_ptr; }
-      
+      const Grid<R>& grid() const;     
       /*! \brief The lattice bounds of the finite grid. */
-      const Combinatoric::LatticeBlock& bounds() const { return _bounds; }
+      const Combinatoric::LatticeBlock& bounds() const;
      
       /*! \brief The bounding box of the finite grid. */
       Rectangle<R> bounding_box() const;
@@ -343,25 +292,17 @@ namespace Ariadne {
 
       /*! \brief The coordinate of the \a n th subdivision point in 
        * dimension \a d. */
-      real_type subdivision_coordinate(dimension_type d, index_type n) const {
-        return _grid_ptr->subdivision_coordinate(d,n);
-      }
+      real_type subdivision_coordinate(dimension_type d, index_type n) const;
   
       /*! \brief The index of interval in dimension \a d index 
        * containing \a x. */
-      index_type subdivision_interval(dimension_type d, const real_type& x) const {
-        return _grid_ptr->subdivision_interval(d,x);
-      }
+      index_type subdivision_interval(dimension_type d, const real_type& x) const;
       
       /*! \brief The index of the subdivision point below \a x. */
-      index_type subdivision_lower_index(dimension_type d, const real_type& x) const {
-        return _grid_ptr->subdivision_lower_index(d,x);
-      }
+      index_type subdivision_lower_index(dimension_type d, const real_type& x) const;
 
       /*! \brief The index of the subdivision point above \a x. */
-      index_type subdivision_upper_index(dimension_type d, const real_type& x) const {
-        return _grid_ptr->subdivision_upper_index(d,x);
-      }
+      index_type subdivision_upper_index(dimension_type d, const real_type& x) const;
       
       /*!\brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;
@@ -373,25 +314,18 @@ namespace Ariadne {
    
     
     
-    template<class R> inline
-    std::istream& operator>>(std::istream& is, Grid<R>& g)
-    {
-      return g.read(is);
-    }
+    template<class R> 
+    std::istream& operator>>(std::istream& is, Grid<R>& g);
 
-    template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const Grid<R>& g)
-    {
-      return g.write(os);
-    }
+    template<class R> 
+    std::ostream& operator<<(std::ostream& os, const Grid<R>& g);
 
-    template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const FiniteGrid<R>& fg)
-    {
-      return fg.write(os);
-    }
+    template<class R>
+    std::ostream& operator<<(std::ostream& os, const FiniteGrid<R>& fg);
 
   }
 }
+
+#include "grid.inline.h"
 
 #endif /* _GRID_H */

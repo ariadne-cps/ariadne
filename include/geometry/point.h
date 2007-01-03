@@ -1,9 +1,8 @@
 /***************************************************************************
  *            point.h
  *
- *  Sun Jan 23 18:00:21 2005
- *  Copyright  2005  Alberto Casagrande
- *  Email casagrande@dimi.uniud.it
+ *  Copyright  2005-7  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -47,15 +46,6 @@ namespace Ariadne {
     template<class> class Sphere;
     template<class> class Ellipsoid;
 
-    template<template<class> class BS1, template<class> class BS2> 
-    inline bool is_a(){ return false; }
-
-    template<> inline bool is_a<Point, Point>(){ return true; }
-
-    /* Forward declaration of friends. */
-    template<class R> std::ostream& operator<<(std::ostream&, const Point<R>&);
-    template<class R> std::istream& operator>>(std::istream&, Point<R>&);
-
     /*!\brief A point in Euclidean space. 
      *
      * A point is defined by its coordinates or type #real_type, which are accessed by 
@@ -86,81 +76,52 @@ namespace Ariadne {
       typedef LinearAlgebra::Vector<R> vector_type;
 
       /*! \brief Default constructor. */
-      Point() : _vector(0) { }
+      Point();
 
       /*! \brief The origin in dimension \a dim. */
-      explicit Point(dimension_type d) : _vector(d) {
-        for(size_type i=0; i!=dimension(); ++i) {
-          _vector(i)=real_type(0);
-        }
-      }
+      explicit Point(dimension_type d);
 
       /*! \brief Construct a point a strided array of data. */
       template<class Rl>
-      Point(dimension_type d, const Rl* data, size_type inc=1)
-        : _vector(d,data,inc) { }
+      Point(dimension_type d, const Rl* data, size_type inc=1);
       
       /*! \brief Construct a point from a range of values. */
       template<class ForwardIterator>
-      Point(ForwardIterator b, ForwardIterator e) : _vector(std::distance(b,e))
-      {
-        for(size_type i=0; i!=dimension(); ++i) {
-          _vector[i]=*b;
-          ++b;
-        }
-      }
+      Point(ForwardIterator b, ForwardIterator e);
 
       /*! \brief Construct a point from a position vector. */
-      explicit Point(const LinearAlgebra::Vector<R>& position) : _vector(position) { }
+      explicit Point(const LinearAlgebra::Vector<R>& position);
 
       /*! \brief Construct a point from a string literal. */
       explicit Point(const std::string& s);
 
       /*! \brief Convert from a point which possibly lies in a different space. */
-      template<class R2>
-      Point(const Point<R2>& original) : _vector(original.position_vector()) { }
+      template<class R2> Point(const Point<R2>& original);
       
       /*! \brief Copy constructor. */
-      Point(const Point<R>& original) : _vector(original._vector) { }
+      Point(const Point<R>& original);
 
       /*! \brief Assignment operator. */
-      Point<R>& operator=(const Point<R>& original) {
-        if(this!=&original) { this->_vector=original._vector; }
-        return *this; 
-      }
+      Point<R>& operator=(const Point<R>& original);
       
  
       /*! \brief Checks equivalence between two states. */
-      bool operator==(const Point<R>& A) const {
-        return this->_vector==A._vector;
-      }
-      
+      bool operator==(const Point<R>& A) const;
+
       /*! \brief Inequality operator. */
-      bool operator!=(const Point<real_type>& A) const {
-        return !( *this == A );
-      }
+      bool operator!=(const Point<R>& A) const;
 
       /*! \brief The dimension of the Euclidean space the state lies in. */
-      dimension_type dimension() const {
-        return this->_vector.size();
-      }
+      dimension_type dimension() const;
 
       /*! \brief Subcripting operator. */
-      real_type& operator[] (dimension_type index) {
-        check_coordinate(*this,index,__PRETTY_FUNCTION__);
-        return  (this->_vector(index));
-      }
+      R& operator[](dimension_type index);
 
       /*! \brief Subcripting operator. */
-      const real_type& operator[](dimension_type index) const {
-        check_coordinate(*this,index,__PRETTY_FUNCTION__);
-        return  (this->_vector(index));
-      }
+      const R& operator[](dimension_type index) const;
 
       /*! \brief The position vector of the point. */
-      const LinearAlgebra::Vector<R>& position_vector() const {
-        return this->_vector; 
-      }
+      const LinearAlgebra::Vector<R>& position_vector() const;
       
      
       /*! \brief Write to an output stream. */
@@ -168,174 +129,73 @@ namespace Ariadne {
       /*! \brief Read from an input stream. */
       std::istream& read(std::istream& is);
 
-      friend std::ostream& operator<< <>(std::ostream& os, const Point<real_type>& state);
-      friend std::istream& operator>> <> (std::istream& is, Point<real_type>& state);
      private:
       LinearAlgebra::Vector<R> _vector;
     };
 
-    template<class R> inline
-    Point<R> approximation(const Point< Interval<R> >& ipt) 
-    {
-      Point<R> result(ipt.dimension());
-      for(dimension_type i=0; i!=ipt.dimension(); ++i) {
-        result[i]=ipt[i].centre();
-      }
-      return result;
-    }
+    template<class R> 
+    Point<R> approximation(const Point<R>& pt);
+    
+    template<class R> 
+    Point<R> approximation(const Point< Interval<R> >& ipt);
     
     template<class R>
-    inline
     Point<typename Numeric::traits<R>::arithmetic_type>
-    minkowski_sum(const Point<R>& pt1, const Point<R>& pt2) {
-      check_equal_dimensions(pt1,pt2,__PRETTY_FUNCTION__);
-      return Point<typename Numeric::traits<R>::arithmetic_type>(pt1.position_vector()+pt2.position_vector());
-    }
+    minkowski_sum(const Point<R>& pt1, const Point<R>& pt2);
     
     template<class R>
-    inline
     Point<typename Numeric::traits<R>::arithmetic_type>
-    minkowski_difference(const Point<R>& pt1, const Point<R>& pt2) {
-      check_equal_dimensions(pt1,pt2,__PRETTY_FUNCTION__);
-      return Point<typename Numeric::traits<R>::arithmetic_type>(pt1.position_vector()-pt2.position_vector());
-    }
+    minkowski_difference(const Point<R>& pt1, const Point<R>& pt2);
     
     template<class R1,class R2>
-    inline
     LinearAlgebra::Vector<typename Numeric::traits<R1,R2>::arithmetic_type>
-    operator-(const Point<R1> pt1, const Point<R2>& pt2) 
-    {
-      check_equal_dimensions(pt1,pt2,__PRETTY_FUNCTION__);
-      return pt1.position_vector()-pt2.position_vector();
-    }
+    operator-(const Point<R1> pt1, const Point<R2>& pt2);
     
     template<class R1,class R2>
-    inline
-    Point<typename Numeric::traits<R1,R2>::arithmetic_type> 
-    operator+(const Point<R1>& pt, const LinearAlgebra::Vector<R2>& v)
-    {
-      check_dimension(pt,v.size(),__PRETTY_FUNCTION__);
-      return Point<typename Numeric::traits<R1,R2>::arithmetic_type>(pt.position_vector() + v);
-    }
+        Point<typename Numeric::traits<R1,R2>::arithmetic_type> 
+    operator+(const Point<R1>& pt, const LinearAlgebra::Vector<R2>& v);
 
 
     template<class R1,class R2>
-    inline
     Point<typename Numeric::traits<R1,R2>::arithmetic_type> 
-    operator-(const Point<R1>& pt, const LinearAlgebra::Vector<R2>& v)
-    {
-      check_dimension(pt,v.size(),__PRETTY_FUNCTION__);
-      return Point<typename Numeric::traits<R1,R2>::arithmetic_type>(pt.position_vector() - v);
-    }
+    operator-(const Point<R1>& pt, const LinearAlgebra::Vector<R2>& v);
 
     template<class R>
-    inline
-    Point<R> 
-    add_approx(const Point<R>& pt, const LinearAlgebra::Vector<R>& v)
-    {
-      check_dimension(pt,v.size(),__PRETTY_FUNCTION__);
-      return Point<R>(add_approx(pt.position_vector(),v));
-    }
+    Point<R> add_approx(const Point<R>& pt, const LinearAlgebra::Vector<R>& v);
 
     template<class R>
-    inline
-    Point<R> 
-    sub_approx(const Point<R>& pt, const LinearAlgebra::Vector<R>& v)
-    {
-      check_dimension(pt,v.size(),__PRETTY_FUNCTION__);
-      return Point<R>(sub_approx(pt.position_vector(),v));
-    }
+    Point<R> sub_approx(const Point<R>& pt, const LinearAlgebra::Vector<R>& v);
 
     
     template<class R>
-    inline
     Point<R>
-    approximate_value(const Point< Interval<R> >& pt) 
-    {
-      Point<R> result(pt.dimension());
-      for(dimension_type i=0; i!=result.dimension(); ++i) {
-        result[i]=approximate_value(pt[i]);
-      }
-      return result;
-    }
+    approximate_value(const Point< Interval<R> >& pt);
     
-    template<class R>
-    inline 
-    Point<R> 
-    project_on_dimensions(const Point<R> &A, const Base::array<bool>& dims) 
-    {
-      if (A.dimension()!=dims.size()) {
-        throw std::runtime_error("project_on_dimensions(const Point & ,...): the two parameters have different dimension");
-      }
-      size_type new_dim=0;
-
-      for (size_type i=0; i< A.dimension(); i++) {
-        if (dims[i]) {
-          new_dim++;
-        }
-      }
-      Point<R> new_point(new_dim);
-      
-      size_type new_i=0;
-      for (size_t i=0; i<dims.size(); i++) {
-        if (dims[i]) {
-           new_point.set(new_i,A[i]);
-           new_i++;
-        } 
-      }
-
-      return new_point;
-    }
+  //template<class R>
+  //Point<R> 
+  //project_on_dimensions(const Point<R> &A, const Base::array<bool>& dims);
 
     template<class R>
-    inline 
     Point<R> 
     project_on_dimensions(const Point<R> &A, 
-                          const size_type& x, const size_type& y, const size_type& z) 
-    {
-
-      if ((A.dimension()<=x)||(A.dimension()<=y)||(A.dimension()<=z)) {
-        throw std::runtime_error("project_on_dimensions(const Point & ,...): the two parameters have different dimension");
-      }
-      
-      Point<R> new_point(3);
-      
-      new_point.set(0,A[x]);
-      new_point.set(1,A[y]);
-      new_point.set(2,A[z]);
-
-      return new_point;
-    }
+                          const size_type& x, const size_type& y, const size_type& z);
 
     template<class R>
-    inline 
-    Point<R> 
+    Point<R>  
     project_on_dimensions(const Point<R> &A, 
-                          const size_type &x, const size_type&y) 
-    {
-      if ((A.dimension()<=x)||(A.dimension()<=y)) {
-         throw "project_on_dimensions(const Point& ,...): one of the projection dimensions is greater than the Point dimension";
-      }
-      Point<R> new_point(2);
-      
-      new_point.set(0,A[x]);
-      new_point.set(1,A[y]);
+                          const size_type &x, const size_type&y);
+    
 
-      return new_point;
-    }
+    template<class R>  
+    std::ostream& operator<<(std::ostream& os, const Point<R>& pt);
     
-    template<class R> inline 
-    std::ostream& operator<<(std::ostream& os, const Point<R>& pt) {
-      return pt.write(os);
-    }
-    
-    template<class R> inline
-    std::istream& operator>>(std::istream& is, Point<R>& pt) {
-      return pt.read(is);
-    }
+    template<class R> 
+    std::istream& operator>>(std::istream& is, Point<R>& pt);
 
 
   }
 }
+
+#include "point.inline.h"
 
 #endif /* _ARIADNE_POINT_H */

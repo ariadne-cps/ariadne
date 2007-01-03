@@ -43,11 +43,12 @@ namespace Ariadne {
     Tensor<R>::_instantiate()
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
-      R* s; Tensor<R>* T; Tensor<F>* qT; R ss; 
-      Tensor<R> TT=*T;
-      Tensor<F> qTT=*qT;
-      qTT=TT*ss;
-      *T + *T; *T * *s;
+      R* s=0; 
+      Tensor<R>* T=0; 
+      Tensor<F>* qT=0;
+      
+      *qT = *T + *T;
+      *qT = *T * *s;
     }
     
     
@@ -122,8 +123,16 @@ namespace Ariadne {
     void
     DerivativeTensor<R>::_instantiate()
     {
-      R* s; Vector<R>* v; Matrix<R>* A; DerivativeTensor<R>* T;
-      *T + *T; *T - *T; *T * *s; *T * *v; *T * *A; *T * *T;
+      R* s=0; 
+      Vector<R>* v=0; 
+      Matrix<R>* A=0; 
+      DerivativeTensor<R>* T=0;
+      *T + *T;
+      *T - *T;
+      *T * *s;
+      *T * *v;
+      *T * *A;
+      *T * *T;
     }
     
     

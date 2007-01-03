@@ -48,6 +48,11 @@
 namespace Ariadne {
   namespace Geometry {
 
+    template<class Base, class Value> class GridSetIterator;
+    template<class R> class GridBlockIterator;
+    template<class R> class GridCellListSetIterator;
+    template<class R> class GridMaskSetIterator;
+
     /*! \brief A unit cell in a grid.
      *
      *  A %GridCell is defined by mapping a LatticeCell \a lc into \f$\mathbb{R}^d\f$
@@ -79,10 +84,10 @@ namespace Ariadne {
       GridCell(const Grid<R>& g, const IndexArray& pos);
 
       /*!\brief The grid containing the cell. */
-      const Grid<R>& grid() const { return _grid; }
+      const Grid<R>& grid() const;
 
       /*!\brief The dimension of the cell. */
-      dimension_type dimension() const { return _lattice_set.dimension(); }
+      dimension_type dimension() const;
 
       /*!\brief The lower bound of the \a i th coordinate. */
       R lower_bound(dimension_type i) const;
@@ -91,13 +96,13 @@ namespace Ariadne {
       R upper_bound(dimension_type i) const;
 
       /*!\brief The position of the cell in the grid. */
-      const Combinatoric::LatticeCell& lattice_set() const { return _lattice_set; }
+      const Combinatoric::LatticeCell& lattice_set() const;
 
       /*! \brief True if the set is bounded. */
-      tribool bounded() const { return true; }
+      tribool bounded() const;
 
       /*!\brief A rectangle containing the grid cell. */
-      Rectangle<R> bounding_box() const { return *this; }
+      Rectangle<R> bounding_box() const;
 
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;
@@ -149,10 +154,10 @@ namespace Ariadne {
       GridBlock<R>& operator=(const GridBlock<R>& gb);
 
       /*!\brief The grid containing the rectangle. */
-      const Grid<R>& grid() const { return *this->_grid_ptr; }
+      const Grid<R>& grid() const;
 
       /*!\brief The dimension of the rectangle. */
-      dimension_type dimension() const { return this->_lattice_set.dimension(); }
+      dimension_type dimension() const;
 
       /*!\brief The lower bound of the \a i th coordinate. */
       R lower_bound(dimension_type i) const;
@@ -161,16 +166,16 @@ namespace Ariadne {
       R upper_bound(dimension_type i) const;
       
       /*!\brief The position of the rectangle in the grid. */
-      const Combinatoric::LatticeBlock& lattice_set() const { return this->_lattice_set; }
+      const Combinatoric::LatticeBlock& lattice_set() const;
 
       /*!\brief Tests if the rectangle is empty. */
-      tribool empty() const { return this->_lattice_set.empty(); }
+      tribool empty() const;
 
       /*! \brief True if the set is bounded. */
-      tribool bounded() const { return true; }
+      tribool bounded() const;
 
       /*!\brief A rectangle containing the grid rectangle. */
-      Rectangle<R> bounding_box() const { return *this; }
+      Rectangle<R> bounding_box() const;
 
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;
@@ -181,47 +186,6 @@ namespace Ariadne {
       Combinatoric::LatticeBlock _lattice_set;
     };
 
-    template<class Base, class Value>
-    class GridSetIterator 
-      : public boost::iterator_adaptor<GridSetIterator<Base,Value>,Base,Value,boost::use_default,Value>
-    { 
-     public:
-      typedef typename Value::real_type real_type;
-      GridSetIterator(const Grid<real_type>& g, Base i) 
-        : GridSetIterator::iterator_adaptor_(i), _grid(g) { }
-     private:
-      friend class boost::iterator_core_access;
-      Value dereference() const { return Value(_grid,*this->base_reference()); }
-      const Grid<real_type>& _grid;
-    };
-
-
-
-
-    template<class R>
-    class GridCellListSetIterator {
-      typedef GridCellListSetIterator Self;
-     public:
-      typedef std::forward_iterator_tag iterator_category;
-      typedef GridCell<R> value_type;
-      typedef GridCell<R> reference;
-      typedef const GridCell<R>* pointer;
-      typedef int difference_type;
-     public:
-      GridCellListSetIterator(const Grid<R>& g, Combinatoric::LatticeCellListSetIterator iter);
-      GridCell<R> operator*() const { return this->dereference(); }
-      Self& operator++() { this->increment(); return *this; }
-      Self operator++(int) { Self tmp=*this; this->increment(); return tmp; }
-      bool operator==(const Self& other) const { return this->equal(other); }
-      bool operator!=(const Self& other) const { return !this->equal(other); }
-     private:
-      bool equal(const GridCellListSetIterator& other) const { return this->_iter==other._iter; }
-      void increment() { ++_iter; }
-      GridCell<R> dereference() const { return GridCell<R>(*_grid_ptr,*_iter); }
-     private:
-      const Grid<R>* _grid_ptr;
-      Combinatoric::LatticeCellListSet::const_iterator _iter;
-    };
 
 
     /*! \brief A denotable set on a grid, defined as a list of cells.
@@ -267,38 +231,38 @@ namespace Ariadne {
       operator ListSet<R,Rectangle>() const;
 
       /*! \brief The underlying grid. */
-      const Grid<R>& grid() const { return *_grid_ptr; }
+      const Grid<R>& grid() const;
 
       /*! \brief The space dimension of the set. */
-      dimension_type dimension() const { return _lattice_set.dimension(); }
+      dimension_type dimension() const;
 
       /*! \brief True if the set is empty. */
-      tribool empty() const { return _lattice_set.empty(); }
+      tribool empty() const;
 
       /*! \brief True if the set is bounded. */
-      tribool bounded() const { return true; }
+      tribool bounded() const;
 
       /*! \brief The numeber of cells in the list. */
-      size_type size() const { return _lattice_set.size(); }
+      size_type size() const;
 
       /*! \brief The lattice set. */
-      const Combinatoric::LatticeCellListSet& lattice_set() const { return _lattice_set; }
+      const Combinatoric::LatticeCellListSet& lattice_set() const;
 
       /*!\brief The @a i th cell in the list. */
-      GridCell<R> operator[] (const size_type i) const { return GridCell<R>(grid(),_lattice_set[i]); }
+      GridCell<R> operator[] (const size_type i) const;
 
       /*! \brief A constant iterator to the beginning of the list. */
-      const_iterator begin() const { return const_iterator(*_grid_ptr,_lattice_set.begin()); }
+      const_iterator begin() const;
 
       /*! \brief A constant iterator to the end of the list. */
-      const_iterator end() const { return const_iterator(*_grid_ptr,_lattice_set.end()); }
+      const_iterator end() const;
 
       /*!\brief Append a GridCell to the list. */
-      void adjoin(const GridCell<R>& c) { _lattice_set.adjoin(c.lattice_set()); }
+      void adjoin(const GridCell<R>& c);
       /*!\brief Append a GridBlock to the list. */
-      void adjoin(const GridBlock<R>& bl) { _lattice_set.adjoin(bl.lattice_set()); }
+      void adjoin(const GridBlock<R>& bl);
       /*!\brief Append a GridCellListSet to the list. */
-      void adjoin(const GridCellListSet<R>& cls) { _lattice_set.adjoin(cls.lattice_set()); }
+      void adjoin(const GridCellListSet<R>& cls);
 
       /*! \brief Empties the set. */
       void clear();
@@ -313,31 +277,6 @@ namespace Ariadne {
     };
 
 
-
-    template<class R>
-    class GridMaskSetIterator {
-      typedef GridMaskSetIterator Self;
-     public:
-      typedef std::forward_iterator_tag iterator_category;
-      typedef GridCell<R> value_type;
-      typedef GridCell<R> reference;
-      typedef const GridCell<R>* pointer;
-      typedef int difference_type;
-     public:
-      GridMaskSetIterator(const Grid<R>& g, Combinatoric::LatticeMaskSetIterator iter);
-      GridCell<R> operator*() const { return this->dereference(); }
-      Self& operator++() { this->increment(); return *this; }
-      Self operator++(int) { Self tmp=*this; this->increment(); return tmp; }
-      bool operator==(const Self& other) const { return this->equal(other); }
-      bool operator!=(const Self& other) const { return !this->equal(other); }
-     private:
-      bool equal(const GridMaskSetIterator& other) const { return this->_iter==other._iter; }
-      void increment() { ++_iter; }
-      GridCell<R> dereference() const { return GridCell<R>(*_grid_ptr,*_iter); }
-     private:
-      const Grid<R>* _grid_ptr;
-      Combinatoric::LatticeMaskSet::const_iterator _iter;
-    };
 
     
     
@@ -410,132 +349,87 @@ namespace Ariadne {
        *
        * \deprecated Equality operator for sets is deprecated.
        */
-      bool operator==(const GridMaskSet<R>& gms) {
-        throw Deprecated(__PRETTY_FUNCTION__);
-      }
+      bool operator==(const GridMaskSet<R>& gms);
 
       /*! \brief Inequality operator. (Deprecated)
        *
        * \deprecated Equality operator for sets is deprecated.
        */
-      bool operator!=(const GridMaskSet<R>& gms) { return !(*this==gms); }
+      bool operator!=(const GridMaskSet<R>& gms);
 
       /*! \brief The underlying grid. */
-      const Grid<R>& grid() const { return *_grid_ptr; }
+      const Grid<R>& grid() const;
 
       /*! \brief The bounds on elements in the set. */
-      GridBlock<R> bounds() const { return GridBlock<R>(*_grid_ptr,_lattice_set.block()); }
+      GridBlock<R> bounds() const;
 
       /*! \brief The underlying lattice set. */
-      const Combinatoric::LatticeMaskSet& lattice_set() const { return _lattice_set; }
+      const Combinatoric::LatticeMaskSet& lattice_set() const;
 
       /*! \brief The space dimension of the set. */
-      dimension_type dimension() const { return _lattice_set.dimension(); }
+      dimension_type dimension() const;
 
        /*! \brief The number of elements in the mask. */
-      size_type capacity() const { return _lattice_set.capacity(); }
+      size_type capacity() const;
       
       /*! \brief The block of cells available in the lattice. */
-      const Combinatoric::LatticeBlock& block() const { return _lattice_set.block(); }
-
-      /*! \brief The lowest position in the grid. (Deprecated)
-       *
-       * \deprecated Use block().lower() instead.
-       */
-      //const IndexArray& lower() const { return _lattice_set.block().lower(); }
-
-      /*! \brief The highest position in the grid. (Deprecated)
-       *
-       * \deprecated Use block().lower() instead.
-       */
-      //const IndexArray& upper() const { return _lattice_set.block().upper(); }
+      const Combinatoric::LatticeBlock& block() const;
 
       /*! \brief The number of cells in each dimension. */
-      const SizeArray& sizes() const { return _lattice_set.sizes(); }
-
-      /*! \brief The number of c. 
-       *
-       * \deprecated Use block().sizes() instead.
-       */
-      //const SizeArray& strides() const { return _lattice_set.block().strides(); }
+      //const SizeArray& sizes() const;
 
       /*! \brief The mask giving the cells in the set. */
-      const BooleanArray& mask() const { return _lattice_set.mask(); }
+      const BooleanArray& mask() const;
 
       /*! \brief Returns true if the set is empty. */
-      tribool empty() const { return _lattice_set.empty(); }
+      tribool empty() const;
       
       /*! \brief Returns true if the set is empty. */
-      tribool bounded() const { return _lattice_set.bounded(); }
+      tribool bounded() const;
       
       /*! \brief The number of cells in the grid. */
-      size_type size() const { return _lattice_set.size(); }
+      size_type size() const;
       
       /*! \brief The ith nonempty cell in the grid. */
-      GridCell<R> operator[](size_type i) const { return GridCell<R>(*_grid_ptr,_lattice_set[i]); }
+      GridCell<R> operator[](size_type i) const;
 
       /*! \brief A constant iterator to the beginning of the set. */
-      const_iterator begin() const { return const_iterator(*this->_grid_ptr,this->_lattice_set.begin()); }
+      const_iterator begin() const;
       /*! \brief A constant iterator to the end of the set. */
-      const_iterator end() const { return const_iterator(*this->_grid_ptr,this->_lattice_set.end()); }
+      const_iterator end() const;
 
       /*! \brief The rectangle bounding the region of the mask. */
-      Rectangle<R> bounding_box() const { return GridBlock<R>(grid(),bounds()); }
+      Rectangle<R> bounding_box() const;
      
       /*! \brief Removes all cells. */
       void clear();
 
       /*! \brief Removes a cell from the set. */
-      void remove(const GridCell<R>& gc) {
-        check_same_grid(*this,gc);
-        this->_lattice_set.remove(gc._lattice_set);
-      }
+      void remove(const GridCell<R>& gc);
 
       /*! \brief Adjoins a cell to the set. */
-      void adjoin(const GridCell<R>& gc) {
-        check_same_grid(*this,gc);
-        this->_lattice_set.adjoin(gc._lattice_set);
-      }
+      void adjoin(const GridCell<R>& gc);
 
       /*! \brief Adjoins a rectangle to the set. */
-      void adjoin(const GridBlock<R>& gb) {
-        check_same_grid(*this,gb);
-        this->_lattice_set.adjoin(gb._lattice_set);
-      }
+      void adjoin(const GridBlock<R>& gb);
 
       /*! \brief Adjoins a GridCellListSet to the set. */
-      void adjoin(const GridCellListSet<R>& gcls) {
-        check_same_grid(*this,gcls);
-        this->_lattice_set.adjoin(gcls._lattice_set);
-      }
+      void adjoin(const GridCellListSet<R>& gcls);
 
       /*! \brief Adjoins a GridMaskSet to the set. */
-      void adjoin(const GridMaskSet<R>& gms) {
-        check_same_grid(*this,gms);
-        this->_lattice_set.adjoin(gms._lattice_set);
-      }
+      void adjoin(const GridMaskSet<R>& gms);
 
       /*! \brief Intersects the set with a GridCellListSet. */
-      void restrict(const GridCellListSet<R>& gcls) {
-        check_same_grid(*this,gcls);
-        this->_lattice_set.restrict(gcls._lattice_set);
-      }
+      void restrict(const GridCellListSet<R>& gcls);
 
       /*! \brief Intersects the set with a GridMaskSet. */
-      void restrict(const GridMaskSet<R>& gms) {
-        check_same_grid(*this,gms);
-        this->_lattice_set.restrict(gms._lattice_set);
-      }
+      void restrict(const GridMaskSet<R>& gms);
 
       /*!\brief The one-box neighbourhood, consisting of all cells whose closure intersects the set. */
-      GridMaskSet neighbourhood() const {
-        return GridMaskSet(this->grid(),this->_lattice_set.neighbourhood());
-      }
+      GridMaskSet neighbourhood() const;
 
       /*!\brief The set of all cells which share a facet a cell in the set. */
-      GridMaskSet adjoining() const {
-        return GridMaskSet(this->grid(),this->_lattice_set.adjoining());
-      }
+      GridMaskSet adjoining() const;
 
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;
@@ -557,24 +451,6 @@ namespace Ariadne {
       const Grid<R>* _grid_ptr;
       Combinatoric::LatticeMaskSet _lattice_set;
     };
-    
-    
-    template<class R> template<template<class> class BS> inline
-    GridMaskSet<R>::operator ListSet<R,BS> () const 
-    {
-      ListSet<R,BS> result(this->dimension());
-      Rectangle<R> r(this->dimension());
-      BS<R> bs(this->dimension());
-      for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-        r=iter;
-        bs=BS<R>(r);
-        result.push_back(bs);
-      }
-      return result;
-    }
-    
-    
-    
     
     
     template<class R> tribool disjoint(const Rectangle<R>&, const GridMaskSet<R>&);
@@ -639,54 +515,18 @@ namespace Ariadne {
     template<class R> GridMaskSet<R> under_approximation(const ListSet<R,Rectangle>& ls, const FiniteGrid<R>& fg); 
     template<class R> GridMaskSet<R> under_approximation(const GridMaskSet<R>& gms, const FiniteGrid<R>& fg);
     template<class R> GridMaskSet<R> under_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& fg);
-    
-    
-    
-    
-    
-    template<class R, template<class> class BS> inline
-    GridMaskSet<R> over_approximation(const ListSet<R,BS>& ls, const FiniteGrid<R>& g) 
-    {
-      GridMaskSet<R> result(g);
-      
-      check_equal_dimensions(ls,g,"over_approximation(ListSet<R,BS>,FiniteGrid<R>)");
 
-      for(typename ListSet<R,BS>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
-       result.adjoin(over_approximation(*iter,g.grid()));
-      }
-        
-      return result;
-    }
     
-    
-    
-    
-    
-    
-    template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const GridCell<R>& gc) {
-      return gc.write(os);
-    }
-    
-    template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const GridBlock<R>& gb) {
-      return gb.write(os);
-    }
-    
-    template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const GridCellListSet<R>& gcls) {
-      return gcls.write(os);
-    }
-    
-    template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const GridMaskSet<R>& gms) {
-      return gms.write(os);
-    }
-    
-    
+    template<class R> std::ostream& operator<<(std::ostream& os, const GridCell<R>& gc);
+    template<class R> std::ostream& operator<<(std::ostream& os, const GridBlock<R>& gb);
+    template<class R> std::ostream& operator<<(std::ostream& os, const GridCellListSet<R>& gcls);
+    template<class R> std::ostream& operator<<(std::ostream& os, const GridMaskSet<R>& gms);
     
     
   }
 }
+
+
+#include "grid_set.inline.h"
 
 #endif /* _GRID_SET_H */

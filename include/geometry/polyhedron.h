@@ -1,9 +1,8 @@
 /***************************************************************************
  *            polyhedron.h
  *
- *  Thu Jan 27 10:26:36 2005
- *  Copyright  2005  Alberto Casagrande
- *  casagrande@dimi.uniud.it
+ *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it  Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -65,10 +64,6 @@ namespace Ariadne {
       typedef Rational real_type;
       /*! \brief The type of denotable point contained by the polyhedron. */
       typedef Point<R> state_type;
-      /*! \brief The type of vector. */
-      typedef Ariadne::LinearAlgebra::Vector<R> vector_type;
-      /*! \brief The type of matrix. */
-      typedef Ariadne::LinearAlgebra::Matrix<R> matrix_type;
       /*! \brief An iterator over the constraints of the Polyhedron. */
       typedef PolyhedronConstraintsIterator<R> constraints_const_iterator;
      public:
@@ -99,8 +94,7 @@ namespace Ariadne {
             
       /*! \brief Copy constructor. 
        */
-      template<class Rl> inline Polyhedron(const Polyhedron<Rl>& original)
-        : _A(original.A()), _b(original.b()) { }
+      template<class Rl> inline Polyhedron(const Polyhedron<Rl>& original);
           
       /*! \brief Copy constructor. 
        */
@@ -118,11 +112,11 @@ namespace Ariadne {
       //@{
       //! \name Data access
       /*! \brief The matrix \f$A\f$ in the inequalities \f$Ax\leq b\f$. */
-      const LinearAlgebra::Matrix<R>& A() const { return this->_A; }
+      const LinearAlgebra::Matrix<R>& A() const;
       /*! \brief The vector \f$b\f$ in the inequalities \f$Ax\leq b\f$. */
-      const LinearAlgebra::Vector<R>& b() const { return this->_b; }
+      const LinearAlgebra::Vector<R>& b() const;
       /*! \brief An iterator to the beginning of the constraints. */
-      size_type number_of_constraints() const { return _A.number_of_rows(); }
+      size_type number_of_constraints() const;
       /*! \brief An iterator to the beginning of the constraints. */
       constraints_const_iterator constraints_begin() const;
       /*! \brief An iterator to the end of the constraints. */
@@ -209,24 +203,25 @@ namespace Ariadne {
        LinearAlgebra::Matrix<R> _A;
        LinearAlgebra::Vector<R> _b;
     };
-   
-
+    
+    
+    
     template<class R>
     class Polyhedron< Interval<R> >
     {
       typedef Interval<R> I;
      public:
       template<class Rl1, class Rl2>
-      Polyhedron(const LinearAlgebra::Matrix<Rl1> A, const LinearAlgebra::Vector<Rl2> b) 
-        : _A(A), _b(b) { }
+      Polyhedron(const LinearAlgebra::Matrix<Rl1> A, const LinearAlgebra::Vector<Rl2> b);
+      
       template<class Rl>
       Polyhedron(const PointList<Rl> pts);
         
-      dimension_type dimension() { return this->_A.number_of_columns(); }
-      size_type number_of_constraints() { return this->_A.number_of_rows(); }
+      dimension_type dimension() const;
+      size_type number_of_constraints() const;
       
-      const LinearAlgebra::Matrix<I>& A() const { return this->_A; }
-      const LinearAlgebra::Vector<I>& b() const { return this->_b; }
+      const LinearAlgebra::Matrix<I>& A() const;
+      const LinearAlgebra::Vector<I>& b() const;
       
       tribool contains(const Point<R>& pt) const;
       tribool contains(const Point<I>& pt) const;
@@ -236,8 +231,8 @@ namespace Ariadne {
       LinearAlgebra::Matrix<I> _A;
       LinearAlgebra::Vector<I> _b;
     };
-  
-
+    
+    
     
     /*! \brief A linear constraint. */
     template<class R>
@@ -252,48 +247,12 @@ namespace Ariadne {
       std::ostream& write(std::ostream& os) const;
      private:
      public:
-      Constraint(const dimension_type d, const R* a, const R& b) : _d(d), _a(a), _b(&b) { }
+      Constraint(const dimension_type d, const R* a, const R& b);
       dimension_type _d; const R* _a; const R* _b;
     };
-
-    template<class R1> template<class R2> inline 
-    tribool Constraint<R1>::satisfied_by(const Point<R2>& pt) const
-    {
-      typedef typename Numeric::traits<R1,R2>::arithmetic_type F;
-      F prod=0;
-      for(dimension_type i=0; i!=pt.dimension(); ++i) {
-        prod+=this->_a[i]*pt[i]; 
-      }
-      return prod<=*this->_b;
-    }
     
-    template<class R>
-    class PolyhedronConstraintsIterator
-      : public boost::iterator_facade<PolyhedronConstraintsIterator<R>,
-                                      Constraint<R>,
-                                      boost::forward_traversal_tag,
-                                      const Constraint<R>&,
-                                      const Constraint<R>*
-                                     >
-    {
-     public:
-      PolyhedronConstraintsIterator(const Polyhedron<R>& ply, const size_type& n)
-        : _c(ply.dimension(),ply.A().begin()+n*ply.dimension(),ply.b().begin()[n]) { }
-      bool equal(const PolyhedronConstraintsIterator<R>& other) const { 
-        return this->_c._a==other._c._a; }
-      const Constraint<R>& dereference() const { return _c; }
-      void increment() { _c._a+=_c._d; _c._b+=1; }
-     private:
-      Constraint<R> _c;
-    };
-     
-      
-   
     
-   
-   
-
-
+    
     template<class R> 
     tribool equal(const Polyhedron<R>& A, const Polyhedron<R>& B);
    
@@ -328,21 +287,20 @@ namespace Ariadne {
     closed_intersection(const Polyhedron<R>& A, const Polyhedron<R>& B) ;
 
     
-    template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const Constraint<R>& c) {
-      return c.write(os); }
+    template<class R>
+    std::ostream& operator<<(std::ostream& os, const Constraint<R>& c);
     
-    template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const Polyhedron<R>& p) {
-      return p.write(os); }
-    template<class R> inline
-    std::istream& operator>>(std::istream& os, Polyhedron<R>& p) {
-      return p.read(os); }
-   
+    template<class R>
+    std::ostream& operator<<(std::ostream& os, const Polyhedron<R>& p);
+    
+    template<class R>
+    std::istream& operator>>(std::istream& os, Polyhedron<R>& p);
 
 
 
   }
 }
+
+#include "polyhedron.inline.h"
 
 #endif /* _ARIADNE_POLYHEDRON_H */

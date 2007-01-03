@@ -39,10 +39,6 @@
 namespace Ariadne {
   namespace Geometry {
 
-    /* Forward declaration of friends. */
-    template<class R> std::ostream& operator<<(std::ostream&, const Ellipsoid<R>&);
-    template<class R> std::istream& operator>>(std::istream&, Ellipsoid<R>&);
-   
     /*! \ingroup BasicSet
      *  \brief An ellipsoid \f$(x-c)^T A (x-c)\leq 1\f$ of arbitrary dimension.
      */
@@ -53,14 +49,10 @@ namespace Ariadne {
       typedef R real_type;
       /*! \brief The type of denotable point contained by the simplex. */
       typedef Point<R> state_type;
-      /*! \brief The type of vector used to describe differences between points. */
-      typedef LinearAlgebra::Vector<R> vector_type;
-      /*! \brief The type of matrix used to describe lengths and directions of the axes. */
-      typedef LinearAlgebra::Matrix<R> matrix_type;
      
      private:
-      state_type _centre;
-      matrix_type _bilinear_form;
+      Point<R> _centre;
+      LinearAlgebra::Matrix<R> _bilinear_form;
      
      public:
       //! \name Constructors 
@@ -69,7 +61,7 @@ namespace Ariadne {
       Ellipsoid(size_type n = 0);
     
       /*! \brief Construct from centre and bilinear form. */
-      explicit Ellipsoid(const state_type& c, const matrix_type& r);
+      explicit Ellipsoid(const Point<R>& c, const LinearAlgebra::Matrix<R>& r);
      
       /*! \brief Construct from a string literal. */
       explicit Ellipsoid(const std::string& s);
@@ -79,102 +71,64 @@ namespace Ariadne {
       Ellipsoid(const Sphere<R>& s);
       
       /*! \brief Copy constructor. */
-      Ellipsoid(const Ellipsoid<R>& original)
-        : _centre(original._centre), _bilinear_form(original._bilinear_form)
-      { }
+      Ellipsoid(const Ellipsoid<R>& original);
       
       /*! \brief Copy assignment operator. */
-      Ellipsoid<R>& operator=(const Ellipsoid<R>& original) {
-        if(this != &original) {
-          this->_centre = original._centre;
-          this->_bilinear_form = original._bilinear_form;
-        }
-        return *this;
-      }
+      Ellipsoid<R>& operator=(const Ellipsoid<R>& original);
       //@}
       
       //@{
       //! \name Comparison operators
       /*! \brief The equality operator.
        */
-      bool operator==(const Ellipsoid<R>& other) const
-      {
-        return this->_centre==other._centre && this->_bilinear_form==other._bilinear_form;
-      }
+      bool operator==(const Ellipsoid<R>& other) const;
       
       /*! \brief The inequality operator. */
-      bool operator!=(const Ellipsoid<R>& other) const {
-        return !(*this == other);
-      }
+      bool operator!=(const Ellipsoid<R>& other) const;
       //@}
       
       //! \name Data elements
       //@{
       /*! \brief The centre of the ellipsoid. */
-      const state_type& centre() const {
-        return this->_centre;
-      }
+      const Point<R>& centre() const;
       
       /*! \brief The bilinear form describing axes of the ellipsoid. */
-      const matrix_type& bilinear_form() const {
-        return this->_bilinear_form;
-      }
+      const LinearAlgebra::Matrix<R>& bilinear_form() const;
       //@}
       
       //! \name Geometric Operators
       //@{
       /*! \brief The dimension of the Euclidean space the ellipsoid lies in. */
-      size_type dimension() const {
-        return this->_centre.dimension();
-      }
+      size_type dimension() const;
       
       /*! \brief True if the ellipsoid is empty. */
-      bool empty() const {
-        return false;
-      }
-      
+      bool empty() const;
+
       /*! \brief True if the ellipsoid has empty interior. */
-      bool empty_interior() const {
-        return _bilinear_form.singular();
-      }
-      
+      bool empty_interior() const;
+
       /*! \brief A rectangle containing the ellipsoid. */
       Rectangle<R> bounding_box() const;
       
       /*! \brief Tests if \a point is contained in the ellipsoid. */
-      bool contains(const state_type& point) const;
-      
-      /*! \brief Tests if \a point is contained in the interior of the ellipsoid. */
-      bool interior_contains(const state_type& point) const;
+      tribool contains(const Point<R>& pt) const;
       //@}
       
 #ifdef DOXYGEN
       //@{
       //! \name Geometric binary predicates
       /*! \brief Tests disjointness */
-      friend bool disjoint(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
+      friend tribool disjoint(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
       /*! \brief Tests disjointness */
-      friend bool disjoint(const Rectangle<R>& A, const Ellipsoid<R>& B);
+      friend tribool disjoint(const Rectangle<R>& A, const Ellipsoid<R>& B);
       /*! \brief Tests disjointness */
-      friend bool disjoint(const Ellipsoid<R>& A, const Rectangle<R>& B);
-      /*! \brief Tests intersection of interiors */
-      friend bool interiors_intersect(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
-      /*! \brief Tests intersection of interiors */
-      friend bool interiors_intersect(const Rectangle<R>& A, const Ellipsoid<R>& B);
-      /*! \brief Tests intersection of interiors */
-      friend bool interiors_intersect(const Ellipsoid<R>& A, const Rectangle<R>& B);
-      /*! \brief Tests inclusion of \a A in the interior of \a B. */
-      friend bool inner_subset(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
-      /*! \brief Tests inclusion of \a A in the interior of \a B. */
-      friend bool inner_subset(const Rectangle<R>& A, const Ellipsoid<R>& B);
-      /*! \brief Tests inclusion of \a A in the interior of \a B. */
-      friend bool inner_subset(const Ellipsoid<R>& A, const Rectangle<R>& B);
+      friend tribool disjoint(const Ellipsoid<R>& A, const Rectangle<R>& B);
       /*! \brief Tests inclusion of \a A in \a B. */
-      friend bool subset(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
+      friend tribool subset(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
       /*! \brief Tests inclusion of \a A in \a B. */
-      friend bool subset(const Rectangle<R>& A, const Ellipsoid<R>& B);
+      friend tribool subset(const Rectangle<R>& A, const Ellipsoid<R>& B);
       /*! \brief Tests inclusion of \a A in \a B. */
-      friend bool subset(const Ellipsoid<R>& A, const Rectangle<R>& B);
+      friend tribool subset(const Ellipsoid<R>& A, const Rectangle<R>& B);
       //@}
       
       //@{
@@ -198,127 +152,47 @@ namespace Ariadne {
       static void _instantiate_geometry_operators();
     };
     
-     
-    template<class R>
-    inline bool disjoint(const Ellipsoid<R>& A, const Ellipsoid<R>& B) 
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
+    template<class R>  
+    tribool disjoint(const Ellipsoid<R>& A, const Ellipsoid<R>& B); 
     
-    template<class R>
-    inline bool disjoint(const Ellipsoid<R>& A, const Rectangle<R>& B) 
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
+    template<class R>  
+    tribool disjoint(const Ellipsoid<R>& A, const Rectangle<R>& B); 
     
-    template<class R>
-    inline bool disjoint(const Rectangle<R>& A, const Ellipsoid<R>& B) 
-    {
-      return disjoint(B,A);
-    }
+    template<class R>  
+    tribool disjoint(const Rectangle<R>& A, const Ellipsoid<R>& B); 
+
+   
+    template<class R> 
+    tribool subset(const Ellipsoid<R>& A, const Ellipsoid<R>& B); 
+
+    template<class R> 
+    tribool subset(const Ellipsoid<R>& A, const Rectangle<R>& B); 
     
+    template<class R> 
+    tribool subset(const Rectangle<R>& A, const Ellipsoid<R>& B); 
     
-    template<class R>
-    inline bool interiors_intersect(const Ellipsoid<R>& A,
-                                    const Ellipsoid<R>& B) 
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
-    
-    template<class R>
-    inline bool interiors_intersect(const Ellipsoid<R>& A,
-                                    const Rectangle<R>& B) 
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
-    
-    template<class R>
-    inline bool interiors_intersect(const Rectangle<R>& A,
-                                    const Ellipsoid<R>& B) 
-    {
-      return interiors_intersect(B,A);
-    }
-    
-    
-    template<class R>
-    inline bool inner_subset(const Ellipsoid<R>& A,
-                             const Ellipsoid<R>& B) 
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
 
     template<class R>
-    inline bool inner_subset(const Ellipsoid<R>& A,
-                             const Rectangle<R>& B) 
-    {
-      for(dimension_type i=0; i!=A.dimension(); ++i) {
-        if(! inner_subset(A.centre()[i]-A.radius(),A.centre()[i]+A.radius(),B[i]) ) {
-          return false;
-        }
-      }
-      return true;
-    }
+    Ellipsoid<R> minkowski_sum(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
 
     template<class R>
-    inline bool inner_subset(const Rectangle<R>& A,
-                             const Ellipsoid<R>& B) 
-    {
-      array< Point<R> > vertices=A.vertices();
-      for(typename Rectangle<R>::vertex_iterator vertex_iter=vertices.begin(); vertex_iter!=vertices.end(); ++vertex_iter) {
-        if(! B.interior_contains(*vertex_iter) ) {
-          return false;
-        }
-      }
-      return true;
-    }
+    Ellipsoid<R> minkowski_difference(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
 
-    
+
     template<class R>
-    inline bool subset(const Ellipsoid<R>& A, 
-                       const Ellipsoid<R>& B) 
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
-    
-    template<class R>
-    inline bool subset(const Ellipsoid<R>& A, 
-                       const Rectangle<R>& B) 
-    {
-      return subset(A.bounding_box(),B);
-    }
-    
-    template<class R>
-    inline bool subset(const Rectangle<R>& A, 
-                       const Ellipsoid<R>& B) 
-    {
-      array< Point<R> > vertices=A.vertices();
-      for(typename Rectangle<R>::vertex_iterator vertex_iter=vertices.begin(); vertex_iter!=vertices.end(); ++vertex_iter) {
-        if(! B.contains(*vertex_iter) ) {
-          return false;
-        }
-      }
-      return true;
-    }
+    Ellipsoid<R> scale(const Ellipsoid<R>& e, const R& scale_factor);
 
     
-    template<class R>
-    Ellipsoid<R> 
-    scale(const Ellipsoid<R>& e, const R& scale_factor);
-
+    template<class R> 
+    std::ostream& operator<<(std::ostream& os, const Ellipsoid<R>& e);
     
-    template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const Ellipsoid<R>& e) {
-      return e.write(os);
-    }
+    template<class R> 
+    std::istream& operator>>(std::istream& is, Ellipsoid<R>& e);
 
-    
-    template<class R> inline
-    std::istream& operator>>(std::istream& is, Ellipsoid<R>& e) {
-      return e.read(is);
-    }
 
-      
   }
 }
 
-#endif /* _ARIADNE_SPHERE_H */
+#include "ellipsoid.inline.h"
+
+#endif /* _ARIADNE_ELLIPSOID_H */

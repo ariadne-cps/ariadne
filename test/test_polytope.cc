@@ -33,6 +33,7 @@
 #include "numeric/rational.h"
 #include "geometry/point.h"
 #include "geometry/point_list.h"
+#include "geometry/polyhedron.h"
 #include "geometry/polytope.h"
 #include "geometry/ppl_polyhedron.h"
 #include "output/epsfstream.h"
@@ -123,17 +124,36 @@ test_polytope()
 
   Polytope<R> pltp2=Polytope<R>(Matrix<R>("[3.125,1.125,-2.875,-0.875;1.75,-0.25,-2.25,-0.25]"));
   cout << "pltp2=" << pltp2 << endl << "pltp2.bounding_box()=" << pltp2.bounding_box() << endl;
+  Polytope<Rational> qpltp2=Polytope<Rational>(pltp2);
+  cout << "qpltp2=" << qpltp2 << endl;
+  Polyhedron<Rational> qplhd2=Polyhedron<Rational>(Polytope<Rational>(pltp2));
+  cout << "qplhd2=" << qplhd2 << endl;
+  qpltp2=Polytope<Rational>(qplhd2);
+  cout << "qpltp2=" << qpltp2 << endl;
+
   RegularGrid<R> gr2(2,0.125);
-  GridCellListSet<R> oap2=over_approximation(pltp2,gr2);
-  GridCellListSet<R> uap2=under_approximation(pltp2,gr2);
+  GridCellListSet<R> uap2(gr2);
+  GridCellListSet<R> oap2(gr2);
+  try {
+    uap2=under_approximation(pltp2,gr2);
+    oap2=over_approximation(pltp2,gr2);
+  }
+  catch(NotImplemented e) {
+    cerr << "Warning: " << e.what() << " not implemented\n";
+  }
+
   cout << "oap2.size()=" << oap2.size() << endl;
   cout << "uap2.size()=" << uap2.size() << endl;
   Rectangle<R> bbox2=pltp2.bounding_box().expand_by(0.25);
   eps.open("test_polytope-2.eps",bbox2);
   eps.set_fill_colour("white");
   eps << pltp2.bounding_box();
-  eps.set_fill_colour("red");
+  eps.set_fill_colour("cyan");
   eps << oap2;
+  eps.set_fill_colour("yellow");
+  eps << qplhd2;
+  eps.set_fill_colour("red");
+  eps << qpltp2;
   eps.set_fill_colour("green");
   eps << pltp2;
   eps.set_fill_colour("blue");

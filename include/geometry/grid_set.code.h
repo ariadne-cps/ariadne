@@ -784,7 +784,8 @@ namespace Ariadne {
 
       for(Combinatoric::LatticeBlock::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
         GridCell<R> cell(g,*iter);
-        if(!disjoint(Rectangle<R>(cell),z)) {
+        if(disjoint(Rectangle<R>(cell),z)) {
+        } else {
           result.adjoin(cell);
         }
       }
@@ -809,7 +810,8 @@ namespace Ariadne {
 
       for(Combinatoric::LatticeBlock::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
         GridCell<R> cell(g,*iter);
-        if(!disjoint(Rectangle<R>(cell),p)) {
+        if(disjoint(Rectangle<R>(cell),p)) {
+        } else {
           result.adjoin(cell);
         }
       }

@@ -174,9 +174,9 @@ namespace Ariadne {
       b.resize(nc);
       for(size_type i=0; i!=nc; ++i) {
         for(size_type j=0; j!=d; ++j) {
-          A(i,j)=argument[i](j);
+          A(i,j)=-result[i](j);
         }
-        b(i)=argument[i](d);
+        b(i)=result[i](d);
       }
     }
     

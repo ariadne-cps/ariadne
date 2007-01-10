@@ -341,21 +341,35 @@ namespace Ariadne {
       return invoke_mpfr(x1,x2,mpfr_div,GMP_RNDD); }
     template<> inline MPFloat div_up(const MPFloat& x1,const MPFloat& x2) {
       return invoke_mpfr(x1,x2,mpfr_div,GMP_RNDU); }
-    
+
     template<> inline MPFloat pow_approx(const MPFloat& x1, const unsigned int& n2) {
-      return invoke_mpfr(x1,n2,mpfr_pow_ui,GMP_RNDN); }
+      return invoke_mpfr(x1,(unsigned long int)n2,mpfr_pow_ui,GMP_RNDN); }
     template<> inline MPFloat pow_down(const MPFloat& x1,const unsigned int& n2) {
-      return invoke_mpfr(x1,n2,mpfr_pow_ui,GMP_RNDD); }
+      return invoke_mpfr(x1,(unsigned long int)n2,mpfr_pow_ui,GMP_RNDD); }
     template<> inline MPFloat pow_up(const MPFloat& x1,const unsigned int& n2) {
-      return invoke_mpfr(x1,n2,mpfr_pow_ui,GMP_RNDU); }
+      return invoke_mpfr(x1,(unsigned long int)n2,mpfr_pow_ui,GMP_RNDU); }
     
     template<> inline MPFloat pow_approx(const MPFloat& x1, const int& n2) {
-      return invoke_mpfr(x1,n2,mpfr_pow_si,GMP_RNDN); }
+      return invoke_mpfr(x1,(long int)n2,mpfr_pow_si,GMP_RNDN); }
     template<> inline MPFloat pow_down(const MPFloat& x1,const int& n2) {
-      return invoke_mpfr(x1,n2,mpfr_pow_si,GMP_RNDD); }
+      return invoke_mpfr(x1,(long int)n2,mpfr_pow_si,GMP_RNDD); }
     template<> inline MPFloat pow_up(const MPFloat& x1,const int& n2) {
-      return invoke_mpfr(x1,n2,mpfr_pow_si,GMP_RNDU); }
+      return invoke_mpfr(x1,(long int)n2,mpfr_pow_si,GMP_RNDU); }
     
+    template<> inline MPFloat pow_approx(const MPFloat& x1, const unsigned long int& n2) {
+      return invoke_mpfr(x1,n2,mpfr_pow_ui,GMP_RNDN); }
+    template<> inline MPFloat pow_down(const MPFloat& x1,const unsigned long int& n2) {
+      return invoke_mpfr(x1,n2,mpfr_pow_ui,GMP_RNDD); }
+    template<> inline MPFloat pow_up(const MPFloat& x1,const unsigned long int& n2) {
+      return invoke_mpfr(x1,n2,mpfr_pow_ui,GMP_RNDU); }
+    
+    template<> inline MPFloat pow_approx(const MPFloat& x1, const long int& n2) {
+      return invoke_mpfr(x1,n2,mpfr_pow_si,GMP_RNDN); }
+    template<> inline MPFloat pow_down(const MPFloat& x1,const long int& n2) {
+      return invoke_mpfr(x1,n2,mpfr_pow_si,GMP_RNDD); }
+    template<> inline MPFloat pow_up(const MPFloat& x1,const long int& n2) {
+      return invoke_mpfr(x1,n2,mpfr_pow_si,GMP_RNDU); }
+     
     template<> inline MPFloat med_approx(const MPFloat& x1, const MPFloat& x2) {
       return div_approx(add_approx(x1,x2),MPFloat(2)); }
     

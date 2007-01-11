@@ -37,6 +37,8 @@ template<class R> void export_polyhedron();
 template<class R> void export_list_set();
 template<class R> void export_grid_set();
 template<class R> void export_partition_tree_set();
+template<class R> void export_hybrid_set();
+template<class R> void export_set();
 
 BOOST_PYTHON_MODULE(geometry)
 {
@@ -51,4 +53,6 @@ BOOST_PYTHON_MODULE(geometry)
   export_list_set<Ariadne::Real>();
   export_grid_set<Ariadne::Real>();
   export_partition_tree_set<Ariadne::Real>();
+  export_hybrid_set<Ariadne::Real>();
+  export_set<Ariadne::Real>();
 }

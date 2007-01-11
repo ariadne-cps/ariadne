@@ -21,8 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/float64.h"
-#include "numeric/mpfloat.h"
+#include "real_typedef.h"
 #include "numeric/rational.h"
 
 #include "geometry/point.h"
@@ -31,11 +30,9 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template class Point<Float64>;
-    template class Point<MPFloat>;
+    template class Point<Real>;
     template class Point<Rational>;
 
-    template class Point< Interval<Float64> >;
-    template class Point< Interval<MPFloat> >;
+    template class Point< Interval<Real> >;
   }
 }

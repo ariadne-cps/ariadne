@@ -21,9 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <vector>
-
-#include "numeric/mpfloat.h"
+#include "real_typedef.h"
 
 #include "geometry/rectangle.h"
 #include "geometry/polytope.h"
@@ -44,7 +42,7 @@ void export_polytope()
   def("subset", (tribool(*)(const RPolytope&, const RPolytope&))(&subset));
   def("convex_hull", (RPolytope(*)(const RPolytope&, const RPolytope&))(&convex_hull));
 
-  class_< Polytope<R> >("Polytope",init<size_type>())
+  class_< Polytope<R> >("Polytope",init<int>())
     .def(init< PointList<R> >())
     .def(init< Polytope<R> >())
     .def(init< Rectangle<R> >())
@@ -56,4 +54,4 @@ void export_polytope()
 
 }
 
-template void export_polytope<MPFloat>();
+template void export_polytope<Real>();

@@ -1,0 +1,84 @@
+/***************************************************************************
+ *            python/export_set.cc
+ *
+ *  Copyright  2007  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ ****************************************************************************/
+
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is diself_ns::stributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+#include "real_typedef.h"
+
+#include "geometry/set.h"
+
+using namespace Ariadne;
+using namespace Ariadne::Geometry;
+
+#include <boost/python.hpp>
+using namespace boost::python;
+
+template<class R>
+class SetWrapper
+  : public Set<R>, public wrapper< Set<R> >
+{
+ public: 
+  Set<R>* clone() const { return this->get_override("clone")(); }
+  dimension_type dimension() const { return this->get_override("dimension")(); }
+  tribool contains(const Point<R>& pt) const { return this->get_override("contains")(); }
+  tribool disjoint(const Rectangle<R>& r) const { return this->get_override("disjoint")(); }
+  tribool superset(const Rectangle<R>& r) const { return this->get_override("superset")(); }
+  tribool subset(const Rectangle<R>& r) const { return this->get_override("subset")(); }
+  Rectangle<R> bounding_box() const { return this->get_override("bounding_box")(); }
+  std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
+};
+
+template<class R>
+void export_set() 
+{
+  class_<SetWrapper<R>, boost::noncopyable>("Set")
+    .def("dimension", pure_virtual(&Set<R>::dimension))
+    .def("contains", pure_virtual(&Set<R>::contains))
+    .def("disjoint", pure_virtual(&Set<R>::disjoint))
+    .def("superset", pure_virtual(&Set<R>::superset))
+    .def("subset", pure_virtual(&Set<R>::subset))
+    .def("bounding_box", pure_virtual(&Set<R>::bounding_box))
+    .def(self_ns::str(self))
+  ;
+
+  class_< RectangularSet<R>, bases< Set<R> > >("RectangularSet",init< Rectangle<R> >())
+    .def("dimension", &RectangularSet<R>::dimension)
+    .def("contains", &RectangularSet<R>::contains)
+    .def("disjoint", &RectangularSet<R>::disjoint)
+    .def("superset", &RectangularSet<R>::superset)
+    .def("subset", &RectangularSet<R>::subset)
+    .def("bounding_box", &RectangularSet<R>::bounding_box)
+    .def(self_ns::str(self))
+  ;
+
+  class_< PolyhedralSet<R>, bases< Set<R> > >("PolyhedralSet",init< Polyhedron<R> >())
+    .def("dimension", &PolyhedralSet<R>::dimension)
+    .def("contains", &PolyhedralSet<R>::contains)
+    .def("disjoint", &PolyhedralSet<R>::disjoint)
+    .def("superset", &PolyhedralSet<R>::superset)
+    .def("subset", &PolyhedralSet<R>::subset)
+    .def("bounding_box", &PolyhedralSet<R>::bounding_box)
+    .def(self_ns::str(self))
+  ;
+}
+
+
+template void export_set<Real>();

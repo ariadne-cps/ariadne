@@ -72,6 +72,7 @@ LINEAR_ALGEBRA_MODULE_SRC = linear_algebra_module.cc \
 
 GEOMETRY_MODULE_SRC = geometry_module.cc \
 	export_point.cc \
+	export_set.cc \
 	export_rectangle.cc \
 	export_zonotope.cc export_parallelotope.cc \
 	export_polytope.cc export_simplex.cc \

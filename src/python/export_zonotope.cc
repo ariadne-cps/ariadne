@@ -22,8 +22,7 @@
  */
 
 
-#include "numeric/mpfloat.h"
-#include "numeric/numerical_traits.h"
+#include "real_typedef.h"
 
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
@@ -105,4 +104,4 @@ void export_zonotope()
   ;
 }
 
-template void export_zonotope<MPFloat>();
+template void export_zonotope<Real>();

@@ -28,29 +28,30 @@
 #include "geometry/polyhedron.h"
 
 using namespace Ariadne;
+using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
-
 template<class R>
 void export_polyhedron() 
 {
-  typedef Polyhedron<R> RPolyhedron;
+  typedef LinearAlgebra::Vector<R> RVector;
+  typedef LinearAlgebra::Matrix<R> RMatrix;
   typedef Rectangle<R> RRectangle;
-  typedef Polytope<R> RPolytope;
+  typedef Polyhedron<R> RPolyhedron;
 
   def("disjoint", (tribool(*)(const RPolyhedron&, const RPolyhedron&))(&disjoint));
   def("subset", (tribool(*)(const RPolyhedron&, const RPolyhedron&))(&subset));
 
-  class_<RPolyhedron>("Polyhedron",init<size_type>())
-    .def(init<RPolyhedron>())
+  class_<RPolyhedron>("Polyhedron",init<int>())
+    .def(init<RMatrix,RVector>())
     .def(init<RRectangle>())
+    .def(init<RPolyhedron>())
     .def("dimension", &RPolyhedron::dimension)
     .def(self_ns::str(self))
   ;
-  
 }
 
-template void export_polyhedron<MPFloat>();
+template void export_polyhedron<Real>();

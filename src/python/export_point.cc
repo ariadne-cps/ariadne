@@ -22,7 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/mpfloat.h"
+#include "real_typedef.h"
 
 #include "linear_algebra/vector.h"
 
@@ -99,6 +99,5 @@ void export_point()
   ;
 }
 
-
-template void export_point<Numeric::MPFloat>();
-template void export_point_list<Numeric::MPFloat>();
+template void export_point<Real>();
+template void export_point_list<Real>();

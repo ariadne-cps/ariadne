@@ -58,6 +58,7 @@ output_la_LIBADD = ../libariadne.la
 models_la_LIBADD = ../libariadne.la
 
 BASE_MODULE_SRC=base_module.cc \
+	export_tribool.cc \
 	export_array.cc
 
 COMBINATORIC_MODULE_SRC=combinatoric_module.cc \

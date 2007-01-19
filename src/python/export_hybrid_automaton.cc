@@ -48,6 +48,7 @@ void export_hybrid_automaton()
     .def("dimension",&DiscreteMode<R>::dimension)
     .def("dynamic",&DiscreteMode<R>::dynamic,return_reference_existing_object)
     .def("invariant",&DiscreteMode<R>::invariant,return_reference_existing_object)
+    .def(self_ns::str(self))
   ;
   
 
@@ -56,6 +57,7 @@ void export_hybrid_automaton()
     .def("destination",&DiscreteTransition<R>::destination,return_reference_existing_object)
     .def("activation",&DiscreteTransition<R>::activation,return_reference_existing_object)
     .def("reset",&DiscreteTransition<R>::reset,return_reference_existing_object)
+    .def(self_ns::str(self))
   ;
 
 
@@ -73,8 +75,9 @@ void export_hybrid_automaton()
            (&HybridAutomaton<R>::new_transition),
          return_reference_existing_object)
     .def("name",&HybridAutomaton<R>::name,return_copy_const_reference)
-    .def("modes",&HybridAutomaton<R>::modes,return_reference_existing_object)
-    .def("transitions",&HybridAutomaton<R>::transitions,return_reference_existing_object)
+    .def("mode",&HybridAutomaton<R>::mode,return_copy_const_reference)
+    .def("transition",&HybridAutomaton<R>::transition,return_copy_const_reference)
+    .def(self_ns::str(self))
   ;
 }
 

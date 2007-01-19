@@ -84,7 +84,8 @@ test_chainreach()
   cout << "ptcr.size()=" << ptcr.size() << "  " << flush;
   cout << "ptcr.capacity()=" << ptcr.capacity() << endl;
 
-  epsfstream eps=epsfstream("test_chainreach-1.eps",epsbb);
+  epsfstream eps;
+  eps.open("test_chainreach-1.eps",epsbb);
   eps.set_pen_colour("black");
   eps.set_fill_colour("white");
   eps << cb;

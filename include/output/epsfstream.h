@@ -25,12 +25,14 @@
  *  \brief Encapsulated postscript output.
  */
  
-#include <cmath>
 #include <iostream>
 #include <fstream>
 #include <algorithm>
-#include <string.h>
+#include <cmath>
+#include <cassert>
+#include <cstring>
 
+#include "../base/stlio.h"
 #include "../numeric/conversion.h"
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
@@ -63,10 +65,63 @@ namespace Ariadne {
 namespace Ariadne {
   namespace Output {
     
-    typedef struct{
+    class Point2d {
+     private:
+      double _coordinates[2];
+     public:
+      Point2d(dimension_type d=2) { assert(d==2); }
+      Point2d(double x, double y) { _coordinates[0]=x; _coordinates[1]=y; }
+      dimension_type dimension() const { return 2; }
+      const double& operator[](dimension_type i) const { return _coordinates[i]; }
+      double& operator[](dimension_type i) { return _coordinates[i]; }
+    };
+
+    std::ostream& operator<<(std::ostream&, const Point2d&);
+
+    inline 
+    bool operator<(const Point2d& pt1, const Point2d& pt2) {
+      return (pt1[0]<pt2[0]) || ( (pt1[0]==pt2[0]) && (pt1[1]<pt2[1]) );
+    }
+
+    class Rectangle2d {
+     private:
+      Point2d _lower_corner;
+      Point2d _upper_corner;
+     public:
+      Rectangle2d(dimension_type d=2) { assert(d==2); }
+      Rectangle2d(const Point2d& l, const Point2d& u) : _lower_corner(l), _upper_corner(u) { }
+      dimension_type dimension() const { return 2; }
+      const double& lower_bound(dimension_type i) const { return _lower_corner[i]; }
+      const double& upper_bound(dimension_type i) const { return _upper_corner[i]; }
+      double& lower_bound(dimension_type i) { return _lower_corner[i]; }
+      double& upper_bound(dimension_type i) { return _upper_corner[i]; }
+      void set_lower_bound(dimension_type i,const double& x) { _lower_corner[i]=x; }
+      void set_upper_bound(dimension_type i,const double& x) { _upper_corner[i]=x; }
+    };
+
+    class Polygon2d {
+     private:
+      std::vector<Point2d> _vertices;
+     public:
+      Polygon2d(dimension_type d=2) { assert(d==2); }
+      Polygon2d(dimension_type d,size_type nv) { assert(d==2); _vertices.resize(nv); }
+      dimension_type dimension() const { return 2; }
+      size_type size() const { return _vertices.size(); }
+      const Point2d& operator[](dimension_type i) const { return _vertices[i]; }
+      Point2d& operator[](dimension_type i) { return _vertices[i]; }
+      void new_vertex(const Point2d& pt) { _vertices.push_back(pt); }
+      Polygon2d& reduce();
+     private:
+      double slope(const Point2d& pt1, const Point2d& pt2) {
+        return (pt2[1]-pt1[1])/(pt2[0]-pt1[0]); }
+    };
+
+
+  typedef struct{
       size_t pos;
       double radiant;
     } radiant_pointer_type;
+
 
     inline bool
     is_smaller_than(const radiant_pointer_type &a, 
@@ -74,6 +129,7 @@ namespace Ariadne {
       return (a.radiant<b.radiant);
     }
    
+
     template<class R1, class R2>
     Geometry::Point<R1> 
     approximate_point(const Geometry::Point<R2>& pt) 
@@ -96,39 +152,42 @@ namespace Ariadne {
       return result;
     }
     
+
+
     class PlanarProjectionMap
     {
      public:
       PlanarProjectionMap() : _d(2), _i(0), _j(1) { }
       PlanarProjectionMap(dimension_type d, dimension_type i, dimension_type j)
         : _d(d), _i(i), _j(j) { if(i>=d || j>=d) { throw Geometry::InvalidCoordinate(__PRETTY_FUNCTION__); } }
-      template<class R> Geometry::Point<double> operator() (const Geometry::Point<R>& pt) const {
-        Geometry::Point<double> result(2); 
+      template<class R> Point2d operator() (const Geometry::Point<R>& pt) const {
+        Point2d result(2); 
         check_dimension(pt,_d,__PRETTY_FUNCTION__);
         result[0]=conv_approx<double>(pt[_i]); 
         result[1]=conv_approx<double>(pt[_j]); 
         return result;
       }
-      template<class R> Geometry::PointList<double> operator() (const Geometry::PointList<R>& ptl) const {
-        Geometry::PointList<double> result(2,ptl.size());
+      template<class R> Polygon2d operator() (const Geometry::PointList<R>& ptl) const {
+        Polygon2d result(2);
         for(size_type i=0; i!=ptl.size(); ++i) { 
-          result[i]=this->operator()(ptl[i]);
+          result.new_vertex(this->operator()(ptl[i]));
         }
+        result.reduce();
         return result;
       }
-      template<class R> Geometry::Rectangle<double> operator() (const Geometry::Rectangle<R>& r) const {
-        Geometry::Rectangle<double> result(2); 
+      template<class R> Rectangle2d operator() (const Geometry::Rectangle<R>& r) const {
+        Rectangle2d result(2); 
         check_dimension(r,this->_d);
-        result.set_lower_bound(0,conv_approx<double>(r.lower_bound(0)));
-        result.set_upper_bound(0,conv_approx<double>(r.upper_bound(0)));
-        result.set_lower_bound(1,conv_approx<double>(r.lower_bound(1)));
-        result.set_upper_bound(1,conv_approx<double>(r.upper_bound(1)));
+        result.lower_bound(0)=conv_approx<double>(r.lower_bound(0));
+        result.upper_bound(0)=conv_approx<double>(r.upper_bound(0));
+        result.lower_bound(1)=conv_approx<double>(r.lower_bound(1));
+        result.upper_bound(1)=conv_approx<double>(r.upper_bound(1));
         return result;
       }
-      template<class R> Geometry::PointList<double> operator() (const Geometry::Zonotope<R>& z) const {
+      template<class R> Polygon2d operator() (const Geometry::Zonotope<R>& z) const {
         return this->operator()(z.vertices());
       }
-      template<class R> Geometry::PointList<double> operator() (const Geometry::Polytope<R>& p) const {
+      template<class R> Polygon2d operator() (const Geometry::Polytope<R>& p) const {
         return this->operator()(p.vertices());
       }
      private:
@@ -137,514 +196,136 @@ namespace Ariadne {
       dimension_type _j;
       };
     
-    Geometry::Point<double> baricentre_of_points(const Geometry::PointList<double>& vertices)
-    {
-      Geometry::Point<double> baricentre(2);
-
-      for (size_type j=0; j!=vertices.size(); ++j) {
-        for (size_type i=0; i<2; i++) {
-          baricentre[i]=baricentre[i]+vertices[j][i];
-        }
-      }
-      for (size_type i=0; i!=2; ++i) {
-        baricentre[i]/=vertices.size();
-      }
-      return baricentre;
-    }
+    Point2d baricentre(const Polygon2d& vertices);
 
 
-    Geometry::PointList<double>
-    order_around_a_point(const Geometry::PointList<double>& vertices, 
-                         const Geometry::Point<double> &centre)
-    {
-      std::vector< LinearAlgebra::Vector<double> > vert_pos(vertices.size());
-      
-      for (size_t i=0; i< vertices.size(); i++) 
-        vert_pos[i]=vertices[i].position_vector()-
-                         centre.position_vector();
-      
-      radiant_pointer_type pointers[vertices.size()];
-      
-      double tangent=0;
-      double tangent_R=0;
-      
-      for (size_t i=0; i< vert_pos.size(); i++) {
-        pointers[i].pos=i;
-        if (vert_pos[i](1)==0) {
-          if (vert_pos[i](0) >0)
-            pointers[i].radiant=std::acos(0.0);
-          else
-            pointers[i].radiant=-std::acos(0.0);
-        } else {
-          tangent_R=vert_pos[i](0)/vert_pos[i](1);
-          tangent=tangent_R;
-          pointers[i].radiant=std::atan(tangent);
-        
-          if (vert_pos[i](1) <0)
-            pointers[i].radiant+=std::acos(-1.0);
-        }
-      }
-      
-      std::sort(pointers, pointers + vert_pos.size(), is_smaller_than);
-      
-      Geometry::PointList<double> new_vector(2,vertices.size()); 
-   
-      for (size_t i=0; i< vertices.size(); i++) {
-        Geometry::PointListReference<double> plref=new_vector[i];
-        Geometry::Point<double> pt(vertices[pointers[i].pos]);
-        plref=pt;
-      }
+    Polygon2d
+    order_around_a_point(const Polygon2d& vertices, 
+                         const Point2d &centre);
 
-      return new_vector;
-    }
     
-    template<class R>
-    Geometry::Rectangle<double>
-    approximate_rectangle(Geometry::Rectangle<R>& r) 
-    {
-      Geometry::Rectangle<double> result(r.dimension());
-      for(dimension_type i=0; i!=result.dimension(); ++i) {
-        result.set_lower_bound(i,conv_approx<double>(r.lower_bound(i)));
-        result.set_upper_bound(i,conv_approx<double>(r.upper_bound(i)));
-      }
-      return result;
-    }
     
-    class epsfstream : public std::ofstream {
+    class epsfstream
+      : public std::ofstream 
+    {
      private:
       static const uint xBBoxSide=300;
       static const uint yBBoxSide=300;
       static const double linewidth=0.0000001;
       
       PlanarProjectionMap p_map;
+      Rectangle2d bbox;
      public:
-      //FIXME: only needed for Boost Python interface.
-      epsfstream(const epsfstream& ofs) : std::ofstream("fnord") { };
-
       std::string line_colour;
       std::string fill_colour;
       bool line_style;
       bool fill_style;
-      
-      epsfstream()
-        : std::ofstream(), line_colour("black"), fill_colour("green"), line_style(true), fill_style(true)
-      {
-        this->p_map=PlanarProjectionMap(2,0,1);
-      }
-      
-      template<class R>
-      epsfstream(const char* fn, const Ariadne::Geometry::Rectangle<R>& bbox)
-        : std::ofstream(fn), line_colour("black"), fill_colour("green"), line_style(true), fill_style(true)
-      {
-        if (bbox.dimension()!=2) {
-           throw std::runtime_error("epsfstream: the bounding box hasn't dimension 2."); 
-        }
-                
-        this->p_map=PlanarProjectionMap(2,0,1);
-        this->open(this->p_map(bbox));
-      }
+     public:
+      ~epsfstream();
 
-      template<class R>
-      epsfstream(const char* fn, const Ariadne::Geometry::Rectangle<R>& bbox, const unsigned int & ix,  const unsigned int& iy)
-       : std::ofstream(fn), line_colour("black"), fill_colour("green"), line_style(true), fill_style(true)
-      {
-        if (bbox.dimension()<=ix)
-          throw std::runtime_error("epsfstream: the given x dimension is greater than the space dimension."); 
-        if (bbox.dimension()<=iy)
-          throw std::runtime_error("epsfstream: the given y dimension is greater than the space dimension."); 
-        
-        this->p_map=PlanarProjectionMap(bbox.dimension(),ix,iy);
-        this->open(this->p_map(bbox));
-      }
-
+      epsfstream();
+      
       template<class R>
       epsfstream(const char* fn, const Ariadne::Geometry::Rectangle<R>& bbox, 
-                 const unsigned int &ix,  const unsigned int& iy, 
-                 const char* x_name, const char* y_name)
-        : std::ofstream(fn), line_colour("black"), fill_colour("green"), line_style(true), fill_style(true)
-      {
-        if (bbox.dimension()<=ix)
-          throw std::runtime_error("epsfstream: the given x dimension is greater than the space dimension."); 
-        if (bbox.dimension()<=iy)
-          throw std::runtime_error("epsfstream: the given y dimension is greater than the space dimension."); 
-        
-        this->p_map=PlanarProjectionMap(bbox.dimension(),ix,iy);
-
-        Geometry::Rectangle<double> proj_bbox=this->p_map(bbox);
-
-        Geometry::Point<double> l(proj_bbox.lower_corner());
-        Geometry::Point<double> u(proj_bbox.upper_corner());
-
-        l[0]-=((u[0]-l[0])/SCALE_DIMENSION);
-        l[1]-=((u[1]-l[1])/SCALE_DIMENSION);
-        //u[0]+=SCALE_DIMENSION;u[1]+=SCALE_DIMENSION;
-        
-        proj_bbox=Geometry::Rectangle<double>(l,u);
-        this->open(proj_bbox);
-
-        this->trace_scale(proj_bbox,6,6,x_name,y_name);
-      }
+                 const unsigned int &ix=0,  const unsigned int& iy=1);
       
-      ~epsfstream() {
-        this->close();
-      }
-
-      inline const PlanarProjectionMap& projection_map() const { return this->p_map; }
-
-      template<class R> 
-      inline void open(const char* fn, const Ariadne::Geometry::Rectangle<R>& bbox)
-      {
-        if (bbox.dimension()!=2) {
-           throw std::runtime_error("epsfstream: the bounding box does not have dimension 2."); 
-        }
-        
-        std::ofstream::open(fn);
-        this->line_colour="black";
-        this->fill_colour="green";
-        this->line_style=true;
-        this->fill_style=true;
-        
-        this->p_map=PlanarProjectionMap(2,0,1);
-        
-        this->open(p_map(bbox));
-      }
-
-      void
-      trace_scale(const Ariadne::Geometry::Rectangle<double>& bb, const int &x_step, 
-                  const int &y_step, const char* x_name, const char* y_name) 
-      {
-        double lx=bb.lower_bound(0);
-        double ly=bb.lower_bound(1);
-        double ux=bb.upper_bound(0);
-        double uy=bb.upper_bound(1);
-
-        double scale_x=((ux-lx)/(SCALE_DIMENSION + 1));
-        double scale_y=((uy-ly)/(SCALE_DIMENSION + 1));
-
-        lx=lx+0.8*scale_x;
-        ly=ly+0.8*scale_y;
-
-
-        double setlinewidth = ((ux-lx)+(uy-ly))/(SCALE_DIMENSION*300);
-                
-        double fontsize = ((ux-lx)+(uy-ly))/(SCALE_DIMENSION*20);
-                
-        *this << setlinewidth << " setlinewidth"<< std::endl
-              << "fillcolour black" << std::endl
-              << "/Times-Roman findfont" << std::endl
-              << fontsize  << " scalefont" << std::endl
-              << "setfont" << std::endl;
-        
-        *this << "newpath" << std::endl
-            << lx << ' ' << ly << " moveto"<< std::endl
-            << ux << ' ' << ly << " lineto"<< std::endl
-            << "stroke"<< std::endl;
-            
-        size_t prec=this->precision();
-
-        if (x_step>0) {
-          for (double i=lx; i< ux; i=i+((ux-lx)/(x_step))) {
-          
-            *this << "newpath" << std::endl
-                << i << ' ' << ly - 0.05*scale_y << " moveto"<< std::endl
-                << i << ' ' << ly + 0.05*scale_y << " lineto"<< std::endl
-                << "stroke"<< std::endl;
-
-            *this << "newpath" << std::endl
-                  << i-0.05*scale_x << ' ' << ly - 0.2*scale_y 
-                << " moveto"<< std::endl;
-
-            this->precision(1);
-            *this << "("<< i << ") show"<< std::endl;
-            this->precision(prec);
-          }
-
-          *this << "newpath" << std::endl
-                << ux << ' ' << ly - 0.05*scale_y << " moveto"<< std::endl
-                << ux << ' ' << ly + 0.05*scale_y << " lineto"<< std::endl
-                << "stroke"<< std::endl;
-
-          *this << "newpath" << std::endl
-                  << ux-0.05*scale_x << ' ' << ly - 0.2*scale_y 
-                << " moveto"<< std::endl;
-
-          this->precision(1);
-          *this << "("<< ux << ") show"<< std::endl;
-          this->precision(prec);
-         
-          double x_name_len=((double)strlen(x_name))/28;
-
-          *this << "/Times-Roman findfont" << std::endl
-              << 1.5* fontsize  << " scalefont" << std::endl
-              << "setfont" << std::endl
-              << "newpath" << std::endl
-              << (ux+lx-x_name_len)/2 << ' ' << ly - 0.5*scale_y
-              << " moveto"<< std::endl
-              << "("<< x_name << ") show"<< std::endl
-              << "/Times-Roman findfont" << std::endl
-              << fontsize  << " scalefont" << std::endl
-              << "setfont" << std::endl;
-        }
-        
-        *this << "newpath" << std::endl
-            << lx << ' ' << ly << " moveto"<< std::endl
-            << lx << ' ' << uy << " lineto"<< std::endl
-            << "stroke"<< std::endl;
-
-        if (y_step>0) {
-          for (double i=ly; i<= uy; i=i+((uy-ly)/(y_step))) {
-          
-            *this << "newpath" << std::endl
-                << lx - 0.05*scale_x << ' ' << i << " moveto"<< std::endl
-                << lx + 0.05*scale_x << ' ' << i << " lineto"<< std::endl
-                << "stroke"<< std::endl;
-
-            *this << "newpath" << std::endl
-                << lx - 0.30*scale_x << ' ' << i-0.05*scale_y 
-                << " moveto"<< std::endl;
-
-            this->precision(1);
-            *this << "("<< i << ") show"<< std::endl;
-            this->precision(prec);
-          }
-          
-          *this << "newpath" << std::endl
-                << lx - 0.05*scale_x << ' ' << uy << " moveto"<< std::endl
-                << lx + 0.05*scale_x << ' ' << uy << " lineto"<< std::endl
-                << "stroke"<< std::endl;
-
-          *this << "newpath" << std::endl
-                << lx - 0.30*scale_x << ' ' << uy-0.05*scale_y 
-                << " moveto"<< std::endl;
-
-          this->precision(1);
-          *this << "("<< uy << ") show"<< std::endl;
-          this->precision(prec);
-
-          double y_name_len=((double)strlen(y_name))/28;
-
-          *this << "/Times-Roman findfont" << std::endl
-              << 1.5* fontsize  << " scalefont" << std::endl
-              << "setfont" << std::endl
-              << "newpath" << std::endl
-              << lx - 0.5*scale_x << ' ' << (uy+ly-y_name_len)/2 
-              << " moveto"<< std::endl
-              << "90 rotate" << std::endl
-              << "("<< y_name << ") show"<< std::endl
-              << "/Times-Roman findfont" << std::endl
-              << fontsize  << " scalefont" << std::endl
-              << "setfont" << std::endl
-              << "stroke" << std::endl
-              << "-90 rotate" << std::endl;
-        }
-        
-        *this << "linewidth setlinewidth" << std::endl
-              << "fillcolour green" << std::endl;
-      }
+      template<class R>
+      void open(const char* fn, const Ariadne::Geometry::Rectangle<R>& bbox, 
+                const unsigned int &ix=0,  const unsigned int& iy=1);
       
-      void open(const Ariadne::Geometry::Rectangle<double>& bbox) {
-        (*this) << "%!PS-Adobe-2.0\n"
-                << "%%Title: Ariadne\n"
-                << "%%Creator: Ariadne\n"
-                << "%%CreationDate: Unknown\n"
-                << "%%For: Test\n"
-                << "%%Pages: 1\n"
-                << "%%DocumentFonts: /Times-Roman\n"
-                << "%%BoundingBox: 0 0 " << xBBoxSide+10 << " " << yBBoxSide+10 << "\n"
-                << "%%EndComments\n"
-                << "\n";
+      void open(const char* fn, const Rectangle2d& bbox,
+                const PlanarProjectionMap& p_map);
 
-        (*this) << "/linewidth " << epsfstream::linewidth << " def\n";
-        (*this) << "/black {0.0 0.0 0.0 setrgbcolor} def\n"
-                << "/gray {0.5 0.5 0.5 setrgbcolor} def\n"
-                << "/white {1.0 1.0 1.0 setrgbcolor} def\n"
-                << "/red {1.0 0.0 0.0 setrgbcolor} def\n"
-                << "/green {0.0 1.0 0.0 setrgbcolor} def\n"
-                << "/blue {0.0 0.0 1.0 setrgbcolor} def\n"
-                << "/yellow {1.0 1.0 0.0 setrgbcolor} def\n"
-                << "/magenta {1.0 0.0 1.0 setrgbcolor} def\n"
-                << "/cyan {0.0 1.0 1.0 setrgbcolor} def\n";
-
-        (*this) << "/bordercolour { black } def\n"
-                << "/fillcolour { green } def\n";
-       
-        (*this) << "/xl " << bbox.lower_bound(0) << " def\n"
-                << "/xu " << bbox.upper_bound(0) << " def\n"
-                << "/yl " << bbox.lower_bound(1) << " def\n"
-                << "/yu " << bbox.upper_bound(1) << " def\n";
-        (*this) << "/xBBoxSide " << xBBoxSide << " def\n"
-                << "/yBBoxSide " << yBBoxSide << " def\n"
-                << "/xscale xBBoxSide xu xl sub div def  % horizontal scaling factor\n"
-                << "/yscale yBBoxSide yu yl sub div def  % vertical scaling factor\n"
-                << "/xscalei 1 xscale div def     % horizontal scaling factor inverse\n"
-                << "/yscalei 1 yscale div def     % vertical scaling factor inverse\n";
-
-        (*this) << "linewidth setlinewidth\n";
-        (*this) << "green\n";
-
-        (*this) << "gsave\n"
-                << "xscale yscale scale xl neg yl neg translate\n";
-      }
-
-      void close() {
-        (*this) << "grestore showpage\n"
-                   "%%Trailer\n";
-        std::ofstream::close();
-      }
+      void close();
       
-      void set_line_style(bool ls) {
-        this->line_style=ls;
-      }
+      void trace_scale(const char* x_name, const char* y_name,
+                       const int& x_step=5, const int& y_step=5);
+      
+      const PlanarProjectionMap& projection_map() const { 
+        return this->p_map; }
+
+      void set_line_style(bool ls) { 
+        this->line_style=ls;  }
     
       void set_fill_style(bool fs) {
-        this->fill_style=fs;
-      }
+        this->fill_style=fs; }
     
       void set_pen_colour(const char* pc) {
-        this->line_colour=pc;
-      }
+        this->line_colour=pc; }
     
       void set_fill_colour(const char* fc) {
-        this->fill_colour=fc;
-      }
+        this->fill_colour=fc; }
+     private:
+      void write_header();
+      void write_trailer();
+      epsfstream(const epsfstream&); // no copy constructor
     };
     
-    
-    
-    epsfstream&
-    trace_polygon(epsfstream& eps, const Geometry::PointList<double>& vertices)
-    {
-      eps << vertices[0][0] << ' ' << vertices[0][1] 
-          << " moveto\n";
-      for (size_type i=1; i!=vertices.size(); ++i) {
-        eps << vertices[i][0] << ' ' << vertices[i][1] 
-            << " lineto\n";
-      }
-      eps << vertices[0][0] << ' ' << vertices[0][1] 
-          << " lineto\n";
-      return eps;
-    }
-    
-    
-    epsfstream&
-    trace(epsfstream& eps, const Ariadne::Geometry::Point<double>& pt)
-    {        
-      eps << pt[0] << " " << pt[1] << " 0.001 0 360 arc closepath\n";
-      return eps;
-    }
-    
-    
-    epsfstream&
-    trace(epsfstream& eps, const Ariadne::Geometry::Rectangle<double>& r)
-    {
-      Geometry::Rectangle<double> proj_r=eps.projection_map()(r);
-      
-      double lx=proj_r.lower_bound(0);
-      double ux=proj_r.upper_bound(0);
-      double ly=proj_r.lower_bound(1);
-      double uy=proj_r.upper_bound(1);
+    epsfstream& trace(epsfstream& eps, const Point2d& pt);
+    epsfstream& trace(epsfstream& eps, const Rectangle2d& r);
+    epsfstream& trace(epsfstream& eps, const Polygon2d& vertices);
 
-      eps << lx << ' ' << ly << " moveto\n"
-          << ux << ' ' << ly << " lineto\n"
-          << ux << ' ' << uy << " lineto\n"
-          << lx << ' ' << uy << " lineto\n"
-          << lx << ' ' << ly << " lineto\n";
-      return eps;
-    }
+    epsfstream& draw(epsfstream& eps, const Point2d& pt);
+    epsfstream& draw(epsfstream& eps, const Rectangle2d& r);
+    epsfstream& draw(epsfstream& eps, const Polygon2d& vertices);
     
-    
-    epsfstream&
-    trace(epsfstream& eps, const Geometry::PointList<double>& vertices)
-    {
-      Geometry::Point<double> baricentre=baricentre_of_points(vertices);
-      Geometry::PointList<double> ordered_vertices=order_around_a_point(vertices,baricentre);
-      return trace_polygon(eps,ordered_vertices);
-    }
-      
-    epsfstream&
-    draw_polygon(epsfstream& eps, const Geometry::PointList<double>& vertices)
-    {
-      if(eps.fill_style) {
-        trace_polygon(eps,vertices) << eps.fill_colour << " fill\n";
-      }
-      if(eps.line_style) {
-        trace_polygon(eps,vertices) << eps.line_colour << " stroke\n\n";
-      }
-      return eps;
-    }
+    template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::Point<R>&); 
+    template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::Rectangle<R>&);
+    template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::Zonotope<R>&);
+    template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::Polytope<R>&); 
+    template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::Polyhedron<R>&); 
+    template<class R,template<class> class BS> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::ListSet<R,BS>&); 
+    template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::GridCellListSet<R>&); 
+    template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::GridMaskSet<R>&); 
+    template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::PartitionTree<R>&); 
+    template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::PartitionTreeSet<R>&); 
+
     
 
-    epsfstream&
-    draw(epsfstream& eps, const Geometry::PointList<double>& vertices) 
+    template<class R>
+    epsfstream::epsfstream(const char* fn, const Ariadne::Geometry::Rectangle<R>& bbox, 
+                           const unsigned int &ix,  const unsigned int& iy)
+      : std::ofstream(), line_colour("black"), fill_colour("green"), line_style(true), fill_style(true)
     {
-      Geometry::Point<double> baricentre=baricentre_of_points(vertices);
-      Geometry::PointList<double> ordered_vertices=order_around_a_point(vertices,baricentre);
-      return draw_polygon(eps,ordered_vertices);
+      this->open(fn,bbox,ix,iy);
     }
-  
-    epsfstream&
-    draw(epsfstream& eps, const Geometry::PointList<double>& vertices,const Geometry::Point<double> baricentre) 
-    {
-      Geometry::PointList<double> ordered_vertices=order_around_a_point(vertices,baricentre);
-      return draw_polygon(eps,ordered_vertices);
-    }
-     
-     
-    
-    epsfstream&
-    draw(epsfstream& eps, 
-         const Geometry::Point<double>& pt)
-    {
-      if(eps.fill_style) {
-        eps << pt[0] << " " << pt[1] << " 0.001 0 360 arc closepath\n";
-        eps << eps.fill_colour << " fill\n";
-      }
-      if(eps.line_style) {
-        eps << pt[0] << " " << pt[1] << " 0.001 0 360 arc closepath\n";
-        eps << eps.line_colour << " stroke\n\n";
-      }
-      return eps;
-    }
-
-    epsfstream&
-    draw(epsfstream& eps, const Geometry::Rectangle<double>& r) 
-    {
-      if(eps.fill_style) {
-        trace(eps,r) << eps.fill_colour << " fill\n";
-      }
-      if(eps.line_style) {
-        trace(eps,r) << eps.line_colour << " stroke\n\n";
-      }
-      return eps;
-    }
-    
 
 
     template<class R>
+    void 
+    epsfstream::open(const char* fn, const Ariadne::Geometry::Rectangle<R>& bbox,
+                     const unsigned int &ix,  const unsigned int& iy)
+    {
+      PlanarProjectionMap p_map(bbox.dimension(),ix,iy);
+      this->open(fn,p_map(bbox),p_map);
+    }
+
+
+
+    template<class R> inline
     epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::Point<R>& pt) 
     {
       return draw(eps, eps.projection_map()(pt));
     }
 
-    template<class R>
+    template<class R> inline
     epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::Rectangle<R>& r) 
     {
-      Geometry::Rectangle<double> dr=eps.projection_map()(r);
+      Rectangle2d dr=eps.projection_map()(r);
       return draw(eps,dr);
     }
     
-    template<class R>
+    template<class R> inline
     epsfstream&
     operator<<(epsfstream& eps, const Geometry::Zonotope<R>& z)
     {
-      Geometry::Point<double> centre=eps.projection_map()(z.centre());
-      Geometry::PointList<double> vertices=eps.projection_map()(Geometry::Zonotope<Rational>(z).vertices());      
-      return draw(eps,vertices,centre);
+      Polygon2d vertices=eps.projection_map()(Geometry::Zonotope<Rational>(z).vertices());      
+      return draw(eps,vertices);
     }
        
-    template<class R>
+    template<class R> inline
     epsfstream&
     operator<<(epsfstream& eps, const Geometry::Parallelotope<R>& p)
     {
@@ -652,21 +333,21 @@ namespace Ariadne {
       return eps << z;
     }
        
-    template<class R>
+    template<class R> inline
     epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::Polytope<R>& p)
     {
       return draw(eps,eps.projection_map()(p.vertices()));      
     }
     
-    template<class R>
+    template<class R> inline
     epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::Polyhedron<R>& p)
     {
       return draw(eps,eps.projection_map()(p.vertices()));      
     }
     
-    template<class R, template<class> class BS>
+    template<class R, template<class> class BS> inline
     epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::ListSet<R,BS>& ds)
     {
@@ -684,14 +365,16 @@ namespace Ariadne {
       return eps;
     }
     
-    template<class R>
+
+    template<class R> inline
     epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::GridMaskSet<R>& ds)
     {
       return eps << Ariadne::Geometry::ListSet<R,Ariadne::Geometry::Rectangle>(ds);
     }
     
-    template<class R>
+ 
+    template<class R> inline
     epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::GridCellListSet<R>& ds)
     {
@@ -699,14 +382,14 @@ namespace Ariadne {
     }
     
 
-    template<class R>
+    template<class R> inline
     epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::PartitionTreeSet<R>& ds)
     {
       return eps << Ariadne::Geometry::ListSet<R,Ariadne::Geometry::Rectangle>(ds);
     }
 
-    template<class R>
+    template<class R> inline
     epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::PartitionTree<R>& pt)
     {

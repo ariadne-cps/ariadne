@@ -462,7 +462,7 @@ namespace Ariadne {
     Matrix<typename Numeric::traits<R1,R2>::arithmetic_type>
     operator/(const Matrix<R1>& A, const R2& s) 
     {
-      return (static_cast<R2>(1)/s)*A;
+      return static_cast<typename Numeric::traits<R2>::arithmetic_type>(static_cast<R2>(1)/s)*A;
     }
     
     template<class R1, class R2> inline

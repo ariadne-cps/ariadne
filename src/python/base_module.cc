@@ -24,9 +24,11 @@
 
 #include <boost/python.hpp>
 
+void export_tribool();
 void export_array();
 
 BOOST_PYTHON_MODULE(base)
 {
+  export_tribool();
   export_array();
 }

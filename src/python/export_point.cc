@@ -22,7 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "real_typedef.h"
+#include "numeric/mpfloat.h"
 
 #include "linear_algebra/vector.h"
 
@@ -67,20 +67,12 @@ Point<R> point_list_get(const PointList<R>& pl, const size_type& n) {
   return pl[n];
 }
 
-template<class R>
-void export_point_list() 
-{
-  class_< PointList<R> >(python_name<R>("PointList").c_str(),init<>())
-    .def("size", &PointList<R>::size)
-    .def("append", &PointList<R>::push_back)
-    .def("__getitem__", &point_list_get<R>)
-  ;
-}
 
 template<class R>
 void export_point() 
 {
-  class_< Point<R> >("FPoint",init<>())
+//  class_< Point<R> >(python_name<R>("Point"),init<>())
+  class_< Point<R> >("Point",init<>())
     .def(init< int >())
     .def(init< Point<R> >())
     .def(init<std::string>())
@@ -95,9 +87,21 @@ void export_point()
 //    .def("__sub__", &rpoint_sub_rpoint)
 //    .def("rectangle_expanded_by", &rectangle_expanded)
     .def(self_ns::str(self))
-
   ;
 }
 
-template void export_point<Real>();
-template void export_point_list<Real>();
+template<class R>
+void export_point_list() 
+{
+  class_< PointList<R> >("PointList",init<>())
+    .def("size", &PointList<R>::size)
+    .def("append", &PointList<R>::push_back)
+    .def("__getitem__", &point_list_get<R>)
+  ;
+}
+
+
+
+
+template void export_point<Numeric::MPFloat>();
+template void export_point_list<Numeric::MPFloat>();

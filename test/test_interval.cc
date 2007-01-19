@@ -213,7 +213,7 @@ test_interval()
     Interval<R> ivloa=ivlodt*ivlt;
     cout << ivlo << " / " << ivlt << " = " << ivlodt << endl;
     cout << ivlo << " in " << ivlodt * ivlt << endl;
-    assert(ivlodt.lower()< ivlodt.upper());
+    assert(ivlodt.lower() < ivlodt.upper());
     assert(ivloa.lower() < ivlo.lower() && ivloa.upper() > ivlo.upper());
     
     

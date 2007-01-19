@@ -32,14 +32,29 @@ using namespace Ariadne::Geometry;
 using namespace boost::python;
 return_value_policy<reference_existing_object> return_reference_existing_object;
 
+template<class HS, class A> 
+inline void set_hybrid_set_item(HS& S, int id, const A& x) {
+  S[id]=x;
+}
+
 template<class R>
 void export_hybrid_set() 
 {
  
   class_< HybridGridMaskSet<R> >("HybridGridMaskSet",init<size_type,const FiniteGrid<R>&>())
     .def("__len__",&HybridGridMaskSet<R>::number_of_discrete_locations)
-    .def("__getitem__",(const GridMaskSet<R>&(HybridGridMaskSet<R>::*)(const size_type& i)const)
+    //    .def("__getitem__",(const GridMaskSet<R>&(HybridGridMaskSet<R>::*)(const size_type& i)const)
+    //                        &HybridGridMaskSet<R>::operator[],return_reference_existing_object)
+    .def("__getitem__",(GridMaskSet<R>&(HybridGridMaskSet<R>::*)(const size_type& i))
                         &HybridGridMaskSet<R>::operator[],return_reference_existing_object)
+    .def("__setitem__", &set_hybrid_set_item< HybridGridMaskSet<R>, GridMaskSet<R> >)
+  ;
+  
+  class_< HybridGridCellListSet<R> >("HybridGridCellListSet",init<size_type,const Grid<R>&>())
+    .def("__len__",&HybridGridCellListSet<R>::number_of_discrete_locations)
+    .def("__getitem__",(const GridCellListSet<R>&(HybridGridCellListSet<R>::*)(const size_type& i)const)
+                        &HybridGridCellListSet<R>::operator[],return_reference_existing_object)
+    .def("__setitem__",&set_hybrid_set_item< HybridGridCellListSet<R>, GridCellListSet<R> >)
   ;
   
 }

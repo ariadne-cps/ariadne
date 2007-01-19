@@ -199,7 +199,7 @@ DiscreteTransition<R>::write(std::ostream& os) const
 
 
 template<class R> inline
-std::ostream& operator<<(std::ostream& os, DiscreteTransition<R>& dt) {
+std::ostream& operator<<(std::ostream& os, const DiscreteTransition<R>& dt) {
   return dt.write(os);
 }
 

@@ -63,9 +63,6 @@ reach_steps=3
 flow_time=flow_steps*step_size
 reach_time=reach_steps*step_size
 
-# FIXME: The line below is necessary to prevent segmentation faults
-initial_set=Identity().image(initial_set)
-
 print "Integrate initial set for time",flow_time
 flowed_set=lohner.integrate(vdp,initial_set,flow_time)
 print "  ",flowed_set,"\n"

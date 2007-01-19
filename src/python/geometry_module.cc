@@ -42,6 +42,7 @@ template<class R> void export_set();
 
 BOOST_PYTHON_MODULE(geometry)
 {
+  export_set<Ariadne::Real>();
   export_point<Ariadne::Real>();
   export_point_list<Ariadne::Real>();
   export_rectangle<Ariadne::Real>();
@@ -54,5 +55,4 @@ BOOST_PYTHON_MODULE(geometry)
   export_grid_set<Ariadne::Real>();
   export_partition_tree_set<Ariadne::Real>();
   export_hybrid_set<Ariadne::Real>();
-  export_set<Ariadne::Real>();
 }

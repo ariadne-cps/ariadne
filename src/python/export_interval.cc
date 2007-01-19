@@ -25,55 +25,57 @@
 
 #include "numeric/interval.h"
 
+
 #include <boost/python.hpp>
 #include "python/python_utilities.h"
 
 using namespace boost::python;
 using namespace Ariadne;
-using Numeric::Interval;
+using namespace Ariadne::Numeric;
 
-template<class R> inline Interval<R> neginvl(const Interval<R>& i) { return -i; }
-template<class R> inline Interval<R> addinvl(const Interval<R>& i, const Interval<R>& j) { return i+j; }
-template<class R> inline Interval<R> subinvl(const Interval<R>& i, const Interval<R>& j) { return i-j; }
-template<class R> inline Interval<R> mulinvl(const Interval<R>& i, const Interval<R>& j) { return i*j; }
-template<class R> inline Interval<R> divinvl(const Interval<R>& i, const Interval<R>& j) { return i/j; }
-
-template<class R1, class R2>
-inline Interval<R1> addreal(const Interval<R1>& i, const R2& r) { return i+(R1)r; }
-template<class R1, class R2>
-inline Interval<R1> subreal(const Interval<R1>& i, const R2& r) { return i-(R1)r; }
-template<class R1, class R2>
-inline Interval<R1> mulreal(const Interval<R1>& i, const R2& r) { return i*(R1)r; }
-template<class R1, class R2>
-inline Interval<R1> divreal(const Interval<R1>& i, const R2& r) { return i/(R1)r; }
 
 template<class R>
 void export_interval()
 {
+  typedef Interval<R> I;
+
   class_< Interval<R> >(python_name<R>("Interval").c_str())
+    //.def(init<std::string>())
     .def(init<int,int>())
     .def(init<double,double>())
     .def(init<R,R>())
     .def(init<int>())
     .def(init<double>())
     .def(init<R>())
-    .def("__neg__", &neginvl<R>)
-    .def("__add__", &addinvl<R>) 
-    .def("__sub__", &subinvl<R>) 
-    .def("__mul__", &mulinvl<R>) 
-    .def("__div__", &divinvl<R>)  // __div__
-    .def("__add__", &addreal<R,int>) 
-    .def("__sub__", &subreal<R,int>) 
-    .def("__mul__", &mulreal<R,int>) 
-    .def("__div__", &divreal<R,int>)
-    .def("__add__", &addreal<R,float>) 
-    .def("__sub__", &subreal<R,float>) 
-    .def("__mul__", &mulreal<R,float>) 
-    .def("__div__", &divreal<R,float>)
-    .def("__add__", &addreal<R,R>) 
-    .def("__sub__", &subreal<R,R>) 
-    .def("__mul__", &mulreal<R,R>) 
-    .def("__div__", &divreal<R,R>)
+    .def("__neg__", &neg<I,I>)
+    .def("__add__", &add<I,I,int,I,R>)
+    .def("__add__", &add<I,I,double,I,R>)
+    .def("__add__", &add<I,I,R>)
+    .def("__add__", &add<I,I,I>)
+    .def("__radd__", &add<I,I,int>)
+    .def("__radd__", &add<I,I,double>)
+    .def("__radd__", &add<I,I,R>)
+    .def("__sub__", &sub<I,I,int,I,R>)
+    .def("__sub__", &sub<I,I,double,I,R>)
+    .def("__sub__", &sub<I,I,R>)
+    .def("__sub__", &sub<I,I,I>)
+    .def("__rsub__", &rsub<I,I,int,I,R>)
+    .def("__rsub__", &rsub<I,I,double,I,R>)
+    .def("__rsub__", &rsub<I,I,R>)
+    .def("__mul__", &mul<I,I,int,I,R>)
+    .def("__mul__", &mul<I,I,double,I,R>)
+    .def("__mul__", &mul<I,I,R>)
+    .def("__mul__", &mul<I,I,I>)
+    .def("__rmul__", &mul<I,I,int,I,R>)
+    .def("__rmul__", &mul<I,I,double,I,R>)
+    .def("__rmul__", &mul<I,I,R>)
+    .def("__div__", &div<I,I,int>)
+    .def("__div__", &div<I,I,double>)
+    .def("__div__", &div<I,I,R>)
+    .def("__div__", &div<I,I,I>)
+    .def("__rdiv__", &rdiv<I,I,int,I,R>)
+    .def("__rdiv__", &rdiv<I,I,double,I,R>)
+    .def("__rdiv__", &rdiv<I,I,R>)
     .def("lower", &Interval<R>::lower, return_value_policy<copy_const_reference>())
     .def("upper", &Interval<R>::upper, return_value_policy<copy_const_reference>())
     .def(self_ns::str(self))    // __self_ns::str__

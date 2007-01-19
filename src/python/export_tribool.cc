@@ -1,8 +1,7 @@
 /***************************************************************************
- *            python/export_polyhedron.cc
+ *            python/export_tribool.cc
  *
- *  21 October 2005
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
+ *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -22,44 +21,37 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "real_typedef.h"
 
-#include "linear_algebra/vector.h"
-#include "linear_algebra/matrix.h"
-#include "geometry/rectangle.h"
-#include "geometry/rectangle.h"
-#include "geometry/polyhedron.h"
+#include "base/tribool.h"
 
 using namespace Ariadne;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Geometry;
+using namespace Ariadne::Base;
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
-
-template<class R>
-void export_polyhedron() 
+std::ostream& operator<<(std::ostream& os, const tribool& tb)
 {
-  typedef Vector<R> RVector;
-  typedef Matrix<R> RMatrix;
-  typedef Set<R> RSet;
-  typedef Polyhedron<R> RPolyhedron;
-  typedef Rectangle<R> RRectangle;
-  typedef Polytope<R> RPolytope;
+  if(tb==true) { os << "True"; }
+  else if (tb==false) { os << "False"; }
+  else { os << "Indeterminate"; }
+  return os;
+}
 
-  def("disjoint", (tribool(*)(const RPolyhedron&, const RPolyhedron&))(&disjoint));
-  def("subset", (tribool(*)(const RPolyhedron&, const RPolyhedron&))(&subset));
+void export_tribool() {
 
-  //class_< RPolyhedron,bases<RSet> >("Polyhedron",init<int>())
-  class_< RPolyhedron >("Polyhedron",init<int>())
-    .def(init<RMatrix,RVector>())
-    .def(init<RPolyhedron>())
-    .def(init<RRectangle>())
-    .def("dimension", &RPolyhedron::dimension)
+  class_<tribool>("tribool",init<bool>())
+    .def(init<int>())
+    .def(init<tribool>())
+    .def("__eq__", (tribool(*)(tribool,tribool))(&boost::logic::operator==))
+    .def("__eq__", (tribool(*)(tribool,bool))(&boost::logic::operator==))
+    .def("__neq__", (tribool(*)(tribool,tribool))(&boost::logic::operator!=))
+    .def("__neq__", (tribool(*)(tribool,bool))(&boost::logic::operator!=))
+    .def("__and__", (tribool(*)(tribool,tribool))(&boost::logic::operator!=))
+    .def("__and__", (tribool(*)(tribool,bool))(&boost::logic::operator!=))
+    .def("__or__", (tribool(*)(tribool,tribool))(&boost::logic::operator!=))
+    .def("__or__", (tribool(*)(tribool,bool))(&boost::logic::operator!=))
     .def(self_ns::str(self))
   ;
   
 }
-
-template void export_polyhedron<MPFloat>();

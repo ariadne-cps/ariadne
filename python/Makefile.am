@@ -7,6 +7,6 @@ pkgpythondir=${pythondir}/ariadne
 
 pkgpython_DATA = src/hybrid_system.py  src/hybrid_system_evolution.py
 
-check_SCRIPTS = test/test_import.py
+check_SCRIPTS = test/test_import.py test/test_numeric.py test/test_linear_algebra.py
 
 TESTS = $(check_SCRIPTS)

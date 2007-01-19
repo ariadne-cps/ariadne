@@ -42,6 +42,9 @@ void export_hybrid_evolver()
   class_< HybridEvolver<R> >("HybridEvolver",init<Applicator<R>&,Integrator<R>&>())
     .def("lower_reach",&HybridEvolver<R>::lower_reach)
     .def("upper_reach",&HybridEvolver<R>::upper_reach)
+    .def("chainreach",&HybridEvolver<R>::chainreach)
+    .def("discrete_step",&HybridEvolver<R>::discrete_step)
+    .def("continuous_chainreach",&HybridEvolver<R>::continuous_chainreach)
   ;
 }
 

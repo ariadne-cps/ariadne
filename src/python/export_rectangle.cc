@@ -22,7 +22,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "real_typedef.h"
+#include "numeric/float64.h"
+#include "numeric/mpfloat.h"
+#include "numeric/rational.h"
 
 #include "linear_algebra/vector.h"
 
@@ -54,6 +56,7 @@ Rectangle<R> over_approximation_of_minkowski_difference(const Rectangle<R>& r1, 
 template<class R>
 void export_rectangle() 
 {
+  typedef Set<R> RSet;
   typedef Point<R> RPoint;
   typedef Rectangle<R> RRectangle;
   typedef Zonotope<R> RZonotope;
@@ -65,7 +68,9 @@ void export_rectangle()
   def("subset", (tribool(*)(const RRectangle&, const RRectangle&))(&subset));
 
   
-  class_<RRectangle>(python_name<R>("Rectangle").c_str(),init<int>())
+//  class_< RRectangle,bases<RSet> >(python_name<R>("Rectangle").c_str(),init<int>())
+//  class_< RRectangle,bases<RSet> >("Rectangle",init<int>())
+  class_< RRectangle >("Rectangle",init<int>())
     .def(init< Point<R>,Point<R> >())
     .def(init<RRectangle>())
     .def(init< Vector<Interval<R> > >())
@@ -95,4 +100,4 @@ void export_rectangle()
   ;
 }
 
-template void export_rectangle<Real>();
+template void export_rectangle<MPFloat>();

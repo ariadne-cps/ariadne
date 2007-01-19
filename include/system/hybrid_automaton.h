@@ -29,6 +29,7 @@
 #include <list>
 #include <iostream>
 
+#include "../base/stlio.h"
 #include "../system/discrete_mode.h"
 #include "../system/discrete_transition.h"
 
@@ -166,20 +167,38 @@ class HybridAutomaton
     return this->_modes;
   }
   
+  /*! \brief The discrete mode with given id. */
+  inline const DiscreteMode<R>& mode(id_type id) const 
+  {
+    return this->_modes[id];
+  }
+  
   /*! \brief The list of discrete transitions. */
   inline const std::vector< DiscreteTransition<R> >& transitions() const 
   {
     return this->_transitions;
   }
   
+  /*! \brief The discrete transition with given id. */
+  inline const DiscreteTransition<R>& transition(id_type id) const 
+  {
+    return this->_transitions[id];
+  }
   
   /*! \brief Returns the hybrid automaton's name. */
   inline const std::string &name() const{ 
     return this->_name; 
   }
   
-   
+  inline std::ostream& write(std::ostream& os) const {
+    return os << "HybridAutomaton( modes=" << this->_modes << ", transitions=" << this->_transitions << ")"; 
+  }
 };
+
+template<class R> inline 
+std::ostream& operator<<(std::ostream& os, const HybridAutomaton<R>& ha) {
+  return ha.write(os);
+}
 
 /*
 

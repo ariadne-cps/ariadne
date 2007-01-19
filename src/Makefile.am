@@ -53,7 +53,8 @@ EVALUATION_SRC = \
 	evaluation/lohner_integrator.cc \
 	evaluation/hybrid_evolver.cc
 
-OUTPUT_SRC = 
+OUTPUT_SRC = \
+	output/epsfstream.cc
 
 noinst_LTLIBRARIES = libnumeric.la liblinearalgebra.la libcombinatoric.la libgeometry.la libsystem.la libevaluation.la liboutput.la
 

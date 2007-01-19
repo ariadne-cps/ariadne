@@ -57,15 +57,17 @@ template<class R> inline void write_grid_mask_set(epsfstream& eps, const GridMas
 template<class R> inline void write_grid_cell_list_set(epsfstream& eps, const GridCellListSet<R>& s) { eps << s; }
 template<class R> inline void write_partition_tree(epsfstream& eps, const PartitionTree<R>& s) { eps << s; }
 template<class R> inline void write_partition_tree_set(epsfstream& eps, const PartitionTreeSet<R>& s) { eps << s; }
-template<class R> inline void epsfstream_open(epsfstream& eps, const Ariadne::Geometry::Rectangle<R>& bbox) { eps.open("Ariadne",bbox); }
+template<class R> inline void epsfstream_open(epsfstream& eps, const Ariadne::Geometry::Rectangle<R>& bbox, int ix, int iy) { eps.open("Ariadne",bbox,ix,iy); }
+template<class R> inline void epsfstream_open_with_defaults(epsfstream& eps, const Ariadne::Geometry::Rectangle<R>& bbox) { eps.open("Ariadne",bbox); }
 inline void epsfstream_close(epsfstream& eps) { eps.close(); }
 
 void export_postscript_output()
 {
-  class_<epsfstream>("EpsPlot",init<const char*,Rectangle<Real> >())
-    .def(init<const char*,Rectangle<Real>, const unsigned int&, const unsigned int&>())
-    .def(init<const char*,Rectangle<Real>, const unsigned int&, const unsigned int&, const char*, const char*>())
+  class_<epsfstream, boost::noncopyable>("EpsPlot",init<>())
+    .def(init<const char*, Rectangle<Real> >())
+    .def(init<const char*, Rectangle<Real>, unsigned int, unsigned int>())
     .def("open",&epsfstream_open<Real>)
+    .def("open",&epsfstream_open_with_defaults<Real>)
     .def("close",&epsfstream_close)
     .def("set_pen_colour",&epsfstream::set_pen_colour)
     .def("set_fill_colour",&epsfstream::set_fill_colour)
@@ -82,8 +84,8 @@ void export_postscript_output()
     .def("write",&write_parallelotope_list_set<Real>)
     .def("write",&write_zonotope_list_set<Real>)
     .def("write",&write_polytope_list_set<Real>)
-    .def("write",&write_grid_mask_set<Real>)
     .def("write",&write_grid_cell_list_set<Real>)
+    .def("write",&write_grid_mask_set<Real>)
     .def("write",&write_partition_tree<Real>)
     .def("write",&write_partition_tree_set<Real>)
   ;

@@ -24,14 +24,21 @@
 namespace Ariadne {  
   namespace Geometry {
 
- 
-
-    template<class R> template<class Rl> inline 
-    Polytope<R>::Polytope(const Polytope<Rl>& original)
-      : _generators(original.generators()) 
+  
+    template<class R> template<class Rl> inline
+    Polytope<R>::Polytope(const Polyhedron<Rl>& p)
+      : _dimension(p.dimension()), _number_of_vertices(), _data()
+    {   
+      (*this)=Geometry::polytope(Polyhedron<R>(p));
+    }
+    
+    template<class R> template<class Rl> inline
+    Polytope<R>::Polytope(const Polytope<Rl>& p)
+      : _dimension(p.dimension()), _number_of_vertices(p.number_of_vertices()), _data(p.data())
     { 
     }
     
+
     
     
     template<class R> inline

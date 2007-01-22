@@ -1,7 +1,7 @@
 /***************************************************************************
- *            zonotope.cc
+ *            taylor_set.cc
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
+ *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -23,18 +23,14 @@
 
 #include "real_typedef.h"
 
-#include "geometry/zonotope.h"
-#include "geometry/zonotope.code.h"
+#include "geometry/taylor_set.h"
+#include "geometry/taylor_set.code.h"
 
 namespace Ariadne {
   namespace Geometry {
 
-    template class Zonotope<Rational>;
-      
-    template class Zonotope<Real>;
-    template class Zonotope< Interval<Real> >;
+    template class TaylorSet<Real>;
+    template class TaylorSet< Interval<Real> >;
 
-    template class ZonotopeVerticesIterator<Rational>;
-    template class ZonotopeVerticesIterator<Real>;
   }
 }

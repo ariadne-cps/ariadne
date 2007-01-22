@@ -182,7 +182,7 @@ namespace Ariadne {
       //Geometry::Point<I> img_centre=f(c);
       
       Geometry::Point<Interval<R> > img_centre(f(c));
-      LinearAlgebra::Matrix<I> df_on_set = f.jacobian(p.bounding_box());
+      LinearAlgebra::Matrix<I> df_on_set = f.jacobian(over_approximation(p.bounding_box()));
       LinearAlgebra::Matrix<I> img_generators = df_on_set*p.generators();
 
       Geometry::Parallelotope<I> result(img_centre,img_generators);
@@ -198,7 +198,7 @@ namespace Ariadne {
       typedef Interval<R> I;
 
       Geometry::Point<I> img_centre=f(z.centre());
-      LinearAlgebra::Matrix<I> df_on_set = f.jacobian(z.bounding_box());
+      LinearAlgebra::Matrix<I> df_on_set = f.jacobian(over_approximation(z.bounding_box()));
       LinearAlgebra::Matrix<I> img_generators = df_on_set*z.generators();
 
       Geometry::Zonotope<I> result(img_centre,img_generators);

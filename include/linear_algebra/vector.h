@@ -240,8 +240,8 @@ namespace Ariadne {
       const R& operator[] (const size_type& i) const { return this->_begin[i*this->_increment]; }
       R& operator[] (const size_type& i) { return this->_begin[i*this->_increment]; }
      
-      template<class E> VectorSlice<R>& operator=(const VectorExpression< E > v) {
-        const E& e=v(); check_size(*this,e,__PRETTY_FUNCTION__);
+      template<class E> VectorSlice<R>& operator=(const VectorExpression< E >& v) {
+        const E& e=v(); check_equal_sizes(*this,e,__PRETTY_FUNCTION__);
         for(size_type i=0; i!=e.size(); ++i) { this->_begin[i*this->_increment]=e(i); }
         return *this;
       }

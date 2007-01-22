@@ -64,7 +64,11 @@ namespace Ariadne {
     template<class R>
     class Polytope {
       typedef typename Numeric::traits<R>::arithmetic_type F;
-      public:
+     private:    
+      dimension_type _dimension;
+      size_type _number_of_vertices;
+      array<R> _data;
+     public:
        /*! \brief The type of denotable real numbers used to describe the convex hull. */
       typedef R real_type;
       /*! \brief The type of denotable point contained by the convex hull. */
@@ -81,7 +85,7 @@ namespace Ariadne {
        */
       explicit Polytope<R>(dimension_type d, size_type nv, const R* data);
 
-     /*! \brief Construct from a matrix whose columns give the vertices. */
+      /*! \brief Construct from a matrix whose columns give the vertices. */
       explicit Polytope(const LinearAlgebra::Matrix<R>& A);
      
       /*! \brief Construct from a list of vertices. */
@@ -91,22 +95,17 @@ namespace Ariadne {
       explicit Polytope(const Rectangle<R>& rect);
             
       /*! \brief Construct from a polyhedron. */
-      explicit Polytope(const Polyhedron<R>& p);
+      template<class Rl> explicit Polytope(const Polyhedron<Rl>& p);
             
-      /*! \brief Copy constructor. 
-       */
-      template<class OR> inline Polytope(const Polytope<OR>& original);
+      /*! \brief Copy constructor. */
+      template<class Rl> Polytope(const Polytope<Rl>& original);
           
-      /*! \brief Copy assignment operator. 
-       *
-       * \param original is the original polytope.
-       * \return A reference to the current object.
-       */
+      /*! \brief Copy assignment operator. */
       Polytope<R>& operator=(const Polytope<R>& original);
       //@}
  
       /*! \brief The matrix of generators. */
-      const LinearAlgebra::Matrix<R>& generators() const;
+      const LinearAlgebra::Matrix<R> generators() const;
       /*! \brief The number of vertices of the convex set. */
       size_type number_of_vertices() const;
       /*! \brief The vertices of the convex set. */
@@ -118,6 +117,18 @@ namespace Ariadne {
       /*! \brief An iterator to the end of the vertices. */
       vertices_const_iterator vertices_end() const;
       
+      const array<R>& data() const { 
+        return this->_data; 
+      }
+      void resize(dimension_type d, size_type nv) { 
+        this->_dimension=d; 
+        this->_number_of_vertices=nv;
+        this->_data.resize((d+1)*nv);
+      }
+      
+      LinearAlgebra::MatrixSlice<R> _generators_() { 
+        return LinearAlgebra::MatrixSlice<R>(this->_dimension+1,this->_number_of_vertices,this->_data.begin(),1,this->_dimension+1); 
+      }
       //@{
       //! \name Conversion operations
       //@}
@@ -206,8 +217,6 @@ namespace Ariadne {
       /*! \brief Read from an input stream. */
       std::istream& read(std::istream& is);
       //@}
-     private:    
-      LinearAlgebra::Matrix<R> _generators;
     };
    
     template<class R>
@@ -217,25 +226,12 @@ namespace Ariadne {
     std::istream& operator>>(std::istream& os, Polytope<R>& p);
     
     
-    
-    template<class R>
-    class Polytope< Interval<R> >
-    {
-      typedef Interval<R> I;
-     public:
-      template<class Rl> Polytope(const PointList<Rl>& v);
-      template<class Rl> explicit Polytope(const Rectangle<Rl>& r);
-      dimension_type dimension() const;
-      size_type number_of_vertices() const;
-      const PointList< Interval<R> >& vertices() const;
-     private:
-      PointList<I> _vertices;
-    };
 
 
     
     template<class R> 
     tribool equal(const Polytope<R>& A, const Polytope<R>& B);
+
    
     template<class R>  
     tribool disjoint(const Polytope<R>& A, const Polytope<R>& B);
@@ -246,7 +242,6 @@ namespace Ariadne {
     template<class R> 
     tribool disjoint(const Rectangle<R>& A, const Polytope<R>& B);
     
-      
       
     template<class R> 
     tribool subset(const Polytope<R>& A, const Polytope<R>& B);
@@ -260,6 +255,14 @@ namespace Ariadne {
 
     template<class R> 
     Polytope<R> convex_hull(const Polytope<R>& A, const Polytope<R>& B);
+  
+    
+    template<class R> 
+    Polytope<R> polytope(const Rectangle<R>& A);
+  
+    template<class R> 
+    Polytope<typename Numeric::traits<R>::arithmetic_type> 
+    polytope(const Polyhedron<R>& A);
   
 
   }

@@ -29,11 +29,11 @@
 #include <mpfr.h>
 #include <boost/numeric/interval.hpp>
 
-#include "numeric/arithmetic.h"
 #include "numeric/interval.h"
 #include "numeric/float64.h"
 #include "numeric/mpfloat.h"
 #include "numeric/rational.h"
+#include "numeric/arithmetic.h"
 
 #include "test.h"
 
@@ -364,7 +364,7 @@ test_arithmetic()
   // Floor and ceiling
   f2=R(-3.25); f3=R(-2);
   
-  assert(floor(f1)==1); assert(ceil(f1)==2);
+  assert(Ariadne::Numeric::floor(f1)==1); assert(Ariadne::Numeric::ceil(f1)==2);
   assert(floor(f2)==-4); assert(ceil(f2)==-3);
   assert(floor(f3)==-2); assert(ceil(f3)==-2);
   

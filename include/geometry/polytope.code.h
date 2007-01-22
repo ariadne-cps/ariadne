@@ -50,98 +50,94 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template<class R>
-    void
-    Polytope<R>::_instantiate_geometry_operators()
-    {
-      Rectangle<R> r;
-      Polytope<R> p;
-      
-      Geometry::disjoint(r,p);
-      Geometry::disjoint(p,r);
-      Geometry::disjoint(p,p);
-      Geometry::subset(r,p);
-      Geometry::subset(p,r);
-      Geometry::subset(p,p);
-      Geometry::convex_hull(p,p);
-    }
-
+    
 
     template<class R>
     Polytope<R>::Polytope(dimension_type d)
-      : _generators(d+1,0)
+      : _dimension(d), _number_of_vertices(0), _data()
     {
     }
    
     template<class R>
     Polytope<R>::Polytope(dimension_type d, size_type nv, const R* data)
-      : _generators(d+1,nv,data,1,d+1)
+      : _dimension(d), _number_of_vertices(nv), _data(data,data+(d+1)*nv)
     {
     }
    
    
     template<class R>
     Polytope<R>::Polytope(const LinearAlgebra::Matrix<R>& G)
-      : _generators(G.number_of_rows()+1,G.number_of_columns())
+      : _dimension(G.number_of_rows()-1), 
+        _number_of_vertices(G.number_of_columns()), 
+        _data(G.number_of_rows()*G.number_of_columns())
     {
-      for(size_type j=0; j!=G.number_of_columns(); ++j) {
-        for(size_type i=0; i!=G.number_of_rows(); ++i) {
-          this->_generators(i,j)=G(i,j);
-        }
-        this->_generators(this->dimension(),j)=static_cast<R>(1);
-      }
+      dimension_type& d=this->_dimension;
+      size_type& nv=this->_number_of_vertices;
+      R* ptr=this->_data.begin();
+      LinearAlgebra::MatrixSlice<R>(d+1,nv,ptr,1u,d+1)=G;
     }
 
    
     template<class R>
     Polytope<R>::Polytope(const PointList<R>& pts)
-      : _generators(pts.dimension()+1,pts.size())
+      : _dimension(pts.dimension()),
+        _number_of_vertices(pts.size()),
+        _data((pts.dimension()+1)*pts.size())
     {
-      for(size_type j=0; j!=pts.size(); ++j) {
-        for(size_type i=0; i!=pts.dimension(); ++i) {
-          this->_generators(i,j)=pts[j][i];
+      dimension_type& d=this->_dimension;
+      size_type& nv=this->_number_of_vertices;
+      R* ptr=this->_data.begin();
+      LinearAlgebra::MatrixSlice<R> g(d+1,nv,ptr,1,d+1);
+      for(size_type j=0; j!=nv; ++j) {
+        for(size_type i=0; i!=d; ++i) {
+          g(i,j)=pts[j][i];
         }
-        this->_generators(this->dimension(),j)=1;
+        g(d,j)=1;
       }
     }
    
     template<class R>
     Polytope<R>::Polytope(const Rectangle<R>& r)
-      : _generators(r.dimension()+1,1<<r.dimension())
+      : _dimension(r.dimension()),
+        _number_of_vertices(r.number_of_vertices()),
+        _data((r.dimension()+1)*r.number_of_vertices())
     {
-      dimension_type d=r.dimension();
+      dimension_type& d=this->_dimension;
+      size_type& nv=this->_number_of_vertices;
+      R* ptr=this->_data.begin();
+      LinearAlgebra::MatrixSlice<R> g(d+1,nv,ptr,1,d+1);
+
       size_type j=0;
       for(typename Rectangle<R>::vertices_const_iterator v=r.vertices_begin();
           v!=r.vertices_end(); ++v)
       {
         for(size_type i=0; i!=this->dimension(); ++i) {
-          this->_generators(i,j)=(*v)[i];
+          this->_generators_()(i,j)=(*v)[i];
         }
-        this->_generators(d,j)=1;
+        this->_generators_()(d,j)=1;
       }
     }
    
+    
     template<class R>
-    Polytope<R>::Polytope(const Polyhedron<R>& pltp)
-      : _generators()
-    {   
-      throw NotImplemented(__PRETTY_FUNCTION__);
+    Polytope<R>
+    polytope(const Rectangle<R>& r)
+    {
+      return Polytope<R>(r);
     }
     
-    template<>
-    Polytope<Rational>::Polytope(const Polyhedron<Rational>& plhd)
-      : _generators()
+    
+    template<class R>
+    Polytope<typename Numeric::traits<R>::arithmetic_type>
+    polytope(const Polyhedron<R>& plhd)
     {
-      //std::cerr << "Polytope<Rational>::Polytope(const Polyhedron<Rational>&)" << std::endl;
-      typedef Rational R;
-      typedef Rational F;
+      typedef typename Numeric::traits<R>::arithmetic_type F;
       
       dimension_type d=plhd.dimension();
       size_type nc=plhd.number_of_constraints();
       
       const LinearAlgebra::Matrix<R>& A=plhd.A();
       const LinearAlgebra::Vector<R>& b=plhd.b();
-      LinearAlgebra::Matrix<R>& G=this->_generators;
       
       std::vector< LinearAlgebra::Vector<F> > result;
       std::vector< LinearAlgebra::Vector<F> > argument;
@@ -155,24 +151,26 @@ namespace Ariadne {
         tmp(d)=b(i);
         argument.push_back(tmp);
       }
-      ddconv(result,argument);     
+      ddconv(result,argument);
       
       //std::cerr << "argument=" << argument << std::endl;
       //std::cerr << "result=" << result << std::endl;
       
       size_type nv=result.size();
-      G.resize(d+1,nv);
+      array<F> data(nv*(d+1));
       for(size_type j=0; j!=nv; ++j) {
         F s=result[j](d);
         if(s!=F(0)) {
           for(size_type i=0; i!=d; ++i) {
-            G(i,j)=result[j](i)/s;
+            data[j*(d+1)+i]=result[j](i)/s;
           }
-          G(d,j)=1;
+          data[j*(d+1)+d]=1;
         } else {
           throw std::runtime_error("Unbounded polytope");
         }
       }
+      
+      return Polytope<F>(d,nv,data.begin());
       //std::cerr << "G=" << G << std::endl;
     }
     
@@ -182,7 +180,9 @@ namespace Ariadne {
       
     {
       if(this!=&p) { 
-        this->_generators=p._generators;
+        this->_dimension=p._dimension;
+        this->_number_of_vertices=p._number_of_vertices;
+        this->_data=p._data;
       }
       return *this;
     }
@@ -192,14 +192,14 @@ namespace Ariadne {
     dimension_type 
     Polytope<R>::dimension() const
     {
-      return this->_generators.number_of_rows()-1;
+      return this->_dimension;
     }
     
     template<class R>
-    const LinearAlgebra::Matrix<R>&
+    const LinearAlgebra::Matrix<R>
     Polytope<R>::generators() const
     {
-      return this->_generators;
+      return const_cast<Polytope<R>*>(this)->_generators_();
     }
     
     
@@ -207,7 +207,7 @@ namespace Ariadne {
     size_type 
     Polytope<R>::number_of_vertices() const
     {
-      return this->_generators.number_of_columns();
+      return this->_number_of_vertices;
     }
     
     template<class R>
@@ -221,9 +221,10 @@ namespace Ariadne {
     Point<R>
     Polytope<R>::vertex(const size_type& j) const 
     {
+      LinearAlgebra::Matrix<R> g=this->generators();
       Point<R> result(this->dimension());
       for(dimension_type i=0; i!=this->dimension(); ++i) {
-        result[i]=this->_generators(i,j);
+        result[i]=g(i,j);
       }
       return result;
     }
@@ -242,20 +243,41 @@ namespace Ariadne {
       return PolytopeVerticesIterator<R>(*this,this->number_of_vertices());
     }
 
-    template<class R>
+
+    template<class R> inline
     Rectangle<R> 
-    Polytope<R>::bounding_box() const 
+    bounding_box(const Polytope<R>& p)  
     {
       //std::cerr << "Polytope<R>::bounding_box()" << std::endl;
-      vertices_const_iterator pt_iter=this->vertices_begin();
+      typename Polytope<R>::vertices_const_iterator pt_iter=p.vertices_begin();
       Rectangle<R> result(*pt_iter);
       ++pt_iter;
-      for( ; pt_iter!=this->vertices_end(); ++pt_iter) {
+      for( ; pt_iter!=p.vertices_end(); ++pt_iter) {
         result=rectangular_hull(result,Rectangle<R>(*pt_iter));
       }
       return result;
     }
       
+    template<class R> inline
+    Rectangle< Interval<R> > 
+    bounding_box(const Polytope< Interval<R> >& p)  
+    {
+      typename Polytope< Interval<R> >::vertices_const_iterator pt_iter=p.vertices_begin();
+      Rectangle<R> result(*pt_iter);
+      ++pt_iter;
+      for( ; pt_iter!=p.vertices_end(); ++pt_iter) {
+        result=rectangular_hull(result,Rectangle<R>(*pt_iter));
+      }
+      return result;
+    }
+      
+    template<class R>
+    Rectangle<R> 
+    Polytope<R>::bounding_box() const 
+    {
+      return Geometry::bounding_box(*this);
+    }
+
 
     template<class R>
     tribool 
@@ -284,6 +306,14 @@ namespace Ariadne {
 
     template<class R>
     tribool 
+    contains(const Polytope< Interval<R> >& ply, const Point< Interval<R> >& pt)
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+
+
+    template<class R>
+    tribool 
     Polytope<R>::contains(const Point<R>& pt) const
     {
       return Geometry::contains(*this,pt);
@@ -295,6 +325,7 @@ namespace Ariadne {
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
+
 
     template<class R>
     tribool 
@@ -316,7 +347,7 @@ namespace Ariadne {
     {
       //typedef typename Numeric::traits<R>::arithmetic_type F;
       typedef Rational F;
-      return subset(Polytope<F>(A),Polyhedron<F>(B));
+      return subset(Polytope<F>(A),Polyhedron<F>(Polytope<F>(B)));
     }
       
     
@@ -338,9 +369,38 @@ namespace Ariadne {
     tribool 
     subset(const Rectangle<R>& A, const Polytope<R>& B)
     {
-      return Geometry::subset(Rectangle<Rational>(A),Polyhedron<Rational>(B));
+      return Geometry::subset(Rectangle<Rational>(A),Polyhedron<Rational>(Polytope<Rational>(B)));
     }
     
+    
+    template<class R>
+    tribool 
+    disjoint(const Polytope< Interval<R> >& ply, const Rectangle< Interval<R> >& rect) 
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+
+    template<class R>
+    tribool 
+    disjoint(const Polytope< Interval<R> >& ply1, const Polytope< Interval<R> >& ply2) 
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+
+    template<class R>
+    tribool 
+    subset(const Rectangle< Interval<R> >& ply1, const Polytope< Interval<R> >& ply2) 
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+
+    template<class R>
+    tribool 
+    subset(const Polytope< Interval<R> >& ply1, const Polytope< Interval<R> >& ply2) 
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+
     template<class R>
     Polytope<R>
     convex_hull(const Polytope<R>& A, const Polytope<R>& B)
@@ -363,8 +423,30 @@ namespace Ariadne {
     }
     
     
+    template<class R>
+    void
+    Polytope<R>::_instantiate_geometry_operators()
+    {   
+      Rectangle<R> r;
+      Polytope<R> p;
+      Polyhedron<R> h;
+      
+      Geometry::disjoint(r,p);
+      Geometry::disjoint(p,r);
+      Geometry::disjoint(p,p);
+      Geometry::subset(r,p);
+      Geometry::subset(p,r);
+      Geometry::subset(p,p);
+      Geometry::convex_hull(p,p);
+      
+      polytope(r);
+      polytope(h);
+      polyhedron(p);
+      
+    }
+
     
-    
+  /*
     
     template<class R>
     dimension_type 
@@ -389,7 +471,7 @@ namespace Ariadne {
       return this->_vertices;
     }
     
-    
+  */
 
   }
 }

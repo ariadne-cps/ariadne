@@ -111,7 +111,7 @@ namespace Ariadne {
       virtual tribool superset(const Rectangle<R>& r) const { 
         return Geometry::subset(r,static_cast<const Rectangle<R>&>(*this)); }
       virtual tribool subset(const Rectangle<R>& r) const { 
-        return Geometry::subset(static_cast<const Polyhedron<R>&>(*this),r); }
+        return Geometry::subset(static_cast<const Rectangle<R>&>(*this),r); }
       virtual std::ostream& write(std::ostream& os) const {
         return Rectangle<R>::write(os);
       }

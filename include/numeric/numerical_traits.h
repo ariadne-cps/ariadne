@@ -92,6 +92,7 @@ namespace Ariadne {
     template<> struct traits< Float64 > { 
       typedef double approximate_arithmetic_type; 
       typedef Float64 closure_type; 
+      typedef Float64 number_type; 
       typedef Interval<Float64> arithmetic_type; 
       typedef Interval<Float64> interval_type;
     };
@@ -99,6 +100,7 @@ namespace Ariadne {
     template<> struct traits< MPFloat > { 
       typedef mpf_class approximate_arithmetic_type; 
       typedef MPFloat closure_type; 
+      typedef MPFloat number_type; 
       typedef Interval<MPFloat> arithmetic_type; 
       typedef Interval<MPFloat> interval_type; 
     };
@@ -106,6 +108,7 @@ namespace Ariadne {
     template<> struct traits< Rational > { 
       typedef Rational approximate_arithmetic_type; 
       typedef Rational closure_type; 
+      typedef Rational number_type; 
       typedef Rational arithmetic_type; 
       typedef Interval<Rational> interval_type; 
     };
@@ -117,6 +120,7 @@ namespace Ariadne {
 
     template<class R> struct traits< Interval<R> > { 
       typedef Interval<typename traits<R>::closure_type> closure_type; 
+      typedef R number_type; 
       typedef Interval<typename traits<R>::closure_type> arithmetic_type; 
       typedef Interval<R> interval_type; 
     };

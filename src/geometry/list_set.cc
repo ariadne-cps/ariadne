@@ -41,6 +41,8 @@ namespace Ariadne {
 
     // The following are not defined for all types,
     // so we can't instantiate them in ListSet<R,BS>::_instantiate_geometry_operators()
+    template  ListSet<Real,Rectangle>::operator  ListSet<Interval<Real>,Parallelotope>() const;
+    template  ListSet<Real,Rectangle>::operator  ListSet<Interval<Real>,Zonotope>() const;
     template  ListSet<Real,Rectangle>::operator  ListSet<Real,Parallelotope>() const;
     template  ListSet<Real,Rectangle>::operator  ListSet<Real,Zonotope>() const;
     template  ListSet<Real,Parallelotope>::operator  ListSet<Real,Zonotope>() const;

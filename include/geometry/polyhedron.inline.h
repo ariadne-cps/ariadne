@@ -25,82 +25,99 @@ namespace Ariadne {
   namespace Geometry {
 
     template<class R> template<class Rl> inline 
-    Polyhedron<R>::Polyhedron(const Polyhedron<Rl>& original)
-      : _A(original.A()), _b(original.b()) 
+    Polyhedron<R>::Polyhedron(const Polytope<Rl>& p)
+    { 
+      (*this)=polyhedron(p);
+    }
+        
+    template<class R> template<class Rl> inline 
+    Polyhedron<R>::Polyhedron(const Polyhedron<Rl>& p)
+      : _dimension(p.dimension()), 
+        _number_of_constraints(p.number_of_constraints()), 
+        _data(p.data())
     { 
     }
         
+
+
     template<class R> inline 
-    const LinearAlgebra::Matrix<R>& 
+    array<R>& 
+    Polyhedron<R>::data() 
+    { 
+      return this->_data; 
+    }
+    
+    template<class R> inline 
+    const array<R>& 
+    Polyhedron<R>::data() const
+    { 
+      return this->_data; 
+    }
+    
+     
+    template<class R> inline 
+    R* 
+    Polyhedron<R>::begin() 
+    {
+      return this->_data.begin(); 
+    }
+    
+
+    template<class R> inline 
+    const R* 
+    Polyhedron<R>::begin() const 
+    {
+      return this->_data.begin(); 
+    }
+
+
+
+    template<class R> inline 
+    const LinearAlgebra::MatrixSlice<R> 
+    Polyhedron<R>::constraints() const 
+    { 
+      return LinearAlgebra::MatrixSlice<R>(this->_number_of_constraints,
+                                           this->_dimension+1u,
+                                           const_cast<R*>(this->begin()),
+                                           this->_dimension+1u,
+                                           1u);
+    }
+    
+
+    template<class R> inline 
+    LinearAlgebra::Matrix<R> 
     Polyhedron<R>::A() const 
     { 
-      return this->_A; 
+      return -LinearAlgebra::MatrixSlice<R>(this->number_of_constraints(),
+                                            this->dimension(),
+                                            const_cast<R*>(this->begin()),
+                                            this->dimension()+1,1u);
     }
     
     template<class R> inline 
-    const LinearAlgebra::Vector<R>& 
+    LinearAlgebra::Vector<R> 
     Polyhedron<R>::b() const 
     { 
-      return this->_b; 
+      return LinearAlgebra::VectorSlice<R>(this->number_of_constraints(),
+                                           const_cast<R*>(this->begin()+this->dimension()),
+                                           this->dimension()+1u);
     }
     
+
     template<class R> inline 
     size_type 
     Polyhedron<R>::number_of_constraints() const 
     { 
-      return _A.number_of_rows(); 
+      return this->_number_of_constraints;
     }
     
     
-    
-    
-    
-    template<class R> template<class Rl1, class Rl2> inline
-    Polyhedron< Interval<R> >::Polyhedron(const LinearAlgebra::Matrix<Rl1> A, const LinearAlgebra::Vector<Rl2> b) 
-      : _A(A), _b(b) 
-    { 
-    }
+
     
     
     template<class R> inline
-    dimension_type 
-    Polyhedron< Interval<R> >::dimension() const
-    { 
-      return this->_A.number_of_columns(); 
-    }
-    
-    
-    template<class R> inline
-    size_type 
-    Polyhedron< Interval<R> >::number_of_constraints() const
-    { 
-      return this->_A.number_of_rows(); 
-    }
-    
-    
-    template<class R> inline
-    const LinearAlgebra::Matrix< Interval<R> >& 
-    Polyhedron< Interval<R> >::A() const 
-    { 
-      return this->_A; 
-    }
-    
-    
-    template<class R> inline
-    const LinearAlgebra::Vector< Interval<R> >& 
-    Polyhedron< Interval<R> >::b() const 
-    { 
-      return this->_b; 
-    }
-    
-    
-    
-    
-    
-    
-    template<class R> inline
-    Constraint<R>::Constraint(const dimension_type d, const R* a, const R& b)
-      : _d(d), _a(a), _b(&b) 
+    Constraint<R>::Constraint(const dimension_type d, const R* a)
+      : _d(d), _a(a) 
     { 
     }
     
@@ -113,7 +130,8 @@ namespace Ariadne {
       for(dimension_type i=0; i!=pt.dimension(); ++i) {
         prod+=this->_a[i]*pt[i]; 
       }
-      return prod<=*this->_b;
+      prod+=this->_a[pt.dimension()]; 
+      return prod>=0;
     }
     
     
@@ -132,11 +150,11 @@ namespace Ariadne {
     {
      public:
       PolyhedronConstraintsIterator(const Polyhedron<R>& ply, const size_type& n)
-        : _c(ply.dimension(),ply.A().begin()+n*ply.dimension(),ply.b().begin()[n]) { }
+        : _c(ply.dimension(),ply.constraints().begin()+n*(ply.dimension()+1)) { }
       bool equal(const PolyhedronConstraintsIterator<R>& other) const { 
         return this->_c._a==other._c._a; }
       const Constraint<R>& dereference() const { return _c; }
-      void increment() { _c._a+=_c._d; _c._b+=1; }
+      void increment() { _c._a+=_c._d+1u; ; }
      private:
       Constraint<R> _c;
     };
@@ -166,7 +184,6 @@ namespace Ariadne {
       return p.read(os); 
     }
    
-
 
 
   }

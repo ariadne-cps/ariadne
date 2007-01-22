@@ -34,7 +34,7 @@
 
 
 namespace Ariadne { namespace Base {
-template<class T, size_t N=0> class array;
+template<class T, unsigned short int N=0> class array;
 template<class T> class sequence;
 }}
 

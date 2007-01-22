@@ -84,15 +84,24 @@ test_zonotope()
   cout << "z3=" << z3 << endl;
   Zonotope<R> z4=Zonotope<R>(Point<R>("(0,0)"),Matrix<R>("[1,0,1;0,1,1]"));
   cout << "z4=" << z4 << endl;
+  cout << endl;
   
+  cout << "z2.dimension()=" << z2.dimension() << endl;
+  cout << "z2.number_of_generators()=" << z2.number_of_generators() << endl;
+  cout << "z2.centre()=" << z2.centre() << endl;
+  for(size_type i=0; i!=z2.number_of_generators(); ++i) {
+    cout << "z2.generator(" << i << ")=" << z2.generator(i) << endl;
+  }
+  cout << "z2.vertices()=" << z2.vertices() << endl;
+  cout << endl;
+
   typename Zonotope<R>::vertices_const_iterator vend=z2.vertices_end();
   typename Zonotope<R>::vertices_const_iterator vi=z2.vertices_begin();
   while(vi!=vend) {
-    cout << *vi << endl;
-    cout << vi << endl;
+    cout << vi << flush;
+    cout << "  " << *vi << endl;
     ++vi;
   }
-  cout << "z2.vertices()=" << z2.vertices() << endl;
   cout << endl;
   
   // Minkowski sum
@@ -153,7 +162,7 @@ test_zonotope()
   eps.set_fill_colour("green");
   eps << z3;
   eps.set_fill_colour("yellow");
-  eps << z3.operator Polyhedron<Rational>();
+  eps << polyhedron(Zonotope<Rational>(z3));
   eps.set_fill_colour("blue");
   eps << uaz3;
   eps.close();

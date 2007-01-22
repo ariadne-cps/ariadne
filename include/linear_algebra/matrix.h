@@ -1,4 +1,4 @@
- /***************************************************************************
+/***************************************************************************
  *            matrix.h
  *
  *  Mon May  3 12:31:15 2004
@@ -34,6 +34,7 @@
 #include "../declarations.h"
 #include "../exceptions.h"
 #include "../base/array.h"
+#include "../numeric/numerical_traits.h"
 #include "../numeric/integer.h"
 #include "../numeric/interval.h"
 
@@ -51,6 +52,7 @@ namespace Ariadne {
       const E& operator() () const { return static_cast<const E&>(*this); }
     };
     
+
 
     /* Proxy for a matrix row in operator[] */
     template<class Mx>
@@ -85,6 +87,9 @@ namespace Ariadne {
       explicit Matrix() : _nr(0), _nc(0), _array() { }
       /*! \brief Construct an \a r by \a c matrix, all of whose entries are zero. */
       explicit Matrix(const size_type& r, const size_type& c) : _nr(r), _nc(c), _array(r*c,static_cast<R>(0)) { }
+      /*! \brief Construct an \a r by \a c matrix from the array beginning at \a ptr. */
+      explicit Matrix(const size_type& nr, const size_type& nc,const R* ptr)
+        : _nr(nr), _nc(nc), _array(ptr,ptr+nr*nc) { }
       /*! \brief Construct an \a r by \a c matrix from the array beginning at \a ptr, 
        *  incrementing the input row elements by \a ri and input columns by \a ci. */
       explicit Matrix(const size_type& nr, const size_type& nc, 
@@ -102,9 +107,10 @@ namespace Ariadne {
       template<class E> Matrix(const MatrixExpression<E>& A)
         : _nr(A().number_of_rows()), _nc(A().number_of_columns()), _array(_nc*_nr)
       { 
+        const E& mx=A();
         for(size_type i=0; i!=_nr; ++i) { 
           for(size_type j=0; j!=_nc; ++j) { 
-            (*this)(i,j)=A()(i,j);
+            (*this)(i,j)=mx(i,j);
           } 
         } 
       }
@@ -148,7 +154,9 @@ namespace Ariadne {
       size_type number_of_rows() const { return this->_nr; }
       /*! \brief The number of columns of the matrix. */
       size_type number_of_columns() const { return this->_nc; }
-      
+      /*! \brief A two-element array giving the number of rows and number of columns of the matrix. */
+      array<size_type,2u> size() const { return array<size_type,2u>(this->_nr,this->_nc); }
+
       /*! \brief A constant reference to \a i,\a j th element. */
       const R& operator() (const size_type& i, const size_type& j) const { 
         return this->_array[i*this->_nc+j]; }
@@ -264,6 +272,7 @@ namespace Ariadne {
     template<class R>
     class MatrixSlice : public MatrixExpression< MatrixSlice<R> >
     {
+      typedef typename Numeric::traits<R>::arithmetic_type F;
      public:
       typedef R value_type;
 
@@ -277,6 +286,7 @@ namespace Ariadne {
 
       size_type number_of_rows() const { return this->_number_of_rows; }
       size_type number_of_columns() const { return this->_number_of_columns; }
+      array<size_type,2u> size() const { return array<size_type,2>(this->_nr,this->_nc); }
       const R* begin() const { return this->_begin; }
       R* begin() { return this->_begin; }
       size_type row_increment() const { return this->_row_increment; }
@@ -287,8 +297,21 @@ namespace Ariadne {
       R& operator() (const size_type& i, const size_type& j) { 
         return this->_begin[i*this->_row_increment+j*this->_column_increment]; }
      
+      VectorSlice<const R> column(const size_type& j) const {
+        return VectorSlice<const R>(this->number_of_rows(),this->begin()+j*this->column_increment(),this->row_increment()); }
         
-      template<class E> MatrixSlice<R>& operator=(const MatrixExpression< E > m) {
+      F norm() const { return Matrix<R>(*this).norm(); }
+      Matrix<F> inverse() const { return Matrix<R>(*this).inverse(); }
+      F determinant() const { return Matrix<R>(*this).determinant(); }
+
+      MatrixSlice<R>& operator=(const R& x) {
+        for(size_type i=0; i!=this->number_of_rows(); ++i) { 
+          for(size_type j=0; j!=this->number_of_columns(); ++j) { 
+            (*this)(i,j)=x; } }
+        return *this;
+      }
+
+      template<class E> MatrixSlice<R>& operator=(const MatrixExpression< E >& m) {
         const E& e=m(); 
         if(!(this->number_of_rows()==e.number_of_rows() && this->number_of_columns()==e.number_of_columns())) {
           throw IncompatibleSizes(__PRETTY_FUNCTION__); }
@@ -297,6 +320,8 @@ namespace Ariadne {
             (*this)(i,j)=e(i,j); } }
         return *this;
       }
+
+      std::ostream& write(std::ostream& os) const { return Matrix<R>(*this).write(os); }
      private:
       size_type _number_of_rows;
       size_type _number_of_columns;
@@ -387,6 +412,19 @@ namespace Ariadne {
     template<class R> inline
     Matrix<R>
     operator-(const Matrix<R>& A) 
+    {
+      Matrix<R> result(A.number_of_rows(),A.number_of_columns());
+      for(size_type i=0; i!=A.number_of_rows(); ++i) {
+        for(size_type j=0; j!=A.number_of_columns(); ++j) {
+          result(i,j)=-A(i,j);
+        }
+      }
+      return result;
+    }
+ 
+    template<class R> inline
+    Matrix<R>
+    operator-(const MatrixSlice<R>& A) 
     {
       Matrix<R> result(A.number_of_rows(),A.number_of_columns());
       for(size_type i=0; i!=A.number_of_rows(); ++i) {
@@ -495,8 +533,68 @@ namespace Ariadne {
       return result;
     }
     
+    template<class R1, class R2> inline
+    Matrix<typename Numeric::traits<R1,R2>::arithmetic_type>
+    operator*(const Matrix<R1>& A1, const MatrixSlice<R2>& A2) 
+    {
+      return A1*Matrix<R2>(A2);
+    }
+    
+    template<class R1, class R2> inline
+    Matrix<typename Numeric::traits<R1,R2>::arithmetic_type>
+    operator*(const MatrixSlice<R1>& A1, const Matrix<R2>& A2) 
+    {
+      return Matrix<R1>(A1)*A2;
+    }
+    
+    template<class R1, class R2> inline
+    Matrix<typename Numeric::traits<R1,R2>::arithmetic_type>
+    operator*(const MatrixSlice<R1>& A1, const MatrixSlice<R2>& A2) 
+    {
+      return Matrix<R1>(A1)*Matrix<R2>(A2);
+    }
+    
     
  
+    template<class R1, class R2> inline
+    Matrix<typename Numeric::traits<R1,R2>::arithmetic_type>
+    operator*(const R1& s, const MatrixSlice<R2>& A) 
+    {
+      typedef typename Numeric::traits<R1,R2>::arithmetic_type R3;
+      Matrix<R3> result(A.number_of_rows(),A.number_of_columns());
+      for(size_type i=0; i!=A.number_of_rows(); ++i) {
+        for(size_type j=0; j!=A.number_of_columns(); ++j) {
+          result(i,j)=s*A(i,j);
+        }
+      }
+      return result;
+    }
+    
+    template<class R1, class R2> inline
+    Matrix<typename Numeric::traits<R1,R2>::arithmetic_type>
+    operator*(const MatrixSlice<R1>& A, const R2& s) 
+    {
+      return s*A;
+    }
+    
+    template<class R1, class R2> inline
+    Vector<typename Numeric::traits<R1,R2>::arithmetic_type>
+    operator*(const MatrixSlice<R1>& A, const Vector<R2>& v) 
+    {
+      typedef typename Numeric::traits<R1,R2>::arithmetic_type R3;
+      Vector<R3> result(A.number_of_rows());
+      for(size_type i=0; i!=A.number_of_rows(); ++i) {
+        for(size_type j=0; j!=A.number_of_columns(); ++j) {
+          result(i)+=A(i,j)*v(j);
+        }
+      }
+      return result;
+    }
+    
+
+
+
+
     template<class R>
     inline
     Vector<typename Numeric::traits<R>::arithmetic_type>
@@ -515,6 +613,14 @@ namespace Ariadne {
     inline
     typename Numeric::traits<R>::arithmetic_type
     norm(const Matrix<R>& A) 
+    {
+      return A.norm();
+    }
+    
+    template<class R>
+    inline
+    typename Numeric::traits<R>::arithmetic_type
+    norm(const MatrixSlice<R>& A) 
     {
       return A.norm();
     }
@@ -550,6 +656,13 @@ namespace Ariadne {
       return Matrix<R>::concatenate_columns(A1,A2);
     }
     
+    template<class R>
+    inline
+    Matrix<R>
+    concatenate_columns(const MatrixSlice<R>& A1, const MatrixSlice<R>& A2) {
+      return concatenate_columns(Matrix<R>(A1),Matrix<R>(A2));
+    }
+    
     
     /*! \brief A matrix \f$A\f$ such that for all zonotopes \f$Z\f$, \f$AZ\subset \overline{\underline{A}}\f$. */
     template<class R>
@@ -576,6 +689,12 @@ namespace Ariadne {
       return excess*Amid;
     }
 
+
+    template<class R>
+    std::ostream&
+    operator<<(std::ostream& os, const MatrixSlice<R>& A) {
+      return A.write(os);
+    }
 
     template<class R>
     std::ostream&

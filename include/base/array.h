@@ -48,7 +48,7 @@ namespace Ariadne {
     
     
     // Need to give default size in first declaration.
-    template<class T, size_t N> class array;
+    template<class T, unsigned short int N> class array;
     
     
     
@@ -85,6 +85,8 @@ namespace Ariadne {
       template<class ForwardIterator> array(ForwardIterator first, ForwardIterator last)
         : _size(std::distance(first,last)), _ptr(new value_type[_size]) { fill(first); }
       
+      /*! \brief Conversion constructor. */
+      template<class T1> array(const array<T1>& a) : _size(a.size()), _ptr(new value_type[_size]) { fill(a.begin()); }
       /*! \brief Copy constructor. */
       array(const array<T>& a) : _size(a.size()), _ptr(new value_type[_size]) { fill(a.begin()); }
       /*! \brief Copy assignment. */ 
@@ -212,7 +214,7 @@ namespace Ariadne {
      * on the stack. Arrays provide checked access using at and unchecked access using operator[].
      */
     // FIXME: Exception safety in constructors
-    template<class T, size_t N> class array {
+    template<class T, unsigned short int N> class array {
      public:
       typedef T value_type;
       typedef value_type& reference;
@@ -221,7 +223,7 @@ namespace Ariadne {
       typedef const value_type* const_pointer;
       typedef pointer iterator;
       typedef const_pointer const_iterator;
-      typedef size_t size_type;
+      typedef unsigned short int size_type;
       typedef ptrdiff_t difference_type;
       
       /*! \brief Destructor */
@@ -229,10 +231,10 @@ namespace Ariadne {
       /*! \brief Default constructor. Constructs an empty array. */
       array() : _size(0) { }
       /*! \brief Constructs an array of size \a n with uninitialised elements. \a n must be less than or equal to \a N. */
-      explicit array(const size_type n) : _size(n) { 
+      explicit array(const unsigned short int n) : _size(n) { 
         if(n>N) { throw std::length_error("array<T,N>::array(size_type)"); } }
       /*! \brief Constructs an array of size \a n with elements initialised to \a x. \a n must be less than or equal to \a N. */
-      array(const size_type n, const value_type& val) : _size(n) { 
+      array(const unsigned short int n, const value_type& val) : _size(n) { 
         if(n>N) { throw std::length_error("array<T,N>::array(size_type)"); } fill(val); }
       /*! \brief Constructs an array from the range \a first to \a last. */
       template<class In> array(In first, In last) : _size(distance(first,last)) { 
@@ -316,7 +318,7 @@ namespace Ariadne {
       value_type _ptr[N];
     };
     
-    template<class T, size_t N> template<class InputIterator> inline
+    template<class T, unsigned short int N> template<class InputIterator> inline
     void array<T,N>::_assign_iter(InputIterator iter)
     { 
       if(_size==1) { 

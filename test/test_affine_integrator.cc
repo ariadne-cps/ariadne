@@ -81,7 +81,7 @@ test_affine_integrator()
   AffineVectorField<R> avf(A,b);
   Rectangle<R> bb("[-4,4]x[-4,4]");
   Rectangle<R> r("[-3.125,-2.875]x[-0.125,0.125]");
-  Zonotope<R> z=r;
+  Zonotope<R> z; z=r;
   
   Zonotope<R> iz1=affine.integration_step(avf,z,h);
   Zonotope<R> iz2=affine.integration_step(avf,iz1,h);

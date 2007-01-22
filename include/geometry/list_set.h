@@ -121,9 +121,9 @@ namespace Ariadne {
       /*! \brief Copy assignment. */
       const ListSet<R,BS>& operator=(const ListSet<R,BS>& A);
 
-      /*!\brief Convert to a list set BS2<R>. */
-      template<template<class> class BS2> 
-      operator ListSet<R,BS2> () const;
+      /*!\brief Convert to a list set BSt<Rl>. */
+      template<class Rl, template<class> class BSt> 
+      operator ListSet<Rl,BSt> () const;
       
       /*!\brief Checks if a denotable set includes a point. */
       tribool contains(const Point<R>& p) const;

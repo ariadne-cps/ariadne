@@ -84,7 +84,7 @@ namespace Ariadne {
       explicit Parallelotope(const Point<R>& c, const LinearAlgebra::Matrix<R>& m);
        
       /*! \brief Construct from a rectangle. */
-      explicit Parallelotope(const Rectangle<R>& r);
+      template<class Rl> explicit Parallelotope(const Rectangle<Rl>& r);
       
       /*! \brief Construct from a string literal. */
       explicit Parallelotope(const std::string& s);
@@ -97,7 +97,7 @@ namespace Ariadne {
       Parallelotope(const Parallelotope<R>& original);
 
       /*! \brief Assign from a rectangle. */
-      Parallelotope<R>& operator=(const Rectangle<R>& r);
+      template<class Rl> Parallelotope<R>& operator=(const Rectangle<Rl>& r);
       //@}
       
       

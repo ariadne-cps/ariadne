@@ -87,6 +87,8 @@ namespace Ariadne {
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
       typedef typename Numeric::traits<R>::interval_type I;
+     private:
+      array<R> _data;
      public:
       /*! \brief The type of denotable real number used for the corners. */
       typedef R real_type;
@@ -159,8 +161,11 @@ namespace Ariadne {
 
       //@{
       //! \name Data access
-      /*! \brief Returns the projection onto the \a i th coordinate. */
-      Interval<R>& operator[] (dimension_type i);
+      /*! \brief Returns a reference to the array of data. */
+      array<R>& data();
+     
+      /*! \brief Returns a constant reference to the array of data. */
+      const array<R>& data() const;
      
       /*! \brief The lower bound of the \a i th coordinate */
       const R& lower_bound(dimension_type i) const;
@@ -174,6 +179,9 @@ namespace Ariadne {
       /*! \brief A reference to the upper bound of the \a i th coordinate */
       R& upper_bound(dimension_type i);
       
+      /*! \brief Returns the projection onto the \a i th coordinate. */
+      Interval<R>& operator[] (dimension_type i);
+     
       /*! \brief The projection onto the \a i th coordinate. */
       const Interval<R>& operator[] (dimension_type i) const;
       
@@ -315,8 +323,6 @@ namespace Ariadne {
       /*! \brief Read from an input stream. */
       std::istream& read(std::istream& is);
       //@}
-     private:
-      array<R> _bounds;
     };
     
     
@@ -330,19 +336,29 @@ namespace Ariadne {
      public:
       typedef Interval<R> real_type;
       typedef Point< Interval<R> > state_type;
+      typedef RectangleVerticesIterator< Interval<R> > vertices_const_iterator;
 
       explicit Rectangle(dimension_type d=0);
+      explicit Rectangle(const Point<I>& pt);
       template<class E> Rectangle(const RectangleExpression<E>& e);
       template<class E> Rectangle< Interval<R> >& operator=(const RectangleExpression<E>& e);
       dimension_type dimension() const;
+      Point<I> centre() const;
+      I radius() const;
+      tribool contains(const Point<I>& pt) const;
       const Interval<R>& lower_bound(const dimension_type& i) const;
       const Interval<R>& upper_bound(const dimension_type& i) const;
       void set_lower_bound(const dimension_type& i, const Interval<R>& x);
       void set_upper_bound(const dimension_type& i, const Interval<R>& x);
+      Point< Interval<R> > lower_corner() const;
+      Point< Interval<R> > upper_corner() const;
+      size_type number_of_vertices() const;
+      RectangleVerticesIterator< Interval<R> > vertices_begin() const;
+      RectangleVerticesIterator< Interval<R> > vertices_end() const;
      private:
       template<class RE> void assign(const RE& re);
      private:
-      array<I> _bounds;
+      array<I> _data;
     };
     
     

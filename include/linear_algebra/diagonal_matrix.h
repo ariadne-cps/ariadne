@@ -56,7 +56,9 @@ namespace Ariadne {
       /*! \brief Construct an \a r by \a c matrix from the array beginning at \a ptr, 
        *  incrementing the input row elements by \a ri and input columns by \a ci. */
       DiagonalMatrix(const size_type& n, const R* ptr, const size_type& i);
-     
+      /*! \brief Construct an \a r by \a c matrix from a vector expression. */
+      template<class E> DiagonalMatrix(const VectorExpression<E>& ve);
+
       /*! \brief The number of rows of the matrix. */
       size_type number_of_rows() const;
       /*! \brief The number of columns of the matrix. */

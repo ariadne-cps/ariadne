@@ -591,7 +591,7 @@ namespace Ariadne {
                                        time_type& h) const 
     {
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      return this->reachability_step(vf,is.bounding_box(),h);
+      return Geometry::Zonotope<R>(this->reachability_step(vf,is.bounding_box(),h));
     }
 
     template<class R>
@@ -701,6 +701,9 @@ namespace Ariadne {
       
       Geometry::GridMaskSet<R> result(bounding_set.grid(),bounding_set.block());
       
+      Geometry::Rectangle<R> tmp_rectangle;
+      Geometry::Parallelotope<R> tmp_parallelotope;
+      
       time_type t=time;
       time_type h=step_size;
       
@@ -711,7 +714,7 @@ namespace Ariadne {
       ListSet<R,Parallelotope> start_set;
       ListSet<R,Parallelotope> finish_set;
       for(typename GridMaskSet<R>::const_iterator iter=initial_set.begin(); iter!=initial_set.end(); ++iter) {
-        start_set.adjoin(Parallelotope<R>(*iter));
+        start_set.adjoin(Parallelotope<R>(Rectangle<R>(*iter)));
       }
       
       while(t!=0) {
@@ -741,7 +744,9 @@ namespace Ariadne {
           }
         }
         for(typename GridMaskSet<R>::const_iterator iter=mask_set.begin(); iter!=mask_set.end(); ++iter) {
-          start_set.adjoin(Geometry::Parallelotope<R>(*iter));
+          tmp_rectangle=*iter;
+          tmp_parallelotope=tmp_rectangle;
+          start_set.adjoin(tmp_parallelotope);
         }
         finish_set.clear();
         t-=h;
@@ -828,7 +833,7 @@ namespace Ariadne {
       for(gms_const_iterator iter=stored.begin(); iter!=stored.end(); ++iter) {
         //Geometry::Rectangle<R> r=*iter;
         //Geometry::Zonotope<R> z(r);
-        input_list.adjoin(Geometry::Zonotope<R>(*iter));
+        input_list.adjoin(Geometry::Zonotope<R>(Geometry::Rectangle<R>(*iter)));
       }
       output_list=this->reach(vector_field,input_list,time_step);
       for(zls_const_iterator iter=output_list.begin(); iter!=output_list.end(); ++iter) {

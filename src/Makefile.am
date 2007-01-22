@@ -32,11 +32,12 @@ GEOMETRY_SRC = \
 	geometry/rectangle.cc \
 	geometry/polytope.cc geometry/polyhedron.cc \
 	geometry/zonotope.cc geometry/parallelotope.cc geometry/simplex.cc \
-	geometry/ppl_polyhedron.cc \
 	geometry/ellipsoid.cc geometry/sphere.cc \
+	geometry/taylor_set.cc \
 	geometry/list_set.cc \
 	geometry/grid.cc geometry/grid_set.cc \
-	geometry/partition_tree_set.cc 
+	geometry/partition_tree_set.cc \
+	geometry/ppl_polyhedron.cc
 
 SYSTEM_SRC = \
 	system/map.cc system/affine_map.cc system/polynomial_map.cc \

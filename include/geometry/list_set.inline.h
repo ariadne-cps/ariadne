@@ -129,13 +129,15 @@ namespace Ariadne {
       return *this;
     }
 
-    template<class R, template<class> class BS> template<template<class> class BS2> inline
-    ListSet<R,BS>::operator ListSet<R,BS2> () const 
+    template<class R, template<class> class BS> 
+    template<class Rl, template<class> class BSt> 
+    inline
+    ListSet<R,BS>::operator ListSet<Rl,BSt> () const 
     {
-      ListSet<R,BS2> result(this->dimension());
-      BS2<R> bs(this->dimension());
+      ListSet<Rl,BSt> result(this->dimension());
+      BSt<Rl> bs(this->dimension());
       for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-        bs=BS2<R>(*iter);
+        bs=BSt<Rl>(*iter);
         result.push_back(bs);
       }
       return result;

@@ -185,7 +185,7 @@ namespace Ariadne {
         return result;
       }
       template<class R> Polygon2d operator() (const Geometry::Zonotope<R>& z) const {
-        return this->operator()(z.vertices());
+        return this->operator()(Geometry::Zonotope<Rational>(z).vertices());
       }
       template<class R> Polygon2d operator() (const Geometry::Polytope<R>& p) const {
         return this->operator()(p.vertices());
@@ -344,7 +344,7 @@ namespace Ariadne {
     epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::Polyhedron<R>& p)
     {
-      return draw(eps,eps.projection_map()(p.vertices()));      
+      return draw(eps,eps.projection_map()(Geometry::Polytope<Rational>(Geometry::Polyhedron<Rational>(p))));      
     }
     
     template<class R, template<class> class BS> inline

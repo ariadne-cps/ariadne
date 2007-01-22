@@ -59,9 +59,15 @@ namespace Ariadne {
     class Polyhedron {
       typedef typename Numeric::traits<R>::arithmetic_type F;
       typedef typename Numeric::traits<R>::interval_type I;
+     private:
+      dimension_type _dimension;
+      size_type _number_of_constraints;
+      array<R> _data;
+     private:
+      LinearAlgebra::MatrixSlice<R> _constraints();
      public:
       /*! \brief The type of denotable real numbers used to describe the polyhedron. */
-      typedef Rational real_type;
+      typedef R real_type;
       /*! \brief The type of denotable point contained by the polyhedron. */
       typedef Point<R> state_type;
       /*! \brief An iterator over the constraints of the Polyhedron. */
@@ -83,46 +89,45 @@ namespace Ariadne {
        */
       explicit Polyhedron<R>(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b);
             
-      /*! \brief Construct from a list of vertices. */
-      explicit Polyhedron<R>(const PointList<R>& vertices);
+      /*! \brief Construct from a list of points. */
+      explicit Polyhedron<R>(const PointList<R>& pts);
             
       /*! \brief Convert from a rectangle. */
-      Polyhedron<R>(const Rectangle<R>& rect);
+      explicit Polyhedron<R>(const Rectangle<R>& rect);
             
       /*! \brief Convert from a polytope. */
-      Polyhedron<R>(const Polytope<R>& plyt);
+      template<class Rl> explicit Polyhedron<R>(const Polytope<Rl>& plyt);
             
-      /*! \brief Copy constructor. 
-       */
-      template<class Rl> inline Polyhedron(const Polyhedron<Rl>& original);
+      /*! \brief Copy constructor. */
+      template<class Rl> Polyhedron(const Polyhedron<Rl>& original);
           
-      /*! \brief Copy constructor. 
-       */
-      Polyhedron<R>(const Polyhedron<R>& original);
-          
-      /*! \brief Copy assignment operator. 
-       *
-       * \param original is the original polyhedron.
-       * \return A reference to the current object.
-       */
+      /*! \brief Copy assignment operator. */
       Polyhedron<R>& operator=(const Polyhedron<R>& original);
       //@}
       
       
       //@{
       //! \name Data access
+      /*! \brief The matrix of constraints \f$C\f$ in the inequalities \f$C\left(\begin{array}{c}x\\1\end{array}\right)\geq 0\f$. */
+      const LinearAlgebra::MatrixSlice<R> constraints() const;
       /*! \brief The matrix \f$A\f$ in the inequalities \f$Ax\leq b\f$. */
-      const LinearAlgebra::Matrix<R>& A() const;
+      LinearAlgebra::Matrix<R> A() const;
       /*! \brief The vector \f$b\f$ in the inequalities \f$Ax\leq b\f$. */
-      const LinearAlgebra::Vector<R>& b() const;
+      LinearAlgebra::Vector<R> b() const;
       /*! \brief An iterator to the beginning of the constraints. */
       size_type number_of_constraints() const;
       /*! \brief An iterator to the beginning of the constraints. */
       constraints_const_iterator constraints_begin() const;
       /*! \brief An iterator to the end of the constraints. */
       constraints_const_iterator constraints_end() const;
-      
-      
+      /*! A reference to the array of real data. */
+      array<R>& data();
+      /*! A constant reference to the array of real data. */
+      const array<R>& data() const;
+      /*! A pointer to the beginning of the array of real data. */
+      R* begin();
+      /*! A constant pointer to the beginning of the array of real data. */
+      const R* begin() const;
       //@}
 
 
@@ -132,9 +137,6 @@ namespace Ariadne {
        */
       dimension_type dimension() const;
       
-      /*! \brief The vertices of the polyhedron. */
-      PointList<Rational>  vertices() const; 
-           
       /*! \brief Checks for emptyness.
        */
       tribool empty() const;
@@ -166,14 +168,26 @@ namespace Ariadne {
       //! \name Geometric binary predicates
       /*! \brief Tests equality. */
       friend tribool Geometry::equal<>(const Polyhedron<R>& A, 
-                                    const Polyhedron<R>& B);
+                                       const Polyhedron<R>& B);
       /*! \brief Tests disjointness. */
       friend tribool Geometry::disjoint<>(const Polyhedron<R>& A, 
-                                       const Polyhedron<R>& B);
+                                          const Polyhedron<R>& B);
+        
+      /*! \brief Tests disjointness. */
+      friend tribool Geometry::disjoint<>(const Polyhedron<R>& A, 
+                                          const Rectangle<R>& B);
         
       /*! \brief Tests inclusion of \a A in \a B. */
+      friend tribool Geometry::subset<>(const Rectangle<R>& A, 
+                                        const Polyhedron<R>& B);
+    
+      /*! \brief Tests inclusion of \a A in \a B. */
       friend tribool Geometry::subset<>(const Polyhedron<R>& A, 
-                                     const Polyhedron<R>& B);
+                                        const Polyhedron<R>& B);
+    
+      /*! \brief Tests inclusion of \a A in \a B. */
+      friend tribool Geometry::subset<>(const Polyhedron<R>& A, 
+                                        const Rectangle<R>& B);
     
       //@}
       
@@ -199,42 +213,13 @@ namespace Ariadne {
       //@}
      private:
       static void _instantiate_geometry_operators();
-     private:
-       LinearAlgebra::Matrix<R> _A;
-       LinearAlgebra::Vector<R> _b;
     };
     
     
     
-    template<class R>
-    class Polyhedron< Interval<R> >
-    {
-      typedef Interval<R> I;
-     public:
-      template<class Rl1, class Rl2>
-      Polyhedron(const LinearAlgebra::Matrix<Rl1> A, const LinearAlgebra::Vector<Rl2> b);
-      
-      template<class Rl>
-      Polyhedron(const PointList<Rl> pts);
-        
-      dimension_type dimension() const;
-      size_type number_of_constraints() const;
-      
-      const LinearAlgebra::Matrix<I>& A() const;
-      const LinearAlgebra::Vector<I>& b() const;
-      
-      tribool contains(const Point<R>& pt) const;
-      tribool contains(const Point<I>& pt) const;
-      
-      static tribool subset(const Polytope<I>& pltp, const Polyhedron<I>& plhd);
-     private:
-      LinearAlgebra::Matrix<I> _A;
-      LinearAlgebra::Vector<I> _b;
-    };
+ 
     
-    
-    
-    /*! \brief A linear constraint. */
+    /*! \brief A linear inequality constraint. */
     template<class R>
     class Constraint
     {
@@ -246,15 +231,15 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;
      private:
-     public:
-      Constraint(const dimension_type d, const R* a, const R& b);
-      dimension_type _d; const R* _a; const R* _b;
+      Constraint(const dimension_type d, const R* a);
+      dimension_type _d; const R* _a;
     };
     
     
     
     template<class R> 
     tribool equal(const Polyhedron<R>& A, const Polyhedron<R>& B);
+
    
     template<class R> 
     tribool disjoint(const Polyhedron<R>& A, const Polyhedron<R>& B);
@@ -268,15 +253,21 @@ namespace Ariadne {
     
     template<class R> 
     tribool subset(const Polyhedron<R>& A, const Polyhedron<R>& B);
+
     template<class R> 
     tribool subset(const Polyhedron<R>& A, const Rectangle<R>& B);
 
+
     template<class R1,class R2> 
     tribool subset(const Rectangle<R1>& A, const Polyhedron<R2>& B);
+
     template<class R1,class R2> 
     tribool subset(const Zonotope<R1>& A, const Polyhedron<R2>& B);
+
     template<class R1,class R2> 
     tribool subset(const Polytope<R1>& A, const Polyhedron<R2>& B);
+
+
 
     template<class R> 
     Polyhedron<R> 
@@ -285,6 +276,15 @@ namespace Ariadne {
     template<class R> 
     Polyhedron<R> 
     closed_intersection(const Polyhedron<R>& A, const Polyhedron<R>& B) ;
+
+    
+    template<class R> 
+    Polyhedron<R> 
+    polyhedron(const Rectangle<R>& A) ;
+
+    template<class R> 
+    Polyhedron<typename Numeric::traits<R>::arithmetic_type> 
+    polyhedron(const Polytope<R>& A) ;
 
     
     template<class R>

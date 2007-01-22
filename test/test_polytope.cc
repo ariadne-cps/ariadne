@@ -122,7 +122,7 @@ test_polytope()
   cout << endl;
 
 
-  Polytope<R> pltp2=Polytope<R>(Matrix<R>("[3.125,1.125,-2.875,-0.875;1.75,-0.25,-2.25,-0.25]"));
+  Polytope<R> pltp2=Polytope<R>(Matrix<R>("[3.125,1.125,-2.875,-0.875;1.75,-0.25,-2.25,-0.25;1.0,1.0,1.0,1.0]"));
   cout << "pltp2=" << pltp2 << endl << "pltp2.bounding_box()=" << pltp2.bounding_box() << endl;
   Polytope<Rational> qpltp2=Polytope<Rational>(pltp2);
   cout << "qpltp2=" << qpltp2 << endl;

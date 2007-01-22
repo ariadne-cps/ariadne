@@ -29,7 +29,6 @@
 #include "../evaluation/integrator.h"
 #include "hybrid_evolver.h"
 
-#include "output/epsfstream.h"
 namespace Ariadne {
   
 template<class Set> 

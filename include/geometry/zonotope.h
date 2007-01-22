@@ -76,10 +76,16 @@ namespace Ariadne {
       typedef Point<R> state_type;
       /*! \brief An iterator through the (possible) vertices of the zonotope. */
       typedef ZonotopeVerticesIterator<R> vertices_const_iterator;
-
      private:
-      Point<R> _centre;
-      LinearAlgebra::Matrix<R> _generators;
+      dimension_type _dimension;
+      size_type _number_of_generators;
+      array<R> _data;
+     private:
+      array<R>& data();
+      size_type data_size() const;
+      void resize(dimension_type d, size_type m);
+      LinearAlgebra::VectorSlice<R> _centre();
+      LinearAlgebra::MatrixSlice<R> _generators();
      public:
       //@{
       //! \name Constructors
@@ -108,50 +114,46 @@ namespace Ariadne {
       explicit Zonotope(const std::string& s);
       
       /*! \brief Copy constructor. */
-      template<class R1> 
-      Zonotope(const Zonotope<R1>& original);
-      
-      /*! \brief Assign from a Rectangle. */
-      Zonotope<R>& operator=(const Rectangle<R>& r);
+      template<class R1> Zonotope(const Zonotope<R1>& z);
       
       /*! \brief Copy assignment operator. */
-      Zonotope<R>& operator=(const Zonotope<R>& original);
+      template<class Rl> Zonotope<R>& operator=(const Zonotope<Rl>& z);
       //@}
       
       
       
       //@{ 
       //! \name Data access
+      /*! \brief The raw data of the zonotope. */
+      const array<R>& data() const;
+
       /*! \brief The centre. */
       Point<R> centre() const;
 
       /*! \brief The matrix of principle directions. */
-      const LinearAlgebra::Matrix<R>& generators() const;
+      const LinearAlgebra::MatrixSlice<R> generators() const;
      
       /*! \brief The number of generators of the zonotope. */
       size_type number_of_generators() const;
 
       /*! \brief The \a n th of principle direction. */
       LinearAlgebra::Vector<R> generator(size_type n) const;
-      
       //@}
       
       
       //@{
       //! \name Conversion and approximation operators
-       
-      /*! \brief Convert from a rectangle. */
-      Zonotope(const Rectangle<real_type>& r);
+      /*! \brief Construct from a rectangle. */
+      template<class Rl> explicit Zonotope(const Rectangle<Rl>& r);
       
+      /*! \brief Assign from a rectangle. */
+      template<class Rl> Zonotope<R>& operator=(const Rectangle<Rl>& z);
+     
       /*! \brief Convert to a polytope. */
-      //operator Polytope<typename Numeric::traits<R>::arithmetic_type> () const;
-      /*! \brief Convert to a polytope. */
-      operator Polytope<Rational> () const;
+      operator Polytope<typename Numeric::traits<R>::arithmetic_type> () const;
       
       /*! \brief Convert to a polyhedron. */
-      //operator Polyhedron<typename Numeric::traits<R>::arithmetic_type> () const;
-      /*! \brief Convert to a polyhedron. */
-      operator Polyhedron<Rational> () const;
+      operator Polyhedron<typename Numeric::traits<R>::arithmetic_type> () const;
       //@}
       
 
@@ -173,7 +175,7 @@ namespace Ariadne {
       tribool contains(const Point<R>& point) const;
 
       /*! \brief The vertices of the zonotope. */
-      PointList<Rational> vertices() const;
+      PointList<typename Numeric::traits<R>::arithmetic_type> vertices() const;
       
       /*! \brief An iterator to the beginning of the (possible) vertices. */
       vertices_const_iterator vertices_begin() const;
@@ -188,8 +190,11 @@ namespace Ariadne {
       ListSet<R,Geometry::Zonotope> subdivide() const;
       
       /*! \brief A rectangle containing the given zonotope. */
-      Rectangle<R> bounding_box() const;
+      Rectangle<typename Numeric::traits<R>::number_type> bounding_box() const;
       
+      /*! \brief Scale the zonotope by a real constant. */
+      static Zonotope<F> scale(const Zonotope<R>& z, const R& sf);
+           
       //@}
       
 #ifdef DOXYGEN
@@ -231,9 +236,6 @@ namespace Ariadne {
       //@}
 #endif
 
-      /*! \brief Scale the zonotope by a real constant. */
-      static Zonotope<F> scale(const Zonotope<R>& z, const R& sf);
-           
       //@{ 
       //! \name Input/output operations
       /*! \brief Write to an output stream. */
@@ -259,47 +261,6 @@ namespace Ariadne {
       std::vector< Point<R> > _approximate_possible_vertices() const ;
     };
   
-
-    template<class R>
-    class Zonotope< Interval<R> >
-    {
-      typedef Interval<R> I;
-     public:
-      typedef Interval<R> real_type;
-      typedef Point< Interval<R> > state_type;
-     
-      Zonotope(dimension_type d=0);
-
-      template<class R1, class R2> Zonotope(const Point<R1>& c, const LinearAlgebra::Matrix<R2>& g);
-        
-      template<class R1, class R2, class R3> 
-      Zonotope(const Point<R1>& c, const LinearAlgebra::Matrix<R2>& g1, const LinearAlgebra::Vector<R3>& g2);
-      
-      template<class R1, class R2, class R3> 
-      Zonotope(const Point<R1>& c, const LinearAlgebra::Matrix<R2>& g1, const LinearAlgebra::Matrix<R3>& g2);
-      
-      Zonotope(const Rectangle<R>& r);
-      Zonotope(const Zonotope<R>& z);
-      
-      dimension_type dimension() const;
-      size_type number_of_generators() const;
-      const Point<I>& centre() const;
-      const LinearAlgebra::Matrix<I>& generators() const;
-      
-      tribool empty() const;
-      tribool bounded() const;
-      tribool contains(const Point< Interval<R> >& pt) const;
-      Rectangle<R> bounding_box() const;
-      
-      std::istream& read(std::istream& is);
-      std::ostream& write(std::ostream& os) const;
-     private:
-      static void _instantiate_geometry_operators();
-     private:
-      Point<I> _centre;
-      LinearAlgebra::Matrix<I> _generators;
-    };
-
 
 
     template<class R> tribool disjoint(const Rectangle<R>& A, const Zonotope<R>& B);
@@ -344,6 +305,37 @@ namespace Ariadne {
     Zonotope<typename Numeric::traits<R>::arithmetic_type> 
     minkowski_difference(const Zonotope<R>& A, const Rectangle<R>& B);
     
+    
+    template<class R> 
+    ListSet<R,Zonotope>
+    subdivide(const Zonotope<R>& z);
+    
+    template<class R> 
+    ListSet<Interval<R>,Zonotope>
+    subdivide(const Zonotope< Interval<R> >& z);
+    
+    template<class R> 
+    ListSet<R,Zonotope>
+    divide(const Zonotope<R>& z);
+    
+    template<class R> 
+    ListSet<Interval<R>,Zonotope>
+    divide(const Zonotope< Interval<R> >& z);
+    
+    
+    template<class R> 
+    Zonotope<typename Numeric::traits<R>::arithmetic_type> 
+    zonotope(const Rectangle<R>& r);
+    
+    template<class R> 
+    Polytope<typename Numeric::traits<R>::arithmetic_type> 
+    polytope(const Zonotope<R>& r);
+    
+    template<class R> 
+    Polyhedron<typename Numeric::traits<R>::arithmetic_type> 
+    polyhedron(const Zonotope<R>& r);
+    
+    
     template<class R> 
     Zonotope<R> 
     operator+(const Zonotope<R>& z, const LinearAlgebra::Matrix<R>& A);
@@ -375,5 +367,6 @@ namespace Ariadne {
 }
 
 #include "zonotope.inline.h"
+#include "zonotope.template.h"
 
 #endif /* _ARIADNE_ZONOTOPE_H */

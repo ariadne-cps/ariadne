@@ -25,126 +25,178 @@
 
 namespace Ariadne {
   namespace Geometry {
-
+    
+    template<class R> inline
+    void over_approximation(Zonotope<R>& z, const Rectangle<R>& r) 
+    {
+      dimension_type d=r.dimension();
+      R* cptr=z.begin();
+      R* gptr=cptr+d;
+      const R* rptr=r.begin();
+      for(size_type i=0; i!=d; ++i) {
+        cptr[i]=med_approx(r.lower_bound(i),r.upper_bound(i));
+        for(size_type j=0; j!=d; ++j) {
+          gptr[i*d+j]=0;
+        }
+        gptr[(d+1)*i]=div_up(sub_up(r.upper_bound(i),r.lower_bound(i)),2);
+      }
+    }
+    
     template<class R> inline
     Zonotope<R>::Zonotope()
-      : _centre(0), _generators(0,0)
+      : _dimension(0),_number_of_generators(0), _data(0)
     { 
     }
      
     
     template<class R> inline
     Zonotope<R>::Zonotope(dimension_type d)
-      : _centre(d), _generators(d,0)
+      : _dimension(d),_number_of_generators(0), _data(d,static_cast<R>(0))
     { 
     }
      
       
     template<class R> inline
     Zonotope<R>::Zonotope(dimension_type d, size_type m)
-      : _centre(d), _generators(d,m)
+      : _dimension(d), _number_of_generators(m), _data(d*(m+1),static_cast<R>(0))
     { 
     }
      
 
-    template<class R> template<class R1, class R2> inline
-      Zonotope<R>::Zonotope(const Point<R1>& c, const LinearAlgebra::Matrix<R2>& g)
-        : _centre(c), _generators(g)
-      {
-        if(c.dimension()!=g.number_of_rows()) { 
-//          throw InvalidGenerators("Zonotope<R>::Zonotope(Point<R1>,Matrix<R2>): "
-//                                  "The matrix of principal directions does not have the same number of rows as the point dimension.");
-          throw InvalidGenerators(__PRETTY_FUNCTION__);
-        }
-        this->minimize_generators();
-      }
 
  
-    template<class R> template<class R1, class R2, class R3> inline
-    Zonotope<R>::Zonotope(const Point<R1>& c, const LinearAlgebra::Matrix<R2>& g1, const LinearAlgebra::Vector<R3>& g2)
-      : _centre(c), _generators(c.dimension(),g1.number_of_columns()+1) 
-    { 
-      if(c.dimension()!=g1.number_of_rows() || c.dimension()!=g2.size()) { 
-//          throw InvalidGenerators("Zonotope<R>::Zonotope(Point<R1>,Matrix<R2>,Vector<R3>): "
-//                                  "The principal directions do not all have the same size as the point dimension.");
-        throw InvalidGenerators(__PRETTY_FUNCTION__);
-      }
-      for(size_type i=0; i!=this->dimension();++i) {
-        for(size_type j1=0; j1!=g1.number_of_columns(); ++j1) {
-          this->_generators(i,j1)=g1(i,j1);
-        }
-        this->_generators(i,g1.number_of_columns())=g2(i);
-      }
-    }
-    
-    
-    template<class R> template<class R1, class R2, class R3> inline
-    Zonotope<R>::Zonotope(const Point<R1>& c, const LinearAlgebra::Matrix<R2>& g1, const LinearAlgebra::Matrix<R3>& g2)
-      : _centre(c), _generators(c.dimension(),g1.number_of_columns()+g2.number_of_columns()) 
-    { 
-      if(c.dimension()!=g1.number_of_rows() || c.dimension()!=g2.number_of_rows()) { 
-//          throw InvalidGenerators("Zonotope<R>::Zonotope(Point<R1>,Matrix<R2>,Matrix<R3>): "
-//                                  "The principal directions do not all have the same size as the point dimension.");
-        throw InvalidGenerators(__PRETTY_FUNCTION__);
-      }
-      for(size_type i=0; i!=this->dimension();++i) {
-        for(size_type j1=0; j1!=g1.number_of_columns(); ++j1) {
-          this->_generators(i,j1)=g1(i,j1);
-        }
-        for(size_type j2=0; j2!=g2.number_of_columns(); ++j2) {
-          this->_generators(i,g1.number_of_columns()+j2)=g2(i,j2);
-        }
-      }
-    }
-
 
     template<class R> template<class Rl> inline
-    Zonotope<R>::Zonotope(const Zonotope<Rl>& original)
-      : _centre(original.centre()),
-        _generators(original.generators())
+    Zonotope<R>::Zonotope(const Rectangle<Rl>& r)
+      : _dimension(r.dimension()), 
+        _number_of_generators(r.dimension()), 
+        _data(r.dimension()*(r.dimension()+1u))
+    {
+      (*this)=r;
+    }
+    
+    
+    template<class R> template<class Rl> inline
+    Zonotope<R>::Zonotope(const Zonotope<Rl>& z)
+      : _dimension(z.dimension()), 
+        _number_of_generators(z.number_of_generators()), 
+        _data(z.data())
     { 
     }
     
     
+    
+    
     template<class R> inline
-    Zonotope<R>& 
-    Zonotope<R>::operator=(const Rectangle<R>& r) {
-      this->_centre=r.centre(); this->_generators.resize(r.dimension(),r.dimension());
+    void assign_zonotope(LinearAlgebra::VectorSlice<R> c, 
+                         LinearAlgebra::MatrixSlice<R> g, 
+                         const Rectangle<R>& r) 
+    {
+      c=r.centre().position_vector(); 
+      g=static_cast<R>(0);
       for(size_type i=0; i!=r.dimension(); ++i) {
-        for(size_type j=0; j!=r.dimension(); ++j) {
-          this->_generators(i,j)=0;
-        }
-        this->_generators(i,i)=div_up(sub_up(r.upper_bound(i),r.lower_bound(i)),R(2));
+        g(i,i)=div_up(sub_up(r.upper_bound(i),r.lower_bound(i)),static_cast<R>(2));
       }
-      return *this;
     }
-    
-    
-    template<class R> inline
+      
+    template<class R>
+    void assign_zonotope(LinearAlgebra::VectorSlice< Interval<R> > c, 
+                         LinearAlgebra::MatrixSlice< Interval<R> > g, 
+                         const Rectangle<R>& r) 
+    {
+      c=r.centre().position_vector(); 
+      g=static_cast<R>(0);
+      for(size_type i=0; i!=r.dimension(); ++i) {
+        g(i,i)=(r.upper_bound(i)-r.lower_bound(i))/static_cast<R>(2);
+      }
+    }
+      
+    template<class R> template<class Rl> inline      
     Zonotope<R>& 
-    Zonotope<R>::operator=(const Zonotope<R>& original) {
-      if(this != &original) {
-        this->_centre = original._centre;
-        this->_generators = original._generators;
+    Zonotope<R>::operator=(const Rectangle<Rl>& r) 
+    {
+      this->resize(r.dimension(),r.dimension());
+      assign_zonotope(this->_centre(),this->_generators(),r);
+      return *this;
+    }
+    
+    
+    template<class R> template<class Rl> inline
+    Zonotope<R>& 
+    Zonotope<R>::operator=(const Zonotope<Rl>& z) {
+      if(this != &z) {
+        this->_dimension = z._dimension;
+        this->_number_of_generators = z._number_of_generators;
+        this->_data = z._data;
       }
       return *this;
     }
 
 
+
+    template<class R> inline
+    const array<R>&
+    Zonotope<R>::data() const 
+    { 
+      return this->_data;
+    }
+
+    template<class R> inline
+    array<R>&
+    Zonotope<R>::data()  
+    { 
+      return this->_data;
+    }
 
     template<class R> inline
     Point<R> 
     Zonotope<R>::centre() const 
     { 
-      return this->_centre; 
+      return Point<R>(this->dimension(),this->data().begin());
+    }
+
+    template<class R> inline
+    size_type 
+    Zonotope<R>::data_size() const 
+    {
+      return this->_dimension*(this->_number_of_generators+1); 
+    }
+      
+    template<class R> inline
+    void 
+    Zonotope<R>::resize(dimension_type d, size_type m) 
+    { 
+      if(this->_data.size()!=d*(m+1)) { this->_data.resize(d*(m+1)); }
+      this->_dimension=d;
+      this->_number_of_generators=m;
+    }
+
+
+
+    template<class R> inline
+    LinearAlgebra::VectorSlice<R> 
+    Zonotope<R>::_centre()  
+    { 
+      return LinearAlgebra::VectorSlice<R>(this->dimension(),this->data().begin());
     }
 
 
     template<class R> inline
-    const LinearAlgebra::Matrix<R>& 
+    LinearAlgebra::MatrixSlice<R> 
+    Zonotope<R>::_generators() 
+    {
+      return LinearAlgebra::MatrixSlice<R>(this->dimension(),this->number_of_generators(),
+                                           this->data().begin()+this->dimension(),
+                                           1u,this->dimension());
+    }
+   
+    template<class R> inline
+    const LinearAlgebra::MatrixSlice<R> 
     Zonotope<R>::generators() const 
     {
-      return this->_generators;
+      return LinearAlgebra::MatrixSlice<R>(this->dimension(),this->number_of_generators(),
+                                           const_cast<R*>(this->data().begin()+this->dimension()),
+                                           1u,this->dimension());
     }
    
 
@@ -152,7 +204,7 @@ namespace Ariadne {
     size_type 
     Zonotope<R>::number_of_generators() const 
     {
-      return this->_generators.number_of_columns();
+      return this->_number_of_generators;
     }
 
 
@@ -160,7 +212,7 @@ namespace Ariadne {
     LinearAlgebra::Vector<R> 
     Zonotope<R>::generator(size_type n) const
     {
-      return this->_generators.column(n);
+      return LinearAlgebra::VectorSlice<R>(this->dimension(),const_cast<R*>(this->_data.begin()+(n+1)*this->dimension()),1);
     }
 
 
@@ -169,7 +221,7 @@ namespace Ariadne {
     dimension_type 
     Zonotope<R>::dimension() const 
     {
-      return this->_centre.dimension();
+      return this->_dimension;
     }
     
     
@@ -197,90 +249,20 @@ namespace Ariadne {
     }
     
     
-      
-      
-      
     template<class R> inline
-    Zonotope< Interval<R> >::Zonotope(dimension_type d)
-      : _centre(d), _generators(d,d) 
-    { 
-    }
-    
-      
-    template<class R> template<class R1, class R2> inline
-    Zonotope< Interval<R> >::Zonotope(const Point<R1>& c, const LinearAlgebra::Matrix<R2>& g)
-      : _centre(c), _generators(g) 
+    ListSet<R,Zonotope>
+    Zonotope<R>::divide() const 
     {
+      return Geometry::divide(*this);
     }
-      
-      
-    template<class R> template<class R1, class R2, class R3> inline
-    Zonotope< Interval<R> >::Zonotope(const Point<R1>& c, const LinearAlgebra::Matrix<R2>& g1, const LinearAlgebra::Vector<R3>& g2)
-      : _centre(c), _generators(c.dimension(),g1.number_of_columns()+1) 
-    { 
-      for(size_type i=0; i!=this->dimension();++i) {
-        for(size_type j1=0; j1!=g1.number_of_columns(); ++j1) {
-          this->_generators(i,j1)=g1(i,j1);
-        }
-        this->_generators(i,g1.number_of_columns())=g2(i);
-      }
-    }
-    
-    
-    template<class R> template<class R1, class R2, class R3> inline
-    Zonotope< Interval<R> >::Zonotope(const Point<R1>& c, const LinearAlgebra::Matrix<R2>& g1, const LinearAlgebra::Matrix<R3>& g2)
-      : _centre(c), _generators(c.dimension(),g1.number_of_columns()+g2.number_of_columns()) 
-    { 
-      for(size_type i=0; i!=this->dimension();++i) {
-        for(size_type j1=0; j1!=g1.number_of_columns(); ++j1) {
-          this->_generators(i,j1)=g1(i,j1);
-        }
-        for(size_type j2=0; j2!=g2.number_of_columns(); ++j2) {
-          this->_generators(i,g1.number_of_columns()+j2)=g2(i,j2);
-        }
-      }
-    }
-    
     
     template<class R> inline
-    Zonotope< Interval<R> >::Zonotope(const Zonotope<R>& z)
-      : _centre(z.centre()), _generators(z.generators()) 
+    ListSet<R,Zonotope>
+    Zonotope<R>::subdivide() const 
     {
+      return Geometry::subdivide(*this);
     }
-    
-    
-    template<class R> inline
-    dimension_type 
-    Zonotope< Interval<R> >::dimension() const 
-    { 
-      return this->_centre.dimension(); 
-    }
-    
-    
-    template<class R> inline
-    size_type 
-    Zonotope< Interval<R> >::number_of_generators() const 
-    { 
-      return this->_generators.number_of_columns();
-    }
-    
-    
-    template<class R> inline
-    const Point< Interval<R> >& 
-    Zonotope< Interval<R> >::centre() const 
-    { 
-      return _centre; 
-    }
-    
-    
-    template<class R> inline
-    const LinearAlgebra::Matrix< Interval<R> >& 
-    Zonotope< Interval<R> >::generators() const 
-    { 
-      return _generators; 
-    }
-    
-    
+   
     
     
     
@@ -393,9 +375,8 @@ namespace Ariadne {
         else { this->_pt=this->_pt+R(2)*this->_z->generator(j); this->_i+=m; }
       }
 
-      std::ostream& write(std::ostream& os) const {
-        return os << _z << " " << _i << " " << _parity << std::endl; }
-    }; 
+      std::ostream& write(std::ostream& os) const;
+    };
 
     template<class R> inline 
     std::ostream& operator<<(std::ostream& os, const ZonotopeVerticesIterator<R>& iter) {

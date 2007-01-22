@@ -40,7 +40,7 @@ namespace Ariadne {
 
     template<class R>
     Rectangle<R>::Rectangle(const std::string& s)
-      : _bounds()
+      : _data()
     {
       std::stringstream ss(s);
       ss >> *this;
@@ -149,6 +149,7 @@ namespace Ariadne {
       return result;
     }
     
+    
     template<class R>
     typename Rectangle<R>::vertices_const_iterator
     Rectangle<R>::vertices_begin() const
@@ -161,6 +162,70 @@ namespace Ariadne {
     Rectangle<R>::vertices_end() const
     {
       return RectangleVerticesIterator<R>(*this,true);
+    }
+    
+    
+    
+    
+    
+    template<class R>
+    inline
+    tribool 
+    Rectangle< Interval<R> >::contains(const Point< Interval<R> >& p) const 
+    {
+      tribool result=true;
+      check_equal_dimensions(*this,p,__PRETTY_FUNCTION__);
+      const Rectangle< Interval<R> >& self=*this;
+      for (size_type i=0; i!=self.dimension(); ++i) {
+        if(self.lower_bound(i)>p[i] || p[i]>self.upper_bound(i)) {
+          return false;
+        }
+        if(self.lower_bound(i)==p[i] || p[i]==self.upper_bound(i)) { 
+          result=indeterminate;
+        }
+      }
+      return result;
+    }
+
+
+    template<class R>
+    Point< Interval<R> > 
+    Rectangle< Interval<R> >::lower_corner() const 
+    {
+      return Point< Interval<R> >(this->dimension(),this->_data.begin(),2u);
+    }
+    
+    
+    template<class R>
+    Point< Interval<R> > 
+    Rectangle< Interval<R> >::upper_corner() const 
+    {
+      return Point< Interval<R> >(this->dimension(),this->_data.begin()+1u,2u);
+    }
+    
+    
+    template<class R>
+    size_type 
+    Rectangle< Interval<R> >::number_of_vertices() const 
+    {
+      return 1<<this->dimension();
+    }
+    
+    
+    template<class R>
+    typename Rectangle< Interval<R> >::vertices_const_iterator
+    Rectangle< Interval<R> >::vertices_begin() const
+    {
+      return RectangleVerticesIterator< Interval<R> >(*this,false);
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+    
+    template<class R>
+    typename Rectangle< Interval<R> >::vertices_const_iterator
+    Rectangle< Interval<R> >::vertices_end() const
+    {
+      return RectangleVerticesIterator< Interval<R> >(*this,true);
+      throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
     

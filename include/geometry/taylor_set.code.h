@@ -1,8 +1,8 @@
 /***************************************************************************
- *            zonotope.cc
+ *            taylor_set.code.h
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2007  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -20,21 +20,46 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+ 
+#include <iostream>
+#include <vector>
+#include <algorithm>
 
-#include "real_typedef.h"
+#include "taylor_set.h"
 
-#include "geometry/zonotope.h"
-#include "geometry/zonotope.code.h"
+#include "../exceptions.h"
+#include "../base/array.h"
+
+#include "../linear_algebra/vector.h"
+#include "../linear_algebra/matrix.h"
+#include "../linear_algebra/tensor.h"
+
+#include "../geometry/point.h"
+#include "../geometry/rectangle.h"
+#include "../geometry/zonotope.h"
+#include "../geometry/list_set.h"
 
 namespace Ariadne {
   namespace Geometry {
+    
+    extern int verbosity;
+   
+    template<class R>
+    void
+    TaylorSet<R>::_instantiate_geometry_operators() 
+    {
+      Zonotope<R>* z=0;
+      TaylorSet<R>* ts=0;
+      *z=over_approximation(*ts);
+    }
+    
+    template<class R> 
+    Zonotope<R> 
+    over_approximation(const TaylorSet<R>&) 
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+ 
 
-    template class Zonotope<Rational>;
-      
-    template class Zonotope<Real>;
-    template class Zonotope< Interval<Real> >;
-
-    template class ZonotopeVerticesIterator<Rational>;
-    template class ZonotopeVerticesIterator<Real>;
   }
 }

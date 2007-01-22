@@ -56,8 +56,8 @@ namespace Ariadne {
     }
     
     
-    template<class R> inline 
-    Parallelotope<R>::Parallelotope(const Rectangle<R>& r)
+    template<class R> template<class Rl> inline 
+    Parallelotope<R>::Parallelotope(const Rectangle<Rl>& r)
       : Zonotope<R>(r) 
     { 
     }
@@ -84,9 +84,9 @@ namespace Ariadne {
     }
     
     
-    template<class R> inline 
+    template<class R> template<class Rl> inline 
     Parallelotope<R>& 
-    Parallelotope<R>::operator=(const Rectangle<R>& r)
+    Parallelotope<R>::operator=(const Rectangle<Rl>& r)
     {
       Zonotope<R>& z=*this; z=r; return *this;
     }

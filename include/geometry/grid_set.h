@@ -486,16 +486,17 @@ namespace Ariadne {
 
     
     
-    template<class R> GridBlock<R> outer_approximation(const Rectangle<R>& p, const Grid<R>& g);
+    template<class R> GridBlock<R> outer_approximation(const Rectangle<R>& r, const Grid<R>& g);
     
     
-    template<class R> GridBlock<R> inner_approximation(const Rectangle<R>& p, const Grid<R>& g);
+    template<class R> GridBlock<R> inner_approximation(const Rectangle<R>& r, const Grid<R>& g);
     
     
-    template<class R> GridBlock<R> over_approximation(const Rectangle<R>& p, const Grid<R>& g);
+    template<class R> GridBlock<R> over_approximation(const Rectangle<R>& r, const Grid<R>& g);
     
-    template<class R> GridCellListSet<R> over_approximation(const Zonotope<R>& p, const Grid<R>& g);
+    template<class R> GridCellListSet<R> over_approximation(const Zonotope<R>& z, const Grid<R>& g);
     template<class R> GridCellListSet<R> over_approximation(const Polytope<R>& p, const Grid<R>& g);
+    template<class R> GridCellListSet<R> over_approximation(const Polyhedron<R>& p, const Grid<R>& g);
     
     template<class R, template<class> class BS> GridMaskSet<R> over_approximation(const ListSet<R,BS>& ls, const FiniteGrid<R>& fg); 
     template<class R> GridMaskSet<R> over_approximation(const GridMaskSet<R>& gms, const FiniteGrid<R>& fg);

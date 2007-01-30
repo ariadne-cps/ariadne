@@ -27,8 +27,10 @@
 
 #include "ariadne.h"
 #include "real_typedef.h"
-#include "geometry/polyhedron.h"
 #include "geometry/set.h"
+#include "geometry/rectangle.h"
+#include "geometry/polyhedron.h"
+#include "geometry/polyhedral_set.h"
 #include "system/affine_map.h"
 #include "system/affine_vector_field.h"
 #include "system/hybrid_automaton.h"
@@ -64,7 +66,7 @@ int test_hybrid_automaton()
   
   PolyhedralSet<R> invariant(p);
   cout << "invariant=" << invariant << endl;
-  PolyhedralSet<R> activation(Polyhedron<R>(Rectangle<R>("[-2,2]x[-2,2]")));
+  PolyhedralSet<R> activation(Rectangle<R>("[-2,2]x[-2,2]"));
   cout << "activation=" << activation << endl;
   cout << endl;
   

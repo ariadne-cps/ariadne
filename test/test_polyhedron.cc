@@ -160,11 +160,15 @@ test_polyhedron()
   bbox2=Rectangle<R>("[-4,4]x[-4,4]");
   RegularGrid<R> gr2(2,0.125);
   GridCellListSet<R> uap2=under_approximation(phd2,gr2);
+  GridCellListSet<R> oap2=over_approximation(phd2,gr2);
   cout << "uap2.size()=" << uap2.size() << endl;
+  cout << "oap2.size()=" << oap2.size() << endl;
   epsfstream eps;
-  eps.open("test_polyhedron.eps",bbox2);
+  eps.open("test_polyhedron-1.eps",bbox2);
   eps.set_fill_colour("white");
   eps << bbox2;
+  eps.set_fill_colour("red");
+  eps << oap2;
   eps.set_fill_colour("green");
   eps << phd2;
   eps.set_fill_colour("blue");
@@ -187,12 +191,45 @@ test_polyhedron<Rational>()
   LinearAlgebra::Vector<R> b("[11/8,1/2,1/4]");
   Polyhedron<R> phd(A,b);
   cout << "phd=" << phd << endl;
+  cout << "phd.constraints()=" << phd.constraints() << endl;
     
   Polytope<R> pltp(phd);
   cout << "Polytope(phd)=" << pltp << endl;
-    
+  cout << "  Vertices should be (71/128,15/16), (-2/3,-4/7),  (212/151,-5/151)" << endl;
   Polyhedron<R> phd2(pltp);
   cout << "Polyhedron(Polytope(phd))=" << phd2 << endl;
-  
+   cout << endl;
+ 
+  Rectangle<R> r1("[7/8,8/8]x[6/8,7/8]");
+  Rectangle<R> r2("[2/8,3/8]x[5/8,6/8]");
+  Rectangle<R> r3("[3/8,4/8]x[4/8,5/8]");
+
+  Rectangle<R> bbox=phd.bounding_box().expand_by(R(0.5));
+
+  epsfstream eps;
+  eps.open("test_polyhedron-2.eps",bbox);
+  eps.set_fill_colour("white");
+  eps << bbox;
+  eps.set_fill_colour("green");
+  eps << phd;
+  eps.set_fill_colour("red");
+  eps << r1;
+  eps.set_fill_colour("yellow");
+  eps << r2;
+  eps.set_fill_colour("blue");
+  eps << r3;
+  eps.close();
+
+  cout << "phd=" << phd << endl;
+  cout << "r1=" << r1 << endl;
+  cout << "r2=" << r2 << endl;
+  cout << "r3=" << r3 << endl;
+  cout << "disjoint(r1,phd)=" << disjoint(r1,phd) << endl;
+  cout << "disjoint(r2,phd)=" << disjoint(r2,phd) << endl;
+  cout << "subset(r3,phd)=" << subset(r3,phd) << endl;
+  assert(disjoint(r1,phd)==true);
+  assert(disjoint(r2,phd)==false);
+  assert(subset(r3,phd)==true);
+
   return 0;
 }

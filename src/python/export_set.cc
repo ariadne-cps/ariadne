@@ -24,8 +24,10 @@
 #include "real_typedef.h"
 
 #include "geometry/set.h"
+#include "geometry/polyhedral_set.h"
 
 using namespace Ariadne;
+using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
 
 #include <boost/python.hpp>
@@ -59,17 +61,9 @@ void export_set()
     .def(self_ns::str(self))
   ;
 
-  class_< RectangularSet<R>, bases< Set<R> > >("RectangularSet",init< Rectangle<R> >())
-    .def("dimension", &RectangularSet<R>::dimension)
-    .def("contains", &RectangularSet<R>::contains)
-    .def("disjoint", &RectangularSet<R>::disjoint)
-    .def("superset", &RectangularSet<R>::superset)
-    .def("subset", &RectangularSet<R>::subset)
-    .def("bounding_box", &RectangularSet<R>::bounding_box)
-    .def(self_ns::str(self))
-  ;
-
   class_< PolyhedralSet<R>, bases< Set<R> > >("PolyhedralSet",init< Polyhedron<R> >())
+    .def(init< Matrix<R>,Vector<R> >())
+    .def(init< Rectangle<R> >())
     .def("dimension", &PolyhedralSet<R>::dimension)
     .def("contains", &PolyhedralSet<R>::contains)
     .def("disjoint", &PolyhedralSet<R>::disjoint)

@@ -27,7 +27,7 @@
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 #include "geometry/rectangle.h"
-#include "geometry/rectangle.h"
+#include "geometry/polytope.h"
 #include "geometry/polyhedron.h"
 
 using namespace Ariadne;
@@ -48,7 +48,11 @@ void export_polyhedron()
   typedef Rectangle<R> RRectangle;
   typedef Polytope<R> RPolytope;
 
+  def("disjoint", (tribool(*)(const RPolyhedron&, const RRectangle&))(&disjoint));
+  def("disjoint", (tribool(*)(const RRectangle&, const RPolyhedron&))(&disjoint));
   def("disjoint", (tribool(*)(const RPolyhedron&, const RPolyhedron&))(&disjoint));
+  def("subset", (tribool(*)(const RRectangle&, const RPolyhedron&))(&subset));
+  def("subset", (tribool(*)(const RPolytope&, const RPolyhedron&))(&subset));
   def("subset", (tribool(*)(const RPolyhedron&, const RPolyhedron&))(&subset));
 
   //class_< RPolyhedron,bases<RSet> >("Polyhedron",init<int>())

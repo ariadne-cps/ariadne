@@ -28,9 +28,10 @@
 #include "ariadne.h"
 #include "debug.h"
 #include "real_typedef.h"
-#include "geometry/rectangle.h"
-#include "geometry/hybrid_set.h"
 #include "geometry/set.h"
+#include "geometry/hybrid_set.h"
+#include "geometry/rectangle.h"
+#include "geometry/polyhedral_set.h"
 #include "system/affine_map.h"
 #include "system/affine_vector_field.h"
 #include "system/hybrid_automaton.h"
@@ -71,10 +72,8 @@ int test_hybrid_evolution()
   AffineVectorField<R> dynamic(Matrix<R>("[-2,-1;1,-2]"),Vector<R>("[-1,0]"));
   AffineMap<R> reset(Matrix<R>("[1,0;0,-1]"),Vector<R>("[0,0]"));
   
-  //PolyhedralSet<R> invariant(p);
-  //PolyhedralSet<R> activation(Polyhedron<R>(Rectangle<R>("[-8,8]x[-3,-2]")));
-  RectangularSet<R> invariant(r);
-  RectangularSet<R> activation(Rectangle<R>("[-7.5,7.5]x[-3,-2]"));
+  PolyhedralSet<R> invariant(r);
+  PolyhedralSet<R> activation(Rectangle<R>("[-7.5,7.5]x[-3,-2]"));
   
   HybridAutomaton<R> automaton("Affine automaton");
   DiscreteMode<R>& mode=automaton.new_mode(dynamic,invariant);
@@ -123,7 +122,7 @@ int test_hybrid_evolution()
   eps.set_fill_colour("white");
   eps << bounding_box;
   eps.set_fill_colour("cyan");
-  eps << static_cast<Rectangle<R>&>(activation);
+  eps << static_cast<Polyhedron<R>&>(activation);
   eps.set_fill_colour("green");
   eps << discrete_reach[0];
   eps.set_fill_colour("blue");
@@ -141,7 +140,7 @@ int test_hybrid_evolution()
   eps.set_fill_colour("white");
   eps << bounding_box;
   eps.set_fill_colour("cyan");
-  eps << static_cast<Rectangle<R>&>(activation);
+  eps << static_cast<Polyhedron<R>&>(activation);
   eps.set_line_style(true);
   eps.set_fill_colour("yellow");
   eps << chainreach[0];

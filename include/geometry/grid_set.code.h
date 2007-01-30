@@ -34,6 +34,7 @@
 #include "../geometry/zonotope.h"
 #include "../geometry/parallelotope.h"
 #include "../geometry/polytope.h"
+#include "../geometry/polyhedron.h"
 #include "../geometry/list_set.h"
 #include "../geometry/partition_tree_set.h"
 #include "../geometry/set.h"
@@ -261,7 +262,7 @@ namespace Ariadne {
       tribool tb;
       Zonotope<R>* z=0;
       Parallelotope<R>* pl=0;
-      Polytope<R>* p=0;
+      Polytope<R>* pt=0;
       Polyhedron<R>* ph=0;
       Grid<R>* g=0;
       GridBlock<R>* gb=0;
@@ -271,11 +272,12 @@ namespace Ariadne {
       
       *gcls=over_approximation(*z,*g);
       *gcls=over_approximation(*pl,*g);
-      *gcls=over_approximation(*p,*g);
+      *gcls=over_approximation(*pt,*g);
+      *gcls=over_approximation(*ph,*g);
 
       *gcls=under_approximation(*z,*g);
       *gcls=under_approximation(*pl,*g);
-      *gcls=under_approximation(*p,*g);
+      *gcls=under_approximation(*pt,*g);
       *gcls=under_approximation(*ph,*g);
     }
 
@@ -820,6 +822,32 @@ namespace Ariadne {
     }
 
    
+    template<class R>
+    GridCellListSet<R>
+    over_approximation(const Polyhedron<R>& p, const Grid<R>& g) 
+    {
+      GridCellListSet<R> result(g);
+      check_equal_dimensions(p,g,"over_approximation(Polyhedron<R>,Grid<R>)");
+      
+      // omit emptyness and boundedness checks
+          
+      Rectangle<R> bb=p.bounding_box();
+
+      GridBlock<R> gbb=over_approximation(bb,g);
+      Combinatoric::LatticeBlock block=gbb.lattice_set();
+
+      for(Combinatoric::LatticeBlock::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
+        GridCell<R> cell(g,*iter);
+        if(disjoint(Rectangle<R>(cell),p)) {
+        } else {
+          result.adjoin(cell);
+        }
+      }
+
+      return result;
+    }
+
+
     template<class R>
     GridCellListSet<R>
     under_approximation(const Parallelotope<R>& p, const Grid<R>& g)

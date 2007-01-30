@@ -136,8 +136,8 @@ namespace Ariadne {
       dimension_type d=plhd.dimension();
       size_type nc=plhd.number_of_constraints();
       
-      const LinearAlgebra::Matrix<R>& A=plhd.A();
-      const LinearAlgebra::Vector<R>& b=plhd.b();
+      const LinearAlgebra::Matrix<R> A=plhd.A();
+      const LinearAlgebra::Vector<R> b=plhd.b();
       
       std::vector< LinearAlgebra::Vector<F> > result;
       std::vector< LinearAlgebra::Vector<F> > argument;

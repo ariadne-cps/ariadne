@@ -23,10 +23,10 @@ from ariadne.output import *
 
 print dir()
 
-space=RectangularSet(Rectangle("[-7.5,7.5]x[-7.5,7.5]"))
+space=PolyhedralSet(Rectangle("[-7.5,7.5]x[-7.5,7.5]"))
 identity=AffineMap(Matrix("[1,0;0,1]"),Vector("[0,0]"))
 dynamic=AffineVectorField(Matrix("[-2,-1; 1,-2]"),Vector("[-1,0]"))
-jump_set = RectangularSet(Rectangle("[-7.5,7.5]x[-3,-2]"))
+jump_set = PolyhedralSet(Rectangle("[-7.5,7.5]x[-3,-2]"))
 reset = AffineMap(Matrix("[1,0;0,-1]"),Vector("[0,0]"))
 
 automaton=HybridAutomaton("Affine hybrid automaton")

@@ -39,6 +39,7 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
+#include "../linear_algebra/linear_program.h"
 
 #include "../geometry/ddconv.h"
 #include "../geometry/ddconv.code.h"
@@ -242,14 +243,93 @@ namespace Ariadne {
     
     
     
+    template<>
+    tribool 
+    disjoint(const Polyhedron<Rational>& p, const Rectangle<Rational>& r)
+    {
+      typedef Rational R;
+      typedef Rational F;
+
+      if(verbosity>7) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+      if(verbosity>8) { std::cerr << p << " " << r << std::endl; }
+      
+      check_equal_dimensions(p,r,__PRETTY_FUNCTION__);
+      dimension_type d=p.dimension();
+      size_type nc=p.number_of_constraints();
+      size_type nnc=0; // number of negative constraints Ax<=b
+      
+      // Translate x'=x-l;  Ax<=b A(x'+l)<=b Ax'<= b-Al b'=b-Al 
+      LinearAlgebra::Vector<F> u=r.upper_corner()-r.lower_corner();
+      LinearAlgebra::Matrix<R> A=p.A();
+      LinearAlgebra::Vector<F> b=p.b()-A*r.lower_corner().position_vector();
+      
+      if(verbosity>8) { std::cerr << "u'=" << u << " A'=" << A << " b'=" << b << std::endl; }
+
+      // count number of negative constraints
+      for(size_type i=0; i!=nc; ++i) {
+        if(b(i)<0) {
+          ++nnc;
+        }
+      }
+
+      LinearAlgebra::Matrix<F> T(nc+d+1,d+nnc+1);
+      // set up constraints Ax<=b
+      size_type k=0; // negative constraint number
+      for(size_type i=0; i!=nc; ++i) {
+        if(b(i)<0) {
+          for(size_type j=0; j!=d; ++j) {
+            T(i,j)=-A(i,j);
+          }
+          T(i,d+k)=-1;
+          T(i,d+nnc)=-b(i);
+          ++k;
+        } else {
+          for(size_type j=0; j!=d; ++j) {
+            T(i,j)=A(i,j);
+          }
+          T(i,d+nnc)=b(i);
+        }          
+      }
+      //
+      for(size_type i=0; i!=d; ++i) {
+        T(nc+i,i)=1;
+        T(nc+i,d+nnc)=u(i);
+      }
+      
+      // Set value function for feasibility problem
+      k=0;
+      for(size_type i=0; i!=nc; ++i) {
+        if(b(i)<0) {
+          for(size_type j=0; j!=d+nnc; ++j) {
+            T(nc+d,j)-=T(i,j);
+          }
+          T(nc+d,d+nnc)-=T(i,d+nnc);
+        }
+      }
+
+      if(verbosity>8) { std::cerr << T << std::endl; }
+
+      LinearAlgebra::LinearProgram<F> lp(T);
+      tribool result=!lp.is_feasible();
+      return result;
+    }
+    
+    
+    template<class R>
+    tribool 
+    disjoint(const Polyhedron< Interval<R> >& p, const Rectangle< Interval<R> >& r)
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+
     template<class R>
     tribool 
     disjoint(const Polyhedron<R>& p, const Rectangle<R>& r)
     {
-      throw NotImplemented(__PRETTY_FUNCTION__);
+      return disjoint(Polyhedron<Rational>(p),Rectangle<Rational>(r));
     }
-    
-    
+
+
     template<class R>
     tribool 
     disjoint(const Rectangle<R>& r, const Polyhedron<R>& p)

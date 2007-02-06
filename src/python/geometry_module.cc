@@ -28,17 +28,18 @@
 
 template<class R> void export_point();
 template<class R> void export_point_list();
+template<class R> void export_set();
 template<class R> void export_rectangle();
 template<class R> void export_parallelotope();
 template<class R> void export_simplex();
 template<class R> void export_zonotope();
 template<class R> void export_polytope();
 template<class R> void export_polyhedron();
+template<class R> void export_polyhedral_set();
 template<class R> void export_list_set();
 template<class R> void export_grid_set();
 template<class R> void export_partition_tree_set();
 template<class R> void export_hybrid_set();
-template<class R> void export_set();
 
 BOOST_PYTHON_MODULE(geometry)
 {
@@ -51,6 +52,7 @@ BOOST_PYTHON_MODULE(geometry)
   export_simplex<Ariadne::Real>();
   export_polytope<Ariadne::Real>();
   export_polyhedron<Ariadne::Real>();
+  export_polyhedral_set<Ariadne::Real>();
   export_list_set<Ariadne::Real>();
   export_grid_set<Ariadne::Real>();
   export_partition_tree_set<Ariadne::Real>();

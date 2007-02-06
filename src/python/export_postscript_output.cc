@@ -30,6 +30,7 @@
 #include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
 #include "geometry/polytope.h"
+#include "geometry/polyhedron.h"
 #include "geometry/list_set.h"
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
@@ -49,6 +50,7 @@ template<class R> inline void write_grid_cell(epsfstream& eps, const GridCell<R>
 template<class R> inline void write_parallelotope(epsfstream& eps, const Parallelotope<R>& p) { eps << p; }
 template<class R> inline void write_zonotope(epsfstream& eps, const Zonotope<R>& z) { eps << z; }
 template<class R> inline void write_polytope(epsfstream& eps, const Polytope<R>& p) { eps << p; }
+template<class R> inline void write_polyhedron(epsfstream& eps, const Polyhedron<R>& p) { eps << p; }
 template<class R> inline void write_rectangle_list_set(epsfstream& eps, const ListSet<R,Rectangle>& r) { eps << r; }
 template<class R> inline void write_parallelotope_list_set(epsfstream& eps, const ListSet<R,Parallelotope>& s) { eps << s; }
 template<class R> inline void write_zonotope_list_set(epsfstream& eps, const ListSet<R,Zonotope>& s) { eps << s; }
@@ -80,6 +82,7 @@ void export_postscript_output()
     .def("write",&write_zonotope<Real>)
     .def("write",&write_parallelotope<Real>)
     .def("write",&write_polytope<Real>)
+    .def("write",&write_polyhedron<Real>)
     .def("write",&write_rectangle_list_set<Real>)
     .def("write",&write_parallelotope_list_set<Real>)
     .def("write",&write_zonotope_list_set<Real>)

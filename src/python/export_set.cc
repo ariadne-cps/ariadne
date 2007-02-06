@@ -24,7 +24,8 @@
 #include "real_typedef.h"
 
 #include "geometry/set.h"
-#include "geometry/polyhedral_set.h"
+#include "geometry/point.h"
+#include "geometry/rectangle.h"
 
 using namespace Ariadne;
 using namespace Ariadne::LinearAlgebra;
@@ -60,19 +61,8 @@ void export_set()
     .def("bounding_box", pure_virtual(&Set<R>::bounding_box))
     .def(self_ns::str(self))
   ;
-
-  class_< PolyhedralSet<R>, bases< Set<R> > >("PolyhedralSet",init< Polyhedron<R> >())
-    .def(init< Matrix<R>,Vector<R> >())
-    .def(init< Rectangle<R> >())
-    .def("dimension", &PolyhedralSet<R>::dimension)
-    .def("contains", &PolyhedralSet<R>::contains)
-    .def("disjoint", &PolyhedralSet<R>::disjoint)
-    .def("superset", &PolyhedralSet<R>::superset)
-    .def("subset", &PolyhedralSet<R>::subset)
-    .def("bounding_box", &PolyhedralSet<R>::bounding_box)
-    .def(self_ns::str(self))
-  ;
 }
+
 
 
 template void export_set<Real>();

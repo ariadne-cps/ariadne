@@ -60,7 +60,7 @@
 
 #include "../evaluation/integrator.h"
 
-namespace Ariadne { namespace Evaluation { extern int verbosity; } }
+namespace Ariadne { namespace Evaluation { extern int verbosity; static bool warning=true; } }
 
 template<class R> 
 R
@@ -132,7 +132,13 @@ Ariadne::Evaluation::AffineIntegrator<R>::integration_step(
   const Geometry::Zonotope<R>& initial_zonotope=static_cast<const Geometry::Zonotope<R>&>(initial_set);
   const System::AffineVectorField<R>* affine_vector_field_ptr=dynamic_cast<const System::AffineVectorField<R>*>(&vector_field);
   if(!affine_vector_field_ptr) {
-    throw std::runtime_error(std::string(__FUNCTION__)+": dynamic_cast to AffineVectorField failed");
+    // FIXME: dynamic_cast doesn't work with boost python interface
+    if(warning) {
+      warning=false;
+      std::cerr << "\nWarning: using static_cast to AffineVectorField\n" << std::endl;
+    }
+    affine_vector_field_ptr=static_cast<const System::AffineVectorField<R>*>(&vector_field);
+    //throw std::runtime_error(std::string(__FUNCTION__)+": dynamic_cast to AffineVectorField failed");
   }
   Geometry::Zonotope<R> phiz=
     this->integration_step(*affine_vector_field_ptr,initial_zonotope,step_size);
@@ -148,11 +154,19 @@ Ariadne::Evaluation::AffineIntegrator<R>::integration_step(
     const Geometry::Zonotope<R>& initial_set, 
     time_type& step_size) const
 {
- if(verbosity>6) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+  if(verbosity>6) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
 
+  //std::type_info info(&vector_field);
+  //std::cerr << "Vector field type is:" << info.name() << std::endl;
   const System::AffineVectorField<R>* affine_vector_field_ptr=dynamic_cast<const System::AffineVectorField<R>*>(&vector_field);
   if(!affine_vector_field_ptr) {
-    throw std::runtime_error(std::string(__FUNCTION__)+": dynamic_cast to AffineVectorField failed");
+    // FIXME: dynamic_cast doesn't work with boost python interface
+    if(warning) {
+      warning=false;
+      std::cerr << "\nWarning: using static_cast to AffineVectorField\n" << std::endl;
+    }
+    affine_vector_field_ptr=static_cast<const System::AffineVectorField<R>*>(&vector_field);
+    //throw std::runtime_error(std::string(__FUNCTION__)+": dynamic_cast to AffineVectorField failed");
   }
   return integration_step(*affine_vector_field_ptr,initial_set,step_size);
 }
@@ -170,7 +184,13 @@ Ariadne::Evaluation::AffineIntegrator<R>::reachability_step(
 
   const System::AffineVectorField<R>* affine_vector_field_ptr=dynamic_cast<const System::AffineVectorField<R>*>(&vector_field);
   if(!affine_vector_field_ptr) {
-    throw std::runtime_error(std::string(__FUNCTION__)+": dynamic_cast to AffineVectorField failed");
+    // FIXME: dynamic_cast doesn't work with boost python interface
+    if(warning) {
+      warning=false;
+      std::cerr << "\nWarning: using static_cast to AffineVectorField\n" << std::endl;
+    }
+    affine_vector_field_ptr=static_cast<const System::AffineVectorField<R>*>(&vector_field);
+    //throw std::runtime_error(std::string(__FUNCTION__)+": dynamic_cast to AffineVectorField failed");
   }
   
   return reachability_step(*affine_vector_field_ptr,initial_set,step_size);

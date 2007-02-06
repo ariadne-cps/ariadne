@@ -77,7 +77,7 @@ GEOMETRY_MODULE_SRC = geometry_module.cc \
 	export_rectangle.cc \
 	export_zonotope.cc export_parallelotope.cc \
 	export_polytope.cc export_simplex.cc \
-	export_polyhedron.cc \
+	export_polyhedron.cc export_polyhedral_set.cc \
 	export_list_set.cc \
 	export_grid_set.cc \
 	export_partition_tree_set.cc \

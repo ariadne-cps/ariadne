@@ -33,6 +33,10 @@
 #include "../declarations.h"
 #include <gmpxx.h>
 
+// FIXME: WE should not use GMP internals
+// The typedef below  may be needed when using GMP 4.2 or above.
+class __gmpq_value;
+
 namespace Ariadne {
   namespace Numeric {
     class Float64;
@@ -113,9 +117,18 @@ namespace Ariadne {
       typedef Interval<Rational> interval_type; 
     };
 
+    // FIXME: WE should not use GMP internals
+    // The following is needed for rational expressions in GMP 4.2.x
     template<class E> struct traits< __gmp_expr<mpq_t,E> > { 
       typedef Rational closure_type; 
     };
+
+    // FIXME: WE should not use GMP internals
+    // The following is needed for rational expressions in GMP 4.1.x
+    template<class E> struct traits< __gmp_expr<__gmpq_value,E> > { 
+      typedef Rational closure_type; 
+    };
+  
 
 
     template<class R> struct traits< Interval<R> > { 

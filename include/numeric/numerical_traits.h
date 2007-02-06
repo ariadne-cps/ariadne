@@ -113,7 +113,7 @@ namespace Ariadne {
       typedef Interval<Rational> interval_type; 
     };
 
-    template<class E> struct traits< __gmp_expr<__gmpq_value,E> > { 
+    template<class E> struct traits< __gmp_expr<mpq_t,E> > { 
       typedef Rational closure_type; 
     };
 

@@ -147,7 +147,7 @@ Res mul(const Arg1& a1, const Arg2& a2) {
 
 template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
 Res div(const Arg1& a1, const Arg2& a2) {
-  return Res(Tmp1(a1)*Tmp2(a2));
+  return Res(Tmp1(a1)/Tmp2(a2));
 }
 
 template<class Res, class Arg1, class Arg2> inline

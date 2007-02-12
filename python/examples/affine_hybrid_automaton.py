@@ -14,12 +14,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from ariadne.linear_algebra import *
-from ariadne.system import *
-from ariadne.geometry import *
-from ariadne.system import *
-from ariadne.evaluation import *
-from ariadne.output import *
+from ariadne import *
 
 print dir()
 

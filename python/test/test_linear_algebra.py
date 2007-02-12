@@ -20,8 +20,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from ariadne.numeric import *
-from ariadne.linear_algebra import *
+from ariadne import *
 
 n=2
 d=2.125

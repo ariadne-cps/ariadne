@@ -33,8 +33,8 @@ using namespace Ariadne::System;
 
 #include <boost/python.hpp>
 using namespace boost::python;
-return_value_policy<copy_const_reference> return_copy_const_reference;
-return_value_policy<reference_existing_object> return_reference_existing_object;
+typedef return_value_policy<copy_const_reference> return_copy_const_reference;
+typedef return_value_policy<reference_existing_object> return_reference_existing_object;
 
 
 template<class R>
@@ -44,19 +44,19 @@ void export_hybrid_automaton()
   
   class_< DiscreteMode<R> >("DiscreteMode",no_init)
     .def("id",&DiscreteMode<R>::id)
-    .def("name",&DiscreteMode<R>::name,return_copy_const_reference)
+    .def("name",&DiscreteMode<R>::name,return_copy_const_reference())
     .def("dimension",&DiscreteMode<R>::dimension)
-    .def("dynamic",&DiscreteMode<R>::dynamic,return_reference_existing_object)
-    .def("invariant",&DiscreteMode<R>::invariant,return_reference_existing_object)
+    .def("dynamic",&DiscreteMode<R>::dynamic,return_reference_existing_object())
+    .def("invariant",&DiscreteMode<R>::invariant,return_reference_existing_object())
     .def(self_ns::str(self))
   ;
   
 
   class_< DiscreteTransition<R> >("DiscreteTransition",no_init)
-    .def("source",&DiscreteTransition<R>::source,return_reference_existing_object)
-    .def("destination",&DiscreteTransition<R>::destination,return_reference_existing_object)
-    .def("activation",&DiscreteTransition<R>::activation,return_reference_existing_object)
-    .def("reset",&DiscreteTransition<R>::reset,return_reference_existing_object)
+    .def("source",&DiscreteTransition<R>::source,return_reference_existing_object())
+    .def("destination",&DiscreteTransition<R>::destination,return_reference_existing_object())
+    .def("activation",&DiscreteTransition<R>::activation,return_reference_existing_object())
+    .def("reset",&DiscreteTransition<R>::reset,return_reference_existing_object())
     .def(self_ns::str(self))
   ;
 
@@ -64,19 +64,19 @@ void export_hybrid_automaton()
   class_< HybridAutomaton<R> >("HybridAutomaton",hybrid_automaton_init)
     .def("new_mode",(DiscreteMode<R>&(HybridAutomaton<R>::*)(const VectorField<R>&,const Geometry::Set<R>&))
            (&HybridAutomaton<R>::new_mode),
-         return_reference_existing_object)
+         return_reference_existing_object())
     .def("new_transition",
          (DiscreteTransition<R>&(HybridAutomaton<R>::*)
              (const Map<R>&,const Geometry::Set<R>&,const DiscreteMode<R>&,const DiscreteMode<R>&))
            (&HybridAutomaton<R>::new_transition),
-         return_reference_existing_object)
+         return_reference_existing_object())
     .def("new_transition",
          (DiscreteTransition<R>&(HybridAutomaton<R>::*)(const Map<R>&,const Geometry::Set<R>&,const id_type&,const id_type&))
            (&HybridAutomaton<R>::new_transition),
-         return_reference_existing_object)
-    .def("name",&HybridAutomaton<R>::name,return_copy_const_reference)
-    .def("mode",&HybridAutomaton<R>::mode,return_copy_const_reference)
-    .def("transition",&HybridAutomaton<R>::transition,return_copy_const_reference)
+         return_reference_existing_object())
+    .def("name",&HybridAutomaton<R>::name,return_copy_const_reference())
+    .def("mode",&HybridAutomaton<R>::mode,return_copy_const_reference())
+    .def("transition",&HybridAutomaton<R>::transition,return_copy_const_reference())
     .def(self_ns::str(self))
   ;
 }

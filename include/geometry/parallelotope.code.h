@@ -269,7 +269,7 @@ namespace Ariadne {
       }
       
       // Check to make such result is valid.
-      assert(LinearAlgebra::norm(LinearAlgebra::row_norms(Gmid.inverse()*G)+(cmid-c))<=R(1));
+      assert((bool)(LinearAlgebra::norm(LinearAlgebra::row_norms(Gmid.inverse()*G)+(cmid-c))<=R(1)));
       return Geometry::Parallelotope<R>(cmid,Gmid);
     }
     

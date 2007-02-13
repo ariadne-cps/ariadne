@@ -383,8 +383,8 @@ namespace Ariadne {
     
     template<class R1, class R2> inline
     tribool operator<=(const Interval<R1>& ivl, const R2& x) { 
-      if(ivl.lower()<=x) { return true; }
-      if(ivl.upper()>x) { return false; }
+      if(ivl.upper()<=x) { return true; }
+      if(ivl.lower()>x) { return false; }
       return indeterminate;
     }
 
@@ -396,8 +396,6 @@ namespace Ariadne {
       return indeterminate;
     }
 
-
-      
     
     template<class R1, class R2> inline
     tribool operator==(const R1& x, const Interval<R2>& ivl) { 

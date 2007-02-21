@@ -179,6 +179,7 @@ namespace Ariadne {
       size_type size() const { return  _vector.size(); }
       size_type max_size() const { return  _vector.max_size(); }
       void resize(size_type n) { _vector.resize(n); }
+      void reallocate(size_type n) { _vector.resize(n); }
       
       reference operator[](size_type i) { return _vector[i]; }
       const_reference operator[](size_type i) const { return _vector[i]; }

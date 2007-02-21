@@ -117,7 +117,11 @@ namespace Ariadne {
       template<class R1> Zonotope(const Zonotope<R1>& z);
       
       /*! \brief Copy assignment operator. */
+      Zonotope<R>& operator=(const Zonotope<R>& z);
+
+      /*! \brief Type conversion assignment operator. */
       template<class Rl> Zonotope<R>& operator=(const Zonotope<Rl>& z);
+
       //@}
       
       

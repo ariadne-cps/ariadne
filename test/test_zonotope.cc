@@ -75,7 +75,12 @@ test_zonotope()
 
   Parallelotope<R> p2=Parallelotope<R>(r2);
   cout << "p2=" << p2 << endl;
-
+  
+  Point<R> pt;
+  Rectangle<R> r;
+  Zonotope<R> z;
+  Zonotope<F> iz;
+  
   Zonotope<R> z1=Zonotope<R>(r1);
   cout << "z1=" << z1 << endl;
   Zonotope<R> z2=Zonotope<R>(p2);
@@ -106,10 +111,10 @@ test_zonotope()
   
   // Minkowski sum
   cout << "z1=" << z1 << "\nz2=" << z2 << endl;
-  Zonotope<F> z5=minkowski_sum(z1,z2);
-  cout << "minkowski_sum(z1,z2)=" << z5 << endl;
-  z5=minkowski_difference(z1,z2);
-  cout << "minkowski_difference(z1,z2)=" << z5 << endl;
+  iz=minkowski_sum(z1,z2);
+  cout << "minkowski_sum(z1,z2)=" << iz << endl;
+  iz=minkowski_difference(z1,z2);
+  cout << "minkowski_difference(z1,z2)=" << iz << endl;
   cout << endl;
   
   ListSet<R,Zonotope> zls;
@@ -172,8 +177,46 @@ test_zonotope()
   eps << z4;
   eps.close();
   
-
+  // Interval zonotope
+  Zonotope<R> z5(Point<R>("(0,0)"),Matrix<R>("[2,1,1,0.125,0;1,-1,1,0,0.125]"));
+  Zonotope< Interval<R> > iz5(Point<Interval<R> >("([-0.125,0.125],[-0.125,0.125])"),Matrix<R>("[2,1,1;1,-1,1]"));
   
+  RegularGrid<R> gr5(2,0.5);
+  GridCellListSet<R> oaiz5=over_approximation(iz5,gr5);
+  GridCellListSet<R> oaz5=over_approximation(z5,gr5);
+  GridCellListSet<R> uaz5=under_approximation(z5,gr5);
+  r=Rectangle<R>("[-2.5,-2.0]x[0.0,0.5]");
+  pt=Point<R>("(-2.5,0.5)");
+  bbox=z5.bounding_box().expand_by(R(0.5));
+  eps.open("test_zonotope-5.eps",bbox);
+  eps.set_fill_colour("white");
+  eps << z5.bounding_box();
+  eps.set_fill_colour("red");
+  eps << oaiz5;
+  eps.set_fill_colour("green");
+  eps << z5;
+  eps.set_fill_colour("blue");
+  eps << uaz5;
+  eps.set_fill_colour("yellow");
+  eps << r;
+  eps.close();
+    
+  cout << "z5=" << z5 << endl;
+  cout << "r=" << r << endl;
+  cout << "pt=" << pt << endl;
+  cout << "z5.bounding_box()=" << z5.bounding_box() << endl;
+  cout << "disjoint(z5,r)=" << disjoint(r,z5) << endl;
+  cout << "subset(r,z5)=" << subset(r,z5) << endl;
+  cout << "contains(z5,pt)=" << z5.contains(pt) << endl;
+  pt=Point<R>("(-2.0,0.0)");
+  cout << "contains(z5,"<<pt<<")=" << z5.contains(pt) << endl;
+  pt=Point<R>("(-2.5,0.0)");
+  cout << "contains(z5,"<<pt<<")=" << z5.contains(pt) << endl;
+  pt=Point<R>("(-2.5,0.5)");
+  cout << "contains(z5,"<<pt<<")=" << z5.contains(pt) << endl;
+  pt=Point<R>("(-2.0,0.5)");
+  cout << "contains(z5,"<<pt<<")=" << z5.contains(pt) << endl;
+    
   try {
     //Rectangle<R> r("[1,17/16]x[19/16,5/4]");
     //Zonotope<R> z(Point<R>("(1/2, 1/10)"),Matrix<R>("[1,1/2;1/2,3/5]"));

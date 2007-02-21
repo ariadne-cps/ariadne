@@ -245,6 +245,9 @@ namespace Ariadne {
       /*! \brief The numeber of cells in the list. */
       size_type size() const;
 
+      /*! \brief Empties the set. */
+      void clear();
+
       /*! \brief The lattice set. */
       const Combinatoric::LatticeCellListSet& lattice_set() const;
 
@@ -264,8 +267,13 @@ namespace Ariadne {
       /*!\brief Append a GridCellListSet to the list. */
       void adjoin(const GridCellListSet<R>& cls);
 
-      /*! \brief Empties the set. */
-      void clear();
+      /*! \brief Adjoins an over-approximation of the set \a s. */
+      template<class S>
+      void adjoin_over_approximation(const S& s);
+
+      /*! \brief Adjoins an under-approximation of the set \a s. */
+      template<class S>
+      void adjoin_under_approximation(const S& s);
 
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;
@@ -431,6 +439,14 @@ namespace Ariadne {
       /*!\brief The set of all cells which share a facet a cell in the set. */
       GridMaskSet adjoining() const;
 
+      /*! \brief Adjoins an over-approximation of the set \a s. */
+      template<class S>
+      void adjoin_over_approximation(const S& s);
+
+      /*! \brief Adjoins an under-approximation of the set \a s. */
+      template<class S>
+      void adjoin_under_approximation(const S& s);
+
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;
 
@@ -498,6 +514,8 @@ namespace Ariadne {
     template<class R> GridCellListSet<R> over_approximation(const Polytope<R>& p, const Grid<R>& g);
     template<class R> GridCellListSet<R> over_approximation(const Polyhedron<R>& p, const Grid<R>& g);
     
+    template<class R> GridCellListSet<R> over_approximation(const Zonotope< Interval<R> >& z, const Grid<R>& g);
+      
     template<class R, template<class> class BS> GridMaskSet<R> over_approximation(const ListSet<R,BS>& ls, const FiniteGrid<R>& fg); 
     template<class R> GridMaskSet<R> over_approximation(const GridMaskSet<R>& gms, const FiniteGrid<R>& fg);
     template<class R> GridMaskSet<R> over_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& fg);

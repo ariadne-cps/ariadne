@@ -84,6 +84,17 @@ namespace Ariadne {
     { 
     }
     
+    template<class R> inline
+    Zonotope<R>& 
+    Zonotope<R>::operator=(const Zonotope<R>& z) {
+      if(this != &z) {
+        this->_dimension = z._dimension;
+        this->_number_of_generators = z._number_of_generators;
+        this->_data = z._data;
+      }
+      return *this;
+    }
+
     
     
     
@@ -124,11 +135,9 @@ namespace Ariadne {
     template<class R> template<class Rl> inline
     Zonotope<R>& 
     Zonotope<R>::operator=(const Zonotope<Rl>& z) {
-      if(this != &z) {
-        this->_dimension = z._dimension;
-        this->_number_of_generators = z._number_of_generators;
-        this->_data = z._data;
-      }
+      this->_dimension = z.dimension();
+      this->_number_of_generators = z.number_of_generators();
+      this->_data = z.data();
       return *this;
     }
 

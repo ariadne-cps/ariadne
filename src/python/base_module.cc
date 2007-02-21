@@ -25,10 +25,15 @@
 #include <boost/python.hpp>
 
 void export_tribool();
-void export_array();
+template<class R> void export_array<R>();
 
 BOOST_PYTHON_MODULE(base)
 {
   export_tribool();
-  export_array();
+  export_array<bool>();
+  export_array<index_type>();
+  export_array<size_type>();
+  export_array<Integer>();
+  export_array<Rational>();
+  export_array<Real>();
 }

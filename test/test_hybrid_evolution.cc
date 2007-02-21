@@ -46,6 +46,7 @@
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
+using namespace Ariadne::Combinatoric;
 using namespace Ariadne::Geometry;
 using namespace Ariadne::System;
 using namespace Ariadne::Evaluation;
@@ -86,9 +87,9 @@ int test_hybrid_evolution()
   AffineIntegrator<R> integrator(0.125,0.5,0.25); 
   HybridEvolver<R> hybrid_evolver(apply,integrator);
   
-  Rectangle<R> bounding_box("[-8,8]x[-8,8]");
-  FiniteGrid<R> finite_grid(bounding_box,64);
-  const Grid<R>& grid=finite_grid.grid();
+  RegularGrid<R> grid(Vector<R>("[0.25,0.25]"));
+  FiniteGrid<R> finite_grid(grid,LatticeBlock("[-32,32]x[-32,32]"));
+  Rectangle<R> bounding_box=finite_grid.extent();
   
   Rectangle<R> initial_rectangle("[-6.96875,-6.9375]x[-6.96875,-6.9375]");
   HybridGridMaskSet<R> initial_set(1,finite_grid);

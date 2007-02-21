@@ -33,23 +33,24 @@ initial_rectangle=Rectangle("[-6.96875,-6.9375]x[-6.96875,-6.9375]");
 bounding_box=Rectangle("[-8,8]x[-8,8]")
 
 
-fgrid=FiniteGrid(bounding_box,64)
-grid=fgrid.grid()
+grid=RegularGrid(Vector("[0.125,0.125]"))
+block=LatticeBlock("[-64,64]x[-64,64]")
+fgrid=FiniteGrid(grid,block)
 print fgrid
 
 print "Creating initial hybrid set",
 initial_set=HybridGridMaskSet(1,fgrid)
-initial_set[0].adjoin(over_approximation(initial_rectangle,grid))
+initial_set[0].adjoin_over_approximation(initial_rectangle)
 print initial_set[0].size(),initial_set[0].capacity()
 
 print "Creating initial hybrid cell list set",
 initial_cell_list_set=HybridGridCellListSet(1,grid)
-initial_cell_list_set[0].adjoin(over_approximation(initial_rectangle,grid))
+initial_cell_list_set[0].adjoin_over_approximation(initial_rectangle)
 print initial_cell_list_set[0].size()
 
 print "Creating bounding hybrid set",
 bounding_set=HybridGridMaskSet(1,fgrid);
-bounding_set[0].adjoin(over_approximation(bounding_box,grid));
+bounding_set[0].adjoin_over_approximation(bounding_box);
 print bounding_set[0].size(),bounding_set[0].capacity()
 
 apply=Applicator()
@@ -80,4 +81,3 @@ eps.set_fill_colour("blue")
 eps.write(initial_set[0])
 eps.close()
 print " done."
-

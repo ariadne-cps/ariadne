@@ -40,24 +40,37 @@ using namespace Ariadne::LinearAlgebra;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template<class R> 
-inline R matrix_get_item(const Matrix<R>& M, tuple index) {
+template<class R> inline 
+R matrix_get_item(const Matrix<R>& M, tuple index) {
   uint i=extract<uint>(index[0]);
   uint j=extract<uint>(index[1]);
   return M(i,j);
 }
 
-template<class R, class A> 
-inline void matrix_set_item(Matrix<R>& M, tuple index, const A& x) {
+template<class R, class A> inline 
+void matrix_set_item(Matrix<R>& M, tuple index, const A& x) {
   uint i=extract<uint>(index[0]);
   uint j=extract<uint>(index[1]);
   M(i,j)=R(x);
 }
 
 
-template<class R>
-inline Matrix<R> matrix_inverse(const Matrix<R>& A) {
+template<class R1,class R2> inline 
+Vector<typename Numeric::traits<R1,R2>::arithmetic_type> 
+matrix_vector_solve(const Matrix<R1>& A, const Vector<R2>& v) {
+ return Matrix<typename Numeric::traits<R1,R2>::arithmetic_type>(A).solve(v);
+}
+
+template<class R> inline 
+Matrix<typename Numeric::traits<R>::arithmetic_type> 
+matrix_inverse(const Matrix<R>& A) {
   return LinearAlgebra::inverse(A);
+}
+
+template<class R> inline 
+Matrix<R> 
+matrix_transpose(const Matrix<R>& A) {
+  return A.transpose();
 }
 
 template<class R>
@@ -98,6 +111,10 @@ void export_matrix()
     .def("__div__",&div<IMx,Mx,I>)
     .def(self_ns::str(self)) 
   ;
+  def("solve",&matrix_vector_solve<R,R>);
+  def("solve",&matrix_vector_solve<R,I>);
+  def("transpose",&matrix_transpose<R>);
+  def("inverse",&matrix_inverse<R>);
 }
 
 template<>
@@ -129,6 +146,10 @@ void export_matrix<Rational>()
     .def("__div__",&div<Mx,Mx,R>)
     .def(self_ns::str(self)) 
   ;
+  
+  def("solve",&matrix_vector_solve<R,R>);
+  def("transpose",&matrix_transpose<R>);
+  def("inverse",&matrix_inverse<R>);
 }
 
 template<class R>
@@ -172,6 +193,10 @@ void export_interval_matrix()
     .def(self_ns::str(self))
   ;
   
+  def("solve",&matrix_vector_solve<R,I>);
+  def("solve",&matrix_vector_solve<I,R>);
+  def("solve",&matrix_vector_solve<I,I>);
+  def("transpose",&matrix_transpose<I>);
   def("inverse",&matrix_inverse<I>);
   def("exp",&LinearAlgebra::exp<R>);
 }

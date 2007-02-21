@@ -163,9 +163,9 @@ namespace Ariadne {
 
     template<class R>
     GridBlock<R>
-    IrregularGrid<R>::bounds() const
+    IrregularGrid<R>::extent() const
     { 
-      return GridBlock<R>(*this,block());
+      return GridBlock<R>(*this,this->lattice_block());
     }
     
     template<class R>
@@ -246,7 +246,7 @@ namespace Ariadne {
 
     template<class R>
     FiniteGrid<R>::FiniteGrid(const Rectangle<R>& bb, const size_type& s)
-      : _grid_ptr(0), _grid_type(REGULAR), _bounds(bb.dimension())
+      : _grid_ptr(0), _grid_type(REGULAR), _lattice_block(bb.dimension())
     {
       array<R> subdivision_lengths(bb.dimension());
       for(dimension_type i=0; i!=bb.dimension(); ++i) {
@@ -254,15 +254,15 @@ namespace Ariadne {
       }
       this->_grid_ptr=new RegularGrid<R>(subdivision_lengths);
       GridBlock<R> bounding_box=over_approximation(bb,*_grid_ptr);
-      this->_bounds=bounding_box.lattice_set();
+      this->_lattice_block=bounding_box.lattice_set();
     }
 
     template<class R>
     Rectangle<R>
-    FiniteGrid<R>::bounding_box() const
+    FiniteGrid<R>::extent() const
     {
       dimension_type dim=this->dimension();
-      const Combinatoric::LatticeBlock &bounds=this->_bounds;
+      const Combinatoric::LatticeBlock &block=this->_lattice_block;
        
       switch(this->_grid_type) {
         case REGULAR:
@@ -272,8 +272,8 @@ namespace Ariadne {
           Point<R> l(dim),u(dim);
           
           for (dimension_type i=0; i< dim; i++) {
-            l[i]=mul_approx(this_grid->subdivision_length(i),bounds.lower_bound(i));
-            u[i]=mul_approx(this_grid->subdivision_length(i),bounds.upper_bound(i));
+            l[i]=mul_approx(this_grid->subdivision_length(i),block.lower_bound(i));
+            u[i]=mul_approx(this_grid->subdivision_length(i),block.upper_bound(i));
           }
           
           return Rectangle<R>(l,u);
@@ -281,7 +281,7 @@ namespace Ariadne {
         case IRREGULAR:
         {
           const IrregularGrid<R> *this_grid=((IrregularGrid<R> *)(this->_grid_ptr));
-          return (Rectangle<R>)(this_grid->bounds());
+          return (Rectangle<R>)(this_grid->extent());
         }
         default:
           throw std::runtime_error("FiniteGrid<R>::bounding_box(): not implemented for this grid type.");
@@ -384,7 +384,7 @@ namespace Ariadne {
     std::ostream&
     FiniteGrid<R>::write(std::ostream& os) const
     {
-      return os << "FiniteGrid(grid=" << this->grid() << ", bounds=" << this->bounds() << ")";
+      return os << "FiniteGrid(grid=" << this->grid() << ", lattice_block=" << this->lattice_block() << ")";
     }
 
 

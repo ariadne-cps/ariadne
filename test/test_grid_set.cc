@@ -98,7 +98,7 @@ test_grid_set()
   GridCellListSet<R> gcls1(ls1);
   cout << gcls1 << "\n";
 
-  FiniteGrid<R> fgr=FiniteGrid<R>(igrj,igrj.block());
+  FiniteGrid<R> fgr=FiniteGrid<R>(igrj,igrj.lattice_block());
   //GridMaskSet<R> gms1(fgr,grlsj1);
   //GridMaskSet<R> gms2(fgr,grlsj2);
   //cout << regular_intersection(gms1,gms2);

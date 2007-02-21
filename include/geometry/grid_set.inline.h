@@ -202,6 +202,26 @@ namespace Ariadne {
     }
 
 
+    template<class R> template<class Set> inline
+    void 
+    GridCellListSet<R>::adjoin_over_approximation(const Set& s) 
+    {
+        this->adjoin(over_approximation(s,this->grid()));
+    }
+
+    
+    template<class R> template<class Set> inline
+    void 
+    GridCellListSet<R>::adjoin_under_approximation(const Set& s) 
+    {
+        this->adjoin(under_approximation(s,this->grid()));
+    }
+
+
+
+
+
+
     template<class R> inline
     bool 
     GridMaskSet<R>::operator==(const GridMaskSet<R>& gms) 
@@ -348,6 +368,21 @@ namespace Ariadne {
         check_same_grid(*this,gcls);
         this->_lattice_set.adjoin(gcls._lattice_set);
     }
+
+    template<class R> template<class Set> inline
+    void 
+    GridMaskSet<R>::adjoin_over_approximation(const Set& s) 
+    {
+        this->adjoin(over_approximation(s,this->grid()));
+    }
+
+    template<class R> template<class Set> inline
+    void 
+    GridMaskSet<R>::adjoin_under_approximation(const Set& s) 
+    {
+        this->adjoin(under_approximation(s,this->grid()));
+    }
+
 
     template<class R> inline
     void 

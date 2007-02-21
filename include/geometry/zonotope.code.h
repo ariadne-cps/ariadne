@@ -418,9 +418,9 @@ namespace Ariadne {
       // Zonotope  x==c+Ge,  -1<=e<=1
       // 
       // Translate x'=x-l,  e'=e+1
-      //   x'+l==c+G(e'-1) ->  x'-Ge' == c-l-G1
-      //   0<=x'<=u-l      ->  x' + sx' == u-l
-      //   0<=e'<=2        ->  e' + se' == 2
+      //   0<=x'<=u-l      ->  x' +     + sx'               == u-l
+      //   0<=e'<=2        ->     +  e' +     + se'         == 2
+      //   x'+l==c+G(e'-1) ->  x' + Ge'             +/- ax' == c-l-G1
       //  
       // Change sign of RHS of first equality if necessary
       // Introduce slack variables for last two inequalities
@@ -429,8 +429,8 @@ namespace Ariadne {
 
       const Geometry::Point<R>& l=r.lower_corner();
       const Geometry::Point<R>& u=r.upper_corner();
-      const Geometry::Point<R>& c=z.centre();
-      const LinearAlgebra::Matrix<R>& G=z.generators();
+      const Geometry::Point<R> c=z.centre();
+      const LinearAlgebra::Matrix<R> G=z.generators();
 
       const LinearAlgebra::Vector<F> qo(m,F(1));
       const LinearAlgebra::Vector<F> ql=l.position_vector();
@@ -459,14 +459,14 @@ namespace Ariadne {
         if(qrhs(i)>=F(0)) {
           T(i+d+m,i)=1;
           for(size_type j=0; j!=m; ++j) {
-            T(i+d+m,m+j)=-qG(i,j);
+            T(i+d+m,d+j)=-qG(i,j);
           }
           T(i+d+m,d+m)=qrhs(i);
         }
         else {
           T(i+d+m,i)=-1;
           for(size_type j=0; j!=m; ++j) {
-            T(i+d+m,m+j)=qG(i,j);
+            T(i+d+m,d+j)=qG(i,j);
           }
           T(i+d+m,d+m)=-qrhs(i);
         }
@@ -575,10 +575,18 @@ namespace Ariadne {
     
     template<class R>
     tribool 
-    subset(const Rectangle<R>& A, const Zonotope<R>& B) 
+    subset(const Rectangle<R>& r, const Zonotope<R>& z) 
     {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-      return Geometry::subset(Rectangle<F>(A),B.operator Polyhedron<F>());
+      typedef typename Rectangle<R>::vertices_const_iterator RVIter;
+      tribool result=true;
+      for(RVIter rv_iter=r.vertices_begin(); rv_iter!=r.vertices_end(); ++rv_iter) {
+        const Point<R>& pt=*rv_iter;
+        result=result && z.contains(pt);
+        if(result==false) {
+          break;
+        }
+      }
+      return result;
     }
     
 

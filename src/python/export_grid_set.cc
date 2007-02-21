@@ -24,7 +24,7 @@
 
 #include "real_typedef.h"
 
-#include "linear_algebra/linear_algebra.h"
+#include "linear_algebra/vector.h"
 
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
@@ -38,11 +38,20 @@
 
 #include "python/python_utilities.h"
 using namespace Ariadne;
+using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Combinatoric;
 using namespace Ariadne::Geometry;
 
 #include <boost/python.hpp>
 using namespace boost::python;
+
+
+template<class PS, class S>
+void
+adjoin_over_approximation(PS& ps, const S& s) 
+{
+  ps.adjoin_over_approximation(s);
+}
 
 template<class R>
 struct GridWrap : Grid<R>, wrapper< Grid<R> >
@@ -52,7 +61,7 @@ struct GridWrap : Grid<R>, wrapper< Grid<R> >
   grid_type type() const { return this->get_override("type")(); }
   R subdivision_coordinate(dimension_type d, index_type n) const { return this->get_override("subdivision_coordinate")(); }
   index_type subdivision_interval(dimension_type d, const R& x) const { return this->get_override("subdivision_interval")(); }
-  bool bounds_enclose(const Rectangle<R>& r) const { return this->get_override("bounds_enclose")(); }
+  bool encloses(const Rectangle<R>& r) const { return this->get_override("encloses")(); }
   std::ostream& write(std::ostream& os) const { return this->get_override("write")(); }
   std::istream& read(std::istream& is) { return this->get_override("read")(); }
 };
@@ -75,9 +84,11 @@ void export_grid_set()
   typedef Parallelotope<R> RParallelotope;
   typedef Zonotope<R> RZonotope;
   typedef Polytope<R> RPolytope;
+  typedef Zonotope< Interval<R> > IZonotope;
   typedef ListSet<R,Rectangle> RRectangleListSet;
   typedef ListSet<R,Parallelotope> RParallelotopeListSet;
   typedef ListSet<R,Zonotope> RZonotopeListSet;
+  typedef ListSet<R,Zonotope> IZonotopeListSet;
   typedef PartitionTreeSet<R> RPartitionTreeSet;
   
   class_<RGridWrap, boost::noncopyable>("Grid")
@@ -86,7 +97,7 @@ void export_grid_set()
     .def("subdivision_index", pure_virtual(&RGrid::subdivision_index))
     .def("subdivision_lower_index", &RGrid::subdivision_lower_index)
     .def("subdivision_upper_index", &RGrid::subdivision_upper_index)
-    .def("bounds_enclose", pure_virtual(&RGrid::bounds_enclose))
+    .def("encloses", pure_virtual(&RGrid::encloses))
     .def(self_ns::str(self))    // __str__
     ;
 
@@ -98,11 +109,14 @@ void export_grid_set()
     .def("subdivision_index", &RIrregularGrid::subdivision_index)
     .def("subdivision_lower_index", &RIrregularGrid::subdivision_lower_index)
     .def("subdivision_upper_index", &RIrregularGrid::subdivision_upper_index)
-    .def("bounds_enclose", &RIrregularGrid::bounds_enclose)
+    .def("encloses", &RIrregularGrid::encloses)
+    .def("lattice_block", &RIrregularGrid::lattice_block)
+    .def("extent", &RIrregularGrid::extent)
     .def(self_ns::str(self))    // __str__
     ;
 
   class_< RRegularGrid, bases<RGrid> >("RegularGrid",init<const array<Real>&>())
+    .def(init<const Vector<Real> >())
     .def(init<uint,Real>())
     .def(init<uint,double>())
     .def("dimension", &RRegularGrid::dimension)
@@ -110,19 +124,20 @@ void export_grid_set()
     .def("subdivision_index", &RRegularGrid::subdivision_index)
     .def("subdivision_lower_index", &RRegularGrid::subdivision_lower_index)
     .def("subdivision_upper_index", &RRegularGrid::subdivision_upper_index)
-    .def("bounds_enclose", &RRegularGrid::bounds_enclose)
+    .def("encloses", &RRegularGrid::encloses)
     .def(self_ns::str(self))    // __str__
     ;
 
-  class_< RFiniteGrid>("FiniteGrid",init<RRectangle,size_type>())
-    .def(init<const RGrid&,LatticeBlock>())
+  class_< RFiniteGrid>("FiniteGrid",init<const RGrid&,LatticeBlock>())
+    .def(init<RRectangle,size_type>())
     .def(init<const RGrid&,RRectangle>())
     .def("dimension", &RFiniteGrid::dimension)
     .def("subdivision_coordinate", &RFiniteGrid::subdivision_coordinate)
     .def("subdivision_lower_index", &RFiniteGrid::subdivision_lower_index)
     .def("subdivision_upper_index", &RFiniteGrid::subdivision_upper_index)
     .def("grid", &RFiniteGrid::grid,return_internal_reference<>())
-    .def("bounds", &RFiniteGrid::bounds,return_value_policy<copy_const_reference>())
+    .def("lattice_block", &RFiniteGrid::lattice_block,return_value_policy<copy_const_reference>())
+    .def("extent", &RFiniteGrid::extent)
     .def(self_ns::str(self))    // __str__
     ;
 
@@ -149,7 +164,11 @@ void export_grid_set()
     .def("adjoin", (void(RGridCellListSet::*)(const RGridCell&))(&RGridCellListSet::adjoin))
     .def("adjoin", (void(RGridCellListSet::*)(const RGridBlock&))(&RGridCellListSet::adjoin))
     .def("adjoin", (void(RGridCellListSet::*)(const RGridCellListSet&))(&RGridCellListSet::adjoin))
-    .def("size", &RGridCellListSet::size)
+    .def("adjoin_over_approximation", &adjoin_over_approximation<RGridCellListSet,RRectangle>)
+    .def("adjoin_over_approximation", &adjoin_over_approximation<RGridCellListSet,RZonotope>)
+    .def("adjoin_over_approximation", &adjoin_over_approximation<RGridCellListSet,IZonotope>)
+    .def("adjoin_over_approximation", &adjoin_over_approximation<RGridCellListSet,RPolytope>)
+     .def("size", &RGridCellListSet::size)
     .def("__len__", &RGridCellListSet::size)
     .def("__getitem__", &get_item<RGridCellListSet>)
     .def("__iter__", iterator<RGridCellListSet>())
@@ -157,7 +176,7 @@ void export_grid_set()
     ;
   
   class_<RGridMaskSet>("GridMaskSet",init<const RFiniteGrid&>())
-    .def(init<RGridCellListSet>())
+    .def(init<const RGrid&,LatticeBlock>())
     .def(init<RGridMaskSet>())
     .def(init<RRectangleListSet>())
     .def("bounding_box", &RGridMaskSet::bounding_box)
@@ -170,6 +189,15 @@ void export_grid_set()
     .def("adjoin", (void(RGridMaskSet::*)(const RGridBlock&))(&RGridMaskSet::adjoin))
     .def("adjoin", (void(RGridMaskSet::*)(const RGridCellListSet&))(&RGridMaskSet::adjoin))
     .def("adjoin", (void(RGridMaskSet::*)(const RGridMaskSet&))(&RGridMaskSet::adjoin))
+    .def("restrict", (void(RGridMaskSet::*)(const RGridCellListSet&))(&RGridMaskSet::restrict))
+    .def("restrict", (void(RGridMaskSet::*)(const RGridMaskSet&))(&RGridMaskSet::restrict))
+    .def("adjoin_over_approximation", &adjoin_over_approximation<RGridMaskSet,RRectangle>)
+    .def("adjoin_over_approximation", &adjoin_over_approximation<RGridMaskSet,RZonotope>)
+    .def("adjoin_over_approximation", &adjoin_over_approximation<RGridMaskSet,IZonotope>)
+    .def("adjoin_over_approximation", &adjoin_over_approximation<RGridMaskSet,RPolytope>)
+    //.def("adjoin_over_approximation", &adjoin_over_approximation<RGridMaskSet,RRectangleListSet>)
+    //.def("adjoin_over_approximation", &adjoin_over_approximation<RGridMaskSet,RZonotopeListSet>)
+    //.def("adjoin_over_approximation", &adjoin_over_approximation<RGridMaskSet,IZonotopeListSet>)
     .def("neighbourhood", &RGridMaskSet::neighbourhood)
     .def("adjoining", &RGridMaskSet::adjoining)
     .def("size", &RGridMaskSet::size)
@@ -189,6 +217,7 @@ void export_grid_set()
   def("over_approximation",(RGridBlock(*)(const RRectangle&,const RGrid&))(&Geometry::over_approximation));
   def("over_approximation",(RGridCellListSet(*)(const RZonotope&,const RGrid&))(&Geometry::over_approximation));
   def("over_approximation",(RGridCellListSet(*)(const RPolytope&,const RGrid&))(&Geometry::over_approximation));
+  def("over_approximation",(RGridCellListSet(*)(const IZonotope&,const RGrid&))(&Geometry::over_approximation));
   //def("over_approximation",(RGridCellListSet(*)(const RPolyhedron&,const RGrid&))(&Geometry::over_approximation));
   def("over_approximation",(RGridMaskSet(*)(const RRectangleListSet&,const RFiniteGrid&))(&Geometry::over_approximation));
   def("over_approximation",(RGridMaskSet(*)(const RParallelotopeListSet&,const RFiniteGrid&))(&Geometry::over_approximation));

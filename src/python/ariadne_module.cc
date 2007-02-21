@@ -35,7 +35,7 @@ using namespace Ariadne::Numeric;
 #include <boost/python.hpp>
 
 void export_tribool();
-void export_array();
+template<class T> void export_array();
 
 void export_numeric();
 template<class R> void export_function();
@@ -91,7 +91,12 @@ template<class R> void export_lorenz_system();
 BOOST_PYTHON_MODULE(ariadne)
 {
   export_tribool();
-  export_array();
+  export_array<bool>();
+  export_array<Ariadne::index_type>();
+  export_array<Ariadne::size_type>();
+  export_array<Ariadne::Integer>();
+  export_array<Ariadne::Rational>();
+  export_array<Ariadne::Real>();
 
   export_numeric();
   export_function<MPFloat>();

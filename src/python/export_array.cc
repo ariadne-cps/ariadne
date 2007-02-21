@@ -19,42 +19,34 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- */
+ */ 
 
 #include "base/array.h"
 #include "combinatoric/array_operations.h"
 #include "base/stlio.h"
 
 #include "python/python_utilities.h"
+#include "real_typedef.h"
 using namespace Ariadne;
 using namespace Ariadne::Base;
 
 #include <boost/python.hpp>
 using namespace boost::python;
-  
+
+template<class T>
 void export_array() {
-  class_<BooleanArray>("BooleanArray",init<uint>())
-    .def(init<BooleanArray>())
-    .def("__len__", &BooleanArray::size)
-    .def("__getitem__", &get_item<BooleanArray>)
-    .def("__setitem__", &set_item<BooleanArray>)
+  class_< array<T> >(python_name<T>("Array").c_str(),init<uint>())
+    .def(init< array<T> >())
+    .def("__len__", &array<T>::size)
+    .def("__getitem__", &get_item< array<T> >)
+    .def("__setitem__", &set_item< array<T> >)
     .def(self_ns::str(self))    // __self_ns::str__
   ;
-
-  class_<IndexArray>("IndexArray",init<uint>())
-    .def(init<IndexArray>())
-    .def("__len__", &IndexArray::size)
-    .def("__getitem__", &get_item<IndexArray>)
-    .def("__setitem__", &set_item<IndexArray>)
-    .def(self_ns::str(self))    // __self_ns::str__
-  ;
-
-  class_<SizeArray>("SizeArray",init<uint>())
-    .def(init<SizeArray>())
-    .def("__len__", &SizeArray::size)
-    .def("__getitem__", &get_item<SizeArray>)
-    .def("__setitem__", &set_item<SizeArray>)
-    .def(self_ns::str(self))    // __self_ns::str__
-  ;
-
 }
+
+template void export_array<bool>();
+template void export_array<index_type>();
+template void export_array<size_type>();
+template void export_array<Integer>();
+template void export_array<Rational>();
+template void export_array<Real>();

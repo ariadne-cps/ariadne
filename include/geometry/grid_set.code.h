@@ -261,6 +261,7 @@ namespace Ariadne {
     {
       tribool tb;
       Zonotope<R>* z=0;
+      Zonotope< Interval<R> >* iz=0;
       Parallelotope<R>* pl=0;
       Polytope<R>* pt=0;
       Polyhedron<R>* ph=0;
@@ -274,6 +275,7 @@ namespace Ariadne {
       *gcls=over_approximation(*pl,*g);
       *gcls=over_approximation(*pt,*g);
       *gcls=over_approximation(*ph,*g);
+      *gcls=over_approximation(*iz,*g);
 
       *gcls=under_approximation(*z,*g);
       *gcls=under_approximation(*pl,*g);
@@ -286,14 +288,14 @@ namespace Ariadne {
     
     template<class R>
     GridMaskSet<R>::GridMaskSet(const FiniteGrid<R>& g)
-      : _grid_ptr(&g.grid()), _lattice_set(g.bounds()) 
+      : _grid_ptr(&g.grid()), _lattice_set(g.lattice_block()) 
     { 
     }
 
     
     template<class R>
     GridMaskSet<R>::GridMaskSet(const FiniteGrid<R>& fg, const BooleanArray& m)
-      : _grid_ptr(&fg.grid()), _lattice_set(fg.bounds(),m)
+      : _grid_ptr(&fg.grid()), _lattice_set(fg.lattice_block(),m)
     {
     }
 
@@ -311,8 +313,8 @@ namespace Ariadne {
     {
       const IrregularGrid<R>* irregular_grid_ptr=dynamic_cast<const IrregularGrid<R>*>(_grid_ptr);
       if(irregular_grid_ptr) {
-        if(!subset(b,irregular_grid_ptr->block())) {
-          throw std::runtime_error("Lattice block does not lie in grid bounds");
+        if(!subset(b,irregular_grid_ptr->lattice_block())) {
+          throw std::runtime_error("Lattice block does not lie in grid lattice block");
         }
       }
     }
@@ -324,8 +326,8 @@ namespace Ariadne {
     {
       const IrregularGrid<R>* irregular_grid_ptr=dynamic_cast<const IrregularGrid<R>*>(_grid_ptr);
       if(irregular_grid_ptr) {
-        if(!subset(ms.block(),irregular_grid_ptr->block())) {
-          throw std::runtime_error("Lattice block does not lie in grid bounds");
+        if(!subset(ms.block(),irregular_grid_ptr->lattice_block())) {
+          throw std::runtime_error("Lattice block does not lie in grid lattice block");
         }
       }
     }
@@ -350,7 +352,7 @@ namespace Ariadne {
     template<class R>
     GridMaskSet<R>::GridMaskSet(const ListSet<R,Rectangle>& rls) 
       : _grid_ptr(new IrregularGrid<R>(rls)), 
-        _lattice_set(dynamic_cast<const IrregularGrid<R>*>(_grid_ptr)->block())
+        _lattice_set(dynamic_cast<const IrregularGrid<R>*>(_grid_ptr)->lattice_block())
     {
       //FIXME: Memory leak!    
 
@@ -850,6 +852,44 @@ namespace Ariadne {
 
     template<class R>
     GridCellListSet<R>
+    over_approximation(const Zonotope< Interval<R> >& z, const Grid<R>& g) 
+    {
+      if(verbosity>7) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+      GridCellListSet<R> result(g);
+      check_equal_dimensions(z,g,"over_approximation(Zonotope<R>,Grid<R>)");
+      if(z.empty()) {
+        return result; 
+      }
+      
+      size_type ng=z.number_of_generators();
+      Point< Interval<R> > c=z.centre();
+      LinearAlgebra::Matrix< Interval<R> > G=z.generators();
+      
+      Point<R> ac=approximate_value(c);
+      LinearAlgebra::Matrix<R> aG=approximate_value(G);
+      LinearAlgebra::Vector< Interval<R> > e=(c-ac)+(G-aG)*LinearAlgebra::Vector< Interval<R> >(ng,Interval<R>(-1,1));
+      
+      Zonotope<R> az(ac,aG);
+      
+     
+      Rectangle<R> bb=z.bounding_box();
+
+      GridBlock<R> gbb=over_approximation(bb,g);
+      Combinatoric::LatticeBlock block=gbb.lattice_set();
+
+      for(Combinatoric::LatticeBlock::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
+        GridCell<R> cell(g,*iter);
+        if(disjoint(Rectangle<R>(cell)+e,az)) {
+        } else {
+          result.adjoin(cell);
+        }
+      }
+
+      return result;
+    }
+
+    template<class R>
+    GridCellListSet<R>
     under_approximation(const Parallelotope<R>& p, const Grid<R>& g)
     {
       GridCellListSet<R> result(g);
@@ -974,7 +1014,7 @@ namespace Ariadne {
       check_equal_dimensions(set,fg,"over_approximation(PartitionTreeSet<R>,FiniteGrid<R>)");
       
       const Grid<R>& g=fg.grid();
-      const Combinatoric::LatticeBlock& lb=fg.bounds();
+      const Combinatoric::LatticeBlock& lb=fg.lattice_block();
       
       for(typename Combinatoric::LatticeBlock::const_iterator iter=lb.begin(); iter!=lb.end(); ++iter) {
         GridCell<R> gc(g,*iter);

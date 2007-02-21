@@ -109,9 +109,9 @@ namespace Ariadne {
        * within its bounds. */
     template<class R> inline 
     bool 
-    IrregularGrid<R>::bounds_enclose(const Rectangle<R>& r) const 
+    IrregularGrid<R>::encloses(const Rectangle<R>& r) const 
     {
-      return subset(r,Rectangle<R>(this->bounds())); 
+      return subset(r,Rectangle<R>(this->extent())); 
     }
             
       
@@ -135,7 +135,7 @@ namespace Ariadne {
       
     template<class R> inline 
     Combinatoric::LatticeBlock 
-    IrregularGrid<R>::block() const 
+    IrregularGrid<R>::lattice_block() const 
     { 
       return Combinatoric::LatticeBlock(lower(),upper()); 
     }
@@ -144,14 +144,14 @@ namespace Ariadne {
     SizeArray 
     IrregularGrid<R>::sizes() const 
     { 
-      return block().sizes(); 
+      return lattice_block().sizes(); 
     }
 
     template<class R> inline 
     size_type 
     IrregularGrid<R>::capacity() const 
     { 
-      return block().size(); 
+      return lattice_block().size(); 
     }
 
     template<class R> inline 
@@ -174,14 +174,20 @@ namespace Ariadne {
   
     
   template<class R> inline
+  RegularGrid<R>::RegularGrid(const dimension_type& n, const R& l)
+    : _subdivision_lengths(n,l) 
+  {
+  }
+
+  template<class R> inline
   RegularGrid<R>::RegularGrid(const array<R>& sl)
     : _subdivision_lengths(sl) 
   {
   }
 
   template<class R> inline
-  RegularGrid<R>::RegularGrid(const dimension_type& n, const R& l)
-    : _subdivision_lengths(n,l) 
+  RegularGrid<R>::RegularGrid(const LinearAlgebra::Vector<R>& v)
+    : _subdivision_lengths(v.begin(),v.end()) 
   {
   }
 
@@ -219,18 +225,11 @@ namespace Ariadne {
 
   template<class R> inline
   bool 
-  RegularGrid<R>::bounds_enclose(const Rectangle<R>& r) const 
+  RegularGrid<R>::encloses(const Rectangle<R>& r) const 
   {
     return true; 
   }
      
-  template<class R> inline
-  bool
-  RegularGrid<R>::bounds_superset(const Rectangle<R>& r) const
-  { 
-    return true; 
-  }
-
 
 
 
@@ -238,14 +237,14 @@ namespace Ariadne {
      
   template<class R> inline
   FiniteGrid<R>::FiniteGrid(const Grid<R>& g, const Combinatoric::LatticeBlock& b) 
-    : _grid_ptr(&g), _grid_type(g.type()), _bounds(b)
+    : _grid_ptr(&g), _grid_type(g.type()), _lattice_block(b)
   { 
   }
       
   template<class R> inline
   FiniteGrid<R>::FiniteGrid(const Grid<R>& g, const Rectangle<R>& bb) 
     : _grid_ptr(&g), _grid_type(g.type()), 
-      _bounds(over_approximation(bb,g).lattice_set())
+      _lattice_block(over_approximation(bb,g).lattice_set())
   { 
   }
       
@@ -258,9 +257,9 @@ namespace Ariadne {
       
   template<class R> inline
   const Combinatoric::LatticeBlock& 
-  FiniteGrid<R>::bounds() const 
+  FiniteGrid<R>::lattice_block() const 
   {
-    return _bounds; 
+    return _lattice_block; 
   }
      
 

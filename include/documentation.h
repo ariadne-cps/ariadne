@@ -69,7 +69,7 @@ To make the source code documentation, you will need:
 
 \section Installation
 
-From the ariadne/trunk/ directory of the main tree, type
+From main source directory, type
 \code 
   ./configure
   make
@@ -256,12 +256,266 @@ that the length of \c f(I) approaches 0 as the length of \c I approaches 0.
 
 
 
+\page pivot Pivoting and Permutations
+
+Re-ordering of matrix rows/columns and vector elements can be described by <em>permutations</em> and <em>pivoting</em>.
+Essentially, a permutation gives the re-ordering directly, and is most useful if the re-ordered elements are to be used in-place or copied, whereas pivoting describes the re-ordering as a product of transpositions, and is most useful if the elements are to be re-ordered in place.
+
+We write a permuation
+\f[ \pi=\left(\begin{array}{cccccc}0&1&\cdots&n\!-\!1\\\pi_0&\pi_1&\cdots&\pi_{n-1}\end{array}\right); \quad \pi_i\neq\pi_j \text{ if } i\neq j \f]
+and a pivot
+\f[ p = (0\;p_0)\ (1\;p_1)\ \cdots\ (n\!-\!1,p_{n-1}); \quad p_i\geq i . \f]
+where the transpositions are applied from left to right.
+
+For example, the permutation
+\f[ \pi=\left(\begin{array}{ccccc}0&1&2&3&4\\1&3&4&2&0\end{array}\right)  \f]
+can be writing in pivot form
+\f[ p=(0\;1)\ (1\;3)\ (2\;4)\ (3\;4)\ (4\;4) . \f]
+The inverses are
+\f[ \pi^{-1}=\left(\begin{array}{ccccc}0&1&2&3&4\\4&0&3&1&2\end{array}\right); \qquad 
+     p^{-1}=(4\;4)\ (3\;4)\ (2\;4)\ (1\;3)\ (0\;1) \f]
+
+Applying the permuation to the vector \f$v=(v_0,v_1,v_2,v_3,v_4)^T\f$ yields the vector \f$\pi v=(v_1,v_3,v_4,v_2,v_0)^T\f$.
+Applying the pivots to the vector yield successively \f$(v_1,v_0,v_2,v_3,v_4)^T\f$, \f$(v_1,v_3,v_2,v_0,v_4)^T\f$, \f$(v_1,v_3,v_4,v_0,v_2)^T\f$ and \f$Pv=(v_1,v_3,v_4,v_2,v_0)^T\f$.
+
+The pivot form is used by linear algebra packages such as LAPACK.
+For the triangular factorization of a matrix \f$A\f$ with partial pivoting yields matrices \f$P,L,U\f$ such that \f$PA=LU\f$, where \f$P\f$ is a pivot matrix.
+The matrix
+\f[ A=\left(\begin{matrix}0&0&0&0&1\\1&x&x&x&x\\0&0&0&1&x\\0&1&x&x&x\\0&0&1&x&x\end{matrix}\right)\f]
+yields a pivot matrix \f$P\f$ described by the pivot \f$p=(0\;1)\ (1\;3)\ (2\;4)\ (3\;4)\ (4\;4)\f$. In other words, during the factorisation, we first interchange row 0 and row 1, then row 1 (which corresponds to the old row 0) with row 3, and so on.
+
+The permuation form is mostly used by linear programming packages to select basis variables.
+<br>
+Consider the \f$m\times n\f$ matrix \f$\mathrm{A}\f$ with \f$n>m\f$, and suppose \f$\mathrm{A}\f$ has full row rank.
+Let \f$B=\{ j_0,j_1,\ldots,j_{m-1}\}\f$ be a set of \f$m\f$ values from \f$\{0,\ldots,n\!-\!1\}\f$, and define the matrix \f$\mathrm{B}=\mathrm{A}_B=\bigl( a_{i_0}\ a_{i_1}\ \cdots\ a_{i_{n-1}}\bigr)\f$.
+Here, a (partial) permutation is used to select the pivot elements.
+<br>
+In the reduced simplex algorithm, we store an intermediate form of the problem as \f$x_B+\mathrm{A}x_N=b\f$
+We now store both \f$B=(j_0,j_1,\ldots,j_{m-1})\f$ giving the columns of the basic variables, and \f$N=(j_{m},j_{m+1},\ldots,j_{n-1})\f$ giving the columns of the non-basic variables.
+
+
+
+
+
+
+\page linearprogramming Linear Programming
+
+\section standardprimaldual Standard primal and dual problems
+
+The standard linear programming problem is
+\f[ \text{(P)} \qquad \min c^Tx \text{ s.t. } Ax=b;\ x\geq0.  \f]
+Without loss of generality we can take \f$b\geq0\f$.
+We let \f$x^*\f$ be an optimal point.
+
+The dual to the standard problem is
+\f[ \text{(D)} \qquad \max b^T y \text{ s.t. } A^Ty\leq c \f]
+or alternatively
+\f[ \text{(D)} \qquad \max b^T y \text{ s.t. } A^Ty+z=c;\ z\geq 0. \f]
+The variables \f$y\f$ are called <em>dual variables</em> and the variables \f$z\f$ are <em>slack variables</em>.
+
+<b>Theorem</b> If \f$x\f$ is feasible for (P) and \f$y\f$ is feasible for (D), then \f[c^Tx \geq b^Ty.\f]
+Further, if \f$x^*\f$ is optimal for (P) and \f$(y^*,z^*)\f$ is optimal for (D), then \f[c^Tx^* = b^Ty^* \qquad \text{and} \qquad x^*\!\cdot\! z^*=0 .\f]
+
+The second condition is called <em>complementary slackness</em>.
+
+\section robustprimaldual Robust primal and dual problems
+
+The robust standard linear programming problem is
+\f[ \text{(P)} \qquad \min c^Tx \text{ s.t. } Ax=b;\ x>0.  \f]
+and additionally find column indices \f$B\f$ such that \f$A_B\f$ is nonsingular.
+The dual to the standard problem is
+\f[ \text{(D)} \qquad \max b^T y \text{ s.t. } A^Ty<c \f]
+or alternatively
+\f[ \text{(D)} \qquad \max b^T y \text{ s.t. } A^Ty+z=c;\ z>0. \f]
+
+
+
+\section robustprimaldual Robust feasibility certificates
+
+A <em>robust feasibility certificate</em> for the primal problem is a base \f$B\f$ such that \f$A_B\f$ is nonsingular, and a vector \f$x_N>0\f$ such that \f$-A_B^{-1}A_Nx_N>0\f$, and an infeasibility certificate is a vector \f$y>0\f$ such that \f$A^Ty<c\f$ and \f$b^Ty>0\f$.
+
+A <em>robust feasibility certificate</em> for the dual problem is a vector \f$y\f$ such that \f$A^Ty<c\f$, and an infeasibility certificate is a vector \f$x_N\f$ such that \f$-A_B^{-1}A_Nx_N>0\f$ and \f$c^Tx<0\f$.
+
+
+
+\section reducedform Reduced linear programming problem
+
+The reduced form of the standard linear programming problem is
+\f[ \min c^Tx \text{ s.t. } x_B+\tilde{A}x_N=b;\ x\geq0 . \f]
+Here, \f$x_B\f$ are the basic variables, and \f$x_N\f$ the non-basic variables.
+
+If \f$A\f$ is of full row rank, by choosing a basis such that the basis matrix \f$A_B\f$ is invertible, we can put any linear programming problem in standard form.
+
+
+
+\section dualcertificate Certificates of unsolvability / Farka's Lemma
+
+A certificate of unsolvability of \f$Ax\leq b\f$ is a vector \f$y\geq0\f$ such that \f$y^TA=0\f$ and \f$y^Tb<0\f$.
+For then \f$0=y^TAx\leq y^Tb < 0\f$, a contradiction.
+
+A certificate of unsolvability of \f$Ax<b\f$ is a vector \f$y\geq0;\ y\neq0\f$ such that \f$y^TA=0\f$, and \f$y^Tb\leq0\f$.
+For then \f$0 = (y^TA)x = y^T(Ax) < y^Tb \leq 0\f$, a contradiction.
+
+A certificate of unsolvability of \f$Ax=b;\ x\geq0\f$ is a vector \f$y\f$ such that \f$y^TA\geq0\f$ and \f$y^Tb<0\f$.
+For then \f$0\leq y^TAx\leq y^Tb < 0\f$, a contradiction.
+
+\section robustcertificate Robust certificates
+
+A robust certificate for the polyhedral feasibility problem \f$Ax\leq b\f$ is a point \f$x\f$ such that \f$Ax<b\f$.
+A robust certificate of unsolvability is a base \f$B\f$ such that \f$A_B\f$ is nonsingular, and a vector \f$y>0\f$ such that \f$yA=0\f$ and \f$yb<0\f$.
+
+<b>Theorem</b>
+Suppose \f$Ax\leq b\f$ is robust. Then either there exists \f$x\f$ such that \f$Ax<b\f$, or \f$A\f$ has full column rank and there exists \f$y>0\f$ such that \f$yA=0\f$ and \f$yb<0\f$.
+
+<i>Proof</i> 
+If \f$Ax<b\f$, then this holds also for perturbations of \f$x\f$.
+If \f$yA=0\f$ and \f$A_B\f$ is nonsingular, then \f$y_B=-y_NA_NA_B^{-1}\f$.
+Perturbing \f$A,b\f$ and keeping \f$y_N\f$ constant, we obtain a perturbation of \f$y_B\f$, and hence a certificate for the perturbed problem.
+<br>
+Conversely, suppose the problem is robustly solvable.
+Then the problem \f$Ax\leq b-\epsilon o\f$ is solvable for \f$o>0\f$ and \f$\epsilon\f$ sufficiently small. Hence there exists \f$x\f$ such that \f$Ax<b\f$.
+<br>
+Suppose the problem is robustly unsolvable
+Let \f$P_\epsilon=I+\epsilon O\f$, where \f$O\f$ is the matrix consisting of all ones. Since \f$Ax\leq b\f$ is robustly unsolvable, \f$P_\epsilon Ax\leq P_\epsilon b\f$ is unsolvable for some \f$\epsilon>0\f$. Then there exists \f$y_\epsilon\f$ such that \f$y_\epsilon P_\epsilon A=0\f$, \f$y_\epsilon\geq0\f$ and \f$y_\epsilon P_\epsilon b<0\f$. Then if \f$y=y_\epsilon P_\epsilon\f$, then \f$yA=0\f$, \f$yb<0\f$ and \f$y>0\f$ since \f$y_\epsilon\geq0;\ y_\epsilon\neq0\f$ and \f$P_\epsilon>0\f$.
+
+<b>Theorem</b>
+Suppose \f$Ax=b;\ x\geq0\f$ is robust. Then either \f$A\f$ has full row rank and there exists \f$x>0\f$ such that \f$Ax=b\f$, or there exists \f$y\f$ such that \f$yA<0\f$ and \f$yb>0\f$.
+
+<b>Theorem</b>
+Suppose \f$Ax=b;\ x\geq l\f$ is robust. Then either \f$A\f$ has full row rank and there exists \f$x>l\f$ such that \f$Ax=b\f$, or there exists \f$y\f$ such that \f$yA<0\f$ and \f$y(b-Al)>0\f$.
+
+<b>Theorem</b>
+Suppose \f$Ax=b;\ x\leq u\f$ is robust. Then either \f$A\f$ has full row rank and there exists \f$x<u\f$ such that \f$Ax=b\f$, or there exists \f$y\f$ such that \f$yA<0\f$ and \f$y(b-Au)<0\f$.
+
+<b>Theorem</b>
+Suppose \f$Ax=b;\ l\leq x\leq u\f$ is robust. Then either \f$A\f$ is nonsingular, and there exists \f$x\f$ such that \f$Ax=b\f$ and \f$l<x<u\f$, or there exists column index sets \f$P,Q\f$ and \f$y\f$ such that \f$yA<0;\ y(b-A_Pl_P)>0 \text{ and } y(b-A_Qu_Q)<0\f$.
+
+\section feasiblesolution Solving robust feasibility problems
+
+We wish to use the simplex algorithm to solve robust feasibility problems \f$Ax\leq b\f$ using inexact arithmetic. If the problem is nondegenerate, which in practice means that no \f$n\f$ columns of \f$m\times n\f$ \f$A\f$ are linearly dependent, and no two basic solutions are equal, then the problem is fairly straightforward; the problem is robust and can be solved by the simplex algorithm with sufficiently high precision.
+
+In practice, we run the simplex algorithm until we either find a basis such that \f$A_NA_B^{-1}b_B\lessapprox b_N\f$, or a constraint \f$a_j\f$ such that \f$a_jA_B^{-1}\lessapprox0\f$.
+
+
+
+
+
+
+\section feasibilityalgorithms Algorithms for feasibility 
+
+ - Constrained feasibility problem with equalities  \f$ Ax=b;\ l\leq x\leq u\ (m\leq n)\f$.<br>
+   Find a set of basic variables \f$B\f$ so that \f$ A_B\f$ is nonsingular, where \f$ A_B\f$ is the matrix formed from the columns of \f$A\f$ in \f$B\f$.
+   Initialise \f$x_N\f$ to \f$l\f$ for non-basic variables, and set \f$x_B=A_B^{-1}(b-A_Nx_N)\f$. Then \f$Ax=b\f$, but possibly not \f$l_B\leq x_B\leq u_B\f$.
+   <br>
+   Let \f$c_i=-1\f$ if \f$x_i<l_i\f$ and \f$c_i=-1\f$ if \f$x_i>u_i\f$.
+   Now minimise \f$c^Tx\f$, but relax the currently violated constraints.
+
+   \b Remark: Since we do not assume the existence of \f$\pm\infty\f$ in our number types, we use \f$l=0,\ u=-1\f$ for the constraint \f$x\geq0\f$; this is the only unbounded constraint we allow.
+
+   See Chvatal [Chapter 8, pp 129] for more details.
+ 
+ - Unconstrained feasibility problem with inequalities  \f$ Ax\leq b;\ l\leq x\leq u\ (m\geq n)\f$.<br>
+   Let \f$I\f$ be a set of basic indices such that \f$A_I\f$ is invertible, where \f$A_I\f$ is the matrix formed from the \em rows corresponding to the \f$I\f$.
+   Set \f$v=A_I^{-1}b_I\f$, and let \f$S\f$ be the constraints satisfied by \f$v\f$.
+   Find \f$i\f$ such that \f$a_iv>v\f$ where \f$a_i\f$ is the \f$i^\mathrm{th}\f$ row of \f$A\f$ and let \f$c=a_i\f$.
+   Change basis until either \f$a_i v\leq b\f$ or it is impossible to reduce \f$a_i x\f$ without violating \f$A_Sx\leq b_S\f$.
+
+
+\section simplexalgorithm The simplex algorithm
+
+  Suppose we wish to update a basis of the standard linear programming problem.
+   - The current point \f$v=\mathrm{A}_B^{-1} (b - \mathrm{A}_N x_N)\f$ (typically, \f$x_N=0\f$).
+   - The reduced costs are \f$c_N-(c_B\mathrm{A}_B^{-1})\mathrm{A}_N\f$.
+   - If the reduced costs are all positive, the algorithm terminates. Otherwise, select \f$j\f$ such that \f$c_j<0\f$.
+   - The direction to move is \f$d=\mathrm{A}_B^{-1}a_j\f$.
+   - Choose \f$t\f$ maximal so that \f$l_B \leq v-td\leq u_B\f$; if the update is being used for feasibility, constraints violated by \f$v\f$ may be violated by \f$v-td\f$. Choose \f$k\f$ such that \f$i=\pi_k\f$ corresponds to a saturated constraint.
+   - Replace \f$x_j\f$ by \f$x_k\f$ in the basis and update \f$\mathrm{B}:=\mathrm{A}_B{-1}\f$.
+     - We have \f$\mathrm{B} \mathrm{A}_{\pi_i}=e_i\f$ for \f$i\neq k\f$ and we want \f$\mathrm{B} \mathrm{A}_{\pi_k}=e_k\f$.
+     - Let \f$\mathrm{B}\mathrm{A}_{\pi_k} = a\f$.
+     - For \f$i\neq k\f$, subtract \f$\mathrm{B}_{kj}\,a_i/a_k\f$ from \f$\mathrm{B}_{ij}\f$ for all \f$j\f$.
+     - Then divide \f$\mathrm{B}_{kj}\f$ by \f$a_k\f$ for all \f$j\f$.
+
+
+\section simplexefficiency Efficiency of the simplex algorithm
+
+For a linear programming problem of standard form, with \f$A\f$ an \f$m\times n\f$ matrix, the number of iterations of the simplex algorithm for practical problems grows approximately as \f$m\log n\f$.
+
+
+
+
+
+\section geometricfeasibility Feasibility problems for geometric operations
+
+In the Geometry module, we need to solve the following linear programming problems to test intersection.
+\f[ \begin{array}{|l||c|c|c|c|}\hline
+      &\text{Polyhedron}&\text{Polytope}&\text{Zonotope}\\\hline\hline
+      \text{Point} & Ax\leq b & x=Vs;\ 1\!\cdot\!s=1;\ s\geq0 & x=c+Ge;\ -1\leq e\leq1 \\\hline
+      \text{Rectangle} & Ax\leq b;\ l\leq x\leq u & l\leq v+W\tilde{s}\leq u;\ 1\!\cdot\!s\leq 1;\ s\geq0 & l\leq c+Ge\leq u;\ -1\leq e\leq1 \\\cline{3-4}
+                       &                          & x=Vs;\ 1\!\cdot\!s=1;\ l\leq x\leq u;\ s\geq0 & x=c+Ge;\ l\leq x\leq u; \ -1\leq e\leq1 \\\hline
+      \text{Zonotope} & A(c+Ge)\leq b;\ -1\leq e\leq 1 & Vs=c+Ge;\ 1\!\cdot s=1;\ -1\leq e\leq1;\ s\geq0 & c_1+G_1e_1=c_2+G_2e_2;\ -1\leq e_1,e_2\leq1 \\\cline{0-3}
+      \text{Polytope} & AVs\leq b;\ 1\!\cdot\!s=1;\ s\geq0 & V_1s_1=V_2s_2;\ 1\!\cdot s_1=1;\ 1\cdot s_2=1;\ s_1,s_2\geq0 \\\cline{2-2}
+                      & A(v+W\tilde{s})\leq b;\ 1\!\cdot\!\tilde{s}\leq1;\ s\geq0 &                                       \\\cline{0-2}
+      \text{Polyhedron} & A_1x\leq b_1;\ A_2x\leq b_2 \\\cline{0-1}
+    \end{array}
+\f]
+We notice that apart from the intersecion of a Polytope with a Rectangle or a Polyhedron, these problems fall into one of the following
+ - Unconstrained feasibility problem with inequalities \f$ Ax\leq b\f$
+ - Constrained feasibility problem with inequalities \f$ Ax\leq b;\ l\leq x\leq u\f$ 
+
+ - Semiconstrained feasibility problem with equalities \f$ Ax=b;\ x\geq 0\f$ 
+ - Constrained feasibility problem with equalities \f$ Ax=b;\ l\leq x\leq u\f$ 
+
+It is trivial to convert a feasibility problem with inequalities to one with equalities; we simply introduce slack variables \f$y\geq0\f$ and replace \f$Ax\leq b\f$ with \f$Ax+y=b\f$. However, care must be taken when mixing constrained variables \f$l\leq x\leq u\f$ and semiconstrained variables \f$x\geq 0\f$ since %Ariadne cannot assume the existence of \f$\pm\infty\f$ in the scalar type.
+
+Although it is technically possible to transform between these problems, we wish to use the structure of the problem to implement efficient algorithms. In general, it is advantageous to reduce the number of constraints of the problem, and not to introduce sparse matrices (unless sparse solvers are available).
+
+
+\section ariadnelpsolvers Linear programming solvers provided by Ariadne.
+
+ - lpstp() Perform one step of the standard linear programming problem.
+      Input: \f$\mathrm{A},b,c\f$, InOut: \f$\pi,\mathrm{A}_B^{-1}\f$.
+
+ - lpcstp() Perform one step of the standard linear programming problem with constraints \f$l\leq x\leq u\f$.
+      Input: \f$\mathrm{A},b,c\f$, InOut: \f$\pi,\mathrm{A}_B^{-1}\f$.
+
+ - lpupd() Update the matrix \f$\mathrm{A}_B^{-1}\f$ so that \f$\mathrm{A}_B^{-1}a=e_i\f$ by pivoting on the \f$i^\textrm{th}\f$ row.
+      Input: \f$a,i\f$; InOut\f$\mathrm{A}_B^{-1}\f$.
+
+ - lpslv() Solve the standard linear programming problem \f$\max c^Tx \text{ s.t. }Ax=b;\ x\geq0\f$.
+      Input: \f$A,b,c\f$; Output: \f$\pi,\ \mathrm{A}_B^{-1},\ x^*,\ y^*,\ z^*\f$.
+
+ - lpcslv() Solve the standard linear programming problem with constraints \f$l\leq x\leq u\f$ from a basic feasible solution.
+      Any constraints which are violated are assumed to remain violated; this allows for constraints with infinities.
+      Input: \f$A,b,c\f$; Output: \f$\pi,\ \mathrm{A}_B^{-1},\ x^*,\ z^*\f$.
+
+ - lprslv() Solve the standard linear programming problem given in reduced form \f$\tilde{A}x_N+x_B=b\f$.
+      Input: \f$\tilde{A},b,c,\pi\f$; Output: \f$\pi, x^*, z^*, y^*\f$.
+
+ - lpfeas() Solve the feasibility problem \f$Ax=b;\ x\geq0\f$.
+
+ - lpcfeas() Solve the feasibility problem \f$Ax=b\f$ with \f$l\leq x\leq u\f$.
+
+ - lpdfeas() Solve the dual feasibility problem \f$Ax\leq b\f$ directly.
+
+\section lpduality Duality of Linear Programming Problems
+
+The dual problem to \f[ \text{(P)} \qquad \min c\,x \text{ s.t. } Ax=b;\ x\geq0\f]
+is \f[ \text{(D)} \qquad \max y\,b \text{ s.t. } y A\leq c . \f]
+
+We have the following <em>duality theorem</em>
+
+<b>Theorem</b><br>
+The problem (P) has a basic feasible solution if and only if the dual problem (D) has a basic feasible solution, and for any feasible point \f$x\f$ of (P) and \f$y\f$ of (D), \f$ y\,b \leq c\,x . \f$
+<br>
+Further, if \f$x^*\f$ is the optimal solution of (P), with \f$x^*_B=A_B^{-1}b;\ x^*_N=0\f$, then the optimal solution of (D) is \f$y^*=c_B A_B^{-1}\f$, and \f$y^* b = c x^*\f$.
 
 
 
 
 
 \page geometric Geometric Representation
+
+\deprecated The material in this section is out-of-date
 
 \section Introduction
 
@@ -431,43 +685,101 @@ The error specification depends on the type of approximation used.
 
 
 
-\page GeometricOps Geometric operations.
+
+\page GeometricOps Geometric Operations on Basic Sets.
 
 The core geometric types used by %Ariadne to represent are Rectangle, Zonotope, Polytope (described by generators)
 and Polyhedron (described by constraints). 
-A %Rectangle can be easily converted to a %Zonotope, %Polytope or %Polyhedron.
+The core geometric operations are contains(A,p), subset(A,B) and disjoint(A,B) (equivalent to intersects(A,B) ) .
 
   - Rectangle representation: \f$l\leq x\leq u\f$.
-  - Zonotope representation: \f$x=c+De,\ -1\leq e\leq1\f$.
-  - Polytope representation: \f$x=Gs,\ 1\cdot s=1,\ s\geq0\f$.
+  - Zonotope representation: \f$x=c+Ge,\ -1\leq e\leq1\f$.
+  - Polytope representation: \f$x=Vs,\ \sum s_i=1,\ s\geq0\f$.
   - Polyhedron representation: \f$Ax\leq b\f$.
 
-The core geometric operations are subset(A,B) and disjoint(A,B) .
 
-We can re-write a zonotope as \f$x=c'+D'e,\ 0\leq e\leq1\f$, 
-a polytope as \f$x'=G's,\ s\geq0\f$, and a polyhedron as \f$A'x'\geq0\f$,
-where \f$x'=(x,1)\f$.
+Alternative representations for polytopes and polyhedron are given by taking \f$\hat{x}=(x,1)\f$.
+  - Rectangle representation: \f$x_i\in[l_i,u_i]\f$.
+  - Zonotope representation: \f$x = \hat{G}\hat{e},\ e_0=1,\ -1\leq e\leq1\f$.
+  - Polytope representation: \f$\hat{x} = Rs\f$, \f$s\geq0\f$.
+  - Polyhedron representation: \f$C\hat{x}\geq0\f$.
+
+We sometimes use the based polytopic representation
+  - Polytope representation: \f$x=v+Ws,\ \sum s_i\leq1,\ s\geq0\f$.
+
+Henceforth, we shall always assume \f$-1\leq e\leq1\f$ and \f$1\!\cdot\!s=1;\ s\geq0\f$.
+
+
+\section geometricpreprocessing Preprocessing sets
+
+To simplify certain computations, it may be useful to pre-process the matrices describing a Zonotope, Polytope or Polyhedron.
+
+Given an \f$m\times n\f$ matrix \f$A\f$ of rank \f$k\f$, find an index set \f$I\subset\{0,1,\ldots,n\!-\!1\}\f$ of cardinality \f$k\f$, and an \f$k\times m\f$ matrix \f$B^{-1}\f$ such that
+\f[ B^{-1} A_I = \mathbf{I} \f]
+where \f$ A_I \f$ is the \f$m\times k\f$ matrix consisting of the columns of \f$A\f$ with index \f$j\in I\f$.
+
+
+\section conversion Converting between basic sets
+
+A %Rectangle can be directly converted to a %Polytope or %Polyhedron without using arithmetic. 
+A %Rectangle can be easily converted to a %Zonotope, and a %Zonotope to a %Polytope, but these conversions require arithmetic.
+Conversion between a %Polytope to a %Polyhedron can be performed using the double description algorithm.
+
+The conversion from a %Rectangle or %Zonotope to a %Polytope or conversion between %Polytope and %Polyhedron may be of exponential complexity.
+
+ \section contains Testing inclusion
+
+  - contains(Rectangle,Point) : Check \f$l\leq x\leq u\f$.
+  - contains(Zonotope,Point) : Solve \f$x=c+Ge;\ -1\leq e\leq1\f$.
+  - contains(Polytope,Point) : Solve \f$x=Vs;\ 1\!\cdot\!s=1;\ s\geq 0\f$.
+  - contains(Polyhedron,Point) : Check \f$Ax\leq b\f$.
 
  \section Intersection Testing intersection/disjointness
 
-  - To test intersection of zonotopes and polytope, equate the expression for
-    \f$x\f$ in both sets. 
-  - To test intersection of a zonotope/polytope with a polyhedron, substitute
-    \f$x\f$ in the equation of the polytope, e.g. \f$A(c+De)\leq b,\ 0\leq e\leq 1\f$.
-  - To test intersection of two polyhedra, solve both sets of equations simultaneously.
-    The resulting equations can be solved by linear programming.
+  - intersects(Rectangle,Rectangle) : Check \f$l_1\leq u_2;\ l_2\leq u_1\f$.
+  - intersects(Rectangle,Zonotope) : Solve \f$x=c+Ge;\ l\leq x\leq u;\ -1\leq e\leq1\f$ or \f$l\leq c+Ge\leq u;\ -1\leq e\leq 1\f$.
+  - intersects(Zonotope,Zonotope) : Solve \f$c_1+G_1e_1 = c_2+G_2e_2;\ -1\leq e_1\leq1;\ -1\leq e_2\leq1\f$.
+  - intersects(Rectangle,Polytope) : Solve \f$x=Vs;\ 1\!\cdot\!s=1;\ l\leq x\leq u;\ s\geq 0\f$ or \f$l\leq Vs\leq u;\ 1\!\cdot\!s=1;\ s\leq 1\f$.
+  - intersects(Zonotope,Polytope) : Solve \f$c+Ge = Vx;\ \ 1\!\cdot\!s=1;\ -1\leq e\leq 1;\ s\geq0\f$.
+  - intersects(Polytope,Polytope) : Solve \f$V_1s_1=V_2s_2;\ 1\!\cdot\!s_1=1;\ 1\!\cdot\!s_2=1;\ \cdot s_1\geq0;\ s_2\geq0\f$.
+
+  - intersects(Rectangle,Polyhedron) : Solve \f$Ax\leq b;\ l\leq x\leq u\f$.
+  - intersects(Zonotope,Polyhedron) : Solve \f$Ac+AGe \leq b;\ -1\leq e\leq 1\f$.
+  - intersects(Polytope,Polyhedron) : Solve \f$AVs\leq b;\ 1\!\cdot\!s=1;\ s\geq0\f$.
+  - intersects(Polyhedron,Polyhedron) : Solve \f$A_1x\leq b_1;\ A_2x\leq b_2\f$.
+
+All these problems can be solved using (a variant of) the simplex algorithm. 
+When computing over-approximations of a set on a grid using disjoint(Rectangle R, ConvexSet S), it may be useful to pre-process S to simplify computation of an initial vertex for the feasibility problem.
+
 
 \section Subset Testing subset
 
-  - To test if a zonotope is a subset of a polyhedron, test \f$AGe\leq b-Ac\f$ for \f$-1\leq e\leq 1\f$. 
-    This can be performed by checking at all the extremal values of \f$e\f$.
-  - To test if a polytope is a subset of a polyhedron, test \f$A'G'\geq0\f$.
-  - To test other types of subset relation, we need to transform to 
-    subset(Polytope,Polyhedron).
+Testing whether a convex set is a subset of a polyhedron, or whether a polytope is a subset of a convex set are easy:
+  - subset(ConvexSet S, Polyhedron P) : Check disjoint(S,H) for all complementary halfspaces H of P.
+  - subset(Polytope P, ConvexSet S) : Check contains(S,v) for all vertices v of P.
+
+Checking whether a Rectangle, Zonotope or Polytope is a subset of a Rectangle can be performed directly:
+  - subset(Rectangle, Rectangle) : Check \f$l_1\geq l_2\ \textrm{and}\ u_1\leq u_2\f$.
+  - subset(Zonotope, Rectangle) : Check \f$\sum_{j} |G_{ij}|\leq \min\{c_i-l_i,u_i-c_i\} \forall\,i\f$.
+  - subset(Polytope, Rectangle) : Check \f$l\leq v\leq u\f$ for all vertices \f$v\f$ of \f$P\f$.
+
+The following operations cannot be performed efficiently, but can be easily implemented by testing the vertices of the Rectangle, and are provided for conformance to the Set interface.
+  - subset(Rectangle, Zonotope)
+  - subset(Rectangle, Polytope)
+
+The following operation is provided to help with checking zonotopic over-approximations.
+  - subset(Zonotope, Zonotope)
+
+While a Rectangle can be directly converted to both a Polytope and a Polyhedron, the conversion to a Polytope yields \f$2^d\f$ vertices.
+Hence testing subset(Rectangle, ConvexSet) is in general of exponential complexity, as is subset(Zonotope, ConvexSet).
+When testing subset(Rectangle R, ConvexSet S) for under-approximationg S on a grid, we need to check contains(S,v) for each grid vertex v once only, considerably reducing the amount of work.
+
+Note that for a single test of subset(Rectangle R, Polyhedron P), we prefer to use disjoint(R,H), but for under-approximating a polyhedron P on a grid, we prefer to check contains(P,v) for the grid vertices.
+
 
 \section PolyhedralConversion Converting between a polyhedron and a polytope.
  
-Augment the state by \f$x'=(x,1)\f$.
+Augment the state by \f$\hat{x}=(x,1)\f$.
 
   - Define a Polytope by generators \f$x=\lambda g\f$, given as columns of the augmented generator matrix \f$G'\f$.
   - Define a Polyhedron by constraints \f$a\cdot x\geq 0\f$, given as rows of the augmented constraints matric \f$A'\f$.
@@ -483,7 +795,7 @@ differ only in one row.
 
 \section zonotope Zonotopic reduction methods
 
-Throughout this sections, we use the supremum norm on \f$R^n\f$, and the correspoinding operator norm on \f$\mathbb{R}^{m\times n}\f$.
+Throughout this sections, we use the supremum norm on \f$R^n\f$, and the corresponding operator norm on \f$\mathbb{R}^{m\times n}\f$.
 
 Given a zonotope \f$ Z=\{ c+Ae \mid ||e||\leq 1 \}\subset \mathbb{R}^n\f$, where \f$A\in \mathbb{R}^{n\times p}\f$, 
 we wish to compute a zonotope \f$Z' = \{ c + A' e' \mid ||e'||\leq 1\}\f$ with fewer generators 
@@ -662,6 +974,10 @@ Arnold Neumaier, <em>Interval methods for systems of equations</em>,
 
 A. Neumaier, "The wrapping effect, ellipsoid arithmetic, stability and confidence regions",
   <em>Computing Supplementum</em> <b>9</b> (1993), 175-190.
+
+\section linear_programming_references Linear Programming
+
+V. Chv\'atal, <em>Linear Programming</em>, Freeman, 1983, ISBN 0-7167-1195-8.
 
 \section zonotope_references Zonotopes
 

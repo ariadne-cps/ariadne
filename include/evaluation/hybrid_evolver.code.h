@@ -1,7 +1,7 @@
 /***************************************************************************
  *            hybrid_evolver.code.h
  *
- *  Copyright  2006  Alberto Casagrande,  Pieter Collins
+ *  Copyright  2004-7  Alberto Casagrande,  Pieter Collins
  *  casagrande@dimi.uniud.it  Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -89,6 +89,7 @@ Ariadne::Geometry::HybridGridCellListSet<R>
 Ariadne::Evaluation::HybridEvolver<R>::discrete_step(const System::HybridAutomaton<R>& hybrid_automaton, 
                                                      const Geometry::HybridGridCellListSet<R>& initial_set)
 {
+
   Geometry::HybridGridCellListSet<R> result_set(initial_set);
   result_set.clear();
   
@@ -123,10 +124,9 @@ Ariadne::Evaluation::HybridEvolver<R>::continuous_chainreach(const System::Hybri
       dm_iter!=hybrid_automaton.modes().end(); ++dm_iter)
   {
     const System::DiscreteMode<R>& dm = *dm_iter;
-    Geometry::GridMaskSet<R>& continuous_set=result_set[dm.id()];
     const Geometry::GridMaskSet<R>& invariant=invariants[dm.id()];
-    //if(verbosity>5) { std::cerr << continuous_set.size() << " " << invariant.size() << std::endl; }
-    continuous_set.adjoin(this->_integrator->chainreach(dm.dynamic(),continuous_set,invariant));
+    Geometry::GridMaskSet<R>  continuous_set=regular_intersection(result_set[dm.id()],invariant);
+    result_set[dm.id()].adjoin(this->_integrator->chainreach(dm.dynamic(),continuous_set,invariant));
   }
   return result_set;
 }
@@ -165,8 +165,8 @@ Ariadne::Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<
     invariant=bounding_set[dm.id()];
     invariant.restrict(over_approximation(dm.invariant(),invariant.grid()));
   }
-  
-  Geometry::HybridGridMaskSet<R> intermediate_set=this->continuous_chainreach(hybrid_automaton,initial_set,invariants);
+
+  Geometry::HybridGridMaskSet<R> intermediate_set=this->continuous_chainreach(hybrid_automaton,real_initials,invariants);
   Geometry::HybridGridMaskSet<R> result_set=intermediate_set;
   
   Geometry::HybridGridCellListSet<R> new_activated=regular_intersection(intermediate_set,activations);
@@ -180,3 +180,4 @@ Ariadne::Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<
   }
   return result_set;
 }
+

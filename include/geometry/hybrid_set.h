@@ -28,6 +28,7 @@
 #include <vector>
 #include <list>
 #include <iostream>
+#include <sstream>
 
 #include "../declarations.h"
 #include "../geometry/grid_set.h"

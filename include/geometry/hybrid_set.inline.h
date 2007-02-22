@@ -60,6 +60,13 @@ template<class S> inline
 S& 
 HybridSet<S>::operator[](const location_type& q)
 { 
+  if (q>_component_sets.size()) {
+    std::ostringstream o;
+    o << "Requested the component number "<<q<<" of a hybrid set having " 
+      << _component_sets.size() << " components.";
+    throw std::runtime_error(o.str());
+  }
+
   return _component_sets[q]; 
 }
 
@@ -68,6 +75,13 @@ template<class S> inline
 const S& 
 HybridSet<S>::operator[](const location_type& q) const 
 { 
+  if (q>_component_sets.size()) {
+    std::ostringstream o;
+    o << "Requested the component number "<<q<<" of a hybrid set having " 
+      << _component_sets.size() << " components.";
+    throw std::runtime_error(o.str());
+  }
+
   return _component_sets[q];
 }
 

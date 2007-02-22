@@ -58,14 +58,14 @@ namespace Ariadne {
        *  and a set decribing the offset. */
       explicit AffineMultiMap(const LinearAlgebra::Matrix<R>& A, 
                               const BS<R>& S)
-        : _A(A), _S(S) { }
+        : _A(A), _Set(S) { }
         
       /*! \brief Copy constructor. */
-      AffineMultiMap(const AffineMultiMap<R,BS>& T) : _A(T._A), _S(T._S) { }
+      AffineMultiMap(const AffineMultiMap<R,BS>& T) : _A(T._A), _Set(T._Set) { }
       
       /*! \brief Assignment operator. */
       AffineMultiMap<R,BS>& operator=(const AffineMultiMap<R,BS>& T) {
-        this->_A=T._A; this->_S=T._S; return *this; 
+        this->_A=T._A; this->_Set=T._Set; return *this; 
       }
       
       /*! \brief  The map applied to a state. */
@@ -78,7 +78,7 @@ namespace Ariadne {
       const LinearAlgebra::Matrix<R>& A() const { return _A; }
       
       /*! \brief  The offset set of the map. */
-      const BS<R>& S() const { return _S; }
+      const BS<R>& S() const { return _Set; }
       
       /*! \brief  The dimension of the argument. */
       dimension_type argument_dimension() const {
@@ -95,7 +95,7 @@ namespace Ariadne {
       std::string name() const { return "AffineMultiMap"; }
      private:
       matrix_type _A;
-      set_type _S;
+      set_type _Set;
     };
       
     

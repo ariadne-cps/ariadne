@@ -80,6 +80,9 @@ void export_grid_set()
   typedef GridCellListSet<R> RGridCellListSet;
   typedef GridMaskSet<R> RGridMaskSet;
   
+  typedef Point<R> RPoint;
+  typedef Point< Interval<R> > IPoint;
+  typedef Rectangle<R> RRectangle;
   typedef Rectangle<R> RRectangle;
   typedef Parallelotope<R> RParallelotope;
   typedef Zonotope<R> RZonotope;
@@ -88,7 +91,7 @@ void export_grid_set()
   typedef ListSet<R,Rectangle> RRectangleListSet;
   typedef ListSet<R,Parallelotope> RParallelotopeListSet;
   typedef ListSet<R,Zonotope> RZonotopeListSet;
-  typedef ListSet<R,Zonotope> IZonotopeListSet;
+  typedef ListSet< Interval<R> ,Zonotope> IZonotopeListSet;
   typedef PartitionTreeSet<R> RPartitionTreeSet;
   
   class_<RGridWrap, boost::noncopyable>("Grid")
@@ -214,6 +217,7 @@ void export_grid_set()
   def("overlap",(tribool(*)(const RGridMaskSet&,const RGridMaskSet&))(&Geometry::overlap));
   def("overlap",(tribool(*)(const RGridMaskSet&,const RGridMaskSet&))(&Geometry::overlap));
 
+  def("over_approximation",(RGridBlock(*)(const IPoint&,const RGrid&))(&Geometry::over_approximation));
   def("over_approximation",(RGridBlock(*)(const RRectangle&,const RGrid&))(&Geometry::over_approximation));
   def("over_approximation",(RGridCellListSet(*)(const RZonotope&,const RGrid&))(&Geometry::over_approximation));
   def("over_approximation",(RGridCellListSet(*)(const RPolytope&,const RGrid&))(&Geometry::over_approximation));

@@ -71,8 +71,7 @@ Point<R> point_list_get(const PointList<R>& pl, const size_type& n) {
 template<class R>
 void export_point() 
 {
-//  class_< Point<R> >(python_name<R>("Point"),init<>())
-  class_< Point<R> >("Point",init<>())
+  class_< Point<R> >(python_name<R>("Point").c_str(),init<>())
     .def(init< int >())
     .def(init< Point<R> >())
     .def(init<std::string>())
@@ -85,7 +84,28 @@ void export_point()
     .def("__ne__", &Point<R>::operator!=)
 //    .def("__add__", &rpoint_add_rVector)
 //    .def("__sub__", &rpoint_sub_rpoint)
-//    .def("rectangle_expanded_by", &rectangle_expanded)
+    .def(self_ns::str(self))
+  ;
+}
+
+template<class R>
+void export_interval_point() 
+{
+  class_< Point< Interval<R> > >(python_name<R>("IntervalPoint").c_str(),init<>())
+    .def(init< int >())
+    .def(init< Point<R> >())
+    .def(init< Point< Interval<R> > >())
+    .def(init< Rectangle<R> >())
+    .def(init<std::string>())
+    .def("dimension", &Point< Interval<R> >::dimension)
+    .def("__len__", &Point< Interval<R> >::dimension)
+    .def("__getitem__", &point_getitem< Interval<R> >)
+    .def("__setitem__", &point_setitem< Interval<R> , Interval<R> >)
+    .def("__setitem__", &point_setitem< Interval<R> , double>)
+    .def("__eq__", &Point< Interval<R> >::operator==)
+    .def("__ne__", &Point< Interval<R> >::operator!=)
+//    .def("__add__", &rpoint_add_rVector)
+//    .def("__sub__", &rpoint_sub_rpoint)
     .def(self_ns::str(self))
   ;
 }
@@ -104,4 +124,5 @@ void export_point_list()
 
 
 template void export_point<Numeric::MPFloat>();
+template void export_interval_point< Numeric::MPFloat >();
 template void export_point_list<Numeric::MPFloat>();

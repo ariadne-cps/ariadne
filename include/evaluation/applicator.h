@@ -49,27 +49,21 @@ namespace Ariadne {
       /*! \brief Compute the image of a rectangle under a continuous function. */
       virtual Geometry::Rectangle<R> image(const System::Map<R>& f, const Geometry::Rectangle<R>& s) const;
 
-      /*! \brief Compute the image of a zonotope under a continuous function. */
-      virtual Geometry::Parallelotope<R> image(const System::Map<R>& f, const Geometry::Parallelotope<R>& s) const;
-
       /*! \brief Compute the image of a parallelotope under a continuous function. */
       virtual Geometry::Zonotope<R> image(const System::Map<R>& f, const Geometry::Zonotope<R>& s) const;
-
-      /*! \brief Compute the image of an interval parallelotope under a continuous function. */
-      virtual Geometry::Parallelotope< Interval<R> > image(const System::Map<R>& f, const Geometry::Parallelotope< Interval<R> >& s) const;
 
       /*! \brief Compute the image of an interval zonotope under a continuous function. */
       virtual Geometry::Zonotope< Interval<R> > image(const System::Map<R>& f, const Geometry::Zonotope< Interval<R> >& s) const;
      
      protected:
-      /*! \brief Template for integrating a list set. */
+      /*! \brief Template for computing the image of a list set. */
       template<class Rl,template<class> class BS>
       Geometry::ListSet<Rl,BS> 
       image_list_set(const System::Map<R>& f, 
                      const Geometry::ListSet<Rl,BS>& initial_set) const;
 
       
-      /*! \brief Template for integrating a basic set. */
+      /*! \brief Template for computing the image of a basic set. */
       template<template<class> class BS>
       BS<R>
       image_basic_set(const System::Map<R>& f, 
@@ -80,20 +74,13 @@ namespace Ariadne {
       Geometry::ListSet<R,Geometry::Rectangle> 
       image(const System::Map<R>& f, const Geometry::ListSet<R,Geometry::Rectangle>& ds) const;
        
-      virtual 
-      Geometry::ListSet<R,Geometry::Parallelotope> 
-      image(const System::Map<R>& f, const Geometry::ListSet<R,Geometry::Parallelotope>& ds) const;
-       
+      /*! \brief Compute the image of a list set under a map. */
       virtual 
       Geometry::ListSet<R,Geometry::Zonotope> 
       image(const System::Map<R>& f, const Geometry::ListSet<R,Geometry::Zonotope>& ds) const;
       
       
       /*! \brief Compute the image of a list set under a map. */
-      virtual 
-      Geometry::ListSet<Interval<R>,Geometry::Parallelotope> 
-      image(const System::Map<R>& f, const Geometry::ListSet<Interval<R>,Geometry::Parallelotope>& ds) const;
-      
       virtual 
       Geometry::ListSet<Interval<R>,Geometry::Zonotope> 
       image(const System::Map<R>& f, const Geometry::ListSet<Interval<R>,Geometry::Zonotope>& ds) const;
@@ -120,6 +107,7 @@ namespace Ariadne {
             const Geometry::GridMaskSet<R>& initial_set,
             const Geometry::GridMaskSet<R>& bounding_set) const;
 
+
       /*! \brief Compute the reachable set of \a map starting in \a initial_set. */
       virtual
       Geometry::GridMaskSet<R> 
@@ -141,77 +129,6 @@ namespace Ariadne {
              const Geometry::GridMaskSet<R>& initial_set, 
              const Geometry::GridMaskSet<R>& safe_set) const;
     };
-    
-    
-    
-    
-    /*! \brief Compute the image of a rectangle under a continuous function. 
-     *  \ingroup Apply
-     */
-    template<class R>
-    Geometry::Rectangle<R> 
-    image(const System::Map<R>& f, const Geometry::Rectangle<R>& s) {
-      return Applicator<R>().image(f,s);
-    }
-    
-    /*! \brief Compute the image of a parallelotope under a differentiable function. 
-     *  \ingroup Apply
-     */
-    template<class R>
-    inline
-    Geometry::Parallelotope<R> 
-    image(const System::Map<R>& f, const Geometry::Parallelotope<R>& s) {
-      return Applicator<R>().image(f,s);
-    }
-    
-    /*! \brief Compute the image of a parallelotope under a differentiable function.  
-     *  \ingroup Apply
-     */
-    template<class R>
-    inline
-    Geometry::ListSet<R,Geometry::Parallelotope>
-    image(const System::Map<R>& f, const Geometry::ListSet<R,Geometry::Parallelotope>& s) {
-      return Applicator<R>().image(f,s);
-    }
-    
-    /*! \brief Compute the chain-reachable set of \a map starting in \a initial_set on the grid \a grid while staying within \a bounds.  
-     *  \ingroup Apply
-     */
-    template<class R>
-    inline
-    Geometry::GridMaskSet<R> 
-    image(const System::Map<R>& map, 
-          const Geometry::GridMaskSet<R>& initial_set, 
-          const Geometry::GridMaskSet<R>& bounding_set) 
-    {
-      return Applicator<R>().image(map,initial_set,bounding_set);
-    }
-
-    /*! \brief Compute the chain-reachable set of \a map starting in \a initial_set on the grid \a grid while staying within \a bounds.  
-     *  \ingroup Apply
-     */
-    template<class R>
-    inline
-    Geometry::GridMaskSet<R> 
-    chainreach(const System::Map<R>& map, 
-               const Geometry::GridMaskSet<R>& initial_set, 
-               const Geometry::GridMaskSet<R>& bounding_set) 
-    {
-      return Applicator<R>().chainreach(map,initial_set,bounding_set);
-    }
-
-    /*! \brief Attempt to verify that the reachable set of \a map starting in \a initial_set remains in \a safe_set. 
-     *  \ingroup Apply
-     */
-    template<class R>
-    inline
-    bool
-    verify(const System::Map<R>& map, 
-               const Geometry::GridMaskSet<R>& initial_set, 
-               const Geometry::GridMaskSet<R>& safe_set) 
-    {
-      return Applicator<R>().verify(map,initial_set,safe_set);
-    }
 
   }
 }

@@ -73,62 +73,46 @@ namespace Ariadne {
       AffineMap<R>& operator=(const AffineMap<R>& T) {
         this->_A=T._A; this->_b=T._b; return *this; }
       /*! \brief Returns a pointer to a dynamically-allocated copy of the map. */
-      AffineMap<R>* clone() const { return new AffineMap<R>(*this); }
+      virtual AffineMap<R>* clone() const { return new AffineMap<R>(*this); }
 
       
-      /*! \brief  An approximation to the image of a point. DEPRECATED. */
-      Geometry::Point<F> image(const Geometry::Point<R>& A) const;
+      /*! \brief  An approximation to the image of an approximate point. */
+      Geometry::Point<F> image(const Geometry::Point<F>& A) const;
       
-      /*! \brief  The map applied to a rectangle. */
-      Geometry::Rectangle<R> image(const Geometry::Rectangle<R>& A) const;
-
-      /*! \brief  The map applied to a parallelotope. */
-      Geometry::Parallelotope<R> image(const Geometry::Parallelotope<R>& A) const;
-
       /*! \brief  The map applied to a zonotope. */
-      Geometry::Zonotope<R> image(const Geometry::Zonotope<R>& A) const;
+      Geometry::Zonotope<F> image(const Geometry::Zonotope<F>& A) const;
 
       /*! \brief  The map applied to a polytope. */
-      Geometry::Polytope<R> image(const Geometry::Polytope<R>& A) const;
+      Geometry::Polytope<F> image(const Geometry::Polytope<F>& A) const;
 
-      /*! \brief  The map applied to a parallelotope basic set. */
-      Geometry::Parallelotope<R> operator() (const Geometry::Parallelotope<R>& A) const {
-        return this->image(A); };
-      
       /*! \brief  The map applied to a zonotope basic set. */
-      Geometry::Zonotope<R> operator() (const Geometry::Zonotope<R>& A) const {
+      Geometry::Zonotope<F> operator() (const Geometry::Zonotope<F>& A) const {
         return this->image(A); }
               
       /*! \brief  The map applied to a polytopic basic set. */
-      Geometry::Polytope<R> operator() (const Geometry::Polytope<R>& A) const{
+      Geometry::Polytope<F> operator() (const Geometry::Polytope<R>& A) const{
         return this->image(A); };
               
-      /*! \brief  The map applied to a grid mask set. */
-      Geometry::ListSet<R,Geometry::Parallelotope> operator() (const Geometry::GridMaskSet<R>& ) const;
-      
       /*! \brief  The linear transformation of the map. */
       const LinearAlgebra::Matrix<R>& A() const { return _A; }
       /*! \brief  The offset vector of the map. */
       const LinearAlgebra::Vector<R>& b() const { return _b; }
       
       /*! \brief  The dimension of the argument. */
-      dimension_type argument_dimension() const {
+      virtual dimension_type argument_dimension() const {
         return _A.number_of_columns();
       }
       
       /*! \brief The dimension of the result. */
-      size_type smoothness() const { return (size_type) -1; }
+      virtual size_type smoothness() const { return (size_type) -1; }
       
       /*! \brief The dimension of the result. */
-      dimension_type result_dimension() const {
+      virtual dimension_type result_dimension() const {
         return _b.size();
       }
       
       /*! \brief The Jacobian derivative matrix at a point. */
-      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<R>& pt) const;
-
-      /*! \brief The Jacobian derivative matrix over a rectangle. */
-      virtual LinearAlgebra::Matrix<I> jacobian(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<F>& pt) const;
 
       /*! \brief True if the map is invertible, which is equivalent to invertiblity of
        *  the matrix A. */
@@ -143,6 +127,7 @@ namespace Ariadne {
       LinearAlgebra::Matrix<R> _A;
       LinearAlgebra::Vector<R> _b;
     };
+
 
   }
 }

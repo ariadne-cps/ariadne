@@ -36,6 +36,7 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
+#include "../geometry/point.h"
 #include "../geometry/rectangle.h"
 #include "../system/vector_field.h"
 #include "../system/map.h"
@@ -51,6 +52,7 @@ namespace Ariadne {
     template<class R> class DifferenceMap
       : public VectorField<R>
     {
+      typedef typename Numeric::traits<R>::arithmetic_type F;
      public:
       /*!\brief Construct from a map \a f, which must have the same argument dimension as result dimension. */
       DifferenceMap(const Map<R>& f) : _base(f) { 
@@ -63,12 +65,12 @@ namespace Ariadne {
       /*!\brief The dimension of the space the map acts on. */
       virtual dimension_type dimension() const { return _base.argument_dimension(); }
       /*!\brief Evaluate the function \f$f(x)-x\f$, where \f$f\f$ is the map used to construct the difference map. */
-      LinearAlgebra::Vector< Interval<R> > image(const Geometry::Rectangle<R>& r) const {
-        return _base.image(r)-r; }
+      virtual LinearAlgebra::Vector<F> image(const Geometry::Point<F>& p) const {
+        return _base.image(p)-p; }
       /*!\brief Evaluate the derivative of function \f$f(x)-x\f$, which is \f$Df(x)-I\f$. */
-      virtual LinearAlgebra::Matrix< Interval<R> > jacobian(const Geometry::Rectangle<R>& r) const {
-        LinearAlgebra::Matrix< Interval<R> > d=_base.jacobian(r);
-        LinearAlgebra::Matrix< Interval<R> > i=LinearAlgebra::Matrix< Interval<R> >::identity(this->dimension());
+      virtual LinearAlgebra::Matrix< Interval<R> > jacobian(const Geometry::Point<F>& p) const {
+        LinearAlgebra::Matrix<F> d=_base.jacobian(p);
+        LinearAlgebra::Matrix<F> i=LinearAlgebra::Matrix< Interval<R> >::identity(this->dimension());
         return d-i; }
       /*!\brief The name of the class. */
       virtual std::string name() const { return "DifferenceMap"; }
@@ -82,13 +84,16 @@ namespace Ariadne {
 
 namespace Ariadne {
   namespace Evaluation {
-   
+    
+    
+    
     /*!\ingroup Solve
      * \brief %Base class for solving (nonlinear) equations. 
      */
     template<class R>
     class Solver
     {
+      typedef typename Numeric::traits<R>::interval_type I;
      public:
       /*! \brief Constructor. */
       Solver(R max_error, uint max_steps)
@@ -107,13 +112,14 @@ namespace Ariadne {
       /*! \brief Set the maximum number of steps. */
       void set_maximum_number_of_steps(uint max_steps) { this->_max_steps=max_steps; }
       
-      /*! \brief Solve \f$f(x)=0\f$, starting in the \a r. */
-      virtual Geometry::Rectangle<R> 
-      solve(const System::VectorField<R>& f,const Geometry::Rectangle<R>& r) = 0;
-      /*! \brief Solve \f$f(x)=0\f$, starting in the \a r. */
-      virtual Geometry::Rectangle<R> 
-      fixed_point(const System::Map<R>& f,const Geometry::Rectangle<R>& r) {
-        return solve(System::DifferenceMap<R>(f),r); }
+      /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
+      virtual Geometry::Point<I>
+      solve(const System::VectorField<R>& f,const Geometry::Point<I>& pt) = 0;
+      /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
+      virtual Geometry::Point<I> 
+      fixed_point(const System::Map<R>& f,const Geometry::Point<I>& pt) {
+        return this->solve(System::DifferenceMap<R>(f),pt); }
+      
      private:
       R _max_error;
       uint _max_steps;

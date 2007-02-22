@@ -29,6 +29,7 @@
 #include "system/map.h"
 
 using namespace Ariadne;
+using namespace Ariadne::Geometry;
 using namespace Ariadne::System;
 
 #include <boost/python.hpp>
@@ -37,8 +38,10 @@ using namespace boost::python;
 template<class R>
 class MapWrapper : public Map<R>, public wrapper< Map<R> >
 {
+  typedef typename Map<R>::F F;
  public:
   Map<R>* clone() const { return this->get_override("clone")(); }
+  Point<F> image(const Point<F>&) const { return this->get_override("clone")(); }
   dimension_type argument_dimension() const { return this->get_override("argument_dimension")(); }
   dimension_type result_dimension() const { return this->get_override("result_dimension")(); }
   size_type smoothness() const { return this->get_override("smoothness")(); }

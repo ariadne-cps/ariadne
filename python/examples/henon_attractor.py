@@ -36,9 +36,9 @@ grid_extent=Rectangle("[-10,6]x[-8,8]")
 number_of_subdivisions=128
 finite_grid=FiniteGrid(grid_extent,number_of_subdivisions)
 grid=finite_grid.grid()
-initial_guess=Rectangle("[0,2]x[0,2]") # initial state
+initial_guess=IntervalPoint("([0,2],[0,2])") # initial state
 
-interval_newton=IntervalNewtonSolver(Real(0.00001),64)
+interval_newton=IntervalNewtonSolver(0.00001,64)
 fixed_point=interval_newton.fixed_point(henon_map,initial_guess)
 fixed_point_cell=over_approximation(fixed_point,grid)
 print "Found fixed point in",fixed_point
@@ -48,9 +48,11 @@ initial_set.adjoin(over_approximation(fixed_point,grid))
 bounding_set=GridMaskSet(finite_grid)
 bounding_set.adjoin(over_approximation(grid_extent,grid))
 
+apply=Applicator();
+
 print "Computing chain-reachable set..."
 
-chain_reach_set = chainreach(henon_map,initial_set,bounding_set)
+chain_reach_set = apply.chainreach(henon_map,initial_set,bounding_set)
 print "Found", chain_reach_set.size(), "cells in grid with", chain_reach_set.capacity(), "cells."
 
 chain_reach_tree_set = PartitionTreeSet(chain_reach_set)

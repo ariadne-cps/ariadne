@@ -173,33 +173,22 @@ namespace Ariadne {
     
     
     template<class R>
-    typename Monomial<R>::result_type 
-    Monomial<R>::apply(const Geometry::Point<R>& s) const 
+    typename Monomial<R>::F
+    Monomial<R>::apply(const Geometry::Point<F>& s) const 
     {
       check_argument_dimension(*this,s,"Monomial<R>::apply(Point<R>)");
       result_type result=_coefficient;
       for(size_type k=0; k!=this->argument_dimension(); ++k) {
-        result *= pow_approx(s[k],_multi_index[k]);
-      }
-      return result;
-    }
-    
-    template<class R>
-    Interval<R>
-    Monomial<R>::apply(const Geometry::Rectangle<R>& r) const 
-    {
-      check_argument_dimension(*this,r,"Monomial<R>::apply(Rectangle<R>)");
-      Interval<R> result(this->_coefficient);
-      for(size_type k=0; k!=this->argument_dimension(); ++k) {
-        result *= pow(r[k],_multi_index[k]);
+        result *= pow(s[k],_multi_index[k]);
       }
       return result;
     }
     
     
+    
     template<class R>
-    typename Polynomial<R>::result_type
-    Polynomial<R>::apply(const Geometry::Point<R>& s) const 
+    typename Polynomial<R>::F
+    Polynomial<R>::image(const Geometry::Point<F>& s) const 
     {
       //std::cerr << "Polynomial<R>::apply(const Geometry::Point<R>& s) const " << std::endl;
       check_argument_dimension(*this,s,"Polynomial<R>::apply(Point<R>)");
@@ -210,75 +199,40 @@ namespace Ariadne {
       return result;
     }
     
-    template<class R>
-    Interval<R>
-    Polynomial<R>::apply(const Geometry::Rectangle<R>& r) const 
-    {
-      check_argument_dimension(*this,r,"PolynomialMap<R>::apply(Rectangle<R>)");
-      Interval<R> result(R(0));
-      for(size_type j=0; j!=_terms.size(); ++j) {
-        result += _terms[j].apply(r);
-      }
-      return result;
-    }
     
     
     template<class R>
-    typename PolynomialMap<R>::result_type
-    PolynomialMap<R>::apply(const Geometry::Point<R>& s) const 
+    Geometry::Point<typename PolynomialMap<R>::F>
+    PolynomialMap<R>::image(const Geometry::Point<F>& s) const 
     {
       check_argument_dimension(*this,s,"PolynomialMap<R>::apply(Point<R>)");
       Geometry::Point<F> result(this->result_dimension());
       for(size_type i=0; i!=this->result_dimension(); ++i) {
-        result[i] = _components[i].apply(s);
+        result[i] = _components[i].image(s);
       }
       return result;
     }
     
-    template<class R>
-    Geometry::Rectangle<R>
-    PolynomialMap<R>::apply(const Geometry::Rectangle<R>& r) const 
-    {
-      check_argument_dimension(*this,r,"PolynomialMap<R>::apply(Rectangle<R>)");
-      Geometry::Rectangle<R> result(this->result_dimension());
-      for(size_type i=0; i!=this->result_dimension(); ++i) {
-        result[i] = _components[i].apply(r);
-      }
-      return result;
-    }
     
     template<class R>
     LinearAlgebra::Matrix< typename PolynomialMap<R>::F >
-    PolynomialMap<R>::jacobian(const Geometry::Point<R>& s) const 
+    PolynomialMap<R>::jacobian(const Geometry::Point<F>& s) const 
     {
       //std::cerr << "PolynomialMap<R>::derivative(const Geometry::Point<R>& s) const " << std::endl;
       this->_compute_jacobian();
       LinearAlgebra::Matrix<F> result(this->result_dimension(), this->argument_dimension());
       for(size_type i=0; i!=this->result_dimension(); ++i) {
         for(size_type j=0; j!=this->argument_dimension(); ++j) {
-          result(i,j)=this->_jacobian(i,j).apply(s);
+          result(i,j)=this->_jacobian(i,j).image(s);
         }
       }
       return result;
     }
     
     
+
     template<class R>
-    LinearAlgebra::Matrix< Interval<R> >
-    PolynomialMap<R>::jacobian(const Geometry::Rectangle<R>& r) const 
-    {
-      this->_compute_jacobian();
-      LinearAlgebra::Matrix< Interval<R> > result(this->result_dimension(), this->argument_dimension());
-      for(size_type i=0; i!=this->result_dimension(); ++i) {
-        for(size_type j=0; j!=this->argument_dimension(); ++j) {
-          result(i,j)=this->_jacobian(i,j).apply(r);
-        }
-      }
-      return result;
-    }
-    
-    template<class R>
-    const PolynomialMatrix<R>&
+    const PolynomialMatrix<typename PolynomialMap<R>::F>&
     PolynomialMap<R>::jacobian() const 
     {
       this->_compute_jacobian(); return this->_jacobian;
@@ -293,12 +247,11 @@ namespace Ariadne {
         return;
       }
       
-      this->_jacobian=PolynomialMatrix<R>(this->result_dimension(),this->argument_dimension());
+      this->_jacobian=PolynomialMatrix<F>(this->result_dimension(),this->argument_dimension());
       for(dimension_type i=0; i!=this->result_dimension(); ++i) {
         for(dimension_type j=0; j!=this->argument_dimension(); ++j) {
-          Polynomial<R>& dp=this->_jacobian._matrix(i,j);
-          dp._argument_dimension=this->argument_dimension();
-          for(size_type k=0; k!=this->_components[i].number_of_terms(); ++k) {
+          Polynomial<F>& dp=this->_jacobian(i,j);
+           for(size_type k=0; k!=this->_components[i].number_of_terms(); ++k) {
             const Monomial<R>& m=this->_components[i]._terms[k];
             Monomial<R> dm=m;
             dm._coefficient = mul_approx(dm._coefficient,m._multi_index[j]);

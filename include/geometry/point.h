@@ -46,26 +46,6 @@ namespace Ariadne {
     template<class> class Sphere;
     template<class> class Ellipsoid;
 
-    /*!\brief A point in Euclidean space. 
-     *
-     * A point is defined by its coordinates or type #real_type, which are accessed by 
-     * operator[](dimension_type). 
-     *
-     * We consider Euclidean space as an affine space, so it is allowed to
-     * add a vector (of type #vector_type or LinearAlgebra::Vector < R >) to a point, or subtract two points to obtain a vector,
-     * but not add two points.
-     *
-     * Points can be constructed from string literals of the form
-     * "(p0,p1,...)". Note the use of round brackets in the
-     * literal expression.
-     *
-     * Points are ordered by the lexicographic order.
-     *
-     * Operations on points which cannot be computed exactly in the arithmetic
-     * used, give results of type FuzzyPoint< R >, which is a Point< Numeric::Interval < R > >.
-     * Currently, %Ariadne does not support other space types, such as annuli
-     * or general differential manifolds.
-     */
     template<class R>
     class Point {
       typedef typename Numeric::traits<R>::arithmetic_type F;
@@ -138,6 +118,14 @@ namespace Ariadne {
     
     template<class R> 
     Point<R> approximation(const Point< Interval<R> >& ipt);
+    
+    template<class R> 
+    bool contains_value(const Point< Interval<R> >& ipt, const Point<R>& pt);
+    
+    template<class R> 
+    R error_bound(const Point< Interval<R> >& ipt);
+    
+
     
     template<class R>
     Point<typename Numeric::traits<R>::arithmetic_type>

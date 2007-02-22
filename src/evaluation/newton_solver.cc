@@ -33,12 +33,6 @@ namespace Ariadne {
   namespace Evaluation {
 
     template class IntervalNewtonSolver<Real>;
-      
-    template 
-    Geometry::Rectangle<Real> 
-    interval_newton(const System::VectorField<Real>& f, 
-                    const Geometry::Rectangle<Real>& r, 
-                    const Real& e,
-                    uint max_steps);
+
   }
 }

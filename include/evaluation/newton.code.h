@@ -25,64 +25,60 @@
 
 #include "../debug.h"
 #include "../geometry/point.h"
-#include "../geometry/rectangle.h"
 
 #include "../system/vector_field.h"
 
 
 
 template<class R>
-Ariadne::Geometry::Rectangle<R>
+//Ariadne::Geometry::Point<typename IntervalNewtonSolver<R>::I>
+Ariadne::Geometry::Point<typename Ariadne::Evaluation::IntervalNewtonSolver<R>::I>
 Ariadne::Evaluation::IntervalNewtonSolver<R>::solve(const System::VectorField<R>& f, 
-                                                    const Geometry::Rectangle<R>& x)
+                                                    const Geometry::Point<I>& ix)
 {
   const R& e=this->maximum_error();
   uint n=this->maximum_number_of_steps();
   if(verbosity>1) { std::cerr << "verbosity=" << verbosity << "\n"; }
-  Geometry::Rectangle<R> r=x;
-  while(true) {
-    if(verbosity>1) { std::cerr << "Testing for root in " << r << "\n"; }
-    if(verbosity>1) { std::cerr << "  e=" << r.radius() << "  r=" << r << std::endl; }
-    Geometry::Point<R> m=r.centre();
+  Geometry::Point<I> x=ix;
+  Geometry::Rectangle<R> r(x);
+  while(n>0) {
+    if(verbosity>1) { std::cerr << "Testing for root in " << x << "\n"; }
+    if(verbosity>1) { std::cerr << "  e=" << Geometry::error_bound(x) << "  x=" << x << std::endl; }
+    Geometry::Point<R> m=approximate_value(x);
     if(verbosity>1) { std::cerr << "  m=" << m << std::endl; }
-    Geometry::Rectangle<R> mr(m);
-    if(verbosity>1) { std::cerr << "  mr=" << mr << std::endl; }
-    LinearAlgebra::Vector< Interval<R> > w=f(mr);
-    if(verbosity>1) { std::cerr << "  f(mr)=" << w << std::endl; }
-    LinearAlgebra::Matrix< Interval<R> > A=f.jacobian(r);
+    Geometry::Point<I> im(m);
+    LinearAlgebra::Vector<I> w=f(im);
+    if(verbosity>1) { std::cerr << "  f(m)=" << w << std::endl; }
+    LinearAlgebra::Matrix<I> A=f.jacobian(x);
     if(verbosity>1) { std::cerr << "  Df(r)=" << A << std::endl; }
-    LinearAlgebra::Matrix< Interval<R> > Ainv=A.inverse();
+    LinearAlgebra::Matrix<I> Ainv=A.inverse();
     if(verbosity>1) { std::cerr << "  inverse(Df(r))=" << Ainv << std::endl; }
-    LinearAlgebra::Vector< Interval<R> > dr=Ainv * w;
-    if(verbosity>1) { std::cerr << "  dr=" << dr << std::endl; }
-    Geometry::Rectangle<R> nr= mr - dr;
+    LinearAlgebra::Vector<I> dx=Ainv * w;
+    if(verbosity>1) { std::cerr << "  dx=" << dx << std::endl; }
+    Geometry::Point<I> nx= m - dx;
+    if(verbosity>1) { std::cerr << "  nx=" << nx << std::endl; } 
+    Geometry::Rectangle<R> nr(nx);
     if(verbosity>1) { std::cerr << "  nr=" << nr << std::endl; } 
+
     if(verbosity>1) {
-      std::cerr << "  f(x)=" << f(r) << std::flush;
-      std::cerr << "  f(m)=" << approximate_value(f(mr)) << std::flush;
+      std::cerr << "  f(x)=" << f(x) << std::flush;
+      std::cerr << "  f(m)=" << approximate_value(f(im)) << std::flush;
       std::cerr << "  Df(x) =" << A << "  inv=" << inverse(A) << "  I=" << A*inverse(A) << std::flush;
-      std::cerr << "  nx =" << nr << "\n\n" << std::flush;
-      std::cerr << nr << " subset " << r << " ? " << Geometry::subset(nr,r) << "\n";
-      std::cerr << nr.radius() << " < " << e << " ? " << (nr.radius() < e) << "\n";
+      std::cerr << "  nx =" << nx << "\n" << std::flush;
+      std::cerr << "  nr =" << nr << "\n" << std::flush;
+      std::cerr << "\n";
+      std::cerr << error_bound(nx) << " < " << e << " ? " << (error_bound(nx) < e) << "\n\n";
     }
-    if(Geometry::subset(nr,r) and (nr.radius() < e)) {   \
+    
+    if(Geometry::subset(nr,r) && Geometry::error_bound(nx) < e) {
       return nr;
     }
     if(Geometry::disjoint(nr,r)) {
       throw EvaluationException("No result found -- disjoint");
     }
     r=Geometry::closed_intersection(nr,r);
+    x=r;
     n=n-1;
   }
-  throw EvaluationException("No result found -- disjoint");
-}
-
-template<class R>
-Ariadne::Geometry::Rectangle<R>
-Ariadne::Evaluation::interval_newton(const System::VectorField<R>& f, 
-                                     const Geometry::Rectangle<R>& x,
-                                     const R& e, 
-                                     uint s)
-{
-  return IntervalNewtonSolver<R>(e,s).solve(f,x);
+  throw EvaluationException("No result found -- maximum number of steps reached");
 }

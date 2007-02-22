@@ -48,28 +48,25 @@ namespace Ariadne {
      *
      * Derivatives of multivalued maps are not supported.
      */
-     template<class R>
+     template<class P, class S>
     class MultiMap {
      public:
       /*! \brief The real number type. */
-      typedef R real_type;
+      typedef typename P::real_type real_type;
       /*! \brief The type of denotable state the system acts on. */
-      typedef Geometry::Point<R> state_type;
+      typedef P state_type;
+      /*! \brief The type of set the system value takes at every point. */
+      typedef S set_type;
 
       /*! \brief Virtual destructor. */
       virtual ~MultiMap();
       
-      /*! \brief A minimal cover of the image of a rectangle. */
-      virtual Geometry::ListSet<R,Geometry::Rectangle> operator() (const Geometry::Rectangle<R>& A) const;
-      /*! \brief A minimal cover of the image of a parallelotope. */
-      virtual Geometry::ListSet<R,Geometry::Parallelotope> operator() (const Geometry::Parallelotope<R>& A) const;
-      /*! \brief A minimal cover of the image of a zonotope. */
-      virtual Geometry::ListSet<R,Geometry::Zonotope> operator() (const Geometry::Zonotope<R>& A) const;
-      /*! \brief A minimal cover of the image of a simplex. */
-      virtual Geometry::ListSet<R,Geometry::Simplex> operator() (const Geometry::Simplex<R>& A) const;
-      /*! \brief A minimal cover of the image of a polytope. */
-      virtual Geometry::ListSet<R,Geometry::Polytope> operator() (const Geometry::Polytope<R>& A) const;
+      /*! \brief Call the function at a point. */
+      S operator() (const P& x) const { return this->image(x); }
     
+      /*! \brief The image of the map on a point. */
+      virtual S image(const P& x) const = 0;
+      
       /*! \brief The dimension of the domain space. */
       virtual dimension_type argument_dimension() const = 0;
       /*! \brief The dimension of the range space. */

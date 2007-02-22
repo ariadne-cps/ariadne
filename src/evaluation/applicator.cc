@@ -31,24 +31,5 @@ namespace Ariadne {
 
     template class Applicator<Real>;
 
-/*  template 
-    Geometry::Rectangle<Real> 
-    apply(const Map<Real>&, const Geometry::Rectangle<Real>&);
-  
-    template 
-    Geometry::Parallelotope<Real> 
-    apply(const Map<Real>&, const Geometry::Parallelotope<Real>&);
-  
-    template
-    Ariadne::Geometry::ListSet<Real,Geometry::Parallelotope> 
-    apply(const Map<Real>& f, const Ariadne::Geometry::ListSet<Real,Geometry::Parallelotope>&);
-       
-    template
-    Ariadne::Geometry::GridMaskSet<Real> 
-    chainreach(const Map<Real>&, 
-               const Ariadne::Geometry::ListSet<Real,Ariadne::Geometry::Rectangle>&, 
-               const Ariadne::Geometry::FiniteGrid<Real>&, 
-               const Ariadne::Geometry::Rectangle<Real>&);
-*/
   }
 }

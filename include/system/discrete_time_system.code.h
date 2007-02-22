@@ -41,49 +41,15 @@ namespace Ariadne {
     DiscreteTimeSystem<R>::~DiscreteTimeSystem() 
     {
     }
-  
-    template<class R>
-    Geometry::Point<R> 
-    DiscreteTimeSystem<R>::operator() (const Geometry::Point<R>& x,
-                                       const Geometry::Point<R>& u,
-                                       const Geometry::Point<R>& v) const
-    {
-      throw DeferredImplementation(__PRETTY_FUNCTION__);
-    }
     
-    template<class R>
-    Geometry::Rectangle<R> 
-    DiscreteTimeSystem<R>::operator() (const Geometry::Rectangle<R>& x,
-                                       const Geometry::Rectangle<R>& u,
-                                       const Geometry::Rectangle<R>& v) const
-    {
-      throw DeferredImplementation(__PRETTY_FUNCTION__);
-    }
     
-    template<class R>
-    Geometry::Zonotope<R> 
-    DiscreteTimeSystem<R>::operator() (const Geometry::Zonotope<R>& x,
-                                       const Geometry::Zonotope<R>& u,
-                                       const Geometry::Zonotope<R>& v) const
-    {
-      throw DeferredImplementation(__PRETTY_FUNCTION__);
-    }
     
     
     template<class R>
-    LinearAlgebra::Matrix<R> 
-    DiscreteTimeSystem<R>::derivative(const Geometry::Point<R>& x,
-                                      const Geometry::Point<R>& u,
-                                      const Geometry::Point<R>& v) const
-    {
-      throw DeferredImplementation(__PRETTY_FUNCTION__);
-    }
-
-    template<class R>
-    LinearAlgebra::Matrix<R> 
-    DiscreteTimeSystem<R>::derivative(const Geometry::Rectangle<R>& x,
-                                      const Geometry::Rectangle<R>& u,
-                                      const Geometry::Rectangle<R>& v) const
+    LinearAlgebra::Matrix<F> 
+    DiscreteTimeSystem<R>::jacobian(const Geometry::Point<F>& x,
+                                    const Geometry::Point<F>& u,
+                                    const Geometry::Point<F>& v) const
     {
       throw DeferredImplementation(__PRETTY_FUNCTION__);
     }

@@ -508,6 +508,7 @@ namespace Ariadne {
     template<class R> GridBlock<R> inner_approximation(const Rectangle<R>& r, const Grid<R>& g);
     
     
+    template<class R> GridBlock<R> over_approximation(const Point< Interval<R> >& r, const Grid<R>& g);
     template<class R> GridBlock<R> over_approximation(const Rectangle<R>& r, const Grid<R>& g);
     
     template<class R> GridCellListSet<R> over_approximation(const Zonotope<R>& z, const Grid<R>& g);

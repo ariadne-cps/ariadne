@@ -378,6 +378,7 @@ namespace Ariadne {
     GridMaskSet<R>::_instantiate_geometry_operators()
     {
       tribool tb;
+      Point< Interval<R> >* ipt=0;
       Rectangle<R>* r=0;
       ListSet<R,Rectangle>* rls=0;
       ListSet<R,Zonotope>* zls=0;
@@ -403,7 +404,7 @@ namespace Ariadne {
       tb=subset(*gb,*gms);
       tb=subset(*gcls,*gms);
       tb=subset(*gms,*gms);
-
+      
       *gms=regular_intersection(*gb,*gms);
       *gms=regular_intersection(*gms,*gb);
       *gcls=regular_intersection(*gcls,*gms);
@@ -413,6 +414,8 @@ namespace Ariadne {
       *gms=difference(*gms,*gms);
       *gms=join(*gms,*gms);
 
+      *gb=over_approximation(*ipt,*g);
+  
       *gms=over_approximation(*rls,*fg);
       *gms=over_approximation(*zls,*fg);
       *gms=over_approximation(*plls,*fg);
@@ -735,6 +738,15 @@ namespace Ariadne {
       }
       return GridBlock<R>(g,lower,upper);
     }
+    
+    template<class R>
+    GridBlock<R>
+    over_approximation(const Point< Interval<R> >& ipt, const Grid<R>& g) 
+    {
+      return over_approximation(Rectangle<R>(ipt),g);
+    }
+    
+    
     
     template<class R>
     GridBlock<R>

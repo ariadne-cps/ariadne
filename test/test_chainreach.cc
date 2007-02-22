@@ -73,8 +73,9 @@ test_chainreach()
   in.adjoin(over_approximation(ir,g));
   bd.adjoin(over_approximation(gbb,g));
 
+  Applicator<R> apply;
 
-  GridMaskSet<R> cr=chainreach(h,in,bd);
+  GridMaskSet<R> cr=apply.chainreach(h,in,bd);
   PartitionTreeSet<R> ptcr=PartitionTreeSet<R>(cr);
 
   cout << cr <<endl;

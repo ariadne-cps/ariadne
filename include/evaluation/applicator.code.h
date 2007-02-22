@@ -74,56 +74,11 @@ namespace Ariadne {
     Geometry::Rectangle<R> 
     Applicator<R>::image(const System::Map<R>& f, const Geometry::Rectangle<R>& r) const
     {
-      return f.image(r);
+      return Geometry::Rectangle<R>(f.image(Geometry::Point< Interval<R> >(r)));
     }
     
     
     
-    template<class R>
-    Geometry::Parallelotope<R> 
-    Applicator<R>::image(const System::Map<R>& f, const Geometry::Parallelotope<R>& p) const 
-    {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-
-      const size_type m=p.dimension();
-      const size_type n=p.dimension();
-      
-      LinearAlgebra::Vector< Interval<R> > cuboid_vector(m);
-      const Interval<R> unit_interval(-1,1);
-      for(size_type i=0; i!=cuboid_vector.size(); ++i) {
-        cuboid_vector(i)=Interval<R>(-1,1);
-      }
-            
-      const Geometry::Point<R>& c=p.centre();
-      const LinearAlgebra::Matrix<R>& g=p.generators();
-      
-      Geometry::Point< Interval<R> > img_centre=f(c);
-      LinearAlgebra::Matrix< Interval<R> > df_on_set = f.jacobian(p.bounding_box());
-      LinearAlgebra::Matrix< Interval<R> > df_at_centre = f.jacobian(c);
-      
-      LinearAlgebra::Matrix< Interval<R> > img_generators = df_at_centre*g;
-      
-      LinearAlgebra::Matrix< Interval<R> > img_generators_inverse = LinearAlgebra::inverse(LinearAlgebra::Matrix< Interval<R> >(img_generators));
-      
-      LinearAlgebra::Matrix< Interval<R> > img_generators_on_set = df_on_set * g;
-      LinearAlgebra::Matrix< Interval<R> > cuboid_transform = img_generators_inverse * img_generators_on_set;
-      
-      LinearAlgebra::Vector< Interval<R> > new_cuboid = cuboid_transform * cuboid_vector;
-      
-      R new_cuboid_sup(0);
-      for(size_type j=0; j!=n; ++j) {
-        new_cuboid_sup=std::max( new_cuboid_sup, R(abs(new_cuboid(j).lower())) );
-        new_cuboid_sup=std::max( new_cuboid_sup, R(abs(new_cuboid(j).upper())) );
-      }
-      
-      // FIXME: This is incorrect; need over-approximations
-      Geometry::Point<R> nc=Geometry::approximate_value(img_centre);
-      LinearAlgebra::Matrix<R> ng=approximate_value(img_generators);
-      
-      Geometry::Parallelotope<R> result(nc,ng);
-      return result;
-    }
-
 
 
     template<class R>
@@ -173,22 +128,6 @@ namespace Ariadne {
 
 
     
-    template<class R>
-    Geometry::Parallelotope< Interval<R> > 
-    Applicator<R>::image(const System::Map<R>& f, const Geometry::Parallelotope< Interval<R> >& p) const 
-    {
-      typedef Interval<R> I;
-      const Geometry::Point<I>& c=p.centre();
-      //Geometry::Point<I> img_centre=f(c);
-      
-      Geometry::Point<Interval<R> > img_centre(f(c));
-      LinearAlgebra::Matrix<I> df_on_set = f.jacobian(over_approximation(p.bounding_box()));
-      LinearAlgebra::Matrix<I> img_generators = df_on_set*p.generators();
-
-      Geometry::Parallelotope<I> result(img_centre,img_generators);
-      return result;
-    }
-
     
     
     template<class R>
@@ -227,13 +166,6 @@ namespace Ariadne {
     }
      
     
-    template<class R>
-    Geometry::ListSet<R,Geometry::Parallelotope> 
-    Applicator<R>::image(const System::Map<R>& f, const Geometry::ListSet<R,Geometry::Parallelotope>& ds) const 
-    {
-      return this->image_list_set(f,ds);
-    }
-     
     
     template<class R>
     Geometry::ListSet<R,Geometry::Zonotope> 
@@ -242,13 +174,7 @@ namespace Ariadne {
       return this->image_list_set(f,ds);
     }
      
-    template<class R>
-    Geometry::ListSet<Interval<R>,Geometry::Parallelotope> 
-    Applicator<R>::image(const System::Map<R>& f, const Geometry::ListSet<Interval<R>,Geometry::Parallelotope>& ds) const 
-    {
-      return this->image_list_set(f,ds);
-    }
-     
+
     template<class R>
     Geometry::ListSet<Interval<R>,Geometry::Zonotope> 
     Applicator<R>::image(const System::Map<R>& f, const Geometry::ListSet<Interval<R>,Geometry::Zonotope>& ds) const 

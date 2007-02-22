@@ -89,6 +89,9 @@ namespace Ariadne {
       Monomial(const size_type& n) : _coefficient(0), _multi_index(n,0) { }
       /*! \brief Construct a monomial from a real number and an array of indices. */
       Monomial(const real_type& a, const array<size_type>& i) : _coefficient(a), _multi_index(i) { }
+      /*! \brief Convert from a monomial with a different real type. */
+      template<class Rl>
+      Monomial(const Monomial<Rl>& t) : _coefficient(t.coefficient()), _multi_index(t.multi_index()) { }
      
       /*! \brief The dimension of the argument.
        *
@@ -105,9 +108,7 @@ namespace Ariadne {
       size_type degree() const;
       
       /*! \brief Compute the image of a point under the monomial. */
-      result_type apply(const Geometry::Point<R>& s) const;
-      /*! \brief Compute the image of a rectangle under the monomial. */
-      Interval<R> apply(const Geometry::Rectangle<R>& s) const;
+      F apply(const Geometry::Point<F>& pt) const;
      private:
       friend std::istream& operator>> <> (std::istream&, Monomial<R>&);
       friend class Polynomial<R>;
@@ -151,20 +152,19 @@ namespace Ariadne {
       size_type number_of_terms() const { return _terms.size(); }
       
       /*! \brief Compute the image of a point under the polynomial. */
-      result_type apply(const Geometry::Point<R>& s) const;
-      /*! \brief Compute an over-approximation to a rectangle using interval arithmetic. */
-      Interval<R> apply(const Geometry::Rectangle<R>& s) const;
+      F image(const Geometry::Point<F>& s) const;
      private:
       void _sort();
       void _set_argument_dimension(const dimension_type& n);
       dimension_type _compute_maximum_term_dimension() const;
      private:
       friend class PolynomialMap<R>;
+      friend class PolynomialMap<typename Numeric::traits<R>::number_type>;
       friend std::istream& operator>> <> (std::istream&, Polynomial<R>&);
      private:
       /* Polynomials's terms. */
       dimension_type _argument_dimension;
-      std::vector< Monomial<real_type> > _terms;
+      std::vector< Monomial<R> > _terms;
     };
 
     /*! \brief A polynomial map with multivalued output.
@@ -205,17 +205,13 @@ namespace Ariadne {
       size_type smoothness() const { return (size_type) -1;; }
       
       /*! \brief Compute the image of a point under the polynomial map. */
-      Geometry::Point<F> apply(const Geometry::Point<R>& s) const;
-      /*! \brief Compute an over-approximation to the image of a rectangle under the polynomial map. */
-      Geometry::Rectangle<R> apply(const Geometry::Rectangle<R>& s) const;
+      virtual Geometry::Point<F> image(const Geometry::Point<F>& s) const;
       
       /*! \brief Compute the derivate of the map at a point. */
-      LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<R>& s) const;
-      /*! \brief Compute an over-approximation to the the derivate of the map over a rectangle. */
-      LinearAlgebra::Matrix< Interval<R> > jacobian(const Geometry::Rectangle<R>& s) const;
-      
+      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<F>& s) const;
+     
       /*! \brief Compute a closed form for the derivative of the map. */
-      const PolynomialMatrix<R>& jacobian() const;
+      const PolynomialMatrix<F>& jacobian() const;
       
       std::string name() const { return "PolynomialMap"; }
      private:
@@ -229,7 +225,7 @@ namespace Ariadne {
       /* Components of the map. */
       dimension_type _argument_dimension;
       array< Polynomial<R> > _components;
-      mutable PolynomialMatrix<R> _jacobian;
+      mutable PolynomialMatrix<F> _jacobian;
     };
     
     /*! \brief A matrix with polynomial entries. */

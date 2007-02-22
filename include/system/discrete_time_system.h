@@ -56,39 +56,44 @@ namespace Ariadne {
     template<class R>
     class DiscreteTimeSystem
     {
+      typedef Numeric::traits<R>::arithmetic_type F;
      public:
       /*! \brief The real number type. */
       typedef R real_type;
       /*! \brief The type of denotable state the system acts on. */
       typedef Geometry::Point<R> state_type;
       
-      /*! \brief  An the image of a point. Only available if the image can be 
-       *  computed exactly. */
-      virtual Geometry::Point<R> 
-      operator() (const Geometry::Point<R>& x,
-                  const Geometry::Point<R>& u,
-                  const Geometry::Point<R>& v) const;
+      /*! \brief  The image of a point, computed approximately.  */
+      Geometry::Point<F> 
+      operator() (const Geometry::Point<F>& x,
+                  const Geometry::Point<F>& u,
+                  const Geometry::Point<R>& v) const
+      {
+        return this->image(x,u,v);
+      }
       
-      /*! \brief  The system operating on rectangular sets. */
-      virtual Geometry::Rectangle<R> 
-      operator() (const Geometry::Rectangle<R>& x,
-                  const Geometry::Rectangle<R>& u,
-                  const Geometry::Rectangle<R>& v) const;
-
-      /*! \brief  The system acting on zonotopic sets. */
-      virtual Geometry::Zonotope<R> 
-      operator() (const Geometry::Zonotope<R>& x,
-                  const Geometry::Zonotope<R>& u,
-                  const Geometry::Zonotope<R>& v) const;
-
+      /*! \brief  The image of a point, computed approximately.  */
+      virtual 
+      Geometry::Point<F> 
+      image(const Geometry::Point<F>& x,
+            const Geometry::Point<F>& u,
+            const Geometry::Point<R>& v) const = 0;
+      
+      /*! \brief  The jacobian derivate of a point with respect to the state, computed approximately.  */
+      virtual
+      LinearAlgebra::Matrix<F> 
+      DiscreteTimeSystem<R>::jacobian(const Geometry::Point<F>& x,
+                                      const Geometry::Point<F>& u,
+                                      const Geometry::Point<F>& v) const;
+      
       /*! \brief  The dimension of the state space. */
-      virtual dimension_type state_space_dimension() const;
+      virtual dimension_type state_space_dimension() const = 0;
       
       /*! \brief  The dimension of the control space. */
-      virtual dimension_type control_space_dimension() const;
+      virtual dimension_type control_space_dimension() const = 0;
       
       /*! \brief  The dimension of the noise space. */
-      virtual dimension_type noise_space_dimension() const;
+      virtual dimension_type noise_space_dimension() const = 0;
       
       /*! \brief  The name of the system. */
       virtual std::string name() const { return "DiscreteTimeSystem"; }

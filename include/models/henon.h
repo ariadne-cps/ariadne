@@ -59,14 +59,10 @@ namespace Ariadne {
       HenonMap<R>* clone() const { return new HenonMap<R>(this->_a,this->_b); }
 
       /*! \brief  The map applied to a state. */
-      virtual Geometry::Point<F> image(const Geometry::Point<R>& x) const;
-      /*! \brief  The map applied to a rectangle basic set. */
-      virtual Geometry::Rectangle<R> image(const Geometry::Rectangle<R>& r) const;
+      virtual Geometry::Point<F> image(const Geometry::Point<F>& x) const;
       
       /*! \brief  The derivative of the map at a point. */
-      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<R>& x) const;
-      /*! \brief  The derivative of the map over a rectangular basic set. */
-      virtual LinearAlgebra::Matrix< Interval<R> > jacobian(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<F>& x) const;
             
       /*! \brief  The parameter a. */
       const R& a() const { return _a; }
@@ -93,7 +89,7 @@ namespace Ariadne {
       
     template<class R>
     Geometry::Point<typename HenonMap<R>::F>
-    HenonMap<R>::image(const Geometry::Point<R>& p) const
+    HenonMap<R>::image(const Geometry::Point<F>& p) const
     {
       Geometry::Point<F> result(2); 
       const F& x=p[0];
@@ -104,38 +100,17 @@ namespace Ariadne {
     }
      
     template<class R>
-    Geometry::Rectangle<R>
-    HenonMap<R>::image(const Geometry::Rectangle<R>& A) const
-    {
-      Geometry::Rectangle<R> result(2); 
-      result[0]=_a-A[0]*A[0]-_b*A[1]; 
-      result[1]=A[0]; 
-      return result;
-    }
-     
-    template<class R>
     LinearAlgebra::Matrix<typename HenonMap<R>::F>
-    HenonMap<R>::jacobian(const Geometry::Point<R>& x) const
+    HenonMap<R>::jacobian(const Geometry::Point<F>& x) const
     {
       LinearAlgebra::Matrix<F> result(2,2); 
       result(0,0) = F(-2)*x[0];
-      result(0,1) = R(-_b);
+      result(0,1) = F(-_b);
       result(1,0) = R(1);
       result(1,1) = R(0);
       return result;
     }
      
-    template<class R>
-    LinearAlgebra::Matrix< Interval<R> >
-    HenonMap<R>::jacobian(const Geometry::Rectangle<R>& r) const
-    {
-      LinearAlgebra::Matrix< Interval<R> > result(2,2); 
-      result(0,0) = R(-2)*r[0];
-      result(0,1) = Interval<R>(R(-_b));
-      result(1,0) = Interval<R>(R(1));
-      result(1,1) = Interval<R>(R(0));
-      return result;
-    }
      
      
     template<class R>

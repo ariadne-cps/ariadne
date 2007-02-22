@@ -454,7 +454,6 @@ namespace Ariadne {
     scale(const Geometry::Rectangle<R>& r, const R& scale_factor);
     
     
-    
   }
 }
 

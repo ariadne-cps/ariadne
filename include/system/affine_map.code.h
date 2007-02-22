@@ -40,69 +40,42 @@ namespace Ariadne {
   namespace System {
 
     template<class R>
-    Geometry::Point< typename AffineMap<R>::F >
-    AffineMap<R>::image(const Geometry::Point<R>& pt) const
+    Geometry::Point<typename AffineMap<R>::F>
+    AffineMap<R>::image(const Geometry::Point<F>& pt) const
     {
-      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
-
       check_argument_dimension(*this,pt,__PRETTY_FUNCTION__);
       LinearAlgebra::Vector<F> image(this->A()*LinearAlgebra::Vector<F>(pt.position_vector())+this->b());
       return Geometry::Point<F>(image);
     }
     
-
-    template<class R>
-    Geometry::Rectangle<R>
-    AffineMap<R>::image(const Geometry::Rectangle<R>& r) const
-    {
-      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
-
-      check_argument_dimension(*this,r,__PRETTY_FUNCTION__);
-      return Geometry::Rectangle<R>(this->A()*r.position_vectors()+this->b());
-    }
     
     template<class R>
-    Geometry::Parallelotope<R>
-    AffineMap<R>::image(const Geometry::Parallelotope<R>& p) const
-    {
-      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
-
-      check_argument_dimension(*this,p,__PRETTY_FUNCTION__);
-      Geometry::Point<F> nc=this->image(p.centre());
-      LinearAlgebra::Matrix<F> ng=this->A()*LinearAlgebra::Matrix<F>(p.generators());
-      return Geometry::over_approximation(Geometry::Parallelotope<F>(nc,ng));
-    }
-
-    template<class R>
-    Geometry::Zonotope<R>
-    AffineMap<R>::image(const Geometry::Zonotope<R>& z) const
+    Geometry::Zonotope<typename AffineMap<R>::F>
+    AffineMap<R>::image(const Geometry::Zonotope<F>& z) const
     {
       //std::cerr << __PRETTY_FUNCTION__ << std::endl;
 
       check_argument_dimension(*this,z,__PRETTY_FUNCTION__);
-      return Geometry::over_approximation(Geometry::Zonotope< Interval<R> >(
-        this->image(z.centre()),
-        this->A()*LinearAlgebra::Matrix< Interval<R> >(z.generators())
-      ));
+      Geometry::Point<F> c=z.centre();
+      LinearAlgebra::Matrix<F> G=z.generators();
+      const LinearAlgebra::Matrix<R>& A=this->A();
+      const LinearAlgebra::Vector<R>& b=this->b();
+      
+      return Geometry::Zonotope<F>(
+        Geometry::Point<F>(A*c.position_vector()+b),A*G
+      );
     }   
     
     template<class R>
-    Geometry::Polytope<R>
-    AffineMap<R>::image(const Geometry::Polytope<R>& p) const
+    Geometry::Polytope<typename AffineMap<R>::F>
+    AffineMap<R>::image(const Geometry::Polytope<F>& p) const
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }   
     
     template<class R>
     LinearAlgebra::Matrix<typename AffineMap<R>::F>
-    AffineMap<R>::jacobian(const Geometry::Point<R>& pt) const
-    {
-      return this->_A;
-    }
-    
-    template<class R>
-    LinearAlgebra::Matrix<typename AffineMap<R>::I>
-    AffineMap<R>::jacobian(const Geometry::Rectangle<R>& r) const
+    AffineMap<R>::jacobian(const Geometry::Point<F>& pt) const
     {
       return this->_A;
     }
@@ -115,95 +88,7 @@ namespace Ariadne {
                 << ", b=" << this->b() << " )";
     }
     
-/*
-    template<class R>
-    Geometry::ListSet<R,Geometry::Parallelotope>
-    AffineMap<R>::operator() (const Geometry::GridMaskSet<R>& gms) const
-    {
-      Geometry::ListSet<R,Geometry::Parallelotope> result(gms.dimension());
 
-      for(typename Geometry::GridMaskSet<R>::const_iterator iter=gms.begin();
-          iter!=gms.end(); ++iter) {
-        result.push_back(this->operator()(Geometry::Parallelotope<R>(*iter)));
-      }
-      
-      return result;
-    }  
-
-    Geometry::Point<Rational>
-    AffineMap<Rational>::operator() (const Geometry::Point<Rational>& pt) const
-    {
-      if (this->argument_dimension()!=pt.dimension()) {
-        throw std::domain_error("AffineMap<R>::operator() (const Point&): "
-          "the map does not have the same dimension of the point.");
-      }
-      return Geometry::Point<Rational>(this->A()*pt.position_vector()+this->b());
-    }
-    
-    Geometry::Rectangle<Rational>
-    AffineMap<Rational>::operator() (const Geometry::Rectangle<Rational>& r) const
-    {
-      if (this->argument_dimension()!=r.dimension()) {
-        throw std::domain_error("AffineMap<R>::operator() (const Rectangle&): "
-          "the map does not have the same dimension of the rectangle.");
-      }
-      return Geometry::Rectangle<Rational>(this->A()*r.position_vectors()+this->b());
-    }
-    
-    Geometry::Parallelotope<Rational>
-    AffineMap<Rational>::operator() (const Geometry::Parallelotope<Rational>& p) const
-    {
-      if (this->argument_dimension()!=p.dimension()) {
-        throw std::domain_error("AffineMap<R>::operator() (const Parallelotope&): "
-          "the map does not have the same dimension of the rectangle.");
-      }
-      return Geometry::Parallelotope<Rational>(
-        this->operator() (p.centre()),A()*p.generators());
-    }
-    
-    Geometry::Zonotope<Rational>
-    AffineMap<Rational>::operator() (const Geometry::Zonotope<Rational>& z) const
-    {
-      if (this->argument_dimension()!=z.dimension()) {
-        throw std::domain_error("AffineMap<Rational>::operator() (const Zonotope<Rational>&): "
-          "the map does not have the same dimension of the simplex.");
-      }
-
-      return Geometry::Zonotope<Rational>(
-          this->operator() (z.central_block()),this->A()*z.generators());
-    }
-
-    Geometry::Simplex<Rational>
-    AffineMap<Rational>::operator() (const Geometry::Simplex<Rational>& s) const
-    {
-      if (this->argument_dimension()!=s.dimension()) {
-        throw std::domain_error("AffineMap<Rational>::operator() (const Simplex<Rational>&): "
-          "the map does not have the same dimension of the simplex.");
-      }
-      
-      array< Geometry::Point<Rational> > new_vertices=s.vertices();
-      for (size_type i=0; i< new_vertices.size(); ++i) {
-        new_vertices[i]=this->operator() (new_vertices[i]);
-      }
-      return Geometry::Simplex<Rational>(new_vertices);
-    }
-
-    
-    Geometry::Polytope<Rational>
-    AffineMap<Rational>::operator() (const Geometry::Polytope<Rational>& p) const
-    {
-      if (this->argument_dimension()!=p.dimension()) {
-        throw std::domain_error("AffineMap<Rational>::operator() (const Polytope<Rational>&): "
-          "the map does not have the same dimension of the polytope.");
-      }
-
-      std::vector< Geometry::Point<Rational> > new_vertices=p.vertices();
-      for (size_type i=0; i< new_vertices.size(); ++i) {
-        new_vertices[i]=this->operator() (new_vertices[i]);
-      }
-      return Geometry::Polytope<Rational>(new_vertices);
-    }    
-*/
 
   }
 }

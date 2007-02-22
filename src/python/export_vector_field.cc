@@ -23,9 +23,12 @@
 
 #include "real_typedef.h"
 
+#include "linear_algebra/vector.h"
 #include "system/vector_field.h"
 
 using namespace Ariadne;
+using namespace Ariadne::LinearAlgebra;
+using namespace Ariadne::Geometry;
 using namespace Ariadne::System;
 
 #include <boost/python.hpp>
@@ -35,8 +38,10 @@ template<class R>
 class VectorFieldWrapper
   : public VectorField<R>, public wrapper< VectorField<R> >
 {
+  typedef typename VectorField<R>::F F;
  public: 
   VectorField<R>* clone() const { return this->get_override("clone")(); }
+  Vector<F> image(const Point<F>&) const { return this->get_override("image")(); }
   dimension_type dimension() const { return this->get_override("dimension")(); }
   size_type smoothness() const { return this->get_override("smoothness")(); }
   std::string name() const { return this->get_override("name")(); }

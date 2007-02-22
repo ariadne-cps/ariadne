@@ -59,14 +59,10 @@ namespace Ariadne {
        
        
       /*! \brief  The vector field applied to a state. */
-      virtual LinearAlgebra::Vector<F> image(const Geometry::Point<R>& x) const;
-      /*! \brief  The map applied to a rectangle basic set. */
-      virtual LinearAlgebra::Vector< Interval<R> > image(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::Vector<F> image(const Geometry::Point<F>& x) const;
      
       /*! \brief  The derivative of the map at a point. */
-      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<R>& x) const;
-      /*! \brief  The derivative of the map over a rectangular basic set. */
-      virtual LinearAlgebra::Matrix< Interval<R> > jacobian(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<F>& x) const;
             
       /*! \brief  The parameter \f$\beta\f$. */
       const R& beta() const { return _b; }
@@ -93,7 +89,7 @@ namespace Ariadne {
       
     template<class R>
     LinearAlgebra::Vector<typename LorenzSystem<R>::F>
-    LorenzSystem<R>::image(const Geometry::Point<R>& x) const
+    LorenzSystem<R>::image(const Geometry::Point<F>& x) const
     {
       LinearAlgebra::Vector<F> result(3); 
       result(0)=_s*(x[1]-x[0]);
@@ -102,20 +98,10 @@ namespace Ariadne {
       return result;
     }
      
-    template<class R>
-    LinearAlgebra::Vector< Interval<R> >
-    LorenzSystem<R>::image(const Geometry::Rectangle<R>& X) const
-    {
-      LinearAlgebra::Vector< Interval<R> > result(3); 
-      result(0)=_s*(X[1]-X[0]);
-      result(0)=_p*X[0]-X[1]-X[0]*X[2];
-      result(0)=X[0]*X[1]-_b*X[2];
-      return result;
-    }
      
     template<class R>
     LinearAlgebra::Matrix<typename LorenzSystem<R>::F>
-    LorenzSystem<R>::jacobian(const Geometry::Point<R>& x) const
+    LorenzSystem<R>::jacobian(const Geometry::Point<F>& x) const
     {
       LinearAlgebra::Matrix<F> result(3,3); 
       result(0,0) = -_s;
@@ -130,23 +116,7 @@ namespace Ariadne {
       return result;
     }
      
-    template<class R>
-    LinearAlgebra::Matrix< Interval<R> >
-    LorenzSystem<R>::jacobian(const Geometry::Rectangle<R>& X) const
-    {
-      LinearAlgebra::Matrix< Interval<R> > result(3,3); 
-      result(0,0) = R(-_s);
-      result(0,1) = _s;
-      result(0,2) = R(0);
-      result(1,0) = _p-X[2];
-      result(1,1) = R(-1);
-      result(1,2) = -X[0];
-      result(2,0) = X[1];
-      result(2,1) = X[0];
-      result(2,2) = R(-_b);
-      return result;
-    }
-     
+  
      
     template<class R>
     std::ostream& operator<<(std::ostream& os, const LorenzSystem<R>& ls) {

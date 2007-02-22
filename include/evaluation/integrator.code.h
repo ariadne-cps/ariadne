@@ -532,16 +532,6 @@ namespace Ariadne {
     }
     
     template<class R>
-    Geometry::Parallelotope<R>
-    Integrator<R>::integration_step(const System::VectorField<R>& vector_field, 
-                                      const Geometry::Parallelotope<R>& initial_set, 
-                                      time_type& time) const
-    {
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      return Geometry::Parallelotope<R>(this->integration_step(vector_field,initial_set.bounding_box(),time));
-    }
-    
-    template<class R>
     Geometry::Zonotope<R>
     Integrator<R>::integration_step(const System::VectorField<R>& vector_field, 
                                       const Geometry::Zonotope<R>& initial_set, 
@@ -549,16 +539,6 @@ namespace Ariadne {
     {
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       return Geometry::Zonotope<R>(this->integration_step(vector_field,initial_set.bounding_box(),time));
-    }
-    
-    template<class R>
-    Geometry::Parallelotope< Interval<R> >
-    Integrator<R>::integration_step(const System::VectorField<R>& vector_field, 
-                                      const Geometry::Parallelotope< Interval<R> >& initial_set, 
-                                      time_type& time) const
-    {
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      return Geometry::Parallelotope< Interval<R> >(this->integration_step(vector_field,initial_set.bounding_box(),time));
     }
     
     template<class R>
@@ -618,16 +598,6 @@ namespace Ariadne {
     }
     
     
-    template<class R>
-    Geometry::Parallelotope<R>
-    Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
-                               const Geometry::Parallelotope<R>& initial_set, 
-                               const time_type& time) const
-    {
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      return this->integrate_basic_set(vector_field,initial_set,time);
-    }
-    
     
     template<class R>
     Geometry::Zonotope<R>
@@ -651,17 +621,6 @@ namespace Ariadne {
     {
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
      return this->integrate_list_set(vector_field,initial_set,time);
-    }
-    
-    
-    template<class R>
-    Geometry::ListSet<R,Geometry::Parallelotope> 
-    Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
-                               const Geometry::ListSet<R,Geometry::Parallelotope>& initial_set, 
-                               const time_type& time) const
-    {
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      return this->integrate_list_set(vector_field,initial_set,time);
     }
     
     
@@ -702,7 +661,7 @@ namespace Ariadne {
       Geometry::GridMaskSet<R> result(bounding_set.grid(),bounding_set.block());
       
       Geometry::Rectangle<R> tmp_rectangle;
-      Geometry::Parallelotope<R> tmp_parallelotope;
+      Geometry::Zonotope<R> tmp_zonotope;
       
       time_type t=time;
       time_type h=step_size;
@@ -711,10 +670,10 @@ namespace Ariadne {
       
       R spacial_tolerance=2;
       
-      ListSet<R,Parallelotope> start_set;
-      ListSet<R,Parallelotope> finish_set;
+      ListSet<R,Zonotope> start_set;
+      ListSet<R,Zonotope> finish_set;
       for(typename GridMaskSet<R>::const_iterator iter=initial_set.begin(); iter!=initial_set.end(); ++iter) {
-        start_set.adjoin(Parallelotope<R>(Rectangle<R>(*iter)));
+        start_set.adjoin(Zonotope<R>(Rectangle<R>(*iter)));
       }
       
       while(t!=0) {
@@ -722,16 +681,16 @@ namespace Ariadne {
         std::cerr << "time left=" << t << "  stepsize=" << h << "  sets in list=" << start_set.size() << "\n";
 #endif
         h=min(t,h);
-        for(typename ListSet<R,Parallelotope>::const_iterator iter=start_set.begin(); iter!=start_set.end(); ++iter) {
+        for(typename ListSet<R,Zonotope>::const_iterator iter=start_set.begin(); iter!=start_set.end(); ++iter) {
           const VectorField<R>& vf=vector_field;
-          Geometry::Parallelotope<R> p(*iter);
+          Geometry::Zonotope<R> p(*iter);
           p=this->integrate(vf,p,h);
           finish_set.adjoin(p);
         }
         start_set.clear();
         GridMaskSet<R> mask_set(g,lb);
-        for(typename ListSet<R,Parallelotope>::const_iterator iter=finish_set.begin(); iter!=finish_set.end(); ++iter) {
-          const Parallelotope<R>& p=*iter;
+        for(typename ListSet<R,Zonotope>::const_iterator iter=finish_set.begin(); iter!=finish_set.end(); ++iter) {
+          const Zonotope<R>& p=*iter;
           if(p.radius()>spacial_tolerance) {
 #ifdef DEBUG
             std::cerr << "Splitting, radius=" << p.radius() << "\n" << p << "\n";
@@ -745,33 +704,20 @@ namespace Ariadne {
         }
         for(typename GridMaskSet<R>::const_iterator iter=mask_set.begin(); iter!=mask_set.end(); ++iter) {
           tmp_rectangle=*iter;
-          tmp_parallelotope=tmp_rectangle;
-          start_set.adjoin(tmp_parallelotope);
+          tmp_zonotope=tmp_rectangle;
+          start_set.adjoin(tmp_zonotope);
         }
         finish_set.clear();
         t-=h;
       }
     
-      for(typename ListSet<R,Parallelotope>::const_iterator iter=start_set.begin(); iter!=start_set.end(); ++iter) {
+      for(typename ListSet<R,Zonotope>::const_iterator iter=start_set.begin(); iter!=start_set.end(); ++iter) {
         GridCellListSet<R> oai=over_approximation(*iter,g);
         result.adjoin(oai);
       }
       return result;
     }
    
-        
-    template<class R>
-    Geometry::ListSet<R,Geometry::Zonotope> 
-    Integrator<R>::reach(const System::VectorField<R>& vector_field, 
-                         const Geometry::ListSet<R,Geometry::Parallelotope>& initial_set, 
-                         const time_type& time) const
-    {
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      
-      Geometry::ListSet<R,Geometry::Zonotope> zonotopic_initial_set(initial_set);
-      return reach(vector_field,zonotopic_initial_set,time);
-    }
-    
     
     
     template<class R>

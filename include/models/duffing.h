@@ -64,14 +64,10 @@ namespace Ariadne {
        
        
       /*! \brief  The vector field applied to a state. */
-      virtual LinearAlgebra::Vector<F> image(const Geometry::Point<R>& x) const;
-      /*! \brief  The map applied to a rectangle basic set. */
-      virtual LinearAlgebra::Vector< Interval<R> > image(const Geometry::Rectangle<R>& r) const;
-     
+      virtual LinearAlgebra::Vector<F> image(const Geometry::Point<F>& x) const;
+    
       /*! \brief  The derivative of the map at a point. */
-      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<R>& x) const;
-      /*! \brief  The derivative of the map over a rectangular basic set. */
-      virtual LinearAlgebra::Matrix< Interval<R> > jacobian(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<F>& x) const;
             
       /*! \brief The parameter \f$\delta\f$. */
       const R& delta() const { return _delta; }
@@ -102,7 +98,7 @@ namespace Ariadne {
       
     template<class R>
     LinearAlgebra::Vector<typename DuffingEquation<R>::F>
-    DuffingEquation<R>::image(const Geometry::Point<R>& x) const
+    DuffingEquation<R>::image(const Geometry::Point<F>& x) const
     {
       LinearAlgebra::Vector<F> result(3); 
       result(0)=x[1];
@@ -111,20 +107,10 @@ namespace Ariadne {
       return result;
     }
      
-    template<class R>
-    LinearAlgebra::Vector< Interval<R> >
-    DuffingEquation<R>::image(const Geometry::Rectangle<R>& x) const
-    {
-      LinearAlgebra::Vector< Interval<R> > result(2); 
-      result(0)=x[1];
-      result(1)=-_delta*x[1]-x[0]*(_alpha+_beta*x[0]*x[0])+_gamma*cos(_omega*x[2]+_phi);
-      result(2)=1.0;
-      return result;
-    }
-     
+    
     template<class R>
     LinearAlgebra::Matrix<typename DuffingEquation<R>::F>
-    DuffingEquation<R>::jacobian(const Geometry::Point<R>& x) const
+    DuffingEquation<R>::jacobian(const Geometry::Point<F>& x) const
     {
       LinearAlgebra::Matrix<F> result(2,2); 
       result(0,0) = 0;
@@ -139,23 +125,7 @@ namespace Ariadne {
      return result;
     }
      
-    template<class R>
-    LinearAlgebra::Matrix< Interval<R> >
-    DuffingEquation<R>::jacobian(const Geometry::Rectangle<R>& x) const
-    {
-      LinearAlgebra::Matrix< Interval<R> > result(2,2); 
-      result(0,0) = 0;
-      result(0,1) = 1;
-      result(0,2) = 0;
-      result(1,0) = -(_alpha+3.0*_beta*x[0]*x[0]);
-      result(1,1) = -_delta;
-      result(1,2) = -_gamma*_omega*Numeric::sin(_omega*x[2]+_phi);
-      result(2,0) = 0;
-      result(2,1) = 0;
-      result(2,2) = 0;
-      return result;
-    }
-     
+  
      
     template<class R>
     std::ostream& operator<<(std::ostream& os, const DuffingEquation<R>& de) {

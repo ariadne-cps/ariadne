@@ -118,37 +118,6 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorF
 
 
 
-template<class R>
-Ariadne::Geometry::Parallelotope< Ariadne::Interval<R> > 
-Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
-                                      const Geometry::Parallelotope< Interval<R> >& initial_set, 
-                                      time_type& step_size) const
-{
-  if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-  
-  const Geometry::Zonotope< Interval<R> >& zonotopic_initial_set=initial_set;
-  Geometry::Zonotope< Interval<R> > zonotopic_final_set=this->integration_step(vector_field,zonotopic_initial_set,step_size);
-  return Geometry::Parallelotope< Interval<R> >(zonotopic_final_set);
-}
-
-
-
-template<class R>
-Ariadne::Geometry::Parallelotope<R> 
-Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
-                                      const Geometry::Parallelotope<R>& initial_set, 
-                                      time_type& step_size) const
-{
-  if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-  check_equal_dimensions(vector_field,initial_set);
-
-  Geometry::Zonotope< Interval<R> > fuzzy_zonotopic_initial_set(initial_set);
-  Geometry::Zonotope< Interval<R> > fuzzy_zonotopic_final_set=this->integration_step(vector_field,fuzzy_zonotopic_initial_set,step_size);
-  Geometry::Parallelotope< Interval<R> > fuzzy_parallelotopic_final_set=fuzzy_zonotopic_final_set;
-  Geometry::Parallelotope<R> final_set(Geometry::over_approximation(fuzzy_parallelotopic_final_set));
-  return final_set;
-}
-
 
 
 template<class R>

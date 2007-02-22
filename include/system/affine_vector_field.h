@@ -60,21 +60,17 @@ namespace Ariadne {
       virtual ~AffineVectorField();
       
       /*! \brief Copy constructor. */
-      AffineVectorField(const AffineVectorField<R>& F) : _A(F.A()), _b(F.b()) { }
+      AffineVectorField(const AffineVectorField<R>& avf) : _A(avf.A()), _b(avf.b()) { }
       /*! \brief Construct from the matrix \a A and the vector \a b.. */
       AffineVectorField(const LinearAlgebra::Matrix<R> &A, const LinearAlgebra::Vector<R> &b) : _A(A), _b(b) { }
       /*! \brief Make a copy (clone) of the vector field. */
       AffineVectorField<R>* clone() const { return new AffineVectorField<R>(this->A(),this->b()); }
       
       /*! \brief An approximation to the vector field at a point. */
-      virtual LinearAlgebra::Vector<F> image(const Geometry::Point<R>& x) const;
-      /*! \brief An over-approximation to the vector field over a rectangle. */
-      virtual LinearAlgebra::Vector<I> image(const Geometry::Rectangle<R>& A) const;
-    
+      virtual LinearAlgebra::Vector<F> image(const Geometry::Point<F>& x) const;
+
       /*! \brief An approximation to the Jacobian derivative at a point. */
-      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<R>& x) const;
-      /*! \brief An over-approximation to the Jacobian derivative over a rectangle. */
-      virtual LinearAlgebra::Matrix<I> jacobian(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<F>& x) const;
       
       /*! \brief The matrix \f$A\f$. */
       const LinearAlgebra::Matrix<R>& A() const { return this->_A; }

@@ -21,62 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
-
-#include "../geometry/point.h"
-#include "../geometry/rectangle.h"
-#include "../geometry/parallelotope.h"
-#include "../geometry/zonotope.h"
-#include "../geometry/simplex.h"
-#include "../geometry/polytope.h"
-#include "../geometry/list_set.h"
-
 #include "../system/multimap.h"
 
 namespace Ariadne {
   namespace System {
 
-    template<class R>
-    MultiMap<R>::~MultiMap() 
+    template<class P, class S>
+    MultiMap<P,S>::~MultiMap() 
     {
     }
   
-    template<class R>
-    Geometry::ListSet<R,Geometry::Rectangle>
-    MultiMap<R>::operator() (const Geometry::Rectangle<R>& r) const 
-    {
-      throw DeferredImplementation(__PRETTY_FUNCTION__);
-    }
-    
-    template<class R>
-    Geometry::ListSet<R,Geometry::Parallelotope>
-    MultiMap<R>::operator() (const Geometry::Parallelotope<R>& p) const 
-    {
-      throw DeferredImplementation(__PRETTY_FUNCTION__);
-    }
-    
-    template<class R>
-    Geometry::ListSet<R,Geometry::Zonotope>
-    MultiMap<R>::operator() (const Geometry::Zonotope<R>& p) const 
-    {
-      throw DeferredImplementation(__PRETTY_FUNCTION__);
-    }
-    
-    template<class R>
-    Geometry::ListSet<R,Geometry::Simplex>
-    MultiMap<R>::operator() (const Geometry::Simplex<R>& p) const 
-    {
-      throw DeferredImplementation(__PRETTY_FUNCTION__);
-    }
-    
-    template<class R>
-    Geometry::ListSet<R,Geometry::Polytope>
-    MultiMap<R>::operator() (const Geometry::Polytope<R>& p) const 
-    {
-      throw DeferredImplementation(__PRETTY_FUNCTION__);
-    }
-    
+  
     
   }
 }

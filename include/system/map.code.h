@@ -38,43 +38,15 @@ namespace Ariadne {
     }
     
     template<class R>
-    typename Map<R>::result_type
-    Map<R>::image(const Geometry::Point<R>& r) const 
-    {
-      throw DeferredImplementation(__PRETTY_FUNCTION__);
-    }
-    
-    template<class R>
-    Geometry::Rectangle<R>
-    Map<R>::image(const Geometry::Rectangle<R>& r) const 
-    {
-      throw DeferredImplementation(__PRETTY_FUNCTION__);
-    }
-    
-    template<class R>
     typename Map<R>::F
-    Map<R>::derivative(const Geometry::Point<R>& r, const size_type& i, const multi_index_type& j) const 
-    {
-      throw DeferredImplementation(__PRETTY_FUNCTION__);
-    }
-    
-    template<class R>
-    typename Map<R>::I
-    Map<R>::derivative(const Geometry::Rectangle<R>& r, const size_type& i, const multi_index_type& j) const 
+    Map<R>::derivative(const Geometry::Point<F>& r, const size_type& i, const multi_index_type& j) const 
     {
       throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
     
     template<class R>
     LinearAlgebra::Matrix<typename Map<R>::F>
-    Map<R>::jacobian(const Geometry::Point<R>& r) const 
-    {
-      throw DeferredImplementation(__PRETTY_FUNCTION__);
-    }
-    
-    template<class R>
-    LinearAlgebra::Matrix<typename Map<R>::I> 
-    Map<R>::jacobian(const Geometry::Rectangle<R>& r) const 
+    Map<R>::jacobian(const Geometry::Point<F>& r) const 
     {
       throw DeferredImplementation(__PRETTY_FUNCTION__);
     }

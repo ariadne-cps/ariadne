@@ -46,10 +46,8 @@ void export_henon_map() {
   class_< HenonMap<R>, bases< Map<R> > >("HenonMap",init<R,R>())
     .def("argument_dimension", &HenonMap<R>::argument_dimension)
     .def("result_dimension", &HenonMap<R>::result_dimension)
-    .def("__call__", (Point<F>(HenonMap<R>::*)(const Point<R>&)const)(&HenonMap<R>::image))
-    .def("__call__", (Rectangle<R>(HenonMap<R>::*)(const Rectangle<R>&)const)(&HenonMap<R>::image))
-    .def("jacobian", (Matrix<F>(HenonMap<R>::*)(const Point<R>&)const)(&HenonMap<R>::jacobian))
-    .def("jacobian", (Matrix< Interval<R> >(HenonMap<R>::*)(const Rectangle<R>&)const)(&HenonMap<R>::jacobian))
+    .def("__call__", (Point<F>(HenonMap<R>::*)(const Point<F>&)const)(&HenonMap<R>::image))
+    .def("jacobian", (Matrix<F>(HenonMap<R>::*)(const Point<F>&)const)(&HenonMap<R>::jacobian))
     .def(self_ns::str(self))
   ;
 }
@@ -58,14 +56,11 @@ void export_henon_map() {
 template<class R>
 void export_duffing_equation() {
   typedef typename Numeric::traits<R>::arithmetic_type F;
-  typedef Interval<R> I;
   
   class_< DuffingEquation<R>, bases< VectorField<R> > >("DuffingEquation",init<R,R>())
     .def("dimension", &DuffingEquation<R>::dimension)
-    .def("__call__", (Vector<F>(DuffingEquation<R>::*)(const Point<R>&)const)(&DuffingEquation<R>::image))
-    .def("__call__", (Vector<I>(DuffingEquation<R>::*)(const Rectangle<R>&)const)(&DuffingEquation<R>::image))
-    .def("jacobian", (Matrix<F>(DuffingEquation<R>::*)(const Point<R>&)const)(&DuffingEquation<R>::jacobian))
-    .def("jacobian", (Matrix<I>(DuffingEquation<R>::*)(const Rectangle<R>&)const)(&DuffingEquation<R>::jacobian))
+    .def("__call__", (Vector<F>(DuffingEquation<R>::*)(const Point<F>&)const)(&DuffingEquation<R>::image))
+    .def("jacobian", (Matrix<F>(DuffingEquation<R>::*)(const Point<F>&)const)(&DuffingEquation<R>::jacobian))
     .def(self_ns::str(self))
   ;
 }
@@ -73,14 +68,11 @@ void export_duffing_equation() {
 template<class R>
 void export_van_der_pol_equation() {
   typedef typename Numeric::traits<R>::arithmetic_type F;
-  typedef Interval<R> I;
   
   class_< VanDerPolEquation<R>, bases< VectorField<R> > >("VanDerPolEquation",init<R>())
     .def("dimension", &VanDerPolEquation<R>::dimension)
-    .def("__call__", (Vector<F>(VanDerPolEquation<R>::*)(const Point<R>&)const)(&VanDerPolEquation<R>::image))
-    .def("__call__", (Vector<I>(VanDerPolEquation<R>::*)(const Rectangle<R>&)const)(&VanDerPolEquation<R>::image))
-    .def("jacobian", (Matrix<F>(VanDerPolEquation<R>::*)(const Point<R>&)const)(&VanDerPolEquation<R>::jacobian))
-    .def("jacobian", (Matrix<I>(VanDerPolEquation<R>::*)(const Rectangle<R>&)const)(&VanDerPolEquation<R>::jacobian))
+    .def("__call__", (Vector<F>(VanDerPolEquation<R>::*)(const Point<F>&)const)(&VanDerPolEquation<R>::image))
+    .def("jacobian", (Matrix<F>(VanDerPolEquation<R>::*)(const Point<F>&)const)(&VanDerPolEquation<R>::jacobian))
     .def(self_ns::str(self))
   ;
 }
@@ -90,16 +82,12 @@ template<class R>
 void export_lorenz_system() 
 {
   typedef typename Numeric::traits<R>::arithmetic_type F;
-  typedef Interval<R> I;
-  typedef LorenzSystem<R> RLorenzSystem;
   
   class_< LorenzSystem<R>, bases< VectorField<R> > >("LorenzSystem",init<R,R,R>())
     .def("dimension", &LorenzSystem<R>::dimension)
     .def("smoothness", &LorenzSystem<R>::smoothness)
-    //.def("__call__", (Vector<F>(LorenzSystem<R>::*)(const Point<R>&)const)(&LorenzSystem<R>::image))
-    .def("__call__", (Vector<I>(LorenzSystem<R>::*)(const Rectangle<R>&)const)(&RLorenzSystem::image))
-    //.def("jacobian", (Matrix<F>(LorenzSystem<R>::*)(const Point<R>&)const)(&RLorenzSystem::jacobian))
-    .def("jacobian", (Matrix<I>(LorenzSystem<R>::*)(const Rectangle<R>&)const)(&RLorenzSystem::jacobian))
+    .def("__call__", (Vector<F>(LorenzSystem<R>::*)(const Point<F>&)const)(&LorenzSystem<R>::image))
+    .def("jacobian", (Matrix<F>(LorenzSystem<R>::*)(const Point<F>&)const)(&LorenzSystem<R>::jacobian))
     .def(self_ns::str(self))
   ;
 }

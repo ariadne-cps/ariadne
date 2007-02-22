@@ -53,31 +53,34 @@ template<class R>
 int 
 test_newton()
 {
-  
+
+  R e=1e-10;
+  uint n=64;
+  IntervalNewtonSolver<R> interval_newton(e,n);
 
   HenonMap<R> h(1.5,0.375);
   Rectangle<R> r("[-2.125,-2]x[-2.125,-2]");
-  R e=1e-10;
+  Point< Interval<R> > pt=r;
   
-  cout << h << r << e << endl;
+  cout << "e=" << e << " n=" << n << endl;
   
-  Rectangle<R> fr;
+  cout << "h=" << h << "\nr=" << r << "\npt=" << pt << endl;
+  
+  Point< Interval<R> > fpt;
   try {
-    fr=interval_newton(DifferenceMap<R>(h),r,e);
+    fpt=interval_newton.fixed_point(h,pt);
   }
   catch(EvaluationException e) {
     cout << "No solution found" << endl;
     throw e;
   }
-  assert(fr.radius()<e);
+  assert(error_bound(fpt)<e);
   cout << std::setprecision(20);
-  cout << fr << "  " << fr.radius() << endl;
+  cout << fpt << "  " << error_bound(fpt) << endl;
 
-  Point<R> fp("(-2.0920128158902654,-2.0920128158902654)");
-  assert(fr.contains(fp));
-
-  Point< Interval<R> > ifp=h(fp);
-  
+  Point<R> afpt("(-2.0920128158902654,-2.0920128158902654)");
+  assert(contains_value(fpt,afpt));
+ 
 
 
   return 0;

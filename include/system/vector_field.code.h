@@ -39,44 +39,16 @@ namespace Ariadne {
     }
      
     template<class R>
-    LinearAlgebra::Vector<typename VectorField<R>::F> 
-    VectorField<R>::image(const Geometry::Point<R>& x) const
-    {
-      throw DeferredImplementation(__PRETTY_FUNCTION__);
-    }
-    
-    template<class R>
-    LinearAlgebra::Vector<typename VectorField<R>::I>
-    VectorField<R>::image(const Geometry::Rectangle<R>& x) const
-    {
-      throw DeferredImplementation(__PRETTY_FUNCTION__);
-    }
-    
-    template<class R>
     typename VectorField<R>::F 
-    VectorField<R>::derivative(const Geometry::Point<R>& x, const size_type& i, const multi_index_type& j) const
+    VectorField<R>::derivative(const Geometry::Point<F>& x, const size_type& i, const multi_index_type& j) const
     {
       throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
    
-    template<class R>
-    typename VectorField<R>::I 
-    VectorField<R>::derivative(const Geometry::Rectangle<R>& x, const size_type& i, const multi_index_type& j) const
-    {
-      throw DeferredImplementation(__PRETTY_FUNCTION__);
-    }
-    
 
     template<class R>
     LinearAlgebra::Matrix<typename VectorField<R>::F> 
-    VectorField<R>::jacobian(const Geometry::Point<R>& x) const 
-    {
-      throw DeferredImplementation(__PRETTY_FUNCTION__);
-    }
-    
-    template<class R>
-    LinearAlgebra::Matrix<typename VectorField<R>::I> 
-    VectorField<R>::jacobian(const Geometry::Rectangle<R>& A) const 
+    VectorField<R>::jacobian(const Geometry::Point<F>& x) const 
     {
       throw DeferredImplementation(__PRETTY_FUNCTION__);
     }

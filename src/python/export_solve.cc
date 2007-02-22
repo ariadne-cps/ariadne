@@ -45,8 +45,6 @@ void export_solve()
     .def("fixed_point",&Solver<R>::fixed_point)
   ;
   
-  def("interval_newton",&interval_newton<R>);
-  
 }
 
 template void export_solve<Real>();

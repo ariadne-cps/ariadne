@@ -54,6 +54,7 @@ void export_lattice_set();
 void export_lattice_map();
 
 template<class R> void export_point();
+template<class R> void export_interval_point();
 template<class R> void export_point_list();
 template<class R> void export_set();
 template<class R> void export_rectangle();
@@ -126,6 +127,7 @@ BOOST_PYTHON_MODULE(ariadne)
 
   export_set<Ariadne::Real>();
   export_point<Ariadne::Real>();
+  export_interval_point<Ariadne::Real>();
   export_point_list<Ariadne::Real>();
   export_rectangle<Ariadne::Real>();
   export_zonotope<Ariadne::Real>();

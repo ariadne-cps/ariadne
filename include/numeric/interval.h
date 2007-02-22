@@ -194,6 +194,8 @@ namespace Ariadne {
       //@{
       //! \name \name Approximation operations.
       /*! \brief Test if the interval \a ivl contains the value \a x. */
+      friend bool refines<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      /*! \brief Test if the interval \a ivl contains the value \a x. */
       friend bool contains_value<>(const Interval<R>& ivl, const R& x);
       /*! \brief The approximate value represented by the interval \a ivl. */
       friend R approximate_value<>(const Interval<R>& ivl);

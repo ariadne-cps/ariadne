@@ -141,11 +141,34 @@ namespace Ariadne {
     
 
     template<class R> inline
+    bool contains_value(const Point< Interval<R> >& ipt, const Point<R>& pt) 
+    {
+      check_equal_dimensions(ipt,pt,__PRETTY_FUNCTION__);
+      for(dimension_type i=0; i!=ipt.dimension(); ++i) {
+        if(!contains_value(ipt[i],pt[i])) {
+          return false;
+        }
+      }
+      return true;
+    }
+    
+    
+    template<class R> inline
     Point<R> approximation(const Point< Interval<R> >& ipt) 
     {
       Point<R> result(ipt.dimension());
       for(dimension_type i=0; i!=ipt.dimension(); ++i) {
         result[i]=ipt[i].centre();
+      }
+      return result;
+    }
+    
+    template<class R> inline
+    R error_bound(const Point< Interval<R> >& ipt) 
+    {
+      R result(0);
+      for(dimension_type i=0; i!=ipt.dimension(); ++i) {
+        result=max(result,error_bound(ipt[i]));
       }
       return result;
     }

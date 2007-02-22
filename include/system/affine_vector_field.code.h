@@ -44,31 +44,16 @@ namespace Ariadne {
     
     template<class R>
     LinearAlgebra::Vector<typename AffineVectorField<R>::F>
-    AffineVectorField<R>::image(const Geometry::Point<R>& s) const 
+    AffineVectorField<R>::image(const Geometry::Point<F>& s) const 
     { 
       return LinearAlgebra::Vector<F>(this->_A*LinearAlgebra::Vector<F>(s.position_vector())+this->_b); 
     }
     
     template<class R>
-    LinearAlgebra::Vector<typename AffineVectorField<R>::I> 
-    AffineVectorField<R>::image(const Geometry::Rectangle<R>& r) const 
-    {
-      LinearAlgebra::Vector< Interval<R> > iv=r.position_vectors();
-      return LinearAlgebra::Vector< Interval<R> >(this->_A*iv)+(this->_b);
-    }
-  
-    template<class R>
     LinearAlgebra::Matrix<typename AffineVectorField<R>::F>
-    AffineVectorField<R>::jacobian(const Geometry::Point<R>& x) const 
+    AffineVectorField<R>::jacobian(const Geometry::Point<F>& x) const 
     { 
       return this->_A; 
-    }
-    
-    template<class R>
-    LinearAlgebra::Matrix<typename AffineVectorField<R>::I> 
-    AffineVectorField<R>::jacobian(const Geometry::Rectangle<R>& r) const 
-    { 
-      return LinearAlgebra::Matrix< Interval<R> >(this->_A);
     }
     
     template<class R> 

@@ -54,14 +54,10 @@ namespace Ariadne {
       VanDerPolEquation<R>* clone() const { return new VanDerPolEquation<R>(this->_mu); }
        
       /*! \brief  The vector field applied to a state. */
-      virtual LinearAlgebra::Vector<F> image(const Geometry::Point<R>& x) const;
-      /*! \brief  The map applied to a rectangle basic set. */
-      virtual LinearAlgebra::Vector<I> image(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::Vector<F> image(const Geometry::Point<F>& x) const;
      
       /*! \brief  The derivative of the map at a point. */
-      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<R>& x) const;
-      /*! \brief  The derivative of the map over a rectangular basic set. */
-      virtual LinearAlgebra::Matrix<I> jacobian(const Geometry::Rectangle<R>& r) const;
+      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<F>& x) const;
             
       /*! \brief  The parameter \f$\mu\f$. */
       const R& mu() const { return _mu; }
@@ -82,7 +78,7 @@ namespace Ariadne {
       
     template<class R>
     LinearAlgebra::Vector<typename VanDerPolEquation<R>::F>
-    VanDerPolEquation<R>::image(const Geometry::Point<R>& x) const
+    VanDerPolEquation<R>::image(const Geometry::Point<F>& x) const
     {
       LinearAlgebra::Vector<F> result(2); 
       result(0)=x[1];
@@ -91,32 +87,10 @@ namespace Ariadne {
     }
      
     template<class R>
-    LinearAlgebra::Vector< Interval<R> >
-    VanDerPolEquation<R>::image(const Geometry::Rectangle<R>& x) const
-    {
-      LinearAlgebra::Vector< Interval<R> > result(2); 
-      result(0)=x[1];
-      result(1)=_mu*(R(1.0)-x[0]*x[0])*x[1]-x[0];
-      return result;
-    }
-     
-    template<class R>
     LinearAlgebra::Matrix<typename VanDerPolEquation<R>::F>
-    VanDerPolEquation<R>::jacobian(const Geometry::Point<R>& x) const
+    VanDerPolEquation<R>::jacobian(const Geometry::Point<F>& x) const
     {
       LinearAlgebra::Matrix<F> result(2,2); 
-      result(0,0) = 0.0;
-      result(0,1) = 1.0;
-      result(1,0) = -R(2.0)*_mu*x[0]*x[1]-R(1.0);
-      result(1,1) = _mu*(R(1.0)-x[0]*x[0]);
-      return result;
-    }
-     
-    template<class R>
-    LinearAlgebra::Matrix< Interval<R> >
-    VanDerPolEquation<R>::jacobian(const Geometry::Rectangle<R>& x) const
-    {
-      LinearAlgebra::Matrix< Interval<R> > result(2,2); 
       result(0,0) = 0.0;
       result(0,1) = 1.0;
       result(1,0) = -R(2.0)*_mu*x[0]*x[1]-R(1.0);

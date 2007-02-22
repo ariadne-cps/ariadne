@@ -75,24 +75,16 @@ namespace Ariadne {
       virtual VectorField<R>* clone() const = 0;
      
       /*! \brief An approximation to the vector field at a point. */
-      LinearAlgebra::Vector<F> operator() (const Geometry::Point<R>& x) const { return this->image(x); }
-      /*! \brief A bound for the vector field over a rectangle. */
-      LinearAlgebra::Vector<I> operator() (const Geometry::Rectangle<R>& A) const { return this->image(A); };
+      LinearAlgebra::Vector<F> operator() (const Geometry::Point<F>& x) const { return this->image(x); }
 
       /*! \brief An approximation to the vector field at a point. */
-      virtual LinearAlgebra::Vector<F> image(const Geometry::Point<R>& x) const;
-      /*! \brief A bound for the vector field over a rectangle. */
-      virtual LinearAlgebra::Vector<I> image(const Geometry::Rectangle<R>& A) const;
+      virtual LinearAlgebra::Vector<F> image(const Geometry::Point<F>& x) const = 0;
 
       /*! \brief An approximation to the vector field at a point. */
-      virtual F derivative(const Geometry::Point<R>& x, const size_type& i, const multi_index_type& j) const;
-      /*! \brief A bound for the vector field over a rectangle. */
-      virtual I derivative(const Geometry::Rectangle<R>& A, const size_type& i, const multi_index_type& j) const;
+      virtual F derivative(const Geometry::Point<F>& x, const size_type& i, const multi_index_type& j) const;
 
       /*! \brief An approximation to the Jacobian derivative at a point. */
-      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<R>& x) const;
-      /*! \brief A bound for the Jacobian derivative over a rectangle. */
-      virtual LinearAlgebra::Matrix<I> jacobian(const Geometry::Rectangle<R>& A) const;
+      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<F>& x) const;
     
       /*! \brief The degree of differentiability of the map. */
       virtual size_type smoothness() const = 0;

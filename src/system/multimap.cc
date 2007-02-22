@@ -24,12 +24,15 @@
 #include "system/multimap.h"
 #include "system/multimap.code.h"
 
+#include "geometry/point.h"
+#include "geometry/polytope.h"
+
 #include "real_typedef.h"
 
 namespace Ariadne {
   namespace System {
 
-    template class MultiMap<Real>;
+    template class MultiMap< Geometry::Point<Real>, Geometry::Polytope<Real> >;
       
   }
 }

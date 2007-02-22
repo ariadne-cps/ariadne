@@ -137,23 +137,9 @@ namespace Ariadne {
 
       /*! \brief An algorithm for integrating forward a parallelotope. */
       virtual 
-      Geometry::Parallelotope<R> 
-      integration_step(const System::VectorField<R>&,
-                       const Geometry::Parallelotope<R>&,
-                       time_type&) const;
-
-      /*! \brief An algorithm for integrating forward a parallelotope. */
-      virtual 
       Geometry::Zonotope<R> 
       integration_step(const System::VectorField<R>&,
                        const Geometry::Zonotope<R>&,
-                       time_type&) const;
-
-      /*! \brief An algorithm for integrating forward a parallelotope. */
-      virtual 
-      Geometry::Parallelotope< Interval<R> > 
-      integration_step(const System::VectorField<R>&,
-                       const Geometry::Parallelotope< Interval<R> >&,
                        time_type&) const;
 
       /*! \brief An algorithm for integrating forward a zonotope. */
@@ -197,11 +183,6 @@ namespace Ariadne {
                                                const Geometry::Rectangle<R>& initial_set,
                                                const time_type& time) const;
      
-      /*! \brief An algorithm for integrating forward a parallelotope. */
-      virtual Geometry::Parallelotope<R> integrate(const System::VectorField<R>& vector_field,
-                                                   const Geometry::Parallelotope<R>& initial_set,
-                                                   const time_type& time) const;
-     
       /*! \brief An algorithm for integrating forward a zonotope. */
       virtual Geometry::Zonotope<R> integrate(const System::VectorField<R>& vector_field,
                                               const Geometry::Zonotope<R>& initial_set,
@@ -218,18 +199,6 @@ namespace Ariadne {
                                                                  const Geometry::ListSet<R,Geometry::Rectangle>& initial_set,
                                                                  const time_type& time) const;
 
-      /*! \brief An algorithm for integrating forward a set of parallelotopes.
-       *
-       * The algorithm first finds \f$B_{n+1}\f$ such that \f$R_{n+1}\subset B_{n+1}\f$. 
-       * It then computes an interval matrix \f$ \mathcal{A}_{n} \f$ such that \f$ Df(B_{n+1}) \in \mathcal{A}_{n} \f$.
-       * It then computes a rectangle \f$ \mathcal{c}_{n+1} \f$ such that \f$ \Phi(t,c_{n})\in \mathcal{c}_{n+1} \f$.
-       * We then compute \f$ \mathcal{P}_{n} \f$ such that \f$ D\Phi(h,R_{n}) \subset \mathcal{P}_{n} \f$.
-       * We then compute \f$ A_{n+1} \f$ such that \f$ A_{n+1} \mathcal{e} \supset \mathcal{P}_{n} \mathcal{e} \f$.
-       */
-      virtual Geometry::ListSet<R,Geometry::Parallelotope> integrate(const System::VectorField<R>&,
-                                                                     const Geometry::ListSet<R,Geometry::Parallelotope>&,
-                                                                     const time_type&) const;
-
       /*! \brief An algorithm for integrating forward a set of zonotopes.
        *
        * The algorithm first finds \f$B_{n+1}\f$ such that \f$R_{n+1}\subset B_{n+1}\f$. 
@@ -241,18 +210,12 @@ namespace Ariadne {
       virtual Geometry::ListSet<R,Geometry::Zonotope> integrate(const System::VectorField<R>&,
                                                                 const Geometry::ListSet<R,Geometry::Zonotope>&,
                                                                 const time_type&) const;
-
       
 
       /*! \brief An algorithm for computing the reachable set of in initial set of rectangles up to a certain time. */
       virtual Geometry::ListSet<R,Geometry::Rectangle> reach(const System::VectorField<R>& vector_field,
                                                              const Geometry::ListSet<R,Geometry::Rectangle>& initial_set,
                                                              const time_type& time) const;      
-
-      /*! \brief An algorithm for computing the reachable set of in initial set of parallelotopes up to a certain time. */
-      virtual Geometry::ListSet<R,Geometry::Zonotope> reach(const System::VectorField<R>&,
-                                                            const Geometry::ListSet<R,Geometry::Parallelotope>&,
-                                                            const time_type&) const;
 
       /*! \brief An algorithm for computing the reachable set of in initial set of zonotopes up to a certain time. */
       virtual Geometry::ListSet<R,Geometry::Zonotope> reach(const System::VectorField<R>&,

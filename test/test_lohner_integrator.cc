@@ -63,8 +63,8 @@ test_lohner_integrator()
   Rectangle<R> bb=Rectangle<R>("[0.50,1.25]x[0.25,1.00]");
   Rectangle<R> r=Rectangle<R>("[0.96,1.04]x[0.46,0.54]");
   cout << "r=" << r << endl;
-  Parallelotope<R> p=Parallelotope<R>(r);
-  cout << "p=" << p << endl;
+  Zonotope<R> z(r);
+  cout << "z=" << z << endl;
   Matrix<R> A=Matrix<R>("[-0.25,-1;+1,-0.25]");
   cout << "A=" << A << endl;
   Vector<R> b=Vector<R>("[0,0]");
@@ -72,47 +72,25 @@ test_lohner_integrator()
   AffineVectorField<R> avf=AffineVectorField<R>(A,b);
   cout << "avf=" << avf << endl;
 
-  Real x0=0;
-  Real x1=0.4;
-  Interval<Real> ivl1(0.4);
-  Interval<Real> ivl0;
-  
-  Matrix<Real> fA(2,2);
-  fA(0,0)=0.4;
-  fA(1,1)=0.4;
-  R z=0;
-  Interval<Real> ivlm(z,z);
-  Interval<Real> ivls(z,z);
-  ivls+=abs(fA(0,0));
-  cout << fA(0,0) << "  " << ivls << "  " << ivlm << "\n";
-  ivls+=abs(fA(0,1));
-  ivlm=Numeric::max(ivlm,ivls);
-  cout << fA(0,1) << "  " << ivls << "  " << ivlm << "\n";
-  ivls=Interval<Real>(0);
-  ivls+=abs(fA(1,0));
-  cout << fA(1,0) << "  " << ivls << "  " << ivlm << "\n";
-  ivls+=abs(fA(1,1));
-  ivlm=Numeric::max(ivlm,ivls);
-  cout << fA(1,1) << "  " << ivls << "  " << ivlm << "\n";
-  
   time_type h(0.125);
   cout << "h=" << h << endl;
-  cout << "p.generators().norm()=" << norm(p.generators()) << endl;
+  cout << "z.generators().norm()=" << norm(z.generators()) << endl;
 
-  Parallelotope<R> p0=p;
-  Parallelotope<R> p1=lohner.integration_step(avf,p0,h);
-  Parallelotope<R> p2=lohner.integration_step(avf,p1,h);
-  cout << "p0=" << p0 << "\np1=" << p1 << "\np2=" << p2 << endl;
-  Zonotope<R> z1=lohner.reachability_step(avf,p0,h);
-  Zonotope<R> z2=lohner.reachability_step(avf,p1,h);
-  cout << "z1=" << z1 << "\nz2=" << z2 << endl;
+  Zonotope< Interval<R> > z0=z;
+  Zonotope< Interval<R> > z1=lohner.integration_step(avf,z0,h);
+  Zonotope< Interval<R> > z2=lohner.integration_step(avf,z1,h);
+  cout << "z0=" << z0 << "\np1=" << z1 << "\nz2=" << z2 << endl;
+  Zonotope< Interval<R> > zr1=lohner.reachability_step(avf,z0,h);
+  Zonotope< Interval<R> > zr2=lohner.reachability_step(avf,z1,h);
+  cout << "zr1=" << zr1 << "\nzr2=" << zr2 << endl;
   
   epsfstream eps("test_lohner_integrator.eps",bb);
-  eps << z1 << z2;
+  eps.set_fill_colour("green");
+  eps << over_approximation(zr1) << over_approximation(zr2);
   eps.set_fill_colour("blue");
-  eps << p1 << p2;
+  eps << over_approximation(zr1) << 2;
   eps.set_fill_colour("yellow");
-  eps << p0;
+  eps << over_approximation(z0);
   eps.close();
   
   return 0;

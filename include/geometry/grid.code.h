@@ -123,10 +123,10 @@ namespace Ariadne {
     }
 
     template<class R>
-    IrregularGrid<R>::IrregularGrid(const ListSet<R,Rectangle>& ls)
+    IrregularGrid<R>::IrregularGrid(const ListSet< Rectangle<R> >& ls)
       : _subdivision_coordinates(ls.dimension())
     {
-      for(typename ListSet<R,Rectangle>::const_iterator riter=ls.begin(); riter!=ls.end(); ++riter) {
+      for(typename ListSet< Rectangle<R> >::const_iterator riter=ls.begin(); riter!=ls.end(); ++riter) {
         for(dimension_type n=0; n!=ls.dimension(); ++n) {
           _subdivision_coordinates[n].push_back(riter->lower_bound(n));
           _subdivision_coordinates[n].push_back(riter->upper_bound(n));

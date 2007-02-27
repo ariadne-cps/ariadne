@@ -259,14 +259,14 @@ namespace Ariadne {
     
     
     template<class R> inline
-    ListSet<R,Zonotope>
+    ListSet< Zonotope<R> >
     Zonotope<R>::divide() const 
     {
       return Geometry::divide(*this);
     }
     
     template<class R> inline
-    ListSet<R,Zonotope>
+    ListSet< Zonotope<R> >
     Zonotope<R>::subdivide() const 
     {
       return Geometry::subdivide(*this);

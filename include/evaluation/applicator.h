@@ -67,33 +67,33 @@ namespace Ariadne {
      
      protected:
       /*! \brief Template for computing the image of a list set. */
-      template<class Rl,template<class> class BS>
-      Geometry::ListSet<Rl,BS> 
+      template<class BS>
+      Geometry::ListSet<BS> 
       image_list_set(const System::Map<R>& f, 
-                     const Geometry::ListSet<Rl,BS>& initial_set) const;
+                     const Geometry::ListSet<BS>& initial_set) const;
 
       
       /*! \brief Template for computing the image of a basic set. */
-      template<template<class> class BS>
-      BS<R>
+      template<class BS>
+      BS
       image_basic_set(const System::Map<R>& f, 
-                      const BS<R>& initial_set) const;
+                      const BS& initial_set) const;
      public:
       /*! \brief Compute the image of a list set under a map. */
       virtual 
-      Geometry::ListSet<R,Geometry::Rectangle> 
-      image(const System::Map<R>& f, const Geometry::ListSet<R,Geometry::Rectangle>& ds) const;
+      Geometry::ListSet< Geometry::Rectangle<R> > 
+      image(const System::Map<R>& f, const Geometry::ListSet< Geometry::Rectangle<R> >& ds) const;
        
       /*! \brief Compute the image of a list set under a map. */
       virtual 
-      Geometry::ListSet<R,Geometry::Zonotope> 
-      image(const System::Map<R>& f, const Geometry::ListSet<R,Geometry::Zonotope>& ds) const;
+      Geometry::ListSet< Geometry::Zonotope<R> > 
+      image(const System::Map<R>& f, const Geometry::ListSet< Geometry::Zonotope<R> >& ds) const;
       
       
       /*! \brief Compute the image of a list set under a map. */
       virtual 
-      Geometry::ListSet<Interval<R>,Geometry::Zonotope> 
-      image(const System::Map<R>& f, const Geometry::ListSet<Interval<R>,Geometry::Zonotope>& ds) const;
+      Geometry::ListSet<Geometry::Zonotope< Interval<R> > >
+      image(const System::Map<R>& f, const Geometry::ListSet< Geometry::Zonotope< Interval<R> > >& ds) const;
       
       
       /*! \brief Compute the image of \a map starting in \a initial_set computing the result on \a grid. */

@@ -274,7 +274,7 @@ namespace Ariadne {
     template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::Zonotope<R>&);
     template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::Polytope<R>&); 
     template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::Polyhedron<R>&); 
-    template<class R,template<class> class BS> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::ListSet<R,BS>&); 
+    template<class BS> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::ListSet<BS>&); 
     template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::GridCellListSet<R>&); 
     template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::GridMaskSet<R>&); 
     template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::PartitionTree<R>&); 
@@ -347,11 +347,11 @@ namespace Ariadne {
       return draw(eps,eps.projection_map()(Geometry::Polytope<Rational>(Geometry::Polyhedron<Rational>(p))));      
     }
     
-    template<class R, template<class> class BS> inline
+    template<class BS> inline
     epsfstream&
-    operator<<(epsfstream& eps, const Ariadne::Geometry::ListSet<R,BS>& ds)
+    operator<<(epsfstream& eps, const Ariadne::Geometry::ListSet<BS>& ds)
     {
-      typedef typename Ariadne::Geometry::ListSet<R,BS>::const_iterator const_iterator;
+      typedef typename Ariadne::Geometry::ListSet<BS>::const_iterator const_iterator;
       if(eps.fill_style) {
         for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
           trace(eps,eps.projection_map()(*set_iter)) << eps.fill_colour << " fill\n";
@@ -370,7 +370,7 @@ namespace Ariadne {
     epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::GridMaskSet<R>& ds)
     {
-      return eps << Ariadne::Geometry::ListSet<R,Ariadne::Geometry::Rectangle>(ds);
+      return eps << Ariadne::Geometry::ListSet< Ariadne::Geometry::Rectangle<R> >(ds);
     }
     
  
@@ -378,7 +378,7 @@ namespace Ariadne {
     epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::GridCellListSet<R>& ds)
     {
-      return eps << Ariadne::Geometry::ListSet<R,Ariadne::Geometry::Rectangle>(ds);
+      return eps << Ariadne::Geometry::ListSet< Ariadne::Geometry::Rectangle<R> >(ds);
     }
     
 
@@ -386,7 +386,7 @@ namespace Ariadne {
     epsfstream&
     operator<<(epsfstream& eps, const Ariadne::Geometry::PartitionTreeSet<R>& ds)
     {
-      return eps << Ariadne::Geometry::ListSet<R,Ariadne::Geometry::Rectangle>(ds);
+      return eps << Ariadne::Geometry::ListSet< Ariadne::Geometry::Rectangle<R> >(ds);
     }
 
     template<class R> inline

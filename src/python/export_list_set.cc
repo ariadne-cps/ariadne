@@ -42,21 +42,22 @@ using namespace boost::python;
 
 template<class R>
 inline 
-bool interiors_intersect(const ListSet<R,Zonotope>& A, const Parallelotope<R>& B) 
+bool interiors_intersect(const ListSet< Zonotope<R> >& A, const Parallelotope<R>& B) 
 {
-  return interiors_intersect(A,ListSet<R,Zonotope>(Zonotope<R>(B)));
+  return interiors_intersect(A,ListSet< Zonotope<R> >(Zonotope<R>(B)));
 }
 
-template<class R, template<class> class BS, template<class> class BS2>
+template<class BS1, class BS2>
 inline
-ListSet<R,BS> 
-touching_intersection(const ListSet<R,BS>& ls, const BS2<R>& bs) 
+ListSet<BS1> 
+touching_intersection(const ListSet<BS1>& ls, const BS2& bs) 
 {
-  ListSet<R,BS> output(ls.dimension());
+  ListSet<BS1> output(ls.dimension());
     
   for (size_t i=0; i< ls.size(); i++) {
-    if (!(disjoint(ls[i],bs)))
+    if (!(disjoint(ls[i],bs))) {
       output.adjoin(ls[i]);
+    }
   }
 
   return output;
@@ -72,10 +73,10 @@ void export_list_set()
   typedef Zonotope<R> RZonotope;
   typedef Polytope<R> RPolytope;
   
-  typedef ListSet<R,Rectangle> RRectangleListSet;
-  typedef ListSet<R,Parallelotope> RParallelotopeListSet;
-  typedef ListSet<R,Zonotope> RZonotopeListSet;
-  typedef ListSet<R,Polytope> RPolytopeListSet;
+  typedef ListSet< Rectangle<R> > RRectangleListSet;
+  typedef ListSet< Parallelotope<R> > RParallelotopeListSet;
+  typedef ListSet< Zonotope<R> > RZonotopeListSet;
+  typedef ListSet< Polytope<R> > RPolytopeListSet;
   
   typedef GridCellListSet<R> RGridCellListSet;
   typedef GridMaskSet<R> RGridMaskSet;
@@ -83,18 +84,12 @@ void export_list_set()
   
   def("open_intersection",(RRectangleListSet(*)(const RRectangleListSet&,const RRectangleListSet&))(&open_intersection));
   def("disjoint",(tribool(*)(const RRectangleListSet&,const RRectangleListSet&))(&disjoint));
-  def("disjoint",(tribool(*)(const RParallelotopeListSet&,const RParallelotopeListSet&))(&disjoint));
   def("disjoint",(tribool(*)(const RZonotopeListSet&,const RZonotopeListSet&))(&disjoint));
   def("subset", (tribool(*)(const RRectangleListSet&,const RRectangleListSet&))(&subset));
 
   def("touching_intersection",(RRectangleListSet(*)(const RRectangleListSet&,const RRectangle&))(&touching_intersection));
-  def("touching_intersection",(RRectangleListSet(*)(const RRectangleListSet&,const RParallelotope&))(&touching_intersection));
   def("touching_intersection",(RRectangleListSet(*)(const RRectangleListSet&,const RZonotope&))(&touching_intersection));
-  def("touching_intersection",(RParallelotopeListSet(*)(const RParallelotopeListSet&,const RRectangle&))(&touching_intersection));
-  def("touching_intersection",(RParallelotopeListSet(*)(const RParallelotopeListSet&,const RParallelotope&))(&touching_intersection));
-  def("touching_intersection",(RParallelotopeListSet(*)(const RParallelotopeListSet&,const RZonotope&))(&touching_intersection));
   def("touching_intersection",(RZonotopeListSet(*)(const RZonotopeListSet&,const RRectangle&))(&touching_intersection));
-  def("touching_intersection",(RZonotopeListSet(*)(const RZonotopeListSet&,const RParallelotope&))(&touching_intersection));
   def("touching_intersection",(RZonotopeListSet(*)(const RZonotopeListSet&,const RZonotope&))(&touching_intersection));
 
 

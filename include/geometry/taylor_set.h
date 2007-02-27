@@ -118,10 +118,10 @@ namespace Ariadne {
       R radius() const;
       
       /*! \brief Subdivide into two smaller pieces. */
-      ListSet<R,Geometry::TaylorSet> divide() const;
+      ListSet< TaylorSet<R> > divide() const;
       
       /*! \brief Subdivide into smaller pieces in each dimension. */
-      ListSet<R,Geometry::TaylorSet> subdivide() const;
+      ListSet< TaylorSet<R> > subdivide() const;
       
       /*! \brief A rectangle containing the given Taylor set. */
       Rectangle<R> bounding_box() const;

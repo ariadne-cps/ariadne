@@ -123,9 +123,9 @@ namespace Ariadne {
 
 
     template<class R>
-    PartitionTreeSet<R>::operator ListSet<R,Rectangle>() const 
+    PartitionTreeSet<R>::operator ListSet< Rectangle<R> >() const 
     {
-      ListSet<R,Rectangle> res(this->dimension());
+      ListSet< Rectangle<R> > res(this->dimension());
       for(const_iterator iter=begin(); iter!=end(); ++iter) {
         res.push_back(Rectangle<R>(*iter));
       }
@@ -212,7 +212,7 @@ namespace Ariadne {
     tribool
     subset(const Rectangle<R>& r, const PartitionTreeSet<R>& pts)
     {
-      return subset(r,ListSet<R,Rectangle>(pts));
+      return subset(r,ListSet< Rectangle<R> >(pts));
     }
 
 

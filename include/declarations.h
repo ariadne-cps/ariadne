@@ -83,7 +83,7 @@ template<class R> class Polytope;
 template<class R> class Sphere;
 template<class R> class Ellipsoid;
 
-template<class R, template<class> class BS> class ListSet;
+template<class BS> class ListSet;
 
 typedef enum {
  REGULAR,
@@ -105,7 +105,9 @@ template<class R> class PartitionTreeCell;
 template<class R> class PartitionTreeSet;
 
 template<class R> class Set;
+template<class R> class ArbitrarySet;
 
+template<class S> class HybridSet;
 template<class R> class HybridGridMaskSet;
 }}
 

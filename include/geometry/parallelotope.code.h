@@ -130,11 +130,11 @@ namespace Ariadne {
     }
 
     template<class R>
-    ListSet<R,Parallelotope>
+    ListSet< Parallelotope<R> >
     Parallelotope<R>::divide() const 
     {
       size_type n=this->dimension();
-      ListSet<R,Geometry::Parallelotope> result(this->dimension());
+      ListSet< Parallelotope<R> > result(this->dimension());
       
       LinearAlgebra::Matrix<R> new_generators=this->generators();
       
@@ -163,10 +163,10 @@ namespace Ariadne {
     }
     
     template<class R>
-    ListSet<R,Parallelotope>
+    ListSet< Parallelotope<R> >
     Parallelotope<R>::subdivide() const 
     {
-      ListSet<R,Geometry::Parallelotope> result(this->dimension());
+      ListSet< Parallelotope<R> > result(this->dimension());
       
       R two=2;
       size_type n=this->dimension();

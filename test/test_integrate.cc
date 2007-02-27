@@ -80,28 +80,19 @@ test_integration_step()
 
   Rectangle<R> r=Rectangle<R>("[0.98,1.02]x[0.48,0.52]");
   cout << "r=" << r << endl;
-  Parallelotope<R> p=Parallelotope<R>(r);
-  cout << "p=" << p << endl;
-  Parallelotope< Interval<R> > ip=Parallelotope<R>(r);
-  cout << "ip=" << ip << endl;
   Zonotope<R> z=Zonotope<R>(r);
   cout << "z=" << z << endl;
   Zonotope< Interval<R> > iz=Zonotope<R>(r);
   cout << "iz=" << iz << endl;
 
-  ListSet<R,Parallelotope> pls=ListSet<R,Parallelotope>(p);
-  cout << "pls.size()=" << pls.size() << endl;
-  ListSet<R,Zonotope> zls=ListSet<R,Zonotope>(z);
+  ListSet< Zonotope<R> > zls=ListSet< Zonotope<R> >(z);
   zls.adjoin(Zonotope<R>(Rectangle<R>("[1.02,1.06]x[0.48,0.52]")));
   cout << "zls.size()=" << zls.size() << endl;
   
   Geometry::Rectangle<R> nr;
-  Geometry::Parallelotope<R> np;
-  Geometry::Parallelotope< Interval<R> > nip;
   Geometry::Zonotope<R> nz;
   Geometry::Zonotope< Interval<R> > niz;
-  Geometry::ListSet<R,Parallelotope> npls;
-  Geometry::ListSet<R,Zonotope> nzls;
+  Geometry::ListSet< Zonotope<R> > nzls;
   
   Real x0=0;
   Real x1=0.4;
@@ -126,10 +117,6 @@ test_integration_step()
   cout << niz << endl << endl;
   nz=lohner.integration_step(vdp,z,h);
   cout << nz << endl << endl;
-  nip=lohner.integration_step(vdp,ip,h);
-  cout << nip << endl << endl;
-  np=lohner.integration_step(vdp,p,h);
-  cout << np << endl << endl;
   cout << endl << endl;
   
 
@@ -138,16 +125,11 @@ test_integration_step()
   //nr=lohner.integrate(vdp,r,t);
   //cout << nr << endl;
   nz=lohner.integrate(vdp,z,t);
-  cout << nip << endl << endl;;
-  np=lohner.integrate(vdp,p,t);
-  cout << np << endl << endl;;
+  cout << nz << endl << endl;;
   
   // 'integrate' not defined for fuzzy sets
-  //nip=lohner.integrate(vdp,ip,t);
   //niz=lohner.integrate(vdp,iz,t);
 
-  //npls=lohner.integrate(vdp,pls,t);
-  //cout << npls << endl << endl;;
   nzls=lohner.integrate(vdp,zls,t);
   cout << nzls << endl << endl;
   
@@ -157,10 +139,6 @@ test_integration_step()
   // Affine vector field
   VectorField<R>& avfr=avf;
   //AffineVectorField<R>& avfr=avf;
-  np=lohner.integration_step(avfr,p,h);
-  cout << np << endl;
-  nip=lohner.integration_step(avfr,ip,h);
-  cout << nip << endl;
   nz=lohner.integration_step(avfr,z,h);
   cout << nz << endl;
   niz=lohner.integration_step(avfr,iz,h);

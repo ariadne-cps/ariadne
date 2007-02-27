@@ -179,10 +179,10 @@ namespace Ariadne {
     
 
     template<class R>
-    ListSet<R,Zonotope>
+    ListSet< Zonotope<R> >
     subdivide(const Zonotope<R>& z) 
     {
-      ListSet<R,Geometry::Zonotope> result(z.dimension());
+      ListSet< Zonotope<R> > result(z.dimension());
       
       R two=2;
       dimension_type d=z.dimension();
@@ -214,7 +214,7 @@ namespace Ariadne {
     
     
     template<class R>
-    ListSet<Interval<R>,Zonotope>
+    ListSet< Zonotope< Interval<R> > >
     subdivide(const Zonotope< Interval<R> >&) 
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
@@ -223,13 +223,13 @@ namespace Ariadne {
 
     
     template<class R>
-    ListSet<R,Zonotope>
+    ListSet< Zonotope<R> >
     divide(const Zonotope<R>& z)
     {
       size_type d=z.dimension();
       size_type m=z.number_of_generators();
       R two=2;
-      ListSet<R,Geometry::Zonotope> result(d);
+      ListSet< Zonotope<R> > result(d);
       
       LinearAlgebra::Matrix<R> new_generators=z.generators();
       
@@ -258,7 +258,7 @@ namespace Ariadne {
     
     
     template<class R>
-    ListSet<Interval<R>,Zonotope>
+    ListSet< Zonotope< Interval<R> > >
     divide(const Zonotope< Interval<R> >&)
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
@@ -385,13 +385,13 @@ namespace Ariadne {
   
     
     /*!Set up linear program to solve 
-     *   \f\[x=c+Ge;\ l\leq x\leq u;\ -1\leq e\leq1\f\].
+     *   \f[x=c+Ge;\ l\leq x\leq u;\ -1\leq e\leq1\f].
      *
      * Change variables to normalize \f$x\f$ and \f$e\f$
-     *   \f\[x'=x-l,\ e'=e+1;   x'-Ge' = c-G1-l;  0\leq x\leq u-l; \ 0\leq e\leq 2.\f\] 
+     *   \f[x'=x-l,\ e'=e+1;   x'-Ge' = c-G1-l;  0\leq x\leq u-l; \ 0\leq e\leq 2.\f] 
      * 
      * Introduce slack variables sx and se, and artificial variables ax. Problem in standard form
-     *   \f\[ \matrix{I&0\\0&I\\\pm I&\mp G}\matrix{x'\\e'} + \matrix{I&&\\&I&\\&&I}\matrix{sx\\se\\ax} = \matrix{u-l\\2\\\pm(c-G1-l)}
+     *   \f[ \matrix{I&0\\0&I\\\pm I&\mp G}\matrix{x'\\e'} + \matrix{I&&\\&I&\\&&I}\matrix{sx\\se\\ax} = \matrix{u-l\\2\\\pm(c-G1-l)} \f]
      * 
      */
     template<class R>

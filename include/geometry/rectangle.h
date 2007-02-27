@@ -31,8 +31,6 @@
 
 #include <iosfwd>
 
-#include "../declarations.h"
-
 #include "../base/array.h"
 #include "../base/iterator.h"
 #include "../base/tribool.h"
@@ -245,7 +243,7 @@ namespace Ariadne {
        */
       Rectangle<R> quadrant(const Combinatoric::BinaryWord& q) const;
       /*! \brief Subdivide into smaller pieces. */
-      ListSet<R,Geometry::Rectangle> subdivide() const;
+      ListSet< Rectangle<R> > subdivide() const;
       
       /*! \brief The vertices of the rectangle. */
       PointList<R> vertices() const;

@@ -60,7 +60,7 @@ namespace Ariadne {
 
     /* External class declarations. */
     template<class R> class Rectangle;
-    template<class R, template<class> class BS> class ListSet;
+    template<class BS> class ListSet;
 
     template<class R> class PartitionTreeIterator;
     template<class R> class PartitionTreeSetIterator;
@@ -296,7 +296,7 @@ namespace Ariadne {
       //@}
 
       /*! \brief Convert to a ListSet of Rectangle. */
-      operator ListSet<R,Rectangle> () const;
+      operator ListSet< Rectangle<R> > () const;
 
       /*! \brief The unit box containing the partition tree set. */
       const Rectangle<R>& unit_box() const;

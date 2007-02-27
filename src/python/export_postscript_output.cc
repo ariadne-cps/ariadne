@@ -51,10 +51,10 @@ template<class R> inline void write_parallelotope(epsfstream& eps, const Paralle
 template<class R> inline void write_zonotope(epsfstream& eps, const Zonotope<R>& z) { eps << z; }
 template<class R> inline void write_polytope(epsfstream& eps, const Polytope<R>& p) { eps << p; }
 template<class R> inline void write_polyhedron(epsfstream& eps, const Polyhedron<R>& p) { eps << p; }
-template<class R> inline void write_rectangle_list_set(epsfstream& eps, const ListSet<R,Rectangle>& r) { eps << r; }
-template<class R> inline void write_parallelotope_list_set(epsfstream& eps, const ListSet<R,Parallelotope>& s) { eps << s; }
-template<class R> inline void write_zonotope_list_set(epsfstream& eps, const ListSet<R,Zonotope>& s) { eps << s; }
-template<class R> inline void write_polytope_list_set(epsfstream& eps, const ListSet<R,Polytope>& s) { eps << s; }
+template<class R> inline void write_rectangle_list_set(epsfstream& eps, const ListSet< Rectangle<R> >& r) { eps << r; }
+template<class R> inline void write_parallelotope_list_set(epsfstream& eps, const ListSet< Parallelotope<R> >& s) { eps << s; }
+template<class R> inline void write_zonotope_list_set(epsfstream& eps, const ListSet< Zonotope<R> >& s) { eps << s; }
+template<class R> inline void write_polytope_list_set(epsfstream& eps, const ListSet< Polytope<R> >& s) { eps << s; }
 template<class R> inline void write_grid_mask_set(epsfstream& eps, const GridMaskSet<R>& s) { eps << s; }
 template<class R> inline void write_grid_cell_list_set(epsfstream& eps, const GridCellListSet<R>& s) { eps << s; }
 template<class R> inline void write_partition_tree(epsfstream& eps, const PartitionTree<R>& s) { eps << s; }

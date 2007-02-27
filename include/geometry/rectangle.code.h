@@ -67,10 +67,10 @@ namespace Ariadne {
     }
       
     template<class R>
-    ListSet<R,Rectangle>
+    ListSet< Rectangle<R> >
     Rectangle<R>::subdivide() const 
     {
-      ListSet<R,Geometry::Rectangle> result(this->dimension());
+      ListSet< Rectangle<R> > result(this->dimension());
       size_type n=this->dimension();
       
       Point<R> lwr_crnr=this->lower_corner();

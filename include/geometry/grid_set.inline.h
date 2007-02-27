@@ -418,30 +418,30 @@ namespace Ariadne {
     }
 
     
-    template<class R> template<template<class> class BS> inline
-    GridMaskSet<R>::operator ListSet<R,BS> () const 
+    template<class R> template<class BS> inline
+    GridMaskSet<R>::operator ListSet<BS> () const 
     {
-      ListSet<R,BS> result(this->dimension());
+      ListSet<BS> result(this->dimension());
       Rectangle<R> r(this->dimension());
-      BS<R> bs(this->dimension());
+      BS bs(this->dimension());
       for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
         r=iter;
-        bs=BS<R>(r);
+        bs=BS(r);
         result.push_back(bs);
       }
       return result;
     }
 
     
-    template<class R, template<class> class BS> inline
+    template<class R, class BS> inline
     GridMaskSet<R> 
-    over_approximation(const ListSet<R,BS>& ls, const FiniteGrid<R>& g) 
+    over_approximation(const ListSet<BS>& ls, const FiniteGrid<R>& g) 
     {
       GridMaskSet<R> result(g);
       
       check_equal_dimensions(ls,g,"over_approximation(ListSet<R,BS>,FiniteGrid<R>)");
 
-      for(typename ListSet<R,BS>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
+      for(typename ListSet<BS>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
        result.adjoin(over_approximation(*iter,g.grid()));
       }
         

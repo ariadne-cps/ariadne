@@ -117,7 +117,7 @@ test_zonotope()
   cout << "minkowski_difference(z1,z2)=" << iz << endl;
   cout << endl;
   
-  ListSet<R,Zonotope> zls;
+  ListSet< Zonotope<R> > zls;
   cout << "z2=" << z2 << std::endl;
   
   zls.clear();

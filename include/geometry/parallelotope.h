@@ -115,10 +115,10 @@ namespace Ariadne {
       PointList<F> vertices() const;
       
       /*! \brief Subdivide into two smaller pieces. */
-      ListSet<R,Geometry::Parallelotope> divide() const;
+      ListSet< Parallelotope<R> > divide() const;
       
       /*! \brief Subdivide into smaller pieces in each dimension. */
-      ListSet<R,Geometry::Parallelotope> subdivide() const;      
+      ListSet< Parallelotope<R> > subdivide() const;      
 
       /*! \brief An approximation to the volume. */
       R volume() const;

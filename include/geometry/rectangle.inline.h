@@ -672,7 +672,7 @@ namespace Ariadne {
     
     template<class R> inline
     tribool 
-    subset(const Rectangle<R>& A, ListSet<R,Geometry::Rectangle>& B);
+    subset(const Rectangle<R>& A, ListSet< Geometry::Rectangle<R> >& B);
         
   
     

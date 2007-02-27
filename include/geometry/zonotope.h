@@ -190,10 +190,10 @@ namespace Ariadne {
       vertices_const_iterator vertices_end() const;
       
       /*! \brief Subdivide into two smaller pieces. */
-      ListSet<R,Geometry::Zonotope> divide() const;
+      ListSet< Zonotope<R> > divide() const;
       
       /*! \brief Subdivide into smaller pieces in each dimension. */
-      ListSet<R,Geometry::Zonotope> subdivide() const;
+      ListSet< Zonotope<R> > subdivide() const;
       
       /*! \brief A rectangle containing the given zonotope. */
       Rectangle<typename Numeric::traits<R>::number_type> bounding_box() const;
@@ -320,19 +320,19 @@ namespace Ariadne {
     
     
     template<class R> 
-    ListSet<R,Zonotope>
+    ListSet< Zonotope<R> >
     subdivide(const Zonotope<R>& z);
     
     template<class R> 
-    ListSet<Interval<R>,Zonotope>
+    ListSet< Zonotope< Interval<R> > >
     subdivide(const Zonotope< Interval<R> >& z);
     
     template<class R> 
-    ListSet<R,Zonotope>
+    ListSet< Zonotope<R> >
     divide(const Zonotope<R>& z);
     
     template<class R> 
-    ListSet<Interval<R>,Zonotope>
+    ListSet< Zonotope< Interval<R> > >
     divide(const Zonotope< Interval<R> >& z);
     
     

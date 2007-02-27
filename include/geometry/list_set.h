@@ -58,27 +58,35 @@ namespace Ariadne {
      * A list set is ordered by the order of insertion. Hence, as well as the
      * standard adjoin() method for denotable sets, a %ListSet also provides
      * the STL methods push_back() and pop_back().
+     *
+     * \internal ListSet is parameterised by the basic set type <class BS> instead
+     * of the real type and basic set template <class R, template<class> class BS>
+     * since this is more expressive; using the latter, we could not use basic set
+     * types which do not take a single real parameter, and there are also times
+     * when we do not know the template-id, only the basic set type.
      */
-    template<class R, template<class> class BS>
+    template<class BS>
     class ListSet 
-      : public Set<R>
+      : public Set<typename BS::real_type>
     {
      private:
+      typedef typename BS::real_type R;
+
       /* List of basic sets. Note that std::vector provides a
        * reserve(size_type) method to increase the capacity.
        */
       dimension_type _dimension;
-      std::vector< BS<R> > _vector;
+      std::vector< BS > _vector;
 
      public:
       /*!\brief The type of denotable real number used to represent the sets in the list. */
       typedef R real_type;
       /*!\brief The type of point contained by the set. */
-      typedef typename BS<R>::state_type state_type;
+      typedef typename BS::state_type state_type;
       /*!\brief The type of basic set making up the denotable set. */
-      typedef BS<R> basic_set_type;
+      typedef BS basic_set_type;
       /*!\brief The type of basic set in the list of sets. */
-      typedef BS<R> value_type;
+      typedef BS value_type;
 
       typedef typename std::vector<basic_set_type>::const_iterator const_iterator;
       typedef typename std::vector<basic_set_type>::iterator iterator;
@@ -91,10 +99,10 @@ namespace Ariadne {
       ListSet(size_type n);
 
       /*! \brief A denotable set constructor. */
-      ListSet(const BS<R>& A);
+      ListSet(const BS& A);
 
       /*! \brief The copy constructor. */
-      ListSet(const ListSet<R,BS>& A);
+      ListSet(const ListSet<BS>& A);
 
       /*! \brief The destructor. */
       ~ListSet();
@@ -103,32 +111,32 @@ namespace Ariadne {
       size_type size() const;
 
       /*! \brief Adjoins a basic set to the back of the list. */
-      void push_back(const BS<R>& A);
+      void push_back(const BS& A);
 
       /*! \brief Removes the basic set at the back of the list. */
       void pop_back();
 
       /*! \brief Accesses the i-th basic set in the list. */
-      const BS<R>& get(size_type index) const;
+      const BS& get(size_type index) const;
 
       /*! \brief Assigns to the i-th BasicSet. */
-      void set(size_type index, const BS<R>& set);
+      void set(size_type index, const BS& set);
 
       /*! \brief Accesses the i-th BasicSet. */
-      const BS<R>& operator[](size_type index) const;
+      const BS& operator[](size_type index) const;
 
 
       /*! \brief Copy assignment. */
-      const ListSet<R,BS>& operator=(const ListSet<R,BS>& A);
+      const ListSet<BS>& operator=(const ListSet<BS>& A);
 
       /*!\brief Convert to a list set BSt<Rl>. */
-      template<class Rl, template<class> class BSt> 
-      operator ListSet<Rl,BSt> () const;
+      template<class BSt> 
+      operator ListSet<BSt> () const;
       
       //@{
       //! \name Set methods
-      /*! \brief Tests for disjointness with a Rectangle. */
-      virtual ListSet<R,BS>* clone() const;
+      /*! \brief Make a dynamically-allocated copy of the set. */
+      virtual ListSet<BS>* clone() const;
 
       /*! \brief Returns the denotable set's space dimension. */
       virtual dimension_type dimension() const;
@@ -176,16 +184,16 @@ namespace Ariadne {
       const_iterator end() const;
 
       /*! \brief Adjoins (makes union with) another denotable set. */
-      void adjoin(const ListSet<R,BS>& A);
+      void adjoin(const ListSet<BS>& A);
       
       /*! \brief Adjoins (makes union with) another denotable set. */
-      void inplace_union(const ListSet<R,BS>& A);
+      void inplace_union(const ListSet<BS>& A);
 
       /*! \brief Adjoins (makes union with) a basic set. */
-      void adjoin(const BS<R>& A);
+      void adjoin(const BS& A);
 
       /*! \brief Adjoins (makes union with) a basic set. */
-      void inplace_union(const BS<R>& A);
+      void inplace_union(const BS& A);
       
       //@{
       //! \name Input/output operators
@@ -200,13 +208,13 @@ namespace Ariadne {
       //! \name Geometric binary predicates
       /*! \brief Tests disjointness.
        */
-      friend tribool disjoint(const ListSet<R,BS>& A,
-                           const ListSet<R,BS>& B);
+      friend tribool disjoint(const ListSet<BS>& A,
+                           const ListSet<BS>& B);
 
       /*! \brief Tests inclusion of \a A in \a B.
        */
-      friend tribool subset(const ListSet<R,BS>& A,
-                         const ListSet<R,BS>& B);
+      friend tribool subset(const ListSet<BS>& A,
+                         const ListSet<BS>& B);
       //@}
       
       
@@ -217,15 +225,15 @@ namespace Ariadne {
        * Note that 'union' is a reserved word in C++.
        */
       //FIXME: Compiler doesn't like this
-      //friend ListSet<R,BS> join<> (const ListSet<R,BS>& A,
-      //                             const ListSet<R,BS>& B);
-      friend ListSet<R,BS> join(const ListSet<R,BS>& A,
-                                const ListSet<R,BS>& B);
+      //friend ListSet<BS> join<> (const ListSet<BS>& A,
+      //                           const ListSet<BS>& B);
+      friend ListSet<BS> join(const ListSet<BS>& A,
+                              const ListSet<BS>& B);
 
       /*! \brief The closure of intersection of the interior of \a A with the interior of \a B.
        */
-      friend ListSet<R,BS> regular_intersection(const ListSet<R,BS>& A,
-                                                const ListSet<R,BS>& B);
+      friend ListSet<BS> regular_intersection(const ListSet<BS>& A,
+                                              const ListSet<BS>& B);
       //@}
 #endif      
      private:
@@ -234,58 +242,58 @@ namespace Ariadne {
     };
 
   
-    template<class R, template<class> class BS>
-    std::ostream& operator<<(std::ostream& os, const ListSet<R,BS>& A);
+    template<class BS>
+    std::ostream& operator<<(std::ostream& os, const ListSet<BS>& A);
 
 
-    template<class R, template<class> class BS>
+    template<class BS>
     std::istream&
-    operator>>(std::istream& is, ListSet<R,BS>& A);
+    operator>>(std::istream& is, ListSet<BS>& A);
 
 
 
 
-    template<class R, template<class> class BS>
-    ListSet<R,BS>
-    open_intersection(const ListSet<R,BS>& A,
-                      const ListSet<R,BS>& B);
+    template<class BS>
+    ListSet<BS>
+    open_intersection(const ListSet<BS>& A,
+                      const ListSet<BS>& B);
   
 
 
-    template<class R, template<class> class BS>
+    template<class BS>
     tribool
-    disjoint(const ListSet<R,BS>& A,
-             const ListSet<R,BS>& B);
+    disjoint(const ListSet<BS>& A,
+             const ListSet<BS>& B);
 
 
     template<class R>
     tribool
-    subset(const ListSet<R,Rectangle>& A,
-           const ListSet<R,Rectangle>& B);
+    subset(const ListSet< Rectangle<R> >& A,
+           const ListSet< Rectangle<R> >& B);
     
     
     template<class R, template<class> class BS>
     tribool
-    disjoint(const ListSet<R,BS>& A,
+    disjoint(const ListSet< BS<R> >& A,
              const Rectangle<R>& B);
     
     
     template<class R, template<class> class BS>
     tribool
-    subset(const ListSet<R,BS>& A,
+    subset(const ListSet< BS<R> >& A,
            const Rectangle<R>& B);
     
     
-    template<class R, template<class> class BS>
-    ListSet<R,BS>
-    join(const ListSet<R,BS>& A,
-         const ListSet<R,BS>& B);
+    template<class BS>
+    ListSet<BS>
+    join(const ListSet<BS>& A,
+         const ListSet<BS>& B);
     
 
-    template<class R, template<class> class BS>
-    ListSet<R,BS>
-    open_intersection(const ListSet<R,BS>& A,
-                         const ListSet<R,BS>& B);
+    template<class BS>
+    ListSet<BS>
+    open_intersection(const ListSet<BS>& A,
+                      const ListSet<BS>& B);
   
   }
 }

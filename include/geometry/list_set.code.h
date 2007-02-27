@@ -31,47 +31,47 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template<class R, template<class> class BS>
-    ListSet<R,BS>*
-    ListSet<R,BS>::clone() const
+    template<class BS>
+    ListSet<BS>*
+    ListSet<BS>::clone() const
     {
-      return new ListSet<R,BS>(*this);
+      return new ListSet<BS>(*this);
     }
 
     
-    template<class R, template<class> class BS>
+    template<class BS>
     tribool
-    ListSet<R,BS>::disjoint(const Rectangle<R>& r) const
+    ListSet<BS>::disjoint(const Rectangle<R>& r) const
     {
       return Geometry::disjoint(*this,r);
     }
 
     
-    template<class R, template<class> class BS>
+    template<class BS>
     tribool
-    ListSet<R,BS>::superset(const Rectangle<R>& r) const
+    ListSet<BS>::superset(const Rectangle<R>& r) const
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
 
     
-    template<class R, template<class> class BS>
+    template<class BS>
     tribool
-    ListSet<R,BS>::subset(const Rectangle<R>& r) const
+    ListSet<BS>::subset(const Rectangle<R>& r) const
     {
       return Geometry::subset(*this,r);
     }
 
     
-    template<class R, template<class> class BS>
+    template<class BS>
     tribool
-    disjoint (const ListSet<R,BS>& A,
-              const ListSet<R,BS>& B)
+    disjoint (const ListSet<BS>& A,
+              const ListSet<BS>& B)
     {
       check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
       tribool result=true;
-      for (typename ListSet<R,BS>::const_iterator i=A.begin(); i!=A.end(); ++i) {
-        for (typename ListSet<R,BS>::const_iterator j=B.begin(); j!=B.end(); ++j) {
+      for (typename ListSet<BS>::const_iterator i=A.begin(); i!=A.end(); ++i) {
+        for (typename ListSet<BS>::const_iterator j=B.begin(); j!=B.end(); ++j) {
           result = result && disjoint(*i,*j);
           if(!result) { return result; }
         }
@@ -82,8 +82,8 @@ namespace Ariadne {
 
     template<class R>
     tribool
-    subset(const ListSet<R,Rectangle>& A,
-           const ListSet<R,Rectangle>& B)
+    subset(const ListSet< Rectangle<R> >& A,
+           const ListSet< Rectangle<R> >& B)
     {
       check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
       throw NotImplemented(__PRETTY_FUNCTION__);
@@ -92,11 +92,11 @@ namespace Ariadne {
 
     template<class R, template<class> class BS>
     tribool
-    disjoint(const ListSet<R,BS>& ls,
+    disjoint(const ListSet< BS<R> >& ls,
              const Rectangle<R>& r)
     {
       tribool result=true;
-      for(typename ListSet<R,BS>::const_iterator ls_iter=ls.begin();
+      for(typename ListSet< BS<R> >::const_iterator ls_iter=ls.begin();
           ls_iter!=ls.end(); ++ls_iter)
       {
         result = result && Geometry::disjoint(*ls_iter,r);
@@ -110,11 +110,11 @@ namespace Ariadne {
 
     template<class R, template<class> class BS>
     tribool
-    subset(const ListSet<R,BS>& ls,
+    subset(const ListSet< BS<R> >& ls,
            const Rectangle<R>& r)
     {
       tribool result=true;
-      for(typename ListSet<R,BS>::const_iterator ls_iter=ls.begin();
+      for(typename ListSet< BS<R> >::const_iterator ls_iter=ls.begin();
           ls_iter!=ls.end(); ++ls_iter)
       {
         result = result && Geometry::subset(*ls_iter,r);
@@ -127,24 +127,24 @@ namespace Ariadne {
 
 
 
-    template<class R, template<class> class BS>
-    ListSet<R,BS>
-    join(const ListSet<R,BS>& A,
-         const ListSet<R,BS>& B)
+    template<class BS>
+    ListSet<BS>
+    join(const ListSet<BS>& A,
+         const ListSet<BS>& B)
     {
-      ListSet<R,BS> ds_union(A);
+      ListSet<BS> ds_union(A);
       check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
       ds_union.inplace_union(B);
       return ds_union;
     }
 
 
-    template<class R, template<class> class BS>
-    ListSet<R,BS>
-    open_intersection(const ListSet<R,BS>& A,
-                      const ListSet<R,BS>& B)
+    template<class BS>
+    ListSet<BS>
+    open_intersection(const ListSet<BS>& A,
+                      const ListSet<BS>& B)
     {
-      ListSet<R,BS> ds_inter(A.dimension());
+      ListSet<BS> ds_inter(A.dimension());
       check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
       for (size_type i=0; i<A.size(); i++) {
         for (size_type j=0; j<B.size(); j++) {
@@ -159,21 +159,21 @@ namespace Ariadne {
     
     
     
-    template<class R, template<class> class BS>
+    template<class BS>
     void
-    ListSet<R,BS>::_instantiate_geometry_operators()
+    ListSet<BS>::_instantiate_geometry_operators()
     {
       //tribool tb;
-      //ListSet<R,BS>* ls=0;
+      //ListSet<BS>* ls=0;
       //tb=disjoint(*ls,*ls);
     }
     
     
-    template<class R, template<class> class BS>
+    template<class BS>
     std::ostream& 
-    ListSet<R,BS>::write(std::ostream& os) const
+    ListSet<BS>::write(std::ostream& os) const
     {
-      const ListSet<R,BS>& A=*this;
+      const ListSet<BS>& A=*this;
       os << "ListSet<" << name<R>() << ",BS>{\n  ";
       os << "[ ";
       if (A.size() >0 ) {
@@ -187,12 +187,12 @@ namespace Ariadne {
     }
 
 
-    template<class R, template<class> class BS>
+    template<class BS>
     std::istream& 
-    ListSet<R,BS>::read(std::istream& is)
+    ListSet<BS>::read(std::istream& is)
     {
-      ListSet<R,BS>& A=*this;
-      std::vector< BS<R> >& vec(A._vector);
+      ListSet<BS>& A=*this;
+      std::vector< BS >& vec(A._vector);
       is >> vec;
 
       if(vec.size()==0) {

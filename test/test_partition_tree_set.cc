@@ -79,7 +79,7 @@ int main() {
   PartitionScheme<Real> pg(bb,seq);
   PartitionTree<Real> pt(pg,bnt);
   PartitionTreeSet<Real> pts(pg,bnt,bla);
-  ListSet<Real,Rectangle> rls(pts);
+  ListSet< Rectangle<Real> > rls(pts);
 
   PartitionTree<Real>::const_iterator ptree_iter=pt.begin();
   PartitionTree<Real>::const_iterator ptree_end=pt.end();
@@ -129,7 +129,7 @@ int main() {
   RegularGrid<Real> rg(2,Real(0.125));
   Grid<Real>& g=rg;
   FiniteGrid<Real> fg(g,bb);
-  ListSet<Real,Rectangle> lsua=ptsua;
+  ListSet< Rectangle<Real> > lsua=ptsua;
   cout << "lsua=" << lsua << endl;
   cout << "ptsua.size()=" << ptsua.size() << ", lsua.size()=" << lsua.size() << endl;
   GridMaskSet<Real> gmsina=under_approximation(ptsina,fg);

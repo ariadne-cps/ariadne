@@ -32,7 +32,6 @@
 
 #include "../geometry/rectangle.h"
 #include "../geometry/zonotope.h"
-#include "../geometry/parallelotope.h"
 #include "../geometry/polytope.h"
 #include "../geometry/polyhedron.h"
 #include "../geometry/list_set.h"
@@ -228,10 +227,10 @@ namespace Ariadne {
     
     // FIXME: Memory leak
     template<class R>
-    GridCellListSet<R>::GridCellListSet(const ListSet<R,Rectangle>& rls)
+    GridCellListSet<R>::GridCellListSet(const ListSet< Rectangle<R> >& rls)
       : _grid_ptr(new IrregularGrid<R>(rls)), _lattice_set(rls.dimension())
     {
-      typedef typename ListSet<R,Rectangle>::const_iterator list_set_const_iterator;
+      typedef typename ListSet< Rectangle<R> >::const_iterator list_set_const_iterator;
       for(list_set_const_iterator iter=rls.begin(); iter!=rls.end(); ++iter) {
         this->adjoin(GridBlock<R>(grid(),*iter));
       }
@@ -239,9 +238,9 @@ namespace Ariadne {
 
 
     template<class R>
-    GridCellListSet<R>::operator ListSet<R,Rectangle>() const
+    GridCellListSet<R>::operator ListSet< Rectangle<R> >() const
     {
-      ListSet<R,Rectangle> result(dimension());
+      ListSet< Rectangle<R> > result(dimension());
       for(size_type i=0; i!=size(); ++i) {
         result.push_back((*this)[i]);
       }
@@ -264,9 +263,8 @@ namespace Ariadne {
       tribool tb;
       Zonotope<R>* z=0;
       Zonotope< Interval<R> >* iz=0;
-      Parallelotope<R>* pl=0;
-      Polytope<R>* pt=0;
-      Polyhedron<R>* ph=0;
+      Polytope<R>* ply=0;
+      Polyhedron<R>* phd=0;
       Grid<R>* g=0;
       GridBlock<R>* gb=0;
       GridCellListSet<R>* gcls=0;
@@ -274,15 +272,13 @@ namespace Ariadne {
       tb=Geometry::subset(*gcls,*gb);
       
       *gcls=Geometry::over_approximation(*z,*g);
-      *gcls=Geometry::over_approximation(*pl,*g);
-      *gcls=Geometry::over_approximation(*pt,*g);
-      *gcls=Geometry::over_approximation(*ph,*g);
+      *gcls=Geometry::over_approximation(*ply,*g);
+      *gcls=Geometry::over_approximation(*phd,*g);
       *gcls=Geometry::over_approximation(*iz,*g);
 
       *gcls=Geometry::under_approximation(*z,*g);
-      *gcls=Geometry::under_approximation(*pl,*g);
-      *gcls=Geometry::under_approximation(*pt,*g);
-      *gcls=Geometry::under_approximation(*ph,*g);
+      *gcls=Geometry::under_approximation(*ply,*g);
+      *gcls=Geometry::under_approximation(*phd,*g);
     }
 
 
@@ -352,13 +348,13 @@ namespace Ariadne {
     
     // FIXME: Memory leak
     template<class R>
-    GridMaskSet<R>::GridMaskSet(const ListSet<R,Rectangle>& rls) 
+    GridMaskSet<R>::GridMaskSet(const ListSet< Rectangle<R> >& rls) 
       : _grid_ptr(new IrregularGrid<R>(rls)), 
         _lattice_set(dynamic_cast<const IrregularGrid<R>*>(_grid_ptr)->lattice_block())
     {
       //FIXME: Memory leak!    
 
-      for(typename ListSet<R,Rectangle>::const_iterator riter=rls.begin(); 
+      for(typename ListSet< Rectangle<R> >::const_iterator riter=rls.begin(); 
           riter!=rls.end(); ++riter) 
       {
         GridBlock<R> r(grid(),*riter);
@@ -430,9 +426,8 @@ namespace Ariadne {
       tribool tb;
       Point< Interval<R> >* ipt=0;
       Rectangle<R>* r=0;
-      ListSet<R,Rectangle>* rls=0;
-      ListSet<R,Zonotope>* zls=0;
-      ListSet<R,Parallelotope>* plls=0;
+      ListSet< Rectangle<R> >* rls=0;
+      ListSet< Zonotope<R> >* zls=0;
       Grid<R>* g=0;
       FiniteGrid<R>* fg=0;
       GridCell<R>* gc=0;
@@ -469,7 +464,6 @@ namespace Ariadne {
   
       *gms=Geometry::over_approximation(*rls,*fg);
       *gms=Geometry::over_approximation(*zls,*fg);
-      *gms=Geometry::over_approximation(*plls,*fg);
       *gms=Geometry::over_approximation(*gms,*fg);
       *gms=Geometry::over_approximation(*pts,*fg);
       *gms=Geometry::over_approximation(*set,*fg);
@@ -750,10 +744,10 @@ namespace Ariadne {
     }
 
     template<class R>
-    GridMaskSet<R>::operator ListSet<R,Rectangle>() const
+    GridMaskSet<R>::operator ListSet< Rectangle<R> >() const
     {
       check_bounded(*this);
-      ListSet<R,Rectangle> result(this->dimension());
+      ListSet< Rectangle<R> > result(this->dimension());
       for(typename GridMaskSet::const_iterator riter=begin(); riter!=end(); ++riter) {
         Rectangle<R> r(*riter);
         result.push_back(r);
@@ -965,30 +959,6 @@ namespace Ariadne {
 
     template<class R>
     GridCellListSet<R>
-    under_approximation(const Parallelotope<R>& p, const Grid<R>& g)
-    {
-      GridCellListSet<R> result(g);
-      check_equal_dimensions(p,g,"under_approximation(Parallelotope<R>,Grid<R>)");
-      if(p.empty()) {
-        return result; 
-      }
-      Rectangle<R> bb=p.bounding_box();
-
-      GridBlock<R> gbb=over_approximation(bb,g);
-      Combinatoric::LatticeBlock block=gbb.lattice_set();
-
-      for(Combinatoric::LatticeBlock::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
-        GridCell<R> cell(g,*iter);
-        if(subset(Rectangle<R>(cell),p)) {
-          result.adjoin(cell);
-        }
-      }
-
-      return result;
-    }
-
-    template<class R>
-    GridCellListSet<R>
     under_approximation(const Zonotope<R>& z, const Grid<R>& g) 
     {
       GridCellListSet<R> result(g);
@@ -1112,7 +1082,7 @@ namespace Ariadne {
       
     template<class R>
     GridMaskSet<R>
-    under_approximation(const ListSet<R,Rectangle>& ls, const FiniteGrid<R>& g) 
+    under_approximation(const ListSet< Rectangle<R> >& ls, const FiniteGrid<R>& g) 
     {
       return under_approximation(GridMaskSet<R>(ls),g);
     }
@@ -1142,7 +1112,7 @@ namespace Ariadne {
     GridMaskSet<R>
     under_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& g) 
     {
-      return under_approximation(ListSet<R,Rectangle>(pts),g);
+      return under_approximation(ListSet< Rectangle<R> >(pts),g);
     }
     
 

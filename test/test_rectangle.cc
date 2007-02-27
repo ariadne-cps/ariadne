@@ -92,7 +92,7 @@ test_rectangle()
     }
     cout << endl;
     
-    ListSet<R,Rectangle> cover1,cover2;
+    ListSet< Rectangle<R> > cover1,cover2;
     cover1.push_back(r2);
     cover1.push_back(r3);
     cover1.push_back(r4);

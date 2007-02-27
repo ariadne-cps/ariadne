@@ -162,7 +162,7 @@ namespace Ariadne {
       explicit IrregularGrid(const array< std::vector<R> >& sp);
 
       /*! \brief Construct from a list of rectangles giving the grid points. */
-      explicit IrregularGrid(const ListSet<R,Rectangle>& ls);
+      explicit IrregularGrid(const ListSet< Rectangle<R> >& ls);
 
       /*! \brief Join two irregular grids. */
       IrregularGrid(const IrregularGrid& g1,IrregularGrid& g2);

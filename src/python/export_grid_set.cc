@@ -69,6 +69,8 @@ struct GridWrap : Grid<R>, wrapper< Grid<R> >
 template<class R>
 void export_grid_set() 
 {
+  typedef Interval<R> I;
+
   typedef Grid<R> RGrid;
   typedef GridWrap<R> RGridWrap;
   typedef IrregularGrid<R> RIrregularGrid;
@@ -81,7 +83,7 @@ void export_grid_set()
   typedef GridMaskSet<R> RGridMaskSet;
   
   typedef Point<R> RPoint;
-  typedef Point< Interval<R> > IPoint;
+  typedef Point<I> IPoint;
 
   typedef Set<R> RSet;
   typedef Rectangle<R> RRectangle;
@@ -89,11 +91,11 @@ void export_grid_set()
   typedef Parallelotope<R> RParallelotope;
   typedef Zonotope<R> RZonotope;
   typedef Polytope<R> RPolytope;
-  typedef Zonotope< Interval<R> > IZonotope;
-  typedef ListSet<R,Rectangle> RRectangleListSet;
-  typedef ListSet<R,Parallelotope> RParallelotopeListSet;
-  typedef ListSet<R,Zonotope> RZonotopeListSet;
-  typedef ListSet< Interval<R> ,Zonotope> IZonotopeListSet;
+  typedef Zonotope<I> IZonotope;
+  typedef ListSet< Rectangle<R> > RRectangleListSet;
+  typedef ListSet< Parallelotope<R> > RParallelotopeListSet;
+  typedef ListSet< Zonotope<R> > RZonotopeListSet;
+  typedef ListSet< Zonotope<I> > IZonotopeListSet;
   typedef PartitionTreeSet<R> RPartitionTreeSet;
   
   class_<RGridWrap, boost::noncopyable>("Grid")

@@ -66,7 +66,7 @@ int test_list_set()
   Zonotope<R> z0(r0);
   Zonotope<R> z1(r1);
   
-  ListSet<R,Rectangle> ds1;
+  ListSet< Rectangle<R> > ds1;
   ds1.adjoin(r0);
   ds1.adjoin(r1);
   ds1.adjoin(r2);
@@ -81,13 +81,13 @@ int test_list_set()
   string input("[ [0,1]x[0,1], [1,1.375]x[1,1.375], [1.375,1.5]x[1.375,1.5] ]");
   stringstream is(input);
   
-  ListSet<R,Rectangle> ds2;
+  ListSet< Rectangle<R> > ds2;
   is >> ds2;
   cout << ds2 << endl;
   assert(ds2.size()==3);
   assert(ds1[0]==ds2[0] && ds1[1]==ds2[1] && ds1[2]==ds2[2]);
 
-  ListSet<R,Zonotope> zds;
+  ListSet< Zonotope<R> > zds;
   cout << "z0.empty()=" << z0.empty() << endl;
   zds.push_back(z0);
   assert(zds.size()==1);

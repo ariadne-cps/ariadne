@@ -104,26 +104,26 @@ namespace Ariadne {
 
      protected:
       /*! \brief Template for integrating a basic set. */
-      template<template<class> class BS>
-      BS<R>
+      template<class BS>
+      BS
       integrate_basic_set(const System::VectorField<R>& vector_field, 
-                          const BS<R>& initial_set, 
+                          const BS& initial_set, 
                           const time_type& time) const;
 
       
       /*! \brief Template for integrating a list set. */
-      template<template<class> class BS>
-      Geometry::ListSet<R,BS> 
+      template<class BS>
+      Geometry::ListSet<BS> 
       integrate_list_set(const System::VectorField<R>& vector_field, 
-                         const Geometry::ListSet<R,BS>& initial_set, 
+                         const Geometry::ListSet<BS>& initial_set, 
                          const time_type& time) const;
 
       
       /*! \brief Template for computing the reachable set from a list set. */
-      template<template<class> class BS>
-      Geometry::ListSet<R,BS> 
+      template<class BS>
+      Geometry::ListSet<BS> 
       reach_list_set(const System::VectorField<R>& vector_field, 
-                     const Geometry::ListSet<R,BS>& initial_set, 
+                     const Geometry::ListSet<BS>& initial_set, 
                      const time_type& time) const;
 
       
@@ -195,8 +195,8 @@ namespace Ariadne {
        *
        * C0 algorithms are typically too inaccurate for even the simplest systems.
        */
-      virtual Geometry::ListSet<R,Geometry::Rectangle> integrate(const System::VectorField<R>& vector_field,
-                                                                 const Geometry::ListSet<R,Geometry::Rectangle>& initial_set,
+      virtual Geometry::ListSet< Geometry::Rectangle<R> > integrate(const System::VectorField<R>& vector_field,
+                                                                 const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set,
                                                                  const time_type& time) const;
 
       /*! \brief An algorithm for integrating forward a set of zonotopes.
@@ -207,20 +207,20 @@ namespace Ariadne {
        * We then compute \f$ \mathcal{P}_{n} \f$ such that \f$ D\Phi(h,R_{n}) \subset \mathcal{P}_{n} \f$.
        * We then compute \f$ A_{n+1} \f$ such that \f$ A_{n+1} \mathcal{e} \supset \mathcal{P}_{n} \mathcal{e} \f$.
        */
-      virtual Geometry::ListSet<R,Geometry::Zonotope> integrate(const System::VectorField<R>&,
-                                                                const Geometry::ListSet<R,Geometry::Zonotope>&,
-                                                                const time_type&) const;
+      virtual Geometry::ListSet< Geometry::Zonotope<R> > integrate(const System::VectorField<R>&,
+                                                                   const Geometry::ListSet< Geometry::Zonotope<R> >&,
+                                                                   const time_type&) const;
       
 
       /*! \brief An algorithm for computing the reachable set of in initial set of rectangles up to a certain time. (NOT CURRENTLY IMPLEMENTED) */
-      virtual Geometry::ListSet<R,Geometry::Rectangle> reach(const System::VectorField<R>& vector_field,
-                                                             const Geometry::ListSet<R,Geometry::Rectangle>& initial_set,
-                                                             const time_type& time) const;      
+      virtual Geometry::ListSet< Geometry::Rectangle<R> > reach(const System::VectorField<R>& vector_field,
+                                                                const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set,
+                                                                const time_type& time) const;      
 
       /*! \brief An algorithm for computing the reachable set of in initial set of zonotopes up to a certain time. */
-      virtual Geometry::ListSet<R,Geometry::Zonotope> reach(const System::VectorField<R>&,
-                                                            const Geometry::ListSet<R,Geometry::Zonotope>&,
-                                                            const time_type&) const;
+      virtual Geometry::ListSet< Geometry::Zonotope<R> > reach(const System::VectorField<R>&,
+                                                               const Geometry::ListSet< Geometry::Zonotope<R> >&,
+                                                               const time_type&) const;
 
 
 

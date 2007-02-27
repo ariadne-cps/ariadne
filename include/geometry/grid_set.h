@@ -226,10 +226,10 @@ namespace Ariadne {
       GridCellListSet(const GridCellListSet<R>& gcls);
 
       /*!\brief Construct from a ListSet of Rectangles. */
-      GridCellListSet(const ListSet<R,Rectangle>& rls);
+      GridCellListSet(const ListSet< Rectangle<R> >& rls);
 
       /*!\brief Convert to a ListSet of Rectangles. */
-      operator ListSet<R,Rectangle>() const;
+      operator ListSet< Rectangle<R> >() const;
 
       /*! \brief The underlying grid. */
       const Grid<R>& grid() const;
@@ -346,7 +346,7 @@ namespace Ariadne {
       GridMaskSet(const GridMaskSet<R>& gms);
 
       /*!\brief Construct from a %ListSet of %Rectangle. */
-      GridMaskSet(const ListSet<R,Rectangle>& ls);
+      GridMaskSet(const ListSet< Rectangle<R> >& ls);
 
       /*!\brief Construct from a %GridCellListSet. */
       GridMaskSet(const GridCellListSet<R>& gcls);
@@ -377,8 +377,8 @@ namespace Ariadne {
       //@}
 
       /*!\brief Convert to a %ListSet of BS. */
-      template<template<class> class BS> operator ListSet<R,BS> () const;
-      operator ListSet<R,Rectangle> () const;
+      template<class BS> operator ListSet<BS> () const;
+      operator ListSet< Rectangle<R> > () const;
       
       /*!\brief Equality operator. (Deprecated)
        *
@@ -540,7 +540,7 @@ namespace Ariadne {
     
     template<class R> GridCellListSet<R> over_approximation(const Zonotope< Interval<R> >& z, const Grid<R>& g);
       
-    template<class R, template<class> class BS> GridMaskSet<R> over_approximation(const ListSet<R,BS>& ls, const FiniteGrid<R>& fg); 
+    template<class R, class BS> GridMaskSet<R> over_approximation(const ListSet<BS>& ls, const FiniteGrid<R>& fg); 
     template<class R> GridMaskSet<R> over_approximation(const GridMaskSet<R>& gms, const FiniteGrid<R>& fg);
     template<class R> GridMaskSet<R> over_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& fg);
     template<class R> GridMaskSet<R> over_approximation(const Set<R>& set, const FiniteGrid<R>& fg);
@@ -551,11 +551,10 @@ namespace Ariadne {
     template<class R> GridBlock<R> under_approximation(const Rectangle<R>& p, const Grid<R>& g);
     
     template<class R> GridCellListSet<R> under_approximation(const Zonotope<R>& p, const Grid<R>& g);
-    template<class R> GridCellListSet<R> under_approximation(const Parallelotope<R>& p, const Grid<R>& g);
     template<class R> GridCellListSet<R> under_approximation(const Polytope<R>& p, const Grid<R>& g);
     template<class R> GridCellListSet<R> under_approximation(const Polyhedron<R>& p, const Grid<R>& g);
     
-    template<class R> GridMaskSet<R> under_approximation(const ListSet<R,Rectangle>& ls, const FiniteGrid<R>& fg); 
+    template<class R> GridMaskSet<R> under_approximation(const ListSet< Rectangle<R> >& ls, const FiniteGrid<R>& fg); 
     template<class R> GridMaskSet<R> under_approximation(const GridMaskSet<R>& gms, const FiniteGrid<R>& fg);
     template<class R> GridMaskSet<R> under_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& fg);
 

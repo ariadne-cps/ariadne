@@ -165,12 +165,12 @@ namespace Ariadne {
     }
 
     template<class R>
-    template<class Rl,template<class> class BS>
-    Geometry::ListSet<Rl,BS> 
-    Applicator<R>::image_list_set(const System::Map<R>& f, const Geometry::ListSet<Rl,BS>& ds) const 
+    template<class BS>
+    Geometry::ListSet<BS> 
+    Applicator<R>::image_list_set(const System::Map<R>& f, const Geometry::ListSet<BS>& ds) const 
     {
-      Geometry::ListSet<Rl,BS> result(f.result_dimension());
-      for(typename Geometry::ListSet<Rl,BS>::const_iterator iter=ds.begin(); iter!=ds.end(); ++iter) {
+      Geometry::ListSet<BS> result(f.result_dimension());
+      for(typename Geometry::ListSet<BS>::const_iterator iter=ds.begin(); iter!=ds.end(); ++iter) {
         result.push_back(this->image(f,*iter));
       }
       return result;
@@ -179,8 +179,8 @@ namespace Ariadne {
 
 
     template<class R>
-    Geometry::ListSet<R,Geometry::Rectangle> 
-    Applicator<R>::image(const System::Map<R>& f, const Geometry::ListSet<R,Geometry::Rectangle>& ds) const 
+    Geometry::ListSet< Geometry::Rectangle<R> > 
+    Applicator<R>::image(const System::Map<R>& f, const Geometry::ListSet< Geometry::Rectangle<R> >& ds) const 
     {
       return this->image_list_set(f,ds);
     }
@@ -188,16 +188,16 @@ namespace Ariadne {
     
     
     template<class R>
-    Geometry::ListSet<R,Geometry::Zonotope> 
-    Applicator<R>::image(const System::Map<R>& f, const Geometry::ListSet<R,Geometry::Zonotope>& ds) const 
+    Geometry::ListSet< Geometry::Zonotope<R> > 
+    Applicator<R>::image(const System::Map<R>& f, const Geometry::ListSet< Geometry::Zonotope<R> >& ds) const 
     {
       return this->image_list_set(f,ds);
     }
      
 
     template<class R>
-    Geometry::ListSet<Interval<R>,Geometry::Zonotope> 
-    Applicator<R>::image(const System::Map<R>& f, const Geometry::ListSet<Interval<R>,Geometry::Zonotope>& ds) const 
+    Geometry::ListSet< Geometry::Zonotope< Interval<R> > > 
+    Applicator<R>::image(const System::Map<R>& f, const Geometry::ListSet< Geometry::Zonotope< Interval<R> > >& ds) const 
     {
       return this->image_list_set(f,ds);
     }

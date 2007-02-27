@@ -48,7 +48,7 @@ int
 test_grid_set()
 {
 
-  ListSet<R,Rectangle> ls;
+  ListSet< Rectangle<R> > ls;
   Rectangle< R > r;
   
   string input("[0,0.75]x[0,0.625]  [0.625,1]x[1,1.25]  [1.25,1.5]x[1.25,2.5] ");
@@ -64,7 +64,7 @@ test_grid_set()
 
   GridCellListSet<R> gcls(ls);
   cout << "gcls=" << gcls << endl;
-  cout << "ListSet(gcls)=" << ListSet<R,Rectangle>(gcls) << endl;
+  cout << "ListSet(gcls)=" << ListSet< Rectangle<R> >(gcls) << endl;
   cout << "gcls.lattice_set().bounding_block()=" << gcls.lattice_set().bounding_block() << endl;
 
 
@@ -77,9 +77,9 @@ test_grid_set()
   GridCellListSet<R> gclms(gms);
   cout << gclms << endl;
 
-  cout << ListSet<R,Rectangle>(gms) << endl;
+  cout << ListSet< Rectangle<R> >(gms) << endl;
 
-  ListSet<R,Rectangle> ls1,ls2;
+  ListSet< Rectangle<R> > ls1,ls2;
   ls1.push_back(ls[0]);
   ls1.push_back(ls[2]);
   ls2.push_back(ls[1]);

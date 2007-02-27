@@ -299,10 +299,10 @@ namespace Ariadne {
     
     
     template<class R>
-    template<template<class> class BS>
-    BS<R> 
+    template<class BS>
+    BS 
     Integrator<R>::integrate_basic_set(const System::VectorField<R>& vector_field, 
-                                       const BS<R>& initial_set, 
+                                       const BS& initial_set, 
                                        const time_type& time) const
     {
       if(verbosity>4) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
@@ -311,7 +311,7 @@ namespace Ariadne {
       }
       
       const System::VectorField<R>& vf=vector_field;
-      BS<R> bs=initial_set;
+      BS bs=initial_set;
       time_type t=0;
       time_type h=this->maximum_step_size();
       while(t<time) {
@@ -329,10 +329,10 @@ namespace Ariadne {
     
     // Template pattern for integrating a list set
     template<class R>
-    template<template<class> class BS>
-    Geometry::ListSet<R,BS> 
+    template<class BS>
+    Geometry::ListSet<BS> 
     Integrator<R>::integrate_list_set(const System::VectorField<R>& vector_field, 
-                                      const Geometry::ListSet<R,BS>& initial_set, 
+                                      const Geometry::ListSet<BS>& initial_set, 
                                       const time_type& time) const
     {
       if(verbosity>4) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
@@ -349,16 +349,16 @@ namespace Ariadne {
       
       time_type t=0; // t is the time elapsed!
       time_type h=step_size;
-      BS<R> bs(initial_set.dimension());
+      BS bs(initial_set.dimension());
       
-      typedef std::pair< time_type,BS<R> > timed_set_type;
+      typedef std::pair< time_type,BS > timed_set_type;
       
       // Working sets contains (time,set) pairs, storing the sets reached with different remaining
       std::vector< timed_set_type > working_sets;
       
-      Geometry::ListSet<R,BS> final_set(initial_set.dimension());
+      Geometry::ListSet<BS> final_set(initial_set.dimension());
       
-      typedef typename Geometry::ListSet<R,BS>::const_iterator list_set_const_iterator;
+      typedef typename Geometry::ListSet<BS>::const_iterator list_set_const_iterator;
       for(list_set_const_iterator bs_iter=initial_set.begin(); bs_iter!=initial_set.end(); ++bs_iter) {
         working_sets.push_back(timed_set_type(0,*bs_iter));
       }
@@ -375,7 +375,7 @@ namespace Ariadne {
         if(verbosity>5) { std::cerr << "  t=" << t << "  bs=" << bs << std::endl; }
         if(bs.radius()>maximum_set_radius) {
           if(verbosity>5) { std::cerr << "    subdividing..." << std::flush; }
-          Geometry::ListSet<R,BS> subdivisions=bs.subdivide();
+          Geometry::ListSet<BS> subdivisions=bs.subdivide();
           for(list_set_const_iterator subdiv_iter=subdivisions.begin(); 
               subdiv_iter!=subdivisions.end(); ++subdiv_iter)
           {
@@ -415,10 +415,10 @@ namespace Ariadne {
     
     
     template<class R>
-    template<template<class> class BS>
-    Geometry::ListSet<R,BS> 
+    template<class BS>
+    Geometry::ListSet<BS> 
     Integrator<R>::reach_list_set(const System::VectorField<R>& vector_field, 
-                                  const Geometry::ListSet<R,BS>& initial_set, 
+                                  const Geometry::ListSet<BS>& initial_set, 
                                   const time_type& time) const
     {
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
@@ -432,15 +432,15 @@ namespace Ariadne {
       
       time_type t=0;
       time_type h=step_size;
-      BS<R> bs(initial_set.dimension());
-      BS<R> rs(initial_set.dimension());
+      BS bs(initial_set.dimension());
+      BS rs(initial_set.dimension());
       
-      typedef typename Geometry::ListSet<R,BS>::const_iterator list_set_const_iterator;
-      typedef typename Geometry::ListSet<R,BS>::iterator list_set_iterator;
-      typedef std::pair< time_type, BS<R> > timed_set_type;
+      typedef typename Geometry::ListSet<BS>::const_iterator list_set_const_iterator;
+      typedef typename Geometry::ListSet<BS>::iterator list_set_iterator;
+      typedef std::pair< time_type, BS > timed_set_type;
 
       std::vector< timed_set_type > working_sets;
-      Geometry::ListSet<R,BS> reach_set(initial_set.dimension());
+      Geometry::ListSet<BS> reach_set(initial_set.dimension());
       
       for(list_set_const_iterator bs_iter=initial_set.begin(); bs_iter!=initial_set.end(); ++bs_iter) {
         working_sets.push_back(timed_set_type(0,*bs_iter));
@@ -465,7 +465,7 @@ namespace Ariadne {
 
         if(bs.radius()>maximum_set_radius) {
         if(verbosity>6) { std::cerr << "  subdividing..." << std::endl; }
-          Geometry::ListSet<R,BS> subdivisions=bs.subdivide();
+          Geometry::ListSet<BS> subdivisions=bs.subdivide();
           if(verbosity>6) { std::cerr << "    subdivisions.size() =" << subdivisions.size() << std::endl; }
           for(list_set_const_iterator subdiv_iter=subdivisions.begin(); 
               subdiv_iter!=subdivisions.end(); ++subdiv_iter)
@@ -511,9 +511,9 @@ namespace Ariadne {
     
     
     template<class R>
-    Geometry::ListSet<R,Geometry::Rectangle>
+    Geometry::ListSet< Geometry::Rectangle<R> >
     Integrator<R>::reach(const System::VectorField<R>& vector_field,
-                         const Geometry::ListSet<R,Geometry::Rectangle>& initial_set,
+                         const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set,
                          const time_type& time) const
     {
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
@@ -615,9 +615,9 @@ namespace Ariadne {
     
     
     template<class R>
-    Geometry::ListSet<R,Geometry::Rectangle>
+    Geometry::ListSet< Geometry::Rectangle<R> >
     Integrator<R>::integrate(const System::VectorField<R>& vector_field,
-                               const Geometry::ListSet<R,Geometry::Rectangle>& initial_set,
+                               const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set,
                                const time_type& time) const
     {
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
@@ -626,9 +626,9 @@ namespace Ariadne {
     
     
     template<class R>
-    Geometry::ListSet<R,Geometry::Zonotope> 
+    Geometry::ListSet< Geometry::Zonotope<R> > 
     Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
-                               const Geometry::ListSet<R,Geometry::Zonotope>& initial_set, 
+                               const Geometry::ListSet< Geometry::Zonotope<R> >& initial_set, 
                                const time_type& time) const
     {
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
@@ -671,8 +671,8 @@ namespace Ariadne {
       
       R spacial_tolerance=2;
       
-      ListSet<R,Zonotope> start_set;
-      ListSet<R,Zonotope> finish_set;
+      ListSet< Zonotope<R> > start_set;
+      ListSet< Zonotope<R> > finish_set;
       for(typename GridMaskSet<R>::const_iterator iter=initial_set.begin(); iter!=initial_set.end(); ++iter) {
         start_set.adjoin(Zonotope<R>(Rectangle<R>(*iter)));
       }
@@ -682,7 +682,7 @@ namespace Ariadne {
         std::cerr << "time left=" << t << "  stepsize=" << h << "  sets in list=" << start_set.size() << "\n";
 #endif
         h=min(t,h);
-        for(typename ListSet<R,Zonotope>::const_iterator iter=start_set.begin(); iter!=start_set.end(); ++iter) {
+        for(typename ListSet< Zonotope<R> >::const_iterator iter=start_set.begin(); iter!=start_set.end(); ++iter) {
           const VectorField<R>& vf=vector_field;
           Geometry::Zonotope<R> p(*iter);
           p=this->integrate(vf,p,h);
@@ -690,7 +690,7 @@ namespace Ariadne {
         }
         start_set.clear();
         GridMaskSet<R> mask_set(g,lb);
-        for(typename ListSet<R,Zonotope>::const_iterator iter=finish_set.begin(); iter!=finish_set.end(); ++iter) {
+        for(typename ListSet< Zonotope<R> >::const_iterator iter=finish_set.begin(); iter!=finish_set.end(); ++iter) {
           const Zonotope<R>& p=*iter;
           if(p.radius()>spacial_tolerance) {
 #ifdef DEBUG
@@ -712,7 +712,7 @@ namespace Ariadne {
         t-=h;
       }
     
-      for(typename ListSet<R,Zonotope>::const_iterator iter=start_set.begin(); iter!=start_set.end(); ++iter) {
+      for(typename ListSet< Zonotope<R> >::const_iterator iter=start_set.begin(); iter!=start_set.end(); ++iter) {
         GridCellListSet<R> oai=over_approximation(*iter,g);
         result.adjoin(oai);
       }
@@ -722,9 +722,9 @@ namespace Ariadne {
     
     
     template<class R>
-    Geometry::ListSet<R,Geometry::Zonotope> 
+    Geometry::ListSet< Geometry::Zonotope<R> > 
     Integrator<R>::reach(const System::VectorField<R>& vector_field, 
-                           const Geometry::ListSet<R,Geometry::Zonotope>& initial_set, 
+                           const Geometry::ListSet< Geometry::Zonotope<R> >& initial_set, 
                            const time_type& time) const
     {
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
@@ -742,7 +742,7 @@ namespace Ariadne {
     {
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
-      typedef typename Geometry::ListSet<R,Geometry::Zonotope>::const_iterator zls_const_iterator;
+      typedef typename Geometry::ListSet< Geometry::Zonotope<R> >::const_iterator zls_const_iterator;
       check_bounded(initial_set,__PRETTY_FUNCTION__);
       check_bounded(bounding_set,__PRETTY_FUNCTION__);
       
@@ -775,8 +775,8 @@ namespace Ariadne {
         found=image;
       }
       
-      Geometry::ListSet<R,Geometry::Zonotope> input_list;
-      Geometry::ListSet<R,Geometry::Zonotope> output_list;
+      Geometry::ListSet< Geometry::Zonotope<R> > input_list;
+      Geometry::ListSet< Geometry::Zonotope<R> > output_list;
       for(gms_const_iterator iter=stored.begin(); iter!=stored.end(); ++iter) {
         //Geometry::Rectangle<R> r=*iter;
         //Geometry::Zonotope<R> z(r);
@@ -802,8 +802,8 @@ namespace Ariadne {
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
       typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
-      typedef typename Geometry::ListSet<R,Geometry::Parallelotope>::const_iterator pls_const_iterator;
-      typedef typename Geometry::ListSet<R,Geometry::Zonotope>::const_iterator zls_const_iterator;
+      typedef typename Geometry::ListSet< Geometry::Parallelotope<R> >::const_iterator pls_const_iterator;
+      typedef typename Geometry::ListSet< Geometry::Zonotope<R> >::const_iterator zls_const_iterator;
       check_bounded(initial_set,__PRETTY_FUNCTION__);
       check_bounded(bounding_set,__PRETTY_FUNCTION__);
      
@@ -830,7 +830,7 @@ namespace Ariadne {
         result.adjoin(found);
         image.clear();
         uint size=0;
-        Geometry::ListSet<R,Geometry::Parallelotope> parallotope_list;
+        Geometry::ListSet< Geometry::Parallelotope<R> > parallotope_list;
         for(gcls_const_iterator iter=found.begin(); iter!=found.end(); ++iter) {
           ++size;
           Geometry::Rectangle<R> r=*iter;
@@ -847,7 +847,7 @@ namespace Ariadne {
         found=regular_intersection(image,bounding_set);
       }
       
-      Geometry::ListSet<R,Geometry::Zonotope> zonotope_list;
+      Geometry::ListSet< Geometry::Zonotope<R> > zonotope_list;
       for(gms_const_iterator iter=result.begin(); iter!=result.end(); ++iter) {
         Geometry::Rectangle<R> r=*iter;
         Geometry::Zonotope<R> pp(r);
@@ -872,7 +872,7 @@ namespace Ariadne {
     {
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
-      typedef typename Geometry::ListSet<R,Geometry::Parallelotope>::const_iterator pls_const_iterator;
+      typedef typename Geometry::ListSet< Geometry::Parallelotope<R> >::const_iterator pls_const_iterator;
       check_bounded(initial_set,__PRETTY_FUNCTION__);
       check_bounded(safe_set,__PRETTY_FUNCTION__);
      
@@ -900,7 +900,7 @@ namespace Ariadne {
         chainreach.adjoin(found);
         image.clear();
         uint size=0;
-        Geometry::ListSet<R,Geometry::Parallelotope> parallotope_list;
+        Geometry::ListSet< Geometry::Parallelotope<R> > parallotope_list;
         for(gcls_const_iterator iter=found.begin(); iter!=found.end(); ++iter) {
           ++size;
           Geometry::Rectangle<R> r=*iter;

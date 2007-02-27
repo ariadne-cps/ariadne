@@ -25,20 +25,20 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template<class R, template<class> class BS> inline
-    ListSet<R,BS>::ListSet()
+    template<class BS> inline
+    ListSet<BS>::ListSet()
       : _dimension(0), _vector()
     {
     }
 
-    template<class R, template<class> class BS> inline
-    ListSet<R,BS>::ListSet(size_type n) 
+    template<class BS> inline
+    ListSet<BS>::ListSet(size_type n) 
       : _dimension(n), _vector() 
     {
     }
 
-    template<class R, template<class> class BS> inline
-    ListSet<R,BS>::ListSet(const BS<R>& A)
+    template<class BS> inline
+    ListSet<BS>::ListSet(const BS& A)
       : _dimension(A.dimension()), _vector()
     {
       if (A.empty()) {
@@ -47,38 +47,38 @@ namespace Ariadne {
       _vector.push_back(A);
     }
 
-    template<class R, template<class> class BS> inline
-    ListSet<R,BS>::ListSet(const ListSet<R,BS>& A)
+    template<class BS> inline
+    ListSet<BS>::ListSet(const ListSet<BS>& A)
       : _dimension(A.dimension()), _vector(A._vector) 
     {
     }
 
-    template<class R, template<class> class BS> inline
-    ListSet<R,BS>::~ListSet() 
+    template<class BS> inline
+    ListSet<BS>::~ListSet() 
     {
       this->_vector.clear();
     }
 
 
-    template<class R, template<class> class BS> inline
+    template<class BS> inline
     size_type 
-    ListSet<R,BS>::size() const 
+    ListSet<BS>::size() const 
     {
       return this->_vector.size();
     }
 
-    template<class R, template<class> class BS> inline
+    template<class BS> inline
     void 
-    ListSet<R,BS>::push_back(const BS<R>& A) 
+    ListSet<BS>::push_back(const BS& A) 
     {
       if (this->dimension()==0) { this->_dimension=A.dimension(); }
       check_equal_dimensions(*this,A,__PRETTY_FUNCTION__);
       this->_vector.push_back(A);
     }
 
-    template<class R, template<class> class BS> inline
+    template<class BS> inline
     void 
-    ListSet<R,BS>::pop_back() 
+    ListSet<BS>::pop_back() 
     {
       if (this->_vector.empty()) { 
         throw std::runtime_error("Attempting to pop from an empty ListSet");
@@ -86,41 +86,41 @@ namespace Ariadne {
       this->_vector.pop_back();
     }
 
-    template<class R, template<class> class BS> inline
+    template<class BS> inline
     dimension_type 
-    ListSet<R,BS>::dimension() const 
+    ListSet<BS>::dimension() const 
     {
       return this->_dimension;
     }
 
-    template<class R, template<class> class BS> inline
-    const BS<R>& 
-    ListSet<R,BS>::get(size_type index) const 
+    template<class BS> inline
+    const BS& 
+    ListSet<BS>::get(size_type index) const 
     {
       check_array_index(*this,index,__PRETTY_FUNCTION__);
       return this->_vector[index];
     }
 
-    template<class R, template<class> class BS> inline
+    template<class BS> inline
     void 
-    ListSet<R,BS>::set(size_type index, const BS<R>& set) 
+    ListSet<BS>::set(size_type index, const BS& set) 
     {
       check_array_index(*this,index,__PRETTY_FUNCTION__);
       this->_vector[index]=set;
     }
 
-    template<class R, template<class> class BS> inline
-    const BS<R>& 
-    ListSet<R,BS>::operator[](size_type index) const 
+    template<class BS> inline
+    const BS& 
+    ListSet<BS>::operator[](size_type index) const 
     {
       check_array_index(*this,index,__PRETTY_FUNCTION__);
       return this->_vector[index];
     }
 
 
-    template<class R, template<class> class BS> inline
-    const ListSet<R,BS>& 
-    ListSet<R,BS>::operator=(const ListSet<R,BS>& A) 
+    template<class BS> inline
+    const ListSet<BS>& 
+    ListSet<BS>::operator=(const ListSet<BS>& A) 
     {
       if(this !=& A) {
         this->_dimension = A._dimension;
@@ -129,59 +129,59 @@ namespace Ariadne {
       return *this;
     }
 
-    template<class R, template<class> class BS> 
-    template<class Rl, template<class> class BSt> 
+    template<class BS> 
+    template<class BSt> 
     inline
-    ListSet<R,BS>::operator ListSet<Rl,BSt> () const 
+    ListSet<BS>::operator ListSet<BSt> () const 
     {
-      ListSet<Rl,BSt> result(this->dimension());
-      BSt<Rl> bs(this->dimension());
+      ListSet<BSt> result(this->dimension());
+      BSt bs(this->dimension());
       for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-        bs=BSt<Rl>(*iter);
+        bs=BSt(*iter);
         result.push_back(bs);
       }
       return result;
     }
       
-    template<class R, template<class> class BS> inline
+    template<class BS> inline
     tribool 
-    ListSet<R,BS>::contains(const Point<R>& p) const 
+    ListSet<BS>::contains(const Point<R>& p) const 
     {
       tribool result=false;
-      for (typename ListSet<R,BS>::const_iterator i=this->begin(); i!=this->end(); ++i) {
+      for (typename ListSet<BS>::const_iterator i=this->begin(); i!=this->end(); ++i) {
         result=result || i->contains(p);
         if(result) { return result; }
       }
       return result;
     }
 
-    template<class R, template<class> class BS> inline
+    template<class BS> inline
     tribool 
-    ListSet<R,BS>::empty() const 
+    ListSet<BS>::empty() const 
     {
       tribool result=true;
-      for (typename ListSet<R,BS>::const_iterator i=this->begin(); i!=this->end(); ++i) {
+      for (typename ListSet<BS>::const_iterator i=this->begin(); i!=this->end(); ++i) {
         result = result && i->empty();
         if(!result) { return result; }
       }
       return result;
     }
 
-    template<class R, template<class> class BS> inline
+    template<class BS> inline
     tribool 
-    ListSet<R,BS>::bounded() const 
+    ListSet<BS>::bounded() const 
     {
       tribool result=true;
-      for (typename ListSet<R,BS>::const_iterator i=this->begin(); i!=this->end(); ++i) {
+      for (typename ListSet<BS>::const_iterator i=this->begin(); i!=this->end(); ++i) {
         result = result && i->bounded();
         if(!result) { return result; }
       }
       return result;
     }
 
-    template<class R, template<class> class BS> inline
-    Rectangle<R> 
-    ListSet<R,BS>::bounding_box() const 
+    template<class BS> inline
+    Rectangle<typename ListSet<BS>::real_type> 
+    ListSet<BS>::bounding_box() const 
     {
       if(this->empty()) { return Rectangle<R>(this->dimension()); }
       Rectangle<R> result=(*this)[0].bounding_box();
@@ -199,65 +199,65 @@ namespace Ariadne {
       return result;
     }
         
-    template<class R, template<class> class BS> inline
+    template<class BS> inline
     void 
-    ListSet<R,BS>::clear() 
+    ListSet<BS>::clear() 
     { 
       this->_vector.clear();
     }
       
-    template<class R, template<class> class BS> inline
-    typename ListSet<R,BS>::iterator 
-    ListSet<R,BS>::begin() 
+    template<class BS> inline
+    typename ListSet<BS>::iterator 
+    ListSet<BS>::begin() 
     {
       return _vector.begin();
     }
 
-    template<class R, template<class> class BS> inline
-    typename ListSet<R,BS>::iterator 
-    ListSet<R,BS>::end() 
+    template<class BS> inline
+    typename ListSet<BS>::iterator 
+    ListSet<BS>::end() 
     {
       return _vector.end();
     }
 
-    template<class R, template<class> class BS> inline
-    typename ListSet<R,BS>::const_iterator 
-    ListSet<R,BS>::begin() const 
+    template<class BS> inline
+    typename ListSet<BS>::const_iterator 
+    ListSet<BS>::begin() const 
     {
       return _vector.begin();
     }
 
-    template<class R, template<class> class BS> inline
-    typename ListSet<R,BS>::const_iterator 
-    ListSet<R,BS>::end() const 
+    template<class BS> inline
+    typename ListSet<BS>::const_iterator 
+    ListSet<BS>::end() const 
     {
       return _vector.end();
     }
 
-    template<class R, template<class> class BS> inline
+    template<class BS> inline
     void 
-    ListSet<R,BS>::adjoin(const ListSet<R,BS>& A) 
+    ListSet<BS>::adjoin(const ListSet<BS>& A) 
     {
       if(this->dimension()==0) { 
         this->_dimension=A.dimension(); 
       }
       check_equal_dimensions(*this,A,__PRETTY_FUNCTION__);
       this->_vector.reserve(A.size());
-      for(typename ListSet<R,BS>::const_iterator iter=A.begin(); iter!=A.end(); ++iter) {
+      for(typename ListSet<BS>::const_iterator iter=A.begin(); iter!=A.end(); ++iter) {
         this->_vector.push_back(*iter);
       }
     }
       
-    template<class R, template<class> class BS> inline
+    template<class BS> inline
     void 
-    ListSet<R,BS>::inplace_union(const ListSet<R,BS>& A) 
+    ListSet<BS>::inplace_union(const ListSet<BS>& A) 
     {
       this->adjoin(A);
     }
 
-    template<class R, template<class> class BS> inline
+    template<class BS> inline
     void 
-    ListSet<R,BS>::adjoin(const BS<R>& A) 
+    ListSet<BS>::adjoin(const BS& A) 
     {
       if(this->dimension()==0) { 
         this->_dimension=A.dimension(); 
@@ -268,25 +268,25 @@ namespace Ariadne {
       }
     }
 
-    template<class R, template<class> class BS> inline
+    template<class BS> inline
     void 
-    ListSet<R,BS>::inplace_union(const BS<R>& A) 
+    ListSet<BS>::inplace_union(const BS& A) 
     {
       this->adjoin(A);
     }
 
 
 
-    template<class R, template<class> class BS> inline
+    template<class BS> inline
     std::ostream& 
-    operator<<(std::ostream& os, const ListSet<R,BS>& ls)
+    operator<<(std::ostream& os, const ListSet<BS>& ls)
     {
       return ls.write(os);
     }
 
-    template<class R, template<class> class BS> inline
+    template<class BS> inline
     std::istream& 
-    operator>>(std::istream& is, ListSet<R,BS>& ls)
+    operator>>(std::istream& is, ListSet<BS>& ls)
     {
       return ls.read(is);
     }

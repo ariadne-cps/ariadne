@@ -33,31 +33,26 @@
 
 namespace Ariadne {
   namespace Geometry {
+ 
+    template class ListSet< Rectangle<Real> >;
+    template class ListSet< Parallelotope<Real> >;
+    template class ListSet< Zonotope<Real> >;
+    template class ListSet< Polytope<Real> >;
+    template class ListSet< Zonotope< Interval<Real> > >;
 
-    template class ListSet<Real,Rectangle>;
-    template class ListSet<Real,Parallelotope>;
-    template class ListSet<Real,Zonotope>;
-    template class ListSet<Real,Polytope>;
-    template class ListSet<Interval<Real>,Parallelotope>;
-    template class ListSet<Interval<Real>,Zonotope>;
-
-    template class ListSet<Rational,Rectangle>;
-    template class ListSet<Rational,Zonotope>;
+    template class ListSet< Rectangle<Rational> >;
+    template class ListSet< Zonotope<Rational> >;
     
     // The following are not defined for all types,
     // so we can't instantiate them in ListSet<R,BS>::_instantiate_geometry_operators()
-    template  ListSet<Real,Rectangle>::operator  ListSet<Interval<Real>,Parallelotope>() const;
-    template  ListSet<Real,Rectangle>::operator  ListSet<Interval<Real>,Zonotope>() const;
-    template  ListSet<Real,Rectangle>::operator  ListSet<Real,Parallelotope>() const;
-    template  ListSet<Real,Rectangle>::operator  ListSet<Real,Zonotope>() const;
-    template  ListSet<Real,Parallelotope>::operator  ListSet<Real,Zonotope>() const;
+    template  ListSet< Rectangle<Real> >::operator  ListSet< Zonotope< Interval<Real> > >() const;
+    template  ListSet< Rectangle<Real> >::operator  ListSet< Zonotope<Real> >() const;
     
-    template tribool disjoint(const ListSet<Real,Rectangle>&, const ListSet<Real,Rectangle>&);
-    template tribool disjoint(const ListSet<Real,Parallelotope>&, const ListSet<Real,Parallelotope>&);
-    template tribool disjoint(const ListSet<Real,Zonotope>&, const ListSet<Real,Zonotope>&);
+    template tribool disjoint(const ListSet< Rectangle<Real> >&, const ListSet< Rectangle<Real> >&);
+    template tribool disjoint(const ListSet< Zonotope<Real> >&, const ListSet< Zonotope<Real> >&);
 
-    template tribool subset(const ListSet<Real,Rectangle>&, const ListSet<Real,Rectangle>&);
-    template ListSet<Real,Rectangle> open_intersection(const ListSet<Real,Rectangle>&, const ListSet<Real,Rectangle>&);
+    template tribool subset(const ListSet< Rectangle<Real> >&, const ListSet< Rectangle<Real> >&);
+    template ListSet< Rectangle<Real> > open_intersection(const ListSet< Rectangle<Real> >&, const ListSet< Rectangle<Real> >&);
    
   }
 }

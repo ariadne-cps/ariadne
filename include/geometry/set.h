@@ -38,48 +38,88 @@ namespace Ariadne {
   namespace Geometry {
 
     //! \ingroup ExactSet
-    /*! An abstract base class for general sets. */
+    /*! \brief An abstract base class for general sets. */
     template<class R>
     class Set {
      public:
       typedef R real_type;
       typedef Point<R> state_type;
      
+      /*! \brief Virtual destructor. */
       virtual ~Set();
+      /*! \brief A dynamically-allocated copy of the set. */
       virtual Set<R>* clone() const = 0;
      
+      /*! \brief The dimension of the Euclidean space the set lies in. */
       virtual dimension_type dimension() const = 0;
+      
+      /*! \brief Tests if the set contains a point. */
       virtual tribool contains(const Point<R>&) const = 0;
      
-      virtual Rectangle<R> bounding_box() const = 0;
+      /*! \brief Tests if the set is disjoint from a rectangle. */
       virtual tribool disjoint(const Rectangle<R>&) const = 0;
+      /*! \brief Tests if the set is a superset of a rectangle. */
       virtual tribool superset(const Rectangle<R>&) const = 0;
+      /*! \brief Tests if the set is a subset of a rectangle. */
       virtual tribool subset(const Rectangle<R>&) const = 0;
       
+      /*! \brief A rectangle containing the set. Throws Geometry::UnboundedSet exception if the set is unbounded. */
+      virtual Rectangle<R> bounding_box() const = 0;
+
+      /*! \brief Write to an output stream. 
+       *  Called by operator<<(std::ostream&, const Set<R>&) to dynamically dispatch stream output. 
+       */
       virtual std::ostream& write(std::ostream& os) const = 0;
+
+#ifdef DOXYGEN
+      //@{ 
+      //! \name Binary geometric predicates
+      /*! \brief Tests if the set \a s is disjoint from the rectangle \a r. */
+      friend tribool disjoint(const Set<R>& s, const Rectangle<R>& r);
+      /*! \brief Tests if the rectangle \a r is disjoint from the set \a s. */
+      friend tribool disjoint(const Rectangle<R>& r, const Set<R>& s);
+    
+      /*! \brief Tests if the rectangle \a r is a subset of the set \a s. */
+      friend tribool subset(const Rectangle<R>& r, const Set<R>& s);
+    
+      /*! \brief Tests if the set \a s is a subset of the rectangle \a r. */
+      friend tribool subset(const Set<R>& s, const Rectangle<R>& r);
+      //@}
+
+      //@{ 
+      //! \name Stream input/output 
+      /*! \brief Write to an output stream. */
+      friend std::ostream& operator<<(std::ostream& os, const Set<R>& s);
+      //@}
+#endif
     };
-     
+ 
+
     template<class R> 
     Set<R>::~Set() 
     {
     }
 
 
-    template<class R> inline tribool disjoint(const Set<R>& A, const Rectangle<R>& B) {
-      return A.disjoint(B);
+    template<class R> inline tribool disjoint(const Set<R>& s, const Rectangle<R>& r) {
+      return s.disjoint(r);
     }
     
-    template<class R> inline tribool disjoint(const Rectangle<R>& A, const Set<R>& B) {
-      return B.disjoint(A);
+    template<class R> inline tribool disjoint(const Rectangle<R>& r, const Set<R>& s) {
+      return s.disjoint(r);
     }
     
-    template<class R> inline tribool subset(const Rectangle<R>& A, const Set<R>& B) {
-      return B.superset(A);
+    template<class R> inline tribool subset(const Rectangle<R>& r, const Set<R>& s) {
+      return s.superset(r);
+    }
+    
+    template<class R> inline tribool subset(const Set<R>& s, const Rectangle<R>& r) {
+      return s.subset(r);
     }
     
     template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const Set<R>& set) {
-      return set.write(os);
+    std::ostream& operator<<(std::ostream& os, const Set<R>& s) {
+      return s.write(os);
     }
     
   }

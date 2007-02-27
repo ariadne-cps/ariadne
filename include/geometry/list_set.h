@@ -39,6 +39,7 @@
 #include "../declarations.h"
 #include "../base/utility.h"
 #include "../base/tribool.h"
+#include "../geometry/set.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -59,7 +60,9 @@ namespace Ariadne {
      * the STL methods push_back() and pop_back().
      */
     template<class R, template<class> class BS>
-    class ListSet {
+    class ListSet 
+      : public Set<R>
+    {
      private:
       /* List of basic sets. Note that std::vector provides a
        * reserve(size_type) method to increase the capacity.
@@ -105,9 +108,6 @@ namespace Ariadne {
       /*! \brief Removes the basic set at the back of the list. */
       void pop_back();
 
-      /*! \brief Returns the denotable set's space dimension. */
-      dimension_type dimension() const;
-
       /*! \brief Accesses the i-th basic set in the list. */
       const BS<R>& get(size_type index) const;
 
@@ -125,8 +125,34 @@ namespace Ariadne {
       template<class Rl, template<class> class BSt> 
       operator ListSet<Rl,BSt> () const;
       
+      //@{
+      //! \name Set methods
+      /*! \brief Tests for disjointness with a Rectangle. */
+      virtual ListSet<R,BS>* clone() const;
+
+      /*! \brief Returns the denotable set's space dimension. */
+      virtual dimension_type dimension() const;
+
       /*!\brief Checks if a denotable set includes a point. */
-      tribool contains(const Point<R>& p) const;
+      virtual tribool contains(const Point<R>& p) const;
+
+      /*! \brief Tests for disjointness with a Rectangle. */
+      virtual tribool disjoint(const Rectangle<R>& r) const;
+
+      /*! \brief Tests for superset of a Rectangle. 
+       *
+       * Currently always returns \a indeterminate, since the 
+       * test is difficult for general list sets. 
+       */
+      virtual tribool superset(const Rectangle<R>& r) const;
+
+      /*! \brief Tests for subset of a Rectangle. */
+      virtual tribool subset(const Rectangle<R>& r) const;
+
+      /*! \brief Return a rectangle containing the set. */
+      virtual Rectangle<R> bounding_box() const;
+        
+      //@}
 
       /*! \brief Checks for emptyness. Returns \a true if the denotable set is empty, \a false otherwise. */
       tribool empty() const;
@@ -134,9 +160,6 @@ namespace Ariadne {
       /*! \brief Checks for boundedness. */
       tribool bounded() const;
 
-      /*! \brief Return a rectangle containing the set. */
-      Rectangle<R> bounding_box() const;
-        
       /*! \brief Make the set empty. */
       void clear();
       
@@ -225,22 +248,32 @@ namespace Ariadne {
     template<class R, template<class> class BS>
     ListSet<R,BS>
     open_intersection(const ListSet<R,BS>& A,
-                         const ListSet<R,BS>& B);
+                      const ListSet<R,BS>& B);
   
 
 
     template<class R, template<class> class BS>
     tribool
-    disjoint (const ListSet<R,BS>& A,
-              const ListSet<R,BS>& B);
+    disjoint(const ListSet<R,BS>& A,
+             const ListSet<R,BS>& B);
 
 
-
-
+    template<class R>
+    tribool
+    subset(const ListSet<R,Rectangle>& A,
+           const ListSet<R,Rectangle>& B);
+    
+    
+    template<class R, template<class> class BS>
+    tribool
+    disjoint(const ListSet<R,BS>& A,
+             const Rectangle<R>& B);
+    
+    
     template<class R, template<class> class BS>
     tribool
     subset(const ListSet<R,BS>& A,
-           const ListSet<R,BS>& B);
+           const Rectangle<R>& B);
     
     
     template<class R, template<class> class BS>

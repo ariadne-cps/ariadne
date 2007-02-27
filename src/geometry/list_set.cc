@@ -26,6 +26,7 @@
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
+#include "geometry/polytope.h"
 
 #include "geometry/list_set.h"
 #include "geometry/list_set.code.h"
@@ -36,9 +37,13 @@ namespace Ariadne {
     template class ListSet<Real,Rectangle>;
     template class ListSet<Real,Parallelotope>;
     template class ListSet<Real,Zonotope>;
+    template class ListSet<Real,Polytope>;
     template class ListSet<Interval<Real>,Parallelotope>;
     template class ListSet<Interval<Real>,Zonotope>;
 
+    template class ListSet<Rational,Rectangle>;
+    template class ListSet<Rational,Zonotope>;
+    
     // The following are not defined for all types,
     // so we can't instantiate them in ListSet<R,BS>::_instantiate_geometry_operators()
     template  ListSet<Real,Rectangle>::operator  ListSet<Interval<Real>,Parallelotope>() const;
@@ -54,6 +59,5 @@ namespace Ariadne {
     template tribool subset(const ListSet<Real,Rectangle>&, const ListSet<Real,Rectangle>&);
     template ListSet<Real,Rectangle> open_intersection(const ListSet<Real,Rectangle>&, const ListSet<Real,Rectangle>&);
    
-    
   }
 }

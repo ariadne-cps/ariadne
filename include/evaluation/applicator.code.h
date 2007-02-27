@@ -57,6 +57,7 @@ namespace Ariadne {
    
     template<class R>
     Applicator<R>::Applicator() 
+      : _maximum_basic_set_radius(0.1)
     {
     }
     
@@ -69,6 +70,25 @@ namespace Ariadne {
     
 
 
+
+    template<class R>
+    R
+    Applicator<R>::maximum_basic_set_radius() const
+    {
+      return this->_maximum_basic_set_radius;
+    }
+  
+
+    template<class R>
+    void
+    Applicator<R>::set_maximum_basic_set_radius(const R& mbsr) 
+    {
+      if(mbsr<=0) {
+        throw std::runtime_error("maximum basic set radius must be positive");
+      }
+      this->_maximum_basic_set_radius=mbsr;
+    }
+  
 
     template<class R>
     Geometry::Rectangle<R> 
@@ -288,7 +308,21 @@ namespace Ariadne {
     Applicator<R>::reach(const System::Map<R>& f, 
                          const Geometry::GridMaskSet<R>& initial_set) const 
     {
-      throw NotImplemented(__PRETTY_FUNCTION__);
+      Geometry::GridMaskSet<R> result(initial_set.grid(),initial_set.block());
+      typedef typename Geometry::GridMaskSet<R>::const_iterator basic_set_iterator;
+      Geometry::Rectangle<R> rectangle(initial_set.dimension());
+      Geometry::Zonotope< Interval<R> > zonotope(result.dimension());
+      for(basic_set_iterator bs_iter=initial_set.begin(); 
+          bs_iter!=initial_set.end(); ++bs_iter)
+      {
+        rectangle=*bs_iter;
+        zonotope=rectangle;
+        while(zonotope.radius() < this->maximum_basic_set_radius()) {
+          result.adjoin_over_approximation(zonotope);
+          zonotope=this->image(f,zonotope);
+        }
+      }
+      return result;
     }
     
     template<class R>

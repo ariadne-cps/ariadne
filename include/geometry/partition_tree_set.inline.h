@@ -278,7 +278,7 @@ namespace Ariadne {
 
 
     template<class R> inline
-    const Rectangle<R>& 
+    Rectangle<R> 
     PartitionTreeSet<R>::bounding_box() const 
     {
       return _unit_box; 
@@ -299,7 +299,7 @@ namespace Ariadne {
     }
 
     template<class R> inline
-    size_type 
+    dimension_type 
     PartitionTreeSet<R>::dimension() const 
     {
       return _subdivision_set.dimension(); 

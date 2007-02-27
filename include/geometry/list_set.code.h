@@ -32,6 +32,38 @@ namespace Ariadne {
   namespace Geometry {
 
     template<class R, template<class> class BS>
+    ListSet<R,BS>*
+    ListSet<R,BS>::clone() const
+    {
+      return new ListSet<R,BS>(*this);
+    }
+
+    
+    template<class R, template<class> class BS>
+    tribool
+    ListSet<R,BS>::disjoint(const Rectangle<R>& r) const
+    {
+      return Geometry::disjoint(*this,r);
+    }
+
+    
+    template<class R, template<class> class BS>
+    tribool
+    ListSet<R,BS>::superset(const Rectangle<R>& r) const
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+
+    
+    template<class R, template<class> class BS>
+    tribool
+    ListSet<R,BS>::subset(const Rectangle<R>& r) const
+    {
+      return Geometry::subset(*this,r);
+    }
+
+    
+    template<class R, template<class> class BS>
     tribool
     disjoint (const ListSet<R,BS>& A,
               const ListSet<R,BS>& B)
@@ -47,15 +79,54 @@ namespace Ariadne {
       return result;
     }
 
-    template<class R, template<class> class BS>
+
+    template<class R>
     tribool
-    subset(const ListSet<R,BS>& A,
-           const ListSet<R,BS>& B)
+    subset(const ListSet<R,Rectangle>& A,
+           const ListSet<R,Rectangle>& B)
     {
       check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
+
+    template<class R, template<class> class BS>
+    tribool
+    disjoint(const ListSet<R,BS>& ls,
+             const Rectangle<R>& r)
+    {
+      tribool result=true;
+      for(typename ListSet<R,BS>::const_iterator ls_iter=ls.begin();
+          ls_iter!=ls.end(); ++ls_iter)
+      {
+        result = result && Geometry::disjoint(*ls_iter,r);
+        if(result==false) {
+          return result;
+        }
+      }
+      return result;
+    }
+
+
+    template<class R, template<class> class BS>
+    tribool
+    subset(const ListSet<R,BS>& ls,
+           const Rectangle<R>& r)
+    {
+      tribool result=true;
+      for(typename ListSet<R,BS>::const_iterator ls_iter=ls.begin();
+          ls_iter!=ls.end(); ++ls_iter)
+      {
+        result = result && Geometry::subset(*ls_iter,r);
+        if(result==false) {
+          return result;
+        }
+      }
+      return result;
+    }
+
+
+
     template<class R, template<class> class BS>
     ListSet<R,BS>
     join(const ListSet<R,BS>& A,
@@ -66,6 +137,7 @@ namespace Ariadne {
       ds_union.inplace_union(B);
       return ds_union;
     }
+
 
     template<class R, template<class> class BS>
     ListSet<R,BS>
@@ -113,6 +185,7 @@ namespace Ariadne {
       os << "\n  ]\n}" << std::endl;
       return os;
     }
+
 
     template<class R, template<class> class BS>
     std::istream& 

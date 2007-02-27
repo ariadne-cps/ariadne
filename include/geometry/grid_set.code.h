@@ -179,13 +179,13 @@ namespace Ariadne {
       GridCell<R>* gc=0;
       GridBlock<R>* gb=0;
       
-      tb=subset(*r,*gb);
+      tb=Geometry::subset(*r,*gb);
       
-      tb=overlap(*gb,*gb);
-      tb=subset(*gc,*gb);
-      tb=subset(*gb,*gb);
+      tb=Geometry::overlap(*gb,*gb);
+      tb=Geometry::subset(*gc,*gb);
+      tb=Geometry::subset(*gb,*gb);
 
-      *gb=under_approximation(*r,*g);
+      *gb=Geometry::under_approximation(*r,*g);
     }
     
     
@@ -224,6 +224,8 @@ namespace Ariadne {
     }
 
     
+
+    
     // FIXME: Memory leak
     template<class R>
     GridCellListSet<R>::GridCellListSet(const ListSet<R,Rectangle>& rls)
@@ -235,7 +237,7 @@ namespace Ariadne {
       }
     }
 
-    
+
     template<class R>
     GridCellListSet<R>::operator ListSet<R,Rectangle>() const
     {
@@ -269,18 +271,18 @@ namespace Ariadne {
       GridBlock<R>* gb=0;
       GridCellListSet<R>* gcls=0;
 
-      tb=subset(*gcls,*gb);
+      tb=Geometry::subset(*gcls,*gb);
       
-      *gcls=over_approximation(*z,*g);
-      *gcls=over_approximation(*pl,*g);
-      *gcls=over_approximation(*pt,*g);
-      *gcls=over_approximation(*ph,*g);
-      *gcls=over_approximation(*iz,*g);
+      *gcls=Geometry::over_approximation(*z,*g);
+      *gcls=Geometry::over_approximation(*pl,*g);
+      *gcls=Geometry::over_approximation(*pt,*g);
+      *gcls=Geometry::over_approximation(*ph,*g);
+      *gcls=Geometry::over_approximation(*iz,*g);
 
-      *gcls=under_approximation(*z,*g);
-      *gcls=under_approximation(*pl,*g);
-      *gcls=under_approximation(*pt,*g);
-      *gcls=under_approximation(*ph,*g);
+      *gcls=Geometry::under_approximation(*z,*g);
+      *gcls=Geometry::under_approximation(*pl,*g);
+      *gcls=Geometry::under_approximation(*pt,*g);
+      *gcls=Geometry::under_approximation(*ph,*g);
     }
 
 
@@ -313,7 +315,7 @@ namespace Ariadne {
     {
       const IrregularGrid<R>* irregular_grid_ptr=dynamic_cast<const IrregularGrid<R>*>(_grid_ptr);
       if(irregular_grid_ptr) {
-        if(!subset(b,irregular_grid_ptr->lattice_block())) {
+        if(!Combinatoric::subset(b,irregular_grid_ptr->lattice_block())) {
           throw std::runtime_error("Lattice block does not lie in grid lattice block");
         }
       }
@@ -326,7 +328,7 @@ namespace Ariadne {
     {
       const IrregularGrid<R>* irregular_grid_ptr=dynamic_cast<const IrregularGrid<R>*>(_grid_ptr);
       if(irregular_grid_ptr) {
-        if(!subset(ms.block(),irregular_grid_ptr->lattice_block())) {
+        if(!Combinatoric::subset(ms.block(),irregular_grid_ptr->lattice_block())) {
           throw std::runtime_error("Lattice block does not lie in grid lattice block");
         }
       }
@@ -366,6 +368,54 @@ namespace Ariadne {
     
     
     template<class R>
+    GridMaskSet<R>*
+    GridMaskSet<R>::clone() const
+    {
+      return new GridMaskSet<R>(*this);
+    }
+
+    
+    template<class R>
+    tribool
+    GridMaskSet<R>::contains(const Point<R>& pt) const
+    {
+      return !Geometry::disjoint(*this,Rectangle<R>(pt));
+    }
+
+
+    template<class R>
+    tribool
+    GridMaskSet<R>::disjoint(const Rectangle<R>& r) const
+    {
+      return Geometry::disjoint(*this,r);
+    }
+
+
+    template<class R>
+    tribool
+    GridMaskSet<R>::superset(const Rectangle<R>& r) const
+    {
+      return Geometry::subset(r,*this);
+    }
+
+
+    template<class R>
+    tribool
+    GridMaskSet<R>::subset(const Rectangle<R>& r) const
+    {
+      return Geometry::subset(*this,r);
+    }
+
+    
+    template<class R> 
+    Rectangle<R> 
+    GridMaskSet<R>::bounding_box() const 
+    {
+      return GridBlock<R>(grid(),bounds()); 
+    }
+     
+
+    template<class R>
     void
     GridMaskSet<R>::clear()
     {
@@ -392,42 +442,43 @@ namespace Ariadne {
       PartitionTreeSet<R>* pts=0;
       Set<R>* set=0;
       
-      tb=subset(*r,*gms);
-      tb=disjoint(*r,*gms);
-      tb=disjoint(*gms,*r);
+      tb=Geometry::subset(*r,*gms);
+      tb=Geometry::subset(*gms,*r);
+      tb=Geometry::disjoint(*r,*gms);
+      tb=Geometry::disjoint(*gms,*r);
        
-      tb=overlap(*gb,*gms);
-      tb=overlap(*gms,*gb);
-      tb=overlap(*gms,*gms);
+      tb=Geometry::overlap(*gb,*gms);
+      tb=Geometry::overlap(*gms,*gb);
+      tb=Geometry::overlap(*gms,*gms);
     
-      tb=subset(*gc,*gms);
-      tb=subset(*gb,*gms);
-      tb=subset(*gcls,*gms);
-      tb=subset(*gms,*gms);
+      tb=Geometry::subset(*gc,*gms);
+      tb=Geometry::subset(*gb,*gms);
+      tb=Geometry::subset(*gcls,*gms);
+      tb=Geometry::subset(*gms,*gms);
       
-      *gms=regular_intersection(*gb,*gms);
-      *gms=regular_intersection(*gms,*gb);
-      *gcls=regular_intersection(*gcls,*gms);
-      *gcls=regular_intersection(*gms,*gcls);
-      *gms=regular_intersection(*gms,*gms);
-      *gcls=difference(*gcls,*gms);
-      *gms=difference(*gms,*gms);
-      *gms=join(*gms,*gms);
+      *gms=Geometry::regular_intersection(*gb,*gms);
+      *gms=Geometry::regular_intersection(*gms,*gb);
+      *gcls=Geometry::regular_intersection(*gcls,*gms);
+      *gcls=Geometry::regular_intersection(*gms,*gcls);
+      *gms=Geometry::regular_intersection(*gms,*gms);
+      *gcls=Geometry::difference(*gcls,*gms);
+      *gms=Geometry::difference(*gms,*gms);
+      *gms=Geometry::join(*gms,*gms);
 
-      *gb=over_approximation(*ipt,*g);
+      *gb=Geometry::over_approximation(*ipt,*g);
   
-      *gms=over_approximation(*rls,*fg);
-      *gms=over_approximation(*zls,*fg);
-      *gms=over_approximation(*plls,*fg);
-      *gms=over_approximation(*gms,*fg);
-      *gms=over_approximation(*pts,*fg);
-      *gms=over_approximation(*set,*fg);
+      *gms=Geometry::over_approximation(*rls,*fg);
+      *gms=Geometry::over_approximation(*zls,*fg);
+      *gms=Geometry::over_approximation(*plls,*fg);
+      *gms=Geometry::over_approximation(*gms,*fg);
+      *gms=Geometry::over_approximation(*pts,*fg);
+      *gms=Geometry::over_approximation(*set,*fg);
       
-      *gms=over_approximation(*set,*g);
+      *gms=Geometry::over_approximation(*set,*g);
 
-      *gms=under_approximation(*rls,*fg);
-      *gms=under_approximation(*gms,*fg);
-      *gms=under_approximation(*pts,*fg);
+      *gms=Geometry::under_approximation(*rls,*fg);
+      *gms=Geometry::under_approximation(*gms,*fg);
+      *gms=Geometry::under_approximation(*pts,*fg);
     }
     
     
@@ -611,6 +662,18 @@ namespace Ariadne {
         return false;
       }
       return subset(over_approximation(A,B.grid()),B);
+    }
+
+
+    template<class R>
+    tribool
+    subset(const GridMaskSet<R>& A, const Rectangle<R>& B)
+    {
+      check_equal_dimensions(A,B,"subset(GridMaskSet<R>,Rectangle<R>)");
+      if(!subset(A,B.bounding_box())) {
+        return false;
+      }
+      return subset(A,over_approximation(B,A.grid()));
     }
 
 

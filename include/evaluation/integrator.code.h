@@ -436,6 +436,7 @@ namespace Ariadne {
       BS<R> rs(initial_set.dimension());
       
       typedef typename Geometry::ListSet<R,BS>::const_iterator list_set_const_iterator;
+      typedef typename Geometry::ListSet<R,BS>::iterator list_set_iterator;
       typedef std::pair< time_type, BS<R> > timed_set_type;
 
       std::vector< timed_set_type > working_sets;
@@ -464,7 +465,7 @@ namespace Ariadne {
 
         if(bs.radius()>maximum_set_radius) {
         if(verbosity>6) { std::cerr << "  subdividing..." << std::endl; }
-          Geometry::ListSet<R,Geometry::Zonotope> subdivisions=bs.subdivide();
+          Geometry::ListSet<R,BS> subdivisions=bs.subdivide();
           if(verbosity>6) { std::cerr << "    subdivisions.size() =" << subdivisions.size() << std::endl; }
           for(list_set_const_iterator subdiv_iter=subdivisions.begin(); 
               subdiv_iter!=subdivisions.end(); ++subdiv_iter)
@@ -516,7 +517,7 @@ namespace Ariadne {
                          const time_type& time) const
     {
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      throw NotImplemented(__PRETTY_FUNCTION__);
+      return this->reach_list_set(vector_field,initial_set,time);
     }
     
     
@@ -524,11 +525,11 @@ namespace Ariadne {
     template<class R>
     Geometry::Rectangle<R>
     Integrator<R>::integration_step(const System::VectorField<R>& vector_field, 
-                                      const Geometry::Rectangle<R>& initial_set, 
-                                      time_type& time) const
+                                    const Geometry::Rectangle<R>& initial_set, 
+                                    time_type& time) const
     {
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      throw NotImplemented(__PRETTY_FUNCTION__);
+      throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
     
     template<class R>

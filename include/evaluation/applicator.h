@@ -29,6 +29,8 @@
 #ifndef _ARIADNE_APPLICATOR_H
 #define _ARIADNE_APPLICATOR_H
 
+#include <boost/smart_ptr.hpp>
+
 #include "../declarations.h"
 
 namespace Ariadne {
@@ -39,6 +41,8 @@ namespace Ariadne {
      */
     template<class R>
     class Applicator {
+     private:
+      R _maximum_basic_set_radius;
      public:
       /*! \brief Default constructor. */
       Applicator();
@@ -46,6 +50,12 @@ namespace Ariadne {
       /*! \brief Compute the image of a basic set under a continuous function. */
       virtual ~Applicator();
       
+      /*! \brief Set the maximum allowable radius of a basic set during iteration. */
+      void set_maximum_basic_set_radius(const R&);
+
+      /*! \brief The maximum allowable radius of a basic set during iteration. */
+      virtual R maximum_basic_set_radius() const;
+
       /*! \brief Compute the image of a rectangle under a continuous function. */
       virtual Geometry::Rectangle<R> image(const System::Map<R>& f, const Geometry::Rectangle<R>& s) const;
 
@@ -128,6 +138,10 @@ namespace Ariadne {
       verify(const System::Map<R>& map, 
              const Geometry::GridMaskSet<R>& initial_set, 
              const Geometry::GridMaskSet<R>& safe_set) const;
+
+
+
+       
     };
 
   }

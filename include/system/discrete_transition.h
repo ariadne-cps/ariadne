@@ -42,17 +42,19 @@ template< class R > class HybridAutomaton;
 
 
 /*! \ingroup HybridTime
- *  \brief A discrete transition of a HybridAutomaton.
+ * \brief A discrete transition of a HybridAutomaton, representing an instantaneous
+ * jump from one DiscreteMode to another, governed by an activation Geometry::Set and a reset Map.
+ *
+ * A %DiscreteTransition can only be created using the new_transition() method in
+ * the %HybridAutomaton class.
  */
 template< class R >
 class DiscreteTransition
 {
   friend class HybridAutomaton<R>;
   private:
-    static id_type _next_transition_id;
-    
     // \brief The discrete transition's identificator.
-    id_type _id;
+    id_type _event_id;
   
     // \brief The source of the discrete transition.
     const DiscreteMode<R>* _source;   
@@ -67,119 +69,103 @@ class DiscreteTransition
     boost::shared_ptr< const Map<R> > _reset;  
     
   public:
-    /*! \brief Copy constructor.
-     *
-     * This constructor initializes the object of the  
-     * leaving discrete transition class.
-     * \param orig is the original copy of the leaving arc.
-     */
-    DiscreteTransition(const DiscreteTransition<R> &orig)
-      : _id(orig._id), _source(orig._source), _destination(orig._destination), 
-        _activation(orig._activation), _reset(orig._reset) { 
+    /*! \brief Copy constructor. */
+    DiscreteTransition(const DiscreteTransition<R> &original)
+      : _event_id(original._event_id), _source(original._source), _destination(original._destination), 
+        _activation(original._activation), _reset(original._reset) { 
     }
                 
-    /*! \brief Copy assignment operator for discrete transition.
-     *
-     * This method copies a leaving arc.
-     * \param orig is the original copy of the leaving arc.
-     */
-    inline DiscreteTransition<R>& operator=(const DiscreteTransition<R> &orig) {
-      this->_id=orig._id;
-      this->_activation=orig._activation;
-      this->_destination=orig._destination;
-      this->_reset=orig._reset;
-      this->_source=orig._source;
+    /*! \brief Copy assignment operator. */
+    DiscreteTransition<R>& operator=(const DiscreteTransition<R> &original) {
+      this->_event_id=original._event_id;
+      this->_source=original._source;
+      this->_destination=original._destination;
+      this->_activation=original._activation;
+      this->_reset=original._reset;
       return *this;
     }
     
-    /*! \brief Return the unique identifyer of the discrete transition. */
-    inline const id_type &id() const {
-      return this->_id;
+    /*! \brief The unique identifier of the discrete transition. */
+    id_type id() const {
+      return this->_event_id;
     }      
 
-    /*! \brief Return the source of the discrete transition.
-     *
-     * This method return the source of the discrete transition.
-     * \return The source of the discrete transition.
-     */
-    inline const DiscreteMode<R> &source() const {
+    /*! \brief The source mode of the discrete transition. */
+    const DiscreteMode<R> &source() const {
       return *this->_source;
     }      
 
-      /*! \brief Return the destination of the discrete transition.
-     * 
-     * This method return the destination of the discrete 
-     * transition.
-     * \return The destination of the discrete transition.
-     */
-    inline const DiscreteMode<R> &destination() const { 
+    /*! \brief The destination of the discrete transition. */
+    const DiscreteMode<R> &destination() const { 
       return *this->_destination;
     }
   
-    /*! \brief Return the activation region of the discrete 
-     * transition.
-     * 
-     * This method return the activation region of the leaving 
-     * discrete transition.
-     * \return The activation region of the discrete transition.
-     */
-    inline const Geometry::Set<R> &activation() const { 
+    /*! \brief The activation region of the discrete transition. */
+    const Geometry::Set<R> &activation() const { 
       return *this->_activation;
     }
 
-    /*! \brief Return the reset.
-     * 
-     * This method return the reset function of the leaving 
-     * discrete transition.
-     * \return The reset function of the leaving discrete 
-     * transition.
-     */
-    inline const Map<R> &reset() const { 
+    /*! \brief The reset map of the discrete transition. */
+    const Map<R> &reset() const { 
       return *this->_reset;
     }
     
     /*! \brief Write to an output stream. */
     std::ostream& write(std::ostream& os) const;
   private:
-    /*! \brief This is a discrete transition class constructor.
-     *
-     * This constructor initializes the object of the discrete 
-     * transition class.
-     * @see LeavingDiscreteTransition()
-     * \param reset is the reset relation of the discrete 
-     * transition.
-     * \param act is the activation region of the 
-     * discrete transition.
+ 
+    /* Constructor.
+     * \param event_id is the identifier of the discrete event.
      * \param source is the source mode of the discrete 
      * transition.
-     * \param dest is the destination mode of the discrete 
+     * \param source is the source mode of the discrete 
      * transition.
+     * \param destination is the destination mode of the discrete 
+     * transition.
+     * \param reset is the reset relation of the discrete 
+     * transition.
+     * \param activation is the activation region of the 
+     * discrete transition.
       */
-    DiscreteTransition(id_type id,
-                       const Map<R> &reset,
-                       const Geometry::Set<R> &act, 
+    DiscreteTransition(id_type event_id, 
                        const DiscreteMode<R> &source, 
-                       const DiscreteMode<R> &dest)
-      : _id(id), _source(&source), _destination(&dest), 
-        _activation(act.clone()), _reset(reset.clone()) 
+                       const DiscreteMode<R> &destination,
+                       const Map<R> &reset,
+                       const Geometry::Set<R> &activation)
+      : _event_id(event_id), _source(&source), _destination(&destination), 
+        _activation(activation.clone()), _reset(reset.clone()) 
     { 
-      check_equal_dimensions(act,source);
+      check_equal_dimensions(activation,source);
       check_argument_dimension(reset,source);
-      check_result_dimension(reset,dest);
+      check_result_dimension(reset,destination);
     }
 
-    // Construct from shared pointers (for internal use)
-    DiscreteTransition(id_type id,
-                       const boost::shared_ptr< Map<R> > reset,
-                       const boost::shared_ptr< Geometry::Set<R> > act, 
+    /* Construct from shared pointers (for internal use). */
+    DiscreteTransition(id_type event_id,
                        const DiscreteMode<R> &source, 
-                       const DiscreteMode<R> &dest)
-      : _id(id), _source(&source), _destination(&dest), 
-        _activation(act), _reset(reset) 
+                       const DiscreteMode<R> &destination,
+                       const boost::shared_ptr< Map<R> > reset,
+                       const boost::shared_ptr< Geometry::Set<R> > activation) 
+      : _event_id(event_id), _source(&source), _destination(&destination), 
+        _activation(activation), _reset(reset) 
     { 
-      check_dimension(act,source);
-      check_argument_dimension(reset,source);
-      check_result_dimension(reset,dest);
+      check_equal_dimensions(*activation,source);
+      check_argument_dimension(*reset,source);
+      check_result_dimension(*reset,destination);
+    }
+
+    /* Construct from shared pointers (for internal use). */
+    DiscreteTransition(id_type event_id,
+                       const boost::shared_ptr< DiscreteMode<R> > source, 
+                       const boost::shared_ptr< DiscreteMode<R> > destination,
+                       const boost::shared_ptr< Map<R> > reset,
+                       const boost::shared_ptr< Geometry::Set<R> > activation) 
+      : _event_id(event_id), _source(&*source), _destination(&*destination), 
+        _activation(activation), _reset(reset) 
+    { 
+      check_equal_dimensions(*activation,*source);
+      check_argument_dimension(*reset,*source);
+      check_result_dimension(*reset,*destination);
     }
 
 };
@@ -191,17 +177,27 @@ DiscreteTransition<R>::write(std::ostream& os) const
 { 
   return os << "DiscreteTransition( "
             << "id=" << this->id() << ", " 
-            << "source=" << this->source().id() << ", "
-            << "destination=" << this->destination().id() << ", "
+            << "source_id=" << this->source().id() << ", "
+            << "destination_id=" << this->destination().id() << ", "
             << "activation=" << this->activation() << ", "
             << "reset=" << this->reset() << " )"; 
 }
 
 
 template<class R> inline
-std::ostream& operator<<(std::ostream& os, const DiscreteTransition<R>& dt) {
+std::ostream& operator<<(std::ostream& os, const DiscreteTransition<R>& dt) 
+{
   return dt.write(os);
 }
+
+template<class R> inline
+bool operator<(const DiscreteTransition<R>& transition1, const DiscreteTransition<R>& transition2) 
+{
+  return transition1.id() < transition2.id()
+    || (transition1.id() == transition2.id() 
+          && transition1.source().id() < transition2.source().id());
+}
+
 
 }
 }

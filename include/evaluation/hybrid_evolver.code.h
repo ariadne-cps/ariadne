@@ -149,9 +149,8 @@ Ariadne::Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<
       dt_iter!=hybrid_automaton.transitions().end(); ++dt_iter)
   {
     const System::DiscreteTransition<R>& dt=*dt_iter;
-    Geometry::GridCellListSet<R>& activation=activations[dt.id()];
-    activation.adjoin(over_approximation(dt.activation(),activation.grid()));
-    const Geometry::Set<R>& activation_set=dt.activation();
+    Geometry::GridCellListSet<R>& activation=activations[dt.source().id()];
+    activation.adjoin_over_approximation(dt.activation());
   }
   
   // Compute invariant regions as GridMaskSets
@@ -180,4 +179,3 @@ Ariadne::Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<
   }
   return result_set;
 }
-

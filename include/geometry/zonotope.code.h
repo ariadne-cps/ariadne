@@ -49,7 +49,6 @@ namespace Ariadne {
     
     extern int verbosity;
     
-    
    
 
 

@@ -26,6 +26,7 @@
 #include "system/discrete_mode.h"
 #include "system/discrete_transition.h"
 #include "system/hybrid_automaton.h"
+#include "system/hybrid_automaton.code.h"
 
 
 namespace Ariadne {

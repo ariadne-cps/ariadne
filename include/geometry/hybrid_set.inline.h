@@ -21,68 +21,143 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "../base/stlio.h"
+
 namespace Ariadne { namespace Geometry {
 
 
 template<class S> inline
-HybridSet<S>::HybridSet(location_type nq) 
-  : _component_sets(nq)
+HybridSet<S>::HybridSet() 
+  : _component_sets()
 {
 }
   
   
-template<class S> inline
-HybridSet<S>::HybridSet(location_type nq, const S& s) 
-  : _component_sets(nq,s) 
-{
-}
-   
  
-template<class S> template<class S1> inline
-HybridSet<S>::HybridSet(const HybridSet<S1>& hs)
+template<class S> inline
+HybridSet<S>::HybridSet(const std::map<location_type,dimension_type>& locations)
   : _component_sets() 
 {
-  for(location_type q=0; q!=hs.number_of_discrete_locations(); ++q) {
-    this->_component_sets.push_back(static_cast<S>(hs[q]));
+  for(typename std::map<location_type,dimension_type>::const_iterator loc_iter=locations.begin();
+      loc_iter!=locations.end(); ++loc_iter)
+  {
+    location_type q=loc_iter->first;
+    dimension_type d=loc_iter->second;
+    this->_component_sets.insert(std::make_pair(q,S(d)));
   }
 }
 
 
 template<class S> inline
+HybridSet<S>::HybridSet(const HybridSet<S>& hs)
+  : _component_sets(hs._component_sets) 
+{
+}
+
+
+template<class S> template<class S1> inline
+HybridSet<S>::HybridSet(const HybridSet<S1>& hs)
+  : _component_sets() 
+{
+  for(typename HybridSet<S1>::const_iterator loc_iter=hs.begin();
+      loc_iter!=hs.end(); ++loc_iter)
+  {
+    location_type q=loc_iter->first;
+    const S1& s=loc_iter->second;
+    this->_component_sets.insert(std::make_pair(q,s));
+  }
+}
+
+
+
+template<class S> inline
+S&
+HybridSet<S>::new_location(location_type q, dimension_type d)
+{
+  if(this->has_location(q)) {
+    std::ostringstream msg;
+    msg << "The hybrid set already has location " << q << ".";
+    throw HybridSystemError(msg.str());
+  }
+  this->_component_sets.insert(std::make_pair(q,S(d)));
+  return (*this)[q];
+}
+
+
+template<class S> inline
+S&
+HybridSet<S>::new_location(location_type q, const S& s)
+{
+  if(this->has_location(q)) {
+    std::ostringstream msg;
+    msg << "The hybrid set already has location " << q << ".";
+    throw HybridSystemError(msg.str());
+  }
+  this->_component_sets.insert(std::make_pair(q,s));
+  return (*this)[q];
+}
+
+
+template<class S> template<class T> inline
+S&
+HybridSet<S>::new_location(location_type q, const T& t)
+{
+  if(this->has_location(q)) {
+    std::ostringstream msg;
+    msg << "The hybrid set already has location " << q << ".";
+    throw HybridSystemError(msg.str());
+  }
+  this->_component_sets.insert(std::make_pair(q,S(t)));
+  return (*this)[q];
+}
+
+
+template<class S> inline
+std::map<location_type,dimension_type>
+HybridSet<S>::locations() const 
+{ 
+  std::map<location_type,dimension_type> result;
+  for(const_iterator loc_iter=this->_component_sets.begin(); 
+      loc_iter!=this->_component_sets.end(); ++loc_iter) 
+  {
+    result.insert(std::make_pair(loc_iter->first,loc_iter->second.dimension()));
+  } 
+  return result;
+}
+
+
+
+template<class S> inline
 location_type 
-HybridSet<S>::number_of_discrete_locations() const 
+HybridSet<S>::number_of_locations() const 
 { 
   return _component_sets.size(); 
 }
 
 
 template<class S> inline
-S& 
-HybridSet<S>::operator[](const location_type& q)
+bool 
+HybridSet<S>::has_location(location_type q) const
 { 
-  if (q>_component_sets.size()) {
-    std::ostringstream o;
-    o << "Requested the component number "<<q<<" of a hybrid set having " 
-      << _component_sets.size() << " components.";
-    throw std::runtime_error(o.str());
-  }
+  return this->_component_sets.find(q)!=this->_component_sets.end();
+}
 
-  return _component_sets[q]; 
+
+template<class S> inline
+S& 
+HybridSet<S>::operator[](location_type q)
+{ 
+  this->check_location(q,"HybridSet<S>::operator[](location_type q)");
+  return this->_component_sets.find(q)->second;
 }
 
 
 template<class S> inline  
 const S& 
-HybridSet<S>::operator[](const location_type& q) const 
+HybridSet<S>::operator[](location_type q) const 
 { 
-  if (q>_component_sets.size()) {
-    std::ostringstream o;
-    o << "Requested the component number "<<q<<" of a hybrid set having " 
-      << _component_sets.size() << " components.";
-    throw std::runtime_error(o.str());
-  }
-
-  return _component_sets[q];
+  this->check_location(q,"HybridSet<S>::operator[](location_type q) const");
+  return this->_component_sets.find(q)->second;
 }
 
 
@@ -90,55 +165,103 @@ template<class S> inline
 void 
 HybridSet<S>::clear()
 { 
-  for(location_type q=0; q!=this->number_of_discrete_locations(); ++q) { 
-    (*this)[q].clear();
+  for(iterator loc_iter=this->_component_sets.begin(); 
+      loc_iter!=this->_component_sets.end(); ++loc_iter) 
+  {
+    loc_iter->second.clear();
   } 
 }
+
 
 template<class S> inline  
 tribool 
 HybridSet<S>::empty() const { 
   tribool result=true; 
-  for(size_type q=0; q!=this->number_of_discrete_locations(); ++q) {
-    result=result && (*this)[q].empty();
-    if(!result) { return result; } }
+  for(const_iterator loc_iter=this->begin(); loc_iter!=this->end(); ++loc_iter) {
+    result=result && loc_iter->second.empty();
+    if(!result) { 
+      return result; 
+    }
+  }
   return result;
 }
   
 
 template<class S> template<class S1> inline  
 void 
+HybridSet<S>::adjoin(location_type q, const S1& s) {
+  check_location(q,"HybridSet<S>::adjoin(location_type q, const S1& s)");
+  (*this)[q].adjoin(s);
+}
+
+
+template<class S> template<class S1> inline  
+void 
 HybridSet<S>::adjoin(const HybridSet<S1>& hs) {
-  if(this->number_of_discrete_locations()!=hs.number_of_discrete_locations()) {
-    throw std::runtime_error("Invalid number of discrete components");
+  for(typename HybridSet<S1>::const_iterator loc_iter=hs.begin();
+      loc_iter!=hs.end(); ++loc_iter)
+  {
+    location_type q=loc_iter->first;
+    if(!this->has_location(q)) {
+      throw std::runtime_error("Cannot adjoin a hybrid set to another with different discrete locations");
+    }
   }
-  for(location_type q=0; q!=this->number_of_discrete_locations(); ++q) {
-    (*this)[q].adjoin(hs[q]);
+
+  for(typename HybridSet<S1>::const_iterator loc_iter=hs.begin();
+      loc_iter!=hs.end(); ++loc_iter)
+  {
+    location_type q=loc_iter->first;
+    const S1& s=loc_iter->second;
+    (*this)[q].adjoin(s);
   }
 }
 
 
+template<class S> inline
+typename HybridSet<S>::const_iterator 
+HybridSet<S>::begin() const
+{ 
+  return this->_component_sets.begin();
+}
 
-template<class R> inline  
-HybridGridMaskSet<R>::HybridGridMaskSet(location_type nq, const FiniteGrid<R>& fg) 
-  : HybridSet< GridMaskSet<R> >(nq,GridMaskSet<R>(fg)) 
-{
+
+template<class S> inline
+typename HybridSet<S>::const_iterator 
+HybridSet<S>::end() const
+{ 
+  return this->_component_sets.end();
 }
 
 
 
-template<class R> inline  
-HybridGridCellListSet<R>::HybridGridCellListSet(location_type nq, const Grid<R>& g) 
-  : HybridSet< GridCellListSet<R> >(nq,GridCellListSet<R>(g)) 
-{
+template<class S> inline
+void 
+HybridSet<S>::check_location(location_type q, const char* where) const
+{ 
+  if (!this->has_location(q)) {
+    std::ostringstream o;
+    o << where << ": The hybrid set with locations " << this->locations() << " does not have a location with id " << q << ".";
+    throw HybridSystemError(o.str());
+  }
 }
-    
-  /*! \brief Construct a set for \a n discrete modes, based on a list of finite grids. */
-template<class R> inline  
-HybridGridCellListSet<R>::HybridGridCellListSet(const HybridSet< GridMaskSet<R> >& hgms)
-  : HybridSet< GridCellListSet<R> >(hgms)
-{
+
+
+template<class S> 
+std::ostream& 
+HybridSet<S>::write(std::ostream& os) const
+{ 
+  return os << _component_sets;
 }
+
+
+template<class S> 
+std::ostream& 
+operator<<(std::ostream& os, const HybridSet<S>& hs)
+{ 
+  return hs.write(os);
+}
+
+
 
 
 
@@ -146,13 +269,16 @@ template<class R> inline
 HybridGridCellListSet<R>
 regular_intersection(const HybridGridCellListSet<R>& hgcl, const HybridGridMaskSet<R>& hgms) 
 {
-  if(hgcl.number_of_discrete_locations()!=hgms.number_of_discrete_locations()) {
-    throw HybridSystemError("Intersection of sets with different numbers of discrete locations");
+  if(hgcl.locations()!=hgms.locations()) {
+    throw HybridSystemError("Intersection of sets with different discrete locations");
   }
   
   HybridGridCellListSet<R> result=hgcl;
   result.clear();
-  for(location_type q=0; q!=hgcl.number_of_discrete_locations(); ++q) {
+  for(typename HybridGridCellListSet<R>::const_iterator loc_iter=result.begin(); 
+      loc_iter!=result.end(); ++loc_iter) 
+  {
+    location_type q=loc_iter->first;
     result[q]=regular_intersection(hgcl[q],hgms[q]);
   }
   return result;

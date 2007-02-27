@@ -199,7 +199,8 @@ namespace Ariadne {
      *  \ingroup Grid
      */
     template<class R>
-    class GridCellListSet {
+    class GridCellListSet 
+    {
       friend class GridMaskSet<R>;
      public:
       typedef GridSetIterator< Combinatoric::LatticeCellListSet::const_iterator, GridCell<R> > iterator;
@@ -303,7 +304,9 @@ namespace Ariadne {
      *  \ingroup Grid
      */
     template<class R>
-    class GridMaskSet {
+    class GridMaskSet 
+      : public Set<R>
+    {
       friend class GridCellListSet<R>;
       friend class PartitionTreeSet<R>;
      public:
@@ -349,6 +352,30 @@ namespace Ariadne {
       GridMaskSet(const GridCellListSet<R>& gcls);
 
 
+      //@{
+      //! \name Set methods
+      /*! \brief Tests for disjointness with a Rectangle. */
+      virtual GridMaskSet<R>* clone() const;
+
+      /*! \brief The space dimension of the set. */
+      virtual dimension_type dimension() const;
+
+      /*!\brief Checks if a denotable set includes a point. */
+      virtual tribool contains(const Point<R>& p) const;
+
+      /*! \brief Tests for disjointness with a Rectangle. */
+      virtual tribool disjoint(const Rectangle<R>& r) const;
+
+      /*! \brief Tests for superset of a Rectangle. */ 
+      virtual tribool superset(const Rectangle<R>& r) const;
+
+      /*! \brief Tests for subset of a Rectangle. */
+      virtual tribool subset(const Rectangle<R>& r) const;
+
+      /*! \brief The rectangle bounding the region of the mask. */
+      virtual Rectangle<R> bounding_box() const;
+      //@}
+
       /*!\brief Convert to a %ListSet of BS. */
       template<template<class> class BS> operator ListSet<R,BS> () const;
       operator ListSet<R,Rectangle> () const;
@@ -373,9 +400,6 @@ namespace Ariadne {
 
       /*! \brief The underlying lattice set. */
       const Combinatoric::LatticeMaskSet& lattice_set() const;
-
-      /*! \brief The space dimension of the set. */
-      dimension_type dimension() const;
 
        /*! \brief The number of elements in the mask. */
       size_type capacity() const;
@@ -406,9 +430,6 @@ namespace Ariadne {
       /*! \brief A constant iterator to the end of the set. */
       const_iterator end() const;
 
-      /*! \brief The rectangle bounding the region of the mask. */
-      Rectangle<R> bounding_box() const;
-     
       /*! \brief Removes all cells. */
       void clear();
 
@@ -473,7 +494,8 @@ namespace Ariadne {
     template<class R> tribool disjoint(const GridMaskSet<R>& gm, const Rectangle<R>& r);
     template<class R> tribool subset(const Rectangle<R>&, const GridBlock<R>&);
     template<class R> tribool subset(const Rectangle<R>&, const GridMaskSet<R>&);
-    
+    template<class R> tribool subset(const GridMaskSet<R>&, const Rectangle<R>&);
+   
     template<class R> tribool overlap(const GridBlock<R>&, const GridBlock<R>&);
     template<class R> tribool overlap(const GridBlock<R>&, const GridMaskSet<R>&);
     template<class R> tribool overlap(const GridMaskSet<R>&, const GridBlock<R>&);
@@ -488,6 +510,7 @@ namespace Ariadne {
     template<class R> tribool subset(const GridBlock<R>&, const GridMaskSet<R>&);
     template<class R> tribool subset(const GridCellListSet<R>&, const GridMaskSet<R>&);
     template<class R> tribool subset(const GridMaskSet<R>&, const GridMaskSet<R>&);
+    
     
     template<class R> GridCellListSet<R> regular_intersection(const GridCellListSet<R>&, const GridMaskSet<R>&);
     template<class R> GridCellListSet<R> regular_intersection(const GridMaskSet<R>&, const GridCellListSet<R>&);

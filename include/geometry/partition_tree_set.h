@@ -39,6 +39,7 @@
 #include "../combinatoric/binary_tree.h"
 #include "../combinatoric/subdivision_tree_set.h"
 
+#include "../geometry/set.h"
 #include "../geometry/rectangle_expression.h"
 
 
@@ -240,7 +241,9 @@ namespace Ariadne {
      * Defined as a SubdivisionTree within a base cell given as a Rectangle<R>.
      */
     template<class R>
-    class PartitionTreeSet {
+    class PartitionTreeSet 
+      : public Set<R>
+    {
      public:
       //      typedef PartitionTreeSetIterator<R> iterator;
       //      typedef PartitionTreeSetIterator<R> const_iterator;
@@ -268,20 +271,38 @@ namespace Ariadne {
        */
       PartitionTreeSet(const GridMaskSet<R>& gms);
 
+      //@{
+      //! \name Set methods
+      /*! \brief Tests for disjointness with a Rectangle. */
+      virtual PartitionTreeSet<R>* clone() const;
+
+      /*! \brief The space dimension of the set. */
+      virtual dimension_type dimension() const;
+
+      /*!\brief Checks if a denotable set includes a point. */
+      virtual tribool contains(const Point<R>& p) const;
+
+      /*! \brief Tests for disjointness with a Rectangle. */
+      virtual tribool disjoint(const Rectangle<R>& r) const;
+
+      /*! \brief Tests for superset of a Rectangle. */ 
+      virtual tribool superset(const Rectangle<R>& r) const;
+
+      /*! \brief Tests for subset of a Rectangle. */
+      virtual tribool subset(const Rectangle<R>& r) const;
+
+      /*!\brief A rectangle containing the grid cell. */
+      virtual Rectangle<R> bounding_box() const;
+      //@}
+
       /*! \brief Convert to a ListSet of Rectangle. */
       operator ListSet<R,Rectangle> () const;
-
-      /*! \brief A bounding box. */
-      const Rectangle<R>& bounding_box() const;
 
       /*! \brief The unit box containing the partition tree set. */
       const Rectangle<R>& unit_box() const;
 
       /*! \brief The underlying subdivision set. */
       const Combinatoric::SubdivisionTreeSet& subdivision_set() const;
-
-      /*! \brief The space dimension of the set. */
-      size_type dimension() const;
 
       /*! \brief The subdivision coordinates. */
       const Combinatoric::SubdivisionSequence& subdivisions() const;
@@ -353,6 +374,19 @@ namespace Ariadne {
       Rectangle<R> _unit_box;
       Combinatoric::SubdivisionTreeSet _subdivision_set;
     };
+
+    
+    template<class R>
+    tribool contains(const PartitionTreeSet<R>&, const Point<R>&);
+
+    template<class R>
+    tribool disjoint(const PartitionTreeSet<R>&, const Rectangle<R>&);
+
+    template<class R>
+    tribool subset(const PartitionTreeSet<R>&, const Rectangle<R>&);
+
+    template<class R>
+    tribool subset(const Rectangle<R>&, const PartitionTreeSet<R>&);
 
     
     template<class R, class S>

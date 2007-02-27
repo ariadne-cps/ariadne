@@ -77,6 +77,49 @@ namespace Ariadne {
 
 
 
+    template<class R>
+    PartitionTreeSet<R>*
+    PartitionTreeSet<R>::clone() const
+    {
+      return new PartitionTreeSet<R>(*this);
+    }
+
+
+    template<class R>
+    tribool
+    PartitionTreeSet<R>::contains(const Point<R>& pt) const
+    {
+      return Geometry::contains(*this,pt);
+    }
+
+
+    template<class R>
+    tribool
+    PartitionTreeSet<R>::disjoint(const Rectangle<R>& r) const
+    {
+      return Geometry::disjoint(*this,r);
+    }
+
+
+    template<class R>
+    tribool
+    PartitionTreeSet<R>::superset(const Rectangle<R>& r) const
+    {
+      return Geometry::subset(r,*this);
+    }
+
+
+    template<class R>
+    tribool
+    PartitionTreeSet<R>::subset(const Rectangle<R>& r) const
+    {
+      return Geometry::subset(*this,r);
+    }
+
+
+
+
+
 
 
     template<class R>
@@ -119,6 +162,62 @@ namespace Ariadne {
     }
 
     
+    template<class R>
+    tribool
+    contains(const PartitionTreeSet<R>& pts, const Point<R>& pt)
+    {
+      return subset(Rectangle<R>(pt),pts);
+    }
+
+
+    template<class R>
+    tribool
+    disjoint(const PartitionTreeSet<R>& pts, const Rectangle<R>& r)
+    {
+      tribool result=true;
+      Rectangle<R> cell(pts.dimension());
+      for(typename PartitionTreeSet<R>::const_iterator pts_iter=pts.begin();
+          pts_iter!=pts.end(); ++pts_iter)
+      {
+        cell=*pts_iter;
+        result = result && Geometry::disjoint(cell,r);
+        if(result==false) {
+          return result;
+        }
+      }
+      return result;
+    }
+
+
+    template<class R>
+    tribool
+    subset(const PartitionTreeSet<R>& pts, const Rectangle<R>& r)
+    {
+      tribool result=true;
+      Rectangle<R> cell(pts.dimension());
+      for(typename PartitionTreeSet<R>::const_iterator pts_iter=pts.begin();
+          pts_iter!=pts.end(); ++pts_iter)
+      {
+        cell=*pts_iter;
+        result = result && Geometry::subset(cell,r);
+        if(result==false) {
+          return result;
+        }
+      }
+      return result;
+    }
+
+
+    template<class R>
+    tribool
+    subset(const Rectangle<R>& r, const PartitionTreeSet<R>& pts)
+    {
+      return subset(r,ListSet<R,Rectangle>(pts));
+    }
+
+
+
+
     template<class R, class S>
     PartitionTreeSet<R>
     outer_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth)

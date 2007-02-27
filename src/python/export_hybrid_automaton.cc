@@ -23,6 +23,8 @@
 
 #include "real_typedef.h"
 
+#include "geometry/arbitrary_set.h"
+#include "geometry/hybrid_set.h"
 #include "system/discrete_mode.h"
 #include "system/discrete_transition.h"
 #include "system/hybrid_automaton.h"
@@ -44,7 +46,6 @@ void export_hybrid_automaton()
   
   class_< DiscreteMode<R> >("DiscreteMode",no_init)
     .def("id",&DiscreteMode<R>::id)
-    .def("name",&DiscreteMode<R>::name,return_copy_const_reference())
     .def("dimension",&DiscreteMode<R>::dimension)
     .def("dynamic",&DiscreteMode<R>::dynamic,return_reference_existing_object())
     .def("invariant",&DiscreteMode<R>::invariant,return_reference_existing_object())
@@ -53,6 +54,7 @@ void export_hybrid_automaton()
   
 
   class_< DiscreteTransition<R> >("DiscreteTransition",no_init)
+    .def("id",&DiscreteTransition<R>::id)
     .def("source",&DiscreteTransition<R>::source,return_reference_existing_object())
     .def("destination",&DiscreteTransition<R>::destination,return_reference_existing_object())
     .def("activation",&DiscreteTransition<R>::activation,return_reference_existing_object())
@@ -62,19 +64,23 @@ void export_hybrid_automaton()
 
 
   class_< HybridAutomaton<R> >("HybridAutomaton",hybrid_automaton_init)
-    .def("new_mode",(DiscreteMode<R>&(HybridAutomaton<R>::*)(const VectorField<R>&,const Geometry::Set<R>&))
+    .def("new_mode",(const DiscreteMode<R>&(HybridAutomaton<R>::*)(id_type, const VectorField<R>&,const Geometry::Set<R>&))
            (&HybridAutomaton<R>::new_mode),
          return_reference_existing_object())
     .def("new_transition",
-         (DiscreteTransition<R>&(HybridAutomaton<R>::*)
-             (const Map<R>&,const Geometry::Set<R>&,const DiscreteMode<R>&,const DiscreteMode<R>&))
+         (const DiscreteTransition<R>&(HybridAutomaton<R>::*)
+             (id_type,const DiscreteMode<R>&,const DiscreteMode<R>&,const Map<R>&,const Geometry::Set<R>&))
            (&HybridAutomaton<R>::new_transition),
          return_reference_existing_object())
     .def("new_transition",
-         (DiscreteTransition<R>&(HybridAutomaton<R>::*)(const Map<R>&,const Geometry::Set<R>&,const id_type&,const id_type&))
+         (const DiscreteTransition<R>&(HybridAutomaton<R>::*)
+             (id_type,id_type,id_type,const Map<R>&,const Geometry::Set<R>&))
            (&HybridAutomaton<R>::new_transition),
          return_reference_existing_object())
     .def("name",&HybridAutomaton<R>::name,return_copy_const_reference())
+    .def("has_mode",&HybridAutomaton<R>::has_mode)
+    .def("has_transition",&HybridAutomaton<R>::has_transition)
+    .def("invariant",&HybridAutomaton<R>::invariant)
     .def("mode",&HybridAutomaton<R>::mode,return_copy_const_reference())
     .def("transition",&HybridAutomaton<R>::transition,return_copy_const_reference())
     .def(self_ns::str(self))

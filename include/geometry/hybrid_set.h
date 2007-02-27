@@ -24,9 +24,10 @@
 #ifndef _ARIADNE_HYBRID_SET_H
 #define _ARIADNE_HYBRID_SET_H
 
+#include <set>
+#include <map>
+
 #include <string>
-#include <vector>
-#include <list>
 #include <iostream>
 #include <sstream>
 
@@ -37,7 +38,8 @@
 namespace Ariadne {  
   namespace Geometry {
 
-    typedef size_type location_type;
+    /*! \brief The type identifying a discrete locatation of a hybrid system. */
+    typedef id_type location_type;
 
 
 
@@ -57,38 +59,66 @@ namespace Ariadne {
      public:
       typedef typename S::real_type real_type;
       typedef typename S::state_type state_type;
-      
+      typedef S set_type;
+      typedef typename std::map<location_type,S>::iterator iterator;
+      typedef typename std::map<location_type,S>::const_iterator const_iterator;
      public:
-      /*! \brief Construct a set for \a nq discrete modes. */
-      HybridSet(location_type nq);
+      /*! \brief Construct a set with no locations. */
+      HybridSet();
+      /*! \brief Construct from a dictionary of location identifyers and dimensions. */
+      HybridSet(const std::map<location_type,dimension_type>& locations);
+      /*! \brief Copy constructor. */
+      HybridSet(const HybridSet<S>& hs);
+      /*! \brief Conversion constructor from another hybrid set. */
+      template<class S1> explicit HybridSet(const HybridSet<S1>& hs);
       
-      /*! \brief Construct a set for \a nq discrete modes, each based on the set \a s. */
-      HybridSet(location_type nq, const S& s);
-      
-      /*! \brief Construct a set for \a n discrete modes, each based on the same cells in the same grid. */
-      template<class S1> HybridSet(const HybridSet<S1>& hs);
-      
+      /*! \brief Create a new location with dimension \a d. */
+      S& new_location(location_type q, dimension_type d);
+      /*! \brief Create a new location based on the set \a s. */
+      S& new_location(location_type q, const S& s);
+      /*! \brief Create a new location by constructing a set from an object of type T. */
+      template<class T> S& new_location(location_type q, const T& t);
+
+      /*! \brief The discrete locations of the set. */
+      std::map<location_type,dimension_type> locations() const;
       /*! \brief The number of discrete locations or components comprising the set. */
-      location_type number_of_discrete_locations() const;
+      location_type number_of_locations() const;
+      /*! \brief Check if the hybrid set has a component for discrete location \a q. */
+      bool has_location(location_type q) const;
       /*! \brief A reference to the state set corresponding to discrete location \a q. */
-      S& operator[](const location_type& q);
+      S& operator[](location_type q);
       /*! \brief The state set corresponding to discrete location \a q. */
-      const S& operator[](const location_type& q) const;
+      const S& operator[](location_type q) const;
       
       /*! \brief Clear all discrete locations. */
       void clear();
       /*! \brief Returns true if every component is empty. */
       tribool empty() const;
       
+      /*! \brief Adjoin the set \a s to location \a q. */
+      template<class S1> void adjoin(location_type q, const S1& s);
       /*! \brief Adjoin another hybrid set. */
       template<class S1> void adjoin(const HybridSet<S1>& hs);
       
+      /*! \brief A constant iterator to the beginning of the component sets. */
+      const_iterator begin() const;
+      /*! \brief A constant iterator to the end of the component sets. */
+      const_iterator end() const;
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream& os) const;
      private:
-      std::vector< S > _component_sets;
+      // Tests if the hybrid set has location q; if not, throws an error.
+      void check_location(location_type q, const char*) const;
+     private:
+      std::map< location_type, S > _component_sets;
     };
 
+    template<class S> 
+    std::ostream& operator<<(std::ostream& os, const HybridSet<S>& hs);
+
   
-  
+
+
     /*! \ingroup HybridSet
      *  \brief A hybrid set comprising of a GridMaskSet for every component.
      */
@@ -97,12 +127,12 @@ namespace Ariadne {
       : public HybridSet< GridMaskSet<R> >
     {
      public:
-      /*! \brief Construct a set for \a n discrete modes, each based on the same cells in the same grid. */
-      HybridGridMaskSet(location_type nq, const FiniteGrid<R>& fg);
-      
-      /*! \brief Construct a set for \a n discrete modes, based on a list of finite grids. */
-      template<class FGC> HybridGridMaskSet(const FGC& fgs);
+      HybridGridMaskSet()
+        : HybridSet< GridMaskSet<R> >() { }
+      HybridGridMaskSet(const HybridGridMaskSet<R>& hgms)
+        : HybridSet< GridMaskSet<R> >(hgms) { }
     };
+
 
 
 
@@ -114,12 +144,15 @@ namespace Ariadne {
       : public HybridSet< GridCellListSet<R> >
     {
      public:
-      /*! \brief Construct a set for \a n discrete modes, based on a fixed grid. */
-      HybridGridCellListSet(location_type nq, const Grid<R>& g);
-      
-      /*! \brief Construct a set for \a n discrete modes, based on a list of finite grids. */
-      HybridGridCellListSet(const HybridSet< GridMaskSet<R> >& hgms);
+      HybridGridCellListSet()
+        : HybridSet< GridCellListSet<R> >() { }
+      HybridGridCellListSet(const HybridGridCellListSet<R>& hgcls)
+        : HybridSet< GridCellListSet<R> >(hgcls) { }
+      HybridGridCellListSet(const HybridGridMaskSet<R>& hgms)
+        : HybridSet< GridCellListSet<R> >(hgms) { }
     };
+
+
 
     template<class R> 
     HybridGridCellListSet<R>

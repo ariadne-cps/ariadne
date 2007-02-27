@@ -329,13 +329,6 @@ namespace Ariadne {
       return const_iterator(*this->_grid_ptr,this->_lattice_set.end()); 
     }
 
-    template<class R> inline
-    Rectangle<R> 
-    GridMaskSet<R>::bounding_box() const 
-    {
-      return GridBlock<R>(grid(),bounds()); 
-    }
-     
 
     template<class R> inline
     void 

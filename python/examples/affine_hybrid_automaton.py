@@ -25,9 +25,12 @@ jump_set = PolyhedralSet(Rectangle("[-7.5,7.5]x[-3,-2]"))
 reset = AffineMap(Matrix("[1,0;0,-1]"),Vector("[0,0]"))
 
 automaton=HybridAutomaton("Affine hybrid automaton")
-mode=automaton.new_mode(dynamic,space)
-transition=automaton.new_transition(reset,jump_set,mode.id(),mode.id())
+mode_id=2
+mode=automaton.new_mode(mode_id,dynamic,space)
+event_id=3
+transition=automaton.new_transition(event_id,mode_id,mode_id,reset,jump_set)
 print automaton
+#print automaton.invariant()
 
 initial_rectangle=Rectangle("[-6.96875,-6.9375]x[-6.96875,-6.9375]");
 bounding_box=Rectangle("[-8,8]x[-8,8]")
@@ -39,19 +42,23 @@ fgrid=FiniteGrid(grid,block)
 print fgrid
 
 print "Creating initial hybrid set",
-initial_set=HybridGridMaskSet(1,fgrid)
-initial_set[0].adjoin_over_approximation(initial_rectangle)
-print initial_set[0].size(),initial_set[0].capacity()
+initial_set=HybridGridMaskSet()
+initial_set.new_location(mode_id,fgrid)
+initial_set[mode_id].adjoin_over_approximation(initial_rectangle)
+print "initial_set.locations() =",initial_set.locations()
+print initial_set[mode_id].size(),initial_set[mode_id].capacity()
 
 print "Creating initial hybrid cell list set",
-initial_cell_list_set=HybridGridCellListSet(1,grid)
-initial_cell_list_set[0].adjoin_over_approximation(initial_rectangle)
-print initial_cell_list_set[0].size()
+initial_cell_list_set=HybridGridCellListSet()
+initial_cell_list_set.new_location(mode_id,grid)
+initial_cell_list_set[mode_id].adjoin_over_approximation(initial_rectangle)
+print initial_cell_list_set[mode_id].size()
 
 print "Creating bounding hybrid set",
-bounding_set=HybridGridMaskSet(1,fgrid);
-bounding_set[0].adjoin_over_approximation(bounding_box);
-print bounding_set[0].size(),bounding_set[0].capacity()
+bounding_set=HybridGridMaskSet();
+bounding_set.new_location(mode_id,fgrid)
+bounding_set[mode_id].adjoin_over_approximation(bounding_box);
+print bounding_set[mode_id].size(),bounding_set[mode_id].capacity()
 
 apply=Applicator()
 #integrator=LohnerIntegrator(0.125,0.5,0.25);
@@ -72,12 +79,12 @@ eps.set_line_style(True)
 eps.set_fill_colour("cyan")
 eps.write(jump_set)
 eps.set_fill_colour("yellow")
-eps.write(chainreach_set[0])
+eps.write(chainreach_set[mode_id])
 eps.set_fill_colour("green")
-eps.write(continuous_chainreach_set[0])
+eps.write(continuous_chainreach_set[mode_id])
 eps.set_fill_colour("white")
-eps.write(discrete_step_set[0])
+eps.write(discrete_step_set[mode_id])
 eps.set_fill_colour("blue")
-eps.write(initial_set[0])
+eps.write(initial_set[mode_id])
 eps.close()
 print " done."

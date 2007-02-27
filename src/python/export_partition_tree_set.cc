@@ -51,6 +51,7 @@ void export_partition_tree_set()
   typedef PartitionTreeCell<R> RPartitionTreeCell;
   typedef PartitionTreeSet<R> RPartitionTreeSet;
  
+  typedef Set<R> RSet;
   typedef Rectangle<R> RRectangle;
   typedef GridMaskSet<R> RGridMaskSet;
   
@@ -80,12 +81,12 @@ void export_partition_tree_set()
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 
-  class_<RPartitionTreeSet>("PartitionTreeSet",init<RRectangle,SubdivisionSequence,BinaryTree,BooleanArray>())
+  class_<RPartitionTreeSet, bases<RSet> >("PartitionTreeSet",init<RRectangle,SubdivisionSequence,BinaryTree,BooleanArray>())
     .def(init<RPartitionTree,BooleanArray>())
     .def(init<RPartitionScheme>())
     .def(init<RGridMaskSet>())
     .def("dimension", &RPartitionTreeSet::dimension)
-    .def("bounding_box", &RPartitionTreeSet::bounding_box, return_value_policy<copy_const_reference>())
+    .def("bounding_box", &RPartitionTreeSet::bounding_box)
     .def("unit_box", &RPartitionTreeSet::unit_box, return_value_policy<copy_const_reference>())
     .def("subdivisions", &RPartitionTreeSet::subdivisions, return_value_policy<copy_const_reference>())
     .def("binary_tree", &RPartitionTreeSet::binary_tree, return_value_policy<copy_const_reference>())

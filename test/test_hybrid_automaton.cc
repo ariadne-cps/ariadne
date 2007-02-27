@@ -28,6 +28,8 @@
 #include "ariadne.h"
 #include "real_typedef.h"
 #include "geometry/set.h"
+#include "geometry/arbitrary_set.h"
+#include "geometry/hybrid_set.h"
 #include "geometry/rectangle.h"
 #include "geometry/polyhedron.h"
 #include "geometry/polyhedral_set.h"
@@ -71,9 +73,13 @@ int test_hybrid_automaton()
   cout << endl;
   
   HybridAutomaton<R> automaton("Affine test automaton");
-  DiscreteMode<R>& mode=automaton.new_mode(dynamic,invariant);
-  DiscreteTransition<R>& transition=automaton.new_transition(reset,activation,mode,mode);
+  id_type mode_id=2;
+  const DiscreteMode<R>& mode=automaton.new_mode(mode_id,dynamic,invariant);
+  id_type event_id=3;
+  const DiscreteTransition<R>& transition=automaton.new_transition(event_id,mode_id,mode_id,reset,activation);
   
   cout << mode << "\n" << transition << endl;
+  cout << automaton.invariant() << endl;
+
   return 0;
 }

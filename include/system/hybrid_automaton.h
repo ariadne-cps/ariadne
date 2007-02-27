@@ -36,6 +36,12 @@
 
 
 namespace Ariadne {  
+
+namespace Geometry {
+template<class S> class ArbitrarySet;
+template<class S> class HybridSet;
+}
+
 namespace System {
   
 template< class R > class HybridAutomaton;
@@ -43,11 +49,28 @@ template< class R> void dot_print(const HybridAutomaton< R >& A);
 
   
 /*! \ingroup HybridTime
- *  \brief The class of hybrid automata, (dynamic systems without
- *  input, which have both discrete and continuous dynamics).
- * 
- * It represents automata and its methods evaluate both reachability
- * properties and region.
+ *  \brief A hybrid automaton, comprising continuous-time behaviour
+ *  at each DiscreteMode, coupled by instantaneous DiscreteTransition events.
+ *  The state space is given by a Geometry::HybridSet.  
+ *
+ * A hybrid automaton is a dynamic system with evolution in both
+ * continuous time and discrete time. 
+ * The state space is a product \f$X=\bigcup\{q\}\times X_q\f$
+ * where \f$q\f$ is the <em>discrete state</em> and \f$X_q\f$
+ * is the <em>continuous state space</em> of corresponding to
+ * each discrete state.
+ *
+ * For each %DiscreteMode, the dynamics is given by a 
+ * %VectorField describing the continuous dynamics,
+ * and a %Set giving an invariant which must be satisified at
+ * all times.
+ *
+ * The discrete time behaviour is specified by %DiscreteTransition
+ * objects. 
+ * Each discrete transition represents an jump from a \a source
+ * mode to a \a destination mode. 
+ * There can be at most one discrete transition in an automaton
+ * with the same event_id and source_id.
  */
 template< class R >
 class HybridAutomaton
@@ -55,8 +78,8 @@ class HybridAutomaton
  public:
   typedef R real_type;
  
-  typedef typename std::vector< DiscreteTransition<R> >::const_iterator discrete_transition_iterator;
-  typedef typename std::vector< DiscreteMode<R> >::const_iterator discrete_mode_iterator;
+  typedef typename std::set< DiscreteTransition<R> >::const_iterator discrete_transition_iterator;
+  typedef typename std::set< DiscreteMode<R> >::const_iterator discrete_mode_iterator;
  private: 
   static std::list<std::string> system_names;
   
@@ -68,10 +91,10 @@ class HybridAutomaton
   id_type _id;
   
   /*! \brief The list of the hybrid automaton's discrete modes. */
-  std::vector< DiscreteMode<R> > _modes;
+  std::set< DiscreteMode<R> > _modes;
   
   /*! \brief The hybrid automaton's transitions. */
-  std::vector< DiscreteTransition<R> > _transitions;
+  std::set< DiscreteTransition<R> > _transitions;
   
  public:
   
@@ -81,7 +104,7 @@ class HybridAutomaton
    * hybrid automaton class.
    * \param name is the name of the hybrid automaton.
    */
-  HybridAutomaton(const std::string &name): _name(name) { }
+  HybridAutomaton(const std::string &name);
   
   /*! \brief  This is the destructor of the class hybrid 
    * automaton.
@@ -89,110 +112,79 @@ class HybridAutomaton
    * This destructor deletes in a safe way an object of the
    * hybrid automaton class.
    */
-  ~HybridAutomaton() {
-    //for (size_t i=0; i< (this->_transitions).size(); i++) {
-    //  this->_transitions[i].clear();
-    //}
-    this->_transitions.clear();
-  }
+  ~HybridAutomaton();
   
   /*! \brief Adds a discrete mode.
    *
    * This method adds a discrete mode to automaton definition.
+   * \param id is the unique key or identifyer of the discrete mode.
    * \param dynamic is the discrete mode's vector field.
    * \param invariant is the discrete mode's invariant.
    */
-  inline DiscreteMode<R>& new_mode(const VectorField<R>& dynamic,
-                                   const Geometry::Set<R>& invariant) 
-  {
-    this->_modes.push_back(DiscreteMode<R>(this->_modes.size(),dynamic,invariant));
-    return this->_modes.back();
-  }
+  const DiscreteMode<R>& new_mode(id_type id,
+                                  const VectorField<R>& dynamic,
+                                  const Geometry::Set<R>& invariant);
     
-  /*! \brief Adds a discrete transition.
+  /*! \brief Add a discrete transition.
    *
-   * This method adds an arc and the relavite reset between 
-   * two discrete modes.
-   * \param reset is the discrete transition's reset.
-   * \param activation is the discrete transition's activation region.
+   * This method creates a new discrete transition from the source mode to the 
+   * destination mode.
+   * \param id is the unique identifyer of the 
    * \param source is the discrete transition's source.
    * \param destination is the discrete transition's destination.
+   * \param reset is the discrete transition's reset.
+   * \param activation is the discrete transition's activation region.
    */
-  inline DiscreteTransition<R>& new_transition(const Map<R> &reset,
-                                               const Geometry::Set<R> &activation,
-                                               const DiscreteMode<R> &source, 
-                                               const DiscreteMode<R> &destination) 
-  {
-    if(&this->_modes[source.id()] != &source) {
-      throw std::runtime_error("The source mode of the transition must be in the automaton");
-    }
-    if(&this->_modes[source.id()] != &destination) {
-      throw std::runtime_error("The desitination mode of the transition must be in the automaton");
-    }
-    
-    this->_transitions.push_back(DiscreteTransition<R>(this->_transitions.size(),reset,activation,source,destination));
-    return this->_transitions.back();
-  }
+  const DiscreteTransition<R>& new_transition(id_type event_id,
+                                              const DiscreteMode<R> &source, 
+                                              const DiscreteMode<R> &destination,
+                                              const Map<R> &reset,
+                                              const Geometry::Set<R> &activation);
   
   /*! \brief Adds a discrete transition.
    *
-   * This method adds an arc and the relavite reset between 
-   * two discrete modes.
+   * This method creates a new discrete transition from the mode with  mode to the 
+   * destination mode.
+   * \param event_id is the identifier of the discrete transition's event.
+   * \param source_id is the identifier of the discrete transition's source mode.
+   * \param destination_id is the identifier of the discrete transition's destination mode.
    * \param reset is the discrete transition's reset.
    * \param activation is the discrete transition's activation region.
-   * \param source_id is the identifyer of the discrete transition's source mode.
-   * \param destination_id is the identifyer of the discrete transition's destination mode.
    */
-  inline DiscreteTransition<R>& new_transition(const Map<R> &reset,
-                                               const Geometry::Set<R> &activation,
-                                               const id_type &source_id, 
-                                               const id_type &destination_id) 
-  {
-    if(source_id >= this->modes().size()) {
-      throw std::runtime_error("The automaton does not contain a mode with ths given id");
-    }
-    if(destination_id >= this->modes().size()) {
-      throw std::runtime_error("The automaton does not contain a mode with ths given id");
-    }
-    
-    DiscreteMode<R>& source=this->_modes[source_id];
-    DiscreteMode<R>& destination=this->_modes[destination_id];
-    this->_transitions.push_back(DiscreteTransition<R>(this->_transitions.size(),reset,activation,source,destination));
-    return this->_transitions.back();
-  }
+  const DiscreteTransition<R>& new_transition(id_type event_id,
+                                              id_type source_id, 
+                                              id_type destination_id,
+                                              const Map<R> &reset,
+                                              const Geometry::Set<R> &activation);
   
-  /*! \brief The list of discrete modes. */
-  inline const std::vector< DiscreteMode<R> >& modes() const 
-  {
-    return this->_modes;
-  }
+  /*! \brief Test if the hybrid automaton has a discrete mode with key id. */
+  bool has_mode(id_type id) const;
+  
+  /*! \brief Test if the hybrid automaton has a discrete transition with \a event_id and \a source_id. */
+  bool has_transition(id_type event_id, id_type source_id) const;
+  
+  /*! \brief A map giving the dimension of the state space for each location identifier. */
+  std::map< id_type, dimension_type > locations() const;
+  
+  /*! \brief The hybrid set giving the invariant for each discrete location. */
+  Geometry::HybridSet< Geometry::ArbitrarySet<R> > invariant() const;
+  
+  /*! \brief The set of discrete modes. */
+  const std::set< DiscreteMode<R> >& modes() const;
   
   /*! \brief The discrete mode with given id. */
-  inline const DiscreteMode<R>& mode(id_type id) const 
-  {
-    return this->_modes[id];
-  }
+  const DiscreteMode<R>& mode(id_type id) const;
   
-  /*! \brief The list of discrete transitions. */
-  inline const std::vector< DiscreteTransition<R> >& transitions() const 
-  {
-    return this->_transitions;
-  }
+  /*! \brief The set of discrete transitions. */
+  const std::set< DiscreteTransition<R> >& transitions() const;
   
-  /*! \brief The discrete transition with given id. */
-  inline const DiscreteTransition<R>& transition(id_type id) const 
-  {
-    return this->_transitions[id];
-  }
+  /*! \brief The discrete transition with given \a event_id and \a source id. */
+  const DiscreteTransition<R>& transition(id_type event_id, id_type source_id) const;
   
   /*! \brief Returns the hybrid automaton's name. */
-  inline const std::string &name() const{ 
-    return this->_name; 
-  }
+  const std::string &name() const;
   
-  inline std::ostream& write(std::ostream& os) const {
-    return os << "HybridAutomaton( modes=" << this->_modes << ", transitions=" << this->_transitions << ")"; 
-  }
+  std::ostream& write(std::ostream& os) const;
 };
 
 template<class R> inline 
@@ -200,39 +192,8 @@ std::ostream& operator<<(std::ostream& os, const HybridAutomaton<R>& ha) {
   return ha.write(os);
 }
 
-/*
-
 template< class R>
-inline void dot_print(const HybridAutomaton< R >& A) 
-{          
-  std::ofstream fos;
-  
-  std::string f_name=A.name();
-  
-  f_name+=".dot";
-  
-  fos.open(f_name.c_str() , std::ios::out);
-  
-  size_t arc_number=0;
-  
-  fos << "digraph \""<< A.name()<<"\" {" << std::endl
-      << " rankdir=LR; "<< std::endl
-      << " node [shape = circle]; "<< std::endl;
-  
-  for (size_t i=0; i<(A._modes).size(); i++) {
-    std::string l_name=A._modes[i].name();
-    for (size_t j=0; j<(A._automaton[i]).size(); j++) {
-      fos << "\"" <<  l_name << "\" -> \"" 
-          << (((A._automaton[i])[j]).destination()).name() 
-          << "\" [ label=\"a_" << arc_number++ << "\" ]; " << std::endl;
-    }      
-  }
-  
-  fos << "}" << std::endl;
-  
-  fos.close();
-}
-*/
+void dot_print(const HybridAutomaton< R >& A);
 
 }
 }

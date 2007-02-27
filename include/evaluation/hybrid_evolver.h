@@ -29,8 +29,8 @@
 #include <list>
 #include <iostream>
 
-#include "../declarations.h"
 #include "../geometry/hybrid_set.h"
+#include "../geometry/arbitrary_set.h"
 #include "../system/hybrid_automaton.h"
 
 namespace Ariadne {  
@@ -59,7 +59,7 @@ class HybridEvolver
                                         size_type maximum_number_of_events);
   
   /*! \brief Compute a lower approximation to the reachable set between \a initial_evolution_time and \a final_time
-   *  with up to \a maximum_number_of_events using lower semantics. */
+   *  with up to \a maximum_number_of_events using lower semantics. (NOT CURRENTLY IMPLEMENTED) */
   Geometry::HybridGridMaskSet<R> lower_reach(const System::HybridAutomaton<R>&, 
                                              const Geometry::HybridGridMaskSet<R>&, 
                                              time_type initial_evolution_time, 
@@ -67,7 +67,7 @@ class HybridEvolver
                                              size_type maximum_number_of_events);
   
   /*! \brief Compute an over approximation to the reachable set between \a initial_evolution_time and \a final_time
-   *  with up to \a maximum_number_of_events using upper semantics. */
+   *  with up to \a maximum_number_of_events using upper semantics. (NOT CURRENTLY IMPLEMENTED) */
   Geometry::HybridGridMaskSet<R> upper_reach(const System::HybridAutomaton<R>& automaton, 
                                              const Geometry::HybridGridMaskSet<R>& initial_set, 
                                              time_type initial_evolution_time, 

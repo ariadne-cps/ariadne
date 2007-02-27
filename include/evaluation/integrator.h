@@ -65,7 +65,7 @@ namespace Ariadne {
       virtual time_type maximum_step_size() const;
       /*! \brief A suggested minimum radius of a basic set after a subdivision (not a strict bound). */
       virtual R minimum_basic_set_radius() const;
-      /*! T\brief he maximum allowable radius of a basic set during integration. */
+      /*! \brief The maximum allowable radius of a basic set during integration. */
       virtual R maximum_basic_set_radius() const;
       /*! \brief The time after which an integrator may approximate computed sets on a grid,
        *  in order to use previously caches integration results for the grid. */
@@ -212,7 +212,7 @@ namespace Ariadne {
                                                                 const time_type&) const;
       
 
-      /*! \brief An algorithm for computing the reachable set of in initial set of rectangles up to a certain time. */
+      /*! \brief An algorithm for computing the reachable set of in initial set of rectangles up to a certain time. (NOT CURRENTLY IMPLEMENTED) */
       virtual Geometry::ListSet<R,Geometry::Rectangle> reach(const System::VectorField<R>& vector_field,
                                                              const Geometry::ListSet<R,Geometry::Rectangle>& initial_set,
                                                              const time_type& time) const;      

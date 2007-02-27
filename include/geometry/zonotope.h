@@ -58,7 +58,9 @@ namespace Ariadne {
      *
      *
      * The intersection and membership tests may be performed using algorithms from: <br>
-     * Guibas, Leonidas J.; Nguyen, An; Zhang, Li, "Zonotopes as bounding volumes."  <i>Proceedings of the Fourteenth Annual ACM-SIAM Symposium on Discrete Algorithms</i> (Baltimore, MD, 2003),  803--812, ACM, New York, 2003.
+     * Guibas, Leonidas J.; Nguyen, An; Zhang, Li, "Zonotopes as bounding volumes."  
+     * <i>Proceedings of the Fourteenth Annual ACM-SIAM Symposium on Discrete Algorithms</i> 
+     * (Baltimore, MD, 2003),  803--812, ACM, New York, 2003.
      *
      * \b Storage: A %Zonotope in dimension d with n generators is described by
      * d(n+1) real numbers. The ith component of the centre is given by the
@@ -273,15 +275,22 @@ namespace Ariadne {
     
     template<class R> tribool disjoint(const Zonotope<R>& A, const Zonotope<R>& B);
     
+    template<class R> tribool disjoint(const Zonotope< Interval<R> >& z, const Rectangle< Interval<R> >& r);
+
+
     template<class R> tribool subset(const Rectangle<R>& A, const Zonotope<R>& B);
     
     template<class R> tribool subset(const Zonotope<R>& A, const Rectangle<R>& B);
     
     template<class R> tribool subset(const Zonotope<R>& A, const Zonotope<R>& B);
     
+    template<class R> tribool subset(const Zonotope< Interval<R> >& z, const Rectangle< Interval<R> >& r);
+
+
     template<class R> Zonotope<R> over_approximation(const Zonotope<R>&);
- 
+     
     template<class R> Zonotope<R> over_approximation(const Zonotope< Interval<R> >&);
+
     
     template<class R> 
     Zonotope<typename Numeric::traits<R>::arithmetic_type>

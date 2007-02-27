@@ -302,7 +302,7 @@ namespace Ariadne {
     }
     
     
-    /*!Set up LP problem to solve \f$c+Ge=p\f$; \f$-1<=e<=1\f$.
+    /* Set up LP problem to solve \f$c+Ge=p\f$; \f$-1<=e<=1\f$.
      * Change variables so that the problem becomes \f$Ge=p-c-G1;\ 0\leq e\leq2\f$.
      * Change sign of \f$ Ge=p-c-G1\f$ to make right-hand side positive.
      */
@@ -384,14 +384,16 @@ namespace Ariadne {
 
   
     
-    /*!Set up linear program to solve 
+    /* Set up linear program to solve 
      *   \f[x=c+Ge;\ l\leq x\leq u;\ -1\leq e\leq1\f].
      *
      * Change variables to normalize \f$x\f$ and \f$e\f$
      *   \f[x'=x-l,\ e'=e+1;   x'-Ge' = c-G1-l;  0\leq x\leq u-l; \ 0\leq e\leq 2.\f] 
      * 
      * Introduce slack variables sx and se, and artificial variables ax. Problem in standard form
-     *   \f[ \matrix{I&0\\0&I\\\pm I&\mp G}\matrix{x'\\e'} + \matrix{I&&\\&I&\\&&I}\matrix{sx\\se\\ax} = \matrix{u-l\\2\\\pm(c-G1-l)} \f]
+     *   \f[ \begin{matrix}I&0\\0&I\\\pm I&\mp G\end{matrix} \begin{matrix}x'\\e'\end{matrix}
+     *        + \begin{matrix}I&&\\&I&\\&&I\end{matrix}\begin{matrix}sx\\se\\ax\end{matrix}
+     *             = \begin{matrix}u-l\\2\\\pm(c-G1-l)\end{matrix} \f]
      * 
      */
     template<class R>

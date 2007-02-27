@@ -22,7 +22,7 @@
  */
  
 /*! \file basic_set_concept.h
- *  \brief Documentation for the BasicSet concept.
+ *  \brief Documentation for the BasicSet concept
  */
 
 

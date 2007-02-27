@@ -1,0 +1,124 @@
+/***************************************************************************
+ *            references.h
+ *
+ *  Copyright  2004-7  Pieter Collins
+ *  Pieter.Collins@cwi.nl
+ ****************************************************************************/
+
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+/*! 
+
+\file references.h
+\brief References to the scientific literature
+
+
+
+\page references References
+
+\section computable_analysis_references Computable Analysis
+
+Ker-I Ko <em>Complexity Theory of Real Functions</em>, Birkh\"aser, 1991, ISBN 3-7643-3586-6.
+
+Klaus Weihrauch, <em>Computable Analysis</em>, Springer, 2000.
+
+\section interval_references Interval Arithmetic
+Ramon E. Moore, <em>Methods and applications of interval analysis</em>,
+  SIAM Studies in Applied Mathematics, 2.
+Society for Industrial and Applied Mathematics (SIAM), Philadelphia, Pa., 1979. xi+190 pp. ISBN 0-89871-161-4 
+
+Baker R. Kearfott, "Interval computations: introduction, uses, and resources",
+  <em>Euromath Bull.</em> <b>2</b> (1996), no. 1, 95--112. 
+
+Marcel Gavriliu, "Towards more efficient interval analysis: corner forms and a remainder Newton method", 
+  Ph.D. Thesis, California Institute of Technology, 2005. <br>
+
+R. Krawczyk, "A class of interval-Newton-operators",
+  <em>Computing</em> <b>37</b> (1986), no. 2, 179--183.
+
+Arnold Neumaier, <em>Interval methods for systems of equations</em>,
+  Encyclopedia of Mathematics and its Applications, 37.
+  Cambridge University Press, Cambridge, 1990. xvi+255 pp. ISBN 0-521-33196-X 
+
+A. Neumaier, "The wrapping effect, ellipsoid arithmetic, stability and confidence regions",
+  <em>Computing Supplementum</em> <b>9</b> (1993), 175-190.
+
+\section linear_programming_references Linear Programming
+
+V. Chv\'atal, <em>Linear Programming</em>, Freeman, 1983, ISBN 0-7167-1195-8.
+
+\section zonotope_references Zonotopes
+
+K. Fukuda, "From the zonotope construction to the Minkowski addition of convex polytopes", Preprint, 2003. 
+
+Leonidas J. Guibas, An Nguyen and Li Zhang, "Zonotopes as bounding volumes", Preprint.
+
+Ari Ingimundarson, Jose Manuel Bravo, Vicenc Puig and Teodoro Alama, 
+  "Robust Fault Diagnosis using Parallelotope-based Set-membership Consistency Tests",
+  In <em>Proceedings of CDC-ECC 2005</em>.
+
+\section integration_references Integration
+
+Rudolf J. Lohner, "Enclosing the solutions of ordinary initial and boundary value problems",
+  <em>Computer Arithmetic</em>, 255--286, Teubner, Stuttgart, 1987. 
+
+Rudolf J. Lohner, "Computation of guaranteed enclosures for the solutions of ordinary initial and boundary value problems",
+  <em>Computational ordinary differential equations (London, 1989)</em>,  425--435.
+
+N. S. Nedialkov, K. R. Jackson and G. F. Corliss,
+  "Validated solutions of initial value problems for ordinary differential equations",
+  <em>Appl. Math. Comput.</em> <b>105</b> (1999), no. 1, 21--68.
+
+Piotr Zgliczynski, "C^1 Lohner algorithm", <i>Found. Comput. Math.</i> <b>2</b> (2002), no. 4, 429--465.
+
+\section reachability_references Reachability Analysis and Control
+
+Antoine Girard, Colas Le Guernic and Oded Maler, 
+"Efficient Computation of Reachable Sets of Linear Time-Invariant Systems with Inputs",
+
+Antoine Girard, "Reachability of Uncertain Linear Systems using Zonotopes," 
+  in <em>Proceedings of HSCC 2005</em>, LNCS 3414, pp 291--305, 2005.
+
+Alex Kurzhanskiy and Pravin Varaiya, "Ellipsoidal Techniques for Reachability Analysis of Discrete-Time Linear Systems",
+
+Alexander Kurzhanski and Pravin Varaiya, "On ellipsoidal techniques for reachability analysis", 
+  <em>Optim. Methods Softw.</em> <b>17</b> (2002), no. 2, 207--237
+
+S. V. Rakovic and D. Q. Mayne, "Set Robust Control Invariance for Linear Discrete Time Systems", 
+  in <em>Proceedings of CDC-ECC 2005</em>.
+
+F. Lydoire and P. Poignet, "Nonlinear Model Predictive Control via Interval Analysis", 
+  in <em>Proceedings of CDC-ECC 2005</em>.
+
+Dietmar Szolnoki, "Set oriented methods for computing reachable sets and control sets",
+  <em>Discrete Contin. Dyn. Syst. Ser. B</em> <b>3</b> (2003), no. 3, 361--382.
+
+\section spacial_data_structure_references Spacial Data Structures
+
+Hanan Samet, <em>The Design and Analysis of Spacial Data Structures</em>, Addison-Wesley, 1990, ISBN 0-201-50255-0.
+
+\section algebraic_topology_references Algebraic Topology
+
+Tomasz Kaczynski, Konstantin Mischaikow, Marian Mrozek, <em>Computational Homology</em>, Springer-Verlag, 2004, ISBN 0-387-40853-3.
+
+Afra J. Zomorodian, <em>Topology for Computing</em>, Cambridge University Press, 2005, ISBN 0-521-83666-2.
+
+\section automatic_differentiation_references Automatic Differentiation
+
+Andreas Giewank, <em>Evaluating Derivatives</em>, SIAM, 2000, ISBN 0-89871-451-6.
+
+*/

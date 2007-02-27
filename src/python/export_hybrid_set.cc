@@ -78,6 +78,7 @@ void export_hybrid_set()
   ;
   
   class_< HybridGridMaskSet<R> >("HybridGridMaskSet",init<>())
+    .def(init< HybridGridMaskSet<R> >())
     .def("__len__",&HybridGridMaskSet<R>::number_of_locations)
     .def("locations",&HybridGridMaskSet<R>::locations)
     .def("new_location",&hybrid_set_new_location< HybridGridMaskSet<R>, FiniteGrid<R> >)
@@ -90,6 +91,8 @@ void export_hybrid_set()
   ;
   
   class_< HybridGridCellListSet<R> >("HybridGridCellListSet",init<>())
+    .def(init< HybridGridMaskSet<R> >())
+    .def(init< HybridGridCellListSet<R> >())
     .def("__len__",&HybridGridCellListSet<R>::number_of_locations)
     .def("locations",&HybridGridCellListSet<R>::locations)
     .def("new_location",&hybrid_set_new_location< HybridGridCellListSet<R>, Grid<R> >)

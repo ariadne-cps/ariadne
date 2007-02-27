@@ -56,29 +56,32 @@ template<class R>
 int test_hybrid_automaton() 
 {
   
-  Rectangle<R> r("[-7,7]x[-7,7]");
+  Rectangle<R> r("[-1,1]x[-1,1]");
   cout << "r=" << r << endl;
-  Polyhedron<R> p(r);
-  cout << "p=" << p << endl;
 
-  AffineVectorField<R> dynamic(Matrix<R>("[-2,-1;1,-2]"),Vector<R>("[-1,0]"));
+  AffineVectorField<R> dynamic(Matrix<R>("[-0.25,-1.00;1.00,-0.25]"),Vector<R>("[0.00,0.00]"));
   cout << "dynamic=" << dynamic << endl;
-  AffineMap<R> reset(Matrix<R>("[5,0;0,5]"),Vector<R>("[0,0]"));
+  AffineMap<R> reset(Matrix<R>("[-7,0;0,-7]"),Vector<R>("[0,0]"));
   cout << "reset=" << reset << endl;
   
-  PolyhedralSet<R> invariant(p);
+  PolyhedralSet<R> invariant(r);
   cout << "invariant=" << invariant << endl;
-  PolyhedralSet<R> activation(Rectangle<R>("[-2,2]x[-2,2]"));
-  cout << "activation=" << activation << endl;
+  PolyhedralSet<R> activation12(Rectangle<R>("[-0.20,0.00]x[-0.20,0.00]"));
+  PolyhedralSet<R> activation21(Rectangle<R>("[0.00,0.20]x[0.00,0.20]"));
+  cout << "activation12=" << activation12 << endl;
+  cout << "activation21=" << activation21 << endl;
   cout << endl;
   
   HybridAutomaton<R> automaton("Affine test automaton");
-  id_type mode_id=2;
-  const DiscreteMode<R>& mode=automaton.new_mode(mode_id,dynamic,invariant);
-  id_type event_id=3;
-  const DiscreteTransition<R>& transition=automaton.new_transition(event_id,mode_id,mode_id,reset,activation);
+  id_type mode1_id=0;
+  id_type mode2_id=1;
+  const DiscreteMode<R>& mode1=automaton.new_mode(mode1_id,dynamic,invariant);
+  const DiscreteMode<R>& mode2=automaton.new_mode(mode2_id,dynamic,invariant);
+  id_type event_id=5;
+  const DiscreteTransition<R>& transition12=automaton.new_transition(event_id,mode1_id,mode2_id,reset,activation12);
+  const DiscreteTransition<R>& transition12=automaton.new_transition(event_id,mode1_id,mode2_id,reset,activation21);
   
-  cout << mode << "\n" << transition << endl;
+  cout << mode1  <<  "\n" << mode2 << "\n" << transition12 << "\n" << transition21 << endl;
   cout << automaton.invariant() << endl;
 
   return 0;

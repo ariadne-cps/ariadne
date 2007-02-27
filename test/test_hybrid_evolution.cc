@@ -67,95 +67,140 @@ template<class R>
 int test_hybrid_evolution() 
 {  
   Evaluation::verbosity=7; 
-  Rectangle<R> r("[-7.5,7.5]x[-7.5,7.5]");
-  Polyhedron<R> p(r);
 
-  AffineVectorField<R> dynamic(Matrix<R>("[-2,-1;1,-2]"),Vector<R>("[-1,0]"));
-  AffineMap<R> reset(Matrix<R>("[1,0;0,-1]"),Vector<R>("[0,0]"));
-  
-  PolyhedralSet<R> invariant(r);
-  PolyhedralSet<R> activation(Rectangle<R>("[-7.5,7.5]x[-3,-2]"));
+  PolyhedralSet<R> space(Rectangle<R>("[-7.5,7.5]x[-7.5,7.5]"));
+  AffineMap<R> identity(Matrix<R>("[1,0;0,-1]"),Vector<R>("[0,0]"));
+
+  PolyhedralSet<R> invariant1(space);
+  PolyhedralSet<R> invariant2(space);
+  AffineVectorField<R> dynamic1(Matrix<R>("[-2,-1;1,-2]"),Vector<R>("[-1,0]"));
+  AffineVectorField<R> dynamic2(Matrix<R>("[-2,-1; 1,-2]"),Vector<R>("[1,0]"));
+  //AffineVectorField<R> dynamic2(Matrix<R>("[0,0;0,0]"),Vector<R>("[-1,-2]"));
+  PolyhedralSet<R> activation11(Rectangle<R>("[-7.5,7.5]x[-3,-2]"));
+  PolyhedralSet<R> activation21(Rectangle<R>("[-7.5,7.5]x[-7,-6]"));
+  PolyhedralSet<R> activation12(Rectangle<R>("[-7.5,7.5]x[6,7]"));
+  AffineMap<R> reset11(Matrix<R>("[1,0;0,-1]"),Vector<R>("[0,0]"));
+  AffineMap<R> reset21(Matrix<R>("[1,0;0,-1]"),Vector<R>("[0,0]"));
+  AffineMap<R> reset12(Matrix<R>("[1,0;0,-1]"),Vector<R>("[0,0]"));
+   
   
   HybridAutomaton<R> automaton("Affine automaton");
-  id_type mode_id=2;
-  const DiscreteMode<R>& mode=automaton.new_mode(mode_id,dynamic,invariant);
-  id_type event_id=3;
-  const DiscreteTransition<R>& transition=automaton.new_transition(event_id,mode_id,mode_id,reset,activation);
+  id_type mode1_id=2;
+  id_type mode2_id=3;
+  const DiscreteMode<R>& mode1=automaton.new_mode(mode1_id,dynamic1,invariant1);
+  const DiscreteMode<R>& mode2=automaton.new_mode(mode2_id,dynamic2,invariant2);
+  id_type event1_id=5;
+  id_type event2_id=7;
+  const DiscreteTransition<R>& transition11=automaton.new_transition(event1_id,mode1_id,mode1_id,reset11,activation11);
+  const DiscreteTransition<R>& transition21=automaton.new_transition(event1_id,mode2_id,mode1_id,reset21,activation21);
+  const DiscreteTransition<R>& transition12=automaton.new_transition(event2_id,mode1_id,mode2_id,reset12,activation12);
   
-  cout << mode << endl << transition << endl;
-  
+  cout << mode1 << " " << mode2 << endl;
+  cout << transition11 << " " << transition21 << " " << transition12 << " " << endl;
+  cout << endl;
+
+  time_type maximum_step_size=0.125;
+  time_type lock_to_grid_time=0.25;
+  R maximum_set_radius=0.5;
+
   Applicator<R> apply;
-  //LohnerIntegrator<R> integrator(0.1,0.1,0.1);
-  AffineIntegrator<R> integrator(0.125,0.5,0.25); 
+  AffineIntegrator<R> integrator(maximum_step_size,lock_to_grid_time,maximum_set_radius); 
   HybridEvolver<R> hybrid_evolver(apply,integrator);
   
   RegularGrid<R> grid(Vector<R>("[0.25,0.25]"));
   FiniteGrid<R> finite_grid(grid,LatticeBlock("[-32,32]x[-32,32]"));
   Rectangle<R> bounding_box=finite_grid.extent();
   
-  Rectangle<R> initial_rectangle("[-6.96875,-6.9375]x[-6.96875,-6.9375]");
+  Rectangle<R> initial_rectangle1("[-6.96875,-6.9375]x[-6.96875,-6.9375]");
+  Rectangle<R> initial_rectangle2("[6.9375,6.96875]x[6.9375,6.96875]");
   HybridGridMaskSet<R> initial_set;
-  initial_set.new_location(mode_id,finite_grid);
-  initial_set[mode_id].adjoin_over_approximation(initial_rectangle);
+  initial_set.new_location(mode1_id,finite_grid);
+  initial_set.new_location(mode2_id,finite_grid);
+  initial_set[mode1_id].adjoin_over_approximation(initial_rectangle1);
+  //initial_set[mode2_id].adjoin_over_approximation(initial_rectangle2);
   cout << "initial_set.discrete_locations()=" << initial_set.locations() << endl;
+  cout << "initial_set[mode1_id].size()=" << initial_set[mode1_id].size() << " cells out of " << initial_set[mode1_id].capacity() << endl;
+  cout << "initial_set[mode21_id].size()=" << initial_set[mode2_id].size() << " cells out of " << initial_set[mode2_id].capacity() << endl;
 
   HybridGridMaskSet<R> bounding_set;
-  bounding_set.new_location(mode_id,finite_grid);
-  bounding_set[mode_id].adjoin_over_approximation(bounding_box);
+  bounding_set.new_location(mode1_id,finite_grid);
+  bounding_set.new_location(mode2_id,finite_grid);
+  bounding_set[mode1_id].adjoin_over_approximation(bounding_box);
+  bounding_set[mode2_id].adjoin_over_approximation(bounding_box);
   cout << "bounding_set.discrete_locations()=" << bounding_set.locations() << endl;
+  cout << "bounding_set[mode1_id].size()=" << bounding_set[mode1_id].size() << " cells out of " << bounding_set[mode1_id].capacity() << endl;
+  cout << "bounding_set[mode21_id].size()=" << bounding_set[mode2_id].size() << " cells out of " << bounding_set[mode2_id].capacity() << endl;
+  cout << endl;
 
+  assert(subset(initial_set[mode1_id],bounding_set[mode1_id]));
+
+  cout << "Computing continuous chainreach set" << endl;
   HybridGridMaskSet<R> continuous_chainreach=hybrid_evolver.continuous_chainreach(automaton,initial_set,bounding_set);
-  cout << "Reached " << continuous_chainreach[mode_id].size() << " cells out of " << continuous_chainreach[mode_id].capacity() 
+  cout << "Reached (" << continuous_chainreach[mode1_id].size() << "," << continuous_chainreach[mode2_id].size() << ") cells "
+       << "out of (" << continuous_chainreach[mode1_id].capacity() << "," << continuous_chainreach[mode1_id].capacity() << ") "
        << " by continuous evolution" << endl << endl;
   
   epsfstream eps;
   eps.open("test_hybrid_evolution-1.eps",bounding_box.expand(0.5));
   eps.set_fill_colour("white");
   eps << bounding_box;
+  eps.set_fill_colour("red");
+  eps << continuous_chainreach[mode2_id];
   eps.set_fill_colour("green");
-  eps << continuous_chainreach[mode_id];
+  eps << continuous_chainreach[mode1_id];
   eps.set_fill_colour("blue");
-  eps << initial_set[mode_id];
+  eps << initial_set[mode1_id];
+  eps << initial_set[mode2_id];
   eps.close();
 
 
   HybridGridCellListSet<R> initial_activated_set;
-  initial_activated_set.new_location(mode_id,grid);
-  initial_activated_set[mode_id].adjoin(over_approximation(Rectangle<R>("[-6,-5]x[-3.5,-1.0]"),grid));
-  cout << "initial_activated_set[0].size()=" << initial_activated_set[mode_id].size() << " cells" << endl;
+  initial_activated_set.new_location(mode1_id,grid);
+  initial_activated_set.new_location(mode2_id,grid);
+  initial_activated_set[mode1_id].adjoin(over_approximation(Rectangle<R>("[-6,-5]x[-3.5,-1.0]"),grid));
+  cout << "initial_activated_set[mode1_id].size()=" << initial_activated_set[mode1_id].size() << " cells" << endl;
+  cout << "Computing single discrete step" << endl;
   HybridGridCellListSet<R> discrete_reach=hybrid_evolver.discrete_step(automaton,initial_activated_set);
-  cout << "Reached " << discrete_reach[mode_id].size() << " cells by discrete step" << endl << endl;
+  cout << "Reached " << discrete_reach[mode2_id].size() << " cells by discrete step" << endl << endl;
   
   eps.open("test_hybrid_evolution-2.eps",bounding_box.expand(0.5));
   eps.set_fill_colour("white");
   eps << bounding_box;
   eps.set_fill_colour("cyan");
-  eps << static_cast<Polyhedron<R>&>(activation);
+  eps << static_cast<Polyhedron<R>&>(activation11);
+  eps << static_cast<Polyhedron<R>&>(activation21);
+  eps.set_fill_colour("magenta");
+  eps << static_cast<Polyhedron<R>&>(activation12);
+  eps.set_fill_colour("red");
+  eps << discrete_reach[mode2_id];
   eps.set_fill_colour("green");
-  eps << discrete_reach[mode_id];
+  eps << discrete_reach[mode1_id];
   eps.set_fill_colour("blue");
-  eps << initial_activated_set[mode_id];
+  eps << initial_activated_set[mode1_id];
   eps.close();
   
   
-  cout << "bounding_set[0].size()=" << bounding_set[mode_id].size() << " cells out of " << bounding_set[mode_id].capacity() << endl;
-  assert(subset(initial_set[mode_id],bounding_set[mode_id]));
 
-  cout << "Here" << endl;
   HybridGridMaskSet<R> chainreach=hybrid_evolver.chainreach(automaton,initial_set,bounding_set);
-  cout << "Here" << endl;
-  cout << "Reached " << chainreach[mode_id].size() << " cells out of " << chainreach[mode_id].capacity() << endl;
+  cout << "Reached (" << chainreach[mode1_id].size() << "," << chainreach[mode2_id].size() << ") cells "
+       << "out of (" << chainreach[mode1_id].capacity() << "," << chainreach[mode1_id].capacity() << ") "
+       << endl << endl;
   
   eps.open("test_hybrid_evolution-3.eps",bounding_box.expand(0.5));
   eps.set_fill_colour("white");
   eps << bounding_box;
   eps.set_fill_colour("cyan");
-  eps << static_cast<Polyhedron<R>&>(activation);
+  eps << static_cast<Polyhedron<R>&>(activation11);
+  eps << static_cast<Polyhedron<R>&>(activation21);
+  eps.set_fill_colour("magenta");
+  eps << static_cast<Polyhedron<R>&>(activation12);
   eps.set_line_style(true);
+  eps.set_fill_colour("red");
+  eps << chainreach[mode2_id];
   eps.set_fill_colour("yellow");
-  eps << chainreach[mode_id];
+  eps << chainreach[mode1_id];
   eps.set_fill_colour("blue");
-  eps << initial_set[mode_id];
+  eps << initial_set[mode1_id];
   eps.close();
   
   

@@ -18,40 +18,34 @@ from ariadne import *
 
 print dir()
 
-space=PolyhedralSet(Rectangle("[-7.5,7.5]x[-7.5,7.5]"))
+space=PolyhedralSet(Rectangle("[-1.0,1.0]x[-1.0,1.0]"))
 identity=AffineMap(Matrix("[1,0;0,1]"),Vector("[0,0]"))
 
-invariant1=PolyhedralSet(Rectangle("[-7.5,7.5]x[-7.5,2.5]"))
-invariant2=PolyhedralSet(Rectangle("[-7.5,7.5]x[-7.5,7.5]"))
-dynamic1=AffineVectorField(Matrix("[-2,-1; 1,-2]"),Vector("[-1,0]"))
-dynamic2=AffineVectorField(Matrix("[-2,-1; 1,-2]"),Vector("[1,0]"))
-activation11 = PolyhedralSet(Rectangle("[-7.5,7.5]x[-3,-2]"))
-activation21 = PolyhedralSet(Rectangle("[-7.5,7.5]x[-7,-6]"))
-activation12 = PolyhedralSet(Rectangle("[-7.5,7.5]x[1,2]"))
-reset11 = AffineMap(Matrix("[1,0;0,-1]"),Vector("[0,0]"))
-reset21 = AffineMap(Matrix("[1,0;0,-1]"),Vector("[0,0]"))
-reset12 = AffineMap(Matrix("[1,0;0,-1]"),Vector("[0,0]"))
+invariant=PolyhedralSet(Rectangle("[-1.0,1.0]x[-1.0,1.0]"))
+dynamic=AffineVectorField(Matrix("[-0.25,-1.00; 1.00,-0.25]"),Vector("[0.00,0.00]"))
+activation12 = PolyhedralSet(Rectangle("[-0.2,0.0]x[-0.2,0.0]"))
+activation21 = PolyhedralSet(Rectangle("[0.0,0.2]x[0.0,0.2]"))
+reset = AffineMap(Matrix("[-7,0;0,-7]"),Vector("[0,0]"))
 
 automaton=HybridAutomaton("Affine hybrid automaton")
-mode1_id=2
-mode2_id=3
-mode1=automaton.new_mode(mode1_id,dynamic1,invariant1)
-mode2=automaton.new_mode(mode2_id,dynamic2,invariant2)
-event1_id=5
-event2_id=7
-transition=automaton.new_transition(event1_id,mode1_id,mode1_id,reset11,activation11)
-transition=automaton.new_transition(event2_id,mode1_id,mode2_id,reset12,activation12)
-transition=automaton.new_transition(event1_id,mode2_id,mode1_id,reset21,activation21)
+mode1_id=0
+mode2_id=1
+mode1=automaton.new_mode(mode1_id,dynamic,invariant)
+mode2=automaton.new_mode(mode2_id,dynamic,invariant)
+event_id=0
+transition=automaton.new_transition(event_id,mode1_id,mode2_id,reset,activation12)
+transition=automaton.new_transition(event_id,mode2_id,mode1_id,reset,activation21)
 print automaton
 #print automaton.invariant()
 
-initial_rectangle1=Rectangle("[-6.96875,-6.9375]x[-6.96875,-6.9375]");
-initial_rectangle2=Rectangle("[6.9375,6.96875]x[6.9375,6.96875]")
-bounding_box=Rectangle("[-8,8]x[-8,8]")
+initial_rectangle=Rectangle("[-0.8,-0.7]x[0.7,0.8]")
+bounding_box=Rectangle("[-1,1]x[-1,1]")
 
 
-grid=RegularGrid(Vector("[0.25,0.25]"))
-block=LatticeBlock("[-32,32]x[-32,32]")
+#grid=RegularGrid(Vector("[0.03125,0.03125]"))
+#block=LatticeBlock("[-32,32]x[-32,32]")
+grid=RegularGrid(Vector("[0.0625,0.0625]"))
+block=LatticeBlock("[-16,16]x[-16,16]")
 fgrid=FiniteGrid(grid,block)
 print fgrid
 
@@ -59,18 +53,10 @@ print "Creating initial hybrid set"
 initial_set=HybridGridMaskSet()
 initial_set.new_location(mode1_id,fgrid)
 initial_set.new_location(mode2_id,fgrid)
-initial_set[mode1_id].adjoin_over_approximation(initial_rectangle1)
-initial_set[mode2_id].adjoin_over_approximation(initial_rectangle2)
+initial_set[mode1_id].adjoin_over_approximation(initial_rectangle)
 print "initial_set.locations() =",initial_set.locations()
 print "initial_set[mode1_id].size(),capacity()=",initial_set[mode1_id].size(),initial_set[mode1_id].capacity()
 print "initial_set[mode2_id].size(),capacity()=",initial_set[mode2_id].size(),initial_set[mode2_id].capacity()
-
-print "Creating initial hybrid cell list set"
-initial_cell_list_set=HybridGridCellListSet(initial_set)
-#initial_cell_list_set.new_location(mode1_id,grid)
-#initial_cell_list_set.new_location(mode2_id,grid)
-#initial_cell_list_set[mode2_id].adjoin_over_approximation(initial_rectangle2)
-print "initial_cell_list_set.locations() =",initial_cell_list_set.locations()
 
 print "Creating bounding hybrid set",
 bounding_set=HybridGridMaskSet();
@@ -90,37 +76,29 @@ maximum_set_radius=0.5;
 
 apply=Applicator()
 integrator=AffineIntegrator(maximum_step_size,lock_to_grid_time,maximum_set_radius);
-#integrator=LohnerIntegrator(maximum_step_size,lock_to_grid_time,maximum_set_radius);
 hybrid_evolver=HybridEvolver(apply,integrator);
 
 print "Computing continuous chainreach set"
 continuous_chainreach_set=hybrid_evolver.continuous_chainreach(automaton,initial_set,bounding_set)
 print "Exporting to postscript output...",
-epsbb=Rectangle("[-8.1,8.1]x[-8.1,8.1]") # eps bounding box
+epsbb=Rectangle("[-1.1,1.1]x[-1.1,1.1]") # eps bounding box
 eps=EpsPlot("affine_hybrid_automaton-1.eps",epsbb)
 eps.set_line_style(True)
-eps.set_fill_colour("red")
-eps.write(continuous_chainreach_set[mode2_id])
 eps.set_fill_colour("green")
 eps.write(continuous_chainreach_set[mode1_id])
 eps.set_fill_colour("blue")
 eps.write(initial_set[mode1_id])
-eps.write(initial_set[mode2_id])
 eps.close()
 print
-
-print "Computing single discrete step"
-discrete_step_set=hybrid_evolver.discrete_step(automaton,initial_cell_list_set)
 
 print "Computing chainreach set"
 chainreach_set=hybrid_evolver.chainreach(automaton,initial_set,bounding_set)
 
 print "Exporting to postscript output...",
-epsbb=Rectangle("[-8.1,8.1]x[-8.1,8.1]") # eps bounding box
+epsbb=Rectangle("[-1.1,1.1]x[-1.1,1.1]") # eps bounding box
 eps=EpsPlot("affine_hybrid_automaton-2.eps",epsbb)
 eps.set_line_style(True)
 eps.set_fill_colour("cyan")
-eps.write(activation11)
 eps.write(activation21)
 eps.set_fill_colour("magenta")
 eps.write(activation12)
@@ -130,10 +108,7 @@ eps.set_fill_colour("yellow")
 eps.write(chainreach_set[mode1_id])
 eps.set_fill_colour("green")
 eps.write(continuous_chainreach_set[mode1_id])
-eps.set_fill_colour("white")
-eps.write(discrete_step_set[mode1_id])
 eps.set_fill_colour("blue")
 eps.write(initial_set[mode1_id])
-eps.write(initial_set[mode2_id])
 eps.close()
 print " done."

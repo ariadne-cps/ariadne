@@ -166,7 +166,7 @@ Ariadne::Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<
     invariant.restrict(over_approximation(dm.invariant(),invariant.grid()));
   }
 
-  Geometry::HybridGridMaskSet<R> intermediate_set=this->continuous_chainreach(hybrid_automaton,real_initials,invariants);
+  Geometry::HybridGridMaskSet<R> intermediate_set=this->continuous_chainreach(hybrid_automaton,initial_set,invariants);
   Geometry::HybridGridMaskSet<R> result_set=intermediate_set;
   
   Geometry::HybridGridCellListSet<R> new_activated=regular_intersection(intermediate_set,activations);

@@ -386,10 +386,10 @@ namespace Ariadne {
     
     
     template<class R>
-    bool
+    tribool
     Applicator<R>::verify(const System::Map<R>& f, 
-                             const Geometry::GridMaskSet<R>& initial_set, 
-                             const Geometry::GridMaskSet<R>& safe_set) const
+                          const Geometry::GridMaskSet<R>& initial_set, 
+                          const Geometry::GridMaskSet<R>& safe_set) const
     {
       typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
       check_bounded(initial_set,"Applicator<R>::verify(...)");

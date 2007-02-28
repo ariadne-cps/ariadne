@@ -61,6 +61,7 @@ template<class R> void export_rectangle();
 template<class R> void export_parallelotope();
 template<class R> void export_simplex();
 template<class R> void export_zonotope();
+template<class R> void export_interval_zonotope();
 template<class R> void export_polytope();
 template<class R> void export_polyhedron();
 template<class R> void export_polyhedral_set();
@@ -131,6 +132,7 @@ BOOST_PYTHON_MODULE(ariadne)
   export_point_list<Ariadne::Real>();
   export_rectangle<Ariadne::Real>();
   export_zonotope<Ariadne::Real>();
+  export_interval_zonotope<Ariadne::Real>();
   export_parallelotope<Ariadne::Real>();
   export_simplex<Ariadne::Real>();
   export_polytope<Ariadne::Real>();

@@ -79,7 +79,7 @@ int test_hybrid_automaton()
   const DiscreteMode<R>& mode2=automaton.new_mode(mode2_id,dynamic,invariant);
   id_type event_id=5;
   const DiscreteTransition<R>& transition12=automaton.new_transition(event_id,mode1_id,mode2_id,reset,activation12);
-  const DiscreteTransition<R>& transition12=automaton.new_transition(event_id,mode1_id,mode2_id,reset,activation21);
+  const DiscreteTransition<R>& transition21=automaton.new_transition(event_id,mode2_id,mode1_id,reset,activation21);
   
   cout << mode1  <<  "\n" << mode2 << "\n" << transition12 << "\n" << transition21 << endl;
   cout << automaton.invariant() << endl;

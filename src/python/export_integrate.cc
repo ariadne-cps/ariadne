@@ -30,6 +30,7 @@
 #include "geometry/list_set.h"
 
 #include "system/vector_field.h"
+#include "system/affine_vector_field.h"
 
 #include "evaluation/integrator.h"
 #include "evaluation/lohner_integrator.h"
@@ -49,55 +50,52 @@ template<class R>
 class IntegratorWrapper : public Integrator<R>, public wrapper< Integrator<R> >
 {
  public:
-  IntegratorWrapper() : Integrator<R>(0.125,0.125,0.125) { }
-  Zonotope<R> integrate(const VectorField<R>& vf,const Zonotope<R>& z,const time_type& t) {
-    if (override integrate = this->get_override("integrate")) { return this->integrate(vf,z,t); } 
-    else { return this->Integrator<R>::integrate(vf,z,t); } }
-  Zonotope<R> reach(const VectorField<R>& vf,const Zonotope<R>& z,const time_type& t) {
-    if (override reach = this->get_override("reach")) { return this->reach(vf,z,t); } 
-    else { return this->Integrator<R>::reach(vf,z,t); } }
-  Zonotope<R> default_integrate(const VectorField<R>& vf,const Zonotope<R>& z,const time_type& t) {
-    return this->Integrator<R>::integrate(vf,z,t); }
-  
+  IntegratorWrapper(const time_type& mss, const time_type& lgt, const R& msr) : Integrator<R>(mss,lgt,msr) { }
+  GridMaskSet<R> integrate(const VectorField<R>& vf,const GridMaskSet<R>& is,const GridMaskSet<R>& bs,const time_type& t) const {
+    return this->get_override("integrate")(); }
+  GridMaskSet<R> reach(const VectorField<R>& vf,const GridMaskSet<R>& is,const GridMaskSet<R>& bs,const time_type& t) const {
+    return this->get_override("reach")(); }
+  GridMaskSet<R> chainreach(const VectorField<R>& vf,const GridMaskSet<R>& is,const GridMaskSet<R>& bs) const {
+    return this->get_override("chainreach")(); }
+  tribool verify(const VectorField<R>& vf,const GridMaskSet<R>& is,const GridMaskSet<R>& bs) const {
+    return this->get_override("verify")(); }
 };
   
  
 template<class R>
 void export_integrate() 
 {
+  typedef time_type T;
+  typedef Interval<R> I;
 
- class_< IntegratorWrapper<R>, boost::noncopyable >("Integrator")
-    .def("integrate",(Zonotope<R>(Integrator<R>::*)(const VectorField<R>&,const Zonotope<R>&,const time_type&)const)
-                              (&Integrator<R>::integrate))
-    .def("integrate",(ListSet< Zonotope<R> >(Integrator<R>::*)(const VectorField<R>&,const ListSet< Zonotope<R> >&,const time_type&)const)
-                              (&Integrator<R>::integrate))
-    .def("reach",(ListSet< Zonotope<R> >(Integrator<R>::*)(const VectorField<R>&,const ListSet< Zonotope<R> >&,const time_type&)const)
-                              (&Integrator<R>::reach))
+  class_< IntegratorWrapper<R>, boost::noncopyable >("Integrator",init<T,T,R>())
     .def("integrate",(GridMaskSet<R>(Integrator<R>::*)(const VectorField<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&,const time_type&)const)
                               (&Integrator<R>::integrate))
     .def("reach",(GridMaskSet<R>(Integrator<R>::*)(const VectorField<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&,const time_type&)const)
                               (&Integrator<R>::reach))
     .def("chainreach",(GridMaskSet<R>(Integrator<R>::*)(const VectorField<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
          (&Integrator<R>::chainreach))
+    .def("verify",(bool(Integrator<R>::*)(const VectorField<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
+         (&Integrator<R>::chainreach))
   ;
 
- class_< LohnerIntegrator<R>, bases<Integrator<R> > >("LohnerIntegrator",init<R,R,R>())
+  class_< LohnerIntegrator<R>, bases<Integrator<R> > >("LohnerIntegrator",init<T,T,R>())
     .def(init<double,double,double>()) 
-    .def("integrate",(Zonotope<R>(LohnerIntegrator<R>::*)(const VectorField<R>&,const Zonotope<R>&,const time_type&)const)
+    .def("integrate",(Zonotope<I>(LohnerIntegrator<R>::*)(const VectorField<R>&,const Zonotope<I>&,const time_type&)const)
                               (&LohnerIntegrator<R>::integrate))
-    .def("integrate",(ListSet< Zonotope<R> >(LohnerIntegrator<R>::*)(const VectorField<R>&,const ListSet< Zonotope<R> >&,const time_type&)const)
+    .def("integrate",(ListSet< Zonotope<I> >(LohnerIntegrator<R>::*)(const VectorField<R>&,const ListSet< Zonotope<I> >&,const time_type&)const)
                               (&LohnerIntegrator<R>::integrate))
-    .def("reach",(ListSet< Zonotope<R> >(LohnerIntegrator<R>::*)(const VectorField<R>&,const ListSet< Zonotope<R> >&,const time_type&)const)
+    .def("reach",(ListSet< Zonotope<I> >(LohnerIntegrator<R>::*)(const VectorField<R>&,const ListSet< Zonotope<I> >&,const time_type&)const)
                               (&LohnerIntegrator<R>::reach))
   ;
 
- class_< AffineIntegrator<R>, bases<Integrator<R> > >("AffineIntegrator",init<R,R,R>())
+  class_< AffineIntegrator<R>, bases<Integrator<R> > >("AffineIntegrator",init<T,T,R>())
     .def(init<double,double,double>()) 
-    .def("integrate",(Zonotope<R>(AffineIntegrator<R>::*)(const VectorField<R>&,const Zonotope<R>&,const time_type&)const)
+    .def("integrate",(Zonotope<I>(AffineIntegrator<R>::*)(const AffineVectorField<R>&,const Zonotope<I>&,const time_type&)const)
                               (&AffineIntegrator<R>::integrate))
-    .def("integrate",(ListSet< Zonotope<R> >(AffineIntegrator<R>::*)(const VectorField<R>&,const ListSet< Zonotope<R> >&,const time_type&)const)
+    .def("integrate",(ListSet< Zonotope<I> >(AffineIntegrator<R>::*)(const AffineVectorField<R>&,const ListSet< Zonotope<I> >&,const time_type&)const)
                               (&AffineIntegrator<R>::integrate))
-    .def("reach",(ListSet< Zonotope<R> >(AffineIntegrator<R>::*)(const VectorField<R>&,const ListSet< Zonotope<R> >&,const time_type&)const)
+    .def("reach",(ListSet< Zonotope<I> >(AffineIntegrator<R>::*)(const AffineVectorField<R>&,const ListSet< Zonotope<I> >&,const time_type&)const)
                               (&AffineIntegrator<R>::reach))
   ;
 

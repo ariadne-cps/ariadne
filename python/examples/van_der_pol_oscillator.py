@@ -20,9 +20,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-
 from ariadne import *
 import sys
+
 
 Real=MPFloat
 
@@ -42,8 +42,7 @@ grid_extent=Rectangle("[--4,4]x[-2,2]") # grid bounding box
 finite_grid=FiniteGrid(grid_extent,128)
 grid=finite_grid.grid()
 initial_set=Rectangle("[0.99,1.01]x[0.49,0.51]")
-initial_set=Parallelotope(initial_set)
-initial_set=Zonotope(initial_set)
+initial_set=IntervalZonotope(initial_set)
 
 print "initial_set =", initial_set,"\n"
 
@@ -59,16 +58,15 @@ flowed_set=lohner.integrate(vdp,initial_set,flow_time)
 print "  ",flowed_set,"\n"
 
 print "Computing reachable set from time",flow_time,"to time",flow_time,"+",reach_time
-reach_set=lohner.reach(vdp,ZonotopeListSet(flowed_set),reach_time)
+reach_set=lohner.reach(vdp,IntervalZonotopeListSet(flowed_set),reach_time)
 print reach_set,"\n\n"
 
 
-intermediate_sets=ZonotopeListSet(initial_set)
+intermediate_sets=IntervalZonotopeListSet(initial_set)
 current_set=initial_set
 for i in range(0,flow_steps+reach_steps):
   current_set=lohner.integrate(vdp,current_set,step_size)
   intermediate_sets.adjoin(current_set)
-
 
 print "initial set:",initial_set
 print "flowed set:",flowed_set
@@ -81,10 +79,10 @@ epsbb=Rectangle("[0.4,1.4]x[-0.4,0.6]") # eps bounding box
 eps=EpsPlot("van_der_pol_oscillator-1.eps",epsbb)
 eps.set_line_style(True)
 eps.set_fill_colour("green")
-eps.write(reach_set)
+eps.write(approximation(reach_set))
 eps.set_fill_colour("white")
-eps.write(intermediate_sets)
+eps.write(over_approximation(intermediate_sets))
 eps.set_fill_colour("blue")
-eps.write(initial_set)
+eps.write(over_approximation(initial_set))
 eps.close()
 print " done."

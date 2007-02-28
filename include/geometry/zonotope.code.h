@@ -649,6 +649,38 @@ namespace Ariadne {
     }
     
     
+    template<class R> 
+    Zonotope<R> 
+    approximation(const Zonotope<R>& z)
+    {
+      return z; 
+    }
+
+    
+    template<class R> 
+    Zonotope<R> 
+    approximation(const Zonotope< Interval<R> >& iz)
+    {
+      LinearAlgebra::Matrix< Interval<R> > G=iz.generators();
+
+      return Zonotope<R>(approximate_value(iz.centre()),
+                         approximate_value(G));
+    }
+    
+    
+    template<class R> 
+    Zonotope< Interval<R> > 
+    interval_over_approximation(const Zonotope< Interval<R> >& iz)
+    {
+      // FIXME: This is incorrect; need over-approximations
+      LinearAlgebra::Matrix< Interval<R> > G(iz.generators());
+      LinearAlgebra::Vector< Interval<R> > e(iz.number_of_generators(),Interval<R>(-1,+1));
+      LinearAlgebra::Matrix<R> nG=approximate_value(G);
+      Geometry::Point< Interval<R> > nc=iz.centre()+(G-nG)*e;
+      
+      return Zonotope<Interval<R> >(nc,nG);
+    }
+
     template<class R>
     std::ostream&
     Zonotope<R>::write(std::ostream& os) const 
@@ -713,24 +745,6 @@ namespace Ariadne {
 
     
        
-    template<class R> 
-    Zonotope< Interval<R> > 
-    box_over_approximation(const Zonotope< Interval<R> >& iz)
-    {
-      LinearAlgebra::Vector< Interval<R> > c=iz.centre();
-      LinearAlgebra::Matrix< Interval<R> > G=iz.generators();
-      
-      R x,r;
-      for(dimension_type i=0; i!=G.number_of_rows(); ++i) {
-        for(size_type j=0; j!=G.number_of_columns(); ++j) {
-          x=approximate_value(G(i,j));
-          r=error_bound(G(i,j));
-          c(i)=c(i)+Interval<R>(-r,r);
-          G(i,j)=x;
-        }
-      }
-      return Zonotope< Interval<R> >(c,G);
-    }
     
     
 
@@ -758,11 +772,15 @@ namespace Ariadne {
       Geometry::minkowski_sum(z,z);
       Geometry::minkowski_difference(z,z);
       
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-      Zonotope<F> iz;
+      typedef typename Numeric::traits<R>::arithmetic_type A;
+      Zonotope<A> iz;
       Geometry::over_approximation(iz);
-      
-    }
+      Geometry::approximation(iz);
+
+      //Can't instantiate for Rational type
+      //Geometry::interval_over_approximation(iz);
+
+   }
     
     
   }

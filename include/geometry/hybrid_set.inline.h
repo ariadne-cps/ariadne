@@ -218,10 +218,26 @@ HybridSet<S>::adjoin(const HybridSet<S1>& hs) {
 
 
 template<class S> inline
+typename HybridSet<S>::iterator 
+HybridSet<S>::begin()
+{ 
+  return this->_component_sets.begin();
+}
+
+
+template<class S> inline
 typename HybridSet<S>::const_iterator 
 HybridSet<S>::begin() const
 { 
   return this->_component_sets.begin();
+}
+
+
+template<class S> inline
+typename HybridSet<S>::iterator 
+HybridSet<S>::end()
+{ 
+  return this->_component_sets.end();
 }
 
 
@@ -245,6 +261,26 @@ HybridSet<S>::check_location(location_type q, const char* where) const
   }
 }
 
+template<class S1, class S2> inline
+tribool
+subset(const HybridSet<S1>& hs1, const HybridSet<S2>& hs2)
+{
+  if(hs1.locations()!=hs2.locations()) {
+    throw HybridSystemError("Comparing sets with different discrete locations");
+  }
+  
+  tribool result=true;
+  for(typename HybridSet<S1>::const_iterator hs1_iter=hs1.begin();
+      hs1_iter!=hs1.end(); ++hs1_iter)
+  {
+    location_type q=hs1_iter->first;
+    result=result && subset(hs1[q],hs2[q]);
+    if(!result) {
+      break;
+    }
+  }
+  return result;
+}
 
 template<class S> 
 std::ostream& 
@@ -263,6 +299,80 @@ operator<<(std::ostream& os, const HybridSet<S>& hs)
 
 
 
+
+
+template<class R> inline
+size_type
+HybridGridMaskSet<R>::capacity() const
+{
+  size_type result=0;
+  for(typename HybridGridMaskSet<R>::const_iterator loc_iter=this->begin(); 
+      loc_iter!=this->end(); ++loc_iter) 
+  {
+    result+=loc_iter->second.capacity();
+  }
+  return result;
+}
+
+
+template<class R> inline
+size_type
+HybridGridMaskSet<R>::size() const
+{
+  size_type result=0;
+  for(typename HybridGridMaskSet<R>::const_iterator loc_iter=this->begin(); 
+      loc_iter!=this->end(); ++loc_iter) 
+  {
+    result+=loc_iter->second.size();
+  }
+  return result;
+}
+
+
+template<class R> inline
+size_type
+HybridGridCellListSet<R>::size() const
+{
+  size_type result=0;
+  for(typename HybridGridCellListSet<R>::const_iterator loc_iter=this->begin(); 
+      loc_iter!=this->end(); ++loc_iter) 
+  {
+    result+=loc_iter->second.size();
+  }
+  return result;
+}
+
+
+template<class R> inline
+void
+HybridGridCellListSet<R>::unique_sort() 
+{
+  for(typename HybridGridCellListSet<R>::iterator loc_iter=this->begin(); 
+      loc_iter!=this->end(); ++loc_iter) 
+  {
+    loc_iter->second.unique_sort();
+  }
+}
+
+
+template<class R> inline
+HybridGridCellListSet<R>
+difference(const HybridGridCellListSet<R>& hgcl, const HybridGridMaskSet<R>& hgms) 
+{
+  if(hgcl.locations()!=hgms.locations()) {
+    throw HybridSystemError("Intersection of sets with different discrete locations");
+  }
+  
+  HybridGridCellListSet<R> result=hgcl;
+  result.clear();
+  for(typename HybridGridCellListSet<R>::const_iterator loc_iter=result.begin(); 
+      loc_iter!=result.end(); ++loc_iter) 
+  {
+    location_type q=loc_iter->first;
+    result[q]=difference(hgcl[q],hgms[q]);
+  }
+  return result;
+}
 
 
 template<class R> inline

@@ -58,7 +58,8 @@ int
 test_affine_integrator()
 {
   cout << __PRETTY_FUNCTION__ << endl;
-  
+  typedef Interval<R> I;
+
   {
     Matrix<R> T("[2]");
     Matrix<R> I("[1]");
@@ -81,21 +82,21 @@ test_affine_integrator()
   AffineVectorField<R> avf(A,b);
   Rectangle<R> bb("[-4,4]x[-4,4]");
   Rectangle<R> r("[-3.125,-2.875]x[-0.125,0.125]");
-  Zonotope<R> z; z=r;
+  Zonotope<I> iz; iz=r;
   
-  Zonotope<R> iz1=affine.integration_step(avf,z,h);
-  Zonotope<R> iz2=affine.integration_step(avf,iz1,h);
-  Zonotope<R> rz1=affine.reachability_step(avf,z,h);
-  Zonotope<R> rz2=affine.reachability_step(avf,iz1,h);
+  Zonotope<I> iz1=affine.integration_step(avf,iz,h);
+  Zonotope<I> iz2=affine.integration_step(avf,iz1,h);
+  Zonotope<I> riz1=affine.reachability_step(avf,iz,h);
+  Zonotope<I> riz2=affine.reachability_step(avf,iz1,h);
   
   if(h!=0.125) { cout << "h changed from 0.125 to " << h << endl; }
   
   epsfstream eps("test_affine_integrator.eps",bb);
-  eps << rz1 << rz2;
+  eps << over_approximation(riz1) << over_approximation(riz2);
   eps.set_fill_colour("blue");
-  eps << iz1 << iz2;
+  eps << over_approximation(iz1) << over_approximation(iz2);
   eps.set_fill_colour("yellow");
-  eps << z;
+  eps << over_approximation(iz);
   eps.close();
   
   cout << endl;

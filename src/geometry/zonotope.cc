@@ -33,7 +33,11 @@ namespace Ariadne {
       
     template class Zonotope<Real>;
     template class Zonotope< Interval<Real> >;
-
+  
+    template 
+    Zonotope< Interval<Real> > 
+    interval_over_approximation(const Zonotope< Interval<Real> >&);
+    
     template class ZonotopeVerticesIterator<Rational>;
     template class ZonotopeVerticesIterator<Real>;
   }

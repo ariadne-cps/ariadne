@@ -55,7 +55,7 @@ namespace Ariadne {
     
     template<class R>
     EulerIntegrator<R>::EulerIntegrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_basic_set_radius)
-      : Integrator<R>(maximum_step_size,lock_to_grid_time,maximum_basic_set_radius)
+      : Base_(maximum_step_size,lock_to_grid_time,maximum_basic_set_radius)
     {
     }
 

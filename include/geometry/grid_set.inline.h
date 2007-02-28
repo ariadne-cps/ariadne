@@ -179,6 +179,14 @@ namespace Ariadne {
 
 
     template<class R> inline
+    void
+    GridCellListSet<R>::unique_sort()
+    {
+      this->_lattice_set.unique_sort();
+    }
+
+
+    template<class R> inline
     void 
     GridCellListSet<R>::adjoin(const GridCell<R>& c) 
     {

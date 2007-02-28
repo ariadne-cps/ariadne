@@ -25,6 +25,7 @@
 #include "real_typedef.h"
 
 
+#include "linear_algebra/matrix.h"
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
@@ -35,6 +36,7 @@
 
 #include "python/python_utilities.h"
 using namespace Ariadne;
+using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
 
 #include <boost/python.hpp>
@@ -64,24 +66,57 @@ touching_intersection(const ListSet<BS1>& ls, const BS2& bs)
 }
 
 
+template<class R>
+inline
+ListSet< Zonotope<R> >
+over_approximate_interval_zonotope_list_set(const ListSet< Zonotope<Interval<R> > >& izls)
+{
+  ListSet< Zonotope<R> > result(izls.dimension());
+  for(typename ListSet< Zonotope<Interval<R> > >::const_iterator iz_iter=izls.begin();
+      iz_iter!=izls.end(); ++iz_iter)
+  {
+    result.adjoin(over_approximation(*iz_iter));
+  }
+  return result;
+}
+
+template<class R>
+inline
+ListSet< Zonotope<R> >
+approximate_interval_zonotope_list_set(const ListSet< Zonotope<Interval<R> > > izls)
+{
+  ListSet< Zonotope<R> > result(izls.dimension());
+  for(typename ListSet< Zonotope<Interval<R> > >::const_iterator iz_iter=izls.begin();
+      iz_iter!=izls.end(); ++iz_iter)
+  {
+    result.adjoin(approximation(*iz_iter));
+  }
+  return result;
+}
+
 
 template<class R>
 void export_list_set() 
 {
+  typedef Interval<R> I;
+  
   typedef Rectangle<R> RRectangle;
   typedef Parallelotope<R> RParallelotope;
   typedef Zonotope<R> RZonotope;
   typedef Polytope<R> RPolytope;
-  
+  typedef Zonotope<I> IZonotope;
+
   typedef ListSet< Rectangle<R> > RRectangleListSet;
   typedef ListSet< Parallelotope<R> > RParallelotopeListSet;
   typedef ListSet< Zonotope<R> > RZonotopeListSet;
   typedef ListSet< Polytope<R> > RPolytopeListSet;
+  typedef ListSet< Zonotope<I> > IZonotopeListSet;
   
   typedef GridCellListSet<R> RGridCellListSet;
   typedef GridMaskSet<R> RGridMaskSet;
   typedef PartitionTreeSet<R> RPartitionTreeSet;
   
+  typedef Zonotope< Interval<R> > IZonotope;
   def("open_intersection",(RRectangleListSet(*)(const RRectangleListSet&,const RRectangleListSet&))(&open_intersection));
   def("disjoint",(tribool(*)(const RRectangleListSet&,const RRectangleListSet&))(&disjoint));
   def("disjoint",(tribool(*)(const RZonotopeListSet&,const RZonotopeListSet&))(&disjoint));
@@ -147,6 +182,27 @@ void export_list_set()
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 
+  class_<IZonotopeListSet>("IntervalZonotopeListSet",init<int>())
+    .def(init<IZonotope>())
+    .def(init<RRectangleListSet>())
+    .def(init<RZonotopeListSet>())
+    .def(init<IZonotopeListSet>())
+    .def("dimension", &IZonotopeListSet::dimension)
+    .def("push_back", &IZonotopeListSet::push_back)
+    .def("adjoin", (void(IZonotopeListSet::*)(const IZonotope&))(&IZonotopeListSet::adjoin))
+    .def("adjoin", (void(IZonotopeListSet::*)(const IZonotopeListSet&))(&IZonotopeListSet::adjoin))
+    .def("size", &IZonotopeListSet::size)
+    .def("empty", &IZonotopeListSet::empty)
+    .def("__len__", &IZonotopeListSet::size)
+//    .def("__getitem__", &RParallelotopeListSet::get, return_value_policy<copy_const_reference>())
+    .def("__getitem__", &get_item<IZonotopeListSet>)
+//    .def("__setitem__", &set_item<IZonotopeListSet>)
+    .def("__iter__", iterator<IZonotopeListSet>())
+    .def(self_ns::str(self))    // __self_ns::str__
+  ;
+
+  def("over_approximation",&over_approximate_interval_zonotope_list_set<R>);
+  def("approximation",&approximate_interval_zonotope_list_set<R>);
 }
 
 template void export_list_set<Real>();

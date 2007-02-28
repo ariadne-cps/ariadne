@@ -50,38 +50,31 @@ namespace Ariadne {
      * The \f$C^1\f$-Affine algorithm is a Taylor method.
      */
     template<class R>
-    class AffineIntegrator : public Integrator<R> {
+    class AffineIntegrator
+      : public IntegratorBase< R, System::AffineVectorField<R>, Geometry::Zonotope< Numeric::Interval<R> > > 
+    {
       typedef Interval<R> I;
+      typedef IntegratorBase< R, System::AffineVectorField<R>, Geometry::Zonotope<I> > Base_;
      public:
       /*! \brief Constructor. */
       AffineIntegrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_set_radius);
 
      public:
-      /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a parallelotope. */
-      virtual Geometry::Parallelotope<R> integration_step(const System::VectorField<R>&,
-                                                          const Geometry::Parallelotope<R>&,
-                                                          time_type&) const;
-
       /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope. */
-      virtual Geometry::Zonotope<R> integration_step(const System::VectorField<R>&,
-                                                          const Geometry::Zonotope<R>&,
-                                                          time_type&) const;
+      virtual Geometry::Zonotope<I> integration_step(const System::VectorField<R>&,
+                                                     const Geometry::Zonotope<I>&,
+                                                     time_type&) const;
 
       
       /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. */
-      virtual Geometry::Zonotope<R> reachability_step(const System::VectorField<R>&,
-                                                      const Geometry::Zonotope<R>&,
+      virtual Geometry::Zonotope<I> reachability_step(const System::VectorField<R>&,
+                                                      const Geometry::Zonotope<I>&,
                                                       time_type& step_size) const;
      public:
       /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope. */
-      virtual Geometry::Zonotope< Interval<R> > integration_step(const System::AffineVectorField<R>&,
-                                                                 const Geometry::Zonotope< Interval<R> >&,
-                                                                 time_type&) const;
-
-      /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope. */
-      virtual Geometry::Zonotope<R> integration_step(const System::AffineVectorField<R>&,
-                                                          const Geometry::Zonotope<R>&,
-                                                          time_type&) const;
+      virtual Geometry::Zonotope<I> integration_step(const System::AffineVectorField<R>&,
+                                                     const Geometry::Zonotope<I>&,
+                                                     time_type&) const;
 
       
       /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. 
@@ -89,8 +82,8 @@ namespace Ariadne {
        * We use the formula that the reached set is 
        * \f\[ c + Ge + t(Ac+b) + 
        */
-      virtual Geometry::Zonotope<R> reachability_step(const System::AffineVectorField<R>&,
-                                                      const Geometry::Zonotope<R>&,
+      virtual Geometry::Zonotope<I> reachability_step(const System::AffineVectorField<R>&,
+                                                      const Geometry::Zonotope<I>&,
                                                       time_type& step_size) const;
 
      };

@@ -22,6 +22,7 @@
  */
  
 #include "../declarations.h"
+#include "../debug.h"
 #include "../exceptions.h"
 #include "../geometry/hybrid_set.h"
 #include "../system/hybrid_automaton.h"
@@ -165,11 +166,20 @@ Ariadne::Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<
     invariant.restrict(over_approximation(dm.invariant(),invariant.grid()));
   }
 
+  Geometry::HybridGridMaskSet<R> already_activated=invariants;
+  already_activated.clear();
+
   Geometry::HybridGridMaskSet<R> intermediate_set=this->continuous_chainreach(hybrid_automaton,initial_set,invariants);
   Geometry::HybridGridMaskSet<R> result_set=intermediate_set;
   
   Geometry::HybridGridCellListSet<R> new_activated=regular_intersection(intermediate_set,activations);
-  while(!new_activated.empty()) {
+  while(!Geometry::subset(new_activated,already_activated)) {
+    if(verbosity > 5) { std::cerr << new_activated.size() << " activated cells, " << std::flush; }
+    new_activated.unique_sort();
+    if(verbosity > 5) { std::cerr << "of which " << new_activated.size() << " are not duplicates, " << std::flush; }
+    new_activated=Geometry::difference(new_activated,already_activated);
+    if(verbosity > 5) { std::cerr << "and " << new_activated.size() << " are new. " << std::endl; }
+    already_activated.adjoin(new_activated);
     intermediate_set.clear();
     Geometry::HybridGridCellListSet<R> new_activated_image=this->discrete_step(hybrid_automaton,new_activated);
     intermediate_set.adjoin(new_activated_image);

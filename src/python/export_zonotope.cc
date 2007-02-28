@@ -59,6 +59,7 @@ Zonotope<R> over_approximation_of_minkowski_difference(const Zonotope<R>& z1, co
   return over_approximation(minkowski_difference(z1,z2));
 }
 
+
 template<class R>
 void export_zonotope() 
 {
@@ -104,4 +105,34 @@ void export_zonotope()
   ;
 }
 
+
+template<class R>
+void export_interval_zonotope() 
+{
+  typedef Interval<R> I;
+  typedef Rectangle<R> RRectangle;
+  typedef Zonotope<R> RZonotope;
+  typedef Zonotope<I> IZonotope;
+    
+  class_<IZonotope>("IntervalZonotope",init<int>())
+    .def(init<RZonotope>())
+    .def(init<RRectangle>())
+    .def(init<std::string>())
+    .def("centre",&IZonotope::centre)
+    .def("generators",&IZonotope::generators)
+    .def("dimension", &IZonotope::dimension)
+    .def("empty", &IZonotope::empty)
+    .def("contains", &IZonotope::contains)
+    .def("bounding_box", &IZonotope::bounding_box)
+    .def("subdivide", &IZonotope::subdivide)
+    .def(self_ns::str(self))
+  ;
+    
+  def("interval_over_approximation", (IZonotope(*)(const IZonotope&))(&interval_over_approximation));
+  def("over_approximation", (RZonotope(*)(const IZonotope&))(&over_approximation));
+  def("approximation", (RZonotope(*)(const IZonotope&))(&approximation));
+
+}
+
 template void export_zonotope<Real>();
+template void export_interval_zonotope<Real>();

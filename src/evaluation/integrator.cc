@@ -29,5 +29,9 @@
 namespace Ariadne {
   namespace Evaluation {
     template class Integrator<Real>;
+
+    template class IntegratorBase< Real, System::VectorField<Real>, Geometry::Rectangle<Real> >;
+    template class IntegratorBase<Real, System::VectorField<Real>, Geometry::Zonotope< Interval<Real> > >;
+    template class IntegratorBase< Real, System::AffineVectorField<Real>, Geometry::Zonotope< Interval<Real> > >;
   }
 }

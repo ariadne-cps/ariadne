@@ -30,11 +30,29 @@
 
 #include "../declarations.h"
 #include "../numeric/rational.h"
+#include "../base/tribool.h"
 
 namespace Ariadne {
-  
+
+  namespace Geometry {
+    template<class R> class Set;
+    template<class R> class ArbitrarySet;
+    template<class BS> class ListSet;
+    template<class R> class GridMaskSet;
+  }
+
   namespace Evaluation {
+
    
+    /*! \brief The identity function. */
+    template<class BS> inline
+    BS identity(const BS& bs) 
+    { 
+      return bs;
+    }
+
+
+
     /*! \brief %Base class for integration schemes. 
      *  \ingroup Integrate
      */
@@ -47,11 +65,11 @@ namespace Ariadne {
       R _minimum_basic_set_radius;
       R _maximum_basic_set_radius;
      public:
+      /*! The type used to denote real numbers. */
       typedef R real_type;
+
+      /*! The type used to denote an interval of real numbers. */
       typedef Interval<R> interval_type;
-     
-      virtual Geometry::Zonotope<R> identity(const Geometry::Zonotope<R>& z) const;
-      virtual LinearAlgebra::Vector< Interval<R> > field(const System::VectorField<R>&, const Geometry::Zonotope<R>& z) const;
      
       /*! \brief Virtual destructor. */
       virtual ~Integrator();
@@ -70,6 +88,38 @@ namespace Ariadne {
       /*! \brief The time after which an integrator may approximate computed sets on a grid,
        *  in order to use previously caches integration results for the grid. */
       virtual time_type lock_to_grid_time() const;
+
+
+
+      /*! \brief Integrate \a intial_set for time \a time under \a vector_field, while remaining in \a bounding_set. */
+      virtual Geometry::GridMaskSet<R> integrate(const System::VectorField<R>& vector_field,
+                                                  const Geometry::GridMaskSet<R>& initial_set,
+                                                  const Geometry::GridMaskSet<R>& bounding_set,
+                                                  const time_type& time) const = 0;
+
+      /*! \brief Integrate \a intial_set for times up to \a time under \a vector_field, while remaining in \a bounding_set. */
+      virtual Geometry::GridMaskSet<R> reach(const System::VectorField<R>& vector_field,
+                                             const Geometry::GridMaskSet<R>& initial_set,
+                                             const Geometry::GridMaskSet<R>& bounding_set,
+                                             const time_type& time) const = 0;
+
+      /*! \brief Integrate \a intial_set for all times under \a vector_field, while remaining in \a bounding_set. 
+       *
+       * Implemented by repeated calls to integrate(...) followed by a single call to reach(...).
+       */
+      virtual Geometry::GridMaskSet<R> chainreach(const System::VectorField<R>& vector_field,
+                                                   const Geometry::GridMaskSet<R>& initial_set,
+                                                   const Geometry::GridMaskSet<R>& bounding_set) const = 0;
+
+      /*! \brief  Verifies that the flow of \a vector_field starting in \a initial_set remains in \a safe_set all times.
+       *
+       * Implemented by repeated calls to integrate(...) followed by a single call to reach(...).
+       */
+      virtual tribool verify(const System::VectorField<R>& vector_field,
+                             const Geometry::GridMaskSet<R>& initial_set,
+                             const Geometry::GridMaskSet<R>& safe_set) const = 0;
+
+
 
 
 
@@ -100,160 +150,96 @@ namespace Ariadne {
                                                         const time_type& integration_time) const;
 
 
+    };
 
 
+
+
+
+
+    /*! \brief %Base class for integration schemes. 
+     *  \ingroup Integrate
+     */
+    template<class R, class VF, class BS>
+    class IntegratorBase
+      : public Integrator<R> 
+    {
+      typedef VF VectorField;
+      typedef BS BasicSet;
+      typedef Geometry::Rectangle<R> Rectangle;
+      typedef Geometry::ListSet<BS> ListSet;
+      typedef Geometry::GridCellListSet<R> GridCellListSet;
+      typedef Geometry::GridMaskSet<R> GridMaskSet;
      protected:
+      IntegratorBase(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_basic_set_radius)
+        : Integrator<R>(maximum_step_size,lock_to_grid_time,maximum_basic_set_radius) { }
+     protected:
+      virtual BasicSet integration_step(const VectorField&,
+                                        const BasicSet&,
+                                        time_type&) const = 0;
+     
+      virtual BasicSet reachability_step(const VectorField&,
+                                         const BasicSet&,
+                                         time_type&) const = 0;
+     
+      //virtual void adjoin_subdivision(ListSet&, const BasicSet&) = 0;
+     public:
+
       /*! \brief Template for integrating a basic set. */
-      template<class BS>
       BS
-      integrate_basic_set(const System::VectorField<R>& vector_field, 
-                          const BS& initial_set, 
-                          const time_type& time) const;
+      integrate(const VectorField& vector_field, 
+                const BS& initial_set, 
+                const time_type& time) const;
 
       
       /*! \brief Template for integrating a list set. */
-      template<class BS>
       Geometry::ListSet<BS> 
-      integrate_list_set(const System::VectorField<R>& vector_field, 
-                         const Geometry::ListSet<BS>& initial_set, 
-                         const time_type& time) const;
+      integrate(const VF& vector_field, 
+                const ListSet& initial_set, 
+                const time_type& time) const;
 
       
       /*! \brief Template for computing the reachable set from a list set. */
-      template<class BS>
       Geometry::ListSet<BS> 
-      reach_list_set(const System::VectorField<R>& vector_field, 
-                     const Geometry::ListSet<BS>& initial_set, 
-                     const time_type& time) const;
+      reach(const VectorField& vector_field, 
+            const ListSet& initial_set, 
+            const time_type& time) const;
 
-      
-     public:
-      /*! \brief An algorithm for integrating forward a rectangle. */
-      virtual 
-      Geometry::Rectangle<R>
-      integration_step(const System::VectorField<R>&,
-                       const Geometry::Rectangle<R>&,
-                       time_type&) const;
+      /*! \brief Template for computing the reachable set from a list set. */
+      Geometry::ListSet<BS> 
+      reach(const VectorField& vector_field, 
+            const ListSet& initial_set) const;
 
-      /*! \brief An algorithm for integrating forward a parallelotope. */
-      virtual 
-      Geometry::Zonotope<R> 
-      integration_step(const System::VectorField<R>&,
-                       const Geometry::Zonotope<R>&,
-                       time_type&) const;
 
-      /*! \brief An algorithm for integrating forward a zonotope. */
-      virtual 
-      Geometry::Zonotope< Interval<R> > 
-      integration_step(const System::VectorField<R>&,
-                       const Geometry::Zonotope< Interval<R> >&,
-                       time_type&) const;
-      
-      
-      /*! \brief An algorithm for integrating forward a rectangle up to a certain time. */
-      virtual Geometry::Rectangle<R> 
-      reachability_step(const System::VectorField<R>&,
-                        const Geometry::Rectangle<R>&,
-                        time_type&) const;
+      /*! \brief Template for computing the integral set from a list set. */
+      Geometry::GridMaskSet<R>
+      integrate(const System::VectorField<R>& vector_field, 
+                const Geometry::GridMaskSet<R>& initial_set, 
+                const Geometry::GridMaskSet<R>& bounding_set,
+                const time_type& time) const;
 
-      /*! \brief An algorithm for integrating forward a zonotope up to a certain time. 
-       *
-       * The result type is a zonotope with one extra generator, since the map is from \f$\mathbb{R}^n\times\mathbb{R}\rightarrow\mathbb{R}^n\f$.
-       * and hence is not invertible. 
-       */
-      virtual Geometry::Zonotope<R> 
-      reachability_step(const System::VectorField<R>&,
-                        const Geometry::Zonotope<R>&,
-                        time_type&) const;
+      /*! \brief Compute the reachable set. */
+      Geometry::GridMaskSet<R>
+      reach(const System::VectorField<R>& vector_field, 
+            const Geometry::GridMaskSet<R>& initial_set,
+            const Geometry::GridMaskSet<R>& bounding_set,
+            const time_type& time) const;
 
-      /*! \brief An algorithm for integrating forward a zonotope up to a certain time. 
-        */ 
-      virtual 
-      Geometry::Zonotope< Interval<R> > 
-      reachability_step(const System::VectorField<R>&,
-                        const Geometry::Zonotope< Interval<R> >&,
-                        time_type&) const;
+      Geometry::GridMaskSet<R>
+      chainreach(const System::VectorField<R>& vector_field, 
+                 const Geometry::GridMaskSet<R>& initial_set, 
+                 const Geometry::GridMaskSet<R>& bounding_set) const;
+
+      tribool
+      verify(const System::VectorField<R>& vector_field, 
+             const Geometry::GridMaskSet<R>& initial_set, 
+             const Geometry::GridMaskSet<R>& bounding_set) const;
+
 
      protected:
-      /*! \brief Constructs a zonotopic generator for the convex hull of \a iv and \a -iv. */ 
-      static LinearAlgebra::Matrix<R> symmetrize(const LinearAlgebra::Vector< Interval<R> >& r);
-     public:
-      /*! \brief An algorithm for integrating forward a rectangle. */
-      virtual Geometry::Rectangle<R> integrate(const System::VectorField<R>& vector_field,
-                                               const Geometry::Rectangle<R>& initial_set,
-                                               const time_type& time) const;
-     
-      /*! \brief An algorithm for integrating forward a zonotope. */
-      virtual Geometry::Zonotope<R> integrate(const System::VectorField<R>& vector_field,
-                                              const Geometry::Zonotope<R>& initial_set,
-                                              const time_type& time) const;
-     
-      /*! \brief An algorithm for integrating forward a set of rectangles. 
-       *
-       * The algorithm first finds \f$B_{n+1}\f$ such that \f$R_{n+1}\subset B_{n+1}\f$. 
-       * It then computes \f$ R_{n+1} = R_{n}+ h_{n} Df(B_{n+1})\f$.
-       *
-       * C0 algorithms are typically too inaccurate for even the simplest systems.
-       */
-      virtual Geometry::ListSet< Geometry::Rectangle<R> > integrate(const System::VectorField<R>& vector_field,
-                                                                 const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set,
-                                                                 const time_type& time) const;
-
-      /*! \brief An algorithm for integrating forward a set of zonotopes.
-       *
-       * The algorithm first finds \f$B_{n+1}\f$ such that \f$R_{n+1}\subset B_{n+1}\f$. 
-       * It then computes an interval matrix \f$ \mathcal{A}_{n} \f$ such that \f$ Df(B_{n+1}) \in \mathcal{A}_{n} \f$.
-       * It then computes a rectangle \f$ \mathcal{c}_{n+1} \f$ such that \f$ \Phi(t,c_{n})\in \mathcal{c}_{n+1} \f$.
-       * We then compute \f$ \mathcal{P}_{n} \f$ such that \f$ D\Phi(h,R_{n}) \subset \mathcal{P}_{n} \f$.
-       * We then compute \f$ A_{n+1} \f$ such that \f$ A_{n+1} \mathcal{e} \supset \mathcal{P}_{n} \mathcal{e} \f$.
-       */
-      virtual Geometry::ListSet< Geometry::Zonotope<R> > integrate(const System::VectorField<R>&,
-                                                                   const Geometry::ListSet< Geometry::Zonotope<R> >&,
-                                                                   const time_type&) const;
-      
-
-      /*! \brief An algorithm for computing the reachable set of in initial set of rectangles up to a certain time. (NOT CURRENTLY IMPLEMENTED) */
-      virtual Geometry::ListSet< Geometry::Rectangle<R> > reach(const System::VectorField<R>& vector_field,
-                                                                const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set,
-                                                                const time_type& time) const;      
-
-      /*! \brief An algorithm for computing the reachable set of in initial set of zonotopes up to a certain time. */
-      virtual Geometry::ListSet< Geometry::Zonotope<R> > reach(const System::VectorField<R>&,
-                                                               const Geometry::ListSet< Geometry::Zonotope<R> >&,
-                                                               const time_type&) const;
-
-
-
-      /*! \brief Integrate \a intial_set for time \a time under \a vector_field, while remaining in \a bounding_set. */
-      virtual Geometry::GridMaskSet<R> integrate(const System::VectorField<R>& vector_field,
-                                                 const Geometry::GridMaskSet<R>& initial_set,
-                                                 const Geometry::GridMaskSet<R>& bounding_set,
-                                                 const time_type& time) const;
-
-      /*! \brief Integrate \a intial_set for times up to \a time under \a vector_field, while remaining in \a bounding_set. */
-      virtual Geometry::GridMaskSet<R> reach(const System::VectorField<R>& vector_field,
-                                             const Geometry::GridMaskSet<R>& initial_set,
-                                             const Geometry::GridMaskSet<R>& bounding_set,
-                                             const time_type& time) const;
-
-      /*! \brief Integrate \a intial_set for all times under \a vector_field, while remaining in \a bounding_set. 
-       *
-       * Implemented by repeated calls to integrate(...) followed by a single call to reach(...).
-       */
-      virtual Geometry::GridMaskSet<R> chainreach(const System::VectorField<R>& vector_field,
-                                                  const Geometry::GridMaskSet<R>& initial_set,
-                                                  const Geometry::GridMaskSet<R>& bounding_set) const;
-
-      /*! \brief  Verifies that the flow of \a vector_field starting in \a initial_set remains in \a safe_set all times.
-       *
-       * Implemented by repeated calls to integrate(...) followed by a single call to reach(...).
-       */
-      virtual bool verify(const System::VectorField<R>& vector_field,
-                          const Geometry::GridMaskSet<R>& initial_set,
-                          const Geometry::GridMaskSet<R>& safe_set) const;
-
+      /*! \brief The identity function. */ 
+      BS identity(const BS& bs) const;
     };
-
 
 
 

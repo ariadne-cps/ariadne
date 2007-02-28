@@ -34,10 +34,13 @@
 namespace Ariadne {
   namespace Evaluation {
    
-    /*! \brief An integrator based on the \f$C^0\f$-Lohner algorithm. 
+    /*! \brief An integrator based on the Euler method.
      */
     template<class R>
-    class EulerIntegrator : public Integrator<R> {
+    class EulerIntegrator
+      : public IntegratorBase< R, System::VectorField<R>, Geometry::Rectangle<R> > 
+    {
+      typedef IntegratorBase< R, System::VectorField<R>, Geometry::Rectangle<R> >  Base_;
      public:
       /*! \brief Constructor. */
       EulerIntegrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_set_radius);

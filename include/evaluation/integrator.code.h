@@ -70,21 +70,7 @@ namespace Ariadne {
       }
     };
     
-    template<class R>
-    Geometry::Zonotope<R> 
-    Integrator<R>::identity(const Geometry::Zonotope<R>& z) const
-    {
-      return z;
-    }
-    
-    template<class R>
-    LinearAlgebra::Vector< Interval<R> >
-    Integrator<R>::field(const System::VectorField<R>& vf, const Geometry::Zonotope<R>& z) const
-    {
-      Geometry::Rectangle<R> r=z.bounding_box();
-      return vf(r);
-    }
-    
+
 
     /*!\ brief A class representing pre-computed bounds for an integration step. */
     template<class R>
@@ -154,19 +140,6 @@ namespace Ariadne {
     }
     
     
-    
-    
-    template<class R>
-    LinearAlgebra::Matrix<R>
-    Integrator<R>::symmetrize(const LinearAlgebra::Vector< Interval<R> >& iv)
-    {
-      LinearAlgebra::Matrix<R> A(iv.size(),iv.size()+1);
-      for(size_type i=0; i!=A.number_of_rows(); ++i) {
-        A(i,i)=iv(i).radius();
-        A(i,iv.size())=iv(i).centre();
-      }
-      return A;
-    }
     
     
     
@@ -298,19 +271,18 @@ namespace Ariadne {
     
     
     
-    template<class R>
-    template<class BS>
-    BS 
-    Integrator<R>::integrate_basic_set(const System::VectorField<R>& vector_field, 
-                                       const BS& initial_set, 
-                                       const time_type& time) const
+    template<class R, class VF, class BS>
+    typename IntegratorBase<R,VF,BS>::BasicSet 
+    IntegratorBase<R,VF,BS>::integrate(const VectorField& vector_field, 
+                                                const BasicSet& initial_set, 
+                                                const time_type& time) const
     {
       if(verbosity>4) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       if(time==0) { 
         return initial_set;
       }
       
-      const System::VectorField<R>& vf=vector_field;
+      const VF& vf=vector_field;
       BS bs=initial_set;
       time_type t=0;
       time_type h=this->maximum_step_size();
@@ -328,11 +300,10 @@ namespace Ariadne {
     
     
     // Template pattern for integrating a list set
-    template<class R>
-    template<class BS>
-    Geometry::ListSet<BS> 
-    Integrator<R>::integrate_list_set(const System::VectorField<R>& vector_field, 
-                                      const Geometry::ListSet<BS>& initial_set, 
+    template<class R, class VF, class BS>
+    typename IntegratorBase<R,VF,BS>::ListSet
+    IntegratorBase<R,VF,BS>::integrate(const VectorField& vector_field, 
+                                      const ListSet& initial_set, 
                                       const time_type& time) const
     {
       if(verbosity>4) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
@@ -341,7 +312,7 @@ namespace Ariadne {
         return initial_set;
       }
 
-      const System::VectorField<R>& vf=vector_field;
+      const VectorField& vf=vector_field;
       time_type step_size=this->maximum_step_size();
       R maximum_set_radius=this->maximum_basic_set_radius();
 
@@ -349,16 +320,16 @@ namespace Ariadne {
       
       time_type t=0; // t is the time elapsed!
       time_type h=step_size;
-      BS bs(initial_set.dimension());
+      BasicSet bs(initial_set.dimension());
       
-      typedef std::pair< time_type,BS > timed_set_type;
+      typedef std::pair< time_type, BasicSet> timed_set_type;
       
       // Working sets contains (time,set) pairs, storing the sets reached with different remaining
       std::vector< timed_set_type > working_sets;
       
-      Geometry::ListSet<BS> final_set(initial_set.dimension());
+      ListSet final_set(initial_set.dimension());
       
-      typedef typename Geometry::ListSet<BS>::const_iterator list_set_const_iterator;
+      typedef typename ListSet::const_iterator list_set_const_iterator;
       for(list_set_const_iterator bs_iter=initial_set.begin(); bs_iter!=initial_set.end(); ++bs_iter) {
         working_sets.push_back(timed_set_type(0,*bs_iter));
       }
@@ -375,7 +346,7 @@ namespace Ariadne {
         if(verbosity>5) { std::cerr << "  t=" << t << "  bs=" << bs << std::endl; }
         if(bs.radius()>maximum_set_radius) {
           if(verbosity>5) { std::cerr << "    subdividing..." << std::flush; }
-          Geometry::ListSet<BS> subdivisions=bs.subdivide();
+          ListSet subdivisions=bs.subdivide();
           for(list_set_const_iterator subdiv_iter=subdivisions.begin(); 
               subdiv_iter!=subdivisions.end(); ++subdiv_iter)
           {
@@ -414,15 +385,14 @@ namespace Ariadne {
     
     
     
-    template<class R>
-    template<class BS>
-    Geometry::ListSet<BS> 
-    Integrator<R>::reach_list_set(const System::VectorField<R>& vector_field, 
-                                  const Geometry::ListSet<BS>& initial_set, 
-                                  const time_type& time) const
+    template<class R, class VF, class BS>
+    typename IntegratorBase<R,VF,BS>::ListSet
+    IntegratorBase<R,VF,BS>::reach(const VectorField& vector_field, 
+                                   const ListSet& initial_set, 
+                                   const time_type& time) const
     {
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      const System::VectorField<R>& vf=vector_field;
+      const VectorField& vf=vector_field;
       time_type step_size=this->maximum_step_size();
       R maximum_set_radius=this->maximum_basic_set_radius();
     
@@ -432,15 +402,15 @@ namespace Ariadne {
       
       time_type t=0;
       time_type h=step_size;
-      BS bs(initial_set.dimension());
-      BS rs(initial_set.dimension());
+      BasicSet bs(initial_set.dimension());
+      BasicSet rs(initial_set.dimension());
       
-      typedef typename Geometry::ListSet<BS>::const_iterator list_set_const_iterator;
-      typedef typename Geometry::ListSet<BS>::iterator list_set_iterator;
-      typedef std::pair< time_type, BS > timed_set_type;
+      typedef typename ListSet::const_iterator list_set_const_iterator;
+      typedef typename ListSet::iterator list_set_iterator;
+      typedef std::pair< time_type, BasicSet > timed_set_type;
 
       std::vector< timed_set_type > working_sets;
-      Geometry::ListSet<BS> reach_set(initial_set.dimension());
+      ListSet reach_set(initial_set.dimension());
       
       for(list_set_const_iterator bs_iter=initial_set.begin(); bs_iter!=initial_set.end(); ++bs_iter) {
         working_sets.push_back(timed_set_type(0,*bs_iter));
@@ -465,7 +435,7 @@ namespace Ariadne {
 
         if(bs.radius()>maximum_set_radius) {
         if(verbosity>6) { std::cerr << "  subdividing..." << std::endl; }
-          Geometry::ListSet<BS> subdivisions=bs.subdivide();
+          ListSet subdivisions=bs.subdivide();
           if(verbosity>6) { std::cerr << "    subdivisions.size() =" << subdivisions.size() << std::endl; }
           for(list_set_const_iterator subdiv_iter=subdivisions.begin(); 
               subdiv_iter!=subdivisions.end(); ++subdiv_iter)
@@ -506,144 +476,79 @@ namespace Ariadne {
 
     
     
-    
-    
-    
-    
-    template<class R>
-    Geometry::ListSet< Geometry::Rectangle<R> >
-    Integrator<R>::reach(const System::VectorField<R>& vector_field,
-                         const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set,
-                         const time_type& time) const
+    template<class R, class VF, class BS>
+    typename IntegratorBase<R,VF,BS>::ListSet
+    IntegratorBase<R,VF,BS>::reach(const VectorField& vector_field, 
+                                   const ListSet& initial_set) const
     {
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      return this->reach_list_set(vector_field,initial_set,time);
-    }
+      const VectorField& vf=vector_field;
+      time_type step_size=this->maximum_step_size();
+      R maximum_set_radius=this->maximum_basic_set_radius();
     
-    
-    
-    template<class R>
-    Geometry::Rectangle<R>
-    Integrator<R>::integration_step(const System::VectorField<R>& vector_field, 
-                                    const Geometry::Rectangle<R>& initial_set, 
-                                    time_type& time) const
-    {
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      throw DeferredImplementation(__PRETTY_FUNCTION__);
-    }
-    
-    template<class R>
-    Geometry::Zonotope<R>
-    Integrator<R>::integration_step(const System::VectorField<R>& vector_field, 
-                                      const Geometry::Zonotope<R>& initial_set, 
-                                      time_type& time) const
-    {
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      return Geometry::Zonotope<R>(this->integration_step(vector_field,initial_set.bounding_box(),time));
-    }
-    
-    template<class R>
-    Geometry::Zonotope< Interval<R> >
-    Integrator<R>::integration_step(const System::VectorField<R>& vector_field, 
-                                      const Geometry::Zonotope< Interval<R> >& initial_set, 
-                                      time_type& time) const
-    {
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      return Geometry::Zonotope< Interval<R> >(this->integration_step(vector_field,initial_set.bounding_box(),time));
-    }
-    
-    
-    
-    template<class R>
-    Geometry::Rectangle<R> 
-    Integrator<R>::reachability_step(const System::VectorField<R>& vf,
-                                       const Geometry::Rectangle<R>& is,
-                                       time_type& h) const 
-    {
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      throw DeferredImplementation(__PRETTY_FUNCTION__);
-    }
-    
-    
-    template<class R>
-    Geometry::Zonotope<R> 
-    Integrator<R>::reachability_step(const System::VectorField<R>& vf,
-                                       const Geometry::Zonotope<R>& is,
-                                       time_type& h) const 
-    {
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      return Geometry::Zonotope<R>(this->reachability_step(vf,is.bounding_box(),h));
-    }
+      if(verbosity>4) {
+        std::cerr << "step_size=" << conv_approx<double>(step_size) << "  maximum_set_radius()=" << maximum_set_radius << std::endl<<std::flush;
+      }
+      
+      time_type t=0;
+      time_type h=step_size;
+      BasicSet bs(initial_set.dimension());
+      BasicSet rs(initial_set.dimension());
+      
+      typedef typename ListSet::const_iterator list_set_const_iterator;
+      typedef typename ListSet::iterator list_set_iterator;
 
-    template<class R>
-    Geometry::Zonotope< Interval<R> > 
-    Integrator<R>::reachability_step(const System::VectorField<R>& vf,
-                                       const Geometry::Zonotope< Interval<R> >& is,
-                                       time_type& h) const 
-    {
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      return Geometry::Zonotope< Interval<R> >(this->reachability_step(vf,is.bounding_box(),h));
-    }
+      ListSet reach_set(initial_set.dimension());
+      
+      if(verbosity>6) { std::cerr << "initial_set.size()=" << initial_set.size() << std::endl; }
+      assert(reach_set.size()==0);
+
+      for(list_set_const_iterator bs_iter=initial_set.begin(); bs_iter!=initial_set.end(); ++bs_iter) {
+        bs=*bs_iter;
+        h=step_size;
+        
+        if(verbosity>6) { std::cerr << "  t=" << conv_approx<double>(t) << "  bs.centre()=" << bs.centre() << "  bs.radius() = " << bs.radius() << std::endl; }
+
+        while(bs.radius()<maximum_set_radius) {
+          if(verbosity>6) { std::cerr << "  integrating..." << std::endl; }
+         
+          if(verbosity>6) {
+            std::cerr << "  h=" << conv_approx<double>(h)
+                      << "  bs=" << bs << std::endl;
+          }
+
+          rs=this->reachability_step(vf,bs,h);
+          reach_set.adjoin(rs);
+          
+          bs=integration_step(vf,bs,h);
+        } 
+          
+      }
+      
+      if(verbosity>4) {
+        std::cerr << "  reach_set.size()=" << reach_set.size() <<  std::endl;
+      }
+      return reach_set;
+    } 
+
+    
+    
+    
+    
+    
+    
 
 
+    template<class R, class VF, class BS>
+    Geometry::GridMaskSet<R>
+    IntegratorBase<R,VF,BS>::integrate(const System::VectorField<R>& vector_field, 
+                                      const Geometry::GridMaskSet<R>& initial_set,
+                                      const Geometry::GridMaskSet<R>& bounding_set,
+                                      const time_type& time) const
+    {
+      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+      const VectorField& vf=dynamic_cast<const VectorField&>(vector_field);
 
-
-    template<class R>
-    Geometry::Rectangle<R>
-    Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
-                               const Geometry::Rectangle<R>& initial_set, 
-                               const time_type& time) const
-    {
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      return this->integrate_basic_set(vector_field,initial_set,time);
-    }
-    
-    
-    
-    template<class R>
-    Geometry::Zonotope<R>
-    Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
-                               const Geometry::Zonotope<R>& initial_set, 
-                               const time_type& time) const
-    {
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      Geometry::Zonotope<R> result=this->integrate_basic_set(vector_field,initial_set,time);
-      if(verbosity>2) { std::cerr << result << std::endl; }
-      return result;
-    }
-    
-    
-    
-    template<class R>
-    Geometry::ListSet< Geometry::Rectangle<R> >
-    Integrator<R>::integrate(const System::VectorField<R>& vector_field,
-                               const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set,
-                               const time_type& time) const
-    {
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-     return this->integrate_list_set(vector_field,initial_set,time);
-    }
-    
-    
-    template<class R>
-    Geometry::ListSet< Geometry::Zonotope<R> > 
-    Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
-                               const Geometry::ListSet< Geometry::Zonotope<R> >& initial_set, 
-                               const time_type& time) const
-    {
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      return this->integrate_list_set(vector_field,initial_set,time);
-    }
-   
-    
-    template<class R>
-    Geometry::GridMaskSet<R> 
-    Integrator<R>::integrate(const System::VectorField<R>& vector_field, 
-                             const Geometry::GridMaskSet<R>& initial_set,
-                             const Geometry::GridMaskSet<R>& bounding_set,
-                             const time_type& time) const
-    {
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       check_same_grid(initial_set,bounding_set,__PRETTY_FUNCTION__);
       using namespace System;
       using namespace Geometry;
@@ -655,14 +560,13 @@ namespace Ariadne {
       
       time_type step_size=this->maximum_step_size();
       
-      const Geometry::Grid<R>& g(initial_set.grid());
-      Combinatoric::LatticeBlock lb=bounding_set.block();
-      Geometry::Rectangle<R> bb=bounding_set.bounding_box();
+      Rectangle bb=bounding_set.bounding_box();
       
-      Geometry::GridMaskSet<R> result(bounding_set.grid(),bounding_set.block());
+      GridMaskSet result(bounding_set);
+      result.clear();
       
-      Geometry::Rectangle<R> tmp_rectangle;
-      Geometry::Zonotope<R> tmp_zonotope;
+      Rectangle tmp_rectangle;
+      BasicSet tmp_basic_set;
       
       time_type t=time;
       time_type h=step_size;
@@ -671,10 +575,12 @@ namespace Ariadne {
       
       R spacial_tolerance=2;
       
-      ListSet< Zonotope<R> > start_set;
-      ListSet< Zonotope<R> > finish_set;
-      for(typename GridMaskSet<R>::const_iterator iter=initial_set.begin(); iter!=initial_set.end(); ++iter) {
-        start_set.adjoin(Zonotope<R>(Rectangle<R>(*iter)));
+      ListSet start_set;
+      ListSet finish_set;
+      for(typename GridMaskSet::const_iterator iter=initial_set.begin(); iter!=initial_set.end(); ++iter) {
+        tmp_rectangle=*iter;
+        tmp_basic_set=tmp_rectangle;
+        start_set.adjoin(tmp_basic_set);
       }
       
       while(t!=0) {
@@ -682,84 +588,74 @@ namespace Ariadne {
         std::cerr << "time left=" << t << "  stepsize=" << h << "  sets in list=" << start_set.size() << "\n";
 #endif
         h=min(t,h);
-        for(typename ListSet< Zonotope<R> >::const_iterator iter=start_set.begin(); iter!=start_set.end(); ++iter) {
-          const VectorField<R>& vf=vector_field;
-          Geometry::Zonotope<R> p(*iter);
+        for(typename ListSet::const_iterator iter=start_set.begin(); iter!=start_set.end(); ++iter) {
+          BasicSet p(*iter);
           p=this->integrate(vf,p,h);
           finish_set.adjoin(p);
         }
         start_set.clear();
-        GridMaskSet<R> mask_set(g,lb);
-        for(typename ListSet< Zonotope<R> >::const_iterator iter=finish_set.begin(); iter!=finish_set.end(); ++iter) {
-          const Zonotope<R>& p=*iter;
+        GridMaskSet mask_set(bounding_set);
+        mask_set.clear();
+        for(typename ListSet::const_iterator iter=finish_set.begin(); iter!=finish_set.end(); ++iter) {
+          const BasicSet& p=*iter;
           if(p.radius()>spacial_tolerance) {
 #ifdef DEBUG
             std::cerr << "Splitting, radius=" << p.radius() << "\n" << p << "\n";
 #endif
-            GridCellListSet<R> p_approx=over_approximation(p,g);
-            mask_set.adjoin(p_approx);
+            mask_set.adjoin_over_approximation(p);
           }
           else {
             start_set.adjoin(p);
           }
         }
-        for(typename GridMaskSet<R>::const_iterator iter=mask_set.begin(); iter!=mask_set.end(); ++iter) {
+        for(typename GridMaskSet::const_iterator iter=mask_set.begin(); iter!=mask_set.end(); ++iter) {
           tmp_rectangle=*iter;
-          tmp_zonotope=tmp_rectangle;
-          start_set.adjoin(tmp_zonotope);
+          tmp_basic_set=tmp_rectangle;
+          start_set.adjoin(tmp_basic_set);
         }
         finish_set.clear();
         t-=h;
       }
     
-      for(typename ListSet< Zonotope<R> >::const_iterator iter=start_set.begin(); iter!=start_set.end(); ++iter) {
-        GridCellListSet<R> oai=over_approximation(*iter,g);
-        result.adjoin(oai);
+      for(typename ListSet::const_iterator iter=start_set.begin(); iter!=start_set.end(); ++iter) {
+        const BasicSet& bs=*iter;
+        result.adjoin_over_approximation(bs);
       }
       return result;
     }
    
     
     
-    template<class R>
-    Geometry::ListSet< Geometry::Zonotope<R> > 
-    Integrator<R>::reach(const System::VectorField<R>& vector_field, 
-                           const Geometry::ListSet< Geometry::Zonotope<R> >& initial_set, 
-                           const time_type& time) const
+  
+    
+    template<class R, class VF, class BS>
+    Geometry::GridMaskSet<R>
+    IntegratorBase<R,VF,BS>::reach(const System::VectorField<R>& vector_field, 
+                                  const Geometry::GridMaskSet<R>& initial_set,
+                                  const Geometry::GridMaskSet<R>& bounding_set,
+                                  const time_type& time) const
     {
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      return reach_list_set(vector_field,initial_set,time);
-    }
-    
-    
-    
-    template<class R>
-    Geometry::GridMaskSet<R> 
-    Integrator<R>::reach(const System::VectorField<R>& vector_field, 
-                           const Geometry::GridMaskSet<R>& initial_set,
-                           const Geometry::GridMaskSet<R>& bounding_set,
-                           const time_type& time) const
-    {
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
-      typedef typename Geometry::ListSet< Geometry::Zonotope<R> >::const_iterator zls_const_iterator;
+      typedef typename GridMaskSet::const_iterator gms_const_iterator;
+      typedef typename ListSet::const_iterator ls_const_iterator;
       check_bounded(initial_set,__PRETTY_FUNCTION__);
       check_bounded(bounding_set,__PRETTY_FUNCTION__);
+      const VectorField& vf=dynamic_cast<const VectorField&>(vector_field);
       
       if(!subset(initial_set,bounding_set)) {
         //throw std::runtime_error(strcat(__PRETTY_FUNCTION__,": Initial set must be subset of bounding set"));
         throw std::runtime_error("Initial set must be subset of bounding set");
       }
         
-      const Geometry::Grid<R>& g=initial_set.grid();
-      const Geometry::GridMaskSet<R>& is=initial_set;
-      const Geometry::Rectangle<R>& bb=bounding_set.bounding_box();
-      const Combinatoric::LatticeBlock lb=over_approximation(bb,g).lattice_set();
+      const GridMaskSet& is=initial_set;
+      const Rectangle bb=bounding_set.bounding_box();
       
-      Geometry::GridMaskSet<R> stored(g,lb);
-      Geometry::GridMaskSet<R> found(g,lb);
-      Geometry::GridMaskSet<R> image(g,lb);
-      Geometry::GridMaskSet<R> result(g,lb);
+      GridMaskSet result(bounding_set);
+      result.clear();
+      
+      GridMaskSet stored(result);
+      GridMaskSet found(result);
+      GridMaskSet image(result);
       found.adjoin(is);
       
       int steps=int_up<int>(time_type(time/this->lock_to_grid_time()));
@@ -771,125 +667,128 @@ namespace Ariadne {
         found=difference(found,stored);
         stored.adjoin(found);
         image.clear();
-        Geometry::GridMaskSet<R> image=this->integrate(vector_field,found,bounding_set,time_step);
+        GridMaskSet image=this->integrate(vf,found,bounding_set,time_step);
         found=image;
       }
       
-      Geometry::ListSet< Geometry::Zonotope<R> > input_list;
-      Geometry::ListSet< Geometry::Zonotope<R> > output_list;
+      ListSet input_list;
+      ListSet output_list;
       for(gms_const_iterator iter=stored.begin(); iter!=stored.end(); ++iter) {
-        //Geometry::Rectangle<R> r=*iter;
-        //Geometry::Zonotope<R> z(r);
-        input_list.adjoin(Geometry::Zonotope<R>(Geometry::Rectangle<R>(*iter)));
+        input_list.adjoin(BasicSet(Rectangle(*iter)));
       }
-      output_list=this->reach(vector_field,input_list,time_step);
-      for(zls_const_iterator iter=output_list.begin(); iter!=output_list.end(); ++iter) {
-        Geometry::Zonotope<R> fz=*iter;
-        Geometry::GridCellListSet<R> oai=over_approximation(fz,g);
-        result.adjoin(oai);
+      output_list=this->reach(vf,input_list,time_step);
+      for(ls_const_iterator iter=output_list.begin(); iter!=output_list.end(); ++iter) {
+        const BasicSet& fz=*iter;
+        result.adjoin_over_approximation(fz);
       }
       return result;
     }
     
     
     
-    template<class R>
-    Geometry::GridMaskSet<R> 
-    Integrator<R>::chainreach(const System::VectorField<R>& vf, 
-                              const Geometry::GridMaskSet<R>& initial_set, 
-                              const Geometry::GridMaskSet<R>& bounding_set) const
+    template<class R, class VF, class BS>
+    Geometry::GridMaskSet<R>
+    IntegratorBase<R,VF,BS>::chainreach(const System::VectorField<R>& vector_field, 
+                                        const Geometry::GridMaskSet<R>& initial_set, 
+                                        const Geometry::GridMaskSet<R>& bounding_set) const
     {
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
-      typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
-      typedef typename Geometry::ListSet< Geometry::Parallelotope<R> >::const_iterator pls_const_iterator;
-      typedef typename Geometry::ListSet< Geometry::Zonotope<R> >::const_iterator zls_const_iterator;
+      typedef typename GridCellListSet::const_iterator gcls_const_iterator;
+      typedef typename GridMaskSet::const_iterator gms_const_iterator;
+      typedef typename ListSet::const_iterator ls_const_iterator;
       check_bounded(initial_set,__PRETTY_FUNCTION__);
       check_bounded(bounding_set,__PRETTY_FUNCTION__);
+      const VectorField& vf=dynamic_cast<const VectorField&>(vector_field);
      
       if(!subset(initial_set,bounding_set)) {
         //throw std::runtime_error(strcat(__PRETTY_FUNCTION__,": Initial set must be subset of bounding set"));
         throw std::runtime_error("Initial set must be subset of bounding set");
       }
         
-      const Geometry::Grid<R>& g=initial_set.grid();
-      const Geometry::GridMaskSet<R>& is=initial_set;
-      const Geometry::Rectangle<R>& bb=bounding_set.bounding_box();
-      const Combinatoric::LatticeBlock lb=over_approximation(bb,g).lattice_set();
+      const GridMaskSet& is=initial_set;
+      const Rectangle bb=bounding_set.bounding_box();
       
-      Geometry::GridMaskSet<R> result(g,lb);
-      Geometry::GridCellListSet<R> found(g);
-      Geometry::GridCellListSet<R> image(g);
+      GridMaskSet result(initial_set);
+      result.clear();
+      GridCellListSet image(initial_set.grid());
+      GridCellListSet found(initial_set.grid());
       found.adjoin(is);
       
       time_type step_size=this->maximum_step_size();
       time_type time_step=this->lock_to_grid_time();
       
+      if(verbosity>4) { std::cerr << "Beginning integration phase" << std::endl; }
       while(!subset(found,result)) {
+        if(verbosity>5) { std::cerr << "Found " << found.size() << " cells, " << std::flush; }
+        found.unique_sort();
+        if(verbosity>5) { std::cerr << "of which " << found.size() << " are not duplicates," << std::flush; }
         found=difference(found,result);
+        if(verbosity>5) { std::cerr << " and " << found.size() << " are new" << std::endl; }
         result.adjoin(found);
         image.clear();
         uint size=0;
-        Geometry::ListSet< Geometry::Parallelotope<R> > parallotope_list;
+        ListSet basic_set_list;
         for(gcls_const_iterator iter=found.begin(); iter!=found.end(); ++iter) {
           ++size;
-          Geometry::Rectangle<R> r=*iter;
-          Geometry::Parallelotope<R> pp(r);
-          parallotope_list.adjoin(pp);
+          Rectangle r=*iter;
+          BasicSet z(r);
+          basic_set_list.adjoin(z);
         }
-        parallotope_list=this->integrate_list_set(vf,parallotope_list,time_step);
-        for(pls_const_iterator iter=parallotope_list.begin(); iter!=parallotope_list.end(); ++iter) {
-          Geometry::Parallelotope<R> fp=*iter;
+        basic_set_list=this->integrate(vf,basic_set_list,time_step);
+        for(ls_const_iterator iter=basic_set_list.begin(); iter!=basic_set_list.end(); ++iter) {
+          const BasicSet& fp=*iter;
           if(!disjoint(fp.bounding_box(),bounding_set)) {
-            image.adjoin(over_approximation(fp,g));
+            image.adjoin_over_approximation(fp);
           }
         }
         found=regular_intersection(image,bounding_set);
       }
+      if(verbosity>5) { std::cerr << "Found " << result.size() << " cells, " << std::endl; }
       
-      Geometry::ListSet< Geometry::Zonotope<R> > zonotope_list;
+      if(verbosity>4) { std::cerr << "Beginning reachability phase" << std::endl; }
+      ListSet reach_basic_set_list;
       for(gms_const_iterator iter=result.begin(); iter!=result.end(); ++iter) {
-        Geometry::Rectangle<R> r=*iter;
-        Geometry::Zonotope<R> pp(r);
-        zonotope_list.adjoin(pp);
+        Rectangle r=*iter;
+        BasicSet z(r);
+        reach_basic_set_list.adjoin(z);
       }
-      zonotope_list=this->reach(vf,zonotope_list,time_step);
-      for(zls_const_iterator iter=zonotope_list.begin(); iter!=zonotope_list.end(); ++iter) {
-        Geometry::Zonotope<R> fz=*iter;
+      reach_basic_set_list=this->reach(vf,reach_basic_set_list,time_step);
+      for(ls_const_iterator iter=reach_basic_set_list.begin(); iter!=reach_basic_set_list.end(); ++iter) {
+        BasicSet fz=*iter;
         if(!disjoint(fz.bounding_box(),bounding_set)) {
-          result.adjoin(over_approximation(fz,g));
+          result.adjoin_over_approximation(fz);
         }
       }
+      if(verbosity>4) { std::cerr << "Reached " << result.size() << " cells, " << std::endl; }
       
       return result;
     }
 
-    template<class R>
-    bool
-    Integrator<R>::verify(const System::VectorField<R>& vf, 
-                          const Geometry::GridMaskSet<R>& initial_set, 
-                          const Geometry::GridMaskSet<R>& safe_set) const
+    template<class R, class VF, class BS>
+    tribool
+    IntegratorBase<R,VF,BS>::verify(const System::VectorField<R>& vector_field, 
+                                   const Geometry::GridMaskSet<R>& initial_set, 
+                                   const Geometry::GridMaskSet<R>& safe_set) const
     {
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
-      typedef typename Geometry::ListSet< Geometry::Parallelotope<R> >::const_iterator pls_const_iterator;
+      typedef typename GridCellListSet::const_iterator gcls_const_iterator;
+      typedef typename ListSet::const_iterator ls_const_iterator;
       check_bounded(initial_set,__PRETTY_FUNCTION__);
       check_bounded(safe_set,__PRETTY_FUNCTION__);
+      const VectorField& vf=dynamic_cast<const VectorField&>(vector_field);
      
       if(!subset(initial_set,safe_set)) {
         //throw std::runtime_error(strcat(__PRETTY_FUNCTION__,": Initial set must be subset of bounding set"));
         throw std::runtime_error("Initial set must be subset of bounding set");
       }
         
-      const Geometry::Grid<R>& g=initial_set.grid();
-      const Geometry::GridMaskSet<R>& is=initial_set;
-      const Geometry::Rectangle<R>& bb=safe_set.bounding_box();
-      const Combinatoric::LatticeBlock lb=over_approximation(bb,g).lattice_set();
+      const GridMaskSet& is=initial_set;
+      const Rectangle bb=safe_set.bounding_box();
       
-      Geometry::GridMaskSet<R> chainreach(g,lb);
-      Geometry::GridCellListSet<R> found(g);
-      Geometry::GridCellListSet<R> image(g);
-      Geometry::GridCellListSet<R> cellimage(g);
+      GridMaskSet chainreach(is);
+      GridCellListSet found(is.grid());
+      GridCellListSet image(is.grid());
+      GridCellListSet cellimage(is.grid());
       found.adjoin(is);
       
       time_type step_size=this->maximum_step_size();
@@ -900,21 +799,22 @@ namespace Ariadne {
         chainreach.adjoin(found);
         image.clear();
         uint size=0;
-        Geometry::ListSet< Geometry::Parallelotope<R> > parallotope_list;
+        ListSet basic_set_list;
         for(gcls_const_iterator iter=found.begin(); iter!=found.end(); ++iter) {
           ++size;
-          Geometry::Rectangle<R> r=*iter;
-          Geometry::Parallelotope<R> pp(r);
-          parallotope_list.adjoin(pp);
+          Rectangle r=*iter;
+          BasicSet pp(r);
+          basic_set_list.adjoin(pp);
         }
-        parallotope_list=this->integrate_list_set(vf,parallotope_list,time_step);
-        for(pls_const_iterator iter=parallotope_list.begin(); iter!=parallotope_list.end(); ++iter) {
-          Geometry::Parallelotope<R> fp=*iter;
-          cellimage=over_approximation(fp,g);
+        basic_set_list=this->integrate(vf,basic_set_list,time_step);
+        for(ls_const_iterator iter=basic_set_list.begin(); iter!=basic_set_list.end(); ++iter) {
+          const BasicSet& fp=*iter;
+          cellimage.adjoin_over_approximation(fp);
           if(!subset(cellimage,safe_set)) {
             return false;
           }
           image.adjoin(cellimage);
+          cellimage.clear();
         }
         found=image;
       }

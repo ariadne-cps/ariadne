@@ -41,8 +41,11 @@ namespace Ariadne {
      * The \f$C^1\f$-Lohner algorithm is a Taylor method.
      */
     template<class R>
-    class LohnerIntegrator : public Integrator<R> {
+    class LohnerIntegrator
+      : public IntegratorBase<R, System::VectorField<R>, Geometry::Zonotope< Interval<R> > > 
+    {
       typedef Interval<R> I;
+      typedef IntegratorBase<R, System::VectorField<R>, Geometry::Zonotope< Interval<R> > > Base_;
      public:
       /*! \brief Constructor. */
       LohnerIntegrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_set_radius);
@@ -56,11 +59,6 @@ namespace Ariadne {
        * We then compute \f$ \mathcal{P}_{n} \f$ such that \f$ D\Phi(h,R_{n}) \subset \mathcal{P}_{n} \f$.
        * We then compute \f$ A_{n+1} \f$ such that \f$ A_{n+1} e \supset \mathcal{P}_{n} e \f$.
        */
-      virtual Geometry::Zonotope<R> integration_step(const System::VectorField<R>&,
-                                                          const Geometry::Zonotope<R>&,
-                                                          time_type&) const;
-
-      /*! \brief A C1 algorithm for integrating forward an interval zonotope. */
       virtual Geometry::Zonotope< Interval<R> > 
       integration_step(const System::VectorField<R>&,
                        const Geometry::Zonotope< Interval<R> >&,
@@ -68,11 +66,6 @@ namespace Ariadne {
 
 
       
-      /*! \brief A C1 algorithm for integrating forward a zonotope for a time up to time \a step_size. */
-      virtual Geometry::Zonotope<R> reachability_step(const System::VectorField<R>&,
-                                                      const Geometry::Zonotope<R>&,
-                                                      time_type& step_size) const;
-
       /*! \brief A C1 algorithm for integrating forward a zonotope for a time up to time \a step_size. */
       virtual Geometry::Zonotope< Interval<R> > reachability_step(const System::VectorField<R>&,
                                                       const Geometry::Zonotope< Interval<R> >&,

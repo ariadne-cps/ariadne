@@ -62,7 +62,8 @@ int
 test_integration_step()
 {
   cout << __PRETTY_FUNCTION__ << endl;
-  
+  typedef Interval<R> I;
+
   // Test constructor/destructor
   Integrator<R>* integrator_ptr;
   LohnerIntegrator<R>* lohner_ptr;
@@ -82,17 +83,22 @@ test_integration_step()
   cout << "r=" << r << endl;
   Zonotope<R> z=Zonotope<R>(r);
   cout << "z=" << z << endl;
-  Zonotope< Interval<R> > iz=Zonotope<R>(r);
+  Zonotope<I> iz=Zonotope<R>(r);
   cout << "iz=" << iz << endl;
 
   ListSet< Zonotope<R> > zls=ListSet< Zonotope<R> >(z);
   zls.adjoin(Zonotope<R>(Rectangle<R>("[1.02,1.06]x[0.48,0.52]")));
   cout << "zls.size()=" << zls.size() << endl;
   
+  ListSet< Zonotope<I> > izls=ListSet< Zonotope<I> >(iz);
+  izls.adjoin(Zonotope<I>(Rectangle<R>("[1.02,1.06]x[0.48,0.52]")));
+  cout << "izls.size()=" << izls.size() << endl;
+  
   Geometry::Rectangle<R> nr;
   Geometry::Zonotope<R> nz;
-  Geometry::Zonotope< Interval<R> > niz;
+  Geometry::Zonotope<I> niz;
   Geometry::ListSet< Zonotope<R> > nzls;
+  Geometry::ListSet< Zonotope<I> > nizls;
   
   Real x0=0;
   Real x1=0.4;
@@ -115,8 +121,6 @@ test_integration_step()
   //cout << nr << endl;
   niz=lohner.integration_step(vdp,iz,h);
   cout << niz << endl << endl;
-  nz=lohner.integration_step(vdp,z,h);
-  cout << nz << endl << endl;
   cout << endl << endl;
   
 
@@ -124,25 +128,20 @@ test_integration_step()
   // Integrate
   //nr=lohner.integrate(vdp,r,t);
   //cout << nr << endl;
-  nz=lohner.integrate(vdp,z,t);
-  cout << nz << endl << endl;;
+  niz=lohner.integrate(vdp,iz,t);
+  cout << niz << endl << endl;;
   
-  // 'integrate' not defined for fuzzy sets
-  //niz=lohner.integrate(vdp,iz,t);
-
-  nzls=lohner.integrate(vdp,zls,t);
-  cout << nzls << endl << endl;
+  nizls=lohner.integrate(vdp,izls,t);
+  cout << nizls << endl << endl;
   
-  nzls=lohner.reach(vdp,zls,t);
-  cout << nzls << endl << endl;
+  nizls=lohner.reach(vdp,izls,t);
+  cout << nizls << endl << endl;
   
   // Affine vector field
   VectorField<R>& avfr=avf;
   //AffineVectorField<R>& avfr=avf;
-  nz=lohner.integration_step(avfr,z,h);
-  cout << nz << endl;
   niz=lohner.integration_step(avfr,iz,h);
-  cout << niz << endl;
+  cout << nz << endl;
   cout << endl;
   
   return 0;

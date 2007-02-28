@@ -291,6 +291,12 @@ namespace Ariadne {
      
     template<class R> Zonotope<R> over_approximation(const Zonotope< Interval<R> >&);
 
+    template<class R> Zonotope< Interval<R> > interval_over_approximation(const Zonotope< Interval<R> >&);
+
+    template<class R> Zonotope<R> approximation(const Zonotope< Interval<R> >&);
+
+    template<class R> Zonotope<R> approximation(const Zonotope<R>&);
+
     
     template<class R> 
     Zonotope<typename Numeric::traits<R>::arithmetic_type>

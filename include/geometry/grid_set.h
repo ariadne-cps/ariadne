@@ -261,6 +261,9 @@ namespace Ariadne {
       /*! \brief A constant iterator to the end of the list. */
       const_iterator end() const;
 
+      /*! \brief Sorts the cells lexicographically, removing duplicates. */
+      void unique_sort(); 
+
       /*!\brief Append a GridCell to the list. */
       void adjoin(const GridCell<R>& c);
       /*!\brief Append a GridBlock to the list. */

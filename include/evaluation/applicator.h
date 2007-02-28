@@ -32,6 +32,7 @@
 #include <boost/smart_ptr.hpp>
 
 #include "../declarations.h"
+#include "../base/tribool.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -59,10 +60,10 @@ namespace Ariadne {
       /*! \brief Compute the image of a rectangle under a continuous function. */
       virtual Geometry::Rectangle<R> image(const System::Map<R>& f, const Geometry::Rectangle<R>& s) const;
 
-      /*! \brief Compute the image of a parallelotope under a continuous function. */
+      /*! \brief Compute the image of a zonotope under a differentiable function. */
       virtual Geometry::Zonotope<R> image(const System::Map<R>& f, const Geometry::Zonotope<R>& s) const;
 
-      /*! \brief Compute the image of an interval zonotope under a continuous function. */
+      /*! \brief Compute the image of an interval zonotope under a differentiable function. */
       virtual Geometry::Zonotope< Interval<R> > image(const System::Map<R>& f, const Geometry::Zonotope< Interval<R> >& s) const;
      
      protected:
@@ -92,8 +93,8 @@ namespace Ariadne {
       
       /*! \brief Compute the image of a list set under a map. */
       virtual 
-      Geometry::ListSet<Geometry::Zonotope< Interval<R> > >
-      image(const System::Map<R>& f, const Geometry::ListSet< Geometry::Zonotope< Interval<R> > >& ds) const;
+      Geometry::ListSet< Geometry::Zonotope<Interval<R> > >
+      image(const System::Map<R>& f, const Geometry::ListSet< Geometry::Zonotope<Interval<R> > >& ds) const;
       
       
       /*! \brief Compute the image of \a map starting in \a initial_set computing the result on \a grid. */
@@ -134,7 +135,7 @@ namespace Ariadne {
     
       /*! \brief Attempt to verify that the reachable set of \a map starting in \a initial_set remains in \a safe_set. */
       virtual
-      bool
+      tribool
       verify(const System::Map<R>& map, 
              const Geometry::GridMaskSet<R>& initial_set, 
              const Geometry::GridMaskSet<R>& safe_set) const;
@@ -143,6 +144,8 @@ namespace Ariadne {
 
        
     };
+
+
 
   }
 }

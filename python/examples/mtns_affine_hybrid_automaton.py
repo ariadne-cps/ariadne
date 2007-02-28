@@ -18,13 +18,13 @@ from ariadne import *
 
 print dir()
 
-space=PolyhedralSet(Rectangle("[-1.0,1.0]x[-1.0,1.0]"))
+space=PolyhedralSet(Rectangle("[-2.0,2.0]x[-2.0,2.0]"))
 identity=AffineMap(Matrix("[1,0;0,1]"),Vector("[0,0]"))
 
 invariant=PolyhedralSet(Rectangle("[-1.0,1.0]x[-1.0,1.0]"))
-dynamic=AffineVectorField(Matrix("[-0.25,-1.00; 1.00,-0.25]"),Vector("[0.00,0.00]"))
-activation12 = PolyhedralSet(Rectangle("[-0.2,0.0]x[-0.2,0.0]"))
-activation21 = PolyhedralSet(Rectangle("[0.0,0.2]x[0.0,0.2]"))
+dynamic=AffineVectorField(Matrix("[-0.5,-1.0; 1.0,-0.5]"),Vector("[0.00,0.00]"))
+activation12 = PolyhedralSet(Rectangle("[-0.2,-0.1]x[-0.2,-0.1]"))
+activation21 = PolyhedralSet(Rectangle("[0.1,0.2]x[0.1,0.2]"))
 reset = AffineMap(Matrix("[-7,0;0,-7]"),Vector("[0,0]"))
 
 automaton=HybridAutomaton("Affine hybrid automaton")
@@ -39,13 +39,14 @@ print automaton
 #print automaton.invariant()
 
 initial_rectangle=Rectangle("[-0.8,-0.7]x[0.7,0.8]")
-bounding_box=Rectangle("[-1,1]x[-1,1]")
+bounding_box=Rectangle("[-2,2]x[-2,2]")
+epsbb=Rectangle("[-2.1,2.1]x[-2.1,2.1]") # eps bounding box
 
 
 #grid=RegularGrid(Vector("[0.03125,0.03125]"))
 #block=LatticeBlock("[-32,32]x[-32,32]")
 grid=RegularGrid(Vector("[0.0625,0.0625]"))
-block=LatticeBlock("[-16,16]x[-16,16]")
+block=LatticeBlock("[-32,32]x[-32,32]")
 fgrid=FiniteGrid(grid,block)
 print fgrid
 
@@ -81,8 +82,7 @@ hybrid_evolver=HybridEvolver(apply,integrator);
 print "Computing continuous chainreach set"
 continuous_chainreach_set=hybrid_evolver.continuous_chainreach(automaton,initial_set,bounding_set)
 print "Exporting to postscript output...",
-epsbb=Rectangle("[-1.1,1.1]x[-1.1,1.1]") # eps bounding box
-eps=EpsPlot("affine_hybrid_automaton-1.eps",epsbb)
+eps=EpsPlot("mtns_affine_hybrid_automaton-1.eps",epsbb)
 eps.set_line_style(True)
 eps.set_fill_colour("green")
 eps.write(continuous_chainreach_set[mode1_id])
@@ -95,8 +95,7 @@ print "Computing chainreach set"
 chainreach_set=hybrid_evolver.chainreach(automaton,initial_set,bounding_set)
 
 print "Exporting to postscript output...",
-epsbb=Rectangle("[-1.1,1.1]x[-1.1,1.1]") # eps bounding box
-eps=EpsPlot("affine_hybrid_automaton-2.eps",epsbb)
+eps=EpsPlot("mtns_affine_hybrid_automaton-2.eps",epsbb)
 eps.set_line_style(True)
 eps.set_fill_colour("cyan")
 eps.write(activation21)

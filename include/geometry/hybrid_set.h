@@ -100,10 +100,15 @@ namespace Ariadne {
       /*! \brief Adjoin another hybrid set. */
       template<class S1> void adjoin(const HybridSet<S1>& hs);
       
+      /*! \brief An iterator to the beginning of the component sets. */
+      iterator begin();
       /*! \brief A constant iterator to the beginning of the component sets. */
       const_iterator begin() const;
+      /*! \brief An iterator to the end of the component sets. */
+      iterator end();
       /*! \brief A constant iterator to the end of the component sets. */
       const_iterator end() const;
+
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;
      private:
@@ -116,7 +121,9 @@ namespace Ariadne {
     template<class S> 
     std::ostream& operator<<(std::ostream& os, const HybridSet<S>& hs);
 
-  
+    template<class S1, class S2 > 
+    tribool
+    subset(const HybridSet<S1>&, const HybridSet<S2>&);
 
 
     /*! \ingroup HybridSet
@@ -131,6 +138,8 @@ namespace Ariadne {
         : HybridSet< GridMaskSet<R> >() { }
       HybridGridMaskSet(const HybridGridMaskSet<R>& hgms)
         : HybridSet< GridMaskSet<R> >(hgms) { }
+      size_type size() const;
+      size_type capacity() const;
     };
 
 
@@ -150,9 +159,15 @@ namespace Ariadne {
         : HybridSet< GridCellListSet<R> >(hgcls) { }
       HybridGridCellListSet(const HybridGridMaskSet<R>& hgms)
         : HybridSet< GridCellListSet<R> >(hgms) { }
+      size_type size() const;
+      void unique_sort();
     };
 
 
+
+    template<class R> 
+    HybridGridCellListSet<R>
+    difference(const HybridGridCellListSet<R>& hgcl, const HybridGridMaskSet<R>& hgms);
 
     template<class R> 
     HybridGridCellListSet<R>

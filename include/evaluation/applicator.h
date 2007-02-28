@@ -26,8 +26,8 @@
  *  \brief Methods for computing the images of sets under maps.
  */
 
-#ifndef _ARIADNE_APPLICATOR_H
-#define _ARIADNE_APPLICATOR_H
+#ifndef ARIADNE_APPLICATOR_H
+#define ARIADNE_APPLICATOR_H
 
 #include <boost/smart_ptr.hpp>
 
@@ -150,4 +150,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* _ARIADNE_APPLY_H */
+#endif /* ARIADNE_APPLY_H */

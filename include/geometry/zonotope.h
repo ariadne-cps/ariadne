@@ -25,8 +25,8 @@
  *  \brief Zonotopes (affine images of cuboids).
  */
 
-#ifndef _ARIADNE_ZONOTOPE_H
-#define _ARIADNE_ZONOTOPE_H
+#ifndef ARIADNE_ZONOTOPE_H
+#define ARIADNE_ZONOTOPE_H
 
 #include <iosfwd>
 
@@ -388,4 +388,4 @@ namespace Ariadne {
 #include "zonotope.inline.h"
 #include "zonotope.template.h"
 
-#endif /* _ARIADNE_ZONOTOPE_H */
+#endif /* ARIADNE_ZONOTOPE_H */

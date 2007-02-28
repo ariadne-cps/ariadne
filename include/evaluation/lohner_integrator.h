@@ -25,8 +25,8 @@
  *  \brief Methods for integrating points and sets under a vector field.
  */
 
-#ifndef _ARIADNE_LOHNER_INTEGRATOR_H
-#define _ARIADNE_LOHNER_INTEGRATOR_H
+#ifndef ARIADNE_LOHNER_INTEGRATOR_H
+#define ARIADNE_LOHNER_INTEGRATOR_H
 
 #include "../declarations.h"
 #include "../evaluation/integrator.h"
@@ -77,4 +77,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* _ARIADNE_LOHNER_INTEGRATOR_H */
+#endif /* ARIADNE_LOHNER_INTEGRATOR_H */

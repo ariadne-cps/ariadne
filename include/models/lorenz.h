@@ -25,8 +25,8 @@
  *  \brief The Lorenz system \f$(\dot{x},\dot{y},\dot{z}) = (\sigma(y-x),\rho x-y-xz,-\beta z+xy)\f$.
  */
 
-#ifndef _ARIADNE_LORENZ_SYSTEM_H
-#define _ARIADNE_LORENZ_SYSTEM_H
+#ifndef ARIADNE_LORENZ_SYSTEM_H
+#define ARIADNE_LORENZ_SYSTEM_H
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
@@ -130,4 +130,4 @@ namespace Ariadne {
 }
 
 
-#endif /* _ARIADNE_LORENZ_SYSTEM_H */
+#endif /* ARIADNE_LORENZ_SYSTEM_H */

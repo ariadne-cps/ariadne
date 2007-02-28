@@ -26,8 +26,8 @@
  *  \brief LU factorisation and factorised matrices.
  */
 
-#ifndef _ARIADNE_LU_MATRIX_H
-#define _ARIADNE_LU_MATRIX_H
+#ifndef ARIADNE_LU_MATRIX_H
+#define ARIADNE_LU_MATRIX_H
 
 #include <algorithm>
 
@@ -202,4 +202,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* _ARIADNE_LU_MATRIX_H */
+#endif /* ARIADNE_LU_MATRIX_H */

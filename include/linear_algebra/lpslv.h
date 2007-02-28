@@ -29,8 +29,8 @@
  *  \brief Linear programming solver.
  */
 
-#ifndef _ARIADNE_LPSLV_H
-#define _ARIADNE_LPSLV_H
+#ifndef ARIADNE_LPSLV_H
+#define ARIADNE_LPSLV_H
 
 #include <iosfwd>
 #include <cassert>
@@ -159,4 +159,4 @@ void lpslv(int m, int n, R* A, int rincA, int cincA, R* B, int incB, R* C, int i
 }}
 
 
-#endif /* _ARIADNE_LPSLV_H */
+#endif /* ARIADNE_LPSLV_H */

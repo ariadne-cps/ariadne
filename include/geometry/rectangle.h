@@ -26,8 +26,8 @@
  *  \brief Rectangles and cuboids.
  */
 
-#ifndef _ARIADNE_RECTANGLE_H
-#define _ARIADNE_RECTANGLE_H
+#ifndef ARIADNE_RECTANGLE_H
+#define ARIADNE_RECTANGLE_H
 
 #include <iosfwd>
 
@@ -457,4 +457,4 @@ namespace Ariadne {
 
 #include "rectangle.inline.h"
 
-#endif /* _ARIADNE_RECTANGLE_H */
+#endif /* ARIADNE_RECTANGLE_H */

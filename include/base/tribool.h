@@ -6,8 +6,8 @@
  *
  ****************************************************************************/
 
-#ifndef _ARIADNE_TRIBOOL_H
-#define _ARIADNE_TRIBOOL_H
+#ifndef ARIADNE_TRIBOOL_H
+#define ARIADNE_TRIBOOL_H
 
 #include <boost/logic/tribool.hpp>
 #include <boost/logic/tribool_io.hpp>

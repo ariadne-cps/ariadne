@@ -26,8 +26,8 @@
  *  \brief Simple arithmetic functions for integer, dyadic and rational types and intervals.
  */
  
-#ifndef _ARIADNE_ARITHMETIC_H
-#define _ARIADNE_ARITHMETIC_H
+#ifndef ARIADNE_ARITHMETIC_H
+#define ARIADNE_ARITHMETIC_H
 
 #include <algorithm>
 
@@ -87,4 +87,4 @@ namespace Ariadne {
 
 
 
-#endif /* _ARITHMETIC_H */
+#endif /* ARIADNE_ARITHMETIC_H */

@@ -25,8 +25,8 @@
  *  \brief Arbitrary sets.
  */
 
-#ifndef _ARIADNE_ARBITRARY_SET_H
-#define _ARIADNE_ARBITRARY_SET_H
+#ifndef ARIADNE_ARBITRARY_SET_H
+#define ARIADNE_ARBITRARY_SET_H
 
 #include <iosfwd>
 
@@ -99,4 +99,4 @@ namespace Ariadne {
 }
 
 
-#endif /* _ARIADNE_ARBITRARY_SET_H */
+#endif /* ARIADNE_ARBITRARY_SET_H */

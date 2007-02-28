@@ -25,8 +25,8 @@
  *  \brief Base class for solving equations.
  */
 
-#ifndef _ARIADNE_SOLVER_H
-#define _ARIADNE_SOLVER_H
+#ifndef ARIADNE_SOLVER_H
+#define ARIADNE_SOLVER_H
 
 #include <exception>
 #include <stdexcept>
@@ -131,4 +131,4 @@ namespace Ariadne {
 
 
 
-#endif /* _ARIADNE_SOLVER_H */
+#endif /* ARIADNE_SOLVER_H */

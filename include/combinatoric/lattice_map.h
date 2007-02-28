@@ -25,8 +25,8 @@
  *  \brief Maps on a lattice, implemented by listing the image of each cell.
  */
 
-#ifndef _ARIADNE_LATTICE_MAP_H
-#define _ARIADNE_LATTICE_MAP_H
+#ifndef ARIADNE_LATTICE_MAP_H
+#define ARIADNE_LATTICE_MAP_H
 
 #include <map>
 
@@ -167,4 +167,4 @@ namespace Ariadne {
 }
 
 
-#endif /* _ARIADNE_LATTICE_MAP_H */
+#endif /* ARIADNE_LATTICE_MAP_H */

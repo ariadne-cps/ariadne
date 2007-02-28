@@ -26,8 +26,8 @@
  *  \brief Cuboidal binary trees.
  */
 
-#ifndef _ARIADNE_BINARY_TREE_H
-#define _ARIADNE_BINARY_TREE_H
+#ifndef ARIADNE_BINARY_TREE_H
+#define ARIADNE_BINARY_TREE_H
 
 #include <vector>
 #include <iosfwd>
@@ -160,4 +160,4 @@ namespace Ariadne {
 }// namespace Ariadne
 
 
-#endif /* _ARIADNE_BINARY_TREE_H */
+#endif /* ARIADNE_BINARY_TREE_H */

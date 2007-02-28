@@ -25,8 +25,8 @@
  *  \brief General sets.
  */
 
-#ifndef _ARIADNE_SET_H
-#define _ARIADNE_SET_H
+#ifndef ARIADNE_SET_H
+#define ARIADNE_SET_H
 
 #include <iosfwd>
 
@@ -126,4 +126,4 @@ namespace Ariadne {
 }
 
 
-#endif /* _ARIADNE_SET_H */
+#endif /* ARIADNE_SET_H */

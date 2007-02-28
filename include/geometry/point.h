@@ -25,8 +25,8 @@
  *  \brief A point in Euclidean space.
  */
 
-#ifndef _ARIADNE_POINT_H
-#define _ARIADNE_POINT_H
+#ifndef ARIADNE_POINT_H
+#define ARIADNE_POINT_H
 
 #include <iosfwd>
 #include <stdexcept>
@@ -186,4 +186,4 @@ namespace Ariadne {
 
 #include "point.inline.h"
 
-#endif /* _ARIADNE_POINT_H */
+#endif /* ARIADNE_POINT_H */

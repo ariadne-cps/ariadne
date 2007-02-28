@@ -26,8 +26,8 @@
  *  \brief Vector types and vector operations.
   */
 
-#ifndef _ARIADNE_VECTOR_H
-#define _ARIADNE_VECTOR_H 
+#ifndef ARIADNE_VECTOR_H
+#define ARIADNE_VECTOR_H 
 
 #include <iosfwd>
 #include <algorithm>
@@ -558,4 +558,4 @@ namespace Ariadne {
 }
 
 
-#endif /* _ARIADNE_VECTOR_H */
+#endif /* ARIADNE_VECTOR_H */

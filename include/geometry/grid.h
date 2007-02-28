@@ -25,8 +25,8 @@
  *  \brief Grids in coordinate space.
  */
 
-#ifndef _ARIADNE_GRID_H
-#define _ARIADNE_GRID_H
+#ifndef ARIADNE_GRID_H
+#define ARIADNE_GRID_H
 
 #include <iosfwd>
 
@@ -331,4 +331,4 @@ namespace Ariadne {
 
 #include "grid.inline.h"
 
-#endif /* _GRID_H */
+#endif /* ARIADNE_GRID_H */

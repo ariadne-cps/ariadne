@@ -25,8 +25,8 @@
  *  \brief Polytopes.
  */
  
-#ifndef _ARIADNE_POLYTOPE_H
-#define _ARIADNE_POLYTOPE_H
+#ifndef ARIADNE_POLYTOPE_H
+#define ARIADNE_POLYTOPE_H
 
 #include <iosfwd>
 #include <vector>
@@ -270,4 +270,4 @@ namespace Ariadne {
 
 #include "polytope.inline.h"
 
-#endif /* _ARIADNE_POLYTOPE_H */
+#endif /* ARIADNE_POLYTOPE_H */

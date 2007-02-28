@@ -25,8 +25,8 @@
  *  \brief Type definitions and conversion operators for multiple-precision floating-point numbers.
  */
 
-#ifndef _ARIADNE_MPFLOAT_H
-#define _ARIADNE_MPFLOAT_H
+#ifndef ARIADNE_MPFLOAT_H
+#define ARIADNE_MPFLOAT_H
 
 #include <mpfr.h>
 // Don't use mpf2mpfr, since it ignores rounding modes
@@ -592,4 +592,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* _ARIADNE_MPFLOAT_H */
+#endif /* ARIADNE_MPFLOAT_H */

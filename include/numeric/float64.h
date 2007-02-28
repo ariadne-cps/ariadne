@@ -25,8 +25,8 @@
  *  \brief Type definitions and conversion operators for 64-bit fixed precision floating point numbers.
  */
 
-#ifndef _ARIADNE_FLOAT64_H
-#define _ARIADNE_FLOAT64_H
+#ifndef ARIADNE_FLOAT64_H
+#define ARIADNE_FLOAT64_H
 
 #include <mpfr.h>
 #include <cmath>
@@ -401,4 +401,4 @@ namespace Ariadne {
 
 }
 
-#endif /* _ARIADNE_FLOAT64_H */
+#endif /* ARIADNE_FLOAT64_H */

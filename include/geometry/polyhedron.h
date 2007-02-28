@@ -25,8 +25,8 @@
  *  \brief Polyhedra.
  */
  
-#ifndef _ARIADNE_POLYHEDRON_H
-#define _ARIADNE_POLYHEDRON_H
+#ifndef ARIADNE_POLYHEDRON_H
+#define ARIADNE_POLYHEDRON_H
 
 #include <iosfwd>
 #include <vector>
@@ -303,4 +303,4 @@ namespace Ariadne {
 
 #include "polyhedron.inline.h"
 
-#endif /* _ARIADNE_POLYHEDRON_H */
+#endif /* ARIADNE_POLYHEDRON_H */

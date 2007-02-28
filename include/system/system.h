@@ -25,7 +25,7 @@
  *  \brief Top-level header file for the System module.
  */
 
-#ifndef _ARIADNE_SYSTEM_H
-#define _ARIADNE_SYSTEM_H
+#ifndef ARIADNE_SYSTEM_H
+#define ARIADNE_SYSTEM_H
 
-#endif /* _ARIADNE_SYSTEM_H */
+#endif /* ARIADNE_SYSTEM_H */

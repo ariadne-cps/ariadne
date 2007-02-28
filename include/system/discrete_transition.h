@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _ARIADNE_DISCRETE_TRANSITION_H
-#define _ARIADNE_DISCRETE_TRANSITION_H
+#ifndef ARIADNE_DISCRETE_TRANSITION_H
+#define ARIADNE_DISCRETE_TRANSITION_H
 
 #include <stdexcept>
 #include <memory>
@@ -202,4 +202,4 @@ bool operator<(const DiscreteTransition<R>& transition1, const DiscreteTransitio
 }
 }
  
-#endif /* _ARIADNE_DISCRETE_TRANSITION_H */
+#endif /* ARIADNE_DISCRETE_TRANSITION_H */

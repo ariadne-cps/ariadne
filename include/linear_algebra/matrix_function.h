@@ -25,8 +25,8 @@
  *  \brief Algebraic and transcendental functions on matrices. 
  */
 
-#ifndef _ARIADNE_MATRIX_FUNCTION_H
-#define _ARIADNE_MATRIX_FUNCTION_H
+#ifndef ARIADNE_MATRIX_FUNCTION_H
+#define ARIADNE_MATRIX_FUNCTION_H
 
 #include <iosfwd>
 
@@ -43,4 +43,4 @@ namespace Ariadne {
 }
 
 
-#endif /* _ARIADNE_MATRIX_FUNCTION_H */
+#endif /* ARIADNE_MATRIX_FUNCTION_H */

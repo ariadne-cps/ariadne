@@ -26,8 +26,8 @@
  *  \brief Denotable sets implemented as lists.
  */
 
-#ifndef _ARIADNE_LIST_SET_H
-#define _ARIADNE_LIST_SET_H
+#ifndef ARIADNE_LIST_SET_H
+#define ARIADNE_LIST_SET_H
 
 #include <iosfwd>
 #include <iostream>
@@ -300,4 +300,4 @@ namespace Ariadne {
 
 #include "list_set.inline.h"
 
-#endif /* _LIST_SET_H */
+#endif /* ARIADNE_LIST_SET_H */

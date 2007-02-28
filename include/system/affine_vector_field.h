@@ -26,8 +26,8 @@
  *  \brief Vector_type fields of affine form of the form \f$\dot{x}=Ax+b\f$.
  */
 
-#ifndef _AFFINE_VECTOR_FIELD_H
-#define _AFFINE_VECTOR_FIELD_H
+#ifndef ARIADNE_AFFINE_VECTOR_FIELD_H
+#define ARIADNE_AFFINE_VECTOR_FIELD_H
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
@@ -60,9 +60,9 @@ namespace Ariadne {
       virtual ~AffineVectorField();
       
       /*! \brief Copy constructor. */
-      AffineVectorField(const AffineVectorField<R>& avf) : _A(avf.A()), _b(avf.b()) { }
+      AffineVectorField(const AffineVectorField<R>& avf) : _a(avf.A()), _b(avf.b()) { }
       /*! \brief Construct from the matrix \a A and the vector \a b.. */
-      AffineVectorField(const LinearAlgebra::Matrix<R> &A, const LinearAlgebra::Vector<R> &b) : _A(A), _b(b) { }
+      AffineVectorField(const LinearAlgebra::Matrix<R> &A, const LinearAlgebra::Vector<R> &b) : _a(A), _b(b) { }
       /*! \brief Make a copy (clone) of the vector field. */
       AffineVectorField<R>* clone() const { return new AffineVectorField<R>(this->A(),this->b()); }
       
@@ -73,7 +73,7 @@ namespace Ariadne {
       virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<F>& x) const;
       
       /*! \brief The matrix \f$A\f$. */
-      const LinearAlgebra::Matrix<R>& A() const { return this->_A; }
+      const LinearAlgebra::Matrix<R>& A() const { return this->_a; }
       /*! \brief The vector \f$b\f$. */
       const LinearAlgebra::Vector<R>& b() const { return this->_b; }
       
@@ -89,7 +89,7 @@ namespace Ariadne {
       /*! \brief  The name of the system. */
       virtual std::ostream& write(std::ostream& os) const;
      private:
-      LinearAlgebra::Matrix<R> _A;
+      LinearAlgebra::Matrix<R> _a;
       LinearAlgebra::Vector<R> _b;
     };
  
@@ -116,4 +116,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* _AFFINE_VECTOR_FIELD_H */
+#endif /* ARIADNE_AFFINE_VECTOR_FIELD_H */

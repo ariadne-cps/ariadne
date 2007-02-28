@@ -25,8 +25,8 @@
  *  \brief Numerical expression templates for deferred evaluation.
  */
 
-#ifndef _ARIADNE_NUMERICAL_EXPRESSION_H
-#define _ARIADNE_NUMERICAL_EXPRESSION_H
+#ifndef ARIADNE_NUMERICAL_EXPRESSION_H
+#define ARIADNE_NUMERICAL_EXPRESSION_H
 
 #include <string>
 
@@ -174,4 +174,4 @@ namespace Ariadne {
 }
   
 
-#endif /* _ARIADNE_NUMERICAL_TRAITS_H */
+#endif /* ARIADNE_NUMERICAL_TRAITS_H */

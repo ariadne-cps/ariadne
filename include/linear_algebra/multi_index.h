@@ -25,8 +25,8 @@
  *  \brief Multi-indices of symmetric tensors.
  */
 
-#ifndef _ARIADNE_MULTI_INDEX_H
-#define _ARIADNE_MULTI_INDEX_H
+#ifndef ARIADNE_MULTI_INDEX_H
+#define ARIADNE_MULTI_INDEX_H
 
 #include "../declarations.h"
 #include "../base/iterator.h"
@@ -280,4 +280,4 @@ namespace Ariadne {
     
   }
 }
-#endif /* _ARIADNE_MULTI_INDEX_H */
+#endif /* ARIADNE_MULTI_INDEX_H */

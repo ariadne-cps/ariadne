@@ -25,7 +25,7 @@
  *  \brief Top-level header file for the Output module.
  */
 
-#ifndef _ARIADNE_OUTPUT_H
-#define _ARIADNE_OUTPUT_H
+#ifndef ARIADNE_OUTPUT_H
+#define ARIADNE_OUTPUT_H
 
-#endif /* _ARIADNE_OUTPUT_H */
+#endif /* ARIADNE_OUTPUT_H */

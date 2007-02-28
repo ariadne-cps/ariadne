@@ -26,8 +26,8 @@
  *  \brief Infinite sequences.
  */
 
-#ifndef _ARIADNE_SEQUENCE_H
-#define _ARIADNE_SEQUENCE_H
+#ifndef ARIADNE_SEQUENCE_H
+#define ARIADNE_SEQUENCE_H
 
 #include <cstddef>
 
@@ -287,4 +287,4 @@ namespace Ariadne {
   } // namespace Base
 } // namespace Ariadne
   
-#endif /* _ARIADNE_SEQUENCE_H */
+#endif /* ARIADNE_SEQUENCE_H */

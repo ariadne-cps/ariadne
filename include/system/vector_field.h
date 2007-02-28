@@ -26,8 +26,8 @@
  *  \brief Vector_type field interface.
  */
  
-#ifndef _ARIADNE_VECTOR_FIELD_H
-#define _ARIADNE_VECTOR_FIELD_H
+#ifndef ARIADNE_VECTOR_FIELD_H
+#define ARIADNE_VECTOR_FIELD_H
 
 #include <limits>
 
@@ -106,4 +106,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* _ARIADNE_VECTOR_FIELD_H */
+#endif /* ARIADNE_VECTOR_FIELD_H */

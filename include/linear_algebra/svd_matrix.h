@@ -25,8 +25,8 @@
  *  \brief Singular value decomposition.
  */
 
-#ifndef _ARIADNE_SVD_MATRIX_H
-#define _ARIADNE_SVD_MATRIX_H
+#ifndef ARIADNE_SVD_MATRIX_H
+#define ARIADNE_SVD_MATRIX_H
 
 #include <tblas/copy.hpp>
 #include <tblas/geset.hpp>
@@ -50,42 +50,42 @@ namespace Ariadne {
       SVDMatrix(const Matrix<Real>& A);
       
       /*! \brief The number of rows. */
-      size_type number_of_rows() const { return _U.number_of_rows(); }
+      size_type number_of_rows() const { return _u.number_of_rows(); }
       /*! \brief The number of columns. */
-      size_type number_of_columns() const { return _Vt.number_of_rows(); }
+      size_type number_of_columns() const { return _vt.number_of_rows(); }
       /*! \brief The \a i,\a j th element. */
       Real operator() (const size_type& i, const size_type& j) const;
 
       /*! \brief A vector containing the singular values in decreasing order. */
-      const Vector<Real>& S() const { return _S; }
+      const Vector<Real>& S() const { return _s; }
       /*! \brief The left orthogonal factor. */
-      const Matrix<Real>& U() const { return _U; }
+      const Matrix<Real>& U() const { return _u; }
       /*! \brief The right orthogonal factor. */
-      const Matrix<Real> V() const { return _Vt.transpose(); }
+      const Matrix<Real> V() const { return _vt.transpose(); }
       /*! \brief The transpose of the right orthogonal factor. */
-      const Matrix<Real>& Vt() const { return _Vt; }
+      const Matrix<Real>& Vt() const { return _vt; }
       /*! \brief The diagonal matrix of singular values. */
       Matrix<Real> D() const;
       
       /*! \brief Convert to an ordinary matrix. */
       operator Matrix<Real> () const;
      private:
-      Vector<Real> _S;
-      Matrix<Real> _U;
-      Matrix<Real> _Vt;
+      Vector<Real> _s;
+      Matrix<Real> _u;
+      Matrix<Real> _vt;
     };
     
     template<class Real>
     inline 
     SVDMatrix<Real>::SVDMatrix(const Matrix<Real>& A) 
-      : _S(TBLAS::min(A.number_of_rows(),A.number_of_columns())),
-        _U(A.number_of_rows(),A.number_of_rows()),
-        _Vt(A.number_of_columns(),A.number_of_columns())
+      : _s(TBLAS::min(A.number_of_rows(),A.number_of_columns())),
+        _u(A.number_of_rows(),A.number_of_rows()),
+        _vt(A.number_of_columns(),A.number_of_columns())
     {
       int m=this->number_of_rows();
       int n=this->number_of_columns();
       array<Real> work(A.begin(),A.begin()+m*n);
-      TLAPACK::gesvd(TBLAS::RowMajor,m,n,work.begin(),n,_S.data().begin(),_U.data().begin(),m,_Vt.data().begin(),n);
+      TLAPACK::gesvd(TBLAS::RowMajor,m,n,work.begin(),n,_s.data().begin(),_u.data().begin(),m,_vt.data().begin(),n);
     }
 
     template<class Real>
@@ -98,7 +98,7 @@ namespace Ariadne {
       int nsv=TBLAS::min(m,n);
       Matrix<Real> result(m,n);
       TBLAS::geset(TBLAS::RowMajor,m,n,Real(0),Real(0),result.data().begin(),n);
-      TBLAS::copy(nsv,_S.data().begin(),1,result.data().begin(),n+1);
+      TBLAS::copy(nsv,_s.data().begin(),1,result.data().begin(),n+1);
       return result;
     }
 
@@ -112,7 +112,7 @@ namespace Ariadne {
 
       Real result=0;
       for(int k=0; k!=TBLAS::min(m,n); ++k) { 
-        result += _U(i,k) * _S(k) * _Vt(j,k); 
+        result += _u(i,k) * _s(k) * _vt(j,k); 
       } 
       return result; 
     }
@@ -130,7 +130,7 @@ namespace Ariadne {
         for(int j=0; j!=n; ++j) {
           result(i,j)=0;
           for(int k=0; k!=TBLAS::min(m,n); ++k) { 
-            result(i,j) += _U(i,k) * _S(k) * _Vt(j,k); 
+            result(i,j) += _u(i,k) * _s(k) * _vt(j,k); 
           } 
         }
       }
@@ -140,4 +140,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* _ARIADNE_SVD_MATRIX_H */
+#endif /* ARIADNE_SVD_MATRIX_H */

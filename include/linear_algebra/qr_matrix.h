@@ -25,8 +25,8 @@
  *  \brief QR factorisation and factorised matrices.
  */
 
-#ifndef _ARIADNE_QR_MATRIX_H
-#define _ARIADNE_QR_MATRIX_H
+#ifndef ARIADNE_QR_MATRIX_H
+#define ARIADNE_QR_MATRIX_H
 
 #include <tblas/gecpy.hpp>
 #include <tblas/trset.hpp>
@@ -52,39 +52,39 @@ namespace Ariadne {
       QRMatrix(const Matrix<Real>& A);
       
       /*! \brief The number of rows. */
-      size_type number_of_rows() const { return _R.number_of_rows(); }
+      size_type number_of_rows() const { return _r.number_of_rows(); }
       /*! \brief The number of columns. */
-      size_type number_of_columns() const { return _R.number_of_columns(); }
+      size_type number_of_columns() const { return _r.number_of_columns(); }
       /*! \brief The \a i,\a j th element. */
       Real operator() (const size_type& i, const size_type& j) const { 
-        Real result=0; for(int k=0; k!=j; ++k) { result(i,j)+= _Q(i,k) * _R(k,j); } return result; }
+        Real result=0; for(int k=0; k!=j; ++k) { result(i,j)+= _q(i,k) * _r(k,j); } return result; }
 
       /*! \brief The orthogonal factor. */
-      const Matrix<Real>& Q() const { return _Q; }
+      const Matrix<Real>& Q() const { return _q; }
       /*! \brief The upper-triangular factor. */
-      const Matrix<Real>& R() const { return _R; }
+      const Matrix<Real>& R() const { return _r; }
       
       /*! \brief Convert to an ordinary matrix. */
       operator Matrix<Real> () const;
      private:
-      Matrix<Real> _Q;
-      Matrix<Real> _R;
+      Matrix<Real> _q;
+      Matrix<Real> _r;
     };
     
     template<class Real>
     inline 
     QRMatrix<Real>::QRMatrix(const Matrix<Real>& A) 
-      : _Q(A.number_of_rows(),A.number_of_rows()), _R(A)
+      : _q(A.number_of_rows(),A.number_of_rows()), _r(A)
     {
       int m=this->number_of_rows();
       int n=this->number_of_columns();
       array<Real> tau(m);
       array<Real> work(TBLAS::max(m,n));
-      TLAPACK::geqrf(TBLAS::RowMajor,m,n,this->_R.data().begin(),n,tau.begin(),work.begin());
-      TBLAS::gecpy(TBLAS::RowMajor,m,m,_R.begin(),n,_Q.begin(),m);
-      //TBLAS::copy(m*m,_R.data().begin(),1,_Q.data().begin(),1);
-      TLAPACK::orgqr(TBLAS::RowMajor,m,m,m,this->_Q.data().begin(),m,tau.begin(),work.begin());
-      TBLAS::trset(TBLAS::RowMajor,TBLAS::Lower,TBLAS::Unit,m,n,Real(0),_R.begin(),n);
+      TLAPACK::geqrf(TBLAS::RowMajor,m,n,this->_r.data().begin(),n,tau.begin(),work.begin());
+      TBLAS::gecpy(TBLAS::RowMajor,m,m,_r.begin(),n,_q.begin(),m);
+      //TBLAS::copy(m*m,_r.data().begin(),1,_q.data().begin(),1);
+      TLAPACK::orgqr(TBLAS::RowMajor,m,m,m,this->_q.data().begin(),m,tau.begin(),work.begin());
+      TBLAS::trset(TBLAS::RowMajor,TBLAS::Lower,TBLAS::Unit,m,n,Real(0),_r.begin(),n);
     }
 
     template<class Real>
@@ -95,11 +95,11 @@ namespace Ariadne {
       int n=this->number_of_columns();
 
       Matrix<Real> result(m,n);
-      TBLAS::gemm(TBLAS::RowMajor,TBLAS::NoTrans,TBLAS::NoTrans,m,n,m,Real(1),_Q.begin(),m,_R.begin(),n,Real(0),result.begin(),n);
+      TBLAS::gemm(TBLAS::RowMajor,TBLAS::NoTrans,TBLAS::NoTrans,m,n,m,Real(1),_q.begin(),m,_r.begin(),n,Real(0),result.begin(),n);
       return result;
     }
 
   }
 }
 
-#endif /* _ARIADNE_QR_MATRIX_H */
+#endif /* ARIADNE_QR_MATRIX_H */

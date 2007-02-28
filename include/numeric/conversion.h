@@ -25,8 +25,8 @@
  *  \brief Approximation of numerical types.
  */
 
-#ifndef _ARIADNE_APPROXIMATION_H
-#define _ARIADNE_APPROXIMATION_H
+#ifndef ARIADNE_APPROXIMATION_H
+#define ARIADNE_APPROXIMATION_H
 
 namespace Ariadne {
   namespace Numeric {
@@ -52,4 +52,4 @@ namespace Ariadne {
   }    
 }
 
-#endif /* _ARIADNE_APPROXIMATION_H */
+#endif /* ARIADNE_APPROXIMATION_H */

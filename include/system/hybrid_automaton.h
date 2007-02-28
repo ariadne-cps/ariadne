@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#ifndef _ARIADNE_HYBRID_AUTOMATON_H
-#define _ARIADNE_HYBRID_AUTOMATON_H
+#ifndef ARIADNE_HYBRID_AUTOMATON_H
+#define ARIADNE_HYBRID_AUTOMATON_H
 
 #include <string>
 #include <vector>
@@ -198,4 +198,4 @@ void dot_print(const HybridAutomaton< R >& A);
 }
 }
 
-#endif /* _ARIADNE_HYBRID_AUTOMATON_H */
+#endif /* ARIADNE_HYBRID_AUTOMATON_H */

@@ -28,15 +28,15 @@ namespace Ariadne {
     class PointListIterator
     {
      public:
-      PointListIterator(const LinearAlgebra::Matrix<R>& A, size_type j) : _A(A), _j(j) { }
-      Point<R> operator*() const { return Point<R>(column(_A,_j)); }
+      PointListIterator(const LinearAlgebra::Matrix<R>& A, size_type j) : _mx(A), _j(j) { }
+      Point<R> operator*() const { return Point<R>(column(_mx,_j)); }
       void operator++() { ++_j; }
       bool operator==(const PointListIterator& other) { 
-        return (this->_j==other._j) && (&(this->_A)==&(other._A)); }
+        return (this->_j==other._j) && (&(this->_mx)==&(other._mx)); }
       bool operator!=(const PointListIterator& other) { 
         return !(*this==other); }
      private:
-      const LinearAlgebra::Matrix<R>& _A;
+      const LinearAlgebra::Matrix<R>& _mx;
       size_type _j;
     };
     

@@ -25,8 +25,8 @@
  *  \brief The van der Pol equation \f$\ddot{y}-\mu(1-y^2)\dot{y}+y=0\f$.
  */
 
-#ifndef _ARIADNE_VANDERPOL_EQUATION_H
-#define _ARIADNE_VANDERPOL_EQUATION_H
+#ifndef ARIADNE_VANDERPOL_EQUATION_H
+#define ARIADNE_VANDERPOL_EQUATION_H
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
@@ -111,4 +111,4 @@ namespace Ariadne {
 }
 
 
-#endif /* _ARIADNE_DUFFING_EQUATION_H */
+#endif /* ARIADNE_DUFFING_EQUATION_H */

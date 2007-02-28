@@ -25,8 +25,8 @@
  *  \brief A list of points in Euclidean space.
  */
 
-#ifndef _ARIADNE_POINT_LIST_H
-#define _ARIADNE_POINT_LIST_H
+#ifndef ARIADNE_POINT_LIST_H
+#define ARIADNE_POINT_LIST_H
 
 #include <iostream>
 #include <stdexcept>
@@ -146,4 +146,4 @@ namespace Ariadne {
 
 #include "point_list.inline.h"
 
-#endif /* _ARIADNE_POINT_LIST_H */
+#endif /* ARIADNE_POINT_LIST_H */

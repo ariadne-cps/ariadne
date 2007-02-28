@@ -25,8 +25,8 @@
  *  \brief Simplices.
  */
 
-#ifndef _ARIADNE_SIMPLEX_H
-#define _ARIADNE_SIMPLEX_H
+#ifndef ARIADNE_SIMPLEX_H
+#define ARIADNE_SIMPLEX_H
 
 #include <iosfwd>
 
@@ -105,4 +105,4 @@ namespace Ariadne {
 
 #include "simplex.inline.h"
 
-#endif /* _ARIADNE_SIMPLEX_H */
+#endif /* ARIADNE_SIMPLEX_H */

@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#ifndef _ARIADNE_DISCRETE_MODE_H
-#define _ARIADNE_DISCRETE_MODE_H
+#ifndef ARIADNE_DISCRETE_MODE_H
+#define ARIADNE_DISCRETE_MODE_H
 
 #include <string>
 #include <stdexcept>
@@ -154,4 +154,4 @@ bool operator<(const DiscreteMode<R>& mode1, const DiscreteMode<R>& mode2)
 }
 }
 
-#endif /* _ARIADNE_DISCRETE_MODE_H */
+#endif /* ARIADNE_DISCRETE_MODE_H */

@@ -25,8 +25,8 @@
  *  \brief Type definitions and conversion operators for rational numbers.
  */
 
-#ifndef _ARIADNE_RATIONAL_H
-#define _ARIADNE_RATIONAL_H
+#ifndef ARIADNE_RATIONAL_H
+#define ARIADNE_RATIONAL_H
 
 #include <gmpxx.h>
 #include <iostream>
@@ -184,4 +184,4 @@ namespace Ariadne {
 
 }
 
-#endif /* _ARIADNE_RATIONAL_H */
+#endif /* ARIADNE_RATIONAL_H */

@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#ifndef _ARIADNE_HYBRID_SET_H
-#define _ARIADNE_HYBRID_SET_H
+#ifndef ARIADNE_HYBRID_SET_H
+#define ARIADNE_HYBRID_SET_H
 
 #include <set>
 #include <map>
@@ -182,4 +182,4 @@ namespace Ariadne {
 
 #include "hybrid_set.inline.h"
 
-#endif /* _ARIADNE_HYBRID_EVOLVER_H */
+#endif /* ARIADNE_HYBRID_EVOLVER_H */

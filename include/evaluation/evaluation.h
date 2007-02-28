@@ -25,7 +25,7 @@
  *  \brief Top-level header file for the Evaluation module.
  */
 
-#ifndef _ARIADNE_EVALUATION_H
-#define _ARIADNE_EVALUATION_H
+#ifndef ARIADNE_EVALUATION_H
+#define ARIADNE_EVALUATION_H
 
-#endif /* _ARIADNE_EVALUATION_H */
+#endif /* ARIADNE_EVALUATION_H */

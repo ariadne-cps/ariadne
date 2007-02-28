@@ -26,8 +26,8 @@
  *  \brief Matrices and Matrix operations.
  */
 
-#ifndef _ARIADNE_MATRIX_H
-#define _ARIADNE_MATRIX_H
+#ifndef ARIADNE_MATRIX_H
+#define ARIADNE_MATRIX_H
 
 #include <iosfwd>
 
@@ -58,9 +58,9 @@ namespace Ariadne {
     template<class Mx>
     struct MatrixRow
     {
-      MatrixRow(Mx& A, const size_type& i) : _A(A), _i(i) { }
-      typename Mx::value_type& operator[](const size_type& j) { return _A(_i,j); }
-      Mx& _A; const size_type _i;
+      MatrixRow(Mx& A, const size_type& i) : _mx(A), _i(i) { }
+      typename Mx::value_type& operator[](const size_type& j) { return _mx(_i,j); }
+      Mx& _mx; const size_type _i;
     };
     
     /*!\ingroup LinearAlgebra
@@ -751,4 +751,4 @@ namespace Ariadne {
 }
 
 
-#endif /* _ARIADNE_MATRIX_H */
+#endif /* ARIADNE_MATRIX_H */

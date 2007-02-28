@@ -25,8 +25,8 @@
  *  \brief Mulitvalued map interface.
  */
 
-#ifndef _ARIADNE_MULTIMAP_H
-#define _ARIADNE_MULTIMAP_H
+#ifndef ARIADNE_MULTIMAP_H
+#define ARIADNE_MULTIMAP_H
 
 #include <string>
 
@@ -80,4 +80,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* _ARIADNE_MULTIMAP_H */
+#endif /* ARIADNE_MULTIMAP_H */

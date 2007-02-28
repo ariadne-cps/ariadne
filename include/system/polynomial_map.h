@@ -26,8 +26,8 @@
  *  \brief Polynomial maps.
  */
 
-#ifndef _ARIADNE_POLYNOMIAL_MAP_H
-#define _ARIADNE_POLYNOMIAL_MAP_H
+#ifndef ARIADNE_POLYNOMIAL_MAP_H
+#define ARIADNE_POLYNOMIAL_MAP_H
 
 #include <iosfwd>
 #include <string>
@@ -260,4 +260,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* _ARIADNE_POLYNOMIAL_MAP_H */
+#endif /* ARIADNE_POLYNOMIAL_MAP_H */

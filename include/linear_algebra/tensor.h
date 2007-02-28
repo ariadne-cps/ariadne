@@ -25,8 +25,8 @@
  *  \brief Tensors.
  */
 
-#ifndef _ARIADNE_TENSOR_H
-#define _ARIADNE_TENSOR_H
+#ifndef ARIADNE_TENSOR_H
+#define ARIADNE_TENSOR_H
 
 #include <iosfwd>
 
@@ -573,4 +573,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* _ARIADNE_TENSOR_H */
+#endif /* ARIADNE_TENSOR_H */

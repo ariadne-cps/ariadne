@@ -25,8 +25,8 @@
  *  \brief Top-level header file for the Geometry module.
  */
 
-#ifndef _ARIADNE_GEOMETRY_H
-#define _ARIADNE_GEOMETRY_H
+#ifndef ARIADNE_GEOMETRY_H
+#define ARIADNE_GEOMETRY_H
 
 #include "../geometry/geometry_declarations.h"
 
@@ -41,4 +41,4 @@
 #include "../geometry/grid_set.h"
 #include "../geometry/partition_tree_set.h"
 
-#endif /* _ARIADNE_GEOMETRY_H */
+#endif /* ARIADNE_GEOMETRY_H */

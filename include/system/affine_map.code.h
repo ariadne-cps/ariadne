@@ -77,7 +77,7 @@ namespace Ariadne {
     LinearAlgebra::Matrix<typename AffineMap<R>::F>
     AffineMap<R>::jacobian(const Geometry::Point<F>& pt) const
     {
-      return this->_A;
+      return this->_a;
     }
     
     template<class R>

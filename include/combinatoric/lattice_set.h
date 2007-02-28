@@ -25,8 +25,8 @@
  *  \brief Sets on an integer grid.
  */
 
-#ifndef _ARIADNE_LATTICE_SET_H
-#define _ARIADNE_LATTICE_SET_H
+#ifndef ARIADNE_LATTICE_SET_H
+#define ARIADNE_LATTICE_SET_H
 
 #include <vector>
 #include <iosfwd>
@@ -537,4 +537,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* _ARIADNE_LATTICE_SET_H */
+#endif /* ARIADNE_LATTICE_SET_H */

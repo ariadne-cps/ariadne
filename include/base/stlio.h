@@ -25,8 +25,8 @@
  *  \brief Input-output utilities 
  */
 
-#ifndef _ARIADNE_STLIO_H
-#define _ARIADNE_STLIO_H
+#ifndef ARIADNE_STLIO_H
+#define ARIADNE_STLIO_H
 
 #include <iostream>
 #include <stdexcept>
@@ -285,4 +285,4 @@ namespace std {
 } // namespace std
 
 
-#endif /* _ARIADNE_STLIO_H */
+#endif /* ARIADNE_STLIO_H */

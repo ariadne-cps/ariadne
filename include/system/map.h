@@ -26,8 +26,8 @@
  *  \brief Map interface.
  */
 
-#ifndef _ARIADNE_MAP_H
-#define _ARIADNE_MAP_H
+#ifndef ARIADNE_MAP_H
+#define ARIADNE_MAP_H
 
 #include <string>
 
@@ -108,4 +108,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* _ARIADNE_MAP_H */
+#endif /* ARIADNE_MAP_H */

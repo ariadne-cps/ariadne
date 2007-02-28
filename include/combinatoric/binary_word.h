@@ -67,8 +67,8 @@
  * for big grids or fine subdivisions, memory may well be a limiting factor.
  */
 
-#ifndef _ARIADNE_BINARY_WORD_H
-#define _ARIADNE_BINARY_WORD_H
+#ifndef ARIADNE_BINARY_WORD_H
+#define ARIADNE_BINARY_WORD_H
 
 #include <vector>
 #include <iosfwd>
@@ -82,8 +82,8 @@ namespace Ariadne {
     class BinaryWordList;
     class BinaryWordFixedSizeList;
     
-    class _BinaryWordList_const_iterator;
-    class _BinaryWordFixedSizeList_const_iterator;
+    class BinaryWordList_const_iterator;
+    class BinaryWordFixedSizeList_const_iterator;
     
     /*! \brief A statically-allocated binary word of fixed maximum length.
      */
@@ -209,7 +209,7 @@ namespace Ariadne {
       /*!\brief Union of two BinaryWordList s. */
       friend BinaryWordList join(const BinaryWordList& l1, const BinaryWordList& l2);
       
-      typedef _BinaryWordList_const_iterator const_iterator;
+      typedef BinaryWordList_const_iterator const_iterator;
      private:
       static const size_type _bits_per_byte=std::numeric_limits<byte_type>::digits;
       std::vector<size_type> _sizes;
@@ -237,13 +237,13 @@ namespace Ariadne {
     
     /*!\brief A list of BinaryWord elements, each of the same size, optimised for memory usage. */
     class BinaryWordFixedSizeList {
-      friend class _BinaryWordFixedSizeList_const_iterator;
+      friend class BinaryWordFixedSizeList_const_iterator;
       
       /*!\brief Union of two BinaryWordFixedSizeList s.
        */
       friend BinaryWordFixedSizeList join(const BinaryWordFixedSizeList& l1, const BinaryWordFixedSizeList& l2);
       
-      typedef _BinaryWordFixedSizeList_const_iterator const_iterator;
+      typedef BinaryWordFixedSizeList_const_iterator const_iterator;
      private:
       static const size_type _bits_per_byte=std::numeric_limits<byte_type>::digits;
       size_type _word_size;
@@ -298,4 +298,4 @@ namespace Ariadne {
   } // namespace Base
 } // namespace Ariadne
   
-#endif /* _ARIADNE_BINARY_WORD_H */
+#endif /* ARIADNE_BINARY_WORD_H */

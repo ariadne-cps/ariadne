@@ -25,8 +25,8 @@
  *  \brief Cuboidal partition trees.
  */
 
-#ifndef _ARIADNE_PARTITION_TREE_SET_H
-#define _ARIADNE_PARTITION_TREE_SET_H
+#ifndef ARIADNE_PARTITION_TREE_SET_H
+#define ARIADNE_PARTITION_TREE_SET_H
 
 #include <iosfwd>
 
@@ -421,4 +421,4 @@ namespace Ariadne {
 
 #include "partition_tree_set.inline.h"
 
-#endif /* _ARIADNE_PARTITION_TREE_SET_H */
+#endif /* ARIADNE_PARTITION_TREE_SET_H */

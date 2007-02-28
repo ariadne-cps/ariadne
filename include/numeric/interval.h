@@ -26,8 +26,8 @@
  *  \brief Intervals of real number types (currently implemented using Boost).
  */
  
-#ifndef _ARIADNE_INTERVAL_H
-#define _ARIADNE_INTERVAL_H
+#ifndef ARIADNE_INTERVAL_H
+#define ARIADNE_INTERVAL_H
 
 #include <iostream>
 #include <stdexcept>
@@ -923,4 +923,4 @@ namespace TBLAS {
 }
 
 
-#endif /* _ARIADNE_INTERVAL_H */
+#endif /* ARIADNE_INTERVAL_H */

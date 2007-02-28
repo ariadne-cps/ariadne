@@ -26,8 +26,8 @@
  *  Commonly used inline methods for the Python interface.
  */
  
-#ifndef _ARIADNE_PYTHON_UTILITIES_H
-#define _ARIADNE_PYTHON_UTILITIES_H
+#ifndef ARIADNE_PYTHON_UTILITIES_H
+#define ARIADNE_PYTHON_UTILITIES_H
 
 #include <cstring>
 #include <functional>
@@ -204,4 +204,4 @@ Res ge(const Arg1& a1, const Arg2& a2) {
 }
 
 
-#endif /* _ARIADNE_PYTHON_UTILITIES_H */
+#endif /* ARIADNE_PYTHON_UTILITIES_H */

@@ -25,8 +25,8 @@
  *  \brief Discrete-time systems of the \f$x_{n+1}=f(x_n,u_n,v_n)\f$.
  */
 
-#ifndef _ARIADNE_DISCRETE_TIME_SYSTEM_H
-#define _ARIADNE_DISCRETE_TIME_SYSTEM_H
+#ifndef ARIADNE_DISCRETE_TIME_SYSTEM_H
+#define ARIADNE_DISCRETE_TIME_SYSTEM_H
 
 #include <string>
 
@@ -103,4 +103,4 @@ namespace Ariadne {
 }
 
 
-#endif /* _ARIADNE_DISCRETE_TIME_SYSTEM_H */
+#endif /* ARIADNE_DISCRETE_TIME_SYSTEM_H */

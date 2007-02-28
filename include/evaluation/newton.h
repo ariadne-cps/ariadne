@@ -25,8 +25,8 @@
  *  \brief Newton and interval Newton methods.
  */
 
-#ifndef _ARIADNE_NEWTON_H
-#define _ARIADNE_NEWTON_H
+#ifndef ARIADNE_NEWTON_H
+#define ARIADNE_NEWTON_H
 
 #include <exception>
 #include <stdexcept>
@@ -59,4 +59,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* _ARIADNE_NEWTON_H */
+#endif /* ARIADNE_NEWTON_H */

@@ -22,8 +22,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#ifndef _APPROXIMATE_SET_H
-#define _APPROXIMATE_SET_H
+#ifndef ARIADNE_APPROXIMATE_SET_H
+#define ARIADNE_APPROXIMATE_SET_H
 
 #include "../geometry/approx_type.h"
 #include "../geometry/denotable_set.h"
@@ -171,4 +171,4 @@ class ApproximateSet {
 }
 }
 
-#endif /* _APPROXIMATE_SET_H */
+#endif /* ARIADNE_APPROXIMATE_SET_H */

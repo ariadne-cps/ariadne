@@ -25,8 +25,8 @@
  *  \brief Diagonal matrices.
  */
 
-#ifndef _ARIADNE_DIAGONAL_MATRIX_H
-#define _ARIADNE_DIAGONAL_MATRIX_H
+#ifndef ARIADNE_DIAGONAL_MATRIX_H
+#define ARIADNE_DIAGONAL_MATRIX_H
 
 #include <iosfwd>
 
@@ -117,4 +117,4 @@ namespace Ariadne {
 }
 
 
-#endif /* _ARIADNE_DIAGONAL_MATRIX_H */
+#endif /* ARIADNE_DIAGONAL_MATRIX_H */

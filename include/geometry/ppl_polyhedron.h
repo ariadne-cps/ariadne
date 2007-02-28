@@ -30,8 +30,8 @@
 
 #ifdef HAVE_PPL_HH
 
-#ifndef _ARIADNE_PPL_POLYHEDRON_H
-#define _ARIADNE_PPL_POLYHEDRON_H
+#ifndef ARIADNE_PPL_POLYHEDRON_H
+#define ARIADNE_PPL_POLYHEDRON_H
 
 #include <iosfwd>
 #include <vector>
@@ -156,6 +156,6 @@ namespace Ariadne {
   }
 }
                    
-#endif /* _ARIADNE_PPL_POLYHEDRON_H */
+#endif /* ARIADNE_PPL_POLYHEDRON_H */
 
 #endif /* HAVE_PPL_HH */

@@ -26,8 +26,8 @@
  *  \brief Operations on arrays.
  */
 
-#ifndef _ARIADNE_ARRAY_OPERATIONS_H
-#define _ARIADNE_ARRAY_OPERATIONS_H
+#ifndef ARIADNE_ARRAY_OPERATIONS_H
+#define ARIADNE_ARRAY_OPERATIONS_H
 
 #include "../declarations.h"
 
@@ -86,4 +86,4 @@ namespace Ariadne {
 }
 
 
-#endif /* _ARIADNE_ARRAY_OPERATIONS_H */
+#endif /* ARIADNE_ARRAY_OPERATIONS_H */

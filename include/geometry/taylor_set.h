@@ -25,8 +25,8 @@
  *  \brief Taylor sets (polynomial images of cuboids).
  */
 
-#ifndef _ARIADNE_TAYLOR_SET_H
-#define _ARIADNE_TAYLOR_SET_H
+#ifndef ARIADNE_TAYLOR_SET_H
+#define ARIADNE_TAYLOR_SET_H
 
 #include <iosfwd>
 
@@ -159,4 +159,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* _ARIADNE_TAYLOR_SET_H */
+#endif /* ARIADNE_TAYLOR_SET_H */

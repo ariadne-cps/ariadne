@@ -25,8 +25,8 @@
  *  \brief The Duffing equation \f$(\ddot{x}+\delta\dot{x}+(\beta x^3\pm\omega_0^2)=\gamma\cos(\omega t+\phi)\f$.
  */
 
-#ifndef _ARIADNE_DUFFING_EQUATION_H
-#define _ARIADNE_DUFFING_EQUATION_H
+#ifndef ARIADNE_DUFFING_EQUATION_H
+#define ARIADNE_DUFFING_EQUATION_H
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
@@ -140,4 +140,4 @@ namespace Ariadne {
 }
 
 
-#endif /* _ARIADNE_DUFFING_EQUATION_H */
+#endif /* ARIADNE_DUFFING_EQUATION_H */

@@ -26,8 +26,8 @@
  *  \brief Maps of affine form \f$x\rightarrow Ax+b\f$.
  */
 
-#ifndef _ARIADNE_AFFINE_MAP_H
-#define _ARIADNE_AFFINE_MAP_H
+#ifndef ARIADNE_AFFINE_MAP_H
+#define ARIADNE_AFFINE_MAP_H
 
 #include "../declarations.h"
 
@@ -59,19 +59,19 @@ namespace Ariadne {
       explicit AffineMap() {}
       /*! \brief Construct from the matrix \f$A\f$ and the vector \f$b\f$. */
       explicit AffineMap(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b)
-        : _A(A), _b(b) { }
+        : _a(A), _b(b) { }
       /*! \brief Construct a linear map from the matrix \f$A\f$. */
       explicit AffineMap(const LinearAlgebra::Matrix<R>& A)
-        : _A(A), _b(A.number_of_rows()) { }
+        : _a(A), _b(A.number_of_rows()) { }
       /*! \brief Construct a translation from the vector \f$b\f$. */
       explicit AffineMap(const LinearAlgebra::Vector<R>& b)
-        : _A(LinearAlgebra::Matrix<R>::identity(b.size())), _b(b) { }
+        : _a(LinearAlgebra::Matrix<R>::identity(b.size())), _b(b) { }
       
       /*! \brief Copy constructor. */
-      AffineMap(const AffineMap<R>& T) : _A(T._A), _b(T._b) { }
+      AffineMap(const AffineMap<R>& T) : _a(T._a), _b(T._b) { }
       /*! \brief Assignment operator. */
       AffineMap<R>& operator=(const AffineMap<R>& T) {
-        this->_A=T._A; this->_b=T._b; return *this; }
+        this->_a=T._a; this->_b=T._b; return *this; }
       /*! \brief Returns a pointer to a dynamically-allocated copy of the map. */
       virtual AffineMap<R>* clone() const { return new AffineMap<R>(*this); }
 
@@ -94,13 +94,13 @@ namespace Ariadne {
         return this->image(A); };
               
       /*! \brief  The linear transformation of the map. */
-      const LinearAlgebra::Matrix<R>& A() const { return _A; }
+      const LinearAlgebra::Matrix<R>& A() const { return _a; }
       /*! \brief  The offset vector of the map. */
       const LinearAlgebra::Vector<R>& b() const { return _b; }
       
       /*! \brief  The dimension of the argument. */
       virtual dimension_type argument_dimension() const {
-        return _A.number_of_columns();
+        return _a.number_of_columns();
       }
       
       /*! \brief The dimension of the result. */
@@ -124,7 +124,7 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream& os) const;
      protected:
-      LinearAlgebra::Matrix<R> _A;
+      LinearAlgebra::Matrix<R> _a;
       LinearAlgebra::Vector<R> _b;
     };
 
@@ -133,4 +133,4 @@ namespace Ariadne {
 }
 
 
-#endif /* _ARIADNE_AFFINE_MAP_H */
+#endif /* ARIADNE_AFFINE_MAP_H */

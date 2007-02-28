@@ -26,10 +26,10 @@
  *  \brief Basic linear algebra.
  */
 
-#ifndef _ARIADNE_LINEAR_ALGEBRA_H
-#define _ARIADNE_LINEAR_ALGEBRA_H
+#ifndef ARIADNE_LINEAR_ALGEBRA_H
+#define ARIADNE_LINEAR_ALGEBRA_H
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 
-#endif /* _ARIADNE_LINEAR_ALGEBRA_H */
+#endif /* ARIADNE_LINEAR_ALGEBRA_H */

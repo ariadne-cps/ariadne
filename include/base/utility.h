@@ -25,8 +25,8 @@
  *  \brief Miscellaneous, general-purpose functions.
  */
 
-#ifndef _ARIADNE_UTILITY_H
-#define _ARIADNE_UTILITY_H
+#ifndef ARIADNE_UTILITY_H
+#define ARIADNE_UTILITY_H
 
 #include <iosfwd>
 
@@ -37,4 +37,4 @@ namespace Ariadne {
   }    
 }
 
-#endif /* _ARIADNE_UTILITY_H */
+#endif /* ARIADNE_UTILITY_H */

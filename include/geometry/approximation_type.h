@@ -22,8 +22,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#ifndef _APPROX_TYPE_H
-#define _APPROX_TYPE_H
+#ifndef ARIADNE_APPROXIMATION_TYPE_H
+#define ARIADNE_APPROXIMATION_TYPE_H
 
 
 
@@ -120,4 +120,4 @@ class ApproximationType {
 
 }
 
-#endif /* _APPROX_TYPE_H */
+#endif /* ARIADNE_APPROXIMATION_TYPE_H */

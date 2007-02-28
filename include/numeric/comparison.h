@@ -25,8 +25,8 @@
  *  \brief Comparison operators for numerical types.
  */
  
-#ifndef _ARIADNE_COMPARISON_H
-#define _ARIADNE_COMPARISON_H
+#ifndef ARIADNE_COMPARISON_H
+#define ARIADNE_COMPARISON_H
 
 namespace Ariadne {
   namespace Numeric {
@@ -59,4 +59,4 @@ namespace Ariadne {
 
 
 
-#endif /* _ARIADNE_COMPARISON_H */
+#endif /* ARIADNE_COMPARISON_H */

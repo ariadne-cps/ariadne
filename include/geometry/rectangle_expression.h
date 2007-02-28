@@ -26,8 +26,8 @@
  *  \brief Base class for rectangle expression templates.
  */
 
-#ifndef _ARIADNE_RECTANGLE_EXPRESSION_H
-#define _ARIADNE_RECTANGLE_EXPRESSION_H
+#ifndef ARIADNE_RECTANGLE_EXPRESSION_H
+#define ARIADNE_RECTANGLE_EXPRESSION_H
 
 #include <iosfwd>
 
@@ -55,4 +55,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* _ARIADNE_RECTANGLE_EXPRESSION_H */
+#endif /* ARIADNE_RECTANGLE_EXPRESSION_H */

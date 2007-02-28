@@ -25,8 +25,8 @@
  *  \brief Top-level header file for the Numeric module.
  */
 
-#ifndef _ARIADNE_NUMERIC_H
-#define _ARIADNE_NUMERIC_H
+#ifndef ARIADNE_NUMERIC_H
+#define ARIADNE_NUMERIC_H
 
 
-#endif /* _ARIADNE_GEOMETRY_H */
+#endif /* ARIADNE_GEOMETRY_H */

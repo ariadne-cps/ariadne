@@ -25,8 +25,8 @@
  *  \brief Cuboidal partition trees on a unit cuboid.
  */
 
-#ifndef _ARIADNE_SUBDIVISION_TREE_SET_H
-#define _ARIADNE_SUBDIVISION_TREE_SET_H
+#ifndef ARIADNE_SUBDIVISION_TREE_SET_H
+#define ARIADNE_SUBDIVISION_TREE_SET_H
 
 #include <iosfwd>
 
@@ -390,4 +390,4 @@ namespace Ariadne {
   
 }
 
-#endif /* _ARIADNE_SUBDIVISION_TREE_SET_H */
+#endif /* ARIADNE_SUBDIVISION_TREE_SET_H */

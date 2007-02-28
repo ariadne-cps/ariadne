@@ -46,14 +46,14 @@ namespace Ariadne {
     LinearAlgebra::Vector<typename AffineVectorField<R>::F>
     AffineVectorField<R>::image(const Geometry::Point<F>& s) const 
     { 
-      return LinearAlgebra::Vector<F>(this->_A*LinearAlgebra::Vector<F>(s.position_vector())+this->_b); 
+      return LinearAlgebra::Vector<F>(this->_a*LinearAlgebra::Vector<F>(s.position_vector())+this->_b); 
     }
     
     template<class R>
     LinearAlgebra::Matrix<typename AffineVectorField<R>::F>
     AffineVectorField<R>::jacobian(const Geometry::Point<F>& x) const 
     { 
-      return this->_A; 
+      return this->_a; 
     }
     
     template<class R> 

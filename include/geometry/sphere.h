@@ -25,8 +25,8 @@
  *  \brief Solid spheres in Euclidean space.
  */
 
-#ifndef _ARIADNE_SPHERE_H
-#define _ARIADNE_SPHERE_H
+#ifndef ARIADNE_SPHERE_H
+#define ARIADNE_SPHERE_H
 
 #include <iosfwd>
 
@@ -160,4 +160,4 @@ namespace Ariadne {
 
 #include "sphere.inline.h"
 
-#endif /* _ARIADNE_SPHERE_H */
+#endif /* ARIADNE_SPHERE_H */

@@ -26,8 +26,8 @@
  *  \brief Standard functions on real number types.
  */
 
-#ifndef _ARIADNE_FUNCTION_H
-#define _ARIADNE_FUNCTION_H
+#ifndef ARIADNE_FUNCTION_H
+#define ARIADNE_FUNCTION_H
 
 namespace Ariadne {
   namespace Numeric {
@@ -191,4 +191,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* _ARIADNE_FUNCTION_H */
+#endif /* ARIADNE_FUNCTION_H */

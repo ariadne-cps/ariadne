@@ -26,8 +26,8 @@
  *  \brief STL style arrays.
  */
 
-#ifndef _ARIADNE_ARRAY_H
-#define _ARIADNE_ARRAY_H
+#ifndef ARIADNE_ARRAY_H
+#define ARIADNE_ARRAY_H
 
 #include <cstddef>
 
@@ -800,4 +800,4 @@ namespace Ariadne {
   } // namespace Base
 } // namespace Ariadne
   
-#endif /* _ARIADNE_ARRAY_H */
+#endif /* ARIADNE_ARRAY_H */

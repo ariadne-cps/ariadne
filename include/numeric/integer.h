@@ -25,8 +25,8 @@
  *  \brief Multiple-precision integer type and interger functions.
  */
 
-#ifndef _ARIADNE_INTEGER_H
-#define _ARIADNE_INTEGER_H
+#ifndef ARIADNE_INTEGER_H
+#define ARIADNE_INTEGER_H
 
 #include <gmpxx.h>
 #include <iostream>
@@ -206,4 +206,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* _ARIADNE_INTEGER_H */
+#endif /* ARIADNE_INTEGER_H */

@@ -25,8 +25,8 @@
  *  \brief The Henon map \f$(x,y) \rightarrow (a-x^2-by,x)\f$.
  */
 
-#ifndef _ARIADNE_HENON_MAP_H
-#define _ARIADNE_HENON_MAP_H
+#ifndef ARIADNE_HENON_MAP_H
+#define ARIADNE_HENON_MAP_H
 
 #include <limits>
 
@@ -125,4 +125,4 @@ namespace Ariadne {
 }
 
 
-#endif /* _ARIADNE_HENON_MAP_H */
+#endif /* ARIADNE_HENON_MAP_H */

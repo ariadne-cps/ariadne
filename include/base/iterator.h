@@ -25,8 +25,8 @@
  *  \brief General-purpose iterators
  */
 
-#ifndef _ARIADNE_ITERATOR_H
-#define _ARIADNE_ITERATOR_H
+#ifndef ARIADNE_ITERATOR_H
+#define ARIADNE_ITERATOR_H
 
 #include <boost/iterator.hpp>
 #include <boost/iterator/iterator_facade.hpp>
@@ -216,4 +216,4 @@ namespace Ariadne {
 } // namespace Ariadne
   
   
-#endif /* _ARIADNE_ITERATOR_H */
+#endif /* ARIADNE_ITERATOR_H */

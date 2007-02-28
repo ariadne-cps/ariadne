@@ -25,8 +25,8 @@
  *  \brief Solid ellipsoids in Euclidean space.
  */
 
-#ifndef _ARIADNE_ELLIPSOID_H
-#define _ARIADNE_ELLIPSOID_H
+#ifndef ARIADNE_ELLIPSOID_H
+#define ARIADNE_ELLIPSOID_H
 
 #include <iosfwd>
 
@@ -195,4 +195,4 @@ namespace Ariadne {
 
 #include "ellipsoid.inline.h"
 
-#endif /* _ARIADNE_ELLIPSOID_H */
+#endif /* ARIADNE_ELLIPSOID_H */

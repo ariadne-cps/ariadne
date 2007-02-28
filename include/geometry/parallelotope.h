@@ -26,8 +26,8 @@
  *  \brief Parallelotopes.
  */
 
-#ifndef _ARIADNE_PARALLELOTOPE_H
-#define _ARIADNE_PARALLELOTOPE_H
+#ifndef ARIADNE_PARALLELOTOPE_H
+#define ARIADNE_PARALLELOTOPE_H
 
 #include <iosfwd>
 
@@ -223,4 +223,4 @@ namespace Ariadne {
 
 #include "parallelotope.inline.h"
 
-#endif /* _ARIADNE_PARALLELOTOPE_H */
+#endif /* ARIADNE_PARALLELOTOPE_H */

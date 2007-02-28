@@ -26,8 +26,8 @@
  *  \brief Maps of affine form \f$x\rightarrow Ax \oplus S \f$.
  */
 
-#ifndef _ARIADNE_AFFINE_MULTIMAP_H
-#define _ARIADNE_AFFINE_MULTIMAP_H
+#ifndef ARIADNE_AFFINE_MULTIMAP_H
+#define ARIADNE_AFFINE_MULTIMAP_H
 
 #include "multimap.h"
 
@@ -58,14 +58,14 @@ namespace Ariadne {
        *  and a set decribing the offset. */
       explicit AffineMultiMap(const LinearAlgebra::Matrix<R>& A, 
                               const BS<R>& S)
-        : _A(A), _Set(S) { }
+        : _mx(A), _set(S) { }
         
       /*! \brief Copy constructor. */
-      AffineMultiMap(const AffineMultiMap<R,BS>& T) : _A(T._A), _Set(T._Set) { }
+      AffineMultiMap(const AffineMultiMap<R,BS>& T) : _mx(T._mx), _set(T._set) { }
       
       /*! \brief Assignment operator. */
       AffineMultiMap<R,BS>& operator=(const AffineMultiMap<R,BS>& T) {
-        this->_A=T._A; this->_Set=T._Set; return *this; 
+        this->_mx=T._mx; this->_set=T._set; return *this; 
       }
       
       /*! \brief  The map applied to a state. */
@@ -75,27 +75,27 @@ namespace Ariadne {
       BS<R> operator() (const BS<R>& z) const;
            
       /*! \brief  The matrix of the map. */
-      const LinearAlgebra::Matrix<R>& A() const { return _A; }
+      const LinearAlgebra::Matrix<R>& A() const { return _mx; }
       
       /*! \brief  The offset set of the map. */
-      const BS<R>& S() const { return _Set; }
+      const BS<R>& S() const { return _set; }
       
       /*! \brief  The dimension of the argument. */
       dimension_type argument_dimension() const {
-        return _A.number_of_columns();
+        return _mx.number_of_columns();
       }
       
       /*! \brief The dimension of the result. */
       dimension_type result_dimension() const {
-        return _A.number_of_rows();
+        return _mx.number_of_rows();
       }
       
 
       /*! \brief  The name of the system. */
       std::string name() const { return "AffineMultiMap"; }
      private:
-      matrix_type _A;
-      set_type _Set;
+      matrix_type _mx;
+      set_type _set;
     };
       
     
@@ -103,4 +103,4 @@ namespace Ariadne {
 }
 
 
-#endif /* _ARIADNE_AFFINE_MULTIMAP_H */
+#endif /* ARIADNE_AFFINE_MULTIMAP_H */

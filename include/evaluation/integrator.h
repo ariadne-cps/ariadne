@@ -25,8 +25,8 @@
  *  \brief Methods for integrating points and sets under a vector field.
  */
 
-#ifndef _ARIADNE_INTEGRATOR_H
-#define _ARIADNE_INTEGRATOR_H
+#ifndef ARIADNE_INTEGRATOR_H
+#define ARIADNE_INTEGRATOR_H
 
 #include "../declarations.h"
 #include "../numeric/rational.h"
@@ -248,4 +248,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* _ARIADNE_INTEGRATE_H */
+#endif /* ARIADNE_INTEGRATE_H */

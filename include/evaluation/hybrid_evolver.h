@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#ifndef _ARIADNE_HYBRID_EVOLVER_H
-#define _ARIADNE_HYBRID_EVOLVER_H
+#ifndef ARIADNE_HYBRID_EVOLVER_H
+#define ARIADNE_HYBRID_EVOLVER_H
 
 #include <string>
 #include <vector>
@@ -96,4 +96,4 @@ class HybridEvolver
 }
 }
 
-#endif /* _ARIADNE_HYBRID_EVOLVER_H */
+#endif /* ARIADNE_HYBRID_EVOLVER_H */

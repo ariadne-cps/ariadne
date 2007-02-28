@@ -26,8 +26,8 @@
  *  \brief Denotable sets on grids.
  */
 
-#ifndef _ARIADNE_GRID_SET_H
-#define _ARIADNE_GRID_SET_H
+#ifndef ARIADNE_GRID_SET_H
+#define ARIADNE_GRID_SET_H
 
 #include <iosfwd>
 
@@ -574,4 +574,4 @@ namespace Ariadne {
 
 #include "grid_set.inline.h"
 
-#endif /* _GRID_SET_H */
+#endif /* ARIADNE_GRID_SET_H */

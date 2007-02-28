@@ -25,8 +25,8 @@
  *  \brief Traits classes to define properties of numerical types.
  */
 
-#ifndef _ARIADNE_NUMERICAL_TRAITS_H
-#define _ARIADNE_NUMERICAL_TRAITS_H
+#ifndef ARIADNE_NUMERICAL_TRAITS_H
+#define ARIADNE_NUMERICAL_TRAITS_H
 
 #include <string>
 
@@ -182,4 +182,4 @@ namespace Ariadne {
 }
   
 
-#endif /* _ARIADNE_NUMERICAL_TRAITS_H */
+#endif /* ARIADNE_NUMERICAL_TRAITS_H */

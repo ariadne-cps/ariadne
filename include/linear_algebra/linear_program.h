@@ -29,8 +29,8 @@
  *  \brief Linear programming problems.
  */
 
-#ifndef _ARIADNE_LINEAR_PROGRAM_H
-#define _ARIADNE_LINEAR_PROGRAM_H
+#ifndef ARIADNE_LINEAR_PROGRAM_H
+#define ARIADNE_LINEAR_PROGRAM_H
 
 #include <iosfwd>
 #include <map>
@@ -450,4 +450,4 @@ namespace Ariadne {
 }
 
 
-#endif /* _ARIADNE_LINEAR_PROGRAM_H */
+#endif /* ARIADNE_LINEAR_PROGRAM_H */

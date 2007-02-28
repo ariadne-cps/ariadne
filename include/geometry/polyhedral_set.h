@@ -25,8 +25,8 @@
  *  \brief Wrapper for polyhedron class conforming to the set interface.
  */
 
-#ifndef _ARIADNE_POLYHEDRAL_SET_H
-#define _ARIADNE_POLYHEDRAL_SET_H
+#ifndef ARIADNE_POLYHEDRAL_SET_H
+#define ARIADNE_POLYHEDRAL_SET_H
 
 #include <iosfwd>
 
@@ -79,4 +79,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* _ARIADNE_POLYHEDRAL_SET_H */
+#endif /* ARIADNE_POLYHEDRAL_SET_H */

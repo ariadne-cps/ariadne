@@ -74,7 +74,20 @@
  * (approximate) multiplication operator. Use 
  * mul(Float64,Float64,RoundApproximate) instead.
  * 
- * See the page \ref real for more information.
+ * We use the following abbreviations for template parameters 
+ * for classes and concepts in this module:
+ *  - \b Q: Rational
+ *  - \b F: Float 
+ *  - \b I: Interval<Float>
+ *  - \b A: Rational, Interval<Float>
+ *  - \b R: Rational, Float
+ *  - \b X: Rational, Float, Interval<Float>
+ *
+ * Here, Float refers to any floating-point type, such as Float64 or MPFloat.
+ * 
+ * \internal The above template names are currently not used consistently
+ *
+ * See the page \ref realnumbertypes for more information.
  *
  * \defgroup LinearAlgebra Linear Algebra
  * \ingroup Base
@@ -101,6 +114,14 @@
  * matrix decomposition classes, or for derivative tensors.
  *
  * All classes support exact arithmetic and interval arithmetic.
+ *
+ * We use the following abbreviations for template parameters for classes 
+ * in this module:
+ *  - \b SCA: Scalar
+ *  - \b VEC: Vector
+ *  - \b MX: Matrix
+ *  - \b TEN: Tensor
+ * 
  */
 
 /*!\defgroup Combinatoric Combinatoric
@@ -160,6 +181,14 @@
  * under-approximation. Alternatively, the fundamental binary predicates can
  * be computed directed for the fuzzy set types.
  * Denotable sets are never fuzzy.
+ *
+ * We use the following abbreviations for template parameters for classes in this module:
+ *  - \b S: Set
+ *  - \b BS: BasicSet
+ *  - \b DS: DenotableSet
+ *  - \b LS: ListSet
+ *  - \b GS: GridSet
+ *  - \b PTS: PartitionTreeSet
  *
  * See \ref geometric for more information.
  * 
@@ -235,7 +264,12 @@
  * It is <em>not</em> the purpose of the classes in the system module to
  * compute the image of denotable sets; this is the purpose of the Evaluation 
  * module.
- * 
+ *
+ * We use the following abbreviations for template parameters for classes in this module:
+ *  - \b FN: Function
+ *  - \b MP: Map
+ *  - \b VF: VectorField
+ *
  * See the page on \ref function for more information.
  *
  * \defgroup DiscreteTime Discrete-Time Systems

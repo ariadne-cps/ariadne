@@ -28,7 +28,7 @@
 #include <fstream>
 
 #include "../base/stlio.h"
-#include "../geometry/arbitrary_set.h"
+#include "../geometry/set_reference.h"
 #include "../geometry/hybrid_set.h"
 #include "../system/discrete_mode.h"
 #include "../system/discrete_transition.h"
@@ -56,7 +56,7 @@ template<class R>
 const DiscreteMode<R>& 
 HybridAutomaton<R>::new_mode(id_type id,
          const VectorField<R>& dynamic,
-         const Geometry::Set<R>& invariant) 
+         const Geometry::SetInterface<R>& invariant) 
 {
   if(this->has_mode(id)) {
     throw std::runtime_error("The hybrid automaton already has a mode with the given id");
@@ -72,7 +72,7 @@ HybridAutomaton<R>::new_transition(id_type event_id,
                const DiscreteMode<R> &source, 
                const DiscreteMode<R> &destination,
                const Map<R> &reset,
-               const Geometry::Set<R> &activation) 
+               const Geometry::SetInterface<R> &activation) 
 {
   id_type source_id=source.id();
   id_type destination_id=destination.id();
@@ -106,7 +106,7 @@ HybridAutomaton<R>::new_transition(id_type event_id,
                id_type source_id, 
                id_type destination_id,
                const Map<R> &reset,
-               const Geometry::Set<R> &activation) 
+               const Geometry::SetInterface<R> &activation) 
 {
   if(this->has_transition(event_id,source_id)) {
     throw std::runtime_error("The automaton already has a transition with the given id and source id.");
@@ -158,10 +158,10 @@ HybridAutomaton<R>::has_transition(id_type event_id, id_type source_id) const
 
 
 template<class R>
-Geometry::HybridSet< Geometry::ArbitrarySet<R> >
+Geometry::HybridSet< Geometry::SetReference<R> >
 HybridAutomaton<R>::invariant() const 
 {
-  Geometry::HybridSet< Geometry::ArbitrarySet<R> > result;
+  Geometry::HybridSet< Geometry::SetReference<R> > result;
   for(discrete_mode_iterator mode_iter=this->_modes.begin(); 
       mode_iter!=this->_modes.end(); ++mode_iter)
   {

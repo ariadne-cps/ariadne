@@ -236,30 +236,17 @@ namespace Ariadne {
 
      
   template<class R> inline
-  FiniteGrid<R>::FiniteGrid(const Grid<R>& g, const Combinatoric::LatticeBlock& b) 
-    : _grid_ptr(&g), _grid_type(g.type()), _lattice_block(b)
-  { 
-  }
-      
-  template<class R> inline
-  FiniteGrid<R>::FiniteGrid(const Grid<R>& g, const Rectangle<R>& bb) 
-    : _grid_ptr(&g), _grid_type(g.type()), 
-      _lattice_block(over_approximation(bb,g).lattice_set())
-  { 
-  }
-      
-  template<class R> inline
   const Grid<R>& 
   FiniteGrid<R>::grid() const
   { 
-    return *_grid_ptr; 
+    return *this->_grid_ptr; 
   }
       
   template<class R> inline
   const Combinatoric::LatticeBlock& 
   FiniteGrid<R>::lattice_block() const 
   {
-    return _lattice_block; 
+    return this->_lattice_block; 
   }
      
 
@@ -267,28 +254,28 @@ namespace Ariadne {
   R 
   FiniteGrid<R>::subdivision_coordinate(dimension_type d, index_type n) const
   {
-    return _grid_ptr->subdivision_coordinate(d,n);
+    return this->_grid_ptr->subdivision_coordinate(d,n);
   }
   
   template<class R> inline
   index_type 
   FiniteGrid<R>::subdivision_interval(dimension_type d, const real_type& x) const 
   {
-    return _grid_ptr->subdivision_interval(d,x);
+    return this->_grid_ptr->subdivision_interval(d,x);
   }
       
   template<class R> inline
   index_type 
   FiniteGrid<R>::subdivision_lower_index(dimension_type d, const real_type& x) const 
   {
-    return _grid_ptr->subdivision_lower_index(d,x);
+    return this->_grid_ptr->subdivision_lower_index(d,x);
   }
 
   template<class R> inline
   index_type 
   FiniteGrid<R>::subdivision_upper_index(dimension_type d, const real_type& x) const 
   {
-    return _grid_ptr->subdivision_upper_index(d,x);
+    return this->_grid_ptr->subdivision_upper_index(d,x);
   }
 
 

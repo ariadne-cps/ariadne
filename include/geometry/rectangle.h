@@ -272,7 +272,7 @@ namespace Ariadne {
 #ifdef DOXYGEN
       //@{ 
       //! \name Binary geometric predicates
-      /*! \brief Set equality operator. */
+      /*! \brief SetInterface equality operator. */
       friend tribool equal(const Rectangle<R>& A, const Rectangle<R>& B) const;
       /*! \brief Tests disjointness with \a r. */
       friend tribool disjoint(const Rectangle<R>& A, const Rectangle<R>& B) const;

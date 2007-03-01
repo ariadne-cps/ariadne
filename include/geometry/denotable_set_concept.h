@@ -36,7 +36,7 @@ namespace Ariadne {
      *  A denotable set is any set which can be exactly expressed as a finite
      *  union of sets of some type satisfying the BasicSetConcept.
      *
-     *  See also the Set interface.
+     *  See also the SetInterface interface.
      */
     class DenotableSetConcept 
     {

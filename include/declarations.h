@@ -104,8 +104,8 @@ template<class R> class PartitionTree;
 template<class R> class PartitionTreeCell;
 template<class R> class PartitionTreeSet;
 
-template<class R> class Set;
-template<class R> class ArbitrarySet;
+template<class R> class SetInterface;
+template<class R> class SetReference;
 
 template<class S> class HybridSet;
 template<class R> class HybridGridMaskSet;

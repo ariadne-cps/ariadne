@@ -85,7 +85,7 @@ void export_grid_set()
   typedef Point<R> RPoint;
   typedef Point<I> IPoint;
 
-  typedef Set<R> RSet;
+  typedef SetInterface<R> RSetInterface;
   typedef Rectangle<R> RRectangle;
   typedef Rectangle<R> RRectangle;
   typedef Parallelotope<R> RParallelotope;
@@ -165,7 +165,6 @@ void export_grid_set()
   class_<RGridCellListSet>("GridCellListSet",init<const RGrid&>())
     .def(init<RGridMaskSet>())
     .def(init<RGridCellListSet>())
-    .def(init<RRectangleListSet>())
     .def("lattice_set", &RGridCellListSet::lattice_set,return_value_policy<copy_const_reference>())
     .def("dimension", &RGridCellListSet::dimension)
     .def("adjoin", (void(RGridCellListSet::*)(const RGridCell&))(&RGridCellListSet::adjoin))
@@ -182,7 +181,7 @@ void export_grid_set()
     .def(self_ns::str(self))    // __str__
     ;
   
-  class_<RGridMaskSet, bases<RSet> >("GridMaskSet",init<const RFiniteGrid&>())
+  class_<RGridMaskSet, bases<RSetInterface> >("GridMaskSet",init<const RFiniteGrid&>())
     .def(init<const RGrid&,LatticeBlock>())
     .def(init<RGridMaskSet>())
     .def(init<RRectangleListSet>())

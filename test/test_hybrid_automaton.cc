@@ -27,8 +27,8 @@
 
 #include "ariadne.h"
 #include "real_typedef.h"
-#include "geometry/set.h"
-#include "geometry/arbitrary_set.h"
+#include "geometry/set_interface.h"
+#include "geometry/set_reference.h"
 #include "geometry/hybrid_set.h"
 #include "geometry/rectangle.h"
 #include "geometry/polyhedron.h"

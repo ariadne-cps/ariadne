@@ -29,7 +29,6 @@
 #include "linear_algebra/vector.h"
 
 #include "geometry/rectangle.h"
-#include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 
 using namespace Ariadne;
@@ -56,10 +55,8 @@ Rectangle<R> over_approximation_of_minkowski_difference(const Rectangle<R>& r1, 
 template<class R>
 void export_rectangle() 
 {
-  typedef Set<R> RSet;
   typedef Point<R> RPoint;
   typedef Rectangle<R> RRectangle;
-  typedef Zonotope<R> RZonotope;
     
   def("rectangular_hull", (RRectangle(*)(const RRectangle&, const RRectangle&))(&rectangular_hull));
   def("open_intersection", (RRectangle(*)(const RRectangle&, const RRectangle&))(&open_intersection));
@@ -68,8 +65,6 @@ void export_rectangle()
   def("subset", (tribool(*)(const RRectangle&, const RRectangle&))(&subset));
 
   
-//  class_< RRectangle,bases<RSet> >(python_name<R>("Rectangle").c_str(),init<int>())
-//  class_< RRectangle,bases<RSet> >("Rectangle",init<int>())
   class_< RRectangle >("Rectangle",init<int>())
     .def(init< Point<R>,Point<R> >())
     .def(init<RRectangle>())
@@ -91,11 +86,6 @@ void export_rectangle()
     .def("upper_bound", (const R&(Rectangle<R>::*)(dimension_type)const)(&Rectangle<R>::upper_bound), return_value_policy<copy_const_reference>())
     .def("__add__", &over_approximation_of_minkowski_sum<R>)
     .def("__sub__", &over_approximation_of_minkowski_difference<R>)
-//    .def("__add__", (RRectangle(*)(const RRectangle&,const RRectangle&))(&minkowski_sum))
-//    .def("__add__", (RRectangle(*)(const RRectangle&,const RZonotope&))(&minkowski_sum))
-//    .def("__sub__", (RRectangle(*)(const RRectangle&,const RRectangle&))(&minkowski_difference))
-//    .def("__sub__", (RRectangle(*)(const RRectangle&,const RZonotope&))(&minkowski_difference))
-//    .def("__mul__", (RRectangle(*)(const RRectangle&,const R&))(&scale))
     .def(self_ns::str(self))
   ;
 }

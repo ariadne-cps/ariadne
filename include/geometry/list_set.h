@@ -39,7 +39,7 @@
 #include "../declarations.h"
 #include "../base/utility.h"
 #include "../base/tribool.h"
-#include "../geometry/set.h"
+#include "../geometry/set_interface.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -67,7 +67,7 @@ namespace Ariadne {
      */
     template<class BS>
     class ListSet 
-      : public Set<typename BS::real_type>
+      : public SetInterface<typename BS::real_type>
     {
      private:
       typedef typename BS::real_type R;
@@ -134,7 +134,7 @@ namespace Ariadne {
       operator ListSet<BSt> () const;
       
       //@{
-      //! \name Set methods
+      //! \name SetInterface methods
       /*! \brief Make a dynamically-allocated copy of the set. */
       virtual ListSet<BS>* clone() const;
 

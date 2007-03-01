@@ -296,7 +296,7 @@ namespace Ariadne {
         T(nc+i,d+nnc)=u(i);
       }
       
-      // Set value function for feasibility problem
+      // SetInterface value function for feasibility problem
       k=0;
       for(size_type i=0; i!=nc; ++i) {
         if(b(i)<0) {

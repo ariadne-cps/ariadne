@@ -196,7 +196,7 @@ namespace Ariadne {
     inline bool 
     Grid<R>::operator==(const Grid<R>& g) const 
     { 
-       return this==&g;
+      return this==&g;
     }
             
     template<class R>
@@ -206,16 +206,15 @@ namespace Ariadne {
        return !(*this==g);
     }
 
-    // FIXME: Use dynamic_cast<> 
     template<class R>
     bool 
     IrregularGrid<R>::operator==(const Grid<R>& g) const 
     {
-      if (g.type()!=IRREGULAR) {
+      const IrregularGrid<R>& ig=dynamic_cast<const IrregularGrid<R>&>(g);
+      if(&ig==0) {
          return false;
       }
-      return this->_subdivision_coordinates==
-            ((const IrregularGrid<R>&)(g))._subdivision_coordinates; 
+      return this->_subdivision_coordinates==ig._subdivision_coordinates; 
     }
       
     template<class R>
@@ -225,16 +224,15 @@ namespace Ariadne {
       return !(*this==g);
     }
 
-    // FIXME: Use dynamic_cast<> 
     template<class R>
     bool 
     RegularGrid<R>::operator==(const Grid<R>& g) const 
     { 
-      if (g.type()!=REGULAR) {
+      const RegularGrid<R>& rg=dynamic_cast<const RegularGrid<R>&>(g);
+      if (&rg==0) {
         return false;
       }
-      return this->_subdivision_lengths==
-          ((const RegularGrid<R>&)g)._subdivision_lengths; 
+      return this->_subdivision_lengths==rg._subdivision_lengths; 
     }
             
     template<class R>
@@ -244,18 +242,42 @@ namespace Ariadne {
       return !(*this==g);
     }
 
+
+
+    template<class R>
+    FiniteGrid<R>::~FiniteGrid() 
+    {
+      if(this->_own_ptr) {
+        delete this->_grid_ptr;
+      }
+    }
+
+
+    template<class R> inline
+    FiniteGrid<R>::FiniteGrid(const Grid<R>& g, const Combinatoric::LatticeBlock& b) 
+      : _own_ptr(0), _grid_ptr(&g), _lattice_block(b)
+    { 
+    }
+      
+    template<class R> inline
+    FiniteGrid<R>::FiniteGrid(const Grid<R>& g, const Rectangle<R>& bb) 
+      : _own_ptr(0), _grid_ptr(&g), _lattice_block(over_approximation(bb,g).lattice_set())
+    { 
+    }
+      
     template<class R>
     FiniteGrid<R>::FiniteGrid(const Rectangle<R>& bb, const size_type& s)
-      : _grid_ptr(0), _grid_type(REGULAR), _lattice_block(bb.dimension())
+      : _own_ptr(1), _grid_ptr(0), _lattice_block(bb.dimension())
     {
       array<R> subdivision_lengths(bb.dimension());
       for(dimension_type i=0; i!=bb.dimension(); ++i) {
         subdivision_lengths[i]=div_approx(bb[i].length(),s);
       }
       this->_grid_ptr=new RegularGrid<R>(subdivision_lengths);
-      GridBlock<R> bounding_box=over_approximation(bb,*_grid_ptr);
+      GridBlock<R> bounding_box=over_approximation(bb,this->grid());
       this->_lattice_block=bounding_box.lattice_set();
     }
+
 
     template<class R>
     Rectangle<R>
@@ -264,30 +286,22 @@ namespace Ariadne {
       dimension_type dim=this->dimension();
       const Combinatoric::LatticeBlock &block=this->_lattice_block;
        
-      switch(this->_grid_type) {
-        case REGULAR:
-        {
-          const RegularGrid<R> *this_grid=((RegularGrid<R> *)(this->_grid_ptr));
-          
-          Point<R> l(dim),u(dim);
-          
-          for (dimension_type i=0; i< dim; i++) {
-            l[i]=mul_approx(this_grid->subdivision_length(i),block.lower_bound(i));
-            u[i]=mul_approx(this_grid->subdivision_length(i),block.upper_bound(i));
-          }
-          
-          return Rectangle<R>(l,u);
+      const RegularGrid<R>* rg_ptr=dynamic_cast<const RegularGrid<R>*>(this->_grid_ptr);
+      const IrregularGrid<R>* ig_ptr=dynamic_cast<const IrregularGrid<R>*>(this->_grid_ptr);
+
+      if(rg_ptr) {
+        // RegularGrid
+        Point<R> l(dim),u(dim);
+        for (dimension_type i=0; i< dim; i++) {
+          l[i]=mul_approx(rg_ptr->subdivision_length(i),block.lower_bound(i));
+          u[i]=mul_approx(rg_ptr->subdivision_length(i),block.upper_bound(i));
         }
-        case IRREGULAR:
-        {
-          const IrregularGrid<R> *this_grid=((IrregularGrid<R> *)(this->_grid_ptr));
-          return (Rectangle<R>)(this_grid->extent());
-        }
-        default:
-          throw std::runtime_error("FiniteGrid<R>::bounding_box(): not implemented for this grid type.");
+        return Rectangle<R>(l,u);
+      } else if(ig_ptr) {
+        return Rectangle<R>(ig_ptr->extent());
+      } else {
+        throw std::runtime_error("FiniteGrid<R>::bounding_box(): not implemented for this grid type.");
       }
-           
-      return Rectangle<R>(0);
     }
 
     template<class R>

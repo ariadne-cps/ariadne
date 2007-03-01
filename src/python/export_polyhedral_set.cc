@@ -35,7 +35,7 @@ using namespace boost::python;
 template<class R>
 void export_polyhedral_set() 
 {
-  class_< PolyhedralSet<R>, bases< Set<R>, Polyhedron<R> > >("PolyhedralSet",init< Polyhedron<R> >())
+  class_< PolyhedralSet<R>, bases< SetInterface<R>, Polyhedron<R> > >("PolyhedralSet",init< Polyhedron<R> >())
     .def(init< Matrix<R>,Vector<R> >())
     .def(init< Rectangle<R> >())
     .def("dimension", &PolyhedralSet<R>::dimension)

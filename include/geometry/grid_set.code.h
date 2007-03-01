@@ -36,7 +36,8 @@
 #include "../geometry/polyhedron.h"
 #include "../geometry/list_set.h"
 #include "../geometry/partition_tree_set.h"
-#include "../geometry/set.h"
+
+#include "../geometry/set_interface.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -47,14 +48,14 @@ namespace Ariadne {
     
     template<class R>
     GridCell<R>::GridCell(const Grid<R>& g, const Combinatoric::LatticeCell& pos)
-      : _grid(g), _lattice_set(pos)
+      : _grid_ref(g), _lattice_set(pos)
     {
       check_equal_dimensions(g,pos,"GridCell<R>::GridCell(Grid<R>,LatticeCell");
     }
 
     template<class R>
     GridCell<R>::GridCell(const Grid<R>& g, const IndexArray& pos)
-      : _grid(g), _lattice_set(pos)
+      : _grid_ref(g), _lattice_set(pos)
     {
       check_dimension(g,pos.size(),__PRETTY_FUNCTION__);
     }
@@ -64,7 +65,7 @@ namespace Ariadne {
     R
     GridCell<R>::lower_bound(dimension_type i) const 
     {
-      return _grid.subdivision_coordinate(i,_lattice_set.lower_bound(i));
+      return _grid_ref.subdivision_coordinate(i,_lattice_set.lower_bound(i));
     }
     
     
@@ -72,7 +73,7 @@ namespace Ariadne {
     R
     GridCell<R>::upper_bound(dimension_type i) const 
     {
-      return _grid.subdivision_coordinate(i,_lattice_set.upper_bound(i));
+      return _grid_ref.subdivision_coordinate(i,_lattice_set.upper_bound(i));
     }
     
 
@@ -89,7 +90,7 @@ namespace Ariadne {
     
     template<class R>
     GridBlock<R>::GridBlock(const Grid<R>& g)
-      : _grid_ptr(&g), _lattice_set(g.dimension())
+      : _grid_ref(g), _lattice_set(g.dimension())
     { 
       _lattice_set.set_lower_bound(0,1);
       //_lattice_set.set_lower_bound(0,0);
@@ -99,7 +100,7 @@ namespace Ariadne {
     
     template<class R>
     GridBlock<R>::GridBlock(const Grid<R>& g, const Combinatoric::LatticeBlock& b)
-      : _grid_ptr(&g), _lattice_set(b)
+      : _grid_ref(g), _lattice_set(b)
     {
       check_equal_dimensions(g,b,"GridBlock<R>::GridBlock(Grid<R>,LatticeBlock)");
     }
@@ -107,7 +108,7 @@ namespace Ariadne {
     
     template<class R>
     GridBlock<R>::GridBlock(const Grid<R>& g, const IndexArray& l, const IndexArray& u)
-      : _grid_ptr(&g), _lattice_set(l,u)
+      : _grid_ref(g), _lattice_set(l,u)
     {
       check_dimension(g,l.size(),__PRETTY_FUNCTION__);
     }
@@ -115,7 +116,7 @@ namespace Ariadne {
     
     template<class R>
     GridBlock<R>::GridBlock(const Grid<R>& g, const Rectangle<R>& r)
-      : _grid_ptr(&g), _lattice_set(g.dimension())
+      : _grid_ref(g), _lattice_set(g.dimension())
     {
       check_equal_dimensions(g,r,"GridBlock<R>::GridBlock(Grid<R>,Rectangle<R>)");
       for(dimension_type i=0; i!=dimension(); ++i) {
@@ -128,14 +129,14 @@ namespace Ariadne {
     
     template<class R>
     GridBlock<R>::GridBlock(const GridCell<R>& gc)
-      : _grid_ptr(&gc.grid()), _lattice_set(gc.lattice_set())
+      : _grid_ref(gc.grid()), _lattice_set(gc.lattice_set())
     {
     }
     
     
     template<class R>
     GridBlock<R>::GridBlock(const GridBlock<R>& gb)
-      : _grid_ptr(gb._grid_ptr), _lattice_set(gb.lattice_set())
+      : _grid_ref(gb._grid_ref), _lattice_set(gb.lattice_set())
     {
     }
     
@@ -145,7 +146,9 @@ namespace Ariadne {
     GridBlock<R>::operator=(const GridBlock<R>& gb)
     {
       if(this!=&gb) {
-        this->_grid_ptr=gb._grid_ptr;
+        const Grid<R>* this_grid_ptr=&this->_grid_ref;
+        const Grid<R>* gb_grid_ptr=&gb._grid_ref;
+        this_grid_ptr = gb_grid_ptr;
         this->_lattice_set=gb._lattice_set;
       }
       return *this;
@@ -156,7 +159,7 @@ namespace Ariadne {
     R
     GridBlock<R>::lower_bound(dimension_type i) const 
     {
-      return _grid_ptr->subdivision_coordinate(i,_lattice_set.lower_bound(i));
+      return _grid_ref.subdivision_coordinate(i,_lattice_set.lower_bound(i));
     }
     
     
@@ -164,7 +167,7 @@ namespace Ariadne {
     R
     GridBlock<R>::upper_bound(dimension_type i) const 
     {
-      return _grid_ptr->subdivision_coordinate(i,_lattice_set.upper_bound(i));
+      return _grid_ref.subdivision_coordinate(i,_lattice_set.upper_bound(i));
     }
     
     
@@ -194,7 +197,7 @@ namespace Ariadne {
 
     template<class R>
     GridCellListSet<R>::GridCellListSet(const Grid<R>& g)
-      : _grid_ptr(&g), _lattice_set(g.dimension())
+      : _grid_ref(g), _lattice_set(g.dimension())
     {
     }
 
@@ -202,7 +205,7 @@ namespace Ariadne {
     template<class R>
     GridCellListSet<R>::GridCellListSet(const Grid<R>& g, 
                                         const Combinatoric::LatticeCellListSet& lcls)
-      : _grid_ptr(&g), _lattice_set(lcls)
+      : _grid_ref(g), _lattice_set(lcls)
     {
       check_equal_dimensions(g,lcls,"GridCellListSet<R>::GridCellListSet(Grid<R>,LatticeCellListSet)");
     }
@@ -210,7 +213,7 @@ namespace Ariadne {
     
     template<class R>
     GridCellListSet<R>::GridCellListSet(const GridMaskSet<R>& gms)
-      : _grid_ptr(&gms.grid()), _lattice_set(gms.dimension())
+      : _grid_ref(gms.grid()), _lattice_set(gms.dimension())
     {
       this->_lattice_set.adjoin(gms._lattice_set);
     }
@@ -218,24 +221,26 @@ namespace Ariadne {
     
     template<class R>
     GridCellListSet<R>::GridCellListSet(const GridCellListSet<R>& gcls)
-      : _grid_ptr(&gcls.grid()), _lattice_set(gcls._lattice_set)
+      : _grid_ref(gcls.grid()), _lattice_set(gcls._lattice_set)
     {
     }
 
-    
-
-    
-    // FIXME: Memory leak
     template<class R>
-    GridCellListSet<R>::GridCellListSet(const ListSet< Rectangle<R> >& rls)
-      : _grid_ptr(new IrregularGrid<R>(rls)), _lattice_set(rls.dimension())
+    GridCellListSet<R>&
+    GridCellListSet<R>::operator=(const GridCellListSet<R>& gcls)
     {
-      typedef typename ListSet< Rectangle<R> >::const_iterator list_set_const_iterator;
-      for(list_set_const_iterator iter=rls.begin(); iter!=rls.end(); ++iter) {
-        this->adjoin(GridBlock<R>(grid(),*iter));
+      if(this!=&gcls) {
+        const Grid<R>* this_grid_ptr=&this->_grid_ref;
+        const Grid<R>* gcls_grid_ptr=&gcls._grid_ref;
+        this_grid_ptr = gcls_grid_ptr;
+        this->_lattice_set=gcls._lattice_set;
       }
+      return *this;
     }
 
+    
+
+    
 
     template<class R>
     GridCellListSet<R>::operator ListSet< Rectangle<R> >() const
@@ -286,30 +291,31 @@ namespace Ariadne {
     
     template<class R>
     GridMaskSet<R>::GridMaskSet(const FiniteGrid<R>& g)
-      : _grid_ptr(&g.grid()), _lattice_set(g.lattice_block()) 
+      : _grid_ref(g.grid()), _lattice_set(g.lattice_block()) 
     { 
     }
 
     
     template<class R>
     GridMaskSet<R>::GridMaskSet(const FiniteGrid<R>& fg, const BooleanArray& m)
-      : _grid_ptr(&fg.grid()), _lattice_set(fg.lattice_block(),m)
+      : _grid_ref(fg.grid()), _lattice_set(fg.lattice_block(),m)
     {
     }
 
     
     template<class R>
     GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeBlock& b)
-      : _grid_ptr(&g), _lattice_set(b) 
+      : _grid_ref(g), _lattice_set(b) 
     { 
     }
 
     
     template<class R>
     GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeBlock& b, const BooleanArray& m)
-      : _grid_ptr(&g), _lattice_set(b,m)
+      : _grid_ref(g), _lattice_set(b,m)
     {
-      const IrregularGrid<R>* irregular_grid_ptr=dynamic_cast<const IrregularGrid<R>*>(_grid_ptr);
+      const Grid<R>& grid_ref=this->_grid_ref;
+      const IrregularGrid<R>* irregular_grid_ptr=dynamic_cast<const IrregularGrid<R>*>(&grid_ref);
       if(irregular_grid_ptr) {
         if(!Combinatoric::subset(b,irregular_grid_ptr->lattice_block())) {
           throw std::runtime_error("Lattice block does not lie in grid lattice block");
@@ -320,9 +326,10 @@ namespace Ariadne {
     
     template<class R>
     GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeMaskSet& ms)
-      : _grid_ptr(&g), _lattice_set(ms)
+      : _grid_ref(g), _lattice_set(ms)
     {
-      const IrregularGrid<R>* irregular_grid_ptr=dynamic_cast<const IrregularGrid<R>*>(_grid_ptr);
+      const Grid<R>& _grid_ref=g;
+      const IrregularGrid<R>* irregular_grid_ptr=dynamic_cast<const IrregularGrid<R>*>(&_grid_ref);
       if(irregular_grid_ptr) {
         if(!Combinatoric::subset(ms.block(),irregular_grid_ptr->lattice_block())) {
           throw std::runtime_error("Lattice block does not lie in grid lattice block");
@@ -333,27 +340,40 @@ namespace Ariadne {
     
     template<class R>
     GridMaskSet<R>::GridMaskSet(const GridMaskSet<R>& gms) 
-      : _grid_ptr(&gms.grid()), _lattice_set(gms._lattice_set)
+      : _grid_ref(gms.grid()), _lattice_set(gms._lattice_set)
     {
+    }
+    
+    
+    template<class R>
+    GridMaskSet<R>&
+    GridMaskSet<R>::operator=(const GridMaskSet<R>& gms) 
+    {
+      if(this!=&gms) {
+        const Grid<R>* this_grid_ptr=&this->_grid_ref;
+        const Grid<R>* gms_grid_ptr=&gms._grid_ref;
+        this_grid_ptr=gms_grid_ptr;
+        this->_lattice_set=gms._lattice_set;
+      }
+      return *this;
     }
     
     
     template<class R>
     GridMaskSet<R>::GridMaskSet(const GridCellListSet<R>& gcls)
-      : _grid_ptr(&gcls.grid()),
+      : _grid_ref(gcls.grid()),
         _lattice_set(gcls.lattice_set())
     {
     }
-    
-    
+  
+  
     // FIXME: Memory leak
     template<class R>
     GridMaskSet<R>::GridMaskSet(const ListSet< Rectangle<R> >& rls) 
-      : _grid_ptr(new IrregularGrid<R>(rls)), 
-        _lattice_set(dynamic_cast<const IrregularGrid<R>*>(_grid_ptr)->lattice_block())
+      : _grid_ref(*new IrregularGrid<R>(rls)), 
+        _lattice_set(dynamic_cast<const IrregularGrid<R>&>(static_cast<const Grid<R>&>(_grid_ref)).lattice_block())
     {
-      //FIXME: Memory leak!    
-
+ 
       for(typename ListSet< Rectangle<R> >::const_iterator riter=rls.begin(); 
           riter!=rls.end(); ++riter) 
       {
@@ -435,7 +455,7 @@ namespace Ariadne {
       GridCellListSet<R>* gcls=0;
       GridMaskSet<R>* gms=0;
       PartitionTreeSet<R>* pts=0;
-      Set<R>* set=0;
+      SetInterface<R>* set=0;
       
       tb=Geometry::subset(*r,*gms);
       tb=Geometry::subset(*gms,*r);
@@ -1053,7 +1073,7 @@ namespace Ariadne {
     
     template<class R>
     GridMaskSet<R>
-    over_approximation(const Set<R>& set, const FiniteGrid<R>& fg) 
+    over_approximation(const SetInterface<R>& set, const FiniteGrid<R>& fg) 
     {
       GridMaskSet<R> result(fg);
       check_equal_dimensions(set,fg,"over_approximation(PartitionTreeSet<R>,FiniteGrid<R>)");
@@ -1074,7 +1094,7 @@ namespace Ariadne {
     
     template<class R>
     GridMaskSet<R>
-    over_approximation(const Set<R>& set, const Grid<R>& g) 
+    over_approximation(const SetInterface<R>& set, const Grid<R>& g) 
     {
       FiniteGrid<R> fg(g,set.bounding_box());
       return over_approximation(set,fg);

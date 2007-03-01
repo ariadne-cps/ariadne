@@ -39,7 +39,7 @@
 #include "../combinatoric/binary_tree.h"
 #include "../combinatoric/subdivision_tree_set.h"
 
-#include "../geometry/set.h"
+#include "../geometry/set_interface.h"
 #include "../geometry/rectangle_expression.h"
 
 
@@ -242,7 +242,7 @@ namespace Ariadne {
      */
     template<class R>
     class PartitionTreeSet 
-      : public Set<R>
+      : public SetInterface<R>
     {
      public:
       //      typedef PartitionTreeSetIterator<R> iterator;
@@ -272,7 +272,7 @@ namespace Ariadne {
       PartitionTreeSet(const GridMaskSet<R>& gms);
 
       //@{
-      //! \name Set methods
+      //! \name SetInterface methods
       /*! \brief Tests for disjointness with a Rectangle. */
       virtual PartitionTreeSet<R>* clone() const;
 
@@ -347,23 +347,23 @@ namespace Ariadne {
       
 #ifdef DOXYGEN
       /*! \brief Compute an outer approximation to set \a s based on the partition scheme \a ps to depth a d. */
-      friend template<class Set>
-      PartitionTreeSet<R> outer_approximation(const Set& s, const PartitionScheme<R>& ps, const uint depth);
+      friend template<class SetInterface>
+      PartitionTreeSet<R> outer_approximation(const SetInterface& s, const PartitionScheme<R>& ps, const uint depth);
 
       /*! \brief Compute an inner approximation to set \a s based on the partition scheme \a ps to depth a d. */
-      friend template<class Set>
-      PartitionTreeSet<R> inner_approximation(const Set& s, const PartitionScheme<R>& ps, const uint depth);
+      friend template<class SetInterface>
+      PartitionTreeSet<R> inner_approximation(const SetInterface& s, const PartitionScheme<R>& ps, const uint depth);
 
       /*! \brief Compute an over approximation to set \a s based on the partition scheme \a ps to depth a d.
        *
        * This function may fail if the set \a s is not regular. 
        */
-      friend template<class Set>
-      PartitionTreeSet<R> over_approximation(const Set& s, const PartitionScheme<R>& ps, const uint depth);
+      friend template<class SetInterface>
+      PartitionTreeSet<R> over_approximation(const SetInterface& s, const PartitionScheme<R>& ps, const uint depth);
 
       /*! \brief Compute an under approximation to set \a s based on the partition scheme \a ps to depth a d. */
-      friend template<class Set>
-      PartitionTreeSet<R> under_approximation(const Set& s, const PartitionScheme<R>& ps, const uint depth);
+      friend template<class SetInterface>
+      PartitionTreeSet<R> under_approximation(const SetInterface& s, const PartitionScheme<R>& ps, const uint depth);
 #endif
 
       /*! \brief Write to an output stream. */

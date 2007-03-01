@@ -29,7 +29,7 @@ namespace Ariadne {
     const Grid<R>& 
     GridCell<R>::grid() const 
     { 
-      return this->_grid; 
+      return this->_grid_ref; 
     }
 
     template<class R> inline
@@ -66,7 +66,7 @@ namespace Ariadne {
     const Grid<R>& 
     GridBlock<R>::grid() const 
     {
-      return *this->_grid_ptr; 
+      return this->_grid_ref; 
     }
 
 
@@ -116,7 +116,7 @@ namespace Ariadne {
     const Grid<R>& 
     GridCellListSet<R>::grid() const 
     {
-      return *this->_grid_ptr; 
+      return this->_grid_ref; 
     }
 
     template<class R> inline
@@ -166,7 +166,7 @@ namespace Ariadne {
     typename GridCellListSet<R>::const_iterator 
     GridCellListSet<R>::begin() const 
     {
-      return const_iterator(*_grid_ptr,_lattice_set.begin()); 
+      return const_iterator(this->_grid_ref,_lattice_set.begin()); 
     }
 
 
@@ -174,7 +174,7 @@ namespace Ariadne {
     typename GridCellListSet<R>::const_iterator 
     GridCellListSet<R>::end() const 
     {
-      return const_iterator(*_grid_ptr,_lattice_set.end()); 
+      return const_iterator(this->_grid_ref,_lattice_set.end()); 
     }
 
 
@@ -210,17 +210,17 @@ namespace Ariadne {
     }
 
 
-    template<class R> template<class Set> inline
+    template<class R> template<class SetInterface> inline
     void 
-    GridCellListSet<R>::adjoin_over_approximation(const Set& s) 
+    GridCellListSet<R>::adjoin_over_approximation(const SetInterface& s) 
     {
         this->adjoin(over_approximation(s,this->grid()));
     }
 
     
-    template<class R> template<class Set> inline
+    template<class R> template<class SetInterface> inline
     void 
-    GridCellListSet<R>::adjoin_under_approximation(const Set& s) 
+    GridCellListSet<R>::adjoin_under_approximation(const SetInterface& s) 
     {
         this->adjoin(under_approximation(s,this->grid()));
     }
@@ -249,14 +249,14 @@ namespace Ariadne {
     const Grid<R>& 
     GridMaskSet<R>::grid() const 
     {
-      return *_grid_ptr; 
+      return this->_grid_ref; 
     }
 
     template<class R> inline
     GridBlock<R> 
     GridMaskSet<R>::bounds() const 
     {
-      return GridBlock<R>(*_grid_ptr,_lattice_set.block()); 
+      return GridBlock<R>(this->_grid_ref,_lattice_set.block()); 
     }
 
     template<class R> inline
@@ -321,20 +321,20 @@ namespace Ariadne {
     GridCell<R> 
     GridMaskSet<R>::operator[](size_type i) const 
     {
-      return GridCell<R>(*_grid_ptr,_lattice_set[i]); 
+      return GridCell<R>(this->_grid_ref,_lattice_set[i]); 
     }
 
     template<class R> inline
     typename GridMaskSet<R>::const_iterator 
     GridMaskSet<R>::begin() const 
     {
-      return const_iterator(*this->_grid_ptr,this->_lattice_set.begin()); 
+      return const_iterator(this->_grid_ref,this->_lattice_set.begin()); 
     }
     template<class R> inline
     typename GridMaskSet<R>::const_iterator 
     GridMaskSet<R>::end() const 
     {
-      return const_iterator(*this->_grid_ptr,this->_lattice_set.end()); 
+      return const_iterator(this->_grid_ref,this->_lattice_set.end()); 
     }
 
 
@@ -370,16 +370,16 @@ namespace Ariadne {
         this->_lattice_set.adjoin(gcls._lattice_set);
     }
 
-    template<class R> template<class Set> inline
+    template<class R> template<class SetInterface> inline
     void 
-    GridMaskSet<R>::adjoin_over_approximation(const Set& s) 
+    GridMaskSet<R>::adjoin_over_approximation(const SetInterface& s) 
     {
         this->adjoin(over_approximation(s,this->grid()));
     }
 
-    template<class R> template<class Set> inline
+    template<class R> template<class SetInterface> inline
     void 
-    GridMaskSet<R>::adjoin_under_approximation(const Set& s) 
+    GridMaskSet<R>::adjoin_under_approximation(const SetInterface& s) 
     {
         this->adjoin(under_approximation(s,this->grid()));
     }
@@ -517,9 +517,9 @@ namespace Ariadne {
      private:
       bool equal(const GridCellListSetIterator& other) const { return this->_iter==other._iter; }
       void increment() { ++_iter; }
-      GridCell<R> dereference() const { return GridCell<R>(*_grid_ptr,*_iter); }
+      GridCell<R> dereference() const { return GridCell<R>(_grid_ref,*_iter); }
      private:
-      const Grid<R>* _grid_ptr;
+      Grid<R>& _grid_ref;
       Combinatoric::LatticeCellListSet::const_iterator _iter;
     };
 
@@ -542,9 +542,9 @@ namespace Ariadne {
      private:
       bool equal(const GridMaskSetIterator& other) const { return this->_iter==other._iter; }
       void increment() { ++_iter; }
-      GridCell<R> dereference() const { return GridCell<R>(*_grid_ptr,*_iter); }
+      GridCell<R> dereference() const { return GridCell<R>(_grid_ref,*_iter); }
      private:
-      const Grid<R>* _grid_ptr;
+      Grid<R>& _grid_ref;
       Combinatoric::LatticeMaskSet::const_iterator _iter;
     };
 

@@ -221,7 +221,7 @@ For a linear programming problem of standard form, with \f$A\f$ an \f$m\times n\
  
  - Unconstrained feasibility problem with inequalities  \f$ Ax\leq b;\ l\leq x\leq u\ (m\geq n)\f$.<br>
    Let \f$I\f$ be a set of basic indices such that \f$A_I\f$ is invertible, where \f$A_I\f$ is the matrix formed from the \em rows corresponding to the \f$I\f$.
-   Set \f$v=A_I^{-1}b_I\f$, and let \f$S\f$ be the constraints satisfied by \f$v\f$.
+   SetInterface \f$v=A_I^{-1}b_I\f$, and let \f$S\f$ be the constraints satisfied by \f$v\f$.
    Find \f$i\f$ such that \f$a_iv>v\f$ where \f$a_i\f$ is the \f$i^\mathrm{th}\f$ row of \f$A\f$ and let \f$c=a_i\f$.
    Change basis until either \f$a_i v\leq b\f$ or it is impossible to reduce \f$a_i x\f$ without violating \f$A_Sx\leq b_S\f$.
 

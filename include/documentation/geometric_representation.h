@@ -140,7 +140,7 @@ concept DenotableSet
 
   // No equality operator required.
 
-  // Set-theoretic operations
+  // SetInterface-theoretic operations
   dimension_type dimension() const;
   tribool empty() const;
   tribool contains(const state_type &) const;
@@ -278,7 +278,7 @@ Checking whether a Rectangle, Zonotope or Polytope is a subset of a Rectangle ca
   - subset(Zonotope, Rectangle) : Check \f$\sum_{j} |G_{ij}|\leq \min\{c_i-l_i,u_i-c_i\} \forall\,i\f$.
   - subset(Polytope, Rectangle) : Check \f$l\leq v\leq u\f$ for all vertices \f$v\f$ of \f$P\f$.
 
-The following operations cannot be performed efficiently, but can be easily implemented by testing the vertices of the Rectangle, and are provided for conformance to the Set interface.
+The following operations cannot be performed efficiently, but can be easily implemented by testing the vertices of the Rectangle, and are provided for conformance to the SetInterface interface.
   - subset(Rectangle, Zonotope)
   - subset(Rectangle, Polytope)
 

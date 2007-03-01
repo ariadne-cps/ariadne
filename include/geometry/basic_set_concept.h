@@ -38,7 +38,7 @@ namespace Ariadne {
      *  the given precision, or is not robust with respect to perturbation of
      *  the parameters.
      *
-     *  See also the DenotableSetConcept and the Set interface.
+     *  See also the DenotableSetConcept and the SetInterface interface.
      */
     class BasicSetConcept 
     {

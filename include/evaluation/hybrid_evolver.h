@@ -29,8 +29,8 @@
 #include <list>
 #include <iostream>
 
+#include "../geometry/set_reference.h"
 #include "../geometry/hybrid_set.h"
-#include "../geometry/arbitrary_set.h"
 #include "../system/hybrid_automaton.h"
 
 namespace Ariadne {  

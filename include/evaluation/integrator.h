@@ -35,7 +35,7 @@
 namespace Ariadne {
 
   namespace Geometry {
-    template<class R> class Set;
+    template<class R> class SetInterface;
     template<class R> class ArbitrarySet;
     template<class BS> class ListSet;
     template<class R> class GridMaskSet;

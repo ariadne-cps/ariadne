@@ -34,8 +34,8 @@
 
 #include "../base/tribool.h"
 
-#include "geometry/set.h"
-#include "geometry/polyhedron.h"
+#include "../geometry/set_interface.h"
+#include "../geometry/polyhedron.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -43,17 +43,17 @@ namespace Ariadne {
  
     
     //! \ingroup ExactSet
-    /*! \brief An adaptor for the Polyhedron class conforming to the Set interface. */
+    /*! \brief An adaptor for the Polyhedron class conforming to the SetInterface interface. */
     template<class R>
-    class PolyhedralSet : public Set<R>, public Polyhedron<R>
+    class PolyhedralSet : public SetInterface<R>, public Polyhedron<R>
     {
      public:
       PolyhedralSet(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b)
-        : Set<R>(), Polyhedron<R>(A,b) { }
+        : SetInterface<R>(), Polyhedron<R>(A,b) { }
       PolyhedralSet(const Rectangle<R>& r)
-        : Set<R>(), Polyhedron<R>(r) { }
+        : SetInterface<R>(), Polyhedron<R>(r) { }
       PolyhedralSet(const Polyhedron<R>& ph)
-        : Set<R>(), Polyhedron<R>(ph) { }
+        : SetInterface<R>(), Polyhedron<R>(ph) { }
       
       virtual ~PolyhedralSet<R>() { }
       virtual PolyhedralSet<R>* clone() const { return new PolyhedralSet<R>(*this); }

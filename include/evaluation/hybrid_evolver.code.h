@@ -24,6 +24,7 @@
 #include "../declarations.h"
 #include "../debug.h"
 #include "../exceptions.h"
+#include "../geometry/set_interface.h"
 #include "../geometry/hybrid_set.h"
 #include "../system/hybrid_automaton.h"
 #include "../evaluation/applicator.h"
@@ -32,15 +33,15 @@
 
 namespace Ariadne {
   
-template<class Set> 
+template<class SetInterface> 
 class HybridTimedSet 
 {
  public:
-  HybridTimedSet(const time_type& t, const id_type& id, const Set& s)
+  HybridTimedSet(const time_type& t, const id_type& id, const SetInterface& s)
     : _time(t), _discrete_state(id), _continuous_state_set(s) { }
   const time_type& time() const { return _time; }
   const id_type& discrete_state() const { return _discrete_state; }
-  const Set& continuous_state_set() const { return _continuous_state_set; } 
+  const SetInterface& continuous_state_set() const { return _continuous_state_set; } 
   
   bool operator==(const HybridTimedSet& other) const { 
     return this->_time == other._time 
@@ -51,7 +52,7 @@ class HybridTimedSet
  private:
   time_type _time;
   id_type _discrete_state;
-  Set _continuous_state_set;
+  SetInterface _continuous_state_set;
 };
 
 }

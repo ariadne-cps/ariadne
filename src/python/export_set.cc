@@ -23,7 +23,7 @@
 
 #include "real_typedef.h"
 
-#include "geometry/set.h"
+#include "geometry/set_interface.h"
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
 
@@ -36,10 +36,10 @@ using namespace boost::python;
 
 template<class R>
 class SetWrapper
-  : public Set<R>, public wrapper< Set<R> >
+  : public SetInterface<R>, public wrapper< SetInterface<R> >
 {
  public: 
-  Set<R>* clone() const { return this->get_override("clone")(); }
+  SetInterface<R>* clone() const { return this->get_override("clone")(); }
   dimension_type dimension() const { return this->get_override("dimension")(); }
   tribool contains(const Point<R>& pt) const { return this->get_override("contains")(); }
   tribool disjoint(const Rectangle<R>& r) const { return this->get_override("disjoint")(); }
@@ -53,12 +53,12 @@ template<class R>
 void export_set() 
 {
   class_<SetWrapper<R>, boost::noncopyable>("Set")
-    .def("dimension", pure_virtual(&Set<R>::dimension))
-    .def("contains", pure_virtual(&Set<R>::contains))
-    .def("disjoint", pure_virtual(&Set<R>::disjoint))
-    .def("superset", pure_virtual(&Set<R>::superset))
-    .def("subset", pure_virtual(&Set<R>::subset))
-    .def("bounding_box", pure_virtual(&Set<R>::bounding_box))
+    .def("dimension", pure_virtual(&SetInterface<R>::dimension))
+    .def("contains", pure_virtual(&SetInterface<R>::contains))
+    .def("disjoint", pure_virtual(&SetInterface<R>::disjoint))
+    .def("superset", pure_virtual(&SetInterface<R>::superset))
+    .def("subset", pure_virtual(&SetInterface<R>::subset))
+    .def("bounding_box", pure_virtual(&SetInterface<R>::bounding_box))
     .def(self_ns::str(self))
   ;
 }

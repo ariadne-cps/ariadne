@@ -61,21 +61,12 @@ test_grid_set()
   cout << "ls=" << ls << endl;
 
   RegularGrid<R> gr(2,0.125);
-
-  GridCellListSet<R> gcls(ls);
-  cout << "gcls=" << gcls << endl;
-  cout << "ListSet(gcls)=" << ListSet< Rectangle<R> >(gcls) << endl;
-  cout << "gcls.lattice_set().bounding_block()=" << gcls.lattice_set().bounding_block() << endl;
+  cout << "gr=" << gr << endl;
 
 
   
   GridMaskSet<R> gms(ls);
   cout << "gms=" << flush << gms << endl;
-
-  GridMaskSet<R> gcms(gcls);
-  cout << gcms << endl;
-  GridCellListSet<R> gclms(gms);
-  cout << gclms << endl;
 
   cout << ListSet< Rectangle<R> >(gms) << endl;
 
@@ -94,9 +85,6 @@ test_grid_set()
   IrregularGrid<R> gr1(ls1);
 
   IrregularGrid<R> gr2(ls2);
-
-  GridCellListSet<R> gcls1(ls1);
-  cout << gcls1 << "\n";
 
   FiniteGrid<R> fgr=FiniteGrid<R>(igrj,igrj.lattice_block());
   //GridMaskSet<R> gms1(fgr,grlsj1);

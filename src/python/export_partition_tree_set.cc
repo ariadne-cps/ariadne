@@ -51,7 +51,7 @@ void export_partition_tree_set()
   typedef PartitionTreeCell<R> RPartitionTreeCell;
   typedef PartitionTreeSet<R> RPartitionTreeSet;
  
-  typedef Set<R> RSet;
+  typedef SetInterface<R> RSetInterface;
   typedef Rectangle<R> RRectangle;
   typedef GridMaskSet<R> RGridMaskSet;
   
@@ -81,7 +81,7 @@ void export_partition_tree_set()
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 
-  class_<RPartitionTreeSet, bases<RSet> >("PartitionTreeSet",init<RRectangle,SubdivisionSequence,BinaryTree,BooleanArray>())
+  class_<RPartitionTreeSet, bases<RSetInterface> >("PartitionTreeSet",init<RRectangle,SubdivisionSequence,BinaryTree,BooleanArray>())
     .def(init<RPartitionTree,BooleanArray>())
     .def(init<RPartitionScheme>())
     .def(init<RGridMaskSet>())

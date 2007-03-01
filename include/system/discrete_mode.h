@@ -30,7 +30,7 @@
 
 #include "vector_field.h"
 #include "../exceptions.h"
-#include "../geometry/set.h"
+#include "../geometry/set_interface.h"
 
 namespace Ariadne {
 namespace System {
@@ -41,7 +41,7 @@ template< class R > class HybridAutomaton;
 
 /*!\ingroup HybridTime
  * \brief A discrete mode of a HybridAutomaton, comprising continuous evolution given by a VectorField
- * within and invariant Geometry::Set. 
+ * within and invariant Geometry::SetInterface. 
  *
  * A %DiscreteMode can only be created using the new_mode() method in
  * the %HybridAutomaton class.
@@ -62,7 +62,7 @@ class DiscreteMode {
     boost::shared_ptr< const VectorField<R> > _dynamic;
   
     // The discrete mode's invariant.
-    boost::shared_ptr< const Geometry::Set<R> > _invariant;
+    boost::shared_ptr< const Geometry::SetInterface<R> > _invariant;
   
   public:
     
@@ -92,7 +92,7 @@ class DiscreteMode {
     }
     
     /*! \brief The discrete mode's invariant. */
-    const Geometry::Set<R>& invariant() const{
+    const Geometry::SetInterface<R>& invariant() const{
       return *this->_invariant;  
     }
     
@@ -111,7 +111,7 @@ class DiscreteMode {
      */
     DiscreteMode(id_type id,
                  const VectorField<R> &dynamic, 
-                 const Geometry::Set<R> &invariant)
+                 const Geometry::SetInterface<R> &invariant)
       :  _id(id), _dynamic(dynamic.clone()), _invariant(invariant.clone()) 
     {
       check_equal_dimensions(dynamic,invariant);
@@ -120,7 +120,7 @@ class DiscreteMode {
     /* Construct from objects managed by shared pointers (for internal use) */
     DiscreteMode(id_type id,
                  const boost::shared_ptr< VectorField<R> > dynamic, 
-                 const boost::shared_ptr< Geometry::Set<R> > invariant)
+                 const boost::shared_ptr< Geometry::SetInterface<R> > invariant)
       :  _id(id), _dynamic(dynamic), _invariant(invariant) 
     {
       check_equal_dimensions(*dynamic,*invariant);

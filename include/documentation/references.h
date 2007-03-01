@@ -68,7 +68,7 @@ K. Fukuda, "From the zonotope construction to the Minkowski addition of convex p
 Leonidas J. Guibas, An Nguyen and Li Zhang, "Zonotopes as bounding volumes", Preprint.
 
 Ari Ingimundarson, Jose Manuel Bravo, Vicenc Puig and Teodoro Alama, 
-  "Robust Fault Diagnosis using Parallelotope-based Set-membership Consistency Tests",
+  "Robust Fault Diagnosis using Parallelotope-based SetInterface-membership Consistency Tests",
   In <em>Proceedings of CDC-ECC 2005</em>.
 
 \section integration_references Integration

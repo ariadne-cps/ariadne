@@ -109,7 +109,7 @@ namespace Ariadne {
      private: 
       static void _instantiate_geometry_operators();
      private:
-      const Grid<R>& _grid;
+      const Grid<R>& _grid_ref;
       Combinatoric::LatticeCell _lattice_set;
     };
 
@@ -182,7 +182,7 @@ namespace Ariadne {
      private: 
       static void _instantiate_geometry_operators();
      private:
-      const Grid<R>* _grid_ptr;
+      const Grid<R>& _grid_ref;
       Combinatoric::LatticeBlock _lattice_set;
     };
 
@@ -225,8 +225,8 @@ namespace Ariadne {
       /*!\brief Copy constructor. */
       GridCellListSet(const GridCellListSet<R>& gcls);
 
-      /*!\brief Construct from a ListSet of Rectangles. */
-      GridCellListSet(const ListSet< Rectangle<R> >& rls);
+      /*!\brief Copy assignment. */
+      GridCellListSet<R>& operator=(const GridCellListSet<R>& gcls);
 
       /*!\brief Convert to a ListSet of Rectangles. */
       operator ListSet< Rectangle<R> >() const;
@@ -284,7 +284,7 @@ namespace Ariadne {
      private: 
       static void _instantiate_geometry_operators();
      private:
-      const Grid<R>* _grid_ptr;
+      const Grid<R>& _grid_ref;
       Combinatoric::LatticeCellListSet _lattice_set;
     };
 
@@ -308,7 +308,7 @@ namespace Ariadne {
      */
     template<class R>
     class GridMaskSet 
-      : public Set<R>
+      : public SetInterface<R>
     {
       friend class GridCellListSet<R>;
       friend class PartitionTreeSet<R>;
@@ -345,18 +345,20 @@ namespace Ariadne {
       /*!\brief Construct a set from a grid, and a lattice mask set. */
       GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeMaskSet& ms);
      
-      /*!\brief Copy constructor. */
-      GridMaskSet(const GridMaskSet<R>& gms);
-
-      /*!\brief Construct from a %ListSet of %Rectangle. */
-      GridMaskSet(const ListSet< Rectangle<R> >& ls);
-
       /*!\brief Construct from a %GridCellListSet. */
       GridMaskSet(const GridCellListSet<R>& gcls);
 
+      /*!\brief Copy constructor. */
+      GridMaskSet(const GridMaskSet<R>& gms);
+
+      /*!\brief Copy assignment. */
+      GridMaskSet<R>& operator=(const GridMaskSet<R>& gms);
+
+      /*!\brief Construct from a list set of rectangles. */
+      explicit GridMaskSet(const ListSet< Rectangle<R> >& rls);
 
       //@{
-      //! \name Set methods
+      //! \name SetInterface methods
       /*! \brief Tests for disjointness with a Rectangle. */
       virtual GridMaskSet<R>* clone() const;
 
@@ -488,7 +490,7 @@ namespace Ariadne {
      private: 
       static void _instantiate_geometry_operators();
      private:
-      const Grid<R>* _grid_ptr;
+      const Grid<R>& _grid_ref;
       Combinatoric::LatticeMaskSet _lattice_set;
     };
     
@@ -546,9 +548,9 @@ namespace Ariadne {
     template<class R, class BS> GridMaskSet<R> over_approximation(const ListSet<BS>& ls, const FiniteGrid<R>& fg); 
     template<class R> GridMaskSet<R> over_approximation(const GridMaskSet<R>& gms, const FiniteGrid<R>& fg);
     template<class R> GridMaskSet<R> over_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& fg);
-    template<class R> GridMaskSet<R> over_approximation(const Set<R>& set, const FiniteGrid<R>& fg);
+    template<class R> GridMaskSet<R> over_approximation(const SetInterface<R>& set, const FiniteGrid<R>& fg);
     
-    template<class R> GridMaskSet<R> over_approximation(const Set<R>& set, const Grid<R>& g);
+    template<class R> GridMaskSet<R> over_approximation(const SetInterface<R>& set, const Grid<R>& g);
     
     
     template<class R> GridBlock<R> under_approximation(const Rectangle<R>& p, const Grid<R>& g);

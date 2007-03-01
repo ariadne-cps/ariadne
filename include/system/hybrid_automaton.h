@@ -38,7 +38,7 @@
 namespace Ariadne {  
 
 namespace Geometry {
-template<class S> class ArbitrarySet;
+template<class S> class SetReference;
 template<class S> class HybridSet;
 }
 
@@ -123,7 +123,7 @@ class HybridAutomaton
    */
   const DiscreteMode<R>& new_mode(id_type id,
                                   const VectorField<R>& dynamic,
-                                  const Geometry::Set<R>& invariant);
+                                  const Geometry::SetInterface<R>& invariant);
     
   /*! \brief Add a discrete transition.
    *
@@ -139,7 +139,7 @@ class HybridAutomaton
                                               const DiscreteMode<R> &source, 
                                               const DiscreteMode<R> &destination,
                                               const Map<R> &reset,
-                                              const Geometry::Set<R> &activation);
+                                              const Geometry::SetInterface<R> &activation);
   
   /*! \brief Adds a discrete transition.
    *
@@ -155,7 +155,7 @@ class HybridAutomaton
                                               id_type source_id, 
                                               id_type destination_id,
                                               const Map<R> &reset,
-                                              const Geometry::Set<R> &activation);
+                                              const Geometry::SetInterface<R> &activation);
   
   /*! \brief Test if the hybrid automaton has a discrete mode with key id. */
   bool has_mode(id_type id) const;
@@ -167,7 +167,7 @@ class HybridAutomaton
   std::map< id_type, dimension_type > locations() const;
   
   /*! \brief The hybrid set giving the invariant for each discrete location. */
-  Geometry::HybridSet< Geometry::ArbitrarySet<R> > invariant() const;
+  Geometry::HybridSet< Geometry::SetReference<R> > invariant() const;
   
   /*! \brief The set of discrete modes. */
   const std::set< DiscreteMode<R> >& modes() const;

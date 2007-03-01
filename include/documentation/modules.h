@@ -183,7 +183,7 @@
  * Denotable sets are never fuzzy.
  *
  * We use the following abbreviations for template parameters for classes in this module:
- *  - \b S: Set
+ *  - \b S: SetInterface
  *  - \b BS: BasicSet
  *  - \b DS: DenotableSet
  *  - \b LS: ListSet

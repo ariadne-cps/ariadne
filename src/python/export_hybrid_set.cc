@@ -26,7 +26,7 @@
 #include "real_typedef.h"
 
 #include "geometry/hybrid_set.h"
-#include "geometry/arbitrary_set.h"
+#include "geometry/set_reference.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Geometry;
@@ -70,10 +70,10 @@ void export_hybrid_set()
   ;
 
 
-  class_< HybridSet< ArbitrarySet<R> > >("HybridSet",init<>())
-    .def("__len__",&HybridSet< ArbitrarySet<R> >::number_of_locations)
-    .def("locations",&HybridSet< ArbitrarySet<R> >::locations)
-    .def("__getitem__", &hybrid_set_get_item< HybridSet< ArbitrarySet<R> > >, return_reference_existing_object)
+  class_< HybridSet< SetReference<R> > >("HybridSet",init<>())
+    .def("__len__",&HybridSet< SetReference<R> >::number_of_locations)
+    .def("locations",&HybridSet< SetReference<R> >::locations)
+    .def("__getitem__", &hybrid_set_get_item< HybridSet< SetReference<R> > >, return_reference_existing_object)
     .def(self_ns::str(self))
   ;
   

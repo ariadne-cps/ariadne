@@ -161,7 +161,7 @@ test_integrate()
   Rectangle<R> bb("[-4,4]x[-4,4]");
   Rectangle<R> r("[-3.125,-2.875]x[-0.125,0.125]");
   FiniteGrid<R> fg(bb,128);
-  const Grid<R>& g=fg.grid();
+  const Grid<R>& g(fg.grid());
   
   GridMaskSet<R> initial_set(fg);
   initial_set.adjoin(over_approximation(r,g));

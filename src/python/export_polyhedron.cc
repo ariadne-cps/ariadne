@@ -43,7 +43,7 @@ void export_polyhedron()
 {
   typedef Vector<R> RVector;
   typedef Matrix<R> RMatrix;
-  typedef Set<R> RSet;
+  typedef SetInterface<R> RSetInterface;
   typedef Polyhedron<R> RPolyhedron;
   typedef Rectangle<R> RRectangle;
   typedef Polytope<R> RPolytope;

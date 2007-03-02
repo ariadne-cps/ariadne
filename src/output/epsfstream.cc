@@ -25,6 +25,10 @@
 
 namespace Ariadne { namespace Output {
 
+const uint epsfstream::xBBoxSide=300;
+const uint epsfstream::yBBoxSide=300;
+const double epsfstream::linewidth=0.0000001;
+    
 
 Polygon2d& Polygon2d::reduce() 
 {

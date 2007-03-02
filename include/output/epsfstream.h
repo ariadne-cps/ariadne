@@ -204,14 +204,13 @@ namespace Ariadne {
                          const Point2d &centre);
 
     
-    
     class epsfstream
       : public std::ofstream 
     {
      private:
-      static const uint xBBoxSide=300;
-      static const uint yBBoxSide=300;
-      static const double linewidth=0.0000001;
+      static const uint xBBoxSide;
+      static const uint yBBoxSide;
+      static const double linewidth;
       
       PlanarProjectionMap p_map;
       Rectangle2d bbox;
@@ -261,6 +260,10 @@ namespace Ariadne {
       epsfstream(const epsfstream&); // no copy constructor
     };
     
+
+
+
+
     epsfstream& trace(epsfstream& eps, const Point2d& pt);
     epsfstream& trace(epsfstream& eps, const Rectangle2d& r);
     epsfstream& trace(epsfstream& eps, const Polygon2d& vertices);

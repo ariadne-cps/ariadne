@@ -78,7 +78,7 @@ namespace Ariadne {
 
       /*! \brief Construct from a list of subdivision coordinates in each 
        * dimension, the lower and upper lengths outsize this array, and the position of the central point of the grid. */
-      explicit Grid(const array< array<R> >& sc, const array<R>& sl, const array<uint>& cp);
+      explicit Grid(const array< array<R> >& sc, const array<R>& sl, const array<size_type>& cp);
 
       /*! \brief Construct from raw pointers. */
        explicit Grid(const dimension_type& d, const size_type* nsc, const R** sc, const R* sl, const size_type* cp);
@@ -136,10 +136,10 @@ namespace Ariadne {
      private:
       array< array<R> > _subdivision_coordinates;
       array<R> _subdivision_lengths;
-      array<uint> _centre_positions;
+      array<size_type> _centre_positions;
       array<R*> _centre_pointers;
-      array<int> _lower_indices;
-      array<int> _upper_indices;
+      array<index_type> _lower_indices;
+      array<index_type> _upper_indices;
       array<R> _lower_bounds;
       array<R> _upper_bounds;
       array<R> _lower_origin;

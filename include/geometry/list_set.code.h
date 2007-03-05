@@ -90,13 +90,13 @@ namespace Ariadne {
     }
     
 
-    template<class R, template<class> class BS>
+    template<class R, class BS>
     tribool
-    disjoint(const ListSet< BS<R> >& ls,
+    disjoint(const ListSet< BS >& ls,
              const Rectangle<R>& r)
     {
       tribool result=true;
-      for(typename ListSet< BS<R> >::const_iterator ls_iter=ls.begin();
+      for(typename ListSet< BS >::const_iterator ls_iter=ls.begin();
           ls_iter!=ls.end(); ++ls_iter)
       {
         result = result && Geometry::disjoint(*ls_iter,r);
@@ -108,13 +108,13 @@ namespace Ariadne {
     }
 
 
-    template<class R, template<class> class BS>
+    template<class R, class BS>
     tribool
-    subset(const ListSet< BS<R> >& ls,
+    subset(const ListSet< BS >& ls,
            const Rectangle<R>& r)
     {
       tribool result=true;
-      for(typename ListSet< BS<R> >::const_iterator ls_iter=ls.begin();
+      for(typename ListSet< BS >::const_iterator ls_iter=ls.begin();
           ls_iter!=ls.end(); ++ls_iter)
       {
         result = result && Geometry::subset(*ls_iter,r);

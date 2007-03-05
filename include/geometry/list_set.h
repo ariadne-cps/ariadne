@@ -272,15 +272,15 @@ namespace Ariadne {
            const ListSet< Rectangle<R> >& B);
     
     
-    template<class R, template<class> class BS>
+    template<class R, class BS>
     tribool
-    disjoint(const ListSet< BS<R> >& A,
+    disjoint(const ListSet< BS >& A,
              const Rectangle<R>& B);
     
     
-    template<class R, template<class> class BS>
+    template<class R, class BS>
     tribool
-    subset(const ListSet< BS<R> >& A,
+    subset(const ListSet< BS >& A,
            const Rectangle<R>& B);
     
     

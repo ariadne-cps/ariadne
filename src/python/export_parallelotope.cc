@@ -39,15 +39,15 @@ using namespace Ariadne::Geometry;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template<template<class> class BS1, template<class> class BS2>
+template<class BS1, class BS2>
 inline
-BS1<Real> 
-touching_intersection(const BS1<Real> &a, 
-                      const BS2<Real> &b) 
+BS1
+touching_intersection(const BS1 &a, 
+                      const BS2 &b) 
 {
-  if (disjoint(a,b))
-    return BS1<Real>(a.dimension());
-  
+  if (disjoint(a,b)) {
+    return BS1(a.dimension());
+  }
   return a;
 }
 

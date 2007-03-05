@@ -85,7 +85,7 @@ namespace Ariadne {
 
 
     template<class R>
-    Grid<R>::Grid(const array< array<R> >& sc, const array<R>& sl, const array<uint>& cp) 
+    Grid<R>::Grid(const array< array<R> >& sc, const array<R>& sl, const array<size_type>& cp) 
       : _subdivision_coordinates(sc),
         _subdivision_lengths(sl),
         _centre_positions(cp)
@@ -95,7 +95,7 @@ namespace Ariadne {
 
      
     template<class R>
-    Grid<R>::Grid(const dimension_type& d, const size_type* nsc, const R** sc, const R* sl, const uint* cp) 
+    Grid<R>::Grid(const dimension_type& d, const size_type* nsc, const R** sc, const R* sl, const size_type* cp) 
       : _subdivision_coordinates(d),
         _subdivision_lengths(sl,sl+d),
         _centre_positions(cp,cp+d)

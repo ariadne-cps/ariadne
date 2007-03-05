@@ -26,7 +26,6 @@
 
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
-#include "geometry/polyhedron.h"
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 
@@ -43,9 +42,9 @@ BS1
 touching_intersection(const BS1 &a, 
                       const BS2 &b) 
 {
-  if (disjoint(a,b))
+  if (disjoint(a,b)) {
     return BS1(a.dimension());
-  
+  }
   return a;
 }
 

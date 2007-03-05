@@ -37,11 +37,7 @@
 #include "test.h"
 
 using namespace Ariadne;
-using std::exception;
-using std::ostream; using std::ofstream; using std::stringstream;
-using std::cout; using std::cerr;
-using std::endl; using std::flush; using std::setprecision;
-using std::string;
+using namespace std;
 
 template class Interval<Float64>;
 template class Interval<MPFloat>;

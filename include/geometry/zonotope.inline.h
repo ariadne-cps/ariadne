@@ -22,6 +22,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "../geometry/rectangle_expression.h"
+#include "../geometry/rectangle.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -66,13 +68,13 @@ namespace Ariadne {
 
  
 
-    template<class R> template<class Rl> inline
-    Zonotope<R>::Zonotope(const Rectangle<Rl>& r)
-      : _dimension(r.dimension()), 
-        _number_of_generators(r.dimension()), 
-        _data(r.dimension()*(r.dimension()+1u))
+    template<class R> template<class E> inline
+    Zonotope<R>::Zonotope(const RectangleExpression<E>& re)
+      : _dimension(re().dimension()), 
+        _number_of_generators(re().dimension()), 
+        _data(re().dimension()*(re().dimension()+1u))
     {
-      (*this)=r;
+      (*this)=re;
     }
     
     
@@ -98,15 +100,20 @@ namespace Ariadne {
     
     
     
-    template<class R> inline
+    template<class R, class E> inline
     void assign_zonotope(LinearAlgebra::VectorSlice<R> c, 
                          LinearAlgebra::MatrixSlice<R> g, 
-                         const Rectangle<R>& r) 
+                         const RectangleExpression<E>& re) 
     {
-      c=r.centre().position_vector(); 
-      g=static_cast<R>(0);
+      typedef typename Numeric::traits<R>::number_type N;
+      R zero=static_cast<R>(0);
+      N two=static_cast<N>(2);
+      const E& r(re());
+
+      g=zero;
       for(size_type i=0; i!=r.dimension(); ++i) {
-        g(i,i)=div_up(sub_up(r.upper_bound(i),r.lower_bound(i)),static_cast<R>(2));
+        c(i)=med_approx(r.lower_bound(i),r.upper_bound(i));
+        g(i,i)=div_up(sub_up(r.upper_bound(i),r.lower_bound(i)),two);
       }
     }
       
@@ -122,12 +129,12 @@ namespace Ariadne {
       }
     }
       
-    template<class R> template<class Rl> inline      
+    template<class R> template<class E> inline      
     Zonotope<R>& 
-    Zonotope<R>::operator=(const Rectangle<Rl>& r) 
+    Zonotope<R>::operator=(const RectangleExpression<E>& re) 
     {
-      this->resize(r.dimension(),r.dimension());
-      assign_zonotope(this->_centre(),this->_generators(),r);
+      this->resize(re().dimension(),re().dimension());
+      assign_zonotope(this->_centre(),this->_generators(),re);
       return *this;
     }
     

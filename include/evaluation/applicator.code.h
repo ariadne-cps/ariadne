@@ -46,6 +46,7 @@
 #include "../geometry/parallelotope.h"
 #include "../geometry/list_set.h"
 #include "../geometry/grid_set.h"
+#include "../system/grid_multimap.h"
 
 
 #include "../system/map.h"
@@ -437,6 +438,26 @@ namespace Ariadne {
         found=image;
       }
       return true;
+    }
+
+    template<class R>
+    System::GridMultiMap<R> 
+    Applicator<R>::discretize(const System::Map<R>& f, 
+                              const Geometry::GridMaskSet<R>& domain,
+                              const Geometry::Grid<R>& range_grid) const
+    {
+      System::GridMultiMap<R> result(domain.grid(),range_grid);
+      Geometry::Zonotope<R> basic_set;
+      Geometry::Zonotope<R> image_set;
+      for(typename Geometry::GridMaskSet<R>::const_iterator dom_iter=domain.begin();
+          dom_iter!=domain.end(); ++dom_iter)
+      {
+        const Geometry::GridCell<R>& cell=*dom_iter;
+        basic_set=cell;
+        image_set=this->image(f,basic_set);
+        result.adjoin_to_image(cell,over_approximation(image_set,range_grid));
+      }
+      return result;
     }
 
   }

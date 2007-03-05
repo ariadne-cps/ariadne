@@ -118,13 +118,22 @@ namespace Ariadne {
       /*! \brief Checked access to the \a n th element. */
       const_reference at(size_type i) const { if(i<_size) { return _ptr[i]; } else { throw std::out_of_range("array: index out-of-range"); } }
       
+      /*! \brief A reference to the first element of the array. */
+      reference front() { return _ptr[0]; }
+      /*! \brief A constant reference to the first element of the array. */
+      const_reference front() const { return _ptr[0]; }
+      /*! \brief A reference to the last element of the array. */
+      reference back() { return _ptr[_size-1]; }
+      /*! \brief A constantreference  to the last element of the array. */
+      const_reference back() const { return _ptr[_size-1]; }
+      
       /*! \brief An iterator pointing to the beginning of the array. */
       iterator begin() { return _ptr; }
       /*! \brief A constant iterator pointing to the beginning of the array. */
       const_iterator begin() const { return _ptr; }
       /*! \brief An iterator pointing to the end of the array. */
       iterator end() { return _ptr+_size; }
-      /*! \brief A constant iterator pointing to the beginning of the array. */
+      /*! \brief A constant iterator pointing to the end of the array. */
       const_iterator end() const { return _ptr+_size; }
       
       /*! \brief Tests two arrays for equality */
@@ -185,6 +194,11 @@ namespace Ariadne {
       const_reference operator[](size_type i) const { return _vector[i]; }
       reference at(size_type i) { if(i<size()) { return _vector[i]; } else { throw std::out_of_range("array::index out-of-range"); } } 
       const_reference at(size_type i) const { if(i<size()) { return _vector[i]; } else { throw std::out_of_range("array::index out-of-range"); } }
+      
+      reference front() { return _vector.front(); }
+      const_reference front() const { return _vector.front(); }
+      reference back() { return _vector.back(); }
+      const_reference back() const { return _vector.back(); }
       
       iterator begin() { return _vector.begin(); }
       const_iterator begin() const { return _vector.begin(); }
@@ -285,6 +299,15 @@ namespace Ariadne {
       const_reference at(size_type i) const { 
         if(i>=N) { throw std::out_of_range("array<T,N>::at(size_type)"); }
         return _ptr[i]; }
+      
+      /*! \brief A reference to the first element of the array. */
+      reference front() { return _ptr[0]; }
+      /*! \brief A constant reference to the first element of the array. */
+      const_reference front() const { return _ptr[0]; }
+      /*! \brief A reference to the last element of the array. */
+      reference back() { return _ptr[_size-1]; }
+      /*! \brief A constantreference  to the last element of the array. */
+      const_reference back() const { return _ptr[_size-1]; }
       
       /*! \brief An iterator pointing to the beginning of the array. */
       iterator begin() { return _ptr; }
@@ -394,6 +417,11 @@ namespace Ariadne {
       /*! \brief A checked reference to the \a i th element. */
       reference at(size_type i) const { if(i<size()) { return _first[i]; } else { throw std::out_of_range("array index out-of-range"); } }
       
+      /*! \brief A reference to the first element. */
+      reference front() const { return _first[0]; }
+      /*! \brief A reference to the last element. */
+      reference back() const { return _last[-1]; }
+      
       /*! \brief The beginning of the range. */
       iterator begin() const { return _first; }
       /*! \brief The end of the range. */
@@ -479,6 +507,11 @@ namespace Ariadne {
       reference operator[](size_type i) const { return _begin[i]; }
       /*! \brief A checked reference to the \a i th element. */
       reference at(size_type i) const { if(i<size()) { return _begin[i]; } else { throw std::out_of_range("array index out-of-range"); } }
+      
+      /*! \brief A reference to the first element. */
+      reference front() const { return (*this)[0]; }
+      /*! \brief A reference to the last element. */
+      reference back() const { return (*this)[size()-1]; }
       
       /*! \brief An iterator to the beginning of the referenced array. */
       iterator begin() const { return _begin; }

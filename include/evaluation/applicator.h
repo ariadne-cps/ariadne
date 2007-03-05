@@ -140,6 +140,13 @@ namespace Ariadne {
              const Geometry::GridMaskSet<R>& initial_set, 
              const Geometry::GridMaskSet<R>& safe_set) const;
 
+      /*! \brief Discretize a system on a grid. */ 
+      virtual 
+      System::GridMultiMap<R> 
+      discretize(const System::Map<R>& f, 
+                 const Geometry::GridMaskSet<R>& dom,
+                 const Geometry::Grid<R>& range_grid) const;
+     
 
 
        

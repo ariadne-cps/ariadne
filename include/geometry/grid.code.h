@@ -24,7 +24,9 @@
 #include "grid.h"
 
 #include <ostream>
+#include <algorithm>
 
+#include "../exceptions.h"
 #include "../base/stlio.h"
 
 #include "../numeric/arithmetic.h"
@@ -37,6 +39,272 @@
 namespace Ariadne {
   namespace Geometry {
 
+
+    template<class R> 
+    Grid<R>::~Grid()
+    {
+    }
+  
+  
+
+    template<class R> 
+    Grid<R>::Grid(const dimension_type& d, const R& l)
+      : _subdivision_coordinates(d,array<R>(1,static_cast<R>(0))),
+        _subdivision_lengths(d,l),
+        _centre_positions(d,0)
+    {
+      this->create();
+    }
+  
+
+    template<class R> 
+    Grid<R>::Grid(const LinearAlgebra::Vector<R>& v)
+      : _subdivision_coordinates(v.size(),array<R>(1,static_cast<R>(0))),
+        _subdivision_lengths(v.data()),
+        _centre_positions(v.size(),0)
+    {
+      this->create();
+    }
+  
+
+    template<class R> 
+    Grid<R>::Grid(const Point<R>& pt, const LinearAlgebra::Vector<R>& v)
+      : _subdivision_coordinates(v.size(),array<R>(1)),
+        _subdivision_lengths(v.data()),
+        _centre_positions(v.size(),0)
+    {
+      if(pt.dimension() != v.size()) {
+        throw IncompatibleDimensions(__PRETTY_FUNCTION__);
+      }
+      for(size_type d=0; d!=pt.dimension(); ++d) {
+        this->_subdivision_coordinates[d][0]=v[d];
+      }
+      this->create();
+    }
+  
+
+
+    template<class R>
+    Grid<R>::Grid(const array< array<R> >& sc, const array<R>& sl, const array<uint>& cp) 
+      : _subdivision_coordinates(sc),
+        _subdivision_lengths(sl),
+        _centre_positions(cp)
+    {
+      this->create();
+    }
+
+     
+    template<class R>
+    Grid<R>::Grid(const dimension_type& d, const size_type* nsc, const R** sc, const R* sl, const uint* cp) 
+      : _subdivision_coordinates(d),
+        _subdivision_lengths(sl,sl+d),
+        _centre_positions(cp,cp+d)
+    {
+      for(size_type i=0; i!=d; ++i) {
+        this->_subdivision_coordinates[i]=array<R>(sc[i],sc[i]+nsc[i]);
+      }
+      this->create();
+    }
+
+     
+
+    template<class R>
+    Grid<R>::Grid(const ListSet< Rectangle<R> >& ls)
+      : _subdivision_coordinates(ls.dimension()),
+        _subdivision_lengths(ls.dimension(),static_cast<R>(1)),
+        _centre_positions(ls.dimension(),0u)
+    {
+      dimension_type d=ls.dimension();
+      R one=static_cast<R>(1);
+
+      std::vector<R>* rectangle_bounds=new std::vector<R>[d];
+
+      for(typename ListSet< Rectangle<R> >::const_iterator riter=ls.begin(); riter!=ls.end(); ++riter) {
+        for(dimension_type i=0; i!=d; ++i) {
+          rectangle_bounds[i].push_back(riter->lower_bound(i));
+          rectangle_bounds[i].push_back(riter->upper_bound(i));
+        }
+      }
+
+      for(dimension_type i=0; i!=d; ++i) {
+        std::vector<R>& bounds=rectangle_bounds[i];
+        bounds.push_back(static_cast<R>(0));
+        std::sort(bounds.begin(),bounds.end());
+        typename std::vector<R>::const_iterator bounds_end=std::unique(bounds.begin(),bounds.end());
+        bounds.resize(bounds_end-bounds.begin());
+        R bounds_floor=floor(bounds.front());
+        R bounds_ceil=ceil(bounds.back());
+        if(bounds_floor==bounds.front()) {
+          bounds_floor=floor(sub_up(bounds_floor,one));
+        }
+        if(bounds_ceil==bounds.back()) {
+          bounds_ceil=ceil(add_down(bounds_ceil,one));
+        }
+
+        array<R>& coordinates=this->_subdivision_coordinates[i];
+        coordinates.resize(bounds.size()+2);
+        coordinates[0]=bounds_floor;
+        std::copy(bounds.begin(),bounds.end(),coordinates.begin()+1);
+        coordinates[bounds.size()+1u]=bounds_ceil;
+        
+        this->_centre_positions[i] = std::find(coordinates.begin(),coordinates.end(),static_cast<R>(0))-coordinates.begin();
+      }
+      delete[] rectangle_bounds;
+      this->create();
+    }
+
+    template<class R>
+    Grid<R>::Grid(const Grid<R>& g1, Grid<R>& g2)
+      : _subdivision_coordinates(g1.dimension()),
+        _subdivision_lengths(g1._subdivision_lengths),
+        _centre_positions(g1.dimension(),0)
+    {
+      if(g1._subdivision_lengths!=g2._subdivision_lengths) {
+        throw std::runtime_error("Cannot merge two grids with different subdivision lengths");
+      }
+      for(dimension_type d=0; d!=this->dimension(); ++d) {
+        array<R>& sc(this->_subdivision_coordinates[d]);
+        const array<R>& sc1(g1._subdivision_coordinates[d]);
+        const array<R>& sc2(g2._subdivision_coordinates[d]);
+        sc.resize(sc1.size()+sc2.size());
+        std::merge(sc1.begin(),sc1.end(),sc2.begin(),sc2.end(),sc.begin());
+        index_type n=std::unique(sc.begin(),sc.end())-sc.begin();
+        sc.resize(n);
+        R x=sc1[g1._centre_positions[d]];
+        this->_centre_positions[d]=std::find(sc.begin(),sc.end(),x)-sc.begin();
+      }
+
+      this->create();
+    }
+
+
+
+    template<class R>
+    void
+    Grid<R>::create() 
+    {
+      dimension_type d=this->dimension();
+      this->_centre_pointers.resize(d);
+      this->_lower_origin.resize(d);
+      this->_upper_origin.resize(d);
+      this->_lower_bounds.resize(d);
+      this->_upper_bounds.resize(d);
+      this->_lower_indices.resize(d);
+      this->_upper_indices.resize(d);
+      
+      for(dimension_type i=0; i!=this->dimension(); ++i) {
+        this->_centre_pointers[i]=this->_subdivision_coordinates[i].begin()+_centre_positions[i];
+        this->_lower_indices[i]=0u-this->_centre_positions[i];
+        this->_upper_indices[i]=this->_subdivision_coordinates[i].size()-this->_centre_positions[i]-1;
+        this->_lower_bounds[i]=this->_subdivision_coordinates[i][0];
+        this->_upper_bounds[i]=this->_subdivision_coordinates[i][this->_subdivision_coordinates[i].size()-1];
+        this->_lower_origin[i]=sub_approx(this->_lower_bounds[i],mul_approx(this->_subdivision_lengths[i],this->_lower_indices[i]));
+        this->_upper_origin[i]=sub_approx(this->_upper_bounds[i],mul_approx(this->_subdivision_lengths[i],this->_upper_indices[i]));
+      }
+      return;
+    }
+
+
+
+    template<class R>
+    dimension_type
+    Grid<R>::dimension() const
+    {
+      return this->_subdivision_coordinates.size();
+    }
+
+
+    template<class R>
+    Combinatoric::LatticeBlock
+    Grid<R>::lattice_block() const 
+    {
+      return Combinatoric::LatticeBlock(this->_lower_indices,this->_upper_indices);
+    }
+
+
+    template<class R>
+    R
+    Grid<R>::subdivision_coordinate(dimension_type d, index_type n) const 
+    {
+      if(n > this->_upper_indices[d]) {
+        return add_approx(this->_upper_origin[d],mul_approx(this->_subdivision_lengths[d],n));
+      } else if(n < this->_lower_indices[d]) {
+        return add_approx(this->_lower_origin[d],mul_approx(this->_subdivision_lengths[d],n));
+      } else {
+        return this->_centre_pointers[d][n];
+      }
+    }
+
+
+    template<class R> 
+    index_type 
+    Grid<R>::subdivision_index(dimension_type d, const real_type& x) const 
+    {
+      index_type n=subdivision_lower_index(d,x);
+      if(subdivision_coordinate(d,n) == x) { 
+        return n; 
+      } else {
+        throw std::runtime_error("Value is not a grid coordinate");
+      }
+    }
+    
+
+    template<class R> 
+    index_type 
+    Grid<R>::subdivision_lower_index(dimension_type d, const real_type& x) const 
+    {
+      typename array<R>::const_iterator pos;
+      if(x > this->_upper_bounds[d]) {
+        return int_down<index_type>(div_down(sub_down(x,this->_upper_origin[d]),this->_subdivision_lengths[d]));
+      } else if(x < this->_lower_bounds[d]) {
+        return int_down<index_type>(div_down(sub_down(x,this->_lower_origin[d]),this->_subdivision_lengths[d]));
+      } else {
+        pos = std::upper_bound(_subdivision_coordinates[d].begin(),
+                               _subdivision_coordinates[d].end(), x);
+        return (pos - _centre_pointers[d])-1;
+      }
+    }
+
+
+    template<class R> 
+    index_type 
+    Grid<R>::subdivision_upper_index(dimension_type d, const real_type& x) const 
+    {
+      typename array<R>::const_iterator pos;
+      if(x > this->_upper_bounds[d]) {
+        return int_up<index_type>(div_up(sub_up(x,this->_upper_origin[d]),this->_subdivision_lengths[d]));
+      } else if(x < this->_lower_bounds[d]) {
+        return int_up<index_type>(div_up(sub_up(x,this->_lower_origin[d]),this->_subdivision_lengths[d]));
+      } else {
+        pos = std::lower_bound(_subdivision_coordinates[d].begin(),
+                               _subdivision_coordinates[d].end(), x);
+        return (pos - _centre_pointers[d])+1;
+      }
+    }
+
+
+    template<class R> 
+    bool 
+    Grid<R>::operator==(const Grid<R>& g) const
+    {
+      if(this==&g) { 
+        return true; 
+      } else {
+        return this->_subdivision_coordinates==g._subdivision_coordinates
+          && this->_subdivision_lengths==g._subdivision_lengths
+          && this->_lower_indices==g._lower_indices;
+      }
+    }
+  
+
+    template<class R> 
+    bool 
+    Grid<R>::operator!=(const Grid<R>& g) const
+    {
+      return !(*this==g);
+    }
+
+                   
     template<class R>
     IndexArray 
     Grid<R>::index(const Point<R>& s) const
@@ -48,6 +316,7 @@ namespace Ariadne {
       return res;
     }
 
+
     template<class R>
     IndexArray  
     Grid<R>::lower_index(const Rectangle<R>& r) const {
@@ -57,6 +326,7 @@ namespace Ariadne {
       }
       return res;
     }
+
 
     template<class R>
     IndexArray  
@@ -68,179 +338,68 @@ namespace Ariadne {
       return res;
     }
 
-    template<class R>
-    IrregularGrid<R>*
-    IrregularGrid<R>::clone() const
-    {
-      std::cerr << "WARNING: Cloning FiniteGrid<R> causes memory leak" << std::endl;
-      return new IrregularGrid<R>(*this);
-    }
 
     template<class R>
-    IrregularGrid<R>::~IrregularGrid()
+    Point<R> 
+    Grid<R>::point(const IndexArray& a) const
     {
-    }
-
-    template<class R>
-    IrregularGrid<R>::IrregularGrid(const Rectangle<R>& r, size_type n)
-      : _subdivision_coordinates(r.dimension())
-    {
-      for(dimension_type i=0; i!=r.dimension(); ++i) {
-        R lower(r.lower_bound(i));
-        R upper(r.upper_bound(i));
-        R step=div_approx(sub_approx(upper,lower),(long uint)n);
-        _subdivision_coordinates[i].push_back(lower);
-        for(size_type j=1; j!=n; ++j) {
-          _subdivision_coordinates[i].push_back(add_approx(lower,mul_approx((long uint)j,step)));
-        }
-        _subdivision_coordinates[i].push_back(upper);
+      Point<R> res(a.size());
+      for(size_type i=0; i!=res.dimension(); ++i) {
+        res[i]=subdivision_coordinate(i,a[i]);
       }
-      create();
+      return res;
     }
 
+
     template<class R>
-    IrregularGrid<R>::IrregularGrid(const Rectangle<R>& r, SizeArray sz)
-      : _subdivision_coordinates(r.dimension())
+    Rectangle<R> 
+    Grid<R>::rectangle(const Combinatoric::LatticeBlock& lb) const
     {
-      for(dimension_type i=0; i!=r.dimension(); ++i) {
-        R lower(r.lower_bound(i));
-        R upper(r.upper_bound(i));
-        R step=div_approx(sub_approx(upper,lower),(long uint)sz[i]);
-        _subdivision_coordinates[i].push_back(lower);
-        for(size_type j=1; j!=sz[i]; ++j) {
-          _subdivision_coordinates[i].push_back(add_approx(lower,mul_approx((long uint)j,step)));
-        }
-        _subdivision_coordinates[i].push_back(upper);
+      Rectangle<R> res(lb.dimension());
+      for(size_type i=0; i!=res.dimension(); ++i) {
+        res.set_lower_bound(i,this->subdivision_coordinate(i,lb.lower_bound(i)));
+        res.set_upper_bound(i,this->subdivision_coordinate(i,lb.upper_bound(i)));
       }
-      create();
+      return res;
     }
 
+
     template<class R>
-    IrregularGrid<R>::IrregularGrid(const array< std::vector<R> >& sp)
-      : _subdivision_coordinates(sp)
+    std::ostream&
+    Grid<R>::write(std::ostream& os) const
     {
-      create();
-    }
-
-    template<class R>
-    IrregularGrid<R>::IrregularGrid(const ListSet< Rectangle<R> >& ls)
-      : _subdivision_coordinates(ls.dimension())
-    {
-      for(typename ListSet< Rectangle<R> >::const_iterator riter=ls.begin(); riter!=ls.end(); ++riter) {
-        for(dimension_type n=0; n!=ls.dimension(); ++n) {
-          _subdivision_coordinates[n].push_back(riter->lower_bound(n));
-          _subdivision_coordinates[n].push_back(riter->upper_bound(n));
-        }
-      }
-      create();
-    }
-
-    template<class R>
-    IrregularGrid<R>::IrregularGrid(const IrregularGrid<R>& g1, IrregularGrid<R>& g2)
-      : _subdivision_coordinates(g1.dimension())
-    {
-      for(dimension_type d=0; d!=dimension(); ++d) {
-        std::vector<R>& sc(_subdivision_coordinates[d]);
-        const std::vector<R>& sc1(g1._subdivision_coordinates[d]);
-        const std::vector<R>& sc2(g2._subdivision_coordinates[d]);
-        sc.resize(sc1.size()+sc2.size());
-        std::merge(sc1.begin(),sc1.end(),sc2.begin(),sc2.end(),sc.begin());
-      }
-      create();
-    }
-
-    template<class R>
-    void
-    IrregularGrid<R>::create()
-    {
-       for(dimension_type i=0; i!=dimension(); ++i) {
-        std::vector<R>& pos=_subdivision_coordinates[i];
-        std::sort(pos.begin(),pos.end());
-        typename std::vector<R>::iterator newend=std::unique(pos.begin(),pos.end());
-        pos.resize(std::distance(pos.begin(),newend));
-      }
-    }
-
-    template<class R>
-    GridBlock<R>
-    IrregularGrid<R>::extent() const
-    { 
-      return GridBlock<R>(*this,this->lattice_block());
-    }
-    
-    template<class R>
-    array< std::vector<index_type> >
-    IrregularGrid<R>::index_translation(const IrregularGrid<R>& from, const IrregularGrid<R>& to)
-    {
-      check_equal_dimensions(from,to,"IrregularGrid<R>::index_translation(IrregularGrid<R>,IrregularGrid<R>)");
-      array< std::vector<index_type> > result(from.dimension());
-      for(dimension_type d=0; d!=from.dimension(); ++d) {
-        for(size_type n=0; n!=from.size(d); ++n) {
-          index_type i=to.subdivision_index(d,from.subdivision_coordinate(d,n));
-          result[d].push_back(i);
-        }
-      }
-      return result;
-    }
+      os << "Grid( subdivision_coordinates=" << this->_subdivision_coordinates
+         << ", subdivision_lengths=" << this->_subdivision_lengths
+         << ", centre_positions=" << this->_centre_positions
+         << ", origin=" << this->point(IndexArray(this->dimension(),0)) << " )";
+      return os;
 
 
-    template<class R>
-    RegularGrid<R>*
-    RegularGrid<R>::clone() const
-    {
-      std::cerr << "WARNING: Cloning InfiniteGrid<R> causes memory leak" << std::endl;
-      return new RegularGrid<R>(*this);
-    }
-
-    template<class R>
-    inline bool 
-    Grid<R>::operator==(const Grid<R>& g) const 
-    { 
-      return this==&g;
-    }
-            
-    template<class R>
-    inline bool 
-    Grid<R>::operator!=(const Grid<R>& g) const 
-    { 
-       return !(*this==g);
-    }
-
-    template<class R>
-    bool 
-    IrregularGrid<R>::operator==(const Grid<R>& g) const 
-    {
-      const IrregularGrid<R>& ig=dynamic_cast<const IrregularGrid<R>&>(g);
-      if(&ig==0) {
-         return false;
-      }
-      return this->_subdivision_coordinates==ig._subdivision_coordinates; 
-    }
       
-    template<class R>
-    inline bool 
-    IrregularGrid<R>::operator!=(const Grid<R>& g) const 
-    { 
-      return !(*this==g);
+      os << "Grid( subdivisions=";
+      for(dimension_type d=0; d!=this->dimension(); ++d) {
+        if(d==0) { os << "[ "; } else { os << ", "; }
+        os << "[ " << this->_subdivision_lengths[d] << "; " << this->_subdivision_coordinates[d][0];
+        for(size_type i=1; i!=this->_subdivision_coordinates[d].size(); ++i) {
+          os << ", " << this->_subdivision_coordinates[d][i];
+        }
+        os << "; " << this->_subdivision_lengths[d] << "]";
+        os << " ]";
+      }
+      os << ", origin=" << this->point(IndexArray(this->dimension(),0)) << " )";
+      return os;
     }
 
+
     template<class R>
-    bool 
-    RegularGrid<R>::operator==(const Grid<R>& g) const 
-    { 
-      const RegularGrid<R>& rg=dynamic_cast<const RegularGrid<R>&>(g);
-      if (&rg==0) {
-        return false;
-      }
-      return this->_subdivision_lengths==rg._subdivision_lengths; 
+    std::istream&
+    Grid<R>::read(std::istream& is) 
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
     }
-            
-    template<class R>
-    bool 
-    RegularGrid<R>::operator!=(const Grid<R>& g) const 
-    { 
-      return !(*this==g);
-    }
+
+
+
 
 
 
@@ -269,40 +428,16 @@ namespace Ariadne {
     FiniteGrid<R>::FiniteGrid(const Rectangle<R>& bb, const size_type& s)
       : _own_ptr(1), _grid_ptr(0), _lattice_block(bb.dimension())
     {
+      dimension_type d=bb.dimension();
       array<R> subdivision_lengths(bb.dimension());
       for(dimension_type i=0; i!=bb.dimension(); ++i) {
         subdivision_lengths[i]=div_approx(bb[i].length(),s);
       }
-      this->_grid_ptr=new RegularGrid<R>(subdivision_lengths);
+      this->_grid_ptr=new Grid<R>(LinearAlgebra::Vector<R>(d,subdivision_lengths.begin()));
       GridBlock<R> bounding_box=over_approximation(bb,this->grid());
       this->_lattice_block=bounding_box.lattice_set();
     }
 
-
-    template<class R>
-    Rectangle<R>
-    FiniteGrid<R>::extent() const
-    {
-      dimension_type dim=this->dimension();
-      const Combinatoric::LatticeBlock &block=this->_lattice_block;
-       
-      const RegularGrid<R>* rg_ptr=dynamic_cast<const RegularGrid<R>*>(this->_grid_ptr);
-      const IrregularGrid<R>* ig_ptr=dynamic_cast<const IrregularGrid<R>*>(this->_grid_ptr);
-
-      if(rg_ptr) {
-        // RegularGrid
-        Point<R> l(dim),u(dim);
-        for (dimension_type i=0; i< dim; i++) {
-          l[i]=mul_approx(rg_ptr->subdivision_length(i),block.lower_bound(i));
-          u[i]=mul_approx(rg_ptr->subdivision_length(i),block.upper_bound(i));
-        }
-        return Rectangle<R>(l,u);
-      } else if(ig_ptr) {
-        return Rectangle<R>(ig_ptr->extent());
-      } else {
-        throw std::runtime_error("FiniteGrid<R>::bounding_box(): not implemented for this grid type.");
-      }
-    }
 
     template<class R>
     dimension_type 
@@ -310,89 +445,15 @@ namespace Ariadne {
     {
       return this->_grid_ptr->dimension();
     }
-    
 
-    
+
     template<class R>
-    std::ostream&
-    IrregularGrid<R>::write(std::ostream& os) const
+    Rectangle<R>
+    FiniteGrid<R>::extent() const
     {
-      return os << "IrregularGrid(" << this->_subdivision_coordinates << ")";
+      return this->_grid_ptr->rectangle(this->_lattice_block);
     }
 
-    
-    template<class R>
-    std::ostream&
-    RegularGrid<R>::write(std::ostream& os) const
-    {
-        return os << "RegularGrid( subdivision_lengths=" 
-                  << this->_subdivision_lengths << " )\n";
-    }
-
-    
-    template<class R>
-    std::istream&
-    IrregularGrid<R>::read(std::istream& is)
-    {
-      char c;
-      char grid_string[]="IrregularGrid(";
-
-      try {
-        int i=0; 
-        do {
-          is >> c;
-          if(c != grid_string[i]) {
-             throw std::ios_base::failure("Ariadne::Geometry::IrregularGrid<R>::read: The input object is not an IrregularGrid" );
-          }
-          i++;
-        } while (grid_string[i]!='\0');
-        
-        is >> this->_subdivision_coordinates >> c;
-
-        if (c != ')') {
-             throw std::ios_base::failure("Ariadne::Geometry::IrregularGrid<R>::read: The input IrregularGrid has not a proper format" );
-        }
-
-      } catch(...) {
-        throw; 
-      }
-
-      return is; 
-    }
-
-    
-    template<class R>
-    std::istream&
-    RegularGrid<R>::read(std::istream& is)
-    {
-      char c;
-      char grid_string[]="RegularGrid( subdivision_lengths=";
-
-      try {
-        int i=0; 
-        do {
-          is >> c;
-          if(c != grid_string[i]) {
-             throw std::ios_base::failure("Ariadne::Geometry::RegularGrid<R>::read: The input object is not an RegularGrid" );
-          }
-          i++;
-        } while (grid_string[i]!='\0');
-        
-        is >> this->_subdivision_lengths >> c;
-
-        if (c != ')') {
-             throw std::ios_base::failure("Ariadne::Geometry::RegularGrid<R>::read: The input RegularGrid has not a proper format" );
-        }
-
-      }
-      catch(...) {
-        throw; 
-      }
-
-      return is; 
-    }
-
-    
     
     template<class R>
     std::ostream&

@@ -66,6 +66,7 @@ template<class R> void export_polytope();
 template<class R> void export_polyhedron();
 template<class R> void export_polyhedral_set();
 template<class R> void export_list_set();
+template<class R> void export_grid();
 template<class R> void export_grid_set();
 template<class R> void export_partition_tree_set();
 template<class R> void export_hybrid_set();
@@ -139,6 +140,7 @@ BOOST_PYTHON_MODULE(ariadne)
   export_polyhedron<Ariadne::Real>();
   export_polyhedral_set<Ariadne::Real>();
   export_list_set<Ariadne::Real>();
+  export_grid<Ariadne::Real>();
   export_grid_set<Ariadne::Real>();
   export_partition_tree_set<Ariadne::Real>();
   export_hybrid_set<Ariadne::Real>();

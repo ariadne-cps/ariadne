@@ -130,7 +130,7 @@ test_parallelotope()
   assert(disjoint(p3,r5));
  
   Rectangle<R> bbox3=p3.bounding_box().expand_by(0.25);
-  RegularGrid<R> gr3(2,0.125);
+  Grid<R> gr3(2,0.125);
   
   GridCellListSet<R> oap3=over_approximation(p3,gr3);
   GridCellListSet<R> uap3=under_approximation(p3,gr3);

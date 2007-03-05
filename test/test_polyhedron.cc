@@ -158,7 +158,7 @@ test_polyhedron()
 
   Rectangle<R> bbox2=phd2.bounding_box().expand_by(0.25);
   bbox2=Rectangle<R>("[-4,4]x[-4,4]");
-  RegularGrid<R> gr2(2,0.125);
+  Grid<R> gr2(2,0.125);
   GridCellListSet<R> uap2=under_approximation(phd2,gr2);
   GridCellListSet<R> oap2=over_approximation(phd2,gr2);
   cout << "uap2.size()=" << uap2.size() << endl;

@@ -26,258 +26,48 @@ namespace Ariadne {
   namespace Geometry {
 
     template<class R> inline
-    Grid<R>::~Grid() 
-    {
-    }
-    
-    
-    template<class R> inline
-    index_type Grid<R>::subdivision_index(dimension_type d, const real_type& x) const 
-    {
-      index_type n=subdivision_interval(d,x);
-      if(subdivision_coordinate(d,n) == x) { return n; }
-      throw std::runtime_error("Value is not a grid coordinate");
-    }
-    
-    
-    template<class R> inline
-    index_type 
-    Grid<R>::subdivision_lower_index(dimension_type d, const real_type& x) const
-    {
-      return subdivision_interval(d,x);
-    }
-    
-    
-    template<class R> inline
-    index_type 
-    Grid<R>::subdivision_upper_index(dimension_type d, const real_type& x) const 
-    {
-      index_type n=subdivision_interval(d,x);
-      return subdivision_coordinate(d,n) == x ? n : n+1;
-    }
-
-
-
-   
-    template<class R> inline
-    grid_type
-    IrregularGrid<R>::type() const 
-    {
-      return IRREGULAR;
-    }
-    
-    
-    template<class R> inline
-    dimension_type 
-    IrregularGrid<R>::dimension() const 
+    const Grid<R>& 
+    FiniteGrid<R>::grid() const
     { 
-      return this->_subdivision_coordinates.size();
+      return *this->_grid_ptr; 
     }
-    
-    
+  
+    template<class R> inline
+    const Combinatoric::LatticeBlock& 
+    FiniteGrid<R>::lattice_block() const 
+    {
+      return this->_lattice_block; 
+    }
+     
+
     template<class R> inline
     R 
-    IrregularGrid<R>::subdivision_coordinate(dimension_type d, index_type n) const 
+    FiniteGrid<R>::subdivision_coordinate(dimension_type d, index_type n) const
     {
-      check_coordinate(*this,d,__PRETTY_FUNCTION__);
-      if(!(0<=n && uint(n)<_subdivision_coordinates[d].size())) {
-        std::cerr << "d=" << d << ", n=" << n << ", size=" << _subdivision_coordinates[d].size() << std::endl;
-        throw std::runtime_error("index does not lie in range of finite grid");
-      }
-      return _subdivision_coordinates[d][n];
+      return this->_grid_ptr->subdivision_coordinate(d,n);
     }
-    
-    
+  
     template<class R> inline
     index_type 
-    IrregularGrid<R>::subdivision_interval(dimension_type d, const real_type& x) const 
+    FiniteGrid<R>::subdivision_interval(dimension_type d, const real_type& x) const 
     {
-      typename std::vector<R>::const_iterator pos;
-      check_coordinate(*this,d,__PRETTY_FUNCTION__);
-      if(x<_subdivision_coordinates[d].front() || x>_subdivision_coordinates[d].back()) {
-        std::cerr << "d.front()=" << _subdivision_coordinates[d].front()
-                  <<  " d.back()=" << _subdivision_coordinates[d].back()
-                  <<  " x="<< x <<std::endl<<std::flush;
-        throw std::runtime_error("point does not lie in extent of finite grid");
-      }
-      pos = std::upper_bound(_subdivision_coordinates[d].begin(),
-                             _subdivision_coordinates[d].end(), x);
-      return (pos - _subdivision_coordinates[d].begin()) - 1;
+      return this->_grid_ptr->subdivision_interval(d,x);
     }
-
-      /*! \brief Tests whether the grid contains the given lattice rectangle 
-       * within its bounds. */
-    template<class R> inline 
-    bool 
-    IrregularGrid<R>::encloses(const Rectangle<R>& r) const 
+      
+    template<class R> inline
+    index_type 
+    FiniteGrid<R>::subdivision_lower_index(dimension_type d, const real_type& x) const 
     {
-      return subset(r,Rectangle<R>(this->extent())); 
-    }
-            
-      
-    template<class R> inline 
-    IndexArray 
-    IrregularGrid<R>::lower() const 
-    { 
-      return IndexArray(dimension(),0);
+      return this->_grid_ptr->subdivision_lower_index(d,x);
     }
 
-    template<class R> inline 
-    IndexArray 
-    IrregularGrid<R>::upper() const 
-    { 
-      IndexArray result(this->dimension());
-      for(dimension_type i=0; i!=this->dimension(); ++i) {
-        result[i]=_subdivision_coordinates[i].size()-1;
-      }
-      return result;
+    template<class R> inline
+    index_type 
+    FiniteGrid<R>::subdivision_upper_index(dimension_type d, const real_type& x) const 
+    {
+      return this->_grid_ptr->subdivision_upper_index(d,x);
     }
-      
-    template<class R> inline 
-    Combinatoric::LatticeBlock 
-    IrregularGrid<R>::lattice_block() const 
-    { 
-      return Combinatoric::LatticeBlock(lower(),upper()); 
-    }
-
-    template<class R> inline 
-    SizeArray 
-    IrregularGrid<R>::sizes() const 
-    { 
-      return lattice_block().sizes(); 
-    }
-
-    template<class R> inline 
-    size_type 
-    IrregularGrid<R>::capacity() const 
-    { 
-      return lattice_block().size(); 
-    }
-
-    template<class R> inline 
-    size_type 
-    IrregularGrid<R>::size(dimension_type i) const 
-    { 
-      return _subdivision_coordinates[i].size()-1; 
-    }
-    
-    
-    
-    
-    
-  template<class R> inline 
-  grid_type 
-  RegularGrid<R>::type() const 
-  {
-    return REGULAR;
-  }
   
-    
-  template<class R> inline
-  RegularGrid<R>::RegularGrid(const dimension_type& n, const R& l)
-    : _subdivision_lengths(n,l) 
-  {
-  }
-
-  template<class R> inline
-  RegularGrid<R>::RegularGrid(const array<R>& sl)
-    : _subdivision_lengths(sl) 
-  {
-  }
-
-  template<class R> inline
-  RegularGrid<R>::RegularGrid(const LinearAlgebra::Vector<R>& v)
-    : _subdivision_lengths(v.begin(),v.end()) 
-  {
-  }
-
-
-  template<class R> inline
-  dimension_type 
-  RegularGrid<R>::dimension() const 
-  { 
-    return _subdivision_lengths.size(); 
-  }
-
-
-  template<class R> inline
-  R
-  RegularGrid<R>::subdivision_coordinate(dimension_type d, index_type n) const
-  { 
-    return mul_approx(_subdivision_lengths[d] , n); 
-  }
-
-
-  template<class R> inline
-  R
-  RegularGrid<R>::subdivision_length(dimension_type d) const 
-  { 
-    return _subdivision_lengths[d]; 
-  }
-
-  template<class R> inline
-  index_type
-  RegularGrid<R>::subdivision_interval(dimension_type d, const real_type& x) const 
-  {
-    index_type result = int_down<index_type>(div_down(x,_subdivision_lengths[d]));
-    return result;
-  }
-
-  template<class R> inline
-  bool 
-  RegularGrid<R>::encloses(const Rectangle<R>& r) const 
-  {
-    return true; 
-  }
-     
-
-
-
-
-     
-  template<class R> inline
-  const Grid<R>& 
-  FiniteGrid<R>::grid() const
-  { 
-    return *this->_grid_ptr; 
-  }
-      
-  template<class R> inline
-  const Combinatoric::LatticeBlock& 
-  FiniteGrid<R>::lattice_block() const 
-  {
-    return this->_lattice_block; 
-  }
-     
-
-  template<class R> inline
-  R 
-  FiniteGrid<R>::subdivision_coordinate(dimension_type d, index_type n) const
-  {
-    return this->_grid_ptr->subdivision_coordinate(d,n);
-  }
-  
-  template<class R> inline
-  index_type 
-  FiniteGrid<R>::subdivision_interval(dimension_type d, const real_type& x) const 
-  {
-    return this->_grid_ptr->subdivision_interval(d,x);
-  }
-      
-  template<class R> inline
-  index_type 
-  FiniteGrid<R>::subdivision_lower_index(dimension_type d, const real_type& x) const 
-  {
-    return this->_grid_ptr->subdivision_lower_index(d,x);
-  }
-
-  template<class R> inline
-  index_type 
-  FiniteGrid<R>::subdivision_upper_index(dimension_type d, const real_type& x) const 
-  {
-    return this->_grid_ptr->subdivision_upper_index(d,x);
-  }
-
 
 
 

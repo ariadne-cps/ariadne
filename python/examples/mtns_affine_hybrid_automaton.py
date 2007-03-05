@@ -45,7 +45,7 @@ epsbb=Rectangle("[-2.1,2.1]x[-2.1,2.1]") # eps bounding box
 
 #grid=RegularGrid(Vector("[0.03125,0.03125]"))
 #block=LatticeBlock("[-32,32]x[-32,32]")
-grid=RegularGrid(Vector("[0.0625,0.0625]"))
+grid=Grid(Vector("[0.0625,0.0625]"))
 block=LatticeBlock("[-32,32]x[-32,32]")
 fgrid=FiniteGrid(grid,block)
 print fgrid

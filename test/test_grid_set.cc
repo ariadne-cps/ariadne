@@ -60,7 +60,7 @@ test_grid_set()
   }
   cout << "ls=" << ls << endl;
 
-  RegularGrid<R> gr(2,0.125);
+  Grid<R> gr(2,0.125);
   cout << "gr=" << gr << endl;
 
 
@@ -74,31 +74,44 @@ test_grid_set()
   ls1.push_back(ls[0]);
   ls1.push_back(ls[2]);
   ls2.push_back(ls[1]);
+  cout << "ls1=" << ls1 << "\n" << "ls2=" << ls2 << std::endl;
   
-  IrregularGrid<R> igr1(ls1);
-  IrregularGrid<R> igr2(ls2);
+  Grid<R> igr1(ls1);
+  cout << "Finished constructing grid" << std::endl;
+  cout << "igr1=" << igr1 << std::endl;
 
-  IrregularGrid<R> igrj(igr1,igr2);
+  Grid<R> igr2(ls2);
+  cout << "igr2=" << igr2 << std::endl;
 
-  cout << igr1 << "\n" << igr2 << "\n" << igrj << "\n";
+  Grid<R> igrj(igr1,igr2);
+  cout << "igrj=" << igrj << "\n";
 
-  IrregularGrid<R> gr1(ls1);
+  Grid<R> gr1(ls1);
+  cout << "gr1=" << gr1 << std::endl;
 
-  IrregularGrid<R> gr2(ls2);
+  Grid<R> gr2(ls2);
+  cout << "gr2=" << gr2 << std::endl;
 
   FiniteGrid<R> fgr=FiniteGrid<R>(igrj,igrj.lattice_block());
+  cout << "fgr=" << fgr << std::endl;
   //GridMaskSet<R> gms1(fgr,grlsj1);
   //GridMaskSet<R> gms2(fgr,grlsj2);
   //cout << regular_intersection(gms1,gms2);
   //cout << join(gms1,gms2);
 
+  cout << "\n\ngr=" << gr << std::endl;
+
   // Test over-approximations
   r=Rectangle<R>("[-0.125,0.5]x[0.1,0.3]");
   Parallelotope<R> p(r);
   Zonotope<R> z(r);
+  cout << "\n" << r << "\n" << z << "\n" << std::endl;
   GridBlock<R> roa=over_approximation(r,gr);
+  cout << "roa=" << roa << std::endl;
   GridCellListSet<R> poa=over_approximation(p,gr);
+  cout << "poa=" << poa << std::endl;
   GridCellListSet<R> zoa=over_approximation(z,gr);
+  cout << "zoa=" << zoa << std::endl;
 
   return 0;
 }

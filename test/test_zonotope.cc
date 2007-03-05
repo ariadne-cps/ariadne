@@ -155,7 +155,7 @@ test_zonotope()
   eps.close();
   
   Rectangle<R> bbox3=z3.bounding_box().expand_by(0.25);
-  RegularGrid<R> gr3(2,0.125);
+  Grid<R> gr3(2,0.125);
   GridCellListSet<R> oaz3=over_approximation(z3,gr3);
   GridCellListSet<R> uaz3=under_approximation(z3,gr3);
   bbox=z3.bounding_box().expand_by(R(0.5));
@@ -181,7 +181,7 @@ test_zonotope()
   Zonotope<R> z5(Point<R>("(0,0)"),Matrix<R>("[2,1,1,0.125,0;1,-1,1,0,0.125]"));
   Zonotope< Interval<R> > iz5(Point<Interval<R> >("([-0.125,0.125],[-0.125,0.125])"),Matrix<R>("[2,1,1;1,-1,1]"));
   
-  RegularGrid<R> gr5(2,0.5);
+  Grid<R> gr5(2,0.5);
   GridCellListSet<R> oaiz5=over_approximation(iz5,gr5);
   GridCellListSet<R> oaz5=over_approximation(z5,gr5);
   GridCellListSet<R> uaz5=under_approximation(z5,gr5);

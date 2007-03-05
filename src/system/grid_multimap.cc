@@ -1,8 +1,8 @@
 /***************************************************************************
- *            grid.cc
+ *            grid_multimap.cc
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2007  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,16 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "geometry/grid.h"
-#include "geometry/grid.code.h"
+#include "system/grid_multimap.h"
 
 #include "real_typedef.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  namespace System {
 
-    template class Grid<Real>;
-    template class FiniteGrid<Real>;
- 
+    template class GridMultiMap<Real>;
+      
   }
 }

@@ -150,10 +150,10 @@ namespace Ariadne {
       //@{
       //! \name Conversion and approximation operators
       /*! \brief Construct from a rectangle. */
-      template<class Rl> explicit Zonotope(const Rectangle<Rl>& r);
+      template<class E> explicit Zonotope(const RectangleExpression<E>& re);
       
-      /*! \brief Assign from a rectangle. */
-      template<class Rl> Zonotope<R>& operator=(const Rectangle<Rl>& z);
+      /*! \brief Assign from a rectangle expression. */
+      template<class E> Zonotope<R>& operator=(const RectangleExpression<E>& re);
      
       /*! \brief Convert to a polytope. */
       operator Polytope<typename Numeric::traits<R>::arithmetic_type> () const;

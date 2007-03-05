@@ -108,7 +108,7 @@ int test_hybrid_evolution()
   AffineIntegrator<R> integrator(maximum_step_size,lock_to_grid_time,maximum_set_radius); 
   HybridEvolver<R> hybrid_evolver(apply,integrator);
   
-  RegularGrid<R> grid(Vector<R>("[0.25,0.25]"));
+  Grid<R> grid(Vector<R>("[0.25,0.25]"));
   FiniteGrid<R> finite_grid(grid,LatticeBlock("[-32,32]x[-32,32]"));
   Rectangle<R> bounding_box=finite_grid.extent();
   

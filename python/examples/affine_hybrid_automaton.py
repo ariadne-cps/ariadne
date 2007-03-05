@@ -50,7 +50,7 @@ initial_rectangle2=Rectangle("[6.9375,6.96875]x[6.9375,6.96875]")
 bounding_box=Rectangle("[-8,8]x[-8,8]")
 
 
-grid=RegularGrid(Vector("[0.25,0.25]"))
+grid=Grid(Vector("[0.25,0.25]"))
 block=LatticeBlock("[-32,32]x[-32,32]")
 fgrid=FiniteGrid(grid,block)
 print fgrid

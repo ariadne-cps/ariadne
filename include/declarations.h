@@ -74,6 +74,7 @@ namespace Ariadne { namespace Geometry {
 template<class R> class Point;
 template<class R> class PointList;
 
+template<class E> class RectangleExpression;
 template<class R> class Rectangle;
 template<class R> class Parallelotope;
 template<class R> class Zonotope;
@@ -118,6 +119,7 @@ template<class R> class Function;
 template<class R> class Map;
 template<class R> class AffineMap;
 template<class R, template<class> class BS > class AffineMultiMap;
+template<class R> class GridMultiMap;
 template<class R> class Monomial;
 template<class R> class Polynomial;
 template<class R> class PolynomialMap;

@@ -126,7 +126,7 @@ int main() {
   PartitionTreeSet<Real> ptsouta=outer_approximation< Real, Parallelotope<Real>  >(pltp,pg,dpth);
   cout << "ptsouta=" << ptsouta << endl;
 
-  RegularGrid<Real> g(2,Real(0.125));
+  Grid<Real> g(2,Real(0.125));
   FiniteGrid<Real> fg(g,bb);
   ListSet< Rectangle<Real> > lsua=ptsua;
   cout << "lsua=" << lsua << endl;

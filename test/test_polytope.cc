@@ -131,7 +131,7 @@ test_polytope()
   qpltp2=Polytope<Rational>(qplhd2);
   cout << "qpltp2=" << qpltp2 << endl;
 
-  RegularGrid<R> gr2(2,0.125);
+  Grid<R> gr2(2,0.125);
   GridCellListSet<R> uap2(gr2);
   GridCellListSet<R> oap2(gr2);
   try {

@@ -43,7 +43,8 @@ SYSTEM_SRC = \
 	system/map.cc system/affine_map.cc system/polynomial_map.cc \
 	system/vector_field.cc system/affine_vector_field.cc \
 	system/multimap.cc system/affine_multimap.cc \
-	system/hybrid_automaton.cc 
+	system/hybrid_automaton.cc \
+	system/grid_multimap.cc 
 
 EVALUATION_SRC = \
 	evaluation/solver.cc \

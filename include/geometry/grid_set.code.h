@@ -314,13 +314,6 @@ namespace Ariadne {
     GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeBlock& b, const BooleanArray& m)
       : _grid_ref(g), _lattice_set(b,m)
     {
-      const Grid<R>& grid_ref=this->_grid_ref;
-      const IrregularGrid<R>* irregular_grid_ptr=dynamic_cast<const IrregularGrid<R>*>(&grid_ref);
-      if(irregular_grid_ptr) {
-        if(!Combinatoric::subset(b,irregular_grid_ptr->lattice_block())) {
-          throw std::runtime_error("Lattice block does not lie in grid lattice block");
-        }
-      }
     }
 
     
@@ -328,13 +321,6 @@ namespace Ariadne {
     GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeMaskSet& ms)
       : _grid_ref(g), _lattice_set(ms)
     {
-      const Grid<R>& _grid_ref=g;
-      const IrregularGrid<R>* irregular_grid_ptr=dynamic_cast<const IrregularGrid<R>*>(&_grid_ref);
-      if(irregular_grid_ptr) {
-        if(!Combinatoric::subset(ms.block(),irregular_grid_ptr->lattice_block())) {
-          throw std::runtime_error("Lattice block does not lie in grid lattice block");
-        }
-      }
     }
 
     
@@ -370,8 +356,8 @@ namespace Ariadne {
     // FIXME: Memory leak
     template<class R>
     GridMaskSet<R>::GridMaskSet(const ListSet< Rectangle<R> >& rls) 
-      : _grid_ref(*new IrregularGrid<R>(rls)), 
-        _lattice_set(dynamic_cast<const IrregularGrid<R>&>(static_cast<const Grid<R>&>(_grid_ref)).lattice_block())
+      : _grid_ref(*new Grid<R>(rls)), 
+        _lattice_set(_grid_ref.lattice_block())
     {
  
       for(typename ListSet< Rectangle<R> >::const_iterator riter=rls.begin(); 

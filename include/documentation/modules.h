@@ -122,6 +122,10 @@
  *  - \b MX: Matrix
  *  - \b TEN: Tensor
  * 
+ * \defgroup LinearProgramming Linear Programming
+ * \ingroup LinearAlgebra
+ * \brief Classes and functions for solving linear programming problems (including feasibility problems).
+ *
  */
 
 /*!\defgroup Combinatoric Combinatoric
@@ -266,9 +270,9 @@
  * module.
  *
  * We use the following abbreviations for template parameters for classes in this module:
- *  - \b FN: Function
- *  - \b MP: Map
- *  - \b VF: VectorField
+ *  - \b FN: %Function
+ *  - \b MP: %Map
+ *  - \b VF: %VectorField
  *
  * See the page on \ref function for more information.
  *

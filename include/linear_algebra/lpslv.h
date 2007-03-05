@@ -40,123 +40,251 @@
 #include "../linear_algebra/matrix.h"
 #include "../debug.h"
 
-namespace Ariadne { namespace LinearAlgebra {
+namespace Ariadne { 
+  namespace LinearAlgebra {
   
-/*! \ingroup LinearAlgebra
- *  \brief Solver for linear programming problems.
- *
- *  \param m Number of free constraints
- *  \param n Number of free variables
- *  \param (A,rincA,cincA) An m-by-n matrix
- *  \param (B,incB) An m-element vector
- *  \param (C,incC) An n-element vector
- *  \param d A scalar
- *  \param piv A consecutive (m+n)-element vector of integers.
- *
- * Solve the linear programming problem 
- * \f$ text{minimize}\ c^Tx \text{ subject to } Ax+y=b,\ x,y\geq0\f$ where the
- * current point is given by \f$x=0,\ y=b\f$ and the current value is \f$-d\f$. 
- */
-template<class R>
-void lpslv(int m, int n, R* A, int rincA, int cincA, R* B, int incB, R* C, int incC, R& d, int* piv)
-{
-  
-  if(verbosity>1) {
-    std::cerr << "lpslv(" << m << "," << n << ", " << A-A << "," << rincA << "," << cincA << ", " 
-              << B-A << "," << incB << ", " << C-A << "," << incC << ", "
-              << &d-A << ", " << piv << ")" << std::endl;
-    std::cerr << "T=" << Matrix<R>(m+1,n+1,A,rincA,cincA) << std::endl;
-    std::cerr << "A=" << Matrix<R>(m,n,A,rincA,cincA) << "; b=" << Vector<R>(m,B,incB)
-              << "; c=" << Vector<R>(n,C,incC) << "; d=" << d << std::endl;
-  }
-  
-  R one=static_cast<R>(1);
-  size_type recursions=16;
-  int i,j;
-      
-  //Select variable to enter basis
-  for(j=0; j!=n; ++j) {
-    if(C[j*incC] < 0) {
-      break;
-    }
-  }
+    // Forward declarations
+    class Permutation;
+    template<class X> class Vector;
+    template<class X> class Matrix;
 
-  while(j!=n) {
-    assert(--recursions);
-    
-    // compute variable to exit basis
-    i=m;
-    R min_change=-1;
-    for(int k=0; k!=m; ++k) {
-      if(A[k*rincA+j*cincA]>0) {
-        R change=B[k*incB]/A[k*rincA+j*cincA];
-        if(change<min_change || min_change==-1) {
-          min_change=change;
-          i=k;
-        }
-      }
-    }
 
-    if(verbosity>1) {
-      std::cerr << "Pivoting on (exit=" << i << ", enter=" << j << ")" << std::endl;
-    }
-    
-    std::swap(piv[j],piv[n+i]);
-      
-    // Modify the tableau
-    R pivot=A[i*rincA+j*cincA];
-    
-    // Subtract A(p,j)/A(i,j) times row i from row p, p!=i,
-    // except in the jth column, which is divided by A(i,j)
-    for(int p=0; p!=m; ++p) {
-      if(p!=i) {
-        R scale=A[p*rincA+j*cincA]/pivot;
-        for(int q=0; q!=n; ++q) {
-          if(q!=j) {
-            A[p*rincA+q*cincA] -= A[i*rincA+q*cincA]*scale;
-          }
-        }
-        B[p*incB] -= B[i*incB]*scale;
-        A[p*rincA+j*cincA] = -scale;
-      }
-    }
-    // Subtract c(j)/A(i,j) times row i from c,
-    // except in the jth column, which is divided by A(i,j)
-    R scale = C[j*incC]/pivot;
-    for(int q=0; q!=n; ++q) {
-      if(q!=j) {
-        C[q*incC] -= A[i*rincA+q*incC]*scale;
-      }
-    }
-    d -= B[i*incB]*scale;
-    C[j*incC] = -scale;
+    /*! \ingroup LinearProgramming
+     *  \brief Solver the linear programming problem \f$\max c^Tx\text{ s.t. } Ax=b; \ x\geq0\f$.
+     *.
+     * This problem is equivalent to the dual problem \f$\min b^Ty\text{ s.t. } A^Ty\leq c\f$ with slack variables \f$z=c-A^Ty\f$.
 
-    // Scale the ith row by 1/pivot, except the jth column, which is set to 1/pivot
-    scale=one/pivot;
-    for(int q=0; q!=n; ++q) {
-      A[i*rincA+q*cincA] *= scale;
-    }
-    B[i*incB] *= scale;
-    A[i*rincA+j*cincA] = scale;
-    
-    if(verbosity>1) {
-      std::cerr << "A=" << Matrix<R>(m,n,A,rincA,cincA) << "; b=" << Vector<R>(m,B,incB) 
-                << "; c=" << Vector<R>(n,C,incC) << "; d=" << d << std::endl;
-    }
-    
-    // Select variable to enter basis
-    for(j=0; j!=n; ++j) {
-      if(C[j*incC] < 0) {
-        break;
-      }
-    }
-  }
-  
-  return;
+     *
+     * \return d is the optimum value (if the problem has a finite feasible solution).
+     * \param A is an \f$m\times n\f$ matrix.
+     * \param b is an \f$m\f$-vector.
+     * \param c is an \f$n\f$-vector.
+     * \param p is an input-output parameter giving a permutation of the rows of \a A. The initial basis elements are in the first \a m elements of \a p. 
+     * \param x is an output parameter giving the optimum point (if the primal problem is feasible and finite).
+     * \param y is an output parameter giving the optimum solution of the dual problem (if the dual problem is feasible and finite).
+     *
+     * For a given basis \f$B\f$ with nonbasic variables \f$N\f$, the matrix \f$A_B\f$ is the matrix formed by 
+     * the columns of \f$A\f$ with indices in \f$B\f$. 
+     * The basic solution is given by:
+     * \f[ d=c^TA_B^{-1}b;\ x_B=A_N^{-1}b; \ y=A_B^{-1}c_B; \ z_N = c_N - A_NA_{B}^{-1}c_B  \f]
+     */
+    template<class R>
+    R lpslv(const Matrix<R>& A, const Vector<R>& b, const Vector<R>& c, 
+            Permutation& p,
+            Vector<R>& x, Vector<R>& y);
 
-}
+
+
+    /*! \ingroup LinearProgramming
+     *  \brief Solver the constrained linear programming problem \f$\max c^Tx\text{ s.t. } Ax=b; \ l\leq x\leq0\f$.
+     *
+     * For a given basis \f$B\f$, the non-basic variables \f$N\f$ are partitioned into a set \f$L\f$ taking value \f$l\f$ and a set \f$U\f$ taking value \f$u\f$.
+     * The basic solution is given by:
+     * \f[ d=c^Tx; \quad x_L=l_L; \ x_U=u_U;\ x_B=A_N^{-1}(b-A_Nx_N) . \f]
+     */
+    template<class R>
+    R lpslvc(const Matrix<R>& A, const Vector<R>& b, const Vector<R>& c, 
+             const Vector<R>& l, const Vector<R>& u,
+             Permutation& p,
+             Vector<R>& x, Vector<R>& y);
+
+
+
+
+    /*! \ingroup LinearProgramming
+     *  \brief Solver the primal feasibility problem \f$Ax=b; \ x\geq0\f$. (Only implement if useful)
+     *
+     * \return True if a solution is found; false otherwise.
+     * \param A is an \f$m\times n\f$ matrix.
+     * \param b is an \f$m\f$-vector.
+     * \param p is an input-output parameter giving a permutation of the rows of \a A. The initial basis elements are in the first \a m elements of \a p. 
+     * \param x is an output parameter giving a fesible point (if the problem is solvable).
+     * \param y is an output parameter giving a dual feasible point (if the problem is unsolvable).
+     *
+     */
+    template<class R>
+    bool lpfsp(const Matrix<R>& A, const Vector<R>& b, 
+               Permutation& p,
+               Vector<R>& x, Vector<R>& y);
+
+
+
+    /*! \ingroup LinearProgramming
+     *  \brief Solver the constrained primal feasibility problem \f$Ax=b; \ l\leq x\leq u\f$. (Only implement if useful)
+     *
+     * \return True if a solution is found; false otherwise.
+     * \param A is an \f$m\times n\f$ matrix.
+     * \param b is an \f$m\f$-vector.
+     * \param l is an \f$n\f$-vector.
+     * \param u is an \f$n\f$-vector.
+     * \param p is an input-output parameter giving a permutation of the rows of \a A. The initial basis elements are in the first \a m elements of \a p. 
+     * \param x is an output parameter giving a fesible point (if the problem is solvable).
+     * \param y is an output parameter giving a dual feasible point (if the problem is unsolvable).
+     *
+     * \internal Only implement this if necessary!
+     */
+    template<class R>
+    bool lpfsc(const Matrix<R>& A, const Vector<R>& b, 
+               Vector<R>& l, Vector<R>& u,
+               Permutation& p,
+               Vector<R>& x, Vector<R>& y);
+
+
+    /*! \ingroup LinearProgramming
+     *  \brief Solver the dual feasibility problem \f$A^Ty\leq c\f$. (Only implement if useful)
+     *
+     * \return True if a solution is found; false otherwise.
+     * \param A is an \f$m\times n\f$ matrix.
+     * \param c is an \f$nm\f$-vector.
+     * \param p is an input-output parameter giving a permutation of the rows of \a A. The initial basis elements are in the first \a m elements of \a p. 
+     * \param x is an output parameter giving a dual fesible point (if the problem is solvable).
+     * \param y is an output parameter giving a primal feasible point (if the problem is unsolvable).
+     *
+     * \internal Only implement this if necessary!
+     */
+    template<class R>
+    bool lpfsd(const Matrix<R>& A, const Vector<R>& c, 
+               Permutation& p,
+               Vector<R>& x, Vector<R>& y);
+
+
+
+
+    /*! \ingroup LinearProgramming
+     *  \brief Solver the robust primal feasibility problem \f$Ax=b; \ x>0\f$.
+     *
+     * \return If a solution is found, return true; if a certificate of unsolvability \f$b^Ty>0;\ A^Ty<0\f$ is found, return false; otherwise return indeterminate.
+     * \param A is an \f$m\times n\f$ matrix.
+     * \param b is an \f$m\f$-vector.
+     * \param p is an input-output parameter giving a permutation of the rows of \a A. The initial basis elements are in the first \a m elements of \a p. 
+     * \param x is an output parameter giving a fesible point (if the problem is solvable).
+     * \param y is an output parameter giving a robust dual feasible point  optimum solution of the dual problem (if the dual problem is unsolvable).
+     *
+     */
+    template<class R>
+    tribool lprfsp(const Matrix<R>& A, const Vector<R>& b, 
+                   Permutation& p,
+                   Vector<R>& x, Vector<R>& y);
+
+
+
+    /*! \ingroup LinearProgramming
+     *  \brief Solve the robust constrained feasibility problem \f$Ax=b; \ l\leq x\leq u\f$.
+     *
+     * \return If a solution is found, return true; if a certificate of unsolvability is found, return false; otherwise return indeterminate.
+     * \param A is an \f$m\times n\f$ matrix.
+     * \param b is an \f$m\f$-vector.
+     * \param l is an \f$n\f$-vector.
+     * \param u is an \f$n\f$-vector.
+     * \param p is an input-output parameter giving a permutation of the rows of \a A. The initial basis elements are in the first \a m elements of \a p. 
+     * \param x is an output parameter giving a fesible point (if the problem is robustly solvable).
+     * \param y is an output parameter giving a robust dual feasible point (if the problem is robustly unsolvable).
+     *
+     */
+    template<class R>
+    tribool lprfsc(const Matrix<R>& A, const Vector<R>& b, 
+                   Vector<R>& l, Vector<R>& u,
+                   Permutation& p,
+                   Vector<R>& x, Vector<R>& y);
+
+
+
+  /*! \ingroup LinearProgramming
+     *  \brief Solver the robust dual feasibility problem \f$A^T y<c\f$.
+     *
+     * \return If a solution is found, return true; if a certificate of unsolvability \f$c^Tx<0;\ Ax=0\f$ is found, return false; otherwise return indeterminate.
+     * \param A is an \f$m\times n\f$ matrix.
+     * \param c is an \f$n\f$-vector.
+     * \param p is an input-output parameter giving a permutation of the rows of \a A. The initial basis elements are in the first \a m elements of \a p. 
+     * \param x is an output parameter giving a fesible point (if the problem is solvable).
+     * \param y is an output parameter giving a robust dual feasible point  optimum solution of the dual problem (if the dual problem is unsolvable).
+     *
+     */
+    template<class R>
+    tribool lprfsd(const Matrix<R>& A, const Vector<R>& c, 
+                   Permutation& p,
+                   Vector<R>& x, Vector<R>& y);
+   
+
+    /*!\ingroup LinearProgramming
+     * \brief A step of the simplex algorithm for the linear programming problem \f$\min c^Tx \text{ s.t. } Ax=b; \ x\geq0\f$.
+     * 
+     * \return True if the current basic solution is optimal.
+     * \param A is an \f$m\times n\f$ matrix.
+     * \param b is an \f$m\f$-vector.
+     * \param c is an \f$n\f$-vector.
+     * \param p is an input-output parameter giving a permutation of the rows of \a A. The initial basis elements are in the first \a m elements of \a p. 
+     * \param B is an input-output parameter giving the inverse of the basis matrix; \f$B=A_B^{-1}\f$.
+     * \param x is an \f$n\f$-vector giving the current variables.(Optional)
+     * \param y is an \f$m\f$-vector giving the current dual variables.(Optional)
+     * \param z is an \f$n\f$-vector giving the current slack variables. (Optional)
+     *
+     * The basic primal, dual and slack variables are
+     * \f[ x_B=A_B^{-1}b; \ x_N=0; y=A_B^{-1}c_B;\ z_B=0; z_N=c_N-A_NA_B^{-1}c_B . \f]
+     * The algorithm proceeds as follows.
+     *  -# Find an entering variable \f$x_j\f$ such that satisfying \f$z_j<0\f$.
+     *  -# Find the leaving variable \f$x_k\f$ such that \f$i=\arg\min\{ t_k = x_k/d_k \mid d_k>0  \} \f$where \f$d = A_B^{-1} a_j\f$ and \f$a_j\f$ is the \f$j^\mathrm{th}\f$ column of \f$A\f$.
+     *  -# Update the inverse basis matrix
+     *     \f$ A_{B'}^{-1} = A_B^{-1} - (d-e_i) r^T / d_j . \f$
+     *    Here, \f$e_n\f$ is the n-th unit vector, \f$d:=A_B^{-1}a_j\f$ is the direction of change of the state, and \f$r^T:= e_i^TA_B^{-1}\f$ is the i-th row of \f$A_B^{-1}\f$.
+     *
+     * \internal Use x and y (and maybe z) only if it is more efficient.
+     */
+    template<class R>
+    bool lpstp(const Matrix<R>& A, const Vector<R>& b, const Vector<R>& c, 
+               Permutation& p, Matrix<R>& B
+               // Use these variables too if it's more efficient
+               , Vector<R>& x, Vector<R>& y
+               );
+
+
+
+
+
+    /*!\ingroup LinearProgramming
+     * \brief A step of the simplex algorithm for the constrained linear programming problem \f$\min c^Tx \text{ s.t. } Ax=b; \ l\leq x\leq u\f$.
+     * 
+     * \return True if the current basic solution is optimal.
+     * \param A is an \f$m\times n\f$ matrix.
+     * \param b is an \f$m\f$-vector.
+     * \param c is an \f$n\f$-vector.
+     * \param l is an \f$n\f$-vector.
+     * \param u is an \f$n\f$-vector.
+     * \param p is an input-output parameter giving a permutation of the rows of \a A. The initial basis elements are in the first \a m elements of \a p. 
+     * \param B is an input-output parameter giving the inverse of the basis matrix; \f$B=A_B^{-1}\f$.
+     * \param x is the current point.
+     */
+    template<class R>
+    bool lpstpc(const Matrix<R>& A, const Vector<R>& b, const Vector<R>& c, 
+                const Vector<R>& l, const Vector<R>& u,
+                Permutation& p, Matrix<R>& B, Vector<R>& x);
+
+    /*! \ingroup LinearAlgebra
+     *  \brief Solver for linear programming problems. \deprecated
+     *
+     *  \param m Number of free constraints
+     *  \param n Number of free variables
+     *  \param (A,rincA,cincA) An m-by-n matrix
+     *  \param (B,incB) An m-element vector
+     *  \param (C,incC) An n-element vector
+     *  \param d A scalar
+     *  \param piv A consecutive (m+n)-element vector of integers.
+     *
+     * Solve the linear programming problem 
+     * \f$ text{minimize}\ c^Tx \text{ subject to } Ax+y=b,\ x,y\geq0\f$ where the
+     * current point is given by \f$x=0,\ y=b\f$ and the current value is \f$-d\f$. 
+     */
+    template<class R>
+    void 
+    lpslv(int m, int n, 
+          R* A, int rincA, int cincA, 
+          R* B, int incB, 
+          R* C, int incC, 
+          R& d, 
+          int* piv);
 
 }}
 
+#include "lpslv.template.h"
 
 #endif /* ARIADNE_LPSLV_H */

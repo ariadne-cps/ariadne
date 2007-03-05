@@ -190,23 +190,35 @@ To solve the robust problem, we first find a solution to the standard problem, a
 \section simplexalgorithm The simplex algorithm
 
   Suppose we wish to update a basis of the standard linear programming problem.
-   - The current point \f$v=\mathrm{A}_B^{-1} (b - \mathrm{A}_N x_N)\f$ (typically, \f$x_N=0\f$).
-   - The reduced costs are \f$c_N-(c_B\mathrm{A}_B^{-1})\mathrm{A}_N\f$.
+   - The current point \f$x_B=A_B^{-1} (b - A_N x_N)\f$ (with \f$x_N=0\f$).
+   - The current dual variables are \f$y=A_B^{-1}c\f$.
+   - The reduced costs are \f$z_N=c_N-A_NA_B^{-1}c_B\f$.
    - If the reduced costs are all positive, the algorithm terminates. Otherwise, select \f$j\f$ such that \f$c_j<0\f$.
-   - The direction to move is \f$d=\mathrm{A}_B^{-1}a_j\f$.
-   - Choose \f$t\f$ maximal so that \f$l_B \leq v-td\leq u_B\f$; if the update is being used for feasibility, constraints violated by \f$v\f$ may be violated by \f$v-td\f$. Choose \f$k\f$ such that \f$i=\pi_k\f$ corresponds to a saturated constraint.
-   - Replace \f$x_j\f$ by \f$x_k\f$ in the basis and update \f$\mathrm{B}:=\mathrm{A}_B{-1}\f$.
-     - We have \f$\mathrm{B} \mathrm{A}_{\pi_i}=e_i\f$ for \f$i\neq k\f$ and we want \f$\mathrm{B} \mathrm{A}_{\pi_k}=e_k\f$.
-     - Let \f$\mathrm{B}\mathrm{A}_{\pi_k} = a\f$.
-     - For \f$i\neq k\f$, subtract \f$\mathrm{B}_{kj}\,a_i/a_k\f$ from \f$\mathrm{B}_{ij}\f$ for all \f$j\f$.
-     - Then divide \f$\mathrm{B}_{kj}\f$ by \f$a_k\f$ for all \f$j\f$.
-
-
-\section simplexefficiency Efficiency of the simplex algorithm
-
-For a linear programming problem of standard form, with \f$A\f$ an \f$m\times n\f$ matrix, the number of iterations of the simplex algorithm for practical problems grows approximately as \f$m\log n\f$.
+   - The direction to move the basic variables is \f$d=A_B^{-1}a_j\f$.
+   - Choose \f$t\f$ maximal so that \f$x_B-td\geq 0\f$; if the update is being used for feasibility, constraints violated by \f$v\f$ may be violated by \f$v-td\f$. Choose \f$k\f$ corresponding to a newly saturated constraint.
+   - Replace \f$x_j\f$ by \f$x_k\f$ to obtain new basic \f$B'\f$, and update \f$A_B^{-1}\f$.
+     - We have \f$A_B^{-1} A_B = I\f$ and \f$A_B^{-1}a_j=d\f$ and we want \f$A_{B'}a_j = e_i\f$ if \f$x_k\f$ is the \f$i^\mathrm{th}\f$ basis variable..
+     - Let \f$d=A_{B}^{-1} a_j\f$ where \f$a_j\f$ is the \f$j^\mathrm{th}\f$ column of \f$A\f$.
+     - For \f$p\neq i\f$, subtract \f$\mathrm{B}_{iq}\,d_p/d_i\f$ from \f$\mathrm{B}_{pq}\f$ for all \f$q\f$.
+     - Then divide \f$\mathrm{B}_{iq}\f$ by \f$d_i\f$ for all \f$q\f$.
+     <br>   
+     - Succinctly, \f$A_{B'}^{-1} := A_B^{-1} - (d-e_i) r^T / d_j\f$ where \f$d=A_B^{-1}\f$ and \f$r^T=e_i^T A_B^{-1}\f$.
 
 \section feasibilityalgorithms Algorithms for feasibility 
+
+ - We solve primal feasibility problems by trying to solve the dual feasibility problem \f$A^Ty\leq0\f$, \f$-b^Ty\leq -1\f$.
+If the dual problem has a solution, then the primal problem has no solution, and vice-versa.
+    <br><br>
+    An alternative approach is to add constraints. We start with a basic feasible solution to \f$Ax=b\f$ and want to introduce the constraint \f$c^Tx=d\f$.
+    Assume \f$c^Tx<d\f$. Introduce slack variable \f$z\f$ and try to minimise \f$z\f$ such that \f$Ax+0z=b\f$, \f$c^Tx+z=d\f$. 
+    If a solution with \f$z=0\f$ is found, then the new constraint can be introduced.
+    <br><br>
+    A third approach is to start with a basic solution \f$x_B=A_B^{-1}b\f$ and gradually imposing the constraints \f$x_B\geq0\f$ by maximising \f$x_j\f$ without breaking \f$x_i\geq0\f$ for \f$i<j\f$.
+
+  - We solve dual feasibility problems by gradually adding constraints:<br>
+Suppose we have a basic feasible solution \f$y\f$ of \f$A^Ty\leq c\f$ and we wish to add the constraint \f$ b^Ty\leq d\f$.
+    -# Try to maximise \f$-b^Ty\f$ while satisfying the other constraints.
+    -# If a value of \f$y\f$ is found with \f$b^Ty\leq d\f$, the new constraint can be added.
 
  - Constrained feasibility problem with equalities  \f$ Ax=b;\ l\leq x\leq u\ (m\leq n)\f$.<br>
    Find a set of basic variables \f$B\f$ so that \f$ A_B\f$ is nonsingular, where \f$ A_B\f$ is the matrix formed from the columns of \f$A\f$ in \f$B\f$.
@@ -217,13 +229,17 @@ For a linear programming problem of standard form, with \f$A\f$ an \f$m\times n\
 
    \b Remark: Since we do not assume the existence of \f$\pm\infty\f$ in our number types, we use \f$l=0,\ u=-1\f$ for the constraint \f$x\geq0\f$; this is the only unbounded constraint we allow.
 
-   See Chvatal [Chapter 8, pp 129] for more details.
- 
- - Unconstrained feasibility problem with inequalities  \f$ Ax\leq b;\ l\leq x\leq u\ (m\geq n)\f$.<br>
-   Let \f$I\f$ be a set of basic indices such that \f$A_I\f$ is invertible, where \f$A_I\f$ is the matrix formed from the \em rows corresponding to the \f$I\f$.
-   SetInterface \f$v=A_I^{-1}b_I\f$, and let \f$S\f$ be the constraints satisfied by \f$v\f$.
-   Find \f$i\f$ such that \f$a_iv>v\f$ where \f$a_i\f$ is the \f$i^\mathrm{th}\f$ row of \f$A\f$ and let \f$c=a_i\f$.
-   Change basis until either \f$a_i v\leq b\f$ or it is impossible to reduce \f$a_i x\f$ without violating \f$A_Sx\leq b_S\f$.
+   See Chvatal [Chapter 8, pp 129] for more details on constrained feasibility.
+
+
+\section simplexalgorithmconstrains The simplex algorithm with constraints
+
+  Suppose we wish to update a basis of the standard linear programming problem.
+   - The current point \f$x_B=A_B^{-1} (b - A_N x_N)\f$ (with \f$x_L=l_L; x_U=u_U\f$).
+
+\section simplexefficiency Efficiency of the simplex algorithm
+
+For a linear programming problem of standard form, with \f$A\f$ an \f$m\times n\f$ matrix, the number of iterations of the simplex algorithm for practical problems grows approximately as \f$m\log n\f$.
 
 
 
@@ -256,26 +272,20 @@ We can convert the standard dual feasibility problem into a primal linear progra
  - lpstp() Perform one step of the standard linear programming problem.
       Input: \f$\mathrm{A},b,c\f$, InOut: \f$\pi,\mathrm{A}_B^{-1}\f$.
 
- - lpcstp() Perform one step of the standard linear programming problem with constraints \f$l\leq x\leq u\f$.
+ - lpstpc() Perform one step of the standard linear programming problem with constraints \f$l\leq x\leq u\f$.
      Any constraints which are violated are assumed to remain violated; this allows for constraints with infinities.
      Input: \f$\mathrm{A},b,c\f$, InOut: \f$\pi,\mathrm{A}_B^{-1}\f$.
-
- - lpupd() Update the matrix \f$\mathrm{A}_B^{-1}\f$ so that \f$\mathrm{A}_B^{-1}a=e_i\f$ by pivoting on the \f$i^\textrm{th}\f$ row.
-      Input: \f$a,i\f$; InOut\f$\mathrm{A}_B^{-1}\f$.
 
  - lpslv() Solve the standard linear programming problem \f$\min c^Tx \text{ s.t. }Ax=b;\ x\geq0\f$.
       Input: \f$A,b,c\f$; Output: \f$\pi,\ \mathrm{A}_B^{-1},\ x^*,\ y^*,\ z^*\f$.
 
- - lpcslv() Solve the standard linear programming problem with constraints \f$\min c^Tx \text{ s.t. } Ax=b;\ l\leq x\leq u\f$.
-      Input: \f$A,b,c\f$; Output: \f$\pi,\ \mathrm{A}_B^{-1},\ x^*,\ z^*\f$.
+ - lpslvc() Solve the standard linear programming problem with constraints \f$\min c^Tx \text{ s.t. } Ax=b;\ l\leq x\leq u\f$.
+      Input: \f$A,b,c\f$; Output: \f$\pi,\ \mathrm{A}_B^{-1},\ x^*\ \  (\text{maybe } y^*, z^*)\f$.
 
- - lprslv() Solve the standard linear programming problem with constraints given in reduced form \f$\min \tilde{c}^Tx_N \text{ s.t. } \tilde{A}x_N+x_B=b;\ l\leq x\leq u\f$ \f$\tilde{A}x_N+x_B=b\f$. (This is useful if a starting basis can easily be found, and there are almost as many constraints as variables.)
-      Input: \f$\tilde{A},b,c,\pi\f$; Output: \f$\pi, x^*, z^*, y^*\f$.
+ - lprfsp() Solve the feasibility problem \f$Ax=b;\ x\geq0\f$.
 
- - lpfeas() Solve the feasibility problem \f$Ax=b;\ x\geq0\f$.
+ - lprfsc() Solve the feasibility problem \f$Ax=b\f$ with \f$l\leq x\leq u\f$.
 
- - lpcfeas() Solve the feasibility problem \f$Ax=b\f$ with \f$l\leq x\leq u\f$.
-
- - lpdfeas() Solve the dual feasibility problem \f$Ax\leq b\f$ directly.
+ - lprfsd() Solve the dual feasibility problem \f$Ax\leq b\f$.
 
 */

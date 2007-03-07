@@ -64,8 +64,8 @@ namespace Ariadne {
       Integer denominator() const { return this->get_den();}
     };
 
-    inline std::istream& operator>>(std::istream& is, Rational& q) { 
-      mpq_class& mpq=static_cast<mpq_class&>(q); is >> mpq; mpq.canonicalize(); return is; }
+    std::istream& 
+    operator>>(std::istream& is, Rational& q);
       
     inline Integer numerator(const Rational& num){ 
       return num.get_num(); }

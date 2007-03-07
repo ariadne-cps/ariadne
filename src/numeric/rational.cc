@@ -21,9 +21,64 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <iostream>
+#include <sstream>
+
 #include "numeric/rational.h"
 
-namespace Ariadne {
-  namespace Numeric {
-  } 
+namespace Ariadne { namespace Numeric {
+
+
+// FIXME: Allow decimal input without leading zero e.g.  ".25" or "-.25"
+std::istream& 
+operator>>(std::istream& is, Rational& q) 
+{
+  mpz_class intz;
+  char sep;
+  bool neg;
+
+  // Test if input is negative
+  is >> sep;
+  neg = (sep=='-');
+  is.putback(sep);
+
+  // Input leading part
+  is >> intz;
+
+  sep=is.get();
+  if(sep=='.') {
+    // Decimal input
+    mpz_class numz;
+    mpz_class denz;
+    std::stringstream numstr;
+    std::stringstream denstr;
+    if(neg) {
+      numstr << '-';
+    }
+    denstr << '1';
+    char digit=is.get();
+    while(std::isdigit(digit)) {
+      numstr << digit;
+      denstr << '0';
+      digit=is.get();
+    }
+    is.putback(digit);
+    numstr >> numz;
+    denstr >> denz;
+    q=intz+mpq_class(numz,denz);
+  } else if (sep=='/') {
+    // Fraction input
+    mpz_class numz=intz;
+    mpz_class denz;
+    is >> denz;
+    q=Rational(numz,denz);
+  } else {
+    // Integer input 
+    is.putback(sep);
+    q=intz;
+  }
+  q.canonicalize();
+  return is;
 }
+
+}}

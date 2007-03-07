@@ -115,6 +115,7 @@ void export_numeric() {
 
   class_<Rational>("Rational")
     .def(init<int,int>())
+    .def(init<Integer,Integer>())
     .def(init<int>())
     .def(init<Integer>())
     .def(init<double>())

@@ -36,7 +36,28 @@ using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
 
 #include <boost/python.hpp>
+#include <boost/python/detail/api_placeholder.hpp>
 using namespace boost::python;
+
+template<class R>  
+Vector<R> 
+extract_vector(boost::python::list elements) 
+{
+  // See "Extracting C++ objects" in the Boost Python tutorial
+  int n=boost::python::len(elements);
+  Vector<R> v(n);
+  for(int i=0; i!=n; ++i) {
+    extract<double> x(elements[i]);
+    if (x.check()) {
+      v(i)=static_cast<R>(x);
+    } else {
+      extract<R> x(elements[i]);
+      v(i)=x;
+    }
+  }
+  return v;
+}
+
 
 template<class R> 
 inline
@@ -64,6 +85,7 @@ vector_set_item(Vector<R>& v, int n, const A& x) {
   R& r=v(m);
   r=R(x);
 }
+
 
 
 template<class R>
@@ -99,6 +121,8 @@ void export_vector()
     .def("__div__",&div<IVec,Vec,I>)
     .def(self_ns::str(self))
   ;
+
+  def("extract_vector",&extract_vector<R>,"Extract an Ariadne vector from a Python list");
 }
 
 template<>

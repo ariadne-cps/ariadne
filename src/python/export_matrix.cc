@@ -38,7 +38,35 @@ using namespace Ariadne;
 using namespace Ariadne::LinearAlgebra;
 
 #include <boost/python.hpp>
+#include <boost/python/detail/api_placeholder.hpp>
 using namespace boost::python;
+
+template<class R>  
+Matrix<R> 
+extract_matrix(boost::python::list elements) 
+{
+  // See "Extracting C++ objects" in the Boost Python tutorial
+  int m=boost::python::len(elements);
+  list row=extract<list>(elements[0]);
+  int n=boost::python::len(row);
+  Matrix<R> A(m,n);
+  for(int i=0; i!=m; ++i) {
+    row=extract<list>(elements[i]);
+    if(boost::python::len(row)!=n) {
+      throw std::runtime_error("Matrix with rows of different sizes");
+    }
+    for(int j=0; j!=n; ++j) {
+      extract<double> x(row[j]);
+      if (x.check()) {
+        A(i,j)=static_cast<R>(x);
+      } else {
+        extract<R> x(row[j]);
+        A(i,j)=x;
+      }
+    }
+  }
+  return A;
+}
 
 template<class R> inline 
 R matrix_get_item(const Matrix<R>& M, tuple index) {
@@ -115,6 +143,9 @@ void export_matrix()
   def("solve",&matrix_vector_solve<R,I>);
   def("transpose",&matrix_transpose<R>);
   def("inverse",&matrix_inverse<R>);
+
+  def("extract_matrix",&extract_matrix<R>);
+
 }
 
 template<>

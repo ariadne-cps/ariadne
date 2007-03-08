@@ -103,15 +103,13 @@ namespace Ariadne {
     template<class R>
     Matrix<typename Numeric::traits<R>::arithmetic_type> 
     exp_Ah_approx(const Matrix<R>& A, 
-                  const R& h, 
-                  const R& e); 
+                  const R& h); 
 
     /*! \brief Compute \f$A^{-1}(e^{Ah}-I) = h\sum_{n=0}^{\infty} \frac{{(Ah)}^{n}}{(n+1)!}\f$. */
     template<class R>
     Matrix<typename Numeric::traits<R>::arithmetic_type> 
     exp_Ah_sub_id_div_A_approx(const Matrix<R>& A, 
-                               const R& h, 
-                               const R& e); 
+                               const R& h); 
 
   }
 }

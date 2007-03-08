@@ -153,6 +153,8 @@ namespace Ariadne {
     }
     
 
+    class PlanarProjectionMap;
+    std::ostream& operator<<(std::ostream&, const PlanarProjectionMap&); 
 
     class PlanarProjectionMap
     {
@@ -178,10 +180,10 @@ namespace Ariadne {
       template<class R> Rectangle2d operator() (const Geometry::Rectangle<R>& r) const {
         Rectangle2d result(2); 
         check_dimension(r,this->_d);
-        result.lower_bound(0)=conv_approx<double>(r.lower_bound(0));
-        result.upper_bound(0)=conv_approx<double>(r.upper_bound(0));
-        result.lower_bound(1)=conv_approx<double>(r.lower_bound(1));
-        result.upper_bound(1)=conv_approx<double>(r.upper_bound(1));
+        result.lower_bound(0)=conv_approx<double>(r.lower_bound(this->_i));
+        result.upper_bound(0)=conv_approx<double>(r.upper_bound(this->_i));
+        result.lower_bound(1)=conv_approx<double>(r.lower_bound(this->_j));
+        result.upper_bound(1)=conv_approx<double>(r.upper_bound(this->_j));
         return result;
       }
       template<class R> Polygon2d operator() (const Geometry::Zonotope<R>& z) const {
@@ -191,11 +193,14 @@ namespace Ariadne {
         return this->operator()(p.vertices());
       }
      private:
+      friend std::ostream& operator<<(std::ostream&,const PlanarProjectionMap&);
+     private:
       dimension_type _d;
       dimension_type _i;
       dimension_type _j;
-      };
-    
+    };
+         
+
     Point2d baricentre(const Polygon2d& vertices);
 
 
@@ -225,12 +230,15 @@ namespace Ariadne {
       epsfstream();
       
       template<class R>
-      epsfstream(const char* fn, const Ariadne::Geometry::Rectangle<R>& bbox, 
-                 const unsigned int &ix=0,  const unsigned int& iy=1);
+      void open(const char* fn, const Geometry::Rectangle<R>& bbox);
       
       template<class R>
-      void open(const char* fn, const Ariadne::Geometry::Rectangle<R>& bbox, 
-                const unsigned int &ix=0,  const unsigned int& iy=1);
+      void open(const char* fn, const Geometry::Rectangle<R>& bbox, 
+                unsigned int ix,  unsigned int iy);
+      
+      template<class R>
+      void open(const char* fn, const Geometry::Rectangle<R>& bbox, 
+                const PlanarProjectionMap& p_map);
       
       void open(const char* fn, const Rectangle2d& bbox,
                 const PlanarProjectionMap& p_map);
@@ -272,6 +280,7 @@ namespace Ariadne {
     epsfstream& draw(epsfstream& eps, const Rectangle2d& r);
     epsfstream& draw(epsfstream& eps, const Polygon2d& vertices);
     
+
     template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::Point<R>&); 
     template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::Rectangle<R>&);
     template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::Zonotope<R>&);
@@ -286,20 +295,27 @@ namespace Ariadne {
     
 
     template<class R>
-    epsfstream::epsfstream(const char* fn, const Ariadne::Geometry::Rectangle<R>& bbox, 
-                           const unsigned int &ix,  const unsigned int& iy)
-      : std::ofstream(), line_colour("black"), fill_colour("green"), line_style(true), fill_style(true)
+    void 
+    epsfstream::open(const char* fn, const Ariadne::Geometry::Rectangle<R>& bbox)
     {
-      this->open(fn,bbox,ix,iy);
+      PlanarProjectionMap p_map(bbox.dimension(),0,1);
+      this->open(fn,p_map(bbox),p_map);
     }
-
 
     template<class R>
     void 
     epsfstream::open(const char* fn, const Ariadne::Geometry::Rectangle<R>& bbox,
-                     const unsigned int &ix,  const unsigned int& iy)
+                     unsigned int ix,  unsigned int iy)
     {
       PlanarProjectionMap p_map(bbox.dimension(),ix,iy);
+      this->open(fn,p_map(bbox),p_map);
+    }
+
+    template<class R>
+    void 
+    epsfstream::open(const char* fn, const Ariadne::Geometry::Rectangle<R>& bbox,
+                     const PlanarProjectionMap& p_map)
+    {
       this->open(fn,p_map(bbox),p_map);
     }
 

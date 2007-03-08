@@ -98,6 +98,14 @@ operator<<(std::ostream& os, const Point2d& pt)
   return os << "(" << pt[0] << "," << pt[1] << ")";
 }
 
+std::ostream& 
+operator<<(std::ostream& os, const PlanarProjectionMap& ppm) 
+{
+  return os << "PlanarProjectionMap( argument_dimension=" << ppm._d
+            << ", x_variable=" << ppm._i << ", y_variable=" << ppm._j << " )";
+}
+
+
 Point2d 
 baricentre(const Polygon2d& vertices)
 {
@@ -162,7 +170,6 @@ order_around_a_point(const Polygon2d& vertices,
 epsfstream::epsfstream()
   : std::ofstream(), line_colour("black"), fill_colour("green"), line_style(true), fill_style(true)
 {
-  this->p_map=PlanarProjectionMap(2,0,1);
 }
 
 

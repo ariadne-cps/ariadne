@@ -84,7 +84,8 @@ test_lohner_integrator()
   Zonotope< Interval<R> > zr2=lohner.reachability_step(avf,z1,h);
   cout << "zr1=" << zr1 << "\nzr2=" << zr2 << endl;
   
-  epsfstream eps("test_lohner_integrator.eps",bb);
+  epsfstream eps;
+  eps.open("test_lohner_integrator.eps",bb);
   eps.set_fill_colour("green");
   eps << over_approximation(zr1) << over_approximation(zr2);
   eps.set_fill_colour("blue");

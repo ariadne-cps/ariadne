@@ -49,8 +49,6 @@ void export_affine_multimap()
   typedef Matrix<R> RMatrix;
   typedef Geometry::Rectangle<R> RRectangle;
   
-  int a=1;
-  
   class_< AffineMultiMap<R,Rectangle> >("AffineMultiMapRectangle",init< Matrix<R>, Rectangle<R> >())
     .def(init< AffineMultiMap<R,Rectangle> >())
     .def("argument_dimension",&AffineMultiMap<R,Rectangle>::argument_dimension)

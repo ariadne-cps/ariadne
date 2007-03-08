@@ -71,7 +71,8 @@ int main() {
   cout << z3.vertices() << endl;
   
   
-  epsfstream eps("test_epsfstream.eps",bbox);
+  epsfstream eps;
+  eps.open("test_epsfstream.eps",bbox);
   eps << r1;
   eps.set_fill_colour("blue");
   eps << r2;

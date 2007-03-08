@@ -143,7 +143,8 @@ test_zonotope()
   cout << "Writing to eps stream" << endl;
   
   Rectangle<R> bbox=z2.bounding_box().expand_by(R(0.5));
-  epsfstream eps("test_zonotope-1.eps",bbox,0,1);
+  epsfstream eps;
+  eps.open("test_zonotope-1.eps",bbox,0,1);
   eps << z2;
   for(uint i=0; i!=6; ++i) {
     if(z2.contains(pts[i])) {

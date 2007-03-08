@@ -38,12 +38,13 @@ using namespace Ariadne;
 using namespace Ariadne::LinearAlgebra;
 
 #include <boost/python.hpp>
+#include <boost/python/detail/api_placeholder.hpp>
 using namespace boost::python;
 
 template<class R> 
-inline R tensor_get_item(const Tensor<R>& T, tuple index) {
-//  SizeArray ia(boost::python::len(index.attr("__len__")()));
-  SizeArray ia(extract<uint>(index.attr("__len__")()));
+inline R tensor_get_item(const Tensor<R>& T, boost::python::object obj) {
+  boost::python::tuple index=extract<tuple>(obj);
+  SizeArray ia(len(index));
   for(size_type i=0; i!=ia.size(); ++i) {
     ia[i]=extract<uint>(index[i]);
   }
@@ -51,8 +52,9 @@ inline R tensor_get_item(const Tensor<R>& T, tuple index) {
 }
 
 template<class R, class A> 
-inline void tensor_set_item(Tensor<R>& T, tuple index, const A& x) {
-  SizeArray ia(extract<uint>(index.attr("__len__")()));
+inline void tensor_set_item(Tensor<R>& T, boost::python::object obj, const A& x) {
+  boost::python::tuple index=extract<tuple>(obj);
+  SizeArray ia(len(index));
   for(size_type i=0; i!=ia.size(); ++i) {
     ia[i]=extract<uint>(index[i]);
   }

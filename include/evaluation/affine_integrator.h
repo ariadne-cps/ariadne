@@ -36,12 +36,16 @@ namespace Ariadne {
    
     /*! \brief Compute an over-approximation to \f$\sum_{n=0}^{\infty} \frac{x^n}{(k+n)!}\f$. */
     template<class R> R gexp_up(const R& x, uint k);
-      
-    
-    /*! \brief Compute \f$\sum_{n=0}^{\infty} \frac{(tA)^n}{(k+n)!}b\f$ with an error of at most \a epsilon. */
+  
+    /*! \brief Compute an interval approximation to \f$\sum_{n=0}^{\infty} \frac{(tA)^n}{(k+n)!}b\f$. */
     template<class R> 
     LinearAlgebra::Vector< Numeric::Interval<R> > 
-    gexp(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b, const time_type& t, const uint& k, const R& err);
+    gexp(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b, const time_type& t, const uint& k);
+      
+    /*! \brief Compute an interval approximation to \f$\sum_{n=0}^{\infty} \frac{(tA)^n}{(k+n)!}\f$. */
+    template<class R> 
+    LinearAlgebra::Matrix< Numeric::Interval<R> > 
+    gexp(const LinearAlgebra::Matrix<R>& Ab, const time_type& t, const uint& k);
       
     
     /*!\ingroup Integrate

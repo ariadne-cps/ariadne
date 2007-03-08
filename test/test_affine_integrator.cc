@@ -68,33 +68,48 @@ test_affine_integrator()
     Vector<R> b("[0.125,0.25]");
     time_type h=0.125;
     uint k=1;
-    R err(0.03125);
-    std::cout << gexp(T,u,time_type(0.5),0u,err) << endl;
-    std::cout << gexp(I,u,1,1u,err) << endl;
-    std::cout << gexp(I,u,1,2u,err) << endl;
-    std::cout << gexp(A,b,h,k,err) << endl;
+    std::cout << gexp(T,u,time_type(0.5),0u) << endl;
+    std::cout << gexp(I,u,1,1u) << endl;
+    std::cout << gexp(I,u,1,2u) << endl;
+    std::cout << gexp(A,b,h,k) << endl;
   }
   
   Matrix<R> A("[-2,-1;1,-2]");
   Vector<R> b("[0.125,0.25]");
   time_type h=0.125;
+  time_type hh=h/2;
+  time_type th=h*2;
   AffineIntegrator<R> affine(0.125,0.5,0.25);
   AffineVectorField<R> avf(A,b);
-  Rectangle<R> bb("[-4,4]x[-4,4]");
+  Rectangle<R> bb("[-4,0]x[-2,2]");
   Rectangle<R> r("[-3.125,-2.875]x[-0.125,0.125]");
   Zonotope<I> iz; iz=r;
   
   Zonotope<I> iz1=affine.integration_step(avf,iz,h);
   Zonotope<I> iz2=affine.integration_step(avf,iz1,h);
+  Zonotope<I> iz3=affine.integration_step(avf,iz2,h);
+  Zonotope<I> iz4=affine.integration_step(avf,iz3,h);
+  Zonotope<I> hiz1=affine.integration_step(avf,iz,hh);
+  Zonotope<I> hiz2=affine.integration_step(avf,iz1,hh);
+  Zonotope<I> hiz3=affine.integration_step(avf,iz2,hh);
+  Zonotope<I> hiz4=affine.integration_step(avf,iz3,hh);
   Zonotope<I> riz1=affine.reachability_step(avf,iz,h);
   Zonotope<I> riz2=affine.reachability_step(avf,iz1,h);
+  Zonotope<I> riz3=affine.reachability_step(avf,iz2,h);
+  Zonotope<I> riz4=affine.reachability_step(avf,iz3,h);
   
   if(h!=0.125) { cout << "h changed from 0.125 to " << h << endl; }
   
-  epsfstream eps("test_affine_integrator.eps",bb);
-  eps << over_approximation(riz1) << over_approximation(riz2);
+  epsfstream eps;
+  eps.open("test_affine_integrator.eps",bb);
+  eps.set_fill_colour("red");
+  eps << over_approximation(riz1) << over_approximation(riz2) << over_approximation(riz3) << over_approximation(riz4);
+  eps.set_fill_colour("green");
+  eps << approximation(riz1) << approximation(riz2) << approximation(riz3) << approximation(riz4);
+  eps.set_fill_colour("magenta");
+  eps << approximation(hiz1) << approximation(hiz2) << approximation(hiz3) << approximation(hiz4);
   eps.set_fill_colour("blue");
-  eps << over_approximation(iz1) << over_approximation(iz2);
+  eps << approximation(iz1) << approximation(iz2) << approximation(iz3) << approximation(iz4);
   eps.set_fill_colour("yellow");
   eps << over_approximation(iz);
   eps.close();

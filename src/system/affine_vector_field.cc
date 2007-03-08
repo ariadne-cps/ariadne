@@ -39,13 +39,5 @@ namespace Ariadne {
     
     typedef Numeric::traits<Real>::arithmetic_type IReal;
     
-    template Matrix<IReal> exp_Ah_approx(const Matrix<Real>& A, 
-                                         const Real& h, 
-                                         const Real& e);
-    
-    template Matrix<IReal> exp_Ah_sub_id_div_A_approx(const Matrix<Real>& A, 
-                                                      const Real& h, 
-                                                      const Real& e);
-
   }
 }

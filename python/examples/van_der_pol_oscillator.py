@@ -76,7 +76,8 @@ print "reach set:",reach_set
 print "Exporting to postscript output...",
 epsbb=Rectangle("[-4.1,4.1]x[-2.1,2.1]") # eps bounding box
 epsbb=Rectangle("[0.4,1.4]x[-0.4,0.6]") # eps bounding box
-eps=EpsPlot("van_der_pol_oscillator-1.eps",epsbb)
+eps=EpsPlot()
+eps.open("van_der_pol_oscillator-1.eps",epsbb)
 eps.set_line_style(True)
 eps.set_fill_colour("green")
 eps.write(approximation(reach_set))

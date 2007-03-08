@@ -41,9 +41,10 @@ using namespace boost::python;
 
 template<class R>  
 Vector<R> 
-extract_vector(boost::python::list elements) 
+extract_vector(boost::python::object obj) 
 {
   // See "Extracting C++ objects" in the Boost Python tutorial
+  list elements=extract<list>(obj);
   int n=boost::python::len(elements);
   Vector<R> v(n);
   for(int i=0; i!=n; ++i) {

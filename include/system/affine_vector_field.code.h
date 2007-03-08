@@ -66,53 +66,7 @@ namespace Ariadne {
 
     
     
-  }
-}
 
-
-namespace Ariadne {
-  namespace LinearAlgebra {
-
-    template<class R>
-    Matrix<typename Numeric::traits<R>::arithmetic_type>
-    exp_Ah_approx(const Matrix<R>& A, 
-                  const R& h, 
-                  const R& e) 
-    {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-      Matrix<F> result=Matrix<R>::identity(A.number_of_rows());
-      
-      F norm_Ah=F(h)*norm(A);
-      Matrix<F> AhpowNdivfN=result;
-      uint n=0;
-      while( (norm(AhpowNdivfN)*static_cast<F>(n)) >= (e*(static_cast<R>(n)-norm_Ah)) ) {
-        ++n;
-        AhpowNdivfN=(F(h)/R(n))*(AhpowNdivfN*A);
-        result=result+AhpowNdivfN;
-      }
-      return result;
-    }
-    
-    template<class R> 
-    Matrix<typename Numeric::traits<R>::arithmetic_type> 
-    exp_Ah_sub_id_div_A_approx(const Matrix<R>& A, 
-                               const R& h, 
-                               const R& e)
-    {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-      Matrix<F> result=static_cast<F>(h)*Matrix<R>::identity(A.number_of_rows());
-      
-      F norm_Ah=F(h)*norm(A);
-      Matrix<F> AhpowNdivfN=result;
-      uint n=0;
-      while(norm(AhpowNdivfN)*static_cast<R>(n) >= e*(static_cast<R>(n)-norm_Ah)) {
-        ++n;
-        AhpowNdivfN=(F(h)/R(n+1))*(AhpowNdivfN*A);
-        result=result+AhpowNdivfN;
-      }
-      return result;
-      return A;
-    }      
 
   }
 }

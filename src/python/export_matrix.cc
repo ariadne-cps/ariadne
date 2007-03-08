@@ -43,9 +43,10 @@ using namespace boost::python;
 
 template<class R>  
 Matrix<R> 
-extract_matrix(boost::python::list elements) 
+extract_matrix(boost::python::object obj) 
 {
   // See "Extracting C++ objects" in the Boost Python tutorial
+  boost::python::list elements=extract<list>(obj);
   int m=boost::python::len(elements);
   list row=extract<list>(elements[0]);
   int n=boost::python::len(row);
@@ -69,16 +70,18 @@ extract_matrix(boost::python::list elements)
 }
 
 template<class R> inline 
-R matrix_get_item(const Matrix<R>& M, tuple index) {
-  uint i=extract<uint>(index[0]);
-  uint j=extract<uint>(index[1]);
+R matrix_get_item(const Matrix<R>& M, boost::python::object obj) {
+  tuple index=extract<tuple>(obj);
+  int i=extract<int>(index[0]);
+  int j=extract<int>(index[1]);
   return M(i,j);
 }
 
 template<class R, class A> inline 
-void matrix_set_item(Matrix<R>& M, tuple index, const A& x) {
-  uint i=extract<uint>(index[0]);
-  uint j=extract<uint>(index[1]);
+void matrix_set_item(Matrix<R>& M, boost::python::object obj, const A& x) {
+  tuple index=extract<tuple>(obj);
+  int i=extract<int>(index[0]);
+  int j=extract<int>(index[1]);
   M(i,j)=R(x);
 }
 
@@ -144,10 +147,11 @@ void export_matrix()
   def("transpose",&matrix_transpose<R>);
   def("inverse",&matrix_inverse<R>);
 
-  def("extract_matrix",&extract_matrix<R>);
+  def("extract_matrix",&extract_matrix<R>,"Extract an Ariadne matrix from a Python list of lists");
 
 }
 
+ 
 template<>
 void export_matrix<Rational>() 
 {
@@ -158,9 +162,11 @@ void export_matrix<Rational>()
   class_<Mx>(python_name<R>("Matrix").c_str(),init<int,int>())
     .def(init<std::string>())
     .def(init<Mx>())
+    /*
     .def("__getitem__",&matrix_get_item<R>)
     .def("__setitem__",&matrix_set_item<R,R>)
     .def("__setitem__",&matrix_set_item<R,double>)
+    */
     .def("__neg__",&neg<Mx,Mx>)
     .def("__add__",&add<Mx,Mx,Mx>)
     .def("__sub__",&sub<Mx,Mx,Mx>)
@@ -196,10 +202,12 @@ void export_interval_matrix()
     .def(init<std::string>())
     .def(init<Mx>())
     .def(init<IMx>())
+    /*
     .def("__getitem__",&matrix_get_item<I>)
     .def("__setitem__",&matrix_set_item<I,I>)
     .def("__setitem__",&matrix_set_item<I,R>)
     .def("__setitem__",&matrix_set_item<I,double>)
+    */
     .def("__neg__",&neg<IMx,IMx>)
     .def("__add__",&add<IMx,IMx,Mx>)
     .def("__add__",&add<IMx,IMx,IMx>)

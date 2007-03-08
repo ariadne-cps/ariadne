@@ -62,11 +62,14 @@
 
 namespace Ariadne { namespace Evaluation { extern int verbosity; static bool warning=true; } }
 
+
+
+    
 template<class R> 
 R
 Ariadne::Evaluation::gexp_up(const R& x, uint k)
 {
-  R result=div_up(static_cast<R>(1),static_cast<R>(k));
+  R result=div_up(static_cast<R>(1),static_cast<R>(factorial(k)));
   uint n=k;
   R term=result;
   while(add_down(result,term)==result) {
@@ -77,38 +80,77 @@ Ariadne::Evaluation::gexp_up(const R& x, uint k)
   return result;
 }
 
-
-
-
 template<class R> 
 Ariadne::LinearAlgebra::Vector< Ariadne::Numeric::Interval<R> > 
 Ariadne::Evaluation::gexp(
     const LinearAlgebra::Matrix<R>& A, 
     const LinearAlgebra::Vector<R>& b, 
     const time_type& qt, 
-    const uint& k, 
-    const R& err)
+    const uint& k)
 {
-  check_size(b,A.number_of_rows());
-  check_size(b,A.number_of_columns());
+  //FIXME: Make number of steps depend on precision
+  static const int MAX_STEPS=12;
+  typedef Interval<R> I;
+
+  int ns=MAX_STEPS;
+
+  LinearAlgebra::Matrix<R> id=LinearAlgebra::Matrix<R>::identity(A.number_of_rows());
   
-  LinearAlgebra::Vector< Interval<R> > result=b/static_cast<R>(factorial(k));
+  LinearAlgebra::Vector<I> result=b/static_cast<R>(factorial(k));
+  LinearAlgebra::Vector<I> term=result;
+  I t(qt);
   
-  LinearAlgebra::Vector< Interval<R> > term=result;
-  Numeric::Interval<R> t(qt);
-  R nrm=(A.norm()*t).upper();
-  
-  uint n=k;
-  R e=(n<=nrm) ? static_cast<R>(0) : (term.norm() / (static_cast<R>(1)-nrm/n) ).upper();
-  while( ( n<=nrm ) || (e>= err) ) {
-    n=n+1;
+  for(uint n=k+1; n!=k+ns; ++n) {
     term=(A*term)*(t/static_cast<R>(n));
     result=result+term;
-    e=(n<=nrm) ? static_cast<R>(0) : (term.norm() / (static_cast<R>(1)-nrm/n) ).upper();
-    //std::cerr << n << " " << term << " " << result << " " << e << std::endl;
   }
   
-  return result+LinearAlgebra::Vector< Interval<R> >(result.size(),Interval<R>(-e,e));
+  R err=mul_up(pow_up((A.norm()*t).upper(),ns),gexp_up((A.norm()*t).upper(),k+ns));
+  I ierr=err*I(-1,1);
+  result+=LinearAlgebra::Vector<I>(result.size(),ierr);
+
+  if(Evaluation::verbosity>7) { 
+    std::cerr << "A=" << A << ",  t=" << qt << ",  k=" << k << "\n" 
+              << "gexp(A,t,k)=" << result << ", err=" << err << std::endl; 
+  }
+
+  return result;
+}
+
+template<class R> 
+Ariadne::LinearAlgebra::Matrix< Ariadne::Numeric::Interval<R> > 
+Ariadne::Evaluation::gexp(
+    const LinearAlgebra::Matrix<R>& A, 
+    const time_type& qt, 
+    const uint& k)
+{
+  //FIXME: Make number of steps depend on precision
+  static const int MAX_STEPS=12;
+  typedef Interval<R> I;
+
+  int ns=MAX_STEPS;
+
+  LinearAlgebra::Matrix<R> id=LinearAlgebra::Matrix<R>::identity(A.number_of_rows());
+  
+  LinearAlgebra::Matrix<I> result=id/static_cast<R>(factorial(k));
+  LinearAlgebra::Matrix<I> term=result;
+  I t(qt);
+  
+  for(uint n=k+1; n!=k+ns; ++n) {
+    term=(A*term)*(t/static_cast<R>(n));
+    result=result+term;
+  }
+  
+  R err=mul_up(pow_up((A.norm()*t).upper(),ns),gexp_up((A.norm()*t).upper(),k+ns));
+  I ierr=err*I(-1,1);
+  result+=LinearAlgebra::Matrix<I>(result.number_of_rows(),result.number_of_columns(),&ierr,0,0);
+  
+  if(Evaluation::verbosity>7) { 
+    std::cerr << "A=" << A << ",  t=" << qt << ",  k=" << k << "\n" 
+              << "gexp(A,t,k)=" << result << ", err=" << err << std::endl; 
+  }
+  
+  return result;
 }
 
     
@@ -170,45 +212,42 @@ Ariadne::Evaluation::AffineIntegrator<R>::integration_step(
   using namespace Geometry;
   using namespace System;
   
+
   if(verbosity>6) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
 
   const AffineVectorField<R>& vf=affine_vector_field;
-  Zonotope< Interval<R> > z=initial_set;
-  Interval<R> h=step_size;
+  Zonotope<I> z=initial_set;
+  I h=step_size;
  
-  R max_error=(norm(z.generators())/Interval<R>(65536)).upper();
-  assert(max_error>0);
-  
   if(verbosity>7) { 
     std::cerr << "zonotope generators=" << z.generators() << std::endl;
-    std::cerr << "maximum allowed error=" << max_error << std::endl;
   
     std::cerr << "jacobian=" << vf.A() << std::endl;
     std::cerr << "step size=" << h << std::endl;
   }
   
+  // Use the formula x(t) = x0 + h * P * ( A * x0 + b ) 
+  //                      = D * x0 + h * P * b
+  // where P = gexp(A*h,1) = sum (Ah)^n / (n+1)!
+  const Matrix<R>& A=vf.A();
+  const Vector<R>& b=vf.b();
+  
+  Matrix<I> iP=gexp(A,h.upper(),1);
+  Matrix<I> iD=iP*(h*A)+Matrix<R>::identity(vf.dimension());
 
-  Matrix< Interval<R> > D=exp_Ah_approx(vf.A(),h.upper(),max_error);
-  if(verbosity>7) { std::cerr << "approximate derivative=" << D << std::endl; }
-  Matrix< Interval<R> > P=exp_Ah_sub_id_div_A_approx(vf.A(),h.upper(),max_error);
-  if(verbosity>7) { std::cerr << "twist=" << P << std::endl; }
-  
-  Vector< Interval<R> > ib=vf.b();
-  Matrix< Interval<R> > iD=D;
   if(verbosity>7) { std::cerr << "approximating derivative=" << iD << std::endl; }
-  Matrix< Interval<R> > iP=P;
   if(verbosity>7) { std::cerr << "approximating twist=" << iP << std::endl; }
-  //Vector< Interval<R> > iC=iD*z.centre().position_vector()+iP*vf.b();
-  Vector< Interval<R> > iv1=iD*z.centre().position_vector();
+
+  Vector<I> iv1=(iD*z.centre().position_vector());
   if(verbosity>7) { std::cerr << "iv1=" << iv1 << std::endl; }
-   Vector< Interval<R> > iv2=iP*ib;
+  Vector<I> iv2=h*(iP*b);
   if(verbosity>7) { std::cerr << "iv2=" << iv2 << std::endl; }
-  Vector< Interval<R> > iCv=iv1+iv2;
-  Point< Interval<R> > iC(iCv);
+  Vector<I> icv=iv1+iv2;
+  Point<I> ic(icv);
   
-  if(verbosity>7) { std::cerr << "interval centre=" << iC << std::endl; }
+  if(verbosity>7) { std::cerr << "interval centre=" << ic << std::endl; }
   
-  z=Zonotope< Interval<R> >(iC,iD*z.generators());
+  z=Zonotope<I>(ic,iD*z.generators());
   return z;
 }
 
@@ -226,6 +265,7 @@ Ariadne::Evaluation::AffineIntegrator<R>::reachability_step(
   using namespace Geometry;
   using namespace System;
   
+
   if(verbosity>6) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
 
 

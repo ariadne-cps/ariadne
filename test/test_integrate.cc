@@ -179,7 +179,8 @@ test_integrate()
   }
   GridMaskSet<R> reach_set=affine.reach(affine_vector_field,initial_set,bounding_set,integration_time);
   
-  epsfstream eps("test_integrate.eps",bb);
+  epsfstream eps;
+  eps.open("test_integrate.eps",bb);
   eps << reach_set;
   eps.set_fill_colour("blue");
   eps << integrate_set;

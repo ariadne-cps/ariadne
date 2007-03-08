@@ -65,10 +65,16 @@ inline void epsfstream_close(epsfstream& eps) { eps.close(); }
 
 void export_postscript_output()
 {
+
+  class_<PlanarProjectionMap>("PlanarProjectionMap",init<dimension_type, dimension_type, dimension_type>())
+    .def(self_ns::str(self))
+  ;
+    
   class_<epsfstream, boost::noncopyable>("EpsPlot",init<>())
-    .def(init<const char*, Rectangle<Real> >())
-    .def(init<const char*, Rectangle<Real>, unsigned int, unsigned int>())
-    .def("open",&epsfstream_open<Real>)
+    .def("open",(void(epsfstream::*)(const char* fn,const Rectangle<Real>&))&epsfstream::open<Real>)
+    .def("open",(void(epsfstream::*)(const char* fn,const Rectangle<Real>&,uint,uint))&epsfstream::open<Real>)
+    .def("open",(void(epsfstream::*)(const char* fn,const Rectangle<Real>&,const PlanarProjectionMap&))&epsfstream::open<Real>)
+    .def("open",(void(epsfstream::*)(const char*,const Rectangle2d&,const PlanarProjectionMap&))&epsfstream::open)
     .def("open",&epsfstream_open_with_defaults<Real>)
     .def("close",&epsfstream_close)
     .def("set_pen_colour",&epsfstream::set_pen_colour)

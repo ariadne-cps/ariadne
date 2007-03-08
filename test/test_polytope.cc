@@ -108,7 +108,8 @@ test_polytope()
   Rectangle<R> bbox=p.bounding_box();
   cout << "p.bounding_box()=" << bbox << endl;
   
-  epsfstream eps("test_polytope-1.eps",bbox,0,1);
+  epsfstream eps;
+  eps.open("test_polytope-1.eps",bbox,0,1);
   eps << p << pt1 << pt2 << pt3 << pt4 << pt5 << endl;
   eps.close();
   

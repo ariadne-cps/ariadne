@@ -134,7 +134,8 @@ test_parallelotope()
   
   GridCellListSet<R> oap3=over_approximation(p3,gr3);
   GridCellListSet<R> uap3=under_approximation(p3,gr3);
-  epsfstream eps("test_parallelotope.eps",bbox3,0,1);
+  epsfstream eps;
+  eps.open("test_parallelotope.eps",bbox3,0,1);
   eps.set_fill_colour("white");
   eps << bbox3;
   eps.set_fill_colour("red");

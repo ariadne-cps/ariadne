@@ -147,7 +147,8 @@ void export_matrix()
   def("transpose",&matrix_transpose<R>);
   def("inverse",&matrix_inverse<R>);
 
-  def("extract_matrix",&extract_matrix<R>,"Extract an Ariadne matrix from a Python list of lists");
+  // Need 'Real' here to extract vector of proper class
+  def("extract_matrix",&extract_matrix<Real>,"Extract an Ariadne matrix from a Python list of lists");
 
 }
 

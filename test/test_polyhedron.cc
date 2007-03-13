@@ -61,7 +61,7 @@ int main() {
   
   cout << boolalpha;
   
-  test_polyhedron<MPFloat>();
+  test_polyhedron<Real>();
   test_polyhedron<Rational>();
    
   cerr << "INCOMPLETE ";

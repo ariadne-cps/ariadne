@@ -27,6 +27,7 @@
 #include "list_set.h"
 #include "../base/stlio.h"
 #include "../geometry/rectangle.h"
+#include "../geometry/irregular_grid_set.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -39,7 +40,7 @@ namespace Ariadne {
     }
 
     
-    template<class BS>
+    template<class BS> 
     tribool
     ListSet<BS>::disjoint(const Rectangle<R>& r) const
     {
@@ -51,7 +52,14 @@ namespace Ariadne {
     tribool
     ListSet<BS>::superset(const Rectangle<R>& r) const
     {
-      throw NotImplemented(__PRETTY_FUNCTION__);
+      
+      const ListSet< Rectangle<R> >* rls=
+        dynamic_cast< const ListSet< Rectangle<R> > * >(this);
+      if(rls) {
+        return Geometry::subset(r,IrregularGridMaskSet<R>(*rls));
+      } else {
+        return indeterminate;
+      }
     }
 
     
@@ -164,7 +172,9 @@ namespace Ariadne {
     ListSet<BS>::_instantiate_geometry_operators()
     {
       //tribool tb;
-      //ListSet<BS>* ls=0;
+      Rectangle<R>* r=0;
+      ListSet<BS>* ls=0;
+      //disjoint(*ls,*r);
       //tb=disjoint(*ls,*ls);
     }
     

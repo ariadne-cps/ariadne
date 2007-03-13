@@ -56,18 +56,21 @@ namespace Ariadne {
     template<class R>
     class DiscreteTimeSystem
     {
-      typedef Numeric::traits<R>::arithmetic_type F;
+      typedef typename Numeric::traits<R>::arithmetic_type F;
      public:
       /*! \brief The real number type. */
       typedef R real_type;
       /*! \brief The type of denotable state the system acts on. */
       typedef Geometry::Point<R> state_type;
       
+      /*! \brief Virtual destructor.  */
+      virtual ~DiscreteTimeSystem();
+      
       /*! \brief  The image of a point, computed approximately.  */
       Geometry::Point<F> 
       operator() (const Geometry::Point<F>& x,
                   const Geometry::Point<F>& u,
-                  const Geometry::Point<R>& v) const
+                  const Geometry::Point<F>& v) const
       {
         return this->image(x,u,v);
       }
@@ -77,14 +80,14 @@ namespace Ariadne {
       Geometry::Point<F> 
       image(const Geometry::Point<F>& x,
             const Geometry::Point<F>& u,
-            const Geometry::Point<R>& v) const = 0;
+            const Geometry::Point<F>& v) const = 0;
       
       /*! \brief  The jacobian derivate of a point with respect to the state, computed approximately.  */
       virtual
       LinearAlgebra::Matrix<F> 
-      DiscreteTimeSystem<R>::jacobian(const Geometry::Point<F>& x,
-                                      const Geometry::Point<F>& u,
-                                      const Geometry::Point<F>& v) const;
+      jacobian(const Geometry::Point<F>& x,
+               const Geometry::Point<F>& u,
+               const Geometry::Point<F>& v) const;
       
       /*! \brief  The dimension of the state space. */
       virtual dimension_type state_space_dimension() const = 0;

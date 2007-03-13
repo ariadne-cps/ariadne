@@ -22,12 +22,13 @@
 
 
 from ariadne import *
-
+x=Float64(2.25)
+    
 n=2
 d=2.125
 z=Integer(3)
-x=MPFloat(2.125)
-ix=Interval(MPFloat(2.00),MPFloat(2.25))
+x=Interval(2.125).lower()
+ix=Interval(2.00,2.25)
 q=Rational(17,8)
 
 (z+z,z-z,z*z)

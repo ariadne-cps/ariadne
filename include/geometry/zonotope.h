@@ -72,8 +72,10 @@ namespace Ariadne {
       typedef typename Numeric::traits<R>::arithmetic_type F; 
       typedef typename Numeric::traits<R>::interval_type I; 
      public:
+      /*! \brief The type used for to represent the zonotope. */
+      typedef R value_type;
       /*! \brief The real number type. */
-      typedef R real_type;
+      typedef typename Numeric::traits<R>::number_type real_type;
       /*! \brief The type of denotable point contained by the zonotope. */
       typedef Point<R> state_type;
       /*! \brief An iterator through the (possible) vertices of the zonotope. */
@@ -133,6 +135,12 @@ namespace Ariadne {
       /*! \brief The raw data of the zonotope. */
       const array<R>& data() const;
 
+      /*! \brief The ith component of the centre point. */
+      const R& centre(size_type i) const;
+
+      /*! \brief The (i,j)-th component of the matrix of principle directions. */
+      const R& generators(size_type i, size_type j) const;
+     
       /*! \brief The centre. */
       Point<R> centre() const;
 
@@ -275,12 +283,18 @@ namespace Ariadne {
     
     template<class R> tribool disjoint(const Zonotope<R>& A, const Zonotope<R>& B);
     
+    template<class R> tribool disjoint(const Zonotope< Interval<R> >& z, const Rectangle< R >& r);
+
     template<class R> tribool disjoint(const Zonotope< Interval<R> >& z, const Rectangle< Interval<R> >& r);
 
 
     template<class R> tribool subset(const Rectangle<R>& A, const Zonotope<R>& B);
     
+    template<class R> tribool subset(const Rectangle<R>& A, const Zonotope< Interval<R> >& z);
+
     template<class R> tribool subset(const Zonotope<R>& A, const Rectangle<R>& B);
+    
+    template<class R> tribool subset(const Zonotope< Interval<R> >& A, const Rectangle<R>& B);
     
     template<class R> tribool subset(const Zonotope<R>& A, const Zonotope<R>& B);
     

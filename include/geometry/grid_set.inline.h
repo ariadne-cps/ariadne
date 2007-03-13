@@ -110,6 +110,21 @@ namespace Ariadne {
 
 
 
+    template<class R> inline
+    typename GridBlock<R>::const_iterator 
+    GridBlock<R>::begin() const 
+    {
+      return const_iterator(this->_grid_ref,_lattice_set.begin()); 
+    }
+
+
+    template<class R> inline
+    typename GridBlock<R>::const_iterator 
+    GridBlock<R>::end() const 
+    {
+      return const_iterator(this->_grid_ref,_lattice_set.end()); 
+    }
+
 
 
     template<class R> inline
@@ -381,7 +396,7 @@ namespace Ariadne {
     void 
     GridMaskSet<R>::adjoin_under_approximation(const SetInterface& s) 
     {
-        this->adjoin(under_approximation(s,this->grid()));
+      this->adjoin(under_approximation(s,FiniteGrid<R>(this->grid(),this->block())));
     }
 
 

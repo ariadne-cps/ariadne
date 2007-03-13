@@ -30,6 +30,7 @@
 #include "geometry/polytope.h"
 #include "geometry/polyhedron.h"
 
+#include "python/python_utilities.h"
 using namespace Ariadne;
 using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
@@ -66,4 +67,4 @@ void export_polyhedron()
   
 }
 
-template void export_polyhedron<MPFloat>();
+template void export_polyhedron<Real>();

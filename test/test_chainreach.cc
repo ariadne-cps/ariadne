@@ -58,8 +58,13 @@ test_chainreach()
   R b=params[1];
 
   HenonMap<R> h=HenonMap<R>(a,b);
-  Rectangle<R> gbb=Rectangle<R>("[-11,5]x[-8,8]") ;
+  Rectangle<R> gbb=Rectangle<R>("[-11.00000,5.00000]x[-8.00000,8.00000]") ;
+  cout << "gbb=" << gbb << endl;
   FiniteGrid<R> fg=FiniteGrid<R>(gbb,128); // grid
+  cout << "fg=" << fg << endl;
+  cout << fg.subdivision_coordinate(0,0)<< std::endl;
+  cout << fg.subdivision_coordinate(0,-88) << std::endl;
+  cout << fg.subdivision_coordinate(0,-88)+11.000 << std::endl;
   const Grid<R>& g=fg.grid(); // grid
   Rectangle<R> ir=Rectangle<R>("[1.499,1.501]x[0.499,0.501]"); // initial state
   Rectangle<R> cb=Rectangle<R>("[-4,4]x[-4,4]"); // cutoff box

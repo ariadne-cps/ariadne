@@ -147,6 +147,16 @@ namespace Ariadne {
                  const Geometry::GridMaskSet<R>& dom,
                  const Geometry::Grid<R>& range_grid) const;
      
+      /*! \brief Compute a controller for a control-to-target problem. */ 
+      virtual 
+      System::GridMultiMap<R> 
+      control_synthesis(const System::DiscreteTimeSystem<R>& f, 
+                        const Geometry::SetInterface<R>& initial_set,
+                        const Geometry::SetInterface<R>& target_set,
+                        const Geometry::GridMaskSet<R>& state_bounding_set,
+                        const Geometry::GridMaskSet<R>& control_set,
+                        const Geometry::GridMaskSet<R>& noise_set) const;
+     
 
 
        

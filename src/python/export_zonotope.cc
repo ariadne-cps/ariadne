@@ -31,6 +31,7 @@
 
 #include "python/python_utilities.h"
 using namespace Ariadne;
+using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
 
 #include <boost/python.hpp>
@@ -65,6 +66,7 @@ void export_zonotope()
   typedef typename Numeric::traits<R>::arithmetic_type F;
   
   typedef LinearAlgebra::Matrix<R> RMatrix;
+  typedef LinearAlgebra::MatrixSlice<R> RMatrixSlice;
   typedef Point<R> RPoint;
   typedef Zonotope<R> RZonotope;
   typedef Parallelotope<R> RParallelotope;
@@ -91,8 +93,8 @@ void export_zonotope()
     .def(init<RParallelotope>())
     .def(init<RRectangle>())
     .def(init<std::string>())
-    .def("centre",&RZonotope::centre)
-    .def("generators",&RZonotope::generators)
+    .def("centre",(Point<R>(RZonotope::*)()const)&RZonotope::centre)
+    .def("generators",(const RMatrixSlice(RZonotope::*)()const)&RZonotope::generators)
     .def("dimension", &RZonotope::dimension)
     .def("empty", &RZonotope::empty)
     .def("contains", &RZonotope::contains)
@@ -117,8 +119,8 @@ void export_interval_zonotope()
     .def(init<RZonotope>())
     .def(init<RRectangle>())
     .def(init<std::string>())
-    .def("centre",&IZonotope::centre)
-    .def("generators",&IZonotope::generators)
+    .def("centre",(Point<I>(IZonotope::*)()const)&IZonotope::centre)
+    .def("generators",(const MatrixSlice<I>(IZonotope::*)()const)&IZonotope::generators)
     .def("dimension", &IZonotope::dimension)
     .def("empty", &IZonotope::empty)
     .def("contains", &IZonotope::contains)

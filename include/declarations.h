@@ -124,6 +124,7 @@ template<class R> class Monomial;
 template<class R> class Polynomial;
 template<class R> class PolynomialMap;
 template<class R> class PolynomialMatrix;
+template<class R> class DiscreteTimeSystem;
 template<class R> class VectorField;
 template<class R> class AffineVectorField;
 

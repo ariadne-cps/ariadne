@@ -24,11 +24,14 @@ from ariadne import *
 
 n=2
 d=2.125
-x=MPFloat(2.125)
+#Use this idiom to create a Float
+one=Interval(1.000).lower()
+x=Interval(2.125).lower()
 ix=Interval(2.00,2.25)
-v=extract_vector([1.125,-x])
+v=extract_vector([1.125,2.125])
+v=extract_vector([1.125,x])
 iv=IntervalVector("[[1.00,1.25],[-2.50,-2.25]]")
-A=extract_matrix( [[x,1],[1.0,MPFloat(1)]] )
+A=extract_matrix( [[x,1],[1.0,one]] )
 iA=IntervalMatrix("[[1.875,2.125],[0.875,1.125];[0.875,1.125],[0.875,1.125]]")
 
 (-v,-iv)

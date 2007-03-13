@@ -63,14 +63,16 @@ namespace Ariadne {
      */ 
     template<class R>
     class Polytope {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
+      typedef typename Numeric::traits<R>::arithmetic_type A;
      private:    
       dimension_type _dimension;
       size_type _number_of_vertices;
       array<R> _data;
      public:
        /*! \brief The type of denotable real numbers used to describe the convex hull. */
-      typedef R real_type;
+      typedef R value_type;
+       /*! \brief The type of real numbers used to describe the state space. */
+      typedef typename Numeric::traits<R>::number_type real_type;
       /*! \brief The type of denotable point contained by the convex hull. */
       typedef Point<R> state_type;
       /*! \brief An iterator through the vertices of the polytope. */

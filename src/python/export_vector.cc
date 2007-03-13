@@ -123,7 +123,8 @@ void export_vector()
     .def(self_ns::str(self))
   ;
 
-  def("extract_vector",&extract_vector<R>,"Extract an Ariadne vector from a Python list");
+  // Need 'Real' here to extract vector of proper class
+  def("extract_vector",&extract_vector<Real>,"Extract an Ariadne vector from a Python list");
 }
 
 template<>

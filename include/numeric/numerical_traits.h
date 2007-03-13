@@ -89,6 +89,7 @@ namespace Ariadne {
     template<> struct traits< mpf_class > { 
       typedef mpf_class approximate_arithmetic_type; 
       typedef mpf_class closure_type; 
+      typedef mpf_class number_type; 
       typedef mpf_class arithmetic_type; 
       typedef Interval<MPFloat> interval_type; 
     };

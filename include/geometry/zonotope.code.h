@@ -44,12 +44,24 @@
 #include "../geometry/parallelotope.h"
 #include "../geometry/list_set.h"
 
+#include "../linear_algebra/vector.code.h"
+#include "../linear_algebra/matrix.code.h"
+#include "../linear_algebra/linear_program.code.h"
+#include "../geometry/point.code.h"
+#include "../geometry/rectangle.code.h"
+
 namespace Ariadne {
   namespace Geometry {
     
     extern int verbosity;
     
+    template<class R>
+    tribool
+    disjoint_approx(const Zonotope<R>& z, const Rectangle<R>& r);
    
+    template<class R>
+    tribool
+    disjoint_exact(const Zonotope<R>& z, const Rectangle<R>& r);
 
 
     
@@ -384,6 +396,14 @@ namespace Ariadne {
 
   
     
+    template<class R>
+    tribool
+    disjoint(const Zonotope<R>& z, const Rectangle<R>& r)
+    {
+      return disjoint_approx(z,r);
+    }
+
+
     /* Set up linear program to solve 
      *   \f[x=c+Ge;\ l\leq x\leq u;\ -1\leq e\leq1\f].
      *
@@ -398,7 +418,7 @@ namespace Ariadne {
      */
     template<class R>
     tribool
-    disjoint(const Zonotope<R>& z, const Rectangle<R>& r)
+    disjoint_exact(const Zonotope<R>& z, const Rectangle<R>& r)
     {
       if(verbosity>7) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       if(verbosity>8) { std::cerr << z << " " << r << std::endl; }
@@ -488,6 +508,110 @@ namespace Ariadne {
       return result;
     }
 
+    template<class R>
+    tribool
+    disjoint_approx(const Zonotope<R>& z, const Rectangle<R>& r)
+    {
+      //verbosity=9;
+      
+      if(verbosity>7) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+      if(verbosity>8) { std::cerr << z << " " << r << std::endl; }
+      
+      check_equal_dimensions(z,r,__PRETTY_FUNCTION__);
+      dimension_type d=z.dimension();
+      size_type m=z.number_of_generators();
+    
+      //This method has some problems. It fails when the parameters are
+      //[1,17/16]x[19/16,5/4] and 
+      //  Zonotope(
+      //    centre=(1/2, 1/10)
+      //    directions=[ 1,1/2; 1/2,3/5 ]
+      //  )
+      
+      // Construct tableau for testing intersection of zonotope and rectangle
+      // Rectangle  l<=x<=u
+      // Zonotope  x==c+Ge,  -1<=e<=1
+      // 
+      // Translate x'=x-l,  e'=e+1
+      //   0<=x'<=u-l      ->  x' +     + sx'               == u-l
+      //   0<=e'<=2        ->     +  e' +     + se'         == 2
+      //   x'+l==c+G(e'-1) ->  x' + Ge'             +/- ax' == c-l-G1
+      //  
+      // Change sign of RHS of first equality if necessary
+      // Introduce slack variables for last two inequalities
+      typedef typename Numeric::traits<R>::approximate_arithmetic_type B;
+      B zero=0;
+      B one=1;
+
+      LinearAlgebra::Matrix<B> T(2*d+m+1,d+m+1);
+
+      LinearAlgebra::Vector<B> l(d);
+      LinearAlgebra::Vector<B> u(d);
+      LinearAlgebra::Vector<B> c(d);
+      LinearAlgebra::Matrix<B> G(d,m);
+      for(dimension_type i=0; i!=d; ++i) {
+        l(i)=r.lower_bound(i).get_base();
+        u(i)=r.upper_bound(i).get_base();
+        c(i)=z.centre(i).get_base();
+        for(size_type j=0; j!=m; ++j) {
+          G(i,j)=z.generators(i,j).get_base();
+        }
+      }
+
+      if(verbosity>8) { std::cerr << l << u << c << G << std::endl; }
+
+      const LinearAlgebra::Vector<B> o(m,one);
+      const LinearAlgebra::Vector<B> rhs=c-l-G*o;
+
+      if(verbosity>8) { std::cerr << "l=" << l << ", d=" << d <<", c=" << c << ", G=" << G << std::endl; }
+
+
+      
+      // Set up constraints x+sx=u-l
+      for(size_type i=0; i!=d; ++i) {
+        T(i,i)=1;
+        T(i,d+m)=u(i)-l(i);
+      }
+      
+      // Set up constraints e+se=2
+      for(size_type j=0; j!=m; ++j) {
+        T(d+j,d+j)=1;
+        T(d+j,d+m)=2;
+      }
+      
+      // Set up constraints x-Ge \pm ax=c-l-G1 
+      for(size_type i=0; i!=d; ++i) {
+        if(rhs(i)>=zero) {
+          T(i+d+m,i)=1;
+          for(size_type j=0; j!=m; ++j) {
+            T(i+d+m,d+j)=-G(i,j);
+          }
+          T(i+d+m,d+m)=rhs(i);
+        }
+        else {
+          T(i+d+m,i)=-1;
+          for(size_type j=0; j!=m; ++j) {
+            T(i+d+m,d+j)=G(i,j);
+          }
+          T(i+d+m,d+m)=-rhs(i);
+        }
+      } 
+      
+      // Set up cost function ax^T1
+      for(size_type i=0; i!=d; ++i) {
+        T(2*d+m,i) -= T(i+d+m,i);
+        for(size_type j=0; j!=m; ++j) {
+          T(2*d+m,d+j) -= T(i+d+m,d+j);
+        }
+        T(2*d+m,d+m) -= T(i+d+m,d+m);
+      }
+      
+      LinearAlgebra::LinearProgram<B> lp(T);
+      tribool result=!lp.is_feasible();
+
+      return result;
+    }
+
    
     template<class R>
     tribool
@@ -506,13 +630,14 @@ namespace Ariadne {
       check_equal_dimensions(z1,z2,__PRETTY_FUNCTION__);
       
       dimension_type d=z1.dimension();
+      F one=1;
       size_type m1=z1.number_of_generators();
       size_type m2=z2.number_of_generators();
       
       LinearAlgebra::Matrix<F> T(m1+m2+d+1,m1+m2+1);
 
-      const LinearAlgebra::Vector<F> qo1(m1,F(1));
-      const LinearAlgebra::Vector<F> qo2(m2,F(1));
+      const LinearAlgebra::Vector<F> qo1(m1,one);
+      const LinearAlgebra::Vector<F> qo2(m2,one);
 
       Geometry::Point<F> qc1=z1.centre();
       LinearAlgebra::Matrix<F> qG1=z1.generators();
@@ -709,6 +834,13 @@ namespace Ariadne {
     
     template<class R>
     tribool
+    disjoint(const Zonotope< Interval<R> >& z, const Rectangle<R>& r)
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+
+    template<class R>
+    tribool
     disjoint(const Zonotope< Interval<R> >& z, const Rectangle< Interval<R> >& r)
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
@@ -723,6 +855,13 @@ namespace Ariadne {
 
     template<class R>
     tribool
+    subset(const Rectangle< R >& z, const Zonotope< Interval<R> >& r)
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+
+    template<class R>
+    tribool
     subset(const Rectangle< Interval<R> >& z, const Zonotope< Interval<R> >& r)
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
@@ -731,6 +870,13 @@ namespace Ariadne {
     template<class R>
     tribool
     subset(const Zonotope< Interval<R> >& z, const Zonotope< Interval<R> >& r)
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+
+    template<class R>
+    tribool
+    subset(const Zonotope< Interval<R> >& z, const Rectangle<R>& r)
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
@@ -763,6 +909,7 @@ namespace Ariadne {
     {
       Rectangle<R> r;
       Zonotope<R> z;
+      Zonotope<I> iz;
       Geometry::disjoint(r,z);
       Geometry::disjoint(z,r);
       Geometry::disjoint(z,z);
@@ -772,10 +919,13 @@ namespace Ariadne {
       Geometry::minkowski_sum(z,z);
       Geometry::minkowski_difference(z,z);
       
+      Geometry::subset(iz,r);
+      Geometry::disjoint(iz,r);
+
       typedef typename Numeric::traits<R>::arithmetic_type A;
-      Zonotope<A> iz;
-      Geometry::over_approximation(iz);
-      Geometry::approximation(iz);
+      Zonotope<A> az;
+      Geometry::over_approximation(az);
+      Geometry::approximation(az);
 
       //Can't instantiate for Rational type
       //Geometry::interval_over_approximation(iz);

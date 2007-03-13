@@ -28,6 +28,8 @@ ariadne_la_SOURCES=$(ARIADNE_SRC)
 ariadne_la_LIBADD = ../libariadne.la
 
 ARIADNE_SRC = ariadne_module.cc \
+	export_debug.cc \
+	\
 	export_tribool.cc \
 	export_array.cc \
 	 \

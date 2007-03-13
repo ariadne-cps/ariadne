@@ -28,6 +28,8 @@
 
 #include <vector>
 
+#include "real_typedef.h"
+
 #include "numeric/float64.h"
 #include "numeric/mpfloat.h"
 #include "numeric/rational.h"
@@ -55,8 +57,7 @@ template<class R> int test_polytope();
 template<> int test_polytope<Rational>();
 
 int main() {
-  //test_polytope<Float64>();
-  test_polytope<MPFloat>();
+  test_polytope<Real>();
   test_polytope<Rational>();
   
   cerr << "INCOMPLETE ";

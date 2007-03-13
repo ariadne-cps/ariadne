@@ -276,7 +276,8 @@ Ariadne::Evaluation::AffineIntegrator<R>::reachability_step(
   const size_type n=vector_field.dimension();
   const Matrix<R> id=Matrix<R>::identity(n);
   time_type hc=step_size/2;
-  Interval<R> hh(step_size/2);
+  // FIXME: There should be no need to convert to time_type / Rational
+  Interval<R> hh(time_type(step_size/2));
   
   const Matrix<R>& A=avf.A();
   const Vector<R>& b=avf.b();

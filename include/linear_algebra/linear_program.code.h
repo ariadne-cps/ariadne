@@ -151,8 +151,8 @@ namespace Ariadne {
       size_type cincA=this->tableau().column_increment();
       size_type* piv=const_cast<size_type*>(&*this->_variable_indices.begin());
       
-      size_type nrA=this->tableau().number_of_rows();
-      size_type ncA=this->tableau().number_of_columns();
+      //size_type nrA=this->tableau().number_of_rows();
+      //size_type ncA=this->tableau().number_of_columns();
       //std::cerr << this->tableau() << "\n" << Matrix<R>(nrA,ncA,ptrA,rincA,cincA) << std::endl;
       //std::cerr << nrA << " " << ncA << " " << ptrA << " " << rincA << " " << cincA << std::endl;
       

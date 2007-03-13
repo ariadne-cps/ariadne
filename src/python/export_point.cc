@@ -22,14 +22,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/mpfloat.h"
+#include "real_typedef.h"
 
 #include "linear_algebra/vector.h"
 
 #include "geometry/point.h"
 #include "geometry/point_list.h"
 #include "geometry/rectangle.h"
-#include <boost/python.hpp>
 
 #include "python/python_utilities.h"
 using namespace Ariadne;
@@ -123,6 +122,6 @@ void export_point_list()
 
 
 
-template void export_point<Numeric::MPFloat>();
-template void export_interval_point< Numeric::MPFloat >();
-template void export_point_list<Numeric::MPFloat>();
+template void export_point<Real>();
+template void export_interval_point<Real>();
+template void export_point_list<Real>();

@@ -42,14 +42,16 @@ namespace Ariadne {
     template<class R> class Grid;
     template<class R> class FiniteGrid;
 
+    template<class R> class IrregularGrid;
+    
+
     template<class R> class GridCell;
     template<class R> class GridBlock;
     
-    template<class R> class Point;
-    template<class R> class Rectangle;
-
-    /*! \brief A grid of rectangles in Euclidean space with an irregular 'core' and 
-     *  regular cells outside this core. */
+    
+    /*! \brief An infinite, uniform grid of rectangles in Euclidean space.
+     *  \ingroup Grid
+     */
     template<class R>
     class Grid
     { 
@@ -76,19 +78,6 @@ namespace Ariadne {
       /*! \brief Construct from an array of subdivision lengths \a v. */
       explicit Grid(const LinearAlgebra::Vector<R>& v);
 
-      /*! \brief Construct from a list of subdivision coordinates in each 
-       * dimension, the lower and upper lengths outsize this array, and the position of the central point of the grid. */
-      explicit Grid(const array< array<R> >& sc, const array<R>& sl, const array<size_type>& cp);
-
-      /*! \brief Construct from raw pointers. */
-       explicit Grid(const dimension_type& d, const size_type* nsc, const R** sc, const R* sl, const size_type* cp);
-
-      /*! \brief Construct from a list of rectangles giving the grid points. */
-      explicit Grid(const ListSet< Rectangle<R> >& ls);
-
-      /*! \brief Join two grid, assuming they have the same behaviour for large indices. */
-      Grid(const Grid<R>& g1, Grid<R>& g2);
-
       /*! \brief The underlying dimension of the grid. */
       dimension_type dimension() const;
 
@@ -107,18 +96,18 @@ namespace Ariadne {
 
       /*! \brief Tests equality of two grids. */
       bool operator==(const Grid<R>& g) const; 
+
       /*! \brief Tests inequality of two grids. */
       bool operator!=(const Grid<R>& g) const;
 
-      /*! The block of irregular cells. */
-      Combinatoric::LatticeBlock lattice_block() const;
-
-      /*! The index of the cell countaining the point \a pt. */
+      /*! The index of the cell countaining the point \a pt. \deprecated */
       IndexArray index(const Point<R>& pt) const;
       /*! The index of vertex to the lower-left of \a r. */
       IndexArray lower_index(const Rectangle<R>& r) const;
       /*! The index of vertex to the upper-right of \a r. */
       IndexArray upper_index(const Rectangle<R>& r) const;
+      /*! The block of cells countaining the rectangle \a r. */
+      Combinatoric::LatticeBlock index_block(const Rectangle<R>& r) const;
 
       /*! The vertex of the grid at index position \a index. */
       Point<R> point(const IndexArray& index) const;
@@ -134,18 +123,16 @@ namespace Ariadne {
       /*! Create cached data used to speed up computations. */
       void create();
      private:
-      array< array<R> > _subdivision_coordinates;
-      array<R> _subdivision_lengths;
-      array<size_type> _centre_positions;
-      array<R*> _centre_pointers;
-      array<index_type> _lower_indices;
-      array<index_type> _upper_indices;
-      array<R> _lower_bounds;
-      array<R> _upper_bounds;
-      array<R> _lower_origin;
-      array<R> _upper_origin;
+      array<R> _origin;
+      array<R> _lengths;
     };
 
+
+   
+
+
+
+    
     
     /*!\ingroup Grid
      * \brief A finite grid, suitable for defining a GridMaskSet.
@@ -190,9 +177,9 @@ namespace Ariadne {
        * dimension \a d. */
       real_type subdivision_coordinate(dimension_type d, index_type n) const;
   
-      /*! \brief The index of interval in dimension \a d index 
-       * containing \a x. */
-      index_type subdivision_interval(dimension_type d, const real_type& x) const;
+      /*! \brief The index of the subdivision point \a x in 
+       * dimension \a d.  */
+      index_type subdivision_index(dimension_type d, const real_type& x) const;
       
       /*! \brief The index of the subdivision point below \a x. */
       index_type subdivision_lower_index(dimension_type d, const real_type& x) const;
@@ -219,6 +206,9 @@ namespace Ariadne {
 
     template<class R> 
     std::ostream& operator<<(std::ostream& os, const Grid<R>& g);
+
+    template<class R> 
+    std::ostream& operator<<(std::ostream& os, const IrregularGrid<R>& g);
 
     template<class R>
     std::ostream& operator<<(std::ostream& os, const FiniteGrid<R>& fg);

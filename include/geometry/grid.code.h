@@ -49,9 +49,8 @@ namespace Ariadne {
 
     template<class R> 
     Grid<R>::Grid(const dimension_type& d, const R& l)
-      : _subdivision_coordinates(d,array<R>(1,static_cast<R>(0))),
-        _subdivision_lengths(d,l),
-        _centre_positions(d,0)
+      : _origin(d,static_cast<R>(0)),
+        _lengths(d,l)
     {
       this->create();
     }
@@ -59,9 +58,8 @@ namespace Ariadne {
 
     template<class R> 
     Grid<R>::Grid(const LinearAlgebra::Vector<R>& v)
-      : _subdivision_coordinates(v.size(),array<R>(1,static_cast<R>(0))),
-        _subdivision_lengths(v.data()),
-        _centre_positions(v.size(),0)
+      : _origin(v.size(),static_cast<R>(0)),
+        _lengths(v.data())
     {
       this->create();
     }
@@ -69,113 +67,18 @@ namespace Ariadne {
 
     template<class R> 
     Grid<R>::Grid(const Point<R>& pt, const LinearAlgebra::Vector<R>& v)
-      : _subdivision_coordinates(v.size(),array<R>(1)),
-        _subdivision_lengths(v.data()),
-        _centre_positions(v.size(),0)
+      : _origin(pt.data()),
+        _lengths(v.data())
     {
       if(pt.dimension() != v.size()) {
         throw IncompatibleDimensions(__PRETTY_FUNCTION__);
-      }
-      for(size_type d=0; d!=pt.dimension(); ++d) {
-        this->_subdivision_coordinates[d][0]=v[d];
       }
       this->create();
     }
   
 
 
-    template<class R>
-    Grid<R>::Grid(const array< array<R> >& sc, const array<R>& sl, const array<size_type>& cp) 
-      : _subdivision_coordinates(sc),
-        _subdivision_lengths(sl),
-        _centre_positions(cp)
-    {
-      this->create();
-    }
-
      
-    template<class R>
-    Grid<R>::Grid(const dimension_type& d, const size_type* nsc, const R** sc, const R* sl, const size_type* cp) 
-      : _subdivision_coordinates(d),
-        _subdivision_lengths(sl,sl+d),
-        _centre_positions(cp,cp+d)
-    {
-      for(size_type i=0; i!=d; ++i) {
-        this->_subdivision_coordinates[i]=array<R>(sc[i],sc[i]+nsc[i]);
-      }
-      this->create();
-    }
-
-     
-
-    template<class R>
-    Grid<R>::Grid(const ListSet< Rectangle<R> >& ls)
-      : _subdivision_coordinates(ls.dimension()),
-        _subdivision_lengths(ls.dimension(),static_cast<R>(1)),
-        _centre_positions(ls.dimension(),0u)
-    {
-      dimension_type d=ls.dimension();
-      R one=static_cast<R>(1);
-
-      std::vector<R>* rectangle_bounds=new std::vector<R>[d];
-
-      for(typename ListSet< Rectangle<R> >::const_iterator riter=ls.begin(); riter!=ls.end(); ++riter) {
-        for(dimension_type i=0; i!=d; ++i) {
-          rectangle_bounds[i].push_back(riter->lower_bound(i));
-          rectangle_bounds[i].push_back(riter->upper_bound(i));
-        }
-      }
-
-      for(dimension_type i=0; i!=d; ++i) {
-        std::vector<R>& bounds=rectangle_bounds[i];
-        bounds.push_back(static_cast<R>(0));
-        std::sort(bounds.begin(),bounds.end());
-        typename std::vector<R>::const_iterator bounds_end=std::unique(bounds.begin(),bounds.end());
-        bounds.resize(bounds_end-bounds.begin());
-        R bounds_floor=floor(bounds.front());
-        R bounds_ceil=ceil(bounds.back());
-        if(bounds_floor==bounds.front()) {
-          bounds_floor=floor(sub_up(bounds_floor,one));
-        }
-        if(bounds_ceil==bounds.back()) {
-          bounds_ceil=ceil(add_down(bounds_ceil,one));
-        }
-
-        array<R>& coordinates=this->_subdivision_coordinates[i];
-        coordinates.resize(bounds.size()+2);
-        coordinates[0]=bounds_floor;
-        std::copy(bounds.begin(),bounds.end(),coordinates.begin()+1);
-        coordinates[bounds.size()+1u]=bounds_ceil;
-        
-        this->_centre_positions[i] = std::find(coordinates.begin(),coordinates.end(),static_cast<R>(0))-coordinates.begin();
-      }
-      delete[] rectangle_bounds;
-      this->create();
-    }
-
-    template<class R>
-    Grid<R>::Grid(const Grid<R>& g1, Grid<R>& g2)
-      : _subdivision_coordinates(g1.dimension()),
-        _subdivision_lengths(g1._subdivision_lengths),
-        _centre_positions(g1.dimension(),0)
-    {
-      if(g1._subdivision_lengths!=g2._subdivision_lengths) {
-        throw std::runtime_error("Cannot merge two grids with different subdivision lengths");
-      }
-      for(dimension_type d=0; d!=this->dimension(); ++d) {
-        array<R>& sc(this->_subdivision_coordinates[d]);
-        const array<R>& sc1(g1._subdivision_coordinates[d]);
-        const array<R>& sc2(g2._subdivision_coordinates[d]);
-        sc.resize(sc1.size()+sc2.size());
-        std::merge(sc1.begin(),sc1.end(),sc2.begin(),sc2.end(),sc.begin());
-        index_type n=std::unique(sc.begin(),sc.end())-sc.begin();
-        sc.resize(n);
-        R x=sc1[g1._centre_positions[d]];
-        this->_centre_positions[d]=std::find(sc.begin(),sc.end(),x)-sc.begin();
-      }
-
-      this->create();
-    }
 
 
 
@@ -183,25 +86,6 @@ namespace Ariadne {
     void
     Grid<R>::create() 
     {
-      dimension_type d=this->dimension();
-      this->_centre_pointers.resize(d);
-      this->_lower_origin.resize(d);
-      this->_upper_origin.resize(d);
-      this->_lower_bounds.resize(d);
-      this->_upper_bounds.resize(d);
-      this->_lower_indices.resize(d);
-      this->_upper_indices.resize(d);
-      
-      for(dimension_type i=0; i!=this->dimension(); ++i) {
-        this->_centre_pointers[i]=this->_subdivision_coordinates[i].begin()+_centre_positions[i];
-        this->_lower_indices[i]=0u-this->_centre_positions[i];
-        this->_upper_indices[i]=this->_subdivision_coordinates[i].size()-this->_centre_positions[i]-1;
-        this->_lower_bounds[i]=this->_subdivision_coordinates[i][0];
-        this->_upper_bounds[i]=this->_subdivision_coordinates[i][this->_subdivision_coordinates[i].size()-1];
-        this->_lower_origin[i]=sub_approx(this->_lower_bounds[i],mul_approx(this->_subdivision_lengths[i],this->_lower_indices[i]));
-        this->_upper_origin[i]=sub_approx(this->_upper_bounds[i],mul_approx(this->_subdivision_lengths[i],this->_upper_indices[i]));
-      }
-      return;
     }
 
 
@@ -210,29 +94,16 @@ namespace Ariadne {
     dimension_type
     Grid<R>::dimension() const
     {
-      return this->_subdivision_coordinates.size();
+      return this->_lengths.size();
     }
 
-
-    template<class R>
-    Combinatoric::LatticeBlock
-    Grid<R>::lattice_block() const 
-    {
-      return Combinatoric::LatticeBlock(this->_lower_indices,this->_upper_indices);
-    }
 
 
     template<class R>
     R
     Grid<R>::subdivision_coordinate(dimension_type d, index_type n) const 
     {
-      if(n > this->_upper_indices[d]) {
-        return add_approx(this->_upper_origin[d],mul_approx(this->_subdivision_lengths[d],n));
-      } else if(n < this->_lower_indices[d]) {
-        return add_approx(this->_lower_origin[d],mul_approx(this->_subdivision_lengths[d],n));
-      } else {
-        return this->_centre_pointers[d][n];
-      }
+        return add_approx(this->_origin[d],mul_approx(this->_lengths[d],n));
     }
 
 
@@ -240,8 +111,10 @@ namespace Ariadne {
     index_type 
     Grid<R>::subdivision_index(dimension_type d, const real_type& x) const 
     {
-      index_type n=subdivision_lower_index(d,x);
-      if(subdivision_coordinate(d,n) == x) { 
+      R half=0.5;
+      index_type n=int_down<index_type>(add_approx(div_approx(sub_approx(x,this->_origin[d]),this->_lengths[d]),half));
+      R sc=add_approx(this->_origin[d],mul_approx(this->_lengths[d],n));
+      if(sc == x) { 
         return n; 
       } else {
         throw std::runtime_error("Value is not a grid coordinate");
@@ -253,15 +126,11 @@ namespace Ariadne {
     index_type 
     Grid<R>::subdivision_lower_index(dimension_type d, const real_type& x) const 
     {
-      typename array<R>::const_iterator pos;
-      if(x > this->_upper_bounds[d]) {
-        return int_down<index_type>(div_down(sub_down(x,this->_upper_origin[d]),this->_subdivision_lengths[d]));
-      } else if(x < this->_lower_bounds[d]) {
-        return int_down<index_type>(div_down(sub_down(x,this->_lower_origin[d]),this->_subdivision_lengths[d]));
+      index_type n=int_down<index_type>(div_down(sub_down(x,this->_origin[d]),this->_lengths[d]));
+      if(x>=add_approx(this->_origin[d],mul_approx(this->_lengths[d],(n+1)))) {
+        return n+1;
       } else {
-        pos = std::upper_bound(_subdivision_coordinates[d].begin(),
-                               _subdivision_coordinates[d].end(), x);
-        return (pos - _centre_pointers[d])-1;
+        return n;
       }
     }
 
@@ -270,17 +139,14 @@ namespace Ariadne {
     index_type 
     Grid<R>::subdivision_upper_index(dimension_type d, const real_type& x) const 
     {
-      typename array<R>::const_iterator pos;
-      if(x > this->_upper_bounds[d]) {
-        return int_up<index_type>(div_up(sub_up(x,this->_upper_origin[d]),this->_subdivision_lengths[d]));
-      } else if(x < this->_lower_bounds[d]) {
-        return int_up<index_type>(div_up(sub_up(x,this->_lower_origin[d]),this->_subdivision_lengths[d]));
+      index_type n=int_up<index_type>(div_up(sub_up(x,this->_origin[d]),this->_lengths[d]));
+      if(x<=add_approx(this->_origin[d],mul_approx(this->_lengths[d],(n-1)))) {
+        return n-1;
       } else {
-        pos = std::lower_bound(_subdivision_coordinates[d].begin(),
-                               _subdivision_coordinates[d].end(), x);
-        return (pos - _centre_pointers[d])+1;
+        return n;
       }
     }
+
 
 
     template<class R> 
@@ -290,9 +156,7 @@ namespace Ariadne {
       if(this==&g) { 
         return true; 
       } else {
-        return this->_subdivision_coordinates==g._subdivision_coordinates
-          && this->_subdivision_lengths==g._subdivision_lengths
-          && this->_lower_indices==g._lower_indices;
+        return this->_origin==g._origin && this->_lengths==g._lengths;
       }
     }
   
@@ -340,6 +204,18 @@ namespace Ariadne {
 
 
     template<class R>
+    Combinatoric::LatticeBlock  
+    Grid<R>::index_block(const Rectangle<R>& r) const {
+      Combinatoric::LatticeBlock res(r.dimension());
+      for(size_type i=0; i!=res.dimension(); ++i) {
+        res.set_lower_bound(i,this->subdivision_lower_index(i,r.lower_bound(i)));
+        res.set_upper_bound(i,this->subdivision_upper_index(i,r.upper_bound(i)));
+      }
+      return res;
+    }
+
+
+    template<class R>
     Point<R> 
     Grid<R>::point(const IndexArray& a) const
     {
@@ -368,27 +244,12 @@ namespace Ariadne {
     std::ostream&
     Grid<R>::write(std::ostream& os) const
     {
-      os << "Grid( subdivision_coordinates=" << this->_subdivision_coordinates
-         << ", subdivision_lengths=" << this->_subdivision_lengths
-         << ", centre_positions=" << this->_centre_positions
-         << ", origin=" << this->point(IndexArray(this->dimension(),0)) << " )";
-      return os;
-
-
-      
-      os << "Grid( subdivisions=";
-      for(dimension_type d=0; d!=this->dimension(); ++d) {
-        if(d==0) { os << "[ "; } else { os << ", "; }
-        os << "[ " << this->_subdivision_lengths[d] << "; " << this->_subdivision_coordinates[d][0];
-        for(size_type i=1; i!=this->_subdivision_coordinates[d].size(); ++i) {
-          os << ", " << this->_subdivision_coordinates[d][i];
-        }
-        os << "; " << this->_subdivision_lengths[d] << "]";
-        os << " ]";
-      }
-      os << ", origin=" << this->point(IndexArray(this->dimension(),0)) << " )";
+      os << "Grid( origin=" << this->_origin
+         << ", lengths=" << this->_lengths
+         << " )";
       return os;
     }
+
 
 
     template<class R>
@@ -397,6 +258,7 @@ namespace Ariadne {
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
+
 
 
 
@@ -431,11 +293,10 @@ namespace Ariadne {
       dimension_type d=bb.dimension();
       array<R> subdivision_lengths(bb.dimension());
       for(dimension_type i=0; i!=bb.dimension(); ++i) {
-        subdivision_lengths[i]=div_approx(bb[i].length(),s);
+        subdivision_lengths[i]=div_up(bb[i].length(),R(s));
       }
       this->_grid_ptr=new Grid<R>(LinearAlgebra::Vector<R>(d,subdivision_lengths.begin()));
-      GridBlock<R> bounding_box=over_approximation(bb,this->grid());
-      this->_lattice_block=bounding_box.lattice_set();
+      this->_lattice_block=this->grid().index_block(bb);
     }
 
 

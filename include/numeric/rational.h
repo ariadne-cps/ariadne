@@ -62,6 +62,7 @@ namespace Ariadne {
         : mpq_class(x1,x2) { this->mpq_class::canonicalize(); }
       Integer numerator() const { return this->get_num(); }
       Integer denominator() const { return this->get_den();}
+      mpq_class get_base() const { return *this; }
     };
 
     std::istream& 

@@ -22,9 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/float64.h"
-#include "numeric/mpfloat.h"
-#include "numeric/rational.h"
+#include "real_typedef.h"
 
 #include "linear_algebra/vector.h"
 
@@ -90,4 +88,4 @@ void export_rectangle()
   ;
 }
 
-template void export_rectangle<MPFloat>();
+template void export_rectangle<Real>();

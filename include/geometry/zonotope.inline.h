@@ -165,6 +165,22 @@ namespace Ariadne {
     }
 
     template<class R> inline
+    const R& 
+    Zonotope<R>::centre(size_type i) const
+    {
+      return this->data()[i];
+    }
+
+    template<class R> inline
+    const R& 
+    Zonotope<R>::generators(size_type i, size_type j) const
+    {
+      return this->data()[(j+1)*this->dimension()+i];
+
+    }  
+    
+
+    template<class R> inline
     Point<R> 
     Zonotope<R>::centre() const 
     { 

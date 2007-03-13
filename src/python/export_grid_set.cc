@@ -68,13 +68,11 @@ void export_grid()
   class_< RGrid >("Grid",init<uint,R>())
     .def(init<RPoint,RVector>())
     .def(init<RVector>())
-    .def(init<RRectangleListSet>())
     .def("dimension", &RGrid::dimension)
     .def("subdivision_coordinate", &RGrid::subdivision_coordinate)
     .def("subdivision_index", &RGrid::subdivision_index)
     .def("subdivision_lower_index", &RGrid::subdivision_lower_index)
     .def("subdivision_upper_index", &RGrid::subdivision_upper_index)
-    .def("lattice_block", &RGrid::lattice_block)
     .def(self_ns::str(self))    // __str__
     ;
 
@@ -163,7 +161,6 @@ void export_grid_set()
   class_<RGridMaskSet, bases<RSetInterface> >("GridMaskSet",init<const RFiniteGrid&>())
     .def(init<const RGrid&,LatticeBlock>())
     .def(init<RGridMaskSet>())
-    .def(init<RRectangleListSet>())
     .def("bounding_box", &RGridMaskSet::bounding_box)
     .def("empty", &RGridMaskSet::empty)
     .def("dimension", &RGridMaskSet::dimension)
@@ -214,7 +211,7 @@ void export_grid_set()
   def("under_approximation",(RGridCellListSet(*)(const RZonotope&,const RGrid&))(&Geometry::under_approximation));
   def("under_approximation",(RGridCellListSet(*)(const RPolytope&,const RGrid&))(&Geometry::under_approximation));
   //def("under_approximation",(RGridCellListSet(*)(const RPolyhedron&,const RGrid&))(&Geometry::under_approximation));
-  def("under_approximation",(RGridMaskSet(*)(const RRectangleListSet&,const RFiniteGrid&))(&Geometry::under_approximation));
+  //def("under_approximation",(RGridMaskSet(*)(const RRectangleListSet&,const RFiniteGrid&))(&Geometry::under_approximation));
   //def("under_approximation",(RGridMaskSet(*)(const RParallelotopeListSet&,const RFiniteGrid&))(&Geometry::under_approximation));
   //def("under_approximation",(RGridMaskSet(*)(const RZonotopeListSet&,const RFiniteGrid&))(&Geometry::under_approximation));
   def("under_approximation",(RGridMaskSet(*)(const RGridMaskSet&,const RFiniteGrid&))(&Geometry::under_approximation));

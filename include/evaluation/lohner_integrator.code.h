@@ -167,7 +167,8 @@ Ariadne::Evaluation::LohnerIntegrator<R>::reachability_step(const System::Vector
   /* Throws exception if we can't find flow bounds for given stepsize. */
   Rectangle<R> bbox=estimate_flow_bounds(vf,z.bounding_box(),step_size,256);
   Interval<R> hi(0,step_size);
-  Interval<R> hh(step_size/2);
+  // FIXME: There should be no need to convert to time_type / Rational
+  Interval<R> hh(time_type(step_size/2));
   
   Vector<I> f=vf(bbox);
   Matrix<I> df=vf.jacobian(bbox);

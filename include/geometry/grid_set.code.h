@@ -354,21 +354,7 @@ namespace Ariadne {
   
   
     // FIXME: Memory leak
-    template<class R>
-    GridMaskSet<R>::GridMaskSet(const ListSet< Rectangle<R> >& rls) 
-      : _grid_ref(*new Grid<R>(rls)), 
-        _lattice_set(_grid_ref.lattice_block())
-    {
- 
-      for(typename ListSet< Rectangle<R> >::const_iterator riter=rls.begin(); 
-          riter!=rls.end(); ++riter) 
-      {
-        GridBlock<R> r(grid(),*riter);
-        adjoin(r);
-      }
-    }    
-    
-    
+   
     template<class R>
     GridMaskSet<R>*
     GridMaskSet<R>::clone() const
@@ -479,6 +465,7 @@ namespace Ariadne {
       *gms=Geometry::under_approximation(*rls,*fg);
       *gms=Geometry::under_approximation(*gms,*fg);
       *gms=Geometry::under_approximation(*pts,*fg);
+      *gms=Geometry::under_approximation(*set,*fg);
     }
     
     
@@ -1076,7 +1063,6 @@ namespace Ariadne {
       return result;
     }
     
-    // FIXME: Add GridBlock iterator
     
     template<class R>
     GridMaskSet<R>
@@ -1086,12 +1072,6 @@ namespace Ariadne {
       return over_approximation(set,fg);
     }
       
-    template<class R>
-    GridMaskSet<R>
-    under_approximation(const ListSet< Rectangle<R> >& ls, const FiniteGrid<R>& g) 
-    {
-      return under_approximation(GridMaskSet<R>(ls),g);
-    }
 
     template<class R>
     GridMaskSet<R>
@@ -1118,7 +1098,25 @@ namespace Ariadne {
     GridMaskSet<R>
     under_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& g) 
     {
-      return under_approximation(ListSet< Rectangle<R> >(pts),g);
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+    
+    template<class R>
+    GridMaskSet<R>
+    under_approximation(const SetInterface<R>& s, const FiniteGrid<R>& fg) 
+    {
+      GridMaskSet<R> result(fg);
+      GridBlock<R> gb(fg.grid(),fg.lattice_block());
+      Rectangle<R> r;
+      for(typename GridBlock<R>::const_iterator gb_iter=gb.begin();
+          gb_iter!=gb.end(); ++gb_iter)
+      {
+        r=*gb_iter;
+        if(s.superset(r)) {
+          result.adjoin(fg);
+        }
+      }
+      return result;
     }
     
 

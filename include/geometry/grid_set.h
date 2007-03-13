@@ -133,6 +133,9 @@ namespace Ariadne {
       friend class GridCell<R>;
       friend class GridMaskSet<R>;
      public:
+      typedef GridSetIterator< Combinatoric::LatticeBlock::const_iterator, GridBlock<R> > iterator;
+      typedef GridSetIterator< Combinatoric::LatticeBlock::const_iterator, GridBlock<R> > const_iterator;
+
       /*! \brief The type of denotable real number defining the vertices and cells of the grid. */
       typedef R real_type;
       /*! \brief The type of denotable point contained by the set. */
@@ -178,6 +181,11 @@ namespace Ariadne {
       /*!\brief A rectangle containing the grid rectangle. */
       Rectangle<R> bounding_box() const;
 
+      /*!\brief A constant iterator to the lower cell in the grid block. */
+      const_iterator begin() const;
+      /*!\brief A constant iterator to the past-the-end cell of the grid block. */
+      const_iterator end() const;
+      
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;
      private: 
@@ -354,9 +362,6 @@ namespace Ariadne {
 
       /*!\brief Copy assignment. */
       GridMaskSet<R>& operator=(const GridMaskSet<R>& gms);
-
-      /*!\brief Construct from a list set of rectangles. */
-      explicit GridMaskSet(const ListSet< Rectangle<R> >& rls);
 
       //@{
       //! \name SetInterface methods
@@ -560,10 +565,10 @@ namespace Ariadne {
     template<class R> GridCellListSet<R> under_approximation(const Polytope<R>& p, const Grid<R>& g);
     template<class R> GridCellListSet<R> under_approximation(const Polyhedron<R>& p, const Grid<R>& g);
     
-    template<class R> GridMaskSet<R> under_approximation(const ListSet< Rectangle<R> >& ls, const FiniteGrid<R>& fg); 
     template<class R> GridMaskSet<R> under_approximation(const GridMaskSet<R>& gms, const FiniteGrid<R>& fg);
     template<class R> GridMaskSet<R> under_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& fg);
 
+    template<class R> GridMaskSet<R> under_approximation(const SetInterface<R>& set, const FiniteGrid<R>& fg);
     
     template<class R> std::ostream& operator<<(std::ostream& os, const GridCell<R>& gc);
     template<class R> std::ostream& operator<<(std::ostream& os, const GridBlock<R>& gb);

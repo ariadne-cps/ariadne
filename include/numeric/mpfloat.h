@@ -63,6 +63,7 @@ namespace Ariadne {
       MPFloat(const mpf_class& x) { mpfr_init_set_f(_value,x.get_mpf_t(),GMP_RNDN); }
       MPFloat(const mpf_t x) { mpfr_init_set_f(_value,x,GMP_RNDN); }
       MPFloat& operator=(const MPFloat& x) { if(this != &x) { mpfr_set(_value,x._value,GMP_RNDN); } return *this; }
+      mpf_class get_base() const { mpf_class result; mpfr_get_f(result.get_mpf_t(),_value,GMP_RNDD); return result; }
       mpfr_srcptr get_mpfr_t() const { return _value; }
       mpfr_ptr get_mpfr_t() { return _value; }
       mpf_class get_mpf_class() const { mpf_class result; mpfr_get_f(result.get_mpf_t(),_value,GMP_RNDD); return result; }

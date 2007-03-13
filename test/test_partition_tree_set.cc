@@ -131,8 +131,9 @@ int main() {
   ListSet< Rectangle<Real> > lsua=ptsua;
   cout << "lsua=" << lsua << endl;
   cout << "ptsua.size()=" << ptsua.size() << ", lsua.size()=" << lsua.size() << endl;
-  GridMaskSet<Real> gmsina=under_approximation(ptsina,fg);
-  cout << "gmsina=" << gmsina << endl;
+  // Under approximation of partition tree sets not currently implemented
+  //GridMaskSet<Real> gmsina=under_approximation(ptsina,fg);
+  //cout << "gmsina=" << gmsina << endl;
   GridMaskSet<Real> gmsouta=over_approximation(ptsouta,fg);
   cout << "gmsouta=" << gmsouta << endl;
 
@@ -161,7 +162,7 @@ int main() {
   eps.set_fill_colour("red");
   eps << gmsouta;
   eps.set_fill_colour("blue");
-  eps << gmsina;
+  //eps << gmsina;
   eps.set_fill_style(false);
   eps << pltp;
   eps.close();

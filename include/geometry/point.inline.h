@@ -106,6 +106,13 @@ namespace Ariadne {
     }
 
     template<class R> inline
+    const array<R>& 
+    Point<R>::data() const
+    {
+      return this->_vector.data();
+    }
+
+    template<class R> inline
     R& 
     Point<R>::operator[](dimension_type index) 
     {

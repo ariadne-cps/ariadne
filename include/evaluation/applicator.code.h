@@ -46,16 +46,18 @@
 #include "../geometry/parallelotope.h"
 #include "../geometry/list_set.h"
 #include "../geometry/grid_set.h"
+
 #include "../system/grid_multimap.h"
 
 
 #include "../system/map.h"
+#include "../system/discrete_time_system.h"
 
 
 namespace Ariadne {
   namespace Evaluation {
+  
 
-   
     template<class R>
     Applicator<R>::Applicator() 
       : _maximum_basic_set_radius(0.1)
@@ -440,6 +442,8 @@ namespace Ariadne {
       return true;
     }
 
+
+
     template<class R>
     System::GridMultiMap<R> 
     Applicator<R>::discretize(const System::Map<R>& f, 
@@ -459,6 +463,105 @@ namespace Ariadne {
       }
       return result;
     }
+
+
+
+    template<class R>
+    System::GridMultiMap<R> 
+    Applicator<R>::control_synthesis(const System::DiscreteTimeSystem<R>& f, 
+                                     const Geometry::SetInterface<R>& initial_set,
+                                     const Geometry::SetInterface<R>& target_set,
+                                     const Geometry::GridMaskSet<R>& state_bounding_set,
+                                     const Geometry::GridMaskSet<R>& input_bounding_set,
+                                     const Geometry::GridMaskSet<R>& noise_bounding_set) const
+    {
+      // TODO: Use on-the-fly discretization
+      // TODO: Use adaptive grid refinement
+      
+      typedef typename Numeric::traits<R>::interval_type I;
+
+      using namespace Combinatoric;
+      using namespace Geometry;
+      using namespace System;
+
+      const Grid<R>& state_grid = state_bounding_set.grid();
+      const Grid<R>& input_grid = input_bounding_set.grid();
+      dimension_type state_space_dimension = f.state_space_dimension();
+      dimension_type input_space_dimension = f.control_space_dimension();
+
+      // Discretize function
+      std::map< std::pair<LatticeCell,LatticeCell>, LatticeCellListSet > discretization;
+      for(typename GridMaskSet<R>::const_iterator state_iter=state_bounding_set.begin();
+          state_iter!=state_bounding_set.end(); ++state_iter)
+      {
+        Point<I> state=static_cast< Rectangle<R> >(*state_iter);
+
+        for(typename GridMaskSet<R>::const_iterator input_iter=input_bounding_set.begin();
+            input_iter!=input_bounding_set.end(); ++input_iter)
+        {
+          std::pair<LatticeCell,LatticeCell> control = std::make_pair(state_iter->lattice_set(),input_iter->lattice_set());
+          discretization.insert(std::make_pair(control,LatticeCellListSet(state_space_dimension)));
+
+          Point<I> input = static_cast< Rectangle<R> >(*input_iter);
+
+          for(typename GridMaskSet<R>::const_iterator noise_iter=noise_bounding_set.begin();
+              noise_iter!=noise_bounding_set.end(); ++noise_iter)
+          {
+            Point<I> noise = static_cast< Rectangle<R> >(*noise_iter);
+            
+            Point<I> image = f.image(state,input,noise);
+            
+            GridBlock<R> image_set = over_approximation(image,state_grid);
+            discretization.find(control)->second.adjoin(image_set.lattice_set());
+          }
+        }
+      }
+            
+      // Discretize target set
+      GridMaskSet<R> target_approximation(state_bounding_set.grid(),state_bounding_set.block());
+      target_approximation.adjoin_under_approximation(target_set);
+      Combinatoric::LatticeMaskSet target_lattice_set = target_approximation.lattice_set();
+
+      // Discretize initial set
+      GridMaskSet<R> initial_approximation(state_bounding_set.grid(),state_bounding_set.block());
+      initial_approximation.adjoin_under_approximation(initial_set);
+      Combinatoric::LatticeMaskSet initial_lattice_set = initial_approximation.lattice_set();
+
+      Combinatoric::LatticeMaskSet bounding_lattice_set = state_bounding_set.lattice_set();
+      Combinatoric::LatticeMaskSet input_lattice_set = input_bounding_set.lattice_set();
+
+      // Solve control problem
+      Combinatoric::LatticeMultiMap lattice_control(state_space_dimension,input_space_dimension);
+      Combinatoric::LatticeMaskSet controllable_lattice_set(state_bounding_set.block());
+      Combinatoric::LatticeMaskSet new_controllable_lattice_set(state_bounding_set.block());;
+      
+      new_controllable_lattice_set.adjoin(target_lattice_set);
+      controllable_lattice_set.adjoin(new_controllable_lattice_set);
+      while(!new_controllable_lattice_set.empty() && !subset(initial_lattice_set,controllable_lattice_set)) {
+        new_controllable_lattice_set.clear();
+        for(LatticeMaskSet::const_iterator state_iter = bounding_lattice_set.begin();
+            state_iter!=bounding_lattice_set.end(); ++state_iter)
+        {
+          if(!subset(*state_iter,controllable_lattice_set)) {
+            for(LatticeMaskSet::const_iterator input_iter = input_lattice_set.begin();
+                input_iter!=input_lattice_set.end(); ++input_iter)
+              
+            {
+              if(Combinatoric::subset(discretization.find(std::make_pair(*state_iter,*input_iter))->second,controllable_lattice_set)) {
+                new_controllable_lattice_set.adjoin(*state_iter);
+                lattice_control.adjoin_to_image(*state_iter,*input_iter);
+              }
+            }
+          }
+        }
+        controllable_lattice_set.adjoin(new_controllable_lattice_set);
+      }
+      
+      System::GridMultiMap<R> result(state_grid,input_grid,lattice_control);
+      
+      return result;      
+    }
+
 
   }
 }

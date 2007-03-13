@@ -39,7 +39,7 @@ namespace Ariadne {
       return this->_lattice_block; 
     }
      
-
+ 
     template<class R> inline
     R 
     FiniteGrid<R>::subdivision_coordinate(dimension_type d, index_type n) const
@@ -49,9 +49,9 @@ namespace Ariadne {
   
     template<class R> inline
     index_type 
-    FiniteGrid<R>::subdivision_interval(dimension_type d, const real_type& x) const 
+    FiniteGrid<R>::subdivision_index(dimension_type d, const real_type& x) const 
     {
-      return this->_grid_ptr->subdivision_interval(d,x);
+      return this->_grid_ptr->subdivision_index(d,x);
     }
       
     template<class R> inline

@@ -83,11 +83,13 @@ namespace Ariadne {
     class Rectangle 
       : public RectangleExpression< Rectangle<R> >
     {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
       typedef typename Numeric::traits<R>::interval_type I;
+      typedef typename Numeric::traits<R>::arithmetic_type A;
      private:
       array<R> _data;
      public:
+      /*! \brief The type used for the corners. */
+      typedef R value_type;
       /*! \brief The type of denotable real number used for the corners. */
       typedef R real_type;
       /*! \brief The type of denotable point contained by the rectangle. */
@@ -332,14 +334,15 @@ namespace Ariadne {
     {
       typedef Interval<R> I;
      public:
-      typedef Interval<R> real_type;
-      typedef Point< Interval<R> > state_type;
-      typedef RectangleVerticesIterator< Interval<R> > vertices_const_iterator;
+      typedef Interval<R> value_type;
+      typedef R real_type;
+      typedef Point<R> state_type;
+      typedef RectangleVerticesIterator<I> vertices_const_iterator;
 
       explicit Rectangle(dimension_type d=0);
       explicit Rectangle(const Point<I>& pt);
       template<class E> Rectangle(const RectangleExpression<E>& e);
-      template<class E> Rectangle< Interval<R> >& operator=(const RectangleExpression<E>& e);
+      template<class E> Rectangle<I>& operator=(const RectangleExpression<E>& e);
       dimension_type dimension() const;
       Point<I> centre() const;
       I radius() const;
@@ -348,11 +351,11 @@ namespace Ariadne {
       const Interval<R>& upper_bound(const dimension_type& i) const;
       void set_lower_bound(const dimension_type& i, const Interval<R>& x);
       void set_upper_bound(const dimension_type& i, const Interval<R>& x);
-      Point< Interval<R> > lower_corner() const;
-      Point< Interval<R> > upper_corner() const;
+      Point<I> lower_corner() const;
+      Point<I> upper_corner() const;
       size_type number_of_vertices() const;
-      RectangleVerticesIterator< Interval<R> > vertices_begin() const;
-      RectangleVerticesIterator< Interval<R> > vertices_end() const;
+      RectangleVerticesIterator<I> vertices_begin() const;
+      RectangleVerticesIterator<I> vertices_end() const;
      private:
       template<class RE> void assign(const RE& re);
      private:

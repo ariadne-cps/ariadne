@@ -37,7 +37,6 @@
 #include "../declarations.h"
 #include "../numeric/numerical_traits.h"
 #include "../numeric/function.h"
-#include "../numeric/integer.h"
 #include "../numeric/rational.h"
 
 namespace Ariadne {
@@ -71,6 +70,7 @@ namespace Ariadne {
       Float64& operator=(const double& x) { this->_value=x; return *this; }
       Float64& operator=(const Float64& x) { this->_value=x._value; return *this; }
       
+      double get_base() const { return this->_value; }
       double get_d() const { return this->_value; }
       operator Rational () const { return mpq_class(this->_value); }
      private:

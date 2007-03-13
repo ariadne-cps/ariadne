@@ -70,7 +70,8 @@ namespace Ariadne {
       : public SetInterface<typename BS::real_type>
     {
      private:
-      typedef typename BS::real_type R;
+      typedef typename BS::value_type V;
+      typedef typename Numeric::traits<V>::number_type R;
 
       /* List of basic sets. Note that std::vector provides a
        * reserve(size_type) method to increase the capacity.
@@ -79,7 +80,7 @@ namespace Ariadne {
       std::vector< BS > _vector;
 
      public:
-      /*!\brief The type of denotable real number used to represent the sets in the list. */
+      /*!\brief The type of denotable real number used to represent points in the space. */
       typedef R real_type;
       /*!\brief The type of point contained by the set. */
       typedef typename BS::state_type state_type;

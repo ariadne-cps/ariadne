@@ -51,7 +51,6 @@ template<> inline std::string python_name<Ariadne::Numeric::Rational>(const std:
 template<> inline std::string python_name<Ariadne::Numeric::Float64>(const std::string& bn) { return ""+bn; }
 template<> inline std::string python_name<Ariadne::Numeric::MPFloat>(const std::string& bn) { return "MPF"+bn; }
 #else
-fffs basfsfsf fdsfs;
 template<> inline std::string python_name<Ariadne::Numeric::Float64>(const std::string& bn) { return "F64"+bn; }
 template<> inline std::string python_name<Ariadne::Numeric::MPFloat>(const std::string& bn) { return ""+bn; }
 #endif

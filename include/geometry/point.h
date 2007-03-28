@@ -91,11 +91,11 @@ namespace Ariadne {
       /*! \brief Inequality operator. */
       bool operator!=(const Point<R>& A) const;
 
+      /*! \brief The array containing the point's values. */
+      const array<R>& data() const;
+
       /*! \brief The dimension of the Euclidean space the state lies in. */
       dimension_type dimension() const;
-
-      /*! \brief The array of data values. */
-      const array<R>& data() const;
 
       /*! \brief Subcripting operator. */
       R& operator[](dimension_type index);

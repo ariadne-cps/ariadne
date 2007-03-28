@@ -345,6 +345,9 @@ namespace Ariadne {
        */
       GridMaskSet(const FiniteGrid<R>& g, const BooleanArray& m);
 
+      /*!\brief Construct an empty set based on grid \a g such that the restricted grid covers bounding box \a bb as tightly as possible. */
+      GridMaskSet(const Grid<R>& g, const Rectangle<R>& bb);
+     
       /*!\brief Construct an empty set based on grid \a g and with cells in the block \a b. */
       GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeBlock& b);
      
@@ -354,7 +357,7 @@ namespace Ariadne {
       /*!\brief Construct a set from a grid, and a lattice mask set. */
       GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeMaskSet& ms);
      
-      /*!\brief Construct from a %GridCellListSet. */
+      /*!\brief Convert from a %GridCellListSet. */
       GridMaskSet(const GridCellListSet<R>& gcls);
 
       /*!\brief Copy constructor. */

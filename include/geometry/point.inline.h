@@ -99,17 +99,17 @@ namespace Ariadne {
     }
 
     template<class R> inline
+    const array<R>&
+    Point<R>::data() const 
+    {
+      return this->_vector.data();
+    }
+
+    template<class R> inline
     dimension_type 
     Point<R>::dimension() const 
     {
       return this->_vector.size();
-    }
-
-    template<class R> inline
-    const array<R>& 
-    Point<R>::data() const
-    {
-      return this->_vector.data();
     }
 
     template<class R> inline

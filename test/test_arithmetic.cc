@@ -318,6 +318,12 @@ test_arithmetic()
   cout << "-" << f1 << " = " << f3 << endl; 
   assert(f3==-1.25);
   
+  // Rounding
+  f3=next_down(f1);
+  f4=next_up(f1);
+  cout << f3 << " < " << f1 << " < " << f4 << endl;
+  assert(f3<f1); assert(f4>f1);
+
   // Addition (this should remain exact here)
   f3=add_down(f1,f2);
   f4=add_up(f1,f2);

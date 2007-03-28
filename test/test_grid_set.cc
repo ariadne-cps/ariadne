@@ -36,11 +36,12 @@
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 #include "geometry/grid_set.h"
-#include "geometry/irregular_grid_set.h"
+//#include "geometry/irregular_grid_set.h"
 
 #include "test.h"
 
 using namespace Ariadne;
+using namespace Ariadne::Combinatoric;
 using namespace Ariadne::Geometry;
 using namespace std;
 
@@ -48,6 +49,13 @@ template<class R>
 int
 test_grid_set()
 {
+  Grid<R> gr1(Rectangle<R>("[0,1]x[0,1]x[0,1]"),LatticeBlock("[1,5]x[-1,3]x[-6,-2]"));
+  cout << "gr1=" << gr1 << endl;
+
+  Grid<R> gr2(Rectangle<R>("[0,1]x[0,1]x[0,1]"),LatticeBlock("[1,4]x[-1,2]x[-6,-3]"));
+  cout << "gr2=" << gr2 << endl;
+
+
   Grid<R> gr(2,0.125);
   cout << "gr=" << gr << endl;
 
@@ -81,7 +89,8 @@ test_irregular_grid_set()
     ls.push_back(r);
   }
   cout << "ls=" << ls << endl;
-  
+
+  /*  
   IrregularGridMaskSet<R> igms(ls);
   cout << "igms=" << flush << igms << endl;
 
@@ -108,7 +117,8 @@ test_irregular_grid_set()
 
   IrregularGrid<R> gr2(ls2);
   cout << "gr2=" << gr2 << std::endl;
-  
+  */
+
   return 0;
 }
 

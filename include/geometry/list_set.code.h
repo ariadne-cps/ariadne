@@ -52,7 +52,6 @@ namespace Ariadne {
     tribool
     ListSet<BS>::superset(const Rectangle<R>& r) const
     {
-      
       const ListSet< Rectangle<R> >* rls=
         dynamic_cast< const ListSet< Rectangle<R> > * >(this);
       if(rls) {
@@ -171,11 +170,9 @@ namespace Ariadne {
     void
     ListSet<BS>::_instantiate_geometry_operators()
     {
-      //tribool tb;
-      Rectangle<R>* r=0;
-      ListSet<BS>* ls=0;
+      //Rectangle<R>* r=0;
+      //ListSet<BS>* ls=0;
       //disjoint(*ls,*r);
-      //tb=disjoint(*ls,*ls);
     }
     
     

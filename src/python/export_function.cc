@@ -34,12 +34,18 @@ using namespace Ariadne::Numeric;
 
 template<class R>
 void export_function() {
-  def("div_approx", div_approx<R>, "approximate division function" );
+  def("add_approx",(R(*)(const R&,const R&))(add_approx<R>), "approximate addition function" );
+  def("sub_approx",(R(*)(const R&,const R&))(sub_approx<R>), "approximate subtraction function" );
+  def("mul_approx",(R(*)(const R&,const R&))(mul_approx<R>), "approximate multiplication function" );
+  def("div_approx",(R(*)(const R&,const R&))(div_approx<R>), "approximate division function" );
+  def("mul_approx",(R(*)(const R&,const int&))(mul_approx<R>), "approximate multiplication function" );
+  def("div_approx",(R(*)(const R&,const int&))(div_approx<R>), "approximate division function" );
   def("sqrt_approx", sqrt_approx<R>, "approximate square root function" );
   def("exp_approx", exp_approx<R>, "approximate exponential function" );
   def("log_approx", log_approx<R>, "approximate logarithm function" );
-//  def("cos_approx", cos_approx<R>, "approximate sine function" );
-//  def("sin_approx", sin_approx<R>, "approximate cosine function" );
+  //def("sin_approx", sin_approx<R>, "approximate cosine function" );
+  //def("cos_approx", cos_approx<R>, "approximate sine function" );
+  //def("tan_approx", tan_approx<R>, "approximate tangent function" );
 }
 
 template void export_function<Float64>();

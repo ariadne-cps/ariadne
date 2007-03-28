@@ -24,6 +24,7 @@
 #include "grid.h"
 
 #include <ostream>
+#include <iomanip>
 #include <algorithm>
 
 #include "../exceptions.h"
@@ -73,6 +74,63 @@ namespace Ariadne {
       if(pt.dimension() != v.size()) {
         throw IncompatibleDimensions(__PRETTY_FUNCTION__);
       }
+      this->create();
+    }
+  
+
+    template<class R> 
+    Grid<R>::Grid(const Rectangle<R>& r, const Combinatoric::LatticeBlock& lb)
+      : _origin(r.dimension()),
+        _lengths(r.dimension())
+    {
+      if(r.dimension() != lb.dimension()) {
+        throw IncompatibleDimensions(__PRETTY_FUNCTION__);
+      }
+      for(dimension_type i=0; i!=r.dimension(); ++i) {
+        const R& l=r.lower_bound(i);
+        const R& u=r.upper_bound(i);
+        const index_type& a=lb.lower_bound(i);
+        const index_type& b=lb.upper_bound(i);
+        R& o=this->_origin[i];
+        R& s=this->_lengths[i];
+
+        //std::cerr << "a=" << a << ", b=" << b << ";  l=" << l << ", u=" << u << ";  "  << std::flush;
+
+        if(a==b) {
+           throw std::runtime_error("Invalid grid block");
+        }
+        if(a>0) { // o < l
+          s=div_up(sub_up(u,l),b-a);
+          o=sub_down(l,mul_up(s,a));
+          while(add_approx(o,mul_approx(s,b))<u) {
+            s=next_up(s);
+            o=sub_down(l,mul_up(s,a));
+          }
+        } else if(b<0) { // o > u
+          s=div_up(sub_up(u,l),b-a);
+          o=sub_up(u,mul_down(s,b));
+          while(add_approx(o,mul_approx(s,a))>l) {
+            s=next_up(s);
+            o=sub_up(u,mul_down(s,b));
+          }
+        } else { // l <= o <= u
+          s=div_up(sub_up(u,l),b-a);
+          o=div_approx(sub_approx(mul_approx(l,b),mul_approx(u,a)),b-a);
+          while(add_approx(o,mul_approx(s,a))>l || add_approx(o,mul_approx(s,b))<u ) {
+            s=next_up(s);
+            o=div_approx(sub_approx(mul_approx(l,b),mul_approx(u,a)),b-a);
+          }
+        }
+
+        //std::cerr << "o=" << o << "; s=" << s << std::endl;
+
+        // check  o+sa <= l <= u <= o+sb
+        //std::cerr << "add_approx(o,mul_approx(s,a))=" << add_approx(o,mul_approx(s,a)) << std::endl;
+        assert(add_approx(o,mul_approx(s,a)) <= l);
+        //std::cerr << "add_approx(o,mul_approx(s,b))=" << add_approx(o,mul_approx(s,b)) << std::endl;
+        assert(add_approx(o,mul_approx(s,b)) >= u);
+      }
+
       this->create();
     }
   

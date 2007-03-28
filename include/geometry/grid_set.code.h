@@ -304,6 +304,12 @@ namespace Ariadne {
 
     
     template<class R>
+    GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Rectangle<R>& bb)
+      : _grid_ref(g), _lattice_set(g.index_block(bb)) 
+    { 
+    }
+
+    template<class R>
     GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeBlock& b)
       : _grid_ref(g), _lattice_set(b) 
     { 

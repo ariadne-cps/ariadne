@@ -159,6 +159,12 @@ namespace Ariadne {
     template<> inline Float64 neg(const Float64& x) { return Float64(-x.get_d()); }
     template<> inline Float64 abs(const Float64& x) { return (x>=0) ? x : neg(x); }
     
+    template<> inline Float64 next_up(const Float64& x) { return Float64::rounding().add_up(x.get_d(),std::numeric_limits<double>::min()); }
+    template<> inline Float64 next_down(const Float64& x) { return Float64::rounding().sub_down(x.get_d(),std::numeric_limits<double>::min()); }
+
+    //template<> inline Float64 next_up(const Float64& x) { return mul_up(x,mul_up(div_down(1.0,3.0),3.0)); }
+    //template<> inline Float64 next_down(const Float64& x) { return mul_down(x,mul_down(div_down(1.0,3.0),3.0)); force_rounding(x); }
+      
     template<> inline double conv_approx(const Float64& x) { return x.get_d(); }
 
     template<> inline Float64 conv_exact(const Float64& x) { return x; }
@@ -226,7 +232,7 @@ namespace Ariadne {
     template<> inline Float64 sub_down(const Float64& x1,const Float64& x2) {
       return Float64::rounding().sub_down(x1.get_d(),x2.get_d()); }
     template<> inline Float64 sub_up(const Float64& x1,const Float64& x2) {
-      return Float64::rounding().sub_down(x1.get_d(),x2.get_d()); }
+      return Float64::rounding().sub_up(x1.get_d(),x2.get_d()); }
     template<> inline Float64 sub_approx(const Float64& x1,const Float64& x2) {
       return x1.get_d()-x2.get_d(); }
     
@@ -237,6 +243,13 @@ namespace Ariadne {
     template<> inline Float64 mul_approx(const Float64& x1,const Float64& x2) {
       return x1.get_d()*x2.get_d(); }
     
+    template<> inline Float64 mul_down(const Float64& x1,const int& n2) {
+      return Float64::rounding().mul_down(x1.get_d(),static_cast<double>(n2)); }
+    template<> inline Float64 mul_up(const Float64& x1,const int& n2) {
+      return Float64::rounding().mul_up(x1.get_d(),static_cast<double>(n2)); }
+    template<> inline Float64 mul_approx(const Float64& x1,const int& n2) {
+      return x1.get_d()*n2; }
+
     template<> inline Float64 div_down(const Float64& x1,const Float64& x2) {
       return Float64::rounding().div_down(x1.get_d(),x2.get_d()); }
     template<> inline Float64 div_up(const Float64& x1,const Float64& x2) {
@@ -244,6 +257,15 @@ namespace Ariadne {
     template<> inline Float64 div_approx(const Float64& x1,const Float64& x2) {
       return x1.get_d()/x2.get_d(); }
     
+    template<> inline Float64 div_down(const Float64& x1,const int& n2) {
+      return Float64::rounding().div_down(x1.get_d(),static_cast<double>(n2)); }
+    template<> inline Float64 div_up(const Float64& x1,const int& n2) {
+      return Float64::rounding().div_up(x1.get_d(),static_cast<double>(n2)); }
+    template<> inline Float64 div_approx(const Float64& x1,const int& n2) {
+      return x1.get_d()/n2; }
+
+    
+   
      template<> inline Float64 med_approx(const Float64& x1,const Float64& x2) {
       return (x1.get_d()+x2.get_d())/2; }
     
@@ -267,25 +289,32 @@ namespace Ariadne {
     template<> inline Float64 ceil(const Float64& x) {
       return std::ceil(x.get_d()); }
       
-   inline Float64 mul_approx(const int& n, const Float64& x) {
+    inline Float64 mul_down(const Float64& x1,const int& x2) {
+      return Float64::rounding().mul_down(x1.get_d(),x2); }
+    inline Float64 mul_up(const Float64& x1,const int& x2) {
+      return Float64::rounding().mul_up(x1.get_d(),x2); }
+    inline Float64 mul_approx(const int& n, const Float64& x) {
       return x.get_d()*n; }
     inline Float64 mul_approx(const Float64& x, const int& n) {
       return x.get_d()*n; }
-    inline Float64 div_approx(const Float64& x, const int& n) {
-      return x.get_d()/n; }
       
     inline Float64 mul_approx(const uint& n, const Float64& x) {
       return x.get_d()*n; }
     inline Float64 mul_approx(const Float64& x, const uint& n) {
       return x.get_d()*n; }
-    inline Float64 div_approx(const Float64& x, const uint& n) {
-      return x.get_d()/n; }
       
     inline Float64 mul_approx(const double& d, const Float64& x) {
       return x.get_d()*d; }
     inline Float64 mul_approx(const Float64& x, const double& d) {
       return x.get_d()*d; }
       
+
+    inline Float64 div_down(const Float64& x1,const int& x2) {
+      return Float64::rounding().div_down(x1.get_d(),x2); }
+    inline Float64 div_up(const Float64& x1,const int& x2) {
+      return Float64::rounding().div_up(x1.get_d(),x2); }
+    inline Float64 div_approx(const Float64& x1,const int& x2) {
+      return x1.get_d()/x2; }
       
     template<> inline Float64 sqrt_down(const Float64& x) { 
       return Float64::rounding().sqrt_down(x.get_d()); }

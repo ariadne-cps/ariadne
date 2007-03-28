@@ -42,9 +42,6 @@ namespace Ariadne {
     template<class R> class Grid;
     template<class R> class FiniteGrid;
 
-    template<class R> class IrregularGrid;
-    
-
     template<class R> class GridCell;
     template<class R> class GridBlock;
     
@@ -75,8 +72,12 @@ namespace Ariadne {
       /*! \brief Construct from a centre point and a vector of offsets. */
       explicit Grid(const Point<R>& pt, const LinearAlgebra::Vector<R>& v);
       
-      /*! \brief Construct from an array of subdivision lengths \a v. */
+      /*! \brief Construct a grid centred at the origin from an array of subdivision lengths \a v. */
       explicit Grid(const LinearAlgebra::Vector<R>& v);
+
+      /*! \brief Construct a grid \a g by dividing \a r into pieces given by lattice block \a lb.
+       *  The grid \a g is such that %GridBlock(g,lb) is a superset of \a r, with equality holding if possible. */
+      explicit Grid(const Rectangle<R>& r, const Combinatoric::LatticeBlock& lb);
 
       /*! \brief The underlying dimension of the grid. */
       dimension_type dimension() const;
@@ -206,9 +207,6 @@ namespace Ariadne {
 
     template<class R> 
     std::ostream& operator<<(std::ostream& os, const Grid<R>& g);
-
-    template<class R> 
-    std::ostream& operator<<(std::ostream& os, const IrregularGrid<R>& g);
 
     template<class R>
     std::ostream& operator<<(std::ostream& os, const FiniteGrid<R>& fg);

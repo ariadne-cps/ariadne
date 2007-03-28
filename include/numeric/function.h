@@ -35,6 +35,11 @@ namespace Ariadne {
     //! \name Approximate arithmetical operations.
     //@{ 
     //! \ingroup Numeric
+
+    /*! \brief Rounding. */
+    template<class R> inline R next_down(const R& x);
+    template<class R> inline R next_up(const R& x);
+
     /*! \brief Minumum. */
     template<class R> inline R min_exact(const R& x1,const R& x2);
     template<class R> inline R min_approx(const R& x1,const R& x2);
@@ -81,11 +86,22 @@ namespace Ariadne {
     template<class R> inline R mul_down(const R& x1,const R& x2);
     template<class R> inline R mul_up(const R& x1,const R& x2);
     
+     /*! \brief Multiplication. */
+    template<class R> inline R mul_approx(const R& x1,const int& x2);
+    template<class R> inline R mul_exact(const R& x1,const int& n2);
+    template<class R> inline R mul_down(const R& x1,const int& n2);
+    template<class R> inline R mul_up(const R& x1,const int& n2);
+    
     /*! \brief Division. */
     template<class R> inline R div_approx(const R& x1,const R& x2);
     template<class R> inline R div_exact(const R& x1,const R& x2);
     template<class R> inline R div_down(const R& x1,const R& x2);
     template<class R> inline R div_up(const R& x1,const R& x2);
+    
+    template<class R> inline R div_approx(const R& x1,const int& n2);
+    template<class R> inline R div_exact(const R& x1,const int& n2);
+    template<class R> inline R div_down(const R& x1,const int& n2);
+    template<class R> inline R div_up(const R& x1,const int& n2);
     
     /*! \brief Power. */
     template<class R, class N> inline R pow_approx(const R& x1,const N& x2);

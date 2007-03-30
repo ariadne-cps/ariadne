@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "real_typedef.h"
+#include "python/python_float.h"
 
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
@@ -68,16 +68,17 @@ void export_integrate()
   typedef time_type T;
   typedef Interval<R> I;
 
-  class_< IntegratorWrapper<R>, boost::noncopyable >("Integrator",init<T,T,R>())
+   class_< IntegratorWrapper<R>, boost::noncopyable >("Integrator",init<T,T,R>())
     .def("integrate",(GridMaskSet<R>(Integrator<R>::*)(const VectorField<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&,const time_type&)const)
-                              (&Integrator<R>::integrate))
+                                    (&Integrator<R>::integrate))
     .def("reach",(GridMaskSet<R>(Integrator<R>::*)(const VectorField<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&,const time_type&)const)
                               (&Integrator<R>::reach))
     .def("chainreach",(GridMaskSet<R>(Integrator<R>::*)(const VectorField<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
          (&Integrator<R>::chainreach))
-    .def("verify",(bool(Integrator<R>::*)(const VectorField<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
-         (&Integrator<R>::chainreach))
+    .def("verify",(tribool(Integrator<R>::*)(const VectorField<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
+         (&Integrator<R>::verify))
   ;
+
 
   class_< LohnerIntegrator<R>, bases<Integrator<R> > >("LohnerIntegrator",init<T,T,R>())
     .def(init<double,double,double>()) 
@@ -98,7 +99,6 @@ void export_integrate()
     .def("reach",(ListSet< Zonotope<I> >(AffineIntegrator<R>::*)(const AffineVectorField<R>&,const ListSet< Zonotope<I> >&,const time_type&)const)
                               (&AffineIntegrator<R>::reach))
   ;
-
 }
 
-template void export_integrate<Real>();
+template void export_integrate<Float>();

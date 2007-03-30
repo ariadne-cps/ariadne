@@ -28,7 +28,7 @@
 #include <string>
 
 #include "ariadne.h"
-#include "real_typedef.h"
+#include "test_float.h"
 
 #include "base/utility.h"
 #include "geometry/point.h"
@@ -46,11 +46,11 @@ using namespace std;
 
 int main() {
 
-  Rectangle<Real> bbox(2);
+  Rectangle<Float> bbox(2);
 
-  Point<Real> pt("(0.0,0.0)");
+  Point<Float> pt("(0.0,0.0)");
 
-  Rectangle<Real> r1,r2,r3,r4;
+  Rectangle<Float> r1,r2,r3,r4;
   string input("[-0.125,1.125]x[-0.25, 3.25] "
                "[ 0.0125,1.0]x[0.0,2.0] "
                "[ 0.5,1.0]x[1.0,3.0] "
@@ -60,8 +60,8 @@ int main() {
   stringstream iss(input);
 
   iss >> bbox >> r1 >> r2 >> r3 >> r4;
-  Zonotope<Real> z3(r3);
-  Polytope<Real> p4(r4);
+  Zonotope<Float> z3(r3);
+  Polytope<Float> p4(r4);
   
   cout << bbox << "\n";
   cout << r1 << " " << r2 << endl;

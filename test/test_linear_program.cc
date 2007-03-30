@@ -26,7 +26,7 @@
 #include <fstream>
 #include <string>
 
-#include "real_typedef.h"
+#include "test/test_float.h"
 #include "numeric/rational.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"

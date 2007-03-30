@@ -1,5 +1,5 @@
 /***************************************************************************
- *            <vector>.cc
+ *            vector.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it Pieter.Collins@cwi.nl
@@ -21,10 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "numeric/float64.h"
-#include "numeric/mpfloat.h"
 #include "numeric/rational.h"
-
+#include "numeric/float.h"
 #include "numeric/interval.h"
 
 #include "linear_algebra/vector.h"
@@ -33,12 +31,21 @@
 namespace Ariadne {
   namespace LinearAlgebra {
     
-    template class Vector<Float64>;
-    template class Vector<MPFloat>;
+#warning "Compiling Rational"
     template class Vector<Rational>;
-
-    template class Vector< Interval<Float64> >;
-    template class Vector< Interval<MPFloat> >;
     template class Vector< Interval<Rational> >;
+
+#ifdef ENABLE_FLOAT64
+#warning "Compiling Float64"
+    template class Vector<Float64>;
+    template class Vector< Interval<Float64> >;
+#endif
+  
+#ifdef ENABLE_FLOATMP
+#warning "Compiling FloatMP"
+    template class Vector<FloatMP>;
+    template class Vector< Interval<FloatMP> >;
+#endif
+
   }
 }

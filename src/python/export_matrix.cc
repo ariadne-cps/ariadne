@@ -25,15 +25,14 @@
 #include <utility>  //for std::pair
 
 
-#include "numeric/float64.h"
-#include "numeric/mpfloat.h"
+#include "python/python_utilities.h"
+#include "python/python_float.h"
 #include "numeric/rational.h"
 #include "numeric/interval.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/matrix_function.h"
 
-#include "python/python_utilities.h"
 using namespace Ariadne;
 using namespace Ariadne::LinearAlgebra;
 
@@ -147,8 +146,8 @@ void export_matrix()
   def("transpose",&matrix_transpose<R>);
   def("inverse",&matrix_inverse<R>);
 
-  // Need 'Real' here to extract vector of proper class
-  def("extract_matrix",&extract_matrix<Real>,"Extract an Ariadne matrix from a Python list of lists");
+  // Need 'Float' here to extract vector of proper class
+  def("extract_matrix",&extract_matrix<Float>,"Extract an Ariadne matrix from a Python list of lists");
 
 }
 
@@ -241,9 +240,7 @@ void export_interval_matrix()
   def("exp",&LinearAlgebra::exp<R>);
 }
 
-template void export_matrix<Float64>();
-template void export_matrix<MPFloat>();
+template void export_matrix<Float>();
 template void export_matrix<Rational>();
 
-template void export_interval_matrix<Float64>();
-template void export_interval_matrix<MPFloat>();
+template void export_interval_matrix<Float>();

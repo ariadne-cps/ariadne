@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "real_typedef.h"
+#include "numeric/float.h"
 
 #include "evaluation/applicator.h"
 #include "evaluation/applicator.code.h"
@@ -29,7 +29,13 @@
 namespace Ariadne {
   namespace Evaluation {
 
-    template class Applicator<Real>;
+#ifdef ENABLE_FLOAT64
+    template class Applicator<Float64>;
+#endif
+  
+#ifdef ENABLE_FLOATMP
+    template class Applicator<FloatMP>;
+#endif
 
   }
 }

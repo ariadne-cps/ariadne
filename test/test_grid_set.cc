@@ -28,7 +28,7 @@
 #include <string>
 
 #include "ariadne.h"
-#include "real_typedef.h"
+#include "test_float.h"
 #include "combinatoric/binary_word.h"
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
@@ -124,8 +124,8 @@ test_irregular_grid_set()
 
 
 int main() {
-  test_grid_set<Real>();
-  test_irregular_grid_set<Real>();
+  test_grid_set<Float>();
+  test_irregular_grid_set<Float>();
   cerr << "INCOMPLETE ";
   return 0;
 }

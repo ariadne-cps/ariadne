@@ -28,7 +28,7 @@
 
 #include <vector>
 
-#include "real_typedef.h"
+#include "test_float.h"
 
 #include "ariadne.h"
 #include "debug.h"
@@ -48,7 +48,7 @@ template<class R> int test_parallelotope();
 
 int main() {
   cout << boolalpha;
-  test_parallelotope<Real>();
+  test_parallelotope<Float>();
   cerr << "INCOMPLETE ";
   return 0;
 }

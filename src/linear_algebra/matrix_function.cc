@@ -22,7 +22,7 @@
  */
  
 #include "numeric/float64.h"
-#include "numeric/mpfloat.h"
+#include "numeric/floatmp.h"
 #include "numeric/rational.h"
 
 #include "linear_algebra/matrix_function.h"
@@ -32,7 +32,7 @@ namespace Ariadne {
   namespace LinearAlgebra {
     
     template Matrix< Interval<Float64> > exp(const Matrix< Interval<Float64> >& A); 
-    template Matrix< Interval<MPFloat> > exp(const Matrix< Interval<MPFloat> >& A); 
+    template Matrix< Interval<FloatMP> > exp(const Matrix< Interval<FloatMP> >& A); 
     template Matrix< Interval<Rational> > exp(const Matrix< Interval<Rational> >& A); 
 
   }

@@ -28,6 +28,7 @@
 
 #include <boost/python.hpp>
 #include "python/python_utilities.h"
+#include "python/python_float.h"
 
 using namespace boost::python;
 using namespace Ariadne;
@@ -117,5 +118,4 @@ void export_interval()
 
 }
 
-template void export_interval<Float64>();
-template void export_interval<MPFloat>();
+template void export_interval<Float>();

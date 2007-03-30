@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_arithmetic.cc
+ *            test_float.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -21,38 +21,30 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <cassert>
 #include <fstream>
 #include <sstream>
+#include <string>
 #include <iomanip>
 
-#include <gmpxx.h>
-#include <mpfr.h>
-#include <boost/numeric/interval.hpp>
-
-#include "numeric/interval.h"
-#include "numeric/float64.h"
-#include "numeric/mpfloat.h"
+#include "numeric/integer.h"
 #include "numeric/rational.h"
-#include "numeric/arithmetic.h"
+#include "numeric/float64.h"
+#include "numeric/floatmp.h"
+#include "numeric/interval.h"
 
 #include "test.h"
 
 using namespace std;
-using namespace Ariadne::Numeric;
-using Ariadne::name;
-using Ariadne::Rational;
-using Ariadne::MPFloat;
-using Ariadne::Float64;
+using namespace Ariadne;
 
-int test_boost_rounding(); 
 
 template<class R> int test_class();
 template<class R> int test_conversion();
 template<class R> int test_stream();
-template<> int test_stream<Rational>();
 template<class R> int test_comparison();
 template<class R> int test_arithmetic();
-template<> int test_arithmetic<Rational>();
+template<class R> int test_function();
 
 
 int main() {
@@ -60,56 +52,58 @@ int main() {
   cout << setprecision(20);
   mpf_set_default_prec (8);
 
-  test_class<Rational>();
-  test_class<MPFloat>();
+  test_class<FloatMP>();
   test_class<Float64>();
   cout << endl;
   
-  test_conversion<MPFloat>();
+  test_conversion<FloatMP>();
   test_conversion<Float64>();
   cout << endl;
 
-  test_stream<Rational>();
-  test_stream<MPFloat>();
+  test_stream<FloatMP>();
   test_stream<Float64>();
   cout << endl;
   
-  test_comparison<Rational>();
-  test_comparison<MPFloat>();
+  test_comparison<FloatMP>();
   test_comparison<Float64>();
   cout << endl;
   
-  test_arithmetic<Rational>();
-  test_arithmetic<MPFloat>();
+  test_arithmetic<FloatMP>();
   test_arithmetic<Float64>();
  
-  test_boost_rounding();
-  
+  test_function<FloatMP>();
+  test_function<Float64>();
+ 
   return 0;
 }
 
+
+
+
+template<class R>
 int
-test_boost_rounding() 
+test_inverse_pair(
+  std::string name, 
+  R(*fnl)(const R&),
+  R(*fnu)(const R&),
+  R(*ifnl)(const R&),
+  R(*ifnu)(const R&) )
 {
-  cout << __PRETTY_FUNCTION__ << endl;
-
-  double x=1;
-  double y=3;
-  double zl,zu;
-  
-  { 
-    boost::numeric::interval_lib::rounded_arith_std<double> rnd;
-    zl=rnd.div_down(x,y);
-    zu=rnd.div_up(x,y);
-  }
-  cout << zl << " <= " << x << "/" << y << " <= " << zu << endl;
-  if(!(zl<zu)) {
-    cerr << "Warning: boost::numeric::interval_lib::rounded_arith_std<double> does not round correctly\n";
-  }
-  
+  cout << name << endl;
+  R o=1;
+  R iml=fnl(o);
+  R imu=fnu(o);
+  R ol=ifnl(iml);
+  R ou=ifnu(imu);
+  cout << iml << " <= " << name << "(1) <= " << imu << endl;
+  cout << ol << " <=    1   <= " << ou << endl;
+  assert(iml<imu);
+  assert(ol<=o);
+  assert(o<=ou);
   return 0;
 }
-
+  
+ 
 
 template<class R>
 int
@@ -138,6 +132,7 @@ test_class()
 
   return 0;
 }
+
 
 template<class R>
 int
@@ -172,6 +167,7 @@ test_conversion()
   return 0;
 };
 
+
 template<class R>
 int
 test_stream()
@@ -192,34 +188,6 @@ test_stream()
   return 0;
 }
 
-template<>
-int
-test_stream<Rational>()
-{
-  cout << __PRETTY_FUNCTION__ << endl;
-
-  typedef Rational R;
-  
-  stringstream ss("42 -23/5 8/2 1.25");
-  R f1,f2,f3,f4;
-  ss >> f1;
-  cout << "f1 = " << f3 << endl;
-  assert(f1==42);
-  ss >> f2;
-  cout << "f2 = " << f3 << endl;
-  assert(f2==Rational(-23,5));
-  ss >> f3;
-  cout << "f3 = " << f3 << endl;
-  assert(f3==Rational(8,2));
-  assert(Rational(12,3)==Rational(8,2));
-  assert(f3==Rational(4));
-  ss >> f4;
-  cout << "f4 = " << f4 << endl;
-  if(f4!=1.25) {
-    std::cerr << "Warning: Rational class cannot handle decimal input\n";
-  }
-  return 0;
-}
 
 template<class R>
 int
@@ -274,6 +242,7 @@ test_comparison()
   return 0;
 }
   
+
 template<class R>
 int
 test_arithmetic()
@@ -409,32 +378,22 @@ test_arithmetic()
 }
 
 
-template<>
+template<class R>
 int
-test_arithmetic<Rational>()
+test_function()
 {
   cout << __PRETTY_FUNCTION__ << endl;
   
-  typedef Rational R;
-
-  R f1(1.25);
-  R f2(2.25);
-  R f3;
-
-  f3=add(f1,f2);
-  cout << f1 << " + " << f2 << " = " << f3 << endl;
-  assert(f3==R(7,2));
-  f3=sub(f1,f2);
-  cout << f1 << " - " << f2 << " = " << f3 << endl;
-  assert(f3==R(-1,1));
-  f3=mul(f1,f2);
-  cout << f1 << " * " << f2 << " = " << f3 << endl;
-  assert(f3==R(45,16));
-  f3=div(f1,f2);
-  cout << f1 << " / " << f2 << " = " << f3 << endl;
-  assert(f3==R(5,9));
-
-  cout << endl;
+  cout << setprecision(20);
+  mpf_set_default_prec (128);
   
+  test_inverse_pair("exp",&exp_down<R>,&exp_up<R>,&log_down<R>,&log_up<R>);
+  test_inverse_pair("sin",&sin_down<R>,&sin_up<R>,&asin_down<R>,&asin_up<R>);
+  test_inverse_pair("cos",&cos_down<R>,&cos_up<R>,&acos_down<R>,&acos_up<R>);
+  test_inverse_pair("tan",&tan_down<R>,&tan_up<R>,&atan_down<R>,&atan_up<R>);
+  test_inverse_pair("sinh",&sinh_down<R>,&sinh_up<R>,&asinh_down<R>,&asinh_up<R>);
+  test_inverse_pair("cosh",&cosh_down<R>,&cosh_up<R>,&acosh_down<R>,&acosh_up<R>);
+  test_inverse_pair("tanh",&tanh_down<R>,&tanh_up<R>,&atanh_down<R>,&atanh_up<R>);
   return 0;
 }
+

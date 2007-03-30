@@ -22,7 +22,7 @@
  */
 
 
-#include "real_typedef.h"
+#include "numeric/float.h"
 
 #include "evaluation/integrator.h"
 #include "evaluation/affine_integrator.h"
@@ -32,16 +32,31 @@
 namespace Ariadne {
   namespace Evaluation {
 
-   template Real gexp_up(const Real& x, uint k);
+#ifdef ENABLE_FLOAT64
+   template Float64 gexp_up(const Float64& x, uint k);
 
-    template LinearAlgebra::Vector< Numeric::Interval<Real> > 
-    gexp(const LinearAlgebra::Matrix<Real>& A, const LinearAlgebra::Vector<Real>& b, 
+    template LinearAlgebra::Vector< Numeric::Interval<Float64> > 
+    gexp(const LinearAlgebra::Matrix<Float64>& A, const LinearAlgebra::Vector<Float64>& b, 
          const time_type& t, const uint& k);
     
-    template LinearAlgebra::Matrix< Numeric::Interval<Real> > 
-    gexp(const LinearAlgebra::Matrix<Real>& A, const time_type& t, const uint& k);
+    template LinearAlgebra::Matrix< Numeric::Interval<Float64> > 
+    gexp(const LinearAlgebra::Matrix<Float64>& A, const time_type& t, const uint& k);
     
-    template class AffineIntegrator<Real>;
+    template class AffineIntegrator<Float64>;
+#endif
+  
+#ifdef ENABLE_FLOATMP
+   template FloatMP gexp_up(const FloatMP& x, uint k);
+
+    template LinearAlgebra::Vector< Numeric::Interval<FloatMP> > 
+    gexp(const LinearAlgebra::Matrix<FloatMP>& A, const LinearAlgebra::Vector<FloatMP>& b, 
+         const time_type& t, const uint& k);
+    
+    template LinearAlgebra::Matrix< Numeric::Interval<FloatMP> > 
+    gexp(const LinearAlgebra::Matrix<FloatMP>& A, const time_type& t, const uint& k);
+    
+    template class AffineIntegrator<FloatMP>;
+#endif
 
   }
 }

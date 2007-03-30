@@ -1,5 +1,5 @@
 /***************************************************************************
- *            Tensor.cc
+ *            tensor.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it Pieter.Collins@cwi.nl
@@ -21,9 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/float64.h"
-#include "numeric/mpfloat.h"
 #include "numeric/rational.h"
+#include "numeric/float.h"
+#include "numeric/interval.h"
 
 #include "linear_algebra/tensor.h"
 #include "linear_algebra/tensor.code.h"
@@ -31,14 +31,19 @@
 namespace Ariadne {
   namespace LinearAlgebra {
     
-    template class Tensor<Float64>;
-    template class Tensor<MPFloat>;
     template class Tensor<Rational>;
-    template class Tensor< Interval<Float64> >;
-    template class Tensor< Interval<MPFloat> >;
-    
     template class SymmetricTensor<Rational>;
     template class DerivativeTensor<Rational>;
+
+#ifdef ENABLE_FLOAT64
+    template class Tensor<Float64>;
+    template class Tensor< Interval<Float64> >;
+#endif
+  
+#ifdef ENABLE_FLOATMP
+    template class Tensor<FloatMP>;
+    template class Tensor< Interval<FloatMP> >;
+#endif
 
   }
 }

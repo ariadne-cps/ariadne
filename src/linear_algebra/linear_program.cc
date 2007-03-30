@@ -22,7 +22,6 @@
  */
  
 #include "numeric/rational.h"
-#include "real_typedef.h"
 
 #include "linear_algebra/linear_program.h"
 #include "linear_algebra/linear_program.code.h"
@@ -31,7 +30,6 @@ namespace Ariadne {
   namespace LinearAlgebra {
     
     template class LinearProgram<Rational>;
-    //template class LinearProgram< Interval<Real> >;
 
   }
 }

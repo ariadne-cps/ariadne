@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "real_typedef.h"
+#include "python/python_float.h"
 
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
@@ -62,4 +62,4 @@ void export_apply()
  
 }
 
-template void export_apply<Real>();
+template void export_apply<Float>();

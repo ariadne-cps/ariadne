@@ -21,8 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "real_typedef.h"
+
 #include "numeric/rational.h"
+#include "numeric/float.h"
+#include "numeric/interval.h"
 
 #include "geometry/polyhedron.h"
 #include "geometry/polyhedron.code.h"
@@ -33,12 +35,19 @@ namespace Ariadne {
     template class Polyhedron<Rational>;
     template class Constraint<Rational>;
 
-    template class Polyhedron<Real>;
-    template class Constraint<Real>;
-    template class Polyhedron< Interval<Real> >;
-    template class Constraint< Interval<Real> >;
+#ifdef ENABLE_FLOAT64
+    template class Polyhedron<Float64>;
+    template class Constraint<Float64>;
+    template class Polyhedron< Interval<Float64> >;
+    template class Constraint< Interval<Float64> >;
+#endif
+  
+#ifdef ENABLE_FLOATMP
+    template class Polyhedron<FloatMP>;
+    template class Constraint<FloatMP>;
+    template class Polyhedron< Interval<FloatMP> >;
+    template class Constraint< Interval<FloatMP> >;
+#endif
 
-
-    
   }
 }

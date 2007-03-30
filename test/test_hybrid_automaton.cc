@@ -26,7 +26,7 @@
 #include <string>
 
 #include "ariadne.h"
-#include "real_typedef.h"
+#include "test_float.h"
 #include "geometry/set_interface.h"
 #include "geometry/set_reference.h"
 #include "geometry/hybrid_set.h"
@@ -49,7 +49,7 @@ using namespace std;
 template<class R> int test_hybrid_automaton();
   
 int main() {
-  return test_hybrid_automaton<Real>();
+  return test_hybrid_automaton<Float>();
 }
 
 template<class R>

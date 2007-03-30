@@ -1,8 +1,8 @@
 /***************************************************************************
- *            polytope.cc
+ *            test_boost.cc
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2007  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,27 +21,46 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/rational.h"
-#include "numeric/float.h"
-#include "numeric/interval.h"
+#include <iostream>
+#include <cassert>
 
-#include "geometry/polytope.h"
-#include "geometry/polytope.code.h"
+#include <boost/numeric/interval.hpp>
 
-namespace Ariadne {
-  namespace Geometry {
+using namespace std;
 
-    template class Polytope<Rational>;
+int test_boost_rounding(); 
 
-#ifdef ENABLE_FLOAT64
-    template class Polytope<Float64>;
-    template class Polytope< Interval<Float64> >;
-#endif
-  
-#ifdef ENABLE_FLOATMP
-    template class Polytope<FloatMP>;
-    template class Polytope< Interval<FloatMP> >;
-#endif
 
-  }
+int 
+main() 
+{
+  test_boost_rounding();
+  return 0;
 }
+
+
+int
+test_boost_rounding() 
+{
+  cout << __PRETTY_FUNCTION__ << endl;
+
+  double x=1;
+  double y=3;
+  double zl,zu;
+  
+  { 
+    boost::numeric::interval_lib::rounded_arith_std<double> rnd;
+    zl=rnd.div_down(x,y);
+    zu=rnd.div_up(x,y);
+  }
+  cout << zl << " <= " << x << "/" << y << " <= " << zu << endl;
+  if(!(zl<zu)) {
+    cerr << "Warning: boost::numeric::interval_lib::rounded_arith_std<double> does not round correctly\n";
+  }
+  assert(zl<zu);
+  
+  return 0;
+}
+
+
+

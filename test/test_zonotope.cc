@@ -26,7 +26,7 @@
 #include <fstream>
 #include <string>
 
-#include "real_typedef.h"
+#include "test_float.h"
 
 #include "ariadne.h"
 
@@ -50,7 +50,7 @@ using namespace std;
 template<class R> int test_zonotope();
  
 int main() {
-  test_zonotope<Real>();
+  test_zonotope<Float>();
   
   cerr << "INCOMPLETE ";
   return 0;

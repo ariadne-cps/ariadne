@@ -21,7 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "real_typedef.h"
+#include "numeric/rational.h"
+#include "numeric/float.h"
+#include "numeric/interval.h"
 
 #include "geometry/zonotope.h"
 #include "geometry/zonotope.code.h"
@@ -30,15 +32,21 @@ namespace Ariadne {
   namespace Geometry {
 
     template class Zonotope<Rational>;
-      
-    template class Zonotope<Real>;
-    template class Zonotope< Interval<Real> >;
-  
-    template 
-    Zonotope< Interval<Real> > 
-    interval_over_approximation(const Zonotope< Interval<Real> >&);
-    
     template class ZonotopeVerticesIterator<Rational>;
-    template class ZonotopeVerticesIterator<Real>;
+
+#ifdef ENABLE_FLOAT64
+    template class Zonotope<Float64>;
+    template class Zonotope< Interval<Float64> >;
+    template class ZonotopeVerticesIterator<Float64>;
+    template Zonotope< Interval<Float64> > interval_over_approximation(const Zonotope< Interval<Float64> >&);
+#endif
+  
+#ifdef ENABLE_FLOATMP
+    template class Zonotope<FloatMP>;
+    template class Zonotope< Interval<FloatMP> >;
+    template class ZonotopeVerticesIterator<FloatMP>;
+    template Zonotope< Interval<FloatMP> > interval_over_approximation(const Zonotope< Interval<FloatMP> >&);
+#endif
+
   }
 }

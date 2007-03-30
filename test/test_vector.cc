@@ -21,15 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#define NO_CBLAS
-
 #include <iostream>
 #include <fstream>
 #include <cassert>
 
 
-#include "numeric/float64.h"
-#include "numeric/mpfloat.h"
+#include "test/test_float.h"
 #include "numeric/rational.h"
 #include "numeric/interval.h"
 #include "linear_algebra/vector.h"
@@ -38,8 +35,6 @@
 // but allows testing without rebuilding the entire library.
 #include "linear_algebra/vector.code.h"
 
-#undef DEBUG
-
 using namespace std;
 using namespace Ariadne;
 using namespace Ariadne::LinearAlgebra;
@@ -47,11 +42,9 @@ using namespace Ariadne::LinearAlgebra;
 template<class R> int test_vector();
 
 int main() {
-  test_vector<MPFloat>();
-  test_vector<Float64>();
+  test_vector<Float>();
   //test_vector<Rational>();
-  //test_vector< Interval<MPFloat> >();
-  //test_vector< Interval<Rational> >();
+  //test_vector< Interval<Float> >();
 
   return 0;
 }  

@@ -37,9 +37,10 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_lattice_set.cc \
 	export_lattice_map.cc \
 	 \
-	export_numeric.cc \
+	export_integer.cc \
+	export_rational.cc \
+	export_float.cc \
 	export_interval.cc \
-	export_function.cc \
 	 \
 	export_vector.cc \
 	export_matrix.cc \

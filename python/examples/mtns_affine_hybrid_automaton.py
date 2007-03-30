@@ -82,7 +82,8 @@ hybrid_evolver=HybridEvolver(apply,integrator);
 print "Computing continuous chainreach set"
 continuous_chainreach_set=hybrid_evolver.continuous_chainreach(automaton,initial_set,bounding_set)
 print "Exporting to postscript output...",
-eps=EpsPlot("mtns_affine_hybrid_automaton-1.eps",epsbb)
+eps=EpsPlot()
+eps.open("mtns_affine_hybrid_automaton-1.eps",epsbb)
 eps.set_line_style(True)
 eps.set_fill_colour("green")
 eps.write(continuous_chainreach_set[mode1_id])
@@ -95,7 +96,8 @@ print "Computing chainreach set"
 chainreach_set=hybrid_evolver.chainreach(automaton,initial_set,bounding_set)
 
 print "Exporting to postscript output...",
-eps=EpsPlot("mtns_affine_hybrid_automaton-2.eps",epsbb)
+eps=EpsPlot()
+eps.open("mtns_affine_hybrid_automaton-2.eps",epsbb)
 eps.set_line_style(True)
 eps.set_fill_colour("cyan")
 eps.write(activation21)

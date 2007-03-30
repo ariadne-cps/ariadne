@@ -22,7 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "real_typedef.h"
+#include "python/python_float.h"
 
 
 #include "linear_algebra/matrix.h"
@@ -205,4 +205,4 @@ void export_list_set()
   def("approximation",&approximate_interval_zonotope_list_set<R>);
 }
 
-template void export_list_set<Real>();
+template void export_list_set<Float>();

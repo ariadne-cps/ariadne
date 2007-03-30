@@ -24,13 +24,18 @@
 #include "geometry/ellipsoid.h"
 #include "geometry/ellipsoid.code.h"
 
-#include "real_typedef.h"
+#include "numeric/float.h"
 
 namespace Ariadne {
   namespace Geometry {
 
-    template class Ellipsoid<Real>;
-
+#ifdef ENABLE_FLOAT64
+    template class Ellipsoid<Float64>;
+#endif
+  
+#ifdef ENABLE_FLOATMP
+    template class Ellipsoid<FloatMP>;
+#endif
 
   }
 }

@@ -23,14 +23,13 @@
  */
 
 
-#include "numeric/float64.h"
-#include "numeric/mpfloat.h"
 #include "numeric/rational.h"
 #include "numeric/interval.h"
 
 #include "linear_algebra/vector.h"
 
 #include "python/python_utilities.h"
+#include "python/python_float.h"
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
@@ -123,8 +122,8 @@ void export_vector()
     .def(self_ns::str(self))
   ;
 
-  // Need 'Real' here to extract vector of proper class
-  def("extract_vector",&extract_vector<Real>,"Extract an Ariadne vector from a Python list");
+  // Need 'Float' here to extract vector of proper class
+  def("extract_vector",&extract_vector<Float>,"Extract an Ariadne vector from a Python list");
 }
 
 template<>
@@ -193,9 +192,7 @@ void export_interval_vector() {
   ;
 }
 
-template void export_vector<Float64>();
-template void export_vector<MPFloat>();
+template void export_vector<Float>();
 template void export_vector<Rational>();
 
-template void export_interval_vector<Float64>();
-template void export_interval_vector<MPFloat>();
+template void export_interval_vector<Float>();

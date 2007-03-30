@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "real_typedef.h"
+#include "numeric/float.h"
 
 #include "system/discrete_mode.h"
 #include "system/discrete_transition.h"
@@ -32,9 +32,17 @@
 namespace Ariadne {
   namespace System {
 
-    template class DiscreteMode<Real>;
-    template class DiscreteTransition<Real>;
-    template class HybridAutomaton<Real>;
+#ifdef ENABLE_FLOAT64
+    template class DiscreteMode<Float64>;
+    template class DiscreteTransition<Float64>;
+    template class HybridAutomaton<Float64>;
+#endif
+    
+#ifdef ENABLE_FLOATMP
+    template class DiscreteMode<FloatMP>;
+    template class DiscreteTransition<FloatMP>;
+    template class HybridAutomaton<FloatMP>;
+#endif
       
   }
 }

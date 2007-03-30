@@ -31,7 +31,7 @@
 #include "numeric/interval.h"
 
 #include "numeric/float64.h"
-#include "numeric/mpfloat.h"
+#include "numeric/floatmp.h"
 #include "numeric/rational.h"
 
 #include "test.h"
@@ -40,7 +40,7 @@ using namespace Ariadne;
 using namespace std;
 
 template class Interval<Float64>;
-template class Interval<MPFloat>;
+template class Interval<FloatMP>;
 template class Interval<Rational>;
 
 template<class R> int test_interval();
@@ -51,7 +51,7 @@ int main() {
   mpf_set_default_prec (8);
 
   test_interval<Float64>();
-  test_interval<MPFloat>();
+  test_interval<FloatMP>();
   test_interval<Rational>();
   
   cerr << "INCOMPLETE ";

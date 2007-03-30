@@ -23,7 +23,7 @@
 
 #include <fstream>
 
-#include "real_typedef.h"
+#include "test_float.h"
 
 #include "ariadne.h"
 #include "linear_algebra/vector.h"
@@ -52,8 +52,8 @@ template<class R> int test_integration_step();
 template<class R> int test_integrate();
 
 int main() {
-  test_integration_step<Real>();
-  test_integrate<Real>();
+  test_integration_step<Float>();
+  test_integrate<Float>();
   return 0;
 }
 
@@ -100,10 +100,10 @@ test_integration_step()
   Geometry::ListSet< Zonotope<R> > nzls;
   Geometry::ListSet< Zonotope<I> > nizls;
   
-  Real x0=0;
-  Real x1=0.4;
-  Interval<Real> ivl1(0.4);
-  Interval<Real> ivl0;
+  Float x0=0;
+  Float x1=0.4;
+  Interval<Float> ivl1(0.4);
+  Interval<Float> ivl0;
   
   time_type h(0.0625);
   cout << "h=" << h << endl;

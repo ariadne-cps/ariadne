@@ -28,7 +28,7 @@
 #include <string>
 
 #include "ariadne.h"
-#include "real_typedef.h"
+#include "test_float.h"
 #include "base/stlio.h"
 #include "combinatoric/binary_word.h"
 #include "linear_algebra/matrix.h"
@@ -56,7 +56,7 @@ int main() {
 
   std::vector<Ariadne::dimension_type> seqa;
 
-  Rectangle<Real> bb("[0,1]x[0,3]");
+  Rectangle<Float> bb("[0,1]x[0,3]");
   SubdivisionSequence seq(2);
   BinaryWord bnw;
   BooleanArray bna;
@@ -76,25 +76,25 @@ int main() {
 
   cout << "bb=" << bb << "  seq=" << seq << "  bna=" << bna << "  bla=" << bla << endl;
 
-  PartitionScheme<Real> pg(bb,seq);
-  PartitionTree<Real> pt(pg,bnt);
-  PartitionTreeSet<Real> pts(pg,bnt,bla);
-  ListSet< Rectangle<Real> > rls(pts);
+  PartitionScheme<Float> pg(bb,seq);
+  PartitionTree<Float> pt(pg,bnt);
+  PartitionTreeSet<Float> pts(pg,bnt,bla);
+  ListSet< Rectangle<Float> > rls(pts);
 
-  PartitionTree<Real>::const_iterator ptree_iter=pt.begin();
-  PartitionTree<Real>::const_iterator ptree_end=pt.end();
+  PartitionTree<Float>::const_iterator ptree_iter=pt.begin();
+  PartitionTree<Float>::const_iterator ptree_end=pt.end();
 
-  PartitionTreeSet<Real>::const_iterator ptreeset_iter=pts.begin();
-  PartitionTreeSet<Real>::const_iterator ptreeset_end=pts.end();
+  PartitionTreeSet<Float>::const_iterator ptreeset_iter=pts.begin();
+  PartitionTreeSet<Float>::const_iterator ptreeset_end=pts.end();
 
-  Vector< Interval<Real> > iv(2);
-  iv[0]=Interval<Real>(-0.5,0.5);
-  iv[1]=Interval<Real>(-0.5,0.5);
-  Vector<Real> c("[0.125,0.25]");
-  Matrix<Real> A("[2,1;0.5,1]");
-  bb=Rectangle<Real>("[-4,4]x[-4,4]");
-  Rectangle<Real> rect("[-1.5,2.5]x[0.875,2.25]");
-  Parallelotope<Real> pltp(c,A);
+  Vector< Interval<Float> > iv(2);
+  iv[0]=Interval<Float>(-0.5,0.5);
+  iv[1]=Interval<Float>(-0.5,0.5);
+  Vector<Float> c("[0.125,0.25]");
+  Matrix<Float> A("[2,1;0.5,1]");
+  bb=Rectangle<Float>("[-4,4]x[-4,4]");
+  Rectangle<Float> rect("[-1.5,2.5]x[0.875,2.25]");
+  Parallelotope<Float> pltp(c,A);
   cout << "pltp=" << pltp << endl << "bb=" << bb << endl;
 
 
@@ -110,31 +110,31 @@ int main() {
   cout << "rect=" << rect << endl;
   cout << "pltp=" << pltp << endl;
   cout << "rls=" << rls << endl;
-  pg=PartitionScheme<Real>(bb,seq);
+  pg=PartitionScheme<Float>(bb,seq);
   uint dpth=8;
-  PartitionTreeSet<Real> ptsrua=under_approximation< Real, Rectangle<Real>  >(rect,pg,dpth);
+  PartitionTreeSet<Float> ptsrua=under_approximation< Float, Rectangle<Float>  >(rect,pg,dpth);
   cout << "under_approximation(rect,pg,dpth)=" << ptsrua << endl;
-  PartitionTreeSet<Real> ptsroa=over_approximation< Real, Rectangle<Real>  >(rect,pg,dpth);
+  PartitionTreeSet<Float> ptsroa=over_approximation< Float, Rectangle<Float>  >(rect,pg,dpth);
   cout << "over_approximation(rect,pg,dpth)=" << ptsrua << endl;
 
-  PartitionTreeSet<Real> ptsua=under_approximation< Real, Parallelotope<Real>  >(pltp,pg,dpth);
+  PartitionTreeSet<Float> ptsua=under_approximation< Float, Parallelotope<Float>  >(pltp,pg,dpth);
   cout << "ptsua=" << ptsua << endl;
-  PartitionTreeSet<Real> ptsoa=over_approximation< Real, Parallelotope<Real>  >(pltp,pg,dpth);
+  PartitionTreeSet<Float> ptsoa=over_approximation< Float, Parallelotope<Float>  >(pltp,pg,dpth);
   cout << "ptsoa=" << ptsoa << endl;
-  PartitionTreeSet<Real> ptsina=inner_approximation< Real, Parallelotope<Real>  >(pltp,pg,dpth);
+  PartitionTreeSet<Float> ptsina=inner_approximation< Float, Parallelotope<Float>  >(pltp,pg,dpth);
   cout << "ptsina=" << ptsina << endl;
-  PartitionTreeSet<Real> ptsouta=outer_approximation< Real, Parallelotope<Real>  >(pltp,pg,dpth);
+  PartitionTreeSet<Float> ptsouta=outer_approximation< Float, Parallelotope<Float>  >(pltp,pg,dpth);
   cout << "ptsouta=" << ptsouta << endl;
 
-  Grid<Real> g(2,Real(0.125));
-  FiniteGrid<Real> fg(g,bb);
-  ListSet< Rectangle<Real> > lsua=ptsua;
+  Grid<Float> g(2,Float(0.125));
+  FiniteGrid<Float> fg(g,bb);
+  ListSet< Rectangle<Float> > lsua=ptsua;
   cout << "lsua=" << lsua << endl;
   cout << "ptsua.size()=" << ptsua.size() << ", lsua.size()=" << lsua.size() << endl;
   // Under approximation of partition tree sets not currently implemented
-  //GridMaskSet<Real> gmsina=under_approximation(ptsina,fg);
+  //GridMaskSet<Float> gmsina=under_approximation(ptsina,fg);
   //cout << "gmsina=" << gmsina << endl;
-  GridMaskSet<Real> gmsouta=over_approximation(ptsouta,fg);
+  GridMaskSet<Float> gmsouta=over_approximation(ptsouta,fg);
   cout << "gmsouta=" << gmsouta << endl;
 
   

@@ -25,7 +25,7 @@
 #include <fstream>
 #include <string>
 
-#include "real_typedef.h"
+#include "test_float.h"
 
 #include "ariadne.h"
 #include "geometry/point.h"
@@ -41,7 +41,7 @@ using namespace std;
 template<class R> int test_simplex();
 
 int main() {
-  test_simplex<Real>();
+  test_simplex<Float>();
 
   tribool x=indeterminate;
   cout << x << endl;

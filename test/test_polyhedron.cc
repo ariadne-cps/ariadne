@@ -28,11 +28,9 @@
 
 #include <vector>
 
-#include "real_typedef.h"
+#include "test_float.h"
 
 #include "ariadne.h"
-#include "numeric/float64.h"
-#include "numeric/mpfloat.h"
 #include "numeric/rational.h"
 #include "geometry/point.h"
 #include "geometry/point_list.h"
@@ -61,7 +59,7 @@ int main() {
   
   cout << boolalpha;
   
-  test_polyhedron<Real>();
+  test_polyhedron<Float>();
   test_polyhedron<Rational>();
    
   cerr << "INCOMPLETE ";

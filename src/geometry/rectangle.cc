@@ -21,7 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "real_typedef.h"
+#include "numeric/rational.h"
+#include "numeric/float.h"
+#include "numeric/interval.h"
 
 #include "geometry/rectangle.h"
 #include "geometry/rectangle.code.h"
@@ -29,10 +31,18 @@
 
 namespace Ariadne {
   namespace Geometry {
-    template class Rectangle<Rational>; 
 
-    template class Rectangle<Real>; 
-    template class Rectangle< Interval<Real> >; 
-      
+    template class Rectangle<Rational>;
+
+#ifdef ENABLE_FLOAT64
+    template class Rectangle<Float64>;
+    template class Rectangle< Interval<Float64> >;
+#endif
+  
+#ifdef ENABLE_FLOATMP
+    template class Rectangle<FloatMP>;
+    template class Rectangle< Interval<FloatMP> >;
+#endif
+
   }
 }

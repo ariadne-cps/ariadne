@@ -7,9 +7,10 @@ LDADD   = ../src/libariadne.la -lppl -lmpfr -lgmpxx
 
 check_PROGRAMS = \
 	test_array \
-	test_ddconv test_mpfr \
-	test_integer \
-	test_arithmetic test_function test_interval \
+	test_ddconv \
+	test_boost test_mpfr \
+	test_integer test_rational test_float \
+	test_interval \
 	test_vector test_matrix test_tensor \
 	test_linear_algebra test_linear_program \
 	test_binary_word test_lattice test_subdivision_tree \
@@ -31,10 +32,11 @@ XFAIL_TESTS =
 # This should not be necessary!!
 test_array_SOURCES=test_array.cc
 test_ddconv_SOURCES=test_ddconv.cc
+test_boost_SOURCES=test_boost.cc
 test_mpfr_SOURCES=test_mpfr.cc
 test_integer_SOURCES=test_integer.cc
-test_arithmetic_SOURCES=test_arithmetic.cc
-test_function_SOURCES=test_function.cc
+test_rational_SOURCES=test_rational.cc
+test_float_SOURCES=test_float.cc
 test_interval_SOURCES=test_interval.cc
 test_vector_SOURCES=test_vector.cc
 test_matrix_SOURCES=test_matrix.cc

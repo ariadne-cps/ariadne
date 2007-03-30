@@ -28,7 +28,7 @@
 #include <sstream>
 #include <string>
 
-#include "real_typedef.h"
+#include "test_float.h"
 #include "geometry/point.h"
 
 #include "test.h"
@@ -40,7 +40,7 @@ using namespace std;
 template<class R> int test_point();
 
 int main() {
-  test_point<Real>();
+  test_point<Float>();
   return 0;
 }
 

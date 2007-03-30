@@ -24,12 +24,18 @@
 #include "system/map.h"
 #include "system/map.code.h"
 
-#include "real_typedef.h"
+#include "numeric/float.h"
 
 namespace Ariadne {
   namespace System {
 
-    template class Map<Real>;
-      
+#ifdef ENABLE_FLOAT64
+    template class Map<Float64>;
+#endif
+    
+#ifdef ENABLE_FLOATMP
+    template class Map<FloatMP>;
+#endif
+    
   }
 }

@@ -1,9 +1,8 @@
 /***************************************************************************
- *            real_typedef.h
+ *            floatmp.cc
  *
- *  06 Feb 2006
- *  Copyright  2005  Pieter Collins
- *  pieter.collins@cwi.nl
+ *  Copyright  2006  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,35 +20,36 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-/*! \file real_typedef.h
- *  \brief Defines the real number type used by the library and the Python interface.
- */
 
-#ifndef _ARIADNE_REAL_TYPEDEF_H
-#define _ARIADNE_REAL_TYPEDEF_H
-
-
-#ifndef FLOAT64_REAL 
-#define MPFLOAT_REAL
-#endif
-
-#ifdef FLOAT64_REAL
-#include "numeric/float64.h"
-namespace Ariadne {
-  typedef Numeric::Float64 Real;
-}
-#endif
-
-#ifdef MPFLOAT_REAL
-#include "numeric/mpfloat.h"
-namespace Ariadne {
-  typedef Numeric::MPFloat Real;
-}
-#endif
+#include "numeric/floatmp.h"
+#include "numeric/interval.h"
 
 namespace Ariadne {
-  typedef Ariadne::Numeric::traits<Real>::arithmetic_type Field;
-}
+  namespace Numeric {
 
-#endif /* _ARIADNE_REAL_TYPEDEF_H */
+    Interval<FloatMP> 
+    operator+(const FloatMP& x1, const FloatMP& x2) 
+    {
+      return Interval<FloatMP>(add_down(x1,x2),add_up(x1,x2));
+    }
+    
+    Interval<FloatMP> 
+    operator-(const FloatMP& x1, const FloatMP& x2) 
+    {
+      return Interval<FloatMP>(sub_down(x1,x2),sub_up(x1,x2));
+    }
+
+    Interval<FloatMP> 
+    operator*(const FloatMP& x1, const FloatMP& x2) 
+    {
+      return Interval<FloatMP>(mul_down(x1,x2),mul_up(x1,x2));
+    }
+
+    Interval<FloatMP> 
+    operator/(const FloatMP& x1, const FloatMP& x2) 
+    {
+      return Interval<FloatMP>(div_down(x1,x2),div_up(x1,x2));
+    }
+
+  } 
+}

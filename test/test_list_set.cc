@@ -28,7 +28,7 @@
 #include <string>
 
 #include "ariadne.h"
-#include "real_typedef.h"
+#include "test_float.h"
 #include "base/utility.h"
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
@@ -44,7 +44,7 @@ using namespace std;
 template<class R> int test_list_set();
   
 int main() {
-  test_list_set<Real>();
+  test_list_set<Float>();
   cerr << "INCOMPLETE ";
 }
 

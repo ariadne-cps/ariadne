@@ -34,7 +34,7 @@
 
 #include "models/henon.h"
 #include "test.h"
-#include "real_typedef.h"
+#include "test_float.h"
 
 using namespace std;
 using namespace Ariadne;
@@ -45,7 +45,7 @@ using namespace Ariadne::Evaluation;
 template<class R> int test_newton();
 
 int main() {
-  test_newton<Real>();
+  test_newton<Float>();
   return 0;
 }
 

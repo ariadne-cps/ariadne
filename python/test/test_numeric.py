@@ -22,7 +22,7 @@
 
 
 from ariadne import *
-x=Float64(2.25)
+x=Float(2.25)
     
 n=2
 d=2.125

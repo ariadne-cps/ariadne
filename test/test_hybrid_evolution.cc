@@ -27,7 +27,7 @@
 
 #include "ariadne.h"
 #include "debug.h"
-#include "real_typedef.h"
+#include "test_float.h"
 #include "geometry/set_interface.h"
 #include "geometry/set_reference.h"
 #include "geometry/hybrid_set.h"
@@ -59,7 +59,7 @@ template<class R> int test_hybrid_evolution();
 namespace Ariadne { namespace Evaluation { extern int verbosity; } }
 
 int main() {
-  test_hybrid_evolution<Real>();
+  test_hybrid_evolution<Float>();
   cerr << "INCOMPLETE ";
   return 0;
 }

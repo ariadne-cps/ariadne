@@ -25,8 +25,6 @@
 
 
 #include "base/array.h"
-#include "numeric/float64.h"
-#include "numeric/mpfloat.h"
 #include "numeric/rational.h"
 #include "numeric/interval.h"
 #include "linear_algebra/vector.h"
@@ -34,6 +32,7 @@
 #include "linear_algebra/tensor.h"
 
 #include "python/python_utilities.h"
+#include "python/python_float.h"
 using namespace Ariadne;
 using namespace Ariadne::LinearAlgebra;
 
@@ -126,9 +125,7 @@ void export_interval_tensor()
   ;
 }
 
-template void export_tensor<Float64>();
-template void export_tensor<MPFloat>();
+template void export_tensor<Float>();
 template void export_tensor<Rational>();
 
-template void export_interval_tensor<Float64>();
-template void export_interval_tensor<MPFloat>();
+template void export_interval_tensor<Float>();

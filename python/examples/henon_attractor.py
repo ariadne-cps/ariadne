@@ -22,12 +22,11 @@
 
 from ariadne import *
 import sys
-Real=MPFloat
 
 print "\nAvailable classes and functions\n",dir(),"\n\n"
 
-a=Real(1.5)
-b=Real(0.875)
+a=Float(1.5)
+b=Float(0.875)
 henon_map=HenonMap(a,b)
 print henon_map
 
@@ -61,14 +60,16 @@ print "Reduced to", chain_reach_tree_set.size()," cells" \
 
 print "Exporting to postscript output...",
 epsbb=Rectangle("[-4.1,4.1]x[-4.1,4.1]") # eps bounding box
-eps=EpsPlot("henon_attractor-1.eps",epsbb)
+eps=EpsPlot()
+eps.open("henon_attractor-1.eps",epsbb)
 eps.set_line_style(True)
 eps.set_fill_colour("green")
 eps.write(chain_reach_set)
 eps.set_fill_colour("blue")
 eps.write(fixed_point_cell)
+eps.close()
 
-eps=EpsPlot("henon_attractor-2.eps",epsbb)
+eps.open("henon_attractor-2.eps",epsbb)
 eps.set_pen_colour("black")
 eps.set_fill_colour("green")
 eps.set_line_style(0)

@@ -21,15 +21,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#define NO_CBLAS
-
 #include <iostream>
 #include <fstream>
 #include <fstream>
 #include <cassert>
 
 #include "declarations.h"
-#include "real_typedef.h"
+#include "test/test_float.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/tensor.h"

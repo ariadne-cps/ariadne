@@ -21,16 +21,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "real_typedef.h"
-
 #include "geometry/taylor_set.h"
 #include "geometry/taylor_set.code.h"
+
+#include "numeric/float.h"
 
 namespace Ariadne {
   namespace Geometry {
 
-    template class TaylorSet<Real>;
-    template class TaylorSet< Interval<Real> >;
+#ifdef ENABLE_FLOAT64
+    template class TaylorSet<Float64>;
+#endif
+  
+#ifdef ENABLE_FLOATMP
+    template class TaylorSet<FloatMP>;
+#endif
 
   }
 }

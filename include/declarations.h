@@ -40,9 +40,9 @@ template<class T> class sequence;
 
 namespace Ariadne { namespace Numeric {
 class Integer;
-class Float64;
-class MPFloat;
 class Rational;
+class Float64;
+class FloatMP;
 template<class R> class Interval;
 template<class T1, class T2=T1> class traits;
 }}

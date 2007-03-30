@@ -22,7 +22,7 @@
  */
 
 
-#include "real_typedef.h"
+#include "numeric/float.h"
 
 #include "evaluation/euler_integrator.h"
 #include "evaluation/euler_integrator.code.h"
@@ -30,7 +30,13 @@
 namespace Ariadne {
   namespace Evaluation {
 
-    template class EulerIntegrator<Real>;
+#ifdef ENABLE_FLOAT64
+    template class EulerIntegrator<Float64>;
+#endif
+  
+#ifdef ENABLE_FLOATMP
+    template class EulerIntegrator<FloatMP>;
+#endif
 
   }
 }

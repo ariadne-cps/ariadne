@@ -1,8 +1,8 @@
 /***************************************************************************
- *            polytope.cc
+ *            test_float.h
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2007  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -20,28 +20,17 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+ 
+/*!\file test_float.h 
+ * \brief Definition of floating-point type for the test suite.
+ */
 
-#include "numeric/rational.h"
-#include "numeric/float.h"
-#include "numeric/interval.h"
+#include <config.h>
 
-#include "geometry/polytope.h"
-#include "geometry/polytope.code.h"
-
-namespace Ariadne {
-  namespace Geometry {
-
-    template class Polytope<Rational>;
-
-#ifdef ENABLE_FLOAT64
-    template class Polytope<Float64>;
-    template class Polytope< Interval<Float64> >;
+#if ENABLE_FLOAT64
+#include "numeric/float64.h"
+namespace Ariadne { namespace Numeric { typedef Float64 Float; } }
+#elif ENABLE_FLOATMP
+#include "numeric/mpfloat.h"
+namespace Ariadne { namespace Numeric { typedef MPFloat Float; } }
 #endif
-  
-#ifdef ENABLE_FLOATMP
-    template class Polytope<FloatMP>;
-    template class Polytope< Interval<FloatMP> >;
-#endif
-
-  }
-}

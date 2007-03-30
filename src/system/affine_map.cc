@@ -24,12 +24,18 @@
 #include "system/affine_map.h"
 #include "system/affine_map.code.h"
 
-#include "real_typedef.h"
+#include "numeric/float.h"
 
 namespace Ariadne {
   namespace System {
 
-    template class AffineMap<Real>;
+#ifdef ENABLE_FLOAT64
+    template class AffineMap<Float64>;
+#endif
+    
+#ifdef ENABLE_FLOATMP
+    template class AffineMap<FloatMP>;
+#endif
     
   }
 }

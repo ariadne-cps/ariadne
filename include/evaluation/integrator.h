@@ -62,6 +62,7 @@ namespace Ariadne {
       time_type _minimum_step_size;
       time_type _maximum_step_size;
       time_type _lock_to_grid_time;
+      R _grid_size;
       R _minimum_basic_set_radius;
       R _maximum_basic_set_radius;
      public:
@@ -77,6 +78,9 @@ namespace Ariadne {
       /*! \brief Constructor. */
       Integrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_set_radius);
 
+      //@{
+      //! \name Parameters controlling the accuracy
+
       /*! \brief A suggested minimum step size for integration. */
       virtual time_type minimum_step_size() const;
       /*! \brief The maximum allowable step size for integration. */
@@ -88,22 +92,80 @@ namespace Ariadne {
       /*! \brief The time after which an integrator may approximate computed sets on a grid,
        *  in order to use previously caches integration results for the grid. */
       virtual time_type lock_to_grid_time() const;
+      /*! \brief The time after which an integrator may approximate computed sets on a grid,
+       *  in order to use previously caches integration results for the grid. */
+      virtual R grid_size() const;
+      //@}
+
+      //@{
+      //! \name Integration routines
+
+      /*! \brief Integrate \a intial_set for time \a time under \a vector_field. Returns a dynamically allocated set. */
+      virtual Geometry::SetInterface<R>* integrate(const System::VectorField<R>& vector_field,
+                                                   const Geometry::SetInterface<R>& initial_set,
+                                                   const time_type& time) const;
+
+      /*! \brief Integrate \a intial_set for time \a time under \a vector_field, while remaining in \a bounding_set. Returns a dynamically allocated set. */
+      virtual Geometry::SetInterface<R>* integrate(const System::VectorField<R>& vector_field,
+                                                   const Geometry::SetInterface<R>& initial_set,
+                                                   const Geometry::SetInterface<R>& bounding_set,
+                                                   const time_type& time) const;
+
+      /*! \brief Integrate \a intial_set for times up to \a time under \a vector_field. Returns a dynamically allocated set. */
+      virtual Geometry::SetInterface<R>* reach(const System::VectorField<R>& vector_field,
+                                               const Geometry::SetInterface<R>& initial_set,
+                                               const time_type& time) const;
+
+      /*! \brief Integrate \a intial_set for times up to \a time under \a vector_field, while remaining in \a bounding_set. Returns a dynamically allocated set. */
+      virtual Geometry::SetInterface<R>* reach(const System::VectorField<R>& vector_field,
+                                               const Geometry::SetInterface<R>& initial_set,
+                                               const Geometry::SetInterface<R>& bounding_set,
+                                               const time_type& time) const;
+
+      /*! \brief Integrate \a intial_set for all times under \a vector_field. Returns a dynamically allocated set. */
+      virtual Geometry::SetInterface<R>* reach(const System::VectorField<R>& vector_field,
+                                               const Geometry::SetInterface<R>& initial_set) const;
+
+      /*! \brief Integrate \a intial_set for all times under \a vector_field, while remaining in \a bounding_set. Returns a dynamically allocated set. */
+      virtual Geometry::SetInterface<R>* reach(const System::VectorField<R>& vector_field,
+                                               const Geometry::SetInterface<R>& initial_set,
+                                               const Geometry::SetInterface<R>& bounding_set) const;
+
+      /*! \brief Integrate \a intial_set for all times under \a vector_field, while remaining in \a bounding_set. 
+       *
+       * Implemented by repeated calls to integrate(...) followed by a single call to reach(...).
+       */
+      virtual Geometry::SetInterface<R>* chainreach(const System::VectorField<R>& vector_field,
+                                                   const Geometry::SetInterface<R>& initial_set,
+                                                   const Geometry::SetInterface<R>& bounding_set) const;
+
+      /*! \brief  Verifies that the flow of \a vector_field starting in \a initial_set remains in \a safe_set all times.
+       */
+      virtual tribool verify(const System::VectorField<R>& vector_field,
+                             const Geometry::SetInterface<R>& initial_set,
+                             const Geometry::SetInterface<R>& safe_set) const;
+
+      //@}
+
+      //@{
+      //! \name Integration of grid sets. (Deprecated)
 
 
-
-      /*! \brief Integrate \a intial_set for time \a time under \a vector_field, while remaining in \a bounding_set. */
+      /*!  \deprecated \brief Integrate \a intial_set for time \a time under \a vector_field, while remaining in \a bounding_set. (Deprecated) 
+       */
       virtual Geometry::GridMaskSet<R> integrate(const System::VectorField<R>& vector_field,
                                                   const Geometry::GridMaskSet<R>& initial_set,
                                                   const Geometry::GridMaskSet<R>& bounding_set,
                                                   const time_type& time) const = 0;
 
-      /*! \brief Integrate \a intial_set for times up to \a time under \a vector_field, while remaining in \a bounding_set. */
+      /*! \deprecated \brief Integrate \a intial_set for times up to \a time under \a vector_field, while remaining in \a bounding_set. (Deprecated) 
+       */
       virtual Geometry::GridMaskSet<R> reach(const System::VectorField<R>& vector_field,
                                              const Geometry::GridMaskSet<R>& initial_set,
                                              const Geometry::GridMaskSet<R>& bounding_set,
                                              const time_type& time) const = 0;
 
-      /*! \brief Integrate \a intial_set for all times under \a vector_field, while remaining in \a bounding_set. 
+      /*! \deprecated \brief Integrate \a intial_set for all times under \a vector_field, while remaining in \a bounding_set. (Deprecated)
        *
        * Implemented by repeated calls to integrate(...) followed by a single call to reach(...).
        */
@@ -111,7 +173,7 @@ namespace Ariadne {
                                                    const Geometry::GridMaskSet<R>& initial_set,
                                                    const Geometry::GridMaskSet<R>& bounding_set) const = 0;
 
-      /*! \brief  Verifies that the flow of \a vector_field starting in \a initial_set remains in \a safe_set all times.
+      /*! \brief  Verifies that the flow of \a vector_field starting in \a initial_set remains in \a safe_set all times. (Deprecated) \deprecated
        *
        * Implemented by repeated calls to integrate(...) followed by a single call to reach(...).
        */
@@ -120,7 +182,7 @@ namespace Ariadne {
                              const Geometry::GridMaskSet<R>& safe_set) const = 0;
 
 
-
+      //@}
 
 
       /*! \brief Verifies that the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time. 

@@ -23,7 +23,7 @@
 
 #include <iostream>
 
-#include "real_typedef.h"
+#include "test_float.h"
 
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
@@ -46,7 +46,7 @@ using namespace std;
 template<class R> int test_chainreach();
 
 int main() {
-  return test_chainreach<Real>();
+  return test_chainreach<Float>();
 }
 
 template<class R> 

@@ -23,7 +23,7 @@
  */
 
 
-#include "real_typedef.h"
+#include "python/python_float.h"
 
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
@@ -71,32 +71,32 @@ void export_postscript_output()
   ;
     
   class_<epsfstream, boost::noncopyable>("EpsPlot",init<>())
-    .def("open",(void(epsfstream::*)(const char* fn,const Rectangle<Real>&))&epsfstream::open<Real>)
-    .def("open",(void(epsfstream::*)(const char* fn,const Rectangle<Real>&,uint,uint))&epsfstream::open<Real>)
-    .def("open",(void(epsfstream::*)(const char* fn,const Rectangle<Real>&,const PlanarProjectionMap&))&epsfstream::open<Real>)
+    .def("open",(void(epsfstream::*)(const char* fn,const Rectangle<Float>&))&epsfstream::open<Float>)
+    .def("open",(void(epsfstream::*)(const char* fn,const Rectangle<Float>&,uint,uint))&epsfstream::open<Float>)
+    .def("open",(void(epsfstream::*)(const char* fn,const Rectangle<Float>&,const PlanarProjectionMap&))&epsfstream::open<Float>)
     .def("open",(void(epsfstream::*)(const char*,const Rectangle2d&,const PlanarProjectionMap&))&epsfstream::open)
-    .def("open",&epsfstream_open_with_defaults<Real>)
+    .def("open",&epsfstream_open_with_defaults<Float>)
     .def("close",&epsfstream_close)
     .def("set_pen_colour",&epsfstream::set_pen_colour)
     .def("set_fill_colour",&epsfstream::set_fill_colour)
     .def("set_line_style",&epsfstream::set_line_style)
     .def("set_fill_style",&epsfstream::set_fill_style)
-    .def("write",&write_rectangle<Real>)
-    .def("write",&write_grid_rectangle<Real>)
-    .def("write",&write_grid_cell<Real>)
-    .def("write",&write_parallelotope<Real>)
-    .def("write",&write_zonotope<Real>)
-    .def("write",&write_parallelotope<Real>)
-    .def("write",&write_polytope<Real>)
-    .def("write",&write_polyhedron<Real>)
-    .def("write",&write_rectangle_list_set<Real>)
-    .def("write",&write_parallelotope_list_set<Real>)
-    .def("write",&write_zonotope_list_set<Real>)
-    .def("write",&write_polytope_list_set<Real>)
-    .def("write",&write_grid_cell_list_set<Real>)
-    .def("write",&write_grid_mask_set<Real>)
-    .def("write",&write_partition_tree<Real>)
-    .def("write",&write_partition_tree_set<Real>)
+    .def("write",&write_rectangle<Float>)
+    .def("write",&write_grid_rectangle<Float>)
+    .def("write",&write_grid_cell<Float>)
+    .def("write",&write_parallelotope<Float>)
+    .def("write",&write_zonotope<Float>)
+    .def("write",&write_parallelotope<Float>)
+    .def("write",&write_polytope<Float>)
+    .def("write",&write_polyhedron<Float>)
+    .def("write",&write_rectangle_list_set<Float>)
+    .def("write",&write_parallelotope_list_set<Float>)
+    .def("write",&write_zonotope_list_set<Float>)
+    .def("write",&write_polytope_list_set<Float>)
+    .def("write",&write_grid_cell_list_set<Float>)
+    .def("write",&write_grid_mask_set<Float>)
+    .def("write",&write_partition_tree<Float>)
+    .def("write",&write_partition_tree_set<Float>)
   ;
   
 }

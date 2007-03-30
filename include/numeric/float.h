@@ -1,8 +1,8 @@
 /***************************************************************************
- *            mpfloat.cc
+ *            float.h
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2007  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -20,36 +20,22 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+ 
+/*! \file float.h
+ *  \brief Configuration for floating-point numbers.
+ */
 
-#include "numeric/mpfloat.h"
-#include "numeric/interval.h"
+#ifndef ARIADNE_FLOAT_H
+#define ARIADNE_FLOAT_H
 
-namespace Ariadne {
-  namespace Numeric {
+#include <config.h>
 
-    Interval<MPFloat> 
-    operator+(const MPFloat& x1, const MPFloat& x2) 
-    {
-      return Interval<MPFloat>(add_down(x1,x2),add_up(x1,x2));
-    }
-    
-    Interval<MPFloat> 
-    operator-(const MPFloat& x1, const MPFloat& x2) 
-    {
-      return Interval<MPFloat>(sub_down(x1,x2),sub_up(x1,x2));
-    }
+#ifdef ENABLE_FLOAT64
+#include "float64.h"
+#endif
 
-    Interval<MPFloat> 
-    operator*(const MPFloat& x1, const MPFloat& x2) 
-    {
-      return Interval<MPFloat>(mul_down(x1,x2),mul_up(x1,x2));
-    }
+#ifdef ENABLE_FLOATMP
+#include "floatmp.h"
+#endif
 
-    Interval<MPFloat> 
-    operator/(const MPFloat& x1, const MPFloat& x2) 
-    {
-      return Interval<MPFloat>(div_down(x1,x2),div_up(x1,x2));
-    }
-
-  } 
-}
+#endif /* ARIADNE_FLOAT_H */

@@ -27,7 +27,7 @@
 #include <fstream>
 #include <string>
 
-#include "real_typedef.h"
+#include "test_float.h"
 
 #include "ariadne.h"
 #include "geometry/rectangle.h"
@@ -42,7 +42,7 @@ using namespace std;
 template<class R> int test_rectangle();
 
 int main() {
-  test_rectangle<Real>();
+  test_rectangle<Float>();
 }
 
 template<class R>

@@ -13,7 +13,7 @@ SUBDIRS = . python
 
 NUMERIC_SRC = \
   numeric/integer.cc numeric/rational.cc \
-  numeric/float64.cc numeric/mpfloat.cc 
+  numeric/float64.cc numeric/floatmp.cc 
 
 LINEAR_ALGEBRA_SRC = \
 	linear_algebra/vector.cc linear_algebra/matrix.cc \

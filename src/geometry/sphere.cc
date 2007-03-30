@@ -24,13 +24,18 @@
 #include "geometry/sphere.h"
 #include "geometry/sphere.code.h"
 
-#include "real_typedef.h"
+#include "numeric/float.h"
 
 namespace Ariadne {
   namespace Geometry {
 
-    template class Sphere<Real>;
-
+#ifdef ENABLE_FLOAT64
+    template class Sphere<Float64>;
+#endif
+  
+#ifdef ENABLE_FLOATMP
+    template class Sphere<FloatMP>;
+#endif
 
   }
 }

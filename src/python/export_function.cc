@@ -23,7 +23,7 @@
  */
 
 #include "numeric/float64.h"
-#include "numeric/mpfloat.h"
+#include "numeric/floatmp.h"
 
 #include "numeric/function.h"
 
@@ -49,4 +49,4 @@ void export_function() {
 }
 
 template void export_function<Float64>();
-template void export_function<MPFloat>();
+template void export_function<FloatMP>();

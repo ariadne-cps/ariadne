@@ -24,9 +24,7 @@ from ariadne import *
 import sys
 
 
-Real=MPFloat
-
-mu=Real(0.25)
+mu=Float(0.25)
 
 vdp=VanDerPolEquation(mu)
 

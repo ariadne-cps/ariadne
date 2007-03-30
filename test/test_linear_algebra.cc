@@ -27,8 +27,7 @@
 #include <fstream>
 #include <string>
 
-#include "numeric/float64.h"
-#include "numeric/mpfloat.h"
+#include "test/test_float.h"
 #include "numeric/rational.h"
 
 #include "linear_algebra/vector.h"
@@ -51,8 +50,7 @@ template<> int test_linear_algebra<Rational>();
 
 int main() {
   test_linear_algebra<Rational>();
-  test_linear_algebra<Float64>();
-  test_linear_algebra<MPFloat>();
+  test_linear_algebra<Float>();
 }
 
 template<> 

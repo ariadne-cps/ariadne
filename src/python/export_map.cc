@@ -22,7 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "real_typedef.h"
+#include "python/python_float.h"
 
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
@@ -58,4 +58,4 @@ void export_map()
   ;
 }
 
-template void export_map<Real>();
+template void export_map<Float>();

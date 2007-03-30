@@ -24,13 +24,20 @@
 #include "system/affine_multimap.h"
 #include "system/affine_multimap.code.h"
 
-#include "real_typedef.h"
+#include "numeric/float.h"
 
 namespace Ariadne {
   namespace System {
 
-    template class AffineMultiMap<Real,Geometry::Rectangle>;
-    template class AffineMultiMap<Real,Geometry::Zonotope>;
-
+#ifdef ENABLE_FLOAT64
+    template class AffineMultiMap<Float64,Geometry::Rectangle>;
+    template class AffineMultiMap<Float64,Geometry::Zonotope>;
+#endif
+    
+#ifdef ENABLE_FLOATMP
+    template class AffineMultiMap<FloatMP,Geometry::Rectangle>;
+    template class AffineMultiMap<FloatMP,Geometry::Zonotope>;
+#endif
+    
   }
 }

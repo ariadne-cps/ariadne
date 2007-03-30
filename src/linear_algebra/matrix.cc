@@ -1,5 +1,5 @@
 /***************************************************************************
- *            Matrix.cc
+ *            matrix.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it Pieter.Collins@cwi.nl
@@ -24,10 +24,8 @@
 #include <cstdlib>
 #include <cstdio>
 
-#include "numeric/float64.h"
-#include "numeric/mpfloat.h"
 #include "numeric/rational.h"
-
+#include "numeric/float.h"
 #include "numeric/interval.h"
 
 #include "linear_algebra/matrix.h"
@@ -37,12 +35,18 @@
 namespace Ariadne {
   namespace LinearAlgebra {
     
-    template class Matrix<Float64>;
-    template class Matrix<MPFloat>;
     template class Matrix<Rational>;
-  
-    template class Matrix< Interval<Float64> >;
-    template class Matrix< Interval<MPFloat> >;
     template class Matrix< Interval<Rational> >;
+
+#ifdef ENABLE_FLOAT64
+    template class Matrix<Float64>;
+    template class Matrix< Interval<Float64> >;
+#endif
+  
+#ifdef ENABLE_FLOATMP
+    template class Matrix<FloatMP>;
+    template class Matrix< Interval<FloatMP> >;
+#endif
+
   }
 }

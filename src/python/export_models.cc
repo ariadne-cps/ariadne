@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "real_typedef.h"
+#include "python/python_float.h"
 
 #include "models/henon.h"
 #include "models/duffing.h"
@@ -92,7 +92,7 @@ void export_lorenz_system()
   ;
 }
 
-template void export_henon_map<Real>();
-template void export_duffing_equation<Real>();
-template void export_van_der_pol_equation<Real>();
-template void export_lorenz_system<Real>();
+template void export_henon_map<Float>();
+template void export_duffing_equation<Float>();
+template void export_van_der_pol_equation<Float>();
+template void export_lorenz_system<Float>();

@@ -22,7 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "real_typedef.h"
+#include "python/python_float.h"
 
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
@@ -67,4 +67,4 @@ void export_polyhedron()
   
 }
 
-template void export_polyhedron<Real>();
+template void export_polyhedron<Float>();

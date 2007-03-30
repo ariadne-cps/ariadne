@@ -21,16 +21,24 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "numeric/float.h"
+
 #include "geometry/grid.h"
 #include "geometry/grid.code.h"
 
-#include "real_typedef.h"
 
 namespace Ariadne {
   namespace Geometry {
 
-    template class Grid<Real>;
-    template class FiniteGrid<Real>;
+#ifdef ENABLE_FLOAT64
+    template class Grid<Float64>;
+    template class FiniteGrid<Float64>;
+#endif
+ 
+#ifdef ENABLE_FLOATMP
+    template class Grid<FloatMP>;
+    template class FiniteGrid<FloatMP>;
+#endif
  
   }
 }

@@ -23,12 +23,18 @@
 
 #include "system/grid_multimap.h"
 
-#include "real_typedef.h"
+#include "numeric/float.h"
 
 namespace Ariadne {
   namespace System {
 
-    template class GridMultiMap<Real>;
+#ifdef ENABLE_FLOAT64
+    template class GridMultiMap<Float64>;
+#endif
+    
+#ifdef ENABLE_FLOATMP
+    template class GridMultiMap<FloatMP>;
+#endif
       
   }
 }

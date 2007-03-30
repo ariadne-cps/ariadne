@@ -22,16 +22,20 @@
  */
 
 
-#define DEBUG
-
-#include "real_typedef.h"
+#include "numeric/float.h"
 
 #include "evaluation/solver.h"
 
 namespace Ariadne {
   namespace Evaluation {
 
-    template class Solver<Real>;
-    
+#ifdef ENABLE_FLOAT64
+    template class Solver<Float64>;
+#endif
+  
+#ifdef ENABLE_FLOATMP
+    template class Solver<FloatMP>;
+#endif
+
   }
 }

@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "real_typedef.h"
+#include "python/python_float.h"
 
 #include "geometry/hybrid_set.h"
 #include "evaluation/applicator.h"
@@ -49,4 +49,4 @@ void export_hybrid_evolver()
 }
 
 
-template void export_hybrid_evolver<Real>();
+template void export_hybrid_evolver<Float>();

@@ -21,16 +21,24 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "real_typedef.h"
-
 #include "geometry/parallelotope.h"
 #include "geometry/parallelotope.code.h"
+
+#include "numeric/float.h"
+#include "numeric/interval.h"
 
 namespace Ariadne {
   namespace Geometry {
 
-    template class Parallelotope<Real>;
-    template class Parallelotope< Interval<Real> >;
+#ifdef ENABLE_FLOAT64
+    template class Parallelotope<Float64>;
+    template class Parallelotope< Interval<Float64> >;
+#endif
+  
+#ifdef ENABLE_FLOATMP
+    template class Parallelotope<FloatMP>;
+    template class Parallelotope< Interval<FloatMP> >;
+#endif
 
   }
 }

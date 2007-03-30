@@ -22,7 +22,7 @@
  */
 
 
-#include "real_typedef.h"
+#include "numeric/float.h"
 
 #include "evaluation/integrator.h"
 #include "evaluation/lohner_integrator.h"
@@ -32,7 +32,13 @@
 namespace Ariadne {
   namespace Evaluation {
 
-    template class LohnerIntegrator<Real>;
+#ifdef ENABLE_FLOAT64
+    template class LohnerIntegrator<Float64>;
+#endif
+  
+#ifdef ENABLE_FLOATMP
+    template class LohnerIntegrator<FloatMP>;
+#endif
 
   }
 }

@@ -27,12 +27,18 @@
 #include "geometry/point.h"
 #include "geometry/polytope.h"
 
-#include "real_typedef.h"
+#include "numeric/float.h"
 
 namespace Ariadne {
   namespace System {
 
-    template class MultiMap< Geometry::Point<Real>, Geometry::Polytope<Real> >;
-      
+#ifdef ENABLE_FLOAT64
+    template class MultiMap< Geometry::Point<Float64>, Geometry::Polytope<Float64> >;
+#endif
+    
+#ifdef ENABLE_FLOATMP
+    template class MultiMap< Geometry::Point<FloatMP>, Geometry::Polytope<FloatMP> >;
+#endif
+
   }
 }

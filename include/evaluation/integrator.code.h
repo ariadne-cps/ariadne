@@ -134,13 +134,94 @@ namespace Ariadne {
     }
 
     template<class R>
+    R Integrator<R>::grid_size() const
+    {
+      return this->_grid_size;
+    }
+
+    template<class R>
     time_type Integrator<R>::lock_to_grid_time() const
     {
       return this->_lock_to_grid_time;
     }
     
+
     
-    
+    template<class R>
+    Geometry::SetInterface<R>*
+    Integrator<R>::integrate(const System::VectorField<R>& vector_field,
+                             const Geometry::SetInterface<R>& initial_set,
+                             const time_type& time) const
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+
+    template<class R>
+    Geometry::SetInterface<R>*
+    Integrator<R>::integrate(const System::VectorField<R>& vector_field,
+                             const Geometry::SetInterface<R>& initial_set,
+                             const Geometry::SetInterface<R>& bounding_set,
+                             const time_type& time) const
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+
+    template<class R>
+    Geometry::SetInterface<R>*
+    Integrator<R>::reach(const System::VectorField<R>& vector_field,
+                         const Geometry::SetInterface<R>& initial_set,
+                         const time_type& time) const
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+
+    template<class R>
+    Geometry::SetInterface<R>*
+    Integrator<R>::reach(const System::VectorField<R>& vector_field,
+                         const Geometry::SetInterface<R>& initial_set,
+                         const Geometry::SetInterface<R>& bounding_set,
+                         const time_type& time) const
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+
+    template<class R>
+    Geometry::SetInterface<R>*
+    Integrator<R>::reach(const System::VectorField<R>& vector_field,
+                         const Geometry::SetInterface<R>& initial_set) const
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+
+    template<class R>
+    Geometry::SetInterface<R>*
+    Integrator<R>::reach(const System::VectorField<R>& vector_field,
+                         const Geometry::SetInterface<R>& initial_set,
+                         const Geometry::SetInterface<R>& bounding_set) const
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+
+    template<class R>
+    Geometry::SetInterface<R>*
+    Integrator<R>::chainreach(const System::VectorField<R>& vector_field,
+                              const Geometry::SetInterface<R>& initial_set,
+                              const Geometry::SetInterface<R>& bounding_set) const
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+
+    template<class R>
+    tribool
+    Integrator<R>::verify(const System::VectorField<R>& vector_field,
+                          const Geometry::SetInterface<R>& initial_set,
+                          const Geometry::SetInterface<R>& bounding_set) const
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+
+
+
     
     
     template<class R>

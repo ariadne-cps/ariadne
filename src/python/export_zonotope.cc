@@ -22,7 +22,7 @@
  */
 
 
-#include "real_typedef.h"
+#include "python/python_float.h"
 
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
@@ -135,5 +135,5 @@ void export_interval_zonotope()
 
 }
 
-template void export_zonotope<Real>();
-template void export_interval_zonotope<Real>();
+template void export_zonotope<Float>();
+template void export_interval_zonotope<Float>();

@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "real_typedef.h"
+#include "python/python_float.h"
 
 #include "numeric/interval.h"
 #include "linear_algebra/matrix.h"
@@ -61,4 +61,4 @@ void export_affine_vector_field()
   ;
 }
 
-template void export_affine_vector_field<Real>();
+template void export_affine_vector_field<Float>();

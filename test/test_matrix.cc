@@ -26,9 +26,8 @@
 #include <iostream>
 #include <fstream>
 
-#include "numeric/float64.h"
-#include "numeric/mpfloat.h"
 #include "numeric/rational.h"
+#include "test/test_float.h"
 
 #include "declarations.h"
 #include "linear_algebra/vector.h"
@@ -41,13 +40,14 @@
 
 using namespace std;
 using namespace Ariadne;
+using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
 
 template<class R> int test_matrix();
 
 int main() {
-  test_matrix<Float64>();
-  test_matrix<MPFloat>();
+  test_matrix<Float>();
+  //test_matrix<Rational>();
   return 0;
 }
 

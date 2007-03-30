@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "real_typedef.h"
+#include "python/python_float.h"
 
 #include "evaluation/newton.h"
 #include "python/python_utilities.h"
@@ -47,4 +47,4 @@ void export_solve()
   
 }
 
-template void export_solve<Real>();
+template void export_solve<Float>();

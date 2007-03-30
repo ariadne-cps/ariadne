@@ -23,7 +23,7 @@
 
 #include <fstream>
 
-#include "real_typedef.h"
+#include "test_float.h"
 
 #include "ariadne.h"
 #include "linear_algebra/vector.h"
@@ -48,7 +48,7 @@ using namespace std;
 template<class R> int test_lohner_integrator();
 
 int main() {
-  test_lohner_integrator<Real>();
+  test_lohner_integrator<Float>();
   return 0;
 }
 

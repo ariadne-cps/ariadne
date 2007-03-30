@@ -1,7 +1,7 @@
 /***************************************************************************
- *            polytope.cc
+ *            python/python_float.h
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
+ *  Copyright  2005  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -21,27 +21,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/rational.h"
-#include "numeric/float.h"
-#include "numeric/interval.h"
+/*! \file python_utilities.h
+ *  Commonly used inline methods for the Python interface.
+ */
+ 
+#ifndef ARIADNE_PYTHON_FLOAT_H
+#define ARIADNE_PYTHON_FLOAT_H
 
-#include "geometry/polytope.h"
-#include "geometry/polytope.code.h"
+#include <config.h>
 
-namespace Ariadne {
-  namespace Geometry {
-
-    template class Polytope<Rational>;
-
-#ifdef ENABLE_FLOAT64
-    template class Polytope<Float64>;
-    template class Polytope< Interval<Float64> >;
-#endif
-  
-#ifdef ENABLE_FLOATMP
-    template class Polytope<FloatMP>;
-    template class Polytope< Interval<FloatMP> >;
+#if PYTHON_FLOAT == Float64 
+#include "numeric/float64.h" 
+namespace Ariadne { typedef Numeric::Float64 Float; }
+#elif PYTHON_FLOAT == FloatMP 
+#include "numeric/floatmp.h" 
+namespace Ariadne { typedef Numeric::FloatMP Float; }
 #endif
 
-  }
-}
+#endif /* ARIADNE_PYTHON_FLOAT_H */

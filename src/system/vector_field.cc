@@ -1,5 +1,5 @@
 /***************************************************************************
- *            Vector_field.cc
+ *            vector_field.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -24,12 +24,18 @@
 #include "system/vector_field.h"
 #include "system/vector_field.code.h"
 
-#include "real_typedef.h"
+#include "numeric/float.h"
 
 namespace Ariadne {
   namespace System {
 
-    template class VectorField<Real>;
-      
+#ifdef ENABLE_FLOAT64
+    template class VectorField<Float64>;
+#endif
+    
+#ifdef ENABLE_FLOATMP
+    template class VectorField<FloatMP>;
+#endif
+    
   }
 }

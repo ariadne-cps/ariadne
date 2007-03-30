@@ -52,7 +52,7 @@
  * which must either conform to the ExactArithmetic interface or the 
  * ApproximateArithmetic interface. This use of standard operations allows
  * new classes to be easily dropped in as wrappers. Currently, the Float64 and
- * MPFloat classes support approximate arithmetic, algebraic and transcendental
+ * FloatMP classes support approximate arithmetic, algebraic and transcendental
  * functions, and the Dyadic and Rational classes support exact arithmetic, but
  * no algebraic or transcendental operations. Further, Dyadic does not support
  * division, but does support the median() operation.
@@ -83,7 +83,7 @@
  *  - \b R: Rational, Float
  *  - \b X: Rational, Float, Interval<Float>
  *
- * Here, Float refers to any floating-point type, such as Float64 or MPFloat.
+ * Here, Float refers to any floating-point type, such as Float64 or FloatMP.
  * 
  * \internal The above template names are currently not used consistently
  *

@@ -23,7 +23,7 @@
 
 #include <iostream>
 
-#include "real_typedef.h"
+#include "test_float.h"
 
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
@@ -47,7 +47,7 @@ using namespace std;
 template<class R> int test_apply();
 
 int main() {
-  return test_apply<Real>();
+  return test_apply<Float>();
 }
 
 template<class R> 

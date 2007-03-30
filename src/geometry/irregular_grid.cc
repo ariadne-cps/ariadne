@@ -24,14 +24,20 @@
 #include "geometry/irregular_grid.h"
 #include "geometry/irregular_grid.code.h"
 
-#include "real_typedef.h"
+#include "numeric/float.h"
 
 namespace Ariadne {
   namespace Geometry {
 
-    template class IrregularGrid<Real>;
     template class IrregularGrid<Rational>;
 
-   
+#ifdef ENABLE_FLOAT64
+    template class IrregularGrid<Float64>;
+#endif
+  
+#ifdef ENABLE_FLOATMP
+    template class IrregularGrid<FloatMP>;
+#endif
+
   }
 }

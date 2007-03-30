@@ -23,7 +23,7 @@
 
 #include <map>
 
-#include "real_typedef.h"
+#include "python/python_float.h"
 
 #include "geometry/hybrid_set.h"
 #include "geometry/set_reference.h"
@@ -106,4 +106,4 @@ void export_hybrid_set()
   
 }
 
-template void export_hybrid_set<Real>();
+template void export_hybrid_set<Float>();

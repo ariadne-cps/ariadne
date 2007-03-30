@@ -21,17 +21,29 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "real_typedef.h"
+#include "numeric/float.h"
 
 #include "evaluation/integrator.h"
 #include "evaluation/integrator.code.h"
 
 namespace Ariadne {
   namespace Evaluation {
-    template class Integrator<Real>;
 
-    template class IntegratorBase< Real, System::VectorField<Real>, Geometry::Rectangle<Real> >;
-    template class IntegratorBase<Real, System::VectorField<Real>, Geometry::Zonotope< Interval<Real> > >;
-    template class IntegratorBase< Real, System::AffineVectorField<Real>, Geometry::Zonotope< Interval<Real> > >;
+#ifdef ENABLE_FLOAT64
+    template class Integrator<Float64>;
+
+    template class IntegratorBase< Float64, System::VectorField<Float64>, Geometry::Rectangle<Float64> >;
+    template class IntegratorBase<Float64, System::VectorField<Float64>, Geometry::Zonotope< Interval<Float64> > >;
+    template class IntegratorBase< Float64, System::AffineVectorField<Float64>, Geometry::Zonotope< Interval<Float64> > >;
+#endif
+  
+#ifdef ENABLE_FLOATMP
+    template class Integrator<FloatMP>;
+
+    template class IntegratorBase< FloatMP, System::VectorField<FloatMP>, Geometry::Rectangle<FloatMP> >;
+    template class IntegratorBase<FloatMP, System::VectorField<FloatMP>, Geometry::Zonotope< Interval<FloatMP> > >;
+    template class IntegratorBase< FloatMP, System::AffineVectorField<FloatMP>, Geometry::Zonotope< Interval<FloatMP> > >;
+#endif
+
   }
 }

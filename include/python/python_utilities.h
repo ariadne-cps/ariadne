@@ -34,10 +34,10 @@
 
 
 #include "numeric/float64.h"
-#include "numeric/mpfloat.h"
+#include "numeric/floatmp.h"
 #include "numeric/rational.h"
 
-#include "real_typedef.h"
+#include "python/python_float.h"
 
 template<class R> inline std::string python_name(const std::string& bn);
 
@@ -47,12 +47,15 @@ template<> inline std::string python_name<Ariadne::size_type>(const std::string&
 template<> inline std::string python_name<Ariadne::Numeric::Integer>(const std::string& bn) { return "Z"+bn; }
 template<> inline std::string python_name<Ariadne::Numeric::Rational>(const std::string& bn) { return "Q"+bn; }
 
-#ifdef FLOAT64_REAL
+#if PYTHON_FLOAT == Float64 
 template<> inline std::string python_name<Ariadne::Numeric::Float64>(const std::string& bn) { return ""+bn; }
-template<> inline std::string python_name<Ariadne::Numeric::MPFloat>(const std::string& bn) { return "MPF"+bn; }
+template<> inline std::string python_name<Ariadne::Numeric::FloatMP>(const std::string& bn) { return "MPF"+bn; }
+#elif PYTHON_FLOAT == FloatMP 
+template<> inline std::string python_name<Ariadne::Numeric::Float64>(const std::string& bn) { return "F64"+bn; }
+template<> inline std::string python_name<Ariadne::Numeric::FloatMP>(const std::string& bn) { return ""+bn; }
 #else
 template<> inline std::string python_name<Ariadne::Numeric::Float64>(const std::string& bn) { return "F64"+bn; }
-template<> inline std::string python_name<Ariadne::Numeric::MPFloat>(const std::string& bn) { return ""+bn; }
+template<> inline std::string python_name<Ariadne::Numeric::FloatMP>(const std::string& bn) { return "MPF"+bn; }
 #endif
 
 

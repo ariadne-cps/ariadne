@@ -26,15 +26,24 @@
 #include "geometry/partition_tree_set.h"
 #include "geometry/partition_tree_set.code.h"
 
-#include "real_typedef.h"
+#include "numeric/float.h"
 
 namespace Ariadne {
   namespace Geometry {
 
-    template class PartitionScheme<Real>;
-    template class PartitionTree<Real>;
-    template class PartitionTreeCell<Real>;
-    template class PartitionTreeSet<Real>;
+#ifdef ENABLE_FLOAT64
+    template class PartitionScheme<Float64>;
+    template class PartitionTree<Float64>;
+    template class PartitionTreeCell<Float64>;
+    template class PartitionTreeSet<Float64>;
+#endif
+
+#ifdef ENABLE_FLOATMP
+    template class PartitionScheme<FloatMP>;
+    template class PartitionTree<FloatMP>;
+    template class PartitionTreeCell<FloatMP>;
+    template class PartitionTreeSet<FloatMP>;
+#endif
 
   }
 }

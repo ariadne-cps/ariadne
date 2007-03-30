@@ -40,7 +40,7 @@ class __gmpq_value;
 namespace Ariadne {
   namespace Numeric {
     class Float64;
-    class MPFloat;
+    class FloatMP;
     class Rational;
     template<class R> class Interval;
       
@@ -91,7 +91,7 @@ namespace Ariadne {
       typedef mpf_class closure_type; 
       typedef mpf_class number_type; 
       typedef mpf_class arithmetic_type; 
-      typedef Interval<MPFloat> interval_type; 
+      typedef Interval<FloatMP> interval_type; 
     };
     
     template<> struct traits< Float64 > { 
@@ -102,12 +102,12 @@ namespace Ariadne {
       typedef Interval<Float64> interval_type;
     };
     
-    template<> struct traits< MPFloat > { 
+    template<> struct traits< FloatMP > { 
       typedef mpf_class approximate_arithmetic_type; 
-      typedef MPFloat closure_type; 
-      typedef MPFloat number_type; 
-      typedef Interval<MPFloat> arithmetic_type; 
-      typedef Interval<MPFloat> interval_type; 
+      typedef FloatMP closure_type; 
+      typedef FloatMP number_type; 
+      typedef Interval<FloatMP> arithmetic_type; 
+      typedef Interval<FloatMP> interval_type; 
     };
     
     template<> struct traits< Rational > { 
@@ -147,11 +147,11 @@ namespace Ariadne {
       typedef Rational arithmetic_type; 
     };
     
-    template<> struct traits< MPFloat, Rational > { 
+    template<> struct traits< FloatMP, Rational > { 
       typedef Rational arithmetic_type; 
     };
     
-    template<> struct traits< Rational, MPFloat > { 
+    template<> struct traits< Rational, FloatMP > { 
       typedef Rational arithmetic_type; 
     };
     

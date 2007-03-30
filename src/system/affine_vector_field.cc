@@ -24,20 +24,18 @@
 #include "system/affine_vector_field.h"
 #include "system/affine_vector_field.code.h"
 
-#include "real_typedef.h"
+#include "numeric/float.h"
 
 namespace Ariadne {
   namespace System {
 
-    template class AffineVectorField<Real>;
-  }
-}
-
-
-namespace Ariadne {
-  namespace LinearAlgebra {
+#ifdef ENABLE_FLOAT64
+    template class AffineVectorField<Float64>;
+#endif
     
-    typedef Numeric::traits<Real>::arithmetic_type IReal;
+#ifdef ENABLE_FLOATMP
+    template class AffineVectorField<FloatMP>;
+#endif
     
   }
 }

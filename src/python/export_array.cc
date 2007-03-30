@@ -26,7 +26,7 @@
 #include "base/stlio.h"
 
 #include "python/python_utilities.h"
-#include "real_typedef.h"
+#include "python/python_float.h"
 using namespace Ariadne;
 using namespace Ariadne::Base;
 
@@ -49,4 +49,4 @@ template void export_array<index_type>();
 template void export_array<size_type>();
 template void export_array<Integer>();
 template void export_array<Rational>();
-template void export_array<Real>();
+template void export_array<Float>();

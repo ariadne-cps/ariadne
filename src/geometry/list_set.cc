@@ -21,7 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "real_typedef.h"
+#include "numeric/rational.h"
+#include "numeric/float.h"
 
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
@@ -34,25 +35,46 @@
 namespace Ariadne {
   namespace Geometry {
  
-    template class ListSet< Rectangle<Real> >;
-    template class ListSet< Parallelotope<Real> >;
-    template class ListSet< Zonotope<Real> >;
-    template class ListSet< Polytope<Real> >;
-    template class ListSet< Zonotope< Interval<Real> > >;
-
     template class ListSet< Rectangle<Rational> >;
     template class ListSet< Zonotope<Rational> >;
     
+#ifdef ENABLE_FLOAT64
+    template class ListSet< Rectangle<Float64> >;
+    template class ListSet< Parallelotope<Float64> >;
+    template class ListSet< Zonotope<Float64> >;
+    template class ListSet< Polytope<Float64> >;
+    template class ListSet< Zonotope< Interval<Float64> > >;
+
     // The following are not defined for all types,
     // so we can't instantiate them in ListSet<R,BS>::_instantiate_geometry_operators()
-    template  ListSet< Rectangle<Real> >::operator  ListSet< Zonotope< Interval<Real> > >() const;
-    template  ListSet< Rectangle<Real> >::operator  ListSet< Zonotope<Real> >() const;
+    template  ListSet< Rectangle<Float64> >::operator  ListSet< Zonotope< Interval<Float64> > >() const;
+    template  ListSet< Rectangle<Float64> >::operator  ListSet< Zonotope<Float64> >() const;
     
-    template tribool disjoint(const ListSet< Rectangle<Real> >&, const ListSet< Rectangle<Real> >&);
-    template tribool disjoint(const ListSet< Zonotope<Real> >&, const ListSet< Zonotope<Real> >&);
+    template tribool disjoint(const ListSet< Rectangle<Float64> >&, const ListSet< Rectangle<Float64> >&);
+    template tribool disjoint(const ListSet< Zonotope<Float64> >&, const ListSet< Zonotope<Float64> >&);
 
-    template tribool subset(const ListSet< Rectangle<Real> >&, const ListSet< Rectangle<Real> >&);
-    template ListSet< Rectangle<Real> > open_intersection(const ListSet< Rectangle<Real> >&, const ListSet< Rectangle<Real> >&);
+    template tribool subset(const ListSet< Rectangle<Float64> >&, const ListSet< Rectangle<Float64> >&);
+    template ListSet< Rectangle<Float64> > open_intersection(const ListSet< Rectangle<Float64> >&, const ListSet< Rectangle<Float64> >&);
+#endif
+   
+#ifdef ENABLE_FLOATMP
+    template class ListSet< Rectangle<FloatMP> >;
+    template class ListSet< Parallelotope<FloatMP> >;
+    template class ListSet< Zonotope<FloatMP> >;
+    template class ListSet< Polytope<FloatMP> >;
+    template class ListSet< Zonotope< Interval<FloatMP> > >;
+
+    // The following are not defined for all types,
+    // so we can't instantiate them in ListSet<R,BS>::_instantiate_geometry_operators()
+    template  ListSet< Rectangle<FloatMP> >::operator  ListSet< Zonotope< Interval<FloatMP> > >() const;
+    template  ListSet< Rectangle<FloatMP> >::operator  ListSet< Zonotope<FloatMP> >() const;
+    
+    template tribool disjoint(const ListSet< Rectangle<FloatMP> >&, const ListSet< Rectangle<FloatMP> >&);
+    template tribool disjoint(const ListSet< Zonotope<FloatMP> >&, const ListSet< Zonotope<FloatMP> >&);
+
+    template tribool subset(const ListSet< Rectangle<FloatMP> >&, const ListSet< Rectangle<FloatMP> >&);
+    template ListSet< Rectangle<FloatMP> > open_intersection(const ListSet< Rectangle<FloatMP> >&, const ListSet< Rectangle<FloatMP> >&);
+#endif
    
   }
 }

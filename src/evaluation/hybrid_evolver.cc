@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_automaton.cc
+ *            hybrid_evolver.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "real_typedef.h"
+#include "numeric/float.h"
 
 #include "evaluation/hybrid_evolver.h"
 #include "evaluation/hybrid_evolver.code.h"
@@ -29,7 +29,14 @@
 namespace Ariadne {
   namespace Evaluation {
 
-    template class HybridEvolver<Real>;
+#ifdef ENABLE_FLOAT64
+    template class HybridEvolver<Float64>;
+#endif
+  
+#ifdef ENABLE_FLOATMP
+    template class HybridEvolver<FloatMP>;
+#endif
+
       
   }
 }

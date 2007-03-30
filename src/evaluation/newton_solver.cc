@@ -22,9 +22,7 @@
  */
 
 
-#define DEBUG
-
-#include "real_typedef.h"
+#include "numeric/float.h"
 
 #include "evaluation/newton.h"
 #include "evaluation/newton.code.h"
@@ -32,7 +30,13 @@
 namespace Ariadne {
   namespace Evaluation {
 
-    template class IntervalNewtonSolver<Real>;
+#ifdef ENABLE_FLOAT64
+    template class IntervalNewtonSolver<Float64>;
+#endif
+  
+#ifdef ENABLE_FLOATMP
+    template class IntervalNewtonSolver<FloatMP>;
+#endif
 
   }
 }

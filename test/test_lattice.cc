@@ -25,7 +25,7 @@
 #include <fstream>
 
 #include "declarations.h"
-#include "real_typedef.h"
+#include "test_float.h"
 
 #include "combinatoric/lattice_set.h"
 #include "combinatoric/lattice_map.h"

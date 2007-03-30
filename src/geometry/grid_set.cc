@@ -25,25 +25,30 @@
 #include "geometry/grid_set.h"
 #include "geometry/grid_set.code.h"
 
-#include "real_typedef.h"
+#include "numeric/float.h"
 
 namespace Ariadne {
   namespace Geometry {
 
-    template class GridCell<Real>;
-    template class GridBlock<Real>;
-    template class GridCellListSet<Real>;
-    template class GridMaskSet<Real>;
+#ifdef ENABLE_FLOAT64
+    template class GridCell<Float64>;
+    template class GridBlock<Float64>;
+    template class GridCellListSet<Float64>;
+    template class GridMaskSet<Float64>;
 
-    //template class GridBlockIterator<Real>;
-    template class GridCellListSetIterator<Real>;
-    template class GridMaskSetIterator<Real>;
+    template class GridCellListSetIterator<Float64>;
+    template class GridMaskSetIterator<Float64>;
+#endif
 
+#ifdef ENABLE_FLOATMP
+    template class GridCell<FloatMP>;
+    template class GridBlock<FloatMP>;
+    template class GridCellListSet<FloatMP>;
+    template class GridMaskSet<FloatMP>;
 
-    
-
-
-    
+    template class GridCellListSetIterator<FloatMP>;
+    template class GridMaskSetIterator<FloatMP>;
+#endif
     
   }
 }

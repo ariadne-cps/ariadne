@@ -36,6 +36,8 @@
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 
+#include "../geometry/zonotope.decl.h"
+
 #include "exceptions.h"
 
 namespace Ariadne {
@@ -43,7 +45,6 @@ namespace Ariadne {
    
     template<class> class Rectangle;
     template<class> class Parallelotope;
-    template<class> class Zonotope;
     template<class> class Sphere;
     template<class> class Ellipsoid;
 
@@ -98,6 +99,9 @@ namespace Ariadne {
       /*! \brief The dimension of the Euclidean space the state lies in. */
       dimension_type dimension() const;
 
+      /*! \brief Change the dimension of the space the point lies in. */
+      void resize(dimension_type d);
+      
       /*! \brief Subcripting operator. */
       R& operator[](dimension_type index);
 

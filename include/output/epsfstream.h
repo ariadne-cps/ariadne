@@ -284,7 +284,8 @@ namespace Ariadne {
 
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Point<R>&); 
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Rectangle<R>&);
-    template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Zonotope<R>&);
+    template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Zonotope<R,R>&);
+    template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Zonotope<Numeric::Interval<R>,R>&);
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Polytope<R>&); 
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Polyhedron<R>&); 
     template<class BS> epsfstream& operator<<(epsfstream&, const Geometry::ListSet<BS>&); 
@@ -339,9 +340,18 @@ namespace Ariadne {
     
     template<class R> inline
     epsfstream&
+    operator<<(epsfstream& eps, const Geometry::Zonotope<Numeric::Interval<R>,R>& z)
+    { 
+      Geometry::Zonotope<Numeric::Rational> qz=Geometry::over_approximation(z);
+      Polygon2d vertices=eps.projection_map()(qz);      
+      return draw(eps,vertices);
+    }
+       
+    template<class R> inline
+    epsfstream&
     operator<<(epsfstream& eps, const Geometry::Zonotope<R>& z)
-    {
-      Polygon2d vertices=eps.projection_map()(Geometry::Zonotope<Numeric::Rational>(z).vertices());      
+    { 
+      Polygon2d vertices=eps.projection_map()(Geometry::Zonotope<Numeric::Rational>(z));      
       return draw(eps,vertices);
     }
        

@@ -78,20 +78,24 @@ test_zonotope()
   cout << "p2=" << p2 << endl;
   
   Point<R> pt;
+  cout << pt << endl;
   Rectangle<R> r;
+  cout << r << endl;
   Zonotope<R> z;
+  cout << z << endl;
   Zonotope<F> iz;
+  cout << iz << endl;
   
   Zonotope<R> z1=Zonotope<R>(r1);
   cout << "z1=" << z1 << endl;
-  Zonotope<R> z2=Zonotope<R>(p2);
+  Zonotope<R> z2=Zonotope<R>(r1);
   cout << "z2=" << z2 << endl;
   Zonotope<R> z3=Zonotope<R>(Point<R>("(0.125,-0.25)"),Matrix<R>("[2,1;1,1]"));
   cout << "z3=" << z3 << endl;
   Zonotope<R> z4=Zonotope<R>(Point<R>("(0,0)"),Matrix<R>("[1,0,1;0,1,1]"));
   cout << "z4=" << z4 << endl;
   cout << endl;
-  
+    
   cout << "z2.dimension()=" << z2.dimension() << endl;
   cout << "z2.number_of_generators()=" << z2.number_of_generators() << endl;
   cout << "z2.centre()=" << z2.centre() << endl;
@@ -110,6 +114,9 @@ test_zonotope()
   }
   cout << endl;
   
+  cout << "z3.vertices()=" << z3.vertices() << endl;
+  cout << "z4.vertices()=" << z4.vertices() << endl;
+
   // Minkowski sum
   cout << "z1=" << z1 << "\nz2=" << z2 << endl;
   iz=minkowski_sum(z1,z2);
@@ -156,6 +163,7 @@ test_zonotope()
   }
   eps.close();
   
+
   Rectangle<R> bbox3=z3.bounding_box().expand_by(0.25);
   Grid<R> gr3(2,0.125);
   GridCellListSet<R> oaz3=over_approximation(z3,gr3);
@@ -178,7 +186,7 @@ test_zonotope()
   eps.open("test_zonotope-3.eps",bbox);
   eps << z4;
   eps.close();
-  
+
   // Interval zonotope
   Zonotope<R> z5(Point<R>("(0,0)"),Matrix<R>("[2,1,1,0.125,0;1,-1,1,0,0.125]"));
   Zonotope< Interval<R> > iz5(Point<Interval<R> >("([-0.125,0.125],[-0.125,0.125])"),Matrix<R>("[2,1,1;1,-1,1]"));
@@ -203,6 +211,7 @@ test_zonotope()
   eps << r;
   eps.close();
     
+
   cout << "z5=" << z5 << endl;
   cout << "r=" << r << endl;
   cout << "pt=" << pt << endl;

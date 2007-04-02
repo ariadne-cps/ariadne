@@ -33,10 +33,12 @@
 #include "../base/iterator.h"
 #include "../base/tribool.h"
 
-#include "../numeric/interval.h"
+#include "../numeric/declarations.h"
 
-#include "../linear_algebra/vector.h"
+#include "../linear_algebra/declarations.h"
 #include "../linear_algebra/matrix.h"
+
+#include "zonotope.decl.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -49,7 +51,7 @@ namespace Ariadne {
     template<class R> class Polyhedron;
     template<class BS> class ListSet;
       
-    template<class R> class ZonotopeVerticesIterator;
+    template<class RC,class RG=RC> class ZonotopeVerticesIterator;
       
     /*!\ingroup BasicSet
      * \brief A zonotope of arbitrary dimension.
@@ -73,29 +75,25 @@ namespace Ariadne {
      * ith element, and the ith component of the kth generator is given by the
      * (kd+i)th element.
      */
-    template<class R>
+    template<class RC, class RG>
     class Zonotope {
+      typedef typename Numeric::traits<RC>::number_type R; 
       typedef typename Numeric::traits<R>::arithmetic_type F; 
       typedef typename Numeric::traits<R>::interval_type I; 
      public:
       /*! \brief The type used for to represent the zonotope. */
-      typedef R value_type;
+      typedef RC value_type;
       /*! \brief The real number type. */
       typedef typename Numeric::traits<R>::number_type real_type;
       /*! \brief The type of denotable point contained by the zonotope. */
       typedef Point<R> state_type;
       /*! \brief An iterator through the (possible) vertices of the zonotope. */
-      typedef ZonotopeVerticesIterator<R> vertices_const_iterator;
+      typedef ZonotopeVerticesIterator<RC,RG> vertices_const_iterator;
      private:
-      dimension_type _dimension;
-      size_type _number_of_generators;
-      array<R> _data;
+      Point<RC> _centre;
+      LinearAlgebra::Matrix<RG> _generators;
      private:
-      array<R>& data();
-      size_type data_size() const;
       void resize(dimension_type d, size_type m);
-      LinearAlgebra::VectorSlice<R> _centre();
-      LinearAlgebra::MatrixSlice<R> _generators();
      public:
       //@{
       //! \name Constructors
@@ -109,28 +107,31 @@ namespace Ariadne {
       explicit Zonotope(dimension_type d, size_type m);
      
       /*! \brief Construct from centre and directions. */
-      template<class R1, class R2> 
-      explicit Zonotope(const Point<R1>& c, const LinearAlgebra::Matrix<R2>& g);
+      template<class R0, class R1> 
+      explicit Zonotope(const Point<R0>& c, const LinearAlgebra::Matrix<R1>& g);
 
       /*! \brief Construct from centre directions given by two matrices. */
-      template<class R1, class R2, class R3> 
-      Zonotope(const Point<R1>& c, const LinearAlgebra::Matrix<R2>& g1, const LinearAlgebra::Vector<R3>& g2);
+      template<class R0, class R1, class R2> 
+      Zonotope(const Point<R0>& c, const LinearAlgebra::Matrix<R1>& g1, const LinearAlgebra::Vector<R2>& g2);
       
       /*! \brief Construct from centre directions given by a matrix and a vector. */
-      template<class R1, class R2, class R3> 
-      Zonotope(const Point<R1>& c, const LinearAlgebra::Matrix<R2>& g1, const LinearAlgebra::Matrix<R3>& g2);
+      template<class R0, class R1, class R2> 
+      Zonotope(const Point<R0>& c, const LinearAlgebra::Matrix<R1>& g1, const LinearAlgebra::Matrix<R2>& g2);
 
       /*! \brief Construct from a string literal. */
       explicit Zonotope(const std::string& s);
       
       /*! \brief Copy constructor. */
-      template<class R1> Zonotope(const Zonotope<R1>& z);
+      Zonotope(const Zonotope<RC,RG>& z);
       
       /*! \brief Copy assignment operator. */
-      Zonotope<R>& operator=(const Zonotope<R>& z);
+      Zonotope<RC,RG>& operator=(const Zonotope<RC,RG>& z);
+
+      /*! \brief Type conversion copy constructor operator. */
+      template<class R0,class R1> Zonotope(const Zonotope<R0,R1>& z);
 
       /*! \brief Type conversion assignment operator. */
-      template<class Rl> Zonotope<R>& operator=(const Zonotope<Rl>& z);
+      template<class R0,class R1> Zonotope<RC,RG>& operator=(const Zonotope<R0,R1>& z);
 
       //@}
       
@@ -138,26 +139,23 @@ namespace Ariadne {
       
       //@{ 
       //! \name Data access
-      /*! \brief The raw data of the zonotope. */
-      const array<R>& data() const;
-
       /*! \brief The ith component of the centre point. */
-      const R& centre(size_type i) const;
+      const RC& centre(size_type i) const;
 
       /*! \brief The (i,j)-th component of the matrix of principle directions. */
-      const R& generators(size_type i, size_type j) const;
+      const RG& generators(size_type i, size_type j) const;
      
       /*! \brief The centre. */
-      Point<R> centre() const;
+      const Point<RC>& centre() const;
 
       /*! \brief The matrix of principle directions. */
-      const LinearAlgebra::MatrixSlice<R> generators() const;
+      const LinearAlgebra::Matrix<RG>& generators() const;
      
       /*! \brief The number of generators of the zonotope. */
       size_type number_of_generators() const;
 
       /*! \brief The \a n th of principle direction. */
-      LinearAlgebra::Vector<R> generator(size_type n) const;
+      LinearAlgebra::Vector<RG> generator(size_type n) const;
       //@}
       
       
@@ -167,13 +165,13 @@ namespace Ariadne {
       template<class E> explicit Zonotope(const RectangleExpression<E>& re);
       
       /*! \brief Assign from a rectangle expression. */
-      template<class E> Zonotope<R>& operator=(const RectangleExpression<E>& re);
+      template<class E> Zonotope<RC,RG>& operator=(const RectangleExpression<E>& re);
      
       /*! \brief Convert to a polytope. */
-      operator Polytope<typename Numeric::traits<R>::arithmetic_type> () const;
+      operator Polytope<typename Numeric::traits<RC,RG>::arithmetic_type> () const;
       
       /*! \brief Convert to a polyhedron. */
-      operator Polyhedron<typename Numeric::traits<R>::arithmetic_type> () const;
+      operator Polyhedron<typename Numeric::traits<RC,RG>::arithmetic_type> () const;
       //@}
       
 
@@ -192,10 +190,10 @@ namespace Ariadne {
       R radius() const;
       
       /*! \brief Tests if the zonotope contains point. */
-      tribool contains(const Point<R>& point) const;
+      template<class R> tribool contains(const Point<R>& point) const;
 
       /*! \brief The vertices of the zonotope. */
-      PointList<typename Numeric::traits<R>::arithmetic_type> vertices() const;
+      PointList<typename Numeric::traits<RC,RG>::arithmetic_type> vertices() const;
       
       /*! \brief An iterator to the beginning of the (possible) vertices. */
       vertices_const_iterator vertices_begin() const;
@@ -204,55 +202,52 @@ namespace Ariadne {
       vertices_const_iterator vertices_end() const;
       
       /*! \brief Subdivide into two smaller pieces. */
-      ListSet< Zonotope<R> > divide() const;
+      ListSet< Zonotope<RC,RG> > divide() const;
       
       /*! \brief Subdivide into smaller pieces in each dimension. */
-      ListSet< Zonotope<R> > subdivide() const;
+      ListSet< Zonotope<RC,RG> > subdivide() const;
       
       /*! \brief A rectangle containing the given zonotope. */
-      Rectangle<typename Numeric::traits<R>::number_type> bounding_box() const;
+      Rectangle<R> bounding_box() const;
       
-      /*! \brief Scale the zonotope by a real constant. */
-      static Zonotope<F> scale(const Zonotope<R>& z, const R& sf);
-           
       //@}
       
 #ifdef DOXYGEN
       //@{
       //! \name Geometric binary predicates
       /*! \brief Tests equality */
-      friend tribool equal(const Zonotope<R>& A, const Zonotope<R>& B);
+      friend tribool equal(const Zonotope<RC,RG>& A, const Zonotope<RC,RG>& B);
       /*! \brief Tests disjointness */
-      friend tribool disjoint(const Zonotope<R>& A, const Zonotope<R>& B);
+      friend tribool disjoint(const Zonotope<RC,RG>& A, const Zonotope<RC,RG>& B);
       /*! \brief Tests disjointness */
-      friend tribool disjoint(const Rectangle<R>& A, const Zonotope<R>& B);
+      friend tribool disjoint(const Rectangle<RC,RG>& A, const Zonotope<RC,RG>& B);
       /*! \brief Tests disjointness */
-      friend tribool disjoint(const Zonotope<R>& A, const Rectangle<R>& B);
+      friend tribool disjoint(const Zonotope<RC,RG>& A, const Rectangle<RC,RG>& B);
       /*! \brief Tests inclusion of \a A in \a B. */
-      friend tribool subset(const Zonotope<R>& A, const Zonotope<R>& B);
+      friend tribool subset(const Zonotope<RC,RG>& A, const Zonotope<RC,RG>& B);
       /*! \brief Tests inclusion of \a A in \a B. */
-      friend tribool subset(const Rectangle<R>& A, const Zonotope<R>& B);
+      friend tribool subset(const Rectangle<RC,RG>& A, const Zonotope<RC,RG>& B);
       /*! \brief Tests inclusion of \a A in \a B. */
-      friend tribool subset(const Zonotope<R>& A, const Rectangle<R>& B);
+      friend tribool subset(const Zonotope<RC,RG>& A, const Rectangle<RC,RG>& B);
       //@}
       
       //@{
       //! \name Geometric binary operations
       /*! \brief The Minkoswi sum of two zonotopes */
-      friend Zonotope<F> minkowski_sum(const Zonotope<R>& A, const Zonotope<R>& B);
+      friend Zonotope<F> minkowski_sum(const Zonotope<RC,RG>& A, const Zonotope<RC,RG>& B);
       /*! \brief The Minkoswi sum of a zonotope and a rectangle. */
-      friend Zonotope<F> minkowski_sum(const Rectangle<R>& A, const Zonotope<R>& B);
+      friend Zonotope<F> minkowski_sum(const Rectangle<RC,RG>& A, const Zonotope<RC,RG>& B);
       /*! \brief The Minkoswi sum of a rectangle and a zonotope. */
-      friend Zonotope<F> minkowski_sum(const Zonotope<R>& A, const Rectangle<R>& B);
+      friend Zonotope<F> minkowski_sum(const Zonotope<RC,RG>& A, const Rectangle<RC,RG>& B);
       /*! \brief The Minkoswi difference of two zonotopes */
-      friend Zonotope<F> minkowski_difference(const Zonotope<R>& A, const Zonotope<R>& B);
+      friend Zonotope<F> minkowski_difference(const Zonotope<RC,RG>& A, const Zonotope<RC,RG>& B);
       /*! \brief The Minkoswi difference of a rectangle and a zonotope. */
-      friend Zonotope<F> minkowski_difference(const Rectangle<R>& A, const Zonotope<R>& B);
+      friend Zonotope<F> minkowski_difference(const Rectangle<RC,RG>& A, const Zonotope<RC,RG>& B);
       /*! \brief The Minkoswi difference of a zonotope and a rectangle. */
-      friend Zonotope<F> minkowski_difference(const Zonotope<R>& A, const Rectangle<R>& B);
+      friend Zonotope<F> minkowski_difference(const Zonotope<RC,RG>& A, const Rectangle<RC,RG>& B);
 
       /*! \brief Adjoin generators to a zonotope. */
-      friend Zonotope<R> operator+(const Zonotope<R>& z, const LinearAlgebra::Matrix<R>& G);
+      friend Zonotope<RC,RG> operator+(const Zonotope<RC,RG>& z, const LinearAlgebra::Matrix<RG>& G);
       //@}
 #endif
 
@@ -278,124 +273,107 @@ namespace Ariadne {
 
       // A possible vertex is the image of a vertex of the cube in 
       // generator space under the affine transformation
-      std::vector< Point<R> > _approximate_possible_vertices() const ;
+      std::vector< Point<RC> > _approximate_possible_vertices() const ;
     };
   
 
+    template<class R,class RC,class RG> tribool contains(const Zonotope<RC,RG>& z,const Point<R>& pt);
+    
 
-    template<class R> tribool disjoint(const Rectangle<R>& A, const Zonotope<R>& B);
+    template<class R,class RC,class RG> tribool disjoint(const Rectangle<R>& A, const Zonotope<RC,RG>& B);
     
-    template<class R> tribool disjoint(const Zonotope<R>& A, const Rectangle<R>& B);
+    template<class R,class RC,class RG> tribool disjoint(const Zonotope<RC,RG>& A, const Rectangle<R>& B);
     
-    template<class R> tribool disjoint(const Zonotope<R>& A, const Zonotope<R>& B);
+    template<class RC,class RG> tribool disjoint(const Zonotope<RC,RG>& A, const Zonotope<RC,RG>& B);
     
-    template<class R> tribool disjoint(const Zonotope< Numeric::Interval<R> >& z, const Rectangle< R >& r);
-
-    template<class R> tribool disjoint(const Zonotope< Numeric::Interval<R> >& z, const Rectangle< Numeric::Interval<R> >& r);
-
-
-    template<class R> tribool subset(const Rectangle<R>& A, const Zonotope<R>& B);
-    
-    template<class R> tribool subset(const Rectangle<R>& A, const Zonotope< Numeric::Interval<R> >& z);
-
-    template<class R> tribool subset(const Zonotope<R>& A, const Rectangle<R>& B);
-    
-    template<class R> tribool subset(const Zonotope< Numeric::Interval<R> >& A, const Rectangle<R>& B);
-    
-    template<class R> tribool subset(const Zonotope<R>& A, const Zonotope<R>& B);
-    
-    template<class R> tribool subset(const Zonotope< Numeric::Interval<R> >& z, const Rectangle< Numeric::Interval<R> >& r);
 
 
-    template<class R> Zonotope<R> over_approximation(const Zonotope<R>&);
+    template<class R,class RC,class RG> tribool subset(const Rectangle<R>& A, const Zonotope<RC,RG>& B);
+    
+    template<class R,class RC,class RG> tribool subset(const Zonotope<RC,RG>& A, const Rectangle<R>& B);
+    
+    template<class RC,class RG> tribool subset(const Zonotope<RC,RG>& A, const Zonotope<RC,RG>& B);
+
+
+    template<class R> Zonotope<Numeric::Interval<R>,R> over_approximation(const Zonotope< Numeric::Interval<R>, Numeric::Interval<R> >&);
      
-    template<class R> Zonotope<R> over_approximation(const Zonotope< Numeric::Interval<R> >&);
-
-    template<class R> Zonotope< Numeric::Interval<R> > interval_over_approximation(const Zonotope< Numeric::Interval<R> >&);
+    template<class R> Zonotope<R,R> over_approximation(const Zonotope< Numeric::Interval<R>, R >&);
+     
+          
 
     template<class R> Zonotope<R> approximation(const Zonotope< Numeric::Interval<R> >&);
+
+    template<class R> Zonotope<R> approximation(const Zonotope< Numeric::Interval<R>, R >&);
 
     template<class R> Zonotope<R> approximation(const Zonotope<R>&);
 
     
-    template<class R> 
-    Zonotope<typename Numeric::traits<R>::arithmetic_type>
-    minkowski_sum(const Zonotope<R>& A, const Zonotope<R>& B);
+    template<class RC,class RG> 
+    Zonotope<typename Numeric::traits<RC>::arithmetic_type,RG>
+    minkowski_sum(const Zonotope<RC,RG>& A, const Zonotope<RC,RG>& B);
     
-    template<class R> 
-    Zonotope<typename Numeric::traits<R>::arithmetic_type>
-    minkowski_difference(const Zonotope<R>& A, const Zonotope<R>& B);
+    template<class RC,class RG> 
+    Zonotope<typename Numeric::traits<RC>::arithmetic_type,RG>
+    minkowski_difference(const Zonotope<RC,RG>& A, const Zonotope<RC,RG>& B);
     
     
     
-    template<class R>
-    Zonotope<typename Numeric::traits<R>::arithmetic_type> 
-    minkowski_sum(const Rectangle<R>& A, const Zonotope<R>& B);
+    template<class R,class RC,class RG>
+    Zonotope<typename Numeric::traits<R,RG>::arithmetic_type,typename Numeric::traits<R,RG>::arithmetic_type> 
+    minkowski_sum(const Rectangle<R>& A, const Zonotope<RC,RG>& B);
     
-    template<class R>
-    Zonotope<typename Numeric::traits<R>::arithmetic_type> 
-    minkowski_sum(const Zonotope<R>& A, const Rectangle<R>& B);
+    template<class R,class RC,class RG>
+    Zonotope<typename Numeric::traits<R,RC>::arithmetic_type,typename Numeric::traits<R,RG>::arithmetic_type> 
+    minkowski_sum(const Zonotope<RC,RG>& A, const Rectangle<R>& B);
     
-    template<class R>
-    Zonotope<typename Numeric::traits<R>::arithmetic_type> 
-    minkowski_difference(const Rectangle<R>& A, const Zonotope<R>& B);
+    template<class R,class RC,class RG>
+    Zonotope<typename Numeric::traits<R,RG>::arithmetic_type,typename Numeric::traits<R,RG>::arithmetic_type> 
+    minkowski_difference(const Rectangle<R>& A, const Zonotope<RC,RG>& B);
+    
+    template<class R,class RC,class RG>
+    Zonotope<typename Numeric::traits<R,RC>::arithmetic_type,typename Numeric::traits<R,RG>::arithmetic_type> 
+    minkowski_difference(const Zonotope<RC,RG>& A, const Rectangle<R>& B);
 
-    template<class R>
-    Zonotope<typename Numeric::traits<R>::arithmetic_type> 
-    minkowski_difference(const Zonotope<R>& A, const Rectangle<R>& B);
     
+    template<class RC,class RG> 
+    ListSet< Zonotope<RC,RG> >
+    subdivide(const Zonotope<RC,RG>& z);
     
-    template<class R> 
-    ListSet< Zonotope<R> >
-    subdivide(const Zonotope<R>& z);
-    
-    template<class R> 
-    ListSet< Zonotope< Numeric::Interval<R> > >
-    subdivide(const Zonotope< Numeric::Interval<R> >& z);
-    
-    template<class R> 
-    ListSet< Zonotope<R> >
-    divide(const Zonotope<R>& z);
-    
-    template<class R> 
-    ListSet< Zonotope< Numeric::Interval<R> > >
-    divide(const Zonotope< Numeric::Interval<R> >& z);
+    template<class RC,class RG> 
+    ListSet< Zonotope<RC,RG> >
+    divide(const Zonotope<RC,RG>& z);
     
     
     template<class R> 
     Zonotope<typename Numeric::traits<R>::arithmetic_type> 
     zonotope(const Rectangle<R>& r);
     
-    template<class R> 
-    Polytope<typename Numeric::traits<R>::arithmetic_type> 
-    polytope(const Zonotope<R>& r);
+    template<class RC,class RG> 
+    Polytope<typename Numeric::traits<RC,RG>::arithmetic_type> 
+    polytope(const Zonotope<RC,RG>& r);
     
-    template<class R> 
-    Polyhedron<typename Numeric::traits<R>::arithmetic_type> 
-    polyhedron(const Zonotope<R>& r);
+    template<class RC,class RG> 
+    Polyhedron<typename Numeric::traits<RC,RG>::arithmetic_type> 
+    polyhedron(const Zonotope<RC,RG>& r);
     
     
-    template<class R> 
-    Zonotope<R> 
-    operator+(const Zonotope<R>& z, const LinearAlgebra::Matrix<R>& A);
+    template<class RC,class RG> 
+    Zonotope<RC,RG> 
+    operator+(const Zonotope<RC,RG>& z, const LinearAlgebra::Matrix<RG>& A);
     
-    template<class R> 
-    Zonotope<typename Zonotope<R>::F> 
-    scale(const Zonotope<R>& z, const R& sf);
+    template<class RC,class RG>  
+    std::ostream& operator<<(std::ostream& os, const Zonotope<RC,RG>& z);
     
-    template<class R>  
-    std::ostream& operator<<(std::ostream& os, const Zonotope<R>& z);
-    
-    template<class R> 
-    std::istream& operator>>(std::istream& is, Zonotope<R>& z);
+    template<class RC,class RG> 
+    std::istream& operator>>(std::istream& is, Zonotope<RC,RG>& z);
 
     
     
     
-    template<class R> class ZonotopeVerticesIterator;
+    template<class RC,class RG> class ZonotopeVerticesIterator;
       
-    template<class R> 
-    std::ostream& operator<<(std::ostream& os, const ZonotopeVerticesIterator<R>& iter);
+    template<class RC,class RG> 
+    std::ostream& operator<<(std::ostream& os, const ZonotopeVerticesIterator<RC,RG>& iter);
 
 
 

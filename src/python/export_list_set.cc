@@ -76,7 +76,7 @@ over_approximate_interval_zonotope_list_set(const ListSet< Zonotope<Interval<R> 
   for(typename ListSet< Zonotope<Interval<R> > >::const_iterator iz_iter=izls.begin();
       iz_iter!=izls.end(); ++iz_iter)
   {
-    result.adjoin(over_approximation(*iz_iter));
+    result.adjoin(orthogonal_over_approximation(*iz_iter));
   }
   return result;
 }
@@ -102,22 +102,23 @@ void export_list_set()
   typedef Interval<R> I;
   
   typedef Rectangle<R> RRectangle;
-  typedef Parallelotope<R> RParallelotope;
-  typedef Zonotope<R> RZonotope;
   typedef Polytope<R> RPolytope;
-  typedef Zonotope<I> IZonotope;
+  typedef Parallelotope<R> RParallelotope;
+  typedef Zonotope<R,R> RZonotope;
+  typedef Zonotope<I,R> EZonotope;
+  typedef Zonotope<I,I> IZonotope;
 
   typedef ListSet< Rectangle<R> > RRectangleListSet;
-  typedef ListSet< Parallelotope<R> > RParallelotopeListSet;
-  typedef ListSet< Zonotope<R> > RZonotopeListSet;
   typedef ListSet< Polytope<R> > RPolytopeListSet;
-  typedef ListSet< Zonotope<I> > IZonotopeListSet;
-  
+  typedef ListSet< Parallelotope<R> > RParallelotopeListSet;
+  typedef ListSet< Zonotope<R,R> > RZonotopeListSet;
+  typedef ListSet< Zonotope<I,R> > EZonotopeListSet;
+  typedef ListSet< Zonotope<I,I> > IZonotopeListSet;
+
   typedef GridCellListSet<R> RGridCellListSet;
   typedef GridMaskSet<R> RGridMaskSet;
   typedef PartitionTreeSet<R> RPartitionTreeSet;
   
-  typedef Zonotope< Interval<R> > IZonotope;
   def("open_intersection",(RRectangleListSet(*)(const RRectangleListSet&,const RRectangleListSet&))(&open_intersection));
   def("disjoint",(tribool(*)(const RRectangleListSet&,const RRectangleListSet&))(&disjoint));
   def("disjoint",(tribool(*)(const RZonotopeListSet&,const RZonotopeListSet&))(&disjoint));
@@ -183,10 +184,28 @@ void export_list_set()
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 
+  class_<EZonotopeListSet>("ErrorZonotopeListSet",init<int>())
+    .def(init<EZonotope>())
+    .def(init<RRectangleListSet>())
+    .def(init<RZonotopeListSet>())
+    .def(init<EZonotopeListSet>())
+    .def("dimension", &EZonotopeListSet::dimension)
+    .def("push_back", &EZonotopeListSet::push_back)
+    .def("adjoin", (void(EZonotopeListSet::*)(const EZonotope&))(&EZonotopeListSet::adjoin))
+    .def("adjoin", (void(EZonotopeListSet::*)(const EZonotopeListSet&))(&EZonotopeListSet::adjoin))
+    .def("size", &EZonotopeListSet::size)
+    .def("empty", &EZonotopeListSet::empty)
+    .def("__len__", &EZonotopeListSet::size)
+    .def("__getitem__", &get_item<EZonotopeListSet>)
+    .def("__iter__", iterator<EZonotopeListSet>())
+    .def(self_ns::str(self))    // __self_ns::str__
+  ;
+
   class_<IZonotopeListSet>("IntervalZonotopeListSet",init<int>())
     .def(init<IZonotope>())
     .def(init<RRectangleListSet>())
     .def(init<RZonotopeListSet>())
+    .def(init<EZonotopeListSet>())
     .def(init<IZonotopeListSet>())
     .def("dimension", &IZonotopeListSet::dimension)
     .def("push_back", &IZonotopeListSet::push_back)

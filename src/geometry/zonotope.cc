@@ -38,16 +38,16 @@ namespace Ariadne {
 
 #ifdef ENABLE_FLOAT64
     template class Zonotope<Float64>;
+    template class Zonotope<Interval<Float64>,Float64>;
     template class Zonotope< Interval<Float64> >;
     template class ZonotopeVerticesIterator<Float64>;
-    template Zonotope< Interval<Float64> > interval_over_approximation(const Zonotope< Interval<Float64> >&);
 #endif
   
 #ifdef ENABLE_FLOATMP
     template class Zonotope<FloatMP>;
+    template class Zonotope<Interval<FloatMP>,FloatMP>;
     template class Zonotope< Interval<FloatMP> >;
     template class ZonotopeVerticesIterator<FloatMP>;
-    template Zonotope< Interval<FloatMP> > interval_over_approximation(const Zonotope< Interval<FloatMP> >&);
 #endif
 
   }

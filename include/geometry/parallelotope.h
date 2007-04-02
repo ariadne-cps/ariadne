@@ -201,9 +201,13 @@ namespace Ariadne {
     template<class R> 
     Parallelotope<R> orthogonal_over_approximation(const Zonotope<R>& z);
     
+    /*! \brief Computes an over approximation from an uniform error zonotope using a qr factorization. */
+    template<class R> 
+    Parallelotope<R> orthogonal_over_approximation(const Zonotope<Numeric::Interval<R>,R>& ez);
+    
     /*! \brief Computes an over approximation from an interval zonotope using a qr factorization. */
     template<class R> 
-    Parallelotope<R> orthogonal_over_approximation(const Zonotope< Numeric::Interval<R> >& z);
+    Parallelotope<R> orthogonal_over_approximation(const Zonotope< Numeric::Interval<R> >& iz);
     
     
     

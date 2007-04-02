@@ -67,8 +67,11 @@ namespace Ariadne {
     {
       Parallelotope<R> p;
       Parallelotope< Numeric::Interval<R> > ip;
+      Zonotope< Numeric::Interval<R>,R > ez;
       Zonotope< Numeric::Interval<R> > iz;
       p=Geometry::over_approximation(ip);
+      p=Geometry::over_approximation(ez);
+      p=Geometry::orthogonal_over_approximation(ez);
       p=Geometry::orthogonal_over_approximation(iz);
       return p.empty();
     }
@@ -279,6 +282,39 @@ namespace Ariadne {
     orthogonal_over_approximation(const Zonotope<R>& z)
     {
       return orthogonal_over_approximation(Zonotope< Numeric::Interval<R> >(z));
+    }
+    
+    
+    template<class R>
+    Parallelotope<R>
+    orthogonal_over_approximation(const Zonotope<Numeric::Interval<R>,R>& ez)
+    {
+      //std::cerr << "Parallelotope<R>::orthogonal_over_approximation(const Zonotope<I>&) const" << std::endl;
+      typedef Numeric::Interval<R> I;
+      typedef typename Numeric::traits<R>::approximate_arithmetic_type A;
+      const Point<I>& c=ez.centre();
+      const LinearAlgebra::Matrix<R>& G=ez.generators();
+      
+      size_type d=ez.dimension();
+      
+      Point<R> cmid=approximate_value(c);
+      LinearAlgebra::Vector<I> cerr=c-cmid;
+      
+      LinearAlgebra::QRMatrix<I> QR(G);
+      LinearAlgebra::Matrix<I> Q=QR.Q();
+      LinearAlgebra::Matrix<R> Qmid=approximate_value(Q);
+      LinearAlgebra::Vector<I> Rrwnrm=LinearAlgebra::row_norms(Qmid.transpose()*G);
+      for(size_type i=0; i!=d; ++i) {
+        R scale=(Rrwnrm(i)+cerr(i)).upper();
+        for(size_type j=0; j!=d; ++j) {
+          Qmid(i,j)=mul_up(Qmid(i,j),scale);
+        }
+      }
+      
+      
+      // Check to make such result is valid.
+      //assert(LinearAlgebra::norm(LinearAlgebra::row_norms(Qmid.inverse()*A)+(cmid-c))<=R(1));
+      return Geometry::Parallelotope<R>(cmid,Qmid);
     }
     
     template<class R>

@@ -85,19 +85,28 @@ test_affine_integrator()
   Rectangle<R> bb("[-4,0]x[-2,2]");
   Rectangle<R> r("[-3.125,-2.875]x[-0.125,0.125]");
   Zonotope<I> iz; iz=r;
+  Zonotope<I> iz0=iz;
+  cout << "iz0=" << iz0 << endl;
   
-  Zonotope<I> iz1=affine.integration_step(avf,iz,h);
+  Zonotope<I> iz1=affine.integration_step(avf,iz0,h);
+  cout << "iz1=" << iz1 << endl;
   Zonotope<I> iz2=affine.integration_step(avf,iz1,h);
+  cout << "iz2=" << iz2 << endl;
   Zonotope<I> iz3=affine.integration_step(avf,iz2,h);
+  cout << "iz3=" << iz3 << endl;
   Zonotope<I> iz4=affine.integration_step(avf,iz3,h);
-  Zonotope<I> hiz1=affine.integration_step(avf,iz,hh);
+  cout << "iz4=" << iz4 << endl;
+  Zonotope<I> hiz1=affine.integration_step(avf,iz0,hh);
   Zonotope<I> hiz2=affine.integration_step(avf,iz1,hh);
   Zonotope<I> hiz3=affine.integration_step(avf,iz2,hh);
   Zonotope<I> hiz4=affine.integration_step(avf,iz3,hh);
-  Zonotope<I> riz1=affine.reachability_step(avf,iz,h);
+  cout << "hiz4=" << hiz4 << endl;
+  Zonotope<I> riz1=affine.reachability_step(avf,iz0,h);
+  cout << "riz1=" << riz1 << endl;
   Zonotope<I> riz2=affine.reachability_step(avf,iz1,h);
   Zonotope<I> riz3=affine.reachability_step(avf,iz2,h);
   Zonotope<I> riz4=affine.reachability_step(avf,iz3,h);
+  cout << "riz4=" << riz4 << endl;
   
   if(h!=0.125) { cout << "h changed from 0.125 to " << h << endl; }
   

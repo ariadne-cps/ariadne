@@ -51,12 +51,12 @@ touching_intersection(const BS1 &a,
 }
 
 template<class R> inline
-Zonotope<R> over_approximation_of_minkowski_sum(const Zonotope<R>& z1, const Zonotope<R>& z2) {
+Zonotope<R,R> over_approximation_of_minkowski_sum(const Zonotope<R,R>& z1, const Zonotope<R,R>& z2) {
   return over_approximation(minkowski_sum(z1,z2));
 }
 
 template<class R> inline
-Zonotope<R> over_approximation_of_minkowski_difference(const Zonotope<R>& z1, const Zonotope<R>& z2) {
+Zonotope<R,R> over_approximation_of_minkowski_difference(const Zonotope<R,R>& z1, const Zonotope<R,R>& z2) {
   return over_approximation(minkowski_difference(z1,z2));
 }
 
@@ -94,11 +94,13 @@ void export_zonotope()
     .def(init<RParallelotope>())
     .def(init<RRectangle>())
     .def(init<std::string>())
-    .def("centre",(Point<R>(RZonotope::*)()const)&RZonotope::centre)
-    .def("generators",(const RMatrixSlice(RZonotope::*)()const)&RZonotope::generators)
+    .def("centre",(const RPoint&(RZonotope::*)()const)&RZonotope::centre,return_value_policy<copy_const_reference>())
+    .def("generators",(const RMatrix&(RZonotope::*)()const)&RZonotope::generators,return_value_policy<copy_const_reference>())
     .def("dimension", &RZonotope::dimension)
     .def("empty", &RZonotope::empty)
+    /* 
     .def("contains", &RZonotope::contains)
+    */
     .def("bounding_box", &RZonotope::bounding_box)
     .def("subdivide", &RZonotope::subdivide)
     .def("__add__", &over_approximation_of_minkowski_sum<R>)
@@ -114,9 +116,11 @@ void export_interval_zonotope()
   typedef Interval<R> I;
   typedef Rectangle<R> RRectangle;
   typedef Zonotope<R> RZonotope;
+  typedef Zonotope<I,R> EZonotope;
   typedef Zonotope<I> IZonotope;
     
-  class_<IZonotope>("IntervalZonotope",init<int>())
+/*
+  class_<EZonotope>("ErrorZonotope",init<int>())
     .def(init<RZonotope>())
     .def(init<RRectangle>())
     .def(init<std::string>())
@@ -129,11 +133,30 @@ void export_interval_zonotope()
     .def("subdivide", &IZonotope::subdivide)
     .def(self_ns::str(self))
   ;
-    
-  def("interval_over_approximation", (IZonotope(*)(const IZonotope&))(&interval_over_approximation));
-  def("over_approximation", (RZonotope(*)(const IZonotope&))(&over_approximation));
-  def("approximation", (RZonotope(*)(const IZonotope&))(&approximation));
+*/
 
+  class_<IZonotope>("IntervalZonotope",init<int>())
+    .def(init<RZonotope>())
+    .def(init<RRectangle>())
+    .def(init<std::string>())
+/*    .def("centre",(Point<I>(IZonotope::*)()const)&IZonotope::centre)
+    .def("generators",(const MatrixSlice<I>(IZonotope::*)()const)&IZonotope::generators)
+    .def("dimension", &IZonotope::dimension)
+    .def("empty", &IZonotope::empty)
+    .def("contains", &IZonotope::contains)
+    .def("bounding_box", &IZonotope::bounding_box)
+    .def("subdivide", &IZonotope::subdivide)
+    .def(self_ns::str(self))
+*/
+  ;
+    
+/*
+  def("interval_over_approximation", (EZonotope(*)(const IZonotope&))(&interval_over_approximation));
+  def("orthogonal_over_approximation", (RZonotope(*)(const IZonotope&))(&orthogonal_over_approximation));
+  def("over_approximation", (EZonotope(*)(const IZonotope&))(&over_approximation));
+  def("approximation", (RZonotope(*)(const IZonotope&))(&approximation));
+*/
+  
 }
 
 template void export_zonotope<Float>();

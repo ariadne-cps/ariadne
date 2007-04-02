@@ -42,9 +42,10 @@ namespace Ariadne {
     
 #ifdef ENABLE_FLOAT64
     template class ListSet< Rectangle<Float64> >;
+    template class ListSet< Polytope<Float64> >;
     template class ListSet< Parallelotope<Float64> >;
     template class ListSet< Zonotope<Float64> >;
-    template class ListSet< Polytope<Float64> >;
+    template class ListSet< Zonotope<Interval<Float64>,Float64> >;
     template class ListSet< Zonotope< Interval<Float64> > >;
 
     // The following are not defined for all types,
@@ -61,9 +62,10 @@ namespace Ariadne {
    
 #ifdef ENABLE_FLOATMP
     template class ListSet< Rectangle<FloatMP> >;
+    template class ListSet< Polytope<FloatMP> >;
     template class ListSet< Parallelotope<FloatMP> >;
     template class ListSet< Zonotope<FloatMP> >;
-    template class ListSet< Polytope<FloatMP> >;
+    template class ListSet< Zonotope<Interval<FloatMP>,FloatMP> >;
     template class ListSet< Zonotope< Interval<FloatMP> > >;
 
     // The following are not defined for all types,

@@ -113,6 +113,13 @@ namespace Ariadne {
     }
 
     template<class R> inline
+    void
+    Point<R>::resize(dimension_type d) 
+    {
+      this->_vector.resize(d);
+    }
+
+    template<class R> inline
     R& 
     Point<R>::operator[](dimension_type index) 
     {

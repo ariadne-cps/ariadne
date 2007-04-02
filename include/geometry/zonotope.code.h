@@ -50,54 +50,150 @@
 #include "../geometry/point.code.h"
 #include "../geometry/rectangle.code.h"
 
+namespace {
+  
+  using namespace Ariadne;
+  using namespace Ariadne::Numeric;
+  using namespace Ariadne::LinearAlgebra;
+  using namespace Ariadne::Geometry;
+  
+  
+  
+  template<class R>
+  tribool
+  disjoint_approx(const Zonotope< Interval<R>, Interval<R> >& z, const Rectangle<R>& r);
+  
+  template<class R>
+  tribool
+  disjoint_approx(const Zonotope<Interval<R>,R>& z, const Rectangle<R>& r);
+  
+  template<class R>
+  tribool
+  disjoint_approx(const Zonotope<R,R>& z, const Rectangle<R>& r);
+  
+  
+  tribool
+  disjoint_exact(const Zonotope<Rational,Rational>& z, const Rectangle<Rational>& r);
+  
+  
+  tribool
+  disjoint_exact(const Zonotope<Rational,Rational>& z, const Zonotope<Rational,Rational>& r);
+  
+  
+  tribool
+  contains_exact(const Zonotope<Rational,Rational>& z, const Point<Rational>& r);
+  
+  
+  template<class R> inline
+  void
+  convert(Rectangle<Rational>& qr, const Rectangle<R>& r) {
+    qr=r;
+  }
+  
+  template<class R> inline
+  void
+  convert(Rectangle<Rational>& qr, const Rectangle< Interval<R> >& r) {
+    throw NotImplemented(__PRETTY_FUNCTION__);
+  }
+  
+  
+  template<class R> inline
+  void
+  convert(Zonotope<Rational>& qz, const Zonotope<R,R>& z) {
+    qz=z;
+  }
+  
+  template<class R> inline
+  void
+  convert(Zonotope<Rational>& qz, const Zonotope<Interval<R>,R>& z) {
+    throw NotImplemented(__PRETTY_FUNCTION__);
+  }
+  
+  template<class R> inline
+  void
+  convert(Zonotope<Rational>& qz, const Zonotope< Interval<R>, Interval<R> >& z) {
+    throw NotImplemented(__PRETTY_FUNCTION__);
+  }
+  
+    
+  
+  template<class R,class RC,class RG> inline
+  void
+  convert(Zonotope<RC,RG>& z, const Rectangle<R>& r) {
+    z=r;
+  }
+  
+  template<class R,class RC,class RG> inline 
+  void
+  convert(Polyhedron<R>& p, const Zonotope<RC,RG>& z) {
+    p=Polyhedron<R>(Polytope<R>(z.vertices()));
+  }
+  
+  template<class R,class RC,class RG> inline 
+  void
+  convert(Polytope<R>& p, const Zonotope<RC,RG>& z) {
+    p=Polytope<R>(z.vertices());
+  }
+  
+  template<class R,class RC,class RG> inline 
+  void
+  convert(Polyhedron< Interval<R> >& p, const Zonotope<RC,RG>& z) 
+  {
+    throw NotImplemented(__PRETTY_FUNCTION__);
+  }
+  
+  template<class R,class RC,class RG> inline 
+  void
+  convert(Polytope< Interval<R> >& p, const Zonotope<RC,RG>& z) 
+  {
+    throw NotImplemented(__PRETTY_FUNCTION__);
+  }
+  
+  
+  
+}
+
+
+
+
 namespace Ariadne {
   namespace Geometry {
     
     extern int verbosity;
-    
-    template<class R>
-    tribool
-    disjoint_approx(const Zonotope<R>& z, const Rectangle<R>& r);
-   
-    template<class R>
-    tribool
-    disjoint_exact(const Zonotope<R>& z, const Rectangle<R>& r);
-
 
     
-    
-    template<class R>
-    Zonotope<R>::Zonotope(const std::string& s)
-      : _dimension(), _number_of_generators(), _data()
+    template<class RC,class RG>
+    Zonotope<RC,RG>::Zonotope(const std::string& s)
+      : _centre(), _generators()
     {
       std::stringstream ss(s);
       ss >> *this;
     }
     
      
-    template<class R>
-    typename Zonotope<R>::vertices_const_iterator
-    Zonotope<R>::vertices_begin() const 
+    template<class RC,class RG>
+    typename Zonotope<RC,RG>::vertices_const_iterator
+    Zonotope<RC,RG>::vertices_begin() const 
     {
-      return ZonotopeVerticesIterator<R>(*this,false);
+      return ZonotopeVerticesIterator<RC,RG>(*this,false);
     }
     
     
-    template<class R>
-    typename Zonotope<R>::vertices_const_iterator
-    Zonotope<R>::vertices_end() const 
+    template<class RC,class RG>
+    typename Zonotope<RC,RG>::vertices_const_iterator
+    Zonotope<RC,RG>::vertices_end() const 
     {
-      return ZonotopeVerticesIterator<R>(*this,true);
+      return ZonotopeVerticesIterator<RC,RG>(*this,true);
     }
     
     
-    template<class R>
-    PointList<typename Numeric::traits<R>::arithmetic_type>
-    Zonotope<R>::vertices() const
+    template<class RC,class RG>
+    PointList<typename Numeric::traits<RC,RG>::arithmetic_type>
+    Zonotope<RC,RG>::vertices() const
     {
-      //std::cerr << "Zonotope<R>::vertices()" << std::endl;
+      //std::cerr << "Zonotope<RC,RG>::vertices()" << std::endl;
       PointList<typename Numeric::traits<R>::arithmetic_type> v(this->dimension());
-      for(typename Zonotope<R>::vertices_const_iterator vi=this->vertices_begin();
+      for(typename Zonotope<RC,RG>::vertices_const_iterator vi=this->vertices_begin();
           vi!=this->vertices_end(); ++vi)
       {
         v.push_back(*vi);
@@ -107,95 +203,70 @@ namespace Ariadne {
     
   
     
-    template<class R>
-    Zonotope<R>::operator Polytope<typename Numeric::traits<R>::arithmetic_type> () const
+    template<class RC,class RG>
+    Zonotope<RC,RG>::operator Polytope<typename Numeric::traits<RC,RG>::arithmetic_type> () const
     {
       return Geometry::polytope(*this);
     }
     
-    template<class R>
-    Zonotope<R>::operator Polyhedron<typename Numeric::traits<R>::arithmetic_type> () const
+    template<class RC,class RG>
+    Zonotope<RC,RG>::operator Polyhedron<typename Numeric::traits<RC,RG>::arithmetic_type> () const
     {
       return Geometry::polyhedron(*this);
     }
     
     
-    template<class R>
-    Polytope<typename Numeric::traits<R>::arithmetic_type> 
-    polytope(const Zonotope<R>& z) 
+    template<class RC,class RG>
+    Polytope<typename Numeric::traits<RC,RG>::arithmetic_type> 
+    polytope(const Zonotope<RC,RG>& z) 
     {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-      return Polytope<F>(z.vertices());
+      typedef typename Numeric::traits<RC,RG>::arithmetic_type A;
+      return Geometry::Polytope<A>(z.vertices());
     }
   
-    template<class R>
-    Polyhedron<typename Numeric::traits<R>::arithmetic_type> 
-    polyhedron(const Zonotope<R>& z) 
+    template<class RC,class RG>
+    Polyhedron<typename Numeric::traits<RC,RG>::arithmetic_type> 
+    polyhedron(const Zonotope<RC,RG>& z) 
     {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-      return Polyhedron<F>(Polytope<F>(z.vertices()));
-    }
-  
-    template<class R>
-    Polyhedron<Numeric::Rational> 
-    polyhedron(const Zonotope< Numeric::Interval<R> >& z) 
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
+      typedef typename Numeric::traits<RC,RG>::arithmetic_type A;
+      return Geometry::Polyhedron<A>(Geometry::Polytope<A>(z.vertices()));
     }
   
 
     
-    
-    template<class R>
-    Zonotope<typename Zonotope<R>::F> 
-    Zonotope<R>::scale(const Zonotope<R>& z, const R& scale_factor) 
-    {
-      Geometry::Point<F> new_centre(z.centre().position_vector()*F(scale_factor));
-      LinearAlgebra::Matrix<F> new_generators=z.generators()*F(scale_factor);
-      return Geometry::Zonotope<F>(new_centre, new_generators);
-    }
-    
-    
-    template<class R>
+    template<class RC,class RG>
     tribool 
-    equal(const Zonotope<R>& A, const Zonotope<R>& B)
+    equal(const Zonotope<RC,RG>& A, const Zonotope<RC,RG>& B)
     {
       return subset(A,B) && subset(B,A);
     }
     
     
-    template<class R> inline 
-    Rectangle<R>
-    bounding_box(const Zonotope<R>& z)
+    template<class RC,class RG>
+    Rectangle<typename Zonotope<RC,RG>::real_type>
+    bounding_box(const Zonotope<RC,RG>& z)
     {
+      typedef typename Zonotope<RC,RG>::real_type R;
       using Numeric::Interval;
       LinearAlgebra::Vector< Interval<R> > v(z.number_of_generators(),Interval<R>(-1,1));
       LinearAlgebra::Vector< Interval<R> > b=z.centre().position_vector()+z.generators()*v;
       return Rectangle<R>(b);
     }
     
-    template<class R> inline
-    Rectangle<R>
-    bounding_box(const Zonotope< Numeric::Interval<R> >& z)
-    {
-      using Numeric::Interval;
-      LinearAlgebra::Vector< Interval<R> > e(z.number_of_generators(),Interval<R>(-1,1));
-      LinearAlgebra::Vector< Interval<R> > b=z.centre().position_vector()+z.generators()*e;
-      return Rectangle<R>(b);
-    }
 
-    template<class R>
-    Rectangle<typename Numeric::traits<R>::number_type>
-    Zonotope<R>::bounding_box() const
+
+    template<class RC,class RG>
+    Rectangle<typename Zonotope<RC,RG>::R>
+    Zonotope<RC,RG>::bounding_box() const
     {
       return Geometry::bounding_box(*this);
     }
     
-    
+
 
     template<class R>
-    ListSet< Zonotope<R> >
-    subdivide(const Zonotope<R>& z) 
+    ListSet< Zonotope<R,R> >
+    subdivide(const Zonotope<R,R>& z) 
     {
       ListSet< Zonotope<R> > result(z.dimension());
       
@@ -222,11 +293,50 @@ namespace Ariadne {
             new_centre=add_approx(new_centre,z.generator(i));
           }
         }
-        result.adjoin(Zonotope<R>(new_centre,new_generators));
+        result.adjoin(Zonotope<R,R>(new_centre,new_generators));
       }
       return result;
     }
     
+
+    template<class R>
+    ListSet< Zonotope<Numeric::Interval<R>,R> >
+    subdivide(const Zonotope<Numeric::Interval<R>,R>& z) 
+    {
+      using Numeric::Interval;
+      ListSet< Zonotope<Interval<R>,R> > result(z.dimension());
+      
+      R two=2;
+      dimension_type d=z.dimension();
+      size_type m=z.number_of_generators();
+      
+      LinearAlgebra::Matrix<R> new_generators(d,m);
+      for(size_type i=0; i!=d; ++i) {
+        for(size_type j=0; j!=m; ++j) {
+          new_generators(i,j)=div_up(z.generators()(i,j),two);
+        }
+      }
+
+      Vector<R> v(z.dimension());
+      Point< Interval<R> > first_centre=z.centre();
+      for(size_type i=0; i<m; i++) {
+        v=new_generators.column(i);
+        first_centre=first_centre-v;
+      }
+      
+      for(unsigned long k=0; k!=1u<<m; ++k) {
+        Point< Interval<R> > new_centre=first_centre;
+        for(size_type i=0; i<m; ++i) {
+          if(k & 1u<<i) {
+            v=z.generator(i);
+            new_centre=new_centre+v;
+          }
+        }
+        result.adjoin(Zonotope<Interval<R>,R>(new_centre,new_generators));
+      }
+      return result;
+    }
+      
     
     template<class R>
     ListSet< Zonotope< Numeric::Interval<R> > >
@@ -236,15 +346,15 @@ namespace Ariadne {
     }
     
 
-    
+  
     template<class R>
-    ListSet< Zonotope<R> >
-    divide(const Zonotope<R>& z)
+    ListSet< Zonotope<R,R> >
+    divide(const Zonotope<R,R>& z)
     {
       size_type d=z.dimension();
       size_type m=z.number_of_generators();
       R two=2;
-      ListSet< Zonotope<R> > result(d);
+      ListSet< Zonotope<R,R> > result(d);
       
       LinearAlgebra::Matrix<R> new_generators=z.generators();
       
@@ -264,9 +374,48 @@ namespace Ariadne {
       }
       
       Point<R> new_centre=sub_approx(z.centre(),LinearAlgebra::Vector<R>(new_generators.column(j)));
-      result.adjoin(Zonotope<R>(new_centre,new_generators));
+      result.adjoin(Zonotope<R,R>(new_centre,new_generators));
       new_centre=sub_approx(new_centre,LinearAlgebra::Vector<R>(new_generators.column(j)));
-      result.adjoin(Zonotope<R>(new_centre,new_generators));
+      result.adjoin(Zonotope<R,R>(new_centre,new_generators));
+
+      return result;
+    }
+    
+    
+    template<class R>
+    ListSet< Zonotope<Numeric::Interval<R>,R> >
+    divide(const Zonotope<Numeric::Interval<R>,R>& z)
+    {
+      using namespace Numeric;
+      using namespace LinearAlgebra;
+      
+      size_type d=z.dimension();
+      size_type m=z.number_of_generators();
+      R two=2;
+      ListSet< Zonotope<Interval<R>,R> > result(d);
+      
+      LinearAlgebra::Matrix<R> new_generators=z.generators();
+      
+      Interval<R> max_norm=0;
+      size_type max_column=0;
+      for(size_type j=0; j<m; j++) {
+        Interval<R> norm = LinearAlgebra::norm(Vector<R>(new_generators.column(j)));
+        if(norm>max_norm) {
+          max_norm=norm;
+          max_column=j;
+        }
+      }
+      
+      size_type j=max_column;
+      for(size_type i=0; i!=d; ++i) {
+        new_generators(i,j)=div_up(new_generators(i,j),two);
+      }
+      
+      Vector<R> v=new_generators.column(j);
+      Point< Interval<R> > new_centre=z.centre()-v;
+      result.adjoin(Zonotope<Interval<R>,R>(new_centre,new_generators));
+      new_centre=new_centre-v;
+      result.adjoin(Zonotope<Interval<R>,R>(new_centre,new_generators));
 
       return result;
     }
@@ -280,10 +429,31 @@ namespace Ariadne {
     }
     
     
+    template<class RC,class RG>
+    ListSet< Zonotope<RC,RG> >
+    Zonotope<RC,RG>::divide() const 
+    {
+      return Geometry::divide(*this);
+    }
     
-    template<class R>
+    template<class RC,class RG>
+    ListSet< Zonotope<RC,RG> >
+    Zonotope<RC,RG>::subdivide() const 
+    {
+      return Geometry::subdivide(*this);
+    }
+   
+    
+    
+    
+    
+    
+
+
+    
+    template<class RC,class RG>
     void 
-    Zonotope<R>::minimize_generators(void) 
+    Zonotope<RC,RG>::minimize_generators(void) 
     {
       return;
     }
@@ -298,115 +468,386 @@ namespace Ariadne {
     }
     
     
-    template<class R>
+    template<class RC,class RG>
     void 
-    Zonotope<R>::sort_generators(void)
+    Zonotope<RC,RG>::sort_generators(void)
     {
-      std::vector< LinearAlgebra::Vector<R> > generator_vectors;
+      std::vector< LinearAlgebra::Vector<RG> > generator_vectors;
       for(size_type j=0; j!=this->number_of_generators(); ++j) {
         generator_vectors.push_back(this->generators().column(j));
       }
       
-      std::stable_sort(generator_vectors.begin(),generator_vectors.end(),&norm_grtr<R>);
+      std::stable_sort(generator_vectors.begin(),generator_vectors.end(),&norm_grtr<RG>);
       
       for(size_type j=0; j!=this->number_of_generators(); ++j) {
         for(size_type i=0; i!=this->dimension(); ++i) {
-          this->_generators()(i,j)=generator_vectors[j](i);
+          this->_generators(i,j)=generator_vectors[j](i);
         }
       }
     }
     
     
-    /* Set up LP problem to solve \f$c+Ge=p\f$; \f$-1<=e<=1\f$.
-     * Change variables so that the problem becomes \f$Ge=p-c-G1;\ 0\leq e\leq2\f$.
-     * Change sign of \f$ Ge=p-c-G1\f$ to make right-hand side positive.
-     */
-    template<class R> inline
-    tribool 
-    contains(const Zonotope<R>& z, const Point<R>& pt)
-    { 
-      //std::cerr << "Zonotope<R>::contains(const Point<R>& )" << std::endl;
-      //typedef typename Numeric::traits<R,R>::arithmetic_type F;
-      typedef Numeric::Rational F;
-      check_equal_dimensions(z,pt,__PRETTY_FUNCTION__);
-      dimension_type d=z.dimension();
-      dimension_type m=z.number_of_generators();
-      
-      F zero=0;
-      F one=1;
-      F two=2;
-      
-      const Geometry::Point<F> qc=z.centre();
-      const Geometry::Point<F> qp=pt;
-      const LinearAlgebra::Matrix<F> qG=z.generators();
-      const LinearAlgebra::Vector<F> qo(m,one);
-      const LinearAlgebra::Vector<F> zv(m,zero);
-      const LinearAlgebra::Vector<F> tv(m,two);
 
-      LinearAlgebra::Vector<F> qrhs=qp-qc+qG*qo;
-      
-      LinearAlgebra::Matrix<F> T(d+m+1,m+1);
-      
-      // Set up constraints e+se=2
-      for(dimension_type j=0; j!=m; ++j) {
-        T(j,j)=1;
-        T(j,m)=2;
-      }
-      
-      // Set up constraints Ge \pm ax = p-c+G1
-      for(dimension_type i=0; i!=d; ++i) {
-        if(qrhs(i)>=F(0)) {
-          for(dimension_type j=0; j!=m; ++j) {
-            T(m+i,j)=qG(i,j); 
-          }
-          T(m+i,m)=qrhs(i);
-        } else {
-          for(dimension_type j=0; j!=m; ++j) {
-            T(m+i,j)=-qG(i,j); 
-          }
-          T(m+i,m)=-qrhs(i);
-        }
-      }
-      
-      // Set up cost function ax^T 1
-      for(dimension_type i=0; i!=d; ++i) {
-        for(dimension_type j=0; j!=m; ++j) {
-          T(m+d,j)-=T(m+i,j);
-        }
-        T(m+d,m)-=T(m+i,m);
-      }
-      
-      LinearAlgebra::LinearProgram<F> lp(T);
-      //std::cerr << lp.tableau() << std::endl;
-      tribool result=lp.is_feasible();
-      //std::cerr << lp.tableau() << std::endl;
-      return result;
-    }
-
-    template<class R> inline
+    template<class RC,class RG> template<class R0>
     tribool 
-    contains(const Zonotope< Numeric::Interval<R> >& z, const Point< Numeric::Interval<R> >& pt)
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
-
-    template<class R>
-    tribool 
-    Zonotope<R>::contains(const Point<R>& pt) const 
+    Zonotope<RC,RG>::contains(const Point<R0>& pt) const 
     {
       return Geometry::contains(*this,pt);
     }
 
+    
+/*
+    template<class R>
+    tribool 
+    contains(const Zonotope<R> >& z, const Point<R>& pt)
+    {
+      Zonotope<Rational> qz;
+      Point<Rational> qp(pt);
+      convert(qz,z);
+      return contains_exact(qz,qp);
+    }
+*/
+    
+    template<class R,class RC,class RG>
+    tribool 
+    contains(const Zonotope<RC,RG>& z, const Point<R>& pt)
+    {
+      Zonotope<Rational> qz;
+      Point<Rational> qp(pt);
+      convert(qz,z);
+      return contains_exact(qz,qp);
+    }
+
   
     
-    template<class R>
+    template<class R,class RC,class RG>
     tribool
-    disjoint(const Zonotope<R>& z, const Rectangle<R>& r)
+    disjoint(const Zonotope<RC,RG>& z, const Rectangle<R>& r)
     {
       return disjoint_approx(z,r);
     }
 
+    template<class R,class RC,class RG>
+    tribool
+    disjoint(const Rectangle<R>& r, const Zonotope<RC,RG>& z)
+    {
+      if(verbosity>7) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+      return disjoint(z,r);
+    }
+    
+    template<class RC,class RG>
+    tribool
+    disjoint(const Zonotope<RC,RG>& z1, const Zonotope<RC,RG>& z2)
+    {
+      if(verbosity>7) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+      Zonotope<Numeric::Rational> qz1;
+      Zonotope<Numeric::Rational> qz2;
+      convert(qz1,z1);
+      convert(qz2,z2);
+      
+      return disjoint_exact(qz1,qz2);
+    }
+    
+    
+    template<class R,class RC,class RG>
+    tribool 
+    subset(const Rectangle<R>& r, const Zonotope<RC,RG>& z) 
+    {
+      typedef typename Rectangle<R>::vertices_const_iterator RVIter;
+      tribool result=true;
+      for(RVIter rv_iter=r.vertices_begin(); rv_iter!=r.vertices_end(); ++rv_iter) {
+        const Point<R>& pt=*rv_iter;
+        result=result && z.contains(pt);
+        if(result==false) {
+          break;
+        }
+      }
+      return result;
+    }
+    
 
+    template<class R,class RC,class RG>
+    tribool 
+    subset(const Zonotope<RC,RG>& A, const Rectangle<R>& B) 
+    {
+      return Geometry::subset(A.bounding_box(),B);
+    }
+    
+
+    template<class RC,class RG>
+    tribool 
+    subset(const Zonotope<RC,RG>& A, const Zonotope<RC,RG>& B) 
+    {
+      typedef typename Numeric::traits<RC,RG>::arithmetic_type F;
+      return Geometry::subset(A.operator Polytope<F>(),B.operator Polyhedron<F>());
+    } 
+    
+    
+    template<class R,class RC,class RG>
+    void over_approximation(Zonotope<RC,RG>& z, const Rectangle<R>& r) 
+    {
+      dimension_type d=r.dimension();
+      RC* cptr=z.begin();
+      RG* gptr=cptr+d;
+      const R* rptr=r.begin();
+      for(size_type i=0; i!=d; ++i) {
+        cptr[i]=med_approx(r.lower_bound(i),r.upper_bound(i));
+        for(size_type j=0; j!=d; ++j) {
+          gptr[i*d+j]=0;
+        }
+        gptr[(d+1)*i]=div_up(sub_up(r.upper_bound(i),r.lower_bound(i)),2);
+      }
+    }
+
+    
+    template<class RC,class RG> 
+    Zonotope<typename Numeric::traits<RC>::arithmetic_type,RG>
+    minkowski_sum(const Zonotope<RC,RG>& A, const Zonotope<RC,RG>& B)
+    {
+      typedef typename Numeric::traits<RC>::arithmetic_type F;
+      
+      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
+      
+      return Zonotope<F,RG>(Geometry::minkowski_sum(A.centre(),B.centre()),
+                            LinearAlgebra::concatenate_columns(A.generators(),B.generators()));
+    }
+     
+    
+    template<class RC,class RG> 
+    Zonotope<typename Numeric::traits<RC>::arithmetic_type,RG> 
+    minkowski_difference(const Zonotope<RC,RG>& A, const Zonotope<RC,RG>& B)
+    {
+      typedef typename Numeric::traits<RC>::arithmetic_type F;
+     
+      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
+      
+      return Zonotope<F,RG>(Geometry::minkowski_difference(A.centre(),B.centre()),
+                            LinearAlgebra::concatenate_columns(A.generators(),B.generators()));
+    }
+    
+    
+    
+    template<class R,class RC,class RG>
+    Zonotope<typename Numeric::traits<R,RC>::arithmetic_type,typename Numeric::traits<R,RG>::arithmetic_type> 
+    minkowski_sum(const Rectangle<R>& A, const Zonotope<RC,RG>& B) 
+    {
+      typedef typename Numeric::traits<R>::arithmetic_type F;
+      return Geometry::minkowski_sum(Zonotope<F>(A),B);
+    }
+
+    
+    template<class R,class RC,class RG>
+    Zonotope<typename Numeric::traits<R,RC>::arithmetic_type,typename Numeric::traits<R,RG>::arithmetic_type> 
+    minkowski_sum(const Zonotope<RC,RG>& A, const Rectangle<R>& B) 
+    {
+      typedef typename Numeric::traits<R>::arithmetic_type F;
+      return Geometry::minkowski_sum(A,Zonotope<F>(B));
+    }
+
+    
+    template<class R,class RC,class RG>
+    Zonotope<typename Numeric::traits<R,RC>::arithmetic_type,typename Numeric::traits<R,RG>::arithmetic_type> 
+    minkowski_difference(const Rectangle<R>& A, const Zonotope<RC,RG>& B) 
+    {
+      typedef typename Numeric::traits<R>::arithmetic_type F;
+      return Geometry::minkowski_difference(Zonotope<F>(A),B);
+    }
+
+    
+    template<class R,class RC,class RG>
+    Zonotope<typename Numeric::traits<R,RC>::arithmetic_type,typename Numeric::traits<R,RG>::arithmetic_type> 
+    minkowski_difference(const Zonotope<RC,RG>& A, const Rectangle<R>& B) 
+    {
+      typedef typename Numeric::traits<R>::arithmetic_type F;
+      return Geometry::minkowski_difference(A,Zonotope<F>(B));
+    }
+    
+    
+    
+
+    template<class R> 
+    Zonotope<Numeric::Interval<R>,R> 
+    over_approximation(const Zonotope< Numeric::Interval<R>, Numeric::Interval<R> >& iz)
+    {
+      // FIXME: This is incorrect; need over-approximations
+      LinearAlgebra::Matrix< Numeric::Interval<R> > G(iz.generators());
+      LinearAlgebra::Vector< Numeric::Interval<R> > e(iz.number_of_generators(),Numeric::Interval<R>(-1,+1));
+      LinearAlgebra::Matrix<R> nG=approximate_value(G);
+      Geometry::Point< Numeric::Interval<R> > nc=iz.centre()+(G-nG)*e;
+      
+      return Zonotope< Numeric::Interval<R>, R >(nc,nG);
+    }
+    
+    template<class R> 
+    Zonotope<R,R> 
+    over_approximation(const Zonotope<Numeric::Interval<R>, R>& ez)
+    {
+      dimension_type d=ez.dimension();
+      size_type ng=ez.number_of_generators();
+      Point<R> c=approximate_value(ez.centre());
+      Matrix<R> g(d,ng+d);
+      MatrixSlice<R>(d,ng,g.begin(),g.row_increment(),g.column_increment())=ez.generators();
+      for(size_type i=0; i!=d; ++i) {
+        g(i,i+ng)=ez.centre(i).radius();
+      }
+      return Zonotope<R,R>(c,g);
+    }
+    
+    
+    template<class R> 
+    Zonotope<R,R> 
+    over_approximation(const Zonotope<R,R>& z)
+    {
+      return z;
+    }
+    
+    
+   
+    
+    template<class R> 
+    Zonotope<R,R> 
+    approximation(const Zonotope< Numeric::Interval<R>, Numeric::Interval<R> >& z)
+    {
+      return Zonotope<R,R>(approximate_value(z.centre()),
+                           approximate_value(z.generators()));
+    }
+
+    
+    template<class R> 
+    Zonotope<R,R> 
+    approximation(const Zonotope<Numeric::Interval<R>,R>& z)
+    {
+      return Zonotope<R,R>(approximate_value(z.centre()),
+                           z.generators());
+    }
+
+    
+    template<class R> 
+    Zonotope<R,R> 
+    approximation(const Zonotope<R,R>& z)
+    {
+      return z; 
+    }
+
+    
+
+    
+    template<class RC,class RG>
+    std::ostream&
+    Zonotope<RC,RG>::write(std::ostream& os) const 
+    {
+      const Zonotope<RC,RG>& z=*this;
+      if(z.dimension() > 0) {
+        if (z.empty()) {
+          os << "Zonotope( )" << std::endl;
+        } else {
+          os << "Zonotope( centre=" << z.centre();
+          os << ", directions=" << z.generators();
+          os << ")";
+        } 
+      }
+      return os;
+    }
+    
+    
+    template<class RC,class RG>
+    std::istream& 
+    Zonotope<RC,RG>::read(std::istream& is)
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+    
+    
+
+    
+       
+    
+    
+
+    template<class RC,class RG>
+    std::ostream& 
+    ZonotopeVerticesIterator<RC,RG>::write(std::ostream& os) const 
+    {
+      return os << "ZonotopeVerticesIterator<" << Numeric::name<RC>() << "," << Numeric::name<RG>() << ">" 
+                << "( &z=" << _z << ","
+                << " i=" << _i << " p=" << _parity << ", v=" << **this << ")";
+    }
+  
+
+    template<class RC,class RG>
+    void
+    Zonotope<RC,RG>::_instantiate_geometry_operators() 
+    {
+      Point<R> pt;
+      Rectangle<R> r;
+      Zonotope<RC,RG> z;
+      Zonotope<I> iz;
+      Geometry::contains(z,pt);
+      Geometry::contains(iz,pt);
+      Geometry::disjoint(r,z);
+      Geometry::disjoint(z,r);
+      Geometry::disjoint(z,z);
+      Geometry::subset(r,z);
+      Geometry::subset(z,r);
+      Geometry::subset(z,z);
+      Geometry::minkowski_sum(z,z);
+      Geometry::minkowski_difference(z,z);
+      
+      Geometry::subset(iz,r);
+      Geometry::disjoint(iz,r);
+      
+      Geometry::subdivide(z);
+      Geometry::divide(z);
+
+      typedef typename Numeric::traits<R>::arithmetic_type A;
+      Zonotope<A,A> az;
+      Zonotope<A,R> ez;
+      Geometry::over_approximation(az);
+      Geometry::over_approximation(ez);
+      Geometry::over_approximation(z);
+      Geometry::approximation(az);
+      Geometry::approximation(ez);
+      Geometry::approximation(z);
+      
+      //Can't instantiate for Rational type
+      //Geometry::interval_over_approximation(iz);
+
+   }
+    
+  }
+}
+
+
+
+
+namespace {
+  
+  template<class R>
+  tribool
+  disjoint_approx(const Zonotope< Interval<R>, Interval<R> >& z, const Rectangle<R>& r)
+  {
+    Zonotope<Interval<R>,R> oaz=over_approximation(z);
+    return disjoint_approx(oaz,r);
+  }
+  
+  template<class R>
+  tribool
+  disjoint_approx(const Zonotope<Interval<R>,R>& z, const Rectangle<R>& r) {
+    Point< Interval<Rational> > ic=z.centre();
+    Matrix<Rational> g=z.generators();
+    Point<Rational> c=approximate_value(ic);
+    Rectangle<Rational> qr=r;
+    Rectangle<Rational> xr=qr+(ic-c);
+    return disjoint_exact(Zonotope<Rational>(c,g),xr);
+  }
+  
+  template<class R>
+  tribool
+  disjoint_approx(const Zonotope<R,R>& z, const Rectangle<R>& r) {
+    return disjoint_exact(Zonotope<Rational,Rational>(z),Rectangle<Rational>(r));
+  }
+  
+  
     /* Set up linear program to solve 
      *   \f[x=c+Ge;\ l\leq x\leq u;\ -1\leq e\leq1\f].
      *
@@ -419,12 +860,11 @@ namespace Ariadne {
      *             = \begin{matrix}u-l\\2\\\pm(c-G1-l)\end{matrix} \f]
      * 
      */
-    template<class R>
     tribool
-    disjoint_exact(const Zonotope<R>& z, const Rectangle<R>& r)
+    disjoint_exact(const Zonotope<Rational,Rational>& z, const Rectangle<Rational>& r)
     {
-      if(verbosity>7) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      if(verbosity>8) { std::cerr << z << " " << r << std::endl; }
+      if(Geometry::verbosity>7) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+      if(Geometry::verbosity>8) { std::cerr << z << " " << r << std::endl; }
       
       check_equal_dimensions(z,r,__PRETTY_FUNCTION__);
       dimension_type d=z.dimension();
@@ -448,23 +888,23 @@ namespace Ariadne {
       //  
       // Change sign of RHS of first equality if necessary
       // Introduce slack variables for last two inequalities
-      typedef Numeric::Rational F;
-      LinearAlgebra::Matrix<F> T(2*d+m+1,d+m+1);
+      typedef Numeric::Rational Q;
+      LinearAlgebra::Matrix<Q> T(2*d+m+1,d+m+1);
 
-      const Geometry::Point<R>& l=r.lower_corner();
-      const Geometry::Point<R>& u=r.upper_corner();
-      const Geometry::Point<R> c=z.centre();
-      const LinearAlgebra::Matrix<R> G=z.generators();
+      const Geometry::Point<Q>& l=r.lower_corner();
+      const Geometry::Point<Q>& u=r.upper_corner();
+      const Geometry::Point<Q>& c=z.centre();
+      const LinearAlgebra::Matrix<Q>& G=z.generators();
 
-      const LinearAlgebra::Vector<F> qo(m,F(1));
-      const LinearAlgebra::Vector<F> ql=l.position_vector();
-      const LinearAlgebra::Vector<F> qu=u.position_vector();
-      const LinearAlgebra::Vector<F> qd=qu-ql;
-      const LinearAlgebra::Vector<F> qc=c.position_vector();
-      const LinearAlgebra::Matrix<F> qG=G;
-      const LinearAlgebra::Vector<F> qrhs=qc-ql-qG*qo;
+      const LinearAlgebra::Vector<Q> qo(m,Q(1));
+      const LinearAlgebra::Vector<Q> ql=l.position_vector();
+      const LinearAlgebra::Vector<Q> qu=u.position_vector();
+      const LinearAlgebra::Vector<Q> qd=qu-ql;
+      const LinearAlgebra::Vector<Q> qc=c.position_vector();
+      const LinearAlgebra::Matrix<Q> qG=G;
+      const LinearAlgebra::Vector<Q> qrhs=qc-ql-qG*qo;
       
-      if(verbosity>8) { std::cerr << "ql=" << ql << ", qd=" << qd <<", qc=" << qc << ", qrhs=" << qrhs << std::endl; }
+      if(Geometry::verbosity>8) { std::cerr << "ql=" << ql << ", qd=" << qd <<", qc=" << qc << ", qrhs=" << qrhs << std::endl; }
       
       // Set up constraints x+sx=u-l
       for(size_type i=0; i!=d; ++i) {
@@ -480,7 +920,7 @@ namespace Ariadne {
       
       // Set up constraints x-Ge \pm ax=c-l-G1 
       for(size_type i=0; i!=d; ++i) {
-        if(qrhs(i)>=F(0)) {
+        if(qrhs(i)>=Q(0)) {
           T(i+d+m,i)=1;
           for(size_type j=0; j!=m; ++j) {
             T(i+d+m,d+j)=-qG(i,j);
@@ -505,148 +945,35 @@ namespace Ariadne {
         T(2*d+m,d+m) -= T(i+d+m,d+m);
       }
       
-      LinearAlgebra::LinearProgram<F> lp(T);
-      tribool result=!lp.is_feasible();
-
-      return result;
-    }
-
-    template<class R>
-    tribool
-    disjoint_approx(const Zonotope<R>& z, const Rectangle<R>& r)
-    {
-      //verbosity=9;
-      
-      if(verbosity>7) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      if(verbosity>8) { std::cerr << z << " " << r << std::endl; }
-      
-      check_equal_dimensions(z,r,__PRETTY_FUNCTION__);
-      dimension_type d=z.dimension();
-      size_type m=z.number_of_generators();
-    
-      //This method has some problems. It fails when the parameters are
-      //[1,17/16]x[19/16,5/4] and 
-      //  Zonotope(
-      //    centre=(1/2, 1/10)
-      //    directions=[ 1,1/2; 1/2,3/5 ]
-      //  )
-      
-      // Construct tableau for testing intersection of zonotope and rectangle
-      // Rectangle  l<=x<=u
-      // Zonotope  x==c+Ge,  -1<=e<=1
-      // 
-      // Translate x'=x-l,  e'=e+1
-      //   0<=x'<=u-l      ->  x' +     + sx'               == u-l
-      //   0<=e'<=2        ->     +  e' +     + se'         == 2
-      //   x'+l==c+G(e'-1) ->  x' + Ge'             +/- ax' == c-l-G1
-      //  
-      // Change sign of RHS of first equality if necessary
-      // Introduce slack variables for last two inequalities
-      typedef typename Numeric::traits<R>::approximate_arithmetic_type B;
-      B zero=0;
-      B one=1;
-
-      LinearAlgebra::Matrix<B> T(2*d+m+1,d+m+1);
-
-      LinearAlgebra::Vector<B> l(d);
-      LinearAlgebra::Vector<B> u(d);
-      LinearAlgebra::Vector<B> c(d);
-      LinearAlgebra::Matrix<B> G(d,m);
-      for(dimension_type i=0; i!=d; ++i) {
-        l(i)=r.lower_bound(i).get_base();
-        u(i)=r.upper_bound(i).get_base();
-        c(i)=z.centre(i).get_base();
-        for(size_type j=0; j!=m; ++j) {
-          G(i,j)=z.generators(i,j).get_base();
-        }
-      }
-
-      if(verbosity>8) { std::cerr << l << u << c << G << std::endl; }
-
-      const LinearAlgebra::Vector<B> o(m,one);
-      const LinearAlgebra::Vector<B> rhs=c-l-G*o;
-
-      if(verbosity>8) { std::cerr << "l=" << l << ", d=" << d <<", c=" << c << ", G=" << G << std::endl; }
-
-
-      
-      // Set up constraints x+sx=u-l
-      for(size_type i=0; i!=d; ++i) {
-        T(i,i)=1;
-        T(i,d+m)=u(i)-l(i);
-      }
-      
-      // Set up constraints e+se=2
-      for(size_type j=0; j!=m; ++j) {
-        T(d+j,d+j)=1;
-        T(d+j,d+m)=2;
-      }
-      
-      // Set up constraints x-Ge \pm ax=c-l-G1 
-      for(size_type i=0; i!=d; ++i) {
-        if(rhs(i)>=zero) {
-          T(i+d+m,i)=1;
-          for(size_type j=0; j!=m; ++j) {
-            T(i+d+m,d+j)=-G(i,j);
-          }
-          T(i+d+m,d+m)=rhs(i);
-        }
-        else {
-          T(i+d+m,i)=-1;
-          for(size_type j=0; j!=m; ++j) {
-            T(i+d+m,d+j)=G(i,j);
-          }
-          T(i+d+m,d+m)=-rhs(i);
-        }
-      } 
-      
-      // Set up cost function ax^T1
-      for(size_type i=0; i!=d; ++i) {
-        T(2*d+m,i) -= T(i+d+m,i);
-        for(size_type j=0; j!=m; ++j) {
-          T(2*d+m,d+j) -= T(i+d+m,d+j);
-        }
-        T(2*d+m,d+m) -= T(i+d+m,d+m);
-      }
-      
-      LinearAlgebra::LinearProgram<B> lp(T);
+      LinearAlgebra::LinearProgram<Q> lp(T);
       tribool result=!lp.is_feasible();
 
       return result;
     }
 
    
-    template<class R>
-    tribool
-    disjoint(const Rectangle<R>& r, const Zonotope<R>& z)
-    {
-      if(verbosity>7) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      return disjoint(z,r);
-    }
     
-    
-    template<class R>
     tribool
-    disjoint(const Zonotope<R>& z1, const Zonotope<R>& z2)
+    disjoint_exact(const Zonotope<Rational,Rational>& z1, const Zonotope<Rational,Rational>& z2)
     {
-      typedef Numeric::Rational F;
+      typedef Numeric::Rational Q;
       check_equal_dimensions(z1,z2,__PRETTY_FUNCTION__);
       
       dimension_type d=z1.dimension();
-      F one=1;
+      Q one=1;
       size_type m1=z1.number_of_generators();
       size_type m2=z2.number_of_generators();
       
-      LinearAlgebra::Matrix<F> T(m1+m2+d+1,m1+m2+1);
+      LinearAlgebra::Matrix<Q> T(m1+m2+d+1,m1+m2+1);
 
-      const LinearAlgebra::Vector<F> qo1(m1,one);
-      const LinearAlgebra::Vector<F> qo2(m2,one);
+      const LinearAlgebra::Vector<Q> qo1(m1,one);
+      const LinearAlgebra::Vector<Q> qo2(m2,one);
 
-      Geometry::Point<F> qc1=z1.centre();
-      LinearAlgebra::Matrix<F> qG1=z1.generators();
-      Geometry::Point<F> qc2=z2.centre();
-      LinearAlgebra::Matrix<F> qG2=z2.generators();
-      LinearAlgebra::Vector<F> qrhs = qG1*qo1 - qG2*qo2 + (qc2 - qc1);
+      const Geometry::Point<Q>& qc1=z1.centre();
+      const LinearAlgebra::Matrix<Q>& qG1=z1.generators();
+      const Geometry::Point<Q>& qc2=z2.centre();
+      const LinearAlgebra::Matrix<Q>& qG2=z2.generators();
+      LinearAlgebra::Vector<Q> qrhs = qG1*qo1 - qG2*qo2 + (qc2 - qc1);
             
       // Set up constraints e1 + se1 = 2
       for(size_type j1=0; j1!=m1; ++j1) {
@@ -662,7 +989,7 @@ namespace Ariadne {
       
       // Set up constraints G1*e1 - G2*e2 = (c2 - G2*1) - (c1 - G1*1)
       for(size_type i=0; i!=d; ++i) {
-        if(qrhs(i)>=F(0)) {
+        if(qrhs(i)>=Q(0)) {
           for(size_type j1=0; j1!=m1; ++j1) {
             T(m1+m2+i,j1)=qG1(i,j1);
           }
@@ -693,7 +1020,7 @@ namespace Ariadne {
         T(m1+m2+d,m1+m2) -= T(m1+m2+i,m1+m2);
       }
       
-      LinearAlgebra::LinearProgram<F> lp(T);
+      LinearAlgebra::LinearProgram<Q> lp(T);
       
       tribool result=!lp.is_feasible();
       
@@ -701,240 +1028,70 @@ namespace Ariadne {
       return result;
     }
     
-    
-    template<class R>
+    /* Set up LP problem to solve \f$c+Ge=p\f$; \f$-1<=e<=1\f$.
+     * Change variables so that the problem becomes \f$Ge=p-c-G1;\ 0\leq e\leq2\f$.
+     * Change sign of \f$ Ge=p-c-G1\f$ to make right-hand side positive.
+     */
     tribool 
-    subset(const Rectangle<R>& r, const Zonotope<R>& z) 
-    {
-      typedef typename Rectangle<R>::vertices_const_iterator RVIter;
-      tribool result=true;
-      for(RVIter rv_iter=r.vertices_begin(); rv_iter!=r.vertices_end(); ++rv_iter) {
-        const Point<R>& pt=*rv_iter;
-        result=result && z.contains(pt);
-        if(result==false) {
-          break;
+    contains_exact(const Zonotope<Rational,Rational>& z, const Point<Rational>& pt)
+    { 
+      //std::cerr << "Zonotope<RC,RG>::contains(const Point<R>& )" << std::endl;
+      //typedef typename Numeric::traits<R,R>::arithmetic_type Q;
+      typedef Rational Q;
+      check_equal_dimensions(z,pt,__PRETTY_FUNCTION__);
+      dimension_type d=z.dimension();
+      dimension_type m=z.number_of_generators();
+      
+      Q zero=0;
+      Q one=1;
+      Q two=2;
+      
+      const Geometry::Point<Q>& qc=z.centre();
+      const Geometry::Point<Q>& qp=pt;
+      const LinearAlgebra::Matrix<Q>& qG=z.generators();
+      const LinearAlgebra::Vector<Q> qo(m,one);
+      const LinearAlgebra::Vector<Q> zv(m,zero);
+      const LinearAlgebra::Vector<Q> tv(m,two);
+
+      LinearAlgebra::Vector<Q> qrhs=qp-qc+qG*qo;
+      
+      LinearAlgebra::Matrix<Q> T(d+m+1,m+1);
+      
+      // Set up constraints e+se=2
+      for(dimension_type j=0; j!=m; ++j) {
+        T(j,j)=1;
+        T(j,m)=2;
+      }
+      
+      // Set up constraints Ge \pm ax = p-c+G1
+      for(dimension_type i=0; i!=d; ++i) {
+        if(qrhs(i)>=Q(0)) {
+          for(dimension_type j=0; j!=m; ++j) {
+            T(m+i,j)=qG(i,j); 
+          }
+          T(m+i,m)=qrhs(i);
+        } else {
+          for(dimension_type j=0; j!=m; ++j) {
+            T(m+i,j)=-qG(i,j); 
+          }
+          T(m+i,m)=-qrhs(i);
         }
       }
+      
+      // Set up cost function ax^T 1
+      for(dimension_type i=0; i!=d; ++i) {
+        for(dimension_type j=0; j!=m; ++j) {
+          T(m+d,j)-=T(m+i,j);
+        }
+        T(m+d,m)-=T(m+i,m);
+      }
+      
+      LinearAlgebra::LinearProgram<Q> lp(T);
+      //std::cerr << lp.tableau() << std::endl;
+      tribool result=lp.is_feasible();
+      //std::cerr << lp.tableau() << std::endl;
       return result;
     }
-    
 
-    template<class R>
-    tribool 
-    subset(const Zonotope<R>& A, const Rectangle<R>& B) 
-    {
-      return Geometry::subset(A.bounding_box(),B);
-    }
-    
-
-    template<class R>
-    tribool 
-    subset(const Zonotope<R>& A, const Zonotope<R>& B) 
-    {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-      return Geometry::subset(A.operator Polytope<F>(),B.operator Polyhedron<F>());
-    } 
-    
-    
-    template<class R> 
-    Zonotope<typename Numeric::traits<R>::arithmetic_type>
-    minkowski_sum(const Zonotope<R>& A, const Zonotope<R>& B)
-    {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-      
-      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
-      
-      Geometry::Point<F> new_centre=Geometry::minkowski_sum(A.centre(),B.centre());
-      LinearAlgebra::Matrix<R> new_generators=LinearAlgebra::concatenate_columns(A.generators(),B.generators());
-      return Zonotope<F>(new_centre,new_generators);
-    }
-     
-    
-    template<class R> 
-    Zonotope<typename Numeric::traits<R>::arithmetic_type> 
-    minkowski_difference(const Zonotope<R>& A, const Zonotope<R>& B)
-    {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-     
-      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
-      
-      return Zonotope<F>(Geometry::minkowski_difference(A.centre(),B.centre()),
-                         LinearAlgebra::concatenate_columns(A.generators(),B.generators()));
-    }
-    
-    
-    template<class R> 
-    Zonotope<R> 
-    over_approximation(const Zonotope< Numeric::Interval<R> >& iz)
-    {
-      if(iz.number_of_generators()==iz.dimension()) {
-        Parallelotope< Numeric::Interval<R> > ip=iz;
-        Parallelotope<R> p=over_approximation(ip);
-        return p;
-      } else {
-        return orthogonal_over_approximation(iz);
-      }
-    }
-    
-    
-    template<class R> 
-    Zonotope<R> 
-    approximation(const Zonotope<R>& z)
-    {
-      return z; 
-    }
-
-    
-    template<class R> 
-    Zonotope<R> 
-    approximation(const Zonotope< Numeric::Interval<R> >& iz)
-    {
-      LinearAlgebra::Matrix< Numeric::Interval<R> > G=iz.generators();
-
-      return Zonotope<R>(approximate_value(iz.centre()),
-                         approximate_value(G));
-    }
-    
-    
-    template<class R> 
-    Zonotope< Numeric::Interval<R> > 
-    interval_over_approximation(const Zonotope< Numeric::Interval<R> >& iz)
-    {
-      // FIXME: This is incorrect; need over-approximations
-      LinearAlgebra::Matrix< Numeric::Interval<R> > G(iz.generators());
-      LinearAlgebra::Vector< Numeric::Interval<R> > e(iz.number_of_generators(),Numeric::Interval<R>(-1,+1));
-      LinearAlgebra::Matrix<R> nG=approximate_value(G);
-      Geometry::Point< Numeric::Interval<R> > nc=iz.centre()+(G-nG)*e;
-      
-      return Zonotope< Numeric::Interval<R> >(nc,nG);
-    }
-
-    template<class R>
-    std::ostream&
-    Zonotope<R>::write(std::ostream& os) const 
-    {
-      const Zonotope<R>& z=*this;
-      if(z.dimension() > 0) {
-        if (z.empty()) {
-          os << "Zonotope( )" << std::endl;
-        } else {
-          os << "Zonotope( centre=" << z.centre();
-          os << ", directions=" << z.generators();
-          os << ")";
-        } 
-      }
-      return os;
-    }
-    
-    
-    template<class R>
-    std::istream& 
-    Zonotope<R>::read(std::istream& is)
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
-    
-    
-    template<class R>
-    tribool
-    disjoint(const Zonotope< Numeric::Interval<R> >& z, const Rectangle<R>& r)
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
-
-    template<class R>
-    tribool
-    disjoint(const Zonotope< Numeric::Interval<R> >& z, const Rectangle< Numeric::Interval<R> >& r)
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
-
-    template<class R>
-    tribool
-    disjoint(const Zonotope< Numeric::Interval<R> >& z, const Zonotope< Numeric::Interval<R> >& r)
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
-
-    template<class R>
-    tribool
-    subset(const Rectangle< R >& z, const Zonotope< Numeric::Interval<R> >& r)
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
-
-    template<class R>
-    tribool
-    subset(const Rectangle< Numeric::Interval<R> >& z, const Zonotope< Numeric::Interval<R> >& r)
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
-
-    template<class R>
-    tribool
-    subset(const Zonotope< Numeric::Interval<R> >& z, const Zonotope< Numeric::Interval<R> >& r)
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
-
-    template<class R>
-    tribool
-    subset(const Zonotope< Numeric::Interval<R> >& z, const Rectangle<R>& r)
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
-
-    template<class R>
-    tribool
-    subset(const Zonotope< Numeric::Interval<R> >& z, const Rectangle< Numeric::Interval<R> >& r)
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
-
-
-    
-       
-    
-    
-
-    template<class R>
-    std::ostream& 
-    ZonotopeVerticesIterator<R>::write(std::ostream& os) const 
-    {
-      return os << "ZonotopeVerticesIterator<" << Numeric::name<R>() << ">( &z=" << _z << ","
-                << " i=" << _i << " p=" << _parity << ", v=" << **this << ")";
-    }
-  
-
-    template<class R>
-    void
-    Zonotope<R>::_instantiate_geometry_operators() 
-    {
-      Rectangle<R> r;
-      Zonotope<R> z;
-      Zonotope<I> iz;
-      Geometry::disjoint(r,z);
-      Geometry::disjoint(z,r);
-      Geometry::disjoint(z,z);
-      Geometry::subset(r,z);
-      Geometry::subset(z,r);
-      Geometry::subset(z,z);
-      Geometry::minkowski_sum(z,z);
-      Geometry::minkowski_difference(z,z);
-      
-      Geometry::subset(iz,r);
-      Geometry::disjoint(iz,r);
-
-      typedef typename Numeric::traits<R>::arithmetic_type A;
-      Zonotope<A> az;
-      Geometry::over_approximation(az);
-      Geometry::approximation(az);
-
-      //Can't instantiate for Rational type
-      //Geometry::interval_over_approximation(iz);
-
-   }
-    
-    
-  }
 }
+

@@ -90,7 +90,7 @@ test_lohner_integrator()
   eps.set_fill_colour("green");
   eps << over_approximation(zr1) << over_approximation(zr2);
   eps.set_fill_colour("blue");
-  eps << over_approximation(zr1) << 2;
+  eps << over_approximation(z1) << over_approximation(z2);
   eps.set_fill_colour("yellow");
   eps << over_approximation(z0);
   eps.close();

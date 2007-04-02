@@ -28,6 +28,8 @@
 #ifndef ARIADNE_GEOMETRY_DECLARATIONS_H
 #define ARIADNE_GEOMETRY_DECLARATIONS_H
 
+#include "zonotope.decl.h"
+
 namespace Ariadne { 
   namespace Geometry {
     template<class R> class Point;
@@ -36,7 +38,7 @@ namespace Ariadne {
     template<class E> class RectangleExpression;
     template<class R> class Rectangle;
     template<class R> class Parallelotope;
-    template<class R> class Zonotope;
+    template<class RC,class RG> class Zonotope;
     template<class R> class Simplex;
     template<class R> class Polyhedron;
     template<class R> class Polytope;

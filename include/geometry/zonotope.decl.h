@@ -1,5 +1,5 @@
 /***************************************************************************
- *            taylor_set.code.h
+ *            zonotope.decl.h
  *
  *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -21,45 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include <iostream>
-#include <vector>
-#include <algorithm>
+/*! \file zonotope.decl.h
+ *  \brief Forward declaration of zonotope class. 
+ */
 
-#include "taylor_set.h"
-
-#include "exceptions.h"
-#include "../base/array.h"
-
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
-#include "../linear_algebra/tensor.h"
-
-#include "../geometry/point.h"
-#include "../geometry/rectangle.h"
-#include "../geometry/zonotope.h"
-#include "../geometry/list_set.h"
+#ifndef ARIADNE_ZONOTOPE_DECL_H
+#define ARIADNE_ZONOTOPE_DECL_H
 
 namespace Ariadne {
   namespace Geometry {
-    
-    extern int verbosity;
-   
-    template<class R>
-    void
-    TaylorSet<R>::_instantiate_geometry_operators() 
-    {
-      Zonotope<Numeric::Interval<R>,R>* z=0;
-      TaylorSet<R>* ts=0;
-      *z=over_approximation(*ts);
-    }
-    
-    template<class R> 
-    Zonotope<Numeric::Interval<R>,R> 
-    over_approximation(const TaylorSet<R>&) 
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
- 
+
+    template<class RC,class RG=RC> class Zonotope;
 
   }
 }
+
+#endif /* ARIADNE_ZONOTOPE_DECL_H */

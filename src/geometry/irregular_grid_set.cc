@@ -24,6 +24,7 @@
 #include "geometry/irregular_grid_set.h"
 #include "geometry/irregular_grid_set.code.h"
 
+#include "numeric/rational.h"
 #include "numeric/float.h"
 
 namespace Ariadne {

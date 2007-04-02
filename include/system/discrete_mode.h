@@ -28,9 +28,10 @@
 #include <stdexcept>
 #include <boost/smart_ptr.hpp>
 
-#include "vector_field.h"
-#include "../exceptions.h"
 #include "../geometry/set_interface.h"
+
+#include "../system/exceptions.h"
+#include "../system/vector_field.h"
 
 namespace Ariadne {
 namespace System {

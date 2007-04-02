@@ -24,7 +24,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "declarations.h"
+#include "base/types.h"
 #include "test_float.h"
 
 #include "combinatoric/lattice_set.h"
@@ -32,7 +32,6 @@
 
 using namespace Ariadne;
 using namespace Combinatoric;
-using namespace System;
 using namespace std;
 
 int main() {

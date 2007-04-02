@@ -30,6 +30,7 @@
 
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
+#include "evaluation/exceptions.h"
 #include "evaluation/newton.h"
 
 #include "models/henon.h"
@@ -38,6 +39,7 @@
 
 using namespace std;
 using namespace Ariadne;
+using namespace Ariadne::Numeric;
 using namespace Ariadne::Geometry;
 using namespace Ariadne::System;
 using namespace Ariadne::Evaluation;

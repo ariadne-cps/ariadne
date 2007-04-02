@@ -23,12 +23,9 @@
  
 
 
-#include "../declarations.h"
-
 #include "../base/array.h"
 #include "../base/iterator.h"
 #include "../base/tribool.h"
-#include "../exceptions.h"
 
 #include "../numeric/arithmetic.h"
 #include "../numeric/function.h"
@@ -36,6 +33,7 @@
 
 #include "../linear_algebra/vector.h"
 
+#include "../geometry/exceptions.h"
 #include "../geometry/point.h"
 #include "../geometry/rectangle_expression.h"
 
@@ -61,7 +59,7 @@ namespace Ariadne {
     }
     
     template<class R> inline
-    Rectangle<R>::Rectangle(const array< Interval<R> >& a)
+    Rectangle<R>::Rectangle(const array< Numeric::Interval<R> >& a)
       : _data(2*a.size())
     {
       for(dimension_type i=0; i!=a.size(); ++i) {
@@ -71,7 +69,7 @@ namespace Ariadne {
     }
     
     template<class R> inline
-    Rectangle<R>::Rectangle(const std::vector< Interval<R> >& v)
+    Rectangle<R>::Rectangle(const std::vector< Numeric::Interval<R> >& v)
       : _data(2*v.size())
     {
       for(dimension_type i=0; i!=v.size(); ++i) {
@@ -91,7 +89,7 @@ namespace Ariadne {
     }
     
     template<class R> inline
-    Rectangle<R>::Rectangle(const Point< Interval<R> >& pt)
+    Rectangle<R>::Rectangle(const Point< Numeric::Interval<R> >& pt)
       : _data(2*pt.dimension())
     {
       for(dimension_type i=0; i!=pt.dimension(); ++i) {
@@ -113,7 +111,7 @@ namespace Ariadne {
     
     
     template<class R> inline
-    Rectangle<R>::Rectangle(const LinearAlgebra::Vector< Interval<R> >& iv)
+    Rectangle<R>::Rectangle(const LinearAlgebra::Vector< Numeric::Interval<R> >& iv)
       : _data(2*iv.size())
     {
       for (size_type i=0; i!=this->dimension(); ++i) {
@@ -161,9 +159,9 @@ namespace Ariadne {
     
     // Conversion operators
     template<class R> inline
-    Rectangle<R>::operator Point< Interval<R> >() const 
+    Rectangle<R>::operator Point< Numeric::Interval<R> >() const 
     {
-      return Point< Interval<R> >(this->dimension(),reinterpret_cast<const Interval<R>*>(this->_data.begin()));
+      return Point< Numeric::Interval<R> >(this->dimension(),reinterpret_cast<const Numeric::Interval<R>*>(this->_data.begin()));
     }    
     
     
@@ -233,25 +231,25 @@ namespace Ariadne {
     
     
     template<class R> inline
-    Interval<R>& Rectangle<R>::operator[] (dimension_type i) 
+    Numeric::Interval<R>& Rectangle<R>::operator[] (dimension_type i) 
     {
       check_coordinate(*this,i,__PRETTY_FUNCTION__);
-      return reinterpret_cast<Interval<R>&>(this->_data[2*i]);
+      return reinterpret_cast<Numeric::Interval<R>&>(this->_data[2*i]);
     }
  
     template<class R> inline
-    const Interval<R>& Rectangle<R>::operator[] (dimension_type i) const 
+    const Numeric::Interval<R>& Rectangle<R>::operator[] (dimension_type i) const 
     {
       check_coordinate(*this,i,__PRETTY_FUNCTION__);
-      return reinterpret_cast<const Interval<R>&>(this->_data[2*i]);
+      return reinterpret_cast<const Numeric::Interval<R>&>(this->_data[2*i]);
     }
     
     
     template<class R> inline
-    const Interval<R>& Rectangle<R>::interval(dimension_type i) const 
+    const Numeric::Interval<R>& Rectangle<R>::interval(dimension_type i) const 
     {
       check_coordinate(*this,i,__PRETTY_FUNCTION__);
-      return reinterpret_cast<const Interval<R>&>(this->_data[2*i]);
+      return reinterpret_cast<const Numeric::Interval<R>&>(this->_data[2*i]);
     }
     
     
@@ -277,9 +275,9 @@ namespace Ariadne {
     
     
     template<class R> inline
-    LinearAlgebra::Vector< Interval<R> > Rectangle<R>::position_vectors() const 
+    LinearAlgebra::Vector< Numeric::Interval<R> > Rectangle<R>::position_vectors() const 
     {
-      LinearAlgebra::Vector< Interval<R> > result(this->dimension());
+      LinearAlgebra::Vector< Numeric::Interval<R> > result(this->dimension());
       for(dimension_type i=0; i!=this->dimension(); ++i) {
         result(i)=this->interval(i);
       }
@@ -298,7 +296,7 @@ namespace Ariadne {
     }
     
     template<class R> inline
-    void Rectangle<R>::set_interval(dimension_type i, Interval<R> x)
+    void Rectangle<R>::set_interval(dimension_type i, Numeric::Interval<R> x)
     {
       check_coordinate(*this,i,__PRETTY_FUNCTION__);
       this->set_lower_bound(i,x.lower());
@@ -322,7 +320,7 @@ namespace Ariadne {
     template<class R> inline
     Rectangle<R>& Rectangle<R>::expand_by(const real_type& delta) 
     {
-      Interval<R> expand(-delta,delta);
+      Numeric::Interval<R> expand(-delta,delta);
       for (size_type j=0; j< this->dimension(); ++j) {
         (*this)[j]+=expand;
       }
@@ -433,60 +431,60 @@ namespace Ariadne {
     
     
     template<class R> inline
-    Rectangle< Interval<R> >::Rectangle(dimension_type d)
+    Rectangle< Numeric::Interval<R> >::Rectangle(dimension_type d)
       : _data(2*d) { }
     
     template<class R> template<class E> inline
-    Rectangle< Interval<R> >::Rectangle(const RectangleExpression<E>& e)
+    Rectangle< Numeric::Interval<R> >::Rectangle(const RectangleExpression<E>& e)
       : _data(2*e().dimension()) 
     { 
       this->assign(e()); 
     }
     
     template<class R> template<class E> inline
-    Rectangle< Interval<R> >& 
-    Rectangle< Interval<R> >::operator=(const RectangleExpression<E>& e)
+    Rectangle< Numeric::Interval<R> >& 
+    Rectangle< Numeric::Interval<R> >::operator=(const RectangleExpression<E>& e)
     {
       this->_data.resize(e().dimension()); 
       this->assign(e); 
     }
     
     template<class R> inline
-    dimension_type Rectangle< Interval<R> >::dimension() const { 
+    dimension_type Rectangle< Numeric::Interval<R> >::dimension() const { 
       return this->_data.size()/2; 
     }
     
     template<class R> inline
-    const Interval<R>& 
-    Rectangle< Interval<R> >::lower_bound(const dimension_type& i) const 
+    const Numeric::Interval<R>& 
+    Rectangle< Numeric::Interval<R> >::lower_bound(const dimension_type& i) const 
     { 
       return _data[2*i]; 
     }
     
     template<class R> inline
-    const Interval<R>& 
-    Rectangle< Interval<R> >::upper_bound(const dimension_type& i) const
+    const Numeric::Interval<R>& 
+    Rectangle< Numeric::Interval<R> >::upper_bound(const dimension_type& i) const
     { 
       return _data[2*i+1];
     }
     
     template<class R> inline
     void 
-    Rectangle< Interval<R> >::set_lower_bound(const dimension_type& i, const Interval<R>& x)
+    Rectangle< Numeric::Interval<R> >::set_lower_bound(const dimension_type& i, const Numeric::Interval<R>& x)
     { 
       _data[2*i]=x; 
     }
     
     template<class R> inline
     void 
-    Rectangle< Interval<R> >::set_upper_bound(const dimension_type& i, const Interval<R>& x)
+    Rectangle< Numeric::Interval<R> >::set_upper_bound(const dimension_type& i, const Numeric::Interval<R>& x)
     { 
       _data[2*i+1]=x; 
     }
     
     template<class R> template<class RE> inline
     void 
-    Rectangle< Interval<R> >::assign(const RE& re) 
+    Rectangle< Numeric::Interval<R> >::assign(const RE& re) 
     { 
       for(dimension_type i=0; i!=this->dimension(); ++i) {
         this->_data[2*i]=re.lower_bound(i); this->_data[2*i+1]=re.upper_bound(i);
@@ -511,7 +509,7 @@ namespace Ariadne {
 
 
     template<class R> inline
-    Rectangle<R> over_approximation(const Rectangle< Interval<R> >& ir) 
+    Rectangle<R> over_approximation(const Rectangle< Numeric::Interval<R> >& ir) 
     {
       Rectangle<R> result(ir.dimension());
       for(dimension_type i=0; i!=result.dimension(); ++i) {
@@ -522,7 +520,7 @@ namespace Ariadne {
     }
     
     template<class R> inline
-    Rectangle<R> under_approximation(const Rectangle< Interval<R> >& ir) 
+    Rectangle<R> under_approximation(const Rectangle< Numeric::Interval<R> >& ir) 
     {
       Rectangle<R> result(ir.dimension());
       for(dimension_type i=0; i!=result.dimension(); ++i) {
@@ -603,7 +601,7 @@ namespace Ariadne {
       for(size_type i=0; i != C.dimension(); ++i) {
         C[i]=Numeric::intersection(A[i],B[i]);
         if(C[i].lower()>=C[i].upper()) {
-          C[i]=Interval<R>();
+          C[i]=Numeric::Interval<R>();
         }
       }
       return C;
@@ -679,7 +677,7 @@ namespace Ariadne {
     
     
     template<class R> inline
-    LinearAlgebra::Vector< Interval<R> > 
+    LinearAlgebra::Vector< Numeric::Interval<R> > 
     operator-(const Geometry::Rectangle<R>& r1,
               const Geometry::Rectangle<R>& r2)
     {
@@ -694,7 +692,7 @@ namespace Ariadne {
     {
       const E& ev=v();
       check_dimension(r,ev.size(),__PRETTY_FUNCTION__);
-      LinearAlgebra::Vector< Interval<R> > iv=ev;
+      LinearAlgebra::Vector< Numeric::Interval<R> > iv=ev;
       return r+iv; 
     }
       
@@ -717,7 +715,7 @@ namespace Ariadne {
     inline
     Geometry::Rectangle<R> 
     operator+(const Geometry::Rectangle<R>& r, 
-              const LinearAlgebra::Vector< Interval<R> >& v)
+              const LinearAlgebra::Vector< Numeric::Interval<R> >& v)
     {
       Geometry::Rectangle<R> result(r.dimension());
       check_dimension(r,v.size(),__PRETTY_FUNCTION__);
@@ -746,7 +744,7 @@ namespace Ariadne {
     template<class R> inline
     Geometry::Rectangle<R> 
     operator-(const Geometry::Rectangle<R>& r, 
-              const LinearAlgebra::Vector< Interval<R> >& v)
+              const LinearAlgebra::Vector< Numeric::Interval<R> >& v)
     {
       Geometry::Rectangle<R> result(r.dimension());
       check_dimension(r,v.size(),__PRETTY_FUNCTION__);

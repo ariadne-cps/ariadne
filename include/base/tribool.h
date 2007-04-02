@@ -19,6 +19,7 @@ namespace Ariadne {
 
     inline bool possibly(tribool tb) { return tb || indeterminate(tb); }
   }
+  
 }
 
-#endif
+#endif /* ARIADNE_TRIBOOL_H */

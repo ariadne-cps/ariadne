@@ -45,7 +45,6 @@ namespace Ariadne {
     class VanDerPolEquation : public System::VectorField<R> 
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
-      typedef Interval<R> I;
      public:
       /*! \brief Constructor. */
       explicit VanDerPolEquation(R mu=0.0)

@@ -34,6 +34,8 @@
 
 #include "../base/stlio.h"
 #include "../numeric/conversion.h"
+#include "../linear_algebra/matrix.h"
+#include "../geometry/exceptions.h"
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
 #include "../geometry/list_set.h"
@@ -42,7 +44,6 @@
 #include "../geometry/zonotope.h"
 #include "../geometry/polytope.h"
 #include "../geometry/partition_tree_set.h"
-#include "../linear_algebra/matrix.h"
 #include "../system/affine_map.h"
 
 #define SCALE_DIMENSION 3.5 
@@ -136,7 +137,7 @@ namespace Ariadne {
     {
       Geometry::Point<R1> result(pt.dimension());
       for(size_type i=0; i!= result.dimension(); ++i) {
-        result[i]=conv_approx<R1>(pt[i]);
+        result[i]=Numeric::conv_approx<R1>(pt[i]);
       }
       return result;
     }
@@ -164,9 +165,9 @@ namespace Ariadne {
         : _d(d), _i(i), _j(j) { if(i>=d || j>=d) { throw Geometry::InvalidCoordinate(__PRETTY_FUNCTION__); } }
       template<class R> Point2d operator() (const Geometry::Point<R>& pt) const {
         Point2d result(2); 
-        check_dimension(pt,_d,__PRETTY_FUNCTION__);
-        result[0]=conv_approx<double>(pt[_i]); 
-        result[1]=conv_approx<double>(pt[_j]); 
+        Geometry::check_dimension(pt,_d,__PRETTY_FUNCTION__);
+        result[0]=Numeric::conv_approx<double>(pt[_i]); 
+        result[1]=Numeric::conv_approx<double>(pt[_j]); 
         return result;
       }
       template<class R> Polygon2d operator() (const Geometry::PointList<R>& ptl) const {
@@ -179,15 +180,15 @@ namespace Ariadne {
       }
       template<class R> Rectangle2d operator() (const Geometry::Rectangle<R>& r) const {
         Rectangle2d result(2); 
-        check_dimension(r,this->_d);
-        result.lower_bound(0)=conv_approx<double>(r.lower_bound(this->_i));
-        result.upper_bound(0)=conv_approx<double>(r.upper_bound(this->_i));
-        result.lower_bound(1)=conv_approx<double>(r.lower_bound(this->_j));
-        result.upper_bound(1)=conv_approx<double>(r.upper_bound(this->_j));
+        Geometry::check_dimension(r,this->_d);
+        result.lower_bound(0)=Numeric::conv_approx<double>(r.lower_bound(this->_i));
+        result.upper_bound(0)=Numeric::conv_approx<double>(r.upper_bound(this->_i));
+        result.lower_bound(1)=Numeric::conv_approx<double>(r.lower_bound(this->_j));
+        result.upper_bound(1)=Numeric::conv_approx<double>(r.upper_bound(this->_j));
         return result;
       }
       template<class R> Polygon2d operator() (const Geometry::Zonotope<R>& z) const {
-        return this->operator()(Geometry::Zonotope<Rational>(z).vertices());
+        return this->operator()(Geometry::Zonotope<Numeric::Rational>(z).vertices());
       }
       template<class R> Polygon2d operator() (const Geometry::Polytope<R>& p) const {
         return this->operator()(p.vertices());
@@ -281,22 +282,22 @@ namespace Ariadne {
     epsfstream& draw(epsfstream& eps, const Polygon2d& vertices);
     
 
-    template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::Point<R>&); 
-    template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::Rectangle<R>&);
-    template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::Zonotope<R>&);
-    template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::Polytope<R>&); 
-    template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::Polyhedron<R>&); 
-    template<class BS> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::ListSet<BS>&); 
-    template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::GridCellListSet<R>&); 
-    template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::GridMaskSet<R>&); 
-    template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::PartitionTree<R>&); 
-    template<class R> epsfstream& operator<<(epsfstream&, const Ariadne::Geometry::PartitionTreeSet<R>&); 
+    template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Point<R>&); 
+    template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Rectangle<R>&);
+    template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Zonotope<R>&);
+    template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Polytope<R>&); 
+    template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Polyhedron<R>&); 
+    template<class BS> epsfstream& operator<<(epsfstream&, const Geometry::ListSet<BS>&); 
+    template<class R> epsfstream& operator<<(epsfstream&, const Geometry::GridCellListSet<R>&); 
+    template<class R> epsfstream& operator<<(epsfstream&, const Geometry::GridMaskSet<R>&); 
+    template<class R> epsfstream& operator<<(epsfstream&, const Geometry::PartitionTree<R>&); 
+    template<class R> epsfstream& operator<<(epsfstream&, const Geometry::PartitionTreeSet<R>&); 
 
     
 
     template<class R>
     void 
-    epsfstream::open(const char* fn, const Ariadne::Geometry::Rectangle<R>& bbox)
+    epsfstream::open(const char* fn, const Geometry::Rectangle<R>& bbox)
     {
       PlanarProjectionMap p_map(bbox.dimension(),0,1);
       this->open(fn,p_map(bbox),p_map);
@@ -304,7 +305,7 @@ namespace Ariadne {
 
     template<class R>
     void 
-    epsfstream::open(const char* fn, const Ariadne::Geometry::Rectangle<R>& bbox,
+    epsfstream::open(const char* fn, const Geometry::Rectangle<R>& bbox,
                      unsigned int ix,  unsigned int iy)
     {
       PlanarProjectionMap p_map(bbox.dimension(),ix,iy);
@@ -313,7 +314,7 @@ namespace Ariadne {
 
     template<class R>
     void 
-    epsfstream::open(const char* fn, const Ariadne::Geometry::Rectangle<R>& bbox,
+    epsfstream::open(const char* fn, const Geometry::Rectangle<R>& bbox,
                      const PlanarProjectionMap& p_map)
     {
       this->open(fn,p_map(bbox),p_map);
@@ -323,14 +324,14 @@ namespace Ariadne {
 
     template<class R> inline
     epsfstream&
-    operator<<(epsfstream& eps, const Ariadne::Geometry::Point<R>& pt) 
+    operator<<(epsfstream& eps, const Geometry::Point<R>& pt) 
     {
       return draw(eps, eps.projection_map()(pt));
     }
 
     template<class R> inline
     epsfstream&
-    operator<<(epsfstream& eps, const Ariadne::Geometry::Rectangle<R>& r) 
+    operator<<(epsfstream& eps, const Geometry::Rectangle<R>& r) 
     {
       Rectangle2d dr=eps.projection_map()(r);
       return draw(eps,dr);
@@ -340,7 +341,7 @@ namespace Ariadne {
     epsfstream&
     operator<<(epsfstream& eps, const Geometry::Zonotope<R>& z)
     {
-      Polygon2d vertices=eps.projection_map()(Geometry::Zonotope<Rational>(z).vertices());      
+      Polygon2d vertices=eps.projection_map()(Geometry::Zonotope<Numeric::Rational>(z).vertices());      
       return draw(eps,vertices);
     }
        
@@ -354,23 +355,23 @@ namespace Ariadne {
        
     template<class R> inline
     epsfstream&
-    operator<<(epsfstream& eps, const Ariadne::Geometry::Polytope<R>& p)
+    operator<<(epsfstream& eps, const Geometry::Polytope<R>& p)
     {
       return draw(eps,eps.projection_map()(p.vertices()));      
     }
     
     template<class R> inline
     epsfstream&
-    operator<<(epsfstream& eps, const Ariadne::Geometry::Polyhedron<R>& p)
+    operator<<(epsfstream& eps, const Geometry::Polyhedron<R>& p)
     {
-      return draw(eps,eps.projection_map()(Geometry::Polytope<Rational>(Geometry::Polyhedron<Rational>(p))));      
+      return draw(eps,eps.projection_map()(Geometry::Polytope<Numeric::Rational>(Geometry::Polyhedron<Numeric::Rational>(p))));      
     }
     
     template<class BS> inline
     epsfstream&
-    operator<<(epsfstream& eps, const Ariadne::Geometry::ListSet<BS>& ds)
+    operator<<(epsfstream& eps, const Geometry::ListSet<BS>& ds)
     {
-      typedef typename Ariadne::Geometry::ListSet<BS>::const_iterator const_iterator;
+      typedef typename Geometry::ListSet<BS>::const_iterator const_iterator;
       if(eps.fill_style) {
         for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
           trace(eps,eps.projection_map()(*set_iter)) << eps.fill_colour << " fill\n";
@@ -387,33 +388,33 @@ namespace Ariadne {
 
     template<class R> inline
     epsfstream&
-    operator<<(epsfstream& eps, const Ariadne::Geometry::GridMaskSet<R>& ds)
+    operator<<(epsfstream& eps, const Geometry::GridMaskSet<R>& ds)
     {
-      return eps << Ariadne::Geometry::ListSet< Ariadne::Geometry::Rectangle<R> >(ds);
+      return eps << Geometry::ListSet< Geometry::Rectangle<R> >(ds);
     }
     
  
     template<class R> inline
     epsfstream&
-    operator<<(epsfstream& eps, const Ariadne::Geometry::GridCellListSet<R>& ds)
+    operator<<(epsfstream& eps, const Geometry::GridCellListSet<R>& ds)
     {
-      return eps << Ariadne::Geometry::ListSet< Ariadne::Geometry::Rectangle<R> >(ds);
+      return eps << Geometry::ListSet< Geometry::Rectangle<R> >(ds);
     }
     
 
     template<class R> inline
     epsfstream&
-    operator<<(epsfstream& eps, const Ariadne::Geometry::PartitionTreeSet<R>& ds)
+    operator<<(epsfstream& eps, const Geometry::PartitionTreeSet<R>& ds)
     {
-      return eps << Ariadne::Geometry::ListSet< Ariadne::Geometry::Rectangle<R> >(ds);
+      return eps << Geometry::ListSet< Geometry::Rectangle<R> >(ds);
     }
 
     template<class R> inline
     epsfstream&
-    operator<<(epsfstream& eps, const Ariadne::Geometry::PartitionTree<R>& pt)
+    operator<<(epsfstream& eps, const Geometry::PartitionTree<R>& pt)
     {
-      for(typename Ariadne::Geometry::PartitionTree<R>::const_iterator iter = pt.begin(); iter!=pt.end(); ++iter) {
-        eps << Ariadne::Geometry::Rectangle<R>(*iter);
+      for(typename Geometry::PartitionTree<R>::const_iterator iter = pt.begin(); iter!=pt.end(); ++iter) {
+        eps << Geometry::Rectangle<R>(*iter);
       }
       return eps;
     }

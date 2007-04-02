@@ -102,7 +102,7 @@ class ApproximationType {
     /*! \brief Assigns an ApproximationType's object
      * to an other.
      *
-     * \param orig is the object which has to be 
+     * \param orig is the object whi.has to be 
      * copied.
      * \return A reference to the new object.
      */

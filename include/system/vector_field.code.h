@@ -40,7 +40,7 @@ namespace Ariadne {
      
     template<class R>
     typename VectorField<R>::F 
-    VectorField<R>::derivative(const Geometry::Point<F>& x, const size_type& i, const multi_index_type& j) const
+    VectorField<R>::derivative(const Geometry::Point<F>& x, const size_type& i, const LinearAlgebra::MultiIndex& j) const
     {
       throw DeferredImplementation(__PRETTY_FUNCTION__);
     }

@@ -33,6 +33,7 @@
 #include <boost/iterator/iterator_adaptor.hpp>
 
 #include "../base/array.h"
+#include "../base/types.h"
 
 namespace Ariadne {
   namespace Base {

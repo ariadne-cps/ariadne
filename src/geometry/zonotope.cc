@@ -31,6 +31,8 @@
 namespace Ariadne {
   namespace Geometry {
 
+    using namespace Numeric;
+    
     template class Zonotope<Rational>;
     template class ZonotopeVerticesIterator<Rational>;
 

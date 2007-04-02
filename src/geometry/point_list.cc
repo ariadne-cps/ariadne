@@ -31,6 +31,8 @@
 namespace Ariadne {
   namespace Geometry {
 
+    using namespace Numeric;
+    
     template class PointList<Rational>;
 
 #ifdef ENABLE_FLOAT64

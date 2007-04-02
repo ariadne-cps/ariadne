@@ -29,7 +29,6 @@
 #include "numeric/rational.h"
 #include "test/test_float.h"
 
-#include "declarations.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 

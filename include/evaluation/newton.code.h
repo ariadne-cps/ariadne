@@ -23,11 +23,12 @@
  
 #include "newton.h"
 
-#include "../debug.h"
+#include "../logging.h"
 #include "../geometry/point.h"
 
 #include "../system/vector_field.h"
 
+#include "../evaluation/exceptions.h"
 
 
 template<class R>

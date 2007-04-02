@@ -31,7 +31,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "../declarations.h"
+#include "../linear_algebra/declarations.h"
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 #include "../geometry/point.h"

@@ -37,7 +37,7 @@
 #include "euler_integrator.h"
 
 #include "../base/array.h"
-#include "../debug.h"
+#include "../logging.h"
 #include "../numeric/arithmetic.h"
 #include "../numeric/interval.h"
 
@@ -65,16 +65,21 @@ namespace Ariadne {
                                             const Geometry::Rectangle<R>& initial_set, 
                                             time_type& step_size) const
     {
+      using namespace Numeric;
+      using namespace LinearAlgebra;
+      using namespace Geometry;
+      using namespace System;
+ 
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
 
       check_equal_dimensions(vector_field,initial_set,__PRETTY_FUNCTION__);
       
-      const System::VectorField<R>& vf(vector_field);
-      Geometry::Rectangle<R> r=initial_set;
-      Geometry::Rectangle<R> q=estimate_flow_bounds(vf,r,step_size);
+      const VectorField<R>& vf(vector_field);
+      Rectangle<R> r=initial_set;
+      Rectangle<R> q=estimate_flow_bounds(vf,r,step_size);
       
       Interval<R> h=step_size;      
-      LinearAlgebra::Vector< Interval<R> > fq=vf(q);
+      Vector< Interval<R> > fq=vf(q);
       r=r+(h*fq);
 
       if(verbosity>0) {
@@ -98,19 +103,24 @@ namespace Ariadne {
                                            const Geometry::Rectangle<R>& initial_set, 
                                            time_type& step_size) const
     {
+      using namespace Numeric;
+      using namespace LinearAlgebra;
+      using namespace Geometry;
+      using namespace System;
+  
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
 
       check_equal_dimensions(vector_field,initial_set(),__PRETTY_FUNCTION__);
       
-      const System::VectorField<R>& vf(vector_field);
-      Geometry::Rectangle<R> r=initial_set;
+      const VectorField<R>& vf(vector_field);
+      Rectangle<R> r=initial_set;
       time_type& h=step_size;
 
-      Geometry::Rectangle<R> q=estimate_flow_bounds(vf,r,h);
+      Rectangle<R> q=estimate_flow_bounds(vf,r,h);
       
-      LinearAlgebra::Vector< Interval<R> > fq=vf(q);
+      Vector< Interval<R> > fq=vf(q);
       
-      r=r+LinearAlgebra::Vector< Interval<R> >(Interval<R>(R(0),h)*fq);
+      r=r+Vector< Interval<R> >(Interval<R>(R(0),h)*fq);
 
       if(verbosity>1) { 
         std::cerr << "suggested stepsize=" << step_size << std::endl;

@@ -36,7 +36,6 @@
 #include <tlapack/geqrf.hpp>
 #include <tlapack/orgqr.hpp>
 
-#include "../declarations.h"
 #include "../base/array.h"
 #include "../linear_algebra/matrix.h"
 

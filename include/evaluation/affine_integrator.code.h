@@ -38,8 +38,7 @@
 #include "affine_integrator.h"
 
 #include "../base/array.h"
-#include "../debug.h"
-#include "../exceptions.h"
+#include "../logging.h"
 #include "../numeric/arithmetic.h"
 #include "../numeric/interval.h"
 
@@ -55,6 +54,7 @@
 #include "../geometry/grid.h"
 #include "../geometry/grid_set.h"
 
+#include "../system/exceptions.h"
 #include "../system/vector_field.h"
 #include "../system/affine_vector_field.h"
 
@@ -69,6 +69,8 @@ template<class R>
 R
 Ariadne::Evaluation::gexp_up(const R& x, uint k)
 {
+  using namespace Numeric;
+  
   R result=div_up(static_cast<R>(1),static_cast<R>(factorial(k)));
   uint n=k;
   R term=result;
@@ -88,16 +90,19 @@ Ariadne::Evaluation::gexp(
     const time_type& qt, 
     const uint& k)
 {
+  using namespace Numeric;
+  using namespace LinearAlgebra;
+  
   //FIXME: Make number of steps depend on precision
   static const int MAX_STEPS=12;
   typedef Interval<R> I;
 
   int ns=MAX_STEPS;
 
-  LinearAlgebra::Matrix<R> id=LinearAlgebra::Matrix<R>::identity(A.number_of_rows());
+  Matrix<R> id=LinearAlgebra::Matrix<R>::identity(A.number_of_rows());
   
-  LinearAlgebra::Vector<I> result=b/static_cast<R>(factorial(k));
-  LinearAlgebra::Vector<I> term=result;
+  Vector<I> result=b/static_cast<R>(factorial(k));
+  Vector<I> term=result;
   I t(qt);
   
   for(uint n=k+1; n!=k+ns; ++n) {
@@ -107,7 +112,7 @@ Ariadne::Evaluation::gexp(
   
   R err=mul_up(pow_up((A.norm()*t).upper(),ns),gexp_up((A.norm()*t).upper(),k+ns));
   I ierr=err*I(-1,1);
-  result+=LinearAlgebra::Vector<I>(result.size(),ierr);
+  result+=Vector<I>(result.size(),ierr);
 
   if(Evaluation::verbosity>7) { 
     std::cerr << "A=" << A << ",  t=" << qt << ",  k=" << k << "\n" 
@@ -124,16 +129,19 @@ Ariadne::Evaluation::gexp(
     const time_type& qt, 
     const uint& k)
 {
+  using namespace Numeric;
+  using namespace LinearAlgebra;
+  
   //FIXME: Make number of steps depend on precision
   static const int MAX_STEPS=12;
   typedef Interval<R> I;
 
   int ns=MAX_STEPS;
 
-  LinearAlgebra::Matrix<R> id=LinearAlgebra::Matrix<R>::identity(A.number_of_rows());
+  Matrix<R> id=LinearAlgebra::Matrix<R>::identity(A.number_of_rows());
   
-  LinearAlgebra::Matrix<I> result=id/static_cast<R>(factorial(k));
-  LinearAlgebra::Matrix<I> term=result;
+  Matrix<I> result=id/static_cast<R>(factorial(k));
+  Matrix<I> term=result;
   I t(qt);
   
   for(uint n=k+1; n!=k+ns; ++n) {
@@ -143,7 +151,7 @@ Ariadne::Evaluation::gexp(
   
   R err=mul_up(pow_up((A.norm()*t).upper(),ns),gexp_up((A.norm()*t).upper(),k+ns));
   I ierr=err*I(-1,1);
-  result+=LinearAlgebra::Matrix<I>(result.number_of_rows(),result.number_of_columns(),&ierr,0,0);
+  result+=Matrix<I>(result.number_of_rows(),result.number_of_columns(),&ierr,0,0);
   
   if(Evaluation::verbosity>7) { 
     std::cerr << "A=" << A << ",  t=" << qt << ",  k=" << k << "\n" 
@@ -186,7 +194,7 @@ template<class R>
 Ariadne::Geometry::Zonotope< Ariadne::Numeric::Interval<R> > 
 Ariadne::Evaluation::AffineIntegrator<R>::reachability_step(
     const System::VectorField<R>& vector_field, 
-    const Geometry::Zonotope< Interval<R> >& initial_set, 
+    const Geometry::Zonotope< Numeric::Interval<R> >& initial_set, 
     time_type& step_size) const
 {
   if(verbosity>6) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
@@ -205,7 +213,7 @@ template<class R>
 Ariadne::Geometry::Zonotope< Ariadne::Numeric::Interval<R> > 
 Ariadne::Evaluation::AffineIntegrator<R>::integration_step(
     const System::AffineVectorField<R>& affine_vector_field, 
-    const Geometry::Zonotope< Interval<R> >& initial_set, 
+    const Geometry::Zonotope< Numeric::Interval<R> >& initial_set, 
     time_type& step_size) const
 {
   using namespace LinearAlgebra;
@@ -257,7 +265,7 @@ template<class R>
 Ariadne::Geometry::Zonotope< Ariadne::Numeric::Interval<R> > 
 Ariadne::Evaluation::AffineIntegrator<R>::reachability_step(
     const System::AffineVectorField<R>& vector_field, 
-    const Geometry::Zonotope< Interval<R> >& initial_set, 
+    const Geometry::Zonotope< Numeric::Interval<R> >& initial_set, 
     time_type& step_size) const
 {
   using namespace Numeric;
@@ -265,7 +273,6 @@ Ariadne::Evaluation::AffineIntegrator<R>::reachability_step(
   using namespace Geometry;
   using namespace System;
   
-
   if(verbosity>6) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
 
 

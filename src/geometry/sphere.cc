@@ -29,6 +29,8 @@
 namespace Ariadne {
   namespace Geometry {
 
+    using namespace Numeric;
+    
 #ifdef ENABLE_FLOAT64
     template class Sphere<Float64>;
 #endif

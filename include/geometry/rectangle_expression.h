@@ -29,10 +29,6 @@
 #ifndef ARIADNE_RECTANGLE_EXPRESSION_H
 #define ARIADNE_RECTANGLE_EXPRESSION_H
 
-#include <iosfwd>
-
-#include "../declarations.h"
-
 namespace Ariadne {
   namespace Geometry {
 
@@ -51,7 +47,6 @@ namespace Ariadne {
       const E& operator() () const { return static_cast<const E&>(*this); }
     };
 
-    
   }
 }
 

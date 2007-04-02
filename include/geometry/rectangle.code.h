@@ -57,10 +57,10 @@ namespace Ariadne {
       
       for (size_type i=0; i!=this->dimension(); ++i) {
         if(w[i]) {
-          quadrant[i]=Interval<R>(this->interval(i).centre(),this->upper_bound(i));
+          quadrant[i]=Numeric::Interval<R>(this->interval(i).centre(),this->upper_bound(i));
         } 
         else {
-          quadrant[i]=Interval<R>(this->lower_bound(i),this->interval(i).centre());
+          quadrant[i]=Numeric::Interval<R>(this->lower_bound(i),this->interval(i).centre());
         }
       }
       return quadrant;
@@ -171,11 +171,11 @@ namespace Ariadne {
     template<class R>
     inline
     tribool 
-    Rectangle< Interval<R> >::contains(const Point< Interval<R> >& p) const 
+    Rectangle< Numeric::Interval<R> >::contains(const Point< Numeric::Interval<R> >& p) const 
     {
       tribool result=true;
       check_equal_dimensions(*this,p,__PRETTY_FUNCTION__);
-      const Rectangle< Interval<R> >& self=*this;
+      const Rectangle< Numeric::Interval<R> >& self=*this;
       for (size_type i=0; i!=self.dimension(); ++i) {
         if(self.lower_bound(i)>p[i] || p[i]>self.upper_bound(i)) {
           return false;
@@ -189,42 +189,42 @@ namespace Ariadne {
 
 
     template<class R>
-    Point< Interval<R> > 
-    Rectangle< Interval<R> >::lower_corner() const 
+    Point< Numeric::Interval<R> > 
+    Rectangle< Numeric::Interval<R> >::lower_corner() const 
     {
-      return Point< Interval<R> >(this->dimension(),this->_data.begin(),2u);
+      return Point< Numeric::Interval<R> >(this->dimension(),this->_data.begin(),2u);
     }
     
     
     template<class R>
-    Point< Interval<R> > 
-    Rectangle< Interval<R> >::upper_corner() const 
+    Point< Numeric::Interval<R> > 
+    Rectangle< Numeric::Interval<R> >::upper_corner() const 
     {
-      return Point< Interval<R> >(this->dimension(),this->_data.begin()+1u,2u);
+      return Point< Numeric::Interval<R> >(this->dimension(),this->_data.begin()+1u,2u);
     }
     
     
     template<class R>
     size_type 
-    Rectangle< Interval<R> >::number_of_vertices() const 
+    Rectangle< Numeric::Interval<R> >::number_of_vertices() const 
     {
       return 1<<this->dimension();
     }
     
     
     template<class R>
-    typename Rectangle< Interval<R> >::vertices_const_iterator
-    Rectangle< Interval<R> >::vertices_begin() const
+    typename Rectangle< Numeric::Interval<R> >::vertices_const_iterator
+    Rectangle< Numeric::Interval<R> >::vertices_begin() const
     {
-      return RectangleVerticesIterator< Interval<R> >(*this,false);
+      return RectangleVerticesIterator< Numeric::Interval<R> >(*this,false);
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
     template<class R>
-    typename Rectangle< Interval<R> >::vertices_const_iterator
-    Rectangle< Interval<R> >::vertices_end() const
+    typename Rectangle< Numeric::Interval<R> >::vertices_const_iterator
+    Rectangle< Numeric::Interval<R> >::vertices_end() const
     {
-      return RectangleVerticesIterator< Interval<R> >(*this,true);
+      return RectangleVerticesIterator< Numeric::Interval<R> >(*this,true);
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
@@ -257,8 +257,8 @@ namespace Ariadne {
       is.putback(c);
       if(c=='[') {
         /* Representation as a literal [a1,b1]x[a2,b2]x...x[an,bn] */
-        std::vector< Interval<R> > v;
-        Interval<R> i;
+        std::vector< Numeric::Interval<R> > v;
+        Numeric::Interval<R> i;
         c='x';
         while(c=='x') {
           is >> i;

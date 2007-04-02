@@ -28,9 +28,12 @@
 #ifndef ARIADNE_INTEGRATOR_H
 #define ARIADNE_INTEGRATOR_H
 
-#include "../declarations.h"
-#include "../numeric/rational.h"
-#include "../base/tribool.h"
+#include "../base/types.h"
+#include "../base/declarations.h"
+#include "../numeric/declarations.h"
+#include "../linear_algebra/declarations.h"
+#include "../geometry/declarations.h"
+#include "../system/declarations.h"
 
 namespace Ariadne {
 
@@ -70,7 +73,7 @@ namespace Ariadne {
       typedef R real_type;
 
       /*! The type used to denote an interval of real numbers. */
-      typedef Interval<R> interval_type;
+      typedef Numeric::Interval<R> interval_type;
      
       /*! \brief Virtual destructor. */
       virtual ~Integrator();

@@ -37,6 +37,7 @@
 
 using namespace std;
 using namespace Ariadne;
+using namespace Ariadne::Numeric;
 
 
 template<class R> int test_class();

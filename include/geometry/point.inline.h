@@ -148,7 +148,7 @@ namespace Ariadne {
     
 
     template<class R> inline
-    bool contains_value(const Point< Interval<R> >& ipt, const Point<R>& pt) 
+    bool contains_value(const Point< Numeric::Interval<R> >& ipt, const Point<R>& pt) 
     {
       check_equal_dimensions(ipt,pt,__PRETTY_FUNCTION__);
       for(dimension_type i=0; i!=ipt.dimension(); ++i) {
@@ -161,7 +161,7 @@ namespace Ariadne {
     
     
     template<class R> inline
-    Point<R> approximation(const Point< Interval<R> >& ipt) 
+    Point<R> approximation(const Point< Numeric::Interval<R> >& ipt) 
     {
       Point<R> result(ipt.dimension());
       for(dimension_type i=0; i!=ipt.dimension(); ++i) {
@@ -171,11 +171,11 @@ namespace Ariadne {
     }
     
     template<class R> inline
-    R error_bound(const Point< Interval<R> >& ipt) 
+    R error_bound(const Point< Numeric::Interval<R> >& ipt) 
     {
       R result(0);
       for(dimension_type i=0; i!=ipt.dimension(); ++i) {
-        result=max(result,error_bound(ipt[i]));
+        result=Numeric::max(result,error_bound(ipt[i]));
       }
       return result;
     }
@@ -243,7 +243,7 @@ namespace Ariadne {
     
     template<class R> inline
     Point<R>
-    approximate_value(const Point< Interval<R> >& pt) 
+    approximate_value(const Point< Numeric::Interval<R> >& pt) 
     {
       Point<R> result(pt.dimension());
       for(dimension_type i=0; i!=result.dimension(); ++i) {

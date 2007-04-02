@@ -27,7 +27,7 @@
 #include <iomanip>
 #include <algorithm>
 
-#include "../exceptions.h"
+#include "exceptions.h"
 #include "../base/stlio.h"
 
 #include "../numeric/arithmetic.h"
@@ -169,6 +169,8 @@ namespace Ariadne {
     index_type 
     Grid<R>::subdivision_index(dimension_type d, const real_type& x) const 
     {
+      using namespace Numeric;
+      
       R half=0.5;
       index_type n=int_down<index_type>(add_approx(div_approx(sub_approx(x,this->_origin[d]),this->_lengths[d]),half));
       R sc=add_approx(this->_origin[d],mul_approx(this->_lengths[d],n));
@@ -184,6 +186,8 @@ namespace Ariadne {
     index_type 
     Grid<R>::subdivision_lower_index(dimension_type d, const real_type& x) const 
     {
+      using namespace Numeric;
+      
       index_type n=int_down<index_type>(div_down(sub_down(x,this->_origin[d]),this->_lengths[d]));
       if(x>=add_approx(this->_origin[d],mul_approx(this->_lengths[d],(n+1)))) {
         return n+1;
@@ -197,6 +201,8 @@ namespace Ariadne {
     index_type 
     Grid<R>::subdivision_upper_index(dimension_type d, const real_type& x) const 
     {
+      using namespace Numeric;
+      
       index_type n=int_up<index_type>(div_up(sub_up(x,this->_origin[d]),this->_lengths[d]));
       if(x<=add_approx(this->_origin[d],mul_approx(this->_lengths[d],(n-1)))) {
         return n-1;

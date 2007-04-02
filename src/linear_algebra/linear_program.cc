@@ -29,6 +29,8 @@
 namespace Ariadne {
   namespace LinearAlgebra {
     
+    using namespace Numeric;
+    
     template class LinearProgram<Rational>;
 
   }

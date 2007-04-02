@@ -31,12 +31,14 @@
 
 #include <iosfwd>
 
-#include "../declarations.h"
-#include "../exceptions.h"
+#include "../base/types.h"
 #include "../base/array.h"
 #include "../numeric/numerical_traits.h"
 #include "../numeric/integer.h"
 #include "../numeric/interval.h"
+
+#include "../linear_algebra/vector.h"
+#include "../linear_algebra/exceptions.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {
@@ -335,7 +337,7 @@ namespace Ariadne {
     template<class R>
     inline 
     bool
-    contains_value(const Matrix< Interval<R> >& iA, const Matrix<R>& A) 
+    contains_value(const Matrix< Numeric::Interval<R> >& iA, const Matrix<R>& A) 
     {
       if(!(A.number_of_rows()==iA.number_of_rows() 
            && A.number_of_columns()==iA.number_of_columns())) 
@@ -356,7 +358,7 @@ namespace Ariadne {
     template<class R>
     inline 
     Matrix<R>
-    approximate_value(const Matrix< Interval<R> >& im) 
+    approximate_value(const Matrix< Numeric::Interval<R> >& im) 
     {
       Matrix<R> result(im.number_of_rows(),im.number_of_columns());
       for(size_type i=0; i!=im.number_of_rows(); ++i) {
@@ -375,7 +377,7 @@ namespace Ariadne {
       Matrix<R1> result(im.number_of_rows(),im.number_of_columns());
       for(size_type i=0; i!=im.number_of_rows(); ++i) {
         for(size_type j=0; j!=im.number_of_columns(); ++j) {
-          result(i,j)=conv_approx<R1>(im(i,j));
+          result(i,j)=Numeric::conv_approx<R1>(im(i,j));
         }
       }
       return result;
@@ -383,17 +385,17 @@ namespace Ariadne {
 
     template<class R>
     inline
-    Vector< Interval<R> >
-    radius_row_sum(const Matrix< Interval<R> >& im) 
+    Vector< Numeric::Interval<R> >
+    radius_row_sum(const Matrix< Numeric::Interval<R> >& im) 
     { 
-      Vector< Interval<R> > result(im.number_of_rows());
+      Vector< Numeric::Interval<R> > result(im.number_of_rows());
       for(dimension_type i=0; i!=im.number_of_rows(); ++i) {
         R radius=0;
         for(dimension_type j=0; j!=im.number_of_columns(); ++j) {
           radius=add_up(radius,im(i,j).length());
         }
         radius = div_up(radius,static_cast<R>(2));
-        result[i]=Interval<R>(-radius,radius);
+        result[i]=Numeric::Interval<R>(-radius,radius);
       }
       return result;
     }
@@ -667,7 +669,7 @@ namespace Ariadne {
     /*! \brief A matrix \f$A\f$ such that for all zonotopes \f$Z\f$, \f$AZ\subset \overline{\underline{A}}\f$. */
     template<class R>
     Matrix<R>
-    over_approximation(const Matrix< Interval<R> >& A)
+    over_approximation(const Matrix< Numeric::Interval<R> >& A)
     {
       if(A.number_of_rows()!=A.number_of_columns()) {
         //throw NotImplemented(__PRETTY_FUNCTION__ ": Only implemented for square matrices"); 
@@ -681,7 +683,7 @@ namespace Ariadne {
           Amid(i,j)=(A(i,j).upper()+A(i,j).lower())/2;
         }
       }
-      Matrix< Interval<R> > I=LinearAlgebra::inverse(Matrix< Interval<R> >(Amid))*A;
+      Matrix< Numeric::Interval<R> > I=LinearAlgebra::inverse(Matrix< Numeric::Interval<R> >(Amid))*A;
       
       R excess=LinearAlgebra::norm(I).upper();
       

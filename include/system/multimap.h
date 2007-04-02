@@ -30,7 +30,7 @@
 
 #include <string>
 
-#include "../declarations.h"
+#include "../base/types.h"
 
 namespace Ariadne {
   namespace System {

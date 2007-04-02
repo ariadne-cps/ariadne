@@ -29,8 +29,6 @@
 #define ARIADNE_NUMERICAL_TRAITS_H
 
 #include <string>
-
-#include "../declarations.h"
 #include <gmpxx.h>
 
 // FIXME: WE should not use GMP internals
@@ -39,9 +37,10 @@ class __gmpq_value;
 
 namespace Ariadne {
   namespace Numeric {
+    class Integer;
+    class Rational;
     class Float64;
     class FloatMP;
-    class Rational;
     template<class R> class Interval;
       
     /* numerical traits */
@@ -51,7 +50,7 @@ namespace Ariadne {
     class field_tag { };
       
 #ifndef DOXYGEN
-    template<class T1, class T2> struct traits { 
+    template<class T1, class T2=T1> struct traits { 
     };
     //template<class T1, class T2=T1> class traits { };
 

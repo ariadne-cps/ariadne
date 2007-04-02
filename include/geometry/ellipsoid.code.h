@@ -74,11 +74,11 @@ namespace Ariadne {
     template<class R>
     tribool Ellipsoid<R>::contains(const Point<R>& point) const 
     {
-      LinearAlgebra::Vector<Rational> p=point.position_vector();
-      LinearAlgebra::Vector<Rational> c=this->centre().position_vector();
-      LinearAlgebra::Vector<Rational> d=p-c;
-      LinearAlgebra::Matrix<Rational> A=this->bilinear_form();
-      Rational r=inner_product(d,LinearAlgebra::Vector<Rational>(A*d));
+      LinearAlgebra::Vector<Numeric::Rational> p=point.position_vector();
+      LinearAlgebra::Vector<Numeric::Rational> c=this->centre().position_vector();
+      LinearAlgebra::Vector<Numeric::Rational> d=p-c;
+      LinearAlgebra::Matrix<Numeric::Rational> A=this->bilinear_form();
+      Numeric::Rational r=inner_product(d,LinearAlgebra::Vector<Numeric::Rational>(A*d));
       if(r<1) { return true; }
       if(r>1) { return false; }
       return indeterminate;

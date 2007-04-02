@@ -118,7 +118,7 @@ namespace Ariadne {
     PartitionTreeCell<R>::PartitionTreeCell(const Rectangle<R>& r, const Combinatoric::SubdivisionTreeCell& c)
       : _unit_box(r), _subdivision_cell(c)
     {
-      check_equal_dimensions(r,c,__PRETTY_FUNCTION__); 
+      Geometry::check_equal_dimensions(r,c,__PRETTY_FUNCTION__); 
     }
 
     template<class R> inline

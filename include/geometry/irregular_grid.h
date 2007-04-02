@@ -33,7 +33,9 @@
 namespace Ariadne {
   namespace Geometry {
 
-
+    template<class R> class Rectangle;
+    template<class BS> class ListSet;
+  
     /*! \brief A finite, nonuniform grid of rectangles in Euclidean space. 
      *  \ingroup Grid
      */

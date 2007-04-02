@@ -34,6 +34,8 @@
 #include "test.h"
 
 using namespace Ariadne;
+using namespace Ariadne::Base;
+using namespace Ariadne::Numeric;
 using namespace std;
 
 template class array<bool>;

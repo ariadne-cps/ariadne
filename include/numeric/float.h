@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file float.h
+/*! \file numeric/float.h
  *  \brief Configuration for floating-point numbers.
  */
 

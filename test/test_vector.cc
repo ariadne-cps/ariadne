@@ -37,6 +37,7 @@
 
 using namespace std;
 using namespace Ariadne;
+using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
 
 template<class R> int test_vector();

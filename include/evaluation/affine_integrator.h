@@ -28,7 +28,9 @@
 #ifndef ARIADNE_AFFINE_INTEGRATOR_H
 #define ARIADNE_AFFINE_INTEGRATOR_H
 
-#include "../declarations.h"
+#include "../linear_algebra/declarations.h"
+#include "../geometry/declarations.h"
+#include "../system/declarations.h"
 #include "../evaluation/integrator.h"
 
 namespace Ariadne {
@@ -57,7 +59,7 @@ namespace Ariadne {
     class AffineIntegrator
       : public IntegratorBase< R, System::AffineVectorField<R>, Geometry::Zonotope< Numeric::Interval<R> > > 
     {
-      typedef Interval<R> I;
+      typedef Numeric::Interval<R> I;
       typedef IntegratorBase< R, System::AffineVectorField<R>, Geometry::Zonotope<I> > Base_;
      public:
       /*! \brief Constructor. */

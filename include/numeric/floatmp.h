@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file floatmp.h
+/*! \file numeric/floatmp.h
  *  \brief Type definitions and conversion operators for multiple-precision floating-point numbers.
  */
 
@@ -34,7 +34,6 @@
 
 #include <gmpxx.h>
 
-#include "../declarations.h"
 #include "../numeric/numerical_traits.h"
 #include "../numeric/function.h"
 #include "../numeric/rational.h"

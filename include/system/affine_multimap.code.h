@@ -34,6 +34,7 @@
 #include "../geometry/simplex.h"
 #include "../geometry/polyhedron.h"
 
+#include "../system/exceptions.h"
 #include "../system/affine_map.h"
 
 namespace Ariadne {

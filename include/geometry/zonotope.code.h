@@ -28,7 +28,7 @@
 #include "zonotope.h"
 
 #include "../base/array.h"
-#include "../exceptions.h"
+#include "exceptions.h"
 #include "../numeric/conversion.h"
 
 #include "../linear_algebra/vector.h"
@@ -137,7 +137,8 @@ namespace Ariadne {
     }
   
     template<class R>
-    Polyhedron<Rational> polyhedron(const Zonotope< Interval<R> >& z) 
+    Polyhedron<Numeric::Rational> 
+    polyhedron(const Zonotope< Numeric::Interval<R> >& z) 
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
@@ -167,6 +168,7 @@ namespace Ariadne {
     Rectangle<R>
     bounding_box(const Zonotope<R>& z)
     {
+      using Numeric::Interval;
       LinearAlgebra::Vector< Interval<R> > v(z.number_of_generators(),Interval<R>(-1,1));
       LinearAlgebra::Vector< Interval<R> > b=z.centre().position_vector()+z.generators()*v;
       return Rectangle<R>(b);
@@ -174,8 +176,9 @@ namespace Ariadne {
     
     template<class R> inline
     Rectangle<R>
-    bounding_box(const Zonotope< Interval<R> >& z)
+    bounding_box(const Zonotope< Numeric::Interval<R> >& z)
     {
+      using Numeric::Interval;
       LinearAlgebra::Vector< Interval<R> > e(z.number_of_generators(),Interval<R>(-1,1));
       LinearAlgebra::Vector< Interval<R> > b=z.centre().position_vector()+z.generators()*e;
       return Rectangle<R>(b);
@@ -226,8 +229,8 @@ namespace Ariadne {
     
     
     template<class R>
-    ListSet< Zonotope< Interval<R> > >
-    subdivide(const Zonotope< Interval<R> >&) 
+    ListSet< Zonotope< Numeric::Interval<R> > >
+    subdivide(const Zonotope< Numeric::Interval<R> >&) 
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
@@ -270,8 +273,8 @@ namespace Ariadne {
     
     
     template<class R>
-    ListSet< Zonotope< Interval<R> > >
-    divide(const Zonotope< Interval<R> >&)
+    ListSet< Zonotope< Numeric::Interval<R> > >
+    divide(const Zonotope< Numeric::Interval<R> >&)
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
@@ -324,7 +327,7 @@ namespace Ariadne {
     { 
       //std::cerr << "Zonotope<R>::contains(const Point<R>& )" << std::endl;
       //typedef typename Numeric::traits<R,R>::arithmetic_type F;
-      typedef Rational F;
+      typedef Numeric::Rational F;
       check_equal_dimensions(z,pt,__PRETTY_FUNCTION__);
       dimension_type d=z.dimension();
       dimension_type m=z.number_of_generators();
@@ -382,7 +385,7 @@ namespace Ariadne {
 
     template<class R> inline
     tribool 
-    contains(const Zonotope< Interval<R> >& z, const Point< Interval<R> >& pt)
+    contains(const Zonotope< Numeric::Interval<R> >& z, const Point< Numeric::Interval<R> >& pt)
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
@@ -445,7 +448,7 @@ namespace Ariadne {
       //  
       // Change sign of RHS of first equality if necessary
       // Introduce slack variables for last two inequalities
-      typedef Rational F;
+      typedef Numeric::Rational F;
       LinearAlgebra::Matrix<F> T(2*d+m+1,d+m+1);
 
       const Geometry::Point<R>& l=r.lower_corner();
@@ -626,7 +629,7 @@ namespace Ariadne {
     tribool
     disjoint(const Zonotope<R>& z1, const Zonotope<R>& z2)
     {
-      typedef Rational F;
+      typedef Numeric::Rational F;
       check_equal_dimensions(z1,z2,__PRETTY_FUNCTION__);
       
       dimension_type d=z1.dimension();
@@ -762,10 +765,10 @@ namespace Ariadne {
     
     template<class R> 
     Zonotope<R> 
-    over_approximation(const Zonotope< Interval<R> >& iz)
+    over_approximation(const Zonotope< Numeric::Interval<R> >& iz)
     {
       if(iz.number_of_generators()==iz.dimension()) {
-        Parallelotope< Interval<R> > ip=iz;
+        Parallelotope< Numeric::Interval<R> > ip=iz;
         Parallelotope<R> p=over_approximation(ip);
         return p;
       } else {
@@ -784,9 +787,9 @@ namespace Ariadne {
     
     template<class R> 
     Zonotope<R> 
-    approximation(const Zonotope< Interval<R> >& iz)
+    approximation(const Zonotope< Numeric::Interval<R> >& iz)
     {
-      LinearAlgebra::Matrix< Interval<R> > G=iz.generators();
+      LinearAlgebra::Matrix< Numeric::Interval<R> > G=iz.generators();
 
       return Zonotope<R>(approximate_value(iz.centre()),
                          approximate_value(G));
@@ -794,16 +797,16 @@ namespace Ariadne {
     
     
     template<class R> 
-    Zonotope< Interval<R> > 
-    interval_over_approximation(const Zonotope< Interval<R> >& iz)
+    Zonotope< Numeric::Interval<R> > 
+    interval_over_approximation(const Zonotope< Numeric::Interval<R> >& iz)
     {
       // FIXME: This is incorrect; need over-approximations
-      LinearAlgebra::Matrix< Interval<R> > G(iz.generators());
-      LinearAlgebra::Vector< Interval<R> > e(iz.number_of_generators(),Interval<R>(-1,+1));
+      LinearAlgebra::Matrix< Numeric::Interval<R> > G(iz.generators());
+      LinearAlgebra::Vector< Numeric::Interval<R> > e(iz.number_of_generators(),Numeric::Interval<R>(-1,+1));
       LinearAlgebra::Matrix<R> nG=approximate_value(G);
-      Geometry::Point< Interval<R> > nc=iz.centre()+(G-nG)*e;
+      Geometry::Point< Numeric::Interval<R> > nc=iz.centre()+(G-nG)*e;
       
-      return Zonotope<Interval<R> >(nc,nG);
+      return Zonotope< Numeric::Interval<R> >(nc,nG);
     }
 
     template<class R>
@@ -834,56 +837,56 @@ namespace Ariadne {
     
     template<class R>
     tribool
-    disjoint(const Zonotope< Interval<R> >& z, const Rectangle<R>& r)
+    disjoint(const Zonotope< Numeric::Interval<R> >& z, const Rectangle<R>& r)
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
 
     template<class R>
     tribool
-    disjoint(const Zonotope< Interval<R> >& z, const Rectangle< Interval<R> >& r)
+    disjoint(const Zonotope< Numeric::Interval<R> >& z, const Rectangle< Numeric::Interval<R> >& r)
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
 
     template<class R>
     tribool
-    disjoint(const Zonotope< Interval<R> >& z, const Zonotope< Interval<R> >& r)
+    disjoint(const Zonotope< Numeric::Interval<R> >& z, const Zonotope< Numeric::Interval<R> >& r)
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
 
     template<class R>
     tribool
-    subset(const Rectangle< R >& z, const Zonotope< Interval<R> >& r)
+    subset(const Rectangle< R >& z, const Zonotope< Numeric::Interval<R> >& r)
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
 
     template<class R>
     tribool
-    subset(const Rectangle< Interval<R> >& z, const Zonotope< Interval<R> >& r)
+    subset(const Rectangle< Numeric::Interval<R> >& z, const Zonotope< Numeric::Interval<R> >& r)
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
 
     template<class R>
     tribool
-    subset(const Zonotope< Interval<R> >& z, const Zonotope< Interval<R> >& r)
+    subset(const Zonotope< Numeric::Interval<R> >& z, const Zonotope< Numeric::Interval<R> >& r)
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
 
     template<class R>
     tribool
-    subset(const Zonotope< Interval<R> >& z, const Rectangle<R>& r)
+    subset(const Zonotope< Numeric::Interval<R> >& z, const Rectangle<R>& r)
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
 
     template<class R>
     tribool
-    subset(const Zonotope< Interval<R> >& z, const Rectangle< Interval<R> >& r)
+    subset(const Zonotope< Numeric::Interval<R> >& z, const Rectangle< Numeric::Interval<R> >& r)
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
@@ -898,7 +901,7 @@ namespace Ariadne {
     std::ostream& 
     ZonotopeVerticesIterator<R>::write(std::ostream& os) const 
     {
-      return os << "ZonotopeVerticesIterator<" << name<R>() << ">( &z=" << _z << ","
+      return os << "ZonotopeVerticesIterator<" << Numeric::name<R>() << ">( &z=" << _z << ","
                 << " i=" << _i << " p=" << _parity << ", v=" << **this << ")";
     }
   

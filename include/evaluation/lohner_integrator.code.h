@@ -36,9 +36,10 @@
 
 #include "lohner_integrator.h"
 
+#include "../logging.h"
+
 #include "../base/array.h"
-#include "../debug.h"
-#include "../exceptions.h"
+#include "../base/exceptions.h"
 #include "../numeric/arithmetic.h"
 #include "../numeric/interval.h"
 
@@ -66,7 +67,7 @@ extern int verbosity;
 
 template<class R>
 LinearAlgebra::Matrix<R>
-symmetrize(const LinearAlgebra::Vector< Interval<R> >& iv)
+symmetrize(const LinearAlgebra::Vector< Numeric::Interval<R> >& iv)
 {
   LinearAlgebra::Matrix<R> A(iv.size(),iv.size()+1);
   for(size_type i=0; i!=A.number_of_rows(); ++i) {
@@ -89,37 +90,42 @@ Ariadne::Evaluation::LohnerIntegrator<R>::LohnerIntegrator(const time_type& maxi
 
 
 template<class R>
-Ariadne::Geometry::Zonotope< Ariadne::Interval<R> >
+Ariadne::Geometry::Zonotope<typename Ariadne::Evaluation::LohnerIntegrator<R>::I>
 Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
-                                      const Geometry::Zonotope< Interval<R> >& initial_set, 
+                                      const Geometry::Zonotope<I>& initial_set, 
                                       time_type& step_size) const
 {
+  using namespace Numeric;
+  using namespace LinearAlgebra;
+  using namespace Geometry;
+  using namespace System;
+  
   if(verbosity>6) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
   if(verbosity>6) { std::cerr << "  step_size=" << conv_approx<double>(step_size) << "  initial_set=" << initial_set << std::endl; }
-  const Geometry::Zonotope<I>& z=initial_set;
-  const Geometry::Point<I>& c=z.centre();
-  const LinearAlgebra::Matrix<I>& G=z.generators();
+  const Zonotope<I>& z=initial_set;
+  const Point<I>& c=z.centre();
+  const Matrix<I>& G=z.generators();
   time_type suggested_step_size=step_size;
   
-  Geometry::Rectangle<R> bbox=z.bounding_box();
+  Rectangle<R> bbox=z.bounding_box();
   bbox=this->estimate_flow_bounds(vector_field,bbox,step_size);
   if(verbosity>4) { if(suggested_step_size!=step_size) { std::cerr << "  using step_size=" << conv_approx<double>(step_size) << std::endl; } }
-  const System::VectorField<R>& vf=vector_field;
+  const VectorField<R>& vf=vector_field;
   const size_type n=vf.dimension();
   Interval<R> h=step_size;
-  const LinearAlgebra::Matrix<I> id=LinearAlgebra::Matrix<I>::identity(n);
+  const Matrix<I> id=LinearAlgebra::Matrix<I>::identity(n);
   
-  LinearAlgebra::Vector<I> f=vf(bbox);
-  LinearAlgebra::Matrix<I> df=vf.jacobian(bbox);
-  LinearAlgebra::Matrix<I> hdf=h*df;
-  LinearAlgebra::Matrix<I> dphi=exp(hdf);
+  Vector<I> f=vf(bbox);
+  Matrix<I> df=vf.jacobian(bbox);
+  Matrix<I> hdf=h*df;
+  Matrix<I> dphi=exp(hdf);
   
-  Geometry::Rectangle<R> cbbox(c);
+  Rectangle<R> cbbox(c);
   cbbox=refine_flow_bounds(vf,cbbox,bbox,step_size);
-  LinearAlgebra::Vector<I> fc=vf.image(cbbox);
-  LinearAlgebra::Matrix<I> dfc=vf.jacobian(cbbox);
-  Geometry::Point<I> phic=c+h*fc;
-  LinearAlgebra::Matrix<I> phiG=dphi*G;
+  Vector<I> fc=vf.image(cbbox);
+  Matrix<I> dfc=vf.jacobian(cbbox);
+  Point<I> phic=c+h*fc;
+  Matrix<I> phiG=dphi*G;
 
   if(verbosity>7) {
     std::cerr << "  flow_bounds=" << bbox << std::endl; 
@@ -133,7 +139,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorF
     std::cerr << "  new_centre=" << phic << std::endl;
     std::cerr << "  new_generators=" << phiG << std::endl;
   }
-  return Geometry::Zonotope<I>(phic,phiG);
+  return Zonotope<I>(phic,phiG);
 }
 
 
@@ -144,18 +150,17 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorF
 
 
 template<class R>
-Ariadne::Geometry::Zonotope< Ariadne::Interval<R> > 
+Ariadne::Geometry::Zonotope<typename Ariadne::Evaluation::LohnerIntegrator<R>::I> 
 Ariadne::Evaluation::LohnerIntegrator<R>::reachability_step(const System::VectorField<R>& vector_field, 
-                                                            const Geometry::Zonotope< Interval<R> >& initial_set, 
+                                                            const Geometry::Zonotope<I>& initial_set, 
                                                             time_type& step_size) const
 {
-  if(verbosity>6) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-
-  typedef Interval<R> I;
-
+  using namespace Numeric;
   using namespace LinearAlgebra;
   using namespace Geometry;
   using namespace System;
+  
+  if(verbosity>6) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
 
   check_equal_dimensions(vector_field,initial_set);
 

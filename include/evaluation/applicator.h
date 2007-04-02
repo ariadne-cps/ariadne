@@ -31,8 +31,10 @@
 
 #include <boost/smart_ptr.hpp>
 
-#include "../declarations.h"
-#include "../base/tribool.h"
+#include "../base/types.h"
+#include "../base/declarations.h"
+#include "../geometry/declarations.h"
+#include "../system/declarations.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -64,7 +66,8 @@ namespace Ariadne {
       virtual Geometry::Zonotope<R> image(const System::Map<R>& f, const Geometry::Zonotope<R>& s) const;
 
       /*! \brief Compute the image of an interval zonotope under a differentiable function. */
-      virtual Geometry::Zonotope< Interval<R> > image(const System::Map<R>& f, const Geometry::Zonotope< Interval<R> >& s) const;
+      virtual Geometry::Zonotope< Numeric::Interval<R> > 
+      image(const System::Map<R>& f, const Geometry::Zonotope< Numeric::Interval<R> >& s) const;
      
      protected:
       /*! \brief Template for computing the image of a list set. */
@@ -93,8 +96,8 @@ namespace Ariadne {
       
       /*! \brief Compute the image of a list set under a map. */
       virtual 
-      Geometry::ListSet< Geometry::Zonotope<Interval<R> > >
-      image(const System::Map<R>& f, const Geometry::ListSet< Geometry::Zonotope<Interval<R> > >& ds) const;
+      Geometry::ListSet< Geometry::Zonotope<Numeric::Interval<R> > >
+      image(const System::Map<R>& f, const Geometry::ListSet< Geometry::Zonotope<Numeric::Interval<R> > >& ds) const;
       
       
       /*! \brief Compute the image of \a map starting in \a initial_set computing the result on \a grid. */

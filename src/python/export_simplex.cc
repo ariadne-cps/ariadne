@@ -30,6 +30,7 @@
 #include "geometry/polyhedron.h"
 
 using namespace Ariadne;
+using namespace Ariadne::Numeric;
 using namespace Ariadne::Geometry;
 
 #include <boost/python.hpp>

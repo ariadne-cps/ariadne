@@ -27,6 +27,7 @@
 #include "linear_algebra/linear_program.h"
 
 #include "python/python_utilities.h"
+using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
 

@@ -30,8 +30,6 @@
 
 #include <iosfwd>
 
-#include "../declarations.h"
-
 #include "../base/array.h"
 #include "../base/sequence.h"
 #include "../base/iterator.h"

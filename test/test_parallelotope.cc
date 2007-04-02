@@ -30,8 +30,7 @@
 
 #include "test_float.h"
 
-#include "ariadne.h"
-#include "debug.h"
+#include "logging.h"
 #include "base/utility.h"
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
@@ -39,6 +38,7 @@
 #include "output/epsfstream.h"
 
 using namespace Ariadne;
+using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
 using namespace Ariadne::Output;

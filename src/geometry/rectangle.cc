@@ -32,6 +32,8 @@
 namespace Ariadne {
   namespace Geometry {
 
+    using namespace Numeric;
+    
     template class Rectangle<Rational>;
 
 #ifdef ENABLE_FLOAT64

@@ -29,71 +29,72 @@
 #include <list>
 #include <iostream>
 
-#include "../geometry/set_reference.h"
-#include "../geometry/hybrid_set.h"
-#include "../system/hybrid_automaton.h"
+#include "../base/types.h"
+#include "../geometry/declarations.h"
+#include "../system/declarations.h"
+#include "../evaluation/declarations.h"
 
 namespace Ariadne {  
-namespace Evaluation {
+  namespace Evaluation {
   
 
-/*! \ingroup Evolve
- *  \brief A class for computing the evolution of a hybrid system.
- */
-template< class R >
-class HybridEvolver
-{
- public:
-  /*! \brief Construct from an applicator and an integrator. */
- HybridEvolver(Applicator<R>& applicator, Integrator<R>& integrator);
-  
-  Geometry::HybridGridMaskSet<R> evolve(const System::HybridAutomaton<R>& automaton, 
-                                        const Geometry::HybridGridMaskSet<R>& initial_set, 
-                                        time_type evolution_time,
-                                        size_type maximum_number_of_events);
-  
-  /*! \brief Compute the system evolution at \a time with up to \a maximum_number_of_events. */
-  Geometry::HybridGridMaskSet<R> upper_evolve(const System::HybridAutomaton<R>& automaton, 
-                                        const Geometry::HybridGridMaskSet<R>& initial_set, 
-                                        time_type evolution_time,
-                                        size_type maximum_number_of_events);
-  
-  /*! \brief Compute a lower approximation to the reachable set between \a initial_evolution_time and \a final_time
-   *  with up to \a maximum_number_of_events using lower semantics. (NOT CURRENTLY IMPLEMENTED) */
-  Geometry::HybridGridMaskSet<R> lower_reach(const System::HybridAutomaton<R>&, 
-                                             const Geometry::HybridGridMaskSet<R>&, 
-                                             time_type initial_evolution_time, 
-                                             time_type final_time, 
-                                             size_type maximum_number_of_events);
-  
-  /*! \brief Compute an over approximation to the reachable set between \a initial_evolution_time and \a final_time
-   *  with up to \a maximum_number_of_events using upper semantics. (NOT CURRENTLY IMPLEMENTED) */
-  Geometry::HybridGridMaskSet<R> upper_reach(const System::HybridAutomaton<R>& automaton, 
-                                             const Geometry::HybridGridMaskSet<R>& initial_set, 
-                                             time_type initial_evolution_time, 
-                                             time_type final_time, 
-                                             size_type maximum_number_of_events);
- 
-  /*! \brief Compute an over approximation to the chain-reachable set using upper semantics. */
-  Geometry::HybridGridMaskSet<R> chainreach(const System::HybridAutomaton<R>& automaton, 
+    /*! \ingroup Evolve
+     *  \brief A class for computing the evolution of a hybrid system.
+     */
+    template< class R >
+    class HybridEvolver
+    {
+     public:
+      /*! \brief Construct from an applicator and an integrator. */
+     HybridEvolver(Applicator<R>& applicator, Integrator<R>& integrator);
+      
+      Geometry::HybridGridMaskSet<R> evolve(const System::HybridAutomaton<R>& automaton, 
                                             const Geometry::HybridGridMaskSet<R>& initial_set, 
-                                            const Geometry::HybridGridMaskSet<R>& bounding_set);
- private:
- public:
-  /*! \brief Make a discrete step of the hybrid automaton, starting from initial set. */
-  Geometry::HybridGridCellListSet<R> discrete_step(const System::HybridAutomaton<R>& automaton, 
-                                                   const Geometry::HybridGridCellListSet<R>& initial_set);
-  /*! \brief Evolve the hybrid automaton withing \a invariants starting from the \a initial_set without using discrete transitions. */
-  Geometry::HybridGridMaskSet<R> continuous_chainreach(const System::HybridAutomaton<R>& automaton, 
-                                                       const Geometry::HybridGridMaskSet<R>& initial_set,
-                                                       const Geometry::HybridGridMaskSet<R>& invariants);
- private:
-  Applicator<R>* _applicator;
-  Integrator<R>* _integrator;
-};
+                                            time_type evolution_time,
+                                            size_type maximum_number_of_events);
+      
+      /*! \brief Compute the system evolution at \a time with up to \a maximum_number_of_events. */
+      Geometry::HybridGridMaskSet<R> upper_evolve(const System::HybridAutomaton<R>& automaton, 
+                                            const Geometry::HybridGridMaskSet<R>& initial_set, 
+                                            time_type evolution_time,
+                                            size_type maximum_number_of_events);
+      
+      /*! \brief Compute a lower approximation to the reachable set between \a initial_evolution_time and \a final_time
+       *  with up to \a maximum_number_of_events using lower semantics. (NOT CURRENTLY IMPLEMENTED) */
+      Geometry::HybridGridMaskSet<R> lower_reach(const System::HybridAutomaton<R>&, 
+                                                 const Geometry::HybridGridMaskSet<R>&, 
+                                                 time_type initial_evolution_time, 
+                                                 time_type final_time, 
+                                                 size_type maximum_number_of_events);
+      
+      /*! \brief Compute an over approximation to the reachable set between \a initial_evolution_time and \a final_time
+       *  with up to \a maximum_number_of_events using upper semantics. (NOT CURRENTLY IMPLEMENTED) */
+      Geometry::HybridGridMaskSet<R> upper_reach(const System::HybridAutomaton<R>& automaton, 
+                                                 const Geometry::HybridGridMaskSet<R>& initial_set, 
+                                                 time_type initial_evolution_time, 
+                                                 time_type final_time, 
+                                                 size_type maximum_number_of_events);
+     
+      /*! \brief Compute an over approximation to the chain-reachable set using upper semantics. */
+      Geometry::HybridGridMaskSet<R> chainreach(const System::HybridAutomaton<R>& automaton, 
+                                                const Geometry::HybridGridMaskSet<R>& initial_set, 
+                                                const Geometry::HybridGridMaskSet<R>& bounding_set);
+     private:
+     public:
+      /*! \brief Make a discrete step of the hybrid automaton, starting from initial set. */
+      Geometry::HybridGridCellListSet<R> discrete_step(const System::HybridAutomaton<R>& automaton, 
+                                                       const Geometry::HybridGridCellListSet<R>& initial_set);
+      /*! \brief Evolve the hybrid automaton withing \a invariants starting from the \a initial_set without using discrete transitions. */
+      Geometry::HybridGridMaskSet<R> continuous_chainreach(const System::HybridAutomaton<R>& automaton, 
+                                                           const Geometry::HybridGridMaskSet<R>& initial_set,
+                                                           const Geometry::HybridGridMaskSet<R>& invariants);
+     private:
+      Applicator<R>* _applicator;
+      Integrator<R>* _integrator;
+    };
 
 
-}
+  }
 }
 
 #endif /* ARIADNE_HYBRID_EVOLVER_H */

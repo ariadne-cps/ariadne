@@ -30,8 +30,6 @@
 
 #include <iosfwd>
 
-#include "../declarations.h"
-
 #include "../base/array.h"
 #include "../geometry/point.h"
 #include "../geometry/point_list.h"

@@ -30,13 +30,16 @@
 
 #include <iosfwd>
 
-#include "../declarations.h"
-
+#include "../base/types.h"
 #include "../base/tribool.h"
+
 
 namespace Ariadne {
   namespace Geometry {
 
+    template<class R> class Point;
+    template<class R> class Rectangle;
+      
     //! \ingroup ExactSet
     /*! \brief An abstract base class for general sets. */
     template<class R>

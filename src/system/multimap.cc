@@ -31,7 +31,8 @@
 
 namespace Ariadne {
   namespace System {
-
+    using namespace Numeric;
+    
 #ifdef ENABLE_FLOAT64
     template class MultiMap< Geometry::Point<Float64>, Geometry::Polytope<Float64> >;
 #endif

@@ -32,7 +32,6 @@
 #include <tblas/geset.hpp>
 #include <tlapack/gesvd.hpp>
 
-#include "../declarations.h"
 #include "../base/array.h"
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"

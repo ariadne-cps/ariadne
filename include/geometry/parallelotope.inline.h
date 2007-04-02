@@ -117,39 +117,29 @@ namespace Ariadne {
 
 
     template<class R> inline
-    Parallelotope< Interval<R> >::Parallelotope(dimension_type d)
-      : Zonotope< Interval<R> >(d) 
+    Parallelotope< Numeric::Interval<R> >::Parallelotope(dimension_type d)
+      : Zonotope< Numeric::Interval<R> >(d) 
     { 
     }
     
     
     template<class R> template<class Rl1, class Rl2> inline
-    Parallelotope< Interval<R> >::Parallelotope(const Point<Rl1>& c, const LinearAlgebra::Matrix<Rl2>& g)
-      : Zonotope< Interval<R> >(c,g) 
+    Parallelotope< Numeric::Interval<R> >::Parallelotope(const Point<Rl1>& c, const LinearAlgebra::Matrix<Rl2>& g)
+      : Zonotope< Numeric::Interval<R> >(c,g) 
     { 
     }
     
     
     template<class R> inline
-    Parallelotope< Interval<R> >::Parallelotope(const Rectangle<R>& r)
-      : Zonotope< Interval<R> >(r) 
+    Parallelotope< Numeric::Interval<R> >::Parallelotope(const Rectangle<R>& r)
+      : Zonotope< Numeric::Interval<R> >(r) 
     { 
     }
     
     
     template<class R> inline
-    Parallelotope< Interval<R> >::Parallelotope(const Zonotope<R>& z)
-      : Zonotope< Interval<R> >(z) 
-    { 
-      if(z.dimension()!=z.number_of_generators()) { 
-        throw InvalidGenerators(__PRETTY_FUNCTION__);
-      }
-    }
-    
-    
-    template<class R> inline
-    Parallelotope< Interval<R> >::Parallelotope(const Zonotope<I>& z)
-      : Zonotope< Interval<R> >(z) 
+    Parallelotope< Numeric::Interval<R> >::Parallelotope(const Zonotope<R>& z)
+      : Zonotope< Numeric::Interval<R> >(z) 
     { 
       if(z.dimension()!=z.number_of_generators()) { 
         throw InvalidGenerators(__PRETTY_FUNCTION__);
@@ -158,7 +148,17 @@ namespace Ariadne {
     
     
     template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const Parallelotope< Interval<R> >& p) 
+    Parallelotope< Numeric::Interval<R> >::Parallelotope(const Zonotope<I>& z)
+      : Zonotope< Numeric::Interval<R> >(z) 
+    { 
+      if(z.dimension()!=z.number_of_generators()) { 
+        throw InvalidGenerators(__PRETTY_FUNCTION__);
+      }
+    }
+    
+    
+    template<class R> inline
+    std::ostream& operator<<(std::ostream& os, const Parallelotope< Numeric::Interval<R> >& p) 
     {
       return p.write(os);
     }

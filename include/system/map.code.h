@@ -39,7 +39,7 @@ namespace Ariadne {
     
     template<class R>
     typename Map<R>::F
-    Map<R>::derivative(const Geometry::Point<F>& r, const size_type& i, const multi_index_type& j) const 
+    Map<R>::derivative(const Geometry::Point<F>& r, const size_type& i, const LinearAlgebra::MultiIndex& j) const 
     {
       throw DeferredImplementation(__PRETTY_FUNCTION__);
     }

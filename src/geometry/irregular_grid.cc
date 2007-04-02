@@ -30,6 +30,8 @@
 namespace Ariadne {
   namespace Geometry {
 
+    using namespace Numeric;
+    
     template class IrregularGrid<Rational>;
 
 #ifdef ENABLE_FLOAT64

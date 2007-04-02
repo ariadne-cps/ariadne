@@ -29,7 +29,8 @@
 #ifndef ARIADNE_ARRAY_OPERATIONS_H
 #define ARIADNE_ARRAY_OPERATIONS_H
 
-#include "../declarations.h"
+#include "../base/types.h"
+#include "../base/array.decl.h"
 
 
 namespace Ariadne {

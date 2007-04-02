@@ -31,7 +31,12 @@
 
 #include <string>
 
-#include "../declarations.h"
+#include "../base/types.h"
+#include "../numeric/declarations.h"
+#include "../numeric/numerical_traits.h"
+#include "../linear_algebra/declarations.h"
+#include "../geometry/declarations.h"
+
 
 namespace Ariadne {
   namespace System {
@@ -82,7 +87,7 @@ namespace Ariadne {
       /*! \brief An over-approximation to the image of a point. */
       virtual Geometry::Point<F> image(const Geometry::Point<F>& pt) const = 0;
       /*! \brief The derivative of the \a i th component with respect to the multi-index j. */
-      virtual F derivative(const Geometry::Point<F>& r, const size_type& i, const multi_index_type& j) const;
+      virtual F derivative(const Geometry::Point<F>& r, const size_type& i, const LinearAlgebra::MultiIndex& j) const;
       /*! \brief The Jacobian derivative matrix over a rectangle. */
       virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<F>& r) const;
         

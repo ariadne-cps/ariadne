@@ -30,16 +30,20 @@
 
 #include <iosfwd>
 
-#include "../declarations.h"
 #include "../base/array.h"
-#include "../exceptions.h"
 #include "../numeric/numerical_traits.h"
+#include "../linear_algebra/exceptions.h"
 #include "../linear_algebra/multi_index.h"
 
 
 namespace Ariadne {
   namespace LinearAlgebra {
     
+    // Forward declarations
+    template<class R> class Vector;
+    template<class R> class Matrix;
+      
+      
       
     /*! \ingroup LinearAlgebra
      *  \brief Base class for tensor expressions. 
@@ -251,14 +255,14 @@ namespace Ariadne {
     
       /*! \brief Construct a tensor with 1 upper index of size m, and deg lower indices of size n. */
       SymmetricTensor(size_type n, size_type deg)
-        : _arg_size(n), _degree(deg), _elements(choose(n+deg-1,deg))
+        : _arg_size(n), _degree(deg), _elements(Numeric::choose(n+deg-1,deg))
       { 
         //std::cerr << "SymmetricTensor(size_type m, size_type n, size_type deg)" << std::endl;
       }
       
       /*! \brief Construct a tensor with 1 upper index of size m, and deg lower indices of size n. */
       SymmetricTensor(size_type n, size_type deg, const R* ptr) 
-        : _arg_size(n), _degree(deg), _elements(choose(n+deg-1,deg))
+        : _arg_size(n), _degree(deg), _elements(Numeric::choose(n+deg-1,deg))
       { _elements.fill(ptr); }
       
       // /*! \brief Construct from a string. */
@@ -343,7 +347,7 @@ namespace Ariadne {
       size_type position(const multi_index_type& j) const;
       size_type position(const index_array_type& i) const;
       static size_type number_of_independent_elements(const size_type& n, const size_type& d) {
-        return choose(n+d-1,d); }
+        return Numeric::choose(n+d-1,d); }
      private:
       static void _instantiate();
      private:
@@ -492,7 +496,7 @@ namespace Ariadne {
       size_type position(const size_type& i, const multi_index_type& j) const;
       size_type position(const size_type& i, const index_array_type& i) const;
       static size_type number_of_independent_elements(const size_type& nr, const size_type& na, const size_type& d) {
-        return nr*choose(na+d-1,d); }
+        return nr*Numeric::choose(na+d-1,d); }
      private:
       static void _instantiate();
      private:

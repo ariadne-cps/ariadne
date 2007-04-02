@@ -32,8 +32,6 @@
 
 using namespace std;
 using namespace Ariadne::Numeric;
-using Ariadne::Rational;
-
 
 int test_rational();
 

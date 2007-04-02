@@ -31,6 +31,8 @@
 namespace Ariadne {
   namespace Geometry {
 
+    using namespace Numeric;
+    
     template class Polytope<Rational>;
 
 #ifdef ENABLE_FLOAT64

@@ -36,7 +36,7 @@
 
 #include <vector>
 
-#include "../declarations.h"
+#include "../linear_algebra/declarations.h"
 #include "../base/utility.h"
 #include "../base/tribool.h"
 #include "../geometry/set_interface.h"

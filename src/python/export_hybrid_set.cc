@@ -29,6 +29,7 @@
 #include "geometry/set_reference.h"
 
 using namespace Ariadne;
+using namespace Ariadne::Numeric;
 using namespace Ariadne::Geometry;
 
 #include <boost/python.hpp>

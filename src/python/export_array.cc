@@ -29,6 +29,7 @@
 #include "python/python_float.h"
 using namespace Ariadne;
 using namespace Ariadne::Base;
+using namespace Ariadne::Numeric;
 
 #include <boost/python.hpp>
 using namespace boost::python;

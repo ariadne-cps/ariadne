@@ -118,8 +118,8 @@ namespace Ariadne {
     }
       
     template<class R>
-    void assign_zonotope(LinearAlgebra::VectorSlice< Interval<R> > c, 
-                         LinearAlgebra::MatrixSlice< Interval<R> > g, 
+    void assign_zonotope(LinearAlgebra::VectorSlice< Numeric::Interval<R> > c, 
+                         LinearAlgebra::MatrixSlice< Numeric::Interval<R> > g, 
                          const Rectangle<R>& r) 
     {
       c=r.centre().position_vector(); 

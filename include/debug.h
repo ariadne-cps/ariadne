@@ -29,57 +29,35 @@
 namespace Ariadne {
 
 #ifdef DEBUG
-  static const int default_verbosity=1; 
+  static const int default_debug_level=1; 
 #else
-  static const int default_verbosity=0; 
+  static const int default_debug_level=0; 
 #endif
 
-namespace Numeric { static int verbosity=default_verbosity; }
-namespace LinearAlgebra { static int verbosity=default_verbosity; }
-namespace Combinatoric { static int verbosity=default_verbosity; }
-namespace Geometry { static int verbosity=default_verbosity; }
-namespace System { static int verbosity=default_verbosity; }
-namespace Evaluation { static int verbosity=default_verbosity; }
-  
-static int maximum_verbosity() {
-  return std::max(
-          std::max(Numeric::verbosity,LinearAlgebra::verbosity),
-          std::max(
-            std::max(Combinatoric::verbosity,Geometry::verbosity),
-            std::max(System::verbosity,Evaluation::verbosity)
-          )
-        );
-  
+  class dbgstream;
+  template<class T> dbgstream& operator<<(dbgstream& dbgs, const T& t);
 
-}
+  class dbgstream : public std::ostream
+  {
+   public:
+    dbgstream(std::ostream& os, int debug_level=default_debug_level) : _stream(os), _debug_level(debug_level) { }
+    dbgstream(int debug_level=default_debug_level) : _stream(std::cerr), _debug_level(debug_level) { }
+   private:
+    template<class T> friend dbgstream& operator<<(dbgstream& dbgs, const T& t);
+   private:
+    std::ostream& _stream;
+    int _debug_level;
+  };
 
 
-class dbgstream;
-template<class T> dbgstream& operator<<(dbgstream& dbgs, const T& t);
-
-class dbgstream : public std::ostream
-{
- public:
-  dbgstream(std::ostream& os, int debug_level=default_verbosity) : _stream(os), _debug_level(debug_level) { }
-  dbgstream(int debug_level=default_verbosity) : _stream(std::cerr), _debug_level(debug_level) { }
- private:
-  template<class T> friend dbgstream& operator<<(dbgstream& dbgs, const T& t);
- private:
-  std::ostream& _stream;
-  int _debug_level;
-};
-
-
-template<class T>
-inline
-dbgstream& 
-operator<<(dbgstream& dbgs, const T& t) 
-{
-  if(dbgs._debug_level>0) { dbgs._stream << t; }
-  return dbgs;
-}
-
-
+  template<class T>
+  inline
+  dbgstream& 
+  operator<<(dbgstream& dbgs, const T& t) 
+  {
+    if(dbgs._debug_level>0) { dbgs._stream << t; }
+    return dbgs;
+  }
 
 } // namespace Ariadne
 

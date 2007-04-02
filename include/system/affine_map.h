@@ -29,11 +29,16 @@
 #ifndef ARIADNE_AFFINE_MAP_H
 #define ARIADNE_AFFINE_MAP_H
 
-#include "../declarations.h"
+#include "../base/types.h"
 
-#include "../exceptions.h"
+#include "../numeric/declarations.h"
+#include "../numeric/numerical_traits.h"
+
+#include "../linear_algebra/declarations.h"
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
+
+#include "../geometry/declarations.h"
 
 #include "../system/map.h"
 

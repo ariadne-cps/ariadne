@@ -31,6 +31,8 @@
 namespace Ariadne {
   namespace LinearAlgebra {
     
+    using namespace Numeric;
+    
     template class Tensor<Rational>;
     template class SymmetricTensor<Rational>;
     template class DerivativeTensor<Rational>;

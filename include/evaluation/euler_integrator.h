@@ -28,7 +28,8 @@
 #ifndef ARIADNE_EULER_INTEGRATOR_H
 #define ARIADNE_EULER_INTEGRATOR_H
 
-#include "../declarations.h"
+#include "../geometry/declarations.h"
+#include "../system/declarations.h"
 #include "../evaluation/integrator.h"
 
 namespace Ariadne {

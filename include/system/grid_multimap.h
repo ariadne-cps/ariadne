@@ -32,16 +32,15 @@
 
 #include <boost/iterator/iterator_adaptor.hpp>
 
-#include "../declarations.h"
-#include "../exceptions.h"
-
-#include "../base/array.h"
 #include "../base/tribool.h"
+#include "../base/array.h"
 
 #include "../combinatoric/lattice_map.h"
+
+#include "../geometry/exceptions.h"
+#include "../geometry/rectangle_expression.h"
 #include "../geometry/grid.h"
 #include "../geometry/grid_set.h"
-
 
 namespace Ariadne {
   namespace System {

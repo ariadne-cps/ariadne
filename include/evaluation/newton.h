@@ -32,7 +32,10 @@
 #include <stdexcept>
 #include <string>
 
-#include "../declarations.h"
+#include "../numeric/numerical_traits.h"
+#include "../geometry/declarations.h"
+#include "../system/declarations.h"
+
 #include "solver.h"
 
 namespace Ariadne {

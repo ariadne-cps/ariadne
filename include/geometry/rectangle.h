@@ -34,7 +34,6 @@
 #include "../base/array.h"
 #include "../base/iterator.h"
 #include "../base/tribool.h"
-#include "../exceptions.h"
 
 #include "../numeric/arithmetic.h"
 #include "../numeric/function.h"
@@ -42,6 +41,9 @@
 
 #include "../linear_algebra/vector.h"
 
+#include "../combinatoric/declarations.h"
+
+#include "../geometry/exceptions.h"
 #include "../geometry/point.h"
 #include "../geometry/rectangle_expression.h"
 
@@ -49,6 +51,8 @@ namespace Ariadne {
   namespace Geometry {
 
 
+    template<class R> class PointList;
+    template<class BS> class ListSet;
     template<class R> class RectangleVerticesIterator;
     
     /*! \ingroup BasicSet
@@ -106,16 +110,16 @@ namespace Ariadne {
       template<class ForwardIterator> explicit Rectangle(ForwardIterator b, ForwardIterator e);
       
       /*! \brief Construct from an array of intervals. */
-      explicit Rectangle(const array< Interval<R> >& a);
+      explicit Rectangle(const Base::array< Numeric::Interval<R> >& a);
       
       /*! \brief Construct from a std::vector of intervals. */
-      explicit Rectangle(const std::vector< Interval<R> >& v);
+      explicit Rectangle(const std::vector< Numeric::Interval<R> >& v);
 
       /*! \brief Construct a degenerate rectangle from a single point. */
       explicit Rectangle(const Point<R>& pt);
       
       /*! \brief Construct a rectangle from an interval point. */
-      explicit Rectangle(const Point< Interval<R> >& pt);;
+      explicit Rectangle(const Point< Numeric::Interval<R> >& pt);;
       
       /*! \brief Construct from two corners. */
       explicit Rectangle(const Point<R>& pt1, const Point<R>& pt2);
@@ -124,7 +128,7 @@ namespace Ariadne {
       explicit Rectangle(const std::string& s);
       
       /*! \brief Construct from an interval vector. */
-      explicit Rectangle(const LinearAlgebra::Vector< Interval<R> >& iv);
+      explicit Rectangle(const LinearAlgebra::Vector< Numeric::Interval<R> >& iv);
       
       /*! \brief Convert from a rectangle expression. */
       template<class E> Rectangle(const RectangleExpression<E>& r);
@@ -145,7 +149,7 @@ namespace Ariadne {
       //@{
       //! \name Conversion operators
       /*! \brief Convert to an interval point. */
-      operator Point< Interval<R> >() const;
+      operator Point< Numeric::Interval<R> >() const;
       //@}
       
       
@@ -180,13 +184,13 @@ namespace Ariadne {
       R& upper_bound(dimension_type i);
       
       /*! \brief Returns the projection onto the \a i th coordinate. */
-      Interval<R>& operator[] (dimension_type i);
+      Numeric::Interval<R>& operator[] (dimension_type i);
      
       /*! \brief The projection onto the \a i th coordinate. */
-      const Interval<R>& operator[] (dimension_type i) const;
+      const Numeric::Interval<R>& operator[] (dimension_type i) const;
       
       /*! \brief The interval of values in the \a i th coordinate. */
-      const Interval<R>& interval(dimension_type i) const;
+      const Numeric::Interval<R>& interval(dimension_type i) const;
       
       /*! \brief The lower corner. */
       Point<R> lower_corner() const;
@@ -195,7 +199,7 @@ namespace Ariadne {
       Point<R> upper_corner() const;
       
       /*! \brief The set of position vectors of the rectangle. */
-      LinearAlgebra::Vector< Interval<R> > position_vectors() const;
+      LinearAlgebra::Vector< Numeric::Interval<R> > position_vectors() const;
       //@}
       
       
@@ -205,7 +209,7 @@ namespace Ariadne {
       void clear();
       
       /*! \brief Sets the \a i th interval. */
-      void set_interval(dimension_type i, Interval<R> x);
+      void set_interval(dimension_type i, Numeric::Interval<R> x);
       
       /*! \brief Sets the lower bound of the \a i th coordinate to \a r. */
       void set_lower_bound(dimension_type i, const R& l);
@@ -304,15 +308,15 @@ namespace Ariadne {
       friend Rectangle<R> minkowski_difference(const Rectangle<R>& A, const Rectangle<R>& B); 
       
       /*! \brief The difference between two rectangles. */
-      friend LinearAlgebra::Vector< Interval<R> > operator-(const Rectangle<R>& A, const Rectangle& B);
+      friend LinearAlgebra::Vector< Numeric::Interval<R> > operator-(const Rectangle<R>& A, const Rectangle& B);
       /*! \brief Adds a vector to a rectangle. */
       friend Rectangle<R> operator+(const Rectangle<R>& r, const LinearAlgebra::Vector<R>& v);
       /*! \brief Adds an interval vector to a rectangle. */
-      friend Rectangle<R> operator+(const Rectangle<R>& r, const LinearAlgebra::Vector< Interval<R> >& v);
+      friend Rectangle<R> operator+(const Rectangle<R>& r, const LinearAlgebra::Vector< Numeric::Interval<R> >& v);
       /*! \brief Subtracts a vector from a rectangle. */
       friend Rectangle<R> operator-(const Rectangle<R>& r, const LinearAlgebra::Vector<R>& v);
       /*! \brief Subtracts an interval vector from a rectangle. */
-      friend Rectangle<R> operator-(const Rectangle<R>& r, const LinearAlgebra::Vector< Interval<R> >& v);
+      friend Rectangle<R> operator-(const Rectangle<R>& r, const LinearAlgebra::Vector< Numeric::Interval<R> >& v);
       //@}
 #endif
       
@@ -329,12 +333,12 @@ namespace Ariadne {
     
     
     template<class R>
-    class Rectangle< Interval<R> > 
-      : public RectangleExpression< Rectangle< Interval<R> > >
+    class Rectangle< Numeric::Interval<R> > 
+      : public RectangleExpression< Rectangle< Numeric::Interval<R> > >
     {
-      typedef Interval<R> I;
+      typedef Numeric::Interval<R> I;
      public:
-      typedef Interval<R> value_type;
+      typedef Numeric::Interval<R> value_type;
       typedef R real_type;
       typedef Point<R> state_type;
       typedef RectangleVerticesIterator<I> vertices_const_iterator;
@@ -347,10 +351,10 @@ namespace Ariadne {
       Point<I> centre() const;
       I radius() const;
       tribool contains(const Point<I>& pt) const;
-      const Interval<R>& lower_bound(const dimension_type& i) const;
-      const Interval<R>& upper_bound(const dimension_type& i) const;
-      void set_lower_bound(const dimension_type& i, const Interval<R>& x);
-      void set_upper_bound(const dimension_type& i, const Interval<R>& x);
+      const Numeric::Interval<R>& lower_bound(const dimension_type& i) const;
+      const Numeric::Interval<R>& upper_bound(const dimension_type& i) const;
+      void set_lower_bound(const dimension_type& i, const Numeric::Interval<R>& x);
+      void set_upper_bound(const dimension_type& i, const Numeric::Interval<R>& x);
       Point<I> lower_corner() const;
       Point<I> upper_corner() const;
       size_type number_of_vertices() const;
@@ -415,13 +419,13 @@ namespace Ariadne {
     template<class R> Rectangle<R> over_approximation(const Rectangle<R>& r);
     template<class R> Rectangle<R> under_approximation(const Rectangle<R>& r);
 
-    template<class R> Rectangle<R> over_approximation(const Rectangle< Interval<R> >& ir);
-    template<class R> Rectangle<R> under_approximation(const Rectangle< Interval<R> >& ir);
+    template<class R> Rectangle<R> over_approximation(const Rectangle< Numeric::Interval<R> >& ir);
+    template<class R> Rectangle<R> under_approximation(const Rectangle< Numeric::Interval<R> >& ir);
     
     
     
     template<class R>
-    LinearAlgebra::Vector< Interval<R> > 
+    LinearAlgebra::Vector< Numeric::Interval<R> > 
     operator-(const Geometry::Rectangle<R>& r1, 
               const Geometry::Rectangle<R>& r2);
     
@@ -438,7 +442,7 @@ namespace Ariadne {
     template<class R>
     Geometry::Rectangle<R> 
     operator+(const Geometry::Rectangle<R>& r, 
-              const LinearAlgebra::Vector< Interval<R> >& v);
+              const LinearAlgebra::Vector< Numeric::Interval<R> >& v);
     
     template<class R>
     Geometry::Rectangle<R> 
@@ -448,7 +452,7 @@ namespace Ariadne {
     template<class R>
     Geometry::Rectangle<R> 
     operator-(const Geometry::Rectangle<R>& r, 
-              const LinearAlgebra::Vector< Interval<R> >& v);
+              const LinearAlgebra::Vector< Numeric::Interval<R> >& v);
     
     template<class R>
     Geometry::Rectangle<R> 

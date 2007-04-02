@@ -31,8 +31,6 @@
 #include <iosfwd>
 #include <vector>
 
-#include "../declarations.h"
-
 #include "../base/tribool.h"
 #include "../base/iterator.h"
 
@@ -46,6 +44,7 @@
 namespace Ariadne {  
   namespace Geometry {
 
+    template<class R> class Polytope;
     template<class R> class PolyhedronConstraintsIterator;
     
     /*! \ingroup BasicSet

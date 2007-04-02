@@ -32,12 +32,13 @@
 #include <iosfwd>
 #include <algorithm>
 
-#include "../declarations.h"
+#include "../base/types.h"
 #include "../base/array.h"
 #include "../numeric/integer.h"
 #include "../numeric/arithmetic.h"
 #include "../numeric/interval.h"
 
+#include "../linear_algebra/exceptions.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {
@@ -362,7 +363,7 @@ namespace Ariadne {
     template<class R>
     inline 
     Vector<R>
-    approximate_value(const Vector< Interval<R> >& iv) 
+    approximate_value(const Vector< Numeric::Interval<R> >& iv) 
     {
       Vector<R> result(iv.size());
       for(size_type i=0; i!=iv.size(); ++i) {
@@ -374,7 +375,7 @@ namespace Ariadne {
     template<class R>
     inline 
     bool
-    contains_value(const Vector< Interval<R> >& iv,const Vector<R>& v) 
+    contains_value(const Vector< Numeric::Interval<R> >& iv,const Vector<R>& v) 
     {
       check_equal_sizes(iv,v,__PRETTY_FUNCTION__);
       for(size_type i=0; i!=v.size(); ++i) {

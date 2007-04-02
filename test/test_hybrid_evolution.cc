@@ -26,7 +26,7 @@
 #include <string>
 
 #include "ariadne.h"
-#include "debug.h"
+#include "logging.h"
 #include "test_float.h"
 #include "geometry/set_interface.h"
 #include "geometry/set_reference.h"

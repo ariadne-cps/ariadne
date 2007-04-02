@@ -26,7 +26,6 @@
 #include <fstream>
 #include <cassert>
 
-#include "declarations.h"
 #include "test/test_float.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
@@ -34,6 +33,7 @@
 
 using namespace std;
 using namespace Ariadne;
+using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
 
 int test_tensor_index();

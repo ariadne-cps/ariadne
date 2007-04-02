@@ -28,6 +28,7 @@
 
 namespace Ariadne {
   namespace Evaluation {
+    using namespace Numeric;
 
 #ifdef ENABLE_FLOAT64
     template class Integrator<Float64>;

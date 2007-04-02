@@ -31,7 +31,8 @@
 
 namespace Ariadne {
   namespace System {
-
+    using namespace Numeric;
+    
 #ifdef ENABLE_FLOAT64
     template class DiscreteMode<Float64>;
     template class DiscreteTransition<Float64>;

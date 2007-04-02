@@ -31,6 +31,8 @@
 namespace Ariadne {
   namespace LinearAlgebra {
     
+    using namespace Numeric;
+    
     template Matrix< Interval<Float64> > exp(const Matrix< Interval<Float64> >& A); 
     template Matrix< Interval<FloatMP> > exp(const Matrix< Interval<FloatMP> >& A); 
     template Matrix< Interval<Rational> > exp(const Matrix< Interval<Rational> >& A); 

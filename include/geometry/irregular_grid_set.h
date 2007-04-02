@@ -35,7 +35,9 @@
 namespace Ariadne {
   namespace Geometry {
 
-
+    template<class R> class Point;
+    template<class R> class Rectangle;
+    template<class R> class GridMaskSet;
 
     /*! \brief A denotable set on an irregular finite grid, defined using a mask over a block of cells.
      *  

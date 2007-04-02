@@ -33,22 +33,20 @@
 
 #include <boost/iterator/iterator_adaptor.hpp>
 
-#include "../declarations.h"
-
 #include "../base/array.h"
 #include "../base/tribool.h"
 
 #include "../combinatoric/lattice_set.h"
 
+#include "../geometry/declarations.h"
 #include "../geometry/set_interface.h"
-#include "../geometry/rectangle.h"
 #include "../geometry/grid.h"
 
 /*TODO: Unify bounds in FiniteGrid, and make GridMaskSet use only finite grid bounds*/
 
 namespace Ariadne {
   namespace Geometry {
-
+      
     template<class Base, class Value> class GridSetIterator;
     template<class R> class GridBlockIterator;
     template<class R> class GridCellListSetIterator;
@@ -545,14 +543,14 @@ namespace Ariadne {
     template<class R> GridBlock<R> inner_approximation(const Rectangle<R>& r, const Grid<R>& g);
     
     
-    template<class R> GridBlock<R> over_approximation(const Point< Interval<R> >& r, const Grid<R>& g);
+    template<class R> GridBlock<R> over_approximation(const Point< Numeric::Interval<R> >& r, const Grid<R>& g);
     template<class R> GridBlock<R> over_approximation(const Rectangle<R>& r, const Grid<R>& g);
     
     template<class R> GridCellListSet<R> over_approximation(const Zonotope<R>& z, const Grid<R>& g);
     template<class R> GridCellListSet<R> over_approximation(const Polytope<R>& p, const Grid<R>& g);
     template<class R> GridCellListSet<R> over_approximation(const Polyhedron<R>& p, const Grid<R>& g);
     
-    template<class R> GridCellListSet<R> over_approximation(const Zonotope< Interval<R> >& z, const Grid<R>& g);
+    template<class R> GridCellListSet<R> over_approximation(const Zonotope< Numeric::Interval<R> >& z, const Grid<R>& g);
       
     template<class R, class BS> GridMaskSet<R> over_approximation(const ListSet<BS>& ls, const FiniteGrid<R>& fg); 
     template<class R> GridMaskSet<R> over_approximation(const GridMaskSet<R>& gms, const FiniteGrid<R>& fg);

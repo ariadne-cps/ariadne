@@ -259,10 +259,10 @@ namespace Ariadne {
     }
       
     template<class R> inline
-    Rectangle< Interval<R> > 
-    bounding_box(const Polytope< Interval<R> >& p)  
+    Rectangle< Numeric::Interval<R> > 
+    bounding_box(const Polytope< Numeric::Interval<R> >& p)  
     {
-      typename Polytope< Interval<R> >::vertices_const_iterator pt_iter=p.vertices_begin();
+      typename Polytope< Numeric::Interval<R> >::vertices_const_iterator pt_iter=p.vertices_begin();
       Rectangle<R> result(*pt_iter);
       ++pt_iter;
       for( ; pt_iter!=p.vertices_end(); ++pt_iter) {
@@ -306,7 +306,7 @@ namespace Ariadne {
 
     template<class R>
     tribool 
-    contains(const Polytope< Interval<R> >& ply, const Point< Interval<R> >& pt)
+    contains(const Polytope< Numeric::Interval<R> >& ply, const Point< Numeric::Interval<R> >& pt)
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
@@ -346,7 +346,7 @@ namespace Ariadne {
     subset(const Polytope<R>& A, const Polytope<R>& B)
     {
       //typedef typename Numeric::traits<R>::arithmetic_type F;
-      typedef Rational F;
+      typedef Numeric::Rational F;
       return subset(Polytope<F>(A),Polyhedron<F>(Polytope<F>(B)));
     }
       
@@ -369,34 +369,35 @@ namespace Ariadne {
     tribool 
     subset(const Rectangle<R>& A, const Polytope<R>& B)
     {
-      return Geometry::subset(Rectangle<Rational>(A),Polyhedron<Rational>(Polytope<Rational>(B)));
+      return Geometry::subset(Rectangle<Numeric::Rational>(A),
+                              Polyhedron<Numeric::Rational>(Polytope<Numeric::Rational>(B)));
     }
     
     
     template<class R>
     tribool 
-    disjoint(const Polytope< Interval<R> >& ply, const Rectangle< Interval<R> >& rect) 
+    disjoint(const Polytope< Numeric::Interval<R> >& ply, const Rectangle< Numeric::Interval<R> >& rect) 
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
 
     template<class R>
     tribool 
-    disjoint(const Polytope< Interval<R> >& ply1, const Polytope< Interval<R> >& ply2) 
+    disjoint(const Polytope< Numeric::Interval<R> >& ply1, const Polytope< Numeric::Interval<R> >& ply2) 
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
 
     template<class R>
     tribool 
-    subset(const Rectangle< Interval<R> >& ply1, const Polytope< Interval<R> >& ply2) 
+    subset(const Rectangle< Numeric::Interval<R> >& ply1, const Polytope< Numeric::Interval<R> >& ply2) 
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
 
     template<class R>
     tribool 
-    subset(const Polytope< Interval<R> >& ply1, const Polytope< Interval<R> >& ply2) 
+    subset(const Polytope< Numeric::Interval<R> >& ply1, const Polytope< Numeric::Interval<R> >& ply2) 
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
@@ -450,7 +451,7 @@ namespace Ariadne {
     
     template<class R>
     dimension_type 
-    Polytope< Interval<R> >::dimension() const 
+    Polytope< Numeric::Interval<R> >::dimension() const 
     { 
       return _vertices.dimension(); 
     }
@@ -458,15 +459,15 @@ namespace Ariadne {
     
     template<class R>
     size_type 
-    Polytope< Interval<R> >::number_of_vertices() const 
+    Polytope< Numeric::Interval<R> >::number_of_vertices() const 
     { 
       return _vertices.size(); 
     }
     
     
     template<class R>
-    const PointList< Interval<R> >&
-    Polytope< Interval<R> >::vertices() const 
+    const PointList< Numeric::Interval<R> >&
+    Polytope< Numeric::Interval<R> >::vertices() const 
     {
       return this->_vertices;
     }

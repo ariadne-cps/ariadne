@@ -32,6 +32,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "set_interface.h"
+#include "rectangle.h"
 
 
 namespace Ariadne {

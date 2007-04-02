@@ -30,8 +30,6 @@
 
 #include <iosfwd>
 
-#include "../declarations.h"
-
 #include "../base/tribool.h"
 
 #include "../geometry/set_interface.h"

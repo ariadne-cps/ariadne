@@ -30,7 +30,7 @@
 
 #include <string>
 
-#include "../declarations.h"
+#include "../geometry/declarations.h"
 
 namespace Ariadne {
   namespace System {

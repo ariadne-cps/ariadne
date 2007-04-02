@@ -31,14 +31,12 @@
 
 #include <iosfwd>
 
-#include "../declarations.h"
-#include "../exceptions.h"
-
 #include "../numeric/interval.h"
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 
+#include "../geometry/exceptions.h"
 #include "../geometry/point.h"
 #include "../geometry/zonotope.h"
 
@@ -64,8 +62,8 @@ namespace Ariadne {
     template<class R>
     class Parallelotope : public Zonotope<R> {
      private:
-      typedef typename traits<R>::arithmetic_type F;
-      typedef typename traits<R>::interval_type I;
+      typedef typename Numeric::traits<R>::arithmetic_type F;
+      typedef typename Numeric::traits<R>::interval_type I;
      public:
       /*! \brief The real number type. */
       typedef R real_type;
@@ -147,11 +145,11 @@ namespace Ariadne {
     
      
     template<class R>
-    class Parallelotope< Interval<R> > 
-      : public Zonotope< Interval<R> >
+    class Parallelotope< Numeric::Interval<R> > 
+      : public Zonotope< Numeric::Interval<R> >
     {
-      typedef typename traits<R>::arithmetic_type F;
-      typedef typename traits<R>::interval_type I;
+      typedef typename Numeric::traits<R>::arithmetic_type F;
+      typedef typename Numeric::traits<R>::interval_type I;
      public:
       /* The real number type. */
       typedef I real_type;
@@ -197,7 +195,7 @@ namespace Ariadne {
     
     /*! \brief Computes an over approximation from an interval parallelotope. */
     template<class R> 
-    Parallelotope<R> over_approximation(const Parallelotope< Interval<R> >& p);
+    Parallelotope<R> over_approximation(const Parallelotope< Numeric::Interval<R> >& p);
     
     /*! \brief Computes an over approximation from a zonotope using a qr factorization. */
     template<class R> 
@@ -205,7 +203,7 @@ namespace Ariadne {
     
     /*! \brief Computes an over approximation from an interval zonotope using a qr factorization. */
     template<class R> 
-    Parallelotope<R> orthogonal_over_approximation(const Zonotope< Interval<R> >& z);
+    Parallelotope<R> orthogonal_over_approximation(const Zonotope< Numeric::Interval<R> >& z);
     
     
     
@@ -216,7 +214,7 @@ namespace Ariadne {
     std::ostream& operator<<(std::ostream& os, const Parallelotope<R>& p);
     
     template<class R>
-    std::ostream& operator<<(std::ostream& os, const Parallelotope< Interval<R> >& p) ;
+    std::ostream& operator<<(std::ostream& os, const Parallelotope< Numeric::Interval<R> >& p) ;
     
   }
 }

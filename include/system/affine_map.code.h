@@ -33,6 +33,7 @@
 #include "../geometry/zonotope.h"
 #include "../geometry/polytope.h"
 
+#include "../system/exceptions.h"
 
 
 

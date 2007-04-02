@@ -28,7 +28,8 @@
 
 namespace Ariadne {
   namespace System {
-
+    using namespace Numeric;
+    
 #ifdef ENABLE_FLOAT64
     template class Map<Float64>;
 #endif

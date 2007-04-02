@@ -31,6 +31,8 @@
 
 #include "multimap.h"
 
+#include "../linear_algebra/declarations.h"
+#include "../geometry/declarations.h"
 
 namespace Ariadne {
   namespace System {

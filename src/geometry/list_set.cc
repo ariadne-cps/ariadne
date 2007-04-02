@@ -35,6 +35,8 @@
 namespace Ariadne {
   namespace Geometry {
  
+    using namespace Numeric;
+    
     template class ListSet< Rectangle<Rational> >;
     template class ListSet< Zonotope<Rational> >;
     

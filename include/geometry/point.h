@@ -31,11 +31,12 @@
 #include <iosfwd>
 #include <stdexcept>
 
-#include "../declarations.h"
-#include "../exceptions.h"
 #include "../base/array.h"
+#include "../linear_algebra/declarations.h"
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
+
+#include "exceptions.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -120,13 +121,13 @@ namespace Ariadne {
     Point<R> approximation(const Point<R>& pt);
     
     template<class R> 
-    Point<R> approximation(const Point< Interval<R> >& ipt);
+    Point<R> approximation(const Point< Numeric::Interval<R> >& ipt);
     
     template<class R> 
-    bool contains_value(const Point< Interval<R> >& ipt, const Point<R>& pt);
+    bool contains_value(const Point< Numeric::Interval<R> >& ipt, const Point<R>& pt);
     
     template<class R> 
-    R error_bound(const Point< Interval<R> >& ipt);
+    R error_bound(const Point< Numeric::Interval<R> >& ipt);
     
 
     
@@ -160,7 +161,7 @@ namespace Ariadne {
     
     template<class R>
     Point<R>
-    approximate_value(const Point< Interval<R> >& pt);
+    approximate_value(const Point< Numeric::Interval<R> >& pt);
     
   //template<class R>
   //Point<R> 

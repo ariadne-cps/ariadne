@@ -21,11 +21,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "combinatoric/array_operations.h"
-
-#include "exceptions.h"
-
 #include "base/array.h"
+#include "base/exceptions.h"
+
+#include "combinatoric/exceptions.h"
+#include "combinatoric/array_operations.h"
 
 namespace Ariadne {
   namespace Base {

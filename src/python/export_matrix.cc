@@ -34,6 +34,7 @@
 #include "linear_algebra/matrix_function.h"
 
 using namespace Ariadne;
+using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
 
 #include <boost/python.hpp>

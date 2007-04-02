@@ -34,7 +34,7 @@
 
 #include <boost/iterator/iterator_facade.hpp>
 
-#include "../declarations.h"
+#include "../base/types.h"
 #include "../base/array.h"
 
 #include "../combinatoric/binary_word.h"

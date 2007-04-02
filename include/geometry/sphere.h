@@ -30,10 +30,8 @@
 
 #include <iosfwd>
 
-#include "../declarations.h"
-
 #include "../base/array.h"
-#include "../exceptions.h"
+#include "../geometry/exceptions.h"
 #include "../geometry/point.h"
 
 namespace Ariadne {

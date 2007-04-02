@@ -30,9 +30,11 @@ namespace Ariadne {
   namespace LinearAlgebra {
 
     template<class R>
-    Matrix< Interval<R> >
-    exp(const Matrix< Interval<R> >& A) 
+    Matrix< Numeric::Interval<R> >
+    exp(const Matrix< Numeric::Interval<R> >& A) 
     {
+      using Numeric::Interval;
+      
       check_square(A,__PRETTY_FUNCTION__);
       R err=div_up(A.norm().upper(),R(65536));
       if(err==0) {

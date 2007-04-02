@@ -27,7 +27,7 @@
 
 #include "taylor_set.h"
 
-#include "../exceptions.h"
+#include "exceptions.h"
 #include "../base/array.h"
 
 #include "../linear_algebra/vector.h"

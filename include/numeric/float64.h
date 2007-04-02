@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file float64.h
+/*! \file numeric/float64.h
  *  \brief Type definitions and conversion operators for 64-bit fixed precision floating point numbers.
  */
 
@@ -34,7 +34,6 @@
 #include <boost/numeric/interval/rounded_transc.hpp>
 #include <boost/numeric/interval/hw_rounding.hpp>
 
-#include "../declarations.h"
 #include "../numeric/numerical_traits.h"
 #include "../numeric/function.h"
 #include "../numeric/rational.h"

@@ -30,8 +30,6 @@
 
 #include <iosfwd>
 
-#include "../declarations.h"
-
 #include "../base/array.h"
 #include "../linear_algebra/matrix.h"
 #include "../geometry/point.h"

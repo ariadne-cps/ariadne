@@ -32,7 +32,6 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "../declarations.h"
 #include "../numeric/numerical_traits.h"
 #include "../numeric/conversion.h"
 #include "../numeric/arithmetic.h"

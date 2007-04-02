@@ -63,11 +63,11 @@ namespace Ariadne {
     
     template<class R>
     tribool
-    Parallelotope< Interval<R> >::_instantiate_geometry_operators() 
+    Parallelotope< Numeric::Interval<R> >::_instantiate_geometry_operators() 
     {
       Parallelotope<R> p;
-      Parallelotope< Interval<R> > ip;
-      Zonotope< Interval<R> > iz;
+      Parallelotope< Numeric::Interval<R> > ip;
+      Zonotope< Numeric::Interval<R> > iz;
       p=Geometry::over_approximation(ip);
       p=Geometry::orthogonal_over_approximation(iz);
       return p.empty();
@@ -106,7 +106,7 @@ namespace Ariadne {
       
     template<class R>
     void 
-    Parallelotope< Interval<R> >::_compute_generators_inverse() const 
+    Parallelotope< Numeric::Interval<R> >::_compute_generators_inverse() const 
     {  
       this->_generators_inverse=this->generators().inverse();
     }
@@ -122,7 +122,7 @@ namespace Ariadne {
       
     template<class R>
     tribool 
-    Parallelotope< Interval<R> >::contains(const Point<I>& pt) const {
+    Parallelotope< Numeric::Interval<R> >::contains(const Point<I>& pt) const {
       if(this->_generators_inverse.number_of_rows()==0) {
         this->_compute_generators_inverse();
       }
@@ -198,7 +198,7 @@ namespace Ariadne {
     
     
     template<class R>
-    LinearAlgebra::Vector<typename traits<R>::arithmetic_type>
+    LinearAlgebra::Vector<typename Numeric::traits<R>::arithmetic_type>
     Parallelotope<R>::coordinates(const Point<R>& s) const {
       LinearAlgebra::Vector<F> p=s.position_vector();
       LinearAlgebra::Vector<F> c=this->centre().position_vector();
@@ -242,10 +242,10 @@ namespace Ariadne {
     
     template<class R>
     Parallelotope<R>
-    over_approximation(const Parallelotope< Interval<R> >& p)
+    over_approximation(const Parallelotope< Numeric::Interval<R> >& p)
     {
-      //std::cerr << "IntervalParallelotope<R>::over_approximating_parallelotope() const" << std::endl;
-      typedef Interval<R> I;
+      //std::cerr << "Numeric::IntervalParallelotope<R>::over_approximating_parallelotope() const" << std::endl;
+      typedef Numeric::Interval<R> I;
       const Point<I>& c=p.centre();
       const LinearAlgebra::Matrix<I> G=p.generators();
       
@@ -278,15 +278,15 @@ namespace Ariadne {
     Parallelotope<R>
     orthogonal_over_approximation(const Zonotope<R>& z)
     {
-      return orthogonal_over_approximation(Zonotope< Interval<R> >(z));
+      return orthogonal_over_approximation(Zonotope< Numeric::Interval<R> >(z));
     }
     
     template<class R>
     Parallelotope<R>
-    orthogonal_over_approximation(const Zonotope< Interval<R> >& z)
+    orthogonal_over_approximation(const Zonotope< Numeric::Interval<R> >& z)
     {
       //std::cerr << "Parallelotope<R>::orthogonal_over_approximation(const Zonotope<I>&) const" << std::endl;
-      typedef Interval<R> I;
+      typedef Numeric::Interval<R> I;
       typedef typename Numeric::traits<R>::approximate_arithmetic_type A;
       const Point<I>& c=z.centre();
       const LinearAlgebra::Matrix<I>& G=z.generators();
@@ -300,7 +300,7 @@ namespace Ariadne {
       LinearAlgebra::Matrix<A> Gapprx(d,ng);
       for(size_type i=0; i!=d; ++i) {
         for(size_type j=0; j!=ng; ++j) {
-          Gapprx(i,j)=conv_approx<A>(approximate_value(G(i,j)));
+          Gapprx(i,j)=Numeric::conv_approx<A>(approximate_value(G(i,j)));
         }
       }
       
@@ -377,9 +377,9 @@ namespace Ariadne {
     
     template<class R>
     std::ostream&
-    Parallelotope< Interval<R> >::write(std::ostream& os) const
+    Parallelotope< Numeric::Interval<R> >::write(std::ostream& os) const
     {
-      const Parallelotope< Interval<R> >& p=*this;
+      const Parallelotope< Numeric::Interval<R> >& p=*this;
       if(p.dimension() > 0) {
         os << "Parallelotope( centre=" << p.centre()
            << ", directions=" << p.generators()

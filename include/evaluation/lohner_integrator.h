@@ -28,7 +28,8 @@
 #ifndef ARIADNE_LOHNER_INTEGRATOR_H
 #define ARIADNE_LOHNER_INTEGRATOR_H
 
-#include "../declarations.h"
+#include "../numeric/declarations.h"
+#include "../geometry/declarations.h"
 #include "../evaluation/integrator.h"
 
 namespace Ariadne {
@@ -42,11 +43,12 @@ namespace Ariadne {
      */
     template<class R>
     class LohnerIntegrator
-      : public IntegratorBase<R, System::VectorField<R>, Geometry::Zonotope< Interval<R> > > 
+      : public IntegratorBase<R, System::VectorField<R>, Geometry::Zonotope< Numeric::Interval<R> > > 
     {
-      typedef Interval<R> I;
-      typedef IntegratorBase<R, System::VectorField<R>, Geometry::Zonotope< Interval<R> > > Base_;
+      typedef IntegratorBase<R, System::VectorField<R>, Geometry::Zonotope< Numeric::Interval<R> > > Base_;
      public:
+      typedef Numeric::Interval<R> I;
+
       /*! \brief Constructor. */
       LohnerIntegrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_set_radius);
 
@@ -59,16 +61,16 @@ namespace Ariadne {
        * We then compute \f$ \mathcal{P}_{n} \f$ such that \f$ D\Phi(h,R_{n}) \subset \mathcal{P}_{n} \f$.
        * We then compute \f$ A_{n+1} \f$ such that \f$ A_{n+1} e \supset \mathcal{P}_{n} e \f$.
        */
-      virtual Geometry::Zonotope< Interval<R> > 
+      virtual Geometry::Zonotope<I> 
       integration_step(const System::VectorField<R>&,
-                       const Geometry::Zonotope< Interval<R> >&,
+                       const Geometry::Zonotope<I>&,
                        time_type&) const;
 
 
       
       /*! \brief A C1 algorithm for integrating forward a zonotope for a time up to time \a step_size. */
-      virtual Geometry::Zonotope< Interval<R> > reachability_step(const System::VectorField<R>&,
-                                                      const Geometry::Zonotope< Interval<R> >&,
+      virtual Geometry::Zonotope<I> reachability_step(const System::VectorField<R>&,
+                                                      const Geometry::Zonotope<I>&,
                                                       time_type& step_size) const;
 
     };

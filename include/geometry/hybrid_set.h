@@ -31,7 +31,6 @@
 #include <iostream>
 #include <sstream>
 
-#include "../declarations.h"
 #include "../geometry/grid_set.h"
 #include "../system/hybrid_automaton.h"
 

@@ -38,11 +38,17 @@
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 
-#include "../geometry/point.h"
-
 namespace Ariadne {
   namespace Geometry {
 
+    template<class R> class Point;
+    template<class R> class PointList;
+    template<class E> class RectangleExpression;
+    template<class R> class Rectangle;
+    template<class R> class Polytope;
+    template<class R> class Polyhedron;
+    template<class BS> class ListSet;
+      
     template<class R> class ZonotopeVerticesIterator;
       
     /*!\ingroup BasicSet
@@ -283,31 +289,31 @@ namespace Ariadne {
     
     template<class R> tribool disjoint(const Zonotope<R>& A, const Zonotope<R>& B);
     
-    template<class R> tribool disjoint(const Zonotope< Interval<R> >& z, const Rectangle< R >& r);
+    template<class R> tribool disjoint(const Zonotope< Numeric::Interval<R> >& z, const Rectangle< R >& r);
 
-    template<class R> tribool disjoint(const Zonotope< Interval<R> >& z, const Rectangle< Interval<R> >& r);
+    template<class R> tribool disjoint(const Zonotope< Numeric::Interval<R> >& z, const Rectangle< Numeric::Interval<R> >& r);
 
 
     template<class R> tribool subset(const Rectangle<R>& A, const Zonotope<R>& B);
     
-    template<class R> tribool subset(const Rectangle<R>& A, const Zonotope< Interval<R> >& z);
+    template<class R> tribool subset(const Rectangle<R>& A, const Zonotope< Numeric::Interval<R> >& z);
 
     template<class R> tribool subset(const Zonotope<R>& A, const Rectangle<R>& B);
     
-    template<class R> tribool subset(const Zonotope< Interval<R> >& A, const Rectangle<R>& B);
+    template<class R> tribool subset(const Zonotope< Numeric::Interval<R> >& A, const Rectangle<R>& B);
     
     template<class R> tribool subset(const Zonotope<R>& A, const Zonotope<R>& B);
     
-    template<class R> tribool subset(const Zonotope< Interval<R> >& z, const Rectangle< Interval<R> >& r);
+    template<class R> tribool subset(const Zonotope< Numeric::Interval<R> >& z, const Rectangle< Numeric::Interval<R> >& r);
 
 
     template<class R> Zonotope<R> over_approximation(const Zonotope<R>&);
      
-    template<class R> Zonotope<R> over_approximation(const Zonotope< Interval<R> >&);
+    template<class R> Zonotope<R> over_approximation(const Zonotope< Numeric::Interval<R> >&);
 
-    template<class R> Zonotope< Interval<R> > interval_over_approximation(const Zonotope< Interval<R> >&);
+    template<class R> Zonotope< Numeric::Interval<R> > interval_over_approximation(const Zonotope< Numeric::Interval<R> >&);
 
-    template<class R> Zonotope<R> approximation(const Zonotope< Interval<R> >&);
+    template<class R> Zonotope<R> approximation(const Zonotope< Numeric::Interval<R> >&);
 
     template<class R> Zonotope<R> approximation(const Zonotope<R>&);
 
@@ -344,16 +350,16 @@ namespace Ariadne {
     subdivide(const Zonotope<R>& z);
     
     template<class R> 
-    ListSet< Zonotope< Interval<R> > >
-    subdivide(const Zonotope< Interval<R> >& z);
+    ListSet< Zonotope< Numeric::Interval<R> > >
+    subdivide(const Zonotope< Numeric::Interval<R> >& z);
     
     template<class R> 
     ListSet< Zonotope<R> >
     divide(const Zonotope<R>& z);
     
     template<class R> 
-    ListSet< Zonotope< Interval<R> > >
-    divide(const Zonotope< Interval<R> >& z);
+    ListSet< Zonotope< Numeric::Interval<R> > >
+    divide(const Zonotope< Numeric::Interval<R> >& z);
     
     
     template<class R> 

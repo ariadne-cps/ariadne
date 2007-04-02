@@ -32,6 +32,7 @@
 #include <cstring>
 #include <functional>
 
+#include "base/types.h"
 
 #include "numeric/float64.h"
 #include "numeric/floatmp.h"
@@ -39,177 +40,180 @@
 
 #include "python/python_float.h"
 
-template<class R> inline std::string python_name(const std::string& bn);
+namespace Ariadne {
+  
+  template<class R> inline std::string python_name(const std::string& bn);
 
-template<> inline std::string python_name<bool>(const std::string& bn) { return "Boolean"+bn; }
-template<> inline std::string python_name<Ariadne::index_type>(const std::string& bn) { return "Index"+bn; }
-template<> inline std::string python_name<Ariadne::size_type>(const std::string& bn) { return "Size"+bn; }
-template<> inline std::string python_name<Ariadne::Numeric::Integer>(const std::string& bn) { return "Z"+bn; }
-template<> inline std::string python_name<Ariadne::Numeric::Rational>(const std::string& bn) { return "Q"+bn; }
+  template<> inline std::string python_name<bool>(const std::string& bn) { return "Boolean"+bn; }
+  template<> inline std::string python_name<Base::index_type>(const std::string& bn) { return "Index"+bn; }
+  template<> inline std::string python_name<Base::size_type>(const std::string& bn) { return "Size"+bn; }
+  template<> inline std::string python_name<Numeric::Integer>(const std::string& bn) { return "Z"+bn; }
+  template<> inline std::string python_name<Numeric::Rational>(const std::string& bn) { return "Q"+bn; }
 
-#if PYTHON_FLOAT == Float64 
-template<> inline std::string python_name<Ariadne::Numeric::Float64>(const std::string& bn) { return ""+bn; }
-template<> inline std::string python_name<Ariadne::Numeric::FloatMP>(const std::string& bn) { return "MPF"+bn; }
-#elif PYTHON_FLOAT == FloatMP 
-template<> inline std::string python_name<Ariadne::Numeric::Float64>(const std::string& bn) { return "F64"+bn; }
-template<> inline std::string python_name<Ariadne::Numeric::FloatMP>(const std::string& bn) { return ""+bn; }
-#else
-template<> inline std::string python_name<Ariadne::Numeric::Float64>(const std::string& bn) { return "F64"+bn; }
-template<> inline std::string python_name<Ariadne::Numeric::FloatMP>(const std::string& bn) { return "MPF"+bn; }
-#endif
+  #if PYTHON_FLOAT == Float64 
+  template<> inline std::string python_name<Numeric::Float64>(const std::string& bn) { return ""+bn; }
+  template<> inline std::string python_name<Numeric::FloatMP>(const std::string& bn) { return "MPF"+bn; }
+  #elif PYTHON_FLOAT == FloatMP 
+  template<> inline std::string python_name<Numeric::Float64>(const std::string& bn) { return "F64"+bn; }
+  template<> inline std::string python_name<Numeric::FloatMP>(const std::string& bn) { return ""+bn; }
+  #else
+  template<> inline std::string python_name<Numeric::Float64>(const std::string& bn) { return "F64"+bn; }
+  template<> inline std::string python_name<Numeric::FloatMP>(const std::string& bn) { return "MPF"+bn; }
+  #endif
 
 
-template<class C> 
-inline
-typename C::value_type 
-get_item(const C& c, int n) {
-  if(n<0) {
-    n+=c.size();
+  template<class C> 
+  inline
+  typename C::value_type 
+  get_item(const C& c, int n) {
+    if(n<0) {
+      n+=c.size();
+    }
+    if(n<0) { throw std::out_of_range("Index out-of-range"); }
+    size_t m=size_t(n);
+    if(c.size()<=m) { throw std::out_of_range("Index out-of-range"); }
+    return c[m];
   }
-  if(n<0) { throw std::out_of_range("Index out-of-range"); }
-  size_t m=size_t(n);
-  if(c.size()<=m) { throw std::out_of_range("Index out-of-range"); }
-  return c[m];
-}
 
 
-template<class C, class T> 
-inline
-void
-set_item_from(C& c, int n, const T& x) {
-  if(n<0) {
-    n+=c.size();
+  template<class C, class T> 
+  inline
+  void
+  set_item_from(C& c, int n, const T& x) {
+    if(n<0) {
+      n+=c.size();
+    }
+    if(n<0) { throw std::out_of_range("Index out-of-range"); }
+    size_t m=size_t(n);
+    if(c.size()<=m) { throw std::out_of_range("Index out-of-range"); }
+    c[n]=x;
   }
-  if(n<0) { throw std::out_of_range("Index out-of-range"); }
-  size_t m=size_t(n);
-  if(c.size()<=m) { throw std::out_of_range("Index out-of-range"); }
-  c[n]=x;
-}
 
 
-template<class C> 
-inline
-void
-set_item(C& c, int n, const typename C::value_type& x) {
-  if(n<0) {
-    n+=c.size();
+  template<class C> 
+  inline
+  void
+  set_item(C& c, int n, const typename C::value_type& x) {
+    if(n<0) {
+      n+=c.size();
+    }
+    if(n<0) { throw std::out_of_range("Index out-of-range"); }
+    size_t m=size_t(n);
+    if(c.size()<=m) { throw std::out_of_range("Index out-of-range"); }
+    c[n]=x;
   }
-  if(n<0) { throw std::out_of_range("Index out-of-range"); }
-  size_t m=size_t(n);
-  if(c.size()<=m) { throw std::out_of_range("Index out-of-range"); }
-  c[n]=x;
+
+
+
+  template<class Res, class Arg1, class Arg2, class Op>
+  inline
+  Res
+  evaluate(const Arg1& a1, const Arg2& a2)
+  {
+    return Res(Op()(a1,a2));
+  }
+
+
+  template<class Res, class Arg> inline
+  Res neg(const Arg& a) {
+    return Res(-a);
+  }
+
+  template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
+  Res add(const Arg1& a1, const Arg2& a2) {
+    return Res(Tmp1(a1)+Tmp2(a2));
+  }
+
+  template<class Res, class Arg1, class Arg2> inline
+  Res add(const Arg1& a1, const Arg2& a2) {
+    return Res(a1+a2);
+  }
+
+
+  template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
+  Res sub(const Arg1& a1, const Arg2& a2) {
+    return Res(Tmp1(a1)-Tmp2(a2));
+  }
+
+  template<class Res, class Arg1, class Arg2> inline
+  Res sub(const Arg1& a1, const Arg2& a2) {
+    return Res(a1-a2);
+  }
+
+  template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
+  Res rsub(const Arg1& a1, const Arg2& a2) {
+    return Res(Tmp2(a2)-Tmp1(a1));
+  }
+
+  template<class Res, class Arg1, class Arg2> inline
+  Res rsub(const Arg1& a1, const Arg2& a2) {
+    return Res(a2-a1);
+  }
+
+
+  template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
+  Res mul(const Arg1& a1, const Arg2& a2) {
+   return Res(Tmp1(a1)*Tmp2(a2));
+  }
+
+  template<class Res, class Arg1, class Arg2> inline
+  Res mul(const Arg1& a1, const Arg2& a2) {
+    return Res(a1*a2);
+  }
+
+
+  template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
+  Res div(const Arg1& a1, const Arg2& a2) {
+    return Res(Tmp1(a1)/Tmp2(a2));
+  }
+
+  template<class Res, class Arg1, class Arg2> inline
+  Res div(const Arg1& a1, const Arg2& a2) {
+    return Res(a1/a2);
+  }
+
+  template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
+  Res rdiv(const Arg1& a1, const Arg2& a2) {
+    return Res(Tmp2(a2)/Tmp1(a1));
+  }
+
+  template<class Res, class Arg1, class Arg2> inline
+  Res rdiv(const Arg1& a1, const Arg2& a2) {
+    return Res(a2/a1);
+  }
+
+
+
+  template<class Res,class Arg1,class Arg2> inline
+  Res eq(const Arg1& a1, const Arg2& a2) {
+    return a1==a2;
+  }
+
+  template<class Res,class Arg1,class Arg2> inline
+  Res ne(const Arg1& a1, const Arg2& a2) {
+    return a1!=a2;
+  }
+
+  template<class Res,class Arg1,class Arg2> inline
+  Res lt(const Arg1& a1, const Arg2& a2) {
+    return a1< a2;
+  }
+
+  template<class Res,class Arg1,class Arg2> inline
+  Res le(const Arg1& a1, const Arg2& a2) {
+    return a1<=a2;
+  }
+
+  template<class Res,class Arg1,class Arg2> inline
+  Res gt(const Arg1& a1, const Arg2& a2) {
+    return a1> a2;
+  }
+
+  template<class Res,class Arg1,class Arg2> inline
+  Res ge(const Arg1& a1, const Arg2& a2) {
+    return a1>=a2;
+  }
+
 }
-
-
-
-template<class Res, class Arg1, class Arg2, class Op>
-inline
-Res
-evaluate(const Arg1& a1, const Arg2& a2)
-{
-  return Res(Op()(a1,a2));
-}
-
-
-template<class Res, class Arg> inline
-Res neg(const Arg& a) {
-  return Res(-a);
-}
-
-template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
-Res add(const Arg1& a1, const Arg2& a2) {
-  return Res(Tmp1(a1)+Tmp2(a2));
-}
-
-template<class Res, class Arg1, class Arg2> inline
-Res add(const Arg1& a1, const Arg2& a2) {
-  return Res(a1+a2);
-}
-
-
-template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
-Res sub(const Arg1& a1, const Arg2& a2) {
-  return Res(Tmp1(a1)-Tmp2(a2));
-}
-
-template<class Res, class Arg1, class Arg2> inline
-Res sub(const Arg1& a1, const Arg2& a2) {
-  return Res(a1-a2);
-}
-
-template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
-Res rsub(const Arg1& a1, const Arg2& a2) {
-  return Res(Tmp2(a2)-Tmp1(a1));
-}
-
-template<class Res, class Arg1, class Arg2> inline
-Res rsub(const Arg1& a1, const Arg2& a2) {
-  return Res(a2-a1);
-}
-
-
-template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
-Res mul(const Arg1& a1, const Arg2& a2) {
- return Res(Tmp1(a1)*Tmp2(a2));
-}
-
-template<class Res, class Arg1, class Arg2> inline
-Res mul(const Arg1& a1, const Arg2& a2) {
-  return Res(a1*a2);
-}
-
-
-template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
-Res div(const Arg1& a1, const Arg2& a2) {
-  return Res(Tmp1(a1)/Tmp2(a2));
-}
-
-template<class Res, class Arg1, class Arg2> inline
-Res div(const Arg1& a1, const Arg2& a2) {
-  return Res(a1/a2);
-}
-
-template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
-Res rdiv(const Arg1& a1, const Arg2& a2) {
-  return Res(Tmp2(a2)/Tmp1(a1));
-}
-
-template<class Res, class Arg1, class Arg2> inline
-Res rdiv(const Arg1& a1, const Arg2& a2) {
-  return Res(a2/a1);
-}
-
-
-
-template<class Res,class Arg1,class Arg2> inline
-Res eq(const Arg1& a1, const Arg2& a2) {
-  return a1==a2;
-}
-
-template<class Res,class Arg1,class Arg2> inline
-Res ne(const Arg1& a1, const Arg2& a2) {
-  return a1!=a2;
-}
-
-template<class Res,class Arg1,class Arg2> inline
-Res lt(const Arg1& a1, const Arg2& a2) {
-  return a1< a2;
-}
-
-template<class Res,class Arg1,class Arg2> inline
-Res le(const Arg1& a1, const Arg2& a2) {
-  return a1<=a2;
-}
-
-template<class Res,class Arg1,class Arg2> inline
-Res gt(const Arg1& a1, const Arg2& a2) {
-  return a1> a2;
-}
-
-template<class Res,class Arg1,class Arg2> inline
-Res ge(const Arg1& a1, const Arg2& a2) {
-  return a1>=a2;
-}
-
 
 #endif /* ARIADNE_PYTHON_UTILITIES_H */

@@ -28,7 +28,7 @@
 #ifndef ARIADNE_FUNCTION_H
 #define ARIADNE_FUNCTION_H
 
-#include "../declarations.h"
+#include "../linear_algebra/declarations.h"
 
 namespace Ariadne {
   namespace System {

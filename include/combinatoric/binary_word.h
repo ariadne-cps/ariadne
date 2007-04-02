@@ -74,8 +74,7 @@
 #include <iosfwd>
 #include <stdexcept>
 
-#include "../declarations.h"
-#include "../exceptions.h"
+#include "../base/types.h"
 
 namespace Ariadne {
   namespace Combinatoric {    

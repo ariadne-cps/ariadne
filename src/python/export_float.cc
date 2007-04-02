@@ -31,7 +31,6 @@
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
 
 #include <boost/python.hpp>
 using namespace boost::python;

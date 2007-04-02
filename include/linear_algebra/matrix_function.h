@@ -30,14 +30,16 @@
 
 #include <iosfwd>
 
-#include "../declarations.h"
+#include "../numeric/declarations.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {
 
+    template<class R> class Matrix;
+      
     template<class R>
-    Matrix< Interval<R> >
-    exp(const Matrix< Interval<R> >& A); 
+    Matrix< Numeric::Interval<R> >
+    exp(const Matrix< Numeric::Interval<R> >& A); 
 
   }
 }

@@ -38,21 +38,11 @@
 
 #include <iostream>
 
-#include "../declarations.h"
-
+#include "array.decl.h"
 
 namespace Ariadne {
   
   namespace Base {
-    
-    
-    
-    // Need to give default size in first declaration.
-    template<class T, unsigned short int N> class array;
-    
-    
-    
-    
     
     /*! \ingroup Storage
      *  \brief STL style interface to dynamically-sizable arrays. 
@@ -92,9 +82,9 @@ namespace Ariadne {
       /*! \brief Copy assignment. */ 
       array<T>& operator=(const array<T>& a) { resize(a.size()); fill(a.begin()); return *this; }
       /*! \brief Conversion from an array of fixed size \p N. */ 
-      template<size_type N> array(const array<T,N>& a); /* inline conversion */ 
+      template<unsigned short int N> array(const array<T,N>& a); /* inline conversion */ 
       /*! \brief Assignment from an array of fixed size \p N. */ 
-      template<size_type N> array<T>& operator=(const array<T,N>& a); /* inline conversion */ 
+      template<unsigned short int N> array<T>& operator=(const array<T,N>& a); /* inline conversion */ 
       
       /*! \brief True if the array's size is 0. */
       bool empty() const { return _size==0u; }
@@ -363,7 +353,7 @@ namespace Ariadne {
         while(curr!=this_end) { ++curr; ++iter;  *curr=*iter;  } }
     }
     
-    template<class T> template<size_type N> 
+    template<class T> template<unsigned short int N> 
     inline
     array<T>::array(const array<T,N>& a)
       : _size(a.size()), _ptr(new value_type[_size])
@@ -371,7 +361,7 @@ namespace Ariadne {
       fill(a.begin()); 
     }
     
-    template<class T> template<size_type N> 
+    template<class T> template<unsigned short int N> 
     inline
     array<T>& array<T>::operator=(const array<T,N>& a) 
     { 

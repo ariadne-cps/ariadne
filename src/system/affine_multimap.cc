@@ -28,7 +28,8 @@
 
 namespace Ariadne {
   namespace System {
-
+    using namespace Numeric;
+    
 #ifdef ENABLE_FLOAT64
     template class AffineMultiMap<Float64,Geometry::Rectangle>;
     template class AffineMultiMap<Float64,Geometry::Zonotope>;

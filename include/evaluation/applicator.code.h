@@ -33,8 +33,6 @@
 #include <vector>
 #include <valarray>
 
-#include "../exceptions.h"
-
 #include "../numeric/interval.h"
 
 #include "../linear_algebra/vector.h"
@@ -97,7 +95,7 @@ namespace Ariadne {
     Geometry::Rectangle<R> 
     Applicator<R>::image(const System::Map<R>& f, const Geometry::Rectangle<R>& r) const
     {
-      return Geometry::Rectangle<R>(f.image(Geometry::Point< Interval<R> >(r)));
+      return Geometry::Rectangle<R>(f.image(Geometry::Point< Numeric::Interval<R> >(r)));
     }
     
     
@@ -113,27 +111,27 @@ namespace Ariadne {
       const size_type m=z.dimension();
       const size_type n=z.dimension();
       
-      LinearAlgebra::Vector< Interval<R> > cuboid_vector(m);
-      const Interval<R> unit_interval(-1,1);
+      LinearAlgebra::Vector< Numeric::Interval<R> > cuboid_vector(m);
+      const Numeric::Interval<R> unit_interval(-1,1);
       for(size_type i=0; i!=cuboid_vector.size(); ++i) {
-        cuboid_vector(i)=Interval<R>(-1,1);
+        cuboid_vector(i)=Numeric::Interval<R>(-1,1);
       }
             
       const Geometry::Point<R>& c=z.centre();
       const LinearAlgebra::Matrix<R>& g=z.generators();
       
-      Geometry::Point< Interval<R> > img_centre=f(c);
-      LinearAlgebra::Matrix< Interval<R> > df_on_set = f.jacobian(z.bounding_box());
-      LinearAlgebra::Matrix< Interval<R> > df_at_centre = f.jacobian(c);
+      Geometry::Point< Numeric::Interval<R> > img_centre=f(c);
+      LinearAlgebra::Matrix< Numeric::Interval<R> > df_on_set = f.jacobian(z.bounding_box());
+      LinearAlgebra::Matrix< Numeric::Interval<R> > df_at_centre = f.jacobian(c);
       
-      LinearAlgebra::Matrix< Interval<R> > img_generators = df_at_centre*g;
+      LinearAlgebra::Matrix< Numeric::Interval<R> > img_generators = df_at_centre*g;
       
-      LinearAlgebra::Matrix< Interval<R> > img_generators_inverse = LinearAlgebra::inverse(LinearAlgebra::Matrix< Interval<R> >(img_generators));
+      LinearAlgebra::Matrix< Numeric::Interval<R> > img_generators_inverse = LinearAlgebra::inverse(LinearAlgebra::Matrix< Numeric::Interval<R> >(img_generators));
       
-      LinearAlgebra::Matrix< Interval<R> > img_generators_on_set = df_on_set * g;
-      LinearAlgebra::Matrix< Interval<R> > cuboid_transform = img_generators_inverse * img_generators_on_set;
+      LinearAlgebra::Matrix< Numeric::Interval<R> > img_generators_on_set = df_on_set * g;
+      LinearAlgebra::Matrix< Numeric::Interval<R> > cuboid_transform = img_generators_inverse * img_generators_on_set;
       
-      LinearAlgebra::Vector< Interval<R> > new_cuboid = cuboid_transform * cuboid_vector;
+      LinearAlgebra::Vector< Numeric::Interval<R> > new_cuboid = cuboid_transform * cuboid_vector;
       
       R new_cuboid_sup(0);
       for(size_type j=0; j!=n; ++j) {
@@ -154,10 +152,10 @@ namespace Ariadne {
     
     
     template<class R>
-    Geometry::Zonotope< Interval<R> > 
-    Applicator<R>::image(const System::Map<R>& f, const Geometry::Zonotope< Interval<R> >& z) const 
+    Geometry::Zonotope< Numeric::Interval<R> > 
+    Applicator<R>::image(const System::Map<R>& f, const Geometry::Zonotope< Numeric::Interval<R> >& z) const 
     {
-      typedef Interval<R> I;
+      typedef Numeric::Interval<R> I;
 
       Geometry::Point<I> img_centre=f(z.centre());
       LinearAlgebra::Matrix<I> df_on_set = f.jacobian(over_approximation(z.bounding_box()));
@@ -199,8 +197,8 @@ namespace Ariadne {
      
 
     template<class R>
-    Geometry::ListSet< Geometry::Zonotope< Interval<R> > > 
-    Applicator<R>::image(const System::Map<R>& f, const Geometry::ListSet< Geometry::Zonotope< Interval<R> > >& ds) const 
+    Geometry::ListSet< Geometry::Zonotope< Numeric::Interval<R> > > 
+    Applicator<R>::image(const System::Map<R>& f, const Geometry::ListSet< Geometry::Zonotope< Numeric::Interval<R> > >& ds) const 
     {
       return this->image_list_set(f,ds);
     }
@@ -314,7 +312,7 @@ namespace Ariadne {
       Geometry::GridMaskSet<R> result(initial_set.grid(),initial_set.block());
       typedef typename Geometry::GridMaskSet<R>::const_iterator basic_set_iterator;
       Geometry::Rectangle<R> rectangle(initial_set.dimension());
-      Geometry::Zonotope< Interval<R> > zonotope(result.dimension());
+      Geometry::Zonotope< Numeric::Interval<R> > zonotope(result.dimension());
       for(basic_set_iterator bs_iter=initial_set.begin(); 
           bs_iter!=initial_set.end(); ++bs_iter)
       {

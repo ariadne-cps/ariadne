@@ -27,6 +27,7 @@
 #include "geometry/polytope.h"
 
 using namespace Ariadne;
+using namespace Ariadne::Numeric;
 using namespace Ariadne::Geometry;
 
 #include <boost/python.hpp>

@@ -45,6 +45,7 @@ namespace Ariadne {
     template<class R> class Point;
     template<class R> class Rectangle;
     template<class R> class Zonotope;
+    template<class BS> class ListSet;
 
     /*!\ingroup BasicSet
      * \brief The image of a cuboid under a polynomial.

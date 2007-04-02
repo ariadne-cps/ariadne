@@ -33,7 +33,6 @@
 
 #include "../base/stlio.h"
 #include "../base/array.h"
-#include "../exceptions.h"
 #include "../numeric/interval.h"
 
 #include "../linear_algebra/vector.h"
@@ -42,6 +41,7 @@
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
 
+#include "../system/exceptions.h"
 
 namespace Ariadne {
   namespace System {

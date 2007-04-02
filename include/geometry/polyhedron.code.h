@@ -113,9 +113,9 @@ namespace Ariadne {
     }
   
     template<>
-    Polyhedron<Rational>::Polyhedron(const PointList<Rational>& pts)
+    Polyhedron<Numeric::Rational>::Polyhedron(const PointList<Numeric::Rational>& pts)
     {
-      (*this)=Polyhedron<Rational>(Polytope<Rational>(pts));
+      (*this)=Polyhedron<Numeric::Rational>(Polytope<Numeric::Rational>(pts));
     }
   
 
@@ -188,18 +188,19 @@ namespace Ariadne {
     Rectangle<R> 
     bounding_box(const Polyhedron<R>& p)
     {
+      using Numeric::Rational;
       Rectangle<Rational> qbb=Polytope<Rational>(Polyhedron<Rational>(p)).bounding_box();
       Rectangle<R> bb(p.dimension());
       for(dimension_type i=0; i!=bb.dimension(); ++i) {
-        bb.set_lower_bound(i,conv_down<R>(qbb.lower_bound(i)));
-        bb.set_upper_bound(i,conv_up<R>(qbb.upper_bound(i)));
+        bb.set_lower_bound(i,Numeric::conv_down<R>(qbb.lower_bound(i)));
+        bb.set_upper_bound(i,Numeric::conv_up<R>(qbb.upper_bound(i)));
       }
       return bb;
     }
  
     template<class R> inline
-    Rectangle< Interval<R> > 
-    bounding_box(const Polyhedron< Interval<R> >& p)
+    Rectangle< Numeric::Interval<R> > 
+    bounding_box(const Polyhedron< Numeric::Interval<R> >& p)
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
@@ -245,10 +246,10 @@ namespace Ariadne {
     
     template<>
     tribool 
-    disjoint(const Polyhedron<Rational>& p, const Rectangle<Rational>& r)
+    disjoint(const Polyhedron<Numeric::Rational>& p, const Rectangle<Numeric::Rational>& r)
     {
-      typedef Rational R;
-      typedef Rational F;
+      typedef Numeric::Rational R;
+      typedef Numeric::Rational F;
 
       if(verbosity>7) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       if(verbosity>8) { std::cerr << p << " " << r << std::endl; }
@@ -317,7 +318,7 @@ namespace Ariadne {
     
     template<class R>
     tribool 
-    disjoint(const Polyhedron< Interval<R> >& p, const Rectangle< Interval<R> >& r)
+    disjoint(const Polyhedron< Numeric::Interval<R> >& p, const Rectangle< Numeric::Interval<R> >& r)
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
@@ -326,7 +327,7 @@ namespace Ariadne {
     tribool 
     disjoint(const Polyhedron<R>& p, const Rectangle<R>& r)
     {
-      return disjoint(Polyhedron<Rational>(p),Rectangle<Rational>(r));
+      return disjoint(Polyhedron<Numeric::Rational>(p),Rectangle<Numeric::Rational>(r));
     }
 
 
@@ -350,14 +351,14 @@ namespace Ariadne {
     
     template<class R>
     tribool 
-    subset(const Polyhedron< Interval<R> >& A, const Rectangle< Interval<R> >& B)
+    subset(const Polyhedron< Numeric::Interval<R> >& A, const Rectangle< Numeric::Interval<R> >& B)
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
     template<class R>
     tribool 
-    subset(const Polyhedron< Interval<R> >& A, const Polyhedron< Interval<R> >& B)
+    subset(const Polyhedron< Numeric::Interval<R> >& A, const Polyhedron< Numeric::Interval<R> >& B)
     {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
@@ -366,14 +367,14 @@ namespace Ariadne {
     tribool 
     subset(const Polyhedron<R>& A, const Polyhedron<R>& B)
     {
-      return Geometry::subset(Polytope<Rational>(Polyhedron<Rational>(A)),Polyhedron<Rational>(B));
+      return Geometry::subset(Polytope<Numeric::Rational>(Polyhedron<Numeric::Rational>(A)),Polyhedron<Numeric::Rational>(B));
     }
     
     template<class R>
     tribool 
     subset(const Polyhedron<R>& A, const Rectangle<R>& B)
     {
-      return Geometry::subset(Polytope<Rational>(A),Rectangle<Rational>(B));
+      return Geometry::subset(Polytope<Numeric::Rational>(A),Rectangle<Numeric::Rational>(B));
     }
     
     

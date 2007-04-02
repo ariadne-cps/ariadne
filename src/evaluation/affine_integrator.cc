@@ -31,6 +31,7 @@
 
 namespace Ariadne {
   namespace Evaluation {
+    using namespace Numeric;
 
 #ifdef ENABLE_FLOAT64
    template Float64 gexp_up(const Float64& x, uint k);

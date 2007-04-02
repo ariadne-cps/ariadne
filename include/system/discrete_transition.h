@@ -29,11 +29,11 @@
 
 #include <boost/smart_ptr.hpp>
 
-#include "../exceptions.h"
 #include "../geometry/set_interface.h"
-#include "../system/map.h"
-#include "../system/vector_field.h"
+#include "../system/exceptions.h"
 #include "../system/discrete_mode.h"
+#include "../system/vector_field.h"
+#include "../system/map.h"
 
 namespace Ariadne {
 namespace System {

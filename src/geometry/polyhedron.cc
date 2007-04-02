@@ -32,6 +32,8 @@
 namespace Ariadne {
   namespace Geometry {
 
+    using namespace Numeric;
+    
     template class Polyhedron<Rational>;
     template class Constraint<Rational>;
 

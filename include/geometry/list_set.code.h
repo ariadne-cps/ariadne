@@ -181,7 +181,7 @@ namespace Ariadne {
     ListSet<BS>::write(std::ostream& os) const
     {
       const ListSet<BS>& A=*this;
-      os << "ListSet<" << name<R>() << ",BS>{\n  ";
+      os << "ListSet<" << Numeric::name<R>() << ",BS>{\n  ";
       os << "[ ";
       if (A.size() >0 ) {
         os << A[0];

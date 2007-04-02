@@ -23,11 +23,19 @@
 
 #include "python/python_float.h"
 
-#include "declarations.h"
+#include "base/types.h"
+#include "base/declarations.h"
+#include "numeric/declarations.h"
+#include "linear_algebra/declarations.h"
+#include "combinatoric/declarations.h"
+#include "geometry/declarations.h"
+#include "system/declarations.h"
+#include "evaluation/declarations.h"
 
 #include <boost/python.hpp>
 
 void export_debug();
+void export_logging();
 
 void export_tribool();
 template<class T> void export_array();
@@ -87,73 +95,78 @@ template<class R> void export_duffing_equation();
 template<class R> void export_van_der_pol_equation();
 template<class R> void export_lorenz_system();
 
+using namespace Ariadne;
+using namespace Ariadne::Base;
+using namespace Ariadne::Numeric;
+
 BOOST_PYTHON_MODULE(ariadne)
 {
   export_debug();
+  export_logging();
   export_tribool();
   export_array<bool>();
-  export_array<Ariadne::index_type>();
-  export_array<Ariadne::size_type>();
-  export_array<Ariadne::Integer>();
-  export_array<Ariadne::Rational>();
-  export_array<Ariadne::Float>();
+  export_array<index_type>();
+  export_array<size_type>();
+  export_array<Integer>();
+  export_array<Rational>();
+  export_array<Float>();
 
   export_integer();
   export_rational();
-  export_float<Ariadne::Float>();
-  export_interval<Ariadne::Float>();
+  export_float<Float>();
+  export_interval<Float>();
 
-  export_vector<Ariadne::Float>();
-  export_vector<Ariadne::Rational>();
-  export_matrix<Ariadne::Float>();
-  export_matrix<Ariadne::Rational>();
-  export_tensor<Ariadne::Float>();
-  export_tensor<Ariadne::Rational>();
-  export_linear_program<Ariadne::Rational>();
-  export_interval_vector<Ariadne::Float>();
-  export_interval_matrix<Ariadne::Float>();
-  export_interval_tensor<Ariadne::Float>();
+  export_vector<Float>();
+  export_vector<Rational>();
+  export_matrix<Float>();
+  export_matrix<Rational>();
+  export_tensor<Float>();
+  export_tensor<Rational>();
+  export_linear_program<Rational>();
+  export_interval_vector<Float>();
+  export_interval_matrix<Float>();
+  export_interval_tensor<Float>();
 
   export_binary_tree();
   export_lattice_set();
   export_lattice_map();
 
-  export_set<Ariadne::Float>();
-  export_point<Ariadne::Float>();
-  export_interval_point<Ariadne::Float>();
-  export_point_list<Ariadne::Float>();
-  export_rectangle<Ariadne::Float>();
-  export_zonotope<Ariadne::Float>();
-  export_interval_zonotope<Ariadne::Float>();
-  export_parallelotope<Ariadne::Float>();
-  export_simplex<Ariadne::Float>();
-  export_polytope<Ariadne::Float>();
-  export_polyhedron<Ariadne::Float>();
-  export_polyhedral_set<Ariadne::Float>();
-  export_list_set<Ariadne::Float>();
-  export_grid<Ariadne::Float>();
-  export_grid_set<Ariadne::Float>();
-  export_partition_tree_set<Ariadne::Float>();
-  export_hybrid_set<Ariadne::Float>();
+  export_set<Float>();
+  export_point<Float>();
+  export_interval_point<Float>();
+  export_point_list<Float>();
+  export_rectangle<Float>();
+  export_zonotope<Float>();
+  export_interval_zonotope<Float>();
+  export_parallelotope<Float>();
+  export_simplex<Float>();
+  export_polytope<Float>();
+  export_polyhedron<Float>();
+  export_polyhedral_set<Float>();
+  export_list_set<Float>();
+  export_grid<Float>();
+  export_grid_set<Float>();
+  export_partition_tree_set<Float>();
+  export_hybrid_set<Float>();
 
-  export_map<Ariadne::Float>();
-  export_affine_map<Ariadne::Float>();
-  export_affine_multimap<Ariadne::Float>();
-  export_polynomial_map<Ariadne::Float>();
-  export_vector_field<Ariadne::Float>();
-  export_affine_vector_field<Ariadne::Float>();
-  export_hybrid_automaton<Ariadne::Float>();
+  export_map<Float>();
+  export_affine_map<Float>();
+  export_affine_multimap<Float>();
+  export_polynomial_map<Float>();
+  export_vector_field<Float>();
+  export_affine_vector_field<Float>();
+  export_hybrid_automaton<Float>();
 
-  export_solve<Ariadne::Float>();
-  export_apply<Ariadne::Float>();
-  export_integrate<Ariadne::Float>();
-  export_hybrid_evolver<Ariadne::Float>();
+  export_solve<Float>();
+  export_apply<Float>();
+  export_integrate<Float>();
+  export_hybrid_evolver<Float>();
 
   export_postscript_output();
 
-  export_henon_map<Ariadne::Float>();
-  export_duffing_equation<Ariadne::Float>();
-  export_van_der_pol_equation<Ariadne::Float>();
-  export_lorenz_system<Ariadne::Float>();
+  export_henon_map<Float>();
+  export_duffing_equation<Float>();
+  export_van_der_pol_equation<Float>();
+  export_lorenz_system<Float>();
 
 }

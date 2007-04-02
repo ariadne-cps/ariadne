@@ -354,7 +354,7 @@ namespace Ariadne {
     std::ostream&
     PartitionScheme<R>::write(std::ostream& os) const
     {
-      os << "PartitionScheme<" << name<R>() << ">(\n";
+      os << "PartitionScheme<" << Numeric::name<R>() << ">(\n";
       os << "  unit_box=" << this->unit_box() << ",\n";
       os << "  subdivision_coordinates=" << this->subdivisions() << "\n";
       os << ")\n";
@@ -365,7 +365,7 @@ namespace Ariadne {
     std::ostream&
     PartitionTreeCell<R>::write(std::ostream& os) const
     {
-      os << "PartitionTreeCell<" << name<R>() << ">(\n";
+      os << "PartitionTreeCell<" << Numeric::name<R>() << ">(\n";
       os << "  bounds=" << this->subdivision_cell() << ",\n";
       os << "  rectangle=" << Rectangle<R>(*this) << "\n";
       os << ")\n";
@@ -376,7 +376,7 @@ namespace Ariadne {
     std::ostream&
     PartitionTree<R>::write(std::ostream& os) const
     {
-      os << "PartitionTree<" << name<R>() << ">(\n";
+      os << "PartitionTree<" << Numeric::name<R>() << ">(\n";
       os << "  unit_box=" << this->unit_box() << ",\n";
       os << "  subdivisions=" << this->subdivisions() << "\n";
       os << "  words="; Base::write_sequence(os, this->binary_tree().begin(), this->binary_tree().end()); os << ",\n";
@@ -390,7 +390,7 @@ namespace Ariadne {
     std::ostream&
     PartitionTreeSet<R>::write(std::ostream& os) const
     {
-      os << "PartitionTreeSet<" << name<R>() << ">(\n";
+      os << "PartitionTreeSet<" << Numeric::name<R>() << ">(\n";
       os << "  unit_box=" << this->unit_box() << ",\n";
       os << "  subdivisions=" << this->subdivisions() << ",\n";
       os << "  tree=" << this->binary_tree() << ",\n";

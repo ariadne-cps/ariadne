@@ -50,7 +50,7 @@ namespace Ariadne {
     GridCell<R>::GridCell(const Grid<R>& g, const Combinatoric::LatticeCell& pos)
       : _grid_ref(g), _lattice_set(pos)
     {
-      check_equal_dimensions(g,pos,"GridCell<R>::GridCell(Grid<R>,LatticeCell");
+      Geometry::check_equal_dimensions(g,pos,"GridCell<R>::GridCell(Grid<R>,LatticeCell");
     }
 
     template<class R>
@@ -102,7 +102,7 @@ namespace Ariadne {
     GridBlock<R>::GridBlock(const Grid<R>& g, const Combinatoric::LatticeBlock& b)
       : _grid_ref(g), _lattice_set(b)
     {
-      check_equal_dimensions(g,b,"GridBlock<R>::GridBlock(Grid<R>,LatticeBlock)");
+      Geometry::check_equal_dimensions(g,b,"GridBlock<R>::GridBlock(Grid<R>,LatticeBlock)");
     }
     
     
@@ -207,7 +207,7 @@ namespace Ariadne {
                                         const Combinatoric::LatticeCellListSet& lcls)
       : _grid_ref(g), _lattice_set(lcls)
     {
-      check_equal_dimensions(g,lcls,"GridCellListSet<R>::GridCellListSet(Grid<R>,LatticeCellListSet)");
+      Geometry::check_equal_dimensions(g,lcls,"GridCellListSet<R>::GridCellListSet(Grid<R>,LatticeCellListSet)");
     }
 
     
@@ -267,7 +267,7 @@ namespace Ariadne {
     {
       tribool tb;
       Zonotope<R>* z=0;
-      Zonotope< Interval<R> >* iz=0;
+      Zonotope< Numeric::Interval<R> >* iz=0;
       Polytope<R>* ply=0;
       Polyhedron<R>* phd=0;
       Grid<R>* g=0;
@@ -422,7 +422,7 @@ namespace Ariadne {
     GridMaskSet<R>::_instantiate_geometry_operators()
     {
       tribool tb;
-      Point< Interval<R> >* ipt=0;
+      Point< Numeric::Interval<R> >* ipt=0;
       Rectangle<R>* r=0;
       ListSet< Rectangle<R> >* rls=0;
       ListSet< Zonotope<R> >* zls=0;
@@ -797,7 +797,7 @@ namespace Ariadne {
     
     template<class R>
     GridBlock<R>
-    over_approximation(const Point< Interval<R> >& ipt, const Grid<R>& g) 
+    over_approximation(const Point< Numeric::Interval<R> >& ipt, const Grid<R>& g) 
     {
       return over_approximation(Rectangle<R>(ipt),g);
     }
@@ -920,7 +920,7 @@ namespace Ariadne {
 
     template<class R>
     GridCellListSet<R>
-    over_approximation(const Zonotope< Interval<R> >& z, const Grid<R>& g) 
+    over_approximation(const Zonotope< Numeric::Interval<R> >& z, const Grid<R>& g) 
     {
       if(verbosity>7) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       GridCellListSet<R> result(g);
@@ -930,12 +930,12 @@ namespace Ariadne {
       }
       
       size_type ng=z.number_of_generators();
-      Point< Interval<R> > c=z.centre();
-      LinearAlgebra::Matrix< Interval<R> > G=z.generators();
+      Point< Numeric::Interval<R> > c=z.centre();
+      LinearAlgebra::Matrix< Numeric::Interval<R> > G=z.generators();
       
       Point<R> ac=approximate_value(c);
       LinearAlgebra::Matrix<R> aG=approximate_value(G);
-      LinearAlgebra::Vector< Interval<R> > e=(c-ac)+(G-aG)*LinearAlgebra::Vector< Interval<R> >(ng,Interval<R>(-1,1));
+      LinearAlgebra::Vector< Numeric::Interval<R> > e=(c-ac)+(G-aG)*LinearAlgebra::Vector< Numeric::Interval<R> >(ng,Numeric::Interval<R>(-1,1));
       
       Zonotope<R> az(ac,aG);
       
@@ -1168,7 +1168,7 @@ namespace Ariadne {
     std::ostream&     
     GridCellListSet<R>::write(std::ostream& os) const 
     {
-      os << "GridCellListSet<" << name<R>() << ">(\n";
+      os << "GridCellListSet<" << Numeric::name<R>() << ">(\n";
       os << "  grid=" << this->grid() << "\n";
       os << "  lattice_set=" << this->lattice_set();
       os << ")" << std::endl;
@@ -1181,7 +1181,7 @@ namespace Ariadne {
     std::ostream& 
     GridMaskSet<R>::write(std::ostream& os) const 
     {
-      os << "GridMaskSet<" << name<R>() << ">("<< std::endl;
+      os << "GridMaskSet<" << Numeric::name<R>() << ">("<< std::endl;
       os << "  grid=" << this->grid();
       os << "  bounds=" << this->bounds() << std::endl;
       os << "  mask=" << this->mask() << std::endl;

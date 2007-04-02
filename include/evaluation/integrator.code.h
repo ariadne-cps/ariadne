@@ -36,11 +36,9 @@
 #include <vector>
 #include <valarray>
 
-#include "../declarations.h"
+#include "../logging.h"
 
 #include "../base/array.h"
-#include "../exceptions.h"
-#include "../debug.h"
 
 #include "../numeric/rational.h"
 #include "../numeric/interval.h"
@@ -233,6 +231,7 @@ namespace Ariadne {
     {
       if(verbosity>6) { std::cerr << __FUNCTION__ << std::endl; }
       using namespace Geometry;
+      using namespace Numeric;
       return subset(r+Interval<R>(0,h)*vf(b),b);
     }
     
@@ -245,10 +244,12 @@ namespace Ariadne {
                                         const time_type& h,
                                         const unsigned int& maximum_iterations) const
     {
+      using namespace Geometry;
+      using namespace Numeric;
+
       if(verbosity>6) { std::cerr << __FUNCTION__ << " (maximum_iterations=" << maximum_iterations << ")" << std::endl; }
       if(verbosity>7) { std::cerr << "  h=" << conv_approx<double>(h) << "  r=" << r << "  vf(r)=" << vf(r) << std::endl; }
 
-      using namespace Geometry;
       typedef typename Numeric::traits<R>::arithmetic_type F;
       uint iteration=0;
       R multiplier=1.125;
@@ -291,6 +292,9 @@ namespace Ariadne {
                                         const Geometry::Rectangle<R>& r,
                                         time_type& h) const
     {
+      using namespace Geometry;
+      using namespace Numeric;
+      
       if(verbosity>6) { std::cerr << __FUNCTION__ << std::endl; }
 
       static const unsigned int max_tries=8;
@@ -298,7 +302,7 @@ namespace Ariadne {
       unsigned int max_iterations=4;
       unsigned int remaining_tries=max_tries;
       
-      Geometry::Rectangle<R> bounds(vf.dimension());
+      Rectangle<R> bounds(vf.dimension());
       while(bounds.empty()) {
         try {
           bounds=estimate_flow_bounds(vf,r,h,max_iterations);
@@ -332,13 +336,14 @@ namespace Ariadne {
       using namespace System;
       using namespace Geometry;
       using namespace LinearAlgebra;
+      using namespace Numeric;
       const VectorField<R>& vf=vector_field;
       Rectangle<R> rx=initial_set;
       Rectangle<R> b=estimated_bounds;
-      Interval<R> h=step_size;
+      Numeric::Interval<R> h=step_size;
       
-      Rectangle<R> xb=rx+Interval<R>(0,step_size)*vf(b);
-      Rectangle<R> xxb=rx+Interval<R>(0,step_size)*vf(xb);
+      Rectangle<R> xb=rx+Numeric::Interval<R>(0,step_size)*vf(b);
+      Rectangle<R> xxb=rx+Numeric::Interval<R>(0,step_size)*vf(xb);
 
       if(verbosity>7) { std::cerr << "new_bounds " << xxb << "," << xb << " vs old_bounds " << b << "  " << subset(xb,b) << std::endl; }
 
@@ -387,6 +392,8 @@ namespace Ariadne {
                                       const ListSet& initial_set, 
                                       const time_type& time) const
     {
+      using namespace Numeric;
+      
       if(verbosity>4) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
 
       if(time==0) { 
@@ -472,6 +479,8 @@ namespace Ariadne {
                                    const ListSet& initial_set, 
                                    const time_type& time) const
     {
+      using namespace Numeric;
+      
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       const VectorField& vf=vector_field;
       time_type step_size=this->maximum_step_size();
@@ -562,6 +571,8 @@ namespace Ariadne {
     IntegratorBase<R,VF,BS>::reach(const VectorField& vector_field, 
                                    const ListSet& initial_set) const
     {
+      using namespace Numeric;
+      
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       const VectorField& vf=vector_field;
       time_type step_size=this->maximum_step_size();
@@ -716,6 +727,8 @@ namespace Ariadne {
                                   const Geometry::GridMaskSet<R>& bounding_set,
                                   const time_type& time) const
     {
+      using namespace Numeric;
+      
       if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
       typedef typename GridMaskSet::const_iterator gms_const_iterator;
       typedef typename ListSet::const_iterator ls_const_iterator;

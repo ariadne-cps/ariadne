@@ -46,6 +46,7 @@ namespace Ariadne {
     class Applicator {
      private:
       R _maximum_basic_set_radius;
+      R _grid_size;
      public:
       /*! \brief Default constructor. */
       Applicator();
@@ -56,8 +57,14 @@ namespace Ariadne {
       /*! \brief Set the maximum allowable radius of a basic set during iteration. */
       void set_maximum_basic_set_radius(const R&);
 
+      /*! \brief Set the default size of the approximation grid. */
+      void set_grid_size(const R&);
+
       /*! \brief The maximum allowable radius of a basic set during iteration. */
       virtual R maximum_basic_set_radius() const;
+
+      /*! \brief The default size of the approximation grid. */
+      virtual R grid_size() const;
 
       /*! \brief Compute the image of a rectangle under a continuous function. */
       virtual Geometry::Rectangle<R> image(const System::Map<R>& f, const Geometry::Rectangle<R>& s) const;
@@ -128,7 +135,7 @@ namespace Ariadne {
       reach(const System::Map<R>& map, 
             const Geometry::GridMaskSet<R>& initial_set) const;
 
-      
+            
       /*! \brief Compute the chain-reachable set of \a map starting in \a initial_set while staying within \a bounding_set. */
       virtual
       Geometry::GridMaskSet<R> 
@@ -142,6 +149,42 @@ namespace Ariadne {
       verify(const System::Map<R>& map, 
              const Geometry::GridMaskSet<R>& initial_set, 
              const Geometry::GridMaskSet<R>& safe_set) const;
+
+      
+      
+      /*! \brief Compute the image of \a set under \a map. */
+      virtual
+      Geometry::SetInterface<R>* 
+      image(const System::Map<R>& map, 
+            const Geometry::SetInterface<R>& set) const;
+    
+      /*! \brief Compute the preimage of \a set under \a map. */
+      virtual
+      Geometry::SetInterface<R>*
+      preimage(const System::Map<R>& map, 
+               const Geometry::SetInterface<R>& set) const;
+    
+      /*! \brief Compute the reachable set of \a map starting in \a initial_set while staying within \a bounding_set. */
+      virtual
+      Geometry::SetInterface<R>*
+      reach(const System::Map<R>& map, 
+            const Geometry::SetInterface<R>& initial_set) const;
+    
+      /*! \brief Compute the chain-reachable set of \a map starting in \a initial_set while staying within \a bounding_set. */
+      virtual
+      Geometry::SetInterface<R>*
+      chainreach(const System::Map<R>& map, 
+                 const Geometry::SetInterface<R>& initial_set, 
+                 const Geometry::SetInterface<R>& bounding_set) const;
+    
+      /*! \brief Attempt to verify that the reachable set of \a map starting in \a initial_set remains in \a safe_set. */
+      virtual
+      tribool
+      verify(const System::Map<R>& map, 
+             const Geometry::SetInterface<R>& initial_set, 
+             const Geometry::SetInterface<R>& safe_set) const;
+    
+
 
       /*! \brief Discretize a system on a grid. */ 
       virtual 

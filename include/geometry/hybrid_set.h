@@ -31,6 +31,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "../geometry/set_reference.h"
 #include "../geometry/grid_set.h"
 #include "../system/hybrid_automaton.h"
 
@@ -53,7 +54,7 @@ namespace Ariadne {
      *  \brief A base class for representing subsets of hybrid state spaces.
      */
     template< class S >
-    class HybridSet
+    class HybridSetBase
     {
      public:
       typedef typename S::real_type real_type;
@@ -63,13 +64,13 @@ namespace Ariadne {
       typedef typename std::map<location_type,S>::const_iterator const_iterator;
      public:
       /*! \brief Construct a set with no locations. */
-      HybridSet();
+      HybridSetBase();
       /*! \brief Construct from a dictionary of location identifyers and dimensions. */
-      HybridSet(const std::map<location_type,dimension_type>& locations);
+      HybridSetBase(const std::map<location_type,dimension_type>& locations);
       /*! \brief Copy constructor. */
-      HybridSet(const HybridSet<S>& hs);
+      HybridSetBase(const HybridSetBase<S>& hs);
       /*! \brief Conversion constructor from another hybrid set. */
-      template<class S1> explicit HybridSet(const HybridSet<S1>& hs);
+      template<class S1> explicit HybridSetBase(const HybridSetBase<S1>& hs);
       
       /*! \brief Create a new location with dimension \a d. */
       S& new_location(location_type q, dimension_type d);
@@ -97,7 +98,7 @@ namespace Ariadne {
       /*! \brief Adjoin the set \a s to location \a q. */
       template<class S1> void adjoin(location_type q, const S1& s);
       /*! \brief Adjoin another hybrid set. */
-      template<class S1> void adjoin(const HybridSet<S1>& hs);
+      template<class S1> void adjoin(const HybridSetBase<S1>& hs);
       
       /*! \brief An iterator to the beginning of the component sets. */
       iterator begin();
@@ -118,11 +119,11 @@ namespace Ariadne {
     };
 
     template<class S> 
-    std::ostream& operator<<(std::ostream& os, const HybridSet<S>& hs);
+    std::ostream& operator<<(std::ostream& os, const HybridSetBase<S>& hs);
 
     template<class S1, class S2 > 
     tribool
-    subset(const HybridSet<S1>&, const HybridSet<S2>&);
+    subset(const HybridSetBase<S1>&, const HybridSetBase<S2>&);
 
 
     /*! \ingroup HybridSet
@@ -130,13 +131,13 @@ namespace Ariadne {
      */
     template< class R >
     class HybridGridMaskSet
-      : public HybridSet< GridMaskSet<R> >
+      : public HybridSetBase< GridMaskSet<R> >
     {
      public:
       HybridGridMaskSet()
-        : HybridSet< GridMaskSet<R> >() { }
+        : HybridSetBase< GridMaskSet<R> >() { }
       HybridGridMaskSet(const HybridGridMaskSet<R>& hgms)
-        : HybridSet< GridMaskSet<R> >(hgms) { }
+        : HybridSetBase< GridMaskSet<R> >(hgms) { }
       size_type size() const;
       size_type capacity() const;
     };
@@ -149,15 +150,15 @@ namespace Ariadne {
      */
     template< class R >
     class HybridGridCellListSet
-      : public HybridSet< GridCellListSet<R> >
+      : public HybridSetBase< GridCellListSet<R> >
     {
      public:
       HybridGridCellListSet()
-        : HybridSet< GridCellListSet<R> >() { }
+        : HybridSetBase< GridCellListSet<R> >() { }
       HybridGridCellListSet(const HybridGridCellListSet<R>& hgcls)
-        : HybridSet< GridCellListSet<R> >(hgcls) { }
+        : HybridSetBase< GridCellListSet<R> >(hgcls) { }
       HybridGridCellListSet(const HybridGridMaskSet<R>& hgms)
-        : HybridSet< GridCellListSet<R> >(hgms) { }
+        : HybridSetBase< GridCellListSet<R> >(hgms) { }
       size_type size() const;
       void unique_sort();
     };
@@ -176,6 +177,25 @@ namespace Ariadne {
     HybridGridCellListSet<R>
     regular_intersection(const HybridGridMaskSet<R>& hgms, const HybridGridCellListSet<R>& hgcl);
    
+    
+    
+        /*! \ingroup HybridSet
+     *  \brief A hybrid set comprising of a GridMaskSet for every component.
+     */
+    template< class R >
+    class HybridSet
+      : public HybridSetBase< SetReference<R> >
+    {
+     public:
+      HybridSet()
+        : HybridSetBase< SetReference<R> >() { }
+      HybridSet(const HybridSet<R>& hs)
+        : HybridSetBase< SetReference<R> >(hs) { }
+    };
+
+
+
+    
   }
 }
 

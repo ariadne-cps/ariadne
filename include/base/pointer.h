@@ -1,7 +1,7 @@
 /***************************************************************************
- *            tribool.h
+ *            pointer.h
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
+ *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
@@ -21,20 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef ARIADNE_TRIBOOL_H
-#define ARIADNE_TRIBOOL_H
+#ifndef ARIADNE_POINTER_H
+#define ARIADNE_POINTER_H
 
-#include <boost/logic/tribool.hpp>
-#include <boost/logic/tribool_io.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace Ariadne {
   namespace Base {
-    using boost::logic::tribool;
-    using boost::logic::indeterminate;
-
-    inline bool possibly(tribool tb) { return tb || indeterminate(tb); }
+    using boost::shared_ptr;
+    using boost::scoped_ptr;
   }
-  
 }
 
-#endif /* ARIADNE_TRIBOOL_H */
+#endif /* ARIADNE_POINTER_H */

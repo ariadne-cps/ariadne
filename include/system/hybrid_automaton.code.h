@@ -158,15 +158,29 @@ HybridAutomaton<R>::has_transition(id_type event_id, id_type source_id) const
 
 
 template<class R>
-Geometry::HybridSet< Geometry::SetReference<R> >
+Geometry::HybridSet<R>
 HybridAutomaton<R>::invariant() const 
 {
-  Geometry::HybridSet< Geometry::SetReference<R> > result;
+  Geometry::HybridSet<R> result;
   for(discrete_mode_iterator mode_iter=this->_modes.begin(); 
       mode_iter!=this->_modes.end(); ++mode_iter)
   {
     result.new_location(mode_iter->id(),mode_iter->invariant());
   }
+  return result;
+}
+
+
+template<class R>
+std::map<id_type,dimension_type>
+HybridAutomaton<R>::locations() const 
+{
+  std::map<id_type,dimension_type> result;
+  for(discrete_mode_iterator mode_iter=this->_modes.begin(); 
+      mode_iter!=this->_modes.end(); ++mode_iter) 
+  {
+    result.insert(std::make_pair(mode_iter->id(),mode_iter->dimension()));
+  } 
   return result;
 }
 

@@ -43,6 +43,7 @@
 #include "../geometry/rectangle.h"
 #include "../geometry/parallelotope.h"
 #include "../geometry/list_set.h"
+#include "../geometry/grid.h"
 #include "../geometry/grid_set.h"
 
 #include "../system/grid_multimap.h"
@@ -58,7 +59,8 @@ namespace Ariadne {
 
     template<class R>
     Applicator<R>::Applicator() 
-      : _maximum_basic_set_radius(0.1)
+      : _maximum_basic_set_radius(0.25),
+        _grid_size(0.125)
     {
     }
     
@@ -81,6 +83,14 @@ namespace Ariadne {
   
 
     template<class R>
+    R
+    Applicator<R>::grid_size() const
+    {
+      return this->_grid_size;
+    }
+  
+
+    template<class R>
     void
     Applicator<R>::set_maximum_basic_set_radius(const R& mbsr) 
     {
@@ -88,6 +98,17 @@ namespace Ariadne {
         throw std::runtime_error("maximum basic set radius must be positive");
       }
       this->_maximum_basic_set_radius=mbsr;
+    }
+  
+
+    template<class R>
+    void
+    Applicator<R>::set_grid_size(const R& mgs) 
+    {
+      if(mgs<=0) {
+        throw std::runtime_error("maximum basic set radius must be positive");
+      }
+      this->_grid_size=mgs;
     }
   
 
@@ -440,8 +461,144 @@ namespace Ariadne {
       return true;
     }
 
+    
+    
+    
+    template<class R>
+    Geometry::SetInterface<R>*
+    Applicator<R>::image(const System::Map<R>& f, 
+                         const Geometry::SetInterface<R>& set) const
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+ 
+
+    template<class R>
+    Geometry::SetInterface<R>*
+    Applicator<R>::preimage(const System::Map<R>& f, 
+                         const Geometry::SetInterface<R>& set) const
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+    
+    template<class R>
+    Geometry::SetInterface<R>*
+    Applicator<R>::reach(const System::Map<R>& f, 
+                         const Geometry::SetInterface<R>& initial_set) const
+    {
+      using namespace Geometry;
+      Rectangle<R> r(f.argument_dimension());
+      Rectangle<R> fr(f.result_dimension());
+      Parallelotope<R> p(f.argument_dimension());
+      Parallelotope<R> fp(f.result_dimension());
+      
+      Rectangle<R> bb;
+      try {
+        bb=initial_set.bounding_box();
+      }
+      catch(UnboundedSet) {
+        throw std::runtime_error("Applicator::reach(Map,Set) only implemented for bounded initial sets");
+      }
+      
+      ListSet< Parallelotope<R> > is;
+      if(dynamic_cast<const Rectangle<R>*>(&initial_set)) {
+        is.adjoin(static_cast< Parallelotope<R> >(dynamic_cast<const Rectangle<R>&>(initial_set)));
+      } else if(dynamic_cast<const ListSet< Parallelotope<R> >*>(&initial_set)) {
+        is=dynamic_cast<const ListSet< Parallelotope<R> >&>(initial_set);
+      } else { 
+        GridMaskSet<R> gms(Grid<R>(initial_set.dimension(),this->grid_size()),initial_set.bounding_box());
+        gms.adjoin_under_approximation(initial_set);
+        is=ListSet< Parallelotope<R> >(gms);
+      }
+      
+      
+      
+      if(f.smoothness()>=1) {
+        ListSet< Parallelotope<R> >* reach=new ListSet< Parallelotope<R> >;
+        for(typename ListSet< Parallelotope<R> >::const_iterator iter=is.begin(); iter!=is.end(); ++iter) {
+          p=*iter;
+          //std::cerr << p << std::endl << p.radius() << " of " << this->maximum_basic_set_radius() << std::endl;
+          while(p.radius()<this->maximum_basic_set_radius()) {
+            reach->adjoin(p);
+            p=this->image(f,p);
+            //std::cerr << p << std::endl << p.radius() << " of " << this->maximum_basic_set_radius() << std::endl;
+          }
+        }
+        return reach;
+      } else {
+        ListSet< Rectangle<R> >* reach=new ListSet< Rectangle<R> >;
+        for(typename ListSet< Parallelotope<R> >::const_iterator iter=is.begin(); iter!=is.end(); ++iter) {
+          r=iter->bounding_box();
+          while(r.radius()<this->maximum_basic_set_radius()) {
+            reach->adjoin(r);
+            r=this->image(f,r);
+          }
+        }
+        return reach;
+      }
+    }
+    
 
 
+    template<class R>
+    Geometry::SetInterface<R>*
+    Applicator<R>::chainreach(const System::Map<R>& f, 
+                              const Geometry::SetInterface<R>& initial_set, 
+                              const Geometry::SetInterface<R>& bounding_set) const
+    {
+      using namespace Geometry;
+      
+      Rectangle<R> bb;
+      try {
+        bb=bounding_set.bounding_box();
+      }
+      catch(UnboundedSet&) {
+        throw UnboundedSet("chainreach(Map,Set,Set): bounding_set unbounded");
+      }
+      Grid<R> g(bounding_set.dimension(),this->grid_size());
+      FiniteGrid<R> fg(g,bb);
+      GridMaskSet<R> gbs(fg);
+      gbs.adjoin_over_approximation(bounding_set);
+      GridMaskSet<R> gis(fg);
+      gis.adjoin_over_approximation(initial_set);
+      
+      GridMaskSet<R> gcrs=this->chainreach(f,gis,gbs);
+      return new GridMaskSet<R>(gcrs);
+    }
+      
+      
+
+
+    template<class R>
+    tribool
+    Applicator<R>::verify(const System::Map<R>& f, 
+                          const Geometry::SetInterface<R>& initial_set, 
+                          const Geometry::SetInterface<R>& safe_set) const
+    {
+      using namespace Geometry;
+      Rectangle<R> bb;
+      try {
+        bb=safe_set.bounding_box();
+      }
+      catch(UnboundedSet&) {
+        throw UnboundedSet("verify(Map,Set,Set): safe_set unbounded");
+      }
+      if(!initial_set.subset(bb)) {
+        return false;
+      }
+      Grid<R> g(safe_set.dimension(),this->grid_size());
+      FiniteGrid<R> fg(g,bb);
+      GridMaskSet<R> gss(fg);
+      gss.adjoin_over_approximation(safe_set);
+      GridMaskSet<R> gis(fg);
+      gis.adjoin_over_approximation(initial_set);
+      
+      return this->verify(f,gis,gss);
+    }
+    
+      
+      
+      
     template<class R>
     System::GridMultiMap<R> 
     Applicator<R>::discretize(const System::Map<R>& f, 

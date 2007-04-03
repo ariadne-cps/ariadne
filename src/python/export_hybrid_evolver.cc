@@ -40,12 +40,12 @@ using namespace boost::python;
 template<class R>
 void export_hybrid_evolver() 
 {
-  class_< HybridEvolver<R> >("HybridEvolver",init<Applicator<R>&,Integrator<R>&>())
-    .def("lower_reach",&HybridEvolver<R>::lower_reach)
-    .def("upper_reach",&HybridEvolver<R>::upper_reach)
-    .def("chainreach",&HybridEvolver<R>::chainreach)
-    .def("discrete_step",&HybridEvolver<R>::discrete_step)
-    .def("continuous_chainreach",&HybridEvolver<R>::continuous_chainreach)
+  class_< HybridEvolver<R> >("HybridEvolver",init<Applicator<R>&,Integrator<R>&>()) 
+    .def("discrete_step",(HybridGridCellListSet<R>(HybridEvolver<R>::*)(const HybridAutomaton<R>&,const HybridGridCellListSet<R>&))&HybridEvolver<R>::discrete_step)
+    .def("continuous_chainreach",(HybridGridMaskSet<R>(HybridEvolver<R>::*)(const HybridAutomaton<R>&,const HybridGridMaskSet<R>&,const HybridGridMaskSet<R>&))&HybridEvolver<R>::continuous_chainreach)
+    .def("lower_reach",(HybridGridMaskSet<R>(HybridEvolver<R>::*)(const HybridAutomaton<R>&,const HybridGridMaskSet<R>&,time_type,time_type,size_type))&HybridEvolver<R>::lower_reach)
+    .def("upper_reach",(HybridGridMaskSet<R>(HybridEvolver<R>::*)(const HybridAutomaton<R>&,const HybridGridMaskSet<R>&,time_type,time_type,size_type))&HybridEvolver<R>::upper_reach)
+    .def("chainreach",(HybridGridMaskSet<R>(HybridEvolver<R>::*)(const HybridAutomaton<R>&,const HybridGridMaskSet<R>&,const HybridGridMaskSet<R>&))&HybridEvolver<R>::chainreach)
   ;
 }
 

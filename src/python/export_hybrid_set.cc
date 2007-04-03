@@ -71,10 +71,10 @@ void export_hybrid_set()
   ;
 
 
-  class_< HybridSet< SetReference<R> > >("HybridSet",init<>())
-    .def("__len__",&HybridSet< SetReference<R> >::number_of_locations)
-    .def("locations",&HybridSet< SetReference<R> >::locations)
-    .def("__getitem__", &hybrid_set_get_item< HybridSet< SetReference<R> > >, return_reference_existing_object)
+  class_< HybridSet<R> >("HybridSet",init<>())
+    .def("__len__",&HybridSet<R>::number_of_locations)
+    .def("locations",&HybridSet<R>::locations)
+    .def("__getitem__", &hybrid_set_get_item< HybridSet<R> >, return_reference_existing_object)
     .def(self_ns::str(self))
   ;
   

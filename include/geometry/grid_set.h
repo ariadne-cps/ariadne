@@ -35,6 +35,7 @@
 
 #include "../base/array.h"
 #include "../base/tribool.h"
+#include "../base/pointer.h"
 
 #include "../combinatoric/lattice_set.h"
 
@@ -108,7 +109,7 @@ namespace Ariadne {
      private: 
       static void _instantiate_geometry_operators();
      private:
-      const Grid<R>& _grid_ref;
+      const Grid<R>* _grid_ptr;
       Combinatoric::LatticeCell _lattice_set;
     };
 
@@ -189,7 +190,7 @@ namespace Ariadne {
      private: 
       static void _instantiate_geometry_operators();
      private:
-      const Grid<R>& _grid_ref;
+      const Grid<R>* _grid_ptr;
       Combinatoric::LatticeBlock _lattice_set;
     };
 
@@ -291,7 +292,7 @@ namespace Ariadne {
      private: 
       static void _instantiate_geometry_operators();
      private:
-      const Grid<R>& _grid_ref;
+      shared_ptr< Grid<R> > _grid_ptr;
       Combinatoric::LatticeCellListSet _lattice_set;
     };
 
@@ -480,6 +481,10 @@ namespace Ariadne {
       template<class S>
       void adjoin_under_approximation(const S& s);
 
+      /*! \brief Restricts to an over-approximation of the set \a s. */
+      template<class S>
+      void restrict_over_approximation(const S& s);
+
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;
 
@@ -497,7 +502,7 @@ namespace Ariadne {
      private: 
       static void _instantiate_geometry_operators();
      private:
-      const Grid<R>& _grid_ref;
+      shared_ptr< Grid<R> > _grid_ptr;
       Combinatoric::LatticeMaskSet _lattice_set;
     };
     

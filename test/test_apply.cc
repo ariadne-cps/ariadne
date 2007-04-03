@@ -25,11 +25,13 @@
 
 #include "test_float.h"
 
+#include "base/pointer.h"
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
 #include "geometry/polytope.h"
+#include "geometry/rectangular_set.h"
 #include "evaluation/applicator.h"
 #include "output/epsfstream.h"
 
@@ -80,6 +82,40 @@ test_apply()
   Parallelotope<R> fp=apply.image(h,ip);
   //Zonotope<R> fz=apply(h,iz);
   //Polytope<R> fpl=apply(h,ipl);
+  
+  RectangularSet<R> bs(cb);
+  RectangularSet<R> is(ir);
+  
+/*
+  shared_ptr< SetInterface<R> > ims(apply.image(h,is));
+  shared_ptr< SetInterface<R> > prims=apply.preimage(h,is);
+*/
+  shared_ptr< SetInterface<R> > reach_set(apply.reach(h,is));
+  shared_ptr< SetInterface<R> > chain_reach_set(apply.chainreach(h,is,bs));
+  
+  cout << "rs.dimension()=" << reach_set->dimension() << endl;
+  const ListSet< Parallelotope<R> >& lrs=dynamic_cast<const ListSet< Parallelotope<R> >&>(*reach_set);
+  cout << "lrs.dimension()=" << lrs.dimension() << endl;
+  cout << "lrs.size()=" << lrs.size() << std::endl;
+  
+  cout << "crs.dimension()=" << chain_reach_set->dimension() << endl;
+  const GridMaskSet<R>& gmcrs=dynamic_cast<const GridMaskSet<R>&>(*chain_reach_set);
+  cout << "gmcrs.dimension()=" << gmcrs.dimension() << endl;
+  cout << "gmcrs.grid()=" << gmcrs.grid() << endl;
+  cout << "gmcrs.block()=" << gmcrs.block() << endl;
+  cout << "gmcrs.size()=" << gmcrs.size() << " of " << gmcrs.capacity() << std::endl;
+  
+  epsfstream eps;
+  eps.open("test_apply.eps",epsbb);
+  eps.set_line_style(false);
+  eps.set_fill_colour("green");
+  eps << gmcrs;
+  eps.set_fill_colour("blue");
+  eps << lrs;
+  eps.set_fill_colour("yellow");
+  eps << ir;
+  eps.close();
+  
   
   return 0;
 }

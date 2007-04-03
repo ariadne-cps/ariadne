@@ -27,7 +27,7 @@ namespace Ariadne { namespace Geometry {
 
 
 template<class S> inline
-HybridSet<S>::HybridSet() 
+HybridSetBase<S>::HybridSetBase() 
   : _component_sets()
 {
 }
@@ -35,7 +35,7 @@ HybridSet<S>::HybridSet()
   
  
 template<class S> inline
-HybridSet<S>::HybridSet(const std::map<location_type,dimension_type>& locations)
+HybridSetBase<S>::HybridSetBase(const std::map<location_type,dimension_type>& locations)
   : _component_sets() 
 {
   for(typename std::map<location_type,dimension_type>::const_iterator loc_iter=locations.begin();
@@ -49,17 +49,17 @@ HybridSet<S>::HybridSet(const std::map<location_type,dimension_type>& locations)
 
 
 template<class S> inline
-HybridSet<S>::HybridSet(const HybridSet<S>& hs)
+HybridSetBase<S>::HybridSetBase(const HybridSetBase<S>& hs)
   : _component_sets(hs._component_sets) 
 {
 }
 
 
 template<class S> template<class S1> inline
-HybridSet<S>::HybridSet(const HybridSet<S1>& hs)
+HybridSetBase<S>::HybridSetBase(const HybridSetBase<S1>& hs)
   : _component_sets() 
 {
-  for(typename HybridSet<S1>::const_iterator loc_iter=hs.begin();
+  for(typename HybridSetBase<S1>::const_iterator loc_iter=hs.begin();
       loc_iter!=hs.end(); ++loc_iter)
   {
     location_type q=loc_iter->first;
@@ -72,7 +72,7 @@ HybridSet<S>::HybridSet(const HybridSet<S1>& hs)
 
 template<class S> inline
 S&
-HybridSet<S>::new_location(location_type q, dimension_type d)
+HybridSetBase<S>::new_location(location_type q, dimension_type d)
 {
   if(this->has_location(q)) {
     std::ostringstream msg;
@@ -86,7 +86,7 @@ HybridSet<S>::new_location(location_type q, dimension_type d)
 
 template<class S> inline
 S&
-HybridSet<S>::new_location(location_type q, const S& s)
+HybridSetBase<S>::new_location(location_type q, const S& s)
 {
   if(this->has_location(q)) {
     std::ostringstream msg;
@@ -100,7 +100,7 @@ HybridSet<S>::new_location(location_type q, const S& s)
 
 template<class S> template<class T> inline
 S&
-HybridSet<S>::new_location(location_type q, const T& t)
+HybridSetBase<S>::new_location(location_type q, const T& t)
 {
   if(this->has_location(q)) {
     std::ostringstream msg;
@@ -114,7 +114,7 @@ HybridSet<S>::new_location(location_type q, const T& t)
 
 template<class S> inline
 std::map<location_type,dimension_type>
-HybridSet<S>::locations() const 
+HybridSetBase<S>::locations() const 
 { 
   std::map<location_type,dimension_type> result;
   for(const_iterator loc_iter=this->_component_sets.begin(); 
@@ -127,9 +127,10 @@ HybridSet<S>::locations() const
 
 
 
+
 template<class S> inline
 location_type 
-HybridSet<S>::number_of_locations() const 
+HybridSetBase<S>::number_of_locations() const 
 { 
   return _component_sets.size(); 
 }
@@ -137,7 +138,7 @@ HybridSet<S>::number_of_locations() const
 
 template<class S> inline
 bool 
-HybridSet<S>::has_location(location_type q) const
+HybridSetBase<S>::has_location(location_type q) const
 { 
   return this->_component_sets.find(q)!=this->_component_sets.end();
 }
@@ -145,7 +146,7 @@ HybridSet<S>::has_location(location_type q) const
 
 template<class S> inline
 S& 
-HybridSet<S>::operator[](location_type q)
+HybridSetBase<S>::operator[](location_type q)
 { 
   this->check_location(q,"HybridSet<S>::operator[](location_type q)");
   return this->_component_sets.find(q)->second;
@@ -154,7 +155,7 @@ HybridSet<S>::operator[](location_type q)
 
 template<class S> inline  
 const S& 
-HybridSet<S>::operator[](location_type q) const 
+HybridSetBase<S>::operator[](location_type q) const 
 { 
   this->check_location(q,"HybridSet<S>::operator[](location_type q) const");
   return this->_component_sets.find(q)->second;
@@ -163,7 +164,7 @@ HybridSet<S>::operator[](location_type q) const
 
 template<class S> inline  
 void 
-HybridSet<S>::clear()
+HybridSetBase<S>::clear()
 { 
   for(iterator loc_iter=this->_component_sets.begin(); 
       loc_iter!=this->_component_sets.end(); ++loc_iter) 
@@ -175,7 +176,7 @@ HybridSet<S>::clear()
 
 template<class S> inline  
 tribool 
-HybridSet<S>::empty() const { 
+HybridSetBase<S>::empty() const { 
   tribool result=true; 
   for(const_iterator loc_iter=this->begin(); loc_iter!=this->end(); ++loc_iter) {
     result=result && loc_iter->second.empty();
@@ -189,7 +190,7 @@ HybridSet<S>::empty() const {
 
 template<class S> template<class S1> inline  
 void 
-HybridSet<S>::adjoin(location_type q, const S1& s) {
+HybridSetBase<S>::adjoin(location_type q, const S1& s) {
   check_location(q,"HybridSet<S>::adjoin(location_type q, const S1& s)");
   (*this)[q].adjoin(s);
 }
@@ -197,8 +198,8 @@ HybridSet<S>::adjoin(location_type q, const S1& s) {
 
 template<class S> template<class S1> inline  
 void 
-HybridSet<S>::adjoin(const HybridSet<S1>& hs) {
-  for(typename HybridSet<S1>::const_iterator loc_iter=hs.begin();
+HybridSetBase<S>::adjoin(const HybridSetBase<S1>& hs) {
+  for(typename HybridSetBase<S1>::const_iterator loc_iter=hs.begin();
       loc_iter!=hs.end(); ++loc_iter)
   {
     location_type q=loc_iter->first;
@@ -207,7 +208,7 @@ HybridSet<S>::adjoin(const HybridSet<S1>& hs) {
     }
   }
 
-  for(typename HybridSet<S1>::const_iterator loc_iter=hs.begin();
+  for(typename HybridSetBase<S1>::const_iterator loc_iter=hs.begin();
       loc_iter!=hs.end(); ++loc_iter)
   {
     location_type q=loc_iter->first;
@@ -218,32 +219,32 @@ HybridSet<S>::adjoin(const HybridSet<S1>& hs) {
 
 
 template<class S> inline
-typename HybridSet<S>::iterator 
-HybridSet<S>::begin()
+typename HybridSetBase<S>::iterator 
+HybridSetBase<S>::begin()
 { 
   return this->_component_sets.begin();
 }
 
 
 template<class S> inline
-typename HybridSet<S>::const_iterator 
-HybridSet<S>::begin() const
+typename HybridSetBase<S>::const_iterator 
+HybridSetBase<S>::begin() const
 { 
   return this->_component_sets.begin();
 }
 
 
 template<class S> inline
-typename HybridSet<S>::iterator 
-HybridSet<S>::end()
+typename HybridSetBase<S>::iterator 
+HybridSetBase<S>::end()
 { 
   return this->_component_sets.end();
 }
 
 
 template<class S> inline
-typename HybridSet<S>::const_iterator 
-HybridSet<S>::end() const
+typename HybridSetBase<S>::const_iterator 
+HybridSetBase<S>::end() const
 { 
   return this->_component_sets.end();
 }
@@ -252,7 +253,7 @@ HybridSet<S>::end() const
 
 template<class S> inline
 void 
-HybridSet<S>::check_location(location_type q, const char* where) const
+HybridSetBase<S>::check_location(location_type q, const char* where) const
 { 
   if (!this->has_location(q)) {
     std::ostringstream o;
@@ -263,14 +264,14 @@ HybridSet<S>::check_location(location_type q, const char* where) const
 
 template<class S1, class S2> inline
 tribool
-subset(const HybridSet<S1>& hs1, const HybridSet<S2>& hs2)
+subset(const HybridSetBase<S1>& hs1, const HybridSetBase<S2>& hs2)
 {
   if(hs1.locations()!=hs2.locations()) {
     throw HybridSystemError("Comparing sets with different discrete locations");
   }
   
   tribool result=true;
-  for(typename HybridSet<S1>::const_iterator hs1_iter=hs1.begin();
+  for(typename HybridSetBase<S1>::const_iterator hs1_iter=hs1.begin();
       hs1_iter!=hs1.end(); ++hs1_iter)
   {
     location_type q=hs1_iter->first;
@@ -284,7 +285,7 @@ subset(const HybridSet<S1>& hs1, const HybridSet<S2>& hs2)
 
 template<class S> 
 std::ostream& 
-HybridSet<S>::write(std::ostream& os) const
+HybridSetBase<S>::write(std::ostream& os) const
 { 
   return os << _component_sets;
 }
@@ -292,7 +293,7 @@ HybridSet<S>::write(std::ostream& os) const
 
 template<class S> 
 std::ostream& 
-operator<<(std::ostream& os, const HybridSet<S>& hs)
+operator<<(std::ostream& os, const HybridSetBase<S>& hs)
 { 
   return hs.write(os);
 }

@@ -29,7 +29,7 @@ namespace Ariadne {
     const Grid<R>& 
     GridCell<R>::grid() const 
     { 
-      return this->_grid_ref; 
+      return *this->_grid_ptr; 
     }
 
     template<class R> inline
@@ -66,7 +66,7 @@ namespace Ariadne {
     const Grid<R>& 
     GridBlock<R>::grid() const 
     {
-      return this->_grid_ref; 
+      return *this->_grid_ptr; 
     }
 
 
@@ -114,7 +114,7 @@ namespace Ariadne {
     typename GridBlock<R>::const_iterator 
     GridBlock<R>::begin() const 
     {
-      return const_iterator(this->_grid_ref,_lattice_set.begin()); 
+      return const_iterator(*this->_grid_ptr,_lattice_set.begin()); 
     }
 
 
@@ -122,7 +122,7 @@ namespace Ariadne {
     typename GridBlock<R>::const_iterator 
     GridBlock<R>::end() const 
     {
-      return const_iterator(this->_grid_ref,_lattice_set.end()); 
+      return const_iterator(*this->_grid_ptr,_lattice_set.end()); 
     }
 
 
@@ -131,7 +131,7 @@ namespace Ariadne {
     const Grid<R>& 
     GridCellListSet<R>::grid() const 
     {
-      return this->_grid_ref; 
+      return *this->_grid_ptr; 
     }
 
     template<class R> inline
@@ -181,7 +181,7 @@ namespace Ariadne {
     typename GridCellListSet<R>::const_iterator 
     GridCellListSet<R>::begin() const 
     {
-      return const_iterator(this->_grid_ref,_lattice_set.begin()); 
+      return const_iterator(*this->_grid_ptr,_lattice_set.begin()); 
     }
 
 
@@ -189,7 +189,7 @@ namespace Ariadne {
     typename GridCellListSet<R>::const_iterator 
     GridCellListSet<R>::end() const 
     {
-      return const_iterator(this->_grid_ref,_lattice_set.end()); 
+      return const_iterator(*this->_grid_ptr,_lattice_set.end()); 
     }
 
 
@@ -264,14 +264,14 @@ namespace Ariadne {
     const Grid<R>& 
     GridMaskSet<R>::grid() const 
     {
-      return this->_grid_ref; 
+      return *this->_grid_ptr; 
     }
 
     template<class R> inline
     GridBlock<R> 
     GridMaskSet<R>::bounds() const 
     {
-      return GridBlock<R>(this->_grid_ref,_lattice_set.block()); 
+      return GridBlock<R>(*this->_grid_ptr,_lattice_set.block()); 
     }
 
     template<class R> inline
@@ -336,20 +336,20 @@ namespace Ariadne {
     GridCell<R> 
     GridMaskSet<R>::operator[](size_type i) const 
     {
-      return GridCell<R>(this->_grid_ref,_lattice_set[i]); 
+      return GridCell<R>(*this->_grid_ptr,_lattice_set[i]); 
     }
 
     template<class R> inline
     typename GridMaskSet<R>::const_iterator 
     GridMaskSet<R>::begin() const 
     {
-      return const_iterator(this->_grid_ref,this->_lattice_set.begin()); 
+      return const_iterator(*this->_grid_ptr,this->_lattice_set.begin()); 
     }
     template<class R> inline
     typename GridMaskSet<R>::const_iterator 
     GridMaskSet<R>::end() const 
     {
-      return const_iterator(this->_grid_ref,this->_lattice_set.end()); 
+      return const_iterator(*this->_grid_ptr,this->_lattice_set.end()); 
     }
 
 
@@ -397,6 +397,13 @@ namespace Ariadne {
     GridMaskSet<R>::adjoin_under_approximation(const SetInterface& s) 
     {
       this->adjoin(under_approximation(s,FiniteGrid<R>(this->grid(),this->block())));
+    }
+
+    template<class R> template<class SetInterface> inline
+    void 
+    GridMaskSet<R>::restrict_over_approximation(const SetInterface& s) 
+    {
+      this->restrict(over_approximation(s,FiniteGrid<R>(this->grid(),this->block())));
     }
 
 
@@ -448,7 +455,7 @@ namespace Ariadne {
       Rectangle<R> r(this->dimension());
       BS bs(this->dimension());
       for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-        r=iter;
+        r=*iter;
         bs=BS(r);
         result.push_back(bs);
       }

@@ -167,7 +167,7 @@ class HybridAutomaton
   std::map< id_type, dimension_type > locations() const;
   
   /*! \brief The hybrid set giving the invariant for each discrete location. */
-  Geometry::HybridSet< Geometry::SetReference<R> > invariant() const;
+  Geometry::HybridSet<R> invariant() const;
   
   /*! \brief The set of discrete modes. */
   const std::set< DiscreteMode<R> >& modes() const;

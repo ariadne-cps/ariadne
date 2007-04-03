@@ -495,7 +495,20 @@ namespace Ariadne {
     std::ostream& 
     Polyhedron<R>::write(std::ostream& os) const
     {
-      return os << "Polyhedron( A=" << this->A() << ", b=" << this->b() << " )";
+      //return os << "Polyhedron( A=" << this->A() << ", b=" << this->b() << " )";
+      os << "Polyhedron( constraints=";
+      dimension_type d=this->dimension();
+      size_type nc=this->number_of_constraints();
+      for(size_type i=0; i!=nc; ++i) {
+        os << ( i==0 ? "[" : "," );
+        for(size_type j=0; j!=d; ++j) {
+          os << ( j==0 ? "(" : ",");
+          os << this->_data[i*(d+1)+j]; 
+        }
+        os << ":" << this->_data[i*(d+1)+d] << ")";
+      }
+      os << "] )";
+      return os;
     }
     
     template<class R>  

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            linear_algebra.except.h
+ *            linear_algebra/exceptions.h
  *
- *  Copyright  2005-6  Pieter Collins, Alberto Casagrande
+ *  Copyright  2005-7  Pieter Collins, Alberto Casagrande
  *  Email  Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
  ****************************************************************************/
 
@@ -25,12 +25,13 @@
  *  \brief Exceptions, error handling and assertions for the Linear Algebra module.
  */
 
-#ifndef ARIADNE_LINEAR_ALGEBRA_EXCEPT_H
-#define ARIADNE_LINEAR_ALGEBRA_EXCEPT_H
+#ifndef ARIADNE_LINEAR_ALGEBRA_EXCEPTIONS_H
+#define ARIADNE_LINEAR_ALGEBRA_EXCEPTIONS_H
 
 #include <stdexcept>
 #include <iosfwd>
 
+#include "../throw.h"
 #include "base/types.h"
 
 namespace Ariadne {
@@ -70,4 +71,16 @@ namespace Ariadne {
   }
 }
 
-#endif /* ARIADNE_LINEAR_ALGEBRA_EXCEPT_H */
+#define ARIADNE_CHECK_SIZE(vec,sz,func) \
+  { if((vec).size()!=sz) { ARIADNE_THROW(IncompatibleSizes,func,#vec"="<<vec<<", "#sz"="<<sz); } }
+
+#define ARIADNE_CHECK_EQUAL_SIZES(vec1,vec2,func) \
+  { if((vec1).size()!=vec2.size()) { ARIADNE_THROW(IncompatibleSizes,func,#vec1"="<<vec1<<", "#vec2"="<<vec2); } }
+
+#define ARIADNE_CHECK_SQUARE(mx,func) \
+  { if((mx).number_of_rows()!=(mx).number_of_columns()) { ARIADNE_THROW(IncompatibleSizes,func,#mx"="<<mx<<" is not square"); } }
+
+#define ARIADNE_CHECK_INDEX(vec,ind,func)                                  \
+  { if((vec).size()>=ind) { ARIADNE_THROW(InvalidIndex,func,#vec"="<<vec<<", "#ind"="<<ind); } }
+
+#endif /* ARIADNE_LINEAR_ALGEBRA_EXCEPTIONS_H */

@@ -36,6 +36,7 @@
 
 void export_debug();
 void export_logging();
+void export_exceptions();
 
 void export_tribool();
 template<class T> void export_array();
@@ -103,6 +104,8 @@ BOOST_PYTHON_MODULE(ariadne)
 {
   export_debug();
   export_logging();
+  export_exceptions();
+
   export_tribool();
   export_array<bool>();
   export_array<index_type>();

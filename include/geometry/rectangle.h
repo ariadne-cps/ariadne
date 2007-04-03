@@ -183,10 +183,10 @@ namespace Ariadne {
       /*! \brief A reference to the upper bound of the \a i th coordinate */
       R& upper_bound(dimension_type i);
       
-      /*! \brief Returns the projection onto the \a i th coordinate. */
+      /*! \brief Returns the projection onto the \a i th coordinate (unchecked). */
       Numeric::Interval<R>& operator[] (dimension_type i);
      
-      /*! \brief The projection onto the \a i th coordinate. */
+      /*! \brief The projection onto the \a i th coordinate (unchecked). */
       const Numeric::Interval<R>& operator[] (dimension_type i) const;
       
       /*! \brief The interval of values in the \a i th coordinate. */

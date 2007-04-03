@@ -159,6 +159,11 @@ namespace Ariadne {
       size_type nv=result.size();
       array<F> data(nv*(d+1));
       for(size_type j=0; j!=nv; ++j) {
+        for(size_type i=0; i!=d+1u; ++i) {
+          data[j*(d+1)+i]=result[j](i);
+        }
+      }
+      for(size_type j=0; j!=nv; ++j) {
         F s=result[j](d);
         if(s!=F(0)) {
           for(size_type i=0; i!=d; ++i) {
@@ -166,7 +171,9 @@ namespace Ariadne {
           }
           data[j*(d+1)+d]=1;
         } else {
-          throw std::runtime_error("Unbounded polytope");
+          Polytope<F> pltp(d,nv,data.begin());
+          std::cerr << result << std::endl;
+          ARIADNE_THROW(UnboundedSet,"polytope(Polyhedron plhd)","\n  plhd="<<plhd<<",\n  pltp="<<pltp);
         }
       }
       

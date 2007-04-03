@@ -23,8 +23,10 @@
 
 
 #include "logging.h"
+#include "evaluation/declarations.h"
 
 #include "python/python_utilities.h"
+#include "python/python_float.h"
 using namespace Ariadne;
 
 #include <boost/python.hpp>
@@ -34,15 +36,20 @@ using namespace boost::python;
 void set_linear_algebra_verbosity(int v) { LinearAlgebra::verbosity=v; }
 void set_combinatoric_verbosity(int v) { Combinatoric::verbosity=v; }
 void set_geometry_verbosity(int v) { Geometry::verbosity=v; }
-void set_system_verbosity(int v) { System::verbosity=v; }
 void set_evaluation_verbosity(int v) { Evaluation::verbosity=v; }
+//template<class R> void set_applicator_verbosity(int v) { Evaluation::Applicator<R>::verbosity=v; }
+//template<class R> void set_integrator_verbosity(int v) { Evaluation::Integrator<R>::verbosity=v; }
+//template<class R> void set_hybrid_evolver_verbosity(int v) { Evaluation::HybridEvolver<R>::verbosity=v; }
 
 void export_logging()
 {
   def("set_linear_algebra_verbosity",&set_linear_algebra_verbosity);
   def("set_combinatoric_verbosity",&set_combinatoric_verbosity);
   def("set_geometry_verbosity",&set_geometry_verbosity);
-  def("set_system_verbosity",&set_system_verbosity);
   def("set_evaluation_verbosity",&set_evaluation_verbosity);
+
+  //def("set_applicator_verbosity",&set_applicator_verbosity<Float>);
+  //def("set_integrator_verbosity",&set_integrator_verbosity<Float>);
+  //def("set_hybrid_evolver_verbosity",&set_hybrid_evolver_verbosity<Float>);
 }
 

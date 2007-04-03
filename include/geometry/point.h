@@ -102,11 +102,17 @@ namespace Ariadne {
       /*! \brief Change the dimension of the space the point lies in. */
       void resize(dimension_type d);
       
-      /*! \brief Subcripting operator. */
+      /*! \brief Subcripting operator (unchecked). */
       R& operator[](dimension_type index);
 
-      /*! \brief Subcripting operator. */
+      /*! \brief Subcripting operator (unchecked). */
       const R& operator[](dimension_type index) const;
+
+      /*! \brief Subcripting operator (checked). */
+      R& at(dimension_type index);
+
+      /*! \brief Subcripting operator (checked). */
+      const R& at(dimension_type index) const;
 
       /*! \brief The position vector of the point. */
       const LinearAlgebra::Vector<R>& position_vector() const;

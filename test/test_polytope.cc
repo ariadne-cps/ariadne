@@ -62,7 +62,6 @@ int main() {
   cerr << "INCOMPLETE ";
 }
 
-
 template<class R>
 int 
 test_polytope() 
@@ -188,7 +187,12 @@ test_polytope<Rational>()
   Polytope<R> p(ptl);
   cout << "p=" << p << endl;
   
-  
+  // Test Polyhedron to Polytope conversion for degenerate
+  Polyhedron<R> plhd(Rectangle<R>("[0,1]x[-1,2]x[-1,3]"));
+  Polytope<R> pltp(plhd);
+  cout << "pltp=" << pltp << endl;
+
+
 #ifdef HAVE_PPL_HH
   Parma_Polyhedra_Library::C_Polyhedron ppl_p=ppl_polyhedron(p);
   cout << ppl_p.generators() << endl;

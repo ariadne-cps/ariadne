@@ -34,6 +34,11 @@ namespace Ariadne {
   static const int default_verbosity=0; 
 #endif
 
+#define ARIADNE_SET_VERBOSITY(where,level) \
+  { where::verbosity=level; }
+
+#define ARIADNE_LOG(level,msg) \
+  if(verbosity > 
 namespace Numeric { static int verbosity=default_verbosity; }
 namespace LinearAlgebra { static int verbosity=default_verbosity; }
 namespace Combinatoric { static int verbosity=default_verbosity; }

@@ -49,6 +49,7 @@ template<class R>
 int
 test_point()
 {
+  cout << "test_point<" << name<R>() << ">()\n";
   Point<R> s1(3);
   Point<R> s2(4);
   Point<R> s3(2);

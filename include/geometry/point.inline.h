@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <cassert>
+
 namespace Ariadne {
   namespace Geometry {
    
@@ -123,16 +125,30 @@ namespace Ariadne {
     R& 
     Point<R>::operator[](dimension_type index) 
     {
-      check_coordinate(*this,index,__PRETTY_FUNCTION__);
-        return  (this->_vector(index));
+      return  (this->_vector(index));
     }
 
     template<class R> inline
     const R& 
     Point<R>::operator[](dimension_type index) const 
     {
-      check_coordinate(*this,index,__PRETTY_FUNCTION__);
-        return  (this->_vector(index));
+      return  (this->_vector(index));
+    }
+
+    template<class R> inline
+    R& 
+    Point<R>::at(dimension_type index) 
+    {
+      ARIADNE_CHECK_COORDINATE(*this,index,__PRETTY_FUNCTION__);
+      return  (this->_vector(index));
+    }
+
+    template<class R> inline
+    const R& 
+    Point<R>::at(dimension_type index) const 
+    {
+      ARIADNE_CHECK_COORDINATE(*this,index,__PRETTY_FUNCTION__);
+      return  (this->_vector(index));
     }
 
     template<class R> inline
@@ -157,7 +173,7 @@ namespace Ariadne {
     template<class R> inline
     bool contains_value(const Point< Numeric::Interval<R> >& ipt, const Point<R>& pt) 
     {
-      check_equal_dimensions(ipt,pt,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(ipt,pt,__PRETTY_FUNCTION__);
       for(dimension_type i=0; i!=ipt.dimension(); ++i) {
         if(!contains_value(ipt[i],pt[i])) {
           return false;
@@ -192,7 +208,7 @@ namespace Ariadne {
     Point<typename Numeric::traits<R>::arithmetic_type>
     minkowski_sum(const Point<R>& pt1, const Point<R>& pt2) 
     {
-      check_equal_dimensions(pt1,pt2,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(pt1,pt2,__PRETTY_FUNCTION__);
       return Point<typename Numeric::traits<R>::arithmetic_type>(pt1.position_vector()+pt2.position_vector());
     }
     
@@ -200,7 +216,7 @@ namespace Ariadne {
     Point<typename Numeric::traits<R>::arithmetic_type>
     minkowski_difference(const Point<R>& pt1, const Point<R>& pt2) 
     {
-      check_equal_dimensions(pt1,pt2,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(pt1,pt2,__PRETTY_FUNCTION__);
       return Point<typename Numeric::traits<R>::arithmetic_type>(pt1.position_vector()-pt2.position_vector());
     }
     
@@ -209,7 +225,7 @@ namespace Ariadne {
     LinearAlgebra::Vector<typename Numeric::traits<R1,R2>::arithmetic_type>
     operator-(const Point<R1> pt1, const Point<R2>& pt2) 
     {
-      check_equal_dimensions(pt1,pt2,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(pt1,pt2,__PRETTY_FUNCTION__);
       return pt1.position_vector()-pt2.position_vector();
     }
     
@@ -217,7 +233,7 @@ namespace Ariadne {
     Point<typename Numeric::traits<R1,R2>::arithmetic_type> 
     operator+(const Point<R1>& pt, const LinearAlgebra::Vector<R2>& v)
     {
-      check_dimension(pt,v.size(),__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION(pt,v.size(),__PRETTY_FUNCTION__);
       return Point<typename Numeric::traits<R1,R2>::arithmetic_type>(pt.position_vector() + v);
     }
 
@@ -226,7 +242,7 @@ namespace Ariadne {
     Point<typename Numeric::traits<R1,R2>::arithmetic_type> 
     operator-(const Point<R1>& pt, const LinearAlgebra::Vector<R2>& v)
     {
-      check_dimension(pt,v.size(),__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION(pt,v.size(),__PRETTY_FUNCTION__);
       return Point<typename Numeric::traits<R1,R2>::arithmetic_type>(pt.position_vector() - v);
     }
 
@@ -234,7 +250,7 @@ namespace Ariadne {
     Point<R> 
     add_approx(const Point<R>& pt, const LinearAlgebra::Vector<R>& v)
     {
-      check_dimension(pt,v.size(),__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION(pt,v.size(),__PRETTY_FUNCTION__);
       return Point<R>(add_approx(pt.position_vector(),v));
     }
 
@@ -242,7 +258,7 @@ namespace Ariadne {
     Point<R> 
     sub_approx(const Point<R>& pt, const LinearAlgebra::Vector<R>& v)
     {
-      check_dimension(pt,v.size(),__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION(pt,v.size(),__PRETTY_FUNCTION__);
       return Point<R>(sub_approx(pt.position_vector(),v));
     }
 

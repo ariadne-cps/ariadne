@@ -28,6 +28,8 @@
 #ifndef ARIADNE_COMBINATORIC_EXCEPTIONS_H
 #define ARIADNE_COMBINATORIC_EXCEPTIONS_H
 
+#include <stdexcept>
+
 namespace Ariadne {
   namespace Combinatoric {
       

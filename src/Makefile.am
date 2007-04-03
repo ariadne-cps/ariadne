@@ -62,7 +62,7 @@ OUTPUT_SRC = \
 
 noinst_LTLIBRARIES = libnumeric.la liblinearalgebra.la libcombinatoric.la libgeometry.la libsystem.la libevaluation.la liboutput.la
 
-lib_LTLIBRARIES = libariadne.la libgeometric.la
+lib_LTLIBRARIES = libariadne.la 
 libariadne_la_LIBADD = $(noinst_LTLIBRARIES) -lmpfr -lppl -lgmpxx
 libariadne_la_SOURCES = 
 nodist_EXTRA_libariadne_la_SOURCES = dummy.cc

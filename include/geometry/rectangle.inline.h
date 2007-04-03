@@ -23,6 +23,7 @@
  
 
 
+#include "../throw.h"
 #include "../base/array.h"
 #include "../base/iterator.h"
 #include "../base/tribool.h"
@@ -102,7 +103,9 @@ namespace Ariadne {
     Rectangle<R>::Rectangle(const Point<R>& pt1, const Point<R>& pt2) 
       : _data(2*pt1.dimension())
     {
-      check_equal_dimensions(pt1,pt2,__PRETTY_FUNCTION__);
+      if(pt1.dimension()!=pt2.dimension()) {
+        ARIADNE_THROW(IncompatibleDimensions,"Rectangle(Point pt1, Point pt2)","pt1=" << pt1 << ", pt2=" << pt2);
+      }
       for (size_type i=0; i!=this->dimension(); ++i) {
         this->set_lower_bound(i,Numeric::min_exact(pt1[i],pt2[i]));
         this->set_upper_bound(i,Numeric::max_exact(pt1[i],pt2[i]));
@@ -204,28 +207,36 @@ namespace Ariadne {
     template<class R> inline
     const R& Rectangle<R>::lower_bound(dimension_type i) const 
     {
-      check_coordinate(*this,i,__PRETTY_FUNCTION__);
+      if(i>=this->dimension()) {
+        ARIADNE_THROW(InvalidCoordinate,"Rectangle::lower_bound(dimension_type i) const","*this=" << *this << ", i=" << i);
+      }
       return this->_data[2*i];
     }
     
     template<class R> inline
     R& Rectangle<R>::lower_bound(dimension_type i) 
     {
-      check_coordinate(*this,i,__PRETTY_FUNCTION__);
+      if(i>=this->dimension()) {
+        ARIADNE_THROW(InvalidCoordinate,"Rectangle::lower_bound(dimension_type i)","self=" << *this << "i=" << i);
+      }
       return this->_data[2*i];
     }
     
     template<class R> inline
     const R& Rectangle<R>::upper_bound(dimension_type i) const 
     {
-      check_coordinate(*this,i,__PRETTY_FUNCTION__);
+      if(i>=this->dimension()) {
+        ARIADNE_THROW(InvalidCoordinate,"Rectangle::upper_bound(dimension_type i) const","self=" << *this << "i=" << i);
+      }
       return this->_data[2*i+1];
     }
     
     template<class R> inline
     R& Rectangle<R>::upper_bound(dimension_type i) 
     {
-      check_coordinate(*this,i,__PRETTY_FUNCTION__);
+      if(i>=this->dimension()) {
+        ARIADNE_THROW(InvalidCoordinate,"Rectangle::upper_bound(dimension_type i)","self=" << *this << "i=" << i);
+      }
       return this->_data[2*i+1];
     }
     
@@ -233,14 +244,12 @@ namespace Ariadne {
     template<class R> inline
     Numeric::Interval<R>& Rectangle<R>::operator[] (dimension_type i) 
     {
-      check_coordinate(*this,i,__PRETTY_FUNCTION__);
       return reinterpret_cast<Numeric::Interval<R>&>(this->_data[2*i]);
     }
  
     template<class R> inline
     const Numeric::Interval<R>& Rectangle<R>::operator[] (dimension_type i) const 
     {
-      check_coordinate(*this,i,__PRETTY_FUNCTION__);
       return reinterpret_cast<const Numeric::Interval<R>&>(this->_data[2*i]);
     }
     
@@ -248,7 +257,9 @@ namespace Ariadne {
     template<class R> inline
     const Numeric::Interval<R>& Rectangle<R>::interval(dimension_type i) const 
     {
-      check_coordinate(*this,i,__PRETTY_FUNCTION__);
+      if(i>=this->dimension()) {
+        ARIADNE_THROW(InvalidCoordinate,"Rectangle::interval(dimension_type i) const","self=" << *this << "i=" << i);
+      }
       return reinterpret_cast<const Numeric::Interval<R>&>(this->_data[2*i]);
     }
     
@@ -298,7 +309,9 @@ namespace Ariadne {
     template<class R> inline
     void Rectangle<R>::set_interval(dimension_type i, Numeric::Interval<R> x)
     {
-      check_coordinate(*this,i,__PRETTY_FUNCTION__);
+      if(i>=this->dimension()) {
+        ARIADNE_THROW(InvalidCoordinate,"Rectangle::set_interval(dimension_type i, Interval x) const","self=" << *this << "i=" << i);
+      }
       this->set_lower_bound(i,x.lower());
       this->set_upper_bound(i,x.upper());
     }
@@ -306,14 +319,18 @@ namespace Ariadne {
     template<class R> inline
     void Rectangle<R>::set_lower_bound(dimension_type i, const R& l) 
     {
-      check_coordinate(*this,i,__PRETTY_FUNCTION__);
+      if(i>=this->dimension()) {
+        ARIADNE_THROW(InvalidCoordinate,"Rectangle::set_lower_bound(dimension_type i, Real l) const","self=" << *this << "i=" << i);
+      }
       this->_data[2*i]=l;
     }
     
     template<class R> inline
     void Rectangle<R>::set_upper_bound(dimension_type i, const R& u) 
     {
-      check_coordinate(*this,i,__PRETTY_FUNCTION__);
+      if(i>=this->dimension()) {
+        ARIADNE_THROW(InvalidCoordinate,"Rectangle::set_upper_bound(dimension_type i, Real u) const","self=" << *this << "i=" << i);
+      }
       this->_data[2*i+1]=u;
     }
 
@@ -397,16 +414,16 @@ namespace Ariadne {
     template<class R>
     inline
     tribool 
-    Rectangle<R>::contains(const Point<R>& p) const 
+    Rectangle<R>::contains(const Point<R>& pt) const 
     {
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,pt,"Rectangle::contains(Point pt)");
       tribool result=true;
-      check_equal_dimensions(*this,p,__PRETTY_FUNCTION__);
       const Rectangle<R>& self=*this;
       for (size_type i=0; i!=self.dimension(); ++i) {
-        if(self.lower_bound(i)>p[i] || p[i]>self.upper_bound(i)) {
+        if(self.lower_bound(i)>pt[i] || pt[i]>self.upper_bound(i)) {
           return false;
         }
-        if(self.lower_bound(i)==p[i] || p[i]==self.upper_bound(i)) { 
+        if(self.lower_bound(i)==pt[i] || pt[i]==self.upper_bound(i)) { 
           result=indeterminate;
         }
       }
@@ -533,11 +550,11 @@ namespace Ariadne {
       
     template<class R> inline
     tribool 
-    equal(const Rectangle<R>& A, const Rectangle<R>& B)
+    equal(const Rectangle<R>& r1, const Rectangle<R>& r2)
     {
-      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
-      for(size_type i=0; i!=A.dimension(); ++i) {
-        if(A.lower_bound(i)!=B.lower_bound(i) || A.upper_bound(i)!=B.upper_bound(i)) {
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,"equal(Rectangle r1, Rectangle r2)")
+      for(size_type i=0; i!=r1.dimension(); ++i) {
+        if(r1.lower_bound(i)!=r2.lower_bound(i) || r1.upper_bound(i)!=r2.upper_bound(i)) {
           return false;
         }
       }
@@ -546,15 +563,15 @@ namespace Ariadne {
       
     template<class R> inline
     tribool 
-    disjoint(const Rectangle<R>& A, const Rectangle<R>& B)
+    disjoint(const Rectangle<R>& r1, const Rectangle<R>& r2)
     {
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,"disjoint(Rectangle r1, Rectangle r2)")
       tribool result=false;
-      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
-      for(size_type i=0; i!=A.dimension(); ++i) {
-        if(A.lower_bound(i)>B.upper_bound(i) || A.upper_bound(i)<B.lower_bound(i)) {
+      for(size_type i=0; i!=r1.dimension(); ++i) {
+        if(r1.lower_bound(i)>r2.upper_bound(i) || r1.upper_bound(i)<r2.lower_bound(i)) {
           return true;
         }
-        if(A.lower_bound(i)==B.upper_bound(i) || A.upper_bound(i)==B.lower_bound(i)) {
+        if(r1.lower_bound(i)==r2.upper_bound(i) || r1.upper_bound(i)==r2.lower_bound(i)) {
           result=indeterminate;
         }
       }
@@ -564,15 +581,15 @@ namespace Ariadne {
   
     template<class R> inline
     tribool 
-    subset(const Rectangle<R>& A, const Rectangle<R>& B)
+    subset(const Rectangle<R>& r1, const Rectangle<R>& r2)
     {
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,"subset(Rectangle r1, Rectangle r2)")
       tribool result=true;
-      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
-      for (size_type i=0; i!=A.dimension(); ++i) {
-        if(A.lower_bound(i)<B.lower_bound(i) || A.upper_bound(i)>B.upper_bound(i)) {
+      for (size_type i=0; i!=r1.dimension(); ++i) {
+        if(r1.lower_bound(i)<r2.lower_bound(i) || r1.upper_bound(i)>r2.upper_bound(i)) {
           return false;
         }
-        if(A.lower_bound(i)==B.lower_bound(i) || A.upper_bound(i)==B.upper_bound(i)) {
+        if(r1.lower_bound(i)==r2.lower_bound(i) || r1.upper_bound(i)==r2.upper_bound(i)) {
           result=indeterminate;
         }
       }
@@ -582,95 +599,95 @@ namespace Ariadne {
     
     template<class R> inline
     Rectangle<R> 
-    closed_intersection(const Rectangle<R>& A, const Rectangle<R>& B)
+    closed_intersection(const Rectangle<R>& r1, const Rectangle<R>& r2)
     {
-      Rectangle<R> C(A.dimension());
-      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
-      for(size_type i=0; i != C.dimension(); ++i) {
-        C[i]=Numeric::intersection(A[i],B[i]);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,__PRETTY_FUNCTION__);
+      Rectangle<R> r3(r1.dimension());
+      for(size_type i=0; i != r3.dimension(); ++i) {
+        r3[i]=Numeric::intersection(r1[i],r2[i]);
       }
-      return C;
+      return r3;
     }
   
     template<class R> inline
     Rectangle<R> 
-    open_intersection(const Rectangle<R>& A, const Rectangle<R>& B)
+    open_intersection(const Rectangle<R>& r1, const Rectangle<R>& r2)
     {
-      Rectangle<R> C(A.dimension());
-      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
-      for(size_type i=0; i != C.dimension(); ++i) {
-        C[i]=Numeric::intersection(A[i],B[i]);
-        if(C[i].lower()>=C[i].upper()) {
-          C[i]=Numeric::Interval<R>();
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,__PRETTY_FUNCTION__);
+      Rectangle<R> r3(r1.dimension());
+      for(size_type i=0; i != r3.dimension(); ++i) {
+        r3[i]=Numeric::intersection(r1[i],r2[i]);
+        if(r3[i].lower()>=r3[i].upper()) {
+          r3[i]=Numeric::Interval<R>();
         }
       }
-      return C;
+      return r3;
     }
   
     template<class R> inline
     Rectangle<R>
-    rectangular_hull(const Rectangle<R>& A, const Rectangle<R>& B)
+    rectangular_hull(const Rectangle<R>& r1, const Rectangle<R>& r2)
     {
-      Rectangle<R> C(A.dimension());
-      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
-      for(size_type i=0; i != C.dimension(); ++i) {
-        C[i]=Numeric::hull(A[i],B[i]);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,__PRETTY_FUNCTION__);
+      Rectangle<R> r3(r1.dimension());
+      for(size_type i=0; i != r3.dimension(); ++i) {
+        r3[i]=Numeric::hull(r1[i],r2[i]);
       }
-      return C;
+      return r3;
     }
   
     template<class R> inline
     Rectangle<R>
-    rectangular_hull(const Rectangle<R>& A, const Point<R>& B)
+    rectangular_hull(const Rectangle<R>& r, const Point<R>& pt)
     {
-      return rectangular_hull(A,Rectangle<R>(B));
+      return rectangular_hull(r,Rectangle<R>(pt));
     }
   
     template<class R> inline
     Rectangle<R>
-    rectangular_hull(const Point<R>& A, const Rectangle<R>& B)
+    rectangular_hull(const Point<R>& pt, const Rectangle<R>& r)
     {
-      return rectangular_hull(B,A);
+      return rectangular_hull(Rectangle<R>(pt),r);
     }
 
     template<class R> inline
     Rectangle<R>
-    rectangular_hull(const Point<R>& A, const Point<R>& B)
+    rectangular_hull(const Point<R>& pt1, const Point<R>& pt2)
     {
-      return Rectangle<R>(A,B);
+      return Rectangle<R>(pt1,pt2);
     }
 
  
     template<class R1, class R2> inline
     Rectangle<typename Numeric::traits<R1,R2>::arithmetic_type> 
-    minkowski_sum(const Rectangle<R1>& A, const Rectangle<R2>& B)
+    minkowski_sum(const Rectangle<R1>& r1, const Rectangle<R2>& r2)
     {
-      Rectangle<typename Numeric::traits<R1,R2>::arithmetic_type> C(A.dimension());
-      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
-      for(dimension_type i=0; i!=C.dimension(); ++i) {
-        C.set_lower_bound(i,A.lower_bound(i)+B.lower_bound(i));
-        C.set_lower_bound(i,A.upper_bound(i)+B.upper_bound(i));
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,__PRETTY_FUNCTION__);
+      Rectangle<typename Numeric::traits<R1,R2>::arithmetic_type> r3(r1.dimension());
+      for(dimension_type i=0; i!=r3.dimension(); ++i) {
+        r3.set_lower_bound(i,r1.lower_bound(i)+r2.lower_bound(i));
+        r3.set_lower_bound(i,r1.upper_bound(i)+r2.upper_bound(i));
       }
-      return C;
+      return r3;
     }
   
     template<class R1, class R2> inline
     Rectangle<typename Numeric::traits<R1,R2>::arithmetic_type> 
-    minkowski_difference(const Rectangle<R1>& A, const Rectangle<R2>& B)
+    minkowski_difference(const Rectangle<R1>& r1, const Rectangle<R2>& r2)
     {
-      Rectangle<typename Numeric::traits<R1,R2>::arithmetic_type> C(A.dimension());
-      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
-      for(dimension_type i=0; i!=C.dimension(); ++i) {
-        C.set_lower_bound(i,A.lower_bound(i)-B.lower_bound(i));
-        C.set_upper_bound(i,A.upper_bound(i)-B.upper_bound(i));
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,__PRETTY_FUNCTION__);
+      Rectangle<typename Numeric::traits<R1,R2>::arithmetic_type> r3(r1.dimension());
+      for(dimension_type i=0; i!=r3.dimension(); ++i) {
+        r3.set_lower_bound(i,r1.lower_bound(i)-r2.lower_bound(i));
+        r3.set_upper_bound(i,r1.upper_bound(i)-r2.upper_bound(i));
       }
-      return C;
+      return r3;
     }
     
     
     template<class R> inline
     tribool 
-    subset(const Rectangle<R>& A, ListSet< Geometry::Rectangle<R> >& B);
+    subset(const Rectangle<R>& r, ListSet< Geometry::Rectangle<R> >& ls);
         
   
     
@@ -681,7 +698,7 @@ namespace Ariadne {
     operator-(const Geometry::Rectangle<R>& r1,
               const Geometry::Rectangle<R>& r2)
     {
-      check_equal_dimensions(r1,r2,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,__PRETTY_FUNCTION__);
       return r1.position_vectors()-r2.position_vectors();
     }
   
@@ -691,7 +708,7 @@ namespace Ariadne {
               const LinearAlgebra::VectorExpression<E>& v)
     {
       const E& ev=v();
-      check_dimension(r,ev.size(),__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION_EQUALS_SIZE(r,ev,__PRETTY_FUNCTION__);
       LinearAlgebra::Vector< Numeric::Interval<R> > iv=ev;
       return r+iv; 
     }
@@ -703,7 +720,7 @@ namespace Ariadne {
               const LinearAlgebra::Vector<R>& v)
     {
       Geometry::Rectangle<R> result(r.dimension());
-      check_dimension(r,v.size(),__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION_EQUALS_SIZE(r,v,__PRETTY_FUNCTION__);
        
       for(size_type i=0; i!=result.dimension(); ++i) {
         result.set_interval(i,r[i]+v(i));
@@ -718,7 +735,7 @@ namespace Ariadne {
               const LinearAlgebra::Vector< Numeric::Interval<R> >& v)
     {
       Geometry::Rectangle<R> result(r.dimension());
-      check_dimension(r,v.size(),__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION_EQUALS_SIZE(r,v,__PRETTY_FUNCTION__);
       
       for(size_type i=0; i!=result.dimension(); ++i) {
         result.set_interval(i,r[i]+v(i));
@@ -733,7 +750,7 @@ namespace Ariadne {
               const LinearAlgebra::Vector<R>& v)
     {
       Geometry::Rectangle<R> result(r.dimension());
-      check_dimension(r,v.size(),__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION_EQUALS_SIZE(r,v,__PRETTY_FUNCTION__);
       
       for(size_type i=0; i!=result.dimension(); ++i) {
         result.set_interval(i,r[i]-v(i));
@@ -747,7 +764,7 @@ namespace Ariadne {
               const LinearAlgebra::Vector< Numeric::Interval<R> >& v)
     {
       Geometry::Rectangle<R> result(r.dimension());
-      check_dimension(r,v.size(),__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION_EQUALS_SIZE(r,v,__PRETTY_FUNCTION__);
       
       for(size_type i=0; i!=result.dimension(); ++i) {
         result.set_interval(i,r[i]-v(i));

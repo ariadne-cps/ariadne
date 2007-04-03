@@ -21,17 +21,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "../base/stlio.h"
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 #include "../linear_algebra/matrix.code.h"
-#include "../base/stlio.h"
 
 namespace Ariadne {
 namespace Geometry {
 
 int verbosity=0;
-  
-  
+
 /*! \param argument is a list of constraints (or generators).
  *  \param result is an output parameter storing a list of generators (or constraints).
  */  
@@ -41,7 +40,7 @@ ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
        const std::vector< LinearAlgebra::Vector<R> >&  argument)
 {  
   
-  // 'dimension' is the dimension of the state space
+  // 'dimension' is the dimension of the augmented state space
   dimension_type dimension=argument[0].size();
   
   // The number of lines (as opposed to rays) in 'generators'
@@ -67,6 +66,8 @@ ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
   LinearAlgebra::Vector<R> v(dimension);
   LinearAlgebra::Vector<R> w(dimension);
   
+  if(verbosity>1) { std::cerr << "C=" << constraints << "\n"; }
+
   // Initialize 'lines' to include lines parallel to coordinate directions.
   number_of_lines=dimension;
   for(dimension_type i=0; i!=dimension; ++i) {
@@ -77,7 +78,7 @@ ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
   
   // Add constraints sequentially and compute new generators
   for(size_type k=0; k!=constraints.size(); ++k) {
-    if(verbosity > 1) { std::cerr << "G=" << generators << "\n"; }
+    if(verbosity > 1) { std::cerr << "G=" << generators << " l=" << number_of_lines << "\n"; }
     if(verbosity > 1) { std::cerr << "c=" << constraints[k] << "\n"; }
     
     // If any line does not saturate the new constraint, add a ray containing 
@@ -103,7 +104,8 @@ ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
       if(imax!=number_of_lines) {
         std::swap(generators[imax],generators[number_of_lines]);
       }
-      
+      if(verbosity > 5) { std::clog << "G=" << generators << " after pivot on " << imax << std::endl; }
+
       // Alias pivot element
       LinearAlgebra::Vector<R>& p=generators[number_of_lines];
 
@@ -142,23 +144,28 @@ ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
           }
         }
       }
-      //std::cout << "S=" << saturation_matrix  << "\n\n";
+      if(verbosity>3) { std::clog << "S=" << saturation_matrix  << "\n"; }
       //std::vector< LinearAlgebra::Vector<R> > generators;
     
       size_type number_of_generators=generators.size();
       for(size_type j=number_of_lines; j!=number_of_generators; ++j) {
         if(saturation_matrix(k,j)==-1) {
+          if(verbosity>7) { std::clog << "    j=" << j << " v=" << generators[j] << std::endl; }
           bool found_adjacent=false;
           v=generators[j];
           for(size_type js=number_of_lines; js!=number_of_generators; ++js) {
             if(saturation_matrix(k,js)==1) {
+              // test for adjacent rays
+              // rays are considered adjacent if they jointly saturate d-2 constraints
+              // TODO: check if the above statement is correct
               int asum=0;
               for(size_type i=0; i!=k; ++i) {
-                if(saturation_matrix(i,j)!=saturation_matrix(i,js)) {
+                if(saturation_matrix(i,j)==0 && saturation_matrix(i,js)==0) {
                   ++asum;
                 }
               }
-              if(asum<=2) {
+              if(asum>=dimension-2) { // rays are adjacent
+                if(verbosity>7) { std::clog << "    js=" << js << " v=" << v << " g=" << generators[js] << std::endl; }
                 R dot=inner_product(constraints[k],v);
                 R dots=inner_product(constraints[k],generators[js]);
                 w=v-(dot/dots)*generators[js];
@@ -171,6 +178,7 @@ ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
               }
             }
           }
+          if(verbosity>0) { if(!found_adjacent) { std::clog << "    j=" << j << ": no adjacent rays found" << std::endl; } }
         }
       }
     }

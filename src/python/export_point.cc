@@ -33,6 +33,7 @@
 #include "python/python_utilities.h"
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
+using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
 
 #include <boost/python.hpp>
@@ -40,12 +41,12 @@ using namespace boost::python;
 
 template<class R1, class R2> inline 
 void point_setitem(Point<R1>& p, uint i, R2 x) {
-  p[i]=x;
+  p.at(i)=x;
 }
 
 template<class R> inline 
 R point_getitem(const Point<R>& p, uint i) {
-  return p[i];
+  return p.at(i);
 }
 
 //inline RPoint rpoint_add_rVector(const RPoint& p, const RVector& v) {
@@ -70,6 +71,8 @@ Point<R> point_list_get(const PointList<R>& pl, const size_type& n) {
 template<class R>
 void export_point() 
 {
+  typedef typename Numeric::traits<R>::arithmetic_type A;
+
   class_< Point<R> >(python_name<R>("Point").c_str(),init<>())
     .def(init< int >())
     .def(init< Point<R> >())
@@ -81,8 +84,8 @@ void export_point()
     .def("__setitem__", &point_setitem<R,double>)
     .def("__eq__", &Point<R>::operator==)
     .def("__ne__", &Point<R>::operator!=)
-//    .def("__add__", &rpoint_add_rVector)
-//    .def("__sub__", &rpoint_sub_rpoint)
+    .def("__add__",(Point<A>(*)(const Point<R>&,const Vector<R>&))&operator+)
+    .def("__sub__",(Point<A>(*)(const Point<R>&,const Vector<R>&))&operator-)
     .def(self_ns::str(self))
   ;
 }
@@ -90,6 +93,8 @@ void export_point()
 template<class R>
 void export_interval_point() 
 {
+  typedef Interval<R> I;
+
   class_< Point< Interval<R> > >(python_name<R>("IntervalPoint").c_str(),init<>())
     .def(init< int >())
     .def(init< Point<R> >())
@@ -103,8 +108,12 @@ void export_interval_point()
     .def("__setitem__", &point_setitem< Interval<R> , double>)
     .def("__eq__", &Point< Interval<R> >::operator==)
     .def("__ne__", &Point< Interval<R> >::operator!=)
-//    .def("__add__", &rpoint_add_rVector)
-//    .def("__sub__", &rpoint_sub_rpoint)
+    .def("__add__",(Point<I>(*)(const Point<R>&,const Vector<I>&))&operator+)
+    .def("__add__",(Point<I>(*)(const Point<I>&,const Vector<R>&))&operator+)
+    .def("__add__",(Point<I>(*)(const Point<I>&,const Vector<I>&))&operator+)
+    .def("__sub__",(Point<I>(*)(const Point<R>&,const Vector<I>&))&operator-)
+    .def("__sub__",(Point<I>(*)(const Point<I>&,const Vector<R>&))&operator-)
+    .def("__sub__",(Point<I>(*)(const Point<I>&,const Vector<I>&))&operator-)
     .def(self_ns::str(self))
   ;
 }

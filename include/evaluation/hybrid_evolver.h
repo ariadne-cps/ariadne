@@ -140,8 +140,9 @@ namespace Ariadne {
      private:
       // Evolve the hybrid automaton within \a domains starting from the \a initial_set without using discrete transitions. */
       Geometry::HybridGridMaskSet<R> _continuous_chainreach(const System::HybridAutomaton<R>& automaton, 
-                                                           const Geometry::HybridGridMaskSet<R>& initial_set,
-                                                           const Geometry::HybridGridMaskSet<R>& domains);
+                                                            const Geometry::HybridGridMaskSet<R>& initial_set,
+                                                            const Geometry::HybridGridMaskSet<R>& invariant_set,
+                                                            const Geometry::HybridGridMaskSet<R>& domain_set);
      private:
       Applicator<R>* _applicator;
       Integrator<R>* _integrator;

@@ -189,6 +189,8 @@ epsfstream::open(const char* fn, const Rectangle2d& bbox,
 
   this->std::ofstream::open(fn);
   this->write_header();
+  (*this) << "black\n";
+  trace(*this,bbox) << " stroke\n\n";
 }
 
 

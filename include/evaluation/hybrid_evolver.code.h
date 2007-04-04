@@ -90,7 +90,8 @@ template<class R>
 Ariadne::Geometry::HybridGridMaskSet<R> 
 Ariadne::Evaluation::HybridEvolver<R>::_continuous_chainreach(const System::HybridAutomaton<R>& hybrid_automaton, 
                                                               const Geometry::HybridGridMaskSet<R>& initial_set,
-                                                              const Geometry::HybridGridMaskSet<R>& domains)
+                                                              const Geometry::HybridGridMaskSet<R>& invariant_set,
+                                                              const Geometry::HybridGridMaskSet<R>& domain_set)
 {
   //if(verbosity>5) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
   Geometry::HybridGridMaskSet<R> result_set(initial_set);
@@ -102,9 +103,10 @@ Ariadne::Evaluation::HybridEvolver<R>::_continuous_chainreach(const System::Hybr
       dm_iter!=hybrid_automaton.modes().end(); ++dm_iter)
   {
     const System::DiscreteMode<R>& dm = *dm_iter;
-    const Geometry::GridMaskSet<R>& domain=domains[dm.id()];
+    const Geometry::GridMaskSet<R>& domain=domain_set[dm.id()];
     Geometry::GridMaskSet<R> initial=regular_intersection(initial_set[dm.id()],domain);
     result_set[dm.id()].adjoin(this->_integrator->chainreach(dm.dynamic(),initial,domain));
+    result_set[dm.id()].restrict(invariant_set[dm.id()]);
   }
   return result_set;
 }
@@ -162,14 +164,17 @@ Ariadne::Evaluation::HybridEvolver<R>::continuous_chainreach(const System::Hybri
   //if(verbosity>5) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
   typedef typename System::HybridAutomaton<R>::discrete_mode_iterator discrete_mode_iterator;
   
-  Geometry::HybridGridMaskSet<R> domains(bounding_set);
+  Geometry::HybridGridMaskSet<R> invariant_set(bounding_set);
+  invariant_set.clear();
+  Geometry::HybridGridMaskSet<R> domain_set(bounding_set);
   for(discrete_mode_iterator dm_iter=hybrid_automaton.modes().begin();
       dm_iter!=hybrid_automaton.modes().end(); ++dm_iter)
   {
-    domains[dm_iter->id()].restrict_over_approximation(dm_iter->invariant());
+    invariant_set[dm_iter->id()].adjoin_over_approximation(dm_iter->invariant());
+    domain_set[dm_iter->id()].restrict(invariant_set[dm_iter->id()]);
   }
   
-  return _continuous_chainreach(hybrid_automaton,initial_set,domains);
+  return _continuous_chainreach(hybrid_automaton,initial_set,invariant_set,domain_set);
 }
 
 
@@ -211,19 +216,23 @@ Ariadne::Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<
   }
   
   // Compute restricted invariant domains as GridMaskSets
-  Geometry::HybridGridMaskSet<R> domains(bounding_set);
+  Geometry::HybridGridMaskSet<R> invariant_set(bounding_set);
+  invariant_set.clear();
+  Geometry::HybridGridMaskSet<R> domain_set(bounding_set);
   for(discrete_mode_iterator dm_iter=hybrid_automaton.modes().begin();
       dm_iter!=hybrid_automaton.modes().end(); ++dm_iter)
   {
     const System::DiscreteMode<R>& dm=*dm_iter;
-    Geometry::GridMaskSet<R>& domain=domains[dm.id()];
-    domain.restrict_over_approximation(dm.invariant());
+    Geometry::GridMaskSet<R>& invariant=invariant_set[dm.id()];
+    Geometry::GridMaskSet<R>& domain=domain_set[dm.id()];
+    invariant.adjoin_over_approximation(dm.invariant());
+    domain.restrict_over_approximation(invariant);
   }
 
-  Geometry::HybridGridMaskSet<R> already_activated=domains;
+  Geometry::HybridGridMaskSet<R> already_activated=domain_set;
   already_activated.clear();
 
-  Geometry::HybridGridMaskSet<R> intermediate_set=this->continuous_chainreach(hybrid_automaton,initial_set,domains);
+  Geometry::HybridGridMaskSet<R> intermediate_set=this->_continuous_chainreach(hybrid_automaton,initial_set,invariant_set,domain_set);
   Geometry::HybridGridMaskSet<R> result_set=intermediate_set;
   
   Geometry::HybridGridCellListSet<R> new_activated=regular_intersection(intermediate_set,activations);
@@ -237,7 +246,7 @@ Ariadne::Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<
     intermediate_set.clear();
     Geometry::HybridGridCellListSet<R> new_activated_image=this->discrete_step(hybrid_automaton,new_activated);
     intermediate_set.adjoin(new_activated_image);
-    intermediate_set=this->continuous_chainreach(hybrid_automaton,intermediate_set,domains);
+    intermediate_set=this->_continuous_chainreach(hybrid_automaton,intermediate_set,invariant_set,domain_set);
     result_set.adjoin(intermediate_set);
     new_activated=regular_intersection(intermediate_set,activations);
   }

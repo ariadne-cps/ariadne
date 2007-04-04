@@ -59,9 +59,9 @@ print "Done."
 eps=EpsPlot()
 eps.open("chainreach_example1.eps",bounding_box,0,1)
 
-# Write the bounding box
-eps.set_fill_colour("white")
-eps.write(bounding_box)
+# Write the bound
+eps.set_fill_colour("cyan")
+eps.write(bound)
 
 # Write the invariant
 eps.set_fill_colour("yellow")
@@ -88,8 +88,12 @@ print "Done."
 eps.open("chainreach_example2.eps",bounding_box,0,1)
 
 # Write the bounding box
-eps.set_fill_colour("white")
-eps.write(bounding_box)
+#eps.set_fill_colour("white")
+#eps.write(bounding_box)
+
+# Write the bound
+eps.set_fill_colour("cyan")
+eps.write(bound)
 
 # Write the invariant
 eps.set_fill_colour("yellow")

@@ -102,9 +102,9 @@ int main() {
   seq=SubdivisionSequence(2);
   cout << "seq=" << seq << " " << seq.body_size() << " " << seq.tail_size() << " " << seq.dimension() << endl;
 
-  assert(subset(pltp,bb));
-  assert(!subset(bb,pltp));
-  assert(!disjoint(pltp,bb));
+  assert((bool)(subset(pltp,bb)));
+  assert((bool)(!subset(bb,pltp)));
+  assert((bool)(!disjoint(pltp,bb)));
   
   cout << "pt=" << pt << endl;
   cout << "pts=" << pts << endl;

@@ -240,7 +240,7 @@ test_zonotope()
     cout << "subset(z2,r1)=" << subset(z2,r1) << endl;
     cout << "disjoint(z1,z2)=" << disjoint(z1,z2) << endl;
     cout << "subset(z1,z2)=" << subset(z1,z2) << endl;
-    assert(disjoint(r1,z2));
+    assert((bool)(disjoint(r1,z2)));
   }
   catch(NotImplemented e) {
     cerr << "Warning: " << e.what() << " not implemented\n";

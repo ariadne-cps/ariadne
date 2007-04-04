@@ -77,7 +77,7 @@ test_interval()
   if(ivld2.empty()) { 
     cerr << "Warning: Interval<R> default constructor returns an empty set\n"; 
   } else {
-    assert(ivld2==Interval<R>(zero,zero));
+    assert((bool)(ivld2==Interval<R>(zero,zero)));
   }
   // Constructor with approximations
   Interval<R> ivld3(Rational(21,10),Rational(16,5));

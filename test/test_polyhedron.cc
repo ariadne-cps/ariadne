@@ -96,7 +96,7 @@ test_polyhedron()
   }
   
   cout << "phd1.contains(pt1)=" << flush; cout << phd1.contains(pt1) << endl;
-  assert(phd1.contains(pt1));
+  assert((bool)(phd1.contains(pt1)));
   
   Point<R> pt2("(2.25,-0.375)");
   cout << "pt2=" << pt2 << endl;
@@ -108,7 +108,7 @@ test_polyhedron()
     cout << "  " << c.satisfied_by(pt2) << endl;
   }
   cout << "phd1.contains(pt2)=" << flush; cout << phd1.contains(pt2) << endl;
-  assert(!phd1.contains(pt2));
+  assert((bool)(!phd1.contains(pt2)));
   
 
   Rectangle<R> r1("[-0.06125,0.25]x[0.125,0.375]");
@@ -123,12 +123,12 @@ test_polyhedron()
     }
   }
   cout << "subset(r1,phd1)=" << subset(r1,phd1) << endl;
-  assert(subset(r1,phd1));
+  assert((bool)(subset(r1,phd1)));
   
   Rectangle<R> r2("[-0.125,0.25]x[0.125,0.75]");
   cout << "r2=" << r2 << endl;
   cout << "subset(r2,phd1)=" << subset(r2,phd1) << endl;
-  assert(!subset(r2,phd1));
+  assert((bool)(!subset(r2,phd1)));
   
   Zonotope<R> z1(r1);
   cout << "z1=" << z1 << endl;
@@ -138,7 +138,7 @@ test_polyhedron()
   Polytope<R> p2(r1);
   cout << "p2=" << flush; cout << p2 << endl;
   cout << "subset(p2,phd1)=" << subset(p2,phd1) << endl;
-  assert(subset(p2,phd1));
+  assert((bool)(subset(p2,phd1)));
   
   cout << endl;
 
@@ -226,9 +226,9 @@ test_polyhedron<Rational>()
   cout << "disjoint(r1,phd)=" << disjoint(r1,phd) << endl;
   cout << "disjoint(r2,phd)=" << disjoint(r2,phd) << endl;
   cout << "subset(r3,phd)=" << subset(r3,phd) << endl;
-  assert(disjoint(r1,phd)==true);
-  assert(disjoint(r2,phd)==false);
-  assert(subset(r3,phd)==true);
+  assert((bool)(disjoint(r1,phd)==true));
+  assert((bool)(disjoint(r2,phd)==false));
+  assert((bool)(subset(r3,phd)==true));
 
   return 0;
 }

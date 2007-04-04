@@ -106,15 +106,15 @@ test_rectangle()
          << ", r0.empty()=" << r0.empty() << endl;
     cout << "r1=" << r1 << ", r1.dimension()=" << r1.dimension()
          << ", r1.empty()=" << r1.empty() << endl;
-    assert(!r1.empty());
-    assert(r0.empty());
+    assert((bool)(!r1.empty()));
+    assert((bool)(r0.empty()));
 
-    assert(!disjoint(r1,r1));
+    assert((bool)(!disjoint(r1,r1)));
     assert(indeterminate(subset(r1,r1)));
     cout << "r1=" << r1 << ", s1=" << s1 << ", s3=" << s3 << ", s5=" << s5 << endl;
     assert(indeterminate(r1.contains(s1)));
-    assert(!r1.contains(s3));
-    assert(r1.contains(s5));
+    assert((bool)(!r1.contains(s3)));
+    assert((bool)(r1.contains(s5)));
     //assert(!subset_of_interior(r1,r1));
     //assert(subset_of_open_cover(r1,cover1));
     //assert(!subset_of_open_cover(r1,cover2));

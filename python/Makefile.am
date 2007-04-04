@@ -1,5 +1,5 @@
 #TESTS_ENVIRONMENT = "export PYTHONPATH=$PYTHONPATH:$(top_srcdir)/python/.libs/"
-
+TESTS_ENVIRONMENT = export PYTHONPATH=$PYTHONPATH:$(top_srcdir)/src/python/.libs/ ; $(PYTHON)
 #pythondir=${prefix}/lib/python2.4
 #pyexecdir=${prefix}/lib/python2.4
 

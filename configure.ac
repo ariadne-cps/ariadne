@@ -37,9 +37,10 @@ AC_CHECK_HEADER([boost/version.hpp],,AC_MSG_ERROR([Boost library is missing. You
 AM_PATH_PYTHON(2.4,, :)
 AC_MSG_NOTICE([PYTHON_VERSION=$PYTHON_PREFIX])
 AC_MSG_NOTICE([PYTHON_VERSION=$PYTHON_VERSION])
+AM_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(could not find Python headers)])
+CPPFLAGS="$CPPFLAGS $PYTHON_INCLUDES"
 
 # Check for Boost python
-CPPFLAGS="$CPPFLAGS -I/usr/include/python$PYTHON_VERSION"
 #AC_CHECK_HEADER([boost/python.hpp],,AC_MSG_ERROR([Boost.Python library development files are missing. You must install them.]))
 
 # Check for Doxygen

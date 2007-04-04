@@ -112,12 +112,12 @@ test_parallelotope()
   
   cout << pts[0] << pts[1] << pts[2] << pts[3]<< pts[4] << pts[5]<< endl;
   
-  assert(!p1.contains(pts[0]));
-  assert(!p1.contains(pts[1]));
-  assert(!p1.contains(pts[2]));
-  assert(!p1.contains(pts[3]));
-  assert(!p1.contains(pts[4]));
-  assert(!p1.contains(pts[5]));
+  assert((bool)(!p1.contains(pts[0])));
+  assert((bool)(!p1.contains(pts[1])));
+  assert((bool)(!p1.contains(pts[2])));
+  assert((bool)(!p1.contains(pts[3])));
+  assert((bool)(!p1.contains(pts[4])));
+  assert((bool)(!p1.contains(pts[5])));
 
   // Test grid approximation routines
   Parallelotope< Interval<R> > ip(p1);
@@ -126,8 +126,8 @@ test_parallelotope()
 
   Rectangle<R> r5("[1.125,1.25]x[1.625,1.75]");
   Rectangle<R> r6("[0.875,1.00]x[0.125,0.25]");
-  assert(!disjoint(p3,r6));
-  assert(disjoint(p3,r5));
+  assert((bool)(!disjoint(p3,r6)));
+  assert((bool)(disjoint(p3,r5)));
  
   Rectangle<R> bbox3=p3.bounding_box().expand_by(0.25);
   Grid<R> gr3(2,0.125);

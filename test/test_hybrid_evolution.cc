@@ -133,7 +133,7 @@ int test_hybrid_evolution()
   cout << "bounding_set[mode21_id].size()=" << bounding_set[mode2_id].size() << " cells out of " << bounding_set[mode2_id].capacity() << endl;
   cout << endl;
 
-  assert(subset(initial_set[mode1_id],bounding_set[mode1_id]));
+  assert((bool)(subset(initial_set[mode1_id],bounding_set[mode1_id])));
 
   cout << "Computing continuous chainreach set" << endl;
   HybridGridMaskSet<R> continuous_chainreach=hybrid_evolver.continuous_chainreach(automaton,initial_set,bounding_set);

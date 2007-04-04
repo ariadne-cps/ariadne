@@ -91,8 +91,8 @@ test_simplex()
   cout << "s.coordinates(pt2)=" << s.coordinates(pt2) << endl;
   cout << "s.coordinates(pt3)=" << s.coordinates(pt3) << endl;
   
-  assert(!s.contains(pt1));
-  assert(s.contains(pt3));
+  assert((bool)(!s.contains(pt1)));
+  assert((bool)(s.contains(pt3)));
   assert(indeterminate(s.contains(pt2)));
   
   return 0;

@@ -38,7 +38,7 @@
 
 
 #include "../linear_algebra/matrix.h"
-#include "../logging.h"
+#include "../output/logging.h"
 
 namespace Ariadne { 
   namespace LinearAlgebra {

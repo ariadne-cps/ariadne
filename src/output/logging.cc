@@ -1,5 +1,5 @@
 /***************************************************************************
- *            logging.h
+ *            logging.cc
  *
  *  Copyright  2004-6  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
@@ -21,9 +21,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "logging.h"
+#include "output/logging.h"
 
 namespace Ariadne {
+  namespace Output {
+    std::ofstream log_file_stream;
+
+    void redirect_log(const char* filename) {
+      if(log_file_stream.is_open()) {
+        log_file_stream.close();
+      }
+      log_file_stream.open(filename);
+      std::clog.rdbuf( log_file_stream.rdbuf() );
+    }
+
+  }
+
   namespace Numeric { int verbosity=0; } 
   namespace LinearAlgebra { int verbosity=0; } 
   namespace Combinatoric { int verbosity=0; } 

@@ -37,6 +37,7 @@
 #include "geometry/polytope.h"
 #include "geometry/ppl_polyhedron.h"
 #include "output/epsfstream.h"
+#include "output/logging.h"
 
 #ifdef HAVE_PPL_HH
 #include <ppl.hh>
@@ -58,7 +59,8 @@ template<> int test_polytope<Rational>();
 int main() {
   test_polytope<Float>();
   test_polytope<Rational>();
-  
+ 
+
   cerr << "INCOMPLETE ";
 }
 
@@ -191,7 +193,6 @@ test_polytope<Rational>()
   Polyhedron<R> plhd(Rectangle<R>("[0,1]x[-1,2]x[-1,3]"));
   Polytope<R> pltp(plhd);
   cout << "pltp=" << pltp << endl;
-
 
 #ifdef HAVE_PPL_HH
   Parma_Polyhedra_Library::C_Polyhedron ppl_p=ppl_polyhedron(p);

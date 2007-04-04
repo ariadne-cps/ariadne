@@ -191,7 +191,7 @@ namespace Ariadne {
     PointList<typename Numeric::traits<RC,RG>::arithmetic_type>
     Zonotope<RC,RG>::vertices() const
     {
-      //std::cerr << "Zonotope<RC,RG>::vertices()" << std::endl;
+      //std::clog << "Zonotope<RC,RG>::vertices()" << std::endl;
       PointList<typename Numeric::traits<R>::arithmetic_type> v(this->dimension());
       for(typename Zonotope<RC,RG>::vertices_const_iterator vi=this->vertices_begin();
           vi!=this->vertices_end(); ++vi)
@@ -531,7 +531,7 @@ namespace Ariadne {
     tribool
     disjoint(const Rectangle<R>& r, const Zonotope<RC,RG>& z)
     {
-      if(verbosity>7) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+      if(verbosity>7) { std::clog << __PRETTY_FUNCTION__ << std::endl; }
       return disjoint(z,r);
     }
     
@@ -539,7 +539,7 @@ namespace Ariadne {
     tribool
     disjoint(const Zonotope<RC,RG>& z1, const Zonotope<RC,RG>& z2)
     {
-      if(verbosity>7) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+      if(verbosity>7) { std::clog << __PRETTY_FUNCTION__ << std::endl; }
       Zonotope<Numeric::Rational> qz1;
       Zonotope<Numeric::Rational> qz2;
       convert(qz1,z1);
@@ -863,8 +863,8 @@ namespace {
     tribool
     disjoint_exact(const Zonotope<Rational,Rational>& z, const Rectangle<Rational>& r)
     {
-      if(Geometry::verbosity>7) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      if(Geometry::verbosity>8) { std::cerr << z << " " << r << std::endl; }
+      if(Geometry::verbosity>7) { std::clog << __PRETTY_FUNCTION__ << std::endl; }
+      if(Geometry::verbosity>8) { std::clog << z << " " << r << std::endl; }
       
       check_equal_dimensions(z,r,__PRETTY_FUNCTION__);
       dimension_type d=z.dimension();
@@ -904,7 +904,7 @@ namespace {
       const LinearAlgebra::Matrix<Q> qG=G;
       const LinearAlgebra::Vector<Q> qrhs=qc-ql-qG*qo;
       
-      if(Geometry::verbosity>8) { std::cerr << "ql=" << ql << ", qd=" << qd <<", qc=" << qc << ", qrhs=" << qrhs << std::endl; }
+      if(Geometry::verbosity>8) { std::clog << "ql=" << ql << ", qd=" << qd <<", qc=" << qc << ", qrhs=" << qrhs << std::endl; }
       
       // Set up constraints x+sx=u-l
       for(size_type i=0; i!=d; ++i) {
@@ -1024,7 +1024,7 @@ namespace {
       
       tribool result=!lp.is_feasible();
       
-      //std::cerr << "disjoint(" << z1 << "," << z2 << ")=" << result << std::endl;
+      //std::clog << "disjoint(" << z1 << "," << z2 << ")=" << result << std::endl;
       return result;
     }
     
@@ -1035,7 +1035,7 @@ namespace {
     tribool 
     contains_exact(const Zonotope<Rational,Rational>& z, const Point<Rational>& pt)
     { 
-      //std::cerr << "Zonotope<RC,RG>::contains(const Point<R>& )" << std::endl;
+      //std::clog << "Zonotope<RC,RG>::contains(const Point<R>& )" << std::endl;
       //typedef typename Numeric::traits<R,R>::arithmetic_type Q;
       typedef Rational Q;
       check_equal_dimensions(z,pt,__PRETTY_FUNCTION__);
@@ -1087,9 +1087,9 @@ namespace {
       }
       
       LinearAlgebra::LinearProgram<Q> lp(T);
-      //std::cerr << lp.tableau() << std::endl;
+      //std::clog << lp.tableau() << std::endl;
       tribool result=lp.is_feasible();
-      //std::cerr << lp.tableau() << std::endl;
+      //std::clog << lp.tableau() << std::endl;
       return result;
     }
 

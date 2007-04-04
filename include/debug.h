@@ -28,37 +28,6 @@
 
 namespace Ariadne {
 
-#ifdef DEBUG
-  static const int default_debug_level=1; 
-#else
-  static const int default_debug_level=0; 
-#endif
-
-  class dbgstream;
-  template<class T> dbgstream& operator<<(dbgstream& dbgs, const T& t);
-
-  class dbgstream : public std::ostream
-  {
-   public:
-    dbgstream(std::ostream& os, int debug_level=default_debug_level) : _stream(os), _debug_level(debug_level) { }
-    dbgstream(int debug_level=default_debug_level) : _stream(std::cerr), _debug_level(debug_level) { }
-   private:
-    template<class T> friend dbgstream& operator<<(dbgstream& dbgs, const T& t);
-   private:
-    std::ostream& _stream;
-    int _debug_level;
-  };
-
-
-  template<class T>
-  inline
-  dbgstream& 
-  operator<<(dbgstream& dbgs, const T& t) 
-  {
-    if(dbgs._debug_level>0) { dbgs._stream << t; }
-    return dbgs;
-  }
-
 } // namespace Ariadne
 
 #endif // _ARIADNE_DEBUG_H

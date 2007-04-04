@@ -251,8 +251,8 @@ namespace Ariadne {
       typedef Numeric::Rational R;
       typedef Numeric::Rational F;
 
-      if(verbosity>7) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-      if(verbosity>8) { std::cerr << p << " " << r << std::endl; }
+      if(verbosity>7) { std::clog << __PRETTY_FUNCTION__ << std::endl; }
+      if(verbosity>8) { std::clog << p << " " << r << std::endl; }
       
       check_equal_dimensions(p,r,__PRETTY_FUNCTION__);
       dimension_type d=p.dimension();
@@ -264,7 +264,7 @@ namespace Ariadne {
       LinearAlgebra::Matrix<R> A=p.A();
       LinearAlgebra::Vector<F> b=p.b()-A*r.lower_corner().position_vector();
       
-      if(verbosity>8) { std::cerr << "u'=" << u << " A'=" << A << " b'=" << b << std::endl; }
+      if(verbosity>8) { std::clog << "u'=" << u << " A'=" << A << " b'=" << b << std::endl; }
 
       // count number of negative constraints
       for(size_type i=0; i!=nc; ++i) {
@@ -308,7 +308,7 @@ namespace Ariadne {
         }
       }
 
-      if(verbosity>8) { std::cerr << T << std::endl; }
+      if(verbosity>8) { std::clog << T << std::endl; }
 
       LinearAlgebra::LinearProgram<F> lp(T);
       tribool result=!lp.is_feasible();

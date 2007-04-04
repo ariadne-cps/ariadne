@@ -93,7 +93,6 @@ Ariadne::Evaluation::HybridEvolver<R>::_continuous_chainreach(const System::Hybr
                                                               const Geometry::HybridGridMaskSet<R>& invariant_set,
                                                               const Geometry::HybridGridMaskSet<R>& domain_set)
 {
-  //if(verbosity>5) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
   Geometry::HybridGridMaskSet<R> result_set(initial_set);
   
   typedef typename System::HybridAutomaton<R>::discrete_mode_iterator discrete_mode_iterator;
@@ -161,7 +160,6 @@ Ariadne::Evaluation::HybridEvolver<R>::continuous_chainreach(const System::Hybri
     }
   }
   
-  //if(verbosity>5) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
   typedef typename System::HybridAutomaton<R>::discrete_mode_iterator discrete_mode_iterator;
   
   Geometry::HybridGridMaskSet<R> invariant_set(bounding_set);
@@ -237,11 +235,11 @@ Ariadne::Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<
   
   Geometry::HybridGridCellListSet<R> new_activated=regular_intersection(intermediate_set,activations);
   while(!Geometry::subset(new_activated,already_activated)) {
-    if(verbosity > 5) { std::cerr << new_activated.size() << " activated cells, " << std::flush; }
+    if(verbosity > 5) { std::clog << new_activated.size() << " activated cells, " << std::flush; }
     new_activated.unique_sort();
-    if(verbosity > 5) { std::cerr << "of which " << new_activated.size() << " are not duplicates, " << std::flush; }
+    if(verbosity > 5) { std::clog << "of which " << new_activated.size() << " are not duplicates, " << std::flush; }
     new_activated=Geometry::difference(new_activated,already_activated);
-    if(verbosity > 5) { std::cerr << "and " << new_activated.size() << " are new. " << std::endl; }
+    if(verbosity > 5) { std::clog << "and " << new_activated.size() << " are new. " << std::endl; }
     already_activated.adjoin(new_activated);
     intermediate_set.clear();
     Geometry::HybridGridCellListSet<R> new_activated_image=this->discrete_step(hybrid_automaton,new_activated);

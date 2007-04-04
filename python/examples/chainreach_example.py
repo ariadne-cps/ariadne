@@ -122,9 +122,10 @@ ginit.adjoin_over_approximation(init)
 ginv=GridMaskSet(fgrid)
 ginv.adjoin_over_approximation(inv)
 
-set_evaluation_verbosity(4)
-
+redirect_log("chainreach_example.log")
+set_evaluation_verbosity(6)
 reach=integrator.chainreach(dyn,ginit,ginv)
+set_evaluation_verbosity(0)
 
 # Eps output
 eps.open("chainreach_example3.eps",bounding_box,0,1)

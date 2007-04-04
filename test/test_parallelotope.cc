@@ -57,8 +57,6 @@ template<class R>
 int
 test_parallelotope()
 { 
-  LinearAlgebra::verbosity=9;
-  
   Rectangle<R> r1=Rectangle<R>("[9,11]x[5,11]x[-1,1]");
   Rectangle<R> r2=Rectangle<R>("[4.875,5.125]x[2.875,3.125]x[1.75,2.25]");
   Rectangle<R> r3=Rectangle<R>("[-1,9]x[-1,6]x[0,4]");

@@ -11,9 +11,8 @@ LDADD = -lmpfr -lppl -lgmpxx
 
 SUBDIRS = . python
 
-BASE_SRC = \
-	base/logging.cc
-  
+BASE_SRC = 
+
 NUMERIC_SRC = \
 	numeric/integer.cc numeric/rational.cc \
 	numeric/float64.cc numeric/floatmp.cc 
@@ -61,6 +60,7 @@ EVALUATION_SRC = \
 	evaluation/hybrid_evolver.cc
 
 OUTPUT_SRC = \
+	output/logging.cc \
 	output/epsfstream.cc
 
 noinst_LTLIBRARIES = libbase.la libnumeric.la liblinearalgebra.la libcombinatoric.la libgeometry.la libsystem.la libevaluation.la liboutput.la

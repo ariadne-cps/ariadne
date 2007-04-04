@@ -29,11 +29,11 @@ void lpslv(int m, int n, R* A, int rincA, int cincA, R* B, int incB, R* C, int i
 {
   
   if(verbosity>1) {
-    std::cerr << "lpslv(" << m << "," << n << ", " << A-A << "," << rincA << "," << cincA << ", " 
+    std::clog << "lpslv(" << m << "," << n << ", " << A-A << "," << rincA << "," << cincA << ", " 
               << B-A << "," << incB << ", " << C-A << "," << incC << ", "
               << &d-A << ", " << piv << ")" << std::endl;
-    std::cerr << "T=" << Matrix<R>(m+1,n+1,A,rincA,cincA) << std::endl;
-    std::cerr << "A=" << Matrix<R>(m,n,A,rincA,cincA) << "; b=" << Vector<R>(m,B,incB)
+    std::clog << "T=" << Matrix<R>(m+1,n+1,A,rincA,cincA) << std::endl;
+    std::clog << "A=" << Matrix<R>(m,n,A,rincA,cincA) << "; b=" << Vector<R>(m,B,incB)
               << "; c=" << Vector<R>(n,C,incC) << "; d=" << d << std::endl;
   }
   
@@ -65,7 +65,7 @@ void lpslv(int m, int n, R* A, int rincA, int cincA, R* B, int incB, R* C, int i
     }
 
     if(verbosity>1) {
-      std::cerr << "Pivoting on (exit=" << i << ", enter=" << j << ")" << std::endl;
+      std::clog << "Pivoting on (exit=" << i << ", enter=" << j << ")" << std::endl;
     }
     
     std::swap(piv[j],piv[n+i]);
@@ -107,7 +107,7 @@ void lpslv(int m, int n, R* A, int rincA, int cincA, R* B, int incB, R* C, int i
     A[i*rincA+j*cincA] = scale;
     
     if(verbosity>1) {
-      std::cerr << "A=" << Matrix<R>(m,n,A,rincA,cincA) << "; b=" << Vector<R>(m,B,incB) 
+      std::clog << "A=" << Matrix<R>(m,n,A,rincA,cincA) << "; b=" << Vector<R>(m,B,incB) 
                 << "; c=" << Vector<R>(n,C,incC) << "; d=" << d << std::endl;
     }
     

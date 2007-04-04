@@ -115,7 +115,7 @@ Ariadne::Evaluation::gexp(
   result+=Vector<I>(result.size(),ierr);
 
   if(Evaluation::verbosity>7) { 
-    std::cerr << "A=" << A << ",  t=" << qt << ",  k=" << k << "\n" 
+    std::clog << "A=" << A << ",  t=" << qt << ",  k=" << k << "\n" 
               << "gexp(A,t,k)=" << result << ", err=" << err << std::endl; 
   }
 
@@ -154,7 +154,7 @@ Ariadne::Evaluation::gexp(
   result+=Matrix<I>(result.number_of_rows(),result.number_of_columns(),&ierr,0,0);
   
   if(Evaluation::verbosity>7) { 
-    std::cerr << "A=" << A << ",  t=" << qt << ",  k=" << k << "\n" 
+    std::clog << "A=" << A << ",  t=" << qt << ",  k=" << k << "\n" 
               << "gexp(A,t,k)=" << result << ", err=" << err << std::endl; 
   }
   
@@ -177,10 +177,10 @@ Ariadne::Evaluation::AffineIntegrator<R>::integration_step(
     const Geometry::Zonotope<I>& initial_set, 
     time_type& step_size) const
 {
-  if(verbosity>6) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+  if(verbosity>6) { std::clog << "AffineIntegrator::integration_step(VectorField,Zonotope<Interval>,time_type) const" << std::endl; }
 
   //std::type_info info(&vector_field);
-  //std::cerr << "Vector field type is:" << info.name() << std::endl;
+  //std::clog << "Vector field type is:" << info.name() << std::endl;
   const System::AffineVectorField<R>* affine_vector_field_ptr=dynamic_cast<const System::AffineVectorField<R>*>(&vector_field);
   if(!affine_vector_field_ptr) {
     throw std::runtime_error(std::string(__FUNCTION__)+": dynamic_cast to AffineVectorField failed");
@@ -197,7 +197,7 @@ Ariadne::Evaluation::AffineIntegrator<R>::reachability_step(
     const Geometry::Zonotope< Numeric::Interval<R> >& initial_set, 
     time_type& step_size) const
 {
-  if(verbosity>6) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+  if(verbosity>6) { std::clog << "AffineIntegrator::reachability_step(VectorField,Zonotope<Interval>,time_type) const" << std::endl; }
 
   const System::AffineVectorField<R>* affine_vector_field_ptr=dynamic_cast<const System::AffineVectorField<R>*>(&vector_field);
   if(!affine_vector_field_ptr) {
@@ -221,17 +221,17 @@ Ariadne::Evaluation::AffineIntegrator<R>::integration_step(
   using namespace System;
   
 
-  if(verbosity>6) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+  if(verbosity>6) { std::clog << "AffineIntegrator::integration_step(AffineVectorField,Zonotope<Interval>,time_type) const" << std::endl; }
 
   const AffineVectorField<R>& vf=affine_vector_field;
   Zonotope<I> z=initial_set;
   I h=step_size;
  
   if(verbosity>7) { 
-    std::cerr << "zonotope generators=" << z.generators() << std::endl;
+    std::clog << "zonotope generators=" << z.generators() << std::endl;
   
-    std::cerr << "jacobian=" << vf.A() << std::endl;
-    std::cerr << "step size=" << h << std::endl;
+    std::clog << "jacobian=" << vf.A() << std::endl;
+    std::clog << "step size=" << h << std::endl;
   }
   
   // Use the formula x(t) = x0 + h * P * ( A * x0 + b ) 
@@ -243,17 +243,17 @@ Ariadne::Evaluation::AffineIntegrator<R>::integration_step(
   Matrix<I> iP=gexp(A,h.upper(),1);
   Matrix<I> iD=iP*(h*A)+Matrix<R>::identity(vf.dimension());
 
-  if(verbosity>7) { std::cerr << "approximating derivative=" << iD << std::endl; }
-  if(verbosity>7) { std::cerr << "approximating twist=" << iP << std::endl; }
+  if(verbosity>7) { std::clog << "approximating derivative=" << iD << std::endl; }
+  if(verbosity>7) { std::clog << "approximating twist=" << iP << std::endl; }
 
   Vector<I> iv1=(iD*z.centre().position_vector());
-  if(verbosity>7) { std::cerr << "iv1=" << iv1 << std::endl; }
+  if(verbosity>7) { std::clog << "iv1=" << iv1 << std::endl; }
   Vector<I> iv2=h*(iP*b);
-  if(verbosity>7) { std::cerr << "iv2=" << iv2 << std::endl; }
+  if(verbosity>7) { std::clog << "iv2=" << iv2 << std::endl; }
   Vector<I> icv=iv1+iv2;
   Point<I> ic(icv);
   
-  if(verbosity>7) { std::cerr << "interval centre=" << ic << std::endl; }
+  if(verbosity>7) { std::clog << "interval centre=" << ic << std::endl; }
   
   z=Zonotope<I>(ic,iD*z.generators());
   return z;
@@ -273,7 +273,7 @@ Ariadne::Evaluation::AffineIntegrator<R>::reachability_step(
   using namespace Geometry;
   using namespace System;
   
-  if(verbosity>6) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+  if(verbosity>6) { std::clog << "AffineIntegrator::reachability_step(AffineVectorField,Zonotope<Interval>,time_type) const" << std::endl; }
 
 
   check_equal_dimensions(vector_field,initial_set);

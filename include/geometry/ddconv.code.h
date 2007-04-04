@@ -66,7 +66,7 @@ ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
   LinearAlgebra::Vector<R> v(dimension);
   LinearAlgebra::Vector<R> w(dimension);
   
-  if(verbosity>1) { std::cerr << "C=" << constraints << "\n"; }
+  if(verbosity>1) { std::clog << "C=" << constraints << "\n"; }
 
   // Initialize 'lines' to include lines parallel to coordinate directions.
   number_of_lines=dimension;
@@ -78,8 +78,8 @@ ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
   
   // Add constraints sequentially and compute new generators
   for(size_type k=0; k!=constraints.size(); ++k) {
-    if(verbosity > 1) { std::cerr << "G=" << generators << " l=" << number_of_lines << "\n"; }
-    if(verbosity > 1) { std::cerr << "c=" << constraints[k] << "\n"; }
+    if(verbosity > 1) { std::clog << "G=" << generators << " l=" << number_of_lines << "\n"; }
+    if(verbosity > 1) { std::clog << "c=" << constraints[k] << "\n"; }
     
     // If any line does not saturate the new constraint, add a ray containing 
     // the first such line to the generators. If more lines do not saturate the

@@ -837,7 +837,7 @@ namespace Ariadne {
     GridCellListSet<R>
     over_approximation(const Zonotope<R>& z, const Grid<R>& g) 
     {
-      if(verbosity>7) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+      if(verbosity>7) { std::clog << "GridCellListSet over_approximation(Zonotope z, Grid g)" << std::endl; }
       GridCellListSet<R> result(g);
       check_equal_dimensions(z,g,"over_approximation(Zonotope<R>,Grid<R>)");
       if(z.empty()) {
@@ -916,7 +916,7 @@ namespace Ariadne {
     GridCellListSet<R>
     over_approximation(const Zonotope< Numeric::Interval<R> >& z, const Grid<R>& g) 
     {
-      if(verbosity>7) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+      if(verbosity>7) { std::clog << "GridCellListSet over_approximation(Zonotope<Interval>, Grid g)" << std::endl; }
       GridCellListSet<R> result(g);
       check_equal_dimensions(z,g,"over_approximation(Zonotope<R>,Grid<R>)");
       if(z.empty()) {

@@ -70,9 +70,10 @@ namespace Ariadne {
       using namespace Geometry;
       using namespace System;
  
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+      if(verbosity>6) { std::clog << "EulerIntegrator::integration_step(VectorField,Rectangle,time_type) const" << std::endl; }
 
-      check_equal_dimensions(vector_field,initial_set,__PRETTY_FUNCTION__);
+
+      check_equal_dimensions(vector_field,initial_set,"EulerIntegrator::integration_step(VectorField,Rectangle,time_type) const");
       
       const VectorField<R>& vf(vector_field);
       Rectangle<R> r=initial_set;
@@ -83,14 +84,14 @@ namespace Ariadne {
       r=r+(h*fq);
 
       if(verbosity>0) {
-        std::cerr << "suggested stepsize=" << step_size << std::endl;
+        std::clog << "suggested stepsize=" << step_size << std::endl;
                 
-        std::cerr << "stepsize=" << h << std::endl;
-        std::cerr << "bound=" << q << std::endl;
+        std::clog << "stepsize=" << h << std::endl;
+        std::clog << "bound=" << q << std::endl;
 
-        std::cerr << "derivative=" << fq << std::endl;
+        std::clog << "derivative=" << fq << std::endl;
 
-        std::cerr << "position=" << r << std::endl;
+        std::clog << "position=" << r << std::endl;
       }
       return r;
     }
@@ -108,9 +109,9 @@ namespace Ariadne {
       using namespace Geometry;
       using namespace System;
   
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+      if(verbosity>6) { std::clog << "EulerIntegrator::reachability_step(VectorField,Rectangle,time_type) const" << std::endl; }
 
-      check_equal_dimensions(vector_field,initial_set(),__PRETTY_FUNCTION__);
+      check_equal_dimensions(vector_field,initial_set(),"EulerIntegrator::reachability_step(VectorField,Rectangle,time_type) const");
       
       const VectorField<R>& vf(vector_field);
       Rectangle<R> r=initial_set;
@@ -123,13 +124,13 @@ namespace Ariadne {
       r=r+Vector< Interval<R> >(Interval<R>(R(0),h)*fq);
 
       if(verbosity>1) { 
-        std::cerr << "suggested stepsize=" << step_size << std::endl;
+        std::clog << "suggested stepsize=" << step_size << std::endl;
                   
-        std::cerr << "stepsize=" << h << std::endl;
-        std::cerr << "bound=" << q << std::endl;
+        std::clog << "stepsize=" << h << std::endl;
+        std::clog << "bound=" << q << std::endl;
   
-        std::cerr << "derivative=" << fq << std::endl;
-        std::cerr << "position=" << r << std::endl;
+        std::clog << "derivative=" << fq << std::endl;
+        std::clog << "position=" << r << std::endl;
       }
 
       return r;

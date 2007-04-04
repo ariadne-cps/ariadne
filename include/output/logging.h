@@ -1,7 +1,7 @@
 /***************************************************************************
- *            logging.h
+ *            output/logging.h
  *
- *  Copyright  2004-6  Alberto Casagrande, Pieter Collins
+ *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -25,14 +25,22 @@
 #define _ARIADNE_LOGGING_H
 
 #include <iostream>
-
-#define ARIADNE_SET_VERBOSITY(where,level) \
-  { where::verbosity=level; }
+#include <fstream>
 
 #define ARIADNE_LOG(level,msg) \
   if(verbosity > level) { std::log << msg; }
 
 namespace Ariadne {
+  namespace Output {
+
+    // Global log output file
+    extern std::ofstream log_file_stream;
+  
+    /*! \brief Redirect logging output to file \a filename. */
+    void redirect_log(const char* filename);
+
+  }
+
   namespace Numeric { extern int verbosity; }
   namespace LinearAlgebra { extern int verbosity; }
   namespace Combinatoric { extern int verbosity; }

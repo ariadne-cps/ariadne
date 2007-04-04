@@ -67,8 +67,6 @@ int main() {
 template<class R>
 int test_hybrid_evolution() 
 {  
-  Evaluation::verbosity=7; 
-
   PolyhedralSet<R> space(Rectangle<R>("[-7.5,7.5]x[-7.5,7.5]"));
   AffineMap<R> identity(Matrix<R>("[1,0;0,-1]"),Vector<R>("[0,0]"));
 

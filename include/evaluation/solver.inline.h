@@ -42,7 +42,7 @@ DifferenceMap<R>::DifferenceMap(const Map<R>& f)
   : _base(f)
 { 
   if(f.argument_dimension()!=f.result_dimension()) { 
-    throw Geometry::IncompatibleDimensions(__PRETTY_FUNCTION__); 
+    throw Geometry::IncompatibleDimensions("DifferenceMap::DifferenceMap(Map f): The argument dimension must equal the result dimension"); 
   } 
 }
 

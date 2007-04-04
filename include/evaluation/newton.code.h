@@ -32,43 +32,42 @@
 
 
 template<class R>
-//Ariadne::Geometry::Point<typename IntervalNewtonSolver<R>::I>
 Ariadne::Geometry::Point<typename Ariadne::Evaluation::IntervalNewtonSolver<R>::I>
 Ariadne::Evaluation::IntervalNewtonSolver<R>::solve(const System::VectorField<R>& f, 
                                                     const Geometry::Point<I>& ix)
 {
   const R& e=this->maximum_error();
   uint n=this->maximum_number_of_steps();
-  if(verbosity>1) { std::cerr << "verbosity=" << verbosity << "\n"; }
+  if(verbosity>1) { std::clog << "verbosity=" << verbosity << "\n"; }
   Geometry::Point<I> x=ix;
   Geometry::Rectangle<R> r(x);
   while(n>0) {
-    if(verbosity>1) { std::cerr << "Testing for root in " << x << "\n"; }
-    if(verbosity>1) { std::cerr << "  e=" << Geometry::error_bound(x) << "  x=" << x << std::endl; }
+    if(verbosity>1) { std::clog << "Testing for root in " << x << "\n"; }
+    if(verbosity>1) { std::clog << "  e=" << Geometry::error_bound(x) << "  x=" << x << std::endl; }
     Geometry::Point<R> m=approximate_value(x);
-    if(verbosity>1) { std::cerr << "  m=" << m << std::endl; }
+    if(verbosity>1) { std::clog << "  m=" << m << std::endl; }
     Geometry::Point<I> im(m);
     LinearAlgebra::Vector<I> w=f(im);
-    if(verbosity>1) { std::cerr << "  f(m)=" << w << std::endl; }
+    if(verbosity>1) { std::clog << "  f(m)=" << w << std::endl; }
     LinearAlgebra::Matrix<I> A=f.jacobian(x);
-    if(verbosity>1) { std::cerr << "  Df(r)=" << A << std::endl; }
+    if(verbosity>1) { std::clog << "  Df(r)=" << A << std::endl; }
     LinearAlgebra::Matrix<I> Ainv=A.inverse();
-    if(verbosity>1) { std::cerr << "  inverse(Df(r))=" << Ainv << std::endl; }
+    if(verbosity>1) { std::clog << "  inverse(Df(r))=" << Ainv << std::endl; }
     LinearAlgebra::Vector<I> dx=Ainv * w;
-    if(verbosity>1) { std::cerr << "  dx=" << dx << std::endl; }
+    if(verbosity>1) { std::clog << "  dx=" << dx << std::endl; }
     Geometry::Point<I> nx= m - dx;
-    if(verbosity>1) { std::cerr << "  nx=" << nx << std::endl; } 
+    if(verbosity>1) { std::clog << "  nx=" << nx << std::endl; } 
     Geometry::Rectangle<R> nr(nx);
-    if(verbosity>1) { std::cerr << "  nr=" << nr << std::endl; } 
+    if(verbosity>1) { std::clog << "  nr=" << nr << std::endl; } 
 
     if(verbosity>1) {
-      std::cerr << "  f(x)=" << f(x) << std::flush;
-      std::cerr << "  f(m)=" << approximate_value(f(im)) << std::flush;
-      std::cerr << "  Df(x) =" << A << "  inv=" << inverse(A) << "  I=" << A*inverse(A) << std::flush;
-      std::cerr << "  nx =" << nx << "\n" << std::flush;
-      std::cerr << "  nr =" << nr << "\n" << std::flush;
-      std::cerr << "\n";
-      std::cerr << error_bound(nx) << " < " << e << " ? " << (error_bound(nx) < e) << "\n\n";
+      std::clog << "  f(x)=" << f(x) << std::flush;
+      std::clog << "  f(m)=" << approximate_value(f(im)) << std::flush;
+      std::clog << "  Df(x) =" << A << "  inv=" << inverse(A) << "  I=" << A*inverse(A) << std::flush;
+      std::clog << "  nx =" << nx << "\n" << std::flush;
+      std::clog << "  nr =" << nr << "\n" << std::flush;
+      std::clog << "\n";
+      std::clog << error_bound(nx) << " < " << e << " ? " << (error_bound(nx) < e) << "\n\n";
     }
     
     if(Geometry::subset(nr,r) && Geometry::error_bound(nx) < e) {

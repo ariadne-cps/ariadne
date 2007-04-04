@@ -100,8 +100,8 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorF
   using namespace Geometry;
   using namespace System;
   
-  if(verbosity>6) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
-  if(verbosity>6) { std::cerr << "  step_size=" << conv_approx<double>(step_size) << "  initial_set=" << initial_set << std::endl; }
+  if(verbosity>6) { std::clog << "LohnerIntegrator::integration_step(VectorField,Zonotope<Interval>,time_type) const" << std::endl; }
+  if(verbosity>6) { std::clog << "  step_size=" << conv_approx<double>(step_size) << "  initial_set=" << initial_set << std::endl; }
   const Zonotope<I>& z=initial_set;
   const Point<I>& c=z.centre();
   const Matrix<I>& G=z.generators();
@@ -109,7 +109,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorF
   
   Rectangle<R> bbox=z.bounding_box();
   bbox=this->estimate_flow_bounds(vector_field,bbox,step_size);
-  if(verbosity>4) { if(suggested_step_size!=step_size) { std::cerr << "  using step_size=" << conv_approx<double>(step_size) << std::endl; } }
+  if(verbosity>4) { if(suggested_step_size!=step_size) { std::clog << "  using step_size=" << conv_approx<double>(step_size) << std::endl; } }
   const VectorField<R>& vf=vector_field;
   const size_type n=vf.dimension();
   Interval<R> h=step_size;
@@ -128,16 +128,16 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorF
   Matrix<I> phiG=dphi*G;
 
   if(verbosity>7) {
-    std::cerr << "  flow_bounds=" << bbox << std::endl; 
-    std::cerr << "  centre_flow_bounds=" << cbbox << std::endl; 
-    std::cerr << "  f_for_centre=" << fc << std::endl; 
-    std::cerr << "  f_for_set=" << f << std::endl; 
-    std::cerr << "  df_for_set=" << df << std::endl; 
-    std::cerr << "  hdf_for_set=" << hdf << std::endl; 
-    std::cerr << "  exp_hdf_for_set=" << dphi << std::endl; 
+    std::clog << "  flow_bounds=" << bbox << std::endl; 
+    std::clog << "  centre_flow_bounds=" << cbbox << std::endl; 
+    std::clog << "  f_for_centre=" << fc << std::endl; 
+    std::clog << "  f_for_set=" << f << std::endl; 
+    std::clog << "  df_for_set=" << df << std::endl; 
+    std::clog << "  hdf_for_set=" << hdf << std::endl; 
+    std::clog << "  exp_hdf_for_set=" << dphi << std::endl; 
 
-    std::cerr << "  new_centre=" << phic << std::endl;
-    std::cerr << "  new_generators=" << phiG << std::endl;
+    std::clog << "  new_centre=" << phic << std::endl;
+    std::clog << "  new_generators=" << phiG << std::endl;
   }
   return Zonotope<I>(phic,phiG);
 }
@@ -160,7 +160,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::reachability_step(const System::Vector
   using namespace Geometry;
   using namespace System;
   
-  if(verbosity>6) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+  if(verbosity>6) { std::clog << "LohnerIntegrator::reachability_step(VectorField,Zonotope<Interval>,time_type) const" << std::endl; }
 
   check_equal_dimensions(vector_field,initial_set);
 
@@ -190,23 +190,23 @@ Ariadne::Evaluation::LohnerIntegrator<R>::reachability_step(const System::Vector
   z=Zonotope<I>(phic,mdf,zfh);
 
   if(verbosity>7) {
-    std::cerr << "suggested stepsize=" << step_size << std::endl;
+    std::clog << "suggested stepsize=" << step_size << std::endl;
       
-    std::cerr << "stepsize=" << conv_approx<double>(step_size) << std::endl;
-    std::cerr << "bound=" << bbox << std::endl;
+    std::clog << "stepsize=" << conv_approx<double>(step_size) << std::endl;
+    std::clog << "bound=" << bbox << std::endl;
     
-    std::cerr << "flow=" << f << "=" << std::endl;
-    std::cerr << "jacobian=" << df << std::endl;
-    std::cerr << "flow derivative=" << dphi << std::endl;
+    std::clog << "flow=" << f << "=" << std::endl;
+    std::clog << "jacobian=" << df << std::endl;
+    std::clog << "flow derivative=" << dphi << std::endl;
       
-    std::cerr << "centre=" << c << std::endl;
-    std::cerr << "bounds on centre=" << phic << std::endl;
+    std::clog << "centre=" << c << std::endl;
+    std::clog << "bounds on centre=" << phic << std::endl;
     
-    std::cerr << "flow times stepsize=" << fh << std::endl;
-    std::cerr << "symmetrised flow=" << zfh << std::endl;
-    std::cerr << "over approximating Matrix=" << mdf << std::endl;
+    std::clog << "flow times stepsize=" << fh << std::endl;
+    std::clog << "symmetrised flow=" << zfh << std::endl;
+    std::clog << "over approximating Matrix=" << mdf << std::endl;
     
-    std::cerr << "approximating zonotope " << z;
+    std::clog << "approximating zonotope " << z;
   }
 
   return z;

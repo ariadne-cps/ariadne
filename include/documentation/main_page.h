@@ -75,8 +75,13 @@ To build the source code from the Subversion repository, you will also need
   - GNU m4 <a href="http://www.gnu.org/software/m4/">http://www.gnu.org/software/m4/</a>.
   - Perl <a href="http://www.perl.org/">http://www.perl.org/</a>.
 
-\section Installation
+\section installation Installation from a source tarball
 
+Unpack the source tarball and change to the main directory
+\code 
+  tar -xzf ariadne-x.y.z.tar.gz
+  cd ariadne-x.y.z
+\endcode
 From main source directory, type
 \code 
   ./configure
@@ -89,10 +94,19 @@ These defaults can be changed by using the --prefix flag to ./configure, as in
   ./configure --prefix=$HOME
 \endcode
 
+By default, the C++ library is compiled with both Float64 and FloatMP support, and the Python interface is compiled to use Float64 as the default floating-point type. The flags \tt --disable-float64 or \tt --disable-floatmp can be used to disable support for Float64 or FloatMP, respectively. If Float64 support is disabled, then the Python interface is automatically compiled with FloatMP support. To compile the Python interface with FloatMP support, use \tt --enable-python=FloatMP.
+
+For example, to configure with only 64-bit floating-point support enabled (which should result in the shortest compile times), use
+\code 
+  ./configure --disable-floatmp
+\endcode
+
+\section svninstallation Installation from the Subversion repository
+
 If installing from the Subversion repository, change to the ariadne/trunk/ directory and type 
 \code 
   ./bootstrap
 \endcode
-Then follow the directions above.
+And follow the directions above.
 
 */

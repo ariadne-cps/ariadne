@@ -11,9 +11,12 @@ LDADD = -lmpfr -lppl -lgmpxx
 
 SUBDIRS = . python
 
+BASE_SRC = \
+	base/logging.cc
+  
 NUMERIC_SRC = \
-  numeric/integer.cc numeric/rational.cc \
-  numeric/float64.cc numeric/floatmp.cc 
+	numeric/integer.cc numeric/rational.cc \
+	numeric/float64.cc numeric/floatmp.cc 
 
 LINEAR_ALGEBRA_SRC = \
 	linear_algebra/vector.cc linear_algebra/matrix.cc \
@@ -60,18 +63,19 @@ EVALUATION_SRC = \
 OUTPUT_SRC = \
 	output/epsfstream.cc
 
-noinst_LTLIBRARIES = libnumeric.la liblinearalgebra.la libcombinatoric.la libgeometry.la libsystem.la libevaluation.la liboutput.la
+noinst_LTLIBRARIES = libbase.la libnumeric.la liblinearalgebra.la libcombinatoric.la libgeometry.la libsystem.la libevaluation.la liboutput.la
 
 lib_LTLIBRARIES = libariadne.la 
 libariadne_la_LIBADD = $(noinst_LTLIBRARIES) -lmpfr -lppl -lgmpxx
 libariadne_la_SOURCES = 
 nodist_EXTRA_libariadne_la_SOURCES = dummy.cc
 
-libgeometric_la_LIBADD = libnumeric.la liblinearalgebra.la libcombinatoric.la libgeometry.la -lmpfr -lppl -lgmpxx
+libgeometric_la_LIBADD = libbase.la libnumeric.la liblinearalgebra.la libcombinatoric.la libgeometry.la -lmpfr -lppl -lgmpxx
 libgeometric_la_SOURCES = 
 nodist_EXTRA_libgeometric_la_SOURCES = dummy.cc
 
 
+libbase_la_SOURCES = $(BASE_SRC)
 libnumeric_la_SOURCES = $(NUMERIC_SRC)
 liblinearalgebra_la_SOURCES = $(LINEAR_ALGEBRA_SRC)
 libcombinatoric_la_SOURCES = $(COMBINATORIC_SRC)

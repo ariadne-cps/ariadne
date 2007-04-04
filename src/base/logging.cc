@@ -21,24 +21,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _ARIADNE_LOGGING_H
-#define _ARIADNE_LOGGING_H
-
-#include <iostream>
-
-#define ARIADNE_SET_VERBOSITY(where,level) \
-  { where::verbosity=level; }
-
-#define ARIADNE_LOG(level,msg) \
-  if(verbosity > level) { std::log << msg; }
+#include "logging.h"
 
 namespace Ariadne {
-  namespace Numeric { extern int verbosity; }
-  namespace LinearAlgebra { extern int verbosity; }
-  namespace Combinatoric { extern int verbosity; }
-  namespace Geometry { extern int verbosity; }
-  namespace System { extern int verbosity; }
-  namespace Evaluation { extern int verbosity; }
+  namespace Numeric { int verbosity=0; } 
+  namespace LinearAlgebra { int verbosity=0; } 
+  namespace Combinatoric { int verbosity=0; } 
+  namespace Geometry { int verbosity=0; } 
+  namespace System { int verbosity=0; } 
+  namespace Evaluation { int verbosity=0; } 
 }
-
-#endif // _ARIADNE_LOGGING_H

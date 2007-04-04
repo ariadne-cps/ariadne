@@ -29,7 +29,7 @@
 namespace Ariadne {
 namespace Geometry {
 
-int verbosity=0;
+extern int verbosity;
 
 /*! \param argument is a list of constraints (or generators).
  *  \param result is an output parameter storing a list of generators (or constraints).

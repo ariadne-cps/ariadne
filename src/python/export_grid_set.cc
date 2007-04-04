@@ -193,11 +193,13 @@ void export_grid_set()
     .def(self_ns::str(self))    // __str__
     ;
 
+
   def("join",(RGridMaskSet(*)(const RGridMaskSet&,const RGridMaskSet&))(&Geometry::join));
   def("difference",(RGridMaskSet(*)(const RGridMaskSet&,const RGridMaskSet&))(&Geometry::difference));
   def("regular_intersection",(RGridMaskSet(*)(const RGridMaskSet&,const RGridMaskSet&))(&Geometry::regular_intersection));
   def("overlap",(tribool(*)(const RGridMaskSet&,const RGridMaskSet&))(&Geometry::overlap));
-  def("overlap",(tribool(*)(const RGridMaskSet&,const RGridMaskSet&))(&Geometry::overlap));
+  def("subset",(tribool(*)(const RGridMaskSet&,const RGridMaskSet&))(&Geometry::subset));
+  def("subset",(tribool(*)(const RGridCellListSet&,const RGridMaskSet&))(&Geometry::subset));
 
   def("over_approximation",(RGridBlock(*)(const IPoint&,const RGrid&))(&Geometry::over_approximation));
   def("over_approximation",(RGridBlock(*)(const RRectangle&,const RGrid&))(&Geometry::over_approximation));

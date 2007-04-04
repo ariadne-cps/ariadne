@@ -5,6 +5,7 @@
 # Written by Davide Bresolin on April, 2007
 #
 
+import sys
 from ariadne import *
 
 # Definition of the automaton
@@ -49,6 +50,7 @@ bound=Rectangle("[0,3]x[0,3]")
 bounding_set=HybridGridMaskSet()
 bounding_set.new_location(m0.id(),fgrid)
 bounding_set[m0.id()].adjoin_over_approximation(bound)
+
 
 print "Computing continuous chainreachable set with bounding box [0,5]x[0,5]..."
 reach_set=hybrid_evolver.continuous_chainreach(automaton,initial_set,bounding_set)
@@ -112,20 +114,20 @@ eps.write(fgrid)
 
 eps.close()
 
-print "Computing chainreachable set with bounding box [0,1]x[0,1] using Integrator..."
+print "Computing chainreachable set with bounding box",inv,"using Integrator..."
+block=LatticeBlock("[-2,6]x[-2,6]")
+fgrid=FiniteGrid(grid,block)
 ginit=GridMaskSet(fgrid)
 ginit.adjoin_over_approximation(init)
 ginv=GridMaskSet(fgrid)
 ginv.adjoin_over_approximation(inv)
 
+set_evaluation_verbosity(4)
+
 reach=integrator.chainreach(dyn,ginit,ginv)
 
 # Eps output
 eps.open("chainreach_example3.eps",bounding_box,0,1)
-
-# Write the bounding box
-eps.set_fill_colour("white")
-eps.write(bounding_box)
 
 # Write the invariant
 eps.set_fill_colour("yellow")
@@ -141,7 +143,7 @@ eps.set_fill_colour("blue")
 eps.write(ginit)
 eps.write(init)
 
-eps.write(fgrid)
+#eps.write(fgrid)
 
 eps.close()
 

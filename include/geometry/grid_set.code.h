@@ -1163,7 +1163,8 @@ namespace Ariadne {
     GridCellListSet<R>::write(std::ostream& os) const 
     {
       os << "GridCellListSet<" << Numeric::name<R>() << ">(\n";
-      os << "  grid=" << this->grid() << "\n";
+      os << "  grid=" << this->grid() << ",\n";
+      os << "  size=" << this->size() << ",\n";
       os << "  lattice_set=" << this->lattice_set();
       os << ")" << std::endl;
       return os;
@@ -1176,8 +1177,10 @@ namespace Ariadne {
     GridMaskSet<R>::write(std::ostream& os) const 
     {
       os << "GridMaskSet<" << Numeric::name<R>() << ">("<< std::endl;
-      os << "  grid=" << this->grid();
-      os << "  bounds=" << this->bounds() << std::endl;
+      os << "  grid=" << this->grid() << "," << std::endl;
+      os << "  bounds=" << this->bounds() << "," << std::endl;
+      os << "  size=" << this->size() << "," << std::endl;
+      os << "  capacity=" << this->capacity() << "," << std::endl;
       os << "  mask=" << this->mask() << std::endl;
       os << ")\n";
       return os;

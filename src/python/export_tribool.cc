@@ -30,13 +30,22 @@ using namespace Ariadne::Base;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-std::ostream& operator<<(std::ostream& os, const tribool& tb)
-{
-  if(tb==true) { os << "True"; }
-  else if (tb==false) { os << "False"; }
-  else { os << "Indeterminate"; }
-  return os;
+const char * tribool_c_str(tribool tb) {
+  if(indeterminate(tb)) { return "Indeterminate"; }
+  if(tb==true) { return "True"; }
+  else if(tb==false) { return "False"; }
+  else { return "Indeterminate"; }
 }
+
+tribool tribool_not(tribool tb) {
+  return !tb;
+}
+
+bool tribool_nonzero(tribool tb) {
+  return tb==true;
+}
+
+tribool Indeterminate() { return indeterminate; }
 
 void export_tribool() {
 
@@ -51,7 +60,13 @@ void export_tribool() {
     .def("__and__", (tribool(*)(tribool,bool))(&boost::logic::operator!=))
     .def("__or__", (tribool(*)(tribool,tribool))(&boost::logic::operator!=))
     .def("__or__", (tribool(*)(tribool,bool))(&boost::logic::operator!=))
-    .def(self_ns::str(self))
+    // WARNING: __not__ is not a special method!
+    .def("__not__", (tribool(*)(tribool))(&boost::logic::operator!))
+    .def("__nonzero__", &tribool_nonzero)
+    .def("__str__", &tribool_c_str)
+    //    .def(self_ns::str(self))
   ;
   
+  def("indeterminate",(tribool(*)(void))&Indeterminate);
+
 }

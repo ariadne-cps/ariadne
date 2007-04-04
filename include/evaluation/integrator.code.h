@@ -798,7 +798,10 @@ namespace Ariadne {
         //throw std::runtime_error(strcat(__PRETTY_FUNCTION__,": Initial set must be subset of bounding set"));
         throw std::runtime_error("Initial set must be subset of bounding set");
       }
-        
+      verbosity=4;
+      if(verbosity>3) { std::cerr << "initial_set=" << initial_set << std::endl; }
+      if(verbosity>3) { std::cerr << "bounding_set=" << bounding_set << std::endl; }
+
       const GridMaskSet& is=initial_set;
       const Rectangle bb=bounding_set.bounding_box();
       
@@ -853,8 +856,12 @@ namespace Ariadne {
           result.adjoin_over_approximation(fz);
         }
       }
+      result=regular_intersection(result,bounding_set);
       if(verbosity>4) { std::cerr << "Reached " << result.size() << " cells, " << std::endl; }
-      
+
+      if(!subset(result,bounding_set)) {
+        std::cerr << "WARNING: result is not a subset of bounding_set\n"; 
+      }
       return result;
     }
 

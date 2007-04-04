@@ -291,8 +291,10 @@ namespace Ariadne {
     template<class BS> epsfstream& operator<<(epsfstream&, const Geometry::ListSet<BS>&); 
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::GridCellListSet<R>&); 
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::GridMaskSet<R>&); 
-    template<class R> epsfstream& operator<<(epsfstream&, const Geometry::PartitionTree<R>&); 
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::PartitionTreeSet<R>&); 
+
+    template<class R> epsfstream& operator<<(epsfstream&, const Geometry::FiniteGrid<R>&); 
+    template<class R> epsfstream& operator<<(epsfstream&, const Geometry::PartitionTree<R>&); 
 
     
 
@@ -396,13 +398,6 @@ namespace Ariadne {
     }
     
 
-    template<class R> inline
-    epsfstream&
-    operator<<(epsfstream& eps, const Geometry::GridMaskSet<R>& ds)
-    {
-      return eps << Geometry::ListSet< Geometry::Rectangle<R> >(ds);
-    }
-    
  
     template<class R> inline
     epsfstream&
@@ -414,18 +409,45 @@ namespace Ariadne {
 
     template<class R> inline
     epsfstream&
+    operator<<(epsfstream& eps, const Geometry::GridMaskSet<R>& ds)
+    {
+      return eps << Geometry::ListSet< Geometry::Rectangle<R> >(ds);
+    }
+    
+ 
+
+    template<class R> inline
+    epsfstream&
     operator<<(epsfstream& eps, const Geometry::PartitionTreeSet<R>& ds)
     {
       return eps << Geometry::ListSet< Geometry::Rectangle<R> >(ds);
     }
 
+
+    template<class R> inline
+    epsfstream&
+    operator<<(epsfstream& eps, const Geometry::FiniteGrid<R>& fg)
+    {
+      bool fill_style=eps.fill_style;
+      if(fill_style) { eps.fill_style=false; }
+      Geometry::GridCellListSet<R> gcls(fg.grid());
+      gcls.adjoin(Geometry::GridBlock<R>(fg.grid(),fg.lattice_block()));
+      eps << gcls;
+      if(fill_style) { eps.fill_style=true; }
+      return eps;
+    }
+
+
     template<class R> inline
     epsfstream&
     operator<<(epsfstream& eps, const Geometry::PartitionTree<R>& pt)
     {
+      bool fill_style=eps.fill_style;
+      if(fill_style) { eps.fill_style=false; }
       for(typename Geometry::PartitionTree<R>::const_iterator iter = pt.begin(); iter!=pt.end(); ++iter) {
         eps << Geometry::Rectangle<R>(*iter);
       }
+      if(fill_style) { eps.fill_style=true; }
       return eps;
     }
     

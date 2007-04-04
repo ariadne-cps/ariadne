@@ -212,7 +212,7 @@ epsfstream::write_header()
           << "%%For: Test\n"
           << "%%Pages: 1\n"
           << "%%DocumentFonts: /Times-Roman\n"
-          << "%%BoundingBox: 0 0 " << xBBoxSide+10 << " " << yBBoxSide+10 << "\n"
+          << "%%BoundingBox: -10 -10 " << xBBoxSide+10 << " " << yBBoxSide+10 << "\n"
           << "%%EndComments\n"
           << "\n";
   

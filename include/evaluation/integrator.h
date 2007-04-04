@@ -103,7 +103,7 @@ namespace Ariadne {
       //@{
       //! \name Integration routines
 
-      /*! \brief Integrate \a intial_set for time \a time under \a vector_field. Returns a dynamically allocated set. */
+      /*! \brief Integrate \a intial_set for time \a time under \a vector_field. Returns a dynamically allocated set. (Not currently implemented) */
       virtual Geometry::SetInterface<R>* integrate(const System::VectorField<R>& vector_field,
                                                    const Geometry::SetInterface<R>& initial_set,
                                                    const time_type& time) const;

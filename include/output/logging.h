@@ -28,7 +28,7 @@
 #include <fstream>
 
 #define ARIADNE_LOG(level,msg) \
-  if(verbosity > level) { std::log << msg; }
+  if(verbosity > level) { std::clog << msg; }
 
 namespace Ariadne {
   namespace Output {

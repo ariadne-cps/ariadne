@@ -30,12 +30,12 @@
 
 #include "test_float.h"
 
-#include "logging.h"
 #include "base/utility.h"
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
 #include "output/epsfstream.h"
+#include "output/logging.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;

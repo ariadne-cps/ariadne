@@ -1,7 +1,7 @@
 /***************************************************************************
  *            lohner_integrator.code.h
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
+ *  Copyright  2006-7  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
@@ -36,8 +36,6 @@
 
 #include "lohner_integrator.h"
 
-#include "../logging.h"
-
 #include "../base/array.h"
 #include "../base/exceptions.h"
 #include "../numeric/arithmetic.h"
@@ -59,6 +57,8 @@
 #include "../system/affine_vector_field.h"
 
 #include "../evaluation/integrator.h"
+
+#include "../output/logging.h"
 
 namespace Ariadne { 
 namespace Evaluation { 

@@ -65,6 +65,11 @@ namespace Ariadne {
       IncompatibleGrids(const std::string& str) : std::runtime_error(str) { }
     };
       
+    /*! \brief Attempting to perform a binary operation on two objects on incompatible grids. */
+    struct InvalidGridPosition : public std::runtime_error {
+      InvalidGridPosition(const std::string& str) : std::runtime_error(str) { }
+    };
+      
     /*! \brief Attempting to perform an operation on an unbounded set. */
     struct UnboundedSet : public std::runtime_error {
       UnboundedSet(const std::string& str) : std::runtime_error(str) { }

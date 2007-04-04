@@ -1,7 +1,7 @@
 /***************************************************************************
  *            affine_integrator.code.h
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
+ *  Copyright  2006-7  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
@@ -38,7 +38,7 @@
 #include "affine_integrator.h"
 
 #include "../base/array.h"
-#include "../logging.h"
+
 #include "../numeric/arithmetic.h"
 #include "../numeric/interval.h"
 
@@ -60,9 +60,7 @@
 
 #include "../evaluation/integrator.h"
 
-namespace Ariadne { namespace Evaluation { extern int verbosity; static bool warning=true; } }
-
-
+#include "../output/logging.h"
 
     
 template<class R> 

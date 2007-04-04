@@ -30,6 +30,7 @@
 #include "geometry/grid.h"
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
+#include "geometry/rectangular_set.h"
 #include "evaluation/applicator.h"
 #include "output/epsfstream.h"
 #include "models/henon.h"
@@ -54,6 +55,8 @@ template<class R>
 int 
 test_chainreach()
 {
+  int subdivisions=128;
+
   Point<R> params=Point<R>("(1.5,0.875)");
   R a=params[0];
   R b=params[1];
@@ -80,16 +83,22 @@ test_chainreach()
   bd.adjoin(over_approximation(gbb,g));
 
   Applicator<R> apply;
+  apply.set_grid_size(16.0/subdivisions);
 
-  GridMaskSet<R> cr=apply.chainreach(h,in,bd);
-  PartitionTreeSet<R> ptcr=PartitionTreeSet<R>(cr);
+  GridMaskSet<R> gmcr=apply.chainreach(h,in,bd);
+  PartitionTreeSet<R> ptcr=PartitionTreeSet<R>(gmcr);
 
-  cout << cr <<endl;
+  cout << gmcr <<endl;
   cout << ptcr <<endl;
   
-  cout << "cr.size()=" << cr.size() << endl;
+  cout << "gmcr.size()=" << gmcr.size() << endl;
   cout << "ptcr.size()=" << ptcr.size() << "  " << flush;
   cout << "ptcr.capacity()=" << ptcr.capacity() << endl;
+
+  RectangularSet<R> ins(ir);
+  RectangularSet<R> cbs(cb);
+  SetInterface<R>* crs=apply.chainreach(h,ins,cbs);
+  cout << *crs <<endl;
 
   epsfstream eps;
   eps.open("test_chainreach-1.eps",epsbb);
@@ -98,7 +107,7 @@ test_chainreach()
   eps << cb;
   eps.set_line_style(false);
   eps.set_fill_colour("green");
-  eps << cr;
+  eps << gmcr;
   eps.set_line_style(true);
   eps.set_fill_style(false);
   eps << ptcr.partition_tree();
@@ -107,7 +116,6 @@ test_chainreach()
   eps << ir;
   eps.close();
 
-  GridMaskSet<R> gmcr=GridMaskSet<R>(cr);
   eps.open("test_chainreach-2.eps",epsbb);
   eps.set_line_style(false);
   eps.set_fill_colour("red");
@@ -116,6 +124,12 @@ test_chainreach()
   eps << gmcr.adjoining();
   eps.set_fill_colour("green");
   eps << gmcr;
+  eps.close();
+
+  eps.open("test_chainreach-3.eps",epsbb);
+  eps.set_line_style(false);
+  eps.set_fill_colour("green");
+  eps << crs;
   eps.close();
 
   return 0;

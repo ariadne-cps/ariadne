@@ -50,22 +50,22 @@ namespace Ariadne {
       
       //@{
       //! \name Evolution using abstract sets.
-      /*! \brief Make a discrete step of the hybrid automaton, starting from initial set. */
+      /*! \brief Make a discrete step of the hybrid automaton, starting from initial set. (NOT CURRENTLY IMPLEMENTED) */
       Geometry::HybridSet<R> discrete_step(const System::HybridAutomaton<R>& automaton, 
                                            const Geometry::HybridSet<R>& initial_set);
      
-      /*! \brief Evolve the hybrid automaton within \a bounding_set starting from the \a initial_set respecting invariants and without using discrete transitions. */
+      /*! \brief Evolve the hybrid automaton within \a bounding_set starting from the \a initial_set respecting invariants and without using discrete transitions. (NOT CURRENTLY IMPLEMENTED) */
       Geometry::HybridSet<R> continuous_chainreach(const System::HybridAutomaton<R>& automaton, 
                                                    const Geometry::HybridSet<R>& initial_set,
                                                    const Geometry::HybridSet<R>& bounding_set);
      
-      /*! \brief Compute the system evolution at \a time with up to \a maximum_number_of_events using lower semantics. */
+      /*! \brief Compute the system evolution at \a time with up to \a maximum_number_of_events using lower semantics. (NOT CURRENTLY IMPLEMENTED) */
       Geometry::HybridSet<R> lower_evolve(const System::HybridAutomaton<R>& automaton, 
                                           const Geometry::HybridSet<R>& initial_set, 
                                           time_type evolution_time,
                                           size_type maximum_number_of_events);
       
-      /*! \brief Compute the system evolution at \a time with up to \a maximum_number_of_events using upper semantics. */
+      /*! \brief Compute the system evolution at \a time with up to \a maximum_number_of_events using upper semantics. (NOT CURRENTLY IMPLEMENTED) */
       Geometry::HybridSet<R> upper_evolve(const System::HybridAutomaton<R>& automaton, 
                                           const Geometry::HybridSet<R>& initial_set, 
                                           time_type evolution_time,

@@ -36,6 +36,7 @@
 #include "../geometry/list_set.h"
 
 #include "../geometry/grid_set.h" // for GridBlock<R>
+#include "../output/logging.h" // for GridBlock<R>
 
 namespace Ariadne {
   namespace Geometry {
@@ -174,10 +175,15 @@ namespace Ariadne {
       R half=0.5;
       index_type n=int_down<index_type>(add_approx(div_approx(sub_approx(x,this->_origin[d]),this->_lengths[d]),half));
       R sc=add_approx(this->_origin[d],mul_approx(this->_lengths[d],n));
+      ARIADNE_LOG(9,std::setprecision(20) << std::boolalpha << "sc=" << sc << " x=" << x << " sc-x=" << (sc-x) << "\n")
       if(sc == x) { 
         return n; 
       } else {
-        throw std::runtime_error("Value is not a grid coordinate");
+        std::cerr << std::setprecision(20) << std::boolalpha
+                  << "sc=" << sc << " x=" << x << " sc-x=" << (sc-x) << "\n"
+                  << "sc==x=" << (sc==x) << " sc!=x=" << (sc!=x)
+                  << " sc<x=" << (sc<x) << " sc>x=" << (sc>x) << " sc<=x=" << (sc<=x) << " sc>=x=" << (sc>=x) << std::endl; 
+        ARIADNE_THROW(InvalidGridPosition,std::setprecision(20)<<"Grid::subdivision_index(dimension_type d,real_type x)","d="<<d<<", x="<<x<<", this->origin[d]="<<this->_origin[d]<<", this->lengths[d]="<<this->_lengths[d]<<" (closest value is "<<sc<<")");
       }
     }
     

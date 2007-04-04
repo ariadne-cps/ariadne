@@ -26,7 +26,6 @@
 #include <string>
 
 #include "ariadne.h"
-#include "logging.h"
 #include "test_float.h"
 #include "geometry/set_interface.h"
 #include "geometry/set_reference.h"
@@ -41,6 +40,7 @@
 #include "evaluation/affine_integrator.h"
 #include "evaluation/hybrid_evolver.h"
 #include "output/epsfstream.h"
+#include "output/logging.h"
 
 #include "test.h"
 

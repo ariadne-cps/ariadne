@@ -23,7 +23,7 @@
  
 #include "newton.h"
 
-#include "../logging.h"
+#include "../output/logging.h"
 #include "../geometry/point.h"
 
 #include "../system/vector_field.h"

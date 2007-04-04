@@ -21,14 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "../logging.h"
-
 #include "../geometry/rectangle_expression.h"
 #include "../geometry/set_interface.h"
 #include "../geometry/hybrid_set.h"
 #include "../system/hybrid_automaton.h"
 #include "../evaluation/applicator.h"
 #include "../evaluation/integrator.h"
+
+#include "../output/logging.h"
 
 #include "hybrid_evolver.h"
 

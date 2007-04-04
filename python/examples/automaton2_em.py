@@ -101,7 +101,8 @@ chainreach_set=hybrid_evolver.chainreach(automaton,initial_set,bounding_set)
 
 print "Exporting to postscript output...",
 epsbb=space # eps bounding box
-eps=EpsPlot("automaton2_em.eps",epsbb)
+eps=EpsPlot()
+eps.open("automaton2_em.eps",epsbb)
 eps.set_line_style(True)
 eps.set_fill_colour("red")
 eps.write(invariant1)

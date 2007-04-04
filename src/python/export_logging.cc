@@ -22,7 +22,7 @@
  */
 
 
-#include "logging.h"
+#include "output/logging.h"
 #include "evaluation/declarations.h"
 
 #include "python/python_utilities.h"

@@ -23,11 +23,11 @@
 
 #include <typeinfo>
 
-#include "geometry/exceptions.h"
+#include "base/exceptions.h"
 
 #include "python/python_utilities.h"
 using namespace Ariadne;
-using namespace Ariadne::Geometry;
+using namespace Ariadne::Base;
 using namespace std;
 
 #include <boost/python.hpp>
@@ -40,11 +40,17 @@ void translator(const E& e) {
   PyErr_SetString(PyExc_Exception, e.what());
 }
 
+template<>
+void translator<NotImplemented>(const NotImplemented& e) {
+  PyErr_SetString(PyExc_NotImplementedError, e.what());
+}
 
-/* No need to export exceptions explicitly; just need to put enough information in C++ exceptions. */
+
+/* No need to export all exceptions explicitly; just need to put enough information in C++ exceptions. */
 
 void export_exceptions()
 {
+  register_exception_translator<NotImplemented>(translator<NotImplemented>);
   /*
   register_exception_translator<IncompatibleDimensions>(translator<IncompatibleDimensions>);
   register_exception_translator<InvalidCoordinate>(translator<InvalidCoordinate>);

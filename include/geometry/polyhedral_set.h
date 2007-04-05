@@ -57,13 +57,15 @@ namespace Ariadne {
       virtual PolyhedralSet<R>* clone() const { return new PolyhedralSet<R>(*this); }
       virtual dimension_type dimension() const { return Polyhedron<R>::dimension(); }
       virtual tribool contains(const Point<R>& pt) const { return Polyhedron<R>::contains(pt); }
-      virtual Rectangle<R> bounding_box() const { return Polyhedron<R>::bounding_box(); }      
-      virtual tribool disjoint(const Rectangle<R>& r) const { 
-        return Geometry::disjoint(r,static_cast<const Polyhedron<R>&>(*this)); }
       virtual tribool superset(const Rectangle<R>& r) const { 
         return Geometry::subset(r,static_cast<const Polyhedron<R>&>(*this)); }
+      virtual tribool intersects(const Rectangle<R>& r) const { 
+        return !Geometry::disjoint(r,static_cast<const Polyhedron<R>&>(*this)); }
+      virtual tribool disjoint(const Rectangle<R>& r) const { 
+        return Geometry::disjoint(r,static_cast<const Polyhedron<R>&>(*this)); }
       virtual tribool subset(const Rectangle<R>& r) const { 
         return Geometry::subset(static_cast<const Polyhedron<R>&>(*this),r); }
+      virtual Rectangle<R> bounding_box() const { return Polyhedron<R>::bounding_box(); }      
       virtual std::ostream& write(std::ostream& os) const {
         return Polyhedron<R>::write(os);
       }

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            python/export_polyhedral_set.cc
+ *            python/export_rectangular_set.cc
  *
  *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
@@ -23,7 +23,7 @@
 
 #include "python/python_float.h"
 
-#include "geometry/polyhedral_set.h"
+#include "geometry/rectangular_set.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
@@ -34,22 +34,21 @@ using namespace Ariadne::Geometry;
 using namespace boost::python;
 
 template<class R>
-void export_polyhedral_set() 
+void export_rectangular_set() 
 {
-  class_< PolyhedralSet<R>, bases< SetInterface<R>, Polyhedron<R> > >("PolyhedralSet",init< Polyhedron<R> >())
-    .def(init< Matrix<R>,Vector<R> >())
+  class_< RectangularSet<R>, bases< SetInterface<R>, Rectangle<R> > >("RectangularSet",init< Rectangle<R> >())
+    .def(init< std::string >())
     .def(init< Rectangle<R> >())
-    .def(init< Polyhedron<R> >())
-    .def("dimension", &PolyhedralSet<R>::dimension)
-    .def("contains", &PolyhedralSet<R>::contains)
-    .def("superset", &PolyhedralSet<R>::superset)
-    .def("intersects", &PolyhedralSet<R>::intersects)
-    .def("disjoint", &PolyhedralSet<R>::disjoint)
-    .def("subset", &PolyhedralSet<R>::subset)
-    .def("bounding_box", &PolyhedralSet<R>::bounding_box)
+    .def("dimension", &RectangularSet<R>::dimension)
+    .def("contains", &RectangularSet<R>::contains)
+    .def("superset", &RectangularSet<R>::superset)
+    .def("intersects", &RectangularSet<R>::intersects)
+    .def("disjoint", &RectangularSet<R>::disjoint)
+    .def("subset", &RectangularSet<R>::subset)
+    .def("bounding_box", &RectangularSet<R>::bounding_box)
     .def(self_ns::str(self))
   ;
 }
 
 
-template void export_polyhedral_set<Float>();
+template void export_rectangular_set<Float>();

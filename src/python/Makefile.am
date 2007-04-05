@@ -57,6 +57,7 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_polytope.cc \
 	export_simplex.cc \
 	export_polyhedron.cc \
+	export_rectangular_set.cc \
 	export_polyhedral_set.cc \
 	export_list_set.cc \
 	export_grid_set.cc \

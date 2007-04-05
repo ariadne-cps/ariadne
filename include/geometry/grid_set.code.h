@@ -387,17 +387,25 @@ namespace Ariadne {
 
     template<class R>
     tribool
-    GridMaskSet<R>::disjoint(const Rectangle<R>& r) const
+    GridMaskSet<R>::superset(const Rectangle<R>& r) const
     {
-      return Geometry::disjoint(*this,r);
+      return Geometry::subset(r,*this);
     }
 
 
     template<class R>
     tribool
-    GridMaskSet<R>::superset(const Rectangle<R>& r) const
+    GridMaskSet<R>::intersects(const Rectangle<R>& r) const
     {
-      return Geometry::subset(r,*this);
+      return !Geometry::disjoint(*this,r);
+    }
+
+
+    template<class R>
+    tribool
+    GridMaskSet<R>::disjoint(const Rectangle<R>& r) const
+    {
+      return Geometry::disjoint(*this,r);
     }
 
 

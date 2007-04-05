@@ -69,6 +69,7 @@ template<class R> void export_zonotope();
 template<class R> void export_interval_zonotope();
 template<class R> void export_polytope();
 template<class R> void export_polyhedron();
+template<class R> void export_rectangular_set();
 template<class R> void export_polyhedral_set();
 template<class R> void export_list_set();
 template<class R> void export_grid();
@@ -145,6 +146,7 @@ BOOST_PYTHON_MODULE(ariadne)
   export_simplex<Float>();
   export_polytope<Float>();
   export_polyhedron<Float>();
+  export_rectangular_set<Float>();
   export_polyhedral_set<Float>();
   export_list_set<Float>();
   export_grid<Float>();

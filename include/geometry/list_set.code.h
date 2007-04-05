@@ -42,6 +42,14 @@ namespace Ariadne {
     
     template<class BS> 
     tribool
+    ListSet<BS>::intersects(const Rectangle<R>& r) const
+    {
+      return !Geometry::disjoint(*this,r);
+    }
+
+    
+    template<class BS> 
+    tribool
     ListSet<BS>::disjoint(const Rectangle<R>& r) const
     {
       return Geometry::disjoint(*this,r);

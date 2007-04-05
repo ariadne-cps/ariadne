@@ -145,15 +145,18 @@ namespace Ariadne {
       /*!\brief Checks if a denotable set includes a point. */
       virtual tribool contains(const Point<R>& p) const;
 
-      /*! \brief Tests for disjointness with a Rectangle. */
-      virtual tribool disjoint(const Rectangle<R>& r) const;
-
       /*! \brief Tests for superset of a Rectangle. 
        *
        * Currently always returns \a indeterminate, since the 
        * test is difficult for general list sets. 
        */
       virtual tribool superset(const Rectangle<R>& r) const;
+
+      /*! \brief Tests for intersection with a Rectangle. */
+      virtual tribool intersects(const Rectangle<R>& r) const;
+
+      /*! \brief Tests for disjointness with a Rectangle. */
+      virtual tribool disjoint(const Rectangle<R>& r) const;
 
       /*! \brief Tests for subset of a Rectangle. */
       virtual tribool subset(const Rectangle<R>& r) const;

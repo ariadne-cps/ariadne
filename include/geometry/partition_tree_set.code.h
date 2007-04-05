@@ -95,6 +95,14 @@ namespace Ariadne {
 
     template<class R>
     tribool
+    PartitionTreeSet<R>::intersects(const Rectangle<R>& r) const
+    {
+      return !Geometry::disjoint(*this,r);
+    }
+
+
+    template<class R>
+    tribool
     PartitionTreeSet<R>::disjoint(const Rectangle<R>& r) const
     {
       return Geometry::disjoint(*this,r);

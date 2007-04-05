@@ -45,6 +45,8 @@ namespace Ariadne {
     class RectangularSet : public SetInterface<R>, public Rectangle<R>
     {
      public:
+      RectangularSet(const std::string& str)
+        : SetInterface<R>(), Rectangle<R>(str) { }
       RectangularSet(const Rectangle<R>& r)
         : SetInterface<R>(), Rectangle<R>(r) { }
       
@@ -52,13 +54,15 @@ namespace Ariadne {
       virtual RectangularSet<R>* clone() const { return new RectangularSet<R>(*this); }
       virtual dimension_type dimension() const { return Rectangle<R>::dimension(); }
       virtual tribool contains(const Point<R>& pt) const { return Rectangle<R>::contains(pt); }
-      virtual Rectangle<R> bounding_box() const { return Rectangle<R>::bounding_box(); }      
-      virtual tribool disjoint(const Rectangle<R>& r) const { 
-        return Geometry::disjoint(r,static_cast<const Rectangle<R>&>(*this)); }
       virtual tribool superset(const Rectangle<R>& r) const { 
         return Geometry::subset(r,static_cast<const Rectangle<R>&>(*this)); }
+      virtual tribool intersects(const Rectangle<R>& r) const { 
+        return !Geometry::disjoint(r,static_cast<const Rectangle<R>&>(*this)); }
+      virtual tribool disjoint(const Rectangle<R>& r) const { 
+        return Geometry::disjoint(r,static_cast<const Rectangle<R>&>(*this)); }
       virtual tribool subset(const Rectangle<R>& r) const { 
         return Geometry::subset(static_cast<const Rectangle<R>&>(*this),r); }
+      virtual Rectangle<R> bounding_box() const { return Rectangle<R>::bounding_box(); }      
       virtual std::ostream& write(std::ostream& os) const {
         return Rectangle<R>::write(os);
       }

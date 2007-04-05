@@ -150,8 +150,9 @@ namespace Ariadne {
       SetInterface<R>* clone() const { return this->_ptr->clone(); }
       dimension_type dimension() const { return this->_ptr->dimension(); }
       tribool contains(const Point<R>& pt) const { return this->_ptr->contains(pt); }
-      tribool disjoint(const Rectangle<R>& r) const { return this->_ptr->disjoint(r); }
       tribool superset(const Rectangle<R>& r) const { return this->_ptr->superset(r); }
+      tribool intersects(const Rectangle<R>& r) const { return this->_ptr->intersects(r); }
+      tribool disjoint(const Rectangle<R>& r) const { return this->_ptr->disjoint(r); }
       tribool subset(const Rectangle<R>& r) const { return this->_ptr->subset(r); }
       Rectangle<R> bounding_box() const { return this->_ptr->bounding_box(); }
       std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }

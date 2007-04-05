@@ -42,8 +42,9 @@ class SetWrapper
   SetInterface<R>* clone() const { return this->get_override("clone")(); }
   dimension_type dimension() const { return this->get_override("dimension")(); }
   tribool contains(const Point<R>& pt) const { return this->get_override("contains")(); }
-  tribool disjoint(const Rectangle<R>& r) const { return this->get_override("disjoint")(); }
   tribool superset(const Rectangle<R>& r) const { return this->get_override("superset")(); }
+  tribool intersects(const Rectangle<R>& r) const { return this->get_override("intersects")(); }
+  tribool disjoint(const Rectangle<R>& r) const { return this->get_override("disjoint")(); }
   tribool subset(const Rectangle<R>& r) const { return this->get_override("subset")(); }
   Rectangle<R> bounding_box() const { return this->get_override("bounding_box")(); }
   std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
@@ -55,8 +56,9 @@ void export_set()
   class_<SetWrapper<R>, boost::noncopyable>("Set")
     .def("dimension", pure_virtual(&SetInterface<R>::dimension))
     .def("contains", pure_virtual(&SetInterface<R>::contains))
-    .def("disjoint", pure_virtual(&SetInterface<R>::disjoint))
     .def("superset", pure_virtual(&SetInterface<R>::superset))
+    .def("intersects", pure_virtual(&SetInterface<R>::intersects))
+    .def("disjoint", pure_virtual(&SetInterface<R>::disjoint))
     .def("subset", pure_virtual(&SetInterface<R>::subset))
     .def("bounding_box", pure_virtual(&SetInterface<R>::bounding_box))
     .def(self_ns::str(self))

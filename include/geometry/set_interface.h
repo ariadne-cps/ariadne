@@ -59,10 +59,12 @@ namespace Ariadne {
       /*! \brief Tests if the set contains a point. */
       virtual tribool contains(const Point<R>&) const = 0;
      
-      /*! \brief Tests if the set is disjoint from a rectangle. */
-      virtual tribool disjoint(const Rectangle<R>&) const = 0;
       /*! \brief Tests if the set is a superset of a rectangle. */
       virtual tribool superset(const Rectangle<R>&) const = 0;
+      /*! \brief Tests if the set intersects a rectangle. */
+      virtual tribool intersects(const Rectangle<R>&) const = 0;
+      /*! \brief Tests if the set is disjoint from a rectangle. */
+      virtual tribool disjoint(const Rectangle<R>&) const = 0;
       /*! \brief Tests if the set is a subset of a rectangle. */
       virtual tribool subset(const Rectangle<R>&) const = 0;
       

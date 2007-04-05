@@ -62,6 +62,16 @@ class IntegratorWrapper : public Integrator<R>, public wrapper< Integrator<R> >
     return this->get_override("viable")(); }
   tribool verify(const VectorField<R>& vf,const GridMaskSet<R>& is,const GridMaskSet<R>& bs) const {
     return this->get_override("verify")(); }
+  SetInterface<R>* integrate(const VectorField<R>& vf,const SetInterface<R>& is,const SetInterface<R>& bs,const time_type& t) const {
+    return this->get_override("integrate")(); }
+  SetInterface<R>* reach(const VectorField<R>& vf,const SetInterface<R>& is,const SetInterface<R>& bs,const time_type& t) const {
+    return this->get_override("reach")(); }
+  SetInterface<R>* chainreach(const VectorField<R>& vf,const SetInterface<R>& is,const SetInterface<R>& bs) const {
+    return this->get_override("chainreach")(); }
+  SetInterface<R>* viable(const VectorField<R>& vf,const SetInterface<R>& bs) const {
+    return this->get_override("viable")(); }
+  tribool verify(const VectorField<R>& vf,const SetInterface<R>& is,const SetInterface<R>& bs) const {
+    return this->get_override("verify")(); }
 };
   
  
@@ -78,6 +88,8 @@ void export_integrate()
                               (&Integrator<R>::reach))
     .def("chainreach",(GridMaskSet<R>(Integrator<R>::*)(const VectorField<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
          (&Integrator<R>::chainreach))
+    .def("viable",(GridMaskSet<R>(Integrator<R>::*)(const VectorField<R>&,const GridMaskSet<R>&)const)
+         (&Integrator<R>::viable))
     .def("verify",(tribool(Integrator<R>::*)(const VectorField<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
          (&Integrator<R>::verify))
   ;

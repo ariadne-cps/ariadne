@@ -69,6 +69,87 @@ Ariadne::Evaluation::HybridEvolver<R>::HybridEvolver(Applicator<R>& a, Integrato
 {
 }
 
+
+
+
+
+template<class R>
+Ariadne::Geometry::HybridSet<R> 
+Ariadne::Evaluation::HybridEvolver<R>::discrete_step(const System::HybridAutomaton<R>& automaton, 
+                                                     const Geometry::HybridSet<R>& initial_set)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+template<class R>
+Ariadne::Geometry::HybridSet<R> 
+Ariadne::Evaluation::HybridEvolver<R>::continuous_chainreach(const System::HybridAutomaton<R>& automaton, 
+                                                             const Geometry::HybridSet<R>& initial_set,
+                                                             const Geometry::HybridSet<R>& bounding_set)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+template<class R>
+Ariadne::Geometry::HybridSet<R> 
+Ariadne::Evaluation::HybridEvolver<R>::lower_reach(const System::HybridAutomaton<R>&, 
+                                                   const Geometry::HybridSet<R>&, 
+                                                   time_type t1, 
+                                                   time_type t2, 
+                                                   size_type nmax)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+template<class R>
+Ariadne::Geometry::HybridSet<R> 
+Ariadne::Evaluation::HybridEvolver<R>::upper_reach(const System::HybridAutomaton<R>& hybrid_automaton, 
+                                                   const Geometry::HybridSet<R>& intial_set, 
+                                                   time_type t1, 
+                                                   time_type t2, 
+                                                   size_type nmax)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+template<class R>
+Ariadne::Geometry::HybridSet<R> 
+Ariadne::Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<R>& automaton, 
+                                                  const Geometry::HybridSet<R>& initial_set, 
+                                                  const Geometry::HybridSet<R>& bounding_set)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+template<class R>
+Ariadne::Geometry::HybridSet<R> 
+Ariadne::Evaluation::HybridEvolver<R>::viable(const System::HybridAutomaton<R>& automaton, 
+                                              const Geometry::HybridSet<R>& bounding_set)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+     
+
+template<class R>
+Ariadne::tribool 
+Ariadne::Evaluation::HybridEvolver<R>::verify(const System::HybridAutomaton<R>& automaton, 
+                                              const Geometry::HybridSet<R>& initial_set, 
+                                              const Geometry::HybridSet<R>& safe_set)
+
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+
+
+
+
 template<class R>
 Ariadne::Geometry::HybridGridMaskSet<R> 
 Ariadne::Evaluation::HybridEvolver<R>::lower_reach(const System::HybridAutomaton<R>&, 

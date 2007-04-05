@@ -21,8 +21,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-//#define DEBUG
-
 #include <iosfwd>
 #include <string>
 #include <sstream>
@@ -316,7 +314,7 @@ namespace Ariadne {
                                      const Geometry::Rectangle<R>& b,
                                      const time_type& h) const
     {
-      if(verbosity>6) { std::cerr << __FUNCTION__ << std::endl; }
+      if(verbosity>6) { std::clog << "Integrator::check_flow_bounds" << std::endl; }
       using namespace Geometry;
       using namespace Numeric;
       return subset(r+Interval<R>(0,h)*vf(b),b);
@@ -334,8 +332,8 @@ namespace Ariadne {
       using namespace Geometry;
       using namespace Numeric;
 
-      if(verbosity>6) { std::cerr << __FUNCTION__ << " (maximum_iterations=" << maximum_iterations << ")" << std::endl; }
-      if(verbosity>7) { std::cerr << "  h=" << conv_approx<double>(h) << "  r=" << r << "  vf(r)=" << vf(r) << std::endl; }
+      if(verbosity>6) { std::clog << "Integrator::estimate_flow_bounds" << " (maximum_iterations=" << maximum_iterations << ")" << std::endl; }
+      if(verbosity>7) { std::clog << "  h=" << conv_approx<double>(h) << "  r=" << r << "  vf(r)=" << vf(r) << std::endl; }
 
       typedef typename Numeric::traits<R>::arithmetic_type F;
       uint iteration=0;
@@ -361,7 +359,7 @@ namespace Ariadne {
         reach=bounds;
         t-=dt;
         
-        if(verbosity>8) { std::cerr << "t=" << conv_approx<double>(t) << "  reach="  << reach << std::endl; }
+        if(verbosity>8) { std::clog << "t=" << conv_approx<double>(t) << "  reach="  << reach << std::endl; }
 
         ++iteration;
         if(iteration==maximum_iterations) {
@@ -382,7 +380,7 @@ namespace Ariadne {
       using namespace Geometry;
       using namespace Numeric;
       
-      if(verbosity>6) { std::cerr << __FUNCTION__ << std::endl; }
+      if(verbosity>6) { std::clog << "Integrator::estimate_flow_bounds" << std::endl; }
 
       static const unsigned int max_tries=8;
 
@@ -404,7 +402,7 @@ namespace Ariadne {
         }
       }
       
-      if(verbosity>7) { std::cerr << "  h=" << conv_approx<double>(h) << "  b=" << bounds << std::endl; }
+      if(verbosity>7) { std::clog << "  h=" << conv_approx<double>(h) << "  b=" << bounds << std::endl; }
       
       return bounds;
     }
@@ -418,7 +416,7 @@ namespace Ariadne {
                                       const Geometry::Rectangle<R>& estimated_bounds,
                                       const time_type& step_size) const
     {
-      if(verbosity>6) { std::cerr << __FUNCTION__ << std::endl; }
+      if(verbosity>6) { std::clog << "Integrator::refine_flow_bounds" << std::endl; }
 
       using namespace System;
       using namespace Geometry;
@@ -432,7 +430,7 @@ namespace Ariadne {
       Rectangle<R> xb=rx+Numeric::Interval<R>(0,step_size)*vf(b);
       Rectangle<R> xxb=rx+Numeric::Interval<R>(0,step_size)*vf(xb);
 
-      if(verbosity>7) { std::cerr << "new_bounds " << xxb << "," << xb << " vs old_bounds " << b << "  " << subset(xb,b) << std::endl; }
+      if(verbosity>7) { std::clog << "new_bounds " << xxb << "," << xb << " vs old_bounds " << b << "  " << subset(xb,b) << std::endl; }
 
       Vector< Interval<R> > ddphi=vf.jacobian(xb)*vf(xb);
       Vector< Interval<R> > dfx=vf(rx);
@@ -450,7 +448,8 @@ namespace Ariadne {
                                                 const BasicSet& initial_set, 
                                                 const time_type& time) const
     {
-      if(verbosity>4) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+      if(verbosity>4) { std::clog << "BasicSet IntegratorBase::integrate(VectorField,BasicSet,Time)" << std::endl; } 
+
       if(time==0) { 
         return initial_set;
       }
@@ -466,7 +465,7 @@ namespace Ariadne {
         h=min(time_type(2*h),this->maximum_step_size());
         h=max(h,this->minimum_step_size());
       }
-      if(verbosity>4) { std::cerr << "  t=" << t << "  final_set=" << bs << std::endl; }
+      if(verbosity>4) { std::clog << "  t=" << t << "  final_set=" << bs << std::endl; }
       return bs;
     }
     
@@ -481,7 +480,7 @@ namespace Ariadne {
     {
       using namespace Numeric;
       
-      if(verbosity>4) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+      if(verbosity>4) { std::clog << "ListSet IntegratorBase::integrate(VectorField,ListSet,Time)" << std::endl; } 
 
       if(time==0) { 
         return initial_set;
@@ -491,7 +490,7 @@ namespace Ariadne {
       time_type step_size=this->maximum_step_size();
       R maximum_set_radius=this->maximum_basic_set_radius();
 
-      if(verbosity>7) { std::cerr << "step_size=" << step_size << "  maximum_set_radius=" << maximum_set_radius << std::endl; }
+      if(verbosity>7) { std::clog << "step_size=" << step_size << "  maximum_set_radius=" << maximum_set_radius << std::endl; }
       
       time_type t=0; // t is the time elapsed!
       time_type h=step_size;
@@ -510,7 +509,7 @@ namespace Ariadne {
       }
       
       while(!working_sets.empty()) {
-        if(verbosity>7) { std::cerr << "working_sets.size()=" << working_sets.size() << "\n"; }
+        if(verbosity>7) { std::clog << "working_sets.size()=" << working_sets.size() << "\n"; }
 
         const timed_set_type& ts=working_sets.back();
         t=ts.first;
@@ -518,22 +517,22 @@ namespace Ariadne {
         h=step_size;
         working_sets.pop_back();
 
-        if(verbosity>5) { std::cerr << "  t=" << t << "  bs=" << bs << std::endl; }
+        if(verbosity>5) { std::clog << "  t=" << t << "  bs=" << bs << std::endl; }
         if(bs.radius()>maximum_set_radius) {
-          if(verbosity>5) { std::cerr << "    subdividing..." << std::flush; }
+          if(verbosity>5) { std::clog << "    subdividing..." << std::flush; }
           ListSet subdivisions=bs.subdivide();
           for(list_set_const_iterator subdiv_iter=subdivisions.begin(); 
               subdiv_iter!=subdivisions.end(); ++subdiv_iter)
           {
             working_sets.push_back(timed_set_type(t,*subdiv_iter));
           }
-          if(verbosity>5) { std::cerr << " done" << std::endl; }
+          if(verbosity>5) { std::clog << " done" << std::endl; }
         }
         else {
-          if(verbosity>5) { std::cerr << "    integrating..." << std::endl; }
+          if(verbosity>5) { std::clog << "    integrating..." << std::endl; }
           do {
             if(verbosity>5) { 
-              std::cerr << "      t=" << conv_approx<double>(t) << "  h=" << conv_approx<double>(h) << "  c=" << bs.centre() 
+              std::clog << "      t=" << conv_approx<double>(t) << "  h=" << conv_approx<double>(h) << "  c=" << bs.centre() 
                         << "  r=" << bs.radius() << std::endl;
             }
             h=min(time_type(time-t),h);
@@ -543,7 +542,7 @@ namespace Ariadne {
           } while(t!=time && bs.radius()<=maximum_set_radius);
           
           if(verbosity>5) { 
-            std::cerr << "      t=" << conv_approx<double>(t) << "  c=" << bs.centre() 
+            std::clog << "      t=" << conv_approx<double>(t) << "  c=" << bs.centre() 
                       << "  r=" << bs.radius() << std::endl;
           }
           
@@ -554,7 +553,7 @@ namespace Ariadne {
           }
         }
       }
-      if(verbosity>6) { std::cerr << "  final_set=" << final_set << std::endl; }
+      if(verbosity>6) { std::clog << "  final_set=" << final_set << std::endl; }
       return final_set;
     }
     
@@ -568,13 +567,13 @@ namespace Ariadne {
     {
       using namespace Numeric;
       
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+      if(verbosity>4) { std::clog << "ListSet IntegratorBase::reach(VectorField,BasicSet,Time)" << std::endl; } 
       const VectorField& vf=vector_field;
       time_type step_size=this->maximum_step_size();
       R maximum_set_radius=this->maximum_basic_set_radius();
     
       if(verbosity>4) {
-        std::cerr << "step_size=" << conv_approx<double>(step_size) << "  maximum_set_radius()=" << maximum_set_radius << std::endl<<std::flush;
+        std::clog << "step_size=" << conv_approx<double>(step_size) << "  maximum_set_radius()=" << maximum_set_radius << std::endl<<std::flush;
       }
       
       time_type t=0;
@@ -593,13 +592,13 @@ namespace Ariadne {
         working_sets.push_back(timed_set_type(0,*bs_iter));
       }
       
-      if(verbosity>6) { std::cerr << "initial_set.size()=" << initial_set.size() << std::endl; }
+      if(verbosity>6) { std::clog << "initial_set.size()=" << initial_set.size() << std::endl; }
       assert(working_sets.size()==initial_set.size());
       assert(reach_set.size()==0);
       
       while(!working_sets.empty()) {
         if(verbosity>6) { 
-          std::cerr << "  working_sets.size()=" << working_sets.size() << "  reach_set.size()=" << reach_set.size() << std::endl; 
+          std::clog << "  working_sets.size()=" << working_sets.size() << "  reach_set.size()=" << reach_set.size() << std::endl; 
         }
         
         const timed_set_type& ts=working_sets.back();
@@ -608,12 +607,12 @@ namespace Ariadne {
         h=step_size;
         working_sets.pop_back();
         
-        if(verbosity>6) { std::cerr << "  t=" << conv_approx<double>(t) << "  bs.centre()=" << bs.centre() << "  bs.radius() = " << bs.radius() << std::endl; }
+        if(verbosity>6) { std::clog << "  t=" << conv_approx<double>(t) << "  bs.centre()=" << bs.centre() << "  bs.radius() = " << bs.radius() << std::endl; }
 
         if(bs.radius()>maximum_set_radius) {
-        if(verbosity>6) { std::cerr << "  subdividing..." << std::endl; }
+        if(verbosity>6) { std::clog << "  subdividing..." << std::endl; }
           ListSet subdivisions=bs.subdivide();
-          if(verbosity>6) { std::cerr << "    subdivisions.size() =" << subdivisions.size() << std::endl; }
+          if(verbosity>6) { std::clog << "    subdivisions.size() =" << subdivisions.size() << std::endl; }
           for(list_set_const_iterator subdiv_iter=subdivisions.begin(); 
               subdiv_iter!=subdivisions.end(); ++subdiv_iter)
           {
@@ -621,11 +620,11 @@ namespace Ariadne {
           }
         }
         else {
-          if(verbosity>6) { std::cerr << "  integrating..." << std::endl; }
+          if(verbosity>6) { std::clog << "  integrating..." << std::endl; }
           
           do {
             if(verbosity>6) {
-              std::cerr << "    t=" << conv_approx<double>(t) << "  h=" << conv_approx<double>(h)
+              std::clog << "    t=" << conv_approx<double>(t) << "  h=" << conv_approx<double>(h)
                         << "  bs=" << bs << std::endl;
             }
             
@@ -646,7 +645,7 @@ namespace Ariadne {
       }
       
       if(verbosity>4) {
-        std::cerr << "  reach_set.size()=" << reach_set.size() <<  std::endl;
+        std::clog << "  reach_set.size()=" << reach_set.size() <<  std::endl;
       }
       return reach_set;
     } 
@@ -660,13 +659,13 @@ namespace Ariadne {
     {
       using namespace Numeric;
       
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+      if(verbosity>4) { std::clog << "ListSet IntegratorBase::reach(VectorField,ListSet)" << std::endl; } 
       const VectorField& vf=vector_field;
       time_type step_size=this->maximum_step_size();
       R maximum_set_radius=this->maximum_basic_set_radius();
     
       if(verbosity>4) {
-        std::cerr << "step_size=" << conv_approx<double>(step_size) << "  maximum_set_radius()=" << maximum_set_radius << std::endl<<std::flush;
+        std::clog << "step_size=" << conv_approx<double>(step_size) << "  maximum_set_radius()=" << maximum_set_radius << std::endl<<std::flush;
       }
       
       time_type t=0;
@@ -679,20 +678,20 @@ namespace Ariadne {
 
       ListSet reach_set(initial_set.dimension());
       
-      if(verbosity>6) { std::cerr << "initial_set.size()=" << initial_set.size() << std::endl; }
+      if(verbosity>6) { std::clog << "initial_set.size()=" << initial_set.size() << std::endl; }
       assert(reach_set.size()==0);
 
       for(list_set_const_iterator bs_iter=initial_set.begin(); bs_iter!=initial_set.end(); ++bs_iter) {
         bs=*bs_iter;
         h=step_size;
         
-        if(verbosity>6) { std::cerr << "  t=" << conv_approx<double>(t) << "  bs.centre()=" << bs.centre() << "  bs.radius() = " << bs.radius() << std::endl; }
+        if(verbosity>6) { std::clog << "  t=" << conv_approx<double>(t) << "  bs.centre()=" << bs.centre() << "  bs.radius() = " << bs.radius() << std::endl; }
 
         while(bs.radius()<maximum_set_radius) {
-          if(verbosity>6) { std::cerr << "  integrating..." << std::endl; }
+          if(verbosity>6) { std::clog << "  integrating..." << std::endl; }
          
           if(verbosity>6) {
-            std::cerr << "  h=" << conv_approx<double>(h)
+            std::clog << "  h=" << conv_approx<double>(h)
                       << "  bs=" << bs << std::endl;
           }
 
@@ -705,7 +704,7 @@ namespace Ariadne {
       }
       
       if(verbosity>4) {
-        std::cerr << "  reach_set.size()=" << reach_set.size() <<  std::endl;
+        std::clog << "  reach_set.size()=" << reach_set.size() <<  std::endl;
       }
       return reach_set;
     } 
@@ -725,10 +724,10 @@ namespace Ariadne {
                                       const Geometry::GridMaskSet<R>& bounding_set,
                                       const time_type& time) const
     {
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+      if(verbosity>4) { std::clog << "GridMaskSet IntegratorBase::integrate(VectorField,GridMaskSet,GridMaskSet,Time)" << std::endl; } 
       const VectorField& vf=dynamic_cast<const VectorField&>(vector_field);
 
-      check_same_grid(initial_set,bounding_set,__PRETTY_FUNCTION__);
+      check_same_grid(initial_set,bounding_set,"GridMaskSet IntegratorBase::integrate(VectorField,GridMaskSet,GridMaskSet,Time)");
       using namespace System;
       using namespace Geometry;
       using namespace LinearAlgebra;
@@ -763,9 +762,7 @@ namespace Ariadne {
       }
       
       while(t!=0) {
-#ifdef DEBUG
-        std::cerr << "time left=" << t << "  stepsize=" << h << "  sets in list=" << start_set.size() << "\n";
-#endif
+        if(verbosity > 6) { std::clog << "time left=" << t << "  stepsize=" << h << "  sets in list=" << start_set.size() << "\n"; }
         h=min(t,h);
         for(typename ListSet::const_iterator iter=start_set.begin(); iter!=start_set.end(); ++iter) {
           BasicSet p(*iter);
@@ -778,9 +775,7 @@ namespace Ariadne {
         for(typename ListSet::const_iterator iter=finish_set.begin(); iter!=finish_set.end(); ++iter) {
           const BasicSet& p=*iter;
           if(p.radius()>spacial_tolerance) {
-#ifdef DEBUG
-            std::cerr << "Splitting, radius=" << p.radius() << "\n" << p << "\n";
-#endif
+            if(verbosity > 6) { std::clog << "Splitting, radius=" << p.radius() << "\n" << p << "\n"; }
             mask_set.adjoin_over_approximation(p);
           }
           else {
@@ -816,16 +811,15 @@ namespace Ariadne {
     {
       using namespace Numeric;
       
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+      if(verbosity>4) { std::clog << "GridMaskSet IntegratorBase::reach(VectorField,GridMaskSet,GridMaskSet,Time)" << std::endl; } 
       typedef typename GridMaskSet::const_iterator gms_const_iterator;
       typedef typename ListSet::const_iterator ls_const_iterator;
-      check_bounded(initial_set,__PRETTY_FUNCTION__);
-      check_bounded(bounding_set,__PRETTY_FUNCTION__);
+      check_bounded(initial_set,"GridMaskSet IntegratorBase::reach(VectorField,GridMaskSet,GridMaskSet,Time)");
+      check_bounded(bounding_set,"GridMaskSet IntegratorBase::reach(VectorField,GridMaskSet,GridMaskSet,Time)");
       const VectorField& vf=dynamic_cast<const VectorField&>(vector_field);
       
       if(!subset(initial_set,bounding_set)) {
-        //throw std::runtime_error(strcat(__PRETTY_FUNCTION__,": Initial set must be subset of bounding set"));
-        throw std::runtime_error("Initial set must be subset of bounding set");
+        throw std::runtime_error("GridMaskSet IntegratorBase::reach(VectorField,GridMaskSet,GridMaskSet,Time): Initial set must be subset of bounding set");
       }
         
       const GridMaskSet& is=initial_set;
@@ -873,17 +867,16 @@ namespace Ariadne {
                                         const Geometry::GridMaskSet<R>& initial_set, 
                                         const Geometry::GridMaskSet<R>& bounding_set) const
     {
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+      if(verbosity>4) { std::clog << "GridMaskSet IntegratorBase::chainreach(VectorField,GridMaskSet,GridMaskSet)" << std::endl; } 
       typedef typename GridCellListSet::const_iterator gcls_const_iterator;
       typedef typename GridMaskSet::const_iterator gms_const_iterator;
       typedef typename ListSet::const_iterator ls_const_iterator;
-      check_bounded(initial_set,__PRETTY_FUNCTION__);
-      check_bounded(bounding_set,__PRETTY_FUNCTION__);
+      check_bounded(initial_set,"GridMaskSet IntegratorBase::chainreach(VectorField,GridMaskSet,GridMaskSet)");
+      check_bounded(bounding_set,"GridMaskSet IntegratorBase::chainreach(VectorField,GridMaskSet,GridMaskSet)");
       const VectorField& vf=dynamic_cast<const VectorField&>(vector_field);
      
       if(!subset(initial_set,bounding_set)) {
-        //throw std::runtime_error(strcat(__PRETTY_FUNCTION__,": Initial set must be subset of bounding set"));
-        throw std::runtime_error("Initial set must be subset of bounding set");
+        throw std::runtime_error("GridMaskSet IntegratorBase::chainreach(VectorField,GridMaskSet,GridMaskSet): Initial set must be subset of bounding set");
       }
         
       const GridMaskSet& is=initial_set;
@@ -898,13 +891,13 @@ namespace Ariadne {
       time_type step_size=this->maximum_step_size();
       time_type time_step=this->lock_to_grid_time();
       
-      if(verbosity>4) { std::cerr << "Beginning integration phase" << std::endl; }
+      if(verbosity>4) { std::clog << "Beginning integration phase" << std::endl; }
       while(!subset(found,result)) {
-        if(verbosity>5) { std::cerr << "Found " << found.size() << " cells, " << std::flush; }
+        if(verbosity>5) { std::clog << "Found " << found.size() << " cells, " << std::flush; }
         found.unique_sort();
-        if(verbosity>5) { std::cerr << "of which " << found.size() << " are not duplicates," << std::flush; }
+        if(verbosity>5) { std::clog << "of which " << found.size() << " are not duplicates," << std::flush; }
         found=difference(found,result);
-        if(verbosity>5) { std::cerr << " and " << found.size() << " are new" << std::endl; }
+        if(verbosity>5) { std::clog << " and " << found.size() << " are new" << std::endl; }
         result.adjoin(found);
         image.clear();
         uint size=0;
@@ -924,9 +917,9 @@ namespace Ariadne {
         }
         found=regular_intersection(image,bounding_set);
       }
-      if(verbosity>5) { std::cerr << "Found " << result.size() << " cells, " << std::endl; }
+      if(verbosity>5) { std::clog << "Found " << result.size() << " cells, " << std::endl; }
       
-      if(verbosity>4) { std::cerr << "Beginning reachability phase" << std::endl; }
+      if(verbosity>4) { std::clog << "Beginning reachability phase" << std::endl; }
       ListSet reach_basic_set_list;
       for(gms_const_iterator iter=result.begin(); iter!=result.end(); ++iter) {
         Rectangle r=*iter;
@@ -940,8 +933,10 @@ namespace Ariadne {
           result.adjoin_over_approximation(fz);
         }
       }
-      if(verbosity>4) { std::cerr << "Reached " << result.size() << " cells, " << std::endl; }
+      if(verbosity>4) { std::clog << "Reached " << result.size() << " cells, " << std::endl; }
       
+      result.restrict(bounding_set);
+
       return result;
     }
 
@@ -961,16 +956,15 @@ namespace Ariadne {
                                    const Geometry::GridMaskSet<R>& initial_set, 
                                    const Geometry::GridMaskSet<R>& safe_set) const
     {
-      if(verbosity>0) { std::cerr << __PRETTY_FUNCTION__ << std::endl; }
+      if(verbosity>4) { std::clog << "tribool IntegratorBase::verify(VectorField,GridMaskSet,GridMaskSet)" << std::endl; } 
       typedef typename GridCellListSet::const_iterator gcls_const_iterator;
       typedef typename ListSet::const_iterator ls_const_iterator;
-      check_bounded(initial_set,__PRETTY_FUNCTION__);
-      check_bounded(safe_set,__PRETTY_FUNCTION__);
+      check_bounded(initial_set,"tribool IntegratorBase::verify(VectorField,GridMaskSet,GridMaskSet)");
+      check_bounded(safe_set,"tribool IntegratorBase::verify(VectorField,GridMaskSet,GridMaskSet)");
       const VectorField& vf=dynamic_cast<const VectorField&>(vector_field);
      
       if(!subset(initial_set,safe_set)) {
-        //throw std::runtime_error(strcat(__PRETTY_FUNCTION__,": Initial set must be subset of bounding set"));
-        throw std::runtime_error("Initial set must be subset of bounding set");
+        throw std::runtime_error("tribool IntegratorBase::verify(VectorField,GridMaskSet,GridMaskSet): Initial set must be subset of bounding set");
       }
         
       const GridMaskSet& is=initial_set;

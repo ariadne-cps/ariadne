@@ -58,6 +58,8 @@ class IntegratorWrapper : public Integrator<R>, public wrapper< Integrator<R> >
     return this->get_override("reach")(); }
   GridMaskSet<R> chainreach(const VectorField<R>& vf,const GridMaskSet<R>& is,const GridMaskSet<R>& bs) const {
     return this->get_override("chainreach")(); }
+  GridMaskSet<R> viable(const VectorField<R>& vf,const GridMaskSet<R>& bs) const {
+    return this->get_override("viable")(); }
   tribool verify(const VectorField<R>& vf,const GridMaskSet<R>& is,const GridMaskSet<R>& bs) const {
     return this->get_override("verify")(); }
 };

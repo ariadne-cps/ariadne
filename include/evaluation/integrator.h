@@ -142,6 +142,11 @@ namespace Ariadne {
                                                    const Geometry::SetInterface<R>& initial_set,
                                                    const Geometry::SetInterface<R>& bounding_set) const;
 
+      /*! \brief Computes the set of points which remain in \a bounding_set under evolution of \a vector_field.
+       */
+      virtual Geometry::SetInterface<R>* viable(const System::VectorField<R>& vector_field,
+                                                const Geometry::SetInterface<R>& bounding_set) const;
+
       /*! \brief  Verifies that the flow of \a vector_field starting in \a initial_set remains in \a safe_set all times.
        */
       virtual tribool verify(const System::VectorField<R>& vector_field,
@@ -175,6 +180,11 @@ namespace Ariadne {
       virtual Geometry::GridMaskSet<R> chainreach(const System::VectorField<R>& vector_field,
                                                    const Geometry::GridMaskSet<R>& initial_set,
                                                    const Geometry::GridMaskSet<R>& bounding_set) const = 0;
+
+      /*! \brief Computes the set of points which remain in \a bounding_set under evolution of \a vector_field.
+       */
+      virtual Geometry::GridMaskSet<R> viable(const System::VectorField<R>& vector_field,
+                                              const Geometry::GridMaskSet<R>& bounding_set) const = 0;
 
       /*! \brief  Verifies that the flow of \a vector_field starting in \a initial_set remains in \a safe_set all times. (Deprecated) \deprecated
        *
@@ -283,18 +293,25 @@ namespace Ariadne {
                 const Geometry::GridMaskSet<R>& bounding_set,
                 const time_type& time) const;
 
-      /*! \brief Compute the reachable set. */
+      /*! \brief Template for computing the reachable set. */
       Geometry::GridMaskSet<R>
       reach(const System::VectorField<R>& vector_field, 
             const Geometry::GridMaskSet<R>& initial_set,
             const Geometry::GridMaskSet<R>& bounding_set,
             const time_type& time) const;
 
+      /*! \brief Template for computing the chain-reachable set. */
       Geometry::GridMaskSet<R>
       chainreach(const System::VectorField<R>& vector_field, 
                  const Geometry::GridMaskSet<R>& initial_set, 
                  const Geometry::GridMaskSet<R>& bounding_set) const;
 
+      /*! \brief Template for computing the viability kernel. */
+      Geometry::GridMaskSet<R>
+      viable(const System::VectorField<R>& vector_field, 
+             const Geometry::GridMaskSet<R>& bounding_set) const;
+
+      /*! \brief Template for verifying system evolution. */
       tribool
       verify(const System::VectorField<R>& vector_field, 
              const Geometry::GridMaskSet<R>& initial_set, 

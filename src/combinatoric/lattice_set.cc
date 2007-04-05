@@ -151,20 +151,6 @@ namespace Ariadne {
       return false;
     }
     
-    LatticeBlock
-    LatticeBlock::neighbourhood() const
-    {
-      dimension_type n=this->dimension();
-      IndexArray lower(n);
-      IndexArray upper(n);
-      for(dimension_type i=0; i!=n; ++i) {
-        lower[i]=this->lower_bound(i)-1;
-        upper[i]=this->upper_bound(i)+1;
-      }
-      return LatticeBlock(lower,upper);
-    }
-
-
     
     LatticeBlock
     LatticeTransformation::operator() (const LatticeCell& c) const

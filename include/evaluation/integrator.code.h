@@ -238,6 +238,7 @@ namespace Ariadne {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
 
+
     template<class R>
     Geometry::SetInterface<R>*
     Integrator<R>::chainreach(const System::VectorField<R>& vector_field,
@@ -263,6 +264,15 @@ namespace Ariadne {
       
       GridMaskSet<R> gcrs=this->chainreach(vf,gis,gbs);
       return new GridMaskSet<R>(gcrs);
+    }
+
+
+    template<class R>
+    Geometry::SetInterface<R>*
+    Integrator<R>::viable(const System::VectorField<R>& vector_field,
+                          const Geometry::SetInterface<R>& bounding_set) const
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
     }
 
 
@@ -934,6 +944,16 @@ namespace Ariadne {
       
       return result;
     }
+
+
+    template<class R, class VF, class BS>
+    Geometry::GridMaskSet<R>
+    IntegratorBase<R,VF,BS>::viable(const System::VectorField<R>& vector_field, 
+                                    const Geometry::GridMaskSet<R>& bounding_set) const
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+
 
     template<class R, class VF, class BS>
     tribool

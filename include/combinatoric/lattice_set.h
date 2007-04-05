@@ -176,6 +176,9 @@ namespace Ariadne {
       /*!\brief The upper bound in the \a i th dimension. */
       index_type upper_bound(dimension_type i) const { return this->_lower[i]+1; }
 
+      /*!\brief The one-box neighbourhood of the cell. */
+      LatticeBlock neighbourhood() const;
+
       /*!\brief The position of the lower corner in the latiice. */
       const IndexArray& position() const { return this->_lower; }
       /*!\brief The position of the lower corner in the latiice. */
@@ -195,6 +198,7 @@ namespace Ariadne {
      * \brief A block of indices in a grid. */
     class LatticeBlock {
       friend class LatticeBlockIterator;
+      friend class LatticeCell;
       friend class LatticeMaskSet;
      public:
       typedef LatticeBlockIterator const_iterator;
@@ -254,14 +258,21 @@ namespace Ariadne {
       /*!\brief The totel number of cells. */
       size_type size() const;
       
+      /*!\brief The one-box neighbourhood of the block. */
+      LatticeBlock neighbourhood() const {
+        LatticeBlock result(this->dimension());
+        for(dimension_type i=0; i!=this->dimension(); ++i) {
+          result._lower[i]=this->_lower[i]-1;
+          result._upper[i]=this->_upper[i]+1;
+        }
+        return result;
+      }
+
       /*!\brief A constant iterator to the lower cell in the lattice rectangle. */
       const_iterator begin() const;
       /*!\brief A constant iterator to the past-the-end cell of the lattice rectangle. */
       const_iterator end() const;
       
-      /*!\brief The one-box neighbourhood of the rectangle. */
-      LatticeBlock neighbourhood() const;
-
       /*! \brief Write to an output stream */
       std::ostream& write(std::ostream& os) const;
      private:
@@ -270,6 +281,19 @@ namespace Ariadne {
     };
     
     
+    inline
+    LatticeBlock 
+    LatticeCell::neighbourhood() const 
+    {
+      LatticeBlock result(this->dimension());
+      for(dimension_type i=0; i!=this->dimension(); ++i) {
+        result._lower[i]=this->_lower[i]-1;
+        result._upper[i]=this->_lower[i]+2;
+      }
+      return result;
+    }
+
+
     class LatticeBlockIterator 
       : public boost::iterator_facade<LatticeBlockIterator,
                                       LatticeCell,

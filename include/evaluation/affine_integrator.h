@@ -84,9 +84,6 @@ namespace Ariadne {
 
       
       /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. 
-       *
-       * We use the formula that the reached set is 
-       * \f\[ c + Ge + t(Ac+b) + 
        */
       virtual Geometry::Zonotope<I> reachability_step(const System::AffineVectorField<R>&,
                                                       const Geometry::Zonotope<I>&,
@@ -98,4 +95,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* ARIADNE_LOHNER_INTEGRATOR_H */
+#endif /* ARIADNE_AFFINE_INTEGRATOR_H */

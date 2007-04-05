@@ -408,6 +408,15 @@ namespace Ariadne {
     
     
     template<class R>
+    Geometry::GridMaskSet<R>
+    Applicator<R>::viable(const System::Map<R>& f, 
+                          const Geometry::GridMaskSet<R>& bounding_set) const
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+    
+
+    template<class R>
     tribool
     Applicator<R>::verify(const System::Map<R>& f, 
                           const Geometry::GridMaskSet<R>& initial_set, 
@@ -567,6 +576,16 @@ namespace Ariadne {
     }
       
       
+
+
+    template<class R>
+    Geometry::SetInterface<R>*
+    Applicator<R>::viable(const System::Map<R>& f, 
+                          const Geometry::SetInterface<R>& bounding_set) const
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+    
 
 
     template<class R>

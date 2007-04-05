@@ -30,6 +30,7 @@
 #include <iostream>
 
 #include "../base/types.h"
+#include "../base/tribool.h"
 #include "../geometry/declarations.h"
 #include "../system/declarations.h"
 #include "../evaluation/declarations.h"
@@ -47,7 +48,11 @@ namespace Ariadne {
      public:
       /*! \brief Construct from an applicator and an integrator. */
       HybridEvolver(Applicator<R>& applicator, Integrator<R>& integrator);
-      
+
+      /*! \brief Virtual destructor. */
+      virtual ~HybridEvolver();
+
+
       //@{
       //! \name Evolution using abstract sets.
       /*! \brief Make a discrete step of the hybrid automaton, starting from initial set. (NOT CURRENTLY IMPLEMENTED) */
@@ -91,6 +96,15 @@ namespace Ariadne {
       Geometry::HybridSet<R> chainreach(const System::HybridAutomaton<R>& automaton, 
                                         const Geometry::HybridSet<R>& initial_set, 
                                         const Geometry::HybridSet<R>& bounding_set);
+
+      /*! \brief Compute the viability kernel of \a map within \a bounding_set. (NOT CURRENTLY IMPLEMENTED) */
+      Geometry::HybridSet<R> viable(const System::HybridAutomaton<R>& automaton, 
+                                         const Geometry::HybridSet<R>& bounding_set);
+     
+      /*! \brief Compute an over approximation to the chain-reachable set using upper semantics. (NOT CURRENTLY IMPLEMENTED) */
+      tribool verify(const System::HybridAutomaton<R>& automaton, 
+                     const Geometry::HybridSet<R>& initial_set, 
+                     const Geometry::HybridSet<R>& safe_set);
       //@}
 
      public:
@@ -132,10 +146,19 @@ namespace Ariadne {
                                                  time_type final_time, 
                                                  size_type maximum_number_of_events);
      
+      /*! \brief Compute an over-approximation to the set of points which remain in \a bounding_set under evolution of \a automaton. using lower semantics. (NOT CURRENTLY IMPLEMENTED) */
+      Geometry::HybridGridMaskSet<R> viable(const System::HybridAutomaton<R>& automaton, 
+                                            const Geometry::HybridGridMaskSet<R>& bounding_set);
+     
       /*! \brief Compute an over approximation to the chain-reachable set using upper semantics. */
       Geometry::HybridGridMaskSet<R> chainreach(const System::HybridAutomaton<R>& automaton, 
                                                 const Geometry::HybridGridMaskSet<R>& initial_set, 
                                                 const Geometry::HybridGridMaskSet<R>& bounding_set);
+
+      /*! \brief Attempt to verify that the reachable set of \a map starting in \a initial_set remains in \a safe_set. */
+      tribool verify(const System::HybridAutomaton<R>& automaton, 
+                                            const Geometry::HybridGridMaskSet<R>& initial_set, 
+                                            const Geometry::HybridGridMaskSet<R>& safe_set);
       //@}
      private:
       // Evolve the hybrid automaton within \a domains starting from the \a initial_set without using discrete transitions. */

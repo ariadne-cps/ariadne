@@ -76,6 +76,13 @@ namespace Ariadne {
       return _grid_ptr->subdivision_coordinate(i,_lattice_set.upper_bound(i));
     }
     
+    template<class R>
+    GridBlock<R>
+    GridCell<R>::neighbourhood() const 
+    {
+      return GridBlock<R>(this->_grid_ptr,this->_lattice_set.neighbourhood());
+    }
+    
 
     template<class R>
     void
@@ -166,6 +173,13 @@ namespace Ariadne {
     GridBlock<R>::upper_bound(dimension_type i) const 
     {
       return _grid_ptr->subdivision_coordinate(i,_lattice_set.upper_bound(i));
+    }
+    
+    template<class R>
+    GridBlock<R>
+    GridBlock<R>::neighbourhood() const 
+    {
+      return GridBlock<R>(this->_grid_ptr,this->_lattice_set.neighbourhood());
     }
     
     

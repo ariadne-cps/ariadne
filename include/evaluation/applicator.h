@@ -53,7 +53,13 @@ namespace Ariadne {
       
       /*! \brief Compute the image of a basic set under a continuous function. */
       virtual ~Applicator();
-      
+
+      //@}
+
+
+      //@{ 
+      //! \name Methods to set and get the parameters controlling the accuracy.
+
       /*! \brief Set the maximum allowable radius of a basic set during iteration. */
       void set_maximum_basic_set_radius(const R&);
 
@@ -66,6 +72,12 @@ namespace Ariadne {
       /*! \brief The default size of the approximation grid. */
       virtual R grid_size() const;
 
+      //@}
+
+
+      //@{ 
+      //! \name Methods for applying a system to a basic set.
+
       /*! \brief Compute the image of a rectangle under a continuous function. */
       virtual Geometry::Rectangle<R> image(const System::Map<R>& f, const Geometry::Rectangle<R>& s) const;
 
@@ -75,8 +87,13 @@ namespace Ariadne {
       /*! \brief Compute the image of an interval zonotope under a differentiable function. */
       virtual Geometry::Zonotope< Numeric::Interval<R> > 
       image(const System::Map<R>& f, const Geometry::Zonotope< Numeric::Interval<R> >& s) const;
-     
+
+      //@}
+
      protected:
+      //@{ 
+      //! \name Generic methods for applying a system to a set.
+
       /*! \brief Template for computing the image of a list set. */
       template<class BS>
       Geometry::ListSet<BS> 
@@ -89,7 +106,13 @@ namespace Ariadne {
       BS
       image_basic_set(const System::Map<R>& f, 
                       const BS& initial_set) const;
+
+      //@}
+
      public:
+      //@{ 
+      //! \name Evaluation of maps on concrete sets
+
       /*! \brief Compute the image of a list set under a map. */
       virtual 
       Geometry::ListSet< Geometry::Rectangle<R> > 
@@ -143,15 +166,24 @@ namespace Ariadne {
                  const Geometry::GridMaskSet<R>& initial_set, 
                  const Geometry::GridMaskSet<R>& bounding_set) const;
     
+      /*! \brief Compute the viability kernel of \a map within \a bounding_set. */
+      virtual
+      Geometry::GridMaskSet<R> 
+      viable(const System::Map<R>& map, 
+             const Geometry::GridMaskSet<R>& bounding_set) const;
+    
       /*! \brief Attempt to verify that the reachable set of \a map starting in \a initial_set remains in \a safe_set. */
       virtual
       tribool
       verify(const System::Map<R>& map, 
              const Geometry::GridMaskSet<R>& initial_set, 
              const Geometry::GridMaskSet<R>& safe_set) const;
+      //@}
 
       
-      
+      //@{
+      //! \name Evaluation of maps on abstract sets
+
       /*! \brief Compute the image of \a set under \a map. */
       virtual
       Geometry::SetInterface<R>* 
@@ -177,14 +209,23 @@ namespace Ariadne {
                  const Geometry::SetInterface<R>& initial_set, 
                  const Geometry::SetInterface<R>& bounding_set) const;
     
+      /*! \brief Compute the viability kernel of \a map within \a bounding_set. */
+      virtual
+      Geometry::SetInterface<R>* 
+      viable(const System::Map<R>& map, 
+             const Geometry::SetInterface<R>& bounding_set) const;
+    
       /*! \brief Attempt to verify that the reachable set of \a map starting in \a initial_set remains in \a safe_set. */
       virtual
       tribool
       verify(const System::Map<R>& map, 
              const Geometry::SetInterface<R>& initial_set, 
              const Geometry::SetInterface<R>& safe_set) const;
-    
+      //@}
 
+
+      //@{
+      //! \brief Methods for computing discretizations
 
       /*! \brief Discretize a system on a grid. */ 
       virtual 
@@ -192,7 +233,13 @@ namespace Ariadne {
       discretize(const System::Map<R>& f, 
                  const Geometry::GridMaskSet<R>& dom,
                  const Geometry::Grid<R>& range_grid) const;
-     
+
+      //@}
+
+
+      //@{
+      //! \brief Methods for control systems
+
       /*! \brief Compute a controller for a control-to-target problem. */ 
       virtual 
       System::GridMultiMap<R> 
@@ -203,6 +250,9 @@ namespace Ariadne {
                         const Geometry::GridMaskSet<R>& control_set,
                         const Geometry::GridMaskSet<R>& noise_set) const;
      
+      //@}
+
+
 
 
        

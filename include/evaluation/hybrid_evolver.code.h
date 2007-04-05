@@ -59,6 +59,11 @@ class HybridTimedSet
 }
 
 template<class R>
+Ariadne::Evaluation::HybridEvolver<R>::~HybridEvolver()
+{
+}
+
+template<class R>
 Ariadne::Evaluation::HybridEvolver<R>::HybridEvolver(Applicator<R>& a, Integrator<R>& i)
   : _applicator(&a), _integrator(&i) 
 {
@@ -250,3 +255,24 @@ Ariadne::Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<
   }
   return result_set;
 }
+
+
+template<class R>
+Ariadne::Geometry::HybridGridMaskSet<R> 
+Ariadne::Evaluation::HybridEvolver<R>::viable(const System::HybridAutomaton<R>& hybrid_automaton, 
+                                              const Geometry::HybridGridMaskSet<R>& bounding_set)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+template<class R>
+Ariadne::tribool
+Ariadne::Evaluation::HybridEvolver<R>::verify(const System::HybridAutomaton<R>& hybrid_automaton, 
+                                              const Geometry::HybridGridMaskSet<R>& initial_set, 
+                                              const Geometry::HybridGridMaskSet<R>& bounding_set)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+

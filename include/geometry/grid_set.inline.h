@@ -63,6 +63,13 @@ namespace Ariadne {
 
 
     template<class R> inline
+    GridBlock<R>::GridBlock(const Grid<R>* gptr, const Combinatoric::LatticeBlock& lc)
+      : _grid_ptr(gptr), _lattice_set(lc)
+    {
+    }
+
+
+    template<class R> inline
     const Grid<R>& 
     GridBlock<R>::grid() const 
     {

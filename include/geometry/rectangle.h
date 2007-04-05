@@ -239,7 +239,7 @@ namespace Ariadne {
       /*! \brief The radius in the sup norm. */
       R radius() const;
       
-      /*! An approximation to the volume. */
+      /*! \brief An approximation to the volume. */
       R volume() const;
       
       /*! \brief Compute a quadrant of the Rectangle determined by \a q.

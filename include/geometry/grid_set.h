@@ -104,6 +104,9 @@ namespace Ariadne {
       /*!\brief A rectangle containing the grid cell. */
       Rectangle<R> bounding_box() const;
 
+      /*!\brief The one-box neighbourhood of the cell. */
+      GridBlock<R> neighbourhood() const;
+
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;
      private: 
@@ -180,6 +183,9 @@ namespace Ariadne {
       /*!\brief A rectangle containing the grid rectangle. */
       Rectangle<R> bounding_box() const;
 
+      /*!\brief The one-box neighbourhood of the block. */
+      GridBlock<R> neighbourhood() const;
+
       /*!\brief A constant iterator to the lower cell in the grid block. */
       const_iterator begin() const;
       /*!\brief A constant iterator to the past-the-end cell of the grid block. */
@@ -189,6 +195,8 @@ namespace Ariadne {
       std::ostream& write(std::ostream&) const;
      private: 
       static void _instantiate_geometry_operators();
+     private:
+      GridBlock(const Grid<R>* gptr, const Combinatoric::LatticeBlock& lc);
      private:
       const Grid<R>* _grid_ptr;
       Combinatoric::LatticeBlock _lattice_set;
@@ -310,6 +318,9 @@ namespace Ariadne {
      *  defined over the same block of cells.
      * 
      *  For structured sets, a PartitionTreeSet is usually more efficient.
+     *
+     *  To convert to a PartitionTreeSet, the number of cells used in each coordinate must be a power of two. 
+     *  (This restriction should be lifted in a future version.)
      *
      *  \ingroup DenotableSet
      *  \ingroup Grid

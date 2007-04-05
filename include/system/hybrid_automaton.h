@@ -129,7 +129,7 @@ class HybridAutomaton
    *
    * This method creates a new discrete transition from the source mode to the 
    * destination mode.
-   * \param id is the unique identifyer of the 
+   * \param event_id is the unique identifyer of the discrete event. 
    * \param source is the discrete transition's source.
    * \param destination is the discrete transition's destination.
    * \param reset is the discrete transition's reset.

@@ -85,38 +85,6 @@ namespace Ariadne {
       UnboundedSet(const std::string& str) : std::runtime_error(str) { }
     };
      
-    template<class S1> inline
-    void check_dimension(const S1& s1, const dimension_type& d2, const char* where="") {
-      if(s1.dimension()!=d2) { throw IncompatibleDimensions(where); }
-    }
-    
-    template<class S1, class S2> inline
-    void check_equal_dimensions(const S1& s1, const S2& s2, const char* where="") {
-      if(s1.dimension()!=s2.dimension()) { throw IncompatibleDimensions(where); }
-    }
-    
-    template<class S1> inline
-    void check_coordinate(const S1& s1, const dimension_type& i2, const char* where="") {
-      if(i2>=s1.dimension()) { throw InvalidCoordinate(where); }
-    }
-
-    template<class S1> inline
-    void check_vertex_index(const S1& s1, const dimension_type& i2, const char* where="") {
-      if(i2>=s1.number_of_vertices()) { throw InvalidVertex(where); }
-    }
-
-    template<class S1, class S2> inline
-    void check_same_grid(const S1& s1, const S2& s2, const char* where="") {
-      if(s1.grid()!=s2.grid()) { throw IncompatibleGrids(where); }
-    }
-    
-    template<class S> inline
-    void check_bounded(const S& s, const char* where="") {
-      if(!s.bounded()) { throw UnboundedSet(where); }
-    }
-
-
-
   }
 }
 

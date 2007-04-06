@@ -45,26 +45,6 @@ namespace Ariadne {
 
     //@}
 
-    template<class V1> inline
-    void check_size(const V1& v1, const size_type& n2, const char* where="") {
-      if(v1.size()!=n2) { throw IncompatibleSizes(where); }
-    }
-
-    template<class V1, class V2> inline
-    void check_equal_sizes(const V1& v1, const V2& v2, const char* where="") {
-      if(v1.size()!=v2.size()) { throw IncompatibleSizes(where); }
-    }
-
-    template<class Mx> inline
-    void check_square(const Mx& A, const char* where="") {
-      if(A.number_of_rows()!=A.number_of_columns()) { throw IncompatibleSizes(where); }
-    }
-
-    template<class S1> inline
-    void check_index(const S1& s1, const size_type& i2, const char* where="") {
-      if(i2>=s1.size()) { throw InvalidIndex(where); }
-    }
-
   }
 }
 

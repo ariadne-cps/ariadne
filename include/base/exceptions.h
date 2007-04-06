@@ -82,15 +82,6 @@ namespace Ariadne {
       LengthError(const std::string& str) : std::runtime_error(str) { }
     };
       
-    template<class A1, class A2> inline
-    void check_equal_array_sizes(const A1& ary1, const A2& ary2, const char* where="") {
-      if(ary1.size()!=ary2.size()) { throw std::length_error(where); }
-    }
-
-    template<class A1> inline
-    void check_array_index(const A1& ary1, const size_type& i2, const char* where="") {
-      if(ary1.size()<=i2) { throw std::out_of_range(where); }
-    }
     //@}
    
   }

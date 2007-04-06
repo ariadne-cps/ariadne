@@ -162,10 +162,16 @@ namespace Ariadne {
      public:
       PlanarProjectionMap() : _d(2), _i(0), _j(1) { }
       PlanarProjectionMap(dimension_type d, dimension_type i, dimension_type j)
-        : _d(d), _i(i), _j(j) { if(i>=d || j>=d) { throw Geometry::InvalidCoordinate(__PRETTY_FUNCTION__); } }
+        : _d(d), _i(i), _j(j) 
+      { 
+        if(i>=d || j>=d) { 
+          using Geometry::InvalidCoordinate; 
+          ARIADNE_THROW(InvalidCoordinate,"PlanarProjectionMap::PlanarProjectionMap(dimension_type d, dimension_type i, dimension_type j)",
+                        "d="<<d<<", i="<<i<<", j="<<j); }
+      }
       template<class R> Point2d operator() (const Geometry::Point<R>& pt) const {
         Point2d result(2); 
-        Geometry::check_dimension(pt,_d,__PRETTY_FUNCTION__);
+        ARIADNE_CHECK_DIMENSION(pt,_d,"Point2d PlanarProjectionMap::operator()(Point<R> pt)");
         result[0]=Numeric::conv_approx<double>(pt[_i]); 
         result[1]=Numeric::conv_approx<double>(pt[_j]); 
         return result;
@@ -180,7 +186,7 @@ namespace Ariadne {
       }
       template<class R> Rectangle2d operator() (const Geometry::Rectangle<R>& r) const {
         Rectangle2d result(2); 
-        Geometry::check_dimension(r,this->_d);
+        ARIADNE_CHECK_DIMENSION(r,this->_d,"Rectangle2d PlanarProjectionMap::operator()(Rectangle<R> r)");
         result.lower_bound(0)=Numeric::conv_approx<double>(r.lower_bound(this->_i));
         result.upper_bound(0)=Numeric::conv_approx<double>(r.upper_bound(this->_i));
         result.lower_bound(1)=Numeric::conv_approx<double>(r.lower_bound(this->_j));

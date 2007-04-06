@@ -36,17 +36,6 @@
 namespace Ariadne {
   namespace System {
   
-    //@{ \name Exceptions
-    template<class M, class S> inline
-    void check_argument_dimension(const M& m1, const S& s2, const char* where="") {
-      if(m1.argument_dimension()!=s2.dimension()) { throw Geometry::IncompatibleDimensions(where); }
-    }
-
-    template<class M, class S> inline
-    void check_result_dimension(const M& m1, const S& s2, const char* where="") {
-      if(m1.result_dimension()!=s2.dimension()) { throw Geometry::IncompatibleDimensions(where); }
-    }
-    //@}
   
   }
 }

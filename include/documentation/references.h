@@ -83,15 +83,21 @@ N. S. Nedialkov, K. R. Jackson and G. F. Corliss,
   "Validated solutions of initial value problems for ordinary differential equations",
   <em>Appl. Math. Comput.</em> <b>105</b> (1999), no. 1, 21--68.
 
-Piotr Zgliczynski, "C^1 Lohner algorithm", <i>Found. Comput. Math.</i> <b>2</b> (2002), no. 4, 429--465.
+Piotr Zgliczynski, "C^1 Lohner algorithm", <em>Found. Comput. Math.</em> <b>2</b> (2002), no. 4, 429--465.
 
 \section reachability_references Reachability Analysis and Control
+
+Pieter Collins, "Continuity and computability of reachable sets", <em>Theoretical Comput. Sci.</em> <b>341</b> (2005), 162--195.
+
+Pieter Collins and John Lygeros, "Computability of finite-time reachable sets for hybrid systems", in <em>Proceedings of CDC-ECC 2005</em>, 4688--4693.
+
+Pieter Collins, "Optimal semicomputable approximations to reachable and invariant sets". To appear in <em>Theory Comput. Syst.</em>
 
 Antoine Girard, Colas Le Guernic and Oded Maler, 
 "Efficient Computation of Reachable Sets of Linear Time-Invariant Systems with Inputs",
 
 Antoine Girard, "Reachability of Uncertain Linear Systems using Zonotopes," 
-  in <em>Proceedings of HSCC 2005</em>, LNCS 3414, pp 291--305, 2005.
+  in <em>Proceedings of HSCC 2005</em>, LNCS 3414, 291--305.
 
 Alex Kurzhanskiy and Pravin Varaiya, "Ellipsoidal Techniques for Reachability Analysis of Discrete-Time Linear Systems",
 

@@ -377,7 +377,8 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = include/documentation/ include/linear_algebra/lpslv.h \
+INPUT                  = include/documentation/ \
+                         #include/linear_algebra/lpslv.h \
                          test/test.h 
                          
 
@@ -438,7 +439,7 @@ EXAMPLE_RECURSIVE      = NO
 # directories that contain image that are included in the documentation (see 
 # the \image command).
 
-IMAGE_PATH             = 
+IMAGE_PATH             = fig/
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should 
 # invoke to filter for each input file. Doxygen will invoke the filter program 

@@ -21,6 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "base/stlio.h"
 #include "base/array.h"
 #include "base/exceptions.h"
 
@@ -51,110 +52,110 @@ namespace Ariadne {
     }
 
     BooleanArray&
-    operator&=(BooleanArray& v1, const BooleanArray& v2)
+    operator&=(BooleanArray& a1, const BooleanArray& a2)
     {
-      check_equal_array_sizes(v1,v2,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_ARRAY_SIZES(a1,a2,"BooleanArray& operator&=(BooleanArray a1, BooleanArray a2)");
       typedef BooleanArray::const_iterator const_iterator;
       typedef BooleanArray::iterator iterator;
 
-      iterator v1_iter=v1.begin();
-      const_iterator v2_iter=v2.begin();
-      iterator v1_end=v1.end();
+      iterator a1_iter=a1.begin();
+      const_iterator a2_iter=a2.begin();
+      iterator a1_end=a1.end();
 
-      while(v1_iter!=v1_end) {
-        (*v1_iter) = ( (*v1_iter) & (*v2_iter) );
-        ++v1_iter;
-        ++v2_iter;
+      while(a1_iter!=a1_end) {
+        (*a1_iter) = ( (*a1_iter) & (*a2_iter) );
+        ++a1_iter;
+        ++a2_iter;
       }
-      return v1;
+      return a1;
     }
 
     BooleanArray&
-    operator|=(BooleanArray& v1, const BooleanArray& v2)
+    operator|=(BooleanArray& a1, const BooleanArray& a2)
     {
-      check_equal_array_sizes(v1,v2,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_ARRAY_SIZES(a1,a2,"BooleanArray& operator|=(BooleanArray a1, BooleanArray a2)");
       typedef BooleanArray::const_iterator const_iterator;
       typedef BooleanArray::iterator iterator;
 
-      iterator v1_iter=v1.begin();
-      const_iterator v2_iter=v2.begin();
-      iterator v1_end=v1.end();
+      iterator a1_iter=a1.begin();
+      const_iterator a2_iter=a2.begin();
+      iterator a1_end=a1.end();
 
-      while(v1_iter!=v1_end) {
-        (*v1_iter) = ( (*v1_iter) | (*v2_iter) );
-        ++v1_iter;
-        ++v2_iter;
+      while(a1_iter!=a1_end) {
+        (*a1_iter) = ( (*a1_iter) | (*a2_iter) );
+        ++a1_iter;
+        ++a2_iter;
       }
-      return v1;
+      return a1;
     }
 
     BooleanArray&
-    operator-=(BooleanArray& v1, const BooleanArray& v2)
+    operator-=(BooleanArray& a1, const BooleanArray& a2)
     {
-      check_equal_array_sizes(v1,v2,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_ARRAY_SIZES(a1,a2,"BooleanArray& operator-=(BooleanArray a1, BooleanArray a2)");
       typedef BooleanArray::const_iterator const_iterator;
       typedef BooleanArray::iterator iterator;
 
-      iterator v1_iter=v1.begin();
-      const_iterator v2_iter=v2.begin();
-      iterator v1_end=v1.end();
+      iterator a1_iter=a1.begin();
+      const_iterator a2_iter=a2.begin();
+      iterator a1_end=a1.end();
 
-      while(v1_iter!=v1_end) {
-        (*v1_iter) = ( (*v1_iter) & (!(*v2_iter)) );
-        ++v1_iter;
-        ++v2_iter;
+      while(a1_iter!=a1_end) {
+        (*a1_iter) = ( (*a1_iter) & (!(*a2_iter)) );
+        ++a1_iter;
+        ++a2_iter;
       }
-      return v1;
+      return a1;
     }
 
     BooleanArray
-    operator&(const BooleanArray& v1, const BooleanArray& v2)
+    operator&(const BooleanArray& a1, const BooleanArray& a2)
     {
-      BooleanArray result(v1);
-      return result&=v2;
+      BooleanArray result(a1);
+      return result&=a2;
     }
 
     BooleanArray
-    operator|(const BooleanArray& v1, const BooleanArray& v2)
+    operator|(const BooleanArray& a1, const BooleanArray& a2)
     {
-      BooleanArray result(v1);
-      return result|=v2;
+      BooleanArray result(a1);
+      return result|=a2;
     }
 
     BooleanArray
-    operator-(const BooleanArray& v1, const BooleanArray& v2)
+    operator-(const BooleanArray& a1, const BooleanArray& a2)
     {
-      BooleanArray result(v1);
-      return result-=v2;
+      BooleanArray result(a1);
+      return result-=a2;
     }
 
     bool
-    operator<=(const BooleanArray& v1, const BooleanArray& v2)
+    operator<=(const BooleanArray& a1, const BooleanArray& a2)
     {
-      check_equal_array_sizes(v1,v2,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_ARRAY_SIZES(a1,a2,"bool operator<=(BooleanArray a1, BooleanArray a2)");
       typedef BooleanArray::const_iterator const_iterator;
-      const_iterator v1_iter=v1.begin();
-      const_iterator v2_iter=v2.begin();
-      const_iterator v1_end=v1.end();
-      while(v1_iter!=v1_end) {
-        if((*v1_iter) && (!*v2_iter)) {
+      const_iterator a1_iter=a1.begin();
+      const_iterator a2_iter=a2.begin();
+      const_iterator a1_end=a1.end();
+      while(a1_iter!=a1_end) {
+        if((*a1_iter) && (!*a2_iter)) {
           return false;
         }
-        ++v1_iter;
-        ++v2_iter;
+        ++a1_iter;
+        ++a2_iter;
       }
       return true;
     }
 
     bool
-    lexicographic_less(const IndexArray& s1, const IndexArray& s2)
+    lexicographic_less(const IndexArray& a1, const IndexArray& a2)
     {
-      check_equal_array_sizes(s1,s2,__PRETTY_FUNCTION__);
-      for(dimension_type i=0; i!=s1.size(); ++i) {
-        if(s1[i]<s2[i]) {
+      ARIADNE_CHECK_EQUAL_ARRAY_SIZES(a1,a2,"bool lexicographic_less(BooleanArray a1, BooleanArray a2)");
+      for(dimension_type i=0; i!=a1.size(); ++i) {
+        if(a1[i]<a2[i]) {
           return true;
         }
-        if(s1[i]>s2[i]) {
+        if(a1[i]>a2[i]) {
           return false;
         }
       }
@@ -162,14 +163,14 @@ namespace Ariadne {
     }
 
     bool
-    lexicographic_less_equal(const IndexArray& s1, const IndexArray& s2)
+    lexicographic_less_equal(const IndexArray& a1, const IndexArray& a2)
     {
-      check_equal_array_sizes(s1,s2,__PRETTY_FUNCTION__);
-      for(dimension_type i=0; i!=s1.size(); ++i) {
-        if(s1[i]<s2[i]) {
+      ARIADNE_CHECK_EQUAL_ARRAY_SIZES(a1,a2,"bool lexicographic_less_equal(BooleanArray a1, BooleanArray a2)");
+      for(dimension_type i=0; i!=a1.size(); ++i) {
+        if(a1[i]<a2[i]) {
           return true;
         }
-        if(s1[i]>s2[i]) {
+        if(a1[i]>a2[i]) {
           return false;
         }
       }
@@ -177,11 +178,11 @@ namespace Ariadne {
     }
 
     bool
-    coordinate_less_equal(const IndexArray& s1, const IndexArray& s2)
+    coordinate_less_equal(const IndexArray& a1, const IndexArray& a2)
     {
-      check_equal_array_sizes(s1,s2,__PRETTY_FUNCTION__);
-      for(dimension_type i=0; i!=s1.size(); ++i) {
-        if(s1[i]>s2[i]) {
+      ARIADNE_CHECK_EQUAL_ARRAY_SIZES(a1,a2,"bool coordinate_less_equal(BooleanArray a1, BooleanArray a2)");
+      for(dimension_type i=0; i!=a1.size(); ++i) {
+        if(a1[i]>a2[i]) {
           return false;
         }
       }

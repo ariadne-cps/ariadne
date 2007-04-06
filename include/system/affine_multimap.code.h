@@ -44,28 +44,24 @@ namespace Ariadne {
     BS<R>
     AffineMultiMap<R,BS>::operator() (const Geometry::Point<R>& pt) const
     {
+      ARIADNE_CHECK_ARGUMENT_DIMENSION(*this,pt,"BS AffineMultiMap<BS>(Point pt)");
       throw NotImplemented(__PRETTY_FUNCTION__);
 
       using namespace Ariadne::LinearAlgebra;
       typedef typename Numeric::traits<R>::arithmetic_type F;
       typedef typename Numeric::traits<R>::interval_type I;
-     
-      check_argument_dimension(*this,pt,__PRETTY_FUNCTION__);
-      Vector<I> iv=this->A()*Vector<F>(pt.position_vector());
-//      return over_approximation(minkowski_sum(this->S(),BS<R>(Geometry::Rectangle<R>(iv))));
     }
     
     template<class R, template<class> class BS>
     BS<R>
     AffineMultiMap<R,BS>::operator() (const BS<R>& bs) const
     {
+      ARIADNE_CHECK_ARGUMENT_DIMENSION(*this,bs,"BS AffineMultiMap<BS>::operator()(BS bs)");
       throw NotImplemented(__PRETTY_FUNCTION__);
 
       using namespace Ariadne::LinearAlgebra;
       using namespace Ariadne::Geometry;
 
-      check_argument_dimension(*this,bs,__PRETTY_FUNCTION__);
-//      return over_approximation(minkowski_sum(AffineMap<R>(this->A()).image(bs),this->S()));
     }
     
   }

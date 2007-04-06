@@ -79,11 +79,16 @@ namespace Ariadne {
       operator Matrix<Real> () const;
       /*! \brief The inverse. */
       Matrix<Real> inverse() const;
+
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream& os) const;
      private:
       Matrix<Real> _elements;
       array<int> _pivots;
     };
     
+    template<class Real> std::ostream& operator<<(std::ostream& os, const LUMatrix<Real>& lu);
+
     template<class Real>
     inline 
     LUMatrix<Real>::LUMatrix(const Matrix<Real>& A) 
@@ -176,7 +181,7 @@ namespace Ariadne {
     Real
     LUMatrix<Real>::determinant() const
     {
-      check_square(*this,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_SQUARE(*this,"Real LUMatrix::determinant()");
       
       size_type n=this->number_of_rows();
       Real result=1;
@@ -196,6 +201,13 @@ namespace Ariadne {
       TBLAS::geset(TBLAS::RowMajor,n,n,Real(0),Real(1),result.begin(),n);
       TLAPACK::getrs(TBLAS::RowMajor,TBLAS::NoTrans,n,n,this->_elements.begin(),n,this->_pivots.begin(),result.begin(),n);
       return result;
+    }
+
+    template<class Real> 
+    std::ostream& 
+    operator<<(std::ostream& os, const LUMatrix<Real>& lu)
+    {
+      return os << "LUMatrix( L=" << lu.L() << ", U=" << lu.U() << " )";
     }
 
   }

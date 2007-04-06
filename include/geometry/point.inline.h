@@ -139,7 +139,7 @@ namespace Ariadne {
     R& 
     Point<R>::at(dimension_type index) 
     {
-      ARIADNE_CHECK_COORDINATE(*this,index,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_COORDINATE(*this,index,"R& Point at(dimension_type index)");
       return  (this->_vector(index));
     }
 
@@ -147,7 +147,7 @@ namespace Ariadne {
     const R& 
     Point<R>::at(dimension_type index) const 
     {
-      ARIADNE_CHECK_COORDINATE(*this,index,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_COORDINATE(*this,index,"const R& Point at(dimension_type index) const");
       return  (this->_vector(index));
     }
 
@@ -173,7 +173,7 @@ namespace Ariadne {
     template<class R> inline
     bool contains_value(const Point< Numeric::Interval<R> >& ipt, const Point<R>& pt) 
     {
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(ipt,pt,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(ipt,pt,"bool contains_value(Point<Interval>,Point<Real>)");
       for(dimension_type i=0; i!=ipt.dimension(); ++i) {
         if(!contains_value(ipt[i],pt[i])) {
           return false;
@@ -208,7 +208,7 @@ namespace Ariadne {
     Point<typename Numeric::traits<R>::arithmetic_type>
     minkowski_sum(const Point<R>& pt1, const Point<R>& pt2) 
     {
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(pt1,pt2,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(pt1,pt2,"Point minkowski_sum(Point,Point)");
       return Point<typename Numeric::traits<R>::arithmetic_type>(pt1.position_vector()+pt2.position_vector());
     }
     
@@ -216,7 +216,7 @@ namespace Ariadne {
     Point<typename Numeric::traits<R>::arithmetic_type>
     minkowski_difference(const Point<R>& pt1, const Point<R>& pt2) 
     {
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(pt1,pt2,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(pt1,pt2,"Point minkowski_difference(Point,Point)");
       return Point<typename Numeric::traits<R>::arithmetic_type>(pt1.position_vector()-pt2.position_vector());
     }
     
@@ -225,7 +225,7 @@ namespace Ariadne {
     LinearAlgebra::Vector<typename Numeric::traits<R1,R2>::arithmetic_type>
     operator-(const Point<R1> pt1, const Point<R2>& pt2) 
     {
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(pt1,pt2,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(pt1,pt2,"Vector operator-(Point,Point)");
       return pt1.position_vector()-pt2.position_vector();
     }
     
@@ -233,7 +233,7 @@ namespace Ariadne {
     Point<typename Numeric::traits<R1,R2>::arithmetic_type> 
     operator+(const Point<R1>& pt, const LinearAlgebra::Vector<R2>& v)
     {
-      ARIADNE_CHECK_DIMENSION(pt,v.size(),__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION(pt,v.size(),"Point operator+(Point,Vector)");
       return Point<typename Numeric::traits<R1,R2>::arithmetic_type>(pt.position_vector() + v);
     }
 
@@ -242,7 +242,7 @@ namespace Ariadne {
     Point<typename Numeric::traits<R1,R2>::arithmetic_type> 
     operator-(const Point<R1>& pt, const LinearAlgebra::Vector<R2>& v)
     {
-      ARIADNE_CHECK_DIMENSION(pt,v.size(),__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION(pt,v.size(),"Point operator-(Point,Vector)");
       return Point<typename Numeric::traits<R1,R2>::arithmetic_type>(pt.position_vector() - v);
     }
 
@@ -250,7 +250,7 @@ namespace Ariadne {
     Point<R> 
     add_approx(const Point<R>& pt, const LinearAlgebra::Vector<R>& v)
     {
-      ARIADNE_CHECK_DIMENSION(pt,v.size(),__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION(pt,v.size(),"Point add_approx(Point,Vector)");
       return Point<R>(add_approx(pt.position_vector(),v));
     }
 
@@ -258,7 +258,7 @@ namespace Ariadne {
     Point<R> 
     sub_approx(const Point<R>& pt, const LinearAlgebra::Vector<R>& v)
     {
-      ARIADNE_CHECK_DIMENSION(pt,v.size(),__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION(pt,v.size(),"Point sub_approx(Point,Vector)");
       return Point<R>(sub_approx(pt.position_vector(),v));
     }
 
@@ -278,14 +278,14 @@ namespace Ariadne {
 
     template<class R> inline 
     Point<R> 
-    project_on_dimensions(const Point<R> &A, const Base::array<bool>& dims) 
+    project_on_dimensions(const Point<R> &pt, const Base::array<bool>& dims) 
     {
-      if (A.dimension()!=dims.size()) {
-        throw std::runtime_error("project_on_dimensions(const Point & ,...): the two parameters have different dimension");
+      if (pt.dimension()!=dims.size()) {
+        ARIADNE_THROW(IncompatibleDimensions,"Point project_on_dimensions(Point pt, BooleanArray dims)","pt.dimension()="<<pt<<", dims.size()="<<dims.size());
       }
       size_type new_dim=0;
 
-      for (size_type i=0; i< A.dimension(); i++) {
+      for (size_type i=0; i< pt.dimension(); i++) {
         if (dims[i]) {
           new_dim++;
         }
@@ -295,7 +295,7 @@ namespace Ariadne {
       size_type new_i=0;
       for (size_t i=0; i<dims.size(); i++) {
         if (dims[i]) {
-           new_point.set(new_i,A[i]);
+           new_point.set(new_i,pt[i]);
            new_i++;
         } 
       }
@@ -305,34 +305,36 @@ namespace Ariadne {
 
     template<class R> inline 
     Point<R> 
-    project_on_dimensions(const Point<R> &A, 
+    project_on_dimensions(const Point<R> &pt, 
                           const size_type& x, const size_type& y, const size_type& z) 
     {
-      if ((A.dimension()<=x)||(A.dimension()<=y)||(A.dimension()<=z)) {
-        throw std::runtime_error("project_on_dimensions(const Point & ,...): the two parameters have different dimension");
+      if ((pt.dimension()<=x)||(pt.dimension()<=y)||(pt.dimension()<=z)) {
+        ARIADNE_THROW(InvalidIndex,"Point project_on_dimensions(Point pt, size_type x, size_type y, size_type z)",
+                      "pt.dimension()="<<pt<<", x="<<x<<", y="<<y<<", z="<<z);
       }
       
       Point<R> new_point(3);
       
-      new_point.set(0,A[x]);
-      new_point.set(1,A[y]);
-      new_point.set(2,A[z]);
+      new_point.set(0,pt[x]);
+      new_point.set(1,pt[y]);
+      new_point.set(2,pt[z]);
 
       return new_point;
     }
 
     template<class R> inline 
     Point<R> 
-    project_on_dimensions(const Point<R> &A, 
+    project_on_dimensions(const Point<R> &pt, 
                           const size_type &x, const size_type&y) 
     {
-      if ((A.dimension()<=x)||(A.dimension()<=y)) {
-         throw "project_on_dimensions(const Point& ,...): one of the projection dimensions is greater than the Point dimension";
+      if ((pt.dimension()<=x)||(pt.dimension()<=y)) {
+        ARIADNE_THROW(InvalidIndex,"Point project_on_dimensions(Point pt, size_type x, size_type y)",
+                      "pt.dimension()="<<pt<<", x="<<x<<", y="<<y);
       }
       Point<R> new_point(2);
       
-      new_point.set(0,A[x]);
-      new_point.set(1,A[y]);
+      new_point.set(0,pt[x]);
+      new_point.set(1,pt[y]);
 
       return new_point;
     }

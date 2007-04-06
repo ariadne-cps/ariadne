@@ -69,11 +69,11 @@ namespace Ariadne {
 
     template<class BS> inline
     void 
-    ListSet<BS>::push_back(const BS& A) 
+    ListSet<BS>::push_back(const BS& bs) 
     {
-      if (this->dimension()==0) { this->_dimension=A.dimension(); }
-      check_equal_dimensions(*this,A,__PRETTY_FUNCTION__);
-      this->_vector.push_back(A);
+      if (this->dimension()==0) { this->_dimension=bs.dimension(); }
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,bs,"void ListSet<BS>::push_back(BS bs)");
+      this->_vector.push_back(bs);
     }
 
     template<class BS> inline
@@ -81,7 +81,7 @@ namespace Ariadne {
     ListSet<BS>::pop_back() 
     {
       if (this->_vector.empty()) { 
-        throw std::runtime_error("Attempting to pop from an empty ListSet");
+        ARIADNE_THROW(LengthError,"void ListSet<BS>::pop_back()"," empty list");
       }
       this->_vector.pop_back();
     }
@@ -97,7 +97,7 @@ namespace Ariadne {
     const BS& 
     ListSet<BS>::get(size_type index) const 
     {
-      check_array_index(*this,index,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_ARRAY_INDEX(*this,index,"BS ListSet<BS>::get(size_type index)");
       return this->_vector[index];
     }
 
@@ -105,7 +105,7 @@ namespace Ariadne {
     void 
     ListSet<BS>::set(size_type index, const BS& set) 
     {
-      check_array_index(*this,index,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_ARRAY_INDEX(*this,index,"void ListSet<BS>::set(size_type index, BS set)");
       this->_vector[index]=set;
     }
 
@@ -113,7 +113,7 @@ namespace Ariadne {
     const BS& 
     ListSet<BS>::operator[](size_type index) const 
     {
-      check_array_index(*this,index,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_ARRAY_INDEX(*this,index,"void ListSet<BS>::operator[](size_type index)");
       return this->_vector[index];
     }
 
@@ -236,45 +236,30 @@ namespace Ariadne {
 
     template<class BS> inline
     void 
-    ListSet<BS>::adjoin(const ListSet<BS>& A) 
+    ListSet<BS>::adjoin(const ListSet<BS>& ls) 
     {
       if(this->dimension()==0) { 
-        this->_dimension=A.dimension(); 
+        this->_dimension=ls.dimension(); 
       }
-      check_equal_dimensions(*this,A,__PRETTY_FUNCTION__);
-      this->_vector.reserve(A.size());
-      for(typename ListSet<BS>::const_iterator iter=A.begin(); iter!=A.end(); ++iter) {
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,ls,"void ListSet<BS>::adjoin(ListSet<BS> ls)");
+      this->_vector.reserve(ls.size());
+      for(typename ListSet<BS>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
         this->_vector.push_back(*iter);
       }
     }
       
     template<class BS> inline
     void 
-    ListSet<BS>::inplace_union(const ListSet<BS>& A) 
-    {
-      this->adjoin(A);
-    }
-
-    template<class BS> inline
-    void 
-    ListSet<BS>::adjoin(const BS& A) 
+    ListSet<BS>::adjoin(const BS& bs) 
     {
       if(this->dimension()==0) { 
-        this->_dimension=A.dimension(); 
+        this->_dimension=bs.dimension(); 
       }
-      check_equal_dimensions(*this,A,__PRETTY_FUNCTION__);
-      if(!A.empty()) {
-        this->_vector.push_back(A);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,bs,"void ListSet<BS>::adjoin(BS bs)");
+      if(!bs.empty()) {
+        this->_vector.push_back(bs);
       }
     }
-
-    template<class BS> inline
-    void 
-    ListSet<BS>::inplace_union(const BS& A) 
-    {
-      this->adjoin(A);
-    }
-
 
 
     template<class BS> inline

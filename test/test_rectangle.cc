@@ -138,8 +138,8 @@ test_rectangle()
         is >> r2;
         is >> r3;
    } 
-    catch(invalid_input& e) {
-        cout << "  invalid_input: " << e.what() << "\n";
+    catch(InvalidInput& e) {
+        cout << "  InvalidInput: " << e.what() << "\n";
         return 1;
     }
     catch(std::invalid_argument& e) {

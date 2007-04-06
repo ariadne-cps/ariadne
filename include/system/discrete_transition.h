@@ -135,9 +135,9 @@ class DiscreteTransition
       : _event_id(event_id), _source(&source), _destination(&destination), 
         _activation(activation.clone()), _reset(reset.clone()) 
     { 
-      check_equal_dimensions(activation,source);
-      check_argument_dimension(reset,source);
-      check_result_dimension(reset,destination);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(activation,source,"DiscreteTransition::DiscreteTransition(...)");
+      ARIADNE_CHECK_ARGUMENT_DIMENSION(reset,source,"DiscreteTransition::DiscreteTransition(...)");
+      ARIADNE_CHECK_RESULT_DIMENSION(reset,destination,"DiscreteTransition::DiscreteTransition(...)");
     }
 
     /* Construct from shared pointers (for internal use). */
@@ -149,9 +149,9 @@ class DiscreteTransition
       : _event_id(event_id), _source(&source), _destination(&destination), 
         _activation(activation), _reset(reset) 
     { 
-      check_equal_dimensions(*activation,source);
-      check_argument_dimension(*reset,source);
-      check_result_dimension(*reset,destination);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(*activation,source,"DiscreteTransition::DiscreteTransition(...)");
+      ARIADNE_CHECK_ARGUMENT_DIMENSION(*reset,source,"DiscreteTransition::DiscreteTransition(...)");
+      ARIADNE_CHECK_RESULT_DIMENSION(*reset,destination,"DiscreteTransition::DiscreteTransition(...)");
     }
 
     /* Construct from shared pointers (for internal use). */
@@ -163,9 +163,9 @@ class DiscreteTransition
       : _event_id(event_id), _source(&*source), _destination(&*destination), 
         _activation(activation), _reset(reset) 
     { 
-      check_equal_dimensions(*activation,*source);
-      check_argument_dimension(*reset,*source);
-      check_result_dimension(*reset,*destination);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(*activation,*source,"DiscreteTransition::DiscreteTransition(...)");
+      ARIADNE_CHECK_ARGUMENT_DIMENSION(*reset,*source,"DiscreteTransition::DiscreteTransition(...)");
+      ARIADNE_CHECK_RESULT_DIMENSION(*reset,*destination,"DiscreteTransition::DiscreteTransition(...)");
     }
 
 };

@@ -32,7 +32,8 @@
 #include <iosfwd>
 
 #include "../throw.h"
-#include "base/types.h"
+#include "../base/types.h"
+#include "../base/exceptions.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {
@@ -42,10 +43,6 @@ namespace Ariadne {
       IncompatibleSizes(const std::string& str) : std::runtime_error(str) { }
     };
 
-    /*! \brief The index to an arrayed object was invalid. */
-    struct InvalidIndex : public std::runtime_error {
-      InvalidIndex(const std::string& str) : std::runtime_error(str) { }
-    };
     //@}
 
     template<class V1> inline
@@ -76,6 +73,10 @@ namespace Ariadne {
 
 #define ARIADNE_CHECK_EQUAL_SIZES(vec1,vec2,func) \
   { if((vec1).size()!=vec2.size()) { ARIADNE_THROW(IncompatibleSizes,func,#vec1"="<<vec1<<", "#vec2"="<<vec2); } }
+
+#define ARIADNE_CHECK_MATRIX_EQUAL_SIZES(mx1,mx2,func) \
+  { if((mx1).number_of_rows()!=mx2.number_of_rows() || (mx1).number_of_columns()!=mx2.number_of_columns()) { \
+      ARIADNE_THROW(IncompatibleSizes,func,#mx1"="<<mx1<<", "#mx2"="<<mx2); } }
 
 #define ARIADNE_CHECK_SQUARE(mx,func) \
   { if((mx).number_of_rows()!=(mx).number_of_columns()) { ARIADNE_THROW(IncompatibleSizes,func,#mx"="<<mx<<" is not square"); } }

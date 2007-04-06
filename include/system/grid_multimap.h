@@ -42,6 +42,8 @@
 #include "../geometry/grid.h"
 #include "../geometry/grid_set.h"
 
+#include "exceptions.h"
+
 namespace Ariadne {
   namespace System {
 
@@ -72,69 +74,69 @@ namespace Ariadne {
       GridMultiMap(const Geometry::Grid<R>& ag, const Geometry::Grid<R>& rg, const Combinatoric::LatticeMultiMap& lmm)
         : _argument_grid_ref(ag), _result_grid_ref(rg), _lattice_map(lmm) 
       {
-        Geometry::check_dimension(ag,lmm.argument_dimension());
-        Geometry::check_dimension(rg,lmm.result_dimension());
+        ARIADNE_CHECK_RESULT_DIMENSION(lmm,ag,"GridMultiMap::GridMultiMap(Grid ag, Grid rg, LatticeMultiMap lmm)");
+        ARIADNE_CHECK_RESULT_DIMENSION(lmm,rg,"GridMultiMap::GridMultiMap(Grid ag, Grid rg, LatticeMultiMap lmm)");
       }
 
-       /*! \brief Adjoin set \a img to the image of set \a gc. */
-      void adjoin_to_image(const Geometry::GridCell<R>& gc, const Geometry::GridCell<R>& img) {
-        Geometry::check_dimension(gc,this->argument_dimension());
-        Geometry::check_dimension(img,this->result_dimension());
-        this->_lattice_map.adjoin_to_image(gc.lattice_set(),img.lattice_set());
+       /*! \brief Adjoin set \a igc to the image of set \a agc. */
+      void adjoin_to_image(const Geometry::GridCell<R>& agc, const Geometry::GridCell<R>& igc) {
+        ARIADNE_CHECK_ARGUMENT_DIMENSION(*this,agc,"void GridMultiMap::adjoin_to_image(GridCell agc, GridCell igc)");
+        ARIADNE_CHECK_RESULT_DIMENSION(*this,igc,"void GridMultiMap::adjoin_to_image(GridCell agc, GridCell igc)");
+        this->_lattice_map.adjoin_to_image(agc.lattice_set(),igc.lattice_set());
       }
 
-      /*! \brief Adjoin set \a img to the image of set \a gc. */
-      void adjoin_to_image(const Geometry::GridCell<R>& gc, const Geometry::GridCellListSet<R>& img) {
-        Geometry::check_dimension(gc,this->argument_dimension());
-        Geometry::check_dimension(img,this->result_dimension());
-        this->_lattice_map.adjoin_to_image(gc.lattice_set(),img.lattice_set());
+      /*! \brief Adjoin set \a igcls to the image of set \a agc. */
+      void adjoin_to_image(const Geometry::GridCell<R>& agc, const Geometry::GridCellListSet<R>& igcls) {
+        ARIADNE_CHECK_ARGUMENT_DIMENSION(*this,agc,"void GridMultiMap::adjoin_to_image(GridCell agc, GridCell igclc)");
+        ARIADNE_CHECK_RESULT_DIMENSION(*this,igcls,"void GridMultiMap::adjoin_to_image(GridCell agc, GridCell igcls)");
+        this->_lattice_map.adjoin_to_image(agc.lattice_set(),igcls.lattice_set());
       }
         
       /*! \brief  The map applied to a cell. */
       Geometry::GridCellListSet<R> image(const Geometry::GridCell<R>& gc) const {
-        Geometry::check_dimension(gc,this->argument_dimension());
+        ARIADNE_CHECK_ARGUMENT_DIMENSION(*this,gc,"GridCellListSet GridMultiMap::image(GridCell agc)");
         return Geometry::GridCellListSet<R>(this->_result_grid_ref,this->_lattice_map.image(gc.lattice_set()));
       }
 
       /*! \brief  The map applied to a grid mask set. */
      Geometry::GridCellListSet<R> image(const Geometry::GridMaskSet<R>& gms) const {
-        Geometry::check_dimension(gms,this->argument_dimension());
+       ARIADNE_CHECK_ARGUMENT_DIMENSION(*this,gms,"GridCellListSet GridMultiMap::image(GridMaskSet gms)");
         return Geometry::GridCellListSet<R>(this->_result_grid_ref,this->_lattice_map.image(gms.lattice_set()));
       }
 
       /*! \brief  The map applied to a cell. */
       Geometry::GridCellListSet<R> operator() (const Geometry::GridCell<R>& gc) const {
-        Geometry::check_dimension(gc,this->argument_dimension());
+        ARIADNE_CHECK_ARGUMENT_DIMENSION(*this,gc,"GridCellListSet GridMultiMap::operator()(GridCell gc)");
         return Geometry::GridCellListSet<R>(this->_result_grid_ref,this->_lattice_map(gc.lattice_set()));
       }
         
       /*! \brief  The map applied to a lattice rectangle. */
       Geometry::GridCellListSet<R> operator() (const Geometry::GridBlock<R>& gb) const {
-        Geometry::check_dimension(gb,this->argument_dimension());
+        ARIADNE_CHECK_ARGUMENT_DIMENSION(*this,gb,"GridCellListSet GridMultiMap::operator()(GridBlock gb)");
         return Geometry::GridCellListSet<R>(this->_result_grid_ref,this->_lattice_map(gb.lattice_set()));
       }
         
       /*! \brief  The map applied to a cell list set. */
       Geometry::GridCellListSet<R> operator() (const Geometry::GridCellListSet<R>& gcls) const {
-        Geometry::check_dimension(gcls,this->argument_dimension());
+        ARIADNE_CHECK_ARGUMENT_DIMENSION(*this,gcls,"GridCellListSet GridMultiMap::operator()(GridCellListSet gcls)");
         return Geometry::GridCellListSet<R>(this->_result_grid_ref,this->_lattice_map(gcls.lattice_set()));
       }
                 
       /*! \brief  The map applied to a mask set. */
       Geometry::GridCellListSet<R> operator() (const Geometry::GridMaskSet<R>& gms) const {
-        Geometry::check_dimension(gms,this->argument_dimension());
+        ARIADNE_CHECK_ARGUMENT_DIMENSION(*this,gms,"GridCellListSet GridMultiMap::operator()(GridMaskSet gms)");
         return Geometry::GridCellListSet<R>(this->_result_grid_ref,this->_lattice_map(gms.lattice_set()));
       };
 
       /*! \brief  The set of cells which map into \a lms. */
       Geometry::GridCellListSet<R> strong_preimage (const Geometry::GridMaskSet<R>& gms) const {
-        Geometry::check_dimension(gms,this->result_dimension());
+        ARIADNE_CHECK_RESULT_DIMENSION(*this,gms,"GridCellListSet GridMultiMap::strong_preimage(GridMaskSet gms)");
         return Geometry::GridCellListSet<R>(this->_argument_grid_ref,this->_lattice_map.strong_preimage(gms.lattice_set()));
       };
 
       /*! \brief  The set of cells which map over a cell in \a lms. */
       Geometry::GridCellListSet<R> weak_preimage (const Geometry::GridMaskSet<R>& gms) const {
-        Geometry::check_dimension(gms,this->result_dimension());
+        ARIADNE_CHECK_RESULT_DIMENSION(*this,gms,"GridCellListSet GridMultiMap::weak_preimage(GridMaskSet gms)");
         return Geometry::GridCellListSet<R>(this->_argument_grid_ref,this->_lattice_map.weak_preimage(gms.lattice_set()));
       };
 

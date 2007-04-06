@@ -463,6 +463,12 @@ namespace Ariadne {
       /*! \brief Removes a cell from the set. */
       void remove(const GridCell<R>& gc);
 
+      /*! \brief Removes a list of cells from the set. */
+      void remove(const GridCellListSet<R>& gcls);
+
+      /*! \brief Removes a GridMaskSet from the set. */
+      void remove(const GridMaskSet<R>& gms);
+
       /*! \brief Adjoins a cell to the set. */
       void adjoin(const GridCell<R>& gc);
 

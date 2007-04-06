@@ -51,4 +51,10 @@ namespace Ariadne {
   }
 }
 
+#define ARIADNE_CHECK_ARGUMENT_DIMENSION(map,set,func) \
+  { if((map).argument_dimension()!=(set).dimension()) { using Geometry::IncompatibleDimensions; ARIADNE_THROW(IncompatibleDimensions,func,#map".argument_dimension()="<<(map).argument_dimension()<<", "#set"="<<set); } }
+
+#define ARIADNE_CHECK_RESULT_DIMENSION(map,set,func) \
+{ if((map).result_dimension()!=(set).dimension()) { using Geometry::IncompatibleDimensions; ARIADNE_THROW(IncompatibleDimensions,func,#map".result_dimension()="<<(map).result_dimension()<<", "#set"="<<set); } }
+
 #endif /* ARIADNE_SYSTEM_EXCEPTIONS_H */

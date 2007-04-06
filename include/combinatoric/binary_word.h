@@ -76,6 +76,9 @@
 
 #include "../base/types.h"
 
+#include "../throw.h"
+#include "exceptions.h"
+
 namespace Ariadne {
   namespace Combinatoric {    
     class BinaryWordList;
@@ -173,18 +176,12 @@ namespace Ariadne {
       
       /*! \brief true if the word is a subword of the other word. */
       bool is_subword(const BinaryWord& b) const {
-        //std::cerr << __PRETTY_FUNCTION__ << std::endl;
-        //std::cerr << "self=" << *this << ",  b=" << b << std::endl;
         if(this->size() > b.size()) { return false; }
         for(size_type i=0; i!=b.size()-this->size()+1; ++i) { 
           size_type j=0;
           while(j!=this->size() && (*this)[j]==b[i+j]) {
-            //std::cerr << "i=" << i << ", j=" << j << ",  self[j]=" << (*this)[j] << ",  b[i+j]=" << b[i+j] << std::endl;
             ++j;
           }
-          //std::cerr << "i=" << i << ", j=" << j; 
-          //if(j!=this->size()) { std::cerr << ",  self[j]=" << (*this)[j] << ",  b[i+j]=" << b[i+j]; } 
-          //std::cerr << std::endl;
           if(j==this->size()) {
             return true;
           }
@@ -259,7 +256,9 @@ namespace Ariadne {
       
       /*!\brief Insert an element at the back of the list. */
       void push_back(const BinaryWord& b) { 
-        if(this->word_size()!=b.size()) { throw std::length_error(__PRETTY_FUNCTION__); }
+        if(this->word_size()!=b.size()) { 
+          ARIADNE_THROW(LengthError,"void BinaryWordFixedSizeList::push_back(BinaryWord b)","this->word_size()="<<this->word_size()<<", b="<<b);
+        }
         for(size_type i=0; i!=word_size(); ++i) { _elements.push_back(b[i]); }
       }
       

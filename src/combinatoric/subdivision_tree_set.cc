@@ -33,6 +33,7 @@
 
 #include "combinatoric/lattice_set.h"
 #include "combinatoric/subdivision_tree_set.h"
+#include "combinatoric/exceptions.h"
 
 namespace Ariadne {
   namespace Combinatoric {
@@ -168,7 +169,11 @@ namespace Ariadne {
                                                const BooleanArray& ba)
       : _subdivisions(ss), _words(bt,ba)
     {
-      check_equal_array_sizes(bt,ba,__PRETTY_FUNCTION__);
+      if(bt.size()!=ba.size()) {
+        ARIADNE_THROW(LengthError,
+                      "SubdivisionTreeSet::SubdivisionTreeSet(SubdivisionSequence ss, BinaryTree bt, BooleanArray ba)",
+                      " bt.size()="<<bt.size()<<", ba.size()="<<ba.size());
+      }
       this->reduce();
     }
     

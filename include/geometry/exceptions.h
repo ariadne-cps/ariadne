@@ -70,6 +70,16 @@ namespace Ariadne {
       InvalidGridPosition(const std::string& str) : std::runtime_error(str) { }
     };
       
+    /*! \brief A location of a hybrid set or system was invalid. */
+    struct InvalidLocation : public std::runtime_error {
+      InvalidLocation(const std::string& str) : std::runtime_error(str) { }
+    };
+      
+    /*! \brief The locations of two hybrid sets/systems are incompatible. */
+    struct IncompatibleLocations : public std::runtime_error {
+      IncompatibleLocations(const std::string& str) : std::runtime_error(str) { }
+    };
+      
     /*! \brief Attempting to perform an operation on an unbounded set. */
     struct UnboundedSet : public std::runtime_error {
       UnboundedSet(const std::string& str) : std::runtime_error(str) { }
@@ -111,25 +121,35 @@ namespace Ariadne {
 }
 
 #define ARIADNE_CHECK_DIMENSION(obj,dim,func)                          \
-  { if((obj).dimension()!=dim) { ARIADNE_THROW(IncompatibleDimensions,func,#obj"="<<obj<<", "#dim"="<<dim); } }
+  { if((obj).dimension()!=dim) { using namespace Geometry; ARIADNE_THROW(IncompatibleDimensions,func,#obj"="<<obj<<", "#dim"="<<dim); } }
         
 #define ARIADNE_CHECK_DIMENSION_EQUALS_SIZE(obj1,obj2,func)                          \
-  { if((obj1).dimension()!=obj2.size()) { ARIADNE_THROW(IncompatibleDimensions,func,#obj1"="<<obj1<<", "#obj2"="<<obj2); } }
+  { if((obj1).dimension()!=(obj2).size()) { using namespace Geometry; ARIADNE_THROW(IncompatibleDimensions,func,#obj1"="<<obj1<<", "#obj2"="<<obj2); } }
         
 #define ARIADNE_CHECK_EQUAL_DIMENSIONS(obj1,obj2,func)                  \
-  { if((obj1).dimension()!=obj2.dimension()) { ARIADNE_THROW(IncompatibleDimensions,func,#obj1"="<<obj1<<", "#obj2"="<<obj2); } }
+  { if((obj1).dimension()!=(obj2).dimension()) { using namespace Geometry; ARIADNE_THROW(IncompatibleDimensions,func,#obj1"="<<obj1<<", "#obj2"="<<obj2); } }
         
 #define ARIADNE_CHECK_COORDINATE(obj,ind,func)                          \
-  { if((obj).dimension()>=ind) { ARIADNE_THROW(InvalidCoordinate,func,#obj"="<<obj<<", "#ind"="<<ind); } }
+  { if((obj).dimension()>=ind) { using namespace Geometry; ARIADNE_THROW(InvalidCoordinate,func,#obj"="<<obj<<", "#ind"="<<ind); } }
 
 #define ARIADNE_CHECK_VERTEX_INDEX(poly,ind,func)                       \
-  { if((poly).number_of_vertices()<=ind) { ARIADNE_THROW(InvalidVertex,func,#ind"="<<ind<<" but "#poly"has "<<poly.number_of_vertices()<<" vertices"); } }
+  { if((poly).number_of_vertices()<=ind) { using namespace Geometry; ARIADNE_THROW(InvalidVertex,func,#ind"="<<ind<<" but "#poly"has "<<(poly).number_of_vertices()<<" vertices"); } }
 
-#define ARIADNE_CHECK_SAME_GRID(poly,ind,func)                          \
-  { if((poly).number_of_vertices()<=ind) { ARIADNE_THROW(InvalidVertex,func,#ind"="<<ind<<" but "#poly"has "<<poly.number_of_vertices()<<" vertices"); } }
+#define ARIADNE_CHECK_SAME_GRID(set1,set2,func)                       \
+  { if((set1).grid()!=(set2).grid()) { using namespace Geometry; ARIADNE_THROW(IncompatibleGrids,func,#set1"="<<set1<<", "#set2"="<<set2); } }
 
 #define ARIADNE_CHECK_BOUNDED(set,func)                                 \
-  { if(!(set).bounded()) { ARIADNE_THROW(UnboundedSet,func,#set); } }
+  { if(!(set).bounded()) { using namespace Geometry; ARIADNE_THROW(UnboundedSet,func,#set); } }
+
+
+#define ARIADNE_CHECK_NEW_LOCATION(hybr,loc,func)                              \
+  { if((hybr).has_location(loc)) { using namespace Geometry; ARIADNE_THROW(InvalidLocation,func,#hybr".locations()="<<(hybr).locations()<<" already contains loc="<<loc); } }
+
+#define ARIADNE_CHECK_LOCATION(hybr,loc,func)                              \
+  { if(!(hybr).has_location(loc)) { using namespace Geometry; ARIADNE_THROW(InvalidLocation,func,#hybr".locations()="<<(hybr).locations()<<", "#loc"="<<loc); } }
+
+#define ARIADNE_CHECK_SAME_LOCATIONS(hybr1,hybr2,func)                 \
+  { if((hybr1).locations()!=(hybr2).locations()) { using namespace Geometry; ARIADNE_THROW(IncompatibleLocations,func,#hybr1".locations()="<<(hybr1).locations()<<", "#hybr2".locations()="<<(hybr2).locations()); } }
 
 
 #endif /* ARIADNE_GEOMETRY_EXCEPTIONS_H */

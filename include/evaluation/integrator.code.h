@@ -727,7 +727,7 @@ namespace Ariadne {
       if(verbosity>4) { std::clog << "GridMaskSet IntegratorBase::integrate(VectorField,GridMaskSet,GridMaskSet,Time)" << std::endl; } 
       const VectorField& vf=dynamic_cast<const VectorField&>(vector_field);
 
-      check_same_grid(initial_set,bounding_set,"GridMaskSet IntegratorBase::integrate(VectorField,GridMaskSet,GridMaskSet,Time)");
+      ARIADNE_CHECK_SAME_GRID(initial_set,bounding_set,"GridMaskSet IntegratorBase::integrate(VectorField,GridMaskSet,GridMaskSet,Time)");
       using namespace System;
       using namespace Geometry;
       using namespace LinearAlgebra;
@@ -814,8 +814,8 @@ namespace Ariadne {
       if(verbosity>4) { std::clog << "GridMaskSet IntegratorBase::reach(VectorField,GridMaskSet,GridMaskSet,Time)" << std::endl; } 
       typedef typename GridMaskSet::const_iterator gms_const_iterator;
       typedef typename ListSet::const_iterator ls_const_iterator;
-      check_bounded(initial_set,"GridMaskSet IntegratorBase::reach(VectorField,GridMaskSet,GridMaskSet,Time)");
-      check_bounded(bounding_set,"GridMaskSet IntegratorBase::reach(VectorField,GridMaskSet,GridMaskSet,Time)");
+      ARIADNE_CHECK_BOUNDED(initial_set,"GridMaskSet IntegratorBase::reach(VectorField,GridMaskSet,GridMaskSet,Time)");
+      ARIADNE_CHECK_BOUNDED(bounding_set,"GridMaskSet IntegratorBase::reach(VectorField,GridMaskSet,GridMaskSet,Time)");
       const VectorField& vf=dynamic_cast<const VectorField&>(vector_field);
       
       if(!subset(initial_set,bounding_set)) {
@@ -871,8 +871,8 @@ namespace Ariadne {
       typedef typename GridCellListSet::const_iterator gcls_const_iterator;
       typedef typename GridMaskSet::const_iterator gms_const_iterator;
       typedef typename ListSet::const_iterator ls_const_iterator;
-      check_bounded(initial_set,"GridMaskSet IntegratorBase::chainreach(VectorField,GridMaskSet,GridMaskSet)");
-      check_bounded(bounding_set,"GridMaskSet IntegratorBase::chainreach(VectorField,GridMaskSet,GridMaskSet)");
+      ARIADNE_CHECK_BOUNDED(initial_set,"GridMaskSet IntegratorBase::chainreach(VectorField,GridMaskSet,GridMaskSet)");
+      ARIADNE_CHECK_BOUNDED(bounding_set,"GridMaskSet IntegratorBase::chainreach(VectorField,GridMaskSet,GridMaskSet)");
       const VectorField& vf=dynamic_cast<const VectorField&>(vector_field);
      
       if(!subset(initial_set,bounding_set)) {
@@ -959,8 +959,8 @@ namespace Ariadne {
       if(verbosity>4) { std::clog << "tribool IntegratorBase::verify(VectorField,GridMaskSet,GridMaskSet)" << std::endl; } 
       typedef typename GridCellListSet::const_iterator gcls_const_iterator;
       typedef typename ListSet::const_iterator ls_const_iterator;
-      check_bounded(initial_set,"tribool IntegratorBase::verify(VectorField,GridMaskSet,GridMaskSet)");
-      check_bounded(safe_set,"tribool IntegratorBase::verify(VectorField,GridMaskSet,GridMaskSet)");
+      ARIADNE_CHECK_BOUNDED(initial_set,"tribool IntegratorBase::verify(VectorField,GridMaskSet,GridMaskSet)");
+      ARIADNE_CHECK_BOUNDED(safe_set,"tribool IntegratorBase::verify(VectorField,GridMaskSet,GridMaskSet)");
       const VectorField& vf=dynamic_cast<const VectorField&>(vector_field);
      
       if(!subset(initial_set,safe_set)) {

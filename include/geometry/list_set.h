@@ -190,15 +190,9 @@ namespace Ariadne {
       /*! \brief Adjoins (makes union with) another denotable set. */
       void adjoin(const ListSet<BS>& A);
       
-      /*! \brief Adjoins (makes union with) another denotable set. */
-      void inplace_union(const ListSet<BS>& A);
-
       /*! \brief Adjoins (makes union with) a basic set. */
       void adjoin(const BS& A);
 
-      /*! \brief Adjoins (makes union with) a basic set. */
-      void inplace_union(const BS& A);
-      
       //@{
       //! \name Input/output operators
       /*! \brief Write to an output stream. */

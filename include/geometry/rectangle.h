@@ -360,6 +360,7 @@ namespace Ariadne {
       size_type number_of_vertices() const;
       RectangleVerticesIterator<I> vertices_begin() const;
       RectangleVerticesIterator<I> vertices_end() const;
+      std::ostream& write(std::ostream& os) const;
      private:
       template<class RE> void assign(const RE& re);
      private:

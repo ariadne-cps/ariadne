@@ -50,14 +50,14 @@ namespace Ariadne {
     GridCell<R>::GridCell(const Grid<R>& g, const Combinatoric::LatticeCell& pos)
       : _grid_ptr(&g), _lattice_set(pos)
     {
-      Geometry::check_equal_dimensions(g,pos,"GridCell<R>::GridCell(Grid<R>,LatticeCell");
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(g,pos,"GridCell<R>::GridCell(Grid<R>,LatticeCell");
     }
 
     template<class R>
     GridCell<R>::GridCell(const Grid<R>& g, const IndexArray& pos)
       : _grid_ptr(&g), _lattice_set(pos)
     {
-      check_dimension(g,pos.size(),__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION(g,pos.size(),"GridCell::GridCell(Grid,IndexArray)");
     }
 
     
@@ -106,10 +106,10 @@ namespace Ariadne {
     
     
     template<class R>
-    GridBlock<R>::GridBlock(const Grid<R>& g, const Combinatoric::LatticeBlock& b)
-      : _grid_ptr(&g), _lattice_set(b)
+    GridBlock<R>::GridBlock(const Grid<R>& g, const Combinatoric::LatticeBlock& lb)
+      : _grid_ptr(&g), _lattice_set(lb)
     {
-      Geometry::check_equal_dimensions(g,b,"GridBlock<R>::GridBlock(Grid<R>,LatticeBlock)");
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(g,lb,"GridBlock::GridBlock(Grid g, LatticeBlock lb)");
     }
     
     
@@ -117,7 +117,7 @@ namespace Ariadne {
     GridBlock<R>::GridBlock(const Grid<R>& g, const IndexArray& l, const IndexArray& u)
       : _grid_ptr(&g), _lattice_set(l,u)
     {
-      check_dimension(g,l.size(),__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION(g,l.size(),"GridBlock::GridBlock(Grid g, IndexArray l, IndexArray u)");
     }
     
     
@@ -125,7 +125,7 @@ namespace Ariadne {
     GridBlock<R>::GridBlock(const Grid<R>& g, const Rectangle<R>& r)
       : _grid_ptr(&g), _lattice_set(g.dimension())
     {
-      check_equal_dimensions(g,r,"GridBlock<R>::GridBlock(Grid<R>,Rectangle<R>)");
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(g,r,"GridBlock::GridBlock(Grid g,Rectangle r)");
       for(dimension_type i=0; i!=dimension(); ++i) {
         /* TODO: Catch and rethrow exceptions */
         _lattice_set.set_lower_bound(i,g.subdivision_index(i,r.lower_bound(i)));
@@ -219,7 +219,7 @@ namespace Ariadne {
                                         const Combinatoric::LatticeCellListSet& lcls)
       : _grid_ptr(new Grid<R>(g)), _lattice_set(lcls)
     {
-      Geometry::check_equal_dimensions(g,lcls,"GridCellListSet<R>::GridCellListSet(Grid<R>,LatticeCellListSet)");
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(g,lcls,"GridCellListSet::GridCellListSet(Grid g, LatticeCellListSet lcls)");
     }
 
     
@@ -497,85 +497,86 @@ namespace Ariadne {
 
     template<class R>
     tribool
-    disjoint(const GridBlock<R>& A, const GridBlock<R>& B) {
-      check_same_grid(A,B,"disjoint(GridBlock<R>,GridBlock<R>)");
-      return disjoint(A.lattice_set(),B.lattice_set());
+    disjoint(const GridBlock<R>& gb1, const GridBlock<R>& gb2) {
+      ARIADNE_CHECK_SAME_GRID(gb1,gb2,"tribool disjoint(GridBlock bg1, GridBlock gb2)");
+      return disjoint(gb1.lattice_set(),gb2.lattice_set());
     }
 
 
     template<class R>
     tribool
-    disjoint(const GridBlock<R>& A, const GridMaskSet<R>& B) {
-      check_same_grid(A,B,"disjoint(GridBlock<R>,GridMaskSet<R>)");
-      return disjoint(A.lattice_set(),B.lattice_set());
+    disjoint(const GridBlock<R>& gb, const GridMaskSet<R>& gms) {
+      ARIADNE_CHECK_SAME_GRID(gb,gms,"tribool disjoint(GridBlock gb, GridMaskSet gms)");
+      return disjoint(gb.lattice_set(),gms.lattice_set());
     }
 
 
     template<class R>
     tribool
-    disjoint(const GridMaskSet<R>& A, const GridBlock<R>& B) {
-      check_same_grid(A,B,"disjoint(GridMaskSet<R>,GridBlock<R>)");
-      return disjoint(A.lattice_set(),B.lattice_set());
+    disjoint(const GridMaskSet<R>& gms, const GridBlock<R>& gb) {
+      ARIADNE_CHECK_SAME_GRID(gms,gb,"tribool disjoint(GridMaskSet gms, GridBlock gb)");
+      return disjoint(gms.lattice_set(),gb.lattice_set());
     }
 
 
     template<class R>
     tribool
-    disjoint(const GridMaskSet<R>& A, const GridMaskSet<R>& B)
+    disjoint(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
     {
-      check_same_grid(A,B,"disjoint(GridMaskSet<R>,GridMaskSet<R>)");
-      return disjoint(A.lattice_set(),B.lattice_set());
+      ARIADNE_CHECK_SAME_GRID(gms1,gms2,"tribool disjoint(GridMaskSet gms1, GridMaskSet gms2)");
+      return disjoint(gms1.lattice_set(),gms2.lattice_set());
     }
 
 
     template<class R>
     tribool
-    disjoint(const Rectangle<R>& A, const GridMaskSet<R>& B) {
-      check_equal_dimensions(A,B,"disjoint(Rectangle<R>,GridMaskSet<R>)");
-      Rectangle<R> r=closed_intersection(A,Rectangle<R>(B.bounding_box()));
-      GridBlock<R> gr=outer_approximation(r,B.grid());
-      return !overlap(gr,B);
+    disjoint(const Rectangle<R>& r, const GridMaskSet<R>& gms) 
+    {
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(r,gms,"tribool disjoint(Rectangle r, GridMaskSet gms)");
+      Rectangle<R> br=closed_intersection(r,Rectangle<R>(gms.bounding_box()));
+      GridBlock<R> gb=outer_approximation(br,gms.grid());
+      return !overlap(gb,gms);
     }
     
 
     template<class R>
     tribool
-    disjoint(const GridMaskSet<R>& A, const Rectangle<R>& B) {
-      return disjoint(B,A);
+    disjoint(const GridMaskSet<R>& gms, const Rectangle<R>& r) {
+      return disjoint(r,gms);
     }
     
     
 
     template<class R>
     tribool
-    overlap(const GridBlock<R>& A, const GridBlock<R>& B) {
-      check_same_grid(A,B,"overlap(GridBlock<R>,GridBlock<R>)");
-      return overlap(A.lattice_set(),B.lattice_set());
+    overlap(const GridBlock<R>& gb1, const GridBlock<R>& gb2) {
+      ARIADNE_CHECK_SAME_GRID(gb1,gb2,"tribool overlap(GridBlock gb1,GridBlock gb2)");
+      return overlap(gb1.lattice_set(),gb2.lattice_set());
     }
 
 
     template<class R>
     tribool
-    overlap(const GridBlock<R>& A, const GridMaskSet<R>& B) {
-      check_same_grid(A,B,"overlap(GridBlock<R>,GridMaskSet<R>)");
-      return overlap(A.lattice_set(),B.lattice_set());
+    overlap(const GridBlock<R>& gb, const GridMaskSet<R>& gms) {
+      ARIADNE_CHECK_SAME_GRID(gb,gms,"tribool overlap(GridBlock gb, GridMaskSet gms)");
+      return overlap(gb.lattice_set(),gms.lattice_set());
     }
 
 
     template<class R>
     tribool
-    overlap(const GridMaskSet<R>& A, const GridBlock<R>& B) {
-      check_same_grid(A,B,"overlap(GridMaskSet<R>,GridBlock<R>)");
-      return overlap(A.lattice_set(),B.lattice_set());
+    overlap(const GridMaskSet<R>& gms, const GridBlock<R>& gb) {
+      ARIADNE_CHECK_SAME_GRID(gms,gb,"tribool overlap(GridMaskSet gms, GridBlock gb)");
+      return overlap(gms.lattice_set(),gb.lattice_set());
     }
 
 
     template<class R>
     tribool
-    overlap(const GridMaskSet<R>& A, const GridMaskSet<R>& B)
+    overlap(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
     {
-      check_same_grid(A,B,"overlap(GridMaskSet<R>,GridMaskSet<R>)");
-      return overlap(A.lattice_set(),B.lattice_set());
+      ARIADNE_CHECK_SAME_GRID(gms1,gms2,"tribool overlap(GridMaskSet gms2, GridMaskSet gms2)");
+      return overlap(gms1.lattice_set(),gms2.lattice_set());
     }
 
 
@@ -583,106 +584,106 @@ namespace Ariadne {
 
     template<class R>
     tribool
-    subset(const GridCell<R>& A, const GridBlock<R>& B)
+    subset(const GridCell<R>& gc, const GridBlock<R>& gb)
     {
-      check_equal_dimensions(A,B,"subset(GridCell<R>,GridBlock<R>)");
-      if(A.grid()==B.grid()) {
-        return subset(A.lattice_set(),B.lattice_set());
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(gc,gb,"tribool subset(GridCell gc, GridBlock gb)");
+      if(gc.grid()==gb.grid()) {
+        return subset(gc.lattice_set(),gb.lattice_set());
       }
-      return subset(Rectangle<R>(A),Rectangle<R>(B));
+      return subset(Rectangle<R>(gc),Rectangle<R>(gb));
     }
 
     template<class R>
     tribool
-    subset(const GridBlock<R>& A, const GridBlock<R>& B)
+    subset(const GridBlock<R>& gb1, const GridBlock<R>& gb2)
     {
-      check_equal_dimensions(A,B,"subset(GridBlock<R>,GridBlock<R>)");
-      if(A.grid()==B.grid()) {
-        return subset(A.lattice_set(),B.lattice_set());
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(gb1,gb2,"tribool subset(GridBlock gb1, GridBlock gb2)");
+      if(gb1.grid()==gb2.grid()) {
+        return subset(gb1.lattice_set(),gb2.lattice_set());
       }
-      return subset(Rectangle<R>(A),Rectangle<R>(B));
+      return subset(Rectangle<R>(gb1),Rectangle<R>(gb2));
     }
 
     template<class R>
     tribool
-    subset(const GridCellListSet<R>& A, const GridBlock<R>& B)
+    subset(const GridCellListSet<R>& gcls, const GridBlock<R>& gb)
     {
-      check_same_grid(A,B,"subset(GridCellListSet<R>,GridBlock<R>)");
-      return subset(A.lattice_set(),B.lattice_set());
+      ARIADNE_CHECK_SAME_GRID(gcls,gb,"tribool subset(GridCellListSet gcls, GridBlock gb)");
+      return subset(gcls.lattice_set(),gb.lattice_set());
     }
 
     template<class R>
     tribool
-    subset(const GridMaskSet<R>& A, const GridBlock<R>& B)
+    subset(const GridMaskSet<R>& gms, const GridBlock<R>& gb)
     {
-      check_same_grid(A,B,"subset(GridMaskSet<R>,GridBlock<R>)");
-      return subset(A.lattice_set(),B.lattice_set());
+      ARIADNE_CHECK_SAME_GRID(gms,gb,"tribool subset(GridMaskSet gms, GridBlock gb)");
+      return subset(gms.lattice_set(),gb.lattice_set());
     }
 
     template<class R>
     tribool
-    subset(const GridCell<R>& A, const GridMaskSet<R>& B)
+    subset(const GridCell<R>& gc, const GridMaskSet<R>& gms)
     {
-      check_same_grid(A,B,"subset(GridCell<R>,GridMaskSet<R>)");
-      return subset(A.lattice_set(),B.lattice_set()); 
+      ARIADNE_CHECK_SAME_GRID(gc,gms,"tribool subset(GridCell gc, GridMaskSet gms)");
+      return subset(gc.lattice_set(),gms.lattice_set()); 
     }
 
     template<class R>
     tribool
-    subset(const GridBlock<R>& A, const GridMaskSet<R>& B)
+    subset(const GridBlock<R>& gb, const GridMaskSet<R>& gms)
     {
-      check_same_grid(A,B,"subset(GridBlock<R>,GridMaskSet<R>)");
-      return subset(A.lattice_set(),B.lattice_set()); 
+      ARIADNE_CHECK_SAME_GRID(gb,gms,"tribool subset(GridBlock gb, GridMaskSet gms)");
+      return subset(gb.lattice_set(),gms.lattice_set()); 
     }
 
     template<class R>
     tribool
-    subset(const GridCellListSet<R>& A, const GridMaskSet<R>& B)
+    subset(const GridCellListSet<R>& gcls, const GridMaskSet<R>& gms)
     {
-      check_same_grid(A,B,"subset(GridCellListSet<R>,GridMaskSet<R>)");
-      return subset(A.lattice_set(),B.lattice_set()); 
+      ARIADNE_CHECK_SAME_GRID(gcls,gms,"tribool subset(GridCellListSet gcls, GridMaskSet gms)");
+      return subset(gcls.lattice_set(),gms.lattice_set()); 
     }
 
     template<class R>
     tribool
-    subset(const GridMaskSet<R>& A, const GridMaskSet<R>& B)
+    subset(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
     {
-      check_same_grid(A,B,"subset(GridMaskSet<R>,GridMaskSet<R>)");
-      return subset(A.lattice_set(),B.lattice_set());
+      ARIADNE_CHECK_SAME_GRID(gms1,gms2,"tribool subset(GridMaskSet gms1, GridMaskSet gms2)");
+      return subset(gms1.lattice_set(),gms2.lattice_set());
     }
 
 
     template<class R>
     tribool
-    subset(const Rectangle<R>& A, const GridBlock<R>& B)
+    subset(const Rectangle<R>& r, const GridBlock<R>& gb)
     {
-      check_equal_dimensions(A,B,"subset(Rectangle<R>,GridBlock<R>)");
-      return subset(A,Rectangle<R>(B));
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(r,gb,"tribool subset(Rectangle r, GridBlock gb)");
+      return subset(r,Rectangle<R>(gb));
     }
     
     
 
     template<class R>
     tribool
-    subset(const Rectangle<R>& A, const GridMaskSet<R>& B)
+    subset(const Rectangle<R>& r, const GridMaskSet<R>& gms)
     {
-      check_equal_dimensions(A,B,"subset(Rectangle<R>,GridMaskSet<R>)");
-      if(!subset(A,B.bounding_box())) {
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(r,gms,"tribool subset(Rectangle r, GridMaskSet gms)");
+      if(!subset(r,gms.bounding_box())) {
         return false;
       }
-      return subset(over_approximation(A,B.grid()),B);
+      return subset(over_approximation(r,gms.grid()),gms);
     }
 
 
     template<class R>
     tribool
-    subset(const GridMaskSet<R>& A, const Rectangle<R>& B)
+    subset(const GridMaskSet<R>& gms, const Rectangle<R>& r)
     {
-      check_equal_dimensions(A,B,"subset(GridMaskSet<R>,Rectangle<R>)");
-      if(!subset(A,B.bounding_box())) {
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(gms,r,"tribool subset(GridMaskSet gms, Rectangle r)");
+      if(!subset(gms,r.bounding_box())) {
         return false;
       }
-      return subset(A,over_approximation(B,A.grid()));
+      return subset(gms,over_approximation(r,gms.grid()));
     }
 
 
@@ -691,77 +692,95 @@ namespace Ariadne {
 
     template<class R>
     GridMaskSet<R>
-    join(const GridMaskSet<R>& A, const GridMaskSet<R>& B)
+    join(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
     {
-      check_same_grid(A,B,"join(GridMaskSet<R>,GridMaskSet<R>)");
-      if(A.block()!=B.block()) { throw IncompatibleGrids(__PRETTY_FUNCTION__); }
-      return GridMaskSet<R>(A.grid(), join(A.lattice_set(),B.lattice_set()));
+      ARIADNE_CHECK_SAME_GRID(gms1,gms2,"GridMaskSet join(GridMaskSet gms1, GridMaskSet gms2)");
+      if(gms1.block()==gms2.block()) { 
+        return GridMaskSet<R>(gms1.grid(), join(gms1.lattice_set(),gms2.lattice_set()));
+      } else {
+        GridMaskSet<R> result(gms1.grid(),Combinatoric::rectangular_hull(gms1.block(),gms2.block()));
+        result.adjoin(gms1);
+        result.adjoin(gms2);
+        return result;
+      }
     }
 
 
     template<class R>
     GridMaskSet<R>
-    regular_intersection(const GridMaskSet<R>& A, const GridBlock<R>& B)
+    regular_intersection(const GridMaskSet<R>& gms, const GridBlock<R>& gb)
     {
-      check_same_grid(A,B,"regular_intersection(GridMaskSet<R>,GridBlock<R>)");
-      return GridMaskSet<R>(A.grid(), regular_intersection(A.lattice_set(),B.lattice_set()));
+      ARIADNE_CHECK_SAME_GRID(gms,gb,"GridMaskSet regular_intersection(GridMaskSet gms, GridBlock gb)");
+      return GridMaskSet<R>(gms.grid(), regular_intersection(gms.lattice_set(),gb.lattice_set()));
     }
 
     template<class R>
     GridMaskSet<R>
-    regular_intersection(const GridBlock<R>& A, const GridMaskSet<R>& B)
+    regular_intersection(const GridBlock<R>& gb, const GridMaskSet<R>& gms)
     {
-      check_same_grid(A,B,"regular_intersection(GridBlock<R>,GridMaskSet<R>)");
-      return GridMaskSet<R>(A.grid(), regular_intersection(A.lattice_set(),B.lattice_set()));
+      ARIADNE_CHECK_SAME_GRID(gb,gms,"GridMaskSet regular_intersection(GridBlock gb, GridMaskSet gms)");
+      return GridMaskSet<R>(gb.grid(), regular_intersection(gb.lattice_set(),gms.lattice_set()));
     }
 
     template<class R>
     GridMaskSet<R>
-    regular_intersection(const GridMaskSet<R>& A, const GridMaskSet<R>& B)
+    regular_intersection(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
     {
-      check_same_grid(A,B,"regular_intersection(GridMaskSet<R>,GridMaskSet<R>)");
-      if(A.block()!=B.block()) { throw IncompatibleGrids(__PRETTY_FUNCTION__); }
-      return GridMaskSet<R>(A.grid(), regular_intersection(A.lattice_set(),B.lattice_set()));
+      ARIADNE_CHECK_SAME_GRID(gms1,gms2,"GridMaskSet regular_intersection(GridMaskSet gms1, GridMaskSet gms2)");
+      if(gms1.block()==gms2.block()) { 
+        return GridMaskSet<R>(gms1.grid(), regular_intersection(gms1.lattice_set(),gms2.lattice_set()));
+      } else {
+        GridMaskSet<R> result(gms1.grid(),Combinatoric::rectangular_hull(gms1.block(),gms2.block()));
+        result.adjoin(gms1);
+        result.restrict(gms2);
+        return result;
+      }
     }
 
     template<class R>
     GridCellListSet<R>
-    regular_intersection(const GridCellListSet<R>& A, const GridMaskSet<R>& B)
+    regular_intersection(const GridCellListSet<R>& gcls, const GridMaskSet<R>& gms)
     {
-      check_same_grid(A,B,"regular_intersection(GridCellListSet<R>,GridMaskSet<R>)");
-      return GridCellListSet<R>(A.grid(), regular_intersection(A.lattice_set(),B.lattice_set()));
+      ARIADNE_CHECK_SAME_GRID(gcls,gms,"GridCellListSet regular_intersection(GridCellListSet gcls, GridMaskSet gms)");
+      return GridCellListSet<R>(gcls.grid(), regular_intersection(gcls.lattice_set(),gms.lattice_set()));
     }
 
     template<class R>
     GridCellListSet<R>
-    regular_intersection(const GridMaskSet<R>& A, const GridCellListSet<R>& B)
+    regular_intersection(const GridMaskSet<R>& gms, const GridCellListSet<R>& B)
     {
-      check_same_grid(A,B,"regular_intersection(GridMaskSet<R>,GridCellListSet<R>)");
-      return GridCellListSet<R>(A.grid(), regular_intersection(A.lattice_set(),B.lattice_set()));
+      ARIADNE_CHECK_SAME_GRID(gms,B,"GridCellListSet regular_intersection(GridMaskSet<R>,GridCellListSet<R>)");
+      return GridCellListSet<R>(gms.grid(), regular_intersection(gms.lattice_set(),B.lattice_set()));
     }
 
 
     template<class R>
     GridMaskSet<R>
-    difference(const GridMaskSet<R>& A, const GridMaskSet<R>& B)
+    difference(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
     {
-      check_same_grid(A,B,"difference(GridMaskSet<R>,GridMaskSet<R>)");
-      if(A.block()!=B.block()) { throw IncompatibleGrids(__PRETTY_FUNCTION__); }
-      return GridMaskSet<R>(A.grid(), difference(A.lattice_set(),B.lattice_set()));
+      ARIADNE_CHECK_SAME_GRID(gms1,gms2,"GridMaskSet difference(GridMaskSet<R>,GridMaskSet<R>)");
+      if(gms1.block()==gms2.block()) { 
+      return GridMaskSet<R>(gms1.grid(), difference(gms1.lattice_set(),gms2.lattice_set()));
+      } else {
+        GridMaskSet<R> result(gms1.grid(),Combinatoric::rectangular_hull(gms1.block(),gms2.block()));
+        result.adjoin(gms1);
+        result.remove(gms2);
+        return result;
+      }
     }
 
     template<class R>
     GridCellListSet<R>
-    difference(const GridCellListSet<R>& A, const GridMaskSet<R>& B)
+    difference(const GridCellListSet<R>& gcls, const GridMaskSet<R>& gms)
     {
-      check_same_grid(A,B,"difference(GridCellListSet<R>,GridMaskSet<R>)");
-      return GridCellListSet<R>(A.grid(),Combinatoric::difference(A.lattice_set(),B.lattice_set()));
+      ARIADNE_CHECK_SAME_GRID(gcls,gms,"difference(GridCellListSet gcls, GridMaskSet gms)");
+      return GridCellListSet<R>(gcls.grid(),Combinatoric::difference(gcls.lattice_set(),gms.lattice_set()));
     }
 
     template<class R>
     GridMaskSet<R>::operator ListSet< Rectangle<R> >() const
     {
-      check_bounded(*this);
+      ARIADNE_CHECK_BOUNDED(*this,"GridMaskSet::operator ListSet<Rectangle>()");
       ListSet< Rectangle<R> > result(this->dimension());
       for(typename GridMaskSet::const_iterator riter=begin(); riter!=end(); ++riter) {
         Rectangle<R> r(*riter);
@@ -861,7 +880,7 @@ namespace Ariadne {
     {
       if(verbosity>7) { std::clog << "GridCellListSet over_approximation(Zonotope z, Grid g)" << std::endl; }
       GridCellListSet<R> result(g);
-      check_equal_dimensions(z,g,"over_approximation(Zonotope<R>,Grid<R>)");
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(z,g,"over_approximation(Zonotope<R>,Grid<R>)");
       if(z.empty()) {
         return result; 
       }
@@ -887,7 +906,7 @@ namespace Ariadne {
     over_approximation(const Polytope<R>& p, const Grid<R>& g) 
     {
       GridCellListSet<R> result(g);
-      check_equal_dimensions(p,g,"over_approximation(Polytope<R>,Grid<R>)");
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(p,g,"over_approximation(Polytope<R>,Grid<R>)");
       if(p.empty()) {
         return result; 
       }
@@ -913,7 +932,7 @@ namespace Ariadne {
     over_approximation(const Polyhedron<R>& p, const Grid<R>& g) 
     {
       GridCellListSet<R> result(g);
-      check_equal_dimensions(p,g,"over_approximation(Polyhedron<R>,Grid<R>)");
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(p,g,"over_approximation(Polyhedron<R>,Grid<R>)");
       
       // omit emptyness and boundedness checks
           
@@ -940,7 +959,7 @@ namespace Ariadne {
     {
       if(verbosity>7) { std::clog << "GridCellListSet over_approximation(Zonotope<Interval>, Grid g)" << std::endl; }
       GridCellListSet<R> result(g);
-      check_equal_dimensions(z,g,"over_approximation(Zonotope<R>,Grid<R>)");
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(z,g,"over_approximation(Zonotope<R>,Grid<R>)");
       if(z.empty()) {
         return result; 
       }
@@ -977,7 +996,7 @@ namespace Ariadne {
     under_approximation(const Zonotope<R>& z, const Grid<R>& g) 
     {
       GridCellListSet<R> result(g);
-      check_equal_dimensions(z,g,"under_approximation(Zonotope<R>,Grid<R>)");
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(z,g,"under_approximation(Zonotope<R>,Grid<R>)");
       if(z.empty()) {
         return result; 
       }
@@ -1000,7 +1019,7 @@ namespace Ariadne {
     under_approximation(const Polytope<R>& p, const Grid<R>& g) 
     {
       GridCellListSet<R> result(g);
-      check_equal_dimensions(p,g,"under_approximation(Polytope<R>,Grid<R>)");
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(p,g,"under_approximation(Polytope<R>,Grid<R>)");
       if(p.empty()) {
         return result; 
       }
@@ -1023,7 +1042,7 @@ namespace Ariadne {
     under_approximation(const Polyhedron<R>& p, const Grid<R>& g) 
     {
       GridCellListSet<R> result(g);
-      check_equal_dimensions(p,g,"under_approximation(Polyhedron<R>,Grid<R>)");
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(p,g,"under_approximation(Polyhedron<R>,Grid<R>)");
       
       Rectangle<R> bb=p.bounding_box();
       GridBlock<R> gbb=over_approximation(bb,g);
@@ -1045,7 +1064,7 @@ namespace Ariadne {
     over_approximation(const GridMaskSet<R>& gms, const FiniteGrid<R>& g) 
     {
       GridMaskSet<R> result(g);
-      check_equal_dimensions(gms,g,"over_approximation(GridMaskSet<R>,FiniteGrid<R>)");
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(gms,g,"over_approximation(GridMaskSet<R>,FiniteGrid<R>)");
 
       for(typename GridMaskSet<R>::const_iterator iter=gms.begin(); iter!=gms.end(); ++iter) {
         result.adjoin(over_approximation(Rectangle<R>(*iter),g.grid()));
@@ -1058,7 +1077,7 @@ namespace Ariadne {
     over_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& g) 
     {
       GridMaskSet<R> result(g);
-      check_equal_dimensions(pts,g,"over_approximation(PartitionTreeSet<R>,FiniteGrid<R>)");
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(pts,g,"over_approximation(PartitionTreeSet<R>,FiniteGrid<R>)");
 
       for(typename PartitionTreeSet<R>::const_iterator iter=pts.begin(); iter!=pts.end(); ++iter) {
         result.adjoin(over_approximation(Rectangle<R>(*iter),g.grid()));
@@ -1071,7 +1090,7 @@ namespace Ariadne {
     over_approximation(const SetInterface<R>& set, const FiniteGrid<R>& fg) 
     {
       GridMaskSet<R> result(fg);
-      check_equal_dimensions(set,fg,"over_approximation(PartitionTreeSet<R>,FiniteGrid<R>)");
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(set,fg,"over_approximation(PartitionTreeSet<R>,FiniteGrid<R>)");
       
       const Grid<R>& g=fg.grid();
       const Combinatoric::LatticeBlock& lb=fg.lattice_block();
@@ -1099,7 +1118,7 @@ namespace Ariadne {
     GridMaskSet<R>
     under_approximation(const GridMaskSet<R>& gms, const FiniteGrid<R>& g) 
     {
-      check_equal_dimensions(gms,g,"under_approximation(GridMaskSet<R>,FiniteGrid<R>)");
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(gms,g,"under_approximation(GridMaskSet<R>,FiniteGrid<R>)");
       
       GridMaskSet<R> result(g);
       GridMaskSet<R> bb(g);

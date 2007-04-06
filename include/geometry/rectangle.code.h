@@ -52,7 +52,7 @@ namespace Ariadne {
     Rectangle<R>
     Rectangle<R>::quadrant(const Combinatoric::BinaryWord& w) const 
     {
-      check_dimension(*this,w.size(),__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION(*this,w.size(),"Rectangle Rectangle::quadrant(BinaryWord w)");
       Rectangle<R> quadrant(this->dimension());
       
       for (size_type i=0; i!=this->dimension(); ++i) {
@@ -134,7 +134,7 @@ namespace Ariadne {
       size_type d=this->dimension();
       state_type result(d); 
             
-      check_vertex_index(*this,i,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_VERTEX_INDEX(*this,i,"Point Rectangle::vertex(size_type i)");
       
       for (size_type j=0; j<d; ++j) {
         if (i%2) {
@@ -171,16 +171,16 @@ namespace Ariadne {
     template<class R>
     inline
     tribool 
-    Rectangle< Numeric::Interval<R> >::contains(const Point< Numeric::Interval<R> >& p) const 
+    Rectangle< Numeric::Interval<R> >::contains(const Point< Numeric::Interval<R> >& pt) const 
     {
       tribool result=true;
-      check_equal_dimensions(*this,p,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,pt,"tribool Rectangle<Interval>::contains(Point<Interval> pt)");
       const Rectangle< Numeric::Interval<R> >& self=*this;
       for (size_type i=0; i!=self.dimension(); ++i) {
-        if(self.lower_bound(i)>p[i] || p[i]>self.upper_bound(i)) {
+        if(self.lower_bound(i)>pt[i] || pt[i]>self.upper_bound(i)) {
           return false;
         }
-        if(self.lower_bound(i)==p[i] || p[i]==self.upper_bound(i)) { 
+        if(self.lower_bound(i)==pt[i] || pt[i]==self.upper_bound(i)) { 
           result=indeterminate;
         }
       }
@@ -248,6 +248,23 @@ namespace Ariadne {
     }
     
     template<class R>
+    std::ostream&
+    Rectangle< Numeric::Interval<R> >::write(std::ostream& os) const 
+    {
+      const Rectangle< Numeric::Interval<R> >& self=*this;
+      if(self.dimension()==0) {
+        os << "EmptyRectangle";
+      }
+      else {
+        os << "[" << self.lower_bound(0) << "," << self.upper_bound(0) << "]";
+        for(dimension_type i=1; i!=self.dimension(); ++i) {
+          os << "x[" << self.lower_bound(i) << "," << self.upper_bound(i) << "]";
+        }
+      }
+      return os;
+    }
+    
+    template<class R>
     std::istream& 
     Rectangle<R>::read(std::istream& is)
     {
@@ -276,7 +293,7 @@ namespace Ariadne {
       else {
         /* representation as lower and upper corners */
         /* FIXME */
-        throw invalid_input(__PRETTY_FUNCTION__);
+        ARIADNE_THROW(InvalidInput,"Rectangle::read(istream&)","");
       }
       return is;
     }

@@ -115,7 +115,7 @@ class DiscreteMode {
                  const Geometry::SetInterface<R> &invariant)
       :  _id(id), _dynamic(dynamic.clone()), _invariant(invariant.clone()) 
     {
-      check_equal_dimensions(dynamic,invariant);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(dynamic,invariant,"DiscreteMode::DiscreteMode(...)");
     }
     
     /* Construct from objects managed by shared pointers (for internal use) */
@@ -124,7 +124,7 @@ class DiscreteMode {
                  const boost::shared_ptr< Geometry::SetInterface<R> > invariant)
       :  _id(id), _dynamic(dynamic), _invariant(invariant) 
     {
-      check_equal_dimensions(*dynamic,*invariant);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(*dynamic,*invariant,"DiscreteMode::DiscreteMode(...)");
     }
     
 };

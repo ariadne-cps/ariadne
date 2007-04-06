@@ -50,7 +50,7 @@ namespace Ariadne {
       : _centre(c), _bilinear_form(A)
     {
       if(c.dimension()!=A.number_of_rows() && A.number_of_rows()!=A.number_of_columns()) {
-        throw DimensionException(__PRETTY_FUNCTION__);
+        ARIADNE_THROW(DimensionException,"Ellipsoid::Ellipsoid(Point c, Matrix A)","c="<<c<<", A="<<A);
       }
     }
      

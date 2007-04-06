@@ -153,43 +153,43 @@ namespace Ariadne {
     
     
     LatticeBlock
-    LatticeTransformation::operator() (const LatticeCell& c) const
+    LatticeTransformation::operator() (const LatticeCell& lc) const
     {
-      dimension_type n=c.dimension();
+      dimension_type n=lc.dimension();
       IndexArray lower(n);
       IndexArray upper(n);
       for(dimension_type i=0; i!=n; ++i) {
-        lower[i]=_transformation[i][c.lower_bound(i)];
-        upper[i]=_transformation[i][c.upper_bound(i)];
+        lower[i]=_transformation[i][lc.lower_bound(i)];
+        upper[i]=_transformation[i][lc.upper_bound(i)];
       }
       return LatticeBlock(lower,upper);
     }
 
     LatticeBlock
-    LatticeTransformation::operator() (const LatticeBlock& r) const
+    LatticeTransformation::operator() (const LatticeBlock& lb) const
     {
-      dimension_type n=r.dimension();
+      dimension_type n=lb.dimension();
       IndexArray lower(n);
       IndexArray upper(n);
       for(dimension_type i=0; i!=n; ++i) {
-        lower[i]=_transformation[i][r.lower_bound(i)];
-        upper[i]=_transformation[i][r.upper_bound(i)];
+        lower[i]=_transformation[i][lb.lower_bound(i)];
+        upper[i]=_transformation[i][lb.upper_bound(i)];
       }
       return LatticeBlock(lower,upper);
     }
 
 
 
-    LatticeCellListSet::LatticeCellListSet(const LatticeCell& c) 
-      : _list(c.dimension()) 
+    LatticeCellListSet::LatticeCellListSet(const LatticeCell& lc) 
+      : _list(lc.dimension()) 
     {
-      this->adjoin(c); 
+      this->adjoin(lc); 
     }
     
-    LatticeCellListSet::LatticeCellListSet(const LatticeBlock& r) 
-      : _list(r.dimension()) 
+    LatticeCellListSet::LatticeCellListSet(const LatticeBlock& lb) 
+      : _list(lb.dimension()) 
     {
-      this->adjoin(r); 
+      this->adjoin(lb); 
     }
     
     LatticeCellListSet::LatticeCellListSet(const LatticeMaskSet& ms) 
@@ -205,14 +205,14 @@ namespace Ariadne {
         return LatticeBlock(this->dimension());
       }
 
-      LatticeCell c=(*this)[0];
-      IndexArray lower(c.lower_corner());
-      IndexArray upper(c.upper_corner());
+      LatticeCell lc=(*this)[0];
+      IndexArray lower(lc.lower_corner());
+      IndexArray upper(lc.upper_corner());
 
       for(size_type i=1; i!=this->size(); ++i) {
-        c=(*this)[i];
-        assign_min(lower,c.lower_corner());
-        assign_max(upper,c.upper_corner());
+        lc=(*this)[i];
+        assign_min(lower,lc.lower_corner());
+        assign_max(upper,lc.upper_corner());
       }
       return LatticeBlock(lower,upper);
     }
@@ -243,26 +243,26 @@ namespace Ariadne {
     }
 
     void 
-    LatticeCellListSet::adjoin(const LatticeBlock& r) 
+    LatticeCellListSet::adjoin(const LatticeBlock& lb) 
     { 
-      check_equal_dimensions(*this,r,__PRETTY_FUNCTION__);
-      for(LatticeBlock::const_iterator i=r.begin(); i!=r.end(); ++i) {
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,lb,"void LatticeCellListSet::adjoin(LatticeBlock)");
+      for(LatticeBlock::const_iterator i=lb.begin(); i!=lb.end(); ++i) {
         this->adjoin(*i);
       }
     }
 
     void 
-    LatticeCellListSet::adjoin(const LatticeCellListSet& cl) {
-      for(LatticeCellListSet::const_iterator i=cl.begin(); i!=cl.end(); ++i) {
-        this->adjoin(*i);
+    LatticeCellListSet::adjoin(const LatticeCellListSet& lcls) {
+      for(LatticeCellListSet::const_iterator citer=lcls.begin(); citer!=lcls.end(); ++citer) {
+        this->adjoin(*citer);
       }
     }
 
     void 
     LatticeCellListSet::adjoin(const LatticeMaskSet& lms) {
-      check_equal_dimensions(*this,lms,__PRETTY_FUNCTION__);
-      for(LatticeMaskSet::const_iterator i=lms.begin(); i!=lms.end(); ++i) {
-        this->adjoin(*i);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,lms,"void LatticeCellListSet::adjoin(LatticeMaskSet)");
+      for(LatticeMaskSet::const_iterator citer=lms.begin(); citer!=lms.end(); ++citer) {
+        this->adjoin(*citer);
       }
     }
 
@@ -275,22 +275,22 @@ namespace Ariadne {
 
 
 
-    LatticeMaskSet::LatticeMaskSet(const LatticeBlock& bd, const LatticeCellListSet& cls)
-      : _block(bd), _unbounded(false)
+    LatticeMaskSet::LatticeMaskSet(const LatticeBlock& lb, const LatticeCellListSet& lcls)
+      : _block(lb), _unbounded(false)
     {
       this->_compute_cached_attributes();
-      this->adjoin(cls);
+      this->adjoin(lcls);
     }
     
-    LatticeMaskSet::LatticeMaskSet(const LatticeCellListSet& cls)
-      : _block(cls.bounding_block()), _unbounded(false)
+    LatticeMaskSet::LatticeMaskSet(const LatticeCellListSet& lcls)
+      : _block(lcls.bounding_block()), _unbounded(false)
     {
       this->_compute_cached_attributes();
-      this->adjoin(cls);
+      this->adjoin(lcls);
     }
     
-    LatticeMaskSet::LatticeMaskSet(const LatticeMaskSet& ms)
-      : _block(ms._block), _mask(ms._mask), _unbounded(false)
+    LatticeMaskSet::LatticeMaskSet(const LatticeMaskSet& lms)
+      : _block(lms._block), _mask(lms._mask), _unbounded(false)
     {
       this->_compute_cached_attributes();
     }
@@ -317,9 +317,9 @@ namespace Ariadne {
 
     /* Compute the index of a lattice cell in a grid. */
     size_type
-    LatticeMaskSet::index(const LatticeCell& c) const
+    LatticeMaskSet::index(const LatticeCell& lc) const
     {
-      return this->_index(c.position());
+      return this->_index(lc.position());
     }
     
      /* Compute the index of a lattice cell in a grid. */
@@ -359,6 +359,28 @@ namespace Ariadne {
       }
       array[0]=index;
       return result;
+    }
+
+
+    void 
+    LatticeMaskSet::remove(const LatticeCellListSet& lcls) 
+    {
+      for(LatticeCellListSet::const_iterator i=lcls.begin(); i!=lcls.end(); ++i) {
+        if(subset(*i,this->block())) {
+          this->remove(*i);
+        }
+      }
+    }
+
+
+    void 
+    LatticeMaskSet::remove(const LatticeMaskSet& lms) 
+    {
+      for(LatticeMaskSet::const_iterator i=lms.begin(); i!=lms.end(); ++i) {
+        if(subset(*i,this->block())) {
+          this->remove(*i);
+        }
+      }
     }
 
 
@@ -491,123 +513,123 @@ namespace Ariadne {
 
 
     LatticeBlock 
-    rectangular_hull(const LatticeBlock& A, const LatticeBlock& B) 
+    rectangular_hull(const LatticeBlock& lb1, const LatticeBlock& lb2) 
     {
-      check_equal_dimensions(A,B);
-      LatticeBlock result(A.dimension());
-      for(dimension_type i=0; i!=A.dimension(); ++i) {
-        result.set_lower_bound(i,std::min(A.lower_bound(i),B.lower_bound(i)));
-        result.set_upper_bound(i,std::max(A.upper_bound(i),B.upper_bound(i)));
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(lb1,lb2,"LatticeBlock::rectangular_hull(LatticeBlock lb1, LatticeBlock lb2)");
+      LatticeBlock result(lb1.dimension());
+      for(dimension_type i=0; i!=lb1.dimension(); ++i) {
+        result.set_lower_bound(i,std::min(lb1.lower_bound(i),lb2.lower_bound(i)));
+        result.set_upper_bound(i,std::max(lb1.upper_bound(i),lb2.upper_bound(i)));
       }
       return result;
     }
 
     LatticeBlock 
-    regular_intersection(const LatticeBlock& A, const LatticeBlock& B) 
+    regular_intersection(const LatticeBlock& lb1, const LatticeBlock& lb2) 
     {
-      check_equal_dimensions(A,B);
-      LatticeBlock result(A.dimension());
-      for(dimension_type i=0; i!=A.dimension(); ++i) {
-        result.set_lower_bound(i,std::max(A.lower_bound(i),B.lower_bound(i)));
-        result.set_upper_bound(i,std::min(A.upper_bound(i),B.upper_bound(i)));
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(lb1,lb2,"LatticeBlock::rectangular_hull(LatticeBlock lb1, LatticeBlock lb2)");
+      LatticeBlock result(lb1.dimension());
+      for(dimension_type i=0; i!=lb1.dimension(); ++i) {
+        result.set_lower_bound(i,std::max(lb1.lower_bound(i),lb2.lower_bound(i)));
+        result.set_upper_bound(i,std::min(lb1.upper_bound(i),lb2.upper_bound(i)));
       }
       return result;
     }
 
     LatticeCellListSet
-    regular_intersection(const LatticeCellListSet& A, const LatticeMaskSet& B) 
+    regular_intersection(const LatticeCellListSet& lcls, const LatticeMaskSet& lms) 
     {
-      check_equal_dimensions(A,B);
-      LatticeCellListSet result(A.dimension());
-      for(LatticeCellListSet::const_iterator c=A.begin(); c!=A.end(); ++c) {
-        if(subset(*c,B)) {
-          result.adjoin(*c);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(lcls,lms,"LatticeCellListSet::rectangular_hull(LatticeCellListSet lcls, LatticeMaskSet lb2)");
+      LatticeCellListSet result(lcls.dimension());
+      for(LatticeCellListSet::const_iterator citer=lcls.begin(); citer!=lcls.end(); ++citer) {
+        if(subset(*citer,lms)) {
+          result.adjoin(*citer);
         }
       }
       return result;
     }
 
     LatticeCellListSet
-    regular_intersection(const LatticeMaskSet& A, const LatticeCellListSet& B) 
+    regular_intersection(const LatticeMaskSet& lms, const LatticeCellListSet& lcls) 
     {
-      return regular_intersection(B,A);
+      return regular_intersection(lcls,lms);
     }
 
     LatticeMaskSet
-    regular_intersection(const LatticeBlock& A, const LatticeMaskSet& B) 
+    regular_intersection(const LatticeBlock& lb, const LatticeMaskSet& lms) 
     {
-      LatticeMaskSet C(B.block()); 
-      C.adjoin(A);
-      return regular_intersection(C,B);
+      LatticeMaskSet res(lms.block()); 
+      res.adjoin(lb);
+      return regular_intersection(res,lms);
     }
 
     LatticeMaskSet
-    regular_intersection(const LatticeMaskSet& A, const LatticeBlock& B) 
+    regular_intersection(const LatticeMaskSet& lms, const LatticeBlock& lb) 
     {
-      return regular_intersection(B,A);
+      return regular_intersection(lb,lms);
     }
 
     LatticeMaskSet
-    regular_intersection(const LatticeMaskSet& A, const LatticeMaskSet& B) 
+    regular_intersection(const LatticeMaskSet& lms1, const LatticeMaskSet& lms2) 
     {
-      if(A.block()==B.block()) { 
-        return LatticeMaskSet(A.block(),A.mask() & B.mask(), !A.bounded() && !B.bounded());
+      if(lms1.block()==lms2.block()) { 
+        return LatticeMaskSet(lms1.block(),lms1.mask() & lms2.mask(), !lms1.bounded() && !lms2.bounded());
       } else {
-        check_bounded(A);
-        check_bounded(B);
-        LatticeMaskSet C(regular_intersection(A.block(),B.block()));
-        C.adjoin(regular_intersection(LatticeCellListSet(A),B));
-        return C;
+        ARIADNE_CHECK_BOUNDED(lms1,"LatticeMaskSet regular_intersection(LatticeMaskSet lms1, LatticeMaskSet lms2)");
+        ARIADNE_CHECK_BOUNDED(lms2,"LatticeMaskSet regular_intersection(LatticeMaskSet lms1, LatticeMaskSet lms2)");
+        LatticeMaskSet res(regular_intersection(lms1.block(),lms2.block()));
+        res.adjoin(regular_intersection(LatticeCellListSet(lms1),lms2));
+        return res;
       }
     }
 
     LatticeMaskSet
-    join(const LatticeMaskSet& A, const LatticeMaskSet& B) 
+    join(const LatticeMaskSet& lms1, const LatticeMaskSet& lms2) 
     {
-      if(A.block()==B.block()) { 
-        return LatticeMaskSet(A.block(),A.mask() | B.mask(), !A.bounded() | !B.bounded());
+      if(lms1.block()==lms2.block()) { 
+        return LatticeMaskSet(lms1.block(),lms1.mask() | lms2.mask(), !lms1.bounded() | !lms2.bounded());
       } else {
-        check_bounded(A);
-        check_bounded(B);
-        LatticeMaskSet C(rectangular_hull(A.block(),B.block()));
-        C.adjoin(LatticeCellListSet(A));
-        C.adjoin(LatticeCellListSet(B));
-        return C;
+        ARIADNE_CHECK_BOUNDED(lms1,"LatticeMaskSet join(LatticeMaskSet lms1, LatticeMaskSet lms2)");
+        ARIADNE_CHECK_BOUNDED(lms2,"LatticeMaskSet join(LatticeMaskSet lms1, LatticeMaskSet lms2)");
+        LatticeMaskSet res(rectangular_hull(lms1.block(),lms2.block()));
+        res.adjoin(LatticeCellListSet(lms1));
+        res.adjoin(LatticeCellListSet(lms2));
+        return res;
       }
     }
 
     LatticeMaskSet
-    difference(const LatticeMaskSet& A, const LatticeMaskSet& B) 
+    difference(const LatticeMaskSet& lms1, const LatticeMaskSet& lms2) 
     {
-      if(A.block()==B.block()) { 
-        return LatticeMaskSet(A.block(),A.mask() - B.mask(), !A.bounded() - !B.bounded());
+      if(lms1.block()==lms2.block()) { 
+        return LatticeMaskSet(lms1.block(),lms1.mask() - lms2.mask(), !lms1.bounded() - !lms2.bounded());
       } else {
-        check_bounded(A);
-        check_bounded(B);
-        LatticeMaskSet C(A.block());
-        C.adjoin(difference(LatticeCellListSet(A),B));
-        return C;
+        ARIADNE_CHECK_BOUNDED(lms1,"LatticeMaskSet difference(LatticeMaskSet lms1, LatticeMaskSet lms2)");
+        ARIADNE_CHECK_BOUNDED(lms2,"LatticeMaskSet difference(LatticeMaskSet lms1, LatticeMaskSet lms2)");
+        LatticeMaskSet res(lms1.block());
+        res.adjoin(difference(LatticeCellListSet(lms1),lms2));
+        return res;
       }
     }
 
     LatticeCellListSet
-    difference(const LatticeCellListSet& A, const LatticeMaskSet& B) 
+    difference(const LatticeCellListSet& lcls, const LatticeMaskSet& lms) 
     {
-      LatticeCellListSet result(A.dimension());
-      for(LatticeCellListSet::const_iterator c=A.begin(); c!=A.end(); ++c) {
-        if(!subset(*c,B)) {
-          result.adjoin(*c);
+      LatticeCellListSet result(lcls.dimension());
+      for(LatticeCellListSet::const_iterator citer=lcls.begin(); citer!=lcls.end(); ++citer) {
+        if(!subset(*citer,lms)) {
+          result.adjoin(*citer);
         }
       }
       return result;
     }
 
     bool 
-    disjoint(const LatticeBlock& r1, const LatticeBlock& r2) 
+    disjoint(const LatticeBlock& lb1, const LatticeBlock& lb2) 
     {
-      for(dimension_type i=0; i!=r1.dimension(); ++i) {
-        if(r1.upper_bound(i)<r2.lower_bound(i)
-            || r1.upper_bound(i)<r2.lower_bound(i))
+      for(dimension_type i=0; i!=lb1.dimension(); ++i) {
+        if(lb1.upper_bound(i)<lb2.lower_bound(i)
+            || lb1.upper_bound(i)<lb2.lower_bound(i))
         {
           return true;
         }
@@ -616,23 +638,23 @@ namespace Ariadne {
     }
     
     bool 
-    disjoint(const LatticeBlock& r, const LatticeMaskSet& ms) 
+    disjoint(const LatticeBlock& lb, const LatticeMaskSet& lms) 
     {
-      return !overlap(r.neighbourhood(),ms);
+      return !overlap(lb.neighbourhood(),lms);
     }
     
     bool 
-    disjoint(const LatticeMaskSet& ms1, const LatticeMaskSet& ms2) 
+    disjoint(const LatticeMaskSet& lms1, const LatticeMaskSet& lms2) 
     {
-      return !overlap(ms1.neighbourhood(),ms2);
+      return !overlap(lms1.neighbourhood(),lms2);
     }
     
     bool 
-    overlap(const LatticeBlock& r1, const LatticeBlock& r2) 
+    overlap(const LatticeBlock& lb1, const LatticeBlock& lb2) 
     {
-      for(dimension_type i=0; i!=r1.dimension(); ++i) {
-        if(r1.upper_bound(i)<=r2.lower_bound(i)
-            || r1.upper_bound(i)<=r2.lower_bound(i))
+      for(dimension_type i=0; i!=lb1.dimension(); ++i) {
+        if(lb1.upper_bound(i)<=lb2.lower_bound(i)
+            || lb1.upper_bound(i)<=lb2.lower_bound(i))
         {
           return false;
         }
@@ -641,14 +663,14 @@ namespace Ariadne {
     }
     
     bool 
-    overlap(const LatticeBlock& r, const LatticeMaskSet& ms) 
+    overlap(const LatticeBlock& lb, const LatticeMaskSet& lms) 
     {
-      LatticeBlock rstr=regular_intersection(r,ms.block());
-      if(rstr.empty()) {
+      LatticeBlock rlb=regular_intersection(lb,lms.block());
+      if(rlb.empty()) {
         return false;
       }
-      for(LatticeBlock::const_iterator i=rstr.begin(); i!=rstr.end(); ++i) {
-        if(subset(*i,ms)) {
+      for(LatticeBlock::const_iterator biter=rlb.begin(); biter!=rlb.end(); ++biter) {
+        if(subset(*biter,lms)) {
           return true;
         }
       }
@@ -656,23 +678,23 @@ namespace Ariadne {
     }
     
     bool 
-    overlap(const LatticeMaskSet& a, const LatticeMaskSet& b) 
+    overlap(const LatticeMaskSet& lms1, const LatticeMaskSet& lms2) 
     {
-      if(a.block()==b.block()) {
-        BooleanArray::const_iterator aiter=a.mask().begin();
-        BooleanArray::const_iterator biter=a.mask().begin();
-        BooleanArray::const_iterator aend=a.mask().end();
-        while(aiter!=aend) {
-          if(*aiter & *biter) {
+      if(lms1.block()==lms2.block()) {
+        BooleanArray::const_iterator iter1=lms1.mask().begin();
+        BooleanArray::const_iterator iter2=lms2.mask().begin();
+        BooleanArray::const_iterator end1=lms1.mask().end();
+        while(iter1!=end1) {
+          if(*iter1 & *iter2) {
             return true;
           }
-          ++aiter;
-          ++biter;
+          ++iter1;
+          ++iter2;
         }
         return false;
       } else {
-        for(LatticeMaskSet::const_iterator aiter=a.begin(); aiter!=a.end(); ++aiter) {
-          if(overlap(*aiter,b)) {
+        for(LatticeMaskSet::const_iterator iter1=lms1.begin(); iter1!=lms1.end(); ++iter1) {
+          if(overlap(*iter1,lms2)) {
             return true;
           }
         }
@@ -728,25 +750,25 @@ namespace Ariadne {
     }
 
     bool 
-    subset(const LatticeCell& c, const LatticeMaskSet& ms) 
+    subset(const LatticeCell& lc, const LatticeMaskSet& lms) 
     {
-      if(!subset(c,ms.block())) {
-        return !ms.bounded();
+      if(!subset(lc,lms.block())) {
+        return !lms.bounded();
       }
-      return ms.mask()[ms.index(c)];
+      return lms.mask()[lms.index(lc)];
     }
     
     bool 
-    subset(const LatticeBlock& r, const LatticeMaskSet& ms) 
+    subset(const LatticeBlock& lb, const LatticeMaskSet& lms) 
     {
-      if(r.empty()) {
+      if(lb.empty()) {
         return true;
       }
-      if(!subset(r,ms.block())) {
-        return !ms.bounded();
+      if(!subset(lb,lms.block())) {
+        return !lms.bounded();
       }
-      for(LatticeBlock::const_iterator i=r.begin(); i!=r.end(); ++i) {
-        if(!subset(*i,ms)) {
+      for(LatticeBlock::const_iterator biter=lb.begin(); biter!=lb.end(); ++biter) {
+        if(!subset(*biter,lms)) {
           return false;
         }
       }
@@ -754,10 +776,10 @@ namespace Ariadne {
     }
     
     bool 
-    subset(const LatticeCellListSet& c, const LatticeMaskSet& ms) 
+    subset(const LatticeCellListSet& lc, const LatticeMaskSet& lms) 
     {
-      for(LatticeCellListSet::const_iterator citer=c.begin(); citer!=c.end(); ++citer) {
-        if(!subset(*citer,ms)) {
+      for(LatticeCellListSet::const_iterator citer=lc.begin(); citer!=lc.end(); ++citer) {
+        if(!subset(*citer,lms)) {
           return false;
         }
       }
@@ -765,16 +787,16 @@ namespace Ariadne {
     }
     
     bool 
-    subset(const LatticeMaskSet& a, const LatticeMaskSet& b) {
-      //FIXME: possible bug if a and b unbounded
-      if(!a.bounded() && b.bounded()) { 
+    subset(const LatticeMaskSet& lms1, const LatticeMaskSet& lms2) {
+      //FIXME: possible bug if lms1 and lms2 unbounded
+      if(!lms1.bounded() && lms2.bounded()) { 
         return false;
       }
-      if(a.block() == b.block()) {
-        return a.mask() <= b.mask();
+      if(lms1.block() == lms2.block()) {
+        return lms1.mask() <= lms2.mask();
       } else {
-        for(LatticeMaskSet::const_iterator aiter=a.begin(); aiter!=a.end(); ++aiter) {
-          if(!subset(*aiter,b)) {
+        for(LatticeMaskSet::const_iterator iter1=lms1.begin(); iter1!=lms1.end(); ++iter1) {
+          if(!subset(*iter1,lms2)) {
             return false;
           }
         }
@@ -854,7 +876,6 @@ namespace Ariadne {
     std::istream& 
     operator>>(std::istream& is, LatticeBlock& r)
     {
-      // std::cerr << __PRETTY_FUNCTION__ << std::endl;
       char c;
       is >> c;
       is.putback(c);
@@ -867,7 +888,7 @@ namespace Ariadne {
           int l,u;
           is >> cl >> l >> cm >> u >> cr;
           if(cl!='[' || (cm!=',' && cm!=';') || cr!=']') {
-            throw invalid_input(__PRETTY_FUNCTION__);
+            ARIADNE_THROW(InvalidInput,"istream& LatticeBlock::read(istream&)","");
           }
           v.push_back(l); v.push_back(u);
           c=' ';
@@ -890,7 +911,7 @@ namespace Ariadne {
       else {
         /* representation as lower and upper corners */
         /* FIXME */
-        throw invalid_input(__PRETTY_FUNCTION__);
+        ARIADNE_THROW(InvalidInput,"istream& LatticeBlock::read(istream&)","");
       }
       return is;
     }

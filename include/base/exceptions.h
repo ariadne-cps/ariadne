@@ -31,6 +31,7 @@
 #include <stdexcept>
 #include <iosfwd>
 
+#include "../throw.h"
 #include "base/types.h"
 
 namespace Ariadne {
@@ -65,9 +66,20 @@ namespace Ariadne {
     //@{ \name Exceptions
 
     /*! \brief A stream or string input was invalid. */
-    class invalid_input : public std::runtime_error {
+    class InvalidInput : public std::runtime_error {
      public:
-      invalid_input(const std::string& str) : std::runtime_error(str) { }
+      InvalidInput(const std::string& str) : std::runtime_error(str) { }
+    };
+      
+    /*! \brief The index to an arrayed object was invalid. */
+    struct InvalidIndex : public std::runtime_error {
+      InvalidIndex(const std::string& str) : std::runtime_error(str) { }
+    };
+      
+    /*! \brief The length of an array was invalid. */
+    class LengthError : public std::runtime_error {
+     public:
+      LengthError(const std::string& str) : std::runtime_error(str) { }
     };
       
     template<class A1, class A2> inline
@@ -84,5 +96,11 @@ namespace Ariadne {
   }
   
 }
+
+#define ARIADNE_CHECK_EQUAL_ARRAY_SIZES(ary1,ary2,func) \
+  { if((ary1).size()!=ary2.size()) { ARIADNE_THROW(LengthError,func,#ary1"="<<ary1<<", "#ary2"="<<ary2); } }
+        
+#define ARIADNE_CHECK_ARRAY_INDEX(ary,i,func) \
+  { if((ary).size()<=i) { ARIADNE_THROW(InvalidIndex,func,#ary".size()="<<(ary).size()<<", "#i"="<<i); } }
 
 #endif /* ARIADNE_BASE_EXCEPTIONS_H */

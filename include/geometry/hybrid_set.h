@@ -112,9 +112,6 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;
      private:
-      // Tests if the hybrid set has location q; if not, throws an error.
-      void check_location(location_type q, const char*) const;
-     private:
       std::map< location_type, S > _component_sets;
     };
 

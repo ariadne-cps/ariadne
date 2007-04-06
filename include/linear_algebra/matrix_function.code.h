@@ -35,7 +35,7 @@ namespace Ariadne {
     {
       using Numeric::Interval;
       
-      check_square(A,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_SQUARE(A,__PRETTY_FUNCTION__);
       R err=div_up(A.norm().upper(),R(65536));
       if(err==0) {
         err=div_up(A.norm().upper(),R(65536));

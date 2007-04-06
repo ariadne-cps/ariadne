@@ -60,7 +60,7 @@ namespace Ariadne {
       if(this->_size==0) {
         _pts.resize(pt.dimension()+1,1);
       }
-      check_equal_dimensions(*this,pt,"PointList<R>::push_back(Point<R>)");
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,pt,"PointList<R>::push_back(Point<R>)");
       if(this->size()==this->capacity()) {
         reserve(this->size()*2);
       }

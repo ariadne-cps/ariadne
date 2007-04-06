@@ -364,32 +364,48 @@ namespace Ariadne {
     void 
     GridMaskSet<R>::remove(const GridCell<R>& gc) 
     {
-        check_same_grid(*this,gc);
-        this->_lattice_set.remove(gc._lattice_set);
+      ARIADNE_CHECK_SAME_GRID(*this,gc,"void GridMaskSet::remove(GridCell gc)");
+      this->_lattice_set.remove(gc._lattice_set);
+    }
+
+    template<class R> inline
+    void 
+    GridMaskSet<R>::remove(const GridCellListSet<R>& gcls) 
+    {
+      ARIADNE_CHECK_SAME_GRID(*this,gcls,"void GridMaskSet::remove(GridCellListSet gcls)");
+      this->_lattice_set.remove(gcls._lattice_set);
+    }
+
+    template<class R> inline
+    void 
+    GridMaskSet<R>::remove(const GridMaskSet<R>& gms) 
+    {
+      ARIADNE_CHECK_SAME_GRID(*this,gms,"void GridMaskSet::remove(GridMaskSet gms)");
+      this->_lattice_set.remove(gms._lattice_set);
     }
 
     template<class R> inline
     void 
     GridMaskSet<R>::adjoin(const GridCell<R>& gc) 
     {
-        check_same_grid(*this,gc);
-        this->_lattice_set.adjoin(gc._lattice_set);
+      ARIADNE_CHECK_SAME_GRID(*this,gc,"void GridMaskSet::adjoin(GridCell gc)");
+      this->_lattice_set.adjoin(gc._lattice_set);
     }
 
     template<class R> inline
     void 
     GridMaskSet<R>::adjoin(const GridBlock<R>& gb) 
     {
-        check_same_grid(*this,gb);
-        this->_lattice_set.adjoin(gb._lattice_set);
+      ARIADNE_CHECK_SAME_GRID(*this,gb,"void GridMaskSet::adjoin(GridBlock gb)");
+      this->_lattice_set.adjoin(gb._lattice_set);
     }
 
     template<class R> inline
     void 
     GridMaskSet<R>::adjoin(const GridCellListSet<R>& gcls) 
     {
-        check_same_grid(*this,gcls);
-        this->_lattice_set.adjoin(gcls._lattice_set);
+      ARIADNE_CHECK_SAME_GRID(*this,gcls,"void GridMaskSet::adjoin(GridCellListSet gcls)");
+      this->_lattice_set.adjoin(gcls._lattice_set);
     }
 
     template<class R> template<class SetInterface> inline
@@ -418,24 +434,24 @@ namespace Ariadne {
     void 
     GridMaskSet<R>::adjoin(const GridMaskSet<R>& gms) 
     {
-        check_same_grid(*this,gms);
-        this->_lattice_set.adjoin(gms._lattice_set);
+      ARIADNE_CHECK_SAME_GRID(*this,gms,"void GridMaskSet::adjoin(GridMaskSet gms)");
+      this->_lattice_set.adjoin(gms._lattice_set);
     }
 
     template<class R> inline
     void 
     GridMaskSet<R>::restrict(const GridCellListSet<R>& gcls) 
     {
-        check_same_grid(*this,gcls);
-        this->_lattice_set.restrict(gcls._lattice_set);
+      ARIADNE_CHECK_SAME_GRID(*this,gcls,"void GridMaskSet::restrict(GridCellListSet gcls)");
+      this->_lattice_set.restrict(gcls._lattice_set);
     }
 
     template<class R> inline
     void 
     GridMaskSet<R>::restrict(const GridMaskSet<R>& gms) 
     {
-        check_same_grid(*this,gms);
-        this->_lattice_set.restrict(gms._lattice_set);
+      ARIADNE_CHECK_SAME_GRID(*this,gms,"void GridMaskSet::restrict(GridMaskSet gms)");
+      this->_lattice_set.restrict(gms._lattice_set);
     }
 
 
@@ -474,10 +490,9 @@ namespace Ariadne {
     GridMaskSet<R> 
     over_approximation(const ListSet<BS>& ls, const FiniteGrid<R>& g) 
     {
-      GridMaskSet<R> result(g);
-      
-      check_equal_dimensions(ls,g,"over_approximation(ListSet<R,BS>,FiniteGrid<R>)");
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(ls,g,"over_approximation(ListSet<R,BS>,FiniteGrid<R>)");
 
+      GridMaskSet<R> result(g);
       for(typename ListSet<BS>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
        result.adjoin(over_approximation(*iter,g.grid()));
       }

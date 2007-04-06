@@ -74,11 +74,7 @@ template<class S> inline
 S&
 HybridSetBase<S>::new_location(location_type q, dimension_type d)
 {
-  if(this->has_location(q)) {
-    std::ostringstream msg;
-    msg << "The hybrid set already has location " << q << ".";
-    throw HybridSystemError(msg.str());
-  }
+  ARIADNE_CHECK_NEW_LOCATION(*this,q,"S& HybridSetBase<S>::new_location(location_type q, dimension_type d)");
   this->_component_sets.insert(std::make_pair(q,S(d)));
   return (*this)[q];
 }
@@ -88,11 +84,7 @@ template<class S> inline
 S&
 HybridSetBase<S>::new_location(location_type q, const S& s)
 {
-  if(this->has_location(q)) {
-    std::ostringstream msg;
-    msg << "The hybrid set already has location " << q << ".";
-    throw HybridSystemError(msg.str());
-  }
+  ARIADNE_CHECK_NEW_LOCATION(*this,q,"S& HybridSetBase<S>::new_location(location_type q, S t)");
   this->_component_sets.insert(std::make_pair(q,s));
   return (*this)[q];
 }
@@ -102,11 +94,7 @@ template<class S> template<class T> inline
 S&
 HybridSetBase<S>::new_location(location_type q, const T& t)
 {
-  if(this->has_location(q)) {
-    std::ostringstream msg;
-    msg << "The hybrid set already has location " << q << ".";
-    throw HybridSystemError(msg.str());
-  }
+  ARIADNE_CHECK_NEW_LOCATION(*this,q,"S& HybridSetBase<S>::new_location<T>(location_type q, T t)");
   this->_component_sets.insert(std::make_pair(q,S(t)));
   return (*this)[q];
 }
@@ -148,7 +136,9 @@ template<class S> inline
 S& 
 HybridSetBase<S>::operator[](location_type q)
 { 
-  this->check_location(q,"HybridSet<S>::operator[](location_type q)");
+  if(!this->has_location(q)) {
+    ARIADNE_THROW(InvalidLocation,"S& HybridSetBase::operator[](location_type q)","this->locations()="<<this->locations()<<", q="<<q);
+  }
   return this->_component_sets.find(q)->second;
 }
 
@@ -157,7 +147,9 @@ template<class S> inline
 const S& 
 HybridSetBase<S>::operator[](location_type q) const 
 { 
-  this->check_location(q,"HybridSet<S>::operator[](location_type q) const");
+  if(!this->has_location(q)) {
+    ARIADNE_THROW(InvalidLocation,"S HybridSetBase::operator[](location_type q) const","this->locations()="<<this->locations()<<", q="<<q);
+  }
   return this->_component_sets.find(q)->second;
 }
 
@@ -188,25 +180,18 @@ HybridSetBase<S>::empty() const {
 }
   
 
-template<class S> template<class S1> inline  
+template<class S> template<class T> inline  
 void 
-HybridSetBase<S>::adjoin(location_type q, const S1& s) {
-  check_location(q,"HybridSet<S>::adjoin(location_type q, const S1& s)");
-  (*this)[q].adjoin(s);
+HybridSetBase<S>::adjoin(location_type q, const T& t) {
+  ARIADNE_CHECK_LOCATION(*this,q,"HybridSet<S>::adjoin<T>(location_type q, T t)");
+  (*this)[q].adjoin(t);
 }
 
 
 template<class S> template<class S1> inline  
 void 
 HybridSetBase<S>::adjoin(const HybridSetBase<S1>& hs) {
-  for(typename HybridSetBase<S1>::const_iterator loc_iter=hs.begin();
-      loc_iter!=hs.end(); ++loc_iter)
-  {
-    location_type q=loc_iter->first;
-    if(!this->has_location(q)) {
-      throw std::runtime_error("Cannot adjoin a hybrid set to another with different discrete locations");
-    }
-  }
+  ARIADNE_CHECK_SAME_LOCATIONS(*this,hs,"void HybridSet<S>::adjoin<SET>(HybridSetBase<SET>)");
 
   for(typename HybridSetBase<S1>::const_iterator loc_iter=hs.begin();
       loc_iter!=hs.end(); ++loc_iter)
@@ -251,24 +236,12 @@ HybridSetBase<S>::end() const
 
 
 
-template<class S> inline
-void 
-HybridSetBase<S>::check_location(location_type q, const char* where) const
-{ 
-  if (!this->has_location(q)) {
-    std::ostringstream o;
-    o << where << ": The hybrid set with locations " << this->locations() << " does not have a location with id " << q << ".";
-    throw HybridSystemError(o.str());
-  }
-}
 
 template<class S1, class S2> inline
 tribool
 subset(const HybridSetBase<S1>& hs1, const HybridSetBase<S2>& hs2)
 {
-  if(hs1.locations()!=hs2.locations()) {
-    throw HybridSystemError("Comparing sets with different discrete locations");
-  }
+  ARIADNE_CHECK_SAME_LOCATIONS(hs1,hs2,"tribool subset(HybridSetBase<S1> hs1,HybridSetBase<S2> hs2)"); 
   
   tribool result=true;
   for(typename HybridSetBase<S1>::const_iterator hs1_iter=hs1.begin();
@@ -360,9 +333,7 @@ template<class R> inline
 HybridGridCellListSet<R>
 difference(const HybridGridCellListSet<R>& hgcl, const HybridGridMaskSet<R>& hgms) 
 {
-  if(hgcl.locations()!=hgms.locations()) {
-    throw HybridSystemError("Intersection of sets with different discrete locations");
-  }
+  ARIADNE_CHECK_SAME_LOCATIONS(hgcl,hgms,"HybridGridCellListSet difference(HybridGridCellListSet hgcl, HybridGridMaskSet hgms)");
   
   HybridGridCellListSet<R> result=hgcl;
   result.clear();
@@ -380,9 +351,7 @@ template<class R> inline
 HybridGridCellListSet<R>
 regular_intersection(const HybridGridCellListSet<R>& hgcl, const HybridGridMaskSet<R>& hgms) 
 {
-  if(hgcl.locations()!=hgms.locations()) {
-    throw HybridSystemError("Intersection of sets with different discrete locations");
-  }
+  ARIADNE_CHECK_SAME_LOCATIONS(hgcl,hgms,"HybridGridCellListSet regular_intersection(HybridGridCellListSet hgcl, HybridGridMaskSet hgms)");
   
   HybridGridCellListSet<R> result=hgcl;
   result.clear();

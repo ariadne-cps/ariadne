@@ -162,7 +162,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::reachability_step(const System::Vector
   
   if(verbosity>6) { std::clog << "LohnerIntegrator::reachability_step(VectorField,Zonotope<Interval>,time_type) const" << std::endl; }
 
-  check_equal_dimensions(vector_field,initial_set);
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"LohnerIntegrator::reachability_step(VectorField,Zonotope<Interval>,time_type)");
 
   const VectorField<R>& vf(vector_field);
   Zonotope<I> z=initial_set;

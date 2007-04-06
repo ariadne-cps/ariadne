@@ -48,18 +48,13 @@ namespace Ariadne {
     void
     LatticeMultiMap::adjoin_to_image(const LatticeCell& lc, const LatticeCellListSet& img)
     {
-      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
-      //std::cerr << "result_dimension=" << this->_result_dimension << " lc=" << lc << " img=" << img << std::endl;
       typedef std::map<LatticeCell,LatticeCellListSet>::iterator map_iterator;
       map_iterator iter=this->_map.find(lc);
       if(iter==this->_map.end()) {
         this->_map.insert(std::make_pair(lc,LatticeCellListSet(this->_result_dimension)));
-        //std::cerr << *this << std::endl;
         iter=this->_map.find(lc);
-        //std::cerr << *iter << std::endl;
         assert(iter!=this->_map.end());
       }
-      //std::cerr << iter->first << " " << iter->second.dimension() << " " << iter->second << std::endl;
       iter->second.adjoin(img);
     }
     
@@ -67,7 +62,6 @@ namespace Ariadne {
     LatticeCellListSet
     LatticeMultiMap::image(const LatticeCell& lc) const
     {
-      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
       typedef std::map<LatticeCell,LatticeCellListSet>::iterator map_iterator;
       map_iterator iter=this->_map.find(lc);
       if(iter==this->_map.end()) {
@@ -98,7 +92,6 @@ namespace Ariadne {
     LatticeCellListSet
     LatticeMultiMap::weak_preimage(const LatticeMaskSet& lms) const
     {
-      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
       typedef std::map<LatticeCell,LatticeCellListSet>::iterator map_iterator;
       LatticeCellListSet result(this->argument_dimension());
       for(map_iterator iter=this->_map.begin(); iter!=this->_map.end(); ++iter) {
@@ -113,7 +106,6 @@ namespace Ariadne {
     LatticeCellListSet
     LatticeMultiMap::strong_preimage(const LatticeMaskSet& lms) const
     {
-      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
       typedef std::map<LatticeCell,LatticeCellListSet>::iterator map_iterator;
       LatticeCellListSet result(this->argument_dimension());
       for(map_iterator iter=this->_map.begin(); iter!=this->_map.end(); ++iter) {
@@ -128,14 +120,12 @@ namespace Ariadne {
     LatticeCellListSet
     LatticeMultiMap::operator() (const LatticeCell& lc) const
     {
-      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
       return this->apply(lc);
     }
     
     LatticeCellListSet 
     LatticeMultiMap::operator() (const LatticeBlock& lr) const 
     {
-      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
       LatticeCellListSet result(this->_result_dimension);
       for(LatticeBlock::const_iterator cell_iter=lr.begin(); cell_iter!=lr.end(); ++cell_iter) {
         result.adjoin(this->apply(*cell_iter));
@@ -146,7 +136,6 @@ namespace Ariadne {
     LatticeCellListSet 
     LatticeMultiMap::operator() (const LatticeCellListSet& lcls) const 
     {
-      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
       LatticeCellListSet result(this->_result_dimension);
       for(LatticeCellListSet::const_iterator cell_iter=lcls.begin(); cell_iter!=lcls.end(); ++cell_iter) {
         result.adjoin(this->apply(*cell_iter));
@@ -194,17 +183,17 @@ namespace Ariadne {
     void
     LatticeSystem::set_control_values(const LatticeCell& lc, const LatticeCellListSet& lcls) 
     {
-      check_dimension(lc,this->space_dimension(),__PRETTY_FUNCTION__);
-      check_dimension(lcls,this->input_dimension(),__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION(lc,this->space_dimension(),"void LatticeSystem::set_control_values(LatticeCell lc, LatticeCellListSet lcls)");
+      ARIADNE_CHECK_DIMENSION(lcls,this->input_dimension(),"void LatticeSystem::set_control_values(LatticeCell lc, LatticeCellListSet lcls)");
       this->_control_map.insert(std::make_pair(lc,lcls));
     }
     
     void
     LatticeSystem::set_noise_values(const LatticeCell& splc, const LatticeCell& inlc,const LatticeCellListSet& lcls) 
     {
-      check_dimension(splc,this->space_dimension(),__PRETTY_FUNCTION__);
-      check_dimension(inlc,this->input_dimension(),__PRETTY_FUNCTION__);
-      check_dimension(lcls,this->space_dimension(),__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION(splc,this->space_dimension(),"void LatticeSystem::set_noise_values(LatticeCell splc, LatticeCell inlc, LatticeCellListSet lcls)");
+      ARIADNE_CHECK_DIMENSION(inlc,this->input_dimension(),"void LatticeSystem::set_noise_values(LatticeCell splc, LatticeCell inlc, LatticeCellListSet lcls)");
+      ARIADNE_CHECK_DIMENSION(lcls,this->space_dimension(),"void LatticeSystem::set_noise_values(LatticeCell splc, LatticeCell inlc, LatticeCellListSet lcls)");
       LatticeCell lc(this->space_dimension()+this->input_dimension());
       for(dimension_type i=0; i!=this->space_dimension(); ++i) {
         lc[i]=splc[i];
@@ -218,17 +207,17 @@ namespace Ariadne {
     void
     LatticeSystem::set_noise_values(const LatticeCell& lc, const LatticeCellListSet& lcls) 
     {
-      check_dimension(lc,this->space_dimension(),__PRETTY_FUNCTION__);
-      check_dimension(lcls,this->input_dimension(),__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION(lc,this->space_dimension(),"void LatticeSystem::set_noise_values(LatticeCell lc, LatticeCellListSet lcls)");
+      ARIADNE_CHECK_DIMENSION(lcls,this->input_dimension(),"void LatticeSystem::set_noise_values(LatticeCell lc, LatticeCellListSet lcls)");
       this->_noise_map.insert(std::make_pair(lc,lcls));
     }
     
     LatticeCellListSet
     LatticeSystem::preimage(const LatticeMaskSet& lms) const
     {
+      ARIADNE_CHECK_DIMENSION(lms,this->space_dimension(),"LatticeCellListSet::LatticeSystem::preimate(LatticeMaskSet lms)");
       LatticeCellListSet result(this->space_dimension());
-      
-      check_dimension(lms,this->space_dimension(),__PRETTY_FUNCTION__);
+
       typedef std::map<LatticeCell,LatticeCellListSet>::iterator map_iterator;
       
       LatticeCell space(IndexArray(this->space_dimension()));

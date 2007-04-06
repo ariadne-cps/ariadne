@@ -80,13 +80,13 @@ namespace Ariadne {
     
     template<class BS>
     tribool
-    disjoint (const ListSet<BS>& A,
-              const ListSet<BS>& B)
+    disjoint (const ListSet<BS>& ls1,
+              const ListSet<BS>& ls2)
     {
-      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(ls1,ls2,"tribool disjoint(ListSet<BS> ls1, ListSet<BS> ls2)");
       tribool result=true;
-      for (typename ListSet<BS>::const_iterator i=A.begin(); i!=A.end(); ++i) {
-        for (typename ListSet<BS>::const_iterator j=B.begin(); j!=B.end(); ++j) {
+      for (typename ListSet<BS>::const_iterator i=ls1.begin(); i!=ls1.end(); ++i) {
+        for (typename ListSet<BS>::const_iterator j=ls2.begin(); j!=ls2.end(); ++j) {
           result = result && disjoint(*i,*j);
           if(!result) { return result; }
         }
@@ -97,10 +97,10 @@ namespace Ariadne {
 
     template<class R>
     tribool
-    subset(const ListSet< Rectangle<R> >& A,
-           const ListSet< Rectangle<R> >& B)
+    subset(const ListSet< Rectangle<R> >& rls1,
+           const ListSet< Rectangle<R> >& rls2)
     {
-      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(rls1,rls2,"tribool subset(ListSet<Rectangle> rls1, ListSet<Rectangle> rls2)");
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
@@ -144,27 +144,27 @@ namespace Ariadne {
 
     template<class BS>
     ListSet<BS>
-    join(const ListSet<BS>& A,
-         const ListSet<BS>& B)
+    join(const ListSet<BS>& ls1,
+         const ListSet<BS>& ls2)
     {
-      ListSet<BS> ds_union(A);
-      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
-      ds_union.inplace_union(B);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(ls1,ls2,"ListSet<BS> join(ListSet<BS> ls1, ListSet<BS> ls2)");
+      ListSet<BS> ds_union(ls1);
+      ds_union.inplace_union(ls2);
       return ds_union;
     }
 
 
     template<class BS>
     ListSet<BS>
-    open_intersection(const ListSet<BS>& A,
-                      const ListSet<BS>& B)
+    open_intersection(const ListSet<BS>& ls1,
+                      const ListSet<BS>& ls2)
     {
-      ListSet<BS> ds_inter(A.dimension());
-      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
-      for (size_type i=0; i<A.size(); i++) {
-        for (size_type j=0; j<B.size(); j++) {
-          if (!disjoint(A[i],B[j])) {
-              ds_inter.push_back(open_intersection(A[i],B[j]));
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(ls1,ls2,"ListSet<BS> open_intersection(ListSet<BS> ls1, ListSet<BS> ls2)");
+      ListSet<BS> ds_inter(ls1.dimension());
+      for (size_type i=0; i<ls1.size(); i++) {
+        for (size_type j=0; j<ls2.size(); j++) {
+          if (!disjoint(ls1[i],ls2[j])) {
+              ds_inter.push_back(open_intersection(ls1[i],ls2[j]));
           }
         }
       }
@@ -188,14 +188,14 @@ namespace Ariadne {
     std::ostream& 
     ListSet<BS>::write(std::ostream& os) const
     {
-      const ListSet<BS>& A=*this;
+      const ListSet<BS>& ls=*this;
       os << "ListSet<" << Numeric::name<R>() << ",BS>{\n  ";
       os << "[ ";
-      if (A.size() >0 ) {
-        os << A[0];
+      if (ls.size() >0 ) {
+        os << ls[0];
       }
-      for (size_type i=1; i<A.size(); i++) {
-        os << ",\n    " << A[i];
+      for (size_type i=1; i<ls.size(); i++) {
+        os << ",\n    " << ls[i];
       }
       os << "\n  ]\n}" << std::endl;
       return os;
@@ -206,15 +206,15 @@ namespace Ariadne {
     std::istream& 
     ListSet<BS>::read(std::istream& is)
     {
-      ListSet<BS>& A=*this;
-      std::vector< BS >& vec(A._vector);
+      ListSet<BS>& ls=*this;
+      std::vector< BS >& vec(ls._vector);
       is >> vec;
 
       if(vec.size()==0) {
-        A._dimension = 0;
+        ls._dimension = 0;
       }
       else {
-        A._dimension=vec[0].dimension();
+        ls._dimension=vec[0].dimension();
       }
       return is;
     }

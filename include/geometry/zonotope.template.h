@@ -33,7 +33,7 @@ namespace Ariadne {
         _generators(g)
     {
       if(c.dimension()!=g.number_of_rows()) { 
-        throw InvalidGenerators(__PRETTY_FUNCTION__);
+        ARIADNE_THROW(InvalidGenerators,"Zonotope::Zonotope(Point c,Matrix g)","c="<<c<<", g="<<g);
       }
     }
 
@@ -46,7 +46,7 @@ namespace Ariadne {
         _generators(g1.number_of_rows(),g1.number_of_columns()+1u)
     { 
       if(c.dimension()!=g1.number_of_rows() || c.dimension()!=g2.size()) { 
-        throw InvalidGenerators(__PRETTY_FUNCTION__);
+        ARIADNE_THROW(InvalidGenerators,"Zonotope::Zonotope(Point c, Matrix g1, Vector g2)","c="<<c<<", g1="<<g1<<", g2="<<g2);
       }
       dimension_type d=this->dimension();
       size_type nc=g1.number_of_columns();
@@ -67,7 +67,7 @@ namespace Ariadne {
         _generators(LinearAlgebra::concatenate_columns(g1,g2))
     { 
       if(c.dimension()!=g1.number_of_rows() || c.dimension()!=g2.number_of_rows()) { 
-        throw InvalidGenerators(__PRETTY_FUNCTION__);
+        ARIADNE_THROW(InvalidGenerators,"Zonotope::Zonotope(Point c, Matrix g1, Matrix g2)","c="<<c<<", g1="<<g1<<", g2="<<g2);
       }
     }
 

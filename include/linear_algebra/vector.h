@@ -242,7 +242,8 @@ namespace Ariadne {
       R& operator[] (const size_type& i) { return this->_begin[i*this->_increment]; }
      
       template<class E> VectorSlice<R>& operator=(const VectorExpression< E >& v) {
-        const E& e=v(); check_equal_sizes(*this,e,__PRETTY_FUNCTION__);
+        const E& e=v(); 
+        ARIADNE_CHECK_EQUAL_SIZES(*this,e,"VectorSlice& VectorSlice::operator=(VectorExcpression)");
         for(size_type i=0; i!=e.size(); ++i) { this->_begin[i*this->_increment]=e(i); }
         return *this;
       }
@@ -295,7 +296,7 @@ namespace Ariadne {
     Vector<R1>&
     operator+=(Vector<R1>& v1, const VectorExpression<E2>& e2) {
       const E2& v2=e2();
-      check_equal_sizes(v1,v2,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_SIZES(v1,v2,"Vector& operator+=(Vector,VectorExpression)");
       for(size_type i=0; i!=v1.size(); ++i) { v1(i)+=v2(i); } return v1; 
     }
 
@@ -303,7 +304,7 @@ namespace Ariadne {
     Vector<R1>&
     operator-=(Vector<R1>& v1, const VectorExpression<E2>& e2) {
       const E2& v2=e2();
-      check_equal_sizes(v1,v2,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_SIZE(v1,v2.size(),"Vector& operator-=(Vector,VectorExpression)");
       //for(size_type i=0; i!=v1.size(); ++i) { v1(i)-=v2(i); } return v1; 
       for(size_type i=0; i!=v1.size(); ++i) { v1(i)=v1(i)-v2(i); } return v1; 
     }
@@ -325,7 +326,9 @@ namespace Ariadne {
     BinaryVectorVectorExpression<E1,E2,plus> 
     operator+(const VectorExpression<E1>& e1, const VectorExpression<E2>& e2) {
       const E1& v1=e1(); const E2& v2=e2();
-      check_equal_sizes(v1,v2,__PRETTY_FUNCTION__);
+      if(v1.size()!=v2.size()) {
+        ARIADNE_THROW(IncompatibleSizes,"VectorExpression operator+(VectorExpression ve1, VectorExpression ve2)","ve1.size()="<<v1.size()<<", ve2.size()="<<v2.size());
+      }
       return BinaryVectorVectorExpression<E1,E2,plus>(v1,v2,plus());
     }
 
@@ -333,7 +336,9 @@ namespace Ariadne {
     BinaryVectorVectorExpression<E1,E2,minus> 
     operator-(const VectorExpression<E1>& e1, const VectorExpression<E2>& e2) {
       const E1& v1=e1(); const E2& v2=e2();
-      check_equal_sizes(v1,v2,__PRETTY_FUNCTION__);
+      if(v1.size()!=v2.size()) {
+        ARIADNE_THROW(IncompatibleSizes,"VectorExpression operator-(VectorExpression ve1, VectorExpression ve2)","ve1.size()="<<v1.size()<<", ve2.size()="<<v2.size());
+      }
       return BinaryVectorVectorExpression<E1,E2,minus>(v1,v2,minus());
     }
 
@@ -377,7 +382,7 @@ namespace Ariadne {
     bool
     contains_value(const Vector< Numeric::Interval<R> >& iv,const Vector<R>& v) 
     {
-      check_equal_sizes(iv,v,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_SIZES(iv,v,"bool contains_value(Vector<Interval>,Vector<Float>)");
       for(size_type i=0; i!=v.size(); ++i) {
         if(!Numeric::contains_value(iv(i),v(i))) {
           return false;
@@ -427,7 +432,7 @@ namespace Ariadne {
     template<class R1, class R2> inline
     Vector<typename Numeric::traits<R1,R2>::arithmetic_type> 
     operator+(const Vector<R1>& v1, const Vector<R2>& v2) {
-      check_equal_sizes(v1,v2,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_SIZES(v1,v2,"Vector operator+(Vector,Vector)");
       Vector<typename Numeric::traits<R1,R2>::arithmetic_type> result(v1.size());
       for(size_type i=0; i!=result.size(); ++i) {
         result(i)=v1(i)+v2(i);
@@ -438,7 +443,7 @@ namespace Ariadne {
     template<class R1, class R2> inline
     Vector<class Numeric::traits<R1,R2>::arithmetic_type> 
     operator-(const Vector<R1>& v1, const Vector<R2>& v2) {
-      check_equal_sizes(v1,v2,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_SIZES(v1,v2,"Vector operator-(Vector,Vector)");
       Vector<typename Numeric::traits<R1,R2>::arithmetic_type> result(v1.size());
       for(size_type i=0; i!=result.size(); ++i) {
         result(i)=v1(i)-v2(i);
@@ -476,7 +481,7 @@ namespace Ariadne {
     
     template<class R> inline
     Vector<R> add_approx(const Vector<R>& u, const Vector<R>& v) {
-      check_equal_sizes(u,v,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_SIZES(u,v,"Vector add_approx(Vector,Vector)");
       Vector<R> result(u.size());
       for(size_type i=0; i!=u.size(); ++i) {
         result(i)=add_approx(u(i),v(i));
@@ -486,7 +491,7 @@ namespace Ariadne {
       
     template<class R> inline
     Vector<R> sub_approx(const Vector<R>& u, const Vector<R>& v) {
-      check_equal_sizes(u,v,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_SIZES(u,v,"Vector sub_approx(Vector,Vector)");
       Vector<R> result(u.size());
       for(size_type i=0; i!=u.size(); ++i) {
         result(i)=sub_approx(u(i),v(i));
@@ -526,7 +531,7 @@ namespace Ariadne {
     template<class R> inline 
     R inner_product(const Vector<R>& u, const Vector<R>& v) 
     {
-      check_equal_sizes(u,v,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_SIZES(u,v,"Scalar inner_product(Vector,Vector)");
       R result=0;
       for(size_type i=0; i!=u.size(); ++i) {
         result+=u(i)*v(i);

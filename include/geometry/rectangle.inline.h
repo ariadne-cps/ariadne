@@ -601,7 +601,7 @@ namespace Ariadne {
     Rectangle<R> 
     closed_intersection(const Rectangle<R>& r1, const Rectangle<R>& r2)
     {
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,"Rectangle closed_intersection(Rectangle r1, Rectangle r2)");
       Rectangle<R> r3(r1.dimension());
       for(size_type i=0; i != r3.dimension(); ++i) {
         r3[i]=Numeric::intersection(r1[i],r2[i]);
@@ -613,7 +613,7 @@ namespace Ariadne {
     Rectangle<R> 
     open_intersection(const Rectangle<R>& r1, const Rectangle<R>& r2)
     {
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,"Rectangle closed_intersection(Rectangle r1, Rectangle r2)");
       Rectangle<R> r3(r1.dimension());
       for(size_type i=0; i != r3.dimension(); ++i) {
         r3[i]=Numeric::intersection(r1[i],r2[i]);
@@ -628,7 +628,7 @@ namespace Ariadne {
     Rectangle<R>
     rectangular_hull(const Rectangle<R>& r1, const Rectangle<R>& r2)
     {
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,"Rectangle rectangular_hull(Rectangle r1, Rectangle r2)");
       Rectangle<R> r3(r1.dimension());
       for(size_type i=0; i != r3.dimension(); ++i) {
         r3[i]=Numeric::hull(r1[i],r2[i]);
@@ -662,7 +662,7 @@ namespace Ariadne {
     Rectangle<typename Numeric::traits<R1,R2>::arithmetic_type> 
     minkowski_sum(const Rectangle<R1>& r1, const Rectangle<R2>& r2)
     {
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,"Rectangle minkowski_sum(Rectangle r1, Rectangle r2)");
       Rectangle<typename Numeric::traits<R1,R2>::arithmetic_type> r3(r1.dimension());
       for(dimension_type i=0; i!=r3.dimension(); ++i) {
         r3.set_lower_bound(i,r1.lower_bound(i)+r2.lower_bound(i));
@@ -675,7 +675,7 @@ namespace Ariadne {
     Rectangle<typename Numeric::traits<R1,R2>::arithmetic_type> 
     minkowski_difference(const Rectangle<R1>& r1, const Rectangle<R2>& r2)
     {
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,"Rectangle minkowski_difference(Rectangle r1, Rectangle r2)");
       Rectangle<typename Numeric::traits<R1,R2>::arithmetic_type> r3(r1.dimension());
       for(dimension_type i=0; i!=r3.dimension(); ++i) {
         r3.set_lower_bound(i,r1.lower_bound(i)-r2.lower_bound(i));
@@ -698,7 +698,7 @@ namespace Ariadne {
     operator-(const Geometry::Rectangle<R>& r1,
               const Geometry::Rectangle<R>& r2)
     {
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,"Vector operator-(Rectangle r1, Rectangle r2)");
       return r1.position_vectors()-r2.position_vectors();
     }
   
@@ -707,9 +707,9 @@ namespace Ariadne {
     operator+(const Geometry::Rectangle<R>& r, 
               const LinearAlgebra::VectorExpression<E>& v)
     {
-      const E& ev=v();
-      ARIADNE_CHECK_DIMENSION_EQUALS_SIZE(r,ev,__PRETTY_FUNCTION__);
-      LinearAlgebra::Vector< Numeric::Interval<R> > iv=ev;
+      const E& ve=v();
+      ARIADNE_CHECK_DIMENSION_EQUALS_SIZE(r,ve,"Vector operator-(Rectangle r, VectorExpression ve)");
+      LinearAlgebra::Vector< Numeric::Interval<R> > iv=ve;
       return r+iv; 
     }
       
@@ -720,7 +720,7 @@ namespace Ariadne {
               const LinearAlgebra::Vector<R>& v)
     {
       Geometry::Rectangle<R> result(r.dimension());
-      ARIADNE_CHECK_DIMENSION_EQUALS_SIZE(r,v,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION_EQUALS_SIZE(r,v,"Vector operator+(Rectangle r, Vector v)");
        
       for(size_type i=0; i!=result.dimension(); ++i) {
         result.set_interval(i,r[i]+v(i));
@@ -732,13 +732,13 @@ namespace Ariadne {
     inline
     Geometry::Rectangle<R> 
     operator+(const Geometry::Rectangle<R>& r, 
-              const LinearAlgebra::Vector< Numeric::Interval<R> >& v)
+              const LinearAlgebra::Vector< Numeric::Interval<R> >& iv)
     {
       Geometry::Rectangle<R> result(r.dimension());
-      ARIADNE_CHECK_DIMENSION_EQUALS_SIZE(r,v,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION_EQUALS_SIZE(r,iv,"Vector operator+(Rectangle r, Vector<Interval> iv)");
       
       for(size_type i=0; i!=result.dimension(); ++i) {
-        result.set_interval(i,r[i]+v(i));
+        result.set_interval(i,r[i]+iv(i));
       }
       return result;
     }
@@ -750,7 +750,7 @@ namespace Ariadne {
               const LinearAlgebra::Vector<R>& v)
     {
       Geometry::Rectangle<R> result(r.dimension());
-      ARIADNE_CHECK_DIMENSION_EQUALS_SIZE(r,v,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION_EQUALS_SIZE(r,v,"Vector operator-(Rectangle r, Vector v)");
       
       for(size_type i=0; i!=result.dimension(); ++i) {
         result.set_interval(i,r[i]-v(i));
@@ -761,13 +761,13 @@ namespace Ariadne {
     template<class R> inline
     Geometry::Rectangle<R> 
     operator-(const Geometry::Rectangle<R>& r, 
-              const LinearAlgebra::Vector< Numeric::Interval<R> >& v)
+              const LinearAlgebra::Vector< Numeric::Interval<R> >& iv)
     {
       Geometry::Rectangle<R> result(r.dimension());
-      ARIADNE_CHECK_DIMENSION_EQUALS_SIZE(r,v,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION_EQUALS_SIZE(r,iv,"Vector operator-(Rectangle r, Vector<Interval> v)");
       
       for(size_type i=0; i!=result.dimension(); ++i) {
-        result.set_interval(i,r[i]-v(i));
+        result.set_interval(i,r[i]-iv(i));
       }
       return result;
     }

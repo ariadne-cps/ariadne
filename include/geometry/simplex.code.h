@@ -41,14 +41,14 @@ namespace Ariadne {
     Simplex<R>::Simplex(const LinearAlgebra::Matrix<R>& A)
       : Polytope<R>(A)
     {
-      check_dimension(*this,A.number_of_columns()-1,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION(*this,A.number_of_columns()-1,"Simplex::Simplex(Matrix A)");
     }
     
     template<class R>
     Simplex<R>::Simplex(const PointList<R>& v)
       : Polytope<R>(v)
     {
-      check_dimension(*this,v.size()-1,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_DIMENSION(*this,v.size()-1,"Simplex::Simplex(PointList v)");
     }
     
     template<class R>

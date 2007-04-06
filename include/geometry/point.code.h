@@ -78,7 +78,7 @@ namespace Ariadne {
       } else if(c=='[') {
         Base::read_vector(is, v, '[', ']');
       } else {
-        throw invalid_input("Invalid point input");
+        throw InvalidInput("Invalid point input");
       }
       last_size = v.size();
 

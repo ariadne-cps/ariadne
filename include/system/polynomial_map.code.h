@@ -176,7 +176,7 @@ namespace Ariadne {
     typename Monomial<R>::F
     Monomial<R>::apply(const Geometry::Point<F>& s) const 
     {
-      check_argument_dimension(*this,s,"Monomial<R>::apply(Point<R>)");
+      ARIADNE_CHECK_ARGUMENT_DIMENSION(*this,s,"Monomial<R>::apply(Point<R>)");
       result_type result=_coefficient;
       for(size_type k=0; k!=this->argument_dimension(); ++k) {
         result *= pow(s[k],_multi_index[k]);
@@ -191,7 +191,7 @@ namespace Ariadne {
     Polynomial<R>::image(const Geometry::Point<F>& s) const 
     {
       //std::cerr << "Polynomial<R>::apply(const Geometry::Point<R>& s) const " << std::endl;
-      check_argument_dimension(*this,s,"Polynomial<R>::apply(Point<R>)");
+      ARIADNE_CHECK_ARGUMENT_DIMENSION(*this,s,"Polynomial<R>::apply(Point<R>)");
       F result=0;
       for(size_type j=0; j!=_terms.size(); ++j) {
         result += _terms[j].apply(s);
@@ -205,7 +205,7 @@ namespace Ariadne {
     Geometry::Point<typename PolynomialMap<R>::F>
     PolynomialMap<R>::image(const Geometry::Point<F>& s) const 
     {
-      check_argument_dimension(*this,s,"PolynomialMap<R>::apply(Point<R>)");
+      ARIADNE_CHECK_ARGUMENT_DIMENSION(*this,s,"PolynomialMap<R>::apply(Point<R>)");
       Geometry::Point<F> result(this->result_dimension());
       for(size_type i=0; i!=this->result_dimension(); ++i) {
         result[i] = _components[i].image(s);
@@ -399,11 +399,11 @@ namespace Ariadne {
         }
         is >> c;
         if(!c=='x') {
-          throw invalid_input(__PRETTY_FUNCTION__);
+          throw InvalidInput(__PRETTY_FUNCTION__);
         }
         is >> c;
         if(!c=='_') {
-          throw invalid_input(__PRETTY_FUNCTION__);
+          throw InvalidInput(__PRETTY_FUNCTION__);
         }
         is >> i;
         is >> c;

@@ -314,9 +314,8 @@ namespace Ariadne {
       }
 
       template<class E> MatrixSlice<R>& operator=(const MatrixExpression< E >& m) {
+        ARIADNE_CHECK_MATRIX_EQUAL_SIZES(*this,m(),"MatrixSlice& MatrixSlice::operator=(MatrixExpression)");
         const E& e=m(); 
-        if(!(this->number_of_rows()==e.number_of_rows() && this->number_of_columns()==e.number_of_columns())) {
-          throw IncompatibleSizes(__PRETTY_FUNCTION__); }
         for(size_type i=0; i!=this->number_of_rows(); ++i) { 
           for(size_type j=0; j!=this->number_of_columns(); ++j) { 
             (*this)(i,j)=e(i,j); } }
@@ -339,11 +338,7 @@ namespace Ariadne {
     bool
     contains_value(const Matrix< Numeric::Interval<R> >& iA, const Matrix<R>& A) 
     {
-      if(!(A.number_of_rows()==iA.number_of_rows() 
-           && A.number_of_columns()==iA.number_of_columns())) 
-      {
-        throw IncompatibleSizes(__PRETTY_FUNCTION__);
-      }
+      ARIADNE_CHECK_MATRIX_EQUAL_SIZES(iA,A,"bool contains_value(Matrix<Interval>,Matrix<Real>)");
       for(size_type i=0; i!=A.number_of_rows(); ++i) {
         for(size_type j=0; j!=A.number_of_columns(); ++j) {
           if(!Numeric::contains_value(iA(i,j),A(i,j))) {
@@ -672,8 +667,7 @@ namespace Ariadne {
     over_approximation(const Matrix< Numeric::Interval<R> >& A)
     {
       if(A.number_of_rows()!=A.number_of_columns()) {
-        //throw NotImplemented(__PRETTY_FUNCTION__ ": Only implemented for square matrices"); 
-        throw NotImplemented(__PRETTY_FUNCTION__); 
+        ARIADNE_THROW(NotImplemented,"Matrix<Real> over_approximation(Matrix<Interval>)","A="<<A<<" (only implemented for square matrices)"); 
       }
       dimension_type n=A.number_of_rows();
       
@@ -709,45 +703,7 @@ namespace Ariadne {
     operator>>(std::istream& is, Matrix<R>& A) {
       return A.read(is); 
     }
-
-    
-/*        
-        
-    
-    
-    template<class R>
-    bool independent_rows(Matrix<R> A);
-
-    
-    template<class R>
-    bool 
-    equivalent_columns(const Matrix<R> &A, 
-                       const size_type &A_col, 
-                       const Matrix<R> &B, 
-                       const size_type &B_col);
-    
-  
-    template<class R>
-    size_type 
-    find_first_not_null_in_col(const Matrix<R> &A, 
-                               const size_type &col);
-    
-    template<class R>
-    Matrix<R> 
-    remove_null_columns_but_one(const Matrix<R> &A);
-    
-    template<class R>
-    void 
-    remove_null_columns(const Matrix<R>& A, 
-                        array<size_type>& row, 
-                        array<size_type>& col);
-
-    template<class R>
-    Matrix<R> 
-    compute_space(const Matrix<R>& SA, 
-                  array<size_type>& row,
-                  const array<size_type>& col);
-*/
+   
 
   }
 }

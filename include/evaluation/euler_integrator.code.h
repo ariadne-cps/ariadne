@@ -74,7 +74,7 @@ namespace Ariadne {
       if(verbosity>6) { std::clog << "EulerIntegrator::integration_step(VectorField,Rectangle,time_type) const" << std::endl; }
 
 
-      check_equal_dimensions(vector_field,initial_set,"EulerIntegrator::integration_step(VectorField,Rectangle,time_type) const");
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"EulerIntegrator::integration_step(VectorField,Rectangle,time_type) const");
       
       const VectorField<R>& vf(vector_field);
       Rectangle<R> r=initial_set;
@@ -112,7 +112,7 @@ namespace Ariadne {
   
       if(verbosity>6) { std::clog << "EulerIntegrator::reachability_step(VectorField,Rectangle,time_type) const" << std::endl; }
 
-      check_equal_dimensions(vector_field,initial_set(),"EulerIntegrator::reachability_step(VectorField,Rectangle,time_type) const");
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set(),"EulerIntegrator::reachability_step(VectorField,Rectangle,time_type) const");
       
       const VectorField<R>& vf(vector_field);
       Rectangle<R> r=initial_set;

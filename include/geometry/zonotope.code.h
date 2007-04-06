@@ -602,64 +602,64 @@ namespace Ariadne {
     
     template<class RC,class RG> 
     Zonotope<typename Numeric::traits<RC>::arithmetic_type,RG>
-    minkowski_sum(const Zonotope<RC,RG>& A, const Zonotope<RC,RG>& B)
+    minkowski_sum(const Zonotope<RC,RG>& z1, const Zonotope<RC,RG>& z2)
     {
       typedef typename Numeric::traits<RC>::arithmetic_type F;
       
-      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(z1,z2,"Zonotope minkowski_sum(Zonotope z1, Zonotope z2)");
       
-      return Zonotope<F,RG>(Geometry::minkowski_sum(A.centre(),B.centre()),
-                            LinearAlgebra::concatenate_columns(A.generators(),B.generators()));
+      return Zonotope<F,RG>(Geometry::minkowski_sum(z1.centre(),z2.centre()),
+                            LinearAlgebra::concatenate_columns(z1.generators(),z2.generators()));
     }
      
     
     template<class RC,class RG> 
     Zonotope<typename Numeric::traits<RC>::arithmetic_type,RG> 
-    minkowski_difference(const Zonotope<RC,RG>& A, const Zonotope<RC,RG>& B)
+    minkowski_difference(const Zonotope<RC,RG>& z1, const Zonotope<RC,RG>& z2)
     {
       typedef typename Numeric::traits<RC>::arithmetic_type F;
      
-      check_equal_dimensions(A,B,__PRETTY_FUNCTION__);
-      
-      return Zonotope<F,RG>(Geometry::minkowski_difference(A.centre(),B.centre()),
-                            LinearAlgebra::concatenate_columns(A.generators(),B.generators()));
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(z1,z2,"Zonotope minkowski_difference(Zonotope z1, Zonotope z2)");
+       
+      return Zonotope<F,RG>(Geometry::minkowski_difference(z1.centre(),z2.centre()),
+                            LinearAlgebra::concatenate_columns(z1.generators(),z2.generators()));
     }
     
     
     
     template<class R,class RC,class RG>
     Zonotope<typename Numeric::traits<R,RC>::arithmetic_type,typename Numeric::traits<R,RG>::arithmetic_type> 
-    minkowski_sum(const Rectangle<R>& A, const Zonotope<RC,RG>& B) 
+    minkowski_sum(const Rectangle<R>& r, const Zonotope<RC,RG>& z) 
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
-      return Geometry::minkowski_sum(Zonotope<F>(A),B);
-    }
-
-    
-    template<class R,class RC,class RG>
-    Zonotope<typename Numeric::traits<R,RC>::arithmetic_type,typename Numeric::traits<R,RG>::arithmetic_type> 
-    minkowski_sum(const Zonotope<RC,RG>& A, const Rectangle<R>& B) 
-    {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-      return Geometry::minkowski_sum(A,Zonotope<F>(B));
+      return Geometry::minkowski_sum(Zonotope<F>(r),z);
     }
 
     
     template<class R,class RC,class RG>
     Zonotope<typename Numeric::traits<R,RC>::arithmetic_type,typename Numeric::traits<R,RG>::arithmetic_type> 
-    minkowski_difference(const Rectangle<R>& A, const Zonotope<RC,RG>& B) 
+    minkowski_sum(const Zonotope<RC,RG>& z, const Rectangle<R>& r) 
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
-      return Geometry::minkowski_difference(Zonotope<F>(A),B);
+      return Geometry::minkowski_sum(z,Zonotope<F>(r));
     }
 
     
     template<class R,class RC,class RG>
     Zonotope<typename Numeric::traits<R,RC>::arithmetic_type,typename Numeric::traits<R,RG>::arithmetic_type> 
-    minkowski_difference(const Zonotope<RC,RG>& A, const Rectangle<R>& B) 
+    minkowski_difference(const Rectangle<R>& r, const Zonotope<RC,RG>& z) 
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
-      return Geometry::minkowski_difference(A,Zonotope<F>(B));
+      return Geometry::minkowski_difference(Zonotope<F>(r),z);
+    }
+
+    
+    template<class R,class RC,class RG>
+    Zonotope<typename Numeric::traits<R,RC>::arithmetic_type,typename Numeric::traits<R,RG>::arithmetic_type> 
+    minkowski_difference(const Zonotope<RC,RG>& z, const Rectangle<R>& r) 
+    {
+      typedef typename Numeric::traits<R>::arithmetic_type F;
+      return Geometry::minkowski_difference(z,Zonotope<F>(r));
     }
     
     
@@ -866,7 +866,7 @@ namespace {
       if(Geometry::verbosity>7) { std::clog << __PRETTY_FUNCTION__ << std::endl; }
       if(Geometry::verbosity>8) { std::clog << z << " " << r << std::endl; }
       
-      check_equal_dimensions(z,r,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(z,r,"tribool disjoint(Zonotope<Rational> z, Rectangle<Rational> r)");
       dimension_type d=z.dimension();
       size_type m=z.number_of_generators();
     
@@ -957,7 +957,7 @@ namespace {
     disjoint_exact(const Zonotope<Rational,Rational>& z1, const Zonotope<Rational,Rational>& z2)
     {
       typedef Numeric::Rational Q;
-      check_equal_dimensions(z1,z2,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(z1,z2,"tribool disjoint(Zonotope<Rational> z1, Zonotope<Rational> z2)");
       
       dimension_type d=z1.dimension();
       Q one=1;
@@ -1038,7 +1038,7 @@ namespace {
       //std::clog << "Zonotope<RC,RG>::contains(const Point<R>& )" << std::endl;
       //typedef typename Numeric::traits<R,R>::arithmetic_type Q;
       typedef Rational Q;
-      check_equal_dimensions(z,pt,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(z,pt,"tribool contains(Zonotope<Rational> z, Point<Rational> pt)");
       dimension_type d=z.dimension();
       dimension_type m=z.number_of_generators();
       

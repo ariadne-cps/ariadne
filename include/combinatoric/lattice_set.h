@@ -34,6 +34,7 @@
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/iterator/iterator_adaptor.hpp>
 
+#include "../base/stlio.h"
 #include "../base/array.h"
 #include "../base/iterator.h"
 #include "../base/types.h"
@@ -207,7 +208,7 @@ namespace Ariadne {
       explicit LatticeBlock(dimension_type n=0) : _lower(n), _upper(n) { }
       /*!\brief Construct a lattice rectangle specified by lower and upper corners. */
       explicit LatticeBlock(const IndexArray& l, const IndexArray& u)
-        : _lower(l), _upper(u) { check_equal_array_sizes(l,u,__PRETTY_FUNCTION__); }
+        : _lower(l), _upper(u) { ARIADNE_CHECK_EQUAL_ARRAY_SIZES(l,u,"LatticeBlock::LatticeBlock(IndexArray,IndexArray)"); }
       /*!\brief Construct a lattice rectangle defined by a string literal. */
       explicit LatticeBlock(const std::string& s);
 
@@ -388,7 +389,7 @@ namespace Ariadne {
 
       /*! \brief Adjoins a LatticeCell to the set. */
       void adjoin(const LatticeCell& c) { 
-        check_equal_dimensions(*this,c,__PRETTY_FUNCTION__);
+        ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,c,"void LatticeCellListSet::adjoin(LatticeCell c)");
         this->_list.push_back(c.position()); 
       }
       /*! \brief Adjoins all cells in a LatticeBlock to the set. */
@@ -486,6 +487,12 @@ namespace Ariadne {
            this->_mask[this->index(c)]=false;
         }
       }
+    
+      /*! \brief Removes a LatticeCellListSet from the set. */
+      void remove(const LatticeCellListSet& cls);
+    
+      /*! \brief Removes a LatticeMaskSet from the set. */
+      void remove(const LatticeMaskSet& ms);
     
       /*! \brief Adjoins a LatticeCell to the set. */
       void adjoin(const LatticeCell& c) { 

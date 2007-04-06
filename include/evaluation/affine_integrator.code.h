@@ -274,7 +274,7 @@ Ariadne::Evaluation::AffineIntegrator<R>::reachability_step(
   if(verbosity>6) { std::clog << "AffineIntegrator::reachability_step(AffineVectorField,Zonotope<Interval>,time_type) const" << std::endl; }
 
 
-  check_equal_dimensions(vector_field,initial_set);
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"AffineIntegrator::reachability_step(AffineVectorField,Zonotope<Interval>,Time)");
 
   const AffineVectorField<R>& avf(vector_field);
   Zonotope<I> iz=initial_set;

@@ -30,6 +30,9 @@
 
 #include <stdexcept>
 
+#include "../base/exceptions.h"
+#include "../geometry/exceptions.h"
+
 namespace Ariadne {
   namespace Combinatoric {
       

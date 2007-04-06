@@ -44,7 +44,7 @@ namespace Ariadne {
     Geometry::Point<typename AffineMap<R>::F>
     AffineMap<R>::image(const Geometry::Point<F>& pt) const
     {
-      check_argument_dimension(*this,pt,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_ARGUMENT_DIMENSION(*this,pt,"Point AffineMap::image(Point pt)");
       LinearAlgebra::Vector<F> image(this->A()*LinearAlgebra::Vector<F>(pt.position_vector())+this->b());
       return Geometry::Point<F>(image);
     }
@@ -54,9 +54,7 @@ namespace Ariadne {
     Geometry::Zonotope<typename AffineMap<R>::F>
     AffineMap<R>::image(const Geometry::Zonotope<F>& z) const
     {
-      //std::cerr << __PRETTY_FUNCTION__ << std::endl;
-
-      check_argument_dimension(*this,z,__PRETTY_FUNCTION__);
+      ARIADNE_CHECK_ARGUMENT_DIMENSION(*this,z,"Zonotope AffineMap::image(Zonotope)");
       Geometry::Point<F> c=z.centre();
       LinearAlgebra::Matrix<F> G=z.generators();
       const LinearAlgebra::Matrix<R>& A=this->A();

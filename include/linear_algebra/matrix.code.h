@@ -104,7 +104,9 @@ namespace Ariadne {
     template<class R>
     Matrix<R>
     Matrix<R>::concatenate_columns(const Matrix<R>& A1, const Matrix<R>& A2) {
-      if(!(A1.number_of_rows()==A2.number_of_rows())) { throw IncompatibleSizes(__PRETTY_FUNCTION__); }
+      if(!(A1.number_of_rows()==A2.number_of_rows())) { 
+        ARIADNE_THROW(IncompatibleSizes,"Matrix concatenate_columns(Matrix,Matrix)","A1="<<A1<<", A2="<<A2); 
+      }
       LinearAlgebra::Matrix<R> result(A1.number_of_rows(),A1.number_of_columns()+A2.number_of_columns());
       for(size_type i=0; i!=result.number_of_rows(); ++i) {
         for(size_type j=0; j!=A1.number_of_columns(); ++j) {
@@ -179,7 +181,9 @@ namespace Ariadne {
           Matrix<R>& A=*this;
           A=Matrix<R>(v.size(),v.front().size());
           for(size_type i=0; i!=A.number_of_rows(); ++i) {
-            check_size(v[i],A.number_of_columns(),__PRETTY_FUNCTION__);
+            if(v[i].size()!=A.number_of_columns()) {
+              ARIADNE_THROW(InvalidInput,"Matrix::read(istream&)","row[0].size()="<<v[0].size()<<", row["<<i<<"].size()="<<v[i].size());
+            }
             for(size_type j=0; j!=A.number_of_columns(); ++j) {
               A(i,j)=v[i][j];
             }
@@ -187,203 +191,10 @@ namespace Ariadne {
         }
       }
       else {
-        std::cerr << "c=" << c << std::endl;
-        throw invalid_input("Matrix<R>");
+        ARIADNE_THROW(InvalidInput,"Matrix::read(istream&)"," separator c="<<c);
       }
       return is;
     }
-
-
-
-
-
-    // FIXME:
-    // The following functions are only used by the Zonotope class.
-    // Since they are not very general, we should probably remove 
-    // many of these operations.
-    // Also note that many algorithms can probably be better implemented
-    // by using LU or QR factorizations.
-
-    template<class R>
-    bool
-    independent_rows(Matrix<R> A)
-    {
-     const size_type rows = A.number_of_rows(),cols = A.number_of_columns();
-     size_type i,j,i2,j2;
-
-      if (rows > cols) return false;
-
-      for ( i=0; i<rows; i++) {
-        j=0;
-        while (A(i,j)==0) {
-          j++;
-          if (j >= cols) return false;
-        }
-        for (i2=i+1; i2<rows; i2++) {
-          for (j2=0; j2<cols; j2++) {
-            A(i2,j2)=(A(i2,j2)*A(i,j) - A(i,j2)*A(i2,j));
-          }
-        }
-      }
-
-      return true;
-    }
-
-
-    template<class R>
-    bool
-    equivalent_columns(const Matrix<R> &A, const size_type &A_col,
-                       const Matrix<R> &B, const size_type &B_col)
-    {
-      if (A.number_of_rows()!=B.number_of_rows()) {
-        throw std::domain_error("The two Matrix have a diffentent number of rows");
-      }
-      for (size_type i=0; i<A.number_of_rows(); i++) {
-        if (A(i,A_col)!=B(i,B_col)) {
-          return false;
-        }
-      }
-      return true;
-    }
-
-
-    template<class R>
-    size_type
-    find_first_not_null_in_col(const Matrix<R> &A,
-                               const size_type &col)
-    {
-      size_type i=0;
-
-      while ( (i<A.number_of_rows()) && (A(i,col)==0) ) {
-        ++i;
-      }
-      return i;
-
-    }
-
-
-    template<class R>
-    Matrix<R>
-    remove_null_columns_but_one(const Matrix<R> &A)
-    {
-      size_type directions=0;
-      size_type rows=A.number_of_rows();
-      size_type cols=A.number_of_columns();
-      array<bool> not_null(cols);
-
-      if (cols<2) {
-        return A;
-      }
-
-      for(size_type j=0; j!=cols; ++j) {
-        not_null[j]=(find_first_not_null_in_col(A,j)<rows);
-        if (not_null[j]) {
-          directions++;
-        }
-      }
-
-      Matrix<R> new_A(rows,std::max((size_t)1,directions));
-
-      size_type j2=0;
-      for(size_type j=0; j!=cols; ++j) {
-        if (not_null[j]) {
-          for(size_type i=0; i!=rows; ++i) {
-            new_A(i,j2)=A(i,j);
-          }
-          j2++;
-        }
-      }
-
-      return new_A;
-    }
-
-
-    template<class R>
-    void
-    remove_null_columns(const Matrix<R> &A,
-                        array<size_type> &row, array<size_type> &col)
-    {
-      using std::swap;
-
-      size_type i,j, columns=col.size(), rows=row.size();
-      size_type new_columns=columns;
-
-      j=columns-1;
-      while (j>rows) {
-        i=0;
-        while ((i<rows)&&(A(row[i],col[j])==0))
-          i++;
-
-        if (i==rows) {
-          swap(col[j],col[rows+1]);
-          new_columns--;
-        }
-
-        j--;
-      }
-
-      if (new_columns<columns) {
-        array<size_type> p_col(new_columns);
-
-        for (size_type j=0; j<new_columns; j++)
-          p_col[j]=col[j];
-
-        col=p_col;
-      }
-    }
-
-
-    template<class R>
-    Matrix<R>
-    compute_space(const Matrix<R> &SA,
-                  array<size_type> &row,const array<size_type> &col)
-    {
-      size_type cols=col.size(), rows=row.size();
-
-      if(cols<rows) { throw IncompatibleSizes(__PRETTY_FUNCTION__); }
-
-      size_type SA_cols=SA.number_of_columns(), A_rows=SA_cols-rows;
-      size_type i,j,k,j2;
-
-      Matrix<R> A(A_rows,SA_cols);
-
-      k=0;
-      for (i=0; i<SA_cols; i++) {
-        j=0;
-        while ((j<cols)&&(col[j]!=i))
-          j++;
-
-        if (j==cols) {
-          A(k,i)=1;
-          k++;
-        }
-      }
-
-      R aux;
-
-      for (i=rows; i<cols; i++) {
-        A(k,col[i])=1;
-
-        A(k,col[rows-1])=-SA(row[rows-1], col[i])/SA(row[rows-1],col[rows-1]);
-
-        j=rows;
-        while (j>0) {
-          j--;
-
-          aux=-SA(row[j], col[i]);
-          for (j2=j+1; j2<rows; j2++)
-            aux-=SA(row[j], col[j2])*A(k,col[j2]);
-
-          A(k,col[j])=aux/SA(row[j], col[j]);
-        }
-      }
-
-      return A;
-    }
-
-
-
-
 
 
   }

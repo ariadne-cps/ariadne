@@ -35,6 +35,8 @@ using namespace Ariadne::Geometry;
 #include <boost/python.hpp>
 using namespace boost::python;
 return_value_policy<reference_existing_object> return_reference_existing_object;
+return_value_policy<copy_const_reference> return_copy_const_reference;
+return_value_policy<manage_new_object> return_manage_new_object;
 
 template<class HS, class T> 
 inline void hybrid_set_new_location(HS& s, location_type q, const T& t) {
@@ -44,6 +46,27 @@ inline void hybrid_set_new_location(HS& s, location_type q, const T& t) {
 template<class HS, class A> 
 inline void hybrid_set_set_item(HS& hs, location_type id, const A& x) {
   hs[id]=x;
+}
+
+template<class R> inline 
+SetInterface<R>& hybrid_set_get_reference(HybridSet<R>& hs, location_type id) {
+  //return static_cast<SetInterface<R>&>(hs[id]);
+  SetReference<R> hsref=hs[id];
+  return static_cast<SetInterface<R>&>(hsref);
+}
+
+template<class R> inline 
+SetInterface<R>* hybrid_set_get_pointer(HybridSet<R>& hs, location_type id) {
+  std::cerr << "id="<<id<<std::endl;
+  std::cerr << "hs="<<hs<<std::endl;
+  SetReference<R> hsref=hs[id];
+  std::cerr << "hsref="<<hsref<<std::endl;
+  return &static_cast<SetInterface<R>&>(hsref);
+}
+
+template<class R> inline 
+SetInterface<R>* hybrid_set_get_cloned_pointer(HybridSet<R>& hs, location_type id) {
+  return hs[id].clone();
 }
 
 template<class HS> inline 
@@ -71,10 +94,32 @@ void export_hybrid_set()
   ;
 
 
+  class_<HybridLocation>("HybridLocation",init<id_type,dimension_type>())
+    .def("id",&HybridLocation::id)
+    .def("dimension",&HybridLocation::dimension)
+    .def(self_ns::str(self))
+  ;
+
+  class_<HybridSpace>("HybridSpace",init<>())
+    .def(init< std::map<location_type,dimension_type> >())
+    .def("new_location",(void(HybridSpace::*)(id_type,dimension_type))&HybridSpace::new_location)
+    .def("new_location",(void(HybridSpace::*)(const HybridLocation&))&HybridSpace::new_location)
+    .def("__len__",&HybridSpace::number_of_locations)
+    .def("__getitem__", &HybridSpace::operator[])
+    .def("has_location",&HybridSpace::has_location)
+    .def("dimension",&HybridSpace::dimension)
+    .def("__iter__", iterator<HybridSpace>())
+    .def(self_ns::str(self))
+  ;
+  
   class_< HybridSet<R> >("HybridSet",init<>())
     .def("__len__",&HybridSet<R>::number_of_locations)
+    .def("new_location",&hybrid_set_new_location< HybridSet<R>, Rectangle<R> >)
+    .def("new_location",&hybrid_set_new_location< HybridSet<R>, Polyhedron<R> >)
+    .def("new_location",&hybrid_set_new_location< HybridSet<R>, SetInterface<R> >)
     .def("locations",&HybridSet<R>::locations)
-    .def("__getitem__", &hybrid_set_get_item< HybridSet<R> >, return_reference_existing_object)
+    //.def("__getitem__", &hybrid_set_get_cloned_pointer<R>, return_manage_new_object)
+    .def("__getitem__", &hybrid_set_get_pointer<R>, return_reference_existing_object)
     .def(self_ns::str(self))
   ;
   

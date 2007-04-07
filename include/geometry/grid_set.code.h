@@ -39,6 +39,8 @@
 
 #include "../geometry/set_interface.h"
 
+#include "../output/logging.h"
+
 namespace Ariadne {
   namespace Geometry {
 
@@ -190,6 +192,7 @@ namespace Ariadne {
       tribool tb;
       Rectangle<R>* r=0;
       Grid<R>* g=0;
+      FiniteGrid<R>* fg=0;
       GridCell<R>* gc=0;
       GridBlock<R>* gb=0;
       
@@ -199,6 +202,8 @@ namespace Ariadne {
       tb=Geometry::subset(*gc,*gb);
       tb=Geometry::subset(*gb,*gb);
 
+      *gb=Geometry::over_approximation(*r,*g);
+      *gb=Geometry::over_approximation(*r,*fg);
       *gb=Geometry::under_approximation(*r,*g);
     }
     
@@ -248,10 +253,8 @@ namespace Ariadne {
       return *this;
     }
 
-    
 
     
-
     template<class R>
     GridCellListSet<R>::operator ListSet< Rectangle<R> >() const
     {
@@ -262,6 +265,64 @@ namespace Ariadne {
       return result;
     }
 
+    
+    template<class R>
+    GridCellListSet<R>*
+    GridCellListSet<R>::clone() const
+    {
+      return new GridCellListSet<R>(*this);
+    }
+
+    
+    template<class R>
+    tribool
+    GridCellListSet<R>::contains(const Point<R>& pt) const
+    {
+      return !Geometry::disjoint(*this,Rectangle<R>(pt));
+    }
+
+
+    template<class R>
+    tribool
+    GridCellListSet<R>::superset(const Rectangle<R>& r) const
+    {
+      return Geometry::subset(r,*this);
+    }
+
+
+    template<class R>
+    tribool
+    GridCellListSet<R>::intersects(const Rectangle<R>& r) const
+    {
+      return !Geometry::disjoint(*this,r);
+    }
+
+
+    template<class R>
+    tribool
+    GridCellListSet<R>::disjoint(const Rectangle<R>& r) const
+    {
+      return Geometry::disjoint(*this,r);
+    }
+
+
+    template<class R>
+    tribool
+    GridCellListSet<R>::subset(const Rectangle<R>& r) const
+    {
+      return Geometry::subset(*this,r);
+    }
+
+    
+    template<class R> 
+    Rectangle<R> 
+    GridCellListSet<R>::bounding_box() const 
+    {
+      return GridBlock<R>(this->grid(),this->lattice_set().bounding_block()); 
+    }
+     
+
+    
     
     template<class R>
     void
@@ -277,23 +338,31 @@ namespace Ariadne {
     {
       tribool tb;
       Zonotope<R>* z=0;
+      Zonotope<Numeric::Interval<R>,R>* ez=0;
       Zonotope< Numeric::Interval<R> >* iz=0;
-      Polytope<R>* ply=0;
-      Polyhedron<R>* phd=0;
+      Polytope<R>* pltp=0;
+      Polyhedron<R>* plhd=0;
       Grid<R>* g=0;
+      FiniteGrid<R>* fg=0;
       GridBlock<R>* gb=0;
       GridCellListSet<R>* gcls=0;
 
       tb=Geometry::subset(*gcls,*gb);
       
+      *gcls=Geometry::over_approximation(*pltp,*g);
+      *gcls=Geometry::over_approximation(*plhd,*g);
       *gcls=Geometry::over_approximation(*z,*g);
-      *gcls=Geometry::over_approximation(*ply,*g);
-      *gcls=Geometry::over_approximation(*phd,*g);
+      *gcls=Geometry::over_approximation(*ez,*g);
       *gcls=Geometry::over_approximation(*iz,*g);
 
+      *gcls=Geometry::over_approximation(*pltp,*fg);
+      *gcls=Geometry::over_approximation(*z,*fg);
+      *gcls=Geometry::over_approximation(*ez,*fg);
+      *gcls=Geometry::over_approximation(*iz,*fg);
+
       *gcls=Geometry::under_approximation(*z,*g);
-      *gcls=Geometry::under_approximation(*ply,*g);
-      *gcls=Geometry::under_approximation(*phd,*g);
+      *gcls=Geometry::under_approximation(*pltp,*g);
+      *gcls=Geometry::under_approximation(*plhd,*g);
     }
 
 
@@ -364,6 +433,14 @@ namespace Ariadne {
       : _grid_ptr(gcls._grid_ptr),
         _lattice_set(gcls.lattice_set())
     {
+    }
+  
+  
+    template<class R>
+    Rectangle<R>
+    GridMaskSet<R>::extent() const
+    {
+      return this->bounds();
     }
   
   
@@ -440,6 +517,7 @@ namespace Ariadne {
       tribool tb;
       Point< Numeric::Interval<R> >* ipt=0;
       Rectangle<R>* r=0;
+      Polyhedron<R>* plhd=0;
       ListSet< Rectangle<R> >* rls=0;
       ListSet< Zonotope<R> >* zls=0;
       Grid<R>* g=0;
@@ -458,6 +536,8 @@ namespace Ariadne {
        
       tb=Geometry::overlap(*gb,*gms);
       tb=Geometry::overlap(*gms,*gb);
+      tb=Geometry::overlap(*gcls,*gms);
+      tb=Geometry::overlap(*gms,*gcls);
       tb=Geometry::overlap(*gms,*gms);
     
       tb=Geometry::subset(*gc,*gms);
@@ -476,6 +556,7 @@ namespace Ariadne {
 
       *gb=Geometry::over_approximation(*ipt,*g);
   
+      *gms=Geometry::over_approximation(*plhd,*fg);
       *gms=Geometry::over_approximation(*rls,*fg);
       *gms=Geometry::over_approximation(*zls,*fg);
       *gms=Geometry::over_approximation(*gms,*fg);
@@ -568,6 +649,22 @@ namespace Ariadne {
     overlap(const GridMaskSet<R>& gms, const GridBlock<R>& gb) {
       ARIADNE_CHECK_SAME_GRID(gms,gb,"tribool overlap(GridMaskSet gms, GridBlock gb)");
       return overlap(gms.lattice_set(),gb.lattice_set());
+    }
+
+
+    template<class R>
+    tribool
+    overlap(const GridCellListSet<R>& A, const GridMaskSet<R>& B) {
+      ARIADNE_CHECK_SAME_GRID(A,B,"overlap(GridCellListSet<R>,GridMaskSet<R>)");
+      return overlap(A.lattice_set(),B.lattice_set());
+    }
+
+
+    template<class R>
+    tribool
+    overlap(const GridMaskSet<R>& A, const GridCellListSet<R>& B) {
+      ARIADNE_CHECK_SAME_GRID(A,B,"overlap(GridMaskSet<R>,GridCellListSet<R>)");
+      return overlap(A.lattice_set(),B.lattice_set());
     }
 
 
@@ -860,7 +957,7 @@ namespace Ariadne {
     GridBlock<R>
     under_approximation(const Rectangle<R>& r, const Grid<R>& g) 
     {
-      
+      ARIADNE_LOG(4,"GridBlock under_approximation(Rectangle r, Grid g)\n") 
       if(r.empty()) {
         return GridBlock<R>(g);
       }
@@ -955,6 +1052,43 @@ namespace Ariadne {
 
     template<class R>
     GridCellListSet<R>
+    over_approximation(const Zonotope<Numeric::Interval<R>,R>& z, const Grid<R>& g) 
+    {
+      if(verbosity>7) { std::clog << "GridCellListSet over_approximation(Zonotope<Interval,Float>, Grid)" << std::endl; }
+      GridCellListSet<R> result(g);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(z,g,"over_approximation(Zonotope<Interval,Float>,Grid)");
+      if(z.empty()) {
+        return result; 
+      }
+      
+      Point< Numeric::Interval<R> > c=z.centre();
+      LinearAlgebra::Matrix<R> G=z.generators();
+      
+      Point<R> ac=approximate_value(c);
+      LinearAlgebra::Vector< Numeric::Interval<R> > e=c-ac;
+      
+      Zonotope<R> az(ac,G);
+      
+     
+      Rectangle<R> bb=z.bounding_box();
+
+      GridBlock<R> gbb=over_approximation(bb,g);
+      Combinatoric::LatticeBlock block=gbb.lattice_set();
+
+      for(Combinatoric::LatticeBlock::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
+        GridCell<R> cell(g,*iter);
+        if(disjoint(Rectangle<R>(cell)+e,az)) {
+        } else {
+          result.adjoin(cell);
+        }
+      }
+
+      return result;
+    }
+
+
+    template<class R>
+    GridCellListSet<R>
     over_approximation(const Zonotope< Numeric::Interval<R> >& z, const Grid<R>& g) 
     {
       if(verbosity>7) { std::clog << "GridCellListSet over_approximation(Zonotope<Interval>, Grid g)" << std::endl; }
@@ -991,10 +1125,15 @@ namespace Ariadne {
       return result;
     }
 
+
+
+
+
     template<class R>
     GridCellListSet<R>
     under_approximation(const Zonotope<R>& z, const Grid<R>& g) 
     {
+      ARIADNE_LOG(4,"GridCellListSet under_approximation(Zonotope z, Grid g)\n") 
       GridCellListSet<R> result(g);
       ARIADNE_CHECK_EQUAL_DIMENSIONS(z,g,"under_approximation(Zonotope<R>,Grid<R>)");
       if(z.empty()) {
@@ -1018,6 +1157,7 @@ namespace Ariadne {
     GridCellListSet<R>
     under_approximation(const Polytope<R>& p, const Grid<R>& g) 
     {
+      ARIADNE_LOG(4,"GridCellListSet under_approximation(Polytope p, Grid g)\n") 
       GridCellListSet<R> result(g);
       ARIADNE_CHECK_EQUAL_DIMENSIONS(p,g,"under_approximation(Polytope<R>,Grid<R>)");
       if(p.empty()) {
@@ -1041,6 +1181,7 @@ namespace Ariadne {
     GridCellListSet<R>
     under_approximation(const Polyhedron<R>& p, const Grid<R>& g) 
     {
+      ARIADNE_LOG(4,"GridCellListSet under_approximation(Polyhedron p, Grid g)\n") 
       GridCellListSet<R> result(g);
       ARIADNE_CHECK_EQUAL_DIMENSIONS(p,g,"under_approximation(Polyhedron<R>,Grid<R>)");
       
@@ -1057,30 +1198,88 @@ namespace Ariadne {
       return result;
     }
 
+    template<class R>
+    GridBlock<R>
+    over_approximation(const Rectangle<R>& r, const FiniteGrid<R>& fg) 
+    {
+      return over_approximation(r,fg.grid());
+    }
     
+    template<class R>
+    GridCellListSet<R>
+    over_approximation(const Zonotope<Numeric::Interval<R>,R>& z, const FiniteGrid<R>& fg) 
+    {
+      return over_approximation(z,fg.grid());
+    }
+    
+    template<class R>
+    GridCellListSet<R>
+    over_approximation(const Zonotope< Numeric::Interval<R> >& z, const FiniteGrid<R>& fg) 
+    {
+      return over_approximation(z,fg.grid());
+    }
+    
+    template<class R>
+    GridCellListSet<R>
+    over_approximation(const Zonotope<R>& z, const FiniteGrid<R>& fg) 
+    {
+      return over_approximation(z,fg.grid());
+    }
+    
+    template<class R>
+    GridCellListSet<R>
+    over_approximation(const Polytope<R>& p, const FiniteGrid<R>& fg) 
+    {
+      return over_approximation(p,fg.grid());
+    }
     
     template<class R>
     GridMaskSet<R>
-    over_approximation(const GridMaskSet<R>& gms, const FiniteGrid<R>& g) 
+    over_approximation(const Polyhedron<R>& p, const FiniteGrid<R>& fg) 
     {
-      GridMaskSet<R> result(g);
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(gms,g,"over_approximation(GridMaskSet<R>,FiniteGrid<R>)");
+      GridMaskSet<R> result(fg);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(p,fg,"over_approximation(Polyhedron p, FiniteGrid fg)");
+      
+      if(!subset(p,fg.extent())) { 
+        result.adjoin_unbounded_cell(); 
+      }
+      Polyhedron<R> plhd=closed_intersection(p,fg.extent());
+      GridBlock<R> block=over_approximation(plhd.bounding_box(),fg.grid());
+      for(typename GridBlock<R>::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
+        const GridCell<R>& cell=*iter;
+        if(disjoint(Rectangle<R>(cell),p)) {
+        } else {
+          result.adjoin(cell);
+        }
+      }
+
+      return result;
+    }
+
+
+
+    template<class R>
+    GridMaskSet<R>
+    over_approximation(const GridMaskSet<R>& gms, const FiniteGrid<R>& fg) 
+    {
+      GridMaskSet<R> result(fg);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(gms,fg,"over_approximation(GridMaskSet gms, FiniteGrid fg)");
 
       for(typename GridMaskSet<R>::const_iterator iter=gms.begin(); iter!=gms.end(); ++iter) {
-        result.adjoin(over_approximation(Rectangle<R>(*iter),g.grid()));
+        result.adjoin(over_approximation(Rectangle<R>(*iter),fg.grid()));
       }
       return result;
     }
     
     template<class R>
     GridMaskSet<R>
-    over_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& g) 
+    over_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& fg) 
     {
-      GridMaskSet<R> result(g);
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(pts,g,"over_approximation(PartitionTreeSet<R>,FiniteGrid<R>)");
+      GridMaskSet<R> result(fg);
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(pts,fg,"over_approximation(PartitionTreeSet pts, FiniteGrid fg)");
 
       for(typename PartitionTreeSet<R>::const_iterator iter=pts.begin(); iter!=pts.end(); ++iter) {
-        result.adjoin(over_approximation(Rectangle<R>(*iter),g.grid()));
+        result.adjoin(over_approximation(Rectangle<R>(*iter),fg.grid()));
       }
       return result;
     }
@@ -1116,12 +1315,13 @@ namespace Ariadne {
 
     template<class R>
     GridMaskSet<R>
-    under_approximation(const GridMaskSet<R>& gms, const FiniteGrid<R>& g) 
+    under_approximation(const GridMaskSet<R>& gms, const FiniteGrid<R>& fg) 
     {
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(gms,g,"under_approximation(GridMaskSet<R>,FiniteGrid<R>)");
+      ARIADNE_LOG(4,"GridMaskSet under_approximation(GridMaskSet gms, FiniteGrid fg)\n") 
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(gms,fg,"under_approximation(GridMaskSet<R>,FiniteGrid<R>)");
       
-      GridMaskSet<R> result(g);
-      GridMaskSet<R> bb(g);
+      GridMaskSet<R> result(fg);
+      GridMaskSet<R> bb(fg);
       bb.adjoin(bb.bounds());
       Rectangle<R> r;
       
@@ -1137,8 +1337,9 @@ namespace Ariadne {
 
     template<class R>
     GridMaskSet<R>
-    under_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& g) 
+    under_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& fg) 
     {
+      ARIADNE_LOG(4,"GridMaskSet under_approximation(PartitionTreeSet gms, FiniteGrid fg)\n") 
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
@@ -1146,16 +1347,19 @@ namespace Ariadne {
     GridMaskSet<R>
     under_approximation(const SetInterface<R>& s, const FiniteGrid<R>& fg) 
     {
+      ARIADNE_LOG(4,"GridMaskSet under_approximation(SetInterface s, FiniteGrid fg)\n") 
       GridMaskSet<R> result(fg);
       GridBlock<R> gb(fg.grid(),fg.lattice_block());
       Rectangle<R> r;
+      ARIADNE_LOG(5,"  testing cells in "<<gb<<"\n")
       for(typename GridBlock<R>::const_iterator gb_iter=gb.begin();
           gb_iter!=gb.end(); ++gb_iter)
       {
         r=*gb_iter;
         if(s.superset(r)) {
-          result.adjoin(fg);
+          result.adjoin(*gb_iter);
         }
+        ARIADNE_LOG(6,"s.superset("<<r<<")="<<s.superset(r)<<"\n");
       }
       return result;
     }
@@ -1195,7 +1399,13 @@ namespace Ariadne {
     std::ostream&
     GridBlock<R>::write(std::ostream& os) const 
     {
-      return os << Rectangle<R>(*this);
+      os << "GridBlock(\n";
+      os << "  grid=" << this->grid() << ",\n";
+      os << "  size=" << this->lattice_set().size() << ",\n";
+      os << "  lattice_set=" << this->lattice_set();
+      os << "  rectangle=" << Rectangle<R>(*this);
+      os << ")" << std::endl;
+      return os;
     }
 
     
@@ -1203,11 +1413,11 @@ namespace Ariadne {
     std::ostream&     
     GridCellListSet<R>::write(std::ostream& os) const 
     {
-      os << "GridCellListSet<" << Numeric::name<R>() << ">(\n";
-      os << "  grid=" << this->grid() << ",\n";
-      os << "  size=" << this->size() << ",\n";
-      os << "  lattice_set=" << this->lattice_set();
-      os << ")" << std::endl;
+      os << "GridCellListSet("
+         << " grid=" << this->grid() << ","
+         << " size=" << this->size()
+      //os << "  lattice_set=" << this->lattice_set();
+         << " )" << std::endl;
       return os;
     }
 
@@ -1217,12 +1427,13 @@ namespace Ariadne {
     std::ostream& 
     GridMaskSet<R>::write(std::ostream& os) const 
     {
-      os << "GridMaskSet<" << Numeric::name<R>() << ">("<< std::endl;
+      os << "GridMaskSet("<< std::endl;
       os << "  grid=" << this->grid() << "," << std::endl;
-      os << "  bounds=" << this->bounds() << "," << std::endl;
+      os << "  block=" << this->block() << "," << std::endl;
+      os << "  extent=" << Rectangle<R>(this->bounds()) << "," << std::endl;
       os << "  size=" << this->size() << "," << std::endl;
       os << "  capacity=" << this->capacity() << "," << std::endl;
-      os << "  mask=" << this->mask() << std::endl;
+      //      os << "  mask=" << this->mask() << std::endl;
       os << ")\n";
       return os;
     }

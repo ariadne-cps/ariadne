@@ -1,5 +1,5 @@
 /***************************************************************************
- *            python/export_rectangular_set.cc
+ *            python/export_empty_set.cc
  *
  *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
@@ -23,33 +23,28 @@
 
 #include "python/python_float.h"
 
-#include "geometry/rectangular_set.h"
+#include "geometry/empty_set.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
 template<class R>
-void export_rectangular_set() 
+void export_empty_set() 
 {
-  class_< RectangularSet<R>, bases< SetInterface<R>, Rectangle<R> > >("RectangularSet",init< Rectangle<R> >())
-    .def(init< std::string >())
-    .def(init< Rectangle<R> >())
-    .def("rectangle", &RectangularSet<R>::operator const Rectangle<R>&,return_value_policy<copy_const_reference>())
-    .def("dimension", &RectangularSet<R>::dimension)
-    .def("contains", &RectangularSet<R>::contains)
-    .def("superset", &RectangularSet<R>::superset)
-    .def("intersects", &RectangularSet<R>::intersects)
-    .def("disjoint", &RectangularSet<R>::disjoint)
-    .def("subset", &RectangularSet<R>::subset)
-    .def("bounding_box", &RectangularSet<R>::bounding_box)
+  class_< EmptySet<R>, bases< SetInterface<R> > >("EmptySet",init< dimension_type >())
+    .def("dimension", &EmptySet<R>::dimension)
+    .def("contains", &EmptySet<R>::contains)
+    .def("superset", &EmptySet<R>::superset)
+    .def("intersects", &EmptySet<R>::intersects)
+    .def("disjoint", &EmptySet<R>::disjoint)
+    .def("subset", &EmptySet<R>::subset)
+    .def("bounding_box", &EmptySet<R>::bounding_box)
     .def(self_ns::str(self))
   ;
 }
 
 
-template void export_rectangular_set<Float>();
+template void export_empty_set<Float>();

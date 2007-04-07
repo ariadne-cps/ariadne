@@ -27,6 +27,11 @@ namespace Ariadne { namespace Geometry {
 
 
 template<class S> inline
+HybridSetBase<S>::~HybridSetBase() 
+{
+}
+  
+template<class S> inline
 HybridSetBase<S>::HybridSetBase() 
   : _component_sets()
 {
@@ -35,14 +40,14 @@ HybridSetBase<S>::HybridSetBase()
   
  
 template<class S> inline
-HybridSetBase<S>::HybridSetBase(const std::map<location_type,dimension_type>& locations)
+HybridSetBase<S>::HybridSetBase(const HybridSpace& locations)
   : _component_sets() 
 {
-  for(typename std::map<location_type,dimension_type>::const_iterator loc_iter=locations.begin();
+  for(HybridSpace::const_iterator loc_iter=locations.begin();
       loc_iter!=locations.end(); ++loc_iter)
   {
-    location_type q=loc_iter->first;
-    dimension_type d=loc_iter->second;
+    location_type q=loc_iter->id();
+    dimension_type d=loc_iter->dimension();
     this->_component_sets.insert(std::make_pair(q,S(d)));
   }
 }
@@ -101,14 +106,14 @@ HybridSetBase<S>::new_location(location_type q, const T& t)
 
 
 template<class S> inline
-std::map<location_type,dimension_type>
+HybridSpace
 HybridSetBase<S>::locations() const 
 { 
-  std::map<location_type,dimension_type> result;
+  HybridSpace result;
   for(const_iterator loc_iter=this->_component_sets.begin(); 
       loc_iter!=this->_component_sets.end(); ++loc_iter) 
   {
-    result.insert(std::make_pair(loc_iter->first,loc_iter->second.dimension()));
+    result.new_location(loc_iter->first,loc_iter->second.dimension());
   } 
   return result;
 }
@@ -180,6 +185,20 @@ HybridSetBase<S>::empty() const {
 }
   
 
+template<class S> inline  
+tribool 
+HybridSetBase<S>::bounded() const { 
+  tribool result=true; 
+  for(const_iterator loc_iter=this->begin(); loc_iter!=this->end(); ++loc_iter) {
+    result=result && loc_iter->second.bounded();
+    if(!result) { 
+      return result; 
+    }
+  }
+  return result;
+}
+  
+
 template<class S> template<class T> inline  
 void 
 HybridSetBase<S>::adjoin(location_type q, const T& t) {
@@ -199,6 +218,34 @@ HybridSetBase<S>::adjoin(const HybridSetBase<S1>& hs) {
     location_type q=loc_iter->first;
     const S1& s=loc_iter->second;
     (*this)[q].adjoin(s);
+  }
+}
+
+template<class S> template<class S1> inline  
+void 
+HybridSetBase<S>::restrict(const HybridSetBase<S1>& hs) {
+  ARIADNE_CHECK_SAME_LOCATIONS(*this,hs,"void HybridSet<S>::restrict<SET>(HybridSetBase<SET>)");
+
+  for(typename HybridSetBase<S1>::const_iterator loc_iter=hs.begin();
+      loc_iter!=hs.end(); ++loc_iter)
+  {
+    location_type q=loc_iter->first;
+    const S1& s=loc_iter->second;
+    (*this)[q].restrict(s);
+  }
+}
+
+template<class S> template<class S1> inline  
+void 
+HybridSetBase<S>::remove(const HybridSetBase<S1>& hs) {
+  ARIADNE_CHECK_SAME_LOCATIONS(*this,hs,"void HybridSet<S>::remove<SET>(HybridSetBase<SET>)");
+
+  for(typename HybridSetBase<S1>::const_iterator loc_iter=hs.begin();
+      loc_iter!=hs.end(); ++loc_iter)
+  {
+    location_type q=loc_iter->first;
+    const S1& s=loc_iter->second;
+    (*this)[q].remove(s);
   }
 }
 
@@ -256,20 +303,14 @@ subset(const HybridSetBase<S1>& hs1, const HybridSetBase<S2>& hs2)
   return result;
 }
 
-template<class S> 
-std::ostream& 
-HybridSetBase<S>::write(std::ostream& os) const
-{ 
-  return os << _component_sets;
-}
 
-
-template<class S> 
+template<class S> inline
 std::ostream& 
 operator<<(std::ostream& os, const HybridSetBase<S>& hs)
 { 
   return hs.write(os);
 }
+
 
 
 
@@ -348,6 +389,23 @@ difference(const HybridGridCellListSet<R>& hgcl, const HybridGridMaskSet<R>& hgm
 
 
 template<class R> inline
+HybridGridMaskSet<R>
+difference(const HybridGridMaskSet<R>& hgms1, const HybridGridMaskSet<R>& hgms2) 
+{
+  ARIADNE_CHECK_SAME_LOCATIONS(hgms1,hgms2,"HybridGridCellListSet difference(HybridGridCellListSet hgms1, HybridGridMaskSet hgms2)");
+  
+  HybridGridMaskSet<R> result;
+  for(typename HybridGridMaskSet<R>::const_iterator loc_iter=result.begin(); 
+      loc_iter!=result.end(); ++loc_iter) 
+  {
+    location_type q=loc_iter->first;
+    result.new_location(q,difference(hgms1[q],hgms2[q]));
+  }
+  return result;
+}
+
+
+template<class R> inline
 HybridGridCellListSet<R>
 regular_intersection(const HybridGridCellListSet<R>& hgcl, const HybridGridMaskSet<R>& hgms) 
 {
@@ -372,6 +430,22 @@ regular_intersection(const HybridGridMaskSet<R>& hgms, const HybridGridCellListS
   return regular_intersection(hgcl,hgms);
 }
 
+
+template<class R> inline
+HybridGridMaskSet<R>
+regular_intersection(const HybridGridMaskSet<R>& hgms1, const HybridGridMaskSet<R>& hgms2) 
+{
+  ARIADNE_CHECK_SAME_LOCATIONS(hgms1,hgms2,"HybridGridMaskSet regular_intersection(HybridGridMaskSet hgms1, HybridGridMaskSet hgms2)");
+
+  HybridGridMaskSet<R> result;
+  for(typename HybridGridMaskSet<R>::const_iterator loc_iter=result.begin(); 
+      loc_iter!=result.end(); ++loc_iter) 
+  {
+    location_type q=loc_iter->first;
+    result.new_location(q,regular_intersection(hgms1[q],hgms2[q]));
+  }
+  return result;
+}
 
 
 }}

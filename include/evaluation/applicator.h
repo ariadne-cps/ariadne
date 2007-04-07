@@ -45,6 +45,7 @@ namespace Ariadne {
     template<class R>
     class Applicator {
      private:
+      R _default_bound;
       R _maximum_basic_set_radius;
       R _grid_size;
      public:
@@ -60,17 +61,23 @@ namespace Ariadne {
       //@{ 
       //! \name Methods to set and get the parameters controlling the accuracy.
 
+      /*! \brief The maximum allowable radius of a basic set during iteration. */
+      virtual R maximum_basic_set_radius() const;
+
       /*! \brief Set the maximum allowable radius of a basic set during iteration. */
       void set_maximum_basic_set_radius(const R&);
+
+      /*! \brief The default size of the approximation grid. */
+      virtual R grid_size() const;
 
       /*! \brief Set the default size of the approximation grid. */
       void set_grid_size(const R&);
 
-      /*! \brief The maximum allowable radius of a basic set during iteration. */
-      virtual R maximum_basic_set_radius() const;
+      /*! \brief The default bound to use if necessary. */
+      virtual R default_bound() const;
 
-      /*! \brief The default size of the approximation grid. */
-      virtual R grid_size() const;
+      /*! \brief Set the default bound. */
+      void set_default_bound(const R&);
 
       //@}
 
@@ -79,14 +86,24 @@ namespace Ariadne {
       //! \name Methods for applying a system to a basic set.
 
       /*! \brief Compute the image of a rectangle under a continuous function. */
-      virtual Geometry::Rectangle<R> image(const System::Map<R>& f, const Geometry::Rectangle<R>& s) const;
+      virtual 
+      Geometry::Rectangle<R> 
+      evaluate(const System::Map<R>& f, const Geometry::Rectangle<R>& s) const;
 
       /*! \brief Compute the image of a zonotope under a differentiable function. */
-      virtual Geometry::Zonotope<R> image(const System::Map<R>& f, const Geometry::Zonotope<R>& s) const;
+      virtual 
+      Geometry::Zonotope<R> 
+      evaluate(const System::Map<R>& f, const Geometry::Zonotope<R>& s) const;
+
+      /*! \brief Compute the image of a zonotope under a differentiable function. */
+      virtual 
+      Geometry::Zonotope<Numeric::Interval<R>,R> 
+      evaluate(const System::Map<R>& f, const Geometry::Zonotope<Numeric::Interval<R>,R>& s) const;
 
       /*! \brief Compute the image of an interval zonotope under a differentiable function. */
-      virtual Geometry::Zonotope< Numeric::Interval<R> > 
-      image(const System::Map<R>& f, const Geometry::Zonotope< Numeric::Interval<R> >& s) const;
+      virtual 
+      Geometry::Zonotope< Numeric::Interval<R> > 
+      evaluate(const System::Map<R>& f, const Geometry::Zonotope< Numeric::Interval<R> >& s) const;
 
       //@}
 
@@ -122,7 +139,11 @@ namespace Ariadne {
       virtual 
       Geometry::ListSet< Geometry::Zonotope<R> > 
       image(const System::Map<R>& f, const Geometry::ListSet< Geometry::Zonotope<R> >& ds) const;
-      
+            
+      /*! \brief Compute the image of a list set under a map. */
+      virtual 
+      Geometry::ListSet<Geometry::Zonotope<Numeric::Interval<R>,R> >
+      image(const System::Map<R>& f, const Geometry::ListSet<Geometry::Zonotope<Numeric::Interval<R>,R> >& ds) const;
       
       /*! \brief Compute the image of a list set under a map. */
       virtual 
@@ -138,11 +159,13 @@ namespace Ariadne {
             const Geometry::Grid<R>& grid) const;
 
       /*! \brief Compute the image of \a map starting in \a initial_set computing the result on \a grid. */
+      /*
       virtual
       Geometry::GridMaskSet<R> 
       image(const System::Map<R>& map, 
             const Geometry::GridMaskSet<R>& initial_set,
             const Geometry::FiniteGrid<R>& grid) const;
+      */
 
       /*! \brief Compute the image of \a map starting in \a initial_set while remaining in \a bounding_set. */
       virtual
@@ -152,6 +175,21 @@ namespace Ariadne {
             const Geometry::GridMaskSet<R>& bounding_set) const;
 
 
+      /*! \brief Compute the preimage of \a set under \a map contained in \a bound. */
+      virtual
+      Geometry::GridMaskSet<R> 
+      preimage(const System::Map<R>& map, 
+               const Geometry::GridMaskSet<R>& set,
+               const Geometry::GridMaskSet<R>& bound) const;
+
+
+      /*! \brief Compute the reachable set of \a map starting in \a initial_set. */
+      virtual
+      Geometry::ListSet< Geometry::Zonotope<Numeric::Interval<R>,R> > 
+      reach(const System::Map<R>& map, 
+            const Geometry::ListSet< Geometry::Zonotope<Numeric::Interval<R>,R> >& initial_set) const;
+
+           
       /*! \brief Compute the reachable set of \a map starting in \a initial_set. */
       virtual
       Geometry::GridMaskSet<R> 

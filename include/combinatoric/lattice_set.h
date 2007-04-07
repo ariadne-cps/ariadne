@@ -63,6 +63,7 @@ namespace Ariadne {
     bool disjoint(const LatticeMaskSet&, const LatticeMaskSet&);
     bool overlap(const LatticeBlock&, const LatticeBlock&);
     bool overlap(const LatticeBlock&, const LatticeMaskSet&);
+    bool overlap(const LatticeCellListSet&, const LatticeMaskSet&);
     bool overlap(const LatticeMaskSet&, const LatticeMaskSet&);
     bool subset(const LatticeCell&, const LatticeBlock&);
     bool subset(const LatticeBlock&, const LatticeBlock&);
@@ -493,6 +494,11 @@ namespace Ariadne {
     
       /*! \brief Removes a LatticeMaskSet from the set. */
       void remove(const LatticeMaskSet& ms);
+    
+      /*! \brief Makes the set unbounded. */
+      void adjoin_unbounded_cell() {
+        this->_unbounded=false; 
+      }
     
       /*! \brief Adjoins a LatticeCell to the set. */
       void adjoin(const LatticeCell& c) { 

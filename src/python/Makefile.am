@@ -57,6 +57,7 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_polytope.cc \
 	export_simplex.cc \
 	export_polyhedron.cc \
+	export_empty_set.cc \
 	export_rectangular_set.cc \
 	export_polyhedral_set.cc \
 	export_list_set.cc \
@@ -72,6 +73,7 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_affine_vector_field.cc \
 	export_hybrid_automaton.cc \
 	 \
+	export_evaluation_parameters.cc \
 	export_solve.cc \
 	export_apply.cc \
 	export_integrate.cc \

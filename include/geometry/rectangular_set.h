@@ -42,30 +42,51 @@ namespace Ariadne {
     //! \ingroup ExactSet
     /*! \brief An adaptor for the Rectangle class conforming to the SetInterface interface. */
     template<class R>
-    class RectangularSet : public SetInterface<R>, public Rectangle<R>
+    class RectangularSet : public SetInterface<R>
     {
      public:
+      /*! \brief */
       RectangularSet(const std::string& str)
-        : SetInterface<R>(), Rectangle<R>(str) { }
-      RectangularSet(const Rectangle<R>& r)
-        : SetInterface<R>(), Rectangle<R>(r) { }
-      
+        : SetInterface<R>(), _rectangle(str) { }
+      /*! \brief */
+      template<class R1> RectangularSet(const Rectangle<R1>& r)
+        : SetInterface<R>(), _rectangle(r) { }
+      /*! \brief */
+      template<class R1> RectangularSet(const RectangularSet<R>& rs)
+        : SetInterface<R>(), _rectangle(static_cast<const Rectangle<R1>&>(rs)) { }
+      /*! \brief */
+      operator const Rectangle<R>& () const { return this->_rectangle; }
+
+      /*! \brief */
       virtual ~RectangularSet<R>() { }
-      virtual RectangularSet<R>* clone() const { return new RectangularSet<R>(*this); }
-      virtual dimension_type dimension() const { return Rectangle<R>::dimension(); }
-      virtual tribool contains(const Point<R>& pt) const { return Rectangle<R>::contains(pt); }
+      /*! \brief */
+      virtual RectangularSet<R>* clone() const { return new RectangularSet<R>(this->_rectangle); }
+      /*! \brief */
+      virtual dimension_type dimension() const { return this->_rectangle.dimension(); }
+      /*! \brief */
+      virtual tribool contains(const Point<R>& pt) const { return this->_rectangle.contains(pt); }
+      /*! \brief */
       virtual tribool superset(const Rectangle<R>& r) const { 
-        return Geometry::subset(r,static_cast<const Rectangle<R>&>(*this)); }
+        return Geometry::subset(r,this->_rectangle); }
+      /*! \brief */
       virtual tribool intersects(const Rectangle<R>& r) const { 
-        return !Geometry::disjoint(r,static_cast<const Rectangle<R>&>(*this)); }
+        return !Geometry::disjoint(r,this->_rectangle); }
+      /*! \brief */
       virtual tribool disjoint(const Rectangle<R>& r) const { 
-        return Geometry::disjoint(r,static_cast<const Rectangle<R>&>(*this)); }
+        return Geometry::disjoint(r,this->_rectangle); }
+      /*! \brief */
       virtual tribool subset(const Rectangle<R>& r) const { 
-        return Geometry::subset(static_cast<const Rectangle<R>&>(*this),r); }
-      virtual Rectangle<R> bounding_box() const { return Rectangle<R>::bounding_box(); }      
+        return Geometry::subset(this->_rectangle,r); }
+      /*! \brief */
+      virtual tribool bounded() const { return this->_rectangle.bounded(); }      
+      /*! \brief */
+      virtual Rectangle<R> bounding_box() const { return this->_rectangle.bounding_box(); }      
+      /*! \brief */
       virtual std::ostream& write(std::ostream& os) const {
-        return Rectangle<R>::write(os);
+        return os << "RectangularSet(\"" << this->_rectangle << "\")";
       }
+     private:
+      Rectangle<R> _rectangle;
     };
     
     template<class R> inline

@@ -40,6 +40,7 @@ GEOMETRY_SRC = \
 	geometry/grid.cc geometry/grid_set.cc \
 	geometry/irregular_grid.cc geometry/irregular_grid_set.cc \
 	geometry/partition_tree_set.cc \
+	geometry/hybrid_set.cc \
 	geometry/ppl_polyhedron.cc
 
 SYSTEM_SRC = \
@@ -50,6 +51,7 @@ SYSTEM_SRC = \
 	system/grid_multimap.cc 
 
 EVALUATION_SRC = \
+	evaluation/evaluation_parameters.cc \
 	evaluation/solver.cc \
 	evaluation/newton_solver.cc \
 	evaluation/applicator.cc \

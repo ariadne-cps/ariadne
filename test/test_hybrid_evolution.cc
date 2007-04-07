@@ -31,6 +31,7 @@
 #include "geometry/set_reference.h"
 #include "geometry/hybrid_set.h"
 #include "geometry/rectangle.h"
+#include "geometry/empty_set.h"
 #include "geometry/polyhedral_set.h"
 #include "system/affine_map.h"
 #include "system/affine_vector_field.h"
@@ -166,10 +167,10 @@ int test_hybrid_evolution()
   eps.set_fill_colour("white");
   eps << bounding_box;
   eps.set_fill_colour("cyan");
-  eps << static_cast<Polyhedron<R>&>(activation11);
-  eps << static_cast<Polyhedron<R>&>(activation21);
+  eps << static_cast<const Polyhedron<R>&>(activation11);
+  eps << static_cast<const Polyhedron<R>&>(activation21);
   eps.set_fill_colour("magenta");
-  eps << static_cast<Polyhedron<R>&>(activation12);
+  eps << static_cast<const Polyhedron<R>&>(activation12);
   eps.set_fill_colour("red");
   eps << discrete_reach[mode2_id];
   eps.set_fill_colour("green");
@@ -189,10 +190,10 @@ int test_hybrid_evolution()
   eps.set_fill_colour("white");
   eps << bounding_box;
   eps.set_fill_colour("cyan");
-  eps << static_cast<Polyhedron<R>&>(activation11);
-  eps << static_cast<Polyhedron<R>&>(activation21);
+  eps << static_cast<const Polyhedron<R>&>(activation11);
+  eps << static_cast<const Polyhedron<R>&>(activation21);
   eps.set_fill_colour("magenta");
-  eps << static_cast<Polyhedron<R>&>(activation12);
+  eps << static_cast<const Polyhedron<R>&>(activation12);
   eps.set_line_style(true);
   eps.set_fill_colour("red");
   eps << chainreach[mode2_id];
@@ -202,6 +203,24 @@ int test_hybrid_evolution()
   eps << initial_set[mode1_id];
   eps.close();
   
+  {
+  cout << "\n\nUsing HybridSet arguments" << endl;
+  HybridSet<R> initial_set;
+  initial_set.new_location(mode1_id,initial_rectangle1);
+  initial_set.new_location(mode2_id,EmptySet<R>(2));
+  cout << "initial_set.discrete_locations()=" << initial_set.locations() << endl;
+  cout << "initial_set[mode1_id]=" << initial_set[mode1_id] << endl;
+  cout << "initial_set[mode21_id]=" << initial_set[mode2_id] << endl;
+
+  HybridSet<R> bounding_set;
+  bounding_set.new_location(mode1_id,bounding_box);
+  bounding_set.new_location(mode2_id,bounding_box);
+  cout << "bounding_set.discrete_locations()=" << bounding_set.locations() << endl;
+  cout << "bounding_set[mode1_id]=" << bounding_set[mode1_id] << endl;
+  cout << "bounding_set[mode21_id]=" << bounding_set[mode2_id] << endl;
+  cout << endl;
+
+  }
   
   return 0;
 }

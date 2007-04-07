@@ -50,7 +50,6 @@
 namespace Ariadne {
   namespace Geometry {
 
-
     template<class R> class PointList;
     template<class BS> class ListSet;
     template<class R> class RectangleVerticesIterator;
@@ -217,11 +216,13 @@ namespace Ariadne {
       /*! \brief Sets the upper bound of the \a i th coordinate to \a u. */
       void set_upper_bound(dimension_type i, const R& u);
 
-      /*! \brief Expand the %Rectangle by \a delta in each direction. */
+      /*! \brief Expand the %Rectangle by \a delta in each direction. (Deprecated, use neighbourhood(...) instead) */
       Rectangle<R>& expand_by(const R& delta);
 
-      /*! \brief Return a copy of the %Rectangle expanded by \a delta in each direction. */
+      /*! \brief Return a copy of the %Rectangle expanded by \a delta in each direction. (Deprecated, use neighbourhood(...) instead) */
       Rectangle<R> expand(const R& delta) const;
+      /*! \brief Return a copy of the %Rectangle expanded by \a delta in each direction. */
+      Rectangle<R> neighbourhood(const R& delta) const;
       //@}
       
       
@@ -322,6 +323,8 @@ namespace Ariadne {
       
       //@{ 
       //! \name Input/output operations
+      /*! \brief The name of the class. */
+      static std::string name();
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;
       /*! \brief Read from an input stream. */
@@ -360,6 +363,7 @@ namespace Ariadne {
       size_type number_of_vertices() const;
       RectangleVerticesIterator<I> vertices_begin() const;
       RectangleVerticesIterator<I> vertices_end() const;
+      static std::string name();
       std::ostream& write(std::ostream& os) const;
      private:
       template<class RE> void assign(const RE& re);

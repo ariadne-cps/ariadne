@@ -474,9 +474,9 @@ namespace Ariadne {
     LatticeMaskSet::restrict(const LatticeCellListSet& lcls) {
       LatticeMaskSet copy=*this;
       this->clear();
-      for(LatticeCellListSet::const_iterator i=lcls.begin(); i!=lcls.end(); ++i) {
-        if(subset(*i,copy)) {
-          this->adjoin(*i);
+      for(LatticeCellListSet::const_iterator iter=lcls.begin(); iter!=lcls.end(); ++iter) {
+        if(subset(*iter,copy)) {
+          this->adjoin(*iter);
         }
       }
     }
@@ -484,12 +484,15 @@ namespace Ariadne {
     void 
     LatticeMaskSet::restrict(const LatticeMaskSet& lms) {
       if(this->_block==lms._block) {
+        this->_unbounded &= lms._unbounded;
         this->_mask &= lms._mask;
       }
       else {
+        LatticeMaskSet copy=*this;
+        this->clear();
         for(LatticeMaskSet::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-          if(!subset(*iter,lms)) {
-            this->remove(*iter);
+          if(subset(*iter,lms)) {
+            this->adjoin(*iter);
           }
         }
       }
@@ -662,6 +665,7 @@ namespace Ariadne {
       return true;
     }
     
+
     bool 
     overlap(const LatticeBlock& lb, const LatticeMaskSet& lms) 
     {
@@ -678,6 +682,17 @@ namespace Ariadne {
     }
     
     bool 
+    overlap(const LatticeCellListSet& lcls, const LatticeMaskSet& lms) 
+    {
+      for(LatticeCellListSet::const_iterator citer=lcls.begin(); citer!=lcls.end(); ++citer) {
+        if(subset(*citer,lms)) {
+          return true;
+        }
+      }
+      return false;
+    }
+    
+    bool
     overlap(const LatticeMaskSet& lms1, const LatticeMaskSet& lms2) 
     {
       if(lms1.block()==lms2.block()) {
@@ -694,7 +709,7 @@ namespace Ariadne {
         return false;
       } else {
         for(LatticeMaskSet::const_iterator iter1=lms1.begin(); iter1!=lms1.end(); ++iter1) {
-          if(overlap(*iter1,lms2)) {
+          if(subset(*iter1,lms2)) {
             return true;
           }
         }

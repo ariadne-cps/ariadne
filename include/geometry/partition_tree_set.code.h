@@ -149,6 +149,7 @@ namespace Ariadne {
       uint d=0;
       Rectangle<R>* r=0;
       Parallelotope<R>* pl=0;
+      SetInterface<R>* s=0;
       GridMaskSet<R>* gms=0;
       PartitionScheme<R>* ps=0;
       PartitionTreeSet<R>* pts=0;
@@ -167,6 +168,11 @@ namespace Ariadne {
       *pts=inner_approximation(*gms,*ps,d);
       *pts=over_approximation(*gms,*ps,d);
       *pts=under_approximation(*gms,*ps,d);
+      
+      *pts=outer_approximation(*s,*ps,d);
+      *pts=inner_approximation(*s,*ps,d);
+      *pts=over_approximation(*s,*ps,d);
+      *pts=under_approximation(*s,*ps,d);
     }
 
     

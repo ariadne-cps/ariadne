@@ -43,32 +43,58 @@ namespace Ariadne {
     //! \ingroup ExactSet
     /*! \brief An adaptor for the Polyhedron class conforming to the SetInterface interface. */
     template<class R>
-    class PolyhedralSet : public SetInterface<R>, public Polyhedron<R>
+    class PolyhedralSet
+      : public SetInterface<R>
     {
      public:
+      /*! \brief */
       PolyhedralSet(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b)
-        : SetInterface<R>(), Polyhedron<R>(A,b) { }
+        : SetInterface<R>(), _polyhedron(A,b) { }
+      /*! \brief */
       PolyhedralSet(const Rectangle<R>& r)
-        : SetInterface<R>(), Polyhedron<R>(r) { }
+        : SetInterface<R>(), _polyhedron(r) { }
+      /*! \brief */
+      PolyhedralSet(const Polytope<R>& p)
+        : SetInterface<R>(), _polyhedron(p) { }
+      /*! \brief */
       PolyhedralSet(const Polyhedron<R>& ph)
-        : SetInterface<R>(), Polyhedron<R>(ph) { }
-      
+        : SetInterface<R>(), _polyhedron(ph) { }
+      /*! \brief */
+      PolyhedralSet(const PolyhedralSet<R>& ph)
+        : SetInterface<R>(), _polyhedron(static_cast<const Polyhedron<R>&>(ph)) { }
+      /*! \brief */
+      operator const Polyhedron<R>& () const { return this->_polyhedron; }
+
+      /*! \brief */
       virtual ~PolyhedralSet<R>() { }
-      virtual PolyhedralSet<R>* clone() const { return new PolyhedralSet<R>(*this); }
-      virtual dimension_type dimension() const { return Polyhedron<R>::dimension(); }
-      virtual tribool contains(const Point<R>& pt) const { return Polyhedron<R>::contains(pt); }
+      /*! \brief */
+      virtual PolyhedralSet<R>* clone() const { return new PolyhedralSet<R>(this->_polyhedron); }
+      /*! \brief */
+      virtual dimension_type dimension() const { return this->_polyhedron.dimension(); }
+      /*! \brief */
+      virtual tribool contains(const Point<R>& pt) const { return this->_polyhedron.contains(pt); }
+      /*! \brief */
       virtual tribool superset(const Rectangle<R>& r) const { 
-        return Geometry::subset(r,static_cast<const Polyhedron<R>&>(*this)); }
+        return Geometry::subset(r,this->_polyhedron); }
+      /*! \brief */
       virtual tribool intersects(const Rectangle<R>& r) const { 
-        return !Geometry::disjoint(r,static_cast<const Polyhedron<R>&>(*this)); }
+        return !Geometry::disjoint(r,this->_polyhedron); }
+      /*! \brief */
       virtual tribool disjoint(const Rectangle<R>& r) const { 
-        return Geometry::disjoint(r,static_cast<const Polyhedron<R>&>(*this)); }
+        return Geometry::disjoint(r,this->_polyhedron); }
+      /*! \brief */
       virtual tribool subset(const Rectangle<R>& r) const { 
-        return Geometry::subset(static_cast<const Polyhedron<R>&>(*this),r); }
-      virtual Rectangle<R> bounding_box() const { return Polyhedron<R>::bounding_box(); }      
+        return Geometry::subset(this->_polyhedron,r); }
+      /*! \brief */
+      virtual tribool bounded() const { return this->_polyhedron.bounded(); }      
+      /*! \brief */
+      virtual Rectangle<R> bounding_box() const { return this->_polyhedron.bounding_box(); }      
+      /*! \brief */
       virtual std::ostream& write(std::ostream& os) const {
-        return Polyhedron<R>::write(os);
+        return this->_polyhedron.write(os);
       }
+     private:
+      Polyhedron<R> _polyhedron;
     };
     
     template<class R> inline

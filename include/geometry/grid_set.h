@@ -135,8 +135,8 @@ namespace Ariadne {
       friend class GridCell<R>;
       friend class GridMaskSet<R>;
      public:
-      typedef GridSetIterator< Combinatoric::LatticeBlock::const_iterator, GridBlock<R> > iterator;
-      typedef GridSetIterator< Combinatoric::LatticeBlock::const_iterator, GridBlock<R> > const_iterator;
+      typedef GridSetIterator< Combinatoric::LatticeBlock::const_iterator, GridCell<R> > iterator;
+      typedef GridSetIterator< Combinatoric::LatticeBlock::const_iterator, GridCell<R> > const_iterator;
 
       /*! \brief The type of denotable real number defining the vertices and cells of the grid. */
       typedef R real_type;
@@ -216,6 +216,7 @@ namespace Ariadne {
      */
     template<class R>
     class GridCellListSet 
+      : public SetInterface<R>
     {
       friend class GridMaskSet<R>;
      public:
@@ -250,8 +251,35 @@ namespace Ariadne {
       /*! \brief The underlying grid. */
       const Grid<R>& grid() const;
 
+
+
+      //@{
+      //! \name SetInterface methods
+      /*! \brief Make a dynamically-allocated copy of the set. */
+      virtual GridCellListSet<R>* clone() const;
+
       /*! \brief The space dimension of the set. */
-      dimension_type dimension() const;
+      virtual dimension_type dimension() const;
+
+      /*!\brief Checks if a denotable set includes a point. */
+      virtual tribool contains(const Point<R>& p) const;
+
+      /*! \brief Tests for superset of a Rectangle. */ 
+      virtual tribool superset(const Rectangle<R>& r) const;
+
+      /*! \brief Tests for intersection with a Rectangle. */
+      virtual tribool intersects(const Rectangle<R>& r) const;
+
+      /*! \brief Tests for disjointness with a Rectangle. */
+      virtual tribool disjoint(const Rectangle<R>& r) const;
+
+      /*! \brief Tests for subset of a Rectangle. */
+      virtual tribool subset(const Rectangle<R>& r) const;
+
+      /*! \brief The rectangle bounding the region of the mask. */
+      virtual Rectangle<R> bounding_box() const;
+      //@}
+
 
       /*! \brief True if the set is empty. */
       tribool empty() const;
@@ -425,6 +453,9 @@ namespace Ariadne {
       /*! \brief The bounds on elements in the set. */
       GridBlock<R> bounds() const;
 
+      /*! \brief The extent of the elements in the grid. */
+      Rectangle<R> extent() const;
+
       /*! \brief The underlying lattice set. */
       const Combinatoric::LatticeMaskSet& lattice_set() const;
 
@@ -443,7 +474,7 @@ namespace Ariadne {
       /*! \brief Returns true if the set is empty. */
       tribool empty() const;
       
-      /*! \brief Returns true if the set is empty. */
+      /*! \brief Returns true if the set is bounded. */
       tribool bounded() const;
       
       /*! \brief The number of cells in the grid. */
@@ -460,6 +491,9 @@ namespace Ariadne {
       /*! \brief Removes all cells. */
       void clear();
 
+      /*! \brief Makes the set unbounded. */
+      void adjoin_unbounded_cell();
+    
       /*! \brief Removes a cell from the set. */
       void remove(const GridCell<R>& gc);
 
@@ -511,6 +545,8 @@ namespace Ariadne {
 #ifdef DOXYGEN
       friend tribool overlap<> (const GridBlock<R>&, const GridMaskSet<R>&);
       friend tribool overlap<> (const GridMaskSet<R>&, const GridBlock<R>&);
+      friend tribool overlap<> (const GridCellListSet<R>&, const GridMaskSet<R>&);
+      friend tribool overlap<> (const GridMaskSet<R>&, const GridCellListSet<R>&);
       friend tribool overlap<> (const GridMaskSet<R>&, const GridMaskSet<R>&);
       friend tribool subset<> (const GridCell<R>&, const GridMaskSet<R>&);
       friend tribool subset<> (const GridBlock<R>&, const GridMaskSet<R>&);
@@ -536,6 +572,8 @@ namespace Ariadne {
     template<class R> tribool overlap(const GridBlock<R>&, const GridBlock<R>&);
     template<class R> tribool overlap(const GridBlock<R>&, const GridMaskSet<R>&);
     template<class R> tribool overlap(const GridMaskSet<R>&, const GridBlock<R>&);
+    template<class R> tribool overlap(const GridCellListSet<R>&, const GridMaskSet<R>&);
+    template<class R> tribool overlap(const GridMaskSet<R>&, const GridCellListSet<R>&);
     template<class R> tribool overlap(const GridMaskSet<R>&, const GridMaskSet<R>&);
     
     template<class R> tribool subset(const GridCell<R>&, const GridBlock<R>&);
@@ -575,8 +613,17 @@ namespace Ariadne {
     template<class R> GridCellListSet<R> over_approximation(const Polytope<R>& p, const Grid<R>& g);
     template<class R> GridCellListSet<R> over_approximation(const Polyhedron<R>& p, const Grid<R>& g);
     
+    template<class R> GridCellListSet<R> over_approximation(const Zonotope<Numeric::Interval<R>,R>& z, const Grid<R>& g);
     template<class R> GridCellListSet<R> over_approximation(const Zonotope< Numeric::Interval<R> >& z, const Grid<R>& g);
       
+    template<class R> GridBlock<R> over_approximation(const Rectangle<R>& z, const FiniteGrid<R>& fg);
+    template<class R> GridCellListSet<R> over_approximation(const Zonotope<R>& z, const FiniteGrid<R>& fg);
+    template<class R> GridCellListSet<R> over_approximation(const Polytope<R>& z, const FiniteGrid<R>& fg);
+
+    template<class R> GridCellListSet<R> over_approximation(const Zonotope<Numeric::Interval<R>,R>& z, const FiniteGrid<R>& fg);
+    template<class R> GridCellListSet<R> over_approximation(const Zonotope< Numeric::Interval<R> >& z, const FiniteGrid<R>& fg);
+      
+    template<class R> GridMaskSet<R> over_approximation(const Polyhedron<R>& p, const FiniteGrid<R>& fg);
     template<class R, class BS> GridMaskSet<R> over_approximation(const ListSet<BS>& ls, const FiniteGrid<R>& fg); 
     template<class R> GridMaskSet<R> over_approximation(const GridMaskSet<R>& gms, const FiniteGrid<R>& fg);
     template<class R> GridMaskSet<R> over_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& fg);
@@ -591,6 +638,7 @@ namespace Ariadne {
     template<class R> GridCellListSet<R> under_approximation(const Polytope<R>& p, const Grid<R>& g);
     template<class R> GridCellListSet<R> under_approximation(const Polyhedron<R>& p, const Grid<R>& g);
     
+    template<class R> GridMaskSet<R> under_approximation(const Polyhedron<R>& p, const FiniteGrid<R>& g);
     template<class R> GridMaskSet<R> under_approximation(const GridMaskSet<R>& gms, const FiniteGrid<R>& fg);
     template<class R> GridMaskSet<R> under_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& fg);
 

@@ -44,6 +44,7 @@
 namespace Ariadne {  
   namespace Geometry {
 
+    template<class R> class Constraint;
     template<class R> class Polytope;
     template<class R> class PolyhedronConstraintsIterator;
     
@@ -88,6 +89,10 @@ namespace Ariadne {
        */
       explicit Polyhedron<R>(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b);
             
+      /*! \brief Construct the polyhedron defined by the matrix of constraints \f$C\hat{x}\geq0\f$.
+       */
+      explicit Polyhedron<R>(const LinearAlgebra::Matrix<R>& C);
+            
       /*! \brief Construct from a list of points. */
       explicit Polyhedron<R>(const PointList<R>& pts);
             
@@ -127,6 +132,12 @@ namespace Ariadne {
       R* begin();
       /*! A constant pointer to the beginning of the array of real data. */
       const R* begin() const;
+      //@}
+
+
+      //@{
+      //! \name Modifying operations
+      void new_constraint(const Constraint<R>& c);
       //@}
 
 
@@ -188,6 +199,9 @@ namespace Ariadne {
       friend tribool Geometry::subset<>(const Polyhedron<R>& A, 
                                         const Rectangle<R>& B);
     
+      /*! \brief The generators of a polyhedron. (Deprecated) */
+      friend Matrix<R> Geometry::generators<>(const Polyhedron<R>& A);
+    
       //@}
       
 
@@ -205,6 +219,8 @@ namespace Ariadne {
 #endif
       //@{ 
       //! \name Input/output operations
+      /*! \brief The name of the class. */
+      static std::string name();
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;
       /*! \brief Read from an input stream. */
@@ -225,7 +241,9 @@ namespace Ariadne {
       friend class Polyhedron<R>;
       friend class PolyhedronConstraintsIterator<R>;
      public:
-      /*! \brief Write to an output stream. */
+      /*! \brief The dimension of the constraint. */
+      dimension_type dimension() const;
+      /*! \brief Tests if the constraint is satisfied by a point. */
       template<class RV> tribool satisfied_by(const Point<RV>& pt) const;
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;
@@ -237,44 +255,52 @@ namespace Ariadne {
     
     
     template<class R> 
-    tribool equal(const Polyhedron<R>& A, const Polyhedron<R>& B);
+    tribool equal(const Polyhedron<R>& plhd1, const Polyhedron<R>& plhd2);
 
    
     template<class R> 
-    tribool disjoint(const Polyhedron<R>& A, const Polyhedron<R>& B);
+    tribool disjoint(const Polyhedron<R>& plhd1, const Polyhedron<R>& plhd2);
     
     template<class R> 
-    tribool disjoint(const Polyhedron<R>& A, const Rectangle<R>& B);
+    tribool disjoint(const Polyhedron<R>& plhd1, const Rectangle<R>& plhd2);
     
     template<class R> 
-    tribool disjoint(const Rectangle<R>& A, const Polyhedron<R>& B);
+    tribool disjoint(const Rectangle<R>& plhd1, const Polyhedron<R>& plhd2);
     
     
     template<class R> 
-    tribool subset(const Polyhedron<R>& A, const Polyhedron<R>& B);
+    tribool subset(const Polyhedron<R>& plhd1, const Polyhedron<R>& plhd2);
 
     template<class R> 
-    tribool subset(const Polyhedron<R>& A, const Rectangle<R>& B);
+    tribool subset(const Polyhedron<R>& plhd1, const Rectangle<R>& plhd2);
 
 
     template<class R1,class R2> 
-    tribool subset(const Rectangle<R1>& A, const Polyhedron<R2>& B);
+    tribool subset(const Rectangle<R1>& r, const Polyhedron<R2>& plhd);
 
     template<class R1,class R2> 
-    tribool subset(const Zonotope<R1>& A, const Polyhedron<R2>& B);
+    tribool subset(const Zonotope<R1>& z, const Polyhedron<R2>& plhd);
 
     template<class R1,class R2> 
-    tribool subset(const Polytope<R1>& A, const Polyhedron<R2>& B);
+    tribool subset(const Polytope<R1>& pltp, const Polyhedron<R2>& plhd);
 
 
 
     template<class R> 
     Polyhedron<R> 
-    open_intersection(const Polyhedron<R>& A, const Polyhedron<R>& B);
+    open_intersection(const Polyhedron<R>& plhd1, const Polyhedron<R>& plhd2);
 
     template<class R> 
     Polyhedron<R> 
-    closed_intersection(const Polyhedron<R>& A, const Polyhedron<R>& B) ;
+    closed_intersection(const Polyhedron<R>& plhd1, const Polyhedron<R>& plhd2) ;
+
+    template<class R> 
+    Polyhedron<R> 
+    closed_intersection(const Polyhedron<R>& plhd, const Rectangle<R>& r) ;
+
+    template<class R> 
+    Polyhedron<R> 
+    closed_intersection(const Rectangle<R>& r, const Polyhedron<R>& plhd) ;
 
     
     template<class R> 
@@ -284,6 +310,8 @@ namespace Ariadne {
     template<class R> 
     Polyhedron<typename Numeric::traits<R>::arithmetic_type> 
     polyhedron(const Polytope<R>& A) ;
+
+
 
     
     template<class R>

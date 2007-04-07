@@ -50,13 +50,14 @@ void export_polyhedron()
   typedef Polyhedron<R> RPolyhedron;
   typedef Rectangle<R> RRectangle;
   typedef Polytope<R> RPolytope;
-
+  
   def("disjoint", (tribool(*)(const RPolyhedron&, const RRectangle&))(&disjoint));
   def("disjoint", (tribool(*)(const RRectangle&, const RPolyhedron&))(&disjoint));
   def("disjoint", (tribool(*)(const RPolyhedron&, const RPolyhedron&))(&disjoint));
   def("subset", (tribool(*)(const RRectangle&, const RPolyhedron&))(&subset));
   def("subset", (tribool(*)(const RPolytope&, const RPolyhedron&))(&subset));
   def("subset", (tribool(*)(const RPolyhedron&, const RPolyhedron&))(&subset));
+  def("closed_intersection", (RPolyhedron(*)(const RPolyhedron&, const RPolyhedron&))(&closed_intersection));
 
   //class_< RPolyhedron,bases<RSet> >("Polyhedron",init<int>())
   class_< RPolyhedron >("Polyhedron",init<int>())

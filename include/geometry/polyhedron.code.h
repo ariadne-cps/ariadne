@@ -32,6 +32,8 @@
 
 #include "polyhedron.h"
 
+#include "../debug.h"
+
 #include "../base/stlio.h"
 
 #include "../numeric/interval.h"
@@ -49,9 +51,73 @@
 #include "../geometry/zonotope.h"
 #include "../geometry/polytope.h"
 
+#include "../output/logging.h"
+
+
 namespace Ariadne {
   namespace Geometry {
 
+    template<class R> 
+    tribool 
+    empty(const Polyhedron<R>& plhd) 
+    {
+      return empty(Polyhedron<Numeric::Rational>(plhd));
+    }
+
+  
+    template<class R> 
+    tribool 
+    empty(const Polyhedron< Numeric::Interval<R> >& plhd) 
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+  
+
+    template<> 
+    tribool 
+    empty(const Polyhedron<Numeric::Rational>& plhd) {
+      try {
+        Polytope<Numeric::Rational> pltp(plhd);
+        ARIADNE_LOG(7,"empty(plhd): plhd="<<plhd<<" pltp="<<pltp);
+        return pltp.empty();
+      }
+      catch(UnboundedSet& e) {
+        return false;
+      }
+    }
+  
+      
+    
+    template<class R> 
+    tribool 
+    bounded(const Polyhedron<R>& plhd) 
+    {
+      return bounded(Polyhedron<Numeric::Rational>(plhd));
+    }
+
+  
+    template<class R> 
+    tribool 
+    bounded(const Polyhedron< Numeric::Interval<R> >& plhd) 
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+  
+
+    template<> 
+    tribool 
+    bounded(const Polyhedron<Numeric::Rational>& plhd)
+    {
+      try {
+        Polytope<Numeric::Rational> pltp(plhd);
+        return pltp.bounded();
+      }
+      catch(UnboundedSet& e) {
+        return false;
+      }
+    }
+
+      
     
     template<class R1, class R2, template<class> class BS>
     tribool 
@@ -106,6 +172,16 @@ namespace Ariadne {
       LinearAlgebra::VectorSlice<R>(nc,this->begin()+d,d+1u)=b;
     }
   
+
+    template<class R>
+    Polyhedron<R>::Polyhedron(const LinearAlgebra::Matrix<R>& C) 
+      : _dimension(C.number_of_columns()-1), 
+        _number_of_constraints(C.number_of_rows()), 
+        _data(C.data())
+    {
+    }
+  
+
     template<class R>
     Polyhedron<R>::Polyhedron(const PointList<R>& pts)
       : _dimension(pts.dimension()), _number_of_constraints(0), _data()
@@ -119,6 +195,21 @@ namespace Ariadne {
       (*this)=Polyhedron<Numeric::Rational>(Polytope<Numeric::Rational>(pts));
     }
   
+
+    template<class R>
+    void
+    Polyhedron<R>::new_constraint(const Constraint<R>& c)
+    {
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,c,"void Polyhedron::new_constraint(Constraint& c)");
+      dimension_type d=this->_dimension;
+      size_type sz=this->_data.size();
+      this->_data.resize(sz+d+1u);
+      for(dimension_type i=0; i!=d; ++i) {
+        this->_data[sz+i]=c._a[i];
+        this->_data[sz+d]=c._a[d];
+      }
+    }
+
 
     template<class R>
     LinearAlgebra::MatrixSlice<R>
@@ -219,14 +310,14 @@ namespace Ariadne {
     tribool 
     Polyhedron<R>::empty() const
     {
-      throw NotImplemented(__PRETTY_FUNCTION__);
+      return Geometry::empty(*this);
     }
 
     template<class R>
     tribool 
     Polyhedron<R>::bounded() const
     {
-      throw NotImplemented(__PRETTY_FUNCTION__);
+      return Geometry::bounded(*this);
     }
 
     template<class R>
@@ -252,7 +343,7 @@ namespace Ariadne {
       typedef Numeric::Rational R;
       typedef Numeric::Rational F;
 
-      if(verbosity>7) { std::clog << __PRETTY_FUNCTION__ << std::endl; }
+      if(verbosity>7) { std::clog << "tribool disjoint(Polyhedron<Rational>,Polyhedron<Rational>)" << std::endl; }
       if(verbosity>8) { std::clog << plhd << " " << r << std::endl; }
       
       ARIADNE_CHECK_EQUAL_DIMENSIONS(plhd,r,"tribool disjoint(Polyhedron<Rational> plhd, Rectangle<Rational> r)");
@@ -345,7 +436,7 @@ namespace Ariadne {
     tribool 
     disjoint(const Polyhedron<R>& plhd1, const Polyhedron<R>& plhd2)
     {
-      throw NotImplemented(__PRETTY_FUNCTION__);
+      return closed_intersection(plhd1,plhd2).empty();
     }
     
     
@@ -375,8 +466,39 @@ namespace Ariadne {
     tribool 
     subset(const Polyhedron<R>& plhd, const Rectangle<R>& r)
     {
-      return Geometry::subset(Polytope<Numeric::Rational>(plhd),Rectangle<Numeric::Rational>(r));
+      ARIADNE_LOG(3,"Geometry::subset(plhd,r): ""plhd="<<plhd<<", r="<<r<<"\n");
+      tribool result=true;
+      dimension_type d=plhd.dimension();
+      array<R> data(d+1u);
+      for(size_type i=0; i!=d+1u; ++i) {
+        data[i]=0;
+      }
+      Polyhedron<R> halfspace;
+      ARIADNE_LOG(9,"data="<<data<<"\n");
+     
+      for(size_type j=0; j!=d; ++j) {
+        // Check if disjoint from lower halfspace
+        data[j]=-1;
+        data[d]=r.lower_bound(j);
+        ARIADNE_LOG(9,"data="<<data<<"\n");
+        halfspace=Polyhedron<R>(d,1u,data.begin());
+        ARIADNE_LOG(8,"halfspace="<<halfspace<<"\n");
+        result=result && disjoint(plhd,halfspace);
+        // Check if disjoint from upper halfspace
+        data[j]=1;
+        data[d]=-r.upper_bound(j);
+        halfspace=Polyhedron<R>(d,1u,data.begin());
+        ARIADNE_LOG(8,"halfspace="<<halfspace<<"\n");
+        result=result && disjoint(plhd,halfspace);
+        // Early return
+        if(result==false) {
+          return result;
+        }
+        data[j]=0;
+      }
+      return result;
     }
+
     
     
     
@@ -425,7 +547,7 @@ namespace Ariadne {
     Polyhedron<R> 
     closed_intersection(const Polyhedron<R>& plhd1, const Polyhedron<R>& plhd2)
     {
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(plhd1,plhd2,"Polyhedron closed_intersection(Polyhedron,Polyhedron)");
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(plhd1,plhd2,"Polyhedron closed_intersection(Polyhedron plhd1, Polyhedron plhd2)");
       dimension_type d=plhd1.dimension();
       size_type nc1=plhd1.number_of_constraints();
       size_type nc2=plhd2.number_of_constraints();
@@ -434,6 +556,24 @@ namespace Ariadne {
       LinearAlgebra::MatrixSlice<R>(nc2,d,A.begin()+nc1*d,d,1)=plhd2.A();
       LinearAlgebra::Vector<R> b=direct_sum(plhd1.b(),plhd2.b());
       return Polyhedron<R>(A,b);
+    }
+          
+    
+    template<class R>
+    Polyhedron<R> 
+    closed_intersection(const Rectangle<R>& r, const Polyhedron<R>& plhd)
+    {
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(r,plhd,"Polyhedron closed_intersection(Rectangle r, Polyhedron plhd)");
+      return closed_intersection(Polyhedron<R>(r),plhd);
+    }
+          
+    
+    template<class R>
+    Polyhedron<R> 
+    closed_intersection(const Polyhedron<R>& plhd, const Rectangle<R>& r)
+    {
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(plhd,r,"Polyhedron closed_intersection(Polyhedron plhd, Rectangle r)");
+      return closed_intersection(plhd,Polyhedron<R>(r));
     }
           
     
@@ -492,6 +632,13 @@ namespace Ariadne {
       return os;
     }
     
+    template<class R>
+    std::string
+    Polyhedron<R>::name()
+    {
+      return std::string("Polyhedron")+"<"+Numeric::name<R>()+">";
+    }
+
     template<class R>  
     std::ostream& 
     Polyhedron<R>::write(std::ostream& os) const
@@ -540,6 +687,8 @@ namespace Ariadne {
       subset(p,r);
   
       closed_intersection(p,p);
+      closed_intersection(r,p);
+      closed_intersection(p,r);
       open_intersection(p,p);
       
       polyhedron(r);
@@ -549,3 +698,4 @@ namespace Ariadne {
 
   }
 }
+

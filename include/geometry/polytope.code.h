@@ -47,6 +47,8 @@
 #include "../geometry/rectangle.h"
 #include "../geometry/polyhedron.h"
 
+#include "../output/logging.h"
+
 namespace Ariadne {
   namespace Geometry {
 
@@ -139,46 +141,38 @@ namespace Ariadne {
       const LinearAlgebra::Matrix<R> A=plhd.A();
       const LinearAlgebra::Vector<R> b=plhd.b();
       
-      std::vector< LinearAlgebra::Vector<F> > result;
-      std::vector< LinearAlgebra::Vector<F> > argument;
+      std::vector< LinearAlgebra::Vector<F> > constraints;
+      std::vector< LinearAlgebra::Vector<F> > generators;
       
       LinearAlgebra::Vector<F> tmp(d+1);
-      
+      // Add positivity constraint
+      tmp(d)=1;
+      constraints.push_back(tmp);
       for(size_type i=0; i!=nc; ++i) {
         for(size_type j=0; j!=d; ++j) {
           tmp(j)=-A(i,j);
         }
         tmp(d)=b(i);
-        argument.push_back(tmp);
+        constraints.push_back(tmp);
       }
-      ddconv(result,argument);
+
+      ddconv(generators,constraints);
       
-      //std::cerr << "argument=" << argument << std::endl;
-      //std::cerr << "result=" << result << std::endl;
-      
-      size_type nv=result.size();
+      size_type nv=generators.size();
+      for(size_type j=0; j!=nv; ++j) {
+        if(generators[j](d)==0) {
+          //std::cerr << "Warning: Unbounded polytope\n";
+          ARIADNE_THROW(UnboundedSet,"Polytope::Polytope(Polyhedron plhd)","plhd="<<plhd<<", generators="<<generators);
+        }
+      }
       array<F> data(nv*(d+1));
       for(size_type j=0; j!=nv; ++j) {
         for(size_type i=0; i!=d+1u; ++i) {
-          data[j*(d+1)+i]=result[j](i);
+          data[j*(d+1)+i]=generators[j](i);
         }
       }
-      for(size_type j=0; j!=nv; ++j) {
-        F s=result[j](d);
-        if(s!=F(0)) {
-          for(size_type i=0; i!=d; ++i) {
-            data[j*(d+1)+i]=result[j](i)/s;
-          }
-          data[j*(d+1)+d]=1;
-        } else {
-          Polytope<F> pltp(d,nv,data.begin());
-          std::cerr << result << std::endl;
-          ARIADNE_THROW(UnboundedSet,"polytope(Polyhedron plhd)","\n  plhd="<<plhd<<",\n  pltp="<<pltp);
-        }
-      }
-      
-      return Polytope<F>(d,nv,data.begin());
-      //std::cerr << "G=" << G << std::endl;
+      Polytope<F> pltp(d,nv,data.begin());
+      return pltp;
     }
     
     template<class R>
@@ -290,14 +284,21 @@ namespace Ariadne {
     tribool 
     Polytope<R>::empty() const
     {
-      return indeterminate;
+      return this->number_of_vertices()==0;
     }
     
     template<class R>
     tribool 
     Polytope<R>::bounded() const
     {
-      return true;
+      tribool result=true;
+      dimension_type d=this->dimension();
+      size_type nv=this->number_of_vertices();
+      R zero=0;
+      for(size_type i=0; i!=nv; ++i) {
+        result = result && (this->_data[i*(d+1u)+d]==zero);
+      }
+      return result;
     }
     
     /*!Set up linear programming problem
@@ -416,6 +417,15 @@ namespace Ariadne {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
+
+    template<class R>
+    std::string
+    Polytope<R>::name()
+    {
+      return std::string("Polytope")+"<"+Numeric::name<R>()+">";
+    }
+
+
     template<class R>  
     std::ostream& 
     Polytope<R>::write(std::ostream& os) const 

@@ -46,10 +46,12 @@ using namespace Ariadne::Output;
 using namespace boost::python;
 
 template<class R> inline void write_rectangle(epsfstream& eps, const Rectangle<R>& r) { eps << r; }
+template<class R> inline void write_rectangular_set(epsfstream& eps, const RectangularSet<R>& r) { eps << r; }
 template<class R> inline void write_parallelotope(epsfstream& eps, const Parallelotope<R>& p) { eps << p; }
 template<class R> inline void write_zonotope(epsfstream& eps, const Zonotope<R>& z) { eps << z; }
 template<class R> inline void write_polytope(epsfstream& eps, const Polytope<R>& p) { eps << p; }
 template<class R> inline void write_polyhedron(epsfstream& eps, const Polyhedron<R>& p) { eps << p; }
+template<class R> inline void write_polyhedral_set(epsfstream& eps, const PolyhedralSet<R>& p) { eps << p; }
 template<class R> inline void write_rectangle_list_set(epsfstream& eps, const ListSet< Rectangle<R> >& r) { eps << r; }
 template<class R> inline void write_parallelotope_list_set(epsfstream& eps, const ListSet< Parallelotope<R> >& s) { eps << s; }
 template<class R> inline void write_zonotope_list_set(epsfstream& eps, const ListSet< Zonotope<R> >& s) { eps << s; }
@@ -84,11 +86,13 @@ void export_postscript_output()
     .def("set_line_style",&epsfstream::set_line_style)
     .def("set_fill_style",&epsfstream::set_fill_style)
     .def("write",&write_rectangle<Float>)
+    .def("write",&write_rectangular_set<Float>)
     .def("write",&write_parallelotope<Float>)
     .def("write",&write_zonotope<Float>)
     .def("write",&write_parallelotope<Float>)
     .def("write",&write_polytope<Float>)
     .def("write",&write_polyhedron<Float>)
+    .def("write",&write_polyhedral_set<Float>)
     .def("write",&write_rectangle_list_set<Float>)
     .def("write",&write_parallelotope_list_set<Float>)
     .def("write",&write_zonotope_list_set<Float>)

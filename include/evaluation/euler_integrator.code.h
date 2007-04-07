@@ -52,90 +52,98 @@
 #include "../output/logging.h"
 
 namespace Ariadne {
-  namespace Evaluation {
     
-    template<class R>
-    EulerIntegrator<R>::EulerIntegrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_basic_set_radius)
-      : Base_(maximum_step_size,lock_to_grid_time,maximum_basic_set_radius)
-    {
-    }
 
-    template<class R>
-    Geometry::Rectangle<R> 
-    EulerIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
-                                            const Geometry::Rectangle<R>& initial_set, 
-                                            time_type& step_size) const
-    {
-      using namespace Numeric;
-      using namespace LinearAlgebra;
-      using namespace Geometry;
-      using namespace System;
- 
-      if(verbosity>6) { std::clog << "EulerIntegrator::integration_step(VectorField,Rectangle,time_type) const" << std::endl; }
-
-
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"EulerIntegrator::integration_step(VectorField,Rectangle,time_type) const");
-      
-      const VectorField<R>& vf(vector_field);
-      Rectangle<R> r=initial_set;
-      Rectangle<R> q=estimate_flow_bounds(vf,r,step_size);
-      
-      Interval<R> h=step_size;      
-      Vector< Interval<R> > fq=vf(q);
-      r=r+(h*fq);
-
-      if(verbosity>0) {
-        std::clog << "suggested stepsize=" << step_size << std::endl;
-                
-        std::clog << "stepsize=" << h << std::endl;
-        std::clog << "bound=" << q << std::endl;
-
-        std::clog << "derivative=" << fq << std::endl;
-
-        std::clog << "position=" << r << std::endl;
-      }
-      return r;
-    }
+namespace Evaluation { static int& verbosity = integrator_verbosity; }
 
 
 
-    template<class R>
-    Geometry::Rectangle<R> 
-    EulerIntegrator<R>::reachability_step(const System::VectorField<R>& vector_field, 
-                                           const Geometry::Rectangle<R>& initial_set, 
-                                           time_type& step_size) const
-    {
-      using namespace Numeric;
-      using namespace LinearAlgebra;
-      using namespace Geometry;
-      using namespace System;
-  
-      if(verbosity>6) { std::clog << "EulerIntegrator::reachability_step(VectorField,Rectangle,time_type) const" << std::endl; }
-
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set(),"EulerIntegrator::reachability_step(VectorField,Rectangle,time_type) const");
-      
-      const VectorField<R>& vf(vector_field);
-      Rectangle<R> r=initial_set;
-      time_type& h=step_size;
-
-      Rectangle<R> q=estimate_flow_bounds(vf,r,h);
-      
-      Vector< Interval<R> > fq=vf(q);
-      
-      r=r+Vector< Interval<R> >(Interval<R>(R(0),h)*fq);
-
-      if(verbosity>1) { 
-        std::clog << "suggested stepsize=" << step_size << std::endl;
-                  
-        std::clog << "stepsize=" << h << std::endl;
-        std::clog << "bound=" << q << std::endl;
-  
-        std::clog << "derivative=" << fq << std::endl;
-        std::clog << "position=" << r << std::endl;
-      }
-
-      return r;
-    }
-    
-  }
+template<class R>
+Evaluation::EulerIntegrator<R>::EulerIntegrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_basic_set_radius)
+  : Base_(maximum_step_size,lock_to_grid_time,maximum_basic_set_radius)
+{
 }
+
+
+
+template<class R>
+Geometry::Rectangle<R> 
+Evaluation::EulerIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
+                                                 const Geometry::Rectangle<R>& initial_set, 
+                                                 time_type& step_size) const
+{
+  using namespace Numeric;
+  using namespace LinearAlgebra;
+  using namespace Geometry;
+  using namespace System;
+  
+  if(verbosity>6) { std::clog << "EulerIntegrator::integration_step(VectorField,Rectangle,time_type) const" << std::endl; }
+  
+  
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"EulerIntegrator::integration_step(VectorField,Rectangle,time_type) const");
+  
+  const VectorField<R>& vf(vector_field);
+  Rectangle<R> r=initial_set;
+  Rectangle<R> q=estimate_flow_bounds(vf,r,step_size);
+  
+  Interval<R> h=step_size;      
+  Vector< Interval<R> > fq=vf(q);
+  r=r+(h*fq);
+  
+  if(verbosity>0) {
+    std::clog << "suggested stepsize=" << step_size << std::endl;
+    
+    std::clog << "stepsize=" << h << std::endl;
+    std::clog << "bound=" << q << std::endl;
+    
+    std::clog << "derivative=" << fq << std::endl;
+    
+    std::clog << "position=" << r << std::endl;
+  }
+  return r;
+}
+
+
+
+template<class R>
+Geometry::Rectangle<R> 
+Evaluation::EulerIntegrator<R>::reachability_step(const System::VectorField<R>& vector_field, 
+                                                  const Geometry::Rectangle<R>& initial_set, 
+                                                  time_type& step_size) const
+{
+  using namespace Numeric;
+  using namespace LinearAlgebra;
+  using namespace Geometry;
+  using namespace System;
+  
+  if(verbosity>6) { std::clog << "EulerIntegrator::reachability_step(VectorField,Rectangle,time_type) const" << std::endl; }
+  
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set(),"EulerIntegrator::reachability_step(VectorField,Rectangle,time_type) const");
+  
+  const VectorField<R>& vf(vector_field);
+  Rectangle<R> r=initial_set;
+  time_type& h=step_size;
+  
+  Rectangle<R> q=estimate_flow_bounds(vf,r,h);
+  
+  Vector< Interval<R> > fq=vf(q);
+  
+  r=r+Vector< Interval<R> >(Interval<R>(R(0),h)*fq);
+  
+  if(verbosity>1) { 
+    std::clog << "suggested stepsize=" << step_size << std::endl;
+    
+    std::clog << "stepsize=" << h << std::endl;
+    std::clog << "bound=" << q << std::endl;
+    
+    std::clog << "derivative=" << fq << std::endl;
+    std::clog << "position=" << r << std::endl;
+  }
+  
+  return r;
+}
+
+
+
+}
+

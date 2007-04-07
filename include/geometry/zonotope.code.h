@@ -733,6 +733,14 @@ namespace Ariadne {
 
     
     template<class RC,class RG>
+    std::string
+    Zonotope<RC,RG>::name()
+    {
+      return std::string("Zonotope")+"<"+Numeric::name<RC>()+","+Numeric::name<RG>()+">";
+    }
+
+
+    template<class RC,class RG>
     std::ostream&
     Zonotope<RC,RG>::write(std::ostream& os) const 
     {

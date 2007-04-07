@@ -40,6 +40,7 @@ namespace Ariadne {
     template<class R> class Parallelotope;
     template<class RC,class RG> class Zonotope;
     template<class R> class Simplex;
+    template<class R> class Constraint;
     template<class R> class Polyhedron;
     template<class R> class Polytope;
     template<class R> class Sphere;

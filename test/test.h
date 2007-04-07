@@ -75,7 +75,7 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
 }\
 
 /*! \brief Evaluates \a expression in a boolean context and checks if the result is \a true. */
-#define ARIADNE_ASSERT(expression)               \
+#define ARIADNE_TEST_ASSERT(expression)               \
 { \
   std::cout << #expression << ": " << std::flush; \
   bool result = (expression);                     \
@@ -83,8 +83,8 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
     std::cout << "true\n" << std::endl; \
   } else { \
     ++ARIADNE_TEST_FAILURES; \
-    std::cout << "false\n" << std::endl; \
-    std::cerr << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Assertion `" << #expression << "' failed." << std::endl; \
+    std::cout << "false" << std::endl; \
+    std::cerr << __FILE__ << ":" << __LINE__ << ": " << __FUNCTION__ << ": Assertion `" << #expression << "' failed.\n" << std::endl; \
   } \
 }\
 
@@ -108,14 +108,14 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
 /*! \brief Constructs object \a variable of type \a class from \a expression. */
 #define ARIADNE_CONSTRUCT(class,variable,expression) \
 { \
-  std::cout << #class << " " << #variable << "(" << #expression << "): " << std::flush; \
+  std::cout << #class << " " << #variable << "" << #expression << ": " << std::flush; \
   try { \
-    class variable(expression);                                         \
+    class variable expression;                                         \
     std::cout << #variable << "==" << variable << "\n" << std::endl;     \
   }                                       \
-  ARIADNE_CATCH("Constructor `" << #class << " " << #variable << "(" << #expression << ")'") \
+  ARIADNE_CATCH("Constructor `" << #class << "" << #variable << "" << #expression << "'") \
 } \
-class variable(expression); \
+class variable expression; \
 
 
 /*! \brief Assigns object \a variable from \a expression. */

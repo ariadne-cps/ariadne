@@ -353,6 +353,17 @@ namespace Ariadne {
       return result;
     }
       
+    template<class R> inline
+    Rectangle<R> Rectangle<R>::neighbourhood(const real_type& delta) const
+    {
+      Rectangle<R> result(this->dimension());
+      for (size_type j=0; j!=this->dimension(); ++j) {
+        result.set_lower_bound(j,sub_approx(this->lower_bound(j),delta));
+        result.set_upper_bound(j,add_approx(this->upper_bound(j),delta));
+      }
+      return result;
+    }
+      
 
 
     // Rectangle geometric operations

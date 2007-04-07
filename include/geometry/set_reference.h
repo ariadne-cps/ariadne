@@ -33,6 +33,8 @@
 
 #include "set_interface.h"
 #include "rectangle.h"
+#include "rectangular_set.h"
+#include "polyhedral_set.h"
 
 
 namespace Ariadne {
@@ -141,7 +143,16 @@ namespace Ariadne {
         return *this; 
       }
 
+      //! \brief Construct by making a copy of a Rectangle. 
+      SetReference(const Rectangle<R>& r) : _ptr(new RectangularSet<R>(r)) { }
+
+      //! \brief Construct by making a copy of a Rectangle. 
+      SetReference(const Polyhedron<R>& p) : _ptr(new PolyhedralSet<R>(p)) { }
+
       //! \brief Convert to an ordinary reference. 
+      operator SetInterface<R>& () { return *this->_ptr; }
+
+      //! \brief Convert to an ordinary const reference. 
       operator const SetInterface<R>& () const { return *this->_ptr; }
 
       //! \brief Destructor. 
@@ -154,6 +165,7 @@ namespace Ariadne {
       tribool intersects(const Rectangle<R>& r) const { return this->_ptr->intersects(r); }
       tribool disjoint(const Rectangle<R>& r) const { return this->_ptr->disjoint(r); }
       tribool subset(const Rectangle<R>& r) const { return this->_ptr->subset(r); }
+      tribool bounded() const { return this->_ptr->bounded(); }
       Rectangle<R> bounding_box() const { return this->_ptr->bounding_box(); }
       std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }
     };

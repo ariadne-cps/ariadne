@@ -122,6 +122,14 @@ namespace Ariadne {
     }
     
     
+    template<class R> inline
+    dimension_type
+    Constraint<R>::dimension() const
+    { 
+      return this->_d;
+    }
+    
+    
     template<class R1> template<class R2> inline 
     tribool Constraint<R1>::satisfied_by(const Point<R2>& pt) const
     {

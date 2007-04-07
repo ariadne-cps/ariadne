@@ -30,10 +30,13 @@
 
 #include "../evaluation/exceptions.h"
 
+namespace Ariadne {
+
+namespace Evaluation { static int& verbosity = hybrid_evolver_verbosity; }
 
 template<class R>
-Ariadne::Geometry::Point<typename Ariadne::Evaluation::IntervalNewtonSolver<R>::I>
-Ariadne::Evaluation::IntervalNewtonSolver<R>::solve(const System::VectorField<R>& f, 
+Geometry::Point<typename Evaluation::IntervalNewtonSolver<R>::I>
+Evaluation::IntervalNewtonSolver<R>::solve(const System::VectorField<R>& f, 
                                                     const Geometry::Point<I>& ix)
 {
   const R& e=this->maximum_error();
@@ -81,4 +84,6 @@ Ariadne::Evaluation::IntervalNewtonSolver<R>::solve(const System::VectorField<R>
     n=n-1;
   }
   throw EvaluationException("No result found -- maximum number of steps reached");
+}
+
 }

@@ -33,7 +33,7 @@
 
 #include "../geometry/set_reference.h"
 #include "../geometry/grid_set.h"
-#include "../system/hybrid_automaton.h"
+#include "../geometry/hybrid_space.h"
 
 namespace Ariadne {  
   namespace Geometry {
@@ -42,12 +42,10 @@ namespace Ariadne {
     typedef id_type location_type;
 
 
-
     class HybridSystemError : public std::runtime_error {
      public:
       HybridSystemError(const std::string& what) : std::runtime_error(what) { }
     };
-
 
 
     /*! \ingroup HybridSet
@@ -63,10 +61,12 @@ namespace Ariadne {
       typedef typename std::map<location_type,S>::iterator iterator;
       typedef typename std::map<location_type,S>::const_iterator const_iterator;
      public:
+      /*! \brief Virtual destructor. */
+      virtual ~HybridSetBase();
       /*! \brief Construct a set with no locations. */
       HybridSetBase();
       /*! \brief Construct from a dictionary of location identifyers and dimensions. */
-      HybridSetBase(const std::map<location_type,dimension_type>& locations);
+      HybridSetBase(const HybridSpace& locations);
       /*! \brief Copy constructor. */
       HybridSetBase(const HybridSetBase<S>& hs);
       /*! \brief Conversion constructor from another hybrid set. */
@@ -80,7 +80,7 @@ namespace Ariadne {
       template<class T> S& new_location(location_type q, const T& t);
 
       /*! \brief The discrete locations of the set. */
-      std::map<location_type,dimension_type> locations() const;
+      HybridSpace locations() const;
       /*! \brief The number of discrete locations or components comprising the set. */
       location_type number_of_locations() const;
       /*! \brief Check if the hybrid set has a component for discrete location \a q. */
@@ -94,11 +94,17 @@ namespace Ariadne {
       void clear();
       /*! \brief Returns true if every component is empty. */
       tribool empty() const;
+      /*! \brief Returns true if every component is bounded. */
+      tribool bounded() const;
       
       /*! \brief Adjoin the set \a s to location \a q. */
       template<class S1> void adjoin(location_type q, const S1& s);
       /*! \brief Adjoin another hybrid set. */
       template<class S1> void adjoin(const HybridSetBase<S1>& hs);
+      /*! \brief Restrict to hybrid set. */
+      template<class S1> void restrict(const HybridSetBase<S1>& hs);
+      /*! \brief Remove the set \a hs. */
+      template<class S1> void remove(const HybridSetBase<S1>& hs);
       
       /*! \brief An iterator to the beginning of the component sets. */
       iterator begin();
@@ -110,7 +116,7 @@ namespace Ariadne {
       const_iterator end() const;
 
       /*! \brief Write to an output stream. */
-      std::ostream& write(std::ostream& os) const;
+      virtual std::ostream& write(std::ostream& os) const;
      private:
       std::map< location_type, S > _component_sets;
     };
@@ -121,6 +127,10 @@ namespace Ariadne {
     template<class S1, class S2 > 
     tribool
     subset(const HybridSetBase<S1>&, const HybridSetBase<S2>&);
+
+    template<class S1, class S2 > 
+    tribool
+    disjoint(const HybridSetBase<S1>&, const HybridSetBase<S2>&);
 
 
     /*! \ingroup HybridSet
@@ -137,6 +147,8 @@ namespace Ariadne {
         : HybridSetBase< GridMaskSet<R> >(hgms) { }
       size_type size() const;
       size_type capacity() const;
+
+      virtual std::ostream& write(std::ostream& os) const;
     };
 
 
@@ -167,6 +179,10 @@ namespace Ariadne {
     difference(const HybridGridCellListSet<R>& hgcl, const HybridGridMaskSet<R>& hgms);
 
     template<class R> 
+    HybridGridMaskSet<R>
+    difference(const HybridGridMaskSet<R>& hgcl, const HybridGridMaskSet<R>& hgms);
+
+    template<class R> 
     HybridGridCellListSet<R>
     regular_intersection(const HybridGridCellListSet<R>& hgcl, const HybridGridMaskSet<R>& hgms);
 
@@ -174,9 +190,13 @@ namespace Ariadne {
     HybridGridCellListSet<R>
     regular_intersection(const HybridGridMaskSet<R>& hgms, const HybridGridCellListSet<R>& hgcl);
    
+    template<class R> 
+    HybridGridMaskSet<R>
+    regular_intersection(const HybridGridMaskSet<R>& hgms1, const HybridGridMaskSet<R>& hgms2);
+   
     
     
-        /*! \ingroup HybridSet
+    /*! \ingroup HybridSet
      *  \brief A hybrid set comprising of a GridMaskSet for every component.
      */
     template< class R >
@@ -188,8 +208,9 @@ namespace Ariadne {
         : HybridSetBase< SetReference<R> >() { }
       HybridSet(const HybridSet<R>& hs)
         : HybridSetBase< SetReference<R> >(hs) { }
+      template<class S1> HybridSet(const HybridSetBase<S1>& hs)
+        : HybridSetBase< SetReference<R> >(hs) { }
     };
-
 
 
     
@@ -198,4 +219,4 @@ namespace Ariadne {
 
 #include "hybrid_set.inline.h"
 
-#endif /* ARIADNE_HYBRID_EVOLVER_H */
+#endif /* ARIADNE_HYBRID_SET_H */

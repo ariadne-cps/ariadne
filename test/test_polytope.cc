@@ -122,7 +122,7 @@ test_polytope()
   cout << "Polytope(r)=" << p << endl;
   
   cout << endl;
-
+  
 
   Polytope<R> pltp2=Polytope<R>(Matrix<R>("[3.125,1.125,-2.875,-0.875;1.75,-0.25,-2.25,-0.25;1.0,1.0,1.0,1.0]"));
   cout << "pltp2=" << pltp2 << endl << "pltp2.bounding_box()=" << pltp2.bounding_box() << endl;
@@ -189,7 +189,12 @@ test_polytope<Rational>()
   Polytope<R> p(ptl);
   cout << "p=" << p << endl;
   
-  // Test Polyhedron to Polytope conversion for degenerate
+  // Test Polyhedron to Polytope conversion for empty polytope
+  Polytope<R> epltp;
+  Polyhedron<R> eplhd(epltp);
+  cout << "eplhd=" << eplhd << endl;
+  
+  // Test Polyhedron to Polytope conversion for degenerate case
   Polyhedron<R> plhd(Rectangle<R>("[0,1]x[-1,2]x[-1,3]"));
   Polytope<R> pltp(plhd);
   cout << "pltp=" << pltp << endl;

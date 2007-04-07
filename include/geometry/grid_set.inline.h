@@ -385,6 +385,13 @@ namespace Ariadne {
     }
 
     template<class R> inline
+    void
+    GridMaskSet<R>::adjoin_unbounded_cell() 
+    {
+      this->_lattice_set.adjoin_unbounded_cell();
+    }
+    
+    template<class R> inline
     void 
     GridMaskSet<R>::adjoin(const GridCell<R>& gc) 
     {
@@ -408,23 +415,23 @@ namespace Ariadne {
       this->_lattice_set.adjoin(gcls._lattice_set);
     }
 
-    template<class R> template<class SetInterface> inline
+    template<class R> template<class S> inline
     void 
-    GridMaskSet<R>::adjoin_over_approximation(const SetInterface& s) 
+    GridMaskSet<R>::adjoin_over_approximation(const S& s) 
     {
-        this->adjoin(over_approximation(s,this->grid()));
+      this->adjoin(over_approximation(s,FiniteGrid<R>(this->grid(),this->block())));
     }
 
-    template<class R> template<class SetInterface> inline
+    template<class R> template<class S> inline
     void 
-    GridMaskSet<R>::adjoin_under_approximation(const SetInterface& s) 
+    GridMaskSet<R>::adjoin_under_approximation(const S& s) 
     {
       this->adjoin(under_approximation(s,FiniteGrid<R>(this->grid(),this->block())));
     }
 
-    template<class R> template<class SetInterface> inline
+    template<class R> template<class S> inline
     void 
-    GridMaskSet<R>::restrict_over_approximation(const SetInterface& s) 
+    GridMaskSet<R>::restrict_over_approximation(const S& s) 
     {
       this->restrict(over_approximation(s,FiniteGrid<R>(this->grid(),this->block())));
     }

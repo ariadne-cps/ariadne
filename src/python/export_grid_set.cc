@@ -113,7 +113,7 @@ void export_grid_set()
 
   typedef SetInterface<R> RSetInterface;
   typedef Rectangle<R> RRectangle;
-  typedef Rectangle<R> RRectangle;
+  typedef Polyhedron<R> RPolyhedron;
   typedef Parallelotope<R> RParallelotope;
   typedef Zonotope<R> RZonotope;
   typedef Polytope<R> RPolytope;
@@ -153,6 +153,7 @@ void export_grid_set()
     .def("adjoin_over_approximation", &adjoin_over_approximation<RGridCellListSet,RZonotope>)
     .def("adjoin_over_approximation", &adjoin_over_approximation<RGridCellListSet,IZonotope>)
     .def("adjoin_over_approximation", &adjoin_over_approximation<RGridCellListSet,RPolytope>)
+    .def("adjoin_over_approximation", &adjoin_over_approximation<RGridMaskSet,RPolyhedron>)
     .def("size", &RGridCellListSet::size)
     .def("__len__", &RGridCellListSet::size)
     .def("__getitem__", &get_item<RGridCellListSet>)
@@ -180,6 +181,7 @@ void export_grid_set()
     .def("adjoin_over_approximation", &adjoin_over_approximation<RGridMaskSet,RZonotope>)
     .def("adjoin_over_approximation", &adjoin_over_approximation<RGridMaskSet,IZonotope>)
     .def("adjoin_over_approximation", &adjoin_over_approximation<RGridMaskSet,RPolytope>)
+    .def("adjoin_over_approximation", &adjoin_over_approximation<RGridMaskSet,RPolyhedron>)
     //.def("adjoin_over_approximation", &adjoin_over_approximation<RGridMaskSet,RRectangleListSet>)
     //.def("adjoin_over_approximation", &adjoin_over_approximation<RGridMaskSet,RZonotopeListSet>)
     //.def("adjoin_over_approximation", &adjoin_over_approximation<RGridMaskSet,IZonotopeListSet>)

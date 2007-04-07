@@ -231,6 +231,14 @@ namespace Ariadne {
     
     
     template<class R>
+    std::string
+    Rectangle<R>::name()
+    {
+      return std::string("Rectangle")+"<"+Numeric::name<R>()+">";
+    }
+
+
+    template<class R>
     std::ostream&
     Rectangle<R>::write(std::ostream& os) const 
     {
@@ -247,6 +255,14 @@ namespace Ariadne {
       return os;
     }
     
+    template<class R>
+    std::string
+    Rectangle< Numeric::Interval<R> >::name()
+    {
+      return std::string("Rectangle")+"<"+Numeric::name< Numeric::Interval<R> >()+">";
+    }
+
+
     template<class R>
     std::ostream&
     Rectangle< Numeric::Interval<R> >::write(std::ostream& os) const 

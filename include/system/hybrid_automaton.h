@@ -30,6 +30,7 @@
 #include <iostream>
 
 #include "../base/stlio.h"
+#include "../geometry/hybrid_space.h"
 #include "../system/discrete_mode.h"
 #include "../system/discrete_transition.h"
 
@@ -163,8 +164,8 @@ class HybridAutomaton
   /*! \brief Test if the hybrid automaton has a discrete transition with \a event_id and \a source_id. */
   bool has_transition(id_type event_id, id_type source_id) const;
   
-  /*! \brief A map giving the dimension of the state space for each location identifier. */
-  std::map< id_type, dimension_type > locations() const;
+  /*! \brief A set giving the dimension of the state space for each location identifier. */
+  Geometry::HybridSpace locations() const;
   
   /*! \brief The hybrid set giving the invariant for each discrete location. */
   Geometry::HybridSet<R> invariant() const;

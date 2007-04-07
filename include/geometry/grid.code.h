@@ -314,9 +314,11 @@ namespace Ariadne {
     std::ostream&
     Grid<R>::write(std::ostream& os) const
     {
-      os << "Grid( origin=" << this->_origin
-         << ", lengths=" << this->_lengths
-         << " )";
+      os << "Grid( ";
+      if(this->_origin!=array<R>(this->dimension(),0)) {
+        os << "origin=" << this->_origin << ", ";
+      }
+      os  << "lengths=" << this->_lengths << " )";
       return os;
     }
 

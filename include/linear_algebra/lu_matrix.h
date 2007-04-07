@@ -47,7 +47,7 @@ namespace Ariadne {
   namespace LinearAlgebra {
 
     /*! \ingroup LinearAlgebra
-     *  \brief A matrix stored in LU product form. 
+     *  \brief A matrix stored in LU product form, \f$PA=LU\f$. 
      */
     template<class Real>
     class LUMatrix {

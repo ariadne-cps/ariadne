@@ -57,6 +57,7 @@ integrator=AffineIntegrator(maximum_step_size,lock_to_grid_time,maximum_set_radi
 #integrator=LohnerIntegrator(maximum_step_size,lock_to_grid_time,maximum_set_radius);
 hybrid_evolver=HybridEvolver(apply,integrator);
 
+set_hybrid_evolver_verbosity(4)
 print "Computing chainreachable set..."
 #reach_set=hybrid_evolver.continuous_chainreach(automaton,initial_set,bounding_set)
 reach_set=hybrid_evolver.chainreach(automaton,initial_set,bounding_set)
@@ -70,7 +71,8 @@ print "Done."
 #print reach_set[l1.id()]
 
 # Eps output
-eps=EpsPlot("bouncing-ball.eps",bounding_box,0,1)
+eps=EpsPlot()
+eps.open("bouncing-ball.eps",bounding_box,0,1)
 
 # Defintion of the reference grid
 #eps.set_line_style(False)

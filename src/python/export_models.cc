@@ -50,6 +50,15 @@ void export_henon_map() {
     .def("jacobian", (Matrix<F>(HenonMap<R>::*)(const Point<F>&)const)(&HenonMap<R>::jacobian))
     .def(self_ns::str(self))
   ;
+
+
+  class_< HenonInverseMap<R>, bases< Map<R> > >("HenonInverseMap",init<R,R>())
+    .def("argument_dimension", &HenonInverseMap<R>::argument_dimension)
+    .def("result_dimension", &HenonInverseMap<R>::result_dimension)
+    .def("__call__", (Point<F>(HenonInverseMap<R>::*)(const Point<F>&)const)(&HenonInverseMap<R>::image))
+    .def("jacobian", (Matrix<F>(HenonInverseMap<R>::*)(const Point<F>&)const)(&HenonInverseMap<R>::jacobian))
+    .def(self_ns::str(self))
+  ;
 }
 
 

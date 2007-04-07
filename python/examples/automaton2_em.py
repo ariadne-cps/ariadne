@@ -7,11 +7,11 @@ from ariadne import *
 space=Rectangle("[-5,30]x[-5,30]")
 
 #locazione 1
-invariant1=PolyhedralSet(Rectangle("[0,8]x[0,30]"))
+invariant1=RectangularSet("[0,8]x[0,30]")
 dynamic1=AffineVectorField(Matrix("[0,0;0,-1]"),Vector("[1,25]"))
 
 #locazione 2
-invariant2=PolyhedralSet(Rectangle("[8,20]x[0,30]"))
+invariant2=RectangularSet("[8,20]x[0,30]")
 dynamic2=AffineVectorField(Matrix("[0,0;0,-2]"),Vector("[1,5]"))
 
 #creazione automa ibrido
@@ -23,7 +23,7 @@ mode1=automaton.new_mode(mode1_id,dynamic1,invariant1)
 mode2_id=2
 mode2=automaton.new_mode(mode2_id,dynamic2,invariant2)
 
-activation12 = PolyhedralSet(Rectangle("[8,20]x[0,30]"))
+activation12 = RectangularSet("[8,20]x[0,30]")
 reset12 = AffineMap(Matrix("[1,0;0,1]"),Vector("[0,0]"))
 
 event1_id=3
@@ -89,14 +89,20 @@ hybrid_evolver=HybridEvolver(apply,integrator);
 
 
 print "Computing continuous chainreach set"
+#set_applicator_verbosity(4)
+set_integrator_verbosity(6)
+set_hybrid_evolver_verbosity(4)
 continuous_chainreach_set=hybrid_evolver.continuous_chainreach(automaton,initial_set,bounding_set)
+print
 
-print "Computing single discrete step"
+print "Computing single discrete step..."
 discrete_step_set=hybrid_evolver.discrete_step(automaton,initial_cell_list_set)
-print "discrete step"
-print discrete_step_set
+print
 
-print "Computing chainreach set"
+print "discrete_step_set",discrete_step_set
+print
+
+print "Computing chainreach set..."
 chainreach_set=hybrid_evolver.chainreach(automaton,initial_set,bounding_set)
 
 print "Exporting to postscript output...",

@@ -189,15 +189,20 @@ namespace Ariadne {
     ListSet<BS>::write(std::ostream& os) const
     {
       const ListSet<BS>& ls=*this;
-      os << "ListSet<" << Numeric::name<R>() << ",BS>{\n  ";
-      os << "[ ";
-      if (ls.size() >0 ) {
-        os << ls[0];
+      os << "ListSet<"<<BS::name()<<">(\n  size="<<ls.size()<<",\n";
+      if(!ls.empty()) { os << "  front="<<ls[0]<<",\n"; }
+      // Don't write list
+      if(false) {
+        os << "  [ ";
+        if (ls.size() >0 ) {
+          os << ls[0];
+        }
+        for (size_type i=1; i<ls.size(); i++) {
+          os << ",\n    " << ls[i];
+        }
+        os << "\n  ]\n";
       }
-      for (size_type i=1; i<ls.size(); i++) {
-        os << ",\n    " << ls[i];
-      }
-      os << "\n  ]\n}" << std::endl;
+      os << "}" << std::endl;
       return os;
     }
 

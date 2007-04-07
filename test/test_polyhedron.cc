@@ -41,6 +41,7 @@
 #include "geometry/grid.h"
 #include "geometry/grid_set.h"
 #include "output/epsfstream.h"
+#include "output/logging.h"
 
 #include "geometry/ppl_polyhedron.h"
 
@@ -95,8 +96,9 @@ test_polyhedron()
     cout << "  " << c.satisfied_by(pt1) << endl;
   }
   
-  cout << "phd1.contains(pt1)=" << flush; cout << phd1.contains(pt1) << endl;
-  assert((bool)(phd1.contains(pt1)));
+  ARIADNE_TEST_ASSERT(phd1.contains(pt1));
+  //cout << "phd1.contains(pt1)=" << flush; cout << phd1.contains(pt1) << endl;
+  //assert((bool)(phd1.contains(pt1)));
   
   Point<R> pt2("(2.25,-0.375)");
   cout << "pt2=" << pt2 << endl;
@@ -188,29 +190,42 @@ test_polyhedron<Rational>()
   cout << "test_polyhedron<" << name<R>() << ">" << endl;
   LinearAlgebra::Matrix<R> A("[1,7/8;-1,9/8;1/8,-9/4]");
   LinearAlgebra::Vector<R> b("[11/8,1/2,1/4]");
-  Polyhedron<R> phd(A,b);
-  cout << "phd=" << phd << endl;
-  cout << "phd.constraints()=" << phd.constraints() << endl;
-    
-  Polytope<R> pltp(phd);
-  cout << "Polytope(phd)=" << pltp << endl;
+  ARIADNE_CONSTRUCT(Polyhedron<R>,plhd,(A,b));
+  ARIADNE_TEST_ASSERT(!plhd.empty());
+  ARIADNE_CONSTRUCT(Polytope<R>,pltp,(plhd));
   cout << "  Vertices should be (71/128,15/16), (-2/3,-4/7),  (212/151,-5/151)" << endl;
-  Polyhedron<R> phd2(pltp);
-  cout << "Polyhedron(Polytope(phd))=" << phd2 << endl;
-   cout << endl;
+
+  Rectangle<R> r("[-3/4,3]x[-2/3,1]");
+  cout << "r=" << r << endl;
+  ARIADNE_TEST_ASSERT(subset(plhd,r));
+  r=Rectangle<R>("[-1/4,3]x[-2/3,1]");
+  ARIADNE_TEST_ASSERT(!subset(plhd,r));
+  
+  // Empty polyhedron 
+  ARIADNE_CONSTRUCT(Polyhedron<R>,eplhd,(Matrix<R>("[-1,0;0,-1;1,2]"),Vector<R>("[0,0,-1]")));
+  ARIADNE_TEST_ASSERT(eplhd.empty());
+
+  // Unbounded polyhedron x,y>=0.
+  ARIADNE_CONSTRUCT(Polyhedron<R>,ubplhd,(Matrix<R>("[-1,0;0,-1]"),Vector<R>("[0,0]")));
+  ARIADNE_TEST_ASSERT(!ubplhd.empty());
+  ARIADNE_TEST_ASSERT(!subset(ubplhd,r));
+
+  Polyhedron<R> plhd2(pltp);
+  cout << "Polyhedron(Polytope(phd))=" << plhd2 << endl;
+  cout << endl;
  
   Rectangle<R> r1("[7/8,8/8]x[6/8,7/8]");
   Rectangle<R> r2("[2/8,3/8]x[5/8,6/8]");
   Rectangle<R> r3("[3/8,4/8]x[4/8,5/8]");
 
-  Rectangle<R> bbox=phd.bounding_box().expand_by(R(0.5));
+  Rectangle<R> bbox=plhd.bounding_box().expand_by(R(0.5));
 
   epsfstream eps;
   eps.open("test_polyhedron-2.eps",bbox);
   eps.set_fill_colour("white");
   eps << bbox;
   eps.set_fill_colour("green");
-  eps << phd;
+  eps << plhd;
   eps.set_fill_colour("red");
   eps << r1;
   eps.set_fill_colour("yellow");
@@ -219,16 +234,18 @@ test_polyhedron<Rational>()
   eps << r3;
   eps.close();
 
-  cout << "phd=" << phd << endl;
+  cout << "plhd=" << plhd << endl;
   cout << "r1=" << r1 << endl;
   cout << "r2=" << r2 << endl;
   cout << "r3=" << r3 << endl;
-  cout << "disjoint(r1,phd)=" << disjoint(r1,phd) << endl;
-  cout << "disjoint(r2,phd)=" << disjoint(r2,phd) << endl;
-  cout << "subset(r3,phd)=" << subset(r3,phd) << endl;
-  assert((bool)(disjoint(r1,phd)==true));
-  assert((bool)(disjoint(r2,phd)==false));
-  assert((bool)(subset(r3,phd)==true));
+  cout << "disjoint(r1,plhd)=" << disjoint(r1,plhd) << endl;
+  cout << "disjoint(r2,plhd)=" << disjoint(r2,plhd) << endl;
+  cout << "subset(r3,plhd)=" << subset(r3,plhd) << endl;
+  cout << "subset(plhd,r3)=" << subset(plhd,r3) << endl;
+  
+  assert((bool)(disjoint(r1,plhd)==true));
+  assert((bool)(disjoint(r2,plhd)==false));
+  assert((bool)(subset(r3,plhd)==true));
 
   return 0;
 }

@@ -46,22 +46,3 @@ _ariadne_test(std::ostream& os, const R& r, const ER& er) {
 }\
 
 
-template<class R> void test(double x) {
-  ARIADNE_ASSERT(2+3==23);
-  //assert(2+3==23);
-}
-
-int main() {
-  ARIADNE_TEST(1+2);
-  ARIADNE_TEST(2+3);
-  ARIADNE_TEST_ASSERT(1+2,3);
-  ARIADNE_TEST_ASSERT(2+3,23);
-  ARIADNE_ASSERT(std::string("Hi").size()==2);
-
-  test<int>(1.0);
-  //assert(2+3==23);
-  
-  std::cout << ARIADNE_TEST_FAILURES << " tests failed" << std::endl;
-
-  return ARIADNE_TEST_FAILURES;
-}

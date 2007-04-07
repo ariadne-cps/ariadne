@@ -24,6 +24,7 @@
 #include "python/python_float.h"
 
 #include "geometry/hybrid_set.h"
+#include "system/hybrid_automaton.h"
 #include "evaluation/applicator.h"
 #include "evaluation/integrator.h"
 #include "evaluation/hybrid_evolver.h"

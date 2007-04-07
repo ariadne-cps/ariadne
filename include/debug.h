@@ -21,13 +21,24 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _ARIADNE_DEBUG_H
-#define _ARIADNE_DEBUG_H
+#ifndef ARIADNE_DEBUG_H
+#define ARIADNE_DEBUG_H
 
 #include <iostream>
+#include <cassert>
+
+/*! \brief Evaluates \a expression in a boolean context and checks if the result is \a true. */
+#define ARIADNE_ASSERT(expression) \
+{ \
+  bool result = (expression); \
+  if(!result) { \
+    std::cerr << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Assertion `" << #expression << "' failed.\n" << std::endl; \
+    exit(1); \
+  } \
+} \
 
 namespace Ariadne {
 
 } // namespace Ariadne
 
-#endif // _ARIADNE_DEBUG_H
+#endif // ARIADNE_DEBUG_H

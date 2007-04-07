@@ -55,7 +55,7 @@ template<class R>
 int 
 test_chainreach()
 {
-  int subdivisions=128;
+  int subdivisions=64;
 
   Point<R> params=Point<R>("(1.5,0.875)");
   R a=params[0];
@@ -64,11 +64,8 @@ test_chainreach()
   HenonMap<R> h=HenonMap<R>(a,b);
   Rectangle<R> gbb=Rectangle<R>("[-11.00000,5.00000]x[-8.00000,8.00000]") ;
   cout << "gbb=" << gbb << endl;
-  FiniteGrid<R> fg=FiniteGrid<R>(gbb,128); // grid
+  FiniteGrid<R> fg=FiniteGrid<R>(gbb,subdivisions); // grid
   cout << "fg=" << fg << endl;
-  cout << fg.subdivision_coordinate(0,0)<< std::endl;
-  cout << fg.subdivision_coordinate(0,-88) << std::endl;
-  cout << fg.subdivision_coordinate(0,-88)+11.000 << std::endl;
   const Grid<R>& g=fg.grid(); // grid
   Rectangle<R> ir=Rectangle<R>("[1.499,1.501]x[0.499,0.501]"); // initial state
   Rectangle<R> cb=Rectangle<R>("[-4,4]x[-4,4]"); // cutoff box
@@ -98,7 +95,10 @@ test_chainreach()
   RectangularSet<R> ins(ir);
   RectangularSet<R> cbs(cb);
   SetInterface<R>* crs=apply.chainreach(h,ins,cbs);
-  cout << *crs <<endl;
+  cout << "*crs=" << *crs <<endl;
+  GridMaskSet<R>& gmcrs=*dynamic_cast<GridMaskSet<R>*>(crs);
+  cout << "gmcrs=" << gmcrs <<endl;
+  cout << "gmcrs.size()=" << gmcrs.size() << " of " << gmcrs.capacity() << endl;
 
   epsfstream eps;
   eps.open("test_chainreach-1.eps",epsbb);
@@ -108,12 +108,10 @@ test_chainreach()
   eps.set_line_style(false);
   eps.set_fill_colour("green");
   eps << gmcr;
-  eps.set_line_style(true);
-  eps.set_fill_style(false);
-  eps << ptcr.partition_tree();
-  eps.set_line_style(true);
   eps.set_fill_colour("blue");
   eps << ir;
+  eps.set_line_style(true);
+  eps << ptcr.partition_tree();
   eps.close();
 
   eps.open("test_chainreach-2.eps",epsbb);
@@ -126,10 +124,11 @@ test_chainreach()
   eps << gmcr;
   eps.close();
 
+  epsbb=Rectangle<R>("[-4.1,4.1]x[-4.1,4.1]"); // eps bounding box
   eps.open("test_chainreach-3.eps",epsbb);
   eps.set_line_style(false);
   eps.set_fill_colour("green");
-  eps << crs;
+  eps << gmcr;
   eps.close();
 
   return 0;

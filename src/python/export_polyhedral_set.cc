@@ -36,16 +36,18 @@ using namespace boost::python;
 template<class R>
 void export_polyhedral_set() 
 {
-  class_< PolyhedralSet<R>, bases< SetInterface<R>, Polyhedron<R> > >("PolyhedralSet",init< Polyhedron<R> >())
+  class_< PolyhedralSet<R>, bases< SetInterface<R> > >("PolyhedralSet",init< Polyhedron<R> >())
     .def(init< Matrix<R>,Vector<R> >())
     .def(init< Rectangle<R> >())
     .def(init< Polyhedron<R> >())
+    .def("polyhedron", &PolyhedralSet<R>::operator const Polyhedron<R>&,return_value_policy<copy_const_reference>())
     .def("dimension", &PolyhedralSet<R>::dimension)
     .def("contains", &PolyhedralSet<R>::contains)
     .def("superset", &PolyhedralSet<R>::superset)
     .def("intersects", &PolyhedralSet<R>::intersects)
     .def("disjoint", &PolyhedralSet<R>::disjoint)
     .def("subset", &PolyhedralSet<R>::subset)
+    .def("bounded", &PolyhedralSet<R>::bounded)
     .def("bounding_box", &PolyhedralSet<R>::bounding_box)
     .def(self_ns::str(self))
   ;

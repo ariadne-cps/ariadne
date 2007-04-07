@@ -34,6 +34,7 @@
 #include "geometry/rectangular_set.h"
 #include "evaluation/applicator.h"
 #include "output/epsfstream.h"
+#include "output/logging.h"
 
 #include "models/henon.h"
 
@@ -57,65 +58,160 @@ template<class R>
 int 
 test_apply()
 {
-  Point<R> params=Point<R>("(1.5,0.875)");
-  R a=params[0];
-  R b=params[1];
+  set_evaluation_verbosity(0);
+  typedef Interval<R> I;
 
-  HenonMap<R> h=HenonMap<R>(a,b);
-  Rectangle<R> gbb=Rectangle<R>("[-11,5]x[-8,8]") ;
-  FiniteGrid<R> fg=FiniteGrid<R>(gbb,128); // grid
-  const Grid<R>& g=fg.grid(); // grid
-  Rectangle<R> cb=Rectangle<R>("[-4,4]x[-4,4]"); // cutoff box
-  Rectangle<R> epsbb=Rectangle<R>("[-4.1,4.1]x[-4.1,4.1]"); // eps bounding box
+  double grid_size=0.25;
+  double bound=4.0;
+
+  R a=1.5;
+  R b=0.5;
+
+  HenonMap<R> henon=HenonMap<R>(a,b);
+  HenonInverseMap<R> henon_inverse=HenonInverseMap<R>(a,b);
+  cout << henon << endl << henon_inverse << endl;
+
+  Rectangle<R> bounding_box=Rectangle<R>("[-4,4]x[-4,4]") ;
+  Rectangle<R> eps_bounding_box=bounding_box.neighbourhood(0.1);
   
-  Rectangle<R> ir=Rectangle<R>("[1.499,1.501]x[0.499,0.501]"); // initial state
-  Parallelotope<R> ip=Parallelotope<R>(Rectangle<R>("[1.499,1.501]x[0.499,0.501]")); // initial state
-  Zonotope<R> iz=Zonotope<R>(Rectangle<R>("[1.499,1.501]x[0.499,0.501]")); // initial state
-  Polytope<R> ipl=Polytope<R>(Rectangle<R>("[1.499,1.501]x[0.499,0.501]")); // initial state
-  
-  cb=Rectangle<R>(gbb); // cutoff box
-  epsbb=Rectangle<R>(gbb); // eps bounding box
+  Grid<R> grid(2,grid_size);
+  FiniteGrid<R> finite_grid=FiniteGrid<R>(grid,bounding_box); // grid
+
+  Rectangle<R> r=Rectangle<R>("[1.499,1.501]x[0.499,0.501]"); // initial state
+  Zonotope<R,R> z=Zonotope<R,R>(Rectangle<R>("[1.499,1.501]x[0.499,0.501]")); // initial state
+  Zonotope<I,R> ez=Zonotope<I,R>(Rectangle<R>("[1.499,1.501]x[0.499,0.501]")); // initial state
+  Zonotope<I,I> iz=Zonotope<I,I>(Rectangle<R>("[1.499,1.501]x[0.499,0.501]")); // initial state
+  Polytope<R> pl=Polytope<R>(Rectangle<R>("[1.499,1.501]x[0.499,0.501]")); // initial state
   
   Applicator<R> apply;
+  apply.set_grid_size(grid_size);
+  apply.set_maximum_basic_set_radius(4.0*grid_size);
+  apply.set_default_bound(bound);
   
-  Rectangle<R> fr=apply.image(h,ir);
-  Parallelotope<R> fp=apply.image(h,ip);
-  //Zonotope<R> fz=apply(h,iz);
-  //Polytope<R> fpl=apply(h,ipl);
+
+  //Test evaluation on different classes of sets
+  Rectangle<R> fr=apply.evaluate(henon,r);
+  Zonotope<R,R> fz=apply.evaluate(henon,z);
+  Zonotope<I,R> fez=apply.evaluate(henon,ez);
+  Zonotope<I,I> fiz=apply.evaluate(henon,iz);
+
+  Rectangle<R> pfr=apply.evaluate(henon_inverse,fr);
+  cout << "r=" << r << " fr=" << fr << " pfr="<< pfr << endl;
+  Zonotope<I,R> pfez=apply.evaluate(henon_inverse,fez);
+  cout << "ez=" << ez << " fez=" << fez << " pfez="<< pfez << endl;
   
-  RectangularSet<R> bs(cb);
-  RectangularSet<R> is(ir);
+  RectangularSet<R> bounding_set(bounding_box);
+  RectangularSet<R> initial_set("[-0.2,0.8]x[0.3,1.7]");
   
-/*
-  shared_ptr< SetInterface<R> > ims(apply.image(h,is));
-  shared_ptr< SetInterface<R> > prims=apply.preimage(h,is);
-*/
-  shared_ptr< SetInterface<R> > reach_set(apply.reach(h,is));
-  shared_ptr< SetInterface<R> > chain_reach_set(apply.chainreach(h,is,bs));
+  // Test evaluation on concrete sets
+  GridMaskSet<R> grid_initial_set(grid,initial_set);
+  grid_initial_set.adjoin_over_approximation(Rectangle<R>(initial_set));
+  cout << "grid_initial_set=" << grid_initial_set << endl;
+  GridMaskSet<R> grid_bounding_set(grid,bounding_set);
+  grid_bounding_set.adjoin_over_approximation(Rectangle<R>(bounding_set));
+  cout << "grid_bounding_set=" << grid_bounding_set << endl;
   
-  cout << "rs.dimension()=" << reach_set->dimension() << endl;
-  const ListSet< Parallelotope<R> >& lrs=dynamic_cast<const ListSet< Parallelotope<R> >&>(*reach_set);
-  cout << "lrs.dimension()=" << lrs.dimension() << endl;
-  cout << "lrs.size()=" << lrs.size() << std::endl;
-  
-  cout << "crs.dimension()=" << chain_reach_set->dimension() << endl;
-  const GridMaskSet<R>& gmcrs=dynamic_cast<const GridMaskSet<R>&>(*chain_reach_set);
-  cout << "gmcrs.dimension()=" << gmcrs.dimension() << endl;
-  cout << "gmcrs.grid()=" << gmcrs.grid() << endl;
-  cout << "gmcrs.block()=" << gmcrs.block() << endl;
-  cout << "gmcrs.size()=" << gmcrs.size() << " of " << gmcrs.capacity() << std::endl;
-  
+  GridMaskSet<R> grid_image_set=apply.image(henon,grid_initial_set,grid_bounding_set);
+  cout << "grid_image_set=" << grid_image_set << endl;
+  GridMaskSet<R> grid_preimage_set=apply.preimage(henon,grid_initial_set,grid_bounding_set);
+  cout << "grid_preimage_set=" << grid_preimage_set << endl;
+  GridMaskSet<R> grid_inverse_image_set=apply.image(henon_inverse,grid_initial_set,grid_bounding_set);
+  cout << "grid_inverse_image_set=" << grid_inverse_image_set << endl;
+
+  ListSet< Zonotope<I,R> > list_initial_set(grid_initial_set);
+  cout << "list_initial_set=" << list_initial_set << endl;
+  ListSet< Zonotope<I,R> > list_reach_set=apply.reach(henon,list_initial_set);
+  cout << "list_reach_set=" << list_reach_set << endl;
+
   epsfstream eps;
-  eps.open("test_apply.eps",epsbb);
-  eps.set_line_style(false);
+  eps.open("test_apply-1.eps",eps_bounding_box);
   eps.set_fill_colour("green");
-  eps << gmcrs;
+  eps<<list_reach_set;
   eps.set_fill_colour("blue");
-  eps << lrs;
+  eps<<grid_initial_set;
+  eps.set_fill_colour("green");
+  eps<<grid_image_set;
+  eps.set_fill_colour("red");
+  eps<<grid_inverse_image_set;
   eps.set_fill_colour("yellow");
-  eps << ir;
+  eps<<grid_preimage_set;
+  eps.set_fill_colour("magenta");
+  eps<<list_reach_set;
+  eps.close();
+
+  eps.open("test_apply-2.eps",eps_bounding_box);
+  eps.set_line_style(true);
+  eps.set_fill_colour("green");
+  eps<<grid_image_set;
+  eps.set_fill_colour("red");
+  eps<<apply.preimage(henon,grid_image_set,grid_bounding_set);
+  eps.set_fill_colour("blue");
+  eps<<grid_initial_set;
+  eps.close();
+
+
+
+  set_evaluation_verbosity(3);
+  set_geometry_verbosity(4);
+  shared_ptr< SetInterface<R> > image_set_ptr(apply.image(henon,initial_set));
+  cout << "image_set=" << *image_set_ptr << endl;
+  shared_ptr< SetInterface<R> > preimage_set_ptr(apply.preimage(henon,initial_set));
+  cout << "preimage_set=" << *preimage_set_ptr << endl;
+  shared_ptr< SetInterface<R> > inverse_image_set_ptr(apply.image(henon_inverse,initial_set));
+  cout << "inverse_image_set=" << *inverse_image_set_ptr << endl;
+  const ListSet< Zonotope<Interval<R>,R> >& list_image_set=dynamic_cast<const ListSet< Zonotope<Interval<R>,R> >&>(*image_set_ptr);
+  cout << "list_image_set=" << list_image_set;
+
+  eps.open("test_apply-3.eps",eps_bounding_box);
+  eps.set_fill_colour("blue");
+  eps<<initial_set;
+  eps.set_fill_colour("green");
+  eps<<*image_set_ptr;
+  eps<<list_image_set;
+  eps.set_fill_colour("red");
+  eps<<*inverse_image_set_ptr;
+  eps.set_fill_colour("yellow");
+  eps<<*preimage_set_ptr;
   eps.close();
   
+  cout << "Computing reach_set" << endl;
+  apply.set_grid_size(0.25*grid_size);
+  shared_ptr< SetInterface<R> > reach_set_ptr(apply.reach(henon,initial_set));
+  cout << "reach_set=" << *reach_set_ptr << endl;
+  const ListSet< Zonotope<Interval<R>,R> >& list_reach_set_ref=dynamic_cast<const ListSet< Zonotope<Interval<R>,R> >&>(*reach_set_ptr);
+  cout << "list_reach_set_ref=" << list_reach_set_ref << endl;
+  apply.set_grid_size(grid_size);
+  cout << "Computing chainreach_set" << endl;
+  shared_ptr< SetInterface<R> > chainreach_set_ptr(apply.chainreach(henon,initial_set,bounding_set));
+  cout << "chainreach_set=" << *chainreach_set_ptr << endl;
+
+  eps.open("test_apply-4.eps",eps_bounding_box);
+  eps.set_fill_colour("cyan");
+  eps << bounding_set;
+  eps.set_line_style(false);
+  eps.set_fill_colour("green");
+  eps << *chainreach_set_ptr;
+  eps.set_line_style(true);
+  eps.set_fill_colour("magenta");
+  eps << list_reach_set_ref;
+  eps.set_fill_style(false);
+  eps << initial_set;
+  eps << bounding_set;
+  eps.close();
   
+  cout << "Computing viability kernel" << endl;
+  apply.set_grid_size(grid_size);
+  shared_ptr< SetInterface<R> > viability_kernel_ptr(apply.viable(henon,bounding_set));
+  cout << "viability_kernel=" << *viability_kernel_ptr << endl;
+  const GridMaskSet<R>& grid_viability_kernel_ref=dynamic_cast<const GridMaskSet<R>&>(*viability_kernel_ptr);
+
+  eps.open("test_apply-5.eps",eps_bounding_box);
+  eps.set_fill_style(true);
+  eps.set_fill_colour("cyan");
+  eps << bounding_set;
+  eps.set_fill_colour("magenta");
+  eps << grid_viability_kernel_ref;
+  eps.close();
+
   return 0;
 }

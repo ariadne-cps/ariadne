@@ -157,14 +157,17 @@ namespace Ariadne {
 
       /*! \brief Attempt to verify that the reachable set of \a map starting in \a initial_set remains in \a safe_set. */
       tribool verify(const System::HybridAutomaton<R>& automaton, 
-                                            const Geometry::HybridGridMaskSet<R>& initial_set, 
-                                            const Geometry::HybridGridMaskSet<R>& safe_set);
+                     const Geometry::HybridGridMaskSet<R>& initial_set, 
+                     const Geometry::HybridGridMaskSet<R>& safe_set);
       //@}
      private:
-      // Evolve the hybrid automaton within \a domains starting from the \a initial_set without using discrete transitions. */
+      // Evolve the hybrid automaton within \a domains starting from the initial_set without using discrete transitions (no checking). */
+      Geometry::HybridGridMaskSet<R> _discrete_step(const System::HybridAutomaton<R>& automaton, 
+                                                    const Geometry::HybridGridMaskSet<R>& initial_set,
+                                                    const Geometry::HybridGridMaskSet<R>& domain_set);
+      // Evolve the hybrid automaton within \a domains starting from the initial_set without using discrete transitions (no checking). */
       Geometry::HybridGridMaskSet<R> _continuous_chainreach(const System::HybridAutomaton<R>& automaton, 
                                                             const Geometry::HybridGridMaskSet<R>& initial_set,
-                                                            const Geometry::HybridGridMaskSet<R>& invariant_set,
                                                             const Geometry::HybridGridMaskSet<R>& domain_set);
      private:
       Applicator<R>* _applicator;

@@ -60,10 +60,9 @@
 
 #include "../output/logging.h"
 
-namespace Ariadne { 
-namespace Evaluation { 
+namespace {
 
-extern int verbosity;
+using namespace Ariadne;
 
 template<class R>
 LinearAlgebra::Matrix<R>
@@ -78,22 +77,27 @@ symmetrize(const LinearAlgebra::Vector< Numeric::Interval<R> >& iv)
 }
 
 }
-}
 
 
-    
+
+namespace Ariadne { 
+
+namespace Evaluation { static int& verbosity = integrator_verbosity; }
+
+
+
 template<class R>
-Ariadne::Evaluation::LohnerIntegrator<R>::LohnerIntegrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_basic_set_radius)
+Evaluation::LohnerIntegrator<R>::LohnerIntegrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_basic_set_radius)
   : Base_(maximum_step_size,lock_to_grid_time,maximum_basic_set_radius)
 {
 }
 
 
 template<class R>
-Ariadne::Geometry::Zonotope<typename Ariadne::Evaluation::LohnerIntegrator<R>::I>
-Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
-                                      const Geometry::Zonotope<I>& initial_set, 
-                                      time_type& step_size) const
+Geometry::Zonotope<typename Evaluation::LohnerIntegrator<R>::I>
+Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
+                                                  const Geometry::Zonotope<I>& initial_set, 
+                                                  time_type& step_size) const
 {
   using namespace Numeric;
   using namespace LinearAlgebra;
@@ -126,7 +130,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorF
   Matrix<I> dfc=vf.jacobian(cbbox);
   Point<I> phic=c+h*fc;
   Matrix<I> phiG=dphi*G;
-
+  
   if(verbosity>7) {
     std::clog << "  flow_bounds=" << bbox << std::endl; 
     std::clog << "  centre_flow_bounds=" << cbbox << std::endl; 
@@ -135,7 +139,7 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorF
     std::clog << "  df_for_set=" << df << std::endl; 
     std::clog << "  hdf_for_set=" << hdf << std::endl; 
     std::clog << "  exp_hdf_for_set=" << dphi << std::endl; 
-
+    
     std::clog << "  new_centre=" << phic << std::endl;
     std::clog << "  new_generators=" << phiG << std::endl;
   }
@@ -150,10 +154,10 @@ Ariadne::Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorF
 
 
 template<class R>
-Ariadne::Geometry::Zonotope<typename Ariadne::Evaluation::LohnerIntegrator<R>::I> 
-Ariadne::Evaluation::LohnerIntegrator<R>::reachability_step(const System::VectorField<R>& vector_field, 
-                                                            const Geometry::Zonotope<I>& initial_set, 
-                                                            time_type& step_size) const
+Geometry::Zonotope<typename Evaluation::LohnerIntegrator<R>::I> 
+Evaluation::LohnerIntegrator<R>::reachability_step(const System::VectorField<R>& vector_field, 
+                                                   const Geometry::Zonotope<I>& initial_set, 
+                                                   time_type& step_size) const
 {
   using namespace Numeric;
   using namespace LinearAlgebra;
@@ -161,9 +165,9 @@ Ariadne::Evaluation::LohnerIntegrator<R>::reachability_step(const System::Vector
   using namespace System;
   
   if(verbosity>6) { std::clog << "LohnerIntegrator::reachability_step(VectorField,Zonotope<Interval>,time_type) const" << std::endl; }
-
+  
   ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"LohnerIntegrator::reachability_step(VectorField,Zonotope<Interval>,time_type)");
-
+  
   const VectorField<R>& vf(vector_field);
   Zonotope<I> z=initial_set;
   const size_type n=z.dimension();
@@ -188,17 +192,17 @@ Ariadne::Evaluation::LohnerIntegrator<R>::reachability_step(const System::Vector
   Matrix<I> mdf=dphi*z.generators();
   
   z=Zonotope<I>(phic,mdf,zfh);
-
+  
   if(verbosity>7) {
     std::clog << "suggested stepsize=" << step_size << std::endl;
-      
+    
     std::clog << "stepsize=" << conv_approx<double>(step_size) << std::endl;
     std::clog << "bound=" << bbox << std::endl;
     
     std::clog << "flow=" << f << "=" << std::endl;
     std::clog << "jacobian=" << df << std::endl;
     std::clog << "flow derivative=" << dphi << std::endl;
-      
+    
     std::clog << "centre=" << c << std::endl;
     std::clog << "bounds on centre=" << phic << std::endl;
     
@@ -208,6 +212,10 @@ Ariadne::Evaluation::LohnerIntegrator<R>::reachability_step(const System::Vector
     
     std::clog << "approximating zonotope " << z;
   }
-
+  
   return z;
+}
+
+
+
 }

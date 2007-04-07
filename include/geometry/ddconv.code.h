@@ -25,6 +25,7 @@
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 #include "../linear_algebra/matrix.code.h"
+#include "../output/logging.h"
 
 namespace Ariadne {
 namespace Geometry {
@@ -148,10 +149,26 @@ ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
       //std::vector< LinearAlgebra::Vector<R> > generators;
     
       size_type number_of_generators=generators.size();
+      // Test number of generators satisfying new constraint
+      size_type number_satisfied=0;
+      size_type number_saturated=0;
+      size_type number_unsatisfied=0;
+      for(size_type j=number_of_lines; j!=number_of_generators; ++j) {
+        if(saturation_matrix(k,j)==1) {
+          ++number_satisfied;
+        } else if(saturation_matrix(k,j)==-1) {
+          ++number_unsatisfied;
+        } else {
+          ++number_saturated;
+        }
+      }
+      std::vector< LinearAlgebra::Vector<R> > new_generators;
+      for(size_type j=0; j!=number_of_lines; ++j) {
+        new_generators.push_back(generators[j]);
+      }
       for(size_type j=number_of_lines; j!=number_of_generators; ++j) {
         if(saturation_matrix(k,j)==-1) {
-          if(verbosity>7) { std::clog << "    j=" << j << " v=" << generators[j] << std::endl; }
-          bool found_adjacent=false;
+          ARIADNE_LOG(7,"    j="<<j<<", v="<<generators[j]<<"\n");
           v=generators[j];
           for(size_type js=number_of_lines; js!=number_of_generators; ++js) {
             if(saturation_matrix(k,js)==1) {
@@ -165,22 +182,20 @@ ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
                 }
               }
               if(asum>=dimension-2) { // rays are adjacent
-                if(verbosity>7) { std::clog << "    js=" << js << " v=" << v << " g=" << generators[js] << std::endl; }
+                ARIADNE_LOG(7,"    js="<<js<<" v=" <<v<<" g="<<generators[js]<<"\n");
                 R dot=inner_product(constraints[k],v);
                 R dots=inner_product(constraints[k],generators[js]);
                 w=v-(dot/dots)*generators[js];
-                if(found_adjacent) {
-                  generators.push_back(w);
-                } else {
-                  found_adjacent=true;
-                  generators[j]=w;
-                }
+                new_generators.push_back(w);
               }
             }
           }
-          if(verbosity>0) { if(!found_adjacent) { std::clog << "    j=" << j << ": no adjacent rays found" << std::endl; } }
+        } else {
+          // saturation_matrix(k,j) is 0 or 1; new constraint satisfied
+          new_generators.push_back(generators[j]);
         }
       }
+      generators=new_generators;
     }
   }
   
@@ -191,13 +206,14 @@ ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
     }
   }
   
-  //std::cout << "Result:\n  C=" << constraints << "\n  G=" << generators << std::endl;
+  uint unsatisfied_constraints=0;
   LinearAlgebra::Matrix<int> saturation_matrix(constraints.size(),generators.size());
   for(size_type i=0; i!=constraints.size(); ++i) {
     for(size_type j=0; j!=generators.size(); ++j) {
       R dot=inner_product(constraints[i],generators[j]);
       if(dot<zero) {
         saturation_matrix(i,j)=-1;
+        ++unsatisfied_constraints;
       } else if(dot>zero) {
         saturation_matrix(i,j)=+1;
       } else {
@@ -205,8 +221,12 @@ ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
       }
     }
   }
-  //std::cout << "  S=" << saturation_matrix  << "\n\n";
-    
+  ARIADNE_LOG(7,"argument="<<constraints<<", result="<<generators<<", saturation_matrix="<<saturation_matrix<<"\n");
+  if(unsatisfied_constraints>0) {
+    std::cerr << "Error: argument="<<constraints<<", result="<<generators<<", saturation_matrix="<<saturation_matrix<<std::endl;
+    assert(false);
+  }
+  
 }
 
 }

@@ -1,8 +1,8 @@
 /***************************************************************************
- *            logging.cc
+ *            hybrid_set.code.h
  *
- *  Copyright  2004-6  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2006  Alberto Casagrande,  Pieter Collins
+ *  casagrande@dimi.uniud.it  Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,29 +21,32 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "output/logging.h"
+#include "hybrid_set.h"
 
-namespace Ariadne {
+namespace Ariadne { namespace Geometry {
 
-std::ofstream Output::log_file_stream;
+template<class S> 
+std::ostream& 
+HybridSetBase<S>::write(std::ostream& os) const
+{ 
+  return os << "HybridSet"<<_component_sets;
+}
 
-void Output::redirect_log(const char* filename) 
-{
-  if(log_file_stream.is_open()) {
-    log_file_stream.close();
+
+template<class R> 
+std::ostream& 
+HybridGridMaskSet<R>::write(std::ostream& os) const
+{ 
+  os << "HybridGridMaskSet( { \n";
+  for(typename HybridGridMaskSet<R>::const_iterator iter=this->begin();
+      iter!=this->end(); ++iter)
+  {
+    id_type loc=iter->first;
+    const GridMaskSet<R>& set=iter->second;
+    os << "  "<<loc<<": GridMaskSet( extent=" << set.extent() << ", block=" << set.block() << ", size=" << set.size() << " ),\n";
   }
-  log_file_stream.open(filename);
-  std::clog.rdbuf( log_file_stream.rdbuf() );
+  os << "} )";
+  return os;
 }
 
-int Numeric::verbosity=0; 
-int LinearAlgebra::verbosity=0; 
-int Combinatoric::verbosity=0;
-int Geometry::verbosity=0;
-int System::verbosity=0;
-int Evaluation::solver_verbosity=0;
-int Evaluation::applicator_verbosity=0;
-int Evaluation::integrator_verbosity=0;
-int Evaluation::hybrid_evolver_verbosity=0;
-
-}
+}}

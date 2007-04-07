@@ -172,14 +172,14 @@ HybridAutomaton<R>::invariant() const
 
 
 template<class R>
-std::map<id_type,dimension_type>
+Geometry::HybridSpace
 HybridAutomaton<R>::locations() const 
 {
-  std::map<id_type,dimension_type> result;
+  Geometry::HybridSpace result;
   for(discrete_mode_iterator mode_iter=this->_modes.begin(); 
       mode_iter!=this->_modes.end(); ++mode_iter) 
   {
-    result.insert(std::make_pair(mode_iter->id(),mode_iter->dimension()));
+    result.new_location(mode_iter->id(),mode_iter->dimension());
   } 
   return result;
 }

@@ -46,6 +46,7 @@ class SetWrapper
   tribool intersects(const Rectangle<R>& r) const { return this->get_override("intersects")(); }
   tribool disjoint(const Rectangle<R>& r) const { return this->get_override("disjoint")(); }
   tribool subset(const Rectangle<R>& r) const { return this->get_override("subset")(); }
+  tribool bounded() const { return this->get_override("bounded")(); }
   Rectangle<R> bounding_box() const { return this->get_override("bounding_box")(); }
   std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
@@ -60,6 +61,7 @@ void export_set()
     .def("intersects", pure_virtual(&SetInterface<R>::intersects))
     .def("disjoint", pure_virtual(&SetInterface<R>::disjoint))
     .def("subset", pure_virtual(&SetInterface<R>::subset))
+    .def("bounded", pure_virtual(&SetInterface<R>::bounded))
     .def("bounding_box", pure_virtual(&SetInterface<R>::bounding_box))
     .def(self_ns::str(self))
   ;

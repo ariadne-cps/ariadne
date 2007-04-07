@@ -69,6 +69,7 @@ template<class R> void export_zonotope();
 template<class R> void export_interval_zonotope();
 template<class R> void export_polytope();
 template<class R> void export_polyhedron();
+template<class R> void export_empty_set();
 template<class R> void export_rectangular_set();
 template<class R> void export_polyhedral_set();
 template<class R> void export_list_set();
@@ -85,6 +86,7 @@ template<class R> void export_vector_field();
 template<class R> void export_affine_vector_field();
 template<class R> void export_hybrid_automaton();
 
+template<class R> void export_evaluation_parameters();
 template<class R> void export_solve();
 template<class R> void export_apply();
 template<class R> void export_integrate();
@@ -146,6 +148,7 @@ BOOST_PYTHON_MODULE(ariadne)
   export_simplex<Float>();
   export_polytope<Float>();
   export_polyhedron<Float>();
+  export_empty_set<Float>();
   export_rectangular_set<Float>();
   export_polyhedral_set<Float>();
   export_list_set<Float>();
@@ -162,6 +165,7 @@ BOOST_PYTHON_MODULE(ariadne)
   export_affine_vector_field<Float>();
   export_hybrid_automaton<Float>();
 
+  export_evaluation_parameters<Float>();
   export_solve<Float>();
   export_apply<Float>();
   export_integrate<Float>();

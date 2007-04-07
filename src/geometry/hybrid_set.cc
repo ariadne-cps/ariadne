@@ -1,5 +1,5 @@
 /***************************************************************************
- *            python/export_logging.cc
+ *            hybrid_set.cc
  *
  *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
@@ -11,7 +11,7 @@
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
- *  This program is diself_ns::stributed in the hope that it will be useful,
+ *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
@@ -21,30 +21,29 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "numeric/rational.h"
+#include "numeric/float.h"
+#include "numeric/interval.h"
 
-#include "output/logging.h"
-#include "evaluation/declarations.h"
+#include "geometry/hybrid_set.h"
+#include "geometry/hybrid_set.code.h"
 
-#include "python/python_utilities.h"
-#include "python/python_float.h"
-using namespace Ariadne;
-using namespace Ariadne::Output;
+namespace Ariadne {
+  namespace Geometry {
 
-#include <boost/python.hpp>
-#include <boost/python/detail/api_placeholder.hpp>
-using namespace boost::python;
+    using namespace Numeric;
+    
+#ifdef ENABLE_FLOAT64
+    template class HybridSet<Float64>;
+    template class HybridGridCellListSet<Float64>;
+    template class HybridGridMaskSet<Float64>;
+#endif
+  
+#ifdef ENABLE_FLOATMP
+    template class HybridSet<FloatMP>;
+    template class HybridGridCellListSet<FloatMP>;
+    template class HybridGridMaskSet<FloatMP>;
+#endif
 
-
-void export_logging()
-{
-  def("set_linear_algebra_verbosity",&set_linear_algebra_verbosity);
-  def("set_combinatoric_verbosity",&set_combinatoric_verbosity);
-  def("set_geometry_verbosity",&set_geometry_verbosity);
-  def("set_evaluation_verbosity",&set_evaluation_verbosity);
-  def("set_applicator_verbosity",&set_applicator_verbosity);
-  def("set_integrator_verbosity",&set_integrator_verbosity);
-  def("set_hybrid_evolver_verbosity",&set_hybrid_evolver_verbosity);
-
-  def("redirect_log",&redirect_log);
+  }
 }
-

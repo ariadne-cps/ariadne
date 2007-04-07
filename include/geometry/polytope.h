@@ -213,6 +213,8 @@ namespace Ariadne {
 
       //@{ 
       //! \name Input/output operations
+      /*! \brief The name of the class. */
+      static std::string name();
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;
       /*! \brief Read from an input stream. */

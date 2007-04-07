@@ -68,6 +68,8 @@ namespace Ariadne {
       /*! \brief Tests if the set is a subset of a rectangle. */
       virtual tribool subset(const Rectangle<R>&) const = 0;
       
+      /*! \brief Tests if the set is bounded. */
+      virtual tribool bounded() const = 0;
       /*! \brief A rectangle containing the set. Throws Geometry::UnboundedSet exception if the set is unbounded. */
       virtual Rectangle<R> bounding_box() const = 0;
 

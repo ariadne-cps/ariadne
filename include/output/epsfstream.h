@@ -38,11 +38,13 @@
 #include "../geometry/exceptions.h"
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
+#include "../geometry/rectangular_set.h"
 #include "../geometry/list_set.h"
 #include "../geometry/grid_set.h"
 #include "../geometry/parallelotope.h"
 #include "../geometry/zonotope.h"
 #include "../geometry/polytope.h"
+#include "../geometry/polyhedral_set.h"
 #include "../geometry/partition_tree_set.h"
 #include "../system/affine_map.h"
 
@@ -193,8 +195,10 @@ namespace Ariadne {
         result.upper_bound(1)=Numeric::conv_approx<double>(r.upper_bound(this->_j));
         return result;
       }
-      template<class R> Polygon2d operator() (const Geometry::Zonotope<R>& z) const {
-        return this->operator()(Geometry::Zonotope<Numeric::Rational>(z).vertices());
+      template<class RC,class RG> Polygon2d operator() (const Geometry::Zonotope<RC,RG>& z) const {
+        Geometry::Point<Numeric::Rational> c=approximate_value(z.centre());
+        LinearAlgebra::Matrix<Numeric::Rational> G=approximate_value(z.generators());
+        return this->operator()(Geometry::Zonotope<Numeric::Rational>(c,G).vertices());
       }
       template<class R> Polygon2d operator() (const Geometry::Polytope<R>& p) const {
         return this->operator()(p.vertices());
@@ -294,10 +298,13 @@ namespace Ariadne {
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Zonotope<Numeric::Interval<R>,R>&);
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Polytope<R>&); 
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Polyhedron<R>&); 
+    template<class R> epsfstream& operator<<(epsfstream&, const Geometry::RectangularSet<R>&);
+    template<class R> epsfstream& operator<<(epsfstream&, const Geometry::PolyhedralSet<R>&);
     template<class BS> epsfstream& operator<<(epsfstream&, const Geometry::ListSet<BS>&); 
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::GridCellListSet<R>&); 
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::GridMaskSet<R>&); 
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::PartitionTreeSet<R>&); 
+    template<class R> epsfstream& operator<<(epsfstream&, const Geometry::SetInterface<R>&); 
 
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::FiniteGrid<R>&); 
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::PartitionTree<R>&); 
@@ -348,6 +355,14 @@ namespace Ariadne {
     
     template<class R> inline
     epsfstream&
+    operator<<(epsfstream& eps, const Geometry::RectangularSet<R>& rs)
+    {
+      return eps << Geometry::Rectangle<R>(rs);
+    }
+
+    
+    template<class R> inline
+    epsfstream&
     operator<<(epsfstream& eps, const Geometry::Zonotope<Numeric::Interval<R>,R>& z)
     { 
       Geometry::Zonotope<Numeric::Rational> qz=Geometry::over_approximation(z);
@@ -382,8 +397,16 @@ namespace Ariadne {
     epsfstream&
     operator<<(epsfstream& eps, const Geometry::Polyhedron<R>& p)
     {
-      return draw(eps,eps.projection_map()(Geometry::Polytope<Numeric::Rational>(Geometry::Polyhedron<Numeric::Rational>(p))));      
+      return eps << Geometry::Polytope<Numeric::Rational>(p);
     }
+
+    template<class R> inline
+    epsfstream&
+    operator<<(epsfstream& eps, const Geometry::PolyhedralSet<R>& ps)
+    {
+      return eps << Geometry::Polyhedron<R>(ps);
+    }
+
     
     template<class BS> inline
     epsfstream&
@@ -427,6 +450,17 @@ namespace Ariadne {
     operator<<(epsfstream& eps, const Geometry::PartitionTreeSet<R>& ds)
     {
       return eps << Geometry::ListSet< Geometry::Rectangle<R> >(ds);
+    }
+
+    template<class R> inline
+    epsfstream&
+    operator<<(epsfstream& eps, const Geometry::SetInterface<R>& set)
+    {
+      Geometry::Rectangle<R> bb=set.bounding_box();
+      Geometry::PartitionScheme<R> ps(bb);
+      int depth=16;
+      Geometry::PartitionTreeSet<R> pts=Geometry::over_approximation(set,ps,depth);
+      return eps << pts;
     }
 
 

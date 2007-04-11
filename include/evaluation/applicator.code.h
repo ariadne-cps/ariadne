@@ -369,7 +369,7 @@ Evaluation::Applicator<R>::image(const System::Map<R>& f,
       ARIADNE_LOG(7,"gz="<<gz);
       image.adjoin(gz);
       ARIADNE_LOG(9,"image.size()="<<image.size()<<"\n");
-      assert(subset(gz,image));
+      assert((bool)(subset(gz,image)));
     } else {
       fr=this->evaluate(f,r);
       image.adjoin(over_approximation(fr,g));

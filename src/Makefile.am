@@ -44,6 +44,7 @@ GEOMETRY_SRC = \
 	geometry/ppl_polyhedron.cc
 
 SYSTEM_SRC = \
+	system/function.cc \
 	system/map.cc system/affine_map.cc system/polynomial_map.cc \
 	system/vector_field.cc system/affine_vector_field.cc \
 	system/multimap.cc system/affine_multimap.cc \

@@ -22,7 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
   
-/*! \file function.h
+/*! \file numeric/function.h
  *  \brief Standard functions on real number types.
  */
 

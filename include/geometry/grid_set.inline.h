@@ -232,21 +232,27 @@ namespace Ariadne {
     }
 
 
-    template<class R> template<class SetInterface> inline
+    template<class R> inline
     void 
-    GridCellListSet<R>::adjoin_over_approximation(const SetInterface& s) 
+    GridCellListSet<R>::adjoin_over_approximation(const Rectangle<R>& r) 
     {
-        this->adjoin(over_approximation(s,this->grid()));
+      this->adjoin(over_approximation(r,this->grid()));
     }
 
     
-    template<class R> template<class SetInterface> inline
+    template<class R> template<class BS> inline
     void 
-    GridCellListSet<R>::adjoin_under_approximation(const SetInterface& s) 
+    GridCellListSet<R>::adjoin_outer_approximation(const BS& bs)
     {
-        this->adjoin(under_approximation(s,this->grid()));
+      this->adjoin(outer_approximation(bs,this->grid()));
     }
 
+    template<class R> template<class BS> inline
+    void 
+    GridCellListSet<R>::adjoin_inner_approximation(const BS& bs)
+    {
+      this->adjoin(inner_approximation(bs,this->grid()));
+    }
 
 
 
@@ -415,27 +421,6 @@ namespace Ariadne {
       this->_lattice_set.adjoin(gcls._lattice_set);
     }
 
-    template<class R> template<class S> inline
-    void 
-    GridMaskSet<R>::adjoin_over_approximation(const S& s) 
-    {
-      this->adjoin(over_approximation(s,FiniteGrid<R>(this->grid(),this->block())));
-    }
-
-    template<class R> template<class S> inline
-    void 
-    GridMaskSet<R>::adjoin_under_approximation(const S& s) 
-    {
-      this->adjoin(under_approximation(s,FiniteGrid<R>(this->grid(),this->block())));
-    }
-
-    template<class R> template<class S> inline
-    void 
-    GridMaskSet<R>::restrict_over_approximation(const S& s) 
-    {
-      this->restrict(over_approximation(s,FiniteGrid<R>(this->grid(),this->block())));
-    }
-
 
     template<class R> inline
     void 
@@ -493,22 +478,76 @@ namespace Ariadne {
     }
 
     
-    template<class R, class BS> inline
-    GridMaskSet<R> 
-    over_approximation(const ListSet<BS>& ls, const FiniteGrid<R>& g) 
-    {
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(ls,g,"over_approximation(ListSet<R,BS>,FiniteGrid<R>)");
 
-      GridMaskSet<R> result(g);
-      for(typename ListSet<BS>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
-       result.adjoin(over_approximation(*iter,g.grid()));
-      }
-        
-      return result;
+    template<class R> inline
+    void 
+    GridMaskSet<R>::adjoin_over_approximation(const Rectangle<R>& r)
+    {
+      this->adjoin(over_approximation(r,this->grid()));
     }
+
+    template<class R> inline
+    void 
+    GridMaskSet<R>::adjoin_under_approximation(const Rectangle<R>& r)
+    {
+      this->adjoin(under_approximation(r,this->grid()));
+    }
+
+
+    template<class R> template<class BS> inline
+    void 
+    GridMaskSet<R>::adjoin_outer_approximation(const BS& bs)
+    {
+      this->adjoin(outer_approximation(bs,this->grid()));
+    }
+
     
+    template<class R> template<class BS> inline
+    void 
+    GridMaskSet<R>::adjoin_inner_approximation(const BS& bs)
+    {
+      this->adjoin(inner_approximation(bs,this->grid()));
+    }
+
     
+    template<class R> inline
+    void 
+    GridMaskSet<R>::adjoin_outer_approximation(const SetInterface<R>& s)
+    {
+      FiniteGrid<R> fg(this->grid(),this->block());
+      this->adjoin(outer_approximation(s,fg));
+    }
+
+    template<class R> inline
+    void 
+    GridMaskSet<R>::adjoin_inner_approximation(const SetInterface<R>& s)
+    {
+      FiniteGrid<R> fg(this->grid(),this->block());
+      this->adjoin(inner_approximation(s,fg));
+    }
+
+    template<class R> inline
+    void 
+    GridMaskSet<R>::restrict_outer_approximation(const SetInterface<R>& s)
+    {
+      FiniteGrid<R> fg(this->grid(),this->block());
+      this->restrict(outer_approximation(s,fg));
+    }
+
+    template<class R> inline
+    void 
+    GridMaskSet<R>::restrict_inner_approximation(const SetInterface<R>& s)
+    {
+      FiniteGrid<R> fg(this->grid(),this->block());
+      this->restrict(inner_approximation(s,fg));
+    }
+
     
+
+
+
+
+
     
     
     

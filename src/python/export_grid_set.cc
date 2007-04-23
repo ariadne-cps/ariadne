@@ -47,13 +47,6 @@ using namespace Ariadne::Geometry;
 using namespace boost::python;
 
 
-template<class PS, class S>
-void
-adjoin_over_approximation(PS& ps, const S& s) 
-{
-  ps.adjoin_over_approximation(s);
-}
-
 
 template<class R>
 void export_grid() 
@@ -114,14 +107,14 @@ void export_grid_set()
   typedef SetInterface<R> RSetInterface;
   typedef Rectangle<R> RRectangle;
   typedef Polyhedron<R> RPolyhedron;
-  typedef Parallelotope<R> RParallelotope;
-  typedef Zonotope<R> RZonotope;
   typedef Polytope<R> RPolytope;
-  typedef Zonotope<I> IZonotope;
+  typedef Zonotope<R,R> RZonotope;
+  typedef Zonotope<I,R> EZonotope;
+  typedef Zonotope<I,I> IZonotope;
   typedef ListSet< Rectangle<R> > RRectangleListSet;
-  typedef ListSet< Parallelotope<R> > RParallelotopeListSet;
-  typedef ListSet< Zonotope<R> > RZonotopeListSet;
-  typedef ListSet< Zonotope<I> > IZonotopeListSet;
+  typedef ListSet< Zonotope<R,R> > RZonotopeListSet;
+  typedef ListSet< Zonotope<I,R> > EZonotopeListSet;
+  typedef ListSet< Zonotope<I,I> > IZonotopeListSet;
   typedef PartitionTreeSet<R> RPartitionTreeSet;
   
 
@@ -149,11 +142,13 @@ void export_grid_set()
     .def("adjoin", (void(RGridCellListSet::*)(const RGridCell&))(&RGridCellListSet::adjoin))
     .def("adjoin", (void(RGridCellListSet::*)(const RGridBlock&))(&RGridCellListSet::adjoin))
     .def("adjoin", (void(RGridCellListSet::*)(const RGridCellListSet&))(&RGridCellListSet::adjoin))
-    .def("adjoin_over_approximation", &adjoin_over_approximation<RGridCellListSet,RRectangle>)
-    .def("adjoin_over_approximation", &adjoin_over_approximation<RGridCellListSet,RZonotope>)
-    .def("adjoin_over_approximation", &adjoin_over_approximation<RGridCellListSet,IZonotope>)
-    .def("adjoin_over_approximation", &adjoin_over_approximation<RGridCellListSet,RPolytope>)
-    .def("adjoin_over_approximation", &adjoin_over_approximation<RGridMaskSet,RPolyhedron>)
+    .def("adjoin_over_approximation", &RGridCellListSet::adjoin_over_approximation)
+    .def("adjoin_outer_approximation", (void(RGridCellListSet::*)(const RRectangle&))(&RGridCellListSet::adjoin_outer_approximation))
+    .def("adjoin_outer_approximation", (void(RGridCellListSet::*)(const RPolyhedron&))(&RGridCellListSet::adjoin_outer_approximation))
+    .def("adjoin_outer_approximation", (void(RGridCellListSet::*)(const RPolytope&))(&RGridCellListSet::adjoin_outer_approximation))
+    .def("adjoin_outer_approximation", (void(RGridCellListSet::*)(const RZonotope&))(&RGridCellListSet::adjoin_outer_approximation))
+    .def("adjoin_outer_approximation", (void(RGridCellListSet::*)(const EZonotope&))(&RGridCellListSet::adjoin_outer_approximation))
+    .def("adjoin_outer_approximation", (void(RGridCellListSet::*)(const IZonotope&))(&RGridCellListSet::adjoin_outer_approximation))
     .def("size", &RGridCellListSet::size)
     .def("__len__", &RGridCellListSet::size)
     .def("__getitem__", &get_item<RGridCellListSet>)
@@ -177,14 +172,14 @@ void export_grid_set()
     .def("adjoin", (void(RGridMaskSet::*)(const RGridMaskSet&))(&RGridMaskSet::adjoin))
     .def("restrict", (void(RGridMaskSet::*)(const RGridCellListSet&))(&RGridMaskSet::restrict))
     .def("restrict", (void(RGridMaskSet::*)(const RGridMaskSet&))(&RGridMaskSet::restrict))
-    .def("adjoin_over_approximation", &adjoin_over_approximation<RGridMaskSet,RRectangle>)
-    .def("adjoin_over_approximation", &adjoin_over_approximation<RGridMaskSet,RZonotope>)
-    .def("adjoin_over_approximation", &adjoin_over_approximation<RGridMaskSet,IZonotope>)
-    .def("adjoin_over_approximation", &adjoin_over_approximation<RGridMaskSet,RPolytope>)
-    .def("adjoin_over_approximation", &adjoin_over_approximation<RGridMaskSet,RPolyhedron>)
-    //.def("adjoin_over_approximation", &adjoin_over_approximation<RGridMaskSet,RRectangleListSet>)
-    //.def("adjoin_over_approximation", &adjoin_over_approximation<RGridMaskSet,RZonotopeListSet>)
-    //.def("adjoin_over_approximation", &adjoin_over_approximation<RGridMaskSet,IZonotopeListSet>)
+    .def("adjoin_over_approximation", &RGridMaskSet::adjoin_over_approximation)
+    .def("adjoin_outer_approximation", (void(RGridMaskSet::*)(const RRectangle&))(&RGridMaskSet::adjoin_outer_approximation))
+    .def("adjoin_outer_approximation", (void(RGridMaskSet::*)(const RPolyhedron&))(&RGridMaskSet::adjoin_outer_approximation))
+    .def("adjoin_outer_approximation", (void(RGridMaskSet::*)(const RPolytope&))(&RGridMaskSet::adjoin_outer_approximation))
+    .def("adjoin_outer_approximation", (void(RGridMaskSet::*)(const RZonotope&))(&RGridMaskSet::adjoin_outer_approximation))
+    .def("adjoin_outer_approximation", (void(RGridMaskSet::*)(const EZonotope&))(&RGridMaskSet::adjoin_outer_approximation))
+    .def("adjoin_outer_approximation", (void(RGridMaskSet::*)(const IZonotope&))(&RGridMaskSet::adjoin_outer_approximation))
+    .def("adjoin_over_approximation", &RGridMaskSet::adjoin_over_approximation)
     .def("neighbourhood", &RGridMaskSet::neighbourhood)
     .def("adjoining", &RGridMaskSet::adjoining)
     .def("size", &RGridMaskSet::size)
@@ -203,26 +198,28 @@ void export_grid_set()
   def("subset",(tribool(*)(const RGridMaskSet&,const RGridMaskSet&))(&Geometry::subset));
   def("subset",(tribool(*)(const RGridCellListSet&,const RGridMaskSet&))(&Geometry::subset));
 
-  def("over_approximation",(RGridBlock(*)(const IPoint&,const RGrid&))(&Geometry::over_approximation));
+  def("outer_approximation",(RGridBlock(*)(const IPoint&,const RGrid&))(&Geometry::outer_approximation));
+
   def("over_approximation",(RGridBlock(*)(const RRectangle&,const RGrid&))(&Geometry::over_approximation));
-  def("over_approximation",(RGridCellListSet(*)(const RZonotope&,const RGrid&))(&Geometry::over_approximation));
-  def("over_approximation",(RGridCellListSet(*)(const RPolytope&,const RGrid&))(&Geometry::over_approximation));
-  def("over_approximation",(RGridCellListSet(*)(const IZonotope&,const RGrid&))(&Geometry::over_approximation));
-  //def("over_approximation",(RGridCellListSet(*)(const RPolyhedron&,const RGrid&))(&Geometry::over_approximation));
-  def("over_approximation",(RGridMaskSet(*)(const RRectangleListSet&,const RFiniteGrid&))(&Geometry::over_approximation));
-  def("over_approximation",(RGridMaskSet(*)(const RParallelotopeListSet&,const RFiniteGrid&))(&Geometry::over_approximation));
-  def("over_approximation",(RGridMaskSet(*)(const RZonotopeListSet&,const RFiniteGrid&))(&Geometry::over_approximation));
-  def("over_approximation",(RGridMaskSet(*)(const RGridMaskSet&,const RFiniteGrid&))(&Geometry::over_approximation));
-
   def("under_approximation",(RGridBlock(*)(const RRectangle&,const RGrid&))(&Geometry::under_approximation));
-  def("under_approximation",(RGridCellListSet(*)(const RZonotope&,const RGrid&))(&Geometry::under_approximation));
-  def("under_approximation",(RGridCellListSet(*)(const RPolytope&,const RGrid&))(&Geometry::under_approximation));
-  //def("under_approximation",(RGridCellListSet(*)(const RPolyhedron&,const RGrid&))(&Geometry::under_approximation));
-  //def("under_approximation",(RGridMaskSet(*)(const RRectangleListSet&,const RFiniteGrid&))(&Geometry::under_approximation));
-  //def("under_approximation",(RGridMaskSet(*)(const RParallelotopeListSet&,const RFiniteGrid&))(&Geometry::under_approximation));
-  //def("under_approximation",(RGridMaskSet(*)(const RZonotopeListSet&,const RFiniteGrid&))(&Geometry::under_approximation));
-  def("under_approximation",(RGridMaskSet(*)(const RGridMaskSet&,const RFiniteGrid&))(&Geometry::under_approximation));
+  def("outer_approximation",(RGridBlock(*)(const RRectangle&,const RGrid&))(&Geometry::outer_approximation));
+  def("inner_approximation",(RGridBlock(*)(const RRectangle&,const RGrid&))(&Geometry::inner_approximation));
 
+  def("outer_approximation",(RGridCellListSet(*)(const RPolyhedron&,const RGrid&))(&Geometry::outer_approximation));
+  def("outer_approximation",(RGridCellListSet(*)(const RPolytope&,const RGrid&))(&Geometry::outer_approximation));
+  def("outer_approximation",(RGridCellListSet(*)(const RZonotope&,const RGrid&))(&Geometry::outer_approximation));
+  def("outer_approximation",(RGridCellListSet(*)(const EZonotope&,const RGrid&))(&Geometry::outer_approximation));
+  def("outer_approximation",(RGridCellListSet(*)(const IZonotope&,const RGrid&))(&Geometry::outer_approximation));
+  def("outer_approximation",(RGridMaskSet(*)(const RRectangleListSet&,const RFiniteGrid&))(&Geometry::outer_approximation));
+  def("outer_approximation",(RGridMaskSet(*)(const RZonotopeListSet&,const RFiniteGrid&))(&Geometry::outer_approximation));
+  def("outer_approximation",(RGridMaskSet(*)(const EZonotopeListSet&,const RFiniteGrid&))(&Geometry::outer_approximation));
+  def("outer_approximation",(RGridMaskSet(*)(const IZonotopeListSet&,const RFiniteGrid&))(&Geometry::outer_approximation));
+  def("outer_approximation",(RGridMaskSet(*)(const RSetInterface&,const RFiniteGrid&))(&Geometry::outer_approximation));
+
+  def("inner_approximation",(RGridCellListSet(*)(const RPolytope&,const RGrid&))(&Geometry::inner_approximation));
+  def("inner_approximation",(RGridCellListSet(*)(const RPolyhedron&,const RGrid&))(&Geometry::inner_approximation));
+  def("inner_approximation",(RGridCellListSet(*)(const RZonotope&,const RGrid&))(&Geometry::inner_approximation));
+  def("inner_approximation",(RGridMaskSet(*)(const RSetInterface&,const RFiniteGrid&))(&Geometry::inner_approximation));
 
 }
 

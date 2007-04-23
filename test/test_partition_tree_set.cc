@@ -35,7 +35,7 @@
 #include "linear_algebra/vector.h"
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
-#include "geometry/parallelotope.h"
+#include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 #include "geometry/partition_tree_set.h"
 #include "output/epsfstream.h"
@@ -91,51 +91,45 @@ int main() {
   Vector< Interval<Float> > iv(2);
   iv[0]=Interval<Float>(-0.5,0.5);
   iv[1]=Interval<Float>(-0.5,0.5);
-  Vector<Float> c("[0.125,0.25]");
+  Point<Float> c("(0.125,0.25)");
   Matrix<Float> A("[2,1;0.5,1]");
   bb=Rectangle<Float>("[-4,4]x[-4,4]");
   Rectangle<Float> rect("[-1.5,2.5]x[0.875,2.25]");
-  Parallelotope<Float> pltp(c,A);
-  cout << "pltp=" << pltp << endl << "bb=" << bb << endl;
+  Zonotope<Float> z(c,A);
+  cout << "z=" << z << endl << "bb=" << bb << endl;
 
 
   seq=SubdivisionSequence(2);
   cout << "seq=" << seq << " " << seq.body_size() << " " << seq.tail_size() << " " << seq.dimension() << endl;
 
-  assert((bool)(subset(pltp,bb)));
-  assert((bool)(!subset(bb,pltp)));
-  assert((bool)(!disjoint(pltp,bb)));
+  assert((bool)(subset(z,bb)));
+  assert((bool)(!subset(bb,z)));
+  assert((bool)(!disjoint(z,bb)));
   
   cout << "pt=" << pt << endl;
   cout << "pts=" << pts << endl;
   cout << "rect=" << rect << endl;
-  cout << "pltp=" << pltp << endl;
+  cout << "z=" << z << endl;
   cout << "rls=" << rls << endl;
   pg=PartitionScheme<Float>(bb,seq);
   uint dpth=8;
-  PartitionTreeSet<Float> ptsrua=under_approximation< Float, Rectangle<Float>  >(rect,pg,dpth);
-  cout << "under_approximation(rect,pg,dpth)=" << ptsrua << endl;
-  PartitionTreeSet<Float> ptsroa=over_approximation< Float, Rectangle<Float>  >(rect,pg,dpth);
-  cout << "over_approximation(rect,pg,dpth)=" << ptsrua << endl;
+  PartitionTreeCell<Float> ptcrova=over_approximation(rect,pg);
+  cout << "over_approximation(rect,pg,dpth)=" << ptcrova << endl; 
 
-  PartitionTreeSet<Float> ptsua=under_approximation< Float, Parallelotope<Float>  >(pltp,pg,dpth);
-  cout << "ptsua=" << ptsua << endl;
-  PartitionTreeSet<Float> ptsoa=over_approximation< Float, Parallelotope<Float>  >(pltp,pg,dpth);
-  cout << "ptsoa=" << ptsoa << endl;
-  PartitionTreeSet<Float> ptsina=inner_approximation< Float, Parallelotope<Float>  >(pltp,pg,dpth);
+  PartitionTreeSet<Float> ptsina=inner_approximation(z,pg,dpth);
   cout << "ptsina=" << ptsina << endl;
-  PartitionTreeSet<Float> ptsouta=outer_approximation< Float, Parallelotope<Float>  >(pltp,pg,dpth);
+  PartitionTreeSet<Float> ptsouta=outer_approximation(z,pg,dpth);
   cout << "ptsouta=" << ptsouta << endl;
 
   Grid<Float> g(2,Float(0.125));
   FiniteGrid<Float> fg(g,bb);
-  ListSet< Rectangle<Float> > lsua=ptsua;
-  cout << "lsua=" << lsua << endl;
-  cout << "ptsua.size()=" << ptsua.size() << ", lsua.size()=" << lsua.size() << endl;
+  ListSet< Rectangle<Float> > lsina=ptsina;
+  cout << "lsina=" << lsina << endl;
+  cout << "ptsina.size()=" << ptsina.size() << ", lsina.size()=" << lsina.size() << endl;
   // Under approximation of partition tree sets not currently implemented
   //GridMaskSet<Float> gmsina=under_approximation(ptsina,fg);
   //cout << "gmsina=" << gmsina << endl;
-  GridMaskSet<Float> gmsouta=over_approximation(ptsouta,fg);
+  GridMaskSet<Float> gmsouta=outer_approximation(ptsouta,fg);
   cout << "gmsouta=" << gmsouta << endl;
 
   
@@ -147,25 +141,16 @@ int main() {
   eps.set_fill_colour("blue");
   eps << ptsina;
   eps.set_fill_style(false);
-  eps << pltp;
+  eps << z;
   eps.close();
   
   eps.open("test_partition_tree-2.eps",bb);
-  eps.set_fill_colour("red");
-  eps << ptsoa;
-  eps.set_fill_colour("blue");
-  eps << ptsua;
-  eps.set_fill_style(false);
-  eps << pltp;
-  eps.close();
-  
-  eps.open("test_partition_tree-3.eps",bb);
   eps.set_fill_colour("red");
   eps << gmsouta;
   eps.set_fill_colour("blue");
   //eps << gmsina;
   eps.set_fill_style(false);
-  eps << pltp;
+  eps << z;
   eps.close();
   
   return 0;

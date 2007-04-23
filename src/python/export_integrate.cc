@@ -97,11 +97,11 @@ void export_integrate()
 
   class_< LohnerIntegrator<R>, bases<Integrator<R> > >("LohnerIntegrator",init<T,T,R>())
     .def(init<double,double,double>()) 
-    .def("integrate",(Zonotope<I>(LohnerIntegrator<R>::*)(const VectorField<R>&,const Zonotope<I>&,const time_type&)const)
+    .def("integrate",(Zonotope<I,I>(LohnerIntegrator<R>::*)(const VectorField<R>&,const Zonotope<I,I>&,const time_type&)const)
                               (&LohnerIntegrator<R>::integrate))
-    .def("integrate",(ListSet< Zonotope<I> >(LohnerIntegrator<R>::*)(const VectorField<R>&,const ListSet< Zonotope<I> >&,const time_type&)const)
+    .def("integrate",(ListSet< Zonotope<I,I> >(LohnerIntegrator<R>::*)(const VectorField<R>&,const ListSet< Zonotope<I,I> >&,const time_type&)const)
                               (&LohnerIntegrator<R>::integrate))
-    .def("reach",(ListSet< Zonotope<I> >(LohnerIntegrator<R>::*)(const VectorField<R>&,const ListSet< Zonotope<I> >&,const time_type&)const)
+    .def("reach",(ListSet< Zonotope<I,I> >(LohnerIntegrator<R>::*)(const VectorField<R>&,const ListSet< Zonotope<I,I> >&,const time_type&)const)
                               (&LohnerIntegrator<R>::reach))
   ;
 

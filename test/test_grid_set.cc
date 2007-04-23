@@ -60,17 +60,29 @@ test_grid_set()
   Grid<R> gr(2,0.125);
   cout << "gr=" << gr << endl;
 
-  // Test over-approximations
+  // Test outer-approximations
   Rectangle<R> r("[-0.125,0.5]x[0.1,0.3]");
   Parallelotope<R> p(r);
   Zonotope<R> z(r);
   cout << "\n" << r << "\n" << z << "\n" << std::endl;
-  GridBlock<R> roa=over_approximation(r,gr);
+
+  GridBlock<R> rova=over_approximation(r,gr);
+
+  // Test outer-approximations
+  GridBlock<R> roa=outer_approximation(r,gr);
   cout << "roa=" << roa << std::endl;
-  GridCellListSet<R> poa=over_approximation(p,gr);
+  GridCellListSet<R> poa=outer_approximation(p,gr);
   cout << "poa=" << poa << std::endl;
-  GridCellListSet<R> zoa=over_approximation(z,gr);
+  GridCellListSet<R> zoa=outer_approximation(z,gr);
   cout << "zoa=" << zoa << std::endl;
+
+  // Test inner-approximations
+  GridBlock<R> rua=inner_approximation(r,gr);
+  cout << "rua=" << rua << std::endl;
+  GridCellListSet<R> pua=inner_approximation(p,gr);
+  cout << "pua=" << pua << std::endl;
+  GridCellListSet<R> zua=inner_approximation(z,gr);
+  cout << "zua=" << zua << std::endl;
 
   return 0;
 }

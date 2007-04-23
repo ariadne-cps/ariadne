@@ -39,11 +39,11 @@ initial_guess=IntervalPoint("([0,2],[0,2])") # initial state
 
 interval_newton=IntervalNewtonSolver(0.00001,64)
 fixed_point=interval_newton.fixed_point(henon_map,initial_guess)
-fixed_point_cell=over_approximation(fixed_point,grid)
+fixed_point_cell=outer_approximation(fixed_point,grid)
 print "Found fixed point in",fixed_point
 
 initial_set=GridMaskSet(finite_grid)
-initial_set.adjoin(over_approximation(fixed_point,grid))
+initial_set.adjoin(outer_approximation(fixed_point,grid))
 bounding_set=GridMaskSet(finite_grid)
 bounding_set.adjoin(over_approximation(grid_extent,grid))
 

@@ -50,7 +50,7 @@ void export_hybrid_evolver()
     .def("viable",(HybridSet<R>(HybridEvolver<R>::*)(const HybridAutomaton<R>&,const HybridSet<R>&))&HybridEvolver<R>::viable)
     .def("verify",(tribool(HybridEvolver<R>::*)(const HybridAutomaton<R>&,const HybridSet<R>&,const HybridSet<R>&))&HybridEvolver<R>::verify)
 
-    .def("discrete_step",(HybridGridCellListSet<R>(HybridEvolver<R>::*)(const HybridAutomaton<R>&,const HybridGridCellListSet<R>&))&HybridEvolver<R>::discrete_step)
+    .def("discrete_step",(HybridGridMaskSet<R>(HybridEvolver<R>::*)(const HybridAutomaton<R>&,const HybridGridMaskSet<R>&))&HybridEvolver<R>::discrete_step)
     .def("continuous_chainreach",(HybridGridMaskSet<R>(HybridEvolver<R>::*)(const HybridAutomaton<R>&,const HybridGridMaskSet<R>&,const HybridGridMaskSet<R>&))&HybridEvolver<R>::continuous_chainreach)
     .def("lower_reach",(HybridGridMaskSet<R>(HybridEvolver<R>::*)(const HybridAutomaton<R>&,const HybridGridMaskSet<R>&,time_type,time_type,size_type))&HybridEvolver<R>::lower_reach)
     .def("upper_reach",(HybridGridMaskSet<R>(HybridEvolver<R>::*)(const HybridAutomaton<R>&,const HybridGridMaskSet<R>&,time_type,time_type,size_type))&HybridEvolver<R>::upper_reach)

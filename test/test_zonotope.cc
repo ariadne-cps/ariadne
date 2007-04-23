@@ -166,8 +166,8 @@ test_zonotope()
 
   Rectangle<R> bbox3=z3.bounding_box().expand_by(0.25);
   Grid<R> gr3(2,0.125);
-  GridCellListSet<R> oaz3=over_approximation(z3,gr3);
-  GridCellListSet<R> uaz3=under_approximation(z3,gr3);
+  GridCellListSet<R> oaz3=outer_approximation(z3,gr3);
+  GridCellListSet<R> uaz3=inner_approximation(z3,gr3);
   bbox=z3.bounding_box().expand_by(R(0.5));
   eps.open("test_zonotope-2.eps",bbox);
   eps.set_fill_colour("white");
@@ -192,9 +192,9 @@ test_zonotope()
   Zonotope< Interval<R> > iz5(Point<Interval<R> >("([-0.125,0.125],[-0.125,0.125])"),Matrix<R>("[2,1,1;1,-1,1]"));
   
   Grid<R> gr5(2,0.5);
-  GridCellListSet<R> oaiz5=over_approximation(iz5,gr5);
-  GridCellListSet<R> oaz5=over_approximation(z5,gr5);
-  GridCellListSet<R> uaz5=under_approximation(z5,gr5);
+  GridCellListSet<R> oaiz5=outer_approximation(iz5,gr5);
+  GridCellListSet<R> oaz5=outer_approximation(z5,gr5);
+  GridCellListSet<R> uaz5=inner_approximation(z5,gr5);
   r=Rectangle<R>("[-2.5,-2.0]x[0.0,0.5]");
   pt=Point<R>("(-2.5,0.5)");
   bbox=z5.bounding_box().expand_by(R(0.5));

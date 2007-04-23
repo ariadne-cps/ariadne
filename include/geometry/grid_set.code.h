@@ -38,8 +38,62 @@
 #include "../geometry/partition_tree_set.h"
 
 #include "../geometry/set_interface.h"
+#include "../geometry/set_reference.h"
 
 #include "../output/logging.h"
+
+
+
+namespace {
+  using namespace Ariadne;
+  using namespace Ariadne::Geometry;
+
+
+  template<class R, class BS>
+  inline
+  GridCellListSet<R>
+  outer_approximation_of_basic_set(const BS& bs, const Grid<R>& g) 
+  {
+    GridCellListSet<R> gcls(g);
+    GridBlock<R> gbb=outer_approximation(bs.bounding_box(),g);
+    Rectangle<R> r(bs.dimension());
+
+    for(typename GridBlock<R>::const_iterator iter=gbb.begin(); iter!=gbb.end(); ++iter) {
+      r=*iter;
+      if(disjoint(r,bs)) {
+      } else {
+        gcls.adjoin(*iter);
+      }
+    }
+    return gcls;
+  }
+
+
+  template<class R, class BS>
+  inline
+  GridCellListSet<R>
+  inner_approximation_of_basic_set(const BS& bs, const Grid<R>& g) 
+  {
+    GridCellListSet<R> gcls(g);
+    GridBlock<R> gbb=outer_approximation(bs.bounding_box(),g);
+    Rectangle<R> r(bs.dimension());
+
+    for(typename GridBlock<R>::const_iterator iter=gbb.begin(); iter!=gbb.end(); ++iter) {
+      r=*iter;
+      if(subset(r,bs)) {
+        gcls.adjoin(*iter);
+      }
+    }
+    return gcls;
+  }
+
+
+
+}
+
+
+
+
 
 namespace Ariadne {
   namespace Geometry {
@@ -189,10 +243,11 @@ namespace Ariadne {
     void
     GridBlock<R>::_instantiate_geometry_operators() 
     {
+      typedef Numeric::Interval<R> I;
       tribool tb;
+      Point<I>* ipt=0;
       Rectangle<R>* r=0;
       Grid<R>* g=0;
-      FiniteGrid<R>* fg=0;
       GridCell<R>* gc=0;
       GridBlock<R>* gb=0;
       
@@ -202,9 +257,13 @@ namespace Ariadne {
       tb=Geometry::subset(*gc,*gb);
       tb=Geometry::subset(*gb,*gb);
 
+      *gb=Geometry::outer_approximation(*ipt,*g);
+
       *gb=Geometry::over_approximation(*r,*g);
-      *gb=Geometry::over_approximation(*r,*fg);
       *gb=Geometry::under_approximation(*r,*g);
+
+      *gb=Geometry::outer_approximation(*r,*g);
+      *gb=Geometry::inner_approximation(*r,*g);
     }
     
     
@@ -332,37 +391,41 @@ namespace Ariadne {
     }
     
     
+
     template<class R>
     void
     GridCellListSet<R>::_instantiate_geometry_operators()
     {
+      typedef Numeric::Interval<R> I;
       tribool tb;
-      Zonotope<R>* z=0;
-      Zonotope<Numeric::Interval<R>,R>* ez=0;
-      Zonotope< Numeric::Interval<R> >* iz=0;
+      //Rectangle<R>* r=0;
+      Zonotope<R,R>* z=0;
+      Zonotope<I,R>* ez=0;
+      Zonotope<I,I>* iz=0;
       Polytope<R>* pltp=0;
       Polyhedron<R>* plhd=0;
+      SetInterface<R>* set=0;
+
       Grid<R>* g=0;
-      FiniteGrid<R>* fg=0;
       GridBlock<R>* gb=0;
       GridCellListSet<R>* gcls=0;
 
       tb=Geometry::subset(*gcls,*gb);
       
-      *gcls=Geometry::over_approximation(*pltp,*g);
-      *gcls=Geometry::over_approximation(*plhd,*g);
-      *gcls=Geometry::over_approximation(*z,*g);
-      *gcls=Geometry::over_approximation(*ez,*g);
-      *gcls=Geometry::over_approximation(*iz,*g);
-
-      *gcls=Geometry::over_approximation(*pltp,*fg);
-      *gcls=Geometry::over_approximation(*z,*fg);
-      *gcls=Geometry::over_approximation(*ez,*fg);
-      *gcls=Geometry::over_approximation(*iz,*fg);
-
-      *gcls=Geometry::under_approximation(*z,*g);
-      *gcls=Geometry::under_approximation(*pltp,*g);
-      *gcls=Geometry::under_approximation(*plhd,*g);
+      Geometry::outer_approximation(*pltp,*g);
+      Geometry::outer_approximation(*plhd,*g);
+      Geometry::outer_approximation(*z,*g);
+      Geometry::outer_approximation(*ez,*g);
+      Geometry::outer_approximation(*iz,*g);
+      Geometry::outer_approximation(*set,*g);
+ 
+      Geometry::inner_approximation(*pltp,*g);
+      Geometry::inner_approximation(*plhd,*g);
+      Geometry::inner_approximation(*z,*g);
+      Geometry::inner_approximation(*ez,*g);
+      Geometry::inner_approximation(*iz,*g);
+      Geometry::inner_approximation(*set,*g);
+ 
     }
 
 
@@ -510,25 +573,37 @@ namespace Ariadne {
     }
     
     
+
+
     template<class R>
     void
     GridMaskSet<R>::_instantiate_geometry_operators()
     {
+      typedef Numeric::Interval<R> I;
       tribool tb;
-      Point< Numeric::Interval<R> >* ipt=0;
+      //Point<I>* ipt=0;
       Rectangle<R>* r=0;
-      Polyhedron<R>* plhd=0;
+
       ListSet< Rectangle<R> >* rls=0;
-      ListSet< Zonotope<R> >* zls=0;
-      Grid<R>* g=0;
+      ListSet< Zonotope<R,R> >* zls=0;
+      ListSet< Zonotope<I,R> >* ezls=0;
+      ListSet< Zonotope<I,I> >* izls=0;
+
+      SetInterface<R>* set=0;
+
       FiniteGrid<R>* fg=0;
       GridCell<R>* gc=0;
       GridBlock<R>* gb=0;
       GridCellListSet<R>* gcls=0;
       GridMaskSet<R>* gms=0;
-      PartitionTreeSet<R>* pts=0;
-      SetInterface<R>* set=0;
-      
+
+      *gms=outer_approximation(*set,*fg);
+      *gms=inner_approximation(*set,*fg);
+      *gms=outer_approximation(*rls,*fg);
+      *gms=outer_approximation(*zls,*fg);
+      *gms=outer_approximation(*ezls,*fg);
+      *gms=outer_approximation(*izls,*fg);
+
       tb=Geometry::subset(*r,*gms);
       tb=Geometry::subset(*gms,*r);
       tb=Geometry::disjoint(*r,*gms);
@@ -553,22 +628,6 @@ namespace Ariadne {
       *gcls=Geometry::difference(*gcls,*gms);
       *gms=Geometry::difference(*gms,*gms);
       *gms=Geometry::join(*gms,*gms);
-
-      *gb=Geometry::over_approximation(*ipt,*g);
-  
-      *gms=Geometry::over_approximation(*plhd,*fg);
-      *gms=Geometry::over_approximation(*rls,*fg);
-      *gms=Geometry::over_approximation(*zls,*fg);
-      *gms=Geometry::over_approximation(*gms,*fg);
-      *gms=Geometry::over_approximation(*pts,*fg);
-      *gms=Geometry::over_approximation(*set,*fg);
-      
-      *gms=Geometry::over_approximation(*set,*g);
-
-      *gms=Geometry::under_approximation(*rls,*fg);
-      *gms=Geometry::under_approximation(*gms,*fg);
-      *gms=Geometry::under_approximation(*pts,*fg);
-      *gms=Geometry::under_approximation(*set,*fg);
     }
     
     
@@ -768,7 +827,7 @@ namespace Ariadne {
       if(!subset(r,gms.bounding_box())) {
         return false;
       }
-      return subset(over_approximation(r,gms.grid()),gms);
+      return subset(outer_approximation(r,gms.grid()),gms);
     }
 
 
@@ -780,7 +839,7 @@ namespace Ariadne {
       if(!subset(gms,r.bounding_box())) {
         return false;
       }
-      return subset(gms,over_approximation(r,gms.grid()));
+      return subset(gms,outer_approximation(r,gms.grid()));
     }
 
 
@@ -893,8 +952,52 @@ namespace Ariadne {
   
   
 
-    // Over and under approximations ------------------------------------------
+    // Approximations of rectangles ------------------------------------------
+
+
+    template<class R>
+    GridBlock<R>
+    over_approximation(const Rectangle<R>& r, const Grid<R>& g) 
+    {
+      IndexArray lower(r.dimension());
+      IndexArray upper(r.dimension());
+      for(size_type i=0; i!=r.dimension(); ++i) {
+        if(r.lower_bound(i)==r.upper_bound(i)) {
+          ARIADNE_THROW(EmptyInterior,"GridBlock over_approximation(Rectangle r, Grid g)"," with r="<<r<<" (use outer_approximation(r,g) instead)");
+        }
+        lower[i]=g.subdivision_lower_index(i,r.lower_bound(i));
+        upper[i]=g.subdivision_upper_index(i,r.upper_bound(i));
+      }
+      return GridBlock<R>(g,lower,upper);
+    }
     
+
+    template<class R>
+    GridBlock<R>
+    under_approximation(const Rectangle<R>& r, const Grid<R>& g) 
+    {
+      IndexArray lower(r.dimension());
+      IndexArray upper(r.dimension());
+      for(size_type i=0; i!=r.dimension(); ++i) {
+        if(r.lower_bound(i)==r.upper_bound(i)) {
+          ARIADNE_THROW(EmptyInterior,"GridBlock under_approximation(Rectangle r, Grid g)"," with r="<<r<<" (use outer_approximation(r,g) instead)");
+        }
+        lower[i]=g.subdivision_upper_index(i,r.lower_bound(i));
+        upper[i]=g.subdivision_lower_index(i,r.upper_bound(i));
+      }
+      return GridBlock<R>(g,lower,upper);
+    }
+    
+
+
+
+    template<class R>
+    GridBlock<R>
+    outer_approximation(const Point< Numeric::Interval<R> >& ipt, const Grid<R>& g) 
+    {
+      return outer_approximation(Rectangle<R>(ipt),g);
+    }
+
     template<class R>
     GridBlock<R>
     outer_approximation(const Rectangle<R>& r, const Grid<R>& g) 
@@ -911,6 +1014,7 @@ namespace Ariadne {
       return GridBlock<R>(g,lower,upper);
     }
     
+
     template<class R>
     GridBlock<R>
     inner_approximation(const Rectangle<R>& r, const Grid<R>& g) 
@@ -926,370 +1030,123 @@ namespace Ariadne {
       }
       return GridBlock<R>(g,lower,upper);
     }
-    
-    template<class R>
-    GridBlock<R>
-    over_approximation(const Point< Numeric::Interval<R> >& ipt, const Grid<R>& g) 
-    {
-      return over_approximation(Rectangle<R>(ipt),g);
-    }
-    
-    
-    
-    template<class R>
-    GridBlock<R>
-    over_approximation(const Rectangle<R>& r, const Grid<R>& g) 
-    {
-      if(r.empty()) {
-        return GridBlock<R>(g);
-      }
-      IndexArray lower(r.dimension());
-      IndexArray upper(r.dimension());
-      for(size_type i=0; i!=r.dimension(); ++i) {
-        lower[i]=g.subdivision_lower_index(i,r.lower_bound(i));
-        upper[i]=g.subdivision_upper_index(i,r.upper_bound(i));
-      }
+ 
 
-      return GridBlock<R>(g,lower,upper);
-    }
-    
-    template<class R>
-    GridBlock<R>
-    under_approximation(const Rectangle<R>& r, const Grid<R>& g) 
-    {
-      ARIADNE_LOG(4,"GridBlock under_approximation(Rectangle r, Grid g)\n") 
-      if(r.empty()) {
-        return GridBlock<R>(g);
-      }
-      IndexArray lower(r.dimension());
-      IndexArray upper(r.dimension());
-      for(size_type i=0; i!=r.dimension(); ++i) {
-        lower[i]=g.subdivision_lower_index(i,r.lower_bound(i))+1;
-        upper[i]=g.subdivision_upper_index(i,r.upper_bound(i))-1;
-      }
-
-      return GridBlock<R>(g,lower,upper);
-    }
-    
+  
     template<class R>
     GridCellListSet<R>
-    over_approximation(const Zonotope<R>& z, const Grid<R>& g) 
+    outer_approximation(const Polyhedron<R>& ph, const Grid<R>& g) 
     {
-      if(verbosity>7) { std::clog << "GridCellListSet over_approximation(Zonotope z, Grid g)" << std::endl; }
-      GridCellListSet<R> result(g);
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(z,g,"over_approximation(Zonotope<R>,Grid<R>)");
-      if(z.empty()) {
-        return result; 
-      }
-      Rectangle<R> bb=z.bounding_box();
+      return ::outer_approximation_of_basic_set(ph,g);
+    }
 
-      GridBlock<R> gbb=over_approximation(bb,g);
-      Combinatoric::LatticeBlock block=gbb.lattice_set();
-
-      for(Combinatoric::LatticeBlock::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
-        GridCell<R> cell(g,*iter);
-        if(disjoint(Rectangle<R>(cell),z)) {
-        } else {
-          result.adjoin(cell);
-        }
-      }
-
-      return result;
+    template<class R>
+    GridCellListSet<R>
+    inner_approximation(const Polyhedron<R>& ph, const Grid<R>& g) 
+    {
+      return ::inner_approximation_of_basic_set(ph,g);
     }
 
 
     template<class R>
     GridCellListSet<R>
-    over_approximation(const Polytope<R>& p, const Grid<R>& g) 
+    outer_approximation(const Polytope<R>& p, const Grid<R>& g) 
     {
-      GridCellListSet<R> result(g);
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(p,g,"over_approximation(Polytope<R>,Grid<R>)");
-      if(p.empty()) {
-        return result; 
-      }
-      Rectangle<R> bb=p.bounding_box();
-
-      GridBlock<R> gbb=over_approximation(bb,g);
-      Combinatoric::LatticeBlock block=gbb.lattice_set();
-
-      for(Combinatoric::LatticeBlock::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
-        GridCell<R> cell(g,*iter);
-        if(disjoint(Rectangle<R>(cell),p)) {
-        } else {
-          result.adjoin(cell);
-        }
-      }
-
-      return result;
+      return ::outer_approximation_of_basic_set(p,g);
     }
 
-   
     template<class R>
     GridCellListSet<R>
-    over_approximation(const Polyhedron<R>& p, const Grid<R>& g) 
+    inner_approximation(const Polytope<R>& p, const Grid<R>& g) 
     {
-      GridCellListSet<R> result(g);
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(p,g,"over_approximation(Polyhedron<R>,Grid<R>)");
-      
-      // omit emptyness and boundedness checks
-          
-      Rectangle<R> bb=p.bounding_box();
+      return ::inner_approximation_of_basic_set(p,g);
+    }
 
-      GridBlock<R> gbb=over_approximation(bb,g);
-      Combinatoric::LatticeBlock block=gbb.lattice_set();
 
-      for(Combinatoric::LatticeBlock::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
-        GridCell<R> cell(g,*iter);
-        if(disjoint(Rectangle<R>(cell),p)) {
-        } else {
-          result.adjoin(cell);
-        }
-      }
+    template<class R,class R0,class R1>
+    GridCellListSet<R>
+    outer_approximation(const Zonotope<R0,R1>& z, const Grid<R>& g) 
+    {
+      return ::outer_approximation_of_basic_set(z,g);
+    }
 
-      return result;
+    template<class R,class R0,class R1>
+    GridCellListSet<R>
+    inner_approximation(const Zonotope<R0,R1>& z, const Grid<R>& g) 
+    {
+      return ::inner_approximation_of_basic_set(z,g);
     }
 
 
     template<class R>
     GridCellListSet<R>
-    over_approximation(const Zonotope<Numeric::Interval<R>,R>& z, const Grid<R>& g) 
+    outer_approximation(const SetInterface<R>& set, const Grid<R>& g) 
     {
-      if(verbosity>7) { std::clog << "GridCellListSet over_approximation(Zonotope<Interval,Float>, Grid)" << std::endl; }
       GridCellListSet<R> result(g);
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(z,g,"over_approximation(Zonotope<Interval,Float>,Grid)");
-      if(z.empty()) {
-        return result; 
-      }
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(set,g,"outer_approximation(SetInterface<R>,Grid<R>)");
+      ARIADNE_CHECK_BOUNDED(set,"outer_approximation(SetInterface<R>,Grid<R>)");
       
-      Point< Numeric::Interval<R> > c=z.centre();
-      LinearAlgebra::Matrix<R> G=z.generators();
-      
-      Point<R> ac=approximate_value(c);
-      LinearAlgebra::Vector< Numeric::Interval<R> > e=c-ac;
-      
-      Zonotope<R> az(ac,G);
-      
-     
-      Rectangle<R> bb=z.bounding_box();
-
-      GridBlock<R> gbb=over_approximation(bb,g);
-      Combinatoric::LatticeBlock block=gbb.lattice_set();
-
-      for(Combinatoric::LatticeBlock::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
-        GridCell<R> cell(g,*iter);
-        if(disjoint(Rectangle<R>(cell)+e,az)) {
-        } else {
-          result.adjoin(cell);
-        }
-      }
-
-      return result;
-    }
-
-
-    template<class R>
-    GridCellListSet<R>
-    over_approximation(const Zonotope< Numeric::Interval<R> >& z, const Grid<R>& g) 
-    {
-      if(verbosity>7) { std::clog << "GridCellListSet over_approximation(Zonotope<Interval>, Grid g)" << std::endl; }
-      GridCellListSet<R> result(g);
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(z,g,"over_approximation(Zonotope<R>,Grid<R>)");
-      if(z.empty()) {
-        return result; 
-      }
-      
-      size_type ng=z.number_of_generators();
-      Point< Numeric::Interval<R> > c=z.centre();
-      LinearAlgebra::Matrix< Numeric::Interval<R> > G=z.generators();
-      
-      Point<R> ac=approximate_value(c);
-      LinearAlgebra::Matrix<R> aG=approximate_value(G);
-      LinearAlgebra::Vector< Numeric::Interval<R> > e=(c-ac)+(G-aG)*LinearAlgebra::Vector< Numeric::Interval<R> >(ng,Numeric::Interval<R>(-1,1));
-      
-      Zonotope<R> az(ac,aG);
-      
-     
-      Rectangle<R> bb=z.bounding_box();
-
-      GridBlock<R> gbb=over_approximation(bb,g);
-      Combinatoric::LatticeBlock block=gbb.lattice_set();
-
-      for(Combinatoric::LatticeBlock::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
-        GridCell<R> cell(g,*iter);
-        if(disjoint(Rectangle<R>(cell)+e,az)) {
-        } else {
-          result.adjoin(cell);
-        }
-      }
-
-      return result;
-    }
-
-
-
-
-
-    template<class R>
-    GridCellListSet<R>
-    under_approximation(const Zonotope<R>& z, const Grid<R>& g) 
-    {
-      ARIADNE_LOG(4,"GridCellListSet under_approximation(Zonotope z, Grid g)\n") 
-      GridCellListSet<R> result(g);
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(z,g,"under_approximation(Zonotope<R>,Grid<R>)");
-      if(z.empty()) {
-        return result; 
-      }
-      
-      Rectangle<R> bb=z.bounding_box();
-      GridBlock<R> gbb=over_approximation(bb,g);
-      Combinatoric::LatticeBlock block=gbb.lattice_set();
-
-      for(Combinatoric::LatticeBlock::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
-        GridCell<R> cell(g,*iter);
-        if(subset(Rectangle<R>(cell),z)) {
-          result.adjoin(cell);
+      const GridBlock<R> gb=outer_approximation(set.bounding_box(),g);
+      Rectangle<R> r(g.dimension());
+      for(typename GridBlock<R>::const_iterator iter=gb.begin(); iter!=gb.end(); ++iter) {
+        r=*iter;
+        if(!bool(set.disjoint(r))) {
+          result.adjoin(*iter);
         }
       }
       return result;
     }
-
+    
+ 
     template<class R>
     GridCellListSet<R>
-    under_approximation(const Polytope<R>& p, const Grid<R>& g) 
+    inner_approximation(const SetInterface<R>& set, const Grid<R>& g) 
     {
-      ARIADNE_LOG(4,"GridCellListSet under_approximation(Polytope p, Grid g)\n") 
       GridCellListSet<R> result(g);
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(p,g,"under_approximation(Polytope<R>,Grid<R>)");
-      if(p.empty()) {
-        return result; 
-      }
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(set,g,"inner_approximation(SetInterface<R>,Grid<R>)");
+      ARIADNE_CHECK_BOUNDED(set,"inner_approximation(SetInterface<R>,Grid<R>)");
       
-      Rectangle<R> bb=p.bounding_box();
-      GridBlock<R> gbb=over_approximation(bb,g);
-      Combinatoric::LatticeBlock block=gbb.lattice_set();
-
-      for(Combinatoric::LatticeBlock::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
-        GridCell<R> cell(g,*iter);
-        if(subset(Rectangle<R>(cell),p)) {
-          result.adjoin(cell);
+      const GridBlock<R> gb=outer_approximation(set.bounding_box(),g);
+      Rectangle<R> r(g.dimension());
+      for(typename GridBlock<R>::const_iterator iter=gb.begin(); iter!=gb.end(); ++iter) {
+        r=*iter;
+        if((set.superset(r))) {
+          result.adjoin(*iter);
         }
       }
       return result;
     }
+    
+ 
 
-    template<class R>
-    GridCellListSet<R>
-    under_approximation(const Polyhedron<R>& p, const Grid<R>& g) 
-    {
-      ARIADNE_LOG(4,"GridCellListSet under_approximation(Polyhedron p, Grid g)\n") 
-      GridCellListSet<R> result(g);
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(p,g,"under_approximation(Polyhedron<R>,Grid<R>)");
-      
-      Rectangle<R> bb=p.bounding_box();
-      GridBlock<R> gbb=over_approximation(bb,g);
-      Combinatoric::LatticeBlock block=gbb.lattice_set();
+  
 
-      for(Combinatoric::LatticeBlock::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
-        GridCell<R> cell(g,*iter);
-        if(subset(Rectangle<R>(cell),p)) {
-          result.adjoin(cell);
-        }
-      }
-      return result;
-    }
 
-    template<class R>
-    GridBlock<R>
-    over_approximation(const Rectangle<R>& r, const FiniteGrid<R>& fg) 
-    {
-      return over_approximation(r,fg.grid());
-    }
-    
-    template<class R>
-    GridCellListSet<R>
-    over_approximation(const Zonotope<Numeric::Interval<R>,R>& z, const FiniteGrid<R>& fg) 
-    {
-      return over_approximation(z,fg.grid());
-    }
-    
-    template<class R>
-    GridCellListSet<R>
-    over_approximation(const Zonotope< Numeric::Interval<R> >& z, const FiniteGrid<R>& fg) 
-    {
-      return over_approximation(z,fg.grid());
-    }
-    
-    template<class R>
-    GridCellListSet<R>
-    over_approximation(const Zonotope<R>& z, const FiniteGrid<R>& fg) 
-    {
-      return over_approximation(z,fg.grid());
-    }
-    
-    template<class R>
-    GridCellListSet<R>
-    over_approximation(const Polytope<R>& p, const FiniteGrid<R>& fg) 
-    {
-      return over_approximation(p,fg.grid());
-    }
-    
-    template<class R>
+
+
+
+
+
+    template<class R, class BS>
     GridMaskSet<R>
-    over_approximation(const Polyhedron<R>& p, const FiniteGrid<R>& fg) 
+    outer_approximation(const ListSet<BS>& ls, const FiniteGrid<R>& fg) 
     {
       GridMaskSet<R> result(fg);
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(p,fg,"over_approximation(Polyhedron p, FiniteGrid fg)");
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(ls,fg,"outer_approximation(ListSet<BS> ls, FiniteGrid<R> fg)");
       
-      if(!subset(p,fg.extent())) { 
-        result.adjoin_unbounded_cell(); 
+      for(typename ListSet<BS>::const_iterator bs_iter=ls.begin(); bs_iter!=ls.end(); ++bs_iter) {
+        result.adjoin_outer_approximation(*bs_iter);
       }
-      Polyhedron<R> plhd=closed_intersection(p,fg.extent());
-      GridBlock<R> block=over_approximation(plhd.bounding_box(),fg.grid());
-      for(typename GridBlock<R>::const_iterator iter=block.begin(); iter!=block.end(); ++iter) {
-        const GridCell<R>& cell=*iter;
-        if(disjoint(Rectangle<R>(cell),p)) {
-        } else {
-          result.adjoin(cell);
-        }
-      }
-
       return result;
     }
-
-
+    
 
     template<class R>
     GridMaskSet<R>
-    over_approximation(const GridMaskSet<R>& gms, const FiniteGrid<R>& fg) 
+    outer_approximation(const SetInterface<R>& set, const FiniteGrid<R>& fg) 
     {
       GridMaskSet<R> result(fg);
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(gms,fg,"over_approximation(GridMaskSet gms, FiniteGrid fg)");
-
-      for(typename GridMaskSet<R>::const_iterator iter=gms.begin(); iter!=gms.end(); ++iter) {
-        result.adjoin(over_approximation(Rectangle<R>(*iter),fg.grid()));
-      }
-      return result;
-    }
-    
-    template<class R>
-    GridMaskSet<R>
-    over_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& fg) 
-    {
-      GridMaskSet<R> result(fg);
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(pts,fg,"over_approximation(PartitionTreeSet pts, FiniteGrid fg)");
-
-      for(typename PartitionTreeSet<R>::const_iterator iter=pts.begin(); iter!=pts.end(); ++iter) {
-        result.adjoin(over_approximation(Rectangle<R>(*iter),fg.grid()));
-      }
-      return result;
-    }
-    
-    template<class R>
-    GridMaskSet<R>
-    over_approximation(const SetInterface<R>& set, const FiniteGrid<R>& fg) 
-    {
-      GridMaskSet<R> result(fg);
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(set,fg,"over_approximation(PartitionTreeSet<R>,FiniteGrid<R>)");
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(set,fg,"outer_approximation(PartitionTreeSet<R>,FiniteGrid<R>)");
       
       const Grid<R>& g=fg.grid();
       const Combinatoric::LatticeBlock& lb=fg.lattice_block();
@@ -1304,50 +1161,13 @@ namespace Ariadne {
     }
     
     
-    template<class R>
-    GridMaskSet<R>
-    over_approximation(const SetInterface<R>& set, const Grid<R>& g) 
-    {
-      FiniteGrid<R> fg(g,set.bounding_box());
-      return over_approximation(set,fg);
-    }
-      
-
-    template<class R>
-    GridMaskSet<R>
-    under_approximation(const GridMaskSet<R>& gms, const FiniteGrid<R>& fg) 
-    {
-      ARIADNE_LOG(4,"GridMaskSet under_approximation(GridMaskSet gms, FiniteGrid fg)\n") 
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(gms,fg,"under_approximation(GridMaskSet<R>,FiniteGrid<R>)");
-      
-      GridMaskSet<R> result(fg);
-      GridMaskSet<R> bb(fg);
-      bb.adjoin(bb.bounds());
-      Rectangle<R> r;
-      
-      for(typename GridMaskSet<R>::const_iterator iter=bb.begin(); iter!=bb.end(); ++iter) {
-        r=*iter;
-        if(subset(r,gms)) {
-          const GridCell<R>& cell=*iter;
-          result.adjoin(cell);
-        }
-      }
-      return result;
-    }
-
-    template<class R>
-    GridMaskSet<R>
-    under_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& fg) 
-    {
-      ARIADNE_LOG(4,"GridMaskSet under_approximation(PartitionTreeSet gms, FiniteGrid fg)\n") 
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
     
+
     template<class R>
     GridMaskSet<R>
-    under_approximation(const SetInterface<R>& s, const FiniteGrid<R>& fg) 
+    inner_approximation(const SetInterface<R>& s, const FiniteGrid<R>& fg) 
     {
-      ARIADNE_LOG(4,"GridMaskSet under_approximation(SetInterface s, FiniteGrid fg)\n") 
+      ARIADNE_LOG(4,"GridMaskSet inner_approximation(SetInterface s, FiniteGrid fg)\n") 
       GridMaskSet<R> result(fg);
       GridBlock<R> gb(fg.grid(),fg.lattice_block());
       Rectangle<R> r;
@@ -1366,21 +1186,6 @@ namespace Ariadne {
     
 
     
-    template<class R>
-    inline
-    GridBlock<R>
-    over_approximation(const Rectangle<R>& r, const GridMaskSet<R>& gms) 
-    {
-      return over_approximation(r,gms.grid());
-    }
-    
-    template<class R>
-    inline
-    GridBlock<R>
-    under_approximation(const Rectangle<R>& r, const GridMaskSet<R>& gms) 
-    {
-      return under_approximation(r,gms.grid());
-    }
     
 
 

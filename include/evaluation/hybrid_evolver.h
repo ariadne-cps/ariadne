@@ -111,8 +111,8 @@ namespace Ariadne {
       //@{
       //! \name Evolution using concrete sets.
       /*! \brief Make a discrete step of the hybrid automaton, starting from initial set. */
-      Geometry::HybridGridCellListSet<R> discrete_step(const System::HybridAutomaton<R>& automaton, 
-                                                       const Geometry::HybridGridCellListSet<R>& initial_set);
+      Geometry::HybridGridMaskSet<R> discrete_step(const System::HybridAutomaton<R>& automaton, 
+                                                       const Geometry::HybridGridMaskSet<R>& initial_set);
       /*! \brief Evolve the hybrid automaton within \a bounding_set starting from the \a initial_set respecting invariants and without using discrete transitions. */
       Geometry::HybridGridMaskSet<R> continuous_chainreach(const System::HybridAutomaton<R>& automaton, 
                                                            const Geometry::HybridGridMaskSet<R>& initial_set,

@@ -85,6 +85,11 @@ namespace Ariadne {
       UnboundedSet(const std::string& str) : std::runtime_error(str) { }
     };
      
+    /*! \brief Attempting to perform an invalid operation on a set with empty interior. */
+    struct EmptyInterior : public std::runtime_error {
+      EmptyInterior(const std::string& str) : std::runtime_error(str) { }
+    };
+     
   }
 }
 
@@ -107,7 +112,7 @@ namespace Ariadne {
   { if((set1).grid()!=(set2).grid()) { using namespace Geometry; ARIADNE_THROW(IncompatibleGrids,func,#set1"="<<set1<<", "#set2"="<<set2); } }
 
 #define ARIADNE_CHECK_BOUNDED(set,func)                                 \
-  { if(!(set).bounded()) { using namespace Geometry; ARIADNE_THROW(UnboundedSet,func,#set); } }
+  { if(!(set).bounded()) { using namespace Geometry; ARIADNE_THROW(UnboundedSet,func,#set"="<<set); } }
 
 
 #define ARIADNE_CHECK_NEW_LOCATION(hybr,loc,func)                              \

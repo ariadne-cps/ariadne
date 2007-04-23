@@ -177,9 +177,9 @@ Evaluation::Integrator<R>::integrate(const System::VectorField<R>& vector_field,
   Grid<R> g(bounding_set.dimension(),this->grid_size());
   FiniteGrid<R> fg(g,bb);
   GridMaskSet<R> gbs(fg);
-  gbs.adjoin_over_approximation(bounding_set);
+  gbs.adjoin_outer_approximation(bounding_set);
   GridMaskSet<R> gis(fg);
-  gis.adjoin_over_approximation(initial_set);
+  gis.adjoin_outer_approximation(initial_set);
   
   GridMaskSet<R> gs=this->reach(vf,gis,gbs,time);
   return new GridMaskSet<R>(gs);
@@ -214,9 +214,9 @@ Evaluation::Integrator<R>::reach(const System::VectorField<R>& vector_field,
   Grid<R> g(bounding_set.dimension(),this->grid_size());
   FiniteGrid<R> fg(g,bb);
   GridMaskSet<R> gbs(fg);
-  gbs.adjoin_over_approximation(bounding_set);
+  gbs.adjoin_outer_approximation(bounding_set);
   GridMaskSet<R> gis(fg);
-  gis.adjoin_over_approximation(initial_set);
+  gis.adjoin_outer_approximation(initial_set);
   
   GridMaskSet<R> grs=this->reach(vf,gis,gbs,time);
   return new GridMaskSet<R>(grs);
@@ -260,9 +260,9 @@ Evaluation::Integrator<R>::chainreach(const System::VectorField<R>& vector_field
   Grid<R> g(bounding_set.dimension(),this->grid_size());
   FiniteGrid<R> fg(g,bb);
   GridMaskSet<R> gbs(fg);
-  gbs.adjoin_over_approximation(bounding_set);
+  gbs.adjoin_outer_approximation(bounding_set);
   GridMaskSet<R> gis(fg);
-  gis.adjoin_over_approximation(initial_set);
+  gis.adjoin_outer_approximation(initial_set);
   
   GridMaskSet<R> gcrs=this->chainreach(vf,gis,gbs);
   return new GridMaskSet<R>(gcrs);
@@ -300,9 +300,9 @@ Evaluation::Integrator<R>::verify(const System::VectorField<R>& vector_field,
   Grid<R> g(safe_set.dimension(),this->grid_size());
   FiniteGrid<R> fg(g,bb);
   GridMaskSet<R> gss(fg);
-  gss.adjoin_over_approximation(safe_set);
+  gss.adjoin_outer_approximation(safe_set);
   GridMaskSet<R> gis(fg);
-  gis.adjoin_over_approximation(initial_set);
+  gis.adjoin_outer_approximation(initial_set);
   
   return this->verify(vf,gis,gss);
 }
@@ -780,7 +780,7 @@ Evaluation::IntegratorBase<R,VF,BS>::integrate(const System::VectorField<R>& vec
       const BasicSet& p=*iter;
       if(p.radius()>spacial_tolerance) {
         if(verbosity > 6) { std::clog << "Splitting, radius=" << p.radius() << "\n" << p << "\n"; }
-        mask_set.adjoin_over_approximation(p);
+        mask_set.adjoin_outer_approximation(p);
       }
       else {
         start_set.adjoin(p);
@@ -797,7 +797,7 @@ Evaluation::IntegratorBase<R,VF,BS>::integrate(const System::VectorField<R>& vec
   
   for(typename ListSet::const_iterator iter=start_set.begin(); iter!=start_set.end(); ++iter) {
     const BasicSet& bs=*iter;
-    result.adjoin_over_approximation(bs);
+    result.adjoin_outer_approximation(bs);
   }
   return result;
 }
@@ -858,7 +858,7 @@ Evaluation::IntegratorBase<R,VF,BS>::reach(const System::VectorField<R>& vector_
   output_list=this->reach(vf,input_list,time_step);
   for(ls_const_iterator iter=output_list.begin(); iter!=output_list.end(); ++iter) {
     const BasicSet& fz=*iter;
-    result.adjoin_over_approximation(fz);
+    result.adjoin_outer_approximation(fz);
   }
   return result;
 }
@@ -916,7 +916,7 @@ Evaluation::IntegratorBase<R,VF,BS>::chainreach(const System::VectorField<R>& ve
     for(ls_const_iterator iter=basic_set_list.begin(); iter!=basic_set_list.end(); ++iter) {
       const BasicSet& fp=*iter;
       if(!disjoint(fp.bounding_box(),bounding_set)) {
-        image.adjoin_over_approximation(fp);
+        image.adjoin_outer_approximation(fp);
       }
     }
     found=regular_intersection(image,bounding_set);
@@ -934,7 +934,7 @@ Evaluation::IntegratorBase<R,VF,BS>::chainreach(const System::VectorField<R>& ve
   for(ls_const_iterator iter=reach_basic_set_list.begin(); iter!=reach_basic_set_list.end(); ++iter) {
     BasicSet fz=*iter;
     if(!disjoint(fz.bounding_box(),bounding_set)) {
-      result.adjoin_over_approximation(fz);
+      result.adjoin_outer_approximation(fz);
     }
   }
   if(verbosity>4) { std::clog << "Reached " << result.size() << " cells, " << std::endl; }
@@ -998,7 +998,7 @@ Evaluation::IntegratorBase<R,VF,BS>::verify(const System::VectorField<R>& vector
     basic_set_list=this->integrate(vf,basic_set_list,time_step);
     for(ls_const_iterator iter=basic_set_list.begin(); iter!=basic_set_list.end(); ++iter) {
       const BasicSet& fp=*iter;
-      cellimage.adjoin_over_approximation(fp);
+      cellimage.adjoin_outer_approximation(fp);
       if(!subset(cellimage,safe_set)) {
         return false;
       }

@@ -459,7 +459,7 @@ namespace Ariadne {
       Geometry::Rectangle<R> bb=set.bounding_box();
       Geometry::PartitionScheme<R> ps(bb);
       int depth=16;
-      Geometry::PartitionTreeSet<R> pts=Geometry::over_approximation(set,ps,depth);
+      Geometry::PartitionTreeSet<R> pts=Geometry::outer_approximation(set,ps,depth);
       return eps << pts;
     }
 

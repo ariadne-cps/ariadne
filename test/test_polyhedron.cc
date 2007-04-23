@@ -145,6 +145,12 @@ test_polyhedron()
   cout << endl;
 
 
+  {
+    // check_bounded
+    Polyhedron<R> phd(Matrix<R>("[-1,0;0,-1;1,0;0,1]"),Vector<R>("[0,20,0.125,20]"));
+    ARIADNE_TEST_ASSERT(phd.bounded());
+  }
+
   Polyhedron<R> phd2(Matrix<R>("[1,-1;1,-2;-1,1;-1,2]"),Vector<R>("[1.375,1.625,0.625,0.375]"));
   cout << "phd2=" << phd2 << endl;
   cout << "phd2.bounding_box()=" << phd2.bounding_box() << endl;
@@ -160,8 +166,8 @@ test_polyhedron()
   Rectangle<R> bbox2=phd2.bounding_box().expand_by(0.25);
   bbox2=Rectangle<R>("[-4,4]x[-4,4]");
   Grid<R> gr2(2,0.125);
-  GridCellListSet<R> uap2=under_approximation(phd2,gr2);
-  GridCellListSet<R> oap2=over_approximation(phd2,gr2);
+  GridCellListSet<R> uap2=inner_approximation(phd2,gr2);
+  GridCellListSet<R> oap2=outer_approximation(phd2,gr2);
   cout << "uap2.size()=" << uap2.size() << endl;
   cout << "oap2.size()=" << oap2.size() << endl;
   epsfstream eps;

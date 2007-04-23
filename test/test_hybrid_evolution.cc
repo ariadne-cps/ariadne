@@ -154,13 +154,13 @@ int test_hybrid_evolution()
   eps.close();
 
 
-  HybridGridCellListSet<R> initial_activated_set;
+  HybridGridMaskSet<R> initial_activated_set;
   initial_activated_set.new_location(mode1_id,grid);
   initial_activated_set.new_location(mode2_id,grid);
   initial_activated_set[mode1_id].adjoin(over_approximation(Rectangle<R>("[-6,-5]x[-3.5,-1.0]"),grid));
   cout << "initial_activated_set[mode1_id].size()=" << initial_activated_set[mode1_id].size() << " cells" << endl;
   cout << "Computing single discrete step" << endl;
-  HybridGridCellListSet<R> discrete_reach=hybrid_evolver.discrete_step(automaton,initial_activated_set);
+  HybridGridMaskSet<R> discrete_reach=hybrid_evolver.discrete_step(automaton,initial_activated_set);
   cout << "Reached " << discrete_reach[mode2_id].size() << " cells by discrete step" << endl << endl;
   
   eps.open("test_hybrid_evolution-2.eps",bounding_box.expand(0.5));

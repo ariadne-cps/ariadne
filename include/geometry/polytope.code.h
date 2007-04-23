@@ -296,7 +296,7 @@ namespace Ariadne {
       size_type nv=this->number_of_vertices();
       R zero=0;
       for(size_type i=0; i!=nv; ++i) {
-        result = result && (this->_data[i*(d+1u)+d]==zero);
+        result = result && (this->_data[i*(d+1u)+d]!=zero);
       }
       return result;
     }

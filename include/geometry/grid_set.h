@@ -315,13 +315,16 @@ namespace Ariadne {
       /*!\brief Append a GridCellListSet to the list. */
       void adjoin(const GridCellListSet<R>& cls);
 
-      /*! \brief Adjoins an over-approximation of the set \a s. */
-      template<class S>
-      void adjoin_over_approximation(const S& s);
+      /*! \brief Adjoins an over-approximation of the rectangle \a r. */
+      void adjoin_over_approximation(const Rectangle<R>& r);
 
-      /*! \brief Adjoins an under-approximation of the set \a s. */
+      /*! \brief Adjoins an outer-approximation of the set \a s. */
       template<class S>
-      void adjoin_under_approximation(const S& s);
+      void adjoin_outer_approximation(const S& s);
+
+      /*! \brief Adjoins an inner-approximation of the set \a s. */
+      template<class S>
+      void adjoin_inner_approximation(const S& s);
 
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;
@@ -527,17 +530,31 @@ namespace Ariadne {
       /*!\brief The set of all cells which share a facet a cell in the set. */
       GridMaskSet adjoining() const;
 
-      /*! \brief Adjoins an over-approximation of the set \a s. */
-      template<class S>
-      void adjoin_over_approximation(const S& s);
+      /*! \brief Adjoins an over-approximation of the rectangle \a r. */
+      void adjoin_over_approximation(const Rectangle<R>& r);
 
-      /*! \brief Adjoins an under-approximation of the set \a s. */
-      template<class S>
-      void adjoin_under_approximation(const S& s);
+      /*! \brief Adjoins an under-approximation of the rectangle \a r. */
+      void adjoin_under_approximation(const Rectangle<R>& r);
 
-      /*! \brief Restricts to an over-approximation of the set \a s. */
-      template<class S>
-      void restrict_over_approximation(const S& s);
+      /*! \brief Adjoins an outer-approximation of the basic set \a bs. */
+      template<class BS>
+      void adjoin_outer_approximation(const BS& bs);
+
+      /*! \brief Adjoins an inner-approximation of the basic set \a bs. */
+      template<class BS>
+      void adjoin_inner_approximation(const BS& bs);
+
+      /*! \brief Adjoins an outer-approximation of the set \a s. */
+      void adjoin_outer_approximation(const SetInterface<R>& s);
+
+      /*! \brief Adjoins an inner-approximation of the set \a s. */
+      void adjoin_inner_approximation(const SetInterface<R>& s);
+
+      /*! \brief Restricts to an outer-approximation of the set \a s. */
+      void restrict_outer_approximation(const SetInterface<R>& s);
+
+      /*! \brief Restricts to an inner-approximation of the set \a s. */
+      void restrict_inner_approximation(const SetInterface<R>& s);
 
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;
@@ -599,51 +616,33 @@ namespace Ariadne {
     template<class R> GridMaskSet<R> join(const GridMaskSet<R>&, const GridMaskSet<R>&);
 
     
-    
-    template<class R> GridBlock<R> outer_approximation(const Rectangle<R>& r, const Grid<R>& g);
-    
-    
-    template<class R> GridBlock<R> inner_approximation(const Rectangle<R>& r, const Grid<R>& g);
-    
-    
-    template<class R> GridBlock<R> over_approximation(const Point< Numeric::Interval<R> >& r, const Grid<R>& g);
+ 
     template<class R> GridBlock<R> over_approximation(const Rectangle<R>& r, const Grid<R>& g);
-    
-    template<class R> GridCellListSet<R> over_approximation(const Zonotope<R>& z, const Grid<R>& g);
-    template<class R> GridCellListSet<R> over_approximation(const Polytope<R>& p, const Grid<R>& g);
-    template<class R> GridCellListSet<R> over_approximation(const Polyhedron<R>& p, const Grid<R>& g);
-    
-    template<class R> GridCellListSet<R> over_approximation(const Zonotope<Numeric::Interval<R>,R>& z, const Grid<R>& g);
-    template<class R> GridCellListSet<R> over_approximation(const Zonotope< Numeric::Interval<R> >& z, const Grid<R>& g);
-      
-    template<class R> GridBlock<R> over_approximation(const Rectangle<R>& z, const FiniteGrid<R>& fg);
-    template<class R> GridCellListSet<R> over_approximation(const Zonotope<R>& z, const FiniteGrid<R>& fg);
-    template<class R> GridCellListSet<R> over_approximation(const Polytope<R>& z, const FiniteGrid<R>& fg);
+    template<class R> GridBlock<R> under_approximation(const Rectangle<R>& r, const Grid<R>& g);
 
-    template<class R> GridCellListSet<R> over_approximation(const Zonotope<Numeric::Interval<R>,R>& z, const FiniteGrid<R>& fg);
-    template<class R> GridCellListSet<R> over_approximation(const Zonotope< Numeric::Interval<R> >& z, const FiniteGrid<R>& fg);
-      
-    template<class R> GridMaskSet<R> over_approximation(const Polyhedron<R>& p, const FiniteGrid<R>& fg);
-    template<class R, class BS> GridMaskSet<R> over_approximation(const ListSet<BS>& ls, const FiniteGrid<R>& fg); 
-    template<class R> GridMaskSet<R> over_approximation(const GridMaskSet<R>& gms, const FiniteGrid<R>& fg);
-    template<class R> GridMaskSet<R> over_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& fg);
-    template<class R> GridMaskSet<R> over_approximation(const SetInterface<R>& set, const FiniteGrid<R>& fg);
-    
-    template<class R> GridMaskSet<R> over_approximation(const SetInterface<R>& set, const Grid<R>& g);
-    
-    
-    template<class R> GridBlock<R> under_approximation(const Rectangle<R>& p, const Grid<R>& g);
-    
-    template<class R> GridCellListSet<R> under_approximation(const Zonotope<R>& p, const Grid<R>& g);
-    template<class R> GridCellListSet<R> under_approximation(const Polytope<R>& p, const Grid<R>& g);
-    template<class R> GridCellListSet<R> under_approximation(const Polyhedron<R>& p, const Grid<R>& g);
-    
-    template<class R> GridMaskSet<R> under_approximation(const Polyhedron<R>& p, const FiniteGrid<R>& g);
-    template<class R> GridMaskSet<R> under_approximation(const GridMaskSet<R>& gms, const FiniteGrid<R>& fg);
-    template<class R> GridMaskSet<R> under_approximation(const PartitionTreeSet<R>& pts, const FiniteGrid<R>& fg);
+    template<class R> GridBlock<R> outer_approximation(const Point< Numeric::Interval<R> >& ipt, const Grid<R>& g);
 
-    template<class R> GridMaskSet<R> under_approximation(const SetInterface<R>& set, const FiniteGrid<R>& fg);
-    
+    template<class R> GridBlock<R> outer_approximation(const Rectangle<R>& r, const Grid<R>& g);
+    template<class R> GridBlock<R> inner_approximation(const Rectangle<R>& r, const Grid<R>& g);
+ 
+    template<class R> GridCellListSet<R> outer_approximation(const Polytope<R>& pltp, const Grid<R>& g);
+    template<class R> GridCellListSet<R> inner_approximation(const Polytope<R>& pltp, const Grid<R>& g);
+ 
+    template<class R> GridCellListSet<R> outer_approximation(const Polyhedron<R>& pltp, const Grid<R>& g);
+    template<class R> GridCellListSet<R> inner_approximation(const Polyhedron<R>& pltp, const Grid<R>& g);
+ 
+    template<class R, class R0, class R1> GridCellListSet<R> outer_approximation(const Zonotope<R0,R1>& z, const Grid<R>& g);
+    template<class R, class R0, class R1> GridCellListSet<R> inner_approximation(const Zonotope<R0,R1>& z, const Grid<R>& g);
+ 
+    template<class R> GridCellListSet<R> outer_approximation(const SetInterface<R>& set, const Grid<R>& g);
+    template<class R> GridCellListSet<R> inner_approximation(const SetInterface<R>& set, const Grid<R>& g);
+ 
+    template<class R, class BS> GridMaskSet<R> outer_approximation(const ListSet<BS>& ls, const FiniteGrid<R>& fg);
+ 
+    template<class R> GridMaskSet<R> outer_approximation(const SetInterface<R>& set, const FiniteGrid<R>& fg);
+    template<class R> GridMaskSet<R> inner_approximation(const SetInterface<R>& set, const FiniteGrid<R>& fg);
+ 
+
     template<class R> std::ostream& operator<<(std::ostream& os, const GridCell<R>& gc);
     template<class R> std::ostream& operator<<(std::ostream& os, const GridBlock<R>& gb);
     template<class R> std::ostream& operator<<(std::ostream& os, const GridCellListSet<R>& gcls);

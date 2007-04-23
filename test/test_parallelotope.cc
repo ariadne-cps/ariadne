@@ -130,8 +130,8 @@ test_parallelotope()
   Rectangle<R> bbox3=p3.bounding_box().expand_by(0.25);
   Grid<R> gr3(2,0.125);
   
-  GridCellListSet<R> oap3=over_approximation(p3,gr3);
-  GridCellListSet<R> uap3=under_approximation(p3,gr3);
+  GridCellListSet<R> oap3=outer_approximation(p3,gr3);
+  GridCellListSet<R> uap3=inner_approximation(p3,gr3);
   epsfstream eps;
   eps.open("test_parallelotope.eps",bbox3,0,1);
   eps.set_fill_colour("white");

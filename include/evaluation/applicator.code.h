@@ -323,10 +323,10 @@ Evaluation::Applicator<R>::image(const System::Map<R>& f,
     if(f.smoothness()>=1) {
       z=r;
       fz=this->evaluate(f,z);
-      image.adjoin(over_approximation(fz,image_grid));
+      image.adjoin_outer_approximation(fz);
     } else {
       fr=this->evaluate(f,r);
-      image.adjoin(over_approximation(fr,image_grid));
+      image.adjoin_outer_approximation(fr);
     }
   }
   return image;
@@ -365,14 +365,14 @@ Evaluation::Applicator<R>::image(const System::Map<R>& f,
       z=r;
       fz=this->evaluate(f,z);
       ARIADNE_LOG(7,"z="<<z<<", fz="<<fz<<"\n");
-      GridCellListSet<R> gz=over_approximation(fz,g);
+      GridCellListSet<R> gz=outer_approximation(fz,g);
       ARIADNE_LOG(7,"gz="<<gz);
       image.adjoin(gz);
       ARIADNE_LOG(9,"image.size()="<<image.size()<<"\n");
       assert((bool)(subset(gz,image)));
     } else {
       fr=this->evaluate(f,r);
-      image.adjoin(over_approximation(fr,g));
+      image.adjoin_outer_approximation(fr);
     }
   }
   return regular_intersection(image,bounding_set);
@@ -412,7 +412,7 @@ Evaluation::Applicator<R>::preimage(const System::Map<R>& f,
       r=*bnd_iter;
       z=r;
       fz=this->evaluate(f,z);
-      fgcls.adjoin_over_approximation(fz);
+      fgcls.adjoin_outer_approximation(fz);
       if(subset(fgcls,set)) {
         result.adjoin(*bnd_iter);
       }
@@ -471,7 +471,7 @@ Evaluation::Applicator<R>::reach(const System::Map<R>& f,
       rectangle=*bs_iter;
       zonotope=rectangle;
       while(zonotope.radius() < this->maximum_basic_set_radius()) {
-        result.adjoin_over_approximation(zonotope);
+        result.adjoin_outer_approximation(zonotope);
         zonotope=this->evaluate(f,zonotope);
         ++steps;
       }
@@ -523,12 +523,12 @@ Evaluation::Applicator<R>::chainreach(const System::Map<R>& f,
         z=r;
         fz=this->evaluate(f,z);
         if(!disjoint(fz.bounding_box(),bounding_set)) {
-          image.adjoin(over_approximation(fz,g));
+          image.adjoin(outer_approximation(fz,g));
         }
       } else {
         fr=this->evaluate(f,r);
         if(!disjoint(fr.bounding_box(),bounding_set)) {
-          image.adjoin(over_approximation(fr,g));
+          image.adjoin(outer_approximation(fr,g));
         }
       }
     }
@@ -576,13 +576,13 @@ Evaluation::Applicator<R>::viable(const System::Map<R>& f,
       if(f.smoothness()>0) {
         z=r;
         fz=this->evaluate(f,z);
-        fgcls.adjoin_over_approximation(fz);
-        if(!overlap(result,over_approximation(fz,g))) {
+        fgcls.adjoin_outer_approximation(fz);
+        if(!overlap(result,outer_approximation(fz,g))) {
           unsafe.adjoin(*iter);
         }
       } else {
         fr=this->evaluate(f,r);
-        if(!overlap(result,over_approximation(fr,g))) {
+        if(!overlap(result,outer_approximation(fr,g))) {
           unsafe.adjoin(*iter);
         }
       }
@@ -632,13 +632,13 @@ Evaluation::Applicator<R>::verify(const System::Map<R>& f,
       if(f.smoothness()>=1) {
         z=r;
         fz=this->evaluate(f,z);
-        cell_image.adjoin(over_approximation(fz,g));
+        cell_image.adjoin(outer_approximation(fz,g));
         if(!subset(cell_image,safe_set)) {
           return false;
         }
       } else {
         fr=this->evaluate(f,r);
-        cell_image.adjoin(over_approximation(fr,g));
+        cell_image.adjoin(outer_approximation(fr,g));
         if(!subset(cell_image,safe_set)) {
           return false;
         }
@@ -668,7 +668,7 @@ Evaluation::Applicator<R>::image(const System::Map<R>& f,
   Rectangle<R> bb=set.bounding_box();
   Grid<R> arg_grid(f.argument_dimension(),this->grid_size());
   GridMaskSet<R> grid_arg_set(arg_grid,bb);
-  grid_arg_set.adjoin_over_approximation(set);
+  grid_arg_set.adjoin_outer_approximation(set);
   Rectangle<R> r(f.argument_dimension());
   Zonotope<I,R> z(f.argument_dimension());
   for(typename GridMaskSet<R>::const_iterator cell_iter=grid_arg_set.begin();
@@ -696,9 +696,9 @@ Evaluation::Applicator<R>::preimage(const System::Map<R>& map,
   Grid<R> preimage_grid(map.argument_dimension(),this->grid_size());
   Grid<R> image_grid(map.result_dimension(),this->grid_size());
   GridMaskSet<R> grid_image_set(image_grid,set.bounding_box());
-  grid_image_set.adjoin_under_approximation(set);
+  grid_image_set.adjoin_inner_approximation(set);
   GridMaskSet<R> grid_preimage_bounding_set(preimage_grid,preimage_bounding_box);
-  grid_preimage_bounding_set.adjoin_over_approximation(preimage_bounding_box);
+  grid_preimage_bounding_set.adjoin_outer_approximation(preimage_bounding_box);
   return new GridMaskSet<R>(this->preimage(map,grid_image_set,grid_preimage_bounding_set));
 }
 
@@ -729,7 +729,7 @@ Evaluation::Applicator<R>::reach(const System::Map<R>& f,
   Grid<R> grid(initial_set.dimension(),this->grid_size());
   Rectangle<R> bounding_box=initial_set.bounding_box();
   GridMaskSet<R> gms(grid,bounding_box);
-  gms.adjoin_under_approximation(initial_set);
+  gms.adjoin_inner_approximation(initial_set);
   ARIADNE_LOG(4,"gms="<<gms);
   list_initial_set=ListSet< Zonotope<I,R> >(gms);
   
@@ -753,9 +753,9 @@ Evaluation::Applicator<R>::chainreach(const System::Map<R>& map,
   Grid<R> grid(bounding_set.dimension(),this->grid_size());
   FiniteGrid<R> finite_grid(grid,bounding_box);
   GridMaskSet<R> grid_bounding_set(finite_grid);
-  grid_bounding_set.adjoin_over_approximation(bounding_set);
+  grid_bounding_set.adjoin_outer_approximation(bounding_set);
   GridMaskSet<R> grid_initial_set(finite_grid);
-  grid_initial_set.adjoin_over_approximation(initial_set);
+  grid_initial_set.adjoin_outer_approximation(initial_set);
   
   return new GridMaskSet<R>(this->chainreach(map,grid_initial_set,grid_bounding_set));
 }
@@ -775,7 +775,7 @@ Evaluation::Applicator<R>::viable(const System::Map<R>& map,
   Rectangle<R> bounding_box=bounding_set.bounding_box();
   Grid<R> grid(bounding_set.dimension(),this->grid_size());
   GridMaskSet<R> grid_bounding_set(grid,bounding_box);
-  grid_bounding_set.adjoin_over_approximation(bounding_set);
+  grid_bounding_set.adjoin_outer_approximation(bounding_set);
   return new GridMaskSet<R>(this->viable(map,grid_bounding_set));
 }
 
@@ -795,9 +795,9 @@ Evaluation::Applicator<R>::verify(const System::Map<R>& f,
   Grid<R> grid(safe_set.dimension(),this->grid_size());
   FiniteGrid<R> finite_grid(grid,bounding_box);
   GridMaskSet<R> grid_inner_safe_set(finite_grid);
-  grid_inner_safe_set.adjoin_under_approximation(safe_set);
+  grid_inner_safe_set.adjoin_inner_approximation(safe_set);
   GridMaskSet<R> grid_initial_set(finite_grid);
-  grid_initial_set.adjoin_over_approximation(initial_set);
+  grid_initial_set.adjoin_outer_approximation(initial_set);
   
   return this->verify(f,grid_initial_set,grid_inner_safe_set);
 }
@@ -824,7 +824,7 @@ Evaluation::Applicator<R>::discretize(const System::Map<R>& f,
       const GridCell<R>& cell=*dom_iter;
       basic_set=cell;
       image_set=this->evaluate(f,basic_set);
-      result.adjoin_to_image(cell,over_approximation(image_set,range_grid));
+      result.adjoin_to_image(cell,outer_approximation(image_set,range_grid));
     }
   return result;
 }
@@ -877,7 +877,7 @@ Evaluation::Applicator<R>::control_synthesis(const System::DiscreteTimeSystem<R>
               
               Point<I> image = f.image(state,input,noise);
               
-              GridBlock<R> image_set = over_approximation(image,state_grid);
+              GridBlock<R> image_set = outer_approximation(image,state_grid);
               discretization.find(control)->second.adjoin(image_set.lattice_set());
             }
         }
@@ -885,12 +885,12 @@ Evaluation::Applicator<R>::control_synthesis(const System::DiscreteTimeSystem<R>
   
   // Discretize target set
   GridMaskSet<R> target_approximation(state_bounding_set.grid(),state_bounding_set.block());
-  target_approximation.adjoin_under_approximation(target_set);
+  target_approximation.adjoin_inner_approximation(target_set);
   Combinatoric::LatticeMaskSet target_lattice_set = target_approximation.lattice_set();
   
   // Discretize initial set
   GridMaskSet<R> initial_approximation(state_bounding_set.grid(),state_bounding_set.block());
-  initial_approximation.adjoin_under_approximation(initial_set);
+  initial_approximation.adjoin_inner_approximation(initial_set);
   Combinatoric::LatticeMaskSet initial_lattice_set = initial_approximation.lattice_set();
   
   Combinatoric::LatticeMaskSet bounding_lattice_set = state_bounding_set.lattice_set();

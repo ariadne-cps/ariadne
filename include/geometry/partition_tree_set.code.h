@@ -148,31 +148,26 @@ namespace Ariadne {
     {
       uint d=0;
       Rectangle<R>* r=0;
-      Parallelotope<R>* pl=0;
+      Zonotope<R>* z=0;
       SetInterface<R>* s=0;
       GridMaskSet<R>* gms=0;
       PartitionScheme<R>* ps=0;
+      PartitionTreeCell<R>* ptc=0;
       PartitionTreeSet<R>* pts=0;
       
+      *ptc=over_approximation(*r,*ps);
+
       *pts=outer_approximation(*r,*ps,d);
       *pts=inner_approximation(*r,*ps,d);
-      *pts=over_approximation(*r,*ps,d);
-      *pts=under_approximation(*r,*ps,d);
     
-      *pts=outer_approximation(*pl,*ps,d);
-      *pts=inner_approximation(*pl,*ps,d);
-      *pts=over_approximation(*pl,*ps,d);
-      *pts=under_approximation(*pl,*ps,d);
+      *pts=outer_approximation(*z,*ps,d);
+      *pts=inner_approximation(*z,*ps,d);
     
       *pts=outer_approximation(*gms,*ps,d);
       *pts=inner_approximation(*gms,*ps,d);
-      *pts=over_approximation(*gms,*ps,d);
-      *pts=under_approximation(*gms,*ps,d);
       
       *pts=outer_approximation(*s,*ps,d);
       *pts=inner_approximation(*s,*ps,d);
-      *pts=over_approximation(*s,*ps,d);
-      *pts=under_approximation(*s,*ps,d);
     }
 
     
@@ -231,6 +226,39 @@ namespace Ariadne {
 
 
 
+
+    template<class R>
+    PartitionTreeCell<R>
+    over_approximation(const Rectangle<R>& r, const PartitionScheme<R>& ps)
+    {
+      if(possibly(r.empty())) {
+        ARIADNE_THROW(EmptyInterior,"PartitionTreeCell<R> over_approximation(const Rectangle<R>& r, const PartitionScheme<R>& ps)"," with r="<<r);
+      }
+
+      if(!subset(r,ps.unit_box())) {
+        ARIADNE_THROW(std::runtime_error,"ParttitionTreeCell over_approximation(Rectangle r, PartitionScheme ps, uint d)"," with r="<<r<<", ps="<<ps<<": r is not a subset of ps.unit_box()");
+      }
+
+      const Rectangle<R>& unit_box=ps.unit_box();
+      const Combinatoric::SubdivisionSequence& subdivisions=ps.subdivisions();
+      
+      Combinatoric::BinaryWord word;
+      Combinatoric::BinaryWord new_word;
+      
+      while(true) {
+        new_word=word;
+        new_word.push_back(Combinatoric::BinaryTree::leaf);
+        if(!subset(r,Rectangle<R>(PartitionTreeCell<R>(unit_box,subdivisions,new_word)))) {
+          new_word.pop_back();
+          word.push_back(Combinatoric::BinaryTree::right);
+          if(!subset(r,Rectangle<R>(PartitionTreeCell<R>(unit_box,subdivisions,word)))) {
+            break;
+          }
+        }
+      }
+      return PartitionTreeCell<R>(unit_box,subdivisions,word);
+    }
+    
 
     template<class R, class S>
     PartitionTreeSet<R>
@@ -291,39 +319,6 @@ namespace Ariadne {
           tree.push_back(Combinatoric::BinaryTree::branch);
           word.push_back(Combinatoric::BinaryTree::left);
          }
-      } while(!word.empty());
-      
-      return PartitionTreeSet<R>(unit_box,subdivisions,Combinatoric::BinaryTree(tree),BooleanArray(mask));
-    }
-    
-
-    template<class R, class S>
-    PartitionTreeSet<R>
-    over_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth)
-    {
-      const Rectangle<R>& unit_box=ps.unit_box();
-      const Combinatoric::SubdivisionSequence& subdivisions=ps.subdivisions();
-      std::vector<bool> tree;
-      std::vector<bool> mask;
-      
-      Combinatoric::BinaryWord word;
-      
-      do {
-        Rectangle<R> cell=Rectangle<R>(PartitionTreeCell<R>(unit_box,subdivisions,word));
-        if(word.size()==depth+1 || subset(cell,s)) {
-          tree.push_back(Combinatoric::BinaryTree::leaf);
-          mask.push_back(true);
-          Combinatoric::BinaryTree::advance(word);
-        }  
-        else if(disjoint(cell,s)) {
-          tree.push_back(Combinatoric::BinaryTree::leaf);
-          mask.push_back(false);
-          Combinatoric::BinaryTree::advance(word);
-        }
-        else {
-          tree.push_back(Combinatoric::BinaryTree::branch);
-          word.push_back(Combinatoric::BinaryTree::left);
-        }
       } while(!word.empty());
       
       return PartitionTreeSet<R>(unit_box,subdivisions,Combinatoric::BinaryTree(tree),BooleanArray(mask));

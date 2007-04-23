@@ -158,7 +158,7 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;
      private:
-      const Rectangle<R> _unit_box;
+      Rectangle<R> _unit_box;
       Combinatoric::SubdivisionTreeCell _subdivision_cell;
     };
 
@@ -348,6 +348,10 @@ namespace Ariadne {
       R volume() const;
       
 #ifdef DOXYGEN
+      /*! \brief Compute an over approximation to a rectangle \a r based on the partition scheme \a ps. */
+      friend template<class R>
+      PartitionTreeCell<R> over_approximation(const Rectangle<R>& r, const PartitionScheme<R>& ps);
+
       /*! \brief Compute an outer approximation to set \a s based on the partition scheme \a ps to depth a d. */
       friend template<class SetInterface>
       PartitionTreeSet<R> outer_approximation(const SetInterface& s, const PartitionScheme<R>& ps, const uint depth);
@@ -355,17 +359,6 @@ namespace Ariadne {
       /*! \brief Compute an inner approximation to set \a s based on the partition scheme \a ps to depth a d. */
       friend template<class SetInterface>
       PartitionTreeSet<R> inner_approximation(const SetInterface& s, const PartitionScheme<R>& ps, const uint depth);
-
-      /*! \brief Compute an over approximation to set \a s based on the partition scheme \a ps to depth a d.
-       *
-       * This function may fail if the set \a s is not regular. 
-       */
-      friend template<class SetInterface>
-      PartitionTreeSet<R> over_approximation(const SetInterface& s, const PartitionScheme<R>& ps, const uint depth);
-
-      /*! \brief Compute an under approximation to set \a s based on the partition scheme \a ps to depth a d. */
-      friend template<class SetInterface>
-      PartitionTreeSet<R> under_approximation(const SetInterface& s, const PartitionScheme<R>& ps, const uint depth);
 #endif
 
       /*! \brief Write to an output stream. */
@@ -391,17 +384,14 @@ namespace Ariadne {
     tribool subset(const Rectangle<R>&, const PartitionTreeSet<R>&);
 
     
+    template<class R>
+    PartitionTreeCell<R> over_approximation(const Rectangle<R>& r, const PartitionScheme<R>& ps);
+    
     template<class R, class S>
     PartitionTreeSet<R> outer_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth);
     
     template<class R, class S>
     PartitionTreeSet<R> inner_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth);
-    
-    template<class R, class S>
-    PartitionTreeSet<R> over_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth);
-    
-    template<class R, class S>
-    PartitionTreeSet<R> under_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth);
     
     
     

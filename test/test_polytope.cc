@@ -137,8 +137,8 @@ test_polytope()
   GridCellListSet<R> uap2(gr2);
   GridCellListSet<R> oap2(gr2);
   try {
-    uap2=under_approximation(pltp2,gr2);
-    oap2=over_approximation(pltp2,gr2);
+    uap2=inner_approximation(pltp2,gr2);
+    oap2=outer_approximation(pltp2,gr2);
   }
   catch(NotImplemented e) {
     cerr << "Warning: " << e.what() << " not implemented\n";
@@ -189,7 +189,10 @@ test_polytope<Rational>()
   Polytope<R> p(ptl);
   cout << "p=" << p << endl;
   
-  // Test Polyhedron to Polytope conversion for empty polytope
+  // Test bounded
+  ARIADNE_TEST_ASSERT(p.bounded());
+
+  // Test Polytope to Polyhedron conversion for empty polytope
   Polytope<R> epltp;
   Polyhedron<R> eplhd(epltp);
   cout << "eplhd=" << eplhd << endl;

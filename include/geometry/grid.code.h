@@ -159,6 +159,24 @@ namespace Ariadne {
 
 
     template<class R>
+    Point<R>
+    Grid<R>::origin() const
+    {
+      return Point<R>(LinearAlgebra::Vector<R>(this->_origin));
+    }
+
+
+    template<class R>
+    LinearAlgebra::Vector<R>
+    Grid<R>::lengths() const
+    {
+      return LinearAlgebra::Vector<R>(this->_lengths);
+    }
+
+
+
+
+    template<class R>
     R
     Grid<R>::subdivision_coordinate(dimension_type d, index_type n) const 
     {

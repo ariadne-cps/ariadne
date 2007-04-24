@@ -58,6 +58,7 @@ test_simplex_SOURCES=test_simplex.cc
 test_polytope_SOURCES=test_polytope.cc
 test_polyhedron_SOURCES=test_polyhedron.cc
 test_hybrid_automaton_SOURCES=test_hybrid_automaton.cc
+test_function_SOURCES=test_function.cc
 test_newton_SOURCES=test_newton.cc
 test_apply_SOURCES=test_apply.cc
 test_lohner_integrator_SOURCES=test_lohner_integrator.cc

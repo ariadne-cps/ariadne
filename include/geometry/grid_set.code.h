@@ -426,6 +426,7 @@ namespace Ariadne {
       Geometry::inner_approximation(*iz,*g);
       Geometry::inner_approximation(*set,*g);
  
+      Geometry::lower_approximation(*set,*g);
     }
 
 
@@ -597,12 +598,14 @@ namespace Ariadne {
       GridCellListSet<R>* gcls=0;
       GridMaskSet<R>* gms=0;
 
-      *gms=outer_approximation(*set,*fg);
-      *gms=inner_approximation(*set,*fg);
       *gms=outer_approximation(*rls,*fg);
       *gms=outer_approximation(*zls,*fg);
       *gms=outer_approximation(*ezls,*fg);
       *gms=outer_approximation(*izls,*fg);
+
+      *gms=outer_approximation(*set,*fg);
+      *gms=inner_approximation(*set,*fg);
+      *rls=lower_approximation(*set,*fg);
 
       tb=Geometry::subset(*r,*gms);
       tb=Geometry::subset(*gms,*r);
@@ -1185,8 +1188,45 @@ namespace Ariadne {
     }
     
 
+
+
+    template<class R>
+    ListSet< Rectangle<R> >
+    lower_approximation(const SetInterface<R>& s, const Grid<R>& g) 
+    {
+      ARIADNE_LOG(4,"ListSet<Rectangle> lower_approximation(SetInterface s, Grid fg)\n");
+      FiniteGrid<R> fg(g,s.bounding_box());
+      return lower_approximation(s,fg);
+    }
     
+     
+    template<class R>  
+    ListSet< Rectangle<R> >
+    lower_approximation(const SetInterface<R>& s, const FiniteGrid<R>& fg) 
+    {
+      ARIADNE_LOG(4,"ListSet<Rectangle> lower_approximation(SetInterface s, FiniteGrid fg)\n") 
+      ListSet< Rectangle<R> > result;
+      GridBlock<R> gb(fg.grid(),fg.lattice_block());
+      Rectangle<R> r;
+      Rectangle<R> nr;
+      ARIADNE_LOG(5,"  testing cells in "<<gb<<"\n")
+      for(typename GridBlock<R>::const_iterator gb_iter=gb.begin();
+          gb_iter!=gb.end(); ++gb_iter)
+      {
+        r=*gb_iter;
+        if(!bool(s.disjoint(r))) {
+          nr=gb_iter->neighbourhood();
+          if(s.intersects(nr)) {
+            result.adjoin(nr);
+          }
+        }
+        ARIADNE_LOG(6,"s.interscts("<<r<<")="<<s.intersects(r)<<"\n");
+      }
+      return result;
+    }
     
+     
+         
 
 
 

@@ -85,6 +85,10 @@ namespace Ariadne {
        */
       explicit Polyhedron<R>(dimension_type d, size_type nc, const R* data);
             
+      /*! \brief Construct the polyhedron defined by a string literal.
+       */
+      explicit Polyhedron<R>(const std::string& str);
+            
       /*! \brief Construct the polyhedron defined by the matrix equations \f$Ax\leq b\f$.
        */
       explicit Polyhedron<R>(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b);

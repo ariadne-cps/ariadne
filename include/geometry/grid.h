@@ -85,6 +85,12 @@ namespace Ariadne {
       /*! \brief The underlying dimension of the grid. */
       dimension_type dimension() const;
 
+      /*! \brief The origin of the grid. */
+      Point<R>  origin() const;
+
+      /*! \brief The lengths of the grid blocks. */
+      LinearAlgebra::Vector<R> lengths() const;
+
       /*! \brief The coordinate of the \a n th subdivision point in dimension \a d. */
       real_type subdivision_coordinate(dimension_type d, index_type n) const;
 

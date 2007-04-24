@@ -80,6 +80,10 @@ namespace Ariadne {
       /*! \brief Construct an empty polytope in dimension \a n. */
       Polytope(dimension_type d=0);
      
+      /*! \brief Construct the polyhedron defined by a string literal.
+       */
+      explicit Polytope<R>(const std::string& str);
+            
       /*! \brief Construct a polytope of dimension \a d with \a nv constraints from the data in the
        *  array beginning at \a data. The ith element of the jth vertex is stored in position j*(d+1)+i. 
        *  The j(d+1)+dth data element is padded with a 1.

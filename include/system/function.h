@@ -94,26 +94,13 @@ namespace Ariadne {
       virtual dimension_type result_dimension() const = 0;
     };
   
-    enum Operation { PUSH, PULL, CONST, NEG, ADD, SUB, MUL, DIV };
-    enum TokenType { STR, NUM, INT, REAL, END, ASSIGN, LP, RP, LSP, RSP, PLUS, MINUS, TIMES, DIVIDES };
-
+    /*! \brief The operation codes of the virtual machine. */
+    enum Operation { PUSH, PULL, CONST, MAX, MIN, ABS, POS, NEG, ADD, SUB, MUL, DIV, POW, EXP, LOG, SIN, COS, TAN, ASIN, ACOS, ATAN };
     union ByteCode { Operation op; int var; int ind; int val; };
     struct Variable { std::string name; uint num; uint ind; };
 
     struct Instruction { Operation op; Variable var; };
 
-    struct Token { 
-      TokenType type; 
-      std::string str;
-      int val; 
-      double rval; 
-      Token() { }
-      Token(std::string s) : type(STR), str(s) { }
-      Token(int n) : type(INT), val(n) { }
-      Token(double x) : type(REAL), rval(x) { }
-      Token(TokenType t) : type(t) { }
-    };
-  
 
 
 
@@ -125,6 +112,7 @@ namespace Ariadne {
     class GeneralFunction {
       typedef typename Numeric::traits<R>::arithmetic_type A; 
       typedef typename Numeric::traits<R>::interval_type I; 
+     public:
      public:
       /*! \brief The real number type. */
       typedef R real_type;
@@ -162,21 +150,6 @@ namespace Ariadne {
    
       void _evaluate(A** args) const;
 
-      uint variable_number(const std::string& name) const;
-     private:
-
-      Token get_token(std::istream& is);
-      Token peek_token(std::istream& is);
-      Variable get_variable(std::istream& is);
-
-      std::string read_string(std::istream& is);
-      int read_int(std::istream& is);
-      void read_statement(std::istream& is);
-      void read_assignment(std::istream& is);
-      void read_expression(std::istream& is);
-      void read_factor(std::istream& is);
-      void read_term(std::istream& is);
-      void read_primary(std::istream& is);
       std::vector<R> _parameters;
       std::vector<R> _constants;
       std::vector<ByteCode> _operations;
@@ -192,6 +165,51 @@ namespace Ariadne {
     std::ostream& operator<<(std::ostream& os, const  GeneralFunction<R>& f) {
       return f.write(os);
     };
+
+
+
+    /*! \brief A parser for a function. */
+    class FunctionParser {
+     public:
+      enum TokenType { STR, NUM, INT, REAL, END, ASSIGN, LP, RP, LSP, RSP, PLUS, MINUS, TIMES, DIVIDES, POWER, MIN, MAX, ABS, EXP, LOG, SIN, COS, TAN, ASIN, ACOS, ATAN };
+      
+      struct Token { 
+        TokenType type; 
+        std::string str;
+        int val; 
+        double rval; 
+        Token() { }
+        Token(std::string s) : type(STR), str(s) { }
+        Token(int n) : type(INT), val(n) { }
+        Token(double x) : type(REAL), rval(x) { }
+        Token(TokenType t) : type(t) { }
+      };
+      
+      FunctionParser(std::istream&);
+      FunctionParser(const std::string&);
+      std::vector<ByteCode> operations();
+      std::vector<std::string> variable_names();
+
+     private:
+      uint variable_number(const std::string& name) const;
+      Token get_token(std::istream& is);
+      Token peek_token(std::istream& is);
+      Variable get_variable(std::istream& is);
+
+      std::string read_string(std::istream& is);
+      int read_int(std::istream& is);
+      void read_function(std::istream& is);
+      void read_statement(std::istream& is);
+      void read_assignment(std::istream& is);
+      void read_expression(std::istream& is);
+      void read_factor(std::istream& is);
+      void read_term(std::istream& is);
+      void read_primary(std::istream& is);
+     private:
+      std::vector<std::string> _variable_names;
+      std::vector<ByteCode> _operations;
+    };
+
   }
 }
 

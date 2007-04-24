@@ -51,6 +51,9 @@ namespace Ariadne {
       PolyhedralSet(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b)
         : SetInterface<R>(), _polyhedron(A,b) { }
       /*! \brief */
+      PolyhedralSet(const std::string& str)
+        : SetInterface<R>(), _polyhedron(str) { }
+      /*! \brief */
       PolyhedralSet(const Rectangle<R>& r)
         : SetInterface<R>(), _polyhedron(r) { }
       /*! \brief */

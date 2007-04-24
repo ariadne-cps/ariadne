@@ -843,6 +843,25 @@ namespace Ariadne {
       }
     }
     
+    template<typename R> inline 
+    Interval<R> tan(const Interval<R>& ivl) {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+    
+    template<typename R> inline 
+    Interval<R> asin(const Interval<R>& ivl) {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+    
+    template<typename R> inline 
+    Interval<R> acos(const Interval<R>& ivl) {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+    
+    template<typename R> inline 
+    Interval<R> atan(const Interval<R>& ivl) {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
     
     
     template<class R> inline

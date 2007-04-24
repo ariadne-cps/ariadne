@@ -296,6 +296,7 @@ namespace Ariadne {
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Rectangle<R>&);
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Zonotope<R,R>&);
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Zonotope<Numeric::Interval<R>,R>&);
+    template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Zonotope< Numeric::Interval<R>,Numeric::Interval<R> >&);
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Polytope<R>&); 
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Polyhedron<R>&); 
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::RectangularSet<R>&);
@@ -361,6 +362,16 @@ namespace Ariadne {
     }
 
     
+    template<class R> inline
+    epsfstream&
+    operator<<(epsfstream& eps, const Geometry::Zonotope< Numeric::Interval<R>,Numeric::Interval<R> >& iz)
+    { 
+      Geometry::Zonotope<Numeric::Interval<R>,R> ez=Geometry::over_approximation(iz);
+      Geometry::Zonotope<Numeric::Rational> qz=Geometry::over_approximation(ez);
+      Polygon2d vertices=eps.projection_map()(qz);      
+      return draw(eps,vertices);
+    }
+       
     template<class R> inline
     epsfstream&
     operator<<(epsfstream& eps, const Geometry::Zonotope<Numeric::Interval<R>,R>& z)

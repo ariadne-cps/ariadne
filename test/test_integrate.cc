@@ -37,6 +37,7 @@
 #include "evaluation/affine_integrator.h"
 #include "models/vanderpol.h"
 #include "output/epsfstream.h"
+#include "output/logging.h"
 
 #include "test.h"
 
@@ -132,10 +133,10 @@ test_integration_step()
   niz=lohner.integrate(vdp,iz,t);
   cout << niz << endl << endl;;
   
-  nizls=lohner.integrate(vdp,izls,t);
+  nizls=lohner.lower_integrate(vdp,izls,t);
   cout << nizls << endl << endl;
   
-  nizls=lohner.reach(vdp,izls,t);
+  nizls=lohner.lower_reach(vdp,izls,t);
   cout << nizls << endl << endl;
   
   // Affine vector field
@@ -153,11 +154,12 @@ template<class R>
 int 
 test_integrate()
 {
+  typedef Interval<R> I;
   cout << __PRETTY_FUNCTION__ << endl;
   
-  AffineIntegrator<R> affine(0.0625,1.0,0.25);
+  AffineIntegrator<R> affine(0.125,1.0,0.25);
   
-  AffineVectorField<R> affine_vector_field(Matrix<R>("[-2,-1;1,-2]"),Vector<R>("[1,1]"));
+  AffineVectorField<R> affine_vector_field(Matrix<R>("[-2,-1;1,-2]"),Vector<R>("[0.125,0.25]"));
   
   Rectangle<R> bb("[-4,4]x[-4,4]");
   Rectangle<R> r("[-3.125,-2.875]x[-0.125,0.125]");
@@ -179,16 +181,84 @@ test_integrate()
     integrate_set.adjoin(found_set);
   }
   GridMaskSet<R> reach_set=affine.reach(affine_vector_field,initial_set,bounding_set,integration_time);
+  cout << endl;
   
+  set_integrator_verbosity(4);
+  integration_time=0.5;
+  affine.set_grid_size(0.0625);
+  PolyhedralSet<R> polyhedral_initial_set=PolyhedralSet<R>(Matrix<R>("[-2,0;0,-1;1,1]"),Vector<R>("[-1,-1,3]"));
+  SetInterface<R>* polyhedral_initial_set_ptr=&polyhedral_initial_set;
+  SetInterface<R>* polyhedral_integrate_set_ptr=affine.integrate(affine_vector_field,*polyhedral_initial_set_ptr,integration_time);
+  SetInterface<R>* polyhedral_reach_set_ptr=affine.reach(affine_vector_field,*polyhedral_initial_set_ptr,integration_time);
+
+  cout << "polyhedral_initial_set=" << *polyhedral_initial_set_ptr << endl;
+  cout << "polyhedral_integrate_set=" << *polyhedral_integrate_set_ptr << endl;
+  cout << "polyhedral_reach_set=" << *polyhedral_reach_set_ptr << endl;
+
+  cout << endl;
+
+  //Grid<R> grid(Vector<R>("[0.125,0.125]"));
+  Grid<R> grid(Vector<R>("[0.0625,0.0625]"));
+  ListSet< Rectangle<R> > rectangle_list_initial_set=lower_approximation(*polyhedral_initial_set_ptr,grid);
+  ListSet< Rectangle<R> > rectangle_list_integrate_set=affine.integrate(affine_vector_field,rectangle_list_initial_set,integration_time);
+  ListSet< Rectangle<R> > rectangle_list_reach_set=affine.reach(affine_vector_field,rectangle_list_initial_set,integration_time);
+
+  cout << rectangle_list_initial_set << endl;
+  cout << rectangle_list_integrate_set << endl;
+  cout << rectangle_list_reach_set << endl;
+
+  ListSet< Zonotope<I> > zonotope_list_initial_set=rectangle_list_initial_set;
+  ListSet< Zonotope<I> > zonotope_list_integrate_set=affine.lower_integrate(affine_vector_field,zonotope_list_initial_set,integration_time);
+  ListSet< Zonotope<I> > zonotope_list_reach_set=affine.lower_reach(affine_vector_field,zonotope_list_initial_set,integration_time);
+
+  cout << zonotope_list_initial_set << endl;
+  cout << zonotope_list_integrate_set << endl;
+  cout << zonotope_list_reach_set << endl;
+
+  cout << endl;
+
   epsfstream eps;
-  eps.open("test_integrate.eps",bb);
+  eps.open("test_integrate-1.eps",bb);
+  eps.set_fill_colour("green");
   eps << reach_set;
-  eps.set_fill_colour("blue");
-  eps << integrate_set;
   eps.set_fill_colour("yellow");
+  eps << integrate_set;
+  eps.set_fill_colour("blue");
   eps << initial_set;
   eps.close();
-  cout << endl;
+
+  eps.open("test_integrate-2.eps",bb);
+  eps.set_line_style(false);
+  eps.set_fill_colour("green");
+  eps << dynamic_cast<ListSet< Zonotope<I,I> >&>(*polyhedral_reach_set_ptr);
+  eps.set_fill_colour("yellow");
+  eps << dynamic_cast<ListSet< Zonotope<I,I> >&>(*polyhedral_integrate_set_ptr);
+  eps.set_fill_colour("blue");
+  eps << *polyhedral_initial_set_ptr;
+  eps.close();
+  
+  eps.open("test_integrate-3.eps",bb);
+  eps.set_line_style(false);
+  eps.set_fill_colour("green");
+  eps << rectangle_list_reach_set;
+  eps.set_fill_colour("yellow");
+  eps << rectangle_list_integrate_set;
+  eps.set_fill_colour("blue");
+  eps << rectangle_list_initial_set;
+  eps.set_fill_colour("red");
+  eps << *polyhedral_initial_set_ptr;
+  eps.close();
+  
+  eps.open("test_integrate-4.eps",bb);
+  eps.set_line_style(false);
+  eps.set_fill_colour("green");
+  eps << zonotope_list_reach_set;
+  eps.set_fill_colour("yellow");
+  eps << zonotope_list_integrate_set;
+  eps.set_fill_colour("blue");
+  eps << zonotope_list_initial_set;
+  eps.close();
+  
 
   return 0;
 }

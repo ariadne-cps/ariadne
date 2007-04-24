@@ -59,7 +59,7 @@ int test_function()
   Vector<A> ix1(x1);
   ARIADNE_EVALUATE(f1.image(ix1));
   
-  std::string f2str="y[0] = x[0] - x[1] + x[2];";
+  std::string f2str="y[0] = x[0] - sin(x[1]) + x[2];";
   GeneralFunction<R> f2(f2str);
   cout << "Done read" << endl;
   cout << f2 << endl;
@@ -68,12 +68,15 @@ int test_function()
   Vector<A> ix2(x2);
   ARIADNE_EVALUATE(f2.image(ix2));
   
-  std::string f3str="y[0] = x[0] - x[1] + x[2];";
+  std::string f3str=
+    "y[0] = x[0] - x[1] + x[2]; "
+    "y[1] = (x[0] - x[1]) * x[2] + x[1]; ;";
   GeneralFunction<Rational> f3(f3str);
   cout << "Done read" << endl;
   cout << f3 << endl;
 
   Vector<Rational> qx3("[2,3,5]");
+  cout << f3str << endl << f3 << endl << qx3 << endl;
   ARIADNE_EVALUATE(f3.image(qx3));
   
   return 0;

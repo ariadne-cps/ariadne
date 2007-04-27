@@ -50,8 +50,11 @@ initial_rectangle2=Rectangle("[6.9375,6.96875]x[6.9375,6.96875]")
 bounding_box=Rectangle("[-8,8]x[-8,8]")
 
 
-grid=Grid(Vector("[0.25,0.25]"))
-block=LatticeBlock("[-32,32]x[-32,32]")
+v = Vector(2);
+v[0] = 1.0/32;
+v[1] = 1.0/32;
+grid=Grid(v)
+block=LatticeBlock("[-300,300]x[-300,300]")
 fgrid=FiniteGrid(grid,block)
 print fgrid
 
@@ -83,8 +86,7 @@ print "bounding_set[mode1_id].size(),capacity()=",bounding_set[mode1_id].size(),
 print "bounding_set[mode2_id].size(),capacity()=",bounding_set[mode2_id].size(),bounding_set[mode2_id].capacity()
 print
 
-
-maximum_step_size=0.125;
+maximum_step_size=1.0/32;
 lock_to_grid_time=0.25;
 maximum_set_radius=0.5;
 
@@ -129,10 +131,6 @@ eps.set_fill_colour("red")
 eps.write(chainreach_set[mode2_id])
 eps.set_fill_colour("yellow")
 eps.write(chainreach_set[mode1_id])
-eps.set_fill_colour("green")
-eps.write(continuous_chainreach_set[mode1_id])
-eps.set_fill_colour("white")
-eps.write(discrete_step_set[mode1_id])
 eps.set_fill_colour("blue")
 eps.write(initial_set[mode1_id])
 eps.write(initial_set[mode2_id])

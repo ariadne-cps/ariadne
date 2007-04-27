@@ -42,11 +42,13 @@ initial_rectangle=Rectangle("[-0.8,-0.7]x[0.7,0.8]")
 bounding_box=Rectangle("[-2,2]x[-2,2]")
 epsbb=Rectangle("[-2.1,2.1]x[-2.1,2.1]") # eps bounding box
 
-
-#grid=RegularGrid(Vector("[0.03125,0.03125]"))
+v = Vector(2);
+v[0] = 1.0/128;
+v[1] = 1.0/128;
+grid=Grid(v)
+block=LatticeBlock("[-256,256]x[-256,256]")
+#grid=Grid(Vector("[0.0625,0.0625]"))
 #block=LatticeBlock("[-32,32]x[-32,32]")
-grid=Grid(Vector("[0.0625,0.0625]"))
-block=LatticeBlock("[-32,32]x[-32,32]")
 fgrid=FiniteGrid(grid,block)
 print fgrid
 
@@ -71,7 +73,7 @@ print "bounding_set[mode2_id].size(),capacity()=",bounding_set[mode2_id].size(),
 print
 
 
-maximum_step_size=0.125;
+maximum_step_size=1.0/128;
 lock_to_grid_time=0.25;
 maximum_set_radius=0.5;
 

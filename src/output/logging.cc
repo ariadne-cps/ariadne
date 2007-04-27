@@ -45,5 +45,6 @@ int Evaluation::solver_verbosity=0;
 int Evaluation::applicator_verbosity=0;
 int Evaluation::integrator_verbosity=0;
 int Evaluation::hybrid_evolver_verbosity=0;
+int Input::verbosity=0;
 
 }

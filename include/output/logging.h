@@ -72,6 +72,10 @@ namespace Ariadne {
     ; 
   }
 
+  namespace Input { 
+    extern int verbosity; 
+  }
+
   /*! \brief Set the verbosity level for the %Numeric module. */
   inline void set_numeric_verbosity(int v) { Numeric::verbosity=v; }
   /*! \brief Set the verbosity level for the Linear Algebra module. */
@@ -97,6 +101,9 @@ namespace Ariadne {
   inline void set_integrator_verbosity(int v) { Evaluation::integrator_verbosity=v; }
   /*! \brief Set the verbosity level for the %HybridEvolver class. */
   inline void set_hybrid_evolver_verbosity(int v) { Evaluation::hybrid_evolver_verbosity=v; }
+
+  /*! \brief Set the verbosity level for the %Input class. */
+  inline void set_input_verbosity(int v) { Input::verbosity=v; }
 
 
 

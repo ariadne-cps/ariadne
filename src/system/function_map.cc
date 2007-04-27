@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function.cc
+ *            function_map.cc
  *
  *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -21,24 +21,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/rational.h"
-#include "numeric/float.h"
+#include "system/function_map.h"
+#include "system/function_map.code.h"
 
-#include "system/function.h"
-#include "system/function.code.h"
+#include "numeric/float.h"
 
 namespace Ariadne {
   namespace System {
     using namespace Numeric;
     
-    template class Function<Rational>;
-
 #ifdef ENABLE_FLOAT64
-    template class Function<Float64>;
+    template class FunctionMap<Float64>;
 #endif
     
 #ifdef ENABLE_FLOATMP
-    template class Function<FloatMP>;
+    template class FunctionMap<FloatMP>;
 #endif
     
   }

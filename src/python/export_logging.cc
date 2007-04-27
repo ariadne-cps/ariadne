@@ -44,6 +44,7 @@ void export_logging()
   def("set_applicator_verbosity",&set_applicator_verbosity);
   def("set_integrator_verbosity",&set_integrator_verbosity);
   def("set_hybrid_evolver_verbosity",&set_hybrid_evolver_verbosity);
+  def("set_input_verbosity",&set_input_verbosity);
 
   def("redirect_log",&redirect_log);
 }

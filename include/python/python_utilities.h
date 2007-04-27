@@ -214,6 +214,12 @@ namespace Ariadne {
     return a1>=a2;
   }
 
+
+  template<class Res,class Arg> inline
+  Res sin(const Arg& a) {
+    return sin(a);
+  }
+
 }
 
 #endif /* ARIADNE_PYTHON_UTILITIES_H */

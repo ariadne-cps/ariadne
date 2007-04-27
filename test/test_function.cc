@@ -28,7 +28,9 @@
 #include "ariadne.h"
 #include "test_float.h"
 #include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 #include "system/function.h"
+#include "output/logging.h"
 
 #include "test.h"
 
@@ -48,36 +50,28 @@ int main() {
 template<class R>
 int test_function() 
 {
+  set_input_verbosity(0);
+
   typedef typename Numeric::traits<R>::arithmetic_type A;
-  std::string f1str="y[0] = ( x[1] + x[2] ) * x[0];";
-
-  GeneralFunction<R> f1(f1str);
-  cout << "Done read" << endl;
-  cout << f1 << endl;
-
-  Vector<R> x1("[2,3,5]");
-  Vector<A> ix1(x1);
-  ARIADNE_EVALUATE(f1.image(ix1));
+  ifstream fis("test_function.dat");
   
-  std::string f2str="y[0] = x[0] - sin(x[1]) + x[2];";
-  GeneralFunction<R> f2(f2str);
-  cout << "Done read" << endl;
-  cout << f2 << endl;
+  do {
+    cout << "Inputting function" << endl;
+    Function<R> f;
+    fis >> f;
+    cout << "Done read" << endl;
+    cout << f << endl;
+    Vector<A> x;
+    fis >> x;
+    cout << "x=" << x << endl;
+    cout << "f.image(x)=" << flush; cout << f.image(x) << endl;
+    cout << "f(x)=" << flush; cout << f(x) << endl;
+    cout << "f.jacobian(x)=" << flush; cout << f.jacobian(x) << endl;
+    cout << endl;
 
-  Vector<R> x2("[2,3,5]");
-  Vector<A> ix2(x2);
-  ARIADNE_EVALUATE(f2.image(ix2));
-  
-  std::string f3str=
-    "y[0] = x[0] - x[1] + x[2]; "
-    "y[1] = (x[0] - x[1]) * x[2] + x[1]; ;";
-  GeneralFunction<Rational> f3(f3str);
-  cout << "Done read" << endl;
-  cout << f3 << endl;
-
-  Vector<Rational> qx3("[2,3,5]");
-  cout << f3str << endl << f3 << endl << qx3 << endl;
-  ARIADNE_EVALUATE(f3.image(qx3));
+    // Look for end-of-file
+    char c; fis>>c; fis.putback(c);
+  } while(!fis.eof());
   
   return 0;
 }

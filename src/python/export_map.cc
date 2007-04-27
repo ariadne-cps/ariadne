@@ -26,9 +26,12 @@
 
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
+#include "system/function.h"
 #include "system/map.h"
+#include "system/function_map.h"
 
 using namespace Ariadne;
+using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
 using namespace Ariadne::System;
 
@@ -51,10 +54,25 @@ class MapWrapper : public Map<R>, public wrapper< Map<R> >
 template<class R>
 void export_map() 
 {
-  class_<MapWrapper<R>, boost::noncopyable>("Map")
+  typedef typename Numeric::traits<R>::arithmetic_type A;
+
+  class_<MapWrapper<R>, boost::noncopyable>("MapInterface")
     .def("argument_dimension", pure_virtual(&MapWrapper<R>::argument_dimension))
     .def("result_dimension", pure_virtual(&MapWrapper<R>::result_dimension))
     .def("smoothness", pure_virtual(&MapWrapper<R>::smoothness))
+  ;
+
+  class_< FunctionMap<R> >("FunctionMap", init< const Function<R>&, Point<A> >())
+    .def("argument_dimension", &FunctionMap<R>::argument_dimension)
+    .def("result_dimension", &FunctionMap<R>::result_dimension)
+    .def("number_of_parameters", &FunctionMap<R>::number_of_parameters)
+    .def("smoothness", &FunctionMap<R>::smoothness)
+    .def("parameters", &FunctionMap<R>::parameters, return_value_policy<copy_const_reference>())
+    .def("set_parameters", &FunctionMap<R>::set_parameters)
+    .def("__call__",(Point<A>(FunctionMap<R>::*)(const Point<A>&)const)(&FunctionMap<R>::image))
+    .def("image",(Point<A>(FunctionMap<R>::*)(const Point<A>&)const)(&FunctionMap<R>::image))
+    .def("jacobian",(Matrix<A>(FunctionMap<R>::*)(const Point<A>&)const)(&FunctionMap<R>::jacobian))
+    .def(self_ns::str(self))
   ;
 }
 

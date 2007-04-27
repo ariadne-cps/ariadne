@@ -45,6 +45,7 @@ void export_integer();
 void export_rational();
 template<class R> void export_float();
 template<class R> void export_interval();
+template<class R> void export_differential();
 
 template<class R> void export_vector();
 template<class R> void export_matrix();
@@ -78,6 +79,7 @@ template<class R> void export_grid_set();
 template<class R> void export_partition_tree_set();
 template<class R> void export_hybrid_set();
 
+template<class R> void export_function();
 template<class R> void export_map();
 template<class R> void export_affine_map();
 template<class R> void export_affine_multimap();
@@ -121,6 +123,8 @@ BOOST_PYTHON_MODULE(ariadne)
   export_rational();
   export_float<Float>();
   export_interval<Float>();
+  export_differential<Rational>();
+  export_differential<Float>();
 
   export_vector<Float>();
   export_vector<Rational>();
@@ -157,6 +161,8 @@ BOOST_PYTHON_MODULE(ariadne)
   export_partition_tree_set<Float>();
   export_hybrid_set<Float>();
 
+  export_function<Rational>();
+  export_function<Float>();
   export_map<Float>();
   export_affine_map<Float>();
   export_affine_multimap<Float>();

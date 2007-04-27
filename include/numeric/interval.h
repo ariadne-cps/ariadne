@@ -648,22 +648,22 @@ namespace Ariadne {
 
     template<class R> inline
     Interval<R> operator+(const int& x1, const Interval<R>& x2) {
-      return x1+Interval<R>(x2); 
+      return Interval<R>(x1)+x2;
     }
 
     template<class R> inline
     Interval<R> operator-(const int& x1, const Interval<R>& x2) {
-      return x1-Interval<R>(x2); 
+      return Interval<R>(x1)-Interval<R>(x2); 
     }
 
     template<class R> inline
     Interval<R> operator*(const int& x1, const Interval<R>& x2) {
-      return x1*Interval<R>(x2); 
+      return Interval<R>(x1)*Interval<R>(x2); 
     }
 
     template<class R> inline
     Interval<R> operator/(const int& x1, const Interval<R>& x2) {
-      return x1/Interval<R>(x2); 
+      return Interval<R>(x1)/Interval<R>(x2); 
     }
 
     
@@ -690,22 +690,22 @@ namespace Ariadne {
 
     template<class R> inline
     Interval<R> operator+(const double& x1, const Interval<R>& x2) {
-      return x1+Interval<R>(x2); 
+      return Interval<R>(x1)+x2; 
     }
 
     template<class R> inline
     Interval<R> operator-(const double& x1, const Interval<R>& x2) {
-      return x1-Interval<R>(x2); 
+      return Interval<R>(x1)-x2;
     }
 
     template<class R> inline
     Interval<R> operator*(const double& x1, const Interval<R>& x2) {
-      return x1*Interval<R>(x2); 
+      return Interval<R>(x1)*x2;
     }
 
     template<class R> inline
     Interval<R> operator/(const double& x1, const Interval<R>& x2) {
-      return x1/Interval<R>(x2); 
+      return Interval<R>(x1)/x2; 
     }
 
 
@@ -880,8 +880,22 @@ namespace Ariadne {
       char c;
       R l;
       R u;
-      is >> c >> l >> c >> u >> c;
-      (*this)=Interval<R>(l,u);
+      is >> c;
+      if(c=='[') {
+        is >> l >> c;
+        if(c!=',') {
+          is.setstate(std::ios_base::failbit);
+        }
+        is >> u >> c;
+        if(c!=']') {
+          is.setstate(std::ios_base::failbit);
+        }
+        (*this)=Interval<R>(l,u);
+      } else {
+        is.putback(c);
+        is >> l;
+        (*this)=Interval<R>(l);
+      }
       return is;
     }
         

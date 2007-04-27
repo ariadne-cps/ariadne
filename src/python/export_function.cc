@@ -1,8 +1,7 @@
 /***************************************************************************
  *            python/export_function.cc
  *
- *  21 October 2005
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
+ *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -22,31 +21,37 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/float64.h"
-#include "numeric/floatmp.h"
+#include "python/python_float.h"
 
-#include "numeric/function.h"
+#include "numeric/rational.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
+#include "system/function.h"
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
+using namespace Ariadne;
 using namespace Ariadne::Numeric;
+using namespace Ariadne::LinearAlgebra;
+using namespace Ariadne::System;
 
 template<class R>
-void export_function() {
-  def("add_approx",(R(*)(const R&,const R&))(add_approx<R>), "approximate addition function" );
-  def("sub_approx",(R(*)(const R&,const R&))(sub_approx<R>), "approximate subtraction function" );
-  def("mul_approx",(R(*)(const R&,const R&))(mul_approx<R>), "approximate multiplication function" );
-  def("div_approx",(R(*)(const R&,const R&))(div_approx<R>), "approximate division function" );
-  def("mul_approx",(R(*)(const R&,const int&))(mul_approx<R>), "approximate multiplication function" );
-  def("div_approx",(R(*)(const R&,const int&))(div_approx<R>), "approximate division function" );
-  def("sqrt_approx", sqrt_approx<R>, "approximate square root function" );
-  def("exp_approx", exp_approx<R>, "approximate exponential function" );
-  def("log_approx", log_approx<R>, "approximate logarithm function" );
-  //def("sin_approx", sin_approx<R>, "approximate cosine function" );
-  //def("cos_approx", cos_approx<R>, "approximate sine function" );
-  //def("tan_approx", tan_approx<R>, "approximate tangent function" );
+void export_function() 
+{
+  typedef typename Numeric::traits<R>::arithmetic_type A;
+
+  class_<Function<R> >("Function",init<>())
+    .def(init< std::string >())
+    .def("argument_size", &Function<R>::argument_size)
+    .def("result_size", &Function<R>::result_size)
+    .def("smoothness", &Function<R>::smoothness)
+    .def("__call__",(Vector<A>(Function<R>::*)(const Vector<A>&)const)(&Function<R>::image))
+    .def("jacobian",(Matrix<A>(Function<R>::*)(const Vector<A>&)const)(&Function<R>::jacobian))
+    .def("read",(void(Function<R>::*)(const std::string&))(&Function<R>::read))
+    .def(self_ns::str(self))
+  ;
 }
 
-template void export_function<Float64>();
-template void export_function<FloatMP>();
+template void export_function<Rational>();
+template void export_function<Float>();

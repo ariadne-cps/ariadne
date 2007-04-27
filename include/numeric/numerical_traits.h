@@ -42,12 +42,19 @@ namespace Ariadne {
     class Float64;
     class FloatMP;
     template<class R> class Interval;
+    template<class X, class V> class Differential;
       
     /* numerical traits */
     /*! \brief Tags a class representing a ring. */
     class ring_tag { };
     /*! \brief Tags a class representing a field. */
     class field_tag { };
+    /*! \brief Tags a class based on integer numbers. */
+    class integer_tag { };
+    /*! \brief Tags a class based on rational numbers. */
+    class rational_tag { };
+    /*! \brief Tags a class based on floating-point numbers. */
+    class float_tag { };
       
 #ifndef DOXYGEN
     template<class T1, class T2=T1> struct traits { 
@@ -63,6 +70,8 @@ namespace Ariadne {
     
     /*! \brief Typedef's describing a numerical type. */
     template<class T> struct traits<T,T> { 
+      /*!\brief The type of real number used for T. */
+      typedef RT real_type;
       /*!\brief The type which can be assigned an element of \a T. */
       typedef T closure_type;
       /*!\brief The default type used to store the result of a binary arithmetical operation. */
@@ -75,44 +84,50 @@ namespace Ariadne {
 #endif      
 
     template<> struct traits<int> {
+      typedef integer_tag type;
+      typedef int number_type;
       typedef int closure_type;
       typedef int arithmetic_type;
     };
   
     template<> struct traits<double> {
+      typedef double number_type;
       typedef double closure_type;
       typedef double arithmetic_type;
       typedef Interval<double> interval_type;
     };
   
     template<> struct traits< mpf_class > { 
+      typedef mpf_class number_type; 
       typedef mpf_class approximate_arithmetic_type; 
       typedef mpf_class closure_type; 
-      typedef mpf_class number_type; 
       typedef mpf_class arithmetic_type; 
       typedef Interval<FloatMP> interval_type; 
     };
     
     template<> struct traits< Float64 > { 
+      typedef float_tag type;
+      typedef Float64 number_type; 
       typedef double approximate_arithmetic_type; 
       typedef Float64 closure_type; 
-      typedef Float64 number_type; 
       typedef Interval<Float64> arithmetic_type; 
       typedef Interval<Float64> interval_type;
     };
     
     template<> struct traits< FloatMP > { 
+      typedef float_tag type;
+      typedef FloatMP number_type; 
       typedef mpf_class approximate_arithmetic_type; 
       typedef FloatMP closure_type; 
-      typedef FloatMP number_type; 
       typedef Interval<FloatMP> arithmetic_type; 
       typedef Interval<FloatMP> interval_type; 
     };
     
     template<> struct traits< Rational > { 
+      typedef rational_tag type;
+      typedef Rational number_type; 
       typedef Rational approximate_arithmetic_type; 
       typedef Rational closure_type; 
-      typedef Rational number_type; 
       typedef Rational arithmetic_type; 
       typedef Interval<Rational> interval_type; 
     };
@@ -132,10 +147,14 @@ namespace Ariadne {
 
 
     template<class R> struct traits< Interval<R> > { 
-      typedef Interval<typename traits<R>::closure_type> closure_type; 
       typedef R number_type; 
+      typedef Interval<typename traits<R>::closure_type> closure_type; 
       typedef Interval<typename traits<R>::closure_type> arithmetic_type; 
       typedef Interval<R> interval_type; 
+    };
+
+    template<class X, class V> struct traits< Differential<X,V> > { 
+      typedef typename traits<X>::number_type number_type; 
     };
 
     template<> struct traits< Float64, Rational > { 

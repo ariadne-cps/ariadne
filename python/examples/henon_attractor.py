@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 ##############################################################################
-#            test_polyhedron.py
+#            henon_attractor.py
 #
 #  Copyright 2006  Pieter Collins <Pieter.Collins@cwi.nl>
 ##############################################################################

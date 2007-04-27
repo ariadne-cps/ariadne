@@ -43,6 +43,7 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_rational.cc \
 	export_float.cc \
 	export_interval.cc \
+	export_differential.cc \
 	 \
 	export_vector.cc \
 	export_matrix.cc \
@@ -65,6 +66,7 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_partition_tree_set.cc \
 	export_hybrid_set.cc \
 	 \
+	export_function.cc \
 	export_map.cc \
 	export_affine_map.cc \
 	export_polynomial_map.cc \

@@ -11,6 +11,7 @@ check_PROGRAMS = \
 	test_boost test_mpfr \
 	test_integer test_rational test_float \
 	test_interval \
+	test_differential \
 	test_vector test_matrix test_tensor \
 	test_linear_algebra test_linear_program \
 	test_binary_word test_lattice test_subdivision_tree \
@@ -39,6 +40,7 @@ test_integer_SOURCES=test_integer.cc
 test_rational_SOURCES=test_rational.cc
 test_float_SOURCES=test_float.cc
 test_interval_SOURCES=test_interval.cc
+test_differential_SOURCES=test_differential.cc
 test_vector_SOURCES=test_vector.cc
 test_matrix_SOURCES=test_matrix.cc
 test_tensor_SOURCES=test_tensor.cc

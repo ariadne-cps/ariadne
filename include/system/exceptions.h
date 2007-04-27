@@ -8,7 +8,7 @@
 /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation; either version 2 of the License, or61
  *  (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
@@ -31,14 +31,18 @@
 #include <stdexcept>
 #include <iosfwd>
 
+#include "../linear_algebra/exceptions.h"
 #include "../geometry/exceptions.h"
 
 namespace Ariadne {
   namespace System {
-  
+    struct InvalidParameters : public std::runtime_error { InvalidParameters(const std::string& what) : std::runtime_error(what) { } };
   
   }
 }
+
+#define ARIADNE_CHECK_ARGUMENT_SIZE(function,argument,func) \
+  { if((function).argument_size()!=(argument).size()) { using LinearAlgebra::IncompatibleSizes; ARIADNE_THROW(IncompatibleSizes,func,#function".argument_size()="<<(function).argument_size()<<", "#argument"="<<argument); } }
 
 #define ARIADNE_CHECK_ARGUMENT_DIMENSION(map,set,func) \
   { if((map).argument_dimension()!=(set).dimension()) { using Geometry::IncompatibleDimensions; ARIADNE_THROW(IncompatibleDimensions,func,#map".argument_dimension()="<<(map).argument_dimension()<<", "#set"="<<set); } }

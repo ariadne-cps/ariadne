@@ -7,7 +7,7 @@ lib: libariadne.la
 INCLUDES = -I$(top_srcdir)/include 
 LDADD = -lmpfr -lppl -lgmpxx
 
-#SUBDIRS = base numeric linear_algebra combinatoric geometry system evaluation output python
+#SUBDIRS = base numeric linear_algebra combinatoric geometry system evaluation output input python
 
 SUBDIRS = . python
 
@@ -45,7 +45,7 @@ GEOMETRY_SRC = \
 
 SYSTEM_SRC = \
 	system/function.cc \
-	system/map.cc system/affine_map.cc system/polynomial_map.cc \
+	system/map.cc system/function_map.cc system/affine_map.cc system/polynomial_map.cc \
 	system/vector_field.cc system/affine_vector_field.cc \
 	system/multimap.cc system/affine_multimap.cc \
 	system/hybrid_automaton.cc \
@@ -66,7 +66,11 @@ OUTPUT_SRC = \
 	output/logging.cc \
 	output/epsfstream.cc
 
-noinst_LTLIBRARIES = libbase.la libnumeric.la liblinearalgebra.la libcombinatoric.la libgeometry.la libsystem.la libevaluation.la liboutput.la
+INPUT_SRC = \
+	input/modelica.cc 
+
+
+noinst_LTLIBRARIES = libbase.la libnumeric.la liblinearalgebra.la libcombinatoric.la libgeometry.la libsystem.la libevaluation.la liboutput.la libinput.la
 
 lib_LTLIBRARIES = libariadne.la 
 libariadne_la_LIBADD = $(noinst_LTLIBRARIES) -lmpfr -lppl -lgmpxx
@@ -86,6 +90,7 @@ libgeometry_la_SOURCES = $(GEOMETRY_SRC)
 libsystem_la_SOURCES = $(SYSTEM_SRC)
 libevaluation_la_SOURCES = $(EVALUATION_SRC)
 liboutput_la_SOURCES = $(OUTPUT_SRC)
+libinput_la_SOURCES = $(INPUT_SRC)
 
 
 EXTRA_DIST =  

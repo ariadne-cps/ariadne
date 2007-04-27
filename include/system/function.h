@@ -1,7 +1,7 @@
 /***************************************************************************
  *            function.h
  *
- *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
+ *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it  Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -22,7 +22,7 @@
  */
  
 /*! \file system/function.h
- *  \brief General function interface.
+ *  \brief Functions running on a virtual machine.
  */
  
 #ifndef ARIADNE_SYSTEM_FUNCTION_H
@@ -34,82 +34,23 @@
 #include <stdexcept>
 
 #include "../base/types.h"
+#include "../base/array.h"
 #include "../numeric/numerical_traits.h"
 #include "../linear_algebra/declarations.h"
+#include "../system/function_interface.h"
+#include "../system/virtual_machine.h"
 
 namespace Ariadne {
   namespace System {
-
-    class SyntaxError : public std::runtime_error { public: SyntaxError(const std::string& what) : std::runtime_error(what) { } };
-
-    /*!\ingroup System
-     * \ingroup DiscreteTime
-     * \brief Abstract base class for (differentiable) functionss.
-     * 
-     * The function is specified by the method operator()(const LinearAlgebra::Vector< Interval<R> >& A) const,
-     * This method should compute an interval vector \f$\overline{f}(A)\f$ with the
-     * following properties:
-     *   -# \f$f(A)\subset\overline{f}(A)\f$,
-     *   -# If \f$A_1\subset A_0\f$, then \f$\overline{f}(A_1)\subset 
-     *       \overline{f}(A_0)\f$, and
-     *   -# If \f$\bigcap_{n\in\mathbb{N}}A_n=\{x\}\f$, then 
-     *       \f$\bigcap_{n\in\mathbb{N}}\overline{f}(A_n)=\{f(x)\}\f$.
-     *
-     * More succinctly, we say that \f$\overline{f}(A_n)\f$ converges monotonically 
-     * as \f$A_n\f$ tends to a point.
-     *
-     * Additional accuracy can be obtained be using derivatives.
-     * The method derivative(const LinearAlgebra::Vector< Interval<R> >& A) const computes the \a i th component of the derivative over the set \a A 
-     * with respect to the variables in the multi-index \a j.
-     */
-    template<class R>
-    class Function {
-      typedef typename Numeric::traits<R>::arithmetic_type F; 
-      typedef typename Numeric::traits<R>::interval_type I; 
-     public:
-      /*! \brief The real number type. */
-      typedef R real_type;
       
-      /*! \brief Virtual destructor. */
-      virtual ~Function() { }
-     
-      /*! \brief Make a copy (clone) of the vector field. */
-      virtual Function<R>* clone() const = 0;
-     
-      /*! \brief A bound for the function over a set of vectors. */
-      LinearAlgebra::Vector<I> operator() (const LinearAlgebra::Vector<I>& v) const { return this->image(v); }
-
-      /*! \brief A bound for the vector field over aa set of vectors. */
-      virtual LinearAlgebra::Vector<I> image(const LinearAlgebra::Vector<I>& v) const = 0;
-
-      /*! \brief A bound for the vector field over a set of vectors. */
-      virtual I derivative(const LinearAlgebra::Vector<I>& v, const size_type& i, const LinearAlgebra::MultiIndex& j) const = 0;
-
-    
-      /*! \brief The degree of differentiability of the function. */
-      virtual size_type smoothness() const = 0;
-      /*! \brief The dimension of the function argument. */
-      virtual dimension_type argument_dimension() const = 0;
-      /*! \brief The dimension of the function result. */
-      virtual dimension_type result_dimension() const = 0;
-    };
-  
-    /*! \brief The operation codes of the virtual machine. */
-    enum Operation { PUSH, PULL, CONST, MAX, MIN, ABS, POS, NEG, ADD, SUB, MUL, DIV, POW, EXP, LOG, SIN, COS, TAN, ASIN, ACOS, ATAN };
-    union ByteCode { Operation op; int var; int ind; int val; };
-    struct Variable { std::string name; uint num; uint ind; };
-
-    struct Instruction { Operation op; Variable var; };
-
-
-
-
     /*!\ingroup System
      * \ingroup DiscreteTime
-     * \brief Concrete class for functionss.
+     * \brief Concrete class for functions.
      */
     template<class R>
-    class GeneralFunction {
+    class Function
+      : public FunctionInterface<R>
+    {
       typedef typename Numeric::traits<R>::arithmetic_type A; 
       typedef typename Numeric::traits<R>::interval_type I; 
      public:
@@ -117,14 +58,26 @@ namespace Ariadne {
       /*! \brief The real number type. */
       typedef R real_type;
       
-      /*! \brief Virtual destructor. */
-      virtual ~GeneralFunction() { }
+      /*! \brief  destructor. */
+      virtual ~Function() { }
+     
+      /*! \brief Default constructor. */
+      Function();
      
       /*! \brief Construct from a string literal. */
-      GeneralFunction(const std::string& str);
+      Function(const std::string& filename);
+     
+      /*! \brief Construct by reading from an input stream. */
+      Function( std::istream& is);
+     
+      /*! \brief Construct from a list of variables and an algorithm. */
+      Function(const std::string& name,
+               const std::vector<FunctionVariable>& variables,
+               const std::vector<Numeric::Rational>& constants,
+               const std::vector<VirtualMachine::ByteCode>& algorithm);
      
       /*! \brief Make a copy (clone) of the vector field. */
-      virtual GeneralFunction<R>* clone() const;
+      virtual Function<R>* clone() const;
      
       /*! \brief A bound for the vector field over aa set of vectors. */
       virtual LinearAlgebra::Vector<A> image(const LinearAlgebra::Vector<A>& x) const;
@@ -137,78 +90,47 @@ namespace Ariadne {
 
       /*! \brief The degree of differentiability of the function. */
       virtual size_type smoothness() const;
-      /*! \brief The dimension of the function argument. */
-      virtual dimension_type argument_dimension() const;
-      /*! \brief The dimension of the function result. */
-      virtual dimension_type result_dimension() const;
+      /*! \brief The size of the function argument. */
+      virtual size_type argument_size() const;
+      /*! \brief The size of the function result. */
+      virtual size_type result_size() const;
 
+      /*! \brief The name of the function. */
+      std::string name() const;
+      
+      /*! \brief Read from the file \a filename. */
+      void read(const std::string& filename);
+      
       /*! \brief Read from an input stream. */
       std::istream& read(std::istream& is);
       
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;
-   
-      void _evaluate(A** args) const;
-
-      std::vector<R> _parameters;
-      std::vector<R> _constants;
-      std::vector<ByteCode> _operations;
-      std::vector<std::string> _variable_names;
+     private:
+      void _initialise();
+     private:
+      std::string _name;
+      array<FunctionVariable> _variables;
+      array<VirtualMachine::ByteCode> _operations;
+      array<A> _constants;
+      size_type _argument_size;
+      size_type _result_size;
+      size_type _intermediates_size;
+      size_type _constants_size;
     };
    
+
     template<class R> inline
-    std::istream& operator>>(std::istream& is, GeneralFunction<R>& f) {
+    std::istream& operator>>(std::istream& is, Function<R>& f) {
       return f.read(is);
     }
 
     template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const  GeneralFunction<R>& f) {
+    std::ostream& operator<<(std::ostream& os, const  Function<R>& f) {
       return f.write(os);
     };
 
 
-
-    /*! \brief A parser for a function. */
-    class FunctionParser {
-     public:
-      enum TokenType { STR, NUM, INT, REAL, END, ASSIGN, LP, RP, LSP, RSP, PLUS, MINUS, TIMES, DIVIDES, POWER, MIN, MAX, ABS, EXP, LOG, SIN, COS, TAN, ASIN, ACOS, ATAN };
-      
-      struct Token { 
-        TokenType type; 
-        std::string str;
-        int val; 
-        double rval; 
-        Token() { }
-        Token(std::string s) : type(STR), str(s) { }
-        Token(int n) : type(INT), val(n) { }
-        Token(double x) : type(REAL), rval(x) { }
-        Token(TokenType t) : type(t) { }
-      };
-      
-      FunctionParser(std::istream&);
-      FunctionParser(const std::string&);
-      std::vector<ByteCode> operations();
-      std::vector<std::string> variable_names();
-
-     private:
-      uint variable_number(const std::string& name) const;
-      Token get_token(std::istream& is);
-      Token peek_token(std::istream& is);
-      Variable get_variable(std::istream& is);
-
-      std::string read_string(std::istream& is);
-      int read_int(std::istream& is);
-      void read_function(std::istream& is);
-      void read_statement(std::istream& is);
-      void read_assignment(std::istream& is);
-      void read_expression(std::istream& is);
-      void read_factor(std::istream& is);
-      void read_term(std::istream& is);
-      void read_primary(std::istream& is);
-     private:
-      std::vector<std::string> _variable_names;
-      std::vector<ByteCode> _operations;
-    };
 
   }
 }

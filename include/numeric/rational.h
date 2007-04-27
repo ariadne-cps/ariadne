@@ -93,8 +93,8 @@ namespace Ariadne {
 
     template<> inline Rational pow(const Rational& q, const int& n) {
       if(n<0) { return pow(q,-n); }
-      Rational r=1; Rational p=n; uint e=1; uint un=n;
-      while(e<un) { if(e&un) { r*=p; } p*=p; e*=2; }
+      Rational r=1; Rational p=q; uint e=1; uint un=n;
+      while(e<=un) { if(e&un) { r*=p; } p*=p; e*=2; }
       return r; 
     }      
     

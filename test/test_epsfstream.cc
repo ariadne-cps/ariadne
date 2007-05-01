@@ -41,6 +41,7 @@
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
+using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
 using namespace Ariadne::Output;
 using namespace std;
@@ -72,8 +73,9 @@ int main() {
   cout << z3.vertices() << endl;
   
   
+  // Test output of basic sets
   epsfstream eps;
-  eps.open("test_epsfstream.eps",bbox);
+  eps.open("test_epsfstream-1.eps",bbox);
   eps << r1;
   eps.set_fill_colour("blue");
   eps << r2;
@@ -82,5 +84,18 @@ int main() {
   eps.close();
   eps << pt;
 
+  cout << endl;
+
+  // Test output of grid mask set
+  Rectangle<Float> bb("[0,1]x[0,1]x[0,1]");
+  Grid<Float> g(Vector<Float>("[0.25,0.25,0.25]"));
+  GridMaskSet<Float> gms(g,bb);
+  Rectangle<Float> r("[0.33,0.66]x[0.125,0.375]x[0.25,0.75]");
+  gms.adjoin_outer_approximation(r);
+  cout << "gms.size()=" << gms.size() << endl;
+  eps.open("test_epsfstream-2.eps",bb.neighbourhood(0.125));
+  eps << gms;
+  eps.close();
+  
   return 0;
 }

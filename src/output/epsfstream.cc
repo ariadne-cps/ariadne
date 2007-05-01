@@ -21,16 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "base/stlio.h"
 #include "output/epsfstream.h"
 
-namespace Ariadne { namespace Output {
+namespace Ariadne { 
 
-const uint epsfstream::xBBoxSide=300;
-const uint epsfstream::yBBoxSide=300;
-const double epsfstream::linewidth=0.0000001;
+const uint Output::epsfstream::xBBoxSide=300;
+const uint Output::epsfstream::yBBoxSide=300;
+const double Output::epsfstream::linewidth=0.0000001;
     
 
-Polygon2d& Polygon2d::reduce() 
+Output::Polygon2d& 
+Output::Polygon2d::reduce() 
 {
   //std::cerr << this->_vertices << std::endl;
   std::sort(this->_vertices.begin(),this->_vertices.end());
@@ -93,21 +95,28 @@ Polygon2d& Polygon2d::reduce()
 
 
 std::ostream& 
-operator<<(std::ostream& os, const Point2d& pt) 
+Output::operator<<(std::ostream& os, const Point2d& pt) 
 {
   return os << "(" << pt[0] << "," << pt[1] << ")";
 }
 
 std::ostream& 
-operator<<(std::ostream& os, const PlanarProjectionMap& ppm) 
+Output::operator<<(std::ostream& os, const Rectangle2d& r) 
+{
+  return os << "[" << r.lower_bound(0) << "," << r.upper_bound(0) << "]x["
+            << r.lower_bound(1) << "," << r.upper_bound(1) << "]";
+}
+
+std::ostream& 
+Output::operator<<(std::ostream& os, const PlanarProjectionMap& ppm) 
 {
   return os << "PlanarProjectionMap( argument_dimension=" << ppm._d
             << ", x_variable=" << ppm._i << ", y_variable=" << ppm._j << " )";
 }
 
 
-Point2d 
-baricentre(const Polygon2d& vertices)
+Output::Point2d 
+Output::baricentre(const Polygon2d& vertices)
 {
   Point2d baricentre(2);
   
@@ -124,64 +133,26 @@ baricentre(const Polygon2d& vertices)
 
 
 
-Polygon2d
-order_around_a_point(const Polygon2d& vertices, 
-                     const Point2d &centre)
-{
-  radiant_pointer_type pointers[vertices.size()];
-  
-  double tangent=0;
-  double tangent_R=0;
-  
-  for (size_t i=0; i< vertices.size(); i++) {
-    pointers[i].pos=i;
-    if (vertices[i][1]==0) {
-      if (vertices[i][0] >0)
-        pointers[i].radiant=std::acos(0.0);
-      else
-        pointers[i].radiant=-std::acos(0.0);
-    } else {
-      tangent_R=vertices[i][0]/vertices[i][1];
-      tangent=tangent_R;
-      pointers[i].radiant=std::atan(tangent);
-      
-      if (vertices[i][1] <0)
-        pointers[i].radiant+=std::acos(-1.0);
-    }
-  }
-  
-  std::sort(pointers, pointers + vertices.size(), is_smaller_than);
-  
-  Polygon2d new_vector(2,vertices.size()); 
-  
-  for (size_t i=0; i< vertices.size(); i++) {
-    Point2d pt(vertices[pointers[i].pos]);
-    new_vector[i]=pt;
-  }
-  
-  return new_vector;
-}
-    
 
 
 
 
 
-epsfstream::epsfstream()
+Output::epsfstream::epsfstream()
   : std::ofstream(), line_colour("black"), fill_colour("green"), line_style(true), fill_style(true)
 {
 }
 
 
 
-epsfstream::~epsfstream() {
+Output::epsfstream::~epsfstream() {
   this->close();
 }
 
      
  
 void
-epsfstream::open(const char* fn, const Rectangle2d& bbox, 
+Output::epsfstream::open(const char* fn, const Rectangle2d& bbox, 
                  const PlanarProjectionMap& p_map)
 {
   this->p_map=p_map;
@@ -190,13 +161,14 @@ epsfstream::open(const char* fn, const Rectangle2d& bbox,
   this->std::ofstream::open(fn);
   this->write_header();
   (*this) << "black\n";
-  trace(*this,bbox) << " stroke\n\n";
+  this->trace(bbox);
+  (*this) << " stroke\n\n";
 }
 
 
 
 void 
-epsfstream::close() 
+Output::epsfstream::close() 
 {
   this->write_trailer();
   this->std::ofstream::close();
@@ -205,7 +177,7 @@ epsfstream::close()
 
 
 void 
-epsfstream::write_header() 
+Output::epsfstream::write_header() 
 {
   (*this) << "%!PS-Adobe-2.0\n"
           << "%%Title: Ariadne\n"
@@ -253,7 +225,7 @@ epsfstream::write_header()
 
 
 void 
-epsfstream::write_trailer() 
+Output::epsfstream::write_trailer() 
 {
   (*this) << "grestore showpage\n"
     "%%Trailer\n";
@@ -262,7 +234,7 @@ epsfstream::write_trailer()
 
 
 void
-epsfstream::trace_scale(const char* x_name, const char* y_name,
+Output::epsfstream::trace_scale(const char* x_name, const char* y_name,
                         const int& x_step, const int& y_step) 
 {
   double lx=this->bbox.lower_bound(0);
@@ -393,83 +365,124 @@ epsfstream::trace_scale(const char* x_name, const char* y_name,
 
 
 
-epsfstream&
-trace(epsfstream& eps, const Point2d& pt)
+void
+Output::epsfstream::trace(const Point2d& pt)
 {        
-  eps << pt[0] << " " << pt[1] << " 0.001 0 360 arc closepath\n";
-  return eps;
+  std::ostream& os=*this;
+  os << pt[0] << " " << pt[1] << " 0.001 0 360 arc closepath\n";
 }
 
-epsfstream&
-trace(epsfstream& eps, const Rectangle2d& r)
+void
+Output::epsfstream::trace(const Rectangle2d& r)
 {
   double lx=r.lower_bound(0);
   double ux=r.upper_bound(0);
   double ly=r.lower_bound(1);
   double uy=r.upper_bound(1);
   
-  eps << lx << ' ' << ly << " moveto\n"
-      << ux << ' ' << ly << " lineto\n"
-      << ux << ' ' << uy << " lineto\n"
-      << lx << ' ' << uy << " lineto\n"
-      << lx << ' ' << ly << " lineto\n";
-  return eps;
+  std::ostream& os=*this;
+  os << lx << ' ' << ly << " moveto\n"
+     << ux << ' ' << ly << " lineto\n"
+     << ux << ' ' << uy << " lineto\n"
+     << lx << ' ' << uy << " lineto\n"
+     << lx << ' ' << ly << " lineto\n";
 }
 
-epsfstream&
-trace(epsfstream& eps, const Polygon2d& vertices)
+void
+Output::epsfstream::trace(const Polygon2d& vertices)
 {
-  eps << vertices[0][0] << ' ' << vertices[0][1] 
-      << " moveto\n";
+  std::ostream& os=*this;
+  os << vertices[0][0] << ' ' << vertices[0][1] 
+     << " moveto\n";
   for (size_type i=1; i!=vertices.size(); ++i) {
-    eps << vertices[i][0] << ' ' << vertices[i][1] 
-        << " lineto\n";
+    os << vertices[i][0] << ' ' << vertices[i][1] 
+       << " lineto\n";
   }
-  eps << vertices[0][0] << ' ' << vertices[0][1] 
-      << " lineto\n";
-  return eps;
+  os << vertices[0][0] << ' ' << vertices[0][1] 
+     << " lineto\n";
 }
 
 
 
-epsfstream&
-draw(epsfstream& eps, const Point2d& pt)
+void
+Output::epsfstream::draw(const Point2d& pt)
 {
+  std::ostream& os=*this;
+  epsfstream& eps=*this;
   if(eps.fill_style) {
-    eps << pt[0] << " " << pt[1] << " 0.001 0 360 arc closepath\n";
-    eps << eps.fill_colour << " fill\n";
+    os << pt[0] << " " << pt[1] << " 0.001 0 360 arc closepath\n";
+    os << eps.fill_colour << " fill\n";
   }
   if(eps.line_style) {
-    eps << pt[0] << " " << pt[1] << " 0.001 0 360 arc closepath\n";
-    eps << eps.line_colour << " stroke\n\n";
+    os << pt[0] << " " << pt[1] << " 0.001 0 360 arc closepath\n";
+    os << eps.line_colour << " stroke\n\n";
   }
-  return eps;
 }
 
-epsfstream&
-draw(epsfstream& eps, const Rectangle2d& r) 
+void
+Output::epsfstream::draw(const Rectangle2d& r) 
 {
+  epsfstream& eps=*this;
   if(eps.fill_style) {
-    trace(eps,r) << eps.fill_colour << " fill\n";
+    eps.trace(r);
+    eps.fill();
   }
   if(eps.line_style) {
-    trace(eps,r) << eps.line_colour << " stroke\n\n";
+    eps.trace(r);
+    eps.stroke();
   }
-  return eps;
 }
 
-epsfstream&
-draw(epsfstream& eps, const Polygon2d& vertices)
+void
+Output::epsfstream::draw(const Polygon2d& vertices)
 {
+  epsfstream& eps=*this;
   if(eps.fill_style) {
-    trace(eps,vertices) << eps.fill_colour << " fill\n";
+    eps.trace(vertices);
+    eps.fill();
   }
   if(eps.line_style) {
-    trace(eps,vertices) << eps.line_colour << " stroke\n\n";
+    eps.trace(vertices);
+    eps.stroke();
   }
-  return eps;
 }
 
 
+void
+Output::epsfstream::draw(std::vector<Rectangle2d>& rl)
+{
+  epsfstream& eps=*this;
+  std::sort(rl.begin(),rl.end());
+  rl.resize(std::unique(rl.begin(),rl.end())-rl.begin());
+  if(eps.fill_style) {
+    for(uint i=0; i!=rl.size(); ++i) {
+      eps.trace(rl[i]);
+      eps.fill();
+    }
+  }
+  if(eps.line_style) {
+    for(uint i=0; i!=rl.size(); ++i) {
+      eps.trace(rl[i]);
+      eps.stroke();
+    }
+  }
+}
 
-}}
+
+void 
+Output::epsfstream::fill()
+{
+  std::ostream& os=*this;
+  os << this->fill_colour << " fill\n";
+}
+
+
+void 
+Output::epsfstream::stroke()
+{
+  std::ostream& os=*this;
+  os << this->line_colour << " stroke\n";
+}
+
+
+}

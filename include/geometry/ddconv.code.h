@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include <cassert>
+
 #include "../base/stlio.h"
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
@@ -40,7 +42,9 @@ void
 ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
        const std::vector< LinearAlgebra::Vector<R> >&  argument)
 {  
-  
+  assert(argument.size()>0);
+
+
   // 'dimension' is the dimension of the augmented state space
   dimension_type dimension=argument[0].size();
   

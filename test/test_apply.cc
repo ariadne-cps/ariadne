@@ -32,6 +32,7 @@
 #include "geometry/zonotope.h"
 #include "geometry/polytope.h"
 #include "geometry/rectangular_set.h"
+#include "system/grid_multimap.h"
 #include "evaluation/applicator.h"
 #include "output/epsfstream.h"
 #include "output/logging.h"
@@ -42,6 +43,7 @@
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
+using namespace Ariadne::Combinatoric;
 using namespace Ariadne::Geometry;
 using namespace Ariadne::System;
 using namespace Ariadne::Evaluation;
@@ -61,7 +63,7 @@ test_apply()
   //set_evaluation_verbosity(0);
   typedef Interval<R> I;
 
-  double grid_size=0.25;
+  double grid_size=0.5;
   double bound=4.0;
 
   R a=1.5;
@@ -103,6 +105,7 @@ test_apply()
   RectangularSet<R> bounding_set(bounding_box);
   RectangularSet<R> initial_set("[-0.2,0.8]x[0.3,1.7]");
   
+
   // Test evaluation on concrete sets
   GridMaskSet<R> grid_initial_set(grid,initial_set);
   grid_initial_set.adjoin_over_approximation(Rectangle<R>(initial_set));
@@ -110,7 +113,11 @@ test_apply()
   GridMaskSet<R> grid_bounding_set(grid,bounding_set);
   grid_bounding_set.adjoin_over_approximation(Rectangle<R>(bounding_set));
   cout << "grid_bounding_set=" << grid_bounding_set << endl;
-  
+
+  cout << endl << endl;
+
+  cout << "Computing with concrete sets" << endl;
+
   GridMaskSet<R> grid_image_set=apply.image(henon,grid_initial_set,grid_bounding_set);
   cout << "grid_image_set=" << grid_image_set << endl;
   GridMaskSet<R> grid_preimage_set=apply.preimage(henon,grid_initial_set,grid_bounding_set);
@@ -122,6 +129,9 @@ test_apply()
   cout << "list_initial_set=" << list_initial_set << endl;
   ListSet< Zonotope<I,R> > list_reach_set=apply.reach(henon,list_initial_set);
   cout << "list_reach_set=" << list_reach_set << endl;
+
+  GridMultiMap<R> discretization=apply.discretize(henon,grid_bounding_set,grid);
+  cout << "discretization=GridMultiMap(...)" << endl;
 
   epsfstream eps;
   eps.open("test_apply-1.eps",eps_bounding_box);
@@ -150,39 +160,40 @@ test_apply()
   eps.close();
 
 
+  cout << endl;
 
-  //set_evaluation_verbosity(3);
-  //set_geometry_verbosity(4);
+  cout << "Computing with SetInterface" << endl;
 
+  cout << "Computing image set" << endl;
   shared_ptr< SetInterface<R> > image_set_ptr(apply.image(henon,initial_set));
   cout << "image_set=" << *image_set_ptr << endl;
-  shared_ptr< SetInterface<R> > preimage_set_ptr(apply.preimage(henon,initial_set));
+  cout << "Computing preimage set" << endl;
+  apply.set_grid_size(grid_size/2);
+  shared_ptr< SetInterface<R> > preimage_set_ptr(apply.preimage(henon,initial_set,bounding_set));
+  apply.set_grid_size(grid_size);
   cout << "preimage_set=" << *preimage_set_ptr << endl;
+  cout << "Computing inverse image set" << endl;
   shared_ptr< SetInterface<R> > inverse_image_set_ptr(apply.image(henon_inverse,initial_set));
   cout << "inverse_image_set=" << *inverse_image_set_ptr << endl;
-  const ListSet< Zonotope<Interval<R>,R> >& list_image_set=dynamic_cast<const ListSet< Zonotope<Interval<R>,R> >&>(*image_set_ptr);
-  cout << "list_image_set=" << list_image_set;
 
   eps.open("test_apply-3.eps",eps_bounding_box);
   eps.set_fill_colour("blue");
   eps<<initial_set;
   eps.set_fill_colour("green");
   eps<<*image_set_ptr;
-  eps<<list_image_set;
   eps.set_fill_colour("red");
   eps<<*inverse_image_set_ptr;
   eps.set_fill_colour("yellow");
   eps<<*preimage_set_ptr;
   eps.close();
   
-  cout << "Computing reach_set" << endl;
+
+  cout << "Computing reach set" << endl;
   apply.set_grid_size(0.25*grid_size);
   shared_ptr< SetInterface<R> > reach_set_ptr(apply.reach(henon,initial_set));
   cout << "reach_set=" << *reach_set_ptr << endl;
-  const ListSet< Zonotope<Interval<R>,R> >& list_reach_set_ref=dynamic_cast<const ListSet< Zonotope<Interval<R>,R> >&>(*reach_set_ptr);
-  cout << "list_reach_set_ref=" << list_reach_set_ref << endl;
   apply.set_grid_size(grid_size);
-  cout << "Computing chainreach_set" << endl;
+  cout << "Computing chainreach set" << endl;
   shared_ptr< SetInterface<R> > chainreach_set_ptr(apply.chainreach(henon,initial_set,bounding_set));
   cout << "chainreach_set=" << *chainreach_set_ptr << endl;
 
@@ -194,24 +205,24 @@ test_apply()
   eps << *chainreach_set_ptr;
   eps.set_line_style(true);
   eps.set_fill_colour("magenta");
-  eps << list_reach_set_ref;
+  eps << *reach_set_ptr;
   eps.set_fill_style(false);
   eps << initial_set;
   eps << bounding_set;
   eps.close();
   
+
   cout << "Computing viability kernel" << endl;
   apply.set_grid_size(grid_size);
   shared_ptr< SetInterface<R> > viability_kernel_ptr(apply.viable(henon,bounding_set));
   cout << "viability_kernel=" << *viability_kernel_ptr << endl;
-  const GridMaskSet<R>& grid_viability_kernel_ref=dynamic_cast<const GridMaskSet<R>&>(*viability_kernel_ptr);
 
   eps.open("test_apply-5.eps",eps_bounding_box);
   eps.set_fill_style(true);
   eps.set_fill_colour("cyan");
   eps << bounding_set;
   eps.set_fill_colour("magenta");
-  eps << grid_viability_kernel_ref;
+  eps << *viability_kernel_ptr;
   eps.close();
 
   return 0;

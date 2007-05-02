@@ -31,13 +31,27 @@
 #include <iostream>
 #include <sstream>
 
-#include "../geometry/set_reference.h"
+#include <boost/shared_ptr.hpp>
+
+#include "../geometry/set_interface.h"
 #include "../geometry/grid_cell_list_set.h"
 #include "../geometry/grid_mask_set.h"
 #include "../geometry/hybrid_space.h"
+#include "../geometry/hybrid_set_iterator.h"
 
 namespace Ariadne {  
   namespace Geometry {
+
+    template<class R, class T> inline
+    const SetInterface<R>* clone(const T* t) {
+      return t.clone();
+    }
+
+    template<class S, class T> inline
+    const S* clone(const T* t) {
+      return new S(t); 
+    }
+
 
     /*! \brief The type identifying a discrete locatation of a hybrid system. */
     typedef id_type location_type;
@@ -49,6 +63,26 @@ namespace Ariadne {
     };
 
 
+
+    /*! \ingroup HybridSet
+     *  \brief A base class for representing subsets of hybrid state spaces.
+     */
+    template< class S >
+    class DiscreteLocation
+    {
+     public:
+      DiscreteLocation(location_type q, const S& s) : _location(q), _set_ptr(s.clone()) { }
+      DiscreteLocation(location_type q, boost::shared_ptr<S> s_ptr) : _location(q), _set_ptr(s_ptr) { }
+      DiscreteLocation(std::pair< location_type, boost::shared_ptr<S> > pair) : _location(pair.first), _set_ptr(pair.second) { }
+      location_type location() const { return this->_location; }
+      const S& set() const { return *this->_set_ptr; }
+     private:
+      location_type _location;
+      boost::shared_ptr<S> _set_ptr;
+    };
+
+
+
     /*! \ingroup HybridSet
      *  \brief A base class for representing subsets of hybrid state spaces.
      */
@@ -56,14 +90,13 @@ namespace Ariadne {
     class HybridSetBase
     {
      public:
+      typedef boost::shared_ptr<S> pointer_type;
       typedef typename S::real_type real_type;
       typedef typename S::state_type state_type;
       typedef S set_type;
-      typedef typename std::map<location_type,S>::iterator iterator;
-      typedef typename std::map<location_type,S>::const_iterator const_iterator;
-     public:
-      /*! \brief Virtual destructor. */
-      virtual ~HybridSetBase();
+      typedef typename std::map<location_type,pointer_type>::iterator iterator;
+      typedef typename std::map<location_type,pointer_type>::const_iterator const_iterator;
+     protected:
       /*! \brief Construct a set with no locations. */
       HybridSetBase();
       /*! \brief Construct from a dictionary of location identifyers and dimensions. */
@@ -72,12 +105,15 @@ namespace Ariadne {
       HybridSetBase(const HybridSetBase<S>& hs);
       /*! \brief Conversion constructor from another hybrid set. */
       template<class S1> explicit HybridSetBase(const HybridSetBase<S1>& hs);
+     public:
+      /*! \brief Virtual destructor. */
+      virtual ~HybridSetBase();
       
       /*! \brief Create a new location with dimension \a d. */
       S& new_location(location_type q, dimension_type d);
       /*! \brief Create a new location based on the set \a s. */
       S& new_location(location_type q, const S& s);
-      /*! \brief Create a new location by constructing a set from an object of type T. */
+      /*! \brief Create a new location based on the set \a t. */
       template<class T> S& new_location(location_type q, const T& t);
 
       /*! \brief The discrete locations of the set. */
@@ -119,7 +155,7 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream& os) const;
      private:
-      std::map< location_type, S > _component_sets;
+      std::map< location_type, pointer_type > _component_sets;
     };
 
     template<class S> 
@@ -202,15 +238,15 @@ namespace Ariadne {
      */
     template< class R >
     class HybridSet
-      : public HybridSetBase< SetReference<R> >
+      : public HybridSetBase< SetInterface<R> >
     {
      public:
-      HybridSet()
-        : HybridSetBase< SetReference<R> >() { }
-      HybridSet(const HybridSet<R>& hs)
-        : HybridSetBase< SetReference<R> >(hs) { }
-      template<class S1> HybridSet(const HybridSetBase<S1>& hs)
-        : HybridSetBase< SetReference<R> >(hs) { }
+      HybridSet();
+      HybridSet(const HybridSet<R>& hs);
+      template<class S> HybridSet(const HybridSetBase<S>& hs);
+      SetInterface<R>& new_location(location_type q, const Rectangle<R>& r);
+      SetInterface<R>& new_location(location_type q, const Polyhedron<R>& p);
+      SetInterface<R>& new_location(location_type q, const SetInterface<R>& s);
     };
 
 

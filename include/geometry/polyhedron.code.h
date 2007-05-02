@@ -594,6 +594,13 @@ namespace Ariadne {
       dimension_type d=pltp.dimension();
       size_type nv=pltp.number_of_vertices();
       
+      if(nv==0) {
+        // empty polytope; return empty polyhedron
+        array<F> data(d+1,F(0));
+        data[d]=-1;
+        return Polyhedron<F>(d,1,data.begin());
+      }
+
       const LinearAlgebra::Matrix<R> G=pltp.generators();
       
       std::vector< LinearAlgebra::Vector<F> > result;
@@ -607,6 +614,7 @@ namespace Ariadne {
         }
         argument.push_back(tmp);
       }
+
       ddconv(result,argument);     
       
       size_type nc=result.size();

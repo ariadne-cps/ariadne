@@ -166,14 +166,14 @@ Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<R>& autom
       bs_iter!=bounding_set.end(); ++bs_iter)
   {
     id_type id=bs_iter->first;
-    Grid<R> grid(bs_iter->second.dimension(),this->_applicator->grid_size());
-    FiniteGrid<R> fgrid(grid,bs_iter->second.bounding_box());
+    Grid<R> grid(bs_iter->second->dimension(),this->_applicator->grid_size());
+    FiniteGrid<R> fgrid(grid,bs_iter->second->bounding_box());
     ARIADNE_LOG(5,"Made grid"<<std::endl);
     grid_bounding_set.new_location(id,fgrid);
     grid_initial_set.new_location(id,fgrid);
-    grid_bounding_set[id].adjoin_outer_approximation(bs_iter->second);
+    grid_bounding_set[id].adjoin_outer_approximation(*bs_iter->second);
     grid_bounding_set[id].restrict_outer_approximation(automaton.mode(id).invariant());
-    grid_initial_set[id].adjoin_outer_approximation(bs_iter->second);
+    grid_initial_set[id].adjoin_outer_approximation(*bs_iter->second);
     grid_initial_set[id].restrict_outer_approximation(initial_set[id]);
   }
   ARIADNE_LOG(5,"Made cells"<<std::endl);
@@ -398,9 +398,9 @@ Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<R>& hybri
     if(verbosity>=4) {
       std::stringstream filename;
       filename << "hybrid_chainreach-"<<step<<".eps";
-      const GridMaskSet<R>& dom=domain_set.begin()->second;
-      const GridMaskSet<R>& res=result_set.begin()->second;
-      const GridMaskSet<R>& fnd=found_set.begin()->second;
+      const GridMaskSet<R>& dom=*domain_set.begin()->second;
+      const GridMaskSet<R>& res=*result_set.begin()->second;
+      const GridMaskSet<R>& fnd=*found_set.begin()->second;
       Output::epsfstream eps;
       eps.open(filename.str().c_str(),dom.bounding_box());
       eps.set_fill_colour("cyan"); eps<<dom.extent();

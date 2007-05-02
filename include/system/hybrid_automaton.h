@@ -39,7 +39,6 @@
 namespace Ariadne {  
 
 namespace Geometry {
-template<class S> class SetReference;
 template<class S> class HybridSet;
 }
 

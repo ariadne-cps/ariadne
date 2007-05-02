@@ -232,7 +232,8 @@ namespace Ariadne {
       virtual
       Geometry::SetInterface<R>*
       preimage(const System::Map<R>& map, 
-               const Geometry::SetInterface<R>& set) const;
+               const Geometry::SetInterface<R>& set, 
+               const Geometry::SetInterface<R>& bound) const;
     
       /*! \brief Compute the reachable set of \a map starting in \a initial_set while staying within \a bounding_set. */
       virtual

@@ -77,7 +77,7 @@ test_lohner_integrator()
   cout << "h=" << h << endl;
   cout << "z.generators().norm()=" << norm(z.generators()) << endl;
 
-  Zonotope< Interval<R> > z0=z;
+  Zonotope< Interval<R> > z0=Zonotope< Interval<R> >(z);
   Zonotope< Interval<R> > z1=lohner.integration_step(avf,z0,h);
   Zonotope< Interval<R> > z2=lohner.integration_step(avf,z1,h);
   cout << "z0=" << z0 << "\np1=" << z1 << "\nz2=" << z2 << endl;

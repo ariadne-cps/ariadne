@@ -85,7 +85,7 @@ test_integration_step()
   cout << "r=" << r << endl;
   Zonotope<R> z=Zonotope<R>(r);
   cout << "z=" << z << endl;
-  Zonotope<I> iz=Zonotope<R>(r);
+  Zonotope<I> iz=Zonotope<I>(r);
   cout << "iz=" << iz << endl;
 
   ListSet< Zonotope<R> > zls=ListSet< Zonotope<R> >(z);

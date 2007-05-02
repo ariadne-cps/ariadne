@@ -33,6 +33,7 @@
 #include "geometry/rectangular_set.h"
 #include "evaluation/applicator.h"
 #include "output/epsfstream.h"
+#include "output/logging.h"
 #include "models/henon.h"
 
 #include "test.h"
@@ -55,14 +56,16 @@ template<class R>
 int 
 test_chainreach()
 {
-  int subdivisions=64;
+  set_applicator_verbosity(0);
+  
+  int subdivisions=32;
 
   Point<R> params=Point<R>("(1.5,0.875)");
   R a=params[0];
   R b=params[1];
 
   HenonMap<R> h=HenonMap<R>(a,b);
-  Rectangle<R> gbb=Rectangle<R>("[-11.00000,5.00000]x[-8.00000,8.00000]") ;
+  Rectangle<R> gbb=Rectangle<R>("[-11.0,5.0]x[-8.0,8.0]") ;
   cout << "gbb=" << gbb << endl;
   FiniteGrid<R> fg=FiniteGrid<R>(gbb,subdivisions); // grid
   cout << "fg=" << fg << endl;

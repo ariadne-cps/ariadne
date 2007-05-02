@@ -74,14 +74,6 @@ disjoint_approx(const Zonotope< Interval<R>, Interval<R> >& z, const Rectangle<R
 
 template<class R>
 tribool
-disjoint_approx(const Zonotope< Interval<R>, Interval<R> >& z, const Rectangle<R>& r);
-
-template<class R>
-tribool
-disjoint_approx(const Zonotope< Interval<R>, Interval<R> >& z, const Rectangle<R>& r);
-
-template<class R>
-tribool
 disjoint_approx(const Zonotope<Interval<R>,R>& z, const Rectangle<R>& r);
 
 template<class R>
@@ -448,15 +440,15 @@ template<class R,class RC,class RG>
 tribool
 Geometry::disjoint(const Rectangle<R>& r, const Zonotope<RC,RG>& z)
 {
-  if(verbosity>7) { std::clog << __PRETTY_FUNCTION__ << std::endl; }
-  return disjoint(z,r);
+  return disjoint_approx(z,r);
 }
 
 template<class RC,class RG>
 tribool
 Geometry::disjoint(const Zonotope<RC,RG>& z1, const Zonotope<RC,RG>& z2)
 {
-  if(verbosity>7) { std::clog << __PRETTY_FUNCTION__ << std::endl; }
+  ARIADNE_LOG(6,"disjoint(Zonotope z1, Zonotope z2)\n");
+  ARIADNE_LOG(7,"z1="<<z1<<", z2="<<z2<<"\n");
   Geometry::Zonotope<Numeric::Rational> qz1;
   Geometry::Zonotope<Numeric::Rational> qz2;
   convert(qz1,z1);

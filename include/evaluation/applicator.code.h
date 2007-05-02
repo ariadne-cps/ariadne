@@ -510,9 +510,10 @@ Evaluation::Applicator<R>::chainreach(const System::Map<R>& f,
   uint step=0;
   found=initial_set;
   while(!subset(found,result)) {
-    ARIADNE_LOG(3,"Chainreach step "<<step<<": reached "<<result.size()<<" cells, ");
+    ARIADNE_LOG(3,"Chainreach step "<<step<<": found "<<found.size()<<" cells, ");
     found=difference(found,result);
     ARIADNE_LOG(3,found.size()<<" of which are new.\n");
+    ARIADNE_LOG(3,"reached "<<result.size()<<" cells in total.\n");
     result.adjoin(found);
     image.clear(); 
     uint size=0;
@@ -532,7 +533,9 @@ Evaluation::Applicator<R>::chainreach(const System::Map<R>& f,
         }
       }
     }
+    image.unique_sort();
     found=regular_intersection(image,bounding_set);
+    ++step;
   }
   return result;
 }
@@ -566,25 +569,19 @@ Evaluation::Applicator<R>::viable(const System::Map<R>& f,
   
   result=bounding_set;
   size_type step=0;
+
+  ARIADNE_LOG(3,"Computing discretization...\n");
+  System::GridMultiMap<R> discretization=this->discretize(f,bounding_set,bounding_set.grid());
+  ARIADNE_LOG(3,"   Done computing discretization.\n");
   do {
     ARIADNE_LOG(3,"Viability step "<<step+1<< ": testing "<<result.size()<<" cells.\n");
     ++step;
     unsafe.clear();
     for(gms_const_iterator iter=result.begin(); iter!=result.end(); ++iter) {
-      fgcls.clear();
-      Rectangle<R> r=*iter;
-      if(f.smoothness()>0) {
-        z=r;
-        fz=this->evaluate(f,z);
-        fgcls.adjoin_outer_approximation(fz);
-        if(!overlap(result,outer_approximation(fz,g))) {
-          unsafe.adjoin(*iter);
-        }
-      } else {
-        fr=this->evaluate(f,r);
-        if(!overlap(result,outer_approximation(fr,g))) {
-          unsafe.adjoin(*iter);
-        }
+      fgcls=discretization.image(*iter);
+      ARIADNE_LOG(7,"cell="<<*iter<<", image.size()="<<fgcls.size()<<"\n");
+      if(!overlap(result,fgcls)) {
+        unsafe.adjoin(*iter);
       }
     }
     result.remove(unsafe);
@@ -686,19 +683,20 @@ Evaluation::Applicator<R>::image(const System::Map<R>& f,
 template<class R>
 Geometry::SetInterface<R>*
 Evaluation::Applicator<R>::preimage(const System::Map<R>& map, 
-                                    const Geometry::SetInterface<R>& set) const
+                                    const Geometry::SetInterface<R>& set,
+                                    const Geometry::SetInterface<R>& bound) const
 {
   typedef Numeric::Interval<R> I;
   using namespace Geometry;
   ARIADNE_LOG(2,"SetInterface* Applicator::preimage(Map map, SetInterface set)\n");
   ARIADNE_LOG(3,"set="<<set<<"\n");
-  Rectangle<R> preimage_bounding_box(array<I>(map.argument_dimension(),I(-1,1)*this->default_bound()));
+  Rectangle<R> preimage_bounding_box=bound.bounding_box();
   Grid<R> preimage_grid(map.argument_dimension(),this->grid_size());
   Grid<R> image_grid(map.result_dimension(),this->grid_size());
   GridMaskSet<R> grid_image_set(image_grid,set.bounding_box());
   grid_image_set.adjoin_inner_approximation(set);
   GridMaskSet<R> grid_preimage_bounding_set(preimage_grid,preimage_bounding_box);
-  grid_preimage_bounding_set.adjoin_outer_approximation(preimage_bounding_box);
+  grid_preimage_bounding_set.adjoin_outer_approximation(bound);
   return new GridMaskSet<R>(this->preimage(map,grid_image_set,grid_preimage_bounding_set));
 }
 

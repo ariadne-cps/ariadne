@@ -43,6 +43,7 @@ inline void hybrid_set_new_location(HS& s, location_type q, const T& t) {
   s.new_location(q,t);
 }
 
+
 template<class HS, class A> 
 inline void hybrid_set_set_item(HS& hs, location_type id, const A& x) {
   hs[id]=x;

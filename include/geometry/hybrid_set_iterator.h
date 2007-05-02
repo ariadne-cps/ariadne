@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_set.code.h
+ *            hybrid_set.inline.h
  *
  *  Copyright  2006  Alberto Casagrande,  Pieter Collins
  *  casagrande@dimi.uniud.it  Pieter.Collins@cwi.nl
@@ -21,33 +21,25 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "hybrid_set.h"
-#include "rectangle.h"
+#ifndef ARIADNE_HYBRID_SET_ITERATOR_H
+#define ARIADNE_HYBRID_SET_ITERATOR_H
 
-namespace Ariadne { namespace Geometry {
-
-template<class S> 
-std::ostream& 
-HybridSetBase<S>::write(std::ostream& os) const
-{ 
-  return os << "HybridSet"<<_component_sets;
-}
+namespace Ariadne { 
+  namespace Geometry {
 
 
-template<class R> 
-std::ostream& 
-HybridGridMaskSet<R>::write(std::ostream& os) const
-{ 
-  os << "HybridGridMaskSet( { \n";
-  for(typename HybridGridMaskSet<R>::const_iterator iter=this->begin();
-      iter!=this->end(); ++iter)
-  {
-    id_type loc=iter->first;
-    const GridMaskSet<R>& set=*iter->second;
-    os << "  "<<loc<<": GridMaskSet( extent=" << set.extent() << ", block=" << set.block() << ", size=" << set.size() << " capacity=" << set.capacity() << " ),\n";
+    template<class Base, class Value>
+    class HybridSetIterator
+      : public boost::iterator_adaptor<GridSetIterator<Base,Value>,Base,Value,boost::use_default,Value>
+    {
+     public:
+      HybridSetIterator(Base i) : HybridSetIterator::iterator_adaptor_(i) { }
+     private:
+      friend class boost::iterator_core_access;
+      const Value& dereference() const { return *this->base_reference(); }
+    };
+         
   }
-  os << "} )";
-  return os;
 }
 
-}}
+#endif // ARIADNE_HYBRID_SET_ITERATOR_H

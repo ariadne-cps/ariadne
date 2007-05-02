@@ -528,28 +528,50 @@ namespace Ariadne {
     epsfstream&
     operator<<(epsfstream& eps, const Geometry::SetInterface<R>& set)
     {
-      Geometry::Rectangle<R> bb;
-      try {
-        bb=set.bounding_box();
-      } 
-      catch(Geometry::UnboundedSet& e) {
-        if(set.dimension()==2) {
-          Rectangle2d bbox=eps.bounding_box();
-          bb=Geometry::Rectangle<R>(2);
-          bb.set_lower_bound(0,bbox.lower_bound(0));
-          bb.set_upper_bound(0,bbox.upper_bound(0));
-          bb.set_lower_bound(1,bbox.lower_bound(1));
-          bb.set_upper_bound(1,bbox.upper_bound(1));
-        } else {
-          throw e;
+      using namespace Geometry;
+      typedef Numeric::Interval<R> I;
+      
+      if(dynamic_cast<const RectangularSet<R>*>(&set)) {
+        return eps << dynamic_cast<const RectangularSet<R>&>(set);
+      } else if(dynamic_cast<const PolyhedralSet<R>*>(&set)) {
+        return eps << dynamic_cast<const PolyhedralSet<R>&>(set);
+      } else if(dynamic_cast<const ListSet< Rectangle<R> >*>(&set)) {
+        return eps << dynamic_cast<const ListSet< Rectangle<R> >&>(set);
+      } else if(dynamic_cast<const ListSet< Zonotope<R,R> >*>(&set)) {
+        return eps << dynamic_cast<const ListSet< Zonotope<R,R> >&>(set);
+      } else if(dynamic_cast<const ListSet< Zonotope<I,R> >*>(&set)) {
+        return eps << dynamic_cast<const ListSet< Zonotope<I,R> >&>(set);
+      } else if(dynamic_cast<const ListSet< Zonotope<I,I> >*>(&set)) {
+        return eps << dynamic_cast<const ListSet< Zonotope<I,I> >&>(set);
+      } else if(dynamic_cast<const GridCellListSet<R>*>(&set)) {
+        return eps << dynamic_cast<const GridCellListSet<R>&>(set);
+      } else if(dynamic_cast<const GridMaskSet<R>*>(&set)) {
+        return eps << dynamic_cast<const GridMaskSet<R>&>(set);
+      } else if(dynamic_cast<const PartitionTreeSet<R>*>(&set)) {
+        return eps << dynamic_cast<const PartitionTreeSet<R>&>(set);
+      }  else {
+        Rectangle<R> bb;
+        try {
+          bb=set.bounding_box();
+        } 
+        catch(Geometry::UnboundedSet& e) {
+          if(set.dimension()==2) {
+            Rectangle2d bbox=eps.bounding_box();
+            bb=Geometry::Rectangle<R>(2);
+            bb.set_lower_bound(0,bbox.lower_bound(0));
+            bb.set_upper_bound(0,bbox.upper_bound(0));
+            bb.set_lower_bound(1,bbox.lower_bound(1));
+            bb.set_upper_bound(1,bbox.upper_bound(1));
+          } else {
+            throw e;
+          }
         }
+        Geometry::PartitionScheme<R> ps(bb);
+        int depth=16;
+        Geometry::PartitionTreeSet<R> pts=Geometry::outer_approximation(set,ps,depth);
+        return eps << pts;
       }
-      Geometry::PartitionScheme<R> ps(bb);
-      int depth=16;
-      Geometry::PartitionTreeSet<R> pts=Geometry::outer_approximation(set,ps,depth);
-      return eps << pts;
     }
-
 
     template<class R> inline
     epsfstream&

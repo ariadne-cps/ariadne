@@ -1,8 +1,8 @@
 /***************************************************************************
- *            tribool.h
+ *            grid_cell.code.h
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2005-7  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -18,25 +18,32 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 59 Templece Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef ARIADNE_TRIBOOL_H
-#define ARIADNE_TRIBOOL_H
+#include <ostream>
 
-#include <boost/logic/tribool.hpp>
-#include <boost/logic/tribool_io.hpp>
+#include "../geometry/rectangle.h"
+#include "../geometry/grid_cell.h"
+#include "../geometry/grid_block.h"
 
 namespace Ariadne {
-  namespace Base {
-    using boost::logic::tribool;
-    using boost::logic::indeterminate;
 
-    inline bool possibly(tribool tb) { return tb || indeterminate(tb); }
 
-    inline tribool operator^(tribool tb1, tribool tb2) { return (tb1&&!tb2)||(!tb1&&tb2); }
-  }
-  
+template<class R> inline
+Geometry::GridBlock<R>
+Geometry::GridCell<R>::neighbourhood() const 
+{
+  return GridBlock<R>(this->_grid_ptr,this->_lattice_set.neighbourhood());
 }
 
-#endif /* ARIADNE_TRIBOOL_H */
+
+template<class R>
+std::ostream&
+Geometry::GridCell<R>::write(std::ostream& os) const 
+{
+  return os << Rectangle<R>(*this);
+}
+
+
+}

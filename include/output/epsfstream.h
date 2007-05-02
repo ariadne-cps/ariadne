@@ -266,6 +266,9 @@ namespace Ariadne {
       void trace_scale(const char* x_name, const char* y_name,
                        const int& x_step=5, const int& y_step=5);
       
+      const Rectangle2d& bounding_box() const { 
+        return this->bbox; }
+
       const PlanarProjectionMap& projection_map() const { 
         return this->p_map; }
 
@@ -524,7 +527,22 @@ namespace Ariadne {
     epsfstream&
     operator<<(epsfstream& eps, const Geometry::SetInterface<R>& set)
     {
-      Geometry::Rectangle<R> bb=set.bounding_box();
+      Geometry::Rectangle<R> bb;
+      try {
+        bb=set.bounding_box();
+      } 
+      catch(Geometry::UnboundedSet& e) {
+        if(set.dimension()==2) {
+          Rectangle2d bbox=eps.bounding_box();
+          bb=Geometry::Rectangle<R>(2);
+          bb.set_lower_bound(0,bbox.lower_bound(0));
+          bb.set_upper_bound(0,bbox.upper_bound(0));
+          bb.set_lower_bound(1,bbox.lower_bound(1));
+          bb.set_upper_bound(1,bbox.upper_bound(1));
+        } else {
+          throw e;
+        }
+      }
       Geometry::PartitionScheme<R> ps(bb);
       int depth=16;
       Geometry::PartitionTreeSet<R> pts=Geometry::outer_approximation(set,ps,depth);

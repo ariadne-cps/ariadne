@@ -40,7 +40,10 @@
 #include "../geometry/exceptions.h"
 #include "../geometry/rectangle_expression.h"
 #include "../geometry/grid.h"
-#include "../geometry/grid_set.h"
+#include "../geometry/grid_cell.h"
+#include "../geometry/grid_block.h"
+#include "../geometry/grid_cell_list_set.h"
+#include "../geometry/grid_mask_set.h"
 
 #include "exceptions.h"
 

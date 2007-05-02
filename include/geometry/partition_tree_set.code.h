@@ -29,7 +29,8 @@
 
 #include "../geometry/rectangle.h"
 #include "../geometry/list_set.h"
-#include "../geometry/grid_set.h"
+#include "../geometry/grid_mask_set.h"
+#include "../output/logging.h"
 
 #include <vector>
 
@@ -264,6 +265,7 @@ namespace Ariadne {
     PartitionTreeSet<R>
     outer_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth)
     {
+      ARIADNE_LOG(4,"outer_approximation(S set, PartitionScheme ps, uint depth");
       const Rectangle<R>& bounding_box=ps.unit_box();
       const Combinatoric::SubdivisionSequence& subdivisions=ps.subdivisions();
       std::vector<bool> tree;

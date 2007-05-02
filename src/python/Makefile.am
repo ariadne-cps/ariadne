@@ -64,6 +64,8 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_list_set.cc \
 	export_grid_set.cc \
 	export_partition_tree_set.cc \
+	export_constraint_set.cc \
+	export_level_set.cc \
 	export_hybrid_set.cc \
 	 \
 	export_function.cc \

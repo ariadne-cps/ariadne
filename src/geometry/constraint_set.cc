@@ -1,8 +1,8 @@
 /***************************************************************************
- *            tribool.h
+ *            constraint_set.cc
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2007  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,22 +21,24 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef ARIADNE_TRIBOOL_H
-#define ARIADNE_TRIBOOL_H
 
-#include <boost/logic/tribool.hpp>
-#include <boost/logic/tribool_io.hpp>
+#include "numeric/float.h"
+
+#include "geometry/constraint_set.h"
+#include "geometry/constraint_set.code.h"
 
 namespace Ariadne {
-  namespace Base {
-    using boost::logic::tribool;
-    using boost::logic::indeterminate;
+  namespace Geometry {
 
-    inline bool possibly(tribool tb) { return tb || indeterminate(tb); }
-
-    inline tribool operator^(tribool tb1, tribool tb2) { return (tb1&&!tb2)||(!tb1&&tb2); }
-  }
+    using namespace Numeric;
+    
+#ifdef ENABLE_FLOAT64
+    template class ConstraintSet<Float64>;
+#endif
   
-}
+#ifdef ENABLE_FLOATMP
+    template class ConstraintSet<FloatMP>;
+#endif
 
-#endif /* ARIADNE_TRIBOOL_H */
+  }
+}

@@ -32,7 +32,8 @@
 #include <sstream>
 
 #include "../geometry/set_reference.h"
-#include "../geometry/grid_set.h"
+#include "../geometry/grid_cell_list_set.h"
+#include "../geometry/grid_mask_set.h"
 #include "../geometry/hybrid_space.h"
 
 namespace Ariadne {  

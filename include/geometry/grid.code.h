@@ -35,8 +35,8 @@
 #include "../geometry/rectangle.h"
 #include "../geometry/list_set.h"
 
-#include "../geometry/grid_set.h" // for GridBlock<R>
-#include "../output/logging.h" // for GridBlock<R>
+#include "../geometry/grid_block.h" // for GridBlock<R>
+#include "../output/logging.h"
 
 namespace Ariadne {
   namespace Geometry {

@@ -224,18 +224,15 @@ Evaluation::AffineIntegrator<R>::integration_step(
   using namespace System;
   
   
-  if(verbosity>6) { std::clog << "AffineIntegrator::integration_step(AffineVectorField,Zonotope<Interval>,time_type) const" << std::endl; }
+  ARIADNE_LOG(6,"AffineIntegrator::integration_step(AffineVectorField,Zonotope<Interval>,time_type) const\n");
   
   const AffineVectorField<R>& vf=affine_vector_field;
   Zonotope<I> z=initial_set;
   I h=step_size;
   
-  if(verbosity>7) { 
-    std::clog << "zonotope generators=" << z.generators() << std::endl;
-    
-    std::clog << "jacobian=" << vf.A() << std::endl;
-    std::clog << "step size=" << h << std::endl;
-  }
+  ARIADNE_LOG(9,"vf="<<vf<<"\n");
+  ARIADNE_LOG(7,"z="<<z<<"\n");
+  ARIADNE_LOG(7,"vf(c)="<<vf(z.centre())<<", h="<<h<<"\n");
   
   // Use the formula x(t) = x0 + h * P * ( A * x0 + b ) 
   //                      = D * x0 + h * P * b
@@ -246,19 +243,19 @@ Evaluation::AffineIntegrator<R>::integration_step(
   Matrix<I> iP=gexp(A,h.upper(),1);
   Matrix<I> iD=iP*(h*A)+Matrix<R>::identity(vf.dimension());
   
-  if(verbosity>7) { std::clog << "approximating derivative=" << iD << std::endl; }
-  if(verbosity>7) { std::clog << "approximating twist=" << iP << std::endl; }
+  ARIADNE_LOG(9,"approximating derivative=" << iD << "\n");
+  ARIADNE_LOG(9,"approximating twist=" << iP << "\n");
   
   Vector<I> iv1=(iD*z.centre().position_vector());
-  if(verbosity>7) { std::clog << "iv1=" << iv1 << std::endl; }
+  ARIADNE_LOG(9,"iv1="<<iv1<<"\n");
   Vector<I> iv2=h*(iP*b);
-  if(verbosity>7) { std::clog << "iv2=" << iv2 << std::endl; }
+  ARIADNE_LOG(9,"iv2="<<iv2<<"\n");
   Vector<I> icv=iv1+iv2;
   Point<I> ic(icv);
-  
-  if(verbosity>7) { std::clog << "interval centre=" << ic << std::endl; }
+  ARIADNE_LOG(9,"ic="<<ic<<"\n");
   
   z=Zonotope<I>(ic,iD*z.generators());
+  ARIADNE_LOG(7,"result="<<z<<"\n");
   return z;
 }
 
@@ -276,8 +273,7 @@ Evaluation::AffineIntegrator<R>::reachability_step(
   using namespace Geometry;
   using namespace System;
   
-  if(verbosity>6) { std::clog << "AffineIntegrator::reachability_step(AffineVectorField,Zonotope<Interval>,time_type) const" << std::endl; }
-  
+  ARIADNE_LOG(6,"AffineIntegrator::reachability_step(AffineVectorField,Zonotope<Interval>,Time)\n");
   
   ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"AffineIntegrator::reachability_step(AffineVectorField,Zonotope<Interval>,Time)");
   

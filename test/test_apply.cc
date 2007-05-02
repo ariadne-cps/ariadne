@@ -58,7 +58,7 @@ template<class R>
 int 
 test_apply()
 {
-  set_evaluation_verbosity(0);
+  //set_evaluation_verbosity(0);
   typedef Interval<R> I;
 
   double grid_size=0.25;
@@ -151,8 +151,9 @@ test_apply()
 
 
 
-  set_evaluation_verbosity(3);
-  set_geometry_verbosity(4);
+  //set_evaluation_verbosity(3);
+  //set_geometry_verbosity(4);
+
   shared_ptr< SetInterface<R> > image_set_ptr(apply.image(henon,initial_set));
   cout << "image_set=" << *image_set_ptr << endl;
   shared_ptr< SetInterface<R> > preimage_set_ptr(apply.preimage(henon,initial_set));

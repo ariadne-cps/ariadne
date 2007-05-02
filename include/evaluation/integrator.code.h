@@ -487,7 +487,8 @@ Evaluation::IntegratorBase<R,VF,BS>::integrate(const VectorField& vector_field,
                                                const BasicSet& initial_set, 
                                                const time_type& time) const
 {
-  if(verbosity>4) { std::clog << "BasicSet IntegratorBase::integrate(VectorField,BasicSet,Time)" << std::endl; } 
+  ARIADNE_LOG(4,"BasicSet Integrator::reach(VectorField vector_field, BasicSet initial_set, Time time)\n");
+  ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
   
   if(time==0) { 
     return initial_set;
@@ -517,7 +518,8 @@ Evaluation::IntegratorBase<R,VF,BS>::reach(const VectorField& vector_field,
                                            const BasicSet& initial_set, 
                                            const time_type& time) const
 {
-  if(verbosity>4) { std::clog << "BasicSet IntegratorBase::integrate(VectorField,BasicSet,Time)" << std::endl; } 
+  ARIADNE_LOG(4,"ListSet Integrator::reach(VectorField vector_field, BasicSet initial_set, Time time)\n");
+  ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
   
   if(time==0) { 
     return initial_set;
@@ -554,9 +556,9 @@ Evaluation::IntegratorBase<R,VF,BS>::lower_integrate(const VectorField& vector_f
                                                      const ListSet& initial_set, 
                                                      const time_type& time) const
 {
+  ARIADNE_LOG(2,"ListSet Integrator::lower_integrate(VectorField vector_field, ListSet initial_set, Time time)\n");
+  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   using namespace Numeric;
-  
-  if(verbosity>4) { std::clog << "ListSet IntegratorBase::lower_integrate(VectorField,ListSet,Time)" << std::endl; } 
   
   if(time==0) { 
     return initial_set;
@@ -617,9 +619,10 @@ Evaluation::IntegratorBase<R,VF,BS>::lower_reach(const VectorField& vector_field
                                                  const ListSet& initial_set, 
                                                  const time_type& time) const
 {
+  ARIADNE_LOG(2,"ListSet Integrator::lower_reach(VectorField vector_field, ListSet initial_set, Time time)\n");
+  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   using namespace Numeric;
   
-  if(verbosity>4) { std::clog << "ListSet IntegratorBase::reach(VectorField,ListSet,Time)" << std::endl; } 
   
   if(time==0) { 
     return initial_set;
@@ -679,6 +682,8 @@ Evaluation::IntegratorBase<R,VF,BS>::upper_integrate(const VectorField& vector_f
                                                      const ListSet& initial_set, 
                                                      const time_type& time) const
 {
+  ARIADNE_LOG(2,"ListSet Integrator::upper_integrate(VectorField vector_field, ListSet initial_set, Time time)\n");
+  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   using namespace Numeric;
   
   if(verbosity>4) { std::clog << "ListSet IntegratorBase::integrate(VectorField,ListSet,Time)" << std::endl; } 
@@ -766,9 +771,10 @@ Evaluation::IntegratorBase<R,VF,BS>::upper_reach(const VectorField& vector_field
                                                  const ListSet& initial_set, 
                                                  const time_type& time) const
 {
+  ARIADNE_LOG(2,"ListSet Integrator::integrate(VectorField vector_field, ListSet initial_set, Time time)\n");
+  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   using namespace Numeric;
   
-  if(verbosity>4) { std::clog << "ListSet IntegratorBase::reach(VectorField,BasicSet,Time)" << std::endl; } 
   const VectorField& vf=vector_field;
   time_type step_size=this->maximum_step_size();
   R maximum_set_radius=this->maximum_basic_set_radius();
@@ -863,8 +869,9 @@ Evaluation::IntegratorBase<R,VF,BS>::integrate(const System::VectorField<R>& vec
                                                const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set,
                                                const time_type& time) const
 {
+  ARIADNE_LOG(2,"ListSet<Rectangle> Integrator::integrate(VectorField vector_field, ListSet<Rectangle> initial_set, Time time)\n");
+  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   Geometry::ListSet< Geometry::Rectangle<R> > result;
-  if(verbosity>4) { std::clog << "ListSet<Rectangle> IntegratorBase::integrate(VectorField,ListSet<Rectangle>,Time)" << std::endl; } 
   const VectorField& vf=dynamic_cast<const VectorField&>(vector_field);
   ListSet ils=initial_set;
   ListSet fls=this->lower_integrate(vf,ils,time);
@@ -884,8 +891,10 @@ Evaluation::IntegratorBase<R,VF,BS>::reach(const System::VectorField<R>& vector_
                                            const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set,
                                            const time_type& time) const
 {
+  ARIADNE_LOG(2,"ListSet<Rectangle> Integrator::integrate(VectorField vector_field, ListSet<Rectangle> initial_set, Time time)\n");
+  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
+
   Geometry::ListSet< Geometry::Rectangle<R> > result;
-  if(verbosity>4) { std::clog << "ListSet<Rectangle> IntegratorBase::integrate(VectorField,ListSet<Rectangle>,Time)" << std::endl; } 
   const VectorField& vf=dynamic_cast<const VectorField&>(vector_field);
   ListSet ils=initial_set;
   ListSet rls=this->lower_reach(vf,ils,time);
@@ -906,7 +915,8 @@ Evaluation::IntegratorBase<R,VF,BS>::integrate(const System::VectorField<R>& vec
                                                const Geometry::GridMaskSet<R>& bounding_set,
                                                const time_type& time) const
 {
-  if(verbosity>4) { std::clog << "GridMaskSet IntegratorBase::integrate(VectorField,GridMaskSet,GridMaskSet,Time)" << std::endl; } 
+  ARIADNE_LOG(2,"GridMaskSet Integrator::integrate(VectorField vector_field, GridMaskSet initial_set, GridMaskSet bounding_set, Time time)\n");
+  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   const VectorField& vf=dynamic_cast<const VectorField&>(vector_field);
   
   ARIADNE_CHECK_SAME_GRID(initial_set,bounding_set,"GridMaskSet IntegratorBase::integrate(VectorField,GridMaskSet,GridMaskSet,Time)");
@@ -993,7 +1003,8 @@ Evaluation::IntegratorBase<R,VF,BS>::reach(const System::VectorField<R>& vector_
 {
   using namespace Numeric;
   
-  if(verbosity>4) { std::clog << "GridMaskSet IntegratorBase::reach(VectorField,GridMaskSet,GridMaskSet,Time)" << std::endl; } 
+  ARIADNE_LOG(2,"GridMaskSet Integrator::reach(VectorField vector_field, GridMaskSet initial_set, GridMaskSet bounding_set, Time time)\n");
+  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   typedef typename GridMaskSet::const_iterator gms_const_iterator;
   typedef typename ListSet::const_iterator ls_const_iterator;
   ARIADNE_CHECK_BOUNDED(initial_set,"GridMaskSet IntegratorBase::reach(VectorField,GridMaskSet,GridMaskSet,Time)");
@@ -1049,7 +1060,9 @@ Evaluation::IntegratorBase<R,VF,BS>::chainreach(const System::VectorField<R>& ve
                                                 const Geometry::GridMaskSet<R>& initial_set, 
                                                 const Geometry::GridMaskSet<R>& bounding_set) const
 {
-  if(verbosity>4) { std::clog << "GridMaskSet IntegratorBase::chainreach(VectorField,GridMaskSet,GridMaskSet)" << std::endl; } 
+  ARIADNE_LOG(2,"GridMaskSet Integrator::chainreach(VectorField vector_field, GridMaskSet initial_set, GridMaskSet bounding_set)\n");
+  ARIADNE_LOG(5,"vector_field="<<vector_field<<"\n");
+  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   typedef typename GridCellListSet::const_iterator gcls_const_iterator;
   typedef typename GridMaskSet::const_iterator gms_const_iterator;
   typedef typename ListSet::const_iterator ls_const_iterator;
@@ -1091,12 +1104,14 @@ Evaluation::IntegratorBase<R,VF,BS>::chainreach(const System::VectorField<R>& ve
       basic_set_list.adjoin(z);
     }
     basic_set_list=this->upper_integrate(vf,basic_set_list,time_step);
+    if(verbosity>5) { std::clog << "new basic sets " << basic_set_list << std::endl; }
     for(ls_const_iterator iter=basic_set_list.begin(); iter!=basic_set_list.end(); ++iter) {
       const BasicSet& fp=*iter;
       if(!disjoint(fp.bounding_box(),bounding_set)) {
         image.adjoin_outer_approximation(fp);
-      }
+      } 
     }
+    if(verbosity>5) { std::clog << "image set " << image << std::endl; }
     found=regular_intersection(image,bounding_set);
   }
   if(verbosity>5) { std::clog << "Found " << result.size() << " cells, " << std::endl; }
@@ -1128,11 +1143,11 @@ Geometry::GridMaskSet<R>
 Evaluation::IntegratorBase<R,VF,BS>::viable(const System::VectorField<R>& vector_field, 
                                             const Geometry::GridMaskSet<R>& bounding_set) const
 {
+  ARIADNE_LOG(2,"GridMaskSet Integrator::viable(VectorField vector_field, GridMaskSet bounding_set)\n");
+  ARIADNE_LOG(3,"bounding_set="<<bounding_set<<"\n");
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
   typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
-  ARIADNE_LOG(2,"GridMaskSet Integrator::viable(VectorField vector_field, GridMaskSet bounding_set)\n");
-  ARIADNE_LOG(3,"bounding_set="<<bounding_set<<"\n");
   ARIADNE_CHECK_BOUNDED(bounding_set,"Integrator<R>::viable(VectorField,GridMaskSet)");
   
   const VectorField& vf=dynamic_cast<const VectorField&>(vector_field);
@@ -1187,7 +1202,10 @@ Evaluation::IntegratorBase<R,VF,BS>::verify(const System::VectorField<R>& vector
                                             const Geometry::GridMaskSet<R>& initial_set, 
                                             const Geometry::GridMaskSet<R>& safe_set) const
 {
-  if(verbosity>4) { std::clog << "tribool IntegratorBase::verify(VectorField,GridMaskSet,GridMaskSet)" << std::endl; } 
+  ARIADNE_LOG(2,"GridMaskSet Integrator::verify(VectorField vector_field, GridMaskSet initial_set, GridMaskSet safe_set)\n");
+  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
+  ARIADNE_LOG(3,"safe_set="<<safe_set<<"\n");
+
   typedef typename GridCellListSet::const_iterator gcls_const_iterator;
   typedef typename ListSet::const_iterator ls_const_iterator;
   ARIADNE_CHECK_BOUNDED(initial_set,"tribool IntegratorBase::verify(VectorField,GridMaskSet,GridMaskSet)");

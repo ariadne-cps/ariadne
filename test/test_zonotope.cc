@@ -37,6 +37,7 @@
 #include "geometry/zonotope.h"
 #include "geometry/polyhedron.h"
 
+#include "output/logging.h"
 #include "output/epsfstream.h"
 
 #include "test.h"
@@ -63,7 +64,8 @@ int
 test_zonotope()
 {
   typedef typename Numeric::traits<R>::arithmetic_type F;
-  
+  typedef Interval<R> I;
+
   Point<R> c("(0.125,-0.25,0.5)");
   LinearAlgebra::Vector<R> v("[0.0,1.0,-1.5]");
   LinearAlgebra::Matrix<R> a("[2.0,1.0,-1.5; 1.0,1.0,0.5; 0.0,0.0,0.375]");
@@ -146,7 +148,7 @@ test_zonotope()
   pts[4]=Point<R>("(14.0,5.0,-0.5)");
   pts[5]=Point<R>("(15.5,11.5,0)");
 
-  Interval<R> unit=Interval<R>(-1,1);
+  I unit=I(-1,1);
   
   cout << "Writing to eps stream" << endl;
   
@@ -162,12 +164,19 @@ test_zonotope()
     }
   }
   eps.close();
+  cout << "   done" << endl;
   
 
   Rectangle<R> bbox3=z3.bounding_box().expand_by(0.25);
+  cout << "z3=" << z3 << std::endl;
   Grid<R> gr3(2,0.125);
   GridCellListSet<R> oaz3=outer_approximation(z3,gr3);
-  GridCellListSet<R> uaz3=inner_approximation(z3,gr3);
+  cout << "outer_approximation(z,gr)="<<oaz3<<std::endl;
+  assert(oaz3.size()==372);
+  GridCellListSet<R> iaz3=inner_approximation(z3,gr3);
+  cout << "inner_approximation(z,gr)="<<iaz3<<std::endl;
+  assert(iaz3.size()==210);
+
   bbox=z3.bounding_box().expand_by(R(0.5));
   eps.open("test_zonotope-2.eps",bbox);
   eps.set_fill_colour("white");
@@ -179,7 +188,7 @@ test_zonotope()
   eps.set_fill_colour("yellow");
   eps << polyhedron(Zonotope<Rational>(z3));
   eps.set_fill_colour("blue");
-  eps << uaz3;
+  eps << iaz3;
   eps.close();
   
   bbox=z4.bounding_box().expand_by(R(0.5));
@@ -187,47 +196,100 @@ test_zonotope()
   eps << z4;
   eps.close();
 
-  // Interval zonotope
-  Zonotope<R> z5(Point<R>("(0,0)"),Matrix<R>("[2,1,1,0.125,0;1,-1,1,0,0.125]"));
-  Zonotope< Interval<R> > iz5(Point<Interval<R> >("([-0.125,0.125],[-0.125,0.125])"),Matrix<R>("[2,1,1;1,-1,1]"));
-  
-  Grid<R> gr5(2,0.5);
-  GridCellListSet<R> oaiz5=outer_approximation(iz5,gr5);
-  GridCellListSet<R> oaz5=outer_approximation(z5,gr5);
-  GridCellListSet<R> uaz5=inner_approximation(z5,gr5);
-  r=Rectangle<R>("[-2.5,-2.0]x[0.0,0.5]");
-  pt=Point<R>("(-2.5,0.5)");
-  bbox=z5.bounding_box().expand_by(R(0.5));
-  eps.open("test_zonotope-5.eps",bbox);
-  eps.set_fill_colour("white");
-  eps << z5.bounding_box();
-  eps.set_fill_colour("red");
-  eps << oaiz5;
-  eps.set_fill_colour("green");
-  eps << z5;
-  eps.set_fill_colour("blue");
-  eps << uaz5;
-  eps.set_fill_colour("yellow");
-  eps << r;
-  eps.close();
+  // Approximations of real zonotope
+  {
+    cout << "Inner and outer approximations of Zonotope<R,R>" << endl;
+    Zonotope<R,R> z(Point<R>("(0.25,-0.125)"),Matrix<R>("[2,1,1;1,-1,1]"));
     
+    Grid<R> gr(2,0.5);
+    GridCellListSet<R> oaz=outer_approximation(z,gr);
+    GridCellListSet<R> iaz=inner_approximation(z,gr);
+    r=Rectangle<R>("[-2.5,-2.0]x[0.0,0.5]");
+    pt=Point<R>("(-2.5,0.5)");
+    bbox=z.bounding_box().expand_by(R(0.5));
+    eps.open("test_zonotope-real.eps",bbox);
+    eps.set_fill_colour("white");
+    eps << z.bounding_box();
+    eps.set_fill_colour("red");
+    eps << oaz;
+    eps.set_fill_colour("green");
+    eps << z;
+    eps.set_fill_colour("blue");
+    eps << iaz;
+    eps.close();
+  }    
 
-  cout << "z5=" << z5 << endl;
-  cout << "r=" << r << endl;
-  cout << "pt=" << pt << endl;
-  cout << "z5.bounding_box()=" << z5.bounding_box() << endl;
-  cout << "disjoint(z5,r)=" << disjoint(r,z5) << endl;
-  cout << "subset(r,z5)=" << subset(r,z5) << endl;
-  cout << "contains(z5,pt)=" << z5.contains(pt) << endl;
-  pt=Point<R>("(-2.0,0.0)");
-  cout << "contains(z5,"<<pt<<")=" << z5.contains(pt) << endl;
-  pt=Point<R>("(-2.5,0.0)");
-  cout << "contains(z5,"<<pt<<")=" << z5.contains(pt) << endl;
-  pt=Point<R>("(-2.5,0.5)");
-  cout << "contains(z5,"<<pt<<")=" << z5.contains(pt) << endl;
-  pt=Point<R>("(-2.0,0.5)");
-  cout << "contains(z5,"<<pt<<")=" << z5.contains(pt) << endl;
+  // Uniform error zonotope
+  {
+    cout << "Inner and outer approximations of Zonotope<I,R>" << endl;
+    Zonotope<R,R> z(Point<R>("(0.25,-0.125)"),Matrix<R>("[2,1,1,0.125,0;1,-1,1,0,0.125]"));
+    Zonotope<I,R> ez(Point<I>("([0.125,0.375],[-0.25,0.0])"),Matrix<R>("[2,1,1;1,-1,1]"));
+    Zonotope<R,R> aez=over_approximation(ez);
     
+    Grid<R> gr(2,0.5);
+    GridCellListSet<R> oaez=outer_approximation(ez,gr);
+    GridCellListSet<R> iaez=inner_approximation(ez,gr);
+    r=Rectangle<R>("[-2.5,-2.0]x[0.0,0.5]");
+    pt=Point<R>("(-2.5,0.5)");
+    bbox=z.bounding_box().expand_by(R(0.5));
+    eps.open("test_zonotope-uniform.eps",bbox);
+    eps.set_fill_colour("white");
+    eps << ez.bounding_box();
+    eps.set_fill_colour("red");
+    eps << oaez;
+    eps.set_fill_colour("yellow");
+    //eps << aez;
+    eps.set_fill_colour("yellow");
+    //eps << z;
+    eps.set_fill_colour("green");
+    eps << ez;
+    eps.set_fill_colour("blue");
+    eps << iaez;
+    eps.close();
+  }    
+
+
+  {
+    cout << "Outer approximations of Zonotope<I,I>" << endl;
+    // Interval zonotope
+    Zonotope<R,R> z(Point<R>("(0.25,-0.125)"),Matrix<R>("[2,1,1,0.125,0;1,-1,1,0,0.125]"));
+    Zonotope<I,I> iz(Point<I>("([0.125,0.375],[-0.25,0.0])"),Matrix<R>("[2,1,1;1,-1,1]"));
+    Zonotope<I,R> ez=over_approximation(iz);
+    
+    Grid<R> gr(2,0.5);
+    GridCellListSet<R> oaz=outer_approximation(iz,gr);
+    r=Rectangle<R>("[-2.5,-2.0]x[0.0,0.5]");
+    pt=Point<R>("(-2.5,0.5)");
+    bbox=z.bounding_box().expand_by(R(0.5));
+    eps.open("test_zonotope-interval.eps",bbox);
+    eps.set_fill_colour("white");
+    eps << z.bounding_box();
+    eps.set_fill_colour("red");
+    eps << oaz;
+    eps.set_fill_colour("yellow");
+    eps << z;
+    eps.set_fill_colour("green");
+    eps << approximation(iz);
+    eps.close();
+    
+    
+    cout << "z=" << z << endl;
+    cout << "r=" << r << endl;
+    cout << "pt=" << pt << endl;
+    cout << "z.bounding_box()=" << z.bounding_box() << endl;
+    cout << "disjoint(z,r)=" << disjoint(r,z) << endl;
+    cout << "subset(r,z)=" << subset(r,z) << endl;
+    cout << "contains(z,pt)=" << z.contains(pt) << endl;
+    pt=Point<R>("(-2.0,0.0)");
+    cout << "contains(z,"<<pt<<")=" << z.contains(pt) << endl;
+    pt=Point<R>("(-2.5,0.0)");
+    cout << "contains(z,"<<pt<<")=" << z.contains(pt) << endl;
+    pt=Point<R>("(-2.5,0.5)");
+    cout << "contains(z,"<<pt<<")=" << z.contains(pt) << endl;
+    pt=Point<R>("(-2.0,0.5)");
+    cout << "contains(z,"<<pt<<")=" << z.contains(pt) << endl;
+  }
+
   try {
     //Rectangle<R> r("[1,17/16]x[19/16,5/4]");
     //Zonotope<R> z(Point<R>("(1/2, 1/10)"),Matrix<R>("[1,1/2;1/2,3/5]"));
@@ -261,3 +323,5 @@ test_zonotope()
 
   return 0;
 }
+
+

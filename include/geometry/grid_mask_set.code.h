@@ -622,13 +622,13 @@ std::ostream&
 Geometry::GridMaskSet<R>::write(std::ostream& os) const 
 {
   os << "GridMaskSet("<< std::endl;
-  os << "  grid=" << this->grid() << "," << std::endl;
-  os << "  block=" << this->block() << "," << std::endl;
-  os << "  extent=" << Rectangle<R>(this->bounds()) << "," << std::endl;
-  os << "  size=" << this->size() << "," << std::endl;
-  os << "  capacity=" << this->capacity() << "," << std::endl;
+  os << " grid=" << this->grid() << ",";
+  os << " block=" << this->block() << ",";
+  os << " extent=" << Rectangle<R>(this->bounds()) << ",";
+  os << " size=" << this->size() << ",";
+  os << " capacity=" << this->capacity() << ",";
   //      os << "  mask=" << this->mask() << std::endl;
-  os << ")\n";
+  os << " )\n";
   return os;
 }
 

@@ -7,20 +7,23 @@
 
 from ariadne import *
 
+set_hybrid_evolver_verbosity(4)
+set_integrator_verbosity(4)
+
 # Definition of the automaton
 automaton=HybridAutomaton("Bouncing ball")
 
 # Location fly:
 dyn=AffineVectorField(Matrix("[0, 1, 0; 0, 0, 0; 0, 0, 0]"), Vector("[0,-9.8,1]"))
-inv=PolyhedralSet(Rectangle("[0,15]x[-20,20]x[0,100]"))
+inv=RectangularSet("[0,15]x[-20,20]x[0,100]")
 # inv=PolyhedralSet(Polyhedron(Matrix("[-1,0]"),Vector("[0]")))
 l1=automaton.new_mode(0, dyn, inv)
 
 # Transition l1 -> l1
 #act=Polyhedron(Matrix("[1,0; 0,1]"),Vector("[0,0]"))
-act=Polyhedron(Rectangle("[0,0.01]x[-20,20]x[0,100]"))
+act=RectangularSet("[0,0.01]x[-20,20]x[0,100]")
 res=AffineMap(Matrix("[1,0,0;0,-1,0;0,0,1]"), Vector("[0,0,0]"))
-e12=automaton.new_transition(0,l1.id(),l1.id(),res,PolyhedralSet(act))
+e12=automaton.new_transition(0,l1.id(),l1.id(),res,act)
 
 print automaton
 
@@ -61,14 +64,20 @@ print "Computing chainreachable set..."
 #reach_set=hybrid_evolver.continuous_chainreach(automaton,initial_set,bounding_set)
 reach_set=hybrid_evolver.chainreach(automaton,initial_set,bounding_set)
 
+
 #print "Computing discrete transition..."
 #discrete_init=HybridGridCellListSet(reach_set)
 #discrete_step=hybrid_evolver.discrete_step(automaton,discrete_init)
 
 print "Done."
 
+print "reach_set =",reach_set
+print "reach_set.size() =",reach_set.size()
+print "reach_set.capacity() =",reach_set.capacity()
+
 # Eps output
-eps=EpsPlot("bouncing-ball.eps",bounding_box,0,2)
+eps=EpsPlot()
+eps.open("bouncing-ball.eps",bounding_box,0,2)
 
 # Defintion of the reference grid
 #eps.set_line_style(False)

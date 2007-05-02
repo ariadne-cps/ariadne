@@ -404,9 +404,10 @@ namespace Ariadne {
        
     template<class R> inline
     epsfstream&
-    operator<<(epsfstream& eps, const Geometry::Zonotope<Numeric::Interval<R>,R>& z)
+    operator<<(epsfstream& eps, const Geometry::Zonotope<Numeric::Interval<R>,R>& ez)
     { 
-      Geometry::Zonotope<Numeric::Rational> qz=Geometry::over_approximation(z);
+      Geometry::Zonotope<R> z=Geometry::over_approximation(ez);
+      Geometry::Zonotope<Numeric::Rational> qz(z);
       Polygon2d vertices=eps.projection_map()(qz);      
       eps.draw(vertices);
       return eps;

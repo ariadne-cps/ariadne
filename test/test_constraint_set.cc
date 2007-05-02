@@ -81,7 +81,6 @@ test_constraint_set()
   ARIADNE_ASSERT(s.disjoint(r));
 
 
-  set_geometry_verbosity(4);
   // approximations
   Grid<R> g(Vector<R>("[0.1875,0.125]"));
   Rectangle<R> bb("[-1.01,1.01]x[-1.01,1.01]");

@@ -128,7 +128,7 @@ namespace Ariadne {
       Zonotope<RC,RG>& operator=(const Zonotope<RC,RG>& z);
 
       /*! \brief Type conversion copy constructor operator. */
-      template<class R0,class R1> Zonotope(const Zonotope<R0,R1>& z);
+      template<class R0,class R1> explicit Zonotope(const Zonotope<R0,R1>& z);
 
       /*! \brief Type conversion assignment operator. */
       template<class R0,class R1> Zonotope<RC,RG>& operator=(const Zonotope<R0,R1>& z);
@@ -279,6 +279,8 @@ namespace Ariadne {
     };
   
 
+    template<class RC,class RG> Rectangle<typename Zonotope<RC,RG>::real_type> bounding_box(const Zonotope<RC,RG>& z);
+    
     template<class R,class RC,class RG> tribool contains(const Zonotope<RC,RG>& z,const Point<R>& pt);
     
 
@@ -300,6 +302,8 @@ namespace Ariadne {
     template<class R> Zonotope<Numeric::Interval<R>,R> over_approximation(const Zonotope< Numeric::Interval<R>, Numeric::Interval<R> >&);
      
     template<class R> Zonotope<R,R> over_approximation(const Zonotope< Numeric::Interval<R>, R >&);
+     
+    template<class R> Zonotope<R,R> over_approximation(const Zonotope<R,R>&);
      
           
 

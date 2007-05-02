@@ -183,7 +183,8 @@ test_integrate()
   GridMaskSet<R> reach_set=affine.reach(affine_vector_field,initial_set,bounding_set,integration_time);
   cout << endl;
   
-  set_integrator_verbosity(4);
+  // set_integrator_verbosity(4);
+  
   integration_time=0.5;
   affine.set_grid_size(0.0625);
   PolyhedralSet<R> polyhedral_initial_set=PolyhedralSet<R>(Matrix<R>("[-2,0;0,-1;1,1]"),Vector<R>("[-1,-1,3]"));

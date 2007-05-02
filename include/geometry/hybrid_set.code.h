@@ -43,7 +43,7 @@ HybridGridMaskSet<R>::write(std::ostream& os) const
   {
     id_type loc=iter->first;
     const GridMaskSet<R>& set=iter->second;
-    os << "  "<<loc<<": GridMaskSet( extent=" << set.extent() << ", block=" << set.block() << ", size=" << set.size() << " ),\n";
+    os << "  "<<loc<<": GridMaskSet( extent=" << set.extent() << ", block=" << set.block() << ", size=" << set.size() << " capacity=" << set.capacity() << " ),\n";
   }
   os << "} )";
   return os;

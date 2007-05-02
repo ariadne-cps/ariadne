@@ -59,11 +59,13 @@ outer_approximation_of_basic_set(const BS& bs, const Geometry::Grid<R>& g)
   Geometry::GridCellListSet<R> gcls(g);
   Geometry::GridBlock<R> gbb=outer_approximation(bs.bounding_box(),g);
   Geometry::Rectangle<R> r(bs.dimension());
-  
+  //std::cerr << "bs="<<bs<<" bb="<<bs.bounding_box()<<" gbb="<<gbb<<std::endl;
   for(typename Geometry::GridBlock<R>::const_iterator iter=gbb.begin(); iter!=gbb.end(); ++iter) {
     r=*iter;
     if(disjoint(r,bs)) {
+      //std::cerr << "disjoint("<<r<<","<<bs<<")\n";
     } else {
+      //std::cerr << "adjoining "<<*iter<<"\n";
       gcls.adjoin(*iter);
     }
   }

@@ -282,10 +282,11 @@ Evaluation::HybridEvolver<R>::_continuous_chainreach(const System::HybridAutomat
       dm_iter!=hybrid_automaton.modes().end(); ++dm_iter)
   {
     const System::DiscreteMode<R>& dm = *dm_iter;
+    const System::VectorField<R>& vf = dm.dynamic();
     const Geometry::GridMaskSet<R>& domain=domain_set[dm.id()];
     Geometry::GridMaskSet<R> initial=regular_intersection(initial_set[dm.id()],domain);
     ARIADNE_LOG(4,"continuous_chainreach in mode "<<dm.id()<<":\n  "<<initial.size()<<" initial cells,");
-    result_set[dm.id()].adjoin(this->_integrator->chainreach(dm.dynamic(),initial,domain));
+    result_set[dm.id()].adjoin(this->_integrator->chainreach(vf,initial,domain));
     result_set[dm.id()].restrict(domain);
     ARIADNE_LOG(4," reached "<<result_set[dm.id()].size()<<" cells\n");
   }
@@ -393,15 +394,7 @@ Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<R>& hybri
   uint step=0;
   while(!found_set.empty()) {
     integrated_set=this->_continuous_chainreach(hybrid_automaton,found_set,domain_set);
-    ARIADNE_LOG(4,"\nchainreach found "<<found_set.size()<<" cell by continuous evolution, \n"<<std::endl);
-    found_set=this->_discrete_step(hybrid_automaton,integrated_set,domain_set);
-    ARIADNE_LOG(4,"\nchainreach found "<<found_set.size()<<" cells by discrete step");
-    found_set.remove(result_set);
-    ARIADNE_LOG(4," of which "<<found_set.size()<<" are new; ");
-    result_set.adjoin(integrated_set);
-    result_set.adjoin(found_set);
-    ARIADNE_LOG(4,"reached "<<result_set.size()<< " cells in total.\n" << std::endl);
-    ++step;
+    ARIADNE_LOG(4,"\nchainreach found "<<integrated_set.size()<<" cell by continuous evolution, \n"<<std::endl);
     if(verbosity>=4) {
       std::stringstream filename;
       filename << "hybrid_chainreach-"<<step<<".eps";
@@ -415,6 +408,14 @@ Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<R>& hybri
       eps.set_fill_colour("red"); eps<<fnd;
       eps.close();
     }
+    found_set=this->_discrete_step(hybrid_automaton,integrated_set,domain_set);
+    ARIADNE_LOG(4,"\nchainreach found "<<found_set.size()<<" cells by discrete step");
+    found_set.remove(result_set);
+    ARIADNE_LOG(4," of which "<<found_set.size()<<" are new; ");
+    result_set.adjoin(integrated_set);
+    result_set.adjoin(found_set);
+    ARIADNE_LOG(4,"reached "<<result_set.size()<< " cells in total.\n" << std::endl);
+    ++step;
   }
   return result_set;
 }

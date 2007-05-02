@@ -101,6 +101,7 @@ void export_zonotope()
     .def("contains", (tribool(RZonotope::*)(const RPoint&)const)&RZonotope::contains)
     .def("bounding_box", &RZonotope::bounding_box)
     .def("subdivide", &RZonotope::subdivide)
+    .def("divide", &RZonotope::subdivide)
     .def("__add__", &over_approximation_of_minkowski_sum<R>)
     .def("__sub__", &over_approximation_of_minkowski_difference<R>)
     .def(self_ns::str(self))
@@ -117,12 +118,13 @@ void export_interval_zonotope()
   typedef Point<R> RPoint;
   typedef Point<I> IPoint;
   typedef Rectangle<R> RRectangle;
-  typedef Zonotope<R> RZonotope;
+  typedef Zonotope<R,R> RZonotope;
   typedef Zonotope<I,R> EZonotope;
-  typedef Zonotope<I> IZonotope;
+  typedef Zonotope<I,I> IZonotope;
     
   class_<EZonotope>("ErrorZonotope",init<int>())
     .def(init<EZonotope>())
+    .def(init<RZonotope>())
     .def(init<RRectangle>())
     .def(init<std::string>())
     .def("centre",(const IPoint&(EZonotope::*)()const)&EZonotope::centre,return_value_policy<copy_const_reference>())
@@ -132,11 +134,14 @@ void export_interval_zonotope()
     .def("contains", (tribool(EZonotope::*)(const RPoint&)const)&EZonotope::contains)
     .def("bounding_box", &EZonotope::bounding_box)
     .def("subdivide", &EZonotope::subdivide)
+    .def("divide", &EZonotope::divide)
     .def(self_ns::str(self))
   ;
 
 
   class_<IZonotope>("IntervalZonotope",init<int>())
+    .def(init<IZonotope>())
+    .def(init<EZonotope>())
     .def(init<RZonotope>())
     .def(init<RRectangle>())
     .def(init<std::string>())
@@ -147,6 +152,7 @@ void export_interval_zonotope()
     .def("contains", (tribool(IZonotope::*)(const RPoint&)const)&IZonotope::contains)
     .def("bounding_box", &IZonotope::bounding_box)
     .def("subdivide", &IZonotope::subdivide)
+    .def("divide", &IZonotope::divide)
     .def(self_ns::str(self))
   ;
 

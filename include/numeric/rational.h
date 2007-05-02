@@ -166,17 +166,17 @@ namespace Ariadne {
     template<> inline Rational sub_exact(const Rational& x1, const Rational& x2) { return x1-x2; }
     template<> inline Rational sub_down(const Rational& x1, const Rational& x2) { return sub_exact(x1,x2); }
     template<> inline Rational sub_up(const Rational& x1, const Rational& x2) { return sub_exact(x1,x2); }
-    template<> inline Rational sub_approx(const Rational& x1, const Rational& x2) { return add_exact(x1,x2); }
+    template<> inline Rational sub_approx(const Rational& x1, const Rational& x2) { return sub_exact(x1,x2); }
     
     template<> inline Rational mul_exact(const Rational& x1, const Rational& x2) { return x1*x2; }
     template<> inline Rational mul_down(const Rational& x1, const Rational& x2) { return mul_exact(x1,x2); }
     template<> inline Rational mul_up(const Rational& x1, const Rational& x2) { return mul_exact(x1,x2); }
-    template<> inline Rational mul_approx(const Rational& x1, const Rational& x2) { return add_exact(x1,x2); }
+    template<> inline Rational mul_approx(const Rational& x1, const Rational& x2) { return mul_exact(x1,x2); }
     
     template<> inline Rational div_exact(const Rational& x1, const Rational& x2) { return x1/x2; }
     template<> inline Rational div_down(const Rational& x1, const Rational& x2) { return div_exact(x1,x2); }
     template<> inline Rational div_up(const Rational& x1, const Rational& x2) { return div_exact(x1,x2); }
-    template<> inline Rational div_approx(const Rational& x1, const Rational& x2) { return add_exact(x1,x2); }
+    template<> inline Rational div_approx(const Rational& x1, const Rational& x2) { return div_exact(x1,x2); }
   
   
   }

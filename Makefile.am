@@ -1,10 +1,10 @@
-SUBDIRS = include src test python
+SUBDIRS = include src test examples python
 
 EXTRA_DIST = Doxyfile
 
 CXXFLAGS += -Wall 
 
-.PHONY: shiny lib check-lib
+.PHONY: shiny lib python examples check-lib 
 shiny: maintainer-clean
 	-rm -rf *~ */*~
 	-rm -f *.log */*.log */*.eps
@@ -19,8 +19,15 @@ shiny: maintainer-clean
 lib: 
 	(cd src; make lib)
 
+python: lib
+	(cd src/python; make python)
+
+examples: lib
+	(cd examples; make examples)
+
 check-lib: lib
 	(cd test; make check)
 
-check-python:
+check-python: python
 	(cd python; make check)
+

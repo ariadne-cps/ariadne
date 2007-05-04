@@ -88,6 +88,5 @@ AS_IF([test "x$enable_python" != xno],[AC_DEFINE_UNQUOTED([PYTHON_FLOAT],[$enabl
 AC_MSG_RESULT([$enable_python])
 
 
-#AC_CONFIG_FILES([Makefile include/Makefile src/Makefile src/base/Makefile src/numeric/Makefile src/linear_algebra/Makefile src/combinatoric/Makefile src/geometry/Makefile src/python/Makefile src/system/Makefile src/evaluation/Makefile test/Makefile])
-AC_CONFIG_FILES([Makefile include/Makefile src/Makefile src/python/Makefile python/Makefile test/Makefile])
+AC_CONFIG_FILES([Makefile include/Makefile src/Makefile src/python/Makefile python/Makefile test/Makefile examples/Makefile])
 AC_OUTPUT

@@ -13,6 +13,8 @@ python_MODULES = .libs/ariadne.so
 
 lib_LTLIBRARIES = $(python_LIBS)
 
+python: $(python_LIBS)
+
 install-exec-local:
 	echo "Using the installer " $(INSTALL)
 	echo $(pyexecdir)

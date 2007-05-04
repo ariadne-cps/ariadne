@@ -8,7 +8,9 @@
 from ariadne import *
 
 set_hybrid_evolver_verbosity(4)
-set_integrator_verbosity(4)
+#set_integrator_verbosity(6)
+
+max_time="5"
 
 # Definition of the automaton
 automaton=HybridAutomaton("Bouncing ball")
@@ -28,9 +30,11 @@ e12=automaton.new_transition(0,l1.id(),l1.id(),res,act)
 print automaton
 
 # Defintion of the underlying grid
-grid=Grid(Vector("[0.25,0.25,1]"))
-block=LatticeBlock("[-10,100]x[-100,100]x[-5,105]")
-fgrid=FiniteGrid(grid,block)
+grid=Grid(Vector("[0.25,0.25,0.25]"))
+bounding_box=Rectangle("[0,25]x[-25,25]x[0,"+max_time+"]")
+bounding_box=bounding_box.neighbourhood(Float(0.5));
+extent=bounding_box.neighbourhood(Float(1));
+fgrid=FiniteGrid(grid,extent)
 
 # Initial set 
 init=Rectangle("[10,10.1]x[0,0.1]x[0,0.1]")
@@ -42,7 +46,6 @@ print "initial_set.locations() =",initial_set.locations()
 #print "initial_set[l0.id].size(),capacity()=",initial_set[l0.id()].size(),initial_set[l0.id()].capacity()
 
 # Bounding set 
-bounding_box=Rectangle("[-1,16]x[-21,21]x[-1,101]")
 bounding_set=HybridGridMaskSet()
 bounding_set.new_location(l1.id(),fgrid)
 bounding_set[l1.id()].adjoin_over_approximation(bounding_box)
@@ -51,9 +54,9 @@ print "bounding_set.locations() =",bounding_set.locations()
 #print "bounding_set[mode2_id].size(),capacity()=",bounding_set[m2.id()].size(),bounding_set[m2.id()].capacity()
 
 # Definition of the Hybrid Evolver
-maximum_step_size=0.125;
-lock_to_grid_time=0.5;
-maximum_set_radius=0.25;
+maximum_step_size=0.25;
+lock_to_grid_time=1.0;
+maximum_set_radius=0.5;
 
 apply=Applicator()
 integrator=AffineIntegrator(maximum_step_size,lock_to_grid_time,maximum_set_radius);

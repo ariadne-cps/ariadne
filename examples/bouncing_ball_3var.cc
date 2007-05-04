@@ -45,16 +45,17 @@ int main() {
 template<class R>
 int bouncing_ball_automaton() 
 {
-  
-  Rectangle<R> r("[0,15]x[-20,20]x[0,100]");
-  cout << "r=" << r << endl;
+  set_hybrid_evolver_verbosity(4);
 
-  AffineVectorField<R> dynamic(Matrix<R>("[0,-1,0;0,0,0;0,0,0]"),Vector<R>("[0,-9.8,1.0]"));
+  Rectangle<R> domain("[0,15]x[-20,20]x[0,10]");
+  cout << "domain=" << domain << endl;
+
+  AffineVectorField<R> dynamic(Matrix<R>("[0,1,0;0,0,0;0,0,0]"),Vector<R>("[0,-9.8,1.0]"));
   cout << "dynamic=" << dynamic << endl;
-  PolyhedralSet<R> invariant(r);
+  RectangularSet<R> invariant(domain);
   cout << "invariant=" << invariant << endl;
 
-  PolyhedralSet<R> activation(Rectangle<R>("[0.0,0.01]x[-20,20]x[0,100]"));
+  RectangularSet<R> activation("[0.0,0.01]x[-20,20]x[0,10]");
   cout << "activation=" << activation << endl;
 
   AffineMap<R> reset(Matrix<R>("[1,0,0;0,-1,0;0,0,1]"),Vector<R>("[0,0,0]"));
@@ -69,7 +70,7 @@ int bouncing_ball_automaton()
   cout << mode1  <<  "\n" << transition << endl;
   cout << automaton.invariant() << endl;
 
-	time_type maximum_step_size=0.125;
+  time_type maximum_step_size=0.125;
   time_type lock_to_grid_time=0.5;
   R maximum_set_radius=0.25;
 
@@ -78,7 +79,8 @@ int bouncing_ball_automaton()
   HybridEvolver<R> hybrid_evolver(apply,integrator);
   
   Grid<R> grid(Vector<R>("[0.25,0.25,1.0]"));
-  FiniteGrid<R> finite_grid(grid,LatticeBlock("[-10,100]x[-100,100]x[-5,105]"));
+  Rectangle<R> bounding_box(domain.neighbourhood(1));
+  FiniteGrid<R> finite_grid(grid,bounding_box);
   
   Rectangle<R> initial_rectangle("[10,10.1]x[0,0.1]x[0,0.1]");
   HybridGridMaskSet<R> initial_set;
@@ -87,7 +89,6 @@ int bouncing_ball_automaton()
   cout << "initial_set.discrete_locations()=" << initial_set.locations() << endl;
   cout << "initial_set[mode1_id].size()=" << initial_set[mode1_id].size() << " cells out of " << initial_set[mode1_id].capacity() << endl;
   
-  Rectangle<R> bounding_box("[-1,16]x[-21,21]x[-1,101]");
   HybridGridMaskSet<R> bounding_set;
   bounding_set.new_location(mode1_id,finite_grid);
   bounding_set[mode1_id].adjoin_over_approximation(bounding_box);
@@ -97,25 +98,27 @@ int bouncing_ball_automaton()
 
   assert((bool)(subset(initial_set[mode1_id],bounding_set[mode1_id])));
 
-	cout << "Computing chainreachable set..." << endl;
+  cout << "Computing chainreachable set..." << endl;
 
   HybridGridMaskSet<R> chainreach=hybrid_evolver.chainreach(automaton,initial_set,bounding_set);
   cout << "Reached (" << chainreach[mode1_id].size() << ") cells "
        << "out of (" << chainreach[mode1_id].capacity() << ") "
        << endl << endl;
 
-	epsfstream eps; 
-  eps.open("bouncing-ball-3var-cc.eps",bounding_box.expand(0.5));
-  eps.set_fill_colour("white");
-  eps << bounding_box;
-  eps.set_fill_colour("cyan");
-  eps << static_cast<const Polyhedron<R>&>(activation);
-  eps.set_fill_colour("magenta");
-  eps.set_line_style(true);
-  eps.set_fill_colour("yellow");
-  eps << chainreach[mode1_id];
-  eps.set_fill_colour("blue");
-  eps << initial_set[mode1_id];
+  epsfstream eps; 
+
+  eps.open("bouncing_ball-3var-xv.eps",bounding_box);
+  eps << fill_colour("white") << bounding_box;
+  eps << fill_colour("cyan") << activation;
+  eps << line_style(true) << fill_colour("yellow") << chainreach[mode1_id];
+  eps << fill_colour("blue") << initial_set[mode1_id];
+  eps.close();
+  
+  eps.open("bouncing_ball-3var-tx.eps",bounding_box,PlanarProjectionMap(3,2,0));
+  eps << fill_colour("white") << bounding_box;
+  eps << fill_colour("cyan") << activation;
+  eps << line_style(true) << fill_colour("yellow") << chainreach[mode1_id];
+  eps << fill_colour("blue") << initial_set[mode1_id];
   eps.close();
   
   return 0;

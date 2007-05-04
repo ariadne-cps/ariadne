@@ -28,8 +28,8 @@
 
 #include <vector>
 
+#include "test.h"
 #include "test_float.h"
-#include "test_macros.h"
 
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
@@ -74,11 +74,11 @@ test_constraint_set()
   
   // superset
   r=Rectangle<R>("[0.4,0.5]x[0.45,0.65]");
-  ARIADNE_ASSERT(s.superset(r));
+  ARIADNE_TEST_ASSERT(s.superset(r));
 
   // disjoint
   r=Rectangle<R>("[0.8,0.9]x[0.95,0.95]");
-  ARIADNE_ASSERT(s.disjoint(r));
+  ARIADNE_TEST_ASSERT(s.disjoint(r));
 
 
   // approximations

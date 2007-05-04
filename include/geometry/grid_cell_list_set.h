@@ -75,12 +75,12 @@ namespace Ariadne {
       typedef GridCell<R> value_type;
       
       /*!\brief Construct an empty set based on a Grid. */
-      GridCellListSet(const Grid<R>& g);
+      explicit GridCellListSet(const Grid<R>& g);
 
       /*!\brief Construct from a grid and a lattice cell list set. */
-      GridCellListSet(const Grid<R>& g, const Combinatoric::LatticeCellListSet& lcls);
+      explicit GridCellListSet(const Grid<R>& g, const Combinatoric::LatticeCellListSet& lcls);
 
-      /*!\brief Construct from a GridMaskSet. */
+      /*!\brief Convert from a GridMaskSet. */
       GridCellListSet(const GridMaskSet<R>& gms);
 
       /*!\brief Copy constructor. */
@@ -169,6 +169,12 @@ namespace Ariadne {
       /*! \brief Adjoins an inner-approximation of the set \a s. */
       template<class S>
       void adjoin_inner_approximation(const S& s);
+
+      /*! \brief Restricts to the outer-approximation of the set \a s. */
+      void restrict_outer_approximation(const SetInterface<R>& s);
+
+      /*! \brief Restricts to the inner-approximation of the set \a s. */
+      void restrict_inner_approximation(const SetInterface<R>& s);
 
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;

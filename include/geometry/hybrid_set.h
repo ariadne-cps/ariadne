@@ -103,6 +103,8 @@ namespace Ariadne {
       HybridSetBase(const HybridSpace& locations);
       /*! \brief Copy constructor. */
       HybridSetBase(const HybridSetBase<S>& hs);
+      /*! \brief Copy assignment operator. */
+      HybridSetBase<S>& operator=(const HybridSetBase<S>& hs);
       /*! \brief Conversion constructor from another hybrid set. */
       template<class S1> explicit HybridSetBase(const HybridSetBase<S1>& hs);
      public:
@@ -113,8 +115,10 @@ namespace Ariadne {
       S& new_location(location_type q, dimension_type d);
       /*! \brief Create a new location based on the set \a s. */
       S& new_location(location_type q, const S& s);
-      /*! \brief Create a new location based on the set \a t. */
+      /*! \brief Create a new location based on the parameter \a t. */
       template<class T> S& new_location(location_type q, const T& t);
+      /*! \brief Create a new location based on the parameters \a t1 and \a t2. */
+      template<class T1, class T2> S& new_location(location_type q, const T1& t1, const T2& t2);
 
       /*! \brief The discrete locations of the set. */
       HybridSpace locations() const;

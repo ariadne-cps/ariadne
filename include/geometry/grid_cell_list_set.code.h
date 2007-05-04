@@ -227,6 +227,45 @@ Geometry::GridCellListSet<R>::clear()
 
 
 
+template<class R> inline
+void 
+Geometry::GridCellListSet<R>::restrict_outer_approximation(const SetInterface<R>& s)
+{
+  Geometry::GridCellListSet<R> result(this->grid());
+  Rectangle<R> cell(this->dimension());
+  for(typename GridCellListSet<R>::const_iterator cell_iter=this->begin();
+      cell_iter!=this->end(); ++cell_iter)
+  {
+    cell=*cell_iter;
+    if(possibly(s.intersects(cell))) {
+      result.adjoin(*cell_iter);
+    }
+  }
+  *this=result;
+}
+
+
+template<class R> inline
+void 
+Geometry::GridCellListSet<R>::restrict_inner_approximation(const SetInterface<R>& s)
+{
+  Geometry::GridCellListSet<R> result(this->grid());
+  Rectangle<R> cell(this->dimension());
+  for(typename GridCellListSet<R>::const_iterator cell_iter=this->begin();
+      cell_iter!=this->end(); ++cell_iter)
+  {
+    cell=*cell_iter;
+    if(s.superset(cell)) {
+      result.adjoin(*cell_iter);
+    }
+  }
+  *this=result;
+}
+
+
+
+
+
 template<class R>
 std::ostream&     
 Geometry::GridCellListSet<R>::write(std::ostream& os) const 

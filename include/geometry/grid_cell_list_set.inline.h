@@ -150,9 +150,6 @@ Geometry::GridCellListSet<R>::adjoin_inner_approximation(const BS& bs)
 
 
 
-
-
-
 template<class R> inline
 std::ostream& 
 Geometry::operator<<(std::ostream& os, const GridCellListSet<R>& gcls) {

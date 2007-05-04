@@ -225,6 +225,26 @@ namespace Ariadne {
 
     Point2d baricentre(const Polygon2d& vertices);
 
+    class LineWidth {
+     public:
+      explicit LineWidth(double x) : _value(x) { }
+      double value() const { return this->_value; }
+     private:
+      double _value;
+    };
+
+    LineWidth line_width(double x);
+  
+    class FillColour {
+     public:
+      explicit FillColour(std::string x) : _value(x) { }
+      std::string value() const { return this->_value; }
+     private:
+      std::string _value;
+    };
+
+    FillColour fill_colour(double x);
+        
 
     
     class epsfstream
@@ -313,9 +333,8 @@ namespace Ariadne {
     }
       
 
-
-
-
+    epsfstream& operator<<(epsfstream&, const LineWidth&); 
+    epsfstream& operator<<(epsfstream&, const FillColour&);
 
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Point<R>&); 
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Rectangle<R>&);
@@ -363,6 +382,53 @@ namespace Ariadne {
     }
 
 
+    inline 
+    FillColour 
+    fill_colour(const std::string& x) 
+    {
+      return FillColour(x);
+    }
+
+    inline 
+    LineWidth 
+    line_width(double x) 
+    {
+      return LineWidth(x);
+    }
+
+    inline 
+    LineWidth 
+    line_style(bool b) 
+    {
+      return LineWidth(double(b));
+    }
+
+    inline
+    epsfstream&
+    operator<<(epsfstream& eps, const LineWidth& lw)
+    {
+      if(lw.value()==0.0) {
+        eps.set_line_style(false);
+      } else {
+        eps.set_line_style(true);
+        //eps.set_line_width(lw.value());
+      }
+      return eps;
+    }
+
+
+    inline
+    epsfstream&
+    operator<<(epsfstream& eps, const FillColour& fc)
+    {
+      if(fc.value()=="none" || fc.value()=="transparant") {
+        eps.set_fill_style(false);
+      } else {
+        eps.set_fill_style(true);
+        eps.set_fill_colour(fc.value().c_str());
+      }
+      return eps;
+    }
 
 
     template<class R> inline

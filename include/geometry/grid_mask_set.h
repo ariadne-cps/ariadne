@@ -91,28 +91,28 @@ namespace Ariadne {
        *
        * \deprecated Use GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeBlock& b) instead.
        */
-      GridMaskSet(const FiniteGrid<R>& g);
+      explicit GridMaskSet(const FiniteGrid<R>& g);
      
       /*!\brief Construct a set from a finite grid and a mask. (Deprecated)
        *
        * \deprecated Use GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeBlock& b, const BooleanArray& m) instead.
        */
-      GridMaskSet(const FiniteGrid<R>& g, const BooleanArray& m);
+      explicit GridMaskSet(const FiniteGrid<R>& g, const BooleanArray& m);
 
       /*!\brief Construct an empty set based on grid \a g such that the restricted grid covers bounding box \a bb as tightly as possible. */
-      GridMaskSet(const Grid<R>& g, const Rectangle<R>& bb);
+      explicit GridMaskSet(const Grid<R>& g, const Rectangle<R>& bb);
      
       /*!\brief Construct an empty set based on grid \a g and with cells in the block \a b. */
-      GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeBlock& b);
+      explicit GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeBlock& b);
      
       /*!\brief Construct a set from a grid, a lattice rectangle and a mask. */
-      GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeBlock& b, const BooleanArray& m);
+      explicit GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeBlock& b, const BooleanArray& m);
      
       /*!\brief Construct a set from a grid, and a lattice mask set. */
-      GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeMaskSet& ms);
+      explicit GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeMaskSet& ms);
      
-      /*!\brief Convert from a %GridCellListSet. */
-      GridMaskSet(const GridCellListSet<R>& gcls);
+      /*!\brief Construct from a %GridCellListSet. Implicit conversion is disallowed since the grid bounds are synthesised automatically, which is usually not what is required. */
+      explicit GridMaskSet(const GridCellListSet<R>& gcls);
 
       /*!\brief Copy constructor. */
       GridMaskSet(const GridMaskSet<R>& gms);
@@ -166,16 +166,19 @@ namespace Ariadne {
       /*! \brief The underlying grid. */
       const Grid<R>& grid() const;
 
+      /*! \brief The underlying lattice set. */
+      const Combinatoric::LatticeMaskSet& lattice_set() const;
+
+      /*! \brief The underlying finite_grid. */
+      FiniteGrid<R> finite_grid() const;
+
       /*! \brief The bounds on elements in the set. */
       GridBlock<R> bounds() const;
 
       /*! \brief The extent of the elements in the grid. */
       Rectangle<R> extent() const;
 
-      /*! \brief The underlying lattice set. */
-      const Combinatoric::LatticeMaskSet& lattice_set() const;
-
-       /*! \brief The number of elements in the mask. */
+      /*! \brief The number of elements in the mask. */
       size_type capacity() const;
       
       /*! \brief The block of cells available in the lattice. */

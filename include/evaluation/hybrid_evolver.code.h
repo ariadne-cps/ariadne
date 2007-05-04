@@ -88,17 +88,21 @@ Evaluation::HybridEvolver<R>::discrete_step(const System::HybridAutomaton<R>& au
   if(automaton.locations()!=initial_set.locations()) {
     throw std::runtime_error("HybridEvolver::discrete_step(HybridAutomaton,HybridSet): initial_set locations do not match hybrid_automaton modes");
   }
+  ARIADNE_CHECK_BOUNDED(initial_set,"HybridEvolver::discrete_step(HybridAutomaton automaton, HybridSet initial_set)");
 
   typedef Geometry::HybridSpace::const_iterator locations_iterator;
 
   Geometry::HybridSpace locations=automaton.locations();
   R grid_separation=this->_applicator->grid_size();
-  
+
   Geometry::HybridGridMaskSet<R> grid_initial_set;
   for(locations_iterator loc_iter=locations.begin(); loc_iter!=locations.end(); ++loc_iter) {
     id_type id=loc_iter->id();
     dimension_type dim=loc_iter->dimension();
-    grid_initial_set.new_location(id,Geometry::Grid<R>(LinearAlgebra::Vector<R>(dim,grid_separation)));
+    Geometry::Grid<R> grid(LinearAlgebra::Vector<R>(dim,grid_separation));
+    Geometry::Rectangle<R> bounding_box=initial_set[id].bounding_box();
+    Geometry::FiniteGrid<R> finite_grid(grid,bounding_box);
+    grid_initial_set.new_location(id,finite_grid);
     grid_initial_set[id].adjoin_outer_approximation(initial_set[id]);
   }
   Geometry::HybridGridMaskSet<R> grid_result=discrete_step(automaton,grid_initial_set);
@@ -252,17 +256,17 @@ Evaluation::HybridEvolver<R>::_discrete_step(const System::HybridAutomaton<R>& h
       dt_iter!=hybrid_automaton.transitions().end(); ++dt_iter)
   {
     const System::DiscreteTransition<R>& dt = *dt_iter;
-    const Geometry::GridCellListSet<R>& source_set=initial_set[dt.source().id()];
-    Geometry::GridMaskSet<R>& destination_set=result_set[dt.destination().id()];
-    const Geometry::GridMaskSet<R> activation=Geometry::outer_approximation(dt.activation(),source_set.grid());
-    const Geometry::GridMaskSet<R> active_cells=Geometry::regular_intersection(source_set,activation);
-    ARIADNE_LOG(4,"discrete_step of transition "<<dt.id()<<" from mode "<<dt.source().id()<<" to mode "<<dt.destination().id()<<":\n")
-      ARIADNE_LOG(4,"  "<<active_cells.size()<<" activated cells");
-    const Geometry::GridMaskSet<R> image_cells=this->_applicator->image(dt.reset(),active_cells,destination_set.grid());
-    ARIADNE_LOG(4,", "<<image_cells.size()<<" cells in image\n");
-    destination_set.adjoin(image_cells);
+    const Geometry::GridMaskSet<R>& initial=initial_set[dt.source().id()];
+    Geometry::GridMaskSet<R>& destination=result_set[dt.destination().id()];
+    Geometry::GridCellListSet<R> active=initial;
+    active.restrict_outer_approximation(dt.activation());
+    ARIADNE_LOG(4,"discrete_step of transition "<<dt.id()<<" from mode "<<dt.source().id()<<" to mode "<<dt.destination().id()<<":\n");
+    ARIADNE_LOG(4,"  "<<active.size()<<" activated cells");
+    Geometry::GridCellListSet<R> image=this->_applicator->image(dt.reset(),active,destination.grid());
+    image.unique_sort();
+    ARIADNE_LOG(4,", "<<image.size()<<" cells in image\n");
+    destination.adjoin(image);
   }
-  
   return result_set;
 }
 
@@ -284,9 +288,10 @@ Evaluation::HybridEvolver<R>::_continuous_chainreach(const System::HybridAutomat
     const System::DiscreteMode<R>& dm = *dm_iter;
     const System::VectorField<R>& vf = dm.dynamic();
     const Geometry::GridMaskSet<R>& domain=domain_set[dm.id()];
-    Geometry::GridMaskSet<R> initial=regular_intersection(initial_set[dm.id()],domain);
-    ARIADNE_LOG(4,"continuous_chainreach in mode "<<dm.id()<<":\n  "<<initial.size()<<" initial cells,");
-    result_set[dm.id()].adjoin(this->_integrator->chainreach(vf,initial,domain));
+    const Geometry::GridMaskSet<R>& initial=initial_set[dm.id()];
+    Geometry::GridMaskSet<R> start=regular_intersection(initial,domain);
+    ARIADNE_LOG(4,"continuous_chainreach in mode "<<dm.id()<<":\n  "<<start.size()<<" initial cells,");
+    result_set[dm.id()].adjoin(this->_integrator->chainreach(vf,start,domain));
     result_set[dm.id()].restrict(domain);
     ARIADNE_LOG(4," reached "<<result_set[dm.id()].size()<<" cells\n");
   }
@@ -318,7 +323,7 @@ Evaluation::HybridEvolver<R>::discrete_step(const System::HybridAutomaton<R>& hy
     active_cells.restrict_outer_approximation(dt.activation());
     ARIADNE_LOG(4,"discrete_step of transition "<<dt.id()<<" from mode "<<dt.source().id()<<" to mode "<<dt.destination().id()<<":\n")
     ARIADNE_LOG(4,"  "<<active_cells.size()<<" activated cells");
-    const Geometry::GridMaskSet<R> image_cells=this->_applicator->image(dt.reset(),active_cells,destination_set.grid());
+    const Geometry::GridCellListSet<R> image_cells=this->_applicator->image(dt.reset(),active_cells,destination_set.grid());
     ARIADNE_LOG(4,", "<<image_cells.size()<<" cells in image\n");
     destination_set.adjoin(image_cells);
 
@@ -355,6 +360,7 @@ Evaluation::HybridEvolver<R>::continuous_chainreach(const System::HybridAutomato
   }
   ARIADNE_LOG(3,"domain_set="<<domain_set<<"\n");
 
+  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n"<<"domain_set="<<domain_set<<"\n");
   return _continuous_chainreach(hybrid_automaton,initial_set,domain_set);
 }
 

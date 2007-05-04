@@ -120,11 +120,28 @@ Geometry::GridMaskSet<R>::GridMaskSet(const GridCellListSet<R>& gcls)
 }
 
 
+
+template<class R>
+Geometry::FiniteGrid<R>
+Geometry::GridMaskSet<R>::finite_grid() const
+{
+  return FiniteGrid<R>(this->grid(),this->block());
+}
+
+
 template<class R>
 Geometry::Rectangle<R>
 Geometry::GridMaskSet<R>::extent() const
 {
   return this->bounds();
+}
+
+
+template<class R> inline
+Geometry::GridBlock<R> 
+Geometry::GridMaskSet<R>::bounds() const 
+{
+  return GridBlock<R>(*this->_grid_ptr,_lattice_set.block()); 
 }
 
 
@@ -621,14 +638,14 @@ template<class R>
 std::ostream& 
 Geometry::GridMaskSet<R>::write(std::ostream& os) const 
 {
-  os << "GridMaskSet("<< std::endl;
+  os << "GridMaskSet( " << std::flush;
   os << " grid=" << this->grid() << ",";
   os << " block=" << this->block() << ",";
   os << " extent=" << Rectangle<R>(this->bounds()) << ",";
   os << " size=" << this->size() << ",";
   os << " capacity=" << this->capacity() << ",";
   //      os << "  mask=" << this->mask() << std::endl;
-  os << " )\n";
+  os << " )";
   return os;
 }
 

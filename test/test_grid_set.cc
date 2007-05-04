@@ -42,6 +42,7 @@
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
+using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Combinatoric;
 using namespace Ariadne::Geometry;
 using namespace std;
@@ -83,6 +84,20 @@ test_grid_set()
   cout << "pua=" << pua << std::endl;
   GridCellListSet<R> zua=inner_approximation(z,gr);
   cout << "zua=" << zua << std::endl;
+
+  // test GridMaskSet clone
+  {
+    Grid<R> g(Vector<R>("[0.25,0.25]"));
+    Rectangle<R> bb("[-2,2]x[-2,2]");
+    Rectangle<R> r("[-1.375,0.625]x[0.5,1.375]");
+    
+    GridMaskSet<R> gms(g,bb);
+    gms.adjoin_outer_approximation(r);
+    GridMaskSet<R>* gms_clone=gms.clone();
+    ARIADNE_TEST_ASSERT(gms_clone->size()==gms.size());
+    ARIADNE_EVALUATE(*gms_clone);
+    delete gms_clone;
+  }
 
   return 0;
 }

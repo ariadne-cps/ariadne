@@ -68,6 +68,8 @@ int main() {
 template<class R>
 int test_hybrid_evolution() 
 {  
+  //set_hybrid_evolver_verbosity(4);
+
   PolyhedralSet<R> space(Rectangle<R>("[-7.5,7.5]x[-7.5,7.5]"));
   AffineMap<R> identity(Matrix<R>("[1,0;0,-1]"),Vector<R>("[0,0]"));
 
@@ -118,18 +120,14 @@ int test_hybrid_evolution()
   initial_set.new_location(mode2_id,finite_grid);
   initial_set[mode1_id].adjoin_over_approximation(initial_rectangle1);
   //initial_set[mode2_id].adjoin_over_approximation(initial_rectangle2);
-  cout << "initial_set.discrete_locations()=" << initial_set.locations() << endl;
-  cout << "initial_set[mode1_id].size()=" << initial_set[mode1_id].size() << " cells out of " << initial_set[mode1_id].capacity() << endl;
-  cout << "initial_set[mode21_id].size()=" << initial_set[mode2_id].size() << " cells out of " << initial_set[mode2_id].capacity() << endl;
+  cout << "initial_set=" << initial_set << endl;
 
   HybridGridMaskSet<R> bounding_set;
   bounding_set.new_location(mode1_id,finite_grid);
   bounding_set.new_location(mode2_id,finite_grid);
   bounding_set[mode1_id].adjoin_over_approximation(bounding_box);
   bounding_set[mode2_id].adjoin_over_approximation(bounding_box);
-  cout << "bounding_set.discrete_locations()=" << bounding_set.locations() << endl;
-  cout << "bounding_set[mode1_id].size()=" << bounding_set[mode1_id].size() << " cells out of " << bounding_set[mode1_id].capacity() << endl;
-  cout << "bounding_set[mode21_id].size()=" << bounding_set[mode2_id].size() << " cells out of " << bounding_set[mode2_id].capacity() << endl;
+  cout << "bounding_set=" << bounding_set << endl;
   cout << endl;
 
   assert((bool)(subset(initial_set[mode1_id],bounding_set[mode1_id])));
@@ -144,6 +142,9 @@ int test_hybrid_evolution()
   eps.open("test_hybrid_evolution-1.eps",bounding_box.expand(0.5));
   eps.set_fill_colour("white");
   eps << bounding_box;
+  eps.set_fill_colour("cyan");
+  eps << automaton.mode(mode1_id).invariant();
+  //eps << invariant1;
   eps.set_fill_colour("red");
   eps << continuous_chainreach[mode2_id];
   eps.set_fill_colour("green");
@@ -154,10 +155,13 @@ int test_hybrid_evolution()
   eps.close();
 
 
+
   HybridGridMaskSet<R> initial_activated_set;
-  initial_activated_set.new_location(mode1_id,grid);
-  initial_activated_set.new_location(mode2_id,grid);
+  initial_activated_set.new_location(mode1_id,finite_grid);
+  initial_activated_set.new_location(mode2_id,finite_grid);
+  cout << "empty initial_activated_set=" << initial_activated_set << endl;
   initial_activated_set[mode1_id].adjoin(over_approximation(Rectangle<R>("[-6,-5]x[-3.5,-1.0]"),grid));
+  cout << "initial_activated_set=" << initial_activated_set << endl;
   cout << "initial_activated_set[mode1_id].size()=" << initial_activated_set[mode1_id].size() << " cells" << endl;
   cout << "Computing single discrete step" << endl;
   HybridGridMaskSet<R> discrete_reach=hybrid_evolver.discrete_step(automaton,initial_activated_set);
@@ -168,9 +172,12 @@ int test_hybrid_evolution()
   eps << bounding_box;
   eps.set_fill_colour("cyan");
   eps << static_cast<const Polyhedron<R>&>(activation11);
+  eps << activation11;
   eps << static_cast<const Polyhedron<R>&>(activation21);
+  eps << activation21;
   eps.set_fill_colour("magenta");
   eps << static_cast<const Polyhedron<R>&>(activation12);
+  eps << activation12;
   eps.set_fill_colour("red");
   eps << discrete_reach[mode2_id];
   eps.set_fill_colour("green");
@@ -181,6 +188,7 @@ int test_hybrid_evolution()
   
   
 
+  cout << "Computing chain reachable set" << endl;
   HybridGridMaskSet<R> chainreach=hybrid_evolver.chainreach(automaton,initial_set,bounding_set);
   cout << "Reached (" << chainreach[mode1_id].size() << "," << chainreach[mode2_id].size() << ") cells "
        << "out of (" << chainreach[mode1_id].capacity() << "," << chainreach[mode1_id].capacity() << ") "
@@ -190,10 +198,10 @@ int test_hybrid_evolution()
   eps.set_fill_colour("white");
   eps << bounding_box;
   eps.set_fill_colour("cyan");
-  eps << static_cast<const Polyhedron<R>&>(activation11);
-  eps << static_cast<const Polyhedron<R>&>(activation21);
+  eps << activation11;
+  eps << activation21;
   eps.set_fill_colour("magenta");
-  eps << static_cast<const Polyhedron<R>&>(activation12);
+  eps << activation12;
   eps.set_line_style(true);
   eps.set_fill_colour("red");
   eps << chainreach[mode2_id];

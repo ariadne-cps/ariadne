@@ -51,15 +51,40 @@ Geometry::HybridSetBase<S>::HybridSetBase(const HybridSpace& locations)
   {
     location_type q=loc_iter->id();
     dimension_type d=loc_iter->dimension();
-    this->_component_sets.insert(std::make_pair(q,S(d)));
+    this->new_location(q,d);
   }
 }
 
 
 template<class S> inline
 Geometry::HybridSetBase<S>::HybridSetBase(const HybridSetBase<S>& hs)
-  : _component_sets(hs._component_sets) 
+  : _component_sets() 
 {
+  for(typename HybridSetBase<S>::const_iterator loc_iter=hs.begin();
+      loc_iter!=hs.end(); ++loc_iter)
+  {
+    location_type q=loc_iter->first;
+    const S& s=*loc_iter->second;
+    this->new_location(q,s);
+  }
+}
+
+
+template<class S> inline
+Geometry::HybridSetBase<S>&
+Geometry::HybridSetBase<S>::operator=(const HybridSetBase<S>& hs)
+{
+  if(this!=&hs) {
+    this->_component_sets.clear();
+    for(typename HybridSetBase<S>::const_iterator loc_iter=hs.begin();
+        loc_iter!=hs.end(); ++loc_iter)
+    {
+      location_type q=loc_iter->first;
+      const S& s=*loc_iter->second;
+      this->new_location(q,s);
+    }
+  }
+  return *this;
 }
 
 
@@ -106,6 +131,18 @@ Geometry::HybridSetBase<S>::new_location(location_type q, const T& t)
   ARIADNE_CHECK_NEW_LOCATION(*this,q,"SetInterface<R>& HybridSet<R>::new_location<T>(location_type q, T t)");
   typedef typename S::real_type R;
   this->_component_sets.insert(std::make_pair(q,shared_ptr<S>(new S(t))));
+
+  return (*this)[q];
+}
+
+
+template<class S> template<class T1, class T2> inline
+S&
+Geometry::HybridSetBase<S>::new_location(location_type q, const T1& t1, const T2& t2)
+{
+  ARIADNE_CHECK_NEW_LOCATION(*this,q,"SetInterface<R>& HybridSet<R>::new_location<T>(location_type q, T1 t1, T2 t2)");
+  typedef typename S::real_type R;
+  this->_component_sets.insert(std::make_pair(q,shared_ptr<S>(new S(t1,t2))));
 
   return (*this)[q];
 }

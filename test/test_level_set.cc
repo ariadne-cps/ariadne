@@ -28,8 +28,8 @@
 
 #include <vector>
 
+#include "test.h"
 #include "test_float.h"
-#include "test_macros.h"
 
 #include "numeric/numerical_traits.h"
 #include "geometry/point.h"
@@ -78,15 +78,15 @@ test_level_set()
   // separates
   pt1=Point<A>("(0.77,0.30)");
   pt2=Point<A>("(-0.79,0.59)");
-  ARIADNE_ASSERT(!s.separates(pt1,pt2));
+  ARIADNE_TEST_ASSERT(!s.separates(pt1,pt2));
   pt2=Point<A>("(0.81,0.63)");
-  ARIADNE_ASSERT(s.separates(pt1,pt2));
+  ARIADNE_TEST_ASSERT(s.separates(pt1,pt2));
 
   // disjoint
   r=Rectangle<R>("[0.8,0.9]x[0.95,0.95]");
-  ARIADNE_ASSERT(s.disjoint(r));
+  ARIADNE_TEST_ASSERT(s.disjoint(r));
   r=Rectangle<R>("[0.59,0.61]x[-0.81,-0.79]");
-  ARIADNE_ASSERT(!bool(s.disjoint(r)));
+  ARIADNE_TEST_ASSERT(!bool(s.disjoint(r)));
 
 
   // approximations

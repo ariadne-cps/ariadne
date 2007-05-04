@@ -47,10 +47,10 @@ Geometry::GridMaskSet<R>::grid() const
 }
 
 template<class R> inline
-Geometry::GridBlock<R> 
-Geometry::GridMaskSet<R>::bounds() const 
+const Combinatoric::LatticeBlock& 
+Geometry::GridMaskSet<R>::block() const 
 {
-  return GridBlock<R>(*this->_grid_ptr,_lattice_set.block()); 
+  return _lattice_set.block(); 
 }
 
 template<class R> inline
@@ -59,6 +59,7 @@ Geometry::GridMaskSet<R>::lattice_set() const
 {
   return _lattice_set; 
 }
+
 
 template<class R> inline
 dimension_type 
@@ -72,13 +73,6 @@ size_type
 Geometry::GridMaskSet<R>::capacity() const 
 {
   return _lattice_set.capacity(); 
-}
-
-template<class R> inline
-const Combinatoric::LatticeBlock& 
-Geometry::GridMaskSet<R>::block() const 
-{
-  return _lattice_set.block(); 
 }
 
 //template<class R> inline const SizeArray& GridMaskSet<R>::sizes() const { return _lattice_set.sizes(); } 

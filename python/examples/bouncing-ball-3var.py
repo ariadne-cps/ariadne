@@ -75,8 +75,8 @@ reach_set=hybrid_evolver.chainreach(automaton,initial_set,bounding_set)
 print "Done."
 
 print "reach_set =",reach_set
-print "reach_set.size() =",reach_set.size()
-print "reach_set.capacity() =",reach_set.capacity()
+#print "reach_set.size() =",reach_set.size()
+#print "reach_set.capacity() =",reach_set.capacity()
 
 # Eps output
 eps=EpsPlot()

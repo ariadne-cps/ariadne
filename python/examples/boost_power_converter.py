@@ -91,7 +91,7 @@ initial_set.new_location(mode2_id,fgrid)
 initial_set.new_location(mode3_id,fgrid)
 print initial_set.locations()
 print "Adjoining initial rectangle"
-initial_set[mode1_id].adjoin_over_approximation(initial_rectangle)
+initial_set[mode1_id].adjoin_outer_approximation(initial_rectangle)
 print "initial_set.locations() =",initial_set.locations()
 print "initial_set[mode1_id].size(),capacity()=",initial_set[mode1_id].size(),initial_set[mode1_id].capacity()
 print "initial_set[mode2_id].size(),capacity()=",initial_set[mode2_id].size(),initial_set[mode2_id].capacity()

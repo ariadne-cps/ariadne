@@ -58,10 +58,10 @@ print "initial_set.locations() =",initial_set.locations()
 print "initial_set[mode1_id].size(),capacity()=",initial_set[mode2_id].size(),initial_set[mode2_id].capacity()
 
 
-print "Creating initial hybrid cell list set"
-initial_cell_list_set=HybridGridCellListSet(initial_set)
+#print "Creating initial hybrid cell list set"
+#initial_cell_list_set=HybridGridCellListSet(initial_set)
 
-print "initial_cell_list_set.locations() =",initial_cell_list_set.locations()
+#print "initial_cell_list_set.locations() =",initial_cell_list_set.locations()
 
 print "Creating bounding hybrid set",
 bounding_set=HybridGridMaskSet();
@@ -96,7 +96,7 @@ continuous_chainreach_set=hybrid_evolver.continuous_chainreach(automaton,initial
 print
 
 print "Computing single discrete step..."
-discrete_step_set=hybrid_evolver.discrete_step(automaton,initial_cell_list_set)
+discrete_step_set=hybrid_evolver.discrete_step(automaton,initial_set)
 print
 
 print "discrete_step_set",discrete_step_set

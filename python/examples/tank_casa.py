@@ -39,7 +39,7 @@ initial_rectangle=Rectangle("[0,0.001]x[0,36]");
 
 #definizione dello spazio continuo da analizzare
 grid=Grid(Vector("[0.02,0.1]"));
-block=LatticeBlock("[-1,4]x[-1,45]");
+block=LatticeBlock("[-10,200]x[-10,450]");
 
 #definizione della griglia nel Lattice
 fgrid=FiniteGrid(grid,block)
@@ -73,22 +73,24 @@ res=hybrid_evolver.chainreach(automaton,initial_set,bounding_box_set)
 print "Exporting to postscript output...",
 #
 epsbb=Rectangle("[0,5]x[0,50]") # eps bounding box
-eps=EpsPlot("affine_hybrid_automaton-1.eps",epsbb)
+eps=EpsPlot()
+eps.open("affine_hybrid_automaton-1.eps",epsbb)
 eps.set_line_style(True)
 eps.set_fill_colour("cyan")
 eps.write(jump_set)
 eps.set_fill_colour("yellow")
-eps.write(res[0])
+eps.write(res[mode1_id])
 eps.set_fill_colour("blue")
-eps.write(initial_set[0])
+eps.write(initial_set[mode1_id])
 eps.close()
 
-eps2=EpsPlot("affine_hybrid_automaton-2.eps",epsbb)
+eps2=EpsPlot()
+eps2.open("affine_hybrid_automaton-2.eps",epsbb)
 eps2.set_line_style(True)
 eps2.set_fill_colour("cyan")
 eps2.write(jump_set)
 eps2.set_fill_colour("yellow")
-eps2.write(res[1])
+eps2.write(res[mode2_id])
 eps2.close()
 
 print " done."

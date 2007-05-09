@@ -68,13 +68,6 @@ print "initial_set.locations() =",initial_set.locations()
 print "initial_set[mode1_id].size(),capacity()=",initial_set[mode1_id].size(),initial_set[mode1_id].capacity()
 print "initial_set[mode2_id].size(),capacity()=",initial_set[mode2_id].size(),initial_set[mode2_id].capacity()
 
-print "Creating initial hybrid cell list set"
-initial_cell_list_set=HybridGridCellListSet(initial_set)
-#initial_cell_list_set.new_location(mode1_id,grid)
-#initial_cell_list_set.new_location(mode2_id,grid)
-#initial_cell_list_set[mode2_id].adjoin_over_approximation(initial_rectangle2)
-print "initial_cell_list_set.locations() =",initial_cell_list_set.locations()
-
 print "Creating bounding hybrid set",
 bounding_set=HybridGridMaskSet();
 bounding_set.new_location(mode1_id,fgrid)
@@ -113,14 +106,26 @@ eps.close()
 print
 
 print "Computing single discrete step"
-discrete_step_set=hybrid_evolver.discrete_step(automaton,initial_cell_list_set)
+discrete_step_set=hybrid_evolver.discrete_step(automaton,initial_set)
+
+print "Exporting to postscript output...",
+eps.open("affine_hybrid_automaton-2.eps",epsbb)
+eps.set_line_style(True)
+eps.set_fill_colour("red")
+eps.write(discrete_step_set[mode2_id])
+eps.set_fill_colour("green")
+eps.write(discrete_step_set[mode1_id])
+eps.set_fill_colour("blue")
+eps.write(initial_set[mode1_id])
+eps.write(initial_set[mode2_id])
+eps.close()
+print
 
 print "Computing chainreach set"
 chainreach_set=hybrid_evolver.chainreach(automaton,initial_set,bounding_set)
 
 print "Exporting to postscript output...",
-epsbb=Rectangle("[-8.1,8.1]x[-8.1,8.1]") # eps bounding box
-eps.open("affine_hybrid_automaton-2.eps",epsbb)
+eps.open("affine_hybrid_automaton-3.eps",epsbb)
 eps.set_line_style(True)
 eps.set_fill_colour("cyan")
 eps.write(activation11)

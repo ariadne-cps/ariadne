@@ -26,7 +26,7 @@ bounding_box=Rectangle("[-2,4]x[-2,4]")
 
 # Defintion of the underlying grid
 grid=Grid(Vector("[0.25,0.25]"))
-block=LatticeBlock("[-6,14]x[-6,14]")
+block=LatticeBlock("[-10,80]x[-10,80]")
 fgrid=FiniteGrid(grid,block)
 
 # Initial set 
@@ -118,12 +118,10 @@ eps.write(fgrid)
 eps.close()
 
 print "Computing chainreachable set with bounding box",inv,"using Integrator..."
-block=LatticeBlock("[-2,6]x[-2,6]")
-fgrid=FiniteGrid(grid,block)
 ginit=GridMaskSet(fgrid)
 ginit.adjoin_over_approximation(init)
 ginv=GridMaskSet(fgrid)
-ginv.adjoin_over_approximation(closed_intersection(inv,Polyhedron(bound)))
+ginv.adjoin_outer_approximation(closed_intersection(inv,Polyhedron(bound)))
 
 #redirect_log("chainreach_example.log")
 reach=integrator.chainreach(dyn,ginit,ginv)

@@ -182,6 +182,16 @@ namespace Ariadne {
     return Res(a2/a1);
   }
 
+  template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
+  Res pow(const Arg1& a1, const Arg2& a2) {
+    return Res(pow(Tmp1(a1),Tmp2(a2)));
+  }
+
+  template<class Res, class Arg1, class Arg2> inline
+  Res pow(const Arg1& a1, const Arg2& a2) {
+    return Res(pow(a1,a2));
+  }
+
 
 
   template<class Res,class Arg1,class Arg2> inline
@@ -215,9 +225,44 @@ namespace Ariadne {
   }
 
 
-  template<class Res,class Arg> inline
+  template<class Res,class Arg,class Tmp> inline
+  Res exp(const Arg& a) {
+    return exp(static_cast<Tmp>(a));
+  }
+
+  template<class Res,class Arg,class Tmp> inline
+  Res log(const Arg& a) {
+    return log(static_cast<Tmp>(a));
+  }
+
+  template<class Res,class Arg,class Tmp> inline
   Res sin(const Arg& a) {
-    return sin(a);
+    return sin(static_cast<Tmp>(a));
+  }
+
+  template<class Res,class Arg,class Tmp> inline
+  Res cos(const Arg& a) {
+    return cos(static_cast<Tmp>(a));
+  }
+
+  template<class Res,class Arg,class Tmp> inline
+  Res tan(const Arg& a) {
+    return tan(static_cast<Tmp>(a));
+  }
+
+  template<class Res,class Arg,class Tmp> inline
+  Res asin(const Arg& a) {
+    return asin(static_cast<Tmp>(a));
+  }
+
+  template<class Res,class Arg,class Tmp> inline
+  Res acos(const Arg& a) {
+    return acos(static_cast<Tmp>(a));
+  }
+
+  template<class Res,class Arg,class Tmp> inline
+  Res atan(const Arg& a) {
+    return atan(static_cast<Tmp>(a));
   }
 
 }

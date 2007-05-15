@@ -50,7 +50,7 @@ namespace Ariadne {
     {
       typedef typename Numeric::traits<R>::arithmetic_type A;
      public:
-      /*! \brief Construct the set \f$f(x)\geq0\f$ from the function \f$\f$. */
+      /*! \brief Construct the set \f$f(x)\geq0\f$ from the function \f$f\f$. */
       LevelSet(const System::FunctionInterface<R>& f);
 
       /*! \brief Destructor. */

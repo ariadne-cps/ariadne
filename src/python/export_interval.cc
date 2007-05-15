@@ -77,44 +77,35 @@ void export_interval()
     .def("__rdiv__", &rdiv<I,I,int,I,R>)
     .def("__rdiv__", &rdiv<I,I,double,I,R>)
     .def("__rdiv__", &rdiv<I,I,R>)
+    .def("__pow__", &pow<I,I,int,I,int>)
+    .def("__pow__", &pow<I,I,Integer,I,Integer>)
     .def("lower", &Interval<R>::lower, return_value_policy<copy_const_reference>())
     .def("upper", &Interval<R>::upper, return_value_policy<copy_const_reference>())
     .def(self_ns::str(self))    // __self_ns::str__
   ;
   
-/*
-  IFUN iabs(&boost::numeric::abs);
-  IFUN iexp(&boost::numeric::exp);
-  IFUN ilog(&boost::numeric::log);
-  IFUN isin(&boost::numeric::sin);
-  IFUN icos(&boost::numeric::cos);
-  IFUN itan(&boost::numeric::tan);
-  IFUN iasin(&boost::numeric::asin);
-  IFUN iacos(&boost::numeric::acos);
-  IFUN iatan(&boost::numeric::atan);
-  IFUN isinh(&boost::numeric::sinh);
-  IFUN icosh(&boost::numeric::cosh);
-  IFUN itanh(&boost::numeric::tanh);
-  IFUN iasinh(&boost::numeric::asinh);
-  IFUN iacosh(&boost::numeric::acosh);
-  IFUN iatanh(&boost::numeric::atanh);
+  def("pow",&pow<I,R,int,I,int>);
+  def("pow",&pow<I,I,int,I,int>);
 
-  def("abs", iabs, "interval absolute value function");
-  def("exp", iexp);
-  def("log", ilog);
-  def("sin", isin);
-  def("cos", icos);
-  def("tan", itan);
-  def("asin", iasin);
-  def("acos", iacos);
-  def("atan", iatan);
-  def("sinh", isinh);
-  def("cosh", icosh);
-  def("tanh", itanh);
-  def("asinh", iasinh);
-  def("acosh", iacosh);
-  def("atanh", iatanh);
-*/
+  def("pow",&pow<I,R,Integer,I,Integer>);
+  def("pow",&pow<I,I,Integer,I,Integer>);
+
+  def("exp",&exp<I,R,I>);
+  def("exp",&exp<I,I,I>);
+  def("log",&log<I,R,I>);
+  def("log",&log<I,I,I>);
+  def("sin",&sin<I,R,I>);
+  def("sin",&sin<I,I,I>);
+  def("cos",&cos<I,R,I>);
+  def("cos",&cos<I,I,I>);
+  def("tan",&tan<I,R,I>);
+  def("tan",&tan<I,I,I>);
+  def("asin",&asin<I,R,I>);
+  def("asin",&asin<I,I,I>);
+  def("acos",&acos<I,R,I>);
+  def("acos",&acos<I,I,I>);
+  def("atan",&atan<I,R,I>);
+  def("atan",&atan<I,I,I>);
 
 }
 

@@ -1,8 +1,7 @@
 /***************************************************************************
  *            interval.h
  *
- *  Wed 4 May 2005
- *  Copyright 2005  Alberto Casagrande, Pieter Collins
+ *  Copyright 2005-7  Alberto Casagrande, Pieter Collins
  *  Email casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 

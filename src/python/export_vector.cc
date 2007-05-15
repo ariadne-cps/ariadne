@@ -122,6 +122,9 @@ void export_vector()
     .def(self_ns::str(self))
   ;
 
+  def("zero_vector",&zero_vector<Float>);
+  def("unit_vector",&unit_vector<Float>);
+
   // Need 'Float' here to extract vector of proper class
   def("extract_vector",&extract_vector<Float>,"Extract an Ariadne vector from a Python list");
 }

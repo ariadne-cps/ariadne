@@ -157,6 +157,22 @@ namespace Ariadne {
       typedef typename traits<X>::number_type number_type; 
     };
 
+    template<> struct traits< int, Rational > { 
+      typedef Rational arithmetic_type; 
+    };
+    
+    template<> struct traits< Rational, int > { 
+      typedef Rational arithmetic_type; 
+    };
+    
+    template<> struct traits< double, Rational > { 
+      typedef Rational arithmetic_type; 
+    };
+    
+    template<> struct traits< Rational, double > { 
+      typedef Rational arithmetic_type; 
+    };
+    
     template<> struct traits< Float64, Rational > { 
       typedef Rational arithmetic_type; 
     };
@@ -174,12 +190,13 @@ namespace Ariadne {
     };
     
 
-    template<class R> struct traits< R,Interval<R> > { 
-      typedef Interval<R> arithmetic_type; 
+
+    template<class RF, class RI> struct traits< RF,Interval<RI> > { 
+      typedef Interval<RI> arithmetic_type; 
     };
     
-    template<class R> struct traits< Interval<R>, R > { 
-      typedef Interval<R> arithmetic_type; 
+    template<class RF, class RI> struct traits< Interval<RI>, RF > { 
+      typedef Interval<RI> arithmetic_type; 
     };    
     
 

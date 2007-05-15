@@ -134,6 +134,26 @@ namespace Ariadne {
 
     
     template<class C, class X, class V> inline 
+    Differential<X,V> operator+(const C& c, const Differential<X,V>& x) {
+      return Differential<X,V>(c+x.value(),x.derivative());
+    }
+
+    template<class C, class X, class V> inline 
+    Differential<X,V> operator+(const Differential<X,V>& x, const C& c) {
+      return Differential<X,V>(x.value()+c,x.derivative());
+    }
+
+    template<class C, class X, class V> inline 
+    Differential<X,V> operator-(const C& c, const Differential<X,V>& x) {
+      return Differential<X,V>(c-x.value(),-x.derivative());
+    }
+
+    template<class C, class X, class V> inline 
+    Differential<X,V> operator-(const Differential<X,V>& x, const C& c) {
+      return Differential<X,V>(x.value()-c,x.derivative());
+    }
+
+    template<class C, class X, class V> inline 
     Differential<X,V> operator*(const C& c, const Differential<X,V>& x) {
       return Differential<X,V>(c*x.value(),c*x.derivative());
     }
@@ -141,6 +161,12 @@ namespace Ariadne {
     template<class C, class X, class V> inline 
     Differential<X,V> operator*(const Differential<X,V>& x, const C& c) {
       return Differential<X,V>(c*x.value(),c*x.derivative());
+    }
+    
+    template<class C, class X, class V> inline 
+    Differential<X,V> operator/(const C& c, const Differential<X,V>& x) {
+      // Use this form to get right dimension of constant.
+	  return (c+0*x)/x;
     }
     
     template<class C, class X, class V> inline 
@@ -355,6 +381,51 @@ namespace Ariadne {
     }
 
 
+    template<class X, class V, class H, class C> inline 
+    SecondDifferential<X,V,H> operator+(const C& c, const SecondDifferential<X,V,H>& x) {
+      return SecondDifferential<X,V,H>(c+x.value(),x.first_derivative(),x.second_derivative());
+    }
+ 
+    template<class X, class V, class H, class C> inline 
+    SecondDifferential<X,V,H> operator+(const SecondDifferential<X,V,H>& x, const C& c) {
+      return SecondDifferential<X,V,H>(x.value()+c,x.first_derivative(),x.second_derivative());
+    }
+ 
+    template<class X, class V, class H, class C> inline 
+    SecondDifferential<X,V,H> operator-(const C& c, const SecondDifferential<X,V,H>& x) {
+      return SecondDifferential<X,V,H>(c-x.value(),-x.first_derivative(),-x.second_derivative());
+    }
+ 
+    template<class X, class V, class H, class C> inline 
+    SecondDifferential<X,V,H> operator-(const SecondDifferential<X,V,H>& x, const C& c) {
+      return SecondDifferential<X,V,H>(x.value()-c,x.first_derivative(),x.second_derivative());
+    }
+ 
+    template<class X, class V, class H, class C> inline 
+    SecondDifferential<X,V,H> operator*(const C& c, const SecondDifferential<X,V,H>& x) {
+      return SecondDifferential<X,V,H>(c*x.value(),c*x.first_derivative(),c*x.second_derivative());
+    }
+ 
+    template<class X, class V, class H, class C> inline 
+    SecondDifferential<X,V,H> operator*(const SecondDifferential<X,V,H>& x, const C& c) {
+      return SecondDifferential<X,V,H>(x.value()*c,x.first_derivative()*c,x.second_derivative()*c);
+    }
+ 
+    template<class X, class V, class H, class C> inline 
+    SecondDifferential<X,V,H> operator/(const C& c, const SecondDifferential<X,V,H>& x) {
+      X r=1/x.value();
+      X dr=-r*r;
+      X ddr=-2*r*dr;
+      //std::cerr << "y="<<y<<" s="<<s<<" dy="<<dy<<" ds="<<ds<<" ddy="<<ddy<<std::endl;
+      return SecondDifferential<X,X,X>(c*r,c*dr*x.first_derivative(),
+		                               c*(dr*x.second_derivative()+ddr*pow(x.first_derivative(),2)));
+    }
+ 
+    template<class X, class V, class H, class C> inline 
+    SecondDifferential<X,V,H> operator/(const SecondDifferential<X,V,H>& x, const C& c) {
+      return SecondDifferential<X,V,H>(x.value()/c,x.first_derivative()/c,x.second_derivative()/c);
+    }
+
 
 
     template<class X>  
@@ -549,5 +620,3 @@ namespace Ariadne {
 }
 
 #endif /* ARIADNE_DIFFERENTIAL_H */
-
- 

@@ -370,6 +370,26 @@ namespace Ariadne {
     template<class R>
     inline 
     Vector<R>
+    zero_vector(size_type n)
+	{
+      return Vector<R>(n);
+	}
+	
+	
+    template<class R>
+    inline 
+    Vector<R>
+    unit_vector(size_type n, size_type i)
+	{
+      Vector<R> result(n);
+	  result[i]=1;
+      return result;
+	}
+	
+	
+    template<class R>
+    inline 
+    Vector<R>
     approximate_value(const Vector< Numeric::Interval<R> >& iv) 
     {
       Vector<R> result(iv.size());

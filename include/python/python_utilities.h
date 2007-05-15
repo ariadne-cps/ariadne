@@ -129,6 +129,16 @@ namespace Ariadne {
     return Res(a1+a2);
   }
 
+  template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
+  Res radd(const Arg1& a1, const Arg2& a2) {
+    return Res(Tmp2(a2)+Tmp1(a1));
+  }
+
+  template<class Res, class Arg1, class Arg2> inline
+  Res radd(const Arg1& a1, const Arg2& a2) {
+    return Res(a2+a1);
+  }
+
 
   template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
   Res sub(const Arg1& a1, const Arg2& a2) {
@@ -159,6 +169,16 @@ namespace Ariadne {
   template<class Res, class Arg1, class Arg2> inline
   Res mul(const Arg1& a1, const Arg2& a2) {
     return Res(a1*a2);
+  }
+
+  template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
+  Res rmul(const Arg1& a1, const Arg2& a2) {
+   return Res(Tmp2(a2)*Tmp1(a1));
+  }
+
+  template<class Res, class Arg1, class Arg2> inline
+  Res rmul(const Arg1& a1, const Arg2& a2) {
+    return Res(a2*a1);
   }
 
 

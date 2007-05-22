@@ -140,7 +140,7 @@ void export_differential()
     .def("__rdiv__", &rdiv<SD,SD,A>)
     .def("__pow__", &pow<SD,SD,int>)
     .def("value",(const A&(SD::*)()const) &SD::value, return_value_policy<copy_const_reference>())
-    .def("derivative", (const Vector<A>&(SD::*)()const) &SD::derivative, return_value_policy<copy_const_reference>())
+    .def("derivative", (const A&(SD::*)()const) &SD::derivative, return_value_policy<copy_const_reference>())
     .def(self_ns::str(self))
  ;
   

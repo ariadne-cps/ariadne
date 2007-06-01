@@ -62,7 +62,7 @@ void export_map()
     .def("smoothness", pure_virtual(&MapWrapper<R>::smoothness))
   ;
 
-  class_< FunctionMap<R> >("FunctionMap", init< const Function<R>&, Point<A> >())
+  class_< FunctionMap<R>, bases< Map<R> > >("FunctionMap", init< const Function<R>&, Point<A> >())
     .def("argument_dimension", &FunctionMap<R>::argument_dimension)
     .def("result_dimension", &FunctionMap<R>::result_dimension)
     .def("number_of_parameters", &FunctionMap<R>::number_of_parameters)

@@ -699,11 +699,12 @@ Input::ModelicaParser::read_primary()
   case Parser::INT: case Parser::RL: 
     read_constant();
     break;
-  case Parser::EXP: case Parser::LOG:
+  case Parser::ABS: case Parser::EXP: case Parser::LOG:
   case Parser::SIN: case Parser::COS: case Parser::TAN: 
   case Parser::ASIN: case Parser::ACOS: case Parser::ATAN:
     get_token();
     switch(tok.type) {
+    case Parser::ABS: code.op=VirtualMachine::ABS; break;
     case Parser::EXP: code.op=VirtualMachine::EXP; break;
     case Parser::LOG: code.op=VirtualMachine::LOG; break;
     case Parser::SIN: code.op=VirtualMachine::SIN; break;

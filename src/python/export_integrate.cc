@@ -35,6 +35,7 @@
 #include "evaluation/integrator.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
+#include "evaluation/euler_integrator.h"
 
 
 using namespace Ariadne;
@@ -121,6 +122,15 @@ void export_integrate()
   ;
 
   class_< AffineIntegrator<R>, bases<Integrator<R> > >("AffineIntegrator",init<T,T,R>())
+    .def(init<double,double,double>()) 
+    //.def("integrate",(Zonotope<I>(AffineIntegrator<R>::*)(const AffineVectorField<R>&,const Zonotope<I>&,const time_type&)const)
+    //                          (&AffineIntegrator<R>::integrate))
+    //.def("lower_integrate",(ListSet< Zonotope<I> >(AffineIntegrator<R>::*)(const AffineVectorField<R>&,const ListSet< Zonotope<I> >&,const time_type&)const)
+    //                          (&AffineIntegrator<R>::integrate))
+    //.def("lower_reach",(ListSet< Zonotope<I> >(AffineIntegrator<R>::*)(const AffineVectorField<R>&,const ListSet< Zonotope<I> >&,const time_type&)const)
+    //                          (&AffineIntegrator<R>::reach))
+  ;
+  class_< EulerIntegrator<R>, bases<Integrator<R> > >("EulerIntegrator",init<T,T,R>())
     .def(init<double,double,double>()) 
     //.def("integrate",(Zonotope<I>(AffineIntegrator<R>::*)(const AffineVectorField<R>&,const Zonotope<I>&,const time_type&)const)
     //                          (&AffineIntegrator<R>::integrate))

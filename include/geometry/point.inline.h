@@ -223,7 +223,7 @@ namespace Ariadne {
 
     template<class R1,class R2> inline
     LinearAlgebra::Vector<typename Numeric::traits<R1,R2>::arithmetic_type>
-    operator-(const Point<R1> pt1, const Point<R2>& pt2) 
+    operator-(const Point<R1>& pt1, const Point<R2>& pt2) 
     {
       ARIADNE_CHECK_EQUAL_DIMENSIONS(pt1,pt2,"Vector operator-(Point,Point)");
       return pt1.position_vector()-pt2.position_vector();

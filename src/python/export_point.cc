@@ -86,6 +86,7 @@ void export_point()
     .def("__ne__", &Point<R>::operator!=)
     .def("__add__",(Point<A>(*)(const Point<R>&,const Vector<R>&))&operator+)
     .def("__sub__",(Point<A>(*)(const Point<R>&,const Vector<R>&))&operator-)
+    .def("__sub__",(Vector<A>(*)(const Point<R>&,const Point<R>&))&operator-)
     .def(self_ns::str(self))
   ;
 }
@@ -114,6 +115,7 @@ void export_interval_point()
     .def("__sub__",(Point<I>(*)(const Point<R>&,const Vector<I>&))&operator-)
     .def("__sub__",(Point<I>(*)(const Point<I>&,const Vector<R>&))&operator-)
     .def("__sub__",(Point<I>(*)(const Point<I>&,const Vector<I>&))&operator-)
+    .def("__sub__",(Vector<I>(*)(const Point<I>&,const Point<I>&))&operator-)
     .def(self_ns::str(self))
   ;
 }

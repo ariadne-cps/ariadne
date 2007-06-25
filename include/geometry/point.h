@@ -151,7 +151,7 @@ namespace Ariadne {
     
     template<class R1,class R2>
     LinearAlgebra::Vector<typename Numeric::traits<R1,R2>::arithmetic_type>
-    operator-(const Point<R1> pt1, const Point<R2>& pt2);
+    operator-(const Point<R1>& pt1, const Point<R2>& pt2);
     
     template<class R1,class R2>
         Point<typename Numeric::traits<R1,R2>::arithmetic_type> 

@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#define DEBUG
+
 #include "numeric/rational.h"
 
 #include "linear_algebra/linear_program.h"
@@ -33,5 +35,5 @@ namespace Ariadne {
     
     template class LinearProgram<Rational>;
 
-  }
-}
+   }//namespace LinearAlgebra
+}//namespace Ariadne

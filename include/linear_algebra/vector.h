@@ -421,6 +421,13 @@ namespace Ariadne {
        return v.write(os);
     }
     
+    template<double*>
+    inline
+    std::ostream&
+    operator<<(std::ostream& os, const Vector<double*>& v)
+    {
+    }
+    
     template<class R>
     inline
     std::istream&

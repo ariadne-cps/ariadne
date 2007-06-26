@@ -142,10 +142,10 @@ namespace Ariadne {
     Matrix<R>::write(std::ostream& os) const
     {
       const Matrix<R>& A=*this;
-      os << "[";
+      os << "[" <<std::endl;
       for(uint i=0; i!=A.number_of_rows(); ++i) {
         for(uint j=0; j!=A.number_of_columns(); ++j) {
-          os << (j==0 ? (i==0 ? " " : "; ") : ",");
+          os << (j==0 ? (i==0 ? " " : ";\n ") : ",");
           //os << Ariadne::convert_to<double>(A(i,j));
           os << A(i,j);
         }

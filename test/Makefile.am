@@ -8,26 +8,47 @@ LDADD   = ../src/libariadne.la -lppl -lmpfr -lgmpxx
 check_PROGRAMS = \
 	test_array \
 	test_ddconv \
-	test_boost test_mpfr \
-	test_integer test_rational test_float \
+	test_boost \
+	test_mpfr \
+	test_integer \
+	test_rational \
+	test_float \
 	test_interval \
 	test_differential \
-	test_vector test_matrix test_tensor \
-	test_linear_algebra test_linear_program \
-	test_binary_word test_lattice test_subdivision_tree \
+	test_vector \
+	test_matrix \
+	test_tensor \
+	test_linear_algebra \
+	test_linear_program \
+	test_lpslv \
+	test_lpstp \
+	test_lpfsp \
+	test_lptst \
+	test_binary_word \
+	test_lattice \
+	test_subdivision_tree \
 	test_point \
-	test_rectangle test_zonotope test_parallelotope test_simplex \
-	test_polytope test_polyhedron \
-	test_list_set test_grid_set test_partition_tree_set \
+	test_list_set \
+	test_grid_set \
+	test_partition_tree_set \
+	test_rectangle \
+	test_zonotope \
+	test_parallelotope \
+	test_simplex \
+	test_polytope \
+	test_polyhedron \
+	test_hybrid_automaton \
 	test_constraint_set test_level_set \
 	test_function \
-	test_hybrid_automaton \
 	test_newton \
-	test_apply test_chainreach \
-	test_lohner_integrator test_affine_integrator \
+	test_apply \
+	test_lohner_integrator \
+	test_affine_integrator \
 	test_integrate \
+	test_chainreach \
 	test_hybrid_evolution \
-	test_epsfstream test_chompfstream 
+	test_epsfstream \
+	test_chompfstream 
 
 XFAIL_TESTS = 
 
@@ -47,6 +68,10 @@ test_matrix_SOURCES=test_matrix.cc
 test_tensor_SOURCES=test_tensor.cc
 test_linear_algebra_SOURCES=test_linear_algebra.cc
 test_linear_program_SOURCES=test_linear_program.cc
+test_lpslv_SOURCES=test_lpslv.cc
+test_lpstp_SOURCES=test_lpstp.cc
+test_lpfsp_SOURCES=test_lpfsp.cc
+test_lptst_SOURCES=test_lptst.cc
 test_binary_word_SOURCES=test_binary_word.cc
 test_lattice_SOURCES=test_lattice.cc
 test_subdivision_tree_SOURCES=test_subdivision_tree.cc

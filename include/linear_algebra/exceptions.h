@@ -37,10 +37,27 @@
 
 namespace Ariadne {
   namespace LinearAlgebra {
+    
     //@{ \name Exceptions
+    
     /*! \brief The sizes of the operands are incompatible. */
     struct IncompatibleSizes : public std::runtime_error {
       IncompatibleSizes(const std::string& str) : std::runtime_error(str) { }
+    };
+
+    /*! \brief The problem is unbound. */
+    struct UnboundProblem : public std::runtime_error {
+      UnboundProblem(const std::string& str) : std::runtime_error(str) { }
+    };
+
+    /*! \brief The problem has no feasible origin. */
+    struct InfeasibleOrigin : public std::runtime_error {
+      InfeasibleOrigin(const std::string& str) : std::runtime_error(str) { }
+    };
+
+    /*! \brief The problem has no feasible solution. */
+    struct InfeasibleSolution : public std::runtime_error {
+      InfeasibleSolution(const std::string& str) : std::runtime_error(str) { }
     };
 
     //@}

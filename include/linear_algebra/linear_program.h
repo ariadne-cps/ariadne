@@ -161,7 +161,7 @@ namespace Ariadne {
      * Solve a linear program in the standard form \f$\text{minimize } cx \text{ subject to } Ax=b;\ x\geq0\f$.
      *
      * The problem is stored as a tableau 
-     * \f\[\left(\begin{array}{c|c} A&b\\c^t&d\end{array}\right)\f\]
+     * \f$\left(\begin{array}{c|c} A&b\\\hline c^T&d \end{array}\right)\f$
      * where the constraints are \f$Ax+y = b\f$ and the cost of putting variable
      * \f$x_i\f$ into the basis is given by \f$c_i\f$, and the current value is \f$d\f$.
      *

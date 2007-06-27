@@ -54,9 +54,15 @@ print "bounding_set.locations() =",bounding_set.locations()
 #print "bounding_set[mode2_id].size(),capacity()=",bounding_set[m2.id()].size(),bounding_set[m2.id()].capacity()
 
 # Definition of the Hybrid Evolver
+<<<<<<< .mine
+maximum_step_size=0.25;
+lock_to_grid_time=0.25;
+maximum_set_radius=0.25;
+=======
 maximum_step_size=0.25;
 lock_to_grid_time=1.0;
 maximum_set_radius=0.5;
+>>>>>>> .r295
 
 apply=Applicator()
 integrator=AffineIntegrator(maximum_step_size,lock_to_grid_time,maximum_set_radius);

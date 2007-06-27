@@ -88,6 +88,8 @@ integrator=AffineIntegrator(maximum_step_size,lock_to_grid_time,maximum_set_radi
 #integrator=LohnerIntegrator(maximum_step_size,lock_to_grid_time,maximum_set_radius);
 hybrid_evolver=HybridEvolver(apply,integrator);
 
+<<<<<<< .mine
+=======
 print "Computing continuous chainreach set"
 continuous_chainreach_set=hybrid_evolver.continuous_chainreach(automaton,initial_set,bounding_set)
 print "Exporting to postscript output...",
@@ -108,6 +110,7 @@ print
 print "Computing single discrete step"
 discrete_step_set=hybrid_evolver.discrete_step(automaton,initial_set)
 
+>>>>>>> .r295
 print "Exporting to postscript output...",
 eps.open("affine_hybrid_automaton-2.eps",epsbb)
 eps.set_line_style(True)
@@ -125,7 +128,13 @@ print "Computing chainreach set"
 chainreach_set=hybrid_evolver.chainreach(automaton,initial_set,bounding_set)
 
 print "Exporting to postscript output...",
+<<<<<<< .mine
+epsbb=Rectangle("[-8.1,8.1]x[-8.1,8.1]") # eps bounding box
+eps = EpsPlot()
+eps.open("affine_hybrid_automaton.eps",epsbb)
+=======
 eps.open("affine_hybrid_automaton-3.eps",epsbb)
+>>>>>>> .r295
 eps.set_line_style(True)
 eps.set_fill_colour("cyan")
 eps.write(activation11)

@@ -86,6 +86,7 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_hybrid_evolver.cc \
 	 \
 	export_postscript_output.cc \
+	export_txt_output.cc \
 	export_models.cc
 
 

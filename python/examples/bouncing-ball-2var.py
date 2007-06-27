@@ -117,6 +117,14 @@ eps.close()
 
 print
 
+# Txt output
+txt=TxtPlot()
+txt.open("bouncing-ball.txt")
+txt.write(chainreach_set[l1.id()])
+txt.close()
+
+
+   
 
   	
 

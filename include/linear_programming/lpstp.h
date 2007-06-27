@@ -29,8 +29,8 @@
  *  \brief Linear programming solver step.
  */
 
-#ifndef ARIADNE_LPSLV_H
-#define ARIADNE_LPSLV_H
+#ifndef ARIADNE_LPSTP_H
+#define ARIADNE_LPSTP_H
 
 namespace Ariadne {
   namespace LinearProgramming {
@@ -62,10 +62,15 @@ namespace Ariadne {
      * \internal Use x and y (and maybe z) only if it is more efficient. This routine might not be so useful; maybe use matrix pointers instead.
      */
     template<class AP>
-    tribool lpstp(const LinearAlgebra::Matrix<AP>& A, const LinearAlgebra::Vector<AP>& b, const LinearAlgebra::Vector<AP>& c,
-    LinearAlgebra::Permutation& p, LinearAlgebra::Matrix<AP>& B
-    // Use these variables too if it's more efficient
-    , LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y, LinearAlgebra::Vector<AP>& z
+    tribool lpstp(const LinearAlgebra::Matrix<AP>& A, 
+                  const LinearAlgebra::Vector<AP>& b, 
+                  const LinearAlgebra::Vector<AP>& c,
+                  LinearAlgebra::Permutation& p, 
+                  LinearAlgebra::Matrix<AP>& B
+                  // Use these variables too if it's more efficient
+                  , LinearAlgebra::Vector<AP>& x
+                  , LinearAlgebra::Vector<AP>& y
+                  , LinearAlgebra::Vector<AP>& z
     );
     
     
@@ -86,9 +91,15 @@ namespace Ariadne {
      * \internal Use appropriate dual and slack variables if this makes other routines more efficient. This routine might not be so useful; maybe use matrix pointers instead.
      */
     template<class AP>
-    tribool lpstpc(const LinearAlgebra::Matrix<AP>& A, const LinearAlgebra::Vector<AP>& b, const LinearAlgebra::Vector<AP>& c,
-    const LinearAlgebra::Vector<AP>& l, const LinearAlgebra::Vector<AP>& u,
-    LinearAlgebra::Permutation& p, LinearAlgebra::Matrix<AP>& B, LinearAlgebra::Vector<AP>& x);
+    tribool 
+    lpstpc(const LinearAlgebra::Matrix<AP>& A, 
+           const LinearAlgebra::Vector<AP>& b, 
+           const LinearAlgebra::Vector<AP>& c,
+           const LinearAlgebra::Vector<AP>& l, 
+           const LinearAlgebra::Vector<AP>& u,
+           LinearAlgebra::Permutation& p, 
+           LinearAlgebra::Matrix<AP>& B, 
+           LinearAlgebra::Vector<AP>& x);
     
     
     
@@ -118,18 +129,20 @@ namespace Ariadne {
      * \internal Use x, y and z only if it is more efficient for other routines.
      */
     template<class AP>
-    tribool lpstp(uint m, uint n,
-    const AP* Aptr, uint Arinc, uint Acinc,
-    const AP* bptr, uint binc,
-    const AP* cptr, uint cinc,
-    const AP* dptr,
-    uint* pptr,
-    AP* Bptr, uint Brinc, uint Bcinc
-    // use only if it's more efficient
-    , AP* xptr, uint xinc
-    , AP* yptr, uint yinc
-    , AP* zptr, uint zinc
-    );
+    tribool 
+    lpstp(uint m, uint n,
+          AP* Aptr, uint Arinc, uint Acinc,
+          AP* bptr, uint binc,
+          AP* cptr, uint cinc,
+          AP* dptr,
+          uint* pptr,
+          AP* Bptr, uint Brinc, uint Bcinc
+          // use only if it's more efficient
+          // input/output primal, dual and slack variables 
+          // , AP* xptr, uint xinc
+          // , AP* yptr, uint yinc
+          // , AP* zptr, uint zinc
+         );
     
     
     
@@ -148,25 +161,39 @@ namespace Ariadne {
      * \param x is the current point.
      */
     template<class AP>
-    tribool lpstpc(uint m, uint n,
-    const AP* Aptr, uint Arinc, uint Acinc,
-    const AP* bptr, uint binc,
-    const AP* cptr, uint cinc,
-    const AP* lptr, uint linc,
-    const AP* uptr, uint uinc,
-    const AP* dptr,
-    uint* pptr,
-    AP* Bptr, uint Brinc, uint Bcinc
-    , AP* xptr, uint xinc
-    // input/output dual variables if it's more efficient
-    , AP* yptr, uint yinc
-    // input/output slack variables if it's more efficient
-    , AP* zptr, uint zinc
-    );
+    tribool 
+    lpstpc(uint m, uint n,
+           AP* Aptr, uint Arinc, uint Acinc,
+           AP* bptr, uint binc,
+           AP* cptr, uint cinc,
+           AP* lptr, uint linc,
+           AP* uptr, uint uinc,
+           AP* dptr,
+           uint* pptr,
+           AP* Bptr, uint Brinc, uint Bcinc
+           // use only if it's more efficient
+           // input/output primal, dual and slack variables 
+           , AP* xptr, uint xinc
+           , AP* yptr, uint yinc
+           , AP* zptr, uint zinc
+          );
     
+    // Forward declaration of auxiliary function
+    template<class AP>
+    tribool lpstp(uint m, uint n,
+                  AP* Aptr, uint Arinc, uint Acinc,
+                  AP* bptr, uint binc,
+                  AP* cptr, uint cinc,
+                  AP* dptr,
+                  uint* pptr,
+                  AP* Bptr, uint Brinc, uint Bcinc,
+                  int aux // index of additional variable to solve the auxiliary problem
+                 );
+
     
   } // namespace LinearProgramming
 } // namespace Ariadne
 
+#include "lpstp.template.h"
 
-#endif /* ARIADNE_LPSLV_H */
+#endif /* ARIADNE_LPSTP_H */

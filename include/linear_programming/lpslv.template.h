@@ -21,19 +21,25 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <cassert>
 #include "../linear_algebra/exceptions.h"
+
+#include "lputil.h"
+#include "lpfsp.h"
+#include "lpstp.h"
 
 namespace Ariadne {
   namespace LinearProgramming {
     
-    template<class R>
-    LinearAlgebra::Matrix<R> to_tableau(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b, const LinearAlgebra::Vector<R>& c);
-    
     
     template<class R, class AP>
-    AP lpslv(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b, const LinearAlgebra::Vector<R>& c,
-    LinearAlgebra::Permutation& p, LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y) {
-      
+    AP lpslv(const LinearAlgebra::Matrix<R>& A, 
+             const LinearAlgebra::Vector<R>& b, 
+             const LinearAlgebra::Vector<R>& c,
+             LinearAlgebra::Permutation& p, 
+             LinearAlgebra::Vector<AP>& x, 
+             LinearAlgebra::Vector<AP>& y) 
+    {
       size_type m = A.number_of_rows();
       size_type n = A.number_of_columns();
       LinearAlgebra::Matrix<R>t;
@@ -45,6 +51,7 @@ namespace Ariadne {
       R* bptr;
       R* cptr;
       R* dptr;
+      uint* pptr;
       tribool ans;
       
       // check feasibility
@@ -63,6 +70,7 @@ namespace Ariadne {
         bptr = td + (n+m)*cinc;
         cptr = td+m*rinc;
         dptr = td + m*rinc + (m+n)*cinc;
+        pptr = p.begin();
       }
       else {        // setup for infeasible origin
         
@@ -74,7 +82,7 @@ namespace Ariadne {
       
       // simplex steps
       do {
-        ans = lpstp(m, n, td, rinc, cinc, bptr, rinc, cptr, cinc, dptr, p, B.begin(), Brinc, Bcinc);
+        ans = lpstp(m, n, td, rinc, cinc, bptr, rinc, cptr, cinc, dptr, pptr, B.begin(), Brinc, Bcinc);
         // ToDo: check if d increments and if not then limit recursion
       } while (ans == false);
       
@@ -84,9 +92,10 @@ namespace Ariadne {
       if (ans == true) { // found optimal solution
         
         // create x vector
-        for (int i = 0; i < x.size(); i++) {
+        for (uint i = 0; i < x.size(); i++) {
           // find in which columns the decision variables can be found
-          int j, index = p.getindex(i);
+          uint j;
+          int index = p.getindex(i);
           // decision variable in base?
           if (index >= x.size()) {
             for (j = 0; j < b.size(); j++)
@@ -118,17 +127,30 @@ namespace Ariadne {
     }
     
     
+
     template<class R, class AP>
-    AP lpslvc(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b, const LinearAlgebra::Vector<R>& c,
-    const LinearAlgebra::Vector<R>& l, const LinearAlgebra::Vector<R>& u,
-    LinearAlgebra::Permutation& p, LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y) {
+    AP 
+    lpslvc(const LinearAlgebra::Matrix<R>& A, 
+           const LinearAlgebra::Vector<R>& b, 
+           const LinearAlgebra::Vector<R>& c,
+           const LinearAlgebra::Vector<R>& l, 
+           const LinearAlgebra::Vector<R>& u,
+           LinearAlgebra::Permutation& p, 
+           LinearAlgebra::Vector<AP>& x, 
+           LinearAlgebra::Vector<AP>& y) 
+    {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
     
     template<class R>
-    void lpslv(int m, int n, R* A, int rincA, int cincA, R* B, int incB, R* C, int incC, R& d, int* piv) {
-      
+    void lpslv(int m, int n, 
+               R* A, int rincA, int cincA, 
+               R* B, int incB, 
+               R* C, int incC, 
+               R& d, 
+               int* piv) 
+    {
       if (verbosity>1) {
         std::clog << "lpslv(" << m << "," << n << ", " << A-A << "," << rincA << "," << cincA << ", "
         << B-A << "," << incB << ", " << C-A << "," << incC << ", "
@@ -222,47 +244,7 @@ namespace Ariadne {
       
       return;
     }
-    
-    template<class R>
-    LinearAlgebra::Matrix<R>to_tableau(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b, const LinearAlgebra::Vector<R>& c) {
-      size_type nc = b.size(); // number of constraints
-      size_type nv = c.size(); // number of variables
-      
-      ARIADNE_CHECK_SIZE(b, A.number_of_rows(), __PRETTY_FUNCTION__)
-      ARIADNE_CHECK_SIZE(c, A.number_of_columns(), __PRETTY_FUNCTION__)
-      
-      if (verbosity > 2)
-        std::clog << "to_tableau in:" << std::endl << " A=" << A << std::endl << " b=" << b << std::endl << " c=" << c << std::endl;
-      
-      size_type n = nv+nc;
-      // tableau  needs a row for each constraint + 1 and a column for each variable + slacks + 1
-      LinearAlgebra::Matrix<R> tableau =  LinearAlgebra::Matrix<R>(nc+1, n+1);
-      //  NB: uninitialized elements are assumed to be 0
-      
-      for (size_type i = 0; i != nc; i++) {
-        
-        // paste row of input matrix A
-        for (size_type j = 0; j != nv; j++)
-          tableau(i, j) = A(i, j);
-        
-        // slacks
-        tableau(i, i + nv) = 1;
-        
-        // constraints
-        tableau(i, n) = b(i);
-      }
-      
-      // objective function
-      for (size_type j = 0; j != nv; j++)
-        tableau(nc, j) = -c(j);
-      
-      if (verbosity > 2)
-        std::clog << "to_tableau out:" << tableau << std::endl;
-      
-      return tableau;
-    }
-    
-    
+       
   } // namespace LinearProgramming
 } // namespace Ariadne
 

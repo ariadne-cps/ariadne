@@ -45,7 +45,10 @@ namespace Ariadne {
      * \param x is an \f$n\f$-vector.
      */
     template<class R, class AP>
-    tribool lptst(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b, const LinearAlgebra::Vector<AP>& x);
+    tribool 
+    lptst(const LinearAlgebra::Matrix<R>& A, 
+          const LinearAlgebra::Vector<R>& b, 
+          const LinearAlgebra::Vector<AP>& x);
 
 
     /*! \ingroup LinearProgramming
@@ -59,11 +62,17 @@ namespace Ariadne {
      * \param y is an \f$n\f$-vector.
      */
     template<class R, class AP>
-    tribool lptstopt(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b, const LinearAlgebra::Vector<R>& c, const LinearAlgebra::Vector<AP>& x, const LinearAlgebra::Vector<AP>& y);
+    tribool 
+    lptstopt(const LinearAlgebra::Matrix<R>& A, 
+             const LinearAlgebra::Vector<R>& b, 
+             const LinearAlgebra::Vector<R>& c, 
+             const LinearAlgebra::Vector<AP>& x, 
+             const LinearAlgebra::Vector<AP>& y);
 
 
   } // namespace LinearProgramming
 } // namespace Ariadne
 
+#include "lptst.template.h"
 
 #endif /* ARIADNE_LPTST_H */

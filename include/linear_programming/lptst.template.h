@@ -24,7 +24,6 @@
 namespace Ariadne {
   namespace LinearProgramming {
     
-    
     template<class R, class AP>
     tribool lptst(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b, LinearAlgebra::Vector<AP>& x) {
       tribool ans;

@@ -29,8 +29,10 @@
  *  \brief Linear programming feasibility solver.
  */
 
-#ifndef ARIADNE_LPSLV_H
-#define ARIADNE_LPSLV_H
+#ifndef ARIADNE_LPFSP_H
+#define ARIADNE_LPFSP_H
+
+#include "../linear_algebra/declarations.h"
 
 namespace Ariadne {
   namespace LinearProgramming {
@@ -48,9 +50,12 @@ namespace Ariadne {
      *
      */
     template<class AP>
-    bool lpfsp(const LinearAlgebra::Matrix<AP>& A, const LinearAlgebra::Vector<AP>& b,
-     LinearAlgebra::Permutation& p,
-    LinearAlgebra::Vector<AP>& x,  LinearAlgebra::Vector<AP>& y);
+    bool 
+    lpfsp(const LinearAlgebra::Matrix<AP>& A, 
+          const LinearAlgebra::Vector<AP>& b,
+          LinearAlgebra::Permutation& p,
+          LinearAlgebra::Vector<AP>& x,  
+          LinearAlgebra::Vector<AP>& y);
     
     
     /*! \ingroup LinearProgramming
@@ -68,10 +73,14 @@ namespace Ariadne {
      * \internal Only implement this if necessary!
      */
     template<class AP>
-    bool lpfsc(const LinearAlgebra::Matrix<AP>& A, const LinearAlgebra::Vector<AP>& b,
-    LinearAlgebra::Vector<AP>& l, LinearAlgebra::Vector<AP>& u,
-    LinearAlgebra::Permutation& p,
-    LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y);
+    bool 
+    lpfsc(const LinearAlgebra::Matrix<AP>& A, 
+          const LinearAlgebra::Vector<AP>& b,
+          LinearAlgebra::Vector<AP>& l, 
+          LinearAlgebra::Vector<AP>& u,
+          LinearAlgebra::Permutation& p,
+          LinearAlgebra::Vector<AP>& x, 
+          LinearAlgebra::Vector<AP>& y);
     
     
     /*! \ingroup LinearProgramming
@@ -87,9 +96,12 @@ namespace Ariadne {
      * \internal Only implement this if necessary!
      */
     template<class AP>
-    bool lpfsd(const LinearAlgebra::Matrix<AP>& A, const LinearAlgebra::Vector<AP>& c,
-    LinearAlgebra::Permutation& p,
-    LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y);
+    bool 
+    lpfsd(const LinearAlgebra::Matrix<AP>& A, 
+          const LinearAlgebra::Vector<AP>& c,
+          LinearAlgebra::Permutation& p,
+          LinearAlgebra::Vector<AP>& x, 
+          LinearAlgebra::Vector<AP>& y);
     
         
     /*! \ingroup LinearProgramming
@@ -104,9 +116,12 @@ namespace Ariadne {
      *
      */
     template<class R, class AP>
-    tribool lprfsp(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b,
-    Permutation& p,
-    LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y);
+    tribool 
+    lprfsp(const LinearAlgebra::Matrix<R>& A, 
+           const LinearAlgebra::Vector<R>& b,
+           LinearAlgebra::Permutation& p,
+           LinearAlgebra::Vector<AP>& x, 
+           LinearAlgebra::Vector<AP>& y);
     
     
     /*! \ingroup LinearProgramming
@@ -123,10 +138,14 @@ namespace Ariadne {
      *
      */
     template<class R, class AP>
-    tribool lprfsc(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b,
-    LinearAlgebra::Vector<R>& l, LinearAlgebra::Vector<R>& u,
-    LinearAlgebra::Permutation& p,
-    LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y);
+    tribool 
+    lprfsc(const LinearAlgebra::Matrix<R>& A, 
+           const LinearAlgebra::Vector<R>& b,
+           const LinearAlgebra::Vector<R>& l, 
+           const LinearAlgebra::Vector<R>& u,
+           LinearAlgebra::Permutation& p,
+           LinearAlgebra::Vector<AP>& x, 
+           LinearAlgebra::Vector<AP>& y);
     
     
     /*! \ingroup LinearProgramming
@@ -141,13 +160,16 @@ namespace Ariadne {
      *
      */
     template<class R, class AP>
-    tribool lprfsd(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& c,
-    LinearAlgebra::Permutation& p,
-    LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y);
-    
+    tribool 
+    lprfsd(const LinearAlgebra::Matrix<R>& A, 
+           const LinearAlgebra::Vector<R>& c,
+           LinearAlgebra::Permutation& p,
+           LinearAlgebra::Vector<AP>& x, 
+           LinearAlgebra::Vector<AP>& y);
 
-  }//namespace LinearProgramming
-}//namespace Ariadne
+  } //namespace LinearProgramming
+} //namespace Ariadne
 
+#include "lpfsp.template.h"
 
-#endif /* ARIADNE_LPSLV_H */
+#endif /* ARIADNE_LPFSP_H */

@@ -44,13 +44,10 @@
 #include "../numeric/float64.h"
 
 #include "exceptions.h"
-#include "lpslv.h"
-#include "lpslv.template.h"
-#include "lpfsp.h"
-#include "lpfsp.template.h"
+#include "lputil.h"
 #include "lpstp.h"
-#include "lpstp.template.h"
 #include "lptst.h"
-#include "lptst.template.h"
+#include "lpfsp.h"
+#include "lpslv.h"
 
 #endif /* ARIADNE_LP_H */

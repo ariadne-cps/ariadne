@@ -33,7 +33,7 @@
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/permutation.h"
-#include "linear_programming/lp.h"
+#include "linear_programming/lpslv.h"
 
 //#define FLOAT_TEST
 

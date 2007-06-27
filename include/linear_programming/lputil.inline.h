@@ -1,8 +1,8 @@
 /***************************************************************************
- *            linear_algebra/declarations.h
+ *            lputil.inline.h
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  casagrande@dimi.uniud.it Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -20,26 +20,23 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-/*! \file linear_algebra/declarations.h
- *  \brief Forward declarations of classes in the Linear Algebra module.
- */
 
-#ifndef ARIADNE_LINEAR_ALGEBRA_DECLARATIONS_H
-#define ARIADNE_LINEAR_ALGEBRA_DECLARATIONS_H
-
-
-namespace Ariadne { 
-  namespace LinearAlgebra {
-    class MultiIndex;
-    class Permutation;
-      
-    template<class R> class Vector;
-    template<class R> class VectorSlice;
-    template<class R> class Matrix;
-    template<class R> class MatrixSlice;
-    template<class R> class Tensor;
+namespace Ariadne {
+    
+  inline
+  int 
+  LinearProgramming::getindex(uint* pptr, uint sz, uint value) 
+  {
+    if (value > sz) {
+      return -1;
+    }
+    if (sz > 0) {
+      for (uint i = 0; i < sz; i++) {
+        if (pptr[i] == value) { return i; }
+      }
+    }
+    return -1;
   }
-}
 
-#endif /* ARIADNE_LINEAR_ALGEBRA_DECLARATIONS_H */
+
+} // namespace Ariadne

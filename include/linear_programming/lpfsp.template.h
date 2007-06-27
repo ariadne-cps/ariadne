@@ -20,16 +20,20 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef ARIADNE_LPFSP_TEMPLATE_H
-#define ARIADNE_LPFSP_TEMPLATE_H
+
+#include "lpstp.h"
 
 namespace Ariadne {
   namespace LinearProgramming {
-    
+
     template<class AP>
-    bool lpfsp(const LinearAlgebra::Matrix<AP>& A, const LinearAlgebra::Vector<AP>& b,
-    LinearAlgebra::Permutation& perm,
-    LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y) {
+    bool 
+    lpfsp(const LinearAlgebra::Matrix<AP>& A, 
+          const LinearAlgebra::Vector<AP>& b,
+          LinearAlgebra::Permutation& perm,
+          LinearAlgebra::Vector<AP>& x, 
+          LinearAlgebra::Vector<AP>& y) 
+    {
       
       size_type m = A.number_of_rows();
       size_type n = A.number_of_columns();
@@ -77,19 +81,21 @@ namespace Ariadne {
         AP* bptr = td + (m+n+1)*cinc;
         AP* cptr = td+m*rinc;
         AP* dptr = td + m*rinc + (m+n+1)*cinc;
+        uint* pptr = p.begin();
         
         // auxiliary variable (x0) enters the basis, the slack of the most negative b leaves
-        pivot_tableau(m, n+1, td, rinc, cinc, bptr, rinc, cptr, cinc, dptr, p, auxcolumn, leave);
+        pivot_tableau(m, n+1, td, rinc, cinc, bptr, rinc, cptr, cinc, dptr, pptr, auxcolumn, leave);
         
         // perform simplex steps (note: the last parameter indicates it is an auxiliary problem)
-        while (lpstp(m, n+1, td, rinc, cinc, bptr, rinc, cptr, cinc, dptr, p, B.begin(), Brinc, Bcinc, auxcolumn) == false);
+        while (lpstp(m, n+1, td, rinc, cinc, bptr, rinc, cptr, cinc, dptr, pptr, B.begin(), Brinc, Bcinc, auxcolumn) == false);
         
         if (*dptr == 0) { // infeasible origin, but feasible solution
           // fill the x vector
           for (uint column = 0, i=0; column < n+1; column++)
             if (column != auxcolumn) {
               // find in which columns the decision variables can be found
-              int j, index = p.getindex(column);
+              uint j;
+              int index = p.getindex(column);
               // decision variable in base?
               if (index >= n+1) {
                 for (j = 0; j < m; j++)
@@ -150,7 +156,5 @@ namespace Ariadne {
     }
     
     
-  }//namespace LinearProgramming
-}//namespace Ariadne
-
-#endif /* ARIADNE_LPSFP_TEMPLATE_H */
+  } //namespace LinearProgramming
+} //namespace Ariadne

@@ -29,27 +29,41 @@
 #ifndef ARIADNE_PERMUTATION_H
 #define	ARIADNE_PERMUTATION_H
 
+#include "base/array.h"
+
 namespace Ariadne {
   namespace LinearAlgebra {
     
     class Permutation {
       
       private:
-        std::vector<int> vec;
+        array<uint> vec;
         
         public:
           /*! \brief Construct  permutation. */
           Permutation() : vec() { }
           
           /*! \brief Construct the default permutation of size \a n. */
-          Permutation(const size_type& n) : vec(n, 0) {
+          Permutation(const size_type& n) : vec(n) {
             for (size_type i=0; i<n; i++)
               vec[i]=i;
           }
           
+          /*! \brief Construct from a beginning and end pointer. */
+          Permutation(const uint* begin, const uint* end) : vec(end-begin) {
+            for (size_type i=0; i<vec.size(); i++)
+              vec[i]=begin[i];
+          }
+          
           ~Permutation() { }
           
-          /*!\brief Return size of Permutation. */
+          /*!\brief Return a pointer to beginning of Permutation. */
+          inline uint* begin() { return vec.begin(); }
+          
+          /*!\brief Return pointer to end of Permutation. */
+          inline uint* end() { return vec.end(); }
+          
+         /*!\brief Return size of Permutation. */
           inline size_type size() { return vec.size(); }
           
           /*! \brief Swap two elements. */
@@ -71,11 +85,11 @@ namespace Ariadne {
             return os;
           }
           
-          inline  int& operator[](const size_type& i) { return vec[i]; }
+          inline  uint& operator[](const size_type& i) { return vec[i]; }
           
-          inline int getindex(int index) {
+          inline int getindex(uint index) {
             size_type sz = vec.size();
-            if (uint(index) > sz) return -1;
+            if (index > sz) return -1;
             
             if (sz > 0)
               for (uint i = 0; i < sz; i++)

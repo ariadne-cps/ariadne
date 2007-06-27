@@ -1,7 +1,7 @@
 /***************************************************************************
- *            linear_algebra/declarations.h
+ *            linear_programming/declarations.h
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
+ *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -21,25 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file linear_algebra/declarations.h
- *  \brief Forward declarations of classes in the Linear Algebra module.
+/*! \file linear_programming/declarations.h
+ *  \brief Forward declarations of classes in the Linear Programming module.
  */
 
-#ifndef ARIADNE_LINEAR_ALGEBRA_DECLARATIONS_H
-#define ARIADNE_LINEAR_ALGEBRA_DECLARATIONS_H
+#ifndef ARIADNE_LINEAR_PROGRAMMING_DECLARATIONS_H
+#define ARIADNE_LINEAR_PROGRAMMING_DECLARATIONS_H
 
 
 namespace Ariadne { 
-  namespace LinearAlgebra {
-    class MultiIndex;
-    class Permutation;
-      
-    template<class R> class Vector;
-    template<class R> class VectorSlice;
-    template<class R> class Matrix;
-    template<class R> class MatrixSlice;
-    template<class R> class Tensor;
+  namespace LinearProgramming {
+    template<class R> class LinearProgram;
   }
 }
 
-#endif /* ARIADNE_LINEAR_ALGEBRA_DECLARATIONS_H */
+#endif /* ARIADNE_LINEAR_PROGRAMMING_DECLARATIONS_H */

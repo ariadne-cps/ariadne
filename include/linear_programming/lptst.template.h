@@ -63,7 +63,7 @@ namespace Ariadne {
     
     template<class R, class AP>
     tribool lptstopt(const Matrix<R>& A, const Vector<R>& b, const Vector<R>& c, const Vector<AP>& x, const Vector<AP>& y) {
-      
+      throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
     

@@ -75,7 +75,7 @@ namespace Ariadne {
           
           inline int getindex(int index) {
             size_type sz = vec.size();
-            if (index > sz) return -1;
+            if (uint(index) > sz) return -1;
             
             if (sz > 0)
               for (uint i = 0; i < sz; i++)

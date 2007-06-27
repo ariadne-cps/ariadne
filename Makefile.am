@@ -8,7 +8,7 @@ CXXFLAGS += -Wall
 shiny: maintainer-clean
 	-rm -rf *~ */*~
 	-rm -f *.log */*.log */*.eps
-	-rm -rf html latex
+	-rm -rf html latexb
 	-rm -rf */.deps */.libs
 	-rm -f aclocal.m4 config.* configure depcomp install-sh libtool ltmain.sh missing mkinstalldirs stamp-h* .tm_project.cache
 	-rm -rf autom4te.cache

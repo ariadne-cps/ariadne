@@ -31,8 +31,8 @@
 #include "numeric/rational.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "linear_algebra/lp.h"
 #include "linear_algebra/permutation.h"
+#include "linear_programming/lp.h"
 
 //#define FLOAT_TEST
 

@@ -25,7 +25,7 @@
 #define ARIADNE_LPSTP_TEMPLATE_H
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "linear_algebra/linear_program.h"
+#include "linear_programming/linear_program.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {

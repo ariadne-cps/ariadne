@@ -84,7 +84,7 @@ namespace Ariadne {
     void
     SymmetricTensor<R>::_instantiate()
     {
-      R* s; SymmetricTensor<R>* T;
+      R* s=0; SymmetricTensor<R>* T=0;
       *T + *T; *T * *s;
     }
     

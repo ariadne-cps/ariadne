@@ -35,7 +35,8 @@
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 #include "../linear_algebra/qr_matrix.h"
-#include "../linear_algebra/linear_program.h"
+
+#include "../linear_programming/linear_program.h"
 
 #include "../geometry/point.h"
 #include "../geometry/point_list.h"

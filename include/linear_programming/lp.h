@@ -1,9 +1,13 @@
 /***************************************************************************
- *            linear_program.cc
+ *            lp.h
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it Pieter.Collins@cwi.nl
  ****************************************************************************/
+/*
+ * Based on the linear programming algorithms in PPL-0.8
+ *   Copyright (C) 2001-2006 Roberto Bagnara <bagnara@cs.unipr.it>
+ */
 
  /*
  *  This program is free software; you can redistribute it and/or modify
@@ -21,19 +25,31 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#define DEBUG
+/*! \file lp.h
+ *  \brief Linear programming include file.
+ */
 
-#include "numeric/rational.h"
+#ifndef ARIADNE_LP_H
+#define ARIADNE_LP_H
 
-#include "linear_algebra/linear_program.h"
-#include "linear_algebra/linear_program.code.h"
+#include <iosfwd>
+#include <cassert>
+#include <map>
 
-namespace Ariadne {
-  namespace LinearAlgebra {
-    
-    using namespace Numeric;
-    
-    template class LinearProgram<Rational>;
+#include "../base/tribool.h"
+#include "../linear_algebra/matrix.h"
+#include "../linear_algebra/permutation.h"
+#include "../linear_algebra/exceptions.h"
+#include "../output/logging.h"
+#include "../numeric/float64.h"
 
-   }//namespace LinearAlgebra
-}//namespace Ariadne
+#include "lpslv.h"
+#include "lpslv.template.h"
+#include "lpfsp.h"
+#include "lpfsp.template.h"
+#include "lpstp.h"
+#include "lpstp.template.h"
+#include "lptst.h"
+#include "lptst.template.h"
+
+#endif /* ARIADNE_LP_H */

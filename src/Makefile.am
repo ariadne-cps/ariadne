@@ -2,12 +2,12 @@
 
 phony: lib
 
-lib: libariadne.la
+lib: libgeometric.la libariadne.la
 
 INCLUDES = -I$(top_srcdir)/include 
 LDADD = -lmpfr -lppl -lgmpxx
 
-#SUBDIRS = base numeric linear_algebra combinatoric geometry system evaluation output input python
+#SUBDIRS = base numeric linear_algebra linear_programming combinatoric geometry system evaluation output input python
 
 SUBDIRS = . python
 
@@ -20,8 +20,10 @@ NUMERIC_SRC = \
 LINEAR_ALGEBRA_SRC = \
 	linear_algebra/vector.cc linear_algebra/matrix.cc \
 	linear_algebra/tensor.cc \
-	linear_algebra/linear_program.cc \
 	linear_algebra/matrix_function.cc 
+
+LINEAR_PROGRAMMING_SRC = \
+	linear_programming/linear_program.cc 
 
 COMBINATORIC_SRC = \
 	combinatoric/array_operations.cc \
@@ -74,14 +76,15 @@ INPUT_SRC = \
 	input/modelica.cc 
 
 
-noinst_LTLIBRARIES = libbase.la libnumeric.la liblinearalgebra.la libcombinatoric.la libgeometry.la libsystem.la libevaluation.la liboutput.la libinput.la
+noinst_LTLIBRARIES = libbase.la libnumeric.la liblinearalgebra.la liblinearprogramming.la \
+	libcombinatoric.la libgeometry.la libsystem.la libevaluation.la liboutput.la libinput.la
 
-lib_LTLIBRARIES = libariadne.la 
+lib_LTLIBRARIES = libariadne.la libgeometric.la 
 libariadne_la_LIBADD = $(noinst_LTLIBRARIES) -lmpfr -lppl -lgmpxx
 libariadne_la_SOURCES = 
 nodist_EXTRA_libariadne_la_SOURCES = dummy.cc
 
-libgeometric_la_LIBADD = libbase.la libnumeric.la liblinearalgebra.la libcombinatoric.la libgeometry.la -lmpfr -lppl -lgmpxx
+libgeometric_la_LIBADD = libbase.la libnumeric.la liblinearalgebra.la liblinearprogramming.la libcombinatoric.la libgeometry.la -lmpfr -lppl -lgmpxx
 libgeometric_la_SOURCES = 
 nodist_EXTRA_libgeometric_la_SOURCES = dummy.cc
 
@@ -89,6 +92,7 @@ nodist_EXTRA_libgeometric_la_SOURCES = dummy.cc
 libbase_la_SOURCES = $(BASE_SRC)
 libnumeric_la_SOURCES = $(NUMERIC_SRC)
 liblinearalgebra_la_SOURCES = $(LINEAR_ALGEBRA_SRC)
+liblinearprogramming_la_SOURCES = $(LINEAR_PROGRAMMING_SRC)
 libcombinatoric_la_SOURCES = $(COMBINATORIC_SRC)
 libgeometry_la_SOURCES = $(GEOMETRY_SRC)
 libsystem_la_SOURCES = $(SYSTEM_SRC)

@@ -31,7 +31,7 @@
 #include "numeric/rational.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "linear_algebra/linear_program.h"
+#include "linear_programming/linear_program.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
@@ -46,7 +46,7 @@ void test_optimal_value();
 
 
 int main() {
-  set_linear_algebra_verbosity(4);
+  set_linear_algebra_verbosity(0);
   
   test_linear_program<Rational>();
   test_optimal_value<Rational>();

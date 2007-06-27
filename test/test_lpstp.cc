@@ -32,8 +32,8 @@
 #include "numeric/rational.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "linear_algebra/lp.h"
 #include "linear_algebra/permutation.h"
+#include "linear_programming/lp.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
@@ -44,7 +44,7 @@ template<class R> void test_lpstp();
 
 int main() {
   
-  set_linear_algebra_verbosity(4);
+  set_linear_algebra_verbosity(0);
    
   test_lpstp<Rational>();
   cerr << "INCOMPLETE ";

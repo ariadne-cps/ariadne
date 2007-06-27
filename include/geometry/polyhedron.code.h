@@ -41,7 +41,7 @@
 
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
-#include "../linear_algebra/linear_program.h"
+#include "../linear_programming/linear_program.h"
 
 #include "../geometry/ddconv.h"
 #include "../geometry/ddconv.code.h"

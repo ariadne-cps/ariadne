@@ -51,6 +51,10 @@ namespace Ariadne {
     extern int verbosity; 
   }
 
+  namespace LinearProgramming { 
+    extern int verbosity; 
+  }
+
   namespace Combinatoric { 
     extern int verbosity; 
   }
@@ -80,6 +84,8 @@ namespace Ariadne {
   inline void set_numeric_verbosity(int v) { Numeric::verbosity=v; }
   /*! \brief Set the verbosity level for the Linear Algebra module. */
   inline void set_linear_algebra_verbosity(int v) { LinearAlgebra::verbosity=v; }
+  /*! \brief Set the verbosity level for the Linear Programming module. */
+  inline void set_linear_programming_verbosity(int v) { LinearProgramming::verbosity=v; }
   /*! \brief Set the verbosity level for the %Combinatoric module. */
   inline void set_combinatoric_verbosity(int v) { Combinatoric::verbosity=v; }
   /*! \brief Set the verbosity level for the %Geometry module. */

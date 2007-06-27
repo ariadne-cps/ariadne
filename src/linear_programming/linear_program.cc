@@ -29,11 +29,11 @@
 #include "linear_programming/linear_program.code.h"
 
 namespace Ariadne {
-  namespace LinearAlgebra {
+  namespace LinearProgramming {
     
     using namespace Numeric;
     
     template class LinearProgram<Rational>;
 
-   }//namespace LinearAlgebra
-}//namespace Ariadne
+   } //namespace LinearProgramming
+} //namespace Ariadne

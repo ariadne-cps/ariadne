@@ -33,7 +33,7 @@
 #define ARIADNE_LPSLV_H
 
 namespace Ariadne {
-  namespace LinearAlgebra {
+  namespace LinearProgramming {
     
     
     /*!\ingroup LinearProgramming
@@ -62,10 +62,10 @@ namespace Ariadne {
      * \internal Use x and y (and maybe z) only if it is more efficient. This routine might not be so useful; maybe use matrix pointers instead.
      */
     template<class AP>
-    tribool lpstp(const Matrix<AP>& A, const Vector<AP>& b, const Vector<AP>& c,
-    Permutation& p, Matrix<AP>& B
+    tribool lpstp(const LinearAlgebra::Matrix<AP>& A, const LinearAlgebra::Vector<AP>& b, const LinearAlgebra::Vector<AP>& c,
+    LinearAlgebra::Permutation& p, LinearAlgebra::Matrix<AP>& B
     // Use these variables too if it's more efficient
-    , Vector<AP>& x, Vector<AP>& y, Vector<AP>& z
+    , LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y, LinearAlgebra::Vector<AP>& z
     );
     
     
@@ -86,9 +86,9 @@ namespace Ariadne {
      * \internal Use appropriate dual and slack variables if this makes other routines more efficient. This routine might not be so useful; maybe use matrix pointers instead.
      */
     template<class AP>
-    tribool lpstpc(const Matrix<AP>& A, const Vector<AP>& b, const Vector<AP>& c,
-    const Vector<AP>& l, const Vector<AP>& u,
-    Permutation& p, Matrix<AP>& B, Vector<AP>& x);
+    tribool lpstpc(const LinearAlgebra::Matrix<AP>& A, const LinearAlgebra::Vector<AP>& b, const LinearAlgebra::Vector<AP>& c,
+    const LinearAlgebra::Vector<AP>& l, const LinearAlgebra::Vector<AP>& u,
+    LinearAlgebra::Permutation& p, LinearAlgebra::Matrix<AP>& B, LinearAlgebra::Vector<AP>& x);
     
     
     
@@ -165,7 +165,7 @@ namespace Ariadne {
     );
     
     
-  } // namespace LinearAlgebra
+  } // namespace LinearProgramming
 } // namespace Ariadne
 
 

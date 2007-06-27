@@ -33,7 +33,7 @@
 #include "../base/stlio.h"
 
 namespace Ariadne {
-  namespace LinearAlgebra {
+  namespace LinearProgramming {
 
     template<class R>
     LinearProgram<R>::~LinearProgram()
@@ -49,9 +49,9 @@ namespace Ariadne {
     }
     
     template<class R>
-    LinearProgram<R>::LinearProgram(const Matrix<R>& A,
-                                    const Vector<R>& b,
-                                    const Vector<R>& c)
+    LinearProgram<R>::LinearProgram(const LinearAlgebra::Matrix<R>& A,
+                                    const LinearAlgebra::Vector<R>& b,
+                                    const LinearAlgebra::Vector<R>& c)
       : _tableau(), 
         _variable_indices(b.size()+c.size()),
         _status(UNSOLVED)
@@ -71,7 +71,7 @@ namespace Ariadne {
       
       size_type n=nv+ne+na;
       size_type nfv=nv;
-      _tableau=Matrix<R>(nc+1,nfv+1);
+      _tableau=LinearAlgebra::Matrix<R>(nc+1,nfv+1);
       
       assert(ne==0);
       
@@ -107,7 +107,7 @@ namespace Ariadne {
     }
     
     template<class R>
-    LinearProgram<R>::LinearProgram(const Matrix<R>& T)
+    LinearProgram<R>::LinearProgram(const LinearAlgebra::Matrix<R>& T)
       : _tableau(T),
         _variable_indices(),
         _status(UNSOLVED)
@@ -153,7 +153,7 @@ namespace Ariadne {
       
       //size_type nrA=this->tableau().number_of_rows();
       //size_type ncA=this->tableau().number_of_columns();
-      //std::cerr << this->tableau() << "\n" << Matrix<R>(nrA,ncA,ptrA,rincA,cincA) << std::endl;
+      //std::cerr << this->tableau() << "\n" << LinearAlgebra::Matrix<R>(nrA,ncA,ptrA,rincA,cincA) << std::endl;
       //std::cerr << nrA << " " << ncA << " " << ptrA << " " << rincA << " " << cincA << std::endl;
       
       lpslv(m,n, ptrA,rincA,cincA, ptrA+cincA*n,rincA, ptrA+rincA*(m),cincA, *(ptrA+rincA*(m)+cincA*n), (int*)piv);
@@ -201,7 +201,7 @@ namespace Ariadne {
     }
     
     template<class R>
-    Vector<R>
+    LinearAlgebra::Vector<R>
     LinearProgram<R>::feasible_point() const 
     {
       if(this->_status==UNSOLVED) {
@@ -210,7 +210,7 @@ namespace Ariadne {
       if(this->_status!=UNSATISFIABLE) {
         size_type m=this->number_of_constraints();
         size_type n=this->number_of_free_variables();
-        Vector<R> result(n);
+        LinearAlgebra::Vector<R> result(n);
         for(size_type i=0; i!=m; ++i) {
           size_type j=this->_variable_indices[n+i];
           if(j<result.size()) {
@@ -224,12 +224,12 @@ namespace Ariadne {
     }
 
     template<class R>
-    Vector<R>
+    LinearAlgebra::Vector<R>
     LinearProgram<R>::optimizing_point() const 
     {
       this->solve();
       if(this->_status==OPTIMIZED) {
-        Vector<R> result(this->number_of_free_variables());
+        LinearAlgebra::Vector<R> result(this->number_of_free_variables());
         size_type m=this->number_of_constraints();
         size_type n=this->number_of_free_variables();
         for(size_type i=0; i!=m; ++i) {
@@ -608,7 +608,7 @@ namespace Ariadne {
       // Variable(j) is bound to be nonnegative in `cs'.
       std::deque<bool> nonnegative_variable(cs_num_cols - 1, false);
     
-      // Process each row of the `cs' Matrix.
+      // Process each row of the `cs' LinearAlgebra::Matrix.
       for (size_type i = cs_num_rows; i-- > 0; ) {
         const Linear_Row& cs_i = cs[i];
         bool found_a_nonzero_coeff = false;

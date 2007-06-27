@@ -45,40 +45,25 @@ namespace Ariadne {
       IncompatibleSizes(const std::string& str) : std::runtime_error(str) { }
     };
 
-    /*! \brief The problem is unbound. */
-    struct UnboundProblem : public std::runtime_error {
-      UnboundProblem(const std::string& str) : std::runtime_error(str) { }
-    };
-
-    /*! \brief The problem has no feasible origin. */
-    struct InfeasibleOrigin : public std::runtime_error {
-      InfeasibleOrigin(const std::string& str) : std::runtime_error(str) { }
-    };
-
-    /*! \brief The problem has no feasible solution. */
-    struct InfeasibleSolution : public std::runtime_error {
-      InfeasibleSolution(const std::string& str) : std::runtime_error(str) { }
-    };
-
     //@}
 
   }
 }
 
 #define ARIADNE_CHECK_SIZE(vec,sz,func) \
-  { if((vec).size()!=sz) { ARIADNE_THROW(IncompatibleSizes,func,#vec"="<<vec<<", "#sz"="<<sz); } }
+  { if((vec).size()!=sz) { ARIADNE_THROW(LinearAlgebra::IncompatibleSizes,func,#vec"="<<vec<<", "#sz"="<<sz); } }
 
 #define ARIADNE_CHECK_EQUAL_SIZES(vec1,vec2,func) \
-  { if((vec1).size()!=vec2.size()) { ARIADNE_THROW(IncompatibleSizes,func,#vec1"="<<vec1<<", "#vec2"="<<vec2); } }
+  { if((vec1).size()!=vec2.size()) { ARIADNE_THROW(LinearAlgebra::IncompatibleSizes,func,#vec1"="<<vec1<<", "#vec2"="<<vec2); } }
 
 #define ARIADNE_CHECK_MATRIX_EQUAL_SIZES(mx1,mx2,func) \
   { if((mx1).number_of_rows()!=mx2.number_of_rows() || (mx1).number_of_columns()!=mx2.number_of_columns()) { \
-      ARIADNE_THROW(IncompatibleSizes,func,#mx1"="<<mx1<<", "#mx2"="<<mx2); } }
+      ARIADNE_THROW(LinearAlgebra::IncompatibleSizes,func,#mx1"="<<mx1<<", "#mx2"="<<mx2); } }
 
 #define ARIADNE_CHECK_SQUARE(mx,func) \
-  { if((mx).number_of_rows()!=(mx).number_of_columns()) { ARIADNE_THROW(IncompatibleSizes,func,#mx"="<<mx<<" is not square"); } }
+  { if((mx).number_of_rows()!=(mx).number_of_columns()) { ARIADNE_THROW(LinearAlgebra::IncompatibleSizes,func,#mx"="<<mx<<" is not square"); } }
 
 #define ARIADNE_CHECK_INDEX(vec,ind,func)                                  \
-  { if((vec).size()>=ind) { ARIADNE_THROW(InvalidIndex,func,#vec"="<<vec<<", "#ind"="<<ind); } }
+  { if((vec).size()>=ind) { ARIADNE_THROW(LinearAlgebra::InvalidIndex,func,#vec"="<<vec<<", "#ind"="<<ind); } }
 
 #endif /* ARIADNE_LINEAR_ALGEBRA_EXCEPTIONS_H */

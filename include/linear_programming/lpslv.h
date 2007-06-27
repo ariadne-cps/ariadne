@@ -33,13 +33,17 @@
 #define ARIADNE_LPSLV_H
 
 namespace Ariadne { 
+
+  // Forward declarations
   namespace LinearAlgebra {
-  
-    // Forward declarations
     class Permutation;
     template<class X> class Vector;
     template<class X> class Matrix;
 
+  }
+
+
+  namespace LinearProgramming {
 
     /*! \ingroup LinearProgramming
      *  \brief Solver the linear programming problem \f$\max c^Tx\text{ s.t. } Ax=b; \ x\geq0\f$.
@@ -60,9 +64,9 @@ namespace Ariadne {
      * \f[ d=c^TA_B^{-1}b;\ x_B=A_N^{-1}b; \ y=A_B^{-1}c_B; \ z_N = c_N - A_NA_{B}^{-1}c_B  \f]
      */
     template<class R, class AP>
-    AP lpslv(const Matrix<R>& A, const Vector<R>& b, const Vector<R>& c, 
-            Permutation& p,
-            Vector<AP>& x, Vector<AP>& y);
+    AP lpslv(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b, const LinearAlgebra::Vector<R>& c, 
+            LinearAlgebra::Permutation& p,
+            LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y);
 
 
     /*! \ingroup LinearProgramming
@@ -83,13 +87,13 @@ namespace Ariadne {
      * \f[ d=c^Tx; \quad x_L=l_L; \ x_U=u_U;\ x_B=A_N^{-1}(b-A_Nx_N) . \f]
      */
     template<class R, class AP>
-    AP lpslvc(const Matrix<R>& A, const Vector<R>& b, const Vector<R>& c, 
-             const Vector<R>& l, const Vector<R>& u,
-             Permutation& p,
-             Vector<AP>& x, Vector<AP>& y);
+    AP lpslvc(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b, const LinearAlgebra::Vector<R>& c, 
+             const LinearAlgebra::Vector<R>& l, const LinearAlgebra::Vector<R>& u,
+             LinearAlgebra::Permutation& p,
+             LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y);
  
     
-     /*! \ingroup LinearAlgebra
+     /*! \ingroup LinearProgramming
      *  \brief Solver for linear programming problems. (Deprecated) \deprecated
      *
      *  \param m Number of free constraints
@@ -114,7 +118,7 @@ namespace Ariadne {
           int* piv);
 
 
-  } // namespace LinearAlgebra
+  } // namespace LinearProgramming
 } // namespace Ariadne
 
 

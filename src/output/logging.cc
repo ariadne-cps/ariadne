@@ -38,6 +38,7 @@ void Output::redirect_log(const char* filename)
 
 int Numeric::verbosity=0; 
 int LinearAlgebra::verbosity=0; 
+int LinearProgramming::verbosity=0; 
 int Combinatoric::verbosity=0;
 int Geometry::verbosity=0;
 int System::verbosity=0;

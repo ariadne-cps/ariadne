@@ -402,7 +402,7 @@ namespace Ariadne {
 
       if(verbosity>8) { std::clog << T << std::endl; }
 
-      LinearAlgebra::LinearProgram<F> lp(T);
+      LinearProgramming::LinearProgram<F> lp(T);
       tribool result=!lp.is_feasible();
       return result;
     }

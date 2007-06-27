@@ -1218,7 +1218,7 @@ disjoint_exact(const Zonotope<Rational,Rational>& z, const Rectangle<Rational>& 
     T(2*d+m,d+m) -= T(i+d+m,d+m);
   }
   
-  LinearAlgebra::LinearProgram<Q> lp(T);
+  LinearProgramming::LinearProgram<Q> lp(T);
   tribool result=!lp.is_feasible();
   
   return result;
@@ -1293,7 +1293,7 @@ disjoint_exact(const Zonotope<Rational,Rational>& z1, const Zonotope<Rational,Ra
     T(m1+m2+d,m1+m2) -= T(m1+m2+i,m1+m2);
   }
   
-  LinearAlgebra::LinearProgram<Q> lp(T);
+  LinearProgramming::LinearProgram<Q> lp(T);
   
   tribool result=!lp.is_feasible();
   
@@ -1359,7 +1359,7 @@ contains_exact(const Zonotope<Rational,Rational>& z, const Point<Rational>& pt)
     T(m+d,m)-=T(m+i,m);
   }
   
-  LinearAlgebra::LinearProgram<Q> lp(T);
+  LinearProgramming::LinearProgram<Q> lp(T);
   //std::clog << lp.tableau() << std::endl;
   tribool result=lp.is_feasible();
   //std::clog << lp.tableau() << std::endl;

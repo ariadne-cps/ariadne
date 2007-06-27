@@ -30,6 +30,7 @@
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
+using namespace Ariadne::LinearProgramming;
 
 #include <boost/python.hpp>
 using namespace boost::python;

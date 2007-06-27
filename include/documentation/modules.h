@@ -92,8 +92,7 @@
  * \defgroup LinearAlgebra Linear Algebra
  * \ingroup Base
  * \brief Vector, matrix and tensor classes, solution of linear equations,
- * LU and QR factorisation, singular value decomposition, 
- * and linear programming.
+ * LU and QR factorisation and singular value decomposition.
  * 
  * Basic types are represented by the classes Vector, Matrix
  * and Tensor. Specialist types include PermutationMatrix and DiagonalMatrix.
@@ -104,10 +103,6 @@
  * More complicated matrix operations, such as factorisation, are represented
  * by sub-classes which contain the factorised data, from which the factors 
  * can easily be extracted.
- *
- * The LinearProgram class supports construction and solution of linear 
- * programming problems. Tests for feasibility only are also possible. The 
- * computations are performed by a BLAS/LAPACK style lpslv() routing.
  *
  * Currently sparse and structured (e.g. triangular, symmetric, banded) 
  * matrices are not directly supported, except to the extent needed for the
@@ -123,8 +118,12 @@
  *  - \b TEN: Tensor
  * 
  * \defgroup LinearProgramming Linear Programming
- * \ingroup LinearAlgebra
+ * \ingroup Base
  * \brief Classes and functions for solving linear programming problems (including feasibility problems).
+ *
+ * The LinearProgram class supports construction and solution of linear 
+ * programming problems. Tests for feasibility only are also possible. The 
+ * computations are performed by a BLAS/LAPACK style lpslv() routing.
  *
  */
 

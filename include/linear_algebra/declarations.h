@@ -38,7 +38,6 @@ namespace Ariadne {
     template<class R> class Matrix;
     template<class R> class MatrixSlice;
     template<class R> class Tensor;
-    template<class R> class LinearProgram;
   }
 }
 

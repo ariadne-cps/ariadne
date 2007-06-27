@@ -43,6 +43,7 @@
 #include "../output/logging.h"
 #include "../numeric/float64.h"
 
+#include "exceptions.h"
 #include "lpslv.h"
 #include "lpslv.template.h"
 #include "lpfsp.h"

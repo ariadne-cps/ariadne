@@ -24,19 +24,19 @@
 #define ARIADNE_LPFSP_TEMPLATE_H
 
 namespace Ariadne {
-  namespace LinearAlgebra {
+  namespace LinearProgramming {
     
     template<class AP>
-    bool lpfsp(const Matrix<AP>& A, const Vector<AP>& b,
-    Permutation& perm,
-    Vector<AP>& x, Vector<AP>& y) {
+    bool lpfsp(const LinearAlgebra::Matrix<AP>& A, const LinearAlgebra::Vector<AP>& b,
+    LinearAlgebra::Permutation& perm,
+    LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y) {
       
       size_type m = A.number_of_rows();
       size_type n = A.number_of_columns();
       uint leave;
       
       if (x.size() != n)
-        x = Vector<AP>(n);
+        x = LinearAlgebra::Vector<AP>(n);
       
       // Check for feasibility of origin
       // if infeasibleorigin find most negative b; the related slack will leave the basis
@@ -59,18 +59,18 @@ namespace Ariadne {
         if (verbosity>2)
           std::clog << "Will solve auxiliary problem" << std::endl;
         // add an auxiliary variable to the tableau; via a matrix operation
-        Matrix<AP>Aux = Matrix<AP>(m, 1);
-        Permutation p = Permutation(m+n+1);
+        LinearAlgebra::Matrix<AP> Aux = LinearAlgebra::Matrix<AP>(m, 1);
+        LinearAlgebra::Permutation p = LinearAlgebra::Permutation(m+n+1);
         for (uint i = 0; i < m; i++)  Aux(i, 0) = -1;
-        Matrix<AP>R =  LinearAlgebra::concatenate_columns(Aux, A);
+        LinearAlgebra::Matrix<AP>R =  LinearAlgebra::concatenate_columns(Aux, A);
         uint auxcolumn = 0; // in the previous two lines we inserted an auxiliary variable in column 0
-        Vector<AP>c = Vector<AP>(n+1);
+        LinearAlgebra::Vector<AP>c = LinearAlgebra::Vector<AP>(n+1);
         c(0) = -1;
         
-        Matrix<AP> t = to_tableau<AP>(R, b, c);
+        LinearAlgebra::Matrix<AP> t = to_tableau<AP>(R, b, c);
         uint rinc = t.row_increment();
         uint cinc = t.column_increment();
-        Matrix<AP> B = R;
+        LinearAlgebra::Matrix<AP> B = R;
         uint Brinc = B.row_increment();
         uint Bcinc = B.column_increment();
         AP* td = t.begin();
@@ -109,48 +109,48 @@ namespace Ariadne {
     
     
     template<class AP>
-    bool lpfsc(const Matrix<AP>& A, const Vector<AP>& b,
-    Vector<AP>& l, Vector<AP>& u,
-    Permutation& perm,
-    Vector<AP>& x, Vector<AP>& y) {
+    bool lpfsc(const LinearAlgebra::Matrix<AP>& A, const LinearAlgebra::Vector<AP>& b,
+    LinearAlgebra::Vector<AP>& l, LinearAlgebra::Vector<AP>& u,
+    LinearAlgebra::Permutation& perm,
+    LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y) {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
     
     template<class AP>
-    bool lpfsd(const Matrix<AP>& A, const Vector<AP>& c,
-    Permutation& perm,
-    Vector<AP>& x, Vector<AP>& y) {
+    bool lpfsd(const LinearAlgebra::Matrix<AP>& A, const LinearAlgebra::Vector<AP>& c,
+    LinearAlgebra::Permutation& perm,
+    LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y) {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
     
     template<class R, class AP>
-    tribool lprfsp(const Matrix<R>& A, const Vector<R>& b,
-    Permutation& perm,
-    Vector<AP>& x, Vector<AP>& y) {
+    tribool lprfsp(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b,
+    LinearAlgebra::Permutation& perm,
+    LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y) {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
     
     template<class R, class AP>
-    tribool lprfsc(const Matrix<R>& A, const Vector<R>& b,
-    Vector<R>& l, Vector<R>& u,
-    Permutation& perm,
-    Vector<AP>& x, Vector<AP>& y) {
+    tribool lprfsc(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b,
+    LinearAlgebra::Vector<R>& l, LinearAlgebra::Vector<R>& u,
+    LinearAlgebra::Permutation& perm,
+    LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y) {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
     
     template<class R, class AP>
-    tribool lprfsd(const Matrix<R>& A, const Vector<R>& c,
-    Permutation& perm,
-    Vector<AP>& x, Vector<AP>& y) {
+    tribool lprfsd(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& c,
+    LinearAlgebra::Permutation& perm,
+    LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y) {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
     
-  }//namespace LinearAlgebra
+  }//namespace LinearProgramming
 }//namespace Ariadne
 
 #endif /* ARIADNE_LPSFP_TEMPLATE_H */

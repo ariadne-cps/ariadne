@@ -28,19 +28,42 @@
 #include "linear_programming/linear_program.h"
 
 namespace Ariadne {
-  namespace LinearAlgebra {
+  namespace LinearProgramming {
     
-    
+    // Forward declaration of auxiliary function
     template<class AP>
-    tribool lpstp(const Matrix<AP>& A, const Vector<AP>& b, const Vector<AP>& c,
-    Permutation& p, Matrix<AP>& B,
+    tribool lpstp(uint m, uint n,
+                  AP* Aptr, uint Arinc, uint Acinc,
+                  AP* bptr, uint binc,
+                  AP* cptr, uint cinc,
+                  AP* dptr,
+                  LinearAlgebra::Permutation& perm, // should be uint* pptr,
+                  AP* Bptr, uint Brinc, uint Bcinc
+                  );
+
+    // Forward declaration of auxiliary function
+    template<class AP>
+    tribool lpstp(uint m, uint n,
+                  AP* Aptr, uint Arinc, uint Acinc,
+                  AP* bptr, uint binc,
+                  AP* cptr, uint cinc,
+                  AP* dptr,
+                  LinearAlgebra::Permutation& perm, // should be uint* pptr,
+                  AP* Bptr, uint Brinc, uint Bcinc,
+                  int aux // index of additional variable to solve the auxiliary problem
+                  );
+
+
+    template<class AP>
+    tribool lpstp(const LinearAlgebra::Matrix<AP>& A, const LinearAlgebra::Vector<AP>& b, const LinearAlgebra::Vector<AP>& c,
+    LinearAlgebra::Permutation& p, LinearAlgebra::Matrix<AP>& B,
     // Use these variables too if it's more efficient
-    Vector<AP>& x, Vector<AP>& y, Vector<AP>& z) {
+    LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y, LinearAlgebra::Vector<AP>& z) {
       
       if (verbosity > 2)
         std::clog << "A:" << A << ", b:" << b << ", c:" << c << ", p:" << p << ", B:" << B << std::endl;
       
-      Matrix<AP>t = to_tableau<AP>(A, b, c);
+      LinearAlgebra::Matrix<AP>t = to_tableau<AP>(A, b, c);
       
       uint m = A.number_of_rows();
       uint n = A.number_of_columns();
@@ -59,9 +82,9 @@ namespace Ariadne {
     
     
     template<class AP>
-    tribool lpstpc(const Matrix<AP>& A, const Vector<AP>& b, const Vector<AP>& c,
-    const Vector<AP>& l, const Vector<AP>& u,
-    Permutation& p, Matrix<AP>& B, Vector<AP>& x) {
+    tribool lpstpc(const LinearAlgebra::Matrix<AP>& A, const LinearAlgebra::Vector<AP>& b, const LinearAlgebra::Vector<AP>& c,
+    const LinearAlgebra::Vector<AP>& l, const LinearAlgebra::Vector<AP>& u,
+    LinearAlgebra::Permutation& p, LinearAlgebra::Matrix<AP>& B, LinearAlgebra::Vector<AP>& x) {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
@@ -73,7 +96,7 @@ namespace Ariadne {
     AP* cptr, uint cinc,
     AP* dptr,
     //    uint* pptr,
-    Permutation& perm, AP* Bptr, uint Brinc, uint Bcinc
+    LinearAlgebra::Permutation& perm, AP* Bptr, uint Brinc, uint Bcinc
     // use only if it's more efficient
     //    , AP* xptr, uint xinc, AP* yptr, uint yinc, AP* zptr, uint zinc
     ) {
@@ -88,7 +111,7 @@ namespace Ariadne {
     AP* cptr, uint cinc,
     AP* dptr,
     //    uint* pptr,
-    Permutation& perm, AP* Bptr, uint Brinc, uint Bcinc,
+    LinearAlgebra::Permutation& perm, AP* Bptr, uint Brinc, uint Bcinc,
     // use only if it's more efficient
     //    AP* xptr, uint xinc, AP* yptr, uint yinc, AP* zptr, uint zinc,
     int aux // index of additional variable to solve the auxiliary problem
@@ -97,7 +120,7 @@ namespace Ariadne {
       if (verbosity > 2) {
         std::clog << "lpstp(m=" << m << ", n=" << n << ", Arinc=" << Arinc << ", Acinc=" << Acinc
         << ", binc=" << binc << ", cinc=" << cinc << ", perm=" << perm << ", aux=" << aux << ")" << std::endl;
-        std::clog << "tableau=" << Matrix<AP>(m+1, m+n+1, Aptr, Arinc, Acinc) << std::endl;
+        std::clog << "tableau=" << LinearAlgebra::Matrix<AP>(m+1, m+n+1, Aptr, Arinc, Acinc) << std::endl;
       }
       
       int leave, enter = -1;
@@ -187,7 +210,7 @@ namespace Ariadne {
     AP* bptr, uint binc,
     AP* cptr, uint cinc,
     AP* dptr,
-    Permutation& perm,
+    LinearAlgebra::Permutation& perm,
     int enter, int leave) {
       
       int leave_inc = leave*Arinc;
@@ -220,7 +243,7 @@ namespace Ariadne {
       }
       
       if (verbosity > 4)
-        std::clog << "after subtracting row " << leave << ": \ntableau=" << Matrix<AP>(m+1, m+n+1, Aptr, Arinc, Acinc) << std::endl;
+        std::clog << "after subtracting row " << leave << ": \ntableau=" << LinearAlgebra::Matrix<AP>(m+1, m+n+1, Aptr, Arinc, Acinc) << std::endl;
       
       // Subtract c(enter)/Aptr(leave,enter) times row leave from c,
       // except in the leave column, which is divided by Aptr(leave,enter)
@@ -237,7 +260,7 @@ namespace Ariadne {
       cptr[enter*cinc] = -scale;
       
       if (verbosity > 4)
-        std::clog << "after subtracting row " << leave << " from c: \ntableau=" << Matrix<AP>(m+1, m+n+1, Aptr, Arinc, Acinc) << std::endl;
+        std::clog << "after subtracting row " << leave << " from c: \ntableau=" << LinearAlgebra::Matrix<AP>(m+1, m+n+1, Aptr, Arinc, Acinc) << std::endl;
       
       // Scale the enter row, except the leave column
       scale = pivot_scale;
@@ -248,10 +271,10 @@ namespace Ariadne {
       Aptr[leave_inc+enter_inc] = scale;
       
       if (verbosity > 2)
-        std::clog << "leaving pivot_tableau\ntableau=" << Matrix<AP>(m+1, m+n+1, Aptr, Arinc, Acinc) << "\nperm=" << perm << std::endl;
+        std::clog << "leaving pivot_tableau\ntableau=" << LinearAlgebra::Matrix<AP>(m+1, m+n+1, Aptr, Arinc, Acinc) << "\nperm=" << perm << std::endl;
     }
     
-  } // namespace LinearAlgebra
+  } // namespace LinearProgramming
 } // namespace Ariadne
 
 #endif /* ARIADNE_LPSTP_TEMPLATE_H */

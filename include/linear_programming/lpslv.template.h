@@ -21,21 +21,23 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "../linear_algebra/exceptions.h"
+
 namespace Ariadne {
-  namespace LinearAlgebra {
+  namespace LinearProgramming {
     
     template<class R>
-    Matrix<R>to_tableau(const Matrix<R>& A, const Vector<R>& b, const Vector<R>& c);
+    LinearAlgebra::Matrix<R> to_tableau(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b, const LinearAlgebra::Vector<R>& c);
     
     
     template<class R, class AP>
-    AP lpslv(const Matrix<R>& A, const Vector<R>& b, const Vector<R>& c,
-    Permutation& p, Vector<AP>& x, Vector<AP>& y) {
+    AP lpslv(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b, const LinearAlgebra::Vector<R>& c,
+    LinearAlgebra::Permutation& p, LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y) {
       
       size_type m = A.number_of_rows();
       size_type n = A.number_of_columns();
-      Matrix<R>t;
-      Matrix<R>B;
+      LinearAlgebra::Matrix<R>t;
+      LinearAlgebra::Matrix<R>B;
       uint rinc, cinc;
       uint Brinc, Bcinc;
       
@@ -50,7 +52,7 @@ namespace Ariadne {
         ARIADNE_THROW(InfeasibleSolution, __PRETTY_FUNCTION__, "lp problem is infeasible");
       
       // initialize variables
-      if (x == Vector<R>::zero(n)) {        // setup for feasible origin
+      if (x == LinearAlgebra::Vector<R>::zero(n)) {        // setup for feasible origin
         t = to_tableau<R>(A, b, c);
         rinc = t.row_increment();
         cinc = t.column_increment();
@@ -77,7 +79,7 @@ namespace Ariadne {
       } while (ans == false);
       
       if (x.size() != c.size())
-        x = Vector<AP>(c.size());
+        x = LinearAlgebra::Vector<AP>(c.size());
       
       if (ans == true) { // found optimal solution
         
@@ -97,7 +99,7 @@ namespace Ariadne {
         
         // create y vector
         if (y.size() != b.size())
-          y = Vector<AP>(b.size());
+          y = LinearAlgebra::Vector<AP>(b.size());
         for (int i = 0; i < y.size(); i++) {
           // find in which column the slack variables can be found
           int index = p.getindex(i + c.size());
@@ -107,7 +109,7 @@ namespace Ariadne {
       }
       else { // ans == indeterminate -> problem is unbounded
         // ToDo: create feasible x
-        y = Vector<AP>();
+        y = LinearAlgebra::Vector<AP>();
       }
       
       if (verbosity > 2)
@@ -117,9 +119,9 @@ namespace Ariadne {
     
     
     template<class R, class AP>
-    AP lpslvc(const Matrix<R>& A, const Vector<R>& b, const Vector<R>& c,
-    const Vector<R>& l, const Vector<R>& u,
-    Permutation& p, Vector<AP>& x, Vector<AP>& y) {
+    AP lpslvc(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b, const LinearAlgebra::Vector<R>& c,
+    const LinearAlgebra::Vector<R>& l, const LinearAlgebra::Vector<R>& u,
+    LinearAlgebra::Permutation& p, LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y) {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
@@ -131,9 +133,9 @@ namespace Ariadne {
         std::clog << "lpslv(" << m << "," << n << ", " << A-A << "," << rincA << "," << cincA << ", "
         << B-A << "," << incB << ", " << C-A << "," << incC << ", "
         << &d-A << ", " << piv << ")" << std::endl;
-        std::clog << "T=" << Matrix<R>(m+1, n+1, A, rincA, cincA) << std::endl;
-        std::clog << "A=" << Matrix<R>(m, n, A, rincA, cincA) << "; b=" << Vector<R>(m, B, incB)
-        << "; c=" << Vector<R>(n, C, incC) << "; d=" << d << std::endl;
+        std::clog << "T=" << LinearAlgebra::Matrix<R>(m+1, n+1, A, rincA, cincA) << std::endl;
+        std::clog << "A=" << LinearAlgebra::Matrix<R>(m, n, A, rincA, cincA) << "; b=" << LinearAlgebra::Vector<R>(m, B, incB)
+        << "; c=" << LinearAlgebra::Vector<R>(n, C, incC) << "; d=" << d << std::endl;
       }
       
       R one=static_cast<R>(1);
@@ -206,8 +208,8 @@ namespace Ariadne {
         A[i*rincA+j*cincA] = scale;
         
         if (verbosity>1) {
-          std::clog << "A=" << Matrix<R>(m, n, A, rincA, cincA) << "; b=" << Vector<R>(m, B, incB)
-          << "; c=" << Vector<R>(n, C, incC) << "; d=" << d << std::endl;
+          std::clog << "A=" << LinearAlgebra::Matrix<R>(m, n, A, rincA, cincA) << "; b=" << LinearAlgebra::Vector<R>(m, B, incB)
+          << "; c=" << LinearAlgebra::Vector<R>(n, C, incC) << "; d=" << d << std::endl;
         }
         
         // Select variable to enter basis
@@ -222,7 +224,7 @@ namespace Ariadne {
     }
     
     template<class R>
-    Matrix<R>to_tableau(const Matrix<R>& A, const Vector<R>& b, const Vector<R>& c) {
+    LinearAlgebra::Matrix<R>to_tableau(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b, const LinearAlgebra::Vector<R>& c) {
       size_type nc = b.size(); // number of constraints
       size_type nv = c.size(); // number of variables
       
@@ -234,7 +236,7 @@ namespace Ariadne {
       
       size_type n = nv+nc;
       // tableau  needs a row for each constraint + 1 and a column for each variable + slacks + 1
-      Matrix<R> tableau = Matrix<R>(nc+1, n+1);
+      LinearAlgebra::Matrix<R> tableau =  LinearAlgebra::Matrix<R>(nc+1, n+1);
       //  NB: uninitialized elements are assumed to be 0
       
       for (size_type i = 0; i != nc; i++) {
@@ -261,6 +263,6 @@ namespace Ariadne {
     }
     
     
-  } // namespace LinearAlgebra
+  } // namespace LinearProgramming
 } // namespace Ariadne
 

@@ -33,7 +33,7 @@
 #define ARIADNE_LPSLV_H
 
 namespace Ariadne {
-  namespace LinearAlgebra {
+  namespace LinearProgramming {
     
     
     /*! \ingroup LinearProgramming
@@ -48,9 +48,9 @@ namespace Ariadne {
      *
      */
     template<class AP>
-    bool lpfsp(const Matrix<AP>& A, const Vector<AP>& b,
-    Permutation& p,
-    Vector<AP>& x, Vector<AP>& y);
+    bool lpfsp(const LinearAlgebra::Matrix<AP>& A, const LinearAlgebra::Vector<AP>& b,
+     LinearAlgebra::Permutation& p,
+    LinearAlgebra::Vector<AP>& x,  LinearAlgebra::Vector<AP>& y);
     
     
     /*! \ingroup LinearProgramming
@@ -68,10 +68,10 @@ namespace Ariadne {
      * \internal Only implement this if necessary!
      */
     template<class AP>
-    bool lpfsc(const Matrix<AP>& A, const Vector<AP>& b,
-    Vector<AP>& l, Vector<AP>& u,
-    Permutation& p,
-    Vector<AP>& x, Vector<AP>& y);
+    bool lpfsc(const LinearAlgebra::Matrix<AP>& A, const LinearAlgebra::Vector<AP>& b,
+    LinearAlgebra::Vector<AP>& l, LinearAlgebra::Vector<AP>& u,
+    LinearAlgebra::Permutation& p,
+    LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y);
     
     
     /*! \ingroup LinearProgramming
@@ -87,9 +87,9 @@ namespace Ariadne {
      * \internal Only implement this if necessary!
      */
     template<class AP>
-    bool lpfsd(const Matrix<AP>& A, const Vector<AP>& c,
-    Permutation& p,
-    Vector<AP>& x, Vector<AP>& y);
+    bool lpfsd(const LinearAlgebra::Matrix<AP>& A, const LinearAlgebra::Vector<AP>& c,
+    LinearAlgebra::Permutation& p,
+    LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y);
     
         
     /*! \ingroup LinearProgramming
@@ -104,9 +104,9 @@ namespace Ariadne {
      *
      */
     template<class R, class AP>
-    tribool lprfsp(const Matrix<R>& A, const Vector<R>& b,
+    tribool lprfsp(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b,
     Permutation& p,
-    Vector<AP>& x, Vector<AP>& y);
+    LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y);
     
     
     /*! \ingroup LinearProgramming
@@ -123,10 +123,10 @@ namespace Ariadne {
      *
      */
     template<class R, class AP>
-    tribool lprfsc(const Matrix<R>& A, const Vector<R>& b,
-    Vector<R>& l, Vector<R>& u,
-    Permutation& p,
-    Vector<AP>& x, Vector<AP>& y);
+    tribool lprfsc(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b,
+    LinearAlgebra::Vector<R>& l, LinearAlgebra::Vector<R>& u,
+    LinearAlgebra::Permutation& p,
+    LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y);
     
     
     /*! \ingroup LinearProgramming
@@ -141,12 +141,12 @@ namespace Ariadne {
      *
      */
     template<class R, class AP>
-    tribool lprfsd(const Matrix<R>& A, const Vector<R>& c,
-    Permutation& p,
-    Vector<AP>& x, Vector<AP>& y);
+    tribool lprfsd(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& c,
+    LinearAlgebra::Permutation& p,
+    LinearAlgebra::Vector<AP>& x, LinearAlgebra::Vector<AP>& y);
     
 
-  }//namespace LinearAlgebra
+  }//namespace LinearProgramming
 }//namespace Ariadne
 
 

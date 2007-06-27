@@ -53,6 +53,10 @@ namespace Numeric {}
  */
 namespace LinearAlgebra {}
 
+/*! \brief Functions for linear programming. See the \ref LinearProgramming sub-module for more information.
+ */
+namespace LinearProgramming {}
+
 /*! \brief Combinatorial objects, such as sets and maps on lattices and subdivision trees. See the \ref Combinatoric module for more information.
  */
 namespace Combinatoric {}

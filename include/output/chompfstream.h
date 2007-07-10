@@ -21,6 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#ifndef ARIADNE_CHOMPFSTREAM_H
+#define ARIADNE_CHOMPFSTREAM_H
+
 /*! \file chompfstream.h
  *  \brief Output to CHomP computational homology programs
  */
@@ -35,23 +38,15 @@
 
 namespace Ariadne {
   namespace Output {
-    /*
-    class chompfstream;
-    
-    chompfstream& operator<<(chompfstream&, const std::string&);
-    chompfstream& operator<<(chompfstream&, const Combinatoric::LatticeMaskSet&);
-    chompfstream& operator<<(chompfstream&, const Combinatoric::LatticeCellListSet&);
-    chompfstream& operator<<(chompfstream&, const Combinatoric::LatticeCell&);
- */
     
     class chompfstream {
      public:
-      chompfstream() : _ofs() { }
-      chompfstream(const char* fn) : _ofs(fn) { }
-      ~chompfstream() { this->close(); }
+      chompfstream();
+      chompfstream(const char* fn);
+      ~chompfstream();
 
-      void open(const char* fn) { _ofs.open(fn); }
-      void close() { _ofs.close(); }
+      void open(const char* fn);
+      void close();
      private:
       friend chompfstream& operator<<(chompfstream&, const char*);
       friend chompfstream& operator<<(chompfstream&, const Combinatoric::LatticeCell&);
@@ -61,51 +56,9 @@ namespace Ariadne {
       std::ofstream _ofs;
     };
 
-    
-    inline chompfstream& operator<<(chompfstream& cfs, const char* str) {
-      cfs._ofs << str; return cfs;
-    }
-    
-    inline chompfstream& operator<<(chompfstream& cfs, const Combinatoric::LatticeCell& lc) {
-      std::ofstream& ofs=cfs._ofs;
-      if(lc.dimension()>0) {
-        ofs << "(" << lc.lower_bound(0);
-        for(dimension_type i=1; i!=lc.dimension(); ++i) {
-          ofs << "," << lc.lower_bound(i);
-        }
-        ofs << ")";
-      } else {
-        ofs << "()";
-      }
-      return cfs;
-    }
-    
-    inline chompfstream& operator<<(chompfstream& cfs, const Combinatoric::LatticeMaskSet& lms) {
-      Combinatoric::LatticeCell lc;
-      for(Combinatoric::LatticeMaskSet::const_iterator iter=lms.begin(); iter!=lms.end(); ++iter) {
-        lc=*iter;
-        cfs << lc;
-        cfs._ofs << "\n";
-      }
-      return cfs;
-    }
-    
-    inline chompfstream& operator<<(chompfstream& cfs, const Combinatoric::LatticeMultiMap& lmm) {
-      Combinatoric::LatticeCell lc(lmm.argument_dimension());
-      Combinatoric::LatticeCellListSet lcls(lmm.result_dimension());
-      for(Combinatoric::LatticeMultiMap::const_iterator iter=lmm.begin(); iter!=lmm.end(); ++iter) {
-        lc=iter->first;
-        lcls=iter->second;
-        cfs << lc << " -> { ";
-        for(Combinatoric::LatticeCellListSet::const_iterator lcls_iter=lcls.begin(); 
-            lcls_iter!=lcls.end(); ++lcls_iter) 
-        {
-          cfs << *lcls_iter << " ";
-        }
-        cfs << "}\n";
-      }
-      return cfs;
-    }
-    
   }
 }
+
+#endif /* ARIADNE_CHOMPFSTREAM_H */
+
+

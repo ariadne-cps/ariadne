@@ -21,6 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#ifndef ARIADNE_EPSFSTREAM_H
+#define ARIADNE_EPSFSTREAM_H
+
 /*! \file epsfstream.h
  *  \brief Encapsulated postscript output.
  */
@@ -668,3 +671,6 @@ namespace Ariadne {
     
   }
 }
+
+
+#endif /* ARIADNE_EPSFSTREAM_H */

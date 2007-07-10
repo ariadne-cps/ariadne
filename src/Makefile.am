@@ -71,7 +71,9 @@ EVALUATION_SRC = \
 OUTPUT_SRC = \
 	output/logging.cc \
 	output/epsfstream.cc \
-	output/txtfstream.cc
+	output/txtfstream.cc \
+	output/chompfstream.cc \
+	output/dotfstream.cc 
 
 INPUT_SRC = \
 	input/modelica.cc 

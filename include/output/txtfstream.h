@@ -21,6 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#ifndef ARIADNE_TXTFSTREAM_H
+#define ARIADNE_TXTFSTREAM_H
+
 /*! \file txtfstream.h
  *  \brief Text file output.
  */
@@ -66,24 +69,32 @@ namespace Ariadne {
       
       void close();
  
-			void writenl();
+      void writenl();
  			
-			template <class R> void write(const Geometry::Point<R>& pt) {
-				if(pt.dimension() > 0)
-				{
-					(*this) << Numeric::conv_approx<Numeric::Float64>(pt[0]);	
-						for (dimension_type i=1; i<pt.dimension(); i++) {
-							(*this) << " " << Numeric::conv_approx<Numeric::Float64>(pt[i]);
-					}
-					(*this) << "\n" ;
-				}
-			}
-						 
+      template <class R> void write(const Geometry::Point<R>& pt);
+
      private:
       friend txtfstream& operator<<(txtfstream&, std::ostream&(*)(std::ostream&) );
+
      private:
       txtfstream(const txtfstream&); // no copy constructor
     };
+
+
+    template<class R> inline
+    void 
+    txtfstream::write(const Geometry::Point<R>& pt) 
+    {
+      if(pt.dimension() > 0) {
+        (*this) << Numeric::conv_approx<Numeric::Float64>(pt[0]);	
+        for (dimension_type i=1; i<pt.dimension(); i++) {
+          (*this) << " " << Numeric::conv_approx<Numeric::Float64>(pt[i]);
+        }
+        (*this) << "\n" ;
+      }
+    }
+						 
+
     
     inline 
     txtfstream& operator<<(txtfstream& txt, std::ostream&(*f)(std::ostream&) ) {
@@ -114,33 +125,36 @@ namespace Ariadne {
     txtfstream&
     operator<<(txtfstream& txt, const Geometry::Point<R>& pt) 
     { 		
-			if(pt.dimension() > 0) {
-				txt.write(pt);			
-				txt.writenl();
-			}
-			return txt;
+      if(pt.dimension() > 0) {
+        txt.write(pt);			
+        txt.writenl();
+      }
+      return txt;
     }
 
-		template<class R> inline
+
+    template<class R> inline
     txtfstream&
     operator<<(txtfstream& txt, const Geometry::PointList<R>& pl)
     {
-			if(pl.size() > 0) {
+      if(pl.size() > 0) {
         for (size_type i=0; i<pl.size(); i++) {
-				txt.write(pl[i]);			
-				}
-				txt.writenl();
-			}
-			return txt;
-		}
+          txt.write(pl[i]);			
+        }
+        txt.writenl();
+      }
+      return txt;
+    }
+
 
     template<class R> inline
     txtfstream&
     operator<<(txtfstream& txt, const Geometry::Rectangle<R>& r) 
     {
-			return txt << r.vertices();
+      return txt << r.vertices();
     }
     
+
     template<class R> inline
     txtfstream&
     operator<<(txtfstream& txt, const Geometry::RectangularSet<R>& rs)
@@ -154,21 +168,24 @@ namespace Ariadne {
     operator<<(txtfstream& txt, const Geometry::Zonotope< Numeric::Interval<R>,Numeric::Interval<R> >& iz)
     { 
       return txt << iz.vertices();
-		}
+    }
+
        
     template<class R> inline
     txtfstream&
     operator<<(txtfstream& txt, const Geometry::Zonotope<Numeric::Interval<R>,R>& ez)
     { 
-			return txt << ez.vertices();
+      return txt << ez.vertices();
     }
-       
+      
+ 
     template<class R> inline
     txtfstream&
     operator<<(txtfstream& txt, const Geometry::Zonotope<R>& z)
     {  
-			return txt << z.vertices();
+      return txt << z.vertices();
     }
+
        
     template<class R> inline
     txtfstream&
@@ -176,6 +193,7 @@ namespace Ariadne {
     {
       return txt << p.vertices();
     }
+
        
     template<class R> inline
     txtfstream&
@@ -183,13 +201,15 @@ namespace Ariadne {
     {
       return txt << p.vertices();
     }
+
     
     template<class R> inline
     txtfstream&
     operator<<(txtfstream& txt, const Geometry::Polyhedron<R>& p)
     {
-			return txt << Geometry::Polytope<Numeric::Rational>(p);
+      return txt << Geometry::Polytope<Numeric::Rational>(p);
     }
+
 
     template<class R> inline
     txtfstream&
@@ -204,8 +224,8 @@ namespace Ariadne {
     operator<<(txtfstream& txt, const Geometry::ListSet<BS>& ds)
     {
       typedef typename Geometry::ListSet<BS>::const_iterator const_iterator;
-			for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
-				txt << *set_iter;
+      for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
+        txt << *set_iter;
       }
       return txt;
     }
@@ -233,10 +253,10 @@ namespace Ariadne {
     operator<<(txtfstream& txt, const Geometry::GridCellListSet<R>& ds)
     {
       typedef typename Geometry::GridCellListSet<R>::const_iterator const_iterator;
-			for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
-				txt << *set_iter;
-			}
-			return txt;
+      for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
+        txt << *set_iter;
+      }
+      return txt;
     }
     
 
@@ -245,9 +265,9 @@ namespace Ariadne {
     operator<<(txtfstream& txt, const Geometry::GridMaskSet<R>& ds)
     {
       typedef typename Geometry::GridMaskSet<R>::const_iterator const_iterator;
-			for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
-				txt << *set_iter;
-			}
+      for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
+        txt << *set_iter;
+      }
       return txt;
     }
     
@@ -258,11 +278,12 @@ namespace Ariadne {
     operator<<(txtfstream& txt, const Geometry::PartitionTreeSet<R>& ds)
     {
       typedef typename Geometry::PartitionTreeSet<R>::const_iterator const_iterator;
-			for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
-				txt << Geometry::Rectangle<R>(*set_iter);
-			}
+      for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
+        txt << Geometry::Rectangle<R>(*set_iter);
+      }
       return txt;
     }
+
 
     template<class R> inline
     txtfstream&
@@ -304,6 +325,7 @@ namespace Ariadne {
       }
     }
 
+
     template<class R> inline
     txtfstream&
     operator<<(txtfstream& txt, const Geometry::FiniteGrid<R>& fg)
@@ -327,3 +349,5 @@ namespace Ariadne {
     
   }
 }
+
+#endif /* ARIADNE_TXTFSTREAM_H */

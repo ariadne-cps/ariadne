@@ -44,9 +44,6 @@ template<class S> class HybridSet;
 
 namespace System {
   
-template< class R > class HybridAutomaton;
-template< class R> void dot_print(const HybridAutomaton< R >& A);
-
   
 /*! \ingroup HybridTime
  *  \brief A hybrid automaton, comprising continuous-time behaviour

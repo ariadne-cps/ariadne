@@ -92,6 +92,14 @@ mpfr_array_alloc_init2 (size_t n, mp_prec_t p)
 
 
 
+mpfr_ptr
+mpfr_array_realloc_set_prec (mpfr_ptr a, size_t n, mpfr_prec_t p)
+{
+  mpfr_array_clear_free(a,n);
+  return mpfr_array_alloc_init2(n,p);
+}
+
+
 void
 mpfr_array_clear_free (mpfr_ptr a, size_t n)
 {
@@ -206,36 +214,6 @@ mpfr_array_get_prec (mpfr_srcptr a, size_t n)
 }
 
 void
-mpfr_array_set_si (mpfr_ptr a, size_t n, mpfr_t x, mp_rnd_t rnd_mode)
-{
-  size_t i;
-  for(i=0; i!=n; ++i) 
-    {
-      mpfr_set(a+i,x,rnd_mode);
-    }
-}
-
-void
-mpfr_array_set_si (mpfr_ptr a, size_t n, long z, mp_rnd_t rnd_mode)
-{
-  size_t i;
-  for(i=0; i!=n; ++i) 
-    {
-      mpfr_set_si(a+i,z,rnd_mode);
-    }
-}
-
-void
-mpfr_array_set_d (mpfr_ptr a, size_t n, double d, mp_rnd_t rnd_mode)
-{
-  size_t i;
-  for(i=0; i!=n; ++i) 
-    {
-      mpfr_set_d(a+i,d,rnd_mode);
-    }
-}
-
-void
 mpfr_array_clear (mpfr_ptr m, size_t n)
 {
   size_t i;
@@ -251,4 +229,150 @@ mpfr_array_free (mpfr_ptr a, size_t n)
 {
   (*__gmp_free_func) (a,n*sizeof(mpfr_t));
 }
+
+
+
+void
+mpfr_array_init_zero (mpfr_ptr a, size_t n)
+{
+  mpfr_array_init(a,n);
+  size_t i;
+  for(i=0; i!=n; ++i) 
+    {
+      mpfr_set_si(a+i,0,GMP_RNDN);
+    }
+}
+
+
+void
+mpfr_array_init_zero2 (mpfr_ptr a, size_t n, mpfr_prec_t p)
+{
+  mpfr_array_init2(a,n,p);
+  size_t i;
+  for(i=0; i!=n; ++i) 
+    {
+      mpfr_set_si(a+i,0,GMP_RNDN);
+    }
+}
+
+
+
+void
+mpfr_array_copy (mpfr_ptr a, size_t n, mpfr_srcptr x, mp_rnd_t rnd_mode)
+{
+  size_t i;
+  for(i=0; i!=n; ++i) 
+    {
+      mpfr_set(a+i,x+i,rnd_mode);
+    }
+}
+
+
+void
+mpfr_array_set (mpfr_ptr a, size_t n, mpfr_t x, mp_rnd_t rnd_mode)
+{
+  size_t i;
+  for(i=0; i!=n; ++i) 
+    {
+      mpfr_set(a+i,x,rnd_mode);
+    }
+}
+
+
+
+void 
+mpfr_array_set_ui (mpfr_ptr rop, size_t n, unsigned long int op, mp_rnd_t rnd)
+{
+  size_t i;
+  for(i=0; i!=n; ++i) 
+    {
+      mpfr_set_ui(rop+i,op,rnd);
+    }
+}
+
+void 
+mpfr_array_set_si (mpfr_ptr rop, size_t n, long int op, mp_rnd_t rnd)
+{
+  size_t i;
+  for(i=0; i!=n; ++i) 
+    {
+      mpfr_set_si(rop+i,op,rnd);
+    }
+}
+
+
+#ifdef _MPFR_H_HAVE_INTMAX_T
+
+void mpfr_array_set_uj (mpfr_ptr rop, size_t n, uintmax_t op, mp_rnd_t rnd)
+{
+  size_t i;
+  for(i=0; i!=n; ++i) 
+    {
+      mpfr_set_uj(rop+i,op,rnd);
+    }
+}
+
+void mpfr_array_set_sj (mpfr_ptr rop, size_t n, intmax_t op, mp_rnd_t rnd)
+{
+  size_t i;
+  for(i=0; i!=n; ++i) 
+    {
+      mpfr_set_sj(rop+i,op,rnd);
+    }
+}
+
+#endif
+
+
+void mpfr_array_set_d (mpfr_ptr rop, size_t n, double op, mp_rnd_t rnd)
+{
+  size_t i;
+  for(i=0; i!=n; ++i) 
+    {
+      mpfr_set_d(rop+i,op,rnd);
+    }
+}
+
+
+void mpfr_array_set_ld (mpfr_t rop, size_t n, long double op, mp_rnd_t rnd)
+{
+  size_t i;
+  for(i=0; i!=n; ++i) 
+    {
+      mpfr_set_ld(rop+i,op,rnd);
+    }
+}
+
+
+void mpfr_array_set_z (mpfr_t rop, size_t n, mpz_t op, mp_rnd_t rnd)
+{
+  size_t i;
+  for(i=0; i!=n; ++i) 
+    {
+      mpfr_set_z(rop+i,op,rnd);
+    }
+}
+
+
+void mpfr_array_set_q (mpfr_t rop, size_t n, mpq_t op, mp_rnd_t rnd)
+{
+  size_t i;
+  for(i=0; i!=n; ++i) 
+    {
+      mpfr_set_q(rop+i,op,rnd);
+    }
+}
+
+
+void mpfr_array_set_f (mpfr_t rop, size_t n, mpf_t op, mp_rnd_t rnd)
+{
+  size_t i;
+  for(i=0; i!=n; ++i) 
+    {
+      mpfr_set_f(rop+i,op,rnd);
+    }
+}
+
+
+
 

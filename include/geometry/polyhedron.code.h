@@ -198,9 +198,9 @@ namespace Ariadne {
 
     template<class R>
     void
-    Polyhedron<R>::new_constraint(const Constraint<R>& c)
+    Polyhedron<R>::new_constraint(const LinearConstraint<R>& c)
     {
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,c,"void Polyhedron::new_constraint(Constraint& c)");
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,c,"void Polyhedron::new_constraint(LinearConstraint& c)");
       dimension_type d=this->_dimension;
       size_type sz=this->_data.size();
       this->_data.resize(sz+d+1u);
@@ -632,11 +632,11 @@ namespace Ariadne {
     
     template<class R>  
     std::ostream& 
-    Constraint<R>::write(std::ostream& os) const
+    LinearConstraint<R>::write(std::ostream& os) const
     {
       LinearAlgebra::Vector<R> a=-LinearAlgebra::Vector<R>(this->_d,this->_a);
       R b=this->_a[this->_d];
-      os << "Constraint(a=" << a << ",b=" << b << ")";
+      os << "LinearConstraint(a=" << a << ",b=" << b << ")";
       return os;
     }
     

@@ -1,8 +1,8 @@
 /***************************************************************************
- *            polyhedron.cc
+ *            constraint.cc
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2007  Pieter Collins
+ *  Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -22,33 +22,22 @@
  */
 
 
-#include "numeric/rational.h"
 #include "numeric/float.h"
-#include "numeric/interval.h"
 
-#include "geometry/polyhedron.h"
-#include "geometry/polyhedron.code.h"
+#include "geometry/constraint.h"
+#include "geometry/constraint.code.h"
 
 namespace Ariadne {
   namespace Geometry {
 
     using namespace Numeric;
     
-    template class Polyhedron<Rational>;
-    template class LinearConstraint<Rational>;
-
 #ifdef ENABLE_FLOAT64
-    template class Polyhedron<Float64>;
-    template class LinearConstraint<Float64>;
-    template class Polyhedron< Interval<Float64> >;
-    template class LinearConstraint< Interval<Float64> >;
+    template class Constraint<Float64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class Polyhedron<FloatMP>;
-    template class LinearConstraint<FloatMP>;
-    template class Polyhedron< Interval<FloatMP> >;
-    template class LinearConstraint< Interval<FloatMP> >;
+    template class Constraint<FloatMP>;
 #endif
 
   }

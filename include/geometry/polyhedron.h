@@ -44,7 +44,7 @@
 namespace Ariadne {  
   namespace Geometry {
 
-    template<class R> class Constraint;
+    template<class R> class LinearConstraint;
     template<class R> class Polytope;
     template<class R> class PolyhedronConstraintsIterator;
     
@@ -141,7 +141,7 @@ namespace Ariadne {
 
       //@{
       //! \name Modifying operations
-      void new_constraint(const Constraint<R>& c);
+      void new_constraint(const LinearConstraint<R>& c);
       //@}
 
 
@@ -240,7 +240,7 @@ namespace Ariadne {
     
     /*! \brief A linear inequality constraint. */
     template<class R>
-    class Constraint
+    class LinearConstraint
     {
       friend class Polyhedron<R>;
       friend class PolyhedronConstraintsIterator<R>;
@@ -252,7 +252,7 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;
      private:
-      Constraint(const dimension_type d, const R* a);
+      LinearConstraint(const dimension_type d, const R* a);
       dimension_type _d; const R* _a;
     };
     
@@ -319,7 +319,7 @@ namespace Ariadne {
 
     
     template<class R>
-    std::ostream& operator<<(std::ostream& os, const Constraint<R>& c);
+    std::ostream& operator<<(std::ostream& os, const LinearConstraint<R>& c);
     
     template<class R>
     std::ostream& operator<<(std::ostream& os, const Polyhedron<R>& p);

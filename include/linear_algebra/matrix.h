@@ -252,6 +252,8 @@ namespace Ariadne {
       friend Matrix<AT> operator*<>(const Matrix<R>& A1, const Matrix<R>& A2);
       /*! \brief The product of matrix \a A with vector \a v. */
       friend Vector<AT> operator*<>(const Matrix<R>& A, const Vector<R>& v);
+      /*! \brief The product of vector \a v with matrix \a A. */
+      friend Vector<AT> operator*<>(const Vector<R>& v, const Matrix<R>& A);
 
       /*! \brief The inverse of \a A. */
       friend Matrix<AT> inverse<>(const Matrix<R>& A);
@@ -509,6 +511,20 @@ namespace Ariadne {
       for(size_type i=0; i!=A.number_of_rows(); ++i) {
         for(size_type j=0; j!=A.number_of_columns(); ++j) {
           result(i)+=A(i,j)*v(j);
+        }
+      }
+      return result;
+    }
+    
+    template<class R1, class R2> inline
+    Vector<typename Numeric::traits<R1,R2>::arithmetic_type>
+    operator*(const Vector<R1>& v, const Matrix<R2>& A) 
+    {
+      typedef typename Numeric::traits<R1,R2>::arithmetic_type R3;
+      Vector<R3> result(A.number_of_columns());
+      for(size_type i=0; i!=A.number_of_rows(); ++i) {
+        for(size_type j=0; j!=A.number_of_columns(); ++j) {
+          result(j)+=v(i)*A(i,j);
         }
       }
       return result;

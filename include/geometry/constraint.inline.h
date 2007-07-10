@@ -1,8 +1,8 @@
 /***************************************************************************
- *            polyhedron.cc
+ *            constraint.inline.h
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2007  Pieter Collins
+ *  pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -20,36 +20,30 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-
-
-#include "numeric/rational.h"
-#include "numeric/float.h"
-#include "numeric/interval.h"
-
-#include "geometry/polyhedron.h"
-#include "geometry/polyhedron.code.h"
+ 
 
 namespace Ariadne {
-  namespace Geometry {
-
-    using namespace Numeric;
-    
-    template class Polyhedron<Rational>;
-    template class LinearConstraint<Rational>;
-
-#ifdef ENABLE_FLOAT64
-    template class Polyhedron<Float64>;
-    template class LinearConstraint<Float64>;
-    template class Polyhedron< Interval<Float64> >;
-    template class LinearConstraint< Interval<Float64> >;
-#endif
   
-#ifdef ENABLE_FLOATMP
-    template class Polyhedron<FloatMP>;
-    template class LinearConstraint<FloatMP>;
-    template class Polyhedron< Interval<FloatMP> >;
-    template class LinearConstraint< Interval<FloatMP> >;
-#endif
-
+  template<class R> inline
+  bool
+  Geometry::equal(const Constraint<R>& c1, const Constraint<R>& c2)
+  {
+    return c1._function_ptr == c2._function_ptr && c1._comparison == c2._comparison;;
   }
+
+  template<class R> inline
+  bool 
+  Geometry::opposite(const Constraint<R>& c1, const Constraint<R>& c2)
+  {
+    return c1._function_ptr==c2._function_ptr && c1._comparison != c2._comparison;
+  }
+
+  template<class R> inline
+  std::ostream& 
+  Geometry::operator<<(std::ostream& os, const Geometry::Constraint<R>& c) 
+  {
+    return c.write(os);
+  }
+    
+
 }

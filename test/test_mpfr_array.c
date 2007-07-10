@@ -75,10 +75,14 @@ int main() {
   printf("\n\n");
 
   x = mpfr_array_alloc(7);
-  mpfr_array_init(x,2);
-  mpfr_set_ui(x+0,0,GMP_RNDN);
+  mpfr_array_init(x,4);
+  mpfr_set_ui(x+0,2,GMP_RNDN);
   printf("%f\n",mpfr_get_d(x+0,GMP_RNDN));
   printf("%f\n",mpfr_get_d(x+1,GMP_RNDN));
+  mpfr_set_ui(x+1,3,GMP_RNDN);
+  mpfr_array_copy(x+2,2,x,GMP_RNDN);
+  printf("%f\n",mpfr_get_d(x+2,GMP_RNDN));
+  printf("%f\n",mpfr_get_d(x+3,GMP_RNDN));
   
   printf("\n");
  

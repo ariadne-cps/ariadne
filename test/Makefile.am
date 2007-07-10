@@ -38,6 +38,7 @@ check_PROGRAMS = \
 	test_polytope \
 	test_polyhedron \
 	test_hybrid_automaton \
+	test_constraint \
 	test_constraint_set test_level_set \
 	test_function \
 	test_newton \
@@ -86,6 +87,7 @@ test_parallelotope_SOURCES=test_parallelotope.cc
 test_simplex_SOURCES=test_simplex.cc
 test_polytope_SOURCES=test_polytope.cc
 test_polyhedron_SOURCES=test_polyhedron.cc
+test_constraint_SOURCES=test_constraint.cc
 test_constraint_set_SOURCES=test_constraint_set.cc
 test_level_set_SOURCES=test_level_set.cc
 test_hybrid_automaton_SOURCES=test_hybrid_automaton.cc

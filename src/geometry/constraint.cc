@@ -33,10 +33,14 @@ namespace Ariadne {
     using namespace Numeric;
     
 #ifdef ENABLE_FLOAT64
+    template class ConstraintInterface<Float64>;
     template class Constraint<Float64>;
+    template class LinearConstraint<Float64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
+    template class ConstraintInterface<FloatMP>;
+    template class LinearConstraint<FloatMP>;
     template class Constraint<FloatMP>;
 #endif
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            constraint.inline.h
+ *            constraint_hybrid_automaton.cc
  *
  *  Copyright  2007  Pieter Collins
  *  pieter.collins@cwi.nl
@@ -20,30 +20,28 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
+#include "numeric/float.h"
+
+#include "system/constraint_hybrid_automaton.h"
+#include "system/constraint_hybrid_automaton.code.h"
+
 
 namespace Ariadne {
-  
-  template<class R> inline
-  bool
-  Geometry::equal(const Constraint<R>& c1, const Constraint<R>& c2)
-  {
-    return c1._function_ptr == c2._function_ptr && c1._comparison == c2._comparison;;
-  }
-
-  template<class R> inline
-  bool 
-  Geometry::opposite(const Constraint<R>& c1, const Constraint<R>& c2)
-  {
-    return c1._function_ptr==c2._function_ptr && c1._comparison != c2._comparison;
-  }
-
-  template<class R> inline
-  std::ostream& 
-  Geometry::operator<<(std::ostream& os, const Geometry::ConstraintInterface<R>& c) 
-  {
-    return c.write(os);
-  }
+  namespace System {
+    using namespace Numeric;
     
-
+#ifdef ENABLE_FLOAT64
+    template class ConstraintDiscreteMode<Float64>;
+    template class ConstraintDiscreteTransition<Float64>;
+    template class ConstraintHybridAutomaton<Float64>;
+#endif
+    
+#ifdef ENABLE_FLOATMP
+    template class ConstraintDiscreteMode<FloatMP>;
+    template class ConstraintDiscreteTransition<FloatMP>;
+    template class ConstraintHybridAutomaton<FloatMP>;
+#endif
+      
+  }
 }

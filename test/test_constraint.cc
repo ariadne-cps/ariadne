@@ -86,6 +86,8 @@ test_constraint()
   z=Zonotope<Interval<R>,R>(r);
   ARIADNE_TEST_ASSERT(!satisfies(z,c));
 
+  
+  LinearConstraint<R> lc(Vector<R>("[1,1]"),Geometry::less,R(2));
   return 0;
 }
 

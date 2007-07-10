@@ -116,7 +116,7 @@ namespace Ariadne {
     
     
     template<class R> inline
-    LinearConstraint<R>::LinearConstraint(const dimension_type d, const R* a)
+    PolyhedralConstraint<R>::PolyhedralConstraint(const dimension_type d, const R* a)
       : _d(d), _a(a) 
     { 
     }
@@ -124,14 +124,14 @@ namespace Ariadne {
     
     template<class R> inline
     dimension_type
-    LinearConstraint<R>::dimension() const
+    PolyhedralConstraint<R>::dimension() const
     { 
       return this->_d;
     }
     
     
     template<class R1> template<class R2> inline 
-    tribool LinearConstraint<R1>::satisfied_by(const Point<R2>& pt) const
+    tribool PolyhedralConstraint<R1>::satisfied_by(const Point<R2>& pt) const
     {
       typedef typename Numeric::traits<R1,R2>::arithmetic_type F;
       F prod=0;
@@ -150,10 +150,10 @@ namespace Ariadne {
     template<class R>
     class PolyhedronConstraintsIterator
       : public boost::iterator_facade<PolyhedronConstraintsIterator<R>,
-                                      LinearConstraint<R>,
+                                      PolyhedralConstraint<R>,
                                       boost::forward_traversal_tag,
-                                      const LinearConstraint<R>&,
-                                      const LinearConstraint<R>*
+                                      const PolyhedralConstraint<R>&,
+                                      const PolyhedralConstraint<R>*
                                      >
     {
      public:
@@ -161,10 +161,10 @@ namespace Ariadne {
         : _c(ply.dimension(),ply.constraints().begin()+n*(ply.dimension()+1)) { }
       bool equal(const PolyhedronConstraintsIterator<R>& other) const { 
         return this->_c._a==other._c._a; }
-      const LinearConstraint<R>& dereference() const { return _c; }
+      const PolyhedralConstraint<R>& dereference() const { return _c; }
       void increment() { _c._a+=_c._d+1u; ; }
      private:
-      LinearConstraint<R> _c;
+      PolyhedralConstraint<R> _c;
     };
     
     
@@ -173,7 +173,7 @@ namespace Ariadne {
     
     
     template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const LinearConstraint<R>& c) 
+    std::ostream& operator<<(std::ostream& os, const PolyhedralConstraint<R>& c) 
     {
       return c.write(os); 
     }

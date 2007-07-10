@@ -46,8 +46,20 @@ tribool compare_zero(const Numeric::Interval<R>& ivl, Geometry::Comparison cmp) 
 
 }
 
+
+
 namespace Ariadne {
+
     
+template<class R>
+Geometry::ConstraintInterface<R>::~ConstraintInterface() 
+{ 
+}
+
+
+
+
+
 template<class R>
 Geometry::Constraint<R>::Constraint(const System::FunctionInterface<R>& f, Comparison cmp)
   : _function_ptr(f.clone()), _comparison(cmp)
@@ -175,4 +187,59 @@ Geometry::Constraint<R>::instantiate()
 }
 
 
+
+
+template<class R>
+Geometry::LinearConstraint<R>::~LinearConstraint()
+{
 }
+
+
+template<class R>
+Geometry::LinearConstraint<R>::LinearConstraint(const LinearAlgebra::Vector<R> a, Comparison cmp, const R& b)
+  : _a(a), _b(b), _c(cmp)
+{
+}
+
+
+template<class R>
+Geometry::LinearConstraint<R>* 
+Geometry::LinearConstraint<R>::clone() const
+{
+  return new LinearConstraint<R>(this->_a, this->_c, this->_b);
+}
+
+
+template<class R>
+dimension_type
+Geometry::LinearConstraint<R>::dimension() const 
+{
+  return this->_a.size();
+}
+
+template<class R>
+std::ostream& 
+Geometry::LinearConstraint<R>::write(std::ostream& os) const
+{
+  return os << "LinearConstraint( a=" << this->_a << ", b=" << this->_b << ", c='" << (this->_c==less ? "<" : ">") << "' )";
+}
+
+      
+template<class R>
+typename Geometry::LinearConstraint<R>::A
+Geometry::LinearConstraint<R>::value(const Point<A>& pt) const
+{
+  return LinearAlgebra::inner_product(pt.position_vector(),LinearAlgebra::Vector<A>(this->_a)) - this->_b;
+}
+
+
+template<class R>
+LinearAlgebra::Vector<typename Geometry::LinearConstraint<R>::A>
+Geometry::LinearConstraint<R>::gradient(const Point<A>& pt) const
+{
+  return LinearAlgebra::Vector<A>(this->_a);
+}
+
+
+
+} // namespace Ariadne

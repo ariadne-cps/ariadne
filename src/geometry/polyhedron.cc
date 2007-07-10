@@ -35,20 +35,20 @@ namespace Ariadne {
     using namespace Numeric;
     
     template class Polyhedron<Rational>;
-    template class LinearConstraint<Rational>;
+    template class PolyhedralConstraint<Rational>;
 
 #ifdef ENABLE_FLOAT64
     template class Polyhedron<Float64>;
-    template class LinearConstraint<Float64>;
+    template class PolyhedralConstraint<Float64>;
     template class Polyhedron< Interval<Float64> >;
-    template class LinearConstraint< Interval<Float64> >;
+    template class PolyhedralConstraint< Interval<Float64> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
     template class Polyhedron<FloatMP>;
-    template class LinearConstraint<FloatMP>;
+    template class PolyhedralConstraint<FloatMP>;
     template class Polyhedron< Interval<FloatMP> >;
-    template class LinearConstraint< Interval<FloatMP> >;
+    template class PolyhedralConstraint< Interval<FloatMP> >;
 #endif
 
   }

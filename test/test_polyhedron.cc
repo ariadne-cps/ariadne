@@ -91,7 +91,7 @@ test_polyhedron()
   for(typename Polyhedron<R>::constraints_const_iterator c_iter=phd1.constraints_begin();
       c_iter!=phd1.constraints_end(); ++c_iter)
   {
-    const LinearConstraint<R>& c=*c_iter;
+    const PolyhedralConstraint<R>& c=*c_iter;
     cout << c << flush;
     cout << "  " << c.satisfied_by(pt1) << endl;
   }
@@ -105,7 +105,7 @@ test_polyhedron()
   for(typename Polyhedron<R>::constraints_const_iterator c_iter=phd1.constraints_begin();
       c_iter!=phd1.constraints_end(); ++c_iter)
   {
-    const LinearConstraint<R>& c=*c_iter;
+    const PolyhedralConstraint<R>& c=*c_iter;
     cout << c << flush;
     cout << "  " << c.satisfied_by(pt2) << endl;
   }

@@ -42,7 +42,7 @@ namespace Ariadne {
 
 template<class R>
 System::ConstraintDiscreteMode<R>::ConstraintDiscreteMode(id_type id, 
-                                                          const VectorField<R>& dynamic, 
+                                                          const VectorFieldInterface<R>& dynamic, 
                                                           const std::vector< boost::shared_ptr< const ConstraintInterface<R> > >& invariant)
   : _id(id), _dynamic(dynamic.clone()), _invariant(invariant)
 {
@@ -73,7 +73,7 @@ System::ConstraintDiscreteMode<R>::dimension() const
 
 
 template<class R>
-const System::VectorField<R>&
+const System::VectorFieldInterface<R>&
 System::ConstraintDiscreteMode<R>::dynamic() const
 {
   return *this->_dynamic;
@@ -105,7 +105,7 @@ template<class R>
 System::ConstraintDiscreteTransition<R>::ConstraintDiscreteTransition(id_type id, 
                                                                       const ConstraintDiscreteMode<R>& source, 
                                                                       const ConstraintDiscreteMode<R>& destination,
-                                                                      const Map<R>& reset, 
+                                                                      const MapInterface<R>& reset, 
                                                                       const ConstraintInterface<R>& activation,
                                                                       bool forced)
   : _event_id(id), _source(&source), _destination(&destination), _reset(reset.clone()), _activation(activation.clone()), _forced(forced)
@@ -146,7 +146,7 @@ System::ConstraintDiscreteTransition<R>::destination() const
 
 
 template<class R>
-const System::Map<R>&
+const System::MapInterface<R>&
 System::ConstraintDiscreteTransition<R>::reset() const
 {
   return *this->_reset;
@@ -204,7 +204,7 @@ System::ConstraintHybridAutomaton<R>::~ConstraintHybridAutomaton() {
 template<class R>
 const System::ConstraintDiscreteMode<R>& 
 System::ConstraintHybridAutomaton<R>::new_mode(id_type id,
-                                               const VectorField<R>& dynamic) 
+                                               const VectorFieldInterface<R>& dynamic) 
 {
   if(this->has_mode(id)) {
     throw std::runtime_error("The hybrid automaton already has a mode with the given id");
@@ -218,7 +218,7 @@ System::ConstraintHybridAutomaton<R>::new_mode(id_type id,
 template<class R>
 const typename System::ConstraintHybridAutomaton<R>::mode_type& 
 System::ConstraintHybridAutomaton<R>::new_mode(id_type id,
-                                               const VectorField<R>& dynamic,
+                                               const VectorFieldInterface<R>& dynamic,
                                                const ConstraintInterface<R>& constraint) 
 {
   if(this->has_mode(id)) {
@@ -236,7 +236,7 @@ const typename System::ConstraintHybridAutomaton<R>::transition_type&
 System::ConstraintHybridAutomaton<R>::new_transition(id_type event_id,
                                                       id_type source_id, 
                                                       id_type destination_id,
-                                                      const Map<R>& reset,
+                                                      const MapInterface<R>& reset,
                                                       const ConstraintInterface<R>& activation) 
 {
   if(this->has_transition(event_id,source_id)) {
@@ -263,7 +263,7 @@ const typename System::ConstraintHybridAutomaton<R>::transition_type&
 System::ConstraintHybridAutomaton<R>::new_forced_transition(id_type event_id,
                                                             id_type source_id, 
                                                             id_type destination_id,
-                                                            const Map<R>& reset,
+                                                            const MapInterface<R>& reset,
                                                             const ConstraintInterface<R>& activation) 
 {
   if(this->has_transition(event_id,source_id)) {

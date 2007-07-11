@@ -49,7 +49,7 @@ void export_affine_map()
   typedef typename Numeric::traits<R>::arithmetic_type F;
   typedef Interval<R> I;
   
-  class_< AffineMap<R>, bases< Map<R> > >("AffineMap",init< Matrix<R>, Vector<R> >())
+  class_< AffineMap<R>, bases< MapInterface<R> > >("AffineMap",init< Matrix<R>, Vector<R> >())
     .def("argument_dimension",&AffineMap<R>::argument_dimension)
     .def("result_dimension",&AffineMap<R>::result_dimension)
     .def("smoothness",&AffineMap<R>::smoothness)

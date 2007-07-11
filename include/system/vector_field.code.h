@@ -34,30 +34,30 @@ namespace Ariadne {
   namespace System {
 
     template<class R>
-    VectorField<R>::~VectorField() 
+    VectorFieldInterface<R>::~VectorFieldInterface() 
     {
     }
      
     template<class R>
-    typename VectorField<R>::F 
-    VectorField<R>::derivative(const Geometry::Point<F>& x, const size_type& i, const LinearAlgebra::MultiIndex& j) const
+    typename VectorFieldInterface<R>::F 
+    VectorFieldInterface<R>::derivative(const Geometry::Point<F>& x, const size_type& i, const LinearAlgebra::MultiIndex& j) const
     {
       throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
    
 
     template<class R>
-    LinearAlgebra::Matrix<typename VectorField<R>::F> 
-    VectorField<R>::jacobian(const Geometry::Point<F>& x) const 
+    LinearAlgebra::Matrix<typename VectorFieldInterface<R>::F> 
+    VectorFieldInterface<R>::jacobian(const Geometry::Point<F>& x) const 
     {
       throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
     
     template<class R>
     std::ostream&
-    VectorField<R>::write(std::ostream& os) const 
+    VectorFieldInterface<R>::write(std::ostream& os) const 
     {
-      return os << "VectorField()";
+      return os << "VectorFieldInterface()";
     }
     
     

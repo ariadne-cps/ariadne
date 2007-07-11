@@ -138,9 +138,9 @@ Evaluation::Applicator<R>::set_default_bound(const R& db)
 
 template<class R>
 Geometry::Rectangle<R> 
-Evaluation::Applicator<R>::evaluate(const System::Map<R>& f, const Geometry::Rectangle<R>& r) const
+Evaluation::Applicator<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r) const
 {
-  ARIADNE_LOG(6,"GridMaskSetEvaluation Applicator::evaluate(Map f, Rectangle<Float> r)\n");
+  ARIADNE_LOG(6,"GridMaskSetEvaluation Applicator::evaluate(MapInterface f, Rectangle<Float> r)\n");
   ARIADNE_LOG(7,"  r="<<r<<"\n");
   ARIADNE_LOG(8,"  f(r)="<<Geometry::Rectangle<R>(f.image(Geometry::Point< Numeric::Interval<R> >(r)))<<"\n");
   return Geometry::Rectangle<R>(f.image(Geometry::Point< Numeric::Interval<R> >(r)));
@@ -152,9 +152,9 @@ Evaluation::Applicator<R>::evaluate(const System::Map<R>& f, const Geometry::Rec
 
 template<class R>
 Geometry::Zonotope<R> 
-Evaluation::Applicator<R>::evaluate(const System::Map<R>& f, const Geometry::Zonotope<R>& z) const 
+Evaluation::Applicator<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<R>& z) const 
 {
-  ARIADNE_LOG(6,"GridMaskSetEvaluation Applicator::evaluate(Map f, Zonotope<Float,Float> z)\n");
+  ARIADNE_LOG(6,"GridMaskSetEvaluation Applicator::evaluate(MapInterface f, Zonotope<Float,Float> z)\n");
   ARIADNE_LOG(7,"  z="<<z<<"\n");
   typedef typename Numeric::traits<R>::arithmetic_type F;
   
@@ -204,9 +204,9 @@ Evaluation::Applicator<R>::evaluate(const System::Map<R>& f, const Geometry::Zon
 
 template<class R>
 Geometry::Zonotope<Numeric::Interval<R>,R> 
-Evaluation::Applicator<R>::evaluate(const System::Map<R>& f, const Geometry::Zonotope<Numeric::Interval<R>,R>& z) const 
+Evaluation::Applicator<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<Numeric::Interval<R>,R>& z) const 
 {
-  ARIADNE_LOG(6,"GridMaskSetEvaluation Applicator::evaluate(Map f, Zonotope<Interval,Float> z)\n");
+  ARIADNE_LOG(6,"GridMaskSetEvaluation Applicator::evaluate(MapInterface f, Zonotope<Interval,Float> z)\n");
   ARIADNE_LOG(7,"  z="<<z<<"\n");
   typedef Numeric::Interval<R> I;
   
@@ -223,9 +223,9 @@ Evaluation::Applicator<R>::evaluate(const System::Map<R>& f, const Geometry::Zon
 
 template<class R>
 Geometry::Zonotope< Numeric::Interval<R> > 
-Evaluation::Applicator<R>::evaluate(const System::Map<R>& f, const Geometry::Zonotope< Numeric::Interval<R> >& z) const 
+Evaluation::Applicator<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope< Numeric::Interval<R> >& z) const 
 {
-  ARIADNE_LOG(6,"GridMaskSet Applicator::evaluate(Map f, Zonotope<Interval,Interval> z)\n");
+  ARIADNE_LOG(6,"GridMaskSet Applicator::evaluate(MapInterface f, Zonotope<Interval,Interval> z)\n");
   ARIADNE_LOG(7,"  z="<<z<<"\n");
   typedef Numeric::Interval<R> I;
   
@@ -246,7 +246,7 @@ Evaluation::Applicator<R>::evaluate(const System::Map<R>& f, const Geometry::Zon
 template<class R>
 template<class BS>
 Geometry::ListSet<BS> 
-Evaluation::Applicator<R>::image_list_set(const System::Map<R>& f, const Geometry::ListSet<BS>& ds) const 
+Evaluation::Applicator<R>::image_list_set(const System::MapInterface<R>& f, const Geometry::ListSet<BS>& ds) const 
 {
   Geometry::ListSet<BS> result(f.result_dimension());
   for(typename Geometry::ListSet<BS>::const_iterator iter=ds.begin(); iter!=ds.end(); ++iter) {
@@ -259,9 +259,9 @@ Evaluation::Applicator<R>::image_list_set(const System::Map<R>& f, const Geometr
 
 template<class R>
 Geometry::ListSet< Geometry::Rectangle<R> > 
-Evaluation::Applicator<R>::image(const System::Map<R>& f, const Geometry::ListSet< Geometry::Rectangle<R> >& ds) const 
+Evaluation::Applicator<R>::image(const System::MapInterface<R>& f, const Geometry::ListSet< Geometry::Rectangle<R> >& ds) const 
 {
-  ARIADNE_LOG(2,"GridMaskSet Applicator::image(Map map, ListSet< Rectangle<Float> > initial_set)\n");
+  ARIADNE_LOG(2,"GridMaskSet Applicator::image(MapInterface map, ListSet< Rectangle<Float> > initial_set)\n");
   ARIADNE_LOG(3,"initial_set="<<ds<<"\n");
   return this->image_list_set(f,ds);
 }
@@ -270,9 +270,9 @@ Evaluation::Applicator<R>::image(const System::Map<R>& f, const Geometry::ListSe
 
 template<class R>
 Geometry::ListSet< Geometry::Zonotope<R> > 
-Evaluation::Applicator<R>::image(const System::Map<R>& f, const Geometry::ListSet< Geometry::Zonotope<R> >& ds) const 
+Evaluation::Applicator<R>::image(const System::MapInterface<R>& f, const Geometry::ListSet< Geometry::Zonotope<R> >& ds) const 
 {
-  ARIADNE_LOG(2,"GridMaskSet Applicator::image(Map map, ListSet< Zonotope<Float,Float> > initial_set)\n")
+  ARIADNE_LOG(2,"GridMaskSet Applicator::image(MapInterface map, ListSet< Zonotope<Float,Float> > initial_set)\n")
     ARIADNE_LOG(3,"initial_set="<<ds<<"\n");
   return this->image_list_set(f,ds);
 }
@@ -281,9 +281,9 @@ Evaluation::Applicator<R>::image(const System::Map<R>& f, const Geometry::ListSe
 
 template<class R>
 Geometry::ListSet< Geometry::Zonotope<Numeric::Interval<R>,R> > 
-Evaluation::Applicator<R>::image(const System::Map<R>& f, const Geometry::ListSet< Geometry::Zonotope<Numeric::Interval<R>,R> >& ds) const 
+Evaluation::Applicator<R>::image(const System::MapInterface<R>& f, const Geometry::ListSet< Geometry::Zonotope<Numeric::Interval<R>,R> >& ds) const 
 {
-  ARIADNE_LOG(2,"GridMaskSet Applicator::image(Map map, ListSet< Zonotope<Interval,Float> > initial_set)\n");
+  ARIADNE_LOG(2,"GridMaskSet Applicator::image(MapInterface map, ListSet< Zonotope<Interval,Float> > initial_set)\n");
   ARIADNE_LOG(3,"initial_set="<<ds<<"\n");
   return this->image_list_set(f,ds);
 }
@@ -291,9 +291,9 @@ Evaluation::Applicator<R>::image(const System::Map<R>& f, const Geometry::ListSe
 
 template<class R>
 Geometry::ListSet< Geometry::Zonotope< Numeric::Interval<R> > > 
-Evaluation::Applicator<R>::image(const System::Map<R>& f, const Geometry::ListSet< Geometry::Zonotope< Numeric::Interval<R> > >& ds) const 
+Evaluation::Applicator<R>::image(const System::MapInterface<R>& f, const Geometry::ListSet< Geometry::Zonotope< Numeric::Interval<R> > >& ds) const 
 {
-  ARIADNE_LOG(2,"GridMaskSet Applicator::image(Map map, ListSet< Zonotope<Interval,Interval> > initial_set)\n");
+  ARIADNE_LOG(2,"GridMaskSet Applicator::image(MapInterface map, ListSet< Zonotope<Interval,Interval> > initial_set)\n");
   ARIADNE_LOG(3,"initial_set="<<ds<<"\n");
   return this->image_list_set(f,ds);
 }
@@ -301,14 +301,14 @@ Evaluation::Applicator<R>::image(const System::Map<R>& f, const Geometry::ListSe
 
 template<class R>
 Geometry::GridCellListSet<R> 
-Evaluation::Applicator<R>::image(const System::Map<R>& f, 
+Evaluation::Applicator<R>::image(const System::MapInterface<R>& f, 
                                  const Geometry::GridCellListSet<R>& initial_set, 
                                  const Geometry::Grid<R>& image_grid) const 
 {
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
   typedef typename GridCellListSet<R>::const_iterator gcls_const_iterator;
-  ARIADNE_LOG(2,"GridMaskSet Applicator::image(Map map, GridCellListSet initial_set, Grid image_grid)\n");
+  ARIADNE_LOG(2,"GridMaskSet Applicator::image(MapInterface map, GridCellListSet initial_set, Grid image_grid)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\nimage_grid="<<image_grid<<"\n");
   
   GridCellListSet<R> image(image_grid);
@@ -337,17 +337,17 @@ Evaluation::Applicator<R>::image(const System::Map<R>& f,
 
 template<class R>
 Geometry::GridMaskSet<R> 
-Evaluation::Applicator<R>::image(const System::Map<R>& f, 
+Evaluation::Applicator<R>::image(const System::MapInterface<R>& f, 
                                  const Geometry::GridMaskSet<R>& initial_set, 
                                  const Geometry::GridMaskSet<R>& bounding_set) const 
 {
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
   typedef typename GridMaskSet<R>::const_iterator gms_const_iterator;
-  ARIADNE_LOG(2,"GridMaskSet Applicator::image(Map f, GridMaskSet initial_set, GridMaskSet bounding_set)\n");
+  ARIADNE_LOG(2,"GridMaskSet Applicator::image(MapInterface f, GridMaskSet initial_set, GridMaskSet bounding_set)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\nbounding_set="<<bounding_set);
-  ARIADNE_CHECK_BOUNDED(initial_set,"GridMaskSet Applicator<R>::image(Map,GridMaskSet,GridMaskSet)");
-  ARIADNE_CHECK_BOUNDED(bounding_set,"Applicator<R>::image(Map,GridMaskSet,GridMaskSet)");
+  ARIADNE_CHECK_BOUNDED(initial_set,"GridMaskSet Applicator<R>::image(MapInterface,GridMaskSet,GridMaskSet)");
+  ARIADNE_CHECK_BOUNDED(bounding_set,"Applicator<R>::image(MapInterface,GridMaskSet,GridMaskSet)");
   
   const Grid<R>& g=initial_set.grid();
   Combinatoric::LatticeBlock bd=bounding_set.block();
@@ -384,11 +384,11 @@ Evaluation::Applicator<R>::image(const System::Map<R>& f,
 
 template<class R>
 Geometry::GridMaskSet<R> 
-Evaluation::Applicator<R>::preimage(const System::Map<R>& f, 
+Evaluation::Applicator<R>::preimage(const System::MapInterface<R>& f, 
                                     const Geometry::GridMaskSet<R>& set, 
                                     const Geometry::GridMaskSet<R>& bounding_set) const 
 {
-  ARIADNE_LOG(2,"GridMaskSet Applicator::preimage(Map,GridMaskSet,GridMaskSet)\n");
+  ARIADNE_LOG(2,"GridMaskSet Applicator::preimage(MapInterface,GridMaskSet,GridMaskSet)\n");
   ARIADNE_LOG(3,"set="<<set<<"\nbounding_set="<<bounding_set);
   using namespace Numeric;
   using namespace Geometry;
@@ -424,12 +424,12 @@ Evaluation::Applicator<R>::preimage(const System::Map<R>& f,
 
 template<class R>
 Geometry::ListSet< Geometry::Zonotope<Numeric::Interval<R>,R> > 
-Evaluation::Applicator<R>::reach(const System::Map<R>& f, 
+Evaluation::Applicator<R>::reach(const System::MapInterface<R>& f, 
                                  const Geometry::ListSet< Geometry::Zonotope<Numeric::Interval<R>,R> >& initial_set) const 
 {
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
-  ARIADNE_LOG(2,"GridMaskSet Applicator::reach(Map,ListSet< Zonotope<I,F> >\n");
+  ARIADNE_LOG(2,"GridMaskSet Applicator::reach(MapInterface,ListSet< Zonotope<I,F> >\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   ListSet< Zonotope<I,R> > result; 
   Zonotope<I,R> bs;
@@ -452,12 +452,12 @@ Evaluation::Applicator<R>::reach(const System::Map<R>& f,
 
 template<class R>
 Geometry::GridMaskSet<R> 
-Evaluation::Applicator<R>::reach(const System::Map<R>& f, 
+Evaluation::Applicator<R>::reach(const System::MapInterface<R>& f, 
                                  const Geometry::GridMaskSet<R>& initial_set) const 
 {
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
-  ARIADNE_LOG(2,"GridMaskSet Applicator::reach(Map,GridMaskSet)\n");
+  ARIADNE_LOG(2,"GridMaskSet Applicator::reach(MapInterface,GridMaskSet)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   GridMaskSet<R> result(initial_set.grid(),initial_set.block());
   typedef typename GridMaskSet<R>::const_iterator basic_set_iterator;
@@ -483,17 +483,17 @@ Evaluation::Applicator<R>::reach(const System::Map<R>& f,
 
 template<class R>
 Geometry::GridMaskSet<R> 
-Evaluation::Applicator<R>::chainreach(const System::Map<R>& f, 
+Evaluation::Applicator<R>::chainreach(const System::MapInterface<R>& f, 
                                       const Geometry::GridMaskSet<R>& initial_set, 
                                       const Geometry::GridMaskSet<R>& bounding_set) const
 {
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
   typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
-  ARIADNE_LOG(2,"GridMaskSet Applicator::chainreach(Map map, GridMaskSet initial_set, GridMaskSet bounding_set)\n");
+  ARIADNE_LOG(2,"GridMaskSet Applicator::chainreach(MapInterface map, GridMaskSet initial_set, GridMaskSet bounding_set)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\nbounding_set="<<bounding_set);
-  ARIADNE_CHECK_BOUNDED(initial_set,"GridMaskSet Applicator<R>::chainreach(Map,GridMaskSet,GridMaskSet)");
-  ARIADNE_CHECK_BOUNDED(bounding_set,"GridMaskSet Applicator<R>::chainreach(Map,GridMaskSet,GridMaskSet)");
+  ARIADNE_CHECK_BOUNDED(initial_set,"GridMaskSet Applicator<R>::chainreach(MapInterface,GridMaskSet,GridMaskSet)");
+  ARIADNE_CHECK_BOUNDED(bounding_set,"GridMaskSet Applicator<R>::chainreach(MapInterface,GridMaskSet,GridMaskSet)");
   
   const Grid<R>& g=bounding_set.grid();
   Combinatoric::LatticeBlock bd=bounding_set.block();
@@ -544,15 +544,15 @@ Evaluation::Applicator<R>::chainreach(const System::Map<R>& f,
 
 template<class R>
 Geometry::GridMaskSet<R>
-Evaluation::Applicator<R>::viable(const System::Map<R>& f, 
+Evaluation::Applicator<R>::viable(const System::MapInterface<R>& f, 
                                   const Geometry::GridMaskSet<R>& bounding_set) const
 {
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
   typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
-  ARIADNE_LOG(2,"GridMaskSet Applicator::viable(Map map, GridMaskSet bounding_set)\n");
+  ARIADNE_LOG(2,"GridMaskSet Applicator::viable(MapInterface map, GridMaskSet bounding_set)\n");
   ARIADNE_LOG(3,"bounding_set="<<bounding_set<<"\n");
-  ARIADNE_CHECK_BOUNDED(bounding_set,"Applicator<R>::viable(Map,GridMaskSet)");
+  ARIADNE_CHECK_BOUNDED(bounding_set,"Applicator<R>::viable(MapInterface,GridMaskSet)");
   
   const Grid<R>& g=bounding_set.grid();
   Combinatoric::LatticeBlock bd=bounding_set.block();
@@ -592,11 +592,11 @@ Evaluation::Applicator<R>::viable(const System::Map<R>& f,
 
 template<class R>
 tribool
-Evaluation::Applicator<R>::verify(const System::Map<R>& f, 
+Evaluation::Applicator<R>::verify(const System::MapInterface<R>& f, 
                                   const Geometry::GridMaskSet<R>& initial_set, 
                                   const Geometry::GridMaskSet<R>& safe_set) const
 {
-  ARIADNE_LOG(2,"triboolEvaluation::Applicator::verify(Map map, GridMaskSet initial_set,GridMaskSet  safe_set)\n");
+  ARIADNE_LOG(2,"triboolEvaluation::Applicator::verify(MapInterface map, GridMaskSet initial_set,GridMaskSet  safe_set)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n"<<"safe_set="<<safe_set);
   typedef Numeric::Interval<R> I;
   using namespace Geometry;
@@ -653,13 +653,13 @@ Evaluation::Applicator<R>::verify(const System::Map<R>& f,
 
 template<class R>
 Geometry::SetInterface<R>*
-Evaluation::Applicator<R>::image(const System::Map<R>& f, 
+Evaluation::Applicator<R>::image(const System::MapInterface<R>& f, 
                                  const Geometry::SetInterface<R>& set) const
 {
   // FIXME: Only computes an over-approximation to the image.
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
-  ARIADNE_LOG(2,"SetInterface* Applicator::image(Map,SetInterface)\n");
+  ARIADNE_LOG(2,"SetInterface* Applicator::image(MapInterface,SetInterface)\n");
   ARIADNE_LOG(3,"set="<<set<<"\n");
   ListSet< Zonotope<I,R> >* result=new ListSet< Zonotope<I,R> >;
   Rectangle<R> bb=set.bounding_box();
@@ -682,13 +682,13 @@ Evaluation::Applicator<R>::image(const System::Map<R>& f,
 
 template<class R>
 Geometry::SetInterface<R>*
-Evaluation::Applicator<R>::preimage(const System::Map<R>& map, 
+Evaluation::Applicator<R>::preimage(const System::MapInterface<R>& map, 
                                     const Geometry::SetInterface<R>& set,
                                     const Geometry::SetInterface<R>& bound) const
 {
   typedef Numeric::Interval<R> I;
   using namespace Geometry;
-  ARIADNE_LOG(2,"SetInterface* Applicator::preimage(Map map, SetInterface set)\n");
+  ARIADNE_LOG(2,"SetInterface* Applicator::preimage(MapInterface map, SetInterface set)\n");
   ARIADNE_LOG(3,"set="<<set<<"\n");
   Rectangle<R> preimage_bounding_box=bound.bounding_box();
   Grid<R> preimage_grid(map.argument_dimension(),this->grid_size());
@@ -704,12 +704,12 @@ Evaluation::Applicator<R>::preimage(const System::Map<R>& map,
 
 template<class R>
 Geometry::SetInterface<R>*
-Evaluation::Applicator<R>::reach(const System::Map<R>& f, 
+Evaluation::Applicator<R>::reach(const System::MapInterface<R>& f, 
                                  const Geometry::SetInterface<R>& initial_set) const
 {
   typedef Numeric::Interval<R> I;
   using namespace Geometry;
-  ARIADNE_LOG(2,"SetInterface* Applicator::reach(Map,SetInterface)\n");
+  ARIADNE_LOG(2,"SetInterface* Applicator::reach(MapInterface,SetInterface)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   const ListSet< Zonotope<I,R> >* list_initial_set_ptr=dynamic_cast<const ListSet< Zonotope<I,R> >*>(&initial_set);
   ARIADNE_LOG(4,"list_initial_set_ptr="<<list_initial_set_ptr<<"\n");
@@ -717,7 +717,7 @@ Evaluation::Applicator<R>::reach(const System::Map<R>& f,
     return new ListSet< Zonotope<I,R> >(this->reach(f,*list_initial_set_ptr));
   }
   
-  ARIADNE_CHECK_BOUNDED(initial_set,"SetInterface* Applicator::reach(Map,SetInterface)");
+  ARIADNE_CHECK_BOUNDED(initial_set,"SetInterface* Applicator::reach(MapInterface,SetInterface)");
   
   ListSet< Zonotope<I,R> > list_initial_set;
   if(dynamic_cast<const RectangularSet<R>*>(&initial_set)) {
@@ -738,15 +738,15 @@ Evaluation::Applicator<R>::reach(const System::Map<R>& f,
 
 template<class R>
 Geometry::SetInterface<R>*
-Evaluation::Applicator<R>::chainreach(const System::Map<R>& map, 
+Evaluation::Applicator<R>::chainreach(const System::MapInterface<R>& map, 
                                       const Geometry::SetInterface<R>& initial_set, 
                                       const Geometry::SetInterface<R>& bounding_set) const
 {
   using namespace Geometry;
-  ARIADNE_LOG(2,"SetInterface* Applicator::chainreach(Map,SetInterface,SetInterface)\n");
+  ARIADNE_LOG(2,"SetInterface* Applicator::chainreach(MapInterface,SetInterface,SetInterface)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n"<<"bounding_set="<<bounding_set<<"\n");
   
-  ARIADNE_CHECK_BOUNDED(bounding_set,"SetInterface* Applicator::chainreach(Map map, SetInterface initial_set, SetInterface bounding_set)");
+  ARIADNE_CHECK_BOUNDED(bounding_set,"SetInterface* Applicator::chainreach(MapInterface map, SetInterface initial_set, SetInterface bounding_set)");
   Rectangle<R> bounding_box=bounding_set.bounding_box();
   Grid<R> grid(bounding_set.dimension(),this->grid_size());
   FiniteGrid<R> finite_grid(grid,bounding_box);
@@ -763,13 +763,13 @@ Evaluation::Applicator<R>::chainreach(const System::Map<R>& map,
 
 template<class R>
 Geometry::SetInterface<R>*
-Evaluation::Applicator<R>::viable(const System::Map<R>& map, 
+Evaluation::Applicator<R>::viable(const System::MapInterface<R>& map, 
                                   const Geometry::SetInterface<R>& bounding_set) const
 {
   using namespace Geometry;
-  ARIADNE_LOG(2,"SetInterface* Applicator::viable(Map,SetInterface)\n");
+  ARIADNE_LOG(2,"SetInterface* Applicator::viable(MapInterface,SetInterface)\n");
   ARIADNE_LOG(3,"bounding_set="<<bounding_set<<"\n");
-  ARIADNE_CHECK_BOUNDED(bounding_set,"SetInterface* Applicator::viable(Map map, SetInterface bounding_set)");
+  ARIADNE_CHECK_BOUNDED(bounding_set,"SetInterface* Applicator::viable(MapInterface map, SetInterface bounding_set)");
   Rectangle<R> bounding_box=bounding_set.bounding_box();
   Grid<R> grid(bounding_set.dimension(),this->grid_size());
   GridMaskSet<R> grid_bounding_set(grid,bounding_box);
@@ -781,14 +781,14 @@ Evaluation::Applicator<R>::viable(const System::Map<R>& map,
 
 template<class R>
 tribool
-Evaluation::Applicator<R>::verify(const System::Map<R>& f, 
+Evaluation::Applicator<R>::verify(const System::MapInterface<R>& f, 
                                   const Geometry::SetInterface<R>& initial_set, 
                                   const Geometry::SetInterface<R>& safe_set) const
 {
   using namespace Geometry;
-  ARIADNE_LOG(2,"triboolEvaluation::Applicator::verify(Map,SetInterface,SetInterface)\n");
+  ARIADNE_LOG(2,"triboolEvaluation::Applicator::verify(MapInterface,SetInterface,SetInterface)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n"<<"safe_set="<<safe_set<<"\n");
-  ARIADNE_CHECK_BOUNDED(safe_set,"SetInterface* Applicator::verify(Map map, SetInterface initial_set, SetInterface safe_set)");
+  ARIADNE_CHECK_BOUNDED(safe_set,"SetInterface* Applicator::verify(MapInterface map, SetInterface initial_set, SetInterface safe_set)");
   Rectangle<R> bounding_box=safe_set.bounding_box();
   Grid<R> grid(safe_set.dimension(),this->grid_size());
   FiniteGrid<R> finite_grid(grid,bounding_box);
@@ -805,11 +805,11 @@ Evaluation::Applicator<R>::verify(const System::Map<R>& f,
 
 template<class R>
 System::GridMultiMap<R> 
-Evaluation::Applicator<R>::discretize(const System::Map<R>& f, 
+Evaluation::Applicator<R>::discretize(const System::MapInterface<R>& f, 
                                       const Geometry::GridMaskSet<R>& domain,
                                       const Geometry::Grid<R>& range_grid) const
 {
-  ARIADNE_LOG(2,"GridMultiMap*Evaluation::Applicator::discretize(Map map, GridMaskSet domain, Grid range_grid)\n");
+  ARIADNE_LOG(2,"GridMultiMap*Evaluation::Applicator::discretize(MapInterface map, GridMaskSet domain, Grid range_grid)\n");
   ARIADNE_LOG(3,"domain="<<domain<<"\n"<<"range_grid="<<range_grid);
   using namespace Geometry;
   typedef Numeric::Interval<R> I;

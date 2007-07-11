@@ -140,7 +140,7 @@ test_integration_step()
   cout << nizls << endl << endl;
   
   // Affine vector field
-  VectorField<R>& avfr=avf;
+  VectorFieldInterface<R>& avfr=avf;
   //AffineVectorField<R>& avfr=avf;
   niz=lohner.integration_step(avfr,iz,h);
   cout << nz << endl;

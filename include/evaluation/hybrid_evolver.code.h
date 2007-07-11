@@ -286,7 +286,7 @@ Evaluation::HybridEvolver<R>::_continuous_chainreach(const System::HybridAutomat
       dm_iter!=hybrid_automaton.modes().end(); ++dm_iter)
   {
     const System::DiscreteMode<R>& dm = *dm_iter;
-    const System::VectorField<R>& vf = dm.dynamic();
+    const System::VectorFieldInterface<R>& vf = dm.dynamic();
     const Geometry::GridMaskSet<R>& domain=domain_set[dm.id()];
     const Geometry::GridMaskSet<R>& initial=initial_set[dm.id()];
     Geometry::GridMaskSet<R> start=regular_intersection(initial,domain);

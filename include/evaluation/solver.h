@@ -49,12 +49,12 @@ namespace Ariadne {
      * Useful for computing fixed points.
      */
     template<class R> class DifferenceMap
-      : public VectorField<R>
+      : public VectorFieldInterface<R>
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
      public:
       /*!\brief Construct from a map \a f, which must have the same argument dimension as result dimension. */
-      DifferenceMap(const Map<R>& f);
+      DifferenceMap(const MapInterface<R>& f);
       /*! \brief Make a copy (clone) of the vector field. */
       DifferenceMap<R>* clone() const;
       /*!\brief The dimension of the space the map acts on. */
@@ -68,7 +68,7 @@ namespace Ariadne {
       /*!\brief The name of the class. */
       virtual std::string name() const;
      private:
-      const Map<R>& _base;
+      const MapInterface<R>& _base;
     };
   }
 }
@@ -103,9 +103,9 @@ namespace Ariadne {
       void set_maximum_number_of_steps(uint max_steps);
       
       /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-      virtual Geometry::Point<I> solve(const System::VectorField<R>& f,const Geometry::Point<I>& pt) = 0;
+      virtual Geometry::Point<I> solve(const System::VectorFieldInterface<R>& f,const Geometry::Point<I>& pt) = 0;
       /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-      virtual Geometry::Point<I> fixed_point(const System::Map<R>& f,const Geometry::Point<I>& pt);
+      virtual Geometry::Point<I> fixed_point(const System::MapInterface<R>& f,const Geometry::Point<I>& pt);
       
      private:
       R _max_error;

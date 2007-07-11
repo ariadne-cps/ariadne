@@ -119,7 +119,7 @@ class HybridAutomaton
    * \param invariant is the discrete mode's invariant.
    */
   const DiscreteMode<R>& new_mode(id_type id,
-                                  const VectorField<R>& dynamic,
+                                  const VectorFieldInterface<R>& dynamic,
                                   const Geometry::SetInterface<R>& invariant);
     
   /*! \brief Add a discrete transition.
@@ -135,7 +135,7 @@ class HybridAutomaton
   const DiscreteTransition<R>& new_transition(id_type event_id,
                                               const DiscreteMode<R> &source, 
                                               const DiscreteMode<R> &destination,
-                                              const Map<R> &reset,
+                                              const MapInterface<R> &reset,
                                               const Geometry::SetInterface<R> &activation);
   
   /*! \brief Adds a discrete transition.
@@ -151,7 +151,7 @@ class HybridAutomaton
   const DiscreteTransition<R>& new_transition(id_type event_id,
                                               id_type source_id, 
                                               id_type destination_id,
-                                              const Map<R> &reset,
+                                              const MapInterface<R> &reset,
                                               const Geometry::SetInterface<R> &activation);
   
   /*! \brief Test if the hybrid automaton has a discrete mode with key id. */

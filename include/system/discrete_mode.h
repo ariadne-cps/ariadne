@@ -36,7 +36,7 @@
 namespace Ariadne {
 namespace System {
 
-template< class R > class VectorField;
+template< class R > class VectorFieldInterface;
 template< class R > class HybridAutomaton;
   
 
@@ -60,7 +60,7 @@ class DiscreteMode {
     id_type _id;
   
     // The discrete mode's vector field.
-    boost::shared_ptr< const VectorField<R> > _dynamic;
+    boost::shared_ptr< const VectorFieldInterface<R> > _dynamic;
   
     // The discrete mode's invariant.
     boost::shared_ptr< const Geometry::SetInterface<R> > _invariant;
@@ -88,7 +88,7 @@ class DiscreteMode {
     }
     
     /*! \brief The discrete mode's dynamic (a vector field). */
-    const VectorField<R>& dynamic() const {
+    const VectorFieldInterface<R>& dynamic() const {
       return *this->_dynamic;  
     }
     
@@ -111,7 +111,7 @@ class DiscreteMode {
      * \param invariant is the mode's invariant.
      */
     DiscreteMode(id_type id,
-                 const VectorField<R> &dynamic, 
+                 const VectorFieldInterface<R> &dynamic, 
                  const Geometry::SetInterface<R> &invariant)
       :  _id(id), _dynamic(dynamic.clone()), _invariant(invariant.clone()) 
     {
@@ -120,7 +120,7 @@ class DiscreteMode {
     
     /* Construct from objects managed by shared pointers (for internal use) */
     DiscreteMode(id_type id,
-                 const boost::shared_ptr< VectorField<R> > dynamic, 
+                 const boost::shared_ptr< VectorFieldInterface<R> > dynamic, 
                  const boost::shared_ptr< Geometry::SetInterface<R> > invariant)
       :  _id(id), _dynamic(dynamic), _invariant(invariant) 
     {

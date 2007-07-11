@@ -65,17 +65,17 @@ void export_hybrid_automaton()
 
 
   class_< HybridAutomaton<R> >("HybridAutomaton",hybrid_automaton_init)
-    .def("new_mode",(const DiscreteMode<R>&(HybridAutomaton<R>::*)(id_type, const VectorField<R>&,const Geometry::SetInterface<R>&))
+    .def("new_mode",(const DiscreteMode<R>&(HybridAutomaton<R>::*)(id_type, const VectorFieldInterface<R>&,const Geometry::SetInterface<R>&))
            (&HybridAutomaton<R>::new_mode),
          return_reference_existing_object())
     .def("new_transition",
          (const DiscreteTransition<R>&(HybridAutomaton<R>::*)
-             (id_type,const DiscreteMode<R>&,const DiscreteMode<R>&,const Map<R>&,const Geometry::SetInterface<R>&))
+             (id_type,const DiscreteMode<R>&,const DiscreteMode<R>&,const MapInterface<R>&,const Geometry::SetInterface<R>&))
            (&HybridAutomaton<R>::new_transition),
          return_reference_existing_object())
     .def("new_transition",
          (const DiscreteTransition<R>&(HybridAutomaton<R>::*)
-             (id_type,id_type,id_type,const Map<R>&,const Geometry::SetInterface<R>&))
+             (id_type,id_type,id_type,const MapInterface<R>&,const Geometry::SetInterface<R>&))
            (&HybridAutomaton<R>::new_transition),
          return_reference_existing_object())
     .def("name",&HybridAutomaton<R>::name,return_copy_const_reference())

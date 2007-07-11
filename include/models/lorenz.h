@@ -42,7 +42,7 @@ namespace Ariadne {
 
     /*! \brief The Lorenz system. */
     template<class R>
-    class LorenzSystem : public System::VectorField<R> 
+    class LorenzSystem : public System::VectorFieldInterface<R> 
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
      public:

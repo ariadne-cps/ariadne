@@ -33,29 +33,29 @@ namespace Ariadne {
   namespace System {
 
     template<class R>
-    Map<R>::~Map() 
+    MapInterface<R>::~MapInterface() 
     {
     }
     
     template<class R>
-    typename Map<R>::F
-    Map<R>::derivative(const Geometry::Point<F>& r, const size_type& i, const LinearAlgebra::MultiIndex& j) const 
+    typename MapInterface<R>::F
+    MapInterface<R>::derivative(const Geometry::Point<F>& r, const size_type& i, const LinearAlgebra::MultiIndex& j) const 
     {
       throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
     
     template<class R>
-    LinearAlgebra::Matrix<typename Map<R>::F>
-    Map<R>::jacobian(const Geometry::Point<F>& r) const 
+    LinearAlgebra::Matrix<typename MapInterface<R>::F>
+    MapInterface<R>::jacobian(const Geometry::Point<F>& r) const 
     {
       throw DeferredImplementation(__PRETTY_FUNCTION__);
     }
     
     template<class R>
     std::ostream&
-    Map<R>::write(std::ostream& os) const 
+    MapInterface<R>::write(std::ostream& os) const 
     {
-      return os << "Map()";
+      return os << "MapInterface()";
     }
     
    

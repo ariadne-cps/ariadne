@@ -23,7 +23,7 @@
  */
  
 /*! \file map.h
- *  \brief Map interface.
+ *  \brief MapInterface interface.
  */
 
 #ifndef ARIADNE_MAP_H
@@ -62,7 +62,7 @@ namespace Ariadne {
      * with respect to the variables in the multi-index \a j.
      */
     template<class R>
-    class Map {
+    class MapInterface {
      protected:
       typedef typename Numeric::traits<R>::arithmetic_type F; 
       typedef typename Numeric::traits<R>::interval_type I; 
@@ -75,10 +75,10 @@ namespace Ariadne {
       typedef Geometry::Point<F> result_type;
       
       /*! \brief Virtual destructor. */
-      virtual ~Map();
+      virtual ~MapInterface();
       
       /*! \brief Make a copy (clone) of the map. */
-      virtual Map<R>* clone() const = 0;
+      virtual MapInterface<R>* clone() const = 0;
 
       /*! \brief An over-approximation to the image of a point. */
       Geometry::Point<F> operator() (const Geometry::Point<F>& pt) const {
@@ -106,7 +106,7 @@ namespace Ariadne {
     };
    
     template<class R> inline 
-    std::ostream& operator<<(std::ostream& os, const Map<R>& f) {
+    std::ostream& operator<<(std::ostream& os, const MapInterface<R>& f) {
       return f.write(os);
     }  
     

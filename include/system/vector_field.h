@@ -62,7 +62,7 @@ namespace Ariadne {
      * with respect to the variables in the multi-index \a j.
      */
     template<class R>
-    class VectorField {
+    class VectorFieldInterface {
      protected:
       typedef typename Numeric::traits<R>::arithmetic_type F; 
       typedef typename Numeric::traits<R>::interval_type I; 
@@ -73,10 +73,10 @@ namespace Ariadne {
       typedef Geometry::Point<R> state_type;
       
       /*! \brief Virtual destructor. */
-      virtual ~VectorField();
+      virtual ~VectorFieldInterface();
      
       /*! \brief Make a copy (clone) of the vector field. */
-      virtual VectorField<R>* clone() const = 0;
+      virtual VectorFieldInterface<R>* clone() const = 0;
      
       /*! \brief An approximation to the vector field at a point. */
       LinearAlgebra::Vector<F> operator() (const Geometry::Point<F>& x) const { return this->image(x); }
@@ -103,7 +103,7 @@ namespace Ariadne {
     };
    
     template<class R> inline 
-    std::ostream& operator<<(std::ostream& os, const VectorField<R>& vf) {
+    std::ostream& operator<<(std::ostream& os, const VectorFieldInterface<R>& vf) {
       return vf.write(os);
     }
     

@@ -36,11 +36,11 @@ using namespace boost::python;
 
 template<class R>
 class VectorFieldWrapper
-  : public VectorField<R>, public wrapper< VectorField<R> >
+  : public VectorFieldInterface<R>, public wrapper< VectorFieldInterface<R> >
 {
-  typedef typename VectorField<R>::F F;
+  typedef typename VectorFieldInterface<R>::F F;
  public: 
-  VectorField<R>* clone() const { return this->get_override("clone")(); }
+  VectorFieldInterface<R>* clone() const { return this->get_override("clone")(); }
   Vector<F> image(const Point<F>&) const { return this->get_override("image")(); }
   dimension_type dimension() const { return this->get_override("dimension")(); }
   size_type smoothness() const { return this->get_override("smoothness")(); }
@@ -50,10 +50,10 @@ class VectorFieldWrapper
 template<class R>
 void export_vector_field() 
 {
-  class_<VectorFieldWrapper<R>, boost::noncopyable>("VectorField")
-    .def("dimension", pure_virtual(&VectorField<R>::dimension))
-    .def("smoothness", pure_virtual(&VectorField<R>::smoothness))
-    .def("name", pure_virtual(&VectorField<R>::name))
+  class_<VectorFieldWrapper<R>, boost::noncopyable>("VectorFieldInterface")
+    .def("dimension", pure_virtual(&VectorFieldInterface<R>::dimension))
+    .def("smoothness", pure_virtual(&VectorFieldInterface<R>::smoothness))
+    .def("name", pure_virtual(&VectorFieldInterface<R>::name))
   ;
 }
 

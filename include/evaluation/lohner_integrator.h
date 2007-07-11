@@ -43,9 +43,9 @@ namespace Ariadne {
      */
     template<class R>
     class LohnerIntegrator
-      : public IntegratorBase<R, System::VectorField<R>, Geometry::Zonotope< Numeric::Interval<R> > > 
+      : public IntegratorBase<R, System::VectorFieldInterface<R>, Geometry::Zonotope< Numeric::Interval<R> > > 
     {
-      typedef IntegratorBase<R, System::VectorField<R>, Geometry::Zonotope< Numeric::Interval<R> > > Base_;
+      typedef IntegratorBase<R, System::VectorFieldInterface<R>, Geometry::Zonotope< Numeric::Interval<R> > > Base_;
      public:
       typedef Numeric::Interval<R> I;
 
@@ -62,14 +62,14 @@ namespace Ariadne {
        * We then compute \f$ A_{n+1} \f$ such that \f$ A_{n+1} e \supset \mathcal{P}_{n} e \f$.
        */
       virtual Geometry::Zonotope<I> 
-      integration_step(const System::VectorField<R>&,
+      integration_step(const System::VectorFieldInterface<R>&,
                        const Geometry::Zonotope<I>&,
                        time_type&) const;
 
 
       
       /*! \brief A C1 algorithm for integrating forward a zonotope for a time up to time \a step_size. */
-      virtual Geometry::Zonotope<I> reachability_step(const System::VectorField<R>&,
+      virtual Geometry::Zonotope<I> reachability_step(const System::VectorFieldInterface<R>&,
                                                       const Geometry::Zonotope<I>&,
                                                       time_type& step_size) const;
 

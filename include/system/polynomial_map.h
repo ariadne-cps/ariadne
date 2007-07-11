@@ -171,7 +171,7 @@ namespace Ariadne {
      *  \ingroup DiscreteTime
      */
     template<class R>
-    class PolynomialMap : public Map<R> {
+    class PolynomialMap : public MapInterface<R> {
       typedef typename Numeric::traits<R>::arithmetic_type F;
       typedef Geometry::Point<F> result_type;
      public:

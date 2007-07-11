@@ -42,7 +42,7 @@ namespace Ariadne {
 
     /*! \brief The van der Pol equation. */
     template<class R>
-    class VanDerPolEquation : public System::VectorField<R> 
+    class VanDerPolEquation : public System::VectorFieldInterface<R> 
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
      public:
@@ -110,4 +110,4 @@ namespace Ariadne {
 }
 
 
-#endif /* ARIADNE_DUFFING_EQUATION_H */
+#endif /* ARIADNE_VANDERPOL_EQUATION_H */

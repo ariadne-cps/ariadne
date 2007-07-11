@@ -95,7 +95,7 @@ Evaluation::LohnerIntegrator<R>::LohnerIntegrator(const time_type& maximum_step_
 
 template<class R>
 Geometry::Zonotope<typename Evaluation::LohnerIntegrator<R>::I>
-Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
+Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorFieldInterface<R>& vector_field, 
                                                   const Geometry::Zonotope<I>& initial_set, 
                                                   time_type& step_size) const
 {
@@ -104,7 +104,7 @@ Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorField<R>& 
   using namespace Geometry;
   using namespace System;
   
-  if(verbosity>6) { std::clog << "LohnerIntegrator::integration_step(VectorField,Zonotope<Interval>,time_type) const" << std::endl; }
+  if(verbosity>6) { std::clog << "LohnerIntegrator::integration_step(VectorFieldInterface,Zonotope<Interval>,time_type) const" << std::endl; }
   if(verbosity>6) { std::clog << "  step_size=" << conv_approx<double>(step_size) << "  initial_set=" << initial_set << std::endl; }
   const Zonotope<I>& z=initial_set;
   const Point<I>& c=z.centre();
@@ -114,7 +114,7 @@ Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorField<R>& 
   Rectangle<R> bbox=z.bounding_box();
   bbox=this->estimate_flow_bounds(vector_field,bbox,step_size);
   if(verbosity>4) { if(suggested_step_size!=step_size) { std::clog << "  using step_size=" << conv_approx<double>(step_size) << std::endl; } }
-  const VectorField<R>& vf=vector_field;
+  const VectorFieldInterface<R>& vf=vector_field;
   const size_type n=vf.dimension();
   Interval<R> h=step_size;
   const Matrix<I> id=LinearAlgebra::Matrix<I>::identity(n);
@@ -155,7 +155,7 @@ Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorField<R>& 
 
 template<class R>
 Geometry::Zonotope<typename Evaluation::LohnerIntegrator<R>::I> 
-Evaluation::LohnerIntegrator<R>::reachability_step(const System::VectorField<R>& vector_field, 
+Evaluation::LohnerIntegrator<R>::reachability_step(const System::VectorFieldInterface<R>& vector_field, 
                                                    const Geometry::Zonotope<I>& initial_set, 
                                                    time_type& step_size) const
 {
@@ -164,11 +164,11 @@ Evaluation::LohnerIntegrator<R>::reachability_step(const System::VectorField<R>&
   using namespace Geometry;
   using namespace System;
   
-  if(verbosity>6) { std::clog << "LohnerIntegrator::reachability_step(VectorField,Zonotope<Interval>,time_type) const" << std::endl; }
+  if(verbosity>6) { std::clog << "LohnerIntegrator::reachability_step(VectorFieldInterface,Zonotope<Interval>,time_type) const" << std::endl; }
   
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"LohnerIntegrator::reachability_step(VectorField,Zonotope<Interval>,time_type)");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"LohnerIntegrator::reachability_step(VectorFieldInterface,Zonotope<Interval>,time_type)");
   
-  const VectorField<R>& vf(vector_field);
+  const VectorFieldInterface<R>& vf(vector_field);
   Zonotope<I> z=initial_set;
   const size_type n=z.dimension();
   const Matrix<R> id=Matrix<R>::identity(n);

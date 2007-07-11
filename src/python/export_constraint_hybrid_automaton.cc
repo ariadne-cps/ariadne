@@ -62,11 +62,11 @@ void export_constraint_hybrid_automaton()
 
 
   class_< HybridAutomaton >("ConstraintHybridAutomaton",init<const std::string&>())
-    .def("new_mode",(const DiscreteMode&(HybridAutomaton::*)(id_type, const VectorField<R>&,const ConstraintInterface<R>&))
+    .def("new_mode",(const DiscreteMode&(HybridAutomaton::*)(id_type, const VectorFieldInterface<R>&,const ConstraintInterface<R>&))
            (&HybridAutomaton::new_mode),
          return_reference_existing_object())
     .def("new_transition",
-         (const DiscreteTransition&(HybridAutomaton::*)(id_type,id_type,id_type,const Map<R>&,const ConstraintInterface<R>&))
+         (const DiscreteTransition&(HybridAutomaton::*)(id_type,id_type,id_type,const MapInterface<R>&,const ConstraintInterface<R>&))
            (&HybridAutomaton::new_transition),
          return_reference_existing_object())
     .def("name",&HybridAutomaton::name,return_copy_const_reference())

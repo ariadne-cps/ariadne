@@ -39,21 +39,21 @@ namespace Ariadne {
      */
     template<class R>
     class EulerIntegrator
-      : public IntegratorBase< R, System::VectorField<R>, Geometry::Rectangle<R> > 
+      : public IntegratorBase< R, System::VectorFieldInterface<R>, Geometry::Rectangle<R> > 
     {
-      typedef IntegratorBase< R, System::VectorField<R>, Geometry::Rectangle<R> >  Base_;
+      typedef IntegratorBase< R, System::VectorFieldInterface<R>, Geometry::Rectangle<R> >  Base_;
      public:
       /*! \brief Constructor. */
       EulerIntegrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_set_radius);
 
 
       /*! \brief A C0 algorithm for integrating forward a rectangle. */
-      virtual Geometry::Rectangle<R> integration_step(const System::VectorField<R>&,
+      virtual Geometry::Rectangle<R> integration_step(const System::VectorFieldInterface<R>&,
                                                       const Geometry::Rectangle<R>&,
                                                       time_type&) const;
 
       /*! \brief A C0 algorithm for integrating forward a zonotope up to a certain time. */
-      virtual Geometry::Rectangle<R> reachability_step(const System::VectorField<R>&,
+      virtual Geometry::Rectangle<R> reachability_step(const System::VectorFieldInterface<R>&,
                                                        const Geometry::Rectangle<R>&,
                                                        time_type&) const;
      };

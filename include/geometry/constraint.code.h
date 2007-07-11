@@ -89,6 +89,14 @@ Geometry::Constraint<R>::dimension() const
 }
 
 
+template<class R>
+size_type 
+Geometry::Constraint<R>::smoothness() const 
+{
+  return this->_function_ptr->smoothness(); 
+}
+
+
 
 template<class R>
 tribool 
@@ -216,6 +224,15 @@ Geometry::LinearConstraint<R>::dimension() const
 {
   return this->_a.size();
 }
+
+
+template<class R>
+size_type 
+Geometry::LinearConstraint<R>::smoothness() const 
+{
+  return (size_type) -1; 
+}
+
 
 template<class R>
 std::ostream& 

@@ -54,7 +54,7 @@ System::HybridAutomaton<R>::~HybridAutomaton() {
 template<class R>
 const System::DiscreteMode<R>& 
 System::HybridAutomaton<R>::new_mode(id_type id,
-         const VectorField<R>& dynamic,
+         const VectorFieldInterface<R>& dynamic,
          const Geometry::SetInterface<R>& invariant) 
 {
   if(this->has_mode(id)) {
@@ -70,7 +70,7 @@ const System::DiscreteTransition<R>&
 System::HybridAutomaton<R>::new_transition(id_type event_id,
                const DiscreteMode<R> &source, 
                const DiscreteMode<R> &destination,
-               const Map<R> &reset,
+               const MapInterface<R> &reset,
                const Geometry::SetInterface<R> &activation) 
 {
   id_type source_id=source.id();
@@ -104,7 +104,7 @@ const System::DiscreteTransition<R>&
 System::HybridAutomaton<R>::new_transition(id_type event_id,
                id_type source_id, 
                id_type destination_id,
-               const Map<R> &reset,
+               const MapInterface<R> &reset,
                const Geometry::SetInterface<R> &activation) 
 {
   if(this->has_transition(event_id,source_id)) {

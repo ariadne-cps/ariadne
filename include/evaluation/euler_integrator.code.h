@@ -68,7 +68,7 @@ Evaluation::EulerIntegrator<R>::EulerIntegrator(const time_type& maximum_step_si
 
 template<class R>
 Geometry::Rectangle<R> 
-Evaluation::EulerIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
+Evaluation::EulerIntegrator<R>::integration_step(const System::VectorFieldInterface<R>& vector_field, 
                                                  const Geometry::Rectangle<R>& initial_set, 
                                                  time_type& step_size) const
 {
@@ -77,12 +77,12 @@ Evaluation::EulerIntegrator<R>::integration_step(const System::VectorField<R>& v
   using namespace Geometry;
   using namespace System;
   
-  if(verbosity>6) { std::clog << "EulerIntegrator::integration_step(VectorField,Rectangle,time_type) const" << std::endl; }
+  if(verbosity>6) { std::clog << "EulerIntegrator::integration_step(VectorFieldInterface,Rectangle,time_type) const" << std::endl; }
   
   
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"EulerIntegrator::integration_step(VectorField,Rectangle,time_type) const");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"EulerIntegrator::integration_step(VectorFieldInterface,Rectangle,time_type) const");
   
-  const VectorField<R>& vf(vector_field);
+  const VectorFieldInterface<R>& vf(vector_field);
   Rectangle<R> r=initial_set;
   Rectangle<R> q=estimate_flow_bounds(vf,r,step_size);
   
@@ -107,7 +107,7 @@ Evaluation::EulerIntegrator<R>::integration_step(const System::VectorField<R>& v
 
 template<class R>
 Geometry::Rectangle<R> 
-Evaluation::EulerIntegrator<R>::reachability_step(const System::VectorField<R>& vector_field, 
+Evaluation::EulerIntegrator<R>::reachability_step(const System::VectorFieldInterface<R>& vector_field, 
                                                   const Geometry::Rectangle<R>& initial_set, 
                                                   time_type& step_size) const
 {
@@ -116,11 +116,11 @@ Evaluation::EulerIntegrator<R>::reachability_step(const System::VectorField<R>& 
   using namespace Geometry;
   using namespace System;
   
-  if(verbosity>6) { std::clog << "EulerIntegrator::reachability_step(VectorField,Rectangle,time_type) const" << std::endl; }
+  if(verbosity>6) { std::clog << "EulerIntegrator::reachability_step(VectorFieldInterface,Rectangle,time_type) const" << std::endl; }
   
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set(),"EulerIntegrator::reachability_step(VectorField,Rectangle,time_type) const");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set(),"EulerIntegrator::reachability_step(VectorFieldInterface,Rectangle,time_type) const");
   
-  const VectorField<R>& vf(vector_field);
+  const VectorFieldInterface<R>& vf(vector_field);
   Rectangle<R> r=initial_set;
   time_type& h=step_size;
   

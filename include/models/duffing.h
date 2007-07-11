@@ -42,7 +42,7 @@ namespace Ariadne {
 
     /*! \brief The Duffing equation. */
     template<class R>
-    class DuffingEquation : public System::VectorField<R> 
+    class DuffingEquation : public System::VectorFieldInterface<R> 
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
      public:

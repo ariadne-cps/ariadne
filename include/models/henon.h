@@ -43,7 +43,7 @@ namespace Ariadne {
 
     /*! \brief The Henon map \f$(x,y)\mapsto(a-x^2-by,x)\f$. */
     template<class R>
-    class HenonMap : public System::Map<R> 
+    class HenonMap : public System::MapInterface<R> 
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
      public:
@@ -123,7 +123,7 @@ namespace Ariadne {
 
     /*! \brief The inverse of the Henon map \f$(x,y)\mapsto(y,(a-y^2-x)/b)\f$. */
     template<class R>
-    class HenonInverseMap : public System::Map<R> 
+    class HenonInverseMap : public System::MapInterface<R> 
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
      public:

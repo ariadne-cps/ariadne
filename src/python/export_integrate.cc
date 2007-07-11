@@ -53,36 +53,36 @@ class IntegratorWrapper : public Integrator<R>, public wrapper< Integrator<R> >
 {
  public:
   IntegratorWrapper(const time_type& mss, const time_type& lgt, const R& msr) : Integrator<R>(mss,lgt,msr) { }
-  ListSet< Rectangle<R> > integrate(const VectorField<R>& vf,const ListSet< Rectangle<R> >& is,const time_type& t) const {
+  ListSet< Rectangle<R> > integrate(const VectorFieldInterface<R>& vf,const ListSet< Rectangle<R> >& is,const time_type& t) const {
     return this->get_override("integrate")(); }
-  ListSet< Rectangle<R> > reach(const VectorField<R>& vf,const ListSet< Rectangle<R> >& is,const time_type& t) const {
+  ListSet< Rectangle<R> > reach(const VectorFieldInterface<R>& vf,const ListSet< Rectangle<R> >& is,const time_type& t) const {
     return this->get_override("reach")(); }
-  GridMaskSet<R> integrate(const VectorField<R>& vf,const GridMaskSet<R>& is,const GridMaskSet<R>& bs,const time_type& t) const {
+  GridMaskSet<R> integrate(const VectorFieldInterface<R>& vf,const GridMaskSet<R>& is,const GridMaskSet<R>& bs,const time_type& t) const {
     return this->get_override("integrate")(); }
-  GridMaskSet<R> reach(const VectorField<R>& vf,const GridMaskSet<R>& is,const GridMaskSet<R>& bs,const time_type& t) const {
+  GridMaskSet<R> reach(const VectorFieldInterface<R>& vf,const GridMaskSet<R>& is,const GridMaskSet<R>& bs,const time_type& t) const {
     return this->get_override("reach")(); }
-  GridMaskSet<R> chainreach(const VectorField<R>& vf,const GridMaskSet<R>& is,const GridMaskSet<R>& bs) const {
+  GridMaskSet<R> chainreach(const VectorFieldInterface<R>& vf,const GridMaskSet<R>& is,const GridMaskSet<R>& bs) const {
     return this->get_override("chainreach")(); }
-  GridMaskSet<R> viable(const VectorField<R>& vf,const GridMaskSet<R>& bs) const {
+  GridMaskSet<R> viable(const VectorFieldInterface<R>& vf,const GridMaskSet<R>& bs) const {
     return this->get_override("viable")(); }
-  tribool verify(const VectorField<R>& vf,const GridMaskSet<R>& is,const GridMaskSet<R>& bs) const {
+  tribool verify(const VectorFieldInterface<R>& vf,const GridMaskSet<R>& is,const GridMaskSet<R>& bs) const {
     return this->get_override("verify")(); }
 
-  SetInterface<R>* integrate(const VectorField<R>& vf,const SetInterface<R>& is,const time_type& t) const {
+  SetInterface<R>* integrate(const VectorFieldInterface<R>& vf,const SetInterface<R>& is,const time_type& t) const {
     return this->get_override("integrate")(); }
-  SetInterface<R>* integrate(const VectorField<R>& vf,const SetInterface<R>& is,const SetInterface<R>& bs,const time_type& t) const {
+  SetInterface<R>* integrate(const VectorFieldInterface<R>& vf,const SetInterface<R>& is,const SetInterface<R>& bs,const time_type& t) const {
     return this->get_override("integrate")(); }
-  SetInterface<R>* reach(const VectorField<R>& vf,const SetInterface<R>& is,const time_type& t) const {
+  SetInterface<R>* reach(const VectorFieldInterface<R>& vf,const SetInterface<R>& is,const time_type& t) const {
     return this->get_override("reach")(); }
-  SetInterface<R>* reach(const VectorField<R>& vf,const SetInterface<R>& is,const SetInterface<R>& bs,const time_type& t) const {
+  SetInterface<R>* reach(const VectorFieldInterface<R>& vf,const SetInterface<R>& is,const SetInterface<R>& bs,const time_type& t) const {
     return this->get_override("reach")(); }
-  SetInterface<R>* reach(const VectorField<R>& vf,const SetInterface<R>& is) const {
+  SetInterface<R>* reach(const VectorFieldInterface<R>& vf,const SetInterface<R>& is) const {
     return this->get_override("reach")(); }
-  SetInterface<R>* chainreach(const VectorField<R>& vf,const SetInterface<R>& is,const SetInterface<R>& bs) const {
+  SetInterface<R>* chainreach(const VectorFieldInterface<R>& vf,const SetInterface<R>& is,const SetInterface<R>& bs) const {
     return this->get_override("chainreach")(); }
-  SetInterface<R>* viable(const VectorField<R>& vf,const SetInterface<R>& bs) const {
+  SetInterface<R>* viable(const VectorFieldInterface<R>& vf,const SetInterface<R>& bs) const {
     return this->get_override("viable")(); }
-  tribool verify(const VectorField<R>& vf,const SetInterface<R>& is,const SetInterface<R>& bs) const {
+  tribool verify(const VectorFieldInterface<R>& vf,const SetInterface<R>& is,const SetInterface<R>& bs) const {
     return this->get_override("verify")(); }
 };
   
@@ -94,30 +94,30 @@ void export_integrate()
   typedef Interval<R> I;
 
    class_< IntegratorWrapper<R>, boost::noncopyable >("Integrator",init<T,T,R>())
-    .def("integrate",(ListSet< Rectangle<R> >(Integrator<R>::*)(const VectorField<R>&,const ListSet< Rectangle<R> >&,const time_type&)const)
+    .def("integrate",(ListSet< Rectangle<R> >(Integrator<R>::*)(const VectorFieldInterface<R>&,const ListSet< Rectangle<R> >&,const time_type&)const)
                                     (&Integrator<R>::integrate))
-    .def("reach",(ListSet< Rectangle<R> >(Integrator<R>::*)(const VectorField<R>&,const ListSet< Rectangle<R> >&,const time_type&)const)
+    .def("reach",(ListSet< Rectangle<R> >(Integrator<R>::*)(const VectorFieldInterface<R>&,const ListSet< Rectangle<R> >&,const time_type&)const)
                                     (&Integrator<R>::reach))
-    .def("integrate",(GridMaskSet<R>(Integrator<R>::*)(const VectorField<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&,const time_type&)const)
+    .def("integrate",(GridMaskSet<R>(Integrator<R>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&,const time_type&)const)
                                     (&Integrator<R>::integrate))
-    .def("reach",(GridMaskSet<R>(Integrator<R>::*)(const VectorField<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&,const time_type&)const)
+    .def("reach",(GridMaskSet<R>(Integrator<R>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&,const time_type&)const)
                               (&Integrator<R>::reach))
-    .def("chainreach",(GridMaskSet<R>(Integrator<R>::*)(const VectorField<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
+    .def("chainreach",(GridMaskSet<R>(Integrator<R>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
          (&Integrator<R>::chainreach))
-    .def("viable",(GridMaskSet<R>(Integrator<R>::*)(const VectorField<R>&,const GridMaskSet<R>&)const)
+    .def("viable",(GridMaskSet<R>(Integrator<R>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&)const)
          (&Integrator<R>::viable))
-    .def("verify",(tribool(Integrator<R>::*)(const VectorField<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
+    .def("verify",(tribool(Integrator<R>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
          (&Integrator<R>::verify))
   ;
 
 
   class_< LohnerIntegrator<R>, bases<Integrator<R> > >("LohnerIntegrator",init<T,T,R>())
     .def(init<double,double,double>()) 
-    //.def("integrate",(Zonotope<I,I>(LohnerIntegrator<R>::*)(const VectorField<R>&,const Zonotope<I,I>&,const time_type&)const)
+    //.def("integrate",(Zonotope<I,I>(LohnerIntegrator<R>::*)(const VectorFieldInterface<R>&,const Zonotope<I,I>&,const time_type&)const)
     //                          (&LohnerIntegrator<R>::integrate))
-    //.def("lower_integrate",(ListSet< Zonotope<I,I> >(LohnerIntegrator<R>::*)(const VectorField<R>&,const ListSet< Zonotope<I,I> >&,const time_type&)const)
+    //.def("lower_integrate",(ListSet< Zonotope<I,I> >(LohnerIntegrator<R>::*)(const VectorFieldInterface<R>&,const ListSet< Zonotope<I,I> >&,const time_type&)const)
     //                          (&LohnerIntegrator<R>::integrate))
-    //.def("lower_reach",(ListSet< Zonotope<I,I> >(LohnerIntegrator<R>::*)(const VectorField<R>&,const ListSet< Zonotope<I,I> >&,const time_type&)const)
+    //.def("lower_reach",(ListSet< Zonotope<I,I> >(LohnerIntegrator<R>::*)(const VectorFieldInterface<R>&,const ListSet< Zonotope<I,I> >&,const time_type&)const)
     //                          (&LohnerIntegrator<R>::reach))
   ;
 

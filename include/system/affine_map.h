@@ -23,7 +23,7 @@
  */
  
 /*! \file affine_map.h
- *  \brief Maps of affine form \f$x\rightarrow Ax+b\f$.
+ *  \brief MapInterfaces of affine form \f$x\rightarrow Ax+b\f$.
  */
 
 #ifndef ARIADNE_AFFINE_MAP_H
@@ -50,10 +50,10 @@ namespace Ariadne {
      *  \ingroup DiscreteTime
      */
     template<class R>
-    class AffineMap : public Map<R> 
+    class AffineMap : public MapInterface<R> 
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
-      typedef typename Map<R>::I I;
+      typedef typename MapInterface<R>::I I;
      public:
       /*! \brief The type of denotable real number used to describe the system. */
       typedef R real_type;

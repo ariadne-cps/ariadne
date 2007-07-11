@@ -38,7 +38,7 @@ namespace System {
 
 template<class R> 
 inline
-DifferenceMap<R>::DifferenceMap(const Map<R>& f)
+DifferenceMap<R>::DifferenceMap(const MapInterface<R>& f)
   : _base(f)
 { 
   if(f.argument_dimension()!=f.result_dimension()) { 
@@ -162,7 +162,7 @@ Solver<R>::set_maximum_number_of_steps(uint max_steps)
 template<class R> 
 inline
 Geometry::Point<typename Solver<R>::I> 
-Solver<R>::fixed_point(const System::Map<R>& f,const Geometry::Point<I>& pt) 
+Solver<R>::fixed_point(const System::MapInterface<R>& f,const Geometry::Point<I>& pt) 
 {
   return this->solve(System::DifferenceMap<R>(f),pt); 
 }

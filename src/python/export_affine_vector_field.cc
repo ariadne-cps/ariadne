@@ -50,7 +50,7 @@ void export_affine_vector_field()
   typedef typename Numeric::traits<R>::arithmetic_type F;
   typedef Interval<R> I;
   
-  class_< AffineVectorField<R>, bases< VectorField<R> > >("AffineVectorField",init< Matrix<R>, Vector<R> >())
+  class_< AffineVectorField<R>, bases< VectorFieldInterface<R> > >("AffineVectorField",init< Matrix<R>, Vector<R> >())
     .def("dimension", &AffineVectorField<R>::dimension)
     .def("smoothness", &AffineVectorField<R>::smoothness)
     .def("__call__", (Vector<F>(AffineVectorField<R>::*)(const Point<R>&)const)(&AffineVectorField<R>::image))

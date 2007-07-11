@@ -69,6 +69,8 @@ namespace Ariadne {
       virtual ConstraintInterface<R>* clone() const = 0;
       /*! \brief The dimension of the set. */
       virtual dimension_type dimension() const = 0;
+      /*! \brief The smoothness of the constraint function. */
+      virtual size_type smoothness() const = 0;
       /*! \brief */
       virtual std::ostream& write(std::ostream& os) const = 0;
 
@@ -97,7 +99,7 @@ namespace Ariadne {
       typedef typename Numeric::traits<R>::arithmetic_type A;
       typedef typename Numeric::traits<R>::interval_type I;
      public:
-      /*! \brief Construct the set \f$f(x)\geq0\f$ from the function \f$f\f$. */
+      /*! \brief Construct the set \f$f(x) \lessgtr 0\f$ from the function \f$f\f$. */
       Constraint(const System::FunctionInterface<R>& f, const Comparison cmp=greater);
 
       /*! \brief Destructor. */
@@ -106,7 +108,9 @@ namespace Ariadne {
       virtual Constraint<R>* clone() const;
       /*! \brief The dimension of the set. */
       virtual dimension_type dimension() const;
-      /*! \brief */
+      /*! \brief The smoothness of the constraint function. */
+      virtual size_type smoothness() const;
+      /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream& os) const;
 
       /*! \brief The function defining the constraint. */
@@ -147,7 +151,7 @@ namespace Ariadne {
       typedef typename Numeric::traits<R>::arithmetic_type A;
       typedef typename Numeric::traits<R>::interval_type I;
      public:
-      /*! \brief Construct the constraint \f$a\cdot x \gtlt b\f$. */
+      /*! \brief Construct the constraint \f$a\cdot x \lessgtr b\f$. */
       LinearConstraint(const LinearAlgebra::Vector<R> a, Comparison cmp, const R& b);
 
       /*! \brief Destructor. */
@@ -156,6 +160,8 @@ namespace Ariadne {
       virtual LinearConstraint<R>* clone() const;
       /*! \brief The dimension of the set. */
       virtual dimension_type dimension() const;
+      /*! \brief The smoothness of the constraint function. */
+      virtual size_type smoothness() const;
       /*! \brief */
       virtual std::ostream& write(std::ostream& os) const;
 

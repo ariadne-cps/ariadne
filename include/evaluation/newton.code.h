@@ -36,7 +36,7 @@ namespace Evaluation { static int& verbosity = hybrid_evolver_verbosity; }
 
 template<class R>
 Geometry::Point<typename Evaluation::IntervalNewtonSolver<R>::I>
-Evaluation::IntervalNewtonSolver<R>::solve(const System::VectorField<R>& f, 
+Evaluation::IntervalNewtonSolver<R>::solve(const System::VectorFieldInterface<R>& f, 
                                                     const Geometry::Point<I>& ix)
 {
   const R& e=this->maximum_error();

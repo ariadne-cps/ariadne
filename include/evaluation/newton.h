@@ -54,7 +54,7 @@ namespace Ariadne {
       
       /*! \brief Solve \f$f(x)=0\f$, using the interval Newton method. */
       Geometry::Point<I>
-      solve(const System::VectorField<R>& f, 
+      solve(const System::VectorFieldInterface<R>& f, 
             const Geometry::Point<I>& pt); 
     };            
     

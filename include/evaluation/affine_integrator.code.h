@@ -176,11 +176,11 @@ Evaluation::AffineIntegrator<R>::AffineIntegrator(const time_type& maximum_step_
 template<class R>
 Geometry::Zonotope< Numeric::Interval<R> > 
 Evaluation::AffineIntegrator<R>::integration_step(
-                                                  const System::VectorField<R>& vector_field, 
+                                                  const System::VectorFieldInterface<R>& vector_field, 
                                                   const Geometry::Zonotope<I>& initial_set, 
                                                   time_type& step_size) const
 {
-  if(verbosity>6) { std::clog << "AffineIntegrator::integration_step(VectorField,Zonotope<Interval>,time_type) const" << std::endl; }
+  if(verbosity>6) { std::clog << "AffineIntegrator::integration_step(VectorFieldInterface,Zonotope<Interval>,time_type) const" << std::endl; }
   
   //std::type_info info(&vector_field);
   //std::clog << "Vector field type is:" << info.name() << std::endl;
@@ -196,11 +196,11 @@ Evaluation::AffineIntegrator<R>::integration_step(
 template<class R>
 Geometry::Zonotope< Numeric::Interval<R> > 
 Evaluation::AffineIntegrator<R>::reachability_step(
-                                                   const System::VectorField<R>& vector_field, 
+                                                   const System::VectorFieldInterface<R>& vector_field, 
                                                    const Geometry::Zonotope< Numeric::Interval<R> >& initial_set, 
                                                    time_type& step_size) const
 {
-  if(verbosity>6) { std::clog << "AffineIntegrator::reachability_step(VectorField,Zonotope<Interval>,time_type) const" << std::endl; }
+  if(verbosity>6) { std::clog << "AffineIntegrator::reachability_step(VectorFieldInterface,Zonotope<Interval>,time_type) const" << std::endl; }
   
   const System::AffineVectorField<R>* affine_vector_field_ptr=dynamic_cast<const System::AffineVectorField<R>*>(&vector_field);
   if(!affine_vector_field_ptr) {

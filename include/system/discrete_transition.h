@@ -43,7 +43,7 @@ template< class R > class HybridAutomaton;
 
 /*! \ingroup HybridTime
  * \brief A discrete transition of a HybridAutomaton, representing an instantaneous
- * jump from one DiscreteMode to another, governed by an activation Geometry::SetInterface and a reset Map.
+ * jump from one DiscreteMode to another, governed by an activation Geometry::SetInterface and a reset MapInterface.
  *
  * A %DiscreteTransition can only be created using the new_transition() method in
  * the %HybridAutomaton class.
@@ -66,7 +66,7 @@ class DiscreteTransition
     boost::shared_ptr< const Geometry::SetInterface<R> > _activation; 
 
     // \brief The reset of the discrete transition.
-    boost::shared_ptr< const Map<R> > _reset;  
+    boost::shared_ptr< const MapInterface<R> > _reset;  
     
   public:
     /*! \brief Copy constructor. */
@@ -106,7 +106,7 @@ class DiscreteTransition
     }
 
     /*! \brief The reset map of the discrete transition. */
-    const Map<R> &reset() const { 
+    const MapInterface<R> &reset() const { 
       return *this->_reset;
     }
     
@@ -130,7 +130,7 @@ class DiscreteTransition
     DiscreteTransition(id_type event_id, 
                        const DiscreteMode<R> &source, 
                        const DiscreteMode<R> &destination,
-                       const Map<R> &reset,
+                       const MapInterface<R> &reset,
                        const Geometry::SetInterface<R> &activation)
       : _event_id(event_id), _source(&source), _destination(&destination), 
         _activation(activation.clone()), _reset(reset.clone()) 
@@ -144,7 +144,7 @@ class DiscreteTransition
     DiscreteTransition(id_type event_id,
                        const DiscreteMode<R> &source, 
                        const DiscreteMode<R> &destination,
-                       const boost::shared_ptr< Map<R> > reset,
+                       const boost::shared_ptr< MapInterface<R> > reset,
                        const boost::shared_ptr< Geometry::SetInterface<R> > activation) 
       : _event_id(event_id), _source(&source), _destination(&destination), 
         _activation(activation), _reset(reset) 
@@ -158,7 +158,7 @@ class DiscreteTransition
     DiscreteTransition(id_type event_id,
                        const boost::shared_ptr< DiscreteMode<R> > source, 
                        const boost::shared_ptr< DiscreteMode<R> > destination,
-                       const boost::shared_ptr< Map<R> > reset,
+                       const boost::shared_ptr< MapInterface<R> > reset,
                        const boost::shared_ptr< Geometry::SetInterface<R> > activation) 
       : _event_id(event_id), _source(&*source), _destination(&*destination), 
         _activation(activation), _reset(reset) 

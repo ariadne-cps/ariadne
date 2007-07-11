@@ -22,7 +22,7 @@
  */
  
 /*! \file function_map.h
- *  \brief Maps described by function objects.
+ *  \briefMapInterfaces described by function objects.
  */
 
 #ifndef ARIADNE_FUNCTION_MAP_H
@@ -51,7 +51,7 @@ namespace Ariadne {
      */
     template<class R>
     class FunctionMap
-      : public Map<R>
+      : public MapInterface<R>
     {
      protected:
       typedef typename Numeric::traits<R>::arithmetic_type A; 

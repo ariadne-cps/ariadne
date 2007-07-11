@@ -41,7 +41,7 @@ namespace Ariadne {
      * \brief An affine vector field in Euclidean space, given by \f$f(x)=Ax+b\f$.
      */
     template<class R>
-    class AffineVectorField : public VectorField<R> 
+    class AffineVectorField : public VectorFieldInterface<R> 
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
       typedef typename Numeric::traits<R>::interval_type I;

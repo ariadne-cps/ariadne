@@ -39,11 +39,11 @@ using namespace Ariadne::System;
 using namespace boost::python;
 
 template<class R>
-class MapWrapper : public Map<R>, public wrapper< Map<R> >
+class MapWrapper : public MapInterface<R>, public wrapper< MapInterface<R> >
 {
-  typedef typename Map<R>::F F;
+  typedef typename MapInterface<R>::F F;
  public:
-  Map<R>* clone() const { return this->get_override("clone")(); }
+  MapInterface<R>* clone() const { return this->get_override("clone")(); }
   Point<F> image(const Point<F>&) const { return this->get_override("clone")(); }
   dimension_type argument_dimension() const { return this->get_override("argument_dimension")(); }
   dimension_type result_dimension() const { return this->get_override("result_dimension")(); }
@@ -62,7 +62,7 @@ void export_map()
     .def("smoothness", pure_virtual(&MapWrapper<R>::smoothness))
   ;
 
-  class_< FunctionMap<R>, bases< Map<R> > >("FunctionMap", init< const Function<R>&, Point<A> >())
+  class_< FunctionMap<R>, bases< MapInterface<R> > >("FunctionMap", init< const Function<R>&, Point<A> >())
     .def("argument_dimension", &FunctionMap<R>::argument_dimension)
     .def("result_dimension", &FunctionMap<R>::result_dimension)
     .def("number_of_parameters", &FunctionMap<R>::number_of_parameters)

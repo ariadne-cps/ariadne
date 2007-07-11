@@ -67,13 +67,13 @@ namespace Ariadne {
 
      public:
       /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope. */
-      virtual Geometry::Zonotope<I> integration_step(const System::VectorField<R>&,
+      virtual Geometry::Zonotope<I> integration_step(const System::VectorFieldInterface<R>&,
                                                      const Geometry::Zonotope<I>&,
                                                      time_type&) const;
 
       
       /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. */
-      virtual Geometry::Zonotope<I> reachability_step(const System::VectorField<R>&,
+      virtual Geometry::Zonotope<I> reachability_step(const System::VectorFieldInterface<R>&,
                                                       const Geometry::Zonotope<I>&,
                                                       time_type& step_size) const;
      public:

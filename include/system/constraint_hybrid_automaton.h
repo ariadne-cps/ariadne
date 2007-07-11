@@ -64,6 +64,8 @@ namespace Ariadne {
       id_type _id;
       boost::shared_ptr< const VectorFieldInterface<R> > _dynamic;
       std::vector< boost::shared_ptr< const ConstraintInterface<R> > > _invariant;
+      std::map< id_type, boost::shared_ptr< const ConstraintInterface<R> > > _guards;
+      std::map< id_type, boost::shared_ptr< const ConstraintInterface<R> > > _activations;
     };
       
     template<class R>
@@ -130,9 +132,16 @@ namespace Ariadne {
       typedef R real_type;
       typedef ConstraintDiscreteMode<R> mode_type;
       typedef ConstraintDiscreteTransition<R> transition_type;
+      typedef Geometry::Zonotope<Numeric::Interval<R>,R> basic_set_type;
 
-      typedef typename std::set< mode_type >::const_iterator discrete_mode_iterator;
-      typedef typename std::set< transition_type >::const_iterator discrete_transition_iterator;
+      typedef typename std::set< mode_type >::iterator discrete_mode_iterator;
+      typedef typename std::set< mode_type >::const_iterator discrete_mode_const_iterator;
+      typedef typename std::set< transition_type >::const_iterator discrete_transition_const_iterator;
+      
+      typedef typename boost::shared_ptr< const ConstraintInterface<R> > constraint_pointer;
+      typedef typename boost::shared_ptr< const MapInterface<R> > map_pointer;
+      typedef typename boost::shared_ptr< const VectorFieldInterface<R> > vector_field_pointer;
+      typedef const ConstraintInterface<R>& constraint_reference;
   
      private:
       /*! \brief The name of the hybrid automaton. */
@@ -143,6 +152,12 @@ namespace Ariadne {
       
       /*! \brief The hybrid automaton's transitions. */
       std::set< transition_type > _transitions;
+
+      std::map< id_type, vector_field_pointer > _dynamics;
+      std::map< std::pair<id_type,id_type>, map_pointer > _resets;
+      std::map< id_type, std::vector< constraint_pointer > > _invariants;
+      std::map< id_type, std::map< id_type, constraint_pointer > > _activations;
+      std::map< id_type, std::map< id_type, constraint_pointer > > _guards;
       
      public:
       
@@ -244,10 +259,23 @@ namespace Ariadne {
       /*! \brief The discrete transition with given \a event_id and \a source id. */
       const transition_type& transition(id_type event_id, id_type source_id) const;
       
+      const System::VectorFieldInterface<R>& reset(id_type mode_id) const;
+      const System::MapInterface<R>& reset(id_type event_id, id_type source_id) const;
+
+      const std::vector< constraint_pointer >& invariants(id_type mode_id) const;
+      const std::map< id_type, constraint_pointer >& activations(id_type source_id) const;
+      const std::map< id_type, constraint_pointer >& guards(id_type source_id) const;
+      constraint_reference activation(id_type event_id, id_type source_id) const;
+      constraint_reference guard(id_type event_id, id_type source_id) const;
+
+      
       /*! \brief Returns the hybrid automaton's name. */
       const std::string &name() const;
       
-      std::ostream& write(std::ostream& os) const;
+      std::ostream& write(std::ostream& os) const;  
+     private:
+      /* The discrete mode with given id. */
+      mode_type& _mode(id_type id);
     };
 
 

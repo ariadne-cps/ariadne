@@ -66,9 +66,15 @@ namespace Ariadne {
     template<class R> class SetInterface;
     template<class R> class SetReference;
 
+    template<class R> class ConstraintInterface;
+
     template<class S> class HybridSet;
     template<class R> class HybridGridMaskSet;
     template<class R> class HybridGridCellListSet;
+    template<class BS> class HybridListSet;
+    template<class BS> class HybridBasicSet;
+
+    template<class S> class TimedSet;
   }
 }
 

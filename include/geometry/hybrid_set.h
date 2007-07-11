@@ -238,6 +238,53 @@ namespace Ariadne {
     
     
     /*! \ingroup HybridSet
+     *  \brief A hybrid set comprising of a ListSet for every component.
+     */
+    template< class BS >
+    class HybridListSet
+      : public HybridSetBase< ListSet<BS> >
+    {
+      typedef typename BS::real_type R;
+     public:
+      HybridListSet()
+        : HybridSetBase< ListSet<BS> >() { }
+      HybridListSet(const HybridSpace& hspc)
+        : HybridSetBase< ListSet<BS> >(hspc) { }
+      HybridListSet(const HybridListSet<BS>& hls)
+        : HybridSetBase< ListSet<BS> >(hls) { }
+    };
+
+
+
+    /*! \ingroup HybridSet
+     *  \brief A hybrid set comprising of a single basic set for in a discrete mode.
+     */
+    template<class S> 
+    class HybridBasicSet 
+    {
+      typedef typename S::real_type R;
+     public:
+      typedef typename S::real_type real_type;
+
+      template<class A> HybridBasicSet(const id_type& q, const A& a)
+        : _discrete_state(q), _continuous_state_set(a) { }
+      const id_type& discrete_state() const { return this->_discrete_state; }
+      const S& continuous_state_set() const { return this->_continuous_state_set; } 
+      
+      R radius() const { return this->_continuous_state_set.radius(); }
+
+      bool operator==(const HybridBasicSet& other) const { 
+        return this->_discrete_state==other._discrete_state 
+          && this->_continuous_state_set==other._continuous_state_set; }
+      bool operator!=(const HybridBasicSet& other) const { return !(*this==other); }
+     private:
+      id_type _discrete_state;
+      S _continuous_state_set;
+    };
+  
+
+
+    /*! \ingroup HybridSet
      *  \brief A hybrid set comprising of a GridMaskSet for every component.
      */
     template< class R >

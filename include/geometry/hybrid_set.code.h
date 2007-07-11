@@ -23,6 +23,8 @@
 
 #include "hybrid_set.h"
 #include "rectangle.h"
+#include "zonotope.h"
+#include "list_set.h"
 
 namespace Ariadne { namespace Geometry {
 

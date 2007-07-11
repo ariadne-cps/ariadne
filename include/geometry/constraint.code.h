@@ -138,16 +138,33 @@ Geometry::satisfies(const Zonotope<Numeric::Interval<R>,R>& z, const Constraint<
       
 
 template<class R>
+tribool 
+Geometry::satisfies(const Zonotope< Numeric::Interval<R>, Numeric::Interval<R> >& z, 
+                    const ConstraintInterface<R>& c)
+{
+  typedef Numeric::Interval<R> I;
+  LinearAlgebra::Vector<I> e(z.number_of_generators(),I(-1,1));
+  const Point<I>& zc=z.centre();
+  const LinearAlgebra::Matrix<I>& zG=z.generators();
+  Rectangle<R> bb=z.bounding_box();
+  Point<I> bpt(bb);
+  Numeric::Interval<R> v=c.value(zc)+LinearAlgebra::inner_product(c.gradient(bb)*zG,e);
+  return ::compare_zero(v,c.comparison());
+}
+      
+
+template<class R>
 std::ostream& 
 Geometry::Constraint<R>::write(std::ostream& os) const 
 {
+  return os << "Constraint( ... )";
   return os << "Constraint( function=" << *this->_function_ptr << ", comparison=" << (this->_comparison==less ? "<" : ">") << " )";
 }
 
 
 
 template<class R>
-const Geometry::Comparison&
+Geometry::Comparison
 Geometry::Constraint<R>::comparison() const 
 {
   return this->_comparison;
@@ -184,14 +201,18 @@ template<class R>
 void
 Geometry::Constraint<R>::instantiate() 
 {
+  typedef Numeric::Interval<R> I;
   Rectangle<R>* r=0;
   Zonotope<R,R>* z=0;
-  Zonotope<Numeric::Interval<R>,R>* ez=0;
+  Zonotope<I,R>* ez=0;
+  Zonotope<I,I>* iz=0;
+  ConstraintInterface<R>* ci=0;
   Constraint<R>* c=0;
   
   satisfies(*r,*c);
   satisfies(*z,*c);
   satisfies(*ez,*c);
+  satisfies(*iz,*ci);
 }
 
 
@@ -235,9 +256,18 @@ Geometry::LinearConstraint<R>::smoothness() const
 
 
 template<class R>
+Geometry::Comparison
+Geometry::LinearConstraint<R>::comparison() const 
+{
+  return this->_c;
+}
+
+
+template<class R>
 std::ostream& 
 Geometry::LinearConstraint<R>::write(std::ostream& os) const
 {
+  return os << "LinearConstraint( ... )";
   return os << "LinearConstraint( a=" << this->_a << ", b=" << this->_b << ", c='" << (this->_c==less ? "<" : ">") << "' )";
 }
 

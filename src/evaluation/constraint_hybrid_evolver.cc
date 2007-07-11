@@ -1,8 +1,8 @@
 /***************************************************************************
- *            hybrid_set.cc
+ *            constraint_hybrid_evolver.cc
  *
- *  Copyright  2007  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2007  Pieter Collins
+ *  pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,31 +21,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/rational.h"
 #include "numeric/float.h"
-#include "numeric/interval.h"
 
-#include "geometry/hybrid_set.h"
-#include "geometry/hybrid_set.code.h"
+#include "evaluation/constraint_hybrid_evolver.h"
+#include "evaluation/constraint_hybrid_evolver.code.h"
 
 namespace Ariadne {
-  namespace Geometry {
-
+  namespace Evaluation {
     using namespace Numeric;
-    
+
 #ifdef ENABLE_FLOAT64
-    template class HybridSet<Float64>;
-    template class HybridGridCellListSet<Float64>;
-    template class HybridGridMaskSet<Float64>;
-    template class HybridListSet< Zonotope< Interval<Float64> > >;
+    template class ConstraintHybridEvolver<Float64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class HybridSet<FloatMP>;
-    template class HybridGridCellListSet<FloatMP>;
-    template class HybridGridMaskSet<FloatMP>;
-    template class HybridListSet< Zonotope< Interval<FloatMP> > >;
+    template class ConstraintHybridEvolver<FloatMP>;
 #endif
 
+      
   }
 }

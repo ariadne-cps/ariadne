@@ -44,9 +44,13 @@ namespace Ariadne {
     template<class R> class VectorFieldInterface;
     template<class R> class AffineVectorField;
 
-    template<class R> class DiscreteLocation;
+    template<class R> class DiscreteMode;
     template<class R> class DiscreteTransition;
     template<class R> class HybridAutomaton;
+
+    template<class R> class ConstraintDiscreteMode;
+    template<class R> class ConstraintDiscreteTransition;
+    template<class R> class ConstraintHybridAutomaton;
   }
 }
 

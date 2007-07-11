@@ -605,6 +605,21 @@ namespace Ariadne {
     }
     
 
+    template<class R1, class R2> inline
+    Matrix<typename Numeric::traits<R1,R2>::arithmetic_type>
+    outer_product(const Vector<R1>& v1, const Vector<R2>& v2) 
+    {
+      typedef typename Numeric::traits<R1,R2>::arithmetic_type R3;
+      Matrix<R3> result(v1.size(),v2.size());
+      for(size_type i=0; i!=v1.size(); ++i) {
+        for(size_type j=0; j!=v2.size(); ++j) {
+          result(i,j)=v1(i)*v2(j);
+        }
+      }
+      return result;
+    }
+    
+
 
 
 

@@ -249,10 +249,11 @@ System::ConstraintHybridAutomaton<R>::new_transition(id_type event_id,
     throw std::runtime_error("The desitination mode of the transition must be in the automaton");
   }
   
-  const mode_type& this_source=this->mode(source_id);
-  const mode_type& this_destination=this->mode(destination_id);
+  const mode_type& source=this->mode(source_id);
+  const mode_type& destination=this->mode(destination_id);
   
-  this->_transitions.insert(transition_type(event_id,this_source,this_destination,reset,activation,false));
+  this->_transitions.insert(transition_type(event_id,source,destination,reset,activation,false));
+  this->_mode(source_id)._activations.insert(std::make_pair(event_id,activation.clone()));
   return this->transition(event_id,source_id);
 }
 
@@ -264,7 +265,7 @@ System::ConstraintHybridAutomaton<R>::new_forced_transition(id_type event_id,
                                                             id_type source_id, 
                                                             id_type destination_id,
                                                             const MapInterface<R>& reset,
-                                                            const ConstraintInterface<R>& activation) 
+                                                            const ConstraintInterface<R>& guard) 
 {
   if(this->has_transition(event_id,source_id)) {
     throw std::runtime_error("The automaton already has a transition with the given event_id and source id.");
@@ -276,10 +277,11 @@ System::ConstraintHybridAutomaton<R>::new_forced_transition(id_type event_id,
     throw std::runtime_error("The desitination mode of the transition must be in the automaton");
   }
   
-  const mode_type& this_source=this->mode(source_id);
-  const mode_type& this_destination=this->mode(destination_id);
+  const mode_type& source=this->mode(source_id);
+  const mode_type& destination=this->mode(destination_id);
   
-  this->_transitions.insert(transition_type(event_id,this_source,this_destination,reset,activation,true));
+  this->_transitions.insert(transition_type(event_id,source,destination,reset,guard,true));
+  this->_mode(source_id)._guards.insert(std::make_pair(event_id,guard.clone()));
   return this->transition(event_id,source_id);
 }
 
@@ -306,7 +308,7 @@ template<class R>
 bool 
 System::ConstraintHybridAutomaton<R>::has_transition(id_type event_id, id_type source_id) const 
 {
-  for(discrete_transition_iterator transition_iter=this->_transitions.begin();
+  for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
       transition_iter!=this->_transitions.end(); ++transition_iter) 
   {
     if(transition_iter->id()==event_id && transition_iter->source().id()==source_id) {
@@ -323,7 +325,7 @@ Geometry::HybridSpace
 System::ConstraintHybridAutomaton<R>::locations() const 
 {
   Geometry::HybridSpace result;
-  for(discrete_mode_iterator mode_iter=this->_modes.begin(); 
+  for(discrete_mode_const_iterator mode_iter=this->_modes.begin(); 
       mode_iter!=this->_modes.end(); ++mode_iter) 
   {
     result.new_location(mode_iter->id(),mode_iter->dimension());
@@ -345,11 +347,27 @@ const typename System::ConstraintHybridAutomaton<R>::mode_type&
 System::ConstraintHybridAutomaton<R>::mode(id_type id) const 
 {
   // FIXME: This is a hack; we should use a logarithmic time real search to find a mode with the given id.
-  for(discrete_mode_iterator mode_iter=this->_modes.begin();
+  for(discrete_mode_const_iterator mode_iter=this->_modes.begin();
       mode_iter!=this->_modes.end(); ++mode_iter) 
   {
     if(mode_iter->id()==id) {
       return *mode_iter;
+    }
+  }
+  throw std::runtime_error("The hybrid automaton does not have a mode with the given id.");
+}
+
+
+template<class R>
+typename System::ConstraintHybridAutomaton<R>::mode_type& 
+System::ConstraintHybridAutomaton<R>::_mode(id_type id) 
+{
+  // FIXME: This is a hack; we should use a logarithmic time real search to find a mode with the given id.
+  for(discrete_mode_iterator mode_iter=this->_modes.begin();
+      mode_iter!=this->_modes.end(); ++mode_iter) 
+  {
+    if(mode_iter->id()==id) {
+      return const_cast<mode_type&>(*mode_iter);
     }
   }
   throw std::runtime_error("The hybrid automaton does not have a mode with the given id.");
@@ -368,7 +386,7 @@ template<class R>
 const typename System::ConstraintHybridAutomaton<R>::transition_type&
 System::ConstraintHybridAutomaton<R>::transition(id_type event_id, id_type source_id) const 
 {
-  for(discrete_transition_iterator transition_iter=this->_transitions.begin();
+  for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
       transition_iter!=this->_transitions.end(); ++transition_iter) 
   {
     if(transition_iter->id()==event_id && transition_iter->source().id()==source_id) {
@@ -377,6 +395,52 @@ System::ConstraintHybridAutomaton<R>::transition(id_type event_id, id_type sourc
   }
   throw std::runtime_error("The hybrid automaton does not have a transition with the given event_id and source_id.");
 }
+
+
+template<class R>
+const std::vector<typename System::ConstraintHybridAutomaton<R>::constraint_pointer>&
+System::ConstraintHybridAutomaton<R>::invariants(id_type mode_id) const 
+{
+  if(!this->has_mode(mode_id)) {
+    throw std::runtime_error("The automaton does not contain a mode with ths given id");
+  }
+  return this->mode(mode_id)._invariant;
+}
+
+
+template<class R>
+const std::map<id_type, typename System::ConstraintHybridAutomaton<R>::constraint_pointer>&
+System::ConstraintHybridAutomaton<R>::activations(id_type source_id) const 
+{
+  return this->mode(source_id)._activations;
+}
+
+
+template<class R>
+const std::map<id_type, typename System::ConstraintHybridAutomaton<R>::constraint_pointer>&
+System::ConstraintHybridAutomaton<R>::guards(id_type source_id) const 
+{
+  return this->mode(source_id)._guards;
+}
+
+
+template<class R>
+typename System::ConstraintHybridAutomaton<R>::constraint_reference
+System::ConstraintHybridAutomaton<R>::activation(id_type event_id, id_type source_id) const 
+{
+  return *this->_activations.find(source_id)->second.find(event_id)->second;
+}
+
+
+template<class R>
+typename System::ConstraintHybridAutomaton<R>::constraint_reference
+System::ConstraintHybridAutomaton<R>::guard(id_type event_id, id_type source_id) const 
+{
+  return *this->_guards.find(source_id)->second.find(event_id)->second;
+}
+
+
+
 
 
 template<class R>

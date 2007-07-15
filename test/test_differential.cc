@@ -90,14 +90,16 @@ class TestDifferential {
 };
 
 template<class X>
-class TestSecondDifferential {
+class TestScalarDerivative {
  private:
-  SecondDifferential<X,X,X> x1,x2;
+  ScalarDerivative<X> x1,x2,x3;
  public:
-  TestSecondDifferential() {
-    x1=SecondDifferential<X,X,X>(1.0,1.0,1.0);
-    x2=SecondDifferential<X,X,X>(2.0,1.0,1.0);
-
+  TestScalarDerivative() {
+    x1=ScalarDerivative<X>(3,1.0,1);
+    x2=ScalarDerivative<X>(3,2.0,1);
+    x3=ScalarDerivative<X>("[2.0,1.0,0.1,0.0]");
+    
+    test_degree();
     test_add();
     test_sub();
     test_mul();
@@ -105,35 +107,41 @@ class TestSecondDifferential {
     test_pow();
   }
 
+  void test_degree() {
+    assert(x1.degree()==3);
+  }
+
   void test_add() {
     cout << x1 << "+" << x2 << " = " << x1+x2 << std::endl;
-    assert(((x1+x2)==SecondDifferential<X,X,X>(3,2,2)));
+    assert((x1+x2)==ScalarDerivative<X>("[3,2,0,0]"));
   }
 
   void test_sub() {
     cout << x1 << "-" << x2 << " = " << x1-x2 << std::endl;
-    assert(((x1-x2)==SecondDifferential<X,X,X>(-1,0,0)));
+    assert((x1-x2)==ScalarDerivative<X>("[-1,0,0,0]"));
   }
 
   void test_mul() {
     cout << x1 << "*" << x2 << " = " << x1*x2 << std::endl;
-    assert(((x1*x2)==SecondDifferential<X,X,X>(2,3,5)));
+    assert((x1*x2)==ScalarDerivative<X>("[2,3,2,0]"));
   }
 
   void test_div() {
-    SecondDifferential<X,X,X> x3(2,3,4);
-    SecondDifferential<X,X,X> x4(1,0,0);
+    ScalarDerivative<X> x3("[2,3,4]");
+    ScalarDerivative<X> x4("[1,0,0]");
     cout << x3 << "/" << x4 << " = " << x3/x4 << std::endl;
-    assert(((x3/x4)==x3));
+    assert((x3/x4)==x3);
     cout << x4 << "/" << x3 << " = " << x4/x3 << std::endl;
-    assert(((x4/x3)==SecondDifferential<X,X,X>(0.5,-0.75,1.25)));
+    assert((x4/x3)==ScalarDerivative<X>("[0.5,-0.75,1.25]"));
+    cout << 1 << "/" << x2 << " = " << 1/x2 << std::endl;
+    assert((1/x2)==ScalarDerivative<X>("[0.5,-0.25,0.25,-0.375]"));
     cout << x1 << "/" << x2 << " = " << x1/x2 << std::endl;
-    assert(((x1/x2)==SecondDifferential<X,X,X>(0.5,0.25,0)));
+    assert((x1/x2)==ScalarDerivative<X>("[0.5,0.25,-0.25,0.375]"));
   }
 
   void test_pow() {
     cout << x2 << "^5 = " << pow(x2,5) << std::endl;
-    assert((pow(x2,5)==SecondDifferential<X,X,X>(32,80,240)));
+    assert(pow(x2,5)==ScalarDerivative<X>("[32,80,160,240]"));
   }
 
 };
@@ -141,7 +149,8 @@ class TestSecondDifferential {
 
 int main() {
   TestDifferential<Rational, Vector<Rational> > t1;
-  TestSecondDifferential<Rational> t2;
+  cout << endl;
+  TestScalarDerivative<Rational> t2;
   
   return 0;
 }

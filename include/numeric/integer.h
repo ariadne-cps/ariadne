@@ -121,13 +121,6 @@ namespace Ariadne {
     //! \name %Integer functions
     //@{
     /*! \brief Factorial with mixed argument and result types. */
-    template<class N1, class N2> inline
-    N1 factorial(const N2& n) {
-      N1 result=1;
-      for(N2 i=1; i!=n; ++i) { result*=i; }
-      return result*n;
-    }
-
     /*! \brief Factorial. */
     template<class N> inline
     N factorial(const N& n) {

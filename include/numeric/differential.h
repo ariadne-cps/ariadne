@@ -33,6 +33,7 @@
 
 #include "../base/tribool.h"
 #include "../base/exceptions.h"
+#include "../base/stlio.h"
 
 #include "../numeric/exceptions.h"
 #include "../numeric/numerical_traits.h"
@@ -169,53 +170,6 @@ namespace Ariadne {
       
     };
     
-    
-    /*!\ingroup Numeric
-     * \brief A templated class representing a the differential of a quantity with respect to a scalar argument, 
-     * which can be used to compute the derivative of a scalar-valued function.
-     *
-     * A scalar differential is a pair \f$(x,\dot{x})\f$ where \f$x\f$ is the value of the quantity,
-     * and \f$\dot{x}\f$ is the variation with respect to some independent variable. 
-     * A differential of the form \f$(c,0)\f$ represents a constant. 
-     * A differential of the form \f$(x,1)\f$ represents the independent variable with value \f$x\f$.
-     *
-     * The operation of a scalar function \f$f\f$ on the differential \f$(x,\dot{x})\f$ is defined \f[f(x,\dot{x}):=(f(x),f'(x)\dot{x}) . \f]
-     *
-     * To compute the derivative of a scalar function \f$f\f$ at a point \f$x\f$, evaluate f(%Differential<%Float,%Float>(x,1)).%derivative().
-     * To compute range of derivatives of a scalar function \f$f\f$ over an interval \f$I\f$, evaluate f(%Differential<%Interval,%Interval>(I,1)).%derivative().
-     *
-     * To construct a constant differential \a c, use Differential(c,0).
-     * To construct the differential of a variable \a x, use Differential(x,1).
-     * 
-     * See the documentation for the Differential template for a list of supported operations. See the SecondDifferential<X,X,X> template for computing second derivatives.
-     */
-    template<class X>
-    class Differential< X, X >
-    {
-     private:
-      X _x; X _dx;
-     public:
-      //@{
-      //! \name Constructors and assignment operators
-      /*! \brief Default constructor constructs a differential based on the constant zero. */
-      Differential() : _x(), _dx() { }
-      /*! \brief Constuct a differential based on variable x and derivative dx. */
-      template<class XX0,class XX1> Differential(const XX0& x, const XX1& dx) : _x(x), _dx(dx) { }
-      /*! \brief Assign a differential from a constant quantity. */
-      template<class XX> Differential<X,X>& operator=(const XX& c) { this->_x=c; this->_dx=0; return *this; }
-      //@}
-
-      //@{
-      //! \name Data access
-      /*! \brief The value of the variable. */
-      const X& value() const { return this->_x; }
-      /*! \brief The derivative of the variable with respect to the independent variable. */
-      const X& derivative() const { return this->_dx; }
-      //@}
-    };
-    
-
-
     template<class X1, class V1, class X2, class V2> inline
     bool operator==(const Differential<X1,V1>& x1, const Differential<X2,V2>& x2) {
       return x1.value()==x2.value() && x1.derivative()==x2.derivative();
@@ -232,14 +186,6 @@ namespace Ariadne {
     }
 
 
-    template<class X> inline
-    std::ostream& operator<<(std::ostream& os, const Differential< X, Differential<X,X> >& x) {
-      return os << "("<<x.value()<<","<<x.first_derivative()<<","<<x.second_derivative()<<")";
-    }
-
-
-
-    
     template<class C, class X, class V> inline 
     Differential<X,V> operator+(const C& c, const Differential<X,V>& x) {
       return Differential<X,V>(c+x.value(),x.derivative());
@@ -432,311 +378,408 @@ namespace Ariadne {
 
 
 
+    
 
-
-    template<class X,class V, class H> class SecondDifferential;
 
     /*!\ingroup Numeric
-     * \brief A templated class representing a the second differential of a quantity with respect to a scalar argument,
-     * which can be used to compute the second derivative of a scalar-valued function.
+     * \brief A templated class representing a the derivatives of a scalar quantity with respect to a scalar argument.
      *
-     * The image of the second differential \f$(x,\dot{x},\ddot{x})\f$ under a scalar function \f$f\f$ is 
-     *   \f[f(x,\dot{x},\ddot{x}):=(f(x),\;f'(x)\dot{x},\;f'(x)\ddot{x}+f''(x)\dot{x}^2) . \f]
+     * A scalar derivative is an array \f$(x,\dot{x},\ddot{x},\ldots)\f$ where \f$x\f$ is the value of the quantity,
+     * and \f$\dot{x}\f$ is the variation with respect to some independent variable, \f$\ddot{x}\f$ is the second variation etc. 
+     * A scalar derivative of the form \f$(c,0,0,\ldots)\f$ represents a constant. 
+     * A differential of the form \f$(x,1,0,0,\ldots)\f$ represents the independent variable with value \f$x\f$.
      *
-     * To compute the second derivative of a scalar function \f$f\f$ at a point \f$x\f$, evaluate f(%SecondDifferential<%Float,%Float,%FLoat>(x,1,0)).%second_derivative().
-     * To compute range of second of a scalar function \f$f\f$ over an interval \f$I\f$, evaluate f(%Differential<%Interval,%Interval,%Interval>(I,1,0)).%derivative().
+     * The operation of a scalar function \f$f\f$ on the differential \f$(x,\dot{x})\f$ is defined \f[f(x,\dot{x},\ddot{x}):=(f(x),f'(x)\dot{x},f''(x)\dot{x}^2+f'(x)\ddot{x},\ldots) . \f]
      *
-     * To construct a constant second differential \a c, use SecondDifferential(c,0,0).
-     * To construct the differential of a variable \a x, use SecondDifferential(x,1,0).
+     * To compute the \f$n^\th\f$ derivative of a scalar function \f$f\f$ at a point \f$x\f$, evaluate f(%Differential<%Float>::variable(n,x)).%derivative().
+     * To compute range of derivatives of a scalar function \f$f\f$ over an interval \f$I\f$, evaluate f(%Differential<%Interval>(I,1)).%derivative().
+     *
+     * To construct a constant \a c, use ScalarDerivative(n,c) or ScalarDerivative::constant(n,c).
+     * To construct the derivative of a variable \a x, use ScalarDerivative(n,x,1) or ScalarDerivative::variable(n,x)..
+     * 
      */
     template<class X>
-    class SecondDifferential< X, X, X >
+    class ScalarDerivative
     {
-      private:
-      X _x; X _dx; X _ddx;
      public:
-      //@{
-      //! \name Constructors and assignment operators
-      /*! \brief Default constructor. */
-      SecondDifferential() : _x(), _dx(), _ddx() { }
-      /*! \brief Constuct a second differential based on variable \a x, derivative \a dx and second derivative \a ddx. */
-      template<class XX0,class XX1,class XX2> SecondDifferential(const XX0& x, const XX1& dx, const XX2& ddx)
-        : _x(x), _dx(dx), _ddx(ddx) { }
-      /*! \brief Assign a second differential from a constant quantity. */
-      template<class XX> SecondDifferential<X,X,X>& operator=(const XX& c) { 
-        this->_x=c; this->_dx=0; this->_ddx=0; return *this; }
-      //@}
+      typedef X value_type;
 
-      //@{
-      //! \name Data access
-      /*! \brief The value of the variable. */
-      const X& value() const { return this->_x; }
-      /*! \brief The derivative of the variable with respect to the indepenent variable. */
-      const X& derivative() const { return this->_dx; }
-      /*! \brief The first derivative of the variable with respect to the indepenent variable. */
-      const X& first_derivative() const { return this->_dx; }
-      /*! \brief The second derivative of the variable with respect to the indepenent variable. */
-      const X& second_derivative() const { return this->_ddx; }
-      //@}
-      
+      ScalarDerivative()
+        : _values(1u) { }
+      ScalarDerivative(uint degree)
+        : _values(degree+1u) { }
+      template<class X0> ScalarDerivative(uint degree, const X0& constant)
+        : _values(degree+1u) { this->_values[0]=constant; }
+      template<class X0, class X1> ScalarDerivative(uint degree, const X0& constant, const X1& first_derivative)
+        : _values(degree+1u) 
+      { this->_values[0]=constant; this->_values[1]=first_derivative; }
+
+      template<class XX> ScalarDerivative(const array<XX>& ary)
+        : _values(ary) { }
+      ScalarDerivative(const std::string& str) { 
+        std::stringstream ss(str); read_array(ss,_values); }
+    
+      template<class XX> ScalarDerivative(const ScalarDerivative<XX>& other) 
+        : _values(other._values) { }
+      template<class XX> ScalarDerivative<X>& operator=(const ScalarDerivative<XX>& other) {
+        this->_values=other._values; return *this; }
+
+      template<class XX> bool operator==(const ScalarDerivative<XX>& other) {
+        return this->_values==other._values; }
+      template<class XX> bool operator!=(const ScalarDerivative<XX>& other) {
+        return !(*this==other); }
+
+      static ScalarDerivative<X> constant(uint degree, const X& constant) { 
+        return ScalarDerivative<X>(degree,constant); }
+      static ScalarDerivative<X> variable(uint degree, const X& value) {
+        return ScalarDerivative<X>(degree,value,1); }
+
+      uint degree() const { 
+        return this->_values.size()-1; }
+      const array<X>& values() const {
+        return this->_values; }
+      const X& derivative(uint i) const { 
+        return this->_values[i]; }
+      X& operator[](uint i) { 
+        return this->_values[i]; }
+      const X& operator[](uint i) const { 
+        return this->_values[i]; }
+     private:
+      array<X> _values;
     };
-    
-      
-      
-    template<class X1, class V1, class H1, class X2, class V2, class H2> 
-    bool operator==(const SecondDifferential<X1,V1,H1>& x1, const SecondDifferential<X2,V2,H2>& x2) {
-      return x1.value()==x2.value() 
-        && x1.derivative()==x2.derivative()
-        && x1.second_derivative()==x2.second_derivative();
-    }
-
-    template<class X1, class V1, class H1, class X2, class V2, class H2> 
-    bool operator!=(const SecondDifferential<X1,V1,H1>& x1, const SecondDifferential<X2,V2,H2>& x2) {
-      return !(x1==x2);
-    }
-
-    template<class X, class V, class H> 
-    std::ostream& operator<<(std::ostream& os, const SecondDifferential<X,V,H>& x) {
-    return os << "("<<x.value()<<","<<x.derivative()<<","<<x.second_derivative()<<")";
-    }
 
 
-    template<class X, class V, class H, class C> inline 
-    SecondDifferential<X,V,H> operator+(const C& c, const SecondDifferential<X,V,H>& x) {
-      return SecondDifferential<X,V,H>(c+x.value(),x.first_derivative(),x.second_derivative());
-    }
- 
-    template<class X, class V, class H, class C> inline 
-    SecondDifferential<X,V,H> operator+(const SecondDifferential<X,V,H>& x, const C& c) {
-      return SecondDifferential<X,V,H>(x.value()+c,x.first_derivative(),x.second_derivative());
-    }
- 
-    template<class X, class V, class H, class C> inline 
-    SecondDifferential<X,V,H> operator-(const C& c, const SecondDifferential<X,V,H>& x) {
-      return SecondDifferential<X,V,H>(c-x.value(),-x.first_derivative(),-x.second_derivative());
-    }
- 
-    template<class X, class V, class H, class C> inline 
-    SecondDifferential<X,V,H> operator-(const SecondDifferential<X,V,H>& x, const C& c) {
-      return SecondDifferential<X,V,H>(x.value()-c,x.first_derivative(),x.second_derivative());
-    }
- 
-    template<class X, class V, class H, class C> inline 
-    SecondDifferential<X,V,H> operator*(const C& c, const SecondDifferential<X,V,H>& x) {
-      return SecondDifferential<X,V,H>(c*x.value(),c*x.first_derivative(),c*x.second_derivative());
-    }
- 
-    template<class X, class V, class H, class C> inline 
-    SecondDifferential<X,V,H> operator*(const SecondDifferential<X,V,H>& x, const C& c) {
-      return SecondDifferential<X,V,H>(x.value()*c,x.first_derivative()*c,x.second_derivative()*c);
-    }
- 
-    template<class X, class V, class H, class C> inline 
-    SecondDifferential<X,V,H> operator/(const C& c, const SecondDifferential<X,V,H>& x) {
-      X r=1/x.value();
-      X dr=-r*r;
-      X ddr=-2*r*dr;
-      //std::cerr << "y="<<y<<" s="<<s<<" dy="<<dy<<" ds="<<ds<<" ddy="<<ddy<<std::endl;
-      return SecondDifferential<X,X,X>(c*r,c*dr*x.first_derivative(),
-		                               c*(dr*x.second_derivative()+ddr*pow(x.first_derivative(),2)));
-    }
- 
-    template<class X, class V, class H, class C> inline 
-    SecondDifferential<X,V,H> operator/(const SecondDifferential<X,V,H>& x, const C& c) {
-      return SecondDifferential<X,V,H>(x.value()/c,x.first_derivative()/c,x.second_derivative()/c);
-    }
-
-
-
-    template<class X>  
-    SecondDifferential<X,X,X> abs(const SecondDifferential<X,X,X>& x) {
-      if(x.value()==0) { ARIADNE_THROW(std::runtime_error,"abs(Differntial x)","x.value()==0"); }
-      if(x.value()>0) { return pos(x); } else { return neg(x); }
-    }
-    
-    template<class X>  
-    SecondDifferential<X,X,X> pos(const SecondDifferential<X,X,X>& x) {
-      return SecondDifferential<X,X,X>(x.value(),x.derivative(),x.second_derivative());
-    }
-    
-    template<class X>  
-    SecondDifferential<X,X,X> neg(const SecondDifferential<X,X,X>& x) {
-      return SecondDifferential<X,X,X>(-x.value(),-x.derivative(),-x.second_derivative());
-    }
-    
-    template<class X>  
-    SecondDifferential<X,X,X> add(const SecondDifferential<X,X,X>& x1, const SecondDifferential<X,X,X>& x2) {
-      X y=x1.value()+x2.value();
-      X dy=x1.derivative()+x2.derivative();
-      X ddy=x1.second_derivative()+x2.second_derivative();
-      return SecondDifferential<X,X,X>(y,dy,ddy);
-    }
-    
-    template<class X>  
-    SecondDifferential<X,X,X> sub(const SecondDifferential<X,X,X>& x1, const SecondDifferential<X,X,X>& x2) {
-      X y=x1.value()-x2.value();
-      X dy=x1.derivative()-x2.derivative();
-      X ddy=x1.second_derivative()-x2.second_derivative();
-      return SecondDifferential<X,X,X>(y,dy,ddy);
-    }
-    
-    template<class X>  
-    SecondDifferential<X,X,X> mul(const SecondDifferential<X,X,X>& x1, const SecondDifferential<X,X,X>& x2) {
-      X y=x1.value()*x2.value();
-      X dy=x1.derivative()*x2.value()+x1.value()*x2.derivative();
-      X ddy=x1.second_derivative()*x2.value()+2*x1.derivative()*x2.derivative()+x1.value()*x2.second_derivative();
-      return SecondDifferential<X,X,X>(y,dy,ddy);
-    }
-    
-    // (ddx1*x2-2*x2*dx1*dx2-x1*ddx2)/x2^2+2*x1*dx2^2/x2^3
-    template<class X>  
-    SecondDifferential<X,X,X> div(const SecondDifferential<X,X,X>& x1, const SecondDifferential<X,X,X>& x2) {
-      X y=x1.value()/x2.value();
-      X s=x1.derivative()-y*x2.derivative();
-      X dy=s/x2.value();
-      X ds=x1.second_derivative()-dy*x2.derivative()-y*x2.second_derivative();
-      X ddy=(ds-dy*x2.derivative())/x2.value();
-      //std::cerr << "y="<<y<<" s="<<s<<" dy="<<dy<<" ds="<<ds<<" ddy="<<ddy<<std::endl;
-      return SecondDifferential<X,X,X>(y,dy,ddy);
-    }
-    
-    template<class X>  
-    SecondDifferential<X,X,X> pow(const SecondDifferential<X,X,X>& x, int n) {
-      //std::cerr << "pow(SecondDifferential x, int n)"<<std::endl;
-      if(n==0) {
-        return SecondDifferential<X,X,X>(1,0,0);
-      } else if(n==1) {
-        return SecondDifferential<X,X,X>(x.value(),1,0);
-      } else {
-        X z2=(n*(n-1))*pow(x.value(),n-2);
-        X z1=n*pow(x.value(),n-1);
-        X z0=pow(x.value(),n);
-        X w=pow(x.derivative(),2);
-        return SecondDifferential<X,X,X>(z0,z1*x.derivative(),z1*x.second_derivative()+z2*w);
+    /*! The composition inductively by
+     *  \f[ y^\[n\] = \sum_{i=0}^{n-1} \choose{n}{i} {\dot{y}}^{[i]} x^{(n-i)}
+     */
+    template<class X> inline
+    void compute_composition(ScalarDerivative<X>& y, const ScalarDerivative<X>& x)
+    {
+      assert(y.degree()==x.degree());
+      int d=y.degree();
+      for(int n=0; n<d; ++n) {
+        for(int i=0; i<=n; ++i) {
+          //std::cout<<"y["<<d-i<<"] = 1*y["<<d-i<<"]*x[1]"<<std::flush;
+          y[d-i]*=x[1];
+          for(int j=1; j<=n-i; ++j) {
+            //std::cout<<" + "<<choose(n-i,j)<<"*y["<<d-i-j<<"]*x["<<j+1<<"]"<<std::flush;
+            y[d-i] += choose<int>(n-i,j) * y[d-i-j] * x[j+1];
+          }
+          //std::cout << std::endl;
+        }
       }
-    }
-    
-    template<class X>  
-    SecondDifferential<X,X,X> sqrt(const SecondDifferential<X,X,X>& x) {
-      X y=sqrt(x.value());
-      X r=static_cast<X>(0.5)/y;
-      X dy=x.derivative()*r;
-      X ddy=(x.second_derivative()-pow(x.derivative(),2)/(2*x.value()))*r;
-      return SecondDifferential<X,X,X>(y,dy,ddy);
-    }
-    
-    template<class X>  
-    SecondDifferential<X,X,X> exp(const SecondDifferential<X,X,X>& x) {
-      X y=exp(x.value());
-      X dy=y*x.derivative();
-      X ddy=y*(pow(x.derivative(),2)+x.second_derivative());
-      return SecondDifferential<X,X,X>(y,dy,ddy);
-    }
-    
-    template<class X>  
-    SecondDifferential<X,X,X> log(const SecondDifferential<X,X,X>& x) {
-      X y=log(x.value());
-      X dy=x.derivative()/x.value();
-      X ddy=x.second_derivative()/x.value()-pow(dy,2);
-      return SecondDifferential<X,X,X>(y,dy,ddy);
-    }
-    
-    template<class X>  
-    SecondDifferential<X,X,X> sin(const SecondDifferential<X,X,X>& x) {
-      X s=sin(x.value());
-      X c=cos(x.value());
-      const X& y=s;
-      X dy=c*x.derivative();
-      X ddy=c*x.second_derivative()-s*pow(x.derivative(),2);
-      return SecondDifferential<X,X,X>(y,dy,ddy);
-    }
-    
-    template<class X>  
-    SecondDifferential<X,X,X> cos(const SecondDifferential<X,X,X>& x) {
-      X c=cos(x.value());
-      X s=sin(x.value());
-      const X& y=c;
-      X dy=-s*x.derivative();
-      X ddy=-s*x.second_derivative()-c*pow(x.derivative(),2);
-      return SecondDifferential<X,X,X>(y,dy,ddy);
-    }
-    
-    template<class X>  
-    SecondDifferential<X,X,X> tan(const SecondDifferential<X,X,X>& x) {
-      // TODO: Check these formulae
-      X y=tan(x.value());
-      X z=1+pow(y,2);
-      X dy=z*x.derivative();
-      X ddy=dy*x.second_derivative()+2*y*z*pow(x.derivative(),2);
-      return SecondDifferential<X,X,X>(y,dy,ddy);
-    }
-    
-    template<class X>  
-    SecondDifferential<X,X,X> asin(const SecondDifferential<X,X,X>& x) {
-      // TODO: Check these formulae
-      // TODO: Check these formulae
-      X r=1/sqrt(1-pow(x.value(),2));
-      X y=asin(x.value());
-      X dy=r*x.derivative();
-      X ddy=r*(x.second_derivative()+pow(dy,2));
-      return SecondDifferential<X,X,X>(y,dy,ddy);
+      return;
     }
 
 
-    template<class X>  
-    SecondDifferential<X,X,X> acos(const SecondDifferential<X,X,X>& x) {
-      // TODO: Check these formulae
-      X r=1/sqrt(1-pow(x.value(),2));
-      X y=acos(x.value());
-      X dy=r*x.derivative();
-      X ddy=r*(x.second_derivative()+pow(dy,2));
-      return SecondDifferential<X,X,X>(y,dy,ddy);
+    template<class X> inline
+    void compose(ScalarDerivative<X>& y, const ScalarDerivative<X>& x)
+    {
+      ScalarDerivative<X> result(std::min(x.degree(),y.degree()));
+      for(uint n=0; n!=result.degree(); ++n) { result[n]=y[n]; }
+      compute_composition(result,x);
+      return result;
+    }
+
+
+    template<class X> inline 
+    ScalarDerivative<X> 
+    min(const ScalarDerivative<X>& x1, const ScalarDerivative<X>& x2) 
+    {
+      if(x1[0]==x2[0]) {
+        ARIADNE_THROW(std::runtime_error,"min(ScalarDerivative x1, ScalarDerivative x2)","x1[0]==x2[0]");
+      }
+      return x1[0]<x2[0] ? x1 : x2;
+    }
+    
+    template<class X> inline 
+    ScalarDerivative<X> 
+    max(const ScalarDerivative<X>& x1,const ScalarDerivative<X>& x2) 
+    {
+      if(x1[0]==x2[0]) { 
+        ARIADNE_THROW(std::runtime_error,"max(ScalarDerivative x1, ScalarDerivative x2)","x1[0]==x2[0]"); 
+      }
+      return x1[0]>x2[0] ? x1 : x2;
+    }
+    
+    template<class X> inline
+    ScalarDerivative<X> 
+    pos(const ScalarDerivative<X>& x)
+    {
+      return x;
+    }
+
+    template<class X> inline
+    ScalarDerivative<X> 
+    neg(const ScalarDerivative<X>& x)
+    {
+      ScalarDerivative<X> result(x.degree());
+      for(uint n=0; n<=result.degree(); ++n) {
+          result[n] = -x[n];
+      }
+      return result;
     }
 
     template<class X>  
-    SecondDifferential<X,X,X> atan(const SecondDifferential<X,X,X>& x) {
-      // TODO: Check these formulae
-      X r=1/(1+pow(x.value(),2));
-      X y=atan(x.value());
-      X dy=x.derivative()*r;
-      X ddy=x.second_derivative()*r-2*x.value()*pow(dy,2);
-      return SecondDifferential<X,X,X>(y,dy,ddy);
+    ScalarDerivative<X> 
+    abs(const ScalarDerivative<X>& x) 
+    {
+      if(x[0]==0) { 
+        ARIADNE_THROW(std::runtime_error,"abs(ScalarDerivative x)","x[0]==0"); 
+      }
+      return x[0]>0 ? pos(x) : neg(x); 
+    }
+    
+    template<class X> inline
+    ScalarDerivative<X> 
+    inv(const ScalarDerivative<X>& x)
+    {
+      ScalarDerivative<X> y(x.degree());
+      X mr = X(-1)/x[0];
+      for(uint i=0; i<=y.degree(); ++i) {
+        y[i]=(-factorial<int>(i))*pow(mr,i+1);
+      }
+      //std::cerr << y << std::endl;
+      compute_composition(y,x);
+      //std::cerr << y << std::endl;
+      return y;
+    }
+
+    template<class X> inline
+    ScalarDerivative<X> 
+    add(const ScalarDerivative<X>& x, const ScalarDerivative<X>& y)
+    {
+      ScalarDerivative<X> result(std::min(x.degree(),y.degree()));
+      for(uint n=0; n<=result.degree(); ++n) {
+          result[n] = x[n]+y[n];
+      }
+      return result;
+    }
+
+    template<class X> inline
+    ScalarDerivative<X> 
+    sub(const ScalarDerivative<X>& x, const ScalarDerivative<X>& y)
+    {
+      ScalarDerivative<X> result(std::min(x.degree(),y.degree()));
+      for(uint n=0; n<=result.degree(); ++n) {
+          result[n] = x[n]-y[n];
+      }
+      return result;
+    }
+
+    template<class X> inline
+    ScalarDerivative<X> 
+    mul(const ScalarDerivative<X>& x, const ScalarDerivative<X>& y)
+    {
+      ScalarDerivative<X> result(std::min(x.degree(),y.degree()));
+      for(uint n=0; n<=result.degree(); ++n) {
+        for(uint i=0; i<=n; ++i) {
+          result[n] += choose<int>(n,i)*x[i]*y[n-i];
+        }
+      }
+      return result;
+    }
+
+    template<class X> inline
+    ScalarDerivative<X> 
+    div(const ScalarDerivative<X>& x, const ScalarDerivative<X>& y)
+    {
+      return x*inv(y);
+    }
+
+    template<class X, class N> inline
+    ScalarDerivative<X> 
+    pow(const ScalarDerivative<X>& x, N k)
+    {
+      uint n=k;
+      ScalarDerivative<X> result(x.degree());
+      for(uint i=0; i<=std::min(result.degree(),n); ++i) {
+        int j=n-i;
+        result[i]=(factorial<int>(n)/factorial<int>(j))*pow(x[0],j);
+      }
+      compute_composition(result,x);
+      return result;
+    }
+
+    template<class X>  
+    ScalarDerivative<X> sqrt(const ScalarDerivative<X>& x) {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+    
+    template<class X>  
+    ScalarDerivative<X> exp(const ScalarDerivative<X>& x) {
+      ScalarDerivative<X> y(x.degree());
+      y[0]=exp(x[0]);
+      for(uint i=1; i<=y.degree(); ++i) {
+        y[i]=y[0];
+      }
+      compute_composition(y,x);
+      return y;
+    }
+    
+    template<class X>  
+    ScalarDerivative<X> log(const ScalarDerivative<X>& x) {
+      ScalarDerivative<X> y(x.degree());
+      y[0]=log(x[0]);
+      X mr=(-1)/x[0];
+      for(uint i=1; i!=y.degree();++i) {
+        y[i]=(-factorial<int>(i-1))*pow(x[0],i);
+      }
+      compute_composition(y,x);
+      return y;
+    }
+    
+    template<class X>  
+    ScalarDerivative<X> sin(const ScalarDerivative<X>& x) {
+      uint d=x.degree();
+      ScalarDerivative<X> y(d);
+      y[0]=sin(x[0]);
+      y[1]=cos(x[0]);
+      for(uint i=2; i!=d; ++i) {
+        y[i]=-y[i-2];
+      }
+      compute_composition(y,x);
+      return y;
+    }
+    
+    template<class X>  
+    ScalarDerivative<X> cos(const ScalarDerivative<X>& x) {
+      uint d=x.degree();
+      ScalarDerivative<X> y(d);
+      y[0]=cos(x[0]);
+      y[1]=-sin(x[0]);
+      for(uint i=2; i!=d; ++i) {
+        y[i]=-y[i-2];
+      }
+      compute_composition(y,x);
+      return y;
+    }
+    
+    template<class X>  
+    ScalarDerivative<X> tan(const ScalarDerivative<X>& x) {
+      return sin(x)/cos(x);
+    }
+    
+    template<class X>  
+    ScalarDerivative<X> asin(const ScalarDerivative<X>& x) {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+
+    template<class X>  
+    ScalarDerivative<X> acos(const ScalarDerivative<X>& x) {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+
+    template<class X>  
+    ScalarDerivative<X> atan(const ScalarDerivative<X>& x) {
+      throw NotImplemented(__PRETTY_FUNCTION__);
     }
 
 
-    template<class X, class V, class H> inline 
-    SecondDifferential<X,V,H> operator+(const SecondDifferential<X,V,H>& x) {
-      return pos(x);
-    }
- 
-    template<class X, class V, class H> inline 
-    SecondDifferential<X,V,H> operator-(const SecondDifferential<X,V,H>& x) {
+    template<class X> inline
+    ScalarDerivative<X> 
+    operator-(const ScalarDerivative<X>& x)
+    {
       return neg(x);
     }
- 
-    template<class X, class V, class H> inline 
-    SecondDifferential<X,V,H> operator+(const SecondDifferential<X,V,H>& x1, const SecondDifferential<X,V,H>& x2) {
-      return add(x1,x2);
-    }
- 
-    template<class X, class V, class H> inline 
-    SecondDifferential<X,V,H> operator-(const SecondDifferential<X,V,H>& x1, const SecondDifferential<X,V,H>& x2) {
-      return sub(x1,x2);
-    }
- 
-    template<class X, class V, class H> inline 
-    SecondDifferential<X,V,H> operator*(const SecondDifferential<X,V,H>& x1, const SecondDifferential<X,V,H>& x2) {
-      return mul(x1,x2);
-    }
- 
-    template<class X, class V, class H> inline 
-    SecondDifferential<X,V,H> operator/(const SecondDifferential<X,V,H>& x1, const SecondDifferential<X,V,H>& x2) {
-      return div(x1,x2);
+
+    template<class X> inline
+    ScalarDerivative<X> 
+    operator+(const ScalarDerivative<X>& x, const ScalarDerivative<X>& y)
+    {
+      return add(x,y);
     }
 
+    template<class X> inline
+    ScalarDerivative<X> 
+    operator-(const ScalarDerivative<X>& x, const ScalarDerivative<X>& y)
+    {
+      return sub(x,y);
+    }
+
+    template<class X> inline
+    ScalarDerivative<X> 
+    operator*(const ScalarDerivative<X>& x, const ScalarDerivative<X>& y)
+    {
+      return mul(x,y);
+    }
+
+    template<class X> inline
+    ScalarDerivative<X> 
+    operator/(const ScalarDerivative<X>& x, const ScalarDerivative<X>& y)
+    {
+      return div(x,y);
+    }
+
+    template<class X, class R> inline
+    ScalarDerivative<X> 
+    operator+(const ScalarDerivative<X>& x, const R& c)
+    {
+      return add(x,ScalarDerivative<X>::constant(x.degree(),c));
+    }
+
+    template<class X, class R> inline
+    ScalarDerivative<X> 
+    operator+(const R& c, const ScalarDerivative<X>& x)
+    {
+      return add(ScalarDerivative<X>::constant(x.degree(),c),x);
+    }
+
+    template<class X, class R> inline
+    ScalarDerivative<X> 
+    operator-(const ScalarDerivative<X>& x, const R& c)
+    {
+      return sub(x,ScalarDerivative<X>::constant(x.degree(),c));
+    }
+
+    template<class X, class R> inline
+    ScalarDerivative<X> 
+    operator-(const R& c, const ScalarDerivative<X>& x)
+    {
+      return sub(ScalarDerivative<X>::constant(x.degree(),c),x);
+    }
+
+    template<class X, class R> inline
+    ScalarDerivative<X> 
+    operator*(const ScalarDerivative<X>& x, const R& c)
+    {
+      return mul(x,ScalarDerivative<X>::constant(x.degree(),c));
+    }
+
+    template<class X, class R> inline
+    ScalarDerivative<X> 
+    operator*(const R& c, const ScalarDerivative<X>& x)
+    {
+      return mul(ScalarDerivative<X>::constant(x.degree(),c),x);
+    }
+
+    template<class X, class R> inline
+    ScalarDerivative<X> 
+    operator/(const ScalarDerivative<X>& x, const R& c)
+    {
+      return div(x,ScalarDerivative<X>::constant(x.degree(),c));
+    }
+
+    template<class X, class R> inline
+    ScalarDerivative<X> 
+    operator/(const R& c, const ScalarDerivative<X>& x)
+    {
+      return div(ScalarDerivative<X>::constant(x.degree(),c),x);
+    }
+
+    template<class X> inline
+    std::ostream& operator<<(std::ostream& os, const ScalarDerivative<X>& x) {
+      os << "ScalarDerivative";
+      for(uint i=0; i<=x.degree(); ++i) {
+        os << (i==0 ? '(' : ',') << x[i]; 
+      }
+      os << ")";
+      return os;
+    }
 
 
   }
+
 }
 
 #endif /* ARIADNE_DIFFERENTIAL_H */

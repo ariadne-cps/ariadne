@@ -46,6 +46,7 @@ void export_rational();
 template<class R> void export_float();
 template<class R> void export_interval();
 template<class R> void export_differential();
+template<class R> void export_derivative();
 
 template<class R> void export_vector();
 template<class R> void export_matrix();
@@ -126,6 +127,8 @@ BOOST_PYTHON_MODULE(ariadne)
   export_interval<Float>();
   export_differential<Rational>();
   export_differential<Float>();
+  export_derivative<Rational>();
+  export_derivative<Float>();
 
   export_vector<Float>();
   export_vector<Rational>();

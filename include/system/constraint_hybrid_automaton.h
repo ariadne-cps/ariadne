@@ -52,11 +52,14 @@ namespace Ariadne {
     template<class R>
     class ConstraintDiscreteMode {
       friend class ConstraintHybridAutomaton<R>;
+      typedef typename boost::shared_ptr< const ConstraintInterface<R> > constraint_const_pointer;
      public:
       id_type id() const;
       dimension_type dimension() const;
       const VectorFieldInterface<R>& dynamic() const;
       const ConstraintInterface<R>& invariant(size_type k) const;
+      const ConstraintInterface<R>& activation(id_type event_id) const;
+      const ConstraintInterface<R>& guard(id_type event_id) const;
       std::ostream& write(std::ostream& os) const;
      private:
       ConstraintDiscreteMode(id_type id, const VectorFieldInterface<R>& dynamic, 
@@ -75,6 +78,7 @@ namespace Ariadne {
     template<class R>
     class ConstraintDiscreteTransition {
       friend class ConstraintHybridAutomaton<R>;
+      typedef typename boost::shared_ptr< const ConstraintInterface<R> > constraint_const_pointer;
      public:
       id_type id() const;
       id_type source_id() const;
@@ -132,16 +136,15 @@ namespace Ariadne {
       typedef R real_type;
       typedef ConstraintDiscreteMode<R> mode_type;
       typedef ConstraintDiscreteTransition<R> transition_type;
-      typedef Geometry::Zonotope<Numeric::Interval<R>,R> basic_set_type;
 
       typedef typename std::set< mode_type >::iterator discrete_mode_iterator;
       typedef typename std::set< mode_type >::const_iterator discrete_mode_const_iterator;
       typedef typename std::set< transition_type >::const_iterator discrete_transition_const_iterator;
       
-      typedef typename boost::shared_ptr< const ConstraintInterface<R> > constraint_pointer;
-      typedef typename boost::shared_ptr< const MapInterface<R> > map_pointer;
-      typedef typename boost::shared_ptr< const VectorFieldInterface<R> > vector_field_pointer;
-      typedef const ConstraintInterface<R>& constraint_reference;
+      typedef typename boost::shared_ptr< const ConstraintInterface<R> > constraint_const_pointer;
+      typedef typename boost::shared_ptr< const MapInterface<R> > map_const_pointer;
+      typedef typename boost::shared_ptr< const VectorFieldInterface<R> > vector_field_const_pointer;
+      typedef const ConstraintInterface<R>& constraint_const_reference;
   
      private:
       /*! \brief The name of the hybrid automaton. */
@@ -153,12 +156,6 @@ namespace Ariadne {
       /*! \brief The hybrid automaton's transitions. */
       std::set< transition_type > _transitions;
 
-      std::map< id_type, vector_field_pointer > _dynamics;
-      std::map< std::pair<id_type,id_type>, map_pointer > _resets;
-      std::map< id_type, std::vector< constraint_pointer > > _invariants;
-      std::map< id_type, std::map< id_type, constraint_pointer > > _activations;
-      std::map< id_type, std::map< id_type, constraint_pointer > > _guards;
-      
      public:
       
       /*! \brief This is a hybrid automaton class constructor.
@@ -262,11 +259,11 @@ namespace Ariadne {
       const System::VectorFieldInterface<R>& reset(id_type mode_id) const;
       const System::MapInterface<R>& reset(id_type event_id, id_type source_id) const;
 
-      const std::vector< constraint_pointer >& invariants(id_type mode_id) const;
-      const std::map< id_type, constraint_pointer >& activations(id_type source_id) const;
-      const std::map< id_type, constraint_pointer >& guards(id_type source_id) const;
-      constraint_reference activation(id_type event_id, id_type source_id) const;
-      constraint_reference guard(id_type event_id, id_type source_id) const;
+      const std::vector< constraint_const_pointer >& invariants(id_type mode_id) const;
+      const std::map< id_type, constraint_const_pointer >& activations(id_type source_id) const;
+      const std::map< id_type, constraint_const_pointer >& guards(id_type source_id) const;
+      constraint_const_reference activation(id_type event_id, id_type source_id) const;
+      constraint_const_reference guard(id_type event_id, id_type source_id) const;
 
       
       /*! \brief Returns the hybrid automaton's name. */

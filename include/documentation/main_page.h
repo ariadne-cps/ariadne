@@ -96,7 +96,7 @@ These defaults can be changed by using the --prefix flag to ./configure, as in
   ./configure --prefix=$HOME
 \endcode
 
-By default, the C++ library is compiled with both Float64 and FloatMP support, and the Python interface is compiled to use Float64 as the default floating-point type. The flags \tt --disable-float64 or \tt --disable-floatmp can be used to disable support for Float64 or FloatMP, respectively. If Float64 support is disabled, then the Python interface is automatically compiled with FloatMP support. To compile the Python interface with FloatMP support, use \tt --enable-python=FloatMP.
+By default, the C++ library is compiled with both Float64 and FloatMP support, and the Python interface is compiled to use Float64 as the default floating-point type. The flags \c --disable-float64 or \c --disable-floatmp can be used to disable support for Float64 or FloatMP, respectively. If Float64 support is disabled, then the Python interface is automatically compiled with FloatMP support. To compile the Python interface with FloatMP support, use \c --enable-python=FloatMP.
 
 For example, to configure with only 64-bit floating-point support enabled (which should result in the shortest compile times), use
 \code 

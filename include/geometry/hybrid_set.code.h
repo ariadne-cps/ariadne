@@ -26,19 +26,27 @@
 #include "zonotope.h"
 #include "list_set.h"
 
-namespace Ariadne { namespace Geometry {
+namespace Ariadne { 
 
 template<class S> 
 std::ostream& 
-HybridSetBase<S>::write(std::ostream& os) const
+Geometry::HybridSetBase<S>::write(std::ostream& os) const
 { 
-  return os << "HybridSet"<<_component_sets;
+  os << "HybridSet( { \n";
+  for(const_iterator iter=this->begin(); iter!=this->end(); ++iter)
+  {
+    id_type loc=iter->first;
+    const S& set=*iter->second;
+    os << "  "<<loc<<": " << set << ",\n";
+  }
+  os << "} )";
+  return os;
 }
 
 
 template<class R> 
 std::ostream& 
-HybridGridMaskSet<R>::write(std::ostream& os) const
+Geometry::HybridGridMaskSet<R>::write(std::ostream& os) const
 { 
   os << "HybridGridMaskSet( { \n";
   for(typename HybridGridMaskSet<R>::const_iterator iter=this->begin();
@@ -52,4 +60,4 @@ HybridGridMaskSet<R>::write(std::ostream& os) const
   return os;
 }
 
-}}
+}

@@ -59,7 +59,8 @@ int
 test_lohner_integrator()
 {
   cout << __PRETTY_FUNCTION__ << endl;
-  
+  typedef Interval<R> I;
+
   LohnerIntegrator<R> lohner=LohnerIntegrator<R>(0.125,0.5,0.0625);
   Rectangle<R> bb=Rectangle<R>("[0.50,1.25]x[0.25,1.00]");
   Rectangle<R> r=Rectangle<R>("[0.96,1.04]x[0.46,0.54]");
@@ -77,14 +78,32 @@ test_lohner_integrator()
   cout << "h=" << h << endl;
   cout << "z.generators().norm()=" << norm(z.generators()) << endl;
 
-  Zonotope< Interval<R> > z0=Zonotope< Interval<R> >(z);
-  Zonotope< Interval<R> > z1=lohner.integration_step(avf,z0,h);
-  Zonotope< Interval<R> > z2=lohner.integration_step(avf,z1,h);
+  const IntegratorBase< R, VectorFieldInterface<R>, Zonotope<I> >& integrator=lohner;
+  const VectorFieldInterface<R>& vf=avf;
+
+  Zonotope<I> z0=Zonotope<I>(z);
+  Zonotope<I> z1=lohner.integration_step(avf,z0,h);
+  Zonotope<I> z2=lohner.integration_step(avf,z1,h);
   cout << "z0=" << z0 << "\np1=" << z1 << "\nz2=" << z2 << endl;
-  Zonotope< Interval<R> > zr1=lohner.reachability_step(avf,z0,h);
-  Zonotope< Interval<R> > zr2=lohner.reachability_step(avf,z1,h);
-  cout << "zr1=" << zr1 << "\nzr2=" << zr2 << endl;
+  Zonotope<I> zr1=lohner.reachability_step(avf,z0,h);
+  Zonotope<I> zr2=lohner.reachability_step(avf,z1,h);
+  cout << "zr1=" << zr1 << "\nzr2=" << zr2 << endl << endl;
   
+  Point<I> pt0 = z0.centre();
+  Rectangle<R> bb0=lohner.estimate_flow_bounds(avf,Rectangle<R>(pt0),h);
+  Rectangle<R> rbb0=lohner.refine_flow_bounds(avf,Rectangle<R>(pt0),bb0,h);
+  Rectangle<R> rrbb0=lohner.refine_flow_bounds(avf,Rectangle<R>(pt0),rbb0,h);
+  Point<I> pt1 = lohner.bounded_flow(avf,pt0,bb0,h);
+  Point<I> rpt1 = lohner.bounded_flow(avf,pt0,rbb0,h);
+  Point<I> rrpt1 = lohner.bounded_flow(avf,pt0,rrbb0,h);
+  Matrix<I> mx1 = lohner.bounded_flow_jacobian(avf,pt0,bb0,h);
+  Matrix<I> rmx1 = lohner.bounded_flow_jacobian(avf,pt0,rbb0,h);
+  cout << "pt0=" << pt0 << "\n"
+       << "bb0=" << bb0 << ", rbb0=" << rbb0 << ", rrbb0=" << rrbb0 << "\n"
+       << "pt1=" << pt1 << ", rpt1=" << rpt1 << ", rrpt1=" << rrpt1 << "\n"
+       << "mx1=" << mx1 << ", rmx1=" << rmx1 << "\n" << endl;
+  cout << "I+hDf=" << Matrix<I>::identity(2)+(I(h)*avf.jacobian(pt0)) << "\n" << endl;
+
   epsfstream eps;
   eps.open("test_lohner_integrator.eps",bb);
   eps.set_fill_colour("green");

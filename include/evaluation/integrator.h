@@ -54,6 +54,10 @@ namespace Ariadne {
       return bs;
     }
 
+  
+
+   
+
 
 
     /*! \brief %Base class for integration schemes. 
@@ -249,28 +253,50 @@ namespace Ariadne {
     class IntegratorBase
       : public Integrator<R> 
     {
-      typedef VF VectorFieldInterface;
-      typedef BS BasicSet;
-      typedef Geometry::Rectangle<R> Rectangle;
-      typedef Geometry::ListSet<Rectangle> RectangleListSet;
-      typedef Geometry::ListSet<BS> ListSet;
-      typedef Geometry::Grid<R> Grid;
-      typedef Geometry::GridCellListSet<R> GridCellListSet;
-      typedef Geometry::GridMaskSet<R> GridMaskSet;
+     public:
+      typedef Numeric::Interval<R> I;
+      typedef VF vector_field_type;
+      typedef BS basic_set_type;
+      typedef Geometry::Point<I> point_type;
+      typedef Geometry::Rectangle<R> bounding_set_type;
      protected:
       IntegratorBase(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_basic_set_radius)
         : Integrator<R>(maximum_step_size,lock_to_grid_time,maximum_basic_set_radius) { }
-     protected:
-      virtual BasicSet integration_step(const VectorFieldInterface&,
-                                        const BasicSet&,
-                                        time_type&) const = 0;
-     
-      virtual BasicSet reachability_step(const VectorFieldInterface&,
-                                         const BasicSet&,
-                                         time_type&) const = 0;
-     
-      //virtual void adjoin_subdivision(ListSet&, const BasicSet&) = 0;
      public:
+      /*! \brief Integrate a basic set for within a bounding set. */
+      virtual point_type bounded_flow(const vector_field_type&,
+                                      const point_type&,
+                                      const bounding_set_type&,
+                                      const time_type&) const = 0;
+     
+      /*! \brief Integrate a basic set for within a bounding set. */
+      virtual LinearAlgebra::Matrix<I> bounded_flow_jacobian(const vector_field_type&,
+                                                             const point_type&,
+                                                             const bounding_set_type&,
+                                                             const time_type&) const = 0;
+     
+      /*! \brief Integrate a basic set for within a bounding set. */
+      virtual basic_set_type bounded_integration_step(const vector_field_type&,
+                                              const basic_set_type&,
+                                              const bounding_set_type&,
+                                              const time_type&) const = 0;
+     
+      /*! \brief A reachability step for a basic set within a bounding set. */
+      virtual basic_set_type bounded_reachability_step(const vector_field_type&,
+                                               const basic_set_type&,
+                                               const bounding_set_type&,
+                                               const time_type&) const = 0;
+     
+     public:
+
+      virtual basic_set_type reachability_step(const vector_field_type&,
+                                               const basic_set_type&,
+                                               time_type&) const;
+
+      virtual BS integration_step(const VF&,
+                                  const BS&,
+                                  time_type&) const;
+     
       /*! \brief Integrate a basic set. */
       virtual
       Geometry::SetInterface<R>*
@@ -292,15 +318,15 @@ namespace Ariadne {
      public:
       
       /*! \brief Template for integrating a basic set. */
-      BasicSet 
-      integrate(const VectorFieldInterface& vector_field, 
-                const BasicSet& initial_set, 
+      BS 
+      integrate(const VF& vector_field, 
+                const BS& initial_set, 
                 const time_type& time) const;
 
       /*! \brief Template for computing the reachable set from a basic. */
-      ListSet 
-      reach(const VectorFieldInterface& vector_field, 
-            const BasicSet& initial_set, 
+      Geometry::ListSet<BS> 
+      reach(const VF& vector_field, 
+            const BS& initial_set, 
             const time_type& time) const;
 
 
@@ -308,29 +334,29 @@ namespace Ariadne {
      public:
       
       /*! \brief Template for integrating a list set. */
-      ListSet 
-      lower_integrate(const VectorFieldInterface& vector_field, 
-                      const ListSet& initial_set, 
+      Geometry::ListSet<BS> 
+      lower_integrate(const VF& vector_field, 
+                      const Geometry::ListSet<BS>& initial_set, 
                       const time_type& time) const;
 
       
       /*! \brief Template for computing the reachable set from a list set. */
-      ListSet 
-      lower_reach(const VectorFieldInterface& vector_field, 
-                  const ListSet& initial_set, 
+      Geometry::ListSet<BS> 
+      lower_reach(const VF& vector_field, 
+                  const Geometry::ListSet<BS>& initial_set, 
                   const time_type& time) const;
 
        /*! \brief Template for integrating a list set. */
-      ListSet
-      upper_integrate(const VectorFieldInterface& vector_field, 
-                      const ListSet& initial_set, 
+      Geometry::ListSet<BS>
+      upper_integrate(const VF& vector_field, 
+                      const Geometry::ListSet<BS>& initial_set, 
                       const time_type& time) const;
 
       
       /*! \brief Template for computing the reachable set from a list set. */
-      ListSet
-      upper_reach(const VectorFieldInterface& vector_field, 
-                  const ListSet& initial_set, 
+      Geometry::ListSet<BS>
+      upper_reach(const VF& vector_field, 
+                  const Geometry::ListSet<BS>& initial_set, 
                   const time_type& time) const;
 
      public:

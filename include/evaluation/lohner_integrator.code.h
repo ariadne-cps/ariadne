@@ -94,38 +94,80 @@ Evaluation::LohnerIntegrator<R>::LohnerIntegrator(const time_type& maximum_step_
 
 
 template<class R>
+Geometry::Point<typename Evaluation::LohnerIntegrator<R>::I>
+Evaluation::LohnerIntegrator<R>::bounded_flow(const System::VectorFieldInterface<R>& vector_field, 
+                                              const Geometry::Point<I>& initial_point, 
+                                              const Geometry::Rectangle<R>& bounding_box, 
+                                              const time_type& step_size) const
+{
+  // Use second order formula \f$ \Phi(t,p) = p + tf(p) + t^2/2 Df(B)f(B) \f$
+  const System::VectorFieldInterface<R>& vf=vector_field;
+  const Geometry::Point<I>& p=initial_point;
+  Geometry::Point<I> b=bounding_box;
+  I h=step_size;
+
+  return p + h * ( vf(p) + (h/2) * ( vf.jacobian(b) * vf(b) ) );
+}
+
+
+template<class R>
+LinearAlgebra::Matrix<typename Evaluation::LohnerIntegrator<R>::I>
+Evaluation::LohnerIntegrator<R>::bounded_flow_jacobian(const System::VectorFieldInterface<R>& vector_field, 
+                                                       const Geometry::Point<I>& initial_point, 
+                                                       const Geometry::Rectangle<R>& bounding_box, 
+                                                       const time_type& step_size) const
+{
+  // Use first order formula \f$ D\Phi(t,p) = I + t Df(B) W \f$ where W is a bound for D\Phi([0,h],p)
+  // Use ||W-I|| < e^{Lh}-1, where L is the  norm of Df
+  const dimension_type d=vector_field.dimension();
+  const System::VectorFieldInterface<R>& vf=vector_field;
+  const Geometry::Point<I>& p=initial_point;
+  Geometry::Point<I> b=bounding_box;
+  I h=step_size;
+
+  LinearAlgebra::Matrix<I> Id = LinearAlgebra::Matrix<I>::identity(d);
+
+  LinearAlgebra::Matrix<I> Df = vf.jacobian(b);
+  R l = LinearAlgebra::norm(Df).upper();
+  I e = Numeric::sub_up(Numeric::exp_up(mul_up(h.upper(),l)),R(1))*I(-1,1);
+
+  LinearAlgebra::Matrix<I> W(d,d,&e,0,0);
+  for(uint i=0; i!=d; ++i) { W(i,i) = W(i,i)+1; }
+  verbosity=7;
+  ARIADNE_LOG(7,"Df="<<Df<<"\nW="<<W<<"\n");
+  return Id + h * (Df * W);
+}
+
+
+template<class R>
 Geometry::Zonotope<typename Evaluation::LohnerIntegrator<R>::I>
-Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorFieldInterface<R>& vector_field, 
-                                                  const Geometry::Zonotope<I>& initial_set, 
-                                                  time_type& step_size) const
+Evaluation::LohnerIntegrator<R>::bounded_integration_step(const System::VectorFieldInterface<R>& vector_field, 
+                                                          const Geometry::Zonotope<I>& initial_set, 
+                                                          const Geometry::Rectangle<R>& bounding_box, 
+                                                          const time_type& step_size) const
 {
   using namespace Numeric;
   using namespace LinearAlgebra;
   using namespace Geometry;
   using namespace System;
   
-  if(verbosity>6) { std::clog << "LohnerIntegrator::integration_step(VectorFieldInterface,Zonotope<Interval>,time_type) const" << std::endl; }
-  if(verbosity>6) { std::clog << "  step_size=" << conv_approx<double>(step_size) << "  initial_set=" << initial_set << std::endl; }
   const Zonotope<I>& z=initial_set;
   const Point<I>& c=z.centre();
   const Matrix<I>& G=z.generators();
-  time_type suggested_step_size=step_size;
-  
-  Rectangle<R> bbox=z.bounding_box();
-  bbox=this->estimate_flow_bounds(vector_field,bbox,step_size);
-  if(verbosity>4) { if(suggested_step_size!=step_size) { std::clog << "  using step_size=" << conv_approx<double>(step_size) << std::endl; } }
+
   const VectorFieldInterface<R>& vf=vector_field;
+  const Rectangle<R>& bbox=bounding_box;
   const size_type n=vf.dimension();
   Interval<R> h=step_size;
   const Matrix<I> id=LinearAlgebra::Matrix<I>::identity(n);
   
-  Vector<I> f=vf(bbox);
-  Matrix<I> df=vf.jacobian(bbox);
+  Vector<I> f=vf(bounding_box);
+  Matrix<I> df=vf.jacobian(bounding_box);
   Matrix<I> hdf=h*df;
   Matrix<I> dphi=exp(hdf);
   
   Rectangle<R> cbbox(c);
-  cbbox=refine_flow_bounds(vf,cbbox,bbox,step_size);
+  cbbox=refine_flow_bounds(vf,cbbox,bounding_box,step_size);
   Vector<I> fc=vf.image(cbbox);
   Matrix<I> dfc=vf.jacobian(cbbox);
   Point<I> phic=c+h*fc;
@@ -149,15 +191,12 @@ Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorFieldInter
 
 
 
-
-
-
-
 template<class R>
 Geometry::Zonotope<typename Evaluation::LohnerIntegrator<R>::I> 
-Evaluation::LohnerIntegrator<R>::reachability_step(const System::VectorFieldInterface<R>& vector_field, 
-                                                   const Geometry::Zonotope<I>& initial_set, 
-                                                   time_type& step_size) const
+Evaluation::LohnerIntegrator<R>::bounded_reachability_step(const System::VectorFieldInterface<R>& vector_field, 
+                                                           const Geometry::Zonotope<I>& initial_set,
+                                                           const Geometry::Rectangle<R>& bounding_box,
+                                                           const time_type& step_size) const
 {
   using namespace Numeric;
   using namespace LinearAlgebra;
@@ -170,11 +209,10 @@ Evaluation::LohnerIntegrator<R>::reachability_step(const System::VectorFieldInte
   
   const VectorFieldInterface<R>& vf(vector_field);
   Zonotope<I> z=initial_set;
+  const Rectangle<R>& bbox=bounding_box;
   const size_type n=z.dimension();
   const Matrix<R> id=Matrix<R>::identity(n);
   
-  /* Throws exception if we can't find flow bounds for given stepsize. */
-  Rectangle<R> bbox=estimate_flow_bounds(vf,z.bounding_box(),step_size,256);
   Interval<R> hi(0,step_size);
   // FIXME: There should be no need to convert to time_type / Rational
   Interval<R> hh(time_type(step_size/2));
@@ -188,10 +226,13 @@ Evaluation::LohnerIntegrator<R>::reachability_step(const System::VectorFieldInte
   
   Vector<I> fh=(hh*f);
   
-  Matrix<I> zfh=symmetrize(fh);
   Matrix<I> mdf=dphi*z.generators();
   
-  z=Zonotope<I>(phic,mdf,zfh);
+  Matrix<I> zfh=symmetrize(fh);
+  //z=Zonotope<I>(phic,mdf,zfh);
+
+  //FIXME: Is the below formula correct?
+  z=Zonotope<I>(phic,mdf,fh);
   
   if(verbosity>7) {
     std::clog << "suggested stepsize=" << step_size << std::endl;
@@ -199,7 +240,7 @@ Evaluation::LohnerIntegrator<R>::reachability_step(const System::VectorFieldInte
     std::clog << "stepsize=" << conv_approx<double>(step_size) << std::endl;
     std::clog << "bound=" << bbox << std::endl;
     
-    std::clog << "flow=" << f << "=" << std::endl;
+    std::clog << "flow=" << f << std::endl;
     std::clog << "jacobian=" << df << std::endl;
     std::clog << "flow derivative=" << dphi << std::endl;
     
@@ -212,7 +253,6 @@ Evaluation::LohnerIntegrator<R>::reachability_step(const System::VectorFieldInte
     
     std::clog << "approximating zonotope " << z;
   }
-  
   return z;
 }
 

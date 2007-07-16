@@ -73,8 +73,9 @@ namespace Ariadne {
     template<class R> class HybridGridCellListSet;
     template<class BS> class HybridListSet;
     template<class BS> class HybridBasicSet;
+    template<class BS> class HybridTimedBasicSet;
 
-    template<class S> class TimedSet;
+    template<class T, class BS> class TimedSet;
   }
 }
 

@@ -36,11 +36,33 @@
 #include "../geometry/declarations.h"
 #include "../system/declarations.h"
 #include "../evaluation/declarations.h"
+#include "../evaluation/integrator.h"
 
 namespace Ariadne {  
   namespace Evaluation {
   
     template<class R> class LohnerIntegrator;
+
+    /*! \brief */
+    class HybridTime {
+     public:
+      HybridTime(Numeric::Rational t) : _time(t), _steps(0) { }
+      HybridTime(Numeric::Rational t, Numeric::Integer s) : _time(t), _steps(s) { }
+      Numeric::Rational& time() { return this->_time; }
+      Numeric::Integer& steps() { return this->_steps; }
+      const Numeric::Rational& time() const { return this->_time; }
+      const Numeric::Integer& steps() const { return this->_steps; }
+      bool operator==(const HybridTime& other) const { return this->_time==other._time && this->_steps==other._steps; }
+      bool operator!=(const HybridTime& other) const { return !(*this==other); }
+      bool operator<(const HybridTime& other) const { return this->_time<other._time; }
+      HybridTime operator+(const HybridTime& other) const { return HybridTime(this->_time+other._time,this->_steps+other._steps); }
+      HybridTime operator+(const Numeric::Rational& other) const { return HybridTime(this->_time+other,this->_steps); }
+     private:
+      Numeric::Rational _time;
+      Numeric::Integer _steps;
+    };
+
+    typedef HybridTime hybrid_time_type;  
 
 
     /*! \ingroup Evolve
@@ -49,12 +71,15 @@ namespace Ariadne {
     template< class R >
     class ConstraintHybridEvolver
     {
+      typedef Numeric::Interval<R> I;
+     public:
       typedef typename System::ConstraintDiscreteMode<R> mode_type;
       typedef typename System::ConstraintDiscreteTransition<R> transition_type;
-      typedef typename Geometry::Zonotope<Numeric::Interval<R> > basic_set_type;
-      typedef Geometry::HybridBasicSet<basic_set_type> hybrid_basic_set_type;
-      typedef Geometry::TimedSet<hybrid_basic_set_type> timed_set_type;
-      typedef boost::shared_ptr< const Geometry::ConstraintInterface<R> > constraint_pointer;
+      typedef typename Geometry::Zonotope<Numeric::Interval<R> > continuous_basic_set_type;
+      typedef Geometry::HybridBasicSet<continuous_basic_set_type> hybrid_basic_set_type;
+      typedef Geometry::HybridTimedBasicSet<continuous_basic_set_type> timed_set_type;
+
+      typedef boost::shared_ptr< const Geometry::ConstraintInterface<R> > constraint_const_pointer;
      public:
 
       /*! \brief Construct from an applicator and an integrator. */
@@ -66,19 +91,24 @@ namespace Ariadne {
 
       //@{
       //! \name Evolution steps.
-      basic_set_type
+      /*! \brief Compute the possible states reached by an unfored jump within time \a h.
+       *
+       * The generators are given by
+       * \f[ D\Phi_2 \circ DF \circ D\Phi_1 G; \quad (D\Phi_i\circ DF \circ \dot{\Phi}_1 - \dot{\Phi}_2) (h/2) \f]
+       */
+      continuous_basic_set_type
       unforced_jump(const System::VectorFieldInterface<R>& dynamic1,
                     const System::VectorFieldInterface<R>& dynamic2,
                     const System::MapInterface<R>& reset,
-                    const basic_set_type& basic_set,
+                    const continuous_basic_set_type& basic_set,
                     const Geometry::ConstraintInterface<R>& activation,
                     const time_type& step_size);
 
-      basic_set_type
+      continuous_basic_set_type
       forced_jump(const System::VectorFieldInterface<R>& dynamic1,
                   const System::VectorFieldInterface<R>& dynamic2,
                   const System::MapInterface<R>& reset,
-                  const basic_set_type& basic_set,
+                  const continuous_basic_set_type& basic_set,
                   const Geometry::ConstraintInterface<R>& guard,
                   const time_type& step_size);
 
@@ -91,6 +121,20 @@ namespace Ariadne {
       upper_evolution_step(const System::ConstraintHybridAutomaton<R>& automaton, 
                            const timed_set_type& initial_set,
                            time_type& step_size);
+
+      std::vector<timed_set_type>
+      lower_reachability_step(const System::ConstraintHybridAutomaton<R>& automaton, 
+                              const timed_set_type& initial_set,
+                              time_type& step_size);
+
+      std::vector<timed_set_type>
+      upper_reachability_step(const System::ConstraintHybridAutomaton<R>& automaton, 
+                              const timed_set_type& initial_set,
+                              time_type& step_size);
+
+
+      /*! \brief Subdivide the set. */
+      std::vector<timed_set_type> subdivide(const timed_set_type& ts);
       //@}
 
 
@@ -114,9 +158,9 @@ namespace Ariadne {
       
       /*! \brief Compute the system evolution at \a time with up to \a maximum_number_of_events using upper semantics. (NOT CURRENTLY IMPLEMENTED) */
       std::vector<hybrid_basic_set_type> upper_evolve(const System::ConstraintHybridAutomaton<R>& automaton, 
-                                                  const Geometry::HybridSet<R>&,
-                                                  time_type evolution_time,
-                                                  size_type maximum_number_of_events);
+                                                      const Geometry::HybridSet<R>&,
+                                                      time_type evolution_time,
+                                                      size_type maximum_number_of_events);
       
       /*! \brief Compute a lower approximation to the reachable set between \a initial_evolution_time and \a final_time
        *  with up to \a maximum_number_of_events using lower semantics. (NOT CURRENTLY IMPLEMENTED) */
@@ -161,16 +205,16 @@ namespace Ariadne {
                                                            const Geometry::HybridGridMaskSet<R>& bounding_set);
 
       /*! \brief Compute the system evolution at \a time with up to \a maximum_number_of_events using lower semantics. */
-      Geometry::HybridListSet<basic_set_type> lower_evolve(const System::ConstraintHybridAutomaton<R>& automaton, 
-                                                 const hybrid_basic_set_type& initial_set, 
-                                                 time_type evolution_time,
-                                                 size_type maximum_number_of_events);
+      Geometry::HybridListSet<continuous_basic_set_type> lower_evolve(const System::ConstraintHybridAutomaton<R>& automaton, 
+                                                                      const Geometry::HybridListSet<continuous_basic_set_type>& initial_set, 
+                                                                      time_type evolution_time,
+                                                                      size_type maximum_number_of_events);
       
       /*! \brief Compute the system evolution at \a time with up to \a maximum_number_of_events using upper semantics. */
-      Geometry::HybridListSet<basic_set_type> upper_evolve(const System::ConstraintHybridAutomaton<R>& automaton, 
-                                                 const hybrid_basic_set_type& initial_set, 
-                                                 time_type evolution_time,
-                                                 size_type maximum_number_of_events);
+      Geometry::HybridListSet<continuous_basic_set_type> upper_evolve(const System::ConstraintHybridAutomaton<R>& automaton, 
+                                                                      const Geometry::HybridListSet<continuous_basic_set_type>& initial_set, 
+                                                                      time_type evolution_time,
+                                                                      size_type maximum_number_of_events);
       
       /*! \brief Compute the system evolution at \a time with up to \a maximum_number_of_events using lower semantics. */
       Geometry::HybridGridMaskSet<R> lower_evolve(const System::ConstraintHybridAutomaton<R>& automaton, 
@@ -186,18 +230,23 @@ namespace Ariadne {
       
       /*! \brief Compute a lower approximation to the reachable set between \a initial_evolution_time and \a final_time
        *  with up to \a maximum_number_of_events using lower semantics. (NOT CURRENTLY IMPLEMENTED) */
-      Geometry::HybridGridMaskSet<R> lower_reach(const System::ConstraintHybridAutomaton<R>&, 
-                                                 const Geometry::HybridGridMaskSet<R>&, 
-                                                 time_type initial_evolution_time, 
-                                                 time_type final_time, 
-                                                 size_type maximum_number_of_events);
+      Geometry::HybridListSet<continuous_basic_set_type> lower_reach(const System::ConstraintHybridAutomaton<R>&, 
+                                                                               const Geometry::HybridGridMaskSet<R>&, 
+                                                                               time_type evolution_time, 
+                                                                               size_type maximum_number_of_events);
       
+      /*! \brief Compute an over approximation to the reachable set between \a initial_evolution_time and \a final_time
+       *  with up to \a maximum_number_of_events using upper semantics. (NOT CURRENTLY IMPLEMENTED) */
+      Geometry::HybridListSet<continuous_basic_set_type> upper_reach(const System::ConstraintHybridAutomaton<R>& automaton, 
+                                                                     const Geometry::HybridListSet<continuous_basic_set_type>& initial_set, 
+                                                                     time_type evolution_time, 
+                                                                     size_type maximum_number_of_events);
+     
       /*! \brief Compute an over approximation to the reachable set between \a initial_evolution_time and \a final_time
        *  with up to \a maximum_number_of_events using upper semantics. (NOT CURRENTLY IMPLEMENTED) */
       Geometry::HybridGridMaskSet<R> upper_reach(const System::ConstraintHybridAutomaton<R>& automaton, 
                                                  const Geometry::HybridGridMaskSet<R>& initial_set, 
-                                                 time_type initial_evolution_time, 
-                                                 time_type final_time, 
+                                                 time_type evolution_time, 
                                                  size_type maximum_number_of_events);
      
       /*! \brief Compute an over-approximation to the set of points which remain in \a bounding_set under evolution of \a automaton. using lower semantics. (NOT CURRENTLY IMPLEMENTED) */
@@ -223,10 +272,14 @@ namespace Ariadne {
       Geometry::HybridGridMaskSet<R> _continuous_chainreach(const System::ConstraintHybridAutomaton<R>& automaton, 
                                                             const Geometry::HybridGridMaskSet<R>& initial_set,
                                                             const Geometry::HybridGridMaskSet<R>& domain_set);
+
+     private:
+      // Initialisation and finalisation routines
+      std::vector<timed_set_type> working_sets(const Geometry::HybridListSet<continuous_basic_set_type>& set);
      private:
       Applicator<R>* _applicator;
       // FIXME: Allow arbitrary integrators
-      LohnerIntegrator<R>* _integrator;
+      IntegratorBase< R, System::VectorFieldInterface<R>, Geometry::Zonotope<I,I> >* _integrator;
     };
 
 

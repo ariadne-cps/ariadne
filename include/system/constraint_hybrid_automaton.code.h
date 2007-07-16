@@ -89,6 +89,30 @@ System::ConstraintDiscreteMode<R>::invariant(size_type k) const
 
 
 template<class R>
+const System::ConstraintInterface<R>&
+System::ConstraintDiscreteMode<R>::activation(id_type event_id) const
+{
+  typename std::map< id_type, constraint_const_pointer >::const_iterator act_iter=this->_activations.find(event_id);
+  if(act_iter==this->_activations.end()) {
+    throw std::runtime_error("The discrete mode has no unforced transition with the given event id");
+  }
+  return *act_iter->second;
+}
+
+
+template<class R>
+const System::ConstraintInterface<R>&
+System::ConstraintDiscreteMode<R>::guard(id_type event_id) const
+{
+  typename std::map< id_type, constraint_const_pointer >::const_iterator grd_iter=this->_guards.find(event_id);
+  if(grd_iter==this->_guards.end()) {
+    throw std::runtime_error("The discrete mode has no forced transition with the given event id");
+  }
+  return *grd_iter->second;
+}
+
+
+template<class R>
 std::ostream&
 System::ConstraintDiscreteMode<R>::write(std::ostream& os) const
 {
@@ -398,7 +422,7 @@ System::ConstraintHybridAutomaton<R>::transition(id_type event_id, id_type sourc
 
 
 template<class R>
-const std::vector<typename System::ConstraintHybridAutomaton<R>::constraint_pointer>&
+const std::vector<typename System::ConstraintHybridAutomaton<R>::constraint_const_pointer>&
 System::ConstraintHybridAutomaton<R>::invariants(id_type mode_id) const 
 {
   if(!this->has_mode(mode_id)) {
@@ -409,7 +433,7 @@ System::ConstraintHybridAutomaton<R>::invariants(id_type mode_id) const
 
 
 template<class R>
-const std::map<id_type, typename System::ConstraintHybridAutomaton<R>::constraint_pointer>&
+const std::map<id_type, typename System::ConstraintHybridAutomaton<R>::constraint_const_pointer>&
 System::ConstraintHybridAutomaton<R>::activations(id_type source_id) const 
 {
   return this->mode(source_id)._activations;
@@ -417,7 +441,7 @@ System::ConstraintHybridAutomaton<R>::activations(id_type source_id) const
 
 
 template<class R>
-const std::map<id_type, typename System::ConstraintHybridAutomaton<R>::constraint_pointer>&
+const std::map<id_type, typename System::ConstraintHybridAutomaton<R>::constraint_const_pointer>&
 System::ConstraintHybridAutomaton<R>::guards(id_type source_id) const 
 {
   return this->mode(source_id)._guards;
@@ -425,18 +449,18 @@ System::ConstraintHybridAutomaton<R>::guards(id_type source_id) const
 
 
 template<class R>
-typename System::ConstraintHybridAutomaton<R>::constraint_reference
+typename System::ConstraintHybridAutomaton<R>::constraint_const_reference
 System::ConstraintHybridAutomaton<R>::activation(id_type event_id, id_type source_id) const 
 {
-  return *this->_activations.find(source_id)->second.find(event_id)->second;
+  return this->transition(event_id,source_id).activation();
 }
 
 
 template<class R>
-typename System::ConstraintHybridAutomaton<R>::constraint_reference
+typename System::ConstraintHybridAutomaton<R>::constraint_const_reference
 System::ConstraintHybridAutomaton<R>::guard(id_type event_id, id_type source_id) const 
 {
-  return *this->_guards.find(source_id)->second.find(event_id)->second;
+  return this->mode(source_id).guard(event_id);
 }
 
 

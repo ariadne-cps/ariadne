@@ -173,49 +173,66 @@ Evaluation::AffineIntegrator<R>::AffineIntegrator(const time_type& maximum_step_
 
 
 
+
+template<class R> 
+Geometry::Point< Numeric::Interval<R> > 
+Evaluation::AffineIntegrator<R>::bounded_flow(const System::AffineVectorField<R>& avf,
+                                              const Geometry::Point<I>& p,
+                                              const Geometry::Rectangle<R>& bb,
+                                              const time_type& h) const
+{
+  const LinearAlgebra::Matrix<R>& A=avf.A();
+  const LinearAlgebra::Vector<R>& b=avf.b();
+  return Geometry::Point<I>(gexp(A,h,0)*p.position_vector() + gexp(A,h,1)*b);
+}
+     
+ 
+template<class R> 
+LinearAlgebra::Matrix< Numeric::Interval<R> > 
+Evaluation::AffineIntegrator<R>::bounded_flow_jacobian(const System::AffineVectorField<R>& avf,
+                                                       const Geometry::Point<I>& p,
+                                                       const Geometry::Rectangle<R>& bb,
+                                                       const time_type& h) const
+{
+  const LinearAlgebra::Matrix<R>& A=avf.A();
+  return gexp(A,h,0);
+}
+
+     
+
+
+     
+
+
 template<class R>
 Geometry::Zonotope< Numeric::Interval<R> > 
-Evaluation::AffineIntegrator<R>::integration_step(
-                                                  const System::VectorFieldInterface<R>& vector_field, 
-                                                  const Geometry::Zonotope<I>& initial_set, 
-                                                  time_type& step_size) const
+Evaluation::AffineIntegrator<R>::bounded_integration_step(const System::AffineVectorField<R>& affine_vector_field, 
+                                                          const Geometry::Zonotope< Numeric::Interval<R> >& initial_set, 
+                                                          const Geometry::Rectangle<R>& bounding_set, 
+                                                          const time_type& step_size) const
 {
-  if(verbosity>6) { std::clog << "AffineIntegrator::integration_step(VectorFieldInterface,Zonotope<Interval>,time_type) const" << std::endl; }
-  
-  //std::type_info info(&vector_field);
-  //std::clog << "Vector field type is:" << info.name() << std::endl;
-  const System::AffineVectorField<R>* affine_vector_field_ptr=dynamic_cast<const System::AffineVectorField<R>*>(&vector_field);
-  if(!affine_vector_field_ptr) {
-    throw std::runtime_error(std::string(__FUNCTION__)+": dynamic_cast to AffineVectorField failed");
-  }
-  return integration_step(*affine_vector_field_ptr,initial_set,step_size);
+  return this->integration_step(affine_vector_field,initial_set,const_cast<time_type&>(step_size));
 }
 
 
 
 template<class R>
 Geometry::Zonotope< Numeric::Interval<R> > 
-Evaluation::AffineIntegrator<R>::reachability_step(
-                                                   const System::VectorFieldInterface<R>& vector_field, 
-                                                   const Geometry::Zonotope< Numeric::Interval<R> >& initial_set, 
-                                                   time_type& step_size) const
+Evaluation::AffineIntegrator<R>::bounded_reachability_step(const System::AffineVectorField<R>& affine_vector_field, 
+                                                           const Geometry::Zonotope< Numeric::Interval<R> >& initial_set, 
+                                                           const Geometry::Rectangle<R>& bounding_set, 
+                                                           const time_type& step_size) const
 {
-  if(verbosity>6) { std::clog << "AffineIntegrator::reachability_step(VectorFieldInterface,Zonotope<Interval>,time_type) const" << std::endl; }
-  
-  const System::AffineVectorField<R>* affine_vector_field_ptr=dynamic_cast<const System::AffineVectorField<R>*>(&vector_field);
-  if(!affine_vector_field_ptr) {
-    throw std::runtime_error(std::string(__FUNCTION__)+": dynamic_cast to AffineVectorField failed");
-  }
-  
-  return reachability_step(*affine_vector_field_ptr,initial_set,step_size);
+  return reachability_step(affine_vector_field,initial_set,const_cast<time_type&>(step_size));
 }
+
+
 
 
 
 template<class R>
 Geometry::Zonotope< Numeric::Interval<R> > 
-Evaluation::AffineIntegrator<R>::integration_step(
-                                                  const System::AffineVectorField<R>& affine_vector_field, 
+Evaluation::AffineIntegrator<R>::integration_step(const System::AffineVectorField<R>& affine_vector_field, 
                                                   const Geometry::Zonotope< Numeric::Interval<R> >& initial_set, 
                                                   time_type& step_size) const
 {
@@ -224,7 +241,7 @@ Evaluation::AffineIntegrator<R>::integration_step(
   using namespace System;
   
   
-  ARIADNE_LOG(6,"AffineIntegrator::integration_step(AffineVectorField,Zonotope<Interval>,time_type) const\n");
+  ARIADNE_LOG(6,"AffineIntegrator::integration_step(AffineVectorField,Zonotope<Interval>,Time) const\n");
   
   const AffineVectorField<R>& vf=affine_vector_field;
   Zonotope<I> z=initial_set;
@@ -263,8 +280,7 @@ Evaluation::AffineIntegrator<R>::integration_step(
 
 template<class R>
 Geometry::Zonotope< Numeric::Interval<R> > 
-Evaluation::AffineIntegrator<R>::reachability_step(
-                                                   const System::AffineVectorField<R>& vector_field, 
+Evaluation::AffineIntegrator<R>::reachability_step(const System::AffineVectorField<R>& vector_field, 
                                                    const Geometry::Zonotope< Numeric::Interval<R> >& initial_set, 
                                                    time_type& step_size) const
 {
@@ -281,15 +297,15 @@ Evaluation::AffineIntegrator<R>::reachability_step(
   Zonotope<I> iz=initial_set;
   const size_type n=vector_field.dimension();
   const Matrix<R> id=Matrix<R>::identity(n);
-  time_type hc=step_size/2;
+  const time_type hc=step_size/2;
   // FIXME: There should be no need to convert to time_type / Rational
   Interval<R> hh(time_type(step_size/2));
   
   const Matrix<R>& A=avf.A();
   const Vector<R>& b=avf.b();
   
-  /* Throws exception if we can't find flow bounds for given stepsize. */
-  iz=this->integration_step(avf,iz,hc);
+  // No change of step size for affine integrator
+  iz=this->integration_step(avf,iz,const_cast<time_type&>(hc));
   
   /* Use centre c, generators G and t*(Ac+b), and error (exp(At)-I)Ge+inv(A)(exp(At)-I-At)(Ac+b)
    * 

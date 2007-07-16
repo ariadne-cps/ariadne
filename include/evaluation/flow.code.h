@@ -1,8 +1,8 @@
 /***************************************************************************
- *            evaluation/declarations.h
+ *            flow.code.h
  *
- *  Copyright  2006-7  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2007  Pieter Collins
+ *  pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,22 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file evaluation/declarations.h
- *  \brief Forward declarations of classes in the Evaluation module.
- */
+#include "flow.h"
 
-#ifndef ARIADNE_EVALUATION_DECLARATIONS_H
-#define ARIADNE_EVALUATION_DECLARATIONS_H
+namespace Ariadne {
 
-namespace Ariadne { 
-  namespace Evaluation {
-    template<class R> class Solver;
-    template<class R> class Applicator;
-    template<class R> class Integrator;
-    template<class R> class HybridEvolver;
-
-    template<class R> class Flow;
-  }
 }
-
-#endif /* ARIADNE_EVALUATION_DECLARATIONS_H */

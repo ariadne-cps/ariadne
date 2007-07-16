@@ -653,8 +653,11 @@ Geometry::Zonotope<RC,RG>::write(std::ostream& os) const
       os << "Zonotope( )" << std::endl;
     } else {
       os << "Zonotope( centre=" << z.centre();
-      os << ", directions=" << z.generators();
-      os << ")";
+      os << ", directions=";
+      for(size_type i=0; i!=z.number_of_generators(); ++i) {
+        os << (i==0 ? "[ " : ", ") << z.generator(i);
+      }
+      os << "] )";
     } 
   }
   return os;

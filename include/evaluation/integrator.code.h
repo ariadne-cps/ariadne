@@ -60,6 +60,7 @@ namespace {
     
 using namespace Ariadne;
 
+
 template<class R, class BST>
 struct pair_first_less {
   bool operator()(const std::pair<R,BST>& ts1, const std::pair<R,BST>& ts2) {
@@ -91,6 +92,8 @@ namespace Ariadne {
 namespace Evaluation { static int& verbosity = integrator_verbosity; }
     
 
+using namespace Geometry;
+using namespace System;
 
 template<class R>
 Evaluation::Integrator<R>::~Integrator()
@@ -154,6 +157,36 @@ time_type Evaluation::Integrator<R>::lock_to_grid_time() const
 
 
 
+
+template<class R, class VF, class BS>
+typename Evaluation::IntegratorBase<R,VF,BS>::basic_set_type
+Evaluation::IntegratorBase<R,VF,BS>::integration_step(const vector_field_type& vector_field, 
+                                                      const basic_set_type& initial_set, 
+                                                      time_type& step_size) const
+{
+  ARIADNE_LOG(2,"BasicSet Integrator::integration_step(VectorFieldInterface,BasicSet,Time)\n");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"Integrator::integration_step(VectorFieldInterface,BasicSet,Time)");
+
+  bounding_set_type bounding_set=this->estimate_flow_bounds(vector_field,initial_set.bounding_box(),step_size);
+  return this->bounded_integration_step(vector_field,initial_set,bounding_set,step_size);
+}
+
+
+template<class R, class VF, class BS>
+typename Evaluation::IntegratorBase<R,VF,BS>::basic_set_type
+Evaluation::IntegratorBase<R,VF,BS>::reachability_step(const vector_field_type& vector_field, 
+                                                       const basic_set_type& initial_set, 
+                                                       time_type& step_size) const
+{
+  ARIADNE_LOG(2,"BasicSet Integrator::reachability_step(VectorFieldInterface,BasicSet,Time)\n");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"Integrator::reachability_step(VectorFieldInterface,BasicSet,Time)");
+  bounding_set_type bounding_set=this->estimate_flow_bounds(vector_field,initial_set.bounding_box(),step_size);
+  return this->bounded_reachability_step(vector_field,initial_set,bounding_set,step_size);
+}
+
+
+
+
 template<class R, class VF, class BS>
 Geometry::SetInterface<R>*
 Evaluation::IntegratorBase<R,VF,BS>::integrate(const System::VectorFieldInterface<R>& vector_field, 
@@ -161,18 +194,18 @@ Evaluation::IntegratorBase<R,VF,BS>::integrate(const System::VectorFieldInterfac
                                                const time_type& time) const
 {
   typedef Numeric::Interval<R> I;
-  ARIADNE_LOG(2,"SetInterface* Integrator::integrate(VectorFieldInterface,SetInterface,Time)\n");
+  ARIADNE_LOG(2,"SetInterface* Integrator::integrate(VectorFieldInterface,SetInterface>,Time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
-  const VectorFieldInterface& cast_vector_field=dynamic_cast<const VectorFieldInterface&>(vector_field);
-  Rectangle bb=initial_set.bounding_box();
-  Grid grid(vector_field.dimension(),this->grid_size());
-  RectangleListSet rectangle_list_initial_set=lower_approximation(initial_set,grid);
+  const VF& cast_vector_field=dynamic_cast<const VF&>(vector_field);
+  Rectangle<R> bb=initial_set.bounding_box();
+  Grid<R> grid(vector_field.dimension(),this->grid_size());
+  ListSet< Rectangle<R> > rectangle_list_initial_set=lower_approximation(initial_set,grid);
   ARIADNE_LOG(3,"rectangle_list_initial_set="<<rectangle_list_initial_set);
-  ListSet list_initial_set(rectangle_list_initial_set);
+  ListSet<BS> list_initial_set(rectangle_list_initial_set);
   ARIADNE_LOG(3,"list_initial_set="<<list_initial_set);
-  ListSet list_final_set=this->lower_integrate(cast_vector_field,list_initial_set,time);
+  ListSet<BS> list_final_set=this->lower_integrate(cast_vector_field,list_initial_set,time);
   ARIADNE_LOG(3,"list_final_set="<<list_final_set);
-  return new ListSet(list_final_set);
+  return new ListSet<BS>(list_final_set);
 }
 
 
@@ -216,13 +249,13 @@ Evaluation::IntegratorBase<R,VF,BS>::reach(const System::VectorFieldInterface<R>
   typedef Numeric::Interval<R> I;
   ARIADNE_LOG(2,"SetInterface* Integrator::reach(VectorFile,SetInterface,Time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
-  const VectorFieldInterface& cast_vector_field=dynamic_cast<const VectorFieldInterface&>(vector_field);
-  Rectangle bb=initial_set.bounding_box();
-  Grid grid(vector_field.dimension(),this->grid_size());
-  RectangleListSet rectangle_list_initial_set=lower_approximation(initial_set,grid);
-  ListSet list_initial_set(rectangle_list_initial_set);
-  ListSet list_reach_set=this->lower_reach(cast_vector_field,list_initial_set,time);
-  return new ListSet(list_reach_set);
+  const VF& cast_vector_field=dynamic_cast<const VF&>(vector_field);
+  Rectangle<R> bb=initial_set.bounding_box();
+  Grid<R> grid(vector_field.dimension(),this->grid_size());
+  ListSet< Rectangle<R> > rectangle_list_initial_set=lower_approximation(initial_set,grid);
+  ListSet<BS> list_initial_set(rectangle_list_initial_set);
+  ListSet<BS> list_reach_set=this->lower_reach(cast_vector_field,list_initial_set,time);
+  return new ListSet<BS>(list_reach_set);
 }
 
 
@@ -468,12 +501,7 @@ Evaluation::Integrator<R>::refine_flow_bounds(const System::VectorFieldInterface
   
   if(verbosity>7) { std::clog << "new_bounds " << xxb << "," << xb << " vs old_bounds " << b << "  " << subset(xb,b) << std::endl; }
   
-  Vector< Interval<R> > ddphi=vf.jacobian(xb)*vf(xb);
-  Vector< Interval<R> > dfx=vf(rx);
-  Vector< Interval<R> > hdfx=h*dfx;
-  Vector< Interval<R> > hhddphi=(h*h/R(2))*ddphi;
-  Vector< Interval<R> > dx=hdfx+hhddphi;
-  return rx+dx;
+  return xb;
 }
 
 
@@ -482,9 +510,9 @@ Evaluation::Integrator<R>::refine_flow_bounds(const System::VectorFieldInterface
 
 
 template<class R, class VF, class BS>
-typename Evaluation::IntegratorBase<R,VF,BS>::BasicSet 
-Evaluation::IntegratorBase<R,VF,BS>::integrate(const VectorFieldInterface& vector_field, 
-                                               const BasicSet& initial_set, 
+BS
+Evaluation::IntegratorBase<R,VF,BS>::integrate(const VF& vector_field, 
+                                               const BS& initial_set, 
                                                const time_type& time) const
 {
   ARIADNE_LOG(4,"BasicSet Integrator::reach(VectorFieldInterface vector_field, BasicSet initial_set, Time time)\n");
@@ -513,19 +541,19 @@ Evaluation::IntegratorBase<R,VF,BS>::integrate(const VectorFieldInterface& vecto
 
 
 template<class R, class VF, class BS>
-typename Evaluation::IntegratorBase<R,VF,BS>::ListSet 
-Evaluation::IntegratorBase<R,VF,BS>::reach(const VectorFieldInterface& vector_field, 
-                                           const BasicSet& initial_set, 
+Geometry::ListSet<BS> 
+Evaluation::IntegratorBase<R,VF,BS>::reach(const VF& vector_field, 
+                                           const BS& initial_set, 
                                            const time_type& time) const
 {
-  ARIADNE_LOG(4,"ListSet Integrator::reach(VectorFieldInterface vector_field, BasicSet initial_set, Time time)\n");
+  ARIADNE_LOG(4,"ListSet<BS> Integrator::reach(VectorFieldInterface vector_field, BasicSet initial_set, Time time)\n");
   ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
   
   if(time==0) { 
     return initial_set;
   }
   
-  ListSet reach_set(initial_set.dimension());
+  ListSet<BS> reach_set(initial_set.dimension());
 
   const VF& vf=vector_field;
   BS bs=initial_set;
@@ -551,12 +579,12 @@ Evaluation::IntegratorBase<R,VF,BS>::reach(const VectorFieldInterface& vector_fi
 
 // Template pattern for integrating a list set
 template<class R, class VF, class BS>
-typename Evaluation::IntegratorBase<R,VF,BS>::ListSet
-Evaluation::IntegratorBase<R,VF,BS>::lower_integrate(const VectorFieldInterface& vector_field, 
-                                                     const ListSet& initial_set, 
+Geometry::ListSet<BS>
+Evaluation::IntegratorBase<R,VF,BS>::lower_integrate(const VF& vector_field, 
+                                                     const ListSet<BS>& initial_set, 
                                                      const time_type& time) const
 {
-  ARIADNE_LOG(2,"ListSet Integrator::lower_integrate(VectorFieldInterface vector_field, ListSet initial_set, Time time)\n");
+  ARIADNE_LOG(2,"ListSet< Rectangle<R> > Integrator::lower_integrate(VectorFieldInterface vector_field, ListSet< Rectangle<R> > initial_set, Time time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   using namespace Numeric;
   
@@ -564,7 +592,7 @@ Evaluation::IntegratorBase<R,VF,BS>::lower_integrate(const VectorFieldInterface&
     return initial_set;
   }
   
-  const VectorFieldInterface& vf=vector_field;
+  const VF& vf=vector_field;
   time_type step_size=this->maximum_step_size();
   R maximum_set_radius=this->maximum_basic_set_radius();
   
@@ -572,16 +600,16 @@ Evaluation::IntegratorBase<R,VF,BS>::lower_integrate(const VectorFieldInterface&
   
   time_type t=0; // t is the time elapsed!
   time_type h=step_size;
-  BasicSet bs(initial_set.dimension());
+  BS bs(initial_set.dimension());
   
-  typedef std::pair< time_type, BasicSet> timed_set_type;
+  typedef std::pair< time_type, BS> timed_set_type;
   
   // Working sets contains (time,set) pairs, storing the sets reached with different remaining
   std::vector< timed_set_type > working_sets;
   
-  ListSet final_set(initial_set.dimension());
+  ListSet<BS> final_set(initial_set.dimension());
   
-  typedef typename ListSet::const_iterator list_set_const_iterator;
+  typedef typename ListSet<BS>::const_iterator list_set_const_iterator;
   for(list_set_const_iterator bs_iter=initial_set.begin(); bs_iter!=initial_set.end(); ++bs_iter) {
     t=0;
     bs=*bs_iter;
@@ -614,12 +642,12 @@ Evaluation::IntegratorBase<R,VF,BS>::lower_integrate(const VectorFieldInterface&
 
 
 template<class R, class VF, class BS>
-typename Evaluation::IntegratorBase<R,VF,BS>::ListSet
-Evaluation::IntegratorBase<R,VF,BS>::lower_reach(const VectorFieldInterface& vector_field, 
-                                                 const ListSet& initial_set, 
+Geometry::ListSet<BS>
+Evaluation::IntegratorBase<R,VF,BS>::lower_reach(const VF& vector_field, 
+                                                 const ListSet<BS>& initial_set, 
                                                  const time_type& time) const
 {
-  ARIADNE_LOG(2,"ListSet Integrator::lower_reach(VectorFieldInterface vector_field, ListSet initial_set, Time time)\n");
+  ARIADNE_LOG(2,"ListSet< Rectangle<R> > Integrator::lower_reach(VectorFieldInterface vector_field, ListSet< Rectangle<R> > initial_set, Time time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   using namespace Numeric;
   
@@ -628,7 +656,7 @@ Evaluation::IntegratorBase<R,VF,BS>::lower_reach(const VectorFieldInterface& vec
     return initial_set;
   }
   
-  const VectorFieldInterface& vf=vector_field;
+  const VF& vf=vector_field;
   time_type step_size=this->maximum_step_size();
   R maximum_set_radius=this->maximum_basic_set_radius();
   
@@ -636,17 +664,17 @@ Evaluation::IntegratorBase<R,VF,BS>::lower_reach(const VectorFieldInterface& vec
   
   time_type t=0; // t is the time elapsed!
   time_type h=step_size;
-  BasicSet bs(initial_set.dimension());
-  BasicSet rbs(initial_set.dimension());
+  BS bs(initial_set.dimension());
+  BS rbs(initial_set.dimension());
   
-  typedef std::pair< time_type, BasicSet> timed_set_type;
+  typedef std::pair< time_type, BS> timed_set_type;
   
   // Working sets contains (time,set) pairs, storing the sets reached with different remaining
   std::vector< timed_set_type > working_sets;
   
-  ListSet final_set(initial_set.dimension());
+  ListSet<BS> final_set(initial_set.dimension());
   
-  typedef typename ListSet::const_iterator list_set_const_iterator;
+  typedef typename ListSet<BS>::const_iterator list_set_const_iterator;
   for(list_set_const_iterator bs_iter=initial_set.begin(); bs_iter!=initial_set.end(); ++bs_iter) {
     t=0;
     bs=*bs_iter;
@@ -677,22 +705,22 @@ Evaluation::IntegratorBase<R,VF,BS>::lower_reach(const VectorFieldInterface& vec
 
 // Template pattern for integrating a list set
 template<class R, class VF, class BS>
-typename Evaluation::IntegratorBase<R,VF,BS>::ListSet
-Evaluation::IntegratorBase<R,VF,BS>::upper_integrate(const VectorFieldInterface& vector_field, 
-                                                     const ListSet& initial_set, 
+Geometry::ListSet<BS>
+Evaluation::IntegratorBase<R,VF,BS>::upper_integrate(const VF& vector_field, 
+                                                     const ListSet<BS>& initial_set, 
                                                      const time_type& time) const
 {
-  ARIADNE_LOG(2,"ListSet Integrator::upper_integrate(VectorFieldInterface vector_field, ListSet initial_set, Time time)\n");
+  ARIADNE_LOG(2,"ListSet< Rectangle<R> > Integrator::upper_integrate(VectorFieldInterface vector_field, ListSet< Rectangle<R> > initial_set, Time time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   using namespace Numeric;
   
-  if(verbosity>4) { std::clog << "ListSet IntegratorBase::integrate(VectorFieldInterface,ListSet,Time)" << std::endl; } 
+  if(verbosity>4) { std::clog << "ListSet< Rectangle<R> > IntegratorBase::integrate(VectorFieldInterface,ListSet< Rectangle<R> >,Time)" << std::endl; } 
   
   if(time==0) { 
     return initial_set;
   }
   
-  const VectorFieldInterface& vf=vector_field;
+  const VF& vf=vector_field;
   time_type step_size=this->maximum_step_size();
   R maximum_set_radius=this->maximum_basic_set_radius();
   
@@ -700,16 +728,16 @@ Evaluation::IntegratorBase<R,VF,BS>::upper_integrate(const VectorFieldInterface&
   
   time_type t=0; // t is the time elapsed!
   time_type h=step_size;
-  BasicSet bs(initial_set.dimension());
+  BS bs(initial_set.dimension());
   
-  typedef std::pair< time_type, BasicSet> timed_set_type;
+  typedef std::pair< time_type, BS> timed_set_type;
   
   // Working sets contains (time,set) pairs, storing the sets reached with different remaining
   std::vector< timed_set_type > working_sets;
   
-  ListSet final_set(initial_set.dimension());
+  ListSet<BS> final_set(initial_set.dimension());
   
-  typedef typename ListSet::const_iterator list_set_const_iterator;
+  typedef typename ListSet<BS>::const_iterator list_set_const_iterator;
   for(list_set_const_iterator bs_iter=initial_set.begin(); bs_iter!=initial_set.end(); ++bs_iter) {
     working_sets.push_back(timed_set_type(0,*bs_iter));
   }
@@ -726,7 +754,7 @@ Evaluation::IntegratorBase<R,VF,BS>::upper_integrate(const VectorFieldInterface&
     if(verbosity>5) { std::clog << "  t=" << t << "  bs=" << bs << std::endl; }
     if(bs.radius()>maximum_set_radius) {
       if(verbosity>5) { std::clog << "    subdividing..." << std::flush; }
-      ListSet subdivisions=bs.subdivide();
+      ListSet<BS> subdivisions=bs.subdivide();
       for(list_set_const_iterator subdiv_iter=subdivisions.begin(); 
           subdiv_iter!=subdivisions.end(); ++subdiv_iter)
         {
@@ -766,16 +794,16 @@ Evaluation::IntegratorBase<R,VF,BS>::upper_integrate(const VectorFieldInterface&
 
 
 template<class R, class VF, class BS>
-typename Evaluation::IntegratorBase<R,VF,BS>::ListSet
-Evaluation::IntegratorBase<R,VF,BS>::upper_reach(const VectorFieldInterface& vector_field, 
-                                                 const ListSet& initial_set, 
+Geometry::ListSet<BS>
+Evaluation::IntegratorBase<R,VF,BS>::upper_reach(const VF& vector_field, 
+                                                 const ListSet<BS>& initial_set, 
                                                  const time_type& time) const
 {
-  ARIADNE_LOG(2,"ListSet Integrator::integrate(VectorFieldInterface vector_field, ListSet initial_set, Time time)\n");
+  ARIADNE_LOG(2,"ListSet<BasicSet> Integrator::integrate(VectorFieldInterface vector_field, ListSet<BasicSet> initial_set, Time time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   using namespace Numeric;
   
-  const VectorFieldInterface& vf=vector_field;
+  const VF& vf=vector_field;
   time_type step_size=this->maximum_step_size();
   R maximum_set_radius=this->maximum_basic_set_radius();
   
@@ -785,15 +813,15 @@ Evaluation::IntegratorBase<R,VF,BS>::upper_reach(const VectorFieldInterface& vec
   
   time_type t=0;
   time_type h=step_size;
-  BasicSet bs(initial_set.dimension());
-  BasicSet rs(initial_set.dimension());
+  BS bs(initial_set.dimension());
+  BS rs(initial_set.dimension());
   
-  typedef typename ListSet::const_iterator list_set_const_iterator;
-  typedef typename ListSet::iterator list_set_iterator;
-  typedef std::pair< time_type, BasicSet > timed_set_type;
+  typedef typename ListSet<BS>::const_iterator list_set_const_iterator;
+  typedef typename ListSet<BS>::iterator list_set_iterator;
+  typedef std::pair< time_type, BS > timed_set_type;
   
   std::vector< timed_set_type > working_sets;
-  ListSet reach_set(initial_set.dimension());
+  ListSet<BS> reach_set(initial_set.dimension());
   
   for(list_set_const_iterator bs_iter=initial_set.begin(); bs_iter!=initial_set.end(); ++bs_iter) {
     working_sets.push_back(timed_set_type(0,*bs_iter));
@@ -818,7 +846,7 @@ Evaluation::IntegratorBase<R,VF,BS>::upper_reach(const VectorFieldInterface& vec
     
     if(bs.radius()>maximum_set_radius) {
       if(verbosity>6) { std::clog << "  subdividing..." << std::endl; }
-      ListSet subdivisions=bs.subdivide();
+      ListSet<BS> subdivisions=bs.subdivide();
       if(verbosity>6) { std::clog << "    subdivisions.size() =" << subdivisions.size() << std::endl; }
       for(list_set_const_iterator subdiv_iter=subdivisions.begin(); 
           subdiv_iter!=subdivisions.end(); ++subdiv_iter)
@@ -864,18 +892,18 @@ Evaluation::IntegratorBase<R,VF,BS>::upper_reach(const VectorFieldInterface& vec
 
 
 template<class R, class VF, class BS>
-Geometry::ListSet< Geometry::Rectangle<R> >
+Geometry::ListSet< Rectangle<R> >
 Evaluation::IntegratorBase<R,VF,BS>::integrate(const System::VectorFieldInterface<R>& vector_field, 
-                                               const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set,
+                                               const Geometry::ListSet< Rectangle<R> >& initial_set,
                                                const time_type& time) const
 {
   ARIADNE_LOG(2,"ListSet<Rectangle> Integrator::integrate(VectorFieldInterface vector_field, ListSet<Rectangle> initial_set, Time time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
-  Geometry::ListSet< Geometry::Rectangle<R> > result;
-  const VectorFieldInterface& vf=dynamic_cast<const VectorFieldInterface&>(vector_field);
-  ListSet ils=initial_set;
-  ListSet fls=this->lower_integrate(vf,ils,time);
-  for(typename ListSet::const_iterator bs_iter=fls.begin();
+  ListSet< Rectangle<R> > result;
+  const VF& vf=dynamic_cast<const VF&>(vector_field);
+  ListSet<BS> ils=initial_set;
+  ListSet<BS> fls=this->lower_integrate(vf,ils,time);
+  for(typename ListSet<BS>::const_iterator bs_iter=fls.begin();
       bs_iter!=fls.end(); ++bs_iter)
   {
     result.adjoin(bs_iter->bounding_box());
@@ -886,19 +914,19 @@ Evaluation::IntegratorBase<R,VF,BS>::integrate(const System::VectorFieldInterfac
 
 
 template<class R, class VF, class BS>
-Geometry::ListSet< Geometry::Rectangle<R> >
+Geometry::ListSet< Rectangle<R> >
 Evaluation::IntegratorBase<R,VF,BS>::reach(const System::VectorFieldInterface<R>& vector_field, 
-                                           const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set,
+                                           const Geometry::ListSet< Rectangle<R> >& initial_set,
                                            const time_type& time) const
 {
   ARIADNE_LOG(2,"ListSet<Rectangle> Integrator::integrate(VectorFieldInterface vector_field, ListSet<Rectangle> initial_set, Time time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
 
-  Geometry::ListSet< Geometry::Rectangle<R> > result;
-  const VectorFieldInterface& vf=dynamic_cast<const VectorFieldInterface&>(vector_field);
-  ListSet ils=initial_set;
-  ListSet rls=this->lower_reach(vf,ils,time);
-  for(typename ListSet::const_iterator bs_iter=rls.begin();
+  ListSet< Rectangle<R> > result;
+  const VF& vf=dynamic_cast<const VF&>(vector_field);
+  ListSet<BS> ils=initial_set;
+  ListSet<BS> rls=this->lower_reach(vf,ils,time);
+  for(typename ListSet<BS>::const_iterator bs_iter=rls.begin();
       bs_iter!=rls.end(); ++bs_iter)
   {
     result.adjoin(bs_iter->bounding_box());
@@ -917,7 +945,7 @@ Evaluation::IntegratorBase<R,VF,BS>::integrate(const System::VectorFieldInterfac
 {
   ARIADNE_LOG(2,"GridMaskSet Integrator::integrate(VectorFieldInterface vector_field, GridMaskSet initial_set, GridMaskSet bounding_set, Time time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
-  const VectorFieldInterface& vf=dynamic_cast<const VectorFieldInterface&>(vector_field);
+  const VF& vf=dynamic_cast<const VF&>(vector_field);
   
   ARIADNE_CHECK_SAME_GRID(initial_set,bounding_set,"GridMaskSet IntegratorBase::integrate(VectorFieldInterface,GridMaskSet,GridMaskSet,Time)");
   using namespace System;
@@ -930,13 +958,13 @@ Evaluation::IntegratorBase<R,VF,BS>::integrate(const System::VectorFieldInterfac
   
   time_type step_size=this->maximum_step_size();
   
-  Rectangle bb=bounding_set.bounding_box();
+  Rectangle<R> bb=bounding_set.bounding_box();
   
-  GridMaskSet result(bounding_set);
+  GridMaskSet<R> result(bounding_set);
   result.clear();
   
-  Rectangle tmp_rectangle;
-  BasicSet tmp_basic_set;
+  Rectangle<R> tmp_rectangle;
+  BS tmp_basic_set;
   
   time_type t=time;
   time_type h=step_size;
@@ -945,9 +973,9 @@ Evaluation::IntegratorBase<R,VF,BS>::integrate(const System::VectorFieldInterfac
   
   R spacial_tolerance=2;
   
-  ListSet start_set;
-  ListSet finish_set;
-  for(typename GridMaskSet::const_iterator iter=initial_set.begin(); iter!=initial_set.end(); ++iter) {
+  ListSet<BS> start_set;
+  ListSet<BS> finish_set;
+  for(typename GridMaskSet<R>::const_iterator iter=initial_set.begin(); iter!=initial_set.end(); ++iter) {
     tmp_rectangle=*iter;
     tmp_basic_set=tmp_rectangle;
     start_set.adjoin(tmp_basic_set);
@@ -956,16 +984,16 @@ Evaluation::IntegratorBase<R,VF,BS>::integrate(const System::VectorFieldInterfac
   while(t!=0) {
     if(verbosity > 6) { std::clog << "time left=" << t << "  stepsize=" << h << "  sets in list=" << start_set.size() << "\n"; }
     h=min(t,h);
-    for(typename ListSet::const_iterator iter=start_set.begin(); iter!=start_set.end(); ++iter) {
-      BasicSet p(*iter);
+    for(typename ListSet<BS>::const_iterator iter=start_set.begin(); iter!=start_set.end(); ++iter) {
+      BS p(*iter);
       p=this->integrate(vf,p,h);
       finish_set.adjoin(p);
     }
     start_set.clear();
-    GridMaskSet mask_set(bounding_set);
+    GridMaskSet<R> mask_set(bounding_set);
     mask_set.clear();
-    for(typename ListSet::const_iterator iter=finish_set.begin(); iter!=finish_set.end(); ++iter) {
-      const BasicSet& p=*iter;
+    for(typename ListSet<BS>::const_iterator iter=finish_set.begin(); iter!=finish_set.end(); ++iter) {
+      const BS& p=*iter;
       if(p.radius()>spacial_tolerance) {
         if(verbosity > 6) { std::clog << "Splitting, radius=" << p.radius() << "\n" << p << "\n"; }
         mask_set.adjoin_outer_approximation(p);
@@ -974,7 +1002,7 @@ Evaluation::IntegratorBase<R,VF,BS>::integrate(const System::VectorFieldInterfac
         start_set.adjoin(p);
       }
     }
-    for(typename GridMaskSet::const_iterator iter=mask_set.begin(); iter!=mask_set.end(); ++iter) {
+    for(typename GridMaskSet<R>::const_iterator iter=mask_set.begin(); iter!=mask_set.end(); ++iter) {
       tmp_rectangle=*iter;
       tmp_basic_set=tmp_rectangle;
       start_set.adjoin(tmp_basic_set);
@@ -983,8 +1011,8 @@ Evaluation::IntegratorBase<R,VF,BS>::integrate(const System::VectorFieldInterfac
     t-=h;
   }
   
-  for(typename ListSet::const_iterator iter=start_set.begin(); iter!=start_set.end(); ++iter) {
-    const BasicSet& bs=*iter;
+  for(typename ListSet<BS>::const_iterator iter=start_set.begin(); iter!=start_set.end(); ++iter) {
+    const BS& bs=*iter;
     result.adjoin_outer_approximation(bs);
   }
   return result;
@@ -1005,25 +1033,25 @@ Evaluation::IntegratorBase<R,VF,BS>::reach(const System::VectorFieldInterface<R>
   
   ARIADNE_LOG(2,"GridMaskSet Integrator::reach(VectorFieldInterface vector_field, GridMaskSet initial_set, GridMaskSet bounding_set, Time time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
-  typedef typename GridMaskSet::const_iterator gms_const_iterator;
-  typedef typename ListSet::const_iterator ls_const_iterator;
+  typedef typename GridMaskSet<R>::const_iterator gms_const_iterator;
+  typedef typename ListSet<BS>::const_iterator ls_const_iterator;
   ARIADNE_CHECK_BOUNDED(initial_set,"GridMaskSet IntegratorBase::reach(VectorFieldInterface,GridMaskSet,GridMaskSet,Time)");
   ARIADNE_CHECK_BOUNDED(bounding_set,"GridMaskSet IntegratorBase::reach(VectorFieldInterface,GridMaskSet,GridMaskSet,Time)");
-  const VectorFieldInterface& vf=dynamic_cast<const VectorFieldInterface&>(vector_field);
+  const VF& vf=dynamic_cast<const VF&>(vector_field);
   
   if(!subset(initial_set,bounding_set)) {
     throw std::runtime_error("GridMaskSet IntegratorBase::reach(VectorFieldInterface,GridMaskSet,GridMaskSet,Time): Initial set must be subset of bounding set");
   }
   
-  const GridMaskSet& is=initial_set;
-  const Rectangle bb=bounding_set.bounding_box();
+  const GridMaskSet<R>& is=initial_set;
+  const Rectangle<R> bb=bounding_set.bounding_box();
   
-  GridMaskSet result(bounding_set);
+  GridMaskSet<R> result(bounding_set);
   result.clear();
   
-  GridMaskSet stored(result);
-  GridMaskSet found(result);
-  GridMaskSet image(result);
+  GridMaskSet<R> stored(result);
+  GridMaskSet<R> found(result);
+  GridMaskSet<R> image(result);
   found.adjoin(is);
   
   int steps=int_up<int>(time_type(time/this->lock_to_grid_time()));
@@ -1035,18 +1063,18 @@ Evaluation::IntegratorBase<R,VF,BS>::reach(const System::VectorFieldInterface<R>
     found=difference(found,stored);
     stored.adjoin(found);
     image.clear();
-    GridMaskSet image=this->integrate(vf,found,bounding_set,time_step);
+    GridMaskSet<R> image=this->integrate(vf,found,bounding_set,time_step);
     found=image;
   }
   
-  ListSet input_list;
-  ListSet output_list;
+  ListSet<BS> input_list;
+  ListSet<BS> output_list;
   for(gms_const_iterator iter=stored.begin(); iter!=stored.end(); ++iter) {
-    input_list.adjoin(BasicSet(Rectangle(*iter)));
+    input_list.adjoin(BS(Rectangle<R>(*iter)));
   }
   output_list=this->upper_reach(vf,input_list,time_step);
   for(ls_const_iterator iter=output_list.begin(); iter!=output_list.end(); ++iter) {
-    const BasicSet& fz=*iter;
+    const BS& fz=*iter;
     result.adjoin_outer_approximation(fz);
   }
   return result;
@@ -1063,24 +1091,24 @@ Evaluation::IntegratorBase<R,VF,BS>::chainreach(const System::VectorFieldInterfa
   ARIADNE_LOG(2,"GridMaskSet Integrator::chainreach(VectorFieldInterface vector_field, GridMaskSet initial_set, GridMaskSet bounding_set)\n");
   ARIADNE_LOG(5,"vector_field="<<vector_field<<"\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
-  typedef typename GridCellListSet::const_iterator gcls_const_iterator;
-  typedef typename GridMaskSet::const_iterator gms_const_iterator;
-  typedef typename ListSet::const_iterator ls_const_iterator;
+  typedef typename GridCellListSet<R>::const_iterator gcls_const_iterator;
+  typedef typename GridMaskSet<R>::const_iterator gms_const_iterator;
+  typedef typename ListSet<BS>::const_iterator ls_const_iterator;
   ARIADNE_CHECK_BOUNDED(initial_set,"GridMaskSet IntegratorBase::chainreach(VectorFieldInterface,GridMaskSet,GridMaskSet)");
   ARIADNE_CHECK_BOUNDED(bounding_set,"GridMaskSet IntegratorBase::chainreach(VectorFieldInterface,GridMaskSet,GridMaskSet)");
-  const VectorFieldInterface& vf=dynamic_cast<const VectorFieldInterface&>(vector_field);
+  const VF& vf=dynamic_cast<const VF&>(vector_field);
   
   if(!subset(initial_set,bounding_set)) {
     throw std::runtime_error("GridMaskSet IntegratorBase::chainreach(VectorFieldInterface,GridMaskSet,GridMaskSet): Initial set must be subset of bounding set");
   }
   
-  const GridMaskSet& is=initial_set;
-  const Rectangle bb=bounding_set.bounding_box();
+  const GridMaskSet<R>& is=initial_set;
+  const Rectangle<R> bb=bounding_set.bounding_box();
   
-  GridMaskSet result(initial_set);
+  GridMaskSet<R> result(initial_set);
   result.clear();
-  GridCellListSet image(initial_set.grid());
-  GridCellListSet found(initial_set.grid());
+  GridCellListSet<R> image(initial_set.grid());
+  GridCellListSet<R> found(initial_set.grid());
   found.adjoin(is);
   
   time_type step_size=this->maximum_step_size();
@@ -1096,17 +1124,17 @@ Evaluation::IntegratorBase<R,VF,BS>::chainreach(const System::VectorFieldInterfa
     result.adjoin(found);
     image.clear();
     uint size=0;
-    ListSet basic_set_list;
+    ListSet<BS> basic_set_list;
     for(gcls_const_iterator iter=found.begin(); iter!=found.end(); ++iter) {
       ++size;
-      Rectangle r=*iter;
-      BasicSet z(r);
+      Rectangle<R> r=*iter;
+      BS z(r);
       basic_set_list.adjoin(z);
     }
     basic_set_list=this->upper_integrate(vf,basic_set_list,time_step);
     if(verbosity>5) { std::clog << "new basic sets " << basic_set_list << std::endl; }
     for(ls_const_iterator iter=basic_set_list.begin(); iter!=basic_set_list.end(); ++iter) {
-      const BasicSet& fp=*iter;
+      const BS& fp=*iter;
       if(!disjoint(fp.bounding_box(),bounding_set)) {
         image.adjoin_outer_approximation(fp);
       } 
@@ -1117,15 +1145,15 @@ Evaluation::IntegratorBase<R,VF,BS>::chainreach(const System::VectorFieldInterfa
   if(verbosity>5) { std::clog << "Found " << result.size() << " cells, " << std::endl; }
   
   if(verbosity>4) { std::clog << "Beginning reachability phase" << std::endl; }
-  ListSet reach_basic_set_list;
+  ListSet<BS> reach_basic_set_list;
   for(gms_const_iterator iter=result.begin(); iter!=result.end(); ++iter) {
-    Rectangle r=*iter;
-    BasicSet z(r);
+    Rectangle<R> r=*iter;
+    BS z(r);
     reach_basic_set_list.adjoin(z);
   }
   reach_basic_set_list=this->upper_reach(vf,reach_basic_set_list,time_step);
   for(ls_const_iterator iter=reach_basic_set_list.begin(); iter!=reach_basic_set_list.end(); ++iter) {
-    BasicSet fz=*iter;
+    BS fz=*iter;
     if(!disjoint(fz.bounding_box(),bounding_set)) {
       result.adjoin_outer_approximation(fz);
     }
@@ -1150,19 +1178,19 @@ Evaluation::IntegratorBase<R,VF,BS>::viable(const System::VectorFieldInterface<R
   typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
   ARIADNE_CHECK_BOUNDED(bounding_set,"Integrator<R>::viable(VectorFieldInterface,GridMaskSet)");
   
-  const VectorFieldInterface& vf=dynamic_cast<const VectorFieldInterface&>(vector_field);
-  const Grid& g=bounding_set.grid();
+  const VF& vf=dynamic_cast<const VF&>(vector_field);
+  const Grid<R>& g=bounding_set.grid();
   Combinatoric::LatticeBlock bd=bounding_set.block();
   GridBlock<R> bb(g,bd);
-  GridMaskSet result(g,bd);
-  GridCellListSet unsafe=bounding_set;
+  GridMaskSet<R> result(g,bd);
+  GridCellListSet<R> unsafe=bounding_set;
   
-  Rectangle r(g.dimension());
-  Rectangle fr(g.dimension());
+  Rectangle<R> r(g.dimension());
+  Rectangle<R> fr(g.dimension());
   GridBlock<R> fgb(g);
   BS bs(g.dimension());
   BS fbs(g.dimension());
-  GridCellListSet fgcls(g);
+  GridCellListSet<R> fgcls(g);
   
   // FIXME: Reduct integration time properly
   time_type h=1;
@@ -1206,23 +1234,23 @@ Evaluation::IntegratorBase<R,VF,BS>::verify(const System::VectorFieldInterface<R
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   ARIADNE_LOG(3,"safe_set="<<safe_set<<"\n");
 
-  typedef typename GridCellListSet::const_iterator gcls_const_iterator;
-  typedef typename ListSet::const_iterator ls_const_iterator;
+  typedef typename GridCellListSet<R>::const_iterator gcls_const_iterator;
+  typedef typename ListSet<BS>::const_iterator ls_const_iterator;
   ARIADNE_CHECK_BOUNDED(initial_set,"tribool IntegratorBase::verify(VectorFieldInterface,GridMaskSet,GridMaskSet)");
   ARIADNE_CHECK_BOUNDED(safe_set,"tribool IntegratorBase::verify(VectorFieldInterface,GridMaskSet,GridMaskSet)");
-  const VectorFieldInterface& vf=dynamic_cast<const VectorFieldInterface&>(vector_field);
+  const VF& vf=dynamic_cast<const VF&>(vector_field);
   
   if(!subset(initial_set,safe_set)) {
     return false;
   }
   
-  const GridMaskSet& is=initial_set;
-  const Rectangle bb=safe_set.bounding_box();
+  const GridMaskSet<R>& is=initial_set;
+  const Rectangle<R> bb=safe_set.bounding_box();
   
-  GridMaskSet chainreach(is);
-  GridCellListSet found(is.grid());
-  GridCellListSet image(is.grid());
-  GridCellListSet cellimage(is.grid());
+  GridMaskSet<R> chainreach(is);
+  GridCellListSet<R> found(is.grid());
+  GridCellListSet<R> image(is.grid());
+  GridCellListSet<R> cellimage(is.grid());
   found.adjoin(is);
   
   time_type step_size=this->maximum_step_size();
@@ -1233,16 +1261,16 @@ Evaluation::IntegratorBase<R,VF,BS>::verify(const System::VectorFieldInterface<R
     chainreach.adjoin(found);
     image.clear();
     uint size=0;
-    ListSet basic_set_list;
+    ListSet<BS> basic_set_list;
     for(gcls_const_iterator iter=found.begin(); iter!=found.end(); ++iter) {
       ++size;
-      Rectangle r=*iter;
-      BasicSet pp(r);
+      Rectangle<R> r=*iter;
+      BS pp(r);
       basic_set_list.adjoin(pp);
     }
     basic_set_list=this->upper_integrate(vf,basic_set_list,time_step);
     for(ls_const_iterator iter=basic_set_list.begin(); iter!=basic_set_list.end(); ++iter) {
-      const BasicSet& fp=*iter;
+      const BS& fp=*iter;
       cellimage.adjoin_outer_approximation(fp);
       if(!subset(cellimage,safe_set)) {
         return false;

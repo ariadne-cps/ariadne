@@ -42,17 +42,6 @@
 namespace Ariadne {  
   namespace Geometry {
 
-    template<class R, class T> inline
-    const SetInterface<R>* clone(const T* t) {
-      return t.clone();
-    }
-
-    template<class S, class T> inline
-    const S* clone(const T* t) {
-      return new S(t); 
-    }
-
-
     /*! \brief The type identifying a discrete locatation of a hybrid system. */
     typedef id_type location_type;
 
@@ -81,6 +70,64 @@ namespace Ariadne {
       boost::shared_ptr<S> _set_ptr;
     };
 
+
+
+    /*! \ingroup HybridSet
+     *  \brief A hybrid set comprising of a single basic set for in a discrete mode.
+     */
+    template<class BS> 
+    class HybridBasicSet 
+    {
+      typedef typename BS::real_type R;
+     public:
+      typedef typename BS::real_type real_type;
+
+      template<class A> HybridBasicSet(const id_type& q, const A& a)
+        : _discrete_state(q), _continuous_state_set(a) { }
+      const id_type& discrete_state() const { return this->_discrete_state; }
+      const BS& continuous_state_set() const { return this->_continuous_state_set; } 
+      
+      bool operator==(const HybridBasicSet<BS>& other) const { 
+        return this->_discrete_state==other._discrete_state 
+          && this->_continuous_state_set==other._continuous_state_set; }
+      bool operator!=(const HybridBasicSet<BS>& other) const { return !(*this==other); }
+     private:
+      id_type _discrete_state;
+      BS _continuous_state_set;
+    };
+  
+
+    /*! \ingroup HybridSet
+     *  \brief A hybrid set comprising of a single basic set for in a discrete mode.
+     */
+    template<class BS> 
+    class HybridTimedBasicSet 
+    {
+      typedef typename BS::real_type R;
+     public:
+      typedef typename BS::real_type real_type;
+
+      template<class A> HybridTimedBasicSet(const time_type& t, const discrete_time_type& n, const id_type& q, const A& a)
+        : _time(t), _steps(n), _discrete_state(q), _continuous_state_set(a) { }
+      const time_type& time() const { return this->_time; }
+      const discrete_time_type& steps() const { return this->_steps; }
+      const id_type& discrete_state() const { return this->_discrete_state; }
+      const BS& continuous_state_set() const { return this->_continuous_state_set; } 
+
+      bool operator==(const HybridTimedBasicSet<BS>& other) const { 
+        return this->_time==other._time
+          && this->_steps==other._steps
+          && this->_discrete_state==other._discrete_state 
+          && this->_continuous_state_set==other._continuous_state_set; }
+      bool operator!=(const HybridTimedBasicSet<BS>& other) const { return !(*this==other); }
+      bool operator<(const HybridTimedBasicSet<BS>& other) const { return this->_time<other._time; }
+     private:
+      time_type _time;
+      discrete_time_type _steps;
+      id_type _discrete_state;
+      BS _continuous_state_set;
+    };
+  
 
 
     /*! \ingroup HybridSet
@@ -140,6 +187,8 @@ namespace Ariadne {
       
       /*! \brief Adjoin the set \a s to location \a q. */
       template<class S1> void adjoin(location_type q, const S1& s);
+      /*! \brief Adjoin the set \a s to location \a q. */
+      template<class S1> void adjoin(const HybridBasicSet<S1>& s);
       /*! \brief Adjoin another hybrid set. */
       template<class S1> void adjoin(const HybridSetBase<S1>& hs);
       /*! \brief Restrict to hybrid set. */
@@ -254,34 +303,6 @@ namespace Ariadne {
         : HybridSetBase< ListSet<BS> >(hls) { }
     };
 
-
-
-    /*! \ingroup HybridSet
-     *  \brief A hybrid set comprising of a single basic set for in a discrete mode.
-     */
-    template<class S> 
-    class HybridBasicSet 
-    {
-      typedef typename S::real_type R;
-     public:
-      typedef typename S::real_type real_type;
-
-      template<class A> HybridBasicSet(const id_type& q, const A& a)
-        : _discrete_state(q), _continuous_state_set(a) { }
-      const id_type& discrete_state() const { return this->_discrete_state; }
-      const S& continuous_state_set() const { return this->_continuous_state_set; } 
-      
-      R radius() const { return this->_continuous_state_set.radius(); }
-
-      bool operator==(const HybridBasicSet& other) const { 
-        return this->_discrete_state==other._discrete_state 
-          && this->_continuous_state_set==other._continuous_state_set; }
-      bool operator!=(const HybridBasicSet& other) const { return !(*this==other); }
-     private:
-      id_type _discrete_state;
-      S _continuous_state_set;
-    };
-  
 
 
     /*! \ingroup HybridSet

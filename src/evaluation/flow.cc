@@ -1,8 +1,8 @@
 /***************************************************************************
- *            evaluation/declarations.h
+ *            flow.cc
  *
- *  Copyright  2006-7  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2007  Pieter Collins
+ *  pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -20,23 +20,23 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-/*! \file evaluation/declarations.h
- *  \brief Forward declarations of classes in the Evaluation module.
- */
 
-#ifndef ARIADNE_EVALUATION_DECLARATIONS_H
-#define ARIADNE_EVALUATION_DECLARATIONS_H
+#include "numeric/float.h"
 
-namespace Ariadne { 
+#include "evaluation/flow.h"
+#include "evaluation/flow.code.h"
+
+namespace Ariadne {
   namespace Evaluation {
-    template<class R> class Solver;
-    template<class R> class Applicator;
-    template<class R> class Integrator;
-    template<class R> class HybridEvolver;
+    using namespace Numeric;
 
-    template<class R> class Flow;
+#ifdef ENABLE_FLOAT64
+    template class Flow<Float64>;
+#endif
+  
+#ifdef ENABLE_FLOATMP
+    template class Flow<FloatMP>;
+#endif
+
   }
 }
-
-#endif /* ARIADNE_EVALUATION_DECLARATIONS_H */

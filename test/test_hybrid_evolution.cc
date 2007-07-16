@@ -241,6 +241,7 @@ int test_hybrid_evolution()
 template<class R>
 int test_constraint_hybrid_evolution() 
 {  
+  assert(false);
   set_hybrid_evolver_verbosity(9);
   
   typedef Interval<R> I;
@@ -249,7 +250,7 @@ int test_constraint_hybrid_evolution()
   id_type mode2_id = 2;
   id_type event12_id = 3;
 
-  AffineVectorField<R> dynamic1(Matrix<R>("[-2,-1;1,-2]"),Vector<R>("[-1,0]"));
+  AffineVectorField<R> dynamic1(Matrix<R>("[-2,-1;1,-2]"),Vector<R>("[4,0]"));
   AffineVectorField<R> dynamic2(Matrix<R>("[-2,-1; 1,-2]"),Vector<R>("[1,0]"));
   AffineMap<R> reset12(Matrix<R>("[1,0;0,1]"),Vector<R>("[0,0]"));
 
@@ -262,8 +263,9 @@ int test_constraint_hybrid_evolution()
   automaton.new_forced_transition(event12_id,mode1_id,mode2_id,reset12,guard12);
 
   id_type initial_discrete_mode = mode1_id;
-  Zonotope<I,I> initial_basic_set(Point<R>("(0,0)"),Matrix<R>("[0.1,0.0; 0.0,0.1]"));
-  HybridBasicSet< Zonotope<I,I> > initial_set(initial_discrete_mode,initial_basic_set);
+  Zonotope<I,I> initial_basic_set(Point<R>("(0.5,0)"),Matrix<R>("[0.1,0.0; 0.0,0.1]"));
+  HybridListSet< Zonotope<I,I> > initial_set(automaton.locations());
+  initial_set.adjoin(initial_discrete_mode,initial_basic_set);
   
   time_type maximum_step_size=0.125;
   time_type lock_to_grid_time=0.25;
@@ -279,10 +281,19 @@ int test_constraint_hybrid_evolution()
   cout << "automaton = " << flush;
   cout << automaton << endl << endl;
 
-  HybridListSet< Zonotope<I,I> > evolve_set = hybrid_evolver.upper_evolve(automaton,initial_set,t,n);
+  HybridListSet< Zonotope<I,I> > evolve_set1 = hybrid_evolver.upper_evolve(automaton,initial_set,t,n);
+  HybridListSet< Zonotope<I,I> > evolve_set2 = hybrid_evolver.upper_evolve(automaton,evolve_set1,t,n);
   cout << "evolved_set = " << flush;
 
-  cout << evolve_set << endl;
+  cout << evolve_set1 << endl;
+
+  epsfstream eps;
+  eps.open("test_hybrid_evolution-3.eps",Rectangle<R>("[-2,2]x[-2,2]"));
+  eps << evolve_set1[mode1_id];
+  eps << evolve_set2[mode1_id];
+  eps.set_fill_colour("yellow");
+  eps << initial_set[mode1_id];
+  eps.close();
 
   return 0;
 }

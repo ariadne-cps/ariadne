@@ -33,7 +33,7 @@
 
 \section Introduction
 
-Ariadne currently supports three different real number types, \a \ref Float64, \a FloatMP and \a Rational.
+Ariadne currently supports three different real number types, \a Float64, \a FloatMP and \a Rational.
 The \a Float64 type is a \em finite-precision type, the \a FloatMP type is a \em multiple-precision type
 and \a Rational is an \em exact number type. Future realeases will also support an \em arbitrary-precision
 real number type \a Real.

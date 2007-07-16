@@ -66,28 +66,54 @@ namespace Ariadne {
       AffineIntegrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_set_radius);
 
      public:
-      /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope. */
-      virtual Geometry::Zonotope<I> integration_step(const System::VectorFieldInterface<R>&,
-                                                     const Geometry::Zonotope<I>&,
-                                                     time_type&) const;
 
-      
-      /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. */
-      virtual Geometry::Zonotope<I> reachability_step(const System::VectorFieldInterface<R>&,
-                                                      const Geometry::Zonotope<I>&,
-                                                      time_type& step_size) const;
-     public:
+      /*! \brief Integrate a basic set for within a bounding set. */
+      virtual Geometry::Point<I> bounded_flow(const System::AffineVectorField<R>& vf,
+                                              const Geometry::Point<I>& p,
+                                              const Geometry::Rectangle<R>& bb,
+                                              const time_type&) const;
+     
+      /*! \brief Integrate a basic set for within a bounding set. */
+      virtual LinearAlgebra::Matrix<I> bounded_flow_jacobian(const System::AffineVectorField<R>& vf,
+                                                             const Geometry::Point<I>& p,
+                                                             const Geometry::Rectangle<R>& bb,
+                                                             const time_type&) const;
+     
+
+
       /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope. */
-      virtual Geometry::Zonotope<I> integration_step(const System::AffineVectorField<R>&,
-                                                     const Geometry::Zonotope<I>&,
-                                                     time_type&) const;
+      virtual Geometry::Zonotope<I> bounded_integration_step(const System::AffineVectorField<R>& vector_field,
+                                                             const Geometry::Zonotope<I>& initial_set,
+                                                             const Geometry::Rectangle<R>& bounding_set,
+                                                             const time_type& step_size) const;
 
       
       /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. 
        */
-      virtual Geometry::Zonotope<I> reachability_step(const System::AffineVectorField<R>&,
-                                                      const Geometry::Zonotope<I>&,
+      virtual Geometry::Zonotope<I> bounded_reachability_step(const System::AffineVectorField<R>& vector_field,
+                                                              const Geometry::Zonotope<I>& initial_set, 
+                                                              const Geometry::Rectangle<R>& bounding_set,
+                                                              const time_type& step_size) const;
+
+
+      /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope. 
+      *
+      *  Overrides method in Integrator since we don't use the bounding set. 
+      */
+      virtual Geometry::Zonotope<I> integration_step(const System::AffineVectorField<R>& vector_field,
+                                                     const Geometry::Zonotope<I>& initial_set,
+                                                     time_type& step_size) const;
+
+
+      /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size.
+       *
+       *  Overrides method in Integrator since we don't use the bounding set. 
+       */
+      virtual Geometry::Zonotope<I> reachability_step(const System::AffineVectorField<R>& vector_field,
+                                                      const Geometry::Zonotope<I>& initial_set,
                                                       time_type& step_size) const;
+
+
 
      };
 

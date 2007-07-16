@@ -251,6 +251,14 @@ Geometry::HybridSetBase<S>::adjoin(location_type q, const T& t) {
 }
 
 
+template<class S> template<class T> inline  
+void 
+Geometry::HybridSetBase<S>::adjoin(const HybridBasicSet<T>& hbs) {
+  ARIADNE_CHECK_LOCATION(*this,hbs.discrete_state(),"HybridSet<S>::adjoin<T>(location_type q, T t)");
+  (*this)[hbs.discrete_state()].adjoin(hbs.continuous_state_set());
+}
+
+
 template<class S> template<class S1> inline  
 void 
 Geometry::HybridSetBase<S>::adjoin(const HybridSetBase<S1>& hs) {

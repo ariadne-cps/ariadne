@@ -69,7 +69,7 @@ The standard representations \f$\theta_<\f$, \f$\psi_<\f$ and \f$\kappa_>\f$ cor
  - lower-approximation \f$A_{i}\subset N_{\epsilon_i}(A_{j})\f$ for \f$i<j\f$ and \f$A_n\subset N_{\epsilon_n}(B)\f$ is equivalent to \f$\psi_<\f$ for \f$B\in\mathcal{A}(X)\f$.
  - outer-approximation \f$A_{i+1}\subset A_{i}\f$ and \f$C\subset A_n^\circ\f$ is equivalent to \f$\kappa_>\f$ for \f$C\in\mathcal{K}(X)\f$.
 
-Combining lower-approximation and \outer-approximation, we obtain an approximation corresponding to the standard representation \f$\kappa=\psi_<\vee\kappa_>\f$ of compact sets:
+Combining lower-approximation and outer-approximation, we obtain an approximation corresponding to the standard representation \f$\kappa=\psi_<\vee\kappa_>\f$ of compact sets:
  - effective-approximation \f$C\subset A^\circ_{n} \subset A_{n} \subset N_{\epsilon_n}(C)\f$ for \f$C\in\mathcal{K}(X)\f$.
 
 \section basicset Basic sets.

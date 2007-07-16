@@ -24,16 +24,24 @@
 #ifndef ARIADNE_TIMED_SET_H
 #define ARIADNE_TIMED_SET_H
 
-#include "../base/types.h"
-
 namespace Ariadne {  
   namespace Geometry {
 
     /*! \brief A (basic) set with an associated time value. */
-    template<class S> 
+    template<class T, class S> 
     class TimedSet 
     {
      public:
+      /*! \brief The type used to record the time. */
+      typedef T time_type;
+      
+      /*! \brief The type used for the set. */
+      typedef S set_type;
+      
+      /*! \brief Constructor. */
+      TimedSet(const S& s)
+        : _time(0), _set(s) { }
+
       /*! \brief Constructor. */
       template<class A>
       TimedSet(const time_type& t, const A& a)
@@ -45,19 +53,19 @@ namespace Ariadne {
         : _time(t), _set(a0,a1) { }
 
       /*! \brief The time associated to the set. */
-      const time_type& time() const { return _time; }
+      const T& time() const { return this->_time; }
       /*! \brief The untimed set. */
-      const S& set() const { return _set; } 
+      const S& set() const { return this->_set; } 
       
       /*! \brief Equality operator. */
-      bool operator==(const TimedSet<S>& other) const { 
+      bool operator==(const TimedSet<T,S>& other) const { 
         return this->_time == other._time && this->_set==other._set; }
       /*! \brief Inequality operator. */
-      bool operator!=(const TimedSet<S>& other) const { return !(*this==other); }
+      bool operator!=(const TimedSet<T,S>& other) const { return !(*this==other); }
       /*! \brief Comparison operator by time value. */
-      bool operator<(const TimedSet<S>& other) const { return this->_time <= other._time; }
+      bool operator<(const TimedSet<T,S>& other) const { return this->_time < other._time; }
      private:
-      time_type _time;
+      T _time;
       S _set;
     };
   

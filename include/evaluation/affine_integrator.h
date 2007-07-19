@@ -65,6 +65,9 @@ namespace Ariadne {
       /*! \brief Constructor. */
       AffineIntegrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_set_radius);
 
+      /*! \brief Cloning operator. */
+      virtual AffineIntegrator<R>* clone() const;
+
      public:
 
       /*! \brief Integrate a basic set for within a bounding set. */

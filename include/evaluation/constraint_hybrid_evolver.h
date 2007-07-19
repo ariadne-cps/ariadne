@@ -78,9 +78,18 @@ namespace Ariadne {
       typedef typename Geometry::Zonotope<Numeric::Interval<R> > continuous_basic_set_type;
       typedef Geometry::HybridBasicSet<continuous_basic_set_type> hybrid_basic_set_type;
       typedef Geometry::HybridTimedBasicSet<continuous_basic_set_type> timed_set_type;
+      typedef Geometry::HybridListSet<continuous_basic_set_type> hybrid_list_set_type;
+      typedef Geometry::ConstraintInterface<R> constraint_type;
+      typedef Geometry::Rectangle<R> bounding_box_type;
 
       typedef boost::shared_ptr< const Geometry::ConstraintInterface<R> > constraint_const_pointer;
      public:
+
+      /*! \brief The type used for real numbers. */
+      typedef R real_type;
+
+      /*! \brief Copy constructor. */
+      ConstraintHybridEvolver(const ConstraintHybridEvolver<R>& evolver);
 
       /*! \brief Construct from an applicator and an integrator. */
       ConstraintHybridEvolver(Applicator<R>& applicator, Integrator<R>& integrator);
@@ -90,27 +99,41 @@ namespace Ariadne {
 
 
       //@{
+      //! \name Parameters controlling the evolution.
+      /*! \brief The maximum step size for integration. */
+      time_type maximum_step_size() const;
+      /*! \brief The maximum step size for integration. */
+      real_type maximum_basic_set_radius() const;
+
+      //@}
+
       //! \name Evolution steps.
       /*! \brief Compute the possible states reached by an unfored jump within time \a h.
        *
        * The generators are given by
        * \f[ D\Phi_2 \circ DF \circ D\Phi_1 G; \quad (D\Phi_i\circ DF \circ \dot{\Phi}_1 - \dot{\Phi}_2) (h/2) \f]
        */
-      continuous_basic_set_type
-      unforced_jump(const System::VectorFieldInterface<R>& dynamic1,
-                    const System::VectorFieldInterface<R>& dynamic2,
-                    const System::MapInterface<R>& reset,
-                    const continuous_basic_set_type& basic_set,
-                    const Geometry::ConstraintInterface<R>& activation,
-                    const time_type& step_size);
+      std::vector<timed_set_type>
+      forced_jump(const transition_type& transition,
+                  const timed_set_type& initial_set,
+                  const bounding_box_type& source_bounding_box,
+                  const time_type& step_size) const;
 
-      continuous_basic_set_type
-      forced_jump(const System::VectorFieldInterface<R>& dynamic1,
-                  const System::VectorFieldInterface<R>& dynamic2,
-                  const System::MapInterface<R>& reset,
-                  const continuous_basic_set_type& basic_set,
-                  const Geometry::ConstraintInterface<R>& guard,
-                  const time_type& step_size);
+      std::vector<timed_set_type>
+      unforced_jump(const transition_type& transition,
+                    const timed_set_type& basic_set,
+                    const bounding_box_type& source_bounding_box,
+                    const time_type& step_size) const;
+
+      timed_set_type
+      discrete_step(const transition_type& transition,
+                    const timed_set_type& initial_set) const;
+
+      timed_set_type
+      integration_step(const mode_type& mode,
+                       const timed_set_type& initial_set,
+                       const bounding_box_type& bounding_box,
+                       const time_type& step_size) const;
 
       std::vector<timed_set_type>
       lower_evolution_step(const System::ConstraintHybridAutomaton<R>& automaton, 
@@ -263,6 +286,13 @@ namespace Ariadne {
                      const Geometry::HybridGridMaskSet<R>& initial_set, 
                      const Geometry::HybridGridMaskSet<R>& safe_set);
       //@}
+
+      //@{ 
+      //! \name Traces and diagnostics
+      /*! \brief A trace of the basic sets covered in the last evolution. */
+      const std::vector<timed_set_type>& trace() const;
+      //@}
+
      private:
       // Evolve the hybrid automaton within \a domains starting from the initial_set without using discrete transitions (no checking). */
       Geometry::HybridGridMaskSet<R> _discrete_step(const System::ConstraintHybridAutomaton<R>& automaton, 
@@ -274,12 +304,18 @@ namespace Ariadne {
                                                             const Geometry::HybridGridMaskSet<R>& domain_set);
 
      private:
+
       // Initialisation and finalisation routines
-      std::vector<timed_set_type> working_sets(const Geometry::HybridListSet<continuous_basic_set_type>& set);
+      typedef std::vector<timed_set_type> working_sets_type; 
+      working_sets_type _compute_working_sets(const hybrid_list_set_type& set) const;
+      hybrid_list_set_type _compute_list_set(const working_sets_type& working_sets, const Geometry::HybridSpace& locations) const;
+
      private:
       Applicator<R>* _applicator;
       // FIXME: Allow arbitrary integrators
       IntegratorBase< R, System::VectorFieldInterface<R>, Geometry::Zonotope<I,I> >* _integrator;
+      
+      mutable std::vector<timed_set_type> _trace;
     };
 
 

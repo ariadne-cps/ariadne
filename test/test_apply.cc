@@ -63,6 +63,7 @@ test_apply()
   //set_evaluation_verbosity(0);
   typedef Interval<R> I;
 
+  double basic_set_radius=0.25;
   double grid_size=0.5;
   double bound=4.0;
 
@@ -85,7 +86,8 @@ test_apply()
   Zonotope<I,I> iz=Zonotope<I,I>(Rectangle<R>("[1.499,1.501]x[0.499,0.501]")); // initial state
   Polytope<R> pl=Polytope<R>(Rectangle<R>("[1.499,1.501]x[0.499,0.501]")); // initial state
   
-  Applicator<R> apply;
+  Applicator<R> apply(basic_set_radius,grid_size);
+
   apply.set_grid_size(grid_size);
   apply.set_maximum_basic_set_radius(4.0*grid_size);
   apply.set_default_bound(bound);

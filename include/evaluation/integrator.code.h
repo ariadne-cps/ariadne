@@ -168,6 +168,8 @@ Evaluation::IntegratorBase<R,VF,BS>::integration_step(const vector_field_type& v
   ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"Integrator::integration_step(VectorFieldInterface,BasicSet,Time)");
 
   bounding_set_type bounding_set=this->estimate_flow_bounds(vector_field,initial_set.bounding_box(),step_size);
+  bounding_set=this->refine_flow_bounds(vector_field,initial_set.bounding_box(),bounding_set,step_size);
+  bounding_set=this->refine_flow_bounds(vector_field,initial_set.bounding_box(),bounding_set,step_size);
   return this->bounded_integration_step(vector_field,initial_set,bounding_set,step_size);
 }
 
@@ -181,6 +183,8 @@ Evaluation::IntegratorBase<R,VF,BS>::reachability_step(const vector_field_type& 
   ARIADNE_LOG(2,"BasicSet Integrator::reachability_step(VectorFieldInterface,BasicSet,Time)\n");
   ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"Integrator::reachability_step(VectorFieldInterface,BasicSet,Time)");
   bounding_set_type bounding_set=this->estimate_flow_bounds(vector_field,initial_set.bounding_box(),step_size);
+  bounding_set=this->refine_flow_bounds(vector_field,initial_set.bounding_box(),bounding_set,step_size);
+  bounding_set=this->refine_flow_bounds(vector_field,initial_set.bounding_box(),bounding_set,step_size);
   return this->bounded_reachability_step(vector_field,initial_set,bounding_set,step_size);
 }
 
@@ -395,6 +399,16 @@ template<class R>
 Geometry::Rectangle<R>
 Evaluation::Integrator<R>::estimate_flow_bounds(const System::VectorFieldInterface<R>& vf,
                                                 const Geometry::Rectangle<R>& r,
+                                                const time_type& h) const
+{
+  return this->estimate_flow_bounds(vf,r,h,12);
+}
+
+  
+template<class R>
+Geometry::Rectangle<R>
+Evaluation::Integrator<R>::estimate_flow_bounds(const System::VectorFieldInterface<R>& vf,
+                                                const Geometry::Rectangle<R>& r,
                                                 const time_type& h,
                                                 const unsigned int& maximum_iterations) const
 {
@@ -494,10 +508,38 @@ Evaluation::Integrator<R>::refine_flow_bounds(const System::VectorFieldInterface
   const VectorFieldInterface<R>& vf=vector_field;
   Rectangle<R> rx=initial_set;
   Rectangle<R> b=estimated_bounds;
-  Numeric::Interval<R> h=step_size;
+  Interval<R> h=Interval<R>(0,step_size);
   
-  Rectangle<R> xb=rx+Numeric::Interval<R>(0,step_size)*vf(b);
-  Rectangle<R> xxb=rx+Numeric::Interval<R>(0,step_size)*vf(xb);
+  Rectangle<R> xb=rx+h*vf(b);
+  Rectangle<R> xxb=rx+h*vf(xb);
+  
+  if(verbosity>7) { std::clog << "new_bounds " << xxb << "," << xb << " vs old_bounds " << b << "  " << subset(xb,b) << std::endl; }
+  
+  return xb;
+}
+
+
+template<class R>
+Geometry::Rectangle<R>
+Evaluation::Integrator<R>::refine_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
+                                              const Geometry::Rectangle<R>& initial_set,
+                                              const Geometry::Rectangle<R>& estimated_bounds,
+                                              const Numeric::Interval<time_type>& step_sizes) const
+{
+  if(verbosity>6) { std::clog << "Integrator::refine_flow_bounds" << std::endl; }
+  
+  using namespace System;
+  using namespace Geometry;
+  using namespace LinearAlgebra;
+  using namespace Numeric;
+  const VectorFieldInterface<R>& vf=vector_field;
+  Rectangle<R> rx=initial_set;
+  Rectangle<R> b=estimated_bounds;
+
+  Interval<R> h=hull(Interval<R>(step_sizes),Interval<R>(0));
+
+  Rectangle<R> xb=rx+h*vf(b);
+  Rectangle<R> xxb=rx+h*vf(xb);
   
   if(verbosity>7) { std::clog << "new_bounds " << xxb << "," << xb << " vs old_bounds " << b << "  " << subset(xb,b) << std::endl; }
   
@@ -507,6 +549,22 @@ Evaluation::Integrator<R>::refine_flow_bounds(const System::VectorFieldInterface
 
 
 
+template<class R>
+LinearAlgebra::Matrix< Numeric::Interval<R> >
+Evaluation::Integrator<R>::estimate_flow_jacobian_bounds(const System::VectorFieldInterface<R>& vf,
+                                                         const Geometry::Rectangle<R>& b,
+                                                         const time_type& h) const
+{
+  dimension_type d=vf.dimension();
+  LinearAlgebra::Matrix<I> Df = vf.jacobian(b);
+  R l = LinearAlgebra::norm(Df).upper();
+  I e = Numeric::sub_up(Numeric::exp_up(mul_up(Numeric::Interval<R>(h).upper(),l)),R(1))*I(-1,1);
+
+  LinearAlgebra::Matrix<I> W = LinearAlgebra::Matrix<I>::identity(d)+e*LinearAlgebra::Matrix<I>::one(d,d);
+  return W;
+}
+
+  
 
 
 template<class R, class VF, class BS>

@@ -50,11 +50,14 @@ namespace Ariadne {
       R _grid_size;
      public:
       /*! \brief Default constructor. */
-      Applicator();
+      Applicator(const R& maximum_basic_set_radius, const R& grid_size);
       
       /*! \brief Compute the image of a basic set under a continuous function. */
       virtual ~Applicator();
 
+      /*! \brief Make a dynamically-allocated copy. */
+      Applicator<R>* clone() const;
+      
       //@}
 
 

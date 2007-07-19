@@ -86,6 +86,8 @@ namespace Ariadne {
         : _discrete_state(q), _continuous_state_set(a) { }
       const id_type& discrete_state() const { return this->_discrete_state; }
       const BS& continuous_state_set() const { return this->_continuous_state_set; } 
+
+      Rectangle<R> bounding_box() const { return this->_continuous_state_set->bounding_box(); }
       
       bool operator==(const HybridBasicSet<BS>& other) const { 
         return this->_discrete_state==other._discrete_state 
@@ -96,6 +98,12 @@ namespace Ariadne {
       BS _continuous_state_set;
     };
   
+
+    template<class BS> inline 
+    std::ostream& operator<<(std::ostream& os, const HybridBasicSet<BS>& hs) {
+      return os << ", q=" << hs.discrete_state() << ", s=" << hs.continuous_state_set() 
+                << "}";
+    }
 
     /*! \ingroup HybridSet
      *  \brief A hybrid set comprising of a single basic set for in a discrete mode.
@@ -114,6 +122,8 @@ namespace Ariadne {
       const id_type& discrete_state() const { return this->_discrete_state; }
       const BS& continuous_state_set() const { return this->_continuous_state_set; } 
 
+      Rectangle<R> bounding_box() const { return this->_continuous_state_set.bounding_box(); }
+
       bool operator==(const HybridTimedBasicSet<BS>& other) const { 
         return this->_time==other._time
           && this->_steps==other._steps
@@ -128,6 +138,13 @@ namespace Ariadne {
       BS _continuous_state_set;
     };
   
+    template<class BS> inline 
+    std::ostream& operator<<(std::ostream& os, const HybridTimedBasicSet<BS>& hs) {
+      return os << "{ t=" << hs.time() << ", n=" << hs.steps()
+                << ", q=" << hs.discrete_state() << ", s=" << hs.continuous_state_set() 
+                << "}";
+    }
+
 
 
     /*! \ingroup HybridSet
@@ -301,6 +318,7 @@ namespace Ariadne {
         : HybridSetBase< ListSet<BS> >(hspc) { }
       HybridListSet(const HybridListSet<BS>& hls)
         : HybridSetBase< ListSet<BS> >(hls) { }
+      virtual std::ostream& write(std::ostream&) const;
     };
 
 

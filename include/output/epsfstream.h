@@ -465,7 +465,8 @@ namespace Ariadne {
     operator<<(epsfstream& eps, const Geometry::Zonotope< Numeric::Interval<R>,Numeric::Interval<R> >& iz)
     { 
       Geometry::Zonotope<Numeric::Interval<R>,R> ez=Geometry::over_approximation(iz);
-      Geometry::Zonotope<Numeric::Rational> qz=Geometry::over_approximation(ez);
+      Geometry::Zonotope<R> z=Geometry::over_approximation(ez);
+      Geometry::Zonotope<Numeric::Rational> qz(z);
       Polygon2d vertices=eps.projection_map()(qz);      
       eps.draw(vertices);
       return eps;
@@ -486,7 +487,8 @@ namespace Ariadne {
     epsfstream&
     operator<<(epsfstream& eps, const Geometry::Zonotope<R>& z)
     { 
-      Polygon2d vertices=eps.projection_map()(Geometry::Zonotope<Numeric::Rational>(z));      
+      Geometry::Zonotope<Numeric::Rational> qz(z);
+      Polygon2d vertices=eps.projection_map()(qz);      
       eps.draw(vertices);
       return eps;
     }
@@ -528,16 +530,21 @@ namespace Ariadne {
     {
       typedef typename Geometry::ListSet<BS>::const_iterator const_iterator;
       if(eps.fill_style) {
+        // draw without lines
+        bool line_style=eps.line_style; 
+        eps.line_style=false;
         for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
-          eps.trace(eps.projection_map()(*set_iter));
-          eps.fill();
+          eps << *set_iter;
         }
+        eps.line_style=line_style;
       }
       if(eps.line_style) {
+        bool fill_style=eps.fill_style; 
+        eps.fill_style=false;
         for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
-          eps.trace(eps.projection_map()(*set_iter));
-          eps.stroke();
+          eps << *set_iter;
         }
+        eps.fill_style=fill_style;
       }
       return eps;
     }

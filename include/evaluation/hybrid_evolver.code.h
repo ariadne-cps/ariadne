@@ -66,11 +66,13 @@ class HybridTimedSet
 template<class R>
 Evaluation::HybridEvolver<R>::~HybridEvolver()
 {
+  delete this->_applicator;
+  delete this->_integrator;
 }
 
 template<class R>
 Evaluation::HybridEvolver<R>::HybridEvolver(Applicator<R>& a, Integrator<R>& i)
-  : _applicator(&a), _integrator(&i) 
+  : _applicator(a.clone()), _integrator(i.clone()) 
 {
 }
 

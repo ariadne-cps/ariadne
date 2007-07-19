@@ -40,6 +40,7 @@ namespace Ariadne {
     
     template<class R> class Point;
     template<class R> class Rectangle;
+    template<class R> class Polyhedron;
     template<class R0,class R1> class Zonotope;
 
   
@@ -177,11 +178,14 @@ namespace Ariadne {
       virtual A value(const Point<A>& pt) const;
       /*! \brief The gradient at a point. */
       virtual LinearAlgebra::Vector<A> gradient(const Point<A>& pt) const;
+
+      Polyhedron<R> polyhedron() const;
      public:
       /*! \brief Test for equality as reference. */
       friend bool equal<>(const Constraint<R>& c1, const Constraint<R>& c2);
       /*! \brief Test for equality as reference, but with different sign. */
       friend bool opposite<>(const Constraint<R>& c1, const Constraint<R>& c2);
+      
 
      private:
       static void instantiate();

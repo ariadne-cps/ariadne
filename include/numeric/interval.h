@@ -109,6 +109,9 @@ namespace Ariadne {
       //@{
       //! \name Geometric operations
       /*! \brief The midpoint of the interval, given by \f$(a+b)/2\f$. */
+      R midpoint() const { 
+        return div_approx(add_approx(this->lower(),this->upper()),R(2)); }
+      /*! \brief The midpoint of the interval, given by \f$(a+b)/2\f$. */
       R centre() const { 
         return div_approx(add_approx(this->lower(),this->upper()),R(2)); }
       /*! \brief The radius of the interval, given by \f$(b-a)/2\f$. */

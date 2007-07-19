@@ -61,9 +61,9 @@ namespace Evaluation { static int& verbosity = applicator_verbosity; }
 
 
 template<class R>
-Evaluation::Applicator<R>::Applicator() 
-  : _maximum_basic_set_radius(0.25),
-    _grid_size(0.125)
+Evaluation::Applicator<R>::Applicator(const R& mbsr, const R& gs) 
+  : _maximum_basic_set_radius(mbsr),
+    _grid_size(gs)
 {
 }
 
@@ -72,6 +72,14 @@ Evaluation::Applicator<R>::Applicator()
 template<class R>
 Evaluation::Applicator<R>::~Applicator() 
 {
+}
+
+
+template<class R>
+Evaluation::Applicator<R>*
+Evaluation::Applicator<R>::clone() const 
+{
+  return new Applicator<R>(this->_maximum_basic_set_radius,this->_grid_size);
 }
 
 

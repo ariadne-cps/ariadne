@@ -178,6 +178,10 @@ namespace Ariadne {
       static Matrix<R> zero(const size_type r, const size_type c) {
         return Matrix<R>(r,c); }
         
+      /*! \brief An \a r by \a c matrix, all of whose entries are one. */
+      static Matrix<R> one(const size_type r, const size_type c) {
+        R one(1); return Matrix<R>(r,c,&one,0,0); }
+        
       /*! \brief The \a n by \a n identity matrix. */
       static Matrix<R> identity(const size_type n) {
         Matrix<R> result(n,n); 

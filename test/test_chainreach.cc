@@ -58,6 +58,9 @@ test_chainreach()
 {
   set_applicator_verbosity(0);
   
+  double basic_set_radius=0.25;
+  double grid_size=0.125;
+
   int subdivisions=32;
 
   Point<R> params=Point<R>("(1.5,0.875)");
@@ -82,7 +85,7 @@ test_chainreach()
   in.adjoin(over_approximation(ir,g));
   bd.adjoin(over_approximation(gbb,g));
 
-  Applicator<R> apply;
+  Applicator<R> apply(basic_set_radius,grid_size);
   apply.set_grid_size(16.0/subdivisions);
 
   GridMaskSet<R> gmcr=apply.chainreach(h,in,bd);

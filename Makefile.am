@@ -22,6 +22,9 @@ lib:
 python: lib
 	(cd src/python; make python)
 
+tests: lib
+	(cd test; make tests)
+
 examples: lib
 	(cd examples; make examples)
 

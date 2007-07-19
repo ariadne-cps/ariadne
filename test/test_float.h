@@ -34,3 +34,5 @@ namespace Ariadne { namespace Numeric { typedef Float64 Float; } }
 #include "numeric/mpfloat.h"
 namespace Ariadne { namespace Numeric { typedef MPFloat Float; } }
 #endif
+/* */
+

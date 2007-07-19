@@ -34,6 +34,7 @@
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 #include "../linear_algebra/lu_matrix.h"
+#include "../linear_algebra/qr_matrix.h"
 
 #include "../linear_programming/linear_program.h"
 
@@ -60,6 +61,18 @@ using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
+
+
+template<class R> inline
+void 
+accumulate(R& value, R& error, uint n, const R* aptr, const R* bptr) {
+  Interval<R> v=value;
+  for(uint i=0; i!=n; ++i) {
+    v+=aptr[i]*bptr[i];
+  }
+  value=v.midpoint();
+  error=add_up(error,v.radius());
+}
 
 
 template<class R> inline
@@ -632,6 +645,33 @@ Geometry::approximation(const Zonotope<R,R>& z)
   return z; 
 }
 
+/*
+template<class R> 
+Geometry::Zonotope<Numeric::Interval<R>,R> 
+Geometry::orthogonal_over_approximation(const Zonotope<Numeric::Interval<R>,R>& z)
+{
+  Zonotope<R,R> oaz=over_approximation(z);
+  
+  QRMatrix< Interval<R> > QR(oaz.generators());
+  Point< Interval<R> > c(oaz.centre());
+  Matrix<R> G(z.dimension(),z.number_of_generators());
+
+  Matrix< Interval<R> > q=QR.Q();
+  Matrix< Interval<R> > r=QR.R();
+  for(uint i=0; i!=z.dimension();++i) {
+    Interval<R> a=0;
+    for(uint j=i; j!=z.number_of_generators(); ++j) {
+      a+=r(i,j);
+    }
+    for(uint k=0; k!=z.dimension(); ++k) {
+      Interval<R> b=q(k,i)*a;
+      G(k,i)=b.midpoint();
+      c[k]+=(b-b.midpoint());
+    }
+  }
+  return Zonotope<Interval<R>,R>(c,G);
+}
+*/
 
 
 

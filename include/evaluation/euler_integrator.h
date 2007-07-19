@@ -48,6 +48,9 @@ namespace Ariadne {
       EulerIntegrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_set_radius);
 
 
+      /*! \brief Cloning operator. */
+      virtual EulerIntegrator<R>* clone() const;
+
       /*! \brief A C0 algorithm for integrating forward a point. */
       virtual Geometry::Point<I> 
       bounded_flow(const System::VectorFieldInterface<R>&,

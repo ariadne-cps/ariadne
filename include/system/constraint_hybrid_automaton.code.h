@@ -32,6 +32,7 @@
 #include "../geometry/hybrid_set.h"
 #include "../system/map.h"
 #include "../system/vector_field.h"
+#include "../output/logging.h"
 
 #include "constraint_hybrid_automaton.h"
 
@@ -117,8 +118,10 @@ std::ostream&
 System::ConstraintDiscreteMode<R>::write(std::ostream& os) const
 {
   typedef typename std::set< boost::shared_ptr< const ConstraintInterface<R> > >::const_iterator constraint_iterator;
-  return os << "DiscreteMode( id=" << this->id() 
-            << ", dynamic=" << this->dynamic() << ", invariant={...} )";
+  os << "DiscreteMode( id=" << this->id() 
+            << ", dynamic=" << this->dynamic() << ", invariants=";
+  write_pointer_sequence(os,this->_invariant.begin(),this->_invariant.end(),'{','}');
+  return os << " )";
 }
 
 
@@ -162,10 +165,18 @@ System::ConstraintDiscreteTransition<R>::source() const
 
 
 template<class R>
+id_type
+System::ConstraintDiscreteTransition<R>::destination_id() const
+{
+  return this->_destination->id();
+}
+
+
+template<class R>
 const System::ConstraintDiscreteMode<R>&
 System::ConstraintDiscreteTransition<R>::destination() const
 {
-  return *this->_source;
+  return *this->_destination;
 }
 
 
@@ -258,11 +269,30 @@ System::ConstraintHybridAutomaton<R>::new_mode(id_type id,
 template<class R>
 const typename System::ConstraintHybridAutomaton<R>::transition_type& 
 System::ConstraintHybridAutomaton<R>::new_transition(id_type event_id,
-                                                      id_type source_id, 
-                                                      id_type destination_id,
-                                                      const MapInterface<R>& reset,
-                                                      const ConstraintInterface<R>& activation) 
+                                                     id_type source_id, 
+                                                     id_type destination_id,
+                                                     const MapInterface<R>& reset,
+                                                     const ConstraintInterface<R>& constraint,
+                                                     bool forced) 
 {
+  if(forced) {
+    return this->new_forced_transition(event_id,source_id,destination_id,reset,constraint);
+  } else {
+    return this->new_unforced_transition(event_id,source_id,destination_id,reset,constraint);
+  }
+}
+
+
+template<class R>
+const typename System::ConstraintHybridAutomaton<R>::transition_type& 
+System::ConstraintHybridAutomaton<R>::new_unforced_transition(id_type event_id,
+                                                              id_type source_id, 
+                                                              id_type destination_id,
+                                                              const MapInterface<R>& reset,
+                                                              const ConstraintInterface<R>& activation) 
+{
+  ARIADNE_LOG(4,"  new_unforced_transition(event_id="<<event_id<<", source_id="<<source_id<<", destination_id="<<destination_id<<", reset, guard)\n");
+
   if(this->has_transition(event_id,source_id)) {
     throw std::runtime_error("The automaton already has a transition with the given event_id and source id.");
   }
@@ -270,7 +300,7 @@ System::ConstraintHybridAutomaton<R>::new_transition(id_type event_id,
     throw std::runtime_error("The source mode of the transition must be in the automaton");
   }
   if(!this->has_mode(destination_id)) {
-    throw std::runtime_error("The desitination mode of the transition must be in the automaton");
+    throw std::runtime_error("The destination mode of the transition must be in the automaton");
   }
   
   const mode_type& source=this->mode(source_id);
@@ -291,6 +321,8 @@ System::ConstraintHybridAutomaton<R>::new_forced_transition(id_type event_id,
                                                             const MapInterface<R>& reset,
                                                             const ConstraintInterface<R>& guard) 
 {
+  ARIADNE_LOG(4,"  new_forced_transition(event_id="<<event_id<<", source_id="<<source_id<<", destination_id="<<destination_id<<", reset, guard)\n");
+
   if(this->has_transition(event_id,source_id)) {
     throw std::runtime_error("The automaton already has a transition with the given event_id and source id.");
   }
@@ -298,7 +330,7 @@ System::ConstraintHybridAutomaton<R>::new_forced_transition(id_type event_id,
     throw std::runtime_error("The source mode of the transition must be in the automaton");
   }
   if(!this->has_mode(destination_id)) {
-    throw std::runtime_error("The desitination mode of the transition must be in the automaton");
+    throw std::runtime_error("The destination mode of the transition must be in the automaton");
   }
   
   const mode_type& source=this->mode(source_id);
@@ -306,6 +338,7 @@ System::ConstraintHybridAutomaton<R>::new_forced_transition(id_type event_id,
   
   this->_transitions.insert(transition_type(event_id,source,destination,reset,guard,true));
   this->_mode(source_id)._guards.insert(std::make_pair(event_id,guard.clone()));
+  ARIADNE_LOG(5,"  transition="<<this->transition(event_id,source_id)<<"\n");
   return this->transition(event_id,source_id);
 }
 

@@ -30,6 +30,22 @@
 
 \page references References
 
+\section software Software
+
+\subsection interval_arithmetic_software Interval Arithmetic
+
+Boost Interval Library <a href="http://www.boost.org/libs/numeric/interval/doc/interval.htm">http://www.boost.org/libs/numeric/interval/doc/interval.htm</a> 
+
+
+XSC <a href="http://www.math.uni-wuppertal.de/~xsc/">http://www.math.uni-wuppertal.de/~xsc/</a>
+
+FILIB++ <a href="http://www.math.uni-wuppertal.de/wrswt/software/filib.html">http://www.math.uni-wuppertal.de/wrswt/software/filib.html</a>
+
+INTLAB <a href="http://www.ti3.tu-harburg.de/~rump/intlab/">http://www.ti3.tu-harburg.de/~rump/intlab/</a>
+
+PROFIL/BIAS <a href="http://www.ti3.tu-harburg.de/Software/PROFILEnglisch.html">http://www.ti3.tu-harburg.de/Software/PROFILEnglisch.html</a>
+
+
 \section computable_analysis_references Computable Analysis
 
 Ker-I Ko <em>Complexity Theory of Real Functions</em>, Birkh\"aser, 1991, ISBN 3-7643-3586-6.

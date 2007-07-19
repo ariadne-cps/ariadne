@@ -82,6 +82,7 @@ namespace Ariadne {
      public:
       id_type id() const;
       id_type source_id() const;
+      id_type destination_id() const;
       const ConstraintDiscreteMode<R>& source() const;   
       const ConstraintDiscreteMode<R>& destination() const;
       const MapInterface<R>& reset() const;
@@ -218,8 +219,24 @@ namespace Ariadne {
                                             id_type source_id, 
                                             id_type destination_id,
                                             const MapInterface<R>& reset,
-                                            const ConstraintInterface<R>& activation);
+                                            const ConstraintInterface<R>& activation,
+                                            bool forced);
       
+      /*! \brief Adds a discrete-time reset with a given event, source mode and destination mode..
+       *
+       * This method creates a new discrete transition from the mode with  mode to the 
+       * destination mode.
+       * \param event_id is the identifier of the discrete transition's event.
+       * \param source_id is the identifier of the discrete transition's source mode.
+       * \param destination_id is the identifier of the discrete transition's destination mode.
+       * \param reset is the discrete transition's reset.
+       */
+      const transition_type& new_unforced_transition(id_type event_id,
+                                                     id_type source_id, 
+                                                     id_type destination_id,
+                                                     const MapInterface<R>& reset,
+                                                     const ConstraintInterface<R>& activation);
+
       /*! \brief Adds a discrete-time reset with a given event, source mode and destination mode..
        *
        * This method creates a new discrete transition from the mode with  mode to the 

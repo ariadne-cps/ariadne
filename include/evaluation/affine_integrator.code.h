@@ -173,6 +173,14 @@ Evaluation::AffineIntegrator<R>::AffineIntegrator(const time_type& maximum_step_
 
 
 
+template<class R>
+Evaluation::AffineIntegrator<R>*
+Evaluation::AffineIntegrator<R>::clone() const
+{
+  return new AffineIntegrator<R>(this->maximum_step_size(),this->lock_to_grid_time(),this->maximum_basic_set_radius());
+}
+
+
 
 template<class R> 
 Geometry::Point< Numeric::Interval<R> > 

@@ -140,6 +140,14 @@ namespace Ariadne {
     
   
     template<class R>
+    Polyhedron<R>::Polyhedron(const std::string& str)
+    {
+      std::stringstream ss(str);
+      ss >> *this;
+    }
+    
+    
+    template<class R>
     Polyhedron<R>::Polyhedron(dimension_type d)
       : _dimension(d), 
         _number_of_constraints(0), 
@@ -671,7 +679,41 @@ namespace Ariadne {
     std::istream& 
     Polyhedron<R>::read(std::istream& is) 
     {
-      throw NotImplemented(__PRETTY_FUNCTION__);
+      std::vector< std::vector<R> > Alst;
+      std::vector< R > Blst;
+
+      std::vector<R> a;
+      R b;
+
+      char c;
+      is >> c;
+      assert(c=='[');
+
+      c=is.peek();
+      while(c=='[') {
+        // Read constraint ax<=b in form [a_1,a_2,...,a_n;b];
+        Base::read_vector(is,a,'[',';',',');
+        is >> b;
+        is >> c;
+        assert(c==']');
+        Alst.push_back(a);
+        Blst.push_back(b);
+      }
+      
+      size_type m=Alst.size();
+      size_type n=Alst[0].size();
+      LinearAlgebra::Matrix<R> A(m,n);
+      LinearAlgebra::Vector<R> B(m);
+      for(uint i=0; i!=m; ++i) {
+        for(size_type j=0; j!=n; ++j) {
+          A(i,j)=Alst[i][j];
+        }
+        B(i)=Blst[i];
+      }
+      
+      *this=Polyhedron<R>(A,B);
+      
+      return is;
     }
 
 

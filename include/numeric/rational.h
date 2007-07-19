@@ -58,6 +58,8 @@ namespace Ariadne {
         : mpq_class(x) { this->mpq_class::canonicalize(); }
       template<class R1,class R2> Rational(const R1& x1,const R2& x2)
         : mpq_class(x1,x2) { this->mpq_class::canonicalize(); }
+      template<class R> Rational& operator=(const R& x) {
+        (*this)=Rational(x); return *this; }
       Integer numerator() const { return this->get_num(); }
       Integer denominator() const { return this->get_den();}
       mpq_class get_base() const { return *this; }

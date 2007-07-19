@@ -42,6 +42,7 @@
 
 namespace Ariadne {
   namespace Base { 
+
     template<class InputIterator>
     inline
     std::ostream&
@@ -59,6 +60,25 @@ namespace Ariadne {
       return os;
     }
     
+
+    template<class InputIterator>
+    inline
+    std::ostream&
+    write_pointer_sequence(std::ostream& os, InputIterator first, InputIterator last, char opening='[', char closing=']', char separator=',') 
+    {
+      os << opening;
+      while(first!=last) {
+        os << (**first);
+        ++first;
+        if(first!=last) {
+          os << separator;
+        }
+      }
+      os << closing;
+      return os;
+    }
+    
+
     template<class InputIterator>
     inline
     std::ostream&

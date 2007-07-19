@@ -27,6 +27,7 @@
 #include "../linear_algebra/matrix.h"
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
+#include "../geometry/polyhedron.h"
 #include "../geometry/zonotope.h"
 
 namespace {
@@ -264,10 +265,26 @@ Geometry::LinearConstraint<R>::comparison() const
 
 
 template<class R>
+Geometry::Polyhedron<R>
+Geometry::LinearConstraint<R>::polyhedron() const 
+{
+  if(this->_c==less) {
+    return Polyhedron<R>(LinearAlgebra::Matrix<R>(1,this->dimension(),_a.begin()),
+                         LinearAlgebra::Vector<R>(1,&_b));
+  } else {
+    return Polyhedron<R>(-LinearAlgebra::Matrix<R>(1,this->dimension(),_a.begin()),
+                         -LinearAlgebra::Vector<R>(1,&_b));
+  }
+}
+
+
+
+
+
+template<class R>
 std::ostream& 
 Geometry::LinearConstraint<R>::write(std::ostream& os) const
 {
-  return os << "LinearConstraint( ... )";
   return os << "LinearConstraint( a=" << this->_a << ", b=" << this->_b << ", c='" << (this->_c==less ? "<" : ">") << "' )";
 }
 

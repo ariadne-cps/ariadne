@@ -28,6 +28,7 @@
 
 namespace Ariadne { 
 
+
 template<class S> 
 std::ostream& 
 Geometry::HybridSetBase<S>::write(std::ostream& os) const
@@ -42,6 +43,7 @@ Geometry::HybridSetBase<S>::write(std::ostream& os) const
   os << "} )";
   return os;
 }
+
 
 
 template<class R> 
@@ -60,4 +62,25 @@ Geometry::HybridGridMaskSet<R>::write(std::ostream& os) const
   return os;
 }
 
+
+template<class BS> 
+std::ostream& 
+Geometry::HybridListSet<BS>::write(std::ostream& os) const
+{ 
+  os << "HybridListSet<"<<BS::name()<<">( { \n";
+  for(typename HybridListSet<BS>::const_iterator iter=this->begin();
+      iter!=this->end(); ++iter)
+  {
+    id_type loc=iter->first;
+    const ListSet<BS>& set=*iter->second;
+    os << "  " << loc << ": { size=" << set.size();
+    if(!set.empty()) {
+      os << ", front=" << set[0];
+    }
+    os << "},\n";
+  }
+  os << "} )";
+  return os;
 }
+
+} // namespace Ariadne

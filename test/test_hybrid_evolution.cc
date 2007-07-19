@@ -62,13 +62,6 @@ template<class R> int test_constraint_hybrid_evolution();
   
 namespace Ariadne { namespace Evaluation { extern int verbosity; } }
 
-int main() {
-  //test_hybrid_evolution<Float>();
-  test_constraint_hybrid_evolution<Float>();
-  cerr << "INCOMPLETE ";
-  return 0;
-}
-
 template<class R>
 int test_hybrid_evolution() 
 {  
@@ -108,8 +101,9 @@ int test_hybrid_evolution()
   time_type maximum_step_size=0.125;
   time_type lock_to_grid_time=0.25;
   R maximum_set_radius=0.5;
+  R grid_size=0.125;
 
-  Applicator<R> apply;
+  Applicator<R> apply(maximum_set_radius,grid_size);
   AffineIntegrator<R> integrator(maximum_step_size,lock_to_grid_time,maximum_set_radius); 
   HybridEvolver<R> hybrid_evolver(apply,integrator);
   
@@ -238,62 +232,9 @@ int test_hybrid_evolution()
 }
 
 
-template<class R>
-int test_constraint_hybrid_evolution() 
-{  
-  assert(false);
-  set_hybrid_evolver_verbosity(9);
-  
-  typedef Interval<R> I;
-
-  id_type mode1_id = 1;
-  id_type mode2_id = 2;
-  id_type event12_id = 3;
-
-  AffineVectorField<R> dynamic1(Matrix<R>("[-2,-1;1,-2]"),Vector<R>("[4,0]"));
-  AffineVectorField<R> dynamic2(Matrix<R>("[-2,-1; 1,-2]"),Vector<R>("[1,0]"));
-  AffineMap<R> reset12(Matrix<R>("[1,0;0,1]"),Vector<R>("[0,0]"));
-
-  LinearConstraint<R> guard12(Vector<R>("[1,0]"),Geometry::greater,R(2));
-   
-  ConstraintHybridAutomaton<R> automaton("Affine automaton");
-
-  automaton.new_mode(mode1_id,dynamic1);
-  automaton.new_mode(mode2_id,dynamic2);
-  automaton.new_forced_transition(event12_id,mode1_id,mode2_id,reset12,guard12);
-
-  id_type initial_discrete_mode = mode1_id;
-  Zonotope<I,I> initial_basic_set(Point<R>("(0.5,0)"),Matrix<R>("[0.1,0.0; 0.0,0.1]"));
-  HybridListSet< Zonotope<I,I> > initial_set(automaton.locations());
-  initial_set.adjoin(initial_discrete_mode,initial_basic_set);
-  
-  time_type maximum_step_size=0.125;
-  time_type lock_to_grid_time=0.25;
-  R maximum_set_radius=0.5;
-
-  Applicator<R> apply;
-  LohnerIntegrator<R> integrator(maximum_step_size,lock_to_grid_time,maximum_set_radius); 
-  ConstraintHybridEvolver<R> hybrid_evolver(apply,integrator);
-
-  time_type t=0.5;
-  size_type n=2;
-
-  cout << "automaton = " << flush;
-  cout << automaton << endl << endl;
-
-  HybridListSet< Zonotope<I,I> > evolve_set1 = hybrid_evolver.upper_evolve(automaton,initial_set,t,n);
-  HybridListSet< Zonotope<I,I> > evolve_set2 = hybrid_evolver.upper_evolve(automaton,evolve_set1,t,n);
-  cout << "evolved_set = " << flush;
-
-  cout << evolve_set1 << endl;
-
-  epsfstream eps;
-  eps.open("test_hybrid_evolution-3.eps",Rectangle<R>("[-2,2]x[-2,2]"));
-  eps << evolve_set1[mode1_id];
-  eps << evolve_set2[mode1_id];
-  eps.set_fill_colour("yellow");
-  eps << initial_set[mode1_id];
-  eps.close();
-
+int main() {
+  test_hybrid_evolution<Float>();
+  cerr << "INCOMPLETE ";
   return 0;
 }
+

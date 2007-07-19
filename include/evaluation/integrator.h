@@ -83,6 +83,9 @@ namespace Ariadne {
       /*! \brief Virtual destructor. */
       virtual ~Integrator();
 
+      /*! \brief Make a dynamically-allocated copy. */
+      virtual Integrator<R>* clone() const = 0;
+
       /*! \brief Constructor. */
       Integrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_set_radius);
 
@@ -221,10 +224,16 @@ namespace Ariadne {
                                      const Geometry::Rectangle<R>& bound,
                                      const time_type& integration_time) const;
       
-      /*! \brief Computes a bounding box for the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time. */
+      /*! \brief Computes a bounding box for the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time. The integration time may be dynamically varied to allow the bounding box to be computed. */
       virtual Geometry::Rectangle<R> estimate_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
                                                           const Geometry::Rectangle<R>& initial_set,
                                                           time_type& integration_time) const;
+
+      
+      /*! \brief Computes a bounding box for the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time. */
+      virtual Geometry::Rectangle<R> estimate_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
+                                                          const Geometry::Rectangle<R>& initial_set,
+                                                          const time_type& integration_time) const;
 
       /*! \brief Computes a bounding box for the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time. */
       virtual Geometry::Rectangle<R> estimate_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
@@ -239,6 +248,17 @@ namespace Ariadne {
                                                         const time_type& integration_time) const;
 
 
+      /*! \brief Compute a set \a bound such that the flow of \a vector_field starting in \a initial_point remains in \a bound for times within \a integration_time, given a bound \a estimated_bound. */
+      virtual Geometry::Rectangle<R> refine_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
+                                                        const Geometry::Rectangle<R>& initial_set,
+                                                        const Geometry::Rectangle<R>& estimated_bound,
+                                                        const Numeric::Interval<time_type>& integration_times) const;
+
+
+      /*! \brief Compute a bound for the Jacobian of the flow over the time interval [-h,h], assuming that the flow remains inside the set \a b. */
+      virtual LinearAlgebra::Matrix<I> estimate_flow_jacobian_bounds(const System::VectorFieldInterface<R>& vf,
+                                                                     const Geometry::Rectangle<R>& b,
+                                                                     const time_type& h) const;
     };
 
 

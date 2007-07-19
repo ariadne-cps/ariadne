@@ -67,6 +67,14 @@ Evaluation::EulerIntegrator<R>::EulerIntegrator(const time_type& maximum_step_si
 
 
 template<class R>
+Evaluation::EulerIntegrator<R>*
+Evaluation::EulerIntegrator<R>::clone() const
+{
+  return new EulerIntegrator<R>(this->maximum_step_size(),this->lock_to_grid_time(),this->maximum_basic_set_radius());
+}
+
+
+template<class R>
 Geometry::Point< Numeric::Interval<R> >
 Evaluation::EulerIntegrator<R>::bounded_flow(const System::VectorFieldInterface<R>& vector_field, 
                                              const Geometry::Point<I>& initial_point, 

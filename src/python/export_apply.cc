@@ -46,7 +46,7 @@ void export_apply()
 {
   typedef Interval<R> I;
 
-  class_< Applicator<R> >("Applicator",init<>())
+  class_< Applicator<R> >("Applicator",init<const R&, const R&>())
     .def("image",(SetInterface<R>*(Applicator<R>::*)(const MapInterface<R>&,const SetInterface<R>&)const)
                    (&Applicator<R>::image),return_value_policy<manage_new_object>(),"Compute the image of a set under a map" )
     .def("preimage",(SetInterface<R>*(Applicator<R>::*)(const MapInterface<R>&,const SetInterface<R>&,const SetInterface<R>&)const)

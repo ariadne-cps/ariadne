@@ -49,11 +49,14 @@ check_PROGRAMS = \
 	test_integrate \
 	test_chainreach \
 	test_hybrid_evolution \
+	test_constraint_hybrid_evolution \
         test_epsfstream \
 	test_txtfstream \
 	test_chompfstream 
 
 XFAIL_TESTS = 
+
+tests: $(check_PROGRAMS)
 
 # Explicitly list test sources
 # This should not be necessary!!
@@ -101,6 +104,7 @@ test_affine_integrator_SOURCES=test_affine_integrator.cc
 test_integrate_SOURCES=test_integrate.cc
 test_chainreach_SOURCES=test_chainreach.cc
 test_hybrid_evolution_SOURCES=test_hybrid_evolution.cc
+test_constraint_hybrid_evolution_SOURCES=test_constraint_hybrid_evolution.cc
 test_epsfstream_SOURCES=test_epsfstream.cc 
 test_txtfstream_SOURCES=test_txtfstream.cc
 test_chompfstream_SOURCES=test_chompfstream.cc

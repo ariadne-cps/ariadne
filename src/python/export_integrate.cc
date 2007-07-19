@@ -53,6 +53,7 @@ class IntegratorWrapper : public Integrator<R>, public wrapper< Integrator<R> >
 {
  public:
   IntegratorWrapper(const time_type& mss, const time_type& lgt, const R& msr) : Integrator<R>(mss,lgt,msr) { }
+  IntegratorWrapper<R>* clone() const { return new IntegratorWrapper<R>(*this); }
   ListSet< Rectangle<R> > integrate(const VectorFieldInterface<R>& vf,const ListSet< Rectangle<R> >& is,const time_type& t) const {
     return this->get_override("integrate")(); }
   ListSet< Rectangle<R> > reach(const VectorFieldInterface<R>& vf,const ListSet< Rectangle<R> >& is,const time_type& t) const {
@@ -110,6 +111,16 @@ void export_integrate()
          (&Integrator<R>::verify))
   ;
 
+
+  class_< C1LohnerIntegrator<R>, bases<Integrator<R> > >("C1LohnerIntegrator",init<T,T,R>())
+    .def(init<double,double,double>()) 
+    //.def("integrate",(Zonotope<I,I>(LohnerIntegrator<R>::*)(const VectorFieldInterface<R>&,const Zonotope<I,I>&,const time_type&)const)
+    //                          (&LohnerIntegrator<R>::integrate))
+    //.def("lower_integrate",(ListSet< Zonotope<I,I> >(LohnerIntegrator<R>::*)(const VectorFieldInterface<R>&,const ListSet< Zonotope<I,I> >&,const time_type&)const)
+    //                          (&LohnerIntegrator<R>::integrate))
+    //.def("lower_reach",(ListSet< Zonotope<I,I> >(LohnerIntegrator<R>::*)(const VectorFieldInterface<R>&,const ListSet< Zonotope<I,I> >&,const time_type&)const)
+    //                          (&LohnerIntegrator<R>::reach))
+  ;
 
   class_< LohnerIntegrator<R>, bases<Integrator<R> > >("LohnerIntegrator",init<T,T,R>())
     .def(init<double,double,double>()) 

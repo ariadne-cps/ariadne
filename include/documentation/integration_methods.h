@@ -49,8 +49,8 @@ The second spacial derivative \f$d^2y/dx^2\f$ of the solution satisfies
 \f[ \begin{aligned}
  \frac{d}{dt}     \frac{d^2y}{dx^2} &= D^2f(y)\frac{dy}{dx} + Df(y)\frac{d^2y}{dx^2} \\[\jot]
  \frac{d^2}{dt^2} \frac{d^2y}{dx^2} &= \bigl( D^3f(y)\,f(y) + 3D^2f(y)Df(y) \bigr) \, \left(\frac{dy}{dx}\right)^2
-                                         + \bigl( D^2f(y)f(y)+Df(y)^2 \bigr) \frac{d^2y}{dx^2} \\[\jot]
-\f]
+                                         + \bigl( D^2f(y)f(y)+Df(y)^2 \bigr) \frac{d^2y}{dx^2} 
+\end{aligned} \f]
 
 If we define functions \f$f^{(i)}:\mathbb{R}^n\rightarrow\mathbb{R}^{n}\f$ by \f$f^{(0)}(y)=y\f$ and \f$f^{(i+1)}(y)={\displaystyle Df^{(i)}(y)\cdot f(y)}\f$,
 then 

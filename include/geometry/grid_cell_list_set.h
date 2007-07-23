@@ -67,6 +67,10 @@ namespace Ariadne {
       typedef GridSetIterator< Combinatoric::LatticeCellListSet::const_iterator, GridCell<R> > iterator;
       typedef GridSetIterator< Combinatoric::LatticeCellListSet::const_iterator, GridCell<R> > const_iterator;
 
+      /*! \brief A tag describing the type of set. */
+      typedef denotable_set_tag set_category;
+      /*! \brief The type of basic set used in the list. */
+      typedef GridCell<R> basic_set_type;
       /*! \brief The type of denotable real number defining the vertices and cells of the grid. */
       typedef R real_type;
       /*! \brief The type of denotable point contained by the set. */

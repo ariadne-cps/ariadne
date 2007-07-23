@@ -119,7 +119,7 @@ void export_hybrid_set()
     .def("new_location",&hybrid_set_new_location< HybridSet<R>, Polyhedron<R> >)
     .def("new_location",&hybrid_set_new_location< HybridSet<R>, SetInterface<R> >)
     .def("locations",&HybridSet<R>::locations)
-    //.def("__getitem__", &hybrid_set_get_cloned_pointer<R>, return_manage_new_object)
+    .def("__getitem__", &hybrid_set_get_cloned_pointer<R>, return_manage_new_object)
     .def("__getitem__", &hybrid_set_get_pointer<R>, return_reference_existing_object)
     .def(self_ns::str(self))
   ;
@@ -145,7 +145,9 @@ void export_hybrid_set()
     .def("new_location",&hybrid_set_new_location< HybridGridCellListSet<R>, Grid<R> >)
     .def("new_location",&hybrid_set_new_location< HybridGridCellListSet<R>, GridCellListSet<R> >)
     .def("new_location",&hybrid_set_new_location< HybridGridCellListSet<R>, GridMaskSet<R> >)
+    /*
     .def("__getitem__",&hybrid_set_get_item< HybridGridCellListSet<R> >, return_reference_existing_object)
+    */
     .def("__setitem__",&hybrid_set_set_item< HybridGridCellListSet<R>, GridCellListSet<R> >)
     .def("adjoin", &hybrid_set_adjoin_set< HybridGridCellListSet<R>, GridCellListSet<R> >)
     .def(self_ns::str(self))

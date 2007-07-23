@@ -22,6 +22,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "geometrical_traits.h"
+
 namespace Ariadne {
   namespace Geometry {
 
@@ -262,6 +264,36 @@ namespace Ariadne {
     }
 
 
+    template<class BS> template<class S> inline
+    void 
+    ListSet<BS>::adjoin(const S& s) 
+    {
+      this->adjoin(s, typename geometrical_traits<S>::set_category());
+    }
+
+
+    template<class BS> template<class S> inline
+    void 
+    ListSet<BS>::adjoin(const S& bs, basic_set_tag) 
+    {
+      this->adjoin(static_cast<BS>(bs));
+    }
+
+
+    template<class BS> template<class DS> inline
+    void 
+    ListSet<BS>::adjoin(const DS& ds, denotable_set_tag) 
+    {
+      for(typename DS::const_iterator iter=ds.begin();
+          iter!=ds.end(); ++iter)
+      {
+        this->adjoin(static_cast<BS>(*iter));
+      }
+    }
+
+
+
+      
     template<class BS> inline
     std::ostream& 
     operator<<(std::ostream& os, const ListSet<BS>& ls)

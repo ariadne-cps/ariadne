@@ -46,6 +46,9 @@ namespace Ariadne {
 
     template<class R> class Rectangle;
       
+    class basic_set_tag;
+    class denotable_set_tag;
+  
     /*!\ingroup DenotableSet
      * \ingroup List
      * \brief A finite union of basic sets, represented as a sequence.
@@ -80,6 +83,8 @@ namespace Ariadne {
       std::vector< BS > _vector;
 
      public:
+      /*! \brief A tag describing the type of set. */
+      typedef denotable_set_tag set_category;
       /*!\brief The type of denotable real number used to represent points in the space. */
       typedef R real_type;
       /*!\brief The type of point contained by the set. */
@@ -187,11 +192,14 @@ namespace Ariadne {
       /*! \brief A constant iterator to the end of the list of basic sets. */
       const_iterator end() const;
 
-      /*! \brief Adjoins (makes union with) another denotable set. */
-      void adjoin(const ListSet<BS>& A);
-      
       /*! \brief Adjoins (makes union with) a basic set. */
-      void adjoin(const BS& A);
+      void adjoin(const BS& bs);
+
+      /*! \brief Adjoins (makes union with) another list set. */
+      void adjoin(const ListSet<BS>& ls);
+      
+      /*! \brief Adjoins (makes union with) a set. */
+      template<class S> void adjoin(const S& s);
 
       //@{
       //! \name Input/output operators
@@ -212,7 +220,7 @@ namespace Ariadne {
       /*! \brief Tests inclusion of \a A in \a B.
        */
       friend tribool subset(const ListSet<BS>& A,
-                         const ListSet<BS>& B);
+                            const ListSet<BS>& B);
       //@}
       
       
@@ -234,6 +242,10 @@ namespace Ariadne {
                                               const ListSet<BS>& B);
       //@}
 #endif      
+     private:
+      template<class S> void adjoin(const S& bs, basic_set_tag);
+      template<class DS> void adjoin(const DS& ds, denotable_set_tag);
+
      private:
       static void _instantiate_geometry_operators();
 

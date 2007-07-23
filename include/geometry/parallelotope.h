@@ -43,6 +43,8 @@
 namespace Ariadne {
   namespace Geometry {
  
+    class basic_set_tag;
+
     /*!\ingroup BasicSet
      * \brief A parallelotope of arbitrary dimension.
      *

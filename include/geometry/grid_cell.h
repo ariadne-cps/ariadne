@@ -44,6 +44,8 @@
 namespace Ariadne {
   namespace Geometry {
       
+    class basic_set_tag;
+
     /*! \brief A unit cell in a grid.
      *
      *  A %GridCell is defined by mapping a LatticeCell \a lc into \f$\mathbb{R}^d\f$
@@ -63,6 +65,8 @@ namespace Ariadne {
       friend class GridMaskSet<R>;
       friend class GridCellListSet<R>;
      public:
+      /*! \brief A tag describing the type of set. */
+      typedef basic_set_tag set_category;
       /*! \brief The type of denotable real number defining the vertices and cells of the grid. */
       typedef R real_type;
       /*! \brief The type of denotable point contained by the set. */

@@ -44,6 +44,7 @@
 namespace Ariadne {  
   namespace Geometry {
 
+    class basic_set_tag;
     template<class R> class PolyhedralConstraint;
     template<class R> class Polytope;
     template<class R> class PolyhedronConstraintsIterator;
@@ -66,6 +67,8 @@ namespace Ariadne {
      private:
       LinearAlgebra::MatrixSlice<R> _constraints();
      public:
+      /*! \brief A tag describing the type of set. */
+      typedef basic_set_tag set_category;
       /*! \brief The type of denotable real numbers used to describe the polyhedron. */
       typedef R real_type;
       /*! \brief The type of denotable point contained by the polyhedron. */

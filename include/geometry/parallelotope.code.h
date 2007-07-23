@@ -264,7 +264,7 @@ namespace Ariadne {
       }
       
       LinearAlgebra::Matrix<I> Ginv=LinearAlgebra::inverse(LinearAlgebra::Matrix<I>(Gmid));
-      R err = (norm(Ginv*D)+norm(Ginv*G)).upper();
+      R err = (LinearAlgebra::norm(Ginv*D)+LinearAlgebra::norm(Ginv*G)).upper();
 
       for(size_type i=0; i!=n; ++i) {
         for(size_type j=0; j!=n; ++j) {

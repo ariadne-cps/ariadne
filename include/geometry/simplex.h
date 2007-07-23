@@ -38,6 +38,7 @@
 namespace Ariadne {
   namespace Geometry {
 
+    class basic_set_tag;
 
     /*!\ingroup BasicSet
      * \brief A simplex of arbitrary dimension.

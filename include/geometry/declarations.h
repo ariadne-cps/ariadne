@@ -77,6 +77,10 @@ namespace Ariadne {
     template<class BS> class HybridTimedBasicSet;
 
     template<class T, class BS> class TimedSet;
+
+    class basic_set_tag;
+    class denotable_set_tag;
+
   }
 }
 

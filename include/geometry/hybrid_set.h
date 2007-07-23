@@ -45,6 +45,9 @@ namespace Ariadne {
     /*! \brief The type identifying a discrete locatation of a hybrid system. */
     typedef id_type location_type;
 
+    class basic_set_tag;
+    class denotable_set_tag;
+    class list_set_tag;
 
     class HybridSystemError : public std::runtime_error {
      public:
@@ -81,6 +84,7 @@ namespace Ariadne {
       typedef typename BS::real_type R;
      public:
       typedef typename BS::real_type real_type;
+      typedef basic_set_tag set_category;
 
       template<class A> HybridBasicSet(const id_type& q, const A& a)
         : _discrete_state(q), _continuous_state_set(a) { }
@@ -114,6 +118,7 @@ namespace Ariadne {
       typedef typename BS::real_type R;
      public:
       typedef typename BS::real_type real_type;
+      typedef basic_set_tag set_category;
 
       template<class A> HybridTimedBasicSet(const time_type& t, const discrete_time_type& n, const id_type& q, const A& a)
         : _time(t), _steps(n), _discrete_state(q), _continuous_state_set(a) { }
@@ -248,6 +253,7 @@ namespace Ariadne {
       : public HybridSetBase< GridMaskSet<R> >
     {
      public:
+      typedef denotable_set_tag set_category;
       HybridGridMaskSet()
         : HybridSetBase< GridMaskSet<R> >() { }
       HybridGridMaskSet(const HybridGridMaskSet<R>& hgms)
@@ -269,6 +275,7 @@ namespace Ariadne {
       : public HybridSetBase< GridCellListSet<R> >
     {
      public:
+      typedef denotable_set_tag set_category;
       HybridGridCellListSet()
         : HybridSetBase< GridCellListSet<R> >() { }
       HybridGridCellListSet(const HybridGridCellListSet<R>& hgcls)
@@ -312,6 +319,7 @@ namespace Ariadne {
     {
       typedef typename BS::real_type R;
      public:
+      typedef list_set_tag set_category;
       HybridListSet()
         : HybridSetBase< ListSet<BS> >() { }
       HybridListSet(const HybridSpace& hspc)

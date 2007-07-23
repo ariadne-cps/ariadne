@@ -43,6 +43,7 @@
 namespace Ariadne {  
   namespace Geometry {
 
+    class basic_set_tag;
     template<class R> class Polyhedron;
     template<class R> class PolytopeVerticesIterator;
       
@@ -68,6 +69,8 @@ namespace Ariadne {
       size_type _number_of_vertices;
       array<R> _data;
      public:
+      /*! \brief A tag describing the type of set. */
+      typedef basic_set_tag set_category;
        /*! \brief The type of denotable real numbers used to describe the convex hull. */
       typedef R value_type;
        /*! \brief The type of real numbers used to describe the state space. */

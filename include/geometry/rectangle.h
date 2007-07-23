@@ -50,6 +50,7 @@
 namespace Ariadne {
   namespace Geometry {
 
+    class basic_set_tag;
     template<class R> class PointList;
     template<class BS> class ListSet;
     template<class R> class RectangleVerticesIterator;
@@ -91,10 +92,12 @@ namespace Ariadne {
      private:
       array<R> _data;
      public:
-      /*! \brief The type used for the corners. */
-      typedef R value_type;
+      /*! \brief A tag describing the type of set. */
+      typedef basic_set_tag set_category;
       /*! \brief The type of denotable real number used for the corners. */
       typedef R real_type;
+      /*! \brief The type used for the corners. */
+      typedef R value_type;
       /*! \brief The type of denotable point contained by the rectangle. */
       typedef Point<R> state_type;
       /*! \brief An iterator to the vertices of the rectangle. */

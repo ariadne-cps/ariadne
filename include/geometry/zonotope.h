@@ -43,6 +43,7 @@
 namespace Ariadne {
   namespace Geometry {
 
+    class basic_set_tag;
     template<class R> class Point;
     template<class R> class PointList;
     template<class E> class RectangleExpression;
@@ -81,6 +82,8 @@ namespace Ariadne {
       typedef typename Numeric::traits<R>::arithmetic_type F; 
       typedef typename Numeric::traits<R>::interval_type I; 
      public:
+      /*! \brief A tag describing the type of set. */
+      typedef basic_set_tag set_category;
       /*! \brief The type used for to represent the zonotope. */
       typedef RC value_type;
       /*! \brief The real number type. */

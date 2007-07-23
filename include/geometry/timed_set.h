@@ -36,7 +36,7 @@ namespace Ariadne {
       typedef T time_type;
       
       /*! \brief The type used for the set. */
-      typedef S set_type;
+      typedef S set_category;
       
       /*! \brief Constructor. */
       TimedSet(const S& s)

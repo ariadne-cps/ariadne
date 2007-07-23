@@ -118,6 +118,8 @@ namespace Ariadne {
       : public RectangleExpression< PartitionTreeCell<R> >
     {
      public:
+      /*! \brief A tag describing the type of set. */
+      typedef basic_set_tag set_category;
       /*! \brief The type of denotable real number used for the cell blounds. */
       typedef R real_type;
       /*! \brief The type of denotable point contained by cells. */
@@ -250,6 +252,12 @@ namespace Ariadne {
                                            PartitionTreeCell<R>,
                                            Rectangle<R> > const_iterator;         
       typedef const_iterator iterator;
+
+      /*! \brief A tag describing the type of set. */
+      typedef denotable_set_tag set_category;
+      /*! \brief A tag describing the type of set. */
+      typedef PartitionTreeCell<R> basic_set_type;
+
 
       /*! \brief Construct an empty set based on a partition scheme. */
       PartitionTreeSet(const PartitionScheme<R>& g);

@@ -37,12 +37,16 @@
 namespace Ariadne {
   namespace Geometry {
 
+    class basic_set_tag;
+
     /*! \ingroup BasicSet
      *  \brief An ellipsoid \f$(x-c)^T A (x-c)\leq 1\f$ of arbitrary dimension.
      */
     template<class R>
     class Ellipsoid {
      public:
+      /*! \brief A tag describing the type of set. */
+      typedef basic_set_tag set_category;
       /*! \brief The type of denotable real number used for the corners. */
       typedef R real_type;
       /*! \brief The type of denotable point contained by the simplex. */

@@ -1,8 +1,7 @@
 /***************************************************************************
  *            vector.h
  *
- *  Mon May  3 12:31:15 2004
- *  Copyright  2004-6  Alberto Casagrande, Pieter Collins
+ *  Copyright  2004-7  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -39,47 +38,13 @@
 #include "../numeric/interval.h"
 
 #include "../linear_algebra/exceptions.h"
+#include "../linear_algebra/vector_expression.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {
     
-    /*!\brief Base class for all vector expressions. */
-    template<class E>
-    class VectorExpression 
-    {
-     public:
-      /*!\brief Convert \a *this to a reference to E. */
-      E& operator() () { return static_cast<E&>(*this); }
-      /*!\brief Convert \a *this to a constant reference to E. */
-      const E& operator() () const { return static_cast<const E&>(*this); }
-    };
-
-    struct plus {
-      template<class R1,class R2> 
-      typename Numeric::traits<R1,R2>::arithmetic_type 
-      operator() (const R1& x1, const R2& x2) const { return x1+x2; }
-    };
-
-    struct minus {
-      template<class R1,class R2> 
-      typename Numeric::traits<R1,R2>::arithmetic_type 
-      operator() (const R1& x1, const R2& x2) const { return x1-x2; }
-    };
-
-    struct times {
-      template<class R1,class R2> 
-      typename Numeric::traits<R1,R2>::arithmetic_type 
-      operator() (const R1& x1, const R2& x2) const { return x1*x2; }
-    };
-
-    struct divides {
-      template<class R1,class R2> 
-      typename Numeric::traits<R1,R2>::arithmetic_type 
-      operator() (const R1& x1, const R2& x2) const { return x1/x2; }
-    };
-
     
-    
+
     /*! \ingroup LinearAlgebra
      *  \brief A vector over \a R. 
      */
@@ -93,21 +58,18 @@ namespace Ariadne {
       typedef R value_type;
 
       /*! \brief Construct a vector of size 0. */
-      explicit Vector() : _array(0) { }
+      explicit Vector();
       /*! \brief Construct the zero vector of size \a n. */
-      explicit Vector(const size_type& n) : _array(n,static_cast<R>(0)) { }
+      explicit Vector(const size_type& n);
       /*! \brief Construct the zero vector of size \a n with all elements initialized to \a x. */
-      explicit Vector(const size_type& n, const R& x) : _array(n) { 
-        for(size_type i=0; i!=n; ++i) { (*this)(i)=x; } }
+      explicit Vector(const size_type& n, const R& x);
       /*! \brief Construct a vector from the array \a ary. */
-      explicit Vector(const array<R>& ary) : _array(ary) { }
+      explicit Vector(const array<R>& ary);
       /*! \brief Construct a vector of size \a n from the array beginning at \a ptr. */
-      explicit Vector(const size_type& n, const R* ptr, const size_type& inc=1) : _array(n) { 
-        for(size_type i=0; i!=n; ++i) { (*this)(i)=ptr[i*inc]; } }
+      explicit Vector(const size_type& n, const R* ptr, const size_type& inc=1);
 
       /* Convert from a vector expression. */
-      template<class E> Vector(const VectorExpression<E>& ve) : _array(ve().size()) { 
-        const E& v=ve(); for(size_type i=0; i!=this->size(); ++i) { (*this)(i)=v(i); } }
+      template<class E> Vector(const VectorExpression<E>& ve);
         
       /*! \brief Construct from a string literal of the form 
        *  "[v1,v2,...,vn]", where the vi are numerical literals for the vector elements. 
@@ -115,72 +77,55 @@ namespace Ariadne {
       explicit Vector(const std::string& s); 
 
       /*! \brief Copy constructor. */
-      Vector(const Vector<R>& v) : _array(v._array) { }
+      Vector(const Vector<R>& v);
       /*! \brief Copy assignment operator. */
-      Vector<R>& operator=(const Vector<R>& v) {
-        if(this!=&v) { this->_array=v._array; } return *this; }
+      Vector<R>& operator=(const Vector<R>& v);
       
       /*! \brief The equality operator. */
-      bool operator==(const Vector<R>& v) const {
-        if(this->size()!=v.size()) { return false; }
-        for(size_type i=0; i!=this->size(); ++i) { if((*this)(i)!=v(i)) { return false; } }
-        return true; }
+      bool operator==(const Vector<R>& v) const;
         
       /*! \brief The inequality operator. */
-      bool operator!=(const Vector<R>& v) const {
-        return !(*this==v); }
+      bool operator!=(const Vector<R>& v) const;
       
       /*! \brief Returns the zero vector of size \a n. */
-      static Vector<R> zero(const size_type& n) {
-        Vector<R> v(n); for (dimension_type i=0; i<n; ++i) { v(i)=R(0); } return v; }
+      static Vector<R> zero(const size_type& n);
       /*! \brief Returns the vector of size \a n whose elements are all 1. */
-      static Vector<R> one(const size_type& n) {
-        Vector<R> v(n); for (dimension_type i=0; i<n; ++i) { v(i)=R(1); } return v; }
+      static Vector<R> one(const size_type& n);
       /*! \brief Returns the unit vector of size \a n whose \a i th element is 1. */
-      static Vector<R> unit(dimension_type n, dimension_type i) {
-        Vector<R> v(n); for (dimension_type k=0; k<n; ++k) { v(k)=R(0); } v(i)=R(1); return v; }
+      static Vector<R> unit(dimension_type n, dimension_type i);
         
       /*! \brief A reference to the array storing the elements data. */
-      array<R>& data() { return this->_array; }
+      array<R>& data();
       /*! \brief The array storing the elements data. */
-      const array<R>& data() const { return this->_array; }
+      const array<R>& data() const;
 
       /*! \brief Resize the vector to hold \a n elements. */
-      void resize(const size_type& n) { this->_array.resize(n); }
+      void resize(const size_type& n);
 
       /*! \brief The number of elements of the vector. */
-      size_type size() const { return this->_array.size(); }
-
+      size_type size() const;
       /*! \brief A pointer to the beginning of the data. */
-      R* begin() { return this->data().begin(); }
+      R* begin();
       /*! \brief A constant pointer to the beginning of the data. */
-      const R* begin() const { return this->data().begin(); }
+      const R* begin() const;
       /*! \brief A pointer to the end of the data. */
-      R* end() { return this->data().end(); }
+      R* end();
       /*! \brief A constant pointer to the end of the data. */
-      const R* end() const { return this->data().end(); }
+      const R* end() const;
 
       /*! \brief The increment between elements in the storage array. */
-      size_type increment() const { return 1; }
-      
+      size_type increment() const;
+
       /*! \brief A reference to the \a i th element. */
-      R& operator() (const size_type& i) { return this->_array[i]; }
+      R& operator() (const size_type& i);
       /*! \brief A constant reference to the \a i th element. */
-      const R& operator() (const size_type& i) const { return this->_array[i]; }
-            
+      const R& operator() (const size_type& i) const;
+
       /*! \brief A reference to the \a i th element. */
-      R& operator[] (const size_type& i) { return this->_array[i]; }
+      R& operator[] (const size_type& i);
       /*! \brief A constant reference to the \a i th element. */
-      const R& operator[] (const size_type& i) const { return this->_array[i]; }
-            
-      /*! \brief The supremum norm. */
-      R norm() const {
-        R result=static_cast<R>(0);
-        for(size_type i=0; i!=this->size(); ++i) {
-          result=Numeric::max(Numeric::abs((*this)(i)),result); }
-        return result; 
-      }
-        
+      const R& operator[] (const size_type& i) const;
+
             
 #ifdef DOXYGEN
       /*! \brief The additive inverse of the vector \a v. */
@@ -196,10 +141,10 @@ namespace Ariadne {
       /*! \brief The scalar product of \a v by the reciprocal of \a s. */
       friend Vector<R> operator/<>(const Vector<R>& v, const R& s);
 
-      /*! \brief True if \a v1 and \a v2 are parallel. */
-      friend bool linear_multiple<>(const Vector<R>& v1, const Vector<R>& v2);
       /*! \brief The inner product of \a v1 and \a v2. */
       friend R inner_product<>(const Vector<R>& v1, const Vector<R>& v2);
+      /*! \brief The supremum norm of \a v. */
+      friend R LinearAlgebra::sup_norm<>(const Vector<R>& v);
       /*! \brief The supremum norm of \a v. */
       friend R LinearAlgebra::norm<>(const Vector<R>& v);
       /*! \brief The direct sum (concatentation) of v1 and v2. */
@@ -223,35 +168,25 @@ namespace Ariadne {
      public:
       typedef R value_type;
      
-      explicit VectorSlice(const size_type& size, R* begin, const size_type& increment=1u)
-        : _size(size), _begin(begin), _increment(increment) { }
-
-      VectorSlice(const Vector<R>& v)
-        : _size(v.size()), _begin(v.begin()), _increment(v.increment()) { }
+      explicit VectorSlice(const size_type& size, R* begin, const size_type& increment=1u);
+      VectorSlice(const Vector<R>& v);
+      VectorSlice(const array<R>& a);
       
-       VectorSlice(const array<R>& a)
-        : _size(a.size()), _begin(a.begin()), _increment(1u) { }
+      size_type size() const;
+      const R* begin() const;
+      const R* end() const;
+      size_type increment() const;
       
-     size_type size() const { return this->_size; }
-      const R* begin() const { return this->_begin; }
-      const R* end() const { return this->_begin+this->_size*this->_increment; }
-      size_type increment() const { return this->_increment; }
-      
-      const R& operator() (const size_type& i) const { return this->_begin[i*this->_increment]; }
-      R& operator() (const size_type& i) { return this->_begin[i*this->_increment]; }
+      const R& operator() (const size_type& i) const;
+      R& operator() (const size_type& i);
      
-      const R& operator[] (const size_type& i) const { return this->_begin[i*this->_increment]; }
-      R& operator[] (const size_type& i) { return this->_begin[i*this->_increment]; }
+      const R& operator[] (const size_type& i) const;
+      R& operator[] (const size_type& i);
      
-      template<class E> VectorSlice<R>& operator=(const VectorExpression< E >& v) {
-        const E& e=v(); 
-        ARIADNE_CHECK_EQUAL_SIZES(*this,e,"VectorSlice& VectorSlice::operator=(VectorExcpression)");
-        for(size_type i=0; i!=e.size(); ++i) { this->_begin[i*this->_increment]=e(i); }
-        return *this;
-      }
+      template<class E> VectorSlice<R>& operator=(const VectorExpression< E >& v);
       
       /*! \brief Write to an output stream . */
-      std::ostream& write(std::ostream& os) const { return Vector<R>(*this).write(os); }
+      std::ostream& write(std::ostream& os) const;
      private:
       size_type _size;
       R* _begin;
@@ -259,331 +194,57 @@ namespace Ariadne {
     };
     
     
-    template<class VE1, class VE2, class Op>
-    class BinaryVectorVectorExpression :
-      public VectorExpression< BinaryVectorVectorExpression<VE1,VE2,Op> >
-    {
-     public:
-      typedef typename Numeric::traits<typename VE1::value_type, typename VE2::value_type>::arithmetic_type value_type;
-      BinaryVectorVectorExpression(const VE1& v1, const VE2& v2, Op)
-        : _ve1(v1), _ve2(v2), _op() { }
-      size_type size() const { return _ve1.size(); }
-      value_type operator()(const size_type& i) const { return _op(_ve1(i),_ve2(i)); }
-      value_type operator[](const size_type& i) const { return _op(_ve1(i),_ve2(i)); }
-     private:
-      const VE1& _ve1; const VE2& _ve2; Op _op;
-    };
-    
-    
-    template<class VE, class SE, class Op>
-    class BinaryVectorScalarExpression
-      : public VectorExpression< BinaryVectorScalarExpression<VE,SE,Op> >
-    {
-      typedef typename VE::value_type vector_value_type;
-      typedef typename Numeric::traits<SE>::closure_type scalar_closure_type;
-     public:
-      typedef typename Numeric::traits<vector_value_type,scalar_closure_type>::arithmetic_type value_type;
-      BinaryVectorScalarExpression(const VE& ve, const SE& se, Op) 
-        : _ve(ve), _se(se), _op() { }
-      size_type size() const { return _ve.size(); }
-      value_type operator()(const size_type& i) const { return _op(_ve(i),_se); }
-      value_type operator[](const size_type& i) const { return _op(_ve(i),_se); }
-     private:
-      const VE& _ve; const scalar_closure_type _se; Op _op;
-    };
-    
-    
+    template<class R1, class E2> Vector<R1>& operator+=(Vector<R1>& v1, const VectorExpression<E2>& e2);
+    template<class R1, class E2> Vector<R1>& operator-=(Vector<R1>& v1, const VectorExpression<E2>& e2);
+    template<class R1, class R2> Vector<R1>& operator*=(Vector<R1>& v1, const R2& s2);
+    template<class R1, class R2> Vector<R1>& operator/=(Vector<R1>& v1, const R2& s2);
 
-    template<class R1, class E2> inline
-    Vector<R1>&
-    operator+=(Vector<R1>& v1, const VectorExpression<E2>& e2) {
-      const E2& v2=e2();
-      ARIADNE_CHECK_EQUAL_SIZES(v1,v2,"Vector& operator+=(Vector,VectorExpression)");
-      for(size_type i=0; i!=v1.size(); ++i) { v1(i)+=v2(i); } return v1; 
-    }
-
-    template<class R1, class E2> inline
-    Vector<R1>&
-    operator-=(Vector<R1>& v1, const VectorExpression<E2>& e2) {
-      const E2& v2=e2();
-      ARIADNE_CHECK_SIZE(v1,v2.size(),"Vector& operator-=(Vector,VectorExpression)");
-      //for(size_type i=0; i!=v1.size(); ++i) { v1(i)-=v2(i); } return v1; 
-      for(size_type i=0; i!=v1.size(); ++i) { v1(i)=v1(i)-v2(i); } return v1; 
-    }
-
-    template<class R1, class R2> inline
-    Vector<R1>&
-    operator*=(Vector<R1>& v1, const R2& s2) {
-      for(size_type i=0; i!=v1.size(); ++i) { v1(i)*=s2; } return v1; 
-    }
-
-    template<class R1, class R2> inline
-    Vector<R1>&
-    operator/=(Vector<R1>& v1, const R2& s2) {
-      for(size_type i=0; i!=v1.size(); ++i) { v1(i)/=s2; } return v1; 
-    }
-
-
-    template<class E1, class E2> inline
-    BinaryVectorVectorExpression<E1,E2,plus> 
-    operator+(const VectorExpression<E1>& e1, const VectorExpression<E2>& e2) {
-      const E1& v1=e1(); const E2& v2=e2();
-      if(v1.size()!=v2.size()) {
-        ARIADNE_THROW(IncompatibleSizes,"VectorExpression operator+(VectorExpression ve1, VectorExpression ve2)","ve1.size()="<<v1.size()<<", ve2.size()="<<v2.size());
-      }
-      return BinaryVectorVectorExpression<E1,E2,plus>(v1,v2,plus());
-    }
-
-    template<class E1, class E2> inline
-    BinaryVectorVectorExpression<E1,E2,minus> 
-    operator-(const VectorExpression<E1>& e1, const VectorExpression<E2>& e2) {
-      const E1& v1=e1(); const E2& v2=e2();
-      if(v1.size()!=v2.size()) {
-        ARIADNE_THROW(IncompatibleSizes,"VectorExpression operator-(VectorExpression ve1, VectorExpression ve2)","ve1.size()="<<v1.size()<<", ve2.size()="<<v2.size());
-      }
-      return BinaryVectorVectorExpression<E1,E2,minus>(v1,v2,minus());
-    }
-
-    template<class E1, class E2> inline
-    BinaryVectorScalarExpression<E1,E2,times> 
-    operator*(const E2& e2, const VectorExpression<E1>& e1) {
-      const E1& v1=e1(); const E2& s2=e2;
-      return BinaryVectorScalarExpression<E1,E2,times>(v1,s2,times());
-    }
-
-    template<class E1, class E2> inline
-    BinaryVectorScalarExpression<E1,E2,times> 
-    operator*(const VectorExpression<E1>& e1, const E2& e2) {
-      const E1& v1=e1(); const E2& s2=e2;
-      return BinaryVectorScalarExpression<E1,E2,times>(v1,s2,times());
-    }
-
-    template<class E1, class E2> inline
-    BinaryVectorScalarExpression<E1,typename Numeric::traits<E2>::closure_type,divides> 
-    operator/(const VectorExpression<E1>& e1, const E2& e2) {
-      const E1& v1=e1(); const E2& s2=e2;
-      return BinaryVectorScalarExpression<E1,E2,divides>(v1,s2,divides());
-    }
+    template<class E1, class E2> BinaryVectorVectorExpression<E1,E2,plus> operator+(const VectorExpression<E1>& e1, const VectorExpression<E2>& e2);
+    template<class E1, class E2> BinaryVectorVectorExpression<E1,E2,minus> operator-(const VectorExpression<E1>& e1, const VectorExpression<E2>& e2);
+    template<class E1, class E2> BinaryVectorScalarExpression<E1,E2,times> operator*(const E2& e2, const VectorExpression<E1>& e1);
+    template<class E1, class E2> BinaryVectorScalarExpression<E1,E2,times> operator*(const VectorExpression<E1>& e1, const E2& e2);
+    template<class E1, class E2> BinaryVectorScalarExpression<E1,typename Numeric::traits<E2>::closure_type,divides> operator/(const VectorExpression<E1>& e1, const E2& e2);
 
 
 
-    template<class R>
-    inline 
-    Vector<R>
-    zero_vector(size_type n)
-	{
-      return Vector<R>(n);
-	}
+  template<class R> Vector<R> zero_vector(size_type n);
+  template<class R> Vector<R> unit_vector(size_type n, size_type i);
 	
 	
-    template<class R>
-    inline 
-    Vector<R>
-    unit_vector(size_type n, size_type i)
-	{
-      Vector<R> result(n);
-	  result[i]=1;
-      return result;
-	}
-	
-	
-    template<class R>
-    inline 
-    Vector<R>
-    approximate_value(const Vector< Numeric::Interval<R> >& iv) 
-    {
-      Vector<R> result(iv.size());
-      for(size_type i=0; i!=iv.size(); ++i) {
-        result(i) = approximate_value(iv(i));
-      }
-      return result;
-    }
+  template<class R> Vector<R> approximate_value(const Vector< Numeric::Interval<R> >& iv); 
+  template<class R> bool contains_value(const Vector< Numeric::Interval<R> >& iv,const Vector<R>& v); 
 
-    template<class R>
-    inline 
-    bool
-    contains_value(const Vector< Numeric::Interval<R> >& iv,const Vector<R>& v) 
-    {
-      ARIADNE_CHECK_EQUAL_SIZES(iv,v,"bool contains_value(Vector<Interval>,Vector<Float>)");
-      for(size_type i=0; i!=v.size(); ++i) {
-        if(!Numeric::contains_value(iv(i),v(i))) {
-          return false;
-        }
-      }
-      return true;
-    }
-
-    template<class R>
-    inline
-    std::ostream&
-    operator<<(std::ostream& os, const Vector<R>& v)
-    {
-       return v.write(os);
-    }
-    
-    template<class R>
-    inline
-    std::istream&
-    operator>>(std::istream& is, Vector<R>& v)
-    {
-       return v.read(is);
-    }
-    
-    template<class R>
-    inline
-    std::ostream&
-    operator<<(std::ostream& os, const VectorSlice<R>& vs)
-    {
-       return vs.write(os);
-    }
+  template<class R> std::ostream& operator<<(std::ostream& os, const Vector<R>& v);
+  template<class R> std::istream& operator>>(std::istream& is, Vector<R>& v);
+  template<class R> std::ostream& operator<<(std::ostream& os, const VectorSlice<R>& vs);
     
     
     
     
     
-    template<class R> inline
-    Vector<R> 
-    operator-(const Vector<R>& v) {
-      Vector<R> result(v.size());
-      for(size_type i=0; i!=result.size(); ++i) {
-        result(i)=-v(i);
-      }
-      return result;
-    }
-    
-    template<class R1, class R2> inline
-    Vector<typename Numeric::traits<R1,R2>::arithmetic_type> 
-    operator+(const Vector<R1>& v1, const Vector<R2>& v2) {
-      ARIADNE_CHECK_EQUAL_SIZES(v1,v2,"Vector operator+(Vector,Vector)");
-      Vector<typename Numeric::traits<R1,R2>::arithmetic_type> result(v1.size());
-      for(size_type i=0; i!=result.size(); ++i) {
-        result(i)=v1(i)+v2(i);
-      }
-      return result;
-    }
-    
-    template<class R1, class R2> inline
-    Vector<class Numeric::traits<R1,R2>::arithmetic_type> 
-    operator-(const Vector<R1>& v1, const Vector<R2>& v2) {
-      ARIADNE_CHECK_EQUAL_SIZES(v1,v2,"Vector operator-(Vector,Vector)");
-      Vector<typename Numeric::traits<R1,R2>::arithmetic_type> result(v1.size());
-      for(size_type i=0; i!=result.size(); ++i) {
-        result(i)=v1(i)-v2(i);
-      }
-      return result;
-    }
-    
-    template<class R1, class R2> inline
-    Vector<typename Numeric::traits<R1,R2>::arithmetic_type> 
-    operator*(const R1& s, const Vector<R2>& v) {
-      return v*s;
-    }
-    
-    template<class R1, class R2> inline
-    Vector<typename Numeric::traits<R1,R2>::arithmetic_type> 
-    operator*(const Vector<R1>& v, const R2& s) {
-      Vector<typename Numeric::traits<R1,R2>::arithmetic_type> result(v.size());
-      for(size_type i=0; i!=result.size(); ++i) {
-        result(i)=v(i)*s;
-      }
-      return result;
-    }
-    
-    template<class R1, class R2> inline
-    Vector<typename Numeric::traits<R1,R2>::arithmetic_type> 
-    operator/(const Vector<R1>& v, const R2& s) {
-      Vector<typename Numeric::traits<R1,R2>::arithmetic_type> result(v.size());
-      for(size_type i=0; i!=result.size(); ++i) {
-        result(i)=v(i)/s;
-      }
-      return result;
-    }
-    
+    template<class R> Vector<R> operator-(const Vector<R>& v);
+    template<class R1, class R2> Vector<typename Numeric::traits<R1,R2>::arithmetic_type> operator+(const Vector<R1>& v1, const Vector<R2>& v2);
+    template<class R1, class R2> Vector<class Numeric::traits<R1,R2>::arithmetic_type> operator-(const Vector<R1>& v1, const Vector<R2>& v2);
+    template<class R1, class R2> Vector<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const R1& s, const Vector<R2>& v);
+    template<class R1, class R2> Vector<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const Vector<R1>& v, const R2& s);
+    template<class R1, class R2> Vector<typename Numeric::traits<R1,R2>::arithmetic_type> operator/(const Vector<R1>& v, const R2& s);
    
     
-    template<class R> inline
-    Vector<R> add_approx(const Vector<R>& u, const Vector<R>& v) {
-      ARIADNE_CHECK_EQUAL_SIZES(u,v,"Vector add_approx(Vector,Vector)");
-      Vector<R> result(u.size());
-      for(size_type i=0; i!=u.size(); ++i) {
-        result(i)=add_approx(u(i),v(i));
-      }
-      return result;
-    }
-      
-    template<class R> inline
-    Vector<R> sub_approx(const Vector<R>& u, const Vector<R>& v) {
-      ARIADNE_CHECK_EQUAL_SIZES(u,v,"Vector sub_approx(Vector,Vector)");
-      Vector<R> result(u.size());
-      for(size_type i=0; i!=u.size(); ++i) {
-        result(i)=sub_approx(u(i),v(i));
-      }
-      return result;
-    }
-      
-    template<class R> inline
-    Vector<R> mul_approx(const R& s, const Vector<R>& v) {
-      Vector<R> result(v.size());
-      for(size_type i=0; i!=v.size(); ++i) {
-        result(i)=mul_approx(v(i),s);
-      }
-      return result;
-    }
-      
-    template<class R> inline
-    Vector<R> mul_approx(const Vector<R>& v, const R& s) {
-      Vector<R> result(v.size());
-      for(size_type i=0; i!=v.size(); ++i) {
-        result(i)=mul_approx(v(i),s);
-      }
-      return result;
-    }
-      
-    template<class R> inline
-    Vector<R> div_approx(const Vector<R>& v, const R& s) {
-      Vector<R> result(v.size());
-      for(size_type i=0; i!=v.size(); ++i) {
-        result(i)=div_approx(v(i),s);
-      }
-      return result;
-    }
-      
+    template<class R> Vector<R> add_approx(const Vector<R>& u, const Vector<R>& v);
+    template<class R> Vector<R> sub_approx(const Vector<R>& u, const Vector<R>& v);
+    template<class R> Vector<R> mul_approx(const R& s, const Vector<R>& v);
+    template<class R> Vector<R> mul_approx(const Vector<R>& v, const R& s);
+    template<class R> Vector<R> div_approx(const Vector<R>& v, const R& s);
     
     
-    template<class R> inline 
-    R inner_product(const Vector<R>& u, const Vector<R>& v) 
-    {
-      ARIADNE_CHECK_EQUAL_SIZES(u,v,"Scalar inner_product(Vector,Vector)");
-      R result=0;
-      for(size_type i=0; i!=u.size(); ++i) {
-        result+=u(i)*v(i);
-      }
-      return result;
-    }
+    template<class R> R inner_product(const Vector<R>& u, const Vector<R>& v);
+    template<class R> Vector<R> direct_sum(const Vector<R>& v1, const Vector<R>& v2);
+    template<class R> R sup_norm(const Vector<R>& v);
+    template<class R> R norm(const Vector<R>& v);
 
-    template<class R> inline 
-    Vector<R> direct_sum(const Vector<R>& v1, const Vector<R>& v2) 
-    {
-      Vector<R> result(v1.size()+v2.size());
-      for(size_type i=0; i!=v1.size(); ++i) {
-        result(i)=v1(i);
-      }
-      for(size_type i=0; i!=v2.size(); ++i) {
-        result(i+v1.size())=v2(i);
-      }
-      return result;
-    }
-    
-    /*! \brief The supremum norm. */
-    template<class R> inline 
-    R norm(const Vector<R>& v) 
-    {
-      return v.norm();
-    }
-    
-    
   }
 }
 
+#include "vector.inline.h"
 
 #endif /* ARIADNE_VECTOR_H */

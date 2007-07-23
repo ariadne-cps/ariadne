@@ -125,6 +125,8 @@ void export_vector()
   def("zero_vector",&zero_vector<Float>);
   def("unit_vector",&unit_vector<Float>);
 
+  def("sup_norm",&sup_norm<Float>);
+  def("norm",&sup_norm<Float>);
   // Need 'Float' here to extract vector of proper class
   def("extract_vector",&extract_vector<Float>,"Extract an Ariadne vector from a Python list");
 }
@@ -156,6 +158,9 @@ void export_vector<Rational>()
     .def("__div__",&div<Vec,Vec,R,Vec,R>)
     .def(self_ns::str(self))
   ;
+
+  def("sup_norm",&sup_norm<Float>);
+  def("norm",&sup_norm<Float>);
 }
 
 
@@ -193,6 +198,9 @@ void export_interval_vector() {
     .def("__div__",&div<IVec,IVec,I>)
     .def(self_ns::str(self))
   ;
+  
+  def("sup_norm",&sup_norm<Float>);
+  def("norm",&sup_norm<Float>);
 }
 
 template void export_vector<Float>();

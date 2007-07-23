@@ -113,7 +113,7 @@ Evaluation::gexp(
     result=result+term;
   }
   
-  R err=mul_up(pow_up((A.norm()*t).upper(),ns),gexp_up((A.norm()*t).upper(),k+ns));
+  R err=mul_up(pow_up((norm(A)*t).upper(),ns),gexp_up((norm(A)*t).upper(),k+ns));
   I ierr=err*I(-1,1);
   result+=Vector<I>(result.size(),ierr);
   
@@ -152,7 +152,7 @@ Evaluation::gexp(
     result=result+term;
   }
   
-  R err=mul_up(pow_up((A.norm()*t).upper(),ns),gexp_up((A.norm()*t).upper(),k+ns));
+  R err=mul_up(pow_up((norm(A)*t).upper(),ns),gexp_up((norm(A)*t).upper(),k+ns));
   I ierr=err*I(-1,1);
   result+=Matrix<I>(result.number_of_rows(),result.number_of_columns(),&ierr,0,0);
   

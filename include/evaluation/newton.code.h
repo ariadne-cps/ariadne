@@ -54,7 +54,7 @@ Evaluation::IntervalNewtonSolver<R>::solve(const System::VectorFieldInterface<R>
     if(verbosity>1) { std::clog << "  f(m)=" << w << std::endl; }
     LinearAlgebra::Matrix<I> A=f.jacobian(x);
     if(verbosity>1) { std::clog << "  Df(r)=" << A << std::endl; }
-    LinearAlgebra::Matrix<I> Ainv=A.inverse();
+    LinearAlgebra::Matrix<I> Ainv=LinearAlgebra::inverse(A);
     if(verbosity>1) { std::clog << "  inverse(Df(r))=" << Ainv << std::endl; }
     LinearAlgebra::Vector<I> dx=Ainv * w;
     if(verbosity>1) { std::clog << "  dx=" << dx << std::endl; }

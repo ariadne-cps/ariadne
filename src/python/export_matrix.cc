@@ -89,7 +89,8 @@ void matrix_set_item(Matrix<R>& M, boost::python::object obj, const A& x) {
 template<class R1,class R2> inline 
 Vector<typename Numeric::traits<R1,R2>::arithmetic_type> 
 matrix_vector_solve(const Matrix<R1>& A, const Vector<R2>& v) {
- return Matrix<typename Numeric::traits<R1,R2>::arithmetic_type>(A).solve(v);
+  typedef typename Numeric::traits<R1,R2>::arithmetic_type F;
+  return LinearAlgebra::solve(static_cast<const Matrix<F>&>(A),static_cast<const Vector<F>&>(v));
 }
 
 template<class R> inline 
@@ -101,7 +102,7 @@ matrix_inverse(const Matrix<R>& A) {
 template<class R> inline 
 Matrix<R> 
 matrix_transpose(const Matrix<R>& A) {
-  return A.transpose();
+  return  LinearAlgebra::transpose(A);
 }
 
 template<class R>
@@ -142,10 +143,10 @@ void export_matrix()
     .def("__div__",&div<IMx,Mx,I>)
     .def(self_ns::str(self)) 
   ;
-  def("solve",&matrix_vector_solve<R,R>);
-  def("solve",&matrix_vector_solve<R,I>);
-  def("transpose",&matrix_transpose<R>);
-  def("inverse",&matrix_inverse<R>);
+  def("solve",(Vector<I>(*)(const Matrix<R>&,const Vector<R>&))&solve);
+  def("solve",(Vector<I>(*)(const Matrix<R>&,const Vector<I>&))&solve);
+  def("transpose",(Matrix<R>(*)(const Matrix<R>&))&transpose);
+  def("inverse",(Matrix<I>(*)(const Matrix<R>&))&inverse);
 
   // Need 'Float' here to extract vector of proper class
   def("extract_matrix",&extract_matrix<Float>,"Extract an Ariadne matrix from a Python list of lists");
@@ -185,9 +186,9 @@ void export_matrix<Rational>()
     .def(self_ns::str(self)) 
   ;
   
-  def("solve",&matrix_vector_solve<R,R>);
-  def("transpose",&matrix_transpose<R>);
-  def("inverse",&matrix_inverse<R>);
+  def("solve",(Vector<R>(*)(const Matrix<R>&,const Vector<R>&))&solve);
+  def("transpose",(Matrix<R>(*)(const Matrix<R>&))&transpose);
+  def("inverse",(Matrix<R>(*)(const Matrix<R>&))&inverse);
 }
 
 template<class R>
@@ -233,12 +234,13 @@ void export_interval_matrix()
     .def(self_ns::str(self))
   ;
   
-  def("solve",&matrix_vector_solve<R,I>);
-  def("solve",&matrix_vector_solve<I,R>);
-  def("solve",&matrix_vector_solve<I,I>);
-  def("transpose",&matrix_transpose<I>);
-  def("inverse",&matrix_inverse<I>);
-  def("exp",&LinearAlgebra::exp<R>);
+  def("solve",(Vector<I>(*)(const Matrix<R>&,const Vector<I>&))&solve);
+  def("solve",(Vector<I>(*)(const Matrix<I>&,const Vector<R>&))&solve);
+  def("solve",(Vector<I>(*)(const Matrix<I>&,const Vector<I>&))&solve);
+  def("transpose",(Matrix<I>(*)(const Matrix<I>&))&transpose);
+  def("inverse",(Matrix<I>(*)(const Matrix<I>&))&inverse);
+  def("exp",(Matrix<I>(*)(const Matrix<R>&))&exp);
+  def("exp",(Matrix<I>(*)(const Matrix<I>&))&exp);
 }
 
 template void export_matrix<Float>();

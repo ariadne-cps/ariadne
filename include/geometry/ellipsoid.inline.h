@@ -89,7 +89,7 @@ namespace Ariadne {
     bool 
     Ellipsoid<R>::empty_interior() const
     {
-      return _bilinear_form.singular();
+      return LinearAlgebra::singular(_bilinear_form);
     }
       
 

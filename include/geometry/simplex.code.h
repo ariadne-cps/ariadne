@@ -76,7 +76,7 @@ namespace Ariadne {
         v(i)=pt[i];
       }
       v(pt.dimension())=1;
-      LinearAlgebra::Matrix<F> Ginv=this->generators().inverse();
+      LinearAlgebra::Matrix<F> Ginv=LinearAlgebra::inverse(this->generators());
       return Ginv*v;
     }
     

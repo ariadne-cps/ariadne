@@ -77,7 +77,7 @@ int test_constraint_hybrid_automaton()
   const ConstraintDiscreteMode<R>& mode2=automaton.new_mode(mode2_id,dynamic,constraint2);
   id_type event1_id=2;
   id_type event2_id=3;
-  const ConstraintDiscreteTransition<R>& transition1=automaton.new_transition(event1_id,mode1_id,mode1_id,reset,activation);
+  const ConstraintDiscreteTransition<R>& transition1=automaton.new_unforced_transition(event1_id,mode1_id,mode1_id,reset,activation);
   const ConstraintDiscreteTransition<R>& transition2=automaton.new_forced_transition(event2_id,mode1_id,mode1_id,reset,guard);
   
   cout << mode1  <<  "\n" << mode2 << "\n" << transition1 << "\n" << transition2 << endl;

@@ -121,8 +121,8 @@ test_matrix()
   iA1=Matrix< Interval<R> >::identity(4);
   cout << "iA1= " << iA1 << endl;
 
-  cout << "iA4.norm()=" << iA4.norm() << endl;
-  cout << "iA4.norm().upper()=" << iA4.norm().upper() << endl;
+  cout << "norm(iA4)=" << norm(iA4) << endl;
+  cout << "norm(iA4).upper()=" << norm(iA4).upper() << endl;
   
   return 0;
 }

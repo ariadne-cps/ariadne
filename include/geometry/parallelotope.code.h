@@ -95,7 +95,7 @@ namespace Ariadne {
     R
     Parallelotope<R>::volume() const
     {
-      return approximate_value(this->generators().determinant());
+      return approximate_value(LinearAlgebra::determinant(this->generators()));
     }
    
     
@@ -104,7 +104,7 @@ namespace Ariadne {
     void 
     Parallelotope<R>::_compute_generators_inverse() const 
     {  
-      this->_generators_inverse=this->generators().inverse();
+      this->_generators_inverse=LinearAlgebra::inverse(this->generators());
     }
     
       
@@ -112,7 +112,7 @@ namespace Ariadne {
     void 
     Parallelotope< Numeric::Interval<R> >::_compute_generators_inverse() const 
     {  
-      this->_generators_inverse=this->generators().inverse();
+      this->_generators_inverse=LinearAlgebra::inverse(this->generators());
     }
     
     template<class R>
@@ -208,7 +208,7 @@ namespace Ariadne {
       LinearAlgebra::Vector<F> c=this->centre().position_vector();
       LinearAlgebra::Vector<F> d=p-c;
       LinearAlgebra::Matrix<F> G=this->generators();
-      return G.solve(d);
+      return LinearAlgebra::solve(G,d);
     }
 
 
@@ -264,7 +264,7 @@ namespace Ariadne {
       }
       
       LinearAlgebra::Matrix<I> Ginv=LinearAlgebra::inverse(LinearAlgebra::Matrix<I>(Gmid));
-      R err = ((Ginv*D).norm()+(Ginv*G).norm()).upper();
+      R err = (norm(Ginv*D)+norm(Ginv*G)).upper();
 
       for(size_type i=0; i!=n; ++i) {
         for(size_type j=0; j!=n; ++j) {
@@ -273,7 +273,7 @@ namespace Ariadne {
       }
       
       // Check to make such result is valid.
-      assert((bool)(LinearAlgebra::norm(LinearAlgebra::row_norms(Gmid.inverse()*G)+(cmid-c))<=R(1)));
+      assert((bool)(LinearAlgebra::norm(LinearAlgebra::row_norms(LinearAlgebra::inverse(Gmid)*G)+(cmid-c))<=R(1)));
       return Geometry::Parallelotope<R>(cmid,Gmid);
     }
     
@@ -304,7 +304,7 @@ namespace Ariadne {
       LinearAlgebra::QRMatrix<I> QR(G);
       LinearAlgebra::Matrix<I> Q=QR.Q();
       LinearAlgebra::Matrix<R> Qmid=approximate_value(Q);
-      LinearAlgebra::Vector<I> Rrwnrm=LinearAlgebra::row_norms(Qmid.transpose()*G);
+      LinearAlgebra::Vector<I> Rrwnrm=LinearAlgebra::row_norms(LinearAlgebra::transpose(Qmid)*G);
       for(size_type i=0; i!=d; ++i) {
         R scale=(Rrwnrm(i)+cerr(i)).upper();
         for(size_type j=0; j!=d; ++j) {
@@ -344,7 +344,7 @@ namespace Ariadne {
       LinearAlgebra::QRMatrix<I> QR(G);
       LinearAlgebra::Matrix<I> Q=QR.Q();
       LinearAlgebra::Matrix<R> Qmid=approximate_value(Q);
-      LinearAlgebra::Vector<I> Rrwnrm=LinearAlgebra::row_norms(Qmid.transpose()*G);
+      LinearAlgebra::Vector<I> Rrwnrm=LinearAlgebra::row_norms(LinearAlgebra::transpose(Qmid)*G);
       for(size_type i=0; i!=d; ++i) {
         R scale=(Rrwnrm(i)+cerr(i)).upper();
         for(size_type j=0; j!=d; ++j) {

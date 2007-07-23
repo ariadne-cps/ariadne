@@ -30,6 +30,7 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <cassert>
 
 #include "../base/tribool.h"
 #include "../base/exceptions.h"

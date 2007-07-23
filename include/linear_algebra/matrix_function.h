@@ -39,6 +39,10 @@ namespace Ariadne {
       
     template<class R>
     Matrix< Numeric::Interval<R> >
+    exp(const Matrix<R>& A); 
+
+    template<class R>
+    Matrix< Numeric::Interval<R> >
     exp(const Matrix< Numeric::Interval<R> >& A); 
 
   }

@@ -76,9 +76,9 @@ test_linear_algebra<Rational>()
   
   //assert(1==13*A(2,1));
   
-  x=A.solve(b);
+  x=solve(A,b);
   
-  cout << "A.solve(b)= " << x << endl;
+  cout << "solve(A,b)= " << x << endl;
   cout << "Ax=" << A*b << endl;
   
   assert(x(0)==1 && x(1)==1 && x(2)==1);

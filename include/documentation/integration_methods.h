@@ -115,7 +115,7 @@ The classical Lohner integrator is a first-order in space integration scheme. To
 \f[ \begin{aligned} y(x,t) &= y(x,t)-y(x,0) + y(x,0) \\
                            &= t\dot{y}(x,0)+\frac{t^2}{2}\ddot{y}(x,\tau) + x \\
                            &= t\bigl(\dot{y}(c,0) + \dot{y}'(\xi,0)\cdot(x-c) \bigr) + \frac{t^2}{2}\ddot{y}(x,\tau) + (x-c) + c \\
-                           &= c+tf(c)+\frac{t^2}{2} Df(y(x,\tau))f(x,\tau) + \bigl(I+t\,Df(\xi)\bigr)\cdot(x-c) \\[\jot]
+                           &= c+tf(c)+\frac{t^2}{2} Df(y(x,\tau))f(y(x,\tau)) + \bigl(I+t\,Df(\xi)\bigr)\cdot(x-c) \\[\jot]
                            &\in c+tf(c)+\frac{t^2}{2} Df(B)f(B) + \bigl(I+t\,Df(X)\bigr)\cdot(x-c) \end{aligned} \f]
 Alternatively, by computing bounds on the Jacobian derivative \f$y'(x,t)=D\Phi(x,t)\f$, we obtain a \f$C^1\f$ Lohner integrator
 \f[ \begin{aligned} y(x,t) &= y(x,t)-y(c,t) + y(c,t) \\

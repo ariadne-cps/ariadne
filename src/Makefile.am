@@ -69,7 +69,8 @@ EVALUATION_SRC = \
 	evaluation/lohner_integrator.cc \
 	evaluation/flow.cc \
 	evaluation/hybrid_evolver.cc \
-	evaluation/constraint_hybrid_evolver.cc
+	evaluation/constraint_hybrid_evolver.cc \
+	evaluation/constraint_hybrid_evolver_plugin.cc 
 
 OUTPUT_SRC = \
 	output/logging.cc \

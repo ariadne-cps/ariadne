@@ -1,5 +1,5 @@
 /***************************************************************************
- *            constraint_hybrid_evolver.h
+ *            constraint_hybrid_evolver_plugin.h
  *
  *  Copyright  2007  Pieter Collins
  *  Pieter.Collins@cwi.nl
@@ -37,32 +37,12 @@
 #include "../system/declarations.h"
 #include "../evaluation/declarations.h"
 #include "../evaluation/integrator.h"
+#include "../evaluation/hybrid_time.h"
 
 namespace Ariadne {  
   namespace Evaluation {
   
-    template<class R> class LohnerIntegrator;
-
-    /*! \brief */
-    class HybridTime {
-     public:
-      HybridTime(Numeric::Rational t) : _time(t), _steps(0) { }
-      HybridTime(Numeric::Rational t, Numeric::Integer s) : _time(t), _steps(s) { }
-      Numeric::Rational& time() { return this->_time; }
-      Numeric::Integer& steps() { return this->_steps; }
-      const Numeric::Rational& time() const { return this->_time; }
-      const Numeric::Integer& steps() const { return this->_steps; }
-      bool operator==(const HybridTime& other) const { return this->_time==other._time && this->_steps==other._steps; }
-      bool operator!=(const HybridTime& other) const { return !(*this==other); }
-      bool operator<(const HybridTime& other) const { return this->_time<other._time; }
-      HybridTime operator+(const HybridTime& other) const { return HybridTime(this->_time+other._time,this->_steps+other._steps); }
-      HybridTime operator+(const Numeric::Rational& other) const { return HybridTime(this->_time+other,this->_steps); }
-     private:
-      Numeric::Rational _time;
-      Numeric::Integer _steps;
-    };
-
-    typedef HybridTime hybrid_time_type;  
+    template<class R> class ConstraintHybridEvolverPlugin;
 
 
     /*! \ingroup Evolve
@@ -77,10 +57,12 @@ namespace Ariadne {
       typedef typename System::ConstraintDiscreteTransition<R> transition_type;
       typedef typename Geometry::Zonotope<Numeric::Interval<R> > continuous_basic_set_type;
       typedef Geometry::HybridBasicSet<continuous_basic_set_type> hybrid_basic_set_type;
-      typedef Geometry::HybridTimedBasicSet<continuous_basic_set_type> timed_set_type;
+      //typedef Geometry::HybridTimedBasicSet<continuous_basic_set_type> timed_set_type;
+      typedef TimeModelHybridBasicSet<continuous_basic_set_type> timed_set_type;
       typedef Geometry::HybridListSet<continuous_basic_set_type> hybrid_list_set_type;
       typedef Geometry::ConstraintInterface<R> constraint_type;
       typedef Geometry::Rectangle<R> bounding_box_type;
+      typedef TimeModel<R> time_model_type;
 
       typedef boost::shared_ptr< const Geometry::ConstraintInterface<R> > constraint_const_pointer;
      public:
@@ -107,78 +89,6 @@ namespace Ariadne {
       /*! \brief The time before the sets are locked to the grid. */
       time_type lock_to_grid_time() const;
 
-      //@}
-
-      //! \name Evolution steps.
-      /*! \brief Compute the possible states reached by an unforced jump within time \f$[-h,h]\f$ remaining within \a source_bounding_box and \a destination_bounding_box.
-       */
-      std::vector<timed_set_type>
-      unforced_jump(const transition_type& transition,
-                    const timed_set_type& initial_set,
-                    const bounding_box_type& source_bounding_box,
-                    const bounding_box_type& destination_bounding_box,
-                    const time_type& step_size) const;
-
-      /*! \brief Compute the possible states reached by a forced jump within time \f$[-h,h]\f$ remaining within \a source_bounding_box and \a destination_bounding_box.
-       */
-      std::vector<timed_set_type>
-      forced_jump(const transition_type& transition,
-                  const timed_set_type& initial_set,
-                  const bounding_box_type& source_bounding_box,
-                  const bounding_box_type& destination_bounding_box,
-                  const time_type& step_size) const;
-
-      /*! \brief Compute the possible states reached by an unforced jump within time \a h.
-       *
-       * The generators are given by
-       * \f[ D\Phi_2 \circ DF \circ D\Phi_1 G; \quad (D\Phi_i\circ DF \circ \dot{\Phi}_1 - \dot{\Phi}_2) (h/2) \f]
-       */
-      std::vector<timed_set_type>
-      forced_jump(const transition_type& transition,
-                  const timed_set_type& initial_set,
-                  const bounding_box_type& source_bounding_box,
-                  const time_type& step_size) const;
-
-      /*! \brief Compute the possible states reached by an unforced jump within time \a h. */
-      std::vector<timed_set_type>
-      unforced_jump(const transition_type& transition,
-                    const timed_set_type& basic_set,
-                    const bounding_box_type& source_bounding_box,
-                    const time_type& step_size) const;
-
-      timed_set_type
-      discrete_step(const transition_type& transition,
-                    const timed_set_type& initial_set) const;
-
-      timed_set_type
-      integration_step(const mode_type& mode,
-                       const timed_set_type& initial_set,
-                       const bounding_box_type& bounding_box,
-                       const time_type& step_size) const;
-
-      std::vector<timed_set_type>
-      lower_evolution_step(const System::ConstraintHybridAutomaton<R>& automaton, 
-                           const timed_set_type& initial_set,
-                           time_type& step_size) const;
-
-      std::vector<timed_set_type>
-      upper_evolution_step(const System::ConstraintHybridAutomaton<R>& automaton, 
-                           const timed_set_type& initial_set,
-                           time_type& step_size) const;
-
-      std::vector<timed_set_type>
-      lower_reachability_step(const System::ConstraintHybridAutomaton<R>& automaton, 
-                              const timed_set_type& initial_set,
-                              time_type& step_size) const;
-
-      std::vector<timed_set_type>
-      upper_reachability_step(const System::ConstraintHybridAutomaton<R>& automaton, 
-                              const timed_set_type& initial_set,
-                              time_type& step_size) const;
-
-
-      /*! \brief Subdivide the set. */
-      std::vector<timed_set_type> subdivide(const timed_set_type& ts) const;
       //@}
 
 
@@ -350,10 +260,7 @@ namespace Ariadne {
       hybrid_list_set_type _compute_list_set(const working_sets_type& working_sets, const Geometry::HybridSpace& locations) const;
 
      private:
-      Applicator<R>* _applicator;
-      // FIXME: Allow arbitrary integrators
-      IntegratorBase< R, System::VectorFieldInterface<R>, Geometry::Zonotope<I,I> >* _integrator;
-      
+      ConstraintHybridEvolverPlugin<R>* _plugin;
       mutable std::vector<timed_set_type> _trace;
     };
 

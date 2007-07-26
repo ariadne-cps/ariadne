@@ -95,7 +95,11 @@ eps.close()
 
 print "Done."
 
-set_integrator_verbosity(6)
+# set_integrator_verbosity(6)
+
+maximum_step_size=0.05;
+lock_to_grid_time=1;
+maximum_set_radius=0.5;
 
 integrator=EulerIntegrator(maximum_step_size,lock_to_grid_time,maximum_set_radius)
 

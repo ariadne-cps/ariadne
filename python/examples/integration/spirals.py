@@ -48,14 +48,14 @@ print "chainreach_set.size(),capacity()=",chainreach_set.size(),chainreach_set.c
 
 print "Exporting to text output...",
 txt=TxtPlot()
-txt.open("spirali-affine.txt")
+txt.open("spirals-affine.txt")
 txt.write(chainreach_set)
 txt.close()
 print "Done."
   
 print "Exporting to postscript output...",
 eps=EpsPlot()
-eps.open("spirali-affine.eps",bounding_box,0,1)
+eps.open("spirals-affine.eps",bounding_box,0,1)
 
 eps.set_line_style(True)
 eps.set_fill_colour("white")
@@ -75,7 +75,7 @@ print "Computing chainreach sets with Lohner Integrator..."
 print "chainreach_set.size(),capacity()=",chainreach_set.size(),chainreach_set.capacity()
 
 print "Exporting to postscript output...",
-eps.open("spirali-lohner.eps",bounding_box,0,1)
+eps.open("spirals-lohner.eps",bounding_box,0,1)
 
 eps.set_line_style(True)
 eps.set_fill_colour("white")
@@ -88,6 +88,8 @@ eps.close()
 
 print "Done."
 
+lock_to_grid_time=0.2; 
+
 integrator=EulerIntegrator(maximum_step_size,lock_to_grid_time,maximum_set_radius)
 
 print "Computing chainreach sets with Euler Integrator..."
@@ -95,7 +97,7 @@ chainreach_set=integrator.chainreach(dyn,initial_set,bounding_set)
 print "chainreach_set.size(),capacity()=",chainreach_set.size(),chainreach_set.capacity()
 
 print "Exporting to postscript output...",
-eps.open("spirali-euler.eps",bounding_box,0,1)
+eps.open("spirals-euler.eps",bounding_box,0,1)
 
 eps.set_line_style(True)
 eps.set_fill_colour("white")

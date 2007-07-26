@@ -246,7 +246,7 @@ Evaluation::ConstraintHybridEvolver<R>::forced_jump(const transition_type& trans
   Point<I> centre = continuous_state_set.centre();
   Rectangle<R> centre_bounding_box = this->_integrator->refine_flow_bounds(dynamic1,Rectangle<R>(centre),bounding_box,required_time_step);
   I centre_normal_derivative = inner_product(guard.gradient(centre_bounding_box),dynamic1(centre_bounding_box));
-  assert(centre_normal_derivative>0);
+  assert((bool)(centre_normal_derivative>0));
   I centre_crossing_time_interval = -guard.value(centre)/centre_normal_derivative;
   
   // Refine the estimate of the centre crossing time
@@ -269,7 +269,7 @@ Evaluation::ConstraintHybridEvolver<R>::forced_jump(const transition_type& trans
 
   // Estimate range of hitting times and the bounding box for flowed set
   I normal_derivative = inner_product(guard.gradient(bounding_box),dynamic1(bounding_box));
-  assert(normal_derivative>0);
+  assert((bool)(normal_derivative>0));
   I crossing_time_interval = -guard.value(bounding_box)/normal_derivative;
   Interval<Rational> flowed_crossing_time_interval = Interval<Rational>(crossing_time_interval) - estimated_centre_crossing_time;
 
@@ -653,7 +653,7 @@ Evaluation::ConstraintHybridEvolver<R>::upper_evolve(const System::ConstraintHyb
     timed_set_type working_set=working_sets.back(); working_sets.pop_back();
     time_type time_step=Numeric::min(this->maximum_step_size(),time_type(evolution_time-working_set.time()));
     ARIADNE_LOG(9,"working_set="<<working_set<<"\n");
-    assert(working_set.time()<=evolution_time);
+    assert((bool)(working_set.time()<=evolution_time));
     
     if(working_set.time()==evolution_time) {
       ARIADNE_LOG(9,"  reached evolution time\n");

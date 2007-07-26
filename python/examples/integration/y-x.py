@@ -95,6 +95,8 @@ eps.close()
 
 print "Done."
 
+lock_to_grid_time=1;
+
 integrator=EulerIntegrator(maximum_step_size,lock_to_grid_time,maximum_set_radius)
 
 print "Computing chainreach sets with Euler Integrator..."

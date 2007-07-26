@@ -47,9 +47,9 @@ print "Adjoining bounding rectangle"
 bounding_set.adjoin_over_approximation(bounding_box)
 print "bounding_set.size(),capacity()=",bounding_set.size(),bounding_set.capacity()
 
-maximum_step_size=0.005;
-lock_to_grid_time=2;
-maximum_set_radius=0.1;
+maximum_step_size=0.5;
+lock_to_grid_time=1;
+maximum_set_radius=0.5;
 
 integrator=AffineIntegrator(maximum_step_size,lock_to_grid_time,maximum_set_radius)
 

@@ -49,8 +49,8 @@ namespace Ariadne {
      * lower-semicomputable, and \f$X\times U\Rightarrow X\f$, \f$(x,u)\mapsto f(x,u,v)\f$
      * must be upper-semicomputable.
      *
-     * Currently, a discrete-time control system is defined by operator()(const Geometry::Rectangle<R>&, const Geometry::Rectangle<R>&, const Geometry::Rectangle<R>&) const 
-     * acting on rectangles in \f$X\times U\times V\f$, and by derivatives (see the Map class for details).
+     * Currently, a discrete-time control system is defined by operator()(const Geometry::Point<F>&, const Geometry::Point<F>&, const Geometry::Point<F>&) const 
+     * acting on fuzzy points in \f$X\times U\times V\f$, and by derivatives (see the Map class for details).
      * In a future version, restrictions on \f$U(x)\f$ will also be allowed.
      */
     template<class R>

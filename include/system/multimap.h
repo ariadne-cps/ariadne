@@ -39,7 +39,7 @@ namespace Ariadne {
      * \ingroup DiscreteTime
      * \brief Abstract base class for multivalued functions.
      * 
-     * A multivalued function is specified by operator()(const Geometry::Rectangle<R>& A) const.
+     * A multivalued function is specified by operator()(const Geometry::Point<R>& pt) const.
      * This must return a list set \f$\hat{f}(A)\f$ such that either
      *   - <em>lower-semicontinuity:</em> all sets of \f$\hat{f}(A)\f$ intersect \f$f(A)\f$, or
      *   - <em>upper-semicontinuity:</em> the true image \f$\hat{f}(A)\f$ is a subset of \f$\overline{f}(A)\f$.

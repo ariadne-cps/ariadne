@@ -58,13 +58,11 @@ namespace Ariadne {
      * The action of a scalar function \f$f\f$ on the differential \f$(x,v)\f$ is defined \f[f(x,v):=(f(x),\;f'(x)v) . \f]
      * The chain rule is automatically obtained: \f[(g\circ f)(x,v)=\bigl(g(f(x)),\;g'(f(x))f'(x)v\bigr) . \f]
      *
-     * The constructor Differential(x,v) constructs a variable whose value is \a x and whose partial derivative with respect to the
-     * \a i th independent variable is \a v[i] .
-     * To construct a "constant" quantity with respect to \a n arguments, use %Differential(c, zero_vector(n)) .
-     * To construct the \a i th "variable" x of \a n, use %Differential(x,unit_vector(n,i)) .
+     * The constructor <tt>Differential(x,v)</tt> constructs a variable whose value is \f$x\f$ and whose partial derivative with respect to the
+     * \f$i\f$<sup>th</sup> independent variable is <tt>v[i]</tt> .
+     * To construct a "constant" quantity with respect to \f$n\f$ arguments, use <tt>%Differential(c, zero_vector(n))</tt>.
+     * To construct the \f$i\f$<sup>th</sup> "variable" \f$x\f$ of \a n, use <tt>%Differential(x,unit_vector(n,i))</tt>.
      *
-     * The specialization Differential<X,X> represents a quantiy and its first variation with respect to a single independent variable.
-     * The SecondDifferential<X,X,X> class represents a quantity and its first two variations with respect to an independent variable.
      *
      * \internal 
      * Maybe a better name for the class would be "Variation" or "Derivative". 
@@ -392,11 +390,11 @@ namespace Ariadne {
      *
      * The operation of a scalar function \f$f\f$ on the differential \f$(x,\dot{x})\f$ is defined \f[f(x,\dot{x},\ddot{x}):=(f(x),f'(x)\dot{x},f''(x)\dot{x}^2+f'(x)\ddot{x},\ldots) . \f]
      *
-     * To compute the \f$n^\th\f$ derivative of a scalar function \f$f\f$ at a point \f$x\f$, evaluate f(%Differential<%Float>::variable(n,x)).%derivative().
-     * To compute range of derivatives of a scalar function \f$f\f$ over an interval \f$I\f$, evaluate f(%Differential<%Interval>(I,1)).%derivative().
+     * To compute the \f$n^\mathrm{th}\f$ derivative of a scalar function \f$f\f$ at a point \f$x\f$, evaluate <tt>f(%Differential<%Float>::variable(n,x)).%derivative()</tt>.
+     * To compute range of derivatives of a scalar function \f$f\f$ over an interval \f$I\f$, evaluate <tt>f(%Differential<%Interval>(I,1)).%derivative()</tt>.
      *
-     * To construct a constant \a c, use ScalarDerivative(n,c) or ScalarDerivative::constant(n,c).
-     * To construct the derivative of a variable \a x, use ScalarDerivative(n,x,1) or ScalarDerivative::variable(n,x)..
+     * To construct a constant \f$c\f$, use <tt>ScalarDerivative(n,c) or ScalarDerivative::constant(n,c)</tt>.
+     * To construct the derivative of a variable \f$x\f$, use <tt>ScalarDerivative(n,x,1)</tt>. or <tt>ScalarDerivative::variable(n,x)</tt>.
      * 
      */
     template<class X>
@@ -405,52 +403,134 @@ namespace Ariadne {
      public:
       typedef X value_type;
 
+      /*! \brief Default constructor constructs a constant of degree zero. */
       ScalarDerivative()
         : _values(1u) { }
+      /*! \brief The constant zero of degree \a degree. */
       ScalarDerivative(uint degree)
         : _values(degree+1u) { }
+      /*! \brief The constant \a constant of degree \a degree. */
       template<class X0> ScalarDerivative(uint degree, const X0& constant)
         : _values(degree+1u) { this->_values[0]=constant; }
-      template<class X0, class X1> ScalarDerivative(uint degree, const X0& constant, const X1& first_derivative)
+      /*! \brief A scalar derivative of degree \a degree, with value \a value and first derivative \a first_derivative. Higher derivatives are set to zero. */
+      template<class X0, class X1> ScalarDerivative(uint degree, const X0& value, const X1& first_derivative)
         : _values(degree+1u) 
-      { this->_values[0]=constant; this->_values[1]=first_derivative; }
+      { this->_values[0]=value; this->_values[1]=first_derivative; }
 
+      /*! \brief A scalar derivative with values given by \a ary. */
       template<class XX> ScalarDerivative(const array<XX>& ary)
         : _values(ary) { }
+      /*! \brief A scalar derivative with values given by array literal \a str. */
       ScalarDerivative(const std::string& str) { 
         std::stringstream ss(str); read_array(ss,_values); }
     
+      /*! \brief Copy constructor. */
       template<class XX> ScalarDerivative(const ScalarDerivative<XX>& other) 
         : _values(other._values) { }
+      /*! \brief Copy assignment operator. */
       template<class XX> ScalarDerivative<X>& operator=(const ScalarDerivative<XX>& other) {
         this->_values=other._values; return *this; }
 
+      /*! \brief Equality operator. */
       template<class XX> bool operator==(const ScalarDerivative<XX>& other) {
         return this->_values==other._values; }
+      /*! \brief Inequality operator. */
       template<class XX> bool operator!=(const ScalarDerivative<XX>& other) {
         return !(*this==other); }
 
+      /*! \brief Construct a constant derivative of degree \a degree and value \a constant. */
       static ScalarDerivative<X> constant(uint degree, const X& constant) { 
         return ScalarDerivative<X>(degree,constant); }
+      /*! \brief Construct the derivative of degree \a degree for the indepentent variable at value \a value. */
       static ScalarDerivative<X> variable(uint degree, const X& value) {
         return ScalarDerivative<X>(degree,value,1); }
 
+      /*! \brief The degree (number of derivatives computed). */
       uint degree() const { 
         return this->_values.size()-1; }
+      /*! \brief The array of derivative values. */
       const array<X>& values() const {
         return this->_values; }
+      /*! \brief The \a i<sup> th</sup> derivative \f$d^if/dx^i\f$. */
       const X& derivative(uint i) const { 
         return this->_values[i]; }
+      /*! \brief A reference to the \a i<sup> th</sup> derivative \f$d^if/dx^i\f$. */
       X& operator[](uint i) { 
         return this->_values[i]; }
+      /*! \brief The \a i<sup> th</sup> derivative \f$d^if/dx^i\f$. */
       const X& operator[](uint i) const { 
         return this->_values[i]; }
+#ifdef DOXYGEN
+    //@{ 
+    //! \name Friend operations
+    /*! \brief The composition of two derivatives computes \f$d^iy/dt^i\f$ from \f$d^iy/dx^i\f$ and \f$d^ix/dt^i\f$. 
+     *  The composition inductively by
+     *  \f$ y^{[n]} = \sum_{i=0}^{n-1} \Bigl(\!\begin{array}{c}n\\i\end{array}\!\Bigr) {\dot{y}}^{[i]} x^{(n-i)} \f$
+     */
+    friend ScalarDerivative<X> compose(const ScalarDerivative<X>& y, const ScalarDerivative<X>& x);
+    /*! \brief The derivative of the inverse of \f$y\f$ evaluated at \f$x\f$. (Not currently implemented.) */
+    friend ScalarDerivative<X> inverse(const ScalarDerivative<X>& y, const X& x);
+    /*! \brief The minimum of two derivatives. Returns the derivative whose zero-th order value is minimal. */
+    friend ScalarDerivative<X> min(const ScalarDerivative<X>& x1, const ScalarDerivative<X>& x2);
+    /*! \brief The maximum of two derivatives. Returns the derivative whose zero-th order value is maximal. */
+    friend ScalarDerivative<X> max(const ScalarDerivative<X>& x1, const ScalarDerivative<X>& x2);
+    /*! \brief The derivatives of \f$+x\f$. Returns a copy. */
+    friend ScalarDerivative<X> pos(const ScalarDerivative<X>& x);
+    /*! \brief The derivatives of \f$-x\f$. */
+    friend ScalarDerivative<X> neg(const ScalarDerivative<X>& x);
+    /*! \brief The derivatives of \f$x+y\f$. */
+    friend ScalarDerivative<X> add(const ScalarDerivative<X>& x, const ScalarDerivative<X>& y);
+    /*! \brief The derivatives of \f$x-y\f$. */
+    friend ScalarDerivative<X> sub(const ScalarDerivative<X>& x, const ScalarDerivative<X>& y);
+    /*! \brief The derivatives of \f$x*y\f$. */
+    friend ScalarDerivative<X> mul(const ScalarDerivative<X>& x, const ScalarDerivative<X>& y);
+    /*! \brief The derivatives of \f$x/y\f$. */
+    friend ScalarDerivative<X> div(const ScalarDerivative<X>& x, const ScalarDerivative<X>& y);
+    /*! \brief The derivatives of \f$x^n\f$. */
+    friend ScalarDerivative<X> pow(const ScalarDerivative<X>& x, const Integer& n);
+    /*! \brief The derivatives of \f$\sqrt{x}\f$. */
+    friend ScalarDerivative<X> sqrt(const ScalarDerivative<X>& x);
+    /*! \brief The derivatives of \f$\exp(x)\f$. */
+    friend ScalarDerivative<X> exp(const ScalarDerivative<X>& x);
+    /*! \brief The derivatives of \f$\log(x)\f$. */
+    friend ScalarDerivative<X> log(const ScalarDerivative<X>& x);
+    /*! \brief The derivatives of \f$\sin(x)\f$. */
+    friend ScalarDerivative<X> sin(const ScalarDerivative<X>& x);
+    /*! \brief The derivatives of \f$\cos(x)\f$. */
+    friend ScalarDerivative<X> cos(const ScalarDerivative<X>& x);
+    /*! \brief The derivatives of \f$\tan(x)\f$. */
+    friend ScalarDerivative<X> tan(const ScalarDerivative<X>& x);
+    /*! \brief The derivatives of \f$\sin^{-1}(x)\f$. (Not currently implemented.) */
+    friend ScalarDerivative<X> asin(const ScalarDerivative<X>& x);
+    /*! \brief The derivatives of \f$\cos^{-1}(x)\f$. (Not currently implemented.) */
+    friend ScalarDerivative<X> acos(const ScalarDerivative<X>& x);
+    /*! \brief The derivatives of \f$\tan^{-1}(x)\f$. (Not currently implemented.) */
+    friend ScalarDerivative<X> atan(const ScalarDerivative<X>& x);
+
+    /*! \brief The derivatives of \f$x+y\f$. */
+    friend ScalarDerivative<X> operator+(const ScalarDerivative<X>& x, const ScalarDerivative<X>& y);
+    /*! \brief The derivatives of \f$x-y\f$. */
+    friend ScalarDerivative<X> operator-(const ScalarDerivative<X>& x, const ScalarDerivative<X>& y);
+    /*! \brief The derivatives of \f$x*y\f$. */
+    friend ScalarDerivative<X> operator*(const ScalarDerivative<X>& x, const ScalarDerivative<X>& y);
+    /*! \brief The derivatives of \f$x/y\f$. */
+    friend ScalarDerivative<X> operator/(const ScalarDerivative<X>& x, const ScalarDerivative<X>& y);
+
+    /*! \brief The derivatives of \f$c+x\f$ for a constant \f$c\f$. (Other mixed-mode arithmetic is also supported.) */
+    friend ScalarDerivative<X> operator+(const R& c, const ScalarDerivative<X>& x);
+
+    /*! \brief Stream output operator. */
+    friend std::ostream& operator<<(std::ostream& os, const ScalarDerivative<X>& x);
+    //@}
+#endif 
      private:
       array<X> _values;
     };
 
 
-    /*! The composition inductively by
+    /* The composition of two derivatives, computed in-place. 
+     *
+     *  The composition inductively by
      *  \f[ y^\[n\] = \sum_{i=0}^{n-1} \choose{n}{i} {\dot{y}}^{[i]} x^{(n-i)}
      */
     template<class X> inline
@@ -474,7 +554,7 @@ namespace Ariadne {
 
 
     template<class X> inline
-    void compose(ScalarDerivative<X>& y, const ScalarDerivative<X>& x)
+    ScalarDerivative<X> compose(const ScalarDerivative<X>& y, const ScalarDerivative<X>& x)
     {
       ScalarDerivative<X> result(std::min(x.degree(),y.degree()));
       for(uint n=0; n!=result.degree(); ++n) { result[n]=y[n]; }
@@ -482,6 +562,12 @@ namespace Ariadne {
       return result;
     }
 
+
+    template<class X> inline
+    ScalarDerivative<X> inverse(const ScalarDerivative<X>& y, const X& x)
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
 
     template<class X> inline 
     ScalarDerivative<X> 

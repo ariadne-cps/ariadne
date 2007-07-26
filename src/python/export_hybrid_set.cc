@@ -60,7 +60,7 @@ template<class R> inline
 SetInterface<R>* hybrid_set_get_pointer(HybridSet<R>& hs, location_type id) {
   std::cerr << "id="<<id<<std::endl;
   std::cerr << "hs="<<hs<<std::endl;
-  SetReference<R> hsref=hs[id];
+  SetInterface<R>& hsref=hs[id];
   std::cerr << "hsref="<<hsref<<std::endl;
   return &static_cast<SetInterface<R>&>(hsref);
 }
@@ -71,7 +71,7 @@ SetInterface<R>* hybrid_set_get_cloned_pointer(HybridSet<R>& hs, location_type i
 }
 
 template<class HS> inline 
-const typename HS::set_type& hybrid_set_get_item(HS& hs, location_type id) {
+const typename HS::continuous_state_set_type& hybrid_set_get_item(HS& hs, location_type id) {
   return hs[id];
 }
 
@@ -145,9 +145,7 @@ void export_hybrid_set()
     .def("new_location",&hybrid_set_new_location< HybridGridCellListSet<R>, Grid<R> >)
     .def("new_location",&hybrid_set_new_location< HybridGridCellListSet<R>, GridCellListSet<R> >)
     .def("new_location",&hybrid_set_new_location< HybridGridCellListSet<R>, GridMaskSet<R> >)
-    /*
     .def("__getitem__",&hybrid_set_get_item< HybridGridCellListSet<R> >, return_reference_existing_object)
-    */
     .def("__setitem__",&hybrid_set_set_item< HybridGridCellListSet<R>, GridCellListSet<R> >)
     .def("adjoin", &hybrid_set_adjoin_set< HybridGridCellListSet<R>, GridCellListSet<R> >)
     .def(self_ns::str(self))

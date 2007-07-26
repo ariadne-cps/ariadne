@@ -73,9 +73,10 @@ int bouncing_ball_automaton()
   time_type maximum_step_size=0.125;
   time_type lock_to_grid_time=0.5;
   R maximum_set_radius=0.25;
-  R grid_size=0.25;
+  R grid_size=0.125;
 
   Applicator<R> apply(maximum_set_radius, grid_size);
+
   AffineIntegrator<R> integrator(maximum_step_size,lock_to_grid_time,maximum_set_radius); 
   HybridEvolver<R> hybrid_evolver(apply,integrator);
   

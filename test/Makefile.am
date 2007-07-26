@@ -41,6 +41,7 @@ check_PROGRAMS = \
 	test_constraint_set test_level_set \
 	test_hybrid_automaton \
 	test_constraint_hybrid_automaton \
+	test_affine_model \
 	test_function \
 	test_newton \
 	test_apply \
@@ -94,6 +95,7 @@ test_polyhedron_SOURCES=test_polyhedron.cc
 test_constraint_SOURCES=test_constraint.cc
 test_constraint_set_SOURCES=test_constraint_set.cc
 test_level_set_SOURCES=test_level_set.cc
+test_affine_model_SOURCES=test_affine_model.cc
 test_hybrid_automaton_SOURCES=test_hybrid_automaton.cc
 test_constraint_hybrid_automaton_SOURCES=test_constraint_hybrid_automaton.cc
 test_function_SOURCES=test_function.cc

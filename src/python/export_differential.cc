@@ -170,6 +170,7 @@ void export_derivative()
     .def( init< uint, double, double >())
     .def( init< uint, A >())
     .def( init< uint, A, A >())
+    .def( init< std::string >())
     .def("__getitem__", &scalar_derivative_get_item<A>)
     .def("__setitem__",&scalar_derivative_set_item<A,double>)
     .def("__setitem__",&scalar_derivative_set_item<A,R>)
@@ -207,6 +208,11 @@ void export_derivative()
     .def(self_ns::str(self))
  ;
   
+  def("compose",(SD(*)(const SD&,const SD&))&Numeric::compose);
+  def("inverse",(SD(*)(const SD&,const A&))&Numeric::inverse);
+
+  def("max",(SD(*)(const SD&,const SD&))&Numeric::max);
+  def("min",(SD(*)(const SD&,const SD&))&Numeric::min);
   def("abs",(SD(*)(const SD&))&Numeric::abs);
   def("pow",(SD(*)(const SD&, int))&Numeric::pow);
 
@@ -237,6 +243,7 @@ void export_derivative<Rational>()
     .def( init< uint, Q >())
     .def( init< uint, double, double >())
     .def( init< uint, Q, Q >())
+    .def( init< std::string >())
     .def("__getitem__", &scalar_derivative_get_item<Q>)
     .def("__setitem__",&scalar_derivative_set_item<Q,double>)
     .def("__setitem__",&scalar_derivative_set_item<Q,Q>)
@@ -265,6 +272,11 @@ void export_derivative<Rational>()
     .def(self_ns::str(self))
  ;
   
+  def("compose",(SD(*)(const SD&,const SD&))&Numeric::compose);
+  def("inverse",(SD(*)(const SD&,const Q&))&Numeric::inverse);
+
+  def("max",(SD(*)(const SD&,const SD&))&Numeric::max);
+  def("min",(SD(*)(const SD&,const SD&))&Numeric::min);
   def("abs",(SD(*)(const SD&))&Numeric::abs);
   def("pow",(SD(*)(const SD&, int))&Numeric::pow);
 

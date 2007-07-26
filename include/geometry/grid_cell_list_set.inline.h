@@ -20,6 +20,8 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Templece Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#include "../geometry/grid_set_iterator.h"
  
 namespace Ariadne {
 

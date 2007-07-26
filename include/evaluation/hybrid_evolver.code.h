@@ -108,7 +108,7 @@ Evaluation::HybridEvolver<R>::discrete_step(const System::HybridAutomaton<R>& au
     grid_initial_set[id].adjoin_outer_approximation(initial_set[id]);
   }
   Geometry::HybridGridMaskSet<R> grid_result=discrete_step(automaton,grid_initial_set);
-  Geometry::HybridSetBase< Geometry::GridMaskSet<R> >& grid_base_result(grid_result);
+  Geometry::HybridDenotableSet< Geometry::GridMaskSet<R> >& grid_base_result(grid_result);
   Geometry::HybridSet<R> result(grid_base_result);
   return result;
 }
@@ -168,8 +168,8 @@ Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<R>& autom
   HybridGridMaskSet<R> grid_bounding_set;
   HybridGridMaskSet<R> grid_initial_set;
   
-  for(typename Geometry::HybridSet<R>::const_iterator bs_iter=bounding_set.begin();
-      bs_iter!=bounding_set.end(); ++bs_iter)
+  for(typename Geometry::HybridSet<R>::locations_const_iterator bs_iter=bounding_set.locations_begin();
+      bs_iter!=bounding_set.locations_end(); ++bs_iter)
   {
     id_type id=bs_iter->first;
     Grid<R> grid(bs_iter->second->dimension(),this->_applicator->grid_size());
@@ -406,9 +406,9 @@ Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<R>& hybri
     if(verbosity>=4) {
       std::stringstream filename;
       filename << "hybrid_chainreach-"<<step<<".eps";
-      const GridMaskSet<R>& dom=*domain_set.begin()->second;
-      const GridMaskSet<R>& res=*result_set.begin()->second;
-      const GridMaskSet<R>& fnd=*found_set.begin()->second;
+      const GridMaskSet<R>& dom=domain_set.locations_begin()->second;
+      const GridMaskSet<R>& res=result_set.locations_begin()->second;
+      const GridMaskSet<R>& fnd=found_set.locations_begin()->second;
       Output::epsfstream eps;
       eps.open(filename.str().c_str(),dom.bounding_box());
       eps.set_fill_colour("cyan"); eps<<dom.extent();

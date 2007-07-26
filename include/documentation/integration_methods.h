@@ -30,10 +30,10 @@
 
 \page integration Integration Methods
 
-Integration in Ariadne is performed using <em>integration steps</em> and <em>reachability steps</em> on <em>basic sets</em>, typically cuboids or zonotopes.
+Integration in %Ariadne is performed using <em>integration steps</em> and <em>reachability steps</em> on <em>basic sets</em>, typically cuboids or zonotopes.
 From time-to-time, the basic set may be <em>regularised</em> or <em>subdivided</em> to prevent loss of accuracy.
 
-Most integration methods used in Ariadne are based on Taylor expansion of solutions curves.
+Most integration methods used in %Ariadne are based on Taylor expansion of solutions curves.
 
 \f[ \begin{aligned}
      \frac{dy}{dt} &= f(y) \\[\jot]

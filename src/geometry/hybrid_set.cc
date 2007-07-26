@@ -34,6 +34,7 @@ namespace Ariadne {
     using namespace Numeric;
     
 #ifdef ENABLE_FLOAT64
+  //template class HybridSet< SetInterface<Float64> >;
     template class HybridSet<Float64>;
     template class HybridGridCellListSet<Float64>;
     template class HybridGridMaskSet<Float64>;
@@ -41,6 +42,7 @@ namespace Ariadne {
 #endif
   
 #ifdef ENABLE_FLOATMP
+  //template class HybridSet< SetInterface<FloatMP> >;
     template class HybridSet<FloatMP>;
     template class HybridGridCellListSet<FloatMP>;
     template class HybridGridMaskSet<FloatMP>;

@@ -109,10 +109,14 @@ namespace Ariadne {
     template<> inline Rational ceil(const Rational& x) { 
       return Rational(x.get_num()/x.get_den()); }
 
+    template<> inline Integer int_down(const Rational& x) { 
+      return Integer((x.get_num()+x.get_den()-1)/x.get_den()); }
+    template<> inline Integer int_up(const Rational& x) { 
+      return Integer(x.get_num()/x.get_den()); }
     template<> inline int int_down(const Rational& x) { 
-      return (Integer((x.get_num()+x.get_den()-1)/x.get_den())).get_si(); }
+      return int_down<Integer>(x).get_si(); }
     template<> inline int int_up(const Rational& x) { 
-      return (Integer(x.get_num()/x.get_den())).get_si(); }
+      return int_up<Integer>(x).get_si(); }
     
       
     template<> inline std::string name<Numeric::Rational>() { return "Rational"; }

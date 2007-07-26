@@ -32,7 +32,8 @@
 
 The evolution of a hybrid system takes place in a number of steps. 
 Each step consists of a continuous evolution, followed by at most one discrete transition. 
-Since the time of a discrete transition may depend on the initial state, the evolution time needs to be 
+Since the time of a discrete transition may depend on the initial state, the evolution time needs to be stored as well as the point. Both the set and evolution times are stored as a polynomial "model".
+
 
 \rationale
 
@@ -43,7 +44,8 @@ An alternative approach is to take evolution steps of a fixed time interval. How
 
 
 Due to the need to keep track of transition times, a hybrid evolution is defined on timed hybrid sets. 
-A timed hybrid set consists of a model for the state and for the evolution time. The evolution time is either a rational constant or a function model (e.g. an affine model) defined on the same variables as the set model. e.g. \f$ X = c + Ge; \ t=s+re\f$. Where possible, an evolution will end at an exact time. 
+A timed hybrid set consists of a model for the state and for the evolution time. The evolution time is either a rational constant or a function model (e.g. an affine model) defined on the same variables as the set model: \f[ X = c + Ge; \quad t=s+re. \f]
+Where possible, an evolution will end at an exact time. 
 
 \section evolution_traces Evolution traces
 
@@ -69,8 +71,22 @@ The integration time is reduced if
  
 If one of the smallest integration times corresponds to a guard, then the guard is activated and the flow to the guard set is computed.
 
+
+
 \subsection upper_evolution_trace Upper evolution traces
 
+ -# Compute a bound \f$B\f$ for the flow \f$\Phi(X,[0,h])\f$.
+ -# For each constraint \f$g_e\f$:
+     - Compute an approximation to \f$g(B)\f$ and determine whether the constraint is satisfied, unsatisfied or crossed.
+     - For each constraint which is crossed, estimate the switching time \f$s_e(x)\f$:
+        - If the crossing is transverse, give a first-order approximation to \f$s_e(x)\f$.
+        - If the crossing is not transverse, give a constant lower bound for the crossing time.
+ -# If \f$s_e\f$ becomes negative for some constraint \f$e\f$:
+     - If the radius of \f$X\f$ exceeds \c maximum_splitting_set_radius, subdivide \f$X\f$
+     - Otherwise, perform both an \f$e\f$ and \f$t\f$ step.
+ -# Compute the maximum flow time \f$\tau(x)\f$ and discard all events whose time exceeds the maximum flow time.
+ -# If more than one blocking event is active, and the radius of \f$X\f$ exceeds the maximum_splitting_set_radius, subdivide \f$X\f$.
+ -# If only one blocking event is active, and the crossing time interval exceeds the maximum_crossing_time, subdivide \f$X\f$.
 
 \subsection lower_evolution_trace Lower evolution traces
 

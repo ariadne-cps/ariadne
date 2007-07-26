@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_set.h
+ *            hybrid_basic_set.inline.h
  *
  *  Copyright  2006-7  Alberto Casagrande,  Pieter Collins
  *  casagrande@dimi.uniud.it  Pieter.Collins@cwi.nl
@@ -21,17 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#ifndef ARIADNE_HYBRID_SET_H
-#define ARIADNE_HYBRID_SET_H
 
-#include "../geometry/declarations.h"
-#include "../geometry/geometrical_traits.h"
+namespace Ariadne {
 
-#include "../geometry/hybrid_space.h"
-#include "../geometry/hybrid_set_iterator.h"
 
-#include "../geometry/hybrid_basic_set.h"
-#include "../geometry/hybrid_denotable_set.h"
-#include "../geometry/hybrid_abstract_set.h"
-
-#endif /* ARIADNE_HYBRID_SET_H */
+}

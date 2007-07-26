@@ -33,10 +33,10 @@
 
 \section Introduction
 
-Ariadne currently supports three different real number types, \a Float64, \a FloatMP and \a Rational.
-The \a Float64 type is a \em finite-precision type, the \a FloatMP type is a \em multiple-precision type
-and \a Rational is an \em exact number type. Future realeases will also support an \em arbitrary-precision
-real number type \a Real.
+%Ariadne currently supports three different real number types, \a Float64, \a FloatMP and \a Rational.
+The %Float64 type is a \em finite-precision floating-point type, the %FloatMP type is a \em multiple-precision floating-point type
+and %Rational is an \em exact real number type. Future realeases will also support an \em arbitrary-precision
+real number type \a Real. Additionally, an \a Integer type is supported.
 
 \section floatingpoint Floating-Point Numbers
 
@@ -53,52 +53,53 @@ For a package such as %Ariadne, in which we are concerned with keeping track of 
 we cannot use these types directly. Instead, we provide four different arithmetic operations for
 the same type. We can specify that the result can be rounded up or down, or that the result
 should be rounded to the nearest representable value. However, the default option is to
-<em>return an interval</em> containing the exact value of the operation. To summarize, we have the following 
+<em>return an interval</em> containing the exact value of the operation. 
+To summarize, we have the following 
 operations.
-\code
-// Exact arithmetic where possible
-FPReal neg_exact(FPReal);
-FPReal neg(FPReal);
-FPReal operator-(FPReal);
+ - Exact arithmetic where possible:
+   <dl><dt><dd><tt>Float neg_exact(Float);</tt>
+       <dt><dd><tt>Float neg(Float);</tt>
+       <dt><dd><tt>Float operator-(Float);</tt></dl>
 
-// Approximate and rounded arithmetic
-FPReal add_approx(FPReal);
-FPReal add_down(FPReal);
-FPReal add_up(FPReal);
+ - Approximate and rounded arithmetic:
+   <dl><dt><dd><tt>Float add_approx(Float);</tt>
+       <dt><dd><tt>Float add_down(Float);</tt>
+       <dt><dd><tt>Float add_up(Float);</tt></dl>
 
-// Interval arithmetic
-Interval<FPReal> operator+(Interval<FPReal>,Interval<FPReal>);
+ - Interval arithmetic:
+   <dl><dt><dd><tt>Interval<Float> operator+(Interval<Float>,Interval<Float>);</tt></dl>
 
-// Automatic conversion to interval arithmetic
-Interval<FPReal> operator+(FPReal,FPReal);
-\endcode
+ - Automatic conversion to interval arithmetic:
+   <dl><dt><dd><tt>Interval<Float> operator+(Float,Float);</tt>
+       <dt><dd><tt>Interval<Float> operator+(Interval<Float>,Float);</tt>
+       <dt><dd><tt>Interval<Float> operator+(Float,Interval<Float>);</tt></dl>
+ .
 For types based on floating point numbers, the arithmetical operators should follow IEEE standards.
 
-\code
-// Approximate and rounded algebraic transcendental functions
-FPReal exp_approx(FPReal);
-FPReal exp_down(FPReal);
-FPReal exp_up(FPReal);
+Algebraic and transcendental functions are provided with both rounded and interval versions.
+ - Approximate and rounded algebraic transcendental functions:
+   <dl><dt><dd><tt>Float exp_approx(Float);</tt>
+       <dt><dd><tt>Float exp_down(Float);</tt>
+       <dt><dd><tt>Float exp_up(Float);</tt></dl>
 
-// Interval algebraic and transcendental functions
-Interval<FPReal> exp(Interval<FPReal>);
-\endcode
+ - Interval algebraic and transcendental functions:
+   <dl><dt><dd><tt>Interval<Float> exp(Interval<Float>);</tt>
+       <dt><dd><tt>Interval<Float> exp(Float);</tt></dl>
+
 The precision of the algebraic and transcendental functions is not guarenteed,
 except that the functions must give values in the correct range.
 
 The upper and lower rounded versions satisfy the mathematical postcondition 
 \f$ \underline{f}(x) \leq f(x) \leq \overline{f}(x) \f$
 and the implementation postcondition 
-\code f_down(x) <= f_approx(x) <= f_up(x) \endcode
+<tt>f_down(x) <= f_approx(x) <= f_up(x)</tt> .
 
-\note
-No other conditions are required of the implementation.
+Note that no other conditions are required of the implementation.
 Hence a valid (but useless) implementation of \f$ \sin(x) \f$ is
-\code
-FPReal sin_approx(FPReal x) { return 0.0; }
-FPReal sin_down(FPReal x) { return -1.0; }
-FPReal sin_up(FPReal x) { return 1.0; }
-\endcode
+<dl><dt><dd><tt>Float sin_approx(Float x) { return 0.0; }</tt>
+    <dt><dd><tt>Float sin_down(Float x) { return -1.0; }</tt>
+    <dt><dd><tt>Float sin_up(Float x) { return 1.0; }</tt>
+</dl>
 
 
 \section multipleprecision Multiple-precision types.
@@ -107,7 +108,7 @@ If we have a problem for which a fixed-precision type is not sufficient to obtai
 we can switch to a \em multiple-precision type. The semantics of arithmetic on multiple-precision types 
 is mostly the same as that of a fixed-precision type; arithmetic is approximate, and the default is to
 return an interval. However, a multiple-precision type has a 
-\code MPReal::set_precision(unsigned int) \endcode
+<dl><dt><dd><tt>MPReal::set_precision(unsigned int)</tt></dl>
 method, which sets the precision to which the type can store its result.
 Using a higher precision yields a more accurate answer. Further, the result of an
 arithmetic operation is guarenteed to converge as the precision is increased.
@@ -125,16 +126,6 @@ impractical for describing higher-order types, such as matrices or sets.
 Arbitrary-precision numbers may be used to store constants occurring in a 
 system definition.
 
-\code
-// Exact arithmetical operators.
-APReal operator-(APReal);
-APReal operator+(APReal,APReal);
-
-// Exact algebraic and transcendental functions
-APReal sqrt(APReal);
-APReal exp(APReal);
-APReal sin(APReal);
-\endcode
 \section exactarithmetic Exact arithmetic types.
 
 Elements of a countable set of numbers, such as integer, dyadic, rational or algebraic numbers,
@@ -152,20 +143,18 @@ exist, they are typically less efficient than the fixed-precision and multiple-p
 In %Ariadne, we support arithmetic on the Rational number type, but no algebraic or transcendental functions.
 This type is primarily useful for testing.
 
-\code
-// Exact arithmetical operators.
-ExReal operator-(ExReal);
-ExReal operator+(ExReal,ExReal);
+Exact arithmetic operators:
+<dl><dt><dd><tt>Rational operator-(Rational);</tt>
+    <dt><dd><tt>Rational operator+(Rational,Rational);</tt>
+</dl>
 
-// No algebraic or transcendental functions
-\endcode
 
 Unlike a finite-precision type, arbitrary-precision types are intended for use when precise error specifications are required.
-Hence, whenever a function returns an approximation, the suffix _approx is \em always added to the function name.
+Hence, whenever a function returns an approximation, the suffix \c _approx is \em always added to the function name.
 This ensures that the user is always aware of the use of approximations.
 
 The Dyadic type does not in general support exact division.
-The exception is that division by a power of 2 yields an exact answer.
+The exception is that division by a power of \f$2\f$ yields an exact answer.
 Generic code intended for use with all exact arithmetic types should \em not use division, except by a power of two.
 
 
@@ -179,9 +168,7 @@ The semantics is as follows:
 \subsection finite_precision_interval Finite-precision interval arithmetic
 
 Finite precision functions are of the form
-\code
-Interval<FPReal> f(Interval<FPReal>);
-\endcode
+<dl><dt><dd><tt>Interval<Float> f(Interval<Float>);</tt></dl>
 and satisfy the mathematical postcondition \f$ \forall x\in I,\ f(x)\in\f$\c f(I),
 and the implementation postcondition <tt>I.contains(x)</tt> implies <tt>f(I).contains(f_approx(x))</tt>.
 
@@ -189,6 +176,6 @@ and the implementation postcondition <tt>I.contains(x)</tt> implies <tt>f(I).con
 
 Multiple-precision interval functions follow the same conditions as fixed-precision
 interval functions, together with the convergence criterion
-that the length of \c f(I) approaches 0 as the length of \c I approaches 0.
+that the length of <tt>f(I)</tt> approaches \f$0\f$ as the length of <tt>I</tt> approaches \f$0\f$.
 
 */

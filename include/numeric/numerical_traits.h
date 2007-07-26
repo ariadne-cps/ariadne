@@ -83,6 +83,8 @@ namespace Ariadne {
     };
 #endif      
 
+  template<class T1, class T2> struct traits<const T1, const T2> : public traits<T1,T2> { };
+
     template<> struct traits<int> {
       typedef integer_tag type;
       typedef int number_type;

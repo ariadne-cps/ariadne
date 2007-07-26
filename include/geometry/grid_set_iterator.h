@@ -39,11 +39,11 @@ namespace Ariadne {
      public:
       typedef typename Value::real_type real_type;
       GridSetIterator(const Grid<real_type>& g, Base i) 
-        : GridSetIterator::iterator_adaptor_(i), _grid(g) { }
+        : GridSetIterator::iterator_adaptor_(i), _grid_ptr(&g) { }
      private:
       friend class boost::iterator_core_access;
-      Value dereference() const { return Value(_grid,*this->base_reference()); }
-      const Grid<real_type>& _grid;
+      Value dereference() const { return Value(*_grid_ptr,*this->base_reference()); }
+      const Grid<real_type>* _grid_ptr;
     };
 
   }

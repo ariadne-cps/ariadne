@@ -124,9 +124,17 @@ Evaluation::ConstraintHybridEvolver<R>::maximum_basic_set_radius() const
 }
 
 
+template<class R>
+time_type
+Evaluation::ConstraintHybridEvolver<R>::lock_to_grid_time() const
+{
+  return this->_integrator->lock_to_grid_time();
+}
+
+
 template<class R> inline
 std::vector<typename Evaluation::ConstraintHybridEvolver<R>::timed_set_type>
-Evaluation::ConstraintHybridEvolver<R>::subdivide(const timed_set_type& timed_set)
+Evaluation::ConstraintHybridEvolver<R>::subdivide(const timed_set_type& timed_set) const
 {
   ARIADNE_LOG(8,"HybridEvolver:subdivide(...)\n");
   ARIADNE_LOG(9,"  radius="<<timed_set.continuous_state_set().radius()<<"\n");
@@ -152,14 +160,9 @@ Evaluation::ConstraintHybridEvolver<R>::_compute_working_sets(const hybrid_list_
   for(typename hybrid_list_set_type::const_iterator loc_iter=set.begin();
       loc_iter!=set.end(); ++loc_iter)
   {
-    id_type loc_id=loc_iter->first;
-    const Geometry::ListSet<continuous_basic_set_type>& list_set=*loc_iter->second;
-    for(typename Geometry::ListSet<continuous_basic_set_type>::const_iterator bs_iter=list_set.begin();
-        bs_iter!=list_set.end(); ++bs_iter)
-    {
-      const continuous_basic_set_type& bs=*bs_iter;
-      working_sets.push_back(timed_set_type(0,0,loc_id,bs));
-    }
+    id_type loc_id=loc_iter->discrete_state();
+    const continuous_basic_set_type& bs=loc_iter->continuous_state_set();
+    working_sets.push_back(timed_set_type(0,0,loc_id,bs));
   }
   return working_sets;
 }
@@ -207,6 +210,59 @@ Evaluation::ConstraintHybridEvolver<R>::integration_step(const mode_type& mode,
 
 
 
+/* Compute the possible states reached by a forced jump within time \a [-h,h]. */
+template<class R>
+std::vector<typename Evaluation::ConstraintHybridEvolver<R>::timed_set_type>
+Evaluation::ConstraintHybridEvolver<R>::forced_jump(const transition_type& transition,
+                                                    const timed_set_type& initial_set,
+                                                    const bounding_box_type& source_bounding_box,
+                                                    const bounding_box_type& destination_bounding_box,
+                                                    const time_type& time_step) const
+{
+  const VectorFieldInterface<R>& source_dynamic = transition.source().dynamic();
+  const VectorFieldInterface<R>& destination_dynamic = transition.destination().dynamic();
+  const MapInterface<R>& reset = transition.reset();
+  //const ConstraintInterface<R>& guard = transition.activation();
+
+  continuous_basic_set_type set = initial_set.continuous_state_set();
+  Point<I> jump_centre = reset(set.centre());
+  Matrix<I> jump_jacobian = reset.jacobian(set.bounding_box());
+  
+  Vector<I> jump_flow = reset.jacobian(source_bounding_box) * source_dynamic(source_bounding_box) - destination_dynamic(destination_bounding_box);
+
+  // FIXME: Complete this code!
+
+  timed_set_type result(initial_set.time(),initial_set.steps()+1,transition.destination_id(),set);
+  return std::vector<timed_set_type>(1,result);
+}
+
+
+/* Compute the possible states reached by an unforced jump within time \a [-h,h]. */
+template<class R>
+std::vector<typename Evaluation::ConstraintHybridEvolver<R>::timed_set_type>
+Evaluation::ConstraintHybridEvolver<R>::unforced_jump(const transition_type& transition,
+                                                      const timed_set_type& initial_set,
+                                                      const bounding_box_type& source_bounding_box,
+                                                      const bounding_box_type& destination_bounding_box,
+                                                      const time_type& time_step) const
+{
+  const VectorFieldInterface<R>& source_dynamic = transition.source().dynamic();
+  const VectorFieldInterface<R>& destination_dynamic = transition.destination().dynamic();
+  const MapInterface<R>& reset = transition.reset();
+
+  continuous_basic_set_type set = initial_set.continuous_state_set();
+  Point<I> jump_centre = reset(set.centre());
+  Matrix<I> jump_jacobian = reset.jacobian(set.bounding_box());
+  
+  Vector<I> jump_flow = reset.jacobian(source_bounding_box) * source_dynamic(source_bounding_box) - destination_dynamic(destination_bounding_box);
+
+  set = continuous_basic_set_type(jump_centre,jump_jacobian,Interval<R>(time_step)*jump_flow);
+  
+  timed_set_type result(initial_set.time(),initial_set.steps()+1,transition.destination_id(),set);
+  return std::vector<timed_set_type>(1,result);
+}
+
+
 /*! \brief Compute the possible states reached by an fored jump within time \a h.
  *
  * The generators are given by
@@ -246,7 +302,7 @@ Evaluation::ConstraintHybridEvolver<R>::forced_jump(const transition_type& trans
   Point<I> centre = continuous_state_set.centre();
   Rectangle<R> centre_bounding_box = this->_integrator->refine_flow_bounds(dynamic1,Rectangle<R>(centre),bounding_box,required_time_step);
   I centre_normal_derivative = inner_product(guard.gradient(centre_bounding_box),dynamic1(centre_bounding_box));
-  assert((bool)(centre_normal_derivative>0));
+  assert(centre_normal_derivative>0);
   I centre_crossing_time_interval = -guard.value(centre)/centre_normal_derivative;
   
   // Refine the estimate of the centre crossing time
@@ -269,7 +325,7 @@ Evaluation::ConstraintHybridEvolver<R>::forced_jump(const transition_type& trans
 
   // Estimate range of hitting times and the bounding box for flowed set
   I normal_derivative = inner_product(guard.gradient(bounding_box),dynamic1(bounding_box));
-  assert((bool)(normal_derivative>0));
+  assert(normal_derivative>0);
   I crossing_time_interval = -guard.value(bounding_box)/normal_derivative;
   Interval<Rational> flowed_crossing_time_interval = Interval<Rational>(crossing_time_interval) - estimated_centre_crossing_time;
 
@@ -377,7 +433,7 @@ template<class R>
 std::vector<typename Evaluation::ConstraintHybridEvolver<R>::timed_set_type>
 Evaluation::ConstraintHybridEvolver<R>::lower_evolution_step(const System::ConstraintHybridAutomaton<R>& automaton, 
                                                              const timed_set_type& initial_set,
-                                                             time_type& time_step)
+                                                             time_type& time_step) const
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -387,7 +443,7 @@ template<class R>
 std::vector<typename Evaluation::ConstraintHybridEvolver<R>::timed_set_type> 
 Evaluation::ConstraintHybridEvolver<R>::upper_evolution_step(const System::ConstraintHybridAutomaton<R>& automaton, 
                                                              const timed_set_type& initial_set,
-                                                             time_type& time_step)
+                                                             time_type& time_step) const
 {
   ARIADNE_LOG(2,"HybridEvolver::upper_evolution_step(...)\n");
   ARIADNE_LOG(3,"  initial_set="<<initial_set<<"\n");  
@@ -519,7 +575,7 @@ template<class R>
 std::vector<typename Evaluation::ConstraintHybridEvolver<R>::timed_set_type> 
 Evaluation::ConstraintHybridEvolver<R>::upper_reachability_step(const System::ConstraintHybridAutomaton<R>& automaton, 
                                                                 const timed_set_type& initial_set,
-                                                                time_type& time_step)
+                                                                time_type& time_step) const
 {
   ARIADNE_LOG(2,"HybridEvolver::upper_reachability_step(...)\n");
   ARIADNE_LOG(3,"  initial_set="<<initial_set<<" time_step="<<time_step<<"\n");  
@@ -635,7 +691,7 @@ Geometry::HybridListSet<typename Evaluation::ConstraintHybridEvolver<R>::continu
 Evaluation::ConstraintHybridEvolver<R>::upper_evolve(const System::ConstraintHybridAutomaton<R>& automaton, 
                                                      const Geometry::HybridListSet<continuous_basic_set_type>& initial_set, 
                                                      time_type evolution_time,
-                                                     size_type maximum_number_of_events)
+                                                     size_type maximum_number_of_events) const
 {
   verbosity=8;
   ARIADNE_LOG(2,"HybridEvolver::upper_evolve(HybridAutomaton automaton, ListSet initial_set, Time time, Integer maximum_number_of_events)\n");
@@ -653,7 +709,7 @@ Evaluation::ConstraintHybridEvolver<R>::upper_evolve(const System::ConstraintHyb
     timed_set_type working_set=working_sets.back(); working_sets.pop_back();
     time_type time_step=Numeric::min(this->maximum_step_size(),time_type(evolution_time-working_set.time()));
     ARIADNE_LOG(9,"working_set="<<working_set<<"\n");
-    assert((bool)(working_set.time()<=evolution_time));
+    assert(working_set.time()<=evolution_time);
     
     if(working_set.time()==evolution_time) {
       ARIADNE_LOG(9,"  reached evolution time\n");
@@ -676,7 +732,7 @@ Geometry::HybridListSet<typename Evaluation::ConstraintHybridEvolver<R>::continu
 Evaluation::ConstraintHybridEvolver<R>::upper_reach(const System::ConstraintHybridAutomaton<R>& automaton, 
                                                     const Geometry::HybridListSet<continuous_basic_set_type>& initial_set, 
                                                     time_type evolution_time, 
-                                                    size_type maximum_number_of_events)
+                                                    size_type maximum_number_of_events) const
 {
   ARIADNE_LOG(2,"HybridEvolver::upper_evolve(HybridAutomaton automaton, ListSet initial_set, Time time, Integer maximum_number_of_events)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<", evolution_time="<<evolution_time<<"\n");
@@ -706,6 +762,182 @@ Evaluation::ConstraintHybridEvolver<R>::upper_reach(const System::ConstraintHybr
 
 
 
-      
+
+template<class R>
+Geometry::HybridGridCellListSet<R>
+Evaluation::ConstraintHybridEvolver<R>::upper_evolve(const System::ConstraintHybridAutomaton<R>& automaton, 
+                                                     const Geometry::HybridGridCell<R>& initial_set, 
+                                                     const Geometry::HybridGrid<R>& hybrid_grid, 
+                                                     time_type evolution_time, 
+                                                     size_type maximum_number_of_events) const
+{
+  HybridGridCellListSet<R> final_set(hybrid_grid);
+  
+  HybridListSet< Zonotope<I> > list_set(automaton.locations());
+  list_set.adjoin(initial_set);
+  
+  list_set=this->upper_evolve(automaton,list_set,evolution_time,maximum_number_of_events);
+  
+  final_set.adjoin_outer_approximation(list_set);
+
+  return final_set;
+}
+
+
+template<class R>
+Geometry::HybridGridCellListSet<R>
+Evaluation::ConstraintHybridEvolver<R>::upper_reach(const System::ConstraintHybridAutomaton<R>& automaton, 
+                                                    const Geometry::HybridGridCell<R>& initial_set, 
+                                                    const Geometry::HybridGrid<R>& hybrid_grid, 
+                                                    time_type evolution_time, 
+                                                    size_type maximum_number_of_events) const
+{
+  HybridGridCellListSet<R> final_set(hybrid_grid);
+  
+  HybridListSet< Zonotope<I> > list_set(automaton.locations());
+  list_set.adjoin(initial_set);
+  
+  list_set=this->upper_reach(automaton,list_set,evolution_time,maximum_number_of_events);
+  
+  final_set.adjoin_outer_approximation(list_set);
+
+  return final_set;
+}
+
+
+
+template<class R>
+Geometry::HybridGridMaskSet<R>
+Evaluation::ConstraintHybridEvolver<R>::upper_evolve(const System::ConstraintHybridAutomaton<R>& automaton, 
+                                                     const Geometry::HybridGridMaskSet<R>& initial_set, 
+                                                     time_type evolution_time, 
+                                                     size_type maximum_number_of_events) const
+{
+  Geometry::HybridGrid<R> hybrid_grid=initial_set.grid();
+  Geometry::HybridGridMaskSet<R> current_set=initial_set;
+  Geometry::HybridGridMaskSet<R> next_set=initial_set;
+  next_set.clear();
+
+  Geometry::HybridGridMultiMap<R> map(initial_set.grid(),initial_set.grid());
+  
+  time_type lock_to_grid_time = this->lock_to_grid_time();
+  size_type evolution_steps = int_up<int>(time_type(evolution_time/lock_to_grid_time));
+  lock_to_grid_time = evolution_time/evolution_steps;
+
+  for(uint i=0; i!=evolution_steps; ++i) {
+    for(typename HybridGridMaskSet<R>::const_iterator cell_iter=current_set.begin();
+        cell_iter!=current_set.end(); ++cell_iter)
+    {
+      //const HybridBasicSet< GridCell<R> >& cell=*cell_iter;
+      HybridGridCell<R> cell=*cell_iter;
+      if(!map.has_key(cell)) {
+        map.set_image(cell,this->upper_evolve(automaton,cell,hybrid_grid,lock_to_grid_time,maximum_number_of_events));
+      }
+      next_set.adjoin(map.image(cell));
+    }
+    current_set=next_set;
+    next_set.clear();
+  }
+
+  return current_set;
+}
+
+
+
+template<class R>
+Geometry::HybridGridMaskSet<R>
+Evaluation::ConstraintHybridEvolver<R>::upper_reach(const System::ConstraintHybridAutomaton<R>& automaton, 
+                                                    const Geometry::HybridGridMaskSet<R>& initial_set, 
+                                                    time_type evolution_time, 
+                                                    size_type maximum_number_of_events) const
+{
+  Geometry::HybridGrid<R> hybrid_grid=initial_set.grid();
+  Geometry::HybridGridMaskSet<R> current_set=initial_set;
+  Geometry::HybridGridMaskSet<R> next_set(current_set);
+  next_set.clear();
+
+  Geometry::HybridGridMultiMap<R> map(initial_set.grid(),initial_set.grid());
+
+  size_type evolution_steps = int_up<int>(time_type(evolution_time/this->lock_to_grid_time()));
+  time_type lock_to_grid_time = evolution_time/evolution_steps;
+
+  for(typename HybridGridMaskSet<R>::const_iterator cell_iter=current_set.begin();
+      cell_iter!=current_set.end(); ++cell_iter)
+  {
+    const HybridGridCell<R>& cell=*cell_iter;
+    next_set.adjoin(this->upper_reach(automaton,cell,hybrid_grid,lock_to_grid_time,maximum_number_of_events));
+  }
+  current_set=next_set;
+  next_set.clear();
+
+  for(uint i=0; i!=evolution_steps-1; ++i) {
+    for(typename HybridGridMaskSet<R>::const_iterator cell_iter=current_set.begin();
+        cell_iter!=current_set.end(); ++cell_iter)
+    {
+      const HybridGridCell<R>& cell=*cell_iter;
+      if(!map.has_key(cell)) {
+        map.set_image(cell,this->upper_evolve(automaton,cell,hybrid_grid,lock_to_grid_time,maximum_number_of_events));
+      }
+      next_set.adjoin(map.image(cell));
+    }
+    current_set.adjoin(next_set);
+    next_set.clear();
+  }
+
+  return current_set;
+}
+
+
+template<class R>
+Geometry::HybridGridMaskSet<R>
+Evaluation::ConstraintHybridEvolver<R>::viable(const System::ConstraintHybridAutomaton<R>& automaton, 
+                                               const Geometry::HybridGridMaskSet<R>& bounding_set) const
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+template<class R>
+Geometry::HybridGridMaskSet<R>
+Evaluation::ConstraintHybridEvolver<R>::chainreach(const System::ConstraintHybridAutomaton<R>& automaton, 
+                                                   const Geometry::HybridGridMaskSet<R>& initial_set, 
+                                                   const Geometry::HybridGridMaskSet<R>& bounding_set) const
+{
+  Geometry::HybridGrid<R> hybrid_grid=initial_set.grid();
+  Geometry::HybridGridMaskSet<R> reach_set=initial_set;
+  Geometry::HybridGridMaskSet<R> current_set=initial_set;
+  Geometry::HybridGridMaskSet<R> found_set=initial_set;
+
+  time_type lock_to_grid_time = this->lock_to_grid_time();
+  size_type maximum_number_of_events = (size_type) -1;
+  
+  for(typename HybridGridMaskSet<R>::const_iterator cell_iter=reach_set.begin();
+      cell_iter!=current_set.end(); ++cell_iter)
+  {
+    const HybridGridCell<R>& cell=*cell_iter;
+    found_set.adjoin(this->upper_reach(automaton,cell,hybrid_grid,lock_to_grid_time,maximum_number_of_events));
+  }
+
+  reach_set=found_set;
+  found_set.remove(reach_set);
+  while(!found_set.empty()) {
+    current_set=found_set;
+    found_set.clear();
+
+    for(typename HybridGridMaskSet<R>::const_iterator cell_iter=current_set.begin();
+        cell_iter!=current_set.end(); ++cell_iter)
+    {
+      const HybridGridCell<R>& cell=*cell_iter;
+      found_set.adjoin(this->upper_evolve(automaton,cell,hybrid_grid,lock_to_grid_time,maximum_number_of_events));
+    }
+
+    found_set.remove(reach_set);
+    reach_set.adjoin(found_set);
+  }
+
+  return reach_set;
+}
+
+
 
 } // namespace Ariadne

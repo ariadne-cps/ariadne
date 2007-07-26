@@ -45,7 +45,7 @@ The basic computation on points can be \em exact and \em approximate, as appropr
 \section set_functions  Computations on sets.
 
 A valid arbitrary-precision computation on sets is defined as follows
-If \f$f\f$ is a mathematical function, and \c BS is a basic set type,
+If \f$f\f$ is a mathematical function, and   BS is a basic set type,
 then a valid representation \c f of \f$f\f$ is a function which, 
 for any basic set \f$A\f$, returns a set \f$B\f$ such that \f$f(A)\subset B\f$,
 and such that whenever \f$A_n\f$ is a decreasing sequence of sets with \f$\bigcap_{n=1}^{\infty} A_n=\{x\}\f$,
@@ -61,13 +61,13 @@ Note that it does not make sense to consider a sequence \f$A_n\f$ converging to 
 
 If a denotable state type is invariant under a class of functions (e.g. polynomial functions on a ring),
 then the image of a point is given exactly. Otherwise, a \a fuzzy \a point is given,
-which is a point defined using interval coefficients. A Point< Interval<R> > can be automatically 
-converted to a Rectangle<R>.
+which is a point defined using interval coefficients. A \c Point<Interval<R>> can be automatically 
+converted to a \c Rectangle<R>.
 
 Note that even if \c f is exact, it is impossible to compute 
 the action of \f$f\f$ on a set just from the action of \c f on points,
 unless a modulus of continuity for \f$f\f$ is known.
-
+However, it is possible to compute the action of \f$f\f$ on sets from the action on fuzzy points.
 
 \section real_functions Computations on real numbers.
 
@@ -77,45 +77,23 @@ For this reason, Ariadne provides extended operations for computation on real-va
 
 Arbitrary-precision computations may be exact or approximate. 
 The function \c f(x) computes \f$f(x)\f$ exactly, if possible. 
-If exact computation is not possible, then \c f(x) either returns an interval,
+If exact computation is not possible, then \c f(x) either returns an interval containing the exact result,
 or gives an error at compile time.
+If a floating-point (i.e. non-interval) result is required, then the type of error must be explicitly specified.
+The function \c f_down(x) computes a lower-approximation to \f$f(x)\f$, and \c f_up(x) computes an upper-approximation.
+The function \c f_approx(x) computes \f$f(x)\f$ approximately, with no control on the error bound.
+For some arithmetical operations, the error of \c f_approx(x,y) may be specified.
 
-Although it is not, in general, possible to perform evaluation of functions on sets from their definitions on points,
-in many cases such a computation can be extracted. 
-In particular, we can construct interval computations from pointwise computations in the following cases:
+Note that in many cases, including arithmetic and simple functions, it is possible to compute an interval \f$J\f$ containing \f$f(I)\f$ 
+using \c f_down and \c f_up. This allows an implementation of the standard set-based function \c f(I).
+It is not, in general, possible to perform evaluation of functions on sets from their definitions on points,
+though in many cases such a computation can be extracted. 
+In particular, we can construct interval computations from pointwise computations in the following cases, if error bounds on \f$f(x)\f$ are known.
 <ul>
    <li>The function is Lipschitz with a known Lipschitz constant e.g. \f$\sin,\ \cos\f$.</li>
    <li>The function is monotone e.g. \f$\exp\f$.</li>
    <li>The function is piecewise-monotone with known branches e.g. arithmetic.</li>
 </ul>
 
-
-Fixed-precision computations are inherantly approximate, 
-though in some cases they may happen to give exact result. 
-The function \c f_approx(x) computes \f$f(x)\f$ approximately, with no control on the error bound.
-The function \c f_down(x) computes a lower-approximation to \f$f(x)\f$, 
-and \c f_up(x) computes an upper-approximation.
-
-Without an error specification, \c f(x) either gives an eFor consistency with existing practise, we also allow \c fnc(x) as a valid alternative to \c fnc_approx(x).
-
-Note that in many cases, including arithmetic and simple functions, it is possible to compute an interval \f$J\f$ containing \f$f(I)\f$ 
-using \c f_down and \c f_upp. This allows an implementation of the standard set-based function \c f(I).
-
-\section function_syntax Syntax for continuous functions and function objects.
-
-Elementary and arithmetical functions are represented as ordinary functions
-with the same syntax.
-
-\code
-// Action of functions on points
-Point<ExReal> f(Point<ExReal> x); // Compute f(x) exactly.
-
-Point< Interval<FPReal> > f(Point<ExReal> x); // Compute a fuzzy point approximation to f(x)
-BasicSet<FPReal> f(Point<ExReal> x); // Compute a set containing f(x)
-
-// Action of functions on sets
-BasicSet<FPReal> f(BasicSet<FPReal> A); // Compute an over-approximation to f(A).
-BasicSet<MPReal> f(BasicSet<APReal> A); // Compute a convergent over-approximation to f(A).
-\endcode
 
 */

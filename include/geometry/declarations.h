@@ -70,6 +70,8 @@ namespace Ariadne {
 
     class HybridSpace;
     template<class S> class HybridSet;
+    template<class R> class HybridGrid;
+    template<class R> class HybridGridCell;
     template<class R> class HybridGridMaskSet;
     template<class R> class HybridGridCellListSet;
     template<class BS> class HybridListSet;

@@ -45,7 +45,7 @@ namespace Ariadne {
      * \ingroup DiscreteTime
      * \brief Abstract base class for (differentiable) functions.
      * 
-     * The system is specified by the method operator()(const Geometry::Rectangle<R>& A) const.
+     * The system is specified by the method operator()(const Geometry::Point<F>& A) const.
      * This method should compute a basic set \f$\overline{f}(A)\f$ with the
      * following properties:
      *   -# \f$f(A)\subset\overline{f}(A)\f$,
@@ -58,7 +58,7 @@ namespace Ariadne {
      * as \f$A_n\f$ tends to a point.
      *
      * Additional accuracy can be obtained be using derivatives.
-     * The method derivative(const Geometry::Rectangle<R>& A) const computes the \a i th component of the derivative over the set \a A 
+     * The method derivative(const Geometry::Point<F>& A) const computes the \a i th component of the derivative over the set \a A 
      * with respect to the variables in the multi-index \a j.
      */
     template<class R>

@@ -125,7 +125,7 @@ class TestConstraintHybridEvolution
 
 
   int test_evolution() {
-    set_hybrid_evolver_verbosity(6);
+    // set_hybrid_evolver_verbosity(6);
   
     typedef Interval<R> I;
     

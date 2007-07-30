@@ -130,6 +130,9 @@ test_rectangle()
     //r1[1].lower()=-2.25;
     cout << " r1=" << r1 << endl;
     
+    r1=Rectangle<R>("[0,1]x[-1,1]x[-1,0]");
+    cout << "r1.subdivide()=" << r1.subdivide() << endl;
+
     try {
         string input("[ ]  [ [0,2] ]  [ [0,1], [3/4,4/3], [1,3/2] ] "
                      "{ lower_corner=[0,1], upper_corner=[1,4/3] }");

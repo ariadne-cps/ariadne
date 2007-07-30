@@ -51,6 +51,10 @@ namespace Ariadne {
       /*! \brief Cloning operator. */
       virtual EulerIntegrator<R>* clone() const;
 
+      /*! \brief Subdivide a basic set. */
+      virtual Geometry::ListSet< Geometry::Rectangle<R> >
+      subdivide(const Geometry::Rectangle<R>&) const;
+
       /*! \brief A C0 algorithm for integrating forward a point. */
       virtual Geometry::Point<I> 
       bounded_flow(const System::VectorFieldInterface<R>&,

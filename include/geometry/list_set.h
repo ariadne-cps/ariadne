@@ -101,7 +101,7 @@ namespace Ariadne {
       /*! \brief An empty list set which can hold sets of an unspecified dimension. */
       ListSet();
 
-      /*! \brief An empty ListSet which can only hold sets of dimension \a n. */
+      /*! \brief An empty list set which can only hold sets of dimension \a n. */
       ListSet(size_type n);
 
       /*! \brief A denotable set constructor. */

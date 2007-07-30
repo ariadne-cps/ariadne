@@ -169,7 +169,6 @@ Evaluation::ConstraintHybridEvolver<R>::upper_evolve(const System::ConstraintHyb
                                                      time_type evolution_time,
                                                      size_type maximum_number_of_events) const
 {
-  verbosity=8;
   ARIADNE_LOG(2,"HybridEvolver::upper_evolve(HybridAutomaton automaton, ListSet initial_set, Time time, Integer maximum_number_of_events)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<", evolution_time="<<evolution_time<<"\n");
   

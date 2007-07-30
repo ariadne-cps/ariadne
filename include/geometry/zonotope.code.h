@@ -872,6 +872,8 @@ template<class R>
 void
 adjoin_subdivision(ListSet< Zonotope<Interval<R>,R> >& ls, const Zonotope<Interval<R>,R>& z) 
 {
+  // FIXME: Subdivide in zero order as well!
+  std::cerr << "WARNING: Zonotope<I,R>::subdivision()  does not subdivide the constant terms." << std::endl;
   typedef Numeric::Interval<R> I;
   
   R two=2;
@@ -909,6 +911,8 @@ template<class R>
 void
 adjoin_subdivision(ListSet< Zonotope< Interval<R> > >& ls, const Zonotope< Interval<R>,Interval<R> >& z) 
 {
+  // FIXME: Subdivide in zero order as well!
+  std::cerr << "WARNING: Zonotope<I,I>::subdivision()  does not subdivide the constant terms." << std::endl;
   typedef Numeric::Interval<R> I;
   
   dimension_type d=z.dimension();
@@ -928,6 +932,7 @@ adjoin_subdivision(ListSet< Zonotope< Interval<R> > >& ls, const Zonotope< Inter
     first_centre=first_centre-v;
   }
   
+  Point<I> new_centre=first_centre;
   for(unsigned long k=0; k!=1u<<m; ++k) {
     Point<I> new_centre=first_centre;
     for(size_type i=0; i<m; ++i) {
@@ -938,6 +943,7 @@ adjoin_subdivision(ListSet< Zonotope< Interval<R> > >& ls, const Zonotope< Inter
     }
     ls.adjoin(Zonotope<I,I>(new_centre,new_generators));
   }
+
 }
 
 
@@ -985,28 +991,46 @@ adjoin_division(ListSet< Zonotope<Interval<R>,R> >& ls, const Zonotope<Numeric::
   size_type m=z.number_of_generators();
   R two=2;
   
-  LinearAlgebra::Matrix<R> new_generators=z.generators();
+  I max_radius=0;
+  size_type max_value=0;
+  for(size_type j=0; j<d; ++j) {
+    R radius = z.centre()[j].radius();
+    if(radius>max_radius) {
+      max_radius=radius;
+      max_value=j;
+    }
+  }
   
   I max_norm=0;
   size_type max_column=0;
-  for(size_type j=0; j<m; j++) {
-    I norm = LinearAlgebra::norm(Vector<R>(new_generators.column(j)));
+  for(size_type j=0; j<m; ++j) {
+    I norm = LinearAlgebra::norm(Vector<R>(z.generators().column(j)));
     if(norm>max_norm) {
       max_norm=norm;
       max_column=j;
     }
   }
   
-  size_type j=max_column;
-  for(size_type i=0; i!=d; ++i) {
-    new_generators(i,j)=div_up(new_generators(i,j),two);
+  if(max_norm>max_radius) {
+    LinearAlgebra::Matrix<R> new_generators=z.generators();
+    size_type j=max_column;
+    for(size_type i=0; i!=d; ++i) {
+      new_generators(i,j)=div_up(new_generators(i,j),two);
+    }
+    
+    Vector<R> v=new_generators.column(j);
+    Point<I> new_centre=z.centre()-v;
+    ls.adjoin(Zonotope<I,R>(new_centre,new_generators));
+    new_centre=new_centre-v;
+    ls.adjoin(Zonotope<I,R>(new_centre,new_generators));
+  } else {
+    Point<I> new_centre = z.centre();
+    const LinearAlgebra::Matrix<R>& new_generators = z.generators();
+    new_centre[max_value]=I(z.centre()[max_value].lower(),z.centre()[max_value].midpoint());
+    ls.adjoin(Zonotope<I,R>(new_centre,new_generators));
+    new_centre[max_value]=I(z.centre()[max_value].midpoint(),z.centre()[max_value].upper());
+    ls.adjoin(Zonotope<I,R>(new_centre,new_generators));
   }
-  
-  Vector<R> v=new_generators.column(j);
-  Point<I> new_centre=z.centre()-v;
-  ls.adjoin(Zonotope<I,R>(new_centre,new_generators));
-  new_centre=new_centre-v;
-  ls.adjoin(Zonotope<I,R>(new_centre,new_generators));
 }
 
 
@@ -1020,28 +1044,46 @@ adjoin_division(ListSet< Zonotope< Interval<R>,Interval<R> > >& ls, const Zonoto
   size_type d=z.dimension();
   size_type m=z.number_of_generators();
   
-  LinearAlgebra::Matrix<I> new_generators=z.generators();
+  I max_radius=0;
+  size_type max_value=0;
+  for(size_type j=0; j<d; ++j) {
+    R radius = z.centre()[j].radius();
+    if(radius>max_radius) {
+      max_radius=radius;
+      max_value=j;
+    }
+  }
   
   I max_norm=0;
   size_type max_column=0;
-  for(size_type j=0; j<m; j++) {
-    I norm = LinearAlgebra::norm(Vector<I>(new_generators.column(j)));
+  for(size_type j=0; j<m; ++j) {
+    I norm = LinearAlgebra::norm(Vector<I>(z.generators().column(j)));
     if(norm>max_norm) {
       max_norm=norm;
       max_column=j;
     }
   }
   
-  size_type j=max_column;
-  for(size_type i=0; i!=d; ++i) {
-    new_generators(i,j)=new_generators(i,j)/2;
+  if(max_norm>max_radius) {
+    LinearAlgebra::Matrix<I> new_generators=z.generators();
+    size_type j=max_column;
+    for(size_type i=0; i!=d; ++i) {
+      new_generators(i,j)=new_generators(i,j)/2;
+    }
+    
+    Vector<I> v=new_generators.column(j);
+    Point<I> new_centre=z.centre()-v;
+    ls.adjoin(Zonotope<I,I>(new_centre,new_generators));
+    new_centre=new_centre-v;
+    ls.adjoin(Zonotope<I,I>(new_centre,new_generators));
+  } else {
+    Point<I> new_centre = z.centre();
+    const LinearAlgebra::Matrix<I>& new_generators = z.generators();
+    new_centre[max_value]=I(z.centre()[max_value].lower(),z.centre()[max_value].midpoint());
+    ls.adjoin(Zonotope<I,I>(new_centre,new_generators));
+    new_centre[max_value]=I(z.centre()[max_value].midpoint(),z.centre()[max_value].upper());
+    ls.adjoin(Zonotope<I,I>(new_centre,new_generators));
   }
-  
-  Vector<I> v=new_generators.column(j);
-  Point<I> new_centre=z.centre()-v;
-  ls.adjoin(Zonotope<I,I>(new_centre,new_generators));
-  new_centre=new_centre-v;
-  ls.adjoin(Zonotope<I,I>(new_centre,new_generators));
 }
 
 

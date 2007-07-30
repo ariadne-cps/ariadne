@@ -70,6 +70,9 @@ namespace Ariadne {
 
      public:
 
+      /*! \brief Subdivide the basic set into two pieces. */
+      virtual Geometry::ListSet< Geometry::Zonotope<I> > subdivide(const Geometry::Zonotope<I>& bs) const;
+     
       /*! \brief Integrate a basic set for within a bounding set. */
       virtual Geometry::Point<I> bounded_flow(const System::AffineVectorField<R>& vf,
                                               const Geometry::Point<I>& p,

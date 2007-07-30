@@ -275,14 +275,28 @@ namespace Ariadne {
     {
      public:
       typedef Numeric::Interval<R> I;
+      /*! \brief  */
       typedef VF vector_field_type;
+      /*! \brief  */
       typedef BS basic_set_type;
+      /*! \brief  */
+      typedef Geometry::ListSet<BS> list_set_type;
+      /*! \brief  */
       typedef Geometry::Point<I> point_type;
+      /*! \brief  */
       typedef Geometry::Rectangle<R> bounding_set_type;
      protected:
       IntegratorBase(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_basic_set_radius)
         : Integrator<R>(maximum_step_size,lock_to_grid_time,maximum_basic_set_radius) { }
      public:
+      //@{
+      //! \name Supporting geometric routines
+      /*! \brief Subdivide the basic set into smaller pieces whose radius tends to zero with repeated subdivisions. */
+      virtual list_set_type subdivide(const basic_set_type&) const;
+      //@}
+
+      //@{
+      //! \name Integration of points and basic sets given bounds for the flow. */
       /*! \brief Integrate a basic set for within a bounding set. */
       virtual point_type bounded_flow(const vector_field_type&,
                                       const point_type&,
@@ -307,16 +321,24 @@ namespace Ariadne {
                                                const bounding_set_type&,
                                                const time_type&) const = 0;
      
+      //@}
+
      public:
 
+      //@{
+      //! \name Single-step integration of points and basic sets, with a suggested step size. */
+      /*! \brief Integrate a basic set. */
+      virtual basic_set_type integration_step(const vector_field_type&,
+                                  const basic_set_type&,
+                                  time_type&) const;
+
+      /*! \brief Integrate a basic set up to a given time. */
       virtual basic_set_type reachability_step(const vector_field_type&,
                                                const basic_set_type&,
                                                time_type&) const;
 
-      virtual BS integration_step(const VF&,
-                                  const BS&,
-                                  time_type&) const;
-     
+      //@}
+
       /*! \brief Integrate a basic set. */
       virtual
       Geometry::SetInterface<R>*

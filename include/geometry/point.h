@@ -48,6 +48,12 @@ namespace Ariadne {
     template<class> class Sphere;
     template<class> class Ellipsoid;
 
+    /*!\brief A point in Euclidean space.
+     *
+     * Points may be instantiated with both numeric and interval coefficients. 
+     * An interval point can be automatically converted to and from a rectangle with numerical coefficients.
+     * However, an interval point canonically represents an approximation to a single point, whereas a rectangle represents a set of points.
+     */
     template<class R>
     class Point {
       typedef typename Numeric::traits<R>::arithmetic_type F;

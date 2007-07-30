@@ -54,8 +54,6 @@ namespace Ariadne {
     template<class R> AffineModel<R> implicit(const AffineModel<R>&);
 
 
-  int verbosity=7;
-
     /*!\ingroup System
      * \ingroup DiscreteTime
      * \brief Concrete class for functions.

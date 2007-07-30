@@ -182,6 +182,13 @@ Evaluation::AffineIntegrator<R>::clone() const
 
 
 
+template<class R>
+Geometry::ListSet< Geometry::Zonotope< Numeric::Interval<R> > >
+Evaluation::AffineIntegrator<R>::subdivide(const Geometry::Zonotope<I>& bs) const
+{
+  return bs.divide();
+}
+     
 template<class R> 
 Geometry::Point< Numeric::Interval<R> > 
 Evaluation::AffineIntegrator<R>::bounded_flow(const System::AffineVectorField<R>& avf,

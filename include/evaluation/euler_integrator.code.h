@@ -44,6 +44,7 @@
 #include "../linear_algebra/matrix.h"
 
 #include "../geometry/rectangle.h"
+#include "../geometry/list_set.h"
 
 #include "../system/vector_field.h"
 
@@ -75,6 +76,15 @@ Evaluation::EulerIntegrator<R>::clone() const
 
 
 template<class R>
+Geometry::ListSet< Geometry::Rectangle<R> >
+Evaluation::EulerIntegrator<R>::subdivide(const Geometry::Rectangle<R>& set) const
+{
+  ARIADNE_LOG(5,"EulerIntegrator::subdivide(Rectangle set)\n");
+  return set.subdivide(); 
+}
+
+
+template<class R>
 Geometry::Point< Numeric::Interval<R> >
 Evaluation::EulerIntegrator<R>::bounded_flow(const System::VectorFieldInterface<R>& vector_field, 
                                              const Geometry::Point<I>& initial_point, 
@@ -86,7 +96,7 @@ Evaluation::EulerIntegrator<R>::bounded_flow(const System::VectorFieldInterface<
   using namespace Geometry;
   using namespace System;
   
-  if(verbosity>6) { std::clog << "EulerIntegrator::integration_step(VectorFieldInterface,Rectangle,time_type) const" << std::endl; }
+  ARIADNE_LOG(6,"EulerIntegrator::integration_step(VectorFieldInterface,Rectangle,time_type) const\n");
   ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_point,"EulerIntegrator::integration_step(VectorFieldInterface,Point,Rectangle,time_type) const");
   ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,bounding_set,"EulerIntegrator::integration_step(VectorFieldInterface,Point,Rectangle,time_type) const");
   
@@ -114,7 +124,7 @@ Evaluation::EulerIntegrator<R>::bounded_integration_step(const System::VectorFie
                                                          const Geometry::Rectangle<R>& bounding_set, 
                                                          const time_type& step_size) const
 {
-  if(verbosity>6) { std::clog << "EulerIntegrator::integration_step(VectorFieldInterface,Rectangle,Rectangle,time_type) const" << std::endl; }
+  ARIADNE_LOG(6,"EulerIntegrator::integration_step(VectorFieldInterface,Rectangle,Rectangle,time_type) const\n");
   ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"EulerIntegrator::integration_step(VectorFieldInterface,Rectangle,Rectangle,time_type) const");
 
   return initial_set + I(step_size) * vector_field(bounding_set);
@@ -129,7 +139,7 @@ Evaluation::EulerIntegrator<R>::bounded_reachability_step(const System::VectorFi
                                                           const Geometry::Rectangle<R>& bounding_set, 
                                                           const time_type& step_size) const
 {
-  if(verbosity>6) { std::clog << "EulerIntegrator::reachability_step(VectorFieldInterface,Rectangle,time_type) const" << std::endl; }
+  ARIADNE_LOG(6,"EulerIntegrator::reachability_step(VectorFieldInterface,Rectangle,time_type) const\n");
   
   ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set(),"EulerIntegrator::reachability_step(VectorFieldInterface,Rectangle,time_type) const");
   
@@ -148,7 +158,7 @@ Evaluation::EulerIntegrator<R>::integration_step(const System::VectorFieldInterf
   using namespace Geometry;
   using namespace System;
   
-  if(verbosity>6) { std::clog << "EulerIntegrator::integration_step(VectorFieldInterface,Rectangle,time_type) const" << std::endl; }
+  ARIADNE_LOG(6,"EulerIntegrator::integration_step(VectorFieldInterface,Rectangle,time_type) const\n");
   
   
   ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"EulerIntegrator::integration_step(VectorFieldInterface,Rectangle,time_type) const");
@@ -161,16 +171,16 @@ Evaluation::EulerIntegrator<R>::integration_step(const System::VectorFieldInterf
   Vector< Interval<R> > fq=vf(q);
   r=r+(h*fq);
   
-  if(verbosity>0) {
-    std::clog << "suggested stepsize=" << step_size << std::endl;
+  ARIADNE_LOG(7,"initial_set="<<initial_set<<"\n");
+  ARIADNE_LOG(7,"suggested stepsize="<<conv_approx<double>(step_size)<<"\n");
     
-    std::clog << "stepsize=" << h << std::endl;
-    std::clog << "bound=" << q << std::endl;
+  ARIADNE_LOG(7,"stepsize="<<h<<"\n");
+  ARIADNE_LOG(7,"bound="<<q<<"\n");
     
-    std::clog << "derivative=" << fq << std::endl;
+  ARIADNE_LOG(7,"derivative="<<fq<<"\n");
     
-    std::clog << "position=" << r << std::endl;
-  }
+  ARIADNE_LOG(7,"position="<<r<<"\n");
+  
   return r;
 }
 
@@ -187,7 +197,7 @@ Evaluation::EulerIntegrator<R>::reachability_step(const System::VectorFieldInter
   using namespace Geometry;
   using namespace System;
   
-  if(verbosity>6) { std::clog << "EulerIntegrator::reachability_step(VectorFieldInterface,Rectangle,time_type) const" << std::endl; }
+  ARIADNE_LOG(6,"EulerIntegrator::reachability_step(VectorFieldInterface,Rectangle,time_type) const\n");
   
   ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set(),"EulerIntegrator::reachability_step(VectorFieldInterface,Rectangle,time_type) const");
   
@@ -201,15 +211,14 @@ Evaluation::EulerIntegrator<R>::reachability_step(const System::VectorFieldInter
   
   r=r+Vector< Interval<R> >(Interval<R>(R(0),h)*fq);
   
-  if(verbosity>1) { 
-    std::clog << "suggested stepsize=" << step_size << std::endl;
+  ARIADNE_LOG(7,"initial_set="<<initial_set<<"\n");
+  ARIADNE_LOG(7,"suggested stepsize="<<step_size<<"\n");
     
-    std::clog << "stepsize=" << h << std::endl;
-    std::clog << "bound=" << q << std::endl;
+  ARIADNE_LOG(7,"stepsize="<<h<<"\n");
+  ARIADNE_LOG(7,"bound="<<q<<"\n");
     
-    std::clog << "derivative=" << fq << std::endl;
-    std::clog << "position=" << r << std::endl;
-  }
+  ARIADNE_LOG(7,"derivative="<<fq<<"\n");
+  ARIADNE_LOG(7,"position="<<r<<"\n");
   
   return r;
 }

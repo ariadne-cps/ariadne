@@ -117,16 +117,6 @@ The classical Lohner integrator is a first-order in space integration scheme. To
                            &= t\bigl(\dot{y}(c,0) + \dot{y}'(\xi,0)\cdot(x-c) \bigr) + \frac{t^2}{2}\ddot{y}(x,\tau) + (x-c) + c \\
                            &= c+tf(c)+\frac{t^2}{2} Df(y(x,\tau))f(y(x,\tau)) + \bigl(I+t\,Df(\xi)\bigr)\cdot(x-c) \\[\jot]
                            &\in c+tf(c)+\frac{t^2}{2} Df(B)f(B) + \bigl(I+t\,Df(X)\bigr)\cdot(x-c) \end{aligned} \f]
-Alternatively, by computing bounds on the Jacobian derivative \f$y'(x,t)=D\Phi(x,t)\f$, we obtain a \f$C^1\f$ Lohner integrator
-\f[ \begin{aligned} y(x,t) &= y(x,t)-y(c,t) + y(c,t) \\
-                           &= y'(\xi,t)\cdot(x-c) + y(c,0) + t\dot{y}(c,0) + \frac{t^2}{2} \ddot{y}(c,\tau) \\
-                           &= t\dot{y}'(\xi,\tau)\cdot(x-c) + t\dot{y}(c,0) + \frac{t^2}{2} \ddot{y}(c,\tau) \\
-                           &= c+tf(c)+\frac{t^2}{2}\,Df(y(c,\tau))\,f(y(c,\tau)) + \bigl(I+t\,Df(y(\xi,\tau))\,y'(\xi,\tau)\bigr)\cdot(x-c) \\[\jot]
-                           &\in c+tf(c)+\frac{t^2}{2}\,Df(B_c)\,f(B_c) + \bigl(I+t\,Df(B)\,W\bigr)\cdot(x-c) \end{aligned} \f]
-The Jacobian derivative itself is obtained by
-\f[ \begin{aligned} y'(x,t) &= y'(x,0) + t \dot{y}'(x,\tau) \\
-                            &= I + t\,Df(y(x,\tau))\,y'(x,\tau) \\[\jot]
-                            &\in I + t\,Df(B)\,W \end{aligned} \f]
 
 A reachability step over the interval \f$[0,h]\f$ is most easily obtained using an Euler step from the time \f$h/2\f$ flow.
 \f[ \begin{aligned} y(x,t) &= y(x,h/2) + (t-h/2) \, \dot{y}(x,\tau) \\
@@ -141,26 +131,40 @@ The first- and second- order updates are
 \f[ \begin{aligned} X_1 &= x_0 + h f(x_0) + (I+hDf(X_0)) \cdot (X_0-x_0) + \frac{h^2}{2} Df(B) f(B) \\[\jot]
     X_1 &= x_0 + h f(x_0) + \frac{h^2}{2} Df(x_0)f(x_0) \;+\; \Bigl(I+hDf(X_0)+\frac{h^2}{2} \bigl( D^2f(X_0) f(X_0) + (Df(X_0))^2 \bigr) \Bigr) \cdot (X_0-x_0) \;+\; \frac{h^3}{3} \bigl( D^2f(B) f(B) + (Df(B)^2) \bigr) f(B) \end{aligned}  \f]
 
-If \f$W\f$ is an enclosure for \f$D\Phi(X_0,[0,h])\f$, then the C<sup>1</sup> Lohner scheme is
-\f[ X_1 = P_n(x_0,h) + R_n(B_c,h) + \bigl(DP_{n-1}(B,h)+DR_n(B,h)W\bigr)\cdot(X_0-x_0); \qquad J_1=\bigl(DP_{n-1}(B,h)+DR_n(B,h)W\bigr)\,J_0 \f]
-The first- and second-order updates for the Jacobian derivative are
-\f[ \begin{aligned}  J_1 &= \bigl( I + t\,Df(B)\,W \bigr) \, J_0 \\[\jot]
-                     J_1 &= \bigl( I + t\,Df(B) + \frac{t^2}{2}\,(D^2f(B)f(B)+ Df(B)^2)\,W \bigr) \, J_0 \end{aligned} \f]
 
 
 If the initial set is a zonotope with centre \f$c_0\f$ and generators \f$G_0\f$, 
 then the new centre and generators can be computed with the classical method by
 \f[ c_1 = c_0 + h f(c_0) + \frac{h^2}{2} Df(B) f(B) ;  \qquad  G_1 = \bigl(I  + h Df(X_0) \bigr)\, G_0. \f]
-and by the C<sup>1</sup> method by
-\f[ c_1 = c_0 + h f(c_0) + \frac{h^2}{2} Df(B_c) f(B_c) ;  \qquad  G_1 = \bigl(I+h\,Df(B)\,W\bigr)  \, G_0. \f]
 These schemes may be easily implemented using interval arithmetic.
-
 
 To reduce the wrapping effect in the generator matrix, the interval matrix \f$G\f$ may be replaced by its average \f$\widetilde{G}\f$, and the error absorbed into the centre \f$\tilde{c} = c+(G-\tilde{G})e\f$, where \f$e\f$ is the interval vector with elements \f$[-1,1]\f$.
 
 The Lohner integration step is usually used in conjunction with an orthogonal regularisation scheme.
 The generator matrix is factorised \f$ G = QR \f$ where \f$Q\f$ is orthonormal and \f$R\f$ is upper-triangular, 
 and the new generators \f$G'\f$ are given by \f$ G' = QD \f$, where \f$D\f$ is diagonal with \f$D_{ii}=\sum_{j} |R_{ij}|\f$.
+
+\section c1lohnerintegrator C1 Lohner Integrator
+
+Alternatively, by computing bounds on the Jacobian derivative \f$y'(x,t)=D\Phi(x,t)\f$, we obtain a C<sup>1</sup> Lohner integrator
+\f[ \begin{aligned} y(x,t) &= y(x,t)-y(c,t) + y(c,t) \\
+                           &= y'(\xi,t)\cdot(x-c) + y(c,0) + t\dot{y}(c,0) + \frac{t^2}{2} \ddot{y}(c,\tau) \\
+                           &= t\dot{y}'(\xi,\tau)\cdot(x-c) + t\dot{y}(c,0) + \frac{t^2}{2} \ddot{y}(c,\tau) \\
+                           &= c+tf(c)+\frac{t^2}{2}\,Df(y(c,\tau))\,f(y(c,\tau)) + \bigl(I+t\,Df(y(\xi,\tau))\,y'(\xi,\tau)\bigr)\cdot(x-c) \\[\jot]
+                           &\in c+tf(c)+\frac{t^2}{2}\,Df(B_c)\,f(B_c) + \bigl(I+t\,Df(B)\,W\bigr)\cdot(x-c) \end{aligned} \f]
+The Jacobian derivative itself is obtained by
+\f[ \begin{aligned} y'(x,t) &= y'(x,0) + t \dot{y}'(x,\tau) \\
+                            &= I + t\,Df(y(x,\tau))\,y'(x,\tau) \\[\jot]
+                            &\in I + t\,Df(B)\,W \end{aligned} \f]
+
+If \f$W\f$ is an enclosure for \f$D\Phi(X_0,[0,h])\f$, then the C<sup>1</sup> Lohner scheme is
+\f[ X_1 = P_n(x_0,h) + R_n(B_c,h) + \bigl(DP_{n-1}(B,h)+DR_n(B,h)W\bigr)\cdot(X_0-x_0); \qquad J_1=\bigl(DP_{n-1}(B,h)+DR_n(B,h)W\bigr)\,J_0 \f]
+The first- and second-order updates for the Jacobian derivative are
+\f[ \begin{aligned}  J_1 &= \bigl( I + t\,Df(B)\,W \bigr) \, J_0 \\[\jot]
+                     J_1 &= \bigl( I + t\,Df(B) + \frac{t^2}{2}\,(D^2f(B)f(B)+ Df(B)^2)\,W \bigr) \, J_0 \end{aligned} \f]
+
+If the initial set is a zonotope, the new centre and generators can be computed by
+\f[ c_1 = c_0 + h f(c_0) + \frac{h^2}{2} Df(B_c) f(B_c) ;  \qquad  G_1 = \bigl(I+h\,Df(B)\,W\bigr)  \, G_0. \f]
 
 \section taylorintegrator Taylor methods
 

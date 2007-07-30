@@ -37,9 +37,14 @@ namespace Ariadne {
    
 
     /*!\ingroup Integrate
-     * \brief An integrator based on the \f$C^1\f$-Lohner algorithm. 
-     *  
-     * The \f$C^1\f$-Lohner algorithm is a Taylor method.
+     * \brief An integrator based on the Lohner algorithm.
+     *
+     * The update rule for an integration step on a zonotope is
+     * \f[  \Phi(X,t) \subset c+tf(c)+\frac{t^2}{2} Df(B)f(B) + \bigl(I+t\,Df(X)\bigr)\cdot(x-c) . \f]
+     * where \f$B\f$ is a bound for \f$\Phi(c,[0,t])\f$.
+     * Subdivision is performed using orthogonal over-approximation.
+     *
+     * See the section on the \ref c1lohnerintegrator for details.
      */
     template<class R>
     class LohnerIntegrator
@@ -57,11 +62,14 @@ namespace Ariadne {
 
      public:
       
-      /*! \brief Integrate a basic set for within a bounding set. */
+      /*! \brief Subdivide the basic set into smaller pieces using orthogonal subdivsions */
+      virtual Geometry::ListSet< Geometry::Zonotope<I> > subdivide(const Geometry::Zonotope<I>&) const;
+
+      /*! \brief Integrate a basic set for time \a t within a bounding set. */
       virtual Geometry::Point<I> bounded_flow(const System::VectorFieldInterface<R>& vf,
                                               const Geometry::Point<I>& p,
                                               const Geometry::Rectangle<R>& bb,
-                                              const time_type&) const;
+                                              const time_type& t) const;
      
       /*! \brief Integrate a basic set for within a bounding set. */
       virtual LinearAlgebra::Matrix<I> bounded_flow_jacobian(const System::VectorFieldInterface<R>& vf,
@@ -70,13 +78,7 @@ namespace Ariadne {
                                                              const time_type&) const;
      
        /*! \brief A C1 algorithm for integrating forward a zonotope.
-       *
-       * The algorithm uses a set \f$B_{n+1}\f$ such that \f$R_{n+1}\subset B_{n+1}\f$. 
-       * It then computes an interval Matrix \f$ \mathcal{A}_{n} \f$ such that \f$ Df(B_{n+1}) \in \mathcal{A}_{n} \f$.
-       * It then computes a rectangle \f$ C_{n+1} \f$ such that \f$ \Phi(t,C_{n})\in C_{n+1} \f$.
-       * We then compute \f$ \mathcal{P}_{n} \f$ such that \f$ D\Phi(h,R_{n}) \subset \mathcal{P}_{n} \f$.
-       * We then compute \f$ A_{n+1} \f$ such that \f$ A_{n+1} e \supset \mathcal{P}_{n} e \f$.
-       */
+        */
       virtual Geometry::Zonotope<I> 
       bounded_integration_step(const System::VectorFieldInterface<R>& vf,
                                const Geometry::Zonotope<I>& s,
@@ -98,9 +100,14 @@ namespace Ariadne {
       
     
     /*!\ingroup Integrate
-     * \brief An integrator based on the \f$C^1\f$-Lohner algorithm. 
-     *  
-     * The \f$C^1\f$-Lohner algorithm is a Taylor method.
+     * \brief An integrator based on the C<sup>1</sup>-Lohner algorithm on zonotopes. 
+     *
+     * The update rule for an integration step is 
+     * \f[  \Phi(x,t) \subset c+tf(c)+\frac{t^2}{2}\,Df(B_c)\,f(B_c) + \bigl(I+t\,Df(B)\,W\bigr)\cdot(x-c) \f]
+     * where \f$B_c\f$ is a bound for \f$\Phi(c,[0,t])\f$, \f$B\f$ is a bound for \f$\Phi(X,[0,t])\f$ and \f$W\f$ is a bound for \f$D\Phi(X,[0,t])\f$.
+     * Subdivision is performed using orthogonal over-approximation.
+     *
+     * See the section \ref c1lohnerintegrator for details.
      */
     template<class R>
     class C1LohnerIntegrator
@@ -118,6 +125,9 @@ namespace Ariadne {
 
      public:
       
+      /*! \brief Subdivide the basic set into smaller pieces using orthogonal subdivsions */
+      virtual Geometry::ListSet< Geometry::Zonotope<I> > subdivide(const Geometry::Zonotope<I>&) const;
+
       /*! \brief Integrate a basic set for within a bounding set. */
       virtual Geometry::Point<I> bounded_flow(const System::VectorFieldInterface<R>& vf,
                                               const Geometry::Point<I>& p,
@@ -132,13 +142,7 @@ namespace Ariadne {
                                                              const time_type&) const;
      
        /*! \brief A C1 algorithm for integrating forward a zonotope.
-       *
-       * The algorithm uses a set \f$B_{n+1}\f$ such that \f$R_{n+1}\subset B_{n+1}\f$. 
-       * It then computes an interval Matrix \f$ \mathcal{A}_{n} \f$ such that \f$ Df(B_{n+1}) \in \mathcal{A}_{n} \f$.
-       * It then computes a rectangle \f$ C_{n+1} \f$ such that \f$ \Phi(t,C_{n})\in C_{n+1} \f$.
-       * We then compute \f$ \mathcal{P}_{n} \f$ such that \f$ D\Phi(h,R_{n}) \subset \mathcal{P}_{n} \f$.
-       * We then compute \f$ A_{n+1} \f$ such that \f$ A_{n+1} e \supset \mathcal{P}_{n} e \f$.
-       */
+        */
       virtual Geometry::Zonotope<I> 
       bounded_integration_step(const System::VectorFieldInterface<R>& vf,
                                const Geometry::Zonotope<I>& s,

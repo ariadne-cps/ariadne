@@ -159,6 +159,15 @@ time_type Evaluation::Integrator<R>::lock_to_grid_time() const
 
 
 template<class R, class VF, class BS>
+typename Evaluation::IntegratorBase<R,VF,BS>::list_set_type
+Evaluation::IntegratorBase<R,VF,BS>::subdivide(const basic_set_type& set) const
+{
+  ARIADNE_LOG(5,"Integrator::subdivide(BasicSet)\n");
+  return set.subdivide();
+}
+
+
+template<class R, class VF, class BS>
 typename Evaluation::IntegratorBase<R,VF,BS>::basic_set_type
 Evaluation::IntegratorBase<R,VF,BS>::integration_step(const vector_field_type& vector_field, 
                                                       const basic_set_type& initial_set, 
@@ -812,7 +821,8 @@ Evaluation::IntegratorBase<R,VF,BS>::upper_integrate(const VF& vector_field,
     if(verbosity>5) { std::clog << "  t=" << t << "  bs=" << bs << std::endl; }
     if(bs.radius()>maximum_set_radius) {
       if(verbosity>5) { std::clog << "    subdividing..." << std::flush; }
-      ListSet<BS> subdivisions=bs.subdivide();
+      ListSet<BS> subdivisions=this->subdivide(bs);
+      if(verbosity>5) { std::clog << "    subdivisions.size() =" << subdivisions.size() << std::endl; }
       for(list_set_const_iterator subdiv_iter=subdivisions.begin(); 
           subdiv_iter!=subdivisions.end(); ++subdiv_iter)
         {
@@ -903,9 +913,9 @@ Evaluation::IntegratorBase<R,VF,BS>::upper_reach(const VF& vector_field,
     if(verbosity>6) { std::clog << "  t=" << conv_approx<double>(t) << "  bs.centre()=" << bs.centre() << "  bs.radius() = " << bs.radius() << std::endl; }
     
     if(bs.radius()>maximum_set_radius) {
-      if(verbosity>6) { std::clog << "  subdividing..." << std::endl; }
-      ListSet<BS> subdivisions=bs.subdivide();
-      if(verbosity>6) { std::clog << "    subdivisions.size() =" << subdivisions.size() << std::endl; }
+      if(verbosity>5) { std::clog << "  subdividing..." << std::endl; }
+      ListSet<BS> subdivisions=this->subdivide(bs);
+      if(verbosity>5) { std::clog << "    subdivisions.size() =" << subdivisions.size() << std::endl; }
       for(list_set_const_iterator subdiv_iter=subdivisions.begin(); 
           subdiv_iter!=subdivisions.end(); ++subdiv_iter)
         {

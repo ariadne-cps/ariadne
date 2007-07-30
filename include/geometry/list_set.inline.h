@@ -258,7 +258,8 @@ namespace Ariadne {
         this->_dimension=bs.dimension(); 
       }
       ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,bs,"void ListSet<BS>::adjoin(BS bs)");
-      if(!bs.empty()) {
+      if(bs.empty()) {
+      } else {
         this->_vector.push_back(bs);
       }
     }

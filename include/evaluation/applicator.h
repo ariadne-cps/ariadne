@@ -44,6 +44,7 @@ namespace Ariadne {
      */
     template<class R>
     class Applicator {
+      typedef Numeric::Interval<R> I;
      private:
       R _default_bound;
       R _maximum_basic_set_radius;
@@ -82,6 +83,23 @@ namespace Ariadne {
       /*! \brief Set the default bound. */
       void set_default_bound(const R&);
 
+      //@}
+
+
+      //@{ 
+      //! \name Supporting geometric routines.
+      /*! \brief Subdivide a rectangle into smaller pieces. */
+      virtual Geometry::ListSet< Geometry::Rectangle<R> >
+      subdivide(const Geometry::Rectangle<R>& s) const;
+      /*! \brief Subdivide a zonotope into smaller pieces. */
+      virtual Geometry::ListSet< Geometry::Zonotope<R,R> >
+      subdivide(const Geometry::Zonotope<R,R>& s) const;
+      /*! \brief Subdivide a zonotope into smaller pieces. */
+      virtual Geometry::ListSet< Geometry::Zonotope<I,R> >
+      subdivide(const Geometry::Zonotope<I,R>& s) const;
+      /*! \brief Subdivide a zonotope into smaller pieces. */
+      virtual Geometry::ListSet< Geometry::Zonotope<I,I> >
+      subdivide(const Geometry::Zonotope<I,I>& s) const;
       //@}
 
 

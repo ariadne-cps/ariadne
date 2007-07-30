@@ -102,6 +102,15 @@ Evaluation::LohnerIntegrator<R>::LohnerIntegrator(const time_type& maximum_step_
 
 
 template<class R>
+Geometry::ListSet< Geometry::Zonotope<typename Evaluation::LohnerIntegrator<R>::I> >
+Evaluation::LohnerIntegrator<R>::subdivide(const Geometry::Zonotope<I>& basic_set) const
+{
+  Geometry::Zonotope<I> orthogonal_zonotope(Geometry::orthogonal_over_approximation(basic_set));
+  return orthogonal_zonotope.subdivide();
+}
+
+
+template<class R>
 Geometry::Point<typename Evaluation::LohnerIntegrator<R>::I>
 Evaluation::LohnerIntegrator<R>::bounded_flow(const System::VectorFieldInterface<R>& vector_field, 
                                               const Geometry::Point<I>& initial_point, 
@@ -264,6 +273,15 @@ template<class R>
 Evaluation::C1LohnerIntegrator<R>::C1LohnerIntegrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_basic_set_radius)
   : Base_(maximum_step_size,lock_to_grid_time,maximum_basic_set_radius)
 {
+}
+
+
+template<class R>
+Geometry::ListSet< Geometry::Zonotope<typename Evaluation::C1LohnerIntegrator<R>::I> >
+Evaluation::C1LohnerIntegrator<R>::subdivide(const Geometry::Zonotope<I>& basic_set) const
+{
+  Geometry::Zonotope<I> orthogonal_zonotope(Geometry::orthogonal_over_approximation(basic_set));
+  return orthogonal_zonotope.subdivide();
 }
 
 

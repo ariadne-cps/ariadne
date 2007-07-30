@@ -76,11 +76,11 @@ namespace Ariadne {
       Point<R> lwr_crnr=this->lower_corner();
       Point<R> cntr=this->centre();
       Point<R> upr_crnr=this->upper_corner();
-      Point<R> new_lwr_crnr;
-      Point<R> new_upr_crnr;
+      Point<R> new_lwr_crnr(n);
+      Point<R> new_upr_crnr(n);
       for(size_type i=0; i!=1u<<n; ++i) {
         for(size_type j=0; j!=n; ++j) {
-          if(i&(1<<j)) {
+          if(i&(1u<<j)) {
             new_lwr_crnr[j]=lwr_crnr[j];
             new_upr_crnr[j]=cntr[j];
           }

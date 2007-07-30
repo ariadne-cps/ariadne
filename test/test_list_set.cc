@@ -62,6 +62,7 @@ int test_list_set()
   Rectangle<R> r0(s0,s1);
   Rectangle<R> r1(s1,s2);
   Rectangle<R> r2(s2,s3);
+  Rectangle<R> r3(s3,s3);
   cout << r0 << " " << r1 << " " << r2 << endl;
   
   Zonotope<R> z0(r0);
@@ -71,11 +72,13 @@ int test_list_set()
   ds1.adjoin(r0);
   ds1.adjoin(r1);
   ds1.adjoin(r2);
+  ds1.adjoin(r3);
   cout << ds1 << endl;
-  assert(ds1.size()==3);
+  assert(ds1.size()==4);
   assert(ds1[0]==r0);
   assert(ds1[1]==r1);
   assert(ds1[2]==r2);
+  assert(ds1[3]==r3);
   
   cout << ds1 << endl;
   
@@ -87,6 +90,7 @@ int test_list_set()
   cout << ds2 << endl;
   assert(ds2.size()==3);
   assert(ds1[0]==ds2[0] && ds1[1]==ds2[1] && ds1[2]==ds2[2]);
+  
 
   ListSet< Zonotope<R> > zds;
   cout << "z0.empty()=" << z0.empty() << endl;
@@ -94,6 +98,9 @@ int test_list_set()
   assert(zds.size()==1);
   zds.adjoin(z1);
   assert(zds.size()==2);
+  zds.adjoin(r0);
+  assert(zds.size()==3);
+  cout << zds << endl;
 
   return 0;
 }

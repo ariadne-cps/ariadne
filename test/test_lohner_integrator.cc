@@ -59,7 +59,7 @@ template<class R>
 int 
 test_lohner_integrator()
 {
-  set_integrator_verbosity(8);
+  // set_integrator_verbosity(8);
 
   cout << __PRETTY_FUNCTION__ << endl;
   typedef Interval<R> I;

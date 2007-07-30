@@ -143,6 +143,38 @@ Evaluation::Applicator<R>::set_default_bound(const R& db)
 
 
 
+template<class R>
+Geometry::ListSet< Geometry::Rectangle<R> >
+Evaluation::Applicator<R>::subdivide(const Geometry::Rectangle<R>& s) const
+{
+  return s.subdivide();
+}
+
+
+template<class R>
+Geometry::ListSet< Geometry::Zonotope<R,R> >
+Evaluation::Applicator<R>::subdivide(const Geometry::Zonotope<R,R>& s) const
+{
+  return s.subdivide();
+}
+
+
+template<class R>
+Geometry::ListSet< Geometry::Zonotope<Numeric::Interval<R>,R> >
+Evaluation::Applicator<R>::subdivide(const Geometry::Zonotope<I,R>& s) const
+{
+  return s.subdivide();
+}
+
+
+template<class R>
+Geometry::ListSet< Geometry::Zonotope< Numeric::Interval<R>, Numeric::Interval<R> > >
+Evaluation::Applicator<R>::subdivide(const Geometry::Zonotope<I,I>& s) const
+{
+  return s.subdivide();
+}
+
+
 
 template<class R>
 Geometry::Rectangle<R> 

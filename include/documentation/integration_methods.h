@@ -175,5 +175,22 @@ Methods based on higher-order Taylor expansions can be devised. A second-order i
     \end{aligned} \f]
 For higher order in space, Taylor sets must be used.
 
+\section evolutionerror Error bounds for integration methods
+
+The growth rate of the difference of two solutions of a differential equation \f$\dot{x}(t)=f(x(t))\f$ is governed by the logarithmic norm \f$l\f$ of \f$Df\f$.
+\f[ ||x(t) - y(t) || \leq e^{lt} || x(0)-y(0) || . \f]
+The error of a C<sup>0</sup> integrator, such as the Euler integrator, or the uniform part of a Taylor integrator, is bound by the Lipschitz constant \f$L\f$ of \f$f\f$, which is equal to the norm of \f$Df\f$.
+\f[ ||x(t) - y(t) || \leq e^{Lt} || x(0)-y(0) || . \f]
+For a set-based integrator, we can therefore approximate the error by
+\f[ \varepsilon(t) \leq \epsilon_0 (e^{k_0Lt}-1) + e^{k_1lt} r_0 \f]
+where \f$r_0\f$ is the initial radius, \f$k_0\f$ and \f$k_0\f$ are constants related to the integration method (approximately \f$1+Lh\f$ for a typical step-size \f$h\f$) and \f$\epsilon_0\f$ depends on small round-off errors and higher-order terms (of order \f$h^2\f$).
+
+The error in the constant term may be alleviated by reincorporating the zero-order error into the first-order terms. This is especially useful if the Lipschitz constant \f$L\f$ is much larger than the logarithmic norm \f$l\f$. In this case, the zero-order error may be bounded by a constant times the first-order error.
+\f[ \varepsilon(t) \leq ce^{klt} r . \f]
+
+
+If the initial set is based on a grid with sets of order \f$r\f$, and \f$t\f$ is the lock-to-grid time, then at each lock-to grid step an additional error of order approximately \f$r\f$ is incurred. The error bound is then approximately
+\f[ \varepsilon(t) \leq \epsilon_0 e^{k_0Lt} + (1+e^{k_1lt}) r . \f]
+
 
 */

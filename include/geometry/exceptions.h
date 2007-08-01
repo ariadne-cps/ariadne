@@ -50,6 +50,11 @@ namespace Ariadne {
       InvalidCoordinate(const std::string& str) : std::runtime_error(str) { }
     };
 
+    /*! \brief The value of an element of a geometric object was invalid. */
+    struct InvalidValue : public std::runtime_error {
+      InvalidValue(const std::string& str) : std::runtime_error(str) { }
+    };
+
     /*! \brief An invalid index to the set of vertices. */
     struct InvalidVertex : public std::runtime_error {
       InvalidVertex(const std::string& str) : std::runtime_error(str) { }
@@ -103,7 +108,7 @@ namespace Ariadne {
   { if((obj1).dimension()!=(obj2).dimension()) { using namespace Geometry; ARIADNE_THROW(IncompatibleDimensions,func,#obj1"="<<obj1<<", "#obj2"="<<obj2); } }
         
 #define ARIADNE_CHECK_COORDINATE(obj,ind,func)                          \
-  { if((obj).dimension()>=ind) { using namespace Geometry; ARIADNE_THROW(InvalidCoordinate,func,#obj"="<<obj<<", "#ind"="<<ind); } }
+  { if((obj).dimension()<=ind) { using namespace Geometry; ARIADNE_THROW(InvalidCoordinate,func,#obj"="<<obj<<", "#ind"="<<ind); } }
 
 #define ARIADNE_CHECK_VERTEX_INDEX(poly,ind,func)                       \
   { if((poly).number_of_vertices()<=ind) { using namespace Geometry; ARIADNE_THROW(InvalidVertex,func,#ind"="<<ind<<" but "#poly"has "<<(poly).number_of_vertices()<<" vertices"); } }

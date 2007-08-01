@@ -126,6 +126,9 @@ namespace Ariadne {
       /*! \brief Construct from two corners. */
       explicit Rectangle(const Point<R>& pt1, const Point<R>& pt2);
       
+      /*! \brief Construct a one-dimensional rectangle from two bounds. */
+      explicit Rectangle(const R& l, const R& u);
+      
       /*! \brief Construct from a string literal. */
       explicit Rectangle(const std::string& s);
       
@@ -351,11 +354,11 @@ namespace Ariadne {
 
       explicit Rectangle(dimension_type d=0);
       explicit Rectangle(const Point<I>& pt);
+      explicit Rectangle(const Point<I>& lower_corner, const Point<I>& upper_corner);
+      explicit Rectangle(const I& lower_bound, const I& upper_bound);
       template<class E> Rectangle(const RectangleExpression<E>& e);
       template<class E> Rectangle<I>& operator=(const RectangleExpression<E>& e);
       dimension_type dimension() const;
-      Point<I> centre() const;
-      I radius() const;
       tribool contains(const Point<I>& pt) const;
       const Numeric::Interval<R>& lower_bound(const dimension_type& i) const;
       const Numeric::Interval<R>& upper_bound(const dimension_type& i) const;
@@ -363,6 +366,7 @@ namespace Ariadne {
       void set_upper_bound(const dimension_type& i, const Numeric::Interval<R>& x);
       Point<I> lower_corner() const;
       Point<I> upper_corner() const;
+      Rectangle<R> bounding_box() const;
       size_type number_of_vertices() const;
       RectangleVerticesIterator<I> vertices_begin() const;
       RectangleVerticesIterator<I> vertices_end() const;

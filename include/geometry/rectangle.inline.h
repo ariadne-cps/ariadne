@@ -100,6 +100,14 @@ namespace Ariadne {
     }
     
     template<class R> inline
+    Rectangle<R>::Rectangle(const R& lower_bound, const R& upper_bound)
+      : _data(2)
+    {
+      this->set_lower_bound(0,lower_bound);
+      this->set_upper_bound(0,upper_bound);
+    }
+
+    template<class R> inline
     Rectangle<R>::Rectangle(const Point<R>& pt1, const Point<R>& pt2) 
       : _data(2*pt1.dimension())
     {
@@ -217,7 +225,7 @@ namespace Ariadne {
     R& Rectangle<R>::lower_bound(dimension_type i) 
     {
       if(i>=this->dimension()) {
-        ARIADNE_THROW(InvalidCoordinate,"Rectangle::lower_bound(dimension_type i)","self=" << *this << "i=" << i);
+        ARIADNE_THROW(InvalidCoordinate,"Rectangle::lower_bound(dimension_type i)","self=" << *this << ", i=" << i);
       }
       return this->_data[2*i];
     }
@@ -226,7 +234,7 @@ namespace Ariadne {
     const R& Rectangle<R>::upper_bound(dimension_type i) const 
     {
       if(i>=this->dimension()) {
-        ARIADNE_THROW(InvalidCoordinate,"Rectangle::upper_bound(dimension_type i) const","self=" << *this << "i=" << i);
+        ARIADNE_THROW(InvalidCoordinate,"Rectangle::upper_bound(dimension_type i) const","self=" << *this << ", i=" << i);
       }
       return this->_data[2*i+1];
     }
@@ -235,7 +243,7 @@ namespace Ariadne {
     R& Rectangle<R>::upper_bound(dimension_type i) 
     {
       if(i>=this->dimension()) {
-        ARIADNE_THROW(InvalidCoordinate,"Rectangle::upper_bound(dimension_type i)","self=" << *this << "i=" << i);
+        ARIADNE_THROW(InvalidCoordinate,"Rectangle::upper_bound(dimension_type i)","self=" << *this << ", i=" << i);
       }
       return this->_data[2*i+1];
     }
@@ -258,7 +266,7 @@ namespace Ariadne {
     const Numeric::Interval<R>& Rectangle<R>::interval(dimension_type i) const 
     {
       if(i>=this->dimension()) {
-        ARIADNE_THROW(InvalidCoordinate,"Rectangle::interval(dimension_type i) const","self=" << *this << "i=" << i);
+        ARIADNE_THROW(InvalidCoordinate,"Rectangle::interval(dimension_type i) const","self=" << *this << ", i=" << i);
       }
       return reinterpret_cast<const Numeric::Interval<R>&>(this->_data[2*i]);
     }
@@ -310,7 +318,7 @@ namespace Ariadne {
     void Rectangle<R>::set_interval(dimension_type i, Numeric::Interval<R> x)
     {
       if(i>=this->dimension()) {
-        ARIADNE_THROW(InvalidCoordinate,"Rectangle::set_interval(dimension_type i, Interval x) const","self=" << *this << "i=" << i);
+        ARIADNE_THROW(InvalidCoordinate,"Rectangle::set_interval(dimension_type i, Interval x) const","self=" << *this << ", i=" << i);
       }
       this->set_lower_bound(i,x.lower());
       this->set_upper_bound(i,x.upper());
@@ -320,7 +328,7 @@ namespace Ariadne {
     void Rectangle<R>::set_lower_bound(dimension_type i, const R& l) 
     {
       if(i>=this->dimension()) {
-        ARIADNE_THROW(InvalidCoordinate,"Rectangle::set_lower_bound(dimension_type i, Real l) const","self=" << *this << "i=" << i);
+        ARIADNE_THROW(InvalidCoordinate,"Rectangle::set_lower_bound(dimension_type i, Real l) const","self=" << *this << ", i=" << i);
       }
       this->_data[2*i]=l;
     }
@@ -329,7 +337,7 @@ namespace Ariadne {
     void Rectangle<R>::set_upper_bound(dimension_type i, const R& u) 
     {
       if(i>=this->dimension()) {
-        ARIADNE_THROW(InvalidCoordinate,"Rectangle::set_upper_bound(dimension_type i, Real u) const","self=" << *this << "i=" << i);
+        ARIADNE_THROW(InvalidCoordinate,"Rectangle::set_upper_bound(dimension_type i, Real u) const","self=" << *this << ", i=" << i);
       }
       this->_data[2*i+1]=u;
     }
@@ -462,6 +470,42 @@ namespace Ariadne {
     Rectangle< Numeric::Interval<R> >::Rectangle(dimension_type d)
       : _data(2*d) { }
     
+    template<class R> inline
+    Rectangle< Numeric::Interval<R> >::Rectangle(const I& x1, const I& x2)
+      : _data(2)
+    {
+      if(x1.lower()<=x2.lower() && x1.upper()<=x2.upper()) {
+        this->set_lower_bound(0,x1);
+        this->set_upper_bound(0,x2);
+      } else if(x1.lower()>=x2.lower() && x1.upper()>=x2.upper()) {
+        this->set_lower_bound(0,x2);
+        this->set_upper_bound(0,x1);
+      } else {
+        ARIADNE_THROW(InvalidValue,"Rectangle<Interval>(Interval x1, Interval x2)","x1=" << x1 << ", x2=" << x2);
+      }
+    }
+
+
+    template<class R> inline
+    Rectangle< Numeric::Interval<R> >::Rectangle(const Point<I>& pt1, const Point<I>& pt2)
+      : _data(2*pt1.dimension())
+    {
+      if(pt1.dimension()!=pt2.dimension()) {
+        ARIADNE_THROW(IncompatibleDimensions,"Rectangle<Interval>(Point pt1, Point pt2)","pt1=" << pt1 << ", pt2=" << pt2);
+      }
+      for (size_type i=0; i!=this->dimension(); ++i) {
+        if(pt1[i].lower()<=pt2[i].lower() && pt1[i].upper()<=pt2[i].upper()) {
+          this->set_lower_bound(i,pt1[i]);
+          this->set_upper_bound(i,pt2[i]);
+        } else if(pt1[i].lower()>=pt2[i].lower() && pt1[i].upper()>=pt2[i].upper()) {
+          this->set_lower_bound(0,pt2[i]);
+          this->set_upper_bound(0,pt1[i]);
+        } else {
+          ARIADNE_THROW(InvalidValue,"Rectangle<Interval>(Point pt1, Point pt2)","pt1=" << pt1 << ", pt2=" << pt2);
+        }
+      }
+    }
+
     template<class R> template<class E> inline
     Rectangle< Numeric::Interval<R> >::Rectangle(const RectangleExpression<E>& e)
       : _data(2*e().dimension()) 
@@ -486,6 +530,9 @@ namespace Ariadne {
     const Numeric::Interval<R>& 
     Rectangle< Numeric::Interval<R> >::lower_bound(const dimension_type& i) const 
     { 
+      if(i>=this->dimension()) {
+        ARIADNE_THROW(InvalidCoordinate,"Rectangle<Interval>::lower_bound(dimension_type i) const","self=" << *this << ", i=" << i);
+      }
       return _data[2*i]; 
     }
     
@@ -493,6 +540,9 @@ namespace Ariadne {
     const Numeric::Interval<R>& 
     Rectangle< Numeric::Interval<R> >::upper_bound(const dimension_type& i) const
     { 
+      if(i>=this->dimension()) {
+        ARIADNE_THROW(InvalidCoordinate,"Rectangle<Interval>::upper_bound(dimension_type i) const","self=" << *this << ", i=" << i);
+      }
       return _data[2*i+1];
     }
     
@@ -500,6 +550,10 @@ namespace Ariadne {
     void 
     Rectangle< Numeric::Interval<R> >::set_lower_bound(const dimension_type& i, const Numeric::Interval<R>& x)
     { 
+      if(i>=this->dimension()) {
+        ARIADNE_THROW(InvalidCoordinate,"Rectangle<Interval>::set_lower_bound(dimension_type i, Interval x) const",
+                      "self=" << *this << ", i=" << i << ", x=" << x);
+      }
       _data[2*i]=x; 
     }
     
@@ -507,7 +561,23 @@ namespace Ariadne {
     void 
     Rectangle< Numeric::Interval<R> >::set_upper_bound(const dimension_type& i, const Numeric::Interval<R>& x)
     { 
+      if(i>=this->dimension()) {
+        ARIADNE_THROW(InvalidCoordinate,"Rectangle<Interval>::set_upper_bound(dimension_type i, Interval x) const",
+                      "self=" << *this << ", i=" << i << ", x=" << x);
+      }
       _data[2*i+1]=x; 
+    }
+    
+    template<class R> inline
+    Rectangle<R> 
+    Rectangle< Numeric::Interval<R> >::bounding_box() const
+    { 
+      Rectangle<R> result(this->dimension());
+      for(dimension_type i=0; i!=result.dimension(); ++i) {
+        result.set_lower_bound(i,this->lower_bound(i).lower());
+        result.set_upper_bound(i,this->upper_bound(i).upper());
+      }
+      return result;
     }
     
     template<class R> template<class RE> inline

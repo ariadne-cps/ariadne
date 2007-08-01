@@ -53,22 +53,15 @@ Rectangle<R> over_approximation_of_minkowski_difference(const Rectangle<R>& r1, 
 template<class R>
 void export_rectangle() 
 {
-  typedef Point<R> RPoint;
-  typedef Rectangle<R> RRectangle;
-    
-  def("rectangular_hull", (RRectangle(*)(const RRectangle&, const RRectangle&))(&rectangular_hull));
-  def("open_intersection", (RRectangle(*)(const RRectangle&, const RRectangle&))(&open_intersection));
-  def("closed_intersection", (RRectangle(*)(const RRectangle&, const RRectangle&))(&closed_intersection));
-  def("disjoint", (tribool(*)(const RRectangle&, const RRectangle&))(&disjoint));
-  def("subset", (tribool(*)(const RRectangle&, const RRectangle&))(&subset));
-
+  typedef Interval<R> I;
   
-  class_< RRectangle >("Rectangle",init<int>())
+  class_< Rectangle<R> >("Rectangle",init<int>())
+    .def(init<R,R>())
     .def(init< Point<R>,Point<R> >())
-    .def(init<RRectangle>())
-    .def(init< Vector<Interval<R> > >())
+    .def(init< Rectangle<R> >())
+    .def(init< Vector< Interval<R> > >())
     .def(init<std::string>())
-    .def("empty", &RRectangle::empty)
+    .def("empty", &Rectangle<R>::empty)
     .def("dimension", &Rectangle<R>::dimension)
     .def("contains", &Rectangle<R>::contains)
     .def("centre", &Rectangle<R>::centre)
@@ -87,6 +80,37 @@ void export_rectangle()
     .def("__sub__", &over_approximation_of_minkowski_difference<R>)
     .def(self_ns::str(self))
   ;
+
+  def("rectangular_hull", (Rectangle<R>(*)(const Rectangle<R>&, const Rectangle<R>&))(&rectangular_hull));
+  def("open_intersection", (Rectangle<R>(*)(const Rectangle<R>&, const Rectangle<R>&))(&open_intersection));
+  def("closed_intersection", (Rectangle<R>(*)(const Rectangle<R>&, const Rectangle<R>&))(&closed_intersection));
+  def("disjoint", (tribool(*)(const Rectangle<R>&, const Rectangle<R>&))(&disjoint));
+  def("subset", (tribool(*)(const Rectangle<R>&, const Rectangle<R>&))(&subset));
+
+
+  class_< Rectangle<I> >("IntervalRectangle",init<int>())
+    .def(init<I,I>())
+    .def(init< Point<I>, Point<I> >())
+    .def(init< Rectangle<R> >())
+    .def(init< Rectangle<I> >())
+    .def("dimension", &Rectangle<I>::dimension)
+    .def("contains", &Rectangle<I>::contains)
+    .def("set_lower_bound", &Rectangle<I>::set_lower_bound)
+    .def("set_upper_bound", &Rectangle<I>::set_upper_bound)
+    .def("bounding_box", &Rectangle<I>::bounding_box)
+    .def("lower_corner", &Rectangle<I>::lower_corner)
+    .def("upper_corner", &Rectangle<I>::upper_corner)
+    .def("lower_bound", &Rectangle<I>::lower_bound, return_value_policy<copy_const_reference>())
+    .def("upper_bound", &Rectangle<I>::upper_bound, return_value_policy<copy_const_reference>())
+    //    .def("lower_bound", (const I&(Rectangle<I>::*)(dimension_type)const)(&Rectangle<I>::lower_bound), return_value_policy<copy_const_reference>())
+    //    .def("upper_bound", (const I&(Rectangle<I>::*)(dimension_type)const)(&Rectangle<I>::upper_bound), return_value_policy<copy_const_reference>())
+    .def(self_ns::str(self))
+  ;
+
+  def("under_approximation", (Rectangle<R>(*)(const Rectangle<I>&))(&under_approximation));
+  def("over_approximation", (Rectangle<R>(*)(const Rectangle<I>&))(&over_approximation));
+
+
 }
 
 template void export_rectangle<Float>();

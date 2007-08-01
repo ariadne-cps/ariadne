@@ -53,17 +53,101 @@ namespace Ariadne {
     class Rational : public mpq_class 
     {
      public:
+      //@{
+      //! \name Constructors and assignment operators
+      /*! \brief Default constructor constructs the rational 0/1. */
       Rational() : mpq_class() { }
+      /*! \brief Construct from a numerator and a denominator. */
+      Rational(const Integer& n, const Integer& d)
+        : mpq_class(n,d) { this->mpq_class::canonicalize(); }
+      /*! \brief Copy constructor. */
+      Rational(const Rational& q)
+        : mpq_class(q) { this->mpq_class::canonicalize(); }
+      /*! \brief Copy assignment operator. */
+      Rational& operator=(const Rational& q) {
+        this->mpq_class::operator=(q); return *this; }
+
+      /*! \brief Construct from a numerator and a denominator of arbitrary types. */
+      template<class R1,class R2> Rational(const R1& n, const R2& d)
+        : mpq_class(n,d) { this->mpq_class::canonicalize(); }
+      /*! \brief Convert from another numerical type. */
       template<class R> Rational(const R& x)
         : mpq_class(x) { this->mpq_class::canonicalize(); }
-      template<class R1,class R2> Rational(const R1& x1,const R2& x2)
-        : mpq_class(x1,x2) { this->mpq_class::canonicalize(); }
+      /*! \brief Conversion assignment operator from another numerical type. */
       template<class R> Rational& operator=(const R& x) {
         (*this)=Rational(x); return *this; }
+      //@}
+      
+      //@{
+      //! \name Data access
+      /*! \brief The numerator. */
       Integer numerator() const { return this->get_num(); }
+      /*! \brief The denominator. */
       Integer denominator() const { return this->get_den();}
+      //@}
+     public:
       mpq_class get_base() const { return *this; }
+
+#ifdef DOXYGEN
+      //@{
+      //! \name Arithmetic operations
+      /*! \brief The minimum of q1 and q2. */
+      friend Rational min(const Rational& q1, const Rational& q2);
+      /*! \brief The maximum of q1 and q2. */
+      friend Rational max(const Rational& q1, const Rational& q2);
+      /*! \brief The absolute value \a q. */
+      friend Rational abs(const Rational& q);
+      
+      /*! \brief In-place addition. */
+      friend Rational& operator+=(Rational& q1, const Rational& q2);
+      /*! \brief In-place subtraction of a number. */
+      friend Rational& operator-=(Rational& q1, const Rational& q2);
+      /*! \brief In-place multiplication. */
+      friend Rational& operator*=(Rational& q1, const Rational& q2);
+      /*! \brief In-place division. */
+      friend Rational& operator/=(Rational& q1, const Rational& q2);
+
+      /*! \brief Negation. */
+      friend Rational operator-(const Rational& q);
+      /*! \brief Addition. */
+      friend Rational operator+(const Rational& q1, const Rational& q2);
+      /*! \brief Subtraction. */
+      friend Rational operator-(const Rational& q1, const Rational& q2);
+      /*! \brief Multiplication. */
+      friend Rational operator*(const Rational& q1, const Rational& q2);
+      /*! \brief Division. */
+      friend Rational operator/(const Rational& q1, const Rational& q2);
+      /*! \brief %Integer power. */
+      friend Rational pow(const Rational& q, const Integer& n);
+      //@}
+      
+      
+      //@{
+      //! \name Comparison operators.
+      /*! \brief Equality operator. */
+      friend bool operator==(const Rational& q1, const Rational& q2); 
+      /*! \brief Inequality operator. */
+      friend bool operator!=(const Rational& q1, const Rational& q2); 
+      /*! \brief Less than operator. */
+      friend bool operator<(const Rational& q1, const Rational& q2);  
+      /*! \brief Greater than operator. */
+      friend bool operator>(const Rational& q1, const Rational& q2);
+      /*! \brief Less than or equal to operator. */
+      friend bool operator<=(const Rational& q1, const Rational& q2);
+      /*! \brief Greater than or equal to operator. */
+      friend bool operator>=(const Rational& q1, const Rational& q2);
+      //@}
+
+      //@{
+      //! \name Input/output operators.
+      /*! \brief Stream insertion operator. */
+      friend std::ostream& operator<<(std::ostream& os, const Rational& q);
+      /*! \brief Stream extraction operator. */
+      friend std::istream& operator>>(std::istream& is, Rational& q);
+      //@}
+#endif
     };
+
 
     std::istream& 
     operator>>(std::istream& is, Rational& q);

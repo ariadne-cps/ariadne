@@ -75,7 +75,8 @@ namespace Ariadne {
         mpfr_get_f(f.get_mpf_t(),this->get_mpfr_t(),GMP_RNDN); 
         return mpq_class(f);
       }
-      
+      static uint default_precision() { return mpfr_get_default_prec(); }
+      static void set_default_precision(uint p) { mpfr_set_default_prec(p); }
       int precision() const { return mpfr_get_prec(this->get_mpfr_t()); }
     };
     

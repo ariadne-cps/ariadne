@@ -40,216 +40,90 @@
 #include "../numeric/arithmetic.h"
 #include "../numeric/function.h"
 
+#include "../numeric/interval.class.h"
+
 namespace Ariadne {
   namespace Numeric {
-    //using namespace boost::numeric::interval_lib;
+  
+      template<class R> 
+      Interval<R>::Interval()
+        : _lower(conv_down<R>(0)), _upper(conv_up<R>(0)) { }
 
-    /*!\ingroup Numeric
-     * \brief A templated class representing an interval of real numbers.
-     * 
-     * An interval of real numbers with endpoints of type \a R.
-     * All operations on an interval must be guarenteed to return an interval contining the exact result.
-     * If \a val of real numbers with endpoints of type \a R.
-     * All operations on an interval must be guarenteed to return an interval contining the exact result.
-     * If \a T supports exact evaluation of a function, then the exact evaluation must be used.
-     * If \a T is dense in the reals, e.g. dyadic or rational, then any approximate operations may be given a maximum error of computation.
-     *
-     * Currently implemented as a wrapper around the boost::numeric::interval class template from the Boost C++ library.
-     */
-    template<class R>
-    class Interval
-    {
-     private:
-      R _lower; R _upper;
-     public:
-      //@{
-      //! \name Constructors and assignment operators
-      /*! \brief Default constructer constructs empty interval. */
-      Interval() : _lower(conv_down<R>(0)), _upper(conv_up<R>(0)) { }
-      /*! \brief Construct from lower and upper bounds. */
-      Interval(const R& l, const R& u) : _lower(l), _upper(u) { }
-      /*! \brief Construct from lower and upper bounds. */
-      template<class RL,class RU> Interval(const RL& l, const RU& u)
-        : _lower(conv_down<R>(l)), _upper(conv_up<R>(u)) { }
-       /*! \brief Construct an interval with possibly different real type. */
-      template<class RX> Interval(const Interval<RX>& ivl)
-        : _lower(conv_down<R>(ivl.lower())), _upper(conv_up<R>(ivl.upper())) { }
-      /*! \brief Construct a one-point interval. */
-      template<class RX> Interval(const RX& x)
-        : _lower(conv_down<R>(x)), _upper(conv_up<R>(x)) { }
-      
-      /*! \brief Assignment operator. */
-      template<class RX> 
-      Interval<R>& operator=(const RX& x) {
-        this->_lower=conv_down<R>(x); this->_upper=conv_up<R>(x); return *this;
-      }
-      /*! \brief Assignment operator. */
-      Interval<R>& operator=(const R& x) {
+      template<class R> 
+      Interval<R>::Interval(const R& x)
+        : _lower(x), _upper(x) { }
+
+      template<class R> 
+      Interval<R>::Interval(const R& l, const R& u)
+        : _lower(l), _upper(u) { }
+
+      template<class R> 
+      Interval<R>::Interval(const Interval<R>& ivl)
+        : _lower(ivl._lower), _upper(ivl._upper) { }
+
+      template<class R> 
+      Interval<R>& Interval<R>::operator=(const R& x) {
         this->_lower=x; this->_upper=x; return *this;
       }
-      /*! \brief Assignment operator. */
-      template<class RX> 
-      Interval<R>& operator=(const Interval<RX>& ivl) {
-        this->_lower=conv_down<R>(ivl.lower()); this->_upper=conv_up<R>(ivl.upper()); return *this;
-      }
-      /*! \brief Copy assignment operator. */
-      Interval<R>& operator=(const Interval<R>& ivl) {
+
+      template<class R> 
+      Interval<R>& Interval<R>::operator=(const Interval<R>& ivl) {
         this->_lower=ivl._lower; this->_upper=ivl._upper; return *this;
       }
-      //@}
+
+      template<class R> template<class RL,class RU> 
+      Interval<R>::Interval(const RL& l, const RU& u)
+        : _lower(conv_down<R>(l)), _upper(conv_up<R>(u)) { }
+
+      template<class R> template<class RX> 
+      Interval<R>::Interval(const Interval<RX>& ivl)
+        : _lower(conv_down<R>(ivl.lower())), _upper(conv_up<R>(ivl.upper())) { }
+
+      template<class R> template<class RX> 
+      Interval<R>::Interval(const RX& x)
+        : _lower(conv_down<R>(x)), _upper(conv_up<R>(x)) { }
       
-      //@{
-      //! \name Data access
-      /*! \brief The lower bound. */
-      const R& lower() const { return this->_lower; }
-      /*! \brief The upper bound. */
-      const R& upper() const { return this->_upper; }
-      //@}
+      template<class R> template<class RX> 
+      Interval<R>& Interval<R>::operator=(const RX& x) {
+        this->_lower=conv_down<R>(x); this->_upper=conv_up<R>(x); return *this;
+      }
+
+
+      template<class R> template<class RX> 
+      Interval<R>& Interval<R>::operator=(const Interval<RX>& ivl) {
+        this->_lower=conv_down<R>(ivl.lower()); this->_upper=conv_up<R>(ivl.upper()); return *this;
+      }
+
+
       
-      //@{
-      //! \name Geometric operations
-      /*! \brief The midpoint of the interval, given by \f$(a+b)/2\f$. */
-      R midpoint() const { 
+      template<class R> const R& Interval<R>::lower() const { return this->_lower; }
+
+      template<class R> const R& Interval<R>::upper() const { return this->_upper; }
+      
+
+      template<class R> R Interval<R>::midpoint() const { 
         return div_approx(add_approx(this->lower(),this->upper()),R(2)); }
-      /*! \brief The midpoint of the interval, given by \f$(a+b)/2\f$. */
-      R centre() const { 
+
+      template<class R> R Interval<R>::centre() const { 
         return div_approx(add_approx(this->lower(),this->upper()),R(2)); }
-      /*! \brief The radius of the interval, given by \f$(b-a)/2\f$. */
-      R radius() const { return div_up(sub_up(this->upper(),this->lower()),R(2)); }
-      /*! \brief The length of the interval, given by \f$b-a\f$. */
-      R length() const { return sub_up(this->upper(),this->lower()); }
-      
-      /*! \brief Tests if the interval is empty. */
-      bool empty() const { return this->lower()>this->upper(); }
-      /*! \brief Tests if the interval consists of a single point. */
-      bool singleton() const { return this->lower()==this->upper(); }
-      /*! \brief Tests if the interval contains \a r. */
-      bool contains(const R& r) const { return this->lower()<=r && r<=this->upper(); }
-      
-      /*! \brief Expand the interval by \a r. */
-      void expand_by(const R& r) { this->_lower=sub_down(this->lower(),r); this->_upper=add_up(this->upper(),r); }
-      //@}
-      
-      //@{
-      //! \name Input/output operations
-      /*! \brief Write to an output stream . */
-      std::ostream& write(std::ostream& os) const;
-      /*! \brief Read from an input stream . */
-      std::istream& read(std::istream& is);
-      //@}
 
-#ifdef DOXYGEN
-      //@{
-      //! \name Arithmetic operations
-      /*! \brief The interval of possible minima of \a x1 in \a ivl1 and \a x2 in \a ivl2. */
-      friend Interval<R> min(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief The interval of possible maxima of \a x1 in \a ivl1 and \a x2 in \a ivl2. */
-      friend Interval<R> max(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief The interval of possible absolute values of \a x in \a ivl. */
-      friend Interval<R> abs(const Interval<R>& ivl);
-      
-      /*! \brief In-place addition of an interval. */
-      friend Interval<R>& operator+=<>(Interval<R>&, const Interval<R>&);
-      /*! \brief In-place addition of a number. */
-      friend Interval<R>& operator+=<>(Interval<R>&, const R&);
-      /*! \brief In-place subtraction of an interval. */
-      friend Interval<R>& operator-=<>(Interval<R>&, const Interval<R>&);
-      /*! \brief In-place subtraction of a number. */
-      friend Interval<R>& operator-=<>(Interval<R>&, const R&);
+      template<class R> R Interval<R>::radius() const { return div_up(sub_up(this->upper(),this->lower()),R(2)); }
 
-      /*! \brief Interval negation. */
-      friend Interval<R> operator-(const Interval<R>& ivl);
-      /*! \brief Interval addition. */
-      friend Interval<R> operator+(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief Interval subtraction. */
-      friend Interval<R> operator-(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief Interval multiplication. */
-      friend Interval<R> operator*(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief Interval division. */
-      friend Interval<R> operator/(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief Integer power. */
-      friend template<class N> Interval<R> pow(const Interval<R>& x, const N& n);
-      //@}
+      template<class R>  R Interval<R>::length() const { return sub_up(this->upper(),this->lower()); }
       
-      //@{
-      //! \name Geometric operations
-      /*! \brief Tests equality. */
-      friend bool equal<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief Tests disjointness. */
-      friend bool disjoint<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief Tests intersection of interiors. */
-      friend bool interiors_intersect<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief Tests if \a ivl1 is a subset of \a ivl2. */
-      friend bool subset<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief Tests if \a ivl1 is a subset of the interior of \a ivl2. */
-      friend bool inner_subset<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      
-      /*! \brief The intersection of \a ivl1 and \a ivl2. */
-      friend Interval<R> intersection<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief The closure of the intersection of the interiors of \a ivl1 and \a ivl2. */
-      friend Interval<R> regular_intersection<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief The smallest interval containing \a ivl1 and \a ivl2. */
-      friend Interval<R> hull<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      //@}
-      
-      //@{
-      //! \name \name Approximation operations.
-      /*! \brief Test if the interval \a ivl contains the value \a x. */
-      friend bool refines<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief Test if the interval \a ivl contains the value \a x. */
-      friend bool contains_value<>(const Interval<R>& ivl, const R& x);
-      /*! \brief The approximate value represented by the interval \a ivl. */
-      friend R approximate_value<>(const Interval<R>& ivl);
-      /*! \brief An upper bound for the error of the approximate value represented by the interval \a ivl. */
-      friend R error_bound(const Interval<R>& ivl);
-      //@}
-      
-      //@{
-      //! \name \name Comparison operators.
-      /*! \brief Equality operator. */
-      friend template<class R1, class R2> tribool operator==(const Interval<R1>& ivl1, const Interval<R2>& ivl2); 
-      /*! \brief Inequality operator. */
-      friend template<class R1, class R2> tribool operator!=(const Interval<R1>& ivl1, const Interval<R2>& ivl2); 
-      /*! \brief Less than operator. */
-      friend template<class R1, class R2> tribool operator<(const Interval<R1>& ivl1, const Interval<R2>& ivl2);  
-      /*! \brief Greater than operator. */
-      friend template<class R1, class R2> tribool operator>(const Interval<R1>& ivl1, const Interval<R2>& ivl2);
-      /*! \brief Less than or equal to operator. */
-      friend template<class R1, class R2> tribool operator<=(const Interval<R1>& ivl1, const Interval<R2>& ivl2);
-      /*! \brief Greater than or equal to operator. */
-      friend template<class R1, class R2> tribool operator>=(const Interval<R1>& ivl1, const Interval<R2>& ivl2);
 
-      /*! \brief Equality operator. */
-      friend template<class R1, class R2> tribool operator==(const Interval<R1>& ivl1, const R2& ivl2); 
-      /*! \brief Inequality operator. */
-      friend template<class R1, class R2> tribool operator!=(const Interval<R1>& ivl1, const R2& ivl2); 
-      /*! \brief Less than operator. */
-      friend template<class R1, class R2> tribool operator<(const Interval<R1>& ivl1, const R2& ivl2);  
-      /*! \brief Greater than operator. */
-      friend template<class R1, class R2> tribool operator>(const Interval<R1>& ivl1, const R2& ivl2);
-      /*! \brief Less than or equal to operator. */
-      friend template<class R1, class R2> tribool operator<=(const Interval<R1>& ivl1, const R2& ivl2);
-      /*! \brief Greater than or equal to operator. */
-      friend template<class R1, class R2> tribool operator>=(const Interval<R1>& ivl1, const R2& ivl2);
+      template<class R> bool Interval<R>::empty() const { return this->lower()>this->upper(); }
 
-      /*! \brief Equality operator. */
-      friend template<class R1, class R2> tribool operator==(const R1& ivl1, const Interval<R2>& ivl2); 
-      /*! \brief Inequality operator. */
-      friend template<class R1, class R2> tribool operator!=(const R1& ivl1, const Interval<R2>& ivl2); 
-      /*! \brief Less than operator. */
-      friend template<class R1, class R2> tribool operator<(const R1& ivl1, const Interval<R2>& ivl2);  
-      /*! \brief Greater than operator. */
-      friend template<class R1, class R2> tribool operator>(const R1& ivl1, const Interval<R2>& ivl2);
-      /*! \brief Less than or equal to operator. */
-      friend template<class R1, class R2> tribool operator<=(const R1& ivl1, const Interval<R2>& ivl2);
-      /*! \brief Greater than or equal to operator. */
-      friend template<class R1, class R2> tribool operator>=(const R1& ivl1, const Interval<R2>& ivl2);
+      template<class R> bool Interval<R>::singleton() const { return this->lower()==this->upper(); }
 
-      //@}
-#endif
+      template<class R> bool Interval<R>::contains(const R& r) const { return this->lower()<=r && r<=this->upper(); }
       
-    };
-    
+
+      template<class R> void Interval<R>::expand_by(const R& r) { this->_lower=sub_down(this->lower(),r); this->_upper=add_up(this->upper(),r); }
+
+
+
+
     /*!\ingroup Numeric
      * \brief A reference to an interval. 
      */
@@ -435,7 +309,6 @@ namespace Ariadne {
     tribool operator>=(const R1& x, const Interval<R2>& ivl) {
       return ivl<=x;
     }
-    //@}
 
 
 

@@ -34,7 +34,7 @@ namespace Ariadne {
      *
      * \internal This specification is not finished; some functions may be added or removed. 
      */
-    class FloatConcept {
+    class Float {
      public:
       //@{ 
       //! \name Constructors and assignment operators.
@@ -57,40 +57,9 @@ namespace Ariadne {
 
       //@{ 
       //! \name Conversion operators.
-      /*! \brief Convert to a Rational. (Recommended); */
+      /*! \brief Convert to a rational. (Recommended); */
       operator Rational (); const;
       //@}
-
-      //@{ 
-      //! \name Interval constructors
-      /*! \brief Default constructor. Yields interval \f$[0,0]\f$. */
-      Interval<Float>();
-      /*! \brief . */
-      Interval<Float>(int);
-      /*! \brief . */
-      Interval<Float>(double);
-      /*! \brief . */
-      Interval<Float>(Float);
-      /*! \brief . */
-      Interval<Float>(Rational);
-      /*! \brief . */
-      Interval<Float>(int,int);
-      /*! \brief . */
-      Interval<Float>(double,double);
-      /*! \brief . */
-      Interval<Float>(Float,Float);
-      /*! \brief . */
-      Interval<Float>(Rational,Rational);
-       //@}
-
-      //@{ 
-      //! \name Interval methods
-      /*! \brief . */
-      const Float& lower() const;
-      /*! \brief . */
-      const Float& upper() const;
-      //@}
-
 
       //@{ 
       //! \name Precision

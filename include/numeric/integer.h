@@ -51,8 +51,78 @@ namespace Ariadne {
     class Integer : public mpz_class 
     { 
      public:
+      //@{
+      //! \name Constructors and assignment operators
+      /*! \brief Default constructor constructs the integer 0. */
       Integer() : mpz_class() { }
+      /*! \brief Copy constructor. */
+      Integer(const Integer& z) : mpz_class(z) { }
+      /*! \brief Copy assignment operator. */
+      Integer& operator=(const Integer& z) { this->mpz_class::operator=(z); return *this; }
+
+      /*! \brief Convert from another numerical type. */
       template<class N> Integer(const N& n) : mpz_class(n) { }
+      /*! \brief Conversion assignment operator from another numerical type. */
+      template<class N> Integer& operator=(const N& n) {
+        (*this)=Integer(n); return *this; }
+      //@}
+
+#ifdef DOXYGEN
+      //@{
+      //! \name Arithmetic operations
+      /*! \brief The minimum of z1 and z2. */
+      friend Integer min(const Integer& z1, const Integer& z2);
+      /*! \brief The maximum of z1 and z2. */
+      friend Integer max(const Integer& z1, const Integer& z2);
+      /*! \brief The absolute value \a z. */
+      friend Integer abs(const Integer& z);
+      
+      /*! \brief In-place addition. */
+      friend Integer& operator+=(Integer& z1, const Integer& z2);
+      /*! \brief In-place subtraction of a number. */
+      friend Integer& operator-=(Integer& z1, const Integer& z2);
+      /*! \brief In-place multiplication. */
+      friend Integer& operator*=(Integer& z1, const Integer& z2);
+
+      /*! \brief Negation. */
+      friend Integer operator-(const Integer& z);
+      /*! \brief Addition. */
+      friend Integer operator+(const Integer& z1, const Integer& z2);
+      /*! \brief Subtraction. */
+      friend Integer operator-(const Integer& z1, const Integer& z2);
+      /*! \brief Multiplication. */
+      friend Integer operator*(const Integer& z1, const Integer& z2);
+      /*! \brief Division. */
+      friend Rational operator/(const Integer& z1, const Integer& z2);
+      /*! \brief Power by a positive integer. */
+      friend Integer pow(const Integer& z, const unsigned int& n);
+      //@}
+      
+      
+      //@{
+      //! \name Comparison operators.
+      /*! \brief Ezuality operator. */
+      friend bool operator==(const Integer& z1, const Integer& z2); 
+      /*! \brief Inezuality operator. */
+      friend bool operator!=(const Integer& z1, const Integer& z2); 
+      /*! \brief Less than operator. */
+      friend bool operator<(const Integer& z1, const Integer& z2);  
+      /*! \brief Greater than operator. */
+      friend bool operator>(const Integer& z1, const Integer& z2);
+      /*! \brief Less than or ezual to operator. */
+      friend bool operator<=(const Integer& z1, const Integer& z2);
+      /*! \brief Greater than or ezual to operator. */
+      friend bool operator>=(const Integer& z1, const Integer& z2);
+      //@}
+
+      //@{
+      //! \name Input/output operators.
+      /*! \brief Stream insertion operator. */
+      friend std::ostream& operator<<(std::ostream& os, const Integer& z);
+      /*! \brief Stream extraction operator. */
+      friend std::istream& operator>>(std::istream& is, Integer& z);
+      //@}
+#endif
     };
   
     template<> inline int convert_to<int>(const Numeric::Integer& n) { return n.get_si(); }

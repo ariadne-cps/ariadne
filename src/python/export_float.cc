@@ -35,6 +35,33 @@ using namespace Ariadne::Numeric;
 #include <boost/python.hpp>
 using namespace boost::python;
 
+template<class R> void set_default_precision(uint);
+template<class R> uint default_precision();
+
+#if PYTHON_FLOAT == Float64 
+
+template<> void set_default_precision<Float64>(uint p) { 
+  throw std::runtime_error("Cannot set precision of 64-bit float");
+}
+
+template<> uint default_precision<Float64>() { 
+  return 64;
+}
+
+#elif PYTHON_FLOAT == Float64 
+
+template<> void set_default_precision<FloatMP>(uint p) { 
+  FloatMP::set_default_precision(p);
+}
+
+template<> uint default_precision<FloatMP>() { 
+  return FloatMP::default_precision();
+}
+
+#else
+
+#endif
+
 template<class R>
 void 
 export_float() 
@@ -84,6 +111,9 @@ export_float()
     .def(self_ns::str(self))
   ;
   
+  def("set_default_precision",&set_default_precision<Float>);
+  def("default_precision",&default_precision<Float>);
+
 }
 
 template void export_float<Float>();

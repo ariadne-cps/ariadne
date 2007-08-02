@@ -56,7 +56,6 @@ void export_rectangle()
   typedef Interval<R> I;
   
   class_< Rectangle<R> >("Rectangle",init<int>())
-    .def(init<R,R>())
     .def(init< Point<R>,Point<R> >())
     .def(init< Rectangle<R> >())
     .def(init< Vector< Interval<R> > >())
@@ -89,7 +88,6 @@ void export_rectangle()
 
 
   class_< Rectangle<I> >("IntervalRectangle",init<int>())
-    .def(init<I,I>())
     .def(init< Point<I>, Point<I> >())
     .def(init< Rectangle<R> >())
     .def(init< Rectangle<I> >())
@@ -102,8 +100,6 @@ void export_rectangle()
     .def("upper_corner", &Rectangle<I>::upper_corner)
     .def("lower_bound", &Rectangle<I>::lower_bound, return_value_policy<copy_const_reference>())
     .def("upper_bound", &Rectangle<I>::upper_bound, return_value_policy<copy_const_reference>())
-    //    .def("lower_bound", (const I&(Rectangle<I>::*)(dimension_type)const)(&Rectangle<I>::lower_bound), return_value_policy<copy_const_reference>())
-    //    .def("upper_bound", (const I&(Rectangle<I>::*)(dimension_type)const)(&Rectangle<I>::upper_bound), return_value_policy<copy_const_reference>())
     .def(self_ns::str(self))
   ;
 

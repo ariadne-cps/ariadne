@@ -126,9 +126,6 @@ namespace Ariadne {
       /*! \brief Construct from two corners. */
       explicit Rectangle(const Point<R>& pt1, const Point<R>& pt2);
       
-      /*! \brief Construct a one-dimensional rectangle from two bounds. */
-      explicit Rectangle(const R& l, const R& u);
-      
       /*! \brief Construct from a string literal. */
       explicit Rectangle(const std::string& s);
       
@@ -355,7 +352,6 @@ namespace Ariadne {
       explicit Rectangle(dimension_type d=0);
       explicit Rectangle(const Point<I>& pt);
       explicit Rectangle(const Point<I>& lower_corner, const Point<I>& upper_corner);
-      explicit Rectangle(const I& lower_bound, const I& upper_bound);
       template<class E> Rectangle(const RectangleExpression<E>& e);
       template<class E> Rectangle<I>& operator=(const RectangleExpression<E>& e);
       dimension_type dimension() const;

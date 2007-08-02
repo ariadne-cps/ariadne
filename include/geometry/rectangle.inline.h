@@ -100,14 +100,6 @@ namespace Ariadne {
     }
     
     template<class R> inline
-    Rectangle<R>::Rectangle(const R& lower_bound, const R& upper_bound)
-      : _data(2)
-    {
-      this->set_lower_bound(0,lower_bound);
-      this->set_upper_bound(0,upper_bound);
-    }
-
-    template<class R> inline
     Rectangle<R>::Rectangle(const Point<R>& pt1, const Point<R>& pt2) 
       : _data(2*pt1.dimension())
     {
@@ -470,21 +462,6 @@ namespace Ariadne {
     Rectangle< Numeric::Interval<R> >::Rectangle(dimension_type d)
       : _data(2*d) { }
     
-    template<class R> inline
-    Rectangle< Numeric::Interval<R> >::Rectangle(const I& x1, const I& x2)
-      : _data(2)
-    {
-      if(x1.lower()<=x2.lower() && x1.upper()<=x2.upper()) {
-        this->set_lower_bound(0,x1);
-        this->set_upper_bound(0,x2);
-      } else if(x1.lower()>=x2.lower() && x1.upper()>=x2.upper()) {
-        this->set_lower_bound(0,x2);
-        this->set_upper_bound(0,x1);
-      } else {
-        ARIADNE_THROW(InvalidValue,"Rectangle<Interval>(Interval x1, Interval x2)","x1=" << x1 << ", x2=" << x2);
-      }
-    }
-
 
     template<class R> inline
     Rectangle< Numeric::Interval<R> >::Rectangle(const Point<I>& pt1, const Point<I>& pt2)

@@ -234,7 +234,7 @@ Evaluation::ConstraintHybridEvolver<R>::upper_reach(const System::ConstraintHybr
                                                     time_type evolution_time, 
                                                     size_type maximum_number_of_events) const
 {
-  ARIADNE_LOG(2,"HybridEvolver::upper_evolve(HybridAutomaton automaton, ListSet initial_set, Time time, Integer maximum_number_of_events)\n");
+  ARIADNE_LOG(2,"HybridEvolver::upper_reach(HybridAutomaton automaton, ListSet initial_set, Time time, Integer maximum_number_of_events)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<", evolution_time="<<evolution_time<<"\n");
   ARIADNE_LOG(7,"maximum_step_size="<<this->maximum_step_size()<<", maximum_basic_set_radius="<<this->maximum_basic_set_radius()<<"\n");
 
@@ -245,11 +245,11 @@ Evaluation::ConstraintHybridEvolver<R>::upper_reach(const System::ConstraintHybr
 
   while(!working_sets.empty()) {
     timed_set_type working_set=working_sets.back(); working_sets.pop_back();
-    if(working_set.time()==evolution_time) {
+    if(working_set.time()>=evolution_time) {
     } else if(working_set.continuous_state_set().radius()>this->maximum_basic_set_radius()) {
       ::append(working_sets,this->_plugin->subdivide(working_set));
     } else {
-      ::append(working_sets,this->_plugin->upper_evolution_step(automaton,working_set,evolution_time));
+      ::append(working_sets,this->_plugin->upper_reachability_step(automaton,working_set,evolution_time));
       // A reachability step returns a list whose final element is the continuous reached set
       reached_sets.push_back(working_sets.back()); working_sets.pop_back();
       if(!working_sets.empty()) { std::cout << "evolution step: " << working_sets.back() << std::endl; }
@@ -292,6 +292,7 @@ Evaluation::ConstraintHybridEvolver<R>::upper_reach(const System::ConstraintHybr
                                                     time_type evolution_time, 
                                                     size_type maximum_number_of_events) const
 {
+  ARIADNE_LOG(2,"HybridEvolver::upper_reach(HybridAutomaton, HybridGridCell, HybridGrid, Time, Integer)\n");
   HybridGridCellListSet<R> final_set(hybrid_grid);
   
   HybridListSet< Zonotope<I> > list_set(automaton.locations());
@@ -351,6 +352,7 @@ Evaluation::ConstraintHybridEvolver<R>::upper_reach(const System::ConstraintHybr
                                                     time_type evolution_time, 
                                                     size_type maximum_number_of_events) const
 {
+  ARIADNE_LOG(2,"HybridEvolver::upper_reach(HybridAutomaton, HybridGridMaskSet, Time, Integer)\n");
   Geometry::HybridGrid<R> hybrid_grid=initial_set.grid();
   Geometry::HybridGridMaskSet<R> current_set=initial_set;
   Geometry::HybridGridMaskSet<R> next_set(current_set);

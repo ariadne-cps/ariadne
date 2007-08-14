@@ -26,6 +26,8 @@
 #include "zonotope.h"
 #include "list_set.h"
 
+#include "output/txtfstream.h"
+
 namespace Ariadne { 
 
 
@@ -56,7 +58,7 @@ Geometry::HybridGridMaskSet<R>::write(std::ostream& os) const
   {
     id_type loc=iter->first;
     const GridMaskSet<R>& set=iter->second;
-    os << "  "<<loc<<": GridMaskSet( grid=" << set.grid() << ", extent=" << set.extent() << ", block=" << set.block() << ", size=" << set.size() << " capacity=" << set.capacity() << " ),\n";
+    os << "  "<<loc<<": " << Output::summary(set) << ",\n";
   }
   os << "} )";
   return os;
@@ -73,11 +75,14 @@ Geometry::HybridListSet<BS>::write(std::ostream& os) const
   {
     id_type loc=iter->first;
     const ListSet<BS>& set=iter->second;
+    os << "  " << loc << ": " << Output::summary(set) << ",\n";
+    /*
     os << "  " << loc << ": { size=" << set.size();
     if(!set.empty()) {
       os << ", front=" << set[0];
     }
     os << "},\n";
+    */
   }
   os << "} )";
   return os;

@@ -188,11 +188,11 @@ namespace Ariadne {
     std::ostream& 
     ListSet<BS>::write(std::ostream& os) const
     {
+      static const bool write_full_list=true;
+      
       const ListSet<BS>& ls=*this;
       os << "ListSet<"<<BS::name()<<">(\n  size="<<ls.size()<<",\n";
-      if(!ls.empty()) { os << "  front="<<ls[0]<<",\n"; }
-      // Don't write list
-      if(false) {
+      if(write_full_list) {
         os << "  [ ";
         if (ls.size() >0 ) {
           os << ls[0];
@@ -201,8 +201,11 @@ namespace Ariadne {
           os << ",\n    " << ls[i];
         }
         os << "\n  ]\n";
+      } else {
+        // Don't write full list
+        if(!ls.empty()) { os << "  front="<<ls[0]<<",\n"; }
       }
-      os << "}" << std::endl;
+      os << " }" << std::endl;
       return os;
     }
 

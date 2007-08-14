@@ -81,7 +81,9 @@ namespace Ariadne {
 
 namespace Evaluation { 
 static int& verbosity = hybrid_evolver_verbosity; 
-static const uint time_step_event=0u;
+static const uint time_step_event=uint(-1);
+static const uint final_time_event=uint(-2);
+static const uint regularizing_time_event=uint(-3);
 }
   
 using namespace Numeric;
@@ -143,15 +145,19 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::regularize(const timed_set_type& t
   ARIADNE_LOG(9,"  bounding_box="<<timed_set.continuous_state_set().bounding_box()<<"\n");
   ARIADNE_LOG(9,"  set="<<timed_set<<"\n");
 
-  if(timed_set.time().gradient()!=Vector<I>(timed_set.time().gradient().size())) {
+  if(possibly(timed_set.time().gradient()!=Vector<I>(timed_set.time().gradient().size()))) {
     ARIADNE_LOG(9,"  time="<<timed_set.time()<<"\n");
     ARIADNE_LOG(9,"  cannot regularize if time is not constant\n");
     return timed_set;
   }
+  return timed_set;
   //if(Geometry::Rectangle<R>(timed_set.centre()).radius()*2>timed_set.radius()) {
   if(true) {
     Zonotope<R> z=orthogonal_over_approximation(timed_set.continuous_state_set());
-    return timed_set_type(timed_set.time(),timed_set.steps(),timed_set.discrete_state(),Zonotope<I>(z));
+    time_model_type t(timed_set.time().average(),LinearAlgebra::Vector<I>(z.number_of_generators()));
+    std::cerr << t << "\n" << z << std::endl;
+    assert(t.number_of_generators()==z.number_of_generators());
+    return timed_set_type(t,timed_set.steps(),timed_set.discrete_state(),Zonotope<I>(z));
   } else {
     return timed_set;
   }
@@ -507,12 +513,14 @@ std::map< id_type, typename Evaluation::ConstraintHybridEvolverPlugin<R>::time_m
 Evaluation::ConstraintHybridEvolverPlugin<R>::compute_terminating_event_times(const mode_type& mode,
                                                                               const timed_set_type& initial_set,
                                                                               const timed_set_type& final_set,
-                                                                              const time_type& maximum_time,
-                                                                              const bounding_box_type& bounding_box) const
+                                                                              const time_type& final_time,
+                                                                              const bounding_box_type& bounding_box,
+                                                                              const time_type& time_step_size) const
 {
   typedef boost::shared_ptr< const Geometry::ConstraintInterface<R> > constraint_const_pointer;
   typedef typename reference_set<const transition_type>::const_iterator transitions_const_iterator;
   typedef typename std::set< id_type >::const_iterator events_const_iterator;
+  typedef typename std::map< id_type, time_model_type >::const_iterator event_times_const_iterator;
   typedef typename std::map< id_type, crossing_data_type>::const_iterator crossings_const_iterator;
   typedef typename std::map< id_type, time_model_type>::const_iterator crossing_times_const_iterator;
   typedef Numeric::Interval<R> time_interval_type;
@@ -520,11 +528,16 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::compute_terminating_event_times(co
   const reference_set<const transition_type>& transitions=mode.transitions();
 
   time_model_type zero_time_step(I(0),Vector<I>(initial_set.time().gradient().size()));
-
+  
   // Compute the integration time step
   time_type initial_time_lower_bound=initial_set.time().bound().lower();
   time_type initial_time_upper_bound=initial_set.time().bound().upper();
-  time_model_type integration_time_step=Numeric::min(this->maximum_step_size(),time_type(maximum_time-initial_time_lower_bound))+zero_time_step;
+  time_type initial_time_variation=initial_set.time().bound().width();
+  time_type regularizing_time=initial_time_lower_bound+time_step_size;
+  time_model_type integration_time_step=time_step_size+zero_time_step;
+  time_model_type final_integration_time_step=final_time-initial_set.time();
+  time_model_type regularizing_integration_time_step=regularizing_time-initial_set.time();
+  
 
   // Compute events which are possibly enabled based on bounding box
   reference_set<const transition_type> possibly_enabled_transitions;
@@ -538,22 +551,43 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::compute_terminating_event_times(co
       }
     }
   }
-
+  
+  // Compute full crossing data
   std::map<id_type,crossing_data_type> crossing_data
     = this->compute_crossing_data(possibly_enabled_transitions,initial_set,final_set,bounding_box,this->maximum_step_size());
   ARIADNE_LOG(6,"  crossing_data="<<crossing_data<<"\n");
 
-  // Find minimal blocking times
-  std::set<id_type> blocking_events;
+
+  // Compute the times of the events
+  std::map<id_type,time_model_type> event_time_steps;
   for(crossings_const_iterator crossing_iter = crossing_data.begin();
       crossing_iter != crossing_data.end(); ++crossing_iter)
   {
+    const id_type& id = crossing_iter->first;
     const time_model_type& crossing_time = crossing_iter->second.crossing_time_model;
+    event_time_steps.insert(std::make_pair(id,crossing_time));
+  }
+  // Add the integration termination times
+  event_time_steps.insert(std::make_pair(time_step_event,integration_time_step));
+  event_time_steps.insert(std::make_pair(final_time_event,final_integration_time_step));
+  ARIADNE_LOG(6,"  event_time_steps="<<event_time_steps<<"\n");
+ 
+
+
+
+  // Find minimal blocking times
+  std::set<id_type> blocking_events;
+  for(event_times_const_iterator event_iter = event_time_steps.begin();
+      event_iter != event_time_steps.end(); ++event_iter)
+  {
+    const time_model_type& crossing_time = event_iter->second;
     bool possible_blocking_transition=true;
     for(events_const_iterator comparison_iter = blocking_events.begin();
         comparison_iter != blocking_events.end(); ++comparison_iter)
     {
-      const time_model_type& comparison_time = crossing_data.find(*comparison_iter)->second.crossing_time_model;
+      ARIADNE_LOG(8,"event=" << event_iter->first << " compare=" << *comparison_iter);
+      const time_model_type& comparison_time = event_time_steps.find(*comparison_iter)->second;
+      ARIADNE_LOG(8,"comparison_time=" << comparison_time << "\n");
       if(crossing_time<=comparison_time) {
         blocking_events.erase(comparison_iter);
       } else if(comparison_time<=crossing_time) {
@@ -562,19 +596,26 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::compute_terminating_event_times(co
       }
     }
     if(possible_blocking_transition) {
-      blocking_events.insert(crossing_iter->first);
+      blocking_events.insert(event_iter->first);
     }
   }
+  ARIADNE_LOG(6,"  blocking_events=" << blocking_events << "\n");
 
   std::map<id_type,time_model_type> terminating_event_times;
   for(events_const_iterator event_iter=blocking_events.begin();
       event_iter!=blocking_events.end(); ++event_iter)
   {
-    terminating_event_times.insert(std::make_pair(*event_iter,crossing_data.find(*event_iter)->second.crossing_time_model));
+    ARIADNE_LOG(8,"event=" << *event_iter << "\n");
+    terminating_event_times.insert(std::make_pair(*event_iter,event_time_steps.find(*event_iter)->second));
   }
 
-  ARIADNE_LOG(6,"  terminating_event_times="<<terminating_event_times<<"\n\n");
+  ARIADNE_LOG(6,"  terminating_event_time_steps=" << terminating_event_times<<"\n");
   
+  if(terminating_event_times.size()==1 && terminating_event_times.begin()->first==time_step_event) {
+    terminating_event_times.clear();
+    terminating_event_times.insert(std::make_pair(regularizing_time_event,regularizing_integration_time_step));
+    ARIADNE_LOG(6,"  terminating_event_time_steps="<<terminating_event_times<<"\n");
+  }
   return terminating_event_times;
 }
       
@@ -614,6 +655,7 @@ template<class R>
 std::map<id_type, typename Evaluation::ConstraintHybridEvolverPlugin<R>::time_model_pair_type>
 Evaluation::ConstraintHybridEvolverPlugin<R>::compute_enabled_activation_times(const mode_type& mode,
                                                                                const timed_set_type& initial_set,
+                                                                               const timed_set_type& final_set,
                                                                                const time_model_type& maximum_time_step,
                                                                                const bounding_box_type& bounding_box) const
 {
@@ -646,8 +688,10 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::compute_enabled_activation_times(c
     const transition_type& transition=*transition_iter;
     const id_type event_id = transition.id();
     const constraint_type& constraint=transition.constraint();
+    const vector_field_type& dynamic=transition.source().dynamic();
     time_model_type crossing_time_step=this->compute_crossing_time_step(transition,initial_set,bounding_box);
-    ARIADNE_LOG(7,"    event "<<transition_iter->id()<<" crossing time step"<<crossing_time_step<<"\n");
+    I normal_derivative = LinearAlgebra::inner_product(dynamic(bounding_box),constraint.gradient(bounding_box));
+    ARIADNE_LOG(7,"    event "<<transition_iter->id()<<" crossing time step is "<<crossing_time_step<<"\n");
   
     if(minimum_time_step >= crossing_time_step || crossing_time_step >= maximum_time_step) {
       if(definitely(not Geometry::satisfies(initial_set,constraint))) {
@@ -659,12 +703,25 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::compute_enabled_activation_times(c
       } else {
         ARIADNE_LOG(7,"      inactivated entire evolution time\n");
       }
-    } else if(Geometry::satisfies(initial_set,constraint)) {
+    } else if(Geometry::satisfies(initial_set,constraint)) { 
+      ARIADNE_LOG(7,"      event inactive at beginning of evolution step\n")
       enabled_activations.insert(std::make_pair(event_id,std::make_pair(crossing_time_step,maximum_time_step)));
-    } else {
+    } else if(Geometry::satisfies(final_set,constraint)) { 
+      ARIADNE_LOG(7,"      event inactive at end end of evolution step\n");
       enabled_activations.insert(std::make_pair(event_id,std::make_pair(minimum_time_step,crossing_time_step)));
+    } else {
+      if(normal_derivative>0) {
+        ARIADNE_LOG(7,"      event boundary traversed in positive direction; event becomes activated\n");
+        enabled_activations.insert(std::make_pair(event_id,std::make_pair(crossing_time_step,maximum_time_step)));
+      } else if(normal_derivative<0) {
+        ARIADNE_LOG(7,"      event boundary traversed in negative direction; event becomes deactivated\n");
+        enabled_activations.insert(std::make_pair(event_id,std::make_pair(minimum_time_step,crossing_time_step)));
+      } else {
+        ARIADNE_LOG(7,"  Warning: normal derivative to event boundary has indeterminate sign; cannot determine activation time\n");
+        throw std::runtime_error("Normal derivative to event boundary has indeterminate sign; cannot determine activation time");
+      }
+
     }
-      
   }
   ARIADNE_LOG(6,"  activation_times"<<enabled_activations<<"\n\n");
   return enabled_activations;
@@ -676,31 +733,18 @@ template<class R>
 typename Evaluation::ConstraintHybridEvolverPlugin<R>::timed_set_type
 Evaluation::ConstraintHybridEvolverPlugin<R>::final_continuous_evolution_step(const mode_type& mode,
                                                                               const timed_set_type& initial_set,
-                                                                              const time_model_type& final_time_model,
+                                                                              const time_type& final_time,
                                                                               const bounding_box_type& bounding_box) const
 {
   ARIADNE_LOG(7," HybridEvolverPlugin::final_continuous_evolution_step(...)\n");
-  ARIADNE_LOG(8,"    dynamic="<<mode.dynamic()<<"\n    initial_set="<<initial_set<<"\n    final_time="<<final_time_model<<"\n    bounding_box="<<bounding_box<<"\n");
-  time_model_type time_step=final_time_model-initial_set.time();
+  ARIADNE_LOG(8,"    dynamic="<<mode.dynamic()<<"\n    initial_set="<<initial_set<<"\n    final_time="<<final_time<<"\n    bounding_box="<<bounding_box<<"\n");
+  time_model_type zero_time_model(I(0),LinearAlgebra::Vector<I>(initial_set.number_of_generators()));
+  time_model_type final_time_model=final_time+zero_time_model;
+  time_model_type time_step=final_time-initial_set.time();
   timed_set_type final_set=this->continuous_evolution_step(mode,initial_set,time_step,bounding_box);
   return timed_set_type(final_time_model,final_set.steps(),final_set.discrete_state(),final_set.continuous_state_set());
 }
 
-
-template<class R>
-typename Evaluation::ConstraintHybridEvolverPlugin<R>::timed_set_type
-Evaluation::ConstraintHybridEvolverPlugin<R>::final_continuous_reachability_step(const mode_type& mode,
-                                                                      const timed_set_type& initial_set,
-                                                                      const time_model_type& final_time_model,
-                                                                      const bounding_box_type& bounding_box) const
-{
-  ARIADNE_LOG(7," HybridEvolverPlugin::final_continuous_reachability_step(...)\n");
-  ARIADNE_LOG(8,"    dynamic="<<mode.dynamic()<<"\n    initial_set="<<initial_set<<"\n    final_time="<<final_time_model<<"\n    bounding_box="<<bounding_box<<"\n");
-  time_model_type time_step=final_time_model-initial_set.time();
-  time_model_type zero_time_step=time_step*0;
-  timed_set_type final_set=this->continuous_reachability_step(mode,initial_set,zero_time_step,time_step,bounding_box);
-  return final_set;
-}
 
 
 template<class R>
@@ -898,26 +942,21 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::evolution_step(const System::Const
   ARIADNE_LOG(6,"  integrated_set="<<integrated_set<<"\n\n");
 
   // Schedule events bounding the evolution time
-  std::map<id_type,time_model_type> terminating_event_times = this->compute_terminating_event_times(mode,initial_set,integrated_set,final_time,bounding_box);
+  std::map<id_type,time_model_type> terminating_event_times = this->compute_terminating_event_times(mode,initial_set,integrated_set,final_time,bounding_box,time_step_size);
+  assert(terminating_event_times.size()>=1);
 
-  // Test to see if integration terminates the evolution
-  tribool integration_is_terminating;
+  // Perform switching logic if there is more than one terminating event, and compute the terminating event time step for upper evolution
   time_model_type terminating_time_step;
-
-  // Perform switching logic if there is more than one terminating event
-  if(terminating_event_times.size()==0) {
-    integration_is_terminating=true;
-    terminating_time_step=integration_time_step;
+  if(terminating_event_times.size()==1) {
+    terminating_time_step=terminating_event_times.begin()->second;
   } else {
-    // Compute the absolute maximim and minimum times
+    // Compute the absolute maximim and minimum time steps
     I terminating_time_bound=this->compute_evolution_time_bounds(terminating_event_times);
     if(terminating_time_bound>integration_time_step_size) {
       // events are never triggered
-      integration_is_terminating=true;
       terminating_time_step=integration_time_step;
       terminating_event_times.clear();
     } else if(terminating_time_bound<integration_time_step_size) {
-      integration_is_terminating=false;
       if (terminating_event_times.size()==1) {
         terminating_time_step=terminating_event_times.begin()->second;
       } else {
@@ -929,19 +968,16 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::evolution_step(const System::Const
         // Make the (unique) terminating event the flow event
         integration_time_step=time_type(terminating_time_bound.lower())+zero_time_step;
         terminating_time_step=integration_time_step;
-        integration_is_terminating=true;
         terminating_event_times.clear();
       } else {
         // Make the terminating time the integration time for safety
-        integration_is_terminating = indeterminate;
         terminating_time_step=integration_time_step;
       }
     }
   }
-  ARIADNE_LOG(6,"  integration_is_terminating="<<integration_is_terminating<<"\n");
-  ARIADNE_LOG(6,"  terminating_time_step="<<terminating_time_step<<"\n");
+  ARIADNE_LOG(6,"  terminating_time_step="<<terminating_time_step<<"\n\n");
   
-  if (terminating_event_times.size()>1 || indeterminate(integration_is_terminating)) {
+  if (terminating_event_times.size()>1) {
     // Subdivide if upper semantics and set is not too small
     if(evolution_semantics==upper_semantics && initial_set.radius()>this->maximum_splitting_set_radius()) {
       ARIADNE_LOG(3," Multiply enabled events: subdividing\n");
@@ -951,7 +987,7 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::evolution_step(const System::Const
 
 
   // Schedule events between current time and integration time step
-  std::map<id_type,time_model_pair_type> enabled_activations=this->compute_enabled_activation_times(mode,initial_set,terminating_time_step,bounding_box);
+  std::map<id_type,time_model_pair_type> enabled_activations=this->compute_enabled_activation_times(mode,initial_set,integrated_set,terminating_time_step,bounding_box);
   
   
 
@@ -977,7 +1013,7 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::evolution_step(const System::Const
 
 
   // Add the final sets after the evolution for both integration and reachability 
-  if(lower_semantics && (terminating_event_times.size()>1 || indeterminate(integration_is_terminating))) {
+  if(lower_semantics && terminating_event_times.size()>1) {
     ARIADNE_LOG(6," Multiple terminating events for lower evolution; cannot decide which to take.\n");
     // If lower semantics and terminating_event_times.size()>1, then standard evolution blocks
   } else {
@@ -994,6 +1030,19 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::evolution_step(const System::Const
         result.push_back(continuous_evolved_set);
         this->trace.push_back(continuous_evolved_set);
         ARIADNE_LOG(6,"  continuous_evolved_set="<<continuous_evolved_set<<"\n");
+      } else if(terminating_event==final_time_event) {
+        // The terminating event is reaching the requested integration time
+        timed_set_type continuous_evolved_set=this->final_continuous_evolution_step(mode,initial_set,final_time,bounding_box);
+        result.push_back(continuous_evolved_set);
+        this->trace.push_back(continuous_evolved_set);
+        ARIADNE_LOG(6,"  continuous_evolved_set="<<continuous_evolved_set<<"\n");
+      } else if(terminating_event==regularizing_time_event) {
+        // The terminating event is reaching the requested integration time
+        time_type regularizing_time=(initial_set.time()+terminating_time_step).average().midpoint();
+        timed_set_type continuous_evolved_set=this->final_continuous_evolution_step(mode,initial_set,regularizing_time,bounding_box);
+        result.push_back(continuous_evolved_set);
+        this->trace.push_back(continuous_evolved_set);
+        ARIADNE_LOG(6,"  continuous_evolved_set="<<continuous_evolved_set<<"\n");
       } else {
         // The terminating event is a transition, which may be a blocking (invariant) transition, or a forced jump
         const transition_type& blocking_transition = automaton.transition(terminating_event,discrete_state);
@@ -1005,7 +1054,12 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::evolution_step(const System::Const
           result.push_back(jump_set);
           this->trace.push_back(jump_set);
           ARIADNE_LOG(6,"  forced_jump_set["<<blocking_transition.id()<<"]="<<jump_set<<"\n");
+        } else if(blocking_transition.kind()==invariant_tag) {
+          ARIADNE_LOG(6,"  invariant["<<blocking_transition.id()<<"] reached\n");
+        } else {
+          throw std::runtime_error("Terminating event should block evolution, but unrecognised event type");
         }
+
       }
     }
   }
@@ -1014,12 +1068,14 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::evolution_step(const System::Const
   timed_set_type continuous_reachable_set = this->continuous_reachability_step(mode,initial_set,zero_time_step,terminating_time_step,bounding_box);
   ARIADNE_LOG(6,"  continuous_reachable_set="<<continuous_reachable_set<<"\n");
 
-  // Add the reachable set for reachability analysis only
+
   if(evolution_kind==compute_reachable_set) {
     result.push_back(continuous_reachable_set);
-    this->trace.push_back(continuous_reachable_set);
+    //this->trace.push_back(continuous_reachable_set);
+  } else {
   }
 
+  ARIADNE_LOG(6,"\n  evolution_step::result="<<result<<"\n\n");
   return result;
 }
 

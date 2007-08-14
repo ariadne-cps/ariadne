@@ -223,7 +223,9 @@ namespace Ariadne {
       TimeModelHybridBasicSet(const Numeric::Rational& t, const Numeric::Integer& n, const id_type& q, const BS& bs)
         : Geometry::HybridBasicSet<BS>(q,bs), _time(I(t),LinearAlgebra::Vector<I>(bs.number_of_generators())), _steps(n) { }
       TimeModelHybridBasicSet(const TimeModel<R>& t, const Numeric::Integer& n, const id_type& q, const BS& bs)
-        : Geometry::HybridBasicSet<BS>(q,bs), _time(t), _steps(n) { assert(t.number_of_generators()==bs.number_of_generators()); }
+        : Geometry::HybridBasicSet<BS>(q,bs), _time(t), _steps(n) { 
+        if(t.number_of_generators()!=bs.number_of_generators()) { std::cerr << "t=" << t << "\nbs=" << bs << std::endl; }
+        assert(t.number_of_generators()==bs.number_of_generators()); }
       TimeModelHybridBasicSet(const TimeModelHybridBasicSet<BS>& thbs) 
         : Geometry::HybridBasicSet<BS>(thbs), _time(thbs._time), _steps(thbs._steps) { }
       const TimeModel<R>& time() const { return this->_time; }

@@ -134,13 +134,15 @@ class TestConstraintHybridEvolution
   }
 
 
- int test_evolution() {
-    time_type tr=2.0;
-    time_type t=3.0;
+  int test_evolution() {
+    time_type tr=3.0;
+    time_type t=1.625;
+    //time_type t=1.75;
+    t=1.90;
     size_type n=2;
 
     id_type initial_discrete_mode = mode1_id;
-    Zonotope<I,I> initial_basic_set(Point<R>("(0.5,0)"),Matrix<R>("[0.05,0.0; 0.0,0.05]"));
+    Zonotope<I,I> initial_basic_set(Point<R>("(0.5,0)"),Matrix<R>("[0.02,0.0; 0.0,0.02]"));
     HybridListSet< Zonotope<I,I> > initial_set(automaton.locations());
     initial_set.adjoin(initial_discrete_mode,initial_basic_set);
   
@@ -159,19 +161,20 @@ class TestConstraintHybridEvolution
     reached_set.clear();
     try {
       evolved_set=evolver.upper_evolve(automaton,initial_set,t,n);
-      //reached_set=evolver.upper_reach(automaton,initial_set,tr,n);
+      reached_set=evolver.upper_reach(automaton,initial_set,tr,n);
     } 
     catch(const std::exception& e) {
       cout << "\nCaught: " << e.what() << endl;
     }
-    //cout << "trace=" << evolver.trace() << endl << endl;
+    cout << "\n" << endl;
+    cout << "trace=" << evolver.trace() << endl << endl;
 
     cout << "initial_set = " << initial_set << endl;
     cout << "evolved_set = " << evolved_set << endl;
     cout << "reached_set = " << reached_set << endl;
     
     epsfstream eps;
-    eps.open("test_constraint_hybrid_evolution-1.eps",bounding_box);
+    eps.open("test_constraint_hybrid_evolution-trace.eps",bounding_box);
     eps << fill_colour(magenta) << closed_intersection(bounding_polyhedron,guard_polyhedron);
     eps << fill_colour(cyan) << closed_intersection(bounding_polyhedron,activation_polyhedron);
 
@@ -179,31 +182,29 @@ class TestConstraintHybridEvolution
       switch(evolver.trace()[i].discrete_state()) {
         case mode1_id: eps << fill_colour(Output::green); break;
         case mode2_id: eps << fill_colour(Output::red); break;
-        case mode3_id: eps << fill_colour(Output::blue); break;
+        case mode3_id: eps << fill_colour(Output::cyan); break;
       }
       eps << evolver.trace()[i].continuous_state_set();
     }      
+    eps.close();
 
+    eps.open("test_constraint_hybrid_evolution-evolve.eps",bounding_box);
+    eps << fill_colour(magenta) << closed_intersection(bounding_polyhedron,guard_polyhedron);
+    eps << fill_colour(cyan) << closed_intersection(bounding_polyhedron,activation_polyhedron);
     eps << fill_colour(Output::yellow) << initial_set[mode1_id];
-    eps << reached_set[mode1_id];
-    eps << evolved_set[mode1_id];
-    eps << evolved_set[mode2_id];
-    eps << evolved_set[mode3_id];
-
-    
-    /*
-    Zonotope<I,I> iz(Point<I>("([-1,1],[-0.1,0.1])"),Matrix<I>("[1.0,0.2;1.0,-0.2]"));
-    ListSet< Zonotope<I,I> > izls(iz);
-
-    eps << iz;
-    eps.set_fill_colour("red");
-    eps << izls;
-    */    
-
-
+    eps << fill_colour(Output::white) << evolved_set[mode1_id];
+    eps << fill_colour(Output::white) << evolved_set[mode2_id];
+    eps << fill_colour(Output::white) << evolved_set[mode3_id];
     eps.close();
     
-    cout << automaton;
+    eps.open("test_constraint_hybrid_evolution-reach.eps",bounding_box);
+    eps << fill_colour(magenta) << closed_intersection(bounding_polyhedron,guard_polyhedron);
+    eps << fill_colour(cyan) << closed_intersection(bounding_polyhedron,activation_polyhedron);
+    eps << fill_colour(Output::green) << reached_set[mode1_id];
+    eps << fill_colour(Output::red) << reached_set[mode2_id];
+    eps << fill_colour(Output::blue) << reached_set[mode3_id];
+    eps << fill_colour(Output::yellow) << initial_set[mode1_id];
+    eps.close();
 
     return 0;
   }

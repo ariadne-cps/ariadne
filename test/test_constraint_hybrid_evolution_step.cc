@@ -48,7 +48,7 @@
 
 #include "test.h"
 
-static const int verbosity = 8;
+static const int verbosity = 0;
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;

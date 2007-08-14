@@ -272,8 +272,8 @@ Geometry::GridCellListSet<R>::write(std::ostream& os) const
 {
   os << "GridCellListSet("
      << " grid=" << this->grid() << ","
-     << " size=" << this->size()
-    //os << "  lattice_set=" << this->lattice_set();
+     << " size=" << this->size() << ","
+     << " lattice_set=" << this->lattice_set()
      << " )" << std::endl;
   return os;
 }

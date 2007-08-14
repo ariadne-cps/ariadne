@@ -31,6 +31,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <sstream>
 #include <algorithm>
 #include <cmath>
 #include <cassert>
@@ -57,6 +58,14 @@
 namespace Ariadne {
   namespace Output {
 				
+    class txtfstream;
+    
+    template<class BS> std::string summary(const Geometry::ListSet<BS>& ls);
+    template<class R> std::string summary(const Geometry::GridCellListSet<R>& gcls);
+    template<class R> std::string summary(const Geometry::GridMaskSet<R>& gms);
+
+
+
     /*!\brief A stream for readable textual output. */
     class txtfstream
       : private std::ofstream 
@@ -344,6 +353,41 @@ namespace Ariadne {
       return txt;
     }
     
+
+    template<class BS> inline
+    std::string
+    summary(const Geometry::ListSet<BS>& ls) {
+      std::stringstream ss;
+      ss << "ListSet( size=" << ls.size() << " )";
+      return ss.str();
+    }
+
+    template<class R> inline
+    std::string
+    summary(const Geometry::GridCellListSet<R>& gcls) {
+      std::stringstream ss;
+      ss << "GridCellListSet( grid=" << gcls.grid() << ", size=" << gcls.size() << " )";
+      return ss.str();
+    }
+
+    template<class R> inline
+    std::string
+    summary(const Geometry::GridMaskSet<R>& gms) {
+      std::stringstream ss;
+      ss << "GridMaskSet( grid=" << gms.grid() << ", extent=" << gms.extent() << ", block=" << gms.block()
+         << ", size=" << gms.size() << ", capacity=" << gms.capacity() << " )";
+      return ss.str();
+    }
+
+    template<class R> inline
+    std::string
+    summary(const Geometry::PartitionTreeSet<R>& pts) {
+      std::stringstream ss;
+      ss << "PartitionTreeSet( unit_box" << pts.unit_box() << ", subdivisions=" << pts.subdivisions()
+         << ", size=" << pts.size() << ", capacity=" << pts.capacity() << " )";
+      return ss.str();
+    }
+
   }
 }
 

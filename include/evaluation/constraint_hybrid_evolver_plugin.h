@@ -321,15 +321,8 @@ namespace Ariadne {
       timed_set_type
       final_continuous_evolution_step(const mode_type& mode,
                                       const timed_set_type& initial_set,
-                                      const time_model_type& final_time,
+                                      const time_type& final_time,
                                       const bounding_box_type& bounding_box) const;
-
-      /*! \brief Compute the possible states reached by continuous evolution up to \a final_time, given that the flow remains in \a bounding_box. */
-      timed_set_type
-      final_continuous_reachability_step(const mode_type& mode,
-                                         const timed_set_type& initial_set,
-                                         const time_model_type& final_time,
-                                         const bounding_box_type& bounding_box) const;
 
       /*! \brief Compute an accurate approximation to the crossing time step. */
       time_model_type
@@ -390,12 +383,14 @@ namespace Ariadne {
                                       const timed_set_type& initial_set,
                                       const timed_set_type& final_set,
                                       const time_type& maximum_time,
-                                      const bounding_box_type& bounding_box) const;
+                                      const bounding_box_type& bounding_box,
+                                      const time_type& time_step_size) const;
 
       /*! \brief Compute the activations which are enabled. */
       std::map<id_type, time_model_pair_type>
       compute_enabled_activation_times(const mode_type& mode,
                                        const timed_set_type& initial_set,
+                                       const timed_set_type& final_set,
                                        const time_model_type& maximum_time_step,
                                        const bounding_box_type& bounding_box) const;
  

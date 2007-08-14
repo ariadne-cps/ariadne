@@ -644,7 +644,7 @@ Geometry::GridMaskSet<R>::write(std::ostream& os) const
   os << " extent=" << Rectangle<R>(this->bounds()) << ",";
   os << " size=" << this->size() << ",";
   os << " capacity=" << this->capacity() << ",";
-  //      os << "  mask=" << this->mask() << std::endl;
+  os << " mask=" << this->mask() << std::endl;
   os << " )";
   return os;
 }

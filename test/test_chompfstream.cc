@@ -54,11 +54,18 @@ int main() {
   lmm.adjoin_to_image(LatticeCell("(-1,1,0)"),LatticeCell("(0,1)"));
   lmm.adjoin_to_image(LatticeCell("(-1,2,0)"),LatticeCell("(0,1)"));
   
-  chompfstream cfs("test_chompfstream.hom");
-  cfs << lc << "\n\n";
-  cfs << lms << "\n\n";
-  cfs << lmm << "\n\n";
-  cfs.close();
+  ofstream ofs;
+  chompstream chomps(ofs);
+  ofs.open("test_chompfstream.hom");
+  chomps << lc << "\n\n";
+  chomps << lms << "\n";
+  chomps << lmm << "\n";
+  ofs.close();
+
+  chomps.redirect(cout);
+  chomps << lc << "\n\n";
+  chomps << lms << "\n";
+  chomps << lmm << "\n";
 
   return 0;
 }

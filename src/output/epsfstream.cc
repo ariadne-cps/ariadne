@@ -26,9 +26,11 @@
 
 namespace Ariadne { 
 
+
 const uint Output::epsfstream::xBBoxSide=300;
 const uint Output::epsfstream::yBBoxSide=300;
 const double Output::epsfstream::linewidth=0.0000001;
+const double Output::epsfstream::scale_dimension=3.5;
     
 
 Output::Polygon2d& 
@@ -116,8 +118,9 @@ Output::operator<<(std::ostream& os, const PlanarProjectionMap& ppm)
 
 
 Output::Point2d 
-Output::baricentre(const Polygon2d& vertices)
+Output::Polygon2d::baricentre() const
 {
+  const Polygon2d& vertices=*this;
   Point2d baricentre(2);
   
   for (size_type j=0; j!=vertices.size(); ++j) {
@@ -133,13 +136,29 @@ Output::baricentre(const Polygon2d& vertices)
 
 
 
+Output::PlanarProjectionMap::PlanarProjectionMap()
+  : _d(2), _i(0), _j(1) 
+{ 
+}
+
+
+Output::PlanarProjectionMap::PlanarProjectionMap(dimension_type d, dimension_type i, dimension_type j)
+  : _d(d), _i(i), _j(j) 
+{ 
+  if(i>=d || j>=d) { 
+    using Geometry::InvalidCoordinate; 
+    ARIADNE_THROW(InvalidCoordinate,"PlanarProjectionMap::PlanarProjectionMap(dimension_type d, dimension_type i, dimension_type j)",
+                  "d="<<d<<", i="<<i<<", j="<<j); 
+  }
+}
+  
 
 
 
 
 
 Output::epsfstream::epsfstream()
-  : std::ofstream(), line_colour("black"), fill_colour("green"), line_style(true), fill_style(true)
+  : std::ofstream(), line_colour(black), fill_colour(green), line_style(true), fill_style(true)
 {
 }
 
@@ -153,16 +172,16 @@ Output::epsfstream::~epsfstream() {
  
 void
 Output::epsfstream::open(const char* fn, const Rectangle2d& bbox, 
-                 const PlanarProjectionMap& p_map)
+                         const PlanarProjectionMap& p_map)
 {
   this->p_map=p_map;
   this->bbox=bbox;
 
   this->std::ofstream::open(fn);
   this->write_header();
-  (*this) << "black\n";
+  static_cast<std::ostream&>(*this) << "black\n";
   this->trace(bbox);
-  (*this) << " stroke\n\n";
+  static_cast<std::ostream&>(*this) << " stroke\n\n";
 }
 
 
@@ -179,7 +198,8 @@ Output::epsfstream::close()
 void 
 Output::epsfstream::write_header() 
 {
-  (*this) << "%!PS-Adobe-2.0\n"
+  std::ostream& os=*this;
+  os      << "%!PS-Adobe-2.0\n"
           << "%%Title: Ariadne\n"
           << "%%Creator: Ariadne\n"
           << "%%CreationDate: Unknown\n"
@@ -190,8 +210,8 @@ Output::epsfstream::write_header()
           << "%%EndComments\n"
           << "\n";
   
-  (*this) << "/linewidth " << epsfstream::linewidth << " def\n";
-  (*this) << "/black {0.0 0.0 0.0 setrgbcolor} def\n"
+  os      << "/linewidth " << epsfstream::linewidth << " def\n";
+  os      << "/black {0.0 0.0 0.0 setrgbcolor} def\n"
           << "/gray {0.5 0.5 0.5 setrgbcolor} def\n"
           << "/white {1.0 1.0 1.0 setrgbcolor} def\n"
           << "/red {1.0 0.0 0.0 setrgbcolor} def\n"
@@ -201,24 +221,24 @@ Output::epsfstream::write_header()
           << "/magenta {1.0 0.0 1.0 setrgbcolor} def\n"
           << "/cyan {0.0 1.0 1.0 setrgbcolor} def\n";
   
-  (*this) << "/bordercolour { black } def\n"
+  os      << "/bordercolour { black } def\n"
           << "/fillcolour { green } def\n";
   
-  (*this) << "/xl " << this->bbox.lower_bound(0) << " def\n"
+  os      << "/xl " << this->bbox.lower_bound(0) << " def\n"
           << "/xu " << this->bbox.upper_bound(0) << " def\n"
           << "/yl " << this->bbox.lower_bound(1) << " def\n"
           << "/yu " << this->bbox.upper_bound(1) << " def\n";
-  (*this) << "/xBBoxSide " << xBBoxSide << " def\n"
+  os      << "/xBBoxSide " << xBBoxSide << " def\n"
           << "/yBBoxSide " << yBBoxSide << " def\n"
           << "/xscale xBBoxSide xu xl sub div def  % horizontal scaling factor\n"
           << "/yscale yBBoxSide yu yl sub div def  % vertical scaling factor\n"
           << "/xscalei 1 xscale div def     % horizontal scaling factor inverse\n"
           << "/yscalei 1 yscale div def     % vertical scaling factor inverse\n";
   
-  (*this) << "linewidth setlinewidth\n";
-  (*this) << "green\n";
+  os      << "linewidth setlinewidth\n";
+  os      << "green\n";
   
-  (*this) << "gsave\n"
+  os      << "gsave\n"
           << "xscale yscale scale xl neg yl neg translate\n";
 }
 
@@ -227,7 +247,8 @@ Output::epsfstream::write_header()
 void 
 Output::epsfstream::write_trailer() 
 {
-  (*this) << "grestore showpage\n"
+  std::ostream& os=*this;
+  os << "grestore showpage\n"
     "%%Trailer\n";
 }
 
@@ -242,14 +263,14 @@ Output::epsfstream::trace_scale(const char* x_name, const char* y_name,
   double ux=this->bbox.upper_bound(0);
   double uy=this->bbox.upper_bound(1);
   
-  double scale_x=((ux-lx)/(SCALE_DIMENSION + 1));
-  double scale_y=((uy-ly)/(SCALE_DIMENSION + 1));
+  double scale_x=((ux-lx)/(scale_dimension + 1));
+  double scale_y=((uy-ly)/(scale_dimension + 1));
   
   lx=lx+0.8*scale_x;
   ly=ly+0.8*scale_y;
   
-  double setlinewidth = ((ux-lx)+(uy-ly))/(SCALE_DIMENSION*300);
-  double fontsize = ((ux-lx)+(uy-ly))/(SCALE_DIMENSION*20);
+  double setlinewidth = ((ux-lx)+(uy-ly))/(scale_dimension*300);
+  double fontsize = ((ux-lx)+(uy-ly))/(scale_dimension*20);
   
   *this << setlinewidth << " setlinewidth"<< std::endl
         << "fillcolour black" << std::endl
@@ -411,11 +432,11 @@ Output::epsfstream::draw(const Point2d& pt)
   epsfstream& eps=*this;
   if(eps.fill_style) {
     os << pt[0] << " " << pt[1] << " 0.001 0 360 arc closepath\n";
-    os << eps.fill_colour << " fill\n";
+    os << eps.fill_colour.name() << " fill\n";
   }
   if(eps.line_style) {
     os << pt[0] << " " << pt[1] << " 0.001 0 360 arc closepath\n";
-    os << eps.line_colour << " stroke\n\n";
+    os << eps.line_colour.name() << " stroke\n\n";
   }
 }
 
@@ -473,7 +494,7 @@ void
 Output::epsfstream::fill()
 {
   std::ostream& os=*this;
-  os << this->fill_colour << " fill\n";
+  os << this->fill_colour.name() << " fill\n";
 }
 
 
@@ -481,7 +502,7 @@ void
 Output::epsfstream::stroke()
 {
   std::ostream& os=*this;
-  os << this->line_colour << " stroke\n";
+  os << this->line_colour.name() << " stroke\n";
 }
 
 

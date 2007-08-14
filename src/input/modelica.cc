@@ -175,8 +175,8 @@ Input::ModelicaParser::tokenize(std::istream& is)
   }
 
   
-  ARIADNE_LOG(3,this->_tokens<<"\n"<<std::endl;);
-  if(verbosity>=3) { this->write(std::clog)<<std::endl; }
+  ARIADNE_LOG(3,this->_tokens<<"\n");
+  if(verbosity>=3) { this->write(std::clog); std::clog << std::endl; }
 }
 
 

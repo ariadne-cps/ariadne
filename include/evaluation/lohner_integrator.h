@@ -51,6 +51,7 @@ namespace Ariadne {
       : public IntegratorBase<R, System::VectorFieldInterface<R>, Geometry::Zonotope< Numeric::Interval<R> > > 
     {
       typedef IntegratorBase<R, System::VectorFieldInterface<R>, Geometry::Zonotope< Numeric::Interval<R> > > Base_;
+      typedef time_type Time;
      public:
       typedef Numeric::Interval<R> I;
       
@@ -69,13 +70,13 @@ namespace Ariadne {
       virtual Geometry::Point<I> bounded_flow(const System::VectorFieldInterface<R>& vf,
                                               const Geometry::Point<I>& p,
                                               const Geometry::Rectangle<R>& bb,
-                                              const time_type& t) const;
+                                              const Numeric::Interval<R>& t) const;
      
       /*! \brief Integrate a basic set for within a bounding set. */
       virtual LinearAlgebra::Matrix<I> bounded_flow_jacobian(const System::VectorFieldInterface<R>& vf,
                                                              const Geometry::Point<I>& p,
                                                              const Geometry::Rectangle<R>& bb,
-                                                             const time_type&) const;
+                                                             const Numeric::Interval<R>&) const;
      
        /*! \brief A C1 algorithm for integrating forward a zonotope.
         */
@@ -83,17 +84,14 @@ namespace Ariadne {
       bounded_integration_step(const System::VectorFieldInterface<R>& vf,
                                const Geometry::Zonotope<I>& s,
                                const Geometry::Rectangle<R>& bb,
-                               const time_type&) const;
-
-
+                               const Numeric::Interval<R>&) const;
 
       /*! \brief A C1 algorithm for integrating forward a zonotope for a time up to time \a step_size, assuming the set \a bb is a bounding box for the integration. */
       virtual Geometry::Zonotope<I> 
       bounded_reachability_step(const System::VectorFieldInterface<R>& vf,
                        const Geometry::Zonotope<I>& s,
                        const Geometry::Rectangle<R>& bb,
-                       const time_type&) const;
-
+                       const Numeric::Interval<R>&) const;
 
     };
     
@@ -132,14 +130,14 @@ namespace Ariadne {
       virtual Geometry::Point<I> bounded_flow(const System::VectorFieldInterface<R>& vf,
                                               const Geometry::Point<I>& p,
                                               const Geometry::Rectangle<R>& bb,
-                                              const time_type&) const;
+                                              const Numeric::Interval<R>&) const;
      
 
       /*! \brief Integrate a basic set for within a bounding set. */
       virtual LinearAlgebra::Matrix<I> bounded_flow_jacobian(const System::VectorFieldInterface<R>& vf,
                                                              const Geometry::Point<I>& p,
                                                              const Geometry::Rectangle<R>& bb,
-                                                             const time_type&) const;
+                                                             const Numeric::Interval<R>&) const;
      
        /*! \brief A C1 algorithm for integrating forward a zonotope.
         */
@@ -147,7 +145,7 @@ namespace Ariadne {
       bounded_integration_step(const System::VectorFieldInterface<R>& vf,
                                const Geometry::Zonotope<I>& s,
                                const Geometry::Rectangle<R>& bb,
-                               const time_type&) const;
+                               const Numeric::Interval<R>&) const;
 
 
       /*! \brief A C1 algorithm for integrating forward a zonotope for a time up to time \a step_size, assuming the set \a bb is a bounding box for the integration. */
@@ -155,7 +153,7 @@ namespace Ariadne {
       bounded_reachability_step(const System::VectorFieldInterface<R>& vf,
                        const Geometry::Zonotope<I>& s,
                        const Geometry::Rectangle<R>& bb,
-                       const time_type&) const;
+                       const Numeric::Interval<R>&) const;
 
 
     };

@@ -241,6 +241,11 @@ void export_interval_matrix()
   def("inverse",(Matrix<I>(*)(const Matrix<I>&))&inverse);
   def("exp",(Matrix<I>(*)(const Matrix<R>&))&exp);
   def("exp",(Matrix<I>(*)(const Matrix<I>&))&exp);
+
+  def("midpoint",(Mx(*)(const IMx&))&midpoint);
+  def("encloses",(bool(*)(const IMx&,const Mx&))&encloses);
+  def("refines",(bool(*)(const IMx&,const IMx&))&refines);
+
 }
 
 template void export_matrix<Float>();

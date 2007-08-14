@@ -100,6 +100,36 @@ Geometry::Constraint<R>::smoothness() const
 
 
 template<class R>
+Numeric::Interval<R> 
+Geometry::value(const ConstraintInterface<R>& c, const Rectangle<R>& r)
+{
+  typedef typename Numeric::traits<R>::interval_type I;
+  return c.value(Point<I>(r));
+}
+
+
+template<class R>
+Numeric::Interval<R> 
+Geometry::value(const ConstraintInterface<R>& c, const Zonotope< Numeric::Interval<R> >& z)
+{
+  typedef typename Numeric::traits<R>::interval_type I;
+  LinearAlgebra::Vector<I> e(z.number_of_generators(),I(-1,1));
+  Geometry::Point<I> bpt(z.bounding_box());
+  return c.value(z.centre())+LinearAlgebra::inner_product(c.gradient(bpt),z.generators()*e);
+}
+
+
+template<class R>
+tribool 
+Geometry::satisfies(const Rectangle<R>& r, const ConstraintInterface<R>& c)
+{
+  typedef typename Numeric::traits<R>::interval_type I;
+  Point<I> pt(r);
+  I v=c.value(pt);
+  return ::compare_zero(v,c.comparison());
+}
+
+template<class R>
 tribool 
 Geometry::satisfies(const Rectangle<R>& r, const Constraint<R>& c)
 {
@@ -210,9 +240,13 @@ Geometry::Constraint<R>::instantiate()
   ConstraintInterface<R>* ci=0;
   Constraint<R>* c=0;
   
+  Geometry::value(*c,*r);
+  Geometry::value(*c,*iz);
+
   satisfies(*r,*c);
   satisfies(*z,*c);
   satisfies(*ez,*c);
+  satisfies(*r,*ci);
   satisfies(*iz,*ci);
 }
 
@@ -285,7 +319,8 @@ template<class R>
 std::ostream& 
 Geometry::LinearConstraint<R>::write(std::ostream& os) const
 {
-  return os << "LinearConstraint( a=" << this->_a << ", b=" << this->_b << ", c='" << (this->_c==less ? "<" : ">") << "' )";
+  //return os << "LinearConstraint( a=" << this->_a << ", b=" << this->_b << ", c='" << (this->_c==less ? "<" : ">") << "' )";
+  return os << this->_a << ".x"<< (this->_c==less ? "<" : ">") << "=" << this->_b;
 }
 
       

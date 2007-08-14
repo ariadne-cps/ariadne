@@ -89,6 +89,8 @@ void export_point()
     .def("__sub__",(Vector<A>(*)(const Point<R>&,const Point<R>&))&operator-)
     .def(self_ns::str(self))
   ;
+
+  def("approximation",(Point<R>(*)(const Point<R>&))&approximation);
 }
 
 template<class R>
@@ -118,6 +120,13 @@ void export_interval_point()
     .def("__sub__",(Vector<I>(*)(const Point<I>&,const Point<I>&))&operator-)
     .def(self_ns::str(self))
   ;
+
+  def("approximation",(Point<R>(*)(const Point<I>&))&approximation);
+  def("midpoint",(Point<R>(*)(const Point<I>&))&midpoint);
+  def("radius",(R(*)(const Point<I>&))&radius);
+  def("encloses",(bool(*)(const Point<I>&,const Point<R>&))&encloses);
+  def("refines",(bool(*)(const Point<I>&,const Point<I>&))&refines);
+
 }
 
 template<class R>

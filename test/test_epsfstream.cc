@@ -77,9 +77,9 @@ int main() {
   epsfstream eps;
   eps.open("test_epsfstream-1.eps",bbox);
   eps << r1;
-  eps.set_fill_colour("blue");
+  eps << fill_colour(blue);
   eps << r2;
-  eps.set_fill_colour("red");
+  eps << fill_colour(red);
   eps << z3<< p4;
   eps.close();
   eps << pt;

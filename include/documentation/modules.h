@@ -28,7 +28,7 @@
  * \brief Documentation for %Ariadne modules.
  */
 
-/*!\addtogroup Base Base
+/*!\addtogroup Base Base Module
  * \brief Fundamental classes and operations, mostly implemented as wrappers 
  * around other libraries.
  *
@@ -47,7 +47,7 @@
  * \ingroup Base
  * \brief Numerical types and intervals.
  *
- * In this module, we define Ariadne's base numerical types, and interval 
+ * In this module, we define %Ariadne's base numerical types, and interval 
  * arithmetic. The main classes are the various <em>real number types</em>
  * which must either conform to the ExactArithmetic interface or the 
  * ApproximateArithmetic interface. This use of standard operations allows
@@ -127,9 +127,18 @@
  *
  */
 
-/*!\defgroup Combinatoric Combinatoric
+/*!\defgroup Combinatoric Combinatoric Module
  * \brief Combinatoric sets and maps, based either on integer lattices or
  * partition trees.
+ *
+ * 
+ * \defgroup ArrayOperations Array Operations
+ * \ingroup Combinatoric
+ * \brief Operations on integer arrays
+ *
+ * \defgroup BinaryTree Binary Words and Trees
+ * \ingroup Combinatoric
+ * \brief Classes for binary words and binary trees.
  *
  * 
  * \defgroup Lattice Lattice Sets and Functions
@@ -140,7 +149,7 @@
  * lattices provide a representation for sets in \f$\mathbb{R}^n\f$ based on
  * coordinate-aligned grids.
  *
- * As well as sets of cells, Ariadne also supports maps between lattices.
+ * As well as sets of cells, %Ariadne also supports maps between lattices.
  * The most useful form takes a single grid cell to a set of grid cells, and
  * so is a type of multivalued map. Hence, no LatticeMap class is given.
  *
@@ -164,7 +173,7 @@
  * This gives the dyadic rectangle '[0.25,0.5]x[0.5,1.0]'.
  */
  
-/*!\defgroup Geometry Geometry
+/*!\defgroup Geometry Geometry Module
  * \brief Geometric calculus module.
  *
  * In this module are the classes used to represent sets and approximations to 
@@ -251,7 +260,7 @@
  * sets, one for each component of the state space.
  */
 
-/*!\defgroup System System
+/*!\defgroup System System Module
  * \brief Abstract base classes for system interface, and some commonly used systems.
  *
  * Systems fall into three basic classes, namely <em>discrete-time 
@@ -288,7 +297,7 @@
  * \brief Hybrid-time systems.
  */
 
-/*! \defgroup Evaluation Evaluation
+/*! \defgroup Evaluation Evaluation Module
  *  \brief Functions and methods for computing the evolution of a system and solving equations.
  *
  * 
@@ -310,7 +319,14 @@
  *
  */
 
-/*! \defgroup Output Output
+/*! \defgroup Input Input Module
+ *
+ *  \defgroup Modelica Modelica Input
+ *  \ingroup Input 
+ *  \brief Modelica input.
+ */
+
+/*! \defgroup Output Output Module
  *
  *  \defgroup Postscript Postscript Output
  *  \ingroup Output 

@@ -29,9 +29,37 @@
 
 namespace Ariadne {
   namespace Base {
+
+#ifdef DOXYGEN
+  /*!\brief Built-in logical type. */
+  class bool { };
+  /*!\brief Built-in integer type. */
+  class int { };
+  /*!\brief Built-in unsigned integer type. */
+  class uint { };
+  /*!\brief Built-in double-precision floating-point type. */
+  class double { };
+
+
+  /*!\brief A logic type which can take values \p true, \p false, and \p intermediate. 
+   *
+   * Converting \a intermediate to \c bool yields \p false. 
+   */
+  class tribool { 
+    //! Convertion to a bool.  Returns \c true if and only if the value of \p tb is \c true.
+    operator bool () const;
+    //! Returns \c true if and only if the value of \p tb is \c true.
+    friend bool definitely(tribool tb);
+    //! Returns \c true if and only if the value of \p tb is \c true or \c indeterminate.
+    friend bool possibly(tribool tb);
+    //! Returns \c true if and only if the value of \p tb is \c indeterminate.
+    friend bool indeterminate(bool tb);
+  };
+#endif
     using boost::logic::tribool;
     using boost::logic::indeterminate;
 
+    inline bool definitely(tribool tb) { return tb; }
     inline bool possibly(tribool tb) { return tb || indeterminate(tb); }
 
     inline tribool operator^(tribool tb1, tribool tb2) { return (tb1&&!tb2)||(!tb1&&tb2); }

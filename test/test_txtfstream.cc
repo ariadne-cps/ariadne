@@ -66,11 +66,14 @@ int main() {
   Polytope<Float> p4(r4);
   
   cout << bbox << "\n";
-  cout << r1 << " " << r2 << endl;
-  cout << r3 << " " << r4 << endl;
-  cout << z3 << " " << p4 << endl;
-  cout << p4.vertices() << endl;
+  cout << r1 << "\n" << r2 << endl;
+  cout << r3 << "\n" << r4 << endl;
+  cout << z3 << "\n" << p4 << endl;
+  cout << r1.vertices() << endl;
+  cout << r2.vertices() << endl;
   cout << z3.vertices() << endl;
+  cout << p4.vertices() << endl;
+  cout << endl;
   
   
   // Test output of basic sets
@@ -78,7 +81,7 @@ int main() {
   txt.open("test_txtfstream-1.txt");
   txt << r1;
   txt << r2;
-  txt << z3<< p4;
+  txt << z3 << p4;
   txt << pt;
   txt.close();
 
@@ -89,6 +92,7 @@ int main() {
   Grid<Float> g(Vector<Float>("[0.25,0.25,0.25]"));
   GridMaskSet<Float> gms(g,bb);
   Rectangle<Float> r("[0.33,0.66]x[0.125,0.375]x[0.25,0.75]");
+  cout << "gms.size()=" << gms.size() << endl;
   gms.adjoin_outer_approximation(r);
   cout << "gms.size()=" << gms.size() << endl;
   txt.open("test_txtfstream-2.txt");

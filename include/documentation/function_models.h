@@ -35,10 +35,10 @@ A model is described by two parameters, the \em degree and the \em smoothness.
 
 Hence the general form of a model of \f$f\f$ with degree \f$d\f$ and smoothness \f$s\f$ is
 \f[
-  f^i(x) \in \sum_{0\leq|\alpha|\leq s} c_{\alpha}\,\overline{\underline{a}}^{\;\!i}_{\,\alpha}\,x^\alpha
+  f^i(x) \in \sum_{0\leq|\alpha|\leq s} c_{\alpha}\,\interval{a}^{\;\!i}_{\,\alpha}\,x^\alpha
      + \sum_{s<|\alpha|\leq d} c_\alpha\,a^{i}_{\,\alpha} x^\alpha .
 \f]
-Here, \f$\alpha\f$ is a multi-index \f$(\alpha_1,\ldots,\alpha_m)\f$ with degree \f$|\alpha|=\alpha_1+\cdots+\alpha_m\f$, and \f$x^\alpha := x_1^{\alpha_1}\,x_2^{\alpha_2}\,\cdots\,x_m^{\alpha_m}\f$, and \f$\overline{\underline{a}}\f$ denotes an interval coefficient, and \f$a\f$ a numerical coefficient. The coefficients \f$c_\alpha\f$ are constants depending on the representation of the model. Taking \f$c_\alpha=1\f$ gives a polynomial model, and taking \f$c_\alpha=\prod_{i=1}^{k} \alpha_i!\f$ gives a model where \f$a^i_{\,\alpha} = D_\alpha f^i(0)\f$ for \f$|\alpha|\leq s\f$.
+Here, \f$\alpha\f$ is a multi-index \f$(\alpha_1,\ldots,\alpha_m)\f$ with degree \f$|\alpha|=\alpha_1+\cdots+\alpha_m\f$, and \f$x^\alpha := x_1^{\alpha_1}\,x_2^{\alpha_2}\,\cdots\,x_m^{\alpha_m}\f$, and \f$\interval{a}\f$ denotes an interval coefficient, and \f$a\f$ a numerical coefficient. The coefficients \f$c_\alpha\f$ are constants depending on the representation of the model. Taking \f$c_\alpha=1\f$ gives a polynomial model, and taking \f$c_\alpha=\prod_{i=1}^{k} \alpha_i!\f$ gives a model where \f$a^i_{\,\alpha} = D_\alpha f^i(0)\f$ for \f$|\alpha|\leq s\f$.
 
 The interpretation of \f$s\f$ is that the model contains sufficient information to compute \f$f\f$ and its derivatives up to order \f$s\f$.
 
@@ -70,12 +70,13 @@ The following operations on functions are supported:
 
 An affine model represents a function \f$f\f$ on \f$X\f$ by \f$f(x) = b + A (x-c)\f$. 
 Given \f$f\f$, an \f$s=1\f$ model can be computed by taking 
-\f[ \overline{\underline{b}} \ni f(c); \quad \overline{\underline{A}} \ni Df(X) \f]
-\f[ \fbox{$b$} \ni f(c); \quad \fbox{$A$} \ni Df(X) \f]
 \f[ [b] \ni f(c); \quad [A] \ni Df(X) \f]
-\f[ \mathbf{b} \ni f(c); \quad \mathbf{A} \ni Df(X) \f]
-\f[ \interval{b} \ni f(c); \quad \interval{A} \ni Df(X) \f]
 
+
+\section matrix_inverse_derivative Derivative of Matrix Inverse
+
+If \f$B=A^{-1}\f$, then 
+\f[ \fbox{$ \dot{B} = B\dot{A}B $} \f]
 
 
 */

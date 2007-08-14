@@ -73,7 +73,7 @@ However, it is possible to compute the action of \f$f\f$ on sets from the action
 
 Most continuous functions used in science and engineering are built up from elementary real-valued functions,
 either arithmetical or defined using Taylor series expansions. 
-For this reason, Ariadne provides extended operations for computation on real-valued functions.
+For this reason, %Ariadne provides extended operations for computation on real-valued functions.
 
 Arbitrary-precision computations may be exact or approximate. 
 The function \c f(x) computes \f$f(x)\f$ exactly, if possible. 

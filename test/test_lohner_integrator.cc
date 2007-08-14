@@ -109,14 +109,14 @@ test_lohner_integrator()
 
   epsfstream eps;
   eps.open("test_lohner_integrator-1.eps",bb);
-  eps.set_fill_colour("green");
-  eps << over_approximation(zr1) << over_approximation(zr2)
+  eps << fill_colour(green)
+      << over_approximation(zr1) << over_approximation(zr2)
       << over_approximation(zr3) << over_approximation(zr4);
-  eps.set_fill_colour("blue");
-  eps << over_approximation(z1) << over_approximation(z2)
+  eps << fill_colour(blue)
+      << over_approximation(z1) << over_approximation(z2)
       << over_approximation(z3) << over_approximation(z4);
-  eps.set_fill_colour("yellow");
-  eps << over_approximation(z0);
+  eps << fill_colour(yellow)
+      << over_approximation(z0);
   eps.close();
 
 
@@ -151,14 +151,14 @@ test_lohner_integrator()
        << "mx1=" << mx1 << ", rmx1=" << rmx1 << "\n" << endl;
   
   eps.open("test_lohner_integrator-2.eps",bb);
-  eps.set_fill_colour("green");
-  eps << over_approximation(zr1) << over_approximation(zr2)
+  eps << fill_colour(green)
+      << over_approximation(zr1) << over_approximation(zr2)
       << over_approximation(zr3) << over_approximation(zr4);
-  eps.set_fill_colour("blue");
-  eps << over_approximation(z1) << over_approximation(z2)
+  eps << fill_colour(blue)
+      << over_approximation(z1) << over_approximation(z2)
       << over_approximation(z3) << over_approximation(z4);
-  eps.set_fill_colour("yellow");
-  eps << over_approximation(z0);
+  eps << fill_colour(yellow)
+      << over_approximation(z0);
   eps.close();
   
   cout << "\nAffineIntegrator\n";
@@ -178,14 +178,14 @@ test_lohner_integrator()
   afz=z4;
   
   eps.open("test_lohner_integrator-3.eps",bb);
-  eps.set_fill_colour("green");
-  eps << over_approximation(zr1) << over_approximation(zr2)
+  eps << fill_colour(green)
+      << over_approximation(zr1) << over_approximation(zr2)
       << over_approximation(zr3) << over_approximation(zr4);
-  eps.set_fill_colour("blue");
-  eps << over_approximation(z1) << over_approximation(z2)
+  eps << fill_colour(blue)
+      << over_approximation(z1) << over_approximation(z2)
       << over_approximation(z3) << over_approximation(z4);
-  eps.set_fill_colour("yellow");
-  eps << over_approximation(z0);
+  eps << fill_colour(yellow)
+      << over_approximation(z0);
   eps.close();
   
   cout << endl;

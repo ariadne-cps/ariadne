@@ -37,30 +37,31 @@ namespace Ariadne {
  
 namespace Evaluation { static int& verbosity = hybrid_evolver_verbosity; }
 
+namespace Evaluation {
 
+  template<class SetInterface> 
+  class HybridTimedSet 
+  {
+   public:
+    HybridTimedSet(const time_type& t, const id_type& id, const SetInterface& s)
+      : _time(t), _discrete_state(id), _continuous_state_set(s) { }
+    const time_type& time() const { return _time; }
+    const id_type& discrete_state() const { return _discrete_state; }
+    const SetInterface& continuous_state_set() const { return _continuous_state_set; } 
+    
+    bool operator==(const HybridTimedSet& other) const { 
+      return this->_time == other._time 
+        && this->_discrete_state==other._discrete_state 
+        && this->_continuous_state_set==other._continuous_state_set; }
+    bool operator!=(const HybridTimedSet& other) const { return !(*this==other); }
+    bool operator<=(const HybridTimedSet& other) const { return this->_time <= other._time; }
+   private:
+    time_type _time;
+    id_type _discrete_state;
+    SetInterface _continuous_state_set;
+  };
 
-template<class SetInterface> 
-class HybridTimedSet 
-{
- public:
-  HybridTimedSet(const time_type& t, const id_type& id, const SetInterface& s)
-    : _time(t), _discrete_state(id), _continuous_state_set(s) { }
-  const time_type& time() const { return _time; }
-  const id_type& discrete_state() const { return _discrete_state; }
-  const SetInterface& continuous_state_set() const { return _continuous_state_set; } 
-  
-  bool operator==(const HybridTimedSet& other) const { 
-    return this->_time == other._time 
-      && this->_discrete_state==other._discrete_state 
-      && this->_continuous_state_set==other._continuous_state_set; }
-  bool operator!=(const HybridTimedSet& other) const { return !(*this==other); }
-  bool operator<=(const HybridTimedSet& other) const { return this->_time <= other._time; }
- private:
-  time_type _time;
-  id_type _discrete_state;
-  SetInterface _continuous_state_set;
-};
-
+}
 
 
 template<class R>
@@ -411,9 +412,9 @@ Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<R>& hybri
       const GridMaskSet<R>& fnd=found_set.locations_begin()->second;
       Output::epsfstream eps;
       eps.open(filename.str().c_str(),dom.bounding_box());
-      eps.set_fill_colour("cyan"); eps<<dom.extent();
-      eps.set_fill_colour("green"); eps<<res;
-      eps.set_fill_colour("red"); eps<<fnd;
+      eps << fill_colour(Output::green) << dom.extent();
+      eps << fill_colour(Output::green) << res;
+      eps << fill_colour(Output::red) << fnd;
       eps.close();
     }
     found_set=this->_discrete_step(hybrid_automaton,integrated_set,domain_set);

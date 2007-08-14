@@ -57,10 +57,10 @@ namespace Ariadne {
       
       for (size_type i=0; i!=this->dimension(); ++i) {
         if(w[i]) {
-          quadrant[i]=Numeric::Interval<R>(this->interval(i).centre(),this->upper_bound(i));
+          quadrant[i]=Numeric::Interval<R>(this->interval(i).midpoint(),this->upper_bound(i));
         } 
         else {
-          quadrant[i]=Numeric::Interval<R>(this->lower_bound(i),this->interval(i).centre());
+          quadrant[i]=Numeric::Interval<R>(this->lower_bound(i),this->interval(i).midpoint());
         }
       }
       return quadrant;

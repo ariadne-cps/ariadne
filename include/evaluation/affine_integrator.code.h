@@ -90,7 +90,7 @@ LinearAlgebra::Vector< Numeric::Interval<R> >
 Evaluation::gexp(
                  const LinearAlgebra::Matrix<R>& A, 
                  const LinearAlgebra::Vector<R>& b, 
-                 const time_type& qt, 
+                 const Numeric::Interval<R>& t, 
                  const uint& k)
 {
   using namespace Numeric;
@@ -106,7 +106,6 @@ Evaluation::gexp(
   
   Vector<I> result=b/static_cast<R>(factorial(k));
   Vector<I> term=result;
-  I t(qt);
   
   for(uint n=k+1; n!=k+ns; ++n) {
     term=(A*term)*(t/static_cast<R>(n));
@@ -118,7 +117,7 @@ Evaluation::gexp(
   result+=Vector<I>(result.size(),ierr);
   
   if(Evaluation::verbosity>7) { 
-    std::clog << "A=" << A << ",  t=" << qt << ",  k=" << k << "\n" 
+    std::clog << "A=" << A << ",  t=" << t << ",  k=" << k << "\n" 
               << "gexp(A,t,k)=" << result << ", err=" << err << std::endl; 
   }
   
@@ -129,7 +128,7 @@ template<class R>
 LinearAlgebra::Matrix< Numeric::Interval<R> > 
 Evaluation::gexp(
                  const LinearAlgebra::Matrix<R>& A, 
-                 const time_type& qt, 
+                 const Numeric::Interval<R>& t, 
                  const uint& k)
 {
   using namespace Numeric;
@@ -145,7 +144,6 @@ Evaluation::gexp(
   
   Matrix<I> result=id/static_cast<R>(factorial(k));
   Matrix<I> term=result;
-  I t(qt);
   
   for(uint n=k+1; n!=k+ns; ++n) {
     term=(A*term)*(t/static_cast<R>(n));
@@ -157,7 +155,7 @@ Evaluation::gexp(
   result+=Matrix<I>(result.number_of_rows(),result.number_of_columns(),&ierr,0,0);
   
   if(Evaluation::verbosity>7) { 
-    std::clog << "A=" << A << ",  t=" << qt << ",  k=" << k << "\n" 
+    std::clog << "A=" << A << ",  t=" << t << ",  k=" << k << "\n" 
               << "gexp(A,t,k)=" << result << ", err=" << err << std::endl; 
   }
   
@@ -194,7 +192,7 @@ Geometry::Point< Numeric::Interval<R> >
 Evaluation::AffineIntegrator<R>::bounded_flow(const System::AffineVectorField<R>& avf,
                                               const Geometry::Point<I>& p,
                                               const Geometry::Rectangle<R>& bb,
-                                              const time_type& h) const
+                                              const Numeric::Interval<R>& h) const
 {
   const LinearAlgebra::Matrix<R>& A=avf.A();
   const LinearAlgebra::Vector<R>& b=avf.b();
@@ -207,7 +205,7 @@ LinearAlgebra::Matrix< Numeric::Interval<R> >
 Evaluation::AffineIntegrator<R>::bounded_flow_jacobian(const System::AffineVectorField<R>& avf,
                                                        const Geometry::Point<I>& p,
                                                        const Geometry::Rectangle<R>& bb,
-                                                       const time_type& h) const
+                                                       const Numeric::Interval<R>& h) const
 {
   const LinearAlgebra::Matrix<R>& A=avf.A();
   return gexp(A,h,0);
@@ -224,9 +222,9 @@ Geometry::Zonotope< Numeric::Interval<R> >
 Evaluation::AffineIntegrator<R>::bounded_integration_step(const System::AffineVectorField<R>& affine_vector_field, 
                                                           const Geometry::Zonotope< Numeric::Interval<R> >& initial_set, 
                                                           const Geometry::Rectangle<R>& bounding_set, 
-                                                          const time_type& step_size) const
+                                                          const Numeric::Interval<R>& step_size) const
 {
-  return this->integration_step(affine_vector_field,initial_set,const_cast<time_type&>(step_size));
+  return this->_integration_step(affine_vector_field,initial_set,step_size);
 }
 
 
@@ -236,12 +234,10 @@ Geometry::Zonotope< Numeric::Interval<R> >
 Evaluation::AffineIntegrator<R>::bounded_reachability_step(const System::AffineVectorField<R>& affine_vector_field, 
                                                            const Geometry::Zonotope< Numeric::Interval<R> >& initial_set, 
                                                            const Geometry::Rectangle<R>& bounding_set, 
-                                                           const time_type& step_size) const
+                                                           const Numeric::Interval<R>& step_size) const
 {
-  return reachability_step(affine_vector_field,initial_set,const_cast<time_type&>(step_size));
+  return this->_reachability_step(affine_vector_field,initial_set,step_size);
 }
-
-
 
 
 
@@ -250,6 +246,27 @@ Geometry::Zonotope< Numeric::Interval<R> >
 Evaluation::AffineIntegrator<R>::integration_step(const System::AffineVectorField<R>& affine_vector_field, 
                                                   const Geometry::Zonotope< Numeric::Interval<R> >& initial_set, 
                                                   time_type& step_size) const
+{
+  return this->_integration_step(affine_vector_field,initial_set,step_size);
+}
+
+
+template<class R>
+Geometry::Zonotope< Numeric::Interval<R> > 
+Evaluation::AffineIntegrator<R>::reachability_step(const System::AffineVectorField<R>& affine_vector_field, 
+                                                  const Geometry::Zonotope< Numeric::Interval<R> >& initial_set, 
+                                                  time_type& step_size) const
+{
+  return this->_reachability_step(affine_vector_field,initial_set,step_size);
+}
+
+
+
+template<class R>
+Geometry::Zonotope< Numeric::Interval<R> > 
+Evaluation::AffineIntegrator<R>::_integration_step(const System::AffineVectorField<R>& affine_vector_field, 
+                                                   const Geometry::Zonotope< Numeric::Interval<R> >& initial_set, 
+                                                   const Numeric::Interval<R>& step_size) const
 {
   using namespace LinearAlgebra;
   using namespace Geometry;
@@ -272,7 +289,7 @@ Evaluation::AffineIntegrator<R>::integration_step(const System::AffineVectorFiel
   const Matrix<R>& A=vf.A();
   const Vector<R>& b=vf.b();
   
-  Matrix<I> iP=gexp(A,h.upper(),1);
+  Matrix<I> iP=gexp(A,h,1);
   Matrix<I> iD=iP*(h*A)+Matrix<R>::identity(vf.dimension());
   
   ARIADNE_LOG(9,"approximating derivative=" << iD << "\n");
@@ -295,9 +312,9 @@ Evaluation::AffineIntegrator<R>::integration_step(const System::AffineVectorFiel
 
 template<class R>
 Geometry::Zonotope< Numeric::Interval<R> > 
-Evaluation::AffineIntegrator<R>::reachability_step(const System::AffineVectorField<R>& vector_field, 
-                                                   const Geometry::Zonotope< Numeric::Interval<R> >& initial_set, 
-                                                   time_type& step_size) const
+Evaluation::AffineIntegrator<R>::_reachability_step(const System::AffineVectorField<R>& vector_field, 
+                                                    const Geometry::Zonotope< Numeric::Interval<R> >& initial_set, 
+                                                    const Numeric::Interval<R>& step_size) const
 {
   using namespace Numeric;
   using namespace LinearAlgebra;
@@ -312,15 +329,15 @@ Evaluation::AffineIntegrator<R>::reachability_step(const System::AffineVectorFie
   Zonotope<I> iz=initial_set;
   const size_type n=vector_field.dimension();
   const Matrix<R> id=Matrix<R>::identity(n);
-  const time_type hc=step_size/2;
+  const I hc=step_size/2;
   // FIXME: There should be no need to convert to time_type / Rational
-  Interval<R> hh(time_type(step_size/2));
+  Interval<R> hh(step_size/2);
   
   const Matrix<R>& A=avf.A();
   const Vector<R>& b=avf.b();
   
   // No change of step size for affine integrator
-  iz=this->integration_step(avf,iz,const_cast<time_type&>(hc));
+  iz=this->_integration_step(avf,iz,hc);
   
   /* Use centre c, generators G and t*(Ac+b), and error (exp(At)-I)Ge+inv(A)(exp(At)-I-At)(Ac+b)
    * 

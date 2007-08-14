@@ -37,6 +37,7 @@
 #include "system/affine_map.h"
 #include "system/affine_vector_field.h"
 #include "system/constraint_hybrid_automaton.h"
+#include "output/logging.h"
 
 #include "test.h"
 
@@ -45,11 +46,13 @@ using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
 using namespace Ariadne::System;
+using namespace Ariadne::Output;
 using namespace std;
 
 template<class R> int test_constraint_hybrid_automaton();
   
 int main() {
+  set_system_verbosity(0);
   return test_constraint_hybrid_automaton<Float>();
 }
 
@@ -57,8 +60,6 @@ template<class R>
 int test_constraint_hybrid_automaton() 
 {
   Matrix<R> A("[2,1;1,1]");
-  cout << A << "\n\n";
-
 
   AffineVectorField<R> dynamic(Matrix<R>("[-0.25,-1.00;1.00,-0.25]"),Vector<R>("[0.00,0.00]"));
   cout << "dynamic=" << dynamic << endl;
@@ -71,14 +72,22 @@ int test_constraint_hybrid_automaton()
   LinearConstraint<R> guard(Vector<R>("[0,1]"),Geometry::greater,R(1));
 
   ConstraintHybridAutomaton<R> automaton("Affine test automaton");
-  id_type mode1_id=0;
-  id_type mode2_id=1;
-  const ConstraintDiscreteMode<R>& mode1=automaton.new_mode(mode1_id,dynamic,constraint1);
-  const ConstraintDiscreteMode<R>& mode2=automaton.new_mode(mode2_id,dynamic,constraint2);
+  id_type mode1_id=1;
+  id_type mode2_id=2;
+  id_type event0_id=1;
+  id_type event3_id=4;
+  const ConstraintDiscreteMode<R>& mode1=automaton.new_mode(mode1_id,dynamic);
+  const ConstraintDiscreteMode<R>& mode2=automaton.new_mode(mode2_id,dynamic);
+  cout << automaton << endl;
+  automaton.new_invariant(event0_id,mode1_id,constraint1);
+  automaton.new_invariant(event3_id,mode1_id,constraint2);
+  automaton.new_invariant(event0_id,mode2_id,constraint2);
+  cout << automaton << endl;
   id_type event1_id=2;
   id_type event2_id=3;
   const ConstraintDiscreteTransition<R>& transition1=automaton.new_unforced_transition(event1_id,mode1_id,mode1_id,reset,activation);
   const ConstraintDiscreteTransition<R>& transition2=automaton.new_forced_transition(event2_id,mode1_id,mode1_id,reset,guard);
+  cout << automaton << endl << endl;
   
   cout << mode1  <<  "\n" << mode2 << "\n" << transition1 << "\n" << transition2 << endl;
   cout << automaton << endl;

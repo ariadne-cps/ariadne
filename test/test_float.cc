@@ -364,11 +364,11 @@ test_arithmetic()
   cout << div_down(o,t) << " <= 1/3 <= " << div_up(o,t) << endl;
   assert(div_down(o,t)<div_up(o,t));
   cout << o/t << endl;
-  assert(contains_value(iao,o));
+  assert(encloses(iao,o));
   Interval<R> iaz=iao-io;
   Interval<R> iz=R(1)-R(1);
   cout << iaz << endl;
-  assert(contains_value(iaz,z)); 
+  assert(encloses(iaz,z)); 
   assert(!bool(!subset(iz,iaz)));
   cout << endl;
 

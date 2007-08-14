@@ -57,8 +57,20 @@
 
 namespace Ariadne {
   
-namespace Evaluation { static int& verbosity = applicator_verbosity; }
+namespace Evaluation { 
+static int& verbosity = applicator_verbosity; 
+static const double DEFAULT_MAXIMUM_BASIC_SET_RADIUS=0.25;
+static const double DEFAULT_GRID_SIZE=0.125;
+}
 
+
+
+template<class R>
+Evaluation::Applicator<R>::Applicator() 
+  : _maximum_basic_set_radius(DEFAULT_MAXIMUM_BASIC_SET_RADIUS),
+    _grid_size(DEFAULT_GRID_SIZE)
+{
+}
 
 template<class R>
 Evaluation::Applicator<R>::Applicator(const R& mbsr, const R& gs) 
@@ -230,8 +242,8 @@ Evaluation::Applicator<R>::evaluate(const System::MapInterface<R>& f, const Geom
   }
   
   // FIXME: This is incorrect; need over-approximations
-  Geometry::Point<R> nc=Geometry::approximate_value(img_centre);
-  LinearAlgebra::Matrix<R> ng=approximate_value(img_generators);
+  Geometry::Point<R> nc=Geometry::midpoint(img_centre);
+  LinearAlgebra::Matrix<R> ng=midpoint(img_generators);
   
   Geometry::Zonotope<R> result(nc,ng);
   ARIADNE_LOG(8,"  f(z)="<<result<<"\n");

@@ -40,19 +40,29 @@ template<class R>
 void
 LinearAlgebra::Matrix<R>::instantiate() 
 {
-  typedef typename Numeric::traits<R>::arithmetic_type I;
+  typedef typename Numeric::traits<R>::interval_type I;
   typedef typename Numeric::traits<R>::number_type X;
   Matrix<R>* A=0;
-  Vector<X>* v=0;
+  Matrix<I>* iA=0;
+  Vector<R>* v=0;
+  Vector<X>* nv=0;
   Vector<I>* iv=0;
   sup_norm(*A);
   log_norm(*A);
   singular(*A);
   determinant(*A);
   inverse(*A);
-  solve(*A,*v);
+  solve(*A,*nv);
   solve(*A,*iv);
   transpose(*A);
+  direct_sum(*A,*A);
+  concatenate(*A,*A);
+  concatenate_rows(*A,*A);
+  concatenate_rows(*A,*v);
+  concatenate_columns(*A,*A);
+  concatenate_columns(*A,*v);
+  
+  schulz_inverse(*iA);
 }
 
 
@@ -129,6 +139,67 @@ LinearAlgebra::determinant(const Matrix<R>& A)
 
 template<class R>
 LinearAlgebra::Matrix<R>
+LinearAlgebra::direct_sum(const Matrix<R>& A1, const Matrix<R>& A2) {
+  return concatenate(A1,A2);
+}
+
+
+template<class R>
+LinearAlgebra::Matrix<R>
+LinearAlgebra::concatenate(const Matrix<R>& A1, const Matrix<R>& A2) {
+  LinearAlgebra::Matrix<R> result(A1.number_of_rows()+A2.number_of_rows(),A1.number_of_columns()+A2.number_of_columns());
+  for(size_type j=0; j!=A1.number_of_columns(); ++j) {
+    for(size_type i=0; i!=A1.number_of_rows(); ++i) {
+      result(i,j)=A1(i,j);
+    }
+  }
+  for(size_type j=0; j!=A2.number_of_columns(); ++j) {
+    for(size_type i=0; i!=A2.number_of_rows(); ++i) {
+      result(i+A1.number_of_rows(),j+A1.number_of_columns())=A2(i,j);
+    }
+  }
+  return result;
+}
+
+
+template<class R>
+LinearAlgebra::Matrix<R>
+LinearAlgebra::concatenate_rows(const Matrix<R>& A, const Vector<R>& v) {
+  if(!(A.number_of_columns()==v.size())) { 
+    ARIADNE_THROW(IncompatibleSizes,"Matrix concatenate_rows(Matrix,Matrix)","A="<<A<<", v="<<v); 
+  }
+  LinearAlgebra::Matrix<R> result(A.number_of_rows()+1u,A.number_of_columns());
+  for(size_type j=0; j!=A.number_of_columns(); ++j) {
+    for(size_type i=0; i!=A.number_of_rows(); ++i) {
+      result(i,j)=A(i,j);
+    }
+    result(A.number_of_rows(),j)=v(j);
+  }
+  return result;
+}
+
+
+template<class R>
+LinearAlgebra::Matrix<R>
+LinearAlgebra::concatenate_rows(const Matrix<R>& A1, const Matrix<R>& A2) {
+  if(!(A1.number_of_columns()==A2.number_of_columns())) { 
+    ARIADNE_THROW(IncompatibleSizes,"Matrix concatenate_rows(Matrix,Matrix)","A1="<<A1<<", A2="<<A2); 
+  }
+  LinearAlgebra::Matrix<R> result(A1.number_of_rows()+A2.number_of_rows(),A1.number_of_columns());
+  for(size_type j=0; j!=result.number_of_columns(); ++j) {
+    for(size_type i=0; i!=A1.number_of_rows(); ++i) {
+      result(i,j)=A1(i,j);
+    }
+    for(size_type i=0; i!=A2.number_of_rows(); ++i) {
+      result(i+A1.number_of_rows(),j)=A2(i,j);
+    }
+  }
+  return result;
+}
+
+
+template<class R>
+LinearAlgebra::Matrix<R>
 LinearAlgebra::concatenate_columns(const Matrix<R>& A1, const Matrix<R>& A2) {
   if(!(A1.number_of_rows()==A2.number_of_rows())) { 
     ARIADNE_THROW(IncompatibleSizes,"Matrix concatenate_columns(Matrix,Matrix)","A1="<<A1<<", A2="<<A2); 
@@ -141,6 +212,23 @@ LinearAlgebra::concatenate_columns(const Matrix<R>& A1, const Matrix<R>& A2) {
     for(size_type j=0; j!=A2.number_of_columns(); ++j) {
       result(i,j+A1.number_of_columns())=A2(i,j);
     }
+  }
+  return result;
+}
+
+
+template<class R>
+LinearAlgebra::Matrix<R>
+LinearAlgebra::concatenate_columns(const Matrix<R>& A, const Vector<R>& v) {
+  if(!(A.number_of_rows()==v.size())) {
+    ARIADNE_THROW(IncompatibleSizes,"Matrix concatenate_columns(Matrix,Vector)","A="<<A<<", v="<<v); 
+  }
+  LinearAlgebra::Matrix<R> result(A.number_of_rows(),A.number_of_columns()+1u);
+  for(size_type i=0; i!=A.number_of_rows(); ++i) {
+    for(size_type j=0; j!=A.number_of_columns(); ++j) {
+      result(i,j)=A(i,j);
+    }
+    result(i,A.number_of_columns())=v(i);
   }
   return result;
 }
@@ -161,6 +249,15 @@ LinearAlgebra::solve(const Matrix<R1>& A, const Vector<R2>& v)
 {
   return inverse(A)*v;
 }
+
+
+template<class R>
+LinearAlgebra::Matrix< Numeric::Interval<R> >
+LinearAlgebra::schulz_inverse(const Matrix< Numeric::Interval<R> >& A) 
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
 
 
 template<class R>

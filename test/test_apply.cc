@@ -137,28 +137,19 @@ test_apply()
 
   epsfstream eps;
   eps.open("test_apply-1.eps",eps_bounding_box);
-  eps.set_fill_colour("green");
-  eps<<list_reach_set;
-  eps.set_fill_colour("blue");
-  eps<<grid_initial_set;
-  eps.set_fill_colour("green");
-  eps<<grid_image_set;
-  eps.set_fill_colour("red");
-  eps<<grid_inverse_image_set;
-  eps.set_fill_colour("yellow");
-  eps<<grid_preimage_set;
-  eps.set_fill_colour("magenta");
-  eps<<list_reach_set;
+  eps << fill_colour(green) << list_reach_set;
+  eps << fill_colour(blue) << grid_initial_set;
+  eps << fill_colour(green) << grid_image_set;
+  eps << fill_colour(red) << grid_inverse_image_set;
+  eps << fill_colour(yellow) << grid_preimage_set;
+  eps << fill_colour(magenta) << list_reach_set;
   eps.close();
 
   eps.open("test_apply-2.eps",eps_bounding_box);
-  eps.set_line_style(true);
-  eps.set_fill_colour("green");
-  eps<<grid_image_set;
-  eps.set_fill_colour("red");
-  eps<<apply.preimage(henon,grid_image_set,grid_bounding_set);
-  eps.set_fill_colour("blue");
-  eps<<grid_initial_set;
+  eps << line_style(true);
+  eps << fill_colour(green) << grid_image_set;
+  eps << fill_colour(red) << apply.preimage(henon,grid_image_set,grid_bounding_set);
+  eps << fill_colour(blue) << grid_initial_set;
   eps.close();
 
 
@@ -179,14 +170,10 @@ test_apply()
   cout << "inverse_image_set=" << *inverse_image_set_ptr << endl;
 
   eps.open("test_apply-3.eps",eps_bounding_box);
-  eps.set_fill_colour("blue");
-  eps<<initial_set;
-  eps.set_fill_colour("green");
-  eps<<*image_set_ptr;
-  eps.set_fill_colour("red");
-  eps<<*inverse_image_set_ptr;
-  eps.set_fill_colour("yellow");
-  eps<<*preimage_set_ptr;
+  eps << fill_colour(blue) << initial_set;
+  eps << fill_colour(green) << *image_set_ptr;
+  eps << fill_colour(red) << *inverse_image_set_ptr;
+  eps << fill_colour(yellow) << *preimage_set_ptr;
   eps.close();
   
 
@@ -200,15 +187,10 @@ test_apply()
   cout << "chainreach_set=" << *chainreach_set_ptr << endl;
 
   eps.open("test_apply-4.eps",eps_bounding_box);
-  eps.set_fill_colour("cyan");
-  eps << bounding_set;
-  eps.set_line_style(false);
-  eps.set_fill_colour("green");
-  eps << *chainreach_set_ptr;
-  eps.set_line_style(true);
-  eps.set_fill_colour("magenta");
-  eps << *reach_set_ptr;
-  eps.set_fill_style(false);
+  eps << fill_colour(cyan) << bounding_set;
+  eps << line_style(false) << fill_colour(green) << *chainreach_set_ptr;
+  eps << line_style(true) << fill_colour(magenta) << *reach_set_ptr;
+  eps << fill_colour(transparant);
   eps << initial_set;
   eps << bounding_set;
   eps.close();
@@ -220,11 +202,8 @@ test_apply()
   cout << "viability_kernel=" << *viability_kernel_ptr << endl;
 
   eps.open("test_apply-5.eps",eps_bounding_box);
-  eps.set_fill_style(true);
-  eps.set_fill_colour("cyan");
-  eps << bounding_set;
-  eps.set_fill_colour("magenta");
-  eps << *viability_kernel_ptr;
+  eps << fill_colour(cyan) << bounding_set;
+  eps << fill_colour(magenta) << *viability_kernel_ptr;
   eps.close();
 
   return 0;

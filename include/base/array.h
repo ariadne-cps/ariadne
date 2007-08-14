@@ -151,7 +151,7 @@ namespace Ariadne {
     
     
     
-    
+  /*! \brief Specialisation of array template to hold bit values. */
     template<> class array<bool> {
      public:
       typedef std::vector<bool>::value_type value_type;

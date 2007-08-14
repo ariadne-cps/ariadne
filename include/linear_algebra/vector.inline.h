@@ -437,27 +437,54 @@ LinearAlgebra::unit_vector(size_type n, size_type i)
 
 template<class R> inline 
 LinearAlgebra::Vector<R>
-LinearAlgebra::approximate_value(const Vector< Numeric::Interval<R> >& iv) 
+LinearAlgebra::midpoint(const Vector< Numeric::Interval<R> >& iv) 
 {
   Vector<R> result(iv.size());
   for(size_type i=0; i!=iv.size(); ++i) {
-    result(i) = approximate_value(iv(i));
+    result(i) = midpoint(iv(i));
   }
   return result;
 }
 
 
+
 template<class R> inline
 bool
-LinearAlgebra::contains_value(const Vector< Numeric::Interval<R> >& iv,const Vector<R>& v) 
+LinearAlgebra::encloses(const Vector< Numeric::Interval<R> >& iv, const Vector<R>& v) 
 {
   ARIADNE_CHECK_EQUAL_SIZES(iv,v,"bool contains_value(Vector<Interval>,Vector<Float>)");
   for(size_type i=0; i!=v.size(); ++i) {
-    if(!Numeric::contains_value(iv(i),v(i))) {
+    if(!Numeric::encloses(iv(i),v(i))) {
       return false;
     }
   }
   return true;
+}
+
+
+template<class R> inline
+bool
+LinearAlgebra::refines(const Vector< Numeric::Interval<R> >& iv1, const  Vector< Numeric::Interval<R> >& iv2) 
+{
+  ARIADNE_CHECK_EQUAL_SIZES(iv1,iv2,"bool refines(Vector<Interval>,Vector<Interval>)");
+  for(size_type i=0; i!=iv1.size(); ++i) {
+    if(!Numeric::refines(iv1(i),iv2(i))) {
+      return false;
+    }
+  }
+  return true;
+}
+
+
+template<class R1,class R2> inline 
+LinearAlgebra::Vector<R1>
+LinearAlgebra::approximation(const Vector<R2>& iv) 
+{
+  Vector<R1> result(iv.size());
+  for(size_type i=0; i!=iv.size(); ++i) {
+    result(i)=Numeric::conv_approx<R1>(iv(i));
+  }
+  return result;
 }
 
 
@@ -636,6 +663,14 @@ template<class R> inline
 LinearAlgebra::Vector<R> 
 LinearAlgebra::direct_sum(const Vector<R>& v1, const Vector<R>& v2) 
 {
+  return concatenate(v1,v2);
+}
+
+
+template<class R> inline 
+LinearAlgebra::Vector<R> 
+LinearAlgebra::concatenate(const Vector<R>& v1, const Vector<R>& v2) 
+{
   Vector<R> result(v1.size()+v2.size());
   for(size_type i=0; i!=v1.size(); ++i) {
     result(i)=v1(i);
@@ -643,6 +678,18 @@ LinearAlgebra::direct_sum(const Vector<R>& v1, const Vector<R>& v2)
   for(size_type i=0; i!=v2.size(); ++i) {
     result(i+v1.size())=v2(i);
   }
+  return result;
+}
+
+template<class R> inline 
+LinearAlgebra::Vector<R> 
+LinearAlgebra::concatenate(const Vector<R>& v, const R& s) 
+{
+  Vector<R> result(v.size()+1);
+  for(size_type i=0; i!=v.size(); ++i) {
+    result(i)=v(i);
+  }
+  result(v.size())=s;
   return result;
 }
 

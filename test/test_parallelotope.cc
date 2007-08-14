@@ -85,7 +85,7 @@ test_parallelotope()
   }
   
   cout << "p2.volume()=" << p2.volume() << endl;
-  assert(contains_value(Interval<R>(0.99,1.01),p2.volume()));
+  assert(encloses(Interval<R>(0.99,1.01),p2.volume()));
   
   Zonotope<R>& z2=p2;
   cout << "disjoint(r1,z2)=" << flush; cout << disjoint(r1,z2) << endl;
@@ -134,16 +134,11 @@ test_parallelotope()
   GridCellListSet<R> uap3=inner_approximation(p3,gr3);
   epsfstream eps;
   eps.open("test_parallelotope.eps",bbox3,0,1);
-  eps.set_fill_colour("white");
-  eps << bbox3;
-  eps.set_fill_colour("red");
-  eps << oap3;
-  eps.set_fill_colour("green");
-  eps << p3;
-  eps.set_fill_colour("blue");
-  eps << uap3;
-  eps.set_fill_colour("yellow");
-  eps << r5 << r6;
+  eps << fill_colour(white) << bbox3;
+  eps << fill_colour(red) << oap3;
+  eps << fill_colour(green) << p3;
+  eps << fill_colour(blue) << uap3;
+  eps << fill_colour(yellow) << r5 << r6;
   eps.close();
   
   return 0;

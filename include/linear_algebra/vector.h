@@ -149,6 +149,10 @@ namespace Ariadne {
       friend R LinearAlgebra::norm<>(const Vector<R>& v);
       /*! \brief The direct sum (concatentation) of v1 and v2. */
       friend Vector<R> direct_sum<R>(const Vector<R>& v1, const Vector<R>& v2);
+      /*! \brief The concatentation of v1 and v2. */
+      friend Vector<R> concatenate<R>(const Vector<R>& v1, const Vector<R>& v2);
+      /*! \brief The concatentation of v and s. */
+      friend Vector<R> concatenate<R>(const Vector<R>& v1, R& s);
 #endif 
 
       /*! \brief Write to an output stream . */
@@ -211,8 +215,11 @@ namespace Ariadne {
   template<class R> Vector<R> unit_vector(size_type n, size_type i);
 	
 	
-  template<class R> Vector<R> approximate_value(const Vector< Numeric::Interval<R> >& iv); 
-  template<class R> bool contains_value(const Vector< Numeric::Interval<R> >& iv,const Vector<R>& v); 
+  template<class R> Vector<R> midpoint(const Vector< Numeric::Interval<R> >& iv); 
+  template<class R> bool encloses(const Vector< Numeric::Interval<R> >& iv,const Vector<R>& v); 
+  template<class R> bool refines(const Vector< Numeric::Interval<R> >& iv1, const Vector< Numeric::Interval<R> >& iv2); 
+
+  template<class R1, class R2> Vector<R1> approximation(const Vector<R2>& v);
 
   template<class R> std::ostream& operator<<(std::ostream& os, const Vector<R>& v);
   template<class R> std::istream& operator>>(std::istream& is, Vector<R>& v);
@@ -242,6 +249,8 @@ namespace Ariadne {
     template<class R> R sup_norm(const Vector<R>& v);
     template<class R> R norm(const Vector<R>& v);
 
+    template<class R> Vector<R> concatenate(const Vector<R>& v1, const Vector<R>& v2);
+    template<class R> Vector<R> concatenate(const Vector<R>& v, const R& s);
   }
 }
 

@@ -53,7 +53,7 @@ namespace Ariadne {
       if(pt.dimension() > 0) {
         os << pt[0] ;
         for (size_type i=1; i<pt.dimension(); i++) {
-          os << ", " << pt[i];
+          os << "," << pt[i];
         }
       }
       os << ")" ;

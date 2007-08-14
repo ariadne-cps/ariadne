@@ -51,8 +51,7 @@
 #include "../geometry/polyhedral_set.h"
 #include "../geometry/partition_tree_set.h"
 #include "../system/affine_map.h"
-
-#define SCALE_DIMENSION 3.5 
+#include "../output/colour.h"
 
 // FIXME: This should not be necessary
 namespace Ariadne {
@@ -139,6 +138,7 @@ namespace Ariadne {
       const Point2d& operator[](dimension_type i) const { return _vertices[i]; }
       Point2d& operator[](dimension_type i) { return _vertices[i]; }
       void new_vertex(const Point2d& pt) { _vertices.push_back(pt); }
+      Point2d baricentre() const;
       Polygon2d& reduce();
      private:
       double slope(const Point2d& pt1, const Point2d& pt2) {
@@ -146,28 +146,6 @@ namespace Ariadne {
     };
 
 
-    template<class R1, class R2>
-    Geometry::Point<R1> 
-    approximate_point(const Geometry::Point<R2>& pt) 
-    {
-      Geometry::Point<R1> result(pt.dimension());
-      for(size_type i=0; i!= result.dimension(); ++i) {
-        result[i]=Numeric::conv_approx<R1>(pt[i]);
-      }
-      return result;
-    }
-    
-    template<class R1, class R2>
-    Geometry::PointList<R1> 
-    approximate_point_list(const Geometry::PointList<R2>& ptl) 
-    {
-      Geometry::PointList<R1> result(ptl.dimension(),ptl.size());
-      for(size_type i=0; i!= ptl.size(); ++i) {
-        result.push_back(approximate_point<R1>(ptl[i]));
-      }
-      return result;
-    }
-    
 
     class PlanarProjectionMap;
     std::ostream& operator<<(std::ostream&, const PlanarProjectionMap&); 
@@ -175,48 +153,13 @@ namespace Ariadne {
     class PlanarProjectionMap
     {
      public:
-      PlanarProjectionMap() : _d(2), _i(0), _j(1) { }
-      PlanarProjectionMap(dimension_type d, dimension_type i, dimension_type j)
-        : _d(d), _i(i), _j(j) 
-      { 
-        if(i>=d || j>=d) { 
-          using Geometry::InvalidCoordinate; 
-          ARIADNE_THROW(InvalidCoordinate,"PlanarProjectionMap::PlanarProjectionMap(dimension_type d, dimension_type i, dimension_type j)",
-                        "d="<<d<<", i="<<i<<", j="<<j); }
-      }
-      template<class R> Point2d operator() (const Geometry::Point<R>& pt) const {
-        Point2d result(2); 
-        ARIADNE_CHECK_DIMENSION(pt,_d,"Point2d PlanarProjectionMap::operator()(Point<R> pt)");
-        result[0]=Numeric::conv_approx<double>(pt[_i]); 
-        result[1]=Numeric::conv_approx<double>(pt[_j]); 
-        return result;
-      }
-      template<class R> Polygon2d operator() (const Geometry::PointList<R>& ptl) const {
-        Polygon2d result(2);
-        for(size_type i=0; i!=ptl.size(); ++i) { 
-          result.new_vertex(this->operator()(ptl[i]));
-        }
-        result.reduce();
-        return result;
-      }
-      template<class E> Rectangle2d operator() (const Geometry::RectangleExpression<E>& re) const {
-        Rectangle2d result(2); 
-        const E& r=re();
-        ARIADNE_CHECK_DIMENSION(r,this->_d,"Rectangle2d PlanarProjectionMap::operator()(Rectangle<R> r)");
-        result.lower_bound(0)=Numeric::conv_approx<double>(r.lower_bound(this->_i));
-        result.upper_bound(0)=Numeric::conv_approx<double>(r.upper_bound(this->_i));
-        result.lower_bound(1)=Numeric::conv_approx<double>(r.lower_bound(this->_j));
-        result.upper_bound(1)=Numeric::conv_approx<double>(r.upper_bound(this->_j));
-        return result;
-      }
-      template<class RC,class RG> Polygon2d operator() (const Geometry::Zonotope<RC,RG>& z) const {
-        Geometry::Point<Numeric::Rational> c=approximate_value(z.centre());
-        LinearAlgebra::Matrix<Numeric::Rational> G=approximate_value(z.generators());
-        return this->operator()(Geometry::Zonotope<Numeric::Rational>(c,G).vertices());
-      }
-      template<class R> Polygon2d operator() (const Geometry::Polytope<R>& p) const {
-        return this->operator()(p.vertices());
-      }
+      PlanarProjectionMap();
+      PlanarProjectionMap(dimension_type d, dimension_type i, dimension_type j);
+      template<class R> Point2d operator() (const Geometry::Point<R>& pt) const;
+      template<class R> Polygon2d operator() (const Geometry::PointList<R>& ptl) const;
+      template<class E> Rectangle2d operator() (const Geometry::RectangleExpression<E>& re) const;
+      template<class RC,class RG> Polygon2d operator() (const Geometry::Zonotope<RC,RG>& z) const;
+      template<class R> Polygon2d operator() (const Geometry::Polytope<R>& p) const;
      private:
       friend std::ostream& operator<<(std::ostream&,const PlanarProjectionMap&);
      private:
@@ -226,30 +169,14 @@ namespace Ariadne {
     };
          
 
-    Point2d baricentre(const Polygon2d& vertices);
+ 
+    class LineStyle { bool _style; public: explicit LineStyle(bool ls) : _style(ls) { } operator bool() const { return this->_style; } };
+    class FillColour : public Colour { public: FillColour(const Colour& fc) : Colour(fc) { } };
 
-    class LineWidth {
-     public:
-      explicit LineWidth(double x) : _value(x) { }
-      double value() const { return this->_value; }
-     private:
-      double _value;
-    };
-
-    LineWidth line_width(double x);
-  
-    class FillColour {
-     public:
-      explicit FillColour(std::string x) : _value(x) { }
-      std::string value() const { return this->_value; }
-     private:
-      std::string _value;
-    };
-
-    FillColour fill_colour(double x);
-        
-
+    inline LineStyle line_style(bool s) { return LineStyle(s); }
+    inline FillColour fill_colour(const Colour& c) { return FillColour(c); }
     
+    /*!\brief A stream for Encapsulated PostScript graphical output. */
     class epsfstream
       : private std::ofstream 
     {
@@ -257,12 +184,13 @@ namespace Ariadne {
       static const uint xBBoxSide;
       static const uint yBBoxSide;
       static const double linewidth;
+      static const double scale_dimension;
       
       PlanarProjectionMap p_map;
       Rectangle2d bbox;
      public:
-      std::string line_colour;
-      std::string fill_colour;
+      Colour line_colour;
+      Colour fill_colour;
       bool line_style;
       bool fill_style;
      public:
@@ -270,6 +198,8 @@ namespace Ariadne {
 
       epsfstream();
       
+      std::ostream& ostream();
+
       template<class R>
       void open(const char* fn, const Geometry::Rectangle<R>& bbox);
       
@@ -301,11 +231,19 @@ namespace Ariadne {
       void set_fill_style(bool fs) {
         this->fill_style=fs; }
     
-      void set_pen_colour(const char* pc) {
+      void set_pen_colour(const Colour& pc) {
         this->line_colour=pc; }
     
-      void set_fill_colour(const char* fc) {
+      void set_fill_colour(const Colour& fc) {
         this->fill_colour=fc; }
+
+      // FIXME: This is a hack to preserve the python interface
+      void set_pen_colour(const char* pc) {
+        this->line_colour=Colour(pc,0,0,0); }
+    
+      // FIXME: This is a hack to preserve the python interface
+      void set_fill_colour(const char* fc) {
+        this->fill_colour=Colour(fc,0,0,0); }
 
       void trace(const Point2d& pt);
       void trace(const Rectangle2d& r);
@@ -330,17 +268,23 @@ namespace Ariadne {
       epsfstream(const epsfstream&); // no copy constructor
     };
     
+    inline
+    std::ostream& epsfstream::ostream() { 
+      return static_cast<std::ostream&>(*this); 
+    }
+
     inline 
     epsfstream& operator<<(epsfstream& eps, std::ostream&(*f)(std::ostream&) ) {
       std::ostream& os(eps); os << f; return eps; 
     }
       
 
-    epsfstream& operator<<(epsfstream&, const LineWidth&); 
+    epsfstream& operator<<(epsfstream&, const LineStyle&); 
     epsfstream& operator<<(epsfstream&, const FillColour&);
 
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Point<R>&); 
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Rectangle<R>&);
+    template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Parallelotope<R>&);
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Zonotope<R,R>&);
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Zonotope<Numeric::Interval<R>,R>&);
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::Zonotope< Numeric::Interval<R>,Numeric::Interval<R> >&);
@@ -349,6 +293,7 @@ namespace Ariadne {
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::RectangularSet<R>&);
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::PolyhedralSet<R>&);
     template<class BS> epsfstream& operator<<(epsfstream&, const Geometry::ListSet<BS>&); 
+    template<class R> epsfstream& operator<<(epsfstream&, const Geometry::GridCell<R>&); 
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::GridCellListSet<R>&); 
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::GridMaskSet<R>&); 
     template<class R> epsfstream& operator<<(epsfstream&, const Geometry::PartitionTreeSet<R>&); 
@@ -359,63 +304,12 @@ namespace Ariadne {
 
     
 
-    template<class R>
-    void 
-    epsfstream::open(const char* fn, const Geometry::Rectangle<R>& bbox)
-    {
-      PlanarProjectionMap p_map(bbox.dimension(),0,1);
-      this->open(fn,p_map(bbox),p_map);
-    }
-
-    template<class R>
-    void 
-    epsfstream::open(const char* fn, const Geometry::Rectangle<R>& bbox,
-                     unsigned int ix,  unsigned int iy)
-    {
-      PlanarProjectionMap p_map(bbox.dimension(),ix,iy);
-      this->open(fn,p_map(bbox),p_map);
-    }
-
-    template<class R>
-    void 
-    epsfstream::open(const char* fn, const Geometry::Rectangle<R>& bbox,
-                     const PlanarProjectionMap& p_map)
-    {
-      this->open(fn,p_map(bbox),p_map);
-    }
-
-
-    inline 
-    FillColour 
-    fill_colour(const std::string& x) 
-    {
-      return FillColour(x);
-    }
-
-    inline 
-    LineWidth 
-    line_width(double x) 
-    {
-      return LineWidth(x);
-    }
-
-    inline 
-    LineWidth 
-    line_style(bool b) 
-    {
-      return LineWidth(double(b));
-    }
 
     inline
     epsfstream&
-    operator<<(epsfstream& eps, const LineWidth& lw)
+    operator<<(epsfstream& eps, const LineStyle& ls)
     {
-      if(lw.value()==0.0) {
-        eps.set_line_style(false);
-      } else {
-        eps.set_line_style(true);
-        //eps.set_line_width(lw.value());
-      }
+      eps.set_line_style(ls);
       return eps;
     }
 
@@ -424,259 +318,379 @@ namespace Ariadne {
     epsfstream&
     operator<<(epsfstream& eps, const FillColour& fc)
     {
-      if(fc.value()=="none" || fc.value()=="transparant") {
+      if(fc.transparant()) {
         eps.set_fill_style(false);
       } else {
         eps.set_fill_style(true);
-        eps.set_fill_colour(fc.value().c_str());
+        eps.set_fill_colour(fc);
       }
       return eps;
     }
 
-
-    template<class R> inline
-    epsfstream&
-    operator<<(epsfstream& eps, const Geometry::Point<R>& pt) 
+  /*
+    template<class R1, class R2>
+    Geometry::Point<R1> 
+    approximate_point(const Geometry::Point<R2>& pt) 
     {
-      Point2d dpt=eps.projection_map()(pt);
-      eps.draw(dpt);
-      return eps;
-    }
-
-    template<class R> inline
-    epsfstream&
-    operator<<(epsfstream& eps, const Geometry::Rectangle<R>& r) 
-    {
-      Rectangle2d dr=eps.projection_map()(r);
-      eps.draw(dr);
-      return eps;
-    }
-    
-    template<class R> inline
-    epsfstream&
-    operator<<(epsfstream& eps, const Geometry::RectangularSet<R>& rs)
-    {
-      return eps << Geometry::Rectangle<R>(rs);
-    }
-
-    
-    template<class R> inline
-    epsfstream&
-    operator<<(epsfstream& eps, const Geometry::Zonotope< Numeric::Interval<R>,Numeric::Interval<R> >& iz)
-    { 
-      Geometry::Zonotope<Numeric::Interval<R>,R> ez=Geometry::over_approximation(iz);
-      Geometry::Zonotope<R> z=Geometry::over_approximation(ez);
-      Geometry::Zonotope<Numeric::Rational> qz(z);
-      Polygon2d vertices=eps.projection_map()(qz);      
-      eps.draw(vertices);
-      return eps;
-   }
-       
-    template<class R> inline
-    epsfstream&
-    operator<<(epsfstream& eps, const Geometry::Zonotope<Numeric::Interval<R>,R>& ez)
-    { 
-      Geometry::Zonotope<R> z=Geometry::over_approximation(ez);
-      Geometry::Zonotope<Numeric::Rational> qz(z);
-      Polygon2d vertices=eps.projection_map()(qz);      
-      eps.draw(vertices);
-      return eps;
-    }
-       
-    template<class R> inline
-    epsfstream&
-    operator<<(epsfstream& eps, const Geometry::Zonotope<R>& z)
-    { 
-      Geometry::Zonotope<Numeric::Rational> qz(z);
-      Polygon2d vertices=eps.projection_map()(qz);      
-      eps.draw(vertices);
-      return eps;
-    }
-       
-    template<class R> inline
-    epsfstream&
-    operator<<(epsfstream& eps, const Geometry::Parallelotope<R>& p)
-    {
-      const Geometry::Zonotope<R>& z=p;
-      return eps << z;
-    }
-       
-    template<class R> inline
-    epsfstream&
-    operator<<(epsfstream& eps, const Geometry::Polytope<R>& p)
-    {
-      eps.draw(eps.projection_map()(p.vertices()));
-      return eps;
-    }
-    
-    template<class R> inline
-    epsfstream&
-    operator<<(epsfstream& eps, const Geometry::Polyhedron<R>& p)
-    {
-      return eps << Geometry::Polytope<Numeric::Rational>(p);
-    }
-
-    template<class R> inline
-    epsfstream&
-    operator<<(epsfstream& eps, const Geometry::PolyhedralSet<R>& ps)
-    {
-      return eps << Geometry::Polyhedron<R>(ps);
-    }
-
-    
-    template<class BS> inline
-    epsfstream&
-    operator<<(epsfstream& eps, const Geometry::ListSet<BS>& ds)
-    {
-      typedef typename Geometry::ListSet<BS>::const_iterator const_iterator;
-      if(eps.fill_style) {
-        // draw without lines
-        bool line_style=eps.line_style; 
-        eps.line_style=false;
-        for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
-          eps << *set_iter;
-        }
-        eps.line_style=line_style;
+      Geometry::Point<R1> result(pt.dimension());
+      for(size_type i=0; i!= result.dimension(); ++i) {
+        result[i]=Numeric::conv_approx<R1>(pt[i]);
       }
-      if(eps.line_style) {
-        bool fill_style=eps.fill_style; 
-        eps.fill_style=false;
-        for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
-          eps << *set_iter;
-        }
-        eps.fill_style=fill_style;
+      return result;
+    }
+    
+    template<class R1, class R2>
+    Geometry::PointList<R1> 
+    approximate_point_list(const Geometry::PointList<R2>& ptl) 
+    {
+      Geometry::PointList<R1> result(ptl.dimension(),ptl.size());
+      for(size_type i=0; i!= ptl.size(); ++i) {
+        result.push_back(approximate_point<R1>(ptl[i]));
       }
-      return eps;
+      return result;
     }
-    
-
- 
-    template<class R> inline
-    epsfstream&
-    operator<<(epsfstream& eps, const Geometry::GridCell<R>& bs)
-    {
-      return eps << Geometry::Rectangle<R>(bs);
-    }
-    
-
-    template<class R> inline
-    epsfstream&
-    operator<<(epsfstream& eps, const Geometry::GridBlock<R>& bs)
-    {
-      return eps << Geometry::Rectangle<R>(bs);
-    }
-    
-
-    template<class R> inline
-    epsfstream&
-    operator<<(epsfstream& eps, const Geometry::GridCellListSet<R>& ds)
-    {
-      std::vector<Rectangle2d> rl(ds.size());
-      std::transform(ds.begin(),ds.end(),rl.begin(),eps.projection_map());
-      eps.draw(rl);
-      return eps;
-    }
-    
-
-    template<class R> inline
-    epsfstream&
-    operator<<(epsfstream& eps, const Geometry::GridMaskSet<R>& ds)
-    {
-      std::vector<Rectangle2d> rl(ds.size());
-      std::transform(ds.begin(),ds.end(),rl.begin(),eps.projection_map());
-      eps.draw(rl);
-      return eps;
-    }
-    
- 
-
-    template<class R> inline
-    epsfstream&
-    operator<<(epsfstream& eps, const Geometry::PartitionTreeSet<R>& ds)
-    {
-      std::vector<Rectangle2d> rl(ds.size());
-      std::transform(ds.begin(),ds.end(),rl.begin(),eps.projection_map());
-      eps.draw(rl);
-      return eps;
-    }
-
-    template<class R> inline
-    epsfstream&
-    operator<<(epsfstream& eps, const Geometry::SetInterface<R>& set)
-    {
-      using namespace Geometry;
-      typedef Numeric::Interval<R> I;
-      
-      if(dynamic_cast<const RectangularSet<R>*>(&set)) {
-        return eps << dynamic_cast<const RectangularSet<R>&>(set);
-      } else if(dynamic_cast<const PolyhedralSet<R>*>(&set)) {
-        return eps << dynamic_cast<const PolyhedralSet<R>&>(set);
-      } else if(dynamic_cast<const ListSet< Rectangle<R> >*>(&set)) {
-        return eps << dynamic_cast<const ListSet< Rectangle<R> >&>(set);
-      } else if(dynamic_cast<const ListSet< Zonotope<R,R> >*>(&set)) {
-        return eps << dynamic_cast<const ListSet< Zonotope<R,R> >&>(set);
-      } else if(dynamic_cast<const ListSet< Zonotope<I,R> >*>(&set)) {
-        return eps << dynamic_cast<const ListSet< Zonotope<I,R> >&>(set);
-      } else if(dynamic_cast<const ListSet< Zonotope<I,I> >*>(&set)) {
-        return eps << dynamic_cast<const ListSet< Zonotope<I,I> >&>(set);
-      } else if(dynamic_cast<const GridCellListSet<R>*>(&set)) {
-        return eps << dynamic_cast<const GridCellListSet<R>&>(set);
-      } else if(dynamic_cast<const GridMaskSet<R>*>(&set)) {
-        return eps << dynamic_cast<const GridMaskSet<R>&>(set);
-      } else if(dynamic_cast<const PartitionTreeSet<R>*>(&set)) {
-        return eps << dynamic_cast<const PartitionTreeSet<R>&>(set);
-      }  else {
-        Rectangle<R> bb;
-        try {
-          bb=set.bounding_box();
-        } 
-        catch(Geometry::UnboundedSet& e) {
-          if(set.dimension()==2) {
-            Rectangle2d bbox=eps.bounding_box();
-            bb=Geometry::Rectangle<R>(2);
-            bb.set_lower_bound(0,bbox.lower_bound(0));
-            bb.set_upper_bound(0,bbox.upper_bound(0));
-            bb.set_lower_bound(1,bbox.lower_bound(1));
-            bb.set_upper_bound(1,bbox.upper_bound(1));
-          } else {
-            throw e;
-          }
-        }
-        Geometry::PartitionScheme<R> ps(bb);
-        int depth=16;
-        Geometry::PartitionTreeSet<R> pts=Geometry::outer_approximation(set,ps,depth);
-        return eps << pts;
-      }
-    }
-
-    template<class R> inline
-    epsfstream&
-    operator<<(epsfstream& eps, const Geometry::FiniteGrid<R>& fg)
-    {
-      bool fill_style=eps.fill_style;
-      if(fill_style) { eps.fill_style=false; }
-      Geometry::GridCellListSet<R> gcls(fg.grid());
-      gcls.adjoin(Geometry::GridBlock<R>(fg.grid(),fg.lattice_block()));
-      eps << gcls;
-      if(fill_style) { eps.fill_style=true; }
-      return eps;
-    }
-
-
-    template<class R> inline
-    epsfstream&
-    operator<<(epsfstream& eps, const Geometry::PartitionTree<R>& pt)
-    {
-      bool fill_style=eps.fill_style;
-      if(fill_style) { eps.fill_style=false; }
-      for(typename Geometry::PartitionTree<R>::const_iterator iter = pt.begin(); iter!=pt.end(); ++iter) {
-        eps << Geometry::Rectangle<R>(*iter);
-      }
-      if(fill_style) { eps.fill_style=true; }
-      return eps;
-    }
+  */
     
   }
+
+}
+
+
+// Begin templated code section
+
+namespace Ariadne {
+
+template<class R>
+Output::Point2d
+Output::PlanarProjectionMap::operator()(const Geometry::Point<R>& pt) const 
+{
+  Point2d result(2); 
+  ARIADNE_CHECK_DIMENSION(pt,_d,"Point2d PlanarProjectionMap::operator()(Point<R> pt)");
+  result[0]=Numeric::conv_approx<double>(pt[_i]); 
+  result[1]=Numeric::conv_approx<double>(pt[_j]); 
+  return result;
+}
+
+
+template<class R> 
+Output::Polygon2d 
+Output::PlanarProjectionMap::operator()(const Geometry::PointList<R>& ptl) const
+{
+  Polygon2d result(2);
+  for(size_type i=0; i!=ptl.size(); ++i) { 
+    result.new_vertex(this->operator()(ptl[i]));
+  }
+  result.reduce();
+  return result;
+}
+
+
+template<class E> 
+Output::Rectangle2d 
+Output::PlanarProjectionMap::operator()(const Geometry::RectangleExpression<E>& re) const 
+{
+  Rectangle2d result(2); 
+  const E& r=re();
+  ARIADNE_CHECK_DIMENSION(r,this->_d,"Rectangle2d PlanarProjectionMap::operator()(Rectangle<R> r)");
+  result.lower_bound(0)=Numeric::conv_approx<double>(r.lower_bound(this->_i));
+  result.upper_bound(0)=Numeric::conv_approx<double>(r.upper_bound(this->_i));
+  result.lower_bound(1)=Numeric::conv_approx<double>(r.lower_bound(this->_j));
+  result.upper_bound(1)=Numeric::conv_approx<double>(r.upper_bound(this->_j));
+  return result;
+}
+
+
+template<class RC,class RG> 
+Output::Polygon2d 
+Output::PlanarProjectionMap::operator() (const Geometry::Zonotope<RC,RG>& z) const 
+{
+  Geometry::Point<Numeric::Rational> c=Geometry::approximation(z.centre());
+  LinearAlgebra::Matrix<Numeric::Rational> G=LinearAlgebra::approximation<Numeric::Rational>(z.generators());
+  return this->operator()(Geometry::Zonotope<Numeric::Rational>(c,G).vertices());
+}
+
+
+template<class R> 
+Output::Polygon2d 
+Output::PlanarProjectionMap::operator() (const Geometry::Polytope<R>& p) const 
+{
+  return this->operator()(p.vertices());
+}
+
+
+
+
+template<class R>
+void 
+Output::epsfstream::open(const char* fn, const Geometry::Rectangle<R>& bbox)
+{
+  PlanarProjectionMap p_map(bbox.dimension(),0,1);
+  this->open(fn,p_map(bbox),p_map);
+}
+
+
+template<class R>
+void 
+    Output::epsfstream::open(const char* fn, const Geometry::Rectangle<R>& bbox,
+                             unsigned int ix,  unsigned int iy)
+{
+  PlanarProjectionMap p_map(bbox.dimension(),ix,iy);
+  this->open(fn,p_map(bbox),p_map);
+}
+
+
+template<class R>
+void 
+Output::epsfstream::open(const char* fn, const Geometry::Rectangle<R>& bbox,
+                         const PlanarProjectionMap& p_map)
+{
+  this->open(fn,p_map(bbox),p_map);
+}
+
+
+
+template<class R> 
+Output::epsfstream&
+Output::operator<<(epsfstream& eps, const Geometry::Point<R>& pt) 
+{
+  Point2d dpt=eps.projection_map()(pt);
+  eps.draw(dpt);
+  return eps;
+}
+
+template<class R> 
+Output::epsfstream&
+Output::operator<<(epsfstream& eps, const Geometry::Rectangle<R>& r) 
+{
+  Rectangle2d dr=eps.projection_map()(r);
+  eps.draw(dr);
+  return eps;
+}
+
+template<class R> 
+Output::epsfstream&
+Output::operator<<(epsfstream& eps, const Geometry::RectangularSet<R>& rs)
+{
+  return eps << Geometry::Rectangle<R>(rs);
+}
+
+
+template<class R> 
+Output::epsfstream&
+Output::operator<<(epsfstream& eps, const Geometry::Zonotope< Numeric::Interval<R>,Numeric::Interval<R> >& iz)
+{ 
+  Geometry::Zonotope<Numeric::Interval<R>,R> ez=Geometry::over_approximation(iz);
+  Geometry::Zonotope<R> z=Geometry::over_approximation(ez);
+  Geometry::Zonotope<Numeric::Rational> qz(z);
+  Polygon2d vertices=eps.projection_map()(qz);      
+  eps.draw(vertices);
+  return eps;
+}
+
+template<class R> 
+Output::epsfstream&
+Output::operator<<(epsfstream& eps, const Geometry::Zonotope<Numeric::Interval<R>,R>& ez)
+{ 
+  Geometry::Zonotope<R> z=Geometry::over_approximation(ez);
+  Geometry::Zonotope<Numeric::Rational> qz(z);
+  Polygon2d vertices=eps.projection_map()(qz);      
+  eps.draw(vertices);
+  return eps;
+}
+
+template<class R> 
+Output::epsfstream&
+Output::operator<<(epsfstream& eps, const Geometry::Zonotope<R>& z)
+{ 
+  Geometry::Zonotope<Numeric::Rational> qz(z);
+  Polygon2d vertices=eps.projection_map()(qz);      
+  eps.draw(vertices);
+  return eps;
+}
+
+template<class R> 
+Output::epsfstream&
+Output::operator<<(epsfstream& eps, const Geometry::Parallelotope<R>& p)
+{
+  const Geometry::Zonotope<R>& z=p;
+  return eps << z;
+}
+
+template<class R> 
+Output::epsfstream&
+Output::operator<<(epsfstream& eps, const Geometry::Polytope<R>& p)
+{
+  eps.draw(eps.projection_map()(p.vertices()));
+  return eps;
+}
+
+template<class R> 
+Output::epsfstream&
+Output::operator<<(epsfstream& eps, const Geometry::Polyhedron<R>& p)
+{
+  return eps << Geometry::Polytope<Numeric::Rational>(p);
+}
+
+template<class R> 
+Output::epsfstream&
+Output::operator<<(epsfstream& eps, const Geometry::PolyhedralSet<R>& ps)
+{
+  return eps << Geometry::Polyhedron<R>(ps);
+}
+
+
+template<class BS> 
+Output::epsfstream&
+Output::operator<<(epsfstream& eps, const Geometry::ListSet<BS>& ds)
+{
+  typedef typename Geometry::ListSet<BS>::const_iterator const_iterator;
+  if(eps.fill_style) {
+    // draw without lines
+    bool line_style=eps.line_style; 
+    eps.line_style=false;
+    for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
+      eps << *set_iter;
+    }
+    eps.line_style=line_style;
+  }
+  if(eps.line_style) {
+    bool fill_style=eps.fill_style; 
+    eps.fill_style=false;
+    for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
+      eps << *set_iter;
+    }
+    eps.fill_style=fill_style;
+  }
+  return eps;
+}
+
+
+
+template<class R> 
+Output::epsfstream&
+Output::operator<<(epsfstream& eps, const Geometry::GridCell<R>& bs)
+{
+  return eps << Geometry::Rectangle<R>(bs);
+}
+
+
+template<class R> 
+Output::epsfstream&
+Output::operator<<(epsfstream& eps, const Geometry::GridBlock<R>& bs)
+{
+  return eps << Geometry::Rectangle<R>(bs);
+}
+
+
+template<class R> 
+Output::epsfstream&
+Output::operator<<(epsfstream& eps, const Geometry::GridCellListSet<R>& ds)
+{
+  std::vector<Rectangle2d> rl(ds.size());
+  std::transform(ds.begin(),ds.end(),rl.begin(),eps.projection_map());
+  eps.draw(rl);
+  return eps;
+}
+
+
+template<class R> 
+Output::epsfstream&
+Output::operator<<(epsfstream& eps, const Geometry::GridMaskSet<R>& ds)
+{
+  std::vector<Rectangle2d> rl(ds.size());
+  std::transform(ds.begin(),ds.end(),rl.begin(),eps.projection_map());
+  eps.draw(rl);
+  return eps;
+}
+
+
+
+template<class R> 
+Output::epsfstream&
+Output::operator<<(epsfstream& eps, const Geometry::PartitionTreeSet<R>& ds)
+{
+  std::vector<Rectangle2d> rl(ds.size());
+  std::transform(ds.begin(),ds.end(),rl.begin(),eps.projection_map());
+  eps.draw(rl);
+  return eps;
+}
+
+template<class R> 
+Output::epsfstream&
+Output::operator<<(epsfstream& eps, const Geometry::SetInterface<R>& set)
+{
+  using namespace Geometry;
+  typedef Numeric::Interval<R> I;
+  
+  if(dynamic_cast<const RectangularSet<R>*>(&set)) {
+    return eps << dynamic_cast<const RectangularSet<R>&>(set);
+  } else if(dynamic_cast<const PolyhedralSet<R>*>(&set)) {
+    return eps << dynamic_cast<const PolyhedralSet<R>&>(set);
+  } else if(dynamic_cast<const ListSet< Rectangle<R> >*>(&set)) {
+    return eps << dynamic_cast<const ListSet< Rectangle<R> >&>(set);
+  } else if(dynamic_cast<const ListSet< Zonotope<R,R> >*>(&set)) {
+    return eps << dynamic_cast<const ListSet< Zonotope<R,R> >&>(set);
+  } else if(dynamic_cast<const ListSet< Zonotope<I,R> >*>(&set)) {
+    return eps << dynamic_cast<const ListSet< Zonotope<I,R> >&>(set);
+  } else if(dynamic_cast<const ListSet< Zonotope<I,I> >*>(&set)) {
+    return eps << dynamic_cast<const ListSet< Zonotope<I,I> >&>(set);
+  } else if(dynamic_cast<const GridCellListSet<R>*>(&set)) {
+    return eps << dynamic_cast<const GridCellListSet<R>&>(set);
+  } else if(dynamic_cast<const GridMaskSet<R>*>(&set)) {
+    return eps << dynamic_cast<const GridMaskSet<R>&>(set);
+  } else if(dynamic_cast<const PartitionTreeSet<R>*>(&set)) {
+    return eps << dynamic_cast<const PartitionTreeSet<R>&>(set);
+  }  else {
+    Rectangle<R> bb;
+    try {
+      bb=set.bounding_box();
+    } 
+    catch(Geometry::UnboundedSet& e) {
+      if(set.dimension()==2) {
+        Rectangle2d bbox=eps.bounding_box();
+        bb=Geometry::Rectangle<R>(2);
+        bb.set_lower_bound(0,bbox.lower_bound(0));
+        bb.set_upper_bound(0,bbox.upper_bound(0));
+        bb.set_lower_bound(1,bbox.lower_bound(1));
+        bb.set_upper_bound(1,bbox.upper_bound(1));
+      } else {
+        throw e;
+      }
+    }
+    Geometry::PartitionScheme<R> ps(bb);
+    int depth=16;
+    Geometry::PartitionTreeSet<R> pts=Geometry::outer_approximation(set,ps,depth);
+    return eps << pts;
+  }
+}
+
+template<class R> 
+Output::epsfstream&
+Output::operator<<(epsfstream& eps, const Geometry::FiniteGrid<R>& fg)
+{
+  bool fill_style=eps.fill_style;
+  if(fill_style) { eps.fill_style=false; }
+  Geometry::GridCellListSet<R> gcls(fg.grid());
+  gcls.adjoin(Geometry::GridBlock<R>(fg.grid(),fg.lattice_block()));
+  eps << gcls;
+  if(fill_style) { eps.fill_style=true; }
+  return eps;
+}
+
+
+template<class R> 
+Output::epsfstream&
+Output::operator<<(epsfstream& eps, const Geometry::PartitionTree<R>& pt)
+{
+  bool fill_style=eps.fill_style;
+  if(fill_style) { eps.fill_style=false; }
+  for(typename Geometry::PartitionTree<R>::const_iterator iter = pt.begin(); iter!=pt.end(); ++iter) {
+    eps << Geometry::Rectangle<R>(*iter);
+  }
+  if(fill_style) { eps.fill_style=true; }
+  return eps;
+}
+
 }
 
 

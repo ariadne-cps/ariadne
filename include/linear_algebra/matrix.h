@@ -175,6 +175,12 @@ namespace Ariadne {
       /*! \brief Solve the linear system \f$Ax=b\f$. */
       friend Matrix<AT> solve<>(const Matrix<R>& A, const Vector<R>& b);
 
+      /*! \brief Catenate the rows of \a A with the row vector \a v. */
+      friend Matrix<AT> concatenate_rows<>(const Matrix<R>& A, const Vector<R>& v);
+      /*! \brief Catenate the rows of \a A1 with those of \a A2. */
+      friend Matrix<AT> concatenate_rows<>(const Matrix<R>& A1, const Matrix<R>& A2);
+      /*! \brief Catenate the rows of \a A with the row vector \a v. */
+      friend Matrix<AT> concatenate_columns<>(const Matrix<R>& A, const Vector<R>& v);
       /*! \brief Catenate the columns of \a A1 with those of \a A2. */
       friend Matrix<AT> concatenate_columns<>(const Matrix<R>& A1, const Matrix<R>& A2);
       /*! \brief Checks if the matrices have the same dimensions. */
@@ -232,9 +238,13 @@ namespace Ariadne {
     
 
 
-    template<class R> bool contains_value(const Matrix< Numeric::Interval<R> >& iA, const Matrix<R>& A); 
-    template<class R> Matrix<R> approximate_value(const Matrix< Numeric::Interval<R> >& im); 
-    template<class R1,class R2> Matrix<R1> approximate(const Matrix<R2>& im); 
+    template<class R1,class R2> Matrix<R1> approximation(const Matrix<R2>& im); 
+
+    template<class R> Matrix<R> midpoint(const Matrix< Numeric::Interval<R> >& iA); 
+    template<class R> bool encloses(const Matrix< Numeric::Interval<R> >& iA, const Matrix<R>& A); 
+    template<class R> bool refines(const Matrix< Numeric::Interval<R> >& iA1, const Matrix< Numeric::Interval<R> >& iA2); 
+
+
 
     template<class R> Vector< Numeric::Interval<R> > radius_row_sum(const Matrix< Numeric::Interval<R> >& im); 
     
@@ -242,6 +252,7 @@ namespace Ariadne {
     
     
     template<class R1, class R2>  Matrix<R1>& operator+=(Matrix<R1>& A1, const Matrix<R2>& A2); 
+    template<class R1, class R2>  Matrix<R1>& operator-=(Matrix<R1>& A1, const Matrix<R2>& A2); 
 
     template<class R> Matrix<R> operator-(const Matrix<R>& A);
     template<class R1, class R2> Matrix<typename Numeric::traits<R1,R2>::arithmetic_type> operator+(const Matrix<R1>& A1, const Matrix<R2>& A2); 
@@ -277,6 +288,12 @@ namespace Ariadne {
     template<class R> Matrix<typename Numeric::traits<R>::arithmetic_type> inverse(const Matrix<R>& A);
     template<class R1, class R2> Vector<typename Numeric::traits<R1,R2>::arithmetic_type> solve(const Matrix<R1>& A, const Vector<R2>& v);
     
+    template<class R> Matrix<R> direct_sum(const Matrix<R>& A1, const Matrix<R>& A2);
+
+    template<class R> Matrix<R> concatenate(const Matrix<R>& A1, const Matrix<R>& A2);
+    template<class R> Matrix<R> concatenate_rows(const Matrix<R>& A, const Vector<R>& v);
+    template<class R> Matrix<R> concatenate_rows(const Matrix<R>& A1, const Matrix<R>& A2);
+    template<class R> Matrix<R> concatenate_columns(const Matrix<R>& A, const Vector<R>& v);
     template<class R> Matrix<R> concatenate_columns(const Matrix<R>& A1, const Matrix<R>& A2);
     template<class R> Matrix<R> concatenate_columns(const MatrixSlice<R>& A1, const MatrixSlice<R>& A2);
     
@@ -286,6 +303,7 @@ namespace Ariadne {
     template<class R> std::ostream& operator<<(std::ostream& os, const Matrix<R>& A);
     template<class R> std::istream& operator>>(std::istream& is, Matrix<R>& A);
    
+    template<class R> Matrix< Numeric::Interval<R> > schulz_inverse(const Matrix< Numeric::Interval<R> >& A);
 
   }
 }

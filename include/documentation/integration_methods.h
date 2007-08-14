@@ -192,5 +192,14 @@ The error in the constant term may be alleviated by reincorporating the zero-ord
 If the initial set is based on a grid with sets of order \f$r\f$, and \f$t\f$ is the lock-to-grid time, then at each lock-to grid step an additional error of order approximately \f$r\f$ is incurred. The error bound is then approximately
 \f[ \varepsilon(t) \leq \epsilon_0 e^{k_0Lt} + (1+e^{k_1lt}) r . \f]
 
+\page Time-varying Integration Methods
+
+Suppose the integration time depends on \f$x\f$. We therefore want to compute \f$y(x,s(x)) := \Phi(x,s(x))\f$.
+We have
+\f[ \begin{aligned} y(x,s(x)) &= y(x,s(x)))-y(x,s(c)) + y(x,s(c)) \\
+                           &= y'(x,s(\xi)) \bigl( s(x) - s(c) \bigr) + y(x,s(c)) \\
+                           &= f(\xi) \, \grad s(\xi) \cdot(x-c) + y(x,s(c)) \\
+                           &\in y(x,s(c)) + \bigl( f(B) \grad s(B) \bigr) \cdot (x-c)  \end{aligned} \f]
+\f[
 
 */

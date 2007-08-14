@@ -38,10 +38,10 @@ namespace Ariadne {
 
     template LinearAlgebra::Vector< Numeric::Interval<Float64> > 
     gexp(const LinearAlgebra::Matrix<Float64>& A, const LinearAlgebra::Vector<Float64>& b, 
-         const time_type& t, const uint& k);
+         const Numeric::Interval<Float64>& t, const uint& k);
     
     template LinearAlgebra::Matrix< Numeric::Interval<Float64> > 
-    gexp(const LinearAlgebra::Matrix<Float64>& A, const time_type& t, const uint& k);
+    gexp(const LinearAlgebra::Matrix<Float64>& A, const Numeric::Interval<Float64>& t, const uint& k);
     
     template class AffineIntegrator<Float64>;
 #endif
@@ -51,10 +51,10 @@ namespace Ariadne {
 
     template LinearAlgebra::Vector< Numeric::Interval<FloatMP> > 
     gexp(const LinearAlgebra::Matrix<FloatMP>& A, const LinearAlgebra::Vector<FloatMP>& b, 
-         const time_type& t, const uint& k);
+         const Numeric::Interval<FloatMP>& t, const uint& k);
     
     template LinearAlgebra::Matrix< Numeric::Interval<FloatMP> > 
-    gexp(const LinearAlgebra::Matrix<FloatMP>& A, const time_type& t, const uint& k);
+    gexp(const LinearAlgebra::Matrix<FloatMP>& A, const Numeric::Interval<FloatMP>& t, const uint& k);
     
     template class AffineIntegrator<FloatMP>;
 #endif

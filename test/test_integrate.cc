@@ -220,44 +220,31 @@ test_integrate()
 
   epsfstream eps;
   eps.open("test_integrate-1.eps",bb);
-  eps.set_fill_colour("green");
-  eps << reach_set;
-  eps.set_fill_colour("yellow");
-  eps << integrate_set;
-  eps.set_fill_colour("blue");
-  eps << initial_set;
+  eps << fill_colour(green) << reach_set;
+  eps << fill_colour(yellow) << integrate_set;
+  eps << fill_colour(blue) << initial_set;
   eps.close();
 
   eps.open("test_integrate-2.eps",bb);
-  eps.set_line_style(false);
-  eps.set_fill_colour("green");
-  eps << dynamic_cast<ListSet< Zonotope<I,I> >&>(*polyhedral_reach_set_ptr);
-  eps.set_fill_colour("yellow");
-  eps << dynamic_cast<ListSet< Zonotope<I,I> >&>(*polyhedral_integrate_set_ptr);
-  eps.set_fill_colour("blue");
-  eps << *polyhedral_initial_set_ptr;
+  eps << line_style(false);
+  eps << fill_colour(green) << dynamic_cast<ListSet< Zonotope<I,I> >&>(*polyhedral_reach_set_ptr);
+  eps << fill_colour(yellow) << dynamic_cast<ListSet< Zonotope<I,I> >&>(*polyhedral_integrate_set_ptr);
+  eps << fill_colour(blue) << *polyhedral_initial_set_ptr;
   eps.close();
   
   eps.open("test_integrate-3.eps",bb);
-  eps.set_line_style(false);
-  eps.set_fill_colour("green");
-  eps << rectangle_list_reach_set;
-  eps.set_fill_colour("yellow");
-  eps << rectangle_list_integrate_set;
-  eps.set_fill_colour("blue");
-  eps << rectangle_list_initial_set;
-  eps.set_fill_colour("red");
-  eps << *polyhedral_initial_set_ptr;
+  eps << line_style(false);
+  eps << fill_colour(green) << rectangle_list_reach_set;
+  eps << fill_colour(yellow) << rectangle_list_integrate_set;
+  eps << fill_colour(blue) << rectangle_list_initial_set;
+  eps << fill_colour(red) << *polyhedral_initial_set_ptr;
   eps.close();
   
   eps.open("test_integrate-4.eps",bb);
-  eps.set_line_style(false);
-  eps.set_fill_colour("green");
-  eps << zonotope_list_reach_set;
-  eps.set_fill_colour("yellow");
-  eps << zonotope_list_integrate_set;
-  eps.set_fill_colour("blue");
-  eps << zonotope_list_initial_set;
+  eps << line_style(false);
+  eps << fill_colour(green) << zonotope_list_reach_set;
+  eps << fill_colour(yellow) << zonotope_list_integrate_set;
+  eps << fill_colour(blue) << zonotope_list_initial_set;
   eps.close();
   
 

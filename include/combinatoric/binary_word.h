@@ -87,7 +87,8 @@ namespace Ariadne {
     class BinaryWordList_const_iterator;
     class BinaryWordFixedSizeList_const_iterator;
     
-    /*! \brief A statically-allocated binary word of fixed maximum length.
+    /*! \ingroup BinaryTree
+     *  \brief A statically-allocated binary word of fixed maximum length.
      */
     class BinaryWord {
       friend class BinaryTree;
@@ -199,7 +200,8 @@ namespace Ariadne {
     };
     
     
-    /*!\brief A list of BinaryWord elements of variable size, optimised for memory usage. Access by constant forward iterators only.
+    /*!\ingroup BinaryTree
+     * \brief A list of BinaryWord elements of variable size, optimised for memory usage. Access by constant forward iterators only.
      */
     class BinaryWordList {
       /*!\brief Union of two BinaryWordList s. */
@@ -231,7 +233,8 @@ namespace Ariadne {
       const_iterator end() const;
     };
     
-    /*!\brief A list of BinaryWord elements, each of the same size, optimised for memory usage. */
+    /*!\ingroup BinaryTree
+     * \brief A list of BinaryWord elements, each of the same size, optimised for memory usage. */
     class BinaryWordFixedSizeList {
       friend class BinaryWordFixedSizeList_const_iterator;
       

@@ -76,12 +76,12 @@ test_newton()
     cout << "No solution found" << endl;
     throw e;
   }
-  assert(error_bound(fpt)<e);
+  assert(radius(fpt)<e);
   cout << std::setprecision(20);
-  cout << fpt << "  " << error_bound(fpt) << endl;
+  cout << fpt << "  " << radius(fpt) << endl;
 
   Point<R> afpt("(-2.0920128158902654,-2.0920128158902654)");
-  assert(contains_value(fpt,afpt));
+  assert(encloses(fpt,afpt));
  
 
 

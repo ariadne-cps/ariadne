@@ -57,6 +57,7 @@
 namespace Ariadne {
   namespace Output {
 				
+    /*!\brief A stream for readable textual output. */
     class txtfstream
       : private std::ofstream 
     {
@@ -86,11 +87,7 @@ namespace Ariadne {
     txtfstream::write(const Geometry::Point<R>& pt) 
     {
       if(pt.dimension() > 0) {
-        (*this) << Numeric::conv_approx<Numeric::Float64>(pt[0]);	
-        for (dimension_type i=1; i<pt.dimension(); i++) {
-          (*this) << " " << Numeric::conv_approx<Numeric::Float64>(pt[i]);
-        }
-        (*this) << "\n" ;
+        static_cast<std::ostream&>(*this) << approximation(pt);
       }
     }
 						 

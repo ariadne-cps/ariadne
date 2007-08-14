@@ -32,27 +32,29 @@
 namespace Ariadne { 
   namespace Geometry {
 
-  
+  // FIXME: This class doesn't work
+
   template< class DS, class HBS=HybridBasicSet<typename DS::basic_set_type> >
     class HybridDenotableSetIterator
       : public boost::iterator_facade<HybridDenotableSetIterator<DS>,
                                       HBS,
                                       boost::forward_traversal_tag,
-                                      HBS const&,
-                                      HBS const*
+                                      HBS
                                      >
 
     {
      public:
       HybridDenotableSetIterator(const std::map<location_type,DS>&, bool);
       bool equal(const HybridDenotableSetIterator<DS>&) const;
-      const HBS& dereference() const;
+      HBS dereference() const;
       void increment();
+      const id_type& discrete_state() const { return loc_iter->first; }
+      const typename DS::basic_set_type& continuous_state_set() const { return *bs_iter; }
      private:
-      typename std::map< location_type,DS>::const_iterator loc_iter;
+      typename std::map< location_type,DS>::const_iterator loc_begin;
       typename std::map< location_type,DS>::const_iterator loc_end;
+      typename std::map< location_type,DS>::const_iterator loc_iter;
       typename DS::const_iterator bs_iter;
-      HBS set;
     };
 
 
@@ -64,12 +66,15 @@ namespace Ariadne {
 
 template<class DS, class HBS> inline
 Geometry::HybridDenotableSetIterator<DS,HBS>::HybridDenotableSetIterator(const std::map<location_type,DS>& map, bool end)
-  : loc_iter(map.begin()),
+  : loc_begin(map.begin()),
     loc_end(map.end()),
-    bs_iter(loc_iter->second.begin()),
-    set(loc_iter->first,*bs_iter)
+    loc_iter(end?loc_end:loc_begin),
+    bs_iter(loc_iter->second.begin())
 {
-  if(end) { loc_iter=loc_end; }
+  std::cout << "Iterator:";
+  if(loc_iter==loc_end) { std::cout << " end"; }
+  else { std::cout << loc_iter->first << " " << *bs_iter; }
+  std::cout << std::endl; 
 }
 
 
@@ -77,15 +82,15 @@ template<class DS, class HBS> inline
 bool
 Geometry::HybridDenotableSetIterator<DS,HBS>::equal(const HybridDenotableSetIterator<DS>& other) const
 {
-  return this->loc_iter==other.loc_iter && (this->loc_iter==this->loc_end || this->bs_iter==other.bs_iter);
+  return this->loc_iter==other.loc_iter && this->bs_iter==other.bs_iter;
 }
 
 
 template<class DS, class HBS> inline
-const HBS&
+HBS
 Geometry::HybridDenotableSetIterator<DS,HBS>::dereference() const
 {
-  return this->set;
+  return HBS(loc_iter->first,*this->bs_iter);
 }
 
 
@@ -94,13 +99,18 @@ void
 Geometry::HybridDenotableSetIterator<DS,HBS>::increment() 
 {
   ++this->bs_iter;
-  if(this->bs_iter==loc_iter->second.end()) {
+  while(this->bs_iter==loc_iter->second.end()) {
     ++loc_iter;
-    if(this->loc_iter!=this->loc_end) {
+    if(this->loc_iter==this->loc_end) {
+      this->bs_iter=loc_begin->second.begin();
+    } else {
       this->bs_iter=this->loc_iter->second.begin();
     }
   }
-  this->set=HybridBasicSet<typename DS::basic_set_type>(loc_iter->first,*bs_iter);
+  std::cout << "Iterator:";
+  if(loc_iter==loc_end) { std::cout << " end"; }
+  else { std::cout << loc_iter->first << " " << *bs_iter; }
+  std::cout << std::endl; 
 }
 
 }

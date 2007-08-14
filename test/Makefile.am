@@ -6,6 +6,7 @@ INCLUDES = -I$(top_srcdir)/include
 LDADD   = ../src/libariadne.la -lppl -lmpfr -lgmpxx 
 
 check_PROGRAMS = \
+	test_tribool \
 	test_array \
 	test_ddconv \
 	test_boost \
@@ -50,6 +51,7 @@ check_PROGRAMS = \
 	test_integrate \
 	test_chainreach \
 	test_hybrid_evolution \
+	test_constraint_hybrid_evolution_step \
 	test_constraint_hybrid_evolution \
         test_epsfstream \
 	test_txtfstream \
@@ -61,6 +63,7 @@ tests: $(check_PROGRAMS)
 
 # Explicitly list test sources
 # This should not be necessary!!
+test_tribool_SOURCES=test_tribool.cc
 test_array_SOURCES=test_array.cc
 test_ddconv_SOURCES=test_ddconv.cc
 test_boost_SOURCES=test_boost.cc
@@ -106,6 +109,7 @@ test_affine_integrator_SOURCES=test_affine_integrator.cc
 test_integrate_SOURCES=test_integrate.cc
 test_chainreach_SOURCES=test_chainreach.cc
 test_hybrid_evolution_SOURCES=test_hybrid_evolution.cc
+test_constraint_hybrid_evolution_step_SOURCES=test_constraint_hybrid_evolution_step.cc
 test_constraint_hybrid_evolution_SOURCES=test_constraint_hybrid_evolution.cc
 test_epsfstream_SOURCES=test_epsfstream.cc 
 test_txtfstream_SOURCES=test_txtfstream.cc

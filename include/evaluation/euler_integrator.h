@@ -60,28 +60,28 @@ namespace Ariadne {
       bounded_flow(const System::VectorFieldInterface<R>&,
                    const Geometry::Point<I>&,
                    const Geometry::Rectangle<R>&,
-                   const time_type&) const;
+                   const Numeric::Interval<R>&) const;
 
       /*! \brief A C0 algorithm for computing the Jacobian. (Not provided) */
       virtual LinearAlgebra::Matrix<I> 
       bounded_flow_jacobian(const System::VectorFieldInterface<R>&,
                             const Geometry::Point<I>&,
                             const Geometry::Rectangle<R>&,
-                            const time_type&) const;
+                            const Numeric::Interval<R>&) const;
 
       /*! \brief A C0 algorithm for integrating forward a rectangle. */
       virtual Geometry::Rectangle<R> 
       bounded_integration_step(const System::VectorFieldInterface<R>&,
                                const Geometry::Rectangle<R>&,
                                const Geometry::Rectangle<R>&,
-                               const time_type&) const;
+                               const Numeric::Interval<R>&) const;
 
       /*! \brief A C0 algorithm for integrating forward a zonotope up to a certain time. */
       virtual Geometry::Rectangle<R> 
       bounded_reachability_step(const System::VectorFieldInterface<R>&,
                                 const Geometry::Rectangle<R>&,
                                 const Geometry::Rectangle<R>&,
-                                const time_type&) const;
+                                const Numeric::Interval<R>&) const;
 
       /*! \brief A C0 algorithm for integrating forward a rectangle. */
       virtual Geometry::Rectangle<R> 

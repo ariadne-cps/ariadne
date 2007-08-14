@@ -45,8 +45,10 @@ namespace Ariadne {
     template<class R> class ConstraintHybridEvolverPlugin;
 
 
-    /*! \ingroup Evolve
-     *  \brief A class for computing the evolution of a hybrid system.
+    /*! \ingroup Evolve 
+     *  \brief A class for computing the evolution of a hybrid system. 
+     *
+     * The actual evolution steps are performed by the ConstraintHybridEvolverPlugin class.
      */
     template< class R >
     class ConstraintHybridEvolver

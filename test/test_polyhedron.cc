@@ -172,14 +172,10 @@ test_polyhedron()
   cout << "oap2.size()=" << oap2.size() << endl;
   epsfstream eps;
   eps.open("test_polyhedron-1.eps",bbox2);
-  eps.set_fill_colour("white");
-  eps << bbox2;
-  eps.set_fill_colour("red");
-  eps << oap2;
-  eps.set_fill_colour("green");
-  eps << phd2;
-  eps.set_fill_colour("blue");
-  eps << uap2;
+  eps << fill_colour(white) << bbox2;
+  eps << fill_colour(red) << oap2;
+  eps << fill_colour(green) << phd2;
+  eps << fill_colour(blue) << uap2;
   eps.close();
   
   cout << endl;
@@ -228,16 +224,11 @@ test_polyhedron<Rational>()
 
   epsfstream eps;
   eps.open("test_polyhedron-2.eps",bbox);
-  eps.set_fill_colour("white");
-  eps << bbox;
-  eps.set_fill_colour("green");
-  eps << plhd;
-  eps.set_fill_colour("red");
-  eps << r1;
-  eps.set_fill_colour("yellow");
-  eps << r2;
-  eps.set_fill_colour("blue");
-  eps << r3;
+  eps << fill_colour(white) << bbox;
+  eps << fill_colour(green) << plhd;
+  eps << fill_colour(red) << r1;
+  eps << fill_colour(yellow) << r2;
+  eps << fill_colour(blue) << r3;
   eps.close();
 
   cout << "plhd=" << plhd << endl;

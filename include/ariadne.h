@@ -41,7 +41,7 @@
  */
 namespace Ariadne {
 
-/*! \brief Fundamental base types. See the \ref Base module for more information.
+/*! \brief Fundamental base types. See the \ref Base for more information.
  */
 namespace Base {}
   
@@ -57,23 +57,27 @@ namespace LinearAlgebra {}
  */
 namespace LinearProgramming {}
 
-/*! \brief Combinatorial objects, such as sets and maps on lattices and subdivision trees. See the \ref Combinatoric module for more information.
+/*! \brief Combinatorial objects, such as sets and maps on lattices and subdivision trees. See the \ref Combinatoric for more information.
  */
 namespace Combinatoric {}
   
-/*! \brief Geometric calculus library. See the \ref Geometry module for more information.
+/*! \brief Geometric calculus library. See the \ref Geometry for more information.
  */
 namespace Geometry {}
 
-/*! \brief Classes defining a dynamic system. See the \ref System module for more information.
+/*! \brief Classes defining a dynamic system. See the \ref System for more information.
  */
 namespace System {}
 
-/*! \brief Classes for computing system trajectories. See the \ref Evaluation module for more information.
+/*! \brief Classes for computing system trajectories. See the \ref Evaluation for more information.
  */
 namespace Evaluation {}
 
-/*! \brief Classes for output in various formats. See the \ref Output module for more information.
+/*! \brief Classes for input from various formats. See the \ref Input for more information.
+ */
+namespace Input {}
+
+/*! \brief Classes for output in various formats. See the \ref Output for more information.
  */
 namespace Output {}
 

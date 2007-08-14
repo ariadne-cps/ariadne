@@ -27,94 +27,77 @@ namespace Ariadne {
 
 
 
-Output::chompfstream::chompfstream()
- : _ofs()
+Output::chompstream::chompstream(std::ostream& os)
+ : _os_ptr(&os)
 {
 }
 
 
-
-Output::chompfstream::chompfstream(const char* fn)
- : _ofs(fn)
+void
+Output::chompstream::redirect(std::ostream& os)
 {
+  this->_os_ptr=&os;
 }
 
 
-
-Output::chompfstream::~chompfstream() {
-  this->close();
+Output::chompstream::~chompstream() {
 }
 
       
-void
-Output::chompfstream::open(const char* fn)
+
+Output::chompstream& 
+Output::operator<<(chompstream& chomps, const char* str) 
 {
-  this->_ofs.open(fn);
-}
-
-
-void 
-Output::chompfstream::close() 
-{
-  this->_ofs.close();
-}
-
-
-
-Output::chompfstream& 
-Output::operator<<(chompfstream& cfs, const char* str) 
-{
-  cfs._ofs << str; return cfs;
+  std::ostream& os=*chomps._os_ptr;
+  os << str; 
+  return chomps;
 }
 
     
-Output::chompfstream& 
-Output::operator<<(chompfstream& cfs, const Combinatoric::LatticeCell& lc) 
+Output::chompstream& 
+Output::operator<<(chompstream& chomps, const Combinatoric::LatticeCell& lc) 
 {
-  std::ofstream& ofs=cfs._ofs;
+  std::ostream& os=*chomps._os_ptr;
   if(lc.dimension()>0) {
-    ofs << "(" << lc.lower_bound(0);
+    os << "(" << lc.lower_bound(0);
     for(dimension_type i=1; i!=lc.dimension(); ++i) {
-      ofs << "," << lc.lower_bound(i);
+      os << "," << lc.lower_bound(i);
     }
-    ofs << ")";
+    os << ")";
   } else {
-    ofs << "()";
+    os << "()";
   }
-  return cfs;
+  return chomps;
 }
 
 
-Output::chompfstream& 
-Output::operator<<(chompfstream& cfs, const Combinatoric::LatticeMaskSet& lms) 
+Output::chompstream& 
+Output::operator<<(chompstream& chomps, const Combinatoric::LatticeMaskSet& lms) 
 {
-  Combinatoric::LatticeCell lc;
-  for(Combinatoric::LatticeMaskSet::const_iterator iter=lms.begin(); iter!=lms.end(); ++iter) {
-    lc=*iter;
-    cfs << lc;
-    cfs._ofs << "\n";
+  for(Combinatoric::LatticeMaskSet::const_iterator cell_iter=lms.begin(); cell_iter!=lms.end(); ++cell_iter) {
+    chomps << *cell_iter << "\n";
   }
-  return cfs;
+  return chomps;
 }
 
 
-Output::chompfstream& 
-Output::operator<<(chompfstream& cfs, const Combinatoric::LatticeMultiMap& lmm) 
+Output::chompstream& 
+Output::operator<<(chompstream& chomps, const Combinatoric::LatticeMultiMap& lmm) 
 {
   Combinatoric::LatticeCell lc(lmm.argument_dimension());
   Combinatoric::LatticeCellListSet lcls(lmm.result_dimension());
   for(Combinatoric::LatticeMultiMap::const_iterator iter=lmm.begin(); iter!=lmm.end(); ++iter) {
     lc=iter->first;
     lcls=iter->second;
-    cfs << lc << " -> { ";
+    chomps << lc << " -> { ";
     for(Combinatoric::LatticeCellListSet::const_iterator lcls_iter=lcls.begin(); 
         lcls_iter!=lcls.end(); ++lcls_iter) 
-      {
-        cfs << *lcls_iter << " ";
-      }
-    cfs << "}\n";
+    {
+      chomps << *lcls_iter << " ";
+    }
+    chomps << "}\n";
   }
-  return cfs;
+  return chomps;
 }
 
 

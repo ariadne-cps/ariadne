@@ -383,7 +383,7 @@ namespace Ariadne {
       dimension_type d=bb.dimension();
       array<R> subdivision_lengths(bb.dimension());
       for(dimension_type i=0; i!=bb.dimension(); ++i) {
-        subdivision_lengths[i]=div_up(bb[i].length(),R(s));
+        subdivision_lengths[i]=div_up(bb[i].width(),R(s));
       }
       this->_grid_ptr=new Grid<R>(LinearAlgebra::Vector<R>(d,subdivision_lengths.begin()));
       this->_lattice_block=this->grid().index_block(bb);

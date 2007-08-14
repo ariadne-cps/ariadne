@@ -64,8 +64,11 @@ test_point()
   assert(s1==s1 && s1!=s2 && s1!=s3 && s1!=s4 && s1==s5);
   
   cout << s1 << " " << s2 << " " << s3 << " " << s4 << " " << s5 << endl;
+
+  cout << "approximation(s1)=" << approximation(s1) << endl;
+
   /* Test output format */
-  string str1("(1, 1.5)");
+  string str1("(1,1.5)");
   string str2;
   istringstream is(str1);
   is >> s1;

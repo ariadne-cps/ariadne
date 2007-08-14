@@ -42,6 +42,7 @@ namespace Ariadne {
   namespace Output {
  
     
+    /*!\brief A stream for output to the graph drawing package Dot. */
     class dotfstream
       : private std::ofstream 
     {

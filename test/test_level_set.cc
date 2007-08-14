@@ -101,14 +101,9 @@ test_level_set()
   // graphical output
   epsfstream eps;
   eps.open("test_level_set-1.eps",bb.neighbourhood(0.25));
-  eps.set_fill_colour("red");
-  eps << gmsoa;
-  eps.set_fill_colour("green");
-  eps.set_line_style(false);
-  eps << static_cast<const SetInterface<R>&>(s);
-  eps.set_line_style(true);
-  eps.set_fill_colour("blue");
-  eps << gmsia;
+  eps << fill_colour(red) << gmsoa;
+  eps << line_style(false) << fill_colour(green) << static_cast<const SetInterface<R>&>(s);
+  eps << line_style(true) << fill_colour(blue) << gmsia;
   eps.close();
   
   cout << endl;

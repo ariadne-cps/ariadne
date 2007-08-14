@@ -21,7 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include <iosfwd>
+#include <cassert>
+#include <iostream>
 #include <string>
 #include <sstream>
 #include <algorithm>
@@ -73,8 +74,11 @@ template<class R>
 class IntegrationStepBound {
  public:
   /*!\ brief Constructor. */
-  IntegrationStepBound(const Geometry::Rectangle<R>& bound, const time_type& integration_time) 
+  IntegrationStepBound(const Geometry::Rectangle<R>& bound, const R& integration_time) 
     : _bound(bound), _integration_time(integration_time) { }
+  /*!\ brief Constructor. */
+  IntegrationStepBound(const Geometry::Rectangle<R>& bound, const Numeric::Interval<R>& integration_time) 
+    : _bound(bound), _integration_time(integration_time.upper()) { }
   /*! The spacial bound for the integrations step. */
   const Geometry::Rectangle<R>& bound() const { return _bound; }
   /*! The step size in time of the integrations step. */
@@ -394,7 +398,7 @@ bool
 Evaluation::Integrator<R>::check_flow_bounds(const System::VectorFieldInterface<R>& vf,
                                              const Geometry::Rectangle<R>& r,
                                              const Geometry::Rectangle<R>& b,
-                                             const time_type& h) const
+                                             const Numeric::Rational& h) const
 {
   if(verbosity>6) { std::clog << "Integrator::check_flow_bounds" << std::endl; }
   using namespace Geometry;
@@ -408,7 +412,7 @@ template<class R>
 Geometry::Rectangle<R>
 Evaluation::Integrator<R>::estimate_flow_bounds(const System::VectorFieldInterface<R>& vf,
                                                 const Geometry::Rectangle<R>& r,
-                                                const time_type& h) const
+                                                const Numeric::Rational& h) const
 {
   return this->estimate_flow_bounds(vf,r,h,12);
 }
@@ -418,14 +422,14 @@ template<class R>
 Geometry::Rectangle<R>
 Evaluation::Integrator<R>::estimate_flow_bounds(const System::VectorFieldInterface<R>& vf,
                                                 const Geometry::Rectangle<R>& r,
-                                                const time_type& h,
+                                                const Numeric::Rational& h,
                                                 const unsigned int& maximum_iterations) const
 {
   using namespace Geometry;
   using namespace Numeric;
   
   if(verbosity>6) { std::clog << "Integrator::estimate_flow_bounds" << " (maximum_iterations=" << maximum_iterations << ")" << std::endl; }
-  if(verbosity>7) { std::clog << "  h=" << conv_approx<double>(h) << "  r=" << r << "  vf(r)=" << vf(r) << std::endl; }
+  if(verbosity>7) { std::clog << "  h=" << h << "  r=" << r << "  vf(r)=" << vf(r) << std::endl; }
   
   typedef typename Numeric::traits<R>::arithmetic_type F;
   uint iteration=0;
@@ -436,7 +440,7 @@ Evaluation::Integrator<R>::estimate_flow_bounds(const System::VectorFieldInterfa
   reach=r;
   
   while(t>0) {
-    bounds=reach+multiplier*Interval<R>(R(0),h)*vf(reach);
+    bounds=reach+multiplier*Numeric::Interval<R>(0,h)*vf(reach);
     LinearAlgebra::Vector< Interval<R> > df=vf(bounds);
     
     time_type dt=t;
@@ -467,7 +471,7 @@ template<class R>
 Geometry::Rectangle<R>
 Evaluation::Integrator<R>::estimate_flow_bounds(const System::VectorFieldInterface<R>& vf,
                                                 const Geometry::Rectangle<R>& r,
-                                                time_type& h) const
+                                                Numeric::Rational& h) const
 {
   using namespace Geometry;
   using namespace Numeric;
@@ -506,9 +510,9 @@ Geometry::Rectangle<R>
 Evaluation::Integrator<R>::refine_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
                                               const Geometry::Rectangle<R>& initial_set,
                                               const Geometry::Rectangle<R>& estimated_bounds,
-                                              const time_type& step_size) const
+                                              const Numeric::Rational& step_size) const
 {
-  if(verbosity>6) { std::clog << "Integrator::refine_flow_bounds" << std::endl; }
+  if(verbosity>6) { std::clog << "Integrator::refine_flow_bounds(VectorField,Rectangle,Rectangle,Time)" << std::endl; }
   
   using namespace System;
   using namespace Geometry;
@@ -531,22 +535,71 @@ Evaluation::Integrator<R>::refine_flow_bounds(const System::VectorFieldInterface
 template<class R>
 Geometry::Rectangle<R>
 Evaluation::Integrator<R>::refine_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
-                                              const Geometry::Rectangle<R>& initial_set,
+                                              const Geometry::Point<I>& initial_point,
                                               const Geometry::Rectangle<R>& estimated_bounds,
-                                              const Numeric::Interval<time_type>& step_sizes) const
+                                              const Numeric::Rational& step_size) const
 {
-  if(verbosity>6) { std::clog << "Integrator::refine_flow_bounds" << std::endl; }
+  if(verbosity>6) { std::clog << "Integrator::refine_flow_bounds(VectorField,Point,Rectangle,Time)" << std::endl; }
   
   using namespace System;
   using namespace Geometry;
   using namespace LinearAlgebra;
   using namespace Numeric;
   const VectorFieldInterface<R>& vf=vector_field;
-  Rectangle<R> rx=initial_set;
+  Rectangle<R> rx(initial_point);
   Rectangle<R> b=estimated_bounds;
+  Interval<R> h=Interval<R>(0,step_size);
+  
+  Rectangle<R> xb=rx+h*vf(b);
+  Rectangle<R> xxb=rx+h*vf(xb);
+  
+  if(verbosity>7) { std::clog << "new_bounds " << xxb << "," << xb << " vs old_bounds " << b << "  " << subset(xb,b) << std::endl; }
+  
+  return xb;
+}
 
-  Interval<R> h=hull(Interval<R>(step_sizes),Interval<R>(0));
 
+template<class R>
+Geometry::Rectangle<R>
+Evaluation::Integrator<R>::estimate_interval_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
+                                                         const Geometry::Rectangle<R>& initial_set,
+                                                         Numeric::Interval<R>& step_size) const
+{
+  if(verbosity>6) { std::clog << "Integrator::estimate_flow_bounds(VectorField,Point,TimeInterval)" << std::endl; }
+  
+  Numeric::Rational backwards_step_size=step_size.lower();
+  Numeric::Rational forwards_step_size=step_size.upper();
+  
+  assert(backwards_step_size==0);
+  Rectangle<R> estimated_bounds=estimate_flow_bounds(vector_field,initial_set,forwards_step_size);
+
+  // FIXME: need to round inwards here...
+  step_size=Numeric::Interval<R>(backwards_step_size,forwards_step_size);
+  assert(step_size.lower()>=backwards_step_size);
+  assert(step_size.upper()>=forwards_step_size);
+
+  return estimated_bounds;
+}
+
+
+template<class R>
+Geometry::Rectangle<R>
+Evaluation::Integrator<R>::refine_interval_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
+                                                       const Geometry::Rectangle<R>& initial_set,
+                                                       const Geometry::Rectangle<R>& estimated_bounds,
+                                                       const Numeric::Interval<R>& step_size) const
+{
+  if(verbosity>6) { std::clog << "Integrator::refine_flow_bounds(VectorField,Point,Rectangle,TimeInterval)" << std::endl; }
+  
+  using namespace System;
+  using namespace Geometry;
+  using namespace LinearAlgebra;
+  using namespace Numeric;
+  const VectorFieldInterface<R>& vf=vector_field;
+  const Rectangle<R>& rx(initial_set);
+  Rectangle<R> b=estimated_bounds;
+  const Interval<R>& h=step_size;
+  
   Rectangle<R> xb=rx+h*vf(b);
   Rectangle<R> xxb=rx+h*vf(xb);
   
@@ -558,11 +611,12 @@ Evaluation::Integrator<R>::refine_flow_bounds(const System::VectorFieldInterface
 
 
 
+
 template<class R>
 LinearAlgebra::Matrix< Numeric::Interval<R> >
 Evaluation::Integrator<R>::estimate_flow_jacobian_bounds(const System::VectorFieldInterface<R>& vf,
                                                          const Geometry::Rectangle<R>& b,
-                                                         const time_type& h) const
+                                                         const Numeric::Rational& h) const
 {
   dimension_type d=vf.dimension();
   LinearAlgebra::Matrix<I> Df = vf.jacobian(b);

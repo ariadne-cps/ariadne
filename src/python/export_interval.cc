@@ -99,9 +99,21 @@ void export_interval()
     .def("__ge__", &ge<tribool,I,I>)
     .def("lower", &Interval<R>::lower, return_value_policy<copy_const_reference>())
     .def("upper", &Interval<R>::upper, return_value_policy<copy_const_reference>())
+    .def("midpoint", &Interval<R>::midpoint)
+    .def("radius", &Interval<R>::radius)
+    .def("width", &Interval<R>::width)
     .def(self_ns::str(self))    // __self_ns::str__
   ;
   
+  def("lower", (R(*)(const I&))&lower);
+  def("upper", (R(*)(const I&))&upper);
+  def("midpoint", (R(*)(const I&))&midpoint);
+  def("radius", (R(*)(const I&))&radius);
+  def("width", (R(*)(const I&))&radius);
+
+  def("encloses", (bool(*)(const I&, const R&))&encloses);
+  def("refines", (bool(*)(const I&, const I&))&refines);
+
   def("pow",&pow<I,R,int,I,int>);
   def("pow",&pow<I,I,int,I,int>);
 

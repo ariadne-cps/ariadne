@@ -201,6 +201,10 @@ void export_interval_vector() {
   
   def("sup_norm",&sup_norm<Float>);
   def("norm",&sup_norm<Float>);
+
+  def("midpoint",(Vec(*)(const IVec&))&midpoint);
+  def("encloses",(bool(*)(const IVec&,const Vec&))&encloses);
+  def("refines",(bool(*)(const IVec&,const IVec&))&refines);
 }
 
 template void export_vector<Float>();

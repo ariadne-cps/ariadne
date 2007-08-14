@@ -44,7 +44,8 @@ namespace Ariadne {
     class BinaryTree;
     class BinaryTreeIterator;
     
-    /*!\brief A sorted list of BinaryWord elements such that every binary sequence has a unique prefix in the list.
+    /*!\ingroup BinaryTree
+     * \brief A sorted list of BinaryWord elements such that every binary sequence has a unique prefix in the list.
      *   Optimised for memory usage.
      *   Constant forward iterators only, access may be inefficient.
      */

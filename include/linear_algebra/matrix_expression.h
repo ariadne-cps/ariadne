@@ -42,7 +42,7 @@
 namespace Ariadne {
   namespace LinearAlgebra {
 
-    /*!\brief Base class for all matrix expressions. */
+    /*!\brief %Base class for all matrix expressions. */
     template<class E>
     class MatrixExpression 
     {

@@ -58,8 +58,12 @@ namespace Ariadne {
       /*! \brief */
       typedef basic_set_tag set_category;
 
+      // No default constructor as original set need not have default constructor
+      // HybridBasicSet() : BS(), _discrete_state() { }
       /*! \brief */
       template<class A> HybridBasicSet(const id_type& q, const A& a) : BS(a), _discrete_state(q) { }
+      /*! \brief */
+      HybridBasicSet(const HybridBasicSet<BS>& hbs) : BS(hbs.continuous_state_set()), _discrete_state(hbs.discrete_state()) { }
       /*! \brief */
       const id_type& discrete_state() const { return this->_discrete_state; }
       /*! \brief */

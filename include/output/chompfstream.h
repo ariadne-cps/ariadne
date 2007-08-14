@@ -28,10 +28,7 @@
  *  \brief Output to CHomP computational homology programs
  */
  
-#include <iostream>
-#include <fstream>
-#include <algorithm>
-#include <string>
+#include <iosfwd>
 
 #include "../combinatoric/lattice_set.h"
 #include "../combinatoric/lattice_map.h"
@@ -39,21 +36,19 @@
 namespace Ariadne {
   namespace Output {
     
-    class chompfstream {
+    /*!\brief A stream for output to the computational homology programs CHomP. */
+    class chompstream {
      public:
-      chompfstream();
-      chompfstream(const char* fn);
-      ~chompfstream();
-
-      void open(const char* fn);
-      void close();
+      chompstream(std::ostream& os);
+      void redirect(std::ostream& os);
+      ~chompstream();
      private:
-      friend chompfstream& operator<<(chompfstream&, const char*);
-      friend chompfstream& operator<<(chompfstream&, const Combinatoric::LatticeCell&);
-      friend chompfstream& operator<<(chompfstream&, const Combinatoric::LatticeMaskSet&);
-      friend chompfstream& operator<<(chompfstream&, const Combinatoric::LatticeMultiMap&);
+      friend chompstream& operator<<(chompstream&, const char*);
+      friend chompstream& operator<<(chompstream&, const Combinatoric::LatticeCell&);
+      friend chompstream& operator<<(chompstream&, const Combinatoric::LatticeMaskSet&);
+      friend chompstream& operator<<(chompstream&, const Combinatoric::LatticeMultiMap&);
      private:
-      std::ofstream _ofs;
+      std::ostream* _os_ptr;
     };
 
   }

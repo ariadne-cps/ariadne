@@ -68,7 +68,7 @@ namespace Ariadne {
 
     
     
-    /*!\brief Base class for all vector expressions. */
+    /*!\brief %Base class for all vector expressions. */
     template<class E>
     class VectorExpression 
     {

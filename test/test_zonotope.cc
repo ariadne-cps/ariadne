@@ -97,7 +97,11 @@ test_zonotope()
   Zonotope<R> z4=Zonotope<R>(Point<R>("(0,0)"),Matrix<R>("[1,0,1;0,1,1]"));
   cout << "z4=" << z4 << endl;
   cout << endl;
-    
+
+  // construct from a string literal
+  Zonotope<R> zs("{(0,1),[1,2,3;4,5,6]}");
+  cout << "zs=" << zs << endl;
+  
   cout << "z2.dimension()=" << z2.dimension() << endl;
   cout << "z2.number_of_generators()=" << z2.number_of_generators() << endl;
   cout << "z2.centre()=" << z2.centre() << endl;
@@ -158,9 +162,9 @@ test_zonotope()
   eps << z2;
   for(uint i=0; i!=6; ++i) {
     if(z2.contains(pts[i])) {
-      eps.set_fill_colour("black");
+      eps << fill_colour(black);
     } else {
-      eps.set_fill_colour("red");
+      eps << fill_colour(red);
     }
   }
   eps.close();
@@ -179,16 +183,11 @@ test_zonotope()
 
   bbox=z3.bounding_box().expand_by(R(0.5));
   eps.open("test_zonotope-2.eps",bbox);
-  eps.set_fill_colour("white");
-  eps << bbox3;
-  eps.set_fill_colour("red");
-  eps << oaz3;
-  eps.set_fill_colour("green");
-  eps << z3;
-  eps.set_fill_colour("yellow");
-  eps << polyhedron(Zonotope<Rational>(z3));
-  eps.set_fill_colour("blue");
-  eps << iaz3;
+  eps << fill_colour(white) << bbox3;
+  eps << fill_colour(red) << oaz3;
+  eps << fill_colour(green) << z3;
+  eps << fill_colour(yellow) << polyhedron(Zonotope<Rational>(z3));
+  eps << fill_colour(blue) << iaz3;
   eps.close();
   
   bbox=z4.bounding_box().expand_by(R(0.5));
@@ -208,14 +207,10 @@ test_zonotope()
     pt=Point<R>("(-2.5,0.5)");
     bbox=z.bounding_box().expand_by(R(0.5));
     eps.open("test_zonotope-real.eps",bbox);
-    eps.set_fill_colour("white");
-    eps << z.bounding_box();
-    eps.set_fill_colour("red");
-    eps << oaz;
-    eps.set_fill_colour("green");
-    eps << z;
-    eps.set_fill_colour("blue");
-    eps << iaz;
+    eps << fill_colour(white) << z.bounding_box();
+    eps << fill_colour(red) << oaz;
+    eps << fill_colour(green) << z;
+    eps << fill_colour(blue) << iaz;
     eps.close();
   }    
 
@@ -233,18 +228,12 @@ test_zonotope()
     pt=Point<R>("(-2.5,0.5)");
     bbox=z.bounding_box().expand_by(R(0.5));
     eps.open("test_zonotope-uniform.eps",bbox);
-    eps.set_fill_colour("white");
-    eps << ez.bounding_box();
-    eps.set_fill_colour("red");
-    eps << oaez;
-    eps.set_fill_colour("yellow");
-    //eps << aez;
-    eps.set_fill_colour("yellow");
-    //eps << z;
-    eps.set_fill_colour("green");
-    eps << ez;
-    eps.set_fill_colour("blue");
-    eps << iaez;
+    eps << fill_colour(white) << ez.bounding_box();
+    eps << fill_colour(red) << oaez;
+    // eps << fill_colour(yellow) << aez;
+    //eps << fill_colour(yellow) << z;
+    eps << fill_colour(green) << ez;
+    eps << fill_colour(blue) << iaez;
     eps.close();
   }    
 
@@ -262,14 +251,10 @@ test_zonotope()
     pt=Point<R>("(-2.5,0.5)");
     bbox=z.bounding_box().expand_by(R(0.5));
     eps.open("test_zonotope-interval.eps",bbox);
-    eps.set_fill_colour("white");
-    eps << z.bounding_box();
-    eps.set_fill_colour("red");
-    eps << oaz;
-    eps.set_fill_colour("yellow");
-    eps << z;
-    eps.set_fill_colour("green");
-    eps << approximation(iz);
+    eps << fill_colour(white) << z.bounding_box();
+    eps << fill_colour(red) << oaz;
+    eps << fill_colour(yellow) << z;
+    eps << fill_colour(green) << approximation(iz);
     eps.close();
     
     

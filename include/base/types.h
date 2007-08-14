@@ -44,14 +44,14 @@ namespace Ariadne {
     //! \name Basic types
     //@{
     //! \ingroup Base
-    /*! \brief The type used for a unique identifier or key. */
-    typedef size_t id_type;
     /*! \brief The type of a machine byte. */
     typedef unsigned char byte_type; 
     /*! \brief An unsigned integral type used to represent the size of a list. */
     typedef size_t size_type;
     /*! \brief An signed integral type used to represent the position in a list with positive and negative indices. */
-    typedef int index_type;
+    typedef ptrdiff_t index_type;
+    /*! \brief The type used for a unique identifier or key. */
+    typedef unsigned int id_type;
     /*! \brief An unsigned integral type used to represent a coordinate in state space. */
     typedef unsigned short dimension_type;
     /*! \brief The type used to describe evolution time for discrete time systems. */

@@ -415,38 +415,9 @@ LinearAlgebra::MatrixSlice<R>::write(std::ostream& os) const
 
 
 
-template<class R> inline 
-bool
-LinearAlgebra::contains_value(const Matrix< Numeric::Interval<R> >& iA, const Matrix<R>& A) 
-{
-  ARIADNE_CHECK_MATRIX_EQUAL_SIZES(iA,A,"bool contains_value(Matrix<Interval>,Matrix<Real>)");
-  for(size_type i=0; i!=A.number_of_rows(); ++i) {
-    for(size_type j=0; j!=A.number_of_columns(); ++j) {
-      if(!Numeric::contains_value(iA(i,j),A(i,j))) {
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-
-template<class R> inline 
-LinearAlgebra::Matrix<R>
-LinearAlgebra::approximate_value(const Matrix< Numeric::Interval<R> >& im) 
-{
-  Matrix<R> result(im.number_of_rows(),im.number_of_columns());
-  for(size_type i=0; i!=im.number_of_rows(); ++i) {
-    for(size_type j=0; j!=im.number_of_columns(); ++j) {
-      result(i,j)=approximate_value(im(i,j));
-    }
-  }
-  return result;
-}
-
 template<class R1,class R2> inline 
 LinearAlgebra::Matrix<R1>
-LinearAlgebra::approximate(const Matrix<R2>& im) 
+LinearAlgebra::approximation(const Matrix<R2>& im) 
 {
   Matrix<R1> result(im.number_of_rows(),im.number_of_columns());
   for(size_type i=0; i!=im.number_of_rows(); ++i) {
@@ -456,6 +427,54 @@ LinearAlgebra::approximate(const Matrix<R2>& im)
   }
   return result;
 }
+
+
+template<class R> inline 
+LinearAlgebra::Matrix<R>
+LinearAlgebra::midpoint(const Matrix< Numeric::Interval<R> >& im) 
+{
+  Matrix<R> result(im.number_of_rows(),im.number_of_columns());
+  for(size_type i=0; i!=im.number_of_rows(); ++i) {
+    for(size_type j=0; j!=im.number_of_columns(); ++j) {
+      result(i,j)=midpoint(im(i,j));
+    }
+  }
+  return result;
+}
+
+
+template<class R> inline 
+bool
+LinearAlgebra::encloses(const Matrix< Numeric::Interval<R> >& iA, const Matrix<R>& A) 
+{
+  ARIADNE_CHECK_MATRIX_EQUAL_SIZES(iA,A,"bool encloses(Matrix<Interval>,Matrix<Real>)");
+  for(size_type i=0; i!=A.number_of_rows(); ++i) {
+    for(size_type j=0; j!=A.number_of_columns(); ++j) {
+      if(!Numeric::encloses(iA(i,j),A(i,j))) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+
+template<class R> inline 
+bool
+LinearAlgebra::refines(const Matrix< Numeric::Interval<R> >& iA1, const Matrix< Numeric::Interval<R> >& iA2) 
+{
+  ARIADNE_CHECK_MATRIX_EQUAL_SIZES(iA1,iA2,"bool refines(Matrix<Interval>,Matrix<Interval>)");
+  for(size_type i=0; i!=iA1.number_of_rows(); ++i) {
+    for(size_type j=0; j!=iA1.number_of_columns(); ++j) {
+      if(!Numeric::refines(iA1(i,j),iA2(i,j))) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+
 
 template<class R> inline
 LinearAlgebra::Vector< Numeric::Interval<R> >
@@ -522,6 +541,20 @@ LinearAlgebra::operator+=(Matrix<R1>& A1, const Matrix<R2>& A2)
   }
   return A1;
 }
+
+
+template<class R1, class R2> inline 
+LinearAlgebra::Matrix<R1>&
+LinearAlgebra::operator-=(Matrix<R1>& A1, const Matrix<R2>& A2) 
+{
+  for(size_type i=0; i!=A1.number_of_rows(); ++i) {
+    for(size_type j=0; j!=A1.number_of_columns(); ++j) {
+      A1(i,j)-=A2(i,j);
+    }
+  }
+  return A1;
+}
+
 
 template<class R1, class R2>  inline
 LinearAlgebra::Matrix<typename Numeric::traits<R1,R2>::arithmetic_type>

@@ -110,17 +110,17 @@ int bouncing_ball_automaton()
   epsfstream eps; 
 
   eps.open("bouncing_ball-3var-xv.eps",bounding_box);
-  eps << fill_colour("white") << bounding_box;
-  eps << fill_colour("cyan") << activation;
-  eps << line_style(true) << fill_colour("yellow") << chainreach[mode1_id];
-  eps << fill_colour("blue") << initial_set[mode1_id];
+  eps << fill_colour(white) << bounding_box;
+  eps << fill_colour(cyan) << activation;
+  eps << line_style(true) << fill_colour(yellow) << chainreach[mode1_id];
+  eps << fill_colour(blue) << initial_set[mode1_id];
   eps.close();
   
   eps.open("bouncing_ball-3var-tx.eps",bounding_box,PlanarProjectionMap(3,2,0));
-  eps << fill_colour("white") << bounding_box;
-  eps << fill_colour("cyan") << activation;
-  eps << line_style(true) << fill_colour("yellow") << chainreach[mode1_id];
-  eps << fill_colour("blue") << initial_set[mode1_id];
+  eps << fill_colour(white) << bounding_box;
+  eps << fill_colour(cyan) << activation;
+  eps << line_style(true) << fill_colour(yellow) << chainreach[mode1_id];
+  eps << fill_colour(blue) << initial_set[mode1_id];
   eps.close();
   
   return 0;

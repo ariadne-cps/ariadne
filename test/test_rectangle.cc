@@ -76,7 +76,7 @@ test_rectangle()
          << "r5=" << r5 << ", r6=" << r6 << ", r7=" << r7 << endl;
     
     cout << "r2.volume()=" << r2.volume() << endl;
-    assert(contains_value(Interval<R>(1.74,1.76),r2.volume()));
+    assert(encloses(Interval<R>(1.74,1.76),r2.volume()));
     
     assert(r1==r7);
     assert(indeterminate(equal(r1,r7)));

@@ -69,10 +69,10 @@ test_affine_integrator()
     Vector<R> b("[0.125,0.25]");
     time_type h=0.125;
     uint k=1;
-    std::cout << gexp(T,u,time_type(0.5),0u) << endl;
-    std::cout << gexp(I,u,1,1u) << endl;
-    std::cout << gexp(I,u,1,2u) << endl;
-    std::cout << gexp(A,b,h,k) << endl;
+    std::cout << gexp(T,u,Interval<R>(0.5),0u) << endl;
+    std::cout << gexp(I,u,Interval<R>(1),1u) << endl;
+    std::cout << gexp(I,u,Interval<R>(1),2u) << endl;
+    std::cout << gexp(A,b,Interval<R>(h),k) << endl;
   }
   
   Matrix<R> A("[-2,-1;1,-2]");
@@ -112,16 +112,11 @@ test_affine_integrator()
   
   epsfstream eps;
   eps.open("test_affine_integrator.eps",bb);
-  eps.set_fill_colour("red");
-  eps << over_approximation(riz1) << over_approximation(riz2) << over_approximation(riz3) << over_approximation(riz4);
-  eps.set_fill_colour("green");
-  eps << approximation(riz1) << approximation(riz2) << approximation(riz3) << approximation(riz4);
-  eps.set_fill_colour("magenta");
-  eps << approximation(hiz1) << approximation(hiz2) << approximation(hiz3) << approximation(hiz4);
-  eps.set_fill_colour("blue");
-  eps << approximation(iz1) << approximation(iz2) << approximation(iz3) << approximation(iz4);
-  eps.set_fill_colour("yellow");
-  eps << over_approximation(iz);
+  eps << fill_colour(red) << over_approximation(riz1) << over_approximation(riz2) << over_approximation(riz3) << over_approximation(riz4);
+  eps << fill_colour(green) << approximation(riz1) << approximation(riz2) << approximation(riz3) << approximation(riz4);
+  eps << fill_colour(magenta) << approximation(hiz1) << approximation(hiz2) << approximation(hiz3) << approximation(hiz4);
+  eps << fill_colour(blue) << approximation(iz1) << approximation(iz2) << approximation(iz3) << approximation(iz4);
+  eps << fill_colour(yellow) << over_approximation(iz);
   eps.close();
   
   cout << endl;

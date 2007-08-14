@@ -93,14 +93,10 @@ test_constraint_set()
   // graphical output
   epsfstream eps;
   eps.open("test_constraint_set-1.eps",bb.neighbourhood(0.25));
-  eps.set_fill_colour("red");
-  eps << gmsoa;
-  eps.set_fill_colour("green");
-  eps.set_line_style(false);
-  eps << static_cast<const SetInterface<R>&>(s);
-  eps.set_line_style(true);
-  eps.set_fill_colour("blue");
-  eps << gmsia;
+  eps << fill_colour(red) << gmsoa;
+  eps << fill_colour(green);
+  eps << line_style(false) << static_cast<const SetInterface<R>&>(s);
+  eps << line_style(true) << fill_colour(blue) << gmsia;
   eps.close();
   
   cout << endl;

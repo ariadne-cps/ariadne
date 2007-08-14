@@ -169,38 +169,63 @@ namespace Ariadne {
       return pt;
     }
     
+    template<class R> inline
+    Point<R> approximation(const Point< Numeric::Interval<R> >& ipt) 
+    {
+      Point<R> result(ipt.dimension());
+      for(dimension_type i=0; i!=ipt.dimension(); ++i) {
+        result[i]=midpoint(ipt[i]);
+      }
+      return result;
+    }
+    
 
     template<class R> inline
-    bool contains_value(const Point< Numeric::Interval<R> >& ipt, const Point<R>& pt) 
+    Point<R>
+    midpoint(const Point< Numeric::Interval<R> >& pt) 
     {
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(ipt,pt,"bool contains_value(Point<Interval>,Point<Real>)");
+      Point<R> result(pt.dimension());
+      for(dimension_type i=0; i!=result.dimension(); ++i) {
+        result[i]=midpoint(pt[i]);
+      }
+      return result;
+    }
+    
+
+    template<class R> inline
+    R radius(const Point< Numeric::Interval<R> >& ipt) 
+    {
+      R result(0);
       for(dimension_type i=0; i!=ipt.dimension(); ++i) {
-        if(!contains_value(ipt[i],pt[i])) {
+        result=Numeric::max(result,radius(ipt[i]));
+      }
+      return result;
+    }
+
+
+    template<class R> inline
+    bool encloses(const Point< Numeric::Interval<R> >& ipt, const Point<R>& pt) 
+    {
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(ipt,pt,"bool encloses(Point<Interval>,Point<Real>)");
+      for(dimension_type i=0; i!=ipt.dimension(); ++i) {
+        if(!encloses(ipt[i],pt[i])) {
           return false;
         }
       }
       return true;
     }
     
-    
+
     template<class R> inline
-    Point<R> approximation(const Point< Numeric::Interval<R> >& ipt) 
+    bool refines(const Point< Numeric::Interval<R> >& ipt1, const Point< Numeric::Interval<R> >& ipt2) 
     {
-      Point<R> result(ipt.dimension());
-      for(dimension_type i=0; i!=ipt.dimension(); ++i) {
-        result[i]=ipt[i].centre();
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(ipt1,ipt2,"bool refines(Point<Interval>,Point<Interval>)");
+      for(dimension_type i=0; i!=ipt1.dimension(); ++i) {
+        if(!refines(ipt1[i],ipt2[i])) {
+          return false;
+        }
       }
-      return result;
-    }
-    
-    template<class R> inline
-    R error_bound(const Point< Numeric::Interval<R> >& ipt) 
-    {
-      R result(0);
-      for(dimension_type i=0; i!=ipt.dimension(); ++i) {
-        result=Numeric::max(result,error_bound(ipt[i]));
-      }
-      return result;
+      return true;
     }
     
 
@@ -263,17 +288,6 @@ namespace Ariadne {
     }
 
 
-    
-    template<class R> inline
-    Point<R>
-    approximate_value(const Point< Numeric::Interval<R> >& pt) 
-    {
-      Point<R> result(pt.dimension());
-      for(dimension_type i=0; i!=result.dimension(); ++i) {
-        result[i]=approximate_value(pt[i]);
-      }
-      return result;
-    }
     
 
     template<class R> inline 

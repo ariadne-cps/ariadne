@@ -29,7 +29,7 @@
 
 /*! Send a message to the global logging stream. */
 #define ARIADNE_LOG(level,msg)                  \
-  if(verbosity >= level) { std::clog << msg; }
+  if(verbosity >= level) { std::clog << msg << std::flush; }
 
 namespace Ariadne {
   
@@ -80,37 +80,38 @@ namespace Ariadne {
     extern int verbosity; 
   }
 
-  /*! \brief Set the verbosity level for the %Numeric module. */
-  inline void set_numeric_verbosity(int v) { Numeric::verbosity=v; }
-  /*! \brief Set the verbosity level for the Linear Algebra module. */
-  inline void set_linear_algebra_verbosity(int v) { LinearAlgebra::verbosity=v; }
-  /*! \brief Set the verbosity level for the Linear Programming module. */
-  inline void set_linear_programming_verbosity(int v) { LinearProgramming::verbosity=v; }
-  /*! \brief Set the verbosity level for the %Combinatoric module. */
-  inline void set_combinatoric_verbosity(int v) { Combinatoric::verbosity=v; }
-  /*! \brief Set the verbosity level for the %Geometry module. */
-  inline void set_geometry_verbosity(int v) { Geometry::verbosity=v; }
-  /*! \brief Set the verbosity level for the %System module. */
-  inline void set_system_verbosity(int v) { System::verbosity=v; }
-  /*! \brief Set the verbosity level for the %Evaluation module. */
-  inline void set_evaluation_verbosity(int v) { 
-    Evaluation::solver_verbosity=v;
-    Evaluation::applicator_verbosity=v;
-    Evaluation::integrator_verbosity=v; 
-    Evaluation::hybrid_evolver_verbosity=v;
+  namespace Output { 
+    /*! \brief Set the verbosity level for the %Numeric module. */
+    inline void set_numeric_verbosity(int v) { Numeric::verbosity=v; }
+    /*! \brief Set the verbosity level for the Linear Algebra module. */
+    inline void set_linear_algebra_verbosity(int v) { LinearAlgebra::verbosity=v; }
+    /*! \brief Set the verbosity level for the Linear Programming module. */
+    inline void set_linear_programming_verbosity(int v) { LinearProgramming::verbosity=v; }
+    /*! \brief Set the verbosity level for the %Combinatoric module. */
+    inline void set_combinatoric_verbosity(int v) { Combinatoric::verbosity=v; }
+    /*! \brief Set the verbosity level for the %Geometry module. */
+    inline void set_geometry_verbosity(int v) { Geometry::verbosity=v; }
+    /*! \brief Set the verbosity level for the %System module. */
+    inline void set_system_verbosity(int v) { System::verbosity=v; }
+    /*! \brief Set the verbosity level for the %Evaluation module. */
+    inline void set_evaluation_verbosity(int v) { 
+      Evaluation::solver_verbosity=v;
+      Evaluation::applicator_verbosity=v;
+      Evaluation::integrator_verbosity=v; 
+      Evaluation::hybrid_evolver_verbosity=v;
+    }
+    /*! \brief Set the verbosity level for the %Solver class. */
+    inline void set_solver_verbosity(int v) { Evaluation::solver_verbosity=v; }
+    /*! \brief Set the verbosity level for the %Applicator class. */
+    inline void set_applicator_verbosity(int v) { Evaluation::applicator_verbosity=v; }
+    /*! \brief Set the verbosity level for the %Integrator class. */
+    inline void set_integrator_verbosity(int v) { Evaluation::integrator_verbosity=v; }
+    /*! \brief Set the verbosity level for the %HybridEvolver class. */
+    inline void set_hybrid_evolver_verbosity(int v) { Evaluation::hybrid_evolver_verbosity=v; }
+
+    /*! \brief Set the verbosity level for the %Input class. */
+    inline void set_input_verbosity(int v) { Input::verbosity=v; }
   }
-  /*! \brief Set the verbosity level for the %Solver class. */
-  inline void set_solver_verbosity(int v) { Evaluation::solver_verbosity=v; }
-  /*! \brief Set the verbosity level for the %Applicator class. */
-  inline void set_applicator_verbosity(int v) { Evaluation::applicator_verbosity=v; }
-  /*! \brief Set the verbosity level for the %Integrator class. */
-  inline void set_integrator_verbosity(int v) { Evaluation::integrator_verbosity=v; }
-  /*! \brief Set the verbosity level for the %HybridEvolver class. */
-  inline void set_hybrid_evolver_verbosity(int v) { Evaluation::hybrid_evolver_verbosity=v; }
-
-  /*! \brief Set the verbosity level for the %Input class. */
-  inline void set_input_verbosity(int v) { Input::verbosity=v; }
-
 
 
 }

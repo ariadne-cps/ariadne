@@ -32,6 +32,8 @@
 #include <boost/smart_ptr.hpp>
 
 #include "../base/stlio.h"
+#include "../base/clonable_container.h"
+#include "../base/reference_container.h"
 #include "../geometry/constraint.h"
 #include "../geometry/hybrid_space.h"
 #include "../system/declarations.h"
@@ -49,6 +51,9 @@ namespace Ariadne {
     using Geometry::ConstraintInterface;
     using Geometry::Constraint;
   
+    enum EventKind { invariant_tag, guard_tag, activation_tag };
+
+    /*! \brief A discrete mode of a ConstraintHybridAutomaton. */    
     template<class R>
     class ConstraintDiscreteMode {
       friend class ConstraintHybridAutomaton<R>;
@@ -57,24 +62,26 @@ namespace Ariadne {
       id_type id() const;
       dimension_type dimension() const;
       const VectorFieldInterface<R>& dynamic() const;
-      const ConstraintInterface<R>& invariant(size_type k) const;
-      const ConstraintInterface<R>& activation(id_type event_id) const;
-      const ConstraintInterface<R>& guard(id_type event_id) const;
+      const ConstraintDiscreteTransition<R>& transition(id_type event_id) const;
+      const reference_set< const ConstraintDiscreteTransition<R> >& transitions() const;
       std::ostream& write(std::ostream& os) const;
      private:
-      ConstraintDiscreteMode(id_type id, const VectorFieldInterface<R>& dynamic, 
-                             const std::vector< boost::shared_ptr< const ConstraintInterface<R> > >& invariant);
+      ConstraintDiscreteMode(id_type id, const VectorFieldInterface<R>& dynamic);
       id_type _id;
       boost::shared_ptr< const VectorFieldInterface<R> > _dynamic;
-      std::vector< boost::shared_ptr< const ConstraintInterface<R> > > _invariant;
+      std::map< id_type, boost::shared_ptr< const ConstraintInterface<R> > > _invariants;
       std::map< id_type, boost::shared_ptr< const ConstraintInterface<R> > > _guards;
       std::map< id_type, boost::shared_ptr< const ConstraintInterface<R> > > _activations;
+      reference_data_map< id_type, const ConstraintInterface<R> > _constraints;
+      reference_set< const ConstraintDiscreteTransition<R> > _transitions;
     };
       
     template<class R>
     bool operator<(const ConstraintDiscreteMode<R>& dm1, const ConstraintDiscreteMode<R>& dm2);
 
 
+
+    /*! \brief A discrete transition of a ConstraintHybridAutomaton. */
     template<class R>
     class ConstraintDiscreteTransition {
       friend class ConstraintHybridAutomaton<R>;
@@ -86,18 +93,20 @@ namespace Ariadne {
       const ConstraintDiscreteMode<R>& source() const;   
       const ConstraintDiscreteMode<R>& destination() const;
       const MapInterface<R>& reset() const;
-      const ConstraintInterface<R>& activation() const;
+      const ConstraintInterface<R>& constraint() const;
+      EventKind kind() const;
       bool forced() const;
       std::ostream& write(std::ostream& os) const;
     private:
+      ConstraintDiscreteTransition(id_type id, const ConstraintDiscreteMode<R>& source, const ConstraintInterface<R>& activation);
       ConstraintDiscreteTransition(id_type id, const ConstraintDiscreteMode<R>& source, const ConstraintDiscreteMode<R>& destination,
                                    const MapInterface<R>& reset, const ConstraintInterface<R>& activation, bool forced);
       id_type _event_id;
       const ConstraintDiscreteMode<R>* _source;   
       const ConstraintDiscreteMode<R>* _destination;
       boost::shared_ptr< const MapInterface<R> > _reset;  
-      boost::shared_ptr< const ConstraintInterface<R> > _activation;
-      bool _forced;
+      boost::shared_ptr< const ConstraintInterface<R> > _constraint;
+      EventKind _event_kind;
     };
     
     template<class R>
@@ -107,7 +116,7 @@ namespace Ariadne {
   
     /*! \ingroup HybridTime
      *  \brief A hybrid automaton, comprising continuous-time behaviour
-     *  at each DiscreteMode, coupled by instantaneous DiscreteTransition events.
+     *  at each discrete mode (ConstraintDiscreteMode), coupled by instantaneous transitions (ConstraintDiscreteTransition).
      *  The state space is given by a Geometry::HybridSet.  
      *
      * A hybrid automaton is a dynamic system with evolution in both
@@ -184,29 +193,19 @@ namespace Ariadne {
       const mode_type& new_mode(id_type id,
                                 const VectorFieldInterface<R>& dynamic);
       
-      /*! \brief Adds a discrete mode with a given dynamic but no constraints.
+      /*! \brief Adds an invariant to a discrete mode.
        *
-       * This method adds a discrete mode to automaton definition.
-       * \param id is the unique key or identifier of the discrete mode.
-       * \param dynamic is the discrete mode's vector field.
-       * \param invariant is the discrete mode's invariant. 
+       * This method adds an invariant constraint to a discrete mode of a hybrid automaton.
+       * \param event_id is the unique key or identifier of the discrete mode.
+       * \param mode_id is the unique key or identifier of the discrete mode.
+       * \param constraint is the constraint of the invariant.
        */
-      const mode_type& new_mode(id_type id,
-                                const VectorFieldInterface<R>& dynamic,
-                                const ConstraintInterface<R>& invariant);
-      
-      /*! \brief Adds a discrete mode with a given dynamic but no constraints.
-       *
-       * This method adds a discrete mode to automaton definition.
-       * \param id is the unique key or identifier of the discrete mode.
-       * \param dynamic is the discrete mode's vector field.
-       * \param invariant is the discrete mode's invariant.
-       */
-      const ConstraintInterface<R>& new_invariant(id_type mode_id, 
-                                                  const ConstraintInterface<R>& constraint);
+      const transition_type& new_invariant(id_type event_id,
+                                           id_type mode_id, 
+                                           const ConstraintInterface<R>& constraint);
       
       
-      /*! \brief Adds a discrete-time reset with a given event, source mode and destination mode..
+      /*! \brief Adds a discrete-time reset with a given event, source mode and destination mode.
        *
        * This method creates a new discrete transition from the mode with  mode to the 
        * destination mode.
@@ -214,12 +213,14 @@ namespace Ariadne {
        * \param source_id is the identifier of the discrete transition's source mode.
        * \param destination_id is the identifier of the discrete transition's destination mode.
        * \param reset is the discrete transition's reset.
+       * \param constraint is the discrete transition's activating constraint. The constraint is activated when the activation value is positive.
+       * \param forced is \a true if the transition is forced to occur whenever the constraint is violated.
        */
       const transition_type& new_transition(id_type event_id,
                                             id_type source_id, 
                                             id_type destination_id,
                                             const MapInterface<R>& reset,
-                                            const ConstraintInterface<R>& activation,
+                                            const ConstraintInterface<R>& constraint,
                                             bool forced);
       
       /*! \brief Adds a discrete-time reset with a given event, source mode and destination mode..
@@ -230,6 +231,7 @@ namespace Ariadne {
        * \param source_id is the identifier of the discrete transition's source mode.
        * \param destination_id is the identifier of the discrete transition's destination mode.
        * \param reset is the discrete transition's reset.
+       * \param activation is the discrete transition's activating constraint. The constraint is activated when the activation value is positive.
        */
       const transition_type& new_unforced_transition(id_type event_id,
                                                      id_type source_id, 
@@ -245,17 +247,18 @@ namespace Ariadne {
        * \param source_id is the identifier of the discrete transition's source mode.
        * \param destination_id is the identifier of the discrete transition's destination mode.
        * \param reset is the discrete transition's reset.
+       * \param activation is the discrete transition's guard constraint. The transition is activated when the guard value is positive.
        */
       const transition_type& new_forced_transition(id_type event_id,
                                                    id_type source_id, 
                                                    id_type destination_id,
                                                    const MapInterface<R>& reset,
-                                                   const ConstraintInterface<R>& activation);
+                                                   const ConstraintInterface<R>& guard);
       
       /*! \brief Test if the hybrid automaton has a discrete mode with key id. */
       bool has_mode(id_type id) const;
       
-      /*! \brief Test if the hybrid automaton has a discrete transition with \a event_id and \a source_id. */
+      /*! \brief Test if the hybrid automaton has a discrete transition or invariant with \a event_id and \a source_id. */
       bool has_transition(id_type event_id, id_type source_id) const;
       
       /*! \brief A set giving the dimension of the state space for each location identifier. */
@@ -269,22 +272,13 @@ namespace Ariadne {
       
       /*! \brief The set of discrete transitions. */
       const std::set< transition_type >& transitions() const;
-      
+      /*! \brief The set of discrete transitions with a given \a mode_id. */
+      const reference_set<const transition_type>& transitions(id_type mode_id) const;
       /*! \brief The discrete transition with given \a event_id and \a source id. */
       const transition_type& transition(id_type event_id, id_type source_id) const;
       
-      const System::VectorFieldInterface<R>& reset(id_type mode_id) const;
-      const System::MapInterface<R>& reset(id_type event_id, id_type source_id) const;
-
-      const std::vector< constraint_const_pointer >& invariants(id_type mode_id) const;
-      const std::map< id_type, constraint_const_pointer >& activations(id_type source_id) const;
-      const std::map< id_type, constraint_const_pointer >& guards(id_type source_id) const;
-      constraint_const_reference activation(id_type event_id, id_type source_id) const;
-      constraint_const_reference guard(id_type event_id, id_type source_id) const;
-
-      
       /*! \brief Returns the hybrid automaton's name. */
-      const std::string &name() const;
+      const std::string& name() const;
       
       std::ostream& write(std::ostream& os) const;  
      private:
@@ -303,7 +297,7 @@ namespace Ariadne {
 
     template<class R> inline
     bool operator<(const ConstraintDiscreteTransition<R>& dt1, const ConstraintDiscreteTransition<R>& dt2) {
-      return dt1.id() < dt2.id() or (dt1.id()==dt2.id() and dt1.source_id()==dt2.source_id());
+      return dt1.id() < dt2.id() or (dt1.id()==dt2.id() and dt1.source_id()<dt2.source_id());
     }
 
 

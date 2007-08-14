@@ -45,82 +45,79 @@
 namespace Ariadne {
   namespace Numeric {
   
-      template<class R> 
+      template<class R> inline 
       Interval<R>::Interval()
         : _lower(conv_down<R>(0)), _upper(conv_up<R>(0)) { }
 
-      template<class R> 
+      template<class R> inline 
       Interval<R>::Interval(const R& x)
         : _lower(x), _upper(x) { }
 
-      template<class R> 
+      template<class R> inline 
       Interval<R>::Interval(const R& l, const R& u)
         : _lower(l), _upper(u) { }
 
-      template<class R> 
+      template<class R> inline 
       Interval<R>::Interval(const Interval<R>& ivl)
         : _lower(ivl._lower), _upper(ivl._upper) { }
 
-      template<class R> 
+      template<class R> inline 
       Interval<R>& Interval<R>::operator=(const R& x) {
         this->_lower=x; this->_upper=x; return *this;
       }
 
-      template<class R> 
+      template<class R> inline 
       Interval<R>& Interval<R>::operator=(const Interval<R>& ivl) {
         this->_lower=ivl._lower; this->_upper=ivl._upper; return *this;
       }
 
-      template<class R> template<class RL,class RU> 
+      template<class R> template<class RL,class RU> inline 
       Interval<R>::Interval(const RL& l, const RU& u)
         : _lower(conv_down<R>(l)), _upper(conv_up<R>(u)) { }
 
-      template<class R> template<class RX> 
+      template<class R> template<class RX> inline 
       Interval<R>::Interval(const Interval<RX>& ivl)
         : _lower(conv_down<R>(ivl.lower())), _upper(conv_up<R>(ivl.upper())) { }
 
-      template<class R> template<class RX> 
+      template<class R> template<class RX> inline 
       Interval<R>::Interval(const RX& x)
         : _lower(conv_down<R>(x)), _upper(conv_up<R>(x)) { }
       
-      template<class R> template<class RX> 
+      template<class R> template<class RX> inline 
       Interval<R>& Interval<R>::operator=(const RX& x) {
         this->_lower=conv_down<R>(x); this->_upper=conv_up<R>(x); return *this;
       }
 
 
-      template<class R> template<class RX> 
+      template<class R> template<class RX> inline 
       Interval<R>& Interval<R>::operator=(const Interval<RX>& ivl) {
         this->_lower=conv_down<R>(ivl.lower()); this->_upper=conv_up<R>(ivl.upper()); return *this;
       }
 
 
       
-      template<class R> const R& Interval<R>::lower() const { return this->_lower; }
+      template<class R> inline const R& Interval<R>::lower() const { return this->_lower; }
 
-      template<class R> const R& Interval<R>::upper() const { return this->_upper; }
+      template<class R> inline const R& Interval<R>::upper() const { return this->_upper; }
       
 
-      template<class R> R Interval<R>::midpoint() const { 
-        return div_approx(add_approx(this->lower(),this->upper()),R(2)); }
+      template<class R> inline R Interval<R>::midpoint() const { return div_approx(add_approx(this->lower(),this->upper()),R(2)); }
 
-      template<class R> R Interval<R>::centre() const { 
-        return div_approx(add_approx(this->lower(),this->upper()),R(2)); }
+      template<class R> inline R Interval<R>::radius() const { return div_up(sub_up(this->upper(),this->lower()),R(2)); }
 
-      template<class R> R Interval<R>::radius() const { return div_up(sub_up(this->upper(),this->lower()),R(2)); }
-
-      template<class R>  R Interval<R>::length() const { return sub_up(this->upper(),this->lower()); }
+      template<class R> R Interval<R>::width() const { return sub_up(this->upper(),this->lower()); }
       
 
-      template<class R> bool Interval<R>::empty() const { return this->lower()>this->upper(); }
+      template<class R> inline bool Interval<R>::empty() const { return this->lower()>this->upper(); }
 
-      template<class R> bool Interval<R>::singleton() const { return this->lower()==this->upper(); }
+      template<class R> inline bool Interval<R>::singleton() const { return this->lower()==this->upper(); }
 
-      template<class R> bool Interval<R>::contains(const R& r) const { return this->lower()<=r && r<=this->upper(); }
+      template<class R> template<class RX> inline bool Interval<R>::encloses(const RX& x) const { return this->lower()<=x && x<=this->upper(); }
+      
+      template<class R> template<class RX> inline bool Interval<R>::refines(const Interval<RX>& ivl) const { return ivl.lower()<=this->lower() && this->upper()<=ivl.upper(); }
       
 
-      template<class R> void Interval<R>::expand_by(const R& r) { this->_lower=sub_down(this->lower(),r); this->_upper=add_up(this->upper(),r); }
-
+      template<class R> inline void Interval<R>::expand_by(const R& r) { this->_lower=sub_down(this->lower(),r); this->_upper=add_up(this->upper(),r); }
 
 
 
@@ -143,37 +140,57 @@ namespace Ariadne {
     };
     
     
+  /*
     template<class R> inline 
     R conv_approx(const Interval<R>& ivl) {
       return approximate_value(ivl);
     }
-    
-    template<class R> inline
-    R approximate_value(const Interval<R>& ivl) {
-      return ivl.centre();
-      //return Numeric::med_appox(ivl.lower(),ivl.upper());
-      //return div_approx(add_appox(ivl.lower(),ivl.upper()),2);
-    }
-    
-    template<class R> inline
-    R approximate_value(const R& x) {
-      return x;
-    }
-    
-    template<class R> inline
-    bool contains_value(const Interval<R>& ivl, const R& x) 
-    {
-      return ivl.contains(x);
-    }
-    
-    template<class R> inline
-    R error_bound(const Interval<R>& ivl) 
-    {
-      R av=approximate_value(ivl);
-      return max_up(sub_up(av,ivl.lower()),sub_up(ivl.upper(),av));
-    }
+  */
     
 
+    template<class R> inline
+    R lower(const Interval<R>& x) {
+      return x.lower();
+    }
+    
+    template<class R> inline
+    R upper(const Interval<R>& x) {
+      return x.upper();
+    }
+    
+    template<class R> inline
+    R midpoint(const Interval<R>& x) {
+      return x.midpoint();
+    }
+    
+    template<class R> inline
+    R radius(const Interval<R>& x) { 
+      return x.radius();
+    }
+      
+    template<class R> inline
+    R width(const Interval<R>& x) { 
+      return x.width();
+    }
+
+
+    template<class R> inline
+    R mignitude(const Interval<R>& x) { 
+      if(x.lower()>0) { return x.lower(); }
+      else if(x.upper()<0) { return -x.upper(); }
+      else { return static_cast<R>(0); }
+    }
+
+
+    template<class R, class RX> inline
+    bool encloses(const Interval<R>& ivl, const RX& x) { 
+      return ivl.encloses(x);
+    }
+
+    template<class R1, class R2> inline
+    bool refines(const Interval<R1>& ivl1, const Interval<R2>& ivl2) { 
+      return ivl1.refines(ivl2);
+    }
 
 
     template<class R1, class R2> inline
@@ -617,21 +634,6 @@ namespace Ariadne {
   
 
 
-    template<class R> inline
-    R centre(const Interval<R>& x) {
-      return x.centre();
-    }
-    
-    template<class R> inline
-    R radius(const Interval<R>& x) { 
-      return x.radius();
-    }
-      
-    template<class R> inline
-    R length(const Interval<R>& x) { 
-      return x.length();
-    }
-
 
     template<class R> inline
     bool equal(const Interval<R>& x1, const Interval<R>& x2) {
@@ -739,18 +741,18 @@ namespace Ariadne {
     }
     
     
-    template<class R> inline
+    template<class R> 
     std::ostream& Interval<R>::write(std::ostream& os) const {
       if(this->empty()) {
-        return os << "[1,0]";
+        return os << "[1:0]";
       }
       else {
-        return os << "[" << this->lower() << "," << this->upper() << "]";
+        return os << "[" << this->lower() << ":" << this->upper() << "]";
       }
     }
     
     
-    template<class R> inline
+    template<class R> 
     std::istream& Interval<R>::read(std::istream& is) {
       char c;
       R l;
@@ -758,7 +760,7 @@ namespace Ariadne {
       is >> c;
       if(c=='[') {
         is >> l >> c;
-        if(c!=',') {
+        if(c!=',' && c!=':') {
           is.setstate(std::ios_base::failbit);
         }
         is >> u >> c;

@@ -97,7 +97,7 @@ namespace Ariadne {
     R
     Parallelotope<R>::volume() const
     {
-      return approximate_value(LinearAlgebra::determinant(this->generators()));
+      return midpoint(LinearAlgebra::determinant(this->generators()));
     }
    
     
@@ -256,8 +256,8 @@ namespace Ariadne {
       
       size_type n=c.dimension();
       
-      Point<R> cmid=approximate_value(c);
-      LinearAlgebra::Matrix<R> Gmid=LinearAlgebra::approximate_value(G);
+      Point<R> cmid=midpoint(c);
+      LinearAlgebra::Matrix<R> Gmid=LinearAlgebra::midpoint(G);
       
       LinearAlgebra::Matrix<R> D(n,n);
       for(size_type i=0; i!=n; ++i) {
@@ -299,7 +299,7 @@ namespace Ariadne {
       
       size_type d=ez.dimension();
       
-      Point<R> cmid=approximate_value(c);
+      Point<R> cmid=midpoint(c);
       LinearAlgebra::Vector<I> cerr=c-cmid;
       
       LinearAlgebra::Matrix<I> Q;
@@ -310,7 +310,7 @@ namespace Ariadne {
       catch(Numeric::DivideByZeroException& e) {
         std::cerr << "QR(A) with A=" << G << ": " <<  std::flush;
       }
-      LinearAlgebra::Matrix<R> Qmid=approximate_value(Q);
+      LinearAlgebra::Matrix<R> Qmid=midpoint(Q);
       LinearAlgebra::Vector<I> Rrwnrm=LinearAlgebra::row_norms(LinearAlgebra::transpose(Qmid)*G);
       for(size_type i=0; i!=d; ++i) {
         R scale=(Rrwnrm(i)+cerr(i)).upper();
@@ -337,13 +337,13 @@ namespace Ariadne {
       size_type d=z.dimension();
       size_type ng=z.number_of_generators();
       
-      Point<R> cmid=approximate_value(c);
+      Point<R> cmid=midpoint(c);
       LinearAlgebra::Vector<I> cerr=c-cmid;
       
       LinearAlgebra::Matrix<A> Gapprx(d,ng);
       for(size_type i=0; i!=d; ++i) {
         for(size_type j=0; j!=ng; ++j) {
-          Gapprx(i,j)=Numeric::conv_approx<A>(approximate_value(G(i,j)));
+          Gapprx(i,j)=Numeric::conv_approx<A>(midpoint(G(i,j)));
         }
       }
       
@@ -355,7 +355,7 @@ namespace Ariadne {
       catch(Numeric::DivideByZeroException& e) {
         std::cerr << "QR(A) with A=" << LinearAlgebra::Matrix<R>(Gapprx) << ": " <<  std::flush;
       }
-      LinearAlgebra::Matrix<R> Qmid=approximate_value(Q);
+      LinearAlgebra::Matrix<R> Qmid=midpoint(Q);
       LinearAlgebra::Vector<I> Rrwnrm=LinearAlgebra::row_norms(LinearAlgebra::transpose(Qmid)*G);
       for(size_type i=0; i!=d; ++i) {
         R scale=(Rrwnrm(i)+cerr(i)).upper();

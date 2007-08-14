@@ -74,6 +74,7 @@ EVALUATION_SRC = \
 
 OUTPUT_SRC = \
 	output/logging.cc \
+	output/colour.cc \
 	output/epsfstream.cc \
 	output/txtfstream.cc \
 	output/chompfstream.cc \

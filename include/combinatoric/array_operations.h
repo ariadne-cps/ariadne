@@ -34,10 +34,10 @@
 
 
 namespace Ariadne {
-  namespace Base {
+  namespace Combinatoric {
     //! \name Array operations
     //@{
-    //! \ingroup Base
+    //! \ingroup ArrayOperations
     /*! \brief Inner product. */
     size_type inner_product(const SizeArray& a1, const SizeArray& a2);
     /*! \brief Inner product. */

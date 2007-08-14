@@ -38,7 +38,9 @@
 #include <set>
 #include <map>
 
-#include "../base/array.h"
+#include "array.h"
+#include "reference_container.h"
+#include "clonable_container.h"
 
 namespace Ariadne {
   namespace Base { 
@@ -46,7 +48,8 @@ namespace Ariadne {
     template<class InputIterator>
     inline
     std::ostream&
-    write_sequence(std::ostream& os, InputIterator first, InputIterator last, char opening='[', char closing=']', char separator=',') 
+    write_sequence(std::ostream& os, InputIterator first, InputIterator last, 
+                   char opening='[', char closing=']', char separator=',') 
     {
       os << opening;
       while(first!=last) {
@@ -64,7 +67,8 @@ namespace Ariadne {
     template<class InputIterator>
     inline
     std::ostream&
-    write_pointer_sequence(std::ostream& os, InputIterator first, InputIterator last, char opening='[', char closing=']', char separator=',') 
+    write_pointer_sequence(std::ostream& os, InputIterator first, InputIterator last, 
+                           char opening='[', char closing=']', char separator=',') 
     {
       os << opening;
       while(first!=last) {
@@ -82,11 +86,30 @@ namespace Ariadne {
     template<class InputIterator>
     inline
     std::ostream&
-    write_map_sequence(std::ostream& os, InputIterator first, InputIterator last, char opening='{', char closing='}', char separator=',') 
+    write_map_sequence(std::ostream& os, InputIterator first, InputIterator last, 
+                       char opening='{', char closing='}', char separator=',', char descriptor=':')
     {
       os << opening;
       while(first!=last) {
-        os << first->first << ":" << first->second;
+        os << first->first << descriptor << first->second;
+        ++first;
+        if(first != last) {
+          os << separator;
+        }
+      }
+      os << closing;
+      return os;
+    }
+    
+    template<class InputIterator>
+    inline
+    std::ostream&
+    write_ariadne_map_sequence(std::ostream& os, InputIterator first, InputIterator last, 
+                               char opening='{', char closing='}', char separator=',', char descriptor=':') 
+    {
+      os << opening;
+      while(first!=last) {
+        os << first->key() << descriptor << first->data();
         ++first;
         if(first != last) {
           os << separator;
@@ -99,7 +122,8 @@ namespace Ariadne {
     template<class T>
     inline
     std::istream&
-    read_vector(std::istream& is, std::vector<T>& v, char opening='[', char closing=']', char separator=',') 
+    read_vector(std::istream& is, std::vector<T>& v, 
+                char opening='[', char closing=']', char separator=',') 
     {
       T x;
       char c;
@@ -146,7 +170,8 @@ namespace Ariadne {
     template<class T>
     inline
     std::istream&
-    read_array(std::istream& is, Base::array<T>& a, char opening='[', char closing=']', char separator=',') 
+    read_array(std::istream& is, Base::array<T>& a, 
+               char opening='[', char closing=']', char separator=',') 
     {
       T x;
       char c;
@@ -223,6 +248,30 @@ namespace Ariadne {
       }
       os << " ]";
       return os;
+    }
+
+    template<class T> inline
+    std::ostream&
+    operator<<(std::ostream& os, const reference_vector<T>& v) {
+      return Base::write_sequence(os,v.begin(),v.end(),'[',']',',');
+    }
+
+    template<class T> inline
+    std::ostream&
+    operator<<(std::ostream& os, const reference_set<T>& s) {
+      return Base::write_sequence(os,s.begin(),s.end(),'{','}',',');
+    }
+
+    template<class K, class D, class C> inline
+    std::ostream&
+    operator<<(std::ostream& os, const reference_key_map<K,D,C>& m) {
+      return Base::write_ariadne_map_sequence(os,m.begin(),m.end(),'{','}',',',':');
+    }
+
+    template<class K, class D, class C> inline
+    std::ostream&
+    operator<<(std::ostream& os, const reference_data_map<K,D,C>& m) {
+      return Base::write_ariadne_map_sequence(os,m.begin(),m.end(),'{','}',',',':');
     }
 
     template<class T> inline

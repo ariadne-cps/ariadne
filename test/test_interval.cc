@@ -131,9 +131,12 @@ test_interval()
   cout << "ivlf1=" << ivlf1 << ", ivlf2=" << ivlf2 << ", ivlf3=" << ivlf3 << endl;
   cout << "max(ivlf1,ivlf3)=" << max(ivlf1,ivlf3) << endl;
   cout << "min(ivlf1,ivlf3)=" << min(ivlf1,ivlf3) << endl;
-  cout << "abs(" << ivlf2 << ")=" << abs(ivlf2) << endl;
-  cout << "centre(" << ivlf1 << ")=" << ivlf1.centre() << endl;
-  assert(ivlf1.centre()==R(2.3125));
+  cout << "lower(" << ivlf1 << ")=" << ivlf1.lower() << endl;
+  cout << "upper(" << ivlf1 << ")=" << ivlf1.upper() << endl;
+  cout << "midpoint(" << ivlf1 << ")=" << ivlf1.midpoint() << endl;
+  cout << "radius(" << ivlf2 << ")=" << radius(ivlf2) << endl;
+  cout << "width(" << ivlf2 << ")=" << width(ivlf2) << endl;
+  assert(ivlf1.midpoint()==R(2.3125));
   
   try {
     string input("[1.125,2.25] ");

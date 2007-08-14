@@ -133,18 +133,26 @@ namespace Ariadne {
       LinearAlgebra::Vector<R> _vector;
     };
 
-    template<class R> 
+    
+    template<class R>
     Point<R> approximation(const Point<R>& pt);
     
-    template<class R> 
+    template<class R>
     Point<R> approximation(const Point< Numeric::Interval<R> >& ipt);
+
     
     template<class R> 
-    bool contains_value(const Point< Numeric::Interval<R> >& ipt, const Point<R>& pt);
+    Point<R> midpoint(const Point< Numeric::Interval<R> >& ipt);
     
     template<class R> 
-    R error_bound(const Point< Numeric::Interval<R> >& ipt);
+    R radius(const Point< Numeric::Interval<R> >& ipt);
+
+    template<class R> 
+    bool encloses(const Point< Numeric::Interval<R> >& ipt, const Point<R>& pt);
     
+    template<class R> 
+    bool refines(const Point< Numeric::Interval<R> >& ipt1, const Point< Numeric::Interval<R> >& ipt2);
+
 
     
     template<class R>
@@ -174,10 +182,6 @@ namespace Ariadne {
     template<class R>
     Point<R> sub_approx(const Point<R>& pt, const LinearAlgebra::Vector<R>& v);
 
-    
-    template<class R>
-    Point<R>
-    approximate_value(const Point< Numeric::Interval<R> >& pt);
     
   //template<class R>
   //Point<R> 

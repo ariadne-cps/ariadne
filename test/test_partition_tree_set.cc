@@ -136,21 +136,15 @@ int main() {
 
   epsfstream eps;
   eps.open("test_partition_tree-1.eps",bb);
-  eps.set_fill_colour("red");
-  eps << ptsouta;
-  eps.set_fill_colour("blue");
-  eps << ptsina;
-  eps.set_fill_style(false);
-  eps << z;
+  eps << fill_colour(red) << ptsouta;
+  eps << fill_colour(blue) << ptsina;
+  eps << fill_colour(transparant) << z;
   eps.close();
   
   eps.open("test_partition_tree-2.eps",bb);
-  eps.set_fill_colour("red");
-  eps << gmsouta;
-  eps.set_fill_colour("blue");
-  //eps << gmsina;
-  eps.set_fill_style(false);
-  eps << z;
+  eps << fill_colour(red) << gmsouta;
+  //eps << fill_colour(blue) << gmsina;
+  eps << fill_colour(transparant) << z;
   eps.close();
   
   return 0;

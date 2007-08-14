@@ -108,33 +108,25 @@ test_chainreach()
 
   epsfstream eps;
   eps.open("test_chainreach-1.eps",epsbb);
-  eps.set_pen_colour("black");
-  eps.set_fill_colour("white");
-  eps << cb;
-  eps.set_line_style(false);
-  eps.set_fill_colour("green");
-  eps << gmcr;
-  eps.set_fill_colour("blue");
-  eps << ir;
-  eps.set_line_style(true);
+  eps << fill_colour(white) << cb;
+  eps << line_style(false);
+  eps << fill_colour(green) << gmcr;
+  eps << fill_colour(blue) << ir;
+  eps << line_style(true);
   eps << ptcr.partition_tree();
   eps.close();
 
   eps.open("test_chainreach-2.eps",epsbb);
-  eps.set_line_style(false);
-  eps.set_fill_colour("red");
-  eps << difference(gmcr.neighbourhood(),gmcr);
-  eps.set_fill_colour("blue");
-  eps << gmcr.adjoining();
-  eps.set_fill_colour("green");
-  eps << gmcr;
+  eps << line_style(false);
+  eps << fill_colour(red) << difference(gmcr.neighbourhood(),gmcr);
+  eps << fill_colour(blue) << gmcr.adjoining();
+  eps << fill_colour(green) << gmcr;
   eps.close();
 
   epsbb=Rectangle<R>("[-4.1,4.1]x[-4.1,4.1]"); // eps bounding box
   eps.open("test_chainreach-3.eps",epsbb);
-  eps.set_line_style(false);
-  eps.set_fill_colour("green");
-  eps << gmcr;
+  eps << line_style(false);
+  eps << fill_colour(green) << gmcr;
   eps.close();
 
   return 0;

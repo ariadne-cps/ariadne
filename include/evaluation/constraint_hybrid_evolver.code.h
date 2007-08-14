@@ -135,13 +135,33 @@ typename Evaluation::ConstraintHybridEvolver<R>::working_sets_type
 Evaluation::ConstraintHybridEvolver<R>::_compute_working_sets(const hybrid_list_set_type& set) const
 {
   working_sets_type working_sets;
-  for(typename hybrid_list_set_type::const_iterator loc_iter=set.begin();
-      loc_iter!=set.end(); ++loc_iter)
+  /*
+  for(typename hybrid_list_set_type::const_iterator iter=set.begin();
+      iter!=set.end(); ++iter)
   {
-    id_type loc_id=loc_iter->discrete_state();
-    const continuous_basic_set_type& bs=loc_iter->continuous_state_set();
-    working_sets.push_back(timed_set_type(0,0,loc_id,bs));
+    id_type loc_id=iter->discrete_state();
+    std::cerr << "loc_id=" << loc_id << std::endl;
+    const continuous_basic_set_type& bs=iter->continuous_state_set();
+    std::cerr << "bs=" << bs << std::endl;
+    timed_set_type timed_set(Rational(0),Integer(0),loc_id,bs);
+    std::cerr << "ts=" << timed_set << std::endl;
+    working_sets.push_back(timed_set);
+    std::cerr << "working_sets.size()=" << working_sets.size() << std::endl;
   }
+  */
+  for(typename hybrid_list_set_type::locations_const_iterator loc_iter=set.locations_begin();
+      loc_iter!=set.locations_end(); ++loc_iter)
+  {
+    id_type loc_id=loc_iter->first;
+    for(typename ListSet<Zonotope<I> >::const_iterator set_iter=loc_iter->second.begin();
+        set_iter!=loc_iter->second.end(); ++set_iter)
+    {
+      const continuous_basic_set_type& bs=*set_iter;
+      timed_set_type timed_set(Rational(0),Integer(0),loc_id,bs);
+      working_sets.push_back(timed_set);
+    }
+  }
+
   return working_sets;
 }
 
@@ -174,6 +194,7 @@ Evaluation::ConstraintHybridEvolver<R>::upper_evolve(const System::ConstraintHyb
   
   // Working sets contains (time,set) pairs, storing the sets reached with different remaining
   std::vector< timed_set_type > working_sets=this->_compute_working_sets(initial_set);
+  ARIADNE_LOG(5,"working_sets="<<working_sets<<"\n");
   std::vector< timed_set_type > final_sets;
   std::vector< timed_set_type >& trace_sets=this->_trace;
   trace_sets=working_sets;
@@ -181,17 +202,24 @@ Evaluation::ConstraintHybridEvolver<R>::upper_evolve(const System::ConstraintHyb
   while(!working_sets.empty()) {
     ARIADNE_LOG(9,"working_sets.size()="<<working_sets.size()<<"\n");
     timed_set_type working_set=working_sets.back(); working_sets.pop_back();
-    ARIADNE_LOG(9,"working_set="<<working_set<<"\n");
-    assert(working_set.time()<=evolution_time);
-    
-    if(working_set.time()==evolution_time) {
-      ARIADNE_LOG(9,"  reached evolution time\n");
+    ARIADNE_LOG(9,"unregularised_working_set="<<working_set<<"\n");
+    working_set=this->_plugin->regularize(working_set);
+    ARIADNE_LOG(9,"regularised_working_set="<<working_set<<"\n");
+    if(possibly(working_set.time()>evolution_time)) {
+      ARIADNE_LOG(3,"\n  working_set.time()="<<working_set.time());
+      ARIADNE_LOG(3,", evolution_time="<<evolution_time<<"\n\n");
+      ARIADNE_LOG(3,"Warning: evolution time may be exceeded\n\n");
       final_sets.push_back(working_set);
-    } else if(working_set.continuous_state_set().radius()>this->maximum_basic_set_radius()) {
-      ::append(working_sets,this->_plugin->subdivide(working_set));
     } else {
-      ::append(working_sets,this->_plugin->upper_evolution_step(automaton,working_set,evolution_time));
-      ::append(this->_trace,this->_plugin->upper_evolution_step(automaton,working_set,evolution_time));
+      if(working_set.time()==evolution_time) {
+        ARIADNE_LOG(9,"  reached evolution time\n");
+        final_sets.push_back(working_set);
+      } else if(working_set.continuous_state_set().radius()>this->maximum_basic_set_radius()) {
+        ::append(working_sets,this->_plugin->subdivide(working_set));
+      } else {
+        ::append(working_sets,this->_plugin->upper_evolution_step(automaton,working_set,evolution_time));
+        ::append(this->_trace,this->_plugin->trace);
+      }
     }
   }
 
@@ -222,7 +250,8 @@ Evaluation::ConstraintHybridEvolver<R>::upper_reach(const System::ConstraintHybr
       ::append(working_sets,this->_plugin->subdivide(working_set));
     } else {
       ::append(working_sets,this->_plugin->upper_evolution_step(automaton,working_set,evolution_time));
-      ::append(reached_sets,this->_plugin->upper_reachability_step(automaton,working_set,evolution_time));
+      // A reachability step returns a list whose final element is the continuous reached set
+      reached_sets.push_back(working_sets.back()); working_sets.pop_back();
       if(!working_sets.empty()) { std::cout << "evolution step: " << working_sets.back() << std::endl; }
       if(!reached_sets.empty()) { std::cout << "reach step: " << reached_sets.back() << std::endl; }
     }

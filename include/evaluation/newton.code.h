@@ -46,8 +46,8 @@ Evaluation::IntervalNewtonSolver<R>::solve(const System::VectorFieldInterface<R>
   Geometry::Rectangle<R> r(x);
   while(n>0) {
     if(verbosity>1) { std::clog << "Testing for root in " << x << "\n"; }
-    if(verbosity>1) { std::clog << "  e=" << Geometry::error_bound(x) << "  x=" << x << std::endl; }
-    Geometry::Point<R> m=approximate_value(x);
+    if(verbosity>1) { std::clog << "  e=" << Geometry::radius(x) << "  x=" << x << std::endl; }
+    Geometry::Point<R> m=midpoint(x);
     if(verbosity>1) { std::clog << "  m=" << m << std::endl; }
     Geometry::Point<I> im(m);
     LinearAlgebra::Vector<I> w=f(im);
@@ -65,15 +65,15 @@ Evaluation::IntervalNewtonSolver<R>::solve(const System::VectorFieldInterface<R>
 
     if(verbosity>1) {
       std::clog << "  f(x)=" << f(x) << std::flush;
-      std::clog << "  f(m)=" << approximate_value(f(im)) << std::flush;
+      std::clog << "  f(m)=" << midpoint(f(im)) << std::flush;
       std::clog << "  Df(x) =" << A << "  inv=" << inverse(A) << "  I=" << A*inverse(A) << std::flush;
       std::clog << "  nx =" << nx << "\n" << std::flush;
       std::clog << "  nr =" << nr << "\n" << std::flush;
       std::clog << "\n";
-      std::clog << error_bound(nx) << " < " << e << " ? " << (error_bound(nx) < e) << "\n\n";
+      std::clog << radius(nx) << " < " << e << " ? " << (radius(nx) < e) << "\n\n";
     }
     
-    if(Geometry::subset(nr,r) && Geometry::error_bound(nx) < e) {
+    if(Geometry::subset(nr,r) && Geometry::radius(nx) < e) {
       return nr;
     }
     if(Geometry::disjoint(nr,r)) {

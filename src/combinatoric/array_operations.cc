@@ -29,7 +29,7 @@
 #include "combinatoric/array_operations.h"
 
 namespace Ariadne {
-  namespace Base {
+  namespace Combinatoric {
 
     size_type
     inner_product(const SizeArray& a1, const SizeArray& a2)

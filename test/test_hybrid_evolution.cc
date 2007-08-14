@@ -138,18 +138,12 @@ int test_hybrid_evolution()
   
   epsfstream eps;
   eps.open("test_hybrid_evolution-1.eps",bounding_box.expand(0.5));
-  eps.set_fill_colour("white");
-  eps << bounding_box;
-  eps.set_fill_colour("cyan");
-  eps << automaton.mode(mode1_id).invariant();
+  eps << fill_colour(white) << bounding_box;
+  eps << fill_colour(cyan) << automaton.mode(mode1_id).invariant();
   //eps << invariant1;
-  eps.set_fill_colour("red");
-  eps << continuous_chainreach[mode2_id];
-  eps.set_fill_colour("green");
-  eps << continuous_chainreach[mode1_id];
-  eps.set_fill_colour("blue");
-  eps << initial_set[mode1_id];
-  eps << initial_set[mode2_id];
+  eps << fill_colour(red) << continuous_chainreach[mode2_id];
+  eps << fill_colour(green) << continuous_chainreach[mode1_id];
+  eps << fill_colour(blue) << initial_set[mode1_id] << initial_set[mode2_id];
   eps.close();
 
 
@@ -166,21 +160,20 @@ int test_hybrid_evolution()
   cout << "Reached " << discrete_reach[mode2_id].size() << " cells by discrete step" << endl << endl;
   
   eps.open("test_hybrid_evolution-2.eps",bounding_box.expand(0.5));
-  eps.set_fill_colour("white");
-  eps << bounding_box;
-  eps.set_fill_colour("cyan");
+  eps << fill_colour(white) << bounding_box;
+  eps << fill_colour(cyan);
   eps << static_cast<const Polyhedron<R>&>(activation11);
   eps << activation11;
   eps << static_cast<const Polyhedron<R>&>(activation21);
   eps << activation21;
-  eps.set_fill_colour("magenta");
+  eps << fill_colour(magenta);
   eps << static_cast<const Polyhedron<R>&>(activation12);
   eps << activation12;
-  eps.set_fill_colour("red");
+  eps << fill_colour(red);
   eps << discrete_reach[mode2_id];
-  eps.set_fill_colour("green");
+  eps << fill_colour(green);
   eps << discrete_reach[mode1_id];
-  eps.set_fill_colour("blue");
+  eps << fill_colour(blue);
   eps << initial_activated_set[mode1_id];
   eps.close();
   
@@ -193,20 +186,13 @@ int test_hybrid_evolution()
        << endl << endl;
   
   eps.open("test_hybrid_evolution-3.eps",bounding_box.expand(0.5));
-  eps.set_fill_colour("white");
-  eps << bounding_box;
-  eps.set_fill_colour("cyan");
-  eps << activation11;
-  eps << activation21;
-  eps.set_fill_colour("magenta");
-  eps << activation12;
-  eps.set_line_style(true);
-  eps.set_fill_colour("red");
-  eps << chainreach[mode2_id];
-  eps.set_fill_colour("yellow");
-  eps << chainreach[mode1_id];
-  eps.set_fill_colour("blue");
-  eps << initial_set[mode1_id];
+  eps << fill_colour(white) << bounding_box;
+  eps << fill_colour(cyan) << activation11 << activation21;
+  eps << fill_colour(magenta) << activation12;
+  eps << line_style(true);
+  eps << fill_colour(red) << chainreach[mode2_id];
+  eps << fill_colour(yellow) << chainreach[mode1_id];
+  eps << fill_colour(blue) << initial_set[mode1_id];
   eps.close();
   
   {

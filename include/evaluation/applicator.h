@@ -50,7 +50,10 @@ namespace Ariadne {
       R _maximum_basic_set_radius;
       R _grid_size;
      public:
-      /*! \brief Default constructor. */
+      /*! \brief Default constructor chooses appropriate parameter values for maximum basic set radius and grid size. */
+      Applicator();
+      
+      /*! \brief Construct from a maximum basic set radius and grid size. */
       Applicator(const R& maximum_basic_set_radius, const R& grid_size);
       
       /*! \brief Compute the image of a basic set under a continuous function. */

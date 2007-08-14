@@ -26,18 +26,13 @@
 #include "../numeric/rational.h"
 #include "ellipsoid.h"
 
+#include "../geometry/exceptions.h"
 #include "../geometry/sphere.h"
 
 
 namespace Ariadne {
   namespace Geometry {
  
-    class DimensionException
-      : public std::runtime_error
-    {
-     public:
-      DimensionException(const std::string& s) : std::runtime_error(s) { }
-    };
       
     template<class R>
     Ellipsoid<R>::Ellipsoid(size_type n)
@@ -50,7 +45,7 @@ namespace Ariadne {
       : _centre(c), _bilinear_form(A)
     {
       if(c.dimension()!=A.number_of_rows() && A.number_of_rows()!=A.number_of_columns()) {
-        ARIADNE_THROW(DimensionException,"Ellipsoid::Ellipsoid(Point c, Matrix A)","c="<<c<<", A="<<A);
+        ARIADNE_THROW(IncompatibleDimensions,"Ellipsoid::Ellipsoid(Point c, Matrix A)","c="<<c<<", A="<<A);
       }
     }
      

@@ -192,7 +192,7 @@ template<class R> inline
 void
 convert(Zonotope<Rational>& qz, const Zonotope<Interval<R>,R>& z) {
   Point< Interval<Rational> > ic=z.centre();
-  Point< Rational > c=approximate_value(ic);
+  Point< Rational > c=midpoint(ic);
   Matrix< Rational > G=z.generators();
   Matrix< Rational > E(z.dimension(),z.dimension());
   for(dimension_type i=0; i!=z.dimension(); ++i) {
@@ -587,7 +587,7 @@ Geometry::over_approximation(const Zonotope< Numeric::Interval<R>, Numeric::Inte
   // FIXME: This is incorrect; need over-approximations
   LinearAlgebra::Matrix< Numeric::Interval<R> > G(iz.generators());
   LinearAlgebra::Vector< Numeric::Interval<R> > e(iz.number_of_generators(),Numeric::Interval<R>(-1,+1));
-  LinearAlgebra::Matrix<R> nG=approximate_value(G);
+  LinearAlgebra::Matrix<R> nG=midpoint(G);
   Geometry::Point< Numeric::Interval<R> > nc=iz.centre()+(G-nG)*e;
   
   return Zonotope< Numeric::Interval<R>, R >(nc,nG);
@@ -599,7 +599,7 @@ Geometry::over_approximation(const Zonotope<Numeric::Interval<R>, R>& ez)
 {
   dimension_type d=ez.dimension();
   size_type ng=ez.number_of_generators();
-  Point<R> c=approximate_value(ez.centre());
+  Point<R> c=midpoint(ez.centre());
   Matrix<R> g(d,ng+d);
   MatrixSlice<R>(d,ng,g.begin(),g.row_increment(),g.column_increment())=ez.generators();
   for(size_type i=0; i!=d; ++i) {
@@ -624,8 +624,8 @@ template<class R>
 Geometry::Zonotope<R,R> 
 Geometry::approximation(const Zonotope< Numeric::Interval<R>, Numeric::Interval<R> >& z)
 {
-  return Zonotope<R,R>(approximate_value(z.centre()),
-                       approximate_value(z.generators()));
+  return Zonotope<R,R>(midpoint(z.centre()),
+                       midpoint(z.generators()));
 }
 
 
@@ -633,7 +633,7 @@ template<class R>
 Geometry::Zonotope<R,R> 
 Geometry::approximation(const Zonotope<Numeric::Interval<R>,R>& z)
 {
-  return Zonotope<R,R>(approximate_value(z.centre()),
+  return Zonotope<R,R>(midpoint(z.centre()),
                        z.generators());
 }
 
@@ -688,6 +688,12 @@ std::ostream&
 Geometry::Zonotope<RC,RG>::write(std::ostream& os) const 
 {
   const Zonotope<RC,RG>& z=*this;
+  os << "["<<z.centre();
+  for(size_type j=0; j!=z.number_of_generators(); ++j) {
+    os << ";" << z.generator(j);
+  }
+  os << "]";
+  /*
   if(z.dimension() > 0) {
     if (z.empty()) {
       os << "Zonotope( )" << std::endl;
@@ -700,6 +706,7 @@ Geometry::Zonotope<RC,RG>::write(std::ostream& os) const
       os << "] )";
     } 
   }
+  */
   return os;
 }
 
@@ -708,7 +715,12 @@ template<class RC,class RG>
 std::istream& 
 Geometry::Zonotope<RC,RG>::read(std::istream& is)
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  Point<RC> centre;
+  LinearAlgebra::Matrix<RG> generators;
+  char c0,c1,c2;
+  is >> c0 >> centre >> c1 >> generators >> c2;
+  *this = Zonotope<RC,RG>(centre,generators);
+  return is;
 }
 
 
@@ -1173,7 +1185,7 @@ disjoint_approx(const Zonotope<Interval<R>,R>& z, const Rectangle<R>& r) {
   ARIADNE_LOG(7,"z="<<z<<", r="<<r<<"\n");
   Point< Interval<Rational> > ic=z.centre();
   Matrix<Rational> g=z.generators();
-  Point<Rational> c=approximate_value(ic);
+  Point<Rational> c=midpoint(ic);
   Rectangle<Rational> qr=r;
   Rectangle<Rational> xr=qr+(ic-c);
   return disjoint_exact(Zonotope<Rational>(c,g),xr);

@@ -148,18 +148,12 @@ test_polytope()
   cout << "uap2.size()=" << uap2.size() << endl;
   Rectangle<R> bbox2=pltp2.bounding_box().expand_by(0.25);
   eps.open("test_polytope-2.eps",bbox2);
-  eps.set_fill_colour("white");
-  eps << pltp2.bounding_box();
-  eps.set_fill_colour("cyan");
-  eps << oap2;
-  eps.set_fill_colour("yellow");
-  eps << qplhd2;
-  eps.set_fill_colour("red");
-  eps << qpltp2;
-  eps.set_fill_colour("green");
-  eps << pltp2;
-  eps.set_fill_colour("blue");
-  eps << uap2;
+  eps << fill_colour(white) << pltp2.bounding_box();
+  eps << fill_colour(cyan) << oap2;
+  eps << fill_colour(yellow) << qplhd2;
+  eps << fill_colour(red) << qpltp2;
+  eps << fill_colour(green) << pltp2;
+  eps << fill_colour(blue) << uap2;
   eps.close();
 
   cout << endl;

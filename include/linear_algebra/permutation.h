@@ -34,69 +34,73 @@
 namespace Ariadne {
   namespace LinearAlgebra {
     
+    /*! \brief A permutation. */
     class Permutation {
+     private:
+      array<uint> vec;
+     public:
+      /*! \brief Default constructor constructs permutation of zero values. */
+      Permutation() : vec() { }
+          
+      /*! \brief Construct the identity permutation of \a n objects. */
+      Permutation(const size_type& n) : vec(n) {
+        for (size_type i=0; i<n; i++) { vec[i]=i; }
+      }
+          
+      /*! \brief Construct from a beginning and end pointer. */
+      Permutation(const uint* begin, const uint* end) : vec(end-begin) {
+        for (size_type i=0; i<vec.size(); i++) { vec[i]=begin[i]; }
+      }
       
-      private:
-        array<uint> vec;
-        
-        public:
-          /*! \brief Construct  permutation. */
-          Permutation() : vec() { }
+      /*! \brief Destructor. */ 
+      ~Permutation() { }
           
-          /*! \brief Construct the default permutation of size \a n. */
-          Permutation(const size_type& n) : vec(n) {
-            for (size_type i=0; i<n; i++)
-              vec[i]=i;
-          }
+      /*!\brief A pointer to beginning of the permutation. */
+      inline uint* begin() { return vec.begin(); }
           
-          /*! \brief Construct from a beginning and end pointer. */
-          Permutation(const uint* begin, const uint* end) : vec(end-begin) {
-            for (size_type i=0; i<vec.size(); i++)
-              vec[i]=begin[i];
-          }
+      /*!\brief A pointer to end of the permutation. */
+      inline uint* end() { return vec.end(); }
           
-          ~Permutation() { }
-          
-          /*!\brief Return a pointer to beginning of Permutation. */
-          inline uint* begin() { return vec.begin(); }
-          
-          /*!\brief Return pointer to end of Permutation. */
-          inline uint* end() { return vec.end(); }
-          
-         /*!\brief Return size of Permutation. */
+      /*!\brief The size of the permutation. */
           inline size_type size() { return vec.size(); }
           
-          /*! \brief Swap two elements. */
-          inline void swap(unsigned int a, unsigned int b) {
-            size_type sz = vec.size();
-            if (a != b && a < sz && b < sz)
-              std::swap(vec[a], vec[b]);
-          }
+      /*! \brief Swap the \a i<sup>th</sup> and \a j<sup>th</sup> elements. */
+      inline void swap(unsigned int i, unsigned int j) {
+        size_type sz = vec.size();
+        if (i != j && i < sz && j < sz) { std::swap(vec[i], vec[j]); }
+      }
           
-          /*! \brief Write to an output stream. */
-          std::ostream& write(std::ostream& os) const {
-            size_type sz = vec.size();
-            if (sz > 0) {
-              os << "[" << vec[0];
-              for (uint i = 1; i < sz; i++)
-                os << "," << vec[i];
-              os << "]";
-            }
-            return os;
-          }
-          
-          inline  uint& operator[](const size_type& i) { return vec[i]; }
-          
-          inline int getindex(uint index) {
-            size_type sz = vec.size();
-            if (index > sz) return -1;
-            
-            if (sz > 0)
-              for (uint i = 0; i < sz; i++)
-                if (vec[i] == index) return i;
-            return -1;
-          }
-          
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream& os) const {
+        size_type sz = vec.size();
+        if (sz > 0) {
+          os << "[" << vec[0];
+          for (uint i = 1; i < sz; i++)
+            os << "," << vec[i];
+          os << "]";
+        }
+        return os;
+      }
+      
+      /*! \brief Return a reference to \f$\pi(i)\f$. */ 
+      inline uint& operator[](const size_type& i) { return vec[i]; }
+      
+      /*! \brief Return \f$\pi(i)\f$.  */ 
+      inline const uint& operator[](const size_type& i) const { return vec[i]; }
+      
+      /*! \brief Get the preimage \f$\pi^{-1}(j)\f$ of \a j, or \f$-1\f$ if \a j is not found. */
+      inline int getindex(uint j) {
+        size_type sz = vec.size();
+        for(uint i = 0; i < sz; ++i) {
+          if (vec[i] == j) { return i; }
+        }
+        return -1;
+      }
+      
+#ifdef Doxygen
+      /*!\brief Stream output operator. */
+      friend std::ostream& operator<<(std::ostream& os, const Permutation& v);
+#endif
     };
     
     inline std::ostream& operator<<(std::ostream& os, const Permutation& v) {

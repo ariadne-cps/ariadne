@@ -40,8 +40,8 @@ namespace Ariadne {
     
     template<class R> class Point;
     template<class R> class Rectangle;
-    template<class R> class Polyhedron;
     template<class R0,class R1> class Zonotope;
+    template<class R> class Polyhedron;
 
   
     // Forward declarations for friends
@@ -70,10 +70,10 @@ namespace Ariadne {
       virtual ConstraintInterface<R>* clone() const = 0;
       /*! \brief The dimension of the set. */
       virtual dimension_type dimension() const = 0;
+      /*! \brief The operation used for comparison. */
+      virtual Comparison comparison() const = 0;
       /*! \brief The smoothness of the constraint function. */
       virtual size_type smoothness() const = 0;
-      /*! \brief Write to an output stream. */
-      virtual Comparison comparison() const = 0;
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream& os) const = 0;
 
@@ -179,13 +179,13 @@ namespace Ariadne {
       /*! \brief The gradient at a point. */
       virtual LinearAlgebra::Vector<A> gradient(const Point<A>& pt) const;
 
-      Polyhedron<R> polyhedron() const;
+      /*! \brief Convert to a polyhedron. */
+      virtual Polyhedron<R> polyhedron() const;
      public:
       /*! \brief Test for equality as reference. */
       friend bool equal<>(const Constraint<R>& c1, const Constraint<R>& c2);
       /*! \brief Test for equality as reference, but with different sign. */
       friend bool opposite<>(const Constraint<R>& c1, const Constraint<R>& c2);
-      
 
      private:
       static void instantiate();
@@ -199,6 +199,9 @@ namespace Ariadne {
 
     template<class R> bool equal(const Constraint<R>& c1, const Constraint<R>& c2);
     template<class R> bool opposite(const Constraint<R>& c1, const Constraint<R>& c2);
+
+    template<class R> Numeric::Interval<R> value(const ConstraintInterface<R>& c, const Rectangle<R>& r);
+    template<class R> Numeric::Interval<R> value(const ConstraintInterface<R>& c, const Zonotope< Numeric::Interval<R>, Numeric::Interval<R> >& z);
 
     template<class R> tribool satisfies(const Rectangle<R>& r, const ConstraintInterface<R>& c);
     template<class R> tribool satisfies(const Zonotope<R,R>& z, const ConstraintInterface<R>& c);

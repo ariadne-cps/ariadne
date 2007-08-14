@@ -91,23 +91,23 @@ namespace Ariadne {
       R midpoint() const;
       /*! \brief The radius of the interval, given by \f$(b-a)/2\f$. */
       R radius() const;
+      /*! \brief The width of the interval, given by \f$b-a\f$. */
+      R width() const;
       //@}
       
       //@{
       //! \name Geometric operations
-      /*! \brief The midpoint of the interval, given by \f$(a+b)/2\f$. (Deprecated) */
-      R centre() const;
-      /*! \brief The length of the interval, given by \f$b-a\f$. */
-      R length() const;
       
       /*! \brief Tests if the interval is empty. */
       bool empty() const;
       /*! \brief Tests if the interval consists of a single point. */
       bool singleton() const;
+      /*! \brief Tests if the interval contains \a x. */
+      template<class RX> bool encloses(const RX& x) const;
       /*! \brief Tests if the interval contains \a r. */
-      bool contains(const R& r) const;
+      template<class RX> bool refines(const Interval<RX>& ivl) const;
       
-      /*! \brief Expand the interval by \a r. */
+      /*! \brief Expand the interval by \a r.  (Deprecated) */
       void expand_by(const R& r);
       //}
       
@@ -121,6 +121,26 @@ namespace Ariadne {
 
 #ifdef DOXYGEN
       //@{
+      //@{
+      //! \name Approximation operations.
+      /*! \brief The lower bound of the interval \a ivl. */
+      friend R lower<>(const Interval<R>& ivl);
+      /*! \brief The upper bound of the interval \a ivl. */
+      friend R upper<>(const Interval<R>& ivl);
+      /*! \brief The approximate midpoint of the interval \a ivl. */
+      friend R midpoint<>(const Interval<R>& ivl);
+      /*! \brief The approximate midpoint of the interval \a ivl. */
+      friend R midpoint<>(const Interval<R>& ivl);
+      /*! \brief An upper bound for the error of the approximate value represented by the interval \a ivl. */
+      friend R radius(const Interval<R>& ivl);
+      /*! \brief An upper bound for the error of the approximate value represented by the interval \a ivl. */
+      friend R width(const Interval<R>& ivl);
+      /*! \brief Test if the interval \a ivl encloses the value \a x. */
+      friend bool encloses<>(const Interval<R>& ivl, const R& x);
+      /*! \brief Test if the interval \a ivl1 refines the approximation of the interval \a ivl2. */
+      friend bool refines<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      //@}
+      
       //! \name Arithmetic operations
       /*! \brief The interval of possible minima of \a x1 in \a ivl1 and \a x2 in \a ivl2. */
       friend Interval<R> min(const Interval<R>& ivl1, const Interval<R>& ivl2);
@@ -171,18 +191,6 @@ namespace Ariadne {
       friend Interval<R> regular_intersection<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
       /*! \brief The smallest interval containing \a ivl1 and \a ivl2. */
       friend Interval<R> hull<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      //@}
-      
-      //@{
-      //! \name Approximation operations.
-      /*! \brief Test if the interval \a ivl contains the value \a x. */
-      friend bool refines<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief Test if the interval \a ivl contains the value \a x. */
-      friend bool contains_value<>(const Interval<R>& ivl, const R& x);
-      /*! \brief The approximate value represented by the interval \a ivl. */
-      friend R approximate_value<>(const Interval<R>& ivl);
-      /*! \brief An upper bound for the error of the approximate value represented by the interval \a ivl. */
-      friend R error_bound(const Interval<R>& ivl);
       //@}
       
       //@{

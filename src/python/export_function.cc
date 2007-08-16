@@ -35,6 +35,7 @@ using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::System;
+using namespace Ariadne::Python;
 
 template<class R>
 void export_function() 

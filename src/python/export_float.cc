@@ -31,6 +31,7 @@
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
+using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
 using namespace boost::python;
@@ -111,6 +112,10 @@ export_float()
     .def(self_ns::str(self))
   ;
   
+  def("max",&Python::max<R,R,R>);
+  def("min",&Python::min<R,R,R>);
+  def("abs",&Python::abs<R,R>);
+
   def("set_default_precision",&set_default_precision<Float>);
   def("default_precision",&default_precision<Float>);
 

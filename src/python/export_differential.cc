@@ -37,6 +37,7 @@ using namespace boost::python;
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
+using namespace Ariadne::Python;
 
 
 template<class R1, class R2> inline 
@@ -64,7 +65,7 @@ void export_differential()
     .def( init< R,Vector<A> >())
     .def( init< A,Vector<R> >())
     .def( init< A,Vector<A> >())
-    .def("__neg__", &Ariadne::neg<D,D>)
+    .def("__neg__", &Python::neg<D,D>)
     .def("__add__", &add<D,D,D>)
     .def("__add__", &add<D,D,double>)
     .def("__add__", &add<D,D,R>)
@@ -122,7 +123,7 @@ void export_differential<Rational>()
   class_<D>("QDifferential")
     .def( init< double,Vector<Q> >())
     .def( init< Q,Vector<Q> >())
-    .def("__neg__", &Ariadne::neg<D,D>)
+    .def("__neg__", &Python::neg<D,D>)
     .def("__add__", &add<D,D,D>)
     .def("__add__", &add<D,D,double>)
     .def("__add__", &add<D,D,Q>)
@@ -175,7 +176,7 @@ void export_derivative()
     .def("__setitem__",&scalar_derivative_set_item<A,double>)
     .def("__setitem__",&scalar_derivative_set_item<A,R>)
     .def("__setitem__",&scalar_derivative_set_item<A,A>)
-    .def("__neg__", &Ariadne::neg<SD,SD>)
+    .def("__neg__", &Python::neg<SD,SD>)
     .def("__add__", &add<SD,SD,SD>)
     .def("__add__", &add<SD,SD,double>)
     .def("__add__", &add<SD,SD,R>)
@@ -247,7 +248,7 @@ void export_derivative<Rational>()
     .def("__getitem__", &scalar_derivative_get_item<Q>)
     .def("__setitem__",&scalar_derivative_set_item<Q,double>)
     .def("__setitem__",&scalar_derivative_set_item<Q,Q>)
-    .def("__neg__", &Ariadne::neg<SD,SD>)
+    .def("__neg__", &Python::neg<SD,SD>)
     .def("__add__", &add<SD,SD,SD>)
     .def("__add__", &add<SD,SD,double>)
     .def("__add__", &add<SD,SD,Q>)

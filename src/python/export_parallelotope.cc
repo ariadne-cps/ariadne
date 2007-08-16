@@ -35,6 +35,7 @@
 #include "python/python_utilities.h"
 using namespace Ariadne;
 using namespace Ariadne::Geometry;
+using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
 using namespace boost::python;

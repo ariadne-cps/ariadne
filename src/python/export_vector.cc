@@ -33,6 +33,7 @@
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
+using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>

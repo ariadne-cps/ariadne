@@ -34,6 +34,7 @@ using namespace Ariadne;
 using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
 using namespace Ariadne::System;
+using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
 using namespace boost::python;

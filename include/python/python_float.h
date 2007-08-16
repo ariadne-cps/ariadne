@@ -32,10 +32,10 @@
 
 #if PYTHON_FLOAT == Float64 
 #include "numeric/float64.h" 
-namespace Ariadne { typedef Numeric::Float64 Float; }
+namespace Ariadne { namespace Python { typedef Numeric::Float64 Float; } }
 #elif PYTHON_FLOAT == FloatMP 
 #include "numeric/floatmp.h" 
-namespace Ariadne { typedef Numeric::FloatMP Float; }
+namespace Ariadne { namespace Python { typedef Numeric::FloatMP Float; } }
 #endif
 
 #endif /* ARIADNE_PYTHON_FLOAT_H */

@@ -29,6 +29,7 @@
 #include "system/polynomial_map.h"
 
 using namespace Ariadne;
+using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
 using namespace boost::python;

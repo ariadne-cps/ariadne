@@ -33,6 +33,7 @@
 using namespace boost::python;
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
+using namespace Ariadne::Python;
 
 
 template<class R>
@@ -114,6 +115,10 @@ void export_interval()
 
   def("encloses", (bool(*)(const I&, const R&))&encloses);
   def("refines", (bool(*)(const I&, const I&))&refines);
+
+  def("max",&Python::max<I,I,I>);
+  def("min",&Python::min<I,I,I>);
+  def("abs",&Python::abs<I,I>);
 
   def("pow",&pow<I,R,int,I,int>);
   def("pow",&pow<I,I,int,I,int>);

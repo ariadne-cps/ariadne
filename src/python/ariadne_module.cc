@@ -106,6 +106,7 @@ template<class R> void export_lorenz_system();
 using namespace Ariadne;
 using namespace Ariadne::Base;
 using namespace Ariadne::Numeric;
+using namespace Ariadne::Python;
 
 BOOST_PYTHON_MODULE(ariadne)
 {

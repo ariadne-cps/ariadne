@@ -41,7 +41,8 @@
 #include "python/python_float.h"
 
 namespace Ariadne {
-  
+namespace Python {
+
   template<class R> inline std::string python_name(const std::string& bn);
 
   template<> inline std::string python_name<bool>(const std::string& bn) { return "Boolean"+bn; }
@@ -113,6 +114,26 @@ namespace Ariadne {
     return Res(Op()(a1,a2));
   }
 
+
+  template<class Res, class Arg1, class Arg2> inline
+  Res min(const Arg1& a1, const Arg2& a2) {
+    return Res(min(Res(a1),Res(a2)));
+  }
+
+  template<class Res, class Arg1, class Arg2> inline
+  Res max(const Arg1& a1, const Arg2& a2) {
+    return Res(max(Res(a1),Res(a2)));
+  }
+
+  template<class Res, class Arg> inline
+  Res abs(const Arg& a) {
+    return Res(abs(a));
+  }
+
+  template<class Res, class Arg> inline
+  Res pos(const Arg& a) {
+    return Res(+a);
+  }
 
   template<class Res, class Arg> inline
   Res neg(const Arg& a) {
@@ -291,6 +312,6 @@ namespace Ariadne {
     return atan(static_cast<Tmp>(a));
   }
 
-}
+}}
 
 #endif /* ARIADNE_PYTHON_UTILITIES_H */

@@ -246,6 +246,12 @@ namespace Ariadne {
 
 
   template<class Res,class Arg,class Tmp> inline
+  Res sqrt(const Arg& a) {
+    return sqrt(static_cast<Tmp>(a));
+  }
+
+
+  template<class Res,class Arg,class Tmp> inline
   Res exp(const Arg& a) {
     return exp(static_cast<Tmp>(a));
   }

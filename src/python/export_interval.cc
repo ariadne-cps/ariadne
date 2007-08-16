@@ -39,6 +39,7 @@ template<class R>
 void export_interval()
 {
   typedef Interval<R> I;
+  typedef Integer Z;
 
   class_< Interval<R> >(python_name<R>("Interval").c_str())
     //.def(init<std::string>())
@@ -78,7 +79,7 @@ void export_interval()
     .def("__rdiv__", &rdiv<I,I,double,I,R>)
     .def("__rdiv__", &rdiv<I,I,R>)
     .def("__pow__", &pow<I,I,int,I,int>)
-    .def("__pow__", &pow<I,I,Integer,I,Integer>)
+    .def("__pow__", &pow<I,I,Z,I,Z>)
     .def("__eq__", &eq<tribool,I,double>)
     .def("__eq__", &eq<tribool,I,R>)
     .def("__eq__", &eq<tribool,I,I>)
@@ -117,8 +118,11 @@ void export_interval()
   def("pow",&pow<I,R,int,I,int>);
   def("pow",&pow<I,I,int,I,int>);
 
-  def("pow",&pow<I,R,Integer,I,Integer>);
-  def("pow",&pow<I,I,Integer,I,Integer>);
+  def("pow",&pow<I,R,Z,I,Z>);
+  def("pow",&pow<I,I,Z,I,Z>);
+
+  def("sqrt",&sqrt<I,R,I>);
+  def("sqrt",&sqrt<I,I,I>);
 
   def("exp",&exp<I,R,I>);
   def("exp",&exp<I,I,I>);

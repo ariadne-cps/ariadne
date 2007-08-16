@@ -47,6 +47,9 @@ void export_integer() {
     .def("__mul__", &mul<Integer,Integer,Integer>)
     .def("__mul__", &mul<Integer,Integer,int>)
     .def("__rmul__", &mul<Integer,Integer,int>)
+    .def("__div__", &div<Rational,Integer,Integer,Rational,Rational>)
+    .def("__div__", &div<Rational,Integer,int,Rational,Rational>)
+    .def("__rdiv__", &rdiv<Rational,Integer,int,Rational,Rational>)
     .def("__eq__", &eq<bool,Integer,int>)
     .def("__eq__", &eq<bool,Integer,Integer>)
     .def("__ne__", &ne<bool,Integer,int>)
@@ -62,5 +65,10 @@ void export_integer() {
     .def(self_ns::str(self))
   ;
 
+  def("max",&max<Integer,Integer,Integer>);
+  def("min",&min<Integer,Integer,Integer>);
+  def("abs",&Python::abs<Integer,Integer>);
+
+  def("pow",&pow<Integer,Integer,uint>);
   
 }

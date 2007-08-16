@@ -106,5 +106,8 @@ void export_rational() {
     .def(self_ns::str(self))
   ;
  
-  
+  def("max",&Python::max<Rational,Rational,Rational>);
+  def("min",&Python::min<Rational,Rational,Rational>);
+  def("abs",&Python::abs<Rational,Rational>);
+    
 }

@@ -694,7 +694,7 @@ namespace Ariadne {
       y[0]=sqrt(x[0]);
       X mhr=(-0.5)/x[0];
       for(uint i=1; i<=y.degree(); ++i) {
-        y[i]=(2*i-3)*mhr*y[i-1];
+        y[i]=(2*int(i)-3)*mhr*y[i-1];
       }
       compute_composition(y,x);
       return y;

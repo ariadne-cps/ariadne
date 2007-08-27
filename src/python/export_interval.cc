@@ -133,6 +133,7 @@ void export_interval()
   def("exp",&exp<I,I,I>);
   def("log",&log<I,R,I>);
   def("log",&log<I,I,I>);
+  def("pi",&Numeric::pi<R>);
   def("sin",&sin<I,R,I>);
   def("sin",&sin<I,I,I>);
   def("cos",&cos<I,R,I>);

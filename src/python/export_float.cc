@@ -22,6 +22,9 @@
  */
 
 
+#include <iostream>
+#include <iomanip>
+
 #include "python/python_utilities.h"
 
 #include "python/python_float.h"
@@ -36,8 +39,13 @@ using namespace Ariadne::Python;
 #include <boost/python.hpp>
 using namespace boost::python;
 
+void set_output_precision(uint);
 template<class R> void set_default_precision(uint);
 template<class R> uint default_precision();
+
+void set_output_precision(uint p) {
+  std::cout << std::setprecision(p);
+}
 
 #if PYTHON_FLOAT == Float64 
 
@@ -69,6 +77,8 @@ export_float()
 {
   typedef R Float;
   typedef Interval<R> IFloat;
+  
+  def("set_output_precision",(void(*)(uint))&set_output_precision);
 
   class_<Float>("Float")
     .def(init<int>())

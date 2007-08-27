@@ -29,7 +29,9 @@
 #define ARIADNE_INTERVAL_H
 
 #include <iostream>
+#include <iomanip>
 #include <stdexcept>
+#include <cassert>
 
 #include "../base/tribool.h"
 #include "../base/exceptions.h"
@@ -693,51 +695,112 @@ namespace Ariadne {
 
     
     template<typename R> inline 
+    Interval<R> pi() {
+      return Interval<R>(pi_down<R>(),pi_up<R>());
+    }
+
+
+    template<typename R> inline 
     Interval<R> sin(const Interval<R>& ivl) {
-      R pl=pi_down<R>();
-      R pu=pi_up<R>();
-      R n=floor(div_down(ivl.lower(),pu));
-      R l=sub_down(ivl.lower(),mul_up(pu,n));
-      R u=sub_up(ivl.upper(),mul_down(pl,n));
-      if(sub_down(u,l)>=mul_up(R(2),pu)) {
-        return Interval<R>(static_cast<R>(-1),static_cast<R>(1));
+      if(ivl.lower()>-1.5 && ivl.upper()<+1.5) {
+        return Interval<R>(sin_down(ivl.lower()),sin_up(ivl.upper()));
       } else {
-        throw NotImplemented(__PRETTY_FUNCTION__);
+        return cos(ivl-pi<R>()/2);
       }
     }
     
     template<typename R> inline 
     Interval<R> cos(const Interval<R>& ivl) {
-      R pl=pi_down<R>();
-      R pu=pi_up<R>();
-      R n=floor(div_down(ivl.lower(),pu));
-      R l=sub_down(ivl.lower(),mul_up(pu,n));
-      R u=sub_up(ivl.upper(),mul_down(pl,n));
-      if(sub_down(u,l)>=mul_up(R(2),pu)) {
+      assert(ivl.lower()<=ivl.upper());
+      Interval<R> pi=Numeric::pi<R>();
+      Interval<R> two_pi=2*pi;
+      R n=floor(div_down(ivl.lower(),two_pi.lower()));
+      std::cerr << std::setprecision(20);
+      std::cerr << "n=" << n << std::endl;       
+      // l and u are intervals shifted by a multiple of 2*pi.
+      Interval<R> x=ivl-n*two_pi;
+      const R& pl=pi.lower();
+      const R& pu=pi.upper();
+      const R& tpl=two_pi.lower();
+      const R& tpu=two_pi.upper();
+      const R  thpl=mul_down(pi.lower(),3);
+      const R& l=x.lower();
+      const R& u=x.upper();
+      std::cerr << "l=" << l << ", u=" << u << std::endl;       
+      if(sub_down(u,l)>=tpu) {
+        // There is a full period in [l,u]
         return Interval<R>(static_cast<R>(-1),static_cast<R>(1));
       } else {
-        throw NotImplemented(__PRETTY_FUNCTION__);
+        // Check values are reasonable
+        if(!(l>=0 && l<=tpu)) {
+          std::cerr << "ivl=" << ivl << ", [l:u]=[" << l << ":" << u << "]" << std::endl;
+        }
+        assert(l>=-0 && l<=tpu);
+        if(l<pl) {
+          if(u<pl) {
+            return Interval<R>(cos_down(u),cos_up(l));
+          } else if(u<tpl) {
+            return Interval<R>(static_cast<R>(-1),max(cos_up(l),cos_up(u)));
+          } else {
+            return Interval<R>(static_cast<R>(-1),static_cast<R>(1));
+          }
+        } else if (l<pu) {
+          if(u<tpl) {
+            return Interval<R>(static_cast<R>(-1),max(cos_up(l),cos_up(u)));
+          } else {
+            return Interval<R>(static_cast<R>(-1),static_cast<R>(1));
+          }
+        } else if (l<tpl) {
+          if(u<tpl) {
+            return Interval<R>(cos_down(l),cos_up(u));
+          } else if(u<thpl) {
+            return Interval<R>(min(cos_down(l),cos_down(u)),static_cast<R>(1));
+          } else {
+            return Interval<R>(static_cast<R>(-1),static_cast<R>(1));
+          }
+        } else { // 2*pi_ < ln < 2*pi^
+          if(u<thpl) {
+            return Interval<R>(min(cos_down(l),cos_down(u)),static_cast<R>(1));
+          } else {
+            return Interval<R>(static_cast<R>(-1),static_cast<R>(1));
+          }
+        }
       }
     }
     
     template<typename R> inline 
     Interval<R> tan(const Interval<R>& ivl) {
-      throw NotImplemented(__PRETTY_FUNCTION__);
+      return sin(ivl)/cos(ivl);
     }
     
     template<typename R> inline 
     Interval<R> asin(const Interval<R>& ivl) {
-      throw NotImplemented(__PRETTY_FUNCTION__);
+      static bool warn=true;
+      if(warn) {
+        std::cerr << "WARNING: asin(Interval) does not handle branch cuts correctly" << std::endl;
+        warn=false;
+      }
+      return Interval<R>(asin_down(ivl.lower()),asin_up(ivl.upper()));
     }
     
     template<typename R> inline 
     Interval<R> acos(const Interval<R>& ivl) {
-      throw NotImplemented(__PRETTY_FUNCTION__);
+      static bool warn=true;
+      if(warn) {
+        std::cerr << "WARNING: acos(Interval) does not handle branch cuts correctly" << std::endl;
+        warn=false;
+      }
+      return Interval<R>(acos_down(ivl.upper()),acos_up(ivl.lower()));
     }
     
     template<typename R> inline 
     Interval<R> atan(const Interval<R>& ivl) {
-      throw NotImplemented(__PRETTY_FUNCTION__);
+      static bool warn=true;
+      if(warn) {
+        std::cerr << "WARNING: atan(Interval) does not handle branch cuts correctly" << std::endl;
+        warn=false;
+      }
+      return Interval<R>(atan_down(ivl.lower()),atan_up(ivl.upper()));
     }
     
     

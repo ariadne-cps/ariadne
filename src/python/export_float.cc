@@ -126,6 +126,10 @@ export_float()
   def("min",&Python::min<R,R,R>);
   def("abs",&Python::abs<R,R>);
 
+  def("nan",&Numeric::nan<R>);
+  def("inf",&Numeric::inf<R>);
+  def("infinity",&Numeric::infinity<R>);
+
   def("set_default_precision",&set_default_precision<Float>);
   def("default_precision",&default_precision<Float>);
 

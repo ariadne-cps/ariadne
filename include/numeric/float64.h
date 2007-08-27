@@ -28,8 +28,9 @@
 #ifndef ARIADNE_FLOAT64_H
 #define ARIADNE_FLOAT64_H
 
-#include <mpfr.h>
 #include <cmath>
+#include <limits>
+#include <mpfr.h>
 #include <boost/numeric/interval/rounded_arith.hpp>
 #include <boost/numeric/interval/rounded_transc.hpp>
 #include <boost/numeric/interval/hw_rounding.hpp>
@@ -153,6 +154,10 @@ namespace Ariadne {
       Float64 y; invoke_mpfr(y, x1, x2, f, r); return y;
     }
     
+    template<> inline Float64 nan() { return std::numeric_limits<double>::quiet_NaN(); }
+    template<> inline Float64 inf() { return std::numeric_limits<double>::infinity(); }
+    template<> inline Float64 infinity() { return std::numeric_limits<double>::infinity(); }
+
     template<> inline Float64 min(const Float64& x1, const Float64& x2) { return (x1<=x2) ? x1 : x2; }
     template<> inline Float64 max(const Float64& x1, const Float64& x2) { return (x1>=x2) ? x1 : x2; }
     template<> inline Float64 neg(const Float64& x) { return Float64(-x.get_d()); }

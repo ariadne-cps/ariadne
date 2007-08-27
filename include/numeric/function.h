@@ -36,6 +36,11 @@ namespace Ariadne {
     //@{ 
     //! \ingroup Numeric
 
+    /*! \brief Infinity and NotAnyNumber. */
+    template<class R> inline R nan();
+    template<class R> inline R inf();
+    template<class R> inline R infinity();
+
     /*! \brief Rounding. */
     template<class R> inline R next_down(const R& x);
     template<class R> inline R next_up(const R& x);

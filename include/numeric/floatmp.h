@@ -223,8 +223,12 @@ namespace Ariadne {
       return mpfr_cmp_q(x1.get_mpfr_t(),x2.get_mpq_t())> 0; }
   
   
-  template<> inline FloatMP next_up(const FloatMP& x) { FloatMP y(x); mpfr_nextabove(y.get_mpfr_t()); return y; }
-  template<> inline FloatMP next_down(const FloatMP& x) { FloatMP y(x); mpfr_nextbelow(y.get_mpfr_t()); return y; }
+    template<> inline FloatMP nan() { FloatMP y; mpfr_set_nan(y.get_mpfr_t()); return y; }
+    template<> inline FloatMP inf() { FloatMP y; mpfr_set_inf(y.get_mpfr_t(),+1); return y; }
+    template<> inline FloatMP infinity() { FloatMP y; mpfr_set_inf(y.get_mpfr_t(),+1); return y; }
+   
+    template<> inline FloatMP next_up(const FloatMP& x) { FloatMP y(x); mpfr_nextabove(y.get_mpfr_t()); return y; }
+    template<> inline FloatMP next_down(const FloatMP& x) { FloatMP y(x); mpfr_nextbelow(y.get_mpfr_t()); return y; }
       
       
     template<> inline FloatMP min(const FloatMP& x1, const FloatMP& x2) {

@@ -116,6 +116,14 @@ void export_interval()
   def("encloses", (bool(*)(const I&, const R&))&encloses);
   def("refines", (bool(*)(const I&, const I&))&refines);
 
+  def("equal", (bool(*)(const I&, const I&))&equal);
+  def("disjoint", (bool(*)(const I&, const I&))&disjoint);
+  def("overlap", (bool(*)(const I&, const I&))&overlap);
+  def("subset", (bool(*)(const I&, const I&))&subset);
+  def("inside", (bool(*)(const I&, const I&))&inside);
+  def("intersection", (I(*)(const I&, const I&))&intersection);
+  def("hull", (I(*)(const I&, const I&))&hull);
+
   def("max",&Python::max<I,I,I>);
   def("min",&Python::min<I,I,I>);
   def("abs",&Python::abs<I,I>);

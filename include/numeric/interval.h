@@ -648,8 +648,18 @@ namespace Ariadne {
     }
 
     template<class R> inline
+    bool overlap(const Interval<R>& x1, const Interval<R>& x2) {
+      return (x1.upper()>x2.lower() && x1.lower()<x2.upper());
+    }
+
+    template<class R> inline
     bool subset(const Interval<R>& x1, const Interval<R>& x2) {
       return (x1.lower()>=x2.lower() && x1.upper()<=x2.upper());
+    }
+
+    template<class R> inline
+    bool inside(const Interval<R>& x1, const Interval<R>& x2) {
+      return (x1.lower()>x2.lower() && x1.upper()<x2.upper());
     }
 
     template<class R> inline

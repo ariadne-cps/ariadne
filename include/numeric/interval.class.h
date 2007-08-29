@@ -176,18 +176,22 @@ namespace Ariadne {
       //! \name Geometric operations
       /*! \brief Tests equality. */
       friend bool equal<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief Tests disjointness. */
+      /*! \brief Tests if \a ivl1 and \a ivl2 are disjoint. */
       friend bool disjoint<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief Tests intersection of interiors. */
-      friend bool interiors_intersect<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      /*! \brief Tests if the intersios of \a ivl1 and \a ivl2 overlap. */
+      friend bool overlap<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
       /*! \brief Tests if \a ivl1 is a subset of \a ivl2. */
       friend bool subset<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
       /*! \brief Tests if \a ivl1 is a subset of the interior of \a ivl2. */
+      friend bool inside<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      /*! \brief Tests intersection of interiors. (%Deprecated) */
+      friend bool interiors_intersect<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      /*! \brief Tests if \a ivl1 is a subset of the interior of \a ivl2. (%Deprecated) */
       friend bool inner_subset<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
       
       /*! \brief The intersection of \a ivl1 and \a ivl2. */
       friend Interval<R> intersection<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief The closure of the intersection of the interiors of \a ivl1 and \a ivl2. */
+      /*! \brief The closure of the intersection of the interiors of \a ivl1 and \a ivl2. (%Deprecated) */
       friend Interval<R> regular_intersection<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
       /*! \brief The smallest interval containing \a ivl1 and \a ivl2. */
       friend Interval<R> hull<>(const Interval<R>& ivl1, const Interval<R>& ivl2);

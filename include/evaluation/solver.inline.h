@@ -58,7 +58,7 @@ DifferenceMap<R>::clone() const
 
 template<class R> 
 inline
-size_type 
+smoothness_type 
 DifferenceMap<R>::smoothness() const 
 { 
   return _base.smoothness(); 

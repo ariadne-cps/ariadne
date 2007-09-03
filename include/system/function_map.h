@@ -87,7 +87,7 @@ namespace Ariadne {
       virtual const Geometry::Point<A>& parameters() const;
 
       /*! \brief The degree of differentiability of the map. */
-      virtual size_type smoothness() const;
+      virtual smoothness_type smoothness() const;
       /*! \brief The dimension of the domain space. */
       virtual dimension_type argument_dimension() const;
       /*! \brief The dimension of the range space. */

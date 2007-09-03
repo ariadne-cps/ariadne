@@ -70,7 +70,7 @@ namespace Ariadne {
       const R& b() const { return _b; }
       
       /*! \brief  The dimension of the argument. */
-      size_type smoothness() const { return std::numeric_limits<size_type>::max(); }
+      smoothness_type smoothness() const { return std::numeric_limits<smoothness_type>::max(); }
       /*! \brief  The dimension of the argument. */
       dimension_type argument_dimension() const { return 2; }
       /*! \brief The dimension of the result. */
@@ -150,7 +150,7 @@ namespace Ariadne {
       const R& b() const { return _b; }
       
       /*! \brief  The dimension of the argument. */
-      size_type smoothness() const { return std::numeric_limits<size_type>::max(); }
+      smoothness_type smoothness() const { return std::numeric_limits<smoothness_type>::max(); }
       /*! \brief  The dimension of the argument. */
       dimension_type argument_dimension() const { return 2; }
       /*! \brief The dimension of the result. */

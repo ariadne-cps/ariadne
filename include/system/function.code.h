@@ -322,10 +322,10 @@ System::Function<R>::write(std::ostream& os) const
 
 
 template<class R>
-size_type
+smoothness_type
 System::Function<R>::smoothness() const
 {
-  //return std::numerical_limits<size_type>::max();
+  //return std::numerical_limits<smoothness_type>::max();
   return 1; 
 }
 

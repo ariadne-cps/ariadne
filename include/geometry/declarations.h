@@ -63,9 +63,13 @@ namespace Ariadne {
     template<class R> class PartitionTreeCell;
     template<class R> class PartitionTreeSet;
 
+    template<class R> class BasicSetInterface;
+    template<class R> class DenotableSetInterface;
     template<class R> class SetInterface;
+
     template<class R> class SetReference;
 
+    template<class R> class CurveInterface;
     template<class R> class ConstraintInterface;
 
     class HybridSpace;

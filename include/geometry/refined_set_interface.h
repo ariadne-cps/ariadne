@@ -41,7 +41,7 @@ namespace Ariadne {
     template<class R> class Rectangle;
       
 
-    //! \ingroup ExactSet
+    //! \ingroup SetInterface
     /*! \brief Base for SetInterface classes; constains information common to all classes of set. */
     template<class R>
     class SetInterfaceBase {
@@ -72,7 +72,7 @@ namespace Ariadne {
     };
 
 
-    //! \ingroup ExactSet
+    //! \ingroup SetInterface
     /*! \brief An abstract base class for general sets. */
     template<class R>
     class OpenSetInterface 
@@ -84,7 +84,7 @@ namespace Ariadne {
     };
 
 
-    //! \ingroup ExactSet
+    //! \ingroup SetInterface
     /*! \brief An abstract base class for the lower topology on closed sets. */
     template<class R>
     class LowerClosedSetInterface 
@@ -96,7 +96,7 @@ namespace Ariadne {
     };
 
 
-    //! \ingroup ExactSet
+    //! \ingroup SetInterface
     /*! \brief An abstract base class for the upper Fell topology on closed sets. */
     template<class R>
     class UpperClosedSetInterface 
@@ -108,7 +108,7 @@ namespace Ariadne {
     };
 
 
-    //! \ingroup ExactSet
+    //! \ingroup SetInterface
     /*! \brief An abstract base class for the upper Fell topology on closed sets. */
     template<class R>
     class ClosedSetInterface 
@@ -118,7 +118,7 @@ namespace Ariadne {
     };
 
 
-    //! \ingroup ExactSet
+    //! \ingroup SetInterface
     /*! \brief An abstract base class for the upper Vietoris topology of compact sets. */
     template<class R>
     class UpperCompactSetInterface 
@@ -135,7 +135,7 @@ namespace Ariadne {
     };
 
 
-    //! \ingroup ExactSet
+    //! \ingroup SetInterface
     /*! \brief An abstract base class for the Vietoris topology on compact sets. */
     template<class R>
     class CompactSetInterface 
@@ -144,7 +144,7 @@ namespace Ariadne {
     {
     };
 
-    //! \ingroup ExactSet
+    //! \ingroup SetInterface
     /*! \brief An abstract base class for the lower topology on closed sets. */
     template<class R>
     class RegularSetInterface 

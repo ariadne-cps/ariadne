@@ -78,7 +78,7 @@ namespace Ariadne {
       const LinearAlgebra::Vector<R>& b() const { return this->_b; }
       
       /*! \brief The dimension of the result. */
-      size_type smoothness() const { return (size_type) -1; }
+      smoothness_type smoothness() const { return std::numeric_limits<smoothness_type>::max(); }
  
       /*! \brief The dimension of the vector field is given by the size of \f$b\f$. */
       dimension_type dimension() const { return this->_b.size(); }

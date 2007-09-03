@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include <limits>
+
 #include "constraint.h"
 #include "../numeric/interval.h"
 #include "../linear_algebra/vector.h"
@@ -52,12 +54,6 @@ tribool compare_zero(const Numeric::Interval<R>& ivl, Geometry::Comparison cmp) 
 namespace Ariadne {
 
     
-template<class R>
-Geometry::ConstraintInterface<R>::~ConstraintInterface() 
-{ 
-}
-
-
 
 
 
@@ -91,7 +87,7 @@ Geometry::Constraint<R>::dimension() const
 
 
 template<class R>
-size_type 
+smoothness_type 
 Geometry::Constraint<R>::smoothness() const 
 {
   return this->_function_ptr->smoothness(); 
@@ -283,10 +279,10 @@ Geometry::LinearConstraint<R>::dimension() const
 
 
 template<class R>
-size_type 
+smoothness_type 
 Geometry::LinearConstraint<R>::smoothness() const 
 {
-  return (size_type) -1; 
+  return std::numeric_limits<smoothness_type>::max();
 }
 
 

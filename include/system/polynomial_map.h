@@ -202,7 +202,7 @@ namespace Ariadne {
       /*! \brief The dimension of the result. */
       dimension_type result_dimension() const { return _components.size(); }
       /*! \brief The dimension of the result. */
-      size_type smoothness() const { return (size_type) -1;; }
+      smoothness_type smoothness() const { return std::numeric_limits<smoothness_type>::max(); }
       
       /*! \brief Compute the image of a point under the polynomial map. */
       virtual Geometry::Point<F> image(const Geometry::Point<F>& s) const;

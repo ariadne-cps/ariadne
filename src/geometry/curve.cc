@@ -1,8 +1,8 @@
 /***************************************************************************
- *            constraint.inline.h
+ *            curve.cc
  *
  *  Copyright  2007  Pieter Collins
- *  pieter.collins@cwi.nl
+ *  Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -20,23 +20,28 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
+
+#include "numeric/float.h"
+
+#include "geometry/curve_interface.h"
+#include "geometry/curve.h"
+#include "geometry/curve.code.h"
 
 namespace Ariadne {
+  namespace Geometry {
+
+    using namespace Numeric;
+    
+#ifdef ENABLE_FLOAT64
+    template class CurveInterface<Float64>;
+    template class Curve<Float64>;
+#endif
   
-  template<class R> inline
-  bool
-  Geometry::equal(const Constraint<R>& c1, const Constraint<R>& c2)
-  {
-    return c1._function_ptr == c2._function_ptr && c1._comparison == c2._comparison;;
+#ifdef ENABLE_FLOATMP
+    template class CurveInterface<FloatMP>;
+    template class Curve<FloatMP>;
+#endif
+
   }
-
-  template<class R> inline
-  bool 
-  Geometry::opposite(const Constraint<R>& c1, const Constraint<R>& c2)
-  {
-    return c1._function_ptr==c2._function_ptr && c1._comparison != c2._comparison;
-  }
-
-
 }

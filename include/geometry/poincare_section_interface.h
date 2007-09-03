@@ -1,5 +1,5 @@
 /***************************************************************************
- *            curve_interface.h
+ *            poincare_section_interface.h
  *
  *  Copyright  2007  Pieter Collins
  *  pieter.collins@cwi.nl
@@ -21,69 +21,59 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file curve_interface.h
- *  \brief An interface for curves in Euclidean space.
+/*! \file poincare_section_interface.h
+ *  \brief A hypersurface suitable for defining a Poincare' section.
   */
 
-#ifndef ARIADNE_CURVE_INTERFACE_H
-#define ARIADNE_CURVE_INTERFACE_H
+#ifndef ARIADNE_POINCARE_SECTION_INTERFACE_H
+#define ARIADNE_POINCARE_SECTION_INTERFACE_H
 
 #include <iosfwd>
 
 #include "../base/types.h"
-#include "../numeric/numerical_traits.h"
-#include "../numeric/declarations.h"
-#include "../linear_algebra/declarations.h"
+
+#include "../geometry/declarations.h"
+#include "../system/declarations.h"
 
 namespace Ariadne {
   namespace Geometry {
     
-    template<class R> class Point;
-    template<class R> class Rectangle;
-    template<class R> class Polyhedron;
-    template<class R0,class R1> class Zonotope;
-
-  
     // Forward declarations for friends
-    template<class R> class CurveInterface;
-
+    template<class R> class ConstraintInterface;
+    
     //! \ingroup SetInterface
-    /*! \brief A curve in Euclidean space
+    /*! \brief A hypersurface suitable for use as a Poincare' section.
      */
     template<class R>
-    class CurveInterface
+    class PoincareSectionInterface
     {
       typedef typename Numeric::traits<R>::arithmetic_type A;
       typedef typename Numeric::traits<R>::interval_type I;
      public:
-     public:
       /*! \brief Destructor. */
-      virtual ~CurveInterface();
-      /*! \brief Return a new dynamically-allocated copy of the curve. */
-      virtual CurveInterface<R>* clone() const = 0;
-      /*! \brief The dimension of the space the curve lies in. */
+      virtual ~PoincareSectionInterface() { };
+      /*! \brief Return a new dynamically-allocated copy of the section. */
+      virtual PoincareSectionInterface<R>* clone() const = 0;
+      /*! \brief The dimension of the section. */
       virtual dimension_type dimension() const = 0;
-      /*! \brief The smoothness of the curve. */
+      /*! \brief The smoothness of the section. */
       virtual smoothness_type smoothness() const = 0;
-
-      /*! \brief The point on the curve at a parameter value. */
-      virtual Point<A> value(const A& s) const = 0;
-      /*! \brief The tangent vector to the curve at a parameter value. */
-      virtual LinearAlgebra::Vector<A> tangent(const A& s) const = 0;
-
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream& os) const = 0;
+
+      /*! \brief The map used to define the inclusion of the section in state space. */
+      virtual const System::MapInterface<R>& inclusion_map() const = 0;
+      /*! \brief The map used to define the (local) projection of state space to the section. */
+      virtual const System::MapInterface<R>& projection_map() const = 0;
+      /*! \brief A function whose zero set is the section. */
+      virtual const ConstraintInterface<R>& crossing_condition() const = 0;
     };
     
-    template<class R> CurveInterface<R>::~CurveInterface() {
-    }
-    
-    template<class R> inline std::ostream& operator<<(std::ostream& os, const CurveInterface<R>& c) {
-      return c.write(os);
+    template<class R> inline std::ostream& operator<<(std::ostream& os, const PoincareSectionInterface<R>& ps) {
+      return ps.write(os);
     }
     
   }
 }
 
-
-#endif /* ARIADNE_CURVE_INTERFACE_H */
+#endif /* ARIADNE_POINCARE_SECTION_INTERFACE_H */

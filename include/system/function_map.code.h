@@ -69,7 +69,7 @@ System::FunctionMap<R>::clone() const
 }
 
 template<class R>
-size_type 
+smoothness_type 
 System::FunctionMap<R>::smoothness() const
 {
   return this->_function_ptr->smoothness();

@@ -54,6 +54,8 @@ namespace Ariadne {
     typedef unsigned int id_type;
     /*! \brief An unsigned integral type used to represent a coordinate in state space. */
     typedef unsigned short dimension_type;
+    /*! \brief An integral type used to represent the smoothness of a map. */
+    typedef short smoothness_type;
     /*! \brief The type used to describe evolution time for discrete time systems. */
     typedef Numeric::Integer discrete_time_type;
     /*! \brief The type used to describe evolution time. */

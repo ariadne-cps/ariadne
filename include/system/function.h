@@ -89,7 +89,7 @@ namespace Ariadne {
       virtual LinearAlgebra::Matrix<A> jacobian(const LinearAlgebra::Vector<A>& x) const;
 
       /*! \brief The degree of differentiability of the function. */
-      virtual size_type smoothness() const;
+      virtual smoothness_type smoothness() const;
       /*! \brief The size of the function argument. */
       virtual size_type argument_size() const;
       /*! \brief The size of the function result. */

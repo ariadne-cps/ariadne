@@ -98,7 +98,7 @@ namespace Ariadne {
 
     
       /*! \brief The degree of differentiability of the function. */
-      virtual size_type smoothness() const = 0;
+      virtual smoothness_type smoothness() const = 0;
       /*! \brief The size of the function argument. */
       virtual size_type argument_size() const = 0;
       /*! \brief The size of the function result. */

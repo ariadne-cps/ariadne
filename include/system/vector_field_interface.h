@@ -1,8 +1,8 @@
 /***************************************************************************
- *            constraint.inline.h
+ *            vector_field_interface.h
  *
- *  Copyright  2007  Pieter Collins
- *  pieter.collins@cwi.nl
+ *  Copyright  2005-7  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it
  ****************************************************************************/
 
 /*
@@ -21,22 +21,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+/*! \file vector_field_interface.h
+ *  \brief Vector field interface.
+ */
 
-namespace Ariadne {
-  
-  template<class R> inline
-  bool
-  Geometry::equal(const Constraint<R>& c1, const Constraint<R>& c2)
-  {
-    return c1._function_ptr == c2._function_ptr && c1._comparison == c2._comparison;;
-  }
+#ifndef ARIADNE_VECTOR_FIELD_INTERFACE_H
+#define ARIADNE_VECTOR_FIELD_INTERFACE_H
 
-  template<class R> inline
-  bool 
-  Geometry::opposite(const Constraint<R>& c1, const Constraint<R>& c2)
-  {
-    return c1._function_ptr==c2._function_ptr && c1._comparison != c2._comparison;
-  }
+#include "vector_field.h"
 
-
-}
+#endif /* ARIADNE_VECTOR_FIELD_INTERFACE_H */

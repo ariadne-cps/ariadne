@@ -44,7 +44,7 @@ class VectorFieldWrapper
   VectorFieldInterface<R>* clone() const { return this->get_override("clone")(); }
   Vector<F> image(const Point<F>&) const { return this->get_override("image")(); }
   dimension_type dimension() const { return this->get_override("dimension")(); }
-  size_type smoothness() const { return this->get_override("smoothness")(); }
+  smoothness_type smoothness() const { return this->get_override("smoothness")(); }
   std::string name() const { return this->get_override("name")(); }
 };
 

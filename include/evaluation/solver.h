@@ -58,7 +58,7 @@ namespace Ariadne {
       /*! \brief Make a copy (clone) of the vector field. */
       DifferenceMap<R>* clone() const;
       /*!\brief The dimension of the space the map acts on. */
-      virtual size_type smoothness() const;
+      virtual smoothness_type smoothness() const;
       /*!\brief The dimension of the space the map acts on. */
       virtual dimension_type dimension() const;
       /*!\brief Evaluate the function \f$f(x)-x\f$, where \f$f\f$ is the map used to construct the difference map. */

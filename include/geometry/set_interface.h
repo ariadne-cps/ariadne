@@ -40,7 +40,7 @@ namespace Ariadne {
     template<class R> class Point;
     template<class R> class Rectangle;
       
-    //! \ingroup ExactSet
+    //! \ingroup SetInterface
     /*! \brief An abstract base class for general sets. */
     template<class R>
     class SetInterface {

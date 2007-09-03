@@ -109,7 +109,7 @@ namespace Ariadne {
       }
       
       /*! \brief The dimension of the result. */
-      virtual size_type smoothness() const { return (size_type) -1; }
+      virtual smoothness_type smoothness() const { return std::numeric_limits<smoothness_type>::max(); }
       
       /*! \brief The dimension of the result. */
       virtual dimension_type result_dimension() const {

@@ -243,6 +243,10 @@
  * \ingroup DenotableSet
  * \brief Sets based on partition trees.
  *
+ * \defgroup SetInterface Set interfaces
+ * \ingroup Geometry
+ * \brief Interfaces for various classes of sets.
+ *
  * \defgroup ExactSet Exact sets
  * \ingroup Geometry
  * \brief Sets which can be defined exactly.

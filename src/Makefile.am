@@ -45,7 +45,8 @@ GEOMETRY_SRC = \
 	geometry/grid_cell_list_set.cc geometry/grid_mask_set.cc \
 	geometry/irregular_grid.cc geometry/irregular_grid_set.cc \
 	geometry/partition_tree_set.cc \
-	geometry/constraint.cc \
+	geometry/curve.cc \
+	geometry/constraint.cc geometry/poincare_section.cc \
 	geometry/constraint_set.cc geometry/level_set.cc \
 	geometry/hybrid_set.cc \
 	geometry/ppl_polyhedron.cc
@@ -68,6 +69,7 @@ EVALUATION_SRC = \
 	evaluation/euler_integrator.cc \
 	evaluation/affine_integrator.cc \
 	evaluation/lohner_integrator.cc \
+	evaluation/detector.cc \
 	evaluation/flow.cc \
 	evaluation/hybrid_evolver.cc \
 	evaluation/constraint_hybrid_evolver.cc \

@@ -33,6 +33,7 @@ namespace Ariadne {
     template<class R> class Solver;
     template<class R> class Applicator;
     template<class R> class Integrator;
+    template<class R> class Detector;
     template<class R> class HybridEvolver;
 
     template<class R> class Flow;

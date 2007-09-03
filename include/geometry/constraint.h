@@ -34,6 +34,7 @@
 #include "../base/tribool.h"
 
 #include "../system/function_interface.h"
+#include "constraint_interface.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -45,54 +46,11 @@ namespace Ariadne {
 
   
     // Forward declarations for friends
-    template<class R> class ConstraintInterface;
     template<class R> class Constraint;
     template<class R> bool equal(const Constraint<R>& c1, const Constraint<R>& c2);
     template<class R> bool opposite(const Constraint<R>& c1, const Constraint<R>& c2);
   
-    /*! \brief The type of comparison used to define the constraint. */
-    enum Comparison { less, greater };
 
-
-    //! \ingroup ExactSet
-    /*! \brief A constraint on the state
-     */
-    template<class R>
-    class ConstraintInterface
-    {
-      typedef typename Numeric::traits<R>::arithmetic_type A;
-      typedef typename Numeric::traits<R>::interval_type I;
-     public:
-     public:
-      /*! \brief Destructor. */
-      virtual ~ConstraintInterface();
-      /*! \brief Return a new dynamically-allocated copy of the constraint. */
-      virtual ConstraintInterface<R>* clone() const = 0;
-      /*! \brief The dimension of the set. */
-      virtual dimension_type dimension() const = 0;
-      /*! \brief The operation used for comparison. */
-      virtual Comparison comparison() const = 0;
-      /*! \brief The smoothness of the constraint function. */
-      virtual size_type smoothness() const = 0;
-      /*! \brief Write to an output stream. */
-      virtual std::ostream& write(std::ostream& os) const = 0;
-
-      /*! \brief The value at a point. */
-      virtual A value(const Point<A>& pt) const = 0;
-      /*! \brief The gradient at a point. */
-      virtual LinearAlgebra::Vector<A> gradient(const Point<A>& pt) const = 0;
-#ifdef DOXYGEN
-      /*! \brief Test if the constraint is satisfied over a rectangle. */
-      friend tribool satisfies(const Rectangle<R>& r, const ConstraintInterface<R>& c);
-      /*! \brief Test if the constraint is satisfied over a zonotope. */
-      friend tribool satisfies(const Zonotope<R,R>& z), const ConstraintInterface<R>& c);
-      /*! \brief Test if the constraint is satisfied over a zonotope. */
-      friend tribool satisfies(const Zonotope<I,R>& z), const ConstraintInterface<R>& c);
-      /*! \brief Test if the constraint is satisfied over a zonotope. */
-      friend tribool satisfies(const Zonotope<I,I>& z), const ConstraintInterface<R>& c);
-#endif
-    };
-    
 
     //! \ingroup ExactSet
     /*! \brief A constraint on the state
@@ -114,7 +72,7 @@ namespace Ariadne {
       /*! \brief The dimension of the set. */
       virtual dimension_type dimension() const;
       /*! \brief The smoothness of the constraint function. */
-      virtual size_type smoothness() const;
+      virtual smoothness_type smoothness() const;
       /*! \brief The operation used for comparison. */
       virtual Comparison comparison() const;
       /*! \brief Write to an output stream. */
@@ -168,7 +126,7 @@ namespace Ariadne {
       /*! \brief The dimension of the set. */
       virtual dimension_type dimension() const;
       /*! \brief The smoothness of the constraint function. */
-      virtual size_type smoothness() const;
+      virtual smoothness_type smoothness() const;
       /*! \brief The operation used for comparison. */
       virtual Comparison comparison() const;
       /*! \brief Write to an output stream. */
@@ -200,21 +158,11 @@ namespace Ariadne {
     template<class R> bool equal(const Constraint<R>& c1, const Constraint<R>& c2);
     template<class R> bool opposite(const Constraint<R>& c1, const Constraint<R>& c2);
 
-    template<class R> Numeric::Interval<R> value(const ConstraintInterface<R>& c, const Rectangle<R>& r);
-    template<class R> Numeric::Interval<R> value(const ConstraintInterface<R>& c, const Zonotope< Numeric::Interval<R>, Numeric::Interval<R> >& z);
-
-    template<class R> tribool satisfies(const Rectangle<R>& r, const ConstraintInterface<R>& c);
-    template<class R> tribool satisfies(const Zonotope<R,R>& z, const ConstraintInterface<R>& c);
-    template<class R> tribool satisfies(const Zonotope<Numeric::Interval<R>,R>& z, const ConstraintInterface<R>& c);
-    template<class R> tribool satisfies(const Zonotope< Numeric::Interval<R>,Numeric::Interval<R> >& z, const ConstraintInterface<R>& c);
-
     template<class R> tribool satisfies(const Rectangle<R>& r, const Constraint<R>& c);
     template<class R> tribool satisfies(const Zonotope<R,R>& z, const Constraint<R>& c);
     template<class R> tribool satisfies(const Zonotope<Numeric::Interval<R>,R>& z, const Constraint<R>& c);
     template<class R> tribool satisfies(const Zonotope< Numeric::Interval<R>,Numeric::Interval<R> >& z, const Constraint<R>& c);
 
-    template<class R> std::ostream& operator<<(std::ostream& os, const ConstraintInterface<R>& c);
-    
   }
 }
 

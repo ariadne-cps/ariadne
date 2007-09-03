@@ -92,7 +92,7 @@ namespace Ariadne {
       virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<F>& r) const;
         
       /*! \brief The degree of differentiability of the map. */
-      virtual size_type smoothness() const = 0;
+      virtual smoothness_type smoothness() const = 0;
       /*! \brief The dimension of the domain space. */
       virtual dimension_type argument_dimension() const = 0;
       /*! \brief The dimension of the range space. */

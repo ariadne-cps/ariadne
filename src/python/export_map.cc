@@ -48,7 +48,7 @@ class MapWrapper : public MapInterface<R>, public wrapper< MapInterface<R> >
   Point<F> image(const Point<F>&) const { return this->get_override("clone")(); }
   dimension_type argument_dimension() const { return this->get_override("argument_dimension")(); }
   dimension_type result_dimension() const { return this->get_override("result_dimension")(); }
-  size_type smoothness() const { return this->get_override("smoothness")(); }
+  smoothness_type smoothness() const { return this->get_override("smoothness")(); }
   std::string name() const { return this->get_override("name")(); }
 };
 

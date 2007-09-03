@@ -50,11 +50,11 @@ namespace Ariadne {
                                                 const Interval<R>& x2);
 
     /*! \brief The median (average) of two values. */
-    template<class R> inline R med(const R& x, const R& y);
+    template<class R> inline R med(const R& x1, const R& x2);
 
     /*! \brief Absolute value. */
     template<class R> inline R abs(const R& x);  
-    template<class R> inline Interval<R> abs(const Interval<R>& x1);
+    template<class R> inline Interval<R> abs(const Interval<R>& x);
 
     /*! \brief Unary negation. */
     template<class R> inline R neg(const R& x);

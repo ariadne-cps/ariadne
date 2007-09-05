@@ -43,6 +43,9 @@ namespace Ariadne {
       //!\name Constructors and assignment operators
     
       /*!\brief Cloning operation. */
+      virtual ~BasicSetInterface();
+    
+      /*!\brief Cloning operation. */
       virtual BasicSetInterface<R>* clone() const = 0;
     
       //!\name Geometric operations and predicates
@@ -69,7 +72,11 @@ namespace Ariadne {
       
       //!\name Input/output operations
       /*!\brief Write to an output stream. */
-      std::ostream& write(std::ostream& os) const = 0;
+      virtual std::ostream& write(std::ostream& os) const = 0;
     };
+
+    template<class R> inline BasicSetInterface<R>::~BasicSetInterface() { }
+
+      
   }
 }

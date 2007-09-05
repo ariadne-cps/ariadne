@@ -1,4 +1,4 @@
-#!/projects/ariadne/bin/python2.4
+#!/usr/bin/python
 
 from ariadne import *
 

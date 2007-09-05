@@ -25,11 +25,38 @@
  *  \brief Adaptor for concrete sets to the basic set interface.
  */
 
+#include "basic_set_interface.h"
 
 namespace Ariadne {
   namespace Geometry {
 
+    template<class R> inline
+    dimension_type dimension(const Rectangle<R>& r) {
+      return r.dimension();
+    }
 
+    template<class R> inline
+    tribool contains(const Rectangle<R>& r, const Point<R>& pt) {
+      return r.contains(pt);
+    }
+
+    template<class R> inline
+    Rectangle<R> bounding_box(const Rectangle<R>& r) {
+      return r;
+    }
+
+    template<class R0, class R1> inline
+    dimension_type dimension(const Zonotope<R0,R1>& z) {
+      return z.dimension();
+    }
+
+    template<class R0, class R1> inline
+    Rectangle<typename Zonotope<R0,R1>::real_type> bounding_box(const Zonotope<R0,R1>& z) {
+      return z.bounding_box();
+    }
+
+
+    
     /*! \ingroup BasicSet
      *  \brief Adaptor for concrete sets to the basic set interface.
      *
@@ -56,6 +83,9 @@ namespace Ariadne {
       //! \name Constructors and assignment operators
     
       /*! \brief Construct from a basic set. */
+      BasicSetAdaptor(const BS& bs) : BS(bs) { }
+    
+      /*! \brief Copy constructor. */
       BasicSetAdaptor(const BasicSetAdaptor<BS>& bs) : BS(bs) { }
     
       /*! \brief Cloning operation. */
@@ -67,7 +97,7 @@ namespace Ariadne {
       //@{
       //! \name Required geometric operations
       /*! \brief The dimension of the Euclidean space the set lies in. */
-      virtual size_type dimension() const { return Geometry::dimension(*this); }
+      virtual dimension_type dimension() const { return Geometry::dimension(*this); }
       
       /*! \brief A rectangle containing the given set */
       virtual Rectangle<R> bounding_box() const { return Geometry::bounding_box(*this); };

@@ -23,6 +23,8 @@
 
 #include "numeric/float.h"
 
+#include "evaluation/integrator_plugin_interface.h"
+
 #include "evaluation/integrator.h"
 #include "evaluation/integrator.code.h"
 

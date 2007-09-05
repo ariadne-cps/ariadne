@@ -36,6 +36,8 @@
 #include "../geometry/declarations.h"
 #include "../system/declarations.h"
 
+#include "../evaluation/applicator_plugin.h"
+
 namespace Ariadne {
   namespace Evaluation {
 
@@ -49,12 +51,16 @@ namespace Ariadne {
       R _default_bound;
       R _maximum_basic_set_radius;
       R _grid_size;
+      ApplicatorPlugin<R>* _plugin;
      public:
       /*! \brief Default constructor chooses appropriate parameter values for maximum basic set radius and grid size. */
       Applicator();
       
       /*! \brief Construct from a maximum basic set radius and grid size. */
       Applicator(const R& maximum_basic_set_radius, const R& grid_size);
+      
+      /*! \brief Copy constructor. */
+      Applicator(const Applicator<R>& other);
       
       /*! \brief Compute the image of a basic set under a continuous function. */
       virtual ~Applicator();

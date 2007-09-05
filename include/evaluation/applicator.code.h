@@ -58,7 +58,7 @@
 namespace Ariadne {
   
 namespace Evaluation { 
-static int& verbosity = applicator_verbosity; 
+//static int& verbosity = applicator_verbosity; 
 static const double DEFAULT_MAXIMUM_BASIC_SET_RADIUS=0.25;
 static const double DEFAULT_GRID_SIZE=0.125;
 }
@@ -68,14 +68,28 @@ static const double DEFAULT_GRID_SIZE=0.125;
 template<class R>
 Evaluation::Applicator<R>::Applicator() 
   : _maximum_basic_set_radius(DEFAULT_MAXIMUM_BASIC_SET_RADIUS),
-    _grid_size(DEFAULT_GRID_SIZE)
+    _grid_size(DEFAULT_GRID_SIZE),
+    _plugin()
 {
 }
 
+
 template<class R>
 Evaluation::Applicator<R>::Applicator(const R& mbsr, const R& gs) 
-  : _maximum_basic_set_radius(mbsr),
-    _grid_size(gs)
+  : _default_bound(0),
+    _maximum_basic_set_radius(mbsr),
+    _grid_size(gs),
+    _plugin(new ApplicatorPlugin<R>())
+{
+}
+
+
+template<class R>
+Evaluation::Applicator<R>::Applicator(const Applicator<R>& other) 
+  : _default_bound(other._default_bound),
+    _maximum_basic_set_radius(other._maximum_basic_set_radius),
+    _grid_size(other._grid_size),
+    _plugin(other._plugin->clone())
 {
 }
 
@@ -84,6 +98,7 @@ Evaluation::Applicator<R>::Applicator(const R& mbsr, const R& gs)
 template<class R>
 Evaluation::Applicator<R>::~Applicator() 
 {
+  delete this->_plugin;
 }
 
 
@@ -192,10 +207,7 @@ template<class R>
 Geometry::Rectangle<R> 
 Evaluation::Applicator<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r) const
 {
-  ARIADNE_LOG(6,"GridMaskSetEvaluation Applicator::evaluate(MapInterface f, Rectangle<Float> r)\n");
-  ARIADNE_LOG(7,"  r="<<r<<"\n");
-  ARIADNE_LOG(8,"  f(r)="<<Geometry::Rectangle<R>(f.image(Geometry::Point< Numeric::Interval<R> >(r)))<<"\n");
-  return Geometry::Rectangle<R>(f.image(Geometry::Point< Numeric::Interval<R> >(r)));
+  return this->_plugin->evaluate(f,r);
 }
 
 
@@ -206,48 +218,7 @@ template<class R>
 Geometry::Zonotope<R> 
 Evaluation::Applicator<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<R>& z) const 
 {
-  ARIADNE_LOG(6,"GridMaskSetEvaluation Applicator::evaluate(MapInterface f, Zonotope<Float,Float> z)\n");
-  ARIADNE_LOG(7,"  z="<<z<<"\n");
-  typedef typename Numeric::traits<R>::arithmetic_type F;
-  
-  const size_type m=z.dimension();
-  const size_type n=z.dimension();
-  
-  LinearAlgebra::Vector< Numeric::Interval<R> > cuboid_vector(m);
-  const Numeric::Interval<R> unit_interval(-1,1);
-  for(size_type i=0; i!=cuboid_vector.size(); ++i) {
-    cuboid_vector(i)=Numeric::Interval<R>(-1,1);
-  }
-  
-  const Geometry::Point<R>& c=z.centre();
-  const LinearAlgebra::Matrix<R>& g=z.generators();
-  
-  Geometry::Point< Numeric::Interval<R> > img_centre=f(c);
-  LinearAlgebra::Matrix< Numeric::Interval<R> > df_on_set = f.jacobian(z.bounding_box());
-  LinearAlgebra::Matrix< Numeric::Interval<R> > df_at_centre = f.jacobian(c);
-  
-  LinearAlgebra::Matrix< Numeric::Interval<R> > img_generators = df_at_centre*g;
-  
-  LinearAlgebra::Matrix< Numeric::Interval<R> > img_generators_inverse = LinearAlgebra::inverse(LinearAlgebra::Matrix< Numeric::Interval<R> >(img_generators));
-  
-  LinearAlgebra::Matrix< Numeric::Interval<R> > img_generators_on_set = df_on_set * g;
-  LinearAlgebra::Matrix< Numeric::Interval<R> > cuboid_transform = img_generators_inverse * img_generators_on_set;
-  
-  LinearAlgebra::Vector< Numeric::Interval<R> > new_cuboid = cuboid_transform * cuboid_vector;
-  
-  R new_cuboid_sup(0);
-  for(size_type j=0; j!=n; ++j) {
-    new_cuboid_sup=std::max( new_cuboid_sup, R(abs(new_cuboid(j).lower())) );
-    new_cuboid_sup=std::max( new_cuboid_sup, R(abs(new_cuboid(j).upper())) );
-  }
-  
-  // FIXME: This is incorrect; need over-approximations
-  Geometry::Point<R> nc=Geometry::midpoint(img_centre);
-  LinearAlgebra::Matrix<R> ng=midpoint(img_generators);
-  
-  Geometry::Zonotope<R> result(nc,ng);
-  ARIADNE_LOG(8,"  f(z)="<<result<<"\n");
-  return result;
+  return this->_plugin->evaluate(f,z);
 }
 
 
@@ -258,17 +229,7 @@ template<class R>
 Geometry::Zonotope<Numeric::Interval<R>,R> 
 Evaluation::Applicator<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<Numeric::Interval<R>,R>& z) const 
 {
-  ARIADNE_LOG(6,"GridMaskSetEvaluation Applicator::evaluate(MapInterface f, Zonotope<Interval,Float> z)\n");
-  ARIADNE_LOG(7,"  z="<<z<<"\n");
-  typedef Numeric::Interval<R> I;
-  
-  Geometry::Point<I> img_centre=f(z.centre());
-  LinearAlgebra::Matrix<I> df_on_set = f.jacobian(over_approximation(z.bounding_box()));
-  LinearAlgebra::Matrix<I> img_generators = df_on_set*z.generators();
-  Geometry::Zonotope<I,I> interval_zonotope(img_centre,img_generators);
-  Geometry::Zonotope<I,R> result(over_approximation(interval_zonotope));
-  ARIADNE_LOG(8,"  f(z)="<<result<<"\n");
-  return result;
+  return this->_plugin->evaluate(f,z);
 }
 
 
@@ -277,17 +238,7 @@ template<class R>
 Geometry::Zonotope< Numeric::Interval<R> > 
 Evaluation::Applicator<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope< Numeric::Interval<R> >& z) const 
 {
-  ARIADNE_LOG(6,"GridMaskSet Applicator::evaluate(MapInterface f, Zonotope<Interval,Interval> z)\n");
-  ARIADNE_LOG(7,"  z="<<z<<"\n");
-  typedef Numeric::Interval<R> I;
-  
-  Geometry::Point<I> img_centre=f(z.centre());
-  LinearAlgebra::Matrix<I> df_on_set = f.jacobian(over_approximation(z.bounding_box()));
-  LinearAlgebra::Matrix<I> img_generators = df_on_set*z.generators();
-  
-  Geometry::Zonotope<I> result(img_centre,img_generators);
-  ARIADNE_LOG(8,"  f(z)="<<result<<"\n");
-  return result;
+  return this->_plugin->evaluate(f,z);
 }
 
 

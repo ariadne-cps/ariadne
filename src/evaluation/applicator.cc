@@ -23,6 +23,9 @@
 
 #include "numeric/float.h"
 
+#include "evaluation/applicator_plugin.h"
+#include "evaluation/applicator_plugin.code.h"
+
 #include "evaluation/applicator.h"
 #include "evaluation/applicator.code.h"
 
@@ -31,10 +34,12 @@ namespace Ariadne {
     using namespace Numeric;
 
 #ifdef ENABLE_FLOAT64
+    template class ApplicatorPlugin<Float64>;
     template class Applicator<Float64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
+    template class ApplicatorPlugin<FloatMP>;
     template class Applicator<FloatMP>;
 #endif
 

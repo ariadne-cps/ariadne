@@ -38,8 +38,6 @@
 
 namespace Ariadne {
 
-using namespace System;
-
 std::ostream& 
 Input::operator<<(std::ostream& os, const Token& token)
 {
@@ -328,10 +326,10 @@ Input::ModelicaParser::ModelicaParser(const std::string& str)
 
 
 
-System::FunctionVariable
+Function::FunctionVariable
 Input::ModelicaParser::variable(const std::string& name) const
 {
-  for(std::vector<FunctionVariable>::const_iterator var_iter=this->_variables.begin();
+  for(std::vector<Function::FunctionVariable>::const_iterator var_iter=this->_variables.begin();
       var_iter!=this->_variables.end(); ++var_iter)
   {
     if(var_iter->name==name) {
@@ -343,8 +341,9 @@ Input::ModelicaParser::variable(const std::string& name) const
 
 
 void
-Input::ModelicaParser::new_variable(const std::string& name, FunctionVariable::Type type, uint size)
+Input::ModelicaParser::new_variable(const std::string& name, Function::FunctionVariable::Type type, uint size)
 {
+  using namespace Function;
   size_type start=0;
   for(std::vector<FunctionVariable>::const_iterator var_iter=this->_variables.begin(); 
       var_iter!=this->_variables.end(); ++var_iter)
@@ -375,9 +374,10 @@ Input::ModelicaParser::new_variable(const std::string& name, FunctionVariable::T
 
 
 
-VirtualMachine::Index
+Function::VirtualMachine::Index
 Input::ModelicaParser::get_variable_index()
 {
+  using namespace Function;
   Token tok;
   FunctionVariable var;
   VirtualMachine::Index index;
@@ -410,7 +410,7 @@ Input::ModelicaParser::get_variable_index()
 
 
 
-const std::vector<System::FunctionVariable>&
+const std::vector<Function::FunctionVariable>&
 Input::ModelicaParser::variables() const
 {
   return this->_variables;
@@ -424,7 +424,7 @@ Input::ModelicaParser::constants() const
 }
 
 
-const std::vector<VirtualMachine::ByteCode>&
+const std::vector<Function::VirtualMachine::ByteCode>&
 Input::ModelicaParser::operations() const
 {
   return this->_operations;
@@ -434,8 +434,9 @@ Input::ModelicaParser::operations() const
 void
 Input::ModelicaParser::read_function()
 {
-  Token tok;
+  using namespace Function;
 
+  Token tok;
   tok=this->get_token();
   if(tok.type!=Parser::FUNCTION) {
     ARIADNE_THROW(SyntaxError,"ModelicaParser::read_function()",": expected \"function\" at beginning of input; received "<<tok);
@@ -484,6 +485,7 @@ Input::ModelicaParser::read_function()
 void
 Input::ModelicaParser::read_declaration()
 {
+  using namespace Function;
   std::string name;
   FunctionVariable::Type type;
   Numeric::Rational value;
@@ -567,11 +569,12 @@ Input::ModelicaParser::read_declaration()
 void
 Input::ModelicaParser::read_statement()
 {
+  using namespace Function;
+
   VirtualMachine::ByteCode code;
   VirtualMachine::Index index=this->get_variable_index();
   
   this->read_assignment();
-  
   this->read_expression();
   
   Token tok=this->get_token();
@@ -604,6 +607,7 @@ Input::ModelicaParser::read_expression()
   //   { [ PLUS | MINUS ] } term ( [ PLUS | MINUS ] term )*
 
   ARIADNE_LOG(4,"read_expression");
+  using namespace Function;
   VirtualMachine::ByteCode code;
   Token tok;
   read_term();
@@ -624,6 +628,7 @@ Input::ModelicaParser::read_term()
   //   term: factor ( [ TIMES | DIVIDES ] factor ) *
 
   ARIADNE_LOG(4,"read_term");
+  using namespace Function;
   VirtualMachine::ByteCode code;
   Token tok;
   read_factor();
@@ -644,6 +649,7 @@ Input::ModelicaParser::read_factor()
   // factor:  { PLUS | MINUS } primary | primary ^ integer
 
   ARIADNE_LOG(4,"read_factor");
+  using namespace Function;
   VirtualMachine::ByteCode pncode;
   VirtualMachine::ByteCode code;
   Token tok;
@@ -682,6 +688,8 @@ Input::ModelicaParser::read_factor()
 void
 Input::ModelicaParser::read_primary()
 {
+  using namespace Function;
+
   // primary:  variable | constant | function(expression) | (expression)
   ARIADNE_LOG(4,"read_primary");
   VirtualMachine::ByteCode code;
@@ -743,6 +751,7 @@ void
 Input::ModelicaParser::read_variable()
 {
   ARIADNE_LOG(4,"read_variable");
+  using namespace Function;
   VirtualMachine::ByteCode code;
   code.ind=this->get_variable_index();
   this->_operations.push_back(code);
@@ -752,6 +761,7 @@ void
 Input::ModelicaParser::read_constant()
 {
   ARIADNE_LOG(4,"read_constant");
+  using namespace Function;
   VirtualMachine::ByteCode code;
   Token tok=get_token();
   assert(tok.type==Parser::INT || tok.type==Parser::RL);

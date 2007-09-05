@@ -45,12 +45,15 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_rational.cc \
 	export_float.cc \
 	export_interval.cc \
-	export_differential.cc \
+	export_derivative.cc \
 	 \
 	export_vector.cc \
 	export_matrix.cc \
 	export_tensor.cc \
 	export_linear_program.cc \
+	 \
+	export_function.cc \
+	export_differential.cc \
 	 \
 	export_point.cc \
 	export_set.cc \
@@ -70,7 +73,6 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_level_set.cc \
 	export_hybrid_set.cc \
 	 \
-	export_function.cc \
 	export_map.cc \
 	export_affine_map.cc \
 	export_polynomial_map.cc \

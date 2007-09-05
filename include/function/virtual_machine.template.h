@@ -1,5 +1,5 @@
 /***************************************************************************
- *            virtual_machine.code.h
+ *            virtual_machine.template.h
  *
  *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it  Pieter.Collins@cwi.nl
@@ -30,7 +30,7 @@
 #include "../base/stlio.h"
 #include "../base/exceptions.h"
 #include "../numeric/rational.h"
-#include "../system/virtual_machine.h"
+#include "../function/virtual_machine.h"
 #include "../output/logging.h"
 
 
@@ -39,7 +39,7 @@ namespace {
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using Ariadne::Base::array;
-using Ariadne::System::VirtualMachine;
+using Ariadne::Function::VirtualMachine;
 
 
 template<class X> inline
@@ -143,7 +143,7 @@ void evaluate(const array<VirtualMachine::ByteCode>& ops, Q** args, rational_tag
   std::vector<Q> stack;
   VirtualMachine::Index index;
   int value;
-  for(array<System::VirtualMachine::ByteCode>::const_iterator op_iter=ops.begin();
+  for(array<Function::VirtualMachine::ByteCode>::const_iterator op_iter=ops.begin();
       op_iter!=ops.end(); ++op_iter)
   {
     switch(op_iter->op) {
@@ -217,7 +217,7 @@ namespace Ariadne {
 
 template<class X>
 void 
-System::VirtualMachine::evaluate(const array<ByteCode>& program, X** arguments) const
+Function::VirtualMachine::evaluate(const array<ByteCode>& program, X** arguments) const
 {
   ::evaluate(program,arguments);
 }

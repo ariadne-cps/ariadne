@@ -47,7 +47,7 @@ tribool less(const LinearAlgebra::Vector<X1>& v1, const LinearAlgebra::Vector<X2
 namespace Ariadne {
     
 template<class R>
-Geometry::ConstraintSet<R>::ConstraintSet(const System::FunctionInterface<R>& f)
+Geometry::ConstraintSet<R>::ConstraintSet(const Function::FunctionInterface<R>& f)
   : SetInterface<R>(), _function_ptr(f.clone()) 
 { 
 }
@@ -80,7 +80,7 @@ template<class R>
 tribool 
 Geometry::ConstraintSet<R>::contains(const Point<R>& pt) const 
 {
-  const System::FunctionInterface<R>& f=*this->_function_ptr;
+  const Function::FunctionInterface<R>& f=*this->_function_ptr;
   LinearAlgebra::Vector<A> v=pt.position_vector();
   LinearAlgebra::Vector<R> z=LinearAlgebra::Vector<R>::zero(this->number_of_constraints());
   LinearAlgebra::Vector<A> r=f(v);
@@ -92,7 +92,7 @@ template<class R>
 tribool 
 Geometry::ConstraintSet<R>::contains(const Point<A>& pt) const 
 {
-  const System::FunctionInterface<R>& f=*this->_function_ptr;
+  const Function::FunctionInterface<R>& f=*this->_function_ptr;
   LinearAlgebra::Vector<A> v=pt.position_vector();
   LinearAlgebra::Vector<R> z=LinearAlgebra::Vector<R>::zero(this->number_of_constraints());
   LinearAlgebra::Vector<A> r=f(v);
@@ -104,7 +104,7 @@ template<class R>
 tribool 
 Geometry::ConstraintSet<R>::superset(const Rectangle<R>& r) const 
 {
-  const System::FunctionInterface<R>& f=*this->_function_ptr;
+  const Function::FunctionInterface<R>& f=*this->_function_ptr;
   LinearAlgebra::Vector<A> v=r.position_vectors();
   LinearAlgebra::Vector<R> z=LinearAlgebra::Vector<R>::zero(this->number_of_constraints());
   LinearAlgebra::Vector<A> fv=f(v);
@@ -124,7 +124,7 @@ template<class R>
 tribool 
 Geometry::ConstraintSet<R>::disjoint(const Rectangle<R>& r) const 
 {
-  const System::FunctionInterface<R>& f=*this->_function_ptr;
+  const Function::FunctionInterface<R>& f=*this->_function_ptr;
   LinearAlgebra::Vector<A> v=r.position_vectors();
   LinearAlgebra::Vector<R> z=LinearAlgebra::Vector<R>::zero(this->number_of_constraints());
   return ::less(f(v),z);
@@ -173,7 +173,7 @@ Geometry::ConstraintSet<R>::number_of_constraints() const
 
 
 template<class R>
-const System::FunctionInterface<R>&
+const Function::FunctionInterface<R>&
 Geometry::ConstraintSet<R>::function() const 
 {
   return *this->_function_ptr;
@@ -184,7 +184,7 @@ template<class R>
 Geometry::Point<typename Geometry::ConstraintSet<R>::A> 
 Geometry::ConstraintSet<R>::function(const Point<A>& pt) const 
 {
-  const System::FunctionInterface<R>& f=*this->_function_ptr;
+  const Function::FunctionInterface<R>& f=*this->_function_ptr;
   LinearAlgebra::Vector<A> v=pt.position_vector();
   return Point<A>(f(v));
 }

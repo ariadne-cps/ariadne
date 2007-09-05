@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function.cc
+ *            affine_model.cc
  *
  *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -24,22 +24,20 @@
 #include "numeric/rational.h"
 #include "numeric/float.h"
 
-#include "system/function.h"
-#include "system/function.code.h"
+#include "function/affine_model.h"
+#include "function/affine_model.code.h"
 
 namespace Ariadne {
-  namespace System {
+  namespace Function {
     using namespace Numeric;
     
-    template class Function<Rational>;
-
 #ifdef ENABLE_FLOAT64
-    template class Function<Float64>;
+    template class AffineModel<Float64>;
 #endif
     
 #ifdef ENABLE_FLOATMP
-    template class Function<FloatMP>;
+    template class AffineModel<FloatMP>;
 #endif
-    
+
   }
 }

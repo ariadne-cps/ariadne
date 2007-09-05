@@ -25,9 +25,9 @@
 #include "python/python_float.h"
 
 #include "numeric/rational.h"
-#include "numeric/differential.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
+#include "function/differential.h"
 
 
 #include <boost/python.hpp>
@@ -40,17 +40,6 @@ using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Python;
 
 
-template<class R1, class R2> inline 
-void scalar_derivative_set_item(ScalarDerivative<R1>& sd, uint i, R2 x) {
-  assert(i<=sd.degree()); 
-  sd[i]=x;
-}
-
-template<class R> inline 
-R scalar_derivative_get_item(const ScalarDerivative<R>& sd, uint i) {
-  assert(i<=sd.degree()); 
-  return sd[i];
-}
 
 template<class R>
 void export_differential()
@@ -158,135 +147,6 @@ void export_differential<Rational>()
 
 
 
-template<class R>
-void export_derivative()
-{
-  typedef typename Numeric::traits<R>::arithmetic_type A;
-  typedef ScalarDerivative<A> SD;
-
-
-  class_<SD>(python_name<R>("ScalarDerivative").c_str())
-    .def( init< uint >())
-    .def( init< uint, double >())
-    .def( init< uint, double, double >())
-    .def( init< uint, A >())
-    .def( init< uint, A, A >())
-    .def( init< std::string >())
-    .def("__getitem__", &scalar_derivative_get_item<A>)
-    .def("__setitem__",&scalar_derivative_set_item<A,double>)
-    .def("__setitem__",&scalar_derivative_set_item<A,R>)
-    .def("__setitem__",&scalar_derivative_set_item<A,A>)
-    .def("__neg__", &Python::neg<SD,SD>)
-    .def("__add__", &add<SD,SD,SD>)
-    .def("__add__", &add<SD,SD,double>)
-    .def("__add__", &add<SD,SD,R>)
-    .def("__add__", &add<SD,SD,A>)
-    .def("__radd__", &radd<SD,SD,double>)
-    .def("__radd__", &radd<SD,SD,R>)
-    .def("__radd__", &radd<SD,SD,A>)
-    .def("__sub__", &sub<SD,SD,SD>)
-    .def("__sub__", &sub<SD,SD,double>)
-    .def("__sub__", &sub<SD,SD,R>)
-    .def("__sub__", &sub<SD,SD,A>)
-    .def("__rsub__", &rsub<SD,SD,double>)
-    .def("__rsub__", &rsub<SD,SD,R>)
-    .def("__rsub__", &rsub<SD,SD,A>)
-    .def("__mul__", &mul<SD,SD,SD>)
-    .def("__mul__", &mul<SD,SD,double>)
-    .def("__mul__", &mul<SD,SD,R>)
-    .def("__mul__", &mul<SD,SD,A>)
-    .def("__rmul__", &rmul<SD,SD,double>)
-    .def("__rmul__", &rmul<SD,SD,R>)
-    .def("__rmul__", &rmul<SD,SD,A>)
-    .def("__div__", &div<SD,SD,SD>)
-    .def("__div__", &div<SD,SD,double>)
-    .def("__div__", &div<SD,SD,R>)
-    .def("__div__", &div<SD,SD,A>)
-    .def("__rdiv__", &rdiv<SD,SD,double>)
-    .def("__rdiv__", &rdiv<SD,SD,R>)
-    .def("__rdiv__", &rdiv<SD,SD,A>)
-    .def("__pow__", &pow<SD,SD,int>)
-    .def(self_ns::str(self))
- ;
-  
-  def("compose",(SD(*)(const SD&,const SD&))&Numeric::compose);
-  def("inverse",(SD(*)(const SD&,const A&))&Numeric::inverse);
-
-  def("max",(SD(*)(const SD&,const SD&))&Numeric::max);
-  def("min",(SD(*)(const SD&,const SD&))&Numeric::min);
-  def("abs",(SD(*)(const SD&))&Numeric::abs);
-  def("pow",(SD(*)(const SD&, int))&Numeric::pow);
-
-  def("sqrt", (SD(*)(const SD&))&Numeric::sqrt);
-  def("exp", (SD(*)(const SD&))&Numeric::exp);
-  def("log", (SD(*)(const SD&))&Numeric::log);
-  def("sin", (SD(*)(const SD&))&Numeric::sin);
-  def("cos", (SD(*)(const SD&))&Numeric::cos);
-  def("tan", (SD(*)(const SD&))&Numeric::tan);
-  def("asin", (SD(*)(const SD&))&Numeric::asin);
-  def("acos", (SD(*)(const SD&))&Numeric::acos);
-  def("atan", (SD(*)(const SD&))&Numeric::atan);
-
-}
-
-
-template<>
-void export_derivative<Rational>()
-{
-  typedef Rational Q;
-  typedef ScalarDerivative<Q> SD;
-
-
-  class_<SD>(python_name<Q>("ScalarDerivative").c_str())
-    .def( init< std::string >())
-    .def( init< uint >())
-    .def( init< uint, double >())
-    .def( init< uint, Q >())
-    .def( init< uint, double, double >())
-    .def( init< uint, Q, Q >())
-    .def( init< std::string >())
-    .def("__getitem__", &scalar_derivative_get_item<Q>)
-    .def("__setitem__",&scalar_derivative_set_item<Q,double>)
-    .def("__setitem__",&scalar_derivative_set_item<Q,Q>)
-    .def("__neg__", &Python::neg<SD,SD>)
-    .def("__add__", &add<SD,SD,SD>)
-    .def("__add__", &add<SD,SD,double>)
-    .def("__add__", &add<SD,SD,Q>)
-    .def("__radd__", &radd<SD,SD,double>)
-    .def("__radd__", &radd<SD,SD,Q>)
-    .def("__sub__", &sub<SD,SD,SD>)
-    .def("__sub__", &sub<SD,SD,double>)
-    .def("__sub__", &sub<SD,SD,Q>)
-    .def("__rsub__", &rsub<SD,SD,double>)
-    .def("__rsub__", &rsub<SD,SD,Q>)
-    .def("__mul__", &mul<SD,SD,SD>)
-    .def("__mul__", &mul<SD,SD,double>)
-    .def("__mul__", &mul<SD,SD,Q>)
-    .def("__rmul__", &rmul<SD,SD,double>)
-    .def("__rmul__", &rmul<SD,SD,Q>)
-    .def("__div__", &div<SD,SD,SD>)
-    .def("__div__", &div<SD,SD,double>)
-    .def("__div__", &div<SD,SD,Q>)
-    .def("__rdiv__", &rdiv<SD,SD,double>)
-    .def("__rdiv__", &rdiv<SD,SD,Q>)
-    .def("__pow__", &pow<SD,SD,int>)
-    .def(self_ns::str(self))
- ;
-  
-  def("compose",(SD(*)(const SD&,const SD&))&Numeric::compose);
-  def("inverse",(SD(*)(const SD&,const Q&))&Numeric::inverse);
-
-  def("max",(SD(*)(const SD&,const SD&))&Numeric::max);
-  def("min",(SD(*)(const SD&,const SD&))&Numeric::min);
-  def("abs",(SD(*)(const SD&))&Numeric::abs);
-  def("pow",(SD(*)(const SD&, int))&Numeric::pow);
-
-}
-
-
-
 
 template void export_differential<Rational>();
 template void export_differential<Float>();
-template void export_derivative<Rational>();
-template void export_derivative<Float>();

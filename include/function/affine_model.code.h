@@ -1,8 +1,8 @@
 /***************************************************************************
- *            logging.cc
+ *            affine_model.code.h
  *
- *  Copyright  2004-6  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2007  Pieter Collins
+ *  Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -20,33 +20,9 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-
-#include "output/logging.h"
+ 
+#include "affine_model.h"
 
 namespace Ariadne {
-
-std::ofstream Output::log_file_stream;
-
-void Output::redirect_log(const char* filename) 
-{
-  if(log_file_stream.is_open()) {
-    log_file_stream.close();
-  }
-  log_file_stream.open(filename);
-  std::clog.rdbuf( log_file_stream.rdbuf() );
-}
-
-int Numeric::verbosity=0; 
-int LinearAlgebra::verbosity=0; 
-int LinearProgramming::verbosity=0; 
-int Combinatoric::verbosity=0;
-int Function::verbosity=0;
-int Geometry::verbosity=0;
-int System::verbosity=0;
-int Evaluation::solver_verbosity=0;
-int Evaluation::applicator_verbosity=0;
-int Evaluation::integrator_verbosity=0;
-int Evaluation::hybrid_evolver_verbosity=0;
-int Input::verbosity=0;
 
 }

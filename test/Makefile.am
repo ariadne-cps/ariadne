@@ -15,7 +15,7 @@ check_PROGRAMS = \
 	test_rational \
 	test_float \
 	test_interval \
-	test_differential \
+	test_differentiation \
 	test_vector \
 	test_matrix \
 	test_tensor \
@@ -28,6 +28,9 @@ check_PROGRAMS = \
 	test_binary_word \
 	test_lattice \
 	test_subdivision_tree \
+	test_function \
+	test_affine_model \
+	test_differential \
 	test_point \
 	test_list_set \
 	test_grid_set \
@@ -42,8 +45,6 @@ check_PROGRAMS = \
 	test_constraint_set test_level_set \
 	test_hybrid_automaton \
 	test_constraint_hybrid_automaton \
-	test_affine_model \
-	test_function \
 	test_newton \
 	test_apply \
 	test_lohner_integrator \

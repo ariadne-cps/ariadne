@@ -36,8 +36,8 @@
 #include "../base/types.h"
 #include "../numeric/numerical_traits.h"
 #include "../numeric/rational.h"
-#include "../system/function.h"
-#include "../system/virtual_machine.h"
+#include "../function/interpreted_function.h"
+#include "../function/virtual_machine.h"
 
 namespace Ariadne {
   namespace Input {
@@ -82,23 +82,23 @@ namespace Ariadne {
       ModelicaParser(const std::string&);
       
       const std::string& function_name() const;
-      const std::vector<System::VirtualMachine::ByteCode>& operations() const;
-      const std::vector<System::FunctionVariable>& variables() const;
+      const std::vector<Function::VirtualMachine::ByteCode>& operations() const;
+      const std::vector<Function::FunctionVariable>& variables() const;
       const std::vector<Numeric::Rational>& constants() const;
 
      private:
       void tokenize(std::istream& is);
       Token get_token(std::istream& is);
 
-      void new_variable(const std::string& name, System::FunctionVariable::Type type, uint size);
-      System::FunctionVariable variable(const std::string& name) const;
+      void new_variable(const std::string& name, Function::FunctionVariable::Type type, uint size);
+      Function::FunctionVariable variable(const std::string& name) const;
       
       Token peek_token();
       Token next_token();
       Token get_token();
       Token token();
 
-      System::VirtualMachine::Index get_variable_index();
+      Function::VirtualMachine::Index get_variable_index();
 
       void read_function();
       void read_declaration();
@@ -116,9 +116,9 @@ namespace Ariadne {
      private:
       std::string _name;
       std::vector<Token> _tokens;
-      std::vector<System::FunctionVariable> _variables;
+      std::vector<Function::FunctionVariable> _variables;
       std::vector<Numeric::Rational> _constants;
-      std::vector<System::VirtualMachine::ByteCode> _operations;
+      std::vector<Function::VirtualMachine::ByteCode> _operations;
       
       std::vector<Token>::const_iterator cursor;
     };

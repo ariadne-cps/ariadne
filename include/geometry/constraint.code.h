@@ -58,7 +58,7 @@ namespace Ariadne {
 
 
 template<class R>
-Geometry::Constraint<R>::Constraint(const System::FunctionInterface<R>& f, Comparison cmp)
+Geometry::Constraint<R>::Constraint(const Function::FunctionInterface<R>& f, Comparison cmp)
   : _function_ptr(f.clone()), _comparison(cmp)
 { 
 }
@@ -199,7 +199,7 @@ Geometry::Constraint<R>::comparison() const
 
 
 template<class R>
-const System::FunctionInterface<R>&
+const Function::FunctionInterface<R>&
 Geometry::Constraint<R>::function() const 
 {
   return *this->_function_ptr;

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function.h
+ *            interpreted_function.h
  *
  *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it  Pieter.Collins@cwi.nl
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file system/function.h
+/*! \file system/interpreted_function.h
  *  \brief Functions running on a virtual machine.
  */
  
-#ifndef ARIADNE_SYSTEM_FUNCTION_H
-#define ARIADNE_SYSTEM_FUNCTION_H
+#ifndef ARIADNE_SYSTEM_INTERPRETED_FUNCTION_H
+#define ARIADNE_SYSTEM_INTERPRETED_FUNCTION_H
 
 #include <vector>
 #include <string>
@@ -37,18 +37,17 @@
 #include "../base/array.h"
 #include "../numeric/numerical_traits.h"
 #include "../linear_algebra/declarations.h"
-#include "../system/function_interface.h"
-#include "../system/virtual_machine.h"
+#include "../function/function_interface.h"
+#include "../function/virtual_machine.h"
 
 namespace Ariadne {
-  namespace System {
+  namespace Function {
       
-    /*!\ingroup System
-     * \ingroup DiscreteTime
-     * \brief Concrete class for functions.
+    /*!\ingroup Function
+     * \brief A function running on a virtual machine.
      */
     template<class R>
-    class Function
+    class InterpretedFunction
       : public FunctionInterface<R>
     {
       typedef typename Numeric::traits<R>::arithmetic_type A; 
@@ -59,25 +58,25 @@ namespace Ariadne {
       typedef R real_type;
       
       /*! \brief  destructor. */
-      virtual ~Function() { }
+      virtual ~InterpretedFunction() { }
      
       /*! \brief Default constructor. */
-      Function();
+      InterpretedFunction();
      
       /*! \brief Construct from a string literal. */
-      Function(const std::string& filename);
+      InterpretedFunction(const std::string& filename);
      
       /*! \brief Construct by reading from an input stream. */
-      Function( std::istream& is);
+      InterpretedFunction( std::istream& is);
      
       /*! \brief Construct from a list of variables and an algorithm. */
-      Function(const std::string& name,
-               const std::vector<FunctionVariable>& variables,
-               const std::vector<Numeric::Rational>& constants,
-               const std::vector<VirtualMachine::ByteCode>& algorithm);
+      InterpretedFunction(const std::string& name,
+                          const std::vector<FunctionVariable>& variables,
+                          const std::vector<Numeric::Rational>& constants,
+                          const std::vector<VirtualMachine::ByteCode>& algorithm);
      
       /*! \brief Make a copy (clone) of the vector field. */
-      virtual Function<R>* clone() const;
+      virtual InterpretedFunction<R>* clone() const;
      
       /*! \brief A bound for the vector field over aa set of vectors. */
       virtual LinearAlgebra::Vector<A> image(const LinearAlgebra::Vector<A>& x) const;
@@ -121,12 +120,12 @@ namespace Ariadne {
    
 
     template<class R> inline
-    std::istream& operator>>(std::istream& is, Function<R>& f) {
+    std::istream& operator>>(std::istream& is, InterpretedFunction<R>& f) {
       return f.read(is);
     }
 
     template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const  Function<R>& f) {
+    std::ostream& operator<<(std::ostream& os, const  InterpretedFunction<R>& f) {
       return f.write(os);
     };
 
@@ -135,4 +134,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* ARIADNE_SYSTEM_FUNCTION_H */
+#endif /* ARIADNE_SYSTEM_INTERPRETED_FUNCTION_H */

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            machine.h
+ *            virtual_machine.h
  *
  *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it  Pieter.Collins@cwi.nl
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file system/machine.h
+/*! \file function/virtual_machine.h
  *  \brief Virtual machine for function evaluation.
  */
  
-#ifndef ARIADNE_SYSTEM_VIRTUAL_MACHINE_H
-#define ARIADNE_SYSTEM_VIRTUAL_MACHINE_H
+#ifndef ARIADNE_FUNCTION_VIRTUAL_MACHINE_H
+#define ARIADNE_FUNCTION_VIRTUAL_MACHINE_H
 
 #include <vector>
 #include <string>
@@ -37,13 +37,12 @@
 #include "../base/array.h"
 #include "../numeric/numerical_traits.h"
 #include "../linear_algebra/declarations.h"
-#include "../system/function.h"
+#include "../function/interpreted_function.h"
 
 namespace Ariadne {
-  namespace System {
+  namespace Function {
 
-    /*!\ingroup System
-     * \ingroup Function
+    /*!\ingroup Function
      * \brief A virtual machine for evaluating functions.
      */
     class VirtualMachine
@@ -70,4 +69,4 @@ namespace Ariadne {
 
 
 
-#endif /* ARIADNE_SYSTEM_VIRTUAL_MACHINE_H */
+#endif /* ARIADNE_FUNCTION_VIRTUAL_MACHINE_H */

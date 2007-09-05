@@ -26,7 +26,7 @@
 #include "numeric/rational.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "system/function.h"
+#include "function/interpreted_function.h"
 
 #include <boost/python.hpp>
 using namespace boost::python;
@@ -34,7 +34,7 @@ using namespace boost::python;
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::System;
+using namespace Ariadne::Function;
 using namespace Ariadne::Python;
 
 template<class R>
@@ -42,14 +42,14 @@ void export_function()
 {
   typedef typename Numeric::traits<R>::arithmetic_type A;
 
-  class_<Function<R> >("Function",init<>())
+  class_< InterpretedFunction<R> >("InterpretedFunction",init<>())
     .def(init< std::string >())
-    .def("argument_size", &Function<R>::argument_size)
-    .def("result_size", &Function<R>::result_size)
-    .def("smoothness", &Function<R>::smoothness)
-    .def("__call__",(Vector<A>(Function<R>::*)(const Vector<A>&)const)(&Function<R>::image))
-    .def("jacobian",(Matrix<A>(Function<R>::*)(const Vector<A>&)const)(&Function<R>::jacobian))
-    .def("read",(void(Function<R>::*)(const std::string&))(&Function<R>::read))
+    .def("argument_size", &InterpretedFunction<R>::argument_size)
+    .def("result_size", &InterpretedFunction<R>::result_size)
+    .def("smoothness", &InterpretedFunction<R>::smoothness)
+    .def("__call__",(Vector<A>(InterpretedFunction<R>::*)(const Vector<A>&)const)(&InterpretedFunction<R>::image))
+    .def("jacobian",(Matrix<A>(InterpretedFunction<R>::*)(const Vector<A>&)const)(&InterpretedFunction<R>::jacobian))
+    .def("read",(void(InterpretedFunction<R>::*)(const std::string&))(&InterpretedFunction<R>::read))
     .def(self_ns::str(self))
   ;
 }

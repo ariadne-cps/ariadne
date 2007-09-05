@@ -43,7 +43,7 @@
 #include "../linear_algebra/matrix.h"
 
 namespace Ariadne {
-  namespace System {
+  namespace Function {
       
     template<class R> class AffineModel;
     template<class R> AffineModel<R> operator+(const AffineModel<R>&, const AffineModel<R>&);
@@ -54,8 +54,7 @@ namespace Ariadne {
     template<class R> AffineModel<R> implicit(const AffineModel<R>&);
 
 
-    /*!\ingroup System
-     * \ingroup DiscreteTime
+    /*!\ingroup FunctionModel
      * \brief Concrete class for functions.
      */
     template<class R>
@@ -112,6 +111,7 @@ namespace Ariadne {
       template<class X> friend AffineModel<X> inverse(const AffineModel<X>&, size_type); 
       template<class X> friend AffineModel<X> implicit(const AffineModel<X>&, size_type); 
       template<class X> friend AffineModel<X> operator+(const AffineModel<X>&, const AffineModel<X>&); 
+      template<class X> friend AffineModel<X> operator*(const AffineModel<X>&, const AffineModel<X>&); 
       template<class X> friend AffineModel<X> compose(const AffineModel<X>&, const AffineModel<X>&);
 
      private:
@@ -483,6 +483,20 @@ namespace Ariadne {
         }
       }
       return res;
+    }
+
+    template<class R> inline
+    AffineModel<R> 
+    inverse(const AffineModel<R>&) 
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
+    }
+
+    template<class R> inline
+    AffineModel<R> 
+    implicit(const AffineModel<R>&)
+    {
+      throw NotImplemented(__PRETTY_FUNCTION__);
     }
 
     template<class R> inline

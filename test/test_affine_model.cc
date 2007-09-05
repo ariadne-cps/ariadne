@@ -28,16 +28,15 @@
 #include "ariadne.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "system/affine_model.h"
+#include "function/affine_model.h"
 
 #include "test.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
+using namespace Ariadne::Function;
 using namespace Ariadne::Geometry;
-using namespace Ariadne::System;
-using namespace Ariadne::Evaluation;
 using namespace Ariadne::Output;
 using namespace std;
 

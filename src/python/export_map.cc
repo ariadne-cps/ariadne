@@ -26,12 +26,13 @@
 
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
-#include "system/function.h"
+#include "function/interpreted_function.h"
 #include "system/map.h"
 #include "system/function_map.h"
 
 using namespace Ariadne;
 using namespace Ariadne::LinearAlgebra;
+using namespace Ariadne::Function;
 using namespace Ariadne::Geometry;
 using namespace Ariadne::System;
 using namespace Ariadne::Python;
@@ -63,7 +64,7 @@ void export_map()
     .def("smoothness", pure_virtual(&MapWrapper<R>::smoothness))
   ;
 
-  class_< FunctionMap<R>, bases< MapInterface<R> > >("FunctionMap", init< const Function<R>&, Point<A> >())
+  class_< FunctionMap<R>, bases< MapInterface<R> > >("FunctionMap", init< const InterpretedFunction<R>&, Point<A> >())
     .def("argument_dimension", &FunctionMap<R>::argument_dimension)
     .def("result_dimension", &FunctionMap<R>::result_dimension)
     .def("number_of_parameters", &FunctionMap<R>::number_of_parameters)

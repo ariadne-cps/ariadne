@@ -37,7 +37,7 @@ Geometry::Curve<R>::~Curve()
 }
 
 template<class R>
-Geometry::Curve<R>::Curve(const System::FunctionInterface<R>& f) 
+Geometry::Curve<R>::Curve(const Function::FunctionInterface<R>& f) 
   : _function_ptr(f.clone())
 {
   assert(this->_function_ptr->argument_size()==1);

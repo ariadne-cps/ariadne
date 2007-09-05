@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file system/function_interface.h
+/*! \file function_interface.h
  *  \brief General function interface.
  */
  
-#ifndef ARIADNE_SYSTEM_FUNCTION_INTERFACE_H
-#define ARIADNE_SYSTEM_FUNCTION_INTERFACE_H
+#ifndef ARIADNE_FUNCTION_INTERFACE_H
+#define ARIADNE_FUNCTION_INTERFACE_H
 
 #include <vector>
 #include <string>
@@ -39,7 +39,7 @@
 #include "../linear_algebra/declarations.h"
 
 namespace Ariadne {
-  namespace System {
+  namespace Function {
 
     struct Variable { std::string name; bool array_flag; uint size; };
     std::ostream& operator<<(std::ostream& os, const Variable& var); 
@@ -48,8 +48,7 @@ namespace Ariadne {
     std::ostream& operator<<(std::ostream& os, const FunctionVariable& var); 
 
 
-    /*!\ingroup System
-     * \ingroup DiscreteTime
+    /*!\ingroup Function
      * \brief Abstract base class for (differentiable) functionss.
      * 
      * The function is specified by the method operator()(const LinearAlgebra::Vector< Interval<R> >& A) const,

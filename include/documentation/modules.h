@@ -173,6 +173,21 @@
  * This gives the dyadic rectangle '[0.25,0.5]x[0.5,1.0]'.
  */
  
+/*!\defgroup Function Function Module
+ * \brief Functions on Euclidean space.
+ *
+ * In this module are the classes used to represent concrete functions in Euclidean space.
+ * These functions can be used as the building blocks for geometric objects and dynamic systems.
+ *
+ * \defgroup FunctionTypes Function Types
+ * \ingroup Function
+ * \brief General and specialised function classes.
+ *
+ * \defgroup FunctionModel Function Models
+ * \ingroup Function
+ * \brief Approximate models of general (differentiable) functions.
+ */
+
 /*!\defgroup Geometry Geometry Module
  * \brief Geometric calculus module.
  *

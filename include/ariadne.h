@@ -61,6 +61,10 @@ namespace LinearProgramming {}
  */
 namespace Combinatoric {}
   
+/*! \brief Functional calculus library, including affine and polynomial functions and automatic differentiation. See the \ref Function for more information.
+ */
+namespace Function {}
+  
 /*! \brief Geometric calculus library. See the \ref Geometry for more information.
  */
 namespace Geometry {}

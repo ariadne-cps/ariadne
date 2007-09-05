@@ -31,39 +31,11 @@ namespace Ariadne {
     using namespace Numeric;
     
 #ifdef ENABLE_FLOAT64
-    template class Monomial<Float64>;
-    template class Polynomial<Float64>;
     template class PolynomialMap<Float64>;
-    template class PolynomialMatrix<Float64>;
-
-    template bool operator<(const Monomial<Float64>&, const Monomial<Float64>&);
-    
-    template std::ostream& operator<<(std::ostream&, const Monomial<Float64>&);
-    template std::ostream& operator<<(std::ostream&, const Polynomial<Float64>&);
-    template std::ostream& operator<<(std::ostream&, const PolynomialMap<Float64>&);
-    template std::ostream& operator<<(std::ostream&, const PolynomialMatrix<Float64>&);
-
-    template std::istream& operator>>(std::istream&, Monomial<Float64>&);
-    template std::istream& operator>>(std::istream&, Polynomial<Float64>&);
-    template std::istream& operator>>(std::istream&, PolynomialMap<Float64>&);
 #endif
     
 #ifdef ENABLE_FLOATMP
-    template class Monomial<FloatMP>;
-    template class Polynomial<FloatMP>;
     template class PolynomialMap<FloatMP>;
-    template class PolynomialMatrix<FloatMP>;
-
-    template bool operator<(const Monomial<FloatMP>&, const Monomial<FloatMP>&);
-    
-    template std::ostream& operator<<(std::ostream&, const Monomial<FloatMP>&);
-    template std::ostream& operator<<(std::ostream&, const Polynomial<FloatMP>&);
-    template std::ostream& operator<<(std::ostream&, const PolynomialMap<FloatMP>&);
-    template std::ostream& operator<<(std::ostream&, const PolynomialMatrix<FloatMP>&);
-
-    template std::istream& operator>>(std::istream&, Monomial<FloatMP>&);
-    template std::istream& operator>>(std::istream&, Polynomial<FloatMP>&);
-    template std::istream& operator>>(std::istream&, PolynomialMap<FloatMP>&);
 #endif
 
   }

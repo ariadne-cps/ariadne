@@ -7,7 +7,7 @@ lib: libgeometric.la libariadne.la
 INCLUDES = -I$(top_srcdir)/include 
 LDADD = -lmpfr -lppl -lgmpxx
 
-#SUBDIRS = base numeric linear_algebra linear_programming combinatoric geometry system evaluation output input python
+#SUBDIRS = base numeric linear_algebra linear_programming combinatoric function geometry system evaluation output input python
 
 SUBDIRS = . python
 
@@ -32,6 +32,11 @@ COMBINATORIC_SRC = \
 	combinatoric/lattice_set.cc combinatoric/lattice_map.cc \
 	combinatoric/subdivision_tree_set.cc 
 
+FUNCTION_SRC = \
+	function/interpreted_function.cc \
+	function/affine_model.cc \
+	function/polynomial_model.cc
+
 GEOMETRY_SRC = \
 	geometry/point.cc geometry/point_list.cc \
 	geometry/rectangle.cc \
@@ -52,7 +57,6 @@ GEOMETRY_SRC = \
 	geometry/ppl_polyhedron.cc
 
 SYSTEM_SRC = \
-	system/function.cc \
 	system/map.cc system/function_map.cc system/affine_map.cc system/polynomial_map.cc \
 	system/vector_field.cc system/affine_vector_field.cc \
 	system/multimap.cc system/affine_multimap.cc \
@@ -88,7 +92,8 @@ INPUT_SRC = \
 
 
 noinst_LTLIBRARIES = libbase.la libnumeric.la liblinearalgebra.la liblinearprogramming.la \
-	libcombinatoric.la libgeometry.la libsystem.la libevaluation.la liboutput.la libinput.la
+	libcombinatoric.la libfunction.la libgeometry.la libsystem.la libevaluation.la \
+	liboutput.la libinput.la
 
 lib_LTLIBRARIES = libariadne.la libgeometric.la 
 libariadne_la_LIBADD = $(noinst_LTLIBRARIES) -lmpfr -lppl -lgmpxx
@@ -105,6 +110,7 @@ libnumeric_la_SOURCES = $(NUMERIC_SRC)
 liblinearalgebra_la_SOURCES = $(LINEAR_ALGEBRA_SRC)
 liblinearprogramming_la_SOURCES = $(LINEAR_PROGRAMMING_SRC)
 libcombinatoric_la_SOURCES = $(COMBINATORIC_SRC)
+libfunction_la_SOURCES = $(FUNCTION_SRC)
 libgeometry_la_SOURCES = $(GEOMETRY_SRC)
 libsystem_la_SOURCES = $(SYSTEM_SRC)
 libevaluation_la_SOURCES = $(EVALUATION_SRC)

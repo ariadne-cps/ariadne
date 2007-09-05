@@ -30,16 +30,12 @@
 
 namespace Ariadne { 
   namespace System {
-    template<class R> class Function;
-      
+
     template<class R> class MapInterface;
     template<class R> class AffineMap;
     template<class R, template<class> class BS > class AffineMultiMap;
     template<class R> class GridMultiMap;
-    template<class R> class Monomial;
-    template<class R> class Polynomial;
     template<class R> class PolynomialMap;
-    template<class R> class PolynomialMatrix;
     template<class R> class DiscreteTimeSystem;
     template<class R> class VectorFieldInterface;
     template<class R> class AffineVectorField;

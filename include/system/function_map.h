@@ -36,10 +36,10 @@
 #include "../numeric/declarations.h"
 #include "../numeric/numerical_traits.h"
 #include "../linear_algebra/declarations.h"
+#include "../function/function_interface.h"
+#include "../function/interpreted_function.h"
 #include "../geometry/declarations.h"
 #include "../system/map.h"
-#include "../system/function_interface.h"
-#include "../system/function.h"
 
 
 namespace Ariadne {
@@ -65,9 +65,9 @@ namespace Ariadne {
       typedef Geometry::Point<A> result_type;
       
       /*! \brief Construct from a function interface and parameters. */
-      FunctionMap(const FunctionInterface<R>& f, const Geometry::Point<A>& param);
+      FunctionMap(const Function::FunctionInterface<R>& f, const Geometry::Point<A>& param);
       /*! \brief Construct from a function and parameters. */
-      FunctionMap(const Function<R>& f, const Geometry::Point<A>& param);
+      FunctionMap(const Function::InterpretedFunction<R>& f, const Geometry::Point<A>& param);
 
       /*! \brief Make a copy (clone) of the map. */
       virtual FunctionMap<R>* clone() const;
@@ -99,7 +99,7 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream& os) const;
      private:
-      boost::shared_ptr< FunctionInterface<R> > _function_ptr;
+      boost::shared_ptr< Function::FunctionInterface<R> > _function_ptr;
       Geometry::Point<A> _parameters;
     };
    

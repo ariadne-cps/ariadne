@@ -33,7 +33,7 @@
 
 #include "../base/tribool.h"
 
-#include "../system/function_interface.h"
+#include "../function/function_interface.h"
 #include "constraint_interface.h"
 
 namespace Ariadne {
@@ -63,7 +63,7 @@ namespace Ariadne {
       typedef typename Numeric::traits<R>::interval_type I;
      public:
       /*! \brief Construct the set \f$f(x) \lessgtr 0\f$ from the function \f$f\f$. */
-      Constraint(const System::FunctionInterface<R>& f, const Comparison cmp=greater);
+      Constraint(const Function::FunctionInterface<R>& f, const Comparison cmp=greater);
 
       /*! \brief Destructor. */
       virtual ~Constraint();
@@ -79,7 +79,7 @@ namespace Ariadne {
       virtual std::ostream& write(std::ostream& os) const;
 
       /*! \brief The function defining the constraint. */
-      const System::FunctionInterface<R>& function() const;
+      const Function::FunctionInterface<R>& function() const;
       /*! \brief The value at a point. */
       A value(const Point<A>& pt) const;
       /*! \brief The gradient at a point. */
@@ -103,7 +103,7 @@ namespace Ariadne {
      private:
       static void instantiate();
      private:
-      boost::shared_ptr< const System::FunctionInterface<R> > _function_ptr;
+      boost::shared_ptr< const Function::FunctionInterface<R> > _function_ptr;
       Comparison _comparison;
     };
     

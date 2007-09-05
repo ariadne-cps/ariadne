@@ -29,7 +29,7 @@
 #include "test_float.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "system/function.h"
+#include "function/interpreted_function.h"
 #include "output/logging.h"
 
 #include "test.h"
@@ -38,7 +38,7 @@ using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
-using namespace Ariadne::System;
+using namespace Ariadne::Function;
 using namespace Ariadne::Output;
 using namespace std;
 
@@ -58,7 +58,7 @@ int test_function()
   
   do {
     cout << "Inputting function" << endl;
-    Function<R> f;
+    InterpretedFunction<R> f;
     fis >> f;
     cout << "Done read" << endl;
     cout << f << endl;

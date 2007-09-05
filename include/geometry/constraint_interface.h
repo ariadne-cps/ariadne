@@ -32,8 +32,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "../base/tribool.h"
-
-#include "../system/function_interface.h"
+#include "../linear_algebra/declarations.h"
 
 namespace Ariadne {
   namespace Geometry {

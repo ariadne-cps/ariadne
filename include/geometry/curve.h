@@ -28,8 +28,8 @@
 #ifndef ARIADNE_CURVE_H
 #define ARIADNE_CURVE_H
 
+#include "../function/function_interface.h"
 #include "curve_interface.h"
-#include "../system/function_interface.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -47,7 +47,7 @@ namespace Ariadne {
       /*! \brief Destructor. */
       virtual ~Curve();
       /*! \brief Constructor. */
-      Curve(const System::FunctionInterface<R>& f);
+      Curve(const Function::FunctionInterface<R>& f);
       /*! \brief Copy constructor. */
       Curve(const Curve<R>& c);
       /*! \brief Return a new dynamically-allocated copy of the constraint. */
@@ -65,7 +65,7 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream& os) const;
      private:
-      System::FunctionInterface<R>* _function_ptr;
+      Function::FunctionInterface<R>* _function_ptr;
     };
     
   }

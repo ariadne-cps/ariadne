@@ -30,15 +30,16 @@
 #include "../base/stlio.h"
 #include "../base/exceptions.h"
 #include "../numeric/rational.h"
-#include "../numeric/differential.h"
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
-#include "../system/exceptions.h"
-#include "../system/virtual_machine.h"
+#include "../function/exceptions.h"
+#include "../function/differential.h"
+#include "../function/virtual_machine.h"
 #include "../input/modelica.h"
 
-#include "../system/virtual_machine.template.h"
+#include "../function/virtual_machine.template.h"
 
+#include "interpreted_function.h"
 
 
 
@@ -46,7 +47,7 @@ namespace Ariadne {
 
 
 std::ostream& 
-System::operator<<(std::ostream& os, const Variable& var) 
+Function::operator<<(std::ostream& os, const Variable& var) 
 {
   os << " Real";
   if(var.array_flag==true) { os << "[" << var.size << "]"; }
@@ -55,7 +56,7 @@ System::operator<<(std::ostream& os, const Variable& var)
 }
 
 std::ostream& 
-System::operator<<(std::ostream& os, const FunctionVariable& var) 
+Function::operator<<(std::ostream& os, const FunctionVariable& var) 
 {
   switch(var.type) {
   case FunctionVariable::OUTPUT: os << "output "; break;
@@ -73,7 +74,7 @@ System::operator<<(std::ostream& os, const FunctionVariable& var)
 
 template<class R>
 void
-System::Function<R>::_initialise()
+Function::InterpretedFunction<R>::_initialise()
 {
   this->_argument_size=0;
   this->_result_size=0;
@@ -103,14 +104,14 @@ System::Function<R>::_initialise()
 
 
 template<class R>
-System::Function<R>::Function()
+Function::InterpretedFunction<R>::InterpretedFunction()
 {
   this->_initialise();
 }
 
 
 template<class R>
-System::Function<R>::Function(const std::string& str)
+Function::InterpretedFunction<R>::InterpretedFunction(const std::string& str)
 {
   std::stringstream ss(str);
   this->read(ss);
@@ -118,7 +119,7 @@ System::Function<R>::Function(const std::string& str)
 
 
 template<class R>
-System::Function<R>::Function(std::istream& is)
+Function::InterpretedFunction<R>::InterpretedFunction(std::istream& is)
 {
   this->read(is);
 }
@@ -128,8 +129,8 @@ System::Function<R>::Function(std::istream& is)
 
 
 template<class R>
-LinearAlgebra::Vector<typename System::Function<R>::A>
-System::Function<R>::image(const LinearAlgebra::Vector<A>& x) const
+LinearAlgebra::Vector<typename Function::InterpretedFunction<R>::A>
+Function::InterpretedFunction<R>::image(const LinearAlgebra::Vector<A>& x) const
 {
   ARIADNE_CHECK_ARGUMENT_SIZE(*this,x,"Function::image(Vector x)");
   LinearAlgebra::Vector<A> y(this->result_size());
@@ -145,16 +146,16 @@ System::Function<R>::image(const LinearAlgebra::Vector<A>& x) const
 
 
 template<class R>
-typename System::Function<R>::A
-System::Function<R>::derivative(const LinearAlgebra::Vector<A>& x, const size_type& i, const LinearAlgebra::MultiIndex& j) const
+typename Function::InterpretedFunction<R>::A
+Function::InterpretedFunction<R>::derivative(const LinearAlgebra::Vector<A>& x, const size_type& i, const LinearAlgebra::MultiIndex& j) const
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 
 template<class R>
-LinearAlgebra::Matrix<typename System::Function<R>::A>
-System::Function<R>::jacobian(const LinearAlgebra::Vector<A>& x) const
+LinearAlgebra::Matrix<typename Function::InterpretedFunction<R>::A>
+Function::InterpretedFunction<R>::jacobian(const LinearAlgebra::Vector<A>& x) const
 {
   typedef Numeric::Differential< A,LinearAlgebra::Vector<A> > Differential;
   size_type m=this->result_size();
@@ -186,16 +187,16 @@ System::Function<R>::jacobian(const LinearAlgebra::Vector<A>& x) const
 
 
 template<class R>
-System::Function<R>*
-System::Function<R>::clone() const 
+Function::InterpretedFunction<R>*
+Function::InterpretedFunction<R>::clone() const 
 {
-  return new Function<R>(*this);
+  return new InterpretedFunction<R>(*this);
 }
 
 
 template<class R>
 std::string
-System::Function<R>::name() const
+Function::InterpretedFunction<R>::name() const
 {
   return this->_name;
 }
@@ -203,7 +204,7 @@ System::Function<R>::name() const
 
 template<class R>
 void
-System::Function<R>::read(const std::string& filename)
+Function::InterpretedFunction<R>::read(const std::string& filename)
 {
   std::ifstream ifs(filename.c_str());
   if(ifs) {
@@ -216,7 +217,7 @@ System::Function<R>::read(const std::string& filename)
 
 template<class R>
 std::istream&
-System::Function<R>::read(std::istream& is)
+Function::InterpretedFunction<R>::read(std::istream& is)
 {
   Input::ModelicaParser parser(is);
 
@@ -231,7 +232,7 @@ System::Function<R>::read(std::istream& is)
 
 template<class R>
 std::ostream&
-System::Function<R>::write(std::ostream& os) const
+Function::InterpretedFunction<R>::write(std::ostream& os) const
 {
   VirtualMachine::Index index;
   int value;
@@ -323,7 +324,7 @@ System::Function<R>::write(std::ostream& os) const
 
 template<class R>
 smoothness_type
-System::Function<R>::smoothness() const
+Function::InterpretedFunction<R>::smoothness() const
 {
   //return std::numerical_limits<smoothness_type>::max();
   return 1; 
@@ -332,7 +333,7 @@ System::Function<R>::smoothness() const
 
 template<class R>
 size_type
-System::Function<R>::argument_size() const
+Function::InterpretedFunction<R>::argument_size() const
 {
   return this->_argument_size;
 }
@@ -340,7 +341,7 @@ System::Function<R>::argument_size() const
 
 template<class R>
 size_type
-System::Function<R>::result_size() const
+Function::InterpretedFunction<R>::result_size() const
 {
   return this->_result_size;
 }

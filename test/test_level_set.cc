@@ -36,8 +36,8 @@
 #include "geometry/rectangle.h"
 #include "geometry/grid_set.h"
 #include "geometry/level_set.h"
-#include "system/function_interface.h"
-#include "system/function.h"
+#include "function/function_interface.h"
+#include "function/interpreted_function.h"
 #include "output/epsfstream.h"
 #include "output/logging.h"
 
@@ -45,8 +45,8 @@
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
+using namespace Ariadne::Function;
 using namespace Ariadne::Geometry;
-using namespace Ariadne::System;
 using namespace Ariadne::Output;
 using namespace std;
 
@@ -68,7 +68,7 @@ test_level_set()
   cout << "test_level_set<" << name<R>() << ">" << endl;
   typedef typename Numeric::traits<R>::arithmetic_type A;
 
-  Function<R> f("function disc output Real y; input Real[2] x; algorithm y=1-(x[0]^2+x[1]^2); end disc;");
+  InterpretedFunction<R> f("function disc output Real y; input Real[2] x; algorithm y=1-(x[0]^2+x[1]^2); end disc;");
 
   LevelSet<R> s(f);
 

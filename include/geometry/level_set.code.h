@@ -47,7 +47,7 @@ tribool less(const LinearAlgebra::Vector<X1>& v1, const LinearAlgebra::Vector<X2
 namespace Ariadne {
     
 template<class R>
-Geometry::LevelSet<R>::LevelSet(const System::FunctionInterface<R>& f)
+Geometry::LevelSet<R>::LevelSet(const Function::FunctionInterface<R>& f)
   : SetInterface<R>(), _function_ptr(f.clone()) 
 { 
 }
@@ -82,7 +82,7 @@ Geometry::LevelSet<R>::separates(const Point<A>& pt1, const Point<A>& pt2) const
   if(this->number_of_constraints()!=1) {
     return false;
   }
-  const System::FunctionInterface<R>& f=*this->_function_ptr;
+  const Function::FunctionInterface<R>& f=*this->_function_ptr;
   A z=0;
   LinearAlgebra::Vector<A> v1=pt1.position_vector();
   A fv1=f(pt1.position_vector())[0];
@@ -98,7 +98,7 @@ template<class R>
 tribool 
 Geometry::LevelSet<R>::contains(const Point<R>& pt) const 
 {
-  const System::FunctionInterface<R>& f=*this->_function_ptr;
+  const Function::FunctionInterface<R>& f=*this->_function_ptr;
   LinearAlgebra::Vector<A> v=pt.position_vector();
   LinearAlgebra::Vector<R> z=LinearAlgebra::Vector<R>::zero(this->number_of_constraints());
   LinearAlgebra::Vector<A> fv=f(v);
@@ -126,7 +126,7 @@ template<class R>
 tribool 
 Geometry::LevelSet<R>::disjoint(const Rectangle<R>& r) const 
 {
-  const System::FunctionInterface<R>& f=*this->_function_ptr;
+  const Function::FunctionInterface<R>& f=*this->_function_ptr;
   LinearAlgebra::Vector<A> v=r.position_vectors();
   LinearAlgebra::Vector<R> z=LinearAlgebra::Vector<R>::zero(this->number_of_constraints());
   LinearAlgebra::Vector<A> fv=f(v);
@@ -172,7 +172,7 @@ Geometry::LevelSet<R>::number_of_constraints() const
 
 
 template<class R>
-const System::FunctionInterface<R>&
+const Function::FunctionInterface<R>&
 Geometry::LevelSet<R>::function() const 
 {
   return *this->_function_ptr;
@@ -183,7 +183,7 @@ template<class R>
 Geometry::Point<typename Geometry::LevelSet<R>::A> 
 Geometry::LevelSet<R>::function(const Point<A>& pt) const 
 {
-  const System::FunctionInterface<R>& f=*this->_function_ptr;
+  const Function::FunctionInterface<R>& f=*this->_function_ptr;
   LinearAlgebra::Vector<A> v=pt.position_vector();
   return Point<A>(f(v));
 }

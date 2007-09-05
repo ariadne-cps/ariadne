@@ -24,10 +24,11 @@
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 
+#include "../function/function_interface.h"
+
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
 
-#include "../system/function_interface.h"
 #include "../system/map.h"
 
 #include "../output/logging.h"
@@ -35,7 +36,7 @@
 namespace Ariadne {
 
 template<class R>
-System::FunctionMap<R>::FunctionMap(const FunctionInterface<R>& f, const Geometry::Point<A>& param)
+System::FunctionMap<R>::FunctionMap(const Function::FunctionInterface<R>& f, const Geometry::Point<A>& param)
   : _function_ptr(f.clone()), _parameters(param)
 {
   if(f.argument_size()<=param.dimension()) {
@@ -45,7 +46,7 @@ System::FunctionMap<R>::FunctionMap(const FunctionInterface<R>& f, const Geometr
 }
 
 template<class R>
-System::FunctionMap<R>::FunctionMap(const Function<R>& f, const Geometry::Point<A>& param)
+System::FunctionMap<R>::FunctionMap(const Function::InterpretedFunction<R>& f, const Geometry::Point<A>& param)
   : _function_ptr(f.clone()), _parameters(param)
 {
   if(f.argument_size()<=param.dimension()) {

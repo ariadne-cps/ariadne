@@ -32,7 +32,7 @@
 #include "geometry/partition_tree_set.h"
 #include "geometry/rectangular_set.h"
 #include "evaluation/applicator.h"
-#include "output/epsfstream.h"
+#include "output/epsstream.h"
 #include "output/logging.h"
 #include "models/henon.h"
 

@@ -1,8 +1,8 @@
 /****************************************************************************
- *            dotfstream.cc
+ *            texstream.cc
  *
- *  Copyright  2006-7  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2007  Alberto Casagrande, Pieter Collins, Davide Bresolin
+ *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl, bresolin@sci.univr.it
  ****************************************************************************/
 
 /*
@@ -21,4 +21,5 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "output/dotfstream.h"
+#include "output/texstream.h"
+

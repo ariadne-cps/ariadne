@@ -34,7 +34,7 @@
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
-#include "output/epsfstream.h"
+#include "output/epsstream.h"
 #include "output/logging.h"
 
 using namespace Ariadne;

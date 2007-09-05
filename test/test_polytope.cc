@@ -36,7 +36,7 @@
 #include "geometry/polyhedron.h"
 #include "geometry/polytope.h"
 #include "geometry/ppl_polyhedron.h"
-#include "output/epsfstream.h"
+#include "output/epsstream.h"
 #include "output/logging.h"
 
 #ifdef HAVE_PPL_HH

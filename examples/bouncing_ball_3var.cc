@@ -23,7 +23,7 @@
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
 #include "evaluation/hybrid_evolver.h"
-#include "output/epsfstream.h"
+#include "output/epsstream.h"
 #include "output/logging.h"
 
 using namespace Ariadne;

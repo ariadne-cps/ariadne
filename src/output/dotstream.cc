@@ -1,8 +1,8 @@
 /****************************************************************************
- *            txtfstream.cc
+ *            dotfstream.cc
  *
- *  Copyright  2007  Alberto Casagrande, Pieter Collins, Davide Bresolin
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl, bresolin@sci.univr.it
+ *  Copyright  2006-7  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,41 +21,4 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "base/stlio.h"
-#include "output/txtfstream.h"
-
-namespace Ariadne { 
-
-Output::txtfstream::txtfstream()
-  : std::ofstream()
-{
-}
-
-
-
-Output::txtfstream::~txtfstream() {
-  this->close();
-}
-
-      
-void
-Output::txtfstream::open(const char* fn)
-{
-  this->std::ofstream::open(fn);
-}
-
-
-void 
-Output::txtfstream::close() 
-{
-  this->std::ofstream::close();
-}
-
-
-void 
-Output::txtfstream::writenl() 
-{
-  (*this) << std::endl;
-}
-
-}
+#include "output/dotstream.h"

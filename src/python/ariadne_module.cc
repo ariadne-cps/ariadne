@@ -96,7 +96,7 @@ template<class R> void export_integrate();
 template<class R> void export_hybrid_evolver();
 
 void export_postscript_output();
-void export_txt_output();
+void export_text_output();
 void export_tex_output();
 
 template<class R> void export_henon_map();
@@ -187,7 +187,7 @@ BOOST_PYTHON_MODULE(ariadne)
 
   export_postscript_output();
   export_tex_output();
-  export_txt_output();
+  export_text_output();
 
   export_henon_map<Float>();
   export_duffing_equation<Float>();

@@ -40,7 +40,7 @@
 #include "geometry/polyhedron.h"
 #include "geometry/grid.h"
 #include "geometry/grid_set.h"
-#include "output/epsfstream.h"
+#include "output/epsstream.h"
 #include "output/logging.h"
 
 #include "geometry/ppl_polyhedron.h"

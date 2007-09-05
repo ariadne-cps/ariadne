@@ -38,7 +38,7 @@
 #include "geometry/level_set.h"
 #include "function/function_interface.h"
 #include "function/interpreted_function.h"
-#include "output/epsfstream.h"
+#include "output/epsstream.h"
 #include "output/logging.h"
 
 

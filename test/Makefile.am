@@ -55,9 +55,9 @@ check_PROGRAMS = \
 	test_constraint_hybrid_evolution_step \
 	test_constraint_hybrid_evolution \
         test_texstream \
-        test_epsfstream \
-	test_txtfstream \
-	test_chompfstream 
+        test_epsstream \
+	test_textstream \
+	test_chompstream 
 
 XFAIL_TESTS = 
 

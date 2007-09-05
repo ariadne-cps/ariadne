@@ -38,7 +38,7 @@
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 #include "geometry/partition_tree_set.h"
-#include "output/epsfstream.h"
+#include "output/epsstream.h"
 
 #include "test.h"
 

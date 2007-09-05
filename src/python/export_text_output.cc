@@ -1,7 +1,6 @@
 /***************************************************************************
- *            python/export_txt_output.cc
+ *            python/export_text_output.cc
  *
- *  25 June 2007
  *  Copyright  2005-7  Alberto Casagrande, Pieter Collins, Davide Bresolin
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl, bresolin@sci.univr.it
  ****************************************************************************/
@@ -36,7 +35,7 @@
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
 
-#include "output/txtfstream.h"
+#include "output/textstream.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
@@ -47,32 +46,32 @@ using namespace Ariadne::Python;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template<class S> inline void write(txtfstream& txt, const S& s) { txt << s; }
-template<class R> inline void write_rectangle(txtfstream& txt, const Rectangle<R>& r) { txt << r; }
-template<class R> inline void write_rectangular_set(txtfstream& txt, const RectangularSet<R>& r) { txt << r; }
-template<class R> inline void write_parallelotope(txtfstream& txt, const Parallelotope<R>& p) { txt << p; }
-template<class R0,class R1> inline void write_zonotope(txtfstream& txt, const Zonotope<R0,R1>& z) { txt << z; }
-template<class R> inline void write_polytope(txtfstream& txt, const Polytope<R>& p) { txt << p; }
-template<class R> inline void write_polyhedron(txtfstream& txt, const Polyhedron<R>& p) { txt << p; }
-template<class R> inline void write_polyhedral_set(txtfstream& txt, const PolyhedralSet<R>& p) { txt << p; }
-template<class BS> inline void write_list_set(txtfstream& txt, const ListSet<BS>& ls) { txt << ls; }
-template<class R> inline void write_polytope_list_set(txtfstream& txt, const ListSet< Polytope<R> >& s) { txt << s; }
-template<class R> inline void write_grid_cell(txtfstream& txt, const GridCell<R>& r) { txt << Rectangle<R>(r); }
-template<class R> inline void write_grid_block(txtfstream& txt, const GridBlock<R>& r) { txt << Rectangle<R>(r); }
-template<class R> inline void write_grid_cell_list_set(txtfstream& txt, const GridCellListSet<R>& s) { txt << s; }
-template<class R> inline void write_grid_mask_set(txtfstream& txt, const GridMaskSet<R>& s) { txt << s; }
-template<class R> inline void write_partition_tree_set(txtfstream& txt, const PartitionTreeSet<R>& s) { txt << s; }
-template<class R> inline void write_finite_grid(txtfstream& txt, const FiniteGrid<R>& fg) { txt << fg; }
-template<class R> inline void write_partition_tree(txtfstream& txt, const PartitionTree<R>& s) { txt << s; }
-template<class R> inline void txtfstream_open(txtfstream& txt) { txt.open("Ariadne"); }
-inline void txtfstream_close(txtfstream& txt) { txt.close(); }
+template<class S> inline void write(textfstream& txt, const S& s) { txt << s; }
+template<class R> inline void write_rectangle(textfstream& txt, const Rectangle<R>& r) { txt << r; }
+template<class R> inline void write_rectangular_set(textfstream& txt, const RectangularSet<R>& r) { txt << r; }
+template<class R> inline void write_parallelotope(textfstream& txt, const Parallelotope<R>& p) { txt << p; }
+template<class R0,class R1> inline void write_zonotope(textfstream& txt, const Zonotope<R0,R1>& z) { txt << z; }
+template<class R> inline void write_polytope(textfstream& txt, const Polytope<R>& p) { txt << p; }
+template<class R> inline void write_polyhedron(textfstream& txt, const Polyhedron<R>& p) { txt << p; }
+template<class R> inline void write_polyhedral_set(textfstream& txt, const PolyhedralSet<R>& p) { txt << p; }
+template<class BS> inline void write_list_set(textfstream& txt, const ListSet<BS>& ls) { txt << ls; }
+template<class R> inline void write_polytope_list_set(textfstream& txt, const ListSet< Polytope<R> >& s) { txt << s; }
+template<class R> inline void write_grid_cell(textfstream& txt, const GridCell<R>& r) { txt << Rectangle<R>(r); }
+template<class R> inline void write_grid_block(textfstream& txt, const GridBlock<R>& r) { txt << Rectangle<R>(r); }
+template<class R> inline void write_grid_cell_list_set(textfstream& txt, const GridCellListSet<R>& s) { txt << s; }
+template<class R> inline void write_grid_mask_set(textfstream& txt, const GridMaskSet<R>& s) { txt << s; }
+template<class R> inline void write_partition_tree_set(textfstream& txt, const PartitionTreeSet<R>& s) { txt << s; }
+template<class R> inline void write_finite_grid(textfstream& txt, const FiniteGrid<R>& fg) { txt << fg; }
+template<class R> inline void write_partition_tree(textfstream& txt, const PartitionTree<R>& s) { txt << s; }
+template<class R> inline void textfstream_open(textfstream& txt) { txt.open("Ariadne"); }
+inline void textfstream_close(textfstream& txt) { txt.close(); }
 
-void export_txt_output()
+void export_text_output()
 {
     
-  class_<txtfstream, boost::noncopyable>("TxtPlot",init<>())
-    .def("open",(void(txtfstream::*)(const char* fn))&txtfstream::open)
-    .def("close",&txtfstream_close)
+  class_<textfstream, boost::noncopyable>("TextFile",init<>())
+    .def("open",(void(textfstream::*)(const char* fn))&textfstream::open)
+    .def("close",&textfstream_close)
 		.def("write",&write< Rectangle<Float> >)
     .def("write",&write< RectangularSet<Float> >)
     .def("write",&write< Parallelotope<Float> >)

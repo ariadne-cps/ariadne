@@ -29,7 +29,7 @@
 #include "ariadne.h"
 #include "combinatoric/lattice_set.h"
 #include "combinatoric/lattice_map.h"
-#include "output/chompfstream.h"
+#include "output/chompstream.h"
 
 #include "test.h"
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_txtfstream.cc
+ *            test_textfstream.cc
  *
  *  22 June 2007
  *  Copyright  2007  Pieter Collins, Alberto Casagrande, Davide Bresolin
@@ -35,7 +35,7 @@
 #include "geometry/rectangle.h"
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"
-#include "output/txtfstream.h"
+#include "output/textstream.h"
 
 #include "test.h"
 
@@ -77,7 +77,7 @@ int main() {
   
   
   // Test output of basic sets
-  txtfstream txt;
+  textfstream txt;
   txt.open("test_txtfstream-1.txt");
   txt << r1;
   txt << r2;

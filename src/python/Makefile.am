@@ -90,7 +90,7 @@ ARIADNE_SRC = ariadne_module.cc \
 	 \
 	export_postscript_output.cc \
 	export_tex_output.cc \
-	export_txt_output.cc \
+	export_text_output.cc \
 	 \
 	export_models.cc
 

@@ -36,7 +36,7 @@
 #include "../evaluation/lohner_integrator.h"
 #include "../evaluation/constraint_hybrid_evolver_plugin.h"
 
-#include "../output/epsfstream.h"
+#include "../output/epsstream.h"
 #include "../output/logging.h"
 
 #include "constraint_hybrid_evolver.h"

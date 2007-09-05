@@ -43,7 +43,7 @@
 #include "evaluation/hybrid_evolver.h"
 #include "evaluation/constraint_hybrid_evolver.h"
 #include "evaluation/constraint_hybrid_evolver_plugin.h"
-#include "output/epsfstream.h"
+#include "output/epsstream.h"
 #include "output/logging.h"
 
 #include "test.h"

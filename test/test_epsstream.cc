@@ -1,8 +1,7 @@
 /***************************************************************************
- *            test_epsfstream.cc
+ *            test_epsstream.cc
  *
- *  24 June 2005
- *  Copyright  2005  Pieter Collins
+ *  Copyright  2005-7  Pieter Collins
  *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
  ****************************************************************************/
 
@@ -35,7 +34,7 @@
 #include "geometry/rectangle.h"
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"
-#include "output/epsfstream.h"
+#include "output/epsstream.h"
 
 #include "test.h"
 

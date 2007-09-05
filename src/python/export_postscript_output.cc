@@ -36,7 +36,7 @@
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
 
-#include "output/epsfstream.h"
+#include "output/epsstream.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;

@@ -33,7 +33,7 @@
 #include "system/affine_vector_field.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
-#include "output/epsfstream.h"
+#include "output/epsstream.h"
 
 #include "test.h"
 

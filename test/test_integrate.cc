@@ -36,7 +36,7 @@
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
 #include "models/vanderpol.h"
-#include "output/epsfstream.h"
+#include "output/epsstream.h"
 #include "output/logging.h"
 
 #include "test.h"

@@ -21,10 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef ARIADNE_DOTFSTREAM_H
-#define ARIADNE_DOTFSTREAM_H
+#ifndef ARIADNE_DOTSTREAM_H
+#define ARIADNE_DOTSTREAM_H
 
-/*! \file dotfstream.h
+/*! \file dotstream.h
  *  \brief Dot graph output
  */
  
@@ -43,21 +43,35 @@ namespace Ariadne {
  
     
     /*!\brief A stream for output to the graph drawing package Dot. */
-    class dotfstream
-      : private std::ofstream 
+    class dotstream
     {
      public:
-      dotfstream() : std::ofstream() { }
-      ~dotfstream() { this->close(); }
+      dotstream() : _os_ptr(&std::cout) { }
+      dotstream(std::ostream& os) : _os_ptr(&os) { }
+      void redirect(std::ostream& os) { this->_os_ptr=&os; }
+      std::ostream& ostream() { return *this->_os_ptr; }
+      ~dotstream() { }
+     private:
+      std::ostream* _os_ptr;
+    };
+
+    class dotfstream
+      : private dotstream 
+    {
+     public:
+      dotfstream() : dotstream(), _ofs_ptr(new std::ofstream()) { this->dotstream::redirect(*this->_ofs_ptr); }
+      ~dotfstream() { this->close(); delete this->_ofs_ptr; }
       
-      void open(const char* fn) { this->std::ofstream::open(fn); }
-      void close() { this->std::ofstream::close(); }
+      void open(const char* fn) { this->_ofs_ptr->open(fn); }
+      void close() { this->_ofs_ptr->close(); }
+     private:
+      std::ofstream* _ofs_ptr;
     };
 
     
     template<class R>
-    dotfstream& 
-    operator<<(dotfstream& dots, const System::HybridAutomaton<R>& ha) 
+    dotstream& 
+    operator<<(dotstream& dots, const System::HybridAutomaton<R>& ha) 
     {
       typedef typename System::HybridAutomaton<R>::discrete_transition_iterator transition_iterator;
       

@@ -28,7 +28,7 @@
 #include "../evaluation/applicator.h"
 #include "../evaluation/integrator.h"
 
-#include "../output/epsfstream.h"
+#include "../output/epsstream.h"
 #include "../output/logging.h"
 
 #include "hybrid_evolver.h"

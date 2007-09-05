@@ -26,7 +26,7 @@
 #include "zonotope.h"
 #include "list_set.h"
 
-#include "output/txtfstream.h"
+#include "output/textstream.h"
 
 namespace Ariadne { 
 

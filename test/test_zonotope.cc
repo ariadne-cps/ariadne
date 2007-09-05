@@ -38,7 +38,7 @@
 #include "geometry/polyhedron.h"
 
 #include "output/logging.h"
-#include "output/epsfstream.h"
+#include "output/epsstream.h"
 
 #include "test.h"
 

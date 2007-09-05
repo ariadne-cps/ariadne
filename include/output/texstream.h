@@ -31,6 +31,7 @@
 #include <iosfwd>
 #include <fstream>
 
+#include "../base/types.h"
 #include "../numeric/declarations.h"
 #include "../linear_algebra/declarations.h"
 #include "../function/declarations.h"

@@ -237,7 +237,7 @@ Function::InterpretedFunction<R>::write(std::ostream& os) const
   VirtualMachine::Index index;
   int value;
 
-  os << "Function(\n" << std::flush;
+  os << "InterpretedFunction(\n" << std::flush;
   os << "  result_size=" << this->result_size() << ",\n" << std::flush;
   os << "  argument_size=" << this->argument_size() << ",\n" << std::flush;
   os << "  variables=" << this->_variables << ",\n" << std::flush;

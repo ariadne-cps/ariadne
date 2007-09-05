@@ -23,7 +23,7 @@
 from ariadne import *
 import sys
 
-henon_function=Function()
+henon_function=InterpretedFunction()
 henon_function.read("henon_function.dat")
 print henon_function
 
@@ -45,7 +45,7 @@ print henon_map.jacobian(pt)
 print
 print
 
-square_function=Function("function square output Real y; input Real x; algorithm y:=x^2; end square;")
+square_function=InterpretedFunction("function square output Real y; input Real x; algorithm y:=x^2; end square;")
 print square_function
 print
 v=IntervalVector("[3]")

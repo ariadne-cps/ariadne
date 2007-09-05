@@ -54,6 +54,7 @@ check_PROGRAMS = \
 	test_hybrid_evolution \
 	test_constraint_hybrid_evolution_step \
 	test_constraint_hybrid_evolution \
+        test_texstream \
         test_epsfstream \
 	test_txtfstream \
 	test_chompfstream 

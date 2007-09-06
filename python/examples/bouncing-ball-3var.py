@@ -17,16 +17,18 @@ g="-1"
 automaton=HybridAutomaton("Bouncing ball")
 
 # Location fly:
+mode_id=0
 dyn=AffineVectorField(Matrix("[0, 1, 0; 0, 0, 0; 0, 0, 0]"), Vector("[0,"+g+",1]"))
 inv=RectangularSet("[0,2]x[-2,1]x[0,"+max_time+"]")
 # inv=PolyhedralSet(Polyhedron(Matrix("[-1,0]"),Vector("[0]")))
-l1=automaton.new_mode(0, dyn, inv)
+l1=automaton.new_mode(mode_id, dyn, inv)
 
 # Transition l1 -> l1
 #act=Polyhedron(Matrix("[1,0; 0,1]"),Vector("[0,0]"))
+event_id=1
 act=RectangularSet("[-0.1,0.0]x[-2,0]x[0,"+max_time+"]")
 res=AffineMap(Matrix("[1,0,0;0,-0.5,0;0,0,1]"), Vector("[0,0,0]"))
-e12=automaton.new_transition(0,l1.id(),l1.id(),res,act)
+e12=automaton.new_transition(event_id,l1.id(),l1.id(),res,act)
 
 print automaton
 

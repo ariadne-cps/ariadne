@@ -32,7 +32,7 @@ mode1_id=0
 mode2_id=1
 mode1=automaton.new_mode(mode1_id,dynamic,invariant)
 mode2=automaton.new_mode(mode2_id,dynamic,invariant)
-event_id=0
+event_id=2
 transition=automaton.new_transition(event_id,mode1_id,mode2_id,reset,activation12)
 transition=automaton.new_transition(event_id,mode2_id,mode1_id,reset,activation21)
 print automaton

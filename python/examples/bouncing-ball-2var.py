@@ -11,15 +11,17 @@ from ariadne import *
 automaton=HybridAutomaton("Bouncing ball")
 
 # Location fly:
+mode_id=0
 dyn=AffineVectorField(Matrix("[0, 1; 0, 0]"), Vector("[0,-1.0]"))
 inv=RectangularSet("[0,10]x[-10,10]")
 # inv=PolyhedralSet(Polyhedron(Matrix("[-1,0]"),Vector("[0]")))
-l1=automaton.new_mode(0, dyn, inv)
+l1=automaton.new_mode(mode_id, dyn, inv)
 
 # Transition l1 -> l1
+event_id=1
 act=RectangularSet("[0,0.001]x[-10,0]")
 res=AffineMap(Matrix("[1,0;0,-0.5]"), Vector("[0,0]"))
-e12=automaton.new_transition(0,l1.id(),l1.id(),res,act)
+e12=automaton.new_transition(event_id,l1.id(),l1.id(),res,act)
 
 print automaton
 

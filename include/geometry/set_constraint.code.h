@@ -55,28 +55,37 @@ template<class R>
 smoothness_type 
 Geometry::SetConstraint<R>::smoothness() const
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  return 0u;
 }
 
 template<class R>
 Geometry::Comparison
 Geometry::SetConstraint<R>::comparison() const
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  return this->_inside==true ? less : greater;
 }
 
 template<class R>
 std::ostream& 
 Geometry::SetConstraint<R>::write(std::ostream& os) const
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  return os << "SetConstraint( set=" << *this->_set_ptr << " )";
 }
 
 template<class R>
 typename Geometry::SetConstraint<R>::A 
 Geometry::SetConstraint<R>::value(const Point<A>& pt) const
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  Rectangle<R> r(pt);
+  tribool inside=this->_set_ptr->superset(r);
+  tribool outside=this->_set_ptr->disjoint(r);
+  if(inside==true) {
+    return -1; 
+  } else if(outside==true) {
+    return +1;
+  } else { 
+    return 0;
+  }
 }
 
 template<class R>

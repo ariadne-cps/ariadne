@@ -50,6 +50,7 @@ bounding_set.adjoin(over_approximation(grid_extent,grid))
 apply=Applicator();
 
 print "Computing chain-reachable set..."
+set_applicator_verbosity(3)
 
 chain_reach_set = apply.chainreach(henon_map,initial_set,bounding_set)
 print "Found", chain_reach_set.size(), "cells in grid with", chain_reach_set.capacity(), "cells."

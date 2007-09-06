@@ -14,10 +14,11 @@ set_evaluation_verbosity(2)
 automaton=HybridAutomaton("Stupid Automaton")
 
 # Only one discrete mode
+id=0
 dyn=AffineVectorField(Matrix("[0, 0; 0, 0]"), Vector("[1,1]"))
 inv=Rectangle("[0,1]x[0,1]")
 inv=Polyhedron(Matrix("[-1,0;0,-1]"),Vector("[1,1]"));
-m0=automaton.new_mode(0, dyn, PolyhedralSet(inv))
+m0=automaton.new_mode(id, dyn, PolyhedralSet(inv))
 
 print automaton
 

@@ -30,7 +30,7 @@ mode2=automaton.new_mode(mode2_id,dynamic,space);
 jump_set = PolyhedralSet(Rectangle("[2.9,3]x[30,40]"));
 reset = AffineMap(Matrix("[1,0;0,1]"),Vector("[0,0]"));
 
-event_id=1;
+event_id=3;
 
 transition=automaton.new_transition(event_id,mode1_id,mode2_id,reset,jump_set)
 

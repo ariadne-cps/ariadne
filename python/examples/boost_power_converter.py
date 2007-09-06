@@ -63,9 +63,9 @@ mode3_id=3
 mode1=automaton.new_mode(mode1_id,dynamic1,invariant1)
 mode2=automaton.new_mode(mode2_id,dynamic2,invariant2)
 mode3=automaton.new_mode(mode3_id,dynamic3,invariant3)
-event1_id=1
-event2_id=2
-event3_id=3
+event1_id=4
+event2_id=5
+event3_id=6
 automaton.new_transition(event1_id,mode1_id,mode2_id,reset12,activation12)
 automaton.new_transition(event2_id,mode1_id,mode3_id,reset13,activation13)
 automaton.new_transition(event2_id,mode2_id,mode3_id,reset23,activation23)

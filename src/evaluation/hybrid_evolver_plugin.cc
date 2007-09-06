@@ -23,19 +23,19 @@
 
 #include "numeric/float.h"
 
-#include "evaluation/constraint_hybrid_evolver_plugin.h"
-#include "evaluation/constraint_hybrid_evolver_plugin.code.h"
+#include "evaluation/hybrid_evolver_plugin.h"
+#include "evaluation/hybrid_evolver_plugin.code.h"
 
 namespace Ariadne {
   namespace Evaluation {
     using namespace Numeric;
 
 #ifdef ENABLE_FLOAT64
-  template class ConstraintHybridEvolverPlugin<Float64>;
+  template class HybridEvolverPlugin<Float64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
-  template class ConstraintHybridEvolverPlugin<FloatMP>;
+  template class HybridEvolverPlugin<FloatMP>;
 #endif
 
       

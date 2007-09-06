@@ -1,5 +1,5 @@
 /***************************************************************************
- *            constraint_hybrid_evolver.code.h
+ *            hybrid_evolver.code.h
  *
  *  Copyright  2007  Pieter Collins
  *  Pieter.Collins@cwi.nl
@@ -32,7 +32,7 @@
 #include "../geometry/timed_set.h"
 #include "../system/map.h"
 #include "../system/vector_field.h"
-#include "../system/constraint_hybrid_automaton.h"
+#include "../system/hybrid_automaton.h"
 #include "../evaluation/applicator.h"
 #include "../evaluation/integrator.h"
 
@@ -41,7 +41,7 @@
 #include "../output/epsstream.h"
 #include "../output/logging.h"
 
-#include "constraint_hybrid_evolver.h"
+#include "hybrid_evolver.h"
 
 namespace {
 
@@ -93,17 +93,17 @@ using namespace System;
 
 
 template<class R>
-Evaluation::ConstraintHybridEvolverPlugin<R>::ConstraintHybridEvolverPlugin(Applicator<R>& a, Integrator<R>& i)
+Evaluation::HybridEvolverPlugin<R>::HybridEvolverPlugin(Applicator<R>& a, Integrator<R>& i)
   : _applicator(a.clone()), _integrator(dynamic_cast<LohnerIntegrator<R>*>(i.clone()))
 {
   if(!this->_integrator) {
-    throw std::runtime_error("ConstraintHybridEvolverPlugin::ConstraintHybridEvolverPlugin(Applicator a, Integrator i): Invalid integrator");
+    throw std::runtime_error("HybridEvolverPlugin::HybridEvolverPlugin(Applicator a, Integrator i): Invalid integrator");
   }
 }
 
 
 template<class R>
-Evaluation::ConstraintHybridEvolverPlugin<R>::ConstraintHybridEvolverPlugin(const ConstraintHybridEvolverPlugin<R>& plugin)
+Evaluation::HybridEvolverPlugin<R>::HybridEvolverPlugin(const HybridEvolverPlugin<R>& plugin)
   :_applicator(plugin._applicator), _integrator(plugin._integrator)
 {
 }
@@ -113,7 +113,7 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::ConstraintHybridEvolverPlugin(cons
 
 template<class R>
 time_type
-Evaluation::ConstraintHybridEvolverPlugin<R>::maximum_step_size() const
+Evaluation::HybridEvolverPlugin<R>::maximum_step_size() const
 {
   return this->_integrator->maximum_step_size();
 }
@@ -121,7 +121,7 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::maximum_step_size() const
 
 template<class R>
 R
-Evaluation::ConstraintHybridEvolverPlugin<R>::maximum_basic_set_radius() const
+Evaluation::HybridEvolverPlugin<R>::maximum_basic_set_radius() const
 {
   return this->_integrator->maximum_basic_set_radius();
 }
@@ -129,7 +129,7 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::maximum_basic_set_radius() const
 
 template<class R>
 R
-Evaluation::ConstraintHybridEvolverPlugin<R>::maximum_splitting_set_radius() const
+Evaluation::HybridEvolverPlugin<R>::maximum_splitting_set_radius() const
 {
   return Numeric::div_down(this->_integrator->maximum_basic_set_radius(),8);
 }
@@ -137,8 +137,8 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::maximum_splitting_set_radius() con
 
 
 template<class R> inline
-typename Evaluation::ConstraintHybridEvolverPlugin<R>::timed_set_type
-Evaluation::ConstraintHybridEvolverPlugin<R>::regularize(const timed_set_type& timed_set) const
+typename Evaluation::HybridEvolverPlugin<R>::timed_set_type
+Evaluation::HybridEvolverPlugin<R>::regularize(const timed_set_type& timed_set) const
 {
   ARIADNE_LOG(8,"HybridEvolverPlugin::regularize(...)\n");
   ARIADNE_LOG(9,"  radius="<<timed_set.continuous_state_set().radius()<<"\n");
@@ -165,8 +165,8 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::regularize(const timed_set_type& t
 }
 
 template<class R> inline
-std::vector<typename Evaluation::ConstraintHybridEvolverPlugin<R>::timed_set_type>
-Evaluation::ConstraintHybridEvolverPlugin<R>::subdivide(const timed_set_type& timed_set) const
+std::vector<typename Evaluation::HybridEvolverPlugin<R>::timed_set_type>
+Evaluation::HybridEvolverPlugin<R>::subdivide(const timed_set_type& timed_set) const
 {
   using namespace LinearAlgebra;
   
@@ -209,7 +209,7 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::subdivide(const timed_set_type& ti
 
 template<class R>
 Geometry::Rectangle<R>
-Evaluation::ConstraintHybridEvolverPlugin<R>::estimate_flow_bounds(const mode_type& mode, 
+Evaluation::HybridEvolverPlugin<R>::estimate_flow_bounds(const mode_type& mode, 
                                                                    const timed_set_type& initial_set,
                                                                    time_type& maximum_step_size) const
 {
@@ -218,7 +218,7 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::estimate_flow_bounds(const mode_ty
 
 template<class R>
 Geometry::Rectangle<R>
-Evaluation::ConstraintHybridEvolverPlugin<R>::refine_flow_bounds(const mode_type& mode, 
+Evaluation::HybridEvolverPlugin<R>::refine_flow_bounds(const mode_type& mode, 
                                                                  const timed_set_type& initial_set, 
                                                                  const bounding_box_type& bounding_set,
                                                                  const time_type& maximum_step_size) const
@@ -233,7 +233,7 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::refine_flow_bounds(const mode_type
 
 template<class R>
 tribool
-Evaluation::ConstraintHybridEvolverPlugin<R>::enabled(const transition_type& transition,
+Evaluation::HybridEvolverPlugin<R>::enabled(const transition_type& transition,
                                                       const bounding_box_type& bounding_box) const
 {
   return Geometry::value(transition.constraint(),bounding_box) >= 0;
@@ -242,7 +242,7 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::enabled(const transition_type& tra
 
 template<class R>
 tribool
-Evaluation::ConstraintHybridEvolverPlugin<R>::enabled(const transition_type& transition,
+Evaluation::HybridEvolverPlugin<R>::enabled(const transition_type& transition,
                                                       const timed_set_type& set) const
 {
   return Geometry::value(transition.constraint(),set.continuous_state_set()) >= 0;
@@ -252,7 +252,7 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::enabled(const transition_type& tra
 /*! Tests if constraint2 is always unsatisfied if constraint1 is unsatisfied. */
 template<class R>
 tribool
-Evaluation::ConstraintHybridEvolverPlugin<R>::forces(const constraint_type& constraint1,
+Evaluation::HybridEvolverPlugin<R>::forces(const constraint_type& constraint1,
                                                      const constraint_type& constraint2,
                                                      const bounding_box_type& bounding_box) const
 {
@@ -273,7 +273,7 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::forces(const constraint_type& cons
  */
 template<class R>
 Numeric::Interval<R>
-Evaluation::ConstraintHybridEvolverPlugin<R>::estimate_normal_derivative(const transition_type& transition,
+Evaluation::HybridEvolverPlugin<R>::estimate_normal_derivative(const transition_type& transition,
                                                                          const bounding_box_type& bounding_box) const
 {
   Point<I> bounding_point = bounding_box;
@@ -288,7 +288,7 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::estimate_normal_derivative(const t
  */
 template<class R>
 Numeric::Interval<R>
-Evaluation::ConstraintHybridEvolverPlugin<R>::estimate_crossing_time_step(const transition_type& transition, 
+Evaluation::HybridEvolverPlugin<R>::estimate_crossing_time_step(const transition_type& transition, 
                                                                           const timed_set_type& initial_set,
                                                                           const bounding_box_type& bounding_box) const
 {
@@ -303,12 +303,12 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::estimate_crossing_time_step(const 
  *  Detects non-transverse crossings and provides first-order estimates
  */
 template<class R>
-typename Evaluation::ConstraintHybridEvolverPlugin<R>::time_model_type
-Evaluation::ConstraintHybridEvolverPlugin<R>::compute_crossing_time_step(const transition_type& transition, 
+typename Evaluation::HybridEvolverPlugin<R>::time_model_type
+Evaluation::HybridEvolverPlugin<R>::compute_crossing_time_step(const transition_type& transition, 
                                                                          const timed_set_type& initial_set,
                                                                          const bounding_box_type& bounding_box) const
 {
-  ARIADNE_LOG(8,"    ConstraintHybridEvolverPlugin::compute_crossing_time_step(...)\n");
+  ARIADNE_LOG(8,"    HybridEvolverPlugin::compute_crossing_time_step(...)\n");
   static const int number_of_newton_steps=2;
 
   const mode_type& mode=transition.source();
@@ -405,8 +405,8 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::compute_crossing_time_step(const t
 
                                                             
 template<class R>
-typename Evaluation::ConstraintHybridEvolverPlugin<R>::crossing_data_type
-Evaluation::ConstraintHybridEvolverPlugin<R>::compute_crossing_data(const transition_type& transition,
+typename Evaluation::HybridEvolverPlugin<R>::crossing_data_type
+Evaluation::HybridEvolverPlugin<R>::compute_crossing_data(const transition_type& transition,
                                                                     const timed_set_type& initial_set,
                                                                     const timed_set_type& final_set,
                                                                     const bounding_box_type& bounding_box) const
@@ -436,14 +436,14 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::compute_crossing_data(const transi
 
 
 template<class R>
-std::map< id_type, typename Evaluation::ConstraintHybridEvolverPlugin<R>::crossing_data_type >
-Evaluation::ConstraintHybridEvolverPlugin<R>::compute_crossing_data(const reference_set<const transition_type>& transitions,
+std::map< id_type, typename Evaluation::HybridEvolverPlugin<R>::crossing_data_type >
+Evaluation::HybridEvolverPlugin<R>::compute_crossing_data(const reference_set<const transition_type>& transitions,
                                                                     const timed_set_type& initial_set,
                                                                     const timed_set_type& final_set,
                                                                     const bounding_box_type& bounding_box,
                                                                     const time_type& maximum_time_step) const
 {
-  ARIADNE_LOG(6," ConstraintHybridEvolverPlugin::compute_crossing_data(...)\n");
+  ARIADNE_LOG(6," HybridEvolverPlugin::compute_crossing_data(...)\n");
   ARIADNE_LOG(7,"   initial_set="<<initial_set<<"\n");
   ARIADNE_LOG(7,"   final_set="<<final_set<<"\n");
   ARIADNE_LOG(7,"   bounding_box="<<bounding_box<<"\n\n");
@@ -482,7 +482,7 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::compute_crossing_data(const refere
 
 template<class R>
 Numeric::Interval<R>
-Evaluation::ConstraintHybridEvolverPlugin<R>::
+Evaluation::HybridEvolverPlugin<R>::
 compute_evolution_time_bounds(const std::map<id_type, crossing_data_type>& crossing_data) const
 {
   typedef typename std::map<id_type,crossing_data_type>::const_iterator crossing_data_const_iterator;
@@ -496,7 +496,7 @@ compute_evolution_time_bounds(const std::map<id_type, crossing_data_type>& cross
 
 template<class R>
 Numeric::Interval<R>
-Evaluation::ConstraintHybridEvolverPlugin<R>::
+Evaluation::HybridEvolverPlugin<R>::
 compute_evolution_time_bounds(const std::map<id_type, time_model_type>& event_times) const
 {
   typedef typename std::map<id_type,time_model_type>::const_iterator const_iterator;
@@ -509,8 +509,8 @@ compute_evolution_time_bounds(const std::map<id_type, time_model_type>& event_ti
 
 
 template<class R>
-std::map< id_type, typename Evaluation::ConstraintHybridEvolverPlugin<R>::time_model_type>
-Evaluation::ConstraintHybridEvolverPlugin<R>::compute_terminating_event_times(const mode_type& mode,
+std::map< id_type, typename Evaluation::HybridEvolverPlugin<R>::time_model_type>
+Evaluation::HybridEvolverPlugin<R>::compute_terminating_event_times(const mode_type& mode,
                                                                               const timed_set_type& initial_set,
                                                                               const timed_set_type& final_set,
                                                                               const time_type& final_time,
@@ -624,8 +624,8 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::compute_terminating_event_times(co
 
 
 template<class R>
-reference_set<typename Evaluation::ConstraintHybridEvolverPlugin<R>::transition_type>
-Evaluation::ConstraintHybridEvolverPlugin<R>::compute_possibly_enabled_transitions(const mode_type& mode,
+reference_set<typename Evaluation::HybridEvolverPlugin<R>::transition_type>
+Evaluation::HybridEvolverPlugin<R>::compute_possibly_enabled_transitions(const mode_type& mode,
                                                                                    const bounding_box_type& bounding_box) const
 {
   reference_set<transition_type> possibly_enabled_transitions;
@@ -652,8 +652,8 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::compute_possibly_enabled_transitio
 
 
 template<class R>
-std::map<id_type, typename Evaluation::ConstraintHybridEvolverPlugin<R>::time_model_pair_type>
-Evaluation::ConstraintHybridEvolverPlugin<R>::compute_enabled_activation_times(const mode_type& mode,
+std::map<id_type, typename Evaluation::HybridEvolverPlugin<R>::time_model_pair_type>
+Evaluation::HybridEvolverPlugin<R>::compute_enabled_activation_times(const mode_type& mode,
                                                                                const timed_set_type& initial_set,
                                                                                const timed_set_type& final_set,
                                                                                const time_model_type& maximum_time_step,
@@ -730,8 +730,8 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::compute_enabled_activation_times(c
 
 
 template<class R>
-typename Evaluation::ConstraintHybridEvolverPlugin<R>::timed_set_type
-Evaluation::ConstraintHybridEvolverPlugin<R>::final_continuous_evolution_step(const mode_type& mode,
+typename Evaluation::HybridEvolverPlugin<R>::timed_set_type
+Evaluation::HybridEvolverPlugin<R>::final_continuous_evolution_step(const mode_type& mode,
                                                                               const timed_set_type& initial_set,
                                                                               const time_type& final_time,
                                                                               const bounding_box_type& bounding_box) const
@@ -748,8 +748,8 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::final_continuous_evolution_step(co
 
 
 template<class R>
-typename Evaluation::ConstraintHybridEvolverPlugin<R>::timed_set_type
-Evaluation::ConstraintHybridEvolverPlugin<R>::continuous_evolution_step(const mode_type& mode,
+typename Evaluation::HybridEvolverPlugin<R>::timed_set_type
+Evaluation::HybridEvolverPlugin<R>::continuous_evolution_step(const mode_type& mode,
                                                                         const timed_set_type& initial_set,
                                                                         const time_model_type& time_step,
                                                                         const bounding_box_type& bounding_box) const
@@ -770,8 +770,8 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::continuous_evolution_step(const mo
 
 
 template<class R>
-typename Evaluation::ConstraintHybridEvolverPlugin<R>::timed_set_type
-Evaluation::ConstraintHybridEvolverPlugin<R>::continuous_reachability_step(const mode_type& mode,
+typename Evaluation::HybridEvolverPlugin<R>::timed_set_type
+Evaluation::HybridEvolverPlugin<R>::continuous_reachability_step(const mode_type& mode,
                                                                            const timed_set_type& initial_set,
                                                                            const time_model_type& lower_time_step,
                                                                            const time_model_type& upper_time_step,
@@ -806,8 +806,8 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::continuous_reachability_step(const
 
 
 template<class R>
-typename Evaluation::ConstraintHybridEvolverPlugin<R>::timed_set_type
-Evaluation::ConstraintHybridEvolverPlugin<R>::discrete_event_step(const transition_type& transition,
+typename Evaluation::HybridEvolverPlugin<R>::timed_set_type
+Evaluation::HybridEvolverPlugin<R>::discrete_event_step(const transition_type& transition,
                                                                   const timed_set_type& initial_set) const
 {
   ARIADNE_LOG(7," HybridEvolverPlugin::discrete_event_step(...)\n");
@@ -825,8 +825,8 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::discrete_event_step(const transiti
  * \f[ D\Phi_2 \circ DF \circ D\Phi_1 G; \quad (D\Phi_i\circ DF \circ \dot{\Phi}_1 - \dot{\Phi}_2) (h/2) \f]
  */
 template<class R>
-typename Evaluation::ConstraintHybridEvolverPlugin<R>::timed_set_type
-Evaluation::ConstraintHybridEvolverPlugin<R>::forced_jump_step(const transition_type& transition,
+typename Evaluation::HybridEvolverPlugin<R>::timed_set_type
+Evaluation::HybridEvolverPlugin<R>::forced_jump_step(const transition_type& transition,
                                                                const timed_set_type& initial_set,
                                                                const time_model_type& crossing_time,
                                                                const bounding_box_type& bounding_box) const
@@ -851,8 +851,8 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::forced_jump_step(const transition_
  * \f[ D\Phi_2 \circ DF \circ D\Phi_1 G; \quad (D\Phi_i\circ DF \circ \dot{\Phi}_1 - \dot{\Phi}_2) (h/2) \f]
  */
 template<class R>
-typename Evaluation::ConstraintHybridEvolverPlugin<R>::timed_set_type
-Evaluation::ConstraintHybridEvolverPlugin<R>::unforced_jump_step(const transition_type& transition,
+typename Evaluation::HybridEvolverPlugin<R>::timed_set_type
+Evaluation::HybridEvolverPlugin<R>::unforced_jump_step(const transition_type& transition,
                                                                  const timed_set_type& initial_set,
                                                                  const time_model_type& minimum_time,
                                                                  const time_model_type& maximum_time,
@@ -879,8 +879,8 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::unforced_jump_step(const transitio
 
 
 template<class R>
-std::vector<typename Evaluation::ConstraintHybridEvolverPlugin<R>::timed_set_type>
-Evaluation::ConstraintHybridEvolverPlugin<R>::evolution_step(const System::ConstraintHybridAutomaton<R>& automaton, 
+std::vector<typename Evaluation::HybridEvolverPlugin<R>::timed_set_type>
+Evaluation::HybridEvolverPlugin<R>::evolution_step(const System::HybridAutomaton<R>& automaton, 
                                                              const timed_set_type& initial_set,
                                                              const time_type& final_time,
                                                              EvolutionSemantics evolution_semantics,
@@ -1092,8 +1092,8 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::evolution_step(const System::Const
 
 
 template<class R>
-std::vector<typename Evaluation::ConstraintHybridEvolverPlugin<R>::timed_set_type> 
-Evaluation::ConstraintHybridEvolverPlugin<R>::lower_evolution_step(const System::ConstraintHybridAutomaton<R>& automaton, 
+std::vector<typename Evaluation::HybridEvolverPlugin<R>::timed_set_type> 
+Evaluation::HybridEvolverPlugin<R>::lower_evolution_step(const System::HybridAutomaton<R>& automaton, 
                                                                    const timed_set_type& initial_set,
                                                                    const time_type& maximum_time) const
 {
@@ -1102,8 +1102,8 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::lower_evolution_step(const System:
 
 
 template<class R>
-std::vector<typename Evaluation::ConstraintHybridEvolverPlugin<R>::timed_set_type> 
-Evaluation::ConstraintHybridEvolverPlugin<R>::upper_evolution_step(const System::ConstraintHybridAutomaton<R>& automaton, 
+std::vector<typename Evaluation::HybridEvolverPlugin<R>::timed_set_type> 
+Evaluation::HybridEvolverPlugin<R>::upper_evolution_step(const System::HybridAutomaton<R>& automaton, 
                                                                    const timed_set_type& initial_set,
                                                                    const time_type& maximum_time) const
 {
@@ -1113,8 +1113,8 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::upper_evolution_step(const System:
 
 
 template<class R>
-std::vector<typename Evaluation::ConstraintHybridEvolverPlugin<R>::timed_set_type> 
-Evaluation::ConstraintHybridEvolverPlugin<R>::lower_reachability_step(const System::ConstraintHybridAutomaton<R>& automaton, 
+std::vector<typename Evaluation::HybridEvolverPlugin<R>::timed_set_type> 
+Evaluation::HybridEvolverPlugin<R>::lower_reachability_step(const System::HybridAutomaton<R>& automaton, 
                                                                       const timed_set_type& initial_set,
                                                                       const time_type& maximum_time) const
 {
@@ -1123,8 +1123,8 @@ Evaluation::ConstraintHybridEvolverPlugin<R>::lower_reachability_step(const Syst
 
 
 template<class R>
-std::vector<typename Evaluation::ConstraintHybridEvolverPlugin<R>::timed_set_type> 
-Evaluation::ConstraintHybridEvolverPlugin<R>::upper_reachability_step(const System::ConstraintHybridAutomaton<R>& automaton, 
+std::vector<typename Evaluation::HybridEvolverPlugin<R>::timed_set_type> 
+Evaluation::HybridEvolverPlugin<R>::upper_reachability_step(const System::HybridAutomaton<R>& automaton, 
                                                                       const timed_set_type& initial_set,
                                                                       const time_type& maximum_time) const
 {

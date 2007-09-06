@@ -1,8 +1,8 @@
 /***************************************************************************
  *            hybrid_automaton.cc
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2007  Pieter Collins
+ *  pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -23,8 +23,6 @@
 
 #include "numeric/float.h"
 
-#include "system/discrete_mode.h"
-#include "system/discrete_transition.h"
 #include "system/hybrid_automaton.h"
 #include "system/hybrid_automaton.code.h"
 

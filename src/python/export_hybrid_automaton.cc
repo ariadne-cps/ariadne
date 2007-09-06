@@ -1,8 +1,8 @@
 /***************************************************************************
  *            python/export_hybrid_automaton.cc
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2007 Pieter Collins
+ *  Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -23,10 +23,12 @@
 
 #include "python/python_float.h"
 
-#include "geometry/set_reference.h"
+#include "geometry/set_interface.h"
+#include "geometry/constraint_interface.h"
+#include "system/map_interface.h"
+#include "system/vector_field_interface.h"
+
 #include "geometry/hybrid_set.h"
-#include "system/discrete_mode.h"
-#include "system/discrete_transition.h"
 #include "system/hybrid_automaton.h"
 
 using namespace Ariadne;
@@ -46,43 +48,78 @@ void export_hybrid_automaton()
 {
   init<const std::string&> hybrid_automaton_init;
   
-  class_< DiscreteMode<R> >("DiscreteMode",no_init)
+  class_< DiscreteMode<R> >("HybridAutomatonDiscreteMode",no_init)
     .def("id",&DiscreteMode<R>::id)
-    .def("dimension",&DiscreteMode<R>::dimension)
-    .def("dynamic",&DiscreteMode<R>::dynamic,return_reference_existing_object())
-    .def("invariant",&DiscreteMode<R>::invariant,return_reference_existing_object())
     .def(self_ns::str(self))
   ;
   
 
-  class_< DiscreteTransition<R> >("DiscreteTransition",no_init)
+  class_< DiscreteTransition<R> >("HybridAutomatonDiscreteTransition",no_init)
     .def("id",&DiscreteTransition<R>::id)
-    .def("source",&DiscreteTransition<R>::source,return_reference_existing_object())
-    .def("destination",&DiscreteTransition<R>::destination,return_reference_existing_object())
-    .def("activation",&DiscreteTransition<R>::activation,return_reference_existing_object())
-    .def("reset",&DiscreteTransition<R>::reset,return_reference_existing_object())
     .def(self_ns::str(self))
   ;
 
 
-  class_< HybridAutomaton<R> >("HybridAutomaton",hybrid_automaton_init)
-    .def("new_mode",(const DiscreteMode<R>&(HybridAutomaton<R>::*)(id_type, const VectorFieldInterface<R>&,const Geometry::SetInterface<R>&))
+  class_< HybridAutomaton<R> >("HybridAutomaton",init<const std::string&>())
+    .def("new_dynamic",
+         (const VectorFieldInterface<R>&(HybridAutomaton<R>::*)(id_type, const VectorFieldInterface<R>&)) &HybridAutomaton<R>::new_dynamic,
+         return_reference_existing_object())
+    .def("new_reset",
+         (const MapInterface<R>&(HybridAutomaton<R>::*)(id_type, const MapInterface<R>&)) &HybridAutomaton<R>::new_dynamic,
+         return_reference_existing_object())
+    .def("new_constraint",
+         (const ConstraintInterface<R>&(HybridAutomaton<R>::*)(id_type, const ConstraintInterface<R>&))&HybridAutomaton<R>::new_dynamic,
+         return_reference_existing_object())
+    .def("new_domain",
+         (const SetInterface<R>&(HybridAutomaton<R>::*)(id_type, const SetInterface<R>&)) &HybridAutomaton<R>::new_dynamic,
+         return_reference_existing_object())
+
+    .def("new_mode",
+         (const DiscreteMode<R>&(HybridAutomaton<R>::*)(id_type,id_type)) &HybridAutomaton<R>::new_mode,
+         return_reference_existing_object())
+    .def("new_invariant",
+         (const DiscreteTransition<R>&(HybridAutomaton<R>::*)(id_type,id_type,id_type)) &HybridAutomaton<R>::new_invariant,
+          return_reference_existing_object())
+     .def("new_transition",
+          (const DiscreteTransition<R>&(HybridAutomaton<R>::*)(id_type,id_type,id_type,id_type,id_type,bool)) &HybridAutomaton<R>::new_transition,
+          return_reference_existing_object())
+    .def("new_forced_transition",
+         (const DiscreteTransition<R>&(HybridAutomaton<R>::*)(id_type,id_type,id_type,id_type,id_type)) &HybridAutomaton<R>::new_forced_transition,
+         return_reference_existing_object())
+    .def("new_unforced_transition",
+         (const DiscreteTransition<R>&(HybridAutomaton<R>::*)(id_type,id_type,id_type,id_type,id_type)) &HybridAutomaton<R>::new_unforced_transition,
+          return_reference_existing_object())
+
+    .def("new_mode",(const DiscreteMode<R>&(HybridAutomaton<R>::*)(id_type,const VectorFieldInterface<R>&))
+           (&HybridAutomaton<R>::new_mode),
+         return_reference_existing_object())
+    .def("new_invariant",(const DiscreteTransition<R>&(HybridAutomaton<R>::*)(id_type,id_type,const ConstraintInterface<R>&))
+           (&HybridAutomaton<R>::new_invariant),
+         return_reference_existing_object())
+     .def("new_transition",
+         (const DiscreteTransition<R>&(HybridAutomaton<R>::*)(id_type,id_type,id_type,const MapInterface<R>&,const ConstraintInterface<R>&,bool))
+           (&HybridAutomaton<R>::new_transition),
+         return_reference_existing_object())
+    .def("new_forced_transition",
+         (const DiscreteTransition<R>&(HybridAutomaton<R>::*)(id_type,id_type,id_type,const MapInterface<R>&,const ConstraintInterface<R>&))
+           (&HybridAutomaton<R>::new_forced_transition),
+         return_reference_existing_object())
+    .def("new_unforced_transition",
+         (const DiscreteTransition<R>&(HybridAutomaton<R>::*)(id_type,id_type,id_type,const MapInterface<R>&,const ConstraintInterface<R>&))
+           (&HybridAutomaton<R>::new_unforced_transition),
+         return_reference_existing_object())
+
+    .def("new_mode",(const DiscreteMode<R>&(HybridAutomaton<R>::*)(id_type, const VectorFieldInterface<R>&, const SetInterface<R>&))
            (&HybridAutomaton<R>::new_mode),
          return_reference_existing_object())
     .def("new_transition",
-         (const DiscreteTransition<R>&(HybridAutomaton<R>::*)
-             (id_type,const DiscreteMode<R>&,const DiscreteMode<R>&,const MapInterface<R>&,const Geometry::SetInterface<R>&))
+         (const DiscreteTransition<R>&(HybridAutomaton<R>::*)(id_type,id_type,id_type,const MapInterface<R>&,const SetInterface<R>&))
            (&HybridAutomaton<R>::new_transition),
          return_reference_existing_object())
-    .def("new_transition",
-         (const DiscreteTransition<R>&(HybridAutomaton<R>::*)
-             (id_type,id_type,id_type,const MapInterface<R>&,const Geometry::SetInterface<R>&))
-           (&HybridAutomaton<R>::new_transition),
-         return_reference_existing_object())
+
     .def("name",&HybridAutomaton<R>::name,return_copy_const_reference())
     .def("has_mode",&HybridAutomaton<R>::has_mode)
     .def("has_transition",&HybridAutomaton<R>::has_transition)
-    .def("invariant",&HybridAutomaton<R>::invariant)
     .def("mode",&HybridAutomaton<R>::mode,return_copy_const_reference())
     .def("transition",&HybridAutomaton<R>::transition,return_copy_const_reference())
     .def(self_ns::str(self))

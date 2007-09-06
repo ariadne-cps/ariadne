@@ -32,6 +32,8 @@
 #include <boost/shared_ptr.hpp>
 
 #include "../base/tribool.h"
+#include "../base/types.h"
+#include "../numeric/numerical_traits.h"
 #include "../linear_algebra/declarations.h"
 
 namespace Ariadne {
@@ -62,7 +64,6 @@ namespace Ariadne {
       typedef typename Numeric::traits<R>::arithmetic_type A;
       typedef typename Numeric::traits<R>::interval_type I;
      public:
-     public:
       /*! \brief Destructor. */
       virtual ~ConstraintInterface();
       /*! \brief Return a new dynamically-allocated copy of the constraint. */
@@ -75,7 +76,7 @@ namespace Ariadne {
       virtual smoothness_type smoothness() const = 0;
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream& os) const = 0;
-
+    
       /*! \brief The value of the constraint function at a point. */
       virtual A value(const Point<A>& pt) const = 0;
       /*! \brief The gradient of the constraint function at a point. */

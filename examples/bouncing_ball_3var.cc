@@ -68,7 +68,6 @@ int bouncing_ball_automaton()
   const DiscreteTransition<R>& transition=automaton.new_transition(event_id,mode1_id,mode1_id,reset,activation);
   
   cout << mode1  <<  "\n" << transition << endl;
-  cout << automaton.invariant() << endl;
 
   time_type maximum_step_size=0.125;
   time_type lock_to_grid_time=0.5;

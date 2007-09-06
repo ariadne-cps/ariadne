@@ -39,7 +39,6 @@ namespace Ariadne {
     class Rational;
   }
   
-  
   namespace Base {
     //! \name Basic types
     //@{
@@ -75,6 +74,40 @@ namespace Ariadne {
   }
   
   using namespace Base;
+
+#ifdef DOXYGEN  
+  //! \name Basic types
+  //@{
+  //! \ingroup Base
+  /*! \brief The type of a machine byte. */
+  typedef unsigned char byte_type; 
+  /*! \brief An unsigned integral type used to represent the size of a list. */
+  typedef size_t size_type;
+  /*! \brief An signed integral type used to represent the position in a list with positive and negative indices. */
+  typedef ptrdiff_t index_type;
+  /*! \brief The type used for a unique identifier or key. */
+  typedef unsigned int id_type;
+  /*! \brief An unsigned integral type used to represent a coordinate in state space. */
+  typedef unsigned short dimension_type;
+  /*! \brief An integral type used to represent the smoothness of a map. */
+  typedef short smoothness_type;
+  /*! \brief The type used to describe evolution time for discrete time systems. */
+  typedef Numeric::Integer discrete_time_type;
+  /*! \brief The type used to describe evolution time. */
+  typedef Numeric::Rational time_type;
+  //@}
+  
+  //! \name Array types
+  //@{
+  //! \ingroup Array
+  /*! \brief An array of boolean values. */
+  typedef array<bool> BooleanArray;
+  /*! \brief An array of unsigned integer values. */
+  typedef array<size_type> SizeArray;
+  /*! \brief An array of integer values. */
+  typedef array<index_type> IndexArray;
+  //@}
+#endif   
   
 }
 

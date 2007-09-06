@@ -303,6 +303,7 @@ namespace Ariadne {
   }
 }
 
+
 #include "hybrid_denotable_set.inline.h"
 
 #endif /* ARIADNE_HYBRID_DENOTABLE_SET_H */

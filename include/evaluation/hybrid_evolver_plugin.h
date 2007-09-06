@@ -1,5 +1,5 @@
 /***************************************************************************
- *            constraint_hybrid_evolver_plugin.h
+ *            hybrid_evolver_plugin.h
  *
  *  Copyright  2007  Pieter Collins
  *  Pieter.Collins@cwi.nl
@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#ifndef ARIADNE_CONSTRAINT_HYBRID_EVOLVER_PLUGIN_H
-#define ARIADNE_CONSTRAINT_HYBRID_EVOLVER_PLUGIN_H
+#ifndef ARIADNE_HYBRID_EVOLVER_PLUGIN_H
+#define ARIADNE_HYBRID_EVOLVER_PLUGIN_H
 
 #include <string>
 #include <vector>
@@ -49,7 +49,7 @@
 namespace Ariadne {  
   namespace Evaluation {
   
-    template<class R> class ConstraintHybridEvolver;
+    template<class R> class HybridEvolver;
     template<class R> class LohnerIntegrator;
   
     /*! \brief The set appears to cross a constraint non-transversely. */
@@ -186,9 +186,9 @@ namespace Ariadne {
      * \endpseudocode 
      */
     template< class R >
-    class ConstraintHybridEvolverPlugin
+    class HybridEvolverPlugin
     {
-      friend class ConstraintHybridEvolver<R>;
+      friend class HybridEvolver<R>;
       typedef Numeric::Interval<R> I;
      public:
       /*! \brief The type used for real numbers. */
@@ -196,9 +196,9 @@ namespace Ariadne {
       /*! \brief . */
       typedef Numeric::Rational time_type;
       /*! \brief . */
-      typedef typename System::ConstraintDiscreteMode<R> mode_type;
+      typedef typename System::DiscreteMode<R> mode_type;
       /*! \brief . */
-      typedef typename System::ConstraintDiscreteTransition<R> transition_type;
+      typedef typename System::DiscreteTransition<R> transition_type;
       /*! \brief . */
       typedef typename Geometry::Zonotope<Numeric::Interval<R> > continuous_basic_set_type;
       /*! \brief . */
@@ -225,10 +225,10 @@ namespace Ariadne {
       //! \name Constructors. */
 
       /*! \brief Construct from an applicator and an integrator. */
-      ConstraintHybridEvolverPlugin(Applicator<R>& applicator, Integrator<R>& integrator);
+      HybridEvolverPlugin(Applicator<R>& applicator, Integrator<R>& integrator);
 
       /*! \brief Copy constructor. */
-      ConstraintHybridEvolverPlugin(const ConstraintHybridEvolverPlugin<R>& plugin);
+      HybridEvolverPlugin(const HybridEvolverPlugin<R>& plugin);
 
       //! \name Parameters controlling the evolution.
       /*! \brief The maximum step size for integration. */
@@ -246,7 +246,7 @@ namespace Ariadne {
        * the remaining sets should be continued as working sets.
        */
       std::vector<timed_set_type>
-      evolution_step(const System::ConstraintHybridAutomaton<R>& automaton, 
+      evolution_step(const System::HybridAutomaton<R>& automaton, 
                      const timed_set_type& initial_set,
                      const time_type& maximum_time,
                      EvolutionSemantics evolution_semantics,
@@ -254,25 +254,25 @@ namespace Ariadne {
 
       /*! \brief Compute a lower-approximation to the evolution of a timed basic set using lower semantics. */
       std::vector<timed_set_type>
-      lower_evolution_step(const System::ConstraintHybridAutomaton<R>& automaton, 
+      lower_evolution_step(const System::HybridAutomaton<R>& automaton, 
                            const timed_set_type& initial_set,
                            const time_type& maximum_time) const;
 
       /*! \brief Compute the an over-approximation to the evolution of a timed basic set using upper semantics. */
       std::vector<timed_set_type>
-      upper_evolution_step(const System::ConstraintHybridAutomaton<R>& automaton, 
+      upper_evolution_step(const System::HybridAutomaton<R>& automaton, 
                            const timed_set_type& initial_set,
                            const time_type& maximum_time) const;
 
       /*! \brief Compute the possible states reached during an evolution step using lower semantics. */
       std::vector<timed_set_type>
-      lower_reachability_step(const System::ConstraintHybridAutomaton<R>& automaton, 
+      lower_reachability_step(const System::HybridAutomaton<R>& automaton, 
                               const timed_set_type& initial_set,
                               const time_type& maximum_time) const;
 
       /*! \brief Compute the possible states reached during an evolution step using upper semantics. */
       std::vector<timed_set_type>
-      upper_reachability_step(const System::ConstraintHybridAutomaton<R>& automaton, 
+      upper_reachability_step(const System::HybridAutomaton<R>& automaton, 
                               const timed_set_type& initial_set,
                               const time_type& maximum_time) const;
 

@@ -1,8 +1,8 @@
 /***************************************************************************
- *            constraint_hybrid_automaton.cc
+ *            set_based_hybrid_automaton.cc
  *
- *  Copyright  2007  Pieter Collins
- *  pieter.collins@cwi.nl
+ *  Copyright  2006-7  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -23,8 +23,8 @@
 
 #include "numeric/float.h"
 
-#include "system/constraint_hybrid_automaton.h"
-#include "system/constraint_hybrid_automaton.code.h"
+#include "system/set_based_hybrid_automaton.h"
+#include "system/set_based_hybrid_automaton.code.h"
 
 
 namespace Ariadne {
@@ -32,15 +32,15 @@ namespace Ariadne {
     using namespace Numeric;
     
 #ifdef ENABLE_FLOAT64
-    template class ConstraintDiscreteMode<Float64>;
-    template class ConstraintDiscreteTransition<Float64>;
-    template class ConstraintHybridAutomaton<Float64>;
+    template class SetBasedDiscreteMode<Float64>;
+    template class SetBasedDiscreteTransition<Float64>;
+    template class SetBasedHybridAutomaton<Float64>;
 #endif
     
 #ifdef ENABLE_FLOATMP
-    template class ConstraintDiscreteMode<FloatMP>;
-    template class ConstraintDiscreteTransition<FloatMP>;
-    template class ConstraintHybridAutomaton<FloatMP>;
+    template class SetBasedDiscreteMode<FloatMP>;
+    template class SetBasedDiscreteTransition<FloatMP>;
+    template class SetBasedHybridAutomaton<FloatMP>;
 #endif
       
   }

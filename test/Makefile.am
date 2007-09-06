@@ -42,18 +42,19 @@ check_PROGRAMS = \
 	test_polytope \
 	test_polyhedron \
 	test_constraint \
-	test_constraint_set test_level_set \
+	test_constraint_set \
+	test_level_set \
+	test_set_based_hybrid_automaton \
 	test_hybrid_automaton \
-	test_constraint_hybrid_automaton \
 	test_newton \
 	test_apply \
 	test_lohner_integrator \
 	test_affine_integrator \
 	test_integrate \
 	test_chainreach \
+	test_hybrid_evolution_step \
 	test_hybrid_evolution \
-	test_constraint_hybrid_evolution_step \
-	test_constraint_hybrid_evolution \
+	test_set_based_hybrid_evolution \
         test_texstream \
         test_epsstream \
 	test_textstream \

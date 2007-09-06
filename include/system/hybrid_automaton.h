@@ -1,8 +1,8 @@
 /***************************************************************************
  *            hybrid_automaton.h
  *
- *  Copyright  2004-6  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it  Pieter.Collins@cwi.nl
+ *  Copyright  2007 Pieter Collins
+ *  Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -24,175 +24,398 @@
 #ifndef ARIADNE_HYBRID_AUTOMATON_H
 #define ARIADNE_HYBRID_AUTOMATON_H
 
+namespace Foo {
+int bar(int);
+}
+
 #include <string>
 #include <vector>
 #include <list>
 #include <iostream>
 
-#include "../base/stlio.h"
+#include <boost/smart_ptr.hpp>
+
+#include "../base/types.h"
+#include "../base/clonable_container.h"
+#include "../base/reference_container.h"
+#include "../geometry/constraint_interface.h"
+#include "../geometry/set_interface.h"
 #include "../geometry/hybrid_space.h"
-#include "../system/discrete_mode.h"
-#include "../system/discrete_transition.h"
-
-
+#include "../system/declarations.h"
 
 namespace Ariadne {  
 
-namespace Geometry {
-template<class S> class HybridSet;
-}
+  namespace System {
+  
+    template<class R> class MapInterface;
+    template<class R> class VectorFieldInterface;
+    template<class R> class HybridAutomaton;
+  
+    using Geometry::ConstraintInterface;
+    using Geometry::Constraint;
+  
+    enum EventKind { invariant_tag, guard_tag, activation_tag };
 
-namespace System {
-  
-  
-/*! \ingroup HybridTime
- *  \brief A hybrid automaton, comprising continuous-time behaviour
- *  at each DiscreteMode, coupled by instantaneous DiscreteTransition events.
- *  The state space is given by a Geometry::HybridSet.  
- *
- * A hybrid automaton is a dynamic system with evolution in both
- * continuous time and discrete time. 
- * The state space is a product \f$X=\bigcup\{q\}\times X_q\f$
- * where \f$q\f$ is the <em>discrete state</em> and \f$X_q\f$
- * is the <em>continuous state space</em> of corresponding to
- * each discrete state.
- *
- * For each %DiscreteMode, the dynamics is given by a 
- * %VectorField describing the continuous dynamics,
- * and a %Set giving an invariant which must be satisified at
- * all times.
- *
- * The discrete time behaviour is specified by %DiscreteTransition
- * objects. 
- * Each discrete transition represents an jump from a \a source
- * mode to a \a destination mode. 
- * There can be at most one discrete transition in an automaton
- * with the same event_id and source_id.
- */
-template< class R >
-class HybridAutomaton
-{
- public:
-  typedef R real_type;
- 
-  typedef typename std::set< DiscreteTransition<R> >::const_iterator discrete_transition_iterator;
-  typedef typename std::set< DiscreteMode<R> >::const_iterator discrete_mode_iterator;
- private: 
-  static std::list<std::string> system_names;
-  
- protected:
-  /*! \brief The hybrid automaton's name. */
-  std::string _name;
-  
-  /*! \brief The hybrid automaton's identificator. */
-  id_type _id;
-  
-  /*! \brief The list of the hybrid automaton's discrete modes. */
-  std::set< DiscreteMode<R> > _modes;
-  
-  /*! \brief The hybrid automaton's transitions. */
-  std::set< DiscreteTransition<R> > _transitions;
-  
- public:
-  
-  /*! \brief This is a hybrid automaton class constructor.
-   *  
-   * This constructor initializes the object of the
-   * hybrid automaton class.
-   * \param name is the name of the hybrid automaton.
-   */
-  HybridAutomaton(const std::string &name);
-  
-  /*! \brief  This is the destructor of the class hybrid 
-   * automaton.
-   *
-   * This destructor deletes in a safe way an object of the
-   * hybrid automaton class.
-   */
-  ~HybridAutomaton();
-  
-  /*! \brief Adds a discrete mode.
-   *
-   * This method adds a discrete mode to automaton definition.
-   * \param id is the unique key or identifyer of the discrete mode.
-   * \param dynamic is the discrete mode's vector field.
-   * \param invariant is the discrete mode's invariant.
-   */
-  const DiscreteMode<R>& new_mode(id_type id,
-                                  const VectorFieldInterface<R>& dynamic,
-                                  const Geometry::SetInterface<R>& invariant);
+    /*! \brief A discrete mode of a HybridAutomaton. */    
+    template<class R>
+    class DiscreteMode {
+      friend class HybridAutomaton<R>;
+      typedef typename boost::shared_ptr< const Geometry::ConstraintInterface<R> > constraint_const_pointer;
+     public:
+      id_type id() const;
+      dimension_type dimension() const;
+      const VectorFieldInterface<R>& dynamic() const;
+      const DiscreteTransition<R>& transition(id_type event_id) const;
+      const reference_set< const DiscreteTransition<R> >& transitions() const;
+      std::ostream& write(std::ostream& os) const;
+     private:
+      DiscreteMode(id_type id, const VectorFieldInterface<R>& dynamic);
+      id_type _id;
+      boost::shared_ptr< const VectorFieldInterface<R> > _dynamic;
+      std::map< id_type, boost::shared_ptr< const Geometry::ConstraintInterface<R> > > _invariants;
+      std::map< id_type, boost::shared_ptr< const Geometry::ConstraintInterface<R> > > _guards;
+      std::map< id_type, boost::shared_ptr< const Geometry::ConstraintInterface<R> > > _activations;
+      reference_data_map< id_type, const Geometry::ConstraintInterface<R> > _constraints;
+      reference_set< const DiscreteTransition<R> > _transitions;
+    };
+      
+    template<class R>
+    bool operator<(const DiscreteMode<R>& dm1, const DiscreteMode<R>& dm2);
+
+
+
+    /*! \brief A discrete transition of a HybridAutomaton. */
+    template<class R>
+    class DiscreteTransition {
+      friend class HybridAutomaton<R>;
+      typedef typename boost::shared_ptr< const Geometry::ConstraintInterface<R> > constraint_const_pointer;
+     public:
+      id_type id() const;
+      id_type source_id() const;
+      id_type destination_id() const;
+      const DiscreteMode<R>& source() const;   
+      const DiscreteMode<R>& destination() const;
+      const System::MapInterface<R>& reset() const;
+      const Geometry::ConstraintInterface<R>& constraint() const;
+      EventKind kind() const;
+      bool forced() const;
+      std::ostream& write(std::ostream& os) const;
+    private:
+      DiscreteTransition(id_type id, const DiscreteMode<R>& source, const Geometry::ConstraintInterface<R>& activation);
+      DiscreteTransition(id_type id, const DiscreteMode<R>& source, const DiscreteMode<R>& destination,
+                                   const System::MapInterface<R>& reset, const Geometry::ConstraintInterface<R>& activation, bool forced);
+      id_type _event_id;
+      const DiscreteMode<R>* _source;   
+      const DiscreteMode<R>* _destination;
+      boost::shared_ptr< const System::MapInterface<R> > _reset;  
+      boost::shared_ptr< const Geometry::ConstraintInterface<R> > _constraint;
+      EventKind _event_kind;
+    };
     
-  /*! \brief Add a discrete transition.
-   *
-   * This method creates a new discrete transition from the source mode to the 
-   * destination mode.
-   * \param event_id is the unique identifyer of the discrete event. 
-   * \param source is the discrete transition's source.
-   * \param destination is the discrete transition's destination.
-   * \param reset is the discrete transition's reset.
-   * \param activation is the discrete transition's activation region.
-   */
-  const DiscreteTransition<R>& new_transition(id_type event_id,
-                                              const DiscreteMode<R> &source, 
-                                              const DiscreteMode<R> &destination,
-                                              const MapInterface<R> &reset,
-                                              const Geometry::SetInterface<R> &activation);
-  
-  /*! \brief Adds a discrete transition.
-   *
-   * This method creates a new discrete transition from the mode with  mode to the 
-   * destination mode.
-   * \param event_id is the identifier of the discrete transition's event.
-   * \param source_id is the identifier of the discrete transition's source mode.
-   * \param destination_id is the identifier of the discrete transition's destination mode.
-   * \param reset is the discrete transition's reset.
-   * \param activation is the discrete transition's activation region.
-   */
-  const DiscreteTransition<R>& new_transition(id_type event_id,
-                                              id_type source_id, 
-                                              id_type destination_id,
-                                              const MapInterface<R> &reset,
-                                              const Geometry::SetInterface<R> &activation);
-  
-  /*! \brief Test if the hybrid automaton has a discrete mode with key id. */
-  bool has_mode(id_type id) const;
-  
-  /*! \brief Test if the hybrid automaton has a discrete transition with \a event_id and \a source_id. */
-  bool has_transition(id_type event_id, id_type source_id) const;
-  
-  /*! \brief A set giving the dimension of the state space for each location identifier. */
-  Geometry::HybridSpace locations() const;
-  
-  /*! \brief The hybrid set giving the invariant for each discrete location. */
-  Geometry::HybridSet<R> invariant() const;
-  
-  /*! \brief The set of discrete modes. */
-  const std::set< DiscreteMode<R> >& modes() const;
-  
-  /*! \brief The discrete mode with given id. */
-  const DiscreteMode<R>& mode(id_type id) const;
-  
-  /*! \brief The set of discrete transitions. */
-  const std::set< DiscreteTransition<R> >& transitions() const;
-  
-  /*! \brief The discrete transition with given \a event_id and \a source id. */
-  const DiscreteTransition<R>& transition(id_type event_id, id_type source_id) const;
-  
-  /*! \brief Returns the hybrid automaton's name. */
-  const std::string &name() const;
-  
-  std::ostream& write(std::ostream& os) const;
-};
+    template<class R>
+    bool operator<(const DiscreteTransition<R>& dt1, const DiscreteTransition<R>& dt2);
+ 
 
-template<class R> inline 
-std::ostream& operator<<(std::ostream& os, const HybridAutomaton<R>& ha) {
-  return ha.write(os);
-}
+  
+    /*! \ingroup HybridTime
+     *  \brief A hybrid automaton, comprising continuous-time behaviour
+     *  at each discrete mode (DiscreteMode), coupled by instantaneous transitions (DiscreteTransition).
+     *  The state space is given by a Geometry::HybridSet.  
+     *
+     * A hybrid automaton is a dynamic system with evolution in both
+     * continuous time and discrete time. 
+     * The state space is a product \f$X=\bigcup\{q\}\times X_q\f$
+     * where \f$q\f$ is the <em>discrete state</em> and \f$X_q\f$
+     * is the <em>continuous state space</em> of corresponding to
+     * each discrete state.
+     *
+     * For each %DiscreteMode, the dynamics is given by a 
+     * %VectorFieldInterface describing the continuous dynamics,
+     * and a %Set giving an invariant which must be satisified at
+     * all times.
+     *
+     * The discrete time behaviour is specified by %DiscreteTransition
+     * objects. 
+     * Each discrete transition represents an jump from a \a source
+     * mode to a \a destination mode. 
+     * There can be at most one discrete transition in an automaton
+     * with the same event_id and source_id.
+     */
+    template< class R >
+    class HybridAutomaton
+    {
+     public:
+      typedef R real_type;
+      typedef DiscreteMode<R> mode_type;
+      typedef DiscreteTransition<R> transition_type;
 
-template< class R>
-void dot_print(const HybridAutomaton< R >& A);
+      typedef typename std::set< mode_type >::iterator discrete_mode_iterator;
+      typedef typename std::set< mode_type >::const_iterator discrete_mode_const_iterator;
+      typedef typename std::set< transition_type >::const_iterator discrete_transition_const_iterator;
+      
+      typedef typename boost::shared_ptr< const Geometry::ConstraintInterface<R> > constraint_const_pointer;
+      typedef typename boost::shared_ptr< const System::MapInterface<R> > map_const_pointer;
+      typedef typename boost::shared_ptr< const System::VectorFieldInterface<R> > vector_field_const_pointer;
+      typedef const Geometry::ConstraintInterface<R>& constraint_const_reference;
+  
+     private:
+      /*! \brief The name of the hybrid automaton. */
+      std::string _name;
 
-}
+      /*! \brief The list of the hybrid automaton's discrete modes. */
+      std::set< mode_type > _modes;
+      
+      /*! \brief The hybrid automaton's transitions. */
+      std::set< transition_type > _transitions;
+
+     public:
+      //@{
+      //! \name Constructors and destructors
+      /*! \brief This is a hybrid automaton class constructor.
+       *  
+       * This constructor initializes the object of the
+       * hybrid automaton class.
+       * \param name is the name of the hybrid automaton.
+       */
+      HybridAutomaton(const std::string &name);
+      
+      /*! \brief  This is the destructor of the class hybrid 
+       * automaton.
+       *
+       * This destructor deletes in a safe way an object of the
+       * hybrid automaton class.
+       */
+      ~HybridAutomaton();
+      //@}
+      
+      //@{
+      //! \name Methods for adding new objects
+      /*! \brief Adds a new dynamic to the automaton.
+       * This method does not introduce a new discrete mode.
+       */
+     const System::VectorFieldInterface<R>&  new_dynamic(id_type id, const System::VectorFieldInterface<R>& dynamic);
+      
+      /*! \brief Adds a new reset function to the automaton.
+       * This method does not introduce a new discrete transition.
+       */
+      const System::MapInterface<R>& new_reset(id_type id, const System::MapInterface<R>& reset);
+      
+      /*! \brief Adds a new reset function to the automaton.
+       * This method does not introduce a new discrete transition.
+       */
+      const Geometry::ConstraintInterface<R>& new_constraint(id_type id, const Geometry::ConstraintInterface<R>& constraint);
+
+      /*! \brief Adds a new domain set to the automaton.
+       * This method does not introduce a new invariant or discrete transition.
+       */
+      const Geometry::SetInterface<R>& new_domain(id_type id, const Geometry::SetInterface<R>& domain);
+      //@}
+      
+      //@{
+      //! \name Methods for adding new modes and transitions based on existing objects.
+      /*! \brief Adds a new mode to the automaton with the given dynamic. */
+      const mode_type& new_mode(id_type mode_id, id_type dynamic_id);
+      /*! \brief Adds a new invariant to the automaton with the given event, mode and constraint. */
+      const transition_type& new_invariant(id_type event_id, id_type mode_id, id_type constraint_id);
+      /*! \brief Adds a new transition to the automaton with the given event, mode, reset and constraint, which may be forced or unforced. */
+      const transition_type& new_transition(id_type event_id, id_type source_id, id_type destination_id, id_type reset_id, id_type constraint_id, bool forced);
+      /*! \brief Adds a new force transition to the automaton with the given event, mode, reset and constraint. */
+      const transition_type& new_forced_transition(id_type event_id, id_type source_id, id_type destination_id, id_type reset_id, id_type constraint_id);
+      /*! \brief Adds a new force transition to the automaton with the given event, mode, reset and constraint. */
+      const transition_type& new_unforced_transition(id_type event_id, id_type source_id, id_type destination_id, id_type reset_id, id_type constraint_id);
+      //@}
+
+      //@{
+      //! \name Methods for building the hybrid automaton
+      
+      /*! \brief Adds a discrete mode with a given dynamic but no constraints.
+       *
+       * This method adds a discrete mode to automaton definition.
+       * \param id is the unique key or identifier of the discrete mode.
+       * \param dynamic is the discrete mode's vector field.
+       */
+      const mode_type& new_mode(id_type id,
+                                const System::VectorFieldInterface<R>& dynamic);
+      
+      /*! \brief Adds an invariant to a discrete mode.
+       *
+       * This method adds an invariant constraint to a discrete mode of a hybrid automaton.
+       * \param event_id is the unique key or identifier of the discrete mode.
+       * \param mode_id is the unique key or identifier of the discrete mode.
+       * \param constraint is the constraint of the invariant.
+       */
+      const transition_type& new_invariant(id_type event_id,
+                                           id_type mode_id, 
+                                           const Geometry::ConstraintInterface<R>& constraint);
+      
+      
+      /*! \brief Adds a discrete-time reset with a given event, source mode and destination mode.
+       *
+       * This method creates a new discrete transition from the mode with  mode to the 
+       * destination mode.
+       * \param event_id is the identifier of the discrete transition's event.
+       * \param source_id is the identifier of the discrete transition's source mode.
+       * \param destination_id is the identifier of the discrete transition's destination mode.
+       * \param reset is the discrete transition's reset.
+       * \param constraint is the discrete transition's activating constraint. The constraint is activated when the activation value is positive.
+       * \param forced is \a true if the transition is forced to occur whenever the constraint is violated.
+       */
+      const transition_type& new_transition(id_type event_id,
+                                            id_type source_id, 
+                                            id_type destination_id,
+                                            const System::MapInterface<R>& reset,
+                                            const Geometry::ConstraintInterface<R>& constraint,
+                                            bool forced);
+      
+      /*! \brief Adds a discrete-time reset with a given event, source mode and destination mode..
+       *
+       * This method creates a new discrete transition from the mode with  mode to the 
+       * destination mode.
+       * \param event_id is the identifier of the discrete transition's event.
+       * \param source_id is the identifier of the discrete transition's source mode.
+       * \param destination_id is the identifier of the discrete transition's destination mode.
+       * \param reset is the discrete transition's reset.
+       * \param activation is the discrete transition's activating constraint. The constraint is activated when the activation value is positive.
+       */
+      const transition_type& new_unforced_transition(id_type event_id,
+                                                     id_type source_id, 
+                                                     id_type destination_id,
+                                                     const System::MapInterface<R>& reset,
+                                                     const Geometry::ConstraintInterface<R>& activation);
+
+      /*! \brief Adds a discrete-time reset with a given event, source mode and destination mode..
+       *
+       * This method creates a new discrete transition from the mode with  mode to the 
+       * destination mode.
+       * \param event_id is the identifier of the discrete transition's event.
+       * \param source_id is the identifier of the discrete transition's source mode.
+       * \param destination_id is the identifier of the discrete transition's destination mode.
+       * \param reset is the discrete transition's reset.
+       * \param activation is the discrete transition's guard constraint. The transition is activated when the guard value is positive.
+       */
+      const transition_type& new_forced_transition(id_type event_id,
+                                                   id_type source_id, 
+                                                   id_type destination_id,
+                                                   const System::MapInterface<R>& reset,
+                                                   const Geometry::ConstraintInterface<R>& guard);
+      
+      //@}
+      
+      //@{
+      //! \name Methods for building the hybrid automaton using invariant and activation sets instead of constraints.
+      
+      /*! \brief Adds a discrete mode.
+       *
+       * This method adds a discrete mode to automaton definition.
+       * \param id is the unique key or identifyer of the discrete mode.
+       * \param dynamic is the discrete mode's vector field.
+       * \param invariant is the discrete mode's invariant.
+       */
+      const DiscreteMode<R>& new_mode(id_type id,
+                                      const System::VectorFieldInterface<R>& dynamic,
+                                      const Geometry::SetInterface<R>& invariant);
+      
+      /*! \brief Add a discrete transition. (%Deprecated)
+       *
+       * This method creates a new discrete transition from the source mode to the 
+       * destination mode.
+       * \param event_id is the unique identifyer of the discrete event. 
+       * \param source is the discrete transition's source.
+       * \param destination is the discrete transition's destination.
+       * \param reset is the discrete transition's reset.
+       * \param activation is the discrete transition's activation region.
+       */
+      const DiscreteTransition<R>& new_transition(id_type event_id,
+                                                  const DiscreteMode<R>& source, 
+                                                  const DiscreteMode<R>& destination,
+                                                  const System::MapInterface<R>& reset,
+                                                  const Geometry::SetInterface<R>& activation);
+     /*! \brief Adds a discrete transition.
+      *
+      * This method creates a new discrete transition from the mode with  mode to the 
+      * destination mode.
+      * \param event_id is the identifier of the discrete transition's event.
+      * \param source_id is the identifier of the discrete transition's source mode.
+      * \param destination_id is the identifier of the discrete transition's destination mode.
+      * \param reset is the discrete transition's reset.
+      * \param activation is the discrete transition's activation region.
+      */
+      const DiscreteTransition<R>& new_transition(id_type event_id,
+                                                  id_type source_id, 
+                                                  id_type destination_id,
+                                                  const System::MapInterface<R>& reset,
+                                                  const Geometry::SetInterface<R>& activation);
+      //@}
+
+      //@{
+      //! \name Data access
+      /*! \brief Test if the hybrid automaton has a discrete mode with key id. */
+      bool has_mode(id_type id) const;
+      
+      /*! \brief Test if the hybrid automaton has a discrete transition or invariant with \a event_id and \a source_id. */
+      bool has_transition(id_type event_id, id_type source_id) const;
+      
+      /*! \brief A set giving the dimension of the state space for each location identifier. */
+      Geometry::HybridSpace locations() const;
+      
+      /*! \brief The set of discrete modes. */
+      const std::set< mode_type >& modes() const;
+      
+      /*! \brief The discrete mode with given id. */
+      const mode_type& mode(id_type id) const;
+      
+      /*! \brief The set of discrete transitions. */
+      const std::set< transition_type >& transitions() const;
+      /*! \brief The set of discrete transitions with a given \a mode_id. */
+      const reference_set<const transition_type>& transitions(id_type mode_id) const;
+      /*! \brief The discrete transition with given \a event_id and \a source id. */
+      const transition_type& transition(id_type event_id, id_type source_id) const;
+      
+      /*! \brief Returns the hybrid automaton's name. */
+      const std::string& name() const;
+      //@}
+
+      //@{
+      //! \name Output methods.
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream& os) const;  
+      //@}
+     private:
+      /* The discrete mode with given id. */
+      mode_type& _mode(id_type id);
+    };
+
+
+
+
+    template<class R> inline
+    bool operator<(const DiscreteMode<R>& dm1, const DiscreteMode<R>& dm2) {
+      return dm1.id() < dm2.id();
+    }
+
+
+    template<class R> inline
+    bool operator<(const DiscreteTransition<R>& dt1, const DiscreteTransition<R>& dt2) {
+      return dt1.id() < dt2.id() or (dt1.id()==dt2.id() and dt1.source_id()<dt2.source_id());
+    }
+
+
+    template<class R> inline 
+    std::ostream& operator<<(std::ostream& os, const DiscreteMode<R>& dm) {
+      return dm.write(os);
+    }
+
+    template<class R> inline 
+    std::ostream& operator<<(std::ostream& os, const DiscreteTransition<R>& dt) {
+      return dt.write(os);
+    }
+
+    template<class R> inline 
+    std::ostream& operator<<(std::ostream& os, const HybridAutomaton<R>& ha) {
+      return ha.write(os);
+    }
+
+  }
 }
 
 #endif /* ARIADNE_HYBRID_AUTOMATON_H */

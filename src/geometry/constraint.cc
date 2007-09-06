@@ -24,8 +24,16 @@
 
 #include "numeric/float.h"
 
+#include "geometry/constraint_interface.h"
+
 #include "geometry/constraint.h"
 #include "geometry/constraint.code.h"
+
+#include "geometry/linear_constraint.h"
+#include "geometry/linear_constraint.code.h"
+
+#include "geometry/set_constraint.h"
+#include "geometry/set_constraint.code.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -36,12 +44,14 @@ namespace Ariadne {
     template class ConstraintInterface<Float64>;
     template class Constraint<Float64>;
     template class LinearConstraint<Float64>;
+    template class SetConstraint<Float64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
     template class ConstraintInterface<FloatMP>;
-    template class LinearConstraint<FloatMP>;
     template class Constraint<FloatMP>;
+    template class LinearConstraint<FloatMP>;
+    template class SetConstraint<FloatMP>;
 #endif
 
   }

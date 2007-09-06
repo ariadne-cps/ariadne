@@ -22,6 +22,24 @@
  */
  
 
+namespace {
+ 
+template<class R> inline 
+Ariadne::tribool 
+compare_zero(const Ariadne::Numeric::Interval<R>& ivl, 
+             Ariadne::Geometry::Comparison cmp) 
+{
+  if(ivl.upper()<0) {
+    return (cmp==Ariadne::Geometry::less);
+  } else if(ivl.lower()>0) {
+    return (cmp==Ariadne::Geometry::greater);
+  } else {
+    return Ariadne::indeterminate;
+  }
+}
+
+}
+
 namespace Ariadne {
   
   template<class R> inline

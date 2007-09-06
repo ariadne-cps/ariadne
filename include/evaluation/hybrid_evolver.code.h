@@ -1,8 +1,8 @@
 /***************************************************************************
- *            hybrid_evolver.code.h
+ *            constraint_hybrid_evolver.code.h
  *
- *  Copyright  2004-7  Alberto Casagrande,  Pieter Collins
- *  casagrande@dimi.uniud.it  Pieter.Collins@cwi.nl
+ *  Copyright  2007  Pieter Collins
+ *  Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,60 +21,163 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include <vector>
+
 #include "../geometry/rectangle_expression.h"
 #include "../geometry/set_interface.h"
 #include "../geometry/hybrid_set.h"
+#include "../geometry/timed_set.h"
+#include "../system/map.h"
+#include "../system/vector_field.h"
 #include "../system/hybrid_automaton.h"
 #include "../evaluation/applicator.h"
 #include "../evaluation/integrator.h"
+
+#include "../evaluation/lohner_integrator.h"
+#include "../evaluation/hybrid_evolver_plugin.h"
 
 #include "../output/epsstream.h"
 #include "../output/logging.h"
 
 #include "hybrid_evolver.h"
 
+
+namespace {
+
+using namespace Ariadne;
+
+template<class V, class Iter> inline
+void append(V& v, Iter begin, Iter end) 
+{
+  for(;begin!=end;++begin) {
+    v.push_back(*begin);
+  }
+}
+
+template<class V, class C> inline
+void append(V& v, const C& c) 
+{
+  for(typename C::const_iterator iter=c.begin(); iter!=c.end(); ++iter) {
+    v.push_back(*iter);
+  }
+}
+
+
+} 
+
+
+
 namespace Ariadne {
  
 namespace Evaluation { static int& verbosity = hybrid_evolver_verbosity; }
 
-namespace Evaluation {
-
-  template<class SetInterface> 
-  class HybridTimedSet 
-  {
-   public:
-    HybridTimedSet(const time_type& t, const id_type& id, const SetInterface& s)
-      : _time(t), _discrete_state(id), _continuous_state_set(s) { }
-    const time_type& time() const { return _time; }
-    const id_type& discrete_state() const { return _discrete_state; }
-    const SetInterface& continuous_state_set() const { return _continuous_state_set; } 
-    
-    bool operator==(const HybridTimedSet& other) const { 
-      return this->_time == other._time 
-        && this->_discrete_state==other._discrete_state 
-        && this->_continuous_state_set==other._continuous_state_set; }
-    bool operator!=(const HybridTimedSet& other) const { return !(*this==other); }
-    bool operator<=(const HybridTimedSet& other) const { return this->_time <= other._time; }
-   private:
-    time_type _time;
-    id_type _discrete_state;
-    SetInterface _continuous_state_set;
-  };
-
-}
-
+using namespace Numeric;
+using namespace LinearAlgebra;
+using namespace Geometry;
+using namespace System;
 
 template<class R>
 Evaluation::HybridEvolver<R>::~HybridEvolver()
 {
-  delete this->_applicator;
-  delete this->_integrator;
+  delete this->_plugin;
 }
+
 
 template<class R>
 Evaluation::HybridEvolver<R>::HybridEvolver(Applicator<R>& a, Integrator<R>& i)
-  : _applicator(a.clone()), _integrator(i.clone()) 
+  : _plugin(new HybridEvolverPlugin<R>(a,i))
 {
+}
+
+template<class R>
+Evaluation::HybridEvolver<R>::HybridEvolver(const HybridEvolver<R>& evolver)
+  :_plugin(evolver._plugin)
+{
+}
+
+
+
+template<class R>
+const std::vector<typename Evaluation::HybridEvolver<R>::timed_set_type>&
+Evaluation::HybridEvolver<R>::trace() const
+{
+  return this->_trace;
+}
+
+
+template<class R>
+time_type
+Evaluation::HybridEvolver<R>::maximum_step_size() const
+{
+  return this->_plugin->_integrator->maximum_step_size();
+}
+
+
+template<class R>
+R
+Evaluation::HybridEvolver<R>::maximum_basic_set_radius() const
+{
+  return this->_plugin->_integrator->maximum_basic_set_radius();
+}
+
+
+template<class R>
+time_type
+Evaluation::HybridEvolver<R>::lock_to_grid_time() const
+{
+  return this->_plugin->_integrator->lock_to_grid_time();
+}
+
+
+
+template<class R> 
+typename Evaluation::HybridEvolver<R>::working_sets_type
+Evaluation::HybridEvolver<R>::_compute_working_sets(const hybrid_list_set_type& set) const
+{
+  working_sets_type working_sets;
+  /*
+  for(typename hybrid_list_set_type::const_iterator iter=set.begin();
+      iter!=set.end(); ++iter)
+  {
+    id_type loc_id=iter->discrete_state();
+    std::cerr << "loc_id=" << loc_id << std::endl;
+    const continuous_basic_set_type& bs=iter->continuous_state_set();
+    std::cerr << "bs=" << bs << std::endl;
+    timed_set_type timed_set(Rational(0),Integer(0),loc_id,bs);
+    std::cerr << "ts=" << timed_set << std::endl;
+    working_sets.push_back(timed_set);
+    std::cerr << "working_sets.size()=" << working_sets.size() << std::endl;
+  }
+  */
+  for(typename hybrid_list_set_type::locations_const_iterator loc_iter=set.locations_begin();
+      loc_iter!=set.locations_end(); ++loc_iter)
+  {
+    id_type loc_id=loc_iter->first;
+    for(typename ListSet<Zonotope<I> >::const_iterator set_iter=loc_iter->second.begin();
+        set_iter!=loc_iter->second.end(); ++set_iter)
+    {
+      const continuous_basic_set_type& bs=*set_iter;
+      timed_set_type timed_set(Rational(0),Integer(0),loc_id,bs);
+      working_sets.push_back(timed_set);
+    }
+  }
+
+  return working_sets;
+}
+
+
+template<class R> inline
+typename Evaluation::HybridEvolver<R>::hybrid_list_set_type
+Evaluation::HybridEvolver<R>::_compute_list_set(const working_sets_type& working_sets, const HybridSpace& locations) const
+{
+  hybrid_list_set_type result_set(locations);
+  for(typename working_sets_type::const_iterator iter=working_sets.begin();
+      iter!=working_sets.end(); ++iter)
+  {
+    result_set.adjoin(hybrid_basic_set_type(iter->discrete_state(),iter->continuous_state_set()));
+  }
+
+    return result_set;
 }
 
 
@@ -82,58 +185,19 @@ Evaluation::HybridEvolver<R>::HybridEvolver(Applicator<R>& a, Integrator<R>& i)
 
 
 template<class R>
-Geometry::HybridSet<R> 
+Geometry::HybridSet<R>
 Evaluation::HybridEvolver<R>::discrete_step(const System::HybridAutomaton<R>& automaton, 
-                                            const Geometry::HybridSet<R>& initial_set)
+                                            const Geometry::HybridSet<R>& initial_set) const
 {
-  ARIADNE_LOG(2,"HybridSet HybridEvolver::discrete_step(HybridAutomaton automaton, HybridSet initial_set)\n");
-  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
-  if(automaton.locations()!=initial_set.locations()) {
-    throw std::runtime_error("HybridEvolver::discrete_step(HybridAutomaton,HybridSet): initial_set locations do not match hybrid_automaton modes");
-  }
-  ARIADNE_CHECK_BOUNDED(initial_set,"HybridEvolver::discrete_step(HybridAutomaton automaton, HybridSet initial_set)");
-
-  typedef Geometry::HybridSpace::const_iterator locations_iterator;
-
-  Geometry::HybridSpace locations=automaton.locations();
-  R grid_separation=this->_applicator->grid_size();
-
-  Geometry::HybridGridMaskSet<R> grid_initial_set;
-  for(locations_iterator loc_iter=locations.begin(); loc_iter!=locations.end(); ++loc_iter) {
-    id_type id=loc_iter->id();
-    dimension_type dim=loc_iter->dimension();
-    Geometry::Grid<R> grid(LinearAlgebra::Vector<R>(dim,grid_separation));
-    Geometry::Rectangle<R> bounding_box=initial_set[id].bounding_box();
-    Geometry::FiniteGrid<R> finite_grid(grid,bounding_box);
-    grid_initial_set.new_location(id,finite_grid);
-    grid_initial_set[id].adjoin_outer_approximation(initial_set[id]);
-  }
-  Geometry::HybridGridMaskSet<R> grid_result=discrete_step(automaton,grid_initial_set);
-  Geometry::HybridDenotableSet< Geometry::GridMaskSet<R> >& grid_base_result(grid_result);
-  Geometry::HybridSet<R> result(grid_base_result);
-  return result;
+  throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 
 template<class R>
-Geometry::HybridSet<R> 
+Geometry::HybridSet<R>
 Evaluation::HybridEvolver<R>::continuous_chainreach(const System::HybridAutomaton<R>& automaton, 
-                                                    const Geometry::HybridSet<R>& initial_set,
-                                                    const Geometry::HybridSet<R>& bounding_set)
-{
-  ARIADNE_LOG(2,"HybridSet HybridEvolver::continuous_chainreach(HybridAutomaton automaton, HybridSet initial_set, HybridSet bounding_set)\n");
-  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n"<<"bounding_set="<<bounding_set<<"\n");
-  throw NotImplemented(__PRETTY_FUNCTION__);
-}
-
-
-template<class R>
-Geometry::HybridSet<R> 
-Evaluation::HybridEvolver<R>::lower_reach(const System::HybridAutomaton<R>&, 
-                                                   const Geometry::HybridSet<R>&, 
-                                                   time_type t1, 
-                                                   time_type t2, 
-                                                   size_type nmax)
+                                                    const Geometry::HybridSet<R>& initial_set, 
+                                                    const Geometry::HybridSet<R>& bounding_set) const
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -141,299 +205,64 @@ Evaluation::HybridEvolver<R>::lower_reach(const System::HybridAutomaton<R>&,
 
 template<class R>
 Geometry::HybridSet<R> 
-Evaluation::HybridEvolver<R>::upper_reach(const System::HybridAutomaton<R>& hybrid_automaton, 
-                                                   const Geometry::HybridSet<R>& intial_set, 
-                                                   time_type t1, 
-                                                   time_type t2, 
-                                                   size_type nmax)
+Evaluation::HybridEvolver<R>::lower_evolve(const System::HybridAutomaton<R>& automaton, 
+                                           const Geometry::HybridSet<R>&,
+                                           time_type evolution_time,
+                                           size_type maximum_number_of_events) const
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
-
+      
 
 template<class R>
 Geometry::HybridSet<R> 
+Evaluation::HybridEvolver<R>::upper_evolve(const System::HybridAutomaton<R>& automaton, 
+                                           const Geometry::HybridSet<R>&,
+                                           time_type evolution_time,
+                                           size_type maximum_number_of_events) const
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+      
+
+template<class R>
+Geometry::HybridSet<R> 
+Evaluation::HybridEvolver<R>::lower_reach(const System::HybridAutomaton<R>& automaton, 
+                                          const Geometry::HybridSet<R>&,
+                                          time_type initial_time, 
+                                          time_type final_time, 
+                                          size_type maximum_number_of_events) const
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+      
+
+template<class R>
+Geometry::HybridSet<R> 
+Evaluation::HybridEvolver<R>::upper_reach(const System::HybridAutomaton<R>& automaton, 
+                                          const Geometry::HybridSet<R>&,
+                                          time_type initial_time, 
+                                          time_type final_time, 
+                                          size_type maximum_number_of_events) const
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+      
+
+template<class R>
+Geometry::HybridSet<R>
 Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<R>& automaton, 
                                          const Geometry::HybridSet<R>& initial_set, 
-                                         const Geometry::HybridSet<R>& bounding_set)
+                                         const Geometry::HybridSet<R>& bounding_set) const
 {
-  using namespace Geometry;
-  ARIADNE_LOG(1,"HybridEvolver::chainreach(HybridAutomaton,HybridSet,HybridSet)"<<std::endl);
-  ARIADNE_LOG(2,"  initial_set="<<initial_set<<"\n  bounding_set="<<bounding_set<<std::endl);
-
-  ARIADNE_CHECK_SAME_LOCATIONS(automaton,initial_set,"HybridEvolver::chainreach(HybridAutomaton,HybridSet,HybridSet)");
-  ARIADNE_CHECK_SAME_LOCATIONS(automaton,bounding_set,"HybridEvolver::chainreach(HybridAutomaton,HybridSet,HybridSet)");
-  ARIADNE_CHECK_BOUNDED(bounding_set,"HybridEvolver::chainreach(HybridAutomaton,HybridSet,HybridSet): bounding_set");
-  ARIADNE_LOG(5,"Checked input"<<std::endl);
-  
-  HybridGridMaskSet<R> grid_bounding_set;
-  HybridGridMaskSet<R> grid_initial_set;
-  
-  for(typename Geometry::HybridSet<R>::locations_const_iterator bs_iter=bounding_set.locations_begin();
-      bs_iter!=bounding_set.locations_end(); ++bs_iter)
-  {
-    id_type id=bs_iter->first;
-    Grid<R> grid(bs_iter->second->dimension(),this->_applicator->grid_size());
-    FiniteGrid<R> fgrid(grid,bs_iter->second->bounding_box());
-    ARIADNE_LOG(5,"Made grid"<<std::endl);
-    grid_bounding_set.new_location(id,fgrid);
-    grid_initial_set.new_location(id,fgrid);
-    grid_bounding_set[id].adjoin_outer_approximation(*bs_iter->second);
-    grid_bounding_set[id].restrict_outer_approximation(automaton.mode(id).invariant());
-    grid_initial_set[id].adjoin_outer_approximation(*bs_iter->second);
-    grid_initial_set[id].restrict_outer_approximation(initial_set[id]);
-  }
-  ARIADNE_LOG(5,"Made cells"<<std::endl);
-
-
-  ARIADNE_LOG(2,"  grid_initial_set="<<grid_initial_set<<"\n  grid_bounding_set="<<grid_bounding_set<<std::endl);
-  HybridGridMaskSet<R> grid_chainreach_set=this->chainreach(automaton,grid_initial_set,grid_bounding_set);
-  ARIADNE_LOG(2,"  grid_chainreach_set="<<grid_chainreach_set<<std::endl);
-  HybridSet<R> chainreach_set(grid_chainreach_set);
-  ARIADNE_LOG(2,"  chainreach_set="<<chainreach_set<<std::endl);
-  return chainreach_set;
+  throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 
 template<class R>
-Geometry::HybridSet<R> 
+Geometry::HybridSet<R>
 Evaluation::HybridEvolver<R>::viable(const System::HybridAutomaton<R>& automaton, 
-                                              const Geometry::HybridSet<R>& bounding_set)
-{
-  throw NotImplemented(__PRETTY_FUNCTION__);
-}
-     
-
-template<class R>
-tribool 
-Evaluation::HybridEvolver<R>::verify(const System::HybridAutomaton<R>& automaton, 
-                                              const Geometry::HybridSet<R>& initial_set, 
-                                              const Geometry::HybridSet<R>& safe_set)
-
-{
-  throw NotImplemented(__PRETTY_FUNCTION__);
-}
-
-
-
-
-
-
-template<class R>
-Geometry::HybridGridMaskSet<R> 
-Evaluation::HybridEvolver<R>::lower_reach(const System::HybridAutomaton<R>&, 
-                                                   const Geometry::HybridGridMaskSet<R>&, 
-                                                   time_type t1, 
-                                                   time_type t2, 
-                                                   size_type nmax)
-{
-  throw NotImplemented(__PRETTY_FUNCTION__);
-}
-
-template<class R>
-Geometry::HybridGridMaskSet<R> 
-Evaluation::HybridEvolver<R>::upper_reach(const System::HybridAutomaton<R>& hybrid_automaton, 
-                                                   const Geometry::HybridGridMaskSet<R>& intial_set, 
-                                                   time_type t1, 
-                                                   time_type t2, 
-                                                   size_type nmax)
-{
-  throw NotImplemented(__PRETTY_FUNCTION__);
-}
-
-
-
-
-template<class R>
-Geometry::HybridGridMaskSet<R> 
-Evaluation::HybridEvolver<R>::_discrete_step(const System::HybridAutomaton<R>& hybrid_automaton, 
-                                             const Geometry::HybridGridMaskSet<R>& initial_set, 
-                                             const Geometry::HybridGridMaskSet<R>& domain_set)
-{
-  Geometry::HybridGridMaskSet<R> result_set(initial_set);
-  result_set.clear();
-  
-  typedef typename System::HybridAutomaton<R>::discrete_transition_iterator discrete_transition_iterator;
-  
-  for(discrete_transition_iterator dt_iter=hybrid_automaton.transitions().begin();
-      dt_iter!=hybrid_automaton.transitions().end(); ++dt_iter)
-  {
-    const System::DiscreteTransition<R>& dt = *dt_iter;
-    const Geometry::GridMaskSet<R>& initial=initial_set[dt.source().id()];
-    Geometry::GridMaskSet<R>& destination=result_set[dt.destination().id()];
-    Geometry::GridCellListSet<R> active=initial;
-    active.restrict_outer_approximation(dt.activation());
-    ARIADNE_LOG(4,"discrete_step of transition "<<dt.id()<<" from mode "<<dt.source().id()<<" to mode "<<dt.destination().id()<<":\n");
-    ARIADNE_LOG(4,"  "<<active.size()<<" activated cells");
-    Geometry::GridCellListSet<R> image=this->_applicator->image(dt.reset(),active,destination.grid());
-    image.unique_sort();
-    ARIADNE_LOG(4,", "<<image.size()<<" cells in image\n");
-    destination.adjoin(image);
-  }
-  return result_set;
-}
-
-
-template<class R>
-Geometry::HybridGridMaskSet<R> 
-Evaluation::HybridEvolver<R>::_continuous_chainreach(const System::HybridAutomaton<R>& hybrid_automaton, 
-                                                     const Geometry::HybridGridMaskSet<R>& initial_set,
-                                                     const Geometry::HybridGridMaskSet<R>& domain_set)
-{
-  Geometry::HybridGridMaskSet<R> result_set(initial_set);
-  
-  typedef typename System::HybridAutomaton<R>::discrete_mode_iterator discrete_mode_iterator;
-  result_set.clear();
-  
-  for(discrete_mode_iterator dm_iter=hybrid_automaton.modes().begin();
-      dm_iter!=hybrid_automaton.modes().end(); ++dm_iter)
-  {
-    const System::DiscreteMode<R>& dm = *dm_iter;
-    const System::VectorFieldInterface<R>& vf = dm.dynamic();
-    const Geometry::GridMaskSet<R>& domain=domain_set[dm.id()];
-    const Geometry::GridMaskSet<R>& initial=initial_set[dm.id()];
-    Geometry::GridMaskSet<R> start=regular_intersection(initial,domain);
-    ARIADNE_LOG(4,"continuous_chainreach in mode "<<dm.id()<<":\n  "<<start.size()<<" initial cells,");
-    result_set[dm.id()].adjoin(this->_integrator->chainreach(vf,start,domain));
-    result_set[dm.id()].restrict(domain);
-    ARIADNE_LOG(4," reached "<<result_set[dm.id()].size()<<" cells\n");
-  }
-  return result_set;
-}
-
-
-template<class R>
-Geometry::HybridGridMaskSet<R> 
-Evaluation::HybridEvolver<R>::discrete_step(const System::HybridAutomaton<R>& hybrid_automaton, 
-                                            const Geometry::HybridGridMaskSet<R>& initial_set)
-{
-  ARIADNE_LOG(2,"HybridGridMaskSet HybridEvolver::discrete_step(HybridAutomaton automaton, HybridGridMaskSet initial_set)\n");
-  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
-  ARIADNE_CHECK_SAME_LOCATIONS(hybrid_automaton,initial_set,"HybridEvolver::discrete_step(HybridAutomaton,HybridGridMaskSet)");
-
-  Geometry::HybridGridMaskSet<R> result_set(initial_set);
-  result_set.clear();
-  
-  typedef typename System::HybridAutomaton<R>::discrete_transition_iterator discrete_transition_iterator;
-  
-  for(discrete_transition_iterator dt_iter=hybrid_automaton.transitions().begin();
-      dt_iter!=hybrid_automaton.transitions().end(); ++dt_iter)
-  {
-    const System::DiscreteTransition<R>& dt = *dt_iter;
-    const Geometry::GridMaskSet<R>& source_set=initial_set[dt.source().id()];
-    Geometry::GridMaskSet<R>& destination_set=result_set[dt.destination().id()];
-    Geometry::GridMaskSet<R> active_cells=source_set;
-    active_cells.restrict_outer_approximation(dt.activation());
-    ARIADNE_LOG(4,"discrete_step of transition "<<dt.id()<<" from mode "<<dt.source().id()<<" to mode "<<dt.destination().id()<<":\n")
-    ARIADNE_LOG(4,"  "<<active_cells.size()<<" activated cells");
-    const Geometry::GridCellListSet<R> image_cells=this->_applicator->image(dt.reset(),active_cells,destination_set.grid());
-    ARIADNE_LOG(4,", "<<image_cells.size()<<" cells in image\n");
-    destination_set.adjoin(image_cells);
-
-  }
-  
-  return result_set;
-}
-
-
-template<class R>
-Geometry::HybridGridMaskSet<R> 
-Evaluation::HybridEvolver<R>::continuous_chainreach(const System::HybridAutomaton<R>& hybrid_automaton, 
-                                                    const Geometry::HybridGridMaskSet<R>& initial_set,
-                                                    const Geometry::HybridGridMaskSet<R>& bounding_set)
-{
-  ARIADNE_LOG(2,"HybridGridMaskSet HybridEvolver::continuous_chainreach(HybridAutomaton automaton, HybridGridMaskSet initial_set, HybridGridMaskSet bounding_set)\n");
-  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n"<<"bounding_set="<<bounding_set<<"\n");
-  ARIADNE_LOG(3,"checking input... ");
-  ARIADNE_CHECK_SAME_LOCATIONS(hybrid_automaton,initial_set,"HybridEvolver::continuous_chainreach(HybridAutomaton,HybridGridMaskSet,HybridGridMaskSet)");
-  ARIADNE_CHECK_SAME_LOCATIONS(hybrid_automaton,bounding_set,"HybridEvolver::continuous_chainreach(HybridAutomaton,HybridGridMaskSet,HybridGridMaskSet)");
-  
-  ARIADNE_CHECK_BOUNDED(bounding_set,"HybridEvolver::continuous_chainreach(HybridAutomaton,HybridGridMaskSet,HybridGridMaskSet): bounding_set");
-  
-  ARIADNE_LOG(3,"successful\n");
-
-  typedef typename System::HybridAutomaton<R>::discrete_mode_iterator discrete_mode_iterator;
-  
-  Geometry::HybridGridMaskSet<R> domain_set(bounding_set);
-  for(discrete_mode_iterator dm_iter=hybrid_automaton.modes().begin();
-      dm_iter!=hybrid_automaton.modes().end(); ++dm_iter)
-  {
-    ARIADNE_LOG(3,"computing domain set in mode "<<dm_iter->id()<<"... invariant="<<dm_iter->invariant()<<"\n");
-    domain_set[dm_iter->id()].restrict_outer_approximation(dm_iter->invariant());
-  }
-  ARIADNE_LOG(3,"domain_set="<<domain_set<<"\n");
-
-  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n"<<"domain_set="<<domain_set<<"\n");
-  return _continuous_chainreach(hybrid_automaton,initial_set,domain_set);
-}
-
-
-
-template<class R>
-Geometry::HybridGridMaskSet<R> 
-Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<R>& hybrid_automaton, 
-                                         const Geometry::HybridGridMaskSet<R>& initial_set, 
-                                         const Geometry::HybridGridMaskSet<R>& bounding_set)
-{
-  using namespace Geometry;
-  ARIADNE_LOG(2,"HybridGridMaskSet HybridEvolver::chainreach(HybridAutomaton automaton, HybridGridMaskSet initial_set, HybridGridMaskSet bounding_set)\n");
-  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n"<<"bounding_set="<<bounding_set<<"\n");
-  ARIADNE_CHECK_SAME_LOCATIONS(hybrid_automaton,initial_set,"HybridEvolver::chainreach(HybridAutomaton,HybridGridMaskSet,HybridGridMaskSet)");
-  ARIADNE_CHECK_SAME_LOCATIONS(hybrid_automaton,bounding_set,"HybridEvolver::chainreach(HybridAutomaton,HybridGridMaskSet,HybridGridMaskSet)");
-  
-  ARIADNE_CHECK_BOUNDED(bounding_set,"HybridEvolver::continuous_chainreach(HybridAutomaton,HybridGridMaskSet,HybridGridMaskSet): bounding_set");
-
-  typedef typename System::HybridAutomaton<R>::discrete_transition_iterator discrete_transition_iterator;
-  typedef typename System::HybridAutomaton<R>::discrete_mode_iterator discrete_mode_iterator;
-  
-  // Compute restricted invariant domains as GridMaskSets
-  Geometry::HybridGridMaskSet<R> domain_set(bounding_set);
-  for(discrete_mode_iterator dm_iter=hybrid_automaton.modes().begin();
-      dm_iter!=hybrid_automaton.modes().end(); ++dm_iter)
-  {
-    domain_set[dm_iter->id()].restrict_outer_approximation(dm_iter->invariant());
-  }
-
-  HybridGridMaskSet<R> result_set=domain_set;
-  HybridGridMaskSet<R> integrated_set=domain_set;
-  integrated_set.clear();
-  result_set.restrict(initial_set);
-  ARIADNE_LOG(4,result_set.size()<<" cells in initial set\n");
-  HybridGridMaskSet<R> found_set=result_set;
-  uint step=0;
-  while(!found_set.empty()) {
-    integrated_set=this->_continuous_chainreach(hybrid_automaton,found_set,domain_set);
-    ARIADNE_LOG(4,"\nchainreach found "<<integrated_set.size()<<" cell by continuous evolution, \n"<<std::endl);
-    if(verbosity>=4) {
-      std::stringstream filename;
-      filename << "hybrid_chainreach-"<<step<<".eps";
-      const GridMaskSet<R>& dom=domain_set.locations_begin()->second;
-      const GridMaskSet<R>& res=result_set.locations_begin()->second;
-      const GridMaskSet<R>& fnd=found_set.locations_begin()->second;
-      Output::epsfstream eps;
-      eps.open(filename.str().c_str(),dom.bounding_box());
-      eps << fill_colour(Output::green) << dom.extent();
-      eps << fill_colour(Output::green) << res;
-      eps << fill_colour(Output::red) << fnd;
-      eps.close();
-    }
-    found_set=this->_discrete_step(hybrid_automaton,integrated_set,domain_set);
-    ARIADNE_LOG(4,"\nchainreach found "<<found_set.size()<<" cells by discrete step");
-    found_set.remove(result_set);
-    ARIADNE_LOG(4," of which "<<found_set.size()<<" are new; ");
-    result_set.adjoin(integrated_set);
-    result_set.adjoin(found_set);
-    ARIADNE_LOG(4,"reached "<<result_set.size()<< " cells in total.\n" << std::endl);
-    ++step;
-  }
-  return result_set;
-}
-
-
-template<class R>
-Geometry::HybridGridMaskSet<R> 
-Evaluation::HybridEvolver<R>::viable(const System::HybridAutomaton<R>& hybrid_automaton, 
-                                              const Geometry::HybridGridMaskSet<R>& bounding_set)
+                                     const Geometry::HybridSet<R>& bounding_set) const
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -441,11 +270,275 @@ Evaluation::HybridEvolver<R>::viable(const System::HybridAutomaton<R>& hybrid_au
 
 template<class R>
 tribool
-Evaluation::HybridEvolver<R>::verify(const System::HybridAutomaton<R>& hybrid_automaton, 
-                                              const Geometry::HybridGridMaskSet<R>& initial_set, 
-                                              const Geometry::HybridGridMaskSet<R>& bounding_set)
+Evaluation::HybridEvolver<R>::verify(const System::HybridAutomaton<R>& automaton, 
+                                     const Geometry::HybridSet<R>& initial_set, 
+                                     const Geometry::HybridSet<R>& sage_set) const
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
+
+
+
+
+template<class R>
+Geometry::HybridListSet<typename Evaluation::HybridEvolver<R>::continuous_basic_set_type> 
+Evaluation::HybridEvolver<R>::upper_evolve(const System::HybridAutomaton<R>& automaton, 
+                                                     const Geometry::HybridListSet<continuous_basic_set_type>& initial_set, 
+                                                     time_type evolution_time,
+                                                     size_type maximum_number_of_events) const
+{
+  ARIADNE_LOG(2,"HybridEvolver::upper_evolve(HybridAutomaton automaton, ListSet initial_set, Time time, Integer maximum_number_of_events)\n");
+  ARIADNE_LOG(3,"initial_set="<<initial_set<<", evolution_time="<<evolution_time<<"\n");
+  
+  // Working sets contains (time,set) pairs, storing the sets reached with different remaining
+  std::vector< timed_set_type > working_sets=this->_compute_working_sets(initial_set);
+  ARIADNE_LOG(5,"working_sets="<<working_sets<<"\n");
+  std::vector< timed_set_type > final_sets;
+  std::vector< timed_set_type >& trace_sets=this->_trace;
+  trace_sets=working_sets;
+
+  while(!working_sets.empty()) {
+    ARIADNE_LOG(9,"working_sets.size()="<<working_sets.size()<<"\n");
+    timed_set_type working_set=working_sets.back(); working_sets.pop_back();
+    ARIADNE_LOG(9,"unregularised_working_set="<<working_set<<"\n");
+    working_set=this->_plugin->regularize(working_set);
+    ARIADNE_LOG(9,"regularised_working_set="<<working_set<<"\n");
+    if(possibly(working_set.time()>evolution_time)) {
+      ARIADNE_LOG(3,"\n  working_set.time()="<<working_set.time());
+      ARIADNE_LOG(3,", evolution_time="<<evolution_time<<"\n\n");
+      ARIADNE_LOG(3,"Warning: evolution time may be exceeded\n\n");
+      final_sets.push_back(working_set);
+    } else {
+      if(working_set.time()==evolution_time) {
+        ARIADNE_LOG(9,"  reached evolution time\n");
+        final_sets.push_back(working_set);
+      } else if(working_set.continuous_state_set().radius()>this->maximum_basic_set_radius()) {
+        ::append(working_sets,this->_plugin->subdivide(working_set));
+      } else {
+        ::append(working_sets,this->_plugin->upper_evolution_step(automaton,working_set,evolution_time));
+        ::append(this->_trace,this->_plugin->trace);
+      }
+    }
+  }
+
+  return this->_compute_list_set(final_sets,automaton.locations());
 }
+
+
+template<class R>
+Geometry::HybridListSet<typename Evaluation::HybridEvolver<R>::continuous_basic_set_type> 
+Evaluation::HybridEvolver<R>::upper_reach(const System::HybridAutomaton<R>& automaton, 
+                                                    const Geometry::HybridListSet<continuous_basic_set_type>& initial_set, 
+                                                    time_type evolution_time, 
+                                                    size_type maximum_number_of_events) const
+{
+  ARIADNE_LOG(2,"HybridEvolver::upper_reach(HybridAutomaton automaton, ListSet initial_set, Time time, Integer maximum_number_of_events)\n");
+  ARIADNE_LOG(3,"initial_set="<<initial_set<<", evolution_time="<<evolution_time<<"\n");
+  ARIADNE_LOG(7,"maximum_step_size="<<this->maximum_step_size()<<", maximum_basic_set_radius="<<this->maximum_basic_set_radius()<<"\n");
+
+  
+  // Working sets contains (time,set) pairs, storing the sets reached with different remaining
+  std::vector< timed_set_type > working_sets=this->_compute_working_sets(initial_set);
+  std::vector< timed_set_type > reached_sets;
+
+  while(!working_sets.empty()) {
+    timed_set_type working_set=working_sets.back(); working_sets.pop_back();
+    if(working_set.time()>=evolution_time) {
+    } else if(working_set.continuous_state_set().radius()>this->maximum_basic_set_radius()) {
+      ::append(working_sets,this->_plugin->subdivide(working_set));
+    } else {
+      ::append(working_sets,this->_plugin->upper_reachability_step(automaton,working_set,evolution_time));
+      // A reachability step returns a list whose final element is the continuous reached set
+      reached_sets.push_back(working_sets.back()); working_sets.pop_back();
+      if(!working_sets.empty()) { std::cout << "evolution step: " << working_sets.back() << std::endl; }
+      if(!reached_sets.empty()) { std::cout << "reach step: " << reached_sets.back() << std::endl; }
+    }
+  }
+
+  return this->_compute_list_set(reached_sets,automaton.locations());
+}
+
+
+
+
+template<class R>
+Geometry::HybridGridCellListSet<R>
+Evaluation::HybridEvolver<R>::upper_evolve(const System::HybridAutomaton<R>& automaton, 
+                                                     const Geometry::HybridGridCell<R>& initial_set, 
+                                                     const Geometry::HybridGrid<R>& hybrid_grid, 
+                                                     time_type evolution_time, 
+                                                     size_type maximum_number_of_events) const
+{
+  HybridGridCellListSet<R> final_set(hybrid_grid);
+  
+  HybridListSet< Zonotope<I> > list_set(automaton.locations());
+  list_set.adjoin(initial_set);
+  
+  list_set=this->upper_evolve(automaton,list_set,evolution_time,maximum_number_of_events);
+  
+  final_set.adjoin_outer_approximation(list_set);
+
+  return final_set;
+}
+
+
+template<class R>
+Geometry::HybridGridCellListSet<R>
+Evaluation::HybridEvolver<R>::upper_reach(const System::HybridAutomaton<R>& automaton, 
+                                                    const Geometry::HybridGridCell<R>& initial_set, 
+                                                    const Geometry::HybridGrid<R>& hybrid_grid, 
+                                                    time_type evolution_time, 
+                                                    size_type maximum_number_of_events) const
+{
+  ARIADNE_LOG(2,"HybridEvolver::upper_reach(HybridAutomaton, HybridGridCell, HybridGrid, Time, Integer)\n");
+  HybridGridCellListSet<R> final_set(hybrid_grid);
+  
+  HybridListSet< Zonotope<I> > list_set(automaton.locations());
+  list_set.adjoin(initial_set);
+  
+  list_set=this->upper_reach(automaton,list_set,evolution_time,maximum_number_of_events);
+  
+  final_set.adjoin_outer_approximation(list_set);
+
+  return final_set;
+}
+
+
+
+template<class R>
+Geometry::HybridGridMaskSet<R>
+Evaluation::HybridEvolver<R>::upper_evolve(const System::HybridAutomaton<R>& automaton, 
+                                                     const Geometry::HybridGridMaskSet<R>& initial_set, 
+                                                     time_type evolution_time, 
+                                                     size_type maximum_number_of_events) const
+{
+  Geometry::HybridGrid<R> hybrid_grid=initial_set.grid();
+  Geometry::HybridGridMaskSet<R> current_set=initial_set;
+  Geometry::HybridGridMaskSet<R> next_set=initial_set;
+  next_set.clear();
+
+  Geometry::HybridGridMultiMap<R> map(initial_set.grid(),initial_set.grid());
+  
+  time_type lock_to_grid_time = this->lock_to_grid_time();
+  size_type evolution_steps = int_up<int>(time_type(evolution_time/lock_to_grid_time));
+  lock_to_grid_time = evolution_time/evolution_steps;
+
+  for(uint i=0; i!=evolution_steps; ++i) {
+    for(typename HybridGridMaskSet<R>::const_iterator cell_iter=current_set.begin();
+        cell_iter!=current_set.end(); ++cell_iter)
+    {
+      //const HybridBasicSet< GridCell<R> >& cell=*cell_iter;
+      HybridGridCell<R> cell=*cell_iter;
+      if(!map.has_key(cell)) {
+        map.set_image(cell,this->upper_evolve(automaton,cell,hybrid_grid,lock_to_grid_time,maximum_number_of_events));
+      }
+      next_set.adjoin(map.image(cell));
+    }
+    current_set=next_set;
+    next_set.clear();
+  }
+
+  return current_set;
+}
+
+
+
+template<class R>
+Geometry::HybridGridMaskSet<R>
+Evaluation::HybridEvolver<R>::upper_reach(const System::HybridAutomaton<R>& automaton, 
+                                                    const Geometry::HybridGridMaskSet<R>& initial_set, 
+                                                    time_type evolution_time, 
+                                                    size_type maximum_number_of_events) const
+{
+  ARIADNE_LOG(2,"HybridEvolver::upper_reach(HybridAutomaton, HybridGridMaskSet, Time, Integer)\n");
+  Geometry::HybridGrid<R> hybrid_grid=initial_set.grid();
+  Geometry::HybridGridMaskSet<R> current_set=initial_set;
+  Geometry::HybridGridMaskSet<R> next_set(current_set);
+  next_set.clear();
+
+  Geometry::HybridGridMultiMap<R> map(initial_set.grid(),initial_set.grid());
+
+  size_type evolution_steps = int_up<int>(time_type(evolution_time/this->lock_to_grid_time()));
+  time_type lock_to_grid_time = evolution_time/evolution_steps;
+
+  for(typename HybridGridMaskSet<R>::const_iterator cell_iter=current_set.begin();
+      cell_iter!=current_set.end(); ++cell_iter)
+  {
+    const HybridGridCell<R>& cell=*cell_iter;
+    next_set.adjoin(this->upper_reach(automaton,cell,hybrid_grid,lock_to_grid_time,maximum_number_of_events));
+  }
+  current_set=next_set;
+  next_set.clear();
+
+  for(uint i=0; i!=evolution_steps-1; ++i) {
+    for(typename HybridGridMaskSet<R>::const_iterator cell_iter=current_set.begin();
+        cell_iter!=current_set.end(); ++cell_iter)
+    {
+      const HybridGridCell<R>& cell=*cell_iter;
+      if(!map.has_key(cell)) {
+        map.set_image(cell,this->upper_evolve(automaton,cell,hybrid_grid,lock_to_grid_time,maximum_number_of_events));
+      }
+      next_set.adjoin(map.image(cell));
+    }
+    current_set.adjoin(next_set);
+    next_set.clear();
+  }
+
+  return current_set;
+}
+
+
+template<class R>
+Geometry::HybridGridMaskSet<R>
+Evaluation::HybridEvolver<R>::viable(const System::HybridAutomaton<R>& automaton, 
+                                     const Geometry::HybridGridMaskSet<R>& bounding_set) const
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+template<class R>
+Geometry::HybridGridMaskSet<R>
+Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<R>& automaton, 
+                                                   const Geometry::HybridGridMaskSet<R>& initial_set, 
+                                                   const Geometry::HybridGridMaskSet<R>& bounding_set) const
+{
+  Geometry::HybridGrid<R> hybrid_grid=initial_set.grid();
+  Geometry::HybridGridMaskSet<R> reach_set=initial_set;
+  Geometry::HybridGridMaskSet<R> current_set=initial_set;
+  Geometry::HybridGridMaskSet<R> found_set=initial_set;
+
+  time_type lock_to_grid_time = this->lock_to_grid_time();
+  size_type maximum_number_of_events = (size_type) -1;
+  
+  for(typename HybridGridMaskSet<R>::const_iterator cell_iter=reach_set.begin();
+      cell_iter!=current_set.end(); ++cell_iter)
+  {
+    const HybridGridCell<R>& cell=*cell_iter;
+    found_set.adjoin(this->upper_reach(automaton,cell,hybrid_grid,lock_to_grid_time,maximum_number_of_events));
+  }
+
+  reach_set=found_set;
+  found_set.remove(reach_set);
+  while(!found_set.empty()) {
+    current_set=found_set;
+    found_set.clear();
+
+    for(typename HybridGridMaskSet<R>::const_iterator cell_iter=current_set.begin();
+        cell_iter!=current_set.end(); ++cell_iter)
+    {
+      const HybridGridCell<R>& cell=*cell_iter;
+      found_set.adjoin(this->upper_evolve(automaton,cell,hybrid_grid,lock_to_grid_time,maximum_number_of_events));
+    }
+
+    found_set.remove(reach_set);
+    reach_set.adjoin(found_set);
+  }
+
+  return reach_set;
+}
+
+
+
+} // namespace Ariadne

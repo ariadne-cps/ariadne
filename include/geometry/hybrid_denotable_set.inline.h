@@ -24,6 +24,7 @@
 #include "../base/stlio.h"
 #include "../geometry/rectangular_set.h"
 #include "../geometry/polyhedral_set.h"
+#include "../geometry/hybrid_space.h"
 
 namespace Ariadne { 
 

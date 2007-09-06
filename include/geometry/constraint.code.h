@@ -32,24 +32,6 @@
 #include "../geometry/polyhedron.h"
 #include "../geometry/zonotope.h"
 
-namespace {
- 
-using namespace Ariadne;
-
-template<class R> inline 
-tribool compare_zero(const Numeric::Interval<R>& ivl, Geometry::Comparison cmp) {
-  if(ivl.upper()<0) {
-    return (cmp==Geometry::less);
-  } else if(ivl.lower()>0) {
-    return (cmp==Geometry::greater);
-  } else {
-    return indeterminate;
-  }
-}
-
-}
-
-
 
 namespace Ariadne {
 
@@ -244,95 +226,6 @@ Geometry::Constraint<R>::instantiate()
   satisfies(*ez,*c);
   satisfies(*r,*ci);
   satisfies(*iz,*ci);
-}
-
-
-
-
-template<class R>
-Geometry::LinearConstraint<R>::~LinearConstraint()
-{
-}
-
-
-template<class R>
-Geometry::LinearConstraint<R>::LinearConstraint(const LinearAlgebra::Vector<R> a, Comparison cmp, const R& b)
-  : _a(a), _b(b), _c(cmp)
-{
-}
-
-
-template<class R>
-Geometry::LinearConstraint<R>* 
-Geometry::LinearConstraint<R>::clone() const
-{
-  return new LinearConstraint<R>(this->_a, this->_c, this->_b);
-}
-
-
-template<class R>
-dimension_type
-Geometry::LinearConstraint<R>::dimension() const 
-{
-  return this->_a.size();
-}
-
-
-template<class R>
-smoothness_type 
-Geometry::LinearConstraint<R>::smoothness() const 
-{
-  return std::numeric_limits<smoothness_type>::max();
-}
-
-
-template<class R>
-Geometry::Comparison
-Geometry::LinearConstraint<R>::comparison() const 
-{
-  return this->_c;
-}
-
-
-template<class R>
-Geometry::Polyhedron<R>
-Geometry::LinearConstraint<R>::polyhedron() const 
-{
-  if(this->_c==less) {
-    return Polyhedron<R>(LinearAlgebra::Matrix<R>(1,this->dimension(),_a.begin()),
-                         LinearAlgebra::Vector<R>(1,&_b));
-  } else {
-    return Polyhedron<R>(-LinearAlgebra::Matrix<R>(1,this->dimension(),_a.begin()),
-                         -LinearAlgebra::Vector<R>(1,&_b));
-  }
-}
-
-
-
-
-
-template<class R>
-std::ostream& 
-Geometry::LinearConstraint<R>::write(std::ostream& os) const
-{
-  //return os << "LinearConstraint( a=" << this->_a << ", b=" << this->_b << ", c='" << (this->_c==less ? "<" : ">") << "' )";
-  return os << this->_a << ".x"<< (this->_c==less ? "<" : ">") << "=" << this->_b;
-}
-
-      
-template<class R>
-typename Geometry::LinearConstraint<R>::A
-Geometry::LinearConstraint<R>::value(const Point<A>& pt) const
-{
-  return LinearAlgebra::inner_product(pt.position_vector(),LinearAlgebra::Vector<A>(this->_a)) - this->_b;
-}
-
-
-template<class R>
-LinearAlgebra::Vector<typename Geometry::LinearConstraint<R>::A>
-Geometry::LinearConstraint<R>::gradient(const Point<A>& pt) const
-{
-  return LinearAlgebra::Vector<A>(this->_a);
 }
 
 

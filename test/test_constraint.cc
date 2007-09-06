@@ -35,6 +35,7 @@
 #include "geometry/rectangle.h"
 #include "geometry/grid_set.h"
 #include "geometry/constraint.h"
+#include "geometry/linear_constraint.h"
 #include "function/function_interface.h"
 #include "function/interpreted_function.h"
 #include "output/epsstream.h"

@@ -1,8 +1,8 @@
 /***************************************************************************
- *            test_constraint_hybrid_automaton.cc
+ *            test_set_based_hybrid_automaton.cc
  *
- *  Copyright  2007  Pieter Collins
- *  Email  Pieter.Collins@cwi.nl
+ *  Copyright  2006-7  Alberto Casagrande,  Pieter Collins
+ *  Email  casagrande@dimi.uniud.it  Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -33,11 +33,9 @@
 #include "geometry/rectangle.h"
 #include "geometry/polyhedron.h"
 #include "geometry/polyhedral_set.h"
-#include "geometry/constraint.h"
 #include "system/affine_map.h"
 #include "system/affine_vector_field.h"
-#include "system/constraint_hybrid_automaton.h"
-#include "output/logging.h"
+#include "system/set_based_hybrid_automaton.h"
 
 #include "test.h"
 
@@ -46,51 +44,45 @@ using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
 using namespace Ariadne::System;
-using namespace Ariadne::Output;
 using namespace std;
 
-template<class R> int test_constraint_hybrid_automaton();
+template<class R> int test_set_based_hybrid_automaton();
   
 int main() {
-  set_system_verbosity(0);
-  return test_constraint_hybrid_automaton<Float>();
+  return test_set_based_hybrid_automaton<Float>();
 }
 
 template<class R>
-int test_constraint_hybrid_automaton() 
+int test_set_based_hybrid_automaton() 
 {
-  Matrix<R> A("[2,1;1,1]");
+  
+  Rectangle<R> r("[-1,1]x[-1,1]");
+  cout << "r=" << r << endl;
 
   AffineVectorField<R> dynamic(Matrix<R>("[-0.25,-1.00;1.00,-0.25]"),Vector<R>("[0.00,0.00]"));
   cout << "dynamic=" << dynamic << endl;
   AffineMap<R> reset(Matrix<R>("[-7,0;0,-7]"),Vector<R>("[0,0]"));
   cout << "reset=" << reset << endl;
   
-  LinearConstraint<R> constraint1(Vector<R>("[1,0]"),Geometry::greater,R(0));
-  LinearConstraint<R> constraint2(Vector<R>("[1,0]"),Geometry::less,R(2));
-  LinearConstraint<R> activation(Vector<R>("[1,0]"),Geometry::greater,R(1));
-  LinearConstraint<R> guard(Vector<R>("[0,1]"),Geometry::greater,R(1));
-
-  ConstraintHybridAutomaton<R> automaton("Affine test automaton");
-  id_type mode1_id=1;
-  id_type mode2_id=2;
-  id_type event0_id=1;
-  id_type event3_id=4;
-  const ConstraintDiscreteMode<R>& mode1=automaton.new_mode(mode1_id,dynamic);
-  const ConstraintDiscreteMode<R>& mode2=automaton.new_mode(mode2_id,dynamic);
-  cout << automaton << endl;
-  automaton.new_invariant(event0_id,mode1_id,constraint1);
-  automaton.new_invariant(event3_id,mode1_id,constraint2);
-  automaton.new_invariant(event0_id,mode2_id,constraint2);
-  cout << automaton << endl;
-  id_type event1_id=2;
-  id_type event2_id=3;
-  const ConstraintDiscreteTransition<R>& transition1=automaton.new_unforced_transition(event1_id,mode1_id,mode1_id,reset,activation);
-  const ConstraintDiscreteTransition<R>& transition2=automaton.new_forced_transition(event2_id,mode1_id,mode1_id,reset,guard);
-  cout << automaton << endl << endl;
+  PolyhedralSet<R> invariant(r);
+  cout << "invariant=" << invariant << endl;
+  PolyhedralSet<R> activation12(Rectangle<R>("[-0.20,0.00]x[-0.20,0.00]"));
+  PolyhedralSet<R> activation21(Rectangle<R>("[0.00,0.20]x[0.00,0.20]"));
+  cout << "activation12=" << activation12 << endl;
+  cout << "activation21=" << activation21 << endl;
+  cout << endl;
   
-  cout << mode1  <<  "\n" << mode2 << "\n" << transition1 << "\n" << transition2 << endl;
-  cout << automaton << endl;
+  SetBasedHybridAutomaton<R> automaton("Affine test automaton");
+  id_type mode1_id=0;
+  id_type mode2_id=1;
+  const SetBasedDiscreteMode<R>& mode1=automaton.new_mode(mode1_id,dynamic,invariant);
+  const SetBasedDiscreteMode<R>& mode2=automaton.new_mode(mode2_id,dynamic,invariant);
+  id_type event_id=5;
+  const SetBasedDiscreteTransition<R>& transition12=automaton.new_transition(event_id,mode1_id,mode2_id,reset,activation12);
+  const SetBasedDiscreteTransition<R>& transition21=automaton.new_transition(event_id,mode2_id,mode1_id,reset,activation21);
+  
+  cout << mode1  <<  "\n" << mode2 << "\n" << transition12 << "\n" << transition21 << endl;
+  cout << automaton.invariant() << endl;
 
   return 0;
 }

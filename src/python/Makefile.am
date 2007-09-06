@@ -80,7 +80,6 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_vector_field.cc \
 	export_affine_vector_field.cc \
 	export_hybrid_automaton.cc \
-	export_constraint_hybrid_automaton.cc \
 	 \
 	export_evaluation_parameters.cc \
 	export_solve.cc \
@@ -95,3 +94,7 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_models.cc
 
 
+#	 \
+#	export_set_based_hybrid_automaton.cc \
+#	export_set_based_hybrid_evolver.cc \
+#

@@ -296,7 +296,7 @@ namespace Ariadne {
      private: 
       static void _instantiate_geometry_operators();
      private:
-      shared_ptr< Grid<R> > _grid_ptr;
+      Base::shared_ptr< Grid<R> > _grid_ptr;
       Combinatoric::LatticeMaskSet _lattice_set;
     };
     

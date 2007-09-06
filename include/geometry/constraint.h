@@ -108,53 +108,6 @@ namespace Ariadne {
     };
     
 
-    /*! \brief A linear inequality constraint. */
-    template<class R>
-    class LinearConstraint
-      : public ConstraintInterface<R>
-    {
-      typedef typename Numeric::traits<R>::arithmetic_type A;
-      typedef typename Numeric::traits<R>::interval_type I;
-     public:
-      /*! \brief Construct the constraint \f$a\cdot x \lessgtr b\f$. */
-      LinearConstraint(const LinearAlgebra::Vector<R> a, Comparison cmp, const R& b);
-
-      /*! \brief Destructor. */
-      virtual ~LinearConstraint();
-      /*! \brief Return a new dynamically-allocated copy of the constraint. */
-      virtual LinearConstraint<R>* clone() const;
-      /*! \brief The dimension of the set. */
-      virtual dimension_type dimension() const;
-      /*! \brief The smoothness of the constraint function. */
-      virtual smoothness_type smoothness() const;
-      /*! \brief The operation used for comparison. */
-      virtual Comparison comparison() const;
-      /*! \brief Write to an output stream. */
-      virtual std::ostream& write(std::ostream& os) const;
-
-      /*! \brief The value at a point. */
-      virtual A value(const Point<A>& pt) const;
-      /*! \brief The gradient at a point. */
-      virtual LinearAlgebra::Vector<A> gradient(const Point<A>& pt) const;
-
-      /*! \brief Convert to a polyhedron. */
-      virtual Polyhedron<R> polyhedron() const;
-     public:
-      /*! \brief Test for equality as reference. */
-      friend bool equal<>(const Constraint<R>& c1, const Constraint<R>& c2);
-      /*! \brief Test for equality as reference, but with different sign. */
-      friend bool opposite<>(const Constraint<R>& c1, const Constraint<R>& c2);
-
-     private:
-      static void instantiate();
-     private:
-      LinearAlgebra::Vector<R> _a;
-      R _b;
-      Comparison _c;
-    };
-
-
-
     template<class R> bool equal(const Constraint<R>& c1, const Constraint<R>& c2);
     template<class R> bool opposite(const Constraint<R>& c1, const Constraint<R>& c2);
 

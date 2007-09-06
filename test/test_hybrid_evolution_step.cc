@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_constraint_hybrid_evolution.cc
+ *            test_hybrid_evolution_step.cc
  *
  *  Copyright  2007  Pieter Collins
  *  Email  Pieter.Collins@cwi.nl
@@ -33,16 +33,17 @@
 #include "geometry/rectangle.h"
 #include "geometry/empty_set.h"
 #include "geometry/polyhedral_set.h"
+#include "geometry/linear_constraint.h"
 #include "system/affine_map.h"
 #include "system/affine_vector_field.h"
 #include "system/hybrid_automaton.h"
-#include "system/constraint_hybrid_automaton.h"
+#include "system/hybrid_automaton.h"
 #include "evaluation/applicator.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
 #include "evaluation/hybrid_evolver.h"
-#include "evaluation/constraint_hybrid_evolver.h"
-#include "evaluation/constraint_hybrid_evolver_plugin.h"
+#include "evaluation/hybrid_evolver.h"
+#include "evaluation/hybrid_evolver_plugin.h"
 #include "output/epsstream.h"
 #include "output/logging.h"
 
@@ -68,7 +69,7 @@ static const id_type event5_id = 5;
 static const id_type event6_id = 6;
   
 template<class R>
-ConstraintHybridEvolverPlugin<R> construct_evolver_plugin() 
+HybridEvolverPlugin<R> construct_evolver_plugin() 
 {
   time_type maximum_step_size=0.125;
   time_type lock_to_grid_time=0.5;
@@ -77,12 +78,12 @@ ConstraintHybridEvolverPlugin<R> construct_evolver_plugin()
   
   Applicator<R> apply(maximum_set_radius,grid_size);
   LohnerIntegrator<R> lohner_integrator(maximum_step_size,lock_to_grid_time,maximum_set_radius); 
-  return ConstraintHybridEvolverPlugin<R>(apply,lohner_integrator);
+  return HybridEvolverPlugin<R>(apply,lohner_integrator);
 }
 
 
 template<class R>
-ConstraintHybridAutomaton<R> construct_automaton() 
+HybridAutomaton<R> construct_automaton() 
 {
     AffineVectorField<R> dynamic1(Matrix<R>("[-0.3,-0.4;0.2,0.2]"),Vector<R>("[2,0.5]"));
     AffineVectorField<R> dynamic2(Matrix<R>("[0,0; 0,0]"),Vector<R>("[0.75,1]"));
@@ -95,7 +96,7 @@ ConstraintHybridAutomaton<R> construct_automaton()
     LinearConstraint<R> activation512(Vector<R>("[0,1]"),Geometry::less,R(2));
     LinearConstraint<R> invariant61(Vector<R>("[0,1]"),Geometry::less,R(2.5));
     
-    ConstraintHybridAutomaton<R> automaton("");
+    HybridAutomaton<R> automaton("");
 
     automaton.new_mode(mode1_id,dynamic1);
     automaton.new_mode(mode2_id,dynamic2);
@@ -114,17 +115,17 @@ ConstraintHybridAutomaton<R> construct_automaton()
 
 
 template<class R>
-class TestConstraintHybridEvolverPlugin
+class TestHybridEvolverPlugin
 {
   typedef Interval<R> I;
   typedef TimeModelHybridBasicSet< Zonotope<I,I> > timed_set_type;
  public:
-  ConstraintHybridAutomaton<R> automaton;
-  ConstraintHybridEvolverPlugin<R> evolver;
+  HybridAutomaton<R> automaton;
+  HybridEvolverPlugin<R> evolver;
   Rectangle<R> bounding_box;
     
 
-  TestConstraintHybridEvolverPlugin()
+  TestHybridEvolverPlugin()
     : automaton(construct_automaton<R>()), 
       evolver(construct_evolver_plugin<R>()),
       bounding_box("[-3,3]x[-3,3]")
@@ -244,7 +245,7 @@ class TestConstraintHybridEvolverPlugin
 int main() {
   set_hybrid_evolver_verbosity(::verbosity);
 
-  TestConstraintHybridEvolverPlugin<Float>().test();
+  TestHybridEvolverPlugin<Float>().test();
   cerr << "INCOMPLETE ";
   return 0;
 }

@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/python
 #
 # Integration example
 #

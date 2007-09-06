@@ -56,6 +56,8 @@
 <b>Common mistakes</b>
  - A class static constant should be declared inside the class and initialised outside the class body. This initialisation should go in a source code file (.cc or .code.h or .template.h). An exception is an integer constant, which may be initialised in the class definition.
   
+\section pythoncodingstandards Python Coding Standards
+ - Every executable Python code file should begin with <c>#!/usr/bin/python</c>. This is the proper location for the Python interpreter following the Linux <a href="http://www.pathname.com/fhs/">Filesystem Hierarchy Standard</a> (FHS).
     
 
 */

@@ -5,7 +5,7 @@ TESTS_ENVIRONMENT = export PYTHONPATH=$PYTHONPATH:$(top_srcdir)/src/python/.libs
 
 #pkgpythondir=${pythondir}/ariadne
 
-pkgpython_DATA = src/hybrid_system.py  src/hybrid_system_evolution.py
+pkgpython_DATA = 
 
 check_SCRIPTS = test/test_import.py test/test_numeric.py test/test_linear_algebra.py
 

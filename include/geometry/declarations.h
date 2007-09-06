@@ -70,7 +70,9 @@ namespace Ariadne {
     template<class R> class SetReference;
 
     template<class R> class CurveInterface;
+    template<class R> class DifferentiableCurveInterface;
     template<class R> class ConstraintInterface;
+    template<class R> class DifferentiableConstraintInterface;
 
     class HybridSpace;
     template<class S> class HybridSet;

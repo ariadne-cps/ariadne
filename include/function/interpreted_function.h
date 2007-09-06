@@ -48,7 +48,7 @@ namespace Ariadne {
      */
     template<class R>
     class InterpretedFunction
-      : public FunctionInterface<R>
+      : public SmoothFunctionInterface<R>
     {
       typedef typename Numeric::traits<R>::arithmetic_type A; 
       typedef typename Numeric::traits<R>::interval_type I; 
@@ -78,8 +78,8 @@ namespace Ariadne {
       /*! \brief Make a copy (clone) of the vector field. */
       virtual InterpretedFunction<R>* clone() const;
      
-      /*! \brief A bound for the vector field over aa set of vectors. */
-      virtual LinearAlgebra::Vector<A> image(const LinearAlgebra::Vector<A>& x) const;
+      /*! \brief A bound for the vector field over a set of vectors. */
+      virtual LinearAlgebra::Vector<A> evaluate(const LinearAlgebra::Vector<A>& x) const;
  
       /*! \brief A bound for the vector field over a set of vectors. */
       virtual A derivative(const LinearAlgebra::Vector<A>& x, const size_type& i, const LinearAlgebra::MultiIndex& j) const;

@@ -130,7 +130,7 @@ Function::InterpretedFunction<R>::InterpretedFunction(std::istream& is)
 
 template<class R>
 LinearAlgebra::Vector<typename Function::InterpretedFunction<R>::A>
-Function::InterpretedFunction<R>::image(const LinearAlgebra::Vector<A>& x) const
+Function::InterpretedFunction<R>::evaluate(const LinearAlgebra::Vector<A>& x) const
 {
   ARIADNE_CHECK_ARGUMENT_SIZE(*this,x,"Function::image(Vector x)");
   LinearAlgebra::Vector<A> y(this->result_size());

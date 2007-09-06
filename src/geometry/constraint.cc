@@ -42,14 +42,16 @@ namespace Ariadne {
     
 #ifdef ENABLE_FLOAT64
     template class ConstraintInterface<Float64>;
-    template class Constraint<Float64>;
+    template class DifferentiableConstraintInterface<Float64>;
+    template class DifferentiableConstraint<Float64>;
     template class LinearConstraint<Float64>;
     template class SetConstraint<Float64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
     template class ConstraintInterface<FloatMP>;
-    template class Constraint<FloatMP>;
+    template class DifferentiableConstraintInterface<FloatMP>;
+    template class DifferentiableConstraint<FloatMP>;
     template class LinearConstraint<FloatMP>;
     template class SetConstraint<FloatMP>;
 #endif

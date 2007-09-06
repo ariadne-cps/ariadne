@@ -79,20 +79,24 @@ namespace Ariadne {
     
       /*! \brief The value of the constraint function at a point. */
       virtual A value(const Point<A>& pt) const = 0;
-      /*! \brief The gradient of the constraint function at a point. */
-      virtual LinearAlgebra::Vector<A> gradient(const Point<A>& pt) const = 0;
-#ifdef DOXYGEN
-      /*! \brief Test if the constraint is satisfied over a rectangle. */
-      friend tribool satisfies(const Rectangle<R>& r, const ConstraintInterface<R>& c);
-      /*! \brief Test if the constraint is satisfied over a zonotope. */
-      friend tribool satisfies(const Zonotope<R,R>& z), const ConstraintInterface<R>& c);
-      /*! \brief Test if the constraint is satisfied over a zonotope. */
-      friend tribool satisfies(const Zonotope<I,R>& z), const ConstraintInterface<R>& c);
-      /*! \brief Test if the constraint is satisfied over a zonotope. */
-      friend tribool satisfies(const Zonotope<I,I>& z), const ConstraintInterface<R>& c);
-#endif
     };
     
+    //! \ingroup SetInterface
+    /*! \brief A differentiable constraint on the state
+     */
+    template<class R>
+    class DifferentiableConstraintInterface
+      : public ConstraintInterface<R>
+    {
+      typedef typename Numeric::traits<R>::arithmetic_type A;
+     public:
+      /*! \brief Return a new dynamically-allocated copy of the constraint. */
+      virtual DifferentiableConstraintInterface<R>* clone() const = 0;
+      /*! \brief The gradient of the constraint function at a point. */
+      virtual LinearAlgebra::Vector<A> gradient(const Point<A>& pt) const = 0;
+    };
+
+
     template<class R> ConstraintInterface<R>::~ConstraintInterface() { 
     }
     
@@ -100,14 +104,6 @@ namespace Ariadne {
       return c.write(os);
     }
     
-    template<class R> Numeric::Interval<R> value(const ConstraintInterface<R>& c, const Rectangle<R>& r);
-    template<class R> Numeric::Interval<R> value(const ConstraintInterface<R>& c, const Zonotope< Numeric::Interval<R>, Numeric::Interval<R> >& z);
-
-    template<class R> tribool satisfies(const Rectangle<R>& r, const ConstraintInterface<R>& c);
-    template<class R> tribool satisfies(const Zonotope<R,R>& z, const ConstraintInterface<R>& c);
-    template<class R> tribool satisfies(const Zonotope<Numeric::Interval<R>,R>& z, const ConstraintInterface<R>& c);
-    template<class R> tribool satisfies(const Zonotope< Numeric::Interval<R>,Numeric::Interval<R> >& z, const ConstraintInterface<R>& c);
-
   }
 }
 

@@ -37,7 +37,7 @@ Geometry::Curve<R>::~Curve()
 }
 
 template<class R>
-Geometry::Curve<R>::Curve(const Function::FunctionInterface<R>& f) 
+Geometry::Curve<R>::Curve(const Function::DifferentiableFunctionInterface<R>& f) 
   : _function_ptr(f.clone())
 {
   assert(this->_function_ptr->argument_size()==1);
@@ -76,7 +76,7 @@ Geometry::Point< typename Geometry::Curve<R>::A >
 Geometry::Curve<R>::value(const A& s) const 
 {
   LinearAlgebra::Vector<A> v(1,&s);
-  return Point<A>(this->_function_ptr->image(v));
+  return Point<A>(this->_function_ptr->evaluate(v));
 }
 
 template<class R>

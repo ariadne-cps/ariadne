@@ -45,30 +45,31 @@ namespace Ariadne {
     template<class R> class Polyhedron;
 
   
+  /*
     // Forward declarations for friends
-    template<class R> class Constraint;
-    template<class R> bool equal(const Constraint<R>& c1, const Constraint<R>& c2);
-    template<class R> bool opposite(const Constraint<R>& c1, const Constraint<R>& c2);
-  
+    template<class R> class DifferentiableConstraint;
+    template<class R> bool equal(const DifferentiableConstraint<R>& c1, const DifferentiableConstraint<R>& c2);
+    template<class R> bool opposite(const DifferentiableConstraint<R>& c1, const DifferentiableConstraint<R>& c2);
+  */  
 
 
     //! \ingroup ExactSet
     /*! \brief A constraint on the state
      */
     template<class R>
-    class Constraint
-      : public ConstraintInterface<R>
+    class DifferentiableConstraint
+      : public DifferentiableConstraintInterface<R>
     {
       typedef typename Numeric::traits<R>::arithmetic_type A;
       typedef typename Numeric::traits<R>::interval_type I;
      public:
       /*! \brief Construct the set \f$f(x) \lessgtr 0\f$ from the function \f$f\f$. */
-      Constraint(const Function::FunctionInterface<R>& f, const Comparison cmp=greater);
+      DifferentiableConstraint(const Function::DifferentiableFunctionInterface<R>& f, const Comparison cmp=greater);
 
       /*! \brief Destructor. */
-      virtual ~Constraint();
+      virtual ~DifferentiableConstraint();
       /*! \brief Return a new dynamically-allocated copy of the constraint. */
-      virtual Constraint<R>* clone() const;
+      virtual DifferentiableConstraint<R>* clone() const;
       /*! \brief The dimension of the set. */
       virtual dimension_type dimension() const;
       /*! \brief The smoothness of the constraint function. */
@@ -79,17 +80,16 @@ namespace Ariadne {
       virtual std::ostream& write(std::ostream& os) const;
 
       /*! \brief The function defining the constraint. */
-      const Function::FunctionInterface<R>& function() const;
+      const Function::DifferentiableFunctionInterface<R>& function() const;
       /*! \brief The value at a point. */
       A value(const Point<A>& pt) const;
       /*! \brief The gradient at a point. */
       LinearAlgebra::Vector<A> gradient(const Point<A>& pt) const;
      public:
       /*! \brief Test for equality as reference. */
-      friend bool equal<>(const Constraint<R>& c1, const Constraint<R>& c2);
+      //      friend bool equal<>(const Constraint<R>& c1, const Constraint<R>& c2);
       /*! \brief Test for equality as reference, but with different sign. */
-      friend bool opposite<>(const Constraint<R>& c1, const Constraint<R>& c2);
-
+      //      friend bool opposite<>(const Constraint<R>& c1, const Constraint<R>& c2);
 #ifdef DOXYGEN
       /*! \brief Test if the constraint is satisfied over a rectangle. */
       friend tribool satisfies(const Rectangle<R>& r, const Constraint<R>& c);
@@ -103,19 +103,19 @@ namespace Ariadne {
      private:
       static void instantiate();
      private:
-      boost::shared_ptr< const Function::FunctionInterface<R> > _function_ptr;
+      boost::shared_ptr< const Function::DifferentiableFunctionInterface<R> > _function_ptr;
       Comparison _comparison;
     };
     
+/*
+    template<class R> bool equal(const DifferentiableConstraint<R>& c1, const DifferentiableConstraint<R>& c2);
+    template<class R> bool opposite(const DifferentiableConstraint<R>& c1, const DifferentiableConstraint<R>& c2);
 
-    template<class R> bool equal(const Constraint<R>& c1, const Constraint<R>& c2);
-    template<class R> bool opposite(const Constraint<R>& c1, const Constraint<R>& c2);
-
-    template<class R> tribool satisfies(const Rectangle<R>& r, const Constraint<R>& c);
-    template<class R> tribool satisfies(const Zonotope<R,R>& z, const Constraint<R>& c);
-    template<class R> tribool satisfies(const Zonotope<Numeric::Interval<R>,R>& z, const Constraint<R>& c);
-    template<class R> tribool satisfies(const Zonotope< Numeric::Interval<R>,Numeric::Interval<R> >& z, const Constraint<R>& c);
-
+    template<class R> tribool satisfies(const Rectangle<R>& r, const DifferentiableConstraint<R>& c);
+    template<class R> tribool satisfies(const Zonotope<R,R>& z, const DifferentiableConstraint<R>& c);
+    template<class R> tribool satisfies(const Zonotope<Numeric::Interval<R>,R>& z, const DifferentiableConstraint<R>& c);
+    template<class R> tribool satisfies(const Zonotope< Numeric::Interval<R>,Numeric::Interval<R> >& z, const DifferentiableConstraint<R>& c);
+*/
   }
 }
 

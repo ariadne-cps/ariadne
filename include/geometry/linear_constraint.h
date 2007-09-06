@@ -49,11 +49,13 @@ namespace Ariadne {
     /*! \brief A linear inequality constraint. */
     template<class R>
     class LinearConstraint
-      : public ConstraintInterface<R>
+      : public DifferentiableConstraintInterface<R>
     {
       typedef typename Numeric::traits<R>::arithmetic_type A;
       typedef typename Numeric::traits<R>::interval_type I;
      public:
+      /*! \brief Construct the constraint \f$a\cdot x < b\f$. */
+      LinearConstraint(const LinearAlgebra::Vector<R> a, const R& b);
       /*! \brief Construct the constraint \f$a\cdot x \lessgtr b\f$. */
       LinearConstraint(const LinearAlgebra::Vector<R> a, Comparison cmp, const R& b);
 

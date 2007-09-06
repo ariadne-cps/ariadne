@@ -36,11 +36,11 @@
 namespace Ariadne {
 
 template<class R>
-System::FunctionMap<R>::FunctionMap(const Function::FunctionInterface<R>& f, const Geometry::Point<A>& param)
+System::FunctionMap<R>::FunctionMap(const Function::DifferentiableFunctionInterface<R>& f, const Geometry::Point<A>& param)
   : _function_ptr(f.clone()), _parameters(param)
 {
   if(f.argument_size()<=param.dimension()) {
-    ARIADNE_THROW(std::runtime_error,"FunctionMap(FunctionInterface f, Point param)",
+    ARIADNE_THROW(std::runtime_error,"FunctionMap(DifferentiableFunctionInterface f, Point param)",
                   "with f.argument_size()="<<f.argument_size()<<", param="<<param<<": too many parameters");
   }
 }
@@ -122,7 +122,7 @@ System::FunctionMap<R>::image(const Geometry::Point<A>& x) const
 {
   ARIADNE_LOG(8,"FunctionMap::image(Point x) with x="<<x);
   LinearAlgebra::Vector<A> v=LinearAlgebra::direct_sum(x.position_vector(),this->_parameters.position_vector());
-  return Geometry::Point<A>(this->_function_ptr->image(v));
+  return Geometry::Point<A>(this->_function_ptr->evaluate(v));
 }
 
 

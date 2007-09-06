@@ -50,6 +50,12 @@ Geometry::LinearConstraint<R>::LinearConstraint(const LinearAlgebra::Vector<R> a
 {
 }
 
+template<class R>
+Geometry::LinearConstraint<R>::LinearConstraint(const LinearAlgebra::Vector<R> a, const R& b)
+  : _a(a), _b(b), _c(less)
+{
+}
+
 
 template<class R>
 Geometry::LinearConstraint<R>* 

@@ -49,7 +49,7 @@ namespace Ariadne {
 
 
     /*!\ingroup Function
-     * \brief Abstract base class for (differentiable) functionss.
+     * \brief Abstract base class for continuous functionss.
      * 
      * The function is specified by the method operator()(const LinearAlgebra::Vector< Interval<R> >& A) const,
      * This method should compute an interval vector \f$\overline{f}(A)\f$ with the
@@ -77,7 +77,7 @@ namespace Ariadne {
       /*! \brief Virtual destructor. */
       virtual ~FunctionInterface();
      
-      /*! \brief Make a copy (clone) of the vector field. */
+      /*! \brief Make a copy (clone) of the function. */
       virtual FunctionInterface<R>* clone() const = 0;
      
       /*! \brief The name of the function. */
@@ -87,15 +87,8 @@ namespace Ariadne {
       LinearAlgebra::Vector<A> operator() (const LinearAlgebra::Vector<A>& x) const;
 
       /*! \brief Evaluate the function. */
-      virtual LinearAlgebra::Vector<A> image(const LinearAlgebra::Vector<A>& x) const = 0;
+      virtual LinearAlgebra::Vector<A> evaluate(const LinearAlgebra::Vector<A>& x) const = 0;
 
-      /*! \brief Evaluate the derivative of the function. */
-      virtual A derivative(const LinearAlgebra::Vector<A>& x, const size_type& i, const LinearAlgebra::MultiIndex& j) const = 0;
-
-      /*! \brief Evaluate the Jacobian derivative matrix at the point \a x. */
-      virtual LinearAlgebra::Matrix<A> jacobian(const LinearAlgebra::Vector<A>& x) const = 0;
-
-    
       /*! \brief The degree of differentiability of the function. */
       virtual smoothness_type smoothness() const = 0;
       /*! \brief The size of the function argument. */
@@ -107,6 +100,40 @@ namespace Ariadne {
       virtual std::ostream& write(std::ostream& os) const = 0;
     };
   
+    /*!\ingroup Function
+     * \brief Abstract base class for differentiable functionss.
+     */
+    template<class R>
+    class DifferentiableFunctionInterface 
+      : public FunctionInterface<R>
+    {
+      typedef typename Numeric::traits<R>::arithmetic_type A; 
+     public:
+      /*! \brief Evaluate the Jacobian derivative matrix at the point \a x. */
+      virtual LinearAlgebra::Matrix<A> jacobian(const LinearAlgebra::Vector<A>& x) const = 0;
+      /*! \brief Make a copy (clone) of the function. */
+      virtual DifferentiableFunctionInterface<R>* clone() const = 0;
+     
+    };
+
+    /*!\ingroup Function
+     * \brief Abstract base class for smooth (arbitrarily differentiable) functions.
+     */
+    template<class R>
+    class SmoothFunctionInterface 
+      : public DifferentiableFunctionInterface<R>
+    {
+      typedef typename Numeric::traits<R>::arithmetic_type A; 
+     public:
+      /*! \brief Make a copy (clone) of the function. */
+      virtual SmoothFunctionInterface<R>* clone() const = 0;
+      /*! \brief Evaluate the derivative of the function. */
+      virtual A derivative(const LinearAlgebra::Vector<A>& x, const size_type& i, const LinearAlgebra::MultiIndex& j) const = 0;
+    };
+
+
+
+
     template<class R> inline 
     FunctionInterface<R>::~FunctionInterface() {
     }; 
@@ -114,7 +141,7 @@ namespace Ariadne {
     template<class R> inline 
     LinearAlgebra::Vector<typename FunctionInterface<R>::A>
     FunctionInterface<R>::operator() (const LinearAlgebra::Vector<A>& x) const {
-      return this->image(x);
+      return this->evaluate(x);
     }; 
 
     template<class R> inline 

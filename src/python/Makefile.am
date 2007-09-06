@@ -73,6 +73,8 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_level_set.cc \
 	export_hybrid_set.cc \
 	 \
+	export_constraint.cc \
+	 \
 	export_map.cc \
 	export_affine_map.cc \
 	export_polynomial_map.cc \
@@ -85,6 +87,7 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_solve.cc \
 	export_apply.cc \
 	export_integrate.cc \
+	export_detector.cc \
 	export_hybrid_evolver.cc \
 	export_set_based_hybrid_evolver.cc \
 	 \

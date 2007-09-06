@@ -47,21 +47,36 @@ namespace Ariadne {
     template<class R>
     class DetectorInterface 
     {
+      typedef Numeric::Interval<R> I;
      public:
       /*! \brief Virtual destructor. */
-      virtual ~DetectorInterface() = 0;
+      virtual ~DetectorInterface() { };
 
       /*! \brief Make a dynamically-allocated copy. */
       virtual DetectorInterface<R>* clone() const = 0;
 
       /*! \brief Compute the value of a constraint over a set. */
-      Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
-                                 const Geometry::BasicSetInterface<R>& bs) = 0;
+      virtual Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
+                                         const Geometry::BasicSetInterface<R>& bs) const = 0;
+
+      /*! \brief Determine whether constraint \a c1 forces constraint \a c2 within \a dom.
+       */
+      virtual tribool forces(const Geometry::ConstraintInterface<R>& c1,
+                             const Geometry::ConstraintInterface<R>& c2,
+                             const Geometry::Rectangle<R>& dom) const = 0;
+
+      /*! \brief Estimate the time needed to cross a constraint. */
+      virtual Numeric::Interval<R> crossing_time(const System::VectorFieldInterface<R>, 
+                                                 const Geometry::ConstraintInterface<R>& c, 
+                                                 const Geometry::Point<I>& pt, 
+                                                 const Geometry::Rectangle<R>& b) const = 0;
 
       /*! \brief Compute the value of a constraint over a set. */
-      TimeModel<R> crossing_time(const System::VectorFieldInterface<R>, 
-                                 const Geometry::ConstraintInterface<R>& c, 
-                                 const Geometry::BasicSetInterface<R>& bs) = 0;
+      virtual Evaluation::TimeModel<R> crossing_time(const System::VectorFieldInterface<R> vf, 
+                                                     const Geometry::ConstraintInterface<R>& c, 
+                                                     const Geometry::Rectangle<R>& d, 
+                                                     const Geometry::Rectangle<R>& b, 
+                                                     const Evaluation::Integrator<R>& i) const = 0;
 
     };
 

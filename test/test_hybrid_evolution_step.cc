@@ -41,6 +41,7 @@
 #include "evaluation/applicator.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
+#include "evaluation/detector.h"
 #include "evaluation/hybrid_evolver.h"
 #include "evaluation/hybrid_evolver.h"
 #include "evaluation/hybrid_evolver_plugin.h"
@@ -78,7 +79,8 @@ HybridEvolverPlugin<R> construct_evolver_plugin()
   
   Applicator<R> apply(maximum_set_radius,grid_size);
   LohnerIntegrator<R> lohner_integrator(maximum_step_size,lock_to_grid_time,maximum_set_radius); 
-  return HybridEvolverPlugin<R>(apply,lohner_integrator);
+  Detector<R> detector;
+  return HybridEvolverPlugin<R>(apply,lohner_integrator,detector);
 }
 
 

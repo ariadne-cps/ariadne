@@ -35,6 +35,7 @@
 #include "../geometry/declarations.h"
 #include "../system/declarations.h"
 
+#include "../geometry/constraint_interface.h"
 #include "../evaluation/time_model.h"
 
 namespace Ariadne {
@@ -46,9 +47,13 @@ namespace Ariadne {
     template<class R>
     class Detector 
     {
+      typedef Numeric::Interval<R> I;
      public:
       /*! \brief Virtual destructor. */
       virtual ~Detector();
+
+      /*! \brief Default constructor. */
+      Detector();
 
       /*! \brief Copy constructor. */
       Detector(const Detector<R>& det);
@@ -56,18 +61,81 @@ namespace Ariadne {
       /*! \brief Make a dynamically-allocated copy. */
       virtual Detector<R>* clone() const;
 
-      /*! \brief Compute the value of a constraint over a set. */
-      virtual  Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
-                                          const Geometry::BasicSetInterface<R>& bs);
+      /*! \brief Test if a set entirely satisfies the constraint. */
+      template<class BS>
+      tribool satisfies(const BS& bs, const Geometry::ConstraintInterface<R>& c) const;
+
 
       /*! \brief Compute the value of a constraint over a set. */
-      virtual TimeModel<R> crossing_time(const System::VectorFieldInterface<R> vf, 
-                                         const Geometry::ConstraintInterface<R>& c, 
-                                         const Geometry::BasicSetInterface<R>& bs);
+      virtual  Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
+                                          const Geometry::BasicSetInterface<R>& bs) const;
+
+      /*! \brief Compute the value of a constraint over a rectangle. */
+      Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
+                                 const Geometry::Rectangle<R>& r) const;
+
+      /*! \brief Compute the value of a constraint over a zonotope. */
+      Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
+                                 const Geometry::Zonotope<I,R>& z) const;
+
+      /*! \brief Compute the value of a constraint over a zonotope. */
+      Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
+                                 const Geometry::Zonotope<I,I>& z) const;
+
+      /*! \brief Determine whether constraint \a c1 forces constraint \a c2 within \a dom.
+       */
+      virtual tribool forces(const Geometry::ConstraintInterface<R>& c1,
+                             const Geometry::ConstraintInterface<R>& c2,
+                             const Geometry::Rectangle<R>& dom) const;
+
+      /*! \brief Compute the normal derivative to of the vector field \a vf to the constraint \a c at the point \a pt.
+       */
+      virtual Numeric::Interval<R> normal_derivative(const System::VectorFieldInterface<R>& vf, 
+                                                     const Geometry::DifferentiableConstraintInterface<R>& c, 
+                                                     const Geometry::Point<I>& pt) const;
+
+      /*! \brief Estimate the time needed for the point \a pt to reach constraint \a c under vector field \a vf,
+       *  assuming that the flow remains in \a bb. 
+       */
+      virtual Numeric::Interval<R> crossing_time(const System::VectorFieldInterface<R>& vf, 
+                                                 const Geometry::ConstraintInterface<R>& c, 
+                                                 const Geometry::Point<I>& pt, 
+                                                 const Geometry::Rectangle<R>& bb) const;
+
+      /*! \brief Compute the time needed for points in the domain rectangle \a dom to reach constraint \a c under vector field \a vf,
+       *  assuming that the flow remains in \a bb. The integrator \a i is used to integrate the flow.
+       */
+      virtual Evaluation::TimeModel<R> crossing_time(const System::VectorFieldInterface<R>& vf, 
+                                                     const Geometry::ConstraintInterface<R>& c, 
+                                                     const Geometry::Rectangle<R>& dom, 
+                                                     const Geometry::Rectangle<R>& bb,
+                                                     const Evaluation::Integrator<R>& i) const;
 
     };
 
   }
 }
+
+
+
+namespace Ariadne {
+
+template<class R> template<class BS> inline
+tribool 
+Evaluation::Detector<R>::satisfies(const BS& bs,
+                                   const Geometry::ConstraintInterface<R>& c) const
+{
+  Numeric::Interval<R> ivl=this->value(c,bs);
+  Geometry::Comparison cmp=c.comparison();
+  if(ivl.upper()<0) {
+    return (cmp==Geometry::less);
+  } else if(ivl.lower()>0) {
+    return (cmp==Geometry::greater);
+  } else {
+    return indeterminate;
+  }
+}
+
+} // namespace Ariadne
 
 #endif /* ARIADNE_DETECTOR_H */

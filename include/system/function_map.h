@@ -65,7 +65,7 @@ namespace Ariadne {
       typedef Geometry::Point<A> result_type;
       
       /*! \brief Construct from a function interface and parameters. */
-      FunctionMap(const Function::FunctionInterface<R>& f, const Geometry::Point<A>& param);
+      FunctionMap(const Function::DifferentiableFunctionInterface<R>& f, const Geometry::Point<A>& param);
       /*! \brief Construct from a function and parameters. */
       FunctionMap(const Function::InterpretedFunction<R>& f, const Geometry::Point<A>& param);
 
@@ -99,7 +99,7 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream& os) const;
      private:
-      boost::shared_ptr< Function::FunctionInterface<R> > _function_ptr;
+      boost::shared_ptr< Function::DifferentiableFunctionInterface<R> > _function_ptr;
       Geometry::Point<A> _parameters;
     };
    

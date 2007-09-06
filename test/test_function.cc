@@ -65,7 +65,7 @@ int test_function()
     Vector<A> x;
     fis >> x;
     cout << "x=" << x << endl;
-    cout << "f.image(x)=" << flush; cout << f.image(x) << endl;
+    cout << "f.evaluate(x)=" << flush; cout << f.evaluate(x) << endl;
     cout << "f(x)=" << flush; cout << f(x) << endl;
     cout << "f.jacobian(x)=" << flush; cout << f.jacobian(x) << endl;
     cout << endl;

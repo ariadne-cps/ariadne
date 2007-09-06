@@ -39,6 +39,13 @@ namespace Ariadne {
     struct EvaluationException : public std::runtime_error {
       EvaluationException(const std::string& s) : std::runtime_error(s) { }
     };
+    /*! \brief The set appears to cross a constraint non-transversely. */
+    class NonTransverseCrossingException : public std::exception { };
+    /*! \brief The set appears to cross two or more constraints. */
+    class CornerCollisionException : public std::exception { };
+    /*! \brief A constraint is crossed during a time interval which does not contain the integration time window. */
+    class PartiallyEnabledConstraintException : public std::exception { };
+
     //@}
 
   } 

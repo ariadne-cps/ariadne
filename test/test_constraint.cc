@@ -38,6 +38,7 @@
 #include "geometry/linear_constraint.h"
 #include "function/function_interface.h"
 #include "function/interpreted_function.h"
+#include "evaluation/detector.h"
 #include "output/epsstream.h"
 #include "output/logging.h"
 
@@ -47,6 +48,7 @@ using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Function;
 using namespace Ariadne::Geometry;
+using namespace Ariadne::Evaluation;
 using namespace Ariadne::Output;
 using namespace std;
 
@@ -69,7 +71,8 @@ test_constraint()
 
   InterpretedFunction<R> f("function disc output Real y; input Real[2] x; algorithm y=1-(x[0]^2+x[1]^2); end disc;");
 
-  Constraint<R> c(f);
+  DifferentiableConstraint<R> c(f);
+  Detector<R> d;
 
   Rectangle<R> r;
   Zonotope<Interval<R>,R> z;
@@ -77,15 +80,15 @@ test_constraint()
   
   // satisfies
   r=Rectangle<R>("[0.4,0.5]x[0.45,0.65]");
-  ARIADNE_TEST_ASSERT(satisfies(r,c));
+  ARIADNE_TEST_ASSERT(d.satisfies(r,c));
   z=Zonotope<Interval<R>,R>(r);
-  ARIADNE_TEST_ASSERT(satisfies(z,c));
+  ARIADNE_TEST_ASSERT(d.satisfies(z,c));
 
   // does not satisfy
   r=Rectangle<R>("[0.8,0.9]x[0.95,0.95]");
-  ARIADNE_TEST_ASSERT(!satisfies(r,c));
+  ARIADNE_TEST_ASSERT(!d.satisfies(r,c));
   z=Zonotope<Interval<R>,R>(r);
-  ARIADNE_TEST_ASSERT(!satisfies(z,c));
+  ARIADNE_TEST_ASSERT(!d.satisfies(z,c));
 
   
   LinearConstraint<R> lc(Vector<R>("[1,1]"),Geometry::less,R(2));

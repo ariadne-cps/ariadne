@@ -60,6 +60,8 @@ void export_binary_tree();
 void export_lattice_set();
 void export_lattice_map();
 
+template<class R> void export_function();
+
 template<class R> void export_point();
 template<class R> void export_interval_point();
 template<class R> void export_point_list();
@@ -80,7 +82,8 @@ template<class R> void export_grid_set();
 template<class R> void export_partition_tree_set();
 template<class R> void export_hybrid_set();
 
-template<class R> void export_function();
+template<class R> void export_constraint();
+
 template<class R> void export_map();
 template<class R> void export_affine_map();
 template<class R> void export_affine_multimap();
@@ -93,6 +96,7 @@ template<class R> void export_evaluation_parameters();
 template<class R> void export_solve();
 template<class R> void export_apply();
 template<class R> void export_integrate();
+template<class R> void export_detector();
 template<class R> void export_hybrid_evolver();
 template<class R> void export_set_based_hybrid_evolver();
 
@@ -150,6 +154,9 @@ BOOST_PYTHON_MODULE(ariadne)
   export_lattice_set();
   export_lattice_map();
 
+  export_function<Rational>();
+  export_function<Float>();
+
   export_set<Float>();
   export_point<Float>();
   export_interval_point<Float>();
@@ -170,8 +177,8 @@ BOOST_PYTHON_MODULE(ariadne)
   export_partition_tree_set<Float>();
   export_hybrid_set<Float>();
 
-  export_function<Rational>();
-  export_function<Float>();
+  export_constraint<Float>();
+
   export_map<Float>();
   export_affine_map<Float>();
   export_affine_multimap<Float>();
@@ -184,6 +191,7 @@ BOOST_PYTHON_MODULE(ariadne)
   export_solve<Float>();
   export_apply<Float>();
   export_integrate<Float>();
+  export_detector<Float>();
   export_hybrid_evolver<Float>();
   export_set_based_hybrid_evolver<Float>();
 

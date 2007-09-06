@@ -35,6 +35,7 @@
 #include "../system/hybrid_automaton.h"
 #include "../evaluation/applicator.h"
 #include "../evaluation/integrator.h"
+#include "../evaluation/detector.h"
 
 #include "../evaluation/lohner_integrator.h"
 
@@ -93,8 +94,10 @@ using namespace System;
 
 
 template<class R>
-Evaluation::HybridEvolverPlugin<R>::HybridEvolverPlugin(Applicator<R>& a, Integrator<R>& i)
-  : _applicator(a.clone()), _integrator(dynamic_cast<LohnerIntegrator<R>*>(i.clone()))
+Evaluation::HybridEvolverPlugin<R>::HybridEvolverPlugin(const Applicator<R>& a, const Integrator<R>& i, const Detector<R>& d)
+  : _applicator(a.clone()), 
+    _integrator(dynamic_cast<LohnerIntegrator<R>*>(i.clone())),
+    _detector(d.clone())
 {
   if(!this->_integrator) {
     throw std::runtime_error("HybridEvolverPlugin::HybridEvolverPlugin(Applicator a, Integrator i): Invalid integrator");
@@ -104,7 +107,9 @@ Evaluation::HybridEvolverPlugin<R>::HybridEvolverPlugin(Applicator<R>& a, Integr
 
 template<class R>
 Evaluation::HybridEvolverPlugin<R>::HybridEvolverPlugin(const HybridEvolverPlugin<R>& plugin)
-  :_applicator(plugin._applicator), _integrator(plugin._integrator)
+  :_applicator(plugin._applicator), 
+   _integrator(plugin._integrator),
+   _detector(plugin._detector)
 {
 }
 
@@ -236,16 +241,16 @@ tribool
 Evaluation::HybridEvolverPlugin<R>::enabled(const transition_type& transition,
                                                       const bounding_box_type& bounding_box) const
 {
-  return Geometry::value(transition.constraint(),bounding_box) >= 0;
+  return this->_detector->value(transition.constraint(),bounding_box) >= 0;
 }
 
 
 template<class R>
 tribool
 Evaluation::HybridEvolverPlugin<R>::enabled(const transition_type& transition,
-                                                      const timed_set_type& set) const
+                                            const timed_set_type& set) const
 {
-  return Geometry::value(transition.constraint(),set.continuous_state_set()) >= 0;
+  return this->_detector->value(transition.constraint(),set.continuous_state_set()) >= 0;
 }
 
 
@@ -253,19 +258,10 @@ Evaluation::HybridEvolverPlugin<R>::enabled(const transition_type& transition,
 template<class R>
 tribool
 Evaluation::HybridEvolverPlugin<R>::forces(const constraint_type& constraint1,
-                                                     const constraint_type& constraint2,
-                                                     const bounding_box_type& bounding_box) const
+                                           const constraint_type& constraint2,
+                                           const bounding_box_type& bounding_box) const
 {
-  Point<I> centre = bounding_box.centre();
-  Point<I> bounding_point = bounding_box;
-  Vector<I> vector_radius = bounding_point-centre;
-  I centre_difference = constraint1.value(centre) - constraint2.value(centre);
-  Vector<I> gradient_difference = constraint1.gradient(bounding_point)-constraint2.gradient(bounding_point);
-  I interval_difference = centre_difference+inner_product(gradient_difference,vector_radius);
-
-  if(interval_difference<0) { return true; }
-  else if ( interval_difference>0) { return false; }
-  else { return indeterminate; }
+  return this->_detector->forces(constraint1,constraint2,bounding_box);
 }
 
 
@@ -274,13 +270,14 @@ Evaluation::HybridEvolverPlugin<R>::forces(const constraint_type& constraint1,
 template<class R>
 Numeric::Interval<R>
 Evaluation::HybridEvolverPlugin<R>::estimate_normal_derivative(const transition_type& transition,
-                                                                         const bounding_box_type& bounding_box) const
+                                                               const bounding_box_type& bounding_box) const
 {
-  Point<I> bounding_point = bounding_box;
-  Vector<I> constraint_gradient = transition.constraint().gradient(bounding_point);
-  Vector<I> flow_direction = transition.source().dynamic()(bounding_point);
-  I normal_derivative = inner_product(constraint_gradient,flow_direction);
-  return normal_derivative;
+  const vector_field_type& dynamic=transition.source().dynamic();
+  const differentiable_constraint_type& constraint=dynamic_cast<const differentiable_constraint_type&>( transition.constraint());
+  const Geometry::Point<I> bounds=bounding_box;
+  assert(&constraint);
+
+  return this->_detector->normal_derivative(dynamic,constraint,bounds);
 }
 
 
@@ -289,13 +286,14 @@ Evaluation::HybridEvolverPlugin<R>::estimate_normal_derivative(const transition_
 template<class R>
 Numeric::Interval<R>
 Evaluation::HybridEvolverPlugin<R>::estimate_crossing_time_step(const transition_type& transition, 
-                                                                          const timed_set_type& initial_set,
-                                                                          const bounding_box_type& bounding_box) const
+                                                                const timed_set_type& initial_set,
+                                                                const bounding_box_type& bounding_box) const
 {
-  Point<I> initial_bounding_point = initial_set.bounding_box();
-  I initial_constraint_value = transition.constraint().value(initial_bounding_point);
-  I approximate_crossing_time_step = (-initial_constraint_value)/this->estimate_normal_derivative(transition,bounding_box);
-  return approximate_crossing_time_step;
+  const vector_field_type& dynamic=transition.source().dynamic();
+  const constraint_type& constraint=transition.constraint();
+  const Geometry::Point<I> initial_point=initial_set.bounding_box();
+
+  return this->_detector->crossing_time(dynamic,constraint,initial_point,bounding_box);
 }
   
 
@@ -305,99 +303,23 @@ Evaluation::HybridEvolverPlugin<R>::estimate_crossing_time_step(const transition
 template<class R>
 typename Evaluation::HybridEvolverPlugin<R>::time_model_type
 Evaluation::HybridEvolverPlugin<R>::compute_crossing_time_step(const transition_type& transition, 
-                                                                         const timed_set_type& initial_set,
-                                                                         const bounding_box_type& bounding_box) const
+                                                               const timed_set_type& initial_set,
+                                                               const bounding_box_type& bounding_box) const
 {
   ARIADNE_LOG(8,"    HybridEvolverPlugin::compute_crossing_time_step(...)\n");
-  static const int number_of_newton_steps=2;
+  const System::VectorFieldInterface<R>& dynamic=transition.source().dynamic();
+  const Geometry::ConstraintInterface<R>& constraint=transition.constraint();
+  const Geometry::Rectangle<R> domain=initial_set.bounding_box();
+  const Integrator<R>& integrator=*this->_integrator;
 
-  const mode_type& mode=transition.source();
-  const vector_field_type& dynamic=mode.dynamic();
-  const constraint_type& constraint=transition.constraint();
+  TimeModel<R> spacial_crossing_time_step=this->_detector->crossing_time(dynamic,constraint,domain,bounding_box,integrator);
+  ARIADNE_LOG(9,"    spacial_crossing_time_step="<<spacial_crossing_time_step<<"\n");
 
-  const Zonotope<I,I>& continuous_state_set=initial_set.continuous_state_set();
-  const Matrix<I>& generators=continuous_state_set.generators();
+  // FIXME: Is this formula correct? Maybe the average crossing time is too small for the centre...
+  TimeModel<R> parameter_crossing_time_step(spacial_crossing_time_step.average(),spacial_crossing_time_step.gradient()*initial_set.generators());
+  ARIADNE_LOG(9,"    parameter_crossing_time_step="<<parameter_crossing_time_step<<"\n\n");
 
-  Numeric::Rational flow_time = 0;
-  Point<I> centre = continuous_state_set.centre();
-  Vector<I> centre_flow_direction;
-  Vector<I> centre_constraint_gradient;
-  I centre_normal_derivative;
-  I centre_constraint_value;
-  I centre_time_step;
-  Rectangle<R> centre_bounding_box;
-
-  try {
-    // Estimate crossing time for centre by taking Newton iterations
-    for(int i=0; i!=number_of_newton_steps; ++i) {
-      centre = Geometry::midpoint(centre);
-      centre_flow_direction = dynamic(centre);
-      centre_constraint_value = constraint.value(centre);
-      centre_constraint_gradient = constraint.gradient(centre);
-      centre_normal_derivative = inner_product(centre_flow_direction,centre_constraint_gradient);
-      if(possibly(centre_normal_derivative==0)) {
-        throw NonTransverseCrossingException();
-      }
-      flow_time += Numeric::Rational(centre_time_step.midpoint());
-      Interval<R> time_interval=Numeric::Rational(flow_time);
-
-      centre_bounding_box=this->_integrator->refine_flow_bounds(dynamic,centre,bounding_box,centre_time_step.upper());
-      centre_bounding_box=this->_integrator->refine_flow_bounds(dynamic,centre,centre_bounding_box,centre_time_step.upper());
-      centre=this->_integrator->bounded_flow(dynamic,centre,centre_bounding_box,flow_time);
-    }
-  
-    ARIADNE_LOG(9,"    estimated_centre_crossing_time="<<flow_time<<"\n");
-    
-    // Perform integration to close to centre
-    Vector<I> flow_direction = dynamic(bounding_box);
-    ARIADNE_LOG(9,"    flow_direction="<<flow_direction<<"\n");
-    I constraint_value = constraint.value(centre);
-    ARIADNE_LOG(9,"    constraint_value="<<constraint_value<<"\n");
-    Vector<I> constraint_gradient = constraint.gradient(bounding_box);
-    ARIADNE_LOG(9,"    constraint_gradient="<<constraint_gradient<<"\n");
-    I normal_derivative = -inner_product(constraint_gradient,flow_direction);
-    ARIADNE_LOG(9,"    normal_derivative="<<normal_derivative<<"\n");
-
-    // Estimate centre crossing time
-    I centre_normal_derivative = normal_derivative;
-    I centre_crossing_time = constraint.value(centre)/centre_normal_derivative;
-    
-    // Compute the gradient of the crossing times
-    Vector<I> spacial_time_gradient = constraint_gradient/normal_derivative;
-    
-    // Log the crossing time step and return
-    TimeModel<R> spacial_crossing_time_step(centre_crossing_time, spacial_time_gradient);
-    ARIADNE_LOG(9,"    spacial_crossing_time_step="<<spacial_crossing_time_step<<"\n");
-    TimeModel<R> parameter_crossing_time_step(centre_crossing_time, spacial_time_gradient*generators);
-    ARIADNE_LOG(9,"    parameter_crossing_time_step="<<parameter_crossing_time_step<<"\n\n");
-    return parameter_crossing_time_step;
-  }
-
-  // Use the following code for non-transverse crossings
-  catch(NonTransverseCrossingException) {
-    ARIADNE_LOG(9,"   Non-transverse crossing");
-    Vector<I> flow_direction = dynamic(bounding_box);
-    ARIADNE_LOG(9,"    flow_direction="<<flow_direction<<"\n");
-    I constraint_value = constraint.value(centre);
-    ARIADNE_LOG(9,"    constraint_value="<<constraint_value<<"\n");
-    Vector<I> constraint_gradient = constraint.gradient(bounding_box);
-    ARIADNE_LOG(9,"    constraint_gradient="<<constraint_gradient<<"\n");
-    I normal_derivative = -inner_product(constraint_gradient,flow_direction);
-    ARIADNE_LOG(9,"    normal_derivative="<<normal_derivative<<"\n");
-    
-    R minimum_crossing_time = (constraint.value(bounding_box)/normal_derivative).lower();
-    R maximum_crossing_time = (R(1)/R(0)).upper(); // Should be inf (infinity)
-    Interval<R> crossing_time(minimum_crossing_time,maximum_crossing_time);
-    Vector<I> spacial_time_gradient(initial_set.dimension());
-    Vector<I> time_gradient(continuous_state_set.generators().number_of_columns());
-
-    TimeModel<R> spacial_crossing_time_step(crossing_time, spacial_time_gradient);
-    ARIADNE_LOG(9,"    spacial_crossing_time_step="<<spacial_crossing_time_step<<"\n");
-    TimeModel<R> parameter_crossing_time_step(crossing_time, time_gradient);
-    ARIADNE_LOG(9,"    parameter_crossing_time_step="<<parameter_crossing_time_step<<"\n\n");
-    return parameter_crossing_time_step;
-  } 
-
+  return parameter_crossing_time_step;
 }
 
   
@@ -414,9 +336,9 @@ Evaluation::HybridEvolverPlugin<R>::compute_crossing_data(const transition_type&
   const constraint_type& constraint = transition.constraint();
 
   // constraint might not be satisfied; compute further
-  I value_range = Geometry::value(constraint,bounding_box);
-  I initial_constraint_value = Geometry::value(constraint,initial_set);
-  I final_constraint_value = Geometry::value(constraint,final_set);
+  I value_range = this->_detector->value(constraint,bounding_box);
+  I initial_constraint_value = this->_detector->value(constraint,initial_set.continuous_state_set());
+  I final_constraint_value = this->_detector->value(constraint,final_set);
   I normal_derivative = this->estimate_normal_derivative(transition,bounding_box);
   I crossing_time_bounds = this->estimate_crossing_time_step(transition,initial_set,bounding_box);
   TimeModel<R> crossing_time_model=this->compute_crossing_time_step(transition,initial_set,bounding_box);
@@ -457,7 +379,7 @@ Evaluation::HybridEvolverPlugin<R>::compute_crossing_data(const reference_set<co
     const id_type& id = transition_iter->id();
     const constraint_type& constraint = transition_iter->constraint();
     
-    I value_range=Geometry::value(constraint,bounding_box);
+    I value_range=this->_detector->value(constraint,bounding_box);
     ARIADNE_LOG(7,"   constraint["<<id<<"]={"<<constraint<<"}\n");
     if(value_range<0) {
       // constraint is satisfied throughout evolution
@@ -632,7 +554,7 @@ Evaluation::HybridEvolverPlugin<R>::compute_possibly_enabled_transitions(const m
   for(typename reference_set<const transition_type>::const_iterator transition_iter=mode.transitions().begin();
       transition_iter != mode.transitions().end(); ++transition_iter)
   {
-    I value_range=Geometry::value(transition_iter->constraint(),bounding_box);
+    I value_range=this->_detector->value(transition_iter->constraint(),bounding_box);
     ARIADNE_LOG(7,"   constraint["<<transition_iter->id()<<"]={"<<transition_iter->constraint()<<"}\n");
     ARIADNE_LOG(7,"     value_range="<<value_range<<"\n");
     if(possibly(value_range>=0)) {
@@ -674,7 +596,7 @@ Evaluation::HybridEvolverPlugin<R>::compute_enabled_activation_times(const mode_
       transition_iter!=transitions.end(); ++transition_iter)
   {
     if(transition_iter->kind()==System::activation_tag) {
-      if(possibly(!Geometry::satisfies(bounding_box,transition_iter->constraint()))) {
+      if(possibly(!this->_detector->satisfies(bounding_box,transition_iter->constraint()))) {
         possibly_enabled_activations.insert(*transition_iter);
         ARIADNE_LOG(6,"  event "<<transition_iter->id()<<" with constraint "<<transition_iter->constraint()<<" possibly not satisfied by "<<bounding_box<<"\n");
       }
@@ -687,26 +609,27 @@ Evaluation::HybridEvolverPlugin<R>::compute_enabled_activation_times(const mode_
   {
     const transition_type& transition=*transition_iter;
     const id_type event_id = transition.id();
-    const constraint_type& constraint=transition.constraint();
+    const differentiable_constraint_type& constraint=dynamic_cast<const differentiable_constraint_type&>(transition.constraint());
+    assert(&constraint);
     const vector_field_type& dynamic=transition.source().dynamic();
     time_model_type crossing_time_step=this->compute_crossing_time_step(transition,initial_set,bounding_box);
     I normal_derivative = LinearAlgebra::inner_product(dynamic(bounding_box),constraint.gradient(bounding_box));
     ARIADNE_LOG(7,"    event "<<transition_iter->id()<<" crossing time step is "<<crossing_time_step<<"\n");
   
     if(minimum_time_step >= crossing_time_step || crossing_time_step >= maximum_time_step) {
-      if(definitely(not Geometry::satisfies(initial_set,constraint))) {
+      if(definitely(not this->_detector->satisfies(initial_set,constraint))) {
         ARIADNE_LOG(7,"      activated entire evolution time\n");
         enabled_activations.insert(std::make_pair(event_id,std::make_pair(minimum_time_step,maximum_time_step)));
-      } else if(possibly(not Geometry::satisfies(initial_set,constraint))) {
+      } else if(possibly(not this->_detector->satisfies(initial_set,constraint))) {
         ARIADNE_LOG(7,"      appears to be activated entire evolution time\n");
         enabled_activations.insert(std::make_pair(event_id,std::make_pair(minimum_time_step,maximum_time_step)));
       } else {
         ARIADNE_LOG(7,"      inactivated entire evolution time\n");
       }
-    } else if(Geometry::satisfies(initial_set,constraint)) { 
+    } else if(this->_detector->satisfies(initial_set,constraint)) { 
       ARIADNE_LOG(7,"      event inactive at beginning of evolution step\n")
       enabled_activations.insert(std::make_pair(event_id,std::make_pair(crossing_time_step,maximum_time_step)));
-    } else if(Geometry::satisfies(final_set,constraint)) { 
+    } else if(this->_detector->satisfies(final_set,constraint)) { 
       ARIADNE_LOG(7,"      event inactive at end end of evolution step\n");
       enabled_activations.insert(std::make_pair(event_id,std::make_pair(minimum_time_step,crossing_time_step)));
     } else {
@@ -1133,33 +1056,3 @@ Evaluation::HybridEvolverPlugin<R>::upper_reachability_step(const System::Hybrid
 }
 
 } // namespace Ariadne
-
-
-
-
-
-/*
-  // Test for initially enabled events
-  reference_set<const transition_type> initially_enabled_invariants;
-  reference_set<const transition_type> initially_enabled_guards;
-  reference_set<const transition_type> initially_enabled_activations;
-  for(transitions_const_iterator transition_iter = possibly_enabled_events.begin();
-      transition_iter != possibly_enabled_events.end(); ++transition_iter)
-  {
-    const constraint_type& constraint = transition_iter->constraint();
-    if(definitely(not Geometry::satisfies(initial_set,constraint))) {
-      ARIADNE_LOG(6,"    event "<<transition_iter->id()<<" with constraint "<<constraint<<" definitely not satisfied by "<<Geometry::over_approximation(initial_set)<<"\n");
-      if(transition_iter->kind()==System::invariant_tag) {
-        initially_enabled_invariants.insert(*transition_iter);
-      } else if(transition_iter->kind()==System::guard_tag) {
-        initially_enabled_guards.insert(*transition_iter);
-      } else if(transition_iter->kind()==System::activation_tag) {
-        initially_enabled_activations.insert(*transition_iter);
-      }
-    }
-  }
-  ARIADNE_LOG(6,"  initially_enabled_invariants="<<::ids(initially_enabled_invariants)<<"\n");
-  ARIADNE_LOG(6,"  initially_enabled_guards="<<::ids(initially_enabled_guards)<<"\n");
-  ARIADNE_LOG(6,"  initially_enabled_activations="<<::ids(initially_enabled_activations)<<"\n\n");
-
-*/

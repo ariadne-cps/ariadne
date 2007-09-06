@@ -39,7 +39,7 @@ namespace Ariadne {
      */
     template<class R>
     class Curve
-      : public CurveInterface<R>
+      : public DifferentiableCurveInterface<R>
     {
       typedef typename Numeric::traits<R>::arithmetic_type A;
       typedef typename Numeric::traits<R>::interval_type I;
@@ -47,7 +47,7 @@ namespace Ariadne {
       /*! \brief Destructor. */
       virtual ~Curve();
       /*! \brief Constructor. */
-      Curve(const Function::FunctionInterface<R>& f);
+      Curve(const Function::DifferentiableFunctionInterface<R>& f);
       /*! \brief Copy constructor. */
       Curve(const Curve<R>& c);
       /*! \brief Return a new dynamically-allocated copy of the constraint. */
@@ -65,7 +65,7 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream& os) const;
      private:
-      Function::FunctionInterface<R>* _function_ptr;
+      Function::DifferentiableFunctionInterface<R>* _function_ptr;
     };
     
   }

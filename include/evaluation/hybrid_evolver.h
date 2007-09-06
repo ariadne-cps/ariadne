@@ -75,8 +75,11 @@ namespace Ariadne {
       /*! \brief Copy constructor. */
       HybridEvolver(const HybridEvolver<R>& evolver);
 
-      /*! \brief Construct from an applicator and an integrator. */
-      HybridEvolver(Applicator<R>& applicator, Integrator<R>& integrator);
+      /*! \brief Construct from an applicator and an integrator. (Deprecated) */
+      HybridEvolver(const Applicator<R>& applicator, const Integrator<R>& integrator);
+
+      /*! \brief Construct from an applicator, an integrator and a detector. */
+      HybridEvolver(const Applicator<R>& applicator, const Integrator<R>& integrator, const Detector<R>& detector);
 
       /*! \brief Virtual destructor. */
       virtual ~HybridEvolver();

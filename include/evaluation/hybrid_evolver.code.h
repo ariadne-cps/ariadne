@@ -32,6 +32,7 @@
 #include "../system/hybrid_automaton.h"
 #include "../evaluation/applicator.h"
 #include "../evaluation/integrator.h"
+#include "../evaluation/detector.h"
 
 #include "../evaluation/lohner_integrator.h"
 #include "../evaluation/hybrid_evolver_plugin.h"
@@ -84,8 +85,14 @@ Evaluation::HybridEvolver<R>::~HybridEvolver()
 
 
 template<class R>
-Evaluation::HybridEvolver<R>::HybridEvolver(Applicator<R>& a, Integrator<R>& i)
-  : _plugin(new HybridEvolverPlugin<R>(a,i))
+Evaluation::HybridEvolver<R>::HybridEvolver(const Applicator<R>& a, const Integrator<R>& i)
+  : _plugin(new HybridEvolverPlugin<R>(a,i,Detector<R>()))
+{
+}
+
+template<class R>
+Evaluation::HybridEvolver<R>::HybridEvolver(const Applicator<R>& a, const Integrator<R>& i, const Detector<R>& d)
+  : _plugin(new HybridEvolverPlugin<R>(a,i,d))
 {
 }
 

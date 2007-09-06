@@ -76,6 +76,7 @@ namespace Ariadne {
       solver_verbosity,
       applicator_verbosity, 
       integrator_verbosity, 
+      detector_verbosity, 
       hybrid_evolver_verbosity
     ; 
   }
@@ -104,6 +105,7 @@ namespace Ariadne {
       Evaluation::solver_verbosity=v;
       Evaluation::applicator_verbosity=v;
       Evaluation::integrator_verbosity=v; 
+      Evaluation::detector_verbosity=v; 
       Evaluation::hybrid_evolver_verbosity=v;
     }
     /*! \brief Set the verbosity level for the %Solver class. */
@@ -112,6 +114,8 @@ namespace Ariadne {
     inline void set_applicator_verbosity(int v) { Evaluation::applicator_verbosity=v; }
     /*! \brief Set the verbosity level for the %Integrator class. */
     inline void set_integrator_verbosity(int v) { Evaluation::integrator_verbosity=v; }
+    /*! \brief Set the verbosity level for the %Detector class. */
+    inline void set_detector_verbosity(int v) { Evaluation::detector_verbosity=v; }
     /*! \brief Set the verbosity level for the %HybridEvolver class. */
     inline void set_hybrid_evolver_verbosity(int v) { Evaluation::hybrid_evolver_verbosity=v; }
 

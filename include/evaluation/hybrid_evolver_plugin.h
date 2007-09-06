@@ -42,6 +42,7 @@
 #include "../geometry/declarations.h"
 #include "../system/declarations.h"
 #include "../evaluation/declarations.h"
+#include "../evaluation/exceptions.h"
 #include "../evaluation/integrator.h"
 
 #include "../evaluation/hybrid_time.h"
@@ -52,13 +53,6 @@ namespace Ariadne {
     template<class R> class HybridEvolver;
     template<class R> class LohnerIntegrator;
   
-    /*! \brief The set appears to cross a constraint non-transversely. */
-    class NonTransverseCrossingException : public std::exception { };
-    /*! \brief The set appears to cross two or more constraints. */
-    class CornerCollisionException : public std::exception { };
-    /*! \brief A constraint is crossed during a time interval which does not contain the integration time window. */
-    class PartiallyEnabledConstraintException : public std::exception { };
-
     /*! \brief The semantics used for the evolution trajectories (\c lower_semantics or \c upper_semantics). */
     enum EvolutionSemantics { lower_semantics, upper_semantics };
     /*! \brief The kind of set to approximate (\c compute_evolved_set or \c compute_reachable_set). */
@@ -210,6 +204,8 @@ namespace Ariadne {
       /*! \brief . */
       typedef Geometry::ConstraintInterface<R> constraint_type;
       /*! \brief . */
+      typedef Geometry::DifferentiableConstraintInterface<R> differentiable_constraint_type;
+      /*! \brief . */
       typedef Geometry::Rectangle<R> bounding_box_type;
       /*! \brief . */
       typedef System::MapInterface<R> map_type;
@@ -224,8 +220,8 @@ namespace Ariadne {
   
       //! \name Constructors. */
 
-      /*! \brief Construct from an applicator and an integrator. */
-      HybridEvolverPlugin(Applicator<R>& applicator, Integrator<R>& integrator);
+      /*! \brief Construct from an applicator, an integrator and a detector. */
+      HybridEvolverPlugin(const Applicator<R>& applicator, const Integrator<R>& integrator, const Detector<R>& detector);
 
       /*! \brief Copy constructor. */
       HybridEvolverPlugin(const HybridEvolverPlugin<R>& plugin);
@@ -439,6 +435,7 @@ namespace Ariadne {
      private:
       Applicator<R>* _applicator;
       LohnerIntegrator<R>* _integrator;
+      Detector<R>* _detector;
     };
 
 

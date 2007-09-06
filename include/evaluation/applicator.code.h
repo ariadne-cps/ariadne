@@ -69,7 +69,7 @@ template<class R>
 Evaluation::Applicator<R>::Applicator() 
   : _maximum_basic_set_radius(DEFAULT_MAXIMUM_BASIC_SET_RADIUS),
     _grid_size(DEFAULT_GRID_SIZE),
-    _plugin()
+    _plugin(new ApplicatorPlugin<R>())
 {
 }
 
@@ -207,6 +207,7 @@ template<class R>
 Geometry::Rectangle<R> 
 Evaluation::Applicator<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r) const
 {
+  ARIADNE_LOG(4,"Rectangle Applicator::evaluate(MapInterface,Rectangle)\n");
   return this->_plugin->evaluate(f,r);
 }
 
@@ -218,6 +219,7 @@ template<class R>
 Geometry::Zonotope<R> 
 Evaluation::Applicator<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<R>& z) const 
 {
+  ARIADNE_LOG(4,"Rectangle Applicator::evaluate(MapInterface,Zonotope<R>)\n");
   return this->_plugin->evaluate(f,z);
 }
 
@@ -229,6 +231,7 @@ template<class R>
 Geometry::Zonotope<Numeric::Interval<R>,R> 
 Evaluation::Applicator<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<Numeric::Interval<R>,R>& z) const 
 {
+  ARIADNE_LOG(4,"Rectangle Applicator::evaluate(MapInterface,Zonotope<I,R>)\n");
   return this->_plugin->evaluate(f,z);
 }
 
@@ -238,6 +241,7 @@ template<class R>
 Geometry::Zonotope< Numeric::Interval<R> > 
 Evaluation::Applicator<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope< Numeric::Interval<R> >& z) const 
 {
+  ARIADNE_LOG(4,"Rectangle Applicator::evaluate(MapInterface,Zonotope<I,I>)\n");
   return this->_plugin->evaluate(f,z);
 }
 
@@ -494,7 +498,7 @@ Evaluation::Applicator<R>::chainreach(const System::MapInterface<R>& f,
   typedef Numeric::Interval<R> I;
   typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
   ARIADNE_LOG(2,"GridMaskSet Applicator::chainreach(MapInterface map, GridMaskSet initial_set, GridMaskSet bounding_set)\n");
-  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\nbounding_set="<<bounding_set);
+  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\nbounding_set="<<bounding_set<<"\n");
   ARIADNE_CHECK_BOUNDED(initial_set,"GridMaskSet Applicator<R>::chainreach(MapInterface,GridMaskSet,GridMaskSet)");
   ARIADNE_CHECK_BOUNDED(bounding_set,"GridMaskSet Applicator<R>::chainreach(MapInterface,GridMaskSet,GridMaskSet)");
   

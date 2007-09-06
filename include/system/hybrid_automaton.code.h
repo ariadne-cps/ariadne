@@ -107,6 +107,22 @@ System::DiscreteMode<R>::transitions() const
   return this->_transitions;
 }
 
+template<class R>
+const Geometry::SetInterface<R>&
+System::DiscreteMode<R>::invariant() const
+{
+  ARIADNE_LOG(4,"DiscreteMode::invariant()\n");
+  if(this->_invariants.size()!=1) {
+    throw std::runtime_error("DiscreteMode::invariant(): cannot compute invariant set for more than one constraint");
+  }
+  const Geometry::ConstraintInterface<R>& constraint=*this->_invariants.begin()->second;
+  const Geometry::SetConstraint<R>* set_constraint=dynamic_cast<const Geometry::SetConstraint<R>*>(&constraint);
+  if(!set_constraint) {
+    throw std::runtime_error("DiscreteMode::invariant(): constraint is not a SetConstraint");
+  }
+  return set_constraint->set();
+}
+
 
 /*
 template<class R>
@@ -229,6 +245,22 @@ System::DiscreteTransition<R>::constraint() const
   return *this->_constraint;
 }
 
+
+template<class R>
+const Geometry::SetInterface<R>&
+System::DiscreteTransition<R>::activation() const
+{
+  ARIADNE_LOG(4,"DiscreteTransition::activation()\n");
+  const Geometry::ConstraintInterface<R>& constraint=this->constraint();
+  const Geometry::SetConstraint<R>* set_constraint=dynamic_cast<const Geometry::SetConstraint<R>*>(&constraint);
+  if(!set_constraint) {
+    throw std::runtime_error("DiscreteTransition::activation(): constraint is not a SetConstraint");
+  }
+  if(set_constraint->inside()!=false) {
+    throw std::runtime_error("DiscreteTransition::activation(): constraint is not of form x not in Set");
+  }
+  return set_constraint->set();
+}
 
 template<class R>
 System::EventKind

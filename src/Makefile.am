@@ -61,7 +61,6 @@ SYSTEM_SRC = \
 	system/vector_field.cc system/affine_vector_field.cc \
 	system/multimap.cc system/affine_multimap.cc \
 	system/hybrid_automaton.cc \
-	system/set_based_hybrid_automaton.cc \
 	system/grid_multimap.cc 
 
 

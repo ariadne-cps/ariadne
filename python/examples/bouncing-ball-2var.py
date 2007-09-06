@@ -61,7 +61,8 @@ print maximum_step_size,lock_to_grid_time,maximum_set_radius;
 apply=Applicator()
 integrator=AffineIntegrator(maximum_step_size,lock_to_grid_time,maximum_set_radius);
 #integrator=LohnerIntegrator(maximum_step_size,lock_to_grid_time,maximum_set_radius);
-hybrid_evolver=HybridEvolver(apply,integrator);
+#hybrid_evolver=HybridEvolver(apply,integrator);
+hybrid_evolver=SetBasedHybridEvolver(apply,integrator);
 
 set_hybrid_evolver_verbosity(4)
 #set_applicator_verbosity(7)
@@ -119,8 +120,8 @@ eps.close()
 
 print
 
-# Txt output
-txt=TxtPlot()
+# Text output
+txt=TextFile()
 txt.open("bouncing-ball.txt")
 txt.write(chainreach_set[l1.id()])
 txt.close()

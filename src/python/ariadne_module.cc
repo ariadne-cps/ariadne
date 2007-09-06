@@ -94,6 +94,7 @@ template<class R> void export_solve();
 template<class R> void export_apply();
 template<class R> void export_integrate();
 template<class R> void export_hybrid_evolver();
+template<class R> void export_set_based_hybrid_evolver();
 
 void export_postscript_output();
 void export_text_output();
@@ -184,6 +185,7 @@ BOOST_PYTHON_MODULE(ariadne)
   export_apply<Float>();
   export_integrate<Float>();
   export_hybrid_evolver<Float>();
+  export_set_based_hybrid_evolver<Float>();
 
   export_postscript_output();
   export_tex_output();

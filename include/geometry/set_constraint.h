@@ -73,6 +73,8 @@ namespace Ariadne {
 
       /*! \brief The function defining the constraint. */
       const Geometry::SetInterface<R>& set() const;
+      /*! \brief Returns true if the constraint has negative value for points inside the set. */
+      bool inside() const;
      private:
       static void instantiate();
      private:

@@ -21,6 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+/*! \file pointer.h
+ *  \brief Smart pointers.
+ */
+
 #ifndef ARIADNE_POINTER_H
 #define ARIADNE_POINTER_H
 
@@ -33,5 +37,14 @@ namespace Ariadne {
     using boost::scoped_ptr;
   }
 }
+
+#ifdef DOXYGEN
+namespace Ariadne {
+  /*! \brief Reference-counted shared pointer. Initialise with a dynamically-allocated object; destruction is performed automatically. */
+  template<class T> class shared_ptr { };
+  /*! \brief Scope smart pointer. Initialise with a dynamically-allocated object; destruction is performed automatically when object goes out of scope. Cannot be used in containers. */
+  template<class T> class scoped_ptr { };
+}
+#endif
 
 #endif /* ARIADNE_POINTER_H */

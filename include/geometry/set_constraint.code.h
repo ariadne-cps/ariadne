@@ -103,6 +103,13 @@ Geometry::SetConstraint<R>::set() const
 }
 
 template<class R>
+bool
+Geometry::SetConstraint<R>::inside() const
+{
+  return this->_inside;
+}
+
+template<class R>
 void 
 instantiate()
 {

@@ -35,7 +35,7 @@
 #include "geometry/polyhedral_set.h"
 #include "system/affine_map.h"
 #include "system/affine_vector_field.h"
-#include "system/set_based_hybrid_automaton.h"
+#include "system/hybrid_automaton.h"
 
 #include "test.h"
 
@@ -72,17 +72,16 @@ int test_set_based_hybrid_automaton()
   cout << "activation21=" << activation21 << endl;
   cout << endl;
   
-  SetBasedHybridAutomaton<R> automaton("Affine test automaton");
+  HybridAutomaton<R> automaton("Affine test automaton");
   id_type mode1_id=0;
   id_type mode2_id=1;
-  const SetBasedDiscreteMode<R>& mode1=automaton.new_mode(mode1_id,dynamic,invariant);
-  const SetBasedDiscreteMode<R>& mode2=automaton.new_mode(mode2_id,dynamic,invariant);
+  const DiscreteMode<R>& mode1=automaton.new_mode(mode1_id,dynamic,invariant);
+  const DiscreteMode<R>& mode2=automaton.new_mode(mode2_id,dynamic,invariant);
   id_type event_id=5;
-  const SetBasedDiscreteTransition<R>& transition12=automaton.new_transition(event_id,mode1_id,mode2_id,reset,activation12);
-  const SetBasedDiscreteTransition<R>& transition21=automaton.new_transition(event_id,mode2_id,mode1_id,reset,activation21);
+  const DiscreteTransition<R>& transition12=automaton.new_transition(event_id,mode1_id,mode2_id,reset,activation12);
+  const DiscreteTransition<R>& transition21=automaton.new_transition(event_id,mode2_id,mode1_id,reset,activation21);
   
   cout << mode1  <<  "\n" << mode2 << "\n" << transition12 << "\n" << transition21 << endl;
-  cout << automaton.invariant() << endl;
 
   return 0;
 }

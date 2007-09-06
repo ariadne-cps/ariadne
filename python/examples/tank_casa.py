@@ -65,7 +65,8 @@ print bounding_box_set[mode1_id].size(),bounding_box_set[mode1_id].capacity()
 
 apply=Applicator()
 integrator=AffineIntegrator(0.125,0.5,0.25);
-hybrid_evolver=HybridEvolver(apply,integrator);
+#hybrid_evolver=HybridEvolver(apply,integrator);
+hybrid_evolver=SetBasedHybridEvolver(apply,integrator);
 
 #chain reach
 res=hybrid_evolver.chainreach(automaton,initial_set,bounding_box_set)

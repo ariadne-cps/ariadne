@@ -86,15 +86,10 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_apply.cc \
 	export_integrate.cc \
 	export_hybrid_evolver.cc \
+	export_set_based_hybrid_evolver.cc \
 	 \
 	export_postscript_output.cc \
 	export_tex_output.cc \
 	export_text_output.cc \
 	 \
 	export_models.cc
-
-
-#	 \
-#	export_set_based_hybrid_automaton.cc \
-#	export_set_based_hybrid_evolver.cc \
-#

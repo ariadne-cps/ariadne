@@ -86,7 +86,8 @@ maximum_set_radius=0.5;
 apply=Applicator()
 integrator=AffineIntegrator(maximum_step_size,lock_to_grid_time,maximum_set_radius);
 #integrator=LohnerIntegrator(maximum_step_size,lock_to_grid_time,maximum_set_radius);
-hybrid_evolver=HybridEvolver(apply,integrator);
+#hybrid_evolver=HybridEvolver(apply,integrator);
+hybrid_evolver=SetBasedHybridEvolver(apply,integrator);
 
 print "Computing continuous chainreach set"
 continuous_chainreach_set=hybrid_evolver.continuous_chainreach(automaton,initial_set,bounding_set)

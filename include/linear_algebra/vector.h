@@ -64,9 +64,9 @@ namespace Ariadne {
       /*! \brief Construct the zero vector of size \a n with all elements initialized to \a x. */
       explicit Vector(const size_type& n, const R& x);
       /*! \brief Construct a vector from the array \a ary. */
-      explicit Vector(const array<R>& ary);
-      /*! \brief Construct a vector of size \a n from the array beginning at \a ptr. */
-      explicit Vector(const size_type& n, const R* ptr, const size_type& inc=1);
+      template<class RR> explicit Vector(const array<RR>& ary);
+      /*! \brief Construct a vector of size \a n from the array beginning at \a ptr with increment inc. */
+      template<class RR> explicit Vector(const size_type& n, const RR* ptr, const size_type& inc=1);
 
       /* Convert from a vector expression. */
       template<class E> Vector(const VectorExpression<E>& ve);

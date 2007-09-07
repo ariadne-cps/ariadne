@@ -44,14 +44,15 @@ LinearAlgebra::Vector<R>::Vector(const size_type& n, const R& x)
   for(size_type i=0; i!=n; ++i) { (*this)(i)=x; }
 }
 
-template<class R> inline
-LinearAlgebra::Vector<R>::Vector(const array<R>& ary)
+
+template<class R> template<class RR> inline
+LinearAlgebra::Vector<R>::Vector(const array<RR>& ary)
   : _array(ary) 
 { 
 }
 
-template<class R> inline
-LinearAlgebra::Vector<R>::Vector(const size_type& n, const R* ptr, const size_type& inc)
+template<class R> template<class RR> inline
+LinearAlgebra::Vector<R>::Vector(const size_type& n, const RR* ptr, const size_type& inc)
   : _array(n) 
 { 
   for(size_type i=0; i!=n; ++i) { 

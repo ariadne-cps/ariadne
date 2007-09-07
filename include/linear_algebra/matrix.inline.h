@@ -38,17 +38,17 @@ LinearAlgebra::Matrix<R>::Matrix(const size_type& r, const size_type& c)
 }
 
 
-template<class R> inline
-LinearAlgebra::Matrix<R>::Matrix(const size_type& nr, const size_type& nc,const R* ptr)
+template<class R> template<class RR> inline
+LinearAlgebra::Matrix<R>::Matrix(const size_type& nr, const size_type& nc,const RR* ptr)
   
   : _nr(nr), _nc(nc), _array(ptr,ptr+nr*nc) 
 { 
 }
 
 
-template<class R> inline
+template<class R> template<class RR> inline
 LinearAlgebra::Matrix<R>::Matrix(const size_type& nr, const size_type& nc, 
-                                 const R* ptr, const size_type& ri, const size_type& ci)
+                                 const RR* ptr, const size_type& ri, const size_type& ci)
   : _nr(nr), _nc(nc), _array(nr*nc) 
 { 
   for(size_type i=0; i!=nr; ++i) { 

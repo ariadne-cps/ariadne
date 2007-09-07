@@ -179,11 +179,19 @@ namespace Ariadne {
       return n1*n2;
     }
     
-    /*! \brief The power of a real number type by an integer. */
+    /*! \brief The power of an integer by an unsigned integer. */
     template<> inline 
     Integer pow(const Integer& n, const uint& i) {
       Integer r=1; Integer p=n; uint e=1;
-      while(e<i) { if(e&i) { r*=p; } p*=p; e*=2; }
+      while(e<=i) { if(e&i) { r*=p; } p*=p; e*=2; }
+      return r; 
+    }
+
+    /*! \brief The power of an integer by an unsigned integer. */
+    template<> inline 
+    uint pow(const uint& n, const uint& i) {
+      uint r=1; uint p=n; uint e=1;
+      while(e<=i) { if(e&i) { r*=p; } p*=p; e*=2; }
       return r; 
     }
     //@}
@@ -207,10 +215,44 @@ namespace Ariadne {
       //std::cerr << "choose(" << n << "," << k << ")=" << std::flush;
       if(k==0 || k==n) { return 1; }
       if(n<0 || k<0 || k>n) { return 0; }
-      N m=(n-k < k) ? k : static_cast<N>(n-k);
+      N m=(k < n-k) ? k : static_cast<N>(n-k);
       N result=1;
       for(N i=n; i!=n-m; --i) { result*=i; }
       for(N i=m; i!=1; --i) { result/=i; }
+      //std::cerr << result << std::endl;
+      return result;
+    }
+    
+    /*!\brief The number of ways of choosing \a k objects from \a n. */
+    template<> inline 
+    int choose<int>(const int& n, const int& k) 
+    {
+      //std::cerr << "choose<int>(" << n << "," << k << ")=" << std::flush;
+      long result=1;
+      if(k==0 || k==n) { }
+      else if(n<0 || k<0 || k>n) { result=0; }
+      else {
+        int m=(k < n-k) ? k : n-k;
+        for(int i=n; i!=n-m; --i) { result*=i; }
+        for(int i=m; i!=1; --i) { result/=i; }
+      }
+      //std::cerr << result << std::endl;
+      return result;
+    }
+    
+    template<> inline 
+    uint choose<uint>(const uint& n, const uint& k) 
+    {
+      //std::cerr << "choose<uint>(" << n << "," << k << ")=" << std::flush;
+      ulong result=1;
+      if(k==0 || k==n) { }
+      else if(n<0 || k<0 || k>n) { result=0; }
+      else {
+        uint m=(k < n-k) ? k : (n-k);
+        for(uint i=n; i!=n-m; --i) { result*=i; }
+        for(uint i=m; i!=1; --i) { result/=i; }
+      }
+      //std::cerr << result << std::endl;
       return result;
     }
     

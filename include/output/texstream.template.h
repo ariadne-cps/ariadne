@@ -40,11 +40,12 @@ inline void Output::texfstream::open(const char* fn, const char* preamble) {
 inline void Output::texfstream::close() { 
   *this->_ofs_ptr << "\n\\end{document}\n"; this->_ofs_ptr->close(); }
 inline Output::texfstream::~texfstream() { 
-  this->_ofs_ptr->close(); delete this->_ofs_ptr; }
+  this->close(); delete this->_ofs_ptr; }
 
 inline Output::texstream& Output::operator<<(texstream& txs, const char& c) { *txs._os_ptr << c; return txs; }
 inline Output::texstream& Output::operator<<(texstream& txs, const char* s) { *txs._os_ptr << s; return txs; }
 inline Output::texstream& Output::operator<<(texstream& txs, const int& n) { *txs._os_ptr << n; return txs; }
+inline Output::texstream& Output::operator<<(texstream& txs, const uint& n) { *txs._os_ptr << n; return txs; }
 inline Output::texstream& Output::operator<<(texstream& txs, const double& x) { *txs._os_ptr << x; return txs; }
 
 inline Output::texstream& Output::operator<<(texstream& txs, const Numeric::Integer& z) { *txs._os_ptr << z; return txs; }
@@ -98,19 +99,6 @@ Output::operator<<(texstream& txs, const Geometry::Rectangle<R>& r)
     txs << ivl;
     //    txs << Numeric::Interval<R>(r[i]);
   } 
-  return txs;
-}
-
-template<class R> 
-Output::texstream& 
-Output::operator<<(texstream& txs, const Function::Polynomial<R>& p) 
-{
-  /*
-  assert(p.result_size()==1);
-  for(size_type i=0; i!=p.number_of_terms(); ++i) {
-    txs << p[i];
-  } 
-  */
   return txs;
 }
 

@@ -69,11 +69,11 @@ namespace Ariadne {
       /*! \brief Construct an \a r by \a c matrix, all of whose entries are zero. */
       explicit Matrix(const size_type& r, const size_type& c);
       /*! \brief Construct an \a r by \a c matrix from the array beginning at \a ptr. */
-      explicit Matrix(const size_type& nr, const size_type& nc,const R* ptr);
+      template<class RR> explicit Matrix(const size_type& nr, const size_type& nc,const RR* ptr);
       /*! \brief Construct an \a r by \a c matrix from the array beginning at \a ptr, 
        *  incrementing the input row elements by \a ri and input columns by \a ci. */
-      explicit Matrix(const size_type& nr, const size_type& nc, 
-                      const R* ptr, const size_type& ri, const size_type& ci=1u);
+      template<class RR> explicit Matrix(const size_type& nr, const size_type& nc, 
+                                         const RR* ptr, const size_type& ri, const size_type& ci=1u);
 
       /*! \brief Convert from a matrix expression. */
       template<class E> Matrix(const MatrixExpression<E>& A);

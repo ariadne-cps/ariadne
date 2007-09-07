@@ -1,8 +1,8 @@
 /***************************************************************************
- *            function/declarations.h
+ *            polynomial.cc
  *
  *  Copyright  2007  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -20,25 +20,28 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-/*! \file function/declarations.h
- *  \brief Forward declarations of classes in the function module.
- */
 
-#ifndef ARIADNE_FUNCTION_DECLARATIONS_H
-#define ARIADNE_FUNCTION_DECLARATIONS_H
+#include "numeric/float.h"
 
-namespace Ariadne { 
+#include "function/polynomial.h"
+#include "function/polynomial.code.h"
+
+namespace Ariadne {
   namespace Function {
-    template<class R> class FunctionInterface;
-    template<class R> class InterpretedFunction;
-     
-    template<class R> class Polynomial;
+    using namespace Numeric;
+    
+    template class Polynomial<Rational>;
+    template void add(Polynomial<Rational>&,const Polynomial<Rational>&,const Polynomial<Rational>&);
 
-    template<class R> class AffineModel;
-    template<class R> class PolynomialModel;
+#ifdef ENABLE_FLOAT64
+    template class Polynomial<Float64>;
+    template class Polynomial< Interval<Float64> >;
+#endif
+    
+#ifdef ENABLE_FLOATMP
+    template class Polynomial<FloatMP>;
+    template class Polynomial< Interval<FloatMP> >;
+#endif
 
   }
 }
-
-#endif /* ARIADNE_FUNCTION_DECLARATIONS_H */

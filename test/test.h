@@ -58,7 +58,7 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
   std::cout << #statement << ": " << std::flush; \
   try { \
     statement;                      \
-    std::cout << "ok\n" << std::endl; \
+    std::cout << " (ok)\n" << std::endl;        \
   } \
   ARIADNE_CATCH("Statement `" << #statement << "'")       \
 }\
@@ -127,5 +127,20 @@ class variable expression; \
     std::cout << variable << "\n" << std::endl; \
   }                                       \
   ARIADNE_CATCH("Assignment `" << #variable << "=" << #expression << "'")   \
+} \
+
+
+/*! \brief Evaluates expression and expects an exception. */
+#define ARIADNE_FAIL(statement) \
+{ \
+  std::cout << #statement << ": " << std::flush; \
+  try { \
+    statement; \
+    ++ARIADNE_TEST_FAILURES; \
+    std::cout << "expected exception; none thrown\n"; \
+  } \
+  catch(...) { \
+    std::cout << "caught exception as expected\n" << std::endl; \
+  } \
 } \
 

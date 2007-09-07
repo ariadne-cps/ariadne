@@ -35,7 +35,8 @@ COMBINATORIC_SRC = \
 FUNCTION_SRC = \
 	function/interpreted_function.cc \
 	function/affine_model.cc \
-	function/polynomial_model.cc
+	function/polynomial_model.cc \
+	function/polynomial.cc
 
 GEOMETRY_SRC = \
 	geometry/point.cc geometry/point_list.cc \
@@ -102,7 +103,8 @@ libariadne_la_LIBADD = $(noinst_LTLIBRARIES) -lmpfr -lppl -lgmpxx
 libariadne_la_SOURCES = 
 nodist_EXTRA_libariadne_la_SOURCES = dummy.cc
 
-libgeometric_la_LIBADD = libbase.la libnumeric.la liblinearalgebra.la liblinearprogramming.la libcombinatoric.la libgeometry.la -lmpfr -lppl -lgmpxx
+libgeometric_la_LIBADD = libbase.la libnumeric.la liblinearalgebra.la liblinearprogramming.la \
+	libcombinatoric.la libfunction.la libgeometry.la -lmpfr -lppl -lgmpxx
 libgeometric_la_SOURCES = 
 nodist_EXTRA_libgeometric_la_SOURCES = dummy.cc
 

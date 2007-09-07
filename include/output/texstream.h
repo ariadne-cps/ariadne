@@ -42,8 +42,10 @@ namespace Ariadne {
     
     class texstream;
 
-    texstream& operator<<(texstream& txs, const char* c);
+    texstream& operator<<(texstream& txs, const char& c);
+    texstream& operator<<(texstream& txs, const char* s);
     texstream& operator<<(texstream& txs, const int& n);
+    texstream& operator<<(texstream& txs, const uint& n);
     texstream& operator<<(texstream& txs, const double& x);
 
     template<class R> texstream& operator<<(texstream& txs, const Numeric::Integer& z);
@@ -68,6 +70,7 @@ namespace Ariadne {
       friend texstream& operator<<(texstream&, const char&);
       friend texstream& operator<<(texstream&, const char*);
       friend texstream& operator<<(texstream&, const int&);
+      friend texstream& operator<<(texstream&, const uint&);
       friend texstream& operator<<(texstream&, const double&);
       friend texstream& operator<<(texstream&, const Numeric::Integer&);
       friend texstream& operator<<(texstream&, const Numeric::Rational&);

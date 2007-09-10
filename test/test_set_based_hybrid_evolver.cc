@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_set_based_hybrid_evolution.cc
+ *            test_set_based_hybrid_evolver.cc
  *
  *  Copyright  2006  Alberto Casagrande,  Pieter Collins
  *  Email  casagrande@dimi.uniud.it  Pieter.Collins@cwi.nl
@@ -35,11 +35,10 @@
 #include "geometry/polyhedral_set.h"
 #include "system/affine_map.h"
 #include "system/affine_vector_field.h"
-#include "system/hybrid_automaton.h"
+#include "system/set_based_hybrid_automaton.h"
 #include "evaluation/applicator.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
-#include "evaluation/hybrid_evolver.h"
 #include "evaluation/set_based_hybrid_evolver.h"
 #include "output/epsstream.h"
 #include "output/logging.h"
@@ -81,16 +80,16 @@ int test_set_based_hybrid_evolution()
   AffineMap<R> reset12(Matrix<R>("[1,0;0,-1]"),Vector<R>("[0,0]"));
    
   
-  HybridAutomaton<R> automaton("Affine automaton");
+  SetBasedHybridAutomaton<R> automaton("Affine automaton");
   id_type mode1_id=2;
   id_type mode2_id=3;
-  const DiscreteMode<R>& mode1=automaton.new_mode(mode1_id,dynamic1,invariant1);
-  const DiscreteMode<R>& mode2=automaton.new_mode(mode2_id,dynamic2,invariant2);
+  const SetBasedDiscreteMode<R>& mode1=automaton.new_mode(mode1_id,dynamic1,invariant1);
+  const SetBasedDiscreteMode<R>& mode2=automaton.new_mode(mode2_id,dynamic2,invariant2);
   id_type event1_id=5;
   id_type event2_id=7;
-  const DiscreteTransition<R>& transition11=automaton.new_transition(event1_id,mode1_id,mode1_id,reset11,activation11);
-  const DiscreteTransition<R>& transition21=automaton.new_transition(event1_id,mode2_id,mode1_id,reset21,activation21);
-  const DiscreteTransition<R>& transition12=automaton.new_transition(event2_id,mode1_id,mode2_id,reset12,activation12);
+  const SetBasedDiscreteTransition<R>& transition11=automaton.new_transition(event1_id,mode1_id,mode1_id,reset11,activation11);
+  const SetBasedDiscreteTransition<R>& transition21=automaton.new_transition(event1_id,mode2_id,mode1_id,reset21,activation21);
+  const SetBasedDiscreteTransition<R>& transition12=automaton.new_transition(event2_id,mode1_id,mode2_id,reset12,activation12);
   
   cout << mode1 << " " << mode2 << endl;
   cout << transition11 << " " << transition21 << " " << transition12 << " " << endl;

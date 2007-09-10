@@ -37,7 +37,6 @@
 #include "../geometry/declarations.h"
 #include "../system/declarations.h"
 #include "../evaluation/declarations.h"
-#include "../evaluation/integrator.h"
 #include "../evaluation/time_model.h"
 
 namespace Ariadne {  

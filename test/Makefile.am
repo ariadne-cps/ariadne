@@ -54,7 +54,7 @@ check_PROGRAMS = \
 	test_level_set \
 	 \
 	test_set_based_hybrid_automaton \
-	test_hybrid_automaton \
+	test_constraint_based_hybrid_automaton \
 	 \
 	test_newton \
 	test_apply \
@@ -62,9 +62,9 @@ check_PROGRAMS = \
 	test_affine_integrator \
 	test_integrate \
 	test_chainreach \
-	test_hybrid_evolution_step \
-	test_hybrid_evolution \
-	test_set_based_hybrid_evolution \
+	test_set_based_hybrid_evolver \
+	test_constraint_based_hybrid_evolver \
+	test_constraint_based_hybrid_evolver_plugin \
 	 \
         test_texstream \
         test_epsstream \
@@ -122,7 +122,10 @@ test_polyhedron_SOURCES=test_polyhedron.cc
 test_constraint_SOURCES=test_constraint.cc
 test_constraint_set_SOURCES=test_constraint_set.cc
 test_level_set_SOURCES=test_level_set.cc
-test_hybrid_automaton_SOURCES=test_hybrid_automaton.cc
+
+test_set_based_hybrid_automaton_SOURCES=test_set_based_hybrid_automaton.cc
+test_constraint_based_hybrid_automaton_SOURCES=test_constraint_based_hybrid_automaton.cc
+
 
 test_newton_SOURCES=test_newton.cc
 test_apply_SOURCES=test_apply.cc
@@ -131,8 +134,15 @@ test_affine_integrator_SOURCES=test_affine_integrator.cc
 test_integrate_SOURCES=test_integrate.cc
 test_chainreach_SOURCES=test_chainreach.cc
 test_hybrid_evolution_step_SOURCES=test_hybrid_evolution_step.cc
-test_hybrid_evolution_SOURCES=test_hybrid_evolution.cc
-test_set_based_hybrid_evolution_SOURCES=test_hybrid_evolution.cc
+test_set_based_hybrid_evolver_SOURCES=test_set_based_hybrid_evolver.cc
+test_constraint_based_hybrid_evolver_SOURCES=test_constraint_based_hybrid_evolver.cc
+test_constraint_based_hybrid_evolver_plugin_SOURCES=test_constraint_based_hybrid_evolver_plugin.cc
+
+test_epsstream_SOURCES=test_epsstream.cc 
+test_textstream_SOURCES=test_textstream.cc
+test_chompstream_SOURCES=test_chompfstream.cc
+
+
 
 test_epsstream_SOURCES=test_epsstream.cc 
 test_textstream_SOURCES=test_textstream.cc

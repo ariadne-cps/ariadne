@@ -24,7 +24,7 @@
 #include "python/python_float.h"
 
 #include "geometry/hybrid_set.h"
-#include "system/hybrid_automaton.h"
+#include "system/set_based_hybrid_automaton.h"
 #include "evaluation/applicator.h"
 #include "evaluation/integrator.h"
 #include "evaluation/set_based_hybrid_evolver.h"
@@ -43,13 +43,13 @@ template<class R>
 void export_set_based_hybrid_evolver() 
 {
   class_< SetBasedHybridEvolver<R> >("SetBasedHybridEvolver",init<Applicator<R>&,Integrator<R>&>()) 
-    .def("discrete_step",(HybridSet<R>(SetBasedHybridEvolver<R>::*)(const HybridAutomaton<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::discrete_step)
-    .def("continuous_chainreach",(HybridSet<R>(SetBasedHybridEvolver<R>::*)(const HybridAutomaton<R>&,const HybridSet<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::continuous_chainreach)
-    .def("chainreach",(HybridSet<R>(SetBasedHybridEvolver<R>::*)(const HybridAutomaton<R>&,const HybridSet<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::chainreach)
+    .def("discrete_step",(HybridSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::discrete_step)
+    .def("continuous_chainreach",(HybridSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridSet<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::continuous_chainreach)
+    .def("chainreach",(HybridSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridSet<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::chainreach)
 
-    .def("discrete_step",(HybridGridMaskSet<R>(SetBasedHybridEvolver<R>::*)(const HybridAutomaton<R>&,const HybridGridMaskSet<R>&))&SetBasedHybridEvolver<R>::discrete_step)
-    .def("continuous_chainreach",(HybridGridMaskSet<R>(SetBasedHybridEvolver<R>::*)(const HybridAutomaton<R>&,const HybridGridMaskSet<R>&,const HybridGridMaskSet<R>&))&SetBasedHybridEvolver<R>::continuous_chainreach)
-    .def("chainreach",(HybridGridMaskSet<R>(SetBasedHybridEvolver<R>::*)(const HybridAutomaton<R>&,const HybridGridMaskSet<R>&,const HybridGridMaskSet<R>&))&SetBasedHybridEvolver<R>::chainreach)
+    .def("discrete_step",(HybridGridMaskSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridGridMaskSet<R>&))&SetBasedHybridEvolver<R>::discrete_step)
+    .def("continuous_chainreach",(HybridGridMaskSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridGridMaskSet<R>&,const HybridGridMaskSet<R>&))&SetBasedHybridEvolver<R>::continuous_chainreach)
+    .def("chainreach",(HybridGridMaskSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridGridMaskSet<R>&,const HybridGridMaskSet<R>&))&SetBasedHybridEvolver<R>::chainreach)
   ;
 }
 

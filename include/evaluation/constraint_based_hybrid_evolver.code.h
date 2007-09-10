@@ -1,5 +1,5 @@
 /***************************************************************************
- *            constraint_hybrid_evolver.code.h
+ *            constraint_based_hybrid_evolver.code.h
  *
  *  Copyright  2007  Pieter Collins
  *  Pieter.Collins@cwi.nl
@@ -29,18 +29,18 @@
 #include "../geometry/timed_set.h"
 #include "../system/map.h"
 #include "../system/vector_field.h"
-#include "../system/hybrid_automaton.h"
+#include "../system/constraint_based_hybrid_automaton.h"
 #include "../evaluation/applicator.h"
 #include "../evaluation/integrator.h"
+#include "../evaluation/lohner_integrator.h"
 #include "../evaluation/detector.h"
 
-#include "../evaluation/lohner_integrator.h"
-#include "../evaluation/hybrid_evolver_plugin.h"
+#include "../evaluation/constraint_based_hybrid_evolver_plugin.h"
 
 #include "../output/epsstream.h"
 #include "../output/logging.h"
 
-#include "hybrid_evolver.h"
+#include "constraint_based_hybrid_evolver.h"
 
 
 namespace {
@@ -78,26 +78,26 @@ using namespace Geometry;
 using namespace System;
 
 template<class R>
-Evaluation::HybridEvolver<R>::~HybridEvolver()
+Evaluation::ConstraintBasedHybridEvolver<R>::~ConstraintBasedHybridEvolver()
 {
   delete this->_plugin;
 }
 
 
 template<class R>
-Evaluation::HybridEvolver<R>::HybridEvolver(const Applicator<R>& a, const Integrator<R>& i)
-  : _plugin(new HybridEvolverPlugin<R>(a,i,Detector<R>()))
+Evaluation::ConstraintBasedHybridEvolver<R>::ConstraintBasedHybridEvolver(const Applicator<R>& a, const Integrator<R>& i)
+  : _plugin(new ConstraintBasedHybridEvolverPlugin<R>(a,i,Detector<R>()))
 {
 }
 
 template<class R>
-Evaluation::HybridEvolver<R>::HybridEvolver(const Applicator<R>& a, const Integrator<R>& i, const Detector<R>& d)
-  : _plugin(new HybridEvolverPlugin<R>(a,i,d))
+Evaluation::ConstraintBasedHybridEvolver<R>::ConstraintBasedHybridEvolver(const Applicator<R>& a, const Integrator<R>& i, const Detector<R>& d)
+  : _plugin(new ConstraintBasedHybridEvolverPlugin<R>(a,i,d))
 {
 }
 
 template<class R>
-Evaluation::HybridEvolver<R>::HybridEvolver(const HybridEvolver<R>& evolver)
+Evaluation::ConstraintBasedHybridEvolver<R>::ConstraintBasedHybridEvolver(const ConstraintBasedHybridEvolver<R>& evolver)
   :_plugin(evolver._plugin)
 {
 }
@@ -105,8 +105,8 @@ Evaluation::HybridEvolver<R>::HybridEvolver(const HybridEvolver<R>& evolver)
 
 
 template<class R>
-const std::vector<typename Evaluation::HybridEvolver<R>::timed_set_type>&
-Evaluation::HybridEvolver<R>::trace() const
+const std::vector<typename Evaluation::ConstraintBasedHybridEvolver<R>::timed_set_type>&
+Evaluation::ConstraintBasedHybridEvolver<R>::trace() const
 {
   return this->_trace;
 }
@@ -114,7 +114,7 @@ Evaluation::HybridEvolver<R>::trace() const
 
 template<class R>
 time_type
-Evaluation::HybridEvolver<R>::maximum_step_size() const
+Evaluation::ConstraintBasedHybridEvolver<R>::maximum_step_size() const
 {
   return this->_plugin->_integrator->maximum_step_size();
 }
@@ -122,7 +122,7 @@ Evaluation::HybridEvolver<R>::maximum_step_size() const
 
 template<class R>
 R
-Evaluation::HybridEvolver<R>::maximum_basic_set_radius() const
+Evaluation::ConstraintBasedHybridEvolver<R>::maximum_basic_set_radius() const
 {
   return this->_plugin->_integrator->maximum_basic_set_radius();
 }
@@ -130,7 +130,7 @@ Evaluation::HybridEvolver<R>::maximum_basic_set_radius() const
 
 template<class R>
 time_type
-Evaluation::HybridEvolver<R>::lock_to_grid_time() const
+Evaluation::ConstraintBasedHybridEvolver<R>::lock_to_grid_time() const
 {
   return this->_plugin->_integrator->lock_to_grid_time();
 }
@@ -138,8 +138,8 @@ Evaluation::HybridEvolver<R>::lock_to_grid_time() const
 
 
 template<class R> 
-typename Evaluation::HybridEvolver<R>::working_sets_type
-Evaluation::HybridEvolver<R>::_compute_working_sets(const hybrid_list_set_type& set) const
+typename Evaluation::ConstraintBasedHybridEvolver<R>::working_sets_type
+Evaluation::ConstraintBasedHybridEvolver<R>::_compute_working_sets(const hybrid_list_set_type& set) const
 {
   working_sets_type working_sets;
   /*
@@ -174,8 +174,8 @@ Evaluation::HybridEvolver<R>::_compute_working_sets(const hybrid_list_set_type& 
 
 
 template<class R> inline
-typename Evaluation::HybridEvolver<R>::hybrid_list_set_type
-Evaluation::HybridEvolver<R>::_compute_list_set(const working_sets_type& working_sets, const HybridSpace& locations) const
+typename Evaluation::ConstraintBasedHybridEvolver<R>::hybrid_list_set_type
+Evaluation::ConstraintBasedHybridEvolver<R>::_compute_list_set(const working_sets_type& working_sets, const HybridSpace& locations) const
 {
   hybrid_list_set_type result_set(locations);
   for(typename working_sets_type::const_iterator iter=working_sets.begin();
@@ -193,7 +193,7 @@ Evaluation::HybridEvolver<R>::_compute_list_set(const working_sets_type& working
 
 template<class R>
 Geometry::HybridSet<R>
-Evaluation::HybridEvolver<R>::discrete_step(const System::HybridAutomaton<R>& automaton, 
+Evaluation::ConstraintBasedHybridEvolver<R>::discrete_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                             const Geometry::HybridSet<R>& initial_set) const
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
@@ -202,7 +202,7 @@ Evaluation::HybridEvolver<R>::discrete_step(const System::HybridAutomaton<R>& au
 
 template<class R>
 Geometry::HybridSet<R>
-Evaluation::HybridEvolver<R>::continuous_chainreach(const System::HybridAutomaton<R>& automaton, 
+Evaluation::ConstraintBasedHybridEvolver<R>::continuous_chainreach(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                                     const Geometry::HybridSet<R>& initial_set, 
                                                     const Geometry::HybridSet<R>& bounding_set) const
 {
@@ -212,7 +212,7 @@ Evaluation::HybridEvolver<R>::continuous_chainreach(const System::HybridAutomato
 
 template<class R>
 Geometry::HybridSet<R> 
-Evaluation::HybridEvolver<R>::lower_evolve(const System::HybridAutomaton<R>& automaton, 
+Evaluation::ConstraintBasedHybridEvolver<R>::lower_evolve(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                            const Geometry::HybridSet<R>&,
                                            time_type evolution_time,
                                            size_type maximum_number_of_events) const
@@ -223,7 +223,7 @@ Evaluation::HybridEvolver<R>::lower_evolve(const System::HybridAutomaton<R>& aut
 
 template<class R>
 Geometry::HybridSet<R> 
-Evaluation::HybridEvolver<R>::upper_evolve(const System::HybridAutomaton<R>& automaton, 
+Evaluation::ConstraintBasedHybridEvolver<R>::upper_evolve(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                            const Geometry::HybridSet<R>&,
                                            time_type evolution_time,
                                            size_type maximum_number_of_events) const
@@ -234,7 +234,7 @@ Evaluation::HybridEvolver<R>::upper_evolve(const System::HybridAutomaton<R>& aut
 
 template<class R>
 Geometry::HybridSet<R> 
-Evaluation::HybridEvolver<R>::lower_reach(const System::HybridAutomaton<R>& automaton, 
+Evaluation::ConstraintBasedHybridEvolver<R>::lower_reach(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                           const Geometry::HybridSet<R>&,
                                           time_type initial_time, 
                                           time_type final_time, 
@@ -246,7 +246,7 @@ Evaluation::HybridEvolver<R>::lower_reach(const System::HybridAutomaton<R>& auto
 
 template<class R>
 Geometry::HybridSet<R> 
-Evaluation::HybridEvolver<R>::upper_reach(const System::HybridAutomaton<R>& automaton, 
+Evaluation::ConstraintBasedHybridEvolver<R>::upper_reach(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                           const Geometry::HybridSet<R>&,
                                           time_type initial_time, 
                                           time_type final_time, 
@@ -258,7 +258,7 @@ Evaluation::HybridEvolver<R>::upper_reach(const System::HybridAutomaton<R>& auto
 
 template<class R>
 Geometry::HybridSet<R>
-Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<R>& automaton, 
+Evaluation::ConstraintBasedHybridEvolver<R>::chainreach(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                          const Geometry::HybridSet<R>& initial_set, 
                                          const Geometry::HybridSet<R>& bounding_set) const
 {
@@ -268,7 +268,7 @@ Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<R>& autom
 
 template<class R>
 Geometry::HybridSet<R>
-Evaluation::HybridEvolver<R>::viable(const System::HybridAutomaton<R>& automaton, 
+Evaluation::ConstraintBasedHybridEvolver<R>::viable(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                      const Geometry::HybridSet<R>& bounding_set) const
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
@@ -277,7 +277,7 @@ Evaluation::HybridEvolver<R>::viable(const System::HybridAutomaton<R>& automaton
 
 template<class R>
 tribool
-Evaluation::HybridEvolver<R>::verify(const System::HybridAutomaton<R>& automaton, 
+Evaluation::ConstraintBasedHybridEvolver<R>::verify(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                      const Geometry::HybridSet<R>& initial_set, 
                                      const Geometry::HybridSet<R>& sage_set) const
 {
@@ -289,13 +289,13 @@ Evaluation::HybridEvolver<R>::verify(const System::HybridAutomaton<R>& automaton
 
 
 template<class R>
-Geometry::HybridListSet<typename Evaluation::HybridEvolver<R>::continuous_basic_set_type> 
-Evaluation::HybridEvolver<R>::upper_evolve(const System::HybridAutomaton<R>& automaton, 
+Geometry::HybridListSet<typename Evaluation::ConstraintBasedHybridEvolver<R>::continuous_basic_set_type> 
+Evaluation::ConstraintBasedHybridEvolver<R>::upper_evolve(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                                      const Geometry::HybridListSet<continuous_basic_set_type>& initial_set, 
                                                      time_type evolution_time,
                                                      size_type maximum_number_of_events) const
 {
-  ARIADNE_LOG(2,"HybridEvolver::upper_evolve(HybridAutomaton automaton, ListSet initial_set, Time time, Integer maximum_number_of_events)\n");
+  ARIADNE_LOG(2,"ConstraintBasedHybridEvolver::upper_evolve(ConstraintBasedHybridAutomaton automaton, ListSet initial_set, Time time, Integer maximum_number_of_events)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<", evolution_time="<<evolution_time<<"\n");
   
   // Working sets contains (time,set) pairs, storing the sets reached with different remaining
@@ -334,13 +334,13 @@ Evaluation::HybridEvolver<R>::upper_evolve(const System::HybridAutomaton<R>& aut
 
 
 template<class R>
-Geometry::HybridListSet<typename Evaluation::HybridEvolver<R>::continuous_basic_set_type> 
-Evaluation::HybridEvolver<R>::upper_reach(const System::HybridAutomaton<R>& automaton, 
+Geometry::HybridListSet<typename Evaluation::ConstraintBasedHybridEvolver<R>::continuous_basic_set_type> 
+Evaluation::ConstraintBasedHybridEvolver<R>::upper_reach(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                                     const Geometry::HybridListSet<continuous_basic_set_type>& initial_set, 
                                                     time_type evolution_time, 
                                                     size_type maximum_number_of_events) const
 {
-  ARIADNE_LOG(2,"HybridEvolver::upper_reach(HybridAutomaton automaton, ListSet initial_set, Time time, Integer maximum_number_of_events)\n");
+  ARIADNE_LOG(2,"ConstraintBasedHybridEvolver::upper_reach(ConstraintBasedHybridAutomaton automaton, ListSet initial_set, Time time, Integer maximum_number_of_events)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<", evolution_time="<<evolution_time<<"\n");
   ARIADNE_LOG(7,"maximum_step_size="<<this->maximum_step_size()<<", maximum_basic_set_radius="<<this->maximum_basic_set_radius()<<"\n");
 
@@ -371,7 +371,7 @@ Evaluation::HybridEvolver<R>::upper_reach(const System::HybridAutomaton<R>& auto
 
 template<class R>
 Geometry::HybridGridCellListSet<R>
-Evaluation::HybridEvolver<R>::upper_evolve(const System::HybridAutomaton<R>& automaton, 
+Evaluation::ConstraintBasedHybridEvolver<R>::upper_evolve(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                                      const Geometry::HybridGridCell<R>& initial_set, 
                                                      const Geometry::HybridGrid<R>& hybrid_grid, 
                                                      time_type evolution_time, 
@@ -392,13 +392,13 @@ Evaluation::HybridEvolver<R>::upper_evolve(const System::HybridAutomaton<R>& aut
 
 template<class R>
 Geometry::HybridGridCellListSet<R>
-Evaluation::HybridEvolver<R>::upper_reach(const System::HybridAutomaton<R>& automaton, 
+Evaluation::ConstraintBasedHybridEvolver<R>::upper_reach(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                                     const Geometry::HybridGridCell<R>& initial_set, 
                                                     const Geometry::HybridGrid<R>& hybrid_grid, 
                                                     time_type evolution_time, 
                                                     size_type maximum_number_of_events) const
 {
-  ARIADNE_LOG(2,"HybridEvolver::upper_reach(HybridAutomaton, HybridGridCell, HybridGrid, Time, Integer)\n");
+  ARIADNE_LOG(2,"ConstraintBasedHybridEvolver::upper_reach(ConstraintBasedHybridAutomaton, HybridGridCell, HybridGrid, Time, Integer)\n");
   HybridGridCellListSet<R> final_set(hybrid_grid);
   
   HybridListSet< Zonotope<I> > list_set(automaton.locations());
@@ -415,7 +415,7 @@ Evaluation::HybridEvolver<R>::upper_reach(const System::HybridAutomaton<R>& auto
 
 template<class R>
 Geometry::HybridGridMaskSet<R>
-Evaluation::HybridEvolver<R>::upper_evolve(const System::HybridAutomaton<R>& automaton, 
+Evaluation::ConstraintBasedHybridEvolver<R>::upper_evolve(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                                      const Geometry::HybridGridMaskSet<R>& initial_set, 
                                                      time_type evolution_time, 
                                                      size_type maximum_number_of_events) const
@@ -453,12 +453,12 @@ Evaluation::HybridEvolver<R>::upper_evolve(const System::HybridAutomaton<R>& aut
 
 template<class R>
 Geometry::HybridGridMaskSet<R>
-Evaluation::HybridEvolver<R>::upper_reach(const System::HybridAutomaton<R>& automaton, 
+Evaluation::ConstraintBasedHybridEvolver<R>::upper_reach(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                                     const Geometry::HybridGridMaskSet<R>& initial_set, 
                                                     time_type evolution_time, 
                                                     size_type maximum_number_of_events) const
 {
-  ARIADNE_LOG(2,"HybridEvolver::upper_reach(HybridAutomaton, HybridGridMaskSet, Time, Integer)\n");
+  ARIADNE_LOG(2,"ConstraintBasedHybridEvolver::upper_reach(ConstraintBasedHybridAutomaton, HybridGridMaskSet, Time, Integer)\n");
   Geometry::HybridGrid<R> hybrid_grid=initial_set.grid();
   Geometry::HybridGridMaskSet<R> current_set=initial_set;
   Geometry::HybridGridMaskSet<R> next_set(current_set);
@@ -498,7 +498,7 @@ Evaluation::HybridEvolver<R>::upper_reach(const System::HybridAutomaton<R>& auto
 
 template<class R>
 Geometry::HybridGridMaskSet<R>
-Evaluation::HybridEvolver<R>::viable(const System::HybridAutomaton<R>& automaton, 
+Evaluation::ConstraintBasedHybridEvolver<R>::viable(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                      const Geometry::HybridGridMaskSet<R>& bounding_set) const
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
@@ -507,7 +507,7 @@ Evaluation::HybridEvolver<R>::viable(const System::HybridAutomaton<R>& automaton
 
 template<class R>
 Geometry::HybridGridMaskSet<R>
-Evaluation::HybridEvolver<R>::chainreach(const System::HybridAutomaton<R>& automaton, 
+Evaluation::ConstraintBasedHybridEvolver<R>::chainreach(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                                    const Geometry::HybridGridMaskSet<R>& initial_set, 
                                                    const Geometry::HybridGridMaskSet<R>& bounding_set) const
 {

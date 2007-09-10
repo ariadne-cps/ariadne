@@ -37,16 +37,17 @@ namespace Ariadne {
     template<class R> class GridMultiMap;
     template<class R> class PolynomialMap;
     template<class R> class DiscreteTimeSystem;
+
     template<class R> class VectorFieldInterface;
     template<class R> class AffineVectorField;
 
-    template<class R> class DiscreteMode;
-    template<class R> class DiscreteTransition;
-    template<class R> class HybridAutomaton;
+    template<class R> class SetBasedDiscreteMode;
+    template<class R> class SetBasedDiscreteTransition;
+    template<class R> class SetBasedHybridAutomaton;
 
-    template<class R> class ConstraintDiscreteMode;
-    template<class R> class ConstraintDiscreteTransition;
-    template<class R> class ConstraintHybridAutomaton;
+    template<class R> class ConstraintBasedDiscreteMode;
+    template<class R> class ConstraintBasedDiscreteTransition;
+    template<class R> class ConstraintBasedHybridAutomaton;
   }
 }
 

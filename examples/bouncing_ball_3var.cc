@@ -18,11 +18,11 @@
 #include "geometry/polyhedral_set.h"
 #include "system/affine_map.h"
 #include "system/affine_vector_field.h"
-#include "system/hybrid_automaton.h"
+#include "system/set_based_hybrid_automaton.h"
 #include "evaluation/applicator.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
-#include "evaluation/hybrid_evolver.h"
+#include "evaluation/set_based_hybrid_evolver.h"
 #include "output/epsstream.h"
 #include "output/logging.h"
 
@@ -61,11 +61,11 @@ int bouncing_ball_automaton()
   AffineMap<R> reset(Matrix<R>("[1,0,0;0,-1,0;0,0,1]"),Vector<R>("[0,0,0]"));
   cout << "reset=" << reset << endl;
   
-  HybridAutomaton<R> automaton("Bouncing ball automaton");
+  SetBasedHybridAutomaton<R> automaton("Bouncing ball automaton");
   id_type mode1_id=0;
-  const DiscreteMode<R>& mode1=automaton.new_mode(mode1_id,dynamic,invariant);
+  const SetBasedDiscreteMode<R>& mode1=automaton.new_mode(mode1_id,dynamic,invariant);
   id_type event_id=5;
-  const DiscreteTransition<R>& transition=automaton.new_transition(event_id,mode1_id,mode1_id,reset,activation);
+  const SetBasedDiscreteTransition<R>& transition=automaton.new_transition(event_id,mode1_id,mode1_id,reset,activation);
   
   cout << mode1  <<  "\n" << transition << endl;
 
@@ -77,7 +77,7 @@ int bouncing_ball_automaton()
   Applicator<R> apply(maximum_set_radius, grid_size);
 
   AffineIntegrator<R> integrator(maximum_step_size,lock_to_grid_time,maximum_set_radius); 
-  HybridEvolver<R> hybrid_evolver(apply,integrator);
+  SetBasedHybridEvolver<R> hybrid_evolver(apply,integrator);
   
   Grid<R> grid(Vector<R>("[0.25,0.25,1.0]"));
   Rectangle<R> bounding_box(domain.neighbourhood(1));

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            constraint_hybrid_evolver.cc
+ *            constraint_based_hybrid_evolver_plugin.cc
  *
  *  Copyright  2007  Pieter Collins
  *  pieter.collins@cwi.nl
@@ -23,19 +23,19 @@
 
 #include "numeric/float.h"
 
-#include "evaluation/hybrid_evolver_plugin.h"
-#include "evaluation/hybrid_evolver_plugin.code.h"
+#include "evaluation/constraint_based_hybrid_evolver_plugin.h"
+#include "evaluation/constraint_based_hybrid_evolver_plugin.code.h"
 
 namespace Ariadne {
   namespace Evaluation {
     using namespace Numeric;
 
 #ifdef ENABLE_FLOAT64
-  template class HybridEvolverPlugin<Float64>;
+  template class ConstraintBasedHybridEvolverPlugin<Float64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
-  template class HybridEvolverPlugin<FloatMP>;
+  template class ConstraintBasedHybridEvolverPlugin<FloatMP>;
 #endif
 
       

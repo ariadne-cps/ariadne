@@ -1,5 +1,5 @@
 /***************************************************************************
- *            set_hybrid_evolver.cc
+ *            set_based_hybrid_evolver.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl

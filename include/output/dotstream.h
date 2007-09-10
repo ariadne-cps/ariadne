@@ -36,7 +36,8 @@
 #include <cassert>
 #include <cstring>
 
-#include "../system/hybrid_automaton.h"
+#include "../system/set_based_hybrid_automaton.h"
+#include "../system/constraint_based_hybrid_automaton.h"
 
 namespace Ariadne {
   namespace Output {
@@ -71,9 +72,9 @@ namespace Ariadne {
     
     template<class R>
     dotstream& 
-    operator<<(dotstream& dots, const System::HybridAutomaton<R>& ha) 
+    operator<<(dotstream& dots, const System::ConstraintBasedHybridAutomaton<R>& ha) 
     {
-      typedef typename System::HybridAutomaton<R>::discrete_transition_iterator transition_iterator;
+      typedef typename System::ConstraintBasedHybridAutomaton<R>::discrete_transition_const_iterator transition_iterator;
       
       std::string f_name=ha.name();
       std::ostream& os=dots;
@@ -85,7 +86,7 @@ namespace Ariadne {
          << " node [shape = circle]; "<< std::endl;
       
       for (transition_iterator iter=ha.transitions().begin(); iter!=ha.transitions().end(); ++iter) {
-        System::DiscreteTransition<R>& dt=*iter;
+        System::ConstraintBasedDiscreteTransition<R>& dt=*iter;
 
         os << "\"" <<  dt.source().id() << "\" -> \"" 
            << dt.destination().id()

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_hybrid_automaton.cc
+ *            test_constraint_based_hybrid_automaton.cc
  *
  *  Copyright  2007  Pieter Collins
  *  Email  Pieter.Collins@cwi.nl
@@ -36,7 +36,7 @@
 #include "geometry/linear_constraint.h"
 #include "system/affine_map.h"
 #include "system/affine_vector_field.h"
-#include "system/hybrid_automaton.h"
+#include "system/constraint_based_hybrid_automaton.h"
 #include "output/logging.h"
 
 #include "test.h"
@@ -49,15 +49,15 @@ using namespace Ariadne::System;
 using namespace Ariadne::Output;
 using namespace std;
 
-template<class R> int test_hybrid_automaton();
+template<class R> int test_constraint_based_hybrid_automaton();
   
 int main() {
   set_system_verbosity(0);
-  return test_hybrid_automaton<Float>();
+  return test_constraint_based_hybrid_automaton<Float>();
 }
 
 template<class R>
-int test_hybrid_automaton() 
+int test_constraint_based_hybrid_automaton() 
 {
   Matrix<R> A("[2,1;1,1]");
 
@@ -71,13 +71,13 @@ int test_hybrid_automaton()
   LinearConstraint<R> activation(Vector<R>("[1,0]"),Geometry::greater,R(1));
   LinearConstraint<R> guard(Vector<R>("[0,1]"),Geometry::greater,R(1));
 
-  HybridAutomaton<R> automaton("Affine test automaton");
+  ConstraintBasedHybridAutomaton<R> automaton("Affine test automaton");
   id_type mode1_id=1;
   id_type mode2_id=2;
   id_type event0_id=1;
   id_type event3_id=4;
-  const DiscreteMode<R>& mode1=automaton.new_mode(mode1_id,dynamic);
-  const DiscreteMode<R>& mode2=automaton.new_mode(mode2_id,dynamic);
+  const ConstraintBasedDiscreteMode<R>& mode1=automaton.new_mode(mode1_id,dynamic);
+  const ConstraintBasedDiscreteMode<R>& mode2=automaton.new_mode(mode2_id,dynamic);
   cout << automaton << endl;
   automaton.new_invariant(event0_id,mode1_id,constraint1);
   automaton.new_invariant(event3_id,mode1_id,constraint2);
@@ -85,8 +85,8 @@ int test_hybrid_automaton()
   cout << automaton << endl;
   id_type event1_id=2;
   id_type event2_id=3;
-  const DiscreteTransition<R>& transition1=automaton.new_unforced_transition(event1_id,mode1_id,mode1_id,reset,activation);
-  const DiscreteTransition<R>& transition2=automaton.new_forced_transition(event2_id,mode1_id,mode1_id,reset,guard);
+  const ConstraintBasedDiscreteTransition<R>& transition1=automaton.new_unforced_transition(event1_id,mode1_id,mode1_id,reset,activation);
+  const ConstraintBasedDiscreteTransition<R>& transition2=automaton.new_forced_transition(event2_id,mode1_id,mode1_id,reset,guard);
   cout << automaton << endl << endl;
   
   cout << mode1  <<  "\n" << mode2 << "\n" << transition1 << "\n" << transition2 << endl;

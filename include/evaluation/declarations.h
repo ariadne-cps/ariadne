@@ -34,9 +34,12 @@ namespace Ariadne {
     template<class R> class Applicator;
     template<class R> class Integrator;
     template<class R> class Detector;
-    template<class R> class HybridEvolver;
 
-    template<class R> class Flow;
+    template<class R> class DiscreteTimeEvolver;
+    template<class R> class ContinuousTimeEvolver;
+    template<class R> class SetBasedHybridEvolver;
+    template<class R> class ConstraintBasedHybridEvolver;
+
   }
 }
 

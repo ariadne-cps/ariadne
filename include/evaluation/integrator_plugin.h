@@ -35,6 +35,8 @@
 #include "../geometry/declarations.h"
 #include "../system/declarations.h"
 
+#include "continuous_time_evolver.h"
+#include "integrator_plugin_interface.h"
 #include "integrator_plugin_interface.h"
 
 namespace Ariadne {
@@ -77,7 +79,7 @@ namespace Ariadne {
                         const Geometry::BasicSetInterface<R>& s,
                         const time_type& h,
                         const Geometry::Rectangle<R>& bb) const;
-
+    };
 
   }
 }

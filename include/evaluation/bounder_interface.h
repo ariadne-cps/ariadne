@@ -1,5 +1,5 @@
 /***************************************************************************
- *            bounder_plugin_interface.h
+ *            bounder_interface.h
  *
  *  Copyright  2006-7  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file bounder_plugin_interface.h
+/*! \file bounder_interface.h
  *  \brief Class for bounding the flow of a vector field.
  */
 
-#ifndef ARIADNE_BOUNDER_PLUGIN_INTERFACE_H
-#define ARIADNE_BOUNDER_PLUGIN_INTERFACE_H
+#ifndef ARIADNE_BOUNDER_INTERFACE_H
+#define ARIADNE_BOUNDER_INTERFACE_H
 
 #include <boost/shared_ptr.hpp>
 
@@ -44,17 +44,17 @@ namespace Ariadne {
      *  \ingroup VectorFieldEvolver
      */
     template<class R>
-    class BounderPluginInterface
+    class BounderInterface
     {
       typedef Numeric::Interval<R> I;
      public:
       //@{ 
       //! \name Destructors, constructors and cloning operations.
       /*! \brief Destructor. */
-      virtual ~BounderPluginInterface() { }
+      virtual ~BounderInterface() { }
 
       /*! \brief Make a dynamically-allocated copy. */
-      virtual BounderPluginInterface<R>* clone() const = 0;
+      virtual BounderInterface<R>* clone() const = 0;
      
       //@}
 
@@ -126,4 +126,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* ARIADNE_BOUNDER_PLUGIN_INTERFACE_H */
+#endif /* ARIADNE_BOUNDER_INTERFACE_H */

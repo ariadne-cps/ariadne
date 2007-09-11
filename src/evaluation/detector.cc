@@ -23,20 +23,20 @@
 
 #include "numeric/float.h"
 
-#include "evaluation/detector_plugin_interface.h"
-#include "evaluation/detector_plugin.h"
-#include "evaluation/detector_plugin.code.h"
+#include "evaluation/detector_interface.h"
+#include "evaluation/detector.h"
+#include "evaluation/detector.code.h"
 
 namespace Ariadne {
   namespace Evaluation {
     using namespace Numeric;
 
 #ifdef ENABLE_FLOAT64
-    template class DetectorPlugin<Float64>;
+    template class Detector<Float64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class DetectorPlugin<FloatMP>;
+    template class Detector<FloatMP>;
 #endif
 
   }

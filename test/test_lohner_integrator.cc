@@ -31,7 +31,7 @@
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
 #include "system/affine_vector_field.h"
-#include "evaluation/bounder_plugin.h"
+#include "evaluation/bounder.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
 #include "output/epsstream.h"
@@ -65,7 +65,7 @@ test_lohner_integrator()
   cout << __PRETTY_FUNCTION__ << endl;
   typedef Interval<R> I;
 
-  BounderPlugin<R> bounder;
+  Bounder<R> bounder;
   LohnerIntegrator<R> lohner=LohnerIntegrator<R>();
   C1LohnerIntegrator<R> c1lohner=C1LohnerIntegrator<R>();
   AffineIntegrator<R> affine=AffineIntegrator<R>();

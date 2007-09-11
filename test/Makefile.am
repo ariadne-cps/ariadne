@@ -63,7 +63,7 @@ check_PROGRAMS = \
 	test_vector_field_evolver \
 	test_set_based_hybrid_evolver \
 	test_constraint_based_hybrid_evolver \
-	test_constraint_based_hybrid_evolver_plugin \
+	test_constraint_based_hybrid_scheduler \
 	 \
         test_texstream \
         test_epsstream \
@@ -132,7 +132,7 @@ test_map_evolver_SOURCES=test_map_evolver.cc
 test_vector_field_evolver_SOURCES=test_vector_field_evolver.cc
 test_set_based_hybrid_evolver_SOURCES=test_set_based_hybrid_evolver.cc
 test_constraint_based_hybrid_evolver_SOURCES=test_constraint_based_hybrid_evolver.cc
-test_constraint_based_hybrid_evolver_plugin_SOURCES=test_constraint_based_hybrid_evolver_plugin.cc
+test_constraint_based_hybrid_scheduler_SOURCES=test_constraint_based_hybrid_scheduler.cc
 
 test_epsstream_SOURCES=test_epsstream.cc 
 test_textstream_SOURCES=test_textstream.cc

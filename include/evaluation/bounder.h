@@ -1,5 +1,5 @@
 /***************************************************************************
- *            bounder_plugin.h
+ *            bounder.h
  *
  *  Copyright  2006-7  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file bounder_plugin.h
+/*! \file bounder.h
  *  \brief Class for bounding the flow of a vector field.
  */
 
-#ifndef ARIADNE_BOUNDER_PLUGIN_H
-#define ARIADNE_BOUNDER_PLUGIN_H
+#ifndef ARIADNE_BOUNDER_H
+#define ARIADNE_BOUNDER_H
 
 #include <boost/shared_ptr.hpp>
 
@@ -35,7 +35,7 @@
 #include "../geometry/declarations.h"
 #include "../system/declarations.h"
 
-#include "bounder_plugin_interface.h"
+#include "bounder_interface.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -44,8 +44,8 @@ namespace Ariadne {
      *  \ingroup VectorFieldEvolver
      */
     template<class R>
-    class BounderPlugin
-      : public BounderPluginInterface<R>
+    class Bounder
+      : public BounderInterface<R>
     {
       typedef Numeric::Interval<R> I;
      public:
@@ -53,10 +53,10 @@ namespace Ariadne {
       //! \name Destructors, constructors and cloning operations.
  
       /*! \brief Default constructor. */
-      BounderPlugin();
+      Bounder();
 
       /*! \brief Make a dynamically-allocated copy. */
-      BounderPlugin<R>* clone() const;
+      Bounder<R>* clone() const;
      
       //@}
 
@@ -128,4 +128,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* ARIADNE_BOUNDER_PLUGIN_H */
+#endif /* ARIADNE_BOUNDER_H */

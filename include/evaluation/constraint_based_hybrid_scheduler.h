@@ -1,5 +1,5 @@
 /***************************************************************************
- *            constraint_based_hybrid_evolver_plugin.h
+ *            constraint_based_hybrid_scheduler.h
  *
  *  Copyright  2007  Pieter Collins
  *  Pieter.Collins@cwi.nl
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file constraint_based_hybrid_evolver_plugin.h
- *  \brief Plugin with time-stepping methods for hybrid systems.
+/*! \file constraint_based_hybrid_scheduler.h
+ *  \brief  with time-stepping methods for hybrid systems.
  */
 
-#ifndef ARIADNE_CONSTRAINT_BASED_HYBRID_EVOLVER_PLUGIN_H
-#define ARIADNE_CONSTRAINT_BASED_HYBRID_EVOLVER_PLUGIN_H
+#ifndef ARIADNE_CONSTRAINT_BASED_HYBRID_SCHEDULER_H
+#define ARIADNE_CONSTRAINT_BASED_HYBRID_SCHEDULER_H
 
 #include <string>
 #include <vector>
@@ -183,7 +183,7 @@ namespace Ariadne {
      * \endpseudocode 
      */
     template< class R >
-    class ConstraintBasedHybridEvolverPlugin
+    class ConstraintBasedHybridScheduler
     {
       friend class ConstraintBasedHybridEvolver<R>;
       typedef Numeric::Interval<R> I;
@@ -225,13 +225,13 @@ namespace Ariadne {
       //! \name Constructors and destructors. */
 
       /*! \brief Destructor. */
-      ~ConstraintBasedHybridEvolverPlugin();
+      ~ConstraintBasedHybridScheduler();
 
       /*! \brief Construct from an applicator, an integrator and a detector. */
-      ConstraintBasedHybridEvolverPlugin(const ApplicatorPluginInterface<R>& applicator, const IntegratorPluginInterface<R>& integrator, const DetectorPluginInterface<R>& detector);
+      ConstraintBasedHybridScheduler(const ApplicatorInterface<R>& applicator, const IntegratorInterface<R>& integrator, const DetectorInterface<R>& detector);
 
       /*! \brief Copy constructor. */
-      ConstraintBasedHybridEvolverPlugin(const ConstraintBasedHybridEvolverPlugin<R>& plugin);
+      ConstraintBasedHybridScheduler(const ConstraintBasedHybridScheduler<R>& plugin);
 
 
       //! \name Evolution steps
@@ -432,10 +432,10 @@ namespace Ariadne {
      public:
       mutable std::vector<timed_set_type> trace;
      private:
-      ApplicatorPluginInterface<R>* _applicator;
-      BounderPluginInterface<R>* _bounder;
-      DifferentiableIntegratorPluginInterface<R>* _integrator;
-      DetectorPluginInterface<R>* _detector;
+      ApplicatorInterface<R>* _applicator;
+      BounderInterface<R>* _bounder;
+      DifferentiableIntegratorInterface<R>* _integrator;
+      DetectorInterface<R>* _detector;
     };
 
 
@@ -456,4 +456,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* ARIADNE_CONSTRAINT_BASED_HYBRID_EVOLVER_PLUGIN_H */
+#endif /* ARIADNE_CONSTRAINT_BASED_HYBRID_EVOLVER_H */

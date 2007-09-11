@@ -1,5 +1,5 @@
 /***************************************************************************
- *            integrator_plugin_interface.h
+ *            integrator_interface.h
  *
  *  Copyright  2006-7  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file integrator_plugin_interface.h
+/*! \file integrator_interface.h
  *  \brief Class for computing the image of a basic set under a map.
  */
 
-#ifndef ARIADNE_INTEGRATOR_PLUGIN_INTERFACE_H
-#define ARIADNE_INTEGRATOR_PLUGIN_INTERFACE_H
+#ifndef ARIADNE_INTEGRATOR_INTERFACE_H
+#define ARIADNE_INTEGRATOR_INTERFACE_H
 
 #include <boost/shared_ptr.hpp>
 
@@ -36,7 +36,7 @@
 #include "../geometry/declarations.h"
 #include "../system/declarations.h"
 
-#include "applicator_plugin_interface.h"
+#include "applicator_interface.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -46,16 +46,16 @@ namespace Ariadne {
      *  \ingroup Integrators
      */
     template<class R>
-    class IntegratorPluginInterface
+    class IntegratorInterface
     {
       typedef Numeric::Interval<R> I;
      public:
       //@{ 
       //! \name Constructors and cloning operations.
       /*! \brief Virtual destructor. */
-      virtual ~IntegratorPluginInterface() { }
+      virtual ~IntegratorInterface() { }
       /*! \brief Make a dynamically-allocated copy. */
-      virtual IntegratorPluginInterface<R>* clone() const = 0;
+      virtual IntegratorInterface<R>* clone() const = 0;
       //@}
 
 
@@ -125,13 +125,13 @@ namespace Ariadne {
      *  \ingroup Integrators
      */
     template<class R>
-    class DifferentiableIntegratorPluginInterface
-      : public IntegratorPluginInterface<R>
+    class DifferentiableIntegratorInterface
+      : public IntegratorInterface<R>
     {
       typedef Numeric::Interval<R> I;
      public:
       /*! \brief Make a dynamically-allocated copy. */
-      virtual DifferentiableIntegratorPluginInterface<R>* clone() const = 0;
+      virtual DifferentiableIntegratorInterface<R>* clone() const = 0;
       //@{ 
       //! \name Methods for computing flow Jacobians. 
       /*! \brief Compute the spacial jacobian over a flow step of time \a t starting at \a p assuming that the flow remains within \a bb. */
@@ -144,6 +144,6 @@ namespace Ariadne {
   }
 }
 
-#include "integrator_plugin_interface.inline.h"
+#include "integrator_interface.inline.h"
 
-#endif /* ARIADNE_INTEGRATOR_PLUGIN_INTERFACE_H */
+#endif /* ARIADNE_INTEGRATOR_INTERFACE_H */

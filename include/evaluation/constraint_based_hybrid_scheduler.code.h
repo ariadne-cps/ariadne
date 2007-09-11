@@ -1,5 +1,5 @@
 /***************************************************************************
- *            constraint_based_hybrid_evolver_plugin.code.h
+ *            constraint_based_hybrid_scheduler.code.h
  *
  *  Copyright  2007  Pieter Collins
  *  Pieter.Collins@cwi.nl
@@ -33,13 +33,13 @@
 #include "../system/map.h"
 #include "../system/vector_field.h"
 #include "../system/constraint_based_hybrid_automaton.h"
-#include "../evaluation/applicator_plugin_interface.h"
-#include "../evaluation/bounder_plugin_interface.h"
-#include "../evaluation/integrator_plugin_interface.h"
-#include "../evaluation/detector_plugin_interface.h"
+#include "../evaluation/applicator_interface.h"
+#include "../evaluation/bounder_interface.h"
+#include "../evaluation/integrator_interface.h"
+#include "../evaluation/detector_interface.h"
 
-#include "../evaluation/bounder_plugin.h"
-#include "../evaluation/detector_plugin.h"
+#include "../evaluation/bounder.h"
+#include "../evaluation/detector.h"
 #include "../evaluation/lohner_integrator.h"
 
 #include "../output/epsstream.h"
@@ -97,7 +97,7 @@ using namespace System;
 
 
 template<class R>
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::~ConstraintBasedHybridEvolverPlugin()
+Evaluation::ConstraintBasedHybridScheduler<R>::~ConstraintBasedHybridScheduler()
 {
   delete _applicator;
   delete _bounder;
@@ -107,20 +107,20 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::~ConstraintBasedHybridEvolver
 
 
 template<class R>
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::ConstraintBasedHybridEvolverPlugin(const ApplicatorPluginInterface<R>& a, const IntegratorPluginInterface<R>& i, const DetectorPluginInterface<R>& d)
+Evaluation::ConstraintBasedHybridScheduler<R>::ConstraintBasedHybridScheduler(const ApplicatorInterface<R>& a, const IntegratorInterface<R>& i, const DetectorInterface<R>& d)
   : _applicator(a.clone()), 
-    _bounder(new BounderPlugin<R>()),
+    _bounder(new Bounder<R>()),
     _integrator(dynamic_cast<C1LohnerIntegrator<R>*>(i.clone())),
     _detector(d.clone())
 {
   if(!this->_integrator) {
-    throw std::runtime_error("ConstraintBasedHybridEvolverPlugin::ConstraintBasedHybridEvolverPlugin(MapEvolver a, VectorFieldEvolver i, Detector d): Invalid integrator");
+    throw std::runtime_error("ConstraintBasedHybridScheduler::ConstraintBasedHybridScheduler(MapEvolver a, VectorFieldEvolver i, Detector d): Invalid integrator");
   }
 }
 
 
 template<class R>
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::ConstraintBasedHybridEvolverPlugin(const ConstraintBasedHybridEvolverPlugin<R>& plugin)
+Evaluation::ConstraintBasedHybridScheduler<R>::ConstraintBasedHybridScheduler(const ConstraintBasedHybridScheduler<R>& plugin)
   : _applicator(plugin._applicator->clone()), 
     _bounder(plugin._bounder->clone()), 
     _integrator(plugin._integrator->clone()),
@@ -132,10 +132,10 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::ConstraintBasedHybridEvolverP
 
 
 template<class R> inline
-typename Evaluation::ConstraintBasedHybridEvolverPlugin<R>::timed_set_type
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::regularize(const timed_set_type& timed_set) const
+typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type
+Evaluation::ConstraintBasedHybridScheduler<R>::regularize(const timed_set_type& timed_set) const
 {
-  ARIADNE_LOG(8,"ConstraintBasedHybridEvolverPlugin::regularize(...)\n");
+  ARIADNE_LOG(8,"ConstraintBasedHybridScheduler::regularize(...)\n");
   ARIADNE_LOG(9,"  radius="<<timed_set.continuous_state_set().radius()<<"\n");
   ARIADNE_LOG(9,"  bounding_box="<<timed_set.continuous_state_set().bounding_box()<<"\n");
   ARIADNE_LOG(9,"  set="<<timed_set<<"\n");
@@ -160,12 +160,12 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::regularize(const timed_set_ty
 }
 
 template<class R> inline
-std::vector<typename Evaluation::ConstraintBasedHybridEvolverPlugin<R>::timed_set_type>
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::subdivide(const timed_set_type& timed_set) const
+std::vector<typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type>
+Evaluation::ConstraintBasedHybridScheduler<R>::subdivide(const timed_set_type& timed_set) const
 {
   using namespace LinearAlgebra;
   
-  ARIADNE_LOG(8,"ConstraintBasedHybridEvolverPlugin:subdivide(...)\n");
+  ARIADNE_LOG(8,"ConstraintBasedHybridScheduler:subdivide(...)\n");
   ARIADNE_LOG(9,"  radius="<<timed_set.continuous_state_set().radius()<<"\n");
   ARIADNE_LOG(9,"  bounding_box="<<timed_set.continuous_state_set().bounding_box()<<"\n");
   ARIADNE_LOG(9,"  set="<<timed_set<<"\n");
@@ -192,7 +192,7 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::subdivide(const timed_set_typ
     TimeModel<R> time_model(combined_set.centre()[dimension],combined_set.generators().row(dimension));
     
     if(time_model.number_of_generators()!=continuous_state_set.number_of_generators()) {
-      ARIADNE_LOG(2,"ConstraintBasedHybridEvolverPlugin:subdivide(...):\n"
+      ARIADNE_LOG(2,"ConstraintBasedHybridScheduler:subdivide(...):\n"
                     "combined_set="<<*iter<<", continuous_state_set="<<continuous_state_set<<", time_model="<<time_model<<"\n");
       assert(time_model.number_of_generators()==continuous_state_set.number_of_generators());
     }
@@ -204,7 +204,7 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::subdivide(const timed_set_typ
 
 template<class R>
 Geometry::Rectangle<R>
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::estimate_flow_bounds(const mode_type& mode, 
+Evaluation::ConstraintBasedHybridScheduler<R>::estimate_flow_bounds(const mode_type& mode, 
                                                                    const timed_set_type& initial_set,
                                                                    time_type& maximum_step_size) const
 {
@@ -213,7 +213,7 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::estimate_flow_bounds(const mo
 
 template<class R>
 Geometry::Rectangle<R>
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::refine_flow_bounds(const mode_type& mode, 
+Evaluation::ConstraintBasedHybridScheduler<R>::refine_flow_bounds(const mode_type& mode, 
                                                                  const timed_set_type& initial_set, 
                                                                  const bounding_box_type& bounding_set,
                                                                  const time_type& maximum_step_size) const
@@ -228,7 +228,7 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::refine_flow_bounds(const mode
 
 template<class R>
 tribool
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::enabled(const transition_type& transition,
+Evaluation::ConstraintBasedHybridScheduler<R>::enabled(const transition_type& transition,
                                                            const bounding_box_type& bounding_box) const
 {
   return this->_detector->value(transition.constraint(),bounding_box) >= 0;
@@ -237,10 +237,10 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::enabled(const transition_type
 
 template<class R>
 tribool
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::enabled(const transition_type& transition,
+Evaluation::ConstraintBasedHybridScheduler<R>::enabled(const transition_type& transition,
                                                            const timed_set_type& set) const
 {
-  DetectorPlugin<R>* detector=dynamic_cast<DetectorPlugin<R>*>(this->_detector);
+  Detector<R>* detector=dynamic_cast<Detector<R>*>(this->_detector);
   assert(detector);
   return detector->value(transition.constraint(),set.continuous_state_set()) >= 0;
 }
@@ -249,7 +249,7 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::enabled(const transition_type
 /*! Tests if constraint2 is always unsatisfied if constraint1 is unsatisfied. */
 template<class R>
 tribool
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::forces(const constraint_type& constraint1,
+Evaluation::ConstraintBasedHybridScheduler<R>::forces(const constraint_type& constraint1,
                                                           const constraint_type& constraint2,
                                                           const bounding_box_type& bounding_box) const
 {
@@ -261,7 +261,7 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::forces(const constraint_type&
  */
 template<class R>
 Numeric::Interval<R>
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::estimate_normal_derivative(const transition_type& transition,
+Evaluation::ConstraintBasedHybridScheduler<R>::estimate_normal_derivative(const transition_type& transition,
                                                                               const bounding_box_type& bounding_box) const
 {
   const vector_field_type& dynamic=transition.source().dynamic();
@@ -277,7 +277,7 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::estimate_normal_derivative(co
  */
 template<class R>
 Numeric::Interval<R>
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::estimate_crossing_time_step(const transition_type& transition, 
+Evaluation::ConstraintBasedHybridScheduler<R>::estimate_crossing_time_step(const transition_type& transition, 
                                                                                const timed_set_type& initial_set,
                                                                                const bounding_box_type& bounding_box) const
 {
@@ -293,12 +293,12 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::estimate_crossing_time_step(c
  *  Detects non-transverse crossings and provides first-order estimates
  */
 template<class R>
-typename Evaluation::ConstraintBasedHybridEvolverPlugin<R>::time_model_type
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::compute_crossing_time_step(const transition_type& transition, 
+typename Evaluation::ConstraintBasedHybridScheduler<R>::time_model_type
+Evaluation::ConstraintBasedHybridScheduler<R>::compute_crossing_time_step(const transition_type& transition, 
                                                                const timed_set_type& initial_set,
                                                                const bounding_box_type& bounding_box) const
 {
-  ARIADNE_LOG(8,"    ConstraintBasedHybridEvolverPlugin::compute_crossing_time_step(...)\n");
+  ARIADNE_LOG(8,"    ConstraintBasedHybridScheduler::compute_crossing_time_step(...)\n");
   const System::VectorFieldInterface<R>& dynamic=transition.source().dynamic();
   const Geometry::ConstraintInterface<R>& constraint=transition.constraint();
   const Geometry::Rectangle<R> domain=initial_set.bounding_box();
@@ -318,13 +318,13 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::compute_crossing_time_step(co
 
                                                             
 template<class R>
-typename Evaluation::ConstraintBasedHybridEvolverPlugin<R>::crossing_data_type
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::compute_crossing_data(const transition_type& transition,
+typename Evaluation::ConstraintBasedHybridScheduler<R>::crossing_data_type
+Evaluation::ConstraintBasedHybridScheduler<R>::compute_crossing_data(const transition_type& transition,
                                                                     const timed_set_type& initial_set,
                                                                     const timed_set_type& final_set,
                                                                     const bounding_box_type& bounding_box) const
 {
-  DetectorPlugin<R>* detector=dynamic_cast<DetectorPlugin<R>*>(this->_detector);
+  Detector<R>* detector=dynamic_cast<Detector<R>*>(this->_detector);
   const constraint_type& constraint = transition.constraint();
 
   // constraint might not be satisfied; compute further
@@ -350,14 +350,14 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::compute_crossing_data(const t
 
 
 template<class R>
-std::map< id_type, typename Evaluation::ConstraintBasedHybridEvolverPlugin<R>::crossing_data_type >
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::compute_crossing_data(const reference_set<const transition_type>& transitions,
+std::map< id_type, typename Evaluation::ConstraintBasedHybridScheduler<R>::crossing_data_type >
+Evaluation::ConstraintBasedHybridScheduler<R>::compute_crossing_data(const reference_set<const transition_type>& transitions,
                                                                     const timed_set_type& initial_set,
                                                                     const timed_set_type& final_set,
                                                                     const bounding_box_type& bounding_box,
                                                                     const time_type& maximum_time_step) const
 {
-  ARIADNE_LOG(6," ConstraintBasedHybridEvolverPlugin::compute_crossing_data(...)\n");
+  ARIADNE_LOG(6," ConstraintBasedHybridScheduler::compute_crossing_data(...)\n");
   ARIADNE_LOG(7,"   initial_set="<<initial_set<<"\n");
   ARIADNE_LOG(7,"   final_set="<<final_set<<"\n");
   ARIADNE_LOG(7,"   bounding_box="<<bounding_box<<"\n\n");
@@ -396,7 +396,7 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::compute_crossing_data(const r
 
 template<class R>
 Numeric::Interval<R>
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::
+Evaluation::ConstraintBasedHybridScheduler<R>::
 compute_evolution_time_bounds(const std::map<id_type, crossing_data_type>& crossing_data) const
 {
   typedef typename std::map<id_type,crossing_data_type>::const_iterator crossing_data_const_iterator;
@@ -410,7 +410,7 @@ compute_evolution_time_bounds(const std::map<id_type, crossing_data_type>& cross
 
 template<class R>
 Numeric::Interval<R>
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::
+Evaluation::ConstraintBasedHybridScheduler<R>::
 compute_evolution_time_bounds(const std::map<id_type, time_model_type>& event_times) const
 {
   typedef typename std::map<id_type,time_model_type>::const_iterator const_iterator;
@@ -423,8 +423,8 @@ compute_evolution_time_bounds(const std::map<id_type, time_model_type>& event_ti
 
 
 template<class R>
-std::map< id_type, typename Evaluation::ConstraintBasedHybridEvolverPlugin<R>::time_model_type>
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::compute_terminating_event_times(const mode_type& mode,
+std::map< id_type, typename Evaluation::ConstraintBasedHybridScheduler<R>::time_model_type>
+Evaluation::ConstraintBasedHybridScheduler<R>::compute_terminating_event_times(const mode_type& mode,
                                                                               const timed_set_type& initial_set,
                                                                               const timed_set_type& final_set,
                                                                               const time_type& final_time,
@@ -538,8 +538,8 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::compute_terminating_event_tim
 
 
 template<class R>
-reference_set<typename Evaluation::ConstraintBasedHybridEvolverPlugin<R>::transition_type>
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::compute_possibly_enabled_transitions(const mode_type& mode,
+reference_set<typename Evaluation::ConstraintBasedHybridScheduler<R>::transition_type>
+Evaluation::ConstraintBasedHybridScheduler<R>::compute_possibly_enabled_transitions(const mode_type& mode,
                                                                                    const bounding_box_type& bounding_box) const
 {
   reference_set<transition_type> possibly_enabled_transitions;
@@ -566,8 +566,8 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::compute_possibly_enabled_tran
 
 
 template<class R>
-std::map<id_type, typename Evaluation::ConstraintBasedHybridEvolverPlugin<R>::time_model_pair_type>
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::compute_enabled_activation_times(const mode_type& mode,
+std::map<id_type, typename Evaluation::ConstraintBasedHybridScheduler<R>::time_model_pair_type>
+Evaluation::ConstraintBasedHybridScheduler<R>::compute_enabled_activation_times(const mode_type& mode,
                                                                                const timed_set_type& initial_set,
                                                                                const timed_set_type& final_set,
                                                                                const time_model_type& maximum_time_step,
@@ -647,13 +647,13 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::compute_enabled_activation_ti
 
 
 template<class R>
-typename Evaluation::ConstraintBasedHybridEvolverPlugin<R>::timed_set_type
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::final_continuous_evolution_step(const mode_type& mode,
+typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type
+Evaluation::ConstraintBasedHybridScheduler<R>::final_continuous_evolution_step(const mode_type& mode,
                                                                               const timed_set_type& initial_set,
                                                                               const time_type& final_time,
                                                                               const bounding_box_type& bounding_box) const
 {
-  ARIADNE_LOG(7," ConstraintBasedHybridEvolverPlugin::final_continuous_evolution_step(...)\n");
+  ARIADNE_LOG(7," ConstraintBasedHybridScheduler::final_continuous_evolution_step(...)\n");
   ARIADNE_LOG(8,"    dynamic="<<mode.dynamic()<<"\n    initial_set="<<initial_set<<"\n    final_time="<<final_time<<"\n    bounding_box="<<bounding_box<<"\n");
   time_model_type zero_time_model(I(0),LinearAlgebra::Vector<I>(initial_set.number_of_generators()));
   time_model_type final_time_model=final_time+zero_time_model;
@@ -665,13 +665,13 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::final_continuous_evolution_st
 
 
 template<class R>
-typename Evaluation::ConstraintBasedHybridEvolverPlugin<R>::timed_set_type
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::continuous_evolution_step(const mode_type& mode,
+typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type
+Evaluation::ConstraintBasedHybridScheduler<R>::continuous_evolution_step(const mode_type& mode,
                                                                         const timed_set_type& initial_set,
                                                                         const time_model_type& time_step,
                                                                         const bounding_box_type& bounding_box) const
 {
-  ARIADNE_LOG(7," ConstraintBasedHybridEvolverPlugin::continuous_evolution_step(...)\n");
+  ARIADNE_LOG(7," ConstraintBasedHybridScheduler::continuous_evolution_step(...)\n");
   ARIADNE_LOG(8,"    dynamic="<<mode.dynamic()<<"\n    initial_set="<<initial_set<<"\n    time_step="<<time_step<<"\n    bounding_box="<<bounding_box<<"\n");
   assert(mode.id()==initial_set.discrete_state());
   I average_time_step = time_step.average();
@@ -687,14 +687,14 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::continuous_evolution_step(con
 
 
 template<class R>
-typename Evaluation::ConstraintBasedHybridEvolverPlugin<R>::timed_set_type
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::continuous_reachability_step(const mode_type& mode,
+typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type
+Evaluation::ConstraintBasedHybridScheduler<R>::continuous_reachability_step(const mode_type& mode,
                                                                            const timed_set_type& initial_set,
                                                                            const time_model_type& lower_time_step,
                                                                            const time_model_type& upper_time_step,
                                                                            const bounding_box_type& bounding_box) const
 {
-  ARIADNE_LOG(7," ConstraintBasedHybridEvolverPlugin::continuous_reachability_step(...)\n");
+  ARIADNE_LOG(7," ConstraintBasedHybridScheduler::continuous_reachability_step(...)\n");
   ARIADNE_LOG(8,"    dynamic="<<mode.dynamic()<<"\n    initial_set="<<initial_set<<"\n");
   ARIADNE_LOG(8,"    lower_time_step="<<lower_time_step<<"\n    upper_time_step="<<upper_time_step<<"\n    bounding_box="<<bounding_box<<"\n");
   assert(mode.id()==initial_set.discrete_state());
@@ -723,11 +723,11 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::continuous_reachability_step(
 
 
 template<class R>
-typename Evaluation::ConstraintBasedHybridEvolverPlugin<R>::timed_set_type
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::discrete_event_step(const transition_type& transition,
+typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type
+Evaluation::ConstraintBasedHybridScheduler<R>::discrete_event_step(const transition_type& transition,
                                                                   const timed_set_type& initial_set) const
 {
-  ARIADNE_LOG(7," ConstraintBasedHybridEvolverPlugin::discrete_event_step(...)\n");
+  ARIADNE_LOG(7," ConstraintBasedHybridScheduler::discrete_event_step(...)\n");
   assert(transition.source().id()==initial_set.discrete_state());
   continuous_basic_set_type continuous_state_set = 
     this->_applicator->evaluate(transition.reset(),initial_set.continuous_state_set());
@@ -742,13 +742,13 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::discrete_event_step(const tra
  * \f[ D\Phi_2 \circ DF \circ D\Phi_1 G; \quad (D\Phi_i\circ DF \circ \dot{\Phi}_1 - \dot{\Phi}_2) (h/2) \f]
  */
 template<class R>
-typename Evaluation::ConstraintBasedHybridEvolverPlugin<R>::timed_set_type
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::forced_jump_step(const transition_type& transition,
+typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type
+Evaluation::ConstraintBasedHybridScheduler<R>::forced_jump_step(const transition_type& transition,
                                                                const timed_set_type& initial_set,
                                                                const time_model_type& crossing_time,
                                                                const bounding_box_type& bounding_box) const
 {
-  ARIADNE_LOG(7,"ConstraintBasedHybridEvolverPlugin::forced_jump_step(...)\n");
+  ARIADNE_LOG(7,"ConstraintBasedHybridScheduler::forced_jump_step(...)\n");
   ARIADNE_LOG(8,"  transition="<<transition<<"\n");
   ARIADNE_LOG(8,"  initial_set="<<initial_set.continuous_state_set()<<"\n");
   ARIADNE_LOG(8,"  initial_time="<<initial_set.time()<<"\n");
@@ -768,14 +768,14 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::forced_jump_step(const transi
  * \f[ D\Phi_2 \circ DF \circ D\Phi_1 G; \quad (D\Phi_i\circ DF \circ \dot{\Phi}_1 - \dot{\Phi}_2) (h/2) \f]
  */
 template<class R>
-typename Evaluation::ConstraintBasedHybridEvolverPlugin<R>::timed_set_type
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::unforced_jump_step(const transition_type& transition,
+typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type
+Evaluation::ConstraintBasedHybridScheduler<R>::unforced_jump_step(const transition_type& transition,
                                                                  const timed_set_type& initial_set,
                                                                  const time_model_type& minimum_time,
                                                                  const time_model_type& maximum_time,
                                                                  const bounding_box_type& bounding_box) const
 {
-  ARIADNE_LOG(7," ConstraintBasedHybridEvolverPlugin::unforced_jump_step(...)\n");
+  ARIADNE_LOG(7," ConstraintBasedHybridScheduler::unforced_jump_step(...)\n");
   ARIADNE_LOG(8,"  transition="<<transition<<"\n");
   ARIADNE_LOG(8,"  initial_set="<<initial_set.continuous_state_set()<<"\n");
   ARIADNE_LOG(8,"  initial_time="<<initial_set.time()<<"\n");
@@ -796,8 +796,8 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::unforced_jump_step(const tran
 
 
 template<class R>
-std::vector<typename Evaluation::ConstraintBasedHybridEvolverPlugin<R>::timed_set_type>
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::evolution_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
+std::vector<typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type>
+Evaluation::ConstraintBasedHybridScheduler<R>::evolution_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                                                   const timed_set_type& initial_set,
                                                                   const time_type& final_time,
                                                                   EvolutionSemantics evolution_semantics,
@@ -815,7 +815,7 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::evolution_step(const System::
 
   this->trace.clear();
 
-  ARIADNE_LOG(2,"\nConstraintBasedHybridEvolverPlugin::evolution_step(...)\n");
+  ARIADNE_LOG(2,"\nConstraintBasedHybridEvolver::evolution_step(...)\n");
   ARIADNE_LOG(3,"  evolution_semantics="<<(evolution_semantics==lower_semantics?"lower":"upper"));
   ARIADNE_LOG(3,", evolution_kind="<<(evolution_kind==compute_evolved_set?"evolve":"reach")<<"\n");  
   ARIADNE_LOG(3,"  initial_steps="<<initial_set.steps()<<"  initial_mode="<<initial_set.discrete_state()<<"\n")
@@ -1012,8 +1012,8 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::evolution_step(const System::
 
 
 template<class R>
-std::vector<typename Evaluation::ConstraintBasedHybridEvolverPlugin<R>::timed_set_type> 
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::lower_evolution_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
+std::vector<typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type> 
+Evaluation::ConstraintBasedHybridScheduler<R>::lower_evolution_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                                                    const timed_set_type& initial_set,
                                                                    const time_type& maximum_time) const
 {
@@ -1022,19 +1022,19 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::lower_evolution_step(const Sy
 
 
 template<class R>
-std::vector<typename Evaluation::ConstraintBasedHybridEvolverPlugin<R>::timed_set_type> 
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::upper_evolution_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
+std::vector<typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type> 
+Evaluation::ConstraintBasedHybridScheduler<R>::upper_evolution_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                                                    const timed_set_type& initial_set,
                                                                    const time_type& maximum_time) const
 {
-  ARIADNE_LOG(2,"\nConstraintBasedHybridEvolverPlugin::upper_evolution_step(...)\n");
+  ARIADNE_LOG(2,"\nConstraintBasedHybridEvolver::upper_evolution_step(...)\n");
   return this->evolution_step(automaton, initial_set, maximum_time, upper_semantics, compute_evolved_set);
 }
 
 
 template<class R>
-std::vector<typename Evaluation::ConstraintBasedHybridEvolverPlugin<R>::timed_set_type> 
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::lower_reachability_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
+std::vector<typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type> 
+Evaluation::ConstraintBasedHybridScheduler<R>::lower_reachability_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                                                       const timed_set_type& initial_set,
                                                                       const time_type& maximum_time) const
 {
@@ -1043,12 +1043,12 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::lower_reachability_step(const
 
 
 template<class R>
-std::vector<typename Evaluation::ConstraintBasedHybridEvolverPlugin<R>::timed_set_type> 
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::upper_reachability_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
+std::vector<typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type> 
+Evaluation::ConstraintBasedHybridScheduler<R>::upper_reachability_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                                                       const timed_set_type& initial_set,
                                                                       const time_type& maximum_time) const
 {
-  ARIADNE_LOG(2,"\nConstraintBasedHybridEvolverPlugin::upper_reachability_step(...)\n");
+  ARIADNE_LOG(2,"\nConstraintBasedHybridEvolver::upper_reachability_step(...)\n");
   return this->evolution_step(automaton, initial_set, maximum_time, upper_semantics, compute_reachable_set);
 }
 

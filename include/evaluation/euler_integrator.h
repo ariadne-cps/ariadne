@@ -30,7 +30,7 @@
 
 #include "../geometry/declarations.h"
 #include "../system/declarations.h"
-#include "../evaluation/integrator_plugin_interface.h"
+#include "../evaluation/integrator_interface.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -39,7 +39,7 @@ namespace Ariadne {
      */
     template<class R>
     class EulerIntegrator
-      : public IntegratorPluginInterface<R>
+      : public IntegratorInterface<R>
     {
       typedef Numeric::Interval<R> I;
      public:

@@ -32,7 +32,7 @@
 #include "system/vector_field.h"
 #include "system/affine_vector_field.h"
 
-#include "evaluation/integrator_plugin_interface.h"
+#include "evaluation/integrator_interface.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
 #include "evaluation/euler_integrator.h"
@@ -50,14 +50,14 @@ using namespace Ariadne::Python;
 using namespace boost::python;
 
 template<class R>
-class IntegratorPluginWrapper
-  : public IntegratorPluginInterface<R>,
-    public wrapper< IntegratorPluginInterface<R> >
+class IntegratorWrapper
+  : public IntegratorInterface<R>,
+    public wrapper< IntegratorInterface<R> >
 {
   typedef Interval<R> I;
  public:
-  IntegratorPluginWrapper() { }
-  IntegratorPluginWrapper<R>* clone() const { return this->get_override("clone")(); }
+  IntegratorWrapper() { }
+  IntegratorWrapper<R>* clone() const { return this->get_override("clone")(); }
   Point<I> flow_step(const VectorFieldInterface<R>&, const Point<I>&, const I&, const Rectangle<R>&) const {
     return this->get_override("flow_step")(); }
   Rectangle<R> integration_step(const VectorFieldInterface<R>&, const Rectangle<R>&, const I&, const Rectangle<R>&) const {
@@ -79,15 +79,15 @@ void export_integrator()
 {
   typedef Interval<R> I;
 
-  class_< IntegratorPluginWrapper<R>, boost::noncopyable >("IntegratorPluginInterface",init<>());
+  class_< IntegratorWrapper<R>, boost::noncopyable >("IntegratorInterface",init<>());
 
-  class_< C1LohnerIntegrator<R>, bases<IntegratorPluginInterface<R> > >("C1LohnerIntegrator",init<>());
+  class_< C1LohnerIntegrator<R>, bases<IntegratorInterface<R> > >("C1LohnerIntegrator",init<>());
 
-  class_< LohnerIntegrator<R>, bases<IntegratorPluginInterface<R> > >("LohnerIntegrator",init<>());
+  class_< LohnerIntegrator<R>, bases<IntegratorInterface<R> > >("LohnerIntegrator",init<>());
 
-  class_< AffineIntegrator<R>, bases<IntegratorPluginInterface<R> > >("AffineIntegrator",init<>());
+  class_< AffineIntegrator<R>, bases<IntegratorInterface<R> > >("AffineIntegrator",init<>());
 
-  class_< EulerIntegrator<R>, bases<IntegratorPluginInterface<R> > >("EulerIntegrator",init<>());
+  class_< EulerIntegrator<R>, bases<IntegratorInterface<R> > >("EulerIntegrator",init<>());
 }
 
 template void export_integrator<Float>();

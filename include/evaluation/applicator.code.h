@@ -1,5 +1,5 @@
 /***************************************************************************
- *            applicator_plugin.code.h
+ *            applicator.code.h
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "applicator_plugin.h"
+#include "applicator.h"
 
 #include <iosfwd>
 #include <string>
@@ -162,44 +162,44 @@ Evaluation::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<
 
 
 template<class R>
-Evaluation::ApplicatorPlugin<R>::ApplicatorPlugin() 
+Evaluation::Applicator<R>::Applicator() 
 {
 }
 
 
 template<class R>
-Evaluation::ApplicatorPlugin<R>*
-Evaluation::ApplicatorPlugin<R>::clone() const 
+Evaluation::Applicator<R>*
+Evaluation::Applicator<R>::clone() const 
 {
-  return new ApplicatorPlugin<R>();
+  return new Applicator<R>();
 }
 
 
 
 template<class R>
 Geometry::Rectangle<R>
-Evaluation::ApplicatorPlugin<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r) const
+Evaluation::Applicator<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r) const
 {
   return Evaluation::evaluate(f,r);
 }
 
 template<class R>
 Geometry::Zonotope<R,R>
-Evaluation::ApplicatorPlugin<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<R,R>& z) const
+Evaluation::Applicator<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<R,R>& z) const
 {
   return Evaluation::evaluate(f,z);
 }
 
 template<class R>
-Geometry::Zonotope<typename Evaluation::ApplicatorPlugin<R>::I,R>
-Evaluation::ApplicatorPlugin<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<I,R>& z) const
+Geometry::Zonotope<typename Evaluation::Applicator<R>::I,R>
+Evaluation::Applicator<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<I,R>& z) const
 {
   return Evaluation::evaluate(f,z);
 }
 
 template<class R>
-Geometry::Zonotope<typename Evaluation::ApplicatorPlugin<R>::I>
-Evaluation::ApplicatorPlugin<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<I,I>& z) const
+Geometry::Zonotope<typename Evaluation::Applicator<R>::I>
+Evaluation::Applicator<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<I,I>& z) const
 {
   return Evaluation::evaluate(f,z);
 }
@@ -207,7 +207,7 @@ Evaluation::ApplicatorPlugin<R>::evaluate(const System::MapInterface<R>& f, cons
 
 template<class R>
 void
-Evaluation::ApplicatorPlugin<R>::instantiate()
+Evaluation::Applicator<R>::instantiate()
 {
   Geometry::Rectangle<R>* r=0;
   Geometry::Zonotope<R,R>* z=0;

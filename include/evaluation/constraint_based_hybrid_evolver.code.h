@@ -31,13 +31,13 @@
 #include "../system/vector_field.h"
 #include "../system/constraint_based_hybrid_automaton.h"
 #include "../evaluation/evolution_parameters.h"
-#include "../evaluation/applicator_plugin_interface.h"
-#include "../evaluation/integrator_plugin_interface.h"
-#include "../evaluation/detector_plugin_interface.h"
+#include "../evaluation/applicator_interface.h"
+#include "../evaluation/integrator_interface.h"
+#include "../evaluation/detector_interface.h"
 #include "../evaluation/lohner_integrator.h"
-#include "../evaluation/detector_plugin.h"
+#include "../evaluation/detector.h"
 
-#include "../evaluation/constraint_based_hybrid_evolver_plugin.h"
+#include "../evaluation/constraint_based_hybrid_scheduler.h"
 
 #include "../output/epsstream.h"
 #include "../output/logging.h"
@@ -83,28 +83,28 @@ template<class R>
 Evaluation::ConstraintBasedHybridEvolver<R>::~ConstraintBasedHybridEvolver()
 {
   delete this->_parameters;
-  delete this->_plugin;
+  delete this->_scheduler;
 }
 
 
 template<class R>
-Evaluation::ConstraintBasedHybridEvolver<R>::ConstraintBasedHybridEvolver(const EvolutionParameters<R>& p, const ApplicatorPluginInterface<R>& a, const IntegratorPluginInterface<R>& i)
+Evaluation::ConstraintBasedHybridEvolver<R>::ConstraintBasedHybridEvolver(const EvolutionParameters<R>& p, const ApplicatorInterface<R>& a, const IntegratorInterface<R>& i)
   : _parameters(new EvolutionParameters<R>(p)),
-    _plugin(new ConstraintBasedHybridEvolverPlugin<R>(a,i,DetectorPlugin<R>()))
+    _scheduler(new ConstraintBasedHybridScheduler<R>(a,i,Detector<R>()))
 {
 }
 
 template<class R>
-Evaluation::ConstraintBasedHybridEvolver<R>::ConstraintBasedHybridEvolver(const EvolutionParameters<R>& p, const ApplicatorPluginInterface<R>& a, const IntegratorPluginInterface<R>& i, const DetectorPluginInterface<R>& d)
+Evaluation::ConstraintBasedHybridEvolver<R>::ConstraintBasedHybridEvolver(const EvolutionParameters<R>& p, const ApplicatorInterface<R>& a, const IntegratorInterface<R>& i, const DetectorInterface<R>& d)
   : _parameters(new EvolutionParameters<R>(p)),
-    _plugin(new ConstraintBasedHybridEvolverPlugin<R>(a,i,d))
+    _scheduler(new ConstraintBasedHybridScheduler<R>(a,i,d))
 {
 }
 
 template<class R>
 Evaluation::ConstraintBasedHybridEvolver<R>::ConstraintBasedHybridEvolver(const ConstraintBasedHybridEvolver<R>& evolver)
   : _parameters(new EvolutionParameters<R>(*evolver._parameters)),
-    _plugin(new ConstraintBasedHybridEvolverPlugin<R>(*evolver._plugin))
+    _scheduler(new ConstraintBasedHybridScheduler<R>(*evolver._scheduler))
 {
 }
 
@@ -331,7 +331,7 @@ Evaluation::ConstraintBasedHybridEvolver<R>::upper_evolve(const System::Constrai
     ARIADNE_LOG(9,"working_sets.size()="<<working_sets.size()<<"\n");
     timed_set_type working_set=working_sets.back(); working_sets.pop_back();
     ARIADNE_LOG(9,"unregularised_working_set="<<working_set<<"\n");
-    working_set=this->_plugin->regularize(working_set);
+    working_set=this->_scheduler->regularize(working_set);
     ARIADNE_LOG(9,"regularised_working_set="<<working_set<<"\n");
     if(possibly(working_set.time()>evolution_time)) {
       ARIADNE_LOG(3,"\n  working_set.time()="<<working_set.time());
@@ -343,10 +343,10 @@ Evaluation::ConstraintBasedHybridEvolver<R>::upper_evolve(const System::Constrai
         ARIADNE_LOG(9,"  reached evolution time\n");
         final_sets.push_back(working_set);
       } else if(working_set.continuous_state_set().radius()>this->maximum_basic_set_radius()) {
-        ::append(working_sets,this->_plugin->subdivide(working_set));
+        ::append(working_sets,this->_scheduler->subdivide(working_set));
       } else {
-        ::append(working_sets,this->_plugin->upper_evolution_step(automaton,working_set,evolution_time));
-        ::append(this->_trace,this->_plugin->trace);
+        ::append(working_sets,this->_scheduler->upper_evolution_step(automaton,working_set,evolution_time));
+        ::append(this->_trace,this->_scheduler->trace);
       }
     }
   }
@@ -375,9 +375,9 @@ Evaluation::ConstraintBasedHybridEvolver<R>::upper_reach(const System::Constrain
     timed_set_type working_set=working_sets.back(); working_sets.pop_back();
     if(working_set.time()>=evolution_time) {
     } else if(working_set.continuous_state_set().radius()>this->maximum_basic_set_radius()) {
-      ::append(working_sets,this->_plugin->subdivide(working_set));
+      ::append(working_sets,this->_scheduler->subdivide(working_set));
     } else {
-      ::append(working_sets,this->_plugin->upper_reachability_step(automaton,working_set,evolution_time));
+      ::append(working_sets,this->_scheduler->upper_reachability_step(automaton,working_set,evolution_time));
       // A reachability step returns a list whose final element is the continuous reached set
       reached_sets.push_back(working_sets.back()); working_sets.pop_back();
       if(!working_sets.empty()) { std::cout << "evolution step: " << working_sets.back() << std::endl; }

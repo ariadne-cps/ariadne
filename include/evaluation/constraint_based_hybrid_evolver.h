@@ -46,13 +46,13 @@ namespace Ariadne {
   namespace Evaluation {
   
     template<class R> class EvolutionParameters;
-    template<class R> class ConstraintBasedHybridEvolverPlugin;
+    template<class R> class ConstraintBasedHybridScheduler;
 
 
     /*! \ingroup Evolve 
      *  \brief A class for computing the evolution of a hybrid system. 
      *
-     * The actual evolution steps are performed by the HybridEvolverPlugin class.
+     * The actual evolution steps are performed by the HybridEvolver class.
      */
     template< class R >
     class ConstraintBasedHybridEvolver
@@ -81,10 +81,10 @@ namespace Ariadne {
       ConstraintBasedHybridEvolver(const ConstraintBasedHybridEvolver<R>& evolver);
 
       /*! \brief Construct from an applicator and an integrator. (Deprecated) */
-      ConstraintBasedHybridEvolver(const EvolutionParameters<R>& parameters, const ApplicatorPluginInterface<R>& applicator, const IntegratorPluginInterface<R>& integrator);
+      ConstraintBasedHybridEvolver(const EvolutionParameters<R>& parameters, const ApplicatorInterface<R>& applicator, const IntegratorInterface<R>& integrator);
 
       /*! \brief Construct from an applicator, an integrator and a detector. */
-      ConstraintBasedHybridEvolver(const EvolutionParameters<R>& parameters, const ApplicatorPluginInterface<R>& applicator, const IntegratorPluginInterface<R>& integrator, const DetectorPluginInterface<R>& detector);
+      ConstraintBasedHybridEvolver(const EvolutionParameters<R>& parameters, const ApplicatorInterface<R>& applicator, const IntegratorInterface<R>& integrator, const DetectorInterface<R>& detector);
 
       /*! \brief Virtual destructor. */
       virtual ~ConstraintBasedHybridEvolver();
@@ -275,7 +275,7 @@ namespace Ariadne {
 
      private:
       EvolutionParameters<R>* _parameters;
-      ConstraintBasedHybridEvolverPlugin<R>* _plugin;
+      ConstraintBasedHybridScheduler<R>* _scheduler;
       mutable std::vector<timed_set_type> _trace;
    };
 

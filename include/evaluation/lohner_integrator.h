@@ -30,7 +30,7 @@
 
 #include "../numeric/declarations.h"
 #include "../geometry/declarations.h"
-#include "../evaluation/integrator_plugin_interface.h"
+#include "../evaluation/integrator_interface.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -48,7 +48,7 @@ namespace Ariadne {
      */
     template<class R>
     class LohnerIntegrator
-      : public IntegratorPluginInterface<R>
+      : public IntegratorInterface<R>
     {
       typedef Numeric::Interval<R> I;
       typedef Geometry::Zonotope<I,R> BS;
@@ -127,7 +127,7 @@ namespace Ariadne {
      */
     template<class R>
     class C1LohnerIntegrator
-      : public DifferentiableIntegratorPluginInterface<R> 
+      : public DifferentiableIntegratorInterface<R> 
     {
       typedef Numeric::Interval<R> I;
       typedef Geometry::Zonotope<I,I> BS;

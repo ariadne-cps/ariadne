@@ -38,7 +38,7 @@
 #include "geometry/linear_constraint.h"
 #include "function/function_interface.h"
 #include "function/interpreted_function.h"
-#include "evaluation/detector_plugin.h"
+#include "evaluation/detector.h"
 #include "output/epsstream.h"
 #include "output/logging.h"
 
@@ -72,7 +72,7 @@ test_constraint()
   InterpretedFunction<R> f("function disc output Real y; input Real[2] x; algorithm y=1-(x[0]^2+x[1]^2); end disc;");
 
   DifferentiableConstraint<R> c(f);
-  DetectorPlugin<R> d;
+  Detector<R> d;
 
   Rectangle<R> r;
   Zonotope<Interval<R>,R> z;

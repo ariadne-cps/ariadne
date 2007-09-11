@@ -34,7 +34,7 @@
 #include "geometry/rectangular_set.h"
 #include "system/grid_multimap.h"
 #include "evaluation/map_evolver.h"
-#include "evaluation/applicator_plugin.h"
+#include "evaluation/applicator.h"
 #include "output/epsstream.h"
 #include "output/logging.h"
 

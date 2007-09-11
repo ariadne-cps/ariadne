@@ -1,5 +1,5 @@
 /***************************************************************************
- *            bounder_plugin.code.h
+ *            bounder.code.h
  *
  *  Copyright  2006-7  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -25,30 +25,30 @@
 #include "../system/vector_field_interface.h"
 #include "../output/logging.h"
 
-#include "bounder_plugin_interface.h"
-#include "bounder_plugin.h"
+#include "bounder_interface.h"
+#include "bounder.h"
 
 namespace Ariadne {
 
 namespace Evaluation { static int& verbosity = integrator_verbosity; }
 
 template<class R>
-Evaluation::BounderPlugin<R>::BounderPlugin() 
+Evaluation::Bounder<R>::Bounder() 
 {
 }
 
 
 template<class R>
-Evaluation::BounderPlugin<R>*
-Evaluation::BounderPlugin<R>::clone() const
+Evaluation::Bounder<R>*
+Evaluation::Bounder<R>::clone() const
 {
-  return new BounderPlugin<R>();
+  return new Bounder<R>();
 }
 
 
 template<class R>
 bool
-Evaluation::BounderPlugin<R>::check_flow_bounds(const System::VectorFieldInterface<R>& vf,
+Evaluation::Bounder<R>::check_flow_bounds(const System::VectorFieldInterface<R>& vf,
                                              const Geometry::Rectangle<R>& r,
                                              const Geometry::Rectangle<R>& b,
                                              const Numeric::Rational& h) const
@@ -63,7 +63,7 @@ Evaluation::BounderPlugin<R>::check_flow_bounds(const System::VectorFieldInterfa
 
 template<class R>
 Geometry::Rectangle<R>
-Evaluation::BounderPlugin<R>::estimate_flow_bounds(const System::VectorFieldInterface<R>& vf,
+Evaluation::Bounder<R>::estimate_flow_bounds(const System::VectorFieldInterface<R>& vf,
                                                    const Geometry::Rectangle<R>& r,
                                                    const Numeric::Rational& h) const
 {
@@ -73,7 +73,7 @@ Evaluation::BounderPlugin<R>::estimate_flow_bounds(const System::VectorFieldInte
   
 template<class R>
 Geometry::Rectangle<R>
-Evaluation::BounderPlugin<R>::estimate_flow_bounds(const System::VectorFieldInterface<R>& vf,
+Evaluation::Bounder<R>::estimate_flow_bounds(const System::VectorFieldInterface<R>& vf,
                                                    const Geometry::Rectangle<R>& r,
                                                    const Numeric::Rational& h,
                                                    const unsigned int& maximum_iterations) const
@@ -122,7 +122,7 @@ Evaluation::BounderPlugin<R>::estimate_flow_bounds(const System::VectorFieldInte
 
 template<class R>
 Geometry::Rectangle<R>
-Evaluation::BounderPlugin<R>::estimate_flow_bounds(const System::VectorFieldInterface<R>& vf,
+Evaluation::Bounder<R>::estimate_flow_bounds(const System::VectorFieldInterface<R>& vf,
                                                 const Geometry::Rectangle<R>& r,
                                                 Numeric::Rational& h) const
 {
@@ -160,7 +160,7 @@ Evaluation::BounderPlugin<R>::estimate_flow_bounds(const System::VectorFieldInte
 
 template<class R>
 Geometry::Rectangle<R>
-Evaluation::BounderPlugin<R>::refine_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
+Evaluation::Bounder<R>::refine_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
                                               const Geometry::Rectangle<R>& initial_set,
                                               const Geometry::Rectangle<R>& estimated_bounds,
                                               const Numeric::Rational& step_size) const
@@ -187,7 +187,7 @@ Evaluation::BounderPlugin<R>::refine_flow_bounds(const System::VectorFieldInterf
 
 template<class R>
 Geometry::Rectangle<R>
-Evaluation::BounderPlugin<R>::refine_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
+Evaluation::Bounder<R>::refine_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
                                               const Geometry::Point<I>& initial_point,
                                               const Geometry::Rectangle<R>& estimated_bounds,
                                               const Numeric::Rational& step_size) const
@@ -214,7 +214,7 @@ Evaluation::BounderPlugin<R>::refine_flow_bounds(const System::VectorFieldInterf
 
 template<class R>
 Geometry::Rectangle<R>
-Evaluation::BounderPlugin<R>::estimate_interval_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
+Evaluation::Bounder<R>::estimate_interval_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
                                                          const Geometry::Rectangle<R>& initial_set,
                                                          Numeric::Interval<R>& step_size) const
 {
@@ -237,7 +237,7 @@ Evaluation::BounderPlugin<R>::estimate_interval_flow_bounds(const System::Vector
 
 template<class R>
 Geometry::Rectangle<R>
-Evaluation::BounderPlugin<R>::refine_interval_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
+Evaluation::Bounder<R>::refine_interval_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
                                                        const Geometry::Rectangle<R>& initial_set,
                                                        const Geometry::Rectangle<R>& estimated_bounds,
                                                        const Numeric::Interval<R>& step_size) const
@@ -267,7 +267,7 @@ Evaluation::BounderPlugin<R>::refine_interval_flow_bounds(const System::VectorFi
 
 template<class R>
 LinearAlgebra::Matrix< Numeric::Interval<R> >
-Evaluation::BounderPlugin<R>::estimate_flow_jacobian_bounds(const System::VectorFieldInterface<R>& vf,
+Evaluation::Bounder<R>::estimate_flow_jacobian_bounds(const System::VectorFieldInterface<R>& vf,
                                                          const Geometry::Rectangle<R>& b,
                                                          const Numeric::Rational& h) const
 {

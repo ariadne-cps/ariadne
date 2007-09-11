@@ -25,8 +25,8 @@
  *  \brief Methods for computing the images of sets under maps.
  */
 
-#ifndef ARIADNE_APPLICATOR_H
-#define ARIADNE_APPLICATOR_H
+#ifndef ARIADNE_MAP_EVOLVER_H
+#define ARIADNE_MAP_EVOLVER_H
 
 #include <boost/smart_ptr.hpp>
 
@@ -36,7 +36,7 @@
 #include "../system/declarations.h"
 
 #include "../evaluation/evolution_parameters.h"
-#include "../evaluation/applicator_plugin_interface.h"
+#include "../evaluation/applicator_interface.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -50,7 +50,7 @@ namespace Ariadne {
       typedef Geometry::Zonotope<I,R> BS;
      private:
       EvolutionParameters<R>* _parameters;
-      ApplicatorPluginInterface<R>* _plugin;
+      ApplicatorInterface<R>* _applicator;
      public:
       /*! \brief Default constructor chooses appropriate parameter values for maximum basic set radius and grid size. */
       MapEvolver();

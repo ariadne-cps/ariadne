@@ -1,5 +1,5 @@
 /***************************************************************************
- *            detector_plugin_interface.h
+ *            detector_interface.h
  *
  *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file detector_plugin_interface.h
+/*! \file detector_interface.h
  *  \brief Methods for detecting crossings with constraints.
  */
 
-#ifndef ARIADNE_DETECTOR_PLUGIN_INTERFACE_H
-#define ARIADNE_DETECTOR_PLUGIN_INTERFACE_H
+#ifndef ARIADNE_DETECTOR_INTERFACE_H
+#define ARIADNE_DETECTOR_INTERFACE_H
 
 #include "../base/types.h"
 #include "../base/declarations.h"
@@ -45,16 +45,16 @@ namespace Ariadne {
      *  \ingroup Detection
      */
     template<class R>
-    class DetectorPluginInterface 
+    class DetectorInterface 
     {
       typedef Numeric::Interval<R> I;
       typedef typename Geometry::Rectangle<R> BS;
      public:
       /*! \brief Virtual destructor. */
-      virtual ~DetectorPluginInterface() { };
+      virtual ~DetectorInterface() { };
 
       /*! \brief Make a dynamically-allocated copy. */
-      virtual DetectorPluginInterface<R>* clone() const = 0;
+      virtual DetectorInterface<R>* clone() const = 0;
 
       /*! \brief Compute the value of a constraint over a set. */
       virtual Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
@@ -89,4 +89,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* ARIADNE_DETECTOR_PLUGIN_INTERFACE_H */
+#endif /* ARIADNE_DETECTOR_INTERFACE_H */

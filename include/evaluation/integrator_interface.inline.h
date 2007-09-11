@@ -1,8 +1,8 @@
 /***************************************************************************
- *            constraint_based_hybrid_evolver_plugin.cc
+ *            integrator_interface.inline.h
  *
- *  Copyright  2007  Pieter Collins
- *  pieter.collins@cwi.nl
+ *  Copyright  2006-7  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -20,24 +20,14 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+ 
+#include "integrator_interface.h"
 
-#include "numeric/float.h"
-
-#include "evaluation/constraint_based_hybrid_evolver_plugin.h"
-#include "evaluation/constraint_based_hybrid_evolver_plugin.code.h"
+#include "geometry/rectangle.h"
+#include "geometry/zonotope.h"
 
 namespace Ariadne {
-  namespace Evaluation {
-    using namespace Numeric;
 
-#ifdef ENABLE_FLOAT64
-  template class ConstraintBasedHybridEvolverPlugin<Float64>;
-#endif
-  
-#ifdef ENABLE_FLOATMP
-  template class ConstraintBasedHybridEvolverPlugin<FloatMP>;
-#endif
 
-      
-  }
-}
+
+} // namespace Ariadne

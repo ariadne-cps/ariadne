@@ -35,11 +35,11 @@ namespace Ariadne {
     template<class R> class MapEvolver;
     template<class R> class VectorFieldEvolver;
   
-    template<class R> class ApplicatorPluginInterface;
-    template<class R> class BounderPluginInterface;
-    template<class R> class IntegratorPluginInterface;
-    template<class R> class DifferentiableIntegratorPluginInterface;
-    template<class R> class DetectorPluginInterface;
+    template<class R> class ApplicatorInterface;
+    template<class R> class BounderInterface;
+    template<class R> class IntegratorInterface;
+    template<class R> class DifferentiableIntegratorInterface;
+    template<class R> class DetectorInterface;
 
     template<class R> class DiscreteTimeEvolver;
     template<class R> class ContinuousTimeEvolver;

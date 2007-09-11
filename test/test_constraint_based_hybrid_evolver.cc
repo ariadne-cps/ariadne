@@ -38,11 +38,11 @@
 #include "system/affine_vector_field.h"
 #include "system/constraint_based_hybrid_automaton.h"
 #include "evaluation/evolution_parameters.h"
-#include "evaluation/applicator_plugin.h"
+#include "evaluation/applicator.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
 #include "evaluation/constraint_based_hybrid_evolver.h"
-#include "evaluation/constraint_based_hybrid_evolver_plugin.h"
+#include "evaluation/constraint_based_hybrid_evolver.h"
 #include "output/epsstream.h"
 #include "output/logging.h"
 
@@ -81,11 +81,11 @@ construct_evolver()
   parameters.set_maximum_basic_set_radius(0.25);
   parameters.set_grid_length(0.125);
   
-  ApplicatorPlugin<R> applicator;
+  Applicator<R> applicator;
   LohnerIntegrator<R> lohner_integrator; 
-  const ApplicatorPluginInterface<R>& applicator_plugin=applicator;
-  const IntegratorPluginInterface<R>& integrator_plugin=lohner_integrator;
-  return ConstraintBasedHybridEvolver<R>(parameters,applicator_plugin,integrator_plugin);
+  const ApplicatorInterface<R>& applicator_interface=applicator;
+  const IntegratorInterface<R>& integrator_interface=lohner_integrator;
+  return ConstraintBasedHybridEvolver<R>(parameters,applicator_interface,integrator_interface);
 }
 
 

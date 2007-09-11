@@ -23,7 +23,7 @@
 
 #include "python/python_float.h"
 
-#include "evaluation/applicator_plugin.h"
+#include "evaluation/applicator.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;

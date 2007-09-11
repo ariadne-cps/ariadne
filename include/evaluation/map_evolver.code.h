@@ -54,7 +54,7 @@
 #include "../system/map.h"
 #include "../system/discrete_time_system.h"
 
-#include "../evaluation/applicator_plugin.h"
+#include "../evaluation/applicator.h"
 
 #include "../output/logging.h"
 
@@ -71,7 +71,7 @@ static const double DEFAULT_GRID_LENGTH=0.125;
 template<class R>
 Evaluation::MapEvolver<R>::MapEvolver() 
   : _parameters(new EvolutionParameters<R>()),
-    _plugin(new ApplicatorPlugin<R>())
+    _applicator(new Applicator<R>())
 {
   _parameters->set_maximum_basic_set_radius(DEFAULT_MAXIMUM_BASIC_SET_RADIUS);
   _parameters->set_grid_length(DEFAULT_GRID_LENGTH);
@@ -81,7 +81,7 @@ Evaluation::MapEvolver<R>::MapEvolver()
 template<class R>
 Evaluation::MapEvolver<R>::MapEvolver(const EvolutionParameters<R>& parameters)
   : _parameters(new EvolutionParameters<R>(parameters)),
-    _plugin(new ApplicatorPlugin<R>())
+    _applicator(new Applicator<R>())
 {
 }
 
@@ -89,7 +89,7 @@ Evaluation::MapEvolver<R>::MapEvolver(const EvolutionParameters<R>& parameters)
 template<class R>
 Evaluation::MapEvolver<R>::MapEvolver(const MapEvolver<R>& other) 
   : _parameters(new EvolutionParameters<R>(other.parameters())),
-    _plugin(other._plugin->clone())
+    _applicator(other._applicator->clone())
 {
 }
 
@@ -99,7 +99,7 @@ template<class R>
 Evaluation::MapEvolver<R>::~MapEvolver() 
 {
   delete this->_parameters;
-  delete this->_plugin;
+  delete this->_applicator;
 }
 
 
@@ -148,7 +148,7 @@ typename Evaluation::MapEvolver<R>::BS
 Evaluation::MapEvolver<R>::evaluate(const System::MapInterface<R>& f, const BS& bs) const
 {
   ARIADNE_LOG(4,"BS MapEvolver::evaluate(MapInterface,BasicSet)\n");
-  return this->_plugin->evaluate(f,bs);
+  return this->_applicator->evaluate(f,bs);
 }
 
 

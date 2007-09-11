@@ -31,7 +31,7 @@
 #include "../linear_algebra/declarations.h"
 #include "../geometry/declarations.h"
 #include "../system/declarations.h"
-#include "../evaluation/integrator_plugin_interface.h"
+#include "../evaluation/integrator_interface.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -57,7 +57,7 @@ namespace Ariadne {
      */
     template<class R>
     class AffineIntegrator
-      : public DifferentiableIntegratorPluginInterface<R> 
+      : public DifferentiableIntegratorInterface<R> 
     {
       typedef Numeric::Interval<R> I;
       typedef Geometry::Zonotope<I> BS;

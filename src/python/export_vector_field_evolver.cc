@@ -34,7 +34,7 @@
 
 #include "evaluation/evolution_parameters.h"
 #include "evaluation/vector_field_evolver.h"
-#include "evaluation/integrator_plugin_interface.h"
+#include "evaluation/integrator_interface.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
@@ -51,7 +51,7 @@ template<class R>
 void export_vector_field_evolver() 
 {
 
-  class_< VectorFieldEvolver<R> >("VectorFieldEvolver",init<const EvolutionParameters<R>&,const IntegratorPluginInterface<R>&>())
+  class_< VectorFieldEvolver<R> >("VectorFieldEvolver",init<const EvolutionParameters<R>&,const IntegratorInterface<R>&>())
     .def("integrate",(ListSet< Rectangle<R> >(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const ListSet< Rectangle<R> >&,const time_type&)const)
                                     (&VectorFieldEvolver<R>::integrate))
     .def("reach",(ListSet< Rectangle<R> >(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const ListSet< Rectangle<R> >&,const time_type&)const)

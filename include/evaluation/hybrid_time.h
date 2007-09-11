@@ -1,5 +1,5 @@
 /***************************************************************************
- *            constraint_hybrid_evolver_plugin.h
+ *            constraint_hybrid_evolver.h
  *
  *  Copyright  2007  Pieter Collins
  *  Pieter.Collins@cwi.nl

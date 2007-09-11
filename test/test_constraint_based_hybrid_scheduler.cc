@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_constraint_based_hybrid_evolver_plugin.cc
+ *            test_constraint_based_hybrid_scheduler.cc
  *
  *  Copyright  2007  Pieter Collins
  *  Email  Pieter.Collins@cwi.nl
@@ -25,7 +25,6 @@
 #include <fstream>
 #include <string>
 
-#include "ariadne.h"
 #include "test_float.h"
 #include "geometry/set_interface.h"
 #include "geometry/set_reference.h"
@@ -38,12 +37,12 @@
 #include "system/affine_vector_field.h"
 #include "system/constraint_based_hybrid_automaton.h"
 #include "evaluation/evolution_parameters.h"
-#include "evaluation/applicator_plugin.h"
+#include "evaluation/applicator.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
-#include "evaluation/detector_plugin.h"
+#include "evaluation/detector.h"
 #include "evaluation/constraint_based_hybrid_evolver.h"
-#include "evaluation/constraint_based_hybrid_evolver_plugin.h"
+#include "evaluation/constraint_based_hybrid_scheduler.h"
 #include "output/epsstream.h"
 #include "output/logging.h"
 
@@ -69,8 +68,8 @@ static const id_type event5_id = 5;
 static const id_type event6_id = 6;
   
 template<class R>
-ConstraintBasedHybridEvolverPlugin<R> 
-construct_evolver_plugin() 
+ConstraintBasedHybridScheduler<R> 
+construct_scheduler() 
 {
   typedef Interval<R> I;
   typedef Zonotope<I,I> BS;
@@ -81,10 +80,10 @@ construct_evolver_plugin()
   parameters.set_maximum_basic_set_radius(0.25);
   parameters.set_grid_length(0.125);
   
-  ApplicatorPlugin<R> apply;
+  Applicator<R> apply;
   LohnerIntegrator<R> lohner_integrator; 
-  DetectorPlugin<R> detector;
-  return ConstraintBasedHybridEvolverPlugin<R>(apply,lohner_integrator,detector);
+  Detector<R> detector;
+  return ConstraintBasedHybridScheduler<R>(apply,lohner_integrator,detector);
 }
 
 
@@ -122,19 +121,19 @@ construct_automaton()
 
 
 template<class R>
-class TestConstraintBasedHybridEvolverPlugin
+class TestConstraintBasedHybridScheduler
 {
   typedef Interval<R> I;
   typedef TimeModelHybridBasicSet< Zonotope<I,I> > timed_set_type;
  public:
   ConstraintBasedHybridAutomaton<R> automaton;
-  ConstraintBasedHybridEvolverPlugin<R> evolver;
+  ConstraintBasedHybridScheduler<R> scheduler;
   Rectangle<R> bounding_box;
     
 
-  TestConstraintBasedHybridEvolverPlugin()
+  TestConstraintBasedHybridScheduler()
     : automaton(construct_automaton<R>()), 
-      evolver(construct_evolver_plugin<R>()),
+      scheduler(construct_scheduler<R>()),
       bounding_box("[-3,3]x[-3,3]")
   { }
 
@@ -173,7 +172,7 @@ class TestConstraintBasedHybridEvolverPlugin
     cout << "\n" << __FUNCTION__ << "\n";
     time_type step_size=0.25;
     timed_set_type initial_set(1,Zonotope<I,I>("{(0.5,-0.4),[0.1,0,0.01;0,0.1,0.01]}"));
-    std::vector<timed_set_type> reach_set=evolver.evolution_step(automaton,initial_set,step_size,upper_semantics,compute_reachable_set);
+    std::vector<timed_set_type> reach_set=scheduler.evolution_step(automaton,initial_set,step_size,upper_semantics,compute_reachable_set);
     cout << "\nreach_set=" << reach_set << endl;
     plot("reach",initial_set,reach_set);
     return 0;
@@ -183,7 +182,7 @@ class TestConstraintBasedHybridEvolverPlugin
     cout << "\n" << __FUNCTION__ << "\n";
     time_type step_size=0.25;
     timed_set_type initial_set(1,Zonotope<I,I>("{(1.90,-0.4),[0.05,0,0.01;0,0.05,0.01]}"));
-    std::vector<timed_set_type> reach_set=evolver.evolution_step(automaton,initial_set,step_size,upper_semantics,compute_reachable_set);
+    std::vector<timed_set_type> reach_set=scheduler.evolution_step(automaton,initial_set,step_size,upper_semantics,compute_reachable_set);
     cout << "\nreach_set=" << reach_set << endl;
     plot("guard",initial_set,reach_set);
     return 0;
@@ -193,7 +192,7 @@ class TestConstraintBasedHybridEvolverPlugin
     cout << "\n" << __FUNCTION__ << "\n";
     time_type step_size=0.25;
     timed_set_type initial_set(1,Zonotope<I,I>(Rectangle<R>("[-1.45,-1.35]x[2.05,2.15]")));
-    std::vector<timed_set_type> reach_set=evolver.evolution_step(automaton,initial_set,step_size,upper_semantics,compute_reachable_set);
+    std::vector<timed_set_type> reach_set=scheduler.evolution_step(automaton,initial_set,step_size,upper_semantics,compute_reachable_set);
     cout << "\nreach_set=" << reach_set << endl;
     plot("activation",initial_set,reach_set);
     return 0;
@@ -203,7 +202,7 @@ class TestConstraintBasedHybridEvolverPlugin
     cout << "\n" << __FUNCTION__ << "\n";
     time_type step_size=0.25;
     TimeModelHybridBasicSet< Zonotope<I,I> > initial_set(1,Zonotope<I,I>(Rectangle<R>("[1.35,1.45]x[2.35,2.45]")));
-    std::vector<timed_set_type> reach_set=evolver.evolution_step(automaton,initial_set,step_size,upper_semantics,compute_reachable_set);
+    std::vector<timed_set_type> reach_set=scheduler.evolution_step(automaton,initial_set,step_size,upper_semantics,compute_reachable_set);
     cout << "\nreach_set=" << reach_set << endl;
     plot("invariant",initial_set,reach_set);
     return 0;
@@ -213,7 +212,7 @@ class TestConstraintBasedHybridEvolverPlugin
     cout << "\n" << __FUNCTION__ << "\n";
     time_type step_size=0.25;
     TimeModelHybridBasicSet< Zonotope<I,I> > initial_set(1,Zonotope<I,I>(Rectangle<R>("[1.95,2.05]x[1.35,1.45]")));
-    std::vector<timed_set_type> reach_set=evolver.evolution_step(automaton,initial_set,step_size,upper_semantics,compute_reachable_set);
+    std::vector<timed_set_type> reach_set=scheduler.evolution_step(automaton,initial_set,step_size,upper_semantics,compute_reachable_set);
     cout << "\nreach_set=" << reach_set << endl;
     plot("initial_guard",initial_set,reach_set);
     return 0;
@@ -223,11 +222,11 @@ class TestConstraintBasedHybridEvolverPlugin
     cout << "\n" << __FUNCTION__ << "\n";
     time_type step_size=0.25;
     TimeModelHybridBasicSet< Zonotope<I,I> > initial_set(1,Zonotope<I,I>(Rectangle<R>("[1.65,1.75]x[2.35,2.45]")));
-    std::vector<timed_set_type> subdivided_set=evolver.evolution_step(automaton,initial_set,step_size,upper_semantics,compute_reachable_set);
+    std::vector<timed_set_type> subdivided_set=scheduler.evolution_step(automaton,initial_set,step_size,upper_semantics,compute_reachable_set);
     std::vector<timed_set_type> reach_set;
     cout << "\nsubdivided_set=" << subdivided_set << endl;
     for(uint i=0; i!=subdivided_set.size(); ++i) { 
-      std::vector<timed_set_type> reach_subset=evolver.evolution_step(automaton,subdivided_set[i],step_size,upper_semantics,compute_reachable_set);
+      std::vector<timed_set_type> reach_subset=scheduler.evolution_step(automaton,subdivided_set[i],step_size,upper_semantics,compute_reachable_set);
       reach_set.insert(reach_set.end(),reach_subset.begin(),reach_subset.end());
     }
     cout << "reach_set=" << reach_set << endl;
@@ -252,7 +251,7 @@ class TestConstraintBasedHybridEvolverPlugin
 int main() {
   set_hybrid_evolver_verbosity(::verbosity);
 
-  TestConstraintBasedHybridEvolverPlugin<Float>().test();
+  TestConstraintBasedHybridScheduler<Float>().test();
   cerr << "INCOMPLETE ";
   return 0;
 }

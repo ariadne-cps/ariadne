@@ -23,7 +23,7 @@
 
 #include "numeric/float.h"
 
-#include "evaluation/integrator_plugin_interface.h"
+#include "evaluation/integrator_interface.h"
 
 #include "evaluation/vector_field_evolver.h"
 #include "evaluation/vector_field_evolver.code.h"

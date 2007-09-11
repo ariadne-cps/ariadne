@@ -25,8 +25,8 @@
  *  \brief Methods for integrating points and sets under a vector field.
  */
 
-#ifndef ARIADNE_INTEGRATOR_H
-#define ARIADNE_INTEGRATOR_H
+#ifndef ARIADNE_VECTOR_FIELD_EVOLVER_H
+#define ARIADNE_VECTOR_FIELD_EVOLVER_H
 
 #include "../base/types.h"
 #include "../base/declarations.h"
@@ -48,8 +48,8 @@ namespace Ariadne {
 
    
     template<class R> class EvolutionParameters;
-    template<class R> class IntegratorPluginInterface;
-    template<class R> class BounderPluginInterface;
+    template<class R> class IntegratorInterface;
+    template<class R> class BounderInterface;
 
 
 
@@ -63,8 +63,8 @@ namespace Ariadne {
       typedef Geometry::Zonotope<I,R> BS;
 
       EvolutionParameters<R>* _parameters;
-      BounderPluginInterface<R>* _bounder_plugin;
-      IntegratorPluginInterface<R>* _integrator_plugin;
+      BounderInterface<R>* _bounder;
+      IntegratorInterface<R>* _integrator;
      public:
       /*! The type used to denote real numbers. */
       typedef R real_type;
@@ -91,7 +91,7 @@ namespace Ariadne {
       virtual ~VectorFieldEvolver();
 
       /*! \brief Constructor. */
-      VectorFieldEvolver(const EvolutionParameters<R>& parameters, const IntegratorPluginInterface<R>& plugin);
+      VectorFieldEvolver(const EvolutionParameters<R>& parameters, const IntegratorInterface<R>& plugin);
 
       /*! \brief Copy constructor. */
       VectorFieldEvolver(const VectorFieldEvolver<R>& i);

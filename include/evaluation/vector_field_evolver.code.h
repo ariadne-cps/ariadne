@@ -54,8 +54,8 @@
 #include "../system/affine_vector_field.h"
 
 #include "../evaluation/evolution_parameters.h"
-#include "../evaluation/bounder_plugin.h"
-#include "../evaluation/integrator_plugin_interface.h"
+#include "../evaluation/bounder.h"
+#include "../evaluation/integrator_interface.h"
 
 #include "../output/logging.h"
 
@@ -108,15 +108,15 @@ template<class R>
 Evaluation::VectorFieldEvolver<R>::~VectorFieldEvolver()
 {
   delete _parameters;
-  delete _bounder_plugin;
-  delete _integrator_plugin;
+  delete _bounder;
+  delete _integrator;
 }
 
 template<class R>
 Evaluation::VectorFieldEvolver<R>::VectorFieldEvolver(const VectorFieldEvolver<R>& i)
   : _parameters(i._parameters->clone()),
-    _bounder_plugin(i._bounder_plugin->clone()),
-    _integrator_plugin(i._integrator_plugin->clone())
+    _bounder(i._bounder->clone()),
+    _integrator(i._integrator->clone())
 {
 }
 
@@ -129,10 +129,10 @@ Evaluation::VectorFieldEvolver<R>*
 }
 
 template<class R>
-Evaluation::VectorFieldEvolver<R>::VectorFieldEvolver(const EvolutionParameters<R>& parameters, const IntegratorPluginInterface<R>& plugin)
+Evaluation::VectorFieldEvolver<R>::VectorFieldEvolver(const EvolutionParameters<R>& parameters, const IntegratorInterface<R>& plugin)
   : _parameters(new EvolutionParameters<R>(parameters)),
-    _bounder_plugin(new BounderPlugin<R>()),
-    _integrator_plugin(plugin.clone())
+    _bounder(new Bounder<R>()),
+    _integrator(plugin.clone())
 {
 }
 
@@ -215,10 +215,10 @@ Evaluation::VectorFieldEvolver<R>::integration_step(const vector_field_type& vec
   ARIADNE_LOG(2,"BasicSet VectorFieldEvolver::integration_step(VectorFieldInterface,BasicSet,Time)\n");
   ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"VectorFieldEvolver::integration_step(VectorFieldInterface,BasicSet,Time)");
 
-  bounding_set_type bounding_set=this->_bounder_plugin->estimate_flow_bounds(vector_field,initial_set.bounding_box(),step_size);
-  bounding_set=this->_bounder_plugin->refine_flow_bounds(vector_field,initial_set.bounding_box(),bounding_set,step_size);
-  bounding_set=this->_bounder_plugin->refine_flow_bounds(vector_field,initial_set.bounding_box(),bounding_set,step_size);
-  return this->_integrator_plugin->integration_step(vector_field,initial_set,step_size,bounding_set);
+  bounding_set_type bounding_set=this->_bounder->estimate_flow_bounds(vector_field,initial_set.bounding_box(),step_size);
+  bounding_set=this->_bounder->refine_flow_bounds(vector_field,initial_set.bounding_box(),bounding_set,step_size);
+  bounding_set=this->_bounder->refine_flow_bounds(vector_field,initial_set.bounding_box(),bounding_set,step_size);
+  return this->_integrator->integration_step(vector_field,initial_set,step_size,bounding_set);
 }
 
 
@@ -230,10 +230,10 @@ Evaluation::VectorFieldEvolver<R>::reachability_step(const vector_field_type& ve
 {
   ARIADNE_LOG(2,"BasicSet VectorFieldEvolver::reachability_step(VectorFieldInterface,BasicSet,Time)\n");
   ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"VectorFieldEvolver::reachability_step(VectorFieldInterface,BasicSet,Time)");
-  bounding_set_type bounding_set=this->_bounder_plugin->estimate_flow_bounds(vector_field,initial_set.bounding_box(),step_size);
-  bounding_set=this->_bounder_plugin->refine_flow_bounds(vector_field,initial_set.bounding_box(),bounding_set,step_size);
-  bounding_set=this->_bounder_plugin->refine_flow_bounds(vector_field,initial_set.bounding_box(),bounding_set,step_size);
-  return this->_integrator_plugin->reachability_step(vector_field,initial_set,step_size,bounding_set);
+  bounding_set_type bounding_set=this->_bounder->estimate_flow_bounds(vector_field,initial_set.bounding_box(),step_size);
+  bounding_set=this->_bounder->refine_flow_bounds(vector_field,initial_set.bounding_box(),bounding_set,step_size);
+  bounding_set=this->_bounder->refine_flow_bounds(vector_field,initial_set.bounding_box(),bounding_set,step_size);
+  return this->_integrator->reachability_step(vector_field,initial_set,step_size,bounding_set);
 }
 
 

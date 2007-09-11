@@ -81,7 +81,7 @@ EVALUATION_SRC = \
 	evaluation/vector_field_evolver.cc \
 	evaluation/set_based_hybrid_evolver.cc \
 	evaluation/constraint_based_hybrid_evolver.cc \
-	evaluation/constraint_based_hybrid_evolver_plugin.cc 
+	evaluation/constraint_based_hybrid_scheduler.cc 
 
 OUTPUT_SRC = \
 	output/logging.cc \

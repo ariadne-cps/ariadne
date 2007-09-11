@@ -372,15 +372,6 @@ Function::mul(Polynomial<R0>& p0, const Polynomial<R1>& p1, const Polynomial<R2>
 }
 
 
-template<class R0, class R1, class R2>
-void
-Function::div(Polynomial<R0>& p0, const Polynomial<R1>& p1, const Polynomial<R2>& p2)
-{
-  Polynomial<R0> p3;
-  Function::recip(p3,p2);
-  Function::mul(p0,p1,p3);
-}
-
 
 template<class R0,class R1>
 void
@@ -417,13 +408,6 @@ Function::scale(Polynomial<R0>& p0, const R1& x1)
   for(size_type i=0; i!=p0._data.size(); ++i) {
     p0._data[i]*=x1;
   }
-}
-
-template<class R0,class R1>
-void
-Function::recip(Polynomial<R0>& p0, const Polynomial<R1>& p1)
-{
-  throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 
@@ -485,12 +469,20 @@ Function::compose(Polynomial<R0>& p0, const Polynomial<R1>& p1, const Polynomial
 }
 
 
+template<class R0,class R1>
+void
+Function::derivative(Polynomial<R0>& p0, const Polynomial<R1>& p1, const size_type& k)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
 template<class R>
 LinearAlgebra::Matrix<typename Function::Polynomial<R>::F> 
 Function::Polynomial<R>::jacobian(const LinearAlgebra::Vector<F>& s) const
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
+
 
 
 template<class R>
@@ -563,6 +555,7 @@ void
 Function::Polynomial<R>::instantiate()
 {
   typedef typename Numeric::traits<R>::arithmetic_type I;
+  size_type* k=0;
   R* x=0;
   Polynomial<R>* p=0;
   std::ostream* os = 0;
@@ -571,11 +564,12 @@ Function::Polynomial<R>::instantiate()
   Function::operator+(*p,*p);
   Function::operator-(*p,*p);
   Function::operator*(*p,*p);
-  Function::operator/(*p,*p);
+  Function::operator*(*x,*p);
   Function::operator*(*p,*x);
   Function::operator/(*p,*x);
   Function::pow(*p,0u);
   Function::compose(*p,*p);
+  Function::derivative(*p,*k);
   *os << *p;
   *texs << *p;
 }

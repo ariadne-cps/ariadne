@@ -125,15 +125,6 @@ Function::operator*(const Polynomial<R1>& p1, const Polynomial<R2>& p2)
 
 template<class R1,class R2> inline
 Function::Polynomial<typename Numeric::traits<R1,R2>::arithmetic_type>
-Function::operator/(const Polynomial<R1>& p1, const Polynomial<R2>& p2)
-{
-  Polynomial<typename Numeric::traits<R1,R2>::arithmetic_type> p0;
-  div(p0,p1,p2);
-  return p0;
-}
-
-template<class R1,class R2> inline
-Function::Polynomial<typename Numeric::traits<R1,R2>::arithmetic_type>
 Function::operator*(const Polynomial<R1>& p1, const R2& x2)
 {
   Polynomial<typename Numeric::traits<R1,R2>::arithmetic_type> p0(p1);
@@ -155,16 +146,6 @@ Function::operator*(const R1& x1, const Polynomial<R2>& p2)
   return p2*x1;
 }
 
-template<class R1,class R2> inline
-Function::Polynomial<typename Numeric::traits<R1,R2>::arithmetic_type>
-Function::operator/(const R1& x1, const Polynomial<R2>& p2)
-{
-  Polynomial<typename Numeric::traits<R1,R2>::arithmetic_type> p0;
-  Function::recip(p0,p2);
-  Function::scale(p0,x1);
-  return p0;
-}
-
 template<class R> inline
 Function::Polynomial<typename Numeric::traits<R>::arithmetic_type>
 Function::pow(const Polynomial<R>& p, const unsigned int& n)
@@ -180,6 +161,15 @@ Function::compose(const Polynomial<R1>& p1, const Polynomial<R2>& p2)
 {
   Polynomial<typename Numeric::traits<R1,R2>::arithmetic_type> p0;
   compose(p0,p1,p2);
+  return p0;
+}
+
+template<class R> inline
+Function::Polynomial<typename Numeric::traits<R>::arithmetic_type>
+Function::derivative(const Polynomial<R>& p1, const size_type& k)
+{
+  Polynomial<typename Numeric::traits<R>::arithmetic_type> p0;
+  derivative(p0,p1,k);
   return p0;
 }
 

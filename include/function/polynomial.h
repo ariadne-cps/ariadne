@@ -54,34 +54,30 @@ namespace Ariadne {
     template<class R0, class R1, class R2> void add(Polynomial<R0>&, const Polynomial<R1>&, const Polynomial<R2>&);
     template<class R0, class R1, class R2> void sub(Polynomial<R0>&, const Polynomial<R1>&, const Polynomial<R2>&);
     template<class R0, class R1, class R2> void mul(Polynomial<R0>&, const Polynomial<R1>&, const Polynomial<R2>&);
-    template<class R0, class R1, class R2> void div(Polynomial<R0>&, const Polynomial<R1>&, const Polynomial<R2>&);
     template<class R0, class R1> void pow(Polynomial<R0>&, const Polynomial<R1>&, const unsigned int&);
 
     template<class R0, class R1> void scale(Polynomial<R0>&, const R1&);
-    template<class R0, class R1> void recip(Polynomial<R0>&, const Polynomial<R1>&);
 
     template<class R0, class R1> void derivative(Polynomial<R0>&, const Polynomial<R1>&, const size_type&);
     template<class R0, class R1, class R2> void compose(Polynomial<R0>&, const Polynomial<R1>&, const Polynomial<R2>&);
     template<class R0, class R1, class R2> void combine(Polynomial<R0>&, const Polynomial<R1>&, const Polynomial<R2>&);
     template<class R0, class R1, class R2> void join(Polynomial<R0>&, const Polynomial<R1>&, const Polynomial<R2>&);
-    template<class R0, class R1> void inverse(Polynomial<R0>&, const Polynomial<R1>&);
-    template<class R0, class R1> void implicit(Polynomial<R0>&, const Polynomial<R1>&, const size_type&);
 
-    template<class R0, class R1> void reduce(Polynomial<R0>&, const Polynomial<R1>&, const size_type&, const size_type&);
+    template<class R0, class R1, class R2> void truncate(Polynomial<R0>&, const Polynomial<R1>&, const Geometry::Rectangle<R1>&, const size_type&, const size_type&);
+
 
     template<class R1, class R2> Polynomial<typename Numeric::traits<R1,R2>::arithmetic_type> operator+(const Polynomial<R1>&, const Polynomial<R2>&);
     template<class R1, class R2> Polynomial<typename Numeric::traits<R1,R2>::arithmetic_type> operator-(const Polynomial<R1>&, const Polynomial<R2>&);
     template<class R1, class R2> Polynomial<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const Polynomial<R1>&, const Polynomial<R2>&);
-    template<class R1, class R2> Polynomial<typename Numeric::traits<R1,R2>::arithmetic_type> operator/(const Polynomial<R1>&, const Polynomial<R2>&);
 
     template<class R1, class R2> Polynomial<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const R1&, const Polynomial<R2>&);
-    template<class R1, class R2> Polynomial<typename Numeric::traits<R1,R2>::arithmetic_type> operator/(const R1&, const Polynomial<R2>&);
     template<class R1, class R2> Polynomial<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const Polynomial<R1>&, const R2&);
     template<class R1, class R2> Polynomial<typename Numeric::traits<R1,R2>::arithmetic_type> operator/(const Polynomial<R1>&, const R2&);
 
     template<class R1, class R2> Polynomial<typename Numeric::traits<R1,R2>::arithmetic_type> compose(const Polynomial<R1>&, const Polynomial<R2>&);
     template<class R> Polynomial<typename Numeric::traits<R>::arithmetic_type> pow(const Polynomial<R>& p, const unsigned int& n);
     template<class R> Polynomial<typename Numeric::traits<R>::arithmetic_type> derivative(const Polynomial<R>&, const size_type& k);
+    template<class R> Polynomial<typename Numeric::traits<R>::interval_type> truncate(const Polynomial<R>&, const Geometry::Rectangle<typename Numeric::traits<R>::number_type>&, const size_type&, const size_type&);
 
     template<class R> std::ostream& operator<<(std::ostream&, const Polynomial<R>&);
   
@@ -162,6 +158,31 @@ namespace Ariadne {
       std::ostream& write(std::ostream& os) const;
       /*! \brief Read from an input stream. */
       std::istream& read(std::istream& is);
+
+#ifdef DOXYGEN
+      /*! \brief Addition. */
+      friend template<class R1, class R2> Polynomial<typename Numeric::traits<R1,R2>::arithmetic_type> operator+(const Polynomial<R1>&, const Polynomial<R2>&);
+      /*! \brief Subtraction. */
+      friend template<class R1, class R2> Polynomial<typename Numeric::traits<R1,R2>::arithmetic_type> operator-(const Polynomial<R1>&, const Polynomial<R2>&);
+      /*! \brief Multiplication. At least one argument must be scalar-valued. */
+      friend template<class R1, class R2> Polynomial<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const Polynomial<R1>&, const Polynomial<R2>&);
+
+      /*! \brief Multiplication by a scalar. */
+      friend template<class R1, class R2> Polynomial<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const R1&, const Polynomial<R2>&);
+      /*! \brief Multiplication by a scalar. */
+      friend template<class R1, class R2> Polynomial<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const Polynomial<R1>&, const R2&);
+      /*! \brief Division by a scalar. */
+      friend template<class R1, class R2> Polynomial<typename Numeric::traits<R1,R2>::arithmetic_type> operator/(const Polynomial<R1>&, const R2&);
+
+      /*! \brief Composition \f$p\circ q(x)=p(q(x))\f$. */
+      friend template<class R1, class R2> Polynomial<typename Numeric::traits<R1,R2>::arithmetic_type> compose(const Polynomial<R1>&, const Polynomial<R2>&);
+      /*! \brief Power of a scalar polynomial. */
+      friend template<class R> Polynomial<typename Numeric::traits<R>::arithmetic_type> pow(const Polynomial<R>& p, const unsigned int& n);
+      /*! \brief Derivative with respect to variable \a k. */
+      friend template<class R> Polynomial<typename Numeric::traits<R>::arithmetic_type> derivative(const Polynomial<R>&, const size_type& k);
+      /*! \brief Truncate within \a r to a polynomial of degree at most \a d, putting the error into terms of degree \a s. */
+      friend template<class R> Polynomial<typename Numeric::traits<R>::arithmetic_type> truncate(const Polynomial<R>& p, const Rectangle<R>& bb, const size_type& d, const size_type& s);
+#endif
      private:
       static void instantiate();
       void _compute_jacobian() const;

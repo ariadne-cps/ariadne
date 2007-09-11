@@ -52,10 +52,10 @@ namespace Ariadne {
     class SetBasedHybridEvolver
     {
       typedef Numeric::Interval<R> I;
-      typedef Geometry::Zonotope<I> BS;
+      typedef Geometry::Zonotope<I,R> BS;
      public:
       /*! \brief Construct from an applicator and an integrator. */
-      SetBasedHybridEvolver(MapEvolver<BS>& applicator, VectorFieldEvolver<BS>& integrator);
+      SetBasedHybridEvolver(MapEvolver<R>& applicator, VectorFieldEvolver<R>& integrator);
 
       /*! \brief Virtual destructor. */
       virtual ~SetBasedHybridEvolver();
@@ -107,8 +107,8 @@ namespace Ariadne {
                                                             const Geometry::HybridGridMaskSet<R>& initial_set,
                                                             const Geometry::HybridGridMaskSet<R>& domain_set);
      private:
-      MapEvolver<BS>* _applicator;
-      VectorFieldEvolver<BS>* _integrator;
+      MapEvolver<R>* _applicator;
+      VectorFieldEvolver<R>* _integrator;
     };
 
 

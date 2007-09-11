@@ -210,6 +210,52 @@ Evaluation::AffineIntegrator<R>::flow_step_jacobian(const System::VectorFieldInt
 
 
 template<class R>
+Geometry::Rectangle<R>
+Evaluation::AffineIntegrator<R>::integration_step(const System::VectorFieldInterface<R>& vector_field, 
+                                                  const Geometry::Rectangle<R>& initial_set, 
+                                                  const Numeric::Interval<R>& step_size, 
+                                                  const Geometry::Rectangle<R>& bounding_set) const
+{
+  return this->integration_step(vector_field,Geometry::Zonotope<I>(initial_set),step_size,bounding_set).bounding_box();
+}
+
+
+
+template<class R>
+Geometry::Rectangle<R> 
+Evaluation::AffineIntegrator<R>::reachability_step(const System::VectorFieldInterface<R>& vector_field, 
+                                                   const Geometry::Rectangle<R>& initial_set, 
+                                                   const Numeric::Interval<R>& step_size, 
+                                                   const Geometry::Rectangle<R>& bounding_set) const
+{
+  return this->reachability_step(vector_field,Geometry::Zonotope<I>(initial_set),step_size,bounding_set).bounding_box();
+}
+
+
+template<class R>
+Geometry::Zonotope< Numeric::Interval<R>,R > 
+Evaluation::AffineIntegrator<R>::integration_step(const System::VectorFieldInterface<R>& vector_field, 
+                                                  const Geometry::Zonotope<I,R>& initial_set, 
+                                                  const Numeric::Interval<R>& step_size, 
+                                                  const Geometry::Rectangle<R>& bounding_set) const
+{
+  return Geometry::over_approximation(this->integration_step(vector_field,Geometry::Zonotope<I>(initial_set),step_size,bounding_set));
+}
+
+
+
+template<class R>
+Geometry::Zonotope< Numeric::Interval<R>,R > 
+Evaluation::AffineIntegrator<R>::reachability_step(const System::VectorFieldInterface<R>& vector_field, 
+                                                   const Geometry::Zonotope<I,R>& initial_set, 
+                                                   const Numeric::Interval<R>& step_size, 
+                                                   const Geometry::Rectangle<R>& bounding_set) const
+{
+  return Geometry::over_approximation(this->reachability_step(vector_field,Geometry::Zonotope<I>(initial_set),step_size,bounding_set));
+}
+
+
+template<class R>
 Geometry::Zonotope< Numeric::Interval<R> > 
 Evaluation::AffineIntegrator<R>::integration_step(const System::VectorFieldInterface<R>& vector_field, 
                                                   const Geometry::Zonotope< Numeric::Interval<R> >& initial_set, 
@@ -242,6 +288,27 @@ Evaluation::AffineIntegrator<R>::reachability_step(const System::VectorFieldInte
 
 
 
+
+
+template<class R>
+Geometry::Zonotope<typename Evaluation::AffineIntegrator<R>::I,R>
+Evaluation::AffineIntegrator<R>::integration_step(const System::AffineVectorField<R>& affine_vector_field, 
+                                                  const Geometry::Zonotope<I,R>& initial_set, 
+                                                  const Numeric::Interval<R>& step_size) const
+{
+  return Geometry::over_approximation(this->integration_step(affine_vector_field,Geometry::Zonotope<I,I>(initial_set),step_size));
+}
+
+
+
+template<class R>
+Geometry::Zonotope<typename Evaluation::AffineIntegrator<R>::I,R>
+Evaluation::AffineIntegrator<R>::reachability_step(const System::AffineVectorField<R>& affine_vector_field, 
+                                                   const Geometry::Zonotope<I,R>& initial_set, 
+                                                   const Numeric::Interval<R>& step_size) const
+{
+  return Geometry::over_approximation(this->reachability_step(affine_vector_field,Geometry::Zonotope<I,I>(initial_set),step_size));
+}
 
 
 

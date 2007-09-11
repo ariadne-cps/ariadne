@@ -24,9 +24,7 @@
 
 #include "numeric/float.h"
 
-#include "evaluation/vector_field_evolver.h"
 #include "evaluation/lohner_integrator.h"
-
 #include "evaluation/lohner_integrator.code.h"
 
 namespace Ariadne {

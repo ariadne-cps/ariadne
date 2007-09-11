@@ -44,7 +44,7 @@
 #include "../linear_algebra/matrix.h"
 
 #include "../geometry/rectangle.h"
-#include "../geometry/list_set.h"
+#include "../geometry/zonotope.h"
 
 #include "../system/vector_field.h"
 
@@ -85,9 +85,9 @@ Evaluation::EulerIntegrator<R>::flow_step(const System::VectorFieldInterface<R>&
   using namespace Geometry;
   using namespace System;
   
-  ARIADNE_LOG(6,"EulerIntegrator::integration_step(VectorFieldInterface,Rectangle,Numeric::Interval<R>) const\n");
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_point,"EulerIntegrator::integration_step(VectorFieldInterface,Point,Rectangle,Numeric::Interval<R>) const");
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,bounding_set,"EulerIntegrator::integration_step(VectorFieldInterface,Point,Rectangle,Numeric::Interval<R>) const");
+  ARIADNE_LOG(6,"EulerIntegrator::flow_step(VectorFieldInterface,Point,Interval,Rectangle) const\n");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_point,"EulerIntegrator::flow_step(VectorFieldInterface,Point,Interval,Rectangle) const");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,bounding_set,"EulerIntegrator::flow_step(VectorFieldInterface,Point,Interval,Rectangle) const");
   
   return initial_point + ( I(step_size) * vector_field(Point<I>(bounding_set)) );
 }
@@ -103,8 +103,8 @@ Evaluation::EulerIntegrator<R>::integration_step(const System::VectorFieldInterf
                                                          const Numeric::Interval<R>& step_size, 
                                                          const Geometry::Rectangle<R>& bounding_set) const
 {
-  ARIADNE_LOG(6,"EulerIntegrator::integration_step(VectorFieldInterface,Rectangle,Rectangle,Numeric::Interval<R>) const\n");
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"EulerIntegrator::integration_step(VectorFieldInterface,Rectangle,Rectangle,Numeric::Interval<R>) const");
+  ARIADNE_LOG(6,"EulerIntegrator::integration_step(VectorFieldInterface,Rectangle,Interval,Rectangle) const\n");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"EulerIntegrator::integration_step(VectorFieldInterface,Rectangle,Interval,Rectangle) const");
 
   return initial_set + I(step_size) * vector_field(bounding_set);
 }
@@ -123,6 +123,67 @@ Evaluation::EulerIntegrator<R>::reachability_step(const System::VectorFieldInter
   ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set(),"EulerIntegrator::reachability_step(VectorFieldInterface,Rectangle,Numeric::Interval<R>) const");
   
   return initial_set + I(0,step_size.upper()) * vector_field(bounding_set);
+}
+
+
+
+
+
+
+template<class R>
+Geometry::Zonotope<typename Evaluation::EulerIntegrator<R>::I,R> 
+Evaluation::EulerIntegrator<R>::integration_step(const System::VectorFieldInterface<R>& vector_field, 
+                                                 const Geometry::Zonotope<I,R>& initial_set, 
+                                                 const Numeric::Interval<R>& step_size, 
+                                                 const Geometry::Rectangle<R>& bounding_set) const
+{
+  ARIADNE_LOG(6,"EulerIntegrator::integration_step(VectorFieldInterface,Zonotope,Interval,Rectangle) const\n");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"EulerIntegrator::integration_step(VectorFieldInterface,Zonotope,Interval,Rectangle) const");
+  return Geometry::Zonotope<I,R>(this->integration_step(vector_field,initial_set.bounding_box(),step_size,bounding_set));
+}
+
+
+
+
+template<class R>
+Geometry::Zonotope<typename Evaluation::EulerIntegrator<R>::I,R> 
+Evaluation::EulerIntegrator<R>::reachability_step(const System::VectorFieldInterface<R>& vector_field, 
+                                                  const Geometry::Zonotope<I,R>& initial_set, 
+                                                  const Numeric::Interval<R>& step_size, 
+                                                  const Geometry::Rectangle<R>& bounding_set) const
+{
+  ARIADNE_LOG(6,"EulerIntegrator::reachability_step(VectorFieldInterface,Zonotope,Interval,Rectangle) const\n");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"EulerIntegrator::reachability_step(VectorFieldInterface,Zonotope,Interval,Rectangle) const");
+  return Geometry::Zonotope<I,R>(this->reachability_step(vector_field,initial_set.bounding_box(),step_size,bounding_set));
+}
+
+
+
+template<class R>
+Geometry::Zonotope<typename Evaluation::EulerIntegrator<R>::I> 
+Evaluation::EulerIntegrator<R>::integration_step(const System::VectorFieldInterface<R>& vector_field, 
+                                                 const Geometry::Zonotope<I,I>& initial_set, 
+                                                 const Numeric::Interval<R>& step_size, 
+                                                 const Geometry::Rectangle<R>& bounding_set) const
+{
+  ARIADNE_LOG(6,"EulerIntegrator::integration_step(VectorFieldInterface,Zonotope,Interval,Rectangle) const\n");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"EulerIntegrator::integration_step(VectorFieldInterface,Zonotope,Interval,Rectangle) const");
+  return Geometry::Zonotope<I,I>(this->integration_step(vector_field,initial_set.bounding_box(),step_size,bounding_set));
+}
+
+
+
+
+template<class R>
+Geometry::Zonotope<typename Evaluation::EulerIntegrator<R>::I> 
+Evaluation::EulerIntegrator<R>::reachability_step(const System::VectorFieldInterface<R>& vector_field, 
+                                                  const Geometry::Zonotope<I,I>& initial_set, 
+                                                  const Numeric::Interval<R>& step_size, 
+                                                  const Geometry::Rectangle<R>& bounding_set) const
+{
+  ARIADNE_LOG(6,"EulerIntegrator::reachability_step(VectorFieldInterface,Zonotope,Interval,Rectangle) const\n");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"EulerIntegrator::reachability_step(VectorFieldInterface,Zonotope,Interval,Rectangle) const");
+  return Geometry::Zonotope<I,I>(this->reachability_step(vector_field,initial_set.bounding_box(),step_size,bounding_set));
 }
 
 

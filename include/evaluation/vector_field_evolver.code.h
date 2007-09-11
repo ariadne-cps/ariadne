@@ -104,16 +104,16 @@ namespace Evaluation { static int& verbosity = integrator_verbosity; }
 using namespace Geometry;
 using namespace System;
 
-template<class BS>
-Evaluation::VectorFieldEvolver<BS>::~VectorFieldEvolver()
+template<class R>
+Evaluation::VectorFieldEvolver<R>::~VectorFieldEvolver()
 {
   delete _parameters;
   delete _bounder_plugin;
   delete _integrator_plugin;
 }
 
-template<class BS>
-Evaluation::VectorFieldEvolver<BS>::VectorFieldEvolver(const VectorFieldEvolver<BS>& i)
+template<class R>
+Evaluation::VectorFieldEvolver<R>::VectorFieldEvolver(const VectorFieldEvolver<R>& i)
   : _parameters(i._parameters->clone()),
     _bounder_plugin(i._bounder_plugin->clone()),
     _integrator_plugin(i._integrator_plugin->clone())
@@ -121,15 +121,15 @@ Evaluation::VectorFieldEvolver<BS>::VectorFieldEvolver(const VectorFieldEvolver<
 }
 
 
-template<class BS>
-Evaluation::VectorFieldEvolver<BS>*
-  Evaluation::VectorFieldEvolver<BS>::clone() const
+template<class R>
+Evaluation::VectorFieldEvolver<R>*
+  Evaluation::VectorFieldEvolver<R>::clone() const
 {
-  return new VectorFieldEvolver<BS>(*this);
+  return new VectorFieldEvolver<R>(*this);
 }
 
-template<class BS>
-Evaluation::VectorFieldEvolver<BS>::VectorFieldEvolver(const EvolutionParameters<R>& parameters, const IntegratorPluginInterface<BS>& plugin)
+template<class R>
+Evaluation::VectorFieldEvolver<R>::VectorFieldEvolver(const EvolutionParameters<R>& parameters, const IntegratorPluginInterface<R>& plugin)
   : _parameters(new EvolutionParameters<R>(parameters)),
     _bounder_plugin(new BounderPlugin<R>()),
     _integrator_plugin(plugin.clone())
@@ -138,58 +138,58 @@ Evaluation::VectorFieldEvolver<BS>::VectorFieldEvolver(const EvolutionParameters
 
 
 
-template<class BS>
-Evaluation::EvolutionParameters<typename Evaluation::VectorFieldEvolver<BS>::R>&
-Evaluation::VectorFieldEvolver<BS>::parameters() 
+template<class R>
+Evaluation::EvolutionParameters<R>&
+Evaluation::VectorFieldEvolver<R>::parameters() 
 {
   return *this->_parameters;
 }
 
-template<class BS>
-const Evaluation::EvolutionParameters<typename Evaluation::VectorFieldEvolver<BS>::R>&
-Evaluation::VectorFieldEvolver<BS>::parameters() const
+template<class R>
+const Evaluation::EvolutionParameters<R>&
+Evaluation::VectorFieldEvolver<R>::parameters() const
 {
   return *this->_parameters;
 }
 
-template<class BS>
+template<class R>
 time_type 
-Evaluation::VectorFieldEvolver<BS>::minimum_step_size() const
+Evaluation::VectorFieldEvolver<R>::minimum_step_size() const
 {
   return this->_parameters->minimum_step_size();
 }
 
-template<class BS>
+template<class R>
 time_type 
-Evaluation::VectorFieldEvolver<BS>::maximum_step_size() const
+Evaluation::VectorFieldEvolver<R>::maximum_step_size() const
 {
   return this->_parameters->maximum_step_size();
 }
 
-template<class BS>
-typename Evaluation::VectorFieldEvolver<BS>::R
-Evaluation::VectorFieldEvolver<BS>::minimum_basic_set_radius() const
+template<class R>
+R
+Evaluation::VectorFieldEvolver<R>::minimum_basic_set_radius() const
 {
   return this->_parameters->minimum_basic_set_radius();
 }
 
-template<class BS>
-typename Evaluation::VectorFieldEvolver<BS>::R
-Evaluation::VectorFieldEvolver<BS>::maximum_basic_set_radius() const
+template<class R>
+R
+Evaluation::VectorFieldEvolver<R>::maximum_basic_set_radius() const
 {
   return this->_parameters->maximum_basic_set_radius();
 }
 
-template<class BS>
-typename Evaluation::VectorFieldEvolver<BS>::R
-Evaluation::VectorFieldEvolver<BS>::grid_length() const
+template<class R>
+R
+Evaluation::VectorFieldEvolver<R>::grid_length() const
 {
   return this->_parameters->grid_length();
 }
 
-template<class BS>
+template<class R>
 time_type 
-Evaluation::VectorFieldEvolver<BS>::lock_to_grid_time() const
+Evaluation::VectorFieldEvolver<R>::lock_to_grid_time() const
 {
   return this->_parameters->lock_to_grid_time();
 }
@@ -197,18 +197,18 @@ Evaluation::VectorFieldEvolver<BS>::lock_to_grid_time() const
 
 
 
-template<class BS>
-typename Evaluation::VectorFieldEvolver<BS>::list_set_type
-Evaluation::VectorFieldEvolver<BS>::subdivide(const basic_set_type& set) const
+template<class R>
+typename Evaluation::VectorFieldEvolver<R>::list_set_type
+Evaluation::VectorFieldEvolver<R>::subdivide(const basic_set_type& set) const
 {
   ARIADNE_LOG(5,"VectorFieldEvolver::subdivide(BasicSet)\n");
   return set.subdivide();
 }
 
 
-template<class BS>
-typename Evaluation::VectorFieldEvolver<BS>::basic_set_type
-Evaluation::VectorFieldEvolver<BS>::integration_step(const vector_field_type& vector_field, 
+template<class R>
+typename Evaluation::VectorFieldEvolver<R>::basic_set_type
+Evaluation::VectorFieldEvolver<R>::integration_step(const vector_field_type& vector_field, 
                                              const basic_set_type& initial_set, 
                                              time_type& step_size) const
 {
@@ -222,9 +222,9 @@ Evaluation::VectorFieldEvolver<BS>::integration_step(const vector_field_type& ve
 }
 
 
-template<class BS>
-typename Evaluation::VectorFieldEvolver<BS>::basic_set_type
-Evaluation::VectorFieldEvolver<BS>::reachability_step(const vector_field_type& vector_field, 
+template<class R>
+typename Evaluation::VectorFieldEvolver<R>::basic_set_type
+Evaluation::VectorFieldEvolver<R>::reachability_step(const vector_field_type& vector_field, 
                                               const basic_set_type& initial_set, 
                                               time_type& step_size) const
 {
@@ -239,9 +239,9 @@ Evaluation::VectorFieldEvolver<BS>::reachability_step(const vector_field_type& v
 
 
 
-template<class BS>
-Geometry::SetInterface<typename Evaluation::VectorFieldEvolver<BS>::R>*
-Evaluation::VectorFieldEvolver<BS>::integrate(const System::VectorFieldInterface<R>& vector_field, 
+template<class R>
+Geometry::SetInterface<R>*
+Evaluation::VectorFieldEvolver<R>::integrate(const System::VectorFieldInterface<R>& vector_field, 
                                       const Geometry::SetInterface<R>& initial_set, 
                                       const Numeric::Rational& time) const
 {
@@ -260,9 +260,9 @@ Evaluation::VectorFieldEvolver<BS>::integrate(const System::VectorFieldInterface
 }
 
 
-template<class BS>
-Geometry::SetInterface<typename BS::real_type>*
-Evaluation::VectorFieldEvolver<BS>::integrate(const System::VectorFieldInterface<R>& vector_field,
+template<class R>
+Geometry::SetInterface<R>*
+Evaluation::VectorFieldEvolver<R>::integrate(const System::VectorFieldInterface<R>& vector_field,
                                      const Geometry::SetInterface<R>& initial_set,
                                      const Geometry::SetInterface<R>& bounding_set,
                                      const time_type& time) const
@@ -290,9 +290,9 @@ Evaluation::VectorFieldEvolver<BS>::integrate(const System::VectorFieldInterface
 }
 
 
-template<class BS>
-Geometry::SetInterface<typename BS::real_type>*
-Evaluation::VectorFieldEvolver<BS>::reach(const System::VectorFieldInterface<R>& vector_field,
+template<class R>
+Geometry::SetInterface<R>*
+Evaluation::VectorFieldEvolver<R>::reach(const System::VectorFieldInterface<R>& vector_field,
                                   const Geometry::SetInterface<R>& initial_set,
                                   const time_type& time) const
 {
@@ -310,9 +310,9 @@ Evaluation::VectorFieldEvolver<BS>::reach(const System::VectorFieldInterface<R>&
 }
 
 
-template<class BS>
-Geometry::SetInterface<typename BS::real_type>*
-Evaluation::VectorFieldEvolver<BS>::reach(const System::VectorFieldInterface<R>& vector_field,
+template<class R>
+Geometry::SetInterface<R>*
+Evaluation::VectorFieldEvolver<R>::reach(const System::VectorFieldInterface<R>& vector_field,
                                  const Geometry::SetInterface<R>& initial_set,
                                  const Geometry::SetInterface<R>& bounding_set,
                                  const time_type& time) const
@@ -339,9 +339,9 @@ Evaluation::VectorFieldEvolver<BS>::reach(const System::VectorFieldInterface<R>&
 }
 
 
-template<class BS>
-Geometry::SetInterface<typename BS::real_type>*
-Evaluation::VectorFieldEvolver<BS>::reach(const System::VectorFieldInterface<R>& vector_field,
+template<class R>
+Geometry::SetInterface<R>*
+Evaluation::VectorFieldEvolver<R>::reach(const System::VectorFieldInterface<R>& vector_field,
                                            const Geometry::SetInterface<R>& initial_set) const
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
@@ -349,9 +349,9 @@ Evaluation::VectorFieldEvolver<BS>::reach(const System::VectorFieldInterface<R>&
 
 
 
-template<class BS>
-Geometry::SetInterface<typename BS::real_type>*
-Evaluation::VectorFieldEvolver<BS>::chainreach(const System::VectorFieldInterface<R>& vector_field,
+template<class R>
+Geometry::SetInterface<R>*
+Evaluation::VectorFieldEvolver<R>::chainreach(const System::VectorFieldInterface<R>& vector_field,
                                       const Geometry::SetInterface<R>& initial_set,
                                       const Geometry::SetInterface<R>& bounding_set) const
 {
@@ -377,9 +377,9 @@ Evaluation::VectorFieldEvolver<BS>::chainreach(const System::VectorFieldInterfac
 }
 
 
-template<class BS>
-Geometry::SetInterface<typename BS::real_type>*
-Evaluation::VectorFieldEvolver<BS>::viable(const System::VectorFieldInterface<R>& vector_field,
+template<class R>
+Geometry::SetInterface<R>*
+Evaluation::VectorFieldEvolver<R>::viable(const System::VectorFieldInterface<R>& vector_field,
                                   const Geometry::SetInterface<R>& bounding_set) const
 {
   using namespace Geometry;
@@ -394,9 +394,9 @@ Evaluation::VectorFieldEvolver<BS>::viable(const System::VectorFieldInterface<R>
 }
 
 
-template<class BS>
+template<class R>
 tribool
-Evaluation::VectorFieldEvolver<BS>::verify(const System::VectorFieldInterface<R>& vector_field,
+Evaluation::VectorFieldEvolver<R>::verify(const System::VectorFieldInterface<R>& vector_field,
                                   const Geometry::SetInterface<R>& initial_set,
                                   const Geometry::SetInterface<R>& safe_set) const
 {
@@ -429,9 +429,9 @@ Evaluation::VectorFieldEvolver<BS>::verify(const System::VectorFieldInterface<R>
 
 
 
-template<class BS>
-BS
-Evaluation::VectorFieldEvolver<BS>::integrate(const VectorFieldInterface<R>& vector_field, 
+template<class R>
+typename Evaluation::VectorFieldEvolver<R>::BS
+Evaluation::VectorFieldEvolver<R>::integrate(const VectorFieldInterface<R>& vector_field, 
                                                const BS& initial_set, 
                                                const time_type& time) const
 {
@@ -460,9 +460,9 @@ Evaluation::VectorFieldEvolver<BS>::integrate(const VectorFieldInterface<R>& vec
 
 
 
-template<class BS>
-Geometry::ListSet<BS> 
-Evaluation::VectorFieldEvolver<BS>::reach(const VectorFieldInterface<R>& vector_field, 
+template<class R>
+Geometry::ListSet<typename Evaluation::VectorFieldEvolver<R>::BS> 
+Evaluation::VectorFieldEvolver<R>::reach(const VectorFieldInterface<R>& vector_field, 
                                            const BS& initial_set, 
                                            const time_type& time) const
 {
@@ -498,9 +498,9 @@ Evaluation::VectorFieldEvolver<BS>::reach(const VectorFieldInterface<R>& vector_
 
 
 // Template pattern for integrating a list set
-template<class BS>
-Geometry::ListSet<BS>
-Evaluation::VectorFieldEvolver<BS>::lower_integrate(const VectorFieldInterface<R>& vector_field, 
+template<class R>
+Geometry::ListSet<typename Evaluation::VectorFieldEvolver<R>::BS>
+Evaluation::VectorFieldEvolver<R>::lower_integrate(const VectorFieldInterface<R>& vector_field, 
                                                      const ListSet<BS>& initial_set, 
                                                      const time_type& time) const
 {
@@ -561,9 +561,9 @@ Evaluation::VectorFieldEvolver<BS>::lower_integrate(const VectorFieldInterface<R
 
 
 
-template<class BS>
-Geometry::ListSet<BS>
-Evaluation::VectorFieldEvolver<BS>::lower_reach(const VectorFieldInterface<R>& vector_field, 
+template<class R>
+Geometry::ListSet<typename Evaluation::VectorFieldEvolver<R>::BS>
+Evaluation::VectorFieldEvolver<R>::lower_reach(const VectorFieldInterface<R>& vector_field, 
                                                  const ListSet<BS>& initial_set, 
                                                  const time_type& time) const
 {
@@ -624,9 +624,9 @@ Evaluation::VectorFieldEvolver<BS>::lower_reach(const VectorFieldInterface<R>& v
 
 
 // Template pattern for integrating a list set
-template<class BS>
-Geometry::ListSet<BS>
-Evaluation::VectorFieldEvolver<BS>::upper_integrate(const VectorFieldInterface<R>& vector_field, 
+template<class R>
+Geometry::ListSet<typename Evaluation::VectorFieldEvolver<R>::BS>
+Evaluation::VectorFieldEvolver<R>::upper_integrate(const VectorFieldInterface<R>& vector_field, 
                                                      const ListSet<BS>& initial_set, 
                                                      const time_type& time) const
 {
@@ -714,9 +714,9 @@ Evaluation::VectorFieldEvolver<BS>::upper_integrate(const VectorFieldInterface<R
 
 
 
-template<class BS>
-Geometry::ListSet<BS>
-Evaluation::VectorFieldEvolver<BS>::upper_reach(const VectorFieldInterface<R>& vector_field, 
+template<class R>
+Geometry::ListSet<typename Evaluation::VectorFieldEvolver<R>::BS>
+Evaluation::VectorFieldEvolver<R>::upper_reach(const VectorFieldInterface<R>& vector_field, 
                                                  const ListSet<BS>& initial_set, 
                                                  const time_type& time) const
 {
@@ -812,9 +812,9 @@ Evaluation::VectorFieldEvolver<BS>::upper_reach(const VectorFieldInterface<R>& v
 
 
 
-template<class BS>
-Geometry::ListSet< Rectangle<typename BS::real_type> >
-Evaluation::VectorFieldEvolver<BS>::integrate(const System::VectorFieldInterface<R>& vector_field, 
+template<class R>
+Geometry::ListSet< Rectangle<R> >
+Evaluation::VectorFieldEvolver<R>::integrate(const System::VectorFieldInterface<R>& vector_field, 
                                                const Geometry::ListSet< Rectangle<R> >& initial_set,
                                                const time_type& time) const
 {
@@ -834,9 +834,9 @@ Evaluation::VectorFieldEvolver<BS>::integrate(const System::VectorFieldInterface
 
 
 
-template<class BS>
-Geometry::ListSet< Rectangle<typename BS::real_type> >
-Evaluation::VectorFieldEvolver<BS>::reach(const System::VectorFieldInterface<R>& vector_field, 
+template<class R>
+Geometry::ListSet< Rectangle<R> >
+Evaluation::VectorFieldEvolver<R>::reach(const System::VectorFieldInterface<R>& vector_field, 
                                            const Geometry::ListSet< Rectangle<R> >& initial_set,
                                            const time_type& time) const
 {
@@ -857,9 +857,9 @@ Evaluation::VectorFieldEvolver<BS>::reach(const System::VectorFieldInterface<R>&
 
 
 
-template<class BS>
-Geometry::GridMaskSet<typename BS::real_type>
-Evaluation::VectorFieldEvolver<BS>::integrate(const System::VectorFieldInterface<R>& vector_field, 
+template<class R>
+Geometry::GridMaskSet<R>
+Evaluation::VectorFieldEvolver<R>::integrate(const System::VectorFieldInterface<R>& vector_field, 
                                                const Geometry::GridMaskSet<R>& initial_set,
                                                const Geometry::GridMaskSet<R>& bounding_set,
                                                const time_type& time) const
@@ -943,9 +943,9 @@ Evaluation::VectorFieldEvolver<BS>::integrate(const System::VectorFieldInterface
 
 
 
-template<class BS>
-Geometry::GridMaskSet<typename BS::real_type>
-Evaluation::VectorFieldEvolver<BS>::reach(const System::VectorFieldInterface<R>& vector_field, 
+template<class R>
+Geometry::GridMaskSet<R>
+Evaluation::VectorFieldEvolver<R>::reach(const System::VectorFieldInterface<R>& vector_field, 
                                            const Geometry::GridMaskSet<R>& initial_set,
                                            const Geometry::GridMaskSet<R>& bounding_set,
                                            const time_type& time) const
@@ -1003,9 +1003,9 @@ Evaluation::VectorFieldEvolver<BS>::reach(const System::VectorFieldInterface<R>&
 
 
 
-template<class BS>
-Geometry::GridMaskSet<typename BS::real_type>
-Evaluation::VectorFieldEvolver<BS>::chainreach(const System::VectorFieldInterface<R>& vector_field, 
+template<class R>
+Geometry::GridMaskSet<R>
+Evaluation::VectorFieldEvolver<R>::chainreach(const System::VectorFieldInterface<R>& vector_field, 
                                                 const Geometry::GridMaskSet<R>& initial_set, 
                                                 const Geometry::GridMaskSet<R>& bounding_set) const
 {
@@ -1087,9 +1087,9 @@ Evaluation::VectorFieldEvolver<BS>::chainreach(const System::VectorFieldInterfac
 }
 
 
-template<class BS>
-Geometry::GridMaskSet<typename BS::real_type>
-Evaluation::VectorFieldEvolver<BS>::viable(const System::VectorFieldInterface<R>& vector_field, 
+template<class R>
+Geometry::GridMaskSet<R>
+Evaluation::VectorFieldEvolver<R>::viable(const System::VectorFieldInterface<R>& vector_field, 
                                             const Geometry::GridMaskSet<R>& bounding_set) const
 {
   ARIADNE_LOG(2,"GridMaskSet VectorFieldEvolver::viable(VectorFieldInterface vector_field, GridMaskSet bounding_set)\n");
@@ -1097,7 +1097,7 @@ Evaluation::VectorFieldEvolver<BS>::viable(const System::VectorFieldInterface<R>
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
   typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
-  ARIADNE_CHECK_BOUNDED(bounding_set,"VectorFieldEvolver<BS>::viable(VectorFieldInterface,GridMaskSet)");
+  ARIADNE_CHECK_BOUNDED(bounding_set,"VectorFieldEvolver<R>::viable(VectorFieldInterface,GridMaskSet)");
   
   const VectorFieldInterface<R>& vf=vector_field;
   const Grid<R>& g=bounding_set.grid();
@@ -1145,9 +1145,9 @@ Evaluation::VectorFieldEvolver<BS>::viable(const System::VectorFieldInterface<R>
 }
 
 
-template<class BS>
+template<class R>
 tribool
-Evaluation::VectorFieldEvolver<BS>::verify(const System::VectorFieldInterface<R>& vector_field, 
+Evaluation::VectorFieldEvolver<R>::verify(const System::VectorFieldInterface<R>& vector_field, 
                                             const Geometry::GridMaskSet<R>& initial_set, 
                                             const Geometry::GridMaskSet<R>& safe_set) const
 {

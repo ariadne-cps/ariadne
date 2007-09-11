@@ -52,18 +52,18 @@ using namespace Ariadne::Evaluation;
 using namespace Ariadne::Output;
 using namespace std;
 
-template<class R> int test_integration_step();
-template<class R> int test_integrate();
+template<class R> int test_integrator();
+template<class R> int test_vector_field_evolver();
 
 int main() {
-  test_integration_step<Float>();
-  test_integrate<Float>();
+  test_integrator<Float>();
+  test_vector_field_evolver<Float>();
   return 0;
 }
 
 template<class R> 
 int 
-test_integration_step()
+test_integrator()
 {
   cout << __PRETTY_FUNCTION__ << endl;
   typedef Interval<R> I;
@@ -74,12 +74,9 @@ test_integration_step()
   parameters.set_maximum_step_size(0.125);
   
   // Test constructor/destructor
-  VectorFieldEvolver< Zonotope<I,I> >* integrator_ptr;
   LohnerIntegrator<R>* lohner_ptr;
   lohner_ptr=new LohnerIntegrator<R>();
   delete lohner_ptr;
-  integrator_ptr=new VectorFieldEvolver< Zonotope<I,I> >(parameters,*lohner_ptr);
-  delete integrator_ptr;
   
   AffineVectorField<R> avf=AffineVectorField<R>(Matrix<R>("[-0.25,-1.0;+1.0,-0.25]"),Vector<R>("[0.25,0.0]"));
   cout << "avf=" << avf << endl;
@@ -88,14 +85,14 @@ test_integration_step()
 
   Rectangle<R> r=Rectangle<R>("[0.98,1.02]x[0.48,0.52]");
   cout << "r=" << r << endl;
-  Zonotope<I,R> fz=Zonotope<I,R>(r);
-  cout << "fz=" << fz << endl;
+  Zonotope<I,R> ez=Zonotope<I,R>(r);
+  cout << "ez=" << ez << endl;
   Zonotope<I,I> iz=Zonotope<I,I>(r);
   cout << "iz=" << iz << endl;
 
-  ListSet< Zonotope<I,R> > fzls=ListSet< Zonotope<I,R> >(fz);
-  fzls.adjoin(Zonotope<R>(Rectangle<R>("[1.02,1.06]x[0.48,0.52]")));
-  cout << "fzls.size()=" << fzls.size() << endl;
+  ListSet< Zonotope<I,R> > ezls=ListSet< Zonotope<I,R> >(ez);
+  ezls.adjoin(Zonotope<R>(Rectangle<R>("[1.02,1.06]x[0.48,0.52]")));
+  cout << "ezls.size()=" << ezls.size() << endl;
   
   ListSet< Zonotope<I,I> > izls=ListSet< Zonotope<I> >(iz);
   izls.adjoin(Zonotope<I,I>(Rectangle<R>("[1.02,1.06]x[0.48,0.52]")));
@@ -103,8 +100,9 @@ test_integration_step()
   
   Geometry::Rectangle<R> nr;
   Geometry::Zonotope<R> nz;
+  Geometry::Zonotope<I,R> nez;
   Geometry::Zonotope<I> niz;
-  Geometry::ListSet< Zonotope<I,R> > nfzls;
+  Geometry::ListSet< Zonotope<I,R> > nezls;
   Geometry::ListSet< Zonotope<I,I> > nizls;
   
   Float x0=0;
@@ -127,29 +125,23 @@ test_integration_step()
   //nr=lohner.integration_step(vdp,r,h);
   //cout << nr << endl;
   LohnerIntegrator<R> plugin;
-  VectorFieldEvolver< Zonotope<I,I> > evolver(parameters,plugin);
-  niz=evolver.integration_step(vdp,iz,h);
-  cout << niz << endl << endl;
+  VectorFieldEvolver<R> evolver(parameters,plugin);
+  nez=evolver.integration_step(vdp,ez,h);
+  cout << nez << endl << endl;
   cout << endl << endl;
   
 
   
-  // Integrate
-  //nr=lohner.integrate(vdp,r,t);
-  //cout << nr << endl;
-  niz=evolver.integrate(vdp,iz,t);
-  cout << niz << endl << endl;;
+  nezls=evolver.lower_integrate(vdp,ezls,t);
+  cout << nezls << endl << endl;
   
-  nizls=evolver.lower_integrate(vdp,izls,t);
-  cout << nizls << endl << endl;
-  
-  nizls=evolver.lower_reach(vdp,izls,t);
-  cout << nizls << endl << endl;
+  nezls=evolver.lower_reach(vdp,ezls,t);
+  cout << nezls << endl << endl;
   
   // Affine vector field
   VectorFieldInterface<R>& avfr=avf;
   //AffineVectorField<R>& avfr=avf;
-  niz=evolver.integration_step(avfr,iz,h);
+  nez=evolver.integration_step(avfr,ez,h);
   cout << nz << endl;
   cout << endl;
   
@@ -159,7 +151,7 @@ test_integration_step()
 
 template<class R> 
 int 
-test_integrate()
+test_vector_field_evolver()
 {
   typedef Interval<R> I;
   cout << __PRETTY_FUNCTION__ << endl;
@@ -170,7 +162,7 @@ test_integrate()
   parameters.set_maximum_step_size(0.25);
   
   AffineIntegrator<R> plugin;
-  VectorFieldEvolver< Zonotope<I,I> > evolver(parameters,plugin);
+  VectorFieldEvolver<R> evolver(parameters,plugin);
 
   AffineVectorField<R> affine_vector_field(Matrix<R>("[-2,-1;1,-2]"),Vector<R>("[0.125,0.25]"));
   
@@ -221,9 +213,9 @@ test_integrate()
   cout << rectangle_list_integrate_set << endl;
   cout << rectangle_list_reach_set << endl;
 
-  ListSet< Zonotope<I> > zonotope_list_initial_set=rectangle_list_initial_set;
-  ListSet< Zonotope<I> > zonotope_list_integrate_set=evolver.lower_integrate(affine_vector_field,zonotope_list_initial_set,integration_time);
-  ListSet< Zonotope<I> > zonotope_list_reach_set=evolver.lower_reach(affine_vector_field,zonotope_list_initial_set,integration_time);
+  ListSet< Zonotope<I,R> > zonotope_list_initial_set=rectangle_list_initial_set;
+  ListSet< Zonotope<I,R> > zonotope_list_integrate_set=evolver.lower_integrate(affine_vector_field,zonotope_list_initial_set,integration_time);
+  ListSet< Zonotope<I,R> > zonotope_list_reach_set=evolver.lower_reach(affine_vector_field,zonotope_list_initial_set,integration_time);
 
   cout << zonotope_list_initial_set << endl;
   cout << zonotope_list_integrate_set << endl;
@@ -232,20 +224,20 @@ test_integrate()
   cout << endl;
 
   epsfstream eps;
-  eps.open("test_integrate-1.eps",bb);
+  eps.open("test_vector_field_evolver-1.eps",bb);
   eps << fill_colour(green) << reach_set;
   eps << fill_colour(yellow) << integrate_set;
   eps << fill_colour(blue) << initial_set;
   eps.close();
 
-  eps.open("test_integrate-2.eps",bb);
+  eps.open("test_vector_field_evolver-2.eps",bb);
   eps << line_style(false);
   eps << fill_colour(green) << dynamic_cast<ListSet< Zonotope<I,I> >&>(*polyhedral_reach_set_ptr);
   eps << fill_colour(yellow) << dynamic_cast<ListSet< Zonotope<I,I> >&>(*polyhedral_integrate_set_ptr);
   eps << fill_colour(blue) << *polyhedral_initial_set_ptr;
   eps.close();
   
-  eps.open("test_integrate-3.eps",bb);
+  eps.open("test_vector_field_evolver-3.eps",bb);
   eps << line_style(false);
   eps << fill_colour(green) << rectangle_list_reach_set;
   eps << fill_colour(yellow) << rectangle_list_integrate_set;
@@ -253,7 +245,7 @@ test_integrate()
   eps << fill_colour(red) << *polyhedral_initial_set_ptr;
   eps.close();
   
-  eps.open("test_integrate-4.eps",bb);
+  eps.open("test_vector_field_evolver-4.eps",bb);
   eps << line_style(false);
   eps << fill_colour(green) << zonotope_list_reach_set;
   eps << fill_colour(yellow) << zonotope_list_integrate_set;

@@ -24,9 +24,6 @@
 #include "numeric/float.h"
 #include "geometry/zonotope.h"
 
-#include "evaluation/applicator_plugin.h"
-#include "evaluation/applicator_plugin.code.h"
-
 #include "evaluation/map_evolver.h"
 #include "evaluation/map_evolver.code.h"
 
@@ -35,21 +32,11 @@ namespace Ariadne {
     using namespace Numeric;
 
 #ifdef ENABLE_FLOAT64
-    typedef Geometry::Zonotope<Interval<Float64>,Float64> IFZonotope64;
-    typedef Geometry::Zonotope<Interval<Float64>,Interval<Float64> > IIZonotope64;
-    template class ApplicatorPlugin<IFZonotope64>;
-    template class ApplicatorPlugin<IIZonotope64>;
-    template class MapEvolver<IFZonotope64>;
-    template class MapEvolver<IIZonotope64>;
+    template class MapEvolver<Float64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    typedef Geometry::Zonotope<Interval<FloatMP>,FloatMP> IFZonotopeMP;
-    typedef Geometry::Zonotope<Interval<FloatMP>,Interval<FloatMP> > IIZonotopeMP;
-    template class ApplicatorPlugin<IFZonotopeMP>;
-    template class ApplicatorPlugin<IIZonotopeMP>;
-    template class MapEvolver<IFZonotopeMP>;
-    template class MapEvolver<IIZonotopeMP>;
+    template class MapEvolver<FloatMP>;
 #endif
 
   }

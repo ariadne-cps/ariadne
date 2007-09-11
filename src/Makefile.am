@@ -70,6 +70,7 @@ EVALUATION_SRC = \
 	evaluation/evolution_parameters.cc \
 	evaluation/solver.cc \
 	evaluation/newton_solver.cc \
+	evaluation/applicator.cc \
 	evaluation/euler_integrator.cc \
 	evaluation/affine_integrator.cc \
 	evaluation/lohner_integrator.cc \

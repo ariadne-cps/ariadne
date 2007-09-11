@@ -99,14 +99,6 @@ Evaluation::LohnerIntegrator<R>::LohnerIntegrator()
 }
 
 
-template<class R>
-Geometry::ListSet< Geometry::Zonotope<typename Evaluation::LohnerIntegrator<R>::I> >
-Evaluation::LohnerIntegrator<R>::subdivide(const Geometry::Zonotope<I>& basic_set) const
-{
-  Geometry::Zonotope<I> orthogonal_zonotope(Geometry::orthogonal_over_approximation(basic_set));
-  return orthogonal_zonotope.subdivide();
-}
-
 
 template<class R>
 Geometry::Point<typename Evaluation::LohnerIntegrator<R>::I>
@@ -131,16 +123,16 @@ Evaluation::LohnerIntegrator<R>::flow_step(const System::VectorFieldInterface<R>
 template<class R>
 Geometry::Zonotope<typename Evaluation::LohnerIntegrator<R>::I>
 Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorFieldInterface<R>& vector_field, 
-                                                          const Geometry::Zonotope<I>& initial_set, 
-                                                          const Numeric::Interval<R>& step_size, 
-                                                          const Geometry::Rectangle<R>& bounding_box) const
+                                                  const Geometry::Zonotope<I,I>& initial_set, 
+                                                  const Numeric::Interval<R>& step_size, 
+                                                  const Geometry::Rectangle<R>& bounding_box) const
 {
   using namespace Numeric;
   using namespace LinearAlgebra;
   using namespace Geometry;
   using namespace System;
   
-  const Zonotope<I>& z=initial_set;
+  const Zonotope<I,I>& z=initial_set;
   const Point<I>& c=z.centre();
   const Matrix<I>& G=z.generators();
 
@@ -159,22 +151,22 @@ Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorFieldInter
 
   Point<I> phic=c+h*(fc+(h/2)*(df*f));
   Matrix<I> phiG=G+h*df0*G;
+  Zonotope<I,I> iz=Zonotope<I>(phic,phiG);
 
-  ARIADNE_LOG(7,"  c="<<c<<"\n")
-  ARIADNE_LOG(7,"  G="<<G<<"\n")
-  ARIADNE_LOG(7,"  B="<<bb<<"\n")
+  ARIADNE_LOG(7,"  c="<<c<<"\n");
+  ARIADNE_LOG(7,"  G="<<G<<"\n");
+  ARIADNE_LOG(7,"  B="<<bb<<"\n");
 
-  ARIADNE_LOG(7,"  f(c)="<<fc<<"\n")
-  ARIADNE_LOG(7,"  f(B)="<<f<<"\n")
-  ARIADNE_LOG(7,"  df(c) for centre="<<dfc<<"\n")
-  ARIADNE_LOG(7,"  df(X)="<<df0<<"\n")
-  ARIADNE_LOG(7,"  df(B)="<<df<<"\n")
+  ARIADNE_LOG(7,"  f(c)="<<fc<<"\n");
+  ARIADNE_LOG(7,"  f(B)="<<f<<"\n");
+  ARIADNE_LOG(7,"  df(c) for centre="<<dfc<<"\n");
+  ARIADNE_LOG(7,"  df(X)="<<df0<<"\n");
+  ARIADNE_LOG(7,"  df(B)="<<df<<"\n");
 
-  ARIADNE_LOG(7,"  new_centre="<<phic<<"\n")
-  ARIADNE_LOG(7,"  new_generators="<<phiG<<"\n")
+  ARIADNE_LOG(7,"  new_centre="<<phic<<"\n");
+  ARIADNE_LOG(7,"  new_generators="<<phiG<<"\n");
 
-  return Zonotope<I>(phic,phiG);
-
+  return iz;
   
 }
 
@@ -182,11 +174,11 @@ Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorFieldInter
 
 
 template<class R>
-Geometry::Zonotope<typename Evaluation::LohnerIntegrator<R>::I> 
+Geometry::Zonotope<typename Evaluation::LohnerIntegrator<R>::I>
 Evaluation::LohnerIntegrator<R>::reachability_step(const System::VectorFieldInterface<R>& vector_field, 
-                                                           const Geometry::Zonotope<I>& initial_set,
-                                                           const Numeric::Interval<R>& step_size,
-                                                           const Geometry::Rectangle<R>& bounding_box) const
+                                                   const Geometry::Zonotope<I,I>& initial_set,
+                                                   const Numeric::Interval<R>& step_size,
+                                                   const Geometry::Rectangle<R>& bounding_box) const
 {
   using namespace Numeric;
   using namespace LinearAlgebra;
@@ -198,7 +190,7 @@ Evaluation::LohnerIntegrator<R>::reachability_step(const System::VectorFieldInte
   ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"LohnerIntegrator::reachability_step(VectorFieldInterface,Zonotope<Interval>,Numeric::Interval<R>)");
   
   const VectorFieldInterface<R>& vf(vector_field);
-  Zonotope<I> z=initial_set;
+  Zonotope<I,I> z=initial_set;
   const Rectangle<R>& bbox=bounding_box;
   const size_type n=z.dimension();
   const Matrix<R> id=Matrix<R>::identity(n);
@@ -221,7 +213,7 @@ Evaluation::LohnerIntegrator<R>::reachability_step(const System::VectorFieldInte
   //z=Zonotope<I>(phic,mdf,zfh);
 
   //FIXME: Is the below formula correct?
-  z=Zonotope<I>(phic,mdf,fh);
+  Zonotope<I,I> iz=Zonotope<I>(phic,mdf,fh);
   
   ARIADNE_LOG(7,"stepsize="<<step_size<<"\n");
   ARIADNE_LOG(7,"bound="<<bbox<<"\n");
@@ -239,7 +231,48 @@ Evaluation::LohnerIntegrator<R>::reachability_step(const System::VectorFieldInte
     
   ARIADNE_LOG(7,"approximating zonotope "<<z<<"\n");
 
-  return z;
+  return iz;
+}
+
+
+template<class R>
+Geometry::Rectangle<R>
+Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorFieldInterface<R>& vector_field, 
+                                                  const Geometry::Rectangle<R>& initial_set, 
+                                                  const Numeric::Interval<R>& step_size, 
+                                                  const Geometry::Rectangle<R>& bounding_box) const
+{
+  return this->integration_step(vector_field,Geometry::Zonotope<I,I>(initial_set),step_size,bounding_box).bounding_box();
+}
+
+template<class R>
+Geometry::Rectangle<R>
+Evaluation::LohnerIntegrator<R>::reachability_step(const System::VectorFieldInterface<R>& vector_field, 
+                                                  const Geometry::Rectangle<R>& initial_set, 
+                                                  const Numeric::Interval<R>& step_size, 
+                                                  const Geometry::Rectangle<R>& bounding_box) const
+{
+  return this->reachability_step(vector_field,Geometry::Zonotope<I,I>(initial_set),step_size,bounding_box).bounding_box();
+}
+
+template<class R>
+Geometry::Zonotope<typename Evaluation::LohnerIntegrator<R>::I,R>
+Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorFieldInterface<R>& vector_field, 
+                                                  const Geometry::Zonotope<I,R>& initial_set, 
+                                                  const Numeric::Interval<R>& step_size, 
+                                                  const Geometry::Rectangle<R>& bounding_box) const
+{
+  return Geometry::over_approximation(this->integration_step(vector_field,Geometry::Zonotope<I,I>(initial_set),step_size,bounding_box));
+}
+
+template<class R>
+Geometry::Zonotope<typename Evaluation::LohnerIntegrator<R>::I,R>
+Evaluation::LohnerIntegrator<R>::reachability_step(const System::VectorFieldInterface<R>& vector_field, 
+                                                  const Geometry::Zonotope<I,R>& initial_set, 
+                                                  const Numeric::Interval<R>& step_size, 
+                                                  const Geometry::Rectangle<R>& bounding_box) const
+{
+  return Geometry::over_approximation(this->reachability_step(vector_field,Geometry::Zonotope<I,I>(initial_set),step_size,bounding_box));
 }
 
 
@@ -259,15 +292,6 @@ Evaluation::C1LohnerIntegrator<R>::clone() const
 template<class R>
 Evaluation::C1LohnerIntegrator<R>::C1LohnerIntegrator()
 {
-}
-
-
-template<class R>
-Geometry::ListSet< Geometry::Zonotope<typename Evaluation::C1LohnerIntegrator<R>::I> >
-Evaluation::C1LohnerIntegrator<R>::subdivide(const Geometry::Zonotope<I>& basic_set) const
-{
-  Geometry::Zonotope<I> orthogonal_zonotope(Geometry::orthogonal_over_approximation(basic_set));
-  return orthogonal_zonotope.subdivide();
 }
 
 
@@ -369,9 +393,9 @@ Evaluation::C1LohnerIntegrator<R>::reachability_step(const System::VectorFieldIn
   using namespace Geometry;
   using namespace System;
   
-  ARIADNE_LOG(6,"C1LohnerIntegrator::reachability_step(VectorFieldInterface,Zonotope<Interval>,Interval) const\n");
+  ARIADNE_LOG(6,"C1LohnerIntegrator::reachability_step(VectorFieldInterface,Zonotope<Interval>,Interval,Rectangle) const\n");
   
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"C1LohnerIntegrator::reachability_step(VectorFieldInterface,Zonotope<Interval>,Interval)");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"C1LohnerIntegrator::reachability_step(VectorFieldInterface,Zonotope<Interval>,Interval,Rectangle)");
   
   const VectorFieldInterface<R>& vf(vector_field);
   const Zonotope<I>& z=initial_set;
@@ -401,6 +425,47 @@ Evaluation::C1LohnerIntegrator<R>::reachability_step(const System::VectorFieldIn
   ARIADNE_LOG(7,"z="<<result);
 
   return result;
+}
+
+
+template<class R>
+Geometry::Rectangle<R>
+Evaluation::C1LohnerIntegrator<R>::integration_step(const System::VectorFieldInterface<R>& vector_field, 
+                                                  const Geometry::Rectangle<R>& initial_set, 
+                                                  const Numeric::Interval<R>& step_size, 
+                                                  const Geometry::Rectangle<R>& bounding_box) const
+{
+  return this->integration_step(vector_field,Geometry::Zonotope<I,I>(initial_set),step_size,bounding_box).bounding_box();
+}
+
+template<class R>
+Geometry::Rectangle<R>
+Evaluation::C1LohnerIntegrator<R>::reachability_step(const System::VectorFieldInterface<R>& vector_field, 
+                                                  const Geometry::Rectangle<R>& initial_set, 
+                                                  const Numeric::Interval<R>& step_size, 
+                                                  const Geometry::Rectangle<R>& bounding_box) const
+{
+  return this->reachability_step(vector_field,Geometry::Zonotope<I,I>(initial_set),step_size,bounding_box).bounding_box();
+}
+
+template<class R>
+Geometry::Zonotope<typename Evaluation::C1LohnerIntegrator<R>::I,R>
+Evaluation::C1LohnerIntegrator<R>::integration_step(const System::VectorFieldInterface<R>& vector_field, 
+                                                  const Geometry::Zonotope<I,R>& initial_set, 
+                                                  const Numeric::Interval<R>& step_size, 
+                                                  const Geometry::Rectangle<R>& bounding_box) const
+{
+  return Geometry::over_approximation(this->integration_step(vector_field,Geometry::Zonotope<I,I>(initial_set),step_size,bounding_box));
+}
+
+template<class R>
+Geometry::Zonotope<typename Evaluation::C1LohnerIntegrator<R>::I,R>
+Evaluation::C1LohnerIntegrator<R>::reachability_step(const System::VectorFieldInterface<R>& vector_field, 
+                                                  const Geometry::Zonotope<I,R>& initial_set, 
+                                                  const Numeric::Interval<R>& step_size, 
+                                                  const Geometry::Rectangle<R>& bounding_box) const
+{
+  return Geometry::over_approximation(this->reachability_step(vector_field,Geometry::Zonotope<I,I>(initial_set),step_size,bounding_box));
 }
 
 

@@ -81,10 +81,10 @@ namespace Ariadne {
       ConstraintBasedHybridEvolver(const ConstraintBasedHybridEvolver<R>& evolver);
 
       /*! \brief Construct from an applicator and an integrator. (Deprecated) */
-      ConstraintBasedHybridEvolver(const EvolutionParameters<R>& parameters, const ApplicatorPluginInterface<BS>& applicator, const IntegratorPluginInterface<BS>& integrator);
+      ConstraintBasedHybridEvolver(const EvolutionParameters<R>& parameters, const ApplicatorPluginInterface<R>& applicator, const IntegratorPluginInterface<R>& integrator);
 
       /*! \brief Construct from an applicator, an integrator and a detector. */
-      ConstraintBasedHybridEvolver(const EvolutionParameters<R>& parameters, const ApplicatorPluginInterface<BS>& applicator, const IntegratorPluginInterface<BS>& integrator, const DetectorPluginInterface<R>& detector);
+      ConstraintBasedHybridEvolver(const EvolutionParameters<R>& parameters, const ApplicatorPluginInterface<R>& applicator, const IntegratorPluginInterface<R>& integrator, const DetectorPluginInterface<R>& detector);
 
       /*! \brief Virtual destructor. */
       virtual ~ConstraintBasedHybridEvolver();

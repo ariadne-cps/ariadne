@@ -72,8 +72,8 @@ Evaluation::SetBasedHybridEvolver<R>::~SetBasedHybridEvolver()
 }
 
 template<class R>
-Evaluation::SetBasedHybridEvolver<R>::SetBasedHybridEvolver(MapEvolver<BS>& a, VectorFieldEvolver<BS>& i)
-  : _applicator(new MapEvolver<BS>(a)), _integrator(new VectorFieldEvolver<BS>(i))
+Evaluation::SetBasedHybridEvolver<R>::SetBasedHybridEvolver(MapEvolver<R>& a, VectorFieldEvolver<R>& i)
+  : _applicator(new MapEvolver<R>(a)), _integrator(new VectorFieldEvolver<R>(i))
 {
 }
 

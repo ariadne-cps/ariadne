@@ -48,24 +48,23 @@ namespace Ariadne {
 
    
     template<class R> class EvolutionParameters;
-    template<class BS> class IntegratorPluginInterface;
-    template<class BS> class BounderPluginInterface;
+    template<class R> class IntegratorPluginInterface;
+    template<class R> class BounderPluginInterface;
 
 
 
     /*! \brief %Base class for integration schemes. 
      *  \ingroup Integrate
      */
-    template<class BS>
+    template<class R>
     class VectorFieldEvolver {
      private:
-      typedef typename BS::real_type R;
-      typedef typename Numeric::traits<R>::arithmetic_type F;
       typedef Numeric::Interval<R> I;
+      typedef Geometry::Zonotope<I,R> BS;
 
       EvolutionParameters<R>* _parameters;
       BounderPluginInterface<R>* _bounder_plugin;
-      IntegratorPluginInterface<BS>* _integrator_plugin;
+      IntegratorPluginInterface<R>* _integrator_plugin;
      public:
       /*! The type used to denote real numbers. */
       typedef R real_type;
@@ -92,13 +91,13 @@ namespace Ariadne {
       virtual ~VectorFieldEvolver();
 
       /*! \brief Constructor. */
-      VectorFieldEvolver(const EvolutionParameters<R>& parameters, const IntegratorPluginInterface<BS>& plugin);
+      VectorFieldEvolver(const EvolutionParameters<R>& parameters, const IntegratorPluginInterface<R>& plugin);
 
       /*! \brief Copy constructor. */
-      VectorFieldEvolver(const VectorFieldEvolver<BS>& i);
+      VectorFieldEvolver(const VectorFieldEvolver<R>& i);
 
       /*! \brief Make a dynamically-allocated copy. */
-      virtual VectorFieldEvolver<BS>* clone() const;
+      virtual VectorFieldEvolver<R>* clone() const;
 
       //@{
       //! \name Parameters controlling the accuracy

@@ -44,13 +44,13 @@ namespace Ariadne {
     /*! \brief A class for computing the image of a set under a map. 
      *  \ingroup Applicators
      */
-    template<class BS>
+    template<class R>
     class MapEvolver {
-      typedef typename BS::real_type R;
       typedef Numeric::Interval<R> I;
+      typedef Geometry::Zonotope<I,R> BS;
      private:
       EvolutionParameters<R>* _parameters;
-      ApplicatorPluginInterface<BS>* _plugin;
+      ApplicatorPluginInterface<R>* _plugin;
      public:
       /*! \brief Default constructor chooses appropriate parameter values for maximum basic set radius and grid size. */
       MapEvolver();
@@ -59,13 +59,13 @@ namespace Ariadne {
       MapEvolver(const EvolutionParameters<R>& parameters);
       
       /*! \brief Copy constructor. */
-      MapEvolver(const MapEvolver<BS>& other);
+      MapEvolver(const MapEvolver<R>& other);
       
       /*! \brief Compute the image of a basic set under a continuous function. */
       virtual ~MapEvolver();
 
       /*! \brief Make a dynamically-allocated copy. */
-      MapEvolver<BS>* clone() const;
+      MapEvolver<R>* clone() const;
       
       //@}
 

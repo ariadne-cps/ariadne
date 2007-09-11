@@ -1,7 +1,7 @@
 /***************************************************************************
- *            test_apply.cc
+ *            test_map_evolver.cc
  *
- *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
+ *  Copyright  2005-7  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
@@ -51,15 +51,15 @@ using namespace Ariadne::Evaluation;
 using namespace Ariadne::Output;
 using namespace std;
 
-template<class R> int test_apply();
+template<class R> int test_map_evolver();
 
 int main() {
-  return test_apply<Float>();
+  return test_map_evolver<Float>();
 }
 
 template<class R> 
 int 
-test_apply()
+test_map_evolver()
 {
   //set_evaluation_verbosity(0);
   typedef Interval<R> I;
@@ -99,7 +99,7 @@ test_apply()
   parameters.set_grid_length(grid_length);
   parameters.set_bounding_domain_size(bounding_domain_size);
 
-  MapEvolver<BS> apply(parameters);
+  MapEvolver<R> evolver(parameters);
   Rectangle<R> pfr=evaluate(henon_inverse,fr);
   cout << "r=" << r << " fr=" << fr << " pfr="<< pfr << endl;
   Zonotope<I,R> pfez=evaluate(henon_inverse,fez);
@@ -121,23 +121,23 @@ test_apply()
 
   cout << "Computing with concrete sets" << endl;
 
-  GridMaskSet<R> grid_image_set=apply.image(henon,grid_initial_set,grid_bounding_set);
+  GridMaskSet<R> grid_image_set=evolver.image(henon,grid_initial_set,grid_bounding_set);
   cout << "grid_image_set=" << grid_image_set << endl;
-  GridMaskSet<R> grid_preimage_set=apply.preimage(henon,grid_initial_set,grid_bounding_set);
+  GridMaskSet<R> grid_preimage_set=evolver.preimage(henon,grid_initial_set,grid_bounding_set);
   cout << "grid_preimage_set=" << grid_preimage_set << endl;
-  GridMaskSet<R> grid_inverse_image_set=apply.image(henon_inverse,grid_initial_set,grid_bounding_set);
+  GridMaskSet<R> grid_inverse_image_set=evolver.image(henon_inverse,grid_initial_set,grid_bounding_set);
   cout << "grid_inverse_image_set=" << grid_inverse_image_set << endl;
 
   ListSet< Zonotope<I,R> > list_initial_set(grid_initial_set);
   cout << "list_initial_set=" << list_initial_set << endl;
-  ListSet< Zonotope<I,R> > list_reach_set=apply.reach(henon,list_initial_set);
+  ListSet< Zonotope<I,R> > list_reach_set=evolver.reach(henon,list_initial_set);
   cout << "list_reach_set=" << list_reach_set << endl;
 
-  GridMultiMap<R> discretization=apply.discretize(henon,grid_bounding_set,grid);
+  GridMultiMap<R> discretization=evolver.discretize(henon,grid_bounding_set,grid);
   cout << "discretization=GridMultiMap(...)" << endl;
 
   epsfstream eps;
-  eps.open("test_apply-1.eps",eps_bounding_box);
+  eps.open("test_map_evolver-1.eps",eps_bounding_box);
   eps << fill_colour(green) << list_reach_set;
   eps << fill_colour(blue) << grid_initial_set;
   eps << fill_colour(green) << grid_image_set;
@@ -146,10 +146,10 @@ test_apply()
   eps << fill_colour(magenta) << list_reach_set;
   eps.close();
 
-  eps.open("test_apply-2.eps",eps_bounding_box);
+  eps.open("test_map_evolver-2.eps",eps_bounding_box);
   eps << line_style(true);
   eps << fill_colour(green) << grid_image_set;
-  eps << fill_colour(red) << apply.preimage(henon,grid_image_set,grid_bounding_set);
+  eps << fill_colour(red) << evolver.preimage(henon,grid_image_set,grid_bounding_set);
   eps << fill_colour(blue) << grid_initial_set;
   eps.close();
 
@@ -159,18 +159,18 @@ test_apply()
   cout << "Computing with SetInterface" << endl;
 
   cout << "Computing image set" << endl;
-  shared_ptr< SetInterface<R> > image_set_ptr(apply.image(henon,initial_set));
+  shared_ptr< SetInterface<R> > image_set_ptr(evolver.image(henon,initial_set));
   cout << "image_set=" << *image_set_ptr << endl;
   cout << "Computing preimage set" << endl;
-  apply.parameters().set_grid_length((grid_length/2).midpoint());
-  shared_ptr< SetInterface<R> > preimage_set_ptr(apply.preimage(henon,initial_set,bounding_set));
-  apply.parameters().set_grid_length(grid_length);
+  evolver.parameters().set_grid_length((grid_length/2).midpoint());
+  shared_ptr< SetInterface<R> > preimage_set_ptr(evolver.preimage(henon,initial_set,bounding_set));
+  evolver.parameters().set_grid_length(grid_length);
   cout << "preimage_set=" << *preimage_set_ptr << endl;
   cout << "Computing inverse image set" << endl;
-  shared_ptr< SetInterface<R> > inverse_image_set_ptr(apply.image(henon_inverse,initial_set));
+  shared_ptr< SetInterface<R> > inverse_image_set_ptr(evolver.image(henon_inverse,initial_set));
   cout << "inverse_image_set=" << *inverse_image_set_ptr << endl;
 
-  eps.open("test_apply-3.eps",eps_bounding_box);
+  eps.open("test_map_evolver-3.eps",eps_bounding_box);
   eps << fill_colour(blue) << initial_set;
   eps << fill_colour(green) << *image_set_ptr;
   eps << fill_colour(red) << *inverse_image_set_ptr;
@@ -179,15 +179,15 @@ test_apply()
   
 
   cout << "Computing reach set" << endl;
-  apply.parameters().set_grid_length((0.25*grid_length).midpoint());
-  shared_ptr< SetInterface<R> > reach_set_ptr(apply.reach(henon,initial_set));
+  evolver.parameters().set_grid_length((0.25*grid_length).midpoint());
+  shared_ptr< SetInterface<R> > reach_set_ptr(evolver.reach(henon,initial_set));
   cout << "reach_set=" << *reach_set_ptr << endl;
-  apply.parameters().set_grid_length(grid_length);
+  evolver.parameters().set_grid_length(grid_length);
   cout << "Computing chainreach set" << endl;
-  shared_ptr< SetInterface<R> > chainreach_set_ptr(apply.chainreach(henon,initial_set,bounding_set));
+  shared_ptr< SetInterface<R> > chainreach_set_ptr(evolver.chainreach(henon,initial_set,bounding_set));
   cout << "chainreach_set=" << *chainreach_set_ptr << endl;
 
-  eps.open("test_apply-4.eps",eps_bounding_box);
+  eps.open("test_map_evolver-4.eps",eps_bounding_box);
   eps << fill_colour(cyan) << bounding_set;
   eps << line_style(false) << fill_colour(green) << *chainreach_set_ptr;
   eps << line_style(true) << fill_colour(magenta) << *reach_set_ptr;
@@ -198,11 +198,11 @@ test_apply()
   
 
   cout << "Computing viability kernel" << endl;
-  apply.parameters().set_grid_length(grid_length);
-  shared_ptr< SetInterface<R> > viability_kernel_ptr(apply.viable(henon,bounding_set));
+  evolver.parameters().set_grid_length(grid_length);
+  shared_ptr< SetInterface<R> > viability_kernel_ptr(evolver.viable(henon,bounding_set));
   cout << "viability_kernel=" << *viability_kernel_ptr << endl;
 
-  eps.open("test_apply-5.eps",eps_bounding_box);
+  eps.open("test_map_evolver-5.eps",eps_bounding_box);
   eps << fill_colour(cyan) << bounding_set;
   eps << fill_colour(magenta) << *viability_kernel_ptr;
   eps.close();

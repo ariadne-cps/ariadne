@@ -1,7 +1,7 @@
 /***************************************************************************
- *            vector_field_evolver.cc
+ *            applicator.cc
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
+ *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
@@ -22,22 +22,21 @@
  */
 
 #include "numeric/float.h"
+#include "geometry/zonotope.h"
 
-#include "evaluation/integrator_plugin_interface.h"
-
-#include "evaluation/vector_field_evolver.h"
-#include "evaluation/vector_field_evolver.code.h"
+#include "evaluation/applicator_plugin.h"
+#include "evaluation/applicator_plugin.code.h"
 
 namespace Ariadne {
   namespace Evaluation {
     using namespace Numeric;
 
 #ifdef ENABLE_FLOAT64
-    template class VectorFieldEvolver<Float64>;
+    template class ApplicatorPlugin<Float64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class VectorFieldEvolver<FloatMP>;
+    template class ApplicatorPlugin<FloatMP>;
 #endif
 
   }

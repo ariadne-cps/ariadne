@@ -107,7 +107,7 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::~ConstraintBasedHybridEvolver
 
 
 template<class R>
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::ConstraintBasedHybridEvolverPlugin(const ApplicatorPluginInterface<BS>& a, const IntegratorPluginInterface<BS>& i, const DetectorPluginInterface<R>& d)
+Evaluation::ConstraintBasedHybridEvolverPlugin<R>::ConstraintBasedHybridEvolverPlugin(const ApplicatorPluginInterface<R>& a, const IntegratorPluginInterface<R>& i, const DetectorPluginInterface<R>& d)
   : _applicator(a.clone()), 
     _bounder(new BounderPlugin<R>()),
     _integrator(dynamic_cast<C1LohnerIntegrator<R>*>(i.clone())),

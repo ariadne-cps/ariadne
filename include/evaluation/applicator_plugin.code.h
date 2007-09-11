@@ -161,31 +161,53 @@ Evaluation::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<
 
 
 
-template<class BS>
-Evaluation::ApplicatorPlugin<BS>::ApplicatorPlugin() 
+template<class R>
+Evaluation::ApplicatorPlugin<R>::ApplicatorPlugin() 
 {
 }
 
 
-template<class BS>
-Evaluation::ApplicatorPlugin<BS>*
-Evaluation::ApplicatorPlugin<BS>::clone() const 
+template<class R>
+Evaluation::ApplicatorPlugin<R>*
+Evaluation::ApplicatorPlugin<R>::clone() const 
 {
-  return new ApplicatorPlugin<BS>();
+  return new ApplicatorPlugin<R>();
 }
 
 
 
-template<class BS>
-BS
-Evaluation::ApplicatorPlugin<BS>::evaluate(const System::MapInterface<R>& f, const BS& bs) const
+template<class R>
+Geometry::Rectangle<R>
+Evaluation::ApplicatorPlugin<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r) const
 {
-  return Evaluation::evaluate(f,bs);
+  return Evaluation::evaluate(f,r);
 }
 
-template<class BS>
+template<class R>
+Geometry::Zonotope<R,R>
+Evaluation::ApplicatorPlugin<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<R,R>& z) const
+{
+  return Evaluation::evaluate(f,z);
+}
+
+template<class R>
+Geometry::Zonotope<typename Evaluation::ApplicatorPlugin<R>::I,R>
+Evaluation::ApplicatorPlugin<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<I,R>& z) const
+{
+  return Evaluation::evaluate(f,z);
+}
+
+template<class R>
+Geometry::Zonotope<typename Evaluation::ApplicatorPlugin<R>::I>
+Evaluation::ApplicatorPlugin<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<I,I>& z) const
+{
+  return Evaluation::evaluate(f,z);
+}
+
+
+template<class R>
 void
-Evaluation::ApplicatorPlugin<BS>::instantiate()
+Evaluation::ApplicatorPlugin<R>::instantiate()
 {
   Geometry::Rectangle<R>* r=0;
   Geometry::Zonotope<R,R>* z=0;

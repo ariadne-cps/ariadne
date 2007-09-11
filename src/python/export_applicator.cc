@@ -1,8 +1,8 @@
 /***************************************************************************
- *            vector_field_evolver.cc
+ *            python/export_applicator.cc
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2007  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -11,7 +11,7 @@
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
+ *  This program is diself_ns::stributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
@@ -21,24 +21,24 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/float.h"
+#include "python/python_float.h"
 
-#include "evaluation/integrator_plugin_interface.h"
+#include "evaluation/applicator_plugin.h"
 
-#include "evaluation/vector_field_evolver.h"
-#include "evaluation/vector_field_evolver.code.h"
+using namespace Ariadne;
+using namespace Ariadne::Numeric;
+using namespace Ariadne::Geometry;
+using namespace Ariadne::System;
+using namespace Ariadne::Evaluation;
+using namespace Ariadne::Python;
 
-namespace Ariadne {
-  namespace Evaluation {
-    using namespace Numeric;
+#include <boost/python.hpp>
+using namespace boost::python;
 
-#ifdef ENABLE_FLOAT64
-    template class VectorFieldEvolver<Float64>;
-#endif
-  
-#ifdef ENABLE_FLOATMP
-    template class VectorFieldEvolver<FloatMP>;
-#endif
-
-  }
+template<class R>
+void export_applicator() 
+{
+ 
 }
+
+template void export_applicator<Float>();

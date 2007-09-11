@@ -81,10 +81,10 @@ construct_evolver()
   parameters.set_maximum_basic_set_radius(0.25);
   parameters.set_grid_length(0.125);
   
-  ApplicatorPlugin<BS> applicator;
+  ApplicatorPlugin<R> applicator;
   LohnerIntegrator<R> lohner_integrator; 
-  const ApplicatorPluginInterface<BS>& applicator_plugin=applicator;
-  const IntegratorPluginInterface<BS>& integrator_plugin=lohner_integrator;
+  const ApplicatorPluginInterface<R>& applicator_plugin=applicator;
+  const IntegratorPluginInterface<R>& integrator_plugin=lohner_integrator;
   return ConstraintBasedHybridEvolver<R>(parameters,applicator_plugin,integrator_plugin);
 }
 

@@ -57,7 +57,7 @@ namespace Ariadne {
      */
     template<class R>
     class AffineIntegrator
-      : public DifferentiableIntegratorPluginInterface< Geometry::Zonotope< Numeric::Interval<R> > > 
+      : public DifferentiableIntegratorPluginInterface<R> 
     {
       typedef Numeric::Interval<R> I;
       typedef Geometry::Zonotope<I> BS;
@@ -83,14 +83,34 @@ namespace Ariadne {
                                                           const Geometry::Rectangle<R>& bb) const;
      
 
+      virtual Geometry::Rectangle<R> integration_step(const System::VectorFieldInterface<R>& vector_field,
+                                                     const Geometry::Rectangle<R>& initial_set,
+                                                     const Numeric::Interval<R>& step_size,
+                                                     const Geometry::Rectangle<R>& bounding_set) const;
+      
+      virtual Geometry::Rectangle<R> reachability_step(const System::VectorFieldInterface<R>& affine_vector_field,
+                                                      const Geometry::Rectangle<R>& initial_set,
+                                                      const Numeric::Interval<R>& step_size,
+                                                      const Geometry::Rectangle<R>& bounding_set) const;
+
+      virtual Geometry::Zonotope<I,R> integration_step(const System::VectorFieldInterface<R>& vector_field,
+                                                     const Geometry::Zonotope<I,R>& initial_set,
+                                                     const Numeric::Interval<R>& step_size,
+                                                     const Geometry::Rectangle<R>& bounding_set) const;
+      
+      virtual Geometry::Zonotope<I,R> reachability_step(const System::VectorFieldInterface<R>& affine_vector_field,
+                                                        const Geometry::Zonotope<I,R>& initial_set,
+                                                      const Numeric::Interval<R>& step_size,
+                                                      const Geometry::Rectangle<R>& bounding_set) const;
+
       /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope. */
-      virtual Geometry::Zonotope<I> integration_step(const System::VectorFieldInterface<R>& vector_field,
+      virtual Geometry::Zonotope<I,I> integration_step(const System::VectorFieldInterface<R>& vector_field,
                                                      const Geometry::Zonotope<I>& initial_set,
                                                      const Numeric::Interval<R>& step_size,
                                                      const Geometry::Rectangle<R>& bounding_set) const;
       
       /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. */
-      virtual Geometry::Zonotope<I> reachability_step(const System::VectorFieldInterface<R>& affine_vector_field,
+      virtual Geometry::Zonotope<I,I> reachability_step(const System::VectorFieldInterface<R>& affine_vector_field,
                                                       const Geometry::Zonotope<I>& initial_set,
                                                       const Numeric::Interval<R>& step_size,
                                                       const Geometry::Rectangle<R>& bounding_set) const;
@@ -106,14 +126,21 @@ namespace Ariadne {
                                                    const Numeric::Interval<R>& step_size) const;
 
       /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. */
+      Geometry::Zonotope<I,R> integration_step(const System::AffineVectorField<R>& affine_vector_field,
+                                               const Geometry::Zonotope<I,R>& initial_set,
+                                               const Numeric::Interval<R>& step_size) const;
+
+      /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. */
+     Geometry::Zonotope<I,R> reachability_step(const System::AffineVectorField<R>& affine_vector_field,
+                                               const Geometry::Zonotope<I,R>& initial_set,
+                                               const Numeric::Interval<R>& step_size) const;
+
+      /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. */
       Geometry::Zonotope<I> integration_step(const System::AffineVectorField<R>& affine_vector_field,
                                               const Geometry::Zonotope<I>& initial_set,
                                               const Numeric::Interval<R>& step_size) const;
 
-      /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. 
-       *
-       *  Overrides method in VectorFieldEvolver since we don't use the bounding set. 
-       */
+      /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. */
      Geometry::Zonotope<I> reachability_step(const System::AffineVectorField<R>& affine_vector_field,
                                                const Geometry::Zonotope<I>& initial_set,
                                                const Numeric::Interval<R>& step_size) const;

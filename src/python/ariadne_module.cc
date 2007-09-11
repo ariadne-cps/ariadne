@@ -94,10 +94,12 @@ template<class R> void export_set_based_hybrid_automaton();
 template<class R> void export_constraint_based_hybrid_automaton();
 
 template<class R> void export_evolution_parameters();
-template<class R> void export_solve();
-template<class R> void export_apply();
-template<class R> void export_integrate();
+template<class R> void export_solver();
+template<class R> void export_applicator();
+template<class R> void export_integrator();
 template<class R> void export_detector();
+template<class R> void export_map_evolver();
+template<class R> void export_vector_field_evolver();
 template<class R> void export_set_based_hybrid_evolver();
 template<class R> void export_constraint_based_hybrid_evolver();
 
@@ -190,10 +192,12 @@ BOOST_PYTHON_MODULE(ariadne)
   export_constraint_based_hybrid_automaton<Float>();
 
   export_evolution_parameters<Float>();
-  export_solve<Float>();
-  export_apply<Float>();
-  export_integrate<Float>();
+  export_solver<Float>();
+  export_applicator<Float>();
+  export_integrator<Float>();
   export_detector<Float>();
+  export_map_evolver<Float>();
+  export_vector_field_evolver<Float>();
   export_set_based_hybrid_evolver<Float>();
   export_constraint_based_hybrid_evolver<Float>();
 

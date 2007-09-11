@@ -88,14 +88,14 @@ Evaluation::ConstraintBasedHybridEvolver<R>::~ConstraintBasedHybridEvolver()
 
 
 template<class R>
-Evaluation::ConstraintBasedHybridEvolver<R>::ConstraintBasedHybridEvolver(const EvolutionParameters<R>& p, const ApplicatorPluginInterface<BS>& a, const IntegratorPluginInterface<BS>& i)
+Evaluation::ConstraintBasedHybridEvolver<R>::ConstraintBasedHybridEvolver(const EvolutionParameters<R>& p, const ApplicatorPluginInterface<R>& a, const IntegratorPluginInterface<R>& i)
   : _parameters(new EvolutionParameters<R>(p)),
     _plugin(new ConstraintBasedHybridEvolverPlugin<R>(a,i,DetectorPlugin<R>()))
 {
 }
 
 template<class R>
-Evaluation::ConstraintBasedHybridEvolver<R>::ConstraintBasedHybridEvolver(const EvolutionParameters<R>& p, const ApplicatorPluginInterface<BS>& a, const IntegratorPluginInterface<BS>& i, const DetectorPluginInterface<R>& d)
+Evaluation::ConstraintBasedHybridEvolver<R>::ConstraintBasedHybridEvolver(const EvolutionParameters<R>& p, const ApplicatorPluginInterface<R>& a, const IntegratorPluginInterface<R>& i, const DetectorPluginInterface<R>& d)
   : _parameters(new EvolutionParameters<R>(p)),
     _plugin(new ConstraintBasedHybridEvolverPlugin<R>(a,i,d))
 {

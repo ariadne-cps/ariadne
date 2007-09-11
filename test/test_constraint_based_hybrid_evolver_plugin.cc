@@ -81,7 +81,7 @@ construct_evolver_plugin()
   parameters.set_maximum_basic_set_radius(0.25);
   parameters.set_grid_length(0.125);
   
-  ApplicatorPlugin<BS> apply;
+  ApplicatorPlugin<R> apply;
   LohnerIntegrator<R> lohner_integrator; 
   DetectorPlugin<R> detector;
   return ConstraintBasedHybridEvolverPlugin<R>(apply,lohner_integrator,detector);

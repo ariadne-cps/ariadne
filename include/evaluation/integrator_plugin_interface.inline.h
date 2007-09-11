@@ -1,7 +1,7 @@
 /***************************************************************************
- *            vector_field_evolver.cc
+ *            integrator_plugin_interface.inline.h
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
+ *  Copyright  2006-7  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
@@ -20,25 +20,14 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+ 
+#include "integrator_plugin_interface.h"
 
-#include "numeric/float.h"
-
-#include "evaluation/integrator_plugin_interface.h"
-
-#include "evaluation/vector_field_evolver.h"
-#include "evaluation/vector_field_evolver.code.h"
+#include "geometry/rectangle.h"
+#include "geometry/zonotope.h"
 
 namespace Ariadne {
-  namespace Evaluation {
-    using namespace Numeric;
 
-#ifdef ENABLE_FLOAT64
-    template class VectorFieldEvolver<Float64>;
-#endif
-  
-#ifdef ENABLE_FLOATMP
-    template class VectorFieldEvolver<FloatMP>;
-#endif
 
-  }
-}
+
+} // namespace Ariadne

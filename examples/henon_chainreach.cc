@@ -89,7 +89,7 @@ henon_chainreach()
   parameters.set_maximum_basic_set_radius(maximum_basic_set_radius);
   parameters.set_grid_length(grid_length);
   
-  MapEvolver<BS> evolver(parameters);
+  MapEvolver<R> evolver(parameters);
   evolver.parameters().set_grid_length(16.0/subdivisions);
 
   GridMaskSet<R> gmcr=evolver.chainreach(h,in,bd);

@@ -39,9 +39,8 @@ namespace Ariadne {
      */
     template<class R>
     class EulerIntegrator
-      : public IntegratorPluginInterface< Geometry::Rectangle<R> >
+      : public IntegratorPluginInterface<R>
     {
-      typedef Geometry::Rectangle<R> BS;
       typedef Numeric::Interval<R> I;
      public:
       /*! \brief Constructor. */
@@ -69,6 +68,34 @@ namespace Ariadne {
       virtual Geometry::Rectangle<R> 
       reachability_step(const System::VectorFieldInterface<R>&,
                         const Geometry::Rectangle<R>&,
+                        const Numeric::Interval<R>&,
+                        const Geometry::Rectangle<R>&) const;
+
+      /*! \brief A C0 algorithm for integrating forward a zonotope. */
+      virtual Geometry::Zonotope<I,R> 
+      integration_step(const System::VectorFieldInterface<R>&,
+                       const Geometry::Zonotope<I,R>&,
+                       const Numeric::Interval<R>&,
+                       const Geometry::Rectangle<R>&) const;
+
+      /*! \brief A C0 algorithm for integrating forward a zonotope up to a certain time. */
+      virtual Geometry::Zonotope<I,R> 
+      reachability_step(const System::VectorFieldInterface<R>&,
+                        const Geometry::Zonotope<I,R>&,
+                        const Numeric::Interval<R>&,
+                        const Geometry::Rectangle<R>&) const;
+
+      /*! \brief A C0 algorithm for integrating forward a zonotope. */
+      virtual Geometry::Zonotope<I,I> 
+      integration_step(const System::VectorFieldInterface<R>&,
+                       const Geometry::Zonotope<I,I>&,
+                       const Numeric::Interval<R>&,
+                       const Geometry::Rectangle<R>&) const;
+
+      /*! \brief A C0 algorithm for integrating forward a zonotope up to a certain time. */
+      virtual Geometry::Zonotope<I,I> 
+      reachability_step(const System::VectorFieldInterface<R>&,
+                        const Geometry::Zonotope<I,I>&,
                         const Numeric::Interval<R>&,
                         const Geometry::Rectangle<R>&) const;
 

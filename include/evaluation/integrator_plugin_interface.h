@@ -45,10 +45,9 @@ namespace Ariadne {
     /*! \brief A class for computing the image of a basic set under a map. 
      *  \ingroup Integrators
      */
-    template<class BS>
+    template<class R>
     class IntegratorPluginInterface
     {
-      typedef typename BS::real_type R;
       typedef Numeric::Interval<R> I;
      public:
       //@{ 
@@ -56,7 +55,7 @@ namespace Ariadne {
       /*! \brief Virtual destructor. */
       virtual ~IntegratorPluginInterface() { }
       /*! \brief Make a dynamically-allocated copy. */
-      virtual IntegratorPluginInterface<BS>* clone() const = 0;
+      virtual IntegratorPluginInterface<R>* clone() const = 0;
       //@}
 
 
@@ -67,27 +66,57 @@ namespace Ariadne {
       virtual 
       Geometry::Point<I> 
       flow_step(const System::VectorFieldInterface<R>& f, 
-                        const Geometry::Point<I>& s, 
-                        const Numeric::Interval<R>& t, 
-                        const Geometry::Rectangle<R>& bb) const = 0;
+                const Geometry::Point<I>& s, 
+                const Numeric::Interval<R>& t, 
+                const Geometry::Rectangle<R>& bb) const = 0;
 
-
-      /*! \brief Compute the image of a basic set under a continuous function. Returns a dynamically allocated set. */
-      
+      /*! \brief Compute the image of a basic set under a continuous function. */
       virtual 
-      BS
+      Geometry::Rectangle<R>
       integration_step(const System::VectorFieldInterface<R>& f, 
-                       const BS& s, 
+                       const Geometry::Rectangle<R>& s, 
                        const Numeric::Interval<R>& t, 
                        const Geometry::Rectangle<R>& bb) const = 0; 
       
-      /*! \brief Compute the image of a basic set under a continuous function. Returns a dynamically allocated set. */
+      /*! \brief Compute the image of a basic set under a continuous function. */
       virtual 
-      BS
+      Geometry::Rectangle<R>
       reachability_step(const System::VectorFieldInterface<R>& f, 
-                                const BS& s, 
-                                const Numeric::Interval<R>& t, 
-                                const Geometry::Rectangle<R>& bb) const = 0;
+                        const Geometry::Rectangle<R>& s, 
+                        const Numeric::Interval<R>& t, 
+                        const Geometry::Rectangle<R>& bb) const = 0;
+      
+      /*! \brief Compute the image of a basic set under a continuous function. */
+      virtual 
+      Geometry::Zonotope<I,R>
+      integration_step(const System::VectorFieldInterface<R>& f, 
+                       const Geometry::Zonotope<I,R>& s, 
+                       const Numeric::Interval<R>& t, 
+                       const Geometry::Rectangle<R>& bb) const = 0; 
+      
+      /*! \brief Compute the image of a basic set under a continuous function. */
+      virtual 
+      Geometry::Zonotope<I,R>
+      reachability_step(const System::VectorFieldInterface<R>& f, 
+                        const Geometry::Zonotope<I,R>& s, 
+                        const Numeric::Interval<R>& t, 
+                        const Geometry::Rectangle<R>& bb) const = 0;
+
+      /*! \brief Compute the image of a basic set under a continuous function. */
+      virtual 
+      Geometry::Zonotope<I,I>
+      integration_step(const System::VectorFieldInterface<R>& f, 
+                       const Geometry::Zonotope<I,I>& s, 
+                       const Numeric::Interval<R>& t, 
+                       const Geometry::Rectangle<R>& bb) const = 0;
+
+      /*! \brief Compute the image of a basic set under a continuous function. */
+      virtual 
+      Geometry::Zonotope<I,I>
+      reachability_step(const System::VectorFieldInterface<R>& f, 
+                        const Geometry::Zonotope<I,I>& s, 
+                        const Numeric::Interval<R>& t, 
+                        const Geometry::Rectangle<R>& bb) const = 0;
       //@}
     };
 
@@ -95,15 +124,14 @@ namespace Ariadne {
     /*! \brief A class for computing the image of a basic set under a differentiable map. 
      *  \ingroup Integrators
      */
-    template<class BS>
+    template<class R>
     class DifferentiableIntegratorPluginInterface
-      : public IntegratorPluginInterface<BS>
+      : public IntegratorPluginInterface<R>
     {
-      typedef typename BS::real_type R;
       typedef Numeric::Interval<R> I;
      public:
       /*! \brief Make a dynamically-allocated copy. */
-      virtual DifferentiableIntegratorPluginInterface<BS>* clone() const = 0;
+      virtual DifferentiableIntegratorPluginInterface<R>* clone() const = 0;
       //@{ 
       //! \name Methods for computing flow Jacobians. 
       /*! \brief Compute the spacial jacobian over a flow step of time \a t starting at \a p assuming that the flow remains within \a bb. */
@@ -116,5 +144,6 @@ namespace Ariadne {
   }
 }
 
+#include "integrator_plugin_interface.inline.h"
 
 #endif /* ARIADNE_INTEGRATOR_PLUGIN_INTERFACE_H */

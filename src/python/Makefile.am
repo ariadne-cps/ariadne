@@ -86,6 +86,8 @@ ARIADNE_SRC = ariadne_module.cc \
 	 \
 	export_evolution_parameters.cc \
 	export_solver.cc \
+	export_applicator.cc \
+	export_integrator.cc \
 	export_detector.cc \
 	export_map_evolver.cc \
 	export_vector_field_evolver.cc \

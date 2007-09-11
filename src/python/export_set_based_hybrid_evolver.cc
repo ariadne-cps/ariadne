@@ -44,9 +44,8 @@ template<class R>
 void export_set_based_hybrid_evolver() 
 {
   typedef Numeric::Interval<R> I;
-  typedef Zonotope<I,I> BS;
 
-  class_< SetBasedHybridEvolver<R> >("SetBasedHybridEvolver",init<MapEvolver<BS>&,VectorFieldEvolver<BS>&>()) 
+  class_< SetBasedHybridEvolver<R> >("SetBasedHybridEvolver",init<MapEvolver<R>&,VectorFieldEvolver<R>&>()) 
     .def("discrete_step",(HybridSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::discrete_step)
     .def("continuous_chainreach",(HybridSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridSet<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::continuous_chainreach)
     .def("chainreach",(HybridSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridSet<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::chainreach)

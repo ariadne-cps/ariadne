@@ -34,7 +34,7 @@ using namespace Ariadne::Python;
 using namespace boost::python;
 
 template<class R>
-void export_solve() 
+void export_solver() 
 {
   return_value_policy<copy_const_reference> copy_const_reference;
   
@@ -48,4 +48,4 @@ void export_solve()
   
 }
 
-template void export_solve<Float>();
+template void export_solver<Float>();

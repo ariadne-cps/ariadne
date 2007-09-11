@@ -228,7 +228,7 @@ namespace Ariadne {
       ~ConstraintBasedHybridEvolverPlugin();
 
       /*! \brief Construct from an applicator, an integrator and a detector. */
-      ConstraintBasedHybridEvolverPlugin(const ApplicatorPluginInterface<BS>& applicator, const IntegratorPluginInterface<BS>& integrator, const DetectorPluginInterface<R>& detector);
+      ConstraintBasedHybridEvolverPlugin(const ApplicatorPluginInterface<R>& applicator, const IntegratorPluginInterface<R>& integrator, const DetectorPluginInterface<R>& detector);
 
       /*! \brief Copy constructor. */
       ConstraintBasedHybridEvolverPlugin(const ConstraintBasedHybridEvolverPlugin<R>& plugin);
@@ -432,9 +432,9 @@ namespace Ariadne {
      public:
       mutable std::vector<timed_set_type> trace;
      private:
-      ApplicatorPluginInterface<BS>* _applicator;
+      ApplicatorPluginInterface<R>* _applicator;
       BounderPluginInterface<R>* _bounder;
-      DifferentiableIntegratorPluginInterface<BS>* _integrator;
+      DifferentiableIntegratorPluginInterface<R>* _integrator;
       DetectorPluginInterface<R>* _detector;
     };
 

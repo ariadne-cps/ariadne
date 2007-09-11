@@ -219,30 +219,13 @@ Geometry::GridMaskSet<R>::_instantiate_geometry_operators()
 {
   typedef Numeric::Interval<R> I;
   tribool tb;
-  //Point<I>* ipt=0;
   Rectangle<R>* r=0;
-  
-  ListSet< Rectangle<R> >* rls=0;
-  ListSet< Zonotope<R,R> >* zls=0;
-  ListSet< Zonotope<I,R> >* ezls=0;
-  ListSet< Zonotope<I,I> >* izls=0;
-  
-  SetInterface<R>* set=0;
   
   FiniteGrid<R>* fg=0;
   GridCell<R>* gc=0;
   GridBlock<R>* gb=0;
   GridCellListSet<R>* gcls=0;
   GridMaskSet<R>* gms=0;
-  
-  *gms=outer_approximation(*rls,*fg);
-  *gms=outer_approximation(*zls,*fg);
-  *gms=outer_approximation(*ezls,*fg);
-  *gms=outer_approximation(*izls,*fg);
-  
-  *gms=outer_approximation(*set,*fg);
-  *gms=inner_approximation(*set,*fg);
-  *rls=lower_approximation(*set,*fg);
   
   tb=Geometry::subset(*r,*gms);
   tb=Geometry::subset(*gms,*r);
@@ -538,95 +521,6 @@ Geometry::GridMaskSet<R>::operator ListSet< Rectangle<R> >() const
   return result;
 }
 
-
-
-
-template<class R, class BS>
-Geometry::GridMaskSet<R>
-Geometry::outer_approximation(const ListSet<BS>& ls, const FiniteGrid<R>& fg) 
-{
-  GridMaskSet<R> result(fg);
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(ls,fg,"outer_approximation(ListSet<BS> ls, FiniteGrid<R> fg)\n");
-  
-  for(typename ListSet<BS>::const_iterator bs_iter=ls.begin(); bs_iter!=ls.end(); ++bs_iter) {
-    result.adjoin_outer_approximation(*bs_iter);
-  }
-  return result;
-}
-
-
-template<class R>
-Geometry::GridMaskSet<R>
-Geometry::outer_approximation(const SetInterface<R>& set, const FiniteGrid<R>& fg) 
-{
-  ARIADNE_LOG(4,"GridMaskSet outer_approximation(SetInterface, FiniteGrid)\n");
-  GridMaskSet<R> result(fg);
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(set,fg,"outer_approximation(PartitionTreeSet<R>,FiniteGrid<R>)");
-  
-  const Grid<R>& g=fg.grid();
-  const Combinatoric::LatticeBlock& lb=fg.lattice_block();
-  
-  for(typename Combinatoric::LatticeBlock::const_iterator iter=lb.begin(); iter!=lb.end(); ++iter) {
-    GridCell<R> gc(g,*iter);
-    if(!bool(set.disjoint(Rectangle<R>(gc)))) {
-      result.adjoin(gc);
-    }
-  }
-  return result;
-}
-
-
-
-
-template<class R>
-Geometry::GridMaskSet<R>
-Geometry::inner_approximation(const SetInterface<R>& s, const FiniteGrid<R>& fg) 
-{
-  ARIADNE_LOG(4,"GridMaskSet inner_approximation(SetInterface s, FiniteGrid fg)\n") 
-    GridMaskSet<R> result(fg);
-  GridBlock<R> gb(fg.grid(),fg.lattice_block());
-  Rectangle<R> r;
-  ARIADNE_LOG(5,"  testing cells in "<<gb<<"\n")
-    for(typename GridBlock<R>::const_iterator gb_iter=gb.begin();
-        gb_iter!=gb.end(); ++gb_iter)
-      {
-        r=*gb_iter;
-        if(s.superset(r)) {
-          result.adjoin(*gb_iter);
-        }
-        ARIADNE_LOG(6,"s.superset("<<r<<")="<<s.superset(r)<<"\n");
-      }
-  return result;
-}
-
-
-
-
-
-template<class R>  
-Geometry::ListSet< Geometry::Rectangle<R> >
-Geometry::lower_approximation(const SetInterface<R>& s, const FiniteGrid<R>& fg) 
-{
-  ARIADNE_LOG(4,"ListSet<Rectangle> lower_approximation(SetInterface s, FiniteGrid fg)\n") 
-    ListSet< Rectangle<R> > result;
-  GridBlock<R> gb(fg.grid(),fg.lattice_block());
-  Rectangle<R> r;
-  Rectangle<R> nr;
-  ARIADNE_LOG(5,"  testing cells in "<<gb<<"\n")
-    for(typename GridBlock<R>::const_iterator gb_iter=gb.begin();
-        gb_iter!=gb.end(); ++gb_iter)
-      {
-        r=*gb_iter;
-        if(!bool(s.disjoint(r))) {
-          nr=gb_iter->neighbourhood();
-          if(s.intersects(nr)) {
-            result.adjoin(nr);
-          }
-        }
-        ARIADNE_LOG(6,"s.interscts("<<r<<")="<<s.intersects(r)<<"\n");
-      }
-  return result;
-}
 
 
 

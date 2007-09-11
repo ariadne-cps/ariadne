@@ -47,6 +47,7 @@ GEOMETRY_SRC = \
 	geometry/taylor_set.cc \
 	geometry/list_set.cc \
 	geometry/grid.cc \
+	geometry/grid_approximation.cc \
 	geometry/grid_cell.cc geometry/grid_block.cc \
 	geometry/grid_cell_list_set.cc geometry/grid_mask_set.cc \
 	geometry/irregular_grid.cc geometry/irregular_grid_set.cc \

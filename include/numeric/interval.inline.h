@@ -163,6 +163,11 @@ namespace Ariadne {
 
 
     template<class R> inline
+    bool empty(const Interval<R>& x) {
+      return x.empty();
+    }
+    
+    template<class R> inline
     R lower(const Interval<R>& x) {
       return x.lower();
     }

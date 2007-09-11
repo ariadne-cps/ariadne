@@ -45,6 +45,7 @@
 #include "../geometry/list_set.h"
 #include "../geometry/grid.h"
 #include "../geometry/grid_set.h"
+#include "../geometry/grid_approximation.h"
 #include "../geometry/rectangular_set.h"
 
 #include "../system/grid_multimap.h"
@@ -206,7 +207,7 @@ Evaluation::Applicator<BS>::image(const System::MapInterface<R>& f,
   for(gcls_const_iterator iter=initial_set.begin(); iter!=initial_set.end(); ++iter) {
     bs=*iter;
     fbs=this->evaluate(f,bs);
-    image.adjoin_outer_approximation(fbs);
+    image.adjoin(Geometry::fuzzy_outer_approximation(fbs,image_grid));
   }
   return image;
 }
@@ -241,7 +242,7 @@ Evaluation::Applicator<BS>::image(const System::MapInterface<R>& f,
     bs=r;
     fbs=this->evaluate(f,bs);
     ARIADNE_LOG(7,"bs="<<bs<<", fbs="<<fbs<<"\n");
-    GridCellListSet<R> gbs=outer_approximation(fbs,g);
+    GridCellListSet<R> gbs=Geometry::fuzzy_outer_approximation(fbs,g);
     ARIADNE_LOG(7,"gbs="<<gbs);
     image.adjoin(gbs);
     ARIADNE_LOG(9,"image.size()="<<image.size()<<"\n");
@@ -283,7 +284,7 @@ Evaluation::Applicator<BS>::preimage(const System::MapInterface<R>& f,
       r=*bnd_iter;
       bs=r;
       fbs=this->evaluate(f,bs);
-      fgcls.adjoin_outer_approximation(fbs);
+      fgcls.adjoin(Geometry::fuzzy_outer_approximation(fbs,fgcls.grid()));
       if(subset(fgcls,set)) {
         result.adjoin(*bnd_iter);
       }
@@ -372,7 +373,7 @@ Evaluation::Applicator<BS>::reach(const System::MapInterface<R>& f,
       rectangle=*bs_iter;
       basic_set=rectangle;
       while(basic_set.radius() < this->parameters().maximum_basic_set_radius()) {
-        result.adjoin_outer_approximation(basic_set);
+        result.adjoin(Geometry::fuzzy_outer_approximation(basic_set,result.grid()));
         basic_set=this->evaluate(f,basic_set);
         ++steps;
       }
@@ -422,7 +423,7 @@ Evaluation::Applicator<BS>::chainreach(const System::MapInterface<R>& f,
       bs=r;
       fbs=this->evaluate(f,bs);
       if(!disjoint(fbs.bounding_box(),bounding_set)) {
-        image.adjoin(outer_approximation(fbs,g));
+        image.adjoin(Geometry::fuzzy_outer_approximation(fbs,g));
       }
     }
     image.unique_sort();
@@ -518,7 +519,7 @@ Evaluation::Applicator<BS>::verify(const System::MapInterface<R>& f,
       r=*iter;
       bs=r;
       fbs=this->evaluate(f,bs);
-      cell_image.adjoin(outer_approximation(fbs,g));
+      cell_image.adjoin(Geometry::fuzzy_outer_approximation(fbs,g));
       if(!subset(cell_image,safe_set)) {
         return false;
       }

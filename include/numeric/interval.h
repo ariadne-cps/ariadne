@@ -73,6 +73,8 @@ namespace Ariadne {
     template<class R> R radius(const Interval<R>& x);
     template<class R> R width(const Interval<R>& x);
 
+    template<class R> bool empty(const Interval<R>& x);
+    template<class R> bool singleton(const Interval<R>& x);
     template<class R, class RX> bool encloses(const Interval<R>& ivl, const RX& x);
     template<class R1, class R2> bool refines(const Interval<R1>& ivl1, const Interval<R2>& ivl2);
 

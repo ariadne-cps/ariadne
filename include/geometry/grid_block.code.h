@@ -132,7 +132,6 @@ Geometry::GridBlock<R>::_instantiate_geometry_operators()
 {
   typedef Numeric::Interval<R> I;
   tribool tb;
-  Point<I>* ipt=0;
   Rectangle<R>* r=0;
   Grid<R>* g=0;
   GridCell<R>* gc=0;
@@ -143,14 +142,6 @@ Geometry::GridBlock<R>::_instantiate_geometry_operators()
   tb=Geometry::overlap(*gb,*gb);
   tb=Geometry::subset(*gc,*gb);
   tb=Geometry::subset(*gb,*gb);
-  
-  *gb=Geometry::outer_approximation(*ipt,*g);
-  
-  *gb=Geometry::over_approximation(*r,*g);
-  *gb=Geometry::under_approximation(*r,*g);
-  
-  *gb=Geometry::outer_approximation(*r,*g);
-  *gb=Geometry::inner_approximation(*r,*g);
 }
 
 
@@ -221,85 +212,6 @@ Geometry::subset(const Rectangle<R>& r, const GridBlock<R>& gb)
 
 
 
-
-// Approximations of rectangles ------------------------------------------
-
-
-template<class R>
-Geometry::GridBlock<R>
-Geometry::over_approximation(const Rectangle<R>& r, const Grid<R>& g) 
-{
-  IndexArray lower(r.dimension());
-  IndexArray upper(r.dimension());
-  for(size_type i=0; i!=r.dimension(); ++i) {
-    if(r.lower_bound(i)==r.upper_bound(i)) {
-      ARIADNE_THROW(EmptyInterior,"GridBlock over_approximation(Rectangle r, Grid g)"," with r="<<r<<" (use outer_approximation(r,g) instead)");
-    }
-    lower[i]=g.subdivision_lower_index(i,r.lower_bound(i));
-    upper[i]=g.subdivision_upper_index(i,r.upper_bound(i));
-  }
-  return GridBlock<R>(g,lower,upper);
-}
-
-
-template<class R>
-Geometry::GridBlock<R>
-Geometry::under_approximation(const Rectangle<R>& r, const Grid<R>& g) 
-{
-  IndexArray lower(r.dimension());
-  IndexArray upper(r.dimension());
-  for(size_type i=0; i!=r.dimension(); ++i) {
-    if(r.lower_bound(i)==r.upper_bound(i)) {
-      ARIADNE_THROW(EmptyInterior,"GridBlock under_approximation(Rectangle r, Grid g)"," with r="<<r<<" (use outer_approximation(r,g) instead)");
-    }
-    lower[i]=g.subdivision_upper_index(i,r.lower_bound(i));
-    upper[i]=g.subdivision_lower_index(i,r.upper_bound(i));
-  }
-  return GridBlock<R>(g,lower,upper);
-}
-
-
-
-
-template<class R>
-Geometry::GridBlock<R>
-Geometry::outer_approximation(const Point< Numeric::Interval<R> >& ipt, const Grid<R>& g) 
-{
-  return outer_approximation(Rectangle<R>(ipt),g);
-}
-
-template<class R>
-Geometry::GridBlock<R>
-Geometry::outer_approximation(const Rectangle<R>& r, const Grid<R>& g) 
-{
-  if(r.empty()) {
-    return GridBlock<R>(g);
-  }
-  IndexArray lower(r.dimension());
-  IndexArray upper(r.dimension());
-  for(size_type i=0; i!=r.dimension(); ++i) {
-    lower[i]=g.subdivision_upper_index(i,r.lower_bound(i))-1;
-    upper[i]=g.subdivision_lower_index(i,r.upper_bound(i))+1;
-  }
-  return GridBlock<R>(g,lower,upper);
-}
-
-
-template<class R>
-Geometry::GridBlock<R>
-Geometry::inner_approximation(const Rectangle<R>& r, const Grid<R>& g) 
-{
-  if(r.empty()) {
-    return GridBlock<R>(g);
-  }
-  IndexArray lower(r.dimension());
-  IndexArray upper(r.dimension());
-  for(size_type i=0; i!=r.dimension(); ++i) {
-    lower[i]=g.subdivision_lower_index(i,r.lower_bound(i))+1;
-    upper[i]=g.subdivision_upper_index(i,r.upper_bound(i))-1;
-  }
-  return GridBlock<R>(g,lower,upper);
-}
 
 
 

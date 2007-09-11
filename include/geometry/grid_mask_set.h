@@ -333,14 +333,6 @@ namespace Ariadne {
 
    
  
-    template<class R, class BS> GridMaskSet<R> outer_approximation(const ListSet<BS>& ls, const FiniteGrid<R>& fg);
- 
-    template<class R> GridMaskSet<R> outer_approximation(const SetInterface<R>& set, const FiniteGrid<R>& fg);
-    template<class R> GridMaskSet<R> inner_approximation(const SetInterface<R>& set, const FiniteGrid<R>& fg);
-
-    template<class R> ListSet< Rectangle<R> > lower_approximation(const SetInterface<R>& set, const Grid<R>& fg);
-    template<class R> ListSet< Rectangle<R> > lower_approximation(const SetInterface<R>& set, const FiniteGrid<R>& fg);
- 
 
     template<class R> std::ostream& operator<<(std::ostream& os, const GridMaskSet<R>& gms);
     

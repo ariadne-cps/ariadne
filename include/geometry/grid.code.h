@@ -36,6 +36,7 @@
 #include "../geometry/list_set.h"
 
 #include "../geometry/grid_block.h" // for GridBlock<R>
+#include "../geometry/grid_approximation.h"
 #include "../output/logging.h"
 
 namespace Ariadne {

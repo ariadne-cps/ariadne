@@ -198,19 +198,24 @@ test_zonotope()
   // Approximations of real zonotope
   {
     cout << "Inner and outer approximations of Zonotope<R,R>" << endl;
-    Zonotope<R,R> z(Point<R>("(0.25,-0.125)"),Matrix<R>("[2,1,1;1,-1,1]"));
+    //Zonotope<R,R> z(Point<R>("(0.25,-0.125)"),Matrix<R>("[2,1,1;1,-1,1]"));
+    Zonotope<R,R> z(Point<R>("(0.25,-0.125)"),Matrix<R>("[2,1;1,-1]"));
     
     Grid<R> gr(2,0.5);
+    GridCellListSet<R> foaz=fuzzy_outer_approximation(z,gr);
     GridCellListSet<R> oaz=outer_approximation(z,gr);
     GridCellListSet<R> iaz=inner_approximation(z,gr);
+    ARIADNE_TEST_ASSERT(subset(iaz,oaz));
+    ARIADNE_TEST_ASSERT(subset(oaz,foaz));
     r=Rectangle<R>("[-2.5,-2.0]x[0.0,0.5]");
     pt=Point<R>("(-2.5,0.5)");
     bbox=z.bounding_box().expand_by(R(0.5));
     eps.open("test_zonotope-real.eps",bbox);
     eps << fill_colour(white) << z.bounding_box();
-    eps << fill_colour(red) << oaz;
-    eps << fill_colour(green) << z;
+    eps << fill_colour(red) << foaz;
+    eps << fill_colour(yellow) << oaz;
     eps << fill_colour(blue) << iaz;
+    eps << fill_colour(transparant) << z;
     eps.close();
   }    
 
@@ -222,18 +227,20 @@ test_zonotope()
     Zonotope<R,R> aez=over_approximation(ez);
     
     Grid<R> gr(2,0.5);
+    GridCellListSet<R> foaez=fuzzy_outer_approximation(ez,gr);
     GridCellListSet<R> oaez=outer_approximation(ez,gr);
     GridCellListSet<R> iaez=inner_approximation(ez,gr);
+    ARIADNE_TEST_ASSERT(subset(iaez,oaez));
+    ARIADNE_TEST_ASSERT(subset(oaez,foaez));
     r=Rectangle<R>("[-2.5,-2.0]x[0.0,0.5]");
     pt=Point<R>("(-2.5,0.5)");
     bbox=z.bounding_box().expand_by(R(0.5));
     eps.open("test_zonotope-uniform.eps",bbox);
     eps << fill_colour(white) << ez.bounding_box();
-    eps << fill_colour(red) << oaez;
-    // eps << fill_colour(yellow) << aez;
-    //eps << fill_colour(yellow) << z;
-    eps << fill_colour(green) << ez;
+    eps << fill_colour(red) << foaez;
+    eps << fill_colour(yellow) << oaez;
     eps << fill_colour(blue) << iaez;
+    eps << fill_colour(transparant) << ez;
     eps.close();
   }    
 

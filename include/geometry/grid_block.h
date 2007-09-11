@@ -136,11 +136,6 @@ namespace Ariadne {
       Combinatoric::LatticeBlock _lattice_set;
     };
 
-
-
-
-    
-    
     
     template<class R> tribool subset(const Rectangle<R>&, const GridBlock<R>&);
    
@@ -150,14 +145,6 @@ namespace Ariadne {
     template<class R> tribool subset(const GridBlock<R>&, const GridBlock<R>&);
     
 
-    template<class R> GridBlock<R> over_approximation(const Rectangle<R>& r, const Grid<R>& g);
-    template<class R> GridBlock<R> under_approximation(const Rectangle<R>& r, const Grid<R>& g);
-
-    template<class R> GridBlock<R> outer_approximation(const Point< Numeric::Interval<R> >& ipt, const Grid<R>& g);
-
-    template<class R> GridBlock<R> outer_approximation(const Rectangle<R>& r, const Grid<R>& g);
-    template<class R> GridBlock<R> inner_approximation(const Rectangle<R>& r, const Grid<R>& g);
- 
 
     template<class R> std::ostream& operator<<(std::ostream& os, const GridBlock<R>& gb);
     

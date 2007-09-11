@@ -183,28 +183,14 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;
      private: 
-      static void _instantiate_geometry_operators();
+      static void _instantiate();
      private:
       Base::shared_ptr< Grid<R> > _grid_ptr;
       Combinatoric::LatticeCellListSet _lattice_set;
     };
 
     template<class R> tribool subset(const GridCellListSet<R>&, const GridBlock<R>&);
-    
-    
-    
- 
-    template<class R> GridCellListSet<R> outer_approximation(const Polytope<R>& pltp, const Grid<R>& g);
-    template<class R> GridCellListSet<R> inner_approximation(const Polytope<R>& pltp, const Grid<R>& g);
- 
-    template<class R> GridCellListSet<R> outer_approximation(const Polyhedron<R>& pltp, const Grid<R>& g);
-    template<class R> GridCellListSet<R> inner_approximation(const Polyhedron<R>& pltp, const Grid<R>& g);
- 
-    template<class R, class R0, class R1> GridCellListSet<R> outer_approximation(const Zonotope<R0,R1>& z, const Grid<R>& g);
-    template<class R, class R0, class R1> GridCellListSet<R> inner_approximation(const Zonotope<R0,R1>& z, const Grid<R>& g);
- 
-    template<class R> GridCellListSet<R> outer_approximation(const SetInterface<R>& set, const Grid<R>& g);
-    template<class R> GridCellListSet<R> inner_approximation(const SetInterface<R>& set, const Grid<R>& g);
+    template<class R> tribool subset(const GridCellListSet<R>&, const GridCellListSet<R>&);
  
     template<class R> std::ostream& operator<<(std::ostream& os, const GridCellListSet<R>& gcls);
     
